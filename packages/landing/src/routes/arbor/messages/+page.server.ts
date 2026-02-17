@@ -7,8 +7,8 @@
 
 import { redirect, fail } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
-import { GROVE_MESSAGE_CHANNELS } from "@autumnsgrove/groveengine/services";
-import { isWayfinder } from "@autumnsgrove/groveengine/config";
+import { GROVE_MESSAGE_CHANNELS } from "@autumnsgrove/lattice/services";
+import { isWayfinder } from "@autumnsgrove/lattice/config";
 
 interface DbMessage {
   id: string;

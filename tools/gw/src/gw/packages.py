@@ -1,6 +1,6 @@
 """Monorepo package detection and management.
 
-Detects packages in the GroveEngine monorepo and provides utilities for
+Detects packages in the Lattice monorepo and provides utilities for
 running commands in the appropriate package context.
 """
 

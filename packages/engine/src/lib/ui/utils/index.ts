@@ -3,8 +3,8 @@
 // This module exports utility functions for the Grove Design System.
 //
 // Usage:
-//   import { cn } from '@groveengine/ui/utils';
-//   import { generateTierColors, hexToHsl } from '@groveengine/ui/utils';
+//   import { cn } from '@lattice/ui/utils';
+//   import { generateTierColors, hexToHsl } from '@lattice/ui/utils';
 
 export { cn } from "./cn.js";
 

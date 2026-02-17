@@ -1,5 +1,5 @@
 # Grove Router Worker
-# Proxies wildcard subdomain requests to groveengine Pages
+# Proxies wildcard subdomain requests to lattice Pages
 #
 # This worker catches all *.grove.place requests and forwards them
 # to grove-lattice.pages.dev with the original host in X-Forwarded-Host.

@@ -3,8 +3,8 @@
 // This module exports specialized form input components
 //
 // Usage:
-//   import { SearchInput, ContentSearch } from '@groveengine/ui/forms';
-//   import { createTextFilter, createMultiFieldFilter } from '@groveengine/ui/forms';
+//   import { SearchInput, ContentSearch } from '@lattice/ui/forms';
+//   import { createTextFilter, createMultiFieldFilter } from '@lattice/ui/forms';
 
 export { default as SearchInput } from "./SearchInput.svelte";
 export { default as ContentSearch } from "./ContentSearch.svelte";

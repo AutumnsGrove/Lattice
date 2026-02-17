@@ -17,7 +17,7 @@ import {
   type LoomRoute,
   type LoomConfig,
   type LoomRequestContext,
-} from "@autumnsgrove/groveengine/loom";
+} from "@autumnsgrove/lattice/loom";
 import type {
   LoadProfile,
   RunResults,

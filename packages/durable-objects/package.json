@@ -9,7 +9,7 @@
     "check": "tsc --noEmit"
   },
   "dependencies": {
-    "@autumnsgrove/groveengine": "workspace:*",
+    "@autumnsgrove/lattice": "workspace:*",
     "fflate": "^0.8.2"
   },
   "devDependencies": {

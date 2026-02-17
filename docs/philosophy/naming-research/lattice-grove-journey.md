@@ -1,11 +1,11 @@
 ---
 published: false
-lastUpdated: '2026-01-25'
+lastUpdated: "2026-01-25"
 ---
 
 # A Journey Through the Grove: The Core Framework
 
-*Scratchpad for exploring the name of what powers everything*
+_Scratchpad for exploring the name of what powers everything_
 
 ---
 
@@ -20,7 +20,7 @@ Before I walk, I need to understand what I'm naming.
          |
     ┌────┴────────────────────────────────────────┐
     │                                             │
-    │    @autumnsgrove/groveengine                │
+    │    @autumnsgrove/lattice                │
     │                                             │
     │    - UI components (buttons, cards, icons)  │
     │    - Auth utilities (magic codes, sessions) │
@@ -43,7 +43,7 @@ Before I walk, I need to understand what I'm naming.
 This is the npm package that powers EVERY Grove site. One package, many blogs.
 Multi-tenant: meadow, landing, plant, clearing, individual blogs—all built on this.
 
-Currently called: **Lattice** (internal: GroveEngine)
+Currently called: **Lattice** (internal: Lattice)
 
 ---
 
@@ -110,25 +110,30 @@ They hand me... a toolkit? A foundation? A framework?
 Let me think about what category it belongs to:
 
 ### Is it a PLACE?
+
 No. Meadow is a place. Nook is a place. Porch is a place.
 This isn't somewhere you go—it's something you use.
 
 ### Is it an OBJECT?
+
 Amber is an object (fossilized resin).
 Patina is a layer that forms.
 This is more like... a system? A collection?
 
 ### Is it a TREE FEATURE?
+
 Heartwood is the core identity.
 Foliage is the visible appearance.
 Rings are the private growth record.
 This isn't part of the user's tree—it's what enables the tree to exist.
 
 ### Is it a CONNECTION?
+
 Ivy connects. Mycelium connects. Reeds whisper together.
 This doesn't connect things—it underlies them.
 
 ### Is it a STRUCTURE?
+
 Lattice is a structure. That's the current name.
 A framework for climbing, for building upon.
 But is "structure" the right category?
@@ -153,12 +158,14 @@ The current metaphor:
 ```
 
 This works because:
+
 - Lattice is a support structure
 - Things grow on it, not in it
 - It's essential but not the focus
 - "Vines" are already a feature (sidebar widgets)
 
 But I'm questioning:
+
 - A lattice is a GARDEN structure, not a FOREST feature
 - A lattice is VISIBLE—you see it in the garden
 - A lattice is ARTIFICIAL—made, not grown
@@ -173,6 +180,7 @@ Is there something more organic? More forest?
 ### What about SOIL?
 
 Everything grows FROM soil. It's:
+
 - Foundational
 - Nourishing
 - Invisible in the plant itself
@@ -223,6 +231,7 @@ The living layer that generates UI components, auth utilities, patterns.
 Invisible beneath the bark, essential for every ring that follows."
 
 I love this metaphor:
+
 - Cambium is GENERATIVE (creates new growth)
 - Cambium is INVISIBLE (beneath the bark)
 - Cambium is LIVING (active, not passive)
@@ -239,6 +248,7 @@ Sap is the lifeblood of trees. It flows through, carrying nutrients.
 "Sap is what nourishes every branch."
 
 Sap is:
+
 - Essential
 - Invisible (inside the tree)
 - Flowing (active)
@@ -255,6 +265,7 @@ The fabric created by interlocking threads.
 "The weave that holds every Grove site together."
 
 Weave suggests:
+
 - Interconnection
 - Strength through integration
 - Intentional creation
@@ -276,12 +287,14 @@ The user's content is the scion grafted onto Grove's rootstock.
 "Rootstock provides the foundation; your content provides the fruit."
 
 This is actually a perfect metaphor:
+
 - Users GRAFT their content onto Grove's infrastructure
 - The rootstock is essential but invisible
 - It determines vigor and hardiness
 - Professional orchards all use rootstock
 
 But... "rootstock" is:
+
 - Two words (or hyphenated)
 - Obscure (horticulture term)
 - Maybe too technical
@@ -310,12 +323,14 @@ Let me re-examine what Lattice gets right:
 ```
 
 Lattice IS:
+
 - A support structure (accurate)
 - Something you build on (accurate)
 - Essential but not the focus (accurate)
 - Where vines climb (and Vines are a feature!)
 
 Lattice IS NOT:
+
 - Organic (it's crafted)
 - Forest-native (it's garden)
 - Living (it's structural)
@@ -329,6 +344,7 @@ Actually... no. The naming doc says names are "about what happens IN AND AROUND 
 ## A Different Angle: What Does It FEEL Like?
 
 When you use this package, you should feel:
+
 - Supported (infrastructure handles the hard parts)
 - Empowered (you can build without worrying)
 - Connected (part of something larger)
@@ -351,7 +367,7 @@ That's... accurate. The package is well-organized, structured, dependable.
 
 A good Grove name should complete this sentence naturally:
 
-> "[Name] is the _______________."
+> "[Name] is the **\*\***\_\_\_**\*\***."
 
 - **Lattice** is the framework that supports growth.
 - **Soil** is the ground from which everything emerges.
@@ -396,6 +412,7 @@ This is a point FOR Lattice.
 ## The Verdict
 
 I've walked through the grove. I've examined:
+
 - Soil/Loam (too elemental, not structural)
 - Cambium (beautiful but obscure)
 - Sap (liquid, not structural)
@@ -463,12 +480,14 @@ If I were to improve the Lattice metaphor, I might expand on:
 **Lattice is the right name.**
 
 The walk confirmed it. I explored alternatives:
+
 - **Cambium** was beautiful but obscure
 - **Rootstock** was perfect but two words and technical
 - **Soil** was foundational but too elemental
 - **Weave** was strong but textile-y
 
 Lattice wins because:
+
 - It enables the Vines metaphor (already in use)
 - It's intuitive (no education needed)
 - It captures the essence (support structure for growth)
@@ -476,14 +495,14 @@ Lattice wins because:
 
 The current description is already right:
 
-> *"A lattice is the framework that supports growth. Vines climb it.
+> _"A lattice is the framework that supports growth. Vines climb it.
 > Gardens are built around it. It's not the thing you see—it's the
-> thing that holds everything else up.*
+> thing that holds everything else up._
 >
-> *Lattice is the npm package powering every Grove site. UI components,
+> _Lattice is the npm package powering every Grove site. UI components,
 > authentication utilities, markdown rendering, database patterns:
 > all the infrastructure that makes building on Grove feel effortless.
-> You don't admire a lattice. You build on it, and watch what grows."*
+> You don't admire a lattice. You build on it, and watch what grows."_
 
 ---
 
@@ -511,8 +530,8 @@ The current description is already right:
                    ═══════════════════
 ```
 
-*The framework that supports growth.*
-*Build on it. Watch what grows.*
+_The framework that supports growth._
+_Build on it. Watch what grows._
 
 ---
 
@@ -523,6 +542,7 @@ If I had to pick a runner-up, it would be **Cambium**.
 "The living layer that generates new growth."
 
 Cambium is more accurate in some ways:
+
 - It's GENERATIVE (the package provides components that create UI)
 - It's LIVING (actively maintained, evolving)
 - It's INVISIBLE (beneath the bark, beneath what users see)
@@ -536,6 +556,6 @@ In this world, Lattice wins through clarity.
 
 ---
 
-*Journey completed: January 6, 2026*
-*Verdict: Lattice confirmed as the right name*
-*Runner-up: Cambium (for the poetry of it)*
+_Journey completed: January 6, 2026_
+_Verdict: Lattice confirmed as the right name_
+_Runner-up: Cambium (for the poetry of it)_

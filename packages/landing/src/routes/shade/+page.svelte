@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
-	import { GroveTerm } from '@autumnsgrove/groveengine/ui';
+	import { GroveTerm } from '@autumnsgrove/lattice/ui';
 	import { toolIcons, stateIcons } from '$lib/utils/icons';
 
 	let { data } = $props();

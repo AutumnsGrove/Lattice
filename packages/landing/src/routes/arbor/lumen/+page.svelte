@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { GlassCard } from '@autumnsgrove/groveengine/ui';
+	import { GlassCard } from '@autumnsgrove/lattice/ui';
 	import { Sparkles, Shield, Loader2, AlertTriangle, RefreshCw } from 'lucide-svelte';
-	import { LumenAnalytics, SafetyMonitoring } from '@autumnsgrove/groveengine';
+	import { LumenAnalytics, SafetyMonitoring } from '@autumnsgrove/lattice';
 
 	interface LumenData {
 		today: Array<{

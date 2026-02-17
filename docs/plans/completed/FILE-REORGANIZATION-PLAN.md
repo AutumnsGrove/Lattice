@@ -1,9 +1,9 @@
-# GroveEngine File Reorganization Plan
+# Lattice File Reorganization Plan
 
 > **Status**: ✅ COMPLETE
 > **Created**: 2026-01-14
 > **Completed**: 2026-01-16
-> **Purpose**: Comprehensive guide for reorganizing the GroveEngine codebase structure
+> **Purpose**: Comprehensive guide for reorganizing the Lattice codebase structure
 
 ---
 
@@ -12,36 +12,42 @@
 **All phases completed on 2026-01-16.** This document is now archived for historical reference.
 
 ### ✅ Phase 1: Quick Wins
+
 - Deleted duplicate `docs/grove-sustainability.md`
 - Renamed `_archived/` → `_deprecated/`
 - Created README files for `_deprecated/` and `archives/`
 - Renamed UPPERCASE docs to lowercase (LEMONSQUEEZY-SETUP.md → lemonsqueezy-setup.md, etc.)
 
 ### ✅ Phase 2: Documentation Restructure
+
 - Created new directory structure (setup/, infrastructure/, design-system/, philosophy/naming-research/, developer/, plans/)
 - Moved ~36 files from docs/ root to appropriate subdirectories
 - Moved 54 files from docs/scratch/ to docs/philosophy/naming-research/
 - Created docs/README.md and docs/plans/README.md
 
 ### ✅ Phase 3: Root Cleanup
+
 - Moved PLAN.md → docs/plans/completed/payment-migration-stripe-to-lemonsqueezy.md
-- Moved CHROME-*.md files to archives/ and docs/plans/
+- Moved CHROME-\*.md files to archives/ and docs/plans/
 - Moved cloudflare-setup.md → docs/infrastructure/
 - Moved cdn-index.html → assets/
 - Deleted root plans/ directory
 
 ### ✅ Phase 4: Migration Numbering Fix
+
 - Fixed 4 collision pairs in packages/engine/migrations/
 - Renumbered all migrations to sequential 001-024
 
 ### ✅ Phase 5: App Directory Deduplication (commit `9b96872`)
+
 - **Deleted ~130 duplicate files** from `landing/`, `clearing/`, and `meadow/`
 - Removed duplicate nature component subdirectories from all apps
-- Migrated apps to use `@autumnsgrove/groveengine` package exports
+- Migrated apps to use `@autumnsgrove/lattice` package exports
 - Fixed import paths to use `ui/chrome` instead of `ui/components/chrome`
 - Deleted unused `cn.ts` utility files across apps
 
 ### ✅ Phase 6: Structural Moves
+
 - Moved `domains/` → `packages/domains/`
 - Moved `clearing/`, `meadow/`, `plant/`, `landing/` → `packages/`
 - Removed empty `vineyard/` directory
@@ -51,10 +57,12 @@
 - Updated all GitHub workflows for new paths
 
 ### ✅ Legal Pages Consolidation (commit `eaba81f`)
+
 - Moved legal pages into knowledge base at `/knowledge/legal/{slug}`
 - Removed 6 hardcoded legal page routes (~1,197 lines deleted)
 
 ### ✅ Dependency Unification (2026-01-16)
+
 - Unified `@cloudflare/workers-types` to `^4.20260116.0` across all packages
 - Documented vitest version strategy (post-migrator stays at ^3.2.4 for @cloudflare/vitest-pool-workers compatibility)
 
@@ -62,9 +70,10 @@
 
 ## Overview
 
-This document provides a complete migration plan for reorganizing the GroveEngine repository. An implementing agent should read this document in full, explore the referenced directories to understand current state, then execute the changes systematically.
+This document provides a complete migration plan for reorganizing the Lattice repository. An implementing agent should read this document in full, explore the referenced directories to understand current state, then execute the changes systematically.
 
 **Goals:**
+
 1. Eliminate duplicate code and documentation
 2. Establish clear, consistent directory structure
 3. Improve discoverability and maintainability
@@ -89,13 +98,13 @@ This document provides a complete migration plan for reorganizing the GroveEngin
 
 ### Package Naming Standard
 
-| Package | Current Name | Target Name | Scoped? |
-|---------|--------------|-------------|---------|
-| Engine (main) | `@autumnsgrove/groveengine` | `@autumnsgrove/groveengine` | YES (only one) |
-| Durable Objects | `grove-durable-objects` | `grove-durable-objects` | No |
-| Router | `grove-router` | `grove-router` | No |
-| OG Worker | `grove-og` | `grove-og` | No |
-| Post Migrator | `grove-post-migrator` | `grove-post-migrator` | No |
+| Package         | Current Name            | Target Name             | Scoped?        |
+| --------------- | ----------------------- | ----------------------- | -------------- |
+| Engine (main)   | `@autumnsgrove/lattice` | `@autumnsgrove/lattice` | YES (only one) |
+| Durable Objects | `grove-durable-objects` | `grove-durable-objects` | No             |
+| Router          | `grove-router`          | `grove-router`          | No             |
+| OG Worker       | `grove-og`              | `grove-og`              | No             |
+| Post Migrator   | `grove-post-migrator`   | `grove-post-migrator`   | No             |
 
 **Rule**: Only the main engine package uses the `@autumnsgrove/` scope. All other packages use the `grove-` prefix without scoping.
 
@@ -120,38 +129,38 @@ This document provides a complete migration plan for reorganizing the GroveEngin
 
 These files are foundational and must remain at the repository root:
 
-| File | Purpose | Action |
-|------|---------|--------|
-| `AGENT.md` | Primary agent instructions | Keep - essential |
-| `CLAUDE.md` | Claude Code entry point | Keep - essential |
-| `README.md` | Public project overview | Keep - essential |
-| `CONTRIBUTING.md` | Contribution guidelines | Keep - essential |
-| `CHANGELOG.md` | Version history | Keep - essential |
-| `TODOS.md` | Active task tracking | Keep - essential |
-| `COMPLETED.md` | Historical task reference | Keep - essential |
-| `LICENSE` | Legal | Keep - essential |
-| `package.json` | Monorepo root config | Keep - essential |
-| `pnpm-workspace.yaml` | Workspace config | Keep - essential |
-| `pnpm-lock.yaml` | Lock file | Keep - essential |
-| `.gitignore` | Git config | Keep - essential |
-| `.nvmrc` | Node version | Keep - essential |
+| File                  | Purpose                    | Action           |
+| --------------------- | -------------------------- | ---------------- |
+| `AGENT.md`            | Primary agent instructions | Keep - essential |
+| `CLAUDE.md`           | Claude Code entry point    | Keep - essential |
+| `README.md`           | Public project overview    | Keep - essential |
+| `CONTRIBUTING.md`     | Contribution guidelines    | Keep - essential |
+| `CHANGELOG.md`        | Version history            | Keep - essential |
+| `TODOS.md`            | Active task tracking       | Keep - essential |
+| `COMPLETED.md`        | Historical task reference  | Keep - essential |
+| `LICENSE`             | Legal                      | Keep - essential |
+| `package.json`        | Monorepo root config       | Keep - essential |
+| `pnpm-workspace.yaml` | Workspace config           | Keep - essential |
+| `pnpm-lock.yaml`      | Lock file                  | Keep - essential |
+| `.gitignore`          | Git config                 | Keep - essential |
+| `.nvmrc`              | Node version               | Keep - essential |
 
 ### Files to MOVE from Root
 
-| File | Current Location | New Location | Reason |
-|------|------------------|--------------|--------|
-| `PLAN.md` | Root | `docs/plans/completed/payment-migration-stripe-to-lemonsqueezy.md` | Completed migration plan |
-| `CHROME-EXTRACTION-PLAN.md` | Root | `archives/chrome-extraction-plan-v1-superseded.md` | Superseded by V2 |
-| `CHROME-MIGRATION-V2.md` | Root | `docs/plans/planned/chrome-migration-v2.md` | Ready for implementation |
-| `CHROME-ROLLBACK-ANALYSIS.md` | Root | `archives/chrome-rollback-analysis-2026-01.md` | Post-mortem reference |
-| `cloudflare-setup.md` | Root | `docs/infrastructure/cloudflare-setup.md` | Infrastructure reference |
-| `icon-analysis.md` | Root | `docs/design-system/icon-standardization.md` | Design system reference |
-| `cdn-index.html` | Root | `assets/cdn-index.html` | Asset file, not project doc |
+| File                          | Current Location | New Location                                                       | Reason                      |
+| ----------------------------- | ---------------- | ------------------------------------------------------------------ | --------------------------- |
+| `PLAN.md`                     | Root             | `docs/plans/completed/payment-migration-stripe-to-lemonsqueezy.md` | Completed migration plan    |
+| `CHROME-EXTRACTION-PLAN.md`   | Root             | `archives/chrome-extraction-plan-v1-superseded.md`                 | Superseded by V2            |
+| `CHROME-MIGRATION-V2.md`      | Root             | `docs/plans/planned/chrome-migration-v2.md`                        | Ready for implementation    |
+| `CHROME-ROLLBACK-ANALYSIS.md` | Root             | `archives/chrome-rollback-analysis-2026-01.md`                     | Post-mortem reference       |
+| `cloudflare-setup.md`         | Root             | `docs/infrastructure/cloudflare-setup.md`                          | Infrastructure reference    |
+| `icon-analysis.md`            | Root             | `docs/design-system/icon-standardization.md`                       | Design system reference     |
+| `cdn-index.html`              | Root             | `assets/cdn-index.html`                                            | Asset file, not project doc |
 
 ### Files to DELETE from Root
 
-| File | Reason |
-|------|--------|
+| File | Reason                            |
+| ---- | --------------------------------- |
 | None | All root files have a destination |
 
 ---
@@ -241,7 +250,7 @@ Also check for duplicate `010_*` migrations and renumber if found.
    - Deployment order (durable-objects → engine → workers)
 
 2. **Create `packages/grove-router/README.md`**:
-   - Purpose: Subdomain routing for *.grove.place
+   - Purpose: Subdomain routing for \*.grove.place
    - How routing decisions are made
    - Configuration options
    - Deployment instructions
@@ -270,6 +279,7 @@ Update each package's `tsconfig.json` to extend this base config.
 ### Component Rename
 
 **Rename for clarity**:
+
 - `packages/engine/src/lib/ui/components/ui/` → `packages/engine/src/lib/ui/components/glass/`
 - Update all imports referencing this path
 - Update exports in `packages/engine/src/lib/ui/components/index.ts`
@@ -278,13 +288,13 @@ Update each package's `tsconfig.json` to extend this base config.
 
 This rename changes import paths. If the engine package is published to npm:
 
-1. **Before renaming**: Check current published version (`npm view @autumnsgrove/groveengine version`)
+1. **Before renaming**: Check current published version (`npm view @autumnsgrove/lattice version`)
 2. **Add backward compatibility** (temporary):
    ```typescript
    // In packages/engine/src/lib/ui/components/index.ts
    // Re-export from new location with old name for transition period
-   export * from './glass';
-   export * as ui from './glass'; // Deprecated alias
+   export * from "./glass";
+   export * as ui from "./glass"; // Deprecated alias
    ```
 3. **Bump minor version** after rename (breaking change = minor bump pre-1.0)
 4. **Document in CHANGELOG.md** with migration instructions
@@ -386,48 +396,48 @@ docs/
 
 ### Files to DELETE (Duplicates)
 
-| File | Reason |
-|------|--------|
+| File                           | Reason                                                 |
+| ------------------------------ | ------------------------------------------------------ |
 | `docs/grove-sustainability.md` | Duplicate of `docs/philosophy/grove-sustainability.md` |
 
 ### Directories to DELETE (After Moving Contents)
 
-| Directory | Action |
-|-----------|--------|
-| `docs/scratch/` | Move 51 files to `docs/philosophy/naming-research/`, then delete |
-| `docs/business/` | Move to `docs/internal/business/`, then delete |
-| `docs/schema/` | Move to `docs/developer/database/schema/`, then delete |
-| `docs/concepts/` | Move to `docs/marketing/concepts/`, then delete |
-| `docs/migrations/` | Move to `docs/plans/completed/`, then delete |
-| `/plans/` (root) | Move 2 files to `docs/plans/planning/`, then delete |
+| Directory          | Action                                                           |
+| ------------------ | ---------------------------------------------------------------- |
+| `docs/scratch/`    | Move 51 files to `docs/philosophy/naming-research/`, then delete |
+| `docs/business/`   | Move to `docs/internal/business/`, then delete                   |
+| `docs/schema/`     | Move to `docs/developer/database/schema/`, then delete           |
+| `docs/concepts/`   | Move to `docs/marketing/concepts/`, then delete                  |
+| `docs/migrations/` | Move to `docs/plans/completed/`, then delete                     |
+| `/plans/` (root)   | Move 2 files to `docs/plans/planning/`, then delete              |
 
 ### Documentation README to Create
 
 **Create `docs/README.md`**:
 
 ```markdown
-# GroveEngine Documentation
+# Lattice Documentation
 
 This directory contains all project documentation organized by audience and purpose.
 
 ## Directory Structure
 
-| Directory | Audience | Purpose |
-|-----------|----------|---------|
-| `setup/` | Developers | Configuration and setup guides |
-| `infrastructure/` | DevOps | Cloud infrastructure documentation |
-| `developer/` | Engineers | Architecture, database, integration docs |
-| `design-system/` | Designers/Frontend | UI patterns, icons, standards |
-| `philosophy/` | Everyone | Project vision, voice, naming |
-| `plans/` | Team | Planning workflow (planning → planned → completed) |
-| `specs/` | Engineers | Technical specifications |
-| `patterns/` | Engineers | Architectural patterns |
-| `help-center/` | Users | End-user help articles |
-| `guides/` | Various | Implementation guides |
-| `marketing/` | Marketing | Marketing materials |
-| `security/` | Security | Security documentation |
-| `legal/` | Legal | Policies and terms |
-| `internal/` | Team | Internal communications |
+| Directory         | Audience           | Purpose                                            |
+| ----------------- | ------------------ | -------------------------------------------------- |
+| `setup/`          | Developers         | Configuration and setup guides                     |
+| `infrastructure/` | DevOps             | Cloud infrastructure documentation                 |
+| `developer/`      | Engineers          | Architecture, database, integration docs           |
+| `design-system/`  | Designers/Frontend | UI patterns, icons, standards                      |
+| `philosophy/`     | Everyone           | Project vision, voice, naming                      |
+| `plans/`          | Team               | Planning workflow (planning → planned → completed) |
+| `specs/`          | Engineers          | Technical specifications                           |
+| `patterns/`       | Engineers          | Architectural patterns                             |
+| `help-center/`    | Users              | End-user help articles                             |
+| `guides/`         | Various            | Implementation guides                              |
+| `marketing/`      | Marketing          | Marketing materials                                |
+| `security/`       | Security           | Security documentation                             |
+| `legal/`          | Legal              | Policies and terms                                 |
+| `internal/`       | Team               | Internal communications                            |
 
 ## Plans Workflow
 
@@ -453,13 +463,14 @@ Documentation moves through the planning pipeline:
 This directory organizes planning documentation through its lifecycle.
 
 ## Workflow
-
 ```
+
 planning/ ──→ planned/ ──→ completed/
-   ↑            ↑            ↑
-   │            │            │
- Active      Ready for    Implemented
- research    implementation
+↑ ↑ ↑
+│ │ │
+Active Ready for Implemented
+research implementation
+
 ```
 
 ## Directories
@@ -494,9 +505,9 @@ When implementation is complete:
 
 > **Status**: DONE (commit `9b96872` on 2026-01-14)
 >
-> This section documents what was completed. The ~130 duplicate nature component files were deleted from `landing/`, `meadow/`, and `clearing/`. Apps now import from `@autumnsgrove/groveengine`.
+> This section documents what was completed. The ~130 duplicate nature component files were deleted from `landing/`, `meadow/`, and `clearing/`. Apps now import from `@autumnsgrove/lattice`.
 
-**Original Issue**: `landing/` and `meadow/` both contained identical copies of ~200 nature component files. These are already available in the `@autumnsgrove/groveengine` package.
+**Original Issue**: `landing/` and `meadow/` both contained identical copies of ~200 nature component files. These are already available in the `@autumnsgrove/lattice` package.
 
 **⚠️ VERIFICATION REQUIRED BEFORE DELETION**
 
@@ -513,7 +524,7 @@ cat > /tmp/test-import.ts << 'EOF'
 import {
   // Try importing a few key components
   Sun, Moon, Cloud, Tree, Flower, Bird
-} from '@autumnsgrove/groveengine/ui/nature';
+} from '@autumnsgrove/lattice/ui/nature';
 console.log('Imports work:', { Sun, Moon, Cloud, Tree, Flower, Bird });
 EOF
 
@@ -544,11 +555,12 @@ Same as landing - completed in same commit. Also included `clearing/` app.
 **Issue**: `landing/src/app.css` has 17 `@font-face` declarations that should be in the engine package.
 
 **Action**:
+
 1. Move font declarations to `packages/engine/src/lib/ui/styles/fonts.css`
 2. Export from engine package
 3. Update `landing/src/app.css` to import:
    ```css
-   @import "@autumnsgrove/groveengine/ui/styles/fonts.css";
+   @import "@autumnsgrove/lattice/ui/styles/fonts.css";
    ```
 4. Apply same pattern to `plant/` and `clearing/`
 
@@ -557,22 +569,31 @@ Same as landing - completed in same commit. Also included `clearing/` app.
 CSS `@import` can block parallel font downloads, potentially impacting page load. Consider these alternatives:
 
 **Option A: CSS @import (simpler, slight performance cost)**
+
 ```css
 /* app.css */
-@import "@autumnsgrove/groveengine/ui/styles/fonts.css";
+@import "@autumnsgrove/lattice/ui/styles/fonts.css";
 ```
 
 **Option B: HTML link preload (better performance)**
+
 ```html
 <!-- app.html -->
-<link rel="preload" href="/fonts/lexend.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/styles/fonts.css">
+<link
+  rel="preload"
+  href="/fonts/lexend.woff2"
+  as="font"
+  type="font/woff2"
+  crossorigin
+/>
+<link rel="stylesheet" href="/styles/fonts.css" />
 ```
 
 **Option C: JavaScript dynamic import (for code-split scenarios)**
+
 ```typescript
 // +layout.svelte
-onMount(() => import('@autumnsgrove/groveengine/ui/styles/fonts.css'));
+onMount(() => import("@autumnsgrove/lattice/ui/styles/fonts.css"));
 ```
 
 **Recommendation**: Use Option B (HTML preload) from the start for better Core Web Vitals. The slight added complexity is worth avoiding font-related layout shifts and blocking behavior. Option A is acceptable for local development or if deployment constraints prevent HTML modifications.
@@ -582,6 +603,7 @@ onMount(() => import('@autumnsgrove/groveengine/ui/styles/fonts.css'));
 **Issue**: `domains/` is a full SvelteKit application sitting at root level with configuration directories.
 
 **Pre-Move Audit**:
+
 ```bash
 # Find all references to domains/ in workspace configs
 grep -r "domains" pnpm-workspace.yaml package.json
@@ -600,6 +622,7 @@ cat domains/wrangler.toml 2>/dev/null | grep -E "^name|^route|pages_build"
 **⚠️ Deployment Config Warning**: If `domains/` has its own `wrangler.toml` or Cloudflare Pages config, the deployment pipeline may reference absolute paths. Update deployment scripts and CI/CD after moving.
 
 **Action**:
+
 1. Audit references (commands above)
 2. Move using git: `git mv domains/ packages/domains/`
 3. Update `pnpm-workspace.yaml` if needed
@@ -615,12 +638,13 @@ cat domains/wrangler.toml 2>/dev/null | grep -E "^name|^route|pages_build"
 
 **Current confusion**: `_archived/` and `archives/` have similar names but different purposes.
 
-| Directory | Current Purpose | New Name | New Purpose |
-|-----------|-----------------|----------|-------------|
+| Directory    | Current Purpose                       | New Name       | New Purpose              |
+| ------------ | ------------------------------------- | -------------- | ------------------------ |
 | `_archived/` | Deprecated code with expiration dates | `_deprecated/` | Code marked for deletion |
-| `archives/` | Historical reference materials | `archives/` | Keep as-is |
+| `archives/`  | Historical reference materials        | `archives/`    | Keep as-is               |
 
 **Action**:
+
 1. Rename `_archived/` → `_deprecated/`
 2. Add `_deprecated/README.md` explaining:
    - Contains deprecated code with expiration dates in filenames
@@ -632,6 +656,7 @@ cat domains/wrangler.toml 2>/dev/null | grep -E "^name|^route|pages_build"
 **Issue**: `plans/` at root has 2 files that belong in `docs/plans/planning/`
 
 **Action**:
+
 1. Move `plans/sentinel-threshold-integration-plan.md` → `docs/plans/planning/`
 2. Move `plans/threshold-engine-integration.md` → `docs/plans/planning/`
 3. Delete empty `plans/` directory
@@ -676,21 +701,29 @@ Utility scripts organized by purpose.
 ## Directories
 
 ### `db/`
+
 SQL scripts for database seeding and data fixes.
+
 - Run via: `wrangler d1 execute grove-engine-db --file=scripts/db/script.sql`
 
 ### `deploy/`
+
 Deployment and operational scripts.
+
 - Backfill operations
 - Service setup
 
 ### `generate/`
+
 Asset and documentation generation.
+
 - Logo generation
 - Release notes
 
 ### `repo/`
+
 Repository management tools.
+
 - Snapshots
 - Secret handling
 ```
@@ -832,6 +865,7 @@ Consider adding path aliases to `tsconfig.base.json` for cleaner imports after r
 ```
 
 **Benefits**:
+
 - Cleaner imports: `import { GlassCard } from '@grove/ui/glass'`
 - Easier refactoring: Change alias target, not every import
 - Self-documenting: Makes package boundaries explicit
@@ -850,5 +884,5 @@ Keep the original branch available until verification is complete.
 
 ---
 
-*This plan was generated 2026-01-14 based on comprehensive codebase exploration.*
-*Updated 2026-01-14 to incorporate PR review feedback.*
+_This plan was generated 2026-01-14 based on comprehensive codebase exploration._
+_Updated 2026-01-14 to incorporate PR review feedback._

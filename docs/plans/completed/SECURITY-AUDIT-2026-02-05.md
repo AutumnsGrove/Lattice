@@ -1,4 +1,4 @@
-# GroveEngine Security Audit Report
+# Lattice Security Audit Report
 
 **Date:** 2026-02-05
 **Auditor:** Claude Opus 4.6 (automated)
@@ -9,11 +9,12 @@
 
 ## Executive Summary
 
-GroveEngine demonstrates a **strong security posture overall**, with evidence of security-conscious design decisions throughout the codebase. The project has solid foundations: parameterized database queries, HTML sanitization via DOMPurify, tenant isolation via TenantDb, magic-byte file validation, rate limiting, Stripe webhook signature verification with timing-safe comparison, and comprehensive security headers (CSP, HSTS, X-Frame-Options, etc.).
+Lattice demonstrates a **strong security posture overall**, with evidence of security-conscious design decisions throughout the codebase. The project has solid foundations: parameterized database queries, HTML sanitization via DOMPurify, tenant isolation via TenantDb, magic-byte file validation, rate limiting, Stripe webhook signature verification with timing-safe comparison, and comprehensive security headers (CSP, HSTS, X-Frame-Options, etc.).
 
 That said, several findings warrant attention — ranging from medium-severity issues that should be addressed soon to low-severity items that represent defense-in-depth improvements.
 
 **Finding Summary:**
+
 - **CRITICAL:** 0
 - **HIGH:** 2
 - **MEDIUM:** 5
@@ -41,9 +42,10 @@ const cookieParts = [
 
 **Impact:** If an XSS vulnerability is exploited anywhere on `*.grove.place`, an attacker can read the CSRF token via `document.cookie` and use it to forge state-changing requests. The CSRF token becomes useless as a defense layer if XSS is present.
 
-**Mitigation note:** The CSRF token *needs* to be readable by JavaScript so the frontend can include it in request headers. This is a standard pattern. However, the real concern is that combined with `SameSite=Lax` (not `Strict`), the CSRF token is sent on top-level navigations from external sites. Additionally, the token has a 7-day lifetime and is scoped to `Domain=.grove.place` — meaning a CSRF token from one tenant's subdomain is valid for all tenants.
+**Mitigation note:** The CSRF token _needs_ to be readable by JavaScript so the frontend can include it in request headers. This is a standard pattern. However, the real concern is that combined with `SameSite=Lax` (not `Strict`), the CSRF token is sent on top-level navigations from external sites. Additionally, the token has a 7-day lifetime and is scoped to `Domain=.grove.place` — meaning a CSRF token from one tenant's subdomain is valid for all tenants.
 
 **Recommendation:**
+
 1. Scope CSRF tokens per-session rather than a standalone long-lived cookie
 2. Consider the double-submit cookie pattern with a session-tied token
 3. Reduce the token lifetime from 7 days to match session lifetime
@@ -59,29 +61,39 @@ The server-side (SSR) sanitization fallback uses regex-based HTML stripping inst
 ```typescript
 function sanitizeServerSafe(html: string): string {
   // Normalize whitespace in tag names to prevent bypass via newlines/tabs
-  sanitized = sanitized.replace(/<([\s]*s[\s]*c[\s]*r[\s]*i[\s]*p[\s]*t)/gi, "<script");
+  sanitized = sanitized.replace(
+    /<([\s]*s[\s]*c[\s]*r[\s]*i[\s]*p[\s]*t)/gi,
+    "<script",
+  );
   // Strip script tags with content (closed tags)
-  sanitized = sanitized.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
+  sanitized = sanitized.replace(
+    /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+    "",
+  );
   // ...
 }
 ```
 
 **Known bypasses for regex sanitizers include:**
+
 - Mutation XSS (mXSS) via nested tags: `<svg><desc><![CDATA[</desc><script>alert(1)</script>]]></desc></svg>`
 - Encoding tricks not covered by the normalizer (HTML entities: `&#x3C;script&#x3E;`)
 - `<img src=x onerror=...>` where the event handler regex misses unquoted attributes with certain characters
 - SVG/MathML namespace tricks
 
 The event handler stripping regex has a specific gap:
+
 ```typescript
 sanitized = sanitized.replace(/\s+on\w+\s*=\s*["'][^"']*["']/gi, "");
 sanitized = sanitized.replace(/\s+on\w+\s*=\s*[^\s>]*/gi, "");
 ```
+
 This won't catch: `<img src=x onerror = alert(1)>` (spaces around `=` with no quotes), or `<img src=x onerror&#x3D;alert(1)>` (HTML-entity-encoded equals sign).
 
 **Impact:** Any user-generated HTML rendered server-side (SSR) during the first page load can potentially execute arbitrary JavaScript. Client-side, DOMPurify takes over and is robust — but the SSR-rendered HTML is what search engines and initial page loads see.
 
 **Recommendation:**
+
 1. Use a proper HTML parser for server-side sanitization (e.g., `sanitize-html` or `ammonia` via WASM for Cloudflare Workers)
 2. If regex must be used, add an additional layer: escape all HTML entities in the output as a final step, then selectively un-escape only allowed tags
 3. Consider always rendering user content client-side (skip SSR for user HTML)
@@ -107,6 +119,7 @@ This completely disables SvelteKit's built-in CSRF origin checking. The code com
 **Mitigation note:** The engine's `hooks.server.ts` implements custom CSRF validation via `validateCSRF()` for form actions and `validateCSRFToken()` for API endpoints. However, plant's `hooks.server.ts` only checks form submissions with specific content types — JSON API calls to POST endpoints may bypass CSRF validation entirely.
 
 **Recommendation:**
+
 1. In plant's hooks, extend CSRF checking to all state-changing methods (PUT, DELETE, PATCH), not just POST
 2. Consider using `trustedOrigins: ["https://grove.place", "https://*.grove.place"]` instead of `["*"]` — SvelteKit supports wildcard patterns
 3. Document explicitly which CSRF layer protects which endpoint
@@ -133,6 +146,7 @@ Some browsers and HTTP clients (particularly for non-CORS requests like simple f
 **Impact:** An attacker could craft a form submission that avoids sending the Origin header (some techniques exist using Flash/Java applets on older systems, or by targeting edge cases in browser behavior).
 
 **Recommendation:**
+
 1. For state-changing requests, require either a valid Origin header OR a valid CSRF token — don't pass if both are absent
 2. Consider falling back to `Referer` header checking when `Origin` is absent
 
@@ -156,6 +170,7 @@ This means a CSRF token set by `autumn.grove.place` is readable by `evil-tenant.
 **Impact:** A malicious tenant could set up a page that reads the shared CSRF token and uses it to make authenticated requests to other tenants' admin endpoints (if the victim is logged into both).
 
 **Recommendation:**
+
 1. Generate per-tenant CSRF tokens (include tenant ID in the token or use separate cookie names per tenant)
 2. Alternatively, tie the CSRF token to the session and validate the binding server-side
 
@@ -179,6 +194,7 @@ if (host.includes("localhost") || host.includes("127.0.0.1")) {
 **Impact:** If the production deployment ever resolves `localhost` or `127.0.0.1` in the Host header (unlikely but possible through misconfigured reverse proxies or DNS rebinding), an attacker could impersonate any tenant.
 
 **Recommendation:**
+
 1. Gate this behind an explicit `DEV_MODE` or `NODE_ENV` environment variable check rather than hostname detection
 2. Add a comment or guard like: `if (process.env.NODE_ENV !== 'production')`
 
@@ -203,6 +219,7 @@ try {
 If KV is unavailable (outage, misconfiguration), all rate limits are effectively disabled. This is a deliberate availability-over-security trade-off, but it means an attacker who can cause KV errors (e.g., through request flooding that overwhelms KV) can bypass rate limits.
 
 **Recommendation:**
+
 1. For security-critical rate limits (login attempts, upload abuse), consider failing closed instead
 2. Add alerting/monitoring for KV failures so the team is notified immediately
 3. Consider a local in-memory fallback counter for critical endpoints
@@ -349,6 +366,7 @@ Missing `secure: true` and `httpOnly: true` in the deletion options. While brows
 ### I-1: Database Query Helpers — Well-Designed
 
 The `database.ts` module demonstrates good security practices:
+
 - Table/column names validated against `VALID_IDENTIFIER = /^[a-zA-Z_][a-zA-Z0-9_]*$/`
 - All user values passed via parameterized `.bind()`
 - `TenantDb` wrapper automatically injects `tenant_id` into all queries
@@ -358,6 +376,7 @@ The `database.ts` module demonstrates good security practices:
 ### I-2: Upload Security — Comprehensive
 
 The image upload pipeline is notably thorough:
+
 - MIME type allowlist
 - Extension validation and cross-check against MIME type
 - Magic byte signature verification (including WebP RIFF+marker check)
@@ -372,6 +391,7 @@ The image upload pipeline is notably thorough:
 ### I-3: Security Headers — Comprehensive
 
 All apps set appropriate security headers:
+
 - `X-Frame-Options: DENY`
 - `X-Content-Type-Options: nosniff`
 - `Referrer-Policy: strict-origin-when-cross-origin`
@@ -396,24 +416,25 @@ Grep across the entire codebase found no hardcoded API keys, tokens, or password
 
 ## Recommendations Priority Matrix
 
-| Priority | Finding | Effort |
-|----------|---------|--------|
-| **Do now** | M-2: Fix `validateCSRF()` to not pass when Origin is absent | Low |
-| **Do now** | M-3: Scope CSRF tokens per-tenant or per-session | Medium |
+| Priority    | Finding                                                        | Effort |
+| ----------- | -------------------------------------------------------------- | ------ |
+| **Do now**  | M-2: Fix `validateCSRF()` to not pass when Origin is absent    | Low    |
+| **Do now**  | M-3: Scope CSRF tokens per-tenant or per-session               | Medium |
 | **Do soon** | H-2: Replace regex sanitizer with a proper HTML parser for SSR | Medium |
-| **Do soon** | M-1: Narrow `trustedOrigins` and extend plant's CSRF checking | Low |
-| **Do soon** | L-3: Sanitize error messages before returning to clients | Low |
-| **Plan** | H-1: Rearchitect CSRF to be session-bound | Medium |
-| **Plan** | L-1: Migrate to nonce-based CSP | High |
-| **Plan** | L-2: Narrow `unsafe-eval` route matching | Low |
-| **Track** | M-4: Gate dev subdomain simulation behind env var | Low |
-| **Track** | M-5: Add KV failure monitoring/alerting | Medium |
+| **Do soon** | M-1: Narrow `trustedOrigins` and extend plant's CSRF checking  | Low    |
+| **Do soon** | L-3: Sanitize error messages before returning to clients       | Low    |
+| **Plan**    | H-1: Rearchitect CSRF to be session-bound                      | Medium |
+| **Plan**    | L-1: Migrate to nonce-based CSP                                | High   |
+| **Plan**    | L-2: Narrow `unsafe-eval` route matching                       | Low    |
+| **Track**   | M-4: Gate dev subdomain simulation behind env var              | Low    |
+| **Track**   | M-5: Add KV failure monitoring/alerting                        | Medium |
 
 ---
 
 ## Methodology
 
 This audit was conducted through:
+
 1. Manual code review of all security-critical files (hooks, auth, database, sanitization, CSRF, uploads, routing)
 2. Automated search for common vulnerability patterns (SQL injection, XSS, eval, hardcoded secrets, etc.)
 3. Analysis of 8 parallel exploration agents covering: SQL injection, XSS, auth/sessions, CSRF/input validation, secrets/config, file upload/access control, API/rate limiting, and dependency vulnerabilities
@@ -421,4 +442,4 @@ This audit was conducted through:
 
 ---
 
-*Report generated by security audit on branch `claude/security-audit-pIxZe`*
+_Report generated by security audit on branch `claude/security-audit-pIxZe`_

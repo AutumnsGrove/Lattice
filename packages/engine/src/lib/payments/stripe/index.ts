@@ -14,8 +14,8 @@
  * ```
  */
 
-export { StripeClient, StripeAPIError } from './client.js';
-export { StripeProvider, createStripeProvider } from './provider.js';
+export { StripeClient, StripeAPIError } from "./client.js";
+export { StripeProvider, createStripeProvider } from "./provider.js";
 
 // Re-export Stripe-specific types
 export type {
@@ -35,4 +35,4 @@ export type {
   StripeLoginLink,
   StripeBillingPortalSession,
   StripeEvent,
-} from './client.js';
+} from "./client.js";

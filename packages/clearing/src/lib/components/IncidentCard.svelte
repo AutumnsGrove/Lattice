@@ -4,7 +4,7 @@
 	 *
 	 * Shows incident title, status, affected components, and timeline of updates.
 	 */
-	import { cn } from "@autumnsgrove/groveengine/ui/utils";
+	import { cn } from "@autumnsgrove/lattice/ui/utils";
 	import { formatTime, formatDuration } from "$lib/utils/date";
 	import type {
 		IncidentStatus,

@@ -22,7 +22,7 @@ compatibility_date = "2025-01-01"
 # crons = ["0 3 * * *"]
 
 # =============================================================================
-# D1 Database - Same database as GroveEngine
+# D1 Database - Same database as Lattice
 # =============================================================================
 [[d1_databases]]
 binding = "DB"

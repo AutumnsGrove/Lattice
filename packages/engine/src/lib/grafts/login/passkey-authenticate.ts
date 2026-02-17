@@ -7,7 +7,7 @@
  *
  * @example
  * ```typescript
- * import { authenticateWithPasskey } from '@autumnsgrove/groveengine/grafts/login';
+ * import { authenticateWithPasskey } from '@autumnsgrove/lattice/grafts/login';
  *
  * const result = await authenticateWithPasskey({ returnTo: '/dashboard' });
  * if (result.success) {
@@ -218,6 +218,7 @@ export async function authenticateWithPasskey(
   try {
     // Step 1: Get authentication options from server
     const optionsResponse = await fetch("/api/passkey/authenticate/options", {
+      // csrf-ok
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -271,6 +272,7 @@ export async function authenticateWithPasskey(
       credential.response as AuthenticatorAssertionResponse;
 
     const verifyResponse = await fetch("/api/passkey/authenticate/verify", {
+      // csrf-ok
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -1,6 +1,6 @@
 import type { ServerLoad } from "@sveltejs/kit";
-import { buildGroveAdminUrl } from "@autumnsgrove/groveengine/utils";
-import { loadChannelMessages } from "@autumnsgrove/groveengine/services";
+import { buildGroveAdminUrl } from "@autumnsgrove/lattice/utils";
+import { loadChannelMessages } from "@autumnsgrove/lattice/services";
 
 export const load: ServerLoad = async ({ locals, platform }) => {
   let groveUrl: string | null = null;

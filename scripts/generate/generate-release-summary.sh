@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# 🌲 GroveEngine Release Summary Generator
+# 🌲 Lattice Release Summary Generator
 #
 # Generates meaningful release summaries using LLM analysis of git commits.
 # Integrates with the auto-tag workflow to create summaries for each version.

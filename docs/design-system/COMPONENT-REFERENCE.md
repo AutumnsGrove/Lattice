@@ -8,7 +8,7 @@ lastUpdated: "2026-02-16"
 # Component Reference
 
 > 236 components organized by category, ready to help you build something beautiful.
-> Import from `@autumnsgrove/groveengine/ui` and its subpaths.
+> Import from `@autumnsgrove/lattice/ui` and its subpaths.
 
 This is your field guide to Grove's component library. Each component is designed to feel warm, organic, and genuinely helpful—like a good friend who happens to know exactly what you need.
 
@@ -44,37 +44,37 @@ Import from specific subpaths when you need several components from the same fam
 ```svelte
 <script>
   // Glass UI components
-  import { GlassCard, GlassButton, Dialog } from '@autumnsgrove/groveengine/ui';
+  import { GlassCard, GlassButton, Dialog } from '@autumnsgrove/lattice/ui';
 
   // Nature elements for forest scenes
-  import { TreePine, Cardinal, Cloud } from '@autumnsgrove/groveengine/ui/nature';
+  import { TreePine, Cardinal, Cloud } from '@autumnsgrove/lattice/ui/nature';
 
   // Layout chrome
-  import { Header, Footer, ThemeToggle } from '@autumnsgrove/groveengine/ui/chrome';
+  import { Header, Footer, ThemeToggle } from '@autumnsgrove/lattice/ui/chrome';
 
   // Wrapper components (simplified APIs over primitives)
-  import { Accordion, Select, Tabs, Sheet } from '@autumnsgrove/groveengine/ui';
+  import { Accordion, Select, Tabs, Sheet } from '@autumnsgrove/lattice/ui';
 </script>
 ```
 
 ### Available Import Paths
 
-| Path                                      | What's Inside                                         |
-| ----------------------------------------- | ----------------------------------------------------- |
-| `@autumnsgrove/groveengine/ui`            | Core UI: Glass components, Button, Card, Dialog, etc. |
-| `@autumnsgrove/groveengine/ui/nature`     | Trees, creatures, sky, weather, botanical elements    |
-| `@autumnsgrove/groveengine/ui/chrome`     | Header, Footer, MobileMenu, ThemeToggle               |
-| `@autumnsgrove/groveengine/ui/typography` | Font provider components                              |
-| `@autumnsgrove/groveengine/ui/states`     | Loading, EmptyState, skeletons                        |
-| `@autumnsgrove/groveengine/ui/forms`      | SearchInput, ContentSearch, filter utilities          |
-| `@autumnsgrove/groveengine/ui/charts`     | Data visualization components                         |
-| `@autumnsgrove/groveengine/ui/content`    | ProductCard, SearchCard, PlanCard, Curios, Hum cards  |
-| `@autumnsgrove/groveengine/ui/gallery`    | ImageGallery, Lightbox, ZoomableImage                 |
-| `@autumnsgrove/groveengine/ui/indicators` | StatusBadge, ScoreBar, CreditBalance                  |
-| `@autumnsgrove/groveengine/ui/icons`      | Icon components and Lucide icon registries            |
-| `@autumnsgrove/groveengine/ui/terrarium`  | Canvas editor for nature scene composition            |
-| `@autumnsgrove/groveengine/ui/utils`      | Utilities like `cn()` for class merging               |
-| `@autumnsgrove/groveengine/ui/stores`     | `seasonStore`, `themeStore` for reactive state        |
+| Path                                  | What's Inside                                         |
+| ------------------------------------- | ----------------------------------------------------- |
+| `@autumnsgrove/lattice/ui`            | Core UI: Glass components, Button, Card, Dialog, etc. |
+| `@autumnsgrove/lattice/ui/nature`     | Trees, creatures, sky, weather, botanical elements    |
+| `@autumnsgrove/lattice/ui/chrome`     | Header, Footer, MobileMenu, ThemeToggle               |
+| `@autumnsgrove/lattice/ui/typography` | Font provider components                              |
+| `@autumnsgrove/lattice/ui/states`     | Loading, EmptyState, skeletons                        |
+| `@autumnsgrove/lattice/ui/forms`      | SearchInput, ContentSearch, filter utilities          |
+| `@autumnsgrove/lattice/ui/charts`     | Data visualization components                         |
+| `@autumnsgrove/lattice/ui/content`    | ProductCard, SearchCard, PlanCard, Curios, Hum cards  |
+| `@autumnsgrove/lattice/ui/gallery`    | ImageGallery, Lightbox, ZoomableImage                 |
+| `@autumnsgrove/lattice/ui/indicators` | StatusBadge, ScoreBar, CreditBalance                  |
+| `@autumnsgrove/lattice/ui/icons`      | Icon components and Lucide icon registries            |
+| `@autumnsgrove/lattice/ui/terrarium`  | Canvas editor for nature scene composition            |
+| `@autumnsgrove/lattice/ui/utils`      | Utilities like `cn()` for class merging               |
+| `@autumnsgrove/lattice/ui/stores`     | `seasonStore`, `themeStore` for reactive state        |
 
 ---
 
@@ -92,7 +92,7 @@ Beautiful translucent cards with backdrop blur. Your go-to for content container
 
 ```svelte
 <script>
-  import { GlassCard } from '@autumnsgrove/groveengine/ui';
+  import { GlassCard } from '@autumnsgrove/lattice/ui';
 </script>
 
 <!-- Basic card with title and description -->
@@ -138,7 +138,7 @@ Translucent buttons that feel substantial yet light.
 
 ```svelte
 <script>
-  import { GlassButton } from '@autumnsgrove/groveengine/ui';
+  import { GlassButton } from '@autumnsgrove/lattice/ui';
   import { X } from 'lucide-svelte';
 </script>
 
@@ -171,7 +171,7 @@ For moments that need a pause—destructive actions, important decisions.
 
 ```svelte
 <script>
-  import { GlassConfirmDialog } from '@autumnsgrove/groveengine/ui';
+  import { GlassConfirmDialog } from '@autumnsgrove/lattice/ui';
 
   let showDeleteDialog = $state(false);
 
@@ -255,7 +255,7 @@ These wrap the primitives with Grove styling, ready to use out of the box.
 
 ## primitives/ - Headless Primitives (45)
 
-Built on [bits-ui](https://bits-ui.com), primitives are unstyled, accessible building blocks that power Grove's wrapper components. The primitives themselves are internal—you'll use the simplified wrapper components exported from `@autumnsgrove/groveengine/ui`.
+Built on [bits-ui](https://bits-ui.com), primitives are unstyled, accessible building blocks that power Grove's wrapper components. The primitives themselves are internal—you'll use the simplified wrapper components exported from `@autumnsgrove/lattice/ui`.
 
 ### Wrapper Components
 
@@ -263,7 +263,7 @@ Grove provides wrapper components with sensible defaults and Grove styling. Impo
 
 ```svelte
 <script>
-  import { Accordion, Dialog, Select, Sheet, Tabs, Table } from '@autumnsgrove/groveengine/ui';
+  import { Accordion, Dialog, Select, Sheet, Tabs, Table } from '@autumnsgrove/lattice/ui';
 </script>
 ```
 
@@ -271,7 +271,7 @@ Grove provides wrapper components with sensible defaults and Grove styling. Impo
 
 ```svelte
 <script>
-  import { Accordion } from '@autumnsgrove/groveengine/ui';
+  import { Accordion } from '@autumnsgrove/lattice/ui';
 </script>
 
 <Accordion items={[
@@ -284,7 +284,7 @@ Grove provides wrapper components with sensible defaults and Grove styling. Impo
 
 ```svelte
 <script>
-  import { Select } from '@autumnsgrove/groveengine/ui';
+  import { Select } from '@autumnsgrove/lattice/ui';
 
   let season = $state('autumn');
 </script>
@@ -305,7 +305,7 @@ Grove provides wrapper components with sensible defaults and Grove styling. Impo
 
 ```svelte
 <script>
-  import { Dialog } from '@autumnsgrove/groveengine/ui';
+  import { Dialog } from '@autumnsgrove/lattice/ui';
 
   let open = $state(false);
 </script>
@@ -322,7 +322,7 @@ Slide-out panels from any edge.
 
 ```svelte
 <script>
-  import { Sheet } from '@autumnsgrove/groveengine/ui';
+  import { Sheet } from '@autumnsgrove/lattice/ui';
 
   let open = $state(false);
 </script>
@@ -336,7 +336,7 @@ Slide-out panels from any edge.
 
 ```svelte
 <script>
-  import { Tabs } from '@autumnsgrove/groveengine/ui';
+  import { Tabs } from '@autumnsgrove/lattice/ui';
 </script>
 
 <Tabs
@@ -361,7 +361,7 @@ Table subcomponents are exported for flexible table composition:
     TableRow,
     TableHead,
     TableCell
-  } from '@autumnsgrove/groveengine/ui';
+  } from '@autumnsgrove/lattice/ui';
 </script>
 
 <Table>
@@ -382,18 +382,18 @@ Table subcomponents are exported for flexible table composition:
 
 ### Available Wrapper Components
 
-| Component               | What It Wraps              | Exported From                  |
-| ----------------------- | -------------------------- | ------------------------------ |
-| `Accordion`             | Collapsible content panels | `@autumnsgrove/groveengine/ui` |
-| `Dialog`                | Modal dialogs              | `@autumnsgrove/groveengine/ui` |
-| `Select`                | Dropdown selection         | `@autumnsgrove/groveengine/ui` |
-| `Sheet`                 | Slide-out panels           | `@autumnsgrove/groveengine/ui` |
-| `Tabs`                  | Tabbed content             | `@autumnsgrove/groveengine/ui` |
-| `Table` + subcomponents | Data tables                | `@autumnsgrove/groveengine/ui` |
-| `Input`                 | Text input                 | `@autumnsgrove/groveengine/ui` |
-| `Textarea`              | Multi-line input           | `@autumnsgrove/groveengine/ui` |
-| `Badge`                 | Labels and tags            | `@autumnsgrove/groveengine/ui` |
-| `Skeleton`              | Loading placeholders       | `@autumnsgrove/groveengine/ui` |
+| Component               | What It Wraps              | Exported From              |
+| ----------------------- | -------------------------- | -------------------------- |
+| `Accordion`             | Collapsible content panels | `@autumnsgrove/lattice/ui` |
+| `Dialog`                | Modal dialogs              | `@autumnsgrove/lattice/ui` |
+| `Select`                | Dropdown selection         | `@autumnsgrove/lattice/ui` |
+| `Sheet`                 | Slide-out panels           | `@autumnsgrove/lattice/ui` |
+| `Tabs`                  | Tabbed content             | `@autumnsgrove/lattice/ui` |
+| `Table` + subcomponents | Data tables                | `@autumnsgrove/lattice/ui` |
+| `Input`                 | Text input                 | `@autumnsgrove/lattice/ui` |
+| `Textarea`              | Multi-line input           | `@autumnsgrove/lattice/ui` |
+| `Badge`                 | Labels and tags            | `@autumnsgrove/lattice/ui` |
+| `Skeleton`              | Loading placeholders       | `@autumnsgrove/lattice/ui` |
 
 ---
 
@@ -415,8 +415,8 @@ Most nature components accept a `season` prop that adapts their appearance:
 
 ```svelte
 <script>
-  import { TreePine } from '@autumnsgrove/groveengine/ui/nature';
-  import { seasonStore } from '@autumnsgrove/groveengine/ui/stores';
+  import { TreePine } from '@autumnsgrove/lattice/ui/nature';
+  import { seasonStore } from '@autumnsgrove/lattice/ui/stores';
 </script>
 
 <!-- This tree follows the global season -->
@@ -435,7 +435,7 @@ Most nature components accept a `season` prop that adapts their appearance:
 
 ```svelte
 <script>
-  import { TreePine, TreeAspen, TreeBirch, TreeCherry } from '@autumnsgrove/groveengine/ui/nature';
+  import { TreePine, TreeAspen, TreeBirch, TreeCherry } from '@autumnsgrove/lattice/ui/nature';
 </script>
 
 <!-- Evergreen pine with snow in winter -->
@@ -466,7 +466,7 @@ Forest friends that bring your scenes to life.
 
 ```svelte
 <script>
-  import { Cardinal, Robin, Owl, Deer, Firefly, Butterfly } from '@autumnsgrove/groveengine/ui/nature';
+  import { Cardinal, Robin, Owl, Deer, Firefly, Butterfly } from '@autumnsgrove/lattice/ui/nature';
 </script>
 
 <!-- Northern Cardinal (perfect for winter scenes) -->
@@ -494,7 +494,7 @@ Forest friends that bring your scenes to life.
 
 ```svelte
 <script>
-  import { Sun, Moon, Cloud, Star, Rainbow } from '@autumnsgrove/groveengine/ui/nature';
+  import { Sun, Moon, Cloud, Star, Rainbow } from '@autumnsgrove/lattice/ui/nature';
 </script>
 
 <Sun class="w-12 h-12" />
@@ -512,7 +512,7 @@ Forest floor details.
 
 ```svelte
 <script>
-  import { Mushroom, Fern, Rock, Bush, GrassTuft } from '@autumnsgrove/groveengine/ui/nature';
+  import { Mushroom, Fern, Rock, Bush, GrassTuft } from '@autumnsgrove/lattice/ui/nature';
 </script>
 
 <Mushroom class="w-6 h-8" variant="red" />
@@ -530,7 +530,7 @@ Leaves, petals, and organic details.
 
 ```svelte
 <script>
-  import { Leaf, FallingLeavesLayer, FallingPetalsLayer, Acorn } from '@autumnsgrove/groveengine/ui/nature';
+  import { Leaf, FallingLeavesLayer, FallingPetalsLayer, Acorn } from '@autumnsgrove/lattice/ui/nature';
 </script>
 
 <!-- Single leaf -->
@@ -557,7 +557,7 @@ Leaves, petals, and organic details.
 
 ```svelte
 <script>
-  import { Pond, LilyPad, Stream, Reeds } from '@autumnsgrove/groveengine/ui/nature';
+  import { Pond, LilyPad, Stream, Reeds } from '@autumnsgrove/lattice/ui/nature';
 </script>
 
 <Pond class="w-24 h-16" />
@@ -570,7 +570,7 @@ Leaves, petals, and organic details.
 
 ```svelte
 <script>
-  import { SnowfallLayer, Snowflake } from '@autumnsgrove/groveengine/ui/nature';
+  import { SnowfallLayer, Snowflake } from '@autumnsgrove/lattice/ui/nature';
 </script>
 
 <!-- Full snowfall effect -->
@@ -588,7 +588,7 @@ Garden structures and paths.
 
 ```svelte
 <script>
-  import { Birdhouse, Bridge, Lantern, Lattice, StonePath } from '@autumnsgrove/groveengine/ui/nature';
+  import { Birdhouse, Bridge, Lantern, Lattice, StonePath } from '@autumnsgrove/lattice/ui/nature';
 </script>
 
 <Birdhouse class="w-8 h-10" />
@@ -616,7 +616,7 @@ import {
   getSeasonalGreens, // Helper for seasonal foliage
   getCherryColors, // Helper for cherry tree colors
   type Season,
-} from "@autumnsgrove/groveengine/ui/nature";
+} from "@autumnsgrove/lattice/ui/nature";
 ```
 
 ### Other Nature Components
@@ -635,7 +635,7 @@ Scoped font components that automatically load fonts and apply them to their chi
 
 ```svelte
 <script>
-  import { Lexend, Alagard, Caveat, IBMPlexMono } from '@autumnsgrove/groveengine/ui/typography';
+  import { Lexend, Alagard, Caveat, IBMPlexMono } from '@autumnsgrove/lattice/ui/typography';
 </script>
 
 <!-- Default font (used across all Grove) -->
@@ -674,7 +674,7 @@ import {
   fontById, // Get font by ID
   getFontUrl, // Get CDN URL for a font
   getFontsByCategory, // Filter fonts by category
-} from "@autumnsgrove/groveengine/ui/typography";
+} from "@autumnsgrove/lattice/ui/typography";
 ```
 
 ---
@@ -685,8 +685,8 @@ The scaffolding that holds every Grove page together.
 
 ```svelte
 <script>
-  import { Header, Footer, ThemeToggle, MobileMenu } from '@autumnsgrove/groveengine/ui/chrome';
-  import { seasonStore, themeStore } from '@autumnsgrove/groveengine/ui/chrome';
+  import { Header, Footer, ThemeToggle, MobileMenu } from '@autumnsgrove/lattice/ui/chrome';
+  import { seasonStore, themeStore } from '@autumnsgrove/lattice/ui/chrome';
 </script>
 
 <Header
@@ -721,7 +721,7 @@ The scaffolding that holds every Grove page together.
 ### Stores
 
 ```typescript
-import { seasonStore, themeStore } from "@autumnsgrove/groveengine/ui/stores";
+import { seasonStore, themeStore } from "@autumnsgrove/lattice/ui/stores";
 
 // Season store
 $seasonStore; // Current season: 'spring' | 'summer' | 'autumn' | 'winter' | 'midnight'
@@ -740,7 +740,7 @@ A creative playground where users compose nature scenes by dragging and dropping
 
 ```svelte
 <script>
-  import { Terrarium } from '@autumnsgrove/groveengine/ui/terrarium';
+  import { Terrarium } from '@autumnsgrove/lattice/ui/terrarium';
 </script>
 
 <Terrarium />
@@ -769,7 +769,7 @@ import {
   CANVAS_BACKGROUNDS,
   DEFAULT_SCENE,
   exportSceneAsPNG,
-} from "@autumnsgrove/groveengine/ui/terrarium";
+} from "@autumnsgrove/lattice/ui/terrarium";
 ```
 
 ---
@@ -780,7 +780,7 @@ Simple, warm charts for displaying data without overwhelming.
 
 ```svelte
 <script>
-  import { Sparkline, LOCBar, ActivityOverview, RepoBreakdown } from '@autumnsgrove/groveengine/ui/charts';
+  import { Sparkline, LOCBar, ActivityOverview, RepoBreakdown } from '@autumnsgrove/lattice/ui/charts';
 </script>
 
 <!-- Mini trend line -->
@@ -807,7 +807,7 @@ Cards, embeds, and interactive widgets for displaying structured content. Includ
 
 ```svelte
 <script>
-  import { ProductCard, PlanCard, SearchCard, RoadmapPreview } from '@autumnsgrove/groveengine/ui/content';
+  import { ProductCard, PlanCard, SearchCard, RoadmapPreview } from '@autumnsgrove/lattice/ui/content';
 </script>
 
 <ProductCard
@@ -887,7 +887,7 @@ Beautiful ways to display images.
 
 ```svelte
 <script>
-  import { ImageGallery, Lightbox, ZoomableImage } from '@autumnsgrove/groveengine/ui/gallery';
+  import { ImageGallery, Lightbox, ZoomableImage } from '@autumnsgrove/lattice/ui/gallery';
 </script>
 
 <!-- Grid gallery with lightbox -->
@@ -920,7 +920,7 @@ For those in-between moments.
 
 ```svelte
 <script>
-  import { Loading, LoadingSkeleton, EmptyState, ThemeToggle } from '@autumnsgrove/groveengine/ui/states';
+  import { Loading, LoadingSkeleton, EmptyState, ThemeToggle } from '@autumnsgrove/lattice/ui/states';
 </script>
 
 <!-- Full loading state -->
@@ -956,7 +956,7 @@ Specialized form components.
 
 ```svelte
 <script>
-  import { SearchInput, ContentSearch, createTextFilter } from '@autumnsgrove/groveengine/ui/forms';
+  import { SearchInput, ContentSearch, createTextFilter } from '@autumnsgrove/lattice/ui/forms';
 </script>
 
 <!-- Simple search input -->
@@ -983,7 +983,7 @@ import {
   createFuzzyFilter, // Fuzzy/approximate matching
   createDateFilter, // Filter by date range
   combineFilters, // Combine multiple filters
-} from "@autumnsgrove/groveengine/ui/forms";
+} from "@autumnsgrove/lattice/ui/forms";
 
 // Example: Search title and content
 const filter = createMultiFieldFilter(["title", "content", "tags"]);
@@ -997,7 +997,7 @@ Visual indicators for status and progress.
 
 ```svelte
 <script>
-  import { StatusBadge, ScoreBar, CreditBalance } from '@autumnsgrove/groveengine/ui/indicators';
+  import { StatusBadge, ScoreBar, CreditBalance } from '@autumnsgrove/lattice/ui/indicators';
 </script>
 
 <!-- Status indicator -->
@@ -1019,8 +1019,8 @@ Grove uses [Lucide icons](https://lucide.dev) with semantic groupings and custom
 
 ```svelte
 <script>
-  import { Icons, IconLegend } from '@autumnsgrove/groveengine/ui/icons';
-  import { Check, ArrowRight, Sprout, Heart } from '@autumnsgrove/groveengine/ui/icons';
+  import { Icons, IconLegend } from '@autumnsgrove/lattice/ui/icons';
+  import { Check, ArrowRight, Sprout, Heart } from '@autumnsgrove/lattice/ui/icons';
 </script>
 
 <!-- Custom multi-icon component -->
@@ -1049,7 +1049,7 @@ import {
   authIcons, // Auth: fingerprint, key, link
   getIcon, // Get icon by semantic key
   allIcons, // All icons in one map
-} from "@autumnsgrove/groveengine/ui/icons";
+} from "@autumnsgrove/lattice/ui/icons";
 ```
 
 ---
@@ -1059,7 +1059,7 @@ import {
 ### Class Merging
 
 ```typescript
-import { cn } from "@autumnsgrove/groveengine/ui/utils";
+import { cn } from "@autumnsgrove/lattice/ui/utils";
 
 // Merge classes with Tailwind conflict resolution
 const className = cn(

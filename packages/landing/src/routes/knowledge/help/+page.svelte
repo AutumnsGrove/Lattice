@@ -2,7 +2,7 @@
   import SEO from '$lib/components/SEO.svelte';
   import Header from '$lib/components/Header.svelte';
   import Footer from '$lib/components/Footer.svelte';
-  import { CategoryNav } from '@autumnsgrove/groveengine';
+  import { CategoryNav } from '@autumnsgrove/lattice';
   import { toolIcons, stateIcons, type ToolIconKey } from '$lib/utils/icons';
   import type { HelpSection } from '$lib/types/docs';
 

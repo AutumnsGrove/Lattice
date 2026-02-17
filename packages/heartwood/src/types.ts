@@ -13,7 +13,7 @@ export interface Env {
   // D1 Database (Heartwood auth data)
   DB: D1Database;
 
-  // D1 Database (GroveEngine data - email signups, etc.)
+  // D1 Database (Lattice data - email signups, etc.)
   ENGINE_DB: D1Database;
 
   // KV Namespace for Better Auth session caching
@@ -395,7 +395,7 @@ export interface AdminStats {
   users_by_tier: Record<string, number>;
   recent_logins: AuditLog[];
   total_clients: number;
-  // GroveEngine stats
+  // Lattice stats
   email_signups_count: number;
 }
 

@@ -2,7 +2,7 @@
 	import type { PageData } from './$types';
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
-	import { GlassCard } from '@autumnsgrove/groveengine/ui';
+	import { GlassCard } from '@autumnsgrove/lattice/ui';
 	import {
 		Play,
 		Square,

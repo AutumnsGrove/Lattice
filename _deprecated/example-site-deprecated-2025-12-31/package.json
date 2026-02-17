@@ -4,7 +4,7 @@
   "private": true,
   "license": "AGPL-3.0-only",
   "author": "AutumnsGrove",
-  "description": "Example site showcasing all GroveEngine features - The Midnight Bloom Tea Café",
+  "description": "Example site showcasing all Lattice features - The Midnight Bloom Tea Café",
   "type": "module",
   "scripts": {
     "dev": "vite dev",
@@ -30,7 +30,7 @@
     "vite": "^5.4.10"
   },
   "dependencies": {
-    "@autumnsgrove/groveengine": "workspace:*",
+    "@autumnsgrove/lattice": "workspace:*",
     "clsx": "^2.1.1",
     "dompurify": "^3.3.0",
     "gray-matter": "^4.0.3",

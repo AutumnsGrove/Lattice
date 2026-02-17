@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
-	import { GlassComparisonTable } from '@autumnsgrove/groveengine/ui';
+	import { GlassComparisonTable } from '@autumnsgrove/lattice/ui';
 	import SEO from '$lib/components/SEO.svelte';
 	import { ArrowLeft } from 'lucide-svelte';
 

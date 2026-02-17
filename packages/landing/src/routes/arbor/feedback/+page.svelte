@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from "./$types";
 	import { enhance } from "$app/forms";
-	import { GlassCard, GroveSwap } from "@autumnsgrove/groveengine/ui";
+	import { GlassCard, GroveSwap } from "@autumnsgrove/lattice/ui";
 	import { Smile, Frown, Meh, Mail, Globe, MessageCircle } from "lucide-svelte";
 	import type { ComponentType } from "svelte";
 

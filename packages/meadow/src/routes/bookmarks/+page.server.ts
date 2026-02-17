@@ -3,7 +3,7 @@
  */
 
 import { redirect } from "@sveltejs/kit";
-import { buildLoginUrl } from "@autumnsgrove/groveengine/grafts/login";
+import { buildLoginUrl } from "@autumnsgrove/lattice/grafts/login";
 import type { PageServerLoad } from "./$types";
 import { getFeed } from "$lib/server/feed";
 

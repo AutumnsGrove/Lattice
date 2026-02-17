@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { enhance } from '$app/forms';
-	import { GlassCard } from '@autumnsgrove/groveengine/ui';
+	import { GlassCard } from '@autumnsgrove/lattice/ui';
 	import { ArrowLeft, Clock, AlertCircle, CheckCircle2 } from 'lucide-svelte';
 
 	let { data }: { data: PageData } = $props();

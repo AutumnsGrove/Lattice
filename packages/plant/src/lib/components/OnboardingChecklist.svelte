@@ -6,8 +6,8 @@
 	 * in their journey to taking root in the Grove.
 	 */
 
-	import { Check, User, Mail, CreditCard, Sparkles } from '@autumnsgrove/groveengine/ui/icons';
-	import { GlassCard, GroveSwap } from '@autumnsgrove/groveengine/ui';
+	import { Check, User, Mail, CreditCard, Sparkles } from '@autumnsgrove/lattice/ui/icons';
+	import { GlassCard, GroveSwap } from '@autumnsgrove/lattice/ui';
 	import { page } from '$app/state';
 
 	// Define onboarding steps with Grove-friendly language

@@ -41,6 +41,7 @@ Automatically generates meaningful release summaries using LLM analysis of git c
 The Grove roadmap previously displayed only basic version metadata: version number, date, line count, and commit count. This felt sparse and didn't communicate what actually changed in each release.
 
 This system automatically generates 2-4 sentence summaries for each version release by:
+
 1. Extracting commits between version tags
 2. Analyzing conventional commit messages
 3. Sending to LLM with context about Grove
@@ -102,7 +103,7 @@ This system automatically generates 2-4 sentence summaries for each version rele
 ### File Structure
 
 ```
-GroveEngine/
+Lattice/
 ├── scripts/
 │   ├── generate-release-summary.sh    # Core summary generator
 │   └── backfill-summaries.sh          # Historical backfill tool
@@ -162,6 +163,7 @@ Each version summary is stored as JSON:
 ```
 
 **Fields:**
+
 - `version`: Version tag (e.g., "v0.9.0")
 - `date`: ISO 8601 timestamp of release
 - `commitHash`: Short git commit hash
@@ -176,12 +178,14 @@ Each version summary is stored as JSON:
 ### Provider: OpenRouter
 
 **Why OpenRouter:**
+
 - Cost-effective access to multiple models
 - No vendor lock-in (can switch models easily)
 - Straightforward API (OpenAI-compatible)
 - Pay-as-you-go pricing
 
 **Model:** `deepseek/deepseek-v3.2`
+
 - Cost: ~$0.55 per million tokens (input) / ~$2.20 per million tokens (output)
 - Estimated: $0.0005 per release summary
 - Quality: Excellent for summarization tasks, competitive with GPT-4
@@ -190,12 +194,14 @@ Each version summary is stored as JSON:
 ### Prompt Engineering
 
 The prompt sent to the LLM includes:
+
 1. Context about Grove (platform description)
 2. Full commit list for the version
 3. Instructions for tone and style
 4. Length constraints (2-4 sentences)
 
 **Example prompt:**
+
 ```
 You are analyzing git commits for a release of Grove, a multi-tenant blog
 platform built with SvelteKit and Cloudflare Workers.
@@ -219,6 +225,7 @@ Respond with ONLY the summary text, no additional formatting or labels.
 ### Fallback Behavior
 
 If the LLM API call fails:
+
 1. Script continues with basic summary
 2. Basic summary: "Version X includes N features, M fixes, P refactoring changes"
 3. GitHub Action doesn't fail (warning only)
@@ -247,6 +254,7 @@ If the LLM API call fails:
 ```
 
 **Required Secret:**
+
 - `OPENROUTER_API_KEY`: OpenRouter API key (set in GitHub repo secrets)
 
 **Sync step updated:**
@@ -266,6 +274,7 @@ If the LLM API call fails:
 ### Automatic Generation (Production)
 
 Summaries are generated automatically when:
+
 1. Developer bumps version in `packages/engine/package.json`
 2. Changes are pushed to `main` branch
 3. Auto-tag workflow detects version change
@@ -319,6 +328,7 @@ cp -r snapshots/summaries/* landing/static/data/summaries/
 **URL:** `/journey`
 
 **Features:**
+
 - Displays all releases in reverse chronological order
 - Shows version number, date, lines of code, commit count
 - Displays LLM-generated summary prominently
@@ -327,6 +337,7 @@ cp -r snapshots/summaries/* landing/static/data/summaries/
 - Lists top features and fixes extracted from commits
 
 **Data loading:**
+
 1. Fetches `history.csv` for basic metrics
 2. Fetches individual JSON summaries for each version
 3. Merges data for complete display
@@ -343,18 +354,21 @@ The main `/roadmap` page includes a prominent link to version history in the her
 ### Per-Release Cost
 
 **LLM API Call:**
+
 - Model: DeepSeek V3.2
 - Input tokens: ~500-1000 (prompt + commits)
 - Output tokens: ~100-150 (summary)
 - Cost: ~$0.0005 per release
 
 **GitHub Actions:**
+
 - Minutes used: +30 seconds per release
 - Cost: Free (within GitHub free tier)
 
 ### Annual Projection
 
 Assuming 50 releases per year:
+
 - LLM costs: $0.025/year (~2.5 cents)
 - GitHub Actions: Free
 
@@ -374,16 +388,19 @@ Assuming 50 releases per year:
 ### Common Issues
 
 **Issue:** Summary generation fails with API error
+
 - **Cause:** Missing or invalid OPENROUTER_API_KEY
 - **Fix:** Set secret in GitHub repo settings
 - **Fallback:** Basic summary is used, workflow continues
 
 **Issue:** Summary quality is poor
+
 - **Cause:** Prompt needs refinement or model change
 - **Fix:** Edit prompt in `generate-release-summary.sh`
 - **Re-generate:** Run script manually for that version
 
 **Issue:** Historical versions missing summaries
+
 - **Cause:** Backfill not run yet
 - **Fix:** Run `./scripts/backfill-summaries.sh`
 
@@ -406,13 +423,16 @@ Assuming 50 releases per year:
 If cost or quality becomes an issue:
 
 **Current model:**
+
 - `deepseek/deepseek-v3.2` - $0.55/$2.20 per M tokens (~$0.0005/release) ← **In use**
 
 **Cheaper options:**
+
 - `openai/gpt-4o-mini` - $0.15/M tokens (~$0.0002/release)
 - `google/gemini-2.0-flash-exp` - Free tier available
 
 **Higher quality (if needed):**
+
 - `anthropic/claude-3.5-sonnet` - $3/M tokens (~$0.003/release)
 - `anthropic/claude-3.5-haiku` - $1/M tokens (~$0.001/release)
 - `openai/gpt-4o` - $2.5/M tokens (~$0.0025/release)
@@ -514,6 +534,7 @@ pnpm dev
 ### 3. Verify Setup
 
 The workflow will automatically use the key when generating summaries. You can verify by:
+
 - Checking workflow logs for "Generating release summary"
 - Looking for generated files in `snapshots/summaries/`
 - No error messages about missing API key
@@ -522,5 +543,5 @@ The workflow will automatically use the key when generating summaries. You can v
 
 ---
 
-*Last Updated: January 2026*
-*Model: DeepSeek V3.2 via OpenRouter*
+_Last Updated: January 2026_
+_Model: DeepSeek V3.2 via OpenRouter_

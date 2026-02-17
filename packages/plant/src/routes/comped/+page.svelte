@@ -6,9 +6,9 @@
 	 * Shows them their special status and creates their tenant directly.
 	 */
 
-	import { Gift, Check, Loader2, Sparkles, ArrowRight, Heart } from '@autumnsgrove/groveengine/ui/icons';
-	import { GlassCard, GroveSwap } from '@autumnsgrove/groveengine/ui';
-	import { TIERS } from '@autumnsgrove/groveengine/config';
+	import { Gift, Check, Loader2, Sparkles, ArrowRight, Heart } from '@autumnsgrove/lattice/ui/icons';
+	import { GlassCard, GroveSwap } from '@autumnsgrove/lattice/ui';
+	import { TIERS } from '@autumnsgrove/lattice/config';
 	import { submitForm } from '$lib/submit-form';
 
 	let { data } = $props();

@@ -8,7 +8,7 @@ import type {
   BetterAuthProvider,
 } from "../types/index.js";
 
-/** Better Auth API base URL — canonical source: @autumnsgrove/groveengine/config AUTH_HUB_URL */
+/** Better Auth API base URL — canonical source: @autumnsgrove/lattice/config AUTH_HUB_URL */
 const BETTER_AUTH_BASE_URL = "https://login.grove.place";
 
 /**

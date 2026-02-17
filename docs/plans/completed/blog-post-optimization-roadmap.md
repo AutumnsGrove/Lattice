@@ -1,6 +1,6 @@
 # Blog Post Optimization Roadmap
 
-> *From direct D1 reads to intelligent caching with hot/warm/cold storage strategy*
+> _From direct D1 reads to intelligent caching with hot/warm/cold storage strategy_
 
 **Status:** Planning
 **Created:** 2026-01-12
@@ -14,23 +14,27 @@
 ### What We Have
 
 **Storage:**
+
 - All blog posts in D1 (`posts` table)
 - Markdown + pre-rendered HTML stored together
 - Multi-tenant architecture with `tenant_id` scoping
 - Dual-source support (D1 + filesystem fallback)
 
 **Data Access:**
+
 - **ZERO caching** - every page view hits D1 directly
 - No Cache-Control headers on blog routes
 - No KV caching layer
 - Config queries hit D1 on every request
 
 **Durable Objects:**
+
 - **NONE implemented yet**
 - Comprehensive Loom pattern designed (see `docs/patterns/loom-durable-objects-pattern.md`)
 - No bindings in wrangler.toml
 
 **Cost Impact:**
+
 - Every blog view = 1 D1 read
 - Tenant config fetched on every request
 - Analytics written individually (no batching)
@@ -108,6 +112,7 @@
 ### Split PostDO into Two DOs
 
 **Current Design (from loom-durable-objects-pattern.md):**
+
 - Single `PostDO` handles content, reactions, comments, presence
 
 **New Design (Optimized):**
@@ -117,6 +122,7 @@
 **ID Pattern:** `post-meta:{tenantId}:{postId}`
 
 **Purpose:**
+
 - Real-time reactions (atomic counters)
 - Comment buffering and delivery
 - Presence tracking ("X people viewing")
@@ -125,6 +131,7 @@
 - Last edited timestamp
 
 **Storage (DO SQLite):**
+
 ```sql
 CREATE TABLE reactions (
   user_id TEXT NOT NULL,
@@ -160,10 +167,14 @@ CREATE TABLE stats (
 ```
 
 **Methods:**
+
 ```typescript
 class PostMetaDO extends DurableObject {
   // Reactions (atomic, instant)
-  async toggleReaction(userId: string, type: string): Promise<{ added: boolean; newCount: number }>;
+  async toggleReaction(
+    userId: string,
+    type: string,
+  ): Promise<{ added: boolean; newCount: number }>;
   async getReactionCounts(): Promise<Record<string, number>>;
 
   // Comments (buffered)
@@ -184,6 +195,7 @@ class PostMetaDO extends DurableObject {
 ```
 
 **Flush to D1:**
+
 - Reaction counts: Every 5 minutes (for backup/analytics)
 - Comments: Every 30 seconds (batch insert)
 - View counts: Every hour (aggregated)
@@ -195,12 +207,14 @@ class PostMetaDO extends DurableObject {
 **ID Pattern:** `post-content:{tenantId}:{postId}`
 
 **Purpose:**
+
 - Content caching layer
 - Draft auto-save (cross-device sync)
 - Content migration coordination
 - Storage location tracking
 
 **Storage (DO SQLite):**
+
 ```sql
 CREATE TABLE content (
   version INTEGER PRIMARY KEY,
@@ -224,13 +238,22 @@ CREATE TABLE drafts (
 ```
 
 **Methods:**
+
 ```typescript
 class PostContentDO extends DurableObject {
   // Content retrieval (checks D1 vs R2)
-  async getContent(): Promise<{ markdown: string; html: string; version: number }>;
+  async getContent(): Promise<{
+    markdown: string;
+    html: string;
+    version: number;
+  }>;
 
   // Content updates
-  async saveContent(markdown: string, html: string, userId: string): Promise<{ version: number }>;
+  async saveContent(
+    markdown: string,
+    html: string,
+    userId: string,
+  ): Promise<{ version: number }>;
 
   // Draft sync (cross-device)
   async saveDraft(draft: Draft, deviceId: string): Promise<void>;
@@ -238,7 +261,10 @@ class PostContentDO extends DurableObject {
   async listDrafts(): Promise<Draft[]>;
 
   // Storage migration
-  async getStorageLocation(): Promise<{ location: 'd1' | 'r2' | 'r2_archived'; r2Key?: string }>;
+  async getStorageLocation(): Promise<{
+    location: "d1" | "r2" | "r2_archived";
+    r2Key?: string;
+  }>;
   async migrateToR2(r2Key: string): Promise<void>;
   async migrateToD1(): Promise<void>;
 
@@ -249,14 +275,14 @@ class PostContentDO extends DurableObject {
 
 **Why Split?**
 
-| Concern | PostMetaDO | PostContentDO |
-|---------|------------|---------------|
-| **Read Frequency** | High (every page view for stats) | Low (cached aggressively) |
-| **Write Frequency** | High (reactions, comments, views) | Low (edits, publishes) |
-| **Data Size** | Small (<10KB per post) | Large (1KB-1MB per post) |
-| **Hibernation** | Rare (always active for popular posts) | Frequent (most posts idle) |
-| **Cache Strategy** | Short TTL (5 min) | Long TTL (1-24 hours) |
-| **Cost Sensitivity** | Request count matters | Storage + duration matters |
+| Concern              | PostMetaDO                             | PostContentDO              |
+| -------------------- | -------------------------------------- | -------------------------- |
+| **Read Frequency**   | High (every page view for stats)       | Low (cached aggressively)  |
+| **Write Frequency**  | High (reactions, comments, views)      | Low (edits, publishes)     |
+| **Data Size**        | Small (<10KB per post)                 | Large (1KB-1MB per post)   |
+| **Hibernation**      | Rare (always active for popular posts) | Frequent (most posts idle) |
+| **Cache Strategy**   | Short TTL (5 min)                      | Long TTL (1-24 hours)      |
+| **Cost Sensitivity** | Request count matters                  | Storage + duration matters |
 
 ---
 
@@ -278,20 +304,20 @@ export async function load({ params, locals, setHeaders }) {
   const post = await getPostWithCache(params.slug, subdomain);
 
   if (!post) {
-    throw error(404, 'Post not found');
+    throw error(404, "Post not found");
   }
 
   // Public posts: aggressive edge caching
-  if (post.status === 'published') {
+  if (post.status === "published") {
     setHeaders({
-      'Cache-Control': 'public, max-age=300, s-maxage=300',      // Browser: 5 min
-      'CDN-Cache-Control': 'max-age=3600, stale-while-revalidate=86400', // Edge: 1 hour, stale: 24h
-      'Vary': 'Cookie',  // Vary by auth state (owner sees edit buttons)
+      "Cache-Control": "public, max-age=300, s-maxage=300", // Browser: 5 min
+      "CDN-Cache-Control": "max-age=3600, stale-while-revalidate=86400", // Edge: 1 hour, stale: 24h
+      Vary: "Cookie", // Vary by auth state (owner sees edit buttons)
     });
   } else {
     // Drafts: never cache
     setHeaders({
-      'Cache-Control': 'private, no-cache, no-store, must-revalidate',
+      "Cache-Control": "private, no-cache, no-store, must-revalidate",
     });
   }
 
@@ -307,8 +333,8 @@ export async function load({ locals, setHeaders }) {
   const posts = await getPostListWithCache(subdomain);
 
   setHeaders({
-    'Cache-Control': 'public, max-age=300, s-maxage=600',  // Browser: 5 min, Edge: 10 min
-    'CDN-Cache-Control': 'max-age=600, stale-while-revalidate=3600',
+    "Cache-Control": "public, max-age=300, s-maxage=600", // Browser: 5 min, Edge: 10 min
+    "CDN-Cache-Control": "max-age=600, stale-while-revalidate=3600",
   });
 
   return { posts };
@@ -322,7 +348,7 @@ export async function load({ locals, setHeaders }) {
 **File:** `packages/engine/src/lib/server/services/posts.ts`
 
 ```typescript
-import { cache } from '$lib/server/services/cache';
+import { cache } from "$lib/server/services/cache";
 
 interface CachedPost {
   id: string;
@@ -335,13 +361,13 @@ interface CachedPost {
   gutter_content: any;
   published_at: number;
   status: string;
-  storage_location: 'd1' | 'r2' | 'r2_archived';
+  storage_location: "d1" | "r2" | "r2_archived";
   r2_key?: string;
 }
 
 export async function getPostWithCache(
   slug: string,
-  tenantId: string
+  tenantId: string,
 ): Promise<CachedPost | null> {
   const cacheKey = `posts:${tenantId}:${slug}`;
 
@@ -362,7 +388,7 @@ export async function getPostWithCache(
   }
 
   // Cache published posts only (drafts are too volatile)
-  if (post.status === 'published') {
+  if (post.status === "published") {
     await cache.set(cacheKey, post, { ttl: 300 }); // 5 min
   }
 
@@ -371,29 +397,37 @@ export async function getPostWithCache(
 
 async function fetchPostFromStorage(
   slug: string,
-  tenantId: string
+  tenantId: string,
 ): Promise<CachedPost | null> {
   // Get metadata from D1 (always)
-  const meta = await db.prepare(`
+  const meta = await db
+    .prepare(
+      `
     SELECT
       id, slug, title, description, tags, published_at, status,
       storage_location, r2_key,
       markdown_content, html_content, gutter_content
     FROM posts
     WHERE slug = ? AND tenant_id = ?
-  `).bind(slug, tenantId).first();
+  `,
+    )
+    .bind(slug, tenantId)
+    .first();
 
   if (!meta) {
     return null;
   }
 
   // If content is in D1, we already have it
-  if (meta.storage_location === 'd1' || !meta.storage_location) {
+  if (meta.storage_location === "d1" || !meta.storage_location) {
     return meta as CachedPost;
   }
 
   // If content is in R2, fetch it
-  if (meta.storage_location === 'r2' || meta.storage_location === 'r2_archived') {
+  if (
+    meta.storage_location === "r2" ||
+    meta.storage_location === "r2_archived"
+  ) {
     const r2Object = await env.IMAGES.get(meta.r2_key);
 
     if (!r2Object) {
@@ -401,7 +435,7 @@ async function fetchPostFromStorage(
       return null;
     }
 
-    const content = await r2Object.json() as {
+    const content = (await r2Object.json()) as {
       markdown: string;
       html: string;
       migratedAt: number;
@@ -419,7 +453,7 @@ async function fetchPostFromStorage(
 
 export async function getPostListWithCache(
   tenantId: string,
-  status: 'published' | 'all' = 'published'
+  status: "published" | "all" = "published",
 ): Promise<CachedPost[]> {
   const cacheKey = `posts:list:${tenantId}:${status}`;
 
@@ -433,12 +467,13 @@ export async function getPostListWithCache(
   console.log(`[Cache MISS] ${cacheKey}`);
 
   // Fetch from D1 (metadata only, no content)
-  const query = status === 'published'
-    ? `SELECT id, slug, title, description, tags, published_at, status
+  const query =
+    status === "published"
+      ? `SELECT id, slug, title, description, tags, published_at, status
        FROM posts
        WHERE tenant_id = ? AND status = 'published'
        ORDER BY published_at DESC`
-    : `SELECT id, slug, title, description, tags, published_at, status
+      : `SELECT id, slug, title, description, tags, published_at, status
        FROM posts
        WHERE tenant_id = ?
        ORDER BY published_at DESC`;
@@ -469,7 +504,7 @@ export async function invalidatePostCache(slug: string, tenantId: string) {
 **File:** `packages/engine/src/routes/api/posts/[slug]/+server.ts`
 
 ```typescript
-import { invalidatePostCache } from '$lib/server/services/posts';
+import { invalidatePostCache } from "$lib/server/services/posts";
 
 export async function PUT({ request, params, locals }) {
   const { slug } = params;
@@ -477,15 +512,26 @@ export async function PUT({ request, params, locals }) {
 
   // ... existing update logic ...
 
-  await db.prepare(`
+  await db
+    .prepare(
+      `
     UPDATE posts
     SET title = ?, markdown_content = ?, html_content = ?,
         description = ?, tags = ?, updated_at = ?
     WHERE slug = ? AND tenant_id = ?
-  `).bind(
-    title, markdown, html, description, JSON.stringify(tags),
-    Date.now(), slug, subdomain
-  ).run();
+  `,
+    )
+    .bind(
+      title,
+      markdown,
+      html,
+      description,
+      JSON.stringify(tags),
+      Date.now(),
+      slug,
+      subdomain,
+    )
+    .run();
 
   // Invalidate caches
   await invalidatePostCache(slug, subdomain);
@@ -497,7 +543,8 @@ export async function DELETE({ params, locals }) {
   const { slug } = params;
   const { subdomain } = locals;
 
-  await db.prepare(`DELETE FROM posts WHERE slug = ? AND tenant_id = ?`)
+  await db
+    .prepare(`DELETE FROM posts WHERE slug = ? AND tenant_id = ?`)
     .bind(slug, subdomain)
     .run();
 
@@ -513,10 +560,12 @@ export async function DELETE({ params, locals }) {
 ### Phase 1 Expected Results
 
 **Before:**
+
 - 100K views/month = 100K D1 reads
 - Cost: ~$0.10
 
 **After:**
+
 - 100K views/month = ~5K D1 reads (95% cache hit rate)
 - Cost: ~$0.005 + KV costs (~$0.02) = **~$0.025 total**
 - **75% cost reduction**
@@ -591,11 +640,15 @@ export class TenantDO extends DurableObject {
 
     // If not in DO storage, load from D1 and cache
     const tenantId = this.getTenantIdFromObjectId();
-    const row = await this.env.DB.prepare(`
+    const row = await this.env.DB.prepare(
+      `
       SELECT subdomain, display_name, theme, tier, limits
       FROM tenants
       WHERE subdomain = ?
-    `).bind(tenantId).first();
+    `,
+    )
+      .bind(tenantId)
+      .first();
 
     if (row) {
       this.config = row as unknown as TenantConfig;
@@ -603,9 +656,9 @@ export class TenantDO extends DurableObject {
       // Store in DO for next time
       await this.ctx.storage.sql.exec(
         "INSERT OR REPLACE INTO config (key, value, updated_at) VALUES (?, ?, ?)",
-        'tenant_config',
+        "tenant_config",
         JSON.stringify(this.config),
-        Date.now()
+        Date.now(),
       );
 
       this.configLoadedAt = Date.now();
@@ -617,39 +670,39 @@ export class TenantDO extends DurableObject {
     const path = url.pathname;
 
     // API routing
-    if (path === '/config') {
+    if (path === "/config") {
       return this.handleGetConfig();
     }
 
-    if (path === '/config/update' && request.method === 'POST') {
+    if (path === "/config/update" && request.method === "POST") {
       return this.handleUpdateConfig(request);
     }
 
-    if (path.startsWith('/drafts/')) {
-      const slug = path.split('/').pop();
+    if (path.startsWith("/drafts/")) {
+      const slug = path.split("/").pop();
 
-      if (request.method === 'GET') {
+      if (request.method === "GET") {
         return this.handleGetDraft(slug!);
       }
 
-      if (request.method === 'PUT') {
+      if (request.method === "PUT") {
         return this.handleSaveDraft(slug!, request);
       }
 
-      if (request.method === 'DELETE') {
+      if (request.method === "DELETE") {
         return this.handleDeleteDraft(slug!);
       }
     }
 
-    if (path === '/drafts' && request.method === 'GET') {
+    if (path === "/drafts" && request.method === "GET") {
       return this.handleListDrafts();
     }
 
-    if (path === '/analytics' && request.method === 'POST') {
+    if (path === "/analytics" && request.method === "POST") {
       return this.handleRecordEvent(request);
     }
 
-    return new Response('Not found', { status: 404 });
+    return new Response("Not found", { status: 404 });
   }
 
   async handleGetConfig(): Promise<Response> {
@@ -659,7 +712,7 @@ export class TenantDO extends DurableObject {
     }
 
     if (!this.config) {
-      return new Response('Tenant not found', { status: 404 });
+      return new Response("Tenant not found", { status: 404 });
     }
 
     return Response.json(this.config);
@@ -674,23 +727,27 @@ export class TenantDO extends DurableObject {
     // Update DO storage
     await this.ctx.storage.sql.exec(
       "INSERT OR REPLACE INTO config (key, value, updated_at) VALUES (?, ?, ?)",
-      'tenant_config',
+      "tenant_config",
       JSON.stringify(this.config),
-      Date.now()
+      Date.now(),
     );
 
     // Update D1 (source of truth)
     const tenantId = this.getTenantIdFromObjectId();
-    await this.env.DB.prepare(`
+    await this.env.DB.prepare(
+      `
       UPDATE tenants
       SET display_name = ?, theme = ?, updated_at = ?
       WHERE subdomain = ?
-    `).bind(
-      this.config.display_name,
-      JSON.stringify(this.config.theme),
-      Date.now(),
-      tenantId
-    ).run();
+    `,
+    )
+      .bind(
+        this.config.display_name,
+        JSON.stringify(this.config.theme),
+        Date.now(),
+        tenantId,
+      )
+      .run();
 
     this.configLoadedAt = Date.now();
 
@@ -698,10 +755,11 @@ export class TenantDO extends DurableObject {
   }
 
   async handleSaveDraft(slug: string, request: Request): Promise<Response> {
-    const draft = await request.json() as Draft;
+    const draft = (await request.json()) as Draft;
 
     // Save to DO storage
-    await this.ctx.storage.sql.exec(`
+    await this.ctx.storage.sql.exec(
+      `
       INSERT OR REPLACE INTO drafts (slug, markdown, metadata, last_saved, device_id)
       VALUES (?, ?, ?, ?, ?)
     `,
@@ -709,7 +767,7 @@ export class TenantDO extends DurableObject {
       draft.content,
       JSON.stringify(draft.metadata),
       Date.now(),
-      draft.deviceId
+      draft.deviceId,
     );
 
     // Update in-memory cache
@@ -730,7 +788,7 @@ export class TenantDO extends DurableObject {
       .one();
 
     if (!row) {
-      return new Response('Draft not found', { status: 404 });
+      return new Response("Draft not found", { status: 404 });
     }
 
     const draft = {
@@ -747,7 +805,9 @@ export class TenantDO extends DurableObject {
 
   async handleListDrafts(): Promise<Response> {
     const rows = await this.ctx.storage.sql
-      .exec("SELECT slug, last_saved, device_id FROM drafts ORDER BY last_saved DESC")
+      .exec(
+        "SELECT slug, last_saved, device_id FROM drafts ORDER BY last_saved DESC",
+      )
       .toArray();
 
     return Response.json(rows);
@@ -761,7 +821,7 @@ export class TenantDO extends DurableObject {
   }
 
   async handleRecordEvent(request: Request): Promise<Response> {
-    const event = await request.json() as AnalyticsEvent;
+    const event = (await request.json()) as AnalyticsEvent;
 
     // Buffer in memory
     this.analyticsBuffer.push(event);
@@ -794,7 +854,9 @@ export class TenantDO extends DurableObject {
     const tenantId = this.getTenantIdFromObjectId();
 
     // TODO: Implement analytics table and batch insert
-    console.log(`[TenantDO] Flushing ${events.length} analytics events for ${tenantId}`);
+    console.log(
+      `[TenantDO] Flushing ${events.length} analytics events for ${tenantId}`,
+    );
 
     // For now, just log (implement analytics table in Phase 3)
   }
@@ -803,7 +865,7 @@ export class TenantDO extends DurableObject {
     // Extract tenant ID from DO object ID
     // Format: tenant:{subdomain}
     const idString = this.ctx.id.toString();
-    return idString.replace('tenant:', '');
+    return idString.replace("tenant:", "");
   }
 }
 
@@ -811,7 +873,7 @@ interface TenantConfig {
   subdomain: string;
   display_name: string;
   theme: any;
-  tier: 'seedling' | 'sapling' | 'oak' | 'evergreen';
+  tier: "seedling" | "sapling" | "oak" | "evergreen";
   limits: any;
 }
 
@@ -844,7 +906,7 @@ interface AnalyticsEvent {
 [[durable_objects.bindings]]
 name = "TENANTS"
 class_name = "TenantDO"
-script_name = "groveengine"
+script_name = "lattice"
 
 [[migrations]]
 tag = "v1"
@@ -862,7 +924,7 @@ declare global {
         CACHE_KV: KVNamespace;
         IMAGES: R2Bucket;
         AUTH: Fetcher;
-        TENANTS: DurableObjectNamespace;  // Add this
+        TENANTS: DurableObjectNamespace; // Add this
       };
     }
   }
@@ -880,19 +942,19 @@ export async function handle({ event, resolve }) {
   const subdomain = extractSubdomain(event.request);
 
   if (!subdomain) {
-    return new Response('Invalid subdomain', { status: 400 });
+    return new Response("Invalid subdomain", { status: 400 });
   }
 
   // Get TenantDO
   const tenantDO = event.platform.env.TENANTS.get(
-    event.platform.env.TENANTS.idFromName(`tenant:${subdomain}`)
+    event.platform.env.TENANTS.idFromName(`tenant:${subdomain}`),
   );
 
   // Fetch config from DO (cached, fast)
-  const configResponse = await tenantDO.fetch('https://do/config');
+  const configResponse = await tenantDO.fetch("https://do/config");
 
   if (!configResponse.ok) {
-    return new Response('Tenant not found', { status: 404 });
+    return new Response("Tenant not found", { status: 404 });
   }
 
   const config = await configResponse.json();
@@ -920,7 +982,7 @@ export async function GET({ params, locals }) {
   const response = await tenantDO.fetch(`https://do/drafts/${slug}`);
 
   if (!response.ok) {
-    throw error(404, 'Draft not found');
+    throw error(404, "Draft not found");
   }
 
   const draft = await response.json();
@@ -934,7 +996,7 @@ export async function PUT({ params, request, locals }) {
   const draft = await request.json();
 
   const response = await tenantDO.fetch(`https://do/drafts/${slug}`, {
-    method: 'PUT',
+    method: "PUT",
     body: JSON.stringify(draft),
   });
 
@@ -947,7 +1009,7 @@ export async function DELETE({ params, locals }) {
   const { tenantDO } = locals;
 
   await tenantDO.fetch(`https://do/drafts/${slug}`, {
-    method: 'DELETE',
+    method: "DELETE",
   });
 
   return json({ success: true });
@@ -973,7 +1035,10 @@ onMount(async () => {
     if (response.ok) {
       const serverDraft = await response.json();
 
-      if (!localDraft || serverDraft.lastSaved > JSON.parse(localDraft).lastSaved) {
+      if (
+        !localDraft ||
+        serverDraft.lastSaved > JSON.parse(localDraft).lastSaved
+      ) {
         // Server version is newer
         if (localDraft && content !== serverDraft.content) {
           // Show conflict dialog
@@ -984,7 +1049,7 @@ onMount(async () => {
       }
     }
   } catch (err) {
-    console.error('Failed to load server draft:', err);
+    console.error("Failed to load server draft:", err);
   }
 
   // Auto-save to server every 30 seconds
@@ -1002,8 +1067,8 @@ onDestroy(() => {
 async function saveDraftToServer() {
   try {
     await fetch(`/api/drafts/${slug}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         content,
         metadata: { title, description, tags },
@@ -1011,9 +1076,9 @@ async function saveDraftToServer() {
       }),
     });
 
-    console.log('[Draft] Synced to server');
+    console.log("[Draft] Synced to server");
   } catch (err) {
-    console.error('[Draft] Server sync failed:', err);
+    console.error("[Draft] Server sync failed:", err);
   }
 }
 ```
@@ -1023,12 +1088,14 @@ async function saveDraftToServer() {
 ### Phase 2 Expected Results
 
 **Benefits:**
+
 - **Config queries:** D1 → TenantDO (99% reduction in D1 reads)
 - **Cross-device drafts:** Works seamlessly across devices
 - **Analytics batching:** 100 events = 1 D1 write (vs 100 writes before)
 - **Real-time admin:** Foundation for live dashboard stats
 
 **Cost Impact:**
+
 - Config queries: ~$0.05/month → ~$0.001/month (D1)
 - Added DO costs: ~$0.05/month (request count)
 - Net savings: ~$0.04/month per tenant (small but compounds at scale)
@@ -1097,7 +1164,7 @@ export class PostMetaDO extends DurableObject {
       .exec("SELECT reaction_type, count FROM reaction_counts")
       .toArray();
 
-    counts.forEach(row => {
+    counts.forEach((row) => {
       this.reactionCounts.set(row.reaction_type as string, row.count as number);
     });
 
@@ -1106,7 +1173,7 @@ export class PostMetaDO extends DurableObject {
       .exec("SELECT key, value FROM stats")
       .toArray();
 
-    statsRows.forEach(row => {
+    statsRows.forEach((row) => {
       this.stats[row.key as keyof PostStats] = row.value as number;
     });
   }
@@ -1116,10 +1183,10 @@ export class PostMetaDO extends DurableObject {
     const path = url.pathname;
 
     // WebSocket upgrade for real-time updates
-    if (url.pathname === '/ws') {
-      const upgradeHeader = request.headers.get('Upgrade');
-      if (upgradeHeader !== 'websocket') {
-        return new Response('Expected websocket', { status: 426 });
+    if (url.pathname === "/ws") {
+      const upgradeHeader = request.headers.get("Upgrade");
+      if (upgradeHeader !== "websocket") {
+        return new Response("Expected websocket", { status: 426 });
       }
 
       const webSocketPair = new WebSocketPair();
@@ -1128,7 +1195,7 @@ export class PostMetaDO extends DurableObject {
       this.ctx.acceptWebSocket(server);
 
       // Track presence
-      const userId = url.searchParams.get('userId') || 'anonymous';
+      const userId = url.searchParams.get("userId") || "anonymous";
       this.activeViewers.set(userId, server);
 
       // Broadcast presence update
@@ -1141,23 +1208,23 @@ export class PostMetaDO extends DurableObject {
     }
 
     // API routing
-    if (path === '/reactions' && request.method === 'POST') {
+    if (path === "/reactions" && request.method === "POST") {
       return this.handleToggleReaction(request);
     }
 
-    if (path === '/reactions' && request.method === 'GET') {
+    if (path === "/reactions" && request.method === "GET") {
       return this.handleGetReactions();
     }
 
-    if (path === '/view' && request.method === 'POST') {
+    if (path === "/view" && request.method === "POST") {
       return this.handleTrackView(request);
     }
 
-    if (path === '/stats' && request.method === 'GET') {
+    if (path === "/stats" && request.method === "GET") {
       return this.handleGetStats();
     }
 
-    return new Response('Not found', { status: 404 });
+    return new Response("Not found", { status: 404 });
   }
 
   async handleToggleReaction(request: Request): Promise<Response> {
@@ -1165,7 +1232,11 @@ export class PostMetaDO extends DurableObject {
 
     // Check if user already reacted
     const existing = await this.ctx.storage.sql
-      .exec("SELECT 1 FROM reactions WHERE user_id = ? AND reaction_type = ?", userId, reactionType)
+      .exec(
+        "SELECT 1 FROM reactions WHERE user_id = ? AND reaction_type = ?",
+        userId,
+        reactionType,
+      )
       .one();
 
     let added: boolean;
@@ -1175,7 +1246,7 @@ export class PostMetaDO extends DurableObject {
       await this.ctx.storage.sql.exec(
         "DELETE FROM reactions WHERE user_id = ? AND reaction_type = ?",
         userId,
-        reactionType
+        reactionType,
       );
 
       // Decrement count
@@ -1186,7 +1257,7 @@ export class PostMetaDO extends DurableObject {
       await this.ctx.storage.sql.exec(
         "UPDATE reaction_counts SET count = ? WHERE reaction_type = ?",
         newCount,
-        reactionType
+        reactionType,
       );
 
       added = false;
@@ -1196,7 +1267,7 @@ export class PostMetaDO extends DurableObject {
         "INSERT INTO reactions (user_id, reaction_type, created_at) VALUES (?, ?, ?)",
         userId,
         reactionType,
-        Date.now()
+        Date.now(),
       );
 
       // Increment count
@@ -1207,7 +1278,7 @@ export class PostMetaDO extends DurableObject {
       await this.ctx.storage.sql.exec(
         "INSERT OR REPLACE INTO reaction_counts (reaction_type, count) VALUES (?, ?)",
         reactionType,
-        newCount
+        newCount,
       );
 
       added = true;
@@ -1217,7 +1288,7 @@ export class PostMetaDO extends DurableObject {
 
     // Broadcast to all connected viewers
     this.broadcast({
-      type: 'reaction',
+      type: "reaction",
       reactionType,
       count: newCount,
       added,
@@ -1239,12 +1310,12 @@ export class PostMetaDO extends DurableObject {
 
     await this.ctx.storage.sql.exec(
       "INSERT OR REPLACE INTO stats (key, value) VALUES ('viewCount', ?)",
-      this.stats.viewCount
+      this.stats.viewCount,
     );
 
     await this.ctx.storage.sql.exec(
       "INSERT OR REPLACE INTO stats (key, value) VALUES ('lastViewedAt', ?)",
-      this.stats.lastViewedAt
+      this.stats.lastViewedAt,
     );
 
     return Response.json({ success: true });
@@ -1258,12 +1329,12 @@ export class PostMetaDO extends DurableObject {
     try {
       const data = JSON.parse(message);
 
-      if (data.type === 'typing') {
+      if (data.type === "typing") {
         // Broadcast typing indicator
-        this.broadcast({ type: 'typing', userId: data.userId }, ws);
+        this.broadcast({ type: "typing", userId: data.userId }, ws);
       }
     } catch (err) {
-      console.error('[PostMetaDO] WebSocket message error:', err);
+      console.error("[PostMetaDO] WebSocket message error:", err);
     }
   }
 
@@ -1295,14 +1366,14 @@ export class PostMetaDO extends DurableObject {
 
   broadcastPresence() {
     this.broadcast({
-      type: 'presence',
+      type: "presence",
       count: this.activeViewers.size,
     });
   }
 
   async alarm() {
     // Flush stats to D1 periodically (every hour)
-    console.log('[PostMetaDO] Flushing stats to D1');
+    console.log("[PostMetaDO] Flushing stats to D1");
 
     const postId = this.getPostIdFromObjectId();
 
@@ -1312,7 +1383,7 @@ export class PostMetaDO extends DurableObject {
   private getPostIdFromObjectId(): { tenantId: string; postId: string } {
     // Format: post-meta:{tenantId}:{postId}
     const idString = this.ctx.id.toString();
-    const [_, tenantId, postId] = idString.split(':');
+    const [_, tenantId, postId] = idString.split(":");
     return { tenantId, postId };
   }
 }
@@ -1334,30 +1405,30 @@ interface PostStats {
 ```typescript
 export class PostContentDO extends DurableObject {
   private cachedContent: { markdown: string; html: string } | null = null;
-  private storageLocation: 'd1' | 'r2' | 'r2_archived' = 'd1';
+  private storageLocation: "d1" | "r2" | "r2_archived" = "d1";
   private r2Key: string | null = null;
 
   async fetch(request: Request): Promise<Response> {
     const url = new URL(request.url);
     const path = url.pathname;
 
-    if (path === '/content' && request.method === 'GET') {
+    if (path === "/content" && request.method === "GET") {
       return this.handleGetContent();
     }
 
-    if (path === '/content' && request.method === 'PUT') {
+    if (path === "/content" && request.method === "PUT") {
       return this.handleSaveContent(request);
     }
 
-    if (path === '/migrate/r2' && request.method === 'POST') {
+    if (path === "/migrate/r2" && request.method === "POST") {
       return this.handleMigrateToR2(request);
     }
 
-    if (path === '/migrate/d1' && request.method === 'POST') {
+    if (path === "/migrate/d1" && request.method === "POST") {
       return this.handleMigrateToD1();
     }
 
-    return new Response('Not found', { status: 404 });
+    return new Response("Not found", { status: 404 });
   }
 
   async handleGetContent(): Promise<Response> {
@@ -1369,20 +1440,24 @@ export class PostContentDO extends DurableObject {
     const { tenantId, postId } = this.getPostIdFromObjectId();
 
     // Get metadata from D1
-    const meta = await this.env.DB.prepare(`
+    const meta = await this.env.DB.prepare(
+      `
       SELECT storage_location, r2_key, markdown_content, html_content
       FROM posts
       WHERE id = ? AND tenant_id = ?
-    `).bind(postId, tenantId).first();
+    `,
+    )
+      .bind(postId, tenantId)
+      .first();
 
     if (!meta) {
-      return new Response('Post not found', { status: 404 });
+      return new Response("Post not found", { status: 404 });
     }
 
-    this.storageLocation = meta.storage_location || 'd1';
+    this.storageLocation = meta.storage_location || "d1";
     this.r2Key = meta.r2_key;
 
-    if (this.storageLocation === 'd1') {
+    if (this.storageLocation === "d1") {
       this.cachedContent = {
         markdown: meta.markdown_content,
         html: meta.html_content,
@@ -1392,7 +1467,7 @@ export class PostContentDO extends DurableObject {
       const r2Object = await this.env.IMAGES.get(this.r2Key!);
 
       if (!r2Object) {
-        return new Response('Content not found in R2', { status: 404 });
+        return new Response("Content not found in R2", { status: 404 });
       }
 
       const content = await r2Object.json();
@@ -1411,11 +1486,15 @@ export class PostContentDO extends DurableObject {
     const { tenantId, postId } = this.getPostIdFromObjectId();
 
     // Save to D1
-    await this.env.DB.prepare(`
+    await this.env.DB.prepare(
+      `
       UPDATE posts
       SET markdown_content = ?, html_content = ?, updated_at = ?
       WHERE id = ? AND tenant_id = ?
-    `).bind(markdown, html, Date.now(), postId, tenantId).run();
+    `,
+    )
+      .bind(markdown, html, Date.now(), postId, tenantId)
+      .run();
 
     // Update cache
     this.cachedContent = { markdown, html };
@@ -1434,34 +1513,42 @@ export class PostContentDO extends DurableObject {
     }
 
     if (!this.cachedContent) {
-      return new Response('No content to migrate', { status: 400 });
+      return new Response("No content to migrate", { status: 400 });
     }
 
     const { tenantId, postId } = this.getPostIdFromObjectId();
 
     // Upload to R2
-    await this.env.IMAGES.put(r2Key, JSON.stringify({
-      markdown: this.cachedContent.markdown,
-      html: this.cachedContent.html,
-      migratedAt: Date.now(),
-    }), {
-      httpMetadata: {
-        contentType: 'application/json',
-        cacheControl: 'public, max-age=31536000, immutable',
+    await this.env.IMAGES.put(
+      r2Key,
+      JSON.stringify({
+        markdown: this.cachedContent.markdown,
+        html: this.cachedContent.html,
+        migratedAt: Date.now(),
+      }),
+      {
+        httpMetadata: {
+          contentType: "application/json",
+          cacheControl: "public, max-age=31536000, immutable",
+        },
       },
-    });
+    );
 
     // Update D1 metadata
-    await this.env.DB.prepare(`
+    await this.env.DB.prepare(
+      `
       UPDATE posts
       SET storage_location = 'r2',
           r2_key = ?,
           markdown_content = NULL,
           html_content = NULL
       WHERE id = ? AND tenant_id = ?
-    `).bind(r2Key, postId, tenantId).run();
+    `,
+    )
+      .bind(r2Key, postId, tenantId)
+      .run();
 
-    this.storageLocation = 'r2';
+    this.storageLocation = "r2";
     this.r2Key = r2Key;
 
     console.log(`[PostContentDO] Migrated ${postId} to R2: ${r2Key}`);
@@ -1475,27 +1562,31 @@ export class PostContentDO extends DurableObject {
     }
 
     if (!this.cachedContent) {
-      return new Response('No content to migrate', { status: 400 });
+      return new Response("No content to migrate", { status: 400 });
     }
 
     const { tenantId, postId } = this.getPostIdFromObjectId();
 
     // Move content back to D1
-    await this.env.DB.prepare(`
+    await this.env.DB.prepare(
+      `
       UPDATE posts
       SET storage_location = 'd1',
           markdown_content = ?,
           html_content = ?,
           r2_key = NULL
       WHERE id = ? AND tenant_id = ?
-    `).bind(
-      this.cachedContent.markdown,
-      this.cachedContent.html,
-      postId,
-      tenantId
-    ).run();
+    `,
+    )
+      .bind(
+        this.cachedContent.markdown,
+        this.cachedContent.html,
+        postId,
+        tenantId,
+      )
+      .run();
 
-    this.storageLocation = 'd1';
+    this.storageLocation = "d1";
     this.r2Key = null;
 
     console.log(`[PostContentDO] Migrated ${postId} back to D1`);
@@ -1506,7 +1597,7 @@ export class PostContentDO extends DurableObject {
   private getPostIdFromObjectId(): { tenantId: string; postId: string } {
     // Format: post-content:{tenantId}:{postId}
     const idString = this.ctx.id.toString();
-    const [_, tenantId, postId] = idString.split(':');
+    const [_, tenantId, postId] = idString.split(":");
     return { tenantId, postId };
   }
 }
@@ -1538,6 +1629,7 @@ CREATE INDEX idx_posts_published_age ON posts(published_at, storage_location);
 ### Phase 3 Expected Results
 
 **Benefits:**
+
 - **Real-time reactions:** Atomic counters, no race conditions
 - **Presence indicators:** "X people viewing this post"
 - **WebSocket support:** Live updates without polling
@@ -1567,17 +1659,18 @@ CREATE INDEX idx_posts_published_age ON posts(published_at, storage_location);
  */
 
 export async function migratePostsToTiers(env: Env) {
-  console.log('[Migrator] Starting post tier migration...');
+  console.log("[Migrator] Starting post tier migration...");
 
   const now = Date.now();
-  const thirtyDaysAgo = now - (30 * 24 * 60 * 60 * 1000);
-  const oneYearAgo = now - (365 * 24 * 60 * 60 * 1000);
+  const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
+  const oneYearAgo = now - 365 * 24 * 60 * 60 * 1000;
 
   // =============================================
   // WARM TIER: Move posts older than 30 days to R2
   // =============================================
 
-  const warmCandidates = await env.DB.prepare(`
+  const warmCandidates = await env.DB.prepare(
+    `
     SELECT id, tenant_id, slug
     FROM posts
     WHERE storage_location = 'd1'
@@ -1587,19 +1680,25 @@ export async function migratePostsToTiers(env: Env) {
       AND view_count < 100  -- Not popular posts
     ORDER BY published_at ASC
     LIMIT 100  -- Batch size
-  `).bind(thirtyDaysAgo, thirtyDaysAgo).all();
+  `,
+  )
+    .bind(thirtyDaysAgo, thirtyDaysAgo)
+    .all();
 
-  console.log(`[Migrator] Found ${warmCandidates.results.length} posts for WARM migration`);
+  console.log(
+    `[Migrator] Found ${warmCandidates.results.length} posts for WARM migration`,
+  );
 
   for (const post of warmCandidates.results) {
-    await migratePostToR2(env, post, 'r2');
+    await migratePostToR2(env, post, "r2");
   }
 
   // =============================================
   // COLD TIER: Move archived or 1+ year old posts
   // =============================================
 
-  const coldCandidates = await env.DB.prepare(`
+  const coldCandidates = await env.DB.prepare(
+    `
     SELECT id, tenant_id, slug
     FROM posts
     WHERE storage_location IN ('d1', 'r2')
@@ -1609,19 +1708,25 @@ export async function migratePostsToTiers(env: Env) {
       )
     ORDER BY published_at ASC
     LIMIT 100
-  `).bind(oneYearAgo).all();
+  `,
+  )
+    .bind(oneYearAgo)
+    .all();
 
-  console.log(`[Migrator] Found ${coldCandidates.results.length} posts for COLD migration`);
+  console.log(
+    `[Migrator] Found ${coldCandidates.results.length} posts for COLD migration`,
+  );
 
   for (const post of coldCandidates.results) {
-    await migratePostToR2(env, post, 'r2_archived');
+    await migratePostToR2(env, post, "r2_archived");
   }
 
   // =============================================
   // HOT TIER: Move popular posts back to D1
   // =============================================
 
-  const hotCandidates = await env.DB.prepare(`
+  const hotCandidates = await env.DB.prepare(
+    `
     SELECT id, tenant_id, slug
     FROM posts
     WHERE storage_location = 'r2'
@@ -1629,61 +1734,72 @@ export async function migratePostsToTiers(env: Env) {
       AND view_count > 100  -- Popular posts
       AND last_accessed_at > ?  -- Recent activity
     LIMIT 50
-  `).bind(thirtyDaysAgo).all();
+  `,
+  )
+    .bind(thirtyDaysAgo)
+    .all();
 
-  console.log(`[Migrator] Found ${hotCandidates.results.length} posts for HOT migration`);
+  console.log(
+    `[Migrator] Found ${hotCandidates.results.length} posts for HOT migration`,
+  );
 
   for (const post of hotCandidates.results) {
     await migratePostToD1(env, post);
   }
 
-  console.log('[Migrator] Migration complete');
+  console.log("[Migrator] Migration complete");
 }
 
 async function migratePostToR2(
   env: Env,
   post: { id: string; tenant_id: string; slug: string },
-  tier: 'r2' | 'r2_archived'
+  tier: "r2" | "r2_archived",
 ) {
   // Get PostContentDO
   const contentDO = env.POST_CONTENT.get(
-    env.POST_CONTENT.idFromName(`post-content:${post.tenant_id}:${post.id}`)
+    env.POST_CONTENT.idFromName(`post-content:${post.tenant_id}:${post.id}`),
   );
 
-  const r2Key = `posts/${post.tenant_id}/${tier === 'r2_archived' ? 'archived/' : ''}${post.slug}.json`;
+  const r2Key = `posts/${post.tenant_id}/${tier === "r2_archived" ? "archived/" : ""}${post.slug}.json`;
 
   // Trigger migration
-  const response = await contentDO.fetch('https://do/migrate/r2', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+  const response = await contentDO.fetch("https://do/migrate/r2", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ r2Key }),
   });
 
   if (response.ok) {
     console.log(`[Migrator] ✓ Migrated ${post.slug} to ${tier}`);
   } else {
-    console.error(`[Migrator] ✗ Failed to migrate ${post.slug}:`, await response.text());
+    console.error(
+      `[Migrator] ✗ Failed to migrate ${post.slug}:`,
+      await response.text(),
+    );
   }
 }
 
 async function migratePostToD1(
   env: Env,
-  post: { id: string; tenant_id: string; slug: string }
+  post: { id: string; tenant_id: string; slug: string },
 ) {
   // Get PostContentDO
   const contentDO = env.POST_CONTENT.get(
-    env.POST_CONTENT.idFromName(`post-content:${post.tenant_id}:${post.id}`)
+    env.POST_CONTENT.idFromName(`post-content:${post.tenant_id}:${post.id}`),
   );
 
   // Trigger migration
-  const response = await contentDO.fetch('https://do/migrate/d1', {
-    method: 'POST',
+  const response = await contentDO.fetch("https://do/migrate/d1", {
+    method: "POST",
   });
 
   if (response.ok) {
     console.log(`[Migrator] ✓ Moved ${post.slug} back to HOT (D1)`);
   } else {
-    console.error(`[Migrator] ✗ Failed to move ${post.slug} to D1:`, await response.text());
+    console.error(
+      `[Migrator] ✗ Failed to move ${post.slug} to D1:`,
+      await response.text(),
+    );
   }
 }
 ```
@@ -1722,17 +1838,17 @@ id = "514e91e81cc44d128a82ec6f668303e4"
 [[durable_objects.bindings]]
 name = "POST_CONTENT"
 class_name = "PostContentDO"
-script_name = "groveengine"
+script_name = "lattice"
 ```
 
 **File:** `packages/post-migrator/src/index.ts`
 
 ```typescript
-import { migratePostsToTiers } from '../../engine/src/lib/workers/post-migrator';
+import { migratePostsToTiers } from "../../engine/src/lib/workers/post-migrator";
 
 export default {
   async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
-    console.log('[Cron] Starting scheduled post migration');
+    console.log("[Cron] Starting scheduled post migration");
 
     ctx.waitUntil(migratePostsToTiers(env));
   },
@@ -1748,7 +1864,7 @@ export default {
 ```typescript
 export async function getPostWithCache(
   slug: string,
-  tenantId: string
+  tenantId: string,
 ): Promise<CachedPost | null> {
   const cacheKey = `posts:${tenantId}:${slug}`;
 
@@ -1761,8 +1877,8 @@ export async function getPostWithCache(
   }
 
   // Track access time (async, don't await)
-  trackPostAccess(post.id, tenantId).catch(err => {
-    console.error('[Posts] Failed to track access:', err);
+  trackPostAccess(post.id, tenantId).catch((err) => {
+    console.error("[Posts] Failed to track access:", err);
   });
 
   // ... rest of function ...
@@ -1772,20 +1888,25 @@ export async function getPostWithCache(
 
 async function trackPostAccess(postId: string, tenantId: string) {
   // Update last_accessed_at in D1
-  await db.prepare(`
+  await db
+    .prepare(
+      `
     UPDATE posts
     SET last_accessed_at = ?
     WHERE id = ? AND tenant_id = ?
-  `).bind(Date.now(), postId, tenantId).run();
+  `,
+    )
+    .bind(Date.now(), postId, tenantId)
+    .run();
 
   // Also track view in PostMetaDO (for real-time stats)
   const metaDO = env.POST_META.get(
-    env.POST_META.idFromName(`post-meta:${tenantId}:${postId}`)
+    env.POST_META.idFromName(`post-meta:${tenantId}:${postId}`),
   );
 
-  await metaDO.fetch('https://do/view', {
-    method: 'POST',
-    body: JSON.stringify({ userId: 'anonymous' }),
+  await metaDO.fetch("https://do/view", {
+    method: "POST",
+    body: JSON.stringify({ userId: "anonymous" }),
   });
 }
 ```
@@ -1796,11 +1917,11 @@ async function trackPostAccess(postId: string, tenantId: string) {
 
 **Storage Optimization:**
 
-| Scenario | Before | After | Savings |
-|----------|--------|-------|---------|
-| 10,000 posts (all in D1) | $0.20/month | $0.03/month | 85% |
-| 100,000 posts (all in D1) | $2.00/month | $0.25/month | 87% |
-| Popular post (1000 views/day) | D1 storage + reads | R2 storage + cache hits | 93% |
+| Scenario                      | Before             | After                   | Savings |
+| ----------------------------- | ------------------ | ----------------------- | ------- |
+| 10,000 posts (all in D1)      | $0.20/month        | $0.03/month             | 85%     |
+| 100,000 posts (all in D1)     | $2.00/month        | $0.25/month             | 87%     |
+| Popular post (1000 views/day) | D1 storage + reads | R2 storage + cache hits | 93%     |
 
 **Migration Flow Example:**
 
@@ -1835,25 +1956,25 @@ export class FeedDO extends DurableObject {
     const url = new URL(request.url);
     const path = url.pathname;
 
-    if (path === '/feed' && request.method === 'GET') {
+    if (path === "/feed" && request.method === "GET") {
       return this.handleGetFeed(url.searchParams);
     }
 
-    if (path === '/prefetch' && request.method === 'POST') {
+    if (path === "/prefetch" && request.method === "POST") {
       return this.handlePrefetchFeed(request);
     }
 
-    if (path === '/following' && request.method === 'PUT') {
+    if (path === "/following" && request.method === "PUT") {
       return this.handleUpdateFollowing(request);
     }
 
-    return new Response('Not found', { status: 404 });
+    return new Response("Not found", { status: 404 });
   }
 
   async handleGetFeed(params: URLSearchParams): Promise<Response> {
-    const limit = parseInt(params.get('limit') || '50');
-    const cursor = params.get('cursor');
-    const sortBy = params.get('sortBy') || 'recent';
+    const limit = parseInt(params.get("limit") || "50");
+    const cursor = params.get("cursor");
+    const sortBy = params.get("sortBy") || "recent";
 
     // Load from DO storage if empty
     if (this.feedItems.length === 0) {
@@ -1863,7 +1984,7 @@ export class FeedDO extends DurableObject {
     // Paginate
     let items = this.feedItems;
 
-    if (sortBy === 'relevance') {
+    if (sortBy === "relevance") {
       items = [...items].sort((a, b) => b.score - a.score);
     } else {
       items = [...items].sort((a, b) => b.created_at - a.created_at);
@@ -1880,7 +2001,7 @@ export class FeedDO extends DurableObject {
   }
 
   async handlePrefetchFeed(request: Request): Promise<Response> {
-    const { postIds } = await request.json() as { postIds: string[] };
+    const { postIds } = (await request.json()) as { postIds: string[] };
 
     console.log(`[FeedDO] Prefetching ${postIds.length} posts`);
 
@@ -1928,8 +2049,10 @@ export class FeedDO extends DurableObject {
     score += Math.max(0, 100 - daysSincePublished);
 
     // Engagement (0-100)
-    const totalReactions = Object.values(post.reaction_counts || {})
-      .reduce((sum: number, count: any) => sum + (count as number), 0);
+    const totalReactions = Object.values(post.reaction_counts || {}).reduce(
+      (sum: number, count: any) => sum + (count as number),
+      0,
+    );
     score += Math.min(100, totalReactions);
 
     // TODO: Add personalization based on user interests
@@ -1942,7 +2065,7 @@ export class FeedDO extends DurableObject {
       .exec("SELECT * FROM feed_items ORDER BY created_at DESC LIMIT 500")
       .toArray();
 
-    this.feedItems = rows.map(row => ({
+    this.feedItems = rows.map((row) => ({
       post_id: row.post_id as string,
       tenant_id: row.tenant_id as string,
       author_id: row.author_id as string,
@@ -1961,7 +2084,8 @@ export class FeedDO extends DurableObject {
     await this.ctx.storage.sql.exec("DELETE FROM feed_items");
 
     for (const item of itemsToSave) {
-      await this.ctx.storage.sql.exec(`
+      await this.ctx.storage.sql.exec(
+        `
         INSERT INTO feed_items (
           post_id, tenant_id, author_id, score, created_at,
           cached_preview, reaction_counts, added_at
@@ -1974,7 +2098,7 @@ export class FeedDO extends DurableObject {
         item.created_at,
         JSON.stringify(item.cached_preview),
         JSON.stringify(item.reaction_counts),
-        item.added_at
+        item.added_at,
       );
     }
   }
@@ -1982,7 +2106,7 @@ export class FeedDO extends DurableObject {
   async handleUpdateFollowing(request: Request): Promise<Response> {
     const { userId, action } = await request.json();
 
-    if (action === 'follow') {
+    if (action === "follow") {
       this.following.add(userId);
     } else {
       this.following.delete(userId);
@@ -2022,20 +2146,20 @@ export async function GET({ locals, url }) {
   const { user } = locals;
 
   if (!user) {
-    throw error(401, 'Unauthorized');
+    throw error(401, "Unauthorized");
   }
 
   // Get user's FeedDO
   const feedDO = locals.platform.env.FEEDS.get(
-    locals.platform.env.FEEDS.idFromName(`feed:${user.id}`)
+    locals.platform.env.FEEDS.idFromName(`feed:${user.id}`),
   );
 
-  const limit = url.searchParams.get('limit') || '50';
-  const cursor = url.searchParams.get('cursor') || '';
-  const sortBy = url.searchParams.get('sortBy') || 'recent';
+  const limit = url.searchParams.get("limit") || "50";
+  const cursor = url.searchParams.get("cursor") || "";
+  const sortBy = url.searchParams.get("sortBy") || "recent";
 
   const response = await feedDO.fetch(
-    `https://do/feed?limit=${limit}&cursor=${cursor}&sortBy=${sortBy}`
+    `https://do/feed?limit=${limit}&cursor=${cursor}&sortBy=${sortBy}`,
   );
 
   const feed = await response.json();
@@ -2050,22 +2174,24 @@ export async function GET({ locals, url }) {
 
 **Feed Performance:**
 
-| Metric | Without FeedDO | With FeedDO | Improvement |
-|--------|----------------|-------------|-------------|
-| Initial load time | 2-5 seconds (D1 queries) | 100-300ms (cached) | 10-50x faster |
-| D1 queries per load | 50-100 (joins, filters) | 0 (pre-computed) | 100% reduction |
-| Personalization | Expensive (compute per request) | Pre-scored | Instant |
-| Concurrent users | Limited (D1 bottleneck) | Scales horizontally | Unlimited |
+| Metric              | Without FeedDO                  | With FeedDO         | Improvement    |
+| ------------------- | ------------------------------- | ------------------- | -------------- |
+| Initial load time   | 2-5 seconds (D1 queries)        | 100-300ms (cached)  | 10-50x faster  |
+| D1 queries per load | 50-100 (joins, filters)         | 0 (pre-computed)    | 100% reduction |
+| Personalization     | Expensive (compute per request) | Pre-scored          | Instant        |
+| Concurrent users    | Limited (D1 bottleneck)         | Scales horizontally | Unlimited      |
 
 **Prefetch Strategy:**
 
 When user follows someone:
+
 1. FeedDO fetches that user's recent 50 posts
 2. Calculates relevance scores
 3. Caches preview data
 4. Ready to serve instantly
 
 When user opens Meadow:
+
 1. FeedDO has 500 posts already scored and cached
 2. No D1 queries needed
 3. Pagination is instant (in-memory)
@@ -2106,6 +2232,7 @@ TOTAL: $0.24/month
 ```
 
 **Similar cost, but:**
+
 - 95% reduction in D1 load (future-proof)
 - Real-time features enabled (reactions, presence)
 - Cross-device draft sync
@@ -2117,6 +2244,7 @@ TOTAL: $0.24/month
 ## Implementation Timeline
 
 ### Week 1: Caching Foundation
+
 - **Day 1-2:** Phase 1 (HTTP + KV caching)
   - Add Cache-Control headers
   - Implement KV caching layer
@@ -2130,6 +2258,7 @@ TOTAL: $0.24/month
 - **Day 5:** Deploy to production, monitor
 
 **Deliverables:**
+
 - 90% reduction in D1 reads
 - 10x faster page loads
 - Foundation for DO integration
@@ -2137,6 +2266,7 @@ TOTAL: $0.24/month
 ---
 
 ### Week 2: TenantDO
+
 - **Day 1-2:** Implement TenantDO class
   - Config caching
   - Draft sync storage
@@ -2152,6 +2282,7 @@ TOTAL: $0.24/month
 - **Day 5:** Testing & cross-device validation
 
 **Deliverables:**
+
 - Tenant config cached in DO
 - Cross-device draft sync working
 - Analytics batched
@@ -2159,6 +2290,7 @@ TOTAL: $0.24/month
 ---
 
 ### Week 3: Post DOs + Storage Tiers
+
 - **Day 1-2:** Implement PostMetaDO
   - Reactions
   - Comments buffering
@@ -2174,6 +2306,7 @@ TOTAL: $0.24/month
 - **Day 5:** Testing real-time features
 
 **Deliverables:**
+
 - Real-time reactions working
 - WebSocket presence indicators
 - Foundation for migration
@@ -2181,6 +2314,7 @@ TOTAL: $0.24/month
 ---
 
 ### Week 4: Migration Worker + FeedDO
+
 - **Day 1-2:** Create migration worker
   - Hot/warm/cold logic
   - Batch migration process
@@ -2197,6 +2331,7 @@ TOTAL: $0.24/month
   - Cost validation
 
 **Deliverables:**
+
 - Automated post migration working
 - Feed prefetching ready for Meadow
 - Complete optimization stack deployed
@@ -2206,17 +2341,20 @@ TOTAL: $0.24/month
 ## Success Metrics
 
 ### Performance
+
 - [ ] Blog page load time < 200ms (95th percentile)
 - [ ] Cache hit rate > 90%
 - [ ] Feed load time < 300ms
 - [ ] Real-time reactions < 100ms latency
 
 ### Cost
+
 - [ ] D1 read operations reduced by 95%
 - [ ] Storage costs reduced by 85%
 - [ ] Total infrastructure cost < $1/month per 10K users
 
 ### Features
+
 - [ ] Cross-device draft sync working
 - [ ] Real-time reactions functional
 - [ ] Presence indicators showing
@@ -2290,24 +2428,22 @@ Each phase is independently deployable and reversible:
 ## Next Steps
 
 **Immediate (This Session):**
+
 1. Review this plan
 2. Validate technical approach
 3. Identify any gaps or concerns
 
 **Next Session:**
+
 1. Start Phase 1: Implement caching layer
 2. Test cache hit rates
 3. Deploy to production
 4. Monitor performance
 
-**Future Sessions:**
-2. Phase 2: TenantDO implementation
-3. Phase 3: PostMetaDO + PostContentDO
-4. Phase 4: Migration worker
-5. Phase 5: FeedDO for Meadow
+**Future Sessions:** 2. Phase 2: TenantDO implementation 3. Phase 3: PostMetaDO + PostContentDO 4. Phase 4: Migration worker 5. Phase 5: FeedDO for Meadow
 
 ---
 
-*This is your roadmap to a scalable, cost-effective, real-time blog platform. Each phase builds on the last, and you can pause after any phase with a working system. The architecture is designed to grow with your vision—from personal blogs to Meadow's social feed to whatever comes next in the Grove ecosystem.*
+_This is your roadmap to a scalable, cost-effective, real-time blog platform. Each phase builds on the last, and you can pause after any phase with a working system. The architecture is designed to grow with your vision—from personal blogs to Meadow's social feed to whatever comes next in the Grove ecosystem._
 
-*Let's build something that feels like home.* 🌲
+_Let's build something that feels like home._ 🌲

@@ -5,7 +5,7 @@ description: Write elegant, narrative-driven documentation that treats codebases
 
 # Museum Documentation
 
-> *Documentation as hospitality. Code as curated collection.*
+> _Documentation as hospitality. Code as curated collection._
 
 The art of transforming technical systems into welcoming guided tours. Museum documentation positions the writer as a guide walking alongside readers through "why" questions before diving into implementation specifics.
 
@@ -22,6 +22,7 @@ This is Grove's elegant documentation style—meant for Wanderers of any experie
 - Onboarding documentation that walks through architecture
 
 **Not for:**
+
 - API references (use grove-documentation)
 - Technical specs (use grove-spec-writing)
 - Quick-reference guides
@@ -69,19 +70,22 @@ A museum doesn't hand you a catalog and wish you luck. It **guides** you through
 ### Orient Before Explaining
 
 Start exhibits by establishing context. Before showing code or architecture, tell readers:
+
 - What they're looking at
 - Why it exists
 - Who benefits from it
 
 **Instead of:**
+
 > The TokenRefreshMap stores active refresh operations keyed by user ID.
 
 **Write:**
+
 > When someone's login expires, we need to refresh their credentials without logging them out. This map coordinates that process—preventing duplicate refresh attempts when multiple tabs are open.
 
 ### Explain Reasoning Over Facts
 
-Code shows *what*. Documentation explains *why*.
+Code shows _what_. Documentation explains _why_.
 
 Rather than stating that a Map stores token refresh operations, describe the coordination problem it solves. Connect the abstraction to the experience it creates.
 
@@ -89,14 +93,14 @@ Rather than stating that a Map stores token refresh operations, describe the coo
 
 Connect technical concepts to familiar experiences:
 
-| Technical Concept | Museum Metaphor |
-|-------------------|-----------------|
-| Database | A filing cabinet with organized drawers |
-| Cache | A quick-lookup shelf by the door |
-| Middleware | A security checkpoint you pass through |
-| Queue | A line where requests wait their turn |
-| Worker | A helpful assistant handling tasks in the background |
-| Webhook | A doorbell that rings when something happens |
+| Technical Concept | Museum Metaphor                                      |
+| ----------------- | ---------------------------------------------------- |
+| Database          | A filing cabinet with organized drawers              |
+| Cache             | A quick-lookup shelf by the door                     |
+| Middleware        | A security checkpoint you pass through               |
+| Queue             | A line where requests wait their turn                |
+| Worker            | A helpful assistant handling tasks in the background |
+| Webhook           | A doorbell that rings when something happens         |
 
 ### Show Real Code, Then Analyze
 
@@ -107,7 +111,7 @@ const pending = this.refreshInProgress.get(userId);
 if (pending) return pending;
 ```
 
-*If a refresh is already happening for this person, we wait for that one instead of starting another. One kitchen, one cook.*
+_If a refresh is already happening for this person, we wait for that one instead of starting another. One kitchen, one cook._
 
 ---
 
@@ -146,12 +150,15 @@ Use galleries, parts, or sections to organize the journey:
 ## The Tour
 
 ### Gallery 1: The Front Door
+
 How visitors arrive and prove who they are.
 
 ### Gallery 2: The Memory Room
+
 How we remember who's logged in.
 
 ### Gallery 3: The Renewal Office
+
 How sessions stay fresh without interrupting work.
 ```
 
@@ -199,7 +206,7 @@ Link to related exhibits:
 ```markdown
 ---
 
-*— Autumn, January 2026*
+_— Autumn, January 2026_
 ```
 
 Or a poetic one-liner:
@@ -207,7 +214,7 @@ Or a poetic one-liner:
 ```markdown
 ---
 
-*Trust is built one verified request at a time.*
+_Trust is built one verified request at a time._
 ```
 
 ---
@@ -237,11 +244,11 @@ Show processes and relationships:
 ### Tables for Quick Reference
 
 ```markdown
-| File | What It Does | Why It Matters |
-|------|--------------|----------------|
-| `auth.ts` | Handles OAuth flow | The front door |
-| `session.ts` | Manages login state | The memory |
-| `middleware.ts` | Checks every request | The bouncer |
+| File            | What It Does         | Why It Matters |
+| --------------- | -------------------- | -------------- |
+| `auth.ts`       | Handles OAuth flow   | The front door |
+| `session.ts`    | Manages login state  | The memory     |
+| `middleware.ts` | Checks every request | The bouncer    |
 ```
 
 ### Code Blocks with Context
@@ -253,13 +260,13 @@ Never show code in isolation. Always explain before or after:
 export async function authGuard(request: Request): Promise<Response | null> {
   const session = await getSession(request);
   if (!session) {
-    return redirect('/login');
+    return redirect("/login");
   }
   return null; // Continue to the page
 }
 ```
 
-*If you're not logged in, you go to login. If you are, you continue. Simple checkpoint logic.*
+_If you're not logged in, you go to login. If you are, you continue. Simple checkpoint logic._
 
 ---
 
@@ -284,9 +291,11 @@ export async function authGuard(request: Request): Promise<Response | null> {
 ### The Distinction
 
 **Generic (avoid):**
+
 > This module provides robust functionality for handling authentication flows in a seamless manner, leveraging industry-standard OAuth protocols.
 
 **Museum style (use):**
+
 > This is where login happens. When someone proves they own an email address, this code decides what they can access.
 
 ---
@@ -327,15 +336,19 @@ For multi-part systems, use galleries:
 
 ```markdown
 ## Gallery 1: Data Layer
+
 How posts are stored and retrieved.
 
 ## Gallery 2: API Endpoints
+
 The doors visitors knock on.
 
 ## Gallery 3: The Editor Component
+
 Where the magic happens in the browser.
 
 ## Gallery 4: Security Considerations
+
 Keeping things safe.
 ```
 
@@ -346,6 +359,7 @@ Keeping things safe.
 Before finalizing any museum documentation:
 
 ### Structure
+
 - [ ] Title includes tagline
 - [ ] "What You're Looking At" orients the reader
 - [ ] Organized into logical galleries/sections
@@ -354,12 +368,14 @@ Before finalizing any museum documentation:
 - [ ] Meaningful closing (signature or poetic line)
 
 ### Visual Variety
+
 - [ ] At least one ASCII diagram or flow
 - [ ] Tables where comparison helps
 - [ ] Code blocks with explanatory context
 - [ ] No walls of text longer than 4-5 paragraphs
 
 ### Voice (refer to grove-documentation)
+
 - [ ] No em-dashes
 - [ ] No corporate jargon
 - [ ] Direct tone explaining motivations
@@ -367,6 +383,7 @@ Before finalizing any museum documentation:
 - [ ] Clear connections between system parts
 
 ### Reader Experience
+
 - [ ] A newcomer could follow the tour
 - [ ] "Why" is answered before "how"
 - [ ] Technical details are contextualized
@@ -385,7 +402,7 @@ Before finalizing any museum documentation:
 
 3. **grove-spec-writing** — Borrow ASCII art techniques for diagrams
 4. **grove-documentation** — Check terminology (Wanderer, Rooted, etc.)
-5. **GroveTerm components** — When exhibits include Grove terminology in UI, use `GroveTerm`, `GroveSwap`, or `GroveText` from `@autumnsgrove/groveengine/ui` instead of hardcoding terms. New visitors see standard terms by default; Grove Mode users see the nature-themed vocabulary. Use `[[term]]` syntax in markdown content for auto-transformation via the rehype-groveterm plugin.
+5. **GroveTerm components** — When exhibits include Grove terminology in UI, use `GroveTerm`, `GroveSwap`, or `GroveText` from `@autumnsgrove/lattice/ui` instead of hardcoding terms. New visitors see standard terms by default; Grove Mode users see the nature-themed vocabulary. Use `[[term]]` syntax in markdown content for auto-transformation via the rehype-groveterm plugin.
 
 ### After Writing
 
@@ -396,7 +413,7 @@ Before finalizing any museum documentation:
 
 ## Example: A Complete Exhibit
 
-```markdown
+````markdown
 # The Session Exhibit
 
 > How Grove remembers who you are.
@@ -417,11 +434,12 @@ A session starts with a cookie. Not the chocolate chip kind—a small
 piece of text your browser holds onto.
 
 ```typescript
-const SESSION_COOKIE = 'grove_session';
+const SESSION_COOKIE = "grove_session";
 const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days
 ```
+````
 
-*Seven days. Long enough to be convenient, short enough to stay secure.*
+_Seven days. Long enough to be convenient, short enough to stay secure._
 
 When you log in, we generate a random ID and store it in this cookie.
 The ID itself means nothing—it's just a key to look you up.
@@ -432,12 +450,12 @@ The ID itself means nothing—it's just a key to look you up.
 
 The actual session data lives in the database:
 
-| Column | What It Holds |
-|--------|---------------|
-| `id` | The random key from the cookie |
-| `user_id` | Who this session belongs to |
-| `created_at` | When you logged in |
-| `expires_at` | When this session ends |
+| Column       | What It Holds                  |
+| ------------ | ------------------------------ |
+| `id`         | The random key from the cookie |
+| `user_id`    | Who this session belongs to    |
+| `created_at` | When you logged in             |
+| `expires_at` | When this session ends         |
 
 Every time you load a page, we look up your cookie's ID in this table.
 If we find it (and it hasn't expired), you're still logged in.
@@ -458,7 +476,7 @@ if (session.expiresAt < Date.now() + SESSION_DURATION / 2) {
 }
 ```
 
-*Active visitors stay. Abandoned sessions expire.*
+_Active visitors stay. Abandoned sessions expire._
 
 ---
 
@@ -489,7 +507,8 @@ Database sessions are older technology. Sometimes older is wiser.
 
 ---
 
-*— Autumn, January 2026*
+_— Autumn, January 2026_
+
 ```
 
 ---
@@ -501,3 +520,4 @@ Museum documentation respects readers' time and intelligence while acknowledging
 Wanderers who read these exhibits should leave understanding not just *what* Grove does, but *why* it does it that way. They should feel like they've been welcomed into the workshop, not handed a manual.
 
 *Every codebase has stories. Museum documentation tells them.*
+```

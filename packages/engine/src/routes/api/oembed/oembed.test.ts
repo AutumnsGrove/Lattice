@@ -65,10 +65,7 @@ function createOGResponse(
   title?: string,
 ): Response {
   const metaTags = Object.entries(tags)
-    .map(
-      ([prop, content]) =>
-        `<meta property="${prop}" content="${content}">`,
-    )
+    .map(([prop, content]) => `<meta property="${prop}" content="${content}">`)
     .join("\n");
 
   const titleTag = title ? `<title>${title}</title>` : "";
@@ -84,10 +81,7 @@ function createOGResponse(
  * Simulate the endpoint logic (mirrors the hardened handler)
  * This tests the actual business logic without SvelteKit request handling
  */
-async function simulateOEmbedEndpoint(
-  targetUrl: string,
-  kv?: KVNamespace,
-) {
+async function simulateOEmbedEndpoint(targetUrl: string, kv?: KVNamespace) {
   // Validate URL
   try {
     new URL(targetUrl);
@@ -253,9 +247,7 @@ describe("trusted provider embed flow", () => {
   });
 
   it("uses extractEmbedUrl even when oEmbed fetch fails", async () => {
-    const mockFetch = vi
-      .fn()
-      .mockRejectedValueOnce(new Error("Network error"));
+    const mockFetch = vi.fn().mockRejectedValueOnce(new Error("Network error"));
     globalThis.fetch = mockFetch;
 
     const result = await simulateOEmbedEndpoint(
@@ -294,9 +286,11 @@ describe("trusted provider embed flow", () => {
   });
 
   it("includes sandbox permissions from provider config", async () => {
-    const mockFetch = vi.fn().mockResolvedValueOnce(
-      createOEmbedResponse({ type: "rich", title: "Poll" }),
-    );
+    const mockFetch = vi
+      .fn()
+      .mockResolvedValueOnce(
+        createOEmbedResponse({ type: "rich", title: "Poll" }),
+      );
     globalThis.fetch = mockFetch;
 
     const result = await simulateOEmbedEndpoint(
@@ -308,9 +302,11 @@ describe("trusted provider embed flow", () => {
   });
 
   it("returns aspect ratio from provider config", async () => {
-    const mockFetch = vi.fn().mockResolvedValueOnce(
-      createOEmbedResponse({ type: "video", title: "Video" }),
-    );
+    const mockFetch = vi
+      .fn()
+      .mockResolvedValueOnce(
+        createOEmbedResponse({ type: "video", title: "Video" }),
+      );
     globalThis.fetch = mockFetch;
 
     const result = await simulateOEmbedEndpoint(
@@ -328,9 +324,11 @@ describe("trusted provider embed flow", () => {
 describe("oEmbed response validation in flow", () => {
   it("rejects oEmbed with invalid type and still returns embed via extractEmbedUrl", async () => {
     // Provider returns bad type, but we have extractEmbedUrl as fallback
-    const mockFetch = vi.fn().mockResolvedValueOnce(
-      createOEmbedResponse({ type: "malicious" as any, title: "Bad" }),
-    );
+    const mockFetch = vi
+      .fn()
+      .mockResolvedValueOnce(
+        createOEmbedResponse({ type: "malicious" as any, title: "Bad" }),
+      );
     globalThis.fetch = mockFetch;
 
     const result = await simulateOEmbedEndpoint(
@@ -369,12 +367,14 @@ describe("oEmbed response validation in flow", () => {
   });
 
   it("rejects oEmbed with oversized content-length", async () => {
-    const mockFetch = vi.fn().mockResolvedValueOnce(
-      createOEmbedResponse(
-        { type: "video", title: "Video" },
-        { contentLength: String(MAX_OEMBED_RESPONSE_SIZE + 1) },
-      ),
-    );
+    const mockFetch = vi
+      .fn()
+      .mockResolvedValueOnce(
+        createOEmbedResponse(
+          { type: "video", title: "Video" },
+          { contentLength: String(MAX_OEMBED_RESPONSE_SIZE + 1) },
+        ),
+      );
     globalThis.fetch = mockFetch;
 
     const result = await simulateOEmbedEndpoint(
@@ -410,9 +410,11 @@ describe("oEmbed response validation in flow", () => {
 
 describe("URL normalization in flow", () => {
   it("matches YouTube URL with uppercase hostname", async () => {
-    const mockFetch = vi.fn().mockResolvedValueOnce(
-      createOEmbedResponse({ type: "video", title: "Test" }),
-    );
+    const mockFetch = vi
+      .fn()
+      .mockResolvedValueOnce(
+        createOEmbedResponse({ type: "video", title: "Test" }),
+      );
     globalThis.fetch = mockFetch;
 
     const result = await simulateOEmbedEndpoint(
@@ -424,9 +426,11 @@ describe("URL normalization in flow", () => {
   });
 
   it("matches Spotify URL with tracking params", async () => {
-    const mockFetch = vi.fn().mockResolvedValueOnce(
-      createOEmbedResponse({ type: "rich", title: "Track" }),
-    );
+    const mockFetch = vi
+      .fn()
+      .mockResolvedValueOnce(
+        createOEmbedResponse({ type: "rich", title: "Track" }),
+      );
     globalThis.fetch = mockFetch;
 
     const result = await simulateOEmbedEndpoint(
@@ -517,9 +521,7 @@ describe("SSRF protection for preview fallback", () => {
   });
 
   it("blocks private IP addresses in preview fallback", async () => {
-    const result = await simulateOEmbedEndpoint(
-      "http://192.168.1.1/secret",
-    );
+    const result = await simulateOEmbedEndpoint("http://192.168.1.1/secret");
 
     expect(result.type).toBe("preview");
     expect(result.og).toBeNull();

@@ -9,8 +9,8 @@
  *
  * @example
  * ```tsx
- * import { WelcomeEmail, Day7Email } from '@autumnsgrove/groveengine/email/sequences';
- * import { render } from '@autumnsgrove/groveengine/email/render';
+ * import { WelcomeEmail, Day7Email } from '@autumnsgrove/lattice/email/sequences';
+ * import { render } from '@autumnsgrove/lattice/email/render';
  *
  * const html = await render(
  *   <WelcomeEmail audienceType="waitlist" name="Wanderer" />

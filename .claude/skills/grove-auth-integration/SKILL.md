@@ -20,11 +20,11 @@ Add Heartwood authentication to a Grove property — from client registration th
 
 ## Key URLs
 
-| Service | URL | Purpose |
-|---------|-----|---------|
-| **Login UI** | `https://heartwood.grove.place` | Where users authenticate |
-| **API** | `https://auth-api.grove.place` | Token exchange, verify, sessions |
-| **D1 Database** | `groveauth` (via wrangler) | Client registration |
+| Service         | URL                             | Purpose                          |
+| --------------- | ------------------------------- | -------------------------------- |
+| **Login UI**    | `https://heartwood.grove.place` | Where users authenticate         |
+| **API**         | `https://auth-api.grove.place`  | Token exchange, verify, sessions |
+| **D1 Database** | `groveauth` (via wrangler)      | Client registration              |
 
 ---
 
@@ -38,12 +38,17 @@ Identify → Register Client → Configure Secrets → Write Code → Wire Wrang
 Auth errors MUST use the `AUTH_ERRORS` Signpost catalog — never bare redirect with ad-hoc error strings.
 
 ```typescript
-import { AUTH_ERRORS, getAuthError, logAuthError, buildErrorParams } from '@autumnsgrove/groveengine/heartwood';
+import {
+  AUTH_ERRORS,
+  getAuthError,
+  logAuthError,
+  buildErrorParams,
+} from "@autumnsgrove/lattice/heartwood";
 
 // In callback — map OAuth error to structured code
 if (errorParam) {
   const authError = getAuthError(errorParam);
-  logAuthError(authError, { path: '/auth/callback' });
+  logAuthError(authError, { path: "/auth/callback" });
   redirect(302, `/login?${buildErrorParams(authError)}`);
 }
 ```
@@ -85,11 +90,11 @@ CLIENT_SECRET_HASH=$(echo -n "$CLIENT_SECRET" | openssl dgst -sha256 -binary | b
 echo "Secret Hash: $CLIENT_SECRET_HASH"
 ```
 
-| Format | Example | Correct? |
-|--------|---------|----------|
-| **base64url** | `Sdgtaokie8-H7GKw-tn0S_6XNSh1rdv` | YES |
-| base64 | `Sdgtaokie8+H7GKw+tn0S/6XNSh1rdv=` | NO |
-| hex | `49d82d6a89227bcf87ec62b0...` | NO |
+| Format        | Example                            | Correct? |
+| ------------- | ---------------------------------- | -------- |
+| **base64url** | `Sdgtaokie8-H7GKw-tn0S_6XNSh1rdv`  | YES      |
+| base64        | `Sdgtaokie8+H7GKw+tn0S/6XNSh1rdv=` | NO       |
+| hex           | `49d82d6a89227bcf87ec62b0...`      | NO       |
 
 #### 2c. Insert into Heartwood database
 
@@ -151,12 +156,16 @@ import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 
 function generateRandomString(length: number): string {
-  const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
+  const charset =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
   const randomValues = crypto.getRandomValues(new Uint8Array(length));
   return Array.from(randomValues, (v) => charset[v % charset.length]).join("");
 }
 
-async function generatePKCE(): Promise<{ verifier: string; challenge: string }> {
+async function generatePKCE(): Promise<{
+  verifier: string;
+  challenge: string;
+}> {
   const verifier = generateRandomString(64);
   const encoder = new TextEncoder();
   const data = encoder.encode(verifier);
@@ -178,7 +187,8 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
   const { verifier, challenge } = await generatePKCE();
   const state = generateRandomString(32);
 
-  const isProduction = url.hostname !== "localhost" && url.hostname !== "127.0.0.1";
+  const isProduction =
+    url.hostname !== "localhost" && url.hostname !== "127.0.0.1";
   const cookieOptions = {
     path: "/",
     httpOnly: true,
@@ -264,7 +274,7 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
       redirect(302, "/?error=token_exchange_failed");
     }
 
-    const tokens = await tokenResponse.json() as {
+    const tokens = (await tokenResponse.json()) as {
       access_token: string;
       refresh_token?: string;
       expires_in?: number;
@@ -279,7 +289,7 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
       redirect(302, "/?error=userinfo_failed");
     }
 
-    const userinfo = await userinfoResponse.json() as {
+    const userinfo = (await userinfoResponse.json()) as {
       sub?: string;
       id?: string;
       email: string;
@@ -295,7 +305,8 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
     }
 
     // Set session cookies
-    const isProduction = url.hostname !== "localhost" && url.hostname !== "127.0.0.1";
+    const isProduction =
+      url.hostname !== "localhost" && url.hostname !== "127.0.0.1";
     const cookieOptions = {
       path: "/",
       httpOnly: true,
@@ -321,7 +332,12 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
 
     redirect(302, "/dashboard"); // Or wherever authenticated users go
   } catch (err) {
-    if (err && typeof err === "object" && "status" in err && err.status === 302) {
+    if (
+      err &&
+      typeof err === "object" &&
+      "status" in err &&
+      err.status === 302
+    ) {
       throw err; // Re-throw redirects
     }
     redirect(302, "/?error=auth_failed");
@@ -380,15 +396,21 @@ export const handle: Handle = async ({ event, resolve }) => {
   const cookieHeader = event.request.headers.get("Cookie") || "";
 
   // Only validate if grove_session or access_token cookie exists
-  if (cookieHeader.includes("grove_session") || cookieHeader.includes("access_token")) {
+  if (
+    cookieHeader.includes("grove_session") ||
+    cookieHeader.includes("access_token")
+  ) {
     try {
       const env = event.platform?.env as any;
 
       // Use service binding for sub-100ms validation
-      const response = await env.AUTH.fetch("https://auth-api.grove.place/session/validate", {
-        method: "POST",
-        headers: { Cookie: cookieHeader },
-      });
+      const response = await env.AUTH.fetch(
+        "https://auth-api.grove.place/session/validate",
+        {
+          method: "POST",
+          headers: { Cookie: cookieHeader },
+        },
+      );
 
       if (response.ok) {
         const { valid, user } = await response.json();
@@ -517,22 +539,22 @@ service = "groveauth"
 
 ## Token Lifecycle
 
-| Token | Lifetime | Storage | Refresh |
-|-------|----------|---------|---------|
-| Access Token | 1 hour | httpOnly cookie | Via refresh token |
-| Refresh Token | 30 days | httpOnly cookie | Re-login required |
-| PKCE Verifier | 10 minutes | httpOnly cookie | Single-use |
-| State | 10 minutes | httpOnly cookie | Single-use |
+| Token         | Lifetime   | Storage         | Refresh           |
+| ------------- | ---------- | --------------- | ----------------- |
+| Access Token  | 1 hour     | httpOnly cookie | Via refresh token |
+| Refresh Token | 30 days    | httpOnly cookie | Re-login required |
+| PKCE Verifier | 10 minutes | httpOnly cookie | Single-use        |
+| State         | 10 minutes | httpOnly cookie | Single-use        |
 
 ---
 
 ## Session Validation Approaches
 
-| Approach | Speed | Requirement | Use When |
-|----------|-------|-------------|----------|
-| **Token Verify** (`/verify`) | ~50-150ms | Network call | Cross-account, external services |
-| **SessionDO** (`/session/validate`) | ~5-20ms | Service binding | Same Cloudflare account (recommended) |
-| **Cookie SSO** (`.grove.place`) | ~0ms (local) | Same domain | All `*.grove.place` properties |
+| Approach                            | Speed        | Requirement     | Use When                              |
+| ----------------------------------- | ------------ | --------------- | ------------------------------------- |
+| **Token Verify** (`/verify`)        | ~50-150ms    | Network call    | Cross-account, external services      |
+| **SessionDO** (`/session/validate`) | ~5-20ms      | Service binding | Same Cloudflare account (recommended) |
+| **Cookie SSO** (`.grove.place`)     | ~0ms (local) | Same domain     | All `*.grove.place` properties        |
 
 For Grove properties on `.grove.place` subdomains, the `grove_session` cookie is shared automatically across all subdomains.
 
@@ -559,28 +581,36 @@ Before going live, verify:
 ## Troubleshooting
 
 ### "Invalid client credentials" (401)
+
 Almost always a **hash format mismatch**. Regenerate with the exact base64url command in Step 2b.
 
 ### "Invalid redirect_uri"
+
 The callback URL must EXACTLY match what's in the `redirect_uris` JSON array in the database. Check trailing slashes, protocol, and port.
 
 ### "Invalid state" on callback
+
 The state cookie expired (10min TTL) or was lost. Check:
+
 - Cookie domain matches the callback domain
 - No redirect loops between domains consuming the cookie early
 
 ### "Code verifier required"
+
 The PKCE verifier cookie wasn't sent with the callback request. Ensure:
+
 - Cookie `path` is `/` (not `/auth`)
 - Cookie domain matches callback domain
 - No third-party cookie blocking
 
 ### Session validation returns 401
+
 - Token may have expired (1hr lifetime) — implement refresh logic
 - Service binding may not be configured — check wrangler.toml
 - Cookie domain mismatch — `.grove.place` cookies only work on subdomains
 
 ### "CORS error" on auth API calls
+
 Add your domain to `allowed_origins` in the Heartwood `clients` table.
 
 ---
@@ -599,4 +629,4 @@ Add your domain to `allowed_origins` in the Heartwood `clients` table.
 
 ---
 
-*Authentication should be invisible until it's needed. Let Heartwood handle the complexity.*
+_Authentication should be invisible until it's needed. Let Heartwood handle the complexity._

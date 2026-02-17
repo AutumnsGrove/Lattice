@@ -644,7 +644,7 @@ interface PushWebhook {
 	before: string; // Previous commit SHA
 	after: string; // New commit SHA
 	repository: {
-		full_name: string; // "AutumnsGrove/GroveEngine"
+		full_name: string; // "AutumnsGrove/Lattice"
 		clone_url: string;
 	};
 	pusher: {

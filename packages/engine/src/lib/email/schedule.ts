@@ -7,7 +7,7 @@
  *
  * @example
  * ```typescript
- * import { scheduleWelcomeSequence } from '@autumnsgrove/groveengine/email/schedule';
+ * import { scheduleWelcomeSequence } from '@autumnsgrove/lattice/email/schedule';
  *
  * await scheduleWelcomeSequence({
  *   email: 'wanderer@example.com',

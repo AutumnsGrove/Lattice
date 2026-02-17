@@ -4,7 +4,7 @@ description: Structured error codes across all Grove packages, so every failure 
 category: plans
 specCategory: developer-experience
 icon: alert-triangle
-lastUpdated: '2026-02-07'
+lastUpdated: "2026-02-07"
 aliases: []
 date created: Friday, February 7th 2026
 date modified: Friday, February 7th 2026
@@ -39,7 +39,7 @@ type: implementation-plan
            Every error tells you where to look.
 ```
 
-> *Every error tells you where to look.*
+> _Every error tells you where to look._
 
 When something breaks in Grove right now, you see "Something went wrong." That's useless at 2 AM when you're trying to figure out if it's a D1 binding, a cookie issue, or a missing config. You have to dig through Worker logs, guess which package threw it, and grep for the string.
 
@@ -78,11 +78,13 @@ A signpost at a fork in the trail tells you which path leads where. You don't ha
 **The outcome:** Every error surface in Grove carries a unique, structured code. You see the code, you know the package, the category, and the fix.
 
 **What exists today:**
+
 - `HW-AUTH-XXX` in `packages/engine/src/lib/heartwood/errors.ts` (complete)
 - `PLANT-XXX` in `packages/plant/src/lib/errors.ts` (complete)
 - ~750 hardcoded error strings everywhere else
 
 **What we're building:**
+
 - A shared `GroveErrorDef` type in the engine that all packages import
 - Error catalogs for every package with namespaced prefixes
 - Shared helpers for logging, URL building, JSON responses, and SvelteKit errors
@@ -114,7 +116,11 @@ Export path in `packages/engine/package.json`:
 Consumer import:
 
 ```typescript
-import { type GroveErrorDef, logGroveError, buildErrorUrl } from '@autumnsgrove/groveengine/errors';
+import {
+  type GroveErrorDef,
+  logGroveError,
+  buildErrorUrl,
+} from "@autumnsgrove/lattice/errors";
 ```
 
 ---
@@ -127,9 +133,9 @@ Both `AuthErrorDef` and `PlantErrorDef` are structurally identical. They become 
 export type ErrorCategory = "user" | "admin" | "bug";
 
 export interface GroveErrorDef {
-  code: string;         // e.g. "GROVE-API-040"
+  code: string; // e.g. "GROVE-API-040"
   category: ErrorCategory;
-  userMessage: string;  // warm, safe for display
+  userMessage: string; // warm, safe for display
   adminMessage: string; // detailed, for logs
 }
 ```
@@ -175,17 +181,17 @@ export interface GroveErrorDef {
 
 ## Package Error Prefixes
 
-| Package | Prefix | File Location |
-|---------|--------|---------------|
-| Engine (API routes) | `GROVE-API-XXX` | `packages/engine/src/lib/errors/api-errors.ts` |
-| Engine (Arbor admin) | `GROVE-ARBOR-XXX` | `packages/engine/src/lib/errors/arbor-errors.ts` |
-| Engine (Public pages) | `GROVE-SITE-XXX` | `packages/engine/src/lib/errors/site-errors.ts` |
-| Heartwood (Auth) | `HW-AUTH-XXX` | **Already exists** |
-| Heartwood (Sessions) | `HW-SESS-XXX` | `packages/heartwood/src/errors/session-errors.ts` |
-| Plant (Onboarding) | `PLANT-XXX` | **Already exists** |
-| Landing | `GROVE-LAND-XXX` | `packages/landing/src/lib/errors.ts` |
-| Domains | `GROVE-DOM-XXX` | `packages/domains/src/lib/errors.ts` |
-| Clearing | `GROVE-CLR-XXX` | `packages/clearing/src/lib/errors.ts` |
+| Package               | Prefix            | File Location                                     |
+| --------------------- | ----------------- | ------------------------------------------------- |
+| Engine (API routes)   | `GROVE-API-XXX`   | `packages/engine/src/lib/errors/api-errors.ts`    |
+| Engine (Arbor admin)  | `GROVE-ARBOR-XXX` | `packages/engine/src/lib/errors/arbor-errors.ts`  |
+| Engine (Public pages) | `GROVE-SITE-XXX`  | `packages/engine/src/lib/errors/site-errors.ts`   |
+| Heartwood (Auth)      | `HW-AUTH-XXX`     | **Already exists**                                |
+| Heartwood (Sessions)  | `HW-SESS-XXX`     | `packages/heartwood/src/errors/session-errors.ts` |
+| Plant (Onboarding)    | `PLANT-XXX`       | **Already exists**                                |
+| Landing               | `GROVE-LAND-XXX`  | `packages/landing/src/lib/errors.ts`              |
+| Domains               | `GROVE-DOM-XXX`   | `packages/domains/src/lib/errors.ts`              |
+| Clearing              | `GROVE-CLR-XXX`   | `packages/clearing/src/lib/errors.ts`             |
 
 ---
 
@@ -193,13 +199,13 @@ export interface GroveErrorDef {
 
 All packages follow the same numbering scheme:
 
-| Range | Category |
-|-------|----------|
+| Range   | Category                                                |
+| ------- | ------------------------------------------------------- |
 | 001-019 | Service bindings, infrastructure (D1/KV/R2 unavailable) |
-| 020-039 | Auth, session, CSRF, origin validation |
-| 040-059 | Business logic, data validation |
-| 060-079 | Rate limiting, security |
-| 080-099 | Internal / catch-all |
+| 020-039 | Auth, session, CSRF, origin validation                  |
+| 040-059 | Business logic, data validation                         |
+| 060-079 | Rate limiting, security                                 |
+| 080-099 | Internal / catch-all                                    |
 
 ---
 
@@ -207,14 +213,14 @@ All packages follow the same numbering scheme:
 
 Approximate hardcoded error count by package:
 
-| Package | Files | Hardcoded Errors | Priority |
-|---------|-------|-----------------|----------|
-| Engine | ~70 | ~596 | High (largest surface) |
-| Landing | ~20 | ~67 | Medium |
-| Domains | ~12 | ~67 | Medium |
-| Plant | ~25 | ~14 remaining | Low (mostly done) |
-| Heartwood | ~8 | ~30 JSON responses | Medium |
-| Clearing | ~2 | ~5 | Low |
+| Package   | Files | Hardcoded Errors   | Priority               |
+| --------- | ----- | ------------------ | ---------------------- |
+| Engine    | ~70   | ~596               | High (largest surface) |
+| Landing   | ~20   | ~67                | Medium                 |
+| Domains   | ~12   | ~67                | Medium                 |
+| Plant     | ~25   | ~14 remaining      | Low (mostly done)      |
+| Heartwood | ~8    | ~30 JSON responses | Medium                 |
+| Clearing  | ~2    | ~5                 | Low                    |
 
 ---
 
@@ -225,8 +231,8 @@ Approximate hardcoded error count by package:
 Structured logging. Sanitizes `cause` to extract message only. Never logs tokens, secrets, or passwords.
 
 ```typescript
-logGroveError('Landing', LANDING_ERRORS.DB_UNAVAILABLE, {
-  path: '/blog',
+logGroveError("Landing", LANDING_ERRORS.DB_UNAVAILABLE, {
+  path: "/blog",
   cause: err,
 });
 // → [Landing] GROVE-LAND-001: D1 database binding unavailable {"code":"GROVE-LAND-001",...}
@@ -237,7 +243,7 @@ logGroveError('Landing', LANDING_ERRORS.DB_UNAVAILABLE, {
 Builds `/?error=message&error_code=CODE` for redirect-based error display. Same pattern Plant uses today.
 
 ```typescript
-const url = buildErrorUrl(PLANT_ERRORS.SESSION_FETCH_FAILED, '/');
+const url = buildErrorUrl(PLANT_ERRORS.SESSION_FETCH_FAILED, "/");
 // → /?error=We+couldn't+verify...&error_code=PLANT-020
 ```
 
@@ -255,7 +261,9 @@ return c.json(buildErrorJson(AUTH_ERRORS.RATE_LIMITED), 429);
 Calls SvelteKit's `error()` with augmented `App.Error` body: `{ message, code, category }`. Logs first, then throws.
 
 ```typescript
-throwGroveError(500, GROVE_API_ERRORS.DB_UNAVAILABLE, 'Engine', { path: url.pathname });
+throwGroveError(500, GROVE_API_ERRORS.DB_UNAVAILABLE, "Engine", {
+  path: url.pathname,
+});
 // logs → [Engine] GROVE-API-001: ...
 // throws → error(500, { message: "...", code: "GROVE-API-001", category: "bug" })
 ```
@@ -316,10 +324,10 @@ Existing imports continue to work with zero changes:
 
 ```typescript
 // Before (still works)
-import { AUTH_ERRORS, logAuthError, AuthErrorDef } from '$lib/heartwood/errors';
+import { AUTH_ERRORS, logAuthError, AuthErrorDef } from "$lib/heartwood/errors";
 
 // After (also works)
-import { GroveErrorDef, logGroveError } from '@autumnsgrove/groveengine/errors';
+import { GroveErrorDef, logGroveError } from "@autumnsgrove/lattice/errors";
 ```
 
 **Plant errors.ts**: Same approach. `PlantErrorDef = GroveErrorDef`. `logPlantError` wraps `logGroveError('Plant', ...)`. Every existing import still works.
@@ -346,6 +354,7 @@ The Lumen AI error system uses a class-based pattern (`LumenError extends Error`
 6. Verify all existing imports still resolve
 
 **Key files:**
+
 - `packages/engine/src/lib/errors/types.ts` (new)
 - `packages/engine/src/lib/errors/helpers.ts` (new)
 - `packages/engine/src/lib/errors/index.ts` (new)
@@ -364,6 +373,7 @@ The Lumen AI error system uses a class-based pattern (`LumenError extends Error`
 5. Replace `throw error(...)` calls across engine files
 
 **Grouping for parallel work:**
+
 - API routes (~45 files)
 - Arbor admin pages (~15 files)
 - Public site pages (~10 files)
@@ -422,7 +432,7 @@ For each: create `src/lib/errors.ts`, define error catalog, replace hardcoded st
 ## Verification
 
 1. **Type check**: `npx svelte-check --tsconfig ./tsconfig.json` in each modified package
-2. **Import resolution**: After engine rebuild, verify consumer packages can `import { GroveErrorDef } from '@autumnsgrove/groveengine/errors'`
+2. **Import resolution**: After engine rebuild, verify consumer packages can `import { GroveErrorDef } from '@autumnsgrove/lattice/errors'`
 3. **Backward compat**: Verify `import { PLANT_ERRORS, logPlantError } from '$lib/errors'` still works in Plant
 4. **Visual check**: Load Plant homepage with `?error=test&error_code=PLANT-001` and verify GlassCard renders
 5. **Error page check**: Trigger a 404 in engine and verify `+error.svelte` renders the code
@@ -431,4 +441,4 @@ For each: create `src/lib/errors.ts`, define error catalog, replace hardcoded st
 
 ---
 
-*A signpost stands where paths diverge. It doesn't fix the road. It tells you where you are.*
+_A signpost stands where paths diverge. It doesn't fix the road. It tells you where you are._

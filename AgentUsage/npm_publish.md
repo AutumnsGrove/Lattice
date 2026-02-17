@@ -1,6 +1,6 @@
 # Publishing to npm
 
-This guide covers publishing `@autumnsgrove/groveengine` to npm.
+This guide covers publishing `@autumnsgrove/lattice` to npm.
 
 ## The Problem
 
@@ -22,7 +22,7 @@ Every time you need to publish, create a new granular access token:
 3. Configure:
    - **Name**: `publish-cli` (or whatever)
    - **Expiration**: 7 days is fine (90 days max)
-   - **Packages**: `@autumnsgrove/groveengine` or "All packages"
+   - **Packages**: `@autumnsgrove/lattice` or "All packages"
    - **Permissions**: **Read and write**
    - **Bypass 2FA**: **ENABLE THIS** (critical!)
 4. Copy the token (starts with `npm_`)
@@ -52,7 +52,7 @@ npm publish --access public
 ## Verify
 
 ```bash
-npm view @autumnsgrove/groveengine version
+npm view @autumnsgrove/lattice version
 ```
 
 ## Notes

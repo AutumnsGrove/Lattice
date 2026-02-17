@@ -5,7 +5,7 @@
   optional description, optional action buttons, and content area.
 
   Usage:
-    import { ArborSection } from '@autumnsgrove/groveengine/ui/arbor';
+    import { ArborSection } from '@autumnsgrove/lattice/ui/arbor';
 
     <ArborSection title="Garden" description="Manage your blog posts" icon={FileText}>
       page content here

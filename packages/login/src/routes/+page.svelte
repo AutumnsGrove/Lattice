@@ -18,7 +18,7 @@
 	import { enhance } from '$app/forms';
 	import { authClient } from '$lib/auth-client';
 	import { validateRedirectUrl } from '$lib/redirect';
-	import { Waystone } from '@autumnsgrove/groveengine/ui';
+	import { Waystone } from '@autumnsgrove/lattice/ui';
 
 	let { form } = $props();
 

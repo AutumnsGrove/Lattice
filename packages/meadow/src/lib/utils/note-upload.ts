@@ -5,13 +5,13 @@
  * Passed as the `uploadImage` prop to NoteEditor.
  */
 
-import { apiRequest } from "@autumnsgrove/groveengine/utils/api";
+import { apiRequest } from "@autumnsgrove/lattice/utils/api";
 import {
   normalizeFileForUpload,
   isConvertibleFormat,
   getActionableUploadError,
-} from "@autumnsgrove/groveengine/utils/upload-validation";
-import { convertHeicToJpeg } from "@autumnsgrove/groveengine/utils/imageProcessor";
+} from "@autumnsgrove/lattice/utils/upload-validation";
+import { convertHeicToJpeg } from "@autumnsgrove/lattice/utils/imageProcessor";
 
 /**
  * Upload an image file for use in a Note.

@@ -91,7 +91,7 @@ class GitHubConfig:
 
     # Repository context (auto-detected, but can override)
     owner: str = "AutumnsGrove"
-    repo: str = "GroveEngine"
+    repo: str = "Lattice"
 
     # Default labels for new PRs/issues
     default_pr_labels: list[str] = field(default_factory=list)
@@ -211,7 +211,7 @@ class GWConfig:
         github_data = data.get("github", {})
         github = GitHubConfig(
             owner=github_data.get("owner", "AutumnsGrove"),
-            repo=github_data.get("repo", "GroveEngine"),
+            repo=github_data.get("repo", "Lattice"),
             default_pr_labels=github_data.get("default_pr_labels", []),
             default_issue_labels=github_data.get("default_issue_labels", []),
             rate_limit_warn_threshold=github_data.get("rate_limit_warn_threshold", 100),

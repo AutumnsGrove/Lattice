@@ -33,7 +33,7 @@
 		ArrowUpRight,
 		Zap,
 	} from "lucide-svelte";
-	import { GlassCard, GroveSwap } from "@autumnsgrove/groveengine/ui";
+	import { GlassCard, GroveSwap } from "@autumnsgrove/lattice/ui";
 
 	let { data, form } = $props();
 

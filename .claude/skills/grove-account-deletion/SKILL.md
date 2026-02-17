@@ -38,7 +38,7 @@ npx wrangler d1 execute grove-engine-db --remote --command="SELECT id, subdomain
 npx wrangler d1 execute grove-engine-db --remote --command="SELECT id, subdomain, display_name, email, plan, created_at FROM tenants WHERE display_name LIKE '%NAME%';"
 ```
 
-**Run these from the project root** (`/Users/mini/Documents/Projects/GroveEngine`).
+**Run these from the project root** (`/Users/mini/Documents/Projects/Lattice`).
 
 ### Step 2: Confirm with the User
 
@@ -198,26 +198,30 @@ For accounts the user explicitly calls "test accounts" or accounts created in th
 ## Edge Cases
 
 ### User has multiple tenants
+
 One email can own multiple subdomains. Only delete the specified tenant. Don't touch others.
 
 ### Tenant not found
+
 If the subdomain/email doesn't match any tenant, tell the user. Don't guess.
 
 ### Heartwood session cleanup
+
 Heartwood sessions are stored in KV, not D1. The D1 `sessions` table is for legacy/local sessions. Heartwood sessions will expire naturally (24h TTL). No manual cleanup needed unless urgency is specified.
 
 ### LemonSqueezy subscription active
+
 If `user_onboarding.lemonsqueezy_subscription_id` is set, warn the user that they may need to cancel the subscription in the LemonSqueezy dashboard separately. D1 deletion doesn't cancel external billing.
 
 ---
 
 ## Environment
 
-All commands run from the project root: `/Users/mini/Documents/Projects/GroveEngine`
+All commands run from the project root: `/Users/mini/Documents/Projects/Lattice`
 
 The database is: `grove-engine-db` (D1)
 The media bucket is: `grove-media` (R2)
 
 ---
 
-*A clean deletion is a kind goodbye. Leave no orphans behind.*
+_A clean deletion is a kind goodbye. Leave no orphans behind._

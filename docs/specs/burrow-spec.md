@@ -4,7 +4,7 @@ description: Trusted cross-property access between greenhouse-mode Grove propert
 category: specs
 specCategory: platform-services
 icon: network
-lastUpdated: '2026-02-06'
+lastUpdated: "2026-02-06"
 aliases: []
 tags:
   - cross-property-access
@@ -36,14 +36,14 @@ tags:
                  Shared only with trusted companions.
 ```
 
-> *A protected way through.*
+> _A protected way through._
 
 Grove's system for trusted cross-property access. When two properties are both in greenhouse mode with matching permissions, a Wanderer can burrow from one to the other with a single click. No new account. No separate login. Just a secure handoff from your arbor into a property that's opened its doors to you.
 
 **Public Name:** Burrow
 **Internal Name:** GroveBurrow
-**Domain:** *Integrated into Arbor*
-**Repository:** Part of [AutumnsGrove/GroveEngine](https://github.com/AutumnsGrove/GroveEngine)
+**Domain:** _Integrated into Arbor_
+**Repository:** Part of [AutumnsGrove/Lattice](https://github.com/AutumnsGrove/Lattice)
 **Last Updated:** January 2026
 
 In the forest, a burrow is a protected passage beneath the earth. Animals create burrows to move safely between dens, sharing them with family and trusted companions. The passage is invisible from above. You have to know it's there.
@@ -56,17 +56,17 @@ Burrow builds on top of Greenhouse mode. Where Greenhouse provides the trust lay
 
 Extending the Graft vocabulary with burrow-specific terms:
 
-| Term | Action | Description |
-|------|--------|-------------|
-| **Burrow** | Connection | A trusted passage between two greenhouse properties |
-| **Dig** | Create | Open a burrow (establish access) |
-| **Fill** | Close | Close a burrow (revoke access) |
-| **Receiving** | Property state | A property configured to accept incoming burrows |
-| **Surface** | Exit | Leave a burrowed session, return to origin |
+| Term          | Action         | Description                                         |
+| ------------- | -------------- | --------------------------------------------------- |
+| **Burrow**    | Connection     | A trusted passage between two greenhouse properties |
+| **Dig**       | Create         | Open a burrow (establish access)                    |
+| **Fill**      | Close          | Close a burrow (revoke access)                      |
+| **Receiving** | Property state | A property configured to accept incoming burrows    |
+| **Surface**   | Exit           | Leave a burrowed session, return to origin          |
 
-*"I'll dig a burrow to The Prism for Dave."*
-*"Put The Prism in receiving mode."*
-*"Fill that burrow. His moderation privileges have been revoked."*
+_"I'll dig a burrow to The Prism for Dave."_
+_"Put The Prism in receiving mode."_
+_"Fill that burrow. His moderation privileges have been revoked."_
 
 ---
 
@@ -319,12 +319,12 @@ The key insight: **your burrow permissions are constrained by your existing role
 
 ### Permission Levels
 
-| Level | Can Do |
-|-------|--------|
-| `full` | Everything. Reserved for Wayfinder. |
-| `admin` | Moderate, configure settings, manage content |
-| `contributor` | Add content, suggest changes, participate |
-| `readonly` | View admin interface, no modifications |
+| Level         | Can Do                                       |
+| ------------- | -------------------------------------------- |
+| `full`        | Everything. Reserved for Wayfinder.          |
+| `admin`       | Moderate, configure settings, manage content |
+| `contributor` | Add content, suggest changes, participate    |
+| `readonly`    | View admin interface, no modifications       |
 
 ---
 
@@ -477,16 +477,16 @@ The handoff is the critical moment: transferring trust from source to target wit
 
 ```typescript
 interface BurrowHandoffToken {
-  source_tenant: string;      // Where they came from
-  target_property: string;    // Where they're going
-  user_id: string;            // Who they are
-  user_role: UserRole;        // Their Grove-wide role
+  source_tenant: string; // Where they came from
+  target_property: string; // Where they're going
+  user_id: string; // Who they are
+  user_role: UserRole; // Their Grove-wide role
   permissions: PermissionLevel; // What they can do here
-  created_at: number;         // Unix timestamp
-  expires_at: number;         // Unix timestamp (created_at + 60s)
-  nonce: string;              // Prevent replay
-  client_ip: string;          // IP at token creation (binding)
-  client_ua_hash: string;     // SHA-256 of User-Agent (binding)
+  created_at: number; // Unix timestamp
+  expires_at: number; // Unix timestamp (created_at + 60s)
+  nonce: string; // Prevent replay
+  client_ip: string; // IP at token creation (binding)
+  client_ua_hash: string; // SHA-256 of User-Agent (binding)
 }
 ```
 
@@ -703,49 +703,61 @@ Burrows appear in the user's arbor (admin panel) when they have active connectio
 ### Check Burrow Access
 
 ```typescript
-import { canBurrow, getBurrows } from '@autumnsgrove/groveengine/burrow';
+import { canBurrow, getBurrows } from "@autumnsgrove/lattice/burrow";
 
 // Check if user can burrow to a specific property
-const canAccess = await canBurrow({
-  userId: locals.user.id,
-  sourceTenant: locals.tenant.id,
-  targetProperty: 'the-prism'
-}, platform.env);
+const canAccess = await canBurrow(
+  {
+    userId: locals.user.id,
+    sourceTenant: locals.tenant.id,
+    targetProperty: "the-prism",
+  },
+  platform.env,
+);
 
 // Get all active burrows for a user
-const burrows = await getBurrows({
-  userId: locals.user.id,
-  sourceTenant: locals.tenant.id
-}, platform.env);
+const burrows = await getBurrows(
+  {
+    userId: locals.user.id,
+    sourceTenant: locals.tenant.id,
+  },
+  platform.env,
+);
 ```
 
 ### Dig a Burrow
 
 ```typescript
-import { digBurrow } from '@autumnsgrove/groveengine/burrow';
+import { digBurrow } from "@autumnsgrove/lattice/burrow";
 
 // Wayfinder or property admin digs a burrow for someone
-const burrow = await digBurrow({
-  sourceTenant: 'dave',
-  userId: 'user_dave_123',
-  targetProperty: 'the-prism',
-  maxPermission: 'admin',
-  durationType: 'infinite',
-  createdBy: locals.user.id
-}, platform.env);
+const burrow = await digBurrow(
+  {
+    sourceTenant: "dave",
+    userId: "user_dave_123",
+    targetProperty: "the-prism",
+    maxPermission: "admin",
+    durationType: "infinite",
+    createdBy: locals.user.id,
+  },
+  platform.env,
+);
 ```
 
 ### Generate Handoff Token
 
 ```typescript
-import { createHandoff } from '@autumnsgrove/groveengine/burrow';
+import { createHandoff } from "@autumnsgrove/lattice/burrow";
 
 // Called when user clicks "Enter"
-const { redirectUrl } = await createHandoff({
-  burrowId: burrow.id,
-  userId: locals.user.id,
-  userRole: locals.user.role
-}, platform.env);
+const { redirectUrl } = await createHandoff(
+  {
+    burrowId: burrow.id,
+    userId: locals.user.id,
+    userRole: locals.user.role,
+  },
+  platform.env,
+);
 
 // Redirect user to target with token
 throw redirect(302, redirectUrl);
@@ -754,12 +766,12 @@ throw redirect(302, redirectUrl);
 ### Validate Handoff (Target Side)
 
 ```typescript
-import { validateHandoff } from '@autumnsgrove/groveengine/burrow';
+import { validateHandoff } from "@autumnsgrove/lattice/burrow";
 
 // In target property's hook or middleware
 const handoff = await validateHandoff(
-  url.searchParams.get('burrow_token'),
-  platform.env
+  url.searchParams.get("burrow_token"),
+  platform.env,
 );
 
 if (handoff) {
@@ -767,7 +779,7 @@ if (handoff) {
   locals.burrowSession = {
     sourceProperty: handoff.source_tenant,
     permissions: handoff.permissions,
-    userId: handoff.user_id
+    userId: handoff.user_id,
   };
 }
 ```
@@ -775,47 +787,53 @@ if (handoff) {
 ### Fill a Burrow (Revoke)
 
 ```typescript
-import { fillBurrow } from '@autumnsgrove/groveengine/burrow';
+import { fillBurrow } from "@autumnsgrove/lattice/burrow";
 
 // Revoke someone's access
-await fillBurrow({
-  burrowId: burrow.id,
-  revokedBy: locals.user.id,
-  reason: 'Moderation privileges no longer needed'
-}, platform.env);
+await fillBurrow(
+  {
+    burrowId: burrow.id,
+    revokedBy: locals.user.id,
+    reason: "Moderation privileges no longer needed",
+  },
+  platform.env,
+);
 ```
 
 ### Configure Property as Receiving (Wayfinder Only)
 
 ```typescript
-import { configureReceiving, isWayfinder } from '@autumnsgrove/groveengine/burrow';
+import { configureReceiving, isWayfinder } from "@autumnsgrove/lattice/burrow";
 
 // Only Wayfinder can configure receiving mode
 if (!isWayfinder(locals.user)) {
-  throw error(403, 'Only the Wayfinder can configure receiving mode');
+  throw error(403, "Only the Wayfinder can configure receiving mode");
 }
 
 // Enable a property to accept incoming burrows
-await configureReceiving({
-  propertyId: 'the-greenhouse',
-  propertyType: 'forest',
-  propertyName: 'The Greenhouse',
-  receivingEnabled: true,
-  maxIncomingPermission: 'admin',
-  allowedSources: null, // any greenhouse property
-  configuredBy: locals.user.id
-}, platform.env);
+await configureReceiving(
+  {
+    propertyId: "the-greenhouse",
+    propertyType: "forest",
+    propertyName: "The Greenhouse",
+    receivingEnabled: true,
+    maxIncomingPermission: "admin",
+    allowedSources: null, // any greenhouse property
+    configuredBy: locals.user.id,
+  },
+  platform.env,
+);
 ```
 
 ### Check Wayfinder Universal Access
 
 ```typescript
-import { canWayfinderBurrow } from '@autumnsgrove/groveengine/burrow';
+import { canWayfinderBurrow } from "@autumnsgrove/lattice/burrow";
 
 // Wayfinder can burrow anywhere, even non-receiving properties
 const hasUniversalAccess = await canWayfinderBurrow(
   locals.user.id,
-  platform.env
+  platform.env,
 );
 
 if (hasUniversalAccess) {
@@ -867,27 +885,27 @@ if (hasUniversalAccess) {
 
 Every burrow action is logged:
 
-| Action | Logged Data |
-|--------|-------------|
-| `dig` | Who created, for whom, what permissions, duration |
-| `fill` | Who revoked, reason |
-| `use` | When used, IP, user agent |
-| `expire` | Automatic expiration timestamp |
-| `extend` | Who extended, new duration |
+| Action   | Logged Data                                       |
+| -------- | ------------------------------------------------- |
+| `dig`    | Who created, for whom, what permissions, duration |
+| `fill`   | Who revoked, reason                               |
+| `use`    | When used, IP, user agent                         |
+| `expire` | Automatic expiration timestamp                    |
+| `extend` | Who extended, new duration                        |
 
 ### Token Hardening
 
 Handoff tokens are hardened against interception and replay:
 
-| Protection | How | Why |
-|-----------|-----|-----|
-| **Single-use** | Atomic KV delete on first validation | Prevents replay even if token is intercepted |
-| **60-second TTL** | KV expiration + explicit check | Redirect takes <2s; 60s is generous buffer with minimal exposure |
-| **IP binding** | Client IP stored at creation, verified at validation | Stolen token is useless from a different network |
-| **UA binding** | SHA-256 of User-Agent stored and verified | Adds fingerprint layer alongside IP |
-| **Referrer-Policy** | `no-referrer` header on redirect response | Prevents token leaking to third-party resources via Referer header |
-| **URL cleanup** | 302 redirect to clean URL after validation | Removes token from address bar, browser history, and bookmarks |
-| **No third-party loads** | Token landing page loads zero external resources | No CDN fonts, no analytics, nothing that could leak the URL |
+| Protection               | How                                                  | Why                                                                |
+| ------------------------ | ---------------------------------------------------- | ------------------------------------------------------------------ |
+| **Single-use**           | Atomic KV delete on first validation                 | Prevents replay even if token is intercepted                       |
+| **60-second TTL**        | KV expiration + explicit check                       | Redirect takes <2s; 60s is generous buffer with minimal exposure   |
+| **IP binding**           | Client IP stored at creation, verified at validation | Stolen token is useless from a different network                   |
+| **UA binding**           | SHA-256 of User-Agent stored and verified            | Adds fingerprint layer alongside IP                                |
+| **Referrer-Policy**      | `no-referrer` header on redirect response            | Prevents token leaking to third-party resources via Referer header |
+| **URL cleanup**          | 302 redirect to clean URL after validation           | Removes token from address bar, browser history, and bookmarks     |
+| **No third-party loads** | Token landing page loads zero external resources     | No CDN fonts, no analytics, nothing that could leak the URL        |
 
 ### Rate Limiting
 
@@ -995,13 +1013,13 @@ Fast access paths require caching. Here's what gets cached, for how long, and wh
 
 ### Cache Invalidation Triggers
 
-| Event | Caches Invalidated |
-|-------|-------------------|
-| `digBurrow()` | User burrow list |
-| `fillBurrow()` | User burrow list |
-| `configureReceiving()` | Receiving status |
-| Burrow expiration (cron) | User burrow list |
-| Greenhouse enrollment | Greenhouse status |
+| Event                    | Caches Invalidated |
+| ------------------------ | ------------------ |
+| `digBurrow()`            | User burrow list   |
+| `fillBurrow()`           | User burrow list   |
+| `configureReceiving()`   | Receiving status   |
+| Burrow expiration (cron) | User burrow list   |
+| Greenhouse enrollment    | Greenhouse status  |
 
 ### Why These TTLs
 
@@ -1021,14 +1039,14 @@ Following the Grove testing philosophy: write tests, not too many, mostly integr
 
 Test complete user flows that mirror real usage:
 
-| Flow | What to Test |
-|------|--------------|
-| **Burrow access** | User clicks "Enter" → handoff → arrives at target with correct permissions |
-| **Permission ceiling** | Rooted user + admin burrow → gets contributor (role ceiling applied) |
-| **Expired burrow** | Access attempt after expiration → graceful denial, clear message |
-| **Fill revocation** | Active burrow filled → immediate access denial, audit logged |
-| **Wayfinder override** | Wayfinder burrows into non-receiving property → succeeds |
-| **Receiving configuration** | Enable receiving → property appears in burrow targets |
+| Flow                        | What to Test                                                               |
+| --------------------------- | -------------------------------------------------------------------------- |
+| **Burrow access**           | User clicks "Enter" → handoff → arrives at target with correct permissions |
+| **Permission ceiling**      | Rooted user + admin burrow → gets contributor (role ceiling applied)       |
+| **Expired burrow**          | Access attempt after expiration → graceful denial, clear message           |
+| **Fill revocation**         | Active burrow filled → immediate access denial, audit logged               |
+| **Wayfinder override**      | Wayfinder burrows into non-receiving property → succeeds                   |
+| **Receiving configuration** | Enable receiving → property appears in burrow targets                      |
 
 ### Unit Tests (Isolated Logic)
 
@@ -1061,14 +1079,14 @@ Critical paths that must never fail:
 ```typescript
 // Use builders for consistent test data
 const testBurrow = buildBurrow({
-  permission: 'admin',
-  duration: 'infinite',
-  status: 'active'
+  permission: "admin",
+  duration: "infinite",
+  status: "active",
 });
 
 const testHandoff = buildHandoff({
   burrow: testBurrow,
-  user: { role: 'pathfinder' }
+  user: { role: "pathfinder" },
 });
 ```
 
@@ -1077,17 +1095,20 @@ const testHandoff = buildHandoff({
 ## Implementation Checklist
 
 ### Phase 0: Wayfinder Foundation
+
 - [ ] Create `wayfinder_burrow` feature graft
 - [ ] Implement Wayfinder detection in burrow checks
 - [ ] Add property type classification (property vs. personal grove)
 - [ ] Create `configureReceiving()` API for Wayfinder
 
 ### Phase 1: Database & Types
+
 - [ ] Create D1 schema migration for burrow tables
 - [ ] Define TypeScript types for burrow entities
 - [ ] Add burrow-related types to grafts module
 
 ### Phase 2: Core Burrow Service
+
 - [ ] Implement `canBurrow()` check
 - [ ] Implement `digBurrow()` creation
 - [ ] Implement `fillBurrow()` revocation
@@ -1095,36 +1116,42 @@ const testHandoff = buildHandoff({
 - [ ] Add KV caching for hot paths
 
 ### Phase 3: Handoff Mechanism
+
 - [ ] Implement `createHandoff()` token generation
 - [ ] Implement `validateHandoff()` token consumption
 - [ ] Add HMAC signing utilities
 - [ ] Configure KV TTL for handoff tokens
 
 ### Phase 4: Arbor UI Integration
+
 - [ ] Add "Your Burrows" section to arbor dashboard
 - [ ] Implement "Enter" flow with redirect
 - [ ] Add burrow management UI for Wayfinder
 - [ ] Create "Dig New Burrow" form
 
 ### Phase 5: Target Property Middleware
+
 - [ ] Add burrow token detection to SvelteKit hooks
 - [ ] Implement burrow session creation
 - [ ] Add permission enforcement middleware
 - [ ] Create "Surface" (exit) functionality
 
 ### Phase 6: Audit & Monitoring
+
 - [ ] Implement comprehensive audit logging
 - [ ] Add rate limiting for handoff generation
 - [ ] Create audit log viewer in arbor
 - [ ] Set up alerts for suspicious activity
 
 ### Phase 7: Forest Integration
+
 - [ ] Configure all Forests as receiving
 - [ ] Add Forest moderation permissions
 - [ ] Test Pathfinder → Forest admin flow
 - [ ] Document Forest-specific use cases
 
 ### Phase 8: Documentation
+
 - [ ] Update grove-naming.md with Burrow entry
 - [ ] Add Burrow lexicon to grafts-spec.md
 - [ ] Create Waystone help articles
@@ -1141,4 +1168,4 @@ const testHandoff = buildHandoff({
 
 ---
 
-*In the forest, burrows connect what the surface keeps separate. The passage is invisible from above. You have to know it's there.*
+_In the forest, burrows connect what the surface keeps separate. The passage is invisible from above. You have to know it's there._

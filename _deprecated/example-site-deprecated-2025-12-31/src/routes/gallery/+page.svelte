@@ -1,5 +1,5 @@
 <script>
-	import { ImageGallery } from '@autumnsgrove/groveengine';
+	import { ImageGallery } from '@autumnsgrove/lattice';
 
 	// Transform gallery items to match ImageGallery's expected format
 	const galleryImages = [

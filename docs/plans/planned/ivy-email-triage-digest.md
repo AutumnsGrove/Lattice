@@ -6,7 +6,7 @@ Multiple email inboxes across accounts/apps create an overwhelming, stress-induc
 
 **Build on Ivy** (`Projects/Ivy`), which is ~70% complete with full inbox UI, webhook handling, D1/R2 storage, and auth stubs. Wire it up with existing Grove infra — **Lumen** for AI classification, **Zephyr** for digest delivery, **Loom** for DO-coordinated processing — using the real engine package, not local reimplementations.
 
-**Forward-thinking principle:** Use what already exists. The engine exports `@autumnsgrove/groveengine/lumen` and `@autumnsgrove/groveengine/zephyr` — import them directly. Use the Loom DO pattern for email processing so it scales from 5 emails to 200+ without hitting Worker CPU limits. Build it right for one user (MVP), but structure it so others can use it later.
+**Forward-thinking principle:** Use what already exists. The engine exports `@autumnsgrove/lattice/lumen` and `@autumnsgrove/lattice/zephyr` — import them directly. Use the Loom DO pattern for email processing so it scales from 5 emails to 200+ without hitting Worker CPU limits. Build it right for one user (MVP), but structure it so others can use it later.
 
 ## Architecture Overview
 
@@ -48,7 +48,7 @@ Gmail/ProtonMail/etc → Forward to triage@grove.place
 - **Digest at 8am / 1pm / 6pm** — configurable times, stored in settings
 - **Auth: just me** — Heartwood check, if my email → real inbox, else → demo
 - **Loom DO for processing** — scales to 100+ emails without Worker CPU limits, alarm-based digest scheduling
-- **Engine dependency** — use real `@autumnsgrove/groveengine/lumen` and `/zephyr`, not local clients
+- **Engine dependency** — use real `@autumnsgrove/lattice/lumen` and `/zephyr`, not local clients
 
 ---
 
@@ -56,9 +56,9 @@ Gmail/ProtonMail/etc → Forward to triage@grove.place
 
 **This must happen FIRST.** Ivy is standalone with no engine dependency. A lot has changed in the engine since Ivy was built. We need to bring Ivy up to speed before any integration work.
 
-### 0a. Add `@autumnsgrove/groveengine` to Ivy's `package.json`
+### 0a. Add `@autumnsgrove/lattice` to Ivy's `package.json`
 
-- Add `"@autumnsgrove/groveengine": "^0.9.99"` to dependencies
+- Add `"@autumnsgrove/lattice": "^0.9.99"` to dependencies
 - This gives Ivy access to Lumen, Zephyr, shared types, UI components, chrome — everything
 - **File:** `Ivy/package.json`
 
@@ -79,8 +79,8 @@ Gmail/ProtonMail/etc → Forward to triage@grove.place
 
 ### 0d. Verify Lumen and Zephyr imports work
 
-- Test: `import { createLumenClient } from '@autumnsgrove/groveengine/lumen'`
-- Test: `import { ZephyrClient } from '@autumnsgrove/groveengine/zephyr'`
+- Test: `import { createLumenClient } from '@autumnsgrove/lattice/lumen'`
+- Test: `import { ZephyrClient } from '@autumnsgrove/lattice/zephyr'`
 - Fix any import resolution issues
 
 ### 0e. Migrate Ivy UI to use engine components where possible

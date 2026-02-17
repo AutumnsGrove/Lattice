@@ -46,7 +46,7 @@ def reinstall(ctx: click.Context) -> None:
 
     if not tools_root.exists():
         error(f"Could not find tools directory")
-        info("Please run this command from within the GroveEngine repository")
+        info("Please run this command from within the Lattice repository")
         ctx.exit(1)
 
     # If we didn't find via git search, we're likely running from installed location
@@ -56,7 +56,7 @@ def reinstall(ctx: click.Context) -> None:
         if not (gw_path.exists() and (gw_path / "pyproject.toml").exists()):
             error(f"Not running from a valid source directory")
             info(f"Current directory: {cwd}")
-            info(f"Please run this command from within the GroveEngine repository")
+            info(f"Please run this command from within the Lattice repository")
             ctx.exit(1)
 
     gw_path = tools_root / "gw"

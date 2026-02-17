@@ -195,7 +195,7 @@ gw gh run cancel --write 12345678          # Cancel a run
 
 ```bash
 # GET requests (always safe)
-gw gh api repos/AutumnsGrove/GroveEngine
+gw gh api repos/AutumnsGrove/Lattice
 
 # POST/PATCH (needs --write)
 gw gh api --write repos/{owner}/{repo}/labels -X POST -f name="bug"

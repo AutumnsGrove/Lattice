@@ -23,12 +23,12 @@
  * @returns The correct origin URL (e.g., "https://autumn.grove.place")
  */
 export function getRealOrigin(request: Request, url: URL): string {
-	const forwardedHost = request.headers.get("x-forwarded-host");
-	if (forwardedHost) {
-		// Always use HTTPS in production (grove-router only handles HTTPS)
-		// Only use HTTP for localhost development
-		const protocol = url.hostname === "localhost" ? "http:" : "https:";
-		return `${protocol}//${forwardedHost}`;
-	}
-	return url.origin;
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  if (forwardedHost) {
+    // Always use HTTPS in production (grove-router only handles HTTPS)
+    // Only use HTTP for localhost development
+    const protocol = url.hostname === "localhost" ? "http:" : "https:";
+    return `${protocol}//${forwardedHost}`;
+  }
+  return url.origin;
 }

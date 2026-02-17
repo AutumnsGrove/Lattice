@@ -5,7 +5,7 @@
 	 * The main hero banner showing the current overall platform status.
 	 * Uses glassmorphism with status-appropriate coloring.
 	 */
-	import { cn } from '@autumnsgrove/groveengine/ui/utils';
+	import { cn } from '@autumnsgrove/lattice/ui/utils';
 	import { formatRelativeTime } from '$lib/utils/date';
 	import type { OverallStatus } from '$lib/types/status';
 	import {

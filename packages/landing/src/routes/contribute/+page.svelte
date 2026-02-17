@@ -1,9 +1,9 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
-	import { GlassCard } from '@autumnsgrove/groveengine/ui';
-	import { MobileTOC } from '@autumnsgrove/groveengine';
-	import { GroveTerm } from '@autumnsgrove/groveengine/ui';
+	import { GlassCard } from '@autumnsgrove/lattice/ui';
+	import { MobileTOC } from '@autumnsgrove/lattice';
+	import { GroveTerm } from '@autumnsgrove/lattice/ui';
 	import SEO from '$lib/components/SEO.svelte';
 
 	let { data } = $props();
@@ -86,7 +86,7 @@
 								what you expected, and how to reproduce it.
 							</p>
 							<a
-								href="https://github.com/AutumnsGrove/GroveEngine/issues/new?template=bug_report.md"
+								href="https://github.com/AutumnsGrove/Lattice/issues/new?template=bug_report.md"
 								target="_blank"
 								rel="noopener noreferrer"
 								class="inline-flex items-center gap-2 mt-3 text-accent-muted hover:text-accent-foreground transition-colors font-sans text-sm"
@@ -105,7 +105,7 @@
 								it solves and who would benefit.
 							</p>
 							<a
-								href="https://github.com/AutumnsGrove/GroveEngine/issues/new?template=feature_request.md"
+								href="https://github.com/AutumnsGrove/Lattice/issues/new?template=feature_request.md"
 								target="_blank"
 								rel="noopener noreferrer"
 								class="inline-flex items-center gap-2 mt-3 text-accent-muted hover:text-accent-foreground transition-colors font-sans text-sm"
@@ -146,7 +146,7 @@
 								<strong class="text-accent-muted">"good first issue"</strong> for beginner-friendly tasks.
 							</p>
 							<a
-								href="https://github.com/AutumnsGrove/GroveEngine/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+								href="https://github.com/AutumnsGrove/Lattice/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
 								target="_blank"
 								rel="noopener noreferrer"
 								class="inline-flex items-center gap-2 mt-3 text-accent-muted hover:text-accent-foreground transition-colors font-sans text-sm"
@@ -219,7 +219,7 @@
 
 					<div class="grid gap-4">
 						<a
-							href="https://github.com/AutumnsGrove/GroveEngine/issues"
+							href="https://github.com/AutumnsGrove/Lattice/issues"
 							target="_blank"
 							rel="noopener noreferrer"
 							class="group flex items-center gap-4 p-4 bg-background border border-default hover:border-accent/50 rounded-xl transition-all"
@@ -235,7 +235,7 @@
 						</a>
 
 						<a
-							href="https://github.com/AutumnsGrove/GroveEngine"
+							href="https://github.com/AutumnsGrove/Lattice"
 							target="_blank"
 							rel="noopener noreferrer"
 							class="group flex items-center gap-4 p-4 bg-background border border-default hover:border-accent/50 rounded-xl transition-all"
@@ -251,7 +251,7 @@
 						</a>
 
 						<a
-							href="https://github.com/AutumnsGrove/GroveEngine/blob/main/CONTRIBUTING.md"
+							href="https://github.com/AutumnsGrove/Lattice/blob/main/CONTRIBUTING.md"
 							target="_blank"
 							rel="noopener noreferrer"
 							class="group flex items-center gap-4 p-4 bg-background border border-default hover:border-accent/50 rounded-xl transition-all"

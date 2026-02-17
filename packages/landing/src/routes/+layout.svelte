@@ -2,9 +2,9 @@
 	import '../app.css';
 	// Import theme store from engine to initialize it on page load
 	// The store is self-managing via $effect.root() - just importing it triggers initialization
-	import { themeStore } from '@autumnsgrove/groveengine/ui/stores';
+	import { themeStore } from '@autumnsgrove/lattice/ui/stores';
 	import { navigating } from '$app/stores';
-	import { PassageTransition } from '@autumnsgrove/groveengine/ui';
+	import { PassageTransition } from '@autumnsgrove/lattice/ui';
 
 	let { children } = $props();
 

@@ -1,6 +1,6 @@
 ---
 published: false
-lastUpdated: '2026-01-25'
+lastUpdated: "2026-01-25"
 ---
 
 # Grove Ecosystem Naming History Research
@@ -33,17 +33,19 @@ This document establishes the philosophical foundation for naming in the Grove e
 ### Core Infrastructure
 
 #### **Lattice**
-- **Original Name:** GroveEngine (internal), engine-spec.md
+
+- **Original Name:** Lattice (internal), engine-spec.md
 - **Renamed:** January 1, 2026 (commit `95a834b`)
-- **Internal Name:** GroveEngine (still used for repository, infrastructure)
+- **Internal Name:** Lattice (still used for repository, infrastructure)
 - **Public Name:** Lattice
-- **NPM Package:** `@autumnsgrove/groveengine`
+- **NPM Package:** `@autumnsgrove/lattice`
 - **Philosophy:** A lattice is the framework that supports growth—vines climb it, gardens are built around it
 - **First Spec:** December 30, 2025 (as engine-spec.md)
 
 ### Platform Services
 
 #### **Heartwood**
+
 - **Original Name:** GroveAuth (repository name remains)
 - **Repository:** [AutumnsGrove/GroveAuth](https://github.com/AutumnsGrove/GroveAuth)
 - **First Mentioned:** December 30, 2025 in grove-naming.md
@@ -51,6 +53,7 @@ This document establishes the philosophical foundation for naming in the Grove e
 - **Philosophy:** The densest, most durable part at the center of a tree—the authentic core
 
 #### **Arbor**
+
 - **Original Name:** admin-panel-spec.md
 - **Renamed:** January 1, 2026 (commit `68ddf93`)
 - **Sub-rename:** Gutter → Vines on January 5, 2026 (commit `5e47c6c`)
@@ -59,6 +62,7 @@ This document establishes the philosophical foundation for naming in the Grove e
 - **Note:** The gutter widgets were renamed to "Vines" to align with the Lattice metaphor (vines climb the lattice)
 
 #### **Plant**
+
 - **Original Name:** tenant-onboarding-spec.md, Seedbed
 - **Renamed:** January 1, 2026 (commit `95a834b`)
 - **Established:** Public name "Plant", internal name "Seedbed" (commit `50fb381`)
@@ -66,12 +70,14 @@ This document establishes the philosophical foundation for naming in the Grove e
 - **First Spec:** December 30, 2025
 
 #### **Amber**
+
 - **Repository:** [AutumnsGrove/Amber](https://github.com/AutumnsGrove/Amber)
 - **First Mentioned:** December 30, 2025 in grove-naming.md
 - **No rename:** Created with Amber name
 - **Philosophy:** Fossilized tree resin that preserves moments in time
 
 #### **Pantry**
+
 - **First Spec:** December 31, 2025 (commit `d907316`)
 - **Workshop Added:** December 31, 2025 (commit `09e5b97`)
 - **Subdomain Claimed:** December 31, 2025 (commit `3f99596`)
@@ -79,6 +85,7 @@ This document establishes the philosophical foundation for naming in the Grove e
 - **Philosophy:** Where you keep what sustains you—a cupboard in a warm kitchen
 
 #### **Foliage**
+
 - **Repository:** [AutumnsGrove/Foliage](https://github.com/AutumnsGrove/Foliage)
 - **Spec Synced:** December 31, 2025 (commit `a8d3f99`)
 - **No previous name:** Created as Foliage
@@ -86,6 +93,7 @@ This document establishes the philosophical foundation for naming in the Grove e
 - **Philosophy:** What you see when you look at a tree—the leaves, color, personality
 
 #### **Terrarium**
+
 - **First Spec:** December 31, 2025 (commit `67ed06d`)
 - **Workshop Added:** December 30, 2025 (commit `ae42cd0`)
 - **MVP Implemented:** December 31, 2025 (commit `6506e7c`)
@@ -93,12 +101,14 @@ This document establishes the philosophical foundation for naming in the Grove e
 - **Philosophy:** A sealed world under glass—a miniature ecosystem you design and arrange
 
 #### **Rings**
+
 - **Original Name:** analytics-spec.md
 - **Renamed:** January 1, 2026 (commit `95a834b`)
 - **First Spec:** December 30, 2025
 - **Philosophy:** Count the rings to learn a tree's story—private insights about growth
 
 #### **Clearing**
+
 - **Original Name:** status-page-spec.md
 - **Renamed:** January 1, 2026 (commit `95a834b`)
 - **Frontend Added:** December 31, 2025 (commit `aa793b0`)
@@ -106,12 +116,14 @@ This document establishes the philosophical foundation for naming in the Grove e
 - **Philosophy:** An open space where visibility opens up—transparent platform health
 
 #### **Waystone**
+
 - **Original Name:** help-center-spec.md
 - **Renamed:** January 1, 2026 (commit `68ddf93`)
 - **First Spec:** December 30, 2025
 - **Philosophy:** Trail markers travelers leave along forest paths
 
 #### **Porch**
+
 - **Original Name:** Echo
 - **Renamed:** January 6, 2026 (commit `bdcdf25`)
 - **Echo Created:** December 31, 2025 (commit `849075a`)
@@ -122,6 +134,7 @@ This document establishes the philosophical foundation for naming in the Grove e
 ### Content & Community
 
 #### **Wisp**
+
 - **Original Name:** ai-writing-assistant-spec.md
 - **Renamed:** January 1, 2026 (commit `95a834b`)
 - **Fireside Mode Added:** December 31, 2025 (commit `537f64c`)
@@ -130,12 +143,14 @@ This document establishes the philosophical foundation for naming in the Grove e
 - **Sub-feature:** Fireside (conversation mode for writers who freeze at blank page)
 
 #### **Reeds**
+
 - **Original Name:** comments-spec.md
 - **Renamed:** January 1, 2026 (commit `68ddf93`)
 - **First Spec:** December 30, 2025
 - **Philosophy:** Reeds swaying together at the water's edge—gentle murmur of community
 
 #### **Thorn**
+
 - **Original Name:** CONTENT-MODERATION.md
 - **Renamed:** January 1, 2026 (commit `68ddf93`)
 - **Songbird Integration:** January 1, 2026 (commit `1141436`)
@@ -143,6 +158,7 @@ This document establishes the philosophical foundation for naming in the Grove e
 - **Philosophy:** Content moderation system integrated with Songbird prompt injection protection
 
 #### **Meadow**
+
 - **Original Name:** social-spec.md
 - **Renamed:** January 1, 2026 (commit `95a834b`)
 - **Landing Page Added:** January 2, 2026 (commit `7e58368`)
@@ -150,6 +166,7 @@ This document establishes the philosophical foundation for naming in the Grove e
 - **Philosophy:** Where the forest opens up—social media that remembers what "social" means
 
 #### **Trails**
+
 - **First Spec:** December 30, 2025 (commit `7defa51`)
 - **No previous name:** Created as Trails
 - **Philosophy:** Personal roadmaps—the path you're walking through the forest
@@ -157,30 +174,35 @@ This document establishes the philosophical foundation for naming in the Grove e
 ### Standalone Tools
 
 #### **Ivy**
+
 - **Repository:** [AutumnsGrove/Ivy](https://github.com/AutumnsGrove/Ivy)
 - **First Mentioned:** December 30, 2025 in grove-naming.md
 - **No previous name:** Created as Ivy
 - **Philosophy:** Climbs the lattice—living connection that grows along the framework
 
 #### **Bloom**
+
 - **Repository:** [AutumnsGrove/GroveBloom](https://github.com/AutumnsGrove/GroveBloom)
 - **First Spec:** December 30, 2025 (commit `7defa51`)
 - **No previous name:** Created as Bloom
 - **Philosophy:** Brief, brilliant moment when a flower opens—ephemeral serverless infrastructure
 
 #### **Forage**
+
 - **Repository:** [AutumnsGrove/Forage](https://github.com/AutumnsGrove/Forage)
 - **First Mentioned:** December 30, 2025 in grove-naming.md
 - **No previous name:** Created as Forage
 - **Philosophy:** Searching the forest floor for what you need—domain discovery
 
 #### **Nook**
+
 - **Repository:** [AutumnsGrove/Nook](https://github.com/AutumnsGrove/Nook)
 - **First Mentioned:** December 30, 2025 in grove-naming.md
 - **No previous name:** Created as Nook
 - **Philosophy:** A tucked-away corner—intimate, private video sharing
 
 #### **Outpost**
+
 - **Repository:** [AutumnsGrove/GroveMC](https://github.com/AutumnsGrove/GroveMC)
 - **First Mentioned:** December 30, 2025 in grove-naming.md
 - **No previous name:** Created as Outpost
@@ -189,6 +211,7 @@ This document establishes the philosophical foundation for naming in the Grove e
 ### Operations
 
 #### **Vista**
+
 - **Original Name:** GroveMonitor (internal)
 - **Repository:** [AutumnsGrove/GroveMonitor](https://github.com/AutumnsGrove/GroveMonitor)
 - **First Spec:** December 31, 2025 (commit `c81e6d2`)
@@ -196,6 +219,7 @@ This document establishes the philosophical foundation for naming in the Grove e
 - **Philosophy:** A clearing where the canopy opens—infrastructure observability
 
 #### **Patina**
+
 - **Original Name:** Cache
 - **Repository:** [AutumnsGrove/Patina](https://github.com/AutumnsGrove/Patina)
 - **Cache Spec Added:** December 31, 2025 (commit `41d32fb` from GroveBackups repo)
@@ -204,6 +228,7 @@ This document establishes the philosophical foundation for naming in the Grove e
 - **Note:** Repository was originally GroveBackups, spec was cache-spec.md
 
 #### **Mycelium**
+
 - **Repository:** [AutumnsGrove/GroveMCP](https://github.com/AutumnsGrove/GroveMCP)
 - **First Mentioned:** December 30, 2025 in grove-naming.md
 - **No previous name:** Created as Mycelium
@@ -211,11 +236,13 @@ This document establishes the philosophical foundation for naming in the Grove e
 - **Status:** In development
 
 #### **Shade**
+
 - **First Spec:** December 30, 2025 (commit `7defa51`)
 - **No previous name:** Created as Shade
 - **Philosophy:** Cool relief beneath the canopy—protection from AI crawlers and scrapers
 
 #### **CDN Uploader**
+
 - **Status:** Not renamed to Grove name yet
 - **Note:** Appears in Workshop categorization (commit `1a9ed22`)
 - **Functional name still in use**
@@ -223,6 +250,7 @@ This document establishes the philosophical foundation for naming in the Grove e
 ### Architecture Patterns
 
 #### **Prism**
+
 - **Original Name:** Glass
 - **Created as Glass:** January 2, 2026 (commit `fe6b5f7`)
 - **Renamed to Prism:** January 2, 2026 (commit `d3ec579`)
@@ -231,18 +259,21 @@ This document establishes the philosophical foundation for naming in the Grove e
 - **File:** `docs/patterns/prism-pattern.md`
 
 #### **Loom**
+
 - **Original Name:** Durable Objects pattern, grove-durable-objects-architecture.md
 - **Renamed:** January 1, 2026 (commit `80b09c0`)
 - **File:** `docs/patterns/loom-durable-objects-pattern.md`
 - **Philosophy:** Durable Objects architecture for auth, coordination, and real-time features
 
 #### **Threshold**
+
 - **First Added:** January 2, 2026 (commit `9223b54`)
 - **No previous name:** Created as Threshold
 - **Philosophy:** Authentication/authorization pattern
 - **Integration Plan:** Created January 2, 2026 (commit `d754d76`)
 
 #### **Songbird**
+
 - **First Added:** December 31, 2025 (commit `462bd5a`)
 - **Moved to patterns:** January 1, 2026 (commit `cf513cd`)
 - **No previous name:** Created as Songbird
@@ -250,18 +281,21 @@ This document establishes the philosophical foundation for naming in the Grove e
 - **File:** `docs/patterns/songbird-pattern.md`
 
 #### **Sentinel**
+
 - **First Added:** January 2, 2026 (commit `9223b54`)
 - **No previous name:** Created as Sentinel
 - **Added to knowledge base:** January 2, 2026 (commit `30479e3`)
 - **Philosophy:** Security and monitoring pattern
 
 #### **Firefly**
+
 - **First Added:** January 1, 2026 (commit `14f66ea`)
 - **No previous name:** Created as Firefly
 - **Added to knowledge base:** January 2, 2026 (commit `30479e3`)
 - **Philosophy:** Ephemeral server pattern—brief lights that appear and disappear
 
 #### **Vineyard**
+
 - **First Spec:** December 30, 2025 (commit `7defa51`)
 - **Showcase Site:** December 31, 2025 (commit `1f45133`)
 - **No previous name:** Created as Vineyard
@@ -273,6 +307,7 @@ This document establishes the philosophical foundation for naming in the Grove e
 ## Timeline of Major Naming Events
 
 ### December 30, 2025
+
 - **grove-naming.md created** with initial philosophy (commit `7defa51`)
 - Initial batch of specs added with functional names:
   - admin-panel-spec.md (→ Arbor)
@@ -287,6 +322,7 @@ This document establishes the philosophical foundation for naming in the Grove e
   - engine-spec.md (→ Lattice)
 
 ### December 31, 2025
+
 - Fireside mode added to Wisp spec
 - Cache spec added (→ Patina)
 - Vista spec added
@@ -297,6 +333,7 @@ This document establishes the philosophical foundation for naming in the Grove e
 - Clearing frontend added
 
 ### January 1, 2026
+
 - **Major standardization:** 10 spec files renamed to Grove names (commit `95a834b`)
   - engine-spec.md → lattice-spec.md
   - theme-system-spec.md → canopy-spec.md
@@ -318,15 +355,18 @@ This document establishes the philosophical foundation for naming in the Grove e
 - Plant established as public name, Seedbed as internal
 
 ### January 2, 2026
+
 - **Glass pattern created and renamed to Prism** same day (commits `fe6b5f7`, `d3ec579`)
 - Sentinel and Firefly patterns added to knowledge base
 - Threshold pattern added
 - Meadow landing page added
 
 ### January 5, 2026
+
 - **Gutter renamed to Vines** in Arbor admin panel (commit `5e47c6c`)
 
 ### January 6, 2026
+
 - **Echo renamed to Porch** (commit `bdcdf25`)
 - **walking-through-the-grove skill added** to help with future naming decisions
 
@@ -360,12 +400,14 @@ These services were created with Grove-themed names from the start:
 ## Removed/Deprecated Services
 
 ### **Canopy**
+
 - **Created:** January 1, 2026 as theme-system-spec.md → canopy-spec.md
 - **Removed:** January 1, 2026 (commit `31444c4`)
 - **Reason:** Redundant with Foliage
 - **Lifespan:** Less than one day
 
 ### **Seasons**
+
 - **Created:** January 1, 2026 as versioning-spec.md → seasons-spec.md
 - **Status:** Appears to have been a versioning system
 - **Current Status:** Unknown if still active
@@ -374,26 +416,28 @@ These services were created with Grove-themed names from the start:
 
 ## Internal vs Public Names
 
-| Public Name | Internal/Repo Name | Note |
-|-------------|-------------------|------|
-| Lattice | GroveEngine | Internal name remains for repository |
-| Heartwood | GroveAuth | Repository name |
-| Vista | GroveMonitor | Repository name |
-| Patina | GrovePatina | Repository name |
-| Plant | Seedbed | Internal name |
-| Vines | Gutter | Old internal name |
+| Public Name | Internal/Repo Name | Note                                 |
+| ----------- | ------------------ | ------------------------------------ |
+| Lattice     | Lattice            | Internal name remains for repository |
+| Heartwood   | GroveAuth          | Repository name                      |
+| Vista       | GroveMonitor       | Repository name                      |
+| Patina      | GrovePatina        | Repository name                      |
+| Plant       | Seedbed            | Internal name                        |
+| Vines       | Gutter             | Old internal name                    |
 
 ---
 
 ## Special Features and Sub-Names
 
 ### **Vines** (feature of Lattice/Arbor)
+
 - **Original Name:** Gutter
 - **Renamed:** January 5, 2026 (commit `5e47c6c`)
 - **Philosophy:** Like vines climbing a trellis, they grow alongside posts in the sidebar margins
 - **Part of:** Arbor admin panel and Lattice framework
 
 ### **Fireside** (mode of Wisp)
+
 - **Added:** December 31, 2025 (commit `537f64c`)
 - **Not a separate service:** A conversation mode within Wisp
 - **Philosophy:** Creates space where stories emerge for writers who can't start writing
@@ -403,6 +447,7 @@ These services were created with Grove-themed names from the start:
 ## Repository Name Patterns
 
 Most Grove services follow the naming convention:
+
 - **Public Name:** Nature-themed (Forage, Bloom, Nook, etc.)
 - **Repository:** Grove[PublicName] or Treasure[Name]
 - **Examples:**
@@ -447,5 +492,5 @@ The **walking-through-the-grove** skill was added with the Porch rename to help 
 
 ---
 
-*Research compiled from git history of the GroveEngine repository*
-*Last updated: January 6, 2026*
+_Research compiled from git history of the Lattice repository_
+_Last updated: January 6, 2026_

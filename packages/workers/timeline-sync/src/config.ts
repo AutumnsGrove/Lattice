@@ -195,6 +195,6 @@ export interface ParsedAIResponse {
 // Constants
 // =============================================================================
 
-export const USER_AGENT = "GroveEngine-Timeline-Sync";
+export const USER_AGENT = "Lattice-Timeline-Sync";
 export const DEFAULT_OPENROUTER_MODEL = "anthropic/claude-3.5-haiku";
 export const DEFAULT_VOICE = "professional";

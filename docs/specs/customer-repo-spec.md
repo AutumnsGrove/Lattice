@@ -4,7 +4,7 @@ description: Template structure for customer blog repositories
 category: specs
 specCategory: reference
 icon: filecode
-lastUpdated: '2025-11-26'
+lastUpdated: "2025-11-26"
 aliases: []
 tags:
   - templates
@@ -28,7 +28,7 @@ tags:
       \____/
 ```
 
-> *Your own plot in the grove*
+> _Your own plot in the grove_
 
 ---
 
@@ -43,7 +43,7 @@ Template structure for individual customer blog repositories, each with dedicate
 
 ## Overview
 
-Each customer has their own repository that imports `@groveengine/core` as a dependency. This single-tenant model provides:
+Each customer has their own repository that imports `@lattice/core` as a dependency. This single-tenant model provides:
 
 - **Isolation:** Each customer has dedicated Cloudflare resources
 - **Customization:** Full control over routes, styling, and configuration
@@ -179,9 +179,9 @@ customer-blog/
 
 ```typescript
 // src/routes/+layout.server.ts
-import { getSiteConfig } from '@groveengine/core/server';
-import siteJson from '../../config/site.json';
-import type { LayoutServerLoad } from './$types';
+import { getSiteConfig } from "@lattice/core/server";
+import siteJson from "../../config/site.json";
+import type { LayoutServerLoad } from "./$types";
 
 export const load: LayoutServerLoad = async ({ platform, locals }) => {
   // Merge static config with dynamic config from D1
@@ -190,9 +190,9 @@ export const load: LayoutServerLoad = async ({ platform, locals }) => {
   return {
     siteConfig: {
       ...siteJson,
-      ...dynamicConfig
+      ...dynamicConfig,
     },
-    user: locals.user
+    user: locals.user,
   };
 };
 ```
@@ -223,7 +223,7 @@ export const load: LayoutServerLoad = async ({ platform, locals }) => {
     "deploy": "wrangler pages deploy"
   },
   "dependencies": {
-    "@groveengine/core": "^0.1.0"
+    "@lattice/core": "^0.1.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20241127.0",
@@ -249,8 +249,8 @@ export const load: LayoutServerLoad = async ({ platform, locals }) => {
 ### svelte.config.js
 
 ```javascript
-import adapter from '@sveltejs/adapter-cloudflare';
-import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
+import adapter from "@sveltejs/adapter-cloudflare";
+import { vitePreprocess } from "@sveltejs/vite-plugin-svelte";
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
@@ -258,14 +258,14 @@ const config = {
   kit: {
     adapter: adapter({
       routes: {
-        include: ['/*'],
-        exclude: ['<all>']
-      }
+        include: ["/*"],
+        exclude: ["<all>"],
+      },
     }),
     alias: {
-      $config: './config'
-    }
-  }
+      $config: "./config",
+    },
+  },
 };
 
 export default config;
@@ -286,30 +286,30 @@ export default config;
     {
       "binding": "DB",
       "database_name": "grove-blog-myblog",
-      "database_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-    }
+      "database_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    },
   ],
 
   // KV Namespace for sessions and cache
   "kv_namespaces": [
     {
       "binding": "KV",
-      "id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-    }
+      "id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    },
   ],
 
   // R2 Bucket for media storage
   "r2_buckets": [
     {
       "binding": "STORAGE",
-      "bucket_name": "grove-assets-myblog"
-    }
+      "bucket_name": "grove-assets-myblog",
+    },
   ],
 
   // Environment variables
   "vars": {
-    "PUBLIC_SITE_URL": "https://myblog.grove.place"
-  }
+    "PUBLIC_SITE_URL": "https://myblog.grove.place",
+  },
 
   // Secrets (set via CLI):
   // wrangler secret put RESEND_API_KEY
@@ -321,7 +321,7 @@ export default config;
 ```typescript
 /// <reference types="@cloudflare/workers-types" />
 
-import type { User, Session } from '@groveengine/core';
+import type { User, Session } from "@lattice/core";
 
 declare global {
   namespace App {
@@ -342,7 +342,7 @@ declare global {
     }
 
     interface PageData {
-      siteConfig: import('$config/site.json');
+      siteConfig: import("$config/site.json");
       user: User | null;
     }
 
@@ -356,19 +356,19 @@ export {};
 ### src/hooks.server.ts
 
 ```typescript
-import { validateSession } from '@groveengine/core/server';
-import type { Handle } from '@sveltejs/kit';
+import { validateSession } from "@lattice/core/server";
+import type { Handle } from "@sveltejs/kit";
 
 export const handle: Handle = async ({ event, resolve }) => {
   // Get session from cookie
-  const sessionId = event.cookies.get('session');
+  const sessionId = event.cookies.get("session");
 
   if (sessionId && event.platform?.env) {
     // Validate session and get user
     const { user, session } = await validateSession(
       sessionId,
       event.platform.env.KV,
-      event.platform.env.DB
+      event.platform.env.DB,
     );
 
     event.locals.user = user;
@@ -390,8 +390,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 ```svelte
 <script lang="ts">
-  import { Header, Footer } from '@groveengine/core';
-  import { siteConfig } from '@groveengine/core/stores';
+  import { Header, Footer } from '@lattice/core';
+  import { siteConfig } from '@lattice/core/stores';
   import '../app.css';
 
   let { data, children } = $props();
@@ -417,7 +417,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 ```svelte
 <script lang="ts">
-  import { PostList } from '@groveengine/core';
+  import { PostList } from '@lattice/core';
 
   let { data } = $props();
 </script>
@@ -456,24 +456,24 @@ export const handle: Handle = async ({ event, resolve }) => {
 ### src/routes/blog/+page.server.ts
 
 ```typescript
-import { getPosts } from '@groveengine/core/server';
-import type { PageServerLoad } from './$types';
+import { getPosts } from "@lattice/core/server";
+import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ platform, url }) => {
-  const page = Number(url.searchParams.get('page')) || 1;
+  const page = Number(url.searchParams.get("page")) || 1;
   const limit = 10;
 
   const { posts, total } = await getPosts(platform?.env.DB, {
-    status: 'published',
+    status: "published",
     page,
-    limit
+    limit,
   });
 
   return {
     posts,
     page,
     total,
-    totalPages: Math.ceil(total / limit)
+    totalPages: Math.ceil(total / limit),
   };
 };
 ```
@@ -482,7 +482,7 @@ export const load: PageServerLoad = async ({ platform, url }) => {
 
 ```svelte
 <script lang="ts">
-  import { PostView, TableOfContents, GutterLinks } from '@groveengine/core';
+  import { PostView, TableOfContents, GutterLinks } from '@lattice/core';
 
   let { data } = $props();
 </script>
@@ -521,7 +521,7 @@ export const load: PageServerLoad = async ({ platform, url }) => {
 
 ```svelte
 <script lang="ts">
-  import { AdminPanel } from '@groveengine/core';
+  import { AdminPanel } from '@lattice/core';
 
   let { data } = $props();
 </script>
@@ -539,20 +539,20 @@ export const load: PageServerLoad = async ({ platform, url }) => {
 ### src/routes/admin/+layout.server.ts
 
 ```typescript
-import { redirect } from '@sveltejs/kit';
-import type { LayoutServerLoad } from './$types';
+import { redirect } from "@sveltejs/kit";
+import type { LayoutServerLoad } from "./$types";
 
 export const load: LayoutServerLoad = async ({ locals }) => {
   if (!locals.user) {
-    throw redirect(302, '/login?redirect=/admin');
+    throw redirect(302, "/login?redirect=/admin");
   }
 
-  if (locals.user.role !== 'admin' && locals.user.role !== 'editor') {
-    throw redirect(302, '/');
+  if (locals.user.role !== "admin" && locals.user.role !== "editor") {
+    throw redirect(302, "/");
   }
 
   return {
-    user: locals.user
+    user: locals.user,
   };
 };
 ```
@@ -564,18 +564,18 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 ### src/app.css
 
 ```css
-@import 'tailwindcss/base';
-@import 'tailwindcss/components';
-@import 'tailwindcss/utilities';
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
 
 /* Import engine base styles */
-@import '@groveengine/core/styles.css';
+@import "@lattice/core/styles.css";
 
 /* Custom site overrides */
 :root {
-  --color-primary: theme('colors.indigo.600');
-  --color-secondary: theme('colors.emerald.500');
-  --color-accent: theme('colors.amber.500');
+  --color-primary: theme("colors.indigo.600");
+  --color-secondary: theme("colors.emerald.500");
+  --color-accent: theme("colors.amber.500");
 }
 
 /* Custom component styles */
@@ -592,31 +592,31 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 ### tailwind.config.js
 
 ```javascript
-import typography from '@tailwindcss/typography';
+import typography from "@tailwindcss/typography";
 
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
-    './src/**/*.{html,js,svelte,ts}',
-    './node_modules/@groveengine/core/**/*.{html,js,svelte,ts}'
+    "./src/**/*.{html,js,svelte,ts}",
+    "./node_modules/@lattice/core/**/*.{html,js,svelte,ts}",
   ],
   theme: {
     extend: {
       colors: {
         primary: {
-          DEFAULT: 'var(--color-primary)',
+          DEFAULT: "var(--color-primary)",
           // Add shades if needed
         },
         secondary: {
-          DEFAULT: 'var(--color-secondary)'
+          DEFAULT: "var(--color-secondary)",
         },
         accent: {
-          DEFAULT: 'var(--color-accent)'
-        }
-      }
-    }
+          DEFAULT: "var(--color-accent)",
+        },
+      },
+    },
   },
-  plugins: [typography]
+  plugins: [typography],
 };
 ```
 
@@ -651,8 +651,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -697,11 +697,12 @@ For `www.example.com`:
    - Or use Cloudflare as DNS provider
 
 3. Update `wrangler.jsonc`:
+
    ```jsonc
    {
      "vars": {
-       "PUBLIC_SITE_URL": "https://www.example.com"
-     }
+       "PUBLIC_SITE_URL": "https://www.example.com",
+     },
    }
    ```
 
@@ -722,7 +723,7 @@ Customer repos include migrations from the engine:
 
 ```bash
 # Copy migrations from engine (done during setup)
-cp node_modules/@groveengine/core/migrations/*.sql migrations/
+cp node_modules/@lattice/core/migrations/*.sql migrations/
 
 # Apply migrations locally
 pnpm db:migrate:local
@@ -746,25 +747,25 @@ migrations/
 
 ### What Customers Can Customize
 
-| Area | Customization Level |
-|------|---------------------|
-| Site config | Full control via `config/site.json` |
-| Colors/fonts | CSS variables in `app.css` |
-| Route structure | Can add/modify routes |
-| Components | Can override or wrap engine components |
-| Static assets | Full control over `static/` |
-| API routes | Can add custom endpoints |
+| Area            | Customization Level                    |
+| --------------- | -------------------------------------- |
+| Site config     | Full control via `config/site.json`    |
+| Colors/fonts    | CSS variables in `app.css`             |
+| Route structure | Can add/modify routes                  |
+| Components      | Can override or wrap engine components |
+| Static assets   | Full control over `static/`            |
+| API routes      | Can add custom endpoints               |
 
 ### What is Managed by Engine
 
-| Area | Engine Control |
-|------|----------------|
-| Core components | Updated via npm |
-| Database schema | Migrations from engine |
-| Authentication logic | Server utilities |
-| Admin panel UI | Engine components |
-| API handlers | Engine server code |
+| Area                 | Engine Control         |
+| -------------------- | ---------------------- |
+| Core components      | Updated via npm        |
+| Database schema      | Migrations from engine |
+| Authentication logic | Server utilities       |
+| Admin panel UI       | Engine components      |
+| API handlers         | Engine server code     |
 
 ---
 
-*Last Updated: November 2025*
+_Last Updated: November 2025_

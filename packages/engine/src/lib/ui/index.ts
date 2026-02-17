@@ -1,15 +1,15 @@
 // GroveUI - Main Entry Point
-// @groveengine/ui v0.2.0
+// @lattice/ui v0.2.0
 //
 // A calm, organic design system for the Grove platform.
 // "a place to Be"
 
 // Re-export all component categories
 
-// Core UI (from GroveEngine)
+// Core UI (from Lattice)
 export * from "./components/ui/index.js";
 export * from "./components/gallery/index.js";
-// Editor component is in GroveEngine (domain-specific)
+// Editor component is in Lattice (domain-specific)
 
 // New categories (from GroveScout)
 export * from "./components/indicators/index.js";

@@ -3,7 +3,7 @@
  * Backfill NPM Package Sizes from Registry
  *
  * For each version in history.csv, this script:
- * 1. Fetches the NPM registry metadata for @autumnsgrove/groveengine
+ * 1. Fetches the NPM registry metadata for @autumnsgrove/lattice
  * 2. Extracts the unpackedSize (bytes) for each version
  * 3. Adds/updates the npm_unpacked_size column in history.csv
  *
@@ -38,7 +38,7 @@ const CSV_PATHS = [
 	path.join(GROVE_ROOT, "packages/landing/static/data/history.csv"), // Local dev location
 ];
 
-const NPM_PACKAGE_NAME = "@autumnsgrove/groveengine";
+const NPM_PACKAGE_NAME = "@autumnsgrove/lattice";
 const NPM_REGISTRY_URL = `https://registry.npmjs.org/${NPM_PACKAGE_NAME}`;
 const NPM_CACHE_PATH = path.join(GROVE_ROOT, "scripts/journey/npm-metadata.json");
 
@@ -104,7 +104,7 @@ interface NPMPackageMetadata {
 
 function fetchNPMMetadata(): Promise<NPMPackageMetadata> {
 	// Try loading from local cache first (useful if network is unavailable)
-	// Cache can be created with: curl -s "https://registry.npmjs.org/@autumnsgrove/groveengine" > scripts/journey/npm-metadata.json
+	// Cache can be created with: curl -s "https://registry.npmjs.org/@autumnsgrove/lattice" > scripts/journey/npm-metadata.json
 	// Use --no-cache to force a fresh fetch
 	if (!NO_CACHE && fs.existsSync(NPM_CACHE_PATH)) {
 		console.log(`      Loading from cache: ${NPM_CACHE_PATH}`);

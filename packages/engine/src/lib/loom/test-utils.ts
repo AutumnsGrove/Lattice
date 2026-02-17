@@ -7,7 +7,7 @@
  *
  * @example
  * ```typescript
- * import { createMockDOState, createMockStorage } from '@autumnsgrove/groveengine/loom/testing';
+ * import { createMockDOState, createMockStorage } from '@autumnsgrove/lattice/loom/testing';
  *
  * const state = createMockDOState("test-id");
  * const env = { DB: createMockD1() };

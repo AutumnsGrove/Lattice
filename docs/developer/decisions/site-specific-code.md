@@ -2,19 +2,21 @@
 
 **Quick Reference for Claude Code & Developers**
 
-This document helps you identify code that belongs in individual site deployments, not in the reusable GroveEngine or GroveUI packages.
+This document helps you identify code that belongs in individual site deployments, not in the reusable Lattice or GroveUI packages.
 
 ---
 
 ## What IS Site-Specific Code?
 
 Site-specific code is anything that:
+
 - Only applies to ONE website/deployment
 - Contains business-specific content or branding
 - Includes environment-specific configuration
 - Implements custom features unique to one client
 
 **Examples of sites**:
+
 - `packages/example-site/` - The Midnight Bloom Tea Café demo
 - `landing/` - grove.place marketing site
 - Customer sites (client deployments)
@@ -26,6 +28,7 @@ Site-specific code is anything that:
 ### 1. Routes & Pages
 
 **Custom Pages**:
+
 - `/about` - About this specific business
 - `/contact` - Contact page with specific business info
 - `/` - Homepage with specific content
@@ -33,6 +36,7 @@ Site-specific code is anything that:
 - `/team` - Team page with specific people
 
 **Custom Route Logic**:
+
 ```svelte
 <!-- routes/about/+page.svelte -->
 <script>
@@ -49,19 +53,21 @@ Site-specific code is anything that:
 ### 2. Branding & Theming
 
 **Custom Branding**:
+
 - Business name, logo, tagline
 - Color overrides specific to this brand
 - Custom fonts not in Grove design system
 - Brand-specific imagery
 
 **Example**:
+
 ```typescript
 // lib/config.ts
 export const siteConfig = {
-  businessName: 'The Midnight Bloom Tea Café',
-  tagline: 'Where every sip tells a story',
-  brandColor: '#8B4513', // Custom brown, not Grove green
-  logo: '/images/midnight-bloom-logo.svg'
+  businessName: "The Midnight Bloom Tea Café",
+  tagline: "Where every sip tells a story",
+  brandColor: "#8B4513", // Custom brown, not Grove green
+  logo: "/images/midnight-bloom-logo.svg",
 };
 ```
 
@@ -70,6 +76,7 @@ export const siteConfig = {
 ### 3. Environment-Specific Configuration
 
 **Environment Variables**:
+
 ```env
 # .env.local
 PUBLIC_SITE_URL=https://themidnightbloom.com
@@ -80,6 +87,7 @@ EMAIL_FROM=hello@themidnightbloom.com
 ```
 
 **Config Files**:
+
 ```typescript
 // lib/env.ts
 export const env = {
@@ -94,6 +102,7 @@ export const env = {
 ### 4. Custom Integrations
 
 **Third-Party Services** (specific to this deployment):
+
 - Google Analytics ID for this site
 - Facebook Pixel for this business
 - Custom CRM integrations
@@ -101,11 +110,12 @@ export const env = {
 - Custom payment providers beyond Grove defaults
 
 **Example**:
+
 ```typescript
 // lib/analytics.ts
 export function initAnalytics() {
   // Google Analytics for THIS site only
-  gtag('config', 'GA-12345-SPECIFIC');
+  gtag("config", "GA-12345-SPECIFIC");
 }
 ```
 
@@ -114,6 +124,7 @@ export function initAnalytics() {
 ### 5. Custom Content & Copy
 
 **Static Content**:
+
 - Blog posts written for this site
 - Product descriptions specific to this business
 - Team member bios
@@ -121,12 +132,13 @@ export function initAnalytics() {
 - FAQ content
 
 **Example**:
+
 ```typescript
 // lib/content/faqs.ts
 export const faqs = [
   {
     question: "What are your café hours?",
-    answer: "We're open Monday-Friday 7am-9pm..."
+    answer: "We're open Monday-Friday 7am-9pm...",
   },
   // All content specific to The Midnight Bloom
 ];
@@ -137,6 +149,7 @@ export const faqs = [
 ### 6. Custom Features
 
 **Business-Specific Features**:
+
 - Reservation system for a restaurant
 - Appointment booking for a salon
 - Custom product configurator
@@ -144,6 +157,7 @@ export const faqs = [
 - Custom checkout flows
 
 **Example**:
+
 ```svelte
 <!-- routes/reservations/+page.svelte -->
 <script>
@@ -160,6 +174,7 @@ export const faqs = [
 ### 7. Site-Specific Assets
 
 **Custom Assets**:
+
 - Product images for this business
 - Hero images unique to this site
 - Staff photos
@@ -167,6 +182,7 @@ export const faqs = [
 - Videos produced for this business
 
 **File Structure**:
+
 ```
 static/
 ├── images/
@@ -184,6 +200,7 @@ static/
 ### 8. Custom Layouts (Site-Specific)
 
 **Unique Layouts**:
+
 ```svelte
 <!-- routes/+layout.svelte -->
 <script>
@@ -207,7 +224,8 @@ static/
 
 ## ❌ Does NOT Belong in Site-Specific
 
-### Generic Features → GroveEngine
+### Generic Features → Lattice
+
 - Markdown parsing
 - Authentication system
 - Payment processing (abstraction)
@@ -215,6 +233,7 @@ static/
 - Blog engine
 
 ### Generic UI → GroveUI
+
 - Button, Card, Input components
 - Design tokens
 - Tailwind presets
@@ -231,30 +250,33 @@ Is this code specific to ONE deployment?
 │  └─ NO: Is it a custom feature unique to this business?
 │     ├─ YES: ✅ Site-Specific Code
 │     └─ NO: Could other Grove sites use it?
-│        ├─ YES: ❌ Consider contributing to GroveEngine
+│        ├─ YES: ❌ Consider contributing to Lattice
 │        └─ NO: ✅ Site-Specific Code
 │
 └─ NO: Is it reusable across deployments?
    ├─ YES (UI): ❌ GroveUI
-   └─ YES (Features): ❌ GroveEngine
+   └─ YES (Features): ❌ Lattice
 ```
 
 ### Quick Tests
 
 **The "One Site" Test**:
 "Is this specific to ONE website?"
+
 - **YES** → Site-Specific
-- **NO** → GroveEngine or GroveUI
+- **NO** → Lattice or GroveUI
 
 **The "Content" Test**:
 "Does this contain business-specific content or copy?"
+
 - **YES** → Site-Specific
-- **NO** → Could be GroveEngine or GroveUI
+- **NO** → Could be Lattice or GroveUI
 
 **The "Environment" Test**:
 "Is this tied to one environment/deployment?"
+
 - **YES** → Site-Specific
-- **NO** → GroveEngine or GroveUI
+- **NO** → Lattice or GroveUI
 
 ---
 
@@ -264,8 +286,8 @@ Is this code specific to ONE deployment?
 
 ```typescript
 // ✅ Good - Import from packages
-import { Button, Card, Input } from '@groveengine/ui/ui';
-import { ContentWithGutter, MarkdownEditor } from '@autumnsgrove/groveengine';
+import { Button, Card, Input } from '@lattice/ui/ui';
+import { ContentWithGutter, MarkdownEditor } from '@autumnsgrove/lattice';
 
 // ✅ Good - Use in site-specific page
 export function AboutPage() {
@@ -287,8 +309,8 @@ export function AboutPage() {
 {
   "name": "my-customer-site",
   "dependencies": {
-    "@groveengine/ui": "^0.3.0",
-    "@autumnsgrove/groveengine": "^0.3.0",
+    "@lattice/ui": "^0.3.0",
+    "@autumnsgrove/lattice": "^0.3.0",
     "svelte": "^5.0.0"
   }
 }
@@ -301,10 +323,11 @@ export function AboutPage() {
 ### ✅ Belongs in Site-Specific
 
 **Example 1: About Page**
+
 ```svelte
 <!-- routes/about/+page.svelte -->
 <script>
-  import { Card } from '@groveengine/ui/ui';
+  import { Card } from '@lattice/ui/ui';
   import { siteConfig } from '$lib/config';
 </script>
 
@@ -315,30 +338,34 @@ export function AboutPage() {
   </p>
 </Card>
 ```
+
 **Why**: Content specific to this business.
 
 **Example 2: Site Configuration**
+
 ```typescript
 // lib/config.ts
 export const siteConfig = {
-  businessName: 'The Midnight Bloom Tea Café',
-  email: 'hello@midnightbloom.com',
-  phone: '(555) 123-4567',
-  address: '123 Tea Lane, Portland, OR',
+  businessName: "The Midnight Bloom Tea Café",
+  email: "hello@midnightbloom.com",
+  phone: "(555) 123-4567",
+  address: "123 Tea Lane, Portland, OR",
   socialMedia: {
-    instagram: '@midnightbloomcafe',
-    facebook: '/midnightbloom'
-  }
+    instagram: "@midnightbloomcafe",
+    facebook: "/midnightbloom",
+  },
 };
 ```
+
 **Why**: All information specific to this business.
 
 **Example 3: Custom Product Page**
+
 ```svelte
 <!-- routes/shop/[slug]/+page.svelte -->
 <script>
-  import { Button } from '@groveengine/ui/ui';
-  import { ProductDisplay } from '@autumnsgrove/groveengine';
+  import { Button } from '@lattice/ui/ui';
+  import { ProductDisplay } from '@autumnsgrove/lattice';
 
   export let data; // Product data for THIS site
 </script>
@@ -347,11 +374,13 @@ export const siteConfig = {
   <Button>Add to Cart</Button>
 </ProductDisplay>
 ```
+
 **Why**: Uses Grove packages, but implements custom product display for this site.
 
 ### ❌ Does NOT Belong in Site-Specific
 
 **Example 1: Generic Button**
+
 ```svelte
 <!-- This belongs in GroveUI -->
 <script>
@@ -359,16 +388,19 @@ export const siteConfig = {
   // Generic UI component
 </script>
 ```
+
 **Why**: Reusable across all projects.
 
 **Example 2: Markdown Parser**
+
 ```typescript
-// This belongs in GroveEngine
+// This belongs in Lattice
 export function parseMarkdown(content: string) {
   // Parse markdown with Mermaid support
   return processedHTML;
 }
 ```
+
 **Why**: Generic feature all Grove sites need.
 
 ---
@@ -377,7 +409,8 @@ export function parseMarkdown(content: string) {
 
 Sometimes site-specific code becomes generic enough to contribute back to Grove packages:
 
-### Contribute to GroveEngine if:
+### Contribute to Lattice if:
+
 - Feature could benefit other Grove-powered sites
 - It's domain-specific (content management, auth, payments)
 - Other customers would find it useful
@@ -385,6 +418,7 @@ Sometimes site-specific code becomes generic enough to contribute back to Grove 
 **Example**: Recipe management → Could be useful for all food/restaurant sites
 
 ### Contribute to GroveUI if:
+
 - It's a generic UI component with no business logic
 - Other projects (non-Grove) could use it
 - It fits the Grove design system
@@ -392,6 +426,7 @@ Sometimes site-specific code becomes generic enough to contribute back to Grove 
 **Example**: Star rating component → Generic UI, useful everywhere
 
 ### Keep Site-Specific if:
+
 - Truly unique to one business
 - Includes business-specific logic or content
 - Would require significant abstraction to generalize
@@ -420,8 +455,8 @@ my-customer-site/
 │       ├── +page.svelte           # Homepage
 │       ├── about/
 │       ├── contact/
-│       ├── blog/                  # Uses GroveEngine blog feature
-│       └── shop/                  # Uses GroveEngine shop feature
+│       ├── blog/                  # Uses Lattice blog feature
+│       └── shop/                  # Uses Lattice shop feature
 ├── static/                        # Site-specific assets
 │   ├── images/
 │   ├── fonts/                     # Custom fonts if any
@@ -440,7 +475,7 @@ my-customer-site/
 
 - **Form using GroveUI components** + **Business-specific contact info** → **Site-Specific**
 - Uses: `Input, Textarea, Button` from GroveUI
-- Uses: `ContactForm` logic from GroveEngine
+- Uses: `ContactForm` logic from Lattice
 - Adds: Specific business address, phone, email
 
 ### Scenario 2: "I'm styling the site"
@@ -455,7 +490,7 @@ my-customer-site/
 
 **Question**: Who else would use this?
 
-- **All Grove sites** would benefit → **Contribute to GroveEngine**
+- **All Grove sites** would benefit → **Contribute to Lattice**
 - **Just this business** needs it → **Site-Specific**
 - **Any project** could use it → **Consider GroveUI or external library**
 
@@ -473,12 +508,13 @@ When writing code for a site deployment, ask:
 
 If you answered **YES** to any → ✅ **Site-Specific Code**
 
-If all are **NO** → Consider contributing to GroveEngine or GroveUI
+If all are **NO** → Consider contributing to Lattice or GroveUI
 
 ---
 
 **Last Updated**: 2025-12-03
 **Related Docs**:
-- `belongs-in-engine.md` (GroveEngine decision guide)
+
+- `belongs-in-engine.md` (Lattice decision guide)
 - `BELONGS_IN_UI.md` (GroveUI decision guide)
 - `customer-template.md` (New project template)

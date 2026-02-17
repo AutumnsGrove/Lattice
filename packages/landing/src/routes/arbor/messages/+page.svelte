@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { enhance } from '$app/forms';
-	import { GlassCard, GroveMessages } from '@autumnsgrove/groveengine/ui';
-	import type { GroveMessage, GroveMessageChannel } from '@autumnsgrove/groveengine/ui';
+	import { GlassCard, GroveMessages } from '@autumnsgrove/lattice/ui';
+	import type { GroveMessage, GroveMessageChannel } from '@autumnsgrove/lattice/ui';
 	import {
 		Plus,
 		Pencil,

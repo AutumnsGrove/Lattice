@@ -6,7 +6,7 @@
  *
  * @example
  * ```ts
- * import { storage, db, cache } from '@autumnsgrove/groveengine/services';
+ * import { storage, db, cache } from '@autumnsgrove/lattice/services';
  *
  * // Storage operations
  * const file = await storage.uploadFile(bucket, database, {

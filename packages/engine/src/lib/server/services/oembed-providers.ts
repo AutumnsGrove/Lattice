@@ -98,23 +98,13 @@ export const EMBED_PROVIDERS: EmbedProvider[] = [
   // ── Polls & Interactive ─────────────────────────────────────────────
   {
     name: "Strawpoll",
-    patterns: [
-      /^https?:\/\/(www\.)?strawpoll\.com\/[a-zA-Z0-9-]+/,
-    ],
+    patterns: [/^https?:\/\/(www\.)?strawpoll\.com\/[a-zA-Z0-9-]+/],
     oembedUrl: "https://strawpoll.com/oembed",
     renderStrategy: "iframe-src",
-    sandboxPermissions: [
-      "allow-scripts",
-      "allow-same-origin",
-      "allow-forms",
-    ],
+    sandboxPermissions: ["allow-scripts", "allow-same-origin", "allow-forms"],
     extractEmbedUrl: (url: string) => {
-      const match = url.match(
-        /strawpoll\.com\/(?:polls\/)?([a-zA-Z0-9-]+)/,
-      );
-      return match
-        ? `https://strawpoll.com/embed/${match[1]}`
-        : null;
+      const match = url.match(/strawpoll\.com\/(?:polls\/)?([a-zA-Z0-9-]+)/);
+      return match ? `https://strawpoll.com/embed/${match[1]}` : null;
     },
     aspectRatio: "4:3",
   },
@@ -129,11 +119,7 @@ export const EMBED_PROVIDERS: EmbedProvider[] = [
     ],
     oembedUrl: "https://www.youtube.com/oembed",
     renderStrategy: "iframe-src",
-    sandboxPermissions: [
-      "allow-scripts",
-      "allow-same-origin",
-      "allow-popups",
-    ],
+    sandboxPermissions: ["allow-scripts", "allow-same-origin", "allow-popups"],
     extractEmbedUrl: (url: string) => {
       let videoId: string | null = null;
       const longMatch = url.match(
@@ -155,16 +141,10 @@ export const EMBED_PROVIDERS: EmbedProvider[] = [
     ],
     oembedUrl: "https://vimeo.com/api/oembed.json",
     renderStrategy: "iframe-src",
-    sandboxPermissions: [
-      "allow-scripts",
-      "allow-same-origin",
-      "allow-popups",
-    ],
+    sandboxPermissions: ["allow-scripts", "allow-same-origin", "allow-popups"],
     extractEmbedUrl: (url: string) => {
       const match = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
-      return match
-        ? `https://player.vimeo.com/video/${match[1]}`
-        : null;
+      return match ? `https://player.vimeo.com/video/${match[1]}` : null;
     },
     aspectRatio: "16:9",
   },
@@ -177,11 +157,7 @@ export const EMBED_PROVIDERS: EmbedProvider[] = [
     ],
     oembedUrl: "https://open.spotify.com/oembed",
     renderStrategy: "iframe-src",
-    sandboxPermissions: [
-      "allow-scripts",
-      "allow-same-origin",
-      "allow-popups",
-    ],
+    sandboxPermissions: ["allow-scripts", "allow-same-origin", "allow-popups"],
     extractEmbedUrl: (url: string) => {
       const match = url.match(
         /open\.spotify\.com\/(track|album|playlist|episode|show)\/([a-zA-Z0-9]+)/,
@@ -200,27 +176,17 @@ export const EMBED_PROVIDERS: EmbedProvider[] = [
     ],
     oembedUrl: "https://soundcloud.com/oembed",
     renderStrategy: "iframe-srcdoc",
-    sandboxPermissions: [
-      "allow-scripts",
-      "allow-same-origin",
-      "allow-popups",
-    ],
+    sandboxPermissions: ["allow-scripts", "allow-same-origin", "allow-popups"],
     aspectRatio: "3:1",
   },
 
   // ── Social ──────────────────────────────────────────────────────────
   {
     name: "Bluesky",
-    patterns: [
-      /^https?:\/\/bsky\.app\/profile\/[^/]+\/post\/[a-zA-Z0-9]+/,
-    ],
+    patterns: [/^https?:\/\/bsky\.app\/profile\/[^/]+\/post\/[a-zA-Z0-9]+/],
     oembedUrl: "https://embed.bsky.app/oembed",
     renderStrategy: "iframe-srcdoc",
-    sandboxPermissions: [
-      "allow-scripts",
-      "allow-same-origin",
-      "allow-popups",
-    ],
+    sandboxPermissions: ["allow-scripts", "allow-same-origin", "allow-popups"],
     aspectRatio: "1:1",
   },
 
@@ -387,9 +353,7 @@ const VALID_OEMBED_TYPES = new Set(["photo", "video", "link", "rich"]);
  * This prevents a compromised or malicious provider from injecting
  * unexpected data through the oEmbed protocol.
  */
-export function validateOEmbedResponse(
-  data: unknown,
-): OEmbedResponse | null {
+export function validateOEmbedResponse(data: unknown): OEmbedResponse | null {
   if (!data || typeof data !== "object" || Array.isArray(data)) {
     return null;
   }

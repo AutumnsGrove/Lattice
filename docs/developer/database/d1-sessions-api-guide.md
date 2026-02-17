@@ -1,6 +1,6 @@
 # D1 Sessions API Guide
 
-This guide explains how GroveEngine uses Cloudflare D1's Sessions API for consistent database reads, and how to enable read replication when ready.
+This guide explains how Lattice uses Cloudflare D1's Sessions API for consistent database reads, and how to enable read replication when ready.
 
 ## What We Did
 
@@ -34,13 +34,14 @@ type D1DatabaseOrSession = D1Database | D1DatabaseSession;
 
 export async function getSession(
   db: D1DatabaseOrSession,
-  sessionId: string
+  sessionId: string,
 ): Promise<Session | null> {
   // Works with either type
 }
 ```
 
 This means:
+
 - Old code passing `D1Database` still works
 - New code can pass `D1DatabaseSession` for session consistency
 - No breaking changes
@@ -82,6 +83,7 @@ That's it. The Sessions API is already in place, so reads will automatically go 
 ### Monitoring
 
 After enabling, check Cloudflare D1 analytics for:
+
 - `served_by_region` - Shows which replica served each query
 - Latency improvements for global users
 
@@ -93,10 +95,10 @@ When adding new db.ts functions, follow this pattern:
 // Use the type alias
 export async function myNewFunction(
   db: D1DatabaseOrSession,
-  param: string
+  param: string,
 ): Promise<Result> {
   return await db
-    .prepare('SELECT * FROM table WHERE col = ?')
+    .prepare("SELECT * FROM table WHERE col = ?")
     .bind(param)
     .first();
 }
@@ -113,7 +115,7 @@ export async function load({ locals, platform }) {
   // Fall back to raw DB if needed (e.g., no auth hook ran)
   const db = locals.dbSession ?? platform?.env?.DB;
 
-  if (!db) throw error(500, 'Database unavailable');
+  if (!db) throw error(500, "Database unavailable");
 
   const data = await someDbFunction(db, params);
   return { data };

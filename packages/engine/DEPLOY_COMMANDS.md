@@ -56,11 +56,11 @@ npx wrangler d1 execute grove-engine-db \
 
 After migration, you should see 3 seeded flags:
 
-| id | name | enabled |
-|----|------|---------|
-| jxl_encoding | JPEG XL Encoding | 0 |
-| jxl_kill_switch | JXL Kill Switch | 1 |
-| meadow_access | Meadow Access | 0 |
+| id              | name             | enabled |
+| --------------- | ---------------- | ------- |
+| jxl_encoding    | JPEG XL Encoding | 0       |
+| jxl_kill_switch | JXL Kill Switch  | 1       |
+| meadow_access   | Meadow Access    | 0       |
 
 ## Rollback (if needed)
 

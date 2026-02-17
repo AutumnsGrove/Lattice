@@ -5,8 +5,8 @@ on:
     branches:
       - main
     paths:
-      - 'vineyard/**'
-      - '.github/workflows/deploy-vineyard.yml'
+      - "vineyard/**"
+      - ".github/workflows/deploy-vineyard.yml"
   workflow_dispatch:
 
 jobs:
@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Deploy to Cloudflare Pages
     steps:
-      - name: Checkout GroveEngine
+      - name: Checkout Lattice
         uses: actions/checkout@v4
 
       - name: Checkout Vineyard
@@ -31,8 +31,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Build Vineyard package
         run: |
@@ -57,7 +57,7 @@ jobs:
           export { default as RoadmapSection } from "./components/RoadmapSection.svelte";
           EOF
 
-      - name: Install GroveEngine dependencies
+      - name: Install Lattice dependencies
         run: pnpm install --ignore-workspace
 
       - name: Build vineyard site

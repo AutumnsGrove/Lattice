@@ -4,7 +4,7 @@ description: Foundational terminology for personal spaces, collections, and cont
 category: specs
 specCategory: foundational
 icon: flower
-lastUpdated: '2026-02-02'
+lastUpdated: "2026-02-02"
 aliases: []
 tags:
   - terminology
@@ -48,7 +48,7 @@ tags:
           wander → take root → tree grows → grove flourishes → blooms
 ```
 
-> *What you call things matters. These three words are the foundation.*
+> _What you call things matters. These three words are the foundation._
 
 The language of content in Grove. Not "blogs" and "posts." Groves, gardens, and blooms. This document defines the foundational terminology that shapes how Wanderers understand and interact with their spaces.
 
@@ -85,17 +85,19 @@ This isn't just branding. It's how we think about what we're building: a forest 
 
 **What it replaces:** blog, site, space
 
-**What it is:** A grove is a small group of trees growing together. Intimate, sheltered, yours. The platform is called Grove. Your space within it is *your* grove.
+**What it is:** A grove is a small group of trees growing together. Intimate, sheltered, yours. The platform is called Grove. Your space within it is _your_ grove.
 
 **Domain:** `{you}.grove.place`
 
 **When to use:**
+
 - "Welcome to my grove"
 - "Come visit Autumn's grove"
 - "Your grove is where your words live"
 - "Start your grove today"
 
 **Implementation:**
+
 - Used in headers, navigation, welcome messages
 - The possessive makes it personal: "Autumn's grove" not "Autumn's Grove"
 - Lowercase when referring to a specific person's space
@@ -126,12 +128,14 @@ This isn't just branding. It's how we think about what we're building: a forest 
 **URL:** `{you}.grove.place/garden`
 
 **When to use:**
+
 - "Browse my garden"
 - "New blooms in the garden"
 - "Your garden holds all your writing"
 - "Visit the garden to see everything they've grown"
 
 **Implementation:**
+
 - The main listing page for all blooms
 - Can be organized chronologically or by category/tag
 - Supports pagination, filtering, search
@@ -166,12 +170,14 @@ This isn't just branding. It's how we think about what we're building: a forest 
 **URL:** `{you}.grove.place/garden/{slug}`
 
 **When to use:**
+
 - "Read my latest bloom"
 - "I wrote a new bloom this morning"
 - "Their garden has beautiful blooms"
 - "This bloom was written in autumn"
 
 **Implementation:**
+
 - Individual pieces of written content
 - Has title, body, metadata, optional images
 - Can be published, drafted, or scheduled
@@ -196,13 +202,13 @@ The journey of a Wanderer through Grove:
 
 Each stage has its own vocabulary:
 
-| Stage | Action | Result |
-|-------|--------|--------|
-| Wander | Exploring | Visitor becomes interested |
-| Take Root | Subscribing | Wanderer becomes Rooted |
-| Tree Grows | Customizing | Grove takes shape |
-| Flourishes | Thriving | Garden fills with blooms |
-| Blooms | Creating | Words reach the world |
+| Stage      | Action      | Result                     |
+| ---------- | ----------- | -------------------------- |
+| Wander     | Exploring   | Visitor becomes interested |
+| Take Root  | Subscribing | Wanderer becomes Rooted    |
+| Tree Grows | Customizing | Grove takes shape          |
+| Flourishes | Thriving    | Garden fills with blooms   |
+| Blooms     | Creating    | Words reach the world      |
 
 ---
 
@@ -226,28 +232,29 @@ Grove terms appear prominently with standard terms available for accessibility:
 
 ### URL Structure
 
-| Concept | URL Pattern | Example |
-|---------|-------------|---------|
-| Grove (home) | `{username}.grove.place` | `autumn.grove.place` |
-| Garden (index) | `{username}.grove.place/garden` | `autumn.grove.place/garden` |
+| Concept        | URL Pattern                            | Example                                 |
+| -------------- | -------------------------------------- | --------------------------------------- |
+| Grove (home)   | `{username}.grove.place`               | `autumn.grove.place`                    |
+| Garden (index) | `{username}.grove.place/garden`        | `autumn.grove.place/garden`             |
 | Bloom (single) | `{username}.grove.place/garden/{slug}` | `autumn.grove.place/garden/hello-world` |
-| Static page | `{username}.grove.place/{slug}` | `autumn.grove.place/about` |
+| Static page    | `{username}.grove.place/{slug}`        | `autumn.grove.place/about`              |
 
 ### Database Considerations
 
 Internal tables may keep standard names for clarity:
 
-| Public Term | Internal Table | Notes |
-|-------------|---------------|-------|
-| Grove | `tenants` | The tenant/site record |
-| Garden | (computed) | Listing of posts, no separate table |
-| Bloom | `posts` | Individual content pieces |
+| Public Term | Internal Table | Notes                               |
+| ----------- | -------------- | ----------------------------------- |
+| Grove       | `tenants`      | The tenant/site record              |
+| Garden      | (computed)     | Listing of posts, no separate table |
+| Bloom       | `posts`        | Individual content pieces           |
 
-This mirrors the Lattice/GroveEngine pattern: poetic externally, pragmatic internally.
+This mirrors the Lattice/Lattice pattern: poetic externally, pragmatic internally.
 
 ### UI Components
 
 **Navigation:**
+
 ```svelte
 <nav aria-label="blog navigation">
   <a href="/garden">Garden</a>
@@ -256,6 +263,7 @@ This mirrors the Lattice/GroveEngine pattern: poetic externally, pragmatic inter
 ```
 
 **Bloom Card:**
+
 ```svelte
 <article class="bloom" aria-label="blog post">
   <h2>{bloom.title}</h2>
@@ -268,6 +276,7 @@ This mirrors the Lattice/GroveEngine pattern: poetic externally, pragmatic inter
 ```
 
 **Empty State:**
+
 ```svelte
 <div class="garden-empty">
   <p>Your garden is waiting to grow.</p>
@@ -282,6 +291,7 @@ This mirrors the Lattice/GroveEngine pattern: poetic externally, pragmatic inter
 ### Marketing Copy
 
 **Good:**
+
 > "Start your grove. Grow your garden. Let it bloom."
 
 > "Your words deserve a home. Plant them somewhere beautiful."
@@ -289,6 +299,7 @@ This mirrors the Lattice/GroveEngine pattern: poetic externally, pragmatic inter
 > "Every bloom starts with a single thought."
 
 **Avoid:**
+
 > "Start your blog today!"
 
 > "Create your first post!"
@@ -298,6 +309,7 @@ This mirrors the Lattice/GroveEngine pattern: poetic externally, pragmatic inter
 ### UI Microcopy
 
 **Good:**
+
 - Empty garden: "Your garden is waiting. Plant something."
 - New bloom: "What's growing in your mind?"
 - Publish: "Let it bloom"
@@ -305,6 +317,7 @@ This mirrors the Lattice/GroveEngine pattern: poetic externally, pragmatic inter
 - Delete: "Pull this bloom from the garden?"
 
 **Avoid:**
+
 - "No posts yet"
 - "Write something"
 - "Publish post"
@@ -314,11 +327,13 @@ This mirrors the Lattice/GroveEngine pattern: poetic externally, pragmatic inter
 ### Error Messages
 
 **Good:**
+
 > "This bloom couldn't be saved. Check your connection and try again."
 
 > "That bloom doesn't exist. It may have been moved or unpublished."
 
 **Avoid:**
+
 > "Post save failed."
 
 > "404: Post not found."
@@ -337,11 +352,11 @@ This mirrors the Lattice/GroveEngine pattern: poetic externally, pragmatic inter
 
 ### Plural Forms
 
-| Singular | Plural | Usage |
-|----------|--------|-------|
-| bloom | blooms | "Read their blooms" |
-| garden | gardens | Rare; typically one per grove |
-| grove | groves | "Explore other groves" |
+| Singular | Plural  | Usage                         |
+| -------- | ------- | ----------------------------- |
+| bloom    | blooms  | "Read their blooms"           |
+| garden   | gardens | Rare; typically one per grove |
+| grove    | groves  | "Explore other groves"        |
 
 ### Possessive Forms
 
@@ -385,15 +400,15 @@ When updating existing systems:
 
 ### Search & Replace (User-Facing)
 
-| Find | Replace |
-|------|---------|
-| blog | grove |
-| posts | blooms |
-| post | bloom |
-| articles | blooms |
-| article | bloom |
-| blog index | garden |
-| archive | garden |
+| Find       | Replace |
+| ---------- | ------- |
+| blog       | grove   |
+| posts      | blooms  |
+| post       | bloom   |
+| articles   | blooms  |
+| article    | bloom   |
+| blog index | garden  |
+| archive    | garden  |
 
 ### Do NOT Replace
 
@@ -422,18 +437,18 @@ Before launching any user-facing feature:
 
 ## Quick Reference
 
-| Old Term | Grove Term | URL | Aria Label |
-|----------|-----------|-----|------------|
-| blog | grove | `{you}.grove.place` | "blog" |
-| blog index | garden | `/garden` | "blog posts" |
-| post | bloom | `/garden/{slug}` | "blog post" |
-| write post | plant bloom | `/garden/new` | "write new post" |
-| all posts | all blooms | `/garden` | "all blog posts" |
-| draft | tucked away | — | "draft" |
-| published | in bloom | — | "published" |
+| Old Term   | Grove Term  | URL                 | Aria Label       |
+| ---------- | ----------- | ------------------- | ---------------- |
+| blog       | grove       | `{you}.grove.place` | "blog"           |
+| blog index | garden      | `/garden`           | "blog posts"     |
+| post       | bloom       | `/garden/{slug}`    | "blog post"      |
+| write post | plant bloom | `/garden/new`       | "write new post" |
+| all posts  | all blooms  | `/garden`           | "all blog posts" |
+| draft      | tucked away | —                   | "draft"          |
+| published  | in bloom    | —                   | "published"      |
 
 ---
 
-*What you call things matters. These three words are the foundation.*
+_What you call things matters. These three words are the foundation._
 
-*The name was always there. We just had to walk until we found it.*
+_The name was always there. We just had to walk until we found it._

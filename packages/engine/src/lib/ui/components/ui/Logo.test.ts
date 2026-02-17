@@ -927,9 +927,9 @@ describe("Logo Theme-Aware Background", () => {
       const previousCenter = "#dcfce7";
       // New center (#f0fdf4) should be lighter than old center (#dcfce7)
       // Compare by checking the green channel is higher (lighter)
-      expect(parseInt(BG_GRADIENTS.light.center.slice(3, 5), 16)).toBeGreaterThan(
-        parseInt(previousCenter.slice(3, 5), 16),
-      );
+      expect(
+        parseInt(BG_GRADIENTS.light.center.slice(3, 5), 16),
+      ).toBeGreaterThan(parseInt(previousCenter.slice(3, 5), 16));
     });
   });
 

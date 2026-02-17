@@ -1,6 +1,6 @@
 <script lang="ts">
 	import '../app.css';
-	import { themeStore, seasonStore } from '@autumnsgrove/groveengine/ui/stores';
+	import { themeStore, seasonStore } from '@autumnsgrove/lattice/ui/stores';
 
 	let { children } = $props();
 

@@ -11,8 +11,8 @@ import {
   TreeDeciduous,
   Trees,
   Crown,
-} from "@autumnsgrove/groveengine/ui/icons";
-import type { TierIcon } from "@autumnsgrove/groveengine/config";
+} from "@autumnsgrove/lattice/ui/icons";
+import type { TierIcon } from "@autumnsgrove/lattice/config";
 
 /**
  * Map tier icon identifiers to Lucide icon components.

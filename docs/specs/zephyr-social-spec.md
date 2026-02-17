@@ -4,7 +4,7 @@ description: Extending Zephyr from email gateway to unified messaging with socia
 category: specs
 specCategory: operations
 icon: megaphone
-lastUpdated: '2026-02-07'
+lastUpdated: "2026-02-07"
 aliases: []
 tags:
   - social
@@ -179,18 +179,18 @@ Each platform is a provider, just like Resend is a provider for email. Same patt
 
 ### Phase 1: Open Platforms (No Approval Required)
 
-| Platform | Auth Method | Content Type | Char Limit | API Cost |
-|----------|-------------|-------------|------------|----------|
-| **Bluesky** | App password | Short-form posts | 300 graphemes | Free |
-| **Mastodon** | OAuth bearer token | Short-form posts | 500 chars (default) | Free |
-| **DEV.to** | API key | Long-form articles | No limit | Free |
+| Platform     | Auth Method        | Content Type       | Char Limit          | API Cost |
+| ------------ | ------------------ | ------------------ | ------------------- | -------- |
+| **Bluesky**  | App password       | Short-form posts   | 300 graphemes       | Free     |
+| **Mastodon** | OAuth bearer token | Short-form posts   | 500 chars (default) | Free     |
+| **DEV.to**   | API key            | Long-form articles | No limit            | Free     |
 
 ### Phase 2: Gated Platforms (App Review Required)
 
-| Platform | Auth Method | Content Type | Char Limit | API Cost |
-|----------|-------------|-------------|------------|----------|
-| **LinkedIn** | OAuth 2.0 + Marketing API | Short-form posts | 3000 chars | Free |
-| **Threads** | OAuth via Meta | Short-form posts | 500 chars | Free |
+| Platform     | Auth Method               | Content Type     | Char Limit | API Cost |
+| ------------ | ------------------------- | ---------------- | ---------- | -------- |
+| **LinkedIn** | OAuth 2.0 + Marketing API | Short-form posts | 3000 chars | Free     |
+| **Threads**  | OAuth via Meta            | Short-form posts | 500 chars  | Free     |
 
 ### Provider Interface
 
@@ -440,8 +440,8 @@ type SocialPlatform =
   | "bluesky"
   | "mastodon"
   | "devto"
-  | "linkedin"   // Phase 2
-  | "threads";   // Phase 2
+  | "linkedin" // Phase 2
+  | "threads"; // Phase 2
 ```
 
 ### Content Adaptation
@@ -454,7 +454,7 @@ interface ContentAdapter {
   adapt(
     content: string,
     platform: SocialPlatform,
-    options?: { url?: string; longForm?: boolean }
+    options?: { url?: string; longForm?: boolean },
   ): string;
 }
 ```
@@ -492,19 +492,21 @@ interface ContentAdapter {
 ### Usage Examples
 
 ```typescript
-import { Zephyr } from "@autumnsgrove/groveengine/zephyr";
+import { Zephyr } from "@autumnsgrove/lattice/zephyr";
 
 // Quick thought, post to short-form platforms
 const result = await Zephyr.broadcast({
   channel: "social",
-  content: "Building in public is scary and wonderful. Today I shipped cross-posting from code. The wind carries more than letters now. 🌿",
+  content:
+    "Building in public is scary and wonderful. Today I shipped cross-posting from code. The wind carries more than letters now. 🌿",
   platforms: ["bluesky", "mastodon"],
 });
 
 // Blog post syndication: teaser to social, full article to DEV.to
 const result = await Zephyr.broadcast({
   channel: "social",
-  content: "New post: Why I Left Big Tech to Build a Forest\n\nOn leaving the algorithm behind and planting something real.",
+  content:
+    "New post: Why I Left Big Tech to Build a Forest\n\nOn leaving the algorithm behind and planting something real.",
   platforms: ["bluesky", "mastodon", "devto"],
   longForm: {
     title: "Why I Left Big Tech to Build a Forest",
@@ -521,7 +523,8 @@ const result = await Zephyr.broadcast({
 // Scheduled launch announcement
 const result = await Zephyr.broadcast({
   channel: "social",
-  content: "Grove is open for signups. A forest for your words. Come find your clearing. 🌲\n\nhttps://grove.place",
+  content:
+    "Grove is open for signups. A forest for your words. Come find your clearing. 🌲\n\nhttps://grove.place",
   platforms: "all",
   scheduledAt: "2026-03-01T14:00:00Z",
   idempotencyKey: "launch-announcement-2026-03-01",
@@ -760,11 +763,11 @@ Social platforms have their own rate limits. Zephyr respects them with per-platf
 
 ```typescript
 const SOCIAL_RATE_LIMITS: Record<SocialPlatform, RateLimitConfig> = {
-  bluesky:  { perMinute: 10, perDay: 100 },
+  bluesky: { perMinute: 10, perDay: 100 },
   mastodon: { perMinute: 10, perDay: 100 },
-  devto:    { perMinute: 2,  perDay: 20 },
-  linkedin: { perMinute: 5,  perDay: 50 },
-  threads:  { perMinute: 5,  perDay: 50 },
+  devto: { perMinute: 2, perDay: 20 },
+  linkedin: { perMinute: 5, perDay: 50 },
+  threads: { perMinute: 5, perDay: 50 },
 };
 ```
 
@@ -841,6 +844,7 @@ When a post is published on Grove, the engine can automatically trigger syndicat
 ```
 
 The hook formats content per platform:
+
 - **Short-form platforms** get the post title + excerpt + link
 - **DEV.to** gets the full markdown body with a canonical URL back to Grove
 
@@ -857,13 +861,13 @@ The hook formats content per platform:
 
 ### Secrets Required
 
-| Secret | Platform | How to Get |
-|--------|----------|------------|
-| `BLUESKY_HANDLE` | Bluesky | Your handle (e.g., `autumn.bsky.social`) |
-| `BLUESKY_APP_PASSWORD` | Bluesky | Settings > App Passwords > Create |
+| Secret                  | Platform | How to Get                                      |
+| ----------------------- | -------- | ----------------------------------------------- |
+| `BLUESKY_HANDLE`        | Bluesky  | Your handle (e.g., `autumn.bsky.social`)        |
+| `BLUESKY_APP_PASSWORD`  | Bluesky  | Settings > App Passwords > Create               |
 | `MASTODON_INSTANCE_URL` | Mastodon | Your instance (e.g., `https://mastodon.social`) |
-| `MASTODON_ACCESS_TOKEN` | Mastodon | Settings > Development > New Application |
-| `DEVTO_API_KEY` | DEV.to | Settings > Extensions > Generate API Key |
+| `MASTODON_ACCESS_TOKEN` | Mastodon | Settings > Development > New Application        |
+| `DEVTO_API_KEY`         | DEV.to   | Settings > Extensions > Generate API Key        |
 
 ---
 
@@ -956,14 +960,14 @@ crons = ["*/15 * * * *"]
 
 ## Cost Analysis
 
-| Component | Cost |
-|-----------|------|
-| Cloudflare Worker (cron, requests) | Free tier |
-| D1 storage (broadcast queue + logs) | Free tier |
-| Bluesky AT Protocol API | Free |
-| Mastodon API | Free |
-| DEV.to API | Free |
-| **Total** | **$0/month** |
+| Component                           | Cost         |
+| ----------------------------------- | ------------ |
+| Cloudflare Worker (cron, requests)  | Free tier    |
+| D1 storage (broadcast queue + logs) | Free tier    |
+| Bluesky AT Protocol API             | Free         |
+| Mastodon API                        | Free         |
+| DEV.to API                          | Free         |
+| **Total**                           | **$0/month** |
 
 The entire social broadcasting pipeline runs at zero marginal cost. Platform APIs are free. Cloudflare's free tier covers the worker, cron, and D1 storage for this volume.
 

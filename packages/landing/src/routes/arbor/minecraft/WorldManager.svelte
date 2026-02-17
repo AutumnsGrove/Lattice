@@ -5,7 +5,7 @@
 	 * Uses client-side fetch to Heartwood for world and backup operations.
 	 */
 
-	import { GlassCard } from '@autumnsgrove/groveengine/ui';
+	import { GlassCard } from '@autumnsgrove/lattice/ui';
 	import {
 		Map,
 		Download,

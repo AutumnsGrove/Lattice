@@ -1,12 +1,13 @@
 ---
 title: Grove UI Patterns
-description: 'Glassmorphism, seasonal themes, and the visual language of Grove'
+description: "Glassmorphism, seasonal themes, and the visual language of Grove"
 category: design
-lastUpdated: '2026-01-12'
+lastUpdated: "2026-01-12"
 ---
+
 # Grove UI Patterns
 
-> *Every design choice should feel welcoming, organic, readable, and alive.*
+> _Every design choice should feel welcoming, organic, readable, and alive._
 
 Grove is a place. Nature-themed, warm, inviting. Like a midnight tea shop with good documentation. This guide covers the visual patterns that make Grove feel like home.
 
@@ -19,6 +20,7 @@ From the project's guiding philosophy:
 > Write with the warmth of a midnight tea shop and the clarity of good documentation.
 
 **Every design choice should feel:**
+
 - **Welcoming** — like entering a cozy space
 - **Organic** — natural, not rigid or corporate
 - **Readable** — content-first, decorations enhance, never obstruct
@@ -44,19 +46,19 @@ Content (text, cards, UI)
 
 ### Glass Variants
 
-| Variant | Use Case | Light Mode | Dark Mode |
-|---------|----------|------------|-----------|
-| `surface` | Headers, navbars | 95% white | 95% slate |
-| `tint` | Text over backgrounds | 60% white | 50% slate |
-| `card` | Content cards | 80% white | 70% slate |
-| `accent` | Callouts, highlights | 30% accent | 20% accent |
-| `overlay` | Modal backdrops | 50% black | 60% black |
-| `muted` | Subtle backgrounds | 40% white | 30% slate |
+| Variant   | Use Case              | Light Mode | Dark Mode  |
+| --------- | --------------------- | ---------- | ---------- |
+| `surface` | Headers, navbars      | 95% white  | 95% slate  |
+| `tint`    | Text over backgrounds | 60% white  | 50% slate  |
+| `card`    | Content cards         | 80% white  | 70% slate  |
+| `accent`  | Callouts, highlights  | 30% accent | 20% accent |
+| `overlay` | Modal backdrops       | 50% black  | 60% black  |
+| `muted`   | Subtle backgrounds    | 40% white  | 30% slate  |
 
 ### Usage
 
 ```svelte
-import { Glass, GlassCard, GlassButton } from '@groveengine/ui/ui';
+import { Glass, GlassCard, GlassButton } from '@lattice/ui/ui';
 
 <Glass variant="tint" class="p-6 rounded-xl">
   <p>Readable text over busy backgrounds</p>
@@ -75,26 +77,31 @@ import { Glass, GlassCard, GlassButton } from '@groveengine/ui/ui';
 
 Grove uses four seasons, each with distinct colors, weather effects, and moods.
 
-| Season | Primary Colors | Mood |
-|--------|---------------|------|
-| **Spring** | Yellow-green new growth, cherry blossoms, wildflowers | Renewal, hope |
-| **Summer** | Deep greens, pink blossoms | Growth, warmth |
-| **Autumn** | Amber, rust, gold, maple reds | Harvest, reflection |
-| **Winter** | Frost, snow, frosted evergreens | Rest, stillness |
+| Season     | Primary Colors                                        | Mood                |
+| ---------- | ----------------------------------------------------- | ------------------- |
+| **Spring** | Yellow-green new growth, cherry blossoms, wildflowers | Renewal, hope       |
+| **Summer** | Deep greens, pink blossoms                            | Growth, warmth      |
+| **Autumn** | Amber, rust, gold, maple reds                         | Harvest, reflection |
+| **Winter** | Frost, snow, frosted evergreens                       | Rest, stillness     |
 
 ### Color Palette Organization
 
 Colors are organized **dark-to-light** for atmospheric depth. Darker colors go in the background, lighter in the foreground.
 
 ```typescript
-import { greens, autumn, winter, springFoliage } from '@autumnsgrove/groveengine/ui/nature';
+import {
+  greens,
+  autumn,
+  winter,
+  springFoliage,
+} from "@autumnsgrove/lattice/ui/nature";
 
 // Dark to light
-greens.darkForest  // Background trees
-greens.deepGreen   // Mid-distance
-greens.grove       // Grove brand primary
-greens.meadow      // Standard foliage
-greens.mint        // Light accent
+greens.darkForest; // Background trees
+greens.deepGreen; // Mid-distance
+greens.grove; // Grove brand primary
+greens.meadow; // Standard foliage
+greens.mint; // Light accent
 ```
 
 ### Seasonal Weather Effects
@@ -133,11 +140,11 @@ const TREE_ASPECT_RATIO_RANGE = { min: 1.0, max: 1.5 };
 ### Responsive Density
 
 ```typescript
-if (width < 768) return 1;        // Mobile: base count
-if (width < 1024) return 1.3;     // Tablet
-if (width < 1440) return 1.8;     // Desktop
-if (width < 2560) return 2.5;     // Large desktop
-return 3.5;                        // Ultrawide
+if (width < 768) return 1; // Mobile: base count
+if (width < 1024) return 1.3; // Tablet
+if (width < 1440) return 1.8; // Desktop
+if (width < 2560) return 2.5; // Large desktop
+return 3.5; // Ultrawide
 ```
 
 ---
@@ -158,19 +165,19 @@ import { MapPin, Check, Leaf, Trees, Mail } from 'lucide-svelte';
 
 ### Standard Icon Mapping
 
-| Concept | Icon |
-|---------|------|
-| Home | `Home` |
-| Vision | `Telescope` |
-| Pricing | `HandCoins` |
-| Knowledge | `BookOpen` |
-| Forest | `Trees` |
-| Email | `Mail` |
-| Storage | `HardDrive` |
-| Success | `Check` |
-| Error | `X` |
-| Loading | `Loader2` (with animate-spin) |
-| Growth | `Sprout` |
+| Concept   | Icon                          |
+| --------- | ----------------------------- |
+| Home      | `Home`                        |
+| Vision    | `Telescope`                   |
+| Pricing   | `HandCoins`                   |
+| Knowledge | `BookOpen`                    |
+| Forest    | `Trees`                       |
+| Email     | `Mail`                        |
+| Storage   | `HardDrive`                   |
+| Success   | `Check`                       |
+| Error     | `X`                           |
+| Loading   | `Loader2` (with animate-spin) |
+| Growth    | `Sprout`                      |
 
 ### Icon Sizing
 
@@ -191,7 +198,7 @@ import { MapPin, Check, Leaf, Trees, Mail } from 'lucide-svelte';
 
 ## Icon Composition
 
-> *"The grove doesn't need to be drawn. It just needs to be arranged."*
+> _"The grove doesn't need to be drawn. It just needs to be arranged."_
 
 For custom logos and illustrations, compose existing Lucide icons rather than drawing custom SVG.
 
@@ -203,10 +210,10 @@ For custom logos and illustrations, compose existing Lucide icons rather than dr
 
 ### Transform Cheatsheet
 
-| Transform | Effect |
-|-----------|--------|
-| `translate(x, y)` | Move origin |
-| `scale(s)` | Uniform size |
+| Transform             | Effect                |
+| --------------------- | --------------------- |
+| `translate(x, y)`     | Move origin           |
+| `scale(s)`            | Uniform size          |
 | `rotate(deg, cx, cy)` | Rotation around point |
 
 ### Create Depth
@@ -221,12 +228,12 @@ For custom logos and illustrations, compose existing Lucide icons rather than dr
 For dreamy, far-future, mystical content. The tea shop at the edge of tomorrow.
 
 ```typescript
-midnightBloom.deepPlum   // #581c87 - Night sky depth
-midnightBloom.purple     // #7c3aed - Soft purple glow
-midnightBloom.violet     // #8b5cf6 - Lighter accent
-midnightBloom.amber      // #f59e0b - Lantern warmth
-midnightBloom.warmCream  // #fef3c7 - Tea steam, page glow
-midnightBloom.softGold   // #fcd34d - Fairy lights
+midnightBloom.deepPlum; // #581c87 - Night sky depth
+midnightBloom.purple; // #7c3aed - Soft purple glow
+midnightBloom.violet; // #8b5cf6 - Lighter accent
+midnightBloom.amber; // #f59e0b - Lantern warmth
+midnightBloom.warmCream; // #fef3c7 - Tea steam, page glow
+midnightBloom.softGold; // #fcd34d - Fairy lights
 ```
 
 Use with stars, moon, fireflies, and purple glass effects for nighttime sections.
@@ -237,12 +244,12 @@ Use with stars, moon, fireflies, and purple glass effects for nighttime sections
 
 ### Decorative Elements
 
-| Element | Mobile Treatment |
-|---------|-----------------|
-| Trees | Reduce count (density = 1) |
-| Particles | Reduce count (40→20) |
-| Clouds | Keep 2-3 |
-| Touch targets | Minimum 44x44px |
+| Element       | Mobile Treatment           |
+| ------------- | -------------------------- |
+| Trees         | Reduce count (density = 1) |
+| Particles     | Reduce count (40→20)       |
+| Clouds        | Keep 2-3                   |
+| Touch targets | Minimum 44x44px            |
 
 ### Respect Reduced Motion
 
@@ -256,13 +263,13 @@ Use with stars, moon, fireflies, and purple glass effects for nighttime sections
 
 ## When to Use / When Not to Use
 
-| Pattern | Good For | Avoid When |
-|---------|----------|------------|
-| **Glassmorphism** | Text over backgrounds, navbars, cards | Data-dense pages, forms |
-| **Randomized forests** | Story pages, about pages | Simple informational content |
-| **Seasonal themes** | Roadmaps, emotional storytelling | Brand-critical contexts |
-| **Midnight Bloom** | Future features, dreams | Practical documentation |
-| **Weather particles** | Hero sections, transitions | Performance-critical pages |
+| Pattern                | Good For                              | Avoid When                   |
+| ---------------------- | ------------------------------------- | ---------------------------- |
+| **Glassmorphism**      | Text over backgrounds, navbars, cards | Data-dense pages, forms      |
+| **Randomized forests** | Story pages, about pages              | Simple informational content |
+| **Seasonal themes**    | Roadmaps, emotional storytelling      | Brand-critical contexts      |
+| **Midnight Bloom**     | Future features, dreams               | Practical documentation      |
+| **Weather particles**  | Hero sections, transitions            | Performance-critical pages   |
 
 ---
 
@@ -281,4 +288,4 @@ Before shipping a Grove page:
 
 ---
 
-*Every pixel is an invitation. Make it feel like home.*
+_Every pixel is an invitation. Make it feel like home._

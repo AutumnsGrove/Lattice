@@ -17,7 +17,7 @@
 
 ## Phase 1: First Frost (Complete)
 
-*"The quiet before dawn"*
+_"The quiet before dawn"_
 
 The groundwork laid in stillness. Foundations built when no one was watching.
 
@@ -68,7 +68,7 @@ The groundwork laid in stillness. Foundations built when no one was watching.
 
 ## Phase 2: Thaw (Current)
 
-*"The ice begins to crack"*
+_"The ice begins to crack"_
 
 Grove opens its doors. The first trees take root.
 
@@ -148,7 +148,7 @@ Grove opens its doors. The first trees take root.
 
 ## Phase 3: First Buds
 
-*"Green emerging through snow"*
+_"Green emerging through snow"_
 
 New growth appears. The grove finds its voice.
 
@@ -203,7 +203,7 @@ New growth appears. The grove finds its voice.
 
 ## Phase 4: Full Bloom
 
-*"Petals everywhere"*
+_"Petals everywhere"_
 
 The grove becomes a community. Roots intertwine.
 
@@ -264,7 +264,7 @@ The grove becomes a community. Roots intertwine.
 
 ## Phase 5: Golden Hour
 
-*"Warm light through the canopy"*
+_"Warm light through the canopy"_
 
 The grove settles into itself. A time for refinement.
 
@@ -305,7 +305,7 @@ The grove settles into itself. A time for refinement.
 
 ## Phase 6: Midnight Bloom
 
-*"The far horizon: a dream taking shape"*
+_"The far horizon: a dream taking shape"_
 
 Where digital roots meet physical ground. The vision that pulls everything forward.
 
@@ -346,36 +346,41 @@ Where digital roots meet physical ground. The vision that pulls everything forwa
 > See `docs/grove-durable-objects-architecture.md` for full specification.
 
 **DO Phase 1: Auth (Heartwood)** - Highest Priority
+
 - SessionDO for cross-subdomain auth
 - Expected: Login 15s -> 2-3s, validation sub-millisecond
 
 **DO Phase 2: Tenant Coordination**
+
 - TenantDO for config caching
 - Per-tenant rate limiting
 - Analytics buffering
 
 **DO Phase 3: Content Coordination**
+
 - PostDO for real-time reactions
 - Comment WebSocket for live updates
 - Presence indicators
 
 **DO Phase 4: Meadow Social**
+
 - FeedDO for personalized feeds
 - NotificationDO for aggregation
 - Push notifications via WebSocket
 
 **DO Phase 5: Analytics (Rings)**
+
 - AnalyticsDO per tenant per day
 - 87% reduction in D1 writes
 - Real-time dashboard via WebSocket
 
 ### Hybrid Routing Strategy
 
-| User Type | Domain | Routing | Cost |
-|-----------|--------|---------|------|
-| Seedling/Sapling | `*.grove.place` | Worker wildcards | Free |
-| Oak (BYOD) | `custom.com` | Cloudflare for SaaS | $0.10/hostname |
-| Evergreen | `custom.com` | Cloudflare for SaaS | $0.10/hostname |
+| User Type        | Domain          | Routing             | Cost           |
+| ---------------- | --------------- | ------------------- | -------------- |
+| Seedling/Sapling | `*.grove.place` | Worker wildcards    | Free           |
+| Oak (BYOD)       | `custom.com`    | Cloudflare for SaaS | $0.10/hostname |
+| Evergreen        | `custom.com`    | Cloudflare for SaaS | $0.10/hostname |
 
 ---
 
@@ -399,7 +404,7 @@ Where digital roots meet physical ground. The vision that pulls everything forwa
 
 ## Full Bloom: Wisp - Writing Assistant
 
-> *A helper, not a writer—and sometimes, a good listener*
+> _A helper, not a writer—and sometimes, a good listener_
 
 **Status:** Implementation complete, pending deployment
 
@@ -408,6 +413,7 @@ Wisp is Grove's ethical AI writing assistant. It helps polish your voice without
 **Fireside Mode** extends Wisp for writers who freeze at the blank page. Have a conversation with Wisp, and your words get organized into a draft. The fire doesn't tell the story—it just creates the space where stories emerge. See `docs/specs/ai-writing-assistant-spec.md` for full specification.
 
 ### Core Implementation Complete
+
 - [x] Model configuration (DeepSeek V3.2 via Fireworks AI)
 - [x] Inference client with provider fallback cascade
 - [x] Local readability calculations (Flesch-Kincaid)
@@ -421,47 +427,55 @@ Wisp is Grove's ethical AI writing assistant. It helps polish your voice without
 ### Fireside Mode (Planned)
 
 **Phase F1: Core Conversation**
+
 - [ ] Fireside chat endpoint (`/api/grove/wisp/fireside`)
 - [ ] Session state management (sessionStorage + optional KV recovery)
 - [ ] Starter prompt rotation (12 prompts, pseudorandom algorithm)
 - [ ] Error response handling
 
 **Phase F2: Draft Generation**
+
 - [ ] Conversation → draft prompt (voice-preserving, minimal transitions)
 - [ ] Draft preview UI
 - [ ] Transparency marker injection (server-side enforced)
 - [ ] Database migration (`015_wisp_fireside.sql`)
 
 **Phase F3: Guardrails**
+
 - [ ] Two-layer detection: client-side keywords + server-side inference
 - [ ] `canDraft` logic (3+ messages, 150+ tokens)
 - [ ] "Write for me" redirect responses
 
 **Phase F4: Polish**
+
 - [ ] ASCII fire art (with mobile emoji fallback)
 - [ ] Keyboard navigation (Tab, Enter, Escape, Arrows)
 - [ ] Screen reader support (aria-live announcements)
 - [ ] "Start with a conversation" button in editor
 
 **Phase F5: Testing**
+
 - [ ] Unit tests, integration tests, privacy audit, accessibility audit
 
 ### Deployment Tasks (Pre-Launch)
+
 - [ ] Run database migration: `wrangler d1 execute <db> --file=packages/engine/migrations/014_wisp.sql`
 - [ ] Set Fireworks AI API key: `wrangler secret put FIREWORKS_API_KEY`
 - [ ] (Optional) Set backup provider keys: `CEREBRAS_API_KEY`, `GROQ_API_KEY`
 - [ ] Add default settings to D1: `wisp_enabled=false`, `wisp_mode=quick`
-- [ ] Deploy updated GroveEngine package to npm
+- [ ] Deploy updated Lattice package to npm
 - [ ] Run AutumnsGrove migration (see `docs/specs/wisp-migration-prompt.md`)
 
 ### AutumnsGrove Migration Tasks
-- [ ] Update component imports to use `WispPanel` from groveengine
+
+- [ ] Update component imports to use `WispPanel` from lattice
 - [ ] Update settings page to Wisp branding
 - [ ] Change API endpoint from `/api/ai/writing-assist` to `/api/grove/wisp`
 - [ ] Update setting keys: `ai_assistant_enabled` → `wisp_enabled`
 - [ ] Remove old files: `AIWritingPanel.svelte`, `ai-models.js`, `api/ai/writing-assist/`
 
 ### Testing Checklist
+
 - [ ] Settings page loads, toggle works
 - [ ] Usage stats display correctly
 - [ ] Grammar analysis returns suggestions
@@ -472,12 +486,14 @@ Wisp is Grove's ethical AI writing assistant. It helps polish your voice without
 - [ ] Cost cap warning appears at 80%
 
 ### Documentation
+
 - [x] Unified spec: `docs/specs/writing-assistant-unified-spec.md`
 - [x] Migration guide: `docs/specs/wisp-migration-prompt.md`
 - [x] Grove naming: Added to `docs/grove-naming.md`
 - [ ] User guide for settings panel
 
 ### Key Files
+
 ```
 packages/engine/
 ├── src/lib/config/wisp.js           # Model config, pricing
@@ -493,16 +509,16 @@ scripts/
 ```
 
 ### Privacy & Philosophy
+
 - All features OFF by default (opt-in only)
 - Zero Data Retention (ZDR) from all inference providers
 - Content analyzed, never stored
 - Outcome-only retention (scores, not content)
 - User's voice is sacred: we polish, never replace
 
-*Like a will-o'-the-wisp in the forest: light, airy, guiding without forcing.*
+_Like a will-o'-the-wisp in the forest: light, airy, guiding without forcing._
 
 ---
-
 
 ---
 
@@ -526,13 +542,13 @@ scripts/
 
 ## Decision Log
 
-| Date | Decision |
-|------|----------|
-| 2025-11-21 | Split into 3 projects (Engine, Website, Social) |
+| Date       | Decision                                            |
+| ---------- | --------------------------------------------------- |
+| 2025-11-21 | Split into 3 projects (Engine, Website, Social)     |
 | 2025-11-21 | Raised pricing significantly ($8-35/month vs $5-10) |
-| 2025-11-21 | Changed post limits to soft archival (no deletion) |
+| 2025-11-21 | Changed post limits to soft archival (no deletion)  |
 | 2025-12-24 | Sent first launch emails to 59 waitlist subscribers |
-| 2025-12-29 | Redesigned plant.grove.place signup page |
+| 2025-12-29 | Redesigned plant.grove.place signup page            |
 
 ---
 
@@ -545,5 +561,5 @@ scripts/
 
 ---
 
-*Last Updated: January 2026*
-*Next Review: After first 5 clients are onboarded*
+_Last Updated: January 2026_
+_Next Review: After first 5 clients are onboarded_

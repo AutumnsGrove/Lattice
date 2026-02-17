@@ -6,15 +6,12 @@
  */
 
 import { json, error } from "@sveltejs/kit";
-import {
-  validateTracePath,
-  sanitizeObject,
-} from "@autumnsgrove/groveengine/utils";
-import { checkRateLimit, getClientIP } from "@autumnsgrove/groveengine/server";
+import { validateTracePath, sanitizeObject } from "@autumnsgrove/lattice/utils";
+import { checkRateLimit, getClientIP } from "@autumnsgrove/lattice/server";
 import {
   generateId,
   sendTraceNotification,
-} from "@autumnsgrove/groveengine/services";
+} from "@autumnsgrove/lattice/services";
 import type { RequestHandler } from "./$types.js";
 
 interface TraceInput {

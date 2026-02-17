@@ -16,7 +16,7 @@
  * ONLY 2 SECRETS NEEDED! Price IDs are hardcoded below (not secrets).
  */
 
-import { PAID_TIERS, type PaidTierKey } from "@autumnsgrove/groveengine/config";
+import { PAID_TIERS, type PaidTierKey } from "@autumnsgrove/lattice/config";
 
 // =============================================================================
 // STRIPE PRICE IDS

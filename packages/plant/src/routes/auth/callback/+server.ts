@@ -15,7 +15,7 @@
 import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { PLANT_ERRORS, logPlantError, buildPlantErrorUrl } from "$lib/errors";
-import { AUTH_HUB_URL } from "@autumnsgrove/groveengine/config";
+import { AUTH_HUB_URL } from "@autumnsgrove/lattice/config";
 
 /** Better Auth session cookie names (production uses __Secure- prefix) */
 const BETTER_AUTH_COOKIE = "better-auth.session_token";

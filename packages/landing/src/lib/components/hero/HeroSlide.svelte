@@ -6,9 +6,9 @@
 -->
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import type { Season } from '@autumnsgrove/groveengine/ui/nature';
+	import type { Season } from '@autumnsgrove/lattice/ui/nature';
 	import { getGradientClasses, type BgVariant } from './hero-types';
-	import { Lexend } from '@autumnsgrove/groveengine/ui/typography';
+	import { Lexend } from '@autumnsgrove/lattice/ui/typography';
 
 	interface Props {
 		season: Season;

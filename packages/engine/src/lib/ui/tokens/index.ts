@@ -4,9 +4,9 @@
 // colors, typography, spacing, effects, animation
 //
 // Usage:
-//   import { colors, grove, bark, cream } from '@groveengine/ui/tokens';
+//   import { colors, grove, bark, cream } from '@lattice/ui/tokens';
 
-// Design tokens will be added here after extraction from GroveEngine
+// Design tokens will be added here after extraction from Lattice
 // The tokens define the visual language of the Grove platform:
 // - Grove Green: Primary brand color (#16a34a)
 // - Bark Brown: Text and dark accents (#3d2914)

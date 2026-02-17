@@ -6,15 +6,15 @@
 
 ## Quick Reference
 
-| Term | Meaning |
-|------|---------|
-| **Feature Flag** | A database toggle that controls whether a capability is enabled |
-| **Graft** | Grove's term for a feature flag (from horticulture: grafting branches) |
-| **UI Graft** | A reusable component that can be "spliced" onto pages |
-| **Greenhouse** | Early access program for trusted tenants to test experimental features |
-| **Cultivate** | Enable a flag globally |
-| **Prune** | Disable a flag globally |
-| **Blight** | Emergency kill switch (instant disable, no caching) |
+| Term             | Meaning                                                                |
+| ---------------- | ---------------------------------------------------------------------- |
+| **Feature Flag** | A database toggle that controls whether a capability is enabled        |
+| **Graft**        | Grove's term for a feature flag (from horticulture: grafting branches) |
+| **UI Graft**     | A reusable component that can be "spliced" onto pages                  |
+| **Greenhouse**   | Early access program for trusted tenants to test experimental features |
+| **Cultivate**    | Enable a flag globally                                                 |
+| **Prune**        | Disable a flag globally                                                |
+| **Blight**       | Emergency kill switch (instant disable, no caching)                    |
 
 ---
 
@@ -32,7 +32,7 @@
 ├─────────────────────────────────────────────────────────────┤
 │  LAYER 1: UI GRAFTS                                         │
 │  "How do features render?"                                  │
-│  └─ Reusable components from @autumnsgrove/groveengine      │
+│  └─ Reusable components from @autumnsgrove/lattice      │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -94,13 +94,13 @@ export type KnownGraftId =
   | "meadow_access"
   | "jxl_encoding"
   | "jxl_kill_switch"
-  | "my_feature";  // Add your new flag
+  | "my_feature"; // Add your new flag
 ```
 
 ### Step 4: Use in Code
 
 ```typescript
-import { isGraftEnabled } from '@autumnsgrove/groveengine/feature-flags';
+import { isGraftEnabled } from "@autumnsgrove/lattice/feature-flags";
 
 // In a +page.server.ts or +layout.server.ts
 export const load: PageServerLoad = async ({ parent, platform }) => {
@@ -111,9 +111,9 @@ export const load: PageServerLoad = async ({ parent, platform }) => {
 
   // Option B: Direct check (use sparingly - adds DB/KV call)
   const myFeatureEnabled = await isGraftEnabled(
-    'my_feature',
+    "my_feature",
     { tenantId: locals.tenantId, inGreenhouse: parentData.inGreenhouse },
-    { DB: platform.env.DB, FLAGS_KV: platform.env.FLAGS_KV }
+    { DB: platform.env.DB, FLAGS_KV: platform.env.FLAGS_KV },
   );
 
   return { myFeatureEnabled };
@@ -124,13 +124,13 @@ export const load: PageServerLoad = async ({ parent, platform }) => {
 
 ## Flag Types and When to Use Them
 
-| Type | Use Case | Default Value Example |
-|------|----------|----------------------|
-| `boolean` | Simple on/off toggle | `'false'` or `'true'` |
-| `percentage` | Gradual rollout (0-100%) | `'0'` |
-| `tier` | Subscription-gated features | `'["oak", "evergreen"]'` |
-| `variant` | A/B testing with named variants | `'{"control": 50, "variant_a": 50}'` |
-| `json` | Complex configuration | `'{"limit": 10, "enabled": true}'` |
+| Type         | Use Case                        | Default Value Example                |
+| ------------ | ------------------------------- | ------------------------------------ |
+| `boolean`    | Simple on/off toggle            | `'false'` or `'true'`                |
+| `percentage` | Gradual rollout (0-100%)        | `'0'`                                |
+| `tier`       | Subscription-gated features     | `'["oak", "evergreen"]'`             |
+| `variant`    | A/B testing with named variants | `'{"control": 50, "variant_a": 50}'` |
+| `json`       | Complex configuration           | `'{"limit": 10, "enabled": true}'`   |
 
 ---
 
@@ -140,15 +140,15 @@ Rules determine WHO gets what value. Higher priority = evaluated first.
 
 ### Priority Conventions
 
-| Priority | Rule Type | Use Case |
-|----------|-----------|----------|
-| 100 | `tenant` | Always enable for specific tenants |
-| 90 | `user` | Always enable for specific users |
-| 80 | `tier` | Enable for subscription tiers |
-| 50 | `percentage` | Gradual rollout |
-| 50 | `tenant_override` | Greenhouse self-serve (auto-created) |
-| 10 | `time` | Seasonal/time-based features |
-| 0 | `always` | Default catch-all |
+| Priority | Rule Type         | Use Case                             |
+| -------- | ----------------- | ------------------------------------ |
+| 100      | `tenant`          | Always enable for specific tenants   |
+| 90       | `user`            | Always enable for specific users     |
+| 80       | `tier`            | Enable for subscription tiers        |
+| 50       | `percentage`      | Gradual rollout                      |
+| 50       | `tenant_override` | Greenhouse self-serve (auto-created) |
+| 10       | `time`            | Seasonal/time-based features         |
+| 0        | `always`          | Default catch-all                    |
 
 ### Example: Enable for Specific Tenant
 
@@ -213,11 +213,13 @@ INSERT OR IGNORE INTO feature_flags (
 ```
 
 **When to use `greenhouse_only`:**
+
 - Experimental user-facing features needing feedback
 - Features that might change based on beta testing
 - "Try before everyone else" experiences
 
 **When NOT to use `greenhouse_only`:**
+
 - Safety gates (like `image_uploads_enabled`)
 - Infrastructure toggles (like `jxl_kill_switch`)
 - Features not ready for anyone yet (use `enabled=0` instead)
@@ -244,6 +246,7 @@ Grafts are loaded ONCE at the admin layout level and cascaded to all child pages
 ```
 
 **Why this pattern?**
+
 - Single DB/KV call per request (not per page)
 - Consistent graft state across all admin pages
 - Easy to access: `const { grafts } = await parent()`
@@ -252,11 +255,11 @@ Grafts are loaded ONCE at the admin layout level and cascaded to all child pages
 
 ## Caching Behavior
 
-| Cache TTL | Use Case | Example |
-|-----------|----------|---------|
-| 60s (default) | Normal flags | Most features |
-| 0s (instant) | Kill switches | `jxl_kill_switch` |
-| 300s | Stable, rarely-changed | Tier gates |
+| Cache TTL     | Use Case               | Example           |
+| ------------- | ---------------------- | ----------------- |
+| 60s (default) | Normal flags           | Most features     |
+| 0s (instant)  | Kill switches          | `jxl_kill_switch` |
+| 300s          | Stable, rarely-changed | Tier gates        |
 
 To set custom TTL:
 
@@ -287,7 +290,7 @@ INSERT OR IGNORE INTO feature_flags (
 In code, check kill switch first:
 
 ```typescript
-const killSwitch = await isFeatureEnabled('my_feature_kill_switch', ctx, env);
+const killSwitch = await isFeatureEnabled("my_feature_kill_switch", ctx, env);
 if (killSwitch) {
   // Feature is killed - skip everything
   return fallbackBehavior();
@@ -314,16 +317,16 @@ if (killSwitch) {
 
 ## File Reference
 
-| File | Purpose |
-|------|---------|
-| `packages/engine/migrations/` | SQL migrations that create flags |
-| `packages/engine/src/lib/feature-flags/types.ts` | Type definitions |
-| `packages/engine/src/lib/feature-flags/grafts.ts` | `getEnabledGrafts()`, `isGraftEnabled()` |
-| `packages/engine/src/lib/feature-flags/evaluate.ts` | Core evaluation logic |
-| `packages/engine/src/lib/feature-flags/greenhouse.ts` | Greenhouse enrollment |
-| `packages/engine/src/lib/feature-flags/tenant-grafts.ts` | Self-serve controls |
-| `packages/engine/src/lib/feature-flags/admin.ts` | Admin UI functions |
-| `docs/specs/grafts-spec.md` | Full specification |
+| File                                                     | Purpose                                  |
+| -------------------------------------------------------- | ---------------------------------------- |
+| `packages/engine/migrations/`                            | SQL migrations that create flags         |
+| `packages/engine/src/lib/feature-flags/types.ts`         | Type definitions                         |
+| `packages/engine/src/lib/feature-flags/grafts.ts`        | `getEnabledGrafts()`, `isGraftEnabled()` |
+| `packages/engine/src/lib/feature-flags/evaluate.ts`      | Core evaluation logic                    |
+| `packages/engine/src/lib/feature-flags/greenhouse.ts`    | Greenhouse enrollment                    |
+| `packages/engine/src/lib/feature-flags/tenant-grafts.ts` | Self-serve controls                      |
+| `packages/engine/src/lib/feature-flags/admin.ts`         | Admin UI functions                       |
+| `docs/specs/grafts-spec.md`                              | Full specification                       |
 
 ---
 
@@ -374,19 +377,19 @@ VALUES ('premium_feature', 80, 'tier', '{"tiers": ["oak", "evergreen"]}', 'true'
 
 ## Vocabulary Quick Reference
 
-| Grove Term | Meaning |
-|------------|---------|
-| **Graft** | Enable a feature |
-| **Prune** | Disable a feature |
-| **Cultivate** | Full rollout (100%) |
-| **Propagate** | Gradual rollout (percentage) |
-| **Cultivars** | A/B test variants |
-| **Blight** | Emergency kill switch |
-| **Under glass** | Greenhouse-only feature |
-| **Transplant** | Move from greenhouse to production |
-| **Harden off** | Gradual rollout during transplant |
-| **Took** | Graft is active and working |
+| Grove Term      | Meaning                            |
+| --------------- | ---------------------------------- |
+| **Graft**       | Enable a feature                   |
+| **Prune**       | Disable a feature                  |
+| **Cultivate**   | Full rollout (100%)                |
+| **Propagate**   | Gradual rollout (percentage)       |
+| **Cultivars**   | A/B test variants                  |
+| **Blight**      | Emergency kill switch              |
+| **Under glass** | Greenhouse-only feature            |
+| **Transplant**  | Move from greenhouse to production |
+| **Harden off**  | Gradual rollout during transplant  |
+| **Took**        | Graft is active and working        |
 
 ---
 
-*For the complete specification, see `docs/specs/grafts-spec.md`.*
+_For the complete specification, see `docs/specs/grafts-spec.md`._

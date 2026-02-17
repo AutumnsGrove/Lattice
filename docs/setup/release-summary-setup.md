@@ -14,7 +14,7 @@ The release summary feature uses **DeepSeek V3.2** via OpenRouter to generate me
 
 ### Step 2: Add to GitHub Secrets
 
-1. Go to https://github.com/AutumnsGrove/GroveEngine
+1. Go to https://github.com/AutumnsGrove/Lattice
 2. Navigate to: **Settings → Secrets and variables → Actions**
 3. Click **"New repository secret"**
 4. Name: `OPENROUTER_API_KEY`
@@ -51,6 +51,7 @@ Summaries appear on: https://grove.place/journey
 ## Fallback Behavior
 
 If the API key is missing or the call fails:
+
 - ⚠️ Warning logged in GitHub Actions
 - ✅ Basic summary generated (no LLM)
 - ✅ Workflow continues successfully
@@ -61,6 +62,7 @@ If the API key is missing or the call fails:
 Monitor your usage at: https://openrouter.ai/activity
 
 Expected costs:
+
 - Per release: ~$0.0005
 - Per year (50 releases): ~$0.025
 - First 10 releases: ~$0.005 (half a penny)
@@ -92,6 +94,7 @@ cp -r snapshots/summaries/* landing/static/data/summaries/
 **Problem:** Summaries not appearing on roadmap page
 
 **Solutions:**
+
 1. Check if `OPENROUTER_API_KEY` is set in GitHub Secrets
 2. Look for errors in GitHub Actions logs
 3. Verify files exist in `snapshots/summaries/`

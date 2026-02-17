@@ -7,7 +7,7 @@
  * with their token pre-attached, so their email is pre-filled.
  */
 
-import { ZephyrClient } from "@autumnsgrove/groveengine/zephyr";
+import { ZephyrClient } from "@autumnsgrove/lattice/zephyr";
 
 const DEFAULT_ZEPHYR_URL = "https://grove-zephyr.m7jv4v7npb.workers.dev";
 

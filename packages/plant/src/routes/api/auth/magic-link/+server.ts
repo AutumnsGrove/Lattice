@@ -9,7 +9,7 @@
 
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { AUTH_HUB_URL } from "@autumnsgrove/groveengine/config";
+import { AUTH_HUB_URL } from "@autumnsgrove/lattice/config";
 
 interface MagicLinkRequest {
   email: string;

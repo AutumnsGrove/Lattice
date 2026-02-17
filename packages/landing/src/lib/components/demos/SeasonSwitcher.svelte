@@ -4,7 +4,7 @@
   Pure client-side, no API dependencies.
 -->
 <script lang="ts">
-	import type { Season } from '@autumnsgrove/groveengine/ui/nature';
+	import type { Season } from '@autumnsgrove/lattice/ui/nature';
 	import {
 		TreePine,
 		TreeCherry,
@@ -18,7 +18,7 @@
 		Leaf,
 		Fern,
 		Rock
-	} from '@autumnsgrove/groveengine/ui/nature';
+	} from '@autumnsgrove/lattice/ui/nature';
 
 	let season = $state<Season>('autumn');
 

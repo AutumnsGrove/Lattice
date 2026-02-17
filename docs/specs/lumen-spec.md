@@ -4,7 +4,7 @@ description: Unified AI routing layer with task-based provider selection and obs
 category: specs
 specCategory: operations
 icon: lamp-ceiling
-lastUpdated: '2026-01-29'
+lastUpdated: "2026-01-29"
 aliases: []
 tags:
   - ai-integration
@@ -163,14 +163,14 @@ Lumen routes requests based on task type, selecting the optimal model for each j
 
 ### Task Registry
 
-| Task         | Primary Model    | Provider   | Fallback Chain                       | Use Case              |
-| ------------ | ---------------- | ---------- | ------------------------------------ | --------------------- |
-| `moderation` | LlamaGuard 4 12B | OpenRouter | LlamaGuard 3 (CF) → ShieldGemma (CF) | Content safety checks |
-| `generation` | DeepSeek v3.2    | OpenRouter | Kimi K2 → Llama 3.3 70B              | Long-form writing     |
-| `summary`    | DeepSeek v3.2    | OpenRouter | Kimi K2 → Llama 3.3 70B              | Summarization         |
-| `embedding`  | BGE-M3           | OpenRouter | Qwen3 Embed → BGE Base (CF)          | Vector embeddings     |
-| `chat`       | DeepSeek v3.2    | OpenRouter | Kimi K2 → Llama 3.3 70B              | Conversational        |
-| `image`      | Gemini 2.5 Flash | OpenRouter | Claude Haiku 4.5                     | Image analysis        |
+| Task            | Primary Model          | Provider      | Fallback Chain                       | Use Case              |
+| --------------- | ---------------------- | ------------- | ------------------------------------ | --------------------- |
+| `moderation`    | LlamaGuard 4 12B       | OpenRouter    | LlamaGuard 3 (CF) → ShieldGemma (CF) | Content safety checks |
+| `generation`    | DeepSeek v3.2          | OpenRouter    | Kimi K2 → Llama 3.3 70B              | Long-form writing     |
+| `summary`       | DeepSeek v3.2          | OpenRouter    | Kimi K2 → Llama 3.3 70B              | Summarization         |
+| `embedding`     | BGE-M3                 | OpenRouter    | Qwen3 Embed → BGE Base (CF)          | Vector embeddings     |
+| `chat`          | DeepSeek v3.2          | OpenRouter    | Kimi K2 → Llama 3.3 70B              | Conversational        |
+| `image`         | Gemini 2.5 Flash       | OpenRouter    | Claude Haiku 4.5                     | Image analysis        |
 | `code`          | DeepSeek v3.2          | OpenRouter    | Claude Haiku 4.5 → Kimi K2           | Code generation       |
 | `transcription` | Whisper Large v3 Turbo | Cloudflare AI | Whisper → Whisper Tiny EN            | Voice-to-text         |
 
@@ -240,7 +240,7 @@ type TaskType =
 ### Usage Examples
 
 ```typescript
-import { Lumen } from "@autumnsgrove/groveengine/lumen";
+import { Lumen } from "@autumnsgrove/lattice/lumen";
 
 // Content moderation (Thorn)
 const safety = await Lumen.inference({

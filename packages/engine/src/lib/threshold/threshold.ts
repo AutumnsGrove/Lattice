@@ -6,7 +6,7 @@
  *
  * @example
  * ```typescript
- * import { Threshold, ThresholdKVStore } from "@autumnsgrove/groveengine/threshold";
+ * import { Threshold, ThresholdKVStore } from "@autumnsgrove/lattice/threshold";
  *
  * const threshold = new Threshold({
  *   store: new ThresholdKVStore(platform.env.CACHE),

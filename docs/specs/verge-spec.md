@@ -4,7 +4,7 @@ description: Serverless autonomous coding agent on transient VPS
 category: specs
 specCategory: standalone-tools
 icon: loader
-lastUpdated: '2026-02-02'
+lastUpdated: "2026-02-02"
 aliases: []
 tags:
   - remote-coding
@@ -46,7 +46,7 @@ tags:
                          Brief, brilliant, gone.
 ```
 
-> *Brief, brilliant, gone.*
+> _Brief, brilliant, gone._
 
 Grove's serverless remote coding infrastructure. Send your code through the Verge—into ephemeral compute spinning up in another dimension. AI coding agents work autonomously, transforming what you sent. Then the Verge closes and your code returns more beautiful than you expected.
 
@@ -136,7 +136,7 @@ Verge is Grove's serverless remote coding infrastructure. It spins up temporary 
                           │  └─────────────────────────────┘    │
                           │                                     │
                           │  /workspace/                        │
-                          │  ├── GroveEngine/                   │
+                          │  ├── Lattice/                   │
                           │  ├── GroveAuth/                     │
                           │  ├── ... (configured repos)         │
                           │  └── .verge/ (agent state)          │
@@ -149,17 +149,17 @@ Verge is Grove's serverless remote coding infrastructure. It spins up temporary 
 
 ## Technology Stack
 
-| Component | Choice | Reason |
-|-----------|--------|--------|
-| **Frontend** | SvelteKit (GroveEngine patterns) | Consistent with Grove ecosystem, mobile-first capable |
-| **Orchestrator** | Cloudflare Workers | Zero cold-start, handles auth, Hetzner API, WebSocket proxy |
-| **Auth** | Heartwood (GroveAuth) | Existing OAuth 2.0 + PKCE, admin-only access |
-| **Compute** | Hetzner Cloud (CX33/CPX31) | Cheapest robust option (~€0.008/hr EU). Fast provisioning. |
-| **Storage** | Cloudflare R2 | Repos, node_modules, workspace state. No Hetzner Volume. |
-| **Database** | Cloudflare D1 | Session history, config, cost tracking |
-| **Agent** | Kilo Code CLI | Open source, 500+ models, autonomous mode, multi-mode |
-| **Inference** | OpenRouter | Single API key for DeepSeek V3.2 + GLM 4.6V (swappable) |
-| **Terminal** | ttyd | Web terminal over HTTPS/WebSocket. Mobile-friendly. |
+| Component        | Choice                       | Reason                                                      |
+| ---------------- | ---------------------------- | ----------------------------------------------------------- |
+| **Frontend**     | SvelteKit (Lattice patterns) | Consistent with Grove ecosystem, mobile-first capable       |
+| **Orchestrator** | Cloudflare Workers           | Zero cold-start, handles auth, Hetzner API, WebSocket proxy |
+| **Auth**         | Heartwood (GroveAuth)        | Existing OAuth 2.0 + PKCE, admin-only access                |
+| **Compute**      | Hetzner Cloud (CX33/CPX31)   | Cheapest robust option (~€0.008/hr EU). Fast provisioning.  |
+| **Storage**      | Cloudflare R2                | Repos, node_modules, workspace state. No Hetzner Volume.    |
+| **Database**     | Cloudflare D1                | Session history, config, cost tracking                      |
+| **Agent**        | Kilo Code CLI                | Open source, 500+ models, autonomous mode, multi-mode       |
+| **Inference**    | OpenRouter                   | Single API key for DeepSeek V3.2 + GLM 4.6V (swappable)     |
+| **Terminal**     | ttyd                         | Web terminal over HTTPS/WebSocket. Mobile-friendly.         |
 
 ---
 
@@ -167,10 +167,10 @@ Verge is Grove's serverless remote coding infrastructure. It spins up temporary 
 
 Verge uses a dual-model approach via OpenRouter for cost-efficiency:
 
-| Mode | Model | Purpose | Pricing (per 1M tokens) |
-|------|-------|---------|-------------------------|
+| Mode               | Model                           | Purpose                                 | Pricing (per 1M tokens)    |
+| ------------------ | ------------------------------- | --------------------------------------- | -------------------------- |
 | **Reasoning/Code** | `deepseek/deepseek-chat` (V3.2) | Planning, architecture, code generation | $0.28 input / $0.42 output |
-| **Vision** | `z-ai/glm-4.6v` | Screenshot analysis, UI understanding | $0.30 input / $0.90 output |
+| **Vision**         | `z-ai/glm-4.6v`                 | Screenshot analysis, UI understanding   | $0.30 input / $0.90 output |
 
 ### Kilo Code Configuration
 
@@ -227,16 +227,16 @@ Projects to clone and maintain in the workspace. Edit this section to add/remove
 
 <!-- REPO_MANIFEST_START -->
 
-| Repository | Branch | Path | Notes |
-|------------|--------|------|-------|
-| `AutumnsGrove/GroveEngine` | `main` | `/workspace/GroveEngine` | Core blog engine, Lattice |
-| `AutumnsGrove/GroveAuth` | `main` | `/workspace/GroveAuth` | Heartwood auth service |
-| | | | |
-| | | | |
-| | | | |
-| | | | |
-| | | | |
-| | | | |
+| Repository               | Branch | Path                   | Notes                     |
+| ------------------------ | ------ | ---------------------- | ------------------------- |
+| `AutumnsGrove/Lattice`   | `main` | `/workspace/Lattice`   | Core blog engine, Lattice |
+| `AutumnsGrove/GroveAuth` | `main` | `/workspace/GroveAuth` | Heartwood auth service    |
+|                          |        |                        |                           |
+|                          |        |                        |                           |
+|                          |        |                        |                           |
+|                          |        |                        |                           |
+|                          |        |                        |                           |
+|                          |        |                        |                           |
 
 <!-- REPO_MANIFEST_END -->
 
@@ -254,7 +254,7 @@ Pre-cloned repositories with dependencies installed:
 
 ```
 verge-repos/
-├── GroveEngine/
+├── Lattice/
 │   ├── .git/
 │   ├── node_modules.tar.gz      # Compressed for faster sync
 │   ├── packages/
@@ -285,12 +285,14 @@ verge-state/
 ### Sync Strategy
 
 **On Boot:**
+
 1. Pull repos from `verge-repos/`
 2. Extract `node_modules.tar.gz` for each project
 3. `git fetch && git pull` for latest changes
 4. Restore Kilo context from `verge-state/kilo/`
 
 **On Shutdown:**
+
 1. Commit and push any uncommitted changes (with user confirmation option)
 2. Compress updated `node_modules` if changed
 3. Snapshot workspace to `verge-state/`
@@ -298,6 +300,7 @@ verge-state/
 5. Delete VPS
 
 **Estimated Sync Times:**
+
 - Cold boot (no cache): ~2-3 minutes
 - Warm boot (cached): ~30-60 seconds
 
@@ -352,11 +355,11 @@ verge-state/
 
 ### Shutdown Triggers
 
-| Trigger | Behavior | Default |
-|---------|----------|---------|
-| **Manual Stop** | User clicks "Close Verge" in dashboard | Always available |
-| **Idle Timeout** | No terminal activity for X minutes | 2 hours (configurable) |
-| **Task Completion** | Kilo signals task done via exit code or webhook | Enabled |
+| Trigger             | Behavior                                        | Default                |
+| ------------------- | ----------------------------------------------- | ---------------------- |
+| **Manual Stop**     | User clicks "Close Verge" in dashboard          | Always available       |
+| **Idle Timeout**    | No terminal activity for X minutes              | 2 hours (configurable) |
+| **Task Completion** | Kilo signals task done via exit code or webhook | Enabled                |
 
 ### Shutdown Flow
 
@@ -375,10 +378,10 @@ verge-state/
 
 ## Cost Comparison: EU vs US
 
-| Location | Instance | Specs | Hourly | Monthly Cap | 100 hrs Est. | Latency to GA |
-|----------|----------|-------|--------|-------------|--------------|---------------|
-| **EU (Falkenstein)** | CX33 | 4 vCPU, 8GB, 80GB NVMe | €0.008 (~$0.0085) | €5.49 (~$5.80) | **~$0.85** | ~90-100ms |
-| **US (Ashburn)** | CPX31 | 4 vCPU, 8GB, 160GB NVMe | €0.0211 (~$0.022) | €13.93 (~$14.70) | **~$2.20** | ~20-30ms |
+| Location             | Instance | Specs                   | Hourly            | Monthly Cap      | 100 hrs Est. | Latency to GA |
+| -------------------- | -------- | ----------------------- | ----------------- | ---------------- | ------------ | ------------- |
+| **EU (Falkenstein)** | CX33     | 4 vCPU, 8GB, 80GB NVMe  | €0.008 (~$0.0085) | €5.49 (~$5.80)   | **~$0.85**   | ~90-100ms     |
+| **US (Ashburn)**     | CPX31    | 4 vCPU, 8GB, 160GB NVMe | €0.0211 (~$0.022) | €13.93 (~$14.70) | **~$2.20**   | ~20-30ms      |
 
 ### Region Toggle
 
@@ -393,10 +396,10 @@ The dashboard includes a **region selector** for cost vs latency tradeoffs:
 
 ### Cloudflare DNS Records
 
-| Type | Name | Content | Proxy | TTL | Notes |
-|------|------|---------|-------|-----|-------|
-| A | verge | `<VPS_IP>` | ❌ DNS only | 60s | Updated by worker on boot |
-| CNAME | verge (offline) | verge-offline.pages.dev | ✅ Proxied | Auto | When VPS is down |
+| Type  | Name            | Content                 | Proxy       | TTL  | Notes                     |
+| ----- | --------------- | ----------------------- | ----------- | ---- | ------------------------- |
+| A     | verge           | `<VPS_IP>`              | ❌ DNS only | 60s  | Updated by worker on boot |
+| CNAME | verge (offline) | verge-offline.pages.dev | ✅ Proxied  | Auto | When VPS is down          |
 
 **Connection**: `verge.grove.place` for both dashboard and terminal.
 
@@ -470,7 +473,7 @@ Get current session status.
     "thisMonth": 0.45
   },
   "workspace": {
-    "activeProject": "GroveEngine",
+    "activeProject": "Lattice",
     "uncommittedChanges": 3,
     "lastSync": "2025-01-15T12:00:00Z"
   }
@@ -506,8 +509,8 @@ List available projects in workspace.
 {
   "projects": [
     {
-      "name": "GroveEngine",
-      "path": "/workspace/GroveEngine",
+      "name": "Lattice",
+      "path": "/workspace/Lattice",
       "branch": "main",
       "uncommittedChanges": 0,
       "lastCommit": "abc123"
@@ -579,12 +582,12 @@ Update Verge configuration.
 
 ### Webhook Endpoints (Internal)
 
-| Endpoint | Purpose |
-|----------|---------|
-| `POST /webhook/ready` | VPS signals boot complete |
-| `POST /webhook/heartbeat` | Daemon reports status |
-| `POST /webhook/task-complete` | Agent signals task done |
-| `POST /webhook/idle-timeout` | Daemon triggers shutdown |
+| Endpoint                      | Purpose                   |
+| ----------------------------- | ------------------------- |
+| `POST /webhook/ready`         | VPS signals boot complete |
+| `POST /webhook/heartbeat`     | Daemon reports status     |
+| `POST /webhook/task-complete` | Agent signals task done   |
+| `POST /webhook/idle-timeout`  | Daemon triggers shutdown  |
 
 ---
 
@@ -639,12 +642,12 @@ Update Verge configuration.
 │  └─────────────────────────────────────────────────────────┘    │
 │                                                                 │
 │  ┌─────────────────────────────────────────────────────────┐    │
-│  │ Project: GroveEngine ▾                    [Sync]        │    │
+│  │ Project: Lattice ▾                    [Sync]        │    │
 │  └─────────────────────────────────────────────────────────┘    │
 │                                                                 │
 │  ┌─────────────────────────────────────────────────────────┐    │
 │  │ ┌─────────────────────────────────────────────────────┐ │    │
-│  │ │ ~/workspace/GroveEngine $ kilocode                  │ │    │
+│  │ │ ~/workspace/Lattice $ kilocode                  │ │    │
 │  │ │                                                     │ │    │
 │  │ │ 🤖 Kilo Code v2.1.0                                 │ │    │
 │  │ │ Model: deepseek/deepseek-chat                       │ │    │
@@ -691,7 +694,7 @@ Update Verge configuration.
 │                                                                 │
 │  ── Projects ────────────────────────────────────────────────   │
 │                                                                 │
-│  GroveEngine        main    [Edit] [Remove]                     │
+│  Lattice        main    [Edit] [Remove]                     │
 │  GroveAuth          main    [Edit] [Remove]                     │
 │  + Add Project                                                  │
 │                                                                 │
@@ -797,7 +800,7 @@ packages:
 write_files:
   # Verge daemon script
   - path: /opt/verge/daemon.sh
-    permissions: '0755'
+    permissions: "0755"
     content: |
       #!/bin/bash
       # Verge Daemon - monitors activity and handles shutdown triggers
@@ -857,7 +860,7 @@ write_files:
 
   # Sync script
   - path: /opt/verge/sync-to-r2.sh
-    permissions: '0755'
+    permissions: "0755"
     content: |
       #!/bin/bash
       # Sync workspace to R2
@@ -925,7 +928,7 @@ write_files:
 
   # ttyd activity wrapper
   - path: /opt/verge/ttyd-wrapper.sh
-    permissions: '0755'
+    permissions: "0755"
     content: |
       #!/bin/bash
       # Wrapper that updates activity timestamp on input
@@ -1106,6 +1109,7 @@ fi
 ## Implementation Checklist
 
 ### Phase 1: Cloudflare Setup
+
 - [ ] Create R2 bucket: `verge-repos`
 - [ ] Create R2 bucket: `verge-state`
 - [ ] Create D1 database: `verge-db`
@@ -1114,6 +1118,7 @@ fi
 - [ ] Note Zone ID and create API token for DNS updates
 
 ### Phase 2: Prepare Initial Repos
+
 - [ ] Clone configured repos locally
 - [ ] Install node_modules for each
 - [ ] Compress and upload to `verge-repos`
@@ -1121,12 +1126,14 @@ fi
 - [ ] Upload to R2
 
 ### Phase 3: Hetzner Setup
+
 - [ ] Create Hetzner Cloud account (if not exists)
 - [ ] Generate API token
 - [ ] Add SSH key
 - [ ] Test API with both regions
 
 ### Phase 4: Worker Development
+
 - [ ] Create `verge-control` worker
 - [ ] `POST /start` — provision VPS
 - [ ] `POST /stop` — graceful shutdown
@@ -1141,7 +1148,8 @@ fi
 - [ ] WebSocket proxy for terminal
 
 ### Phase 5: Dashboard (SvelteKit)
-- [ ] Initialize SvelteKit project with GroveEngine patterns
+
+- [ ] Initialize SvelteKit project with Lattice patterns
 - [ ] Heartwood auth integration
 - [ ] Main view (offline state)
 - [ ] Running view (terminal embed)
@@ -1153,6 +1161,7 @@ fi
 - [ ] Mobile-responsive design
 
 ### Phase 6: VPS Scripts
+
 - [ ] Write cloud-init YAML
 - [ ] Write `daemon.sh` (idle detection, heartbeat)
 - [ ] Write `sync-to-r2.sh`
@@ -1160,6 +1169,7 @@ fi
 - [ ] Test on throwaway Hetzner server
 
 ### Phase 7: Testing
+
 - [ ] Full boot cycle (EU)
 - [ ] Full boot cycle (US)
 - [ ] R2 sync (up and down)
@@ -1172,6 +1182,7 @@ fi
 - [ ] Kilo Code autonomous mode
 
 ### Phase 8: Polish
+
 - [ ] Error handling and retries
 - [ ] Loading states
 - [ ] Toast notifications
@@ -1184,66 +1195,66 @@ fi
 
 ### Compute (Hetzner)
 
-| Usage | EU (CX33) | US (CPX31) |
-|-------|-----------|------------|
-| 10 hrs | ~$0.09 | ~$0.22 |
-| 25 hrs | ~$0.21 | ~$0.55 |
-| 50 hrs | ~$0.43 | ~$1.10 |
-| 100 hrs | ~$0.85 | ~$2.20 |
+| Usage   | EU (CX33) | US (CPX31) |
+| ------- | --------- | ---------- |
+| 10 hrs  | ~$0.09    | ~$0.22     |
+| 25 hrs  | ~$0.21    | ~$0.55     |
+| 50 hrs  | ~$0.43    | ~$1.10     |
+| 100 hrs | ~$0.85    | ~$2.20     |
 
 ### Storage (R2)
 
-| Data | Monthly Cost |
-|------|--------------|
-| 5GB repos + modules | ~$0.08 |
-| 2GB state/snapshots | ~$0.03 |
-| **Total** | **~$0.11** |
+| Data                | Monthly Cost |
+| ------------------- | ------------ |
+| 5GB repos + modules | ~$0.08       |
+| 2GB state/snapshots | ~$0.03       |
+| **Total**           | **~$0.11**   |
 
 ### AI (OpenRouter)
 
-| Usage | DeepSeek V3.2 | GLM 4.6V | Total |
-|-------|---------------|----------|-------|
-| Light (500K tokens) | ~$0.20 | ~$0.05 | ~$0.25 |
-| Medium (2M tokens) | ~$0.80 | ~$0.20 | ~$1.00 |
-| Heavy (5M tokens) | ~$2.00 | ~$0.50 | ~$2.50 |
+| Usage               | DeepSeek V3.2 | GLM 4.6V | Total  |
+| ------------------- | ------------- | -------- | ------ |
+| Light (500K tokens) | ~$0.20        | ~$0.05   | ~$0.25 |
+| Medium (2M tokens)  | ~$0.80        | ~$0.20   | ~$1.00 |
+| Heavy (5M tokens)   | ~$2.00        | ~$0.50   | ~$2.50 |
 
 ### Total Estimates
 
-| Scenario | Compute | Storage | AI | **Total** |
-|----------|---------|---------|-----|-----------|
-| Light (10hr, 500K tok) | $0.09 | $0.11 | $0.25 | **~$0.45** |
-| Medium (25hr, 2M tok) | $0.21 | $0.11 | $1.00 | **~$1.32** |
-| Heavy (50hr, 5M tok) | $0.43 | $0.11 | $2.50 | **~$3.04** |
+| Scenario               | Compute | Storage | AI    | **Total**  |
+| ---------------------- | ------- | ------- | ----- | ---------- |
+| Light (10hr, 500K tok) | $0.09   | $0.11   | $0.25 | **~$0.45** |
+| Medium (25hr, 2M tok)  | $0.21   | $0.11   | $1.00 | **~$1.32** |
+| Heavy (50hr, 5M tok)   | $0.43   | $0.11   | $2.50 | **~$3.04** |
 
 ---
 
 ## Quick Reference
 
-| Action | Method | Endpoint |
-|--------|--------|----------|
-| Open Verge | POST | `/api/start` |
-| Close Verge | POST | `/api/stop` |
-| Get status | GET | `/api/status` |
-| Send task | POST | `/api/task` |
-| List projects | GET | `/api/projects` |
-| Manual sync | POST | `/api/sync` |
-| Session history | GET | `/api/history` |
-| Update config | POST | `/api/config` |
+| Action          | Method | Endpoint        |
+| --------------- | ------ | --------------- |
+| Open Verge      | POST   | `/api/start`    |
+| Close Verge     | POST   | `/api/stop`     |
+| Get status      | GET    | `/api/status`   |
+| Send task       | POST   | `/api/task`     |
+| List projects   | GET    | `/api/projects` |
+| Manual sync     | POST   | `/api/sync`     |
+| Session history | GET    | `/api/history`  |
+| Update config   | POST   | `/api/config`   |
 
-| Shutdown Trigger | Default | Behavior |
-|------------------|---------|----------|
-| Manual | Always | User clicks Close |
-| Idle Timeout | 2 hours | No terminal activity |
-| Task Complete | Enabled | Kilo exits with code 0 |
+| Shutdown Trigger | Default | Behavior               |
+| ---------------- | ------- | ---------------------- |
+| Manual           | Always  | User clicks Close      |
+| Idle Timeout     | 2 hours | No terminal activity   |
+| Task Complete    | Enabled | Kilo exits with code 0 |
 
-| State | VPS | Services | Billing |
-|-------|-----|----------|---------|
-| OFFLINE | ❌ | ❌ | ❌ |
-| PROVISIONING | 🔄 | 🔄 | ✅ |
-| RUNNING | ✅ | ✅ | ✅ |
-| IDLE | ✅ | ✅ | ✅ |
-| SYNCING | ✅ | 🔄 | ✅ |
-| TERMINATING | 🔄 | ❌ | ✅ |
+| State        | VPS | Services | Billing |
+| ------------ | --- | -------- | ------- |
+| OFFLINE      | ❌  | ❌       | ❌      |
+| PROVISIONING | 🔄  | 🔄       | ✅      |
+| RUNNING      | ✅  | ✅       | ✅      |
+| IDLE         | ✅  | ✅       | ✅      |
+| SYNCING      | ✅  | 🔄       | ✅      |
+| TERMINATING  | 🔄  | ❌       | ✅      |
 
 ---
 
@@ -1260,7 +1271,7 @@ fi
 
 ---
 
-*You send it through. It comes back transformed.*
+_You send it through. It comes back transformed._
 
-*Last updated: February 2026*
-*Status: Specification complete, ready for implementation*
+_Last updated: February 2026_
+_Status: Specification complete, ready for implementation_

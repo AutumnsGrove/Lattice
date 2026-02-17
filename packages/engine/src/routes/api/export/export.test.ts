@@ -56,7 +56,7 @@ describe("Export Rate Limiting", () => {
    */
   const checkRateLimit = (
     data: RateLimitData | null,
-    now: number
+    now: number,
   ): { allowed: boolean; remaining: number; resetAt: number } => {
     if (!data || now - data.windowStart >= RATE_LIMIT_WINDOW_SECONDS) {
       // New window - reset counter
@@ -354,7 +354,9 @@ describe("Export CSRF Protection", () => {
       if (!origin) return false;
       try {
         const originUrl = new URL(origin);
-        return originUrl.host === host || originUrl.hostname.endsWith(".grove.place");
+        return (
+          originUrl.host === host || originUrl.hostname.endsWith(".grove.place")
+        );
       } catch {
         return false;
       }
@@ -362,7 +364,9 @@ describe("Export CSRF Protection", () => {
 
     // Valid origins
     expect(validateCSRF("https://grove.place", "grove.place")).toBe(true);
-    expect(validateCSRF("https://alice.grove.place", "alice.grove.place")).toBe(true);
+    expect(validateCSRF("https://alice.grove.place", "alice.grove.place")).toBe(
+      true,
+    );
 
     // Invalid origins
     expect(validateCSRF(null, "grove.place")).toBe(false);

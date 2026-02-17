@@ -1,7 +1,7 @@
 /**
  * Vitest Setup File
  *
- * Configures global mocks and test environment for GroveEngine tests.
+ * Configures global mocks and test environment for Lattice tests.
  *
  * Note: We export the mock environment directly rather than using vi.mock()
  * because vi.mock() doesn't work with dynamic require() calls. The test helpers

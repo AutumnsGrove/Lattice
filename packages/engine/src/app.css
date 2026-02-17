@@ -3,135 +3,135 @@
 @tailwind utilities;
 
 @layer base {
-	:root {
-		/* shadcn HSL color system - AutumnsGrove color mapping */
+  :root {
+    /* shadcn HSL color system - AutumnsGrove color mapping */
 
-		/* Primary: Forest Green (#2c5f2d) */
-		--primary: 121 37% 27%;
-		--primary-foreground: 0 0% 100%;
+    /* Primary: Forest Green (#2c5f2d) */
+    --primary: 121 37% 27%;
+    --primary-foreground: 0 0% 100%;
 
-		/* Secondary: Light Gray (#f5f5f5) */
-		--secondary: 0 0% 96%;
-		--secondary-foreground: 0 0% 20%;
+    /* Secondary: Light Gray (#f5f5f5) */
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 20%;
 
-		/* Muted: Medium Gray */
-		--muted: 0 0% 96%;
-		--muted-foreground: 25 32% 33%;
+    /* Muted: Medium Gray */
+    --muted: 0 0% 96%;
+    --muted-foreground: 25 32% 33%;
 
-		/* Accent: Purple for tags (#7c4dab) */
-		--accent: 270 38% 49%;
-		--accent-foreground: 0 0% 100%;
+    /* Accent: Purple for tags (#7c4dab) */
+    --accent: 270 38% 49%;
+    --accent-foreground: 0 0% 100%;
 
-		/* Destructive: Red (#d73a49) */
-		--destructive: 354 66% 54%;
-		--destructive-foreground: 0 0% 100%;
+    /* Destructive: Red (#d73a49) */
+    --destructive: 354 66% 54%;
+    --destructive-foreground: 0 0% 100%;
 
-		/* Background & Foreground */
-		--background: 0 0% 98%;
-		--foreground: 0 0% 20%;
-		--foreground-muted: 25 30% 38%;
-		--foreground-subtle: 25 25% 45%;
+    /* Background & Foreground */
+    --background: 0 0% 98%;
+    --foreground: 0 0% 20%;
+    --foreground-muted: 25 30% 38%;
+    --foreground-subtle: 25 25% 45%;
 
-		/* Card */
-		--card: 0 0% 100%;
-		--card-foreground: 0 0% 20%;
+    /* Card */
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 20%;
 
-		/* Popover */
-		--popover: 0 0% 100%;
-		--popover-foreground: 0 0% 20%;
+    /* Popover */
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 20%;
 
-		/* Surface: component backgrounds */
-		--surface: 0 0% 100%;
-		--surface-hover: 30 10% 96%;
-		--surface-elevated: 0 0% 100%;
-		--surface-subtle: 30 15% 97%;
-		--surface-alt: 30 10% 95%;
+    /* Surface: component backgrounds */
+    --surface: 0 0% 100%;
+    --surface-hover: 30 10% 96%;
+    --surface-elevated: 0 0% 100%;
+    --surface-subtle: 30 15% 97%;
+    --surface-alt: 30 10% 95%;
 
-		/* Accent extensions */
-		--accent-muted: 121 37% 32%;
-		--accent-subtle: 121 40% 92%;
+    /* Accent extensions */
+    --accent-muted: 121 37% 32%;
+    --accent-subtle: 121 40% 92%;
 
-		/* Border & Input */
-		--border: 0 0% 88%;
-		--input: 0 0% 88%;
-		--ring: 121 37% 27%;
-		--default: 0 0% 88%;
-		--subtle: 0 0% 92%;
+    /* Border & Input */
+    --border: 0 0% 88%;
+    --input: 0 0% 88%;
+    --ring: 121 37% 27%;
+    --default: 0 0% 88%;
+    --subtle: 0 0% 92%;
 
-		/* Foreground extensions */
-		--foreground-faint: 25 15% 62%;
+    /* Foreground extensions */
+    --foreground-faint: 25 15% 62%;
 
-		/* Border Radius */
-		--radius: 0.5rem;
-	}
+    /* Border Radius */
+    --radius: 0.5rem;
+  }
 
-	.dark {
-		/* Dark mode HSL values */
+  .dark {
+    /* Dark mode HSL values */
 
-		/* Primary: Lighter Forest Green */
-		--primary: 121 37% 45%;
-		--primary-foreground: 0 0% 100%;
+    /* Primary: Lighter Forest Green */
+    --primary: 121 37% 45%;
+    --primary-foreground: 0 0% 100%;
 
-		/* Secondary: Dark Gray */
-		--secondary: 0 0% 10%;
-		--secondary-foreground: 0 0% 90%;
+    /* Secondary: Dark Gray */
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 90%;
 
-		/* Muted: Darker Gray */
-		--muted: 0 0% 15%;
-		--muted-foreground: 30 6% 75%;
+    /* Muted: Darker Gray */
+    --muted: 0 0% 15%;
+    --muted-foreground: 30 6% 75%;
 
-		/* Accent: Lighter Purple for tags */
-		--accent: 270 38% 60%;
-		--accent-foreground: 0 0% 100%;
+    /* Accent: Lighter Purple for tags */
+    --accent: 270 38% 60%;
+    --accent-foreground: 0 0% 100%;
 
-		/* Destructive: Same red */
-		--destructive: 354 66% 54%;
-		--destructive-foreground: 0 0% 100%;
+    /* Destructive: Same red */
+    --destructive: 354 66% 54%;
+    --destructive-foreground: 0 0% 100%;
 
-		/* Background & Foreground */
-		--background: 0 0% 10%;
-		--foreground: 0 0% 94%;
-		--foreground-muted: 30 6% 65%;
-		--foreground-subtle: 30 5% 58%;
+    /* Background & Foreground */
+    --background: 0 0% 10%;
+    --foreground: 0 0% 94%;
+    --foreground-muted: 30 6% 65%;
+    --foreground-subtle: 30 5% 58%;
 
-		/* Card */
-		--card: 0 0% 14%;
-		--card-foreground: 0 0% 94%;
+    /* Card */
+    --card: 0 0% 14%;
+    --card-foreground: 0 0% 94%;
 
-		/* Popover */
-		--popover: 0 0% 14%;
-		--popover-foreground: 0 0% 94%;
+    /* Popover */
+    --popover: 0 0% 14%;
+    --popover-foreground: 0 0% 94%;
 
-		/* Surface: component backgrounds */
-		--surface: 0 0% 12%;
-		--surface-hover: 0 0% 18%;
-		--surface-elevated: 0 0% 16%;
-		--surface-subtle: 0 0% 14%;
-		--surface-alt: 0 0% 16%;
+    /* Surface: component backgrounds */
+    --surface: 0 0% 12%;
+    --surface-hover: 0 0% 18%;
+    --surface-elevated: 0 0% 16%;
+    --surface-subtle: 0 0% 14%;
+    --surface-alt: 0 0% 16%;
 
-		/* Accent extensions */
-		--accent-muted: 121 45% 55%;
-		--accent-subtle: 121 25% 20%;
+    /* Accent extensions */
+    --accent-muted: 121 45% 55%;
+    --accent-subtle: 121 25% 20%;
 
-		/* Border & Input */
-		--border: 0 0% 20%;
-		--input: 0 0% 20%;
-		--ring: 121 37% 45%;
-		--default: 0 0% 20%;
-		--subtle: 0 0% 16%;
+    /* Border & Input */
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 121 37% 45%;
+    --default: 0 0% 20%;
+    --subtle: 0 0% 16%;
 
-		/* Foreground extensions */
-		--foreground-faint: 30 5% 45%;
-	}
+    /* Foreground extensions */
+    --foreground-faint: 30 5% 45%;
+  }
 }
 
 @layer base {
-	* {
-		@apply border-border;
-	}
-	body {
-		@apply bg-background text-foreground;
-	}
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
 
 /* ─────────────────────────────────────────────────────────────────
@@ -140,8 +140,8 @@
    ───────────────────────────────────────────────────────────────── */
 
 @layer utilities {
-	/* Text color utilities using HSL CSS variables */
-	.text-foreground-subtle {
-		color: hsl(var(--foreground-subtle));
-	}
+  /* Text color utilities using HSL CSS variables */
+  .text-foreground-subtle {
+    color: hsl(var(--foreground-subtle));
+  }
 }

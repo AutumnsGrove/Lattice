@@ -11,11 +11,13 @@ Unify the mobile sidebar experience across Grove properties by removing the inli
 ### Current State
 
 **Landing (grove.place)** uses chrome components:
-- Imports `Header` from `@autumnsgrove/groveengine/ui/chrome`
+
+- Imports `Header` from `@autumnsgrove/lattice/ui/chrome`
 - Header renders `MobileMenu.svelte` internally
 - Result: Beautiful glassmorphism slide-out panel with Lucide icons, organized sections (Resources, Connect), GroveDivider nature elements
 
-**Tenant sites (*.grove.place)** use inline implementation:
+**Tenant sites (\*.grove.place)** use inline implementation:
+
 - `packages/engine/src/routes/+layout.svelte` has ~100 lines of inline mobile menu code (lines 324-358)
 - Basic dropdown animation instead of slide-out
 - Plain text links, no icons, no sections, no glassmorphism
@@ -27,25 +29,27 @@ The chrome components exist and work beautifully. Tenants simply don't use them.
 
 ### Visual Comparison
 
-| Aspect | Landing (Chrome) | Tenant (Inline) |
-|--------|------------------|-----------------|
-| Animation | Slide-out from right | Dropdown from header |
-| Backdrop | Glassmorphism blur | Solid dark background |
-| Icons | Lucide icons per item | No icons |
-| Sections | Resources, Connect groups | Flat list |
-| Dividers | GroveDivider with nature elements | None |
-| Close button | Explicit X with label | Click outside only |
+| Aspect       | Landing (Chrome)                  | Tenant (Inline)       |
+| ------------ | --------------------------------- | --------------------- |
+| Animation    | Slide-out from right              | Dropdown from header  |
+| Backdrop     | Glassmorphism blur                | Solid dark background |
+| Icons        | Lucide icons per item             | No icons              |
+| Sections     | Resources, Connect groups         | Flat list             |
+| Dividers     | GroveDivider with nature elements | None                  |
+| Close button | Explicit X with label             | Click outside only    |
 
 ---
 
 ## Architectural Decision: Extend Chrome vs New Graft
 
 ### Option A: Create MobileMenuGraft
+
 - New abstraction layer in `src/lib/grafts/navigation/`
 - Variants for landing, tenant, minimal contexts
 - More flexibility, more code
 
 ### Option B: Extend Chrome (Recommended)
+
 - Add search support to existing Header component
 - Create tenant nav builder utility
 - Refactor tenant layout to use chrome
@@ -70,7 +74,7 @@ interface Props {
   resourceLinks?: FooterLink[];
   connectLinks?: FooterLink[];
   brandTitle?: string;
-  maxWidth?: 'default' | 'wide' | 'full';
+  maxWidth?: "default" | "wide" | "full";
 
   // NEW: Search support for tenant sites
   searchEnabled?: boolean;
@@ -80,6 +84,7 @@ interface Props {
 ```
 
 Implementation notes:
+
 - Search is opt-in (disabled by default for landing)
 - Search input appears in desktop nav and mobile menu
 - `onSearch` callback allows tenant to handle navigation
@@ -93,8 +98,8 @@ Implementation notes:
 Utility to transform tenant database data into `NavItem[]` format:
 
 ```typescript
-import type { NavItem } from './types';
-import { Home, BookOpen, Image, Clock, User } from 'lucide-svelte';
+import type { NavItem } from "./types";
+import { Home, BookOpen, Image, Clock, User } from "lucide-svelte";
 
 interface TenantNavPage {
   slug: string;
@@ -118,16 +123,16 @@ const PAGE_ICONS: Record<string, typeof Home> = {
 
 export function buildTenantNavItems(options: TenantNavOptions): NavItem[] {
   const items: NavItem[] = [
-    { href: '/', label: 'Home', icon: Home },
-    { href: '/blog', label: 'Blog', icon: BookOpen },
+    { href: "/", label: "Home", icon: Home },
+    { href: "/blog", label: "Blog", icon: BookOpen },
   ];
 
   // Add optional sections based on tenant config
   if (options.showTimeline) {
-    items.push({ href: '/timeline', label: 'Timeline', icon: Clock });
+    items.push({ href: "/timeline", label: "Timeline", icon: Clock });
   }
   if (options.showGallery) {
-    items.push({ href: '/gallery', label: 'Gallery', icon: Image });
+    items.push({ href: "/gallery", label: "Gallery", icon: Image });
   }
 
   // Add custom nav pages from database
@@ -140,7 +145,7 @@ export function buildTenantNavItems(options: TenantNavOptions): NavItem[] {
   }
 
   // About always last
-  items.push({ href: '/about', label: 'About', icon: User });
+  items.push({ href: "/about", label: "About", icon: User });
 
   return items;
 }
@@ -156,13 +161,13 @@ Add new exports:
 
 ```typescript
 // Existing exports...
-export { default as Header } from './Header.svelte';
-export { default as Footer } from './Footer.svelte';
-export { default as MobileMenu } from './MobileMenu.svelte';
+export { default as Header } from "./Header.svelte";
+export { default as Footer } from "./Footer.svelte";
+export { default as MobileMenu } from "./MobileMenu.svelte";
 
 // NEW: Tenant nav utility
-export { buildTenantNavItems } from './tenant-nav';
-export type { TenantNavOptions, TenantNavPage } from './tenant-nav';
+export { buildTenantNavItems } from "./tenant-nav";
+export type { TenantNavOptions, TenantNavPage } from "./tenant-nav";
 ```
 
 ---
@@ -210,7 +215,7 @@ This is the main change. Replace the inline header/mobile-menu implementation wi
 
 ```svelte
 <script lang="ts">
-  import { Header, Footer, buildTenantNavItems } from '@autumnsgrove/groveengine/ui/chrome';
+  import { Header, Footer, buildTenantNavItems } from '@autumnsgrove/lattice/ui/chrome';
   import { goto } from '$app/navigation';
 
   // ... existing data/props ...
@@ -246,6 +251,7 @@ This is the main change. Replace the inline header/mobile-menu implementation wi
 #### What Gets Removed
 
 From `+layout.svelte`:
+
 - Lines 324-358: Inline mobile menu HTML (~35 lines)
 - Lines 280-323: Inline desktop nav HTML (~45 lines)
 - Lines 600-765: Inline header/nav CSS (~165 lines)
@@ -275,6 +281,7 @@ The chrome MobileMenu shows "Resources" and "Connect" sections. For tenants, pas
 ```
 
 Alternatively, we could add boolean props to Header:
+
 ```typescript
 showResourcesSection?: boolean;  // default: true
 showConnectSection?: boolean;    // default: true
@@ -286,12 +293,12 @@ This makes the intent clearer than passing empty arrays.
 
 ## Files Summary
 
-| File | Action | Lines Changed |
-|------|--------|---------------|
-| `engine/.../chrome/Header.svelte` | MODIFY | +30 (search props) |
-| `engine/.../chrome/tenant-nav.ts` | CREATE | +45 |
-| `engine/.../chrome/index.ts` | MODIFY | +5 (exports) |
-| `engine/src/routes/+layout.svelte` | MODIFY | -295, +20 |
+| File                               | Action | Lines Changed      |
+| ---------------------------------- | ------ | ------------------ |
+| `engine/.../chrome/Header.svelte`  | MODIFY | +30 (search props) |
+| `engine/.../chrome/tenant-nav.ts`  | CREATE | +45                |
+| `engine/.../chrome/index.ts`       | MODIFY | +5 (exports)       |
+| `engine/src/routes/+layout.svelte` | MODIFY | -295, +20          |
 
 **Net change: ~245 fewer lines**
 
@@ -300,21 +307,25 @@ This makes the intent clearer than passing empty arrays.
 ## Migration Checklist
 
 ### Pre-Implementation
+
 - [ ] Read current `+layout.svelte` thoroughly
 - [ ] Identify all tenant-specific nav variations
 - [ ] Check if any tenants have custom nav pages in DB
 
 ### Phase 1: Chrome Extensions
+
 - [ ] Add `searchEnabled`, `searchPlaceholder`, `onSearch` props to Header
 - [ ] Add search input to Header (desktop and mobile)
 - [ ] Test search callback fires correctly
 
 ### Phase 2: Tenant Nav Utility
+
 - [ ] Create `tenant-nav.ts` with `buildTenantNavItems`
 - [ ] Add icon mapping for common page types
 - [ ] Export from chrome/index.ts
 
 ### Phase 3: Tenant Layout Refactor
+
 - [ ] Import Header from chrome
 - [ ] Replace inline header HTML with `<Header>`
 - [ ] Wire up search handler
@@ -323,6 +334,7 @@ This makes the intent clearer than passing empty arrays.
 - [ ] Remove inline CSS for header/nav/mobile-menu
 
 ### Phase 4: Testing
+
 - [ ] Test on tenant site (autumn.grove.place)
 - [ ] Verify mobile menu slides out (not drops down)
 - [ ] Verify icons appear on nav items
@@ -347,10 +359,12 @@ This makes the intent clearer than passing empty arrays.
   - Search hidden when `searchEnabled={false}` (default)
 
 **Test file locations:**
+
 - `packages/engine/src/lib/ui/components/chrome/tenant-nav.test.ts`
 - `packages/engine/src/lib/ui/components/chrome/Header.test.ts` (extend existing or create)
 
 ### Phase 6: Cleanup
+
 - [ ] Remove any orphaned CSS classes
 - [ ] Verify no console errors
 - [ ] Check accessibility (focus states, ARIA)
@@ -373,12 +387,12 @@ This makes the intent clearer than passing empty arrays.
 
 ## Risk Assessment
 
-| Risk | Mitigation |
-|------|------------|
-| Theme toggle breaks | Ensure themeStore is properly imported/used |
-| Search routing differs | Make onSearch callback flexible |
-| Tenant nav order changes | Match current order in buildTenantNavItems |
-| CSS specificity conflicts | Remove all inline CSS, rely on chrome |
+| Risk                       | Mitigation                                    |
+| -------------------------- | --------------------------------------------- |
+| Theme toggle breaks        | Ensure themeStore is properly imported/used   |
+| Search routing differs     | Make onSearch callback flexible               |
+| Tenant nav order changes   | Match current order in buildTenantNavItems    |
+| CSS specificity conflicts  | Remove all inline CSS, rely on chrome         |
 | Mobile menu z-index issues | Chrome uses `z-grove-mobile-menu` from preset |
 
 ---
@@ -386,6 +400,7 @@ This makes the intent clearer than passing empty arrays.
 ## Future Considerations
 
 After this unification:
+
 - All Grove properties use the same mobile navigation
 - Changes to MobileMenu.svelte benefit everyone
 - Tenant-specific features can be added via props
@@ -396,14 +411,17 @@ After this unification:
 ## Related Files Reference
 
 ### Chrome Components (the good ones)
+
 - `packages/engine/src/lib/ui/components/chrome/Header.svelte`
 - `packages/engine/src/lib/ui/components/chrome/MobileMenu.svelte`
 - `packages/engine/src/lib/ui/components/chrome/types.ts`
 - `packages/engine/src/lib/ui/components/chrome/defaults.ts`
 
 ### Tenant Layout (needs refactor)
+
 - `packages/engine/src/routes/+layout.svelte`
 
 ### Landing Usage (reference for how chrome is used)
+
 - `packages/landing/src/routes/+page.svelte`
 - `packages/landing/src/routes/manifesto/+page.svelte`

@@ -4,7 +4,7 @@ description: Node-graph editor for animations and diagrams within Terrarium
 category: specs
 specCategory: platform-services
 icon: splinepointer
-lastUpdated: '2026-01-06'
+lastUpdated: "2026-01-06"
 aliases: []
 tags:
   - animation
@@ -41,7 +41,7 @@ tags:
           └─────────────────────────────────────────┘
 ```
 
-> *Weave your world together.*
+> _Weave your world together._
 
 **Status:** Spec Complete
 **Parent Feature:** Terrarium
@@ -61,7 +61,7 @@ Weave is Grove's visual composition studio. Place elements on a grid, draw conne
 
 The connections themselves are called **threads** — the individual strands you weave together to create the whole.
 
-*Weave your world together.*
+_Weave your world together._
 
 ### Why Weave?
 
@@ -72,39 +72,39 @@ The connections themselves are called **threads** — the individual strands you
 
 ### Other Candidates Considered
 
-| Name | Why Not |
-|------|---------|
-| **Bower** | More noun-like, less active energy |
-| **Canopy** | Too observational, not creative enough |
-| **Thread** | Better for the connections themselves |
-| **Sway/Fern** | Good sub-mode names if needed later |
+| Name          | Why Not                                |
+| ------------- | -------------------------------------- |
+| **Bower**     | More noun-like, less active energy     |
+| **Canopy**    | Too observational, not creative enough |
+| **Thread**    | Better for the connections themselves  |
+| **Sway/Fern** | Good sub-mode names if needed later    |
 
 ---
 
 ## Internal Naming
 
-| Public Name | Internal Name | Icon |
-|-------------|---------------|------|
-| Weave | GroveWeave | `spline-pointer` |
-| Breeze (animation) | GroveBreeze | `wind` |
-| Trace (diagrams) | GroveTrace | `waypoints` |
-| Threads (connections) | GroveThreads | `route` |
+| Public Name           | Internal Name | Icon             |
+| --------------------- | ------------- | ---------------- |
+| Weave                 | GroveWeave    | `spline-pointer` |
+| Breeze (animation)    | GroveBreeze   | `wind`           |
+| Trace (diagrams)      | GroveTrace    | `waypoints`      |
+| Threads (connections) | GroveThreads  | `route`          |
 
 ### Sub-Mode Naming
 
-**Breeze** — *Animation Mode*
+**Breeze** — _Animation Mode_
 
 A breeze is the invisible force that moves through and makes everything respond. It propagates naturally—a breeze doesn't stop at one leaf. Send a breeze through your scene, and watch motion ripple through every connected element.
 
-*Let it breathe.*
+_Let it breathe._
 
-**Trace** — *Diagram Mode*
+**Trace** — _Diagram Mode_
 
 In the forest, you trace tracks to find where an animal went. You trace a stream to find its source. You trace the veins in a leaf to understand how it grows. Tracing reveals structure that was already there—making the invisible visible, the unclear clear.
 
 Trace is where you diagram. Connect one point to another. Show relationships. Map structure. Make someone understand.
 
-*Follow the path. Reveal the structure.*
+_Follow the path. Reveal the structure._
 
 ---
 
@@ -145,6 +145,7 @@ The workspace for building animated relationships with nature assets. Send a bre
 ```
 
 **Key Features:**
+
 - Snap-to-grid placement (0.5rem increments for half-steps)
 - Draw connections by dragging lines between assets
 - Select connections to configure timing/easing
@@ -324,11 +325,11 @@ The existing Terrarium canvas, enhanced to play animations.
 
 ### Alignment Options
 
-| Type | Description |
-|------|-------------|
+| Type                 | Description                        |
+| -------------------- | ---------------------------------- |
 | **Corner-to-corner** | Align asset corners to grid points |
-| **Side-to-side** | Align asset edges |
-| **Center** | Align asset centers to grid |
+| **Side-to-side**     | Align asset edges                  |
+| **Center**           | Align asset centers to grid        |
 
 ---
 
@@ -338,11 +339,11 @@ Threads define relationships between assets. When a parent moves, connected chil
 
 ### Thread Properties
 
-| Property | Description | Default |
-|----------|-------------|---------|
-| **Duration** | Time for child to respond to parent movement | 0.3s |
-| **Delay** | Wait time before child starts moving | 0s |
-| **Easing** | Animation curve (ease-in, ease-out, bounce, etc.) | ease-out |
+| Property     | Description                                       | Default  |
+| ------------ | ------------------------------------------------- | -------- |
+| **Duration** | Time for child to respond to parent movement      | 0.3s     |
+| **Delay**    | Wait time before child starts moving              | 0s       |
+| **Easing**   | Animation curve (ease-in, ease-out, bounce, etc.) | ease-out |
 
 ### Thread Behavior (V1)
 
@@ -400,14 +401,14 @@ The rock-and-vines example:
 
 ## Export Options
 
-| Format | Use Case | Mode |
-|--------|----------|------|
-| **Blog Import** | Live animation plays on Grove blog (uses Foliage) | Breeze |
-| **GIF** | Shareable, loops forever | Breeze |
-| **Video (WebM/MP4)** | Higher quality, social sharing | Breeze |
-| **PNG Sequence** | Frame-by-frame for external editing | Breeze |
-| **SVG** | Scalable vectors for docs, embeds | Trace |
-| **PNG** | Static image export | Both |
+| Format               | Use Case                                          | Mode   |
+| -------------------- | ------------------------------------------------- | ------ |
+| **Blog Import**      | Live animation plays on Grove blog (uses Foliage) | Breeze |
+| **GIF**              | Shareable, loops forever                          | Breeze |
+| **Video (WebM/MP4)** | Higher quality, social sharing                    | Breeze |
+| **PNG Sequence**     | Frame-by-frame for external editing               | Breeze |
+| **SVG**              | Scalable vectors for docs, embeds                 | Trace  |
+| **PNG**              | Static image export                               | Both   |
 
 ---
 
@@ -459,6 +460,7 @@ The same node-graph engine that powers Animation Studio can also power a **Grove
 ### The Problem with Mermaid
 
 Mermaid diagrams are powerful but:
+
 - Heavy rendering library (bloats bundle size)
 - External dependency for what's essentially boxes and arrows
 - Styling doesn't match Grove's aesthetic
@@ -483,18 +485,21 @@ Build diagram rendering into the same node-graph foundation:
 ### Diagram Editor Features
 
 **Node Types:**
+
 - **Glass Cards** — Grove's glassmorphism aesthetic, customizable content
 - **Lucide Icons** — MIT-licensed, tree-shakeable, perfect fit
 - **Text Nodes** — Simple labeled boxes
 - **Custom Components** — Extend with Svelte components
 
 **Connection Types (Threads):**
+
 - Solid arrows (→)
 - Dashed lines (--)
 - Labeled connections
 - Directional/bidirectional
 
 **Diagram Types (potential):**
+
 - Flowcharts
 - Sequence diagrams
 - Entity relationships
@@ -526,7 +531,7 @@ Diagram nodes use Grove's glass component system for consistent styling:
 
 ```svelte
 <script>
-  import { GlassCard } from '@groveengine/ui/ui';
+  import { GlassCard } from '@lattice/ui/ui';
   import { Database, Zap, Cloud } from 'lucide-svelte';
 </script>
 
@@ -541,12 +546,12 @@ Diagram nodes use Grove's glass component system for consistent styling:
 
 **Glass Variants for Diagrams:**
 
-| Variant | Use Case |
-|---------|----------|
-| `card` | Standard diagram nodes (80% opacity) |
+| Variant  | Use Case                                      |
+| -------- | --------------------------------------------- |
+| `card`   | Standard diagram nodes (80% opacity)          |
 | `accent` | Highlighted/selected nodes (30% accent color) |
-| `tint` | Background grouping boxes (60% opacity) |
-| `muted` | Disabled/inactive nodes (40% opacity) |
+| `tint`   | Background grouping boxes (60% opacity)       |
+| `muted`  | Disabled/inactive nodes (40% opacity)         |
 
 ### Lucide Icon Mapping for Diagrams
 
@@ -586,16 +591,17 @@ const diagramIcons = {
 
 ### Output Formats
 
-| Format | Use Case |
-|--------|----------|
+| Format          | Use Case                                         |
+| --------------- | ------------------------------------------------ |
 | **Live Svelte** | Renders directly in blog posts, no external deps |
-| **SVG Export** | Clean vectors for docs, READMEs |
-| **PNG Export** | Static images |
-| **Embed Code** | Copy/paste component into posts |
+| **SVG Export**  | Clean vectors for docs, READMEs                  |
+| **PNG Export**  | Static images                                    |
+| **Embed Code**  | Copy/paste component into posts                  |
 
 ### Icon Integration
 
 [Lucide](https://lucide.dev) icons are:
+
 - MIT licensed (fully permissive)
 - Tree-shakeable (only import what you use)
 - SVG-based (scales perfectly)
@@ -619,12 +625,13 @@ For persistence, wrap diagram/animation data in D1 batch operations using the Lo
 // Example: Save diagram with all nodes and connections in one batch
 await loom.batch([
   db.insert(diagrams).values({ id, name, userId }),
-  ...nodes.map(node => db.insert(diagramNodes).values(node)),
-  ...connections.map(conn => db.insert(diagramConnections).values(conn))
+  ...nodes.map((node) => db.insert(diagramNodes).values(node)),
+  ...connections.map((conn) => db.insert(diagramConnections).values(conn)),
 ]);
 ```
 
 Benefits:
+
 - Single round-trip for complex saves
 - Transactional consistency
 - Efficient for node-graph structures with many relationships
@@ -656,12 +663,14 @@ packages/engine/src/lib/ui/components/
 ## Decisions Made
 
 ### Naming
+
 - [x] **Weave** — unified node-graph engine
 - [x] **Breeze** — animation sub-mode (nature assets, timing, propagation)
 - [x] **Trace** — diagram sub-mode (glass cards, Lucide icons, static)
 - [x] **Threads** — the connections between nodes
 
 ### Technical
+
 - [x] **Threads in Live Mode** → Hidden by default, toggle to show
 - [x] **Circular connections** → Detect and warn, but allow (valid for showing circular deps)
 - [x] **Max chain depth** → 15 levels (tested ceiling)
@@ -669,6 +678,7 @@ packages/engine/src/lib/ui/components/
 - [x] **Resource limits** → 100 nodes, 200 threads, 4000×4000px canvas max
 
 ### Diagram Editor
+
 - [x] **Markdown shortcode** → Yes, fenced code block syntax:
   ````markdown
   ```weave
@@ -677,9 +687,10 @@ packages/engine/src/lib/ui/components/
   ```
   ````
   Rendered via Cloudflare Worker, displayed live in posts.
-- [x] **Dark/light mode** → Editor UI defaults to dark mode (better for creative tools). Exports inherit the *target blog's* theme setting, not the editor's. Markdown shortcode diagrams auto-adapt to page theme.
+- [x] **Dark/light mode** → Editor UI defaults to dark mode (better for creative tools). Exports inherit the _target blog's_ theme setting, not the editor's. Markdown shortcode diagrams auto-adapt to page theme.
 
 ### Open Questions (Remaining)
+
 - [ ] Starter Lucide icon palette — which icons to include by default?
 - [ ] Audio sync possibilities for V2+?
 - [ ] Physics simulation parameters for V2?
@@ -692,11 +703,13 @@ packages/engine/src/lib/ui/components/
 ### Input Sanitization
 
 **JSON Fields** (`canvas_settings`, `props`):
+
 - Parse all JSON through a strict validator before storage
 - Define allowed keys per component type (no arbitrary fields)
 - Reject unknown properties, sanitize values
 
 **Text Fields** (`label`, `name`):
+
 - Strip HTML tags from all user-provided text
 - Escape special characters before rendering
 - Max lengths: name (100 chars), label (50 chars)
@@ -707,7 +720,7 @@ Thread labels and node content render in the canvas and exports:
 
 ```typescript
 // All user text goes through sanitization
-import { sanitize } from '$lib/utils/security';
+import { sanitize } from "$lib/utils/security";
 
 const safeLabel = sanitize(thread.label, { maxLength: 50 });
 const safeName = sanitize(node.name, { maxLength: 100 });
@@ -716,6 +729,7 @@ const safeName = sanitize(node.name, { maxLength: 100 });
 **SVG Export Sanitization:**
 
 SVG files can contain executable JavaScript. All SVG exports must:
+
 - Strip `<script>` tags entirely
 - Remove event handlers (`onclick`, `onload`, `onerror`, `onmouseover`, etc.)
 - Remove `javascript:` URLs from `href` and `xlink:href` attributes
@@ -725,34 +739,36 @@ SVG files can contain executable JavaScript. All SVG exports must:
 
 ```typescript
 // SVG export sanitization
-import DOMPurify from 'dompurify';
+import DOMPurify from "dompurify";
 
 const safeSvg = DOMPurify.sanitize(svgString, {
   USE_PROFILES: { svg: true },
-  ADD_TAGS: ['use'], // Allow internal use refs only
-  FORBID_ATTR: ['onclick', 'onload', 'onerror', 'onmouseover'],
-  FORBID_TAGS: ['script', 'foreignObject']
+  ADD_TAGS: ["use"], // Allow internal use refs only
+  FORBID_ATTR: ["onclick", "onload", "onerror", "onmouseover"],
+  FORBID_TAGS: ["script", "foreignObject"],
 });
 ```
 
 ### Resource Limits
 
-| Resource | Limit | Rationale |
-|----------|-------|-----------|
-| **Nodes per composition** | 100 | Prevents canvas performance degradation |
-| **Threads per composition** | 200 | Max 2 connections per node average |
-| **Chain depth** | 15 levels | Tested propagation delay ceiling |
-| **Compositions per user** | 50 (free), 200 (paid) | Storage tier limits |
-| **Canvas dimensions** | 4000×4000px | Export and render ceiling |
-| **JSON field size** | 10KB | Prevents blob storage abuse |
+| Resource                    | Limit                 | Rationale                               |
+| --------------------------- | --------------------- | --------------------------------------- |
+| **Nodes per composition**   | 100                   | Prevents canvas performance degradation |
+| **Threads per composition** | 200                   | Max 2 connections per node average      |
+| **Chain depth**             | 15 levels             | Tested propagation delay ceiling        |
+| **Compositions per user**   | 50 (free), 200 (paid) | Storage tier limits                     |
+| **Canvas dimensions**       | 4000×4000px           | Export and render ceiling               |
+| **JSON field size**         | 10KB                  | Prevents blob storage abuse             |
 
 ### Cycle Detection
 
 Circular connections are allowed (useful for showing circular dependencies in diagrams) but:
+
 - Display warning indicator on cyclic threads (orange dashed outline)
 - Export warnings note cycle presence
 
 **Live Mode behavior for cycles:**
+
 - Propagation stops at the cycle point (no infinite loops)
 - User sees animation propagate up to the repeated node, then halt
 - Visual indicator pulses briefly on the cycle-completing thread
@@ -761,6 +777,7 @@ Circular connections are allowed (useful for showing circular dependencies in di
 ### Rate Limiting
 
 Composition operations follow standard Threshold patterns:
+
 - Create: 10/minute per user
 - Update: 30/minute per user
 - Export: 10/minute per user (allows retries for failed exports)
@@ -823,8 +840,9 @@ CREATE TABLE weave_threads (
 
 ---
 
-*Draft created: January 6th, 2026*
-*Updated: January 6th, 2026*
+_Draft created: January 6th, 2026_
+_Updated: January 6th, 2026_
+
 - Added Diagram Editor concept (Fern mode)
 - Completed grove walk, chose **Weave** as unified name
 - Sub-modes: **Breeze** (animation) + **Trace** (diagrams)
@@ -833,4 +851,4 @@ CREATE TABLE weave_threads (
 - Decided: markdown shortcode syntax, dark mode default, preset jiggle patterns
 - Added Security & Resource Limits section (JSON sanitization, XSS prevention, resource caps)
 
-*Status: Spec complete — ready for implementation planning*
+_Status: Spec complete — ready for implementation planning_

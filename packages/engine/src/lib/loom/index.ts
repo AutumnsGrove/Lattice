@@ -2,10 +2,10 @@
  * Loom — Durable Object Framework for Grove
  *
  * Core barrel export. Adapters have separate export paths for tree-shaking:
- * - @autumnsgrove/groveengine/loom           (this file)
- * - @autumnsgrove/groveengine/loom/sveltekit
- * - @autumnsgrove/groveengine/loom/worker
- * - @autumnsgrove/groveengine/loom/testing
+ * - @autumnsgrove/lattice/loom           (this file)
+ * - @autumnsgrove/lattice/loom/sveltekit
+ * - @autumnsgrove/lattice/loom/worker
+ * - @autumnsgrove/lattice/loom/testing
  */
 
 // Core types

@@ -7,7 +7,7 @@
  * @example
  * ```typescript
  * // In +page.server.ts
- * import { transformAllTiers, getAllCheckoutUrls, createCheckoutConfigFromEnv } from '@autumnsgrove/groveengine/grafts/pricing';
+ * import { transformAllTiers, getAllCheckoutUrls, createCheckoutConfigFromEnv } from '@autumnsgrove/lattice/grafts/pricing';
  *
  * export const load = async ({ platform }) => {
  *   const checkoutConfig = createCheckoutConfigFromEnv(platform.env);
@@ -20,7 +20,7 @@
  * ```svelte
  * // In +page.svelte
  * <script>
- *   import { PricingGraft } from '@autumnsgrove/groveengine/grafts/pricing';
+ *   import { PricingGraft } from '@autumnsgrove/lattice/grafts/pricing';
  *   let { data } = $props();
  * </script>
  *

@@ -5,7 +5,7 @@
  * GroveSwap/GroveTerm Svelte components can't be used.
  *
  * Usage:
- *   import { resolveTerm, resolveTermString } from '@autumnsgrove/groveengine/ui/utils';
+ *   import { resolveTerm, resolveTermString } from '@autumnsgrove/lattice/ui/utils';
  *
  *   toast.success(`${resolveTerm('blooms')} saved!`);
  *   // Grove Mode ON: "Blooms saved!" / OFF: "Posts saved!"
@@ -49,9 +49,7 @@ export function resolveTerm(slug: string): string {
   // Brand terms (alwaysGrove) always show the Grove name regardless of mode —
   // this runs after the null check so unknown slugs fall through safely above.
   if (entry.alwaysGrove) return entry.term;
-  return groveModeStore.current
-    ? entry.term
-    : entry.standardTerm || entry.term;
+  return groveModeStore.current ? entry.term : entry.standardTerm || entry.term;
 }
 
 /**

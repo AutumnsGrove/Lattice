@@ -11,7 +11,7 @@ Vineyard is a Svelte 5 component library that provides consistent showcase/docum
 ```
 Vineyard (standalone package)
     ↓ link: dependency
-GroveEngine (@autumnsgrove/groveengine)
+Lattice (@autumnsgrove/lattice)
     ↓ re-exports from /vineyard
 Grove Tools (Amber, Ivy, Foliage, etc.)
 ```
@@ -73,19 +73,19 @@ import type {
 
 ---
 
-## Using via GroveEngine Re-exports
+## Using via Lattice Re-exports
 
-If your project already depends on GroveEngine, you can import from there instead:
+If your project already depends on Lattice, you can import from there instead:
 
 ```typescript
 import {
   VineyardLayout,
   FeatureCard,
   StatusBadge,
-} from "@autumnsgrove/groveengine/vineyard";
+} from "@autumnsgrove/lattice/vineyard";
 ```
 
-This is the recommended approach for Grove tools that already use GroveEngine.
+This is the recommended approach for Grove tools that already use Lattice.
 
 ---
 
@@ -112,7 +112,7 @@ src/routes/vineyard/
     DemoContainer,
     CodeExample,
     RoadmapSection
-  } from '@autumnsgrove/groveengine/vineyard';
+  } from '@autumnsgrove/lattice/vineyard';
 </script>
 
 <VineyardLayout
@@ -161,7 +161,7 @@ src/routes/vineyard/
   <section>
     <h2>Quick Start</h2>
     <CodeExample language="typescript" filename="src/routes/+page.svelte">
-{`import { getStorageStats } from '@autumnsgrove/groveengine/amber';
+{`import { getStorageStats } from '@autumnsgrove/lattice/amber';
 
 const stats = await getStorageStats();
 console.log(stats.usedBytes, stats.totalBytes);`}

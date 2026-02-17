@@ -1,6 +1,6 @@
-# Lattice (@autumnsgrove/groveengine)
+# Lattice (@autumnsgrove/lattice)
 
-> **Internal codename:** GroveEngine
+> **Internal codename:** Lattice
 
 Multi-tenant blog engine for the Grove Platform. Each Grove site runs as its own Cloudflare Worker, powered by Lattice. A lattice is the framework that supports growth—vines climb it, gardens are built around it.
 
@@ -69,12 +69,14 @@ RESEND_API_KEY=re_xxxxx
 ## Quick Start
 
 1. **Clone and install**
+
    ```bash
    cd packages/engine
    npm install
    ```
 
 2. **Set up Cloudflare resources**
+
    ```bash
    npx wrangler d1 create your-site-db
    npx wrangler r2 bucket create your-site-images
@@ -82,6 +84,7 @@ RESEND_API_KEY=re_xxxxx
    ```
 
 3. **Run migrations**
+
    ```bash
    npx wrangler d1 execute your-site-db --local --file=migrations/001_magic_codes.sql
    npx wrangler d1 execute your-site-db --local --file=migrations/002_auth_security.sql
@@ -91,12 +94,14 @@ RESEND_API_KEY=re_xxxxx
    ```
 
 4. **Configure environment**
+
    ```bash
    cp .dev.vars.example .dev.vars
    # Edit .dev.vars with your values
    ```
 
 5. **Start development**
+
    ```bash
    npm run dev
    ```
@@ -112,10 +117,11 @@ Lattice includes self-hosted accessibility-focused fonts in `static/fonts/`. Aft
 
 ```bash
 # Copy fonts from node_modules to your static folder
-cp -r node_modules/@autumnsgrove/groveengine/static/fonts/ static/fonts/
+cp -r node_modules/@autumnsgrove/lattice/static/fonts/ static/fonts/
 ```
 
 **Included fonts:**
+
 - `alagard.ttf` - Pixel art style
 - `AtkinsonHyperlegible-Regular.ttf` - High legibility
 - `CozetteVector.ttf` - Bitmap style
@@ -129,14 +135,18 @@ Your `@font-face` declarations should reference `/fonts/fontname.ttf`.
 ## Key Components
 
 ### Gutter System
+
 The unique gutter annotation system allows sidebar notes on blog posts:
+
 - `ContentWithGutter.svelte` - Main content layout
 - `GutterItem.svelte` - Individual annotations
 - `LeftGutter.svelte` - Gutter container
 - `GutterManager.svelte` - Admin UI for managing gutters
 
 ### Markdown Editor
+
 Full-featured editor with:
+
 - Live preview
 - Multiple themes (Grove, Amber, Matrix, Dracula, Nord, Rose)
 - Drag-drop image upload to R2
@@ -145,7 +155,9 @@ Full-featured editor with:
 - Zen mode
 
 ### Authentication
+
 Passwordless magic code system:
+
 - Email-based verification codes
 - JWT sessions
 - Rate limiting

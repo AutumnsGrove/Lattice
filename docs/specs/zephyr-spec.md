@@ -4,7 +4,7 @@ description: Unified email delivery worker with retries, fallbacks, and observab
 category: specs
 specCategory: operations
 icon: send
-lastUpdated: '2026-02-01'
+lastUpdated: "2026-02-01"
 aliases: []
 tags:
   - email
@@ -204,20 +204,20 @@ Marketing can afford to miss occasionally. Tracking helps optimize content. Sing
 
 ## Template Registry
 
-| Template           | Type           | Use Case                        | Current Home |
-| ------------------ | -------------- | ------------------------------- | ------------ |
-| `welcome`          | sequence       | New signup welcome              | engine       |
-| `day-1`            | sequence       | First day follow-up             | engine       |
-| `day-7`            | sequence       | Week check-in                   | engine       |
-| `day-14`           | sequence       | Two week follow-up              | engine       |
-| `day-30`           | sequence       | Month check-in                  | engine       |
-| `porch-reply`      | notification   | **Support reply** (THE BUG)     | NEW          |
-| `verification`     | verification   | Email verification code         | plant        |
-| `payment-received` | lifecycle      | Subscription confirmed          | plant        |
-| `payment-failed`   | lifecycle      | Charge failed                   | plant        |
-| `trial-ending`     | lifecycle      | Trial expiring soon             | plant        |
-| `feedback-forward` | transactional  | Forward inbound email           | landing      |
-| `raw`              | any            | Pre-rendered HTML pass-through  | any          |
+| Template           | Type          | Use Case                       | Current Home |
+| ------------------ | ------------- | ------------------------------ | ------------ |
+| `welcome`          | sequence      | New signup welcome             | engine       |
+| `day-1`            | sequence      | First day follow-up            | engine       |
+| `day-7`            | sequence      | Week check-in                  | engine       |
+| `day-14`           | sequence      | Two week follow-up             | engine       |
+| `day-30`           | sequence      | Month check-in                 | engine       |
+| `porch-reply`      | notification  | **Support reply** (THE BUG)    | NEW          |
+| `verification`     | verification  | Email verification code        | plant        |
+| `payment-received` | lifecycle     | Subscription confirmed         | plant        |
+| `payment-failed`   | lifecycle     | Charge failed                  | plant        |
+| `trial-ending`     | lifecycle     | Trial expiring soon            | plant        |
+| `feedback-forward` | transactional | Forward inbound email          | landing      |
+| `raw`              | any           | Pre-rendered HTML pass-through | any          |
 
 ---
 
@@ -292,7 +292,7 @@ type ZephyrErrorCode =
 ### Usage Examples
 
 ```typescript
-import { Zephyr } from "@autumnsgrove/groveengine/zephyr";
+import { Zephyr } from "@autumnsgrove/lattice/zephyr";
 
 // Porch reply notification (THE FIX)
 const result = await Zephyr.send({
@@ -553,17 +553,17 @@ CREATE UNIQUE INDEX idx_zephyr_idempotency ON zephyr_logs(idempotency_key)
 
 ### What Gets Logged
 
-| Field          | Logged   | Purpose             |
-| -------------- | -------- | ------------------- |
-| Recipient      | Yes      | Debugging, audit    |
-| Subject line   | Yes      | Debugging           |
-| Email body     | **No**   | Privacy             |
-| Template name  | Yes      | Analytics           |
-| Template data  | **No**   | Privacy             |
-| Error messages | Yes      | Debugging           |
-| Latency        | Yes      | Performance         |
-| Provider used  | Yes      | Cost tracking       |
-| Attempts       | Yes      | Retry visibility    |
+| Field          | Logged | Purpose          |
+| -------------- | ------ | ---------------- |
+| Recipient      | Yes    | Debugging, audit |
+| Subject line   | Yes    | Debugging        |
+| Email body     | **No** | Privacy          |
+| Template name  | Yes    | Analytics        |
+| Template data  | **No** | Privacy          |
+| Error messages | Yes    | Debugging        |
+| Latency        | Yes    | Performance      |
+| Provider used  | Yes    | Cost tracking    |
+| Attempts       | Yes    | Retry visibility |
 
 ### Idempotency
 
@@ -721,24 +721,24 @@ packages/engine/src/lib/zephyr/
 
 ### Monthly Estimates
 
-| Email Type           | Volume/month | Cost   |
-| -------------------- | ------------ | ------ |
-| Onboarding sequences | ~500         | $0.50  |
-| Verification codes   | ~200         | $0.20  |
-| Payment notifications| ~100         | $0.10  |
-| Porch replies        | ~50          | $0.05  |
-| **Total**            | ~850         | **$0.85** |
+| Email Type            | Volume/month | Cost      |
+| --------------------- | ------------ | --------- |
+| Onboarding sequences  | ~500         | $0.50     |
+| Verification codes    | ~200         | $0.20     |
+| Payment notifications | ~100         | $0.10     |
+| Porch replies         | ~50          | $0.05     |
+| **Total**             | ~850         | **$0.85** |
 
 (Well under free tier)
 
 ### Cost Benefits
 
-| Benefit              | Impact                                    |
-| -------------------- | ----------------------------------------- |
-| Single API key       | Easier management, fewer secrets          |
-| Retry logic          | No lost emails = no lost users            |
-| Centralized logging  | Debug issues faster                       |
-| Template consistency | Lower maintenance, better branding        |
+| Benefit              | Impact                             |
+| -------------------- | ---------------------------------- |
+| Single API key       | Easier management, fewer secrets   |
+| Retry logic          | No lost emails = no lost users     |
+| Centralized logging  | Debug issues faster                |
+| Template consistency | Lower maintenance, better branding |
 
 ---
 

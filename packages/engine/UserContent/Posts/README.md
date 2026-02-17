@@ -25,7 +25,7 @@ Create a new file like `my-first-post.md`:
 ```markdown
 ---
 title: "My First Blog Post"
-description: "This is my first post using GroveEngine. It's going to be amazing!"
+description: "This is my first post using Lattice. It's going to be amazing!"
 date: "2025-12-01"
 tags: ["blog", "introduction", "first-post"]
 hero: "/images/my-hero-image.jpg"
@@ -37,7 +37,7 @@ font: "serif"
 This is the main content of your blog post. You can use all standard Markdown formatting:
 
 - **Bold text**
-- *Italic text*
+- _Italic text_
 - [Links](https://example.com)
 - Images
 - Code blocks
@@ -45,7 +45,7 @@ This is the main content of your blog post. You can use all standard Markdown fo
 
 ## Adding More Content
 
-Write your post content here using Markdown syntax. The GroveEngine will automatically render it beautifully.
+Write your post content here using Markdown syntax. The Lattice will automatically render it beautifully.
 
 ### Code Examples
 

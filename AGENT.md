@@ -6,13 +6,13 @@
 
 ## Project Naming
 
-|                       |                           |
-| --------------------- | ------------------------- |
-| **Public name**       | Lattice                   |
-| **Internal codename** | GroveEngine               |
-| **npm package**       | @autumnsgrove/groveengine |
+|                       |                       |
+| --------------------- | --------------------- |
+| **Public name**       | Lattice               |
+| **Internal codename** | Lattice               |
+| **npm package**       | @autumnsgrove/lattice |
 
-Lattice is the core framework that powers the Grove ecosystem. The name evokes a framework that supports growth—vines climb it, gardens are built around it. Use "Lattice" in user-facing documentation and marketing; use "GroveEngine" for internal references, database names, and infrastructure.
+Lattice is the core framework that powers the Grove ecosystem. The name evokes a framework that supports growth—vines climb it, gardens are built around it. Use "Lattice" in user-facing documentation and marketing; use "Lattice" for internal references, database names, and infrastructure.
 
 ---
 
@@ -386,7 +386,7 @@ gw ci --affected --fail-fast --diagnose
 
 ### Task Tracking (GitHub Issues)
 
-- **All tasks are tracked in [GitHub Issues](https://github.com/AutumnsGrove/GroveEngine/issues)** — not in local files
+- **All tasks are tracked in [GitHub Issues](https://github.com/AutumnsGrove/Lattice/issues)** — not in local files
 - **Check open issues** when starting a session to understand current priorities
 - **Use labels** to filter by component (heartwood, lattice, amber, etc.) or type (bug, feature, enhancement)
 - **Close issues** when work is complete — reference the issue number in commit messages (e.g., `fixes #123`)
@@ -524,7 +524,7 @@ Write a brief description of what the PR does and why. No specific format requir
 
 ```
 1. CHECK: Does the engine already have this?
-   └── YES → Import from @autumnsgrove/groveengine
+   └── YES → Import from @autumnsgrove/lattice
    └── NO  → Continue to step 2
 
 2. IMPLEMENT: Add it to the engine FIRST
@@ -532,7 +532,7 @@ Write a brief description of what the PR does and why. No specific format requir
    └── Export it properly in package.json
 
 3. IMPORT: Then use it from the engine in your app
-   └── import { thing } from '@autumnsgrove/groveengine/...'
+   └── import { thing } from '@autumnsgrove/lattice/...'
 ```
 
 ### Why This Matters
@@ -541,21 +541,21 @@ We just deleted **11,925 lines** of duplicate code that accumulated because apps
 
 ### What the Engine Provides
 
-| Category              | Import Path                               | Examples                     |
-| --------------------- | ----------------------------------------- | ---------------------------- |
-| **UI Components**     | `@autumnsgrove/groveengine/ui/chrome`     | Header, Footer, Logo         |
-| **UI Utilities**      | `@autumnsgrove/groveengine/ui/utils`      | `cn()` (with tailwind-merge) |
-| **Stores**            | `@autumnsgrove/groveengine/ui/stores`     | `seasonStore`, `themeStore`  |
-| **Nature Components** | `@autumnsgrove/groveengine/ui/nature`     | Trees, creatures, palette    |
-| **Glass UI**          | `@autumnsgrove/groveengine/ui`            | GlassCard, GlassButton       |
-| **General Utils**     | `@autumnsgrove/groveengine/utils`         | csrf, sanitize, markdown     |
-| **Content**           | `@autumnsgrove/groveengine/ui/content`    | ContentWithGutter, TOC       |
-| **Forms**             | `@autumnsgrove/groveengine/ui/forms`      | Form components              |
-| **Gallery**           | `@autumnsgrove/groveengine/ui/gallery`    | Image galleries              |
-| **Charts**            | `@autumnsgrove/groveengine/ui/charts`     | Data visualization           |
-| **Icons**             | `@autumnsgrove/groveengine/ui/icons`      | Icon components              |
-| **Typography**        | `@autumnsgrove/groveengine/ui/typography` | Text components              |
-| **Auth**              | `@autumnsgrove/groveengine/auth`          | Authentication utilities     |
+| Category              | Import Path                           | Examples                     |
+| --------------------- | ------------------------------------- | ---------------------------- |
+| **UI Components**     | `@autumnsgrove/lattice/ui/chrome`     | Header, Footer, Logo         |
+| **UI Utilities**      | `@autumnsgrove/lattice/ui/utils`      | `cn()` (with tailwind-merge) |
+| **Stores**            | `@autumnsgrove/lattice/ui/stores`     | `seasonStore`, `themeStore`  |
+| **Nature Components** | `@autumnsgrove/lattice/ui/nature`     | Trees, creatures, palette    |
+| **Glass UI**          | `@autumnsgrove/lattice/ui`            | GlassCard, GlassButton       |
+| **General Utils**     | `@autumnsgrove/lattice/utils`         | csrf, sanitize, markdown     |
+| **Content**           | `@autumnsgrove/lattice/ui/content`    | ContentWithGutter, TOC       |
+| **Forms**             | `@autumnsgrove/lattice/ui/forms`      | Form components              |
+| **Gallery**           | `@autumnsgrove/lattice/ui/gallery`    | Image galleries              |
+| **Charts**            | `@autumnsgrove/lattice/ui/charts`     | Data visualization           |
+| **Icons**             | `@autumnsgrove/lattice/ui/icons`      | Icon components              |
+| **Typography**        | `@autumnsgrove/lattice/ui/typography` | Text components              |
+| **Auth**              | `@autumnsgrove/lattice/auth`          | Authentication utilities     |
 
 ### Common Violations (Don't Do These)
 
@@ -567,7 +567,7 @@ export function cn(...classes) {
 }
 
 // ✅ GOOD - Import from engine
-import { cn } from "@autumnsgrove/groveengine/ui/utils";
+import { cn } from "@autumnsgrove/lattice/ui/utils";
 ```
 
 ```typescript
@@ -576,7 +576,7 @@ import { cn } from "@autumnsgrove/groveengine/ui/utils";
 export const season = createSeasonStore();
 
 // ✅ GOOD - Import from engine
-import { seasonStore } from "@autumnsgrove/groveengine/ui/stores";
+import { seasonStore } from "@autumnsgrove/lattice/ui/stores";
 ```
 
 ```typescript
@@ -584,7 +584,7 @@ import { seasonStore } from "@autumnsgrove/groveengine/ui/stores";
 // landing/src/lib/components/nature/TreePine.svelte
 
 // ✅ GOOD - Import from engine
-import { TreePine } from "@autumnsgrove/groveengine/ui/nature";
+import { TreePine } from "@autumnsgrove/lattice/ui/nature";
 ```
 
 ### When You Need Something New
@@ -592,7 +592,7 @@ import { TreePine } from "@autumnsgrove/groveengine/ui/nature";
 1. **Check the engine exports:** `grep -r "export" packages/engine/src/lib/`
 2. **If it doesn't exist:** Add it to the engine, not the app
 3. **Export it properly:** Update `packages/engine/package.json` exports
-4. **Then import it:** Use in your app via `@autumnsgrove/groveengine/...`
+4. **Then import it:** Use in your app via `@autumnsgrove/lattice/...`
 
 ### Quick Engine Export Check
 
@@ -1047,7 +1047,7 @@ import {
   logGroveError,
   buildErrorJson,
   buildErrorUrl,
-} from "@autumnsgrove/groveengine/errors";
+} from "@autumnsgrove/lattice/errors";
 ```
 
 **Quick Reference — Which Helper Where:**
@@ -1061,20 +1061,20 @@ import {
 
 **Error Catalogs:**
 
-| Catalog        | Prefix            | Import                                |
-| -------------- | ----------------- | ------------------------------------- |
-| `API_ERRORS`   | `GROVE-API-XXX`   | `@autumnsgrove/groveengine/errors`    |
-| `ARBOR_ERRORS` | `GROVE-ARBOR-XXX` | `@autumnsgrove/groveengine/errors`    |
-| `SITE_ERRORS`  | `GROVE-SITE-XXX`  | `@autumnsgrove/groveengine/errors`    |
-| `AUTH_ERRORS`  | `HW-AUTH-XXX`     | `@autumnsgrove/groveengine/heartwood` |
-| `PLANT_ERRORS` | `PLANT-XXX`       | `packages/plant/src/lib/errors.ts`    |
+| Catalog        | Prefix            | Import                             |
+| -------------- | ----------------- | ---------------------------------- |
+| `API_ERRORS`   | `GROVE-API-XXX`   | `@autumnsgrove/lattice/errors`     |
+| `ARBOR_ERRORS` | `GROVE-ARBOR-XXX` | `@autumnsgrove/lattice/errors`     |
+| `SITE_ERRORS`  | `GROVE-SITE-XXX`  | `@autumnsgrove/lattice/errors`     |
+| `AUTH_ERRORS`  | `HW-AUTH-XXX`     | `@autumnsgrove/lattice/heartwood`  |
+| `PLANT_ERRORS` | `PLANT-XXX`       | `packages/plant/src/lib/errors.ts` |
 
 **Number ranges:** 001-019 infrastructure, 020-039 auth, 040-059 business logic, 060-079 rate limiting, 080-099 internal
 
 **Client-Side Feedback (Toast):**
 
 ```typescript
-import { toast } from "@autumnsgrove/groveengine/ui";
+import { toast } from "@autumnsgrove/lattice/ui";
 
 // After successful action
 toast.success("Post published!");

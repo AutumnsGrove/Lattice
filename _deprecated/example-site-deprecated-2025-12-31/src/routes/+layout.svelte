@@ -186,7 +186,7 @@
 			<div class="footer-links">
 				<a href="/admin">Admin</a>
 				<span class="divider">|</span>
-				<a href="https://github.com/AutumnsGrove/GroveEngine" target="_blank" rel="noopener">Powered by GroveEngine</a>
+				<a href="https://github.com/AutumnsGrove/Lattice" target="_blank" rel="noopener">Powered by Lattice</a>
 			</div>
 		</div>
 		<div class="footer-actions">

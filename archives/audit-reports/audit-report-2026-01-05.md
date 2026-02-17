@@ -1,12 +1,13 @@
-# GroveEngine Codebase Audit Report
+# Lattice Codebase Audit Report
 
 ## Executive Summary
 
-This report documents the findings from a comprehensive audit of the GroveEngine codebase. All packages built successfully, but numerous warnings were identified that should be addressed to improve code quality, accessibility, and maintainability.
+This report documents the findings from a comprehensive audit of the Lattice codebase. All packages built successfully, but numerous warnings were identified that should be addressed to improve code quality, accessibility, and maintainability.
 
 ## Build Status
 
 ✅ **All packages built successfully**
+
 - packages/engine: Built with warnings
 - landing: Built with warnings
 - packages/og-worker: TypeScript check passed
@@ -23,6 +24,7 @@ This report documents the findings from a comprehensive audit of the GroveEngine
 The most common issues are accessibility warnings across all packages:
 
 #### Form Labels
+
 - **Issue**: Form labels not associated with controls
 - **Files affected**: Multiple files across all packages
 - **Examples**:
@@ -32,6 +34,7 @@ The most common issues are accessibility warnings across all packages:
 - **Fix**: Add `for` attribute to labels or wrap inputs with labels
 
 #### Click Events on Non-interactive Elements
+
 - **Issue**: Divs and other non-interactive elements with click handlers
 - **Files affected**: Gallery components, modal backdrops, lightboxes
 - **Examples**:
@@ -41,27 +44,32 @@ The most common issues are accessibility warnings across all packages:
 - **Fix**: Add proper ARIA roles or use interactive elements (button/a)
 
 #### Keyboard Event Handlers
+
 - **Issue**: Missing keyboard event handlers for click events
 - **Files affected**: Modal components, gallery lightboxes
 - **Fix**: Add `on:keydown` handlers alongside `on:click`
 
 #### Autofocus Usage
+
 - **Issue**: Using autofocus attribute
 - **Files affected**: SearchInput components
 - **Examples**: `src/lib/ui/components/forms/SearchInput.svelte:53:3`
 - **Fix**: Remove autofocus or implement focus management properly
 
 #### Redundant Alt Text
+
 - **Issue**: Screenreaders already announce img elements
 - **Files**: `src/routes/contact/+page.svelte:35:4`
 - **Fix**: Remove redundant "Photo of" from alt text
 
 #### Missing ARIA Labels
+
 - **Issue**: Buttons without text or aria-label attributes
 - **Files**: `src/routes/admin/searcher/+page.svelte:1246:6`
 - **Fix**: Add aria-label, aria-labelledby, or title attributes
 
 #### Non-interactive Elements with Interactive Roles
+
 - **Issue**: Images with button roles
 - **Files**: `src/lib/ui/components/gallery/ZoomableImage.svelte:132:0`
 - **Fix**: Use proper interactive elements
@@ -79,11 +87,13 @@ Multiple unused CSS selectors were found:
 ### 3. Svelte-specific Warnings
 
 #### State Reference Issues
+
 - **Issue**: State referenced locally instead of in closure
 - **File**: `src/lib/ui/components/ui/CollapsibleSection.svelte:19:21`
 - **Fix**: Use proper reactive declarations
 
 #### Self-closing HTML Tags
+
 - **Issue**: Non-void elements with self-closing tags
 - **File**: `src/routes/admin/searcher/+page.svelte:1254:7`
 - **Fix**: Use proper closing tags
@@ -91,6 +101,7 @@ Multiple unused CSS selectors were found:
 ### 4. Configuration Deprecations
 
 #### CSRF Configuration
+
 - **Issue**: `config.kit.csrf.checkOrigin` is deprecated
 - **Files**: plant package configuration
 - **Fix**: Use `csrf.trustedOrigins` instead
@@ -98,23 +109,27 @@ Multiple unused CSS selectors were found:
 ### 5. Cloudflare-specific Warnings
 
 #### Routes.json Limits
-- **Issue**: Functions includes/exceeds exceeds _routes.json limits
+
+- **Issue**: Functions includes/exceeds exceeds \_routes.json limits
 - **Files**: landing package
 - **Fix**: Optimize route patterns or reduce exclude rules
 
 ## Recommendations
 
 ### High Priority
+
 1. **Fix accessibility issues** - These impact user experience and may violate accessibility standards
 2. **Remove unused CSS** - Clean up dead code to improve maintainability
 3. **Update deprecated configurations** - Ensure future compatibility
 
 ### Medium Priority
+
 1. **Standardize form label patterns** - Create consistent patterns across the codebase
 2. **Implement proper keyboard navigation** - Essential for accessibility
 3. **Review and fix state management issues** - Prevent potential bugs
 
 ### Low Priority
+
 1. **Optimize Cloudflare route patterns** - Improve performance
 2. **Standardize component patterns** - Improve code consistency
 

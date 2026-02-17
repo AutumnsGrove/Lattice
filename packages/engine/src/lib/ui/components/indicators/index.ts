@@ -3,10 +3,10 @@
 // This module exports status and progress indicator components
 //
 // Usage:
-//   import { StatusBadge, ScoreBar, CreditBalance } from '@groveengine/ui/indicators';
+//   import { StatusBadge, ScoreBar, CreditBalance } from '@lattice/ui/indicators';
 
-export { default as StatusBadge } from './StatusBadge.svelte';
-export { default as ScoreBar } from './ScoreBar.svelte';
-export { default as CreditBalance } from './CreditBalance.svelte';
+export { default as StatusBadge } from "./StatusBadge.svelte";
+export { default as ScoreBar } from "./ScoreBar.svelte";
+export { default as CreditBalance } from "./CreditBalance.svelte";
 
-export const INDICATORS_VERSION = '0.2.0';
+export const INDICATORS_VERSION = "0.2.0";

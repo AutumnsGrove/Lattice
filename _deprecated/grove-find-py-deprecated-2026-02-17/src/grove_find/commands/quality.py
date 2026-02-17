@@ -368,14 +368,14 @@ def auth_cmd(
 
 
 def engine_command(module: Optional[str] = None) -> None:
-    """Find @autumnsgrove/groveengine imports."""
+    """Find @autumnsgrove/lattice imports."""
     config = get_config()
 
     if module:
         print_section(f"Engine imports from: {module}", "")
         output = _run_rg(
             [
-                f"@autumnsgrove/groveengine/{module}",
+                f"@autumnsgrove/lattice/{module}",
                 "--glob",
                 "!packages/engine",
                 "--glob",
@@ -395,7 +395,7 @@ def engine_command(module: Optional[str] = None) -> None:
         print_section("UI Components", "")
         output = _run_rg(
             [
-                "@autumnsgrove/groveengine/ui",
+                "@autumnsgrove/lattice/ui",
                 "--glob",
                 "!packages/engine",
                 "--glob",
@@ -414,7 +414,7 @@ def engine_command(module: Optional[str] = None) -> None:
         print_section("Utilities", "")
         output = _run_rg(
             [
-                "@autumnsgrove/groveengine/utils",
+                "@autumnsgrove/lattice/utils",
                 "--glob",
                 "!packages/engine",
                 "--glob",
@@ -433,7 +433,7 @@ def engine_command(module: Optional[str] = None) -> None:
         print_section("Stores", "")
         output = _run_rg(
             [
-                "@autumnsgrove/groveengine/ui/stores",
+                "@autumnsgrove/lattice/ui/stores",
                 "--glob",
                 "!packages/engine",
                 "--glob",
@@ -452,7 +452,7 @@ def engine_command(module: Optional[str] = None) -> None:
         print_section("Auth", "")
         output = _run_rg(
             [
-                "@autumnsgrove/groveengine/auth",
+                "@autumnsgrove/lattice/auth",
                 "--glob",
                 "!packages/engine",
                 "--glob",
@@ -471,7 +471,7 @@ def engine_command(module: Optional[str] = None) -> None:
         print_section("Apps using the engine", "")
         output = _run_rg(
             [
-                "@autumnsgrove/groveengine",
+                "@autumnsgrove/lattice",
                 "-l",
                 "--glob",
                 "!packages/engine",
@@ -499,7 +499,7 @@ def engine_cmd(
         None, help="Engine module (ui, stores, utils)"
     ),
 ) -> None:
-    """Find @autumnsgrove/groveengine imports."""
+    """Find @autumnsgrove/lattice imports."""
     engine_command(module)
 
 

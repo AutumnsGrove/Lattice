@@ -6,7 +6,7 @@
  * and redirects to /feed.
  */
 
-import { createCallbackHandler } from "@autumnsgrove/groveengine/grafts/login/server";
+import { createCallbackHandler } from "@autumnsgrove/lattice/grafts/login/server";
 
 export const GET = createCallbackHandler({
   defaultReturnTo: "/feed",

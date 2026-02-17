@@ -25,6 +25,7 @@
 ### The Problem
 
 Grove's payment flow touches multiple systems:
+
 - Plant (onboarding + checkout)
 - Stripe (payment processing)
 - Webhooks (tenant provisioning)
@@ -105,14 +106,14 @@ A failure anywhere in this chain blocks user signups. Currently, we rely on manu
 
 ### Component Responsibilities
 
-| Component | Role in E2E Testing |
-|-----------|---------------------|
-| **Playwright** | Browser automation, virtual authenticator, assertions |
-| **Plant** | Onboarding flow, Stripe checkout redirect |
-| **Stripe (Test Mode)** | Payment processing with test cards |
-| **Webhook Handler** | Receives Stripe events, creates tenant |
-| **Engine** | Tenant provisioning, admin panel, content |
-| **E2E API Endpoints** | Setup/teardown, protected by token |
+| Component              | Role in E2E Testing                                   |
+| ---------------------- | ----------------------------------------------------- |
+| **Playwright**         | Browser automation, virtual authenticator, assertions |
+| **Plant**              | Onboarding flow, Stripe checkout redirect             |
+| **Stripe (Test Mode)** | Payment processing with test cards                    |
+| **Webhook Handler**    | Receives Stripe events, creates tenant                |
+| **Engine**             | Tenant provisioning, admin panel, content             |
+| **E2E API Endpoints**  | Setup/teardown, protected by token                    |
 
 ---
 
@@ -129,6 +130,7 @@ VALUES ('grove-e2e-test', 'system', unixepoch());
 ```
 
 **Why "grove-e2e-test" instead of "test":**
+
 - Clear purpose from the name
 - Won't conflict with user expectations
 - Easily identified in logs and database
@@ -184,11 +186,11 @@ VALUES ('grove-e2e-test', 'system', unixepoch());
 
 ### Why Passkeys Over OAuth Mocking
 
-| Approach | Pros | Cons |
-|----------|------|------|
-| **Mock OAuth** | Fast, simple | Doesn't test real auth, fake confidence |
-| **Real Google OAuth** | Realistic | Flaky (Google's servers), slow, credentials management |
-| **Passkeys (chosen)** | Tests real flow, fast, self-contained | Need virtual authenticator setup |
+| Approach              | Pros                                  | Cons                                                   |
+| --------------------- | ------------------------------------- | ------------------------------------------------------ |
+| **Mock OAuth**        | Fast, simple                          | Doesn't test real auth, fake confidence                |
+| **Real Google OAuth** | Realistic                             | Flaky (Google's servers), slow, credentials management |
+| **Passkeys (chosen)** | Tests real flow, fast, self-contained | Need virtual authenticator setup                       |
 
 ### Playwright Virtual Authenticator
 
@@ -200,27 +202,30 @@ Playwright supports WebAuthn virtual authenticators via Chrome DevTools Protocol
 export async function setupVirtualAuthenticator(page: Page) {
   const client = await page.context().newCDPSession(page);
 
-  await client.send('WebAuthn.enable');
+  await client.send("WebAuthn.enable");
 
-  const { authenticatorId } = await client.send('WebAuthn.addVirtualAuthenticator', {
-    options: {
-      protocol: 'ctap2',
-      transport: 'internal',
-      hasResidentKey: true,
-      hasUserVerification: true,
-      isUserVerified: true,  // Auto-approve biometric prompts
-    }
-  });
+  const { authenticatorId } = await client.send(
+    "WebAuthn.addVirtualAuthenticator",
+    {
+      options: {
+        protocol: "ctap2",
+        transport: "internal",
+        hasResidentKey: true,
+        hasUserVerification: true,
+        isUserVerified: true, // Auto-approve biometric prompts
+      },
+    },
+  );
 
   return { client, authenticatorId };
 }
 
 export async function removeVirtualAuthenticator(
   client: CDPSession,
-  authenticatorId: string
+  authenticatorId: string,
 ) {
-  await client.send('WebAuthn.removeVirtualAuthenticator', { authenticatorId });
-  await client.send('WebAuthn.disable');
+  await client.send("WebAuthn.removeVirtualAuthenticator", { authenticatorId });
+  await client.send("WebAuthn.disable");
 }
 ```
 
@@ -229,26 +234,25 @@ export async function removeVirtualAuthenticator(
 ```typescript
 // tests/e2e/auth.spec.ts
 
-test('user can register and authenticate with passkey', async ({ page }) => {
+test("user can register and authenticate with passkey", async ({ page }) => {
   const { client, authenticatorId } = await setupVirtualAuthenticator(page);
 
   try {
     // Navigate to admin (requires auth)
-    await page.goto('https://grove-e2e-test.grove.place/admin');
+    await page.goto("https://grove-e2e-test.grove.place/admin");
 
     // Should redirect to login
     await expect(page).toHaveURL(/\/login/);
 
     // Register passkey
-    await page.click('text=Create Passkey');
+    await page.click("text=Create Passkey");
 
     // Virtual authenticator auto-responds to WebAuthn ceremony
     // No manual interaction needed!
 
     // Should be redirected to admin dashboard
     await expect(page).toHaveURL(/\/admin$/);
-    await expect(page.locator('h1')).toContainText('Dashboard');
-
+    await expect(page.locator("h1")).toContainText("Dashboard");
   } finally {
     await removeVirtualAuthenticator(client, authenticatorId);
   }
@@ -283,10 +287,10 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 
 Stripe provides deterministic test cards:
 
-| Card Number | Behavior |
-|-------------|----------|
-| `4242424242424242` | Always succeeds |
-| `4000000000000002` | Always declines |
+| Card Number        | Behavior           |
+| ------------------ | ------------------ |
+| `4242424242424242` | Always succeeds    |
+| `4000000000000002` | Always declines    |
 | `4000002500003155` | Requires 3D Secure |
 | `4000000000009995` | Insufficient funds |
 
@@ -301,22 +305,20 @@ The E2E test must wait for the Stripe webhook to be processed:
 
 export async function waitForTenantCreation(
   subdomain: string,
-  timeoutMs = 30000
+  timeoutMs = 30000,
 ): Promise<boolean> {
   const startTime = Date.now();
 
   while (Date.now() - startTime < timeoutMs) {
     // Check if tenant exists
-    const response = await fetch(
-      `https://${subdomain}.grove.place/api/health`
-    );
+    const response = await fetch(`https://${subdomain}.grove.place/api/health`);
 
     if (response.ok) {
       return true;
     }
 
     // Wait before retry
-    await new Promise(r => setTimeout(r, 1000));
+    await new Promise((r) => setTimeout(r, 1000));
   }
 
   return false;
@@ -324,6 +326,7 @@ export async function waitForTenantCreation(
 ```
 
 **Flakiness Mitigation:**
+
 - 30-second timeout for webhook processing
 - Exponential backoff on retries
 - Clear error messages on timeout
@@ -343,6 +346,7 @@ X-E2E-Test-Token: <E2E_TEST_TOKEN from Cloudflare secrets>
 ```
 
 The token is:
+
 - 64-character random string
 - Stored as Cloudflare Secret (not in code)
 - Only available in CI environment
@@ -355,34 +359,36 @@ Cleans up test tenant and related data:
 ```typescript
 // packages/plant/src/routes/api/e2e/cleanup/+server.ts
 
-import { json, error } from '@sveltejs/kit';
-import type { RequestHandler } from './$types';
+import { json, error } from "@sveltejs/kit";
+import type { RequestHandler } from "./$types";
 
-const TEST_TENANT_SUBDOMAIN = 'grove-e2e-test';
+const TEST_TENANT_SUBDOMAIN = "grove-e2e-test";
 
 export const POST: RequestHandler = async ({ request, platform }) => {
   // Verify E2E token
-  const token = request.headers.get('X-E2E-Test-Token');
+  const token = request.headers.get("X-E2E-Test-Token");
   if (token !== platform?.env?.E2E_TEST_TOKEN) {
-    throw error(403, 'Invalid E2E test token');
+    throw error(403, "Invalid E2E test token");
   }
 
   const db = platform?.env?.DB;
-  if (!db) throw error(500, 'Database unavailable');
+  if (!db) throw error(500, "Database unavailable");
 
   // 1. Find tenant
   const tenant = await db
-    .prepare('SELECT id FROM tenants WHERE subdomain = ?')
+    .prepare("SELECT id FROM tenants WHERE subdomain = ?")
     .bind(TEST_TENANT_SUBDOMAIN)
     .first<{ id: string }>();
 
   if (!tenant) {
-    return json({ cleaned: false, reason: 'Tenant not found' });
+    return json({ cleaned: false, reason: "Tenant not found" });
   }
 
   // 2. Get billing info for Stripe cleanup
   const billing = await db
-    .prepare('SELECT provider_subscription_id FROM platform_billing WHERE tenant_id = ?')
+    .prepare(
+      "SELECT provider_subscription_id FROM platform_billing WHERE tenant_id = ?",
+    )
     .bind(tenant.id)
     .first<{ provider_subscription_id: string | null }>();
 
@@ -392,26 +398,23 @@ export const POST: RequestHandler = async ({ request, platform }) => {
       await fetch(
         `https://api.stripe.com/v1/subscriptions/${billing.provider_subscription_id}`,
         {
-          method: 'DELETE',
+          method: "DELETE",
           headers: {
-            'Authorization': `Bearer ${platform.env.STRIPE_SECRET_KEY}`,
+            Authorization: `Bearer ${platform.env.STRIPE_SECRET_KEY}`,
           },
-        }
+        },
       );
     } catch (e) {
-      console.warn('[E2E Cleanup] Failed to cancel Stripe subscription:', e);
+      console.warn("[E2E Cleanup] Failed to cancel Stripe subscription:", e);
     }
   }
 
   // 4. Delete tenant (CASCADE handles related tables)
-  await db
-    .prepare('DELETE FROM tenants WHERE id = ?')
-    .bind(tenant.id)
-    .run();
+  await db.prepare("DELETE FROM tenants WHERE id = ?").bind(tenant.id).run();
 
   // 5. Delete orphaned onboarding records
   await db
-    .prepare('DELETE FROM user_onboarding WHERE username = ?')
+    .prepare("DELETE FROM user_onboarding WHERE username = ?")
     .bind(TEST_TENANT_SUBDOMAIN)
     .run();
 
@@ -439,13 +442,13 @@ export const GET: RequestHandler = async ({ platform }) => {
 
   // Check if test tenant exists
   const tenant = await db
-    ?.prepare('SELECT id, created_at FROM tenants WHERE subdomain = ?')
-    .bind('grove-e2e-test')
+    ?.prepare("SELECT id, created_at FROM tenants WHERE subdomain = ?")
+    .bind("grove-e2e-test")
     .first();
 
   return json({
     e2eEnabled: !!platform?.env?.E2E_TEST_TOKEN,
-    stripeTestMode: platform?.env?.STRIPE_SECRET_KEY?.startsWith('sk_test_'),
+    stripeTestMode: platform?.env?.STRIPE_SECRET_KEY?.startsWith("sk_test_"),
     testTenantExists: !!tenant,
     testTenantCreatedAt: tenant?.created_at,
   });
@@ -487,10 +490,10 @@ tests/
 ```typescript
 // tests/e2e/playwright.config.ts
 
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
-  testDir: './specs',
+  testDir: "./specs",
 
   // Run tests sequentially (order matters for full journey)
   fullyParallel: false,
@@ -506,32 +509,32 @@ export default defineConfig({
 
   // Reporter
   reporter: [
-    ['html', { outputFolder: 'playwright-report' }],
-    ['json', { outputFile: 'test-results.json' }],
+    ["html", { outputFolder: "playwright-report" }],
+    ["json", { outputFile: "test-results.json" }],
   ],
 
   // Global setup/teardown
-  globalSetup: require.resolve('./global-setup'),
-  globalTeardown: require.resolve('./global-teardown'),
+  globalSetup: require.resolve("./global-setup"),
+  globalTeardown: require.resolve("./global-teardown"),
 
   use: {
     // Base URL for relative navigations
-    baseURL: 'https://plant.grove.place',
+    baseURL: "https://plant.grove.place",
 
     // Capture traces on failure
-    trace: 'on-first-retry',
+    trace: "on-first-retry",
 
     // Screenshot on failure
-    screenshot: 'only-on-failure',
+    screenshot: "only-on-failure",
 
     // Video on failure
-    video: 'on-first-retry',
+    video: "on-first-retry",
   },
 
   projects: [
     {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      name: "chromium",
+      use: { ...devices["Desktop Chrome"] },
     },
   ],
 });
@@ -542,15 +545,15 @@ export default defineConfig({
 ```typescript
 // tests/e2e/global-setup.ts
 
-import { request } from '@playwright/test';
+import { request } from "@playwright/test";
 
-const E2E_API_BASE = 'https://plant.grove.place/api/e2e';
+const E2E_API_BASE = "https://plant.grove.place/api/e2e";
 
 async function globalSetup() {
   const token = process.env.E2E_TEST_TOKEN;
 
   if (!token) {
-    throw new Error('E2E_TEST_TOKEN environment variable is required');
+    throw new Error("E2E_TEST_TOKEN environment variable is required");
   }
 
   const context = await request.newContext();
@@ -558,22 +561,22 @@ async function globalSetup() {
   // Clean up any existing test tenant
   const response = await context.post(`${E2E_API_BASE}/cleanup`, {
     headers: {
-      'X-E2E-Test-Token': token,
+      "X-E2E-Test-Token": token,
     },
   });
 
   const result = await response.json();
-  console.log('[E2E Setup] Cleanup result:', result);
+  console.log("[E2E Setup] Cleanup result:", result);
 
   // Verify Stripe is in test mode
   const status = await context.get(`${E2E_API_BASE}/status`);
   const statusData = await status.json();
 
   if (!statusData.stripeTestMode) {
-    throw new Error('Stripe is not in test mode! Aborting E2E tests.');
+    throw new Error("Stripe is not in test mode! Aborting E2E tests.");
   }
 
-  console.log('[E2E Setup] Environment ready:', statusData);
+  console.log("[E2E Setup] Environment ready:", statusData);
 
   await context.dispose();
 }
@@ -590,25 +593,24 @@ export default globalSetup;
 ```typescript
 // tests/e2e/specs/full-journey.spec.ts
 
-import { test, expect, Page } from '@playwright/test';
-import { setupVirtualAuthenticator } from '../helpers/authenticator';
-import { waitForTenantCreation, fillStripeCheckout } from '../helpers/stripe';
+import { test, expect, Page } from "@playwright/test";
+import { setupVirtualAuthenticator } from "../helpers/authenticator";
+import { waitForTenantCreation, fillStripeCheckout } from "../helpers/stripe";
 
 const TEST_TENANT = {
-  username: 'grove-e2e-test',
-  displayName: 'E2E Test Garden',
-  email: 'e2e-test@grove.place',
+  username: "grove-e2e-test",
+  displayName: "E2E Test Garden",
+  email: "e2e-test@grove.place",
 };
 
-test.describe('Full User Journey', () => {
-
-  test('signup → payment → auth → content → billing', async ({ page }) => {
+test.describe("Full User Journey", () => {
+  test("signup → payment → auth → content → billing", async ({ page }) => {
     // ═══════════════════════════════════════════════════════════════════
     // PHASE 1: SIGNUP
     // ═══════════════════════════════════════════════════════════════════
 
-    await test.step('Complete onboarding form', async () => {
-      await page.goto('/');
+    await test.step("Complete onboarding form", async () => {
+      await page.goto("/");
 
       // Fill onboarding
       await page.fill('[name="username"]', TEST_TENANT.username);
@@ -619,38 +621,38 @@ test.describe('Full User Journey', () => {
       await page.click('[data-color="#16a34a"]');
 
       // Continue to plans
-      await page.click('text=Continue');
+      await page.click("text=Continue");
     });
 
-    await test.step('Select Seedling plan', async () => {
+    await test.step("Select Seedling plan", async () => {
       await expect(page).toHaveURL(/\/plans/);
       await page.click('[data-plan="seedling"]');
-      await page.click('text=Continue to Checkout');
+      await page.click("text=Continue to Checkout");
     });
 
     // ═══════════════════════════════════════════════════════════════════
     // PHASE 2: STRIPE CHECKOUT
     // ═══════════════════════════════════════════════════════════════════
 
-    await test.step('Complete Stripe Checkout', async () => {
+    await test.step("Complete Stripe Checkout", async () => {
       // Wait for redirect to Stripe
       await page.waitForURL(/checkout\.stripe\.com/);
 
       // Fill test card details
       await fillStripeCheckout(page, {
-        cardNumber: '4242424242424242',
-        expiry: '12/30',
-        cvc: '123',
+        cardNumber: "4242424242424242",
+        expiry: "12/30",
+        cvc: "123",
         name: TEST_TENANT.displayName,
-        country: 'United States',
-        zip: '12345',
+        country: "United States",
+        zip: "12345",
       });
 
       // Submit payment
       await page.click('[data-testid="hosted-payment-submit-button"]');
     });
 
-    await test.step('Wait for tenant creation', async () => {
+    await test.step("Wait for tenant creation", async () => {
       // Should redirect to success page
       await page.waitForURL(/\/success/, { timeout: 60000 });
 
@@ -665,7 +667,7 @@ test.describe('Full User Journey', () => {
 
     const tenantUrl = `https://${TEST_TENANT.username}.grove.place`;
 
-    await test.step('Register passkey and authenticate', async () => {
+    await test.step("Register passkey and authenticate", async () => {
       const { client, authenticatorId } = await setupVirtualAuthenticator(page);
 
       try {
@@ -676,13 +678,12 @@ test.describe('Full User Journey', () => {
         await expect(page).toHaveURL(/\/login/);
 
         // Register passkey
-        await page.click('text=Create Passkey');
+        await page.click("text=Create Passkey");
 
         // Virtual authenticator handles WebAuthn ceremony
         // Should be authenticated and redirected
         await expect(page).toHaveURL(`${tenantUrl}/admin`);
-        await expect(page.locator('h1')).toContainText('Dashboard');
-
+        await expect(page.locator("h1")).toContainText("Dashboard");
       } finally {
         // Keep authenticator for remaining tests
         // Will be cleaned up at end
@@ -693,17 +694,17 @@ test.describe('Full User Journey', () => {
     // PHASE 4: ADMIN PANEL
     // ═══════════════════════════════════════════════════════════════════
 
-    await test.step('Verify admin panel access', async () => {
+    await test.step("Verify admin panel access", async () => {
       // Check dashboard loads
       await expect(page.locator('[data-testid="usage-stats"]')).toBeVisible();
 
       // Navigate to settings
-      await page.click('text=Settings');
+      await page.click("text=Settings");
       await expect(page).toHaveURL(/\/admin\/settings/);
 
       // Verify site title shows
       await expect(page.locator('[name="siteTitle"]')).toHaveValue(
-        TEST_TENANT.displayName
+        TEST_TENANT.displayName,
       );
     });
 
@@ -713,61 +714,63 @@ test.describe('Full User Journey', () => {
 
     const postTitle = `E2E Test Post - ${Date.now()}`;
 
-    await test.step('Create and publish a post', async () => {
+    await test.step("Create and publish a post", async () => {
       // Navigate to new post
-      await page.click('text=Garden');
-      await page.click('text=New Bloom');
+      await page.click("text=Garden");
+      await page.click("text=New Bloom");
 
       // Fill post details
       await page.fill('[name="title"]', postTitle);
-      await page.fill('[data-testid="markdown-editor"]', `
+      await page.fill(
+        '[data-testid="markdown-editor"]',
+        `
 # Hello from E2E Tests!
 
 This post was created automatically by the E2E test suite.
 
 **Timestamp:** ${new Date().toISOString()}
-      `);
+      `,
+      );
 
       // Publish
-      await page.click('text=Publish');
+      await page.click("text=Publish");
 
       // Should redirect to post list
-      await expect(page.locator('text=' + postTitle)).toBeVisible();
+      await expect(page.locator("text=" + postTitle)).toBeVisible();
     });
 
-    await test.step('Verify post is publicly visible', async () => {
+    await test.step("Verify post is publicly visible", async () => {
       // Navigate to public blog
       await page.goto(`${tenantUrl}/garden`);
 
       // Post should be visible
-      await expect(page.locator('text=' + postTitle)).toBeVisible();
+      await expect(page.locator("text=" + postTitle)).toBeVisible();
     });
 
     // ═══════════════════════════════════════════════════════════════════
     // PHASE 6: BILLING
     // ═══════════════════════════════════════════════════════════════════
 
-    await test.step('Access billing portal', async () => {
+    await test.step("Access billing portal", async () => {
       // Go to account settings
       await page.goto(`${tenantUrl}/admin/account`);
 
       // Click manage subscription
-      await page.click('text=Manage Subscription');
+      await page.click("text=Manage Subscription");
 
       // Should open Stripe Billing Portal
       await page.waitForURL(/billing\.stripe\.com/);
 
       // Verify portal loads (just check we got there)
-      await expect(page.locator('text=Subscription')).toBeVisible();
+      await expect(page.locator("text=Subscription")).toBeVisible();
     });
 
     // ═══════════════════════════════════════════════════════════════════
     // SUCCESS!
     // ═══════════════════════════════════════════════════════════════════
 
-    console.log('✅ Full journey completed successfully!');
+    console.log("✅ Full journey completed successfully!");
   });
-
 });
 ```
 
@@ -786,18 +789,18 @@ on:
   push:
     branches: [main]
     paths:
-      - 'packages/plant/**'
-      - 'packages/engine/src/routes/api/billing/**'
-      - 'packages/engine/src/lib/payments/**'
+      - "packages/plant/**"
+      - "packages/engine/src/routes/api/billing/**"
+      - "packages/engine/src/lib/payments/**"
 
   pull_request:
     paths:
-      - 'packages/plant/**'
-      - 'packages/engine/src/routes/api/billing/**'
+      - "packages/plant/**"
+      - "packages/engine/src/routes/api/billing/**"
 
   # Run daily at 6 AM UTC
   schedule:
-    - cron: '0 6 * * *'
+    - cron: "0 6 * * *"
 
   workflow_dispatch:
 
@@ -816,8 +819,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install
@@ -858,14 +861,14 @@ The E2E test results can be displayed on Clearing:
 
 // Add E2E test status
 const e2eStatus = await fetch(
-  'https://api.github.com/repos/AutumnsGrove/GroveEngine/actions/workflows/e2e-payments.yml/runs?per_page=1',
-  { headers: { 'Accept': 'application/vnd.github.v3+json' } }
-).then(r => r.json());
+  "https://api.github.com/repos/AutumnsGrove/Lattice/actions/workflows/e2e-payments.yml/runs?per_page=1",
+  { headers: { Accept: "application/vnd.github.v3+json" } },
+).then((r) => r.json());
 
 return {
   // ... other status
   e2ePayments: {
-    status: e2eStatus.workflow_runs[0]?.conclusion || 'unknown',
+    status: e2eStatus.workflow_runs[0]?.conclusion || "unknown",
     lastRun: e2eStatus.workflow_runs[0]?.created_at,
     url: e2eStatus.workflow_runs[0]?.html_url,
   },
@@ -878,13 +881,13 @@ return {
 
 ### Common Sources of Flakiness
 
-| Issue | Mitigation |
-|-------|------------|
-| Webhook delays | 30s timeout with polling |
+| Issue                 | Mitigation                  |
+| --------------------- | --------------------------- |
+| Webhook delays        | 30s timeout with polling    |
 | Stripe iframe loading | Wait for specific selectors |
-| Network variability | Retry failed tests once |
-| Race conditions | Sequential test execution |
-| Stale test data | Clean slate before each run |
+| Network variability   | Retry failed tests once     |
+| Race conditions       | Sequential test execution   |
+| Stale test data       | Clean slate before each run |
 
 ### Best Practices
 
@@ -918,7 +921,7 @@ return {
 // Middleware for E2E endpoints
 function validateE2EAccess(request: Request, env: Env) {
   // Only allow from CI or with valid token
-  const token = request.headers.get('X-E2E-Test-Token');
+  const token = request.headers.get("X-E2E-Test-Token");
 
   if (!token || token !== env.E2E_TEST_TOKEN) {
     return false;
@@ -969,21 +972,21 @@ function validateE2EAccess(request: Request, env: Env) {
 
 ### Stripe Test Card Reference
 
-| Scenario | Card Number | Expected Result |
-|----------|-------------|-----------------|
-| Successful payment | 4242424242424242 | Succeeds |
-| Generic decline | 4000000000000002 | Declined |
-| Insufficient funds | 4000000000009995 | Declined |
-| 3D Secure required | 4000002500003155 | Requires auth |
-| Expired card | 4000000000000069 | Declined |
+| Scenario           | Card Number      | Expected Result |
+| ------------------ | ---------------- | --------------- |
+| Successful payment | 4242424242424242 | Succeeds        |
+| Generic decline    | 4000000000000002 | Declined        |
+| Insufficient funds | 4000000000009995 | Declined        |
+| 3D Secure required | 4000002500003155 | Requires auth   |
+| Expired card       | 4000000000000069 | Declined        |
 
 ### Environment Variables
 
-| Variable | Where | Purpose |
-|----------|-------|---------|
-| `E2E_TEST_TOKEN` | GitHub Secrets + Cloudflare | E2E endpoint auth |
-| `STRIPE_SECRET_KEY` | Cloudflare (existing) | Stripe API (test mode) |
-| `STRIPE_WEBHOOK_SECRET` | Cloudflare (existing) | Webhook verification |
+| Variable                | Where                       | Purpose                |
+| ----------------------- | --------------------------- | ---------------------- |
+| `E2E_TEST_TOKEN`        | GitHub Secrets + Cloudflare | E2E endpoint auth      |
+| `STRIPE_SECRET_KEY`     | Cloudflare (existing)       | Stripe API (test mode) |
+| `STRIPE_WEBHOOK_SECRET` | Cloudflare (existing)       | Webhook verification   |
 
 ### Related Documentation
 
@@ -994,4 +997,4 @@ function validateE2EAccess(request: Request, env: Env) {
 
 ---
 
-*From 10,000 feet, the path is clear: signup, payment, auth, create, manage. Every step tested, every journey verified.* 🦅
+_From 10,000 feet, the path is clear: signup, payment, auth, create, manage. Every step tested, every journey verified._ 🦅

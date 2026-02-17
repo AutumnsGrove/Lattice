@@ -4,7 +4,7 @@ description: Centralized email delivery worker with retries, fallbacks, and obse
 category: plans
 planCategory: infrastructure
 icon: wind
-lastUpdated: '2026-02-01'
+lastUpdated: "2026-02-01"
 status: planned
 priority: high
 tags:
@@ -169,31 +169,31 @@ Zephyr routes emails based on type, applying appropriate handling for each categ
 
 ### Email Type Registry
 
-| Type | Description | From Address | Retry | Track Opens |
-|------|-------------|--------------|-------|-------------|
-| `transactional` | One-to-one triggered emails | `hello@grove.place` | 3x | No |
-| `notification` | System notifications (replies, alerts) | `porch@grove.place` | 3x | No |
-| `verification` | Auth codes, magic links | `hello@grove.place` | 3x | No |
-| `sequence` | Onboarding drip emails | `autumn@grove.place` | 3x | Yes |
-| `lifecycle` | Payment, renewal, trial | `hello@grove.place` | 3x | No |
-| `broadcast` | Marketing, announcements | `autumn@grove.place` | 1x | Yes |
+| Type            | Description                            | From Address         | Retry | Track Opens |
+| --------------- | -------------------------------------- | -------------------- | ----- | ----------- |
+| `transactional` | One-to-one triggered emails            | `hello@grove.place`  | 3x    | No          |
+| `notification`  | System notifications (replies, alerts) | `porch@grove.place`  | 3x    | No          |
+| `verification`  | Auth codes, magic links                | `hello@grove.place`  | 3x    | No          |
+| `sequence`      | Onboarding drip emails                 | `autumn@grove.place` | 3x    | Yes         |
+| `lifecycle`     | Payment, renewal, trial                | `hello@grove.place`  | 3x    | No          |
+| `broadcast`     | Marketing, announcements               | `autumn@grove.place` | 1x    | Yes         |
 
 ### Template Registry
 
-| Template | Type | Use Case | Package (Current) |
-|----------|------|----------|-------------------|
-| `welcome` | sequence | New signup welcome | engine |
-| `day-1` | sequence | First day follow-up | engine |
-| `day-7` | sequence | Week check-in | engine |
-| `day-14` | sequence | Two week follow-up | engine |
-| `day-30` | sequence | Month check-in | engine |
-| `porch-reply` | notification | **Support reply** (THE BUG) | landing (NEW) |
-| `verification-code` | verification | Email verification | plant |
-| `payment-received` | lifecycle | Subscription confirmed | plant |
-| `payment-failed` | lifecycle | Charge failed | plant |
-| `trial-ending` | lifecycle | Trial expiring soon | plant |
-| `feedback-forward` | transactional | Forward inbound email | landing |
-| `raw` | any | Pre-rendered HTML pass-through | any |
+| Template            | Type          | Use Case                       | Package (Current) |
+| ------------------- | ------------- | ------------------------------ | ----------------- |
+| `welcome`           | sequence      | New signup welcome             | engine            |
+| `day-1`             | sequence      | First day follow-up            | engine            |
+| `day-7`             | sequence      | Week check-in                  | engine            |
+| `day-14`            | sequence      | Two week follow-up             | engine            |
+| `day-30`            | sequence      | Month check-in                 | engine            |
+| `porch-reply`       | notification  | **Support reply** (THE BUG)    | landing (NEW)     |
+| `verification-code` | verification  | Email verification             | plant             |
+| `payment-received`  | lifecycle     | Subscription confirmed         | plant             |
+| `payment-failed`    | lifecycle     | Charge failed                  | plant             |
+| `trial-ending`      | lifecycle     | Trial expiring soon            | plant             |
+| `feedback-forward`  | transactional | Forward inbound email          | landing           |
+| `raw`               | any           | Pre-rendered HTML pass-through | any               |
 
 ---
 
@@ -268,7 +268,7 @@ type ZephyrErrorCode =
 ### Usage Examples
 
 ```typescript
-import { Zephyr } from "@autumnsgrove/groveengine/zephyr";
+import { Zephyr } from "@autumnsgrove/lattice/zephyr";
 
 // Porch reply notification (THE FIX)
 const result = await Zephyr.send({
@@ -354,8 +354,8 @@ const retryConfig = {
 
   // Only retry on transient errors
   retryable: [
-    "PROVIDER_ERROR",  // Resend 5xx
-    "CIRCUIT_OPEN",    // Will retry after circuit closes
+    "PROVIDER_ERROR", // Resend 5xx
+    "CIRCUIT_OPEN", // Will retry after circuit closes
   ],
 
   // Never retry these
@@ -364,7 +364,7 @@ const retryConfig = {
     "INVALID_TEMPLATE",
     "INVALID_RECIPIENT",
     "UNSUBSCRIBED",
-    "RATE_LIMITED",    // Respect rate limits
+    "RATE_LIMITED", // Respect rate limits
   ],
 };
 ```
@@ -373,10 +373,10 @@ const retryConfig = {
 
 ```typescript
 const circuitConfig = {
-  failureThreshold: 5,    // Failures before opening
-  windowMs: 60000,        // 1 minute window
-  cooldownMs: 30000,      // 30 seconds before retry
-  halfOpenRequests: 2,    // Test requests in half-open state
+  failureThreshold: 5, // Failures before opening
+  windowMs: 60000, // 1 minute window
+  cooldownMs: 30000, // 30 seconds before retry
+  halfOpenRequests: 2, // Test requests in half-open state
 };
 
 // Circuit states:
@@ -434,16 +434,16 @@ CREATE UNIQUE INDEX idx_zephyr_idempotency ON zephyr_logs(idempotency_key)
 
 ### What Gets Logged
 
-| Field | Logged | Purpose |
-|-------|--------|---------|
-| Recipient email | Yes | Debugging, audit |
-| Subject line | Yes | Debugging |
-| Email body | **No** | Privacy |
-| Template name | Yes | Analytics |
-| Template data | **No** | Privacy |
-| Error messages | Yes | Debugging |
-| Latency | Yes | Performance |
-| Provider used | Yes | Cost tracking |
+| Field           | Logged | Purpose          |
+| --------------- | ------ | ---------------- |
+| Recipient email | Yes    | Debugging, audit |
+| Subject line    | Yes    | Debugging        |
+| Email body      | **No** | Privacy          |
+| Template name   | Yes    | Analytics        |
+| Template data   | **No** | Privacy          |
+| Error messages  | Yes    | Debugging        |
+| Latency         | Yes    | Performance      |
+| Provider used   | Yes    | Cost tracking    |
 
 ---
 
@@ -578,13 +578,13 @@ packages/engine/src/lib/zephyr/
 
 ### Monthly Estimates
 
-| Email Type | Volume | Cost |
-|------------|--------|------|
-| Onboarding sequences | ~500/month | $0.50 |
-| Verification codes | ~200/month | $0.20 |
-| Payment notifications | ~100/month | $0.10 |
-| Porch replies | ~50/month | $0.05 |
-| **Total** | ~850/month | **~$0.85** |
+| Email Type            | Volume     | Cost       |
+| --------------------- | ---------- | ---------- |
+| Onboarding sequences  | ~500/month | $0.50      |
+| Verification codes    | ~200/month | $0.20      |
+| Payment notifications | ~100/month | $0.10      |
+| Porch replies         | ~50/month  | $0.05      |
+| **Total**             | ~850/month | **~$0.85** |
 
 (Well under free tier)
 

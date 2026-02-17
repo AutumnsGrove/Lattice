@@ -73,7 +73,10 @@ export function stripControlChars(input: string): string {
 // Comment Settings
 // ============================================================================
 
-const DEFAULT_SETTINGS: Omit<CommentSettingsRecord, "tenant_id" | "updated_at"> = {
+const DEFAULT_SETTINGS: Omit<
+  CommentSettingsRecord,
+  "tenant_id" | "updated_at"
+> = {
   comments_enabled: 1,
   public_comments_enabled: 1,
   who_can_comment: "anyone",
@@ -89,9 +92,8 @@ const DEFAULT_SETTINGS: Omit<CommentSettingsRecord, "tenant_id" | "updated_at"> 
 export async function getCommentSettings(
   tenantDb: TenantDb,
 ): Promise<CommentSettingsRecord> {
-  const settings = await tenantDb.queryOne<CommentSettingsRecord>(
-    "comment_settings",
-  );
+  const settings =
+    await tenantDb.queryOne<CommentSettingsRecord>("comment_settings");
 
   if (settings) return settings;
 
@@ -153,14 +155,10 @@ export async function getPendingComments(
 /**
  * Get count of pending public comments (for nav badge).
  */
-export async function getPendingCount(
-  tenantDb: TenantDb,
-): Promise<number> {
-  return tenantDb.count(
-    "comments",
-    "is_public = 1 AND status = ?",
-    ["pending"],
-  );
+export async function getPendingCount(tenantDb: TenantDb): Promise<number> {
+  return tenantDb.count("comments", "is_public = 1 AND status = ?", [
+    "pending",
+  ]);
 }
 
 /**
@@ -183,12 +181,10 @@ export async function getModeratedComments(
 export async function getAllPrivateReplies(
   tenantDb: TenantDb,
 ): Promise<CommentRecord[]> {
-  return tenantDb.queryMany<CommentRecord>(
-    "comments",
-    "is_public = 0",
-    [],
-    { orderBy: "created_at DESC", limit: 100 },
-  );
+  return tenantDb.queryMany<CommentRecord>("comments", "is_public = 0", [], {
+    orderBy: "created_at DESC",
+    limit: 100,
+  });
 }
 
 /**
@@ -225,9 +221,7 @@ const MAX_THREAD_DEPTH = 3;
  * Build a threaded comment tree from a flat list.
  * Comments beyond MAX_THREAD_DEPTH are flattened with @mention prefix.
  */
-export function buildCommentTree(
-  comments: CommentRecord[],
-): ThreadedComment[] {
+export function buildCommentTree(comments: CommentRecord[]): ThreadedComment[] {
   const map = new Map<string, ThreadedComment>();
   const roots: ThreadedComment[] = [];
 
@@ -365,11 +359,9 @@ export async function deleteComment(
   commentId: string,
 ): Promise<boolean> {
   // Check if this comment has any replies
-  const hasReplies = await tenantDb.exists(
-    "comments",
-    "parent_id = ?",
-    [commentId],
-  );
+  const hasReplies = await tenantDb.exists("comments", "parent_id = ?", [
+    commentId,
+  ]);
 
   if (hasReplies) {
     // Soft delete: replace content, keep structure for thread integrity
@@ -512,9 +504,8 @@ export async function upsertCommentSettings(
   tenantDb: TenantDb,
   settings: Partial<Omit<CommentSettingsRecord, "tenant_id" | "updated_at">>,
 ): Promise<void> {
-  const existing = await tenantDb.queryOne<CommentSettingsRecord>(
-    "comment_settings",
-  );
+  const existing =
+    await tenantDb.queryOne<CommentSettingsRecord>("comment_settings");
 
   if (existing) {
     await tenantDb.update(

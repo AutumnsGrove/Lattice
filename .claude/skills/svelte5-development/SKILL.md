@@ -8,6 +8,7 @@ description: Build web applications with Svelte 5 runes, SvelteKit routing, form
 ## When to Activate
 
 Activate this skill when:
+
 - Creating Svelte 5 components
 - Working with SvelteKit routing
 - Implementing runes ($state, $derived, $effect)
@@ -25,12 +26,12 @@ pnpm build             # Build for production
 
 ## Runes Quick Reference
 
-| Rune | Purpose | Example |
-|------|---------|---------|
-| `$state` | Reactive state | `let count = $state(0)` |
-| `$derived` | Computed values | `let doubled = $derived(count * 2)` |
-| `$effect` | Side effects | `$effect(() => console.log(count))` |
-| `$props` | Component props | `let { name } = $props()` |
+| Rune        | Purpose         | Example                                  |
+| ----------- | --------------- | ---------------------------------------- |
+| `$state`    | Reactive state  | `let count = $state(0)`                  |
+| `$derived`  | Computed values | `let doubled = $derived(count * 2)`      |
+| `$effect`   | Side effects    | `$effect(() => console.log(count))`      |
+| `$props`    | Component props | `let { name } = $props()`                |
 | `$bindable` | Two-way binding | `let { value = $bindable() } = $props()` |
 
 ## Reactive State ($state)
@@ -114,20 +115,20 @@ pnpm build             # Build for production
 
 ## SvelteKit File Conventions
 
-| File | Purpose |
-|------|---------|
-| `+page.svelte` | Page component |
+| File              | Purpose                  |
+| ----------------- | ------------------------ |
+| `+page.svelte`    | Page component           |
 | `+page.server.js` | Server-only load/actions |
-| `+layout.svelte` | Shared layout |
-| `+server.js` | API endpoints |
-| `+error.svelte` | Error boundary |
+| `+layout.svelte`  | Shared layout            |
+| `+server.js`      | API endpoints            |
+| `+error.svelte`   | Error boundary           |
 
 ## Data Loading
 
 ```javascript
 // src/routes/posts/+page.server.js
 export async function load({ fetch }) {
-  const response = await fetch('/api/posts');
+  const response = await fetch("/api/posts");
   return { posts: await response.json() };
 }
 ```
@@ -149,20 +150,20 @@ export async function load({ fetch }) {
 
 ```javascript
 // src/routes/login/+page.server.js
-import { fail, redirect } from '@sveltejs/kit';
+import { fail, redirect } from "@sveltejs/kit";
 
 export const actions = {
   default: async ({ request, cookies }) => {
     const data = await request.formData();
-    const email = data.get('email');
+    const email = data.get("email");
 
     if (!email) {
       return fail(400, { missing: true });
     }
 
-    cookies.set('session', token, { path: '/' });
-    throw redirect(303, '/dashboard');
-  }
+    cookies.set("session", token, { path: "/" });
+    throw redirect(303, "/dashboard");
+  },
 };
 ```
 
@@ -186,7 +187,7 @@ export const actions = {
 
 ```javascript
 // src/routes/api/posts/+server.js
-import { json } from '@sveltejs/kit';
+import { json } from "@sveltejs/kit";
 
 export async function GET({ url }) {
   const posts = await getPosts();
@@ -203,6 +204,7 @@ export async function POST({ request }) {
 ## Common Pitfalls
 
 ### Destructuring Breaks Reactivity
+
 ```javascript
 // ❌ Bad
 let { count } = $state({ count: 0 });
@@ -213,6 +215,7 @@ state.count++;
 ```
 
 ### Missing Keys in Each
+
 ```svelte
 <!-- ❌ Bad -->
 {#each items as item}
@@ -222,6 +225,7 @@ state.count++;
 ```
 
 ### Use Progressive Enhancement
+
 ```svelte
 <script>
   import { enhance } from '$app/forms';
@@ -235,37 +239,45 @@ state.count++;
 **Toast** is the primary client-side feedback for user actions:
 
 ```typescript
-import { toast } from '@autumnsgrove/groveengine/ui';
+import { toast } from "@autumnsgrove/lattice/ui";
 
 // After successful action
-toast.success('Post published!');
+toast.success("Post published!");
 
 // After failed action
-toast.error(err instanceof Error ? err.message : 'Something went wrong');
+toast.error(err instanceof Error ? err.message : "Something went wrong");
 
 // Async operations
-toast.promise(apiRequest('/api/export', { method: 'POST' }), {
-  loading: 'Exporting...', success: 'Done!', error: 'Export failed.',
+toast.promise(apiRequest("/api/export", { method: "POST" }), {
+  loading: "Exporting...",
+  success: "Done!",
+  error: "Export failed.",
 });
 
 // Multi-step flows
-const id = toast.loading('Saving...');
+const id = toast.loading("Saving...");
 // ... later
 toast.dismiss(id);
-toast.success('Saved!');
+toast.success("Saved!");
 ```
 
 **When NOT to use toast:** form validation (use `fail()` + inline errors), page load failures (`+error.svelte`), persistent notices (use GroveMessages).
 
 **Server-side errors** use Signpost codes:
+
 ```typescript
-import { API_ERRORS, buildErrorJson, throwGroveError, logGroveError } from '@autumnsgrove/groveengine/errors';
+import {
+  API_ERRORS,
+  buildErrorJson,
+  throwGroveError,
+  logGroveError,
+} from "@autumnsgrove/lattice/errors";
 
 // API route: return structured error
 return json(buildErrorJson(API_ERRORS.RESOURCE_NOT_FOUND), { status: 404 });
 
 // Page load: throw to +error.svelte
-throwGroveError(404, SITE_ERRORS.PAGE_NOT_FOUND, 'Engine');
+throwGroveError(404, SITE_ERRORS.PAGE_NOT_FOUND, "Engine");
 ```
 
 See `AgentUsage/error_handling.md` for the full reference.
@@ -291,7 +303,7 @@ When building Grove UI that includes nature-themed terminology, always use the G
 
 ```svelte
 <script lang="ts">
-  import { GroveTerm, GroveSwap, GroveText } from '@autumnsgrove/groveengine/ui';
+  import { GroveTerm, GroveSwap, GroveText } from '@autumnsgrove/lattice/ui';
   import groveTermManifest from '$lib/data/grove-term-manifest.json';
 </script>
 
@@ -310,6 +322,7 @@ See `packages/engine/src/lib/ui/components/ui/groveterm/` for component source a
 ## Related Resources
 
 See `AgentUsage/svelte5_guide.md` for complete documentation including:
+
 - Advanced rune patterns
 - Snippets for reusable markup
 - Performance optimization

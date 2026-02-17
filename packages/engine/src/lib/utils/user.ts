@@ -6,8 +6,8 @@
  */
 
 export interface UserLike {
-	name?: string | null;
-	email?: string | null;
+  name?: string | null;
+  email?: string | null;
 }
 
 /**
@@ -26,8 +26,8 @@ export interface UserLike {
  * ```
  */
 export function getUserDisplayName(user?: UserLike | null): string {
-	if (!user) return 'Wanderer';
-	return user.name || user.email?.split('@')[0] || 'Wanderer';
+  if (!user) return "Wanderer";
+  return user.name || user.email?.split("@")[0] || "Wanderer";
 }
 
 /**
@@ -35,8 +35,8 @@ export function getUserDisplayName(user?: UserLike | null): string {
  * Use this to decide between "Welcome, Wanderer" vs "Welcome back, {name}"
  */
 export function hasPersonalizedName(user?: UserLike | null): boolean {
-	if (!user) return false;
-	return Boolean(user.name || user.email);
+  if (!user) return false;
+  return Boolean(user.name || user.email);
 }
 
 /**
@@ -49,10 +49,12 @@ export function hasPersonalizedName(user?: UserLike | null): boolean {
  * normalizeEmail(null) // null
  * ```
  */
-export function normalizeEmail(email: string | null | undefined): string | null {
-	if (!email) return null;
-	const normalized = email.toLowerCase().trim();
-	return normalized || null;
+export function normalizeEmail(
+  email: string | null | undefined,
+): string | null {
+  if (!email) return null;
+  const normalized = email.toLowerCase().trim();
+  return normalized || null;
 }
 
 /**
@@ -66,11 +68,11 @@ export function normalizeEmail(email: string | null | undefined): string | null 
  * ```
  */
 export function emailsMatch(
-	email1: string | null | undefined,
-	email2: string | null | undefined
+  email1: string | null | undefined,
+  email2: string | null | undefined,
 ): boolean {
-	const normalized1 = normalizeEmail(email1);
-	const normalized2 = normalizeEmail(email2);
-	if (!normalized1 || !normalized2) return false;
-	return normalized1 === normalized2;
+  const normalized1 = normalizeEmail(email1);
+  const normalized2 = normalizeEmail(email2);
+  if (!normalized1 || !normalized2) return false;
+  return normalized1 === normalized2;
 }

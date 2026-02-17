@@ -103,7 +103,7 @@ class CircularBuffer<T extends { timestamp: string }> {
 
   getSince(timestamp: string): T[] {
     return this.buffer.filter(
-      (log) => new Date(log.timestamp) > new Date(timestamp)
+      (log) => new Date(log.timestamp) > new Date(timestamp),
     );
   }
 
@@ -134,7 +134,7 @@ function createLogEntry(
   level: LogLevel,
   category: LogCategory,
   message: string,
-  metadata: Record<string, unknown> = {}
+  metadata: Record<string, unknown> = {},
 ): LogEntry {
   return {
     id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -166,7 +166,7 @@ export function logAPI(
   endpoint: string,
   method: string,
   status: number,
-  metadata: APIMetadata = {}
+  metadata: APIMetadata = {},
 ): void {
   const level: LogLevel =
     status >= 500
@@ -185,7 +185,7 @@ export function logAPI(
       method,
       status,
       ...metadata,
-    }
+    },
   );
 
   logBuffers.api.push(log);
@@ -194,7 +194,7 @@ export function logAPI(
   // Also log to console in development
   if (metadata.duration) {
     console.log(
-      `[API] ${method} ${endpoint} ${status} (${metadata.duration}ms)`
+      `[API] ${method} ${endpoint} ${status} (${metadata.duration}ms)`,
     );
   }
 }
@@ -202,8 +202,15 @@ export function logAPI(
 /**
  * Log GitHub API operations (rate limits, queries, errors)
  */
-export function logGitHub(operation: string, metadata: GitHubMetadata = {}): void {
-  const level: LogLevel = metadata.error ? "error" : metadata.warning ? "warn" : "info";
+export function logGitHub(
+  operation: string,
+  metadata: GitHubMetadata = {},
+): void {
+  const level: LogLevel = metadata.error
+    ? "error"
+    : metadata.warning
+      ? "warn"
+      : "info";
   const log = createLogEntry(level, "github", operation, metadata);
 
   logBuffers.github.push(log);
@@ -213,7 +220,7 @@ export function logGitHub(operation: string, metadata: GitHubMetadata = {}): voi
     `[GitHub] ${operation}`,
     metadata.rateLimit
       ? `(${metadata.rateLimit.remaining}/${metadata.rateLimit.limit} remaining)`
-      : ""
+      : "",
   );
 }
 
@@ -223,7 +230,7 @@ export function logGitHub(operation: string, metadata: GitHubMetadata = {}): voi
 export function logError(
   message: string,
   error: Error | null = null,
-  metadata: Record<string, unknown> = {}
+  metadata: Record<string, unknown> = {},
 ): void {
   const log = createLogEntry("error", "errors", message, {
     error: error
@@ -248,7 +255,7 @@ export function logError(
 export function logCache(
   operation: string,
   key: string,
-  metadata: CacheMetadata = {}
+  metadata: CacheMetadata = {},
 ): void {
   const level: LogLevel = metadata.error ? "error" : "info";
   const log = createLogEntry(
@@ -259,7 +266,7 @@ export function logCache(
       operation,
       key,
       ...metadata,
-    }
+    },
   );
 
   logBuffers.cache.push(log);
@@ -269,7 +276,10 @@ export function logCache(
 /**
  * Get logs from a specific category
  */
-export function getLogs(category: LogCategory, since: string | null = null): LogEntry[] {
+export function getLogs(
+  category: LogCategory,
+  since: string | null = null,
+): LogEntry[] {
   if (!logBuffers[category]) {
     return [];
   }
@@ -296,7 +306,7 @@ export function getAllLogs(since: string | null = null): LogEntry[] {
 
   // Sort by timestamp (newest first)
   return allLogs.sort(
-    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
   );
 }
 
@@ -341,8 +351,8 @@ export function clearLogs(category: LogCategory | null = null): void {
   if (category && logBuffers[category]) {
     logBuffers[category].clear();
   } else if (!category) {
-    (Object.values(logBuffers) as CircularBuffer<LogEntry>[]).forEach((buffer) =>
-      buffer.clear()
+    (Object.values(logBuffers) as CircularBuffer<LogEntry>[]).forEach(
+      (buffer) => buffer.clear(),
     );
   }
 }

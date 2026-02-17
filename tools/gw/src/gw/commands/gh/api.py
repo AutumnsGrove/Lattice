@@ -113,7 +113,7 @@ def api(
 
     \b
     Examples:
-        gw gh api repos/AutumnsGrove/GroveEngine
+        gw gh api repos/AutumnsGrove/Lattice
         gw gh api user
         gw gh api --write repos/{owner}/{repo}/labels -X POST -f name="bug" -f color="d73a4a"
         gw gh api --write --force repos/{owner}/{repo}/labels/old-label -X DELETE

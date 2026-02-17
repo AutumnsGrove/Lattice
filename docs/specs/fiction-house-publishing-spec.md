@@ -4,7 +4,7 @@ description: Project specification for the first Grove customer site
 category: specs
 specCategory: reference
 icon: book
-lastUpdated: '2025-12-01'
+lastUpdated: "2025-12-01"
 aliases: []
 tags:
   - customer-site
@@ -31,32 +31,33 @@ tags:
         |||
 ```
 
-> *Stories find their home*
+> _Stories find their home_
 
 ---
 
 # Fiction House Publishing — Project Specification
 
-> A warm, welcoming home for Fiction House Publishing. Built on GroveEngine, leveraging the tenant architecture with custom book catalog features.
+> A warm, welcoming home for Fiction House Publishing. Built on Lattice, leveraging the tenant architecture with custom book catalog features.
 
-A single-tenant deployment for Fiction House Publishing featuring a book catalog, blog, and contact form. Uses GroveEngine as a dependency with custom book management extensions for this boutique literary publisher.
+A single-tenant deployment for Fiction House Publishing featuring a book catalog, blog, and contact form. Uses Lattice as a dependency with custom book management extensions for this boutique literary publisher.
 
 **Repository:** `AutumnsGrove/FictionHousePublishing` (private)
 **Business Name:** Fiction House Publishing
 **Domain:** Custom domain (TBD)
-**Type:** Custom site using `@autumnsgrove/groveengine` as dependency
+**Type:** Custom site using `@autumnsgrove/lattice` as dependency
 
 ---
 
 ## Project Overview
 
 Fiction House Publishing is a publishing house portfolio site featuring:
+
 - **Book Catalog** — Showcasing published works with cover images, descriptions, and purchase links
 - **Blog** — Updates, author insights, and publishing news
 - **About** — The story behind Fiction House
 - **Contact** — How to reach the publisher
 
-This is a **single-tenant deployment** using GroveEngine's infrastructure. We leverage the existing tenant architecture (D1 tables, auth, admin panel) with minimal site-specific additions.
+This is a **single-tenant deployment** using Lattice's infrastructure. We leverage the existing tenant architecture (D1 tables, auth, admin panel) with minimal site-specific additions.
 
 ---
 
@@ -72,15 +73,15 @@ This is a **single-tenant deployment** using GroveEngine's infrastructure. We le
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|------------|
-| **Framework** | SvelteKit 2.0+ with Svelte 5 |
-| **Styling** | Tailwind CSS |
-| **Database** | Cloudflare D1 (SQLite) |
-| **Storage** | Cloudflare R2 (images, book covers) |
-| **Auth** | Heartwood (GroveAuth) via engine |
-| **Hosting** | Cloudflare Pages |
-| **Package** | `@autumnsgrove/groveengine` |
+| Layer         | Technology                          |
+| ------------- | ----------------------------------- |
+| **Framework** | SvelteKit 2.0+ with Svelte 5        |
+| **Styling**   | Tailwind CSS                        |
+| **Database**  | Cloudflare D1 (SQLite)              |
+| **Storage**   | Cloudflare R2 (images, book covers) |
+| **Auth**      | Heartwood (GroveAuth) via engine    |
+| **Hosting**   | Cloudflare Pages                    |
+| **Package**   | `@autumnsgrove/lattice`             |
 
 ---
 
@@ -156,7 +157,8 @@ FictionHousePublishing/
 
 ### Using Existing Tenant Tables
 
-From GroveEngine, we use:
+From Lattice, we use:
+
 - `tenants` — Site configuration (single tenant for this site)
 - `posts` — Blog posts
 - `pages` — Static pages (About content)
@@ -238,15 +240,15 @@ export interface Book {
   purchase_links: PurchaseLink[];
   is_featured: number;
   display_order: number;
-  status: 'draft' | 'published' | 'archived';
+  status: "draft" | "published" | "archived";
   created_at: number;
   updated_at: number;
 }
 
 export interface PurchaseLink {
-  name: string;      // "Amazon", "Barnes & Noble", "IndieBound", etc.
+  name: string; // "Amazon", "Barnes & Noble", "IndieBound", etc.
   url: string;
-  icon?: string;     // Optional icon identifier
+  icon?: string; // Optional icon identifier
 }
 
 export interface SiteSettings {
@@ -312,6 +314,7 @@ export interface SocialLink {
 ```
 
 **Data Requirements:**
+
 - Featured books (is_featured = 1, limit 3)
 - Recent blog posts (limit 3)
 - Site settings (tagline, description)
@@ -378,6 +381,7 @@ Grid layout showing all published books.
 ### Blog Page (`/blog`)
 
 Uses engine's post system. Standard blog listing with:
+
 - Post title
 - Publication date
 - Excerpt/description
@@ -386,6 +390,7 @@ Uses engine's post system. Standard blog listing with:
 ### About Page (`/about`)
 
 Static content (stored in `pages` table) with:
+
 - Story of Fiction House Publishing
 - Mission/vision
 - Photo of publisher (optional)
@@ -395,6 +400,7 @@ Content managed via admin panel.
 ### Contact Page (`/contact`)
 
 Interactive contact form that sends email via Resend:
+
 - Name field
 - Email field
 - Message textarea
@@ -402,6 +408,7 @@ Interactive contact form that sends email via Resend:
 - Success/error feedback
 
 Plus static contact information:
+
 - Email address
 - Social media links (optional)
 
@@ -440,23 +447,23 @@ Plus static contact information:
 
 ```typescript
 // src/routes/api/contact/+server.ts
-import { json } from '@sveltejs/kit';
-import { Resend } from 'resend';
+import { json } from "@sveltejs/kit";
+import { Resend } from "resend";
 
 export const POST = async ({ request, platform }) => {
   const { name, email, message } = await request.json();
 
   // Validation
   if (!name || !email || !message) {
-    return json({ error: 'All fields are required' }, { status: 400 });
+    return json({ error: "All fields are required" }, { status: 400 });
   }
 
   const resend = new Resend(platform.env.RESEND_API_KEY);
 
   try {
     await resend.emails.send({
-      from: 'Fiction House <noreply@fictionhouse.com>',
-      to: 'contact@fictionhouse.com',
+      from: "Fiction House <noreply@fictionhouse.com>",
+      to: "contact@fictionhouse.com",
       replyTo: email,
       subject: `Contact Form: ${name}`,
       text: `
@@ -470,8 +477,8 @@ ${message}
 
     return json({ success: true });
   } catch (err) {
-    console.error('Failed to send contact email:', err);
-    return json({ error: 'Failed to send message' }, { status: 500 });
+    console.error("Failed to send contact email:", err);
+    return json({ error: "Failed to send message" }, { status: 500 });
   }
 };
 ```
@@ -690,29 +697,29 @@ ${message}
 
 ## Admin Panel Integration
 
-The admin panel is imported from GroveEngine with site-specific extensions:
+The admin panel is imported from Lattice with site-specific extensions:
 
 ### Admin Routes
 
 ```typescript
 // src/routes/admin/+layout.server.ts
-import { redirect } from '@sveltejs/kit';
-import { getUserFromSession } from '@autumnsgrove/groveengine/services';
+import { redirect } from "@sveltejs/kit";
+import { getUserFromSession } from "@autumnsgrove/lattice/services";
 
 export const load = async ({ cookies, platform }) => {
-  const accessToken = cookies.get('access_token');
+  const accessToken = cookies.get("access_token");
   if (!accessToken) {
-    redirect(302, '/auth/login');
+    redirect(302, "/auth/login");
   }
 
   const user = await getUserFromSession(
     platform.env.DB,
     accessToken,
-    platform.env.GROVEAUTH_URL
+    platform.env.GROVEAUTH_URL,
   );
 
   if (!user) {
-    redirect(302, '/auth/login');
+    redirect(302, "/auth/login");
   }
 
   return { user };
@@ -935,7 +942,7 @@ GROVEAUTH_CLIENT_ID = "fiction-house"
     "db:seed": "wrangler d1 execute fiction-house-db --file=migrations/002_seed_data.sql --remote"
   },
   "dependencies": {
-    "@autumnsgrove/groveengine": "^0.6.4",
+    "@autumnsgrove/lattice": "^0.6.4",
     "resend": "^4.0.0"
   },
   "devDependencies": {
@@ -960,29 +967,29 @@ GROVEAUTH_CLIENT_ID = "fiction-house"
 ```javascript
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ['./src/**/*.{html,js,svelte,ts}'],
-  darkMode: 'class',
+  content: ["./src/**/*.{html,js,svelte,ts}"],
+  darkMode: "class",
   theme: {
     extend: {
       colors: {
         // Grove green palette
         primary: {
-          DEFAULT: 'hsl(142, 43%, 35%)',
-          50: 'hsl(142, 43%, 95%)',
-          100: 'hsl(142, 43%, 90%)',
-          200: 'hsl(142, 43%, 80%)',
-          300: 'hsl(142, 43%, 65%)',
-          400: 'hsl(142, 43%, 50%)',
-          500: 'hsl(142, 43%, 35%)',
-          600: 'hsl(142, 43%, 28%)',
-          700: 'hsl(142, 43%, 22%)',
-          800: 'hsl(142, 43%, 16%)',
-          900: 'hsl(142, 43%, 10%)',
+          DEFAULT: "hsl(142, 43%, 35%)",
+          50: "hsl(142, 43%, 95%)",
+          100: "hsl(142, 43%, 90%)",
+          200: "hsl(142, 43%, 80%)",
+          300: "hsl(142, 43%, 65%)",
+          400: "hsl(142, 43%, 50%)",
+          500: "hsl(142, 43%, 35%)",
+          600: "hsl(142, 43%, 28%)",
+          700: "hsl(142, 43%, 22%)",
+          800: "hsl(142, 43%, 16%)",
+          900: "hsl(142, 43%, 10%)",
         },
       },
       fontFamily: {
-        sans: ['Lexend', 'system-ui', 'sans-serif'],
-        serif: ['Merriweather', 'Georgia', 'serif'],
+        sans: ["Lexend", "system-ui", "sans-serif"],
+        serif: ["Merriweather", "Georgia", "serif"],
       },
     },
   },
@@ -995,13 +1002,15 @@ export default {
 ## Implementation Phases
 
 ### Phase 1: Foundation (Day 1)
+
 - [ ] Initialize SvelteKit project with Cloudflare adapter
-- [ ] Install dependencies (`@autumnsgrove/groveengine`, Tailwind, etc.)
+- [ ] Install dependencies (`@autumnsgrove/lattice`, Tailwind, etc.)
 - [ ] Set up Tailwind with Grove theme
 - [ ] Create base layout (Header, Footer, ThemeToggle)
 - [ ] Set up wrangler.toml configuration
 
 ### Phase 2: Database & Auth (Day 1-2)
+
 - [ ] Create D1 database on Cloudflare
 - [ ] Run engine migrations (tenants, posts, pages, media)
 - [ ] Run books migration (001_books.sql)
@@ -1010,6 +1019,7 @@ export default {
 - [ ] Test admin access
 
 ### Phase 3: Core Pages (Day 2-3)
+
 - [ ] Build Homepage with HeroSection and FeaturedBooks
 - [ ] Build Books listing page with BookGrid
 - [ ] Build individual Book page with BookDetail
@@ -1018,12 +1028,14 @@ export default {
 - [ ] Build Blog listing and post pages (using engine's post system)
 
 ### Phase 4: Admin Extensions (Day 3-4)
+
 - [ ] Add Books management to admin panel
 - [ ] Create book editor form (with cover upload)
 - [ ] Test full CRUD for books
 - [ ] Seed placeholder content
 
 ### Phase 5: Polish & Deploy (Day 4-5)
+
 - [ ] Add dark mode toggle
 - [ ] Responsive design testing
 - [ ] SEO meta tags
@@ -1040,7 +1052,7 @@ For the agent initializing this project:
 - [ ] Create `AutumnsGrove/FictionHousePublishing` repo (private)
 - [ ] Initialize SvelteKit: `pnpm create svelte@latest` (skeleton, TypeScript)
 - [ ] Install Cloudflare adapter: `pnpm add -D @sveltejs/adapter-cloudflare`
-- [ ] Install engine: `pnpm add @autumnsgrove/groveengine`
+- [ ] Install engine: `pnpm add @autumnsgrove/lattice`
 - [ ] Install Tailwind: `pnpm add -D tailwindcss postcss autoprefixer`
 - [ ] Copy this spec to `docs/PROJECT-SPEC.md`
 - [ ] Create `AGENT.md` with project instructions
@@ -1055,19 +1067,19 @@ For the agent initializing this project:
 
 **Set via `wrangler secret put`:**
 
-| Variable | Description |
-|----------|-------------|
-| `GROVEAUTH_CLIENT_SECRET` | OAuth client secret from GroveAuth |
-| `RESEND_API_KEY` | API key from Resend for contact form emails |
+| Variable                  | Description                                 |
+| ------------------------- | ------------------------------------------- |
+| `GROVEAUTH_CLIENT_SECRET` | OAuth client secret from GroveAuth          |
+| `RESEND_API_KEY`          | API key from Resend for contact form emails |
 
 **Set in wrangler.toml [vars]:**
 
-| Variable | Value |
-|----------|-------|
-| `SITE_NAME` | Fiction House Publishing |
-| `GROVEAUTH_URL` | https://auth.grove.place |
-| `GROVEAUTH_CLIENT_ID` | fiction-house |
-| `CONTACT_EMAIL` | contact@fictionhouse.com |
+| Variable              | Value                    |
+| --------------------- | ------------------------ |
+| `SITE_NAME`           | Fiction House Publishing |
+| `GROVEAUTH_URL`       | https://auth.grove.place |
+| `GROVEAUTH_CLIENT_ID` | fiction-house            |
+| `CONTACT_EMAIL`       | contact@fictionhouse.com |
 
 ---
 
@@ -1087,4 +1099,4 @@ For the agent initializing this project:
 
 ---
 
-*Fiction House Publishing — Stories that feel like coming home.*
+_Fiction House Publishing — Stories that feel like coming home._

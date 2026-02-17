@@ -10,13 +10,13 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/AutumnsGrove/GroveEngine.git"
+		"url": "https://github.com/AutumnsGrove/Lattice.git"
 	},
 	"type": "module",
 	"scripts": {
 		"test": "pnpm -r run test:run",
 		"test:watch": "pnpm -r run test",
-		"test:engine": "pnpm --filter @autumnsgrove/groveengine test:run",
+		"test:engine": "pnpm --filter @autumnsgrove/lattice test:run",
 		"test:landing": "pnpm --filter grove-landing test:run",
 		"test:plant": "pnpm --filter grove-plant test:run",
 		"test:clearing": "pnpm --filter grove-clearing test:run",

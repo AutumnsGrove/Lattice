@@ -1,26 +1,26 @@
-# GroveEngine Documentation
+# Lattice Documentation
 
 This directory contains all project documentation organized by audience and purpose.
 
 ## Directory Structure
 
-| Directory | Audience | Purpose |
-|-----------|----------|---------|
-| `setup/` | Developers | Configuration and setup guides |
-| `infrastructure/` | DevOps | Cloud infrastructure documentation |
-| `developer/` | Engineers | Architecture, database, integration docs |
-| `design-system/` | Designers/Frontend | UI patterns, icons, standards |
-| `philosophy/` | Everyone | Project vision, voice, naming |
-| `plans/` | Team | Planning workflow (planning → planned → completed) |
-| `specs/` | Engineers | Technical specifications |
-| `patterns/` | Engineers | Architectural patterns |
-| `help-center/` | Users | End-user help articles |
-| `guides/` | Various | Implementation guides |
-| `marketing/` | Marketing | Marketing materials |
-| `security/` | Security | Security documentation |
-| `legal/` | Legal | Policies and terms |
-| `internal/` | Team | Internal communications and business docs |
-| `templates/` | Various | Reusable templates |
+| Directory         | Audience           | Purpose                                            |
+| ----------------- | ------------------ | -------------------------------------------------- |
+| `setup/`          | Developers         | Configuration and setup guides                     |
+| `infrastructure/` | DevOps             | Cloud infrastructure documentation                 |
+| `developer/`      | Engineers          | Architecture, database, integration docs           |
+| `design-system/`  | Designers/Frontend | UI patterns, icons, standards                      |
+| `philosophy/`     | Everyone           | Project vision, voice, naming                      |
+| `plans/`          | Team               | Planning workflow (planning → planned → completed) |
+| `specs/`          | Engineers          | Technical specifications                           |
+| `patterns/`       | Engineers          | Architectural patterns                             |
+| `help-center/`    | Users              | End-user help articles                             |
+| `guides/`         | Various            | Implementation guides                              |
+| `marketing/`      | Marketing          | Marketing materials                                |
+| `security/`       | Security           | Security documentation                             |
+| `legal/`          | Legal              | Policies and terms                                 |
+| `internal/`       | Team               | Internal communications and business docs          |
+| `templates/`      | Various            | Reusable templates                                 |
 
 ## Plans Workflow
 

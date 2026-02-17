@@ -27,9 +27,7 @@ export function updateLastActivity(
   tenantId: string,
 ): Promise<void> {
   return db
-    .prepare(
-      "UPDATE tenants SET last_activity_at = unixepoch() WHERE id = ?",
-    )
+    .prepare("UPDATE tenants SET last_activity_at = unixepoch() WHERE id = ?")
     .bind(tenantId)
     .run()
     .then(() => {})

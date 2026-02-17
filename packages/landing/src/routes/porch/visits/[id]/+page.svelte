@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { GlassCard } from '@autumnsgrove/groveengine/ui';
+	import { GlassCard } from '@autumnsgrove/lattice/ui';
 	import Header from '$lib/components/Header.svelte';
-	import { seasonStore } from '@autumnsgrove/groveengine/ui/chrome';
+	import { seasonStore } from '@autumnsgrove/lattice/ui/chrome';
 	import Footer from '$lib/components/Footer.svelte';
-	import { Logo } from '@autumnsgrove/groveengine/ui/nature';
+	import { Logo } from '@autumnsgrove/lattice/ui/nature';
 	import { MessageCircle, Clock, CheckCircle, ArrowLeft, Send } from 'lucide-svelte';
 	import type { ActionData, PageData } from './$types';
 

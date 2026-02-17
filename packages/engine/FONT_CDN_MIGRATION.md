@@ -9,6 +9,7 @@ This document provides instructions for migrating font files from local static s
 ## Current State
 
 Fonts are currently stored in:
+
 - `packages/engine/static/fonts/` (engine package)
 - `landing/static/fonts/` (landing site)
 
@@ -20,7 +21,7 @@ Font-face declarations in `packages/engine/src/routes/+layout.svelte` are config
 
 ```bash
 # Navigate to the project root
-cd /path/to/GroveEngine
+cd /path/to/Lattice
 
 # Upload each font file to R2 bucket
 # Replace 'grove-cdn' with your R2 bucket name
@@ -71,10 +72,12 @@ echo "Done! All fonts uploaded to R2."
 ## Step 2: Configure R2 Public Access
 
 Ensure your R2 bucket is configured with:
+
 1. Public access enabled OR
 2. Custom domain `cdn.grove.place` pointing to the bucket
 
 ### Cloudflare Dashboard Steps:
+
 1. Go to R2 > Your Bucket > Settings
 2. Enable "Public Access" or configure custom domain
 3. Verify fonts are accessible at `https://cdn.grove.place/fonts/Lexend-Regular.ttf`
@@ -110,10 +113,7 @@ Consider excluding fonts from the npm package in `packages/engine/package.json`:
 
 ```json
 {
-  "files": [
-    "dist",
-    "!dist/**/*.test.*"
-  ]
+  "files": ["dist", "!dist/**/*.test.*"]
 }
 ```
 
@@ -121,28 +121,28 @@ Remove `"static"` from files array if fonts are the only static assets.
 
 ## Font File Inventory
 
-| Font Name | Filename | Format |
-|-----------|----------|--------|
-| Alagard | alagard.ttf | TrueType |
+| Font Name             | Filename                         | Format   |
+| --------------------- | -------------------------------- | -------- |
+| Alagard               | alagard.ttf                      | TrueType |
 | Atkinson Hyperlegible | AtkinsonHyperlegible-Regular.ttf | TrueType |
-| Bodoni Moda | BodoniModa-Regular.ttf | TrueType |
-| Calistoga | Calistoga-Regular.ttf | TrueType |
-| Caveat | Caveat-Regular.ttf | TrueType |
-| Cormorant | Cormorant-Regular.ttf | TrueType |
-| Cozette | CozetteVector.ttf | TrueType |
-| EB Garamond | EBGaramond-Regular.ttf | TrueType |
-| Fraunces | Fraunces-Regular.ttf | TrueType |
-| IBM Plex Mono | IBMPlexMono-Regular.ttf | TrueType |
-| Instrument Sans | InstrumentSans-Regular.ttf | TrueType |
-| Lexend | Lexend-Regular.ttf | TrueType |
-| Lora | Lora-Regular.ttf | TrueType |
-| Luciole | Luciole-Regular.ttf | TrueType |
-| Manrope | Manrope-Regular.ttf | TrueType |
-| Merriweather | Merriweather-Regular.ttf | TrueType |
-| Nunito | Nunito-Regular.ttf | TrueType |
-| OpenDyslexic | OpenDyslexic-Regular.otf | OpenType |
-| Plus Jakarta Sans | PlusJakartaSans-Regular.ttf | TrueType |
-| Quicksand | Quicksand-Regular.ttf | TrueType |
+| Bodoni Moda           | BodoniModa-Regular.ttf           | TrueType |
+| Calistoga             | Calistoga-Regular.ttf            | TrueType |
+| Caveat                | Caveat-Regular.ttf               | TrueType |
+| Cormorant             | Cormorant-Regular.ttf            | TrueType |
+| Cozette               | CozetteVector.ttf                | TrueType |
+| EB Garamond           | EBGaramond-Regular.ttf           | TrueType |
+| Fraunces              | Fraunces-Regular.ttf             | TrueType |
+| IBM Plex Mono         | IBMPlexMono-Regular.ttf          | TrueType |
+| Instrument Sans       | InstrumentSans-Regular.ttf       | TrueType |
+| Lexend                | Lexend-Regular.ttf               | TrueType |
+| Lora                  | Lora-Regular.ttf                 | TrueType |
+| Luciole               | Luciole-Regular.ttf              | TrueType |
+| Manrope               | Manrope-Regular.ttf              | TrueType |
+| Merriweather          | Merriweather-Regular.ttf         | TrueType |
+| Nunito                | Nunito-Regular.ttf               | TrueType |
+| OpenDyslexic          | OpenDyslexic-Regular.otf         | OpenType |
+| Plus Jakarta Sans     | PlusJakartaSans-Regular.ttf      | TrueType |
+| Quicksand             | Quicksand-Regular.ttf            | TrueType |
 
 ## Rollback
 
@@ -150,12 +150,12 @@ If issues occur, revert font-face declarations to use local paths:
 
 ```css
 /* Change FROM */
-src: url('https://cdn.grove.place/fonts/Lexend-Regular.ttf') format('truetype');
+src: url("https://cdn.grove.place/fonts/Lexend-Regular.ttf") format("truetype");
 
 /* Change TO */
-src: url('/fonts/Lexend-Regular.ttf') format('truetype');
+src: url("/fonts/Lexend-Regular.ttf") format("truetype");
 ```
 
 ---
 
-*Last updated: 2025-12-20*
+_Last updated: 2025-12-20_

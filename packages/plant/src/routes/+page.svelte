@@ -4,8 +4,8 @@
 		GlassCard,
 		Logo,
 		RoadmapPreview
-	} from '@autumnsgrove/groveengine/ui';
-	import { LoginRedirectButton } from '@autumnsgrove/groveengine/grafts/login';
+	} from '@autumnsgrove/lattice/ui';
+	import { LoginRedirectButton } from '@autumnsgrove/lattice/grafts/login';
 	import {
 		// Feature icons
 		Leaf,
@@ -25,10 +25,10 @@
 		Lock,
 		// Notice icon
 		AlertTriangle
-	} from '@autumnsgrove/groveengine/ui/icons';
+	} from '@autumnsgrove/lattice/ui/icons';
 
 	// Use graft config for tier data
-	import { transformAllTiers, type PricingTier } from '@autumnsgrove/groveengine/grafts/pricing';
+	import { transformAllTiers, type PricingTier } from '@autumnsgrove/lattice/grafts/pricing';
 
 	// Shared icon mapping
 	import { tierIcons } from '$lib/ui/tier-icons';

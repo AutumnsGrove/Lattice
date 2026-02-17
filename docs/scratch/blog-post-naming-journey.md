@@ -2,25 +2,27 @@
 title: Blog & Post Naming Journey
 description: Finding Grove names for the two biggest concepts — concluded with Grove, Garden, and Bloom
 category: philosophy
-lastUpdated: '2026-02-02'
+lastUpdated: "2026-02-02"
 status: concluded
 ---
+
 # Blog & Post Naming Journey
 
-> *The two hardest words to replace. The heart of everything.*
+> _The two hardest words to replace. The heart of everything._
 
 ---
 
 ## The Challenge
 
 "Blog" and "post" are everywhere. They're in:
+
 - Database tables
 - URLs
 - User-facing text
 - Documentation
 - Every API endpoint
 
-But more than that—they're *fundamental concepts*. A blog isn't just a feature. It's the thing. It's why someone comes to Grove. And a post isn't just content. It's the act of putting something into the world.
+But more than that—they're _fundamental concepts_. A blog isn't just a feature. It's the thing. It's why someone comes to Grove. And a post isn't just content. It's the act of putting something into the world.
 
 This isn't like naming a status page (Clearing) or a backup system (Patina). This is naming the tree itself.
 
@@ -48,7 +50,7 @@ Around me: trees. Each tree is a Wanderer who took root. Their branches reach to
 I'm walking to visit Autumn's tree. I see it ahead—
 I see... what? Their **blog**?
 
-No. I see their *tree*. Their space. Their home in the grove.
+No. I see their _tree_. Their space. Their home in the grove.
 
 I get closer. I want to read what they wrote. I want to see their latest **post**—
 
@@ -61,17 +63,20 @@ No. I want to see their... their what?
 Let me sit with this.
 
 **What it does:**
+
 - A blog is someone's space. Their corner of the grove.
 - It contains everything they've written.
 - It has their personality (Foliage), their tools (Curios), their conversations (Reeds).
 - It exists at `autumn.grove.place`
 
 **What it IS in Grove metaphor:**
+
 - The tree itself? But "every Wanderer is a tree."
 - A plot of land? A clearing?
 - A den? A hollow? A canopy?
 
 **The existing metaphor chain:**
+
 - Wanderer → takes root → becomes Rooted
 - Their tree grows in the grove
 - They tend it with Arbor (the admin)
@@ -85,12 +90,14 @@ So the blog... is the tree? Or is it what grows ON the tree?
 ## What IS a Post?
 
 **What it does:**
+
 - A post is a single piece of writing
 - It has a title, content, maybe images
 - It gets published, shared, commented on (Reeds)
 - It lives in time—published on a date
 
 **What it IS in Grove metaphor:**
+
 - A leaf? (seasonal, many, individual)
 - A branch? (extends outward, grows over time)
 - A fruit? (something produced, shared with others)
@@ -104,7 +111,8 @@ So the blog... is the tree? Or is it what grows ON the tree?
 Let me think through possibilities...
 
 ### 1. Tree
-*"Your tree in the grove"*
+
+_"Your tree in the grove"_
 
 The obvious choice. Every wanderer IS a tree. But wait—the person is the tree, or their blog is the tree? This conflation might actually work. You ARE your tree. Your writings are its expression.
 
@@ -112,7 +120,8 @@ The obvious choice. Every wanderer IS a tree. But wait—the person is the tree,
 **Cons:** Might be too abstract? "Go visit their tree" vs "go visit their blog"
 
 ### 2. Hollow
-*"A cozy hollow in the tree"*
+
+_"A cozy hollow in the tree"_
 
 A hollow is the space inside a tree where animals make homes. Private, protected, intimate.
 
@@ -120,7 +129,8 @@ A hollow is the space inside a tree where animals make homes. Private, protected
 **Cons:** Implies the blog is INSIDE something, not the primary thing
 
 ### 3. Canopy
-*"Your canopy in the grove"*
+
+_"Your canopy in the grove"_
 
 The canopy is what people see from below—the crown of the tree, the foliage visible to others.
 
@@ -128,7 +138,8 @@ The canopy is what people see from below—the crown of the tree, the foliage vi
 **Cons:** Foliage already exists for theming
 
 ### 4. Grove (personal)
-*"Your grove"*
+
+_"Your grove"_
 
 Wait—could someone's blog be their own little grove? A grove within the Grove?
 
@@ -136,7 +147,8 @@ Wait—could someone's blog be their own little grove? A grove within the Grove?
 **Cons:** Confusing—Grove is the platform, grove is also your space?
 
 ### 5. Plot
-*"Your plot in the grove"*
+
+_"Your plot in the grove"_
 
 A plot of land. Where your tree grows. Your territory.
 
@@ -144,14 +156,16 @@ A plot of land. Where your tree grows. Your territory.
 **Cons:** Feels more garden than forest
 
 ### 6. Stand
-*"Your stand of trees"*
+
+_"Your stand of trees"_
 
 A stand is a cluster of trees in forestry. But one person, one stand?
 
 **Cons:** Doesn't quite fit the singular nature
 
 ### 7. Hearth
-*"Your hearth"*
+
+_"Your hearth"_
 
 A hearth is the center of a home. Warmth, gathering, the place you return to.
 
@@ -159,7 +173,8 @@ A hearth is the center of a home. Warmth, gathering, the place you return to.
 **Cons:** Not nature-specific (though forest cabins have hearths)
 
 ### 8. Den
-*"Your den"*
+
+_"Your den"_
 
 Where an animal lives. Cozy, protected, personal.
 
@@ -171,7 +186,8 @@ Where an animal lives. Cozy, protected, personal.
 ## Candidates: The Post
 
 ### 1. Leaf
-*"A new leaf"*
+
+_"A new leaf"_
 
 Leaves are what the tree produces. Seasonal, many, individual, beautiful.
 
@@ -179,7 +195,8 @@ Leaves are what the tree produces. Seasonal, many, individual, beautiful.
 **Cons:** Leaves fall and die—is that the vibe? Though rebirth is part of the cycle.
 
 ### 2. Branch
-*"A new branch"*
+
+_"A new branch"_
 
 Branches extend outward, permanent, grow over time.
 
@@ -187,7 +204,8 @@ Branches extend outward, permanent, grow over time.
 **Cons:** Feels more like categories/sections than individual posts
 
 ### 3. Fruit
-*"New fruit from the grove"*
+
+_"New fruit from the grove"_
 
 Fruit is what a tree produces to share with the world. Contains seeds (ideas) that can spread.
 
@@ -195,7 +213,8 @@ Fruit is what a tree produces to share with the world. Contains seeds (ideas) th
 **Cons:** "Read my latest fruit" sounds weird?
 
 ### 4. Seed
-*"A new seed"*
+
+_"A new seed"_
 
 Seeds contain ideas. They travel, take root elsewhere, grow into new things.
 
@@ -203,7 +222,8 @@ Seeds contain ideas. They travel, take root elsewhere, grow into new things.
 **Cons:** Seeds are potential, not finished work. Posts are complete things.
 
 ### 5. Bloom
-*"A new bloom"*
+
+_"A new bloom"_
 
 Blooms are flowers—moments of expression, color, beauty.
 
@@ -211,42 +231,48 @@ Blooms are flowers—moments of expression, color, beauty.
 **Cons:** Bloom is already the remote coding infrastructure
 
 ### 6. Ring
-*"A new ring"*
+
+_"A new ring"_
 
 Tree rings record growth over time...
 
 **Cons:** Rings is already analytics. Also, rings are internal/private.
 
 ### 7. Bark
-*"New bark"*
+
+_"New bark"_
 
 The outer layer of the tree...
 
 **Cons:** Protective layer, not expressive content
 
 ### 8. Sap
-*"Fresh sap"*
+
+_"Fresh sap"_
 
 The life flowing through the tree...
 
 **Cons:** Too internal? Sap isn't shared, it flows within
 
 ### 9. Page
-*"A new page"*
+
+_"A new page"_
 
 Already exists for static pages...
 
 **Cons:** Confusing overlap
 
 ### 10. Entry
-*"A new entry"*
+
+_"A new entry"_
 
 Generic journal terminology...
 
 **Cons:** Not nature-themed
 
 ### 11. Note
-*"A new note"*
+
+_"A new note"_
 
 From birdsong—notes are the individual sounds birds make...
 
@@ -254,7 +280,8 @@ From birdsong—notes are the individual sounds birds make...
 **Cons:** Might feel too casual/small for substantial posts
 
 ### 12. Call
-*"A new call"*
+
+_"A new call"_
 
 Bird calls, the way forest creatures communicate...
 
@@ -262,14 +289,16 @@ Bird calls, the way forest creatures communicate...
 **Cons:** Ephemeral feel, like social media posts
 
 ### 13. Echo
-*"A new echo"*
+
+_"A new echo"_
 
 Sound bouncing through the forest...
 
 **Cons:** Echo implies repetition, not original content
 
 ### 14. Tale
-*"A new tale"*
+
+_"A new tale"_
 
 Stories told around the fire...
 
@@ -277,7 +306,8 @@ Stories told around the fire...
 **Cons:** Not everything is a story/narrative
 
 ### 15. Letter
-*"A new letter"*
+
+_"A new letter"_
 
 Correspondence, messages...
 
@@ -287,11 +317,12 @@ Correspondence, messages...
 
 ## The Walk Continues...
 
-*Sitting on a log, thinking.*
+_Sitting on a log, thinking._
 
 What if I'm overthinking the blog part?
 
 The language already works:
+
 - "Take root" → you have a tree
 - "Your tree" → your space
 - "Visit their tree" → go to their blog
@@ -314,24 +345,28 @@ For posts... leaves feels right emotionally. Leaves grow on trees. Leaves are se
 ## Testing the Tagline
 
 **Tree:**
+
 > "Your tree is your home in the grove."
 
 **Leaf:**
+
 > "Leaves are the words your tree grows."
 
-*Leaves are the words your tree grows.* That's... that's really nice.
+_Leaves are the words your tree grows._ That's... that's really nice.
 
 ---
 
 ## The Feeling
 
 **Tree feels like:**
+
 - Permanence
 - Growth
 - Belonging
 - "This is mine"
 
 **Leaf feels like:**
+
 - Expression
 - Seasons
 - Abundance
@@ -342,19 +377,23 @@ For posts... leaves feels right emotionally. Leaves grow on trees. Leaves are se
 ## Concerns to Address
 
 ### URL Structure
+
 - `autumn.grove.place/leaves` → list of posts
 - `autumn.grove.place/leaves/hello-world` → individual post
 - Or just `autumn.grove.place/hello-world` (current)?
 
 ### Plural vs Singular
+
 - "A leaf" vs "leaves"
 - "Write a leaf" vs "Write a new leaf"
 
 ### Database/Code Impact
+
 - Table: `posts` → `leaves`? Or keep internal as `posts`?
-- Like Lattice (public) vs GroveEngine (internal)?
+- Like Lattice (public) vs Lattice (internal)?
 
 ### The Word "Post" as Verb
+
 - "Post something" → "Grow a leaf"? "Write a leaf"?
 - The verb form matters for UI: "New Post" → "New Leaf"
 
@@ -376,7 +415,8 @@ Or...
 What about the sound of rustling leaves? The voice of the tree?
 
 ### Whisper
-*"A new whisper"*
+
+_"A new whisper"_
 
 Trees whisper in the wind. Their leaves rustle, communicating.
 
@@ -388,7 +428,8 @@ Trees whisper in the wind. Their leaves rustle, communicating.
 **Cons:** Might feel too quiet/small for bold pieces?
 
 ### Murmur
-*"A murmur through the leaves"*
+
+_"A murmur through the leaves"_
 
 Similar but with community connotation—murmuring together.
 
@@ -403,23 +444,23 @@ What feels more like home?
 
 ---
 
-*To be continued...*
+_To be continued..._
 
 ---
 
 ## The Conclusion
 
-*February 2, 2026 — The walk found its end.*
+_February 2, 2026 — The walk found its end._
 
 After exploring leaves, whispers, hollows, and dens... Autumn felt it:
 
-**Grove** for your space. Not overlap with the platform—*resonance*. The platform is the Grove. Your space is *your* grove. The possessive makes it personal. And the original URL was autumnsgrove.com. The name was trying to come home.
+**Grove** for your space. Not overlap with the platform—_resonance_. The platform is the Grove. Your space is _your_ grove. The possessive makes it personal. And the original URL was autumnsgrove.com. The name was trying to come home.
 
 **Garden** for the collection. Where your blooms grow together. Not a feed, not a list—a garden you've tended.
 
 **Bloom** for your writing. What your grove produces. Moments of expression, color, beauty. "Read my latest bloom."
 
-The old "Bloom" (remote coding infrastructure) becomes **Verge**—the threshold, the liminal edge where code goes through and comes back transformed. *Brief, brilliant, gone.*
+The old "Bloom" (remote coding infrastructure) becomes **Verge**—the threshold, the liminal edge where code goes through and comes back transformed. _Brief, brilliant, gone._
 
 ### The Final Chain
 
@@ -428,6 +469,7 @@ The old "Bloom" (remote coding infrastructure) becomes **Verge**—the threshold
 ### Implementation Pattern
 
 Like "step away (unsubscribe)" in emails:
+
 - **UI text:** "Your Garden" / "New Bloom"
 - **Aria labels:** "blog posts" / "write new post"
 - **URLs:** `/garden` / `/garden/hello-world`
@@ -436,13 +478,13 @@ Like "step away (unsubscribe)" in emails:
 
 ## What Changed
 
-| Old Term | New Term | Notes |
-|----------|----------|-------|
-| blog | grove | Your space, your corner of the forest |
-| blog index | garden | The collection, where blooms grow together |
-| post | bloom | What your grove produces |
-| Bloom (remote coding) | Verge | The threshold—brief, brilliant, gone |
+| Old Term              | New Term | Notes                                      |
+| --------------------- | -------- | ------------------------------------------ |
+| blog                  | grove    | Your space, your corner of the forest      |
+| blog index            | garden   | The collection, where blooms grow together |
+| post                  | bloom    | What your grove produces                   |
+| Bloom (remote coding) | Verge    | The threshold—brief, brilliant, gone       |
 
 ---
 
-*The name was always there. We just had to walk until we found it.*
+_The name was always there. We just had to walk until we found it._

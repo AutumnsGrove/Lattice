@@ -20,7 +20,7 @@ from ..ui import console, create_table, error, info, success
 def packages(ctx: click.Context) -> None:
     """Monorepo package discovery.
 
-    Inspect packages in the GroveEngine monorepo.
+    Inspect packages in the Lattice monorepo.
 
     \b
     Examples:

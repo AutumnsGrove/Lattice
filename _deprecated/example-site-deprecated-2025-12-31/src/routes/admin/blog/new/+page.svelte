@@ -1,5 +1,5 @@
 <script>
-	import { MarkdownEditor } from '@autumnsgrove/groveengine';
+	import { MarkdownEditor } from '@autumnsgrove/lattice';
 
 	let title = $state('');
 	let content = $state(`# Your New Post
@@ -26,7 +26,7 @@ Happy writing!
 		saving = true;
 		setTimeout(() => {
 			saving = false;
-			alert('This is a demo - your post was not actually saved.\n\nIn a real GroveEngine site, this would save to your database or filesystem.');
+			alert('This is a demo - your post was not actually saved.\n\nIn a real Lattice site, this would save to your database or filesystem.');
 		}, 500);
 	}
 </script>

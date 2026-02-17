@@ -3,8 +3,8 @@ import type { PageServerLoad, Actions } from "./$types";
 import {
   getUploadSuspensionStatus,
   setUploadSuspension,
-} from "@autumnsgrove/groveengine/feature-flags";
-import { isWayfinder } from "@autumnsgrove/groveengine/config";
+} from "@autumnsgrove/lattice/feature-flags";
+import { isWayfinder } from "@autumnsgrove/lattice/config";
 
 interface Tenant {
   id: string;

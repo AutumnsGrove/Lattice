@@ -8,7 +8,7 @@ Cloudflare Pages doesn't support self-hosted Durable Objects, so we deploy them 
 
 ```
 ┌─────────────────────────┐     ┌──────────────────────────┐
-│   GroveEngine (Pages)   │────▶│  grove-durable-objects   │
+│   Lattice (Pages)   │────▶│  grove-durable-objects   │
 │   blog.grove.place      │     │  (this worker)           │
 └─────────────────────────┘     │                          │
                                 │  ┌─────────────────────┐ │
@@ -21,11 +21,11 @@ Cloudflare Pages doesn't support self-hosted Durable Objects, so we deploy them 
 
 ## Durable Object Classes
 
-| Class | Purpose | ID Pattern |
-|-------|---------|------------|
-| **TenantDO** | Config caching, draft sync, analytics buffering | `tenant:{subdomain}` |
-| **PostMetaDO** | Views, reactions, real-time presence (hot data) | `post:{tenantId}:{slug}` |
-| **PostContentDO** | Content cache, hot/warm/cold storage | `content:{tenantId}:{slug}` |
+| Class             | Purpose                                         | ID Pattern                  |
+| ----------------- | ----------------------------------------------- | --------------------------- |
+| **TenantDO**      | Config caching, draft sync, analytics buffering | `tenant:{subdomain}`        |
+| **PostMetaDO**    | Views, reactions, real-time presence (hot data) | `post:{tenantId}:{slug}`    |
+| **PostContentDO** | Content cache, hot/warm/cold storage            | `content:{tenantId}:{slug}` |
 
 ## Deployment
 
@@ -74,6 +74,7 @@ curl https://grove-durable-objects.<account>.workers.dev/health
 ```
 
 Returns:
+
 ```json
 {
   "status": "ok",

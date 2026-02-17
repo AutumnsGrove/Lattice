@@ -1,20 +1,22 @@
-# GroveEngine Implementation Prompt (Phase 2 of 2)
+# Lattice Implementation Prompt (Phase 2 of 2)
 
-> **Purpose:** Implement new features for `@groveengine/core` that don't exist in the source repository.
+> **Purpose:** Implement new features for `@lattice/core` that don't exist in the source repository.
 > **Prerequisite:** Complete `web-engine-extraction-prompt.md` (Phase 1) first.
 
 ---
 
 ## CONTEXT
 
-You are implementing Phase 2 of GroveEngine. Phase 1 extracted and converted existing components from the AutumnsGrove website. This phase builds the remaining features required by the specifications.
+You are implementing Phase 2 of Lattice. Phase 1 extracted and converted existing components from the AutumnsGrove website. This phase builds the remaining features required by the specifications.
 
 **Reference Specifications:**
+
 - `docs/specs/engine-spec.md` - Core engine architecture
 - `docs/specs/customer-repo-spec.md` - Customer repository template
 - `docs/specs/website-spec.md` - Grove website platform
 
 **What this prompt implements:**
+
 - Magic code authentication (Resend email integration)
 - D1 database schema and query utilities
 - KV session management
@@ -29,21 +31,25 @@ You are implementing Phase 2 of GroveEngine. Phase 1 extracted and converted exi
 ## CRITICAL PRINCIPLES
 
 ### 1. Spec Compliance
+
 - Follow the specifications exactly as documented
 - Use the type definitions created in Phase 1
 - Match the database schema from `engine-spec.md`
 
 ### 2. Cloudflare Native
+
 - All server code must work in Cloudflare Workers
 - Use Web Crypto API (not Node.js crypto)
 - D1 for database, KV for sessions, R2 for storage
 
 ### 3. TypeScript Strict Mode
+
 - All code must be TypeScript
 - No `any` types without explicit justification
 - Proper error handling with typed errors
 
 ### 4. Security First
+
 - Hash magic codes with SHA-256
 - Secure session cookies (httpOnly, secure, sameSite)
 - Parameterized queries only (no string concatenation)
@@ -58,8 +64,9 @@ You are implementing Phase 2 of GroveEngine. Phase 1 extracted and converted exi
 Create D1 migrations in `package/migrations/`:
 
 **package/migrations/0001_initial_schema.sql:**
+
 ```sql
--- GroveEngine Initial Schema
+-- Lattice Initial Schema
 -- Database: D1 (SQLite)
 
 -- Users table
@@ -169,6 +176,7 @@ CREATE INDEX IF NOT EXISTS idx_media_uploaded_at ON media(uploaded_at DESC);
 ### 2.1 Magic Code Generation
 
 **package/src/lib/server/auth/magic-code.ts:**
+
 ```typescript
 /**
  * Magic code authentication for passwordless login
@@ -176,7 +184,7 @@ CREATE INDEX IF NOT EXISTS idx_media_uploaded_at ON media(uploaded_at DESC);
  */
 
 const MAGIC_CODE_TTL = 600; // 10 minutes in seconds
-const MAGIC_CODE_PREFIX = 'magic_code:';
+const MAGIC_CODE_PREFIX = "magic_code:";
 
 /**
  * Generate a cryptographically secure 6-digit code
@@ -184,7 +192,7 @@ const MAGIC_CODE_PREFIX = 'magic_code:';
 export function generateMagicCode(): string {
   const array = new Uint32Array(1);
   crypto.getRandomValues(array);
-  return String(array[0] % 1000000).padStart(6, '0');
+  return String(array[0] % 1000000).padStart(6, "0");
 }
 
 /**
@@ -193,9 +201,9 @@ export function generateMagicCode(): string {
 export async function hashCode(code: string): Promise<string> {
   const encoder = new TextEncoder();
   const data = encoder.encode(code);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 /**
@@ -204,13 +212,13 @@ export async function hashCode(code: string): Promise<string> {
 export async function storeMagicCode(
   kv: KVNamespace,
   email: string,
-  code: string
+  code: string,
 ): Promise<void> {
   const hashedCode = await hashCode(code);
   const key = `${MAGIC_CODE_PREFIX}${email.toLowerCase()}`;
 
   await kv.put(key, hashedCode, {
-    expirationTtl: MAGIC_CODE_TTL
+    expirationTtl: MAGIC_CODE_TTL,
   });
 }
 
@@ -222,7 +230,7 @@ export async function storeMagicCode(
 export async function verifyMagicCode(
   kv: KVNamespace,
   email: string,
-  code: string
+  code: string,
 ): Promise<boolean> {
   const key = `${MAGIC_CODE_PREFIX}${email.toLowerCase()}`;
   const storedHash = await kv.get(key);
@@ -247,7 +255,7 @@ export async function verifyMagicCode(
  */
 export async function deleteMagicCode(
   kv: KVNamespace,
-  email: string
+  email: string,
 ): Promise<void> {
   const key = `${MAGIC_CODE_PREFIX}${email.toLowerCase()}`;
   await kv.delete(key);
@@ -257,15 +265,16 @@ export async function deleteMagicCode(
 ### 2.2 Session Management
 
 **package/src/lib/server/auth/session.ts:**
+
 ```typescript
 /**
  * Session management using Cloudflare KV
  */
 
-import type { User, Session } from '../../types';
+import type { User, Session } from "../../types";
 
 const SESSION_TTL = 60 * 60 * 24 * 7; // 7 days in seconds
-const SESSION_PREFIX = 'session:';
+const SESSION_PREFIX = "session:";
 
 /**
  * Generate a secure session ID
@@ -274,8 +283,8 @@ export function generateSessionId(): string {
   const array = new Uint8Array(32);
   crypto.getRandomValues(array);
   return Array.from(array)
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('');
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 /**
@@ -283,19 +292,19 @@ export function generateSessionId(): string {
  */
 export async function createSession(
   kv: KVNamespace,
-  user: User
+  user: User,
 ): Promise<string> {
   const sessionId = generateSessionId();
   const session: Session = {
     id: sessionId,
     user_id: user.id,
     expires_at: Math.floor(Date.now() / 1000) + SESSION_TTL,
-    created_at: Math.floor(Date.now() / 1000)
+    created_at: Math.floor(Date.now() / 1000),
   };
 
   const key = `${SESSION_PREFIX}${sessionId}`;
   await kv.put(key, JSON.stringify({ session, user }), {
-    expirationTtl: SESSION_TTL
+    expirationTtl: SESSION_TTL,
   });
 
   return sessionId;
@@ -307,7 +316,7 @@ export async function createSession(
 export async function validateSession(
   sessionId: string,
   kv: KVNamespace,
-  db: D1Database
+  db: D1Database,
 ): Promise<{ user: User | null; session: Session | null }> {
   if (!sessionId) {
     return { user: null, session: null };
@@ -321,7 +330,10 @@ export async function validateSession(
   }
 
   try {
-    const { session, user } = JSON.parse(data) as { session: Session; user: User };
+    const { session, user } = JSON.parse(data) as {
+      session: Session;
+      user: User;
+    };
 
     // Check if session is expired
     if (session.expires_at < Math.floor(Date.now() / 1000)) {
@@ -340,7 +352,7 @@ export async function validateSession(
  */
 export async function deleteSession(
   kv: KVNamespace,
-  sessionId: string
+  sessionId: string,
 ): Promise<void> {
   const key = `${SESSION_PREFIX}${sessionId}`;
   await kv.delete(key);
@@ -351,11 +363,11 @@ export async function deleteSession(
  */
 export function getSessionCookieOptions(isProduction: boolean = true) {
   return {
-    path: '/',
+    path: "/",
     httpOnly: true,
     secure: isProduction,
-    sameSite: 'lax' as const,
-    maxAge: SESSION_TTL
+    sameSite: "lax" as const,
+    maxAge: SESSION_TTL,
   };
 }
 ```
@@ -363,6 +375,7 @@ export function getSessionCookieOptions(isProduction: boolean = true) {
 ### 2.3 Email Integration (Resend)
 
 **package/src/lib/server/email/resend.ts:**
+
 ```typescript
 /**
  * Email sending via Resend API
@@ -391,37 +404,43 @@ export interface ResendError {
  */
 export async function sendEmail(
   apiKey: string,
-  options: SendEmailOptions
+  options: SendEmailOptions,
 ): Promise<{ success: boolean; id?: string; error?: string }> {
-  const { to, subject, html, text, from = 'Grove <noreply@grove.place>' } = options;
+  const {
+    to,
+    subject,
+    html,
+    text,
+    from = "Grove <noreply@grove.place>",
+  } = options;
 
   try {
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         from,
         to,
         subject,
         html,
-        text: text || stripHtml(html)
-      })
+        text: text || stripHtml(html),
+      }),
     });
 
     if (!response.ok) {
-      const error = await response.json() as ResendError;
+      const error = (await response.json()) as ResendError;
       return { success: false, error: error.message };
     }
 
-    const data = await response.json() as ResendResponse;
+    const data = (await response.json()) as ResendResponse;
     return { success: true, id: data.id };
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : "Unknown error",
     };
   }
 }
@@ -433,7 +452,7 @@ export async function sendMagicCodeEmail(
   apiKey: string,
   email: string,
   code: string,
-  siteName: string = 'Grove'
+  siteName: string = "Grove",
 ): Promise<{ success: boolean; error?: string }> {
   const html = `
     <!DOCTYPE html>
@@ -462,7 +481,7 @@ export async function sendMagicCodeEmail(
   return sendEmail(apiKey, {
     to: email,
     subject: `Your ${siteName} login code: ${code}`,
-    html
+    html,
   });
 }
 
@@ -471,8 +490,8 @@ export async function sendMagicCodeEmail(
  */
 function stripHtml(html: string): string {
   return html
-    .replace(/<[^>]*>/g, '')
-    .replace(/\s+/g, ' ')
+    .replace(/<[^>]*>/g, "")
+    .replace(/\s+/g, " ")
     .trim();
 }
 ```
@@ -480,6 +499,7 @@ function stripHtml(html: string): string {
 ### 2.4 Auth Index Export
 
 **package/src/lib/server/auth/index.ts:**
+
 ```typescript
 // Magic code authentication
 export {
@@ -487,8 +507,8 @@ export {
   hashCode,
   storeMagicCode,
   verifyMagicCode,
-  deleteMagicCode
-} from './magic-code';
+  deleteMagicCode,
+} from "./magic-code";
 
 // Session management
 export {
@@ -496,21 +516,22 @@ export {
   createSession,
   validateSession,
   deleteSession,
-  getSessionCookieOptions
-} from './session';
+  getSessionCookieOptions,
+} from "./session";
 ```
 
 ### 2.5 Email Index Export
 
 **package/src/lib/server/email/index.ts:**
+
 ```typescript
 export {
   sendEmail,
   sendMagicCodeEmail,
   type SendEmailOptions,
   type ResendResponse,
-  type ResendError
-} from './resend';
+  type ResendError,
+} from "./resend";
 ```
 
 ---
@@ -520,8 +541,9 @@ export {
 ### 3.1 User Queries
 
 **package/src/lib/server/db/users.ts:**
+
 ```typescript
-import type { User } from '../../types';
+import type { User } from "../../types";
 
 /**
  * Generate a unique user ID
@@ -530,8 +552,8 @@ export function generateUserId(): string {
   const array = new Uint8Array(16);
   crypto.getRandomValues(array);
   return Array.from(array)
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('');
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 /**
@@ -539,10 +561,10 @@ export function generateUserId(): string {
  */
 export async function getUserByEmail(
   db: D1Database,
-  email: string
+  email: string,
 ): Promise<User | null> {
   const result = await db
-    .prepare('SELECT * FROM users WHERE email = ?')
+    .prepare("SELECT * FROM users WHERE email = ?")
     .bind(email.toLowerCase())
     .first<User>();
 
@@ -554,10 +576,10 @@ export async function getUserByEmail(
  */
 export async function getUserById(
   db: D1Database,
-  id: string
+  id: string,
 ): Promise<User | null> {
   const result = await db
-    .prepare('SELECT * FROM users WHERE id = ?')
+    .prepare("SELECT * FROM users WHERE id = ?")
     .bind(id)
     .first<User>();
 
@@ -569,23 +591,25 @@ export async function getUserById(
  */
 export async function createUser(
   db: D1Database,
-  data: { email: string; name?: string; role?: 'admin' | 'editor' | 'user' }
+  data: { email: string; name?: string; role?: "admin" | "editor" | "user" },
 ): Promise<User> {
   const id = generateUserId();
   const now = Math.floor(Date.now() / 1000);
 
   await db
-    .prepare(`
+    .prepare(
+      `
       INSERT INTO users (id, email, name, role, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?)
-    `)
+    `,
+    )
     .bind(
       id,
       data.email.toLowerCase(),
       data.name || null,
-      data.role || 'user',
+      data.role || "user",
       now,
-      now
+      now,
     )
     .run();
 
@@ -593,9 +617,9 @@ export async function createUser(
     id,
     email: data.email.toLowerCase(),
     name: data.name,
-    role: data.role || 'user',
+    role: data.role || "user",
     created_at: now,
-    updated_at: now
+    updated_at: now,
   };
 }
 
@@ -605,32 +629,32 @@ export async function createUser(
 export async function updateUser(
   db: D1Database,
   id: string,
-  data: Partial<Pick<User, 'name' | 'role' | 'avatar_url'>>
+  data: Partial<Pick<User, "name" | "role" | "avatar_url">>,
 ): Promise<void> {
   const updates: string[] = [];
   const values: (string | number)[] = [];
 
   if (data.name !== undefined) {
-    updates.push('name = ?');
+    updates.push("name = ?");
     values.push(data.name);
   }
   if (data.role !== undefined) {
-    updates.push('role = ?');
+    updates.push("role = ?");
     values.push(data.role);
   }
   if (data.avatar_url !== undefined) {
-    updates.push('avatar_url = ?');
+    updates.push("avatar_url = ?");
     values.push(data.avatar_url);
   }
 
   if (updates.length === 0) return;
 
-  updates.push('updated_at = ?');
+  updates.push("updated_at = ?");
   values.push(Math.floor(Date.now() / 1000));
   values.push(id);
 
   await db
-    .prepare(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`)
+    .prepare(`UPDATE users SET ${updates.join(", ")} WHERE id = ?`)
     .bind(...values)
     .run();
 }
@@ -641,7 +665,7 @@ export async function updateUser(
  */
 export async function getOrCreateUser(
   db: D1Database,
-  email: string
+  email: string,
 ): Promise<User> {
   const existing = await getUserByEmail(db, email);
   if (existing) {
@@ -655,9 +679,10 @@ export async function getOrCreateUser(
 ### 3.2 Post Queries
 
 **package/src/lib/server/db/posts.ts:**
+
 ```typescript
-import type { Post, PostListItem } from '../../types';
-import { parseMarkdownContent } from '../../utils/markdown';
+import type { Post, PostListItem } from "../../types";
+import { parseMarkdownContent } from "../../utils/markdown";
 
 /**
  * Generate a unique post ID
@@ -666,8 +691,8 @@ export function generatePostId(): string {
   const array = new Uint8Array(16);
   crypto.getRandomValues(array);
   return Array.from(array)
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('');
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 /**
@@ -676,8 +701,8 @@ export function generatePostId(): string {
 export function generateSlug(title: string): string {
   return title
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 }
 
 /**
@@ -697,7 +722,7 @@ export function countWords(content: string): number {
 }
 
 export interface GetPostsOptions {
-  status?: 'draft' | 'published' | 'archived';
+  status?: "draft" | "published" | "archived";
   userId?: string;
   tag?: string;
   page?: number;
@@ -709,21 +734,21 @@ export interface GetPostsOptions {
  */
 export async function getPosts(
   db: D1Database,
-  options: GetPostsOptions = {}
+  options: GetPostsOptions = {},
 ): Promise<{ posts: PostListItem[]; total: number }> {
   const { status, userId, tag, page = 1, limit = 10 } = options;
   const offset = (page - 1) * limit;
 
-  let whereClause = '1=1';
+  let whereClause = "1=1";
   const params: (string | number)[] = [];
 
   if (status) {
-    whereClause += ' AND p.status = ?';
+    whereClause += " AND p.status = ?";
     params.push(status);
   }
 
   if (userId) {
-    whereClause += ' AND p.user_id = ?';
+    whereClause += " AND p.user_id = ?";
     params.push(userId);
   }
 
@@ -737,7 +762,8 @@ export async function getPosts(
 
   // Get posts
   const posts = await db
-    .prepare(`
+    .prepare(
+      `
       SELECT
         p.id, p.title, p.slug, p.excerpt, p.featured_image,
         p.reading_time, p.published_at
@@ -745,13 +771,14 @@ export async function getPosts(
       WHERE ${whereClause}
       ORDER BY p.published_at DESC NULLS LAST, p.created_at DESC
       LIMIT ? OFFSET ?
-    `)
+    `,
+    )
     .bind(...params, limit, offset)
     .all<PostListItem>();
 
   return {
     posts: posts.results || [],
-    total
+    total,
   };
 }
 
@@ -760,10 +787,10 @@ export async function getPosts(
  */
 export async function getPostBySlug(
   db: D1Database,
-  slug: string
+  slug: string,
 ): Promise<Post | null> {
   const post = await db
-    .prepare('SELECT * FROM posts WHERE slug = ?')
+    .prepare("SELECT * FROM posts WHERE slug = ?")
     .bind(slug)
     .first<Post>();
 
@@ -775,10 +802,10 @@ export async function getPostBySlug(
  */
 export async function getPostById(
   db: D1Database,
-  id: string
+  id: string,
 ): Promise<Post | null> {
   const post = await db
-    .prepare('SELECT * FROM posts WHERE id = ?')
+    .prepare("SELECT * FROM posts WHERE id = ?")
     .bind(id)
     .first<Post>();
 
@@ -790,7 +817,7 @@ export interface CreatePostData {
   title: string;
   content: string;
   excerpt?: string;
-  status?: 'draft' | 'published';
+  status?: "draft" | "published";
   featured_image?: string;
 }
 
@@ -799,7 +826,7 @@ export interface CreatePostData {
  */
 export async function createPost(
   db: D1Database,
-  data: CreatePostData
+  data: CreatePostData,
 ): Promise<Post> {
   const id = generatePostId();
   const slug = generateSlug(data.title);
@@ -807,16 +834,18 @@ export async function createPost(
   const wordCount = countWords(data.content);
   const readingTime = calculateReadingTime(data.content);
   const now = Math.floor(Date.now() / 1000);
-  const publishedAt = data.status === 'published' ? now : null;
+  const publishedAt = data.status === "published" ? now : null;
 
   await db
-    .prepare(`
+    .prepare(
+      `
       INSERT INTO posts (
         id, user_id, title, slug, content, excerpt, html,
         status, featured_image, word_count, reading_time,
         published_at, created_at, updated_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `)
+    `,
+    )
     .bind(
       id,
       data.user_id,
@@ -825,13 +854,13 @@ export async function createPost(
       data.content,
       data.excerpt || null,
       html,
-      data.status || 'draft',
+      data.status || "draft",
       data.featured_image || null,
       wordCount,
       readingTime,
       publishedAt,
       now,
-      now
+      now,
     )
     .run();
 
@@ -843,13 +872,13 @@ export async function createPost(
     content: data.content,
     excerpt: data.excerpt,
     html,
-    status: data.status || 'draft',
+    status: data.status || "draft",
     featured_image: data.featured_image,
     word_count: wordCount,
     reading_time: readingTime,
     published_at: publishedAt ?? undefined,
     created_at: now,
-    updated_at: now
+    updated_at: now,
   };
 }
 
@@ -857,7 +886,7 @@ export interface UpdatePostData {
   title?: string;
   content?: string;
   excerpt?: string;
-  status?: 'draft' | 'published' | 'archived';
+  status?: "draft" | "published" | "archived";
   featured_image?: string;
 }
 
@@ -867,14 +896,14 @@ export interface UpdatePostData {
 export async function updatePost(
   db: D1Database,
   id: string,
-  data: UpdatePostData
+  data: UpdatePostData,
 ): Promise<void> {
   const updates: string[] = [];
   const values: (string | number | null)[] = [];
   const now = Math.floor(Date.now() / 1000);
 
   if (data.title !== undefined) {
-    updates.push('title = ?', 'slug = ?');
+    updates.push("title = ?", "slug = ?");
     values.push(data.title, generateSlug(data.title));
   }
 
@@ -883,39 +912,44 @@ export async function updatePost(
     const wordCount = countWords(data.content);
     const readingTime = calculateReadingTime(data.content);
 
-    updates.push('content = ?', 'html = ?', 'word_count = ?', 'reading_time = ?');
+    updates.push(
+      "content = ?",
+      "html = ?",
+      "word_count = ?",
+      "reading_time = ?",
+    );
     values.push(data.content, html, wordCount, readingTime);
   }
 
   if (data.excerpt !== undefined) {
-    updates.push('excerpt = ?');
+    updates.push("excerpt = ?");
     values.push(data.excerpt);
   }
 
   if (data.status !== undefined) {
-    updates.push('status = ?');
+    updates.push("status = ?");
     values.push(data.status);
 
     // Set published_at when publishing
-    if (data.status === 'published') {
-      updates.push('published_at = COALESCE(published_at, ?)');
+    if (data.status === "published") {
+      updates.push("published_at = COALESCE(published_at, ?)");
       values.push(now);
     }
   }
 
   if (data.featured_image !== undefined) {
-    updates.push('featured_image = ?');
+    updates.push("featured_image = ?");
     values.push(data.featured_image);
   }
 
   if (updates.length === 0) return;
 
-  updates.push('updated_at = ?');
+  updates.push("updated_at = ?");
   values.push(now);
   values.push(id);
 
   await db
-    .prepare(`UPDATE posts SET ${updates.join(', ')} WHERE id = ?`)
+    .prepare(`UPDATE posts SET ${updates.join(", ")} WHERE id = ?`)
     .bind(...values)
     .run();
 }
@@ -923,31 +957,26 @@ export async function updatePost(
 /**
  * Delete a post
  */
-export async function deletePost(
-  db: D1Database,
-  id: string
-): Promise<void> {
-  await db
-    .prepare('DELETE FROM posts WHERE id = ?')
-    .bind(id)
-    .run();
+export async function deletePost(db: D1Database, id: string): Promise<void> {
+  await db.prepare("DELETE FROM posts WHERE id = ?").bind(id).run();
 }
 ```
 
 ### 3.3 Site Config Queries
 
 **package/src/lib/server/db/config.ts:**
+
 ```typescript
-import type { SiteConfig } from '../../types';
+import type { SiteConfig } from "../../types";
 
 /**
  * Get site configuration from database
  */
 export async function getSiteConfig(
-  db: D1Database
+  db: D1Database,
 ): Promise<Partial<SiteConfig>> {
   const results = await db
-    .prepare('SELECT key, value FROM site_config')
+    .prepare("SELECT key, value FROM site_config")
     .all<{ key: string; value: string }>();
 
   const config: Record<string, unknown> = {};
@@ -969,19 +998,21 @@ export async function getSiteConfig(
 export async function setSiteConfigValue(
   db: D1Database,
   key: string,
-  value: unknown
+  value: unknown,
 ): Promise<void> {
   const now = Math.floor(Date.now() / 1000);
   const jsonValue = JSON.stringify(value);
 
   await db
-    .prepare(`
+    .prepare(
+      `
       INSERT INTO site_config (key, value, updated_at)
       VALUES (?, ?, ?)
       ON CONFLICT(key) DO UPDATE SET
         value = excluded.value,
         updated_at = excluded.updated_at
-    `)
+    `,
+    )
     .bind(key, jsonValue, now)
     .run();
 }
@@ -990,6 +1021,7 @@ export async function setSiteConfigValue(
 ### 3.4 Database Index Export
 
 **package/src/lib/server/db/index.ts:**
+
 ```typescript
 // User queries
 export {
@@ -998,8 +1030,8 @@ export {
   getUserById,
   createUser,
   updateUser,
-  getOrCreateUser
-} from './users';
+  getOrCreateUser,
+} from "./users";
 
 // Post queries
 export {
@@ -1015,14 +1047,11 @@ export {
   deletePost,
   type GetPostsOptions,
   type CreatePostData,
-  type UpdatePostData
-} from './posts';
+  type UpdatePostData,
+} from "./posts";
 
 // Config queries
-export {
-  getSiteConfig,
-  setSiteConfigValue
-} from './config';
+export { getSiteConfig, setSiteConfigValue } from "./config";
 ```
 
 ---
@@ -1030,6 +1059,7 @@ export {
 ## PHASE 4: R2 STORAGE UTILITIES
 
 **package/src/lib/server/storage/r2.ts:**
+
 ```typescript
 /**
  * R2 storage utilities for media files
@@ -1058,10 +1088,10 @@ export function generateR2Key(filename: string): string {
   const timestamp = Date.now();
   const random = crypto.getRandomValues(new Uint8Array(8));
   const randomStr = Array.from(random)
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('');
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 
-  const ext = filename.split('.').pop() || '';
+  const ext = filename.split(".").pop() || "";
   return `media/${timestamp}-${randomStr}.${ext}`;
 }
 
@@ -1072,7 +1102,7 @@ export async function uploadToR2(
   bucket: R2Bucket,
   file: File | ArrayBuffer,
   filename: string,
-  mimeType: string
+  mimeType: string,
 ): Promise<UploadResult> {
   try {
     const key = generateR2Key(filename);
@@ -1080,19 +1110,19 @@ export async function uploadToR2(
 
     await bucket.put(key, body, {
       httpMetadata: {
-        contentType: mimeType
-      }
+        contentType: mimeType,
+      },
     });
 
     return {
       success: true,
       key,
-      url: `/media/${key}`
+      url: `/media/${key}`,
     };
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Upload failed'
+      error: error instanceof Error ? error.message : "Upload failed",
     };
   }
 }
@@ -1102,7 +1132,7 @@ export async function uploadToR2(
  */
 export async function deleteFromR2(
   bucket: R2Bucket,
-  key: string
+  key: string,
 ): Promise<boolean> {
   try {
     await bucket.delete(key);
@@ -1117,7 +1147,7 @@ export async function deleteFromR2(
  */
 export async function getFromR2(
   bucket: R2Bucket,
-  key: string
+  key: string,
 ): Promise<R2ObjectBody | null> {
   return bucket.get(key);
 }
@@ -1127,24 +1157,25 @@ export async function getFromR2(
  */
 export async function listR2Files(
   bucket: R2Bucket,
-  options: { prefix?: string; limit?: number; cursor?: string } = {}
+  options: { prefix?: string; limit?: number; cursor?: string } = {},
 ): Promise<{ objects: R2Object[]; cursor?: string }> {
-  const { prefix = 'media/', limit = 100, cursor } = options;
+  const { prefix = "media/", limit = 100, cursor } = options;
 
   const list = await bucket.list({
     prefix,
     limit,
-    cursor
+    cursor,
   });
 
   return {
     objects: list.objects,
-    cursor: list.truncated ? list.cursor : undefined
+    cursor: list.truncated ? list.cursor : undefined,
   };
 }
 ```
 
 **package/src/lib/server/storage/index.ts:**
+
 ```typescript
 export {
   generateR2Key,
@@ -1153,8 +1184,8 @@ export {
   getFromR2,
   listR2Files,
   type UploadResult,
-  type MediaMetadata
-} from './r2';
+  type MediaMetadata,
+} from "./r2";
 ```
 
 ---
@@ -1162,18 +1193,19 @@ export {
 ## PHASE 5: SERVER INDEX EXPORT
 
 **package/src/lib/server/index.ts:**
+
 ```typescript
 // Authentication
-export * from './auth';
+export * from "./auth";
 
 // Database
-export * from './db';
+export * from "./db";
 
 // Storage
-export * from './storage';
+export * from "./storage";
 
 // Email
-export * from './email';
+export * from "./email";
 ```
 
 ---
@@ -1183,6 +1215,7 @@ export * from './email';
 ### 6.1 Login Form
 
 **package/src/lib/components/auth/LoginForm.svelte:**
+
 ```svelte
 <script lang="ts">
   interface Props {
@@ -1416,8 +1449,9 @@ export * from './email';
 ### 6.2 Auth Components Index
 
 **package/src/lib/components/auth/index.ts:**
+
 ```typescript
-export { default as LoginForm } from './LoginForm.svelte';
+export { default as LoginForm } from "./LoginForm.svelte";
 ```
 
 ---
@@ -1427,6 +1461,7 @@ export { default as LoginForm } from './LoginForm.svelte';
 ### 7.1 PostCard Component
 
 **package/src/lib/components/blog/PostCard.svelte:**
+
 ```svelte
 <script lang="ts">
   import type { PostListItem } from '../../types';
@@ -1585,6 +1620,7 @@ export { default as LoginForm } from './LoginForm.svelte';
 ### 7.2 PostList Component
 
 **package/src/lib/components/blog/PostList.svelte:**
+
 ```svelte
 <script lang="ts">
   import type { PostListItem } from '../../types';
@@ -1652,6 +1688,7 @@ export { default as LoginForm } from './LoginForm.svelte';
 ### 7.3 PostView Component
 
 **package/src/lib/components/blog/PostView.svelte:**
+
 ```svelte
 <script lang="ts">
   import type { Post } from '../../types';
@@ -1829,10 +1866,11 @@ export { default as LoginForm } from './LoginForm.svelte';
 ### 7.4 Blog Components Index
 
 **package/src/lib/components/blog/index.ts:**
+
 ```typescript
-export { default as PostCard } from './PostCard.svelte';
-export { default as PostList } from './PostList.svelte';
-export { default as PostView } from './PostView.svelte';
+export { default as PostCard } from "./PostCard.svelte";
+export { default as PostList } from "./PostList.svelte";
+export { default as PostView } from "./PostView.svelte";
 ```
 
 ---
@@ -1842,18 +1880,19 @@ export { default as PostView } from './PostView.svelte';
 Update the main components index to include new components:
 
 **package/src/lib/components/index.ts:**
+
 ```typescript
 // UI Components
-export * from './ui';
+export * from "./ui";
 
 // Layout Components
-export * from './layout';
+export * from "./layout";
 
 // Blog Components
-export * from './blog';
+export * from "./blog";
 
 // Auth Components
-export * from './auth';
+export * from "./auth";
 
 // Admin Components (to be added as needed)
 // export * from './admin';
@@ -1866,7 +1905,7 @@ export * from './auth';
 ### 9.1 Type Check
 
 ```bash
-cd /home/user/GroveEngine/package
+cd /home/user/Lattice/package
 pnpm run check
 ```
 
@@ -1890,11 +1929,11 @@ ls -la dist/components/auth/
 ## PHASE 10: COMMIT
 
 ```bash
-cd /home/user/GroveEngine
+cd /home/user/Lattice
 git add package/
 git commit -m "feat: implement auth, database, and blog components
 
-Phase 2 of GroveEngine implementation:
+Phase 2 of Lattice implementation:
 - Add magic code authentication (Resend integration)
 - Add D1 database schema and migrations
 - Add KV session management utilities
@@ -1945,4 +1984,4 @@ After completing both phases:
 
 ---
 
-*Last Updated: November 2025*
+_Last Updated: November 2025_

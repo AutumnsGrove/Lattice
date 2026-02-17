@@ -3,9 +3,9 @@ import type { PageServerLoad } from "./$types";
 import {
   verifyTurnstileToken,
   generateId,
-} from "@autumnsgrove/groveengine/services";
-import { createZephyrClient } from "@autumnsgrove/groveengine/zephyr";
-import { GROVE_EMAILS } from "@autumnsgrove/groveengine/config";
+} from "@autumnsgrove/lattice/services";
+import { createZephyrClient } from "@autumnsgrove/lattice/zephyr";
+import { GROVE_EMAILS } from "@autumnsgrove/lattice/config";
 
 /**
  * Escape HTML special characters to prevent XSS in email templates

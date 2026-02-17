@@ -15,8 +15,8 @@
 import type {
   ErrorCategory as _ErrorCategory,
   GroveErrorDef,
-} from "@autumnsgrove/groveengine/errors";
-import { logGroveError, buildErrorUrl } from "@autumnsgrove/groveengine/errors";
+} from "@autumnsgrove/lattice/errors";
+import { logGroveError, buildErrorUrl } from "@autumnsgrove/lattice/errors";
 
 // =============================================================================
 // BACKWARD-COMPATIBLE TYPE ALIASES
@@ -24,7 +24,7 @@ import { logGroveError, buildErrorUrl } from "@autumnsgrove/groveengine/errors";
 
 export type ErrorCategory = _ErrorCategory;
 
-/** @deprecated Use GroveErrorDef from '@autumnsgrove/groveengine/errors' */
+/** @deprecated Use GroveErrorDef from '@autumnsgrove/lattice/errors' */
 export type PlantErrorDef = GroveErrorDef;
 
 // =============================================================================

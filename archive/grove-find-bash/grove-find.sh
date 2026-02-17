@@ -63,7 +63,7 @@
 #   gfagent                        # Quick reference for AI agents
 #
 # Pro tip: Add to your ~/.bashrc or ~/.zshrc:
-#   source /path/to/GroveEngine/scripts/grove-find.sh
+#   source /path/to/Lattice/scripts/grove-find.sh
 #
 
 # Colors for output
@@ -190,8 +190,8 @@ if [ -n "${BASH_SOURCE[0]:-}" ]; then
 elif [ -n "${(%):-%x}" ]; then
     GROVE_ROOT="$(cd "$(dirname "${(%):-%x}")/../.." && pwd)"
 else
-    # Fallback: assume we're in the GroveEngine directory
-    GROVE_ROOT="$(cd "$(dirname "$0")/../.." 2>/dev/null && pwd)" || GROVE_ROOT="$HOME/Documents/Projects/GroveEngine"
+    # Fallback: assume we're in the Lattice directory
+    GROVE_ROOT="$(cd "$(dirname "$0")/../.." 2>/dev/null && pwd)" || GROVE_ROOT="$HOME/Documents/Projects/Lattice"
 fi
 
 # =============================================================================
@@ -2100,7 +2100,7 @@ gfauth() {
     fi
 }
 
-# gfengine - Find @autumnsgrove/groveengine imports and usage
+# gfengine - Find @autumnsgrove/lattice imports and usage
 # Usage: gfengine [module]
 # Examples: gfengine, gfengine ui, gfengine stores, gfengine utils
 gfengine() {
@@ -2108,34 +2108,34 @@ gfengine() {
     echo -e "${CYAN}🌲 Finding engine imports${module:+ from: $module}${NC}\n"
 
     if [ -n "$module" ]; then
-        "$GROVE_RG" --color=always -n "@autumnsgrove/groveengine/$module" "$GROVE_ROOT" \
+        "$GROVE_RG" --color=always -n "@autumnsgrove/lattice/$module" "$GROVE_ROOT" \
            --glob '!node_modules' --glob '!dist' --glob '!packages/engine' \
            --glob "*.{ts,js,svelte}"
     else
         echo -e "${GREEN}Engine Imports by Module:${NC}"
 
         echo -e "\n${PURPLE}UI Components:${NC}"
-        "$GROVE_RG" --color=always -n "@autumnsgrove/groveengine/ui" "$GROVE_ROOT" \
+        "$GROVE_RG" --color=always -n "@autumnsgrove/lattice/ui" "$GROVE_ROOT" \
            --glob '!node_modules' --glob '!dist' --glob '!packages/engine' \
            --glob "*.{ts,js,svelte}" | head -15
 
         echo -e "\n${PURPLE}Utilities:${NC}"
-        "$GROVE_RG" --color=always -n "@autumnsgrove/groveengine/utils" "$GROVE_ROOT" \
+        "$GROVE_RG" --color=always -n "@autumnsgrove/lattice/utils" "$GROVE_ROOT" \
            --glob '!node_modules' --glob '!dist' --glob '!packages/engine' \
            --glob "*.{ts,js,svelte}" | head -10
 
         echo -e "\n${PURPLE}Stores:${NC}"
-        "$GROVE_RG" --color=always -n "@autumnsgrove/groveengine/ui/stores" "$GROVE_ROOT" \
+        "$GROVE_RG" --color=always -n "@autumnsgrove/lattice/ui/stores" "$GROVE_ROOT" \
            --glob '!node_modules' --glob '!dist' --glob '!packages/engine' \
            --glob "*.{ts,js,svelte}" | head -10
 
         echo -e "\n${PURPLE}Auth:${NC}"
-        "$GROVE_RG" --color=always -n "@autumnsgrove/groveengine/auth" "$GROVE_ROOT" \
+        "$GROVE_RG" --color=always -n "@autumnsgrove/lattice/auth" "$GROVE_ROOT" \
            --glob '!node_modules' --glob '!dist' --glob '!packages/engine' \
            --glob "*.{ts,js,svelte}" | head -10
 
         echo -e "\n${YELLOW}Apps using the engine:${NC}"
-        "$GROVE_RG" -l "@autumnsgrove/groveengine" "$GROVE_ROOT" \
+        "$GROVE_RG" -l "@autumnsgrove/lattice" "$GROVE_ROOT" \
            --glob '!node_modules' --glob '!dist' --glob '!packages/engine' \
            --glob "*.{ts,js,svelte}" | \
            sed 's|.*/||; s|/.*||' | sort -u
@@ -2228,7 +2228,7 @@ CODE QUALITY
   gftype [name]       Find TypeScript types/interfaces
   gfexport [pattern]  Find module exports
   gfauth [aspect]     Find authentication code
-  gfengine [module]   Find @autumnsgrove/groveengine imports
+  gfengine [module]   Find @autumnsgrove/lattice imports
 
 METRICS
   gf-stats [path]     Full statistics summary
@@ -2732,7 +2732,7 @@ gfhelp() {
     echo "  gftype [name]     - Find TypeScript types/interfaces"
     echo "  gfexport [name]   - Find module exports"
     echo "  gfauth [aspect]   - Find authentication code"
-    echo "  gfengine [module] - Find @autumnsgrove/groveengine imports"
+    echo "  gfengine [module] - Find @autumnsgrove/lattice imports"
     echo ""
     echo -e "${CYAN}Counting & Metrics:${NC}"
     echo "  gf-count-lines [path]  - Count lines of code"

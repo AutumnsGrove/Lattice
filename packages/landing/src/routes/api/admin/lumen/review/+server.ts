@@ -6,8 +6,8 @@
 
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { updateFlagStatus } from "@autumnsgrove/groveengine/thorn";
-import { isWayfinder } from "@autumnsgrove/groveengine/config";
+import { updateFlagStatus } from "@autumnsgrove/lattice/thorn";
+import { isWayfinder } from "@autumnsgrove/lattice/config";
 
 export const POST: RequestHandler = async ({ request, locals, platform }) => {
   if (!locals.user || !isWayfinder(locals.user.email)) {

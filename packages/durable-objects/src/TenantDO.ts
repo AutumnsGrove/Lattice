@@ -20,7 +20,7 @@ import {
   type LoomRoute,
   type LoomConfig,
   type LoomRequestContext,
-} from "@autumnsgrove/groveengine/loom";
+} from "@autumnsgrove/lattice/loom";
 import { TIERS, type TierKey, type PaidTierKey } from "./tiers.js";
 
 // ============================================================================

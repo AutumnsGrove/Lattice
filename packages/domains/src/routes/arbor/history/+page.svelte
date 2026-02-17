@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { untrack } from 'svelte';
-	import { GlassCard, GlassButton } from '@autumnsgrove/groveengine/ui';
+	import { GlassCard, GlassButton } from '@autumnsgrove/lattice/ui';
 
 	let { data }: { data: PageData } = $props();
 
@@ -94,7 +94,7 @@
 	async function pollRunningJobs() {
 		for (const jobId of runningJobIds) {
 			try {
-				const response = await fetch(`/api/search/status?job_id=${jobId}`);
+				const response = await fetch(`/api/search/status?job_id=${jobId}`); // csrf-ok
 				if (response.ok) {
 					const result = await response.json() as { job?: typeof jobs[0] };
 					if (result.job) {
@@ -131,7 +131,7 @@
 		syncing = true;
 		syncMessage = null;
 		try {
-			const response = await fetch('/api/search/sync', { method: 'POST' });
+			const response = await fetch('/api/search/sync', { method: 'POST' }); // csrf-ok
 			if (!response.ok) {
 				const errData = await response.json().catch(() => ({}));
 				syncMessage = `Sync failed: ${(errData as {message?: string}).message || response.statusText}`;

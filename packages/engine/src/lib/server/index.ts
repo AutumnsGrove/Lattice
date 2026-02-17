@@ -2,7 +2,7 @@
  * Server-Side Utilities for Grove Engine
  *
  * This is the canonical import path for server-side utilities.
- * Use: import { checkRateLimit, TIER_RATE_LIMITS } from '@autumnsgrove/groveengine/server'
+ * Use: import { checkRateLimit, TIER_RATE_LIMITS } from '@autumnsgrove/lattice/server'
  *
  * @module server
  */

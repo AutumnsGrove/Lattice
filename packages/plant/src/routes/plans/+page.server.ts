@@ -3,8 +3,8 @@ import type { PageServerLoad, Actions } from "./$types";
 import {
   transformAllTiers,
   type PricingTier,
-} from "@autumnsgrove/groveengine/grafts/pricing";
-import { type TierKey, isValidTier } from "@autumnsgrove/groveengine/config";
+} from "@autumnsgrove/lattice/grafts/pricing";
+import { type TierKey, isValidTier } from "@autumnsgrove/lattice/config";
 
 // Valid billing cycles for database storage (maps from graft's "annual" to "yearly")
 const VALID_BILLING_CYCLES = ["monthly", "yearly"] as const;

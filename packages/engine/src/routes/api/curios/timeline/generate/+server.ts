@@ -666,7 +666,7 @@ async function fetchUserRepos(
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: "application/vnd.github.v3+json",
-        "User-Agent": "GroveEngine-Timeline-Curio",
+        "User-Agent": "Lattice-Timeline-Curio",
       },
     },
   );
@@ -720,7 +720,7 @@ async function fetchRepoCommitsForDate(
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: "application/vnd.github.v3+json",
-        "User-Agent": "GroveEngine-Timeline-Curio",
+        "User-Agent": "Lattice-Timeline-Curio",
       },
     });
 
@@ -786,7 +786,7 @@ async function fetchCommitStats(
           headers: {
             Authorization: `Bearer ${token}`,
             Accept: "application/vnd.github.v3+json",
-            "User-Agent": "GroveEngine-Timeline-Curio",
+            "User-Agent": "Lattice-Timeline-Curio",
           },
         },
       );

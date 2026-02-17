@@ -1,13 +1,13 @@
-<h1><img src="docs/internal/email-assets/logos/social/logo-summer-1024-social.png" alt="GroveEngine logo" width="32" height="32" valign="middle">&nbsp;Lattice</h1>
+<h1><img src="docs/internal/email-assets/logos/social/logo-summer-1024-social.png" alt="Lattice logo" width="32" height="32" valign="middle">&nbsp;Lattice</h1>
 
-[![npm version](https://img.shields.io/npm/v/@autumnsgrove/groveengine.svg?style=flat-square&color=4a7c59)](https://www.npmjs.com/package/@autumnsgrove/groveengine)
-[![license](https://img.shields.io/npm/l/@autumnsgrove/groveengine.svg?style=flat-square&color=8b5a2b)](LICENSE)
+[![npm version](https://img.shields.io/npm/v/@autumnsgrove/lattice.svg?style=flat-square&color=4a7c59)](https://www.npmjs.com/package/@autumnsgrove/lattice)
+[![license](https://img.shields.io/npm/l/@autumnsgrove/lattice.svg?style=flat-square&color=8b5a2b)](LICENSE)
 
-> **Internal codename:** GroveEngine
+> **Internal codename:** Lattice
 
 Lattice is the core framework that powers [Grove](https://grove.place) — a multi-tenant blogging platform where people get their own blogs on subdomains (`username.grove.place`). Built entirely on Cloudflare infrastructure with SvelteKit.
 
-> *A lattice is the framework that supports growth. Vines climb it. Gardens are built around it. It's not the thing you see — it's the thing that holds everything else up.*
+> _A lattice is the framework that supports growth. Vines climb it. Gardens are built around it. It's not the thing you see — it's the thing that holds everything else up._
 
 ---
 
@@ -23,7 +23,7 @@ Grove is different:
 
 - **Portable by philosophy** — Your content lives in markdown. You can export and migrate anytime. We don't hold your data hostage.
 
-- **Built for people, not engagement metrics** — No dark patterns, no algorithmic manipulation. Just a place to *be*.
+- **Built for people, not engagement metrics** — No dark patterns, no algorithmic manipulation. Just a place to _be_.
 
 This isn't just a SaaS — it's about helping people have their own space online, away from big tech algorithms.
 
@@ -43,57 +43,56 @@ This isn't just a SaaS — it's about helping people have their own space online
 
 ## Packages
 
-| Package | Description |
-|---------|-------------|
-| [@autumnsgrove/groveengine](packages/engine) | Lattice — the core multi-tenant blog engine |
-| [landing](packages/landing) | Marketing site at [grove.place](https://grove.place) |
-| [heartwood](packages/heartwood) | Authentication service (Google OAuth 2.0 + PKCE) |
-| [plant](packages/plant) | Tenant blog management app |
-| [meadow](packages/meadow) | Community feed |
-| [domains](packages/domains) | Forage frontend — AI-powered domain discovery |
-| [clearing](packages/clearing) | Status page at [status.grove.place](https://status.grove.place) |
-| [terrarium](packages/terrarium) | Admin & testing interface |
-| [grove-router](packages/grove-router) | Subdomain routing Worker |
-| [og-worker](packages/og-worker) | Dynamic OG image generation at [og.grove.place](https://og.grove.place) |
-| [durable-objects](packages/durable-objects) | Cloudflare Durable Objects for caching and coordination |
-| [post-migrator](packages/post-migrator) | Hot/warm/cold storage migration (cron-triggered) |
-| [@autumnsgrove/vineyard](packages/vineyard) | Component showcase library for `/vineyard` routes |
-| [workers](packages/workers) | Scheduled workers (health monitoring, timeline sync, webhook cleanup) |
-
+| Package                                     | Description                                                             |
+| ------------------------------------------- | ----------------------------------------------------------------------- |
+| [@autumnsgrove/lattice](packages/engine)    | Lattice — the core multi-tenant blog engine                             |
+| [landing](packages/landing)                 | Marketing site at [grove.place](https://grove.place)                    |
+| [heartwood](packages/heartwood)             | Authentication service (Google OAuth 2.0 + PKCE)                        |
+| [plant](packages/plant)                     | Tenant blog management app                                              |
+| [meadow](packages/meadow)                   | Community feed                                                          |
+| [domains](packages/domains)                 | Forage frontend — AI-powered domain discovery                           |
+| [clearing](packages/clearing)               | Status page at [status.grove.place](https://status.grove.place)         |
+| [terrarium](packages/terrarium)             | Admin & testing interface                                               |
+| [grove-router](packages/grove-router)       | Subdomain routing Worker                                                |
+| [og-worker](packages/og-worker)             | Dynamic OG image generation at [og.grove.place](https://og.grove.place) |
+| [durable-objects](packages/durable-objects) | Cloudflare Durable Objects for caching and coordination                 |
+| [post-migrator](packages/post-migrator)     | Hot/warm/cold storage migration (cron-triggered)                        |
+| [@autumnsgrove/vineyard](packages/vineyard) | Component showcase library for `/vineyard` routes                       |
+| [workers](packages/workers)                 | Scheduled workers (health monitoring, timeline sync, webhook cleanup)   |
 
 ### Live Sites
 
-| Site | URL |
-|------|-----|
-| Grove Landing | [grove.place](https://grove.place) |
-| Vineyard | [grove.place/vineyard](https://grove.place/vineyard) |
-| Example Blog | [example.grove.place](https://example.grove.place) |
-| Forage | [forage.grove.place](https://forage.grove.place) |
-| Auth | [auth.grove.place](https://auth.grove.place) |
-| OG Images | [og.grove.place](https://og.grove.place) |
-| CDN | [cdn.grove.place](https://cdn.grove.place) |
-| Status | [status.grove.place](https://status.grove.place) |
-| Scout | [scout.grove.place](https://scout.grove.place) |
+| Site          | URL                                                  |
+| ------------- | ---------------------------------------------------- |
+| Grove Landing | [grove.place](https://grove.place)                   |
+| Vineyard      | [grove.place/vineyard](https://grove.place/vineyard) |
+| Example Blog  | [example.grove.place](https://example.grove.place)   |
+| Forage        | [forage.grove.place](https://forage.grove.place)     |
+| Auth          | [auth.grove.place](https://auth.grove.place)         |
+| OG Images     | [og.grove.place](https://og.grove.place)             |
+| CDN           | [cdn.grove.place](https://cdn.grove.place)           |
+| Status        | [status.grove.place](https://status.grove.place)     |
+| Scout         | [scout.grove.place](https://scout.grove.place)       |
 
 ### Related Projects
 
-| Project | Repository |
-|---------|------------|
-| GroveScout | [AutumnsGrove/GroveScout](https://github.com/AutumnsGrove/GroveScout) |
-| Forage (backend) | [AutumnsGrove/Forage](https://github.com/AutumnsGrove/Forage) |
-| Shutter | [AutumnsGrove/Shutter](https://github.com/AutumnsGrove/Shutter) |
+| Project          | Repository                                                            |
+| ---------------- | --------------------------------------------------------------------- |
+| GroveScout       | [AutumnsGrove/GroveScout](https://github.com/AutumnsGrove/GroveScout) |
+| Forage (backend) | [AutumnsGrove/Forage](https://github.com/AutumnsGrove/Forage)         |
+| Shutter          | [AutumnsGrove/Shutter](https://github.com/AutumnsGrove/Shutter)       |
 
 ---
 
 ## Pricing
 
-| Plan | Price | Posts | Storage |
-|------|-------|-------|---------|
-| Free | $0/mo | 5 | 50 MB |
-| Seedling | $8/mo | 50 | 1 GB |
-| Sapling | $12/mo | 250 | 5 GB |
-| Oak | $25/mo | Unlimited | 20 GB |
-| Evergreen | $35/mo | Unlimited | 100 GB |
+| Plan      | Price  | Posts     | Storage |
+| --------- | ------ | --------- | ------- |
+| Free      | $0/mo  | 5         | 50 MB   |
+| Seedling  | $8/mo  | 50        | 1 GB    |
+| Sapling   | $12/mo | 250       | 5 GB    |
+| Oak       | $25/mo | Unlimited | 20 GB   |
+| Evergreen | $35/mo | Unlimited | 100 GB  |
 
 Full details at [grove.place/pricing](https://grove.place/pricing).
 
@@ -104,6 +103,7 @@ Full details at [grove.place/pricing](https://grove.place/pricing).
 The platform is deep in active development. The engine is approaching v1.0 with a comprehensive multi-tenant architecture, a full design system, and production infrastructure on Cloudflare.
 
 **What's solid:**
+
 - Multi-tenant blog engine with subdomain routing and per-tenant isolation
 - Full design system with glassmorphism, seasonal themes, and nature components
 - Heartwood authentication with Google OAuth
@@ -115,6 +115,7 @@ The platform is deep in active development. The engine is approaching v1.0 with 
 - Forage AI domain search with real-time streaming
 
 **What's in progress:**
+
 - Glass design system expansion across all pages
 - Tenant onboarding flow
 - Multi-tenant infrastructure hardening
@@ -133,8 +134,8 @@ The platform is deep in active development. The engine is approaching v1.0 with 
 ### Quick Start
 
 ```bash
-git clone https://github.com/AutumnsGrove/GroveEngine.git
-cd GroveEngine
+git clone https://github.com/AutumnsGrove/Lattice.git
+cd Lattice
 pnpm install
 
 # Start the engine
@@ -178,7 +179,6 @@ See [SETUP.md](SETUP.md) for the full development guide, including Cloudflare bi
 - **AI:** DeepSeek via OpenRouter (Forage domain search)
 - **Testing:** Vitest, Testing Library, happy-dom
 - **Build:** Vite, pnpm workspaces
-
 
 ---
 

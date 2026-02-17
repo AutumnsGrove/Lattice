@@ -1,6 +1,6 @@
 # Multi-Tenant Architecture
 
-> *Single deployment serving all tenants, like YouTube or Twitter.*
+> _Single deployment serving all tenants, like YouTube or Twitter._
 
 Grove uses a multi-tenant architecture where a single codebase serves all users. Each user gets their own subdomain (`username.grove.place`) while sharing underlying infrastructure.
 
@@ -16,7 +16,7 @@ Grove uses a multi-tenant architecture where a single codebase serves all users.
                           │
                           ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                   groveengine Pages                         │
+│                   lattice Pages                         │
 │                  (single deployment)                        │
 ├─────────────────────────────────────────────────────────────┤
 │  hooks.server.ts                                            │
@@ -39,11 +39,11 @@ Grove uses a multi-tenant architecture where a single codebase serves all users.
 
 ### Content Storage
 
-| Data Type | Storage | Pattern |
-|-----------|---------|---------|
-| Posts & Pages | D1 | `tenant_id` column, markdown stored in DB |
-| Media | R2 | Tenant prefix: `tenants/{tenant_id}/media/...` |
-| Config/Cache | KV | Key prefix: `tenant:{tenant_id}:...` |
+| Data Type     | Storage | Pattern                                        |
+| ------------- | ------- | ---------------------------------------------- |
+| Posts & Pages | D1      | `tenant_id` column, markdown stored in DB      |
+| Media         | R2      | Tenant prefix: `tenants/{tenant_id}/media/...` |
+| Config/Cache  | KV      | Key prefix: `tenant:{tenant_id}:...`           |
 
 ### Caching Strategy
 
@@ -56,6 +56,7 @@ Request → KV Cache → D1 Database
 ```
 
 **Cache TTLs:**
+
 - Tenant config: 5 minutes
 - Post list: 1 minute
 - Individual post: 5 minutes
@@ -110,12 +111,12 @@ Grove uses a **shared database with tenant_id columns** pattern:
 
 ### At 100 Tenants
 
-| Service | Usage | Cost |
-|---------|-------|------|
-| D1 reads | ~3,000/day (with KV cache) | ~$0.003/mo |
-| D1 writes | ~500/week | Free |
-| KV reads | 90%+ cache hit | Minimal |
-| R2 storage | 5GB | Free |
+| Service    | Usage                      | Cost       |
+| ---------- | -------------------------- | ---------- |
+| D1 reads   | ~3,000/day (with KV cache) | ~$0.003/mo |
+| D1 writes  | ~500/week                  | Free       |
+| KV reads   | 90%+ cache hit             | Minimal    |
+| R2 storage | 5GB                        | Free       |
 
 **Total: ~$5/month** (Workers Paid base)
 
@@ -141,4 +142,4 @@ Applied at runtime via CSS variables.
 
 ---
 
-*The full architecture doc is at `docs/multi-tenant-architecture.md`.*
+_The full architecture doc is at `docs/multi-tenant-architecture.md`._

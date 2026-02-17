@@ -2,7 +2,7 @@
 	import { enhance } from '$app/forms';
 	import { browser } from '$app/environment';
 	import { invalidateAll } from '$app/navigation';
-	import { GlassCard } from '@autumnsgrove/groveengine/ui';
+	import { GlassCard } from '@autumnsgrove/lattice/ui';
 	import {
 		Fingerprint,
 		Shield,
@@ -15,8 +15,8 @@
 		AlertTriangle,
 		Key,
 		RefreshCw
-	} from '@autumnsgrove/groveengine/ui/icons';
-	import { base64urlToBuffer, bufferToBase64url } from '@autumnsgrove/groveengine/utils';
+	} from '@autumnsgrove/lattice/ui/icons';
+	import { base64urlToBuffer, bufferToBase64url } from '@autumnsgrove/lattice/utils';
 
 	// Type definitions
 	interface Passkey {
@@ -130,7 +130,7 @@
 
 		try {
 			// Get registration options from the server
-			const optionsRes = await fetch('/api/account/passkey/register-options', {
+			const optionsRes = await fetch('/api/account/passkey/register-options', { // csrf-ok
 				method: 'POST'
 			});
 
@@ -162,7 +162,7 @@
 			const response = credential.response as AuthenticatorAttestationResponse;
 
 			// Send to server for verification
-			const verifyRes = await fetch('/api/account/passkey/verify-registration', {
+			const verifyRes = await fetch('/api/account/passkey/verify-registration', { // csrf-ok
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({

@@ -7,6 +7,7 @@
 API tokens (`github_token`, `openrouter_key`) are **encrypted using AES-256-GCM** before storage in the D1 database. This encryption was implemented in PR #400.
 
 **Encryption details:**
+
 - Algorithm: AES-256-GCM (authenticated encryption)
 - Key: 256-bit (64 hex characters) via `TOKEN_ENCRYPTION_KEY` environment variable
 - IV: 12 bytes, randomly generated per encryption
@@ -26,6 +27,7 @@ The `v1:` prefix enables future algorithm changes without breaking existing data
 ### Key Management
 
 For setup and key rotation procedures, see:
+
 - `docs/security/token-encryption.md` - Complete encryption guide
 
 **Critical:** If `TOKEN_ENCRYPTION_KEY` is lost, encrypted tokens become unrecoverable. Users would need to re-enter their tokens.
@@ -33,6 +35,7 @@ For setup and key rotation procedures, see:
 ### Graceful Degradation
 
 If `TOKEN_ENCRYPTION_KEY` is not set:
+
 - Tokens are stored as plaintext (with console warning)
 - Existing tokens continue to work
 - On next config save, tokens will be encrypted (if key is then set)

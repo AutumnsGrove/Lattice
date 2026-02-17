@@ -1,8 +1,8 @@
 <script lang="ts">
 	import '../app.css';
-	import { themeStore } from '@autumnsgrove/groveengine/ui/stores';
-	import { GroveMessages } from '@autumnsgrove/groveengine/ui';
-	import { CurioCursorsLayer, CurioAmbientLayer } from '@autumnsgrove/groveengine/ui/content/curios';
+	import { themeStore } from '@autumnsgrove/lattice/ui/stores';
+	import { GroveMessages } from '@autumnsgrove/lattice/ui';
+	import { CurioCursorsLayer, CurioAmbientLayer } from '@autumnsgrove/lattice/ui/content/curios';
 
 	let { children, data } = $props();
 

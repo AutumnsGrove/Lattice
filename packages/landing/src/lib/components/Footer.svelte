@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { Footer as EngineFooter } from '@autumnsgrove/groveengine/ui/chrome';
+	import { Footer as EngineFooter } from '@autumnsgrove/lattice/ui/chrome';
 	import {
 		LANDING_RESOURCE_LINKS,
 		LANDING_CONNECT_LINKS,
 		LANDING_LEGAL_LINKS
-	} from '@autumnsgrove/groveengine/ui/chrome';
-	import type { MaxWidth } from '@autumnsgrove/groveengine/ui/chrome';
+	} from '@autumnsgrove/lattice/ui/chrome';
+	import type { MaxWidth } from '@autumnsgrove/lattice/ui/chrome';
 
 	interface Props {
 		maxWidth?: MaxWidth;

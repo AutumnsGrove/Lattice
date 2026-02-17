@@ -1,8 +1,8 @@
 /**
  * Database operations for the Landing site
  *
- * CDN file operations have been moved to @autumnsgrove/groveengine/services
- * Use: import { storage } from '@autumnsgrove/groveengine/services'
+ * CDN file operations have been moved to @autumnsgrove/lattice/services
+ * Use: import { storage } from '@autumnsgrove/lattice/services'
  */
 
 import {
@@ -12,7 +12,7 @@ import {
   futureTimestamp,
   queryOne,
   execute,
-} from "@autumnsgrove/groveengine/services";
+} from "@autumnsgrove/lattice/services";
 
 // Re-export for backwards compatibility
 export { generateId, now };

@@ -4,7 +4,7 @@
 // Button, Card, Input, Dialog, Select, Tabs, Accordion, Badge, etc.
 //
 // Usage:
-//   import { Button, Card } from '@groveengine/ui/ui';
+//   import { Button, Card } from '@lattice/ui/ui';
 
 // Types
 export * from "./types";

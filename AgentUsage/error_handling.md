@@ -7,6 +7,7 @@
 ## Overview
 
 Grove's **Signpost** error system ensures every error tells you three things:
+
 1. **What broke** — a structured code like `GROVE-API-040`
 2. **Who fixes it** — category: `user` (retry), `admin` (config), or `bug` (investigation)
 3. **What to say** — a warm `userMessage` (safe for users) and a detailed `adminMessage` (for logs)
@@ -40,13 +41,13 @@ toast.error(message)     ← User sees warm, actionable feedback
 
 ## Error Catalogs
 
-| Catalog | Prefix | Codes | Import Path |
-|---------|--------|-------|-------------|
-| `API_ERRORS` | `GROVE-API-XXX` | 37 | `@autumnsgrove/groveengine/errors` |
-| `ARBOR_ERRORS` | `GROVE-ARBOR-XXX` | 13 | `@autumnsgrove/groveengine/errors` |
-| `SITE_ERRORS` | `GROVE-SITE-XXX` | 14 | `@autumnsgrove/groveengine/errors` |
-| `AUTH_ERRORS` | `HW-AUTH-XXX` | 16 | `@autumnsgrove/groveengine/heartwood` |
-| `PLANT_ERRORS` | `PLANT-XXX` | 11 | `packages/plant/src/lib/errors.ts` |
+| Catalog        | Prefix            | Codes | Import Path                        |
+| -------------- | ----------------- | ----- | ---------------------------------- |
+| `API_ERRORS`   | `GROVE-API-XXX`   | 37    | `@autumnsgrove/lattice/errors`     |
+| `ARBOR_ERRORS` | `GROVE-ARBOR-XXX` | 13    | `@autumnsgrove/lattice/errors`     |
+| `SITE_ERRORS`  | `GROVE-SITE-XXX`  | 14    | `@autumnsgrove/lattice/errors`     |
+| `AUTH_ERRORS`  | `HW-AUTH-XXX`     | 16    | `@autumnsgrove/lattice/heartwood`  |
+| `PLANT_ERRORS` | `PLANT-XXX`       | 11    | `packages/plant/src/lib/errors.ts` |
 
 **Total: ~91 structured error codes across 5 catalogs.**
 
@@ -56,22 +57,22 @@ Every error code is a `GroveErrorDef`:
 
 ```typescript
 interface GroveErrorDef {
-  code: string;           // "GROVE-API-040"
+  code: string; // "GROVE-API-040"
   category: ErrorCategory; // "user" | "admin" | "bug"
-  userMessage: string;     // Safe, warm — shown to users
-  adminMessage: string;    // Detailed — for logs only
+  userMessage: string; // Safe, warm — shown to users
+  adminMessage: string; // Detailed — for logs only
 }
 ```
 
 ### Number Ranges
 
-| Range | Purpose | Examples |
-|-------|---------|---------|
-| `001-019` | Infrastructure | DB not configured, bindings missing |
-| `020-039` | Authentication & authorization | Unauthorized, invalid token, CSRF |
-| `040-059` | Business logic | Invalid input, not found, conflicts |
-| `060-079` | Rate limiting | Rate limited, quota exceeded |
-| `080-099` | Internal errors | Unexpected failures, catch-all |
+| Range     | Purpose                        | Examples                            |
+| --------- | ------------------------------ | ----------------------------------- |
+| `001-019` | Infrastructure                 | DB not configured, bindings missing |
+| `020-039` | Authentication & authorization | Unauthorized, invalid token, CSRF   |
+| `040-059` | Business logic                 | Invalid input, not found, conflicts |
+| `060-079` | Rate limiting                  | Rate limited, quota exceeded        |
+| `080-099` | Internal errors                | Unexpected failures, catch-all      |
 
 ---
 
@@ -81,14 +82,22 @@ interface GroveErrorDef {
 
 ```typescript
 import {
-  API_ERRORS, ARBOR_ERRORS, SITE_ERRORS,
-  throwGroveError, logGroveError, buildErrorJson, buildErrorUrl,
-} from '@autumnsgrove/groveengine/errors';
+  API_ERRORS,
+  ARBOR_ERRORS,
+  SITE_ERRORS,
+  throwGroveError,
+  logGroveError,
+  buildErrorJson,
+  buildErrorUrl,
+} from "@autumnsgrove/lattice/errors";
 
 // For auth errors:
 import {
-  AUTH_ERRORS, getAuthError, logAuthError, buildErrorParams,
-} from '@autumnsgrove/groveengine/heartwood';
+  AUTH_ERRORS,
+  getAuthError,
+  logAuthError,
+  buildErrorParams,
+} from "@autumnsgrove/lattice/heartwood";
 ```
 
 ### Pattern 1: API Route (`+server.ts`)
@@ -96,13 +105,15 @@ import {
 ```typescript
 export const POST: RequestHandler = async ({ request, locals, platform }) => {
   if (!locals.user) {
-    logGroveError('Engine', API_ERRORS.UNAUTHORIZED, { path: '/api/posts' });
+    logGroveError("Engine", API_ERRORS.UNAUTHORIZED, { path: "/api/posts" });
     return json(buildErrorJson(API_ERRORS.UNAUTHORIZED), { status: 401 });
   }
 
   const body = schema.safeParse(await request.json());
   if (!body.success) {
-    return json(buildErrorJson(API_ERRORS.INVALID_REQUEST_BODY), { status: 400 });
+    return json(buildErrorJson(API_ERRORS.INVALID_REQUEST_BODY), {
+      status: 400,
+    });
   }
 
   // ... business logic
@@ -115,7 +126,7 @@ export const POST: RequestHandler = async ({ request, locals, platform }) => {
 export const load: PageServerLoad = async ({ params, locals }) => {
   const post = await getPost(params.slug);
   if (!post) {
-    throwGroveError(404, SITE_ERRORS.POST_NOT_FOUND, 'Engine');
+    throwGroveError(404, SITE_ERRORS.POST_NOT_FOUND, "Engine");
   }
   return { post };
 };
@@ -126,8 +137,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 ```typescript
 if (errorParam) {
   const authError = getAuthError(errorParam);
-  logAuthError(authError, { path: '/auth/callback', ip });
-  redirect(302, buildErrorUrl(authError, '/login'));
+  logAuthError(authError, { path: "/auth/callback", ip });
+  redirect(302, buildErrorUrl(authError, "/login"));
 }
 ```
 
@@ -154,15 +165,15 @@ try {
 ### Import
 
 ```typescript
-import { toast } from '@autumnsgrove/groveengine/ui';
+import { toast } from "@autumnsgrove/lattice/ui";
 ```
 
 ### After Successful Action
 
 ```typescript
-const response = await apiRequest('/api/posts', { method: 'POST', body });
+const response = await apiRequest("/api/posts", { method: "POST", body });
 if (response.ok) {
-  toast.success('Post published!');
+  toast.success("Post published!");
 }
 ```
 
@@ -170,62 +181,59 @@ if (response.ok) {
 
 ```typescript
 try {
-  await apiRequest('/api/posts', { method: 'DELETE' });
-  toast.success('Post deleted');
+  await apiRequest("/api/posts", { method: "DELETE" });
+  toast.success("Post deleted");
 } catch (err) {
-  toast.error(err instanceof Error ? err.message : 'Something went wrong');
+  toast.error(err instanceof Error ? err.message : "Something went wrong");
 }
 ```
 
 ### Async Operations with `toast.promise()`
 
 ```typescript
-toast.promise(
-  apiRequest('/api/export', { method: 'POST' }),
-  {
-    loading: 'Exporting your data...',
-    success: 'Export complete!',
-    error: 'Export failed. Please try again.',
-  }
-);
+toast.promise(apiRequest("/api/export", { method: "POST" }), {
+  loading: "Exporting your data...",
+  success: "Export complete!",
+  error: "Export failed. Please try again.",
+});
 ```
 
 ### Multi-Step Flows with Loading
 
 ```typescript
-const id = toast.loading('Saving changes...');
+const id = toast.loading("Saving changes...");
 try {
-  await apiRequest('/api/settings', { method: 'PUT', body });
+  await apiRequest("/api/settings", { method: "PUT", body });
   toast.dismiss(id);
-  toast.success('Settings saved!');
+  toast.success("Settings saved!");
 } catch (err) {
   toast.dismiss(id);
-  toast.error('Failed to save settings');
+  toast.error("Failed to save settings");
 }
 ```
 
 ### Toast Methods Reference
 
-| Method | Duration | Use For |
-|--------|----------|---------|
-| `toast.success(msg)` | 3s | Completed actions |
-| `toast.error(msg)` | 4s | Failed actions |
-| `toast.info(msg)` | 3s | Neutral information |
-| `toast.warning(msg)` | 3.5s | Caution notices |
-| `toast.loading(msg)` | Persistent | In-progress operations (returns ID) |
-| `toast.promise(p, msgs)` | Auto | Async with loading/success/error states |
-| `toast.dismiss(id?)` | — | Dismiss specific or all toasts |
+| Method                   | Duration   | Use For                                 |
+| ------------------------ | ---------- | --------------------------------------- |
+| `toast.success(msg)`     | 3s         | Completed actions                       |
+| `toast.error(msg)`       | 4s         | Failed actions                          |
+| `toast.info(msg)`        | 3s         | Neutral information                     |
+| `toast.warning(msg)`     | 3.5s       | Caution notices                         |
+| `toast.loading(msg)`     | Persistent | In-progress operations (returns ID)     |
+| `toast.promise(p, msgs)` | Auto       | Async with loading/success/error states |
+| `toast.dismiss(id?)`     | —          | Dismiss specific or all toasts          |
 
 ---
 
 ## When NOT to Use Toast
 
-| Situation | Use Instead |
-|-----------|-------------|
-| Form validation errors | `fail()` + inline error display next to fields |
-| Page load failures | `+error.svelte` (SvelteKit handles this automatically via `throwGroveError`) |
-| Persistent admin notices | `GroveMessages` component |
-| Console-only debugging | `logGroveError()` server-side (never `console.error` alone) |
+| Situation                | Use Instead                                                                  |
+| ------------------------ | ---------------------------------------------------------------------------- |
+| Form validation errors   | `fail()` + inline error display next to fields                               |
+| Page load failures       | `+error.svelte` (SvelteKit handles this automatically via `throwGroveError`) |
+| Persistent admin notices | `GroveMessages` component                                                    |
+| Console-only debugging   | `logGroveError()` server-side (never `console.error` alone)                  |
 
 ---
 
@@ -255,14 +263,14 @@ MEDIA_UPLOAD_FAILED: {
 
 ## Common Pitfalls
 
-| Pitfall | Correct Approach |
-|---------|-----------------|
-| `throw new Error('Not found')` | `throwGroveError(404, SITE_ERRORS.PAGE_NOT_FOUND, 'Engine')` |
-| `throw error(500, 'Internal error')` | `return json(buildErrorJson(API_ERRORS.INTERNAL_ERROR), { status: 500 })` |
-| `console.error(err)` alone | `logGroveError('Engine', API_ERRORS.INTERNAL_ERROR, { cause: err })` |
-| `alert('Saved!')` | `toast.success('Saved!')` |
-| Exposing `adminMessage` to client | Always return `userMessage` only; `adminMessage` stays in server logs |
-| `fetch('/api/...')` for mutations | `apiRequest('/api/...')` — handles CSRF + credentials automatically |
+| Pitfall                              | Correct Approach                                                                     |
+| ------------------------------------ | ------------------------------------------------------------------------------------ |
+| `throw new Error('Not found')`       | `throwGroveError(404, SITE_ERRORS.PAGE_NOT_FOUND, 'Engine')`                         |
+| `throw error(500, 'Internal error')` | `return json(buildErrorJson(API_ERRORS.INTERNAL_ERROR), { status: 500 })`            |
+| `console.error(err)` alone           | `logGroveError('Engine', API_ERRORS.INTERNAL_ERROR, { cause: err })`                 |
+| `alert('Saved!')`                    | `toast.success('Saved!')`                                                            |
+| Exposing `adminMessage` to client    | Always return `userMessage` only; `adminMessage` stays in server logs                |
+| `fetch('/api/...')` for mutations    | `apiRequest('/api/...')` — handles CSRF + credentials automatically                  |
 | Auth errors revealing user existence | Use same message: "Invalid credentials" (never "user not found" vs "wrong password") |
 
 ---
@@ -294,4 +302,4 @@ MEDIA_UPLOAD_FAILED: {
 
 ---
 
-*Every error tells a story. Signpost makes sure it's the right one.*
+_Every error tells a story. Signpost makes sure it's the right one._

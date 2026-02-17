@@ -374,7 +374,7 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
               return { data: user };
             }
 
-            // Fallback: check comped/beta invites in GroveEngine DB
+            // Fallback: check comped/beta invites in Lattice DB
             // Comped invites grant authentication access (unused invites only)
             if (env.ENGINE_DB) {
               try {

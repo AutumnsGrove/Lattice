@@ -83,7 +83,7 @@
    * This component previously loaded Lexend from Google Fonts, which blocks rendering.
    * Consumer apps should use the engine's font system instead:
    *
-   * import { Lexend } from '@autumnsgrove/groveengine/ui/typography';
+   * import { Lexend } from '@autumnsgrove/lattice/ui/typography';
    *
    * Or configure Lexend in your app's font setup. The engine provides optimized
    * font loading with proper preloading and fallbacks.

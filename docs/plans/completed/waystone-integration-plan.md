@@ -4,10 +4,12 @@
 **Status:** Planning
 **Priority:** High — Critical for v1 launch user experience
 **Related Issues:**
+
 - #697 — Create contextual Waystone indicator component
 - #699 — Integrate contextual waystones throughout Grove UI
 
 **Related Documents:**
+
 - `docs/specs/waystone-spec.md` — Help Center specification
 - `docs/help-center/WRITING-GUIDE.md` — Voice and tone guidelines
 - `docs/plans/planned/help-center-article-roadmap.md` — Article writing roadmap
@@ -28,6 +30,7 @@ The goal is to provide contextual help discovery directly where users need it �
 ## The Problem
 
 ### Current State
+
 - Help articles exist in `docs/help-center/articles/` (49 articles across 10 sections)
 - No contextual help integration in the admin panel (Arbor)
 - Users must know to navigate to `/help` or the landing site to find documentation
@@ -35,6 +38,7 @@ The goal is to provide contextual help discovery directly where users need it �
 - New users encountering unfamiliar features have no in-context guidance
 
 ### User Impact
+
 - New Wanderers struggle with unfamiliar features (Flow editor, Fireside, Curios)
 - Settings pages have many options without explanation of what they do
 - Users on independent domains feel disconnected from Grove's help resources
@@ -46,9 +50,10 @@ The goal is to provide contextual help discovery directly where users need it �
 
 Waystones should feel like helpful signposts, not intrusive tooltips:
 
-> *"Trail markers that guide you through the forest."*
+> _"Trail markers that guide you through the forest."_
 
 **Principles:**
+
 1. **Subtle but discoverable** — Present but not demanding attention
 2. **Contextually relevant** — Linked to exactly what the user is looking at
 3. **Non-blocking** — Opens in new tab, doesn't interrupt workflow
@@ -72,6 +77,7 @@ Waystones should feel like helpful signposts, not intrusive tooltips:
 | `inline` | `boolean` | No | Display inline with text (default: `false`) |
 
 **Visual Design:**
+
 ```
 ┌─────┐
 │  ?  │  <- 20px circle, subtle border, question mark
@@ -84,6 +90,7 @@ Waystones should feel like helpful signposts, not intrusive tooltips:
 - Focus: Visible focus ring for accessibility
 
 **Behavior:**
+
 - Click opens `/help/{slug}` in new tab
 - Tooltip on hover: "Learn more" (or custom label)
 - Screen reader announces: "Help: {label or article title}"
@@ -188,6 +195,7 @@ Waystones should feel like helpful signposts, not intrusive tooltips:
 ### 1.3 Export from Engine
 
 Add to `packages/engine/package.json` exports:
+
 ```json
 {
   "./ui": "./src/lib/ui/components/ui/index.ts"
@@ -195,8 +203,9 @@ Add to `packages/engine/package.json` exports:
 ```
 
 Add to `packages/engine/src/lib/ui/components/ui/index.ts`:
+
 ```typescript
-export { default as Waystone } from './Waystone.svelte';
+export { default as Waystone } from "./Waystone.svelte";
 ```
 
 ### 1.4 Accessibility Requirements
@@ -213,46 +222,46 @@ export { default as Waystone } from './Waystone.svelte';
 
 ### 2.1 Arbor Panel (Admin)
 
-| Section | Confusion Point | Waystone Placement | Article Slug | Article Status |
-|---------|-----------------|-------------------|--------------|----------------|
-| **Dashboard** | What metrics mean | Next to "Analytics" card header | `analytics/understanding-stats` | Needs writing |
-| **Blog Posts** | Scheduling vs publishing | Near publish date picker | `writing/drafts-and-scheduling` | Needs writing |
-| **Blog Post Editor** | Markdown syntax | Next to editor mode toggle | `writing/formatting-your-posts` | Needs writing |
-| **Blog Post Editor** | Flow editor features | Near editor toolbar | `writing/the-markdown-editor` | Needs writing |
-| **Blog Post Editor** | What Fireside does | Next to Fireside toggle | `ai/what-is-wisp` | Needs writing |
-| **Pages** | Pages vs posts | Page header area | `writing/pages-vs-posts` | Needs writing |
-| **Curios** | What Curios are | Curios landing page header | `features/what-are-curios` | Needs writing |
-| **Curios > Timeline** | Timeline Curio setup | Timeline config section | `curios/timeline-setup` | Needs writing |
-| **Curios > Journey** | Journey Curio setup | Journey config section | `curios/journey-setup` | Needs writing |
-| **Curios > Gallery** | Gallery sync options | Gallery settings | `curios/gallery-setup` | Needs writing |
-| **Images** | Storage limits by tier | Near storage indicator | `billing/storage-limits` | Needs writing |
-| **Analytics** | Data interpretation | Analytics header | `analytics/understanding-stats` | Needs writing |
-| **Trails** | What Trails shows | Trails header | `features/what-are-trails` | Needs writing |
-| **Account** | Subscription tiers | Next to plan display | `billing/understanding-your-plan` | Partially exists |
-| **Account** | Data export | Export card header | `data/exporting-your-content` | Needs writing |
-| **Settings > Typography** | Font accessibility | Typography section header | `customization/custom-fonts` | Needs writing |
-| **Settings > Accent Color** | Color usage | Accent color section header | `customization/custom-accent-colors` | Needs writing |
-| **Settings > Cache** | What cache clearing does | Cache section header | `settings/cache-management` | Needs writing |
+| Section                     | Confusion Point          | Waystone Placement              | Article Slug                         | Article Status   |
+| --------------------------- | ------------------------ | ------------------------------- | ------------------------------------ | ---------------- |
+| **Dashboard**               | What metrics mean        | Next to "Analytics" card header | `analytics/understanding-stats`      | Needs writing    |
+| **Blog Posts**              | Scheduling vs publishing | Near publish date picker        | `writing/drafts-and-scheduling`      | Needs writing    |
+| **Blog Post Editor**        | Markdown syntax          | Next to editor mode toggle      | `writing/formatting-your-posts`      | Needs writing    |
+| **Blog Post Editor**        | Flow editor features     | Near editor toolbar             | `writing/the-markdown-editor`        | Needs writing    |
+| **Blog Post Editor**        | What Fireside does       | Next to Fireside toggle         | `ai/what-is-wisp`                    | Needs writing    |
+| **Pages**                   | Pages vs posts           | Page header area                | `writing/pages-vs-posts`             | Needs writing    |
+| **Curios**                  | What Curios are          | Curios landing page header      | `features/what-are-curios`           | Needs writing    |
+| **Curios > Timeline**       | Timeline Curio setup     | Timeline config section         | `curios/timeline-setup`              | Needs writing    |
+| **Curios > Journey**        | Journey Curio setup      | Journey config section          | `curios/journey-setup`               | Needs writing    |
+| **Curios > Gallery**        | Gallery sync options     | Gallery settings                | `curios/gallery-setup`               | Needs writing    |
+| **Images**                  | Storage limits by tier   | Near storage indicator          | `billing/storage-limits`             | Needs writing    |
+| **Analytics**               | Data interpretation      | Analytics header                | `analytics/understanding-stats`      | Needs writing    |
+| **Trails**                  | What Trails shows        | Trails header                   | `features/what-are-trails`           | Needs writing    |
+| **Account**                 | Subscription tiers       | Next to plan display            | `billing/understanding-your-plan`    | Partially exists |
+| **Account**                 | Data export              | Export card header              | `data/exporting-your-content`        | Needs writing    |
+| **Settings > Typography**   | Font accessibility       | Typography section header       | `customization/custom-fonts`         | Needs writing    |
+| **Settings > Accent Color** | Color usage              | Accent color section header     | `customization/custom-accent-colors` | Needs writing    |
+| **Settings > Cache**        | What cache clearing does | Cache section header            | `settings/cache-management`          | Needs writing    |
 
 ### 2.2 User-Facing Features
 
-| Feature | Confusion Point | Waystone Placement | Article Slug | Article Status |
-|---------|-----------------|-------------------|--------------|----------------|
-| **Flow Editor** | Markdown shortcuts | Status bar or toolbar | `writing/the-markdown-editor` | Needs writing |
-| **Flow Editor** | Zen mode purpose | Zen mode toggle | `writing/zen-mode` | Needs writing |
-| **Fireside Chat** | How AI assists | Fireside panel header | `ai/what-is-wisp` | Needs writing |
-| **Fireside Chat** | Privacy of drafts | Fireside input area | `ai/wisp-privacy` | Needs writing |
-| **Comment Section** | Moderation options | Comment settings | `comments/moderating-your-comments` | Needs writing |
-| **Vines Editor** | What vines are | Vines section header | `writing/vines-sidebar-links` | Needs writing |
-| **RSS Link** | How RSS works | Near RSS feed link | `writing/your-rss-feed` | Needs writing |
+| Feature             | Confusion Point    | Waystone Placement    | Article Slug                        | Article Status |
+| ------------------- | ------------------ | --------------------- | ----------------------------------- | -------------- |
+| **Flow Editor**     | Markdown shortcuts | Status bar or toolbar | `writing/the-markdown-editor`       | Needs writing  |
+| **Flow Editor**     | Zen mode purpose   | Zen mode toggle       | `writing/zen-mode`                  | Needs writing  |
+| **Fireside Chat**   | How AI assists     | Fireside panel header | `ai/what-is-wisp`                   | Needs writing  |
+| **Fireside Chat**   | Privacy of drafts  | Fireside input area   | `ai/wisp-privacy`                   | Needs writing  |
+| **Comment Section** | Moderation options | Comment settings      | `comments/moderating-your-comments` | Needs writing  |
+| **Vines Editor**    | What vines are     | Vines section header  | `writing/vines-sidebar-links`       | Needs writing  |
+| **RSS Link**        | How RSS works      | Near RSS feed link    | `writing/your-rss-feed`             | Needs writing  |
 
 ### 2.3 Public/Visitor Areas
 
-| Area | Confusion Point | Waystone Placement | Article Slug | Article Status |
-|------|-----------------|-------------------|--------------|----------------|
-| **Help Center Home** | Navigation help | Help center header | N/A (self-referential) | N/A |
-| **Login Page** | Auth method | Near Google sign-in | `getting-started/creating-your-account` | Needs writing |
-| **Onboarding** | Plan selection | Plan comparison card | `billing/choosing-your-plan` | Partially exists |
+| Area                 | Confusion Point | Waystone Placement   | Article Slug                            | Article Status   |
+| -------------------- | --------------- | -------------------- | --------------------------------------- | ---------------- |
+| **Help Center Home** | Navigation help | Help center header   | N/A (self-referential)                  | N/A              |
+| **Login Page**       | Auth method     | Near Google sign-in  | `getting-started/creating-your-account` | Needs writing    |
+| **Onboarding**       | Plan selection  | Plan comparison card | `billing/choosing-your-plan`            | Partially exists |
 
 ---
 
@@ -263,6 +272,7 @@ export { default as Waystone } from './Waystone.svelte';
 For GlassCard sections, add waystone adjacent to the `<h2>`:
 
 **Before:**
+
 ```svelte
 <GlassCard variant="frosted" class="mb-6">
   <h2>Typography</h2>
@@ -271,6 +281,7 @@ For GlassCard sections, add waystone adjacent to the `<h2>`:
 ```
 
 **After:**
+
 ```svelte
 <GlassCard variant="frosted" class="mb-6">
   <div class="section-header">
@@ -282,6 +293,7 @@ For GlassCard sections, add waystone adjacent to the `<h2>`:
 ```
 
 **CSS pattern:**
+
 ```css
 .section-header {
   display: flex;
@@ -343,11 +355,13 @@ packages/engine/src/routes/help/
 ### 4.2 Article Loading Strategy
 
 **Option A: Build-time bundled (Recommended for v1)**
+
 - Bundle markdown articles into the engine at build time
 - Pros: Fast, no D1 queries, works offline
 - Cons: Requires rebuild to update articles
 
 **Option B: D1-stored (Better for future)**
+
 - Store articles in D1 per the waystone-spec.md schema
 - Pros: Live updates, search via FTS5
 - Cons: More complex, requires migration
@@ -358,7 +372,8 @@ packages/engine/src/routes/help/
 
 Create `HelpArticle.svelte` to render markdown with Grove styling.
 
-> **XSS Protection:** Uses `sanitizeMarkdown()` from `@autumnsgrove/groveengine/utils`, which wraps DOMPurify with Grove-safe config:
+> **XSS Protection:** Uses `sanitizeMarkdown()` from `@autumnsgrove/lattice/utils`, which wraps DOMPurify with Grove-safe config:
+>
 > - Strips `<script>` tags and `javascript:` URIs
 > - Removes `on*` event handlers
 > - Allows safe markdown-to-HTML tags only (headings, lists, code, links, images, blockquotes)
@@ -366,7 +381,7 @@ Create `HelpArticle.svelte` to render markdown with Grove styling.
 ```svelte
 <!-- packages/engine/src/lib/components/help/HelpArticle.svelte -->
 <script lang="ts">
-  import { sanitizeMarkdown } from '@autumnsgrove/groveengine/utils';
+  import { sanitizeMarkdown } from '@autumnsgrove/lattice/utils';
   import '$lib/styles/content.css';
 
   interface Props {
@@ -430,23 +445,23 @@ Based on the UI audit, these articles must be created before waystone integratio
 
 ### Priority 1: Write Before Waystone Launch
 
-| Article | Slug | Why Critical |
-|---------|------|--------------|
-| The Markdown Editor | `writing/the-markdown-editor` | Flow editor is core feature |
-| What is Wisp | `ai/what-is-wisp` | Fireside integration depends on it |
-| Understanding Your Plan | `billing/understanding-your-plan` | Account section links here |
-| Drafts and Scheduling | `writing/drafts-and-scheduling` | Blog post confusion point |
-| Formatting Your Posts | `writing/formatting-your-posts` | Editor help button target |
+| Article                 | Slug                              | Why Critical                       |
+| ----------------------- | --------------------------------- | ---------------------------------- |
+| The Markdown Editor     | `writing/the-markdown-editor`     | Flow editor is core feature        |
+| What is Wisp            | `ai/what-is-wisp`                 | Fireside integration depends on it |
+| Understanding Your Plan | `billing/understanding-your-plan` | Account section links here         |
+| Drafts and Scheduling   | `writing/drafts-and-scheduling`   | Blog post confusion point          |
+| Formatting Your Posts   | `writing/formatting-your-posts`   | Editor help button target          |
 
 ### Priority 2: Write Soon After Launch
 
-| Article | Slug | Why Important |
-|---------|------|--------------|
-| What are Curios | `features/what-are-curios` | Curios section entry point |
-| Vines (Sidebar Links) | `writing/vines-sidebar-links` | User-facing feature |
-| Custom Fonts | `customization/custom-fonts` | Settings section |
-| Storage Limits | `billing/storage-limits` | Images section |
-| Exporting Your Content | `data/exporting-your-content` | Account section |
+| Article                | Slug                          | Why Important              |
+| ---------------------- | ----------------------------- | -------------------------- |
+| What are Curios        | `features/what-are-curios`    | Curios section entry point |
+| Vines (Sidebar Links)  | `writing/vines-sidebar-links` | User-facing feature        |
+| Custom Fonts           | `customization/custom-fonts`  | Settings section           |
+| Storage Limits         | `billing/storage-limits`      | Images section             |
+| Exporting Your Content | `data/exporting-your-content` | Account section            |
 
 ### Priority 3: Complete Coverage
 
@@ -457,6 +472,7 @@ All remaining articles from the UI audit table.
 ## Implementation Checklist
 
 ### Phase 1: Component Foundation (Issue #697)
+
 - [ ] Create `Waystone.svelte` component
 - [ ] Add to engine UI exports
 - [ ] Create accompanying CSS tokens if needed
@@ -467,6 +483,7 @@ All remaining articles from the UI audit table.
 - [ ] Test reduced motion preference
 
 ### Phase 2: Help Routes
+
 - [ ] Create `/help` route structure in engine
 - [ ] Implement article loading (build-time bundle)
 - [ ] Create `HelpArticle.svelte` renderer
@@ -478,6 +495,7 @@ All remaining articles from the UI audit table.
 - [ ] Add "Edit on GitHub" link to article footer
 
 ### Phase 3: Arbor Integration (Issue #699)
+
 - [ ] Settings page: Typography section
 - [ ] Settings page: Accent Color section
 - [ ] Settings page: Cache section
@@ -490,18 +508,21 @@ All remaining articles from the UI audit table.
 - [ ] Analytics page: Header
 
 ### Phase 4: Editor Integration
+
 - [ ] Flow editor: Toolbar help button
 - [ ] Flow editor: Zen mode toggle
 - [ ] Fireside chat: Panel header
 - [ ] Fireside chat: Privacy note area
 
 ### Phase 5: Article Writing
+
 - [ ] Write Priority 1 articles (5)
 - [ ] Write Priority 2 articles (5)
 - [ ] Review all articles for waystone-spec compliance
 - [ ] Verify all slugs match waystone integration points
 
 ### Phase 6: Polish
+
 - [ ] Visual consistency audit across all placements
 - [ ] Mobile responsiveness check
 - [ ] Performance check (no layout shift)
@@ -517,16 +538,20 @@ All remaining articles from the UI audit table.
 When users access Grove from custom domains, waystones need to route correctly:
 
 **Option 1: Always link to grove.place** (Simple)
+
 ```svelte
 const helpBaseUrl = 'https://grove.place/help';
 ```
+
 - Pros: Guaranteed article availability
 - Cons: Context switch for users
 
 **Option 2: Link to tenant /help if available** (Better UX)
+
 ```svelte
 const helpBaseUrl = '/help';  // Relative to current domain
 ```
+
 - Pros: Stays in user context
 - Cons: Requires help routes deployed to all tenants
 
@@ -535,10 +560,12 @@ const helpBaseUrl = '/help';  // Relative to current domain
 ### Bundle Size Impact
 
 Bundling all help articles at build time adds to the initial bundle:
+
 - **Measured:** ~207KB total markdown (49 articles, ~4.2KB avg)
 - **After gzip:** ~60KB compressed
 
 **Mitigation:**
+
 - Lazy load article content only when `/help` is accessed
 - Code-split the help section into its own chunk
 - Articles are text-only, so compression is highly effective
@@ -546,6 +573,7 @@ Bundling all help articles at build time adds to the initial bundle:
 ### Caching Strategy
 
 Help articles should be cached aggressively:
+
 - Set `Cache-Control: public, max-age=86400` (24 hours)
 - Invalidate on deployment
 - KV cache for search results
@@ -554,13 +582,13 @@ Help articles should be cached aggressively:
 
 ## Design Decisions (Resolved)
 
-| Question | Decision |
-|----------|----------|
-| **Mobile behavior** | Tappable button, opens article in new tab (same as desktop) |
-| **Interaction model** | Opens new tab; tooltip preview with "Read more" link is a **post-v1 enhancement** (Phase 1 = simple link with aria-labels) |
-| **Search for v1** | Skip — browse by category only |
-| **"Was this helpful?"** | Include in v1 — simple thumbs up/down using Lucide icons |
-| **Article workflow** | Deploy fresh with builds; keep markdown in repo; add "Edit on GitHub" link for contributors |
+| Question                | Decision                                                                                                                   |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| **Mobile behavior**     | Tappable button, opens article in new tab (same as desktop)                                                                |
+| **Interaction model**   | Opens new tab; tooltip preview with "Read more" link is a **post-v1 enhancement** (Phase 1 = simple link with aria-labels) |
+| **Search for v1**       | Skip — browse by category only                                                                                             |
+| **"Was this helpful?"** | Include in v1 — simple thumbs up/down using Lucide icons                                                                   |
+| **Article workflow**    | Deploy fresh with builds; keep markdown in repo; add "Edit on GitHub" link for contributors                                |
 
 ---
 
@@ -722,18 +750,18 @@ Include feedback on every article page. Simple thumbs up/down with Lucide icons 
 **Location:** `packages/engine/src/routes/help/feedback/+server.ts`
 
 ```typescript
-import { json } from '@sveltejs/kit';
-import type { RequestHandler } from './$types';
+import { json } from "@sveltejs/kit";
+import type { RequestHandler } from "./$types";
 
 // Validate slug to prevent directory traversal and injection
 // Each path segment must: start with alphanumeric, contain only [a-z0-9\-], end with alphanumeric
 // Note: Only hyphens allowed (not underscores) to match existing article slug conventions
 function isValidSlug(slug: string): boolean {
   if (!slug || slug.length > 200) return false;
-  if (slug.includes('..')) return false;
-  if (slug.startsWith('/') || slug.endsWith('/')) return false;
+  if (slug.includes("..")) return false;
+  if (slug.startsWith("/") || slug.endsWith("/")) return false;
 
-  const segments = slug.split('/');
+  const segments = slug.split("/");
   for (const segment of segments) {
     // Single char segments must be alphanumeric
     if (segment.length === 1) {
@@ -748,20 +776,25 @@ function isValidSlug(slug: string): boolean {
 
 export const POST: RequestHandler = async ({ request, platform, locals }) => {
   const data = await request.formData();
-  const slug = data.get('slug') as string;
-  const helpful = data.get('helpful') === 'true';
+  const slug = data.get("slug") as string;
+  const helpful = data.get("helpful") === "true";
 
   if (!slug || !isValidSlug(slug)) {
-    return json({ error: 'Invalid article slug' }, { status: 400 });
+    return json({ error: "Invalid article slug" }, { status: 400 });
   }
 
   // Store feedback in D1
   const db = platform?.env?.DB;
   if (db) {
-    await db.prepare(`
+    await db
+      .prepare(
+        `
       INSERT INTO help_article_feedback (article_slug, helpful, created_at)
       VALUES (?, ?, datetime('now'))
-    `).bind(slug, helpful ? 1 : 0).run();
+    `,
+      )
+      .bind(slug, helpful ? 1 : 0)
+      .run();
   }
 
   return json({ success: true });
@@ -804,7 +837,7 @@ Each article page includes an "Edit on GitHub" link for community contributions:
     {/if}
 
     <a
-      href="https://github.com/AutumnsGrove/GroveEngine/edit/main/docs/help-center/articles/{slug}.md"
+      href="https://github.com/AutumnsGrove/Lattice/edit/main/docs/help-center/articles/{slug}.md"
       target="_blank"
       rel="noopener"
       class="edit-link"
@@ -833,15 +866,15 @@ Each article page includes an "Edit on GitHub" link for community contributions:
 
 ## Timeline Estimate
 
-| Phase | Scope | Estimate |
-|-------|-------|----------|
-| Phase 1 | Waystone component | 1 day |
-| Phase 2 | Help routes | 2-3 days |
-| Phase 3 | Arbor integration | 2 days |
-| Phase 4 | Editor integration | 1 day |
-| Phase 5 | Priority 1 articles | 2-3 days |
-| Phase 6 | Polish & testing | 1-2 days |
-| **Total** | | **9-12 days** |
+| Phase     | Scope               | Estimate      |
+| --------- | ------------------- | ------------- |
+| Phase 1   | Waystone component  | 1 day         |
+| Phase 2   | Help routes         | 2-3 days      |
+| Phase 3   | Arbor integration   | 2 days        |
+| Phase 4   | Editor integration  | 1 day         |
+| Phase 5   | Priority 1 articles | 2-3 days      |
+| Phase 6   | Polish & testing    | 1-2 days      |
+| **Total** |                     | **9-12 days** |
 
 ---
 
@@ -855,4 +888,4 @@ Each article page includes an "Edit on GitHub" link for community contributions:
 
 ---
 
-*This plan ensures contextual help is available exactly where Wanderers need it — making Grove feel welcoming even when something's unfamiliar.*
+_This plan ensures contextual help is available exactly where Wanderers need it — making Grove feel welcoming even when something's unfamiliar._

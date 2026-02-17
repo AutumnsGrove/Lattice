@@ -7,9 +7,9 @@
 		ArrowLeft,
 		Loader2,
 		Sprout,
-	} from "@autumnsgrove/groveengine/ui/icons";
-	import { GlassCard, GroveTerm } from "@autumnsgrove/groveengine/ui";
-	import { groveModeStore } from "@autumnsgrove/groveengine/ui/stores";
+	} from "@autumnsgrove/lattice/ui/icons";
+	import { GlassCard, GroveTerm } from "@autumnsgrove/lattice/ui";
+	import { groveModeStore } from "@autumnsgrove/lattice/ui/stores";
 
 	// Use graft config for tier data and toggle component
 	import {
@@ -20,11 +20,11 @@
 		billingPeriodToDbFormat,
 		getMonthlyEquivalentPrice,
 		getYearlySavingsAmount,
-	} from "@autumnsgrove/groveengine/grafts/pricing";
-	import type { TierStatus, TierKey } from "@autumnsgrove/groveengine/config";
+	} from "@autumnsgrove/lattice/grafts/pricing";
+	import type { TierStatus, TierKey } from "@autumnsgrove/lattice/config";
 
 	// UpgradesGraft components for plan selection
-	import { GrowthCard } from "@autumnsgrove/groveengine/grafts/upgrades";
+	import { GrowthCard } from "@autumnsgrove/lattice/grafts/upgrades";
 
 	// Shared icon mapping
 	import { tierIcons } from "$lib/ui/tier-icons";

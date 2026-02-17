@@ -35,14 +35,14 @@ Grove's image compression pipeline currently uses WebP format. With JPEG XL (JXL
 
 ### Why JPEG XL?
 
-| Aspect | WebP | JPEG XL |
-|--------|------|---------|
-| Compression ratio | Good | 20-60% smaller at same quality |
-| Lossless support | Yes | Yes (better) |
-| Progressive decode | Limited | Excellent |
-| HDR support | No | Yes |
-| Animation | Yes | Yes |
-| Browser support | Universal | Chrome, Safari 17+, Edge (Firefox pending) |
+| Aspect             | WebP      | JPEG XL                                    |
+| ------------------ | --------- | ------------------------------------------ |
+| Compression ratio  | Good      | 20-60% smaller at same quality             |
+| Lossless support   | Yes       | Yes (better)                               |
+| Progressive decode | Limited   | Excellent                                  |
+| HDR support        | No        | Yes                                        |
+| Animation          | Yes       | Yes                                        |
+| Browser support    | Universal | Chrome, Safari 17+, Edge (Firefox pending) |
 
 ### Grove's Image Pipeline Goals
 
@@ -60,6 +60,7 @@ Grove's image compression pipeline currently uses WebP format. With JPEG XL (JXL
 **File:** `packages/engine/src/lib/utils/imageProcessor.ts`
 
 Current flow:
+
 ```
 User selects image
     ↓
@@ -73,6 +74,7 @@ Upload processed blob to R2
 ```
 
 **Key functions:**
+
 - `processImage()` - Main conversion, uses `canvas.toBlob()` with `image/webp`
 - `sanitizeImageFilename()` - Adds `.webp` extension
 - Quality mapping: 10-100% → dimension limits (960-4096px max)
@@ -109,16 +111,17 @@ Upload processed blob to R2
 
 ### Native JXL Decode Support (January 2026)
 
-| Browser | Status | Notes |
-|---------|--------|-------|
+| Browser              | Status              | Notes                        |
+| -------------------- | ------------------- | ---------------------------- |
 | Chrome/Chromium 124+ | Merging to mainline | Was behind flag, now default |
-| Safari 17+ | Full support | macOS Sonoma, iOS 17+ |
-| Edge | Follows Chromium | Same timeline as Chrome |
-| Firefox | Pending | Waiting on Rust decoder |
+| Safari 17+           | Full support        | macOS Sonoma, iOS 17+        |
+| Edge                 | Follows Chromium    | Same timeline as Chrome      |
+| Firefox              | Pending             | Waiting on Rust decoder      |
 
 ### Implication
 
 ~75-80% of users have native JXL support. For the remaining ~20%:
+
 - Firefox users: Need WebP fallback
 - Older Safari/Chrome: Need WebP fallback
 
@@ -187,10 +190,11 @@ Upload processed blob to R2
 ### Phase 1: Add @jsquash/jxl Dependency
 
 ```bash
-pnpm add @jsquash/jxl -w --filter @autumnsgrove/groveengine
+pnpm add @jsquash/jxl -w --filter @autumnsgrove/lattice
 ```
 
 **Package details:**
+
 - NPM: `@jsquash/jxl`
 - License: Apache-2.0
 - Size: ~800KB WASM encoder
@@ -202,20 +206,20 @@ The @jsquash/jxl encoder is ~800KB. **Do not import statically** - use lazy load
 
 ```typescript
 // ❌ BAD - adds 800KB to main bundle
-import { encode as encodeJxl } from '@jsquash/jxl';
+import { encode as encodeJxl } from "@jsquash/jxl";
 
 // ✅ GOOD - lazy load only when needed
-let jxlEncoder: typeof import('@jsquash/jxl') | null = null;
+let jxlEncoder: typeof import("@jsquash/jxl") | null = null;
 
 async function getJxlEncoder() {
   if (!jxlEncoder) {
-    jxlEncoder = await import('@jsquash/jxl');
+    jxlEncoder = await import("@jsquash/jxl");
   }
   return jxlEncoder;
 }
 
 // Usage in processImage()
-if (targetFormat === 'jxl') {
+if (targetFormat === "jxl") {
   const { encode } = await getJxlEncoder();
   const encoded = await encode(imageData, options);
   // ...
@@ -234,16 +238,16 @@ export interface ProcessedImageResult {
   height: number;
   originalSize: number;
   processedSize: number;
-  format: 'jxl' | 'webp' | 'gif' | 'original';  // Explicit format tracking
-  skipped?: boolean;  // True for GIFs and originals
+  format: "jxl" | "webp" | "gif" | "original"; // Explicit format tracking
+  skipped?: boolean; // True for GIFs and originals
 }
 
 export interface ProcessImageOptions {
   quality?: number;
-  convertToWebP?: boolean;      // Deprecated, kept for backward compat
-  convertToJxl?: boolean;       // New default
+  convertToWebP?: boolean; // Deprecated, kept for backward compat
+  convertToJxl?: boolean; // New default
   fullResolution?: boolean;
-  format?: 'auto' | 'jxl' | 'webp' | 'original';  // New
+  format?: "auto" | "jxl" | "webp" | "original"; // New
 }
 
 /**
@@ -252,10 +256,10 @@ export interface ProcessImageOptions {
 export async function supportsJxlEncoding(): Promise<boolean> {
   try {
     // Check for WASM support
-    if (typeof WebAssembly !== 'object') return false;
+    if (typeof WebAssembly !== "object") return false;
 
     // Try to load the JXL encoder
-    await import('@jsquash/jxl');
+    await import("@jsquash/jxl");
     return true;
   } catch {
     return false;
@@ -267,32 +271,34 @@ export async function supportsJxlEncoding(): Promise<boolean> {
  */
 export async function processImage(
   file: File,
-  options: ProcessImageOptions = {}
+  options: ProcessImageOptions = {},
 ): Promise<ProcessedImageResult> {
-  const {
-    quality = 80,
-    format = 'auto',
-    fullResolution = false
-  } = options;
+  const { quality = 80, format = "auto", fullResolution = false } = options;
 
   // GIFs preserved for animation
-  if (file.type === 'image/gif') {
-    return { /* existing GIF handling */ };
+  if (file.type === "image/gif") {
+    return {
+      /* existing GIF handling */
+    };
   }
 
   // Determine target format
-  let targetFormat: 'jxl' | 'webp' = 'webp';
+  let targetFormat: "jxl" | "webp" = "webp";
 
-  if (format === 'jxl' || format === 'auto') {
+  if (format === "jxl" || format === "auto") {
     const canUseJxl = await supportsJxlEncoding();
-    if (canUseJxl) targetFormat = 'jxl';
+    if (canUseJxl) targetFormat = "jxl";
   }
 
   // Load and resize image via canvas (strips EXIF)
   // IMPORTANT: Drawing to canvas then extracting ImageData strips all metadata
   // including EXIF, GPS, and camera info - this is intentional for privacy
   const img = await loadImage(file);
-  const { width, height } = calculateTargetDimensions(img, quality, fullResolution);
+  const { width, height } = calculateTargetDimensions(
+    img,
+    quality,
+    fullResolution,
+  );
   const imageData = getImageData(img, width, height);
 
   // VERIFY: @jsquash/jxl encode() receives ImageData (pixel array), NOT the
@@ -302,18 +308,18 @@ export async function processImage(
   // Encode to target format
   let blob: Blob;
 
-  if (targetFormat === 'jxl') {
+  if (targetFormat === "jxl") {
     // Adaptive effort: lower on mobile for battery/performance
     const effort = getAdaptiveEffort();
 
-    const { encode } = await getJxlEncoder();  // Lazy load
+    const { encode } = await getJxlEncoder(); // Lazy load
     const encoded = await encode(imageData, {
       quality,
       effort,
       lossless: false,
-      progressive: true // Better loading UX
+      progressive: true, // Better loading UX
     });
-    blob = new Blob([encoded], { type: 'image/jxl' });
+    blob = new Blob([encoded], { type: "image/jxl" });
   } else {
     // WebP fallback via Canvas API
     blob = await canvasToWebP(imageData, quality);
@@ -329,8 +335,9 @@ export async function processImage(
  */
 function getAdaptiveEffort(): number {
   // Detect mobile via user agent or screen size
-  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
-    || window.innerWidth < 768;
+  const isMobile =
+    /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+    window.innerWidth < 768;
 
   // Mobile gets lower effort for battery/performance
   if (isMobile) return 5;
@@ -343,11 +350,11 @@ function getAdaptiveEffort(): number {
 
 **Effort levels explained:**
 
-| Device | Effort | Encoding Time | Compression |
-|--------|--------|---------------|-------------|
-| Mobile | 5 | ~1s | Good |
-| Desktop | 7 | ~2s | Better |
-| High-end | 7 | ~2s | Better |
+| Device   | Effort | Encoding Time | Compression |
+| -------- | ------ | ------------- | ----------- |
+| Mobile   | 5      | ~1s           | Good        |
+| Desktop  | 7      | ~2s           | Better      |
+| High-end | 7      | ~2s           | Better      |
 
 > **Note**: Originally proposed effort 9 for high-end devices (~4s), but this exceeds the <3s performance target. Cap at effort 7 for all devices to ensure consistent UX. Users can override via advanced settings if desired.
 
@@ -358,11 +365,11 @@ function getAdaptiveEffort(): number {
 ```typescript
 // Add JXL to allowed types
 const ALLOWED_TYPES = [
-  'image/jpeg',
-  'image/png',
-  'image/gif',
-  'image/webp',
-  'image/jxl'  // New
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+  "image/jxl", // New
 ];
 
 // JXL has two valid formats with different signatures
@@ -374,16 +381,16 @@ interface SignaturePattern {
 
 const FILE_SIGNATURES: Record<string, SignaturePattern[]> = {
   // ... existing types (update structure) ...
-  'image/jxl': [
+  "image/jxl": [
     {
-      bytes: [0x00, 0x00, 0x00, 0x0C, 0x4A, 0x58, 0x4C, 0x20],
-      minLength: 12  // Container format (ISO BMFF) needs 12+ bytes
+      bytes: [0x00, 0x00, 0x00, 0x0c, 0x4a, 0x58, 0x4c, 0x20],
+      minLength: 12, // Container format (ISO BMFF) needs 12+ bytes
     },
     {
-      bytes: [0xFF, 0x0A],
-      minLength: 2   // Codestream format (naked) only needs 2 bytes
-    }
-  ]
+      bytes: [0xff, 0x0a],
+      minLength: 2, // Codestream format (naked) only needs 2 bytes
+    },
+  ],
 };
 
 /**
@@ -397,7 +404,7 @@ function validateMagicBytes(buffer: ArrayBuffer, mimeType: string): boolean {
   if (!patterns) return false;
 
   // Check each pattern - file must match at least one
-  return patterns.some(pattern => {
+  return patterns.some((pattern) => {
     // Check minimum length for THIS pattern
     if (bytes.length < pattern.minLength) return false;
 
@@ -409,7 +416,7 @@ function validateMagicBytes(buffer: ArrayBuffer, mimeType: string): boolean {
 // Add extension mapping
 const MIME_TO_EXTENSIONS: Record<string, string[]> = {
   // ... existing ...
-  'image/jxl': ['jxl']
+  "image/jxl": ["jxl"],
 };
 ```
 
@@ -422,12 +429,12 @@ const MIME_TO_EXTENSIONS: Record<string, string[]> = {
 ```typescript
 const ALLOWED_CONTENT_TYPES = new Set([
   // Images
-  'image/jpeg',
-  'image/png',
-  'image/gif',
-  'image/webp',
-  'image/avif',
-  'image/jxl',  // New
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+  "image/avif",
+  "image/jxl", // New
   // ... rest unchanged
 ]);
 
@@ -437,10 +444,10 @@ const ALLOWED_CONTENT_TYPES = new Set([
  */
 function getImageHeaders(contentType: string): Record<string, string> {
   return {
-    'Content-Type': contentType,
-    'Cache-Control': 'public, max-age=31536000, immutable',
-    'X-Content-Type-Options': 'nosniff',  // Prevent MIME sniffing
-    'Vary': 'Accept'  // For content negotiation caching
+    "Content-Type": contentType,
+    "Cache-Control": "public, max-age=31536000, immutable",
+    "X-Content-Type-Options": "nosniff", // Prevent MIME sniffing
+    Vary: "Accept", // For content negotiation caching
   };
 }
 ```
@@ -551,6 +558,7 @@ Two approaches:
 #### Option A: Cloudflare Transform Rules (Simpler)
 
 Configure in Cloudflare Dashboard:
+
 ```
 When: Request Header "Accept" contains "image/jxl"
 Transform: Rewrite URL from /photos/... to /photos-jxl/...
@@ -562,23 +570,23 @@ Transform: Rewrite URL from /photos/... to /photos-jxl/...
 // In CDN serving worker
 export async function fetch(request: Request, env: Env) {
   const url = new URL(request.url);
-  const accept = request.headers.get('Accept') || '';
+  const accept = request.headers.get("Accept") || "";
 
   // Check if client accepts JXL
-  const acceptsJxl = accept.includes('image/jxl');
+  const acceptsJxl = accept.includes("image/jxl");
 
   // Try JXL version first if supported
   if (acceptsJxl) {
-    const jxlKey = url.pathname.replace(/\.(webp|jpg|png)$/, '.jxl');
+    const jxlKey = url.pathname.replace(/\.(webp|jpg|png)$/, ".jxl");
     const jxlObject = await env.IMAGES.get(jxlKey);
     if (jxlObject) {
       return new Response(jxlObject.body, {
         headers: {
-          'Content-Type': 'image/jxl',
-          'Cache-Control': 'public, max-age=31536000, immutable',
-          'X-Content-Type-Options': 'nosniff',
-          'Vary': 'Accept'  // Critical for CDN caching
-        }
+          "Content-Type": "image/jxl",
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "X-Content-Type-Options": "nosniff",
+          Vary: "Accept", // Critical for CDN caching
+        },
       });
     }
   }
@@ -588,15 +596,15 @@ export async function fetch(request: Request, env: Env) {
   if (object) {
     return new Response(object.body, {
       headers: {
-        'Content-Type': object.httpMetadata?.contentType || 'image/webp',
-        'Cache-Control': 'public, max-age=31536000, immutable',
-        'X-Content-Type-Options': 'nosniff',
-        'Vary': 'Accept'
-      }
+        "Content-Type": object.httpMetadata?.contentType || "image/webp",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "X-Content-Type-Options": "nosniff",
+        Vary: "Accept",
+      },
     });
   }
 
-  return new Response('Not found', { status: 404 });
+  return new Response("Not found", { status: 404 });
 }
 ```
 
@@ -635,7 +643,7 @@ The `Vary: Accept` header is **critical** for correct CDN caching:
 
 ```typescript
 // Add .jxl to supported extensions
-const IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.jxl'];
+const IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".jxl"];
 ```
 
 ---
@@ -666,11 +674,13 @@ function logJxlEncoding(result: {
   error?: string;
 }) {
   // Send to analytics (Rings, or external service)
-  console.log(JSON.stringify({
-    event: 'jxl_encoding',
-    ...result,
-    timestamp: new Date().toISOString()
-  }));
+  console.log(
+    JSON.stringify({
+      event: "jxl_encoding",
+      ...result,
+      timestamp: new Date().toISOString(),
+    }),
+  );
 }
 
 // In processImage():
@@ -682,7 +692,7 @@ try {
     fallback: false,
     encodingTimeMs: performance.now() - startTime,
     originalSize: file.size,
-    encodedSize: encoded.byteLength
+    encodedSize: encoded.byteLength,
   });
 } catch (error) {
   logJxlEncoding({
@@ -691,7 +701,7 @@ try {
     encodingTimeMs: performance.now() - startTime,
     originalSize: file.size,
     encodedSize: 0,
-    error: error.message
+    error: error.message,
   });
   // Fall back to WebP
   return processImageAsWebP(file, options);
@@ -700,11 +710,11 @@ try {
 
 ### Alert Thresholds
 
-| Metric | Warning | Critical |
-|--------|---------|----------|
-| JXL fallback rate | >30% | >50% |
-| Encoding errors | >5%/hour | >15%/hour |
-| Avg encoding time | >5s | >10s |
+| Metric            | Warning  | Critical  |
+| ----------------- | -------- | --------- |
+| JXL fallback rate | >30%     | >50%      |
+| Encoding errors   | >5%/hour | >15%/hour |
+| Avg encoding time | >5s      | >10s      |
 
 ---
 
@@ -720,13 +730,13 @@ try {
 
 ### Cost-Benefit Analysis
 
-| Factor | Transcode Now | Transcode Later |
-|--------|---------------|-----------------|
-| Storage savings | Immediate 20-30% | Delayed |
-| R2 egress | $0.36/GB to read existing | None |
-| CPU (Workers) | High (batch processing) | Amortized |
-| Complexity | High (queue, progress) | Low |
-| Risk | Medium (bulk changes) | Low |
+| Factor          | Transcode Now             | Transcode Later |
+| --------------- | ------------------------- | --------------- |
+| Storage savings | Immediate 20-30%          | Delayed         |
+| R2 egress       | $0.36/GB to read existing | None            |
+| CPU (Workers)   | High (batch processing)   | Amortized       |
+| Complexity      | High (queue, progress)    | Low             |
+| Risk            | Medium (bulk changes)     | Low             |
 
 **Break-even calculation:**
 
@@ -764,7 +774,7 @@ export class BatchTranscoder {
       const jxlData = await encodeJxl(imageData, { quality: 80, effort: 7 });
 
       // Store JXL variant
-      const jxlKey = image.r2_key.replace('.webp', '.jxl');
+      const jxlKey = image.r2_key.replace(".webp", ".jxl");
       await env.IMAGES.put(jxlKey, jxlData);
 
       // Update database
@@ -796,12 +806,12 @@ Once feature flags are implemented, JXL can be disabled via flag:
 ```typescript
 // Example feature flag check (implementation TBD)
 // In imageProcessor
-if (!isFeatureEnabled('jxl_encoding')) {
+if (!isFeatureEnabled("jxl_encoding")) {
   return processImageAsWebP(file, options);
 }
 
 // Interim: environment variable approach
-const JXL_ENABLED = env.JXL_ENCODING_ENABLED === 'true';
+const JXL_ENABLED = env.JXL_ENCODING_ENABLED === "true";
 if (!JXL_ENABLED) {
   return processImageAsWebP(file, options);
 }
@@ -840,29 +850,29 @@ If JXL images exist but need to be served as WebP:
 // Worker middleware for emergency fallback
 async function handleImageRequest(request: Request, env: Env) {
   const url = new URL(request.url);
-  const accept = request.headers.get('Accept') || '';
+  const accept = request.headers.get("Accept") || "";
 
   // Client wants JXL and we have it? Serve it.
-  if (accept.includes('image/jxl')) {
+  if (accept.includes("image/jxl")) {
     const jxlObject = await env.IMAGES.get(url.pathname);
-    if (jxlObject) return serveImage(jxlObject, 'image/jxl');
+    if (jxlObject) return serveImage(jxlObject, "image/jxl");
   }
 
   // Client doesn't support JXL, check for WebP fallback
-  const webpKey = url.pathname.replace('.jxl', '.webp');
+  const webpKey = url.pathname.replace(".jxl", ".webp");
   const webpObject = await env.IMAGES.get(webpKey);
-  if (webpObject) return serveImage(webpObject, 'image/webp');
+  if (webpObject) return serveImage(webpObject, "image/webp");
 
   // No WebP fallback exists - transcode on demand (expensive!)
   const jxlObject = await env.IMAGES.get(url.pathname);
-  if (jxlObject && url.pathname.endsWith('.jxl')) {
+  if (jxlObject && url.pathname.endsWith(".jxl")) {
     const webpBlob = await transcodeJxlToWebp(jxlObject);
     // Cache the transcoded version for future requests
     await env.IMAGES.put(webpKey, webpBlob);
-    return serveImage(webpBlob, 'image/webp');
+    return serveImage(webpBlob, "image/webp");
   }
 
-  return new Response('Not found', { status: 404 });
+  return new Response("Not found", { status: 404 });
 }
 ```
 
@@ -910,11 +920,11 @@ async function handleImageRequest(request: Request, env: Env) {
 
 ### Size Comparison Estimates
 
-| Scenario | WebP | JXL | Savings |
-|----------|------|-----|---------|
-| Photo (2MB orig) | 400KB | 280KB | 30% |
-| Screenshot (1MB) | 200KB | 100KB | 50% |
-| Graphic (500KB) | 80KB | 60KB | 25% |
+| Scenario         | WebP  | JXL   | Savings |
+| ---------------- | ----- | ----- | ------- |
+| Photo (2MB orig) | 400KB | 280KB | 30%     |
+| Screenshot (1MB) | 200KB | 100KB | 50%     |
+| Graphic (500KB)  | 80KB  | 60KB  | 25%     |
 
 ### Dual Storage Cost
 
@@ -931,27 +941,27 @@ async function handleImageRequest(request: Request, env: Env) {
 
 ### Files to Modify
 
-| File | Change |
-|------|--------|
-| `packages/engine/package.json` | Add `@jsquash/jxl` dependency |
-| `packages/engine/src/lib/utils/imageProcessor.ts` | Add JXL encoding, format detection |
-| `packages/engine/src/routes/api/images/upload/+server.ts` | Add JXL MIME type, magic bytes |
-| `packages/engine/src/lib/server/services/storage.ts` | Add JXL to allowed types |
-| `packages/engine/src/routes/admin/images/+page.svelte` | Format selector UI |
-| `packages/engine/src/lib/utils/gallery.ts` | Add `.jxl` extension |
+| File                                                      | Change                             |
+| --------------------------------------------------------- | ---------------------------------- |
+| `packages/engine/package.json`                            | Add `@jsquash/jxl` dependency      |
+| `packages/engine/src/lib/utils/imageProcessor.ts`         | Add JXL encoding, format detection |
+| `packages/engine/src/routes/api/images/upload/+server.ts` | Add JXL MIME type, magic bytes     |
+| `packages/engine/src/lib/server/services/storage.ts`      | Add JXL to allowed types           |
+| `packages/engine/src/routes/admin/images/+page.svelte`    | Format selector UI                 |
+| `packages/engine/src/lib/utils/gallery.ts`                | Add `.jxl` extension               |
 
 ### Files to Create
 
-| File | Purpose |
-|------|---------|
+| File                                   | Purpose                           |
+| -------------------------------------- | --------------------------------- |
 | `packages/engine/src/lib/utils/jxl.ts` | JXL-specific utilities (optional) |
 
 ### Documentation to Update
 
-| Document | Update |
-|----------|--------|
-| `docs/specs/amber-spec.md` | Update image format references |
-| Knowledge base article | "How Grove saves storage with modern compression" |
+| Document                   | Update                                            |
+| -------------------------- | ------------------------------------------------- |
+| `docs/specs/amber-spec.md` | Update image format references                    |
+| Knowledge base article     | "How Grove saves storage with modern compression" |
 
 ---
 
@@ -960,38 +970,38 @@ async function handleImageRequest(request: Request, env: Env) {
 ### Unit Tests
 
 ```typescript
-describe('imageProcessor', () => {
-  it('encodes to JXL when WASM available', async () => {
-    const file = createTestImage('test.jpg', 1000, 1000);
-    const result = await processImage(file, { format: 'jxl' });
-    expect(result.blob.type).toBe('image/jxl');
+describe("imageProcessor", () => {
+  it("encodes to JXL when WASM available", async () => {
+    const file = createTestImage("test.jpg", 1000, 1000);
+    const result = await processImage(file, { format: "jxl" });
+    expect(result.blob.type).toBe("image/jxl");
   });
 
-  it('falls back to WebP when JXL unavailable', async () => {
+  it("falls back to WebP when JXL unavailable", async () => {
     // Mock WASM unavailable
-    const file = createTestImage('test.jpg', 1000, 1000);
-    const result = await processImage(file, { format: 'auto' });
-    expect(result.blob.type).toBe('image/webp');
+    const file = createTestImage("test.jpg", 1000, 1000);
+    const result = await processImage(file, { format: "auto" });
+    expect(result.blob.type).toBe("image/webp");
   });
 
-  it('preserves GIFs regardless of format setting', async () => {
-    const file = createTestGif('animation.gif');
-    const result = await processImage(file, { format: 'jxl' });
-    expect(result.blob.type).toBe('image/gif');
+  it("preserves GIFs regardless of format setting", async () => {
+    const file = createTestGif("animation.gif");
+    const result = await processImage(file, { format: "jxl" });
+    expect(result.blob.type).toBe("image/gif");
     expect(result.skipped).toBe(true);
   });
 
   // CRITICAL: Privacy test - verify EXIF stripping works with JXL
-  it('strips EXIF/GPS metadata from JXL output', async () => {
+  it("strips EXIF/GPS metadata from JXL output", async () => {
     // Create test image WITH EXIF data (GPS coordinates, camera info)
-    const fileWithExif = await createImageWithExif('test-with-gps.jpg', {
+    const fileWithExif = await createImageWithExif("test-with-gps.jpg", {
       GPSLatitude: 37.7749,
       GPSLongitude: -122.4194,
-      Make: 'TestCamera',
-      Model: 'TestModel'
+      Make: "TestCamera",
+      Model: "TestModel",
     });
 
-    const result = await processImage(fileWithExif, { format: 'jxl' });
+    const result = await processImage(fileWithExif, { format: "jxl" });
 
     // Parse output JXL and verify no EXIF present
     const exifData = await extractExifFromBlob(result.blob);
@@ -1008,16 +1018,16 @@ describe('imageProcessor', () => {
 ### Integration Tests
 
 ```typescript
-describe('image upload', () => {
-  it('accepts JXL uploads', async () => {
+describe("image upload", () => {
+  it("accepts JXL uploads", async () => {
     const jxlBlob = await createJxlBlob();
     const response = await uploadImage(jxlBlob);
     expect(response.status).toBe(200);
-    expect(response.body.type).toBe('image/jxl');
+    expect(response.body.type).toBe("image/jxl");
   });
 
-  it('validates JXL magic bytes', async () => {
-    const fakeJxl = new Blob(['not a jxl'], { type: 'image/jxl' });
+  it("validates JXL magic bytes", async () => {
+    const fakeJxl = new Blob(["not a jxl"], { type: "image/jxl" });
     const response = await uploadImage(fakeJxl);
     expect(response.status).toBe(400);
   });
@@ -1027,35 +1037,33 @@ describe('image upload', () => {
 ### E2E Tests
 
 **Upload Tests:**
+
 1. Upload image in Chrome (should use JXL)
 2. Upload same image in Firefox (should use WebP)
 
-**Content Negotiation Tests:**
-3. Request image with `Accept: image/jxl, image/webp, */*` → should serve JXL
-4. Request image with `Accept: image/webp, */*` → should serve WebP
-5. Verify `Vary: Accept` header present in all image responses
-6. Verify `X-Content-Type-Options: nosniff` header present
+**Content Negotiation Tests:** 3. Request image with `Accept: image/jxl, image/webp, */*` → should serve JXL 4. Request image with `Accept: image/webp, */*` → should serve WebP 5. Verify `Vary: Accept` header present in all image responses 6. Verify `X-Content-Type-Options: nosniff` header present
 
 **CDN Cache Tests:**
+
 ```typescript
-describe('content negotiation', () => {
-  it('serves JXL to Chrome with correct headers', async () => {
-    const response = await fetch('/photos/2026/01/test.jxl', {
-      headers: { 'Accept': 'image/jxl, image/webp, */*' }
+describe("content negotiation", () => {
+  it("serves JXL to Chrome with correct headers", async () => {
+    const response = await fetch("/photos/2026/01/test.jxl", {
+      headers: { Accept: "image/jxl, image/webp, */*" },
     });
 
-    expect(response.headers.get('Content-Type')).toBe('image/jxl');
-    expect(response.headers.get('Vary')).toBe('Accept');
-    expect(response.headers.get('X-Content-Type-Options')).toBe('nosniff');
+    expect(response.headers.get("Content-Type")).toBe("image/jxl");
+    expect(response.headers.get("Vary")).toBe("Accept");
+    expect(response.headers.get("X-Content-Type-Options")).toBe("nosniff");
   });
 
-  it('serves WebP fallback to Firefox', async () => {
-    const response = await fetch('/photos/2026/01/test.jxl', {
-      headers: { 'Accept': 'image/webp, image/png, */*' }  // No JXL
+  it("serves WebP fallback to Firefox", async () => {
+    const response = await fetch("/photos/2026/01/test.jxl", {
+      headers: { Accept: "image/webp, image/png, */*" }, // No JXL
     });
 
-    expect(response.headers.get('Content-Type')).toBe('image/webp');
-    expect(response.headers.get('Vary')).toBe('Accept');
+    expect(response.headers.get("Content-Type")).toBe("image/webp");
+    expect(response.headers.get("Vary")).toBe("Accept");
   });
 });
 ```
@@ -1084,12 +1092,15 @@ async function benchmarkCompression() {
       jxl: jxl.size,
       webpSavings: (1 - webp.size / original.size) * 100,
       jxlSavings: (1 - jxl.size / original.size) * 100,
-      jxlVsWebp: (1 - jxl.size / webp.size) * 100
+      jxlVsWebp: (1 - jxl.size / webp.size) * 100,
     });
   }
 
   // Log aggregate stats
-  console.log('Average JXL vs WebP savings:', avg(results.map(r => r.jxlVsWebp)));
+  console.log(
+    "Average JXL vs WebP savings:",
+    avg(results.map((r) => r.jxlVsWebp)),
+  );
 }
 ```
 
@@ -1184,24 +1195,25 @@ async function benchmarkCompression() {
 
 ## Success Metrics
 
-| Metric | Target |
-|--------|--------|
-| Average file size reduction (JXL vs WebP) | >20% |
-| JXL encoding success rate | >95% |
-| Client-side encoding time | <3s for typical images |
-| Browser fallback rate | <25% (Firefox users) |
-| User-visible errors | 0 |
+| Metric                                    | Target                 |
+| ----------------------------------------- | ---------------------- |
+| Average file size reduction (JXL vs WebP) | >20%                   |
+| JXL encoding success rate                 | >95%                   |
+| Client-side encoding time                 | <3s for typical images |
+| Browser fallback rate                     | <25% (Firefox users)   |
+| User-visible errors                       | 0                      |
 
 ---
 
-*Document version: 1.2*
-*Created: 2026-01-13*
-*Updated: 2026-01-13*
-*Author: Claude (AI-assisted research and planning)*
+_Document version: 1.2_
+_Created: 2026-01-13_
+_Updated: 2026-01-13_
+_Author: Claude (AI-assisted research and planning)_
 
 ### Changelog
 
 **v1.2** (2026-01-13):
+
 - **BUGFIX**: Fixed magic byte validation to use per-pattern minLength (codestream: 2 bytes, container: 12 bytes)
 - Added EXIF stripping verification test requirement (privacy critical)
 - Capped effort level at 7 for all devices (was 9 for high-end, exceeded 3s target)
@@ -1211,6 +1223,7 @@ async function benchmarkCompression() {
 - Adjusted encoding time target from <2s to <3s
 
 **v1.1** (2026-01-13):
+
 - Added WASM lazy loading guidance to avoid bundle bloat
 - Added adaptive effort levels for mobile/desktop/high-end devices
 - Added ProcessedImageResult interface with explicit format field
@@ -1223,4 +1236,5 @@ async function benchmarkCompression() {
 - Added X-Content-Type-Options security header
 
 **v1.0** (2026-01-13):
+
 - Initial spec with architecture, implementation plan, and testing strategy

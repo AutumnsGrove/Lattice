@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# 🌲 GroveEngine Repository Snapshot Generator
+# 🌲 Lattice Repository Snapshot Generator
 #
 # Creates a visual snapshot of repository statistics for tracking progress over time.
 # Outputs to both a timestamped markdown file and appends to a CSV for trend analysis.
@@ -60,7 +60,7 @@ LABEL="${1:-snapshot}"
 FILENAME="$SNAPSHOTS_DIR/${TIMESTAMP}_${LABEL}.md"
 CSV_FILE="$SNAPSHOTS_DIR/history.csv"
 
-echo -e "${CYAN}🌲 GroveEngine Repository Snapshot${NC}"
+echo -e "${CYAN}🌲 Lattice Repository Snapshot${NC}"
 echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 
@@ -263,7 +263,7 @@ echo -e "Generating snapshot..."
 # ============================================================================
 
 cat > "$FILENAME" << SNAPSHOT
-# 🌲 GroveEngine Repository Snapshot
+# 🌲 Lattice Repository Snapshot
 
 **Generated:** ${DATE_HUMAN}
 **Label:** ${LABEL}
@@ -354,7 +354,7 @@ cat > "$FILENAME" << SNAPSHOT
 │                          🏗️  PROJECT STRUCTURE                              │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
-│             GroveEngine/                                                    │
+│             Lattice/                                                    │
 │             │                                                               │
 │             ├── packages/                                                   │
 │             │   ├── 🌲 engine ────────── Core CMS engine                    │
@@ -399,7 +399,7 @@ cat > "$FILENAME" << SNAPSHOT
                 │   "A midnight tea shop and the clarity  │
                 │    of good documentation..."            │
                 │                                         │
-                │             🌲 GroveEngine 🌲           │
+                │             🌲 Lattice 🌲           │
                 │                                         │
                 ╰─────────────────────────────────────────╯
 \`\`\`

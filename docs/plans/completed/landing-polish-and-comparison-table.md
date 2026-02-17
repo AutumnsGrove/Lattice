@@ -16,24 +16,24 @@ Before adding a new comparison table, we need to tighten the existing foundation
 
 ### Current Page Structure (16 sections, top to bottom)
 
-| # | Section | Container | Glass Pattern |
-|---|---------|-----------|---------------|
-| 1 | Header (engine) | sticky, `bg-surface/95 backdrop-blur-sm` | Engine chrome |
-| 2 | Hero (logo, title, CTAs) | `max-w-4xl`, `mb-12` | None (transparent) |
-| 3 | Hero Carousel | `max-w-4xl`, `mb-16` | `GlassCarousel variant="frosted"` |
-| 4 | Launch Notice | `max-w-lg`, `mb-12` | `.glass-grove` + left accent border |
-| 5 | Feature Grid (2x2) | `max-w-4xl`, `mb-16` | `.glass-grove` per card |
-| 6 | Decorative Divider | leaf SVG | -- |
-| 7 | Quick Links nav | flex wrap, `mb-12` | None |
-| 8 | Roadmap Preview | `max-w-lg`, `mb-16` | `RoadmapPreview` (own glass) |
-| 9 | "Who is Grove for?" | `max-w-2xl`, `mb-12` | `.glass-grove` |
-| 10 | "Why I built this" | `max-w-2xl`, `mb-12` | `.glass-grove` |
-| 11 | "What you get" | `max-w-2xl`, `mb-8` | `.glass-grove` |
-| 12 | FAQ | `max-w-2xl`, `mb-12` | `.glass-grove` |
-| 13 | Divider | leaf SVG | -- |
-| 14 | Email Signup | -- | Own styling |
-| 15 | Pricing Teaser | `max-w-md`, `mb-12` | None |
-| 16 | Footer (engine) | -- | Engine chrome |
+| #   | Section                  | Container                                | Glass Pattern                       |
+| --- | ------------------------ | ---------------------------------------- | ----------------------------------- |
+| 1   | Header (engine)          | sticky, `bg-surface/95 backdrop-blur-sm` | Engine chrome                       |
+| 2   | Hero (logo, title, CTAs) | `max-w-4xl`, `mb-12`                     | None (transparent)                  |
+| 3   | Hero Carousel            | `max-w-4xl`, `mb-16`                     | `GlassCarousel variant="frosted"`   |
+| 4   | Launch Notice            | `max-w-lg`, `mb-12`                      | `.glass-grove` + left accent border |
+| 5   | Feature Grid (2x2)       | `max-w-4xl`, `mb-16`                     | `.glass-grove` per card             |
+| 6   | Decorative Divider       | leaf SVG                                 | --                                  |
+| 7   | Quick Links nav          | flex wrap, `mb-12`                       | None                                |
+| 8   | Roadmap Preview          | `max-w-lg`, `mb-16`                      | `RoadmapPreview` (own glass)        |
+| 9   | "Who is Grove for?"      | `max-w-2xl`, `mb-12`                     | `.glass-grove`                      |
+| 10  | "Why I built this"       | `max-w-2xl`, `mb-12`                     | `.glass-grove`                      |
+| 11  | "What you get"           | `max-w-2xl`, `mb-8`                      | `.glass-grove`                      |
+| 12  | FAQ                      | `max-w-2xl`, `mb-12`                     | `.glass-grove`                      |
+| 13  | Divider                  | leaf SVG                                 | --                                  |
+| 14  | Email Signup             | --                                       | Own styling                         |
+| 15  | Pricing Teaser           | `max-w-md`, `mb-12`                      | None                                |
+| 16  | Footer (engine)          | --                                       | Engine chrome                       |
 
 ### Key Inconsistencies
 
@@ -64,18 +64,21 @@ Before adding a new comparison table, we need to tighten the existing foundation
 ### A1. Normalize Section Spacing
 
 Establish a consistent rhythm:
+
 - **Major sections** (hero, carousel, features, comparison, roadmap): `mb-16`
 - **Content sections** (who, why, benefits, FAQ): `mb-12`
 - **Minor elements** (notices, dividers, quick links): `mb-12`
 - **Section headings**: Consistent `mb-8` gap after all `<h2>` elements
 
 Changes in `+page.svelte`:
+
 - "What you get" section: `mb-8` -> `mb-12`
 - All section `<h2>` elements: normalize to `mb-8`
 
 ### A2. Replace Raw `.glass-grove` with `GlassCard`
 
 The landing page imports `GlassCard` but never uses it. Replace raw `.glass-grove rounded-xl p-6` divs with `<GlassCard>` for these sections:
+
 - "Who is Grove for?"
 - "Why I built this"
 - "What you get"
@@ -86,6 +89,7 @@ Keep `.glass-grove` for the Launch Notice (it's a lightweight callout with a lef
 ### A3. Normalize Feature Grid Cards
 
 The feature showcase grid currently uses raw `.glass-grove` with inline hover styles:
+
 ```
 hover:bg-white/60 dark:hover:bg-emerald-950/40
 ```
@@ -95,6 +99,7 @@ Replace with `<GlassCard hoverable>` to get consistent hover behavior from the e
 ### A4. Fix btn-secondary
 
 The "Learn More" CTA uses `btn-secondary` which isn't defined in `app.css`. Two options:
+
 - **Option A:** Define `.btn-secondary` in `app.css` as transparent bg with accent border
 - **Option B (preferred):** Replace with `GlassButton variant="outline"`
 
@@ -106,10 +111,10 @@ Verify no overflow, proper stacking, touch targets >= 44x44px.
 
 ### Files Changed (Phase A)
 
-| File | Change |
-|------|--------|
+| File                                       | Change                                |
+| ------------------------------------------ | ------------------------------------- |
 | `packages/landing/src/routes/+page.svelte` | Spacing, GlassCard migration, btn fix |
-| `packages/landing/src/app.css` | Add `.btn-secondary` definition |
+| `packages/landing/src/app.css`             | Add `.btn-secondary` definition       |
 
 ---
 
@@ -120,17 +125,18 @@ Verify no overflow, proper stacking, touch targets >= 44x44px.
 **Location:** `packages/engine/src/lib/ui/components/ui/GlassComparisonTable.svelte`
 
 **Props:**
+
 ```typescript
 interface ComparisonColumn {
   name: string;
-  logo?: string;          // URL to logo image
-  highlighted?: boolean;  // true for Grove (featured column)
-  href?: string;          // link to platform
+  logo?: string; // URL to logo image
+  highlighted?: boolean; // true for Grove (featured column)
+  href?: string; // link to platform
 }
 
 interface ComparisonRow {
   feature: string;
-  description?: string;   // tooltip/detail text
+  description?: string; // tooltip/detail text
   values: Record<string, string | boolean>;
   // boolean = checkmark/x, string = custom text like "$8/mo"
 }
@@ -140,23 +146,26 @@ interface Props {
   rows: ComparisonRow[];
   title?: string;
   description?: string;
-  variant?: 'default' | 'frosted';
+  variant?: "default" | "frosted";
   class?: string;
 }
 ```
 
 **Desktop Layout:** Semantic HTML `<table>` with proper `<th scope>` attributes
+
 - Grove column: subtle `bg-accent/10` highlight + top header accent
 - Checkmarks: Green check icon with `aria-label="Yes"`
 - X marks: Muted X icon with `aria-label="No"`
 - Custom text: Rendered inline (e.g., "$8/mo", "Plugin")
 
 **Mobile Layout (< md breakpoint):** Card-based comparison
+
 - Each competitor becomes a card: "Grove vs. [Competitor]"
 - Each card shows features side-by-side (Grove value | Competitor value)
 - Keeps Grove visible in every comparison (no hidden columns)
 
 **Accessibility:**
+
 - `<table>` with `aria-label`
 - `<th scope="col">` for column headers, `<th scope="row">` for feature names
 - Icon-only cells get `aria-label` text
@@ -166,11 +175,12 @@ interface Props {
 ### B2. Export from Engine
 
 Add to `packages/engine/src/lib/ui/components/ui/index.ts`:
+
 ```typescript
-export { default as GlassComparisonTable } from './GlassComparisonTable.svelte';
+export { default as GlassComparisonTable } from "./GlassComparisonTable.svelte";
 ```
 
-Verify export works via `@autumnsgrove/groveengine/ui`.
+Verify export works via `@autumnsgrove/lattice/ui`.
 
 ### B3. Add Comparison Data to Landing Page
 
@@ -180,16 +190,16 @@ Data lives as a `const` in `+page.svelte` (not fetched -- competitor details cha
 
 **Features to compare:**
 
-| Feature | Grove | Bear Blog | Substack | WordPress | Ghost | Tumblr |
-|---------|-------|-----------|----------|-----------|-------|--------|
-| Custom subdomain included | Yes | Yes | No | No | No | Yes |
-| 100-year domain guarantee | Yes | No | No | No | No | No |
-| AI crawler protection (Shade) | Yes | No | No | Plugin | No | No |
-| No algorithms / no engagement metrics | Yes | Yes | No | N/A | Partial | No |
-| Full data export | Yes | Yes | Partial | Yes | Yes | Partial |
-| Community features | Meadow | No | Notes | Plugin | Members | Dashboard |
-| Open source / indie web aligned | Yes | Partial | No | Yes | Yes | No |
-| Pricing starts at | $8/mo | Free/$5 | Free/$10 | Free/$4 | Free/$9 | Free |
+| Feature                               | Grove  | Bear Blog | Substack | WordPress | Ghost   | Tumblr    |
+| ------------------------------------- | ------ | --------- | -------- | --------- | ------- | --------- |
+| Custom subdomain included             | Yes    | Yes       | No       | No        | No      | Yes       |
+| 100-year domain guarantee             | Yes    | No        | No       | No        | No      | No        |
+| AI crawler protection (Shade)         | Yes    | No        | No       | Plugin    | No      | No        |
+| No algorithms / no engagement metrics | Yes    | Yes       | No       | N/A       | Partial | No        |
+| Full data export                      | Yes    | Yes       | Partial  | Yes       | Yes     | Partial   |
+| Community features                    | Meadow | No        | Notes    | Plugin    | Members | Dashboard |
+| Open source / indie web aligned       | Yes    | Partial   | No       | Yes       | Yes     | No        |
+| Pricing starts at                     | $8/mo  | Free/$5   | Free/$10 | Free/$4   | Free/$9 | Free      |
 
 Note: Must be honest and fair. Where competitors do something well, acknowledge it.
 
@@ -198,6 +208,7 @@ Note: Must be honest and fair. Where competitors do something well, acknowledge 
 **Placement:** After the Feature Showcase Grid, before the decorative divider.
 
 Updated section order:
+
 1. Hero (logo, title, CTAs)
 2. Hero Carousel
 3. Launch Notice
@@ -219,11 +230,11 @@ Updated section order:
 
 ### Files Changed (Phase B)
 
-| File | Change |
-|------|--------|
-| `packages/engine/src/lib/ui/components/ui/GlassComparisonTable.svelte` | NEW -- engine component |
-| `packages/engine/src/lib/ui/components/ui/index.ts` | Export new component |
-| `packages/landing/src/routes/+page.svelte` | Add comparison data + section |
+| File                                                                   | Change                        |
+| ---------------------------------------------------------------------- | ----------------------------- |
+| `packages/engine/src/lib/ui/components/ui/GlassComparisonTable.svelte` | NEW -- engine component       |
+| `packages/engine/src/lib/ui/components/ui/index.ts`                    | Export new component          |
+| `packages/landing/src/routes/+page.svelte`                             | Add comparison data + section |
 
 ---
 

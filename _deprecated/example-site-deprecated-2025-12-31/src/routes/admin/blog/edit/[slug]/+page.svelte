@@ -1,6 +1,6 @@
 <script>
 	import { page } from '$app/stores';
-	import { MarkdownEditor } from '@autumnsgrove/groveengine';
+	import { MarkdownEditor } from '@autumnsgrove/lattice';
 
 	// Get slug from route params
 	let slug = $derived($page.params.slug);

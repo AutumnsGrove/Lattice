@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
-	import { GroveTerm, GroveSwapText } from '@autumnsgrove/groveengine/ui';
+	import { GroveTerm, GroveSwapText } from '@autumnsgrove/lattice/ui';
 	import SEO from '$lib/components/SEO.svelte';
 
 	let { data } = $props();
@@ -22,7 +22,7 @@
 	}
 
 	// Import nature assets from engine package
-	import { Logo, Lantern } from '@autumnsgrove/groveengine/ui/nature';
+	import { Logo, Lantern } from '@autumnsgrove/lattice/ui/nature';
 
 	function getCardClass(categoryName: string) {
 		if (categoryName === 'Patterns') {
@@ -75,7 +75,7 @@
 					icon: 'codesandbox',
 					domain: 'grove.place',
 					integration: 'Powers all Grove properties',
-					github: 'https://github.com/AutumnsGrove/GroveEngine',
+					github: 'https://github.com/AutumnsGrove/Lattice',
 					spec: '/knowledge/specs/lattice-spec',
 					whatIsLink: '/knowledge/help/what-is-lattice'
 				},
@@ -106,7 +106,7 @@
 					status: 'live',
 					icon: 'kayak',
 					integration: 'Routes all *.grove.place subdomain traffic',
-					github: 'https://github.com/AutumnsGrove/GroveEngine/tree/main/packages/grove-router',
+					github: 'https://github.com/AutumnsGrove/Lattice/tree/main/packages/grove-router',
 					spec: '/knowledge/specs/passage-spec',
 					whatIsLink: '/knowledge/help/what-is-passage'
 				},

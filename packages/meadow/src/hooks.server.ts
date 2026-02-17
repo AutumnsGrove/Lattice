@@ -6,7 +6,7 @@
  */
 
 import type { Handle } from "@sveltejs/kit";
-import { validateCSRF } from "@autumnsgrove/groveengine/utils";
+import { validateCSRF } from "@autumnsgrove/lattice/utils";
 
 /**
  * Parse a specific cookie by name from the cookie header

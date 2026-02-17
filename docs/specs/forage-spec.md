@@ -4,7 +4,7 @@ description: AI-powered domain hunting that reduces weeks of searching to hours
 category: specs
 specCategory: standalone-tools
 icon: searchcode
-lastUpdated: '2026-01-04'
+lastUpdated: "2026-01-04"
 aliases: []
 tags:
   - domain-search
@@ -29,7 +29,7 @@ tags:
                   has waiting to offer
 ```
 
-> *Plant where the light is—let the search guide you home.*
+> _Plant where the light is—let the search guide you home._
 
 AI-powered asynchronous domain availability checker that reduces domain hunting from weeks to hours. Orchestrates AI agents to generate, check, and evaluate domain name candidates, producing curated lists of available, affordable options.
 
@@ -136,14 +136,16 @@ graph TB
 1. **SQLite-backed DOs are free** — No paid plan required
 2. **Alarm API** — Set alarms to wake the DO, each alarm resets the 30s CPU timer
 3. **Built-in persistence** — State survives between alarms
-4. **No external queue needed** — The DO *is* the queue
+4. **No external queue needed** — The DO _is_ the queue
 
 **Batch flow:**
+
 ```
 alarm(0s) → batch 1 → save → alarm(+10s) → batch 2 → save → ... → done → email
 ```
 
 Each batch:
+
 - Generate 50 candidates (AI call, ~5s)
 - Evaluate with swarm (parallel AI calls, ~10s)
 - Check availability (RDAP, rate-limited, ~5-10s with 10s delays counted as I/O)
@@ -157,6 +159,7 @@ Each batch:
 The `domain_checker.py` script — already built, battle-tested.
 
 **Capabilities:**
+
 - RDAP-based availability checking (no API keys needed)
 - IANA bootstrap for TLD → RDAP server mapping
 - Returns: status, registrar, expiration, creation date
@@ -164,6 +167,7 @@ The `domain_checker.py` script — already built, battle-tested.
 - JSON or formatted output
 
 **Enhancements Required:**
+
 - Add price lookup integration (Cloudflare API for TLDs they sell)
 - Return structured data suitable for D1 insertion
 - Add batch ID for tracking which run produced which results
@@ -174,13 +178,13 @@ The brain that coordinates everything.
 
 **MCP Tools Exposed:**
 
-| Tool | Purpose | Returns |
-|------|---------|---------|
-| `forage.start_search()` | Kicks off autonomous search | `job_id` |
-| `forage.get_status()` | Current batch progress | `batch_num`, `domains_checked`, `candidates_found` |
-| `forage.get_results()` | Final curated list | `domains[]`, `pricing_tiers` |
-| `forage.generate_followup_quiz()` | Creates personalized quiz | `quiz_questions[]` |
-| `forage.resume_search()` | Continues with new context | `new_job_id` |
+| Tool                              | Purpose                     | Returns                                            |
+| --------------------------------- | --------------------------- | -------------------------------------------------- |
+| `forage.start_search()`           | Kicks off autonomous search | `job_id`                                           |
+| `forage.get_status()`             | Current batch progress      | `batch_num`, `domains_checked`, `candidates_found` |
+| `forage.get_results()`            | Final curated list          | `domains[]`, `pricing_tiers`                       |
+| `forage.generate_followup_quiz()` | Creates personalized quiz   | `quiz_questions[]`                                 |
+| `forage.resume_search()`          | Continues with new context  | `new_job_id`                                       |
 
 **Internal Orchestration Logic:**
 
@@ -196,27 +200,27 @@ async def run_search(client_id: str, context: QuizResponses) -> SearchResult:
             previous_results=get_previous_results(client_id),
             batch_num=batch_num
         )
-        
+
         # 2. Spawn Haiku swarm to evaluate candidates in parallel
         evaluations = await haiku_swarm.evaluate(
             candidates=candidates,
             criteria=context.preferences
         )
-        
+
         # 3. Check availability via RDAP (rate-limited)
         availability = await check_domains_batch(
             domains=[e.domain for e in evaluations if e.worth_checking],
             delay=10.0  # Production rate limit
         )
-        
+
         # 4. Persist results
         await persist_batch(client_id, batch_num, evaluations, availability)
-        
+
         # 5. Check if we have enough good results
         good_results = get_good_results(client_id)
         if len(good_results) >= 25:
             return SearchResult(status="complete", domains=good_results[:25])
-    
+
     # Exhausted 6 batches without enough results
     return SearchResult(status="needs_followup", domains=get_good_results(client_id))
 ```
@@ -245,7 +249,7 @@ class RateLimitConfig:
     max_concurrent_rdap: int = int(os.getenv("MAX_CONCURRENT_RDAP", "1"))
     max_concurrent_ai: int = int(os.getenv("MAX_CONCURRENT_AI", "12"))
 
-@dataclass  
+@dataclass
 class SearchConfig:
     """Search behavior"""
     max_batches: int = int(os.getenv("MAX_BATCHES", "6"))
@@ -268,7 +272,7 @@ class ModelConfig:
     swarm_provider: Literal["claude", "kimi"] = os.getenv("SWARM_PROVIDER", "claude")
     swarm_model: str = os.getenv("SWARM_MODEL", "claude-haiku-3-20240307")
     parallel_providers: bool = os.getenv("PARALLEL_PROVIDERS", "false").lower() == "true"
-    
+
     # Kimi alternatives
     kimi_driver_model: str = os.getenv("KIMI_DRIVER", "kimi-k2-0528-thinking")
     kimi_swarm_model: str = os.getenv("KIMI_SWARM", "kimi-k2-0528")
@@ -287,7 +291,7 @@ class Config:
     pricing: PricingConfig = field(default_factory=PricingConfig)
     models: ModelConfig = field(default_factory=ModelConfig)
     email: EmailConfig = field(default_factory=EmailConfig)
-    
+
     # Quick presets
     @classmethod
     def fast_mode(cls) -> "Config":
@@ -297,7 +301,7 @@ class Config:
         cfg.rate_limit.ai_delay_seconds = 0.1
         cfg.search.alarm_delay_seconds = 1
         return cfg
-    
+
     @classmethod
     def cheap_mode(cls) -> "Config":
         """Minimize AI costs — fewer candidates, Haiku only"""
@@ -313,18 +317,21 @@ config = Config()
 ### 4. AI Agent Configuration
 
 **Driver Agent (Sonnet/Opus):**
+
 - Receives quiz responses + previous batch results
 - Generates 50 domain candidates per batch
 - Learns from what's been tried (avoids repetition)
 - Adjusts strategy based on availability patterns
 
 **Haiku Swarm (12 parallel):**
+
 - Each evaluates ~4 candidates from the batch
 - Scores: pronounceability, memorability, brand fit, email-ability
 - Flags potential issues (unfortunate spellings, trademark risks)
 - Quick yes/no/maybe on "worth checking"
 
 **Prompt context includes:**
+
 - Cloudflare TLD list (what's actually purchasable)
 - Price tiers by TLD
 - Client's quiz responses
@@ -379,6 +386,7 @@ CREATE TABLE search_artifacts (
 The quiz should feel like a beautifully designed terminal app. Monospace fonts, subtle animations, clean selections. This aesthetic carries through to emails.
 
 **Design principles:**
+
 - Monospace/code font throughout
 - Minimal color palette (think Catppuccin or Nord)
 - Box-drawing characters for structure
@@ -432,13 +440,13 @@ questions:
     type: text
     prompt: "Business or project name"
     required: true
-    
+
   - id: domain_idea
     type: text
     prompt: "Domain in mind?"
     required: false
     placeholder: "e.g., mybusiness.com"
-    
+
   - id: tld_preference
     type: multi_select
     prompt: "Preferred endings"
@@ -449,7 +457,7 @@ questions:
       - { value: "me", label: ".me (personal brand)" }
       - { value: "any", label: "Open to anything" }
     default: ["com", "any"]
-    
+
   - id: vibe
     type: single_select
     prompt: "What vibe fits your brand?"
@@ -459,7 +467,7 @@ questions:
       - { value: "minimal", label: "Minimal & modern" }
       - { value: "bold", label: "Bold & memorable" }
       - { value: "personal", label: "Personal & approachable" }
-      
+
   - id: keywords
     type: text
     prompt: "Keywords or themes"
@@ -470,12 +478,14 @@ questions:
 **Follow-up Quiz (3 questions, generated dynamically):**
 
 Generated by AI using:
+
 - Original quiz responses
 - All failed/rejected domains and why
 - Patterns in what's available vs. taken
 - Client's stated preferences vs. market reality
 
 Example generated questions:
+
 - "Your top choice [name].com is taken. Would you consider [name]studio.com, get[name].com, or try a different TLD?"
 - "We found availability in .co and .io but nothing in .com. Focus there, or is .com essential?"
 - "Short names are mostly taken. Would you consider longer, more descriptive options?"
@@ -575,24 +585,26 @@ merged = merge_and_dedupe(results)
 
 ## Rate Limiting Strategy
 
-| Context | Delay | Rationale |
-|---------|-------|-----------|
-| Development/testing | 0.2s | Fast iteration |
-| Single client, urgent | 1.0s | Reasonably fast |
-| Background processing | 10.0s | Kind to APIs, no rush |
-| Multiple concurrent jobs | 15.0s | Extra cautious |
+| Context                  | Delay | Rationale             |
+| ------------------------ | ----- | --------------------- |
+| Development/testing      | 0.2s  | Fast iteration        |
+| Single client, urgent    | 1.0s  | Reasonably fast       |
+| Background processing    | 10.0s | Kind to APIs, no rush |
+| Multiple concurrent jobs | 15.0s | Extra cautious        |
 
 **Per-TLD rate tracking:**
 Some RDAP servers are more aggressive about rate limiting. Track 429 responses and back off per-server.
 
 ## Integration Points
 
-**GroveEngine integration:**
+**Lattice integration:**
+
 - Import as dependency: `from forage import DomainSearchClient`
 - Or call MCP server tools directly
 - Webhook on completion → triggers email/notification
 
 **SvelteKit frontend:**
+
 - Quiz component (reusable for initial + follow-up)
 - Results dashboard (for internal review before sending to client)
 - Unique links per client for follow-up quizzes
@@ -657,6 +669,7 @@ forage/
 ## Development Phases
 
 ### Phase 1: Extraction & Core
+
 - [ ] Extract `domain_checker.py` to standalone package
 - [ ] Add Cloudflare pricing lookup
 - [ ] Set up pyproject.toml for UV
@@ -664,33 +677,38 @@ forage/
 - [ ] Create `config.py` with all configurable settings
 
 ### Phase 2: Durable Object & Persistence
+
 - [ ] Set up Cloudflare Worker with Durable Object
 - [ ] Implement SQLite schema in DO
 - [ ] Alarm-based batch chaining
 - [ ] Basic job lifecycle (create → running → complete/needs_followup)
 
 ### Phase 3: AI Orchestration
+
 - [ ] Implement driver agent with prompt templates
 - [ ] Implement Haiku swarm parallel evaluation
 - [ ] Build main search loop (6 batch limit)
 - [ ] Results scoring and ranking
 
 ### Phase 4: MCP Server
+
 - [ ] Implement MCP tool definitions
 - [ ] Add job status tracking
 - [ ] Build results aggregation
 
 ### Phase 5: Quiz System
+
 - [ ] Static initial quiz schema (JSON)
 - [ ] Follow-up quiz generator (AI-based)
 - [ ] SvelteKit quiz components (terminal aesthetic)
 - [ ] Resend email integration
 
 ### Phase 6: Multi-Model & Polish
+
 - [ ] Add Kimi K2 provider
 - [ ] Parallel provider execution
 - [ ] Email templates (terminal aesthetic)
-- [ ] GroveEngine integration
+- [ ] Lattice integration
 
 ## License
 
@@ -750,5 +768,5 @@ SOFTWARE.
 
 ---
 
-*Last updated: 2025-05-28*
-*Author: Autumn Brown (@autumnsgrove)*
+_Last updated: 2025-05-28_
+_Author: Autumn Brown (@autumnsgrove)_

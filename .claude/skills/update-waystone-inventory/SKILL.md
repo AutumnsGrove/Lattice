@@ -159,7 +159,7 @@ rg '<Waystone' packages/ --type svelte -B 2 -A 2
 When adding a new waystone:
 
 - [ ] Add `<Waystone>` component to the target file with appropriate slug, label, and size
-- [ ] Ensure the file imports Waystone (from `$lib/ui` in engine, or `@autumnsgrove/groveengine/ui` in other packages)
+- [ ] Ensure the file imports Waystone (from `$lib/ui` in engine, or `@autumnsgrove/lattice/ui` in other packages)
 - [ ] Add the instance to `.github/waystone-inventory.json`
 - [ ] If it's a new slug, add a new entry to the `slugs` array
 - [ ] If the slug already exists, add an instance to the existing entry

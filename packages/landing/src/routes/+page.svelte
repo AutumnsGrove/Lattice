@@ -1,11 +1,11 @@
 <script lang="ts">
 	import EmailSignup from '$lib/components/EmailSignup.svelte';
 	import Header from '$lib/components/Header.svelte';
-	import { seasonStore } from '@autumnsgrove/groveengine/ui/chrome';
+	import { seasonStore } from '@autumnsgrove/lattice/ui/chrome';
 	import Footer from '$lib/components/Footer.svelte';
-	import { Logo } from '@autumnsgrove/groveengine/ui/nature';
+	import { Logo } from '@autumnsgrove/lattice/ui/nature';
 	import SEO from '$lib/components/SEO.svelte';
-	import { RoadmapPreview, GroveTerm, GroveText, GlassCarousel, GlassCard, GroveMessages } from '@autumnsgrove/groveengine/ui';
+	import { RoadmapPreview, GroveTerm, GroveText, GlassCarousel, GlassCard, GroveMessages } from '@autumnsgrove/lattice/ui';
 	import {
 		HeroRefuge,
 		HeroOwnership,

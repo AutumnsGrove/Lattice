@@ -9,7 +9,7 @@
 import { error, fail } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
 import { sendInviteEmail } from "$lib/server/invite-email";
-import { isWayfinder } from "@autumnsgrove/groveengine/config";
+import { isWayfinder } from "@autumnsgrove/lattice/config";
 
 interface CompedInvite {
   id: string;

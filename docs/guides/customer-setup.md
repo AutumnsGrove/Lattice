@@ -15,7 +15,7 @@ Step-by-step guide for onboarding a new customer to the Grove platform.
 
 Before starting, ensure you have:
 
-- [ ] Access to the GroveEngine team's Cloudflare account
+- [ ] Access to the Lattice team's Cloudflare account
 - [ ] Access to the customer repo template
 - [ ] Customer's desired subdomain or custom domain
 - [ ] Customer's email address for admin account
@@ -92,27 +92,27 @@ Update the configuration file with the resource IDs:
     {
       "binding": "DB",
       "database_name": "grove-blog-customer",
-      "database_id": "YOUR-D1-DATABASE-ID-HERE"
-    }
+      "database_id": "YOUR-D1-DATABASE-ID-HERE",
+    },
   ],
 
   "kv_namespaces": [
     {
       "binding": "KV",
-      "id": "YOUR-KV-NAMESPACE-ID-HERE"
-    }
+      "id": "YOUR-KV-NAMESPACE-ID-HERE",
+    },
   ],
 
   "r2_buckets": [
     {
       "binding": "STORAGE",
-      "bucket_name": "grove-assets-customer"
-    }
+      "bucket_name": "grove-assets-customer",
+    },
   ],
 
   "vars": {
-    "PUBLIC_SITE_URL": "https://customer.grove.place"
-  }
+    "PUBLIC_SITE_URL": "https://customer.grove.place",
+  },
 }
 ```
 
@@ -123,12 +123,12 @@ Update the configuration file with the resource IDs:
 ### Copy Migrations from Engine
 
 ```bash
-# Ensure @groveengine/core is installed
+# Ensure @lattice/core is installed
 pnpm install
 
 # Copy migrations to local directory
 mkdir -p migrations
-cp node_modules/@groveengine/core/migrations/*.sql migrations/
+cp node_modules/@lattice/core/migrations/*.sql migrations/
 ```
 
 ### Apply Migrations
@@ -149,6 +149,7 @@ wrangler d1 execute grove-blog-customer --command "SELECT name FROM sqlite_maste
 ```
 
 Expected output:
+
 ```
 ┌─────────────┐
 │ name        │
@@ -240,9 +241,11 @@ wrangler secret put RESEND_API_KEY
 ### For Custom Domain
 
 1. Customer updates their DNS:
+
    ```
    CNAME www -> customer-blog.pages.dev
    ```
+
    Or if using Cloudflare DNS, configure there.
 
 2. In Cloudflare Dashboard:
@@ -251,11 +254,12 @@ wrangler secret put RESEND_API_KEY
    - Verify ownership
 
 3. Update `wrangler.jsonc`:
+
    ```jsonc
    {
      "vars": {
-       "PUBLIC_SITE_URL": "https://www.customerdomain.com"
-     }
+       "PUBLIC_SITE_URL": "https://www.customerdomain.com",
+     },
    }
    ```
 
@@ -281,7 +285,7 @@ Ensure the file exists with proper configuration:
   "labels": ["dependencies"],
   "packageRules": [
     {
-      "matchPackageNames": ["@groveengine/core"],
+      "matchPackageNames": ["@lattice/core"],
       "automerge": true,
       "automergeType": "pr",
       "schedule": ["at any time"],
@@ -399,10 +403,12 @@ Include the following information:
 ## Checklist Summary
 
 ### Pre-Setup
+
 - [ ] Customer info collected (name, email, domain preference)
 - [ ] Cloudflare access confirmed
 
 ### Infrastructure
+
 - [ ] Repository created from template
 - [ ] D1 database created
 - [ ] KV namespace created
@@ -410,23 +416,27 @@ Include the following information:
 - [ ] wrangler.jsonc configured
 
 ### Configuration
+
 - [ ] Migrations applied
 - [ ] site.json configured
 - [ ] Resend API key set
 - [ ] Domain configured (subdomain or custom)
 
 ### Automation
+
 - [ ] Renovate enabled
 - [ ] GitHub secrets configured
 - [ ] CI/CD workflow verified
 
 ### Launch
+
 - [ ] Initial deployment successful
 - [ ] Site loads correctly
 - [ ] Admin user created
 - [ ] Customer can log in
 
 ### Handoff
+
 - [ ] Welcome email sent
 - [ ] Documentation shared
 - [ ] Onboarding call scheduled (if applicable)
@@ -439,7 +449,7 @@ Include the following information:
 
 1. Check GitHub Actions logs
 2. Verify pnpm-lock.yaml is committed
-3. Ensure @groveengine/core version is published
+3. Ensure @lattice/core version is published
 
 ### Can't Log In
 
@@ -463,16 +473,16 @@ Include the following information:
 
 ## Time Estimate
 
-| Task | Time |
-|------|------|
-| Create repo & Cloudflare resources | 15 min |
-| Configure & apply migrations | 10 min |
-| Set up domain & secrets | 10 min |
-| Configure Renovate & CI/CD | 5 min |
-| Initial deployment & verification | 10 min |
-| Create admin user | 5 min |
-| **Total** | **~55 min** |
+| Task                               | Time        |
+| ---------------------------------- | ----------- |
+| Create repo & Cloudflare resources | 15 min      |
+| Configure & apply migrations       | 10 min      |
+| Set up domain & secrets            | 10 min      |
+| Configure Renovate & CI/CD         | 5 min       |
+| Initial deployment & verification  | 10 min      |
+| Create admin user                  | 5 min       |
+| **Total**                          | **~55 min** |
 
 ---
 
-*Last Updated: November 2025*
+_Last Updated: November 2025_

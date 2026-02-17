@@ -7,8 +7,8 @@
  * ## Quick Start
  *
  * ```tsx
- * import { GroveEmail, GroveButton } from '@autumnsgrove/groveengine/email/components';
- * import { render } from '@autumnsgrove/groveengine/email/render';
+ * import { GroveEmail, GroveButton } from '@autumnsgrove/lattice/email/components';
+ * import { render } from '@autumnsgrove/lattice/email/render';
  *
  * const html = await render(<GroveEmail>Hello!</GroveEmail>);
  * ```

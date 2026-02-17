@@ -171,7 +171,7 @@ Message:
 @click.option("--latest", is_flag=True, help="Run CI on latest commit")
 @click.option("--commit", help="Run CI on specific commit SHA")
 @click.option("--branch", default="main", help="Branch to run on")
-@click.option("--repo", default="AutumnsGrove/GroveEngine", help="Repository")
+@click.option("--repo", default="AutumnsGrove/Lattice", help="Repository")
 @click.pass_context
 def ci_run(ctx, latest: bool, commit: Optional[str], branch: str, repo: str):
     """Manually trigger a CI job.

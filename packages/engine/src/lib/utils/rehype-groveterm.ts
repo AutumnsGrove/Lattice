@@ -220,7 +220,7 @@ function processTextNode(
  * import remarkRehype from 'remark-rehype';
  * import rehypeRaw from 'rehype-raw';
  * import rehypeStringify from 'rehype-stringify';
- * import { rehypeGroveTerm } from '@autumnsgrove/groveengine/utils';
+ * import { rehypeGroveTerm } from '@autumnsgrove/lattice/utils';
  *
  * const result = await unified()
  *   .use(remarkParse)
@@ -236,7 +236,7 @@ function processTextNode(
  * @example With mdsvex
  * ```javascript
  * // svelte.config.js
- * import { rehypeGroveTerm } from '@autumnsgrove/groveengine/utils';
+ * import { rehypeGroveTerm } from '@autumnsgrove/lattice/utils';
  *
  * const mdsvexConfig = {
  *   remarkPlugins: [rehypeGroveTerm],

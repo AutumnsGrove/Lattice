@@ -15,5 +15,5 @@ import { twMerge } from "tailwind-merge";
  * cn('text-blue-500', { 'text-red-500': isError })
  */
 export function cn(...inputs: ClassValue[]) {
-	return twMerge(clsx(inputs));
+  return twMerge(clsx(inputs));
 }

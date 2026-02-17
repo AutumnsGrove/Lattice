@@ -1,11 +1,11 @@
 <script lang="ts">
 	import type { PageData, ActionData } from './$types';
-	import { GlassCard } from '@autumnsgrove/groveengine/ui';
+	import { GlassCard } from '@autumnsgrove/lattice/ui';
 	import {
 		TenantGreenhouseSection,
 		TenantUploadSection,
 		TenantGraftSection
-	} from '@autumnsgrove/groveengine/grafts/greenhouse';
+	} from '@autumnsgrove/lattice/grafts/greenhouse';
 	import {
 		ArrowLeft,
 		Globe,

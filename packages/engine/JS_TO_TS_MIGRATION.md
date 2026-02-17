@@ -16,15 +16,15 @@ These are foundational files with no external dependencies within the project.
 
 ### Files to migrate:
 
-| File | Lines | Notes |
-|------|-------|-------|
-| `src/lib/utils/debounce.js` | ~20 | Simple utility, no deps |
-| `src/lib/utils/json.js` | ~30 | JSON helpers |
-| `src/lib/utils/validation.js` | ~170 | Security validators |
-| `src/lib/utils/csrf.js` | ~85 | CSRF protection |
-| `src/lib/utils/api.js` | ~155 | Client-side fetch wrapper |
-| `src/lib/utils/readability.js` | ~200 | Text analysis (skip test file) |
-| `src/lib/utils/imageProcessor.js` | ~100 | Image processing |
+| File                              | Lines | Notes                          |
+| --------------------------------- | ----- | ------------------------------ |
+| `src/lib/utils/debounce.js`       | ~20   | Simple utility, no deps        |
+| `src/lib/utils/json.js`           | ~30   | JSON helpers                   |
+| `src/lib/utils/validation.js`     | ~170  | Security validators            |
+| `src/lib/utils/csrf.js`           | ~85   | CSRF protection                |
+| `src/lib/utils/api.js`            | ~155  | Client-side fetch wrapper      |
+| `src/lib/utils/readability.js`    | ~200  | Text analysis (skip test file) |
+| `src/lib/utils/imageProcessor.js` | ~100  | Image processing               |
 
 ### Migration steps for each file:
 
@@ -60,10 +60,10 @@ export function validateEmail(email: string): boolean {
 
 ### Files to migrate:
 
-| File | Lines | Notes |
-|------|-------|-------|
-| `src/lib/auth/session.js` | ~90 | Tenant verification |
-| `src/lib/auth/index.js` | ~10 | Re-exports |
+| File                      | Lines | Notes               |
+| ------------------------- | ----- | ------------------- |
+| `src/lib/auth/session.js` | ~90   | Tenant verification |
+| `src/lib/auth/index.js`   | ~10   | Re-exports          |
 
 ### Key types to define:
 
@@ -88,10 +88,10 @@ interface TenantRow {
 
 ### Files to migrate:
 
-| File | Lines | Notes |
-|------|-------|-------|
-| `src/lib/config/wisp.js` | ~190 | Wisp AI config |
-| `src/lib/config/ai-models.js` | ~50 | Model definitions |
+| File                          | Lines | Notes             |
+| ----------------------------- | ----- | ----------------- |
+| `src/lib/config/wisp.js`      | ~190  | Wisp AI config    |
+| `src/lib/config/ai-models.js` | ~50   | Model definitions |
 
 ### Key types to define:
 
@@ -100,7 +100,7 @@ interface TenantRow {
 interface ProviderConfig {
   name: string;
   baseUrl: string;
-  role: 'primary' | 'backup' | 'tertiary';
+  role: "primary" | "backup" | "tertiary";
   zdr: boolean;
   models: Record<string, string>;
 }
@@ -110,8 +110,8 @@ interface ModelPricing {
   output: number;
 }
 
-type AnalysisAction = 'grammar' | 'tone' | 'readability';
-type AnalysisMode = 'quick' | 'thorough';
+type AnalysisAction = "grammar" | "tone" | "readability";
+type AnalysisMode = "quick" | "thorough";
 ```
 
 ---
@@ -120,10 +120,10 @@ type AnalysisMode = 'quick' | 'thorough';
 
 ### Files to migrate:
 
-| File | Lines | Notes |
-|------|-------|-------|
-| `src/lib/server/inference-client.js` | ~320 | AI inference client |
-| `src/lib/server/index.js` | ~20 | Re-exports |
+| File                                 | Lines | Notes               |
+| ------------------------------------ | ----- | ------------------- |
+| `src/lib/server/inference-client.js` | ~320  | AI inference client |
+| `src/lib/server/index.js`            | ~20   | Re-exports          |
 
 ### Key types to define:
 
@@ -131,7 +131,7 @@ type AnalysisMode = 'quick' | 'thorough';
 // inference-client.ts
 interface InferenceRequest {
   prompt: string;
-  mode?: 'quick' | 'thorough';
+  mode?: "quick" | "thorough";
   maxTokens?: number;
   temperature?: number;
   preferredProvider?: string;
@@ -160,13 +160,14 @@ Svelte 5 runes-based composables.
 
 ### Files to migrate:
 
-| File | Lines | Notes |
-|------|-------|-------|
-| `src/lib/components/admin/composables/useDraftManager.svelte.js` | ~150 | Draft storage |
-| `src/lib/components/admin/composables/useEditorTheme.svelte.js` | ~80 | Theme management |
-| `src/lib/components/admin/composables/index.js` | ~10 | Re-exports |
+| File                                                             | Lines | Notes            |
+| ---------------------------------------------------------------- | ----- | ---------------- |
+| `src/lib/components/admin/composables/useDraftManager.svelte.js` | ~150  | Draft storage    |
+| `src/lib/components/admin/composables/useEditorTheme.svelte.js`  | ~80   | Theme management |
+| `src/lib/components/admin/composables/index.js`                  | ~10   | Re-exports       |
 
 ### Notes:
+
 - Keep `.svelte.ts` extension for runes support
 - Svelte 5 runes (`$state`, `$derived`) work the same in TS
 
@@ -178,24 +179,24 @@ Server-side route handlers.
 
 ### Files to migrate:
 
-| File | Notes |
-|------|-------|
-| `src/routes/rss.xml/+server.js` | RSS feed generation |
-| `src/routes/admin/+layout.server.js` | Admin layout data |
-| `src/routes/admin/blog/+page.server.js` | Blog list |
-| `src/routes/admin/pages/+page.server.js` | Pages list |
-| `src/routes/admin/pages/edit/[slug]/+page.server.js` | Page editor |
-| `src/routes/admin/subscribers/+page.server.js` | Subscriber list |
-| `src/routes/api/admin/settings/+server.js` | Admin settings API |
-| `src/routes/api/settings/+server.js` | Public settings API |
-| `src/routes/api/images/analyze/+server.js` | Image analysis |
-| `src/routes/api/images/delete/+server.js` | Image deletion |
+| File                                                 | Notes               |
+| ---------------------------------------------------- | ------------------- |
+| `src/routes/rss.xml/+server.js`                      | RSS feed generation |
+| `src/routes/admin/+layout.server.js`                 | Admin layout data   |
+| `src/routes/admin/blog/+page.server.js`              | Blog list           |
+| `src/routes/admin/pages/+page.server.js`             | Pages list          |
+| `src/routes/admin/pages/edit/[slug]/+page.server.js` | Page editor         |
+| `src/routes/admin/subscribers/+page.server.js`       | Subscriber list     |
+| `src/routes/api/admin/settings/+server.js`           | Admin settings API  |
+| `src/routes/api/settings/+server.js`                 | Public settings API |
+| `src/routes/api/images/analyze/+server.js`           | Image analysis      |
+| `src/routes/api/images/delete/+server.js`            | Image deletion      |
 
 ### SvelteKit types to use:
 
 ```typescript
-import type { RequestHandler } from './$types';
-import type { PageServerLoad } from './$types';
+import type { RequestHandler } from "./$types";
+import type { PageServerLoad } from "./$types";
 
 export const GET: RequestHandler = async ({ params, platform, locals }) => {
   // ...
@@ -210,10 +211,10 @@ export const load: PageServerLoad = async ({ params, platform, locals }) => {
 
 ## Files to SKIP
 
-| File | Reason |
-|------|--------|
+| File                            | Reason                                |
+| ------------------------------- | ------------------------------------- |
 | `src/lib/ui/tailwind.preset.js` | CommonJS config, not worth converting |
-| `*.test.js` files | Tests can stay JS, less overhead |
+| `*.test.js` files               | Tests can stay JS, less overhead      |
 
 ---
 
@@ -235,14 +236,14 @@ After all phases:
 
 ## Quick Reference: JSDoc → TypeScript
 
-| JSDoc | TypeScript |
-|-------|------------|
-| `/** @type {string} */` | `: string` |
-| `/** @param {string} x */` | `x: string` |
-| `/** @returns {boolean} */` | `): boolean` |
-| `/** @typedef {Object} Foo */` | `interface Foo {}` |
-| `/** @type {Record<string, any>} */` | `: Record<string, unknown>` |
-| `/** @type {import('x').Y} */` | `import type { Y } from 'x'` |
+| JSDoc                                | TypeScript                   |
+| ------------------------------------ | ---------------------------- |
+| `/** @type {string} */`              | `: string`                   |
+| `/** @param {string} x */`           | `x: string`                  |
+| `/** @returns {boolean} */`          | `): boolean`                 |
+| `/** @typedef {Object} Foo */`       | `interface Foo {}`           |
+| `/** @type {Record<string, any>} */` | `: Record<string, unknown>`  |
+| `/** @type {import('x').Y} */`       | `import type { Y } from 'x'` |
 
 ---
 

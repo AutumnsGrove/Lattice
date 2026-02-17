@@ -3,7 +3,7 @@
  * Shared showcase/documentation components for the Grove ecosystem
  *
  * Usage:
- * import { VineyardLayout, FeatureCard, StatusBadge } from '@autumnsgrove/groveengine/vineyard';
+ * import { VineyardLayout, FeatureCard, StatusBadge } from '@autumnsgrove/lattice/vineyard';
  */
 
 // Layout

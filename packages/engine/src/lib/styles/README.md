@@ -22,7 +22,7 @@ The `.leaf-pattern` class provides the signature Grove vine background pattern u
 Import in your site's `app.css`:
 
 ```css
-@import '@autumnsgrove/groveengine/lib/styles/vine-pattern.css';
+@import "@autumnsgrove/lattice/lib/styles/vine-pattern.css";
 ```
 
 Or copy the `.leaf-pattern` class definition directly into your app's CSS.
@@ -43,6 +43,7 @@ Then apply the class to your layout:
 ### Customization
 
 To adjust the pattern's appearance, you can modify:
+
 - **Opacity values** in the SVG (currently 0.04-0.14)
 - **Stroke widths** for vines (currently 0.5-1.5)
 - **Color** (currently #22c55e, Grove green)

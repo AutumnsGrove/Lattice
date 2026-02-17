@@ -9,7 +9,7 @@
  * @example
  * ```svelte
  * <script>
- *   import { ArborPanel, ArborSection } from '@autumnsgrove/groveengine/ui/arbor';
+ *   import { ArborPanel, ArborSection } from '@autumnsgrove/lattice/ui/arbor';
  * </script>
  *
  * <ArborPanel {navItems} {footerLinks} user={data.user}>

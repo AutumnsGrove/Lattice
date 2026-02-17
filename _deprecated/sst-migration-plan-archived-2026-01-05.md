@@ -1,15 +1,16 @@
-# SST Migration Plan for GroveEngine
+# SST Migration Plan for Lattice
 
 > **Status:** Active - Ready for Implementation
 > **Created:** 2025-12-20
 > **Updated:** 2025-12-24
-> **Scope:** Migrate GroveEngine to SST + Integrate Foliage theming system
+> **Scope:** Migrate Lattice to SST + Integrate Foliage theming system
 
 ---
 
 ## Executive Summary
 
-Migrate GroveEngine from manual wrangler.toml configuration to SST (sst.dev) for:
+Migrate Lattice from manual wrangler.toml configuration to SST (sst.dev) for:
+
 - Unified infrastructure-as-code in TypeScript
 - Native Stripe integration with type-safe resource linking (greenfield!)
 - Simplified local development with `sst dev`
@@ -30,33 +31,35 @@ Keep what works (Worker wildcard routing for `*.grove.place`) and add Cloudflare
     ↓
 Grove Router Worker (SST-managed)
     ↓
-GroveEngine Worker → D1 tenant lookup
+Lattice Worker → D1 tenant lookup
     ↓
 Serves tenant blog
 
 customdomain.com (Oak+ customers)
     ↓
-Cloudflare for SaaS → Falls back to GroveEngine
+Cloudflare for SaaS → Falls back to Lattice
     ↓
-GroveEngine Worker → D1 custom_domain lookup
+Lattice Worker → D1 custom_domain lookup
     ↓
 Serves tenant blog
 ```
 
 ### Why This Approach
 
-| Approach | Cost | Tenants | Complexity |
-|----------|------|---------|------------|
-| **Worker wildcard only** | FREE | Unlimited | Low |
-| **CF for SaaS only** | $0.10/tenant after 100 | 5,000 max | Medium |
-| **Hybrid (recommended)** | $0.10/custom domain | Unlimited subdomains, 5k custom | Low |
+| Approach                 | Cost                   | Tenants                         | Complexity |
+| ------------------------ | ---------------------- | ------------------------------- | ---------- |
+| **Worker wildcard only** | FREE                   | Unlimited                       | Low        |
+| **CF for SaaS only**     | $0.10/tenant after 100 | 5,000 max                       | Medium     |
+| **Hybrid (recommended)** | $0.10/custom domain    | Unlimited subdomains, 5k custom | Low        |
 
 **Math for 1,000 tenants (conservative):**
+
 - 95% use `*.grove.place` → FREE
 - 5% use custom domains (50 Oak+ users) → FREE (under 100)
 - Total cost: $0
 
 **Math for 5,000 tenants (optimistic):**
+
 - 90% use `*.grove.place` → FREE
 - 10% use custom domains (500 Oak+ users) → 100 free + 400 × $0.10 = $40/month
 - Total cost: $40/month
@@ -71,31 +74,31 @@ Based on your current stack and project vision, here are the SST integrations wo
 
 ### Phase 1: Immediate Value (This Migration)
 
-| Integration | Current Setup | SST Benefit |
-|-------------|---------------|-------------|
-| **Cloudflare D1** | Manual wrangler.toml | Type-safe linking, automatic migrations |
-| **Cloudflare KV** | Manual wrangler.toml | Unified config, resource linking |
-| **Cloudflare R2** | Manual wrangler.toml | Simplified bucket management |
-| **Cloudflare Workers** | grove-router proxy | Easier routing config |
-| **SvelteKit** | adapter-cloudflare | Native SST component |
-| **Stripe** | Manual API calls | Native webhooks, type-safe products/prices |
-| **Cloudflare for SaaS** | grove-router proxy | Eliminate proxy worker for tenant subdomains |
+| Integration             | Current Setup        | SST Benefit                                  |
+| ----------------------- | -------------------- | -------------------------------------------- |
+| **Cloudflare D1**       | Manual wrangler.toml | Type-safe linking, automatic migrations      |
+| **Cloudflare KV**       | Manual wrangler.toml | Unified config, resource linking             |
+| **Cloudflare R2**       | Manual wrangler.toml | Simplified bucket management                 |
+| **Cloudflare Workers**  | grove-router proxy   | Easier routing config                        |
+| **SvelteKit**           | adapter-cloudflare   | Native SST component                         |
+| **Stripe**              | Manual API calls     | Native webhooks, type-safe products/prices   |
+| **Cloudflare for SaaS** | grove-router proxy   | Eliminate proxy worker for tenant subdomains |
 
 ### Phase 2: Future Scaling
 
-| Integration | Use Case | When to Consider |
-|-------------|----------|------------------|
+| Integration  | Use Case          | When to Consider                                                |
+| ------------ | ----------------- | --------------------------------------------------------------- |
 | **OpenAuth** | Replace Heartwood | When scaling auth, adding providers, or consolidating login UIs |
-| **Resend** | Email components | When email complexity grows |
-| **Upstash** | Rate limiting | If KV limits become an issue |
+| **Resend**   | Email components  | When email complexity grows                                     |
+| **Upstash**  | Rate limiting     | If KV limits become an issue                                    |
 
 ### Skip
 
-| Integration | Reason |
-|-------------|--------|
-| **Auth0/Okta** | OpenAuth is closer fit when ready |
-| **AWS services** | Cloudflare-first architecture |
-| **PostgreSQL/MySQL** | D1 works well for your scale |
+| Integration          | Reason                            |
+| -------------------- | --------------------------------- |
+| **Auth0/Okta**       | OpenAuth is closer fit when ready |
+| **AWS services**     | Cloudflare-first architecture     |
+| **PostgreSQL/MySQL** | D1 works well for your scale      |
 
 ---
 
@@ -103,7 +106,7 @@ Based on your current stack and project vision, here are the SST integrations wo
 
 ### Approach: Engine-First Cascade
 
-Since `@autumnsgrove/groveengine` is the core package that other apps consume, migrating it creates a natural cascade:
+Since `@autumnsgrove/lattice` is the core package that other apps consume, migrating it creates a natural cascade:
 
 ```
 Phase 1: Engine Package + SST Config
@@ -128,6 +131,7 @@ npx sst init
 ```
 
 Creates:
+
 - `sst.config.ts` - Main infrastructure config
 - `.sst/` - SST working directory (gitignore)
 
@@ -369,11 +373,13 @@ const landing = new sst.cloudflare.Worker("Landing", {
 ```
 
 **What changes:**
+
 - Internal services (auth, plant, domains) get **explicit domains** → no proxy
 - Engine handles `*.grove.place` wildcard **directly** → no proxy for tenants
 - grove-router routing table shrinks to near-zero
 
 **What stays:**
+
 - Engine's subdomain extraction logic in hooks.server.ts
 - D1 tenant lookup
 - X-Forwarded-Host handling (for any edge cases)
@@ -390,7 +396,7 @@ const CF_API = "https://api.cloudflare.com/client/v4";
 export async function createCustomHostname(
   domain: string,
   tenantId: string,
-  env: { CF_ZONE_ID: string; CF_API_TOKEN: string }
+  env: { CF_ZONE_ID: string; CF_API_TOKEN: string },
 ) {
   const response = await fetch(
     `${CF_API}/zones/${env.CF_ZONE_ID}/custom_hostnames`,
@@ -413,12 +419,14 @@ export async function createCustomHostname(
           tenant_id: tenantId,
         },
       }),
-    }
+    },
   );
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(`Failed to create custom hostname: ${error.errors?.[0]?.message}`);
+    throw new Error(
+      `Failed to create custom hostname: ${error.errors?.[0]?.message}`,
+    );
   }
 
   return response.json();
@@ -426,26 +434,26 @@ export async function createCustomHostname(
 
 export async function deleteCustomHostname(
   hostnameId: string,
-  env: { CF_ZONE_ID: string; CF_API_TOKEN: string }
+  env: { CF_ZONE_ID: string; CF_API_TOKEN: string },
 ) {
   await fetch(
     `${CF_API}/zones/${env.CF_ZONE_ID}/custom_hostnames/${hostnameId}`,
     {
       method: "DELETE",
       headers: { Authorization: `Bearer ${env.CF_API_TOKEN}` },
-    }
+    },
   );
 }
 
 export async function verifyCustomHostname(
   hostnameId: string,
-  env: { CF_ZONE_ID: string; CF_API_TOKEN: string }
+  env: { CF_ZONE_ID: string; CF_API_TOKEN: string },
 ) {
   const response = await fetch(
     `${CF_API}/zones/${env.CF_ZONE_ID}/custom_hostnames/${hostnameId}`,
     {
       headers: { Authorization: `Bearer ${env.CF_API_TOKEN}` },
-    }
+    },
   );
 
   const data = await response.json();
@@ -468,12 +476,12 @@ if (!tenant && !isReservedSubdomain) {
   const hostname = getHostname(request);
 
   // Skip if it's a grove.place domain
-  if (!hostname.endsWith('.grove.place') && !hostname.endsWith('pages.dev')) {
+  if (!hostname.endsWith(".grove.place") && !hostname.endsWith("pages.dev")) {
     // Custom domain lookup
     tenant = await db
       .prepare(
         "SELECT id, subdomain, display_name, email, theme, custom_domain " +
-        "FROM tenants WHERE custom_domain = ? AND active = 1"
+          "FROM tenants WHERE custom_domain = ? AND active = 1",
       )
       .bind(hostname)
       .first();
@@ -498,11 +506,13 @@ if (!tenant && !isReservedSubdomain) {
 #### 3.4.5 What Happens to grove-router?
 
 **Option A: Simplify it** (recommended initially)
+
 - Remove internal service routing (they have explicit domains now)
 - Keep only for edge cases or legacy routes
 - Significantly smaller routing table
 
 **Option B: Delete it** (after SST is stable)
+
 - Workers with explicit domains handle everything
 - Wildcard routes work natively
 - No proxy layer at all
@@ -527,6 +537,7 @@ npx sst dev
 ```
 
 SST dev provides:
+
 - Live Lambda/Worker mode
 - Automatic infrastructure sync
 - Unified console at localhost:3000
@@ -600,6 +611,7 @@ Update `package.json` scripts across all packages:
 ### 5.3 Remove Manual Stripe Config
 
 Delete from engine:
+
 - `plant/src/lib/server/stripe.ts` STRIPE_PRICES constants
 - Manual webhook verification (SST handles this)
 
@@ -608,18 +620,21 @@ Delete from engine:
 ## Migration Checklist
 
 ### Pre-Migration
+
 - [ ] Backup current Cloudflare resource IDs
 - [ ] Document current environment variables/secrets
 - [ ] Ensure all wrangler.toml configs are committed
 - [ ] Create feature branch for migration
 
 ### Phase 1: Foundation
+
 - [ ] Install SST in monorepo root
 - [ ] Add cloudflare and stripe providers
 - [ ] Create base sst.config.ts
 - [ ] Test `sst dev` starts without errors
 
 ### Phase 2: Stripe
+
 - [ ] Define products in sst.config.ts
 - [ ] Define prices in sst.config.ts
 - [ ] Create webhook handler
@@ -627,6 +642,7 @@ Delete from engine:
 - [ ] Test checkout flow in dev stage
 
 ### Phase 3: Apps
+
 - [ ] Add Engine SvelteKit component
 - [ ] Add Landing SvelteKit component
 - [ ] Add Plant SvelteKit component
@@ -635,12 +651,14 @@ Delete from engine:
 - [ ] Test all apps with `sst dev`
 
 ### Phase 4: CI/CD
+
 - [ ] Update GitHub Actions workflow
 - [ ] Test deploy to dev stage
 - [ ] Test deploy to production
 - [ ] Verify DNS/domains work correctly
 
 ### Phase 5: Cleanup
+
 - [ ] Remove wrangler.toml files
 - [ ] Update package.json scripts
 - [ ] Remove deprecated stripe config
@@ -657,7 +675,10 @@ SST can import existing Cloudflare resources:
 
 ```typescript
 // Import existing D1 database instead of creating new
-const db = sst.cloudflare.D1.get("GroveDB", "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68");
+const db = sst.cloudflare.D1.get(
+  "GroveDB",
+  "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68",
+);
 ```
 
 This prevents data loss during migration.
@@ -678,13 +699,13 @@ Always deploy to `--stage dev` before production. SST creates isolated resources
 
 ## Estimated Effort
 
-| Phase | Complexity | Notes |
-|-------|------------|-------|
-| Phase 1 | Low | Mostly config, no code changes |
-| Phase 2 | Medium | Stripe refactor, but well-isolated |
-| Phase 3 | Medium | App configs, test thoroughly |
-| Phase 4 | Low | CI/CD updates |
-| Phase 5 | Low | Cleanup |
+| Phase   | Complexity | Notes                              |
+| ------- | ---------- | ---------------------------------- |
+| Phase 1 | Low        | Mostly config, no code changes     |
+| Phase 2 | Medium     | Stripe refactor, but well-isolated |
+| Phase 3 | Medium     | App configs, test thoroughly       |
+| Phase 4 | Low        | CI/CD updates                      |
+| Phase 5 | Low        | Cleanup                            |
 
 > **Note:** Foliage integration is tracked separately in `docs/specs/completed/foliage-project-spec.md`
 
@@ -739,9 +760,10 @@ export default $config({
         cloudflare: true,
         stripe: {
           // Use test keys for non-production
-          apiKey: input?.stage === "production"
-            ? process.env.STRIPE_SECRET_KEY
-            : process.env.STRIPE_TEST_SECRET_KEY,
+          apiKey:
+            input?.stage === "production"
+              ? process.env.STRIPE_SECRET_KEY
+              : process.env.STRIPE_TEST_SECRET_KEY,
         },
       },
     };
@@ -759,9 +781,10 @@ export default $config({
     const cache = new sst.cloudflare.Kv("GroveCache");
 
     // Media: Shared in staging, separate in PR previews
-    const media = stage === "production" || stage === "dev"
-      ? sst.cloudflare.R2.get("GroveMedia", "grove-media")
-      : new sst.cloudflare.R2("GroveMedia");
+    const media =
+      stage === "production" || stage === "dev"
+        ? sst.cloudflare.R2.get("GroveMedia", "grove-media")
+        : new sst.cloudflare.R2("GroveMedia");
 
     // Domain varies by stage
     const getDomain = (name: string) => {
@@ -784,15 +807,16 @@ export default $config({
 
 ### Staging URLs
 
-| Stage | URL Pattern | Use Case |
-|-------|-------------|----------|
-| `production` | `*.grove.place` | Real users |
-| `dev` | `*.dev.grove.place` | Team testing |
-| `pr-42` | `*.pr-42.grove.place` | PR preview |
+| Stage        | URL Pattern           | Use Case     |
+| ------------ | --------------------- | ------------ |
+| `production` | `*.grove.place`       | Real users   |
+| `dev`        | `*.dev.grove.place`   | Team testing |
+| `pr-42`      | `*.pr-42.grove.place` | PR preview   |
 
 ### Database Strategy
 
 **Option A: Separate databases per stage** (safer)
+
 ```
 production → grove-engine-db (real data)
 dev        → grove-engine-db-dev (test data)
@@ -800,6 +824,7 @@ pr-*       → ephemeral DB (created/destroyed with PR)
 ```
 
 **Option B: Shared database, separate by flag** (simpler)
+
 ```
 production → grove-engine-db
 dev        → grove-engine-db (with test tenants marked)
@@ -821,6 +846,7 @@ const seedling = new stripe.Product("Seedling", {
 ```
 
 **Key insight:** Stripe has test mode and live mode. SST can:
+
 - Use `sk_test_*` keys for dev/PR stages
 - Use `sk_live_*` keys for production
 - Products/prices are separate between test and live
@@ -937,6 +963,7 @@ Add these DNS records in Cloudflare:
 ```
 
 Or use a single wildcard that catches all:
+
 ```
 *.grove.place        CNAME  <worker>     (proxied)
 ```
@@ -948,19 +975,20 @@ The Worker handles stage-based routing internally.
 ## Future Scaling: Auth Migration to OpenAuth
 
 > **When to do this:** After SST migration is stable, when you want to:
+>
 > - Add more OAuth providers (Apple, Discord, Twitter, etc.)
 > - Consolidate the three login page UIs into one
 > - Simplify auth maintenance
 
 ### Why OpenAuth Makes Sense Later
 
-| Current (Heartwood) | Future (OpenAuth) |
-|---------------------|-------------------|
-| Custom OAuth implementation | SST-managed, standards-based |
-| Google + GitHub + Magic Code | Same + Apple, Discord, Twitter, etc. |
-| Subscription tracking built-in | Subscription logic moves to GroveEngine DB |
-| Three different login UIs | One themeable, prebuilt UI |
-| Moderate complexity | Similar complexity, less to maintain |
+| Current (Heartwood)            | Future (OpenAuth)                      |
+| ------------------------------ | -------------------------------------- |
+| Custom OAuth implementation    | SST-managed, standards-based           |
+| Google + GitHub + Magic Code   | Same + Apple, Discord, Twitter, etc.   |
+| Subscription tracking built-in | Subscription logic moves to Lattice DB |
+| Three different login UIs      | One themeable, prebuilt UI             |
+| Moderate complexity            | Similar complexity, less to maintain   |
 
 ### Architecture After OpenAuth Migration
 
@@ -970,7 +998,7 @@ OpenAuth (SST-managed)
 ├── Returns: { sub, email, name, picture }
 └── Deploys to: Cloudflare Workers
 
-GroveEngine Database
+Lattice Database
 ├── users table (linked by groveauth_id / openauth sub)
 ├── subscriptions table (tier, post_limit, billing)
 └── Handles: All business logic
@@ -988,7 +1016,7 @@ App Flow:
    - New users go through OpenAuth
    - Existing users still work via Heartwood
 
-2. **Migrate subscription logic to GroveEngine**
+2. **Migrate subscription logic to Lattice**
    - Move `getSubscription()`, `canUserCreatePost()` to engine
    - Query D1 directly instead of Heartwood API
 
@@ -1029,16 +1057,19 @@ import { Resource } from "sst";
 
 export async function getUserSubscription(userId: string) {
   const db = Resource.GroveDB;
-  const result = await db.prepare(
-    `SELECT tier, post_limit, posts_used FROM subscriptions WHERE user_id = ?`
-  ).bind(userId).first();
+  const result = await db
+    .prepare(
+      `SELECT tier, post_limit, posts_used FROM subscriptions WHERE user_id = ?`,
+    )
+    .bind(userId)
+    .first();
 
-  return result ?? { tier: 'free', post_limit: 10, posts_used: 0 };
+  return result ?? { tier: "free", post_limit: 10, posts_used: 0 };
 }
 
 export async function canCreatePost(userId: string): Promise<boolean> {
   const sub = await getUserSubscription(userId);
-  if (sub.tier === 'evergreen') return true; // unlimited
+  if (sub.tier === "evergreen") return true; // unlimited
   return sub.posts_used < sub.post_limit;
 }
 ```
@@ -1048,6 +1079,7 @@ export async function canCreatePost(userId: string): Promise<boolean> {
 ## Resources
 
 ### SST Core
+
 - [SST Documentation](https://sst.dev/docs/)
 - [SST Cloudflare Components](https://sst.dev/docs/component/cloudflare/)
 - [SST + SvelteKit Guide](https://sst.dev/docs/start/cloudflare/sveltekit/)
@@ -1055,14 +1087,17 @@ export async function canCreatePost(userId: string): Promise<boolean> {
 - [All SST Providers](https://sst.dev/docs/all-providers/)
 
 ### Stripe
+
 - [SST Stripe Provider](https://sst.dev/docs/component/stripe/)
 
 ### Auth (Future Reference)
+
 - [OpenAuth Documentation](https://openauth.js.org/)
 - [OpenAuth GitHub](https://github.com/sst/openauth)
 - [OpenAuth + SST Guide](https://openauth.js.org/docs/start/sst/)
 
 ### Cloudflare
+
 - [Cloudflare for SaaS](https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/)
 - [Custom Hostnames API](https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/domain-support/create-custom-hostnames/)
 - [Wildcard Domains Article](https://hossamelshahawi.com/2025/01/26/handling-wildcard-domains-for-multi-tenant-apps-with-cloudflare-workers/)

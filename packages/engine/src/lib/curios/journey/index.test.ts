@@ -76,7 +76,7 @@ describe("Journey Curio utilities", () => {
   describe("isValidGithubRepoUrl", () => {
     it("accepts valid owner/repo format", () => {
       expect(isValidGithubRepoUrl("owner/repo")).toBe(true);
-      expect(isValidGithubRepoUrl("AutumnsGrove/GroveEngine")).toBe(true);
+      expect(isValidGithubRepoUrl("AutumnsGrove/Lattice")).toBe(true);
       expect(isValidGithubRepoUrl("user123/my-repo")).toBe(true);
       expect(isValidGithubRepoUrl("org_name/repo_name")).toBe(true);
     });
@@ -126,7 +126,7 @@ describe("Journey Curio utilities", () => {
 
     it.each([
       ["owner/repo", true],
-      ["AutumnsGrove/GroveEngine", true],
+      ["AutumnsGrove/Lattice", true],
       ["my-org/my-repo.js", true],
       ["https://github.com/owner/repo", false],
       ["owner", false],

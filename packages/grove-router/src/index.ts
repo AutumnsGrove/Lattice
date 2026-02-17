@@ -1,7 +1,7 @@
 /**
  * Grove Router Worker
  *
- * Proxies wildcard subdomain requests (*.grove.place) to the groveengine Pages project.
+ * Proxies wildcard subdomain requests (*.grove.place) to the lattice Pages project.
  * This is needed because Cloudflare Pages doesn't support wildcard custom domains.
  *
  * The Worker:
@@ -47,7 +47,7 @@ const SUBDOMAIN_ROUTES: Record<string, string | RouteTarget> = {
   // Grove internal Pages projects
   amber: "amber-4x2.pages.dev", // Amber storage
   ivy: "ivy-3uv.pages.dev", // Ivy mail client
-  // autumn subdomain now routes to groveengine (tenant in D1) — legacy autumn-website.pages.dev removed
+  // autumn subdomain now routes to lattice (tenant in D1) — legacy autumn-website.pages.dev removed
   plant: "grove-plant.pages.dev", // Grove Plant (onboarding)
   terrarium: "grove-terrarium.pages.dev", // Terrarium visual composer
   vineyard: "vineyard-grove-place.pages.dev", // Vineyard showcase

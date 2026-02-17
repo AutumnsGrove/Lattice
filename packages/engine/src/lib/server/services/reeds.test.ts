@@ -505,9 +505,11 @@ describe("editComment", () => {
 
   it("returns false for soft-deleted comments", async () => {
     const db = createMockTenantDb({
-      findById: vi.fn().mockResolvedValue(
-        makeComment({ content: "[deleted]", author_name: "[deleted]" }),
-      ),
+      findById: vi
+        .fn()
+        .mockResolvedValue(
+          makeComment({ content: "[deleted]", author_name: "[deleted]" }),
+        ),
     });
 
     const result = await editComment(db, "comment-1", "Trying to resurrect");
@@ -553,11 +555,9 @@ describe("deleteComment", () => {
     const db = createMockTenantDb();
     await deleteComment(db, "comment-1");
 
-    expect(db.exists).toHaveBeenCalledWith(
-      "comments",
-      "parent_id = ?",
-      ["comment-1"],
-    );
+    expect(db.exists).toHaveBeenCalledWith("comments", "parent_id = ?", [
+      "comment-1",
+    ]);
   });
 });
 
@@ -581,7 +581,13 @@ describe("moderateComment", () => {
 
   it("rejects a comment with note", async () => {
     const db = createMockTenantDb();
-    await moderateComment(db, "comment-1", "reject", "mod-1", "Not appropriate");
+    await moderateComment(
+      db,
+      "comment-1",
+      "reject",
+      "mod-1",
+      "Not appropriate",
+    );
 
     expect(db.update).toHaveBeenCalledWith(
       "comments",
@@ -616,7 +622,9 @@ describe("moderateComment", () => {
 describe("isUserBlocked", () => {
   it("returns true when user is blocked", async () => {
     const db = createMockD1();
-    const stmt = (db as unknown as { _mockStatement: { first: ReturnType<typeof vi.fn> } })._mockStatement;
+    const stmt = (
+      db as unknown as { _mockStatement: { first: ReturnType<typeof vi.fn> } }
+    )._mockStatement;
     stmt.first.mockResolvedValue({ "1": 1 });
 
     const result = await isUserBlocked(db, "tenant-1", "user-1");
@@ -636,7 +644,9 @@ describe("isUserBlocked", () => {
     expect(db.prepare).toHaveBeenCalledWith(
       expect.stringContaining("blocked_commenters"),
     );
-    const stmt = (db as unknown as { _mockStatement: { bind: ReturnType<typeof vi.fn> } })._mockStatement;
+    const stmt = (
+      db as unknown as { _mockStatement: { bind: ReturnType<typeof vi.fn> } }
+    )._mockStatement;
     expect(stmt.bind).toHaveBeenCalledWith("tenant-1", "user-1");
   });
 });
@@ -649,7 +659,9 @@ describe("blockCommenter", () => {
     expect(db.prepare).toHaveBeenCalledWith(
       expect.stringContaining("INSERT OR IGNORE INTO blocked_commenters"),
     );
-    const stmt = (db as unknown as { _mockStatement: { bind: ReturnType<typeof vi.fn> } })._mockStatement;
+    const stmt = (
+      db as unknown as { _mockStatement: { bind: ReturnType<typeof vi.fn> } }
+    )._mockStatement;
     expect(stmt.bind).toHaveBeenCalledWith("tenant-1", "user-1", "Spam");
   });
 
@@ -657,7 +669,9 @@ describe("blockCommenter", () => {
     const db = createMockD1();
     await blockCommenter(db, "tenant-1", "user-1");
 
-    const stmt = (db as unknown as { _mockStatement: { bind: ReturnType<typeof vi.fn> } })._mockStatement;
+    const stmt = (
+      db as unknown as { _mockStatement: { bind: ReturnType<typeof vi.fn> } }
+    )._mockStatement;
     expect(stmt.bind).toHaveBeenCalledWith("tenant-1", "user-1", null);
   });
 });
@@ -670,7 +684,9 @@ describe("unblockCommenter", () => {
     expect(db.prepare).toHaveBeenCalledWith(
       expect.stringContaining("DELETE FROM blocked_commenters"),
     );
-    const stmt = (db as unknown as { _mockStatement: { bind: ReturnType<typeof vi.fn> } })._mockStatement;
+    const stmt = (
+      db as unknown as { _mockStatement: { bind: ReturnType<typeof vi.fn> } }
+    )._mockStatement;
     expect(stmt.bind).toHaveBeenCalledWith("tenant-1", "user-1");
   });
 });
@@ -729,13 +745,7 @@ describe("checkCommentRateLimit", () => {
 
   it("uses atomic batch for increment and read", async () => {
     const db = createRateLimitMockD1({ changes: 1, count: 1 });
-    await checkCommentRateLimit(
-      db,
-      "user-1",
-      "private_reply",
-      50,
-      "day",
-    );
+    await checkCommentRateLimit(db, "user-1", "private_reply", 50, "day");
 
     // Both UPSERT and SELECT run in a single atomic batch
     expect(db.batch).toHaveBeenCalledTimes(1);
@@ -744,13 +754,7 @@ describe("checkCommentRateLimit", () => {
 
   it("still uses batch when rate limited (atomic check)", async () => {
     const db = createRateLimitMockD1({ changes: 0, count: 50 });
-    await checkCommentRateLimit(
-      db,
-      "user-1",
-      "private_reply",
-      50,
-      "day",
-    );
+    await checkCommentRateLimit(db, "user-1", "private_reply", 50, "day");
 
     // Batch is always called — the WHERE clause prevents increment atomically
     expect(db.batch).toHaveBeenCalledTimes(1);
@@ -759,13 +763,7 @@ describe("checkCommentRateLimit", () => {
 
   it("uses parameterized queries for UPSERT and SELECT", async () => {
     const db = createRateLimitMockD1({ changes: 1, count: 1 });
-    await checkCommentRateLimit(
-      db,
-      "user-1",
-      "public_comment",
-      20,
-      "week",
-    );
+    await checkCommentRateLimit(db, "user-1", "public_comment", 20, "week");
 
     const calls = (db.prepare as ReturnType<typeof vi.fn>).mock.calls;
     expect(calls[0][0]).toContain("INSERT INTO comment_rate_limits");
@@ -846,7 +844,9 @@ describe("getBlockedCommenters", () => {
       { blocked_user_id: "user-2", reason: null, created_at: "2025-01-02" },
     ];
     const db = createMockD1();
-    const stmt = (db as unknown as { _mockStatement: { all: ReturnType<typeof vi.fn> } })._mockStatement;
+    const stmt = (
+      db as unknown as { _mockStatement: { all: ReturnType<typeof vi.fn> } }
+    )._mockStatement;
     stmt.all.mockResolvedValue({ results: blocked });
 
     const result = await getBlockedCommenters(db, "tenant-1");
@@ -869,7 +869,9 @@ describe("getBlockedCommenters", () => {
     expect(db.prepare).toHaveBeenCalledWith(
       expect.stringContaining("blocked_commenters WHERE tenant_id = ?"),
     );
-    const stmt = (db as unknown as { _mockStatement: { bind: ReturnType<typeof vi.fn> } })._mockStatement;
+    const stmt = (
+      db as unknown as { _mockStatement: { bind: ReturnType<typeof vi.fn> } }
+    )._mockStatement;
     expect(stmt.bind).toHaveBeenCalledWith("tenant-1");
   });
 });

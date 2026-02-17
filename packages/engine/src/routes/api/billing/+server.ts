@@ -52,7 +52,7 @@ async function checkBillingRateLimit(
 }
 
 /**
- * Platform billing for tenant subscriptions to GroveEngine
+ * Platform billing for tenant subscriptions to Lattice
  *
  * Plans are derived from $lib/config/tiers.ts (single source of truth).
  * See tiers.ts for current pricing and features.

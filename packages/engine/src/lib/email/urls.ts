@@ -7,7 +7,7 @@
  *
  * @example
  * ```tsx
- * import { GROVE_URLS } from '@autumnsgrove/groveengine/email/urls';
+ * import { GROVE_URLS } from '@autumnsgrove/lattice/email/urls';
  *
  * <GroveButton href={GROVE_URLS.ARBOR_PANEL}>
  *   Go to your grove

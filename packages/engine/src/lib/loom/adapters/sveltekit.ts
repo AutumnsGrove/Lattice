@@ -6,7 +6,7 @@
  *
  * @example
  * ```typescript
- * import { getLoomDO } from '@autumnsgrove/groveengine/loom/sveltekit';
+ * import { getLoomDO } from '@autumnsgrove/lattice/loom/sveltekit';
  *
  * // In a +page.server.ts load function:
  * const contentDO = getLoomDO(platform, "POST_CONTENT", `content:${tenantId}:${slug}`);

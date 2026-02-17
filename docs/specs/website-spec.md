@@ -4,7 +4,7 @@ description: Marketing site and client management platform
 category: specs
 specCategory: reference
 icon: globe
-lastUpdated: '2025-11-21'
+lastUpdated: "2025-11-21"
 aliases: []
 tags:
   - marketing
@@ -28,7 +28,7 @@ tags:
     ~~~~~|~~~~~|~~~~~
 ```
 
-> *The entrance to the grove*
+> _The entrance to the grove_
 
 ---
 
@@ -45,13 +45,14 @@ The main marketing site and client management platform for Grove. Handles market
 
 ## Overview
 
-Grove Website is the main marketing site and client management platform for Grove. It handles marketing, client acquisition, onboarding, billing, and provides a dashboard for clients to manage their blogs. It's the business layer that sits on top of GroveEngine.
+Grove Website is the main marketing site and client management platform for Grove. It handles marketing, client acquisition, onboarding, billing, and provides a dashboard for clients to manage their blogs. It's the business layer that sits on top of Lattice.
 
 ---
 
 ## Architecture
 
 ### Tech Stack
+
 - **Framework:** SvelteKit 2.0+
 - **Language:** TypeScript
 - **Styling:** Tailwind CSS + Custom Design System
@@ -63,6 +64,7 @@ Grove Website is the main marketing site and client management platform for Grov
 - **Hosting:** Cloudflare Pages
 
 ### Project Structure
+
 ```
 grove-website/
 ├── src/
@@ -127,6 +129,7 @@ grove-website/
 ### 1. Marketing Pages
 
 **Homepage (`grove.place`):**
+
 - Hero section with value proposition
 - Feature highlights (cheap, simple, community-owned)
 - Social proof (testimonials, example blogs)
@@ -134,6 +137,7 @@ grove-website/
 - Pricing preview
 
 **Features Page (`grove.place/features`):**
+
 - Detailed feature list
 - Comparison with competitors
 - Screenshots of admin panel
@@ -141,12 +145,14 @@ grove-website/
 - RSS & ownership benefits
 
 **Pricing Page (`grove.place/pricing`):**
+
 - Clear tier comparison table (Free, Seedling, Sapling, Oak, Evergreen)
 - FAQ section
 - Money-back guarantee
 - "Most Popular" badge on Sapling plan
 
 **Examples Page (`grove.place/examples`):**
+
 - Showcase real client blogs (with permission)
 - Different use cases (personal, portfolio, business)
 - "See it in action" links
@@ -154,6 +160,7 @@ grove-website/
 ### 2. Client Signup & Onboarding
 
 **Signup Flow:**
+
 1. Choose plan (Free/Seedling/Sapling/Oak/Evergreen)
 2. Enter email address
 3. Receive 6-digit code via email
@@ -164,6 +171,7 @@ grove-website/
 8. Welcome email with next steps
 
 **Onboarding Email Sequence:**
+
 - **Immediately:** Welcome + login credentials
 - **Day 1:** Admin panel walkthrough video
 - **Day 3:** First post tutorial
@@ -174,6 +182,7 @@ grove-website/
 ### 3. Client Dashboard
 
 **Dashboard Home:**
+
 - Welcome message
 - Quick stats (posts, views if analytics enabled)
 - Recent activity
@@ -181,6 +190,7 @@ grove-website/
 - Support ticket status
 
 **Blog Management:**
+
 - List of all blogs (for clients with multiple)
 - Create new blog (subdomain selection)
 - Blog settings (title, description, theme)
@@ -190,6 +200,7 @@ grove-website/
 - Custom domain setup (Oak+)
 
 **Billing Management:**
+
 - Current plan details
 - Usage metrics (post count, storage used)
 - Upgrade/downgrade options
@@ -198,6 +209,7 @@ grove-website/
 - Cancel subscription
 
 **Support:**
+
 - Submit support ticket
 - View ticket history
 - Knowledge base access
@@ -205,6 +217,7 @@ grove-website/
 - Book support session (paid)
 
 **Settings:**
+
 - Profile information
 - Email preferences
 - Password change
@@ -216,31 +229,33 @@ grove-website/
 
 **Plans & Features:**
 
-| Feature | Free | Seedling | Sapling | Oak | Evergreen |
-|---------|------|----------|---------|-----|-----------|
-| Monthly Price | $0 | $8 | $12 | $25 | $35 |
-| Yearly Price | — | $82 | $122 | $255 | $357 |
-| Blog | — | ✓ | ✓ | ✓ | ✓ |
-| Blog Posts | — | 50 | 250 | Unlimited | Unlimited |
-| Storage | — | 1 GB | 5 GB | 20 GB | 100 GB |
-| Themes | — | 3 + accent | 10 + accent | Customizer | Customizer + Custom Fonts |
-| Community Themes | — | — | — | ✓ | ✓ |
-| Meadow | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Public Comments | 20/week | Unlimited | Unlimited | Unlimited | Unlimited |
-| Custom Domain | — | — | — | BYOD | ✓ |
-| @grove.place Email | — | — | Forward | Full | Full |
-| Support | Community | Community | Email | Priority | 8hrs + Priority |
-| CDN | ❌ | ✅ | ✅ | ✅ | ✅ |
-| Analytics | Basic | Basic | Standard | Advanced | Advanced |
-| Priority Support | ❌ | ❌ | ❌ | ✅ | ✅ |
+| Feature            | Free      | Seedling   | Sapling     | Oak        | Evergreen                 |
+| ------------------ | --------- | ---------- | ----------- | ---------- | ------------------------- |
+| Monthly Price      | $0        | $8         | $12         | $25        | $35                       |
+| Yearly Price       | —         | $82        | $122        | $255       | $357                      |
+| Blog               | —         | ✓          | ✓           | ✓          | ✓                         |
+| Blog Posts         | —         | 50         | 250         | Unlimited  | Unlimited                 |
+| Storage            | —         | 1 GB       | 5 GB        | 20 GB      | 100 GB                    |
+| Themes             | —         | 3 + accent | 10 + accent | Customizer | Customizer + Custom Fonts |
+| Community Themes   | —         | —          | —           | ✓          | ✓                         |
+| Meadow             | ✓         | ✓          | ✓           | ✓          | ✓                         |
+| Public Comments    | 20/week   | Unlimited  | Unlimited   | Unlimited  | Unlimited                 |
+| Custom Domain      | —         | —          | —           | BYOD       | ✓                         |
+| @grove.place Email | —         | —          | Forward     | Full       | Full                      |
+| Support            | Community | Community  | Email       | Priority   | 8hrs + Priority           |
+| CDN                | ❌        | ✅         | ✅          | ✅         | ✅                        |
+| Analytics          | Basic     | Basic      | Standard    | Advanced   | Advanced                  |
+| Priority Support   | ❌        | ❌         | ❌          | ✅         | ✅                        |
 
 **Billing Cycle:**
+
 - Monthly billing (default)
 - Annual billing (2 months free)
 - Prorated upgrades
 - Full refund within 30 days
 
 **Stripe Integration:**
+
 - Subscription management
 - Automatic renewals
 - Failed payment handling
@@ -251,6 +266,7 @@ grove-website/
 ### 5. Subdomain Provisioning
 
 **Automated Process:**
+
 1. Client chooses subdomain during signup
 2. Check availability (API call to Cloudflare)
 3. Create DNS record (CNAME to pages)
@@ -260,6 +276,7 @@ grove-website/
 7. Send welcome email with admin URL
 
 **Subdomain Rules:**
+
 - Must be 3-63 characters
 - Only letters, numbers, hyphens
 - Cannot start/end with hyphen
@@ -267,6 +284,7 @@ grove-website/
 - Reserved subdomains: admin, support, billing, api
 
 **Custom Domains (Oak+):**
+
 - **Oak:** Bring Your Own Domain (BYOD) - connect your existing domain
 - **Evergreen:** Domain search service included, registration up to $100/year
 - Add domain to Cloudflare
@@ -278,12 +296,14 @@ grove-website/
 ### 6. Support Ticket System
 
 **Ticket Categories:**
+
 - Technical Issue
 - Billing Question
 - Feature Request
 - General Question
 
 **Ticket Workflow:**
+
 1. Client submits ticket via dashboard
 2. Auto-reply with ticket number & expected response time
 3. You receive email notification
@@ -292,6 +312,7 @@ grove-website/
 6. Resolve ticket, client confirms
 
 **SLA by Plan:**
+
 - Free: Help Center only (no SLA)
 - Seedling: 48-hour first response
 - Sapling: 24-hour first response
@@ -299,6 +320,7 @@ grove-website/
 - Evergreen: 4-hour first response
 
 **Escalation:**
+
 - Unresolved after 3 days → Escalate to email
 - Unresolved after 7 days → Offer video call
 - Critical issues (site down) → Immediate response
@@ -306,6 +328,7 @@ grove-website/
 ### 7. Admin Interface (For You)
 
 **Client Management:**
+
 - View all clients
 - Search & filter by plan, status, signup date
 - Edit client details
@@ -314,6 +337,7 @@ grove-website/
 - View client blogs
 
 **Billing Admin:**
+
 - View all subscriptions
 - Process refunds
 - Manual invoice generation
@@ -322,6 +346,7 @@ grove-website/
 - Failed payment tracking
 
 **Support Admin:**
+
 - View all support tickets
 - Assign priority
 - Track response times
@@ -329,6 +354,7 @@ grove-website/
 - View support metrics
 
 **System Admin:**
+
 - Provision new subdomains manually
 - View system health
 - Monitor resource usage
@@ -340,19 +366,20 @@ grove-website/
 ## Database Schema
 
 ### Clients Table
+
 ```sql
 CREATE TABLE clients (
   id TEXT PRIMARY KEY,
   email TEXT UNIQUE NOT NULL,
   name TEXT,
-  
+
   -- Auth
   password_hash TEXT NOT NULL,
   email_verified BOOLEAN DEFAULT FALSE,
   email_verification_token TEXT,
   password_reset_token TEXT,
   password_reset_expires INTEGER,
-  
+
   -- Billing
   stripe_customer_id TEXT,
   stripe_subscription_id TEXT,
@@ -367,7 +394,7 @@ CREATE TABLE clients (
   -- Support
   support_hours_used INTEGER DEFAULT 0,
   support_hours_limit INTEGER DEFAULT 10, -- Month 1 limit
-  
+
   -- Metadata
   ip_address TEXT,
   user_agent TEXT
@@ -380,34 +407,35 @@ CREATE INDEX idx_clients_status ON clients(status);
 ```
 
 ### Blogs Table
+
 ```sql
 CREATE TABLE blogs (
   id TEXT PRIMARY KEY,
   client_id TEXT NOT NULL,
-  
+
   -- Identity
   title TEXT NOT NULL,
   description TEXT,
   subdomain TEXT UNIQUE NOT NULL,
   custom_domain TEXT UNIQUE,
-  
+
   -- Configuration
   theme TEXT DEFAULT 'default',
   config TEXT, -- JSON string of blog config
-  
+
   -- Limits & Usage
   post_limit INTEGER DEFAULT 250,
   current_post_count INTEGER DEFAULT 0,
   storage_limit INTEGER DEFAULT 5, -- GB
   storage_used INTEGER DEFAULT 0, -- MB
-  
+
   -- Status
   status TEXT DEFAULT 'active', -- 'active', 'suspended', 'archived'
-  
+
   -- Timestamps
   created_at INTEGER NOT NULL,
   updated_at INTEGER NOT NULL,
-  
+
   FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE
 );
 
@@ -418,27 +446,28 @@ CREATE INDEX idx_blogs_status ON blogs(status);
 ```
 
 ### Subscriptions Table
+
 ```sql
 CREATE TABLE subscriptions (
   id TEXT PRIMARY KEY,
   client_id TEXT NOT NULL,
   stripe_subscription_id TEXT UNIQUE NOT NULL,
-  
+
   -- Plan details
   plan TEXT NOT NULL,
   billing_cycle TEXT NOT NULL,
   amount INTEGER NOT NULL, -- cents
   currency TEXT DEFAULT 'usd',
-  
+
   -- Status
   status TEXT DEFAULT 'active', -- 'active', 'canceled', 'past_due', 'unpaid'
-  
+
   -- Dates
   current_period_start INTEGER NOT NULL,
   current_period_end INTEGER NOT NULL,
   canceled_at INTEGER,
   created_at INTEGER NOT NULL,
-  
+
   FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE
 );
 
@@ -448,28 +477,29 @@ CREATE INDEX idx_subscriptions_status ON subscriptions(status);
 ```
 
 ### Invoices Table
+
 ```sql
 CREATE TABLE invoices (
   id TEXT PRIMARY KEY,
   client_id TEXT NOT NULL,
   stripe_invoice_id TEXT UNIQUE NOT NULL,
-  
+
   -- Amount
   amount_due INTEGER NOT NULL, -- cents
   amount_paid INTEGER NOT NULL,
   currency TEXT DEFAULT 'usd',
-  
+
   -- Status
   status TEXT NOT NULL, -- 'draft', 'open', 'paid', 'void', 'uncollectible'
-  
+
   -- Dates
   due_date INTEGER,
   paid_at INTEGER,
   created_at INTEGER NOT NULL,
-  
+
   -- PDF
   invoice_pdf TEXT, -- URL to PDF
-  
+
   FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE
 );
 
@@ -480,30 +510,31 @@ CREATE INDEX idx_invoices_due ON invoices(due_date);
 ```
 
 ### Support Tickets Table
+
 ```sql
 CREATE TABLE support_tickets (
   id TEXT PRIMARY KEY,
   client_id TEXT NOT NULL,
-  
+
   -- Ticket details
   subject TEXT NOT NULL,
   description TEXT NOT NULL,
   category TEXT NOT NULL, -- 'technical', 'billing', 'feature', 'general'
-  
+
   -- Status
   status TEXT DEFAULT 'open', -- 'open', 'in_progress', 'resolved', 'closed'
   priority TEXT DEFAULT 'medium', -- 'low', 'medium', 'high', 'urgent'
-  
+
   -- Tracking
   assigned_to TEXT, -- Your user ID
   response_time INTEGER, -- minutes to first response
   resolution_time INTEGER, -- minutes to resolution
-  
+
   -- Timestamps
   created_at INTEGER NOT NULL,
   updated_at INTEGER NOT NULL,
   resolved_at INTEGER,
-  
+
   FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE
 );
 
@@ -514,17 +545,18 @@ CREATE INDEX idx_tickets_assigned ON support_tickets(assigned_to);
 ```
 
 ### Ticket Messages Table
+
 ```sql
 CREATE TABLE ticket_messages (
   id TEXT PRIMARY KEY,
   ticket_id TEXT NOT NULL,
   author_id TEXT NOT NULL, -- client_id or your admin ID
-  
+
   message TEXT NOT NULL,
   is_internal BOOLEAN DEFAULT FALSE, -- For your notes
-  
+
   created_at INTEGER NOT NULL,
-  
+
   FOREIGN KEY (ticket_id) REFERENCES support_tickets(id) ON DELETE CASCADE,
   FOREIGN KEY (author_id) REFERENCES clients(id) ON DELETE CASCADE
 );
@@ -540,6 +572,7 @@ CREATE INDEX idx_messages_created ON ticket_messages(created_at DESC);
 ### Client API
 
 **Create Client:**
+
 ```typescript
 POST /api/clients
 Body: {
@@ -553,30 +586,39 @@ Response: { success: boolean; client: Client; stripe_url?: string }
 ```
 
 **Get Client:**
+
 ```typescript
-GET /api/clients/me
-Auth: Required
-Response: Client
+GET / api / clients / me;
+Auth: Required;
+Response: Client;
 ```
 
 **Update Client:**
+
 ```typescript
-PUT /api/clients/me
-Auth: Required
-Body: Partial<Client>
-Response: { success: boolean; client: Client }
+PUT / api / clients / me;
+Auth: Required;
+Body: Partial<Client>;
+Response: {
+  success: boolean;
+  client: Client;
+}
 ```
 
 **Delete Client:**
+
 ```typescript
-DELETE /api/clients/me
-Auth: Required
-Response: { success: boolean }
+DELETE / api / clients / me;
+Auth: Required;
+Response: {
+  success: boolean;
+}
 ```
 
 ### Blog API
 
 **Create Blog:**
+
 ```typescript
 POST /api/blogs
 Auth: Required
@@ -590,6 +632,7 @@ Response: { success: boolean; blog: Blog }
 ```
 
 **Get My Blogs:**
+
 ```typescript
 GET /api/blogs
 Auth: Required
@@ -597,23 +640,31 @@ Response: { blogs: Blog[] }
 ```
 
 **Update Blog:**
+
 ```typescript
-PUT /api/blogs/[id]
-Auth: Required
-Body: Partial<Blog>
-Response: { success: boolean; blog: Blog }
+PUT / api / blogs / [id];
+Auth: Required;
+Body: Partial<Blog>;
+Response: {
+  success: boolean;
+  blog: Blog;
+}
 ```
 
 **Delete Blog:**
+
 ```typescript
-DELETE /api/blogs/[id]
-Auth: Required
-Response: { success: boolean }
+DELETE / api / blogs / [id];
+Auth: Required;
+Response: {
+  success: boolean;
+}
 ```
 
 ### Subscription API
 
 **Create Subscription:**
+
 ```typescript
 POST /api/subscriptions
 Auth: Required
@@ -626,13 +677,15 @@ Response: { success: boolean; subscription: Subscription; client_secret?: string
 ```
 
 **Get Subscription:**
+
 ```typescript
-GET /api/subscriptions/current
-Auth: Required
-Response: Subscription
+GET / api / subscriptions / current;
+Auth: Required;
+Response: Subscription;
 ```
 
 **Update Subscription:**
+
 ```typescript
 PUT /api/subscriptions/[id]
 Auth: Required
@@ -644,15 +697,19 @@ Response: { success: boolean; subscription: Subscription }
 ```
 
 **Cancel Subscription:**
+
 ```typescript
-DELETE /api/subscriptions/[id]
-Auth: Required
-Response: { success: boolean }
+DELETE / api / subscriptions / [id];
+Auth: Required;
+Response: {
+  success: boolean;
+}
 ```
 
 ### Support API
 
 **Create Ticket:**
+
 ```typescript
 POST /api/support/tickets
 Auth: Required
@@ -666,6 +723,7 @@ Response: { success: boolean; ticket: SupportTicket }
 ```
 
 **Get My Tickets:**
+
 ```typescript
 GET /api/support/tickets
 Auth: Required
@@ -674,11 +732,17 @@ Response: { tickets: SupportTicket[]; total: number }
 ```
 
 **Add Message:**
+
 ```typescript
-POST /api/support/tickets/[id]/messages
-Auth: Required
-Body: { message: string }
-Response: { success: boolean; message: TicketMessage }
+POST / api / support / tickets / [id] / messages;
+Auth: Required;
+Body: {
+  message: string;
+}
+Response: {
+  success: boolean;
+  message: TicketMessage;
+}
 ```
 
 ---
@@ -690,6 +754,7 @@ Response: { success: boolean; message: TicketMessage }
 **Endpoint:** `POST /api/webhooks/stripe`
 
 **Events Handled:**
+
 - `customer.subscription.created` - New subscription
 - `customer.subscription.updated` - Plan change, billing cycle change
 - `customer.subscription.deleted` - Cancellation
@@ -721,8 +786,10 @@ Response: { success: boolean; message: TicketMessage }
 ## Email Templates
 
 ### Welcome Email
+
 **Trigger:** Account created
 **Content:**
+
 - Welcome message
 - Login URL
 - Admin panel URL
@@ -730,40 +797,50 @@ Response: { success: boolean; message: TicketMessage }
 - Support contact info
 
 ### Payment Receipt
+
 **Trigger:** Invoice paid
 **Content:**
+
 - Amount paid
 - Period covered
 - Invoice PDF link
 - Update payment method link
 
 ### Payment Failed
+
 **Trigger:** Payment fails
 **Content:**
+
 - Amount due
 - Retry date
 - Update payment method link
 - Support contact info
 
 ### Subscription Canceled
+
 **Trigger:** Subscription canceled
 **Content:**
+
 - Confirmation of cancellation
 - Service end date
 - Data export instructions
 - Reactivation option (within 30 days)
 
 ### Support Ticket Created
+
 **Trigger:** Ticket submitted
 **Content:**
+
 - Ticket number
 - Subject & description
 - Expected response time
 - View ticket link
 
 ### Support Ticket Updated
+
 **Trigger:** You reply to ticket
 **Content:**
+
 - Ticket number
 - Your message
 - View ticket link
@@ -774,6 +851,7 @@ Response: { success: boolean; message: TicketMessage }
 ## Admin Dashboard (For You)
 
 **Client Overview:**
+
 - Total clients: X
 - Active subscriptions: X
 - Monthly Recurring Revenue (MRR): $X
@@ -781,6 +859,7 @@ Response: { success: boolean; message: TicketMessage }
 - Churned clients this month: X
 
 **Revenue Dashboard:**
+
 - MRR trend (chart)
 - ARR (Annual Run Rate)
 - Average Revenue Per User (ARPU)
@@ -788,6 +867,7 @@ Response: { success: boolean; message: TicketMessage }
 - Outstanding invoices
 
 **Support Dashboard:**
+
 - Open tickets: X
 - Overdue tickets: X
 - Average response time: X hours
@@ -795,6 +875,7 @@ Response: { success: boolean; message: TicketMessage }
 - Tickets by category (chart)
 
 **System Health:**
+
 - Active blogs: X
 - Total posts: X
 - Storage used: X GB
@@ -806,6 +887,7 @@ Response: { success: boolean; message: TicketMessage }
 ## Security
 
 ### Authentication
+
 - Email/password with bcrypt hashing
 - Email verification required
 - Password reset via email
@@ -813,12 +895,14 @@ Response: { success: boolean; message: TicketMessage }
 - Rate limiting on login attempts (5 attempts per 15 min)
 
 ### Authorization
+
 - Clients can only access their own data
 - Admin can impersonate clients for support
 - API endpoints validate permissions
 - Row-level security in database
 
 ### Data Protection
+
 - Encrypt sensitive data at rest
 - HTTPS only
 - Secure cookie flags
@@ -826,6 +910,7 @@ Response: { success: boolean; message: TicketMessage }
 - XSS prevention
 
 ### Compliance
+
 - GDPR compliant (data export, deletion)
 - Privacy policy
 - Terms of service
@@ -837,12 +922,14 @@ Response: { success: boolean; message: TicketMessage }
 ## Performance
 
 ### Caching
+
 - KV cache for client configs (5 min TTL)
 - KV cache for subscription data (1 min TTL)
 - Edge cache for marketing pages (1 hour)
 - No cache for dashboard (real-time data)
 
 ### Optimization
+
 - Lazy load dashboard components
 - Paginate lists (clients, tickets, invoices)
 - Debounce search inputs
@@ -850,6 +937,7 @@ Response: { success: boolean; message: TicketMessage }
 - Minimize JavaScript bundle
 
 ### Monitoring
+
 - Track page load times
 - Monitor API response times
 - Error tracking (Sentry)
@@ -860,6 +948,7 @@ Response: { success: boolean; message: TicketMessage }
 ## Analytics & Metrics
 
 **Business Metrics:**
+
 - Signup conversion rate
 - Trial to paid conversion
 - Churn rate
@@ -868,6 +957,7 @@ Response: { success: boolean; message: TicketMessage }
 - LTV:CAC ratio (target > 3:1)
 
 **Product Metrics:**
+
 - Daily Active Users (DAU)
 - Posts created per day
 - Support tickets per day
@@ -875,6 +965,7 @@ Response: { success: boolean; message: TicketMessage }
 - Client satisfaction (NPS)
 
 **Technical Metrics:**
+
 - Page load times
 - API response times
 - Error rates
@@ -886,17 +977,20 @@ Response: { success: boolean; message: TicketMessage }
 ## Support & SLA
 
 **Support Hours:**
+
 - Email: 9 AM - 6 PM EST, Mon-Fri
 - Response times by plan (see above)
 - Emergency support for site outages
 
 **SLA Guarantees:**
+
 - 99.9% uptime
 - Daily backups
 - 30-day money-back guarantee
 - Data export within 7 days of request
 
 **Support Process:**
+
 1. Ticket submitted via dashboard
 2. Auto-acknowledgment email
 3. Triage & assignment
@@ -909,6 +1003,7 @@ Response: { success: boolean; message: TicketMessage }
 ## Legal & Compliance
 
 **Required Pages:**
+
 - Terms of Service
 - Privacy Policy
 - Acceptable Use Policy
@@ -917,6 +1012,7 @@ Response: { success: boolean; message: TicketMessage }
 - Data Processing Agreement (GDPR)
 
 **Data Retention:**
+
 - Client data: Until account deletion
 - Invoices: 7 years (tax requirement)
 - Support tickets: 2 years
@@ -924,6 +1020,7 @@ Response: { success: boolean; message: TicketMessage }
 - Backups: 30 days
 
 **Client Rights:**
+
 - Right to access data
 - Right to rectify data
 - Right to delete data
@@ -935,6 +1032,7 @@ Response: { success: boolean; message: TicketMessage }
 ## Future Enhancements
 
 See `TODOS.md` for full roadmap including:
+
 - Affiliate program
 - White-label agency plan
 - Advanced analytics
@@ -946,6 +1044,7 @@ See `TODOS.md` for full roadmap including:
 ## Success Metrics
 
 **Launch Goals (Month 1):**
+
 - [ ] 10 client signups
 - [ ] 70% email verification rate
 - [ ] 50% complete onboarding
@@ -953,6 +1052,7 @@ See `TODOS.md` for full roadmap including:
 - [ ] Average setup time < 1 hour
 
 **Growth Goals (Month 3):**
+
 - [ ] 30 active clients
 - [ ] $500 MRR
 - [ ] < 10% churn
@@ -960,6 +1060,7 @@ See `TODOS.md` for full roadmap including:
 - [ ] 80% client satisfaction
 
 **Scale Goals (Month 6):**
+
 - [ ] 100 active clients
 - [ ] $2,000 MRR
 - [ ] < 5% churn
@@ -968,4 +1069,4 @@ See `TODOS.md` for full roadmap including:
 
 ---
 
-*Last Updated: November 2025*
+_Last Updated: November 2025_

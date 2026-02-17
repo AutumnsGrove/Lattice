@@ -1,11 +1,11 @@
 <script lang="ts">
 	import '../app.css';
 	import { page } from '$app/state';
-	import { Logo } from '@autumnsgrove/groveengine/ui/nature';
-	import { Footer, ThemeToggle, MobileMenu, seasonStore, themeStore } from '@autumnsgrove/groveengine/ui/chrome';
-	import { GroveMessages } from '@autumnsgrove/groveengine/ui';
-	import { Menu, ArrowLeft, HandCoins, Home, Trees, FileText } from '@autumnsgrove/groveengine/ui/icons';
-	import type { NavItem, FooterLink } from '@autumnsgrove/groveengine/ui/chrome';
+	import { Logo } from '@autumnsgrove/lattice/ui/nature';
+	import { Footer, ThemeToggle, MobileMenu, seasonStore, themeStore } from '@autumnsgrove/lattice/ui/chrome';
+	import { GroveMessages } from '@autumnsgrove/lattice/ui';
+	import { Menu, ArrowLeft, HandCoins, Home, Trees, FileText } from '@autumnsgrove/lattice/ui/icons';
+	import type { NavItem, FooterLink } from '@autumnsgrove/lattice/ui/chrome';
 
 	// Centralized external links to prevent drift
 	const GROVE_LINKS = {

@@ -149,9 +149,7 @@ describe("BetaWelcomeDialog", () => {
       expect(
         screen.getByText(/first wanderers to explore grove/i),
       ).toBeInTheDocument();
-      expect(
-        screen.getByText(/rough around the edges/i),
-      ).toBeInTheDocument();
+      expect(screen.getByText(/rough around the edges/i)).toBeInTheDocument();
     });
 
     it("should render feedback link with correct URL", async () => {

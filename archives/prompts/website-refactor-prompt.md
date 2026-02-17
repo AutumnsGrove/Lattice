@@ -1,15 +1,15 @@
 # AutumnsGrove Website Refactor Prompt (Phase 3 of 3)
 
-> **Purpose:** Refactor the AutumnsGrove website to use `@groveengine/core` as an external dependency.
+> **Purpose:** Refactor the AutumnsGrove website to use `@lattice/core` as an external dependency.
 > **Prerequisites:** Complete Phase 1 (extraction) and Phase 2 (implementation) first.
 
 ---
 
 ## CONTEXT
 
-You are performing the final phase of the GroveEngine migration. The engine package has been created with all necessary components, utilities, and server functions. Now you need to refactor the AutumnsGrove website to:
+You are performing the final phase of the Lattice migration. The engine package has been created with all necessary components, utilities, and server functions. Now you need to refactor the AutumnsGrove website to:
 
-1. Install and use `@groveengine/core` as a dependency
+1. Install and use `@lattice/core` as a dependency
 2. Remove all code that was extracted to the engine
 3. Update imports throughout the codebase
 4. Configure Cloudflare bindings (D1, KV, R2)
@@ -17,28 +17,32 @@ You are performing the final phase of the GroveEngine migration. The engine pack
 6. Verify the site works identically to before
 
 **Source Website:** `/tmp/AutumnsGrove-source` (cloned from https://github.com/AutumnsGrove/AutumnsGrove)
-**Engine Package:** `/home/user/GroveEngine/package`
+**Engine Package:** `/home/user/Lattice/package`
 
 ---
 
 ## CRITICAL PRINCIPLES
 
 ### 1. Zero Functionality Loss
+
 - Every feature must work identically after refactoring
 - All existing content (posts, recipes, images) must remain accessible
 - No user-facing changes unless explicitly required
 
 ### 2. Clean Separation
+
 - Website contains ONLY site-specific code
 - All engine functionality comes from the package
 - No duplicate code between engine and website
 
 ### 3. Incremental Verification
+
 - Test after each major change
 - Build frequently to catch errors early
 - Keep the site deployable at all stages
 
 ### 4. Proper Dependency Management
+
 - Use local file path for development
 - Prepare for npm registry or GitHub package later
 - Lock versions appropriately
@@ -62,7 +66,7 @@ Add the engine as a local dependency (for development):
 {
   "name": "autumnsgrove",
   "version": "2.0.0",
-  "description": "AutumnsGrove personal website - powered by GroveEngine",
+  "description": "AutumnsGrove personal website - powered by Lattice",
   "type": "module",
   "scripts": {
     "dev": "vite dev",
@@ -89,12 +93,12 @@ Add the engine as a local dependency (for development):
     "wrangler": "^3.91.0"
   },
   "dependencies": {
-    "@groveengine/core": "file:../../GroveEngine/package"
+    "@lattice/core": "file:../../Lattice/package"
   }
 }
 ```
 
-**Note:** The file path `file:../../GroveEngine/package` assumes the GroveEngine repo is at the same level as the AutumnsGrove repo. Adjust as needed.
+**Note:** The file path `file:../../Lattice/package` assumes the Lattice repo is at the same level as the AutumnsGrove repo. Adjust as needed.
 
 ### 1.3 Install Dependencies
 
@@ -107,6 +111,7 @@ pnpm install
 Use TodoWrite to track refactoring tasks:
 
 **Phase 3 Tasks (This Prompt):**
+
 - [ ] Update package.json with engine dependency
 - [ ] Update TypeScript and SvelteKit configuration
 - [ ] Configure Cloudflare bindings (wrangler.jsonc)
@@ -128,8 +133,8 @@ Use TodoWrite to track refactoring tasks:
 ### 2.1 Update svelte.config.js
 
 ```javascript
-import adapter from '@sveltejs/adapter-cloudflare';
-import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
+import adapter from "@sveltejs/adapter-cloudflare";
+import { vitePreprocess } from "@sveltejs/vite-plugin-svelte";
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
@@ -137,14 +142,14 @@ const config = {
   kit: {
     adapter: adapter({
       routes: {
-        include: ['/*'],
-        exclude: ['<all>']
-      }
+        include: ["/*"],
+        exclude: ["<all>"],
+      },
     }),
     alias: {
-      $config: './config'
-    }
-  }
+      $config: "./config",
+    },
+  },
 };
 
 export default config;
@@ -179,31 +184,31 @@ export default config;
     {
       "binding": "DB",
       "database_name": "autumnsgrove-db",
-      "database_id": "YOUR_D1_DATABASE_ID"
-    }
+      "database_id": "YOUR_D1_DATABASE_ID",
+    },
   ],
 
   // KV Namespace for sessions
   "kv_namespaces": [
     {
       "binding": "KV",
-      "id": "YOUR_KV_NAMESPACE_ID"
-    }
+      "id": "YOUR_KV_NAMESPACE_ID",
+    },
   ],
 
   // R2 Bucket for media
   "r2_buckets": [
     {
       "binding": "STORAGE",
-      "bucket_name": "autumnsgrove-assets"
-    }
+      "bucket_name": "autumnsgrove-assets",
+    },
   ],
 
   // Environment variables
   "vars": {
     "PUBLIC_SITE_URL": "https://autumnsgrove.com",
-    "PUBLIC_SITE_NAME": "AutumnsGrove"
-  }
+    "PUBLIC_SITE_NAME": "AutumnsGrove",
+  },
 
   // Secrets (set via CLI):
   // wrangler secret put RESEND_API_KEY
@@ -215,7 +220,7 @@ export default config;
 ```typescript
 /// <reference types="@cloudflare/workers-types" />
 
-import type { User, Session, SiteConfig } from '@groveengine/core';
+import type { User, Session, SiteConfig } from "@lattice/core";
 
 declare global {
   namespace App {
@@ -323,19 +328,19 @@ export {};
 Replace the existing hooks with the engine's auth system:
 
 ```typescript
-import { validateSession } from '@groveengine/core/server';
-import type { Handle } from '@sveltejs/kit';
+import { validateSession } from "@lattice/core/server";
+import type { Handle } from "@sveltejs/kit";
 
 export const handle: Handle = async ({ event, resolve }) => {
   // Get session from cookie
-  const sessionId = event.cookies.get('session');
+  const sessionId = event.cookies.get("session");
 
   if (sessionId && event.platform?.env) {
     // Validate session using engine utilities
     const { user, session } = await validateSession(
       sessionId,
       event.platform.env.KV,
-      event.platform.env.DB
+      event.platform.env.DB,
     );
 
     event.locals.user = user;
@@ -357,41 +362,41 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 Search and replace imports throughout the codebase:
 
-| Old Import | New Import |
-|------------|------------|
-| `import { ImageGallery } from '$lib/components'` | `import { ImageGallery } from '@groveengine/core'` |
-| `import ContentWithGutter from '$lib/components/ContentWithGutter.svelte'` | `import { ContentWithGutter } from '@groveengine/core'` |
-| `import TableOfContents from '$lib/components/TableOfContents.svelte'` | `import { TableOfContents } from '@groveengine/core'` |
-| `import ZoomableImage from '$lib/components/ZoomableImage.svelte'` | `import { ZoomableImage } from '@groveengine/core'` |
-| `import Lightbox from '$lib/components/Lightbox.svelte'` | `import { Lightbox } from '@groveengine/core'` |
-| `import { parseAnchor } from '$lib/utils/gutter.js'` | `import { parseAnchor } from '@groveengine/core/utils'` |
-| `import { parseMarkdownContent } from '$lib/utils/markdown.js'` | `import { parseMarkdownContent } from '@groveengine/core/utils'` |
+| Old Import                                                                 | New Import                                                   |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `import { ImageGallery } from '$lib/components'`                           | `import { ImageGallery } from '@lattice/core'`               |
+| `import ContentWithGutter from '$lib/components/ContentWithGutter.svelte'` | `import { ContentWithGutter } from '@lattice/core'`          |
+| `import TableOfContents from '$lib/components/TableOfContents.svelte'`     | `import { TableOfContents } from '@lattice/core'`            |
+| `import ZoomableImage from '$lib/components/ZoomableImage.svelte'`         | `import { ZoomableImage } from '@lattice/core'`              |
+| `import Lightbox from '$lib/components/Lightbox.svelte'`                   | `import { Lightbox } from '@lattice/core'`                   |
+| `import { parseAnchor } from '$lib/utils/gutter.js'`                       | `import { parseAnchor } from '@lattice/core/utils'`          |
+| `import { parseMarkdownContent } from '$lib/utils/markdown.js'`            | `import { parseMarkdownContent } from '@lattice/core/utils'` |
 
 ### 5.2 Server Import Mapping
 
-| Old Import | New Import |
-|------------|------------|
-| `import { verifySession } from '$lib/auth/session.js'` | `import { validateSession } from '@groveengine/core/server'` |
-| `import { signJwt, verifyJwt } from '$lib/auth/jwt.js'` | N/A - Use session management instead |
+| Old Import                                              | New Import                                               |
+| ------------------------------------------------------- | -------------------------------------------------------- |
+| `import { verifySession } from '$lib/auth/session.js'`  | `import { validateSession } from '@lattice/core/server'` |
+| `import { signJwt, verifyJwt } from '$lib/auth/jwt.js'` | N/A - Use session management instead                     |
 
 ### 5.3 Type Import Mapping
 
 ```typescript
 // Old
-import type { Post, User } from '$lib/types';
+import type { Post, User } from "$lib/types";
 
 // New
-import type { Post, User, SiteConfig } from '@groveengine/core';
+import type { Post, User, SiteConfig } from "@lattice/core";
 ```
 
 ### 5.4 Store Import Mapping
 
 ```typescript
 // Old
-import { theme } from '$lib/stores/theme';
+import { theme } from "$lib/stores/theme";
 
 // New
-import { theme, siteConfig, user } from '@groveengine/core/stores';
+import { theme, siteConfig, user } from "@lattice/core/stores";
 ```
 
 ---
@@ -408,15 +413,15 @@ The website needs a site-specific content loader for markdown files. This stays 
  * Uses import.meta.glob with paths specific to this site
  */
 
-import { parseMarkdownContent } from '@groveengine/core/utils';
-import matter from 'gray-matter';
-import type { Post, PostListItem } from '@groveengine/core';
+import { parseMarkdownContent } from "@lattice/core/utils";
+import matter from "gray-matter";
+import type { Post, PostListItem } from "@lattice/core";
 
 // Import all markdown files from content directory
-const postModules = import.meta.glob('/src/content/posts/*.md', {
+const postModules = import.meta.glob("/src/content/posts/*.md", {
   eager: true,
-  query: '?raw',
-  import: 'default'
+  query: "?raw",
+  import: "default",
 });
 
 interface PostFrontmatter {
@@ -425,7 +430,7 @@ interface PostFrontmatter {
   excerpt?: string;
   featured_image?: string;
   tags?: string[];
-  status?: 'draft' | 'published';
+  status?: "draft" | "published";
 }
 
 /**
@@ -439,9 +444,9 @@ export function getAllPosts(): PostListItem[] {
     const frontmatter = data as PostFrontmatter;
 
     // Skip drafts
-    if (frontmatter.status === 'draft') continue;
+    if (frontmatter.status === "draft") continue;
 
-    const slug = path.split('/').pop()?.replace('.md', '') || '';
+    const slug = path.split("/").pop()?.replace(".md", "") || "";
     const wordCount = body.trim().split(/\s+/).length;
     const readingTime = Math.ceil(wordCount / 200);
 
@@ -453,7 +458,7 @@ export function getAllPosts(): PostListItem[] {
       featured_image: frontmatter.featured_image,
       reading_time: readingTime,
       published_at: new Date(frontmatter.date).getTime() / 1000,
-      tags: frontmatter.tags
+      tags: frontmatter.tags,
     });
   }
 
@@ -478,20 +483,20 @@ export function getPostBySlug(slug: string): Post | null {
 
   return {
     id: slug,
-    user_id: 'owner',
+    user_id: "owner",
     title: frontmatter.title,
     slug,
     content: body,
     excerpt: frontmatter.excerpt,
     html,
-    status: frontmatter.status || 'published',
+    status: frontmatter.status || "published",
     featured_image: frontmatter.featured_image,
     word_count: wordCount,
     reading_time: readingTime,
     published_at: new Date(frontmatter.date).getTime() / 1000,
     created_at: new Date(frontmatter.date).getTime() / 1000,
     updated_at: Date.now() / 1000,
-    tags: frontmatter.tags
+    tags: frontmatter.tags,
   };
 }
 ```
@@ -503,13 +508,13 @@ export function getPostBySlug(slug: string): Post | null {
  * Site-specific content loading for recipes
  */
 
-import { parseMarkdownContent } from '@groveengine/core/utils';
-import matter from 'gray-matter';
+import { parseMarkdownContent } from "@lattice/core/utils";
+import matter from "gray-matter";
 
-const recipeModules = import.meta.glob('/src/content/recipes/*.md', {
+const recipeModules = import.meta.glob("/src/content/recipes/*.md", {
   eager: true,
-  query: '?raw',
-  import: 'default'
+  query: "?raw",
+  import: "default",
 });
 
 // Similar structure to posts.ts
@@ -519,7 +524,7 @@ const recipeModules = import.meta.glob('/src/content/recipes/*.md', {
 ### 6.3 Create src/lib/content/index.ts
 
 ```typescript
-export * from './posts';
+export * from "./posts";
 // export * from './recipes';
 ```
 
@@ -531,8 +536,8 @@ export * from './posts';
 
 ```svelte
 <script lang="ts">
-  import { Header, Footer } from '@groveengine/core';
-  import { siteConfig, user } from '@groveengine/core/stores';
+  import { Header, Footer } from '@lattice/core';
+  import { siteConfig, user } from '@lattice/core/stores';
   import '../app.css';
 
   let { data, children } = $props();
@@ -571,13 +576,13 @@ export * from './posts';
 ### 7.2 Update src/routes/+layout.server.ts
 
 ```typescript
-import type { LayoutServerLoad } from './$types';
-import siteJson from '../../config/site.json';
+import type { LayoutServerLoad } from "./$types";
+import siteJson from "../../config/site.json";
 
 export const load: LayoutServerLoad = async ({ locals }) => {
   return {
     siteConfig: siteJson,
-    user: locals.user
+    user: locals.user,
   };
 };
 ```
@@ -589,9 +594,10 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 ### 8.1 Update Blog Listing Page
 
 **src/routes/blog/+page.svelte:**
+
 ```svelte
 <script lang="ts">
-  import { PostList } from '@groveengine/core';
+  import { PostList } from '@lattice/core';
 
   let { data } = $props();
 </script>
@@ -612,15 +618,16 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 ```
 
 **src/routes/blog/+page.server.ts:**
+
 ```typescript
-import type { PageServerLoad } from './$types';
-import { getAllPosts } from '$lib/content';
+import type { PageServerLoad } from "./$types";
+import { getAllPosts } from "$lib/content";
 
 export const load: PageServerLoad = async () => {
   const posts = getAllPosts();
 
   return {
-    posts
+    posts,
   };
 };
 ```
@@ -628,9 +635,10 @@ export const load: PageServerLoad = async () => {
 ### 8.2 Update Blog Post Page
 
 **src/routes/blog/[slug]/+page.svelte:**
+
 ```svelte
 <script lang="ts">
-  import { ContentWithGutter, TableOfContents } from '@groveengine/core';
+  import { ContentWithGutter, TableOfContents } from '@lattice/core';
 
   let { data } = $props();
 </script>
@@ -650,20 +658,21 @@ export const load: PageServerLoad = async () => {
 ```
 
 **src/routes/blog/[slug]/+page.server.ts:**
+
 ```typescript
-import { error } from '@sveltejs/kit';
-import type { PageServerLoad } from './$types';
-import { getPostBySlug } from '$lib/content';
+import { error } from "@sveltejs/kit";
+import type { PageServerLoad } from "./$types";
+import { getPostBySlug } from "$lib/content";
 
 export const load: PageServerLoad = async ({ params }) => {
   const post = getPostBySlug(params.slug);
 
   if (!post) {
-    throw error(404, 'Post not found');
+    throw error(404, "Post not found");
   }
 
   return {
-    post
+    post,
   };
 };
 ```
@@ -675,12 +684,12 @@ export const load: PageServerLoad = async ({ params }) => {
 ### 9.1 Update src/app.css
 
 ```css
-@import 'tailwindcss/base';
-@import 'tailwindcss/components';
-@import 'tailwindcss/utilities';
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
 
 /* Import engine styles if needed */
-/* @import '@groveengine/core/styles.css'; */
+/* @import '@lattice/core/styles.css'; */
 
 /* Site-specific styles */
 :root {
@@ -695,31 +704,31 @@ export const load: PageServerLoad = async ({ params }) => {
 ### 9.2 Update tailwind.config.js
 
 ```javascript
-import typography from '@tailwindcss/typography';
+import typography from "@tailwindcss/typography";
 
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
-    './src/**/*.{html,js,svelte,ts}',
+    "./src/**/*.{html,js,svelte,ts}",
     // Include engine components in content scanning
-    './node_modules/@groveengine/core/**/*.{html,js,svelte,ts}'
+    "./node_modules/@lattice/core/**/*.{html,js,svelte,ts}",
   ],
   theme: {
     extend: {
       colors: {
         primary: {
-          DEFAULT: 'var(--color-primary)'
+          DEFAULT: "var(--color-primary)",
         },
         secondary: {
-          DEFAULT: 'var(--color-secondary)'
+          DEFAULT: "var(--color-secondary)",
         },
         accent: {
-          DEFAULT: 'var(--color-accent)'
-        }
-      }
-    }
+          DEFAULT: "var(--color-accent)",
+        },
+      },
+    },
   },
-  plugins: [typography]
+  plugins: [typography],
 };
 ```
 
@@ -770,6 +779,7 @@ rm src/lib/utils/gutter.js
 ### 10.5 Keep Site-Specific Files
 
 Keep these files as they contain site-specific code:
+
 - `src/lib/content/` (new content loader)
 - `src/lib/db/` (if it has site-specific schema)
 - `src/lib/utils/github.js` (if used for site-specific features)
@@ -782,9 +792,10 @@ Keep these files as they contain site-specific code:
 ### 11.1 Update Login Page
 
 **src/routes/login/+page.svelte:**
+
 ```svelte
 <script lang="ts">
-  import { LoginForm } from '@groveengine/core';
+  import { LoginForm } from '@lattice/core';
   import { goto } from '$app/navigation';
 
   let { data } = $props();
@@ -830,24 +841,22 @@ Keep these files as they contain site-specific code:
 ### 11.2 Create Auth API Endpoints
 
 **src/routes/api/auth/request-code/+server.ts:**
+
 ```typescript
-import { json } from '@sveltejs/kit';
-import type { RequestHandler } from './$types';
-import {
-  generateMagicCode,
-  storeMagicCode
-} from '@groveengine/core/server';
-import { sendMagicCodeEmail } from '@groveengine/core/server';
+import { json } from "@sveltejs/kit";
+import type { RequestHandler } from "./$types";
+import { generateMagicCode, storeMagicCode } from "@lattice/core/server";
+import { sendMagicCodeEmail } from "@lattice/core/server";
 
 export const POST: RequestHandler = async ({ request, platform }) => {
   if (!platform?.env) {
-    return json({ error: 'Server configuration error' }, { status: 500 });
+    return json({ error: "Server configuration error" }, { status: 500 });
   }
 
   const { email } = await request.json();
 
-  if (!email || typeof email !== 'string') {
-    return json({ error: 'Email is required' }, { status: 400 });
+  if (!email || typeof email !== "string") {
+    return json({ error: "Email is required" }, { status: 400 });
   }
 
   // Generate and store magic code
@@ -859,11 +868,11 @@ export const POST: RequestHandler = async ({ request, platform }) => {
     platform.env.RESEND_API_KEY,
     email,
     code,
-    'AutumnsGrove'
+    "AutumnsGrove",
   );
 
   if (!result.success) {
-    return json({ error: 'Failed to send email' }, { status: 500 });
+    return json({ error: "Failed to send email" }, { status: 500 });
   }
 
   return json({ success: true });
@@ -871,32 +880,33 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 ```
 
 **src/routes/api/auth/verify-code/+server.ts:**
+
 ```typescript
-import { json } from '@sveltejs/kit';
-import type { RequestHandler } from './$types';
+import { json } from "@sveltejs/kit";
+import type { RequestHandler } from "./$types";
 import {
   verifyMagicCode,
   createSession,
-  getSessionCookieOptions
-} from '@groveengine/core/server';
-import { getOrCreateUser } from '@groveengine/core/server';
+  getSessionCookieOptions,
+} from "@lattice/core/server";
+import { getOrCreateUser } from "@lattice/core/server";
 
 export const POST: RequestHandler = async ({ request, platform, cookies }) => {
   if (!platform?.env) {
-    return json({ error: 'Server configuration error' }, { status: 500 });
+    return json({ error: "Server configuration error" }, { status: 500 });
   }
 
   const { email, code } = await request.json();
 
   if (!email || !code) {
-    return json({ error: 'Email and code are required' }, { status: 400 });
+    return json({ error: "Email and code are required" }, { status: 400 });
   }
 
   // Verify the code
   const isValid = await verifyMagicCode(platform.env.KV, email, code);
 
   if (!isValid) {
-    return json({ error: 'Invalid or expired code' }, { status: 401 });
+    return json({ error: "Invalid or expired code" }, { status: 401 });
   }
 
   // Get or create user
@@ -906,26 +916,27 @@ export const POST: RequestHandler = async ({ request, platform, cookies }) => {
   const sessionId = await createSession(platform.env.KV, user);
 
   // Set session cookie
-  cookies.set('session', sessionId, getSessionCookieOptions(true));
+  cookies.set("session", sessionId, getSessionCookieOptions(true));
 
   return json({ success: true, user: { id: user.id, email: user.email } });
 };
 ```
 
 **src/routes/api/auth/logout/+server.ts:**
+
 ```typescript
-import { json } from '@sveltejs/kit';
-import type { RequestHandler } from './$types';
-import { deleteSession } from '@groveengine/core/server';
+import { json } from "@sveltejs/kit";
+import type { RequestHandler } from "./$types";
+import { deleteSession } from "@lattice/core/server";
 
 export const POST: RequestHandler = async ({ platform, cookies }) => {
-  const sessionId = cookies.get('session');
+  const sessionId = cookies.get("session");
 
   if (sessionId && platform?.env) {
     await deleteSession(platform.env.KV, sessionId);
   }
 
-  cookies.delete('session', { path: '/' });
+  cookies.delete("session", { path: "/" });
 
   return json({ success: true });
 };
@@ -953,11 +964,13 @@ pnpm run dev
 ### 12.3 Test All Features
 
 **Homepage:**
+
 - [ ] Page loads without errors
 - [ ] All images display correctly
 - [ ] Navigation works
 
 **Blog:**
+
 - [ ] Blog listing shows all posts
 - [ ] Individual post pages render correctly
 - [ ] ContentWithGutter layout works
@@ -966,11 +979,13 @@ pnpm run dev
 - [ ] Images zoom on click
 
 **Recipes (if applicable):**
+
 - [ ] Recipe listing works
 - [ ] Individual recipe pages render
 - [ ] Gutter content displays correctly
 
 **Admin:**
+
 - [ ] Login page loads
 - [ ] Magic code request works
 - [ ] Code verification works
@@ -978,6 +993,7 @@ pnpm run dev
 - [ ] Logout works
 
 **Responsive:**
+
 - [ ] Desktop layout (3 columns)
 - [ ] Tablet layout (2 columns)
 - [ ] Mobile layout (1 column)
@@ -999,10 +1015,10 @@ Ensure build completes without errors.
 ```bash
 cd /tmp/AutumnsGrove-source
 git add .
-git commit -m "refactor: migrate to @groveengine/core
+git commit -m "refactor: migrate to @lattice/core
 
-Major refactoring to use GroveEngine as external dependency:
-- Add @groveengine/core as dependency
+Major refactoring to use Lattice as external dependency:
+- Add @lattice/core as dependency
 - Update all component imports to use engine
 - Update utility imports to use engine
 - Implement magic code authentication
@@ -1031,7 +1047,7 @@ git push -u origin refactor/use-grove-engine
 
 Phase 3 is complete when:
 
-- [ ] `@groveengine/core` installed as dependency
+- [ ] `@lattice/core` installed as dependency
 - [ ] All imports updated to use engine package
 - [ ] Extracted files removed from website
 - [ ] Site-specific content loader working
@@ -1050,6 +1066,7 @@ Phase 3 is complete when:
 ### Before Deploying to Production
 
 1. **Create Cloudflare Resources:**
+
    ```bash
    # Create D1 database
    wrangler d1 create autumnsgrove-db
@@ -1064,11 +1081,13 @@ Phase 3 is complete when:
 2. **Update wrangler.jsonc** with actual IDs
 
 3. **Run Database Migrations:**
+
    ```bash
    wrangler d1 migrations apply autumnsgrove-db
    ```
 
 4. **Set Secrets:**
+
    ```bash
    wrangler secret put RESEND_API_KEY
    ```
@@ -1080,13 +1099,14 @@ Phase 3 is complete when:
 
 ### Switching to npm Registry
 
-When ready to publish `@groveengine/core` to npm:
+When ready to publish `@lattice/core` to npm:
 
 1. Update package.json dependency:
+
    ```json
    {
      "dependencies": {
-       "@groveengine/core": "^0.1.0"
+       "@lattice/core": "^0.1.0"
      }
    }
    ```
@@ -1102,6 +1122,7 @@ When ready to publish `@groveengine/core` to npm:
 If the refactor fails:
 
 1. **Revert to main branch:**
+
    ```bash
    git checkout main
    ```
@@ -1115,4 +1136,4 @@ The original website on main branch remains fully functional.
 
 ---
 
-*Last Updated: November 2025*
+_Last Updated: November 2025_

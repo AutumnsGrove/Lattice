@@ -7,8 +7,8 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/AutumnsGrove/GroveEngine/tools/grove-find-go/internal/config"
-	"github.com/AutumnsGrove/GroveEngine/tools/grove-find-go/internal/tools"
+	"github.com/AutumnsGrove/Lattice/tools/grove-find-go/internal/config"
+	"github.com/AutumnsGrove/Lattice/tools/grove-find-go/internal/tools"
 )
 
 // MaxPatternLength is the maximum allowed regex pattern length to prevent resource exhaustion.

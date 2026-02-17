@@ -2,7 +2,7 @@
 
 ## Context
 
-You are implementing a Feature Flags Admin UI for the Grove platform. The backend evaluation engine has already been built in GroveEngine (`packages/engine/src/lib/feature-flags/`). Now we need the admin interface to create, edit, and manage feature flags.
+You are implementing a Feature Flags Admin UI for the Grove platform. The backend evaluation engine has already been built in Lattice (`packages/engine/src/lib/feature-flags/`). Now we need the admin interface to create, edit, and manage feature flags.
 
 **Repository**: https://github.com/AutumnsGrove/GroveAuth (frontend in `frontend/` directory)
 **Location**: `/dashboard/flags/` routes
@@ -12,10 +12,11 @@ You are implementing a Feature Flags Admin UI for the Grove platform. The backen
 ### Feature Flags System Overview
 
 The feature flags system uses a **D1 + KV hybrid architecture**:
+
 - **D1 (SQLite)**: Source of truth for flag definitions, rules, and audit log
 - **KV**: Fast read cache for evaluation (60s TTL default)
 
-### Database Schema (in GroveEngine)
+### Database Schema (in Lattice)
 
 ```sql
 -- Core flags table
@@ -60,24 +61,24 @@ CREATE TABLE flag_audit_log (
 
 ### Rule Types Supported
 
-| Rule Type | Condition Format | Description |
-|-----------|------------------|-------------|
-| `tenant` | `{ tenantIds: string[] }` | Match specific tenant IDs |
-| `tier` | `{ tiers: TierKey[] }` | Match subscription tiers (free, seedling, sapling, oak, evergreen) |
-| `percentage` | `{ percentage: number, salt?: string }` | Gradual rollout (0-100%) |
-| `user` | `{ userIds: string[] }` | Match specific user IDs |
-| `time` | `{ startDate?: string, endDate?: string }` | Time-based activation |
-| `always` | `{}` | Catch-all default |
+| Rule Type    | Condition Format                           | Description                                                        |
+| ------------ | ------------------------------------------ | ------------------------------------------------------------------ |
+| `tenant`     | `{ tenantIds: string[] }`                  | Match specific tenant IDs                                          |
+| `tier`       | `{ tiers: TierKey[] }`                     | Match subscription tiers (free, seedling, sapling, oak, evergreen) |
+| `percentage` | `{ percentage: number, salt?: string }`    | Gradual rollout (0-100%)                                           |
+| `user`       | `{ userIds: string[] }`                    | Match specific user IDs                                            |
+| `time`       | `{ startDate?: string, endDate?: string }` | Time-based activation                                              |
+| `always`     | `{}`                                       | Catch-all default                                                  |
 
 ### Flag Types
 
-| Type | Description | Default Value Example |
-|------|-------------|----------------------|
-| `boolean` | On/off toggle | `"true"` or `"false"` |
-| `percentage` | Rollout percentage | `"0"` to `"100"` |
-| `variant` | A/B test variant | `"control"`, `"treatment_a"` |
-| `tier` | Tier-gated access | `"false"` |
-| `json` | Arbitrary JSON config | `"{ \"maxPosts\": 50 }"` |
+| Type         | Description           | Default Value Example        |
+| ------------ | --------------------- | ---------------------------- |
+| `boolean`    | On/off toggle         | `"true"` or `"false"`        |
+| `percentage` | Rollout percentage    | `"0"` to `"100"`             |
+| `variant`    | A/B test variant      | `"control"`, `"treatment_a"` |
+| `tier`       | Tier-gated access     | `"false"`                    |
+| `json`       | Arbitrary JSON config | `"{ \"maxPosts\": 50 }"`     |
 
 ## Requirements
 
@@ -114,6 +115,7 @@ POST /admin/flags/invalidate-all  // Invalidate all flag caches (emergency)
 #### 2.1 Flags List Page (`/dashboard/flags/+page.svelte`)
 
 **Features**:
+
 - Table listing all flags with columns: Name, Type, Status (enabled/disabled), Rules count, Last Updated
 - Quick toggle for enabled/disabled status
 - Search/filter by name or type
@@ -121,6 +123,7 @@ POST /admin/flags/invalidate-all  // Invalidate all flag caches (emergency)
 - Click row to navigate to flag detail page
 
 **UI Components**:
+
 - Use existing GroveAuth styling patterns (Tailwind + grove color palette)
 - Status badge: green for enabled, gray for disabled
 - Flag type badges with distinct colors
@@ -160,6 +163,7 @@ POST /admin/flags/invalidate-all  // Invalidate all flag caches (emergency)
 #### 2.3 Create Flag Page (`/dashboard/flags/new/+page.svelte`)
 
 **Form Fields**:
+
 - Flag ID (text, slug format, validated unique)
 - Name (text, required)
 - Description (textarea, optional)
@@ -168,6 +172,7 @@ POST /admin/flags/invalidate-all  // Invalidate all flag caches (emergency)
 - Enabled (checkbox, default true)
 
 **Validation**:
+
 - Flag ID: lowercase, alphanumeric with underscores, max 64 chars
 - Name: required, max 128 chars
 - Default Value: must be valid JSON for the selected type
@@ -178,16 +183,17 @@ Create a reusable `RuleEditor.svelte` component for adding/editing rules.
 
 **Fields by Rule Type**:
 
-| Rule Type | Fields |
-|-----------|--------|
-| `tenant` | Multi-select or text input for tenant IDs |
-| `tier` | Checkbox group for tiers (free, seedling, sapling, oak, evergreen) |
-| `percentage` | Slider (0-100%) + optional salt input |
-| `user` | Multi-select or text input for user IDs |
-| `time` | Date pickers for start/end |
-| `always` | No additional fields |
+| Rule Type    | Fields                                                             |
+| ------------ | ------------------------------------------------------------------ |
+| `tenant`     | Multi-select or text input for tenant IDs                          |
+| `tier`       | Checkbox group for tiers (free, seedling, sapling, oak, evergreen) |
+| `percentage` | Slider (0-100%) + optional salt input                              |
+| `user`       | Multi-select or text input for user IDs                            |
+| `time`       | Date pickers for start/end                                         |
+| `always`     | No additional fields                                               |
 
 **Common Fields**:
+
 - Priority (number)
 - Result Value (appropriate input for flag type)
 - Enabled (checkbox)
@@ -197,6 +203,7 @@ Create a reusable `RuleEditor.svelte` component for adding/editing rules.
 Based on existing GroveAuth admin UI:
 
 **Styling**:
+
 ```css
 /* Follow existing grove color palette */
 --grove-50 to --grove-950
@@ -212,12 +219,14 @@ Based on existing GroveAuth admin UI:
 ```
 
 **Layout**:
+
 - Use same dashboard layout as other admin pages
 - Header with page title and primary action button
 - Content in card containers
 - Responsive grid for form sections
 
 **Interactions**:
+
 - Form submissions use SvelteKit actions with `$enhance`
 - Confirmations for destructive actions (delete flag, invalidate cache)
 - Toast notifications for success/error feedback
@@ -232,7 +241,7 @@ interface FeatureFlag {
   id: string;
   name: string;
   description?: string;
-  flagType: 'boolean' | 'percentage' | 'variant' | 'tier' | 'json';
+  flagType: "boolean" | "percentage" | "variant" | "tier" | "json";
   defaultValue: unknown;
   enabled: boolean;
   cacheTtl?: number;
@@ -247,7 +256,7 @@ interface FlagRule {
   id: number;
   flagId: string;
   priority: number;
-  ruleType: 'tenant' | 'tier' | 'percentage' | 'user' | 'time' | 'always';
+  ruleType: "tenant" | "tier" | "percentage" | "user" | "time" | "always";
   ruleValue: Record<string, unknown>;
   resultValue: unknown;
   enabled: boolean;
@@ -257,7 +266,15 @@ interface FlagRule {
 interface FlagAuditEntry {
   id: number;
   flagId: string;
-  action: 'create' | 'update' | 'delete' | 'enable' | 'disable' | 'rule_add' | 'rule_update' | 'rule_delete';
+  action:
+    | "create"
+    | "update"
+    | "delete"
+    | "enable"
+    | "disable"
+    | "rule_add"
+    | "rule_update"
+    | "rule_delete";
   oldValue?: unknown;
   newValue?: unknown;
   changedBy?: string;
@@ -281,11 +298,12 @@ Position in navigation: After "Status" or at the end of admin tools section.
 
 ### 7. Database Connection
 
-The feature flags tables are in the **GroveEngine D1 database** (`grove-engine-db`), not the GroveAuth database. The admin API needs to connect to the engine database for flag management.
+The feature flags tables are in the **Lattice D1 database** (`grove-engine-db`), not the GroveAuth database. The admin API needs to connect to the engine database for flag management.
 
 **Options**:
+
 1. Add `GROVE_ENGINE_DB` binding to GroveAuth worker
-2. Proxy flag management through a GroveEngine API endpoint
+2. Proxy flag management through a Lattice API endpoint
 3. Create a shared database binding
 
 Recommendation: Add a new D1 binding to GroveAuth's `wrangler.toml`:

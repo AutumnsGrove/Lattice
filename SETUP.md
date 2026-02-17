@@ -1,6 +1,6 @@
 # Development Setup
 
-Everything you need to get GroveEngine running locally.
+Everything you need to get Lattice running locally.
 
 ---
 
@@ -16,8 +16,8 @@ Everything you need to get GroveEngine running locally.
 ## Install
 
 ```bash
-git clone https://github.com/AutumnsGrove/GroveEngine.git
-cd GroveEngine
+git clone https://github.com/AutumnsGrove/Lattice.git
+cd Lattice
 pnpm install
 ```
 
@@ -168,14 +168,14 @@ All consumer apps **must** use the engine's shared Tailwind preset. Without it, 
 
 ```javascript
 // tailwind.config.js in any app
-import grovePreset from '../engine/src/lib/ui/tailwind.preset.js';
+import grovePreset from "../engine/src/lib/ui/tailwind.preset.js";
 
 export default {
   presets: [grovePreset],
   content: [
-    './src/**/*.{html,js,svelte,ts}',
+    "./src/**/*.{html,js,svelte,ts}",
     // REQUIRED: scan engine components for Tailwind classes
-    '../engine/src/lib/**/*.{html,js,svelte,ts}'
+    "../engine/src/lib/**/*.{html,js,svelte,ts}",
   ],
 };
 ```
@@ -185,9 +185,9 @@ export default {
 ## Project Structure
 
 ```
-GroveEngine/
+Lattice/
 ├── packages/
-│   ├── engine/           # @autumnsgrove/groveengine — core engine
+│   ├── engine/           # @autumnsgrove/lattice — core engine
 │   ├── landing/          # Marketing site (grove.place)
 │   ├── heartwood/        # Authentication service
 │   ├── plant/            # Tenant blog management

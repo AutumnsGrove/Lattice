@@ -21,6 +21,7 @@ I typically respond within 24-48 hours. Please be patient, and I'll get back to 
 ## What to Include
 
 When reaching out, please let me know:
+
 - Your name
 - What you're contacting me about
 - Any relevant links or details

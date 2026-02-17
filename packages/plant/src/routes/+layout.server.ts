@@ -1,5 +1,5 @@
 import type { LayoutServerLoad } from "./$types";
-import { loadChannelMessages } from "@autumnsgrove/groveengine/services";
+import { loadChannelMessages } from "@autumnsgrove/lattice/services";
 import { PLANT_ERRORS } from "$lib/errors";
 
 export const load: LayoutServerLoad = async ({ cookies, platform }) => {

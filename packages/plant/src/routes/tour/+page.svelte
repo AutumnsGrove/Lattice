@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { ArrowRight, X, ChevronLeft, ChevronRight, MapPin, Sprout, PartyPopper } from '@autumnsgrove/groveengine/ui/icons';
-	import { GlassCard } from '@autumnsgrove/groveengine/ui';
+	import { ArrowRight, X, ChevronLeft, ChevronRight, MapPin, Sprout, PartyPopper } from '@autumnsgrove/lattice/ui/icons';
+	import { GlassCard } from '@autumnsgrove/lattice/ui';
 
 	let { data } = $props();
 

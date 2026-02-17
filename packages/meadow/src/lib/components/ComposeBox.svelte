@@ -7,7 +7,7 @@
 -->
 <script lang="ts">
   import type { MeadowPost } from "$lib/types/post";
-  import { NoteEditor } from "@autumnsgrove/groveengine/ui/editor";
+  import { NoteEditor } from "@autumnsgrove/lattice/ui/editor";
   import { uploadNoteImage } from "$lib/utils/note-upload";
 
   interface Props {
@@ -95,8 +95,7 @@
       html !== `<p>${text}</p>` && html !== "<p></p>" && html.trim() !== "";
 
     try {
-      const res = await fetch("/api/notes", {
-        // csrf-ok
+      const res = await fetch("/api/notes", { // csrf-ok
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },

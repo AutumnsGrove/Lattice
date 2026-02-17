@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
 	import { Mail, Loader2, RefreshCw, Check, ArrowRight } from "lucide-svelte";
-	import { GlassCard } from "@autumnsgrove/groveengine/ui";
+	import { GlassCard } from "@autumnsgrove/lattice/ui";
 
 	let { data } = $props();
 

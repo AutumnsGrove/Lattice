@@ -42,7 +42,7 @@ Survey the entire issue board:
 
 ```bash
 # Get all open issues with metadata
-gh issue list --repo AutumnsGrove/GroveEngine --state open --limit 200 --json number,title,labels,createdAt,updatedAt,body
+gh issue list --repo AutumnsGrove/Lattice --state open --limit 200 --json number,title,labels,createdAt,updatedAt,body
 ```
 
 **Build the mental map:**

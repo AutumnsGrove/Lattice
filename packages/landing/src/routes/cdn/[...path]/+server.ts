@@ -2,7 +2,7 @@
 
 import { error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { storage } from "@autumnsgrove/groveengine/services";
+import { storage } from "@autumnsgrove/lattice/services";
 
 /**
  * Validate and return the appropriate CORS origin.

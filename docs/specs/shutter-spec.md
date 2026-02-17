@@ -4,7 +4,7 @@ description: Token-efficient web fetching with built-in prompt injection defense
 category: specs
 specCategory: standalone-tools
 icon: aperture
-lastUpdated: '2026-01-13'
+lastUpdated: "2026-01-13"
 aliases: []
 tags:
   - web-content
@@ -30,11 +30,11 @@ tags:
               What reaches the lens, you control.
 ```
 
-> *Open. Capture. Close.*
+> _Open. Capture. Close._
 
 A web content distillation layer that sits between LLM agents and raw web pages. It fetches URLs, uses a cheap/fast LLM to extract only the relevant content based on a query, and returns clean, focused results.
 
-**Package:** `grove-shutter` (Python) / `@groveengine/shutter` (npm)
+**Package:** `grove-shutter` (Python) / `@lattice/shutter` (npm)
 **Repository:** [AutumnsGrove/Shutter](https://github.com/AutumnsGrove/Shutter)
 **Type:** Python Package / npm Package / Cloudflare Worker
 **Purpose:** Token-efficient web fetching with built-in prompt injection defense
@@ -79,13 +79,13 @@ Driver Agent (Claude, GPT, etc.)
 
 **Two implementations, same interface:**
 
-| | Python | Cloudflare |
-|-|--------|------------|
-| Offenders list | SQLite (local) | D1 (shared) |
-| Rate limiting | Honor system / local | Durable Objects |
-| Fetch | httpx + Tavily | fetch + Tavily |
-| LLM | OpenRouter | OpenRouter |
-| CLI | `shutter` / `uvx grove-shutter` | `npx @groveengine/shutter` |
+|                | Python                          | Cloudflare             |
+| -------------- | ------------------------------- | ---------------------- |
+| Offenders list | SQLite (local)                  | D1 (shared)            |
+| Rate limiting  | Honor system / local            | Durable Objects        |
+| Fetch          | httpx + Tavily                  | fetch + Tavily         |
+| LLM            | OpenRouter                      | OpenRouter             |
+| CLI            | `shutter` / `uvx grove-shutter` | `npx @lattice/shutter` |
 
 ## Invocation Patterns
 
@@ -102,7 +102,7 @@ uvx grove-shutter "https://example.com/pricing" --query "extract pricing tiers"
 ### CLI (Node.js — after v1.5)
 
 ```bash
-npx @groveengine/shutter "https://example.com/pricing" --query "extract pricing tiers"
+npx @lattice/shutter "https://example.com/pricing" --query "extract pricing tiers"
 ```
 
 ### Programmatic (Python)
@@ -121,13 +121,13 @@ result = await shutter(
 ### Programmatic (Node.js — after v1.5)
 
 ```typescript
-import { shutter } from '@groveengine/shutter';
+import { shutter } from "@lattice/shutter";
 
 const result = await shutter({
-  url: 'https://example.com/pricing',
-  query: 'extract pricing tiers',
-  model: 'fast',
-  maxTokens: 500
+  url: "https://example.com/pricing",
+  query: "extract pricing tiers",
+  model: "fast",
+  maxTokens: 500,
 });
 ```
 
@@ -179,23 +179,23 @@ The `prompt_injection` object gives the driver model enough information to decid
 
 ## Configuration Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `url` | str | required | URL to fetch |
-| `query` | str | required | What to extract |
-| `model` | str | `"fast"` | Model preference (see below) |
-| `max_tokens` | int | `500` | Max output tokens |
-| `extended_query` | str | `None` | Additional extraction instructions |
-| `timeout` | int | `30000` | Fetch timeout (ms) |
+| Option           | Type | Default  | Description                        |
+| ---------------- | ---- | -------- | ---------------------------------- |
+| `url`            | str  | required | URL to fetch                       |
+| `query`          | str  | required | What to extract                    |
+| `model`          | str  | `"fast"` | Model preference (see below)       |
+| `max_tokens`     | int  | `500`    | Max output tokens                  |
+| `extended_query` | str  | `None`   | Additional extraction instructions |
+| `timeout`        | int  | `30000`  | Fetch timeout (ms)                 |
 
 ### Model Preferences
 
-| Value | Use Case | Model |
-|-------|----------|-------|
-| `fast` | Quick extractions, simple queries | Cerebras or Groq (fastest available) |
-| `accurate` | Complex extraction, nuanced content | DeepSeek V3.2 |
-| `research` | Web-optimized, longer analysis | Tongyi DeepResearcher (Qwen3 30B-3B) |
-| `code` | Technical docs, code extraction | Minimax M2.1 |
+| Value      | Use Case                            | Model                                |
+| ---------- | ----------------------------------- | ------------------------------------ |
+| `fast`     | Quick extractions, simple queries   | Cerebras or Groq (fastest available) |
+| `accurate` | Complex extraction, nuanced content | DeepSeek V3.2                        |
+| `research` | Web-optimized, longer analysis      | Tongyi DeepResearcher (Qwen3 30B-3B) |
+| `code`     | Technical docs, code extraction     | Minimax M2.1                         |
 
 ## Prompt Injection Defense
 
@@ -204,11 +204,13 @@ The `prompt_injection` object gives the driver model enough information to decid
 Rather than full 3-bird Songbird, Shutter uses a 2-phase approach:
 
 **Phase 1: Canary Check**
+
 - Run extraction with minimal tokens (100-200)
 - Check for instruction-override patterns in output
 - Cost: ~$0.001
 
 **Phase 2: Full Extraction** (only if Phase 1 passes)
+
 - Run full extraction with requested token limit
 - Cost: varies by model and content
 
@@ -232,6 +234,7 @@ class Offender:
 ```
 
 When a request comes in, Shutter checks the offenders list first:
+
 - **Not on list**: Proceed normally
 - **On list, < 3 detections**: Proceed with warning in response
 - **On list, ≥ 3 detections**: Return early with warning, skip fetch entirely
@@ -242,48 +245,51 @@ This creates trial-and-error defense that improves over time.
 
 ### Python Stack (v0.1 - v1.0)
 
-| Component | Tool |
-|-----------|------|
-| HTTP Client | httpx (async) |
-| LLM Provider | OpenRouter |
-| Enhanced Fetch | Tavily SDK |
-| Offenders List | SQLite (local) |
-| CLI | Typer |
-| Validation | Pydantic |
-| Config | TOML (~/.shutter/config.toml) |
+| Component      | Tool                          |
+| -------------- | ----------------------------- |
+| HTTP Client    | httpx (async)                 |
+| LLM Provider   | OpenRouter                    |
+| Enhanced Fetch | Tavily SDK                    |
+| Offenders List | SQLite (local)                |
+| CLI            | Typer                         |
+| Validation     | Pydantic                      |
+| Config         | TOML (~/.shutter/config.toml) |
 
 ### Cloudflare Stack (v1.5+)
 
-| Component | Tool |
-|-----------|------|
-| Compute | Workers |
-| Offenders List | D1 (shared) |
-| Rate Limiting | Durable Objects |
-| Config Cache | KV |
-| Content Cache | R2 (v3.0) |
+| Component      | Tool            |
+| -------------- | --------------- |
+| Compute        | Workers         |
+| Offenders List | D1 (shared)     |
+| Rate Limiting  | Durable Objects |
+| Config Cache   | KV              |
+| Content Cache  | R2 (v3.0)       |
 
 ### Fetch Providers (v1)
 
-| Provider | Use Case |
-|----------|----------|
-| Native fetch/httpx | Direct URL fetching, simple pages |
-| Tavily | Enhanced extraction, JavaScript-rendered content |
+| Provider           | Use Case                                         |
+| ------------------ | ------------------------------------------------ |
+| Native fetch/httpx | Direct URL fetching, simple pages                |
+| Tavily             | Enhanced extraction, JavaScript-rendered content |
 
 Additional providers (Exa, Brave, etc.) planned for v2.
 
 ### Authentication
 
 **Python (local):**
+
 - API keys stored in `~/.shutter/config.toml`
 - Environment variables as fallback
 
 **Cloudflare (hosted at shutter.grove.place):**
 
-*For Grove services (internal):*
+_For Grove services (internal):_
+
 - Service-to-service auth via encrypted key exchange
 - Validated against known Grove service signatures
 
-*For external API users:*
+_For external API users:_
+
 - API key tied to Heartwood user account
 - Rate limits based on subscription tier:
   - Free: 100 requests/day
@@ -297,6 +303,7 @@ Additional providers (Exa, Brave, etc.) planned for v2.
 **Python first.** The Python implementation is the proof of concept. Once validated, port to Cloudflare Workers.
 
 This approach:
+
 - Validates the concept before investing in edge infrastructure
 - Creates a version that always works (no Cloudflare dependency)
 - Aligns with ML/AI ecosystem (most tooling is Python)
@@ -307,6 +314,7 @@ This approach:
 Fully standalone implementation. No Cloudflare required.
 
 **Stack:**
+
 - **httpx** — Async HTTP client for fetching
 - **SQLite** — Local offenders list (portable, same concept as D1)
 - **OpenRouter** — LLM provider abstraction
@@ -315,6 +323,7 @@ Fully standalone implementation. No Cloudflare required.
 - **Pydantic** — Request/response validation
 
 **Install & Run:**
+
 ```bash
 # Install
 pip install grove-shutter
@@ -329,6 +338,7 @@ uvx grove-shutter "https://example.com/pricing" --query "extract pricing tiers"
 ```
 
 **Programmatic:**
+
 ```python
 from grove_shutter import shutter
 
@@ -341,6 +351,7 @@ result = await shutter(
 ```
 
 **Config:**
+
 ```bash
 # First run prompts for setup, or set env vars:
 export OPENROUTER_API_KEY="..."
@@ -348,40 +359,46 @@ export TAVILY_API_KEY="..."  # optional, for enhanced fetching
 ```
 
 **Local storage:**
+
 ```
 ~/.shutter/
   config.toml      # API keys, default model, etc.
   offenders.db     # SQLite offenders list
 ```
 
-### Phase 2: Cloudflare Workers — `@groveengine/shutter`
+### Phase 2: Cloudflare Workers — `@lattice/shutter`
 
 Port after Python version is validated.
 
 **Stack:**
+
 - **Workers** — Edge compute
 - **D1** — Offenders list (shared across instances)
 - **Durable Objects** — Rate limiting
 - **KV** — Config cache
 
 **Why port to Cloudflare:**
+
 - Edge latency (faster for global users)
 - Shared offenders list across all users
 - Integration with other Grove services
 - Scalability without managing servers
 
 **CLI via npx:**
+
 ```bash
-npx @groveengine/shutter "https://example.com/pricing" --query "extract pricing tiers"
+npx @lattice/shutter "https://example.com/pricing" --query "extract pricing tiers"
 ```
 
 The npm package can either:
+
 - Call the hosted API at `shutter.grove.place`
 - Run standalone with user's own OpenRouter key (same as Python)
 
 ### Self-Hosting
 
 **Python (recommended for most users):**
+
 ```bash
 pip install grove-shutter
 # Configure API keys
@@ -389,6 +406,7 @@ shutter --setup
 ```
 
 **Cloudflare (for Grove-scale deployments):**
+
 ```bash
 git clone https://github.com/AutumnsGrove/Shutter
 cd Shutter/cloudflare
@@ -400,6 +418,7 @@ wrangler deploy
 ## Roadmap
 
 ### v0.1 — Python Proof of Concept
+
 - [ ] Core fetch + summarization logic
 - [ ] OpenRouter integration
 - [ ] Basic prompt injection detection
@@ -407,6 +426,7 @@ wrangler deploy
 - [ ] Local SQLite offenders list
 
 ### v1.0 — Python Production
+
 - [ ] Full Canary-based PI detection
 - [ ] Tavily integration for enhanced fetching
 - [ ] All four model tiers (fast/accurate/research/code)
@@ -415,47 +435,50 @@ wrangler deploy
 - [ ] Config management (~/.shutter/)
 
 ### v1.5 — Cloudflare Port
+
 - [ ] Worker implementation (port from Python)
 - [ ] D1 shared offenders list
 - [ ] Durable Objects rate limiting
 - [ ] HTTP API with Heartwood auth
-- [ ] NPM package (`@groveengine/shutter`)
+- [ ] NPM package (`@lattice/shutter`)
 - [ ] npx one-liner support
 
 ### v2.0 — Search
+
 - [ ] Multi-URL search queries
 - [ ] Additional providers (Exa, Brave, etc.)
 - [ ] Result aggregation and deduplication
 - [ ] Source ranking
 
 ### v3.0 — Caching & Intelligence
+
 - [ ] Content caching
 - [ ] Smart cache invalidation
 - [ ] Injection pattern learning
 
 ## Grove Integration Points
 
-| Service | How Shutter Helps |
-|---------|-------------------|
-| **Mycelium** | MCP server routes all external web access through Shutter. One security boundary for all Grove agents. |
+| Service            | How Shutter Helps                                                                                             |
+| ------------------ | ------------------------------------------------------------------------------------------------------------- |
+| **Mycelium**       | MCP server routes all external web access through Shutter. One security boundary for all Grove agents.        |
 | **Daily Clearing** | News verification swarm uses Shutter as its fetch primitive. Already doing similar patterns—now standardized. |
-| **Meadow** | Shared link previews pass through Shutter before rendering. Malicious links caught before they hit users. |
-| **Ivy** | Email link scanning. Inbound emails with suspicious links get Shutter-checked before preview generation. |
-| **Forage** | Domain research fetches (WHOIS pages, registrar info) go through Shutter for clean extraction. |
-| **Aria** | Lyrics/metadata fetching from external sources. Token-efficient, safe. |
+| **Meadow**         | Shared link previews pass through Shutter before rendering. Malicious links caught before they hit users.     |
+| **Ivy**            | Email link scanning. Inbound emails with suspicious links get Shutter-checked before preview generation.      |
+| **Forage**         | Domain research fetches (WHOIS pages, registrar info) go through Shutter for clean extraction.                |
+| **Aria**           | Lyrics/metadata fetching from external sources. Token-efficient, safe.                                        |
 
 ## Future Considerations
 
-Shutter isn't just a fetch tool—it's proving a pattern: *cheap LLM as security/efficiency layer between untrusted input and expensive processing*. If this works for web pages, the architecture applies elsewhere.
+Shutter isn't just a fetch tool—it's proving a pattern: _cheap LLM as security/efficiency layer between untrusted input and expensive processing_. If this works for web pages, the architecture applies elsewhere.
 
 ### Patterns This Proves
 
-| Pattern | Application |
-|---------|-------------|
-| **Sanitization layer** | Any untrusted content passes through cheap LLM before reaching driver models |
-| **Token compression** | Reduce 20k tokens to 200 without losing signal |
+| Pattern                | Application                                                                    |
+| ---------------------- | ------------------------------------------------------------------------------ |
+| **Sanitization layer** | Any untrusted content passes through cheap LLM before reaching driver models   |
+| **Token compression**  | Reduce 20k tokens to 200 without losing signal                                 |
 | **Fail-loud security** | Return detailed rejection info so orchestrators can adapt, not silent failures |
-| **Offenders list** | Trial-and-error defense that improves over time |
+| **Offenders list**     | Trial-and-error defense that improves over time                                |
 
 ### The Broader Primitive
 
@@ -466,6 +489,7 @@ Untrusted Input → Cheap LLM Check → Safe Output (or rejection with details)
 ```
 
 This applies to:
+
 - Web fetches (Shutter v1)
 - User-submitted content in social features
 - File uploads and attachments
@@ -504,4 +528,4 @@ This research informs the extraction prompt design rather than building blind.
 
 ---
 
-*Last updated: January 13, 2026*
+_Last updated: January 13, 2026_

@@ -14,8 +14,8 @@
 
 import { redirect } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
-import { sanitizeReturnTo } from "@autumnsgrove/groveengine/utils";
-import { buildLoginUrl } from "@autumnsgrove/groveengine/grafts/login";
+import { sanitizeReturnTo } from "@autumnsgrove/lattice/utils";
+import { buildLoginUrl } from "@autumnsgrove/lattice/grafts/login";
 
 export const load: PageServerLoad = async ({ url }) => {
   // Where the user wants to go after auth (e.g., /arbor)

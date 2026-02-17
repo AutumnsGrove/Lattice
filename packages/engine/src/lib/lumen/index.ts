@@ -14,7 +14,7 @@
  *
  * @example
  * ```typescript
- * import { createLumenClient } from '@autumnsgrove/groveengine/lumen';
+ * import { createLumenClient } from '@autumnsgrove/lattice/lumen';
  *
  * const lumen = createLumenClient({
  *   openrouterApiKey: env.OPENROUTER_API_KEY,

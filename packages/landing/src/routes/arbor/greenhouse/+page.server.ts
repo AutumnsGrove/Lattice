@@ -4,9 +4,9 @@ import {
   getGreenhouseTenants,
   getFeatureFlags,
   setFlagEnabled,
-} from "@autumnsgrove/groveengine/feature-flags";
-import type { FeatureFlagSummary } from "@autumnsgrove/groveengine/feature-flags";
-import { isWayfinder } from "@autumnsgrove/groveengine/config";
+} from "@autumnsgrove/lattice/feature-flags";
+import type { FeatureFlagSummary } from "@autumnsgrove/lattice/feature-flags";
+import { isWayfinder } from "@autumnsgrove/lattice/config";
 
 export const load: PageServerLoad = async ({ parent, platform }) => {
   const parentData = await parent();

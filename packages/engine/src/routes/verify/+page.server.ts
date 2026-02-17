@@ -32,7 +32,12 @@ function isValidRedirect(target: string, origin: string): boolean {
   }
 }
 
-export const load: PageServerLoad = async ({ cookies, platform, url, request }) => {
+export const load: PageServerLoad = async ({
+  cookies,
+  platform,
+  url,
+  request,
+}) => {
   const secretKey = platform?.env?.TURNSTILE_SECRET_KEY;
   const siteKey = platform?.env?.TURNSTILE_SITE_KEY;
 

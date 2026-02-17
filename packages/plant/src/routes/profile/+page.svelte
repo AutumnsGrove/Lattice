@@ -12,9 +12,9 @@
 		BookOpen,
 		Briefcase,
 		Star,
-	} from "@autumnsgrove/groveengine/ui/icons";
-	import { GlassCard } from "@autumnsgrove/groveengine/ui";
-	import { COLOR_PRESETS } from "@autumnsgrove/groveengine";
+	} from "@autumnsgrove/lattice/ui/icons";
+	import { GlassCard } from "@autumnsgrove/lattice/ui";
+	import { COLOR_PRESETS } from "@autumnsgrove/lattice";
 	import { submitFormAndGo } from "$lib/submit-form";
 
 	let { data } = $props();

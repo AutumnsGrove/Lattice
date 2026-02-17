@@ -5,8 +5,8 @@
 	 * A clearing in the forest where you can see what's happening.
 	 * Public-facing status page showing platform health, incidents, and uptime.
 	 */
-	import { Header, Footer, type NavItem } from '@autumnsgrove/groveengine/ui/chrome';
-	import { GroveIntro, GroveMessages } from '@autumnsgrove/groveengine/ui';
+	import { Header, Footer, type NavItem } from '@autumnsgrove/lattice/ui/chrome';
+	import { GroveIntro, GroveMessages } from '@autumnsgrove/lattice/ui';
 	import GlassStatusBanner from '$lib/components/GlassStatusBanner.svelte';
 	import GlassStatusCard from '$lib/components/GlassStatusCard.svelte';
 	import GlassUptimeBar from '$lib/components/GlassUptimeBar.svelte';

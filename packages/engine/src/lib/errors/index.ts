@@ -13,7 +13,7 @@
  *   buildErrorUrl,
  *   buildErrorJson,
  *   throwGroveError,
- * } from '@autumnsgrove/groveengine/errors';
+ * } from '@autumnsgrove/lattice/errors';
  * ```
  */
 

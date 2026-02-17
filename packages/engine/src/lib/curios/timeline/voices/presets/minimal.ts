@@ -62,7 +62,7 @@ GENERATE THREE OUTPUTS:
 1. BRIEF SUMMARY (1-2 lines max):
    Ultra-concise. Examples:
    - "Auth: session fixes, token refresh. Timeline: CSS polish."
-   - "Refactor day. GroveEngine internals, test cleanup."
+   - "Refactor day. Lattice internals, test cleanup."
    - "Bug fixes across 4 repos. Nothing major."
 
 2. DETAILED BREAKDOWN (markdown):

@@ -29,16 +29,16 @@ This plan transforms Meadow from a landing page into a living community feed —
 
 Reuse Landing's proven dual-auth strategy. Everything downstream depends on `locals.user`.
 
-| File                                                  | Action                                                                      | Reference                                       |
-| ----------------------------------------------------- | --------------------------------------------------------------------------- | ----------------------------------------------- |
-| `packages/meadow/src/hooks.server.ts`                 | **Create** — Heartwood SessionDO (primary) + D1 fallback, CSRF on mutations | `packages/landing/src/hooks.server.ts`          |
-| `packages/meadow/src/routes/auth/callback/+server.ts` | **Create** — `createCallbackHandler({ defaultReturnTo: "/feed" })`          | `@autumnsgrove/groveengine/grafts/login/server` |
-| `packages/meadow/src/routes/+layout.server.ts`        | **Modify** — Add `user: locals.user` to returned data                       | Already returns `messages`                      |
+| File                                                  | Action                                                                      | Reference                                   |
+| ----------------------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------- |
+| `packages/meadow/src/hooks.server.ts`                 | **Create** — Heartwood SessionDO (primary) + D1 fallback, CSRF on mutations | `packages/landing/src/hooks.server.ts`      |
+| `packages/meadow/src/routes/auth/callback/+server.ts` | **Create** — `createCallbackHandler({ defaultReturnTo: "/feed" })`          | `@autumnsgrove/lattice/grafts/login/server` |
+| `packages/meadow/src/routes/+layout.server.ts`        | **Modify** — Add `user: locals.user` to returned data                       | Already returns `messages`                  |
 
 Key imports:
 
-- `buildLoginUrl` from `@autumnsgrove/groveengine/grafts/login`
-- `createCallbackHandler` from `@autumnsgrove/groveengine/grafts/login/server`
+- `buildLoginUrl` from `@autumnsgrove/lattice/grafts/login`
+- `createCallbackHandler` from `@autumnsgrove/lattice/grafts/login/server`
 - Auth cookie names from engine config
 
 ### Phase 2: Service Layer + Constants (7 files, ~380 lines)
@@ -180,7 +180,7 @@ Phase 1 (Auth) ─────────→ Phase 2 (Service Layer + Constants
 | Emoji validation        | `packages/engine/src/lib/curios/guestbook/index.ts`              |
 | Rate limiting (IP-hash) | `packages/engine/src/routes/api/curios/guestbook/+server.ts:192` |
 | Client API calls        | `packages/engine/src/lib/utils/api.ts` (api.post, api.get)       |
-| Error responses         | `@autumnsgrove/groveengine/errors` (buildErrorJson, API_ERRORS)  |
+| Error responses         | `@autumnsgrove/lattice/errors` (buildErrorJson, API_ERRORS)      |
 
 ## Summary
 

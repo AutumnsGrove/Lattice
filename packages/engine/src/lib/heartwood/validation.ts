@@ -24,21 +24,21 @@ export const TOTP_CODE_REGEX = /^\d{6}$/;
  * Matches the Credential interface from the Web Authentication API.
  */
 export interface PasskeyCredential {
-	/** Base64url-encoded credential identifier */
-	id: string;
-	/** Base64url-encoded raw credential ID */
-	rawId: string;
-	/** Credential response containing attestation data */
-	response: {
-		/** Base64url-encoded attestation object */
-		attestationObject: string;
-		/** Base64url-encoded client data JSON */
-		clientDataJSON: string;
-	};
-	/** Credential type, must be "public-key" */
-	type: string;
-	/** Optional user-provided name for the passkey */
-	name?: string;
+  /** Base64url-encoded credential identifier */
+  id: string;
+  /** Base64url-encoded raw credential ID */
+  rawId: string;
+  /** Credential response containing attestation data */
+  response: {
+    /** Base64url-encoded attestation object */
+    attestationObject: string;
+    /** Base64url-encoded client data JSON */
+    clientDataJSON: string;
+  };
+  /** Credential type, must be "public-key" */
+  type: string;
+  /** Optional user-provided name for the passkey */
+  name?: string;
 }
 
 // ==========================================================================
@@ -63,7 +63,7 @@ export interface PasskeyCredential {
  * ```
  */
 export function isValidTotpCode(code: string | undefined): code is string {
-	return typeof code === 'string' && TOTP_CODE_REGEX.test(code);
+  return typeof code === "string" && TOTP_CODE_REGEX.test(code);
 }
 
 // ==========================================================================
@@ -90,24 +90,29 @@ export function isValidTotpCode(code: string | undefined): code is string {
  * ```
  */
 export function isValidCredential(body: unknown): body is PasskeyCredential {
-	if (!body || typeof body !== 'object') return false;
-	const obj = body as Record<string, unknown>;
+  if (!body || typeof body !== "object") return false;
+  const obj = body as Record<string, unknown>;
 
-	// Required fields
-	if (typeof obj.id !== 'string' || !obj.id) return false;
-	if (typeof obj.rawId !== 'string' || !obj.rawId) return false;
-	if (typeof obj.type !== 'string' || obj.type !== 'public-key') return false;
+  // Required fields
+  if (typeof obj.id !== "string" || !obj.id) return false;
+  if (typeof obj.rawId !== "string" || !obj.rawId) return false;
+  if (typeof obj.type !== "string" || obj.type !== "public-key") return false;
 
-	// Response object
-	if (!obj.response || typeof obj.response !== 'object') return false;
-	const response = obj.response as Record<string, unknown>;
-	if (typeof response.attestationObject !== 'string' || !response.attestationObject) return false;
-	if (typeof response.clientDataJSON !== 'string' || !response.clientDataJSON) return false;
+  // Response object
+  if (!obj.response || typeof obj.response !== "object") return false;
+  const response = obj.response as Record<string, unknown>;
+  if (
+    typeof response.attestationObject !== "string" ||
+    !response.attestationObject
+  )
+    return false;
+  if (typeof response.clientDataJSON !== "string" || !response.clientDataJSON)
+    return false;
 
-	// Optional name field
-	if (obj.name !== undefined && typeof obj.name !== 'string') return false;
+  // Optional name field
+  if (obj.name !== undefined && typeof obj.name !== "string") return false;
 
-	return true;
+  return true;
 }
 
 // ==========================================================================
@@ -129,13 +134,13 @@ export function isValidCredential(body: unknown): body is PasskeyCredential {
  * ```
  */
 export function getRequiredEnv(
-	env: Record<string, string> | undefined,
-	key: string,
-	fallback?: string
+  env: Record<string, string> | undefined,
+  key: string,
+  fallback?: string,
 ): string {
-	const value = env?.[key] ?? fallback;
-	if (!value) {
-		throw new Error(`Missing required environment variable: ${key}`);
-	}
-	return value;
+  const value = env?.[key] ?? fallback;
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${key}`);
+  }
+  return value;
 }

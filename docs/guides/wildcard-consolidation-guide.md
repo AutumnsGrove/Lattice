@@ -5,6 +5,7 @@
 Migrate from multiple separate Pages deployments to a single deployment handling `*.grove.place`.
 
 **Current State:**
+
 ```
 example.grove.place  →  example-site Pages project
 another.grove.place  →  another-site Pages project
@@ -13,8 +14,9 @@ domains.grove.place  →  domains Pages project
 ```
 
 **Target State:**
+
 ```
-*.grove.place  →  groveengine Pages project (single deployment)
+*.grove.place  →  lattice Pages project (single deployment)
                   ↓
               SvelteKit hook parses subdomain
                   ↓
@@ -42,7 +44,7 @@ domains.grove.place  →  domains Pages project
                                 │
                                 ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                   groveengine Pages Project                     │
+│                   lattice Pages Project                     │
 │                                                                 │
 │  ┌─────────────────────────────────────────────────────────┐    │
 │  │                   hooks.server.ts                       │    │
@@ -64,7 +66,7 @@ domains.grove.place  →  domains Pages project
 │  │ /[tenant]/  │       │ /apps/      │       │ /           │    │
 │  │  routes     │       │  domains/   │       │ (grove.     │    │
 │  │             │       │  monitor/   │       │  place)     │    │
-│  └─────────────┘       └─────────────┘       └─────────────┘    │ 
+│  └─────────────┘       └─────────────┘       └─────────────┘    │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -118,108 +120,110 @@ packages/engine/src/routes/
 ```typescript
 // src/hooks.server.ts
 
-import type { Handle } from '@sveltejs/kit';
+import type { Handle } from "@sveltejs/kit";
 
 // Reserved subdomains that route to internal apps
 const RESERVED_SUBDOMAINS: Record<string, string> = {
-  'www': '/',                    // Redirect to root
-  'auth': '/auth',               // Auth app
-  'admin': '/admin',             // Platform admin
-  'api': '/api',                 // API routes
-  'domains': '/(apps)/domains',  // Domain search tool
-  'monitor': '/(apps)/monitor',  // GroveMonitor
-  'cdn': null,                   // Handled by R2 directly
-  'staging': null,               // Staging environment flag
+  www: "/", // Redirect to root
+  auth: "/auth", // Auth app
+  admin: "/admin", // Platform admin
+  api: "/api", // API routes
+  domains: "/(apps)/domains", // Domain search tool
+  monitor: "/(apps)/monitor", // GroveMonitor
+  cdn: null, // Handled by R2 directly
+  staging: null, // Staging environment flag
 };
 
 // Subdomains that are separate Workers (not consolidated)
-const EXTERNAL_WORKERS = ['scout', 'music', 'search'];
+const EXTERNAL_WORKERS = ["scout", "music", "search"];
 
 export const handle: Handle = async ({ event, resolve }) => {
-  const host = event.request.headers.get('host') || '';
-  const parts = host.split('.');
-  
+  const host = event.request.headers.get("host") || "";
+  const parts = host.split(".");
+
   // Extract subdomain (handle both grove.place and localhost)
   let subdomain: string | null = null;
-  
-  if (host.includes('grove.place')) {
+
+  if (host.includes("grove.place")) {
     // Production: *.grove.place
     subdomain = parts.length > 2 ? parts[0] : null;
-  } else if (host.includes('localhost') || host.includes('127.0.0.1')) {
+  } else if (host.includes("localhost") || host.includes("127.0.0.1")) {
     // Local dev: Check for subdomain simulation via header or query
-    subdomain = event.request.headers.get('x-subdomain') || 
-                event.url.searchParams.get('subdomain') ||
-                null;
+    subdomain =
+      event.request.headers.get("x-subdomain") ||
+      event.url.searchParams.get("subdomain") ||
+      null;
   }
-  
+
   // No subdomain = landing page (grove.place)
-  if (!subdomain || subdomain === 'grove') {
-    event.locals.context = { type: 'landing' };
+  if (!subdomain || subdomain === "grove") {
+    event.locals.context = { type: "landing" };
     return resolve(event);
   }
-  
+
   // Check if it's a reserved subdomain
   if (subdomain in RESERVED_SUBDOMAINS) {
     const routePrefix = RESERVED_SUBDOMAINS[subdomain];
-    
+
     if (routePrefix === null) {
       // External handling (CDN, etc.)
-      return new Response('Not handled by this worker', { status: 404 });
+      return new Response("Not handled by this worker", { status: 404 });
     }
-    
-    if (subdomain === 'www') {
+
+    if (subdomain === "www") {
       // Redirect www to root
       return new Response(null, {
         status: 301,
-        headers: { Location: `https://grove.place${event.url.pathname}` }
+        headers: { Location: `https://grove.place${event.url.pathname}` },
       });
     }
-    
-    event.locals.context = { 
-      type: 'app', 
+
+    event.locals.context = {
+      type: "app",
       app: subdomain,
-      routePrefix 
+      routePrefix,
     };
     return resolve(event);
   }
-  
+
   // Check if it's an external worker (not consolidated yet)
   if (EXTERNAL_WORKERS.includes(subdomain)) {
     // These are handled by separate Workers, shouldn't hit this
-    return new Response('Service not found', { status: 404 });
+    return new Response("Service not found", { status: 404 });
   }
-  
+
   // Must be a tenant subdomain - look up in D1
   const db = event.platform?.env?.DB;
   if (!db) {
-    console.error('D1 not available');
-    return new Response('Database unavailable', { status: 503 });
+    console.error("D1 not available");
+    return new Response("Database unavailable", { status: 503 });
   }
-  
-  const tenant = await db.prepare(
-    'SELECT * FROM tenants WHERE subdomain = ? AND active = 1'
-  ).bind(subdomain).first();
-  
+
+  const tenant = await db
+    .prepare("SELECT * FROM tenants WHERE subdomain = ? AND active = 1")
+    .bind(subdomain)
+    .first();
+
   if (!tenant) {
     // Subdomain not registered
-    event.locals.context = { type: 'not_found', subdomain };
+    event.locals.context = { type: "not_found", subdomain };
     // Could redirect to signup or show 404
-    return new Response('Blog not found', { status: 404 });
+    return new Response("Blog not found", { status: 404 });
   }
-  
+
   // Valid tenant - set context
   event.locals.context = {
-    type: 'tenant',
+    type: "tenant",
     tenant: {
       id: tenant.id,
       subdomain: tenant.subdomain,
       name: tenant.name,
       theme: tenant.theme_config ? JSON.parse(tenant.theme_config) : null,
       ownerId: tenant.owner_id,
-    }
+    },
   };
   event.locals.tenantId = tenant.id;
-  
+
   return resolve(event);
 };
 ```
@@ -237,7 +241,7 @@ declare global {
       context: AppContext;
       tenantId?: string;
     }
-    
+
     interface Platform {
       env?: {
         DB: D1Database;
@@ -248,11 +252,11 @@ declare global {
   }
 }
 
-type AppContext = 
-  | { type: 'landing' }
-  | { type: 'app'; app: string; routePrefix: string }
-  | { type: 'tenant'; tenant: TenantInfo }
-  | { type: 'not_found'; subdomain: string };
+type AppContext =
+  | { type: "landing" }
+  | { type: "app"; app: string; routePrefix: string }
+  | { type: "tenant"; tenant: TenantInfo }
+  | { type: "not_found"; subdomain: string };
 
 interface TenantInfo {
   id: string;
@@ -315,7 +319,7 @@ mv src/routes/domains/* src/routes/(apps)/domains/
 <!-- src/routes/+layout.svelte -->
 <script lang="ts">
   import { page } from '$app/stores';
-  
+
   $: context = $page.data.context;
 </script>
 
@@ -389,14 +393,14 @@ Then configure vite to handle `*.grove.local`.
 
 ## 📊 Before/After Comparison
 
-| Aspect | Before (Multiple Pages) | After (Wildcard) |
-|--------|------------------------|------------------|
-| Deployments | 5+ Pages projects | 1 Pages project |
-| Build time | 5+ separate builds | 1 build |
-| Code sharing | Manual copy/paste | Shared components |
-| Updates | Deploy to each | Deploy once |
-| DNS records | 5+ CNAME records | 1 wildcard CNAME |
-| Consistency | Can drift | Always in sync |
+| Aspect       | Before (Multiple Pages) | After (Wildcard)  |
+| ------------ | ----------------------- | ----------------- |
+| Deployments  | 5+ Pages projects       | 1 Pages project   |
+| Build time   | 5+ separate builds      | 1 build           |
+| Code sharing | Manual copy/paste       | Shared components |
+| Updates      | Deploy to each          | Deploy once       |
+| DNS records  | 5+ CNAME records        | 1 wildcard CNAME  |
+| Consistency  | Can drift               | Always in sync    |
 
 ---
 

@@ -96,7 +96,7 @@ Every tool has a nature metaphor that actually works as documentation — Heartw
 **Infrastructure:**
 
 - [x] Monorepo with `pnpm` workspaces, `bun` for local execution
-- [x] Engine-first pattern — shared components in `packages/engine/`, consumed via `@autumnsgrove/groveengine/*`
+- [x] Engine-first pattern — shared components in `packages/engine/`, consumed via `@autumnsgrove/lattice/*`
 - [x] Export chain: `package.json` exports → barrel files → individual components
 - [x] Cloudflare-first: Workers, D1, KV, R2, Durable Objects
 - [x] Custom tooling: `gf` (Go, ~40ms) for codebase search, `gw` for infrastructure CLI

@@ -123,7 +123,7 @@ export const LANDING_CONNECT_LINKS: FooterLink[] = [
     external: true,
   },
   {
-    href: "https://github.com/AutumnsGrove/GroveEngine",
+    href: "https://github.com/AutumnsGrove/Lattice",
     label: "GitHub",
     icon: Github,
     external: true,
@@ -163,7 +163,7 @@ export const LANDING_MOBILE_CONNECT_LINKS: FooterLink[] = [
     external: true,
   },
   {
-    href: "https://github.com/AutumnsGrove/GroveEngine",
+    href: "https://github.com/AutumnsGrove/Lattice",
     label: "GitHub",
     icon: Github,
     external: true,

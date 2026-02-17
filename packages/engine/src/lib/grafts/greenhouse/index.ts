@@ -7,7 +7,7 @@
  * @example Tenant-facing status display
  * ```svelte
  * <script>
- *   import { GreenhouseStatusCard } from '@autumnsgrove/groveengine/grafts/greenhouse';
+ *   import { GreenhouseStatusCard } from '@autumnsgrove/lattice/grafts/greenhouse';
  *   let { data } = $props();
  * </script>
  *
@@ -23,7 +23,7 @@
  *   import {
  *     GreenhouseEnrollTable,
  *     GreenhouseEnrollDialog
- *   } from '@autumnsgrove/groveengine/grafts/greenhouse';
+ *   } from '@autumnsgrove/lattice/grafts/greenhouse';
  *   let { data } = $props();
  *   let showDialog = $state(false);
  * </script>

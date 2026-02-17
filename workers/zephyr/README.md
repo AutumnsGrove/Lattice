@@ -128,15 +128,15 @@ if (!result.success) {
 
 ### Components
 
-| Component | Purpose | Location |
-|-----------|---------|----------|
-| **Auth Middleware** | API key validation | `src/middleware/auth.ts` |
-| **Validation** | Request schema validation | `src/middleware/validation.ts` |
-| **Rate Limiter** | Per-tenant rate limiting | `src/middleware/rate-limit.ts` |
-| **Unsubscribe** | Check opt-out list | `src/middleware/unsubscribe.ts` |
-| **Templates** | React Email rendering | `src/templates/index.ts` |
-| **Provider** | Resend with retries | `src/providers/resend.ts` |
-| **D1 Logging** | Audit trail | `src/logging/d1.ts` |
+| Component           | Purpose                   | Location                        |
+| ------------------- | ------------------------- | ------------------------------- |
+| **Auth Middleware** | API key validation        | `src/middleware/auth.ts`        |
+| **Validation**      | Request schema validation | `src/middleware/validation.ts`  |
+| **Rate Limiter**    | Per-tenant rate limiting  | `src/middleware/rate-limit.ts`  |
+| **Unsubscribe**     | Check opt-out list        | `src/middleware/unsubscribe.ts` |
+| **Templates**       | React Email rendering     | `src/templates/index.ts`        |
+| **Provider**        | Resend with retries       | `src/providers/resend.ts`       |
+| **D1 Logging**      | Audit trail               | `src/logging/d1.ts`             |
 
 ## Installation
 
@@ -149,14 +149,14 @@ pnpm install
 
 ### Environment Variables
 
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `RESEND_API_KEY` | Yes | — | Resend API key for sending emails |
-| `ZEPHYR_API_KEY` | Yes | — | API key for authenticating requests |
-| `EMAIL_RENDER_URL` | No | `https://grove-email-render.pages.dev` | Email render worker URL |
-| `DEFAULT_FROM_EMAIL` | No | `autumn@grove.place` | Default sender email |
-| `DEFAULT_FROM_NAME` | No | `Autumn` | Default sender name |
-| `ENVIRONMENT` | No | — | `production` or `staging` |
+| Variable             | Required | Default                                | Description                         |
+| -------------------- | -------- | -------------------------------------- | ----------------------------------- |
+| `RESEND_API_KEY`     | Yes      | —                                      | Resend API key for sending emails   |
+| `ZEPHYR_API_KEY`     | Yes      | —                                      | API key for authenticating requests |
+| `EMAIL_RENDER_URL`   | No       | `https://grove-email-render.pages.dev` | Email render worker URL             |
+| `DEFAULT_FROM_EMAIL` | No       | `autumn@grove.place`                   | Default sender email                |
+| `DEFAULT_FROM_NAME`  | No       | `Autumn`                               | Default sender name                 |
+| `ENVIRONMENT`        | No       | —                                      | `production` or `staging`           |
 
 ### D1 Database Setup
 
@@ -199,12 +199,14 @@ wrangler deploy --env production
 Send an email. Requires authentication.
 
 **Headers:**
+
 ```
 Content-Type: application/json
 X-API-Key: your-api-key-here
 ```
 
 **Request Body:**
+
 ```typescript
 {
   type: EmailType;           // Email category
@@ -227,6 +229,7 @@ X-API-Key: your-api-key-here
 ```
 
 **Example Request:**
+
 ```bash
 curl -X POST https://grove-zephyr.m7jv4v7npb.workers.dev/send \
   -H "Content-Type: application/json" \
@@ -245,6 +248,7 @@ curl -X POST https://grove-zephyr.m7jv4v7npb.workers.dev/send \
 ```
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -255,6 +259,7 @@ curl -X POST https://grove-zephyr.m7jv4v7npb.workers.dev/send \
 ```
 
 **Error Response (4xx/5xx):**
+
 ```json
 {
   "success": false,
@@ -269,6 +274,7 @@ curl -X POST https://grove-zephyr.m7jv4v7npb.workers.dev/send \
 Health check endpoint. No authentication required.
 
 **Response:**
+
 ```json
 {
   "status": "ok",
@@ -282,9 +288,16 @@ Health check endpoint. No authentication required.
 List all available templates. No authentication required.
 
 **Response:**
+
 ```json
 {
-  "templates": ["welcome", "porch-reply", "verification", "payment-failed", "raw"],
+  "templates": [
+    "welcome",
+    "porch-reply",
+    "verification",
+    "payment-failed",
+    "raw"
+  ],
   "version": "1.0.0"
 }
 ```
@@ -293,14 +306,14 @@ List all available templates. No authentication required.
 
 Zephyr categorizes emails by type for appropriate handling:
 
-| Type | Per Minute | Per Day | Use Case | Retry |
-|------|------------|---------|----------|-------|
-| `transactional` | 60 | 1,000 | Password resets, confirmations | 3× |
-| `notification` | 60 | 1,000 | Activity notifications, replies | 3× |
-| `verification` | 10 | 100 | Email verifications, magic links | 3× |
-| `sequence` | 100 | 5,000 | Onboarding drip emails | 3× |
-| `lifecycle` | 60 | 500 | Payment, renewal, trial events | 3× |
-| `broadcast` | 1,000 | 10,000 | Newsletters, announcements | 1× |
+| Type            | Per Minute | Per Day | Use Case                         | Retry |
+| --------------- | ---------- | ------- | -------------------------------- | ----- |
+| `transactional` | 60         | 1,000   | Password resets, confirmations   | 3×    |
+| `notification`  | 60         | 1,000   | Activity notifications, replies  | 3×    |
+| `verification`  | 10         | 100     | Email verifications, magic links | 3×    |
+| `sequence`      | 100        | 5,000   | Onboarding drip emails           | 3×    |
+| `lifecycle`     | 60         | 500     | Payment, renewal, trial events   | 3×    |
+| `broadcast`     | 1,000      | 10,000  | Newsletters, announcements       | 1×    |
 
 ### Type Selection Guide
 
@@ -313,65 +326,65 @@ Zephyr categorizes emails by type for appropriate handling:
 
 ## Error Codes
 
-| Code | HTTP | Description | Retryable |
-|------|------|-------------|-----------|
-| `INVALID_REQUEST` | 400 | Malformed request or missing fields | No |
-| `INVALID_TEMPLATE` | 400 | Unknown template name | No |
-| `INVALID_RECIPIENT` | 400 | Invalid email format | No |
-| `RATE_LIMITED` | 429 | Too many requests for tenant/type | No |
-| `UNSUBSCRIBED` | 403 | Recipient has opted out | No |
-| `PROVIDER_ERROR` | 502 | Resend API error | Yes (auto-retried) |
-| `TEMPLATE_ERROR` | 400 | Template rendering failed | No |
-| `CIRCUIT_OPEN` | 503 | Circuit breaker active, too many failures | Yes (after cooldown) |
-| `INTERNAL_ERROR` | 500 | Unexpected server error | Yes (1 retry) |
+| Code                | HTTP | Description                               | Retryable            |
+| ------------------- | ---- | ----------------------------------------- | -------------------- |
+| `INVALID_REQUEST`   | 400  | Malformed request or missing fields       | No                   |
+| `INVALID_TEMPLATE`  | 400  | Unknown template name                     | No                   |
+| `INVALID_RECIPIENT` | 400  | Invalid email format                      | No                   |
+| `RATE_LIMITED`      | 429  | Too many requests for tenant/type         | No                   |
+| `UNSUBSCRIBED`      | 403  | Recipient has opted out                   | No                   |
+| `PROVIDER_ERROR`    | 502  | Resend API error                          | Yes (auto-retried)   |
+| `TEMPLATE_ERROR`    | 400  | Template rendering failed                 | No                   |
+| `CIRCUIT_OPEN`      | 503  | Circuit breaker active, too many failures | Yes (after cooldown) |
+| `INTERNAL_ERROR`    | 500  | Unexpected server error                   | Yes (1 retry)        |
 
 ## Usage Example (Client)
 
 ```typescript
-import { zephyr } from '@autumnsgrove/groveengine/zephyr';
+import { zephyr } from "@autumnsgrove/lattice/zephyr";
 
 // Send a notification email
 const result = await zephyr.send({
-  type: 'notification',
-  template: 'porch-reply',
-  to: 'user@example.com',
-  data: { 
-    content: 'Thanks for your message!',
-    visitId: 'abc123'
+  type: "notification",
+  template: "porch-reply",
+  to: "user@example.com",
+  data: {
+    content: "Thanks for your message!",
+    visitId: "abc123",
   },
-  tenant: 'grove',
-  source: 'porch-admin',
-  correlationId: visit.id
+  tenant: "grove",
+  source: "porch-admin",
+  correlationId: visit.id,
 });
 
 if (!result.success) {
-  console.error('Email failed:', result.errorCode, result.errorMessage);
+  console.error("Email failed:", result.errorCode, result.errorMessage);
   // Handle error appropriately
 }
 
 // Send with idempotency key (prevents duplicates)
 const result2 = await zephyr.send({
-  type: 'transactional',
-  template: 'welcome',
-  to: 'newuser@example.com',
-  data: { name: 'Autumn' },
-  idempotencyKey: `welcome-${userId}-${Date.now()}`
+  type: "transactional",
+  template: "welcome",
+  to: "newuser@example.com",
+  data: { name: "Autumn" },
+  idempotencyKey: `welcome-${userId}-${Date.now()}`,
 });
 
 // Send raw HTML (for legacy templates)
 const result3 = await zephyr.sendRaw({
-  type: 'transactional',
-  to: 'user@example.com',
-  subject: 'Custom Email',
-  html: '<h1>Hello!</h1><p>Custom content here</p>',
-  text: 'Hello! Custom content here',
-  tenant: 'grove'
+  type: "transactional",
+  to: "user@example.com",
+  subject: "Custom Email",
+  html: "<h1>Hello!</h1><p>Custom content here</p>",
+  text: "Hello! Custom content here",
+  tenant: "grove",
 });
 
 // Check service health
 const health = await zephyr.health();
 if (health) {
-  console.log('Service healthy, available templates:', health.templates);
+  console.log("Service healthy, available templates:", health.templates);
 }
 ```
 
@@ -399,9 +412,9 @@ All `/send` requests require a valid `X-API-Key` header. The key is validated us
 
 ```typescript
 // Valid request
-fetch('/send', {
+fetch("/send", {
   headers: {
-    'X-API-Key': 'your-secret-key'
+    "X-API-Key": "your-secret-key",
   },
   // ...
 });
@@ -432,19 +445,19 @@ Every send attempt is logged to D1 for audit and debugging:
 
 ```sql
 -- Query recent sends
-SELECT * FROM zephyr_logs 
+SELECT * FROM zephyr_logs
 WHERE created_at > unixepoch('now') - 86400
 ORDER BY created_at DESC;
 
 -- Check failures
-SELECT type, template, error_code, COUNT(*) 
-FROM zephyr_logs 
-WHERE success = 0 
+SELECT type, template, error_code, COUNT(*)
+FROM zephyr_logs
+WHERE success = 0
 GROUP BY type, template, error_code;
 
 -- Rate limit hits per tenant
-SELECT tenant, type, COUNT(*) 
-FROM zephyr_logs 
+SELECT tenant, type, COUNT(*)
+FROM zephyr_logs
 WHERE error_code = 'RATE_LIMITED'
 GROUP BY tenant, type;
 ```

@@ -9,18 +9,23 @@
 // LOAD PROFILES
 // =============================================================================
 
-export type ProfileType = 'spike' | 'sustained' | 'oscillation' | 'ramp' | 'custom';
+export type ProfileType =
+  | "spike"
+  | "sustained"
+  | "oscillation"
+  | "ramp"
+  | "custom";
 
 export type TargetSystem =
-  | 'd1_writes'
-  | 'd1_reads'
-  | 'kv_get'
-  | 'kv_put'
-  | 'r2_upload'
-  | 'r2_download'
-  | 'auth_flows'
-  | 'post_crud'
-  | 'media_ops';
+  | "d1_writes"
+  | "d1_reads"
+  | "kv_get"
+  | "kv_put"
+  | "r2_upload"
+  | "r2_download"
+  | "auth_flows"
+  | "post_crud"
+  | "media_ops";
 
 export interface LoadProfile {
   type: ProfileType;
@@ -37,17 +42,17 @@ export interface LoadProfile {
 }
 
 export interface SpikeConfig {
-  warmupSeconds: number;        // Time before spike
+  warmupSeconds: number; // Time before spike
   spikeDurationSeconds: number; // How long the spike lasts
-  spikeMultiplier: number;      // e.g., 10x normal load
-  cooldownSeconds: number;      // Recovery period
+  spikeMultiplier: number; // e.g., 10x normal load
+  cooldownSeconds: number; // Recovery period
 }
 
 export interface OscillationConfig {
   minOpsPerSecond: number;
   maxOpsPerSecond: number;
-  periodSeconds: number;        // Time for one full cycle
-  waveform: 'sine' | 'square' | 'sawtooth';
+  periodSeconds: number; // Time for one full cycle
+  waveform: "sine" | "square" | "sawtooth";
 }
 
 export interface RampConfig {
@@ -67,7 +72,12 @@ export interface CustomConfig {
 // TEST RUNS
 // =============================================================================
 
-export type RunStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+export type RunStatus =
+  | "pending"
+  | "running"
+  | "completed"
+  | "failed"
+  | "cancelled";
 
 export interface SentinelRun {
   id: string;
@@ -86,7 +96,7 @@ export interface SentinelRun {
   results?: RunResults;
 
   // Metadata
-  triggeredBy: 'manual' | 'scheduled' | 'api';
+  triggeredBy: "manual" | "scheduled" | "api";
   notes?: string;
   metadata?: Record<string, unknown>;
   createdAt: Date;
@@ -222,9 +232,14 @@ export interface SentinelSchedule {
 // THE CLEARING (STATUS PAGE)
 // =============================================================================
 
-export type OverallStatus = 'operational' | 'degraded' | 'partial_outage' | 'major_outage' | 'maintenance';
+export type OverallStatus =
+  | "operational"
+  | "degraded"
+  | "partial_outage"
+  | "major_outage"
+  | "maintenance";
 
-export type ComponentStatus = 'operational' | 'degraded' | 'outage';
+export type ComponentStatus = "operational" | "degraded" | "outage";
 
 export interface ClearingStatus {
   id: string;
@@ -246,8 +261,12 @@ export interface ClearingStatus {
   updatedAt: Date;
 }
 
-export type IncidentSeverity = 'minor' | 'major' | 'critical';
-export type IncidentStatus = 'investigating' | 'identified' | 'monitoring' | 'resolved';
+export type IncidentSeverity = "minor" | "major" | "critical";
+export type IncidentStatus =
+  | "investigating"
+  | "identified"
+  | "monitoring"
+  | "resolved";
 
 export interface ClearingIncident {
   id: string;
@@ -284,7 +303,7 @@ export interface OperationGenerator {
     kv: KVNamespace,
     r2: R2Bucket,
     tenantId: string,
-    index: number
+    index: number,
   ) => Promise<OperationResult>;
 }
 
@@ -325,14 +344,33 @@ export interface D1Result<T = unknown> {
 }
 
 export interface KVNamespace {
-  get(key: string, options?: { type?: 'text' | 'json' | 'arrayBuffer' | 'stream' }): Promise<string | object | ArrayBuffer | ReadableStream | null>;
-  put(key: string, value: string | ArrayBuffer | ReadableStream, options?: { expirationTtl?: number; metadata?: object }): Promise<void>;
+  get(
+    key: string,
+    options?: { type?: "text" | "json" | "arrayBuffer" | "stream" },
+  ): Promise<string | object | ArrayBuffer | ReadableStream | null>;
+  put(
+    key: string,
+    value: string | ArrayBuffer | ReadableStream,
+    options?: { expirationTtl?: number; metadata?: object },
+  ): Promise<void>;
   delete(key: string): Promise<void>;
-  list(options?: { prefix?: string; limit?: number; cursor?: string }): Promise<{ keys: { name: string }[]; list_complete: boolean; cursor?: string }>;
+  list(options?: {
+    prefix?: string;
+    limit?: number;
+    cursor?: string;
+  }): Promise<{
+    keys: { name: string }[];
+    list_complete: boolean;
+    cursor?: string;
+  }>;
 }
 
 export interface R2Bucket {
-  put(key: string, value: ReadableStream | ArrayBuffer | ArrayBufferView | string | null, options?: R2PutOptions): Promise<R2Object>;
+  put(
+    key: string,
+    value: ReadableStream | ArrayBuffer | ArrayBufferView | string | null,
+    options?: R2PutOptions,
+  ): Promise<R2Object>;
   get(key: string, options?: R2GetOptions): Promise<R2ObjectBody | null>;
   delete(key: string | string[]): Promise<void>;
   list(options?: R2ListOptions): Promise<R2Objects>;

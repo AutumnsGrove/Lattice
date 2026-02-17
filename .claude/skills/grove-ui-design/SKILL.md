@@ -8,6 +8,7 @@ description: Create warm, nature-themed UI for Grove with glassmorphism, seasona
 ## When to Activate
 
 Activate this skill when:
+
 - Creating or enhancing pages for Grove sites
 - Adding decorative nature elements (trees, clouds, weather effects)
 - Implementing glassmorphism effects for readability
@@ -29,6 +30,7 @@ Write with the warmth of a midnight tea shop and the clarity of good documentati
 ```
 
 **Every design choice should feel:**
+
 - **Welcoming** — like entering a cozy space
 - **Organic** — natural, not rigid or corporate
 - **Readable** — content-first, decorations enhance, never obstruct
@@ -43,17 +45,17 @@ By default, Grove Mode is OFF for new visitors. They see familiar terms: "Posts"
 **The Component Suite:**
 
 ```svelte
-import { GroveTerm, GroveSwap, GroveText, GroveSwapText, GroveIntro } from '@autumnsgrove/groveengine/ui';
+import { GroveTerm, GroveSwap, GroveText, GroveSwapText, GroveIntro } from '@autumnsgrove/lattice/ui';
 import groveTermManifest from '$lib/data/grove-term-manifest.json';
 ```
 
-| Component | Use Case | Behavior |
-|-----------|----------|----------|
-| `GroveTerm` | Interactive terms with popup definitions | Colored underline when ON, click for popup. Shows standard term when OFF. |
-| `GroveSwap` | Silent text replacement | Reactively swaps text. No underline, no interaction. |
-| `GroveText` | Parse `[[term]]` syntax in data strings | Renders `[[bloom\|posts]]` as interactive GroveTerm components. |
-| `GroveSwapText` | Parse `[[term]]` syntax silently | Same parsing, silent swaps (no popups). |
-| `GroveIntro` | "We call it X" page banners | Standardized intro below page titles. |
+| Component       | Use Case                                 | Behavior                                                                  |
+| --------------- | ---------------------------------------- | ------------------------------------------------------------------------- |
+| `GroveTerm`     | Interactive terms with popup definitions | Colored underline when ON, click for popup. Shows standard term when OFF. |
+| `GroveSwap`     | Silent text replacement                  | Reactively swaps text. No underline, no interaction.                      |
+| `GroveText`     | Parse `[[term]]` syntax in data strings  | Renders `[[bloom\|posts]]` as interactive GroveTerm components.           |
+| `GroveSwapText` | Parse `[[term]]` syntax silently         | Same parsing, silent swaps (no popups).                                   |
+| `GroveIntro`    | "We call it X" page banners              | Standardized intro below page titles.                                     |
 
 **Usage:**
 
@@ -75,12 +77,13 @@ import groveTermManifest from '$lib/data/grove-term-manifest.json';
 ```
 
 **Key Rules:**
+
 - **Never hardcode Grove terms** in user-facing UI. Always use GroveTerm components.
 - **Default is OFF** for new visitors. Standard, familiar terminology first.
 - **URLs stay as Grove terms** (`/porch`, `/garden`) regardless of display mode.
 - **Brand terms** (Grove) and **subscription tiers** (Seedling/Sapling/Oak/Evergreen) always show as-is.
 - **Use `[[term]]` syntax** for data-driven content (FAQ items, pricing fineprint, feature lists).
-- **Grove Mode store**: `groveModeStore` from `@autumnsgrove/groveengine/ui/stores`. Toggle lives in the footer.
+- **Grove Mode store**: `groveModeStore` from `@autumnsgrove/lattice/ui/stores`. Toggle lives in the footer.
 
 See `docs/grove-user-identity.md` for the full identity language documentation and `packages/engine/src/lib/ui/components/ui/groveterm/` for component source.
 
@@ -105,7 +108,7 @@ Content (text, cards, UI)
 ### Glass Components
 
 ```svelte
-import { Glass, GlassCard, GlassButton, GlassOverlay } from '@groveengine/ui/ui';
+import { Glass, GlassCard, GlassButton, GlassOverlay } from '@lattice/ui/ui';
 
 <!-- Container with glass effect -->
 <Glass variant="tint" class="p-6 rounded-xl">
@@ -123,14 +126,14 @@ import { Glass, GlassCard, GlassButton, GlassOverlay } from '@groveengine/ui/ui'
 
 ### Glass Variants
 
-| Variant | Use Case | Light Mode | Dark Mode |
-|---------|----------|------------|-----------|
-| `surface` | Headers, navbars | 95% white | 95% slate |
-| `tint` | Text over backgrounds | 60% white | 50% slate |
-| `card` | Content cards | 80% white | 70% slate |
-| `accent` | Callouts, highlights | 30% accent | 20% accent |
-| `overlay` | Modal backdrops | 50% black | 60% black |
-| `muted` | Subtle backgrounds | 40% white | 30% slate |
+| Variant   | Use Case              | Light Mode | Dark Mode  |
+| --------- | --------------------- | ---------- | ---------- |
+| `surface` | Headers, navbars      | 95% white  | 95% slate  |
+| `tint`    | Text over backgrounds | 60% white  | 50% slate  |
+| `card`    | Content cards         | 80% white  | 70% slate  |
+| `accent`  | Callouts, highlights  | 30% accent | 20% accent |
+| `overlay` | Modal backdrops       | 50% black  | 60% black  |
+| `muted`   | Subtle backgrounds    | 40% white  | 30% slate  |
 
 ### CSS Utility Classes
 
@@ -169,75 +172,91 @@ const isWinter = $derived($season === 'winter');
 
 ### Color Palette System
 
-Import from: `@autumnsgrove/groveengine/ui/nature` or `$lib/components/nature/palette`
+Import from: `@autumnsgrove/lattice/ui/nature` or `$lib/components/nature/palette`
 
 #### Core Palettes (Year-Round)
 
 ```typescript
-import { greens, bark, earth, natural } from '@autumnsgrove/groveengine/ui/nature';
+import { greens, bark, earth, natural } from "@autumnsgrove/lattice/ui/nature";
 
 // Greens - organized dark-to-light for atmospheric depth
-greens.darkForest  // #0d4a1c - Background trees
-greens.deepGreen   // #166534 - Mid-distance
-greens.grove       // #16a34a - Grove brand primary
-greens.meadow      // #22c55e - Standard foliage
-greens.spring      // #4ade80 - Bright accent
-greens.mint        // #86efac - Light accent
-greens.pale        // #bbf7d0 - Foreground highlights
+greens.darkForest; // #0d4a1c - Background trees
+greens.deepGreen; // #166534 - Mid-distance
+greens.grove; // #16a34a - Grove brand primary
+greens.meadow; // #22c55e - Standard foliage
+greens.spring; // #4ade80 - Bright accent
+greens.mint; // #86efac - Light accent
+greens.pale; // #bbf7d0 - Foreground highlights
 
 // Bark - warm wood tones
-bark.darkBark      // #3d2817 - Oak, older trees
-bark.bark          // #5d4037 - Standard trunk
-bark.warmBark      // #6B4423 - Pine, cedar
-bark.lightBark     // #8b6914 - Young trees
+bark.darkBark; // #3d2817 - Oak, older trees
+bark.bark; // #5d4037 - Standard trunk
+bark.warmBark; // #6B4423 - Pine, cedar
+bark.lightBark; // #8b6914 - Young trees
 
 // Earth - ground elements
-earth.soil, earth.mud, earth.clay, earth.sand, earth.stone, earth.pebble, earth.slate
+(earth.soil,
+  earth.mud,
+  earth.clay,
+  earth.sand,
+  earth.stone,
+  earth.pebble,
+  earth.slate);
 
 // Natural - cream and off-whites
-natural.cream, natural.aspenBark, natural.bone, natural.mushroom, natural.birchWhite
+(natural.cream,
+  natural.aspenBark,
+  natural.bone,
+  natural.mushroom,
+  natural.birchWhite);
 ```
 
 #### Spring Palettes
 
 ```typescript
-import { springFoliage, springSky, wildflowers, cherryBlossoms, cherryBlossomsPeak } from '@autumnsgrove/groveengine/ui/nature';
+import {
+  springFoliage,
+  springSky,
+  wildflowers,
+  cherryBlossoms,
+  cherryBlossomsPeak,
+} from "@autumnsgrove/lattice/ui/nature";
 
 // Spring Foliage - yellow-green new growth
-springFoliage.sprout      // #65a30d - Distant new growth
-springFoliage.newLeaf     // #84cc16 - Classic spring lime
-springFoliage.freshGreen  // #a3e635 - Bright foreground
-springFoliage.budding     // #bef264 - Pale new leaf
-springFoliage.tender      // #d9f99d - Very pale
+springFoliage.sprout; // #65a30d - Distant new growth
+springFoliage.newLeaf; // #84cc16 - Classic spring lime
+springFoliage.freshGreen; // #a3e635 - Bright foreground
+springFoliage.budding; // #bef264 - Pale new leaf
+springFoliage.tender; // #d9f99d - Very pale
 
 // Spring Sky
-springSky.clear    // #7dd3fc - Clear morning
-springSky.soft     // #bae6fd - Pale sky
+springSky.clear; // #7dd3fc - Clear morning
+springSky.soft; // #bae6fd - Pale sky
 
 // Wildflowers - unified meadow flower colors
-wildflowers.buttercup   // #facc15 - Yellow
-wildflowers.daffodil    // #fde047 - Pale yellow
-wildflowers.crocus      // #a78bfa - Purple crocus
-wildflowers.violet      // #8b5cf6 - Wild violets
-wildflowers.purple      // #a855f7 - Lupine, thistle
-wildflowers.lavender    // #c4b5fd - Distant masses
-wildflowers.tulipPink   // #f9a8d4 - Pink tulips
-wildflowers.tulipRed    // #fb7185 - Red tulips
-wildflowers.white       // #fefefe - Daisies, trillium
+wildflowers.buttercup; // #facc15 - Yellow
+wildflowers.daffodil; // #fde047 - Pale yellow
+wildflowers.crocus; // #a78bfa - Purple crocus
+wildflowers.violet; // #8b5cf6 - Wild violets
+wildflowers.purple; // #a855f7 - Lupine, thistle
+wildflowers.lavender; // #c4b5fd - Distant masses
+wildflowers.tulipPink; // #f9a8d4 - Pink tulips
+wildflowers.tulipRed; // #fb7185 - Red tulips
+wildflowers.white; // #fefefe - Daisies, trillium
 
 // Cherry Blossoms - summer standard
-cherryBlossoms.deep      // #db2777 - Dense centers
-cherryBlossoms.standard  // #ec4899 - Standard blossom
-cherryBlossoms.light     // #f472b6 - Light petals
-cherryBlossoms.pale      // #f9a8d4 - Pale blossoms
-cherryBlossoms.falling   // #fbcfe8 - Falling petals
+cherryBlossoms.deep; // #db2777 - Dense centers
+cherryBlossoms.standard; // #ec4899 - Standard blossom
+cherryBlossoms.light; // #f472b6 - Light petals
+cherryBlossoms.pale; // #f9a8d4 - Pale blossoms
+cherryBlossoms.falling; // #fbcfe8 - Falling petals
 
 // Cherry Blossoms Peak - vibrant spring (one shade brighter!)
-cherryBlossomsPeak.deep      // #ec4899
-cherryBlossomsPeak.standard  // #f472b6
-cherryBlossomsPeak.light     // #f9a8d4
-cherryBlossomsPeak.pale      // #fbcfe8
-cherryBlossomsPeak.falling   // #fce7f3
+cherryBlossomsPeak.deep; // #ec4899
+cherryBlossomsPeak.standard; // #f472b6
+cherryBlossomsPeak.light; // #f9a8d4
+cherryBlossomsPeak.pale; // #fbcfe8
+cherryBlossomsPeak.falling; // #fce7f3
 ```
 
 #### Unified Flowers Palette (NEW!)
@@ -245,32 +264,32 @@ cherryBlossomsPeak.falling   // #fce7f3
 The `flowers` namespace consolidates all flower colors into one organized structure:
 
 ```typescript
-import { flowers } from '@autumnsgrove/groveengine/ui/nature';
+import { flowers } from "@autumnsgrove/lattice/ui/nature";
 
 // Meadow wildflowers (yellows, purples, pinks, whites)
-flowers.wildflower.buttercup   // #facc15 - Yellow
-flowers.wildflower.daffodil    // #fde047 - Pale yellow
-flowers.wildflower.crocus      // #a78bfa - Purple crocus
-flowers.wildflower.violet      // #8b5cf6 - Wild violets
-flowers.wildflower.purple      // #a855f7 - Lupine, thistle
-flowers.wildflower.lavender    // #c4b5fd - Distant masses
-flowers.wildflower.tulipPink   // #f9a8d4 - Pink tulips
-flowers.wildflower.tulipRed    // #fb7185 - Red tulips
-flowers.wildflower.white       // #fefefe - Daisies, trillium
+flowers.wildflower.buttercup; // #facc15 - Yellow
+flowers.wildflower.daffodil; // #fde047 - Pale yellow
+flowers.wildflower.crocus; // #a78bfa - Purple crocus
+flowers.wildflower.violet; // #8b5cf6 - Wild violets
+flowers.wildflower.purple; // #a855f7 - Lupine, thistle
+flowers.wildflower.lavender; // #c4b5fd - Distant masses
+flowers.wildflower.tulipPink; // #f9a8d4 - Pink tulips
+flowers.wildflower.tulipRed; // #fb7185 - Red tulips
+flowers.wildflower.white; // #fefefe - Daisies, trillium
 
 // Cherry blossoms - standard summer
-flowers.cherry.deep      // #db2777
-flowers.cherry.standard  // #ec4899
-flowers.cherry.light     // #f472b6
-flowers.cherry.pale      // #f9a8d4
-flowers.cherry.falling   // #fbcfe8
+flowers.cherry.deep; // #db2777
+flowers.cherry.standard; // #ec4899
+flowers.cherry.light; // #f472b6
+flowers.cherry.pale; // #f9a8d4
+flowers.cherry.falling; // #fbcfe8
 
 // Cherry blossoms at peak bloom - vibrant spring
-flowers.cherryPeak.deep      // #ec4899
-flowers.cherryPeak.standard  // #f472b6
-flowers.cherryPeak.light     // #f9a8d4
-flowers.cherryPeak.pale      // #fbcfe8
-flowers.cherryPeak.falling   // #fce7f3
+flowers.cherryPeak.deep; // #ec4899
+flowers.cherryPeak.standard; // #f472b6
+flowers.cherryPeak.light; // #f9a8d4
+flowers.cherryPeak.pale; // #fbcfe8
+flowers.cherryPeak.falling; // #fce7f3
 ```
 
 **Use `flowers.wildflower` instead of `accents.flower`** — the accents version is deprecated.
@@ -278,57 +297,72 @@ flowers.cherryPeak.falling   // #fce7f3
 #### Autumn & Winter Palettes
 
 ```typescript
-import { autumn, autumnReds, winter } from '@autumnsgrove/groveengine/ui/nature';
+import { autumn, autumnReds, winter } from "@autumnsgrove/lattice/ui/nature";
 
 // Autumn - warm fall foliage (dark-to-light for depth)
-autumn.rust     // #9a3412 - Deep background
-autumn.ember    // #c2410c - Oak-like
-autumn.pumpkin  // #ea580c - Maple mid-tones
-autumn.amber    // #d97706 - Classic fall
-autumn.gold     // #eab308 - Aspen/birch
-autumn.honey    // #facc15 - Bright foreground
-autumn.straw    // #fde047 - Pale dying leaves
+autumn.rust; // #9a3412 - Deep background
+autumn.ember; // #c2410c - Oak-like
+autumn.pumpkin; // #ea580c - Maple mid-tones
+autumn.amber; // #d97706 - Classic fall
+autumn.gold; // #eab308 - Aspen/birch
+autumn.honey; // #facc15 - Bright foreground
+autumn.straw; // #fde047 - Pale dying leaves
 
 // Autumn Reds - cherry/maple fall foliage
-autumnReds.crimson  // #be123c - Deep maple
-autumnReds.scarlet  // #e11d48 - Bright cherry
-autumnReds.rose     // #f43f5e - Light autumn
-autumnReds.coral    // #fb7185 - Pale accent
+autumnReds.crimson; // #be123c - Deep maple
+autumnReds.scarlet; // #e11d48 - Bright cherry
+autumnReds.rose; // #f43f5e - Light autumn
+autumnReds.coral; // #fb7185 - Pale accent
 
 // Winter - frost, snow, ice + frosted evergreens
-winter.snow, winter.frost, winter.ice, winter.glacier
-winter.frostedPine, winter.winterGreen, winter.coldSpruce
-winter.winterSky, winter.twilight, winter.overcast
-winter.bareBranch, winter.frostedBark, winter.coldWood
-winter.hillDeep, winter.hillMid, winter.hillNear, winter.hillFront
+(winter.snow, winter.frost, winter.ice, winter.glacier);
+(winter.frostedPine, winter.winterGreen, winter.coldSpruce);
+(winter.winterSky, winter.twilight, winter.overcast);
+(winter.bareBranch, winter.frostedBark, winter.coldWood);
+(winter.hillDeep, winter.hillMid, winter.hillNear, winter.hillFront);
 ```
 
 #### Accent Palettes
 
 ```typescript
-import { accents, wildflowers } from '@autumnsgrove/groveengine/ui/nature';
+import { accents, wildflowers } from "@autumnsgrove/lattice/ui/nature";
 
 // Mushrooms - fairy tale pops of color
-accents.mushroom.redCap, accents.mushroom.orangeCap, accents.mushroom.brownCap
-accents.mushroom.spots, accents.mushroom.gill
+(accents.mushroom.redCap,
+  accents.mushroom.orangeCap,
+  accents.mushroom.brownCap);
+(accents.mushroom.spots, accents.mushroom.gill);
 
 // Firefly - bioluminescence
-accents.firefly.glow, accents.firefly.warmGlow, accents.firefly.body
+(accents.firefly.glow, accents.firefly.warmGlow, accents.firefly.body);
 
 // Berry - rich saturated
-accents.berry.ripe, accents.berry.elderberry, accents.berry.red
+(accents.berry.ripe, accents.berry.elderberry, accents.berry.red);
 
 // Water - cool blue spectrum
-accents.water.surface, accents.water.deep, accents.water.shallow, accents.water.lily
+(accents.water.surface,
+  accents.water.deep,
+  accents.water.shallow,
+  accents.water.lily);
 
 // Sky - time of day
-accents.sky.dayLight, accents.sky.dayMid, accents.sky.sunset, accents.sky.night, accents.sky.star
+(accents.sky.dayLight,
+  accents.sky.dayMid,
+  accents.sky.sunset,
+  accents.sky.night,
+  accents.sky.star);
 
 // Birds - species-specific colors
-accents.bird.cardinalRed, accents.bird.cardinalMask, accents.bird.cardinalBeak
-accents.bird.chickadeeCap, accents.bird.chickadeeBody, accents.bird.chickadeeBelly
-accents.bird.robinBody, accents.bird.robinBreast, accents.bird.robinBeak
-accents.bird.bluebirdBody, accents.bird.bluebirdWing, accents.bird.bluebirdBreast
+(accents.bird.cardinalRed,
+  accents.bird.cardinalMask,
+  accents.bird.cardinalBeak);
+(accents.bird.chickadeeCap,
+  accents.bird.chickadeeBody,
+  accents.bird.chickadeeBelly);
+(accents.bird.robinBody, accents.bird.robinBreast, accents.bird.robinBeak);
+(accents.bird.bluebirdBody,
+  accents.bird.bluebirdWing,
+  accents.bird.bluebirdBreast);
 
 // NOTE: accents.flower is deprecated - use flowers.wildflower instead
 ```
@@ -336,7 +370,13 @@ accents.bird.bluebirdBody, accents.bird.bluebirdWing, accents.bird.bluebirdBreas
 #### Seasonal Helper Functions
 
 ```typescript
-import { getSeasonalGreens, getCherryColors, isTreeBare, pickRandom, pickFrom } from '@autumnsgrove/groveengine/ui/nature';
+import {
+  getSeasonalGreens,
+  getCherryColors,
+  isTreeBare,
+  pickRandom,
+  pickFrom,
+} from "@autumnsgrove/lattice/ui/nature";
 
 // Get foliage colors mapped to season
 const foliage = getSeasonalGreens(season);
@@ -353,18 +393,20 @@ const cherryColors = getCherryColors(season);
 // winter → null (bare tree)
 
 // Check if deciduous tree is bare
-if (isTreeBare('cherry', 'winter')) { /* no foliage */ }
+if (isTreeBare("cherry", "winter")) {
+  /* no foliage */
+}
 
 // Random color selection for natural variation
 const randomGreen = pickRandom(greens);
-const specificGreen = pickFrom(greens, ['grove', 'meadow']);
+const specificGreen = pickFrom(greens, ["grove", "meadow"]);
 ```
 
 #### Deprecated Aliases (Still Work)
 
 ```typescript
 // These work but will be removed in v1.0:
-import { spring, pinks, springBlossoms } from '@autumnsgrove/groveengine/ui/nature';
+import { spring, pinks, springBlossoms } from "@autumnsgrove/lattice/ui/nature";
 
 // spring → use springFoliage, wildflowers, springSky instead
 // pinks → use cherryBlossoms instead
@@ -374,12 +416,12 @@ import { spring, pinks, springBlossoms } from '@autumnsgrove/groveengine/ui/natu
 
 #### Season Mood Summary
 
-| Season | Primary Colors | Mood |
-|--------|---------------|------|
-| **Spring** | `springFoliage`, `cherryBlossomsPeak`, `wildflowers` | Renewal, hope |
-| **Summer** | `greens`, `cherryBlossoms` | Growth, warmth |
-| **Autumn** | `autumn`, `autumnReds` | Harvest, reflection |
-| **Winter** | `winter` (frost, snow, frosted pines) | Rest, stillness |
+| Season     | Primary Colors                                       | Mood                |
+| ---------- | ---------------------------------------------------- | ------------------- |
+| **Spring** | `springFoliage`, `cherryBlossomsPeak`, `wildflowers` | Renewal, hope       |
+| **Summer** | `greens`, `cherryBlossoms`                           | Growth, warmth      |
+| **Autumn** | `autumn`, `autumnReds`                               | Harvest, reflection |
+| **Winter** | `winter` (frost, snow, frosted pines)                | Rest, stillness     |
 
 ### Seasonal Weather Effects
 
@@ -430,12 +472,12 @@ The forest should feel alive and different every visit.
 ```typescript
 interface GeneratedTree {
   id: number;
-  x: number;           // percentage from left (5-93% to avoid edges)
-  size: number;        // base width in pixels
+  x: number; // percentage from left (5-93% to avoid edges)
+  size: number; // base width in pixels
   aspectRatio: number; // height = size * aspectRatio (1.0-1.5 range)
-  treeType: TreeType;  // 'logo' | 'pine' | 'cherry' | 'aspen' | 'birch'
-  opacity: number;     // 0.5-0.9 for depth
-  zIndex: number;      // larger trees = higher z-index
+  treeType: TreeType; // 'logo' | 'pine' | 'cherry' | 'aspen' | 'birch'
+  opacity: number; // 0.5-0.9 for depth
+  zIndex: number; // larger trees = higher z-index
 }
 
 // Aspect ratio creates natural height variation
@@ -452,7 +494,10 @@ function generateSectionTrees(count: number): GeneratedTree[] {
     do {
       x = 5 + Math.random() * 88;
       attempts++;
-    } while (usedPositions.some(pos => Math.abs(pos - x) < 8) && attempts < 20);
+    } while (
+      usedPositions.some((pos) => Math.abs(pos - x) < 8) &&
+      attempts < 20
+    );
     usedPositions.push(x);
 
     const size = 80 + Math.random() * 80;
@@ -460,7 +505,15 @@ function generateSectionTrees(count: number): GeneratedTree[] {
     const opacity = 0.5 + Math.random() * 0.4;
     const zIndex = size > 130 ? 3 : size > 100 ? 2 : 1;
 
-    trees.push({ id: i, x, size, aspectRatio, treeType: pickRandom(treeTypes), opacity, zIndex });
+    trees.push({
+      id: i,
+      x,
+      size,
+      aspectRatio,
+      treeType: pickRandom(treeTypes),
+      opacity,
+      zIndex,
+    });
   }
 
   return trees.sort((a, b) => a.x - b.x);
@@ -509,11 +562,11 @@ function generateSectionTrees(count: number): GeneratedTree[] {
 ```typescript
 function calculateDensity(): number {
   const width = window.innerWidth;
-  if (width < 768) return 1;        // Mobile: base count
-  if (width < 1024) return 1.3;     // Tablet
-  if (width < 1440) return 1.8;     // Desktop
-  if (width < 2560) return 2.5;     // Large desktop
-  return 3.5;                        // Ultrawide
+  if (width < 768) return 1; // Mobile: base count
+  if (width < 1024) return 1.3; // Tablet
+  if (width < 1440) return 1.8; // Desktop
+  if (width < 2560) return 2.5; // Large desktop
+  return 3.5; // Ultrawide
 }
 ```
 
@@ -549,20 +602,20 @@ ls landing/src/lib/components/nature/creatures/
 
 ### Key Components
 
-| Component | Use | Example Props |
-|-----------|-----|---------------|
-| `Logo` | Grove tree, seasonal | `season`, `animate`, `breathing` |
-| `TreePine` | Evergreen, stays green in autumn | `season`, `animate` |
-| `TreeCherry` | Blossoms in spring, bare in winter | `season`, `animate` |
-| `TreeAspen` / `TreeBirch` | Deciduous, seasonal colors | `season`, `animate` |
-| `Cloud` | Decorative sky element | `variant`, `animate`, `speed`, `direction` |
-| `SnowfallLayer` | Winter particles | `count`, `opacity`, `spawnDelay` |
-| `FallingPetalsLayer` | Spring cherry blossoms | `count`, `opacity`, `fallDuration` |
-| `FallingLeavesLayer` | Autumn leaves (tied to trees) | `trees`, `season` |
-| `Cardinal` / `Chickadee` | Winter birds | `facing` |
-| `Robin` / `Bluebird` | Spring birds | `facing` |
-| `Vine` | Decorative ivy/vines | varies |
-| `Lantern` | Warm glow points | varies |
+| Component                 | Use                                | Example Props                              |
+| ------------------------- | ---------------------------------- | ------------------------------------------ |
+| `Logo`                    | Grove tree, seasonal               | `season`, `animate`, `breathing`           |
+| `TreePine`                | Evergreen, stays green in autumn   | `season`, `animate`                        |
+| `TreeCherry`              | Blossoms in spring, bare in winter | `season`, `animate`                        |
+| `TreeAspen` / `TreeBirch` | Deciduous, seasonal colors         | `season`, `animate`                        |
+| `Cloud`                   | Decorative sky element             | `variant`, `animate`, `speed`, `direction` |
+| `SnowfallLayer`           | Winter particles                   | `count`, `opacity`, `spawnDelay`           |
+| `FallingPetalsLayer`      | Spring cherry blossoms             | `count`, `opacity`, `fallDuration`         |
+| `FallingLeavesLayer`      | Autumn leaves (tied to trees)      | `trees`, `season`                          |
+| `Cardinal` / `Chickadee`  | Winter birds                       | `facing`                                   |
+| `Robin` / `Bluebird`      | Spring birds                       | `facing`                                   |
+| `Vine`                    | Decorative ivy/vines               | varies                                     |
+| `Lantern`                 | Warm glow points                   | varies                                     |
 
 ### Birds by Season
 
@@ -587,15 +640,15 @@ ls landing/src/lib/components/nature/creatures/
 For **dreamy**, **far-future**, **mystical** content. The tea shop that exists at the edge of tomorrow.
 
 ```typescript
-import { midnightBloom } from '$lib/components/nature/palette';
+import { midnightBloom } from "$lib/components/nature/palette";
 
 // Available colors:
-midnightBloom.deepPlum   // #581c87 - Night sky depth
-midnightBloom.purple     // #7c3aed - Soft purple glow
-midnightBloom.violet     // #8b5cf6 - Lighter accent
-midnightBloom.amber      // #f59e0b - Lantern warmth
-midnightBloom.warmCream  // #fef3c7 - Tea steam, page glow
-midnightBloom.softGold   // #fcd34d - Fairy lights
+midnightBloom.deepPlum; // #581c87 - Night sky depth
+midnightBloom.purple; // #7c3aed - Soft purple glow
+midnightBloom.violet; // #8b5cf6 - Lighter accent
+midnightBloom.amber; // #f59e0b - Lantern warmth
+midnightBloom.warmCream; // #fef3c7 - Tea steam, page glow
+midnightBloom.softGold; // #fcd34d - Fairy lights
 ```
 
 ### Midnight Bloom Styling
@@ -639,49 +692,49 @@ import { MapPin, Check, Leaf, Trees, Mail } from 'lucide-svelte';
 
 Use these icons consistently across the project:
 
-| Concept | Icon | Notes |
-|---------|------|-------|
-| **Navigation** | | |
-| Home | `Home` | |
-| About | `Info` | |
-| Vision | `Telescope` | Looking forward |
-| Roadmap | `Map` | Journey/direction |
-| Pricing | `HandCoins` | Money/currency |
-| Knowledge | `BookOpen` | Learning/docs |
-| Forest | `Trees` | Community blogs |
-| Blog | `PenLine` | Writing |
-| **Features** | | |
-| Email | `Mail` | |
-| Storage | `HardDrive` | |
-| Theming | `Palette` | Customization |
-| Authentication | `ShieldCheck` | Security |
-| Cloud | `Cloud` | Remote/serverless |
-| Search | `SearchCode` | Code/advanced search |
-| Archives | `Archive` | Backups |
-| Upload | `Upload` | |
-| Video | `Video` | |
-| Comments | `MessagesSquare` | User discussions |
-| GitHub | `Github` | External links to GitHub |
-| **States** | | |
-| Success | `Check` | Completed/valid |
-| Error | `X` | Failed/close |
-| Loading | `Loader2` | With animate-spin |
-| **Content** | | |
-| Posts | `FileText` | Blog posts |
-| Tags | `Tag` | Categorization |
-| Growth | `Sprout` | Grove brand, new beginnings |
-| Heart | `Heart` | Love, care |
-| External | `ExternalLink` | Opens new tab |
-| Location | `MapPin` | Current position |
-| **Phases** | | |
-| Coming Soon | `Seedling` | Something growing |
-| Refinement | `Gem` | Polish, quality |
-| The Dream | `Sparkles` | Mystical (use sparingly!) |
-| Night | `Star` | Midnight themes |
-| **Actions** | | |
-| Getting Started | `Compass` | Guidance |
-| What's New | `Megaphone` | Announcements |
-| Next Steps | `Lightbulb` | Ideas |
+| Concept         | Icon             | Notes                       |
+| --------------- | ---------------- | --------------------------- |
+| **Navigation**  |                  |                             |
+| Home            | `Home`           |                             |
+| About           | `Info`           |                             |
+| Vision          | `Telescope`      | Looking forward             |
+| Roadmap         | `Map`            | Journey/direction           |
+| Pricing         | `HandCoins`      | Money/currency              |
+| Knowledge       | `BookOpen`       | Learning/docs               |
+| Forest          | `Trees`          | Community blogs             |
+| Blog            | `PenLine`        | Writing                     |
+| **Features**    |                  |                             |
+| Email           | `Mail`           |                             |
+| Storage         | `HardDrive`      |                             |
+| Theming         | `Palette`        | Customization               |
+| Authentication  | `ShieldCheck`    | Security                    |
+| Cloud           | `Cloud`          | Remote/serverless           |
+| Search          | `SearchCode`     | Code/advanced search        |
+| Archives        | `Archive`        | Backups                     |
+| Upload          | `Upload`         |                             |
+| Video           | `Video`          |                             |
+| Comments        | `MessagesSquare` | User discussions            |
+| GitHub          | `Github`         | External links to GitHub    |
+| **States**      |                  |                             |
+| Success         | `Check`          | Completed/valid             |
+| Error           | `X`              | Failed/close                |
+| Loading         | `Loader2`        | With animate-spin           |
+| **Content**     |                  |                             |
+| Posts           | `FileText`       | Blog posts                  |
+| Tags            | `Tag`            | Categorization              |
+| Growth          | `Sprout`         | Grove brand, new beginnings |
+| Heart           | `Heart`          | Love, care                  |
+| External        | `ExternalLink`   | Opens new tab               |
+| Location        | `MapPin`         | Current position            |
+| **Phases**      |                  |                             |
+| Coming Soon     | `Seedling`       | Something growing           |
+| Refinement      | `Gem`            | Polish, quality             |
+| The Dream       | `Sparkles`       | Mystical (use sparingly!)   |
+| Night           | `Star`           | Midnight themes             |
+| **Actions**     |                  |                             |
+| Getting Started | `Compass`        | Guidance                    |
+| What's New      | `Megaphone`      | Announcements               |
+| Next Steps      | `Lightbulb`      | Ideas                       |
 
 ### Icon Mapping Tables in Files
 
@@ -690,10 +743,26 @@ Create a consistent icon map at the top of each component/page that uses icons:
 ```typescript
 // landing/src/lib/utils/icons.ts - Centralized icon registry
 import {
-  Mail, HardDrive, Palette, ShieldCheck, Cloud, SearchCode,
-  Archive, Upload, MessagesSquare, Github, Check, X, Loader2,
-  FileText, Tag, Sprout, Heart, ExternalLink, MapPin, // ... etc
-} from 'lucide-svelte';
+  Mail,
+  HardDrive,
+  Palette,
+  ShieldCheck,
+  Cloud,
+  SearchCode,
+  Archive,
+  Upload,
+  MessagesSquare,
+  Github,
+  Check,
+  X,
+  Loader2,
+  FileText,
+  Tag,
+  Sprout,
+  Heart,
+  ExternalLink,
+  MapPin, // ... etc
+} from "lucide-svelte";
 
 export const featureIcons = {
   mail: Mail,
@@ -725,6 +794,7 @@ Then use in components:
 ```
 
 **Benefits:**
+
 - Single source of truth for all icons
 - Prevents undefined icon errors
 - Easy to maintain and extend
@@ -785,21 +855,25 @@ curl -s https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/tree-pi
 ```typescript
 // TreePine - conifer silhouette
 const treePine = {
-  canopy: 'm17 14 3 3.3a1 1 0 0 1-.7 1.7H4.7a1 1 0 0 1-.7-1.7L7 14h-.3a1 1 0 0 1-.7-1.7L9 9h-.2A1 1 0 0 1 8 7.3L12 3l4 4.3a1 1 0 0 1-.8 1.7H15l3 3.3a1 1 0 0 1-.7 1.7H17Z',
-  trunk: 'M12 22v-3'
+  canopy:
+    "m17 14 3 3.3a1 1 0 0 1-.7 1.7H4.7a1 1 0 0 1-.7-1.7L7 14h-.3a1 1 0 0 1-.7-1.7L9 9h-.2A1 1 0 0 1 8 7.3L12 3l4 4.3a1 1 0 0 1-.8 1.7H15l3 3.3a1 1 0 0 1-.7 1.7H17Z",
+  trunk: "M12 22v-3",
 };
 
 // TreeDeciduous - deciduous/round tree
 const treeDeciduous = {
-  canopy: 'M8 19a4 4 0 0 1-2.24-7.32A3.5 3.5 0 0 1 9 6.03V6a3 3 0 1 1 6 0v.04a3.5 3.5 0 0 1 3.24 5.65A4 4 0 0 1 16 19Z',
-  trunk: 'M12 19v3'
+  canopy:
+    "M8 19a4 4 0 0 1-2.24-7.32A3.5 3.5 0 0 1 9 6.03V6a3 3 0 1 1 6 0v.04a3.5 3.5 0 0 1 3.24 5.65A4 4 0 0 1 16 19Z",
+  trunk: "M12 19v3",
 };
 
 // Moon - crescent moon
-const moon = 'M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401';
+const moon =
+  "M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401";
 
 // Flame - campfire/hearth
-const flame = 'M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4';
+const flame =
+  "M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4";
 ```
 
 ### Composing with SVG Transforms
@@ -831,24 +905,24 @@ Use `<g transform="...">` to position, scale, and rotate icons:
 
 ### Transform Cheatsheet
 
-| Transform | Effect | Example |
-|-----------|--------|---------|
-| `translate(x, y)` | Move origin | `translate(20, 8)` moves icon right 20, down 8 |
-| `scale(s)` | Uniform size | `scale(0.65)` makes icon 65% size |
-| `rotate(deg, cx, cy)` | Rotation around point | `rotate(-5, 12, 12)` tilts 5° around center |
-| Combined | Chain transforms | `translate(20, 8) scale(0.65) rotate(-5, 12, 12)` |
+| Transform             | Effect                | Example                                           |
+| --------------------- | --------------------- | ------------------------------------------------- |
+| `translate(x, y)`     | Move origin           | `translate(20, 8)` moves icon right 20, down 8    |
+| `scale(s)`            | Uniform size          | `scale(0.65)` makes icon 65% size                 |
+| `rotate(deg, cx, cy)` | Rotation around point | `rotate(-5, 12, 12)` tilts 5° around center       |
+| Combined              | Chain transforms      | `translate(20, 8) scale(0.65) rotate(-5, 12, 12)` |
 
 ### Example: Grove Logo Compositions
 
 See `/landing/src/lib/components/logo-concepts/` for real implementations:
 
-| Logo | Composition |
-|------|-------------|
-| `LogoFireflyForest` | TreePine + TreeDeciduous + glowing circles |
-| `LogoGatheringHearth` | Two trees angled toward center Flame |
-| `LogoStarlightPines` | Two TreePines + Moon + star circles |
-| `LogoShelter` | Two TreePines forming archway + Moon |
-| `LogoWinterGrove` | TreePines + snow line accents |
+| Logo                  | Composition                                |
+| --------------------- | ------------------------------------------ |
+| `LogoFireflyForest`   | TreePine + TreeDeciduous + glowing circles |
+| `LogoGatheringHearth` | Two trees angled toward center Flame       |
+| `LogoStarlightPines`  | Two TreePines + Moon + star circles        |
+| `LogoShelter`         | Two TreePines forming archway + Moon       |
+| `LogoWinterGrove`     | TreePines + snow line accents              |
 
 ### Guidelines
 
@@ -885,13 +959,13 @@ Desktop navigation items that don't fit should go to a mobile sheet menu:
 
 ### Decorative Elements on Mobile
 
-| Element | Mobile Treatment |
-|---------|-----------------|
-| Trees | Reduce count, simplify (density multiplier = 1) |
-| Particles | Reduce count (40→20 snowflakes) |
-| Clouds | Hide some, keep 2-3 |
-| Complex animations | Reduce or disable |
-| Touch targets | Minimum 44x44px |
+| Element            | Mobile Treatment                                |
+| ------------------ | ----------------------------------------------- |
+| Trees              | Reduce count, simplify (density multiplier = 1) |
+| Particles          | Reduce count (40→20 snowflakes)                 |
+| Clouds             | Hide some, keep 2-3                             |
+| Complex animations | Reduce or disable                               |
+| Touch targets      | Minimum 44x44px                                 |
 
 ### Performance Guidelines
 
@@ -909,25 +983,25 @@ Desktop navigation items that don't fit should go to a mobile sheet menu:
 
 ## When to Use
 
-| Pattern | Good For |
-|---------|----------|
-| **Glassmorphism** | Text over backgrounds, navbars, cards, modals |
-| **Randomized forests** | Story pages, about pages, visual sections |
-| **Seasonal themes** | Roadmaps, timelines, emotional storytelling |
-| **Midnight Bloom** | Future features, dreams, mystical content |
-| **Weather particles** | Hero sections, transitions between seasons |
-| **Birds** | Adding life to forest scenes, seasonal indicators |
+| Pattern                | Good For                                          |
+| ---------------------- | ------------------------------------------------- |
+| **Glassmorphism**      | Text over backgrounds, navbars, cards, modals     |
+| **Randomized forests** | Story pages, about pages, visual sections         |
+| **Seasonal themes**    | Roadmaps, timelines, emotional storytelling       |
+| **Midnight Bloom**     | Future features, dreams, mystical content         |
+| **Weather particles**  | Hero sections, transitions between seasons        |
+| **Birds**              | Adding life to forest scenes, seasonal indicators |
 
 ## When NOT to Use
 
-| Pattern | Avoid When |
-|---------|------------|
-| **Heavy decoration** | Data-dense pages, admin interfaces, forms |
-| **Particle effects** | Performance-critical pages, accessibility concerns |
-| **Seasonal colors** | Brand-critical contexts needing consistent colors |
-| **Multiple glass layers** | Can cause blur performance issues |
-| **Randomization** | Content that needs to match between sessions |
-| **Complex forests** | Mobile-first pages, simple informational content |
+| Pattern                   | Avoid When                                         |
+| ------------------------- | -------------------------------------------------- |
+| **Heavy decoration**      | Data-dense pages, admin interfaces, forms          |
+| **Particle effects**      | Performance-critical pages, accessibility concerns |
+| **Seasonal colors**       | Brand-critical contexts needing consistent colors  |
+| **Multiple glass layers** | Can cause blur performance issues                  |
+| **Randomization**         | Content that needs to match between sessions       |
+| **Complex forests**       | Mobile-first pages, simple informational content   |
 
 ---
 
@@ -963,11 +1037,11 @@ PNG image (1200×630)
 GET https://og.grove.place/?title=X&subtitle=Y&accent=HEX
 ```
 
-| Param | Default | Description |
-|-------|---------|-------------|
-| `title` | "Grove" | Main title (max 100 chars) |
-| `subtitle` | "A place to Be." | Subtitle (max 200 chars) |
-| `accent` | "16a34a" | Hex color without # (forest green) |
+| Param      | Default          | Description                        |
+| ---------- | ---------------- | ---------------------------------- |
+| `title`    | "Grove"          | Main title (max 100 chars)         |
+| `subtitle` | "A place to Be." | Subtitle (max 200 chars)           |
+| `accent`   | "16a34a"         | Hex color without # (forest green) |
 
 ### Adding OG to New Pages
 
@@ -998,6 +1072,7 @@ Use the SEO component which handles OG meta tags:
 When writing text for Grove UI (tooltips, buttons, onboarding, error messages), invoke the **grove-documentation** skill first. The voice should match the visuals.
 
 **Typical flow:**
+
 1. Design the UI component/page
 2. Activate `grove-documentation` for any user-facing text
 3. Write content following Grove voice principles

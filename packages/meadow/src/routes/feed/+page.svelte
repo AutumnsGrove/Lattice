@@ -7,7 +7,7 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
 	import { page } from "$app/state";
-	import { buildLoginUrl } from "@autumnsgrove/groveengine/grafts/login";
+	import { buildLoginUrl } from "@autumnsgrove/lattice/grafts/login";
 	import PostCard from "$lib/components/PostCard.svelte";
 	import ComposeBox from "$lib/components/ComposeBox.svelte";
 	import FeedFilters from "$lib/components/FeedFilters.svelte";

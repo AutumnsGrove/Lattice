@@ -282,7 +282,7 @@ import {
   API_ERRORS,
   buildErrorJson,
   logGroveError,
-} from "@autumnsgrove/groveengine/errors";
+} from "@autumnsgrove/lattice/errors";
 
 // In +server.ts
 if (!locals.user) {
@@ -294,7 +294,7 @@ if (!locals.user) {
 Client actions show toast feedback:
 
 ```typescript
-import { toast } from "@autumnsgrove/groveengine/ui";
+import { toast } from "@autumnsgrove/lattice/ui";
 
 try {
   await apiRequest("/api/resource", { method: "POST", body });

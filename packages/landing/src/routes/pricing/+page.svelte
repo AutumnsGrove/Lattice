@@ -8,7 +8,7 @@
 
 	import Header from "$lib/components/Header.svelte";
 	import Footer from "$lib/components/Footer.svelte";
-	import { PricingGraft } from "@autumnsgrove/groveengine/grafts/pricing";
+	import { PricingGraft } from "@autumnsgrove/lattice/grafts/pricing";
 	import SEO from "$lib/components/SEO.svelte";
 
 	let { data } = $props();

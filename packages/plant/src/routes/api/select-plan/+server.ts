@@ -12,8 +12,8 @@ import type { RequestHandler } from "./$types";
 import {
   transformAllTiers,
   type PricingTier,
-} from "@autumnsgrove/groveengine/grafts/pricing";
-import { type TierKey, isValidTier } from "@autumnsgrove/groveengine/config";
+} from "@autumnsgrove/lattice/grafts/pricing";
+import { type TierKey, isValidTier } from "@autumnsgrove/lattice/config";
 import { PLANT_ERRORS, logPlantError } from "$lib/errors";
 import { createTenant, getTenantForOnboarding } from "$lib/server/tenant";
 import {
