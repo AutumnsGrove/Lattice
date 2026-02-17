@@ -40,7 +40,7 @@
   {navItems}
   brandTitle="Meadow"
   showSignIn={true}
-  signInHref={buildLoginUrl(`${page.url.origin}/feed`)}
+  signInHref={buildLoginUrl(`${page.url.origin}/auth/callback?returnTo=${encodeURIComponent(page.url.pathname)}`)}
   user={headerUser}
   {userHref}
 />

@@ -43,7 +43,8 @@
 
   function requireAuth(): boolean {
     if (loggedIn) return true;
-    window.location.href = buildLoginUrl(`${page.url.origin}/feed/${post.id}`);
+    const callbackUrl = `${page.url.origin}/auth/callback?returnTo=${encodeURIComponent(`/feed/${post.id}`)}`;
+    window.location.href = buildLoginUrl(callbackUrl);
     return false;
   }
 

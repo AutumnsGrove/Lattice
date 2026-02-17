@@ -9,7 +9,12 @@ import { getFeed } from "$lib/server/feed";
 
 export const load: PageServerLoad = async ({ url, platform, locals }) => {
   if (!locals.user) {
-    redirect(302, buildLoginUrl(`${url.origin}/bookmarks`));
+    redirect(
+      302,
+      buildLoginUrl(
+        `${url.origin}/auth/callback?returnTo=${encodeURIComponent("/bookmarks")}`,
+      ),
+    );
   }
 
   const db = platform?.env?.DB;

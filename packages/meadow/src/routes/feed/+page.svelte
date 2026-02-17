@@ -74,7 +74,8 @@
   // ── Interactions (require auth) ────────────────────────────────────────
   function requireAuth(): boolean {
     if (loggedIn) return true;
-    window.location.href = buildLoginUrl(`${page.url.origin}/feed`);
+    const callbackUrl = `${page.url.origin}/auth/callback?returnTo=${encodeURIComponent(page.url.pathname)}`;
+    window.location.href = buildLoginUrl(callbackUrl);
     return false;
   }
 
