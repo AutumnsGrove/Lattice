@@ -241,15 +241,17 @@ Importable packages. The engine is both a library (npm exports) and a SvelteKit 
 **Source:** `AutumnsGrove/Forage` (also referenced as `AutumnsGrove/GroveDomainTool`)
 **What it is:** AI-powered domain discovery tool. 5-question quiz → AI generates candidates → Haiku swarm evaluates → RDAP checks availability → email with curated list.
 **Front-end:** Already in `packages/domains` (→ `apps/domains`)
-**What comes in:** The Cloudflare Worker backend — DO-based orchestration, AI pipeline, Resend integration.
+**What comes in:** The Cloudflare Worker backend — DO-based orchestration, AI pipeline.
+
+**Key simplification:** As an external repo, Forage needed its own OpenRouter key and Resend integration. Inside the monorepo, it can use **Lumen** for AI and **Zephyr** for email via service bindings — eliminating standalone API keys entirely. See [Integration Upgrades](#integration-upgrades) below.
 
 **Integration points:**
 
 - `apps/domains` calls Forage's API
 - Durable Objects for session state
-- DeepSeek v3.2 via OpenRouter
-- Resend for result emails
-- Service binding in `domains/wrangler.toml`
+- Lumen for AI/LLM calls (replaces standalone OpenRouter key)
+- Zephyr for result emails (replaces standalone Resend key)
+- Service bindings in `wrangler.toml` (Forage ↔ Lumen, Forage ↔ Zephyr, Domains ↔ Forage)
 
 ### Shutter (libs/shutter/)
 
@@ -263,6 +265,44 @@ Importable packages. The engine is both a library (npm exports) and a SvelteKit 
 - Meadow (link previews)
 - Forage (domain research)
 - Publishable as `@autumnsgrove/shutter` or `@groveengine/shutter`
+
+---
+
+## Integration Upgrades
+
+Co-location isn't just about file organization — it simplifies architecture. When services live in the same monorepo and deploy to the same Cloudflare account, they can talk to each other via service bindings (zero-latency, no network hop, no external API keys). Several imported services get simpler as a result.
+
+### Forage: Massive Simplification via Internal Services + Loom SDK
+
+**Before (external repo):** Forage managed its own OpenRouter API key for AI calls, its own Resend API key for result emails, and its own hand-rolled DO orchestration for session state. Two secrets to rotate, two external dependencies to monitor, and a bespoke coordination layer that predated the Loom SDK.
+
+**After (monorepo):**
+
+- **AI → Lumen:** Forage calls Lumen via service binding for all LLM work. Lumen already manages AI provider keys, rate limits, and fallbacks. Forage becomes a consumer, not an operator.
+- **Email → Zephyr:** Forage calls Zephyr via service binding to send result emails. Zephyr already handles Resend integration, email templates, and delivery tracking. One email gateway for the whole platform.
+- **DO orchestration → Loom SDK:** Forage was the _first_ Loom-style service — it pioneered the DO session orchestration pattern before there was a proper SDK. Now there is one (`services/durable-objects`). Forage's entire bespoke DO coordination layer can be replaced with Loom SDK calls, eliminating hundreds of lines of hand-rolled session management.
+- **Result:** Forage's architecture collapses from "standalone service with its own infra" to "thin orchestration layer over Loom + Lumen + Zephyr." Zero secrets in `wrangler.toml` — just service bindings. The import isn't just moving code; it's a chance to dramatically simplify it.
+
+### Shutter: Direct Import Instead of API Calls
+
+**Before (external package):** Services that needed content distillation had to either install the npm package OR call Shutter's API endpoint. Cross-worker calls add latency and complexity.
+
+**After (monorepo):** Services can `import { distill } from '@autumnsgrove/shutter'` directly via `workspace:*`. No API call, no network hop, no auth token. In-process content distillation for any service that needs it. (A standalone worker endpoint can still exist for external consumers.)
+
+### Foliage + Gossamer: Unified Theming Pipeline
+
+**Before (separate repos):** Theme changes required coordinating PRs across three repos (Foliage, Gossamer, Engine). A theme that used Gossamer effects needed version pinning and publish cycles. This is why both stalled.
+
+**After (monorepo):** A single PR can touch the theme definition (Foliage), its visual effects (Gossamer), and the engine integration — all type-checked and built together. `workspace:*` means no version mismatches, no publish-wait-install cycles.
+
+### Future Opportunities
+
+These don't need to happen during the migration, but become possible afterward:
+
+- **Shared D1 migrations:** A single migration pipeline that knows about all services' schema needs
+- **Cross-service type safety:** Services can share TypeScript types directly instead of duplicating them
+- **Unified CI:** One build graph that understands the dependency tree, only rebuilding what changed
+- **Service binding mesh:** Any service can talk to any other service without external API keys or auth tokens
 
 ---
 
@@ -523,23 +563,27 @@ pnpm -r run check
 
 #### 2D: Import Forage → services/forage/
 
+> Forage gets the most dramatic simplification of any import. It was the first Loom-style service, built before the SDK existed. Bringing it in means it can shed its bespoke infrastructure and become a thin orchestrator.
+
 1. Clone `AutumnsGrove/Forage` (or `AutumnsGrove/GroveDomainTool`) into a temp directory
 2. Copy the Worker source into `services/forage/`
 3. Set up `package.json` with name `grove-forage`
-4. Set up `wrangler.toml` for the worker
-5. **Migrate secrets/env vars:** Forage requires API keys to function. Without them it deploys but silently fails every request.
-   - **Source of truth:** The external repo's `wrangler.toml` (for bindings/vars) and `.dev.vars` (for local secrets). Audit both before importing.
-   - Known required secrets:
-     - `OPENROUTER_API_KEY` (DeepSeek v3.2 via OpenRouter)
-     - `RESEND_API_KEY` (result emails)
-     - Any other service-specific secrets discovered during audit
-   - **In the new `services/forage/wrangler.toml`:** Document all required secrets as comments at the top, e.g. `# Required secrets: OPENROUTER_API_KEY, RESEND_API_KEY — set via wrangler secret put`
-   - Create `services/forage/.dev.vars.example` with placeholder values for local development
-   - **Before first production deploy:** Run `wrangler secret put <KEY>` for each secret. The deploy workflow should be tested with a dry-run first.
-   - **Owner:** Whoever runs the Forage deploy workflow is responsible for confirming secrets are set. Consider adding a pre-deploy check in the workflow that fails fast if required vars are unset.
-6. Update `apps/domains/wrangler.toml` service binding to use the local worker
-7. Add deploy workflow: `.github/workflows/deploy-forage.yml`
-8. Verify: build, type-check
+4. Set up `wrangler.toml` with service bindings (no secrets needed):
+   - Bind to Zephyr (email), Lumen (AI), Loom/durable-objects (session orchestration)
+   - For local dev, configure `[env.dev]` service binding stubs or `--local` mode
+5. **Replace bespoke DO orchestration with Loom SDK:**
+   - Forage's hand-rolled DO session management predates the Loom SDK
+   - Replace with Loom SDK calls from `services/durable-objects`
+   - This is the biggest code reduction — potentially hundreds of lines
+6. **Replace Resend with Zephyr service binding:**
+   - Remove `@resend/node` dependency and direct Resend API calls
+   - Call Zephyr's internal API for result emails
+7. **Replace OpenRouter with Lumen service binding:**
+   - Remove standalone OpenRouter key and direct API calls
+   - Route AI calls through Lumen (already manages provider keys, rate limits, fallbacks)
+8. Update `apps/domains/wrangler.toml` service binding to use the local Forage worker
+9. Add deploy workflow: `.github/workflows/deploy-forage.yml`
+10. Verify: build, type-check, test full quiz flow end-to-end (Loom session → Lumen AI → Zephyr email)
 
 ---
 
@@ -626,18 +670,18 @@ Rewrite CI to detect packages by workspace membership rather than hardcoded path
 
 ## Risk Assessment
 
-| Risk                                  | Impact                                   | Mitigation                                                             |
-| ------------------------------------- | ---------------------------------------- | ---------------------------------------------------------------------- |
-| **Broken relative paths**             | High — builds fail                       | Comprehensive search-and-replace; verify with full build               |
-| **CI deploy paths wrong**             | High — deploys stop working              | Update all workflow files; test with dry-run before merge              |
-| **gw package detection breaks**       | High — `gw context`, `gw packages` fail  | Update `packages.py` discover logic to scan new dirs (confirmed)       |
-| **gf impact/infra commands break**    | High — `gf impact`, `gf migrations` fail | Update hardcoded `packages/` in Go + Python (confirmed, 20+ refs)      |
-| **wrangler.toml cross-references**    | Medium — workers can't build             | Explicit audit step; grep for `../` and `packages/` in all configs     |
-| **Forage secrets not wired**          | Medium — worker deploys fail silently    | Document all required secrets; run `wrangler secret put` before deploy |
-| **Git history fragmentation**         | Medium — blame/log harder to trace       | `git log --follow` still works; accept trade-off                       |
-| **Foliage/Gossamer import conflicts** | Medium — existing code vs imported code  | Reconcile carefully in Phase 2; engine foliage re-exports              |
-| **npm publish pipeline break**        | Medium — can't release engine            | Verify publish workflow uses correct new path                          |
-| **Stale path references in docs**     | Low — confusion but no breakage          | Global search for `packages/` after migration                          |
+| Risk                                  | Impact                                   | Mitigation                                                         |
+| ------------------------------------- | ---------------------------------------- | ------------------------------------------------------------------ |
+| **Broken relative paths**             | High — builds fail                       | Comprehensive search-and-replace; verify with full build           |
+| **CI deploy paths wrong**             | High — deploys stop working              | Update all workflow files; test with dry-run before merge          |
+| **gw package detection breaks**       | High — `gw context`, `gw packages` fail  | Update `packages.py` discover logic to scan new dirs (confirmed)   |
+| **gf impact/infra commands break**    | High — `gf impact`, `gf migrations` fail | Update hardcoded `packages/` in Go + Python (confirmed, 20+ refs)  |
+| **wrangler.toml cross-references**    | Medium — workers can't build             | Explicit audit step; grep for `../` and `packages/` in all configs |
+| **Forage service binding wiring**     | Medium — Forage deploys but calls fail   | Test Zephyr + Lumen service bindings end-to-end before going live  |
+| **Git history fragmentation**         | Medium — blame/log harder to trace       | `git log --follow` still works; accept trade-off                   |
+| **Foliage/Gossamer import conflicts** | Medium — existing code vs imported code  | Reconcile carefully in Phase 2; engine foliage re-exports          |
+| **npm publish pipeline break**        | Medium — can't release engine            | Verify publish workflow uses correct new path                      |
+| **Stale path references in docs**     | Low — confusion but no breakage          | Global search for `packages/` after migration                      |
 
 ---
 
