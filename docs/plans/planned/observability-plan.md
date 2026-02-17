@@ -26,6 +26,18 @@
 | **Alerting**                      | No automated notifications when things break or costs spike                   |
 | **Cross-service dashboard**       | No single pane of glass -- data exists but is scattered                       |
 
+### What Changed on Main (Deep Dive Findings)
+
+Three significant services landed or were respecced since the original plan was drafted:
+
+| Service           | What Changed                                                                                                                             | Observability Impact                                                                                                                    |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| **Warden**        | New API gateway — proxies all external API requests for agents with credential injection, nonce-based auth, rate limiting, audit logging | Needs full monitoring: request volume, auth failures, nonce reuse detection, per-service latency, upstream API health, cost attribution |
+| **Meadow**        | Community feed in early beta — RSS poller, note creation, votes/reactions, auth redirect fixes                                           | Needs monitoring: polling health, feed freshness, auth failure rates, note creation errors, rate limit hit rates                        |
+| **Queen Firefly** | Rewritten as provider-agnostic SDK ecosystem — ephemeral server management via Firefly SDK, cost tracking, orphan detection              | Needs monitoring: ignition/fade times, session costs, orphan instance detection, pool health, provider latency                          |
+
+The v1.0 readiness audit also flagged **rate limiter KV failure (fail-open)** as a medium-severity issue — observability should detect when rate limiting silently stops working.
+
 ### GitHub Issues (16 Total, 14 Open)
 
 **Vista Epic (#609, Phases #610-#616):** Full infrastructure monitoring dashboard at vista.grove.place
@@ -49,6 +61,28 @@ Vista's observability module will be built directly in GroveEngine:
 - Reuses existing Heartwood auth (admin-only, no separate OAuth client needed)
 
 This means no separate deployment, no separate D1/KV provisioning, no cross-service auth dance. Just build, deploy the engine, and observability ships with it.
+
+---
+
+## Operational Prerequisites
+
+### Cloudflare API Token
+
+The collectors need a Cloudflare API token to query the Analytics GraphQL API, D1 HTTP API, R2 API, and KV Analytics API. This is the single biggest setup dependency.
+
+**Required token scopes:**
+
+- `Account Analytics:Read` — Worker request/error/latency metrics via GraphQL
+- `Account D1:Read` — Database size, row counts, query stats
+- `Account Workers R2 Storage:Read` — Bucket object counts, storage sizes
+- `Account Workers KV Storage:Read` — Namespace operation counts
+- `Account Workers Scripts:Read` — Worker list and deployment status
+
+**Storage:** The token goes in the engine's `wrangler.toml` as a secret (`CF_OBSERVABILITY_TOKEN`), deployed via `gw secret apply --write` or `wrangler secret put`. It lives alongside `CF_ACCOUNT_ID` which is already in environment config.
+
+**Rotation:** Cloudflare API tokens don't expire by default, but the plan should support rotation. The token is read from the Worker environment on each collection cycle — rotating means deploying a new secret value. No code change needed, just `wrangler secret put CF_OBSERVABILITY_TOKEN`. A future improvement could add token expiry monitoring as an alert threshold itself.
+
+**Separation of concerns:** This token is read-only and scoped to analytics. It cannot modify workers, databases, or storage. It's a separate token from any deployment credentials.
 
 ---
 
@@ -133,13 +167,13 @@ interface CostBreakdown {
 }
 ```
 
-Also define the full service registry:
+Also define the full service registry (updated to include Warden, Meadow, and Queen Firefly):
 
-- 9 Workers with their endpoints and health check paths
-- 9 D1 databases with IDs
-- 6 R2 buckets
-- 7 KV namespaces
-- 7 Durable Object classes
+- 11+ Workers with their endpoints and health check paths (engine, auth, meadow, meadow-poller, warden, cdn, payments, durable-objects, queen, plus cron workers)
+- 9 D1 databases with IDs (including grove-lattice used by Warden for tenant secrets)
+- 6 R2 buckets (including amber.grove.place used by Firefly for state sync)
+- 8+ KV namespaces (add Warden nonce storage, Warden rate limit counters, Meadow CACHE_KV)
+- 7+ Durable Object classes (plus Queen Firefly's LoomDO, and planned Meadow UserFeedDO/PostMetaDO)
 
 ### Step 2: D1 Migration for Observability Tables
 
@@ -281,16 +315,35 @@ The Cloudflare Analytics GraphQL API endpoint is `https://api.cloudflare.com/cli
 
 **File:** `packages/engine/src/lib/server/observability/costs.ts`
 
-Calculate estimated costs based on Cloudflare pricing:
+Calculate estimated costs based on Cloudflare pricing.
 
+**Pricing constants** live in a single `CLOUDFLARE_PRICING` object at the top of `costs.ts` with a `PRICING_LAST_VERIFIED` date. This makes it obvious where to update when Cloudflare changes pricing (they have historically — e.g., R2 egress went free, Workers paid tier changed). Each constant includes a comment with the pricing page URL for verification.
+
+```typescript
+// Last verified: 2026-02-17
+// Source: https://developers.cloudflare.com/workers/platform/pricing/
+const CLOUDFLARE_PRICING = {
+  workers: { perMillionRequests: 0.5, freeRequests: 10_000_000 },
+  d1: { perMillionReads: 0.75, perMillionWrites: 1.0, perGBStorage: 0.75 },
+  r2: { perGBStorage: 0.015, perMillionClassA: 4.5, perMillionClassB: 0.36 },
+  kv: { perMillionReads: 0.5, perMillionWrites: 5.0, perGBStorage: 0.5 },
+  durableObjects: { perMillionRequests: 0.15, perMillionGBSeconds: 12.5 },
+  workersAI: { freeNeuronsPerDay: 10_000, perThousandNeurons: 0.011 },
+} as const;
 ```
-Workers: $0.50/million requests (first 10M free on paid plan)
-D1: $0.75/million rows read, $1.00/million rows written, $0.75/GB storage
-R2: $0.015/GB storage, $4.50/million Class A ops, $0.36/million Class B ops
-KV: $0.50/million reads, $5.00/million writes, $0.50/GB storage
-DOs: $0.15/million requests, $12.50/million GB-seconds
-Workers AI: 10K neurons/day free, then $0.011/1K neurons
+
+Also add Firefly external provider costs for Queen Firefly ephemeral servers:
+
+```typescript
+const FIREFLY_PROVIDER_PRICING = {
+  hetzner: { cx22: 0.008 }, // per hour
+  flyio: { shared1x: 0.02 },
+  railway: { starter: 0.015 },
+  digitalocean: { s1vcpu: 0.01 },
+} as const;
 ```
+
+A future enhancement could move these to a D1 table editable from the admin dashboard, but hardcoded constants with a verified date is the right starting point — it's transparent, auditable, and easy to update.
 
 ### Step 5: Existing Data Aggregation Service
 
@@ -303,6 +356,9 @@ Surface data that already exists in D1:
 3. **`thorn-aggregator.ts`** - Query `thorn_moderation_log` for text moderation stats, flagged content counts
 4. **`sentinel-aggregator.ts`** - Query `sentinel_runs` for recent test results, baseline comparisons
 5. **`clearing-aggregator.ts`** - Query status tables for current component health, incident history
+6. **`warden-aggregator.ts`** - Query `warden_audit_log` for request volume, auth failure rates, per-service latency, scope denials, nonce reuse attempts, rate limit hit rates. Warden already logs structured audit data to D1 — this aggregator surfaces it
+7. **`meadow-aggregator.ts`** - Query `meadow_posts`, `meadow_votes`, `meadow_reactions`, `meadow_reports` for feed health, engagement rates, report volume. Also query Meadow Poller KV poll state keys (`poll:{tenantId}`) for polling success rates, consecutive error counts, and feed freshness (time since last successful poll per tenant)
+8. **`firefly-aggregator.ts`** - Query Queen Firefly's `jobs` and `runners` tables for active pool size, job queue depth, session durations, per-provider costs, and orphan instance count. Also query R2 (`amber.grove.place`) for state sync sizes per consumer (Bloom workspaces, Outpost worlds, CI cache)
 
 ### Step 6: Observability API Endpoints
 
@@ -311,17 +367,20 @@ Surface data that already exists in D1:
 Admin-only API endpoints (require Wayfinder auth):
 
 ```
-GET /api/admin/observability/overview     - Full dashboard summary
-GET /api/admin/observability/workers      - Worker metrics
-GET /api/admin/observability/databases    - D1 metrics
-GET /api/admin/observability/storage      - R2 + KV metrics
+GET /api/admin/observability/overview        - Full dashboard summary
+GET /api/admin/observability/workers         - Worker metrics
+GET /api/admin/observability/databases       - D1 metrics
+GET /api/admin/observability/storage         - R2 + KV metrics
 GET /api/admin/observability/durable-objects - DO status
-GET /api/admin/observability/costs        - Cost breakdown
-GET /api/admin/observability/lumen        - AI usage details
-GET /api/admin/observability/moderation   - Petal + Thorn combined
-GET /api/admin/observability/alerts       - Active and historical alerts
-POST /api/admin/observability/collect     - Trigger manual collection
-POST /api/admin/observability/thresholds  - Configure alert thresholds
+GET /api/admin/observability/costs           - Cost breakdown (CF + Firefly providers)
+GET /api/admin/observability/lumen           - AI usage details
+GET /api/admin/observability/moderation      - Petal + Thorn combined
+GET /api/admin/observability/warden          - API gateway: request volume, auth, upstream health
+GET /api/admin/observability/meadow          - Feed health, polling status, engagement
+GET /api/admin/observability/firefly         - Pool status, job queue, costs, orphans
+GET /api/admin/observability/alerts          - Active and historical alerts
+POST /api/admin/observability/collect        - Trigger manual collection
+POST /api/admin/observability/thresholds     - Configure alert thresholds
 ```
 
 ### Step 7: Admin Dashboard UI
@@ -335,10 +394,13 @@ Build dashboard pages within the existing Arbor admin panel:
 3. **Databases** (`databases/+page.svelte`) - D1 database cards showing size, read/write activity, growth trends
 4. **Storage** (`storage/+page.svelte`) - R2 buckets and KV namespaces with object counts, storage sizes
 5. **Durable Objects** (`durable-objects/+page.svelte`) - DO class breakdown showing active/hibernating counts
-6. **Costs** (`costs/+page.svelte`) - Daily/monthly cost breakdown with projections
+6. **Costs** (`costs/+page.svelte`) - Daily/monthly cost breakdown with projections (Cloudflare + Firefly provider costs)
 7. **AI Usage** (`ai/+page.svelte`) - Lumen cost, token usage, provider breakdown, quota status
 8. **Moderation** (`moderation/+page.svelte`) - Combined Petal + Thorn activity
-9. **Alerts** (`alerts/+page.svelte`) - Active alerts, threshold configuration, alert history
+9. **Warden** (`warden/+page.svelte`) - API gateway health: request volume, auth breakdown (service-binding vs challenge-response), per-service latency, upstream API health, nonce reuse alerts, rate limit consumption, cost attribution per agent
+10. **Meadow** (`meadow/+page.svelte`) - Feed health: polling success rate per tenant, feed freshness gauge, note creation rates, engagement stats (votes/reactions), report queue, rate limit hit rates, auth failure tracking
+11. **Firefly** (`firefly/+page.svelte`) - Pool dashboard: active/warm/ephemeral runners, job queue depth, ignition/fade times, session costs by provider, orphan instance alerts, R2 state sync sizes per consumer
+12. **Alerts** (`alerts/+page.svelte`) - Active alerts, threshold configuration, alert history
 
 Use engine chart components (`@autumnsgrove/groveengine/ui/charts`) and glass design pattern.
 
@@ -365,6 +427,12 @@ async reportMetrics(): Promise<DOInstanceMetrics> {
 
 Also add a `/do-metrics` endpoint on the durable-objects worker that aggregates across instances.
 
+**Dependency note:** The cron collector (Step 9) and admin API (Step 6) will surface DO metrics, but until DOs actually implement `reportMetrics()`, those endpoints return empty data. To avoid misleading gaps in the dashboard:
+
+- The DO collector should return a clear `{ status: 'not_instrumented', className: '...' }` response for DOs that haven't implemented self-reporting yet
+- The dashboard should render uninstrumented DOs as "awaiting instrumentation" rather than showing zeros (which implies "healthy with zero activity")
+- Step 8 can ship incrementally — instrument one DO class at a time, dashboard reflects which ones report real data
+
 ### Step 9: Cron Collection Job
 
 **Add to engine wrangler.toml:** A cron trigger that runs every 5 minutes to collect metrics.
@@ -374,30 +442,45 @@ Alternatively, since we're building inside the engine for now, add a self-trigge
 - A scheduled endpoint called by an external cron (Cloudflare cron trigger)
 - Or manual collection from the admin dashboard
 
+### Step 10: Security-Adjacent Monitoring (v1.0 Audit Findings)
+
+The v1.0 readiness audit identified operational gaps where observability directly supports security posture:
+
+1. **KV health monitoring** — The rate limiter fails open when KV is unavailable (audit finding M-5). Add a KV connectivity check to the health checker that alerts when KV operations start failing, since this silently disables rate limiting across all services.
+
+2. **Auth failure rate tracking** — Track 401/403 rates across all services (engine, Meadow, Warden). A spike in auth failures could indicate session expiry issues, credential rotation problems, or active attack attempts.
+
+3. **Sanitization bypass detection** — Monitor for unusual patterns in content creation (posts, notes, comments) that might indicate XSS attempts getting through. Not a real-time filter (that's Thorn's job), but a signal for the alert system.
+
+These aren't new services to build — they're alert thresholds and aggregation queries that layer on top of the existing collector infrastructure.
+
 ---
 
 ## File Summary
 
-| File                                                                              | Purpose                                                        |
-| --------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| `packages/engine/src/lib/server/observability/types.ts`                           | All observability types, service registry, constants           |
-| `packages/engine/src/lib/server/observability/index.ts`                           | Main orchestrator - coordinates all collectors and aggregators |
-| `packages/engine/src/lib/server/observability/costs.ts`                           | Cloudflare pricing calculator                                  |
-| `packages/engine/src/lib/server/observability/collectors/cloudflare-analytics.ts` | CF GraphQL API collector                                       |
-| `packages/engine/src/lib/server/observability/collectors/d1-collector.ts`         | D1 metrics via API                                             |
-| `packages/engine/src/lib/server/observability/collectors/r2-collector.ts`         | R2 metrics via API                                             |
-| `packages/engine/src/lib/server/observability/collectors/kv-collector.ts`         | KV metrics via API                                             |
-| `packages/engine/src/lib/server/observability/collectors/health-checker.ts`       | Worker health pings                                            |
-| `packages/engine/src/lib/server/observability/collectors/do-collector.ts`         | DO status aggregation                                          |
-| `packages/engine/src/lib/server/observability/aggregators/lumen-aggregator.ts`    | Existing Lumen data                                            |
-| `packages/engine/src/lib/server/observability/aggregators/petal-aggregator.ts`    | Existing Petal data                                            |
-| `packages/engine/src/lib/server/observability/aggregators/thorn-aggregator.ts`    | Existing Thorn data                                            |
-| `packages/engine/src/lib/server/observability/aggregators/sentinel-aggregator.ts` | Existing Sentinel data                                         |
-| `packages/engine/src/lib/server/observability/aggregators/clearing-aggregator.ts` | Existing Clearing data                                         |
-| `packages/engine/migrations/XXXX_observability_metrics.sql`                       | D1 schema for metrics storage                                  |
-| `packages/engine/src/routes/api/admin/observability/[...routes]`                  | API endpoints                                                  |
-| `packages/engine/src/routes/(app)/arbor/observability/[...pages]`                 | Dashboard UI                                                   |
-| `packages/durable-objects/src/*/metrics.ts`                                       | DO self-reporting additions                                    |
+| File                                                                              | Purpose                                                            |
+| --------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `packages/engine/src/lib/server/observability/types.ts`                           | All observability types, service registry, constants               |
+| `packages/engine/src/lib/server/observability/index.ts`                           | Main orchestrator — coordinates all collectors and aggregators     |
+| `packages/engine/src/lib/server/observability/costs.ts`                           | Cloudflare + Firefly provider pricing calculator                   |
+| `packages/engine/src/lib/server/observability/collectors/cloudflare-analytics.ts` | CF GraphQL API collector                                           |
+| `packages/engine/src/lib/server/observability/collectors/d1-collector.ts`         | D1 metrics via API                                                 |
+| `packages/engine/src/lib/server/observability/collectors/r2-collector.ts`         | R2 metrics via API                                                 |
+| `packages/engine/src/lib/server/observability/collectors/kv-collector.ts`         | KV metrics via API (includes KV health check for rate limiter M-5) |
+| `packages/engine/src/lib/server/observability/collectors/health-checker.ts`       | Worker health pings                                                |
+| `packages/engine/src/lib/server/observability/collectors/do-collector.ts`         | DO status aggregation (graceful uninstrumented fallback)           |
+| `packages/engine/src/lib/server/observability/aggregators/lumen-aggregator.ts`    | Existing Lumen data                                                |
+| `packages/engine/src/lib/server/observability/aggregators/petal-aggregator.ts`    | Existing Petal data                                                |
+| `packages/engine/src/lib/server/observability/aggregators/thorn-aggregator.ts`    | Existing Thorn data                                                |
+| `packages/engine/src/lib/server/observability/aggregators/sentinel-aggregator.ts` | Existing Sentinel data                                             |
+| `packages/engine/src/lib/server/observability/aggregators/clearing-aggregator.ts` | Existing Clearing data                                             |
+| `packages/engine/src/lib/server/observability/aggregators/warden-aggregator.ts`   | Warden audit log, auth metrics, upstream API health                |
+| `packages/engine/src/lib/server/observability/aggregators/meadow-aggregator.ts`   | Feed health, polling status, engagement, report queue              |
+| `packages/engine/src/lib/server/observability/aggregators/firefly-aggregator.ts`  | Pool status, job queue, session costs, orphan detection            |
+| `packages/engine/migrations/XXXX_observability_metrics.sql`                       | D1 schema for metrics storage                                      |
+| `packages/engine/src/routes/api/admin/observability/[...routes]`                  | API endpoints (14 GET + 2 POST)                                    |
+| `packages/engine/src/routes/(app)/arbor/observability/[...pages]`                 | Dashboard UI (12 pages)                                            |
+| `packages/durable-objects/src/*/metrics.ts`                                       | DO self-reporting additions                                        |
 
 ---
 
@@ -421,24 +504,22 @@ Alternatively, since we're building inside the engine for now, add a self-trigge
 
 ---
 
-## What This Session Delivers
+## What Implementation Delivers
 
-By the end of this session, you'll have:
-
-1. **Unified observability types** covering every Cloudflare resource in your infrastructure
+1. **Unified observability types** covering every Cloudflare resource in the infrastructure, including Warden, Meadow, and Firefly
 2. **D1 migration** for metrics, health checks, costs, and alerts
 3. **Collector code** ready to query Cloudflare APIs for Workers, D1, R2, KV, and DO metrics
-4. **Aggregators** that surface your existing Lumen, Petal, Thorn, Sentinel, and Clearing data
-5. **Cost calculator** with accurate Cloudflare pricing
-6. **Admin API endpoints** for all observability data
-7. **Dashboard pages** in the Arbor admin panel with glass design
-8. **DO instrumentation** for self-reporting metrics from all 7 Durable Object classes
-9. **Alert infrastructure** with configurable thresholds and history tracking
+4. **8 aggregators** surfacing existing data: Lumen, Petal, Thorn, Sentinel, Clearing, Warden, Meadow, Firefly
+5. **Cost calculator** with versioned Cloudflare pricing constants + Firefly provider costs
+6. **14 admin API endpoints** for all observability data
+7. **12 dashboard pages** in the Arbor admin panel with glass design
+8. **DO instrumentation** with graceful fallback for uninstrumented classes
+9. **Alert infrastructure** with configurable thresholds, history tracking, and security-adjacent monitoring (KV health, auth failure rates)
 
 What remains for a follow-up session:
 
-- Deploy and test with real Cloudflare API tokens
+- Deploy and test with real Cloudflare API tokens (see Operational Prerequisites for required scopes)
 - Set up cron triggers for automated collection
 - Add Resend email alerting
 - Langfuse integration (requires account)
-- Queen Firefly CI observability (requires Queen Firefly)
+- Queen Firefly job/runner instrumentation (requires Queen Firefly to be deployed)
