@@ -391,7 +391,20 @@ Also search for any other `../engine` relative paths in:
 - `vite.config.ts` files
 - Any other config files
 
-**Step 1.9 — Update CI workflows:**
+**Step 1.9 — Audit wrangler.toml cross-references:**
+
+> This must happen **before** committing Phase 1 — not during verification after.
+
+```bash
+# Check for any relative paths that reference sibling packages
+grep -r '\.\.\/' apps/*/wrangler.toml services/*/wrangler.toml workers/*/wrangler.toml libs/*/wrangler.toml
+# Check for any stale packages/ references
+grep -r 'packages/' apps/*/wrangler.toml services/*/wrangler.toml workers/*/wrangler.toml libs/*/wrangler.toml
+```
+
+Also check any `build.ts`, `build.sh`, or custom build scripts referenced from wrangler `[build]` sections. Verify zero hits referencing old paths, or fix any that do.
+
+**Step 1.10 — Update CI workflows:**
 
 All deploy workflows in `.github/workflows/` reference `packages/<name>` paths for:
 
@@ -421,18 +434,19 @@ Workflows to update:
 | `deploy-timeline-sync.yml`    | `packages/workers/timeline-sync` → `workers/timeline-sync`               |
 | `ci.yml`                      | `packages/*` → glob across all categories                                |
 
-**Step 1.10 — Update root package.json:**
+**Step 1.11 — Update root package.json:**
 
 The root `package.json` has test scripts with `--filter` flags. These use package names (not paths), so they should still work. But any scripts referencing paths directly need updating.
 
-**Step 1.11 — Update documentation:**
+**Step 1.12 — Update documentation:**
 
-- `AGENT.md` — Path references throughout
+- `AGENT.md` — Path references throughout (including the hardcoded `cat packages/engine/package.json | grep -A2 '"\./'` one-liner — replace with `gf --agent engine` or update the path to `libs/engine`)
+- `CONTRIBUTING.md` — Dev setup instructions say `cd packages/engine && pnpm dev`, must become `cd libs/engine && pnpm dev`
 - `docs/developer/decisions/project-organization.md` — Directory structure diagrams
 - `CLAUDE.md` — Tailwind preset path example
 - Any other docs referencing `packages/`
 
-**Step 1.12 — Verify:**
+**Step 1.13 — Verify:**
 
 ```bash
 pnpm install
@@ -532,7 +546,11 @@ pnpm -r run check
      - `impact.py` — same `packages/` assumptions (lines 103, 166, 325)
      - `infra.py` — same `packages/` assumptions (lines 219-220, 481, 520-521, 561-562)
      - `quality.py` — hardcoded `!packages/engine` exclusions (lines 380-477)
-   - After updating source, **rebuild gf Go binaries** for all platforms
+   - After updating source, **rebuild gf Go binaries** for all 4 platforms:
+     - Run `tools/grove-find-go/build-all.sh` (or equivalent cross-compile script)
+     - Verify new binaries in `tools/grove-find-go/dist/` for linux-x86_64, linux-arm64, darwin-arm64, windows-x86_64
+     - **This blocks merge.** If binaries aren't rebuilt, `gf impact` and `gf migrations` will silently return wrong results on any machine using the pre-compiled binary.
+     - Commit the rebuilt binaries as part of the Phase 3 tooling PR.
 
 6. **Clean up stale references:**
    - Search entire codebase for `packages/` path references
@@ -575,16 +593,7 @@ Every deploy workflow has `packages/<name>` in path triggers and working directo
 
 ### wrangler.toml Files
 
-**Requires explicit audit.** While most wrangler.toml files reference their own package (so internal paths are unchanged after the move), some workers may reference sibling packages via relative paths in `[build]` commands, `tsconfig` references, or custom build scripts with `../` prefixes.
-
-**Step:** Before declaring Phase 1 complete, run:
-
-```bash
-grep -r '\.\.\/' **/wrangler.toml
-grep -r 'packages/' **/wrangler.toml
-```
-
-Verify zero hits, or update any that reference old paths. Also check any `build.ts` or `build.sh` scripts referenced from wrangler configs.
+Promoted to an explicit pre-commit step (Step 1.9). See Phase 1 above.
 
 ---
 
