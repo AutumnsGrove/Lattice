@@ -10,12 +10,12 @@
 	 * +page.server.ts, so it bypasses ArborPanel chrome.
 	 */
 
-	import { page } from '$app/state';
-	import { ArborPanel } from '@autumnsgrove/groveengine/ui/arbor';
-	import { sidebarStore } from '@autumnsgrove/groveengine/ui/arbor';
-	import { GlassConfirmDialog } from '@autumnsgrove/groveengine/ui';
-	import Header from '$lib/components/Header.svelte';
-	import Footer from '$lib/components/Footer.svelte';
+	import { page } from "$app/state";
+	import { ArborPanel } from "@autumnsgrove/groveengine/ui/arbor";
+	import { sidebarStore } from "@autumnsgrove/groveengine/ui/arbor";
+	import { GlassConfirmDialog } from "@autumnsgrove/groveengine/ui";
+	import Header from "$lib/components/Header.svelte";
+	import Footer from "$lib/components/Footer.svelte";
 	import {
 		Home,
 		MessageCircle,
@@ -30,16 +30,20 @@
 		Megaphone,
 		Wind,
 		Sparkles,
-		ImagePlus
-	} from 'lucide-svelte';
-	import type { ArborNavEntry } from '@autumnsgrove/groveengine/ui/arbor';
-	import type { LayoutData } from './$types';
-	import type { Snippet } from 'svelte';
+		ImagePlus,
+		Eye,
+	} from "lucide-svelte";
+	import type { ArborNavEntry } from "@autumnsgrove/groveengine/ui/arbor";
+	import type { LayoutData } from "./$types";
+	import type { Snippet } from "svelte";
 
 	let { data, children }: { data: LayoutData; children: Snippet } = $props();
 
 	// Check if we're on the login page (which has its own layout)
-	let isLoginPage = $derived(page.url.pathname === '/arbor/login');
+	let isLoginPage = $derived(page.url.pathname === "/arbor/login");
+
+	// Vista provides its own ArborPanel — skip the parent wrapper
+	let isVistaPage = $derived(page.url.pathname.startsWith("/arbor/vista"));
 
 	// Dialog state for logout confirmation
 	let showSignOutDialog = $state(false);
@@ -52,8 +56,8 @@
 	}
 
 	async function handleSignOutConfirm() {
-		await fetch('/api/auth/signout', { method: 'POST' }); // csrf-ok
-		window.location.href = '/';
+		await fetch("/api/auth/signout", { method: "POST" }); // csrf-ok
+		window.location.href = "/";
 	}
 
 	// Map user to HeaderUser shape (landing user has no avatarUrl)
@@ -62,44 +66,48 @@
 			? {
 					id: data.user.id,
 					name: data.user.name,
-					email: data.user.email
+					email: data.user.email,
 				}
-			: null
+			: null,
 	);
 
 	// Admin navigation items
 	const baseItems: ArborNavEntry[] = [
-		{ href: '/arbor', label: 'Dashboard', icon: Home },
-		{ href: '/arbor/feedback', label: 'Feedback', icon: MessageCircle },
-		{ href: '/arbor/subscribers', label: 'Subscribers', icon: AtSign },
-		{ href: '/arbor/cdn', label: 'CDN', icon: Upload }
+		{ href: "/arbor", label: "Dashboard", icon: Home },
+		{ href: "/arbor/feedback", label: "Feedback", icon: MessageCircle },
+		{ href: "/arbor/subscribers", label: "Subscribers", icon: AtSign },
+		{ href: "/arbor/cdn", label: "CDN", icon: Upload },
 	];
 
 	// Wayfinder-only items with section divider
 	const wayfinderItems: ArborNavEntry[] = [
-		{ kind: 'divider', label: 'Wayfinder Tools', style: 'grove' },
-		{ href: '/arbor/messages', label: 'Messages', icon: Megaphone },
-		{ href: '/arbor/porch', label: 'Porch', icon: MessageSquare },
-		{ href: '/arbor/greenhouse', label: 'Greenhouse', icon: Sprout },
-		{ href: '/arbor/comped-invites', label: 'Invites', icon: Gift },
-		{ href: '/arbor/status', label: 'Status', icon: Activity },
-		{ href: '/arbor/tenants', label: 'Tenants', icon: Users },
-		{ href: '/arbor/minecraft', label: 'Minecraft', icon: Gamepad2 },
-		{ href: '/arbor/uploads', label: 'Uploads', icon: ImagePlus },
-		{ href: '/arbor/zephyr', label: 'Zephyr', icon: Wind },
-		{ href: '/arbor/lumen', label: 'Lumen', icon: Sparkles }
+		{ kind: "divider", label: "Wayfinder Tools", style: "grove" },
+		{ href: "/arbor/messages", label: "Messages", icon: Megaphone },
+		{ href: "/arbor/porch", label: "Porch", icon: MessageSquare },
+		{ href: "/arbor/greenhouse", label: "Greenhouse", icon: Sprout },
+		{ href: "/arbor/comped-invites", label: "Invites", icon: Gift },
+		{ href: "/arbor/status", label: "Status", icon: Activity },
+		{ href: "/arbor/tenants", label: "Tenants", icon: Users },
+		{ href: "/arbor/minecraft", label: "Minecraft", icon: Gamepad2 },
+		{ href: "/arbor/uploads", label: "Uploads", icon: ImagePlus },
+		{ href: "/arbor/zephyr", label: "Zephyr", icon: Wind },
+		{ href: "/arbor/lumen", label: "Lumen", icon: Sparkles },
+		{ href: "/arbor/vista", label: "Vista", icon: Eye },
 	];
 
 	let navItems = $derived(data.isWayfinder ? [...baseItems, ...wayfinderItems] : baseItems);
 
 	const footerLinks = [
-		{ href: 'https://grove.place/knowledge/help', label: 'Help Center', external: true },
-		{ href: 'https://grove.place/porch', label: 'Get Support', external: true }
+		{ href: "https://grove.place/knowledge/help", label: "Help Center", external: true },
+		{ href: "https://grove.place/porch", label: "Get Support", external: true },
 	];
 </script>
 
 {#if isLoginPage}
 	<!-- Login page redirects to login.grove.place (fallback renders without ArborPanel) -->
+	{@render children()}
+{:else if isVistaPage}
+	<!-- Vista has its own ArborPanel in /arbor/vista/+layout.svelte — just render children -->
 	{@render children()}
 {:else}
 	<!-- Chrome Header with sidebar toggle (matches engine's arbor pattern) -->

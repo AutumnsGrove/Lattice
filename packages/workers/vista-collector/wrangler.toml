@@ -1,0 +1,28 @@
+# Grove Vista Collector
+# Observability metrics collection for the Vista dashboard
+#
+# Cron schedules:
+# - Every 5 minutes: Full metrics collection (Workers, D1, R2, KV, health checks)
+# - Daily at midnight UTC: Cost aggregation + 90-day retention cleanup
+
+name = "grove-vista-collector"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[triggers]
+crons = [
+  "*/5 * * * *",   # Every 5 min: collect Workers/D1/R2/KV metrics, health checks, alert evaluation
+  "0 0 * * *"      # Daily midnight UTC: cost aggregation + 90-day retention cleanup
+]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "grove-engine-db"
+database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
+
+[vars]
+CF_ACCOUNT_ID = "04e847fa7655624e84414a8280b3a4d0"
+
+# Secrets (via: gw secret apply CF_OBSERVABILITY_TOKEN --worker grove-vista-collector)
+# CF_OBSERVABILITY_TOKEN

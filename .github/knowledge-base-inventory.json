@@ -1,34 +1,34 @@
 {
-  "lastUpdated": "2026-02-16",
-  "docs": {
-    "total": 319,
-    "breakdown": {
-      "specs": 71,
-      "help": 98,
-      "legal": 6,
-      "marketing": 20,
-      "patterns": 9,
-      "philosophy": 69,
-      "design": 9,
-      "exhibit": 37,
-      "research": 1
-    },
-    "paths": {
-      "specs": "docs/specs",
-      "help": "docs/help-center/articles",
-      "legal": "docs/legal",
-      "marketing": "docs/marketing",
-      "patterns": "docs/patterns",
-      "philosophy": "docs/philosophy",
-      "design": "docs/design-system",
-      "exhibit": "docs/museum",
-      "research": "docs/research"
-    }
-  },
-  "freshnessThreshold": {
-    "staleDays": 90,
-    "warnDays": 60
-  },
-  "requiredFields": ["title", "description", "category", "lastUpdated"],
-  "notes": "Tracks knowledge base document inventory and freshness. Used by docs-freshness.yml workflow."
+	"lastUpdated": "2026-02-18",
+	"docs": {
+		"total": 320,
+		"breakdown": {
+			"specs": 72,
+			"help": 98,
+			"legal": 6,
+			"marketing": 20,
+			"patterns": 9,
+			"philosophy": 69,
+			"design": 9,
+			"exhibit": 37,
+			"research": 1
+		},
+		"paths": {
+			"specs": "docs/specs",
+			"help": "docs/help-center/articles",
+			"legal": "docs/legal",
+			"marketing": "docs/marketing",
+			"patterns": "docs/patterns",
+			"philosophy": "docs/philosophy",
+			"design": "docs/design-system",
+			"exhibit": "docs/museum",
+			"research": "docs/research"
+		}
+	},
+	"freshnessThreshold": {
+		"staleDays": 90,
+		"warnDays": 60
+	},
+	"requiredFields": ["title", "description", "category", "lastUpdated"],
+	"notes": "Tracks knowledge base document inventory and freshness. Used by docs-freshness.yml workflow."
 }

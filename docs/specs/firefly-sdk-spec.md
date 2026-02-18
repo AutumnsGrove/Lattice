@@ -8,6 +8,7 @@ tags:
   - sdk
   - cloudflare-workers
 type: tech-spec
+lastUpdated: "2026-02-18"
 ---
 
 # Firefly SDK: Ephemeral Server Provisioning
@@ -71,16 +72,16 @@ The SDK is an import, not a service. There's no Durable Object here, no Worker e
 import { Firefly, HetznerProvider } from "@autumnsgrove/lattice/firefly";
 
 const firefly = new Firefly({
-  provider: new HetznerProvider({ token: env.HETZNER_TOKEN }),
-  sync: new R2StateSynchronizer({ bucket: env.R2_BUCKET }),
-  idle: { threshold: 15 * 60_000, signals: ["agent_task_running"] },
+	provider: new HetznerProvider({ token: env.HETZNER_TOKEN }),
+	sync: new R2StateSynchronizer({ bucket: env.R2_BUCKET }),
+	idle: { threshold: 15 * 60_000, signals: ["agent_task_running"] },
 });
 
 // Ignite
 const instance = await firefly.ignite({
-  size: "cx22",
-  region: "fsn1",
-  image: "bloom-agent-v1",
+	size: "cx22",
+	region: "fsn1",
+	image: "bloom-agent-v1",
 });
 
 // ... work happens ...
@@ -169,11 +170,11 @@ What initiates the lifecycle. Consumers define their own trigger logic; the SDK 
 
 ```typescript
 interface FireflyTrigger {
-  type: "webhook" | "schedule" | "queue" | "manual";
-  source: string; // Where the trigger originated
-  metadata: Record<string, unknown>; // Trigger-specific data
-  priority?: "low" | "normal" | "high";
-  timeout?: number; // Max session duration (ms)
+	type: "webhook" | "schedule" | "queue" | "manual";
+	source: string; // Where the trigger originated
+	metadata: Record<string, unknown>; // Trigger-specific data
+	priority?: "low" | "normal" | "high";
+	timeout?: number; // Max session duration (ms)
 }
 ```
 
@@ -190,20 +191,20 @@ The abstraction layer over cloud APIs. Each provider implements this interface.
 
 ```typescript
 interface FireflyProvider {
-  /** The provider identifier. */
-  readonly name: "hetzner" | "fly" | "railway" | "digitalocean";
+	/** The provider identifier. */
+	readonly name: "hetzner" | "fly" | "railway" | "digitalocean";
 
-  /** Create a new server instance. */
-  provision(config: ServerConfig): Promise<ServerInstance>;
+	/** Create a new server instance. */
+	provision(config: ServerConfig): Promise<ServerInstance>;
 
-  /** Wait for a provisioned server to become ready. */
-  waitForReady(instance: ServerInstance, timeoutMs: number): Promise<boolean>;
+	/** Wait for a provisioned server to become ready. */
+	waitForReady(instance: ServerInstance, timeoutMs: number): Promise<boolean>;
 
-  /** Terminate a server and release all resources. */
-  terminate(instance: ServerInstance): Promise<void>;
+	/** Terminate a server and release all resources. */
+	terminate(instance: ServerInstance): Promise<void>;
 
-  /** List all active instances managed by this provider. */
-  listActive(tags?: string[]): Promise<ServerInstance[]>;
+	/** List all active instances managed by this provider. */
+	listActive(tags?: string[]): Promise<ServerInstance[]>;
 }
 ```
 
@@ -215,15 +216,15 @@ What to provision. Provider-agnostic fields plus a `providerOptions` escape hatc
 
 ```typescript
 interface ServerConfig {
-  provider: "hetzner" | "fly" | "railway" | "digitalocean";
-  size: string; // e.g., 'cx22', 'shared-cpu-1x'
-  region: string; // e.g., 'fsn1', 'iad'
-  image: string; // OS image, snapshot, or container
-  userData?: string; // Cloud-init or startup script
-  sshKeys?: string[]; // SSH key IDs or fingerprints
-  tags?: string[]; // For organization and orphan cleanup
-  maxLifetime?: number; // Hard cap on session duration (ms)
-  providerOptions?: Record<string, unknown>; // Provider-specific config
+	provider: "hetzner" | "fly" | "railway" | "digitalocean";
+	size: string; // e.g., 'cx22', 'shared-cpu-1x'
+	region: string; // e.g., 'fsn1', 'iad'
+	image: string; // OS image, snapshot, or container
+	userData?: string; // Cloud-init or startup script
+	sshKeys?: string[]; // SSH key IDs or fingerprints
+	tags?: string[]; // For organization and orphan cleanup
+	maxLifetime?: number; // Hard cap on session duration (ms)
+	providerOptions?: Record<string, unknown>; // Provider-specific config
 }
 ```
 
@@ -233,14 +234,14 @@ The running server. Provider-agnostic representation.
 
 ```typescript
 interface ServerInstance {
-  id: string; // SDK-assigned UUID
-  providerServerId: string; // Provider's native ID (Hetzner server ID, Fly machine ID)
-  provider: string; // Which provider created this
-  publicIp: string;
-  privateIp?: string;
-  status: "provisioning" | "ready" | "running" | "terminating" | "terminated";
-  createdAt: number; // Unix ms
-  metadata: Record<string, unknown>;
+	id: string; // SDK-assigned UUID
+	providerServerId: string; // Provider's native ID (Hetzner server ID, Fly machine ID)
+	provider: string; // Which provider created this
+	publicIp: string;
+	privateIp?: string;
+	status: "provisioning" | "ready" | "running" | "terminating" | "terminated";
+	createdAt: number; // Unix ms
+	metadata: Record<string, unknown>;
 }
 ```
 
@@ -252,20 +253,20 @@ Top-level configuration object tying the pieces together.
 
 ```typescript
 interface FireflyConfig {
-  provider: FireflyProvider;
-  sync?: StateSyncConfig;
-  idle?: IdleConfig;
-  maxLifetime?: number; // Default max session (ms), overridable per-ignite
-  tags?: string[]; // Default tags applied to all instances
-  onIgnite?: (instance: ServerInstance) => Promise<void>;
-  onFade?: (instance: ServerInstance) => Promise<void>;
-  onOrphanFound?: (instance: ServerInstance) => Promise<void>;
+	provider: FireflyProvider;
+	sync?: StateSyncConfig;
+	idle?: IdleConfig;
+	maxLifetime?: number; // Default max session (ms), overridable per-ignite
+	tags?: string[]; // Default tags applied to all instances
+	onIgnite?: (instance: ServerInstance) => Promise<void>;
+	onFade?: (instance: ServerInstance) => Promise<void>;
+	onOrphanFound?: (instance: ServerInstance) => Promise<void>;
 }
 
 interface StateSyncConfig {
-  synchronizer: StateSynchronizer;
-  syncOnActivity?: boolean; // Sync after each activity report
-  syncInterval?: number; // Periodic sync interval (ms)
+	synchronizer: StateSynchronizer;
+	syncOnActivity?: boolean; // Sync after each activity report
+	syncInterval?: number; // Periodic sync interval (ms)
 }
 ```
 
@@ -275,21 +276,21 @@ Handles persisting server state to durable storage and restoring it on next igni
 
 ```typescript
 interface StateSynchronizer {
-  /** Pull state from storage to server. */
-  hydrate(instance: ServerInstance, stateKey: string): Promise<void>;
+	/** Pull state from storage to server. */
+	hydrate(instance: ServerInstance, stateKey: string): Promise<void>;
 
-  /** Push state from server to storage. */
-  persist(instance: ServerInstance, stateKey: string): Promise<void>;
+	/** Push state from server to storage. */
+	persist(instance: ServerInstance, stateKey: string): Promise<void>;
 
-  /** Check for state conflicts before hydration. */
-  checkConflicts(stateKey: string): Promise<ConflictResult>;
+	/** Check for state conflicts before hydration. */
+	checkConflicts(stateKey: string): Promise<ConflictResult>;
 }
 
 interface ConflictResult {
-  hasConflict: boolean;
-  localVersion?: string;
-  remoteVersion?: string;
-  resolution?: "use_local" | "use_remote" | "manual";
+	hasConflict: boolean;
+	localVersion?: string;
+	remoteVersion?: string;
+	resolution?: "use_local" | "use_remote" | "manual";
 }
 ```
 
@@ -299,33 +300,33 @@ Determines when to initiate the Fade phase.
 
 ```typescript
 interface IdleDetector {
-  /** Start monitoring for idle state. */
-  startMonitoring(instance: ServerInstance, config: IdleConfig): void;
+	/** Start monitoring for idle state. */
+	startMonitoring(instance: ServerInstance, config: IdleConfig): void;
 
-  /** Manually report activity (resets idle timer). */
-  reportActivity(instance: ServerInstance): void;
+	/** Manually report activity (resets idle timer). */
+	reportActivity(instance: ServerInstance): void;
 
-  /** Check current idle duration. */
-  getIdleDuration(instance: ServerInstance): number;
+	/** Check current idle duration. */
+	getIdleDuration(instance: ServerInstance): number;
 
-  /** Register callback for idle threshold reached. */
-  onIdleThreshold(callback: (instance: ServerInstance) => void): void;
+	/** Register callback for idle threshold reached. */
+	onIdleThreshold(callback: (instance: ServerInstance) => void): void;
 }
 
 interface IdleConfig {
-  checkInterval: number; // How often to check (ms)
-  idleThreshold: number; // How long before considered idle (ms)
-  activitySignals: ActivitySignal[];
-  warningAt?: number; // Warn before fade (ms before threshold)
+	checkInterval: number; // How often to check (ms)
+	idleThreshold: number; // How long before considered idle (ms)
+	activitySignals: ActivitySignal[];
+	warningAt?: number; // Warn before fade (ms before threshold)
 }
 
 type ActivitySignal =
-  | "ssh_session_active"
-  | "process_cpu_above_threshold"
-  | "network_traffic"
-  | "player_connected" // Outpost
-  | "agent_task_running" // Bloom, Verge
-  | "ci_job_running"; // Queen CI
+	| "ssh_session_active"
+	| "process_cpu_above_threshold"
+	| "network_traffic"
+	| "player_connected" // Outpost
+	| "agent_task_running" // Bloom, Verge
+	| "ci_job_running"; // Queen CI
 ```
 
 ---
@@ -361,10 +362,10 @@ Every provider follows the same interface. Swapping providers requires changing 
 import { HetznerProvider } from "@autumnsgrove/lattice/firefly";
 
 const provider = new HetznerProvider({
-  token: env.HETZNER_TOKEN,
-  defaultRegion: "fsn1",
-  defaultSize: "cx22",
-  sshKeyIds: ["grove-firefly"],
+	token: env.HETZNER_TOKEN,
+	defaultRegion: "fsn1",
+	defaultSize: "cx22",
+	sshKeyIds: ["grove-firefly"],
 });
 ```
 
@@ -374,10 +375,10 @@ const provider = new HetznerProvider({
 import { FlyProvider } from "@autumnsgrove/lattice/firefly";
 
 const provider = new FlyProvider({
-  token: env.FLY_TOKEN,
-  org: "autumnsgrove",
-  defaultRegion: "iad",
-  defaultSize: "shared-cpu-1x",
+	token: env.FLY_TOKEN,
+	org: "autumnsgrove",
+	defaultRegion: "iad",
+	defaultSize: "shared-cpu-1x",
 });
 ```
 
@@ -387,10 +388,10 @@ const provider = new FlyProvider({
 import { DigitalOceanProvider } from "@autumnsgrove/lattice/firefly";
 
 const provider = new DigitalOceanProvider({
-  token: env.DO_TOKEN,
-  defaultRegion: "nyc1",
-  defaultSize: "s-1vcpu-1gb",
-  sshKeyFingerprints: ["grove-firefly"],
+	token: env.DO_TOKEN,
+	defaultRegion: "nyc1",
+	defaultSize: "s-1vcpu-1gb",
+	sshKeyFingerprints: ["grove-firefly"],
 });
 ```
 
@@ -408,18 +409,18 @@ CI runners for Codeberg webhooks. Managed by the Queen Durable Object.
 
 ```typescript
 const queenCiConfig: FireflyConfig = {
-  provider: new HetznerProvider({ token: env.HETZNER_TOKEN }),
-  sync: {
-    synchronizer: new R2StateSynchronizer({ bucket: env.CI_CACHE_BUCKET }),
-    syncOnActivity: false, // No incremental sync for CI
-  },
-  idle: {
-    checkInterval: 30_000,
-    idleThreshold: 5 * 60_000, // 5 min idle = fade
-    activitySignals: ["ci_job_running"],
-  },
-  maxLifetime: 30 * 60_000, // 30 min hard cap per runner
-  tags: ["queen-ci", "ephemeral"],
+	provider: new HetznerProvider({ token: env.HETZNER_TOKEN }),
+	sync: {
+		synchronizer: new R2StateSynchronizer({ bucket: env.CI_CACHE_BUCKET }),
+		syncOnActivity: false, // No incremental sync for CI
+	},
+	idle: {
+		checkInterval: 30_000,
+		idleThreshold: 5 * 60_000, // 5 min idle = fade
+		activitySignals: ["ci_job_running"],
+	},
+	maxLifetime: 30 * 60_000, // 30 min hard cap per runner
+	tags: ["queen-ci", "ephemeral"],
 };
 ```
 
@@ -431,20 +432,20 @@ Ephemeral coding agents triggered by task queue messages.
 
 ```typescript
 const bloomConfig: FireflyConfig = {
-  provider: new HetznerProvider({ token: env.HETZNER_TOKEN }),
-  sync: {
-    synchronizer: new R2StateSynchronizer({ bucket: env.BLOOM_WORKSPACES }),
-    syncOnActivity: true,
-    syncInterval: 5 * 60_000, // Sync every 5 minutes
-  },
-  idle: {
-    checkInterval: 60_000,
-    idleThreshold: 15 * 60_000, // 15 min idle
-    activitySignals: ["agent_task_running", "ssh_session_active"],
-    warningAt: 10 * 60_000,
-  },
-  maxLifetime: 4 * 60 * 60_000, // 4 hour hard cap
-  tags: ["bloom", "coding-agent"],
+	provider: new HetznerProvider({ token: env.HETZNER_TOKEN }),
+	sync: {
+		synchronizer: new R2StateSynchronizer({ bucket: env.BLOOM_WORKSPACES }),
+		syncOnActivity: true,
+		syncInterval: 5 * 60_000, // Sync every 5 minutes
+	},
+	idle: {
+		checkInterval: 60_000,
+		idleThreshold: 15 * 60_000, // 15 min idle
+		activitySignals: ["agent_task_running", "ssh_session_active"],
+		warningAt: 10 * 60_000,
+	},
+	maxLifetime: 4 * 60 * 60_000, // 4 hour hard cap
+	tags: ["bloom", "coding-agent"],
 };
 ```
 
@@ -456,20 +457,20 @@ On-demand Minecraft servers for friends.
 
 ```typescript
 const outpostConfig: FireflyConfig = {
-  provider: new HetznerProvider({ token: env.HETZNER_TOKEN }),
-  sync: {
-    synchronizer: new R2StateSynchronizer({ bucket: env.OUTPOST_WORLDS }),
-    syncOnActivity: false,
-    syncInterval: 30 * 60_000, // World backup every 30 min
-  },
-  idle: {
-    checkInterval: 60_000,
-    idleThreshold: 30 * 60_000, // 30 min with no players
-    activitySignals: ["player_connected"],
-    warningAt: 25 * 60_000, // Discord warning at 25 min
-  },
-  maxLifetime: 12 * 60 * 60_000, // 12 hour hard cap
-  tags: ["outpost", "minecraft"],
+	provider: new HetznerProvider({ token: env.HETZNER_TOKEN }),
+	sync: {
+		synchronizer: new R2StateSynchronizer({ bucket: env.OUTPOST_WORLDS }),
+		syncOnActivity: false,
+		syncInterval: 30 * 60_000, // World backup every 30 min
+	},
+	idle: {
+		checkInterval: 60_000,
+		idleThreshold: 30 * 60_000, // 30 min with no players
+		activitySignals: ["player_connected"],
+		warningAt: 25 * 60_000, // Discord warning at 25 min
+	},
+	maxLifetime: 12 * 60 * 60_000, // 12 hour hard cap
+	tags: ["outpost", "minecraft"],
 };
 ```
 
@@ -481,18 +482,18 @@ Batch content processing for migration and transformation tasks.
 
 ```typescript
 const journeyConfig: FireflyConfig = {
-  provider: new FlyProvider({ token: env.FLY_TOKEN, org: "autumnsgrove" }),
-  sync: {
-    synchronizer: new R2StateSynchronizer({ bucket: env.JOURNEY_WORKDIR }),
-    syncOnActivity: true,
-  },
-  idle: {
-    checkInterval: 30_000,
-    idleThreshold: 2 * 60_000, // 2 min idle = done processing
-    activitySignals: ["process_cpu_above_threshold"],
-  },
-  maxLifetime: 60 * 60_000, // 1 hour hard cap
-  tags: ["journey", "batch-processing"],
+	provider: new FlyProvider({ token: env.FLY_TOKEN, org: "autumnsgrove" }),
+	sync: {
+		synchronizer: new R2StateSynchronizer({ bucket: env.JOURNEY_WORKDIR }),
+		syncOnActivity: true,
+	},
+	idle: {
+		checkInterval: 30_000,
+		idleThreshold: 2 * 60_000, // 2 min idle = done processing
+		activitySignals: ["process_cpu_above_threshold"],
+	},
+	maxLifetime: 60 * 60_000, // 1 hour hard cap
+	tags: ["journey", "batch-processing"],
 };
 ```
 
@@ -535,17 +536,17 @@ Different consumers need different conflict resolution approaches.
 
 ```typescript
 interface ConflictStrategy {
-  // Bloom: Last-write-wins with version history
-  bloom: "lww_with_history";
+	// Bloom: Last-write-wins with version history
+	bloom: "lww_with_history";
 
-  // Outpost: Single-server lock (only one instance per world)
-  outpost: "exclusive_lock";
+	// Outpost: Single-server lock (only one instance per world)
+	outpost: "exclusive_lock";
 
-  // Queen CI: No conflict possible (each job is independent)
-  queen: "none";
+	// Queen CI: No conflict possible (each job is independent)
+	queen: "none";
 
-  // Journey: Append-only processing log
-  journey: "append_only";
+	// Journey: Append-only processing log
+	journey: "append_only";
 }
 ```
 
@@ -555,16 +556,16 @@ interface ConflictStrategy {
 
 ```typescript
 async function acquireWorldLock(worldId: string): Promise<boolean> {
-  const lock = await kv.get(`world-lock:${worldId}`);
-  if (lock && Date.now() - lock.timestamp < 60_000) {
-    return false; // Another server has the lock
-  }
+	const lock = await kv.get(`world-lock:${worldId}`);
+	if (lock && Date.now() - lock.timestamp < 60_000) {
+		return false; // Another server has the lock
+	}
 
-  await kv.put(`world-lock:${worldId}`, {
-    timestamp: Date.now(),
-    instanceId: currentInstance.id,
-  });
-  return true;
+	await kv.put(`world-lock:${worldId}`, {
+		timestamp: Date.now(),
+		instanceId: currentInstance.id,
+	});
+	return true;
 }
 ```
 
@@ -576,31 +577,26 @@ Orphaned instances are running servers with no corresponding tracker entry. Clou
 
 ```typescript
 async function orphanSweep(
-  provider: FireflyProvider,
-  trackedInstances: ServerInstance[],
+	provider: FireflyProvider,
+	trackedInstances: ServerInstance[],
 ): Promise<void> {
-  const cloudInstances = await provider.listActive();
-  const trackedIds = new Set(trackedInstances.map((t) => t.providerServerId));
+	const cloudInstances = await provider.listActive();
+	const trackedIds = new Set(trackedInstances.map((t) => t.providerServerId));
 
-  for (const cloud of cloudInstances) {
-    if (!trackedIds.has(cloud.providerServerId)) {
-      console.warn(`Orphaned instance detected: ${cloud.providerServerId}`);
-      await provider.terminate(cloud);
-      // Alert ops via Vista
-    }
+	for (const cloud of cloudInstances) {
+		if (!trackedIds.has(cloud.providerServerId)) {
+			console.warn(`Orphaned instance detected: ${cloud.providerServerId}`);
+			await provider.terminate(cloud);
+			// Alert ops via Vista
+		}
 
-    // Also check max lifetime enforcement
-    const tracked = trackedInstances.find(
-      (t) => t.providerServerId === cloud.providerServerId,
-    );
-    if (
-      tracked?.maxLifetime &&
-      Date.now() - tracked.createdAt > tracked.maxLifetime
-    ) {
-      console.warn(`Instance exceeded max lifetime: ${cloud.providerServerId}`);
-      // Trigger graceful fade
-    }
-  }
+		// Also check max lifetime enforcement
+		const tracked = trackedInstances.find((t) => t.providerServerId === cloud.providerServerId);
+		if (tracked?.maxLifetime && Date.now() - tracked.createdAt > tracked.maxLifetime) {
+			console.warn(`Instance exceeded max lifetime: ${cloud.providerServerId}`);
+			// Trigger graceful fade
+		}
+	}
 }
 ```
 
@@ -614,29 +610,29 @@ The fade sequence follows a strict order. Skipping steps risks data loss or orph
 
 ```typescript
 async function gracefulFade(
-  instance: ServerInstance,
-  provider: FireflyProvider,
-  sync?: StateSynchronizer,
+	instance: ServerInstance,
+	provider: FireflyProvider,
+	sync?: StateSynchronizer,
 ): Promise<void> {
-  // 1. Stop accepting new work
-  await instance.exec("systemctl stop workload || true");
+	// 1. Stop accepting new work
+	await instance.exec("systemctl stop workload || true");
 
-  // 2. Wait for in-progress work (with timeout)
-  await waitForQuiet(instance, 60_000);
+	// 2. Wait for in-progress work (with timeout)
+	await waitForQuiet(instance, 60_000);
 
-  // 3. Final state sync
-  if (sync) {
-    await sync.persist(instance, getStateKey(instance));
-  }
+	// 3. Final state sync
+	if (sync) {
+		await sync.persist(instance, getStateKey(instance));
+	}
 
-  // 4. Cleanup sensitive data
-  await instance.exec("shred -u /root/.credentials || true");
+	// 4. Cleanup sensitive data
+	await instance.exec("shred -u /root/.credentials || true");
 
-  // 5. Terminate via provider
-  await provider.terminate(instance);
+	// 5. Terminate via provider
+	await provider.terminate(instance);
 
-  // 6. Log session for billing and analytics
-  await logSession(instance);
+	// 6. Log session for billing and analytics
+	await logSession(instance);
 }
 ```
 
@@ -670,19 +666,19 @@ Firefly reports metrics through Vista integration points. Each consumer wires th
 
 ```typescript
 await vista.record({
-  metric: "firefly.session.completed",
-  tags: {
-    consumer: "bloom",
-    provider: "hetzner",
-    region: "fsn1",
-    size: "cx22",
-  },
-  fields: {
-    duration: sessionDurationMs,
-    cost: calculateCost(sessionDurationMs, "cx22"),
-    syncCount: stateSyncCount,
-    idleDuration: totalIdleMs,
-  },
+	metric: "firefly.session.completed",
+	tags: {
+		consumer: "bloom",
+		provider: "hetzner",
+		region: "fsn1",
+		size: "cx22",
+	},
+	fields: {
+		duration: sessionDurationMs,
+		cost: calculateCost(sessionDurationMs, "cx22"),
+		syncCount: stateSyncCount,
+		idleDuration: totalIdleMs,
+	},
 });
 ```
 

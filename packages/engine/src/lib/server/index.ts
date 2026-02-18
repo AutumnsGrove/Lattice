@@ -25,10 +25,10 @@ export * from "./logger.js";
 // ============================================================================
 
 export {
-  fetchCanopyDirectory,
-  type CanopyWanderer,
-  type CategoryCount,
-  type CanopyDirectoryResult,
+	fetchCanopyDirectory,
+	type CanopyWanderer,
+	type CategoryCount,
+	type CanopyDirectoryResult,
 } from "./canopy-directory.js";
 
 // ============================================================================
@@ -36,3 +36,9 @@ export {
 // ============================================================================
 
 export { canUploadImages, type UploadGateResult } from "./upload-gate.js";
+
+// ============================================================================
+// Vista Observability
+// ============================================================================
+
+export * from "./observability/index.js";

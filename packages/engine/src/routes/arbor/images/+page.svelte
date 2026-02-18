@@ -974,7 +974,7 @@
 						onclick={selectionMode ? () => toggleImageSelection(image.key) : undefined}
 						role={selectionMode ? "checkbox" : undefined}
 						aria-checked={selectionMode ? selectedImages.has(image.key) : undefined}
-						tabindex={selectionMode ? "0" : undefined}
+						tabindex={selectionMode ? 0 : undefined}
 						onkeydown={selectionMode
 							? (/** @type {KeyboardEvent} */ e) => {
 									if (e.key === "Enter" || e.key === " ") {

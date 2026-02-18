@@ -1,452 +1,456 @@
 {
-  "name": "@autumnsgrove/groveengine",
-  "version": "0.9.99",
-  "description": "Multi-tenant blog engine for Grove Platform. Features gutter annotations, markdown editing, magic code auth, and Cloudflare Workers deployment.",
-  "author": "AutumnsGrove",
-  "license": "AGPL-3.0-only",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/AutumnsGrove/GroveEngine.git",
-    "directory": "packages/engine"
-  },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
-  },
-  "keywords": [
-    "blog",
-    "cms",
-    "sveltekit",
-    "cloudflare",
-    "multi-tenant"
-  ],
-  "type": "module",
-  "svelte": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "svelte": "./dist/index.js",
-      "default": "./dist/index.js"
-    },
-    "./components/custom/*": {
-      "types": "./dist/components/custom/*.svelte.d.ts",
-      "svelte": "./dist/components/custom/*.svelte"
-    },
-    "./components/admin/*": {
-      "types": "./dist/components/admin/*.svelte.d.ts",
-      "svelte": "./dist/components/admin/*.svelte"
-    },
-    "./ui": {
-      "types": "./dist/ui/index.d.ts",
-      "svelte": "./dist/ui/index.js",
-      "default": "./dist/ui/index.js"
-    },
-    "./ui/editor": {
-      "types": "./dist/components/editor/index.d.ts",
-      "svelte": "./dist/components/editor/index.js",
-      "default": "./dist/components/editor/index.js"
-    },
-    "./ui/arbor": {
-      "types": "./dist/ui/components/arbor/index.d.ts",
-      "svelte": "./dist/ui/components/arbor/index.js",
-      "default": "./dist/ui/components/arbor/index.js"
-    },
-    "./ui/chrome": {
-      "types": "./dist/ui/components/chrome/index.d.ts",
-      "svelte": "./dist/ui/components/chrome/index.js",
-      "default": "./dist/ui/components/chrome/index.js"
-    },
-    "./ui/stores": {
-      "types": "./dist/ui/stores/index.d.ts",
-      "svelte": "./dist/ui/stores/index.js",
-      "default": "./dist/ui/stores/index.js"
-    },
-    "./ui/gallery": {
-      "types": "./dist/ui/components/gallery/index.d.ts",
-      "svelte": "./dist/ui/components/gallery/index.js",
-      "default": "./dist/ui/components/gallery/index.js"
-    },
-    "./ui/charts": {
-      "types": "./dist/ui/components/charts/index.d.ts",
-      "svelte": "./dist/ui/components/charts/index.js",
-      "default": "./dist/ui/components/charts/index.js"
-    },
-    "./ui/content": {
-      "types": "./dist/ui/components/content/index.d.ts",
-      "svelte": "./dist/ui/components/content/index.js",
-      "default": "./dist/ui/components/content/index.js"
-    },
-    "./ui/content/hum": {
-      "types": "./dist/ui/components/content/hum/index.d.ts",
-      "svelte": "./dist/ui/components/content/hum/index.js",
-      "default": "./dist/ui/components/content/hum/index.js"
-    },
-    "./ui/content/curios": {
-      "types": "./dist/ui/components/content/curios/index.d.ts",
-      "svelte": "./dist/ui/components/content/curios/index.js",
-      "default": "./dist/ui/components/content/curios/index.js"
-    },
-    "./ui/feedback": {
-      "types": "./dist/ui/components/feedback/index.d.ts",
-      "svelte": "./dist/ui/components/feedback/index.js",
-      "default": "./dist/ui/components/feedback/index.js"
-    },
-    "./ui/forms": {
-      "types": "./dist/ui/components/forms/index.d.ts",
-      "svelte": "./dist/ui/components/forms/index.js",
-      "default": "./dist/ui/components/forms/index.js"
-    },
-    "./ui/indicators": {
-      "types": "./dist/ui/components/indicators/index.d.ts",
-      "svelte": "./dist/ui/components/indicators/index.js",
-      "default": "./dist/ui/components/indicators/index.js"
-    },
-    "./ui/icons": {
-      "types": "./dist/ui/components/icons/index.d.ts",
-      "svelte": "./dist/ui/components/icons/index.js",
-      "default": "./dist/ui/components/icons/index.js"
-    },
-    "./ui/states": {
-      "types": "./dist/ui/components/states/index.d.ts",
-      "svelte": "./dist/ui/components/states/index.js",
-      "default": "./dist/ui/components/states/index.js"
-    },
-    "./ui/typography": {
-      "types": "./dist/ui/components/typography/index.d.ts",
-      "svelte": "./dist/ui/components/typography/index.js",
-      "default": "./dist/ui/components/typography/index.js"
-    },
-    "./ui/nature": {
-      "types": "./dist/ui/components/nature/index.d.ts",
-      "svelte": "./dist/ui/components/nature/index.js",
-      "default": "./dist/ui/components/nature/index.js"
-    },
-    "./ui/nature/*": {
-      "types": "./dist/ui/components/nature/*/index.d.ts",
-      "svelte": "./dist/ui/components/nature/*/index.js",
-      "default": "./dist/ui/components/nature/*/index.js"
-    },
-    "./ui/tokens": {
-      "types": "./dist/ui/tokens/index.d.ts",
-      "default": "./dist/ui/tokens/index.js"
-    },
-    "./ui/utils": {
-      "types": "./dist/ui/utils/index.d.ts",
-      "default": "./dist/ui/utils/index.js"
-    },
-    "./ui/styles": "./dist/ui/styles/grove.css",
-    "./ui/styles/*": "./dist/ui/styles/*",
-    "./ui/tailwind": "./dist/ui/tailwind.preset.js",
-    "./utils": {
-      "types": "./dist/utils/index.d.ts",
-      "default": "./dist/utils/index.js"
-    },
-    "./utils/*": {
-      "types": "./dist/utils/*.d.ts",
-      "default": "./dist/utils/*.js"
-    },
-    "./auth": {
-      "types": "./dist/auth/index.d.ts",
-      "default": "./dist/auth/index.js"
-    },
-    "./auth/*": {
-      "types": "./dist/auth/*.d.ts",
-      "default": "./dist/auth/*.js"
-    },
-    "./server": {
-      "types": "./dist/server/index.d.ts",
-      "default": "./dist/server/index.js"
-    },
-    "./server/*": {
-      "types": "./dist/server/*.d.ts",
-      "default": "./dist/server/*.js"
-    },
-    "./config": {
-      "types": "./dist/config/index.d.ts",
-      "default": "./dist/config/index.js"
-    },
-    "./config/*": {
-      "types": "./dist/config/*.d.ts",
-      "default": "./dist/config/*.js"
-    },
-    "./payments": {
-      "types": "./dist/payments/index.d.ts",
-      "default": "./dist/payments/index.js"
-    },
-    "./payments/*": {
-      "types": "./dist/payments/*.d.ts",
-      "default": "./dist/payments/*.js"
-    },
-    "./services": {
-      "types": "./dist/server/services/index.d.ts",
-      "default": "./dist/server/services/index.js"
-    },
-    "./services/*": {
-      "types": "./dist/server/services/*.d.ts",
-      "default": "./dist/server/services/*.js"
-    },
-    "./vineyard": {
-      "types": "./dist/ui/vineyard/index.d.ts",
-      "svelte": "./dist/ui/vineyard/index.js",
-      "default": "./dist/ui/vineyard/index.js"
-    },
-    "./ui/terrarium": {
-      "types": "./dist/ui/components/terrarium/index.d.ts",
-      "svelte": "./dist/ui/components/terrarium/index.js",
-      "default": "./dist/ui/components/terrarium/index.js"
-    },
-    "./config/terrarium": {
-      "types": "./dist/config/terrarium.d.ts",
-      "default": "./dist/config/terrarium.js"
-    },
-    "./heartwood": {
-      "types": "./dist/heartwood/index.d.ts",
-      "default": "./dist/heartwood/index.js"
-    },
-    "./groveauth": {
-      "types": "./dist/heartwood/index.d.ts",
-      "default": "./dist/heartwood/index.js"
-    },
-    "./feature-flags": {
-      "types": "./dist/feature-flags/index.d.ts",
-      "default": "./dist/feature-flags/index.js"
-    },
-    "./curios": {
-      "types": "./dist/curios/index.d.ts",
-      "default": "./dist/curios/index.js"
-    },
-    "./curios/timeline": {
-      "types": "./dist/curios/timeline/index.d.ts",
-      "default": "./dist/curios/timeline/index.js"
-    },
-    "./curios/timeline/voices": {
-      "types": "./dist/curios/timeline/voices/index.d.ts",
-      "default": "./dist/curios/timeline/voices/index.js"
-    },
-    "./curios/gallery": {
-      "types": "./dist/curios/gallery/index.d.ts",
-      "default": "./dist/curios/gallery/index.js"
-    },
-    "./grafts": {
-      "types": "./dist/grafts/index.d.ts",
-      "svelte": "./dist/grafts/index.js",
-      "default": "./dist/grafts/index.js"
-    },
-    "./grafts/pricing": {
-      "types": "./dist/grafts/pricing/index.d.ts",
-      "svelte": "./dist/grafts/pricing/index.js",
-      "default": "./dist/grafts/pricing/index.js"
-    },
-    "./grafts/login": {
-      "types": "./dist/grafts/login/index.d.ts",
-      "svelte": "./dist/grafts/login/index.js",
-      "default": "./dist/grafts/login/index.js"
-    },
-    "./grafts/login/server": {
-      "types": "./dist/grafts/login/server/index.d.ts",
-      "default": "./dist/grafts/login/server/index.js"
-    },
-    "./grafts/greenhouse": {
-      "types": "./dist/grafts/greenhouse/index.d.ts",
-      "svelte": "./dist/grafts/greenhouse/index.js",
-      "default": "./dist/grafts/greenhouse/index.js"
-    },
-    "./grafts/uploads": {
-      "types": "./dist/grafts/uploads/index.d.ts",
-      "svelte": "./dist/grafts/uploads/index.js",
-      "default": "./dist/grafts/uploads/index.js"
-    },
-    "./grafts/upgrades": {
-      "types": "./dist/grafts/upgrades/index.d.ts",
-      "svelte": "./dist/grafts/upgrades/index.js",
-      "default": "./dist/grafts/upgrades/index.js"
-    },
-    "./lumen": {
-      "types": "./dist/lumen/index.d.ts",
-      "default": "./dist/lumen/index.js"
-    },
-    "./threshold": {
-      "types": "./dist/threshold/index.d.ts",
-      "default": "./dist/threshold/index.js"
-    },
-    "./threshold/sveltekit": {
-      "types": "./dist/threshold/adapters/sveltekit.d.ts",
-      "default": "./dist/threshold/adapters/sveltekit.js"
-    },
-    "./threshold/hono": {
-      "types": "./dist/threshold/adapters/hono.d.ts",
-      "default": "./dist/threshold/adapters/hono.js"
-    },
-    "./threshold/worker": {
-      "types": "./dist/threshold/adapters/worker.d.ts",
-      "default": "./dist/threshold/adapters/worker.js"
-    },
-    "./thorn": {
-      "types": "./dist/thorn/index.d.ts",
-      "default": "./dist/thorn/index.js"
-    },
-    "./email": {
-      "types": "./dist/email/index.d.ts",
-      "default": "./dist/email/index.js"
-    },
-    "./email/components": {
-      "types": "./dist/email/components/index.d.ts",
-      "default": "./dist/email/components/index.js"
-    },
-    "./email/render": {
-      "types": "./dist/email/render.d.ts",
-      "default": "./dist/email/render.js"
-    },
-    "./email/sequences": {
-      "types": "./dist/email/sequences/index.d.ts",
-      "default": "./dist/email/sequences/index.js"
-    },
-    "./email/types": {
-      "types": "./dist/email/types.d.ts",
-      "default": "./dist/email/types.js"
-    },
-    "./email/updates": {
-      "types": "./dist/email/updates/index.d.ts",
-      "default": "./dist/email/updates/index.js"
-    },
-    "./email/schedule": {
-      "types": "./dist/email/schedule.d.ts",
-      "default": "./dist/email/schedule.js"
-    },
-    "./email/urls": {
-      "types": "./dist/email/urls.d.ts",
-      "default": "./dist/email/urls.js"
-    },
-    "./email/porch": {
-      "types": "./dist/email/porch/index.d.ts",
-      "default": "./dist/email/porch/index.js"
-    },
-    "./zephyr": {
-      "types": "./dist/zephyr/index.d.ts",
-      "default": "./dist/zephyr/index.js"
-    },
-    "./errors": {
-      "types": "./dist/errors/index.d.ts",
-      "default": "./dist/errors/index.js"
-    },
-    "./loom": {
-      "types": "./dist/loom/index.d.ts",
-      "default": "./dist/loom/index.js"
-    },
-    "./loom/sveltekit": {
-      "types": "./dist/loom/adapters/sveltekit.d.ts",
-      "default": "./dist/loom/adapters/sveltekit.js"
-    },
-    "./loom/worker": {
-      "types": "./dist/loom/adapters/worker.d.ts",
-      "default": "./dist/loom/adapters/worker.js"
-    },
-    "./loom/testing": {
-      "types": "./dist/loom/test-utils.d.ts",
-      "default": "./dist/loom/test-utils.js"
-    }
-  },
-  "files": [
-    "dist",
-    "static",
-    "!dist/**/*.test.*"
-  ],
-  "scripts": {
-    "dev": "vite dev",
-    "dev:wrangler": "wrangler pages dev -- vite dev",
-    "build": "vite build",
-    "build:sveltekit": "vite build",
-    "build:package": "svelte-kit sync && svelte-package -o dist",
-    "prepackage": "npx tsx ../../scripts/generate/grove-term-manifest.ts",
-    "package": "svelte-kit sync && svelte-package -o dist",
-    "prepublishOnly": "pnpm run package",
-    "preview": "vite preview",
-    "deploy": "wrangler pages deploy .svelte-kit/cloudflare --project-name grove-lattice",
-    "audit": "pnpm audit --audit-level=moderate",
-    "audit:fix": "pnpm audit --fix",
-    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-    "test": "vitest",
-    "test:ui": "vitest --ui",
-    "test:run": "vitest run",
-    "test:security": "vitest run tests/security",
-    "test:coverage": "vitest run --coverage",
-    "test:watch": "vitest watch",
-    "email:dev": "email dev -p 3001 --dir src/lib/email",
-    "email:export": "email export --dir src/lib/email"
-  },
-  "peerDependencies": {
-    "@sveltejs/kit": "^2.0.0",
-    "svelte": "^5.0.0",
-    "tailwindcss": "^3.4.0"
-  },
-  "devDependencies": {
-    "@cloudflare/workers-types": "^4.20260210.0",
-    "@lucide/svelte": "^0.482.0",
-    "@sveltejs/adapter-cloudflare": "^7.2.6",
-    "@sveltejs/kit": "^2.50.2",
-    "@sveltejs/package": "^2.5.7",
-    "@sveltejs/vite-plugin-svelte": "^4.0.4",
-    "@tailwindcss/typography": "^0.5.19",
-    "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/svelte": "^5.3.1",
-    "@types/markdown-it": "^14.1.2",
-    "@types/mdast": "^4.0.4",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
-    "@types/sanitize-html": "^2.16.0",
-    "@vitest/coverage-v8": "^4.0.18",
-    "@vitest/ui": "^4.0.18",
-    "autoprefixer": "^10.4.24",
-    "bits-ui": "^1.8.0",
-    "esbuild": "^0.27.3",
-    "happy-dom": "^20.6.1",
-    "jsdom": "^27.4.0",
-    "postcss": "^8.5.6",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "react-email": "^5.2.8",
-    "rehype-raw": "^7.0.0",
-    "rehype-stringify": "^10.0.1",
-    "remark-html": "^16.0.1",
-    "remark-parse": "^11.0.0",
-    "remark-rehype": "^11.1.2",
-    "svelte": "^5.50.1",
-    "svelte-check": "^4.3.6",
-    "tailwind-variants": "^0.3.1",
-    "tailwindcss": "^3.4.19",
-    "typescript": "^5.9.3",
-    "unified": "^11.0.5",
-    "unist-util-visit": "^5.1.0",
-    "vite": "^5.4.21",
-    "vitest": "^4.0.18"
-  },
-  "dependencies": {
-    "@11ty/gray-matter": "^2.0.1",
-    "@autumnsgrove/gossamer": "^0.1.1",
-    "@jsquash/jxl": "^1.3.0",
-    "@lemonsqueezy/lemonsqueezy.js": "^4.0.0",
-    "@react-email/components": "^1.0.7",
-    "@react-email/render": "^2.0.4",
-    "@tiptap/core": "^3.19.0",
-    "@tiptap/extension-bubble-menu": "^3.19.0",
-    "@tiptap/extension-character-count": "^3.19.0",
-    "@tiptap/extension-image": "^3.19.0",
-    "@tiptap/extension-placeholder": "^3.19.0",
-    "@tiptap/extension-underline": "^3.19.0",
-    "@tiptap/pm": "^3.19.0",
-    "@tiptap/starter-kit": "^3.19.0",
-    "clsx": "^2.1.1",
-    "dom-to-image-more": "^3.7.2",
-    "dompurify": "^3.3.1",
-    "esm-env": "^1.2.2",
-    "heic2any": "^0.0.4",
-    "lucide-svelte": "^0.554.0",
-    "markdown-it": "^14.1.1",
-    "resend": "^4.8.0",
-    "sanitize-html": "^2.17.0",
-    "svelte-sonner": "^1.0.7",
-    "svelte-tiptap": "^3.0.1",
-    "tailwind-merge": "^3.4.0"
-  }
+	"name": "@autumnsgrove/groveengine",
+	"version": "0.9.99",
+	"description": "Multi-tenant blog engine for Grove Platform. Features gutter annotations, markdown editing, magic code auth, and Cloudflare Workers deployment.",
+	"author": "AutumnsGrove",
+	"license": "AGPL-3.0-only",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/AutumnsGrove/GroveEngine.git",
+		"directory": "packages/engine"
+	},
+	"publishConfig": {
+		"registry": "https://npm.pkg.github.com"
+	},
+	"keywords": [
+		"blog",
+		"cms",
+		"sveltekit",
+		"cloudflare",
+		"multi-tenant"
+	],
+	"type": "module",
+	"svelte": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"svelte": "./dist/index.js",
+			"default": "./dist/index.js"
+		},
+		"./components/custom/*": {
+			"types": "./dist/components/custom/*.svelte.d.ts",
+			"svelte": "./dist/components/custom/*.svelte"
+		},
+		"./components/admin/*": {
+			"types": "./dist/components/admin/*.svelte.d.ts",
+			"svelte": "./dist/components/admin/*.svelte"
+		},
+		"./ui": {
+			"types": "./dist/ui/index.d.ts",
+			"svelte": "./dist/ui/index.js",
+			"default": "./dist/ui/index.js"
+		},
+		"./ui/editor": {
+			"types": "./dist/components/editor/index.d.ts",
+			"svelte": "./dist/components/editor/index.js",
+			"default": "./dist/components/editor/index.js"
+		},
+		"./ui/arbor": {
+			"types": "./dist/ui/components/arbor/index.d.ts",
+			"svelte": "./dist/ui/components/arbor/index.js",
+			"default": "./dist/ui/components/arbor/index.js"
+		},
+		"./ui/chrome": {
+			"types": "./dist/ui/components/chrome/index.d.ts",
+			"svelte": "./dist/ui/components/chrome/index.js",
+			"default": "./dist/ui/components/chrome/index.js"
+		},
+		"./ui/stores": {
+			"types": "./dist/ui/stores/index.d.ts",
+			"svelte": "./dist/ui/stores/index.js",
+			"default": "./dist/ui/stores/index.js"
+		},
+		"./ui/gallery": {
+			"types": "./dist/ui/components/gallery/index.d.ts",
+			"svelte": "./dist/ui/components/gallery/index.js",
+			"default": "./dist/ui/components/gallery/index.js"
+		},
+		"./ui/charts": {
+			"types": "./dist/ui/components/charts/index.d.ts",
+			"svelte": "./dist/ui/components/charts/index.js",
+			"default": "./dist/ui/components/charts/index.js"
+		},
+		"./ui/content": {
+			"types": "./dist/ui/components/content/index.d.ts",
+			"svelte": "./dist/ui/components/content/index.js",
+			"default": "./dist/ui/components/content/index.js"
+		},
+		"./ui/content/hum": {
+			"types": "./dist/ui/components/content/hum/index.d.ts",
+			"svelte": "./dist/ui/components/content/hum/index.js",
+			"default": "./dist/ui/components/content/hum/index.js"
+		},
+		"./ui/content/curios": {
+			"types": "./dist/ui/components/content/curios/index.d.ts",
+			"svelte": "./dist/ui/components/content/curios/index.js",
+			"default": "./dist/ui/components/content/curios/index.js"
+		},
+		"./ui/feedback": {
+			"types": "./dist/ui/components/feedback/index.d.ts",
+			"svelte": "./dist/ui/components/feedback/index.js",
+			"default": "./dist/ui/components/feedback/index.js"
+		},
+		"./ui/forms": {
+			"types": "./dist/ui/components/forms/index.d.ts",
+			"svelte": "./dist/ui/components/forms/index.js",
+			"default": "./dist/ui/components/forms/index.js"
+		},
+		"./ui/indicators": {
+			"types": "./dist/ui/components/indicators/index.d.ts",
+			"svelte": "./dist/ui/components/indicators/index.js",
+			"default": "./dist/ui/components/indicators/index.js"
+		},
+		"./ui/icons": {
+			"types": "./dist/ui/components/icons/index.d.ts",
+			"svelte": "./dist/ui/components/icons/index.js",
+			"default": "./dist/ui/components/icons/index.js"
+		},
+		"./ui/states": {
+			"types": "./dist/ui/components/states/index.d.ts",
+			"svelte": "./dist/ui/components/states/index.js",
+			"default": "./dist/ui/components/states/index.js"
+		},
+		"./ui/typography": {
+			"types": "./dist/ui/components/typography/index.d.ts",
+			"svelte": "./dist/ui/components/typography/index.js",
+			"default": "./dist/ui/components/typography/index.js"
+		},
+		"./ui/nature": {
+			"types": "./dist/ui/components/nature/index.d.ts",
+			"svelte": "./dist/ui/components/nature/index.js",
+			"default": "./dist/ui/components/nature/index.js"
+		},
+		"./ui/nature/*": {
+			"types": "./dist/ui/components/nature/*/index.d.ts",
+			"svelte": "./dist/ui/components/nature/*/index.js",
+			"default": "./dist/ui/components/nature/*/index.js"
+		},
+		"./ui/tokens": {
+			"types": "./dist/ui/tokens/index.d.ts",
+			"default": "./dist/ui/tokens/index.js"
+		},
+		"./ui/utils": {
+			"types": "./dist/ui/utils/index.d.ts",
+			"default": "./dist/ui/utils/index.js"
+		},
+		"./ui/styles": "./dist/ui/styles/grove.css",
+		"./ui/styles/*": "./dist/ui/styles/*",
+		"./ui/tailwind": "./dist/ui/tailwind.preset.js",
+		"./utils": {
+			"types": "./dist/utils/index.d.ts",
+			"default": "./dist/utils/index.js"
+		},
+		"./utils/*": {
+			"types": "./dist/utils/*.d.ts",
+			"default": "./dist/utils/*.js"
+		},
+		"./auth": {
+			"types": "./dist/auth/index.d.ts",
+			"default": "./dist/auth/index.js"
+		},
+		"./auth/*": {
+			"types": "./dist/auth/*.d.ts",
+			"default": "./dist/auth/*.js"
+		},
+		"./server": {
+			"types": "./dist/server/index.d.ts",
+			"default": "./dist/server/index.js"
+		},
+		"./server/observability": {
+			"types": "./dist/server/observability/index.d.ts",
+			"default": "./dist/server/observability/index.js"
+		},
+		"./server/*": {
+			"types": "./dist/server/*.d.ts",
+			"default": "./dist/server/*.js"
+		},
+		"./config": {
+			"types": "./dist/config/index.d.ts",
+			"default": "./dist/config/index.js"
+		},
+		"./config/*": {
+			"types": "./dist/config/*.d.ts",
+			"default": "./dist/config/*.js"
+		},
+		"./payments": {
+			"types": "./dist/payments/index.d.ts",
+			"default": "./dist/payments/index.js"
+		},
+		"./payments/*": {
+			"types": "./dist/payments/*.d.ts",
+			"default": "./dist/payments/*.js"
+		},
+		"./services": {
+			"types": "./dist/server/services/index.d.ts",
+			"default": "./dist/server/services/index.js"
+		},
+		"./services/*": {
+			"types": "./dist/server/services/*.d.ts",
+			"default": "./dist/server/services/*.js"
+		},
+		"./vineyard": {
+			"types": "./dist/ui/vineyard/index.d.ts",
+			"svelte": "./dist/ui/vineyard/index.js",
+			"default": "./dist/ui/vineyard/index.js"
+		},
+		"./ui/terrarium": {
+			"types": "./dist/ui/components/terrarium/index.d.ts",
+			"svelte": "./dist/ui/components/terrarium/index.js",
+			"default": "./dist/ui/components/terrarium/index.js"
+		},
+		"./config/terrarium": {
+			"types": "./dist/config/terrarium.d.ts",
+			"default": "./dist/config/terrarium.js"
+		},
+		"./heartwood": {
+			"types": "./dist/heartwood/index.d.ts",
+			"default": "./dist/heartwood/index.js"
+		},
+		"./groveauth": {
+			"types": "./dist/heartwood/index.d.ts",
+			"default": "./dist/heartwood/index.js"
+		},
+		"./feature-flags": {
+			"types": "./dist/feature-flags/index.d.ts",
+			"default": "./dist/feature-flags/index.js"
+		},
+		"./curios": {
+			"types": "./dist/curios/index.d.ts",
+			"default": "./dist/curios/index.js"
+		},
+		"./curios/timeline": {
+			"types": "./dist/curios/timeline/index.d.ts",
+			"default": "./dist/curios/timeline/index.js"
+		},
+		"./curios/timeline/voices": {
+			"types": "./dist/curios/timeline/voices/index.d.ts",
+			"default": "./dist/curios/timeline/voices/index.js"
+		},
+		"./curios/gallery": {
+			"types": "./dist/curios/gallery/index.d.ts",
+			"default": "./dist/curios/gallery/index.js"
+		},
+		"./grafts": {
+			"types": "./dist/grafts/index.d.ts",
+			"svelte": "./dist/grafts/index.js",
+			"default": "./dist/grafts/index.js"
+		},
+		"./grafts/pricing": {
+			"types": "./dist/grafts/pricing/index.d.ts",
+			"svelte": "./dist/grafts/pricing/index.js",
+			"default": "./dist/grafts/pricing/index.js"
+		},
+		"./grafts/login": {
+			"types": "./dist/grafts/login/index.d.ts",
+			"svelte": "./dist/grafts/login/index.js",
+			"default": "./dist/grafts/login/index.js"
+		},
+		"./grafts/login/server": {
+			"types": "./dist/grafts/login/server/index.d.ts",
+			"default": "./dist/grafts/login/server/index.js"
+		},
+		"./grafts/greenhouse": {
+			"types": "./dist/grafts/greenhouse/index.d.ts",
+			"svelte": "./dist/grafts/greenhouse/index.js",
+			"default": "./dist/grafts/greenhouse/index.js"
+		},
+		"./grafts/uploads": {
+			"types": "./dist/grafts/uploads/index.d.ts",
+			"svelte": "./dist/grafts/uploads/index.js",
+			"default": "./dist/grafts/uploads/index.js"
+		},
+		"./grafts/upgrades": {
+			"types": "./dist/grafts/upgrades/index.d.ts",
+			"svelte": "./dist/grafts/upgrades/index.js",
+			"default": "./dist/grafts/upgrades/index.js"
+		},
+		"./lumen": {
+			"types": "./dist/lumen/index.d.ts",
+			"default": "./dist/lumen/index.js"
+		},
+		"./threshold": {
+			"types": "./dist/threshold/index.d.ts",
+			"default": "./dist/threshold/index.js"
+		},
+		"./threshold/sveltekit": {
+			"types": "./dist/threshold/adapters/sveltekit.d.ts",
+			"default": "./dist/threshold/adapters/sveltekit.js"
+		},
+		"./threshold/hono": {
+			"types": "./dist/threshold/adapters/hono.d.ts",
+			"default": "./dist/threshold/adapters/hono.js"
+		},
+		"./threshold/worker": {
+			"types": "./dist/threshold/adapters/worker.d.ts",
+			"default": "./dist/threshold/adapters/worker.js"
+		},
+		"./thorn": {
+			"types": "./dist/thorn/index.d.ts",
+			"default": "./dist/thorn/index.js"
+		},
+		"./email": {
+			"types": "./dist/email/index.d.ts",
+			"default": "./dist/email/index.js"
+		},
+		"./email/components": {
+			"types": "./dist/email/components/index.d.ts",
+			"default": "./dist/email/components/index.js"
+		},
+		"./email/render": {
+			"types": "./dist/email/render.d.ts",
+			"default": "./dist/email/render.js"
+		},
+		"./email/sequences": {
+			"types": "./dist/email/sequences/index.d.ts",
+			"default": "./dist/email/sequences/index.js"
+		},
+		"./email/types": {
+			"types": "./dist/email/types.d.ts",
+			"default": "./dist/email/types.js"
+		},
+		"./email/updates": {
+			"types": "./dist/email/updates/index.d.ts",
+			"default": "./dist/email/updates/index.js"
+		},
+		"./email/schedule": {
+			"types": "./dist/email/schedule.d.ts",
+			"default": "./dist/email/schedule.js"
+		},
+		"./email/urls": {
+			"types": "./dist/email/urls.d.ts",
+			"default": "./dist/email/urls.js"
+		},
+		"./email/porch": {
+			"types": "./dist/email/porch/index.d.ts",
+			"default": "./dist/email/porch/index.js"
+		},
+		"./zephyr": {
+			"types": "./dist/zephyr/index.d.ts",
+			"default": "./dist/zephyr/index.js"
+		},
+		"./errors": {
+			"types": "./dist/errors/index.d.ts",
+			"default": "./dist/errors/index.js"
+		},
+		"./loom": {
+			"types": "./dist/loom/index.d.ts",
+			"default": "./dist/loom/index.js"
+		},
+		"./loom/sveltekit": {
+			"types": "./dist/loom/adapters/sveltekit.d.ts",
+			"default": "./dist/loom/adapters/sveltekit.js"
+		},
+		"./loom/worker": {
+			"types": "./dist/loom/adapters/worker.d.ts",
+			"default": "./dist/loom/adapters/worker.js"
+		},
+		"./loom/testing": {
+			"types": "./dist/loom/test-utils.d.ts",
+			"default": "./dist/loom/test-utils.js"
+		}
+	},
+	"files": [
+		"dist",
+		"static",
+		"!dist/**/*.test.*"
+	],
+	"scripts": {
+		"dev": "vite dev",
+		"dev:wrangler": "wrangler pages dev -- vite dev",
+		"build": "vite build",
+		"build:sveltekit": "vite build",
+		"build:package": "svelte-kit sync && svelte-package -o dist",
+		"prepackage": "npx tsx ../../scripts/generate/grove-term-manifest.ts",
+		"package": "svelte-kit sync && svelte-package -o dist",
+		"prepublishOnly": "pnpm run package",
+		"preview": "vite preview",
+		"deploy": "wrangler pages deploy .svelte-kit/cloudflare --project-name grove-lattice",
+		"audit": "pnpm audit --audit-level=moderate",
+		"audit:fix": "pnpm audit --fix",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"test": "vitest",
+		"test:ui": "vitest --ui",
+		"test:run": "vitest run",
+		"test:security": "vitest run tests/security",
+		"test:coverage": "vitest run --coverage",
+		"test:watch": "vitest watch",
+		"email:dev": "email dev -p 3001 --dir src/lib/email",
+		"email:export": "email export --dir src/lib/email"
+	},
+	"peerDependencies": {
+		"@sveltejs/kit": "^2.0.0",
+		"svelte": "^5.0.0",
+		"tailwindcss": "^3.4.0"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20260210.0",
+		"@lucide/svelte": "^0.482.0",
+		"@sveltejs/adapter-cloudflare": "^7.2.6",
+		"@sveltejs/kit": "^2.50.2",
+		"@sveltejs/package": "^2.5.7",
+		"@sveltejs/vite-plugin-svelte": "^4.0.4",
+		"@tailwindcss/typography": "^0.5.19",
+		"@testing-library/jest-dom": "^6.9.1",
+		"@testing-library/svelte": "^5.3.1",
+		"@types/markdown-it": "^14.1.2",
+		"@types/mdast": "^4.0.4",
+		"@types/react": "^19.2.14",
+		"@types/react-dom": "^19.2.3",
+		"@types/sanitize-html": "^2.16.0",
+		"@vitest/coverage-v8": "^4.0.18",
+		"@vitest/ui": "^4.0.18",
+		"autoprefixer": "^10.4.24",
+		"bits-ui": "^1.8.0",
+		"esbuild": "^0.27.3",
+		"happy-dom": "^20.6.1",
+		"jsdom": "^27.4.0",
+		"postcss": "^8.5.6",
+		"react": "^19.2.4",
+		"react-dom": "^19.2.4",
+		"react-email": "^5.2.8",
+		"rehype-raw": "^7.0.0",
+		"rehype-stringify": "^10.0.1",
+		"remark-html": "^16.0.1",
+		"remark-parse": "^11.0.0",
+		"remark-rehype": "^11.1.2",
+		"svelte": "^5.50.1",
+		"svelte-check": "^4.3.6",
+		"tailwind-variants": "^0.3.1",
+		"tailwindcss": "^3.4.19",
+		"typescript": "^5.9.3",
+		"unified": "^11.0.5",
+		"unist-util-visit": "^5.1.0",
+		"vite": "^5.4.21",
+		"vitest": "^4.0.18"
+	},
+	"dependencies": {
+		"@11ty/gray-matter": "^2.0.1",
+		"@autumnsgrove/gossamer": "^0.1.1",
+		"@jsquash/jxl": "^1.3.0",
+		"@lemonsqueezy/lemonsqueezy.js": "^4.0.0",
+		"@react-email/components": "^1.0.7",
+		"@react-email/render": "^2.0.4",
+		"@tiptap/core": "^3.19.0",
+		"@tiptap/extension-bubble-menu": "^3.19.0",
+		"@tiptap/extension-character-count": "^3.19.0",
+		"@tiptap/extension-image": "^3.19.0",
+		"@tiptap/extension-placeholder": "^3.19.0",
+		"@tiptap/extension-underline": "^3.19.0",
+		"@tiptap/pm": "^3.19.0",
+		"@tiptap/starter-kit": "^3.19.0",
+		"clsx": "^2.1.1",
+		"dom-to-image-more": "^3.7.2",
+		"dompurify": "^3.3.1",
+		"esm-env": "^1.2.2",
+		"heic2any": "^0.0.4",
+		"lucide-svelte": "^0.554.0",
+		"markdown-it": "^14.1.1",
+		"resend": "^4.8.0",
+		"sanitize-html": "^2.17.0",
+		"svelte-sonner": "^1.0.7",
+		"svelte-tiptap": "^3.0.1",
+		"tailwind-merge": "^3.4.0"
+	}
 }

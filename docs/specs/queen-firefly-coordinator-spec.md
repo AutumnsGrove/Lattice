@@ -8,6 +8,7 @@ tags:
   - durable-objects
   - cloudflare-workers
 type: tech-spec
+lastUpdated: "2026-02-18"
 ---
 
 # Queen Firefly: Pool Coordinator
@@ -332,22 +333,22 @@ Each consumer registers a profile that tells the Queen how to manage its pool. C
 
 ```typescript
 interface ConsumerProfile {
-  id: string; // 'ci' | 'bloom' | 'outpost'
-  provider: string; // Which FireflyProvider to use
-  size: string; // Server size
-  region: string; // Preferred region
-  image: string; // OS image or snapshot
-  pool: PoolConfig;
-  idle: IdleConfig;
+	id: string; // 'ci' | 'bloom' | 'outpost'
+	provider: string; // Which FireflyProvider to use
+	size: string; // Server size
+	region: string; // Preferred region
+	image: string; // OS image or snapshot
+	pool: PoolConfig;
+	idle: IdleConfig;
 }
 
 interface PoolConfig {
-  minWarm: number; // Always keep N warm
-  maxWarm: number; // Don't exceed N warm runners
-  maxTotal: number; // Hard limit (warm + ephemeral)
-  fadeAfterIdleMinutes: number; // Fade warm runners after N min idle
-  ephemeralFadeAfterMinutes: number; // Fade ephemeral after job
-  scaleUpThreshold: number; // Queue depth that triggers ignition
+	minWarm: number; // Always keep N warm
+	maxWarm: number; // Don't exceed N warm runners
+	maxTotal: number; // Hard limit (warm + ephemeral)
+	fadeAfterIdleMinutes: number; // Fade warm runners after N min idle
+	ephemeralFadeAfterMinutes: number; // Fade ephemeral after job
+	scaleUpThreshold: number; // Queue depth that triggers ignition
 }
 ```
 
@@ -376,27 +377,21 @@ Jobs track work requests from any consumer. CI jobs come from Codeberg webhooks.
 
 ```typescript
 interface Job {
-  id: string; // UUID
-  consumer: string; // 'ci' | 'bloom' | 'outpost'
-  commit?: string; // Git commit SHA (CI)
-  branch?: string; // Git branch (CI)
-  repository?: string; // Repository identifier
-  author?: string; // Who triggered it
-  message?: string; // Commit message or task description
-  status:
-    | "pending"
-    | "claimed"
-    | "running"
-    | "success"
-    | "failure"
-    | "cancelled";
-  runnerId?: string; // Assigned runner
-  startedAt?: number; // Unix ms
-  completedAt?: number; // Unix ms
-  exitCode?: number;
-  metadata: Record<string, unknown>; // Consumer-specific data
-  priority: number; // 0 = normal, 1 = high (main branch)
-  createdAt: number; // Unix ms
+	id: string; // UUID
+	consumer: string; // 'ci' | 'bloom' | 'outpost'
+	commit?: string; // Git commit SHA (CI)
+	branch?: string; // Git branch (CI)
+	repository?: string; // Repository identifier
+	author?: string; // Who triggered it
+	message?: string; // Commit message or task description
+	status: "pending" | "claimed" | "running" | "success" | "failure" | "cancelled";
+	runnerId?: string; // Assigned runner
+	startedAt?: number; // Unix ms
+	completedAt?: number; // Unix ms
+	exitCode?: number;
+	metadata: Record<string, unknown>; // Consumer-specific data
+	priority: number; // 0 = normal, 1 = high (main branch)
+	createdAt: number; // Unix ms
 }
 ```
 
@@ -482,41 +477,41 @@ Every 60 seconds (Queen alarm):
 
 ```typescript
 interface RunnerRegister {
-  type: "register";
-  runnerId: string;
-  providerServerId: string; // Was: hetznerId
-  labels: string[];
-  ip: string;
+	type: "register";
+	runnerId: string;
+	providerServerId: string; // Was: hetznerId
+	labels: string[];
+	ip: string;
 }
 
 interface RunnerClaim {
-  type: "claim";
-  runnerId: string;
+	type: "claim";
+	runnerId: string;
 }
 
 interface RunnerHeartbeat {
-  type: "heartbeat";
-  runnerId: string;
-  status: "ready" | "working";
-  currentJobId?: string;
-  cpuPercent?: number;
-  memPercent?: number;
+	type: "heartbeat";
+	runnerId: string;
+	status: "ready" | "working";
+	currentJobId?: string;
+	cpuPercent?: number;
+	memPercent?: number;
 }
 
 interface RunnerLog {
-  type: "log";
-  runnerId: string;
-  jobId: string;
-  line: string;
-  timestamp: number;
+	type: "log";
+	runnerId: string;
+	jobId: string;
+	line: string;
+	timestamp: number;
 }
 
 interface JobComplete {
-  type: "complete";
-  runnerId: string;
-  jobId: string;
-  exitCode: number;
-  durationMs: number;
+	type: "complete";
+	runnerId: string;
+	jobId: string;
+	exitCode: number;
+	durationMs: number;
 }
 ```
 
@@ -524,20 +519,20 @@ interface JobComplete {
 
 ```typescript
 interface AssignJob {
-  type: "assign";
-  job: {
-    id: string;
-    repository: string;
-    commit: string;
-    branch: string;
-    metadata: Record<string, unknown>;
-  };
+	type: "assign";
+	job: {
+		id: string;
+		repository: string;
+		commit: string;
+		branch: string;
+		metadata: Record<string, unknown>;
+	};
 }
 
 interface FadeCommand {
-  type: "fade";
-  reason: "idle" | "manual" | "max_lifetime" | "orphan";
-  gracePeriodMs: number;
+	type: "fade";
+	reason: "idle" | "manual" | "max_lifetime" | "orphan";
+	gracePeriodMs: number;
 }
 ```
 
@@ -550,20 +545,20 @@ interface FadeCommand {
 ```typescript
 // GET /api/status
 interface StatusResponse {
-  queue: {
-    pending: number;
-    running: number;
-    completed: number; // Last 24 hours
-  };
-  runners: {
-    warm: { ready: number; working: number };
-    ephemeral: { igniting: number; working: number; fading: number };
-  };
-  costs: {
-    today: number; // USD
-    thisMonth: number;
-  };
-  consumers: string[]; // Active consumer profiles
+	queue: {
+		pending: number;
+		running: number;
+		completed: number; // Last 24 hours
+	};
+	runners: {
+		warm: { ready: number; working: number };
+		ephemeral: { igniting: number; working: number; fading: number };
+	};
+	costs: {
+		today: number; // USD
+		thisMonth: number;
+	};
+	consumers: string[]; // Active consumer profiles
 }
 ```
 
@@ -572,27 +567,27 @@ interface StatusResponse {
 ```typescript
 // GET /api/jobs?consumer=ci&status=pending&limit=50
 interface JobsResponse {
-  jobs: Job[];
-  total: number;
+	jobs: Job[];
+	total: number;
 }
 
 // GET /api/jobs/:id
 interface JobDetailResponse {
-  job: Job;
-  logs: string[]; // Truncated log lines
-  runner?: Runner;
+	job: Job;
+	logs: string[]; // Truncated log lines
+	runner?: Runner;
 }
 
 // POST /api/jobs/:id/cancel
 interface CancelResponse {
-  success: boolean;
-  message?: string;
+	success: boolean;
+	message?: string;
 }
 
 // POST /api/jobs/:id/rerun
 interface RerunResponse {
-  success: boolean;
-  newJobId: string;
+	success: boolean;
+	newJobId: string;
 }
 ```
 
@@ -601,18 +596,18 @@ interface RerunResponse {
 ```typescript
 // POST /api/runners/warm
 interface WarmRequest {
-  consumer: string; // Which consumer profile to use
-  count: number;
-  durationMinutes?: number; // Auto-fade after N minutes
+	consumer: string; // Which consumer profile to use
+	count: number;
+	durationMinutes?: number; // Auto-fade after N minutes
 }
 
 // POST /api/runners/freeze
 interface FreezeRequest {
-  consumer?: string; // Freeze specific consumer, or all if omitted
+	consumer?: string; // Freeze specific consumer, or all if omitted
 }
 
 interface FreezeResponse {
-  faded: string[]; // Runner IDs that were faded
+	faded: string[]; // Runner IDs that were faded
 }
 ```
 
@@ -621,16 +616,16 @@ interface FreezeResponse {
 ```typescript
 // GET /api/costs?period=month&consumer=ci
 interface CostResponse {
-  period: "day" | "week" | "month";
-  consumer?: string;
-  total: number; // USD
-  breakdown: {
-    provider: string;
-    hours: number;
-    cost: number;
-  }[];
-  jobCount: number;
-  avgCostPerJob: number;
+	period: "day" | "week" | "month";
+	consumer?: string;
+	total: number; // USD
+	breakdown: {
+		provider: string;
+		hours: number;
+		cost: number;
+	}[];
+	jobCount: number;
+	avgCostPerJob: number;
 }
 ```
 
@@ -645,34 +640,34 @@ The Queen's primary consumer. Codeberg sends webhooks on push and PR events.
 ```typescript
 // POST /webhook/codeberg/push
 interface PushWebhook {
-  ref: string; // "refs/heads/main"
-  before: string; // Previous commit SHA
-  after: string; // New commit SHA
-  repository: {
-    full_name: string; // "AutumnsGrove/GroveEngine"
-    clone_url: string;
-  };
-  pusher: {
-    login: string;
-  };
-  commits: Array<{
-    id: string;
-    message: string;
-    timestamp: string;
-  }>;
+	ref: string; // "refs/heads/main"
+	before: string; // Previous commit SHA
+	after: string; // New commit SHA
+	repository: {
+		full_name: string; // "AutumnsGrove/GroveEngine"
+		clone_url: string;
+	};
+	pusher: {
+		login: string;
+	};
+	commits: Array<{
+		id: string;
+		message: string;
+		timestamp: string;
+	}>;
 }
 
 // POST /webhook/codeberg/pull_request
 interface PRWebhook {
-  action: "opened" | "synchronize" | "closed";
-  number: number;
-  pull_request: {
-    head: { ref: string; sha: string };
-    base: { ref: string };
-  };
-  repository: {
-    full_name: string;
-  };
+	action: "opened" | "synchronize" | "closed";
+	number: number;
+	pull_request: {
+		head: { ref: string; sha: string };
+		base: { ref: string };
+	};
+	repository: {
+		full_name: string;
+	};
 }
 ```
 

@@ -7,6 +7,7 @@ tags:
   - ephemeral-compute
   - patterns
 type: tech-spec
+lastUpdated: "2026-02-18"
 ---
 
 # Firefly — Ephemeral Server Pattern
@@ -127,11 +128,11 @@ The mechanism that detects demand and initiates the Ignite phase.
 
 ```typescript
 interface FireflyTrigger {
-  type: "webhook" | "schedule" | "queue" | "manual";
-  source: string; // Where the trigger originated
-  metadata: Record<string, unknown>; // Trigger-specific data
-  priority?: "low" | "normal" | "high";
-  timeout?: number; // Max session duration (ms)
+	type: "webhook" | "schedule" | "queue" | "manual";
+	source: string; // Where the trigger originated
+	metadata: Record<string, unknown>; // Trigger-specific data
+	priority?: "low" | "normal" | "high";
+	timeout?: number; // Max session duration (ms)
 }
 ```
 
@@ -150,38 +151,38 @@ The component that spins up infrastructure on demand.
 
 ```typescript
 interface ServerProvisioner {
-  // Create a new server instance
-  provision(config: ServerConfig): Promise<ServerInstance>;
+	// Create a new server instance
+	provision(config: ServerConfig): Promise<ServerInstance>;
 
-  // Check if server is ready
-  waitForReady(instance: ServerInstance, timeout: number): Promise<boolean>;
+	// Check if server is ready
+	waitForReady(instance: ServerInstance, timeout: number): Promise<boolean>;
 
-  // Terminate a server
-  terminate(instance: ServerInstance): Promise<void>;
+	// Terminate a server
+	terminate(instance: ServerInstance): Promise<void>;
 
-  // List active instances
-  listActive(): Promise<ServerInstance[]>;
+	// List active instances
+	listActive(): Promise<ServerInstance[]>;
 }
 
 interface ServerConfig {
-  provider: "hetzner" | "digitalocean" | "aws" | "vultr";
-  size: string; // e.g., 'cx22', 's-1vcpu-1gb'
-  region: string; // e.g., 'fsn1', 'nyc1'
-  image: string; // OS image or snapshot
-  userData?: string; // Cloud-init script
-  sshKeys?: string[]; // SSH key IDs
-  tags?: string[]; // For organization and cleanup
-  maxLifetime?: number; // Hard cap on session duration (ms)
+	provider: "hetzner" | "digitalocean" | "aws" | "vultr";
+	size: string; // e.g., 'cx22', 's-1vcpu-1gb'
+	region: string; // e.g., 'fsn1', 'nyc1'
+	image: string; // OS image or snapshot
+	userData?: string; // Cloud-init script
+	sshKeys?: string[]; // SSH key IDs
+	tags?: string[]; // For organization and cleanup
+	maxLifetime?: number; // Hard cap on session duration (ms)
 }
 
 interface ServerInstance {
-  id: string;
-  provider: string;
-  publicIp: string;
-  privateIp?: string;
-  status: "provisioning" | "ready" | "running" | "terminating" | "terminated";
-  createdAt: number;
-  metadata: Record<string, unknown>;
+	id: string;
+	provider: string;
+	publicIp: string;
+	privateIp?: string;
+	status: "provisioning" | "ready" | "running" | "terminating" | "terminated";
+	createdAt: number;
+	metadata: Record<string, unknown>;
 }
 ```
 
@@ -191,21 +192,21 @@ The component that persists work to durable storage.
 
 ```typescript
 interface StateSynchronizer {
-  // Pull state from storage to server
-  hydrate(instance: ServerInstance, stateKey: string): Promise<void>;
+	// Pull state from storage to server
+	hydrate(instance: ServerInstance, stateKey: string): Promise<void>;
 
-  // Push state from server to storage
-  persist(instance: ServerInstance, stateKey: string): Promise<void>;
+	// Push state from server to storage
+	persist(instance: ServerInstance, stateKey: string): Promise<void>;
 
-  // Check for state conflicts
-  checkConflicts(stateKey: string): Promise<ConflictResult>;
+	// Check for state conflicts
+	checkConflicts(stateKey: string): Promise<ConflictResult>;
 }
 
 interface ConflictResult {
-  hasConflict: boolean;
-  localVersion?: string;
-  remoteVersion?: string;
-  resolution?: "use_local" | "use_remote" | "manual";
+	hasConflict: boolean;
+	localVersion?: string;
+	remoteVersion?: string;
+	resolution?: "use_local" | "use_remote" | "manual";
 }
 ```
 
@@ -215,31 +216,31 @@ The component that determines when to initiate the Fade phase.
 
 ```typescript
 interface IdleDetector {
-  // Start monitoring for idle state
-  startMonitoring(instance: ServerInstance, config: IdleConfig): void;
+	// Start monitoring for idle state
+	startMonitoring(instance: ServerInstance, config: IdleConfig): void;
 
-  // Manually report activity (resets idle timer)
-  reportActivity(instance: ServerInstance): void;
+	// Manually report activity (resets idle timer)
+	reportActivity(instance: ServerInstance): void;
 
-  // Check current idle duration
-  getIdleDuration(instance: ServerInstance): number;
+	// Check current idle duration
+	getIdleDuration(instance: ServerInstance): number;
 
-  // Event emitter for idle threshold reached
-  onIdleThreshold(callback: (instance: ServerInstance) => void): void;
+	// Event emitter for idle threshold reached
+	onIdleThreshold(callback: (instance: ServerInstance) => void): void;
 }
 
 interface IdleConfig {
-  checkInterval: number; // How often to check (ms)
-  idleThreshold: number; // How long before considered idle (ms)
-  activitySignals: ActivitySignal[]; // What counts as activity
+	checkInterval: number; // How often to check (ms)
+	idleThreshold: number; // How long before considered idle (ms)
+	activitySignals: ActivitySignal[]; // What counts as activity
 }
 
 type ActivitySignal =
-  | "ssh_session_active"
-  | "process_cpu_above_threshold"
-  | "network_traffic"
-  | "player_connected" // Outpost
-  | "agent_task_running"; // Bloom
+	| "ssh_session_active"
+	| "process_cpu_above_threshold"
+	| "network_traffic"
+	| "player_connected" // Outpost
+	| "agent_task_running"; // Bloom
 ```
 
 ---
@@ -252,31 +253,31 @@ Bloom uses Firefly for ephemeral AI coding agents.
 
 ```typescript
 const bloomFireflyConfig: FireflyConfig = {
-  trigger: {
-    type: "queue",
-    source: "bloom-task-queue",
-  },
+	trigger: {
+		type: "queue",
+		source: "bloom-task-queue",
+	},
 
-  provisioner: {
-    provider: "hetzner",
-    size: "cx22", // 2 vCPU, 4GB RAM
-    region: "fsn1", // Falkenstein, Germany
-    image: "bloom-agent-v1", // Pre-configured with Claude CLI
-    maxLifetime: 4 * 60 * 60 * 1000, // 4 hours max
-  },
+	provisioner: {
+		provider: "hetzner",
+		size: "cx22", // 2 vCPU, 4GB RAM
+		region: "fsn1", // Falkenstein, Germany
+		image: "bloom-agent-v1", // Pre-configured with Claude CLI
+		maxLifetime: 4 * 60 * 60 * 1000, // 4 hours max
+	},
 
-  stateSync: {
-    storage: "r2", // Cloudflare R2
-    bucket: "bloom-workspaces",
-    syncOnActivity: true, // Sync after each task completion
-    syncInterval: 5 * 60 * 1000, // Also sync every 5 minutes
-  },
+	stateSync: {
+		storage: "r2", // Cloudflare R2
+		bucket: "bloom-workspaces",
+		syncOnActivity: true, // Sync after each task completion
+		syncInterval: 5 * 60 * 1000, // Also sync every 5 minutes
+	},
 
-  idle: {
-    threshold: 15 * 60 * 1000, // 15 minutes idle
-    signals: ["agent_task_running", "ssh_session_active"],
-    warningAt: 10 * 60 * 1000, // Warn user at 10 minutes
-  },
+	idle: {
+		threshold: 15 * 60 * 1000, // 15 minutes idle
+		signals: ["agent_task_running", "ssh_session_active"],
+		warningAt: 10 * 60 * 1000, // Warn user at 10 minutes
+	},
 };
 ```
 
@@ -321,32 +322,32 @@ Outpost uses Firefly for on-demand Minecraft servers.
 
 ```typescript
 const outpostFireflyConfig: FireflyConfig = {
-  trigger: {
-    type: "manual",
-    source: "outpost-dashboard",
-    // Also supports: webhook from Discord bot
-  },
+	trigger: {
+		type: "manual",
+		source: "outpost-dashboard",
+		// Also supports: webhook from Discord bot
+	},
 
-  provisioner: {
-    provider: "hetzner",
-    size: "cx32", // 4 vCPU, 8GB RAM (Minecraft needs more)
-    region: "ash", // Ashburn for US players
-    image: "outpost-mc-v2", // Pre-configured with Paper, plugins
-    maxLifetime: 12 * 60 * 60 * 1000, // 12 hours max
-  },
+	provisioner: {
+		provider: "hetzner",
+		size: "cx32", // 4 vCPU, 8GB RAM (Minecraft needs more)
+		region: "ash", // Ashburn for US players
+		image: "outpost-mc-v2", // Pre-configured with Paper, plugins
+		maxLifetime: 12 * 60 * 60 * 1000, // 12 hours max
+	},
 
-  stateSync: {
-    storage: "r2",
-    bucket: "outpost-worlds",
-    syncOnActivity: false, // Sync only on shutdown (world files are large)
-    syncInterval: 30 * 60 * 1000, // Backup every 30 minutes
-  },
+	stateSync: {
+		storage: "r2",
+		bucket: "outpost-worlds",
+		syncOnActivity: false, // Sync only on shutdown (world files are large)
+		syncInterval: 30 * 60 * 1000, // Backup every 30 minutes
+	},
 
-  idle: {
-    threshold: 30 * 60 * 1000, // 30 minutes with no players
-    signals: ["player_connected"],
-    warningAt: 25 * 60 * 1000, // Discord notification at 25 minutes
-  },
+	idle: {
+		threshold: 30 * 60 * 1000, // 30 minutes with no players
+		signals: ["player_connected"],
+		warningAt: 25 * 60 * 1000, // Discord notification at 25 minutes
+	},
 };
 ```
 
@@ -432,38 +433,38 @@ When multiple sessions might modify the same state:
 
 ```typescript
 interface ConflictStrategy {
-  // Bloom: Last-write-wins with version history
-  bloom: "lww_with_history";
+	// Bloom: Last-write-wins with version history
+	bloom: "lww_with_history";
 
-  // Outpost: Single-server lock (only one instance per world)
-  outpost: "exclusive_lock";
+	// Outpost: Single-server lock (only one instance per world)
+	outpost: "exclusive_lock";
 }
 
 // Bloom implementation
 async function handleBloomConflict(conflict: ConflictResult): Promise<void> {
-  // Store both versions
-  await storeVersion(conflict.localVersion, "local");
-  await storeVersion(conflict.remoteVersion, "remote");
+	// Store both versions
+	await storeVersion(conflict.localVersion, "local");
+	await storeVersion(conflict.remoteVersion, "remote");
 
-  // Use local (more recent work), but preserve history
-  await persist(conflict.localVersion);
+	// Use local (more recent work), but preserve history
+	await persist(conflict.localVersion);
 
-  // Notify user of potential conflict
-  await notifyUser("State conflict resolved. Check history if needed.");
+	// Notify user of potential conflict
+	await notifyUser("State conflict resolved. Check history if needed.");
 }
 
 // Outpost implementation
 async function acquireWorldLock(worldId: string): Promise<boolean> {
-  const lock = await kv.get(`world-lock:${worldId}`);
-  if (lock && Date.now() - lock.timestamp < 60000) {
-    return false; // Another server has the lock
-  }
+	const lock = await kv.get(`world-lock:${worldId}`);
+	if (lock && Date.now() - lock.timestamp < 60000) {
+		return false; // Another server has the lock
+	}
 
-  await kv.put(`world-lock:${worldId}`, {
-    timestamp: Date.now(),
-    instanceId: currentInstance.id,
-  });
-  return true;
+	await kv.put(`world-lock:${worldId}`, {
+		timestamp: Date.now(),
+		instanceId: currentInstance.id,
+	});
+	return true;
 }
 ```
 
@@ -473,24 +474,24 @@ Ensure clean termination:
 
 ```typescript
 async function gracefulFade(instance: ServerInstance): Promise<void> {
-  // 1. Stop accepting new work
-  await instance.exec("systemctl stop bloom-agent || true");
-  await instance.exec("minecraft-server stop || true");
+	// 1. Stop accepting new work
+	await instance.exec("systemctl stop bloom-agent || true");
+	await instance.exec("minecraft-server stop || true");
 
-  // 2. Wait for in-progress work to complete (with timeout)
-  await waitForQuiet(instance, 60000);
+	// 2. Wait for in-progress work to complete (with timeout)
+	await waitForQuiet(instance, 60000);
 
-  // 3. Final state sync
-  await stateSynchronizer.persist(instance, getStateKey(instance));
+	// 3. Final state sync
+	await stateSynchronizer.persist(instance, getStateKey(instance));
 
-  // 4. Cleanup sensitive data
-  await instance.exec("shred -u /root/.claude-credentials || true");
+	// 4. Cleanup sensitive data
+	await instance.exec("shred -u /root/.claude-credentials || true");
 
-  // 5. Terminate
-  await provisioner.terminate(instance);
+	// 5. Terminate
+	await provisioner.terminate(instance);
 
-  // 6. Log session
-  await logSession(instance);
+	// 6. Log session
+	await logSession(instance);
 }
 ```
 
@@ -522,23 +523,23 @@ Prevent runaway costs from forgotten instances:
 
 ```typescript
 async function orphanSweep(): Promise<void> {
-  const cloudInstances = await provisioner.listActive();
-  const trackedInstances = await db.getActiveFireflySessions();
+	const cloudInstances = await provisioner.listActive();
+	const trackedInstances = await db.getActiveFireflySessions();
 
-  for (const cloud of cloudInstances) {
-    const tracked = trackedInstances.find((t) => t.id === cloud.id);
+	for (const cloud of cloudInstances) {
+		const tracked = trackedInstances.find((t) => t.id === cloud.id);
 
-    if (!tracked) {
-      console.warn(`Orphaned instance detected: ${cloud.id}`);
-      await provisioner.terminate(cloud);
-      await alertOps("Orphaned instance terminated", cloud);
-    }
+		if (!tracked) {
+			console.warn(`Orphaned instance detected: ${cloud.id}`);
+			await provisioner.terminate(cloud);
+			await alertOps("Orphaned instance terminated", cloud);
+		}
 
-    if (tracked && Date.now() - tracked.createdAt > tracked.maxLifetime) {
-      console.warn(`Instance exceeded max lifetime: ${cloud.id}`);
-      await gracefulFade(cloud);
-    }
-  }
+		if (tracked && Date.now() - tracked.createdAt > tracked.maxLifetime) {
+			console.warn(`Instance exceeded max lifetime: ${cloud.id}`);
+			await gracefulFade(cloud);
+		}
+	}
 }
 
 // Run every 5 minutes
@@ -556,18 +557,18 @@ Firefly exposes controls through Mycelium:
 ```typescript
 // MCP tools for Firefly control
 const fireflyTools = {
-  "firefly.ignite": {
-    description: "Start a Bloom coding session",
-    parameters: { project: "string", task: "string" },
-  },
-  "firefly.status": {
-    description: "Check if a Firefly session is active",
-    parameters: { sessionId: "string" },
-  },
-  "firefly.fade": {
-    description: "Gracefully end a Firefly session",
-    parameters: { sessionId: "string" },
-  },
+	"firefly.ignite": {
+		description: "Start a Bloom coding session",
+		parameters: { project: "string", task: "string" },
+	},
+	"firefly.status": {
+		description: "Check if a Firefly session is active",
+		parameters: { sessionId: "string" },
+	},
+	"firefly.fade": {
+		description: "Gracefully end a Firefly session",
+		parameters: { sessionId: "string" },
+	},
 };
 ```
 
@@ -597,19 +598,19 @@ Firefly reports metrics to Vista:
 
 ```typescript
 await vista.record({
-  metric: "firefly.session.completed",
-  tags: {
-    product: "bloom",
-    provider: "hetzner",
-    region: "fsn1",
-    size: "cx22",
-  },
-  fields: {
-    duration: sessionDurationMs,
-    cost: calculateCost(sessionDurationMs, "cx22"),
-    syncCount: stateSyncCount,
-    idleDuration: totalIdleMs,
-  },
+	metric: "firefly.session.completed",
+	tags: {
+		product: "bloom",
+		provider: "hetzner",
+		region: "fsn1",
+		size: "cx22",
+	},
+	fields: {
+		duration: sessionDurationMs,
+		cost: calculateCost(sessionDurationMs, "cx22"),
+		syncCount: stateSyncCount,
+		idleDuration: totalIdleMs,
+	},
 });
 ```
 
