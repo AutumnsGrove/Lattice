@@ -362,9 +362,9 @@ Surface data that already exists in D1:
 
 ### Step 6: Observability API Endpoints
 
-**Routes:** `packages/engine/src/routes/api/admin/observability/`
+**Routes:** `packages/landing/src/routes/api/admin/observability/`
 
-Admin-only API endpoints (require Wayfinder auth):
+Admin-only API endpoints (require Wayfinder auth). These live in the **landing** package since the dashboard is in the landing's Arbor:
 
 ```
 GET /api/admin/observability/overview        - Full dashboard summary
@@ -383,11 +383,112 @@ POST /api/admin/observability/collect        - Trigger manual collection
 POST /api/admin/observability/thresholds     - Configure alert thresholds
 ```
 
-### Step 7: Admin Dashboard UI
+The server-side observability library (types, collectors, aggregators, cost calculator) lives in the **engine** package so it's importable by any consumer. The API routes in the landing package call into the engine's observability module.
 
-**Routes:** `packages/engine/src/routes/(app)/arbor/observability/`
+### Step 7: Vista Dashboard — Own Chrome in Landing's Arbor
 
-Build dashboard pages within the existing Arbor admin panel:
+**Routes:** `packages/landing/src/routes/arbor/vista/`
+
+Vista lives inside the landing's Arbor admin panel but gets its **own ArborPanel chrome** — a dedicated sidebar with 12 sub-pages, its own brand title, and its own navigation. This is a new pattern: a "sub-arbor" that takes over the full layout when you enter it.
+
+**How it works (SvelteKit nested layout with chrome swap):**
+
+The parent Arbor layout (`/arbor/+layout.svelte`) already conditionally skips ArborPanel for the login page. Vista extends this pattern:
+
+```svelte
+<!-- In /arbor/+layout.svelte — add Vista to the bypass list -->
+let isLoginPage = $derived(page.url.pathname === '/arbor/login');
+let isVistaPage = $derived(page.url.pathname.startsWith('/arbor/vista'));
+
+{#if isLoginPage}
+  {@render children()}
+{:else if isVistaPage}
+  <!-- Vista provides its own ArborPanel chrome -->
+  <Header showSidebarToggle={true} user={headerUser} userHref="/arbor" />
+  {@render children()}
+  <div class="arbor-footer-wrapper" class:collapsed={sidebarCollapsed}>
+    <Footer />
+  </div>
+{:else}
+  <!-- Standard Arbor chrome -->
+  <Header showSidebarToggle={true} user={headerUser} userHref="/arbor" />
+  <ArborPanel ...>{@render children()}</ArborPanel>
+  <Footer ... />
+{/if}
+```
+
+Then Vista's own layout renders its own ArborPanel:
+
+```svelte
+<!-- In /arbor/vista/+layout.svelte -->
+<script lang="ts">
+  import { ArborPanel } from '@autumnsgrove/groveengine/ui/arbor';
+  import {
+    LayoutDashboard, Server, Database, HardDrive,
+    Box, DollarSign, Brain, Shield, Lock,
+    Flower2, Flame, Bell, ArrowLeft
+  } from 'lucide-svelte';
+
+  const vistaNav = [
+    { href: '/arbor', label: 'Back to Admin', icon: ArrowLeft },
+    { kind: 'divider', label: 'Vista', style: 'grove' },
+    { href: '/arbor/vista', label: 'Overview', icon: LayoutDashboard },
+    { href: '/arbor/vista/workers', label: 'Workers', icon: Server },
+    { href: '/arbor/vista/databases', label: 'Databases', icon: Database },
+    { href: '/arbor/vista/storage', label: 'Storage', icon: HardDrive },
+    { href: '/arbor/vista/durable-objects', label: 'Durable Objects', icon: Box },
+    { href: '/arbor/vista/costs', label: 'Costs', icon: DollarSign },
+    { kind: 'divider', label: 'Services', style: 'line' },
+    { href: '/arbor/vista/ai', label: 'AI Usage', icon: Brain },
+    { href: '/arbor/vista/moderation', label: 'Moderation', icon: Shield },
+    { href: '/arbor/vista/warden', label: 'Warden', icon: Lock },
+    { href: '/arbor/vista/meadow', label: 'Meadow', icon: Flower2 },
+    { href: '/arbor/vista/firefly', label: 'Firefly', icon: Flame },
+    { kind: 'divider', style: 'line' },
+    { href: '/arbor/vista/alerts', label: 'Alerts', icon: Bell },
+  ];
+</script>
+
+<ArborPanel
+  navItems={vistaNav}
+  brandTitle="Vista"
+  user={data.user}
+  onLogout={handleLogoutClick}
+>
+  {@render children()}
+</ArborPanel>
+```
+
+**Key design decisions:**
+
+- "Back to Admin" is the first nav item — always one click to return to the main Arbor
+- Vista groups nav into Infrastructure (Workers, DBs, Storage, DOs, Costs) and Services (AI, Moderation, Warden, Meadow, Firefly) with dividers
+- Alerts gets its own section at the bottom since it's cross-cutting
+- `brandTitle="Vista"` replaces "Admin" in the sidebar header
+- Auth is inherited from the parent `/arbor/+layout.server.ts` — no extra auth needed
+- Vista reuses the same `sidebarStore` so mobile toggle still works
+
+**Route structure:**
+
+```
+packages/landing/src/routes/arbor/vista/
+├── +layout.svelte           (Vista chrome — own ArborPanel)
+├── +layout.server.ts        (optional: load overview data)
+├── +page.svelte             (Overview dashboard)
+├── workers/+page.svelte
+├── databases/+page.svelte
+├── storage/+page.svelte
+├── durable-objects/+page.svelte
+├── costs/+page.svelte
+├── ai/+page.svelte
+├── moderation/+page.svelte
+├── warden/+page.svelte
+├── meadow/+page.svelte
+├── firefly/+page.svelte
+└── alerts/+page.svelte
+```
+
+**Dashboard page content (all pages):**
 
 1. **Overview** (`+page.svelte`) - Hero stats grid, service health summary, sparkline charts, active alerts, 24h cost estimate
 2. **Workers** (`workers/+page.svelte`) - Table of all workers with status, request counts, error rates, latency
@@ -403,6 +504,13 @@ Build dashboard pages within the existing Arbor admin panel:
 12. **Alerts** (`alerts/+page.svelte`) - Active alerts, threshold configuration, alert history
 
 Use engine chart components (`@autumnsgrove/groveengine/ui/charts`) and glass design pattern.
+
+**Sidebar link from main Arbor:** Add to the Wayfinder section of the parent layout:
+
+```typescript
+// In /arbor/+layout.svelte wayfinderItems
+{ href: '/arbor/vista', label: 'Vista', icon: Eye }
+```
 
 ### Step 8: DO Self-Reporting (Instrument Existing DOs)
 
@@ -478,8 +586,10 @@ These aren't new services to build — they're alert thresholds and aggregation 
 | `packages/engine/src/lib/server/observability/aggregators/meadow-aggregator.ts`   | Feed health, polling status, engagement, report queue              |
 | `packages/engine/src/lib/server/observability/aggregators/firefly-aggregator.ts`  | Pool status, job queue, session costs, orphan detection            |
 | `packages/engine/migrations/XXXX_observability_metrics.sql`                       | D1 schema for metrics storage                                      |
-| `packages/engine/src/routes/api/admin/observability/[...routes]`                  | API endpoints (14 GET + 2 POST)                                    |
-| `packages/engine/src/routes/(app)/arbor/observability/[...pages]`                 | Dashboard UI (12 pages)                                            |
+| `packages/landing/src/routes/api/admin/observability/[...routes]`                 | API endpoints (14 GET + 2 POST)                                    |
+| `packages/landing/src/routes/arbor/vista/+layout.svelte`                          | Vista chrome — own ArborPanel with 12-page nav                     |
+| `packages/landing/src/routes/arbor/vista/[...pages]`                              | Dashboard UI (12 pages)                                            |
+| `packages/landing/src/routes/arbor/+layout.svelte`                                | Modified — adds Vista bypass + sidebar link                        |
 | `packages/durable-objects/src/*/metrics.ts`                                       | DO self-reporting additions                                        |
 
 ---
