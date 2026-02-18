@@ -574,7 +574,7 @@
 	image="https://grove.place/api/og/forest"
 />
 
-<main class="min-h-screen flex flex-col transition-colors duration-1000 {isMidnight ? 'bg-gradient-to-b from-purple-950 via-slate-900 to-indigo-950' : isWinter ? 'bg-gradient-to-b from-slate-200 via-slate-100 to-slate-50 dark:from-bark-900 dark:via-bark-800 dark:to-bark-700' : isAutumn ? 'bg-gradient-to-b from-orange-100 via-amber-50 to-yellow-50 dark:from-bark-900 dark:via-amber-950 dark:to-orange-950' : isSpring ? 'bg-gradient-to-b from-pink-50 via-sky-50 to-lime-50 dark:from-bark-900 dark:via-pink-950 dark:to-lime-950' : 'bg-gradient-to-b from-sky-100 via-sky-50 to-emerald-50 dark:from-bark-900 dark:via-bark-800 dark:to-grove-950'}">
+<main class="min-h-screen flex flex-col transition-colors duration-1000 {isMidnight ? 'bg-gradient-to-b from-purple-950 via-slate-900 to-indigo-950' : isWinter ? 'bg-gradient-to-b from-slate-200 via-slate-100 to-slate-50 dark:from-cream-50 dark:via-cream-100 dark:to-cream-200' : isAutumn ? 'bg-gradient-to-b from-orange-100 via-amber-50 to-yellow-50 dark:from-cream-50 dark:via-amber-950 dark:to-orange-950' : isSpring ? 'bg-gradient-to-b from-pink-50 via-sky-50 to-lime-50 dark:from-cream-50 dark:via-pink-950 dark:to-lime-950' : 'bg-gradient-to-b from-sky-100 via-sky-50 to-emerald-50 dark:from-cream-50 dark:via-cream-100 dark:to-grove-950'}">
 	<Header user={data.user} />
 
 	<article class="flex-1 relative overflow-hidden">
@@ -643,7 +643,7 @@
 		</div>
 
 		<!-- Sky background gradient -->
-		<div class="absolute inset-0 transition-colors duration-1000 {isMidnight ? 'bg-gradient-to-b from-purple-900/60 via-indigo-900/30 to-transparent' : isWinter ? 'bg-gradient-to-b from-slate-300/50 via-transparent to-transparent dark:from-bark-700/30' : isAutumn ? 'bg-gradient-to-b from-orange-200/50 via-transparent to-transparent dark:from-orange-900/20' : isSpring ? 'bg-gradient-to-b from-pink-200/40 via-sky-100/30 to-transparent dark:from-pink-900/20' : 'bg-gradient-to-b from-sky-200/50 via-transparent to-transparent dark:from-sky-900/20'}"></div>
+		<div class="absolute inset-0 transition-colors duration-1000 {isMidnight ? 'bg-gradient-to-b from-purple-900/60 via-indigo-900/30 to-transparent' : isWinter ? 'bg-gradient-to-b from-slate-300/50 via-transparent to-transparent dark:from-cream-300/20' : isAutumn ? 'bg-gradient-to-b from-orange-200/50 via-transparent to-transparent dark:from-orange-900/20' : isSpring ? 'bg-gradient-to-b from-pink-200/40 via-sky-100/30 to-transparent dark:from-pink-900/20' : 'bg-gradient-to-b from-sky-200/50 via-transparent to-transparent dark:from-sky-900/20'}"></div>
 
 		<!-- Clouds (decorative) - floating across the sky -->
 		<div class="absolute top-6 left-0 opacity-70" aria-hidden="true">

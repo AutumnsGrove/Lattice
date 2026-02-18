@@ -980,7 +980,7 @@
 	<Header user={data.user} />
 
 	<!-- Hero -->
-	<section class="relative py-16 px-6 text-center overflow-hidden bg-gradient-to-b from-slate-100 via-slate-50 to-white dark:from-cream-100 dark:via-cream-50 dark:to-bark-50">
+	<section class="relative py-16 px-6 text-center overflow-hidden bg-gradient-to-b from-slate-100 via-slate-50 to-white dark:from-cream-100 dark:via-cream-50 dark:to-cream-50">
 		<!-- Lanterns -->
 		<div class="absolute top-8 left-[15%] opacity-60" aria-hidden="true">
 			<Lantern class="w-8 h-12" variant="hanging" lit animate />

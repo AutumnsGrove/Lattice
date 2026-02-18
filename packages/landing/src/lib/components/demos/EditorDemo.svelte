@@ -36,9 +36,9 @@ Here, my words grow at their own pace. No analytics telling me which posts *perf
 	let activeTab = $state<'split' | 'write' | 'preview'>('split');
 </script>
 
-<div class="w-full rounded-2xl overflow-hidden border border-subtle bg-white/70 dark:bg-bark-900/50 backdrop-blur-sm">
+<div class="w-full rounded-2xl overflow-hidden border border-subtle bg-white/70 dark:bg-cream-50/50 backdrop-blur-sm">
 	<!-- Toolbar -->
-	<div class="flex items-center justify-between px-3 py-2 border-b border-subtle bg-white/80 dark:bg-bark-800/60">
+	<div class="flex items-center justify-between px-3 py-2 border-b border-subtle bg-white/80 dark:bg-cream-100/60">
 		<div class="flex items-center gap-1">
 			<!-- Mode tabs -->
 			<button
