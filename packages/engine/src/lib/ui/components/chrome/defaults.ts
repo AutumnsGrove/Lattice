@@ -115,7 +115,7 @@ export const LANDING_CONNECT_LINKS: FooterLink[] = [
   { href: "/feedback", label: "Feedback", icon: Inbox },
   { href: "/contact", label: "Contact", icon: Mail },
   { href: "/porch", label: "Porch", icon: Armchair, termSlug: "porch" },
-  { href: "/support", label: "Support", icon: Coffee },
+  { href: "/contribute", label: "Contributing", icon: Coffee },
   {
     href: "https://bsky.app/profile/groveplace.bsky.social",
     label: "Bluesky",
@@ -155,7 +155,7 @@ export const LANDING_MOBILE_CONNECT_LINKS: FooterLink[] = [
   { href: "/feedback", label: "Feedback", icon: Inbox },
   { href: "/contact", label: "Contact", icon: Mail },
   { href: "/porch", label: "Porch", icon: Armchair, termSlug: "porch" },
-  { href: "/support", label: "Support", icon: Coffee },
+  { href: "/contribute", label: "Contributing", icon: Coffee },
   {
     href: "https://bsky.app/profile/groveplace.bsky.social",
     label: "Bluesky",

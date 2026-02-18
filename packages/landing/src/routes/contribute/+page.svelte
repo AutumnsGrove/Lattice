@@ -3,12 +3,14 @@
 	import Footer from '$lib/components/Footer.svelte';
 	import { GlassCard } from '@autumnsgrove/groveengine/ui';
 	import { MobileTOC } from '@autumnsgrove/groveengine';
+	import { GroveTerm } from '@autumnsgrove/groveengine/ui';
 	import SEO from '$lib/components/SEO.svelte';
 
 	let { data } = $props();
 
 	// Icon imports
 	import { featureIcons, contentIcons, actionIcons, stateIcons, toolIcons } from '$lib/utils/icons';
+	import { Coffee, Heart, TreePine, Sparkles } from 'lucide-svelte';
 
 	// Page icons
 	const HeartIcon = contentIcons.heart;
@@ -27,13 +29,14 @@
 		{ id: 'how-to-help', text: 'How to Help', level: 2, icon: HeartIcon },
 		{ id: 'the-workflow', text: 'The Workflow', level: 2, icon: ArrowIcon },
 		{ id: 'get-started', text: 'Get Started', level: 2, icon: SproutIcon },
-		{ id: 'community', text: 'Community', level: 2, icon: UsersIcon }
+		{ id: 'community', text: 'Community', level: 2, icon: UsersIcon },
+		{ id: 'support-financially', text: 'Support Financially', level: 2, icon: Coffee }
 	];
 </script>
 
 <SEO
 	title="Contribute — Grove"
-	description="Help build queer-friendly infrastructure for the web. Every bug report, feature idea, and line of code makes a difference."
+	description="Help Grove grow — whether that's a bug report, a line of code, or a coffee. Built by one person, for everyone."
 	url="/contribute"
 />
 
@@ -42,10 +45,14 @@
 
 	<article class="flex-1 px-6 py-12">
 		<div class="max-w-3xl mx-auto">
-			<!-- Header -->
+			<!-- Hero Header -->
 			<header class="mb-12 text-center">
 				<p class="text-foreground-faint font-sans text-sm uppercase tracking-wide mb-3">Join the Grove</p>
-				<h1 class="text-4xl md:text-5xl font-serif text-foreground mb-6">Contribute</h1>
+				<h1 class="text-4xl md:text-5xl font-serif text-foreground mb-4">Contribute</h1>
+				<p class="text-lg text-foreground-muted font-sans leading-relaxed max-w-xl mx-auto mb-6">
+					Grove is built by people who believe the internet can be better. Warmer. More human.
+					If that resonates with you, there's a place for you here.
+				</p>
 				<div class="flex items-center justify-center gap-4">
 					<div class="w-12 h-px bg-divider"></div>
 					<HeartIcon class="w-4 h-4 text-accent-subtle" />
@@ -55,14 +62,10 @@
 
 			<!-- Intro -->
 			<div class="prose prose-bark max-w-none">
-				<p class="text-lg text-foreground-muted font-sans leading-relaxed mb-8">
-					Grove is built by people who believe the internet can be better. Warmer. More human.
-					If that resonates with you, there's a place for you here.
-				</p>
-
 				<p class="text-lg text-foreground-muted font-sans leading-relaxed mb-12">
 					You don't need to write code to help. Sometimes the most valuable contribution is simply
 					<strong class="text-accent-muted">using the thing and telling us what you see</strong>.
+					And if you'd rather support the project financially, there's a place for that too.
 				</p>
 
 				<!-- How to Help -->
@@ -228,7 +231,7 @@
 								<h3 class="font-serif text-foreground group-hover:text-accent-muted transition-colors">Browse Open Issues</h3>
 								<p class="text-sm text-foreground-subtle">See what needs doing</p>
 							</div>
-							<ArrowIcon class="w-5 h-5 text-foreground-subtle group-hover:text-accent-muted group-hover:translate-x-1 transition-all" />
+							<ArrowIcon class="w-5 h-5 text-foreground-subtle group-hover:text-accent-muted motion-safe:group-hover:translate-x-1 transition-all" />
 						</a>
 
 						<a
@@ -244,7 +247,7 @@
 								<h3 class="font-serif text-foreground group-hover:text-accent-muted transition-colors">View the Repository</h3>
 								<p class="text-sm text-foreground-subtle">Explore the codebase</p>
 							</div>
-							<ArrowIcon class="w-5 h-5 text-foreground-subtle group-hover:text-accent-muted group-hover:translate-x-1 transition-all" />
+							<ArrowIcon class="w-5 h-5 text-foreground-subtle group-hover:text-accent-muted motion-safe:group-hover:translate-x-1 transition-all" />
 						</a>
 
 						<a
@@ -260,7 +263,7 @@
 								<h3 class="font-serif text-foreground group-hover:text-accent-muted transition-colors">Read the Contributor Guide</h3>
 								<p class="text-sm text-foreground-subtle">Setup, code style, and conventions</p>
 							</div>
-							<ArrowIcon class="w-5 h-5 text-foreground-subtle group-hover:text-accent-muted group-hover:translate-x-1 transition-all" />
+							<ArrowIcon class="w-5 h-5 text-foreground-subtle group-hover:text-accent-muted motion-safe:group-hover:translate-x-1 transition-all" />
 						</a>
 					</div>
 				</section>
@@ -290,13 +293,116 @@
 					</GlassCard>
 				</section>
 
+				<!-- Divider between code contrib and financial -->
+				<div class="flex items-center gap-4 my-12">
+					<div class="flex-1 h-px bg-divider"></div>
+					<Coffee class="w-4 h-4 text-accent-subtle" />
+					<div class="flex-1 h-px bg-divider"></div>
+				</div>
+
+				<!-- Support Financially -->
+				<section id="support-financially" class="mb-12 scroll-mt-28">
+					<h2 class="text-2xl font-serif text-foreground mb-4 flex items-center gap-2">
+						<Coffee class="w-6 h-6 text-accent-subtle" />
+						Support Financially
+					</h2>
+
+					<!-- The pitch -->
+					<div class="glass-support rounded-2xl p-8 mb-8">
+						<div class="prose prose-grove max-w-none text-center">
+							<p class="text-foreground-muted font-sans leading-relaxed mb-4">
+								Grove doesn't have investors. No venture capital. No pressure to grow at all costs or sell your data to make the numbers work.
+							</p>
+							<p class="text-foreground-muted font-sans leading-relaxed mb-4">
+								It's just me, building something I believe in.
+							</p>
+							<p class="text-foreground-muted font-sans leading-relaxed">
+								If Grove resonates with you, if you believe in quiet corners of the internet, queer-friendly spaces, and words that belong to the people who write them, you can support the vision directly.
+							</p>
+						</div>
+					</div>
+
+					<!-- Ko-fi Widget -->
+					<div class="mb-8">
+						<div class="kofi-widget-container rounded-2xl overflow-hidden shadow-sm border border-default">
+							<iframe
+								id="kofiframe"
+								src="https://ko-fi.com/autumnsgrove/?hidefeed=true&widget=true&embed=true&preview=true"
+								class="w-full border-none"
+								height="712"
+								title="Support Autumn on Ko-fi"
+							></iframe>
+						</div>
+						<p class="text-sm text-foreground-subtle mt-4 text-center">
+							One-time support, no account needed.
+						</p>
+						<!-- Always-visible fallback: covers JS-off, CSP blocks, and extension-blocked iframes -->
+						<p class="text-sm text-foreground-subtle mt-1 text-center">
+							Widget not showing?
+							<a
+								href="https://ko-fi.com/autumnsgrove"
+								target="_blank"
+								rel="noopener noreferrer"
+								class="underline underline-offset-2 hover:text-foreground motion-safe:transition-colors"
+							>Open Ko-fi directly →</a>
+						</p>
+					</div>
+
+					<!-- What support goes toward -->
+					<div class="space-y-4 mb-8">
+						<h3 class="text-lg font-serif text-foreground text-center mb-6">What your support goes toward</h3>
+
+						<div class="grid gap-4">
+							<div class="flex items-start gap-4 p-4 rounded-xl border border-default bg-surface">
+								<div class="p-2 rounded-lg bg-accent-subtle/20 mt-0.5 shrink-0">
+									<TreePine class="w-4 h-4 text-accent-muted" />
+								</div>
+								<div>
+									<p class="font-sans font-medium text-foreground">Keeping the servers running</p>
+									<p class="text-sm text-foreground-subtle">Hosting, databases, CDN, and all the infrastructure that keeps Grove online.</p>
+								</div>
+							</div>
+
+							<div class="flex items-start gap-4 p-4 rounded-xl border border-default bg-surface">
+								<div class="p-2 rounded-lg bg-accent-subtle/20 mt-0.5 shrink-0">
+									<Sparkles class="w-4 h-4 text-accent-muted" />
+								</div>
+								<div>
+									<p class="font-sans font-medium text-foreground">Building new features</p>
+									<p class="text-sm text-foreground-subtle">More time to code means more features, faster. Federation, galleries, and everything on the roadmap.</p>
+								</div>
+							</div>
+
+							<div class="flex items-start gap-4 p-4 rounded-xl border border-default bg-surface">
+								<div class="p-2 rounded-lg bg-accent-subtle/20 mt-0.5 shrink-0">
+									<Heart class="w-4 h-4 text-accent-muted" />
+								</div>
+								<div>
+									<p class="font-sans font-medium text-foreground">Sustaining the dream</p>
+									<p class="text-sm text-foreground-subtle">Every coffee helps me spend more time on Grove and less time worrying about whether I can keep doing this.</p>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- Already a subscriber note -->
+					<div class="text-center p-6 rounded-xl bg-surface-subtle border border-default">
+						<p class="text-foreground-muted font-sans text-sm leading-relaxed">
+							Already have a Grove subscription? <span class="text-foreground">You're already supporting the dream.</span> Thank you for being <GroveTerm term="rooted">rooted</GroveTerm> with us.
+						</p>
+					</div>
+				</section>
+
 				<!-- Closing -->
 				<section class="text-center py-8 border-t border-default">
 					<p class="text-accent-muted font-serif text-lg mb-2">
 						Thank you for being here.
 					</p>
 					<p class="text-foreground-subtle font-sans">
-						Every contribution—big or small—helps build a better corner of the internet.
+						Every contribution—a bug report, a line of code, or a coffee—helps build a better corner of the internet.
+					</p>
+					<p class="text-sm text-foreground-subtle font-sans mt-2 italic">
+						Every bit helps. Every kind word, too.
 					</p>
 				</section>
 			</div>
@@ -310,16 +416,16 @@
 			<div class="relative group">
 				<a
 					href="#{header.id}"
-					class="flex items-center justify-center w-10 h-10 rounded-full bg-white dark:bg-cream-100 shadow-md border border-accent/30 dark:border-accent/20 hover:bg-accent/10 dark:hover:bg-accent/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 transition-all duration-200"
+					class="flex items-center justify-center w-11 h-11 rounded-full bg-white dark:bg-cream-50 shadow-md border border-accent/30 dark:border-accent/20 hover:bg-accent/10 dark:hover:bg-accent/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 transition-all duration-200"
 					aria-label="Jump to {header.text}"
 					title={header.text}
 				>
 					{#if SectionIcon}
-						<SectionIcon class="w-5 h-5 text-accent dark:text-accent-muted group-hover:scale-110 transition-transform" />
+						<SectionIcon class="w-5 h-5 text-accent dark:text-accent-muted motion-safe:group-hover:scale-110 transition-transform" />
 					{/if}
 				</a>
 				<div class="absolute right-full mr-3 top-1/2 -translate-y-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none">
-					<div class="px-3 py-1.5 rounded-lg bg-white dark:bg-cream-100 shadow-md border border-accent/20 dark:border-accent/10 text-sm font-medium text-foreground whitespace-nowrap">
+					<div class="px-3 py-1.5 rounded-lg bg-white dark:bg-cream-50 shadow-md border border-accent/20 dark:border-accent/10 text-sm font-medium text-foreground whitespace-nowrap">
 						{header.text}
 					</div>
 				</div>
@@ -335,4 +441,25 @@
 
 <style>
 	.bg-divider { background-color: var(--color-divider); }
+
+	.glass-support {
+		background: rgba(255, 255, 255, 0.6);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border: 1px solid var(--color-divider);
+	}
+
+	:global(.dark) .glass-support {
+		background: rgba(30, 41, 59, 0.5);
+	}
+
+	.kofi-widget-container {
+		background: #f9f9f9;
+	}
+
+	/* Ko-fi widget has a fixed light theme, so we add a subtle frame */
+	:global(.dark) .kofi-widget-container {
+		background: #f9f9f9;
+		box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+	}
 </style>
