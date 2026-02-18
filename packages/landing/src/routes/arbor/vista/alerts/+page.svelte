@@ -2,8 +2,6 @@
 	import type { PageData } from "./$types";
 	import { GlassCard } from "@autumnsgrove/groveengine/ui";
 	import { Bell, AlertCircle, CheckCircle2, Info } from "lucide-svelte";
-	import { apiRequest } from "$lib/utils/api";
-
 	let { data }: { data: PageData } = $props();
 
 	// Threshold form state
@@ -40,13 +38,23 @@
 		saveMessage = "";
 
 		try {
-			await apiRequest.post("/api/admin/observability/thresholds", {
-				serviceName: newThreshold.serviceName,
-				metricType: newThreshold.metricType,
-				operator: newThreshold.operator,
-				thresholdValue: parseFloat(newThreshold.thresholdValue),
-				severity: newThreshold.severity,
+			const res = await fetch("/api/admin/observability/thresholds", {
+				// csrf-ok
+				method: "POST",
+				credentials: "include",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					serviceName: newThreshold.serviceName,
+					metricType: newThreshold.metricType,
+					operator: newThreshold.operator,
+					thresholdValue: parseFloat(newThreshold.thresholdValue),
+					severity: newThreshold.severity,
+				}),
 			});
+			if (!res.ok) {
+				const body = (await res.json().catch(() => ({}))) as { error_description?: string };
+				throw new Error(body.error_description ?? "Failed to save threshold.");
+			}
 			saveMessage = "Threshold saved.";
 			newThreshold = {
 				serviceName: "",

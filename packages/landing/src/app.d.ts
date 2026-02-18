@@ -1,53 +1,55 @@
 /// <reference types="@cloudflare/workers-types" />
 
 declare global {
-  namespace App {
-    interface Locals {
-      user: {
-        id: string;
-        email: string;
-        name: string | null;
-        is_admin: boolean;
-      } | null;
-      /** D1 database session for consistent reads within a request */
-      dbSession: D1DatabaseSession;
-    }
+	namespace App {
+		interface Locals {
+			user: {
+				id: string;
+				email: string;
+				name: string | null;
+				is_admin: boolean;
+			} | null;
+			/** D1 database session for consistent reads within a request */
+			dbSession: D1DatabaseSession;
+		}
 
-    interface Platform {
-      env: {
-        DB: D1Database;
-        CDN_BUCKET: R2Bucket;
-        CDN_URL: string;
-        /** @deprecated Use ZEPHYR_API_KEY instead */
-        RESEND_API_KEY?: string;
-        /** Zephyr email gateway API key */
-        ZEPHYR_API_KEY: string;
-        /** Zephyr email gateway URL */
-        ZEPHYR_URL?: string;
-        /** Zephyr service binding (Worker-to-Worker) */
-        ZEPHYR?: Fetcher;
-        /** Secret for unsubscribe token generation */
-        UNSUBSCRIBE_SECRET?: string;
-        ADMIN_EMAILS: string;
-        /** GroveAuth Service Binding (Heartwood - fast session validation) */
-        AUTH: Fetcher;
-        /** Optional KV namespace for caching and rate limiting */
-        CACHE_KV?: KVNamespace;
-        /** Alias for CACHE_KV (rate limiting) */
-        CACHE?: KVNamespace;
-        /** Turnstile (Shade) - human verification */
-        TURNSTILE_SITE_KEY: string;
-        TURNSTILE_SECRET_KEY: string;
-        GROVEAUTH_URL?: string;
-        GROVEAUTH_CLIENT_ID?: string;
-        GROVEAUTH_CLIENT_SECRET?: string;
-      };
-      context: {
-        waitUntil(promise: Promise<unknown>): void;
-      };
-      caches: CacheStorage & { default: Cache };
-    }
-  }
+		interface Platform {
+			env: {
+				DB: D1Database;
+				CDN_BUCKET: R2Bucket;
+				CDN_URL: string;
+				/** @deprecated Use ZEPHYR_API_KEY instead */
+				RESEND_API_KEY?: string;
+				/** Zephyr email gateway API key */
+				ZEPHYR_API_KEY: string;
+				/** Zephyr email gateway URL */
+				ZEPHYR_URL?: string;
+				/** Zephyr service binding (Worker-to-Worker) */
+				ZEPHYR?: Fetcher;
+				/** Secret for unsubscribe token generation */
+				UNSUBSCRIBE_SECRET?: string;
+				ADMIN_EMAILS: string;
+				/** GroveAuth Service Binding (Heartwood - fast session validation) */
+				AUTH: Fetcher;
+				/** Optional KV namespace for caching and rate limiting */
+				CACHE_KV?: KVNamespace;
+				/** Alias for CACHE_KV (rate limiting) */
+				CACHE?: KVNamespace;
+				/** Turnstile (Shade) - human verification */
+				TURNSTILE_SITE_KEY: string;
+				TURNSTILE_SECRET_KEY: string;
+				GROVEAUTH_URL?: string;
+				GROVEAUTH_CLIENT_ID?: string;
+				GROVEAUTH_CLIENT_SECRET?: string;
+				/** CF Analytics API token for Vista observability collector */
+				CF_OBSERVABILITY_TOKEN?: string;
+			};
+			context: {
+				waitUntil(promise: Promise<unknown>): void;
+			};
+			caches: CacheStorage & { default: Cache };
+		}
+	}
 }
 
 export {};

@@ -6,11 +6,12 @@
 	let { data }: { data: PageData } = $props();
 
 	// Group rows by date and compute daily totals
+	type CostRow = (typeof data.costs)[number];
 	const byDate = $derived(() => {
-		const map = new Map<string, { date: string; services: typeof data.costs; total: number }>();
+		const map = new Map<string, { date: string; services: CostRow[]; total: number }>();
 		for (const row of data.costs) {
 			if (!map.has(row.date)) {
-				map.set(row.date, { date: row.date, services: [], total: 0 });
+				map.set(row.date, { date: row.date, services: [] as CostRow[], total: 0 });
 			}
 			const entry = map.get(row.date)!;
 			entry.services.push(row);
