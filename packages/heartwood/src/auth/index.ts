@@ -106,6 +106,11 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
   // Create Drizzle instance for D1 with schema
   const db = drizzle(env.DB, { schema });
   const groveDb = createDbSession(env);
+  const zephyr = new ZephyrClient({
+    baseUrl: env.ZEPHYR_URL,
+    apiKey: env.ZEPHYR_API_KEY,
+    fetcher: env.ZEPHYR, // Service binding for direct worker-to-worker routing
+  });
 
   return betterAuth({
     // Base URL for auth endpoints
@@ -299,12 +304,6 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 
         // Send magic link email via Zephyr (unified email gateway)
         sendMagicLink: async ({ email, url }) => {
-          const zephyr = new ZephyrClient({
-            baseUrl: env.ZEPHYR_URL,
-            apiKey: env.ZEPHYR_API_KEY,
-            fetcher: env.ZEPHYR, // Service binding for direct worker-to-worker routing
-          });
-
           const result = await zephyr.sendRaw({
             to: email,
             subject: "Sign in to Grove",
@@ -314,7 +313,9 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
             fromName: "Grove",
             type: "verification",
             tenant: "heartwood",
-            idempotencyKey: `magic-link-${email}-${Date.now()}`,
+            // Use the magic link token as idempotency key — stable per request,
+            // so retries deduplicate correctly rather than sending duplicate emails.
+            idempotencyKey: `magic-link-${new URL(url).searchParams.get("token") ?? email}`,
           });
 
           if (!result.success) {
