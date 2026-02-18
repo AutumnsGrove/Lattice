@@ -1,78 +1,67 @@
 <h1><img src="docs/internal/email-assets/logos/social/logo-summer-1024-social.png" alt="Lattice logo" width="32" height="32" valign="middle">&nbsp;Lattice</h1>
 
-[![npm version](https://img.shields.io/npm/v/@autumnsgrove/lattice.svg?style=flat-square&color=4a7c59)](https://www.npmjs.com/package/@autumnsgrove/lattice)
-[![license](https://img.shields.io/npm/l/@autumnsgrove/lattice.svg?style=flat-square&color=8b5a2b)](LICENSE)
-
-> **Internal codename:** Lattice
-
-Lattice is the core framework that powers [Grove](https://grove.place) — a multi-tenant blogging platform where people get their own blogs on subdomains (`username.grove.place`). Built entirely on Cloudflare infrastructure with SvelteKit.
-
-> _A lattice is the framework that supports growth. Vines climb it. Gardens are built around it. It's not the thing you see — it's the thing that holds everything else up._
+_A forest of voices. Writing and community tools for a quieter corner of the internet._
 
 ---
 
-## Why Grove?
+## The Grove
 
-Nobody wants generic blogging platforms. Neurodivergent folks especially hate them — the endless customization rabbit holes, the algorithm-driven feeds, the sense that you're always performing for an audience you can't see.
+The internet used to be a garden. Not a manicured one. A wild one, full of weird little corners and handmade pages. You could stumble onto someone's space and feel like you'd discovered something real.
 
-Grove is different:
+Then the walls went up. Friends scattered to different platforms. Words became datasets. The gardens disappeared into algorithmic voids where the only way out was through a gate someone else controlled.
 
-- **Queer-friendly infrastructure** — A safe digital space, especially valuable when physical environments feel hostile. Your corner of the internet, without surveillance capitalism.
+Grove is a place to write, to share, to belong. You get your own blog at `you.grove.place`. Your words live in markdown. No algorithms decide who sees them. No AI scrapes them. You can export everything, anytime. We don't hold your data hostage.
 
-- **Community-owned, solarpunk-aligned** — Decentralized by design, built to be genuinely helpful rather than exploitative. No investor pressure to enshittify.
+This is a forest, not a factory. We grow at the pace of roots.
 
-- **Portable by philosophy** — Your content lives in markdown. You can export and migrate anytime. We don't hold your data hostage.
-
-- **Built for people, not engagement metrics** — No dark patterns, no algorithmic manipulation. Just a place to _be_.
-
-This isn't just a SaaS — it's about helping people have their own space online, away from big tech algorithms.
+_Welcome to the Grove._
 
 ---
 
-## Key Features
+## The Ecosystem
 
-**Core Platform** — Gutter annotations, full-featured markdown editor with live preview and zen mode, multi-tenant subdomain architecture, Stripe payments, feature flags with gradual rollout.
+Everything in Grove has a name. These are the pieces that make up the forest.
 
-**Design System** — Glassmorphism component library, seasonal color palettes (spring, summer, autumn, winter, and midnight — the queer fifth season), nature-themed SVG components for atmospheric forest scenes, accessibility-first font collection including OpenDyslexic, Atkinson Hyperlegible, and Luciole.
+### Apps
 
-**Cloudflare Native** — D1 database, R2 storage, KV caching, Workers deployment, Durable Objects for real-time coordination.
+| Name                            | Path                                             | What it is                                  |
+| ------------------------------- | ------------------------------------------------ | ------------------------------------------- |
+| [Landing](packages/landing)     | [grove.place](https://grove.place)               | The home page, the heart of Grove           |
+| [Plant](packages/plant)         | plant.grove.place                                | Where new Wanderers plant their grove       |
+| [Meadow](packages/meadow)       | meadow.grove.place                               | Community feed, chronological, no algorithm |
+| [Forage](packages/domains)      | forage.grove.place                               | AI-powered domain discovery                 |
+| [Clearing](packages/clearing)   | [status.grove.place](https://status.grove.place) | Status page for the whole forest            |
+| [Terrarium](packages/terrarium) | terrarium.grove.place                            | Admin and testing sandbox                   |
+| [Login](packages/login)         | login.grove.place                                | Unified auth hub                            |
 
-**Heartwood Auth** — Google Sign-In with OAuth 2.0 + PKCE, built into the monorepo at [`packages/heartwood`](packages/heartwood).
+### Services
+
+| Name                             | Path               | What it is                                      |
+| -------------------------------- | ------------------ | ----------------------------------------------- |
+| [Heartwood](packages/heartwood)  | Auth provider      | Google OAuth 2.0 + PKCE, session management     |
+| [Passage](packages/grove-router) | Subdomain routing  | Routes `*.grove.place` to the right app         |
+| [Loom](packages/durable-objects) | Coordination layer | Durable Objects for caching and real-time state |
+
+### Workers
+
+| Name                                    | Path                                     | What it is                                        |
+| --------------------------------------- | ---------------------------------------- | ------------------------------------------------- |
+| [OG Worker](packages/og-worker)         | [og.grove.place](https://og.grove.place) | Dynamic social preview images                     |
+| [Post Migrator](packages/post-migrator) | Background cron                          | Hot/warm/cold storage tiering                     |
+| [Scheduled Workers](packages/workers)   | Background crons                         | Health monitoring, timeline sync, webhook cleanup |
+
+### Libraries
+
+| Name                          | Path                     | What it is                                                  |
+| ----------------------------- | ------------------------ | ----------------------------------------------------------- |
+| [Lattice](packages/engine)    | `@autumnsgrove/lattice`  | The core framework. The thing that holds everything else up |
+| [Vineyard](packages/vineyard) | `@autumnsgrove/vineyard` | Component showcase for every Grove property                 |
 
 ---
 
-## Packages
+## Live
 
-| Package                                     | Description                                                             |
-| ------------------------------------------- | ----------------------------------------------------------------------- |
-| [@autumnsgrove/lattice](packages/engine)    | Lattice — the core multi-tenant blog engine                             |
-| [landing](packages/landing)                 | Marketing site at [grove.place](https://grove.place)                    |
-| [heartwood](packages/heartwood)             | Authentication service (Google OAuth 2.0 + PKCE)                        |
-| [plant](packages/plant)                     | Tenant blog management app                                              |
-| [meadow](packages/meadow)                   | Community feed                                                          |
-| [domains](packages/domains)                 | Forage frontend — AI-powered domain discovery                           |
-| [clearing](packages/clearing)               | Status page at [status.grove.place](https://status.grove.place)         |
-| [terrarium](packages/terrarium)             | Admin & testing interface                                               |
-| [grove-router](packages/grove-router)       | Subdomain routing Worker                                                |
-| [og-worker](packages/og-worker)             | Dynamic OG image generation at [og.grove.place](https://og.grove.place) |
-| [durable-objects](packages/durable-objects) | Cloudflare Durable Objects for caching and coordination                 |
-| [post-migrator](packages/post-migrator)     | Hot/warm/cold storage migration (cron-triggered)                        |
-| [@autumnsgrove/vineyard](packages/vineyard) | Component showcase library for `/vineyard` routes                       |
-| [workers](packages/workers)                 | Scheduled workers (health monitoring, timeline sync, webhook cleanup)   |
-
-### Live Sites
-
-| Site          | URL                                                  |
-| ------------- | ---------------------------------------------------- |
-| Grove Landing | [grove.place](https://grove.place)                   |
-| Vineyard      | [grove.place/vineyard](https://grove.place/vineyard) |
-| Example Blog  | [example.grove.place](https://example.grove.place)   |
-| Forage        | [forage.grove.place](https://forage.grove.place)     |
-| Auth          | [auth.grove.place](https://auth.grove.place)         |
-| OG Images     | [og.grove.place](https://og.grove.place)             |
-| CDN           | [cdn.grove.place](https://cdn.grove.place)           |
-| Status        | [status.grove.place](https://status.grove.place)     |
-| Scout         | [scout.grove.place](https://scout.grove.place)       |
+[grove.place](https://grove.place) · [status.grove.place](https://status.grove.place) · [forage.grove.place](https://forage.grove.place) · [og.grove.place](https://og.grove.place) · [scout.grove.place](https://scout.grove.place)
 
 ### Related Projects
 
@@ -84,108 +73,32 @@ This isn't just a SaaS — it's about helping people have their own space online
 
 ---
 
-## Pricing
-
-| Plan      | Price  | Posts     | Storage |
-| --------- | ------ | --------- | ------- |
-| Free      | $0/mo  | 5         | 50 MB   |
-| Seedling  | $8/mo  | 50        | 1 GB    |
-| Sapling   | $12/mo | 250       | 5 GB    |
-| Oak       | $25/mo | Unlimited | 20 GB   |
-| Evergreen | $35/mo | Unlimited | 100 GB  |
-
-Full details at [grove.place/pricing](https://grove.place/pricing).
-
----
-
-## Where We Are
-
-The platform is deep in active development. The engine is approaching v1.0 with a comprehensive multi-tenant architecture, a full design system, and production infrastructure on Cloudflare.
-
-**What's solid:**
-
-- Multi-tenant blog engine with subdomain routing and per-tenant isolation
-- Full design system with glassmorphism, seasonal themes, and nature components
-- Heartwood authentication with Google OAuth
-- Stripe payment integration with subscription management
-- Feature flag system with tenant-scoped gradual rollout
-- Durable Objects infrastructure for caching and coordination
-- Markdown editor with gutter annotations, live preview, and zen mode
-- Comprehensive test suites (security, unit, integration)
-- Forage AI domain search with real-time streaming
-
-**What's in progress:**
-
-- Glass design system expansion across all pages
-- Tenant onboarding flow
-- Multi-tenant infrastructure hardening
-
-### On the Horizon
-
-- **Forests** — Community aggregation inspired by GeoCities neighborhoods, with themed forests across categories
-- **Wander** — First-person immersive grove discovery with floating terrariums, seasons, weather, and ambient soundscape
-- **Curios** — Cabinet of wonders for old-web personalization (guestbooks, shrines, hit counters, custom cursors, link gardens)
-- **Meadow launch** — Community feed where blogs can share posts, vote, and react with emoji
-
----
-
 ## Development
-
-### Quick Start
 
 ```bash
 git clone https://github.com/AutumnsGrove/Lattice.git
 cd Lattice
 pnpm install
-
-# Start the engine
-cd packages/engine && pnpm dev
-
-# Start the landing page
-cd packages/landing && pnpm dev
+pnpm --filter @autumnsgrove/lattice dev
 ```
 
-### Testing
-
-```bash
-cd packages/engine
-pnpm test              # Run tests
-pnpm test:coverage     # With coverage
-pnpm test:security     # Security suite
-pnpm test:ui           # Vitest UI
-```
-
-### Building
-
-```bash
-cd packages/engine
-pnpm build:package     # Build for npm
-```
-
-See [SETUP.md](SETUP.md) for the full development guide, including Cloudflare bindings, database migrations, and the pnpm + bun hybrid workflow.
+See [SETUP.md](SETUP.md) for the full development guide. See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ---
 
-## Tech Stack
+## Values
 
-- **Framework:** SvelteKit, Svelte 5, TypeScript
-- **Styling:** Tailwind CSS
-- **Backend:** Cloudflare Workers, D1 (SQLite), KV, R2, Durable Objects
-- **Payments:** Stripe
-- **Auth:** Heartwood (Google OAuth 2.0 + PKCE)
-- **Email:** Resend
-- **Markdown:** markdown-it
-- **Icons:** Lucide Svelte
-- **AI:** DeepSeek via OpenRouter (Forage domain search)
-- **Testing:** Vitest, Testing Library, happy-dom
-- **Build:** Vite, pnpm workspaces
+- Queer-friendly infrastructure. Safe digital spaces, especially when physical ones feel hostile.
+- No algorithms, no engagement metrics. Your feed is chronological. Your worth isn't measured by likes.
+- Your words stay yours. Not a dataset. Not a statistic. Exportable in standard markdown, always.
+- AI sanctuary. Every crawler blocked at the gate. What you write here is read by humans.
+- Solarpunk-aligned, no VC. Built slowly, with care, without investor pressure to enshittify.
+- Built to last. Grow with Grove long enough, and your site earns Centennial status. A hundred years online.
 
 ---
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines, commit conventions, and workflow details.
 
 ## License
+
+[![license](https://img.shields.io/npm/l/@autumnsgrove/lattice.svg?style=flat-square&color=8b5a2b)](LICENSE)
 
 [AGPL-3.0](LICENSE)
