@@ -24,7 +24,7 @@ from rich.panel import Panel
 from rich.table import Table
 
 from ..git_wrapper import Git, GitError
-from ..packages import load_monorepo, find_monorepo_root
+from ..packages import extract_package_from_path, load_monorepo, find_monorepo_root
 from ..ui import console, git_error, not_a_repo
 
 
@@ -38,12 +38,10 @@ def _get_affected_packages(file_paths: list[str]) -> list[str]:
     """
     packages = set()
     for filepath in file_paths:
-        parts = Path(filepath).parts
-        if len(parts) >= 2 and parts[0] == "packages":
-            packages.add(parts[1])
-        elif len(parts) >= 2 and parts[0] == "tools":
-            packages.add(f"tools/{parts[1]}")
-        elif len(parts) == 1:
+        pkg = extract_package_from_path(filepath)
+        if pkg:
+            packages.add(pkg)
+        elif len(Path(filepath).parts) == 1:
             packages.add("root")
     return sorted(packages)
 

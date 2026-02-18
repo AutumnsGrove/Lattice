@@ -432,7 +432,8 @@ var engineCmd = &cobra.Command{
 	Args:  cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg := config.Get()
-		engineExclude := "--glob=!packages/engine"
+		// Exclude the engine package itself from results (both old and new layout locations).
+		engineExcludes := []string{"--glob=!packages/engine", "--glob=!libs/engine"}
 
 		if len(args) == 1 {
 			module := args[0]
@@ -441,7 +442,7 @@ var engineCmd = &cobra.Command{
 				out, err := search.RunRg(
 					"@autumnsgrove/lattice/"+module,
 					search.WithGlobs("*.{ts,js,svelte}"),
-					search.WithExtraArgs(engineExclude),
+					search.WithExtraArgs(engineExcludes...),
 				)
 				if err != nil {
 					return err
@@ -460,7 +461,7 @@ var engineCmd = &cobra.Command{
 			out, err := search.RunRg(
 				"@autumnsgrove/lattice/"+module,
 				search.WithGlobs("*.{ts,js,svelte}"),
-				search.WithExtraArgs(engineExclude),
+				search.WithExtraArgs(engineExcludes...),
 			)
 			if err != nil {
 				return err
@@ -492,7 +493,7 @@ var engineCmd = &cobra.Command{
 				out, err := search.RunRg(
 					sec.pattern,
 					search.WithGlobs("*.{ts,js,svelte}"),
-					search.WithExtraArgs(engineExclude),
+					search.WithExtraArgs(engineExcludes...),
 				)
 				if err != nil {
 					return err
@@ -508,7 +509,7 @@ var engineCmd = &cobra.Command{
 			out, err := search.RunRg(
 				"@autumnsgrove/lattice",
 				search.WithGlobs("*.{ts,js,svelte}"),
-				search.WithExtraArgs(engineExclude),
+				search.WithExtraArgs(engineExcludes...),
 				search.WithFilesOnly(),
 			)
 			if err != nil {
@@ -527,7 +528,7 @@ var engineCmd = &cobra.Command{
 			out, err := search.RunRg(
 				sec.pattern,
 				search.WithGlobs("*.{ts,js,svelte}"),
-				search.WithExtraArgs(engineExclude),
+				search.WithExtraArgs(engineExcludes...),
 			)
 			if err != nil {
 				return err
@@ -546,7 +547,7 @@ var engineCmd = &cobra.Command{
 		out, err := search.RunRg(
 			"@autumnsgrove/lattice",
 			search.WithGlobs("*.{ts,js,svelte}"),
-			search.WithExtraArgs(engineExclude),
+			search.WithExtraArgs(engineExcludes...),
 			search.WithFilesOnly(),
 		)
 		if err != nil {

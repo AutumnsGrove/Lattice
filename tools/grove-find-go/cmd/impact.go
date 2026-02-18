@@ -62,10 +62,10 @@ func runImpact(filePath string) error {
 
 	importPatterns := []string{}
 
-	// Convert packages/X/src/Y to $lib/Y style import path.
-	if strings.HasPrefix(importPath, "packages/") {
+	// Convert packages/X/src/Y (or apps/X/src/Y, etc.) to $lib/Y style import path.
+	{
 		parts := strings.Split(importPath, "/")
-		if len(parts) > 3 && parts[2] == "src" {
+		if len(parts) > 3 && isPackageDir(parts[0]) && parts[2] == "src" {
 			libPath := strings.Join(parts[3:], "/")
 			importPatterns = append(importPatterns, libPath)
 		}
@@ -197,11 +197,8 @@ func runImpact(filePath string) error {
 	allFiles = append(allFiles, routes...)
 
 	for _, f := range allFiles {
-		parts := strings.Split(filepath.ToSlash(f), "/")
-		if len(parts) >= 2 && parts[0] == "packages" {
-			affectedSet[parts[1]] = true
-		} else if len(parts) >= 2 && parts[0] == "tools" {
-			affectedSet["tools/"+parts[1]] = true
+		if pkg := extractPackageFromPath(f); pkg != "" {
+			affectedSet[pkg] = true
 		}
 	}
 
@@ -476,12 +473,9 @@ func runDiffSummary(base string) error {
 		totalDel += del
 
 		// Determine package.
-		pathParts := strings.Split(filepath.ToSlash(path), "/")
-		pkg := "root"
-		if len(pathParts) >= 2 && pathParts[0] == "packages" {
-			pkg = pathParts[1]
-		} else if len(pathParts) >= 2 && pathParts[0] == "tools" {
-			pkg = "tools/" + pathParts[1]
+		pkg := extractPackageFromPath(path)
+		if pkg == "" {
+			pkg = "root"
 		}
 		packageSet[pkg] = true
 

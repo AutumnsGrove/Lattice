@@ -12,6 +12,35 @@ from pathlib import Path
 from typing import Optional
 
 
+# Directories that hold monorepo packages (old flat layout + new categorized layout).
+# Both are scanned so gw works before and after the restructure.
+PACKAGE_DIRS = ("packages", "apps", "services", "workers", "libs", "tools")
+
+
+def extract_package_from_path(filepath: str) -> Optional[str]:
+    """Extract a package identifier from a monorepo-relative file path.
+
+    Old 'packages/' layout returns bare names for backwards compatibility:
+        packages/engine/src/foo.ts → 'engine'
+
+    New categorized layout and tools/workers return prefixed names:
+        apps/landing/src/foo.ts    → 'apps/landing'
+        services/heartwood/src/... → 'services/heartwood'
+        libs/engine/src/...        → 'libs/engine'
+        workers/zephyr/src/...     → 'workers/zephyr'
+        tools/gw/src/...           → 'tools/gw'
+
+    Returns None if the path doesn't match any known package directory.
+    """
+    parts = Path(filepath).parts
+    for i, part in enumerate(parts):
+        if part in PACKAGE_DIRS and i + 1 < len(parts):
+            if part == "packages":
+                return parts[i + 1]
+            return f"{part}/{parts[i + 1]}"
+    return None
+
+
 class PackageType(Enum):
     """Type of package in the monorepo."""
 
@@ -248,6 +277,9 @@ def _load_python_package(package_path: Path) -> Optional[Package]:
 def discover_packages(root: Path) -> list[Package]:
     """Discover all packages in the monorepo.
 
+    Scans all package category directories (both old flat layout and new
+    categorized layout) so gw works before and after the restructure.
+
     Args:
         root: Path to monorepo root
 
@@ -255,31 +287,35 @@ def discover_packages(root: Path) -> list[Package]:
         List of Package objects
     """
     packages = []
+    seen_paths: set[Path] = set()
 
-    # Check packages/ directory
-    packages_dir = root / "packages"
-    if packages_dir.exists():
-        for child in packages_dir.iterdir():
-            if child.is_dir():
-                pkg = load_package(child)
-                if pkg:
-                    packages.append(pkg)
+    for category in PACKAGE_DIRS:
+        category_dir = root / category
+        if not category_dir.exists():
+            continue
 
-                # Check for nested packages (e.g., packages/workers/*)
+        for child in category_dir.iterdir():
+            if not child.is_dir():
+                continue
+            resolved = child.resolve()
+            if resolved in seen_paths:
+                continue
+
+            pkg = load_package(child)
+            if pkg:
+                packages.append(pkg)
+                seen_paths.add(resolved)
+
+            # Check for nested packages (e.g., packages/workers/* in old layout)
+            if category == "packages":
                 for subchild in child.iterdir():
                     if subchild.is_dir():
-                        subpkg = load_package(subchild)
-                        if subpkg:
-                            packages.append(subpkg)
-
-    # Check tools/ directory for Python packages
-    tools_dir = root / "tools"
-    if tools_dir.exists():
-        for child in tools_dir.iterdir():
-            if child.is_dir():
-                pkg = load_package(child)
-                if pkg:
-                    packages.append(pkg)
+                        sub_resolved = subchild.resolve()
+                        if sub_resolved not in seen_paths:
+                            subpkg = load_package(subchild)
+                            if subpkg:
+                                packages.append(subpkg)
+                                seen_paths.add(sub_resolved)
 
     return packages
 

@@ -10,6 +10,7 @@ from typing import Any, Optional
 import click
 
 from ..config import GWConfig
+from ..packages import extract_package_from_path
 from ..ui import console, create_panel, create_table, error, info, success
 
 
@@ -197,16 +198,20 @@ def _get_project_info() -> dict[str, Any]:
         # Detect current package
         if cwd != monorepo_root:
             rel_path = cwd.relative_to(monorepo_root)
-            parts = rel_path.parts
-            if len(parts) >= 2 and parts[0] == "packages":
-                info["current_package"] = parts[1]
-            elif len(parts) >= 2 and parts[0] == "tools":
-                info["current_package"] = f"tools/{parts[1]}"
+            pkg = extract_package_from_path(str(rel_path))
+            if pkg:
+                info["current_package"] = pkg
 
     # Check for wrangler.toml
     wrangler_toml = cwd / "wrangler.toml"
     if not wrangler_toml.exists() and info["current_package"]:
-        wrangler_toml = monorepo_root / "packages" / info["current_package"] / "wrangler.toml"
+        pkg_id = info["current_package"]
+        if "/" in pkg_id:
+            # New layout (apps/landing) or tools/workers — path is the identifier
+            wrangler_toml = monorepo_root / pkg_id / "wrangler.toml"
+        else:
+            # Old layout — bare name lives under packages/
+            wrangler_toml = monorepo_root / "packages" / pkg_id / "wrangler.toml"
     if wrangler_toml.exists():
         info["wrangler_config"] = str(wrangler_toml)
 

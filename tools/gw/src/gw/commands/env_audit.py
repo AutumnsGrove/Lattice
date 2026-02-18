@@ -14,6 +14,7 @@ try:
 except ImportError:
     import tomli as tomllib
 
+from ..packages import extract_package_from_path
 from ..ui import console, create_table, error, info, success, warning
 
 
@@ -205,18 +206,9 @@ def _get_package_name(filepath: Path, root: Path) -> str:
     except ValueError:
         return str(filepath.parent.name)
 
-    parts = rel.split("/")
-    if "packages" in parts:
-        idx = parts.index("packages")
-        if idx + 1 < len(parts):
-            return parts[idx + 1]
-    elif "workers" in parts:
-        idx = parts.index("workers")
-        if idx + 1 < len(parts):
-            return f"workers/{parts[idx + 1]}"
-    elif "tools" in parts:
-        idx = parts.index("tools")
-        if idx + 1 < len(parts):
-            return f"tools/{parts[idx + 1]}"
+    pkg = extract_package_from_path(rel)
+    if pkg:
+        return pkg
 
+    parts = rel.split("/")
     return parts[0] if parts else "root"
