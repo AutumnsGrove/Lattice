@@ -80,6 +80,8 @@ export const actions: Actions = {
     const redirectTo = validateRedirectUrl(
       formData.get("redirect")?.toString(),
     );
+    // Relative URL — Heartwood resolves it against the login origin (login.grove.place).
+    // Safe because AUTH is a service binding; this never becomes a public redirect target.
     const callbackURL = `/callback?redirect=${encodeURIComponent(redirectTo)}`;
 
     if (!platform?.env?.AUTH) {
@@ -203,11 +205,15 @@ export const actions: Actions = {
 
     if (!response.ok) {
       let message = "Failed to send magic link. Please try again.";
-      try {
-        const body = (await response.json()) as { message?: string };
-        if (body.message) message = body.message;
-      } catch {
-        // Use default message if response isn't JSON
+      // Only surface Heartwood's message for 4xx errors (client errors the user can act on).
+      // 5xx errors are server-side — use the generic message to avoid leaking internals.
+      if (response.status >= 400 && response.status < 500) {
+        try {
+          const body = (await response.json()) as { message?: string };
+          if (body.message) message = body.message;
+        } catch {
+          // Use default message if response isn't JSON
+        }
       }
       const status =
         response.status >= 400 && response.status < 600 ? response.status : 500;

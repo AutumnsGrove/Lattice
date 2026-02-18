@@ -57,7 +57,10 @@
 			if (result.error) {
 				throw new Error(result.error.message || 'Passkey sign-in failed');
 			}
-			// Session cookie is set — redirect to destination
+			// Session cookie is set — redirect to destination.
+			// Reset loading state before navigating: no-op when navigation proceeds normally,
+			// but keeps UI unblocked if window.location.href is a no-op (sandboxed/test env).
+			passkeyLoading = false;
 			window.location.href = redirectTo;
 		} catch (err) {
 			if (err instanceof Error && err.name === 'NotAllowedError') {
@@ -106,7 +109,7 @@
 				<div>
 					<p class="text-foreground font-medium">Check your email</p>
 					<p class="text-sm text-foreground-muted mt-1">
-						We sent a magic link to <strong class="text-foreground">{form.email}</strong>
+						We sent a magic link to <strong class="text-foreground">{form?.email}</strong>
 					</p>
 				</div>
 				<a
