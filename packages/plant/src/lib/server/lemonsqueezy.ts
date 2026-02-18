@@ -26,7 +26,7 @@ import {
   TIERS,
   PAID_TIERS,
   type PaidTierKey,
-} from "@autumnsgrove/groveengine/config";
+} from "@autumnsgrove/lattice/config";
 
 // =============================================================================
 // VARIANT IDS

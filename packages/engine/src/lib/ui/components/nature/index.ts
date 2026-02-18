@@ -7,8 +7,8 @@
  * @example
  * ```svelte
  * <script>
- *   import { Logo, TreePine, Cardinal } from '@autumnsgrove/groveengine/ui/nature';
- *   import { autumn } from '@autumnsgrove/groveengine/ui/nature';
+ *   import { Logo, TreePine, Cardinal } from '@autumnsgrove/lattice/ui/nature';
+ *   import { autumn } from '@autumnsgrove/lattice/ui/nature';
  * </script>
  *
  * <Logo season="autumn" animate />

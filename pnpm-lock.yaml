@@ -46,7 +46,7 @@ importers:
 
   packages/clearing:
     dependencies:
-      "@autumnsgrove/groveengine":
+      "@autumnsgrove/lattice":
         specifier: workspace:*
         version: link:../engine
       lucide-svelte:
@@ -98,7 +98,7 @@ importers:
 
   packages/domains:
     dependencies:
-      "@autumnsgrove/groveengine":
+      "@autumnsgrove/lattice":
         specifier: workspace:*
         version: link:../engine
       lucide-svelte:
@@ -147,7 +147,7 @@ importers:
 
   packages/durable-objects:
     dependencies:
-      "@autumnsgrove/groveengine":
+      "@autumnsgrove/lattice":
         specifier: workspace:*
         version: link:../engine
       fflate:
@@ -380,7 +380,7 @@ importers:
 
   packages/heartwood:
     dependencies:
-      "@autumnsgrove/groveengine":
+      "@autumnsgrove/lattice":
         specifier: workspace:*
         version: link:../engine
       "@better-auth/passkey":
@@ -429,7 +429,7 @@ importers:
       "@11ty/gray-matter":
         specifier: ^2.0.1
         version: 2.0.1
-      "@autumnsgrove/groveengine":
+      "@autumnsgrove/lattice":
         specifier: workspace:*
         version: link:../engine
       "@lucide/lab":
@@ -502,7 +502,7 @@ importers:
 
   packages/login:
     dependencies:
-      "@autumnsgrove/groveengine":
+      "@autumnsgrove/lattice":
         specifier: workspace:*
         version: link:../engine
       "@better-auth/passkey":
@@ -554,7 +554,7 @@ importers:
 
   packages/meadow:
     dependencies:
-      "@autumnsgrove/groveengine":
+      "@autumnsgrove/lattice":
         specifier: workspace:*
         version: link:../engine
       lucide-svelte:
@@ -625,7 +625,7 @@ importers:
 
   packages/plant:
     dependencies:
-      "@autumnsgrove/groveengine":
+      "@autumnsgrove/lattice":
         specifier: workspace:*
         version: link:../engine
       "@lemonsqueezy/lemonsqueezy.js":
@@ -701,7 +701,7 @@ importers:
 
   packages/terrarium:
     dependencies:
-      "@autumnsgrove/groveengine":
+      "@autumnsgrove/lattice":
         specifier: workspace:*
         version: link:../engine
       lucide-svelte:
@@ -857,7 +857,7 @@ importers:
 
   packages/workers/vista-collector:
     dependencies:
-      "@autumnsgrove/groveengine":
+      "@autumnsgrove/lattice":
         specifier: workspace:*
         version: link:../../engine
     devDependencies:

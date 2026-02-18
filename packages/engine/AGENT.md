@@ -2,7 +2,7 @@
 
 ## What is This?
 
-This is the **GroveEngine blog engine package** - the core that powers all Grove Platform blogs. Each Grove site (username.grove.place) runs as its own Cloudflare Worker deployment using this engine.
+This is the **Lattice blog engine package** - the core that powers all Grove Platform blogs. Each Grove site (username.grove.place) runs as its own Cloudflare Worker deployment using this engine.
 
 ## Project Context
 
@@ -51,32 +51,38 @@ packages/engine/
 
 ## Critical Files
 
-| File | Purpose |
-|------|---------|
-| `src/hooks.server.js` | Auth middleware, CSRF, security headers |
-| `src/lib/auth/session.js` | Session creation and verification |
-| `src/lib/auth/jwt.js` | JWT signing/verification |
-| `src/lib/utils/markdown.js` | Markdown parser with gutter support |
-| `src/lib/utils/csrf.js` | CSRF token generation/validation |
-| `src/lib/utils/sanitize.js` | XSS prevention (DOMPurify) |
-| `wrangler.toml` | Cloudflare bindings configuration |
+| File                        | Purpose                                 |
+| --------------------------- | --------------------------------------- |
+| `src/hooks.server.js`       | Auth middleware, CSRF, security headers |
+| `src/lib/auth/session.js`   | Session creation and verification       |
+| `src/lib/auth/jwt.js`       | JWT signing/verification                |
+| `src/lib/utils/markdown.js` | Markdown parser with gutter support     |
+| `src/lib/utils/csrf.js`     | CSRF token generation/validation        |
+| `src/lib/utils/sanitize.js` | XSS prevention (DOMPurify)              |
+| `wrangler.toml`             | Cloudflare bindings configuration       |
 
 ## Unique Features
 
 ### Gutter Annotations
+
 The signature feature - sidebar annotations for blog posts:
+
 - Comments, photos, galleries alongside content
 - Positioned by paragraph anchors
 - Components: `ContentWithGutter.svelte`, `GutterItem.svelte`, `LeftGutter.svelte`
 
 ### Magic Code Auth
+
 Passwordless authentication:
+
 - User enters email → receives 6-digit code → enters code → logged in
 - Rate limited, timing-attack resistant
 - Routes: `/auth/login`, `/auth/send-code`, `/auth/verify-code`
 
 ### Markdown Editor
+
 Advanced editor in admin panel:
+
 - Live preview, multiple themes
 - Mermaid diagrams, slash commands
 - Drag-drop image upload to R2
@@ -107,21 +113,25 @@ RESEND_API_KEY=       # For sending magic codes
 ## Common Tasks
 
 ### Adding a New API Route
+
 1. Create `src/routes/api/yourroute/+server.js`
 2. Add CSRF protection for mutations
 3. Add tenant_id filtering for multi-tenant
 
 ### Modifying the Markdown Parser
+
 - Edit `src/lib/utils/markdown.js`
 - Uses `marked` library with custom renderers
 - Gutter content loaded from `gutter_content` field
 
 ### Adding a New Component
+
 1. Create in `src/lib/components/`
 2. Export from appropriate index file
 3. Use shadcn patterns for UI components
 
 ### Updating Auth Flow
+
 - Session logic: `src/lib/auth/session.js`
 - Login UI: `src/routes/auth/login/+page.svelte`
 - Verification: `src/routes/auth/verify-code/+server.js`
@@ -165,10 +175,10 @@ npx wrangler pages deploy
 
 ## Quick Reference
 
-| Action | Command |
-|--------|---------|
-| Dev server | `npm run dev` |
-| Build | `npm run build` |
-| Deploy | `npx wrangler pages deploy` |
+| Action         | Command                                                |
+| -------------- | ------------------------------------------------------ |
+| Dev server     | `npm run dev`                                          |
+| Build          | `npm run build`                                        |
+| Deploy         | `npx wrangler pages deploy`                            |
 | Run migrations | `npx wrangler d1 execute DB --file=migrations/XXX.sql` |
-| Test | `npm run test` |
+| Test           | `npm run test`                                         |

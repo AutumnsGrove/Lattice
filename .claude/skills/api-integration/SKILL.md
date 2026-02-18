@@ -8,6 +8,7 @@ description: Integrate external REST APIs with proper authentication, rate limit
 ## When to Activate
 
 Activate this skill when:
+
 - Integrating external APIs
 - Building API clients or wrappers
 - Handling API authentication
@@ -140,14 +141,14 @@ except requests.exceptions.Timeout:
 
 ## HTTP Status Codes
 
-| Code | Meaning | Action |
-|------|---------|--------|
-| 200 | Success | Process response |
-| 401 | Unauthorized | Check API key |
-| 403 | Forbidden | Check permissions |
-| 404 | Not found | Verify endpoint |
-| 429 | Rate limited | Wait and retry |
-| 5xx | Server error | Retry with backoff |
+| Code | Meaning      | Action             |
+| ---- | ------------ | ------------------ |
+| 200  | Success      | Process response   |
+| 401  | Unauthorized | Check API key      |
+| 403  | Forbidden    | Check permissions  |
+| 404  | Not found    | Verify endpoint    |
+| 429  | Rate limited | Wait and retry     |
+| 5xx  | Server error | Retry with backoff |
 
 ## Caching
 
@@ -218,6 +219,7 @@ def fetch_all_pages(base_url: str, api_key: str) -> list:
 ## Best Practices
 
 ### DO ✅
+
 - Store keys in secrets.json
 - Implement retry with exponential backoff
 - Cache responses when appropriate
@@ -226,6 +228,7 @@ def fetch_all_pages(base_url: str, api_key: str) -> list:
 - Log requests (without sensitive data)
 
 ### DON'T ❌
+
 - Hardcode API keys
 - Ignore rate limits
 - Skip error handling
@@ -247,18 +250,24 @@ def fetch_all_pages(base_url: str, api_key: str) -> list:
 When building API routes in Grove applications, **all error responses MUST use Signpost error codes**. Never return ad-hoc JSON error shapes.
 
 ```typescript
-import { API_ERRORS, buildErrorJson, logGroveError } from '@autumnsgrove/groveengine/errors';
-import { json } from '@sveltejs/kit';
+import {
+  API_ERRORS,
+  buildErrorJson,
+  logGroveError,
+} from "@autumnsgrove/lattice/errors";
+import { json } from "@sveltejs/kit";
 
 export const POST: RequestHandler = async ({ request, locals }) => {
   if (!locals.user) {
-    logGroveError('Engine', API_ERRORS.UNAUTHORIZED, { path: '/api/resource' });
+    logGroveError("Engine", API_ERRORS.UNAUTHORIZED, { path: "/api/resource" });
     return json(buildErrorJson(API_ERRORS.UNAUTHORIZED), { status: 401 });
   }
 
   const body = schema.safeParse(await request.json());
   if (!body.success) {
-    return json(buildErrorJson(API_ERRORS.INVALID_REQUEST_BODY), { status: 400 });
+    return json(buildErrorJson(API_ERRORS.INVALID_REQUEST_BODY), {
+      status: 400,
+    });
   }
 
   // ... business logic
@@ -266,14 +275,15 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 ```
 
 Client-side, use `apiRequest()` (handles CSRF + credentials) and show toast feedback:
+
 ```typescript
-import { toast } from '@autumnsgrove/groveengine/ui';
+import { toast } from "@autumnsgrove/lattice/ui";
 
 try {
-  await apiRequest('/api/resource', { method: 'POST', body });
-  toast.success('Created!');
+  await apiRequest("/api/resource", { method: "POST", body });
+  toast.success("Created!");
 } catch (err) {
-  toast.error(err instanceof Error ? err.message : 'Something went wrong');
+  toast.error(err instanceof Error ? err.message : "Something went wrong");
 }
 ```
 
@@ -282,6 +292,7 @@ See `AgentUsage/error_handling.md` for the complete Signpost error code referenc
 ## Related Resources
 
 See `AgentUsage/api_usage.md` for complete documentation including:
+
 - Bash request patterns
 - Conditional requests (ETags)
 - Advanced caching strategies

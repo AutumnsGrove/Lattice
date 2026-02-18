@@ -35,7 +35,7 @@ jobs:
             // Unique product names — safe to match anywhere
             const uniqueComponents = [
               { label: 'heartwood', proper: /\bheartwood\b/, titleFallback: /\b(oauth|passkey|session.?do|pkce)\b/ },
-              { label: 'lattice',   proper: /\blattice\b/,   titleFallback: /\b(groveengine|monorepo|multi.?tenant)\b/ },
+              { label: 'lattice',   proper: /\blattice\b/,   titleFallback: /\b(lattice|monorepo|multi.?tenant)\b/ },
               { label: 'foliage',   proper: /\bfoliage\b/,   titleFallback: /\b(theme engine|design tokens|per.tenant theming)\b/ },
               { label: 'mycelium',  proper: /\bmycelium\b/,  titleFallback: /\b(mcp server|mcp tool|model context protocol)\b/ },
               { label: 'lumen',     proper: /\blumen\b/,     titleFallback: /\b(ai gateway|llm routing|ai pipeline)\b/ },

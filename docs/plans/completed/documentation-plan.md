@@ -28,30 +28,30 @@ Components exist across multiple directories with `index.ts` exports but no cata
 
 **Component Categories**:
 
-| Category | Count | Location |
-|----------|-------|----------|
-| Primitives | 45 | `ui/components/primitives/` |
-| Nature | 64 | `ui/components/nature/` |
-| UI | 28 | `ui/components/ui/` |
-| Typography | 11 | `ui/components/typography/` |
-| Chrome | 6 | `ui/components/chrome/` |
-| Terrarium | 7 | `ui/components/terrarium/` |
-| Gallery | 4 | `ui/components/gallery/` |
-| Charts | 4 | `ui/components/charts/` |
-| Content | 4 | `ui/components/content/` |
-| States | 4 | `ui/components/states/` |
-| Forms | 3 | `ui/components/forms/` |
-| Indicators | 3 | `ui/components/indicators/` |
-| Icons | 2 | `ui/components/icons/` |
+| Category   | Count | Location                    |
+| ---------- | ----- | --------------------------- |
+| Primitives | 45    | `ui/components/primitives/` |
+| Nature     | 64    | `ui/components/nature/`     |
+| UI         | 28    | `ui/components/ui/`         |
+| Typography | 11    | `ui/components/typography/` |
+| Chrome     | 6     | `ui/components/chrome/`     |
+| Terrarium  | 7     | `ui/components/terrarium/`  |
+| Gallery    | 4     | `ui/components/gallery/`    |
+| Charts     | 4     | `ui/components/charts/`     |
+| Content    | 4     | `ui/components/content/`    |
+| States     | 4     | `ui/components/states/`     |
+| Forms      | 3     | `ui/components/forms/`      |
+| Indicators | 3     | `ui/components/indicators/` |
+| Icons      | 2     | `ui/components/icons/`      |
 
 ### Implementation
 
 **File**: `docs/design-system/COMPONENT-REFERENCE.md`
 
-```markdown
+````markdown
 # Component Reference
 
-> 185 components organized by category. Import from `@autumnsgrove/groveengine/ui`.
+> 185 components organized by category. Import from `@autumnsgrove/lattice/ui`.
 
 ## Quick Links
 
@@ -65,15 +65,17 @@ Components exist across multiple directories with `index.ts` exports but no cata
 
 ```typescript
 // Category import
-import { GlassCard, GlassButton } from '@autumnsgrove/groveengine/ui';
+import { GlassCard, GlassButton } from "@autumnsgrove/lattice/ui";
 
 // Specific import
-import { TreePine } from '@autumnsgrove/groveengine/ui/nature';
+import { TreePine } from "@autumnsgrove/lattice/ui/nature";
 ```
+````
 
 ## Primitives (45)
 
 ### Accordion
+
 Collapsible content panels.
 
 ```svelte
@@ -86,7 +88,8 @@ Collapsible content panels.
 ```
 
 [Continue for each component category...]
-```
+
+````
 
 ### Effort: 4-6 hours
 
@@ -112,13 +115,13 @@ Dark mode is fully implemented via CSS variables but not documented:
   --foreground: 60 9% 98%;
   /* ... */
 }
-```
+````
 
 ### Implementation
 
 **File**: `docs/design-system/DARK-MODE-GUIDE.md`
 
-```markdown
+````markdown
 # Dark Mode Guide
 
 > "Nature at night" - Dark mode that maintains warmth and character.
@@ -126,6 +129,7 @@ Dark mode is fully implemented via CSS variables but not documented:
 ## Philosophy
 
 Dark mode in Grove isn't just inverted colors. It evokes a forest at twilight:
+
 - Warm bark browns instead of pure black
 - Cream highlights instead of stark white
 - Maintained contrast for accessibility
@@ -140,32 +144,33 @@ Grove uses HSL color variables that change between modes:
 ```css
 /* Light mode */
 :root {
-  --background: 60 9% 98%;    /* Warm cream */
-  --foreground: 24 10% 10%;   /* Dark bark */
+  --background: 60 9% 98%; /* Warm cream */
+  --foreground: 24 10% 10%; /* Dark bark */
 }
 
 /* Dark mode */
 .dark {
-  --background: 24 10% 10%;   /* Dark bark */
-  --foreground: 60 9% 98%;    /* Light cream */
+  --background: 24 10% 10%; /* Dark bark */
+  --foreground: 60 9% 98%; /* Light cream */
 }
 ```
+````
 
 ### Theme Toggle
 
 Use the engine's theme store:
 
 ```typescript
-import { themeStore } from '@autumnsgrove/groveengine/ui/stores';
+import { themeStore } from "@autumnsgrove/lattice/ui/stores";
 
 // Toggle
 themeStore.toggle();
 
 // Set explicitly
-themeStore.set('dark');
+themeStore.set("dark");
 
 // Read current
-const isDark = $themeStore === 'dark';
+const isDark = $themeStore === "dark";
 ```
 
 ### Component Considerations
@@ -182,13 +187,14 @@ const isDark = $themeStore === 'dark';
 
 ## Color Palette (Dark Mode)
 
-| Token | Light | Dark | Usage |
-|-------|-------|------|-------|
-| `--background` | Cream #FAF9F6 | Bark #1A1410 | Page background |
-| `--foreground` | Bark #1A1410 | Cream #FAF9F6 | Text |
-| `--primary` | Grove #16a34a | Grove #22c55e | Accent |
-| `--muted` | #F5F3EF | #2A241E | Subtle backgrounds |
-```
+| Token          | Light         | Dark          | Usage              |
+| -------------- | ------------- | ------------- | ------------------ |
+| `--background` | Cream #FAF9F6 | Bark #1A1410  | Page background    |
+| `--foreground` | Bark #1A1410  | Cream #FAF9F6 | Text               |
+| `--primary`    | Grove #16a34a | Grove #22c55e | Accent             |
+| `--muted`      | #F5F3EF       | #2A241E       | Subtle backgrounds |
+
+````
 
 ### Effort: 2-3 hours
 
@@ -243,7 +249,7 @@ Grove uses a 4px base unit. All spacing is a multiple of 4.
 Nature components (trees, creatures) use organic spacing:
 - Random offset: `±20%` from base position
 - Cluster grouping: Fibonacci-based gaps
-```
+````
 
 ### Effort: 1-2 hours
 
@@ -256,6 +262,7 @@ Nature components (trees, creatures) use organic spacing:
 Colors defined in `tailwind.preset.js` but not documented narratively.
 
 **Existing palette (from preset)**:
+
 - Grove Green (50-950)
 - Cream neutrals
 - Bark dark tones
@@ -265,7 +272,7 @@ Colors defined in `tailwind.preset.js` but not documented narratively.
 
 **File**: `docs/design-system/COLORS.md`
 
-```markdown
+````markdown
 # Color System
 
 > Nature-inspired palette: Grove greens, warm bark browns, soft cream neutrals.
@@ -273,6 +280,7 @@ Colors defined in `tailwind.preset.js` but not documented narratively.
 ## Philosophy
 
 Colors in Grove evoke a forest clearing:
+
 - **Grove Green** - Primary brand color, growth and vitality
 - **Cream** - Warm paper-like backgrounds
 - **Bark** - Deep browns for text and dark elements
@@ -284,50 +292,50 @@ Colors in Grove evoke a forest clearing:
 
 The primary brand color representing growth.
 
-| Shade | Hex | Usage |
-|-------|-----|-------|
-| grove-50 | #f0fdf4 | Lightest tint, subtle backgrounds |
-| grove-100 | #dcfce7 | Light backgrounds |
-| grove-200 | #bbf7d0 | Hover states |
-| grove-300 | #86efac | Borders |
-| grove-400 | #4ade80 | Icons |
-| grove-500 | #22c55e | Dark mode primary |
-| grove-600 | #16a34a | **Primary** - buttons, links |
-| grove-700 | #15803d | Hover state |
-| grove-800 | #166534 | Active state |
-| grove-900 | #14532d | Darkest |
-| grove-950 | #052e16 | Near-black green |
+| Shade     | Hex     | Usage                             |
+| --------- | ------- | --------------------------------- |
+| grove-50  | #f0fdf4 | Lightest tint, subtle backgrounds |
+| grove-100 | #dcfce7 | Light backgrounds                 |
+| grove-200 | #bbf7d0 | Hover states                      |
+| grove-300 | #86efac | Borders                           |
+| grove-400 | #4ade80 | Icons                             |
+| grove-500 | #22c55e | Dark mode primary                 |
+| grove-600 | #16a34a | **Primary** - buttons, links      |
+| grove-700 | #15803d | Hover state                       |
+| grove-800 | #166534 | Active state                      |
+| grove-900 | #14532d | Darkest                           |
+| grove-950 | #052e16 | Near-black green                  |
 
 ### Cream (Neutrals)
 
 Warm backgrounds that feel like natural paper.
 
-| Shade | Usage |
-|-------|-------|
+| Shade         | Usage              |
+| ------------- | ------------------ |
 | cream-DEFAULT | Primary background |
-| cream-50 | Brightest |
-| cream-100 | Card backgrounds |
-| cream-200 | Borders |
+| cream-50      | Brightest          |
+| cream-100     | Card backgrounds   |
+| cream-200     | Borders            |
 
 ### Bark (Dark Tones)
 
 Warm dark colors that avoid harsh blacks.
 
-| Shade | Usage |
-|-------|-------|
-| bark-DEFAULT | Primary text |
-| bark-dark | Darkest background |
-| bark-light | Muted text |
+| Shade        | Usage              |
+| ------------ | ------------------ |
+| bark-DEFAULT | Primary text       |
+| bark-dark    | Darkest background |
+| bark-light   | Muted text         |
 
 ## Semantic Colors
 
-| Token | Purpose | Light | Dark |
-|-------|---------|-------|------|
-| `primary` | Main actions | grove-600 | grove-500 |
-| `secondary` | Secondary UI | muted | muted |
-| `accent` | Highlights | grove-400 | grove-300 |
-| `destructive` | Errors, danger | red-600 | red-500 |
-| `muted` | Subtle elements | cream-200 | bark-800 |
+| Token         | Purpose         | Light     | Dark      |
+| ------------- | --------------- | --------- | --------- |
+| `primary`     | Main actions    | grove-600 | grove-500 |
+| `secondary`   | Secondary UI    | muted     | muted     |
+| `accent`      | Highlights      | grove-400 | grove-300 |
+| `destructive` | Errors, danger  | red-600   | red-500   |
+| `muted`       | Subtle elements | cream-200 | bark-800  |
 
 ## Usage in Code
 
@@ -338,7 +346,9 @@ Warm dark colors that avoid harsh blacks.
 // CSS variables
 color: hsl(var(--primary));
 ```
-```
+````
+
+````
 
 ### Effort: 2-3 hours
 
@@ -382,14 +392,14 @@ For appearing/disappearing elements.
 ```svelte
 <div class="animate-fade-in">Appears smoothly</div>
 <div class="animate-fade-in-up">Appears and rises</div>
-```
+````
 
-| Class | Duration | Use Case |
-|-------|----------|----------|
-| `animate-fade-in` | 200ms | Modals, toasts |
-| `animate-fade-out` | 150ms | Dismissals |
-| `animate-fade-in-up` | 300ms | Cards loading in |
-| `animate-fade-in-down` | 300ms | Dropdowns |
+| Class                  | Duration | Use Case         |
+| ---------------------- | -------- | ---------------- |
+| `animate-fade-in`      | 200ms    | Modals, toasts   |
+| `animate-fade-out`     | 150ms    | Dismissals       |
+| `animate-fade-in-up`   | 300ms    | Cards loading in |
+| `animate-fade-in-down` | 300ms    | Dropdowns        |
 
 ### Growth Animations
 
@@ -399,11 +409,11 @@ For scaling elements.
 <button class="hover:animate-grow">Grows on hover</button>
 ```
 
-| Class | Effect | Use Case |
-|-------|--------|----------|
-| `animate-grow` | Scale 1→1.05 | Interactive elements |
-| `animate-shrink` | Scale 1→0.95 | Click feedback |
-| `animate-bloom` | Scale 0.9→1 | Appearance |
+| Class            | Effect       | Use Case             |
+| ---------------- | ------------ | -------------------- |
+| `animate-grow`   | Scale 1→1.05 | Interactive elements |
+| `animate-shrink` | Scale 1→0.95 | Click feedback       |
+| `animate-bloom`  | Scale 0.9→1  | Appearance           |
 
 ### Nature Animations
 
@@ -413,11 +423,11 @@ For decorative elements.
 <TreePine class="animate-leaf-sway" />
 ```
 
-| Class | Effect | Use Case |
-|-------|--------|----------|
-| `animate-leaf-fall` | Falling motion | Seasonal decorations |
-| `animate-leaf-sway` | Gentle sway | Trees, plants |
-| `animate-spin-organic` | Irregular spin | Loading states |
+| Class                  | Effect         | Use Case             |
+| ---------------------- | -------------- | -------------------- |
+| `animate-leaf-fall`    | Falling motion | Seasonal decorations |
+| `animate-leaf-sway`    | Gentle sway    | Trees, plants        |
+| `animate-spin-organic` | Irregular spin | Loading states       |
 
 ## Reduced Motion
 
@@ -452,6 +462,7 @@ keyframes: {
   }
 }
 ```
+
 ```
 
 ### Effort: 2-3 hours
@@ -488,3 +499,4 @@ keyframes: {
 - CSS tokens: `packages/engine/src/lib/styles/tokens.css`
 - Typography README: `packages/engine/src/lib/ui/components/typography/README.md`
 - Grove CSS: `packages/engine/src/lib/ui/styles/grove.css`
+```

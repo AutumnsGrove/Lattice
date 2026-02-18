@@ -42,9 +42,7 @@ describe("findProvider", () => {
     });
 
     it("matches YouTube watch URLs", () => {
-      const match = findProvider(
-        "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      );
+      const match = findProvider("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
       expect(match).not.toBeNull();
       expect(match!.provider.name).toBe("YouTube");
     });
@@ -56,9 +54,7 @@ describe("findProvider", () => {
     });
 
     it("matches YouTube Shorts", () => {
-      const match = findProvider(
-        "https://www.youtube.com/shorts/abc123xyz",
-      );
+      const match = findProvider("https://www.youtube.com/shorts/abc123xyz");
       expect(match).not.toBeNull();
       expect(match!.provider.name).toBe("YouTube");
     });
@@ -102,9 +98,7 @@ describe("findProvider", () => {
     });
 
     it("matches CodePen URLs", () => {
-      const match = findProvider(
-        "https://codepen.io/username/pen/abcDEF",
-      );
+      const match = findProvider("https://codepen.io/username/pen/abcDEF");
       expect(match).not.toBeNull();
       expect(match!.provider.name).toBe("CodePen");
     });
@@ -112,9 +106,7 @@ describe("findProvider", () => {
 
   describe("matches after URL normalization (security)", () => {
     it("matches YouTube with uppercase hostname", () => {
-      const match = findProvider(
-        "https://WWW.YOUTUBE.COM/watch?v=dQw4w9WgXcQ",
-      );
+      const match = findProvider("https://WWW.YOUTUBE.COM/watch?v=dQw4w9WgXcQ");
       expect(match).not.toBeNull();
       expect(match!.provider.name).toBe("YouTube");
     });
@@ -144,9 +136,7 @@ describe("findProvider", () => {
     });
 
     it("matches URLs with fragment stripped", () => {
-      const match = findProvider(
-        "https://vimeo.com/123456789#t=30s",
-      );
+      const match = findProvider("https://vimeo.com/123456789#t=30s");
       expect(match).not.toBeNull();
       expect(match!.provider.name).toBe("Vimeo");
     });
@@ -171,9 +161,7 @@ describe("findProvider", () => {
     });
 
     it("returns null for strawpoll-like domains", () => {
-      expect(
-        findProvider("https://fakestrawpoll.com/polls/abc"),
-      ).toBeNull();
+      expect(findProvider("https://fakestrawpoll.com/polls/abc")).toBeNull();
     });
 
     it("returns null for empty string", () => {
@@ -192,9 +180,9 @@ describe("findProvider", () => {
 
 describe("isTrustedProvider", () => {
   it("returns true for trusted URLs", () => {
-    expect(
-      isTrustedProvider("https://www.youtube.com/watch?v=abc123"),
-    ).toBe(true);
+    expect(isTrustedProvider("https://www.youtube.com/watch?v=abc123")).toBe(
+      true,
+    );
   });
 
   it("returns false for untrusted URLs", () => {
@@ -215,24 +203,17 @@ describe("getEmbedUrl", () => {
         youtube,
         "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
       );
-      expect(result).toBe(
-        "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
-      );
+      expect(result).toBe("https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ");
     });
 
     it("uses youtube-nocookie.com for privacy", () => {
-      const result = getEmbedUrl(
-        youtube,
-        "https://youtube.com/watch?v=abc123",
-      );
+      const result = getEmbedUrl(youtube, "https://youtube.com/watch?v=abc123");
       expect(result).toContain("youtube-nocookie.com");
     });
 
     it("extracts embed URL from youtu.be short URL", () => {
       const result = getEmbedUrl(youtube, "https://youtu.be/dQw4w9WgXcQ");
-      expect(result).toBe(
-        "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
-      );
+      expect(result).toBe("https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ");
     });
 
     it("extracts embed URL from Shorts URL", () => {
@@ -240,16 +221,12 @@ describe("getEmbedUrl", () => {
         youtube,
         "https://www.youtube.com/shorts/abc123xyz",
       );
-      expect(result).toBe(
-        "https://www.youtube-nocookie.com/embed/abc123xyz",
-      );
+      expect(result).toBe("https://www.youtube-nocookie.com/embed/abc123xyz");
     });
   });
 
   describe("Strawpoll", () => {
-    const strawpoll = EMBED_PROVIDERS.find(
-      (p) => p.name === "Strawpoll",
-    )!;
+    const strawpoll = EMBED_PROVIDERS.find((p) => p.name === "Strawpoll")!;
 
     it("extracts embed URL from poll URL", () => {
       const result = getEmbedUrl(
@@ -317,9 +294,7 @@ describe("getEmbedUrl", () => {
 
   describe("providers without extractEmbedUrl", () => {
     it("returns null for SoundCloud (uses iframe-srcdoc)", () => {
-      const soundcloud = EMBED_PROVIDERS.find(
-        (p) => p.name === "SoundCloud",
-      )!;
+      const soundcloud = EMBED_PROVIDERS.find((p) => p.name === "SoundCloud")!;
       const result = getEmbedUrl(
         soundcloud,
         "https://soundcloud.com/artist/track",
@@ -371,9 +346,7 @@ describe("buildSandboxAttr", () => {
   });
 
   it("includes allow-forms for interactive providers", () => {
-    const strawpoll = EMBED_PROVIDERS.find(
-      (p) => p.name === "Strawpoll",
-    )!;
+    const strawpoll = EMBED_PROVIDERS.find((p) => p.name === "Strawpoll")!;
     const result = buildSandboxAttr(strawpoll);
     expect(result).toContain("allow-forms");
   });
@@ -451,9 +424,7 @@ describe("EMBED_PROVIDERS registry", () => {
 
   it("no provider has allow-top-navigation (security)", () => {
     for (const provider of EMBED_PROVIDERS) {
-      expect(provider.sandboxPermissions).not.toContain(
-        "allow-top-navigation",
-      );
+      expect(provider.sandboxPermissions).not.toContain("allow-top-navigation");
     }
   });
 
@@ -504,9 +475,7 @@ describe("normalizeUrl", () => {
   });
 
   it("strips Spotify si parameter", () => {
-    const result = normalizeUrl(
-      "https://open.spotify.com/track/abc?si=xyz123",
-    );
+    const result = normalizeUrl("https://open.spotify.com/track/abc?si=xyz123");
     expect(result).toBe("https://open.spotify.com/track/abc");
   });
 
@@ -517,9 +486,7 @@ describe("normalizeUrl", () => {
   });
 
   it("preserves meaningful query parameters", () => {
-    const result = normalizeUrl(
-      "https://www.youtube.com/watch?v=abc123&t=30",
-    );
+    const result = normalizeUrl("https://www.youtube.com/watch?v=abc123&t=30");
     expect(result).toContain("v=abc123");
     expect(result).toContain("t=30");
   });
@@ -580,9 +547,7 @@ describe("validateOEmbedResponse", () => {
 
   it("rejects HTML exceeding size limit", () => {
     const hugeHtml = "x".repeat(MAX_OEMBED_HTML_LENGTH + 1);
-    expect(
-      validateOEmbedResponse({ type: "rich", html: hugeHtml }),
-    ).toBeNull();
+    expect(validateOEmbedResponse({ type: "rich", html: hugeHtml })).toBeNull();
   });
 
   it("accepts HTML within size limit", () => {
@@ -603,9 +568,7 @@ describe("validateOEmbedResponse", () => {
   });
 
   it("rejects non-string title", () => {
-    expect(
-      validateOEmbedResponse({ type: "video", title: 42 }),
-    ).toBeNull();
+    expect(validateOEmbedResponse({ type: "video", title: 42 })).toBeNull();
   });
 
   it("strips non-HTTPS thumbnail URLs", () => {
@@ -636,9 +599,7 @@ describe("validateOEmbedResponse", () => {
   });
 
   it("rejects non-string HTML", () => {
-    expect(
-      validateOEmbedResponse({ type: "rich", html: 42 }),
-    ).toBeNull();
+    expect(validateOEmbedResponse({ type: "rich", html: 42 })).toBeNull();
   });
 
   it("validates numeric fields are finite and non-negative", () => {

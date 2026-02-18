@@ -91,7 +91,7 @@ This runbook provides step-by-step procedures for responding to security inciden
 
 ```bash
 # 1. Verify the report
-cd /home/user/GroveEngine
+cd /home/user/Lattice
 gf --agent search "getVerifiedTenantId" | head -20
 
 # 2. Check recent auth changes
@@ -1001,7 +1001,7 @@ gw git push --write
 ║  5. Preserve evidence (don't delete logs!)                 ║
 ╠════════════════════════════════════════════════════════════╣
 ║ Key Commands:                                              ║
-║  cd /home/user/GroveEngine                                 ║
+║  cd /home/user/Lattice                                 ║
 ║  gf --agent search "pattern"      # Find code              ║
 ║  gw git log --since="1 week ago"  # Recent changes         ║
 ║  pnpm test                        # Verify fix             ║

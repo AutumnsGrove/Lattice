@@ -5,7 +5,7 @@
 	 * Displays a platform component with its current status indicator,
 	 * using glassmorphism styling consistent with Grove's design language.
 	 */
-	import { cn } from '@autumnsgrove/groveengine/ui/utils';
+	import { cn } from '@autumnsgrove/lattice/ui/utils';
 	import type { ComponentStatus } from '$lib/types/status';
 	import { getStatusLabel } from '$lib/types/status';
 	import {

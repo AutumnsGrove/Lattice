@@ -4,7 +4,7 @@
 
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { storage, StorageError } from "@autumnsgrove/groveengine/services";
+import { storage, StorageError } from "@autumnsgrove/lattice/services";
 
 export const DELETE: RequestHandler = async ({ params, locals, platform }) => {
   if (!locals.user) {

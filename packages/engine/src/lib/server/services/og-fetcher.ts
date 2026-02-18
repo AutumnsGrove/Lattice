@@ -6,7 +6,7 @@
  *
  * @example
  * ```ts
- * import { fetchOGMetadata } from '@autumnsgrove/groveengine/services';
+ * import { fetchOGMetadata } from '@autumnsgrove/lattice/services';
  *
  * // Simple fetch
  * const result = await fetchOGMetadata('https://github.com/octocat/Hello-World');

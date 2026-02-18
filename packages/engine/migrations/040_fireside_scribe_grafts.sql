@@ -5,7 +5,7 @@
 -- Fireside = AI-assisted writing prompts
 -- Scribe = Voice transcription
 --
--- @see https://github.com/AutumnsGrove/GroveEngine/issues/640
+-- @see https://github.com/AutumnsGrove/Lattice/issues/640
 -- ============================================================================
 
 -- Fireside Mode graft (AI-assisted writing prompts in editor)

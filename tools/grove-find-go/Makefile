@@ -1,7 +1,7 @@
 .PHONY: build install clean test
 
 BINARY := gf
-MODULE := github.com/AutumnsGrove/GroveEngine/tools/grove-find-go
+MODULE := github.com/AutumnsGrove/Lattice/tools/grove-find-go
 
 build:
 	go build -o $(BINARY) .

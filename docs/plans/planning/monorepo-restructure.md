@@ -870,6 +870,34 @@ Amber is a two-part import: SvelteKit UI to `apps/amber/` and the CF Worker to `
    - Search entire codebase for remaining `packages/` path references
    - Root `landing/` was already handled in Phase 1 Step 1.6
 
+6. **README navigation system:**
+
+   The restructure creates real categories. The README system should reflect that, so anyone exploring the repo can orient themselves quickly.
+
+   **Directory-level READMEs** for each category:
+   - `apps/README.md` — indexes all apps with Grove names, one-line descriptions, and links
+   - `services/README.md` — indexes all services
+   - `workers/README.md` — indexes all workers
+   - `libs/README.md` — indexes all libraries
+
+   **Breadcrumb navigation** at the top of every README:
+   - Root README: none (it IS home)
+   - Directory README: `[Lattice](../README.md) > Apps`
+   - Package README: `[Lattice](../../README.md) > [Apps](../README.md) > Landing`
+
+   **Root README path updates:**
+   - Update the ecosystem table links from `packages/*` to `apps/*`, `services/*`, `libs/*`, `workers/*`
+   - This should be done as part of this step, after all moves are verified
+
+   **Package README standardization** — each package README should have:
+   - Breadcrumb navigation (links back to category and root)
+   - Grove name + standard name (e.g., "Heartwood — Authentication Service")
+   - Brief description in Grove voice
+   - Technical details (setup, bindings, architecture notes)
+   - Packages that currently lack a README get one; packages that have one get the breadcrumb + Grove name added
+
+   > **Why this comes last in Phase 3:** README paths must resolve correctly. Directory moves (Phase 1) and imports (Phase 2) must be complete before writing navigation links that depend on the final structure. Writing READMEs against stale paths creates broken links that erode trust in the docs.
+
 ---
 
 ## Relative Path Impact Analysis
@@ -1121,6 +1149,10 @@ After Phase 3 (docs):
 - [ ] `CONTRIBUTING.md` dev setup paths updated (line 86: `cd libs/engine`)
 - [ ] No stale `packages/` references in docs
 - [ ] `CLAUDE.md` examples use correct paths
+- [ ] Directory READMEs exist: `apps/README.md`, `services/README.md`, `workers/README.md`, `libs/README.md`
+- [ ] All directory READMEs have breadcrumb navigation linking back to root
+- [ ] All package READMEs have breadcrumbs (category + root) and Grove names
+- [ ] Root README ecosystem table links point to new paths (`apps/*`, `services/*`, etc.)
 
 ---
 

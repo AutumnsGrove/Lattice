@@ -27,6 +27,7 @@ Five enhancements to the Plant onboarding flow, listed in priority order:
 ### Current State
 
 Users can complete signup without verifying their email address. This allows:
+
 - Typo'd email addresses to go unnoticed
 - Fake email addresses for spam accounts
 - No reliable communication channel
@@ -61,7 +62,7 @@ CREATE INDEX idx_email_verifications_code ON email_verifications(code);
 
 ```svelte
 <script lang="ts">
-  import { GlassCard, GlassButton } from '@autumnsgrove/groveengine/ui';
+  import { GlassCard, GlassButton } from '@autumnsgrove/lattice/ui';
   import { enhance } from '$app/forms';
 
   let { data, form } = $props();
@@ -104,12 +105,12 @@ CREATE INDEX idx_email_verifications_code ON email_verifications(code);
 **File**: `packages/plant/src/routes/verify-email/+page.server.ts`
 
 ```typescript
-import { fail, redirect } from '@sveltejs/kit';
-import { Resend } from 'resend';
+import { fail, redirect } from "@sveltejs/kit";
+import { Resend } from "resend";
 
 export const load = async ({ locals }) => {
-  if (!locals.user) throw redirect(302, '/');
-  if (locals.user.emailVerified) throw redirect(302, '/profile');
+  if (!locals.user) throw redirect(302, "/");
+  if (locals.user.emailVerified) throw redirect(302, "/profile");
 
   return { email: locals.user.email };
 };
@@ -117,25 +118,33 @@ export const load = async ({ locals }) => {
 export const actions = {
   default: async ({ request, locals, platform }) => {
     const data = await request.formData();
-    const code = data.get('code');
+    const code = data.get("code");
 
     // Verify code against database
-    const verification = await platform.env.DB.prepare(`
+    const verification = await platform.env.DB.prepare(
+      `
       SELECT * FROM email_verifications
       WHERE user_id = ? AND code = ? AND expires_at > unixepoch()
-    `).bind(locals.user.id, code).first();
+    `,
+    )
+      .bind(locals.user.id, code)
+      .first();
 
     if (!verification) {
       // Increment attempts, check for rate limiting
-      return fail(400, { error: 'Invalid or expired code' });
+      return fail(400, { error: "Invalid or expired code" });
     }
 
     // Mark user as verified
-    await platform.env.DB.prepare(`
+    await platform.env.DB.prepare(
+      `
       UPDATE users SET email_verified = 1 WHERE id = ?
-    `).bind(locals.user.id).run();
+    `,
+    )
+      .bind(locals.user.id)
+      .run();
 
-    throw redirect(302, '/profile');
+    throw redirect(302, "/profile");
   },
 
   resend: async ({ locals, platform }) => {
@@ -143,14 +152,18 @@ export const actions = {
     // Use KV for rate limiting (faster than D1, built-in TTL)
     const key = `email_resend:${locals.user.id}`;
     const attempts = await platform.env.RATE_LIMIT_KV.get(key);
-    if (parseInt(attempts || '0') >= 3) {
-      return fail(429, { error: 'Too many attempts. Please try again later.' });
+    if (parseInt(attempts || "0") >= 3) {
+      return fail(429, { error: "Too many attempts. Please try again later." });
     }
-    await platform.env.RATE_LIMIT_KV.put(key, String((parseInt(attempts || '0') + 1)), {
-      expirationTtl: 3600 // 1 hour TTL, auto-cleanup
-    });
+    await platform.env.RATE_LIMIT_KV.put(
+      key,
+      String(parseInt(attempts || "0") + 1),
+      {
+        expirationTtl: 3600, // 1 hour TTL, auto-cleanup
+      },
+    );
     // Generate new code, send via Resend
-  }
+  },
 };
 ```
 
@@ -159,23 +172,23 @@ export const actions = {
 **File**: `packages/plant/src/lib/server/email.ts`
 
 ```typescript
-import { Resend } from 'resend';
+import { Resend } from "resend";
 
 export async function sendVerificationEmail(
   resend: Resend,
   email: string,
-  code: string
+  code: string,
 ) {
   await resend.emails.send({
-    from: 'Grove <noreply@grove.place>',
+    from: "Grove <noreply@grove.place>",
     to: email,
-    subject: 'Verify your Grove email',
+    subject: "Verify your Grove email",
     html: `
       <h1>Welcome to Grove!</h1>
       <p>Your verification code is:</p>
       <h2 style="font-size: 32px; letter-spacing: 4px;">${code}</h2>
       <p>This code expires in 15 minutes.</p>
-    `
+    `,
   });
 }
 ```
@@ -186,11 +199,11 @@ export async function sendVerificationEmail(
 
 ```typescript
 export const load = async ({ locals }) => {
-  if (!locals.user) throw redirect(302, '/');
+  if (!locals.user) throw redirect(302, "/");
 
   // Require email verification before plan selection
   if (!locals.user.emailVerified) {
-    throw redirect(302, '/verify-email');
+    throw redirect(302, "/verify-email");
   }
 
   // Continue with plan selection...
@@ -239,11 +252,16 @@ CREATE INDEX idx_onboarding_tenant ON onboarding_checklist(tenant_id);
 
 ```typescript
 export const ONBOARDING_STEPS = [
-  { id: 'email_verified', label: 'Verify your email', required: true },
-  { id: 'profile_complete', label: 'Complete your profile', required: true },
-  { id: 'first_post', label: 'Write your first post', required: false },
-  { id: 'site_settings', label: 'Customize site settings', required: false },
-  { id: 'custom_domain', label: 'Add a custom domain', required: false, tier: 'oak' },
+  { id: "email_verified", label: "Verify your email", required: true },
+  { id: "profile_complete", label: "Complete your profile", required: true },
+  { id: "first_post", label: "Write your first post", required: false },
+  { id: "site_settings", label: "Customize site settings", required: false },
+  {
+    id: "custom_domain",
+    label: "Add a custom domain",
+    required: false,
+    tier: "oak",
+  },
 ] as const;
 ```
 
@@ -252,6 +270,7 @@ export const ONBOARDING_STEPS = [
 **File**: `packages/engine/src/lib/ui/components/admin/OnboardingChecklist.svelte`
 
 Already exists with basic structure. Enhance with:
+
 - Progress percentage
 - Animated completion states
 - Links to relevant pages
@@ -270,6 +289,7 @@ Already exists with basic structure. Enhance with:
 ### Current State
 
 Uses browser `confirm()` for destructive actions. This:
+
 - Looks inconsistent with Grove aesthetic
 - Cannot be styled
 - Has limited functionality
@@ -327,15 +347,15 @@ Uses browser `confirm()` for destructive actions. This:
 **File**: `packages/engine/src/lib/ui/composables/useConfirm.svelte.ts`
 
 ```typescript
-import { mount } from 'svelte';
-import ConfirmDialog from '../components/dialogs/ConfirmDialog.svelte';
+import { mount } from "svelte";
+import ConfirmDialog from "../components/dialogs/ConfirmDialog.svelte";
 
 interface ConfirmOptions {
   title: string;
   message: string;
   confirmText?: string;
   cancelText?: string;
-  variant?: 'default' | 'destructive';
+  variant?: "default" | "destructive";
 }
 
 export function useConfirm() {
@@ -351,7 +371,7 @@ export function useConfirm() {
           },
         });
       });
-    }
+    },
   };
 }
 ```
@@ -375,6 +395,7 @@ Search for `confirm(` across Plant and replace with `useConfirm`.
 ### Current State
 
 Issues identified:
+
 - Focus not returned to trigger element after actions
 - Potential keyboard traps in modals
 - Mobile tap issues on some interactive elements
@@ -384,6 +405,7 @@ Issues identified:
 #### Task 4.1: Audit Current Focus Issues
 
 Run accessibility audit:
+
 ```bash
 npx axe-core packages/plant
 ```
@@ -430,6 +452,7 @@ Ensure all interactive elements have minimum 44x44px touch targets:
 **Good news**: This work is largely complete!
 
 **Existing Implementation**:
+
 - Migration 012: `reserved_usernames` table with 70 entries
 - Migration 017: 450+ entries across 7 categories
 - TypeScript blocklist: `packages/engine/src/lib/config/domain-blocklist.ts` (865 lines)
@@ -468,6 +491,7 @@ CREATE TABLE IF NOT EXISTS reserved_usernames_audit (
 **File**: `packages/engine/src/lib/config/offensive-blocklist.test.ts`
 
 Test cases needed:
+
 - Leetspeak variant detection
 - Word boundary checking
 - False positive prevention (e.g., "retardant")
@@ -484,30 +508,30 @@ Test cases needed:
 
 ## Priority Summary
 
-| Item | Priority | Effort | Dependencies |
-|------|----------|--------|--------------|
-| Email Verification | P1 | 6-8h | Resend integration |
-| Onboarding Checklist | P2 | 4-6h | None |
-| Custom Dialogs | P2 | 3-4h | None |
-| Focus Management | P2 | 2-3h | Accessibility audit |
-| Reserved Usernames | P3 | 3-4h | Admin routes |
+| Item                 | Priority | Effort | Dependencies        |
+| -------------------- | -------- | ------ | ------------------- |
+| Email Verification   | P1       | 6-8h   | Resend integration  |
+| Onboarding Checklist | P2       | 4-6h   | None                |
+| Custom Dialogs       | P2       | 3-4h   | None                |
+| Focus Management     | P2       | 2-3h   | Accessibility audit |
+| Reserved Usernames   | P3       | 3-4h   | Admin routes        |
 
 ---
 
 ## Files to Create/Modify
 
-| File | Type | Item |
-|------|------|------|
-| `packages/plant/migrations/XXX_email_verification.sql` | New | #1 |
-| `packages/plant/src/routes/verify-email/+page.svelte` | New | #1 |
-| `packages/plant/src/routes/verify-email/+page.server.ts` | New | #1 |
-| `packages/plant/src/lib/server/email.ts` | Modify | #1 |
-| `packages/engine/migrations/XXX_onboarding_checklist.sql` | New | #2 |
-| `packages/engine/src/lib/ui/components/admin/OnboardingChecklist.svelte` | Modify | #2 |
-| `packages/engine/src/lib/ui/components/dialogs/ConfirmDialog.svelte` | New | #3 |
-| `packages/engine/src/lib/ui/composables/useConfirm.svelte.ts` | New | #3 |
-| `packages/engine/src/routes/admin/reserved-usernames/+page.svelte` | New | #5 |
-| `packages/engine/src/lib/config/offensive-blocklist.test.ts` | New | #5 |
+| File                                                                     | Type   | Item |
+| ------------------------------------------------------------------------ | ------ | ---- |
+| `packages/plant/migrations/XXX_email_verification.sql`                   | New    | #1   |
+| `packages/plant/src/routes/verify-email/+page.svelte`                    | New    | #1   |
+| `packages/plant/src/routes/verify-email/+page.server.ts`                 | New    | #1   |
+| `packages/plant/src/lib/server/email.ts`                                 | Modify | #1   |
+| `packages/engine/migrations/XXX_onboarding_checklist.sql`                | New    | #2   |
+| `packages/engine/src/lib/ui/components/admin/OnboardingChecklist.svelte` | Modify | #2   |
+| `packages/engine/src/lib/ui/components/dialogs/ConfirmDialog.svelte`     | New    | #3   |
+| `packages/engine/src/lib/ui/composables/useConfirm.svelte.ts`            | New    | #3   |
+| `packages/engine/src/routes/admin/reserved-usernames/+page.svelte`       | New    | #5   |
+| `packages/engine/src/lib/config/offensive-blocklist.test.ts`             | New    | #5   |
 
 ---
 

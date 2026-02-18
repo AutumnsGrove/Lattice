@@ -1,13 +1,14 @@
 ---
 title: Prism — Grove Design System
-description: 'Glassmorphism, seasonal theming, and organic UI patterns'
+description: "Glassmorphism, seasonal theming, and organic UI patterns"
 category: patterns
 icon: triangle
-lastUpdated: '2026-01-02'
+lastUpdated: "2026-01-02"
 ---
+
 # Prism: Grove Design System
 
-> *Light enters plain and emerges transformed.*
+> _Light enters plain and emerges transformed._
 
 **Public Name:** Prism
 **Internal Name:** GrovePrism
@@ -17,7 +18,7 @@ lastUpdated: '2026-01-02'
 
 Step into a cathedral in the forest. Your eyes adjust to the dim sanctuary, and then you look up—massive stained glass windows transforming ordinary sunlight into something that takes your breath away. Color pools on ancient stone. The world outside becomes the world within, changed by its passage through glass.
 
-A prism doesn't just transmit light. It *transfigures* it. Plain white becomes a spectrum of color. The ordinary becomes extraordinary. That's what Grove's design system does: content floats on translucent surfaces that don't merely display—they transform. Backgrounds hint at depth. Seasons shift the palette. Every visit feels alive.
+A prism doesn't just transmit light. It _transfigures_ it. Plain white becomes a spectrum of color. The ordinary becomes extraordinary. That's what Grove's design system does: content floats on translucent surfaces that don't merely display—they transform. Backgrounds hint at depth. Seasons shift the palette. Every visit feels alive.
 
 This is Prism. Glass that tells stories.
 
@@ -25,7 +26,7 @@ This is Prism. Glass that tells stories.
 
 ## Overview
 
-The Prism pattern defines a layered visual system built on glassmorphism, seasonal theming, and organic randomization. Every page is a *place* you visit—warm like a midnight tea shop, clear like good documentation.
+The Prism pattern defines a layered visual system built on glassmorphism, seasonal theming, and organic randomization. Every page is a _place_ you visit—warm like a midnight tea shop, clear like good documentation.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -79,14 +80,14 @@ The Prism pattern defines a layered visual system built on glassmorphism, season
 
 ### The Grove Aesthetic
 
-Grove is a **place**, not a product. Every design decision should answer: *"Does this make someone feel welcome?"*
+Grove is a **place**, not a product. Every design decision should answer: _"Does this make someone feel welcome?"_
 
-| Principle | Meaning | Implementation |
-|-----------|---------|----------------|
-| **Welcoming** | Like entering a cozy space | Warm colors, soft edges, inviting copy |
-| **Organic** | Natural, not rigid or corporate | Randomization, curves, nature elements |
-| **Readable** | Content-first, decorations enhance | Glass surfaces isolate text from busy backgrounds |
-| **Alive** | Subtle movement, seasonal change | Particles, breathing animations, theme shifts |
+| Principle     | Meaning                            | Implementation                                    |
+| ------------- | ---------------------------------- | ------------------------------------------------- |
+| **Welcoming** | Like entering a cozy space         | Warm colors, soft edges, inviting copy            |
+| **Organic**   | Natural, not rigid or corporate    | Randomization, curves, nature elements            |
+| **Readable**  | Content-first, decorations enhance | Glass surfaces isolate text from busy backgrounds |
+| **Alive**     | Subtle movement, seasonal change   | Particles, breathing animations, theme shifts     |
 
 ### The Guiding Voice
 
@@ -95,7 +96,7 @@ Warm, introspective, queer, unapologetically building something meaningful.
 Write with the warmth of a midnight tea shop and the clarity of good documentation.
 ```
 
-This isn't a style guide for code—it's how Grove *speaks*. UI copy, error messages, empty states, everything should feel like a friend explaining something clearly.
+This isn't a style guide for code—it's how Grove _speaks_. UI copy, error messages, empty states, everything should feel like a friend explaining something clearly.
 
 ---
 
@@ -107,28 +108,34 @@ Glass effects create readability while revealing hints of the world behind.
 
 Traditional approaches have tradeoffs:
 
-| Approach | Pros | Cons |
-|----------|------|------|
-| **Solid backgrounds** | High contrast | Feels heavy, hides decoration |
-| **Transparent overlays** | Shows depth | Text becomes unreadable |
-| **Glass (blur + tint)** | Readable + depth | Requires layering discipline |
+| Approach                 | Pros             | Cons                          |
+| ------------------------ | ---------------- | ----------------------------- |
+| **Solid backgrounds**    | High contrast    | Feels heavy, hides decoration |
+| **Transparent overlays** | Shows depth      | Text becomes unreadable       |
+| **Glass (blur + tint)**  | Readable + depth | Requires layering discipline  |
 
 Glass lets Grove show its decorative soul while keeping content clear.
 
 ### Glass Variants
 
 ```typescript
-type GlassVariant = 'surface' | 'tint' | 'card' | 'accent' | 'overlay' | 'muted';
+type GlassVariant =
+  | "surface"
+  | "tint"
+  | "card"
+  | "accent"
+  | "overlay"
+  | "muted";
 ```
 
-| Variant | Purpose | Light Mode | Dark Mode |
-|---------|---------|------------|-----------|
-| `surface` | Headers, navbars, sticky elements | 95% white | 95% slate-900 |
-| `tint` | Text containers over busy backgrounds | 60% white | 50% slate-800 |
-| `card` | Content cards, feature boxes | 80% white | 70% slate-800 |
-| `accent` | Callouts, highlights, CTAs | 30% brand color | 20% brand color |
-| `overlay` | Modal backdrops, drawers | 50% black | 60% black |
-| `muted` | Subtle backgrounds, secondary content | 40% white | 30% slate-800 |
+| Variant   | Purpose                               | Light Mode      | Dark Mode       |
+| --------- | ------------------------------------- | --------------- | --------------- |
+| `surface` | Headers, navbars, sticky elements     | 95% white       | 95% slate-900   |
+| `tint`    | Text containers over busy backgrounds | 60% white       | 50% slate-800   |
+| `card`    | Content cards, feature boxes          | 80% white       | 70% slate-800   |
+| `accent`  | Callouts, highlights, CTAs            | 30% brand color | 20% brand color |
+| `overlay` | Modal backdrops, drawers              | 50% black       | 60% black       |
+| `muted`   | Subtle backgrounds, secondary content | 40% white       | 30% slate-800   |
 
 ### Implementation
 
@@ -136,7 +143,7 @@ type GlassVariant = 'surface' | 'tint' | 'card' | 'accent' | 'overlay' | 'muted'
 
 ```svelte
 <script>
-  import { Glass, GlassCard, GlassButton, GlassOverlay } from '@groveengine/ui/ui';
+  import { Glass, GlassCard, GlassButton, GlassOverlay } from '@lattice/ui/ui';
 </script>
 
 <!-- Basic glass container -->
@@ -177,7 +184,9 @@ type GlassVariant = 'surface' | 'tint' | 'card' | 'accent' | 'overlay' | 'muted'
 
 ```html
 <!-- Light: white tint, Dark: slate tint, always blur -->
-<div class="bg-white/60 dark:bg-slate-800/50 backdrop-blur-md rounded-xl p-6 border border-white/20 dark:border-slate-700/30">
+<div
+  class="bg-white/60 dark:bg-slate-800/50 backdrop-blur-md rounded-xl p-6 border border-white/20 dark:border-slate-700/30"
+>
   Content
 </div>
 ```
@@ -203,14 +212,19 @@ Navigation bars should remain readable while hinting at scrolled content:
 ### Glass Anti-Patterns
 
 **Don't stack multiple glass layers:**
+
 ```html
 <!-- Bad: blur compounds, performance suffers -->
 <div class="glass">
-  <div class="glass">  <!-- Don't do this -->
-    <div class="glass">  <!-- Definitely don't do this -->
+  <div class="glass">
+    <!-- Don't do this -->
+    <div class="glass"><!-- Definitely don't do this --></div>
+  </div>
+</div>
 ```
 
 **Don't use glass without background interest:**
+
 ```html
 <!-- Bad: glass over solid white is just... solid white with blur overhead -->
 <body class="bg-white">
@@ -352,22 +366,26 @@ Different birds appear in different seasons:
 Import from: `$lib/components/nature/palette`
 
 **Spring:**
+
 - Fresh greens (#84cc16, #65a30d)
 - Cherry pink (#f472b6, #ec4899)
 - Sky blue (#38bdf8)
 
 **Summer:**
+
 - Deep forest green (#166534, #15803d)
 - Rich sky blue (#0284c7)
 - Warm sunshine (#facc15)
 
 **Autumn:**
+
 - Rust (#b45309, #92400e)
 - Amber (#f59e0b, #d97706)
 - Gold (#eab308)
 - Warm brown (#78350f)
 
 **Winter:**
+
 - Slate (#475569, #64748b)
 - Frost (#e2e8f0, #cbd5e1)
 - Evergreen (#166534)
@@ -384,15 +402,15 @@ Forests should feel alive—different each visit, yet always harmonious.
 ```typescript
 interface GeneratedTree {
   id: number;
-  x: number;           // percentage from left (5-93%)
-  size: number;        // base width in pixels (80-160)
+  x: number; // percentage from left (5-93%)
+  size: number; // base width in pixels (80-160)
   aspectRatio: number; // height multiplier (1.0-1.5)
-  treeType: TreeType;  // 'logo' | 'pine' | 'cherry' | 'aspen' | 'birch'
-  opacity: number;     // depth illusion (0.5-0.9)
-  zIndex: number;      // layer ordering
+  treeType: TreeType; // 'logo' | 'pine' | 'cherry' | 'aspen' | 'birch'
+  opacity: number; // depth illusion (0.5-0.9)
+  zIndex: number; // layer ordering
 }
 
-type TreeType = 'logo' | 'pine' | 'cherry' | 'aspen' | 'birch';
+type TreeType = "logo" | "pine" | "cherry" | "aspen" | "birch";
 
 function generateForest(count: number): GeneratedTree[] {
   const trees: GeneratedTree[] = [];
@@ -406,7 +424,7 @@ function generateForest(count: number): GeneratedTree[] {
       x = 5 + Math.random() * 88; // Stay within 5-93% range
       attempts++;
     } while (
-      usedPositions.some(pos => Math.abs(pos - x) < 8) &&
+      usedPositions.some((pos) => Math.abs(pos - x) < 8) &&
       attempts < 20
     );
     usedPositions.push(x);
@@ -435,7 +453,7 @@ function generateForest(count: number): GeneratedTree[] {
 }
 
 function pickRandomTreeType(): TreeType {
-  const types: TreeType[] = ['logo', 'pine', 'cherry', 'aspen', 'birch'];
+  const types: TreeType[] = ["logo", "pine", "cherry", "aspen", "birch"];
   return types[Math.floor(Math.random() * types.length)];
 }
 ```
@@ -444,14 +462,18 @@ function pickRandomTreeType(): TreeType {
 
 ```typescript
 function calculateTreeCount(baseCount: number): number {
-  const width = typeof window !== 'undefined' ? window.innerWidth : 1024;
+  const width = typeof window !== "undefined" ? window.innerWidth : 1024;
 
   let multiplier: number;
-  if (width < 768) multiplier = 1.0;        // Mobile: base count
-  else if (width < 1024) multiplier = 1.3;  // Tablet
-  else if (width < 1440) multiplier = 1.8;  // Desktop
-  else if (width < 2560) multiplier = 2.5;  // Large desktop
-  else multiplier = 3.5;                     // Ultrawide
+  if (width < 768)
+    multiplier = 1.0; // Mobile: base count
+  else if (width < 1024)
+    multiplier = 1.3; // Tablet
+  else if (width < 1440)
+    multiplier = 1.8; // Desktop
+  else if (width < 2560)
+    multiplier = 2.5; // Large desktop
+  else multiplier = 3.5; // Ultrawide
 
   return Math.floor(baseCount * multiplier);
 }
@@ -499,13 +521,13 @@ function calculateTreeCount(baseCount: number): number {
 
 ### Regeneration Rules
 
-| Event | Action |
-|-------|--------|
-| **Page mount** | Generate once |
-| **Window resize (small)** | Keep existing trees |
-| **Window resize (bracket change)** | Regenerate with new density |
-| **Scroll** | Never regenerate (stability during reading) |
-| **Season change** | Keep positions, trees adapt colors |
+| Event                              | Action                                      |
+| ---------------------------------- | ------------------------------------------- |
+| **Page mount**                     | Generate once                               |
+| **Window resize (small)**          | Keep existing trees                         |
+| **Window resize (bracket change)** | Regenerate with new density                 |
+| **Scroll**                         | Never regenerate (stability during reading) |
+| **Season change**                  | Keep positions, trees adapt colors          |
 
 ---
 
@@ -517,12 +539,12 @@ For content about the future, dreams, or mystical features—the tea shop at the
 
 ```typescript
 const midnightBloom = {
-  deepPlum: '#581c87',   // Night sky depth
-  purple: '#7c3aed',     // Soft purple glow
-  violet: '#8b5cf6',     // Lighter accent
-  amber: '#f59e0b',      // Lantern warmth
-  warmCream: '#fef3c7',  // Tea steam, page glow
-  softGold: '#fcd34d',   // Fairy lights
+  deepPlum: "#581c87", // Night sky depth
+  purple: "#7c3aed", // Soft purple glow
+  violet: "#8b5cf6", // Lighter accent
+  amber: "#f59e0b", // Lantern warmth
+  warmCream: "#fef3c7", // Tea steam, page glow
+  softGold: "#fcd34d", // Fairy lights
 };
 ```
 
@@ -579,42 +601,42 @@ const midnightBloom = {
 
 Maintain consistency by using the same icon for the same concept:
 
-| Concept | Icon | Notes |
-|---------|------|-------|
-| **Navigation** | | |
-| Home | `Home` | |
-| About | `Info` | |
-| Vision | `Telescope` | Looking forward |
-| Roadmap | `Map` | Journey/direction |
-| Pricing | `HandCoins` | |
-| Knowledge/Docs | `BookOpen` | |
-| Forest (community) | `Trees` | |
-| Blog/Writing | `PenLine` | |
-| **Features** | | |
-| Email | `Mail` | |
-| Storage | `HardDrive` | |
-| Theming | `Palette` | |
-| Security/Auth | `ShieldCheck` | |
-| Cloud | `Cloud` | |
-| Search | `Search` | |
-| Archives | `Archive` | |
-| **States** | | |
-| Success | `Check` | |
-| Error | `X` | |
-| Loading | `Loader2` | With `animate-spin` |
-| Warning | `AlertTriangle` | |
-| **Content** | | |
-| Posts | `FileText` | |
-| Tags | `Tag` | |
-| Growth | `Sprout` | Grove brand icon |
-| Heart/Love | `Heart` | |
-| External link | `ExternalLink` | |
-| Location | `MapPin` | |
-| **Grove-Specific** | | |
-| Coming Soon | `Seedling` | Something growing |
-| Refinement | `Gem` | Polish, quality |
-| The Dream | `Sparkles` | Use sparingly! |
-| Night/Mystical | `Star` | Midnight themes |
+| Concept            | Icon            | Notes               |
+| ------------------ | --------------- | ------------------- |
+| **Navigation**     |                 |                     |
+| Home               | `Home`          |                     |
+| About              | `Info`          |                     |
+| Vision             | `Telescope`     | Looking forward     |
+| Roadmap            | `Map`           | Journey/direction   |
+| Pricing            | `HandCoins`     |                     |
+| Knowledge/Docs     | `BookOpen`      |                     |
+| Forest (community) | `Trees`         |                     |
+| Blog/Writing       | `PenLine`       |                     |
+| **Features**       |                 |                     |
+| Email              | `Mail`          |                     |
+| Storage            | `HardDrive`     |                     |
+| Theming            | `Palette`       |                     |
+| Security/Auth      | `ShieldCheck`   |                     |
+| Cloud              | `Cloud`         |                     |
+| Search             | `Search`        |                     |
+| Archives           | `Archive`       |                     |
+| **States**         |                 |                     |
+| Success            | `Check`         |                     |
+| Error              | `X`             |                     |
+| Loading            | `Loader2`       | With `animate-spin` |
+| Warning            | `AlertTriangle` |                     |
+| **Content**        |                 |                     |
+| Posts              | `FileText`      |                     |
+| Tags               | `Tag`           |                     |
+| Growth             | `Sprout`        | Grove brand icon    |
+| Heart/Love         | `Heart`         |                     |
+| External link      | `ExternalLink`  |                     |
+| Location           | `MapPin`        |                     |
+| **Grove-Specific** |                 |                     |
+| Coming Soon        | `Seedling`      | Something growing   |
+| Refinement         | `Gem`           | Polish, quality     |
+| The Dream          | `Sparkles`      | Use sparingly!      |
+| Night/Mystical     | `Star`          | Midnight themes     |
 
 ### Icon Usage
 
@@ -647,12 +669,12 @@ Maintain consistency by using the same icon for the same concept:
 
 ### Responsive Decorations
 
-| Element | Desktop | Mobile |
-|---------|---------|--------|
-| Trees | 6-10 per section | 3-4 per section |
-| Particles | 40-100 | 20-40 |
-| Clouds | 4-6 | 2-3 |
-| Complex animations | Full | Reduced or disabled |
+| Element            | Desktop          | Mobile              |
+| ------------------ | ---------------- | ------------------- |
+| Trees              | 6-10 per section | 3-4 per section     |
+| Particles          | 40-100           | 20-40               |
+| Clouds             | 4-6              | 2-3                 |
+| Complex animations | Full             | Reduced or disabled |
 
 ### Touch Targets
 
@@ -735,45 +757,45 @@ Desktop nav items that overflow should collapse to a sheet menu:
 
 Location: `landing/src/lib/components/trees/`
 
-| Component | Description | Seasonal Behavior |
-|-----------|-------------|-------------------|
-| `Logo` | Grove tree (brand mark) | Full seasonal color changes |
-| `TreePine` | Evergreen conifer | Stays green, snow in winter |
-| `TreeCherry` | Cherry blossom tree | Blossoms spring, bare winter |
-| `TreeAspen` | Quaking aspen | Yellow autumn, bare winter |
-| `TreeBirch` | White birch | Golden autumn, bare winter |
+| Component    | Description             | Seasonal Behavior            |
+| ------------ | ----------------------- | ---------------------------- |
+| `Logo`       | Grove tree (brand mark) | Full seasonal color changes  |
+| `TreePine`   | Evergreen conifer       | Stays green, snow in winter  |
+| `TreeCherry` | Cherry blossom tree     | Blossoms spring, bare winter |
+| `TreeAspen`  | Quaking aspen           | Yellow autumn, bare winter   |
+| `TreeBirch`  | White birch             | Golden autumn, bare winter   |
 
 ### Weather
 
 Location: `landing/src/lib/components/nature/weather/`
 
-| Component | Season | Props |
-|-----------|--------|-------|
-| `SnowfallLayer` | Winter | `count`, `opacity`, `spawnDelay` |
-| `FallingPetalsLayer` | Spring | `count`, `opacity`, `fallDuration` |
+| Component            | Season | Props                                 |
+| -------------------- | ------ | ------------------------------------- |
+| `SnowfallLayer`      | Winter | `count`, `opacity`, `spawnDelay`      |
+| `FallingPetalsLayer` | Spring | `count`, `opacity`, `fallDuration`    |
 | `FallingLeavesLayer` | Autumn | `trees`, `season`, `minLeavesPerTree` |
 
 ### Sky
 
 Location: `landing/src/lib/components/nature/sky/`
 
-| Component | Purpose |
-|-----------|---------|
-| `Cloud` | Decorative floating clouds |
-| `Moon` | Lunar phases |
-| `StarCluster` | Groups of stars |
-| `Firefly` | Glowing particles (night scenes) |
+| Component     | Purpose                          |
+| ------------- | -------------------------------- |
+| `Cloud`       | Decorative floating clouds       |
+| `Moon`        | Lunar phases                     |
+| `StarCluster` | Groups of stars                  |
+| `Firefly`     | Glowing particles (night scenes) |
 
 ### Creatures
 
 Location: `landing/src/lib/components/nature/creatures/`
 
-| Component | Season | Notes |
-|-----------|--------|-------|
-| `Cardinal` | Winter | Red bird, `facing` prop |
-| `Chickadee` | Winter | Small bird |
-| `Robin` | Spring | Red breast |
-| `Bluebird` | Spring | Blue bird |
+| Component   | Season | Notes                   |
+| ----------- | ------ | ----------------------- |
+| `Cardinal`  | Winter | Red bird, `facing` prop |
+| `Chickadee` | Winter | Small bird              |
+| `Robin`     | Spring | Red breast              |
+| `Bluebird`  | Spring | Blue bird               |
 
 ### Botanical
 
@@ -795,36 +817,36 @@ Location: `landing/src/lib/components/nature/ground/`
 
 ## When to Use Prism
 
-| Pattern | Best For |
-|---------|----------|
-| **Full glassmorphism + forests** | Story pages, about, vision, roadmap |
-| **Glass only (no nature)** | Admin panels, settings, forms |
-| **Seasonal theming** | Public-facing pages with emotional storytelling |
-| **Midnight Bloom** | Future features, dreams, vision statements |
-| **Weather particles** | Hero sections, transitions, seasonal showcases |
-| **Randomized forests** | Landing pages, community pages, blog indexes |
+| Pattern                          | Best For                                        |
+| -------------------------------- | ----------------------------------------------- |
+| **Full glassmorphism + forests** | Story pages, about, vision, roadmap             |
+| **Glass only (no nature)**       | Admin panels, settings, forms                   |
+| **Seasonal theming**             | Public-facing pages with emotional storytelling |
+| **Midnight Bloom**               | Future features, dreams, vision statements      |
+| **Weather particles**            | Hero sections, transitions, seasonal showcases  |
+| **Randomized forests**           | Landing pages, community pages, blog indexes    |
 
 ## When NOT to Use
 
-| Pattern | Avoid For |
-|---------|-----------|
-| **Heavy decoration** | Data-dense tables, complex forms, dashboards |
-| **Particles** | Performance-critical pages, accessibility-focused contexts |
-| **Multiple glass layers** | Anywhere (never stack glass) |
-| **Randomization** | Content that must match between sessions/screenshots |
-| **Seasonal colors** | Brand-critical contexts requiring consistent colors |
+| Pattern                   | Avoid For                                                  |
+| ------------------------- | ---------------------------------------------------------- |
+| **Heavy decoration**      | Data-dense tables, complex forms, dashboards               |
+| **Particles**             | Performance-critical pages, accessibility-focused contexts |
+| **Multiple glass layers** | Anywhere (never stack glass)                               |
+| **Randomization**         | Content that must match between sessions/screenshots       |
+| **Seasonal colors**       | Brand-critical contexts requiring consistent colors        |
 
 ---
 
 ## Performance Budget
 
-| Element | Target | Measurement |
-|---------|--------|-------------|
-| Total trees | < 15 per viewport | Count |
-| Total particles | < 100 active | Count |
-| Blur radius | 8-12px max | CSS value |
-| Animation frame rate | 60fps | DevTools |
-| First Contentful Paint | < 1.5s | Lighthouse |
+| Element                | Target            | Measurement |
+| ---------------------- | ----------------- | ----------- |
+| Total trees            | < 15 per viewport | Count       |
+| Total particles        | < 100 active      | Count       |
+| Blur radius            | 8-12px max        | CSS value   |
+| Animation frame rate   | 60fps             | DevTools    |
+| First Contentful Paint | < 1.5s            | Lighthouse  |
 
 ### Optimization Techniques
 
@@ -857,14 +879,14 @@ Before shipping a Grove page:
 
 Study these pages for patterns:
 
-| Page | Demonstrates |
-|------|--------------|
-| `/forest` | Full randomized forest, season toggle, interactive demo |
+| Page       | Demonstrates                                              |
+| ---------- | --------------------------------------------------------- |
+| `/forest`  | Full randomized forest, season toggle, interactive demo   |
 | `/roadmap` | Seasonal sections, progressive decoration, midnight bloom |
-| `/vision` | Narrative flow, glass callouts, emotional storytelling |
-| `/about` | Glass cards, team sections, warm voice |
+| `/vision`  | Narrative flow, glass callouts, emotional storytelling    |
+| `/about`   | Glass cards, team sections, warm voice                    |
 
 ---
 
-*Pattern created: January 2026*
-*For use by: All Grove properties*
+_Pattern created: January 2026_
+_For use by: All Grove properties_

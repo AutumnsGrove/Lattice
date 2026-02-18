@@ -5,7 +5,7 @@
   sidebarStore.toggle() on mobile and sidebarStore.toggleCollapse() on desktop.
 
   Usage:
-    import { ArborToggle } from '@autumnsgrove/groveengine/ui/arbor';
+    import { ArborToggle } from '@autumnsgrove/lattice/ui/arbor';
 
     <header>
       <ArborToggle />

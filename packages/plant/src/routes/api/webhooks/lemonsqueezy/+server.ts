@@ -25,7 +25,7 @@ import {
 import {
   sanitizeWebhookPayload,
   calculateWebhookExpiry,
-} from "@autumnsgrove/groveengine/utils";
+} from "@autumnsgrove/lattice/utils";
 
 export const POST: RequestHandler = async ({ request, platform }) => {
   const db = platform?.env?.DB;

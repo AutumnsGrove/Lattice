@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Loader2, CreditCard, ShieldCheck, ArrowLeft } from '@autumnsgrove/groveengine/ui/icons';
-	import { GlassCard } from '@autumnsgrove/groveengine/ui';
-	import { TIERS, PAID_TIERS, type PaidTierKey } from '@autumnsgrove/groveengine/config';
+	import { Loader2, CreditCard, ShieldCheck, ArrowLeft } from '@autumnsgrove/lattice/ui/icons';
+	import { GlassCard } from '@autumnsgrove/lattice/ui';
+	import { TIERS, PAID_TIERS, type PaidTierKey } from '@autumnsgrove/lattice/config';
 
 	let { data } = $props();
 

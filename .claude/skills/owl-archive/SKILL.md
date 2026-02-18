@@ -34,17 +34,19 @@ Closely  Wisdom   Stories   Knowledge  Widely
 
 ### Phase 1: OBSERVE
 
-*The owl's eyes open in the dark, watching how the forest moves...*
+_The owl's eyes open in the dark, watching how the forest moves..._
 
 Before writing a single word, observe what you're documenting:
 
 **What's the Purpose?**
+
 - Are users learning something new? (tutorial)
 - Are they solving a problem? (troubleshooting)
 - Are they looking something up? (reference)
 - Are they deciding whether to use this? (overview)
 
 **Who Seeks This Knowledge?**
+
 - **Wanderer** — New to the forest, needs gentle guidance
 - **Rooted** — Familiar with the grove, wants efficiency
 - **Pathfinder** — Helping others, needs accuracy
@@ -52,6 +54,7 @@ Before writing a single word, observe what you're documenting:
 
 **What Do They Need?**
 Don't document what you want to say. Document what they need to know:
+
 - What question are they asking?
 - What will they try to do after reading?
 - What confusion might stop them?
@@ -62,7 +65,7 @@ Don't document what you want to say. Document what they need to know:
 
 ### Phase 2: HUNT
 
-*The owl glides silently, seeking the specific wisdom needed...*
+_The owl glides silently, seeking the specific wisdom needed..._
 
 Gather the right information with precision:
 
@@ -91,21 +94,23 @@ From the project's guiding principles:
 Mix short sentences with longer ones. Vary your rhythm. Read it aloud—if it sounds monotonous, it is.
 
 **Good:**
+
 > Every new visitor asks the same question. "Is the music broken?" No. There is no music. There never has been.
 
 **Not good:**
+
 > Every new visitor asks a common question. The question is usually about whether the music system is functioning. The answer is that there is no music system. There has never been one.
 
 **User Identity Terminology:**
 
 Grove uses specific terms for community members. **Always use these in user-facing text.**
 
-| Term | Who | Context |
-|------|-----|---------|
-| **Wanderer** | Everyone | Default greeting, anonymous visitors, all users |
-| **Rooted** / **the Rooted** | Subscribers | Those who've planted their tree, paid users |
-| **Pathfinder** | Trusted guides | Appointed community helpers |
-| **Wayfinder** | Autumn (singular) | The grove keeper |
+| Term                        | Who               | Context                                         |
+| --------------------------- | ----------------- | ----------------------------------------------- |
+| **Wanderer**                | Everyone          | Default greeting, anonymous visitors, all users |
+| **Rooted** / **the Rooted** | Subscribers       | Those who've planted their tree, paid users     |
+| **Pathfinder**              | Trusted guides    | Appointed community helpers                     |
+| **Wayfinder**               | Autumn (singular) | The grove keeper                                |
 
 **Key Rules:**
 
@@ -117,11 +122,13 @@ Grove uses specific terms for community members. **Always use these in user-faci
 **Examples:**
 
 **Good:**
+
 - "Welcome, Wanderer."
 - "Thanks for staying rooted with us."
 - "Ask a Pathfinder. They'll show you the way."
 
 **Avoid:**
+
 - "Welcome, user."
 - "Thanks for being a subscriber."
 - "Contact an administrator."
@@ -129,14 +136,15 @@ Grove uses specific terms for community members. **Always use these in user-faci
 **The Symmetry:**
 
 Wanderer → Wayfinder reflects the journey:
-- Wanderers *seek* the way (exploring, finding paths)
-- The Wayfinder *shows* the way (guiding, creating paths)
+
+- Wanderers _seek_ the way (exploring, finding paths)
+- The Wayfinder _shows_ the way (guiding, creating paths)
 
 **Grove Mode & GroveTerm Components:**
 
 When writing content that includes Grove terminology, use the GroveTerm component system instead of hardcoding terms. Grove Mode lets users toggle between standard terms (the default) and Grove-themed terms.
 
-- **In Svelte UI:** Use `GroveTerm`, `GroveSwap`, or `GroveText` from `@autumnsgrove/groveengine/ui`
+- **In Svelte UI:** Use `GroveTerm`, `GroveSwap`, or `GroveText` from `@autumnsgrove/lattice/ui`
 - **In data strings** (FAQ items, tooltips, onboarding text): Use `[[term]]` syntax, e.g., `"Your [[bloom|posts]] are always yours."`
 - **In markdown** (help articles): The `[[term]]` syntax is auto-transformed by the rehype-groveterm plugin
 - **Key principle:** New visitors see standard, familiar terms by default. Grove vocabulary is opt-in.
@@ -145,7 +153,7 @@ When writing content that includes Grove terminology, use the GroveTerm componen
 
 ### Phase 3: GATHER
 
-*The owl collects stories, each one carefully chosen...*
+_The owl collects stories, each one carefully chosen..._
 
 Collect the raw material while avoiding AI patterns:
 
@@ -164,23 +172,25 @@ Collect the raw material while avoiding AI patterns:
 This phrasing is deeply AI-coded. Avoid it entirely.
 
 **Never write:**
+
 - "It's not X, but Y"
 - "It's not just X, but Y"
 - "It's not merely X, but rather Y"
 - "Grove isn't just a platform, it's a home"
 
 **Instead, just say the thing:**
+
 - "Grove is a home for your words."
 - "This is where you belong."
 
 **Overused AI Words:**
 
-| Category | Words to Avoid |
-|----------|---------------|
+| Category       | Words to Avoid                                                                                    |
+| -------------- | ------------------------------------------------------------------------------------------------- |
 | **Adjectives** | robust, seamless, innovative, cutting-edge, transformative, intricate, captivating, comprehensive |
-| **Nouns** | tapestry, camaraderie, realm, plethora, myriad, landscape, journey (when not literal) |
-| **Verbs** | delve, foster, leverage, navigate, empower, embark, unlock, harness |
-| **Phrases** | at the end of the day, in today's world, it goes without saying, needless to say |
+| **Nouns**      | tapestry, camaraderie, realm, plethora, myriad, landscape, journey (when not literal)             |
+| **Verbs**      | delve, foster, leverage, navigate, empower, embark, unlock, harness                               |
+| **Phrases**    | at the end of the day, in today's world, it goes without saying, needless to say                  |
 
 **Heavy Transition Words:**
 
@@ -201,9 +211,11 @@ These make text feel stiff and robotic:
 Don't repeat the same adjective or descriptor multiple times. AI does this constantly.
 
 **Bad:**
+
 > Grove provides a seamless experience. The seamless integration means you can seamlessly move between features.
 
 **Good:**
+
 > Grove gets out of your way. Move between features without friction.
 
 **Generic Safe Claims:**
@@ -226,11 +238,13 @@ White space is your friend. Dense walls of text don't feel like home.
 Use lists when they clarify. But don't turn everything into bullets. Sometimes prose flows better.
 
 **Good use of lists:**
+
 - Specific steps in a process
 - Features that are truly parallel
 - Quick reference information
 
 **Bad use of lists:**
+
 - Narrative content broken awkwardly
 - Things that would read better as a sentence
 
@@ -254,7 +268,7 @@ Don't use callouts for things that should just be in the text.
 
 ### Phase 4: NEST
 
-*The owl arranges each twig carefully, building a home for the knowledge...*
+_The owl arranges each twig carefully, building a home for the knowledge..._
 
 Organize the documentation with care:
 
@@ -272,6 +286,7 @@ When things break, stay warm but be honest. Don't blame the user. Don't hide beh
 **Examples:**
 
 **Good:**
+
 ```
 Couldn't save your post. Check your connection and try again.
 ```
@@ -286,6 +301,7 @@ Your draft is saved locally.
 ```
 
 **Avoid:**
+
 ```
 Oops! 😅 Looks like something went wrong! Don't worry though,
 these things happen! Please try again later!
@@ -315,17 +331,18 @@ Grove is explicitly queer-friendly. This means:
 
 **Concrete Examples:**
 
-| Avoid | Use Instead |
-|-------|-------------|
-| "Add your husband/wife" | "Add your partner" or "Add someone special" |
-| "he or she" | "they" or rephrase to avoid pronouns |
-| "Dear Sir/Madam" | "Hello" or "Hi there" |
-| "mankind" | "people" or "everyone" |
-| Examples with only straight couples | Vary your examples, or keep them neutral |
+| Avoid                               | Use Instead                                 |
+| ----------------------------------- | ------------------------------------------- |
+| "Add your husband/wife"             | "Add your partner" or "Add someone special" |
+| "he or she"                         | "they" or rephrase to avoid pronouns        |
+| "Dear Sir/Madam"                    | "Hello" or "Hi there"                       |
+| "mankind"                           | "people" or "everyone"                      |
+| Examples with only straight couples | Vary your examples, or keep them neutral    |
 
 **In User Flows:**
 
 When asking for relationship info (if ever needed):
+
 - Use open text fields over dropdowns with limited options
 - Don't require titles (Mr/Mrs/Ms)
 - Let people describe themselves rather than selecting from boxes
@@ -345,6 +362,7 @@ Both should avoid AI patterns.
 **The Voice Spectrum:**
 
 **API Reference (minimal warmth, maximum clarity):**
+
 ```
 POST /api/posts
 
@@ -359,6 +377,7 @@ Returns: Post object or 400 error
 ```
 
 **Internal Spec (clear, some personality):**
+
 ```
 ## Feed Caching Strategy
 
@@ -368,6 +387,7 @@ age out naturally. This keeps things fresh without hammering D1.
 ```
 
 **Getting Started Guide (full Grove voice):**
+
 ```
 ## Your First Post
 
@@ -380,6 +400,7 @@ Write something. Anything. Hit publish when it feels ready.
 ```
 
 **Onboarding Tooltip (warm but concise):**
+
 ```
 This is your dashboard. Everything you need, nothing you don't.
 ```
@@ -389,12 +410,14 @@ This is your dashboard. Everything you need, nothing you don't.
 Grove docs often end with an italicized line. This should feel earned, not forced.
 
 **Works:**
-> *Sometimes the most radical thing you can offer is nothing at all.*
 
-> *The path becomes clear by walking it.*
+> _Sometimes the most radical thing you can offer is nothing at all._
+
+> _The path becomes clear by walking it._
 
 **Doesn't work:**
-> *And that's how you configure your settings!*
+
+> _And that's how you configure your settings!_
 
 If you can't find a poetic closer that resonates, don't force one. A clean ending is fine.
 
@@ -402,7 +425,7 @@ If you can't find a poetic closer that resonates, don't force one. A clean endin
 
 ### Phase 5: TEACH
 
-*The owl turns its head, sharing what it knows with those who seek...*
+_The owl turns its head, sharing what it knows with those who seek..._
 
 Share the knowledge effectively:
 
@@ -423,15 +446,16 @@ Before finalizing any Grove documentation:
 
 **When to use owl-archive vs. museum-documentation:**
 
-| Use owl-archive | Use museum-documentation |
-|----------------|-------------------------|
-| Help center articles | "How it works" deep-dives |
-| Tooltips and labels | Codebase guided tours |
-| Error messages | System architecture explains |
-| Onboarding flows | Technical exhibits |
-| Quick-reference guides | Narrative documentation |
+| Use owl-archive        | Use museum-documentation     |
+| ---------------------- | ---------------------------- |
+| Help center articles   | "How it works" deep-dives    |
+| Tooltips and labels    | Codebase guided tours        |
+| Error messages         | System architecture explains |
+| Onboarding flows       | Technical exhibits           |
+| Quick-reference guides | Narrative documentation      |
 
 **Typical Flow:**
+
 1. Design calls for new component/page text
 2. Activate `owl-archive` for voice guidance
 3. Write content following these principles
@@ -440,17 +464,20 @@ Before finalizing any Grove documentation:
 **Documentation Levels:**
 
 **Level 1 - Quick/Functional (owl-archive):**
+
 - Help articles
 - Error messages
 - Tooltips
 - Onboarding copy
 
 **Level 2 - Technical Specs (swan-design):**
+
 - Architecture docs
 - API references
 - Implementation guides
 
 **Level 3 - Narrative (museum-documentation):**
+
 - "How it works" stories
 - Codebase tours
 - Exhibit-style docs
@@ -460,16 +487,21 @@ Before finalizing any Grove documentation:
 ## Owl Rules
 
 ### Patience
+
 The owl doesn't rush. It observes until it understands, then writes what needs to be written. Better to wait for clarity than publish confusion.
 
 ### Selectivity
+
 Not everything deserves documentation. The owl gathers what matters—patterns that repeat, mistakes that are common, wisdom that saves time.
 
 ### Clarity
+
 The nest must be organized. Users should find what they need without hunting. Clear structure, logical flow, good navigation.
 
 ### Communication
+
 Use archival metaphors:
+
 - "Watching the forest..." (observing users)
 - "Seeking wisdom..." (voice research)
 - "Collecting stories..." (gathering content)
@@ -481,6 +513,7 @@ Use archival metaphors:
 ## Anti-Patterns
 
 **The owl does NOT:**
+
 - Document everything (noise obscures signal)
 - Use AI-coded language patterns
 - Write walls of text without breaks
@@ -510,15 +543,15 @@ Use archival metaphors:
 
 ## Quick Decision Guide
 
-| Situation | Action |
-|-----------|--------|
+| Situation              | Action                                         |
+| ---------------------- | ---------------------------------------------- |
 | New feature needs docs | Observe users, gather patterns, write tutorial |
-| Error messages needed | Be honest, helpful, not cute |
-| UI text/tooltips | Concise, warm, action-oriented |
-| Review existing docs | Run self-review checklist, fix AI patterns |
-| Landing page copy | Full Grove voice, earned closer |
-| API documentation | Clear, structured, minimal poetry |
+| Error messages needed  | Be honest, helpful, not cute                   |
+| UI text/tooltips       | Concise, warm, action-oriented                 |
+| Review existing docs   | Run self-review checklist, fix AI patterns     |
+| Landing page copy      | Full Grove voice, earned closer                |
+| API documentation      | Clear, structured, minimal poetry              |
 
 ---
 
-*The forest remembers what the owl teaches. Write what will last.* 🦉
+_The forest remembers what the owl teaches. Write what will last._ 🦉

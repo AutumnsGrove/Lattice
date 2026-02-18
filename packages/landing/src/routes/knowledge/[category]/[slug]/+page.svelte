@@ -3,10 +3,10 @@
 	import { browser } from "$app/environment";
 	import Header from "$lib/components/Header.svelte";
 	import Footer from "$lib/components/Footer.svelte";
-	import { Trace } from "@autumnsgrove/groveengine/ui/feedback";
-	import { GroveTerm } from "@autumnsgrove/groveengine/ui";
+	import { Trace } from "@autumnsgrove/lattice/ui/feedback";
+	import { GroveTerm } from "@autumnsgrove/lattice/ui";
 	import SEO from "$lib/components/SEO.svelte";
-	import { TableOfContents, MobileTOC } from "@autumnsgrove/groveengine";
+	import { TableOfContents, MobileTOC } from "@autumnsgrove/lattice";
 	import RelatedArticles from "$lib/components/RelatedArticles.svelte";
 	import { kbCategoryColors, categoryLabels } from "$lib/utils/kb-colors";
 	import type { DocCategory } from "$lib/types/docs";

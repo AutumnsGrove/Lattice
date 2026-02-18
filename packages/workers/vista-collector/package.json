@@ -10,7 +10,7 @@
 		"tail": "wrangler tail"
 	},
 	"dependencies": {
-		"@autumnsgrove/groveengine": "workspace:*"
+		"@autumnsgrove/lattice": "workspace:*"
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20251128.0",

@@ -75,7 +75,7 @@ export function hashString(str: string): number {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
+    hash = (hash << 5) - hash + char;
     hash = hash & hash; // Convert to 32-bit integer
   }
   return Math.abs(hash);
@@ -113,14 +113,18 @@ export function estimateTokens(text: string): number {
 /**
  * Estimate total tokens in a conversation
  */
-export function estimateConversationTokens(conversation: FiresideMessage[]): number {
+export function estimateConversationTokens(
+  conversation: FiresideMessage[],
+): number {
   return conversation.reduce((sum, m) => sum + estimateTokens(m.content), 0);
 }
 
 /**
  * Check if conversation is approaching the token limit
  */
-export function isConversationTooLong(conversation: FiresideMessage[]): boolean {
+export function isConversationTooLong(
+  conversation: FiresideMessage[],
+): boolean {
   return estimateConversationTokens(conversation) > MAX_CONVERSATION_TOKENS;
 }
 
@@ -132,10 +136,13 @@ export function canDraft(conversation: FiresideMessage[]): boolean {
   const userMessages = conversation.filter((m) => m.role === "user");
   const totalUserTokens = userMessages.reduce(
     (sum, m) => sum + estimateTokens(m.content),
-    0
+    0,
   );
 
-  return userMessages.length >= MIN_MESSAGES_FOR_DRAFT && totalUserTokens >= MIN_TOKENS_FOR_DRAFT;
+  return (
+    userMessages.length >= MIN_MESSAGES_FOR_DRAFT &&
+    totalUserTokens >= MIN_TOKENS_FOR_DRAFT
+  );
 }
 
 /**

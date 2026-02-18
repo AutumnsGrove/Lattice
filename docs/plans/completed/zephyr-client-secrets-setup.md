@@ -7,6 +7,7 @@
 ## Overview
 
 The Zephyr client library already exists at `packages/engine/src/lib/zephyr/`. This plan covers:
+
 1. Fixing the default URL (currently points to .pages.dev instead of .workers.dev)
 2. Setting up secrets for all workers that need Zephyr access
 3. Adding wrangler.toml vars for ZEPHYR_URL
@@ -14,10 +15,11 @@ The Zephyr client library already exists at `packages/engine/src/lib/zephyr/`. T
 ## Current State
 
 **Client library** ✅ Complete:
+
 - `packages/engine/src/lib/zephyr/client.ts` - ZephyrClient class
 - `packages/engine/src/lib/zephyr/types.ts` - All types defined
 - `packages/engine/src/lib/zephyr/index.ts` - Exports
-- Already exported in package.json as `@autumnsgrove/groveengine/zephyr`
+- Already exported in package.json as `@autumnsgrove/lattice/zephyr`
 
 **One fix needed:** Default URL is `https://grove-zephyr.pages.dev` but actual deployment is `https://grove-zephyr.m7jv4v7npb.workers.dev`
 
@@ -28,11 +30,12 @@ The Zephyr client library already exists at `packages/engine/src/lib/zephyr/`. T
 **File:** `packages/engine/src/lib/zephyr/client.ts`
 
 Change line 200:
+
 ```typescript
 // FROM:
-"https://grove-zephyr.pages.dev"
+"https://grove-zephyr.pages.dev";
 // TO:
-"https://grove-zephyr.m7jv4v7npb.workers.dev"
+"https://grove-zephyr.m7jv4v7npb.workers.dev";
 ```
 
 ### Phase 2: Generate & Apply Secrets
@@ -56,6 +59,7 @@ gw secret apply ZEPHYR_API_KEY --worker onboarding-emails
 Add environment variable to each worker's wrangler.toml:
 
 **Workers to update:**
+
 - `packages/engine/wrangler.toml`
 - `packages/landing/wrangler.toml`
 - `packages/plant/wrangler.toml`
@@ -63,6 +67,7 @@ Add environment variable to each worker's wrangler.toml:
 - `packages/landing/workers/onboarding-emails/wrangler.toml`
 
 **Add to [vars] section:**
+
 ```toml
 ZEPHYR_URL = "https://grove-zephyr.m7jv4v7npb.workers.dev"
 ```
@@ -75,23 +80,25 @@ cd packages/engine && pnpm package
 
 ## Files to Modify
 
-| File | Change |
-|------|--------|
-| `packages/engine/src/lib/zephyr/client.ts` | Fix default URL |
-| `packages/engine/wrangler.toml` | Add ZEPHYR_URL var |
-| `packages/landing/wrangler.toml` | Add ZEPHYR_URL var |
-| `packages/plant/wrangler.toml` | Add ZEPHYR_URL var |
-| `packages/workers/clearing-monitor/wrangler.toml` | Add ZEPHYR_URL var |
+| File                                                       | Change             |
+| ---------------------------------------------------------- | ------------------ |
+| `packages/engine/src/lib/zephyr/client.ts`                 | Fix default URL    |
+| `packages/engine/wrangler.toml`                            | Add ZEPHYR_URL var |
+| `packages/landing/wrangler.toml`                           | Add ZEPHYR_URL var |
+| `packages/plant/wrangler.toml`                             | Add ZEPHYR_URL var |
+| `packages/workers/clearing-monitor/wrangler.toml`          | Add ZEPHYR_URL var |
 | `packages/landing/workers/onboarding-emails/wrangler.toml` | Add ZEPHYR_URL var |
 
 ## Verification
 
 1. **Test client locally:**
+
    ```bash
    cd packages/engine && pnpm test src/lib/zephyr
    ```
 
 2. **Verify secrets applied:**
+
    ```bash
    gw secret exists ZEPHYR_API_KEY
    wrangler secret list --name grove-lattice
@@ -104,6 +111,7 @@ cd packages/engine && pnpm package
 ## Future Work (Not in this plan)
 
 Migration of existing Resend calls to use Zephyr client:
+
 - `packages/plant/src/lib/server/send-email.ts`
 - `packages/landing/src/lib/email/send.ts`
 - Other direct Resend usages

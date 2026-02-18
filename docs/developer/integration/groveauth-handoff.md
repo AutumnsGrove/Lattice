@@ -6,9 +6,10 @@
 
 ## Overview
 
-GroveEngine is implementing posting limits based on user tiers. GroveAuth needs to track subscription data for each user so that GroveEngine can check limits before allowing post creation.
+Lattice is implementing posting limits based on user tiers. GroveAuth needs to track subscription data for each user so that Lattice can check limits before allowing post creation.
 
 **Tier Limits:**
+
 - `starter`: 250 posts
 - `professional`: 2,000 posts
 - `business`: unlimited
@@ -72,7 +73,7 @@ Add at the end of the file:
 // SUBSCRIPTION TYPES
 // =============================================================================
 
-export type SubscriptionTier = 'starter' | 'professional' | 'business';
+export type SubscriptionTier = "starter" | "professional" | "business";
 
 export interface UserSubscription {
   id: string;
@@ -102,16 +103,16 @@ export interface SubscriptionAuditLog {
 }
 
 export type SubscriptionAuditEventType =
-  | 'subscription_created'
-  | 'tier_upgraded'
-  | 'tier_downgraded'
-  | 'grace_period_started'
-  | 'grace_period_ended'
-  | 'post_limit_reached'
-  | 'post_archived'
-  | 'custom_domain_added'
-  | 'custom_domain_verified'
-  | 'custom_domain_removed';
+  | "subscription_created"
+  | "tier_upgraded"
+  | "tier_downgraded"
+  | "grace_period_started"
+  | "grace_period_ended"
+  | "post_limit_reached"
+  | "post_archived"
+  | "custom_domain_added"
+  | "custom_domain_verified"
+  | "custom_domain_removed";
 
 export const TIER_POST_LIMITS: Record<SubscriptionTier, number | null> = {
   starter: 250,
@@ -140,59 +141,90 @@ Add these subscription management functions:
 ```typescript
 // ==================== User Subscriptions ====================
 
-import type { UserSubscription, SubscriptionTier, SubscriptionStatus, SubscriptionAuditEventType } from '../types.js';
-import { TIER_POST_LIMITS } from '../types.js';
+import type {
+  UserSubscription,
+  SubscriptionTier,
+  SubscriptionStatus,
+  SubscriptionAuditEventType,
+} from "../types.js";
+import { TIER_POST_LIMITS } from "../types.js";
 
-export async function getUserSubscription(db: D1Database, userId: string): Promise<UserSubscription | null> {
-  return db.prepare('SELECT * FROM user_subscriptions WHERE user_id = ?').bind(userId).first<UserSubscription>();
+export async function getUserSubscription(
+  db: D1Database,
+  userId: string,
+): Promise<UserSubscription | null> {
+  return db
+    .prepare("SELECT * FROM user_subscriptions WHERE user_id = ?")
+    .bind(userId)
+    .first<UserSubscription>();
 }
 
-export async function createUserSubscription(db: D1Database, userId: string, tier: SubscriptionTier = 'starter'): Promise<UserSubscription> {
+export async function createUserSubscription(
+  db: D1Database,
+  userId: string,
+  tier: SubscriptionTier = "starter",
+): Promise<UserSubscription> {
   const id = generateUUID();
   const postLimit = TIER_POST_LIMITS[tier];
   const now = new Date().toISOString();
 
-  await db.prepare(
-    `INSERT INTO user_subscriptions (id, user_id, tier, post_limit, post_count, grace_period_days, created_at, updated_at)
-     VALUES (?, ?, ?, ?, 0, 14, ?, ?)`
-  ).bind(id, userId, tier, postLimit, now, now).run();
+  await db
+    .prepare(
+      `INSERT INTO user_subscriptions (id, user_id, tier, post_limit, post_count, grace_period_days, created_at, updated_at)
+     VALUES (?, ?, ?, ?, 0, 14, ?, ?)`,
+    )
+    .bind(id, userId, tier, postLimit, now, now)
+    .run();
 
   await createSubscriptionAuditLog(db, {
     user_id: userId,
-    event_type: 'subscription_created',
+    event_type: "subscription_created",
     new_value: JSON.stringify({ tier, post_limit: postLimit }),
   });
 
   return (await getUserSubscription(db, userId))!;
 }
 
-export async function getOrCreateUserSubscription(db: D1Database, userId: string): Promise<UserSubscription> {
+export async function getOrCreateUserSubscription(
+  db: D1Database,
+  userId: string,
+): Promise<UserSubscription> {
   const existing = await getUserSubscription(db, userId);
   if (existing) return existing;
-  return createUserSubscription(db, userId, 'starter');
+  return createUserSubscription(db, userId, "starter");
 }
 
-export async function incrementPostCount(db: D1Database, userId: string): Promise<UserSubscription | null> {
+export async function incrementPostCount(
+  db: D1Database,
+  userId: string,
+): Promise<UserSubscription | null> {
   const subscription = await getUserSubscription(db, userId);
   if (!subscription) return null;
 
   const newCount = subscription.post_count + 1;
   const now = new Date().toISOString();
-  const isAtLimit = subscription.post_limit !== null && newCount >= subscription.post_limit;
+  const isAtLimit =
+    subscription.post_limit !== null && newCount >= subscription.post_limit;
 
   let graceStart = subscription.grace_period_start;
   if (isAtLimit && !graceStart) {
     graceStart = now;
   }
 
-  await db.prepare(
-    `UPDATE user_subscriptions SET post_count = ?, grace_period_start = ?, updated_at = ? WHERE user_id = ?`
-  ).bind(newCount, graceStart, now, userId).run();
+  await db
+    .prepare(
+      `UPDATE user_subscriptions SET post_count = ?, grace_period_start = ?, updated_at = ? WHERE user_id = ?`,
+    )
+    .bind(newCount, graceStart, now, userId)
+    .run();
 
   return getUserSubscription(db, userId);
 }
 
-export async function decrementPostCount(db: D1Database, userId: string): Promise<UserSubscription | null> {
+export async function decrementPostCount(
+  db: D1Database,
+  userId: string,
+): Promise<UserSubscription | null> {
   const subscription = await getUserSubscription(db, userId);
   if (!subscription) return null;
 
@@ -205,18 +237,31 @@ export async function decrementPostCount(db: D1Database, userId: string): Promis
     graceStart = null;
   }
 
-  await db.prepare(
-    `UPDATE user_subscriptions SET post_count = ?, grace_period_start = ?, updated_at = ? WHERE user_id = ?`
-  ).bind(newCount, graceStart, now, userId).run();
+  await db
+    .prepare(
+      `UPDATE user_subscriptions SET post_count = ?, grace_period_start = ?, updated_at = ? WHERE user_id = ?`,
+    )
+    .bind(newCount, graceStart, now, userId)
+    .run();
 
   return getUserSubscription(db, userId);
 }
 
-export function getSubscriptionStatus(subscription: UserSubscription): SubscriptionStatus {
-  const { tier, post_count, post_limit, grace_period_start, grace_period_days } = subscription;
+export function getSubscriptionStatus(
+  subscription: UserSubscription,
+): SubscriptionStatus {
+  const {
+    tier,
+    post_count,
+    post_limit,
+    grace_period_start,
+    grace_period_days,
+  } = subscription;
 
-  const posts_remaining = post_limit !== null ? Math.max(0, post_limit - post_count) : null;
-  const percentage_used = post_limit !== null ? Math.min(100, (post_count / post_limit) * 100) : null;
+  const posts_remaining =
+    post_limit !== null ? Math.max(0, post_limit - post_count) : null;
+  const percentage_used =
+    post_limit !== null ? Math.min(100, (post_count / post_limit) * 100) : null;
   const is_at_limit = post_limit !== null && post_count >= post_limit;
 
   let is_in_grace_period = false;
@@ -225,38 +270,71 @@ export function getSubscriptionStatus(subscription: UserSubscription): Subscript
   if (grace_period_start) {
     is_in_grace_period = true;
     const graceStart = new Date(grace_period_start);
-    const graceEnd = new Date(graceStart.getTime() + grace_period_days * 24 * 60 * 60 * 1000);
+    const graceEnd = new Date(
+      graceStart.getTime() + grace_period_days * 24 * 60 * 60 * 1000,
+    );
     const msRemaining = graceEnd.getTime() - Date.now();
-    grace_period_days_remaining = Math.max(0, Math.ceil(msRemaining / (24 * 60 * 60 * 1000)));
+    grace_period_days_remaining = Math.max(
+      0,
+      Math.ceil(msRemaining / (24 * 60 * 60 * 1000)),
+    );
   }
 
-  const grace_expired = grace_period_days_remaining !== null && grace_period_days_remaining <= 0;
-  const can_create_post = !is_at_limit || (is_in_grace_period && !grace_expired);
+  const grace_expired =
+    grace_period_days_remaining !== null && grace_period_days_remaining <= 0;
+  const can_create_post =
+    !is_at_limit || (is_in_grace_period && !grace_expired);
   const upgrade_required = is_at_limit && grace_expired;
 
   return {
-    tier, post_count, post_limit, posts_remaining, percentage_used,
-    is_at_limit, is_in_grace_period, grace_period_days_remaining,
-    can_create_post, upgrade_required,
+    tier,
+    post_count,
+    post_limit,
+    posts_remaining,
+    percentage_used,
+    is_at_limit,
+    is_in_grace_period,
+    grace_period_days_remaining,
+    can_create_post,
+    upgrade_required,
   };
 }
 
-export async function canUserCreatePost(db: D1Database, userId: string): Promise<{ allowed: boolean; status: SubscriptionStatus; subscription: UserSubscription }> {
+export async function canUserCreatePost(
+  db: D1Database,
+  userId: string,
+): Promise<{
+  allowed: boolean;
+  status: SubscriptionStatus;
+  subscription: UserSubscription;
+}> {
   const subscription = await getOrCreateUserSubscription(db, userId);
   const status = getSubscriptionStatus(subscription);
   return { allowed: status.can_create_post, status, subscription };
 }
 
-export async function createSubscriptionAuditLog(db: D1Database, data: {
-  user_id: string;
-  event_type: SubscriptionAuditEventType;
-  old_value?: string;
-  new_value?: string;
-}): Promise<void> {
+export async function createSubscriptionAuditLog(
+  db: D1Database,
+  data: {
+    user_id: string;
+    event_type: SubscriptionAuditEventType;
+    old_value?: string;
+    new_value?: string;
+  },
+): Promise<void> {
   const id = generateUUID();
-  await db.prepare(
-    `INSERT INTO subscription_audit_log (id, user_id, event_type, old_value, new_value) VALUES (?, ?, ?, ?, ?)`
-  ).bind(id, data.user_id, data.event_type, data.old_value || null, data.new_value || null).run();
+  await db
+    .prepare(
+      `INSERT INTO subscription_audit_log (id, user_id, event_type, old_value, new_value) VALUES (?, ?, ?, ?, ?)`,
+    )
+    .bind(
+      id,
+      data.user_id,
+      data.event_type,
+      data.old_value || null,
+      data.new_value || null,
+    )
+    .run();
 }
 ```
 
@@ -275,10 +353,11 @@ All routes require Bearer token authentication via `verifyJWT`.
 ### 5. Register Routes in `src/index.ts`
 
 Add:
+
 ```typescript
-import subscription from './routes/subscription.js';
+import subscription from "./routes/subscription.js";
 // ...
-app.route('/subscription', subscription);
+app.route("/subscription", subscription);
 ```
 
 And update the API info object to include subscription endpoints.
@@ -308,5 +387,5 @@ After implementing:
 
 ---
 
-*Created: 2025-12-08*
-*For: GroveEngine posting limits feature*
+_Created: 2025-12-08_
+_For: Lattice posting limits feature_

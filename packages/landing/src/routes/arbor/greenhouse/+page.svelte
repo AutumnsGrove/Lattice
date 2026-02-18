@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { CultivateFlagTable } from '@autumnsgrove/groveengine/grafts/greenhouse';
-	import { GlassCard } from '@autumnsgrove/groveengine/ui';
+	import { CultivateFlagTable } from '@autumnsgrove/lattice/grafts/greenhouse';
+	import { GlassCard } from '@autumnsgrove/lattice/ui';
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import {

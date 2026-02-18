@@ -135,7 +135,11 @@ describe("Fireside pure functions", () => {
     it("sums tokens across all messages", () => {
       const conversation: FiresideMessage[] = [
         { role: "wisp", content: "test", timestamp: "2024-01-01T00:00:00Z" }, // 1 token
-        { role: "user", content: "testtest", timestamp: "2024-01-01T00:00:01Z" }, // 2 tokens
+        {
+          role: "user",
+          content: "testtest",
+          timestamp: "2024-01-01T00:00:01Z",
+        }, // 2 tokens
       ];
       expect(estimateConversationTokens(conversation)).toBe(3);
     });
@@ -146,9 +150,21 @@ describe("Fireside pure functions", () => {
 
     it("includes both wisp and user messages", () => {
       const conversation: FiresideMessage[] = [
-        { role: "wisp", content: "a".repeat(40), timestamp: "2024-01-01T00:00:00Z" }, // 10 tokens
-        { role: "user", content: "b".repeat(80), timestamp: "2024-01-01T00:00:01Z" }, // 20 tokens
-        { role: "wisp", content: "c".repeat(40), timestamp: "2024-01-01T00:00:02Z" }, // 10 tokens
+        {
+          role: "wisp",
+          content: "a".repeat(40),
+          timestamp: "2024-01-01T00:00:00Z",
+        }, // 10 tokens
+        {
+          role: "user",
+          content: "b".repeat(80),
+          timestamp: "2024-01-01T00:00:01Z",
+        }, // 20 tokens
+        {
+          role: "wisp",
+          content: "c".repeat(40),
+          timestamp: "2024-01-01T00:00:02Z",
+        }, // 10 tokens
       ];
       expect(estimateConversationTokens(conversation)).toBe(40);
     });
@@ -166,7 +182,11 @@ describe("Fireside pure functions", () => {
     it("returns false for short conversation", () => {
       const conversation: FiresideMessage[] = [
         { role: "wisp", content: "Hello!", timestamp: "2024-01-01T00:00:00Z" },
-        { role: "user", content: "Hi there!", timestamp: "2024-01-01T00:00:01Z" },
+        {
+          role: "user",
+          content: "Hi there!",
+          timestamp: "2024-01-01T00:00:01Z",
+        },
       ];
       expect(isConversationTooLong(conversation)).toBe(false);
     });
@@ -176,16 +196,26 @@ describe("Fireside pure functions", () => {
       // 120k tokens * 4 chars = 480k characters
       const longContent = "x".repeat(500000); // Well over the limit
       const conversation: FiresideMessage[] = [
-        { role: "user", content: longContent, timestamp: "2024-01-01T00:00:00Z" },
+        {
+          role: "user",
+          content: longContent,
+          timestamp: "2024-01-01T00:00:00Z",
+        },
       ];
       expect(isConversationTooLong(conversation)).toBe(true);
     });
 
     it("returns false just under the limit", () => {
       // Just under the limit
-      const underLimit = "x".repeat((MAX_CONVERSATION_TOKENS * CHARS_PER_TOKEN) - 10);
+      const underLimit = "x".repeat(
+        MAX_CONVERSATION_TOKENS * CHARS_PER_TOKEN - 10,
+      );
       const conversation: FiresideMessage[] = [
-        { role: "user", content: underLimit, timestamp: "2024-01-01T00:00:00Z" },
+        {
+          role: "user",
+          content: underLimit,
+          timestamp: "2024-01-01T00:00:00Z",
+        },
       ];
       expect(isConversationTooLong(conversation)).toBe(false);
     });
@@ -202,19 +232,47 @@ describe("Fireside pure functions", () => {
 
     it("returns false with only wisp messages", () => {
       const conversation: FiresideMessage[] = [
-        { role: "wisp", content: "What's on your mind?", timestamp: "2024-01-01T00:00:00Z" },
-        { role: "wisp", content: "Tell me more.", timestamp: "2024-01-01T00:00:01Z" },
-        { role: "wisp", content: "That's interesting!", timestamp: "2024-01-01T00:00:02Z" },
+        {
+          role: "wisp",
+          content: "What's on your mind?",
+          timestamp: "2024-01-01T00:00:00Z",
+        },
+        {
+          role: "wisp",
+          content: "Tell me more.",
+          timestamp: "2024-01-01T00:00:01Z",
+        },
+        {
+          role: "wisp",
+          content: "That's interesting!",
+          timestamp: "2024-01-01T00:00:02Z",
+        },
       ];
       expect(canDraft(conversation)).toBe(false);
     });
 
     it("returns false with insufficient user messages", () => {
       const conversation: FiresideMessage[] = [
-        { role: "wisp", content: "What's on your mind?", timestamp: "2024-01-01T00:00:00Z" },
-        { role: "user", content: "I have thoughts.", timestamp: "2024-01-01T00:00:01Z" },
-        { role: "wisp", content: "Tell me more.", timestamp: "2024-01-01T00:00:02Z" },
-        { role: "user", content: "More thoughts here.", timestamp: "2024-01-01T00:00:03Z" },
+        {
+          role: "wisp",
+          content: "What's on your mind?",
+          timestamp: "2024-01-01T00:00:00Z",
+        },
+        {
+          role: "user",
+          content: "I have thoughts.",
+          timestamp: "2024-01-01T00:00:01Z",
+        },
+        {
+          role: "wisp",
+          content: "Tell me more.",
+          timestamp: "2024-01-01T00:00:02Z",
+        },
+        {
+          role: "user",
+          content: "More thoughts here.",
+          timestamp: "2024-01-01T00:00:03Z",
+        },
       ];
       // Only 2 user messages, need MIN_MESSAGES_FOR_DRAFT (3)
       expect(canDraft(conversation)).toBe(false);
@@ -222,9 +280,17 @@ describe("Fireside pure functions", () => {
 
     it("returns false with enough messages but insufficient tokens", () => {
       const conversation: FiresideMessage[] = [
-        { role: "wisp", content: "What's on your mind?", timestamp: "2024-01-01T00:00:00Z" },
+        {
+          role: "wisp",
+          content: "What's on your mind?",
+          timestamp: "2024-01-01T00:00:00Z",
+        },
         { role: "user", content: "Hi", timestamp: "2024-01-01T00:00:01Z" }, // 1 token
-        { role: "wisp", content: "Tell me more.", timestamp: "2024-01-01T00:00:02Z" },
+        {
+          role: "wisp",
+          content: "Tell me more.",
+          timestamp: "2024-01-01T00:00:02Z",
+        },
         { role: "user", content: "Ok", timestamp: "2024-01-01T00:00:03Z" }, // 1 token
         { role: "wisp", content: "And?", timestamp: "2024-01-01T00:00:04Z" },
         { role: "user", content: "Bye", timestamp: "2024-01-01T00:00:05Z" }, // 1 token
@@ -235,14 +301,40 @@ describe("Fireside pure functions", () => {
 
     it("returns true with sufficient messages and tokens", () => {
       // Need MIN_MESSAGES_FOR_DRAFT messages and MIN_TOKENS_FOR_DRAFT tokens
-      const substantialContent = "x".repeat(MIN_TOKENS_FOR_DRAFT * CHARS_PER_TOKEN);
+      const substantialContent = "x".repeat(
+        MIN_TOKENS_FOR_DRAFT * CHARS_PER_TOKEN,
+      );
       const conversation: FiresideMessage[] = [
-        { role: "wisp", content: "What's on your mind?", timestamp: "2024-01-01T00:00:00Z" },
-        { role: "user", content: substantialContent, timestamp: "2024-01-01T00:00:01Z" },
-        { role: "wisp", content: "Tell me more.", timestamp: "2024-01-01T00:00:02Z" },
-        { role: "user", content: "More thoughts.", timestamp: "2024-01-01T00:00:03Z" },
-        { role: "wisp", content: "That's interesting.", timestamp: "2024-01-01T00:00:04Z" },
-        { role: "user", content: "Final thought.", timestamp: "2024-01-01T00:00:05Z" },
+        {
+          role: "wisp",
+          content: "What's on your mind?",
+          timestamp: "2024-01-01T00:00:00Z",
+        },
+        {
+          role: "user",
+          content: substantialContent,
+          timestamp: "2024-01-01T00:00:01Z",
+        },
+        {
+          role: "wisp",
+          content: "Tell me more.",
+          timestamp: "2024-01-01T00:00:02Z",
+        },
+        {
+          role: "user",
+          content: "More thoughts.",
+          timestamp: "2024-01-01T00:00:03Z",
+        },
+        {
+          role: "wisp",
+          content: "That's interesting.",
+          timestamp: "2024-01-01T00:00:04Z",
+        },
+        {
+          role: "user",
+          content: "Final thought.",
+          timestamp: "2024-01-01T00:00:05Z",
+        },
       ];
       expect(canDraft(conversation)).toBe(true);
     });
@@ -250,11 +342,23 @@ describe("Fireside pure functions", () => {
     it("only counts user messages, not wisp messages", () => {
       // Even if wisp has lots of content, it shouldn't count toward canDraft
       const conversation: FiresideMessage[] = [
-        { role: "wisp", content: "x".repeat(1000), timestamp: "2024-01-01T00:00:00Z" },
+        {
+          role: "wisp",
+          content: "x".repeat(1000),
+          timestamp: "2024-01-01T00:00:00Z",
+        },
         { role: "user", content: "short", timestamp: "2024-01-01T00:00:01Z" },
-        { role: "wisp", content: "x".repeat(1000), timestamp: "2024-01-01T00:00:02Z" },
+        {
+          role: "wisp",
+          content: "x".repeat(1000),
+          timestamp: "2024-01-01T00:00:02Z",
+        },
         { role: "user", content: "short", timestamp: "2024-01-01T00:00:03Z" },
-        { role: "wisp", content: "x".repeat(1000), timestamp: "2024-01-01T00:00:04Z" },
+        {
+          role: "wisp",
+          content: "x".repeat(1000),
+          timestamp: "2024-01-01T00:00:04Z",
+        },
         { role: "user", content: "short", timestamp: "2024-01-01T00:00:05Z" },
       ];
       // 3 user messages but very few tokens from user
@@ -330,7 +434,9 @@ describe("Fireside pure functions", () => {
       expect(isValidConversationId("1' OR '1'='1")).toBe(false);
 
       // XSS attempts
-      expect(isValidConversationId("<script>alert('xss')</script>")).toBe(false);
+      expect(isValidConversationId("<script>alert('xss')</script>")).toBe(
+        false,
+      );
       expect(isValidConversationId("javascript:alert(1)")).toBe(false);
 
       // Path traversal
@@ -355,7 +461,9 @@ describe("Fireside pure functions", () => {
       expect(isValidConversationId("1704067200000-abc")).toBe(false);
 
       // Random part too long
-      expect(isValidConversationId("1704067200000-abcdefghijklmnop")).toBe(false);
+      expect(isValidConversationId("1704067200000-abcdefghijklmnop")).toBe(
+        false,
+      );
 
       // Wrong separator
       expect(isValidConversationId("1704067200000_abc123xyz")).toBe(false);
@@ -370,7 +478,8 @@ describe("Fireside pure functions", () => {
     it("generates a valid UUID", () => {
       const id = generateMessageId();
       // UUID v4 format: 8-4-4-4-12 hex characters
-      const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      const uuidPattern =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
       expect(id).toMatch(uuidPattern);
     });
 

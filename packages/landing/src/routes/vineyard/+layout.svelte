@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { GlassNavbar } from '@autumnsgrove/groveengine/ui';
+	import { GlassNavbar } from '@autumnsgrove/lattice/ui';
 	import { Home, Sparkles, TreePine, Type, Palette } from 'lucide-svelte';
 
 	interface Props {

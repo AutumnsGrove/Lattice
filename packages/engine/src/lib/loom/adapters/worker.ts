@@ -6,7 +6,7 @@
  *
  * @example
  * ```typescript
- * import { getWorkerDO, workerFetchJson } from '@autumnsgrove/groveengine/loom/worker';
+ * import { getWorkerDO, workerFetchJson } from '@autumnsgrove/lattice/loom/worker';
  *
  * // In a Hono route handler:
  * const data = await workerFetchJson<PostContent>(

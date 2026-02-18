@@ -11,8 +11,8 @@ import {
   getStats,
   getFlaggedContent,
   getRecentEvents,
-} from "@autumnsgrove/groveengine/thorn";
-import { isWayfinder } from "@autumnsgrove/groveengine/config";
+} from "@autumnsgrove/lattice/thorn";
+import { isWayfinder } from "@autumnsgrove/lattice/config";
 
 interface LumenUsageRow {
   task: string;

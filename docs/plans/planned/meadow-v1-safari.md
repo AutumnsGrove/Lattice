@@ -799,7 +799,7 @@ All mutations use `api.post()` / `api.delete()` from engine utils:
 #### 2. `/auth/callback/+server.ts`
 
 ```typescript
-import { createCallbackHandler } from "@autumnsgrove/groveengine/grafts/login/server";
+import { createCallbackHandler } from "@autumnsgrove/lattice/grafts/login/server";
 export const GET = createCallbackHandler({ defaultReturnTo: "/feed" });
 ```
 
@@ -809,8 +809,8 @@ That's it. One line (plus import). The factory handles everything.
 
 ```typescript
 import { redirect } from "@sveltejs/kit";
-import { buildLoginUrl } from "@autumnsgrove/groveengine/grafts/login";
-import { sanitizeReturnTo } from "@autumnsgrove/groveengine/utils";
+import { buildLoginUrl } from "@autumnsgrove/lattice/grafts/login";
+import { sanitizeReturnTo } from "@autumnsgrove/lattice/utils";
 
 export const load = async ({ url }) => {
   const returnTo = sanitizeReturnTo(url.searchParams.get("redirect"), "/feed");

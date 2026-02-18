@@ -30,7 +30,7 @@ binding = "DB"
 database_name = "groveauth"
 database_id = "45eae4c7-8ae7-4078-9218-8e1677a4360f"
 
-# D1 Database binding (GroveEngine data - email signups, etc.)
+# D1 Database binding (Lattice data - email signups, etc.)
 [[d1_databases]]
 binding = "ENGINE_DB"
 database_name = "grove-engine-db"

@@ -4,7 +4,7 @@ description: Semantic versioning strategy and release workflow
 category: specs
 specCategory: reference
 icon: tag
-lastUpdated: '2025-11-26'
+lastUpdated: "2025-11-26"
 aliases: []
 tags:
   - versioning
@@ -35,13 +35,13 @@ tags:
                  Growth in plenty, resilience through hardship.
 ```
 
-> *Each ring records a season—growth in plenty, resilience through hardship.*
+> _Each ring records a season—growth in plenty, resilience through hardship._
 
 Grove's semantic versioning system defining how Lattice evolves and updates propagate to customer repositories. Covers major/minor/patch conventions, publishing workflows, breaking change protocols, and the Renovate-powered auto-update pipeline.
 
 **Public Name:** Seasons
 **Internal Name:** GroveSeasons
-**Package:** `@autumnsgrove/groveengine`
+**Package:** `@autumnsgrove/lattice`
 **Registry:** npmjs.com (public)
 
 Seasons mark the passage of time in a forest. Spring brings new growth, summer matures it, autumn harvests, winter rests. Each season builds on the last, each version a new ring in the trunk.
@@ -52,7 +52,7 @@ Seasons is Grove's versioning system: how Lattice evolves, how updates propagate
 
 ## Overview
 
-GroveEngine follows [Semantic Versioning 2.0.0](https://semver.org/) for all releases. This document defines how versions are managed, how releases are published, and how updates propagate to customer repositories.
+Lattice follows [Semantic Versioning 2.0.0](https://semver.org/) for all releases. This document defines how versions are managed, how releases are published, and how updates propagate to customer repositories.
 
 ---
 
@@ -110,6 +110,7 @@ Increment MAJOR when making **incompatible API changes** that require customer a
 - Renamed exports without backwards compatibility
 
 **Examples:**
+
 - `PostCard` component removes required `post` prop
 - `createSession()` function signature changes
 - `users` table schema changes column names
@@ -126,6 +127,7 @@ Increment MINOR when adding **backwards-compatible functionality**:
 - New features that don't affect existing APIs
 
 **Examples:**
+
 - New `Newsletter` component added
 - `PostCard` gets optional `showTags` prop
 - New `formatRelativeDate()` utility function
@@ -143,6 +145,7 @@ Increment PATCH for **backwards-compatible bug fixes**:
 - Dependency updates (non-breaking)
 
 **Examples:**
+
 - Fix XSS vulnerability in markdown renderer
 - Fix mobile layout issue in `Header` component
 - Improve database query performance
@@ -189,6 +192,7 @@ Use `-beta.x` suffix for testing before stable releases:
 ```
 
 **When to use beta:**
+
 - Major new features that need testing
 - Database migrations that affect existing data
 - Significant UI/UX changes
@@ -248,7 +252,7 @@ pnpm version prerelease --preid=beta  # 1.2.0 -> 1.2.1-beta.0
 pnpm publish --tag beta --access public
 
 # Customers can install beta:
-# pnpm add @groveengine/core@beta
+# pnpm add @lattice/core@beta
 ```
 
 ### Automated Publishing (CI/CD)
@@ -262,7 +266,7 @@ name: Publish to npm
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 jobs:
   publish:
@@ -276,9 +280,9 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          registry-url: 'https://registry.npmjs.org'
-          cache: 'pnpm'
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
+          cache: "pnpm"
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm test
@@ -306,7 +310,7 @@ Recommended version constraints for customer repositories:
 ```json
 {
   "dependencies": {
-    "@groveengine/core": "^1.0.0"
+    "@lattice/core": "^1.0.0"
   }
 }
 ```
@@ -319,7 +323,7 @@ Recommended version constraints for customer repositories:
     ┌─────────────────────────────────────────────────────────────┐
     │                                                             │
     │  "dependencies": {                                          │
-    │    "@groveengine/core": "^1.0.0"                            │
+    │    "@lattice/core": "^1.0.0"                            │
     │  }                     ▲                                    │
     │                        │                                    │
     │                        └── The caret (^) is your friend     │
@@ -339,13 +343,14 @@ Recommended version constraints for customer repositories:
     1.2.3     ───▶    Exactly 1.2.3            ⛔ Avoid
                       │
                       └── Misses security patches!
-                      
+
     *         ───▶    Any version               🚫 Never use
                       │
                       └── Chaos. Breaking changes everywhere.
 ```
 
 **Version constraint meanings:**
+
 - `^1.2.3` - Allows `>=1.2.3 <2.0.0` (recommended)
 - `~1.2.3` - Allows `>=1.2.3 <1.3.0` (conservative)
 - `1.2.3` - Exact version only (not recommended)
@@ -359,7 +364,7 @@ Recommended version constraints for customer repositories:
 
 ```mermaid
 sequenceDiagram
-    participant E as GroveEngine Repo
+    participant E as Lattice Repo
     participant N as npm Registry
     participant R as Renovate Bot
     participant C as Customer Repo
@@ -393,16 +398,16 @@ sequenceDiagram
 
 Typical update propagation timeline:
 
-| Event | Time |
-|-------|------|
-| Engine publishes new version | T+0 |
-| npm registry indexes package | T+1 minute |
-| Renovate detects update | T+1 hour (worst case) |
-| PR opened on customer repo | T+1 hour |
-| CI runs build & tests | T+1.5 hours |
-| Auto-merge (if passing) | T+1.5 hours |
-| Deploy to Cloudflare | T+2 hours |
-| Customer site running new version | T+2 hours |
+| Event                             | Time                  |
+| --------------------------------- | --------------------- |
+| Engine publishes new version      | T+0                   |
+| npm registry indexes package      | T+1 minute            |
+| Renovate detects update           | T+1 hour (worst case) |
+| PR opened on customer repo        | T+1 hour              |
+| CI runs build & tests             | T+1.5 hours           |
+| Auto-merge (if passing)           | T+1.5 hours           |
+| Deploy to Cloudflare              | T+2 hours             |
+| Customer site running new version | T+2 hours             |
 
 **Note:** Emergency security patches can be expedited by manually triggering Renovate or updating dependencies directly.
 
@@ -472,12 +477,13 @@ When a breaking change is necessary:
 
 Create a migration guide in the release notes:
 
-```markdown
+````markdown
 ## Migrating to v2.0.0
 
 ### Step 1: Update component usage
 
 Find and replace in your codebase:
+
 - `<PostCard post=` → `<PostCard data=`
 - `import { post }` → `import { data }`
 
@@ -486,15 +492,17 @@ Find and replace in your codebase:
 ```bash
 wrangler d1 execute grove-blog --command "ALTER TABLE users RENAME COLUMN email TO email_address;"
 ```
+````
 
 ### Step 3: Update and test
 
 ```bash
-pnpm update @groveengine/core
+pnpm update @lattice/core
 pnpm build
 pnpm test
 ```
-```
+
+````
 
 ### 3. Consider Deprecation Period
 
@@ -508,7 +516,7 @@ export let data: Post = post; // Backwards compatible
 
 // v2.0.0 - Remove deprecated prop
 export let data: Post;
-```
+````
 
 ---
 
@@ -529,24 +537,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
 - New feature being developed
 
 ## [1.1.0] - 2025-11-26
 
 ### Added
+
 - `Newsletter` component for email signups
 - `formatRelativeDate()` utility function
 
 ### Changed
+
 - Improved mobile responsiveness in `Header`
 
 ### Fixed
+
 - XSS vulnerability in markdown renderer
 - Session cookie not persisting on Safari
 
 ## [1.0.0] - 2025-11-01
 
 ### Added
+
 - Initial release with core blog functionality
 - Post management (CRUD)
 - Magic code authentication
@@ -572,13 +585,14 @@ Use these categories in the changelog:
 ### Initial Setup
 
 1. Create npm organization at https://www.npmjs.com/org/create
-   - Organization name: `groveengine`
-   - This reserves the `@groveengine` scope
+   - Organization name: `lattice`
+   - This reserves the `@lattice` scope
 
 2. Configure package.json:
+
    ```json
    {
-     "name": "@groveengine/core",
+     "name": "@lattice/core",
      "publishConfig": {
        "access": "public"
      }
@@ -606,22 +620,22 @@ For CI/CD publishing, create an automation token:
 cat package.json | grep version
 
 # Published version on npm
-npm view @groveengine/core version
+npm view @lattice/core version
 
 # All published versions
-npm view @groveengine/core versions --json
+npm view @lattice/core versions --json
 ```
 
 ### Check Customer Dependencies
 
 ```bash
 # In customer repo
-pnpm list @groveengine/core
+pnpm list @lattice/core
 
 # Check for outdated
-pnpm outdated @groveengine/core
+pnpm outdated @lattice/core
 ```
 
 ---
 
-*Last Updated: November 2025*
+_Last Updated: November 2025_

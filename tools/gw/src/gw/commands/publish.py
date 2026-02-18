@@ -40,7 +40,7 @@ def publish() -> None:
 @publish.command("npm")
 @click.option("--bump", type=click.Choice(["patch", "minor", "major"]), help="Version bump type")
 @click.option("--version", "explicit_version", help="Explicit version (e.g., 1.0.0)")
-@click.option("--package", "-p", default="@autumnsgrove/groveengine", help="Package to publish (default: groveengine)")
+@click.option("--package", "-p", default="@autumnsgrove/lattice", help="Package to publish (default: lattice)")
 @click.option("--dry-run", is_flag=True, help="Preview without executing")
 @click.option("--skip-build", is_flag=True, help="Skip the build step")
 @click.option("--skip-commit", is_flag=True, help="Skip git commit and push")

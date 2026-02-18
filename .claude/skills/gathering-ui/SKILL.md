@@ -128,7 +128,7 @@ Phase: SKETCH
 
 Phase: COLOR
 - Apply seasonal palette
-- Import from @autumnsgrove/groveengine/ui/nature
+- Import from @autumnsgrove/lattice/ui/nature
 
 Phase: TEXTURE
 - Add randomized forests if appropriate

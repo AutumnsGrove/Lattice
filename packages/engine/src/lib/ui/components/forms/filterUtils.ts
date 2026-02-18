@@ -4,7 +4,7 @@
  *
  * @example
  * ```typescript
- * import { createTextFilter, createMultiFieldFilter } from '@autumnsgrove/groveengine';
+ * import { createTextFilter, createMultiFieldFilter } from '@autumnsgrove/lattice';
  *
  * const filterPost = createTextFilter(['title', 'description']);
  * <ContentSearch items={posts} filterFn={filterPost} />
@@ -15,7 +15,7 @@
  * Normalize text for searching (lowercase, trim)
  */
 export function normalizeSearchText(text: string): string {
-	return text.toLowerCase().trim();
+  return text.toLowerCase().trim();
 }
 
 /**
@@ -25,8 +25,11 @@ export function normalizeSearchText(text: string): string {
  * @param normalizedText - Already normalized text to search in
  * @param normalizedQuery - Already normalized query to search for
  */
-export function includesNormalized(normalizedText: string, normalizedQuery: string): boolean {
-	return normalizedText.includes(normalizedQuery);
+export function includesNormalized(
+  normalizedText: string,
+  normalizedQuery: string,
+): boolean {
+  return normalizedText.includes(normalizedQuery);
 }
 
 /**
@@ -37,7 +40,7 @@ export function includesNormalized(normalizedText: string, normalizedQuery: stri
  * @param query - Query to search for (will be normalized)
  */
 export function textIncludes(text: string, query: string): boolean {
-	return normalizeSearchText(text).includes(normalizeSearchText(query));
+  return normalizeSearchText(text).includes(normalizeSearchText(query));
 }
 
 /**
@@ -53,19 +56,19 @@ export function textIncludes(text: string, query: string): boolean {
  * ```
  */
 export function createTextFilter<T extends Record<string, unknown>>(
-	fields: (keyof T)[]
+  fields: (keyof T)[],
 ): (item: T, query: string) => boolean {
-	return (item: T, query: string) => {
-		const normalizedQuery = normalizeSearchText(query);
-		return fields.some(field => {
-			const value = item[field];
-			if (typeof value === 'string') {
-				// Use includesNormalized to avoid double normalization
-				return includesNormalized(normalizeSearchText(value), normalizedQuery);
-			}
-			return false;
-		});
-	};
+  return (item: T, query: string) => {
+    const normalizedQuery = normalizeSearchText(query);
+    return fields.some((field) => {
+      const value = item[field];
+      if (typeof value === "string") {
+        // Use includesNormalized to avoid double normalization
+        return includesNormalized(normalizeSearchText(value), normalizedQuery);
+      }
+      return false;
+    });
+  };
 }
 
 /**
@@ -82,41 +85,44 @@ export function createTextFilter<T extends Record<string, unknown>>(
  * ```
  */
 export function createMultiFieldFilter<T extends Record<string, unknown>>(
-	textFields: (keyof T)[],
-	arrayFields: (keyof T)[] = []
+  textFields: (keyof T)[],
+  arrayFields: (keyof T)[] = [],
 ): (item: T, query: string) => boolean {
-	return (item: T, query: string) => {
-		const normalizedQuery = normalizeSearchText(query);
+  return (item: T, query: string) => {
+    const normalizedQuery = normalizeSearchText(query);
 
-		// Check text fields
-		const matchesText = textFields.some(field => {
-			const value = item[field];
-			if (typeof value === 'string') {
-				// Use includesNormalized to avoid double normalization
-				return includesNormalized(normalizeSearchText(value), normalizedQuery);
-			}
-			return false;
-		});
+    // Check text fields
+    const matchesText = textFields.some((field) => {
+      const value = item[field];
+      if (typeof value === "string") {
+        // Use includesNormalized to avoid double normalization
+        return includesNormalized(normalizeSearchText(value), normalizedQuery);
+      }
+      return false;
+    });
 
-		if (matchesText) return true;
+    if (matchesText) return true;
 
-		// Check array fields
-		const matchesArray = arrayFields.some(field => {
-			const value = item[field];
-			if (Array.isArray(value)) {
-				return value.some(element => {
-					if (typeof element === 'string') {
-						// Use includesNormalized to avoid double normalization
-						return includesNormalized(normalizeSearchText(element), normalizedQuery);
-					}
-					return false;
-				});
-			}
-			return false;
-		});
+    // Check array fields
+    const matchesArray = arrayFields.some((field) => {
+      const value = item[field];
+      if (Array.isArray(value)) {
+        return value.some((element) => {
+          if (typeof element === "string") {
+            // Use includesNormalized to avoid double normalization
+            return includesNormalized(
+              normalizeSearchText(element),
+              normalizedQuery,
+            );
+          }
+          return false;
+        });
+      }
+      return false;
+    });
 
-		return matchesArray;
-	};
+    return matchesArray;
+  };
 }
 
 /**
@@ -156,25 +162,25 @@ export function createMultiFieldFilter<T extends Record<string, unknown>>(
  * ```
  */
 export function precomputeLowercaseFields<T extends Record<string, unknown>>(
-	items: T[],
-	fields: (keyof T)[]
+  items: T[],
+  fields: (keyof T)[],
 ): (T & Record<string, unknown>)[] {
-	return items.map(item => {
-		const computed: Record<string, unknown> = { ...item };
+  return items.map((item) => {
+    const computed: Record<string, unknown> = { ...item };
 
-		fields.forEach(field => {
-			const value = item[field];
-			if (typeof value === 'string') {
-				computed[`${String(field)}Lower`] = value.toLowerCase();
-			} else if (Array.isArray(value)) {
-				computed[`${String(field)}Lower`] = value.map(v =>
-					typeof v === 'string' ? v.toLowerCase() : v
-				);
-			}
-		});
+    fields.forEach((field) => {
+      const value = item[field];
+      if (typeof value === "string") {
+        computed[`${String(field)}Lower`] = value.toLowerCase();
+      } else if (Array.isArray(value)) {
+        computed[`${String(field)}Lower`] = value.map((v) =>
+          typeof v === "string" ? v.toLowerCase() : v,
+        );
+      }
+    });
 
-		return computed as T & Record<string, unknown>;
-	});
+    return computed as T & Record<string, unknown>;
+  });
 }
 
 /**
@@ -191,25 +197,25 @@ export function precomputeLowercaseFields<T extends Record<string, unknown>>(
  * ```
  */
 export function createFuzzyFilter<T extends Record<string, unknown>>(
-	fields: (keyof T)[],
-	minMatchLength = 2
+  fields: (keyof T)[],
+  minMatchLength = 2,
 ): (item: T, query: string) => boolean {
-	return (item: T, query: string) => {
-		if (query.length < minMatchLength) return true;
+  return (item: T, query: string) => {
+    if (query.length < minMatchLength) return true;
 
-		const normalizedQuery = normalizeSearchText(query);
+    const normalizedQuery = normalizeSearchText(query);
 
-		return fields.some(field => {
-			const value = item[field];
-			if (typeof value === 'string') {
-				const normalizedValue = normalizeSearchText(value);
-				// Split into words and check if any word starts with the query
-				const words = normalizedValue.split(/\s+/);
-				return words.some(word => word.startsWith(normalizedQuery));
-			}
-			return false;
-		});
-	};
+    return fields.some((field) => {
+      const value = item[field];
+      if (typeof value === "string") {
+        const normalizedValue = normalizeSearchText(value);
+        // Split into words and check if any word starts with the query
+        const words = normalizedValue.split(/\s+/);
+        return words.some((word) => word.startsWith(normalizedQuery));
+      }
+      return false;
+    });
+  };
 }
 
 /**
@@ -226,11 +232,11 @@ export function createFuzzyFilter<T extends Record<string, unknown>>(
  * ```
  */
 export function combineFilters<T>(
-	filters: Array<(item: T, query: string) => boolean>
+  filters: Array<(item: T, query: string) => boolean>,
 ): (item: T, query: string) => boolean {
-	return (item: T, query: string) => {
-		return filters.every(filter => filter(item, query));
-	};
+  return (item: T, query: string) => {
+    return filters.every((filter) => filter(item, query));
+  };
 }
 
 /**
@@ -247,28 +253,32 @@ export function combineFilters<T>(
  * ```
  */
 export function createDateFilter<T extends Record<string, unknown>>(
-	dateField: keyof T,
-	startDate?: Date,
-	endDate?: Date
+  dateField: keyof T,
+  startDate?: Date,
+  endDate?: Date,
 ): (item: T, query: string) => boolean {
-	// Date filters don't use the query string, but must match the filterFn signature
-	return (item: T, _query: string) => {
-		const dateValue = item[dateField];
-		if (!dateValue) return false;
+  // Date filters don't use the query string, but must match the filterFn signature
+  return (item: T, _query: string) => {
+    const dateValue = item[dateField];
+    if (!dateValue) return false;
 
-		// Validate dateValue is a valid date type before constructing Date
-		if (typeof dateValue !== 'string' && typeof dateValue !== 'number' && !(dateValue instanceof Date)) {
-			return false;
-		}
+    // Validate dateValue is a valid date type before constructing Date
+    if (
+      typeof dateValue !== "string" &&
+      typeof dateValue !== "number" &&
+      !(dateValue instanceof Date)
+    ) {
+      return false;
+    }
 
-		const itemDate = new Date(dateValue);
+    const itemDate = new Date(dateValue);
 
-		// Check if the date is valid (invalid dates return NaN for getTime())
-		if (isNaN(itemDate.getTime())) return false;
+    // Check if the date is valid (invalid dates return NaN for getTime())
+    if (isNaN(itemDate.getTime())) return false;
 
-		if (startDate && itemDate < startDate) return false;
-		if (endDate && itemDate > endDate) return false;
+    if (startDate && itemDate < startDate) return false;
+    if (endDate && itemDate > endDate) return false;
 
-		return true;
-	};
+    return true;
+  };
 }

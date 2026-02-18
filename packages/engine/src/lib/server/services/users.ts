@@ -6,7 +6,7 @@
  *
  * @example
  * ```typescript
- * import { getUserByGroveAuthId, getUserFromSession } from '@autumnsgrove/groveengine/services';
+ * import { getUserByGroveAuthId, getUserFromSession } from '@autumnsgrove/lattice/services';
  *
  * // Get user by GroveAuth ID (from token)
  * const user = await getUserByGroveAuthId(db, groveAuthId);

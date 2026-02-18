@@ -10,15 +10,17 @@
 
 ## Overview
 
-Integrate Amber's ZIP export system into GroveEngine so Grove users get proper ZIP exports (with markdown files, media, and manifest) instead of the current JSON export.
+Integrate Amber's ZIP export system into Lattice so Grove users get proper ZIP exports (with markdown files, media, and manifest) instead of the current JSON export.
 
 ### Current State
+
 - `POST /api/export` returns immediate JSON download
 - No async processing (times out on large exports)
 - No media files included (just URLs)
 - No markdown files (raw JSON data)
 
 ### Target State
+
 - Async export with polling for status
 - Streaming ZIP creation via Durable Objects
 - Posts as `.md` files with YAML frontmatter
@@ -32,16 +34,18 @@ Integrate Amber's ZIP export system into GroveEngine so Grove users get proper Z
 
 **Recommended: Option B — Port to Engine**
 
-Copy Amber's export utilities directly into GroveEngine rather than using service bindings.
+Copy Amber's export utilities directly into Lattice rather than using service bindings.
 
 **Rationale:**
-- GroveEngine already has its own R2 bucket and storage patterns
+
+- Lattice already has its own R2 bucket and storage patterns
 - Avoids cross-service complexity and additional wrangler configuration
 - Amber's export system is self-contained (~400 lines of core code)
 - No dependency on Amber being deployed or maintained
 - Simpler for Grove's single-tenant-per-request architecture
 
 **Files to port:**
+
 - `ExportJobV2.ts` → `packages/engine/src/lib/server/services/export/ExportJob.ts`
 - `zipStream.ts` → `packages/engine/src/lib/server/services/export/zipStream.ts`
 
@@ -97,7 +101,8 @@ export/
 
 Key adaptations from Amber's `ExportJobV2.ts`:
 
-1. **Query GroveEngine's schema** (not Amber's `storage_files`):
+1. **Query Lattice's schema** (not Amber's `storage_files`):
+
    ```typescript
    // Posts query
    SELECT id, slug, title, content, excerpt, published_at, tags, status
@@ -115,13 +120,14 @@ Key adaptations from Amber's `ExportJobV2.ts`:
    WHERE tenant_id = ? AND deleted_at IS NULL
    ```
 
-2. **Use GroveEngine's R2 bucket binding** (`R2_BUCKET` or `MEDIA_BUCKET`)
+2. **Use Lattice's R2 bucket binding** (`R2_BUCKET` or `MEDIA_BUCKET`)
 
-3. **Integrate with GroveEngine's auth pattern** (tenant from locals, not user session)
+3. **Integrate with Lattice's auth pattern** (tenant from locals, not user session)
 
 #### 1.3 Port zipStream.ts
 
 Direct port with minimal changes:
+
 - Add `fflate` dependency to engine package
 - Keep `COMPRESSION_LEVEL: 0` for Worker CPU limits
 - Keep 5MB multipart upload chunking
@@ -148,35 +154,47 @@ pnpm add fflate
 
 export const POST: RequestHandler = async ({ request, locals, platform }) => {
   const tenantId = locals.tenantId;
-  if (!tenantId) return error(401, 'Unauthorized');
+  if (!tenantId) return error(401, "Unauthorized");
 
   const { type, filters } = await request.json();
 
   // Check for existing in-progress export
-  const existing = await platform.env.DB.prepare(`
+  const existing = await platform.env.DB.prepare(
+    `
     SELECT id FROM tenant_exports
     WHERE tenant_id = ? AND status IN ('pending', 'processing')
-  `).bind(tenantId).first();
+  `,
+  )
+    .bind(tenantId)
+    .first();
 
   if (existing) {
-    return error(409, 'An export is already in progress');
+    return error(409, "An export is already in progress");
   }
 
   // Create export record
   const exportId = crypto.randomUUID();
-  await platform.env.DB.prepare(`
+  await platform.env.DB.prepare(
+    `
     INSERT INTO tenant_exports (id, tenant_id, export_type, filter_params)
     VALUES (?, ?, ?, ?)
-  `).bind(exportId, tenantId, type, JSON.stringify(filters || {})).run();
+  `,
+  )
+    .bind(exportId, tenantId, type, JSON.stringify(filters || {}))
+    .run();
 
   // Trigger Durable Object (fire-and-forget)
   const doId = platform.env.EXPORT_JOBS.idFromName(exportId);
   const doStub = platform.env.EXPORT_JOBS.get(doId);
   platform.context.waitUntil(
-    doStub.fetch(new Request(`https://internal/?action=start&exportId=${exportId}&tenantId=${tenantId}`))
+    doStub.fetch(
+      new Request(
+        `https://internal/?action=start&exportId=${exportId}&tenantId=${tenantId}`,
+      ),
+    ),
   );
 
-  return json({ export_id: exportId, status: 'pending' }, { status: 202 });
+  return json({ export_id: exportId, status: "pending" }, { status: 202 });
 };
 ```
 
@@ -192,11 +210,15 @@ export const GET: RequestHandler = async ({ params, locals, platform }) => {
   const tenantId = locals.tenantId;
   const exportId = params.id;
 
-  const record = await platform.env.DB.prepare(`
+  const record = await platform.env.DB.prepare(
+    `
     SELECT * FROM tenant_exports WHERE id = ? AND tenant_id = ?
-  `).bind(exportId, tenantId).first();
+  `,
+  )
+    .bind(exportId, tenantId)
+    .first();
 
-  if (!record) return error(404, 'Export not found');
+  if (!record) return error(404, "Export not found");
 
   return json(record);
 };
@@ -211,19 +233,24 @@ export const GET: RequestHandler = async ({ params, locals, platform }) => {
 // Response: { download_url, expires_at, size_bytes, file_count }
 
 export const GET: RequestHandler = async ({ params, locals, platform }) => {
-  const record = await platform.env.DB.prepare(`
+  const record = await platform.env.DB.prepare(
+    `
     SELECT * FROM tenant_exports WHERE id = ? AND tenant_id = ?
-  `).bind(params.id, locals.tenantId).first();
+  `,
+  )
+    .bind(params.id, locals.tenantId)
+    .first();
 
-  if (!record) return error(404, 'Export not found');
-  if (record.status !== 'completed') return error(400, 'Export not ready');
-  if (new Date(record.expires_at) < new Date()) return error(410, 'Export expired');
+  if (!record) return error(404, "Export not found");
+  if (record.status !== "completed") return error(400, "Export not ready");
+  if (new Date(record.expires_at) < new Date())
+    return error(410, "Export expired");
 
   return json({
     download_url: `/api/export/download/${encodeURIComponent(record.r2_key)}`,
     expires_at: record.expires_at,
     size_bytes: record.size_bytes,
-    file_count: record.file_count
+    file_count: record.file_count,
   });
 };
 ```
@@ -241,20 +268,20 @@ export const GET: RequestHandler = async ({ params, locals, platform }) => {
 
   // Verify ownership via key pattern (exports/{tenantId}/...)
   if (!r2Key.startsWith(`exports/${locals.tenantId}/`)) {
-    return error(403, 'Forbidden');
+    return error(403, "Forbidden");
   }
 
   const object = await platform.env.R2_BUCKET.get(r2Key);
-  if (!object) return error(404, 'File not found');
+  if (!object) return error(404, "File not found");
 
-  const filename = r2Key.split('/').pop() || 'export.zip';
+  const filename = r2Key.split("/").pop() || "export.zip";
 
   return new Response(object.body, {
     headers: {
-      'Content-Type': 'application/zip',
-      'Content-Disposition': `attachment; filename="${filename}"`,
-      'Content-Length': object.size.toString()
-    }
+      "Content-Type": "application/zip",
+      "Content-Disposition": `attachment; filename="${filename}"`,
+      "Content-Length": object.size.toString(),
+    },
   });
 };
 ```
@@ -271,16 +298,18 @@ function postToMarkdown(post: Post): string {
     title: post.title,
     slug: post.slug,
     date: post.published_at,
-    tags: JSON.parse(post.tags || '[]'),
+    tags: JSON.parse(post.tags || "[]"),
     status: post.status,
-    excerpt: post.excerpt
+    excerpt: post.excerpt,
   };
 
   return `---
 ${Object.entries(frontmatter)
   .filter(([_, v]) => v != null)
-  .map(([k, v]) => `${k}: ${typeof v === 'string' ? `"${v}"` : JSON.stringify(v)}`)
-  .join('\n')}
+  .map(
+    ([k, v]) => `${k}: ${typeof v === "string" ? `"${v}"` : JSON.stringify(v)}`,
+  )
+  .join("\n")}
 ---
 
 ${post.content}
@@ -448,36 +477,43 @@ crons = [
 // In worker entry point or scheduled handler
 
 async function processPendingExports(env: Env) {
-  const pending = await env.DB.prepare(`
+  const pending = await env.DB.prepare(
+    `
     SELECT id, tenant_id FROM tenant_exports
     WHERE status = 'pending'
        OR (status = 'processing' AND r2_key IS NULL
            AND created_at < datetime('now', '-2 minutes'))
     LIMIT 5
-  `).all();
+  `,
+  ).all();
 
   for (const exp of pending.results) {
     const doId = env.EXPORT_JOBS.idFromName(exp.id);
     const doStub = env.EXPORT_JOBS.get(doId);
-    await doStub.fetch(new Request(
-      `https://internal/?action=process-sync&exportId=${exp.id}&tenantId=${exp.tenant_id}`
-    ));
+    await doStub.fetch(
+      new Request(
+        `https://internal/?action=process-sync&exportId=${exp.id}&tenantId=${exp.tenant_id}`,
+      ),
+    );
   }
 }
 
 async function deleteExpiredExports(env: Env) {
-  const expired = await env.DB.prepare(`
+  const expired = await env.DB.prepare(
+    `
     SELECT id, r2_key FROM tenant_exports
     WHERE status = 'completed' AND expires_at < datetime('now')
     LIMIT 50
-  `).all();
+  `,
+  ).all();
 
   for (const exp of expired.results) {
     if (exp.r2_key) {
       await env.R2_BUCKET.delete(exp.r2_key);
     }
-    await env.DB.prepare('DELETE FROM tenant_exports WHERE id = ?')
-      .bind(exp.id).run();
+    await env.DB.prepare("DELETE FROM tenant_exports WHERE id = ?")
+      .bind(exp.id)
+      .run();
   }
 }
 ```
@@ -488,15 +524,15 @@ async function deleteExpiredExports(env: Env) {
 
 #### Test Cases
 
-| Test | Description | Expected |
-|------|-------------|----------|
-| Small export | Export with <10 posts, 0 media | Completes in <30s |
-| Medium export | 50 posts, 20 images | Completes with chunking |
-| Large export | 500 posts, 100 images | Chunked processing, multipart upload |
-| Concurrent prevention | Start export while one running | 409 Conflict |
-| Missing media | Post references deleted image | Export continues, file skipped |
-| Expiration | Download after 7 days | 410 Gone |
-| Cancel/retry | Export fails, user retries | New export starts |
+| Test                  | Description                    | Expected                             |
+| --------------------- | ------------------------------ | ------------------------------------ |
+| Small export          | Export with <10 posts, 0 media | Completes in <30s                    |
+| Medium export         | 50 posts, 20 images            | Completes with chunking              |
+| Large export          | 500 posts, 100 images          | Chunked processing, multipart upload |
+| Concurrent prevention | Start export while one running | 409 Conflict                         |
+| Missing media         | Post references deleted image  | Export continues, file skipped       |
+| Expiration            | Download after 7 days          | 410 Gone                             |
+| Cancel/retry          | Export fails, user retries     | New export starts                    |
 
 #### Manual Testing Steps
 
@@ -574,13 +610,13 @@ async alarm() {
 
 ```typescript
 const ZIP_CONFIG = {
-  COMPRESSION_LEVEL: 0,  // Store only, no compression (Worker CPU limits)
+  COMPRESSION_LEVEL: 0, // Store only, no compression (Worker CPU limits)
 };
 
 // Stream directly from R2 to ZIP output
 await zipStreamer.addFile({
   filename: path,
-  data: r2Object.body,  // ReadableStream, not buffer
+  data: r2Object.body, // ReadableStream, not buffer
   size: file.size_bytes,
 });
 ```
@@ -614,9 +650,11 @@ if (currentSize >= MIN_PART_SIZE) {
 ## Dependencies
 
 **npm packages:**
+
 - `fflate` (^0.8.1) — ZIP compression library
 
 **Cloudflare bindings:**
+
 - `EXPORT_JOBS` — Durable Object namespace
 - `R2_BUCKET` — Existing R2 bucket for media
 - `DB` — Existing D1 database
@@ -633,5 +671,5 @@ If issues arise post-deployment:
 
 ---
 
-*Created: 2026-01-16*
-*Based on: Amber export system analysis*
+_Created: 2026-01-16_
+_Based on: Amber export system analysis_

@@ -1,9 +1,9 @@
 ---
 title: How Grove Protects Your Content from AI Scraping
-description: 'Shade: Grove''s seven-layer defense against AI crawlers and scrapers'
+description: "Shade: Grove's seven-layer defense against AI crawlers and scrapers"
 category: help
 section: privacy-security
-lastUpdated: '2025-12-25'
+lastUpdated: "2025-12-25"
 keywords:
   - ai
   - scraping
@@ -38,6 +38,7 @@ Internally, we call our AI protection system **[[shade]]**. Like the cool relief
 Cloudflare maintains a list of over 100 known AI crawler user agents. When these crawlers request your content, they're blocked before they reach it.
 
 **Crawlers we block include:**
+
 - GPTBot, ChatGPT-User (OpenAI)
 - ClaudeBot, anthropic-ai (Anthropic)
 - Google-Extended (Google AI training)
@@ -78,11 +79,13 @@ Before accessing Grove content, visitors complete a brief verification check usi
 Web archiving services like the Internet Archive preserve snapshots of public websites, sometimes indefinitely. We block archive crawlers so that if you delete content, it stays deleted—not preserved in public archives forever.
 
 **What we block:**
+
 - Internet Archive / Wayback Machine
 - Archive-It and other automated archive services
 - Common Crawl (also used for AI training)
 
 **What we can't block:**
+
 - Personal archiving tools (Raindrop, Pocket, browser extensions)
 - Services that ignore robots.txt (like archive.today)
 
@@ -141,7 +144,7 @@ For technically-minded users who want to verify our protections:
 
 **Check response headers:** Look for `X-Robots-Tag: noai, noimageai` in response headers.
 
-**Review our spec:** The complete technical specification is in our [Shade spec document](https://github.com/AutumnsGrove/GroveEngine/blob/main/docs/specs/shade-spec.md).
+**Review our spec:** The complete technical specification is in our [Shade spec document](https://github.com/AutumnsGrove/Lattice/blob/main/docs/specs/shade-spec.md).
 
 ## The verification checkpoint
 
@@ -154,17 +157,20 @@ Once verified, you won't see it again for a week. The verification is stored in 
 ## Related resources
 
 **Cloudflare's documentation:**
+
 - [Cloudflare Bot Management](https://developers.cloudflare.com/bots/)
 - [Cloudflare Turnstile](https://developers.cloudflare.com/turnstile/)
 
 **Community resources:**
+
 - [Dark Visitors](https://darkvisitors.com/) — Community-maintained AI crawler database
 - [AI Crawler User Agents List](https://www.searchenginejournal.com/ai-crawler-user-agents-list/) — Comprehensive list
 
 **Grove documentation:**
+
 - [Understanding your privacy](/knowledge/help/understanding-your-privacy) — Broader privacy overview
 - [Grove](/philosophy/why-grove) — Our philosophy and values
 
 ---
 
-*In a forest full of harvesters, this grove stays shaded.*
+_In a forest full of harvesters, this grove stays shaded._

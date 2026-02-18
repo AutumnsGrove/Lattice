@@ -4,12 +4,12 @@
 // ImageGallery, Lightbox, LightboxCaption, ZoomableImage
 //
 // Usage:
-//   import { ImageGallery, Lightbox } from '@groveengine/ui/gallery';
+//   import { ImageGallery, Lightbox } from '@lattice/ui/gallery';
 
 // Gallery components
-export { default as ImageGallery } from './ImageGallery.svelte';
-export { default as Lightbox } from './Lightbox.svelte';
-export { default as LightboxCaption } from './LightboxCaption.svelte';
-export { default as ZoomableImage } from './ZoomableImage.svelte';
+export { default as ImageGallery } from "./ImageGallery.svelte";
+export { default as Lightbox } from "./Lightbox.svelte";
+export { default as LightboxCaption } from "./LightboxCaption.svelte";
+export { default as ZoomableImage } from "./ZoomableImage.svelte";
 
-export const GALLERY_VERSION = '0.2.0';
+export const GALLERY_VERSION = "0.2.0";

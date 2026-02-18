@@ -118,7 +118,7 @@ Meadow is the community layer of Grove. It provides a social feed where Wanderer
 - **Database:** Cloudflare D1 (shared `grove-engine-db`)
 - **Cache:** Cloudflare KV (feed pages, poll state, rate limits)
 - **Auth:** Better Auth via login.grove.place (service binding)
-- **UI Library:** `@autumnsgrove/groveengine` (GlassCard, AccountStatus, Header, Toast, Tabs)
+- **UI Library:** `@autumnsgrove/lattice` (GlassCard, AccountStatus, Header, Toast, Tabs)
 - **RSS Parsing:** `fast-xml-parser` (~30KB)
 
 ### System Diagram
@@ -592,7 +592,7 @@ interface PostCardProps {
 - Top 3 reaction emojis (size-scaled by count)
 - Bookmark toggle
 
-**Interactions:** All mutations use `api.post()` from `@autumnsgrove/groveengine/utils` with optimistic updates and toast feedback on errors.
+**Interactions:** All mutations use `api.post()` from `@autumnsgrove/lattice/utils` with optimistic updates and toast feedback on errors.
 
 ### Infinite scroll
 
@@ -811,7 +811,7 @@ Auth is a drop-in. The engine's auth infrastructure handles everything.
 **`/auth/callback/+server.ts`** — One meaningful line:
 
 ```typescript
-import { createCallbackHandler } from "@autumnsgrove/groveengine/grafts/login/server";
+import { createCallbackHandler } from "@autumnsgrove/lattice/grafts/login/server";
 export const GET = createCallbackHandler({ defaultReturnTo: "/feed" });
 ```
 
@@ -819,8 +819,8 @@ export const GET = createCallbackHandler({ defaultReturnTo: "/feed" });
 
 ```typescript
 import { redirect } from "@sveltejs/kit";
-import { buildLoginUrl } from "@autumnsgrove/groveengine/grafts/login";
-import { sanitizeReturnTo } from "@autumnsgrove/groveengine/utils";
+import { buildLoginUrl } from "@autumnsgrove/lattice/grafts/login";
+import { sanitizeReturnTo } from "@autumnsgrove/lattice/utils";
 
 export const load = async ({ url }) => {
   const returnTo = sanitizeReturnTo(url.searchParams.get("redirect"), "/feed");

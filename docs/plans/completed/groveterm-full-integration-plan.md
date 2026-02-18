@@ -2,13 +2,14 @@
 title: GroveTerm Full Integration Plan
 description: Complete rollout of interactive Grove terminology across the platform
 status: planning
-created: '2026-02-04'
-updated: '2026-02-04'
-depends_on: ['PR #947 - GroveTerm Simplification']
+created: "2026-02-04"
+updated: "2026-02-04"
+depends_on: ["PR #947 - GroveTerm Simplification"]
 ---
+
 # GroveTerm Full Integration Plan
 
-> *The grove speaks its own language. Every glowing word is an invitation to understand.*
+> _The grove speaks its own language. Every glowing word is an invitation to understand._
 
 ---
 
@@ -17,12 +18,14 @@ depends_on: ['PR #947 - GroveTerm Simplification']
 With the GroveTerm component simplified (internal manifest, no extra imports needed), we can now integrate it across the entire platform. This plan covers the complete rollout from admin pages to public-facing content.
 
 **What GroveTerm Does:**
+
 - Renders terminology as styled, interactive elements
 - Shows definitions on hover (tooltip) with full popup on click (fallback)
 - Color-codes by category (foundational, platform, content, tools, operations)
 - Teaches the Grove lexicon organically as Wanderers explore
 
 **Current State (after PR #947):**
+
 - Component simplified: `<GroveTerm term="bloom">blooms</GroveTerm>`
 - Initial integration in 3 admin pages (arbor dashboard, garden, account features)
 - 51 terms defined in grove-term-manifest.json
@@ -31,11 +34,11 @@ With the GroveTerm component simplified (internal manifest, no extra imports nee
 
 ## Key Decisions
 
-| Question | Decision | Rationale |
-|----------|----------|-----------|
-| `[[term]]` in user blogs? | **YES** | Wanderers should speak the language too |
-| GroveTerm in emails? | **Skip** | Can't render Svelte; small loss, not worth complexity |
-| Tooltip vs Popup? | **Tooltip primary, popup fallback** | Minimally intrusive; full Waystone behavior on click |
+| Question                  | Decision                            | Rationale                                             |
+| ------------------------- | ----------------------------------- | ----------------------------------------------------- |
+| `[[term]]` in user blogs? | **YES**                             | Wanderers should speak the language too               |
+| GroveTerm in emails?      | **Skip**                            | Can't render Svelte; small loss, not worth complexity |
+| Tooltip vs Popup?         | **Tooltip primary, popup fallback** | Minimally intrusive; full Waystone behavior on click  |
 
 ---
 
@@ -84,20 +87,20 @@ With the GroveTerm component simplified (internal manifest, no extra imports nee
 
 ### Target Files
 
-| File | Terms to Wrap | Priority |
-|------|---------------|----------|
-| `arbor/+page.svelte` | ✅ Rooted, Blooms | Done |
-| `arbor/garden/+page.svelte` | ✅ Garden, blooms | Done |
-| `arbor/account/FeaturesCard.svelte` | ✅ Wanderers | Done |
-| `arbor/analytics/+page.svelte` | Rings, Wanderers | High |
-| `arbor/settings/+page.svelte` | Grove, Garden, Foliage | High |
-| `arbor/curios/+page.svelte` | Curios | High |
-| `arbor/timeline/+page.svelte` | Trail | Medium |
-| `arbor/images/+page.svelte` | Amber | Medium |
-| `arbor/account/SubscriptionCard.svelte` | Rooted, membership | Medium |
-| `arbor/account/DataExportCard.svelte` | Blooms, Grove | Medium |
-| `arbor/reserved-usernames/+page.svelte` | Wanderers, Loam | Low |
-| `arbor/comped-invites/+page.svelte` | Wanderers | Low |
+| File                                    | Terms to Wrap          | Priority |
+| --------------------------------------- | ---------------------- | -------- |
+| `arbor/+page.svelte`                    | ✅ Rooted, Blooms      | Done     |
+| `arbor/garden/+page.svelte`             | ✅ Garden, blooms      | Done     |
+| `arbor/account/FeaturesCard.svelte`     | ✅ Wanderers           | Done     |
+| `arbor/analytics/+page.svelte`          | Rings, Wanderers       | High     |
+| `arbor/settings/+page.svelte`           | Grove, Garden, Foliage | High     |
+| `arbor/curios/+page.svelte`             | Curios                 | High     |
+| `arbor/timeline/+page.svelte`           | Trail                  | Medium   |
+| `arbor/images/+page.svelte`             | Amber                  | Medium   |
+| `arbor/account/SubscriptionCard.svelte` | Rooted, membership     | Medium   |
+| `arbor/account/DataExportCard.svelte`   | Blooms, Grove          | Medium   |
+| `arbor/reserved-usernames/+page.svelte` | Wanderers, Loam        | Low      |
+| `arbor/comped-invites/+page.svelte`     | Wanderers              | Low      |
 
 ### Implementation Pattern
 
@@ -113,6 +116,7 @@ With the GroveTerm component simplified (internal manifest, no extra imports nee
 ```
 
 ### Estimated Effort
+
 - ~2-3 hours for remaining 9 pages
 - Simple import + wrap pattern
 - No structural changes needed
@@ -125,30 +129,31 @@ With the GroveTerm component simplified (internal manifest, no extra imports nee
 
 ### Landing Page (`packages/landing`)
 
-| Location | Terms | Notes |
-|----------|-------|-------|
-| Homepage hero | Grove | "Your own grove on the indie web" |
-| Feature section | Garden, Blooms | "Tend your garden, grow your blooms" |
-| Pricing page | Grove, Rooted, Wanderer | Tier descriptions |
-| About page | Wayfinder, Pathfinder | Team/community roles |
+| Location        | Terms                   | Notes                                |
+| --------------- | ----------------------- | ------------------------------------ |
+| Homepage hero   | Grove                   | "Your own grove on the indie web"    |
+| Feature section | Garden, Blooms          | "Tend your garden, grow your blooms" |
+| Pricing page    | Grove, Rooted, Wanderer | Tier descriptions                    |
+| About page      | Wayfinder, Pathfinder   | Team/community roles                 |
 
 ### Knowledge Base (`landing/src/routes/knowledge`)
 
-| Location | Terms | Notes |
-|----------|-------|-------|
-| Help center hub | Waystone, Wanderer | Category descriptions |
-| Philosophy section | All foundational terms | Where the lexicon is explained |
-| Feature articles | Relevant platform terms | Rings, Curios, Trails, etc. |
+| Location           | Terms                   | Notes                          |
+| ------------------ | ----------------------- | ------------------------------ |
+| Help center hub    | Waystone, Wanderer      | Category descriptions          |
+| Philosophy section | All foundational terms  | Where the lexicon is explained |
+| Feature articles   | Relevant platform terms | Rings, Curios, Trails, etc.    |
 
 ### Onboarding Flow (`packages/plant`)
 
-| Location | Terms | Notes |
-|----------|-------|-------|
-| OnboardingChecklist.svelte | Wanderer, Rooted | Journey progress text |
-| Profile setup | Grove | "Your grove is almost ready" |
-| Success page | Rooted, Grove | "You've taken root!" |
+| Location                   | Terms            | Notes                        |
+| -------------------------- | ---------------- | ---------------------------- |
+| OnboardingChecklist.svelte | Wanderer, Rooted | Journey progress text        |
+| Profile setup              | Grove            | "Your grove is almost ready" |
+| Success page               | Rooted, Grove    | "You've taken root!"         |
 
 ### Estimated Effort
+
 - ~4-5 hours across 3 packages
 - May require adding GroveTerm to package dependencies
 - Some cross-package considerations
@@ -210,6 +215,7 @@ A visual grid showing all terms in a category:
 ### Knowledge Base Articles
 
 **1. "The Grove Lexicon" (Philosophy)**
+
 - Why we use custom terminology
 - The forest metaphor explained
 - Full glossary organized by category
@@ -247,6 +253,7 @@ Browse all 51 Grove terms in the [Lexicon Gallery](/knowledge/philosophy/grove-l
 ```
 
 ### Estimated Effort
+
 - ~3-4 hours for Vineyard section
 - ~2 hours for TermGallery component
 - ~3 hours for KB articles (2 articles)
@@ -271,8 +278,8 @@ Markdown Text → [Parse] → AST → [Plugin Transform] → Modified AST → [R
 
 ```typescript
 // packages/engine/src/lib/utils/remark-groveterm.ts
-import { visit } from 'unist-util-visit';
-import type { Root, Text } from 'mdast';
+import { visit } from "unist-util-visit";
+import type { Root, Text } from "mdast";
 
 /**
  * Remark plugin that transforms [[term]] syntax into GroveTerm components.
@@ -283,7 +290,7 @@ import type { Root, Text } from 'mdast';
  */
 export function remarkGroveTerm() {
   return (tree: Root) => {
-    visit(tree, 'text', (node: Text, index, parent) => {
+    visit(tree, "text", (node: Text, index, parent) => {
       if (!parent || index === undefined) return;
 
       // Match [[term]] or [[term|display text]]
@@ -302,13 +309,16 @@ export function remarkGroveTerm() {
 
         // Text before the match
         if (matchIndex > lastIndex) {
-          newNodes.push({ type: 'text', value: node.value.slice(lastIndex, matchIndex) });
+          newNodes.push({
+            type: "text",
+            value: node.value.slice(lastIndex, matchIndex),
+          });
         }
 
         // The GroveTerm element (rendered as custom HTML node for mdsvex)
         newNodes.push({
-          type: 'html',
-          value: `<GroveTerm term="${term}">${displayText || term}</GroveTerm>`
+          type: "html",
+          value: `<GroveTerm term="${term}">${displayText || term}</GroveTerm>`,
         });
 
         lastIndex = matchIndex + fullMatch.length;
@@ -316,7 +326,7 @@ export function remarkGroveTerm() {
 
       // Text after last match
       if (lastIndex < node.value.length) {
-        newNodes.push({ type: 'text', value: node.value.slice(lastIndex) });
+        newNodes.push({ type: "text", value: node.value.slice(lastIndex) });
       }
 
       // Replace original node with new nodes
@@ -336,11 +346,11 @@ export function remarkGroveTerm() {
 
 ```javascript
 // svelte.config.js or mdsvex.config.js
-import { remarkGroveTerm } from './src/lib/utils/remark-groveterm.js';
+import { remarkGroveTerm } from "./src/lib/utils/remark-groveterm.js";
 
 const mdsvexConfig = {
   remarkPlugins: [
-    remarkGroveTerm,  // Transform [[term]] syntax
+    remarkGroveTerm, // Transform [[term]] syntax
     // ... other plugins
   ],
 };
@@ -350,11 +360,13 @@ const mdsvexConfig = {
 
 ```markdown
 <!-- Input -->
+
 Welcome to my [[grove]]. Here you'll find my [[blooms]].
 
 I'm a [[wanderer|traveler]] who finally [[rooted|took root]].
 
 <!-- Output -->
+
 Welcome to my <GroveTerm term="grove">grove</GroveTerm>.
 Here you'll find my <GroveTerm term="blooms">blooms</GroveTerm>.
 
@@ -363,6 +375,7 @@ I'm a <GroveTerm term="wanderer">traveler</GroveTerm> who finally
 ```
 
 ### Estimated Effort
+
 - ~6-8 hours for remark plugin + tests
 - ~2-3 hours for integration across render pipelines
 - Testing across different content types
@@ -412,6 +425,7 @@ Click/Tap → Open full Waystone popup with complete definition, examples, relat
 - [ ] Invalid `[[syntax]]` (unknown term—render as plain text, don't break)
 
 ### Estimated Effort
+
 - ~4-6 hours for audits and fixes
 - May spawn follow-up issues
 
@@ -454,10 +468,10 @@ Week 5: Phase 5 (Polish)
 
 ### Quick Reference
 
-| Syntax | Result |
-|--------|--------|
-| `[[bloom]]` | Shows "bloom" linked to definition |
-| `[[bloom\|my writing]]` | Shows "my writing" linked to bloom definition |
+| Syntax                   | Result                                         |
+| ------------------------ | ---------------------------------------------- |
+| `[[bloom]]`              | Shows "bloom" linked to definition             |
+| `[[bloom\|my writing]]`  | Shows "my writing" linked to bloom definition  |
 | `[[wanderer\|visitors]]` | Shows "visitors" linked to wanderer definition |
 
 ### Best Practices
@@ -477,11 +491,13 @@ Week 5: Phase 5 (Polish)
 ## Success Metrics
 
 ### Qualitative
+
 - [ ] New Wanderers understand Grove terminology faster
 - [ ] Consistent language across all touchpoints
 - [ ] The lexicon feels alive and discoverable
 
 ### Quantitative
+
 - [ ] GroveTerm used in 50+ locations across codebase
 - [ ] All 51 terms accessible via interactive elements
 - [ ] Zero accessibility violations (axe-core)
@@ -493,8 +509,8 @@ Week 5: Phase 5 (Polish)
 
 - [Waystone Lexicon Elements](./waystone-lexicon-elements.md) — Original idea doc
 - [Grove Naming Philosophy](/docs/naming/grove-naming.md) — Source of truth for terms
-- [PR #947](https://github.com/AutumnsGrove/GroveEngine/pull/947) — GroveTerm simplification
+- [PR #947](https://github.com/AutumnsGrove/Lattice/pull/947) — GroveTerm simplification
 
 ---
 
-*The grove speaks. Let it teach.*
+_The grove speaks. Let it teach._

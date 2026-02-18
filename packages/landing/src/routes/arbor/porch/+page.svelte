@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { GlassCard, GroveTerm } from '@autumnsgrove/groveengine/ui';
+	import { GlassCard, GroveTerm } from '@autumnsgrove/lattice/ui';
 	import { MessageCircle, Clock, CheckCircle, Search, Filter, ArrowRight } from 'lucide-svelte';
 	import type { PageData } from './$types';
 

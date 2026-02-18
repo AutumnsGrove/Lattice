@@ -1,6 +1,6 @@
 <script lang="ts">
 	/**
-	 * @deprecated Use `ArborPanel` from `@autumnsgrove/groveengine/ui/arbor` instead.
+	 * @deprecated Use `ArborPanel` from `@autumnsgrove/lattice/ui/arbor` instead.
 	 * ArborPanel provides a full sidebar experience (collapse, mobile slide-in, utility bar)
 	 * that scales gracefully from 3 to 20+ nav items. AdminHeader remains available for
 	 * backwards compatibility but will not receive new features.

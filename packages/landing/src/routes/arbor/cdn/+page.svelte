@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { GlassCard, GlassButton } from '@autumnsgrove/groveengine/ui';
+	import { GlassCard, GlassButton } from '@autumnsgrove/lattice/ui';
 	import {
 		Upload,
 		Image,
@@ -145,7 +145,7 @@
 			try {
 				uploadProgress[i].progress = 50;
 
-				const response = await fetch('/api/arbor/cdn/upload', {
+				const response = await fetch('/api/arbor/cdn/upload', { // csrf-ok
 					method: 'POST',
 					body: formData
 				});
@@ -194,7 +194,7 @@
 
 	async function deleteFile(id: string) {
 		try {
-			const response = await fetch(`/api/arbor/cdn/files/${id}`, {
+			const response = await fetch(`/api/arbor/cdn/files/${id}`, { // csrf-ok
 				method: 'DELETE'
 			});
 
@@ -240,7 +240,7 @@
 		syncResult = null;
 
 		try {
-			const response = await fetch('/api/arbor/cdn/sync', {
+			const response = await fetch('/api/arbor/cdn/sync', { // csrf-ok
 				method: 'POST'
 			});
 

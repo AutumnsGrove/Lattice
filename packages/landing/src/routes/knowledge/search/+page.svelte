@@ -3,7 +3,7 @@
 	import Header from "$lib/components/Header.svelte";
 	import Footer from "$lib/components/Footer.svelte";
 	import SEO from "$lib/components/SEO.svelte";
-	import { ContentSearch } from "@autumnsgrove/groveengine";
+	import { ContentSearch } from "@autumnsgrove/lattice";
 
 	let { data } = $props();
 

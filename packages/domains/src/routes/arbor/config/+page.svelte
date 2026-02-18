@@ -2,7 +2,7 @@
 	import type { PageData } from './$types';
 	import { SEARCH_DEFAULTS } from '$lib/config';
 	import { untrack } from 'svelte';
-	import { GlassCard, GlassButton } from '@autumnsgrove/groveengine/ui';
+	import { GlassCard, GlassButton } from '@autumnsgrove/lattice/ui';
 
 	let { data }: { data: PageData } = $props();
 
@@ -24,7 +24,7 @@
 		errorMessage = '';
 
 		try {
-			const response = await fetch('/api/config', {
+			const response = await fetch('/api/config', { // csrf-ok
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({

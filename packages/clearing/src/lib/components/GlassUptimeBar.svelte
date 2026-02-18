@@ -6,7 +6,7 @@
 	 * Each day is a thin vertical bar colored by the worst status of that day.
 	 * Hover reveals details about specific days.
 	 */
-	import { cn } from '@autumnsgrove/groveengine/ui/utils';
+	import { cn } from '@autumnsgrove/lattice/ui/utils';
 	import { formatDateShort } from '$lib/utils/date';
 	import type { ComponentStatus, DailyStatus } from '$lib/types/status';
 	import { getStatusLabel } from '$lib/types/status';

@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { enhance } from "$app/forms";
-	import { GlassCard } from "@autumnsgrove/groveengine/ui";
-	import { TurnstileWidget } from "@autumnsgrove/groveengine/ui/forms";
+	import { GlassCard } from "@autumnsgrove/lattice/ui";
+	import { TurnstileWidget } from "@autumnsgrove/lattice/ui/forms";
 	import Header from "$lib/components/Header.svelte";
-	import { seasonStore } from "@autumnsgrove/groveengine/ui/chrome";
+	import { seasonStore } from "@autumnsgrove/lattice/ui/chrome";
 	import Footer from "$lib/components/Footer.svelte";
-	import { Logo } from "@autumnsgrove/groveengine/ui/nature";
+	import { Logo } from "@autumnsgrove/lattice/ui/nature";
 	import { CreditCard, Wrench, User, Hand, HelpCircle } from "lucide-svelte";
 	import type { ActionData, PageData } from "./$types";
 

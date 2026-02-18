@@ -1,9 +1,9 @@
 <script lang="ts">
 	import EmailSignup from '$lib/components/EmailSignup.svelte';
-	import { Logo, GroveSwap, GroveIntro } from '@autumnsgrove/groveengine/ui';
+	import { Logo, GroveSwap, GroveIntro } from '@autumnsgrove/lattice/ui';
 	import SEO from '$lib/components/SEO.svelte';
-	import { Header, Footer, type NavItem } from '@autumnsgrove/groveengine/ui/chrome';
-	import { seasonStore } from '@autumnsgrove/groveengine/ui/stores';
+	import { Header, Footer, type NavItem } from '@autumnsgrove/lattice/ui/chrome';
+	import { seasonStore } from '@autumnsgrove/lattice/ui/stores';
 	import { Trees, Users, Heart, Calendar, Zap, Sprout, ArrowRight } from 'lucide-svelte';
 
 	// Minimal navigation - just a way home

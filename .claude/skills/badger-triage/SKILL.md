@@ -33,7 +33,7 @@ Hive     Theme    User      Project  Changed
 
 ### Phase 1: DIG
 
-*The badger digs into the hive, surveying what needs organizing...*
+_The badger digs into the hive, surveying what needs organizing..._
 
 Fetch issues that need triage:
 
@@ -41,7 +41,7 @@ Fetch issues that need triage:
 # Get all open issues with their project field values
 gh api graphql -f query='
 query {
-  repository(owner: "AutumnsGrove", name: "GroveEngine") {
+  repository(owner: "AutumnsGrove", name: "Lattice") {
     issues(first: 100, states: OPEN) {
       nodes {
         number
@@ -69,6 +69,7 @@ query {
 ```
 
 **Identify untriaged issues:**
+
 - No Size assigned
 - No Priority assigned
 - Status is "Backlog" but could be "Ready"
@@ -80,11 +81,12 @@ query {
 
 ### Phase 2: SORT
 
-*The badger sorts the findings into manageable batches...*
+_The badger sorts the findings into manageable batches..._
 
 Group issues by theme for efficient triage:
 
 **Grouping strategies:**
+
 - By component label (all `heartwood` issues together)
 - By type (all bugs, then all features)
 - By likely complexity (quick wins vs. deep work)
@@ -113,13 +115,14 @@ Group issues by theme for efficient triage:
 
 ### Phase 3: DISCUSS
 
-*The badger presents each batch, discussing with the wanderer...*
+_The badger presents each batch, discussing with the wanderer..._
 
 **Interactive triage flow:**
 
 For each batch, use AskUserQuestion to have a conversation:
 
 **Size Discussion:**
+
 ```
 These 5 heartwood issues need sizing. Based on the titles, I'm guessing:
 
@@ -133,6 +136,7 @@ These 5 heartwood issues need sizing. Based on the titles, I'm guessing:
 ```
 
 **Priority Discussion:**
+
 ```
 Now for priority. These are all auth-related. Thinking:
 
@@ -145,6 +149,7 @@ Now for priority. These are all auth-related. Thinking:
 ```
 
 **Status Discussion:**
+
 ```
 Should any of these move from Backlog to Ready?
 
@@ -156,22 +161,22 @@ The others can stay in Backlog until you're closer to working on auth.
 
 **Size Reference:**
 
-| Size | Scope |
-|------|-------|
-| XS | < 1 hour. Single file, obvious fix. |
-| S | 1-3 hours. Small feature, few files. |
-| M | Half day to full day. Multiple files, some complexity. |
-| L | 2-3 days. Significant feature, cross-cutting. |
-| XL | Week+. Major feature, architectural impact. |
+| Size | Scope                                                  |
+| ---- | ------------------------------------------------------ |
+| XS   | < 1 hour. Single file, obvious fix.                    |
+| S    | 1-3 hours. Small feature, few files.                   |
+| M    | Half day to full day. Multiple files, some complexity. |
+| L    | 2-3 days. Significant feature, cross-cutting.          |
+| XL   | Week+. Major feature, architectural impact.            |
 
 **Priority Reference:**
 
-| Priority | Meaning |
-|----------|---------|
-| First Focus | Work on this NOW. Blocking or urgent. |
-| Next Up | In the queue. Will be first focus soon. |
-| In Time | Important but not urgent. Plan for it. |
-| Far Off | Someday/maybe. Keep in backlog. |
+| Priority    | Meaning                                 |
+| ----------- | --------------------------------------- |
+| First Focus | Work on this NOW. Blocking or urgent.   |
+| Next Up     | In the queue. Will be first focus soon. |
+| In Time     | Important but not urgent. Plan for it.  |
+| Far Off     | Someday/maybe. Keep in backlog.         |
 
 **Output:** User-approved sizes, priorities, and status changes
 
@@ -179,11 +184,12 @@ The others can stay in Backlog until you're closer to working on auth.
 
 ### Phase 4: TIMELINE (Optional)
 
-*The badger considers the calendar, planning when work is due...*
+_The badger considers the calendar, planning when work is due..._
 
 If user wants to work with timelines:
 
 **Milestone Mode:**
+
 ```
 Would you like to assign these to a milestone?
 
@@ -196,8 +202,9 @@ Options:
 ```
 
 **Creating milestones:**
+
 ```bash
-gh api repos/AutumnsGrove/GroveEngine/milestones \
+gh api repos/AutumnsGrove/Lattice/milestones \
   --method POST \
   -f title="v1.0 Launch" \
   -f description="Core functionality ready for public use" \
@@ -205,6 +212,7 @@ gh api repos/AutumnsGrove/GroveEngine/milestones \
 ```
 
 **Setting target dates:**
+
 ```bash
 # Update project item field for Target date
 gh api graphql -f query='
@@ -221,6 +229,7 @@ mutation {
 ```
 
 **Timeline Discussion:**
+
 ```
 For the issues we just sized:
 
@@ -237,11 +246,12 @@ Want me to set these target dates?
 
 ### Phase 5: PLACE
 
-*The badger updates the burrow, placing each item where it belongs...*
+_The badger updates the burrow, placing each item where it belongs..._
 
 Execute the agreed-upon changes:
 
 **Update Size:**
+
 ```bash
 gh api graphql -f query='
 mutation {
@@ -257,6 +267,7 @@ mutation {
 ```
 
 **Update Priority:**
+
 ```bash
 gh api graphql -f query='
 mutation {
@@ -272,6 +283,7 @@ mutation {
 ```
 
 **Update Status:**
+
 ```bash
 gh api graphql -f query='
 mutation {
@@ -287,6 +299,7 @@ mutation {
 ```
 
 **Assign Milestone:**
+
 ```bash
 gh issue edit 415 --milestone "v1.0 Launch"
 ```
@@ -297,7 +310,7 @@ gh issue edit 415 --milestone "v1.0 Launch"
 
 ### Phase 6: REPORT
 
-*The badger emerges, reporting what was organized...*
+_The badger emerges, reporting what was organized..._
 
 ```
 🦡 BADGER TRIAGE COMPLETE
@@ -347,41 +360,45 @@ The burrow is organized. Ready for the next dig!
 **Project ID:** `PVT_kwHOAiMO684BNUxo`
 
 ### Status Options
-| Name | ID |
-|------|-----|
-| Backlog | `f75ad846` |
-| Ready | `61e4505c` |
+
+| Name        | ID         |
+| ----------- | ---------- |
+| Backlog     | `f75ad846` |
+| Ready       | `61e4505c` |
 | In progress | `47fc9ee4` |
-| In review | `df73e18b` |
-| Done | `98236657` |
+| In review   | `df73e18b` |
+| Done        | `98236657` |
 
 **Field ID:** `PVTSSF_lAHOAiMO684BNUxozg8Wm9E`
 
 ### Priority Options
-| Name | ID |
-|------|-----|
+
+| Name        | ID         |
+| ----------- | ---------- |
 | First Focus | `aa1d5ead` |
-| Next Up | `c92ef786` |
-| In Time | `88c3eb14` |
-| Far Off | `ce4748e6` |
+| Next Up     | `c92ef786` |
+| In Time     | `88c3eb14` |
+| Far Off     | `ce4748e6` |
 
 **Field ID:** `PVTSSF_lAHOAiMO684BNUxozg8WnH0`
 
 ### Size Options
-| Name | ID |
-|------|-----|
-| XS | `6c6483d2` |
-| S | `f784b110` |
-| M | `7515a9f1` |
-| L | `817d0097` |
-| XL | `db339eb2` |
+
+| Name | ID         |
+| ---- | ---------- |
+| XS   | `6c6483d2` |
+| S    | `f784b110` |
+| M    | `7515a9f1` |
+| L    | `817d0097` |
+| XL   | `db339eb2` |
 
 **Field ID:** `PVTSSF_lAHOAiMO684BNUxozg8WnH4`
 
 ### Date Fields
-| Name | Field ID |
-|------|----------|
-| Start date | `PVTF_lAHOAiMO684BNUxozg8WnIA` |
+
+| Name        | Field ID                       |
+| ----------- | ------------------------------ |
+| Start date  | `PVTF_lAHOAiMO684BNUxozg8WnIA` |
 | Target date | `PVTF_lAHOAiMO684BNUxozg8WnIE` |
 
 ---
@@ -389,19 +406,25 @@ The burrow is organized. Ready for the next dig!
 ## Badger Rules
 
 ### Patience
+
 Work in batches. Don't overwhelm the user with 50 issues at once.
 
 ### Conversation
+
 Always discuss before changing. The badger suggests, the user decides.
 
 ### Accuracy
+
 Double-check field IDs before mutations. A misplaced item is worse than an unsorted one.
 
 ### Code Safety
+
 **NEVER edit code.** The badger only organizes project items.
 
 ### Communication
+
 Use burrow metaphors:
+
 - "Digging into the hive..." (surveying issues)
 - "Sorting into chambers..." (grouping batches)
 - "Discussing the arrangement..." (interactive triage)
@@ -413,6 +436,7 @@ Use burrow metaphors:
 ## Anti-Patterns
 
 **The badger does NOT:**
+
 - Edit any code (only organizes project items)
 - Make changes without user approval
 - Process more than 10 issues without checking in
@@ -425,20 +449,26 @@ Use burrow metaphors:
 ## Triage Modes
 
 ### Quick Triage
+
 "Just size and prioritize what's obvious"
+
 - Focuses on issues that clearly fit a size/priority
 - Skips anything ambiguous for later discussion
 - Fast path for backlog grooming
 
 ### Deep Triage
+
 "Let's really organize this"
+
 - Full discussion on each batch
 - Includes timeline planning
 - Sets up milestones and target dates
 - Moves items between columns thoughtfully
 
 ### Sprint Planning
+
 "What should I work on next?"
+
 - Focuses on moving items to "Ready" and "In Progress"
 - Prioritizes by First Focus and Next Up
 - Sets near-term target dates
@@ -449,6 +479,7 @@ Use burrow metaphors:
 ## Example Triage Session
 
 **User says:**
+
 > /badger-triage — I've got a bunch of new issues from bee-collect, let's organize them
 
 **Badger flow:**
@@ -492,9 +523,10 @@ Deposit in hive →       Place in burrow
 ```
 
 **Typical workflow:**
+
 1. `/bee-collect` — dump your ideas, bee creates issues
 2. `/badger-triage` — badger organizes what bee collected
 
 ---
 
-*A well-organized burrow means always knowing where to dig next.* 🦡
+_A well-organized burrow means always knowing where to dig next._ 🦡

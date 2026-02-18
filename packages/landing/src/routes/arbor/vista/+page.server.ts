@@ -6,10 +6,7 @@
  */
 
 import type { PageServerLoad } from "./$types";
-import {
-	getObservabilityOverview,
-	getAlerts,
-} from "@autumnsgrove/groveengine/server/observability";
+import { getObservabilityOverview, getAlerts } from "@autumnsgrove/lattice/server/observability";
 
 export const load: PageServerLoad = async ({ parent, platform }) => {
 	await parent(); // ensures Wayfinder gate has run

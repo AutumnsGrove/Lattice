@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import Header from '$lib/components/Header.svelte';
-	import { seasonStore } from '@autumnsgrove/groveengine/ui/chrome';
+	import { seasonStore } from '@autumnsgrove/lattice/ui/chrome';
 	import Footer from '$lib/components/Footer.svelte';
 	import SEO from '$lib/components/SEO.svelte';
-	import { Logo } from '@autumnsgrove/groveengine/ui/nature';
+	import { Logo } from '@autumnsgrove/lattice/ui/nature';
 	import { enhance } from '$app/forms';
 	import { MailX, Check } from 'lucide-svelte';
 

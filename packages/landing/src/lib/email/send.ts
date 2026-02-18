@@ -1,4 +1,4 @@
-import { ZephyrClient } from "@autumnsgrove/groveengine/zephyr";
+import { ZephyrClient } from "@autumnsgrove/lattice/zephyr";
 import { getWelcomeEmailHtml, getWelcomeEmailText } from "./templates";
 import { generateUnsubscribeUrl } from "./tokens";
 

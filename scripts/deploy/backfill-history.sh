@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# 🌲 GroveEngine History Backfill Script
+# 🌲 Lattice History Backfill Script
 #
 # Generates historical snapshots by walking through git history.
 # Uses git worktree to safely checkout old commits without affecting your working directory.
@@ -28,7 +28,7 @@ WORKTREE_DIR="/tmp/grove-backfill-worktree"
 # Interval between snapshots (every N commits)
 INTERVAL="${1:-20}"
 
-echo -e "${CYAN}🌲 GroveEngine History Backfill${NC}"
+echo -e "${CYAN}🌲 Lattice History Backfill${NC}"
 echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 echo -e "Generating snapshots every ${YELLOW}${INTERVAL}${NC} commits..."

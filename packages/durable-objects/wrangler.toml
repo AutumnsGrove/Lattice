@@ -2,7 +2,7 @@
 # Hosts all Durable Objects for the Grove Platform
 #
 # This worker exports DO classes that are referenced by:
-# - GroveEngine (Pages) via service binding
+# - Lattice (Pages) via service binding
 # - Post-Migrator worker
 #
 # Deploy: pnpm deploy (from this directory)

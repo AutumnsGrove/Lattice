@@ -11,8 +11,8 @@ import {
 	getCostMetrics,
 	CLOUDFLARE_PRICING,
 	PRICING_LAST_VERIFIED,
-} from "@autumnsgrove/groveengine/server/observability";
-import { isWayfinder } from "@autumnsgrove/groveengine/config";
+} from "@autumnsgrove/lattice/server/observability";
+import { isWayfinder } from "@autumnsgrove/lattice/config";
 
 export const GET: RequestHandler = async ({ platform, locals }) => {
 	const db = platform?.env?.DB;

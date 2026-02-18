@@ -1003,7 +1003,7 @@ export function getSiteConfig(): SiteConfig {
     );
     return {
       owner: { name: "Admin", email: "" },
-      site: { title: "GroveEngine Site", description: "", copyright: "" },
+      site: { title: "Lattice Site", description: "", copyright: "" },
       social: {},
     };
   }

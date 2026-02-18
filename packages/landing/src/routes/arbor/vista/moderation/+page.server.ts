@@ -3,11 +3,11 @@
  */
 
 import type { PageServerLoad } from "./$types";
-import { aggregatePetal, aggregateThorn } from "@autumnsgrove/groveengine/server/observability";
+import { aggregatePetal, aggregateThorn } from "@autumnsgrove/lattice/server/observability";
 import type {
 	PetalAggregateResult,
 	ThornAggregateResult,
-} from "@autumnsgrove/groveengine/server/observability";
+} from "@autumnsgrove/lattice/server/observability";
 
 export const load: PageServerLoad = async ({ parent, platform }) => {
 	await parent();

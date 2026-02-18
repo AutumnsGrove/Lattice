@@ -19,7 +19,7 @@
 
 import { error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { isWayfinder } from "@autumnsgrove/groveengine/config";
+import { isWayfinder } from "@autumnsgrove/lattice/config";
 
 /** Headers to forward from client request to Heartwood */
 const FORWARD_HEADERS = [

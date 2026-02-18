@@ -20,29 +20,29 @@ The Porch reply email bug is the primary driver for Zephyr. Replies were "sendin
 
 ```typescript
 // packages/engine/src/routes/admin/porch/[id]/+page.server.ts
-import { Resend } from 'resend';
+import { Resend } from "resend";
 
 const resend = new Resend(RESEND_API_KEY);
 
 export const actions = {
   reply: async ({ request, params }) => {
     const data = await request.formData();
-    const content = data.get('content');
-    
+    const content = data.get("content");
+
     // Get the visit and user email
     const visit = await db.getVisit(params.id);
-    
+
     // This was failing silently!
     await resend.emails.send({
-      from: 'Grove <hello@grove.place>',
+      from: "Grove <hello@grove.place>",
       to: visit.email,
       subject: `Re: ${visit.subject}`,
       html: `<p>${content}</p>`,
     });
     // No error handling - success assumed
-    
+
     return { success: true };
-  }
+  },
 };
 ```
 
@@ -50,19 +50,19 @@ export const actions = {
 
 ```typescript
 // packages/engine/src/routes/admin/porch/[id]/+page.server.ts
-import { zephyr } from '@autumnsgrove/groveengine/zephyr';
+import { zephyr } from "@autumnsgrove/lattice/zephyr";
 
 export const actions = {
   reply: async ({ request, params }) => {
     const data = await request.formData();
-    const content = data.get('content');
-    
+    const content = data.get("content");
+
     const visit = await db.getVisit(params.id);
-    
+
     // Now we know if it fails
     const result = await zephyr.send({
-      type: 'notification',
-      template: 'porch-reply',
+      type: "notification",
+      template: "porch-reply",
       to: visit.email,
       data: {
         content,
@@ -70,20 +70,20 @@ export const actions = {
         visitNumber: visit.visit_number,
         subject: visit.subject,
       },
-      tenant: 'grove',
-      source: 'porch-admin',
+      tenant: "grove",
+      source: "porch-admin",
       correlationId: visit.id,
     });
-    
+
     if (!result.success) {
-      console.error('Failed to send Porch reply:', result.error);
-      return fail(500, { 
-        error: 'Reply saved but email failed to send. Please try again.' 
+      console.error("Failed to send Porch reply:", result.error);
+      return fail(500, {
+        error: "Reply saved but email failed to send. Please try again.",
       });
     }
-    
+
     return { success: true };
-  }
+  },
 };
 ```
 
@@ -108,20 +108,17 @@ Email verification is critical for user onboarding. Downtime here blocks new sig
 
 ```typescript
 // packages/plant/src/lib/server/email-verification.ts
-import { Resend } from 'resend';
-import { VERIFICATION_EMAIL_TEMPLATE } from './templates';
+import { Resend } from "resend";
+import { VERIFICATION_EMAIL_TEMPLATE } from "./templates";
 
 const resend = new Resend(RESEND_API_KEY);
 
-export async function sendVerificationEmail(
-  email: string, 
-  code: string
-) {
+export async function sendVerificationEmail(email: string, code: string) {
   await resend.emails.send({
-    from: 'Grove <hello@grove.place>',
+    from: "Grove <hello@grove.place>",
     to: email,
-    subject: 'Verify your email',
-    html: VERIFICATION_EMAIL_TEMPLATE.replace('{{code}}', code),
+    subject: "Verify your email",
+    html: VERIFICATION_EMAIL_TEMPLATE.replace("{{code}}", code),
   });
 }
 ```
@@ -130,25 +127,22 @@ export async function sendVerificationEmail(
 
 ```typescript
 // packages/plant/src/lib/server/email-verification.ts
-import { zephyr } from '@autumnsgrove/groveengine/zephyr';
+import { zephyr } from "@autumnsgrove/lattice/zephyr";
 
-export async function sendVerificationEmail(
-  email: string, 
-  code: string
-) {
+export async function sendVerificationEmail(email: string, code: string) {
   const result = await zephyr.send({
-    type: 'verification',
-    template: 'verification',
+    type: "verification",
+    template: "verification",
     to: email,
-    data: { code, expiresIn: '15 minutes' },
-    tenant: 'grove',
-    source: 'plant-auth',
+    data: { code, expiresIn: "15 minutes" },
+    tenant: "grove",
+    source: "plant-auth",
   });
-  
+
   if (!result.success) {
     throw new Error(`Failed to send verification: ${result.errorMessage}`);
   }
-  
+
   return result;
 }
 ```
@@ -174,29 +168,26 @@ Payment emails inform users about charges, failures, and renewals. Important for
 
 ```typescript
 // packages/plant/src/lib/server/payment-emails.ts
-import { Resend } from 'resend';
+import { Resend } from "resend";
 
 export async function sendPaymentReceivedEmail(
   email: string,
   amount: number,
-  plan: string
+  plan: string,
 ) {
   await resend.emails.send({
-    from: 'Grove <hello@grove.place>',
+    from: "Grove <hello@grove.place>",
     to: email,
-    subject: 'Payment confirmed',
+    subject: "Payment confirmed",
     html: renderPaymentEmail({ amount, plan }),
   });
 }
 
-export async function sendPaymentFailedEmail(
-  email: string,
-  amount: number
-) {
+export async function sendPaymentFailedEmail(email: string, amount: number) {
   await resend.emails.send({
-    from: 'Grove <hello@grove.place>',
+    from: "Grove <hello@grove.place>",
     to: email,
-    subject: 'Payment failed',
+    subject: "Payment failed",
     html: renderFailedEmail({ amount }),
   });
 }
@@ -206,34 +197,31 @@ export async function sendPaymentFailedEmail(
 
 ```typescript
 // packages/plant/src/lib/server/payment-emails.ts
-import { zephyr } from '@autumnsgrove/groveengine/zephyr';
+import { zephyr } from "@autumnsgrove/lattice/zephyr";
 
 export async function sendPaymentReceivedEmail(
   email: string,
   amount: number,
-  plan: string
+  plan: string,
 ) {
   return zephyr.send({
-    type: 'lifecycle',
-    template: 'payment-received',
+    type: "lifecycle",
+    template: "payment-received",
     to: email,
     data: { amount, plan, date: new Date().toISOString() },
-    tenant: 'grove',
-    source: 'plant-payments',
+    tenant: "grove",
+    source: "plant-payments",
   });
 }
 
-export async function sendPaymentFailedEmail(
-  email: string,
-  amount: number
-) {
+export async function sendPaymentFailedEmail(email: string, amount: number) {
   return zephyr.send({
-    type: 'lifecycle',
-    template: 'payment-failed',
+    type: "lifecycle",
+    template: "payment-failed",
     to: email,
-    data: { amount, retryUrl: '/billing/retry' },
-    tenant: 'grove',
-    source: 'plant-payments',
+    data: { amount, retryUrl: "/billing/retry" },
+    tenant: "grove",
+    source: "plant-payments",
   });
 }
 ```
@@ -259,45 +247,45 @@ Welcome sequences and drip campaigns. These can be migrated last since they're l
 
 ```typescript
 // packages/engine/src/lib/email/schedule.ts
-import { Resend } from 'resend';
-import { scheduleJob } from './scheduler';
+import { Resend } from "resend";
+import { scheduleJob } from "./scheduler";
 
 export function scheduleWelcomeSequence(userId: string, email: string) {
   // Day 0: Welcome
-  scheduleJob('email', {
+  scheduleJob("email", {
     runAt: Date.now(),
     payload: {
       to: email,
-      template: 'welcome',
-      data: { userId }
-    }
+      template: "welcome",
+      data: { userId },
+    },
   });
-  
+
   // Day 1: Getting started
-  scheduleJob('email', {
+  scheduleJob("email", {
     runAt: Date.now() + 86400000,
     payload: {
       to: email,
-      template: 'day-1',
-      data: { userId }
-    }
+      template: "day-1",
+      data: { userId },
+    },
   });
-  
+
   // Day 7: Check-in
-  scheduleJob('email', {
+  scheduleJob("email", {
     runAt: Date.now() + 604800000,
     payload: {
       to: email,
-      template: 'day-7',
-      data: { userId }
-    }
+      template: "day-7",
+      data: { userId },
+    },
   });
 }
 
 // Worker processes the job
 export async function processEmailJob(job: EmailJob) {
   await resend.emails.send({
-    from: 'Autumn <autumn@grove.place>',
+    from: "Autumn <autumn@grove.place>",
     to: job.payload.to,
     subject: getSubject(job.payload.template),
     html: renderTemplate(job.payload.template, job.payload.data),
@@ -309,46 +297,46 @@ export async function processEmailJob(job: EmailJob) {
 
 ```typescript
 // packages/engine/src/lib/email/schedule.ts
-import { zephyr } from '@autumnsgrove/groveengine/zephyr';
-import { scheduleJob } from './scheduler';
+import { zephyr } from "@autumnsgrove/lattice/zephyr";
+import { scheduleJob } from "./scheduler";
 
 export function scheduleWelcomeSequence(userId: string, email: string) {
   const baseKey = `${userId}-welcome`;
-  
+
   // Day 0: Welcome
-  scheduleJob('zephyr-email', {
+  scheduleJob("zephyr-email", {
     runAt: Date.now(),
     payload: {
-      type: 'sequence',
-      template: 'welcome',
+      type: "sequence",
+      template: "welcome",
       to: email,
       data: { userId },
       idempotencyKey: `${baseKey}-day0`,
-    }
+    },
   });
-  
+
   // Day 1: Getting started
-  scheduleJob('zephyr-email', {
+  scheduleJob("zephyr-email", {
     runAt: Date.now() + 86400000,
     payload: {
-      type: 'sequence',
-      template: 'day-1',
+      type: "sequence",
+      template: "day-1",
       to: email,
       data: { userId },
       idempotencyKey: `${baseKey}-day1`,
-    }
+    },
   });
-  
+
   // Day 7: Check-in
-  scheduleJob('zephyr-email', {
+  scheduleJob("zephyr-email", {
     runAt: Date.now() + 604800000,
     payload: {
-      type: 'sequence',
-      template: 'day-7',
+      type: "sequence",
+      template: "day-7",
       to: email,
       data: { userId },
       idempotencyKey: `${baseKey}-day7`,
-    }
+    },
   });
 }
 
@@ -360,8 +348,8 @@ export async function processEmailJob(job: EmailJob) {
     to: job.payload.to,
     data: job.payload.data,
     idempotencyKey: job.payload.idempotencyKey,
-    tenant: 'grove',
-    source: 'engine-sequences',
+    tenant: "grove",
+    source: "engine-sequences",
   });
 }
 ```
@@ -410,41 +398,41 @@ export async function processEmailJob(job: EmailJob) {
 
 ```typescript
 // __tests__/email.test.ts
-import { zephyr } from '@autumnsgrove/groveengine/zephyr';
-import { vi } from 'vitest';
+import { zephyr } from "@autumnsgrove/lattice/zephyr";
+import { vi } from "vitest";
 
-vi.mock('@autumnsgrove/groveengine/zephyr', () => ({
+vi.mock("@autumnsgrove/lattice/zephyr", () => ({
   zephyr: {
-    send: vi.fn()
-  }
+    send: vi.fn(),
+  },
 }));
 
-test('sends welcome email on signup', async () => {
+test("sends welcome email on signup", async () => {
   const sendMock = vi.mocked(zephyr.send);
-  sendMock.mockResolvedValue({ success: true, messageId: '123' });
-  
-  await signupUser('test@example.com');
-  
+  sendMock.mockResolvedValue({ success: true, messageId: "123" });
+
+  await signupUser("test@example.com");
+
   expect(sendMock).toHaveBeenCalledWith({
-    type: 'sequence',
-    template: 'welcome',
-    to: 'test@example.com',
+    type: "sequence",
+    template: "welcome",
+    to: "test@example.com",
     data: expect.any(Object),
-    tenant: 'grove',
+    tenant: "grove",
     source: expect.any(String),
   });
 });
 
-test('handles email failure gracefully', async () => {
+test("handles email failure gracefully", async () => {
   const sendMock = vi.mocked(zephyr.send);
-  sendMock.mockResolvedValue({ 
-    success: false, 
-    errorCode: 'RATE_LIMITED',
-    errorMessage: 'Too many requests'
+  sendMock.mockResolvedValue({
+    success: false,
+    errorCode: "RATE_LIMITED",
+    errorMessage: "Too many requests",
   });
-  
-  const result = await signupUser('test@example.com');
-  
+
+  const result = await signupUser("test@example.com");
+
   expect(result.emailSent).toBe(false);
   expect(result.userCreated).toBe(true);
 });
@@ -454,34 +442,34 @@ test('handles email failure gracefully', async () => {
 
 ```typescript
 // __tests__/email.integration.test.ts
-test('end-to-end email flow', async () => {
+test("end-to-end email flow", async () => {
   // Start Zephyr dev server
-  const zephyrProcess = spawn('pnpm', ['run', 'dev'], {
-    cwd: 'workers/zephyr'
+  const zephyrProcess = spawn("pnpm", ["run", "dev"], {
+    cwd: "workers/zephyr",
   });
-  
+
   // Wait for server
   await waitForPort(8787);
-  
+
   // Send test email
-  const result = await fetch('http://localhost:8787/send', {
-    method: 'POST',
+  const result = await fetch("http://localhost:8787/send", {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'X-API-Key': 'test-key'
+      "Content-Type": "application/json",
+      "X-API-Key": "test-key",
     },
     body: JSON.stringify({
-      type: 'transactional',
-      template: 'welcome',
-      to: 'test@example.com',
-      data: { name: 'Test' }
-    })
+      type: "transactional",
+      template: "welcome",
+      to: "test@example.com",
+      data: { name: "Test" },
+    }),
   });
-  
+
   const body = await result.json();
   expect(body.success).toBe(true);
   expect(body.messageId).toBeDefined();
-  
+
   // Check D1 logs
   const logs = await db.query(`
     SELECT * FROM zephyr_logs 
@@ -489,7 +477,7 @@ test('end-to-end email flow', async () => {
     ORDER BY created_at DESC
   `);
   expect(logs.length).toBeGreaterThan(0);
-  
+
   // Cleanup
   zephyrProcess.kill();
 });
@@ -526,7 +514,7 @@ const result = await zephyr.send({
   // ... request
 });
 
-console.log('Zephyr response:', JSON.stringify(result, null, 2));
+console.log("Zephyr response:", JSON.stringify(result, null, 2));
 ```
 
 Check D1 logs directly:
@@ -542,6 +530,7 @@ wrangler d1 execute zephyr-logs --command="SELECT * FROM zephyr_logs ORDER BY cr
 If something goes wrong:
 
 1. **Immediate:** Keep old Resend code as fallback:
+
    ```typescript
    const result = await zephyr.send({...});
    if (!result.success && shouldFallback(result.errorCode)) {
@@ -551,6 +540,7 @@ If something goes wrong:
    ```
 
 2. **Short-term:** Revert to previous commit
+
    ```bash
    git revert HEAD
    ```
@@ -578,4 +568,4 @@ After successful migration:
 
 ---
 
-*The wind shifts. Messages flow. The grove breathes easier.*
+_The wind shifts. Messages flow. The grove breathes easier._

@@ -4,7 +4,7 @@ description: Public-facing status page for platform health and incident communic
 category: specs
 specCategory: platform-services
 icon: activity
-lastUpdated: '2025-12-24'
+lastUpdated: "2025-12-24"
 aliases: []
 tags:
   - status-page
@@ -29,7 +29,7 @@ tags:
                    Where you can see clearly.
 ```
 
-> *A clearing in the forest where you can see what's happening.*
+> _A clearing in the forest where you can see what's happening._
 
 Grove's public status page providing transparent, real-time communication about platform health. When something goes wrong or maintenance is planned, users can check the clearing to understand what's happening without contacting support.
 
@@ -150,24 +150,24 @@ Grove's platform is divided into trackable components. Each component has its ow
 
 ### Component List
 
-| Component | Description | Affects |
-|-----------|-------------|---------|
-| **Blog Engine** | Core blog functionality—publishing, reading, editing | All blog operations |
-| **CDN** | Image and media delivery via R2/Cloudflare | Media loading, image uploads |
-| **Authentication** | Heartwood login and session management | Sign-in, admin access |
-| **Meadow** | Community feed, reactions, voting | Social features |
-| **Payments** | Stripe integration for subscriptions | Plan upgrades, billing |
-| **API** | Backend API endpoints | All platform operations |
+| Component          | Description                                          | Affects                      |
+| ------------------ | ---------------------------------------------------- | ---------------------------- |
+| **Blog Engine**    | Core blog functionality—publishing, reading, editing | All blog operations          |
+| **CDN**            | Image and media delivery via R2/Cloudflare           | Media loading, image uploads |
+| **Authentication** | Heartwood login and session management               | Sign-in, admin access        |
+| **Meadow**         | Community feed, reactions, voting                    | Social features              |
+| **Payments**       | Stripe integration for subscriptions                 | Plan upgrades, billing       |
+| **API**            | Backend API endpoints                                | All platform operations      |
 
 ### Component Statuses
 
-| Status | Color | Meaning |
-|--------|-------|---------|
-| **Operational** | Green | Everything working normally |
+| Status                   | Color  | Meaning                           |
+| ------------------------ | ------ | --------------------------------- |
+| **Operational**          | Green  | Everything working normally       |
 | **Degraded Performance** | Yellow | Slower than usual, but functional |
-| **Partial Outage** | Orange | Some functionality unavailable |
-| **Major Outage** | Red | Component is down |
-| **Maintenance** | Blue | Planned maintenance in progress |
+| **Partial Outage**       | Orange | Some functionality unavailable    |
+| **Major Outage**         | Red    | Component is down                 |
+| **Maintenance**          | Blue   | Planned maintenance in progress   |
 
 ---
 
@@ -175,12 +175,12 @@ Grove's platform is divided into trackable components. Each component has its ow
 
 ### Incident Classifications
 
-| Type | Description | Example |
-|------|-------------|---------|
-| **Outage** | Service unavailable | "Blog engine returning 500 errors" |
-| **Degraded Performance** | Service slow or unreliable | "Image uploads taking longer than usual" |
-| **Planned Maintenance** | Scheduled work | "Database migration scheduled for 2am UTC" |
-| **Security Incident** | Security-related issue | "Investigating unusual activity" |
+| Type                     | Description                | Example                                    |
+| ------------------------ | -------------------------- | ------------------------------------------ |
+| **Outage**               | Service unavailable        | "Blog engine returning 500 errors"         |
+| **Degraded Performance** | Service slow or unreliable | "Image uploads taking longer than usual"   |
+| **Planned Maintenance**  | Scheduled work             | "Database migration scheduled for 2am UTC" |
+| **Security Incident**    | Security-related issue     | "Investigating unusual activity"           |
 
 ### Incident Lifecycle
 
@@ -197,12 +197,12 @@ Grove's platform is divided into trackable components. Each component has its ow
 
 ### Incident States
 
-| State | Description |
-|-------|-------------|
-| **Investigating** | Aware of issue, determining cause |
-| **Identified** | Root cause found, working on fix |
-| **Monitoring** | Fix deployed, observing for stability |
-| **Resolved** | Issue fully resolved |
+| State             | Description                           |
+| ----------------- | ------------------------------------- |
+| **Investigating** | Aware of issue, determining cause     |
+| **Identified**    | Root cause found, working on fix      |
+| **Monitoring**    | Fix deployed, observing for stability |
+| **Resolved**      | Issue fully resolved                  |
 
 ---
 
@@ -304,6 +304,7 @@ Status management lives in the GroveAuth admin panel under a new **Status** sect
 #### Dashboard View
 
 Shows at a glance:
+
 - Current overall status
 - Any active incidents
 - Upcoming scheduled maintenance
@@ -312,6 +313,7 @@ Shows at a glance:
 #### Incident Management
 
 **Create Incident:**
+
 1. Title (required)
 2. Type: Outage / Degraded / Maintenance / Security
 3. Impact: Minor / Major / Critical
@@ -320,11 +322,13 @@ Shows at a glance:
 6. Initial update message (what you know so far)
 
 **Update Incident:**
+
 - Post new updates to the timeline
 - Change status (Investigating → Identified → Monitoring → Resolved)
 - Mark as resolved (sets resolved_at timestamp)
 
 **View History:**
+
 - List of past incidents
 - Filter by type, date range, component
 - Click to view full timeline
@@ -388,28 +392,34 @@ Shows at a glance:
 ### Page Structure
 
 **Header:**
+
 - Grove Status logo
 - Current overall status indicator
 - Last updated timestamp
 
 **Current Status Section:**
+
 - Large status banner (All Operational / Active Incident)
 - Component status grid
 
 **Active Incidents:**
+
 - Displayed prominently if any
 - Shows latest update, timeline accessible
 
 **Scheduled Maintenance:**
+
 - Upcoming maintenance windows
 - When scheduled, how long expected
 
 **Incident History:**
+
 - 30-day rolling history
 - Expandable incident details
 - Full timeline for each incident
 
 **Footer:**
+
 - Link to subscribe (RSS)
 - Link to main Grove site
 - "Questions? Contact support"
@@ -504,11 +514,13 @@ When clicking an incident:
 Users see platform status in a **Messages** panel in their Grove admin dashboard.
 
 **What appears:**
+
 - Active incidents affecting the platform
 - Scheduled maintenance announcements
 - Resolved incidents (for 24 hours after resolution)
 
 **Display format:**
+
 ```
 ┌────────────────────────────────────────────────────────────────┐
 │ 📢 Messages                                                    │
@@ -526,6 +538,7 @@ Users see platform status in a **Messages** panel in their Grove admin dashboard
 ```
 
 **When empty:**
+
 ```
 ┌────────────────────────────────────────────────────────────────┐
 │ 📢 Messages                                                    │
@@ -566,6 +579,7 @@ https://status.grove.place/api
 Current overall status.
 
 **Response:**
+
 ```json
 {
   "status": "operational",
@@ -601,11 +615,13 @@ Current overall status.
 List incidents (30-day history).
 
 **Query Parameters:**
+
 - `limit` (default: 20)
 - `offset` (default: 0)
 - `status` (filter: active, resolved, all)
 
 **Response:**
+
 ```json
 {
   "incidents": [
@@ -632,6 +648,7 @@ List incidents (30-day history).
 Single incident with full timeline.
 
 **Response:**
+
 ```json
 {
   "id": "inc_xxx",
@@ -759,7 +776,7 @@ When implementation is ready, use this prompt for the GroveAuth agent:
 ```
 Implement the Status Management feature in the GroveAuth admin panel.
 
-Reference: /docs/specs/clearing-spec.md in the GroveEngine repository
+Reference: /docs/specs/clearing-spec.md in the Lattice repository
 
 Key tasks:
 1. Add "Status" section to admin sidebar
@@ -778,6 +795,6 @@ Status data is written to the shared D1 database and read by status.grove.place.
 
 ---
 
-*Spec Version: 1.0*
-*Created: 2025-12-24*
-*Author: Claude (with guidance from Autumn)*
+_Spec Version: 1.0_
+_Created: 2025-12-24_
+_Author: Claude (with guidance from Autumn)_

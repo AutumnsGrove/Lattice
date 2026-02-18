@@ -9,9 +9,9 @@
 
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { isValidCredential } from "@autumnsgrove/groveengine/heartwood";
+import { isValidCredential } from "@autumnsgrove/lattice/heartwood";
 import { PLANT_ERRORS, logPlantError } from "$lib/errors";
-import { AUTH_HUB_URL } from "@autumnsgrove/groveengine/config";
+import { AUTH_HUB_URL } from "@autumnsgrove/lattice/config";
 
 export const POST: RequestHandler = async ({ request, cookies, platform }) => {
   const accessToken = cookies.get("access_token");

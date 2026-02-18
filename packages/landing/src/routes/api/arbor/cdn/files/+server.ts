@@ -3,7 +3,7 @@
 
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { storage } from "@autumnsgrove/groveengine/services";
+import { storage } from "@autumnsgrove/lattice/services";
 
 export const GET: RequestHandler = async ({ url, locals, platform }) => {
   if (!locals.user) {

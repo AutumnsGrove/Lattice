@@ -6,7 +6,7 @@
  * Falls back to "uncategorized" on any parse failure.
  */
 
-import type { LumenClient } from "@autumnsgrove/groveengine/lumen";
+import type { LumenClient } from "@autumnsgrove/lattice/lumen";
 import type {
   EmailCategory,
   SuggestedAction,

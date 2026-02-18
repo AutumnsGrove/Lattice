@@ -12,6 +12,7 @@
 Phase 0.1 is the critical pre-launch phase where we prepare all infrastructure, setup, and foundational work needed to begin actual development. This phase bridges the gap between "idea on paper" to "ready to code."
 
 ### Success Criteria
+
 - [x] Domain secured (grove.place)
 - [x] Landing page deployed at grove.place (email signup live)
 - [x] Basic branding/logo created
@@ -28,17 +29,20 @@ Phase 0.1 is the critical pre-launch phase where we prepare all infrastructure, 
 ## 🏗️ Infrastructure Setup
 
 ### 1. Domain & DNS Configuration
+
 - [x] Register domain: grove.place (Cloudflare Registrar)
 - [ ] Configure DNS settings
-- [ ] Set up wildcard subdomain record (*.grove.place)
+- [ ] Set up wildcard subdomain record (\*.grove.place)
 - [ ] Verify SSL certificate provisioning
 - [ ] Test subdomain routing (test.grove.place)
 
 **Resources Needed:**
+
 - Cloudflare account with domain access
 - DNS propagation time (24-48 hours)
 
 ### 2. Cloudflare Services Setup
+
 - [ ] Create Cloudflare Pages project for main site
 - [ ] Create D1 database instance (for blog data)
 - [ ] Create R2 bucket (for media storage)
@@ -49,9 +53,11 @@ Phase 0.1 is the critical pre-launch phase where we prepare all infrastructure, 
 **Cost Estimate:** $0-5/month (free tier should cover initial development)
 
 ### 3. GitHub Repository Structure
+
 Create three separate repositories:
 
 #### Repository 1: grove-engine
+
 - [ ] Create repository at: github.com/AutumnsGrove/grove-engine
 - [ ] Initialize with README
 - [ ] Set up branch protection rules
@@ -60,6 +66,7 @@ Create three separate repositories:
 - [ ] Create initial project board
 
 #### Repository 2: grove-website
+
 - [ ] Create repository at: github.com/AutumnsGrove/grove-website
 - [ ] Initialize with README
 - [ ] Set up branch protection rules
@@ -68,6 +75,7 @@ Create three separate repositories:
 - [ ] Create initial project board
 
 #### Repository 3: grove-social
+
 - [ ] Create repository at: github.com/AutumnsGrove/grove-social
 - [ ] Initialize with README
 - [ ] Set up branch protection rules
@@ -80,6 +88,7 @@ Create three separate repositories:
 ## 💻 Development Environment
 
 ### Local Development Setup
+
 - [ ] Install Node.js 20+ (LTS version)
 - [ ] Install pnpm (package manager)
 - [ ] Install wrangler CLI (Cloudflare tooling)
@@ -93,6 +102,7 @@ Create three separate repositories:
 - [ ] Configure local environment variables
 
 ### Development Tools
+
 - [ ] Set up local testing framework
 - [ ] Configure TypeScript strict mode
 - [ ] Set up ESLint + Prettier
@@ -103,7 +113,8 @@ Create three separate repositories:
 
 ## 📦 Project Scaffolding
 
-### GroveEngine Initial Structure
+### Lattice Initial Structure
+
 ```
 grove-engine/
 ├── src/
@@ -128,6 +139,7 @@ grove-engine/
 ```
 
 **Tasks:**
+
 - [ ] Create base SvelteKit project
 - [ ] Set up routing structure
 - [ ] Configure Cloudflare adapter
@@ -140,6 +152,7 @@ grove-engine/
 ## 🔐 Authentication & Security Setup
 
 ### Services to Configure
+
 - [ ] Set up Resend account (for transactional emails)
   - Verify domain for email sending
   - Get API keys
@@ -152,6 +165,7 @@ grove-engine/
 - [ ] Plan magic link authentication flow
 
 **Security Checklist:**
+
 - [ ] Create `secrets.json` template
 - [ ] Add `secrets.json` to `.gitignore`
 - [ ] Document environment variables needed
@@ -162,6 +176,7 @@ grove-engine/
 ## 📋 Documentation & Planning
 
 ### Documentation to Create
+
 - [ ] `CONTRIBUTING.md` - How to contribute to Grove
 - [ ] `DEVELOPMENT.md` - Local development setup guide
 - [ ] `DEPLOYMENT.md` - Deployment instructions
@@ -169,6 +184,7 @@ grove-engine/
 - [ ] Architecture decision records (ADRs)
 
 ### Planning Documents
+
 - [ ] Refine Phase 1 MVP scope
 - [ ] Create Sprint 1 task breakdown
 - [ ] Identify blockers and dependencies
@@ -180,6 +196,7 @@ grove-engine/
 ## 🎨 Design & Assets
 
 ### Design System
+
 - [x] Choose color palette for Grove brand
 - [ ] Select typography (fonts)
 - [ ] Create basic design tokens
@@ -187,6 +204,7 @@ grove-engine/
 - [x] Create favicon
 
 ### Initial Mockups
+
 - [ ] Sketch blog post view (reader experience)
 - [ ] Sketch admin dashboard layout
 - [ ] Sketch main marketing homepage
@@ -199,6 +217,7 @@ grove-engine/
 ## 👥 Stakeholder Alignment
 
 ### First Client (Mom's Publishing House)
+
 - [ ] Schedule kick-off meeting
 - [ ] Understand content migration needs
 - [ ] Document current site structure (autumnsgrove.com)
@@ -206,6 +225,7 @@ grove-engine/
 - [ ] Agree on feedback process
 
 ### Testing & Feedback Plan
+
 - [ ] Identify 2-3 additional beta testers
 - [ ] Create feedback collection process
 - [ ] Set up support ticket system (even if manual initially)
@@ -216,6 +236,7 @@ grove-engine/
 ## 📊 Metrics & Monitoring
 
 ### Initial Tracking Setup
+
 - [ ] Set up error monitoring (Sentry or similar)
 - [ ] Configure analytics (Cloudflare Web Analytics)
 - [ ] Create dashboard for key metrics:
@@ -225,6 +246,7 @@ grove-engine/
   - Error rates
 
 ### Development Metrics
+
 - [ ] Track time spent on Phase 1 tasks
 - [ ] Monitor support hours (starts with Mom)
 - [ ] Document blockers and resolutions
@@ -234,7 +256,8 @@ grove-engine/
 
 ## 🔄 Content Migration Planning
 
-### From autumnsgrove.com to GroveEngine
+### From autumnsgrove.com to Lattice
+
 - [ ] Audit existing blog posts
 - [ ] Export content (markdown format)
 - [ ] Document custom features to replicate:
@@ -251,12 +274,14 @@ grove-engine/
 ## 💰 Financial Setup
 
 ### Business Accounts
+
 - [ ] Set up business bank account (if needed)
 - [ ] Register business entity (if needed)
 - [ ] Set up accounting system (simple spreadsheet initially)
 - [ ] Plan tax tracking for income
 
 ### Payment Processing
+
 - [ ] Complete Stripe onboarding
 - [ ] Set up subscription products in Stripe
   - Seedling Plan: $8/month
@@ -271,6 +296,7 @@ grove-engine/
 ## 📅 Phase 0.1 Timeline
 
 ### Week 1: Infrastructure (Nov 24-30)
+
 - [x] Secure domain (grove.place)
 - [ ] Update all documentation
 - [ ] Set up Cloudflare services
@@ -278,6 +304,7 @@ grove-engine/
 - [ ] Configure local development environment
 
 ### Week 2: Scaffolding (Dec 1-7)
+
 - [ ] Create initial project structures
 - [ ] Set up CI/CD pipelines
 - [ ] Configure authentication services
@@ -285,6 +312,7 @@ grove-engine/
 - [ ] Stakeholder alignment meeting
 
 ### Week 3: Pre-Development (Dec 8-14)
+
 - [ ] Complete all documentation
 - [ ] Finish content migration planning
 - [ ] Set up monitoring and metrics
@@ -300,24 +328,28 @@ grove-engine/
 Before moving to Phase 1 (MVP Development), verify:
 
 **Infrastructure:**
+
 - [ ] Domain configured and DNS working
 - [ ] All Cloudflare services provisioned
 - [ ] GitHub repos created and configured
 - [ ] Local dev environment working
 
 **Tools & Services:**
+
 - [ ] Resend account verified
 - [ ] Stripe test environment ready
 - [ ] Monitoring tools configured
 - [ ] CI/CD pipelines functional
 
 **Documentation:**
+
 - [ ] All specs updated with grove.place
 - [ ] Development guides written
 - [ ] Phase 1 scope clearly defined
 - [ ] First client aligned and ready
 
 **Team Readiness:**
+
 - [ ] Clear timeline and milestones
 - [ ] Blockers identified and mitigated
 - [ ] Support process planned
@@ -327,9 +359,10 @@ Before moving to Phase 1 (MVP Development), verify:
 
 ## 🚀 Next Steps: Phase 1 MVP
 
-Once Phase 0.1 is complete, we'll move into Phase 1: **GroveEngine MVP Development** (4-6 weeks)
+Once Phase 0.1 is complete, we'll move into Phase 1: **Lattice MVP Development** (4-6 weeks)
 
 **Phase 1 Goals:**
+
 1. Extract blog functionality from autumnsgrove.com
 2. Build core post management system
 3. Implement media upload and optimization
@@ -344,6 +377,7 @@ Once Phase 0.1 is complete, we'll move into Phase 1: **GroveEngine MVP Developme
 ## 📞 Need Help?
 
 **Questions or blockers?** Document them in:
+
 - GitHub Issues (for code-related)
 - TODOS.md (for task tracking)
 - This document (for Phase 0.1 specific items)
@@ -352,6 +386,6 @@ Once Phase 0.1 is complete, we'll move into Phase 1: **GroveEngine MVP Developme
 
 ---
 
-*Last Updated: November 24, 2025*
-*Phase: 0.1 - Pre-Launch Preparation*
-*Next Phase: 1.0 - MVP Development*
+_Last Updated: November 24, 2025_
+_Phase: 0.1 - Pre-Launch Preparation_
+_Next Phase: 1.0 - MVP Development_

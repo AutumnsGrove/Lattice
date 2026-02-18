@@ -16,17 +16,17 @@
 // ============================================================================
 
 export interface CacheOptions {
-	/** Time-to-live in seconds (default: 3600 = 1 hour) */
-	ttl?: number;
-	/** Namespace prefix for the key */
-	namespace?: string;
+  /** Time-to-live in seconds (default: 3600 = 1 hour) */
+  ttl?: number;
+  /** Namespace prefix for the key */
+  namespace?: string;
 }
 
 export interface GetOrSetOptions<T> extends CacheOptions {
-	/** Function to compute the value if not in cache */
-	compute: () => Promise<T>;
-	/** Skip cache read and always compute fresh (useful for cache invalidation) */
-	forceRefresh?: boolean;
+  /** Function to compute the value if not in cache */
+  compute: () => Promise<T>;
+  /** Skip cache read and always compute fresh (useful for cache invalidation) */
+  forceRefresh?: boolean;
 }
 
 // ============================================================================
@@ -34,23 +34,23 @@ export interface GetOrSetOptions<T> extends CacheOptions {
 // ============================================================================
 
 export class CacheError extends Error {
-	constructor(
-		message: string,
-		public readonly code: CacheErrorCode,
-		public readonly cause?: unknown
-	) {
-		super(message);
-		this.name = 'CacheError';
-	}
+  constructor(
+    message: string,
+    public readonly code: CacheErrorCode,
+    public readonly cause?: unknown,
+  ) {
+    super(message);
+    this.name = "CacheError";
+  }
 }
 
 export type CacheErrorCode =
-	| 'GET_FAILED'
-	| 'SET_FAILED'
-	| 'DELETE_FAILED'
-	| 'SERIALIZATION_ERROR'
-	| 'COMPUTE_FAILED'
-	| 'KV_UNAVAILABLE';
+  | "GET_FAILED"
+  | "SET_FAILED"
+  | "DELETE_FAILED"
+  | "SERIALIZATION_ERROR"
+  | "COMPUTE_FAILED"
+  | "KV_UNAVAILABLE";
 
 // ============================================================================
 // Configuration
@@ -60,7 +60,7 @@ export type CacheErrorCode =
 const DEFAULT_TTL_SECONDS = 3600;
 
 /** Key prefix to avoid collisions with other KV users */
-const KEY_PREFIX = 'grove';
+const KEY_PREFIX = "grove";
 
 // ============================================================================
 // Key Management
@@ -71,10 +71,10 @@ const KEY_PREFIX = 'grove';
  * @example buildKey('user', '123') => 'grove:user:123'
  */
 function buildKey(namespace: string | undefined, key: string): string {
-	const parts = [KEY_PREFIX];
-	if (namespace) parts.push(namespace);
-	parts.push(key);
-	return parts.join(':');
+  const parts = [KEY_PREFIX];
+  if (namespace) parts.push(namespace);
+  parts.push(key);
+  return parts.join(":");
 }
 
 // ============================================================================
@@ -93,27 +93,27 @@ function buildKey(namespace: string | undefined, key: string): string {
  * ```
  */
 export async function get<T>(
-	kv: KVNamespace,
-	key: string,
-	options?: Pick<CacheOptions, 'namespace'>
+  kv: KVNamespace,
+  key: string,
+  options?: Pick<CacheOptions, "namespace">,
 ): Promise<T | null> {
-	const fullKey = buildKey(options?.namespace, key);
+  const fullKey = buildKey(options?.namespace, key);
 
-	try {
-		const value = await kv.get(fullKey, 'text');
-		if (value === null) {
-			return null;
-		}
+  try {
+    const value = await kv.get(fullKey, "text");
+    if (value === null) {
+      return null;
+    }
 
-		try {
-			return JSON.parse(value) as T;
-		} catch {
-			// If it's not JSON, return as-is (for string values)
-			return value as unknown as T;
-		}
-	} catch (err) {
-		throw new CacheError(`Failed to get key: ${fullKey}`, 'GET_FAILED', err);
-	}
+    try {
+      return JSON.parse(value) as T;
+    } catch {
+      // If it's not JSON, return as-is (for string values)
+      return value as unknown as T;
+    }
+  } catch (err) {
+    throw new CacheError(`Failed to get key: ${fullKey}`, "GET_FAILED", err);
+  }
 }
 
 /**
@@ -125,28 +125,32 @@ export async function get<T>(
  * ```
  */
 export async function set<T>(
-	kv: KVNamespace,
-	key: string,
-	value: T,
-	options?: CacheOptions
+  kv: KVNamespace,
+  key: string,
+  value: T,
+  options?: CacheOptions,
 ): Promise<void> {
-	const fullKey = buildKey(options?.namespace, key);
-	const ttl = options?.ttl ?? DEFAULT_TTL_SECONDS;
+  const fullKey = buildKey(options?.namespace, key);
+  const ttl = options?.ttl ?? DEFAULT_TTL_SECONDS;
 
-	let serialized: string;
-	try {
-		serialized = typeof value === 'string' ? value : JSON.stringify(value);
-	} catch (err) {
-		throw new CacheError('Failed to serialize value', 'SERIALIZATION_ERROR', err);
-	}
+  let serialized: string;
+  try {
+    serialized = typeof value === "string" ? value : JSON.stringify(value);
+  } catch (err) {
+    throw new CacheError(
+      "Failed to serialize value",
+      "SERIALIZATION_ERROR",
+      err,
+    );
+  }
 
-	try {
-		await kv.put(fullKey, serialized, {
-			expirationTtl: ttl
-		});
-	} catch (err) {
-		throw new CacheError(`Failed to set key: ${fullKey}`, 'SET_FAILED', err);
-	}
+  try {
+    await kv.put(fullKey, serialized, {
+      expirationTtl: ttl,
+    });
+  } catch (err) {
+    throw new CacheError(`Failed to set key: ${fullKey}`, "SET_FAILED", err);
+  }
 }
 
 /**
@@ -158,17 +162,21 @@ export async function set<T>(
  * ```
  */
 export async function del(
-	kv: KVNamespace,
-	key: string,
-	options?: Pick<CacheOptions, 'namespace'>
+  kv: KVNamespace,
+  key: string,
+  options?: Pick<CacheOptions, "namespace">,
 ): Promise<void> {
-	const fullKey = buildKey(options?.namespace, key);
+  const fullKey = buildKey(options?.namespace, key);
 
-	try {
-		await kv.delete(fullKey);
-	} catch (err) {
-		throw new CacheError(`Failed to delete key: ${fullKey}`, 'DELETE_FAILED', err);
-	}
+  try {
+    await kv.delete(fullKey);
+  } catch (err) {
+    throw new CacheError(
+      `Failed to delete key: ${fullKey}`,
+      "DELETE_FAILED",
+      err,
+    );
+  }
 }
 
 /**
@@ -191,35 +199,35 @@ export async function del(
  * ```
  */
 export async function getOrSet<T>(
-	kv: KVNamespace,
-	key: string,
-	options: GetOrSetOptions<T>
+  kv: KVNamespace,
+  key: string,
+  options: GetOrSetOptions<T>,
 ): Promise<T> {
-	const { compute, forceRefresh, ...cacheOptions } = options;
+  const { compute, forceRefresh, ...cacheOptions } = options;
 
-	// Try to get from cache first (unless forcing refresh)
-	if (!forceRefresh) {
-		const cached = await get<T>(kv, key, cacheOptions);
-		if (cached !== null) {
-			return cached;
-		}
-	}
+  // Try to get from cache first (unless forcing refresh)
+  if (!forceRefresh) {
+    const cached = await get<T>(kv, key, cacheOptions);
+    if (cached !== null) {
+      return cached;
+    }
+  }
 
-	// Compute the value
-	let value: T;
-	try {
-		value = await compute();
-	} catch (err) {
-		throw new CacheError('Failed to compute value', 'COMPUTE_FAILED', err);
-	}
+  // Compute the value
+  let value: T;
+  try {
+    value = await compute();
+  } catch (err) {
+    throw new CacheError("Failed to compute value", "COMPUTE_FAILED", err);
+  }
 
-	// Store in cache (don't await - fire and forget for performance)
-	// Errors here are logged but don't fail the request
-	set(kv, key, value, cacheOptions).catch((err) => {
-		console.error(`[Cache] Failed to store key ${key}:`, err);
-	});
+  // Store in cache (don't await - fire and forget for performance)
+  // Errors here are logged but don't fail the request
+  set(kv, key, value, cacheOptions).catch((err) => {
+    console.error(`[Cache] Failed to store key ${key}:`, err);
+  });
 
-	return value;
+  return value;
 }
 
 /**
@@ -235,32 +243,32 @@ export async function getOrSet<T>(
  * ```
  */
 export async function getOrSetSync<T>(
-	kv: KVNamespace,
-	key: string,
-	options: GetOrSetOptions<T>
+  kv: KVNamespace,
+  key: string,
+  options: GetOrSetOptions<T>,
 ): Promise<T> {
-	const { compute, forceRefresh, ...cacheOptions } = options;
+  const { compute, forceRefresh, ...cacheOptions } = options;
 
-	// Try to get from cache first (unless forcing refresh)
-	if (!forceRefresh) {
-		const cached = await get<T>(kv, key, cacheOptions);
-		if (cached !== null) {
-			return cached;
-		}
-	}
+  // Try to get from cache first (unless forcing refresh)
+  if (!forceRefresh) {
+    const cached = await get<T>(kv, key, cacheOptions);
+    if (cached !== null) {
+      return cached;
+    }
+  }
 
-	// Compute the value
-	let value: T;
-	try {
-		value = await compute();
-	} catch (err) {
-		throw new CacheError('Failed to compute value', 'COMPUTE_FAILED', err);
-	}
+  // Compute the value
+  let value: T;
+  try {
+    value = await compute();
+  } catch (err) {
+    throw new CacheError("Failed to compute value", "COMPUTE_FAILED", err);
+  }
 
-	// Store in cache and wait for it
-	await set(kv, key, value, cacheOptions);
+  // Store in cache and wait for it
+  await set(kv, key, value, cacheOptions);
 
-	return value;
+  return value;
 }
 
 // ============================================================================
@@ -276,11 +284,11 @@ export async function getOrSetSync<T>(
  * ```
  */
 export async function delMany(
-	kv: KVNamespace,
-	keys: string[],
-	options?: Pick<CacheOptions, 'namespace'>
+  kv: KVNamespace,
+  keys: string[],
+  options?: Pick<CacheOptions, "namespace">,
 ): Promise<void> {
-	await Promise.all(keys.map((key) => del(kv, key, options)));
+  await Promise.all(keys.map((key) => del(kv, key, options)));
 }
 
 /**
@@ -293,28 +301,28 @@ export async function delMany(
  * ```
  */
 export async function delByPrefix(
-	kv: KVNamespace,
-	prefix: string,
-	options?: Pick<CacheOptions, 'namespace'>
+  kv: KVNamespace,
+  prefix: string,
+  options?: Pick<CacheOptions, "namespace">,
 ): Promise<number> {
-	const fullPrefix = buildKey(options?.namespace, prefix);
+  const fullPrefix = buildKey(options?.namespace, prefix);
 
-	let deleted = 0;
-	let cursor: string | undefined;
+  let deleted = 0;
+  let cursor: string | undefined;
 
-	do {
-		const list = await kv.list({ prefix: fullPrefix, cursor });
-		const keys = list.keys.map((k: { name: string }) => k.name);
+  do {
+    const list = await kv.list({ prefix: fullPrefix, cursor });
+    const keys = list.keys.map((k: { name: string }) => k.name);
 
-		if (keys.length > 0) {
-			await Promise.all(keys.map((key: string) => kv.delete(key)));
-			deleted += keys.length;
-		}
+    if (keys.length > 0) {
+      await Promise.all(keys.map((key: string) => kv.delete(key)));
+      deleted += keys.length;
+    }
 
-		cursor = list.list_complete ? undefined : list.cursor;
-	} while (cursor);
+    cursor = list.list_complete ? undefined : list.cursor;
+  } while (cursor);
 
-	return deleted;
+  return deleted;
 }
 
 // ============================================================================
@@ -332,12 +340,12 @@ export async function delByPrefix(
  * ```
  */
 export async function has(
-	kv: KVNamespace,
-	key: string,
-	options?: Pick<CacheOptions, 'namespace'>
+  kv: KVNamespace,
+  key: string,
+  options?: Pick<CacheOptions, "namespace">,
 ): Promise<boolean> {
-	const value = await get(kv, key, options);
-	return value !== null;
+  const value = await get(kv, key, options);
+  return value !== null;
 }
 
 /**
@@ -349,16 +357,16 @@ export async function has(
  * ```
  */
 export async function touch(
-	kv: KVNamespace,
-	key: string,
-	options?: CacheOptions
+  kv: KVNamespace,
+  key: string,
+  options?: CacheOptions,
 ): Promise<boolean> {
-	const value = await get(kv, key, options);
-	if (value === null) {
-		return false;
-	}
-	await set(kv, key, value, options);
-	return true;
+  const value = await get(kv, key, options);
+  if (value === null) {
+    return false;
+  }
+  await set(kv, key, value, options);
+  return true;
 }
 
 // ============================================================================
@@ -367,9 +375,9 @@ export async function touch(
 
 /** Result from a rate limit check */
 export interface RateLimitResult {
-	allowed: boolean;
-	remaining: number;
-	resetAt: number;
+  allowed: boolean;
+  remaining: number;
+  resetAt: number;
 }
 
 /**
@@ -397,64 +405,64 @@ export interface RateLimitResult {
  * ```
  */
 export async function rateLimit(
-	kv: KVNamespace,
-	key: string,
-	options: {
-		/** Maximum number of attempts allowed */
-		limit: number;
-		/** Time window in seconds */
-		windowSeconds: number;
-		/** Namespace for the rate limit key */
-		namespace?: string;
-	}
+  kv: KVNamespace,
+  key: string,
+  options: {
+    /** Maximum number of attempts allowed */
+    limit: number;
+    /** Time window in seconds */
+    windowSeconds: number;
+    /** Namespace for the rate limit key */
+    namespace?: string;
+  },
 ): Promise<RateLimitResult> {
-	const fullKey = buildKey(options.namespace ?? 'ratelimit', key);
+  const fullKey = buildKey(options.namespace ?? "ratelimit", key);
 
-	// Get current count
-	const data = await get<{ count: number; resetAt: number }>(kv, fullKey);
+  // Get current count
+  const data = await get<{ count: number; resetAt: number }>(kv, fullKey);
 
-	const now = Math.floor(Date.now() / 1000);
+  const now = Math.floor(Date.now() / 1000);
 
-	// If no data or window expired, start fresh
-	if (!data || data.resetAt <= now) {
-		const resetAt = now + options.windowSeconds;
-		await set(
-			kv,
-			fullKey,
-			{ count: 1, resetAt },
-			{ ttl: options.windowSeconds }
-		);
-		return {
-			allowed: true,
-			remaining: options.limit - 1,
-			resetAt
-		};
-	}
+  // If no data or window expired, start fresh
+  if (!data || data.resetAt <= now) {
+    const resetAt = now + options.windowSeconds;
+    await set(
+      kv,
+      fullKey,
+      { count: 1, resetAt },
+      { ttl: options.windowSeconds },
+    );
+    return {
+      allowed: true,
+      remaining: options.limit - 1,
+      resetAt,
+    };
+  }
 
-	// Check if over limit
-	if (data.count >= options.limit) {
-		return {
-			allowed: false,
-			remaining: 0,
-			resetAt: data.resetAt
-		};
-	}
+  // Check if over limit
+  if (data.count >= options.limit) {
+    return {
+      allowed: false,
+      remaining: 0,
+      resetAt: data.resetAt,
+    };
+  }
 
-	// Increment count
-	const newCount = data.count + 1;
-	const remaining = Math.max(0, options.limit - newCount);
-	await set(
-		kv,
-		fullKey,
-		{ count: newCount, resetAt: data.resetAt },
-		{ ttl: data.resetAt - now }
-	);
+  // Increment count
+  const newCount = data.count + 1;
+  const remaining = Math.max(0, options.limit - newCount);
+  await set(
+    kv,
+    fullKey,
+    { count: newCount, resetAt: data.resetAt },
+    { ttl: data.resetAt - now },
+  );
 
-	return {
-		allowed: true,
-		remaining,
-		resetAt: data.resetAt
-	};
+  return {
+    allowed: true,
+    remaining,
+    resetAt: data.resetAt,
+  };
 }
 
 // ============================================================================
@@ -462,6 +470,6 @@ export async function rateLimit(
 // ============================================================================
 
 export const CACHE_DEFAULTS = {
-	TTL_SECONDS: DEFAULT_TTL_SECONDS,
-	KEY_PREFIX
+  TTL_SECONDS: DEFAULT_TTL_SECONDS,
+  KEY_PREFIX,
 } as const;

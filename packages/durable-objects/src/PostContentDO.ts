@@ -23,7 +23,7 @@ import {
   type LoomConfig,
   type LoomRequestContext,
   safeJsonParse,
-} from "@autumnsgrove/groveengine/loom";
+} from "@autumnsgrove/lattice/loom";
 
 // ============================================================================
 // Types

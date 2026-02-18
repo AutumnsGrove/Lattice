@@ -6,8 +6,8 @@
  */
 
 import type { PageServerLoad } from "./$types";
-import { aggregateFirefly } from "@autumnsgrove/groveengine/server/observability";
-import type { FireflyAggregateResult } from "@autumnsgrove/groveengine/server/observability";
+import { aggregateFirefly } from "@autumnsgrove/lattice/server/observability";
+import type { FireflyAggregateResult } from "@autumnsgrove/lattice/server/observability";
 
 export const load: PageServerLoad = async ({ parent, platform }) => {
 	await parent();

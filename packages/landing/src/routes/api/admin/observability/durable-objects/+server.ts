@@ -9,8 +9,8 @@
 
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { SERVICE_REGISTRY } from "@autumnsgrove/groveengine/server/observability";
-import { isWayfinder } from "@autumnsgrove/groveengine/config";
+import { SERVICE_REGISTRY } from "@autumnsgrove/lattice/server/observability";
+import { isWayfinder } from "@autumnsgrove/lattice/config";
 
 interface DOStatsRow {
 	class_name: string;

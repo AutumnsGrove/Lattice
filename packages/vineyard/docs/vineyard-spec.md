@@ -122,7 +122,7 @@ Use consistent status indicators across all Vineyards:
 
 ## Shared Components
 
-These components should live in Lattice (`@autumnsgrove/groveengine`) for reuse across all Vineyards:
+These components should live in Lattice (`@autumnsgrove/lattice`) for reuse across all Vineyards:
 
 ### VineyardLayout
 
@@ -297,7 +297,7 @@ packages/engine/src/lib/ui/components/vineyard/
 └── index.ts
 ```
 
-Export from `@autumnsgrove/groveengine/vineyard`:
+Export from `@autumnsgrove/lattice/vineyard`:
 
 ```typescript
 export {

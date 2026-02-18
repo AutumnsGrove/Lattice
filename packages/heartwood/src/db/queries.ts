@@ -61,7 +61,7 @@ export function extractSubdomainFromRedirectUri(
 }
 
 /**
- * Check if a subdomain exists as an active tenant in GroveEngine.
+ * Check if a subdomain exists as an active tenant in Lattice.
  * This prevents redirect hijacking to non-existent or suspended tenants.
  */
 export async function isActiveTenant(
@@ -94,7 +94,7 @@ export async function getClientByClientId(
  *
  * @param client - The client object
  * @param redirectUri - The redirect URI to validate
- * @param engineDb - Optional GroveEngine database for wildcard tenant validation
+ * @param engineDb - Optional Lattice database for wildcard tenant validation
  */
 export async function validateRedirectUriForClient(
   client: Client,
@@ -126,12 +126,12 @@ export async function validateRedirectUriForClient(
  * 1. Exact match against registered redirect_uris (backward compatible)
  * 2. For supported clients (e.g., groveengine): wildcard subdomain validation
  *    - Extract subdomain from URI pattern (e.g., autumn.grove.place)
- *    - Verify subdomain exists as active tenant in GroveEngine DB
+ *    - Verify subdomain exists as active tenant in Lattice DB
  *
  * @param db - Heartwood database connection
  * @param clientId - The OAuth client ID
  * @param redirectUri - The redirect URI to validate
- * @param engineDb - Optional GroveEngine database for wildcard tenant validation
+ * @param engineDb - Optional Lattice database for wildcard tenant validation
  */
 export async function validateClientRedirectUri(
   db: D1DatabaseOrSession,
@@ -1226,7 +1226,7 @@ export async function getAdminStats(
     .prepare(`SELECT COUNT(*) as count FROM clients`)
     .first<{ count: number }>();
 
-  // GroveEngine: Email signups count
+  // Lattice: Email signups count
   let emailSignupsCount = 0;
   if (engineDb) {
     const emailSignupsResult = await engineDb

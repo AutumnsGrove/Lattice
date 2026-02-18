@@ -4,7 +4,7 @@
  * Displays clickable terms with popup definitions, styled by category.
  *
  * Usage:
- *   import { GroveTerm } from '@autumnsgrove/groveengine/ui';
+ *   import { GroveTerm } from '@autumnsgrove/lattice/ui';
  *   import groveTermManifest from '$lib/data/grove-term-manifest.json';
  *
  *   <GroveTerm term="grove" manifest={groveTermManifest} />

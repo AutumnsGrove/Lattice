@@ -6,7 +6,7 @@
 --   - users (id, email, is_admin, created_at, updated_at)
 --   - sessions (id, user_id, expires_at, created_at)
 --   - magic_codes (id, email, code, expires_at, used_at, created_at)
--- These tables are defined in the main GroveEngine schema.
+-- These tables are defined in the main Lattice schema.
 --
 -- NOTE: D1 (SQLite) does not enforce foreign key constraints by default.
 -- The REFERENCES clauses are for documentation only. Cascading deletes

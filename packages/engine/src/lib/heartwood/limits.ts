@@ -1,12 +1,12 @@
 /**
  * Post Limit Enforcement
  *
- * High-level utilities for enforcing post limits in GroveEngine.
+ * High-level utilities for enforcing post limits in Lattice.
  * Uses GroveAuth subscription API to check and update limits.
  */
 
-import type { SubscriptionStatus, CanPostResponse } from './types.js';
-import { TIER_POST_LIMITS, TIER_NAMES } from './types.js';
+import type { SubscriptionStatus, CanPostResponse } from "./types.js";
+import { TIER_POST_LIMITS, TIER_NAMES } from "./types.js";
 
 // =============================================================================
 // LIMIT STATUS HELPERS
@@ -17,7 +17,7 @@ import { TIER_POST_LIMITS, TIER_NAMES } from './types.js';
  */
 export function getQuotaDescription(status: SubscriptionStatus): string {
   if (status.post_limit === null) {
-    return 'Unlimited posts';
+    return "Unlimited posts";
   }
 
   const remaining = status.posts_remaining ?? 0;
@@ -28,7 +28,10 @@ export function getQuotaDescription(status: SubscriptionStatus): string {
     return `Limit reached (${used}/${limit}). Upgrade required.`;
   }
 
-  if (status.is_in_grace_period && status.grace_period_days_remaining !== null) {
+  if (
+    status.is_in_grace_period &&
+    status.grace_period_days_remaining !== null
+  ) {
     return `Limit reached. ${status.grace_period_days_remaining} days remaining in grace period.`;
   }
 
@@ -46,20 +49,25 @@ export function getQuotaDescription(status: SubscriptionStatus): string {
 /**
  * Get the urgency level for the current quota status
  */
-export function getQuotaUrgency(status: SubscriptionStatus): 'healthy' | 'warning' | 'critical' | 'blocked' {
+export function getQuotaUrgency(
+  status: SubscriptionStatus,
+): "healthy" | "warning" | "critical" | "blocked" {
   if (status.upgrade_required) {
-    return 'blocked';
+    return "blocked";
   }
 
-  if (status.is_at_limit || (status.percentage_used !== null && status.percentage_used >= 100)) {
-    return 'critical';
+  if (
+    status.is_at_limit ||
+    (status.percentage_used !== null && status.percentage_used >= 100)
+  ) {
+    return "critical";
   }
 
   if (status.percentage_used !== null && status.percentage_used >= 90) {
-    return 'warning';
+    return "warning";
   }
 
-  return 'healthy';
+  return "healthy";
 }
 
 /**
@@ -69,23 +77,29 @@ export function getSuggestedActions(status: SubscriptionStatus): string[] {
   const actions: string[] = [];
 
   if (status.upgrade_required) {
-    actions.push('Upgrade your plan to continue posting');
-    actions.push('Delete older posts to free up space');
+    actions.push("Upgrade your plan to continue posting");
+    actions.push("Delete older posts to free up space");
     return actions;
   }
 
   if (status.is_in_grace_period) {
-    actions.push(`Upgrade within ${status.grace_period_days_remaining} days to avoid read-only mode`);
-    actions.push('Delete older posts to get under the limit');
+    actions.push(
+      `Upgrade within ${status.grace_period_days_remaining} days to avoid read-only mode`,
+    );
+    actions.push("Delete older posts to get under the limit");
   }
 
   if (status.is_at_limit) {
-    actions.push('Upgrade your plan for more posts');
-    actions.push('Delete older posts to create new ones');
+    actions.push("Upgrade your plan for more posts");
+    actions.push("Delete older posts to create new ones");
   }
 
-  if (status.percentage_used !== null && status.percentage_used >= 75 && status.percentage_used < 90) {
-    actions.push('Consider upgrading soon - you\'re using most of your quota');
+  if (
+    status.percentage_used !== null &&
+    status.percentage_used >= 75 &&
+    status.percentage_used < 90
+  ) {
+    actions.push("Consider upgrading soon - you're using most of your quota");
   }
 
   return actions;
@@ -102,36 +116,37 @@ export function getUpgradeRecommendation(status: SubscriptionStatus): {
 } {
   const tierName = TIER_NAMES[status.tier];
 
-  if (status.tier === 'evergreen') {
+  if (status.tier === "evergreen") {
     return {
       recommended: false,
       fromTier: tierName,
       toTier: null,
-      reason: 'You have the highest tier with unlimited posts',
+      reason: "You have the highest tier with unlimited posts",
     };
   }
 
-  if (status.tier === 'oak') {
+  if (status.tier === "oak") {
     return {
       recommended: false,
       fromTier: tierName,
-      toTier: 'Evergreen',
-      reason: 'You already have unlimited posts. Evergreen adds domain search and support hours.',
+      toTier: "Evergreen",
+      reason:
+        "You already have unlimited posts. Evergreen adds domain search and support hours.",
     };
   }
 
   if (status.upgrade_required || status.is_at_limit) {
-    const toTier = status.tier === 'seedling' ? 'Sapling' : 'Oak';
+    const toTier = status.tier === "seedling" ? "Sapling" : "Oak";
     return {
       recommended: true,
       fromTier: tierName,
       toTier,
-      reason: 'You\'ve reached your post limit',
+      reason: "You've reached your post limit",
     };
   }
 
   if (status.percentage_used !== null && status.percentage_used >= 80) {
-    const toTier = status.tier === 'seedling' ? 'Sapling' : 'Oak';
+    const toTier = status.tier === "seedling" ? "Sapling" : "Oak";
     return {
       recommended: true,
       fromTier: tierName,
@@ -144,7 +159,7 @@ export function getUpgradeRecommendation(status: SubscriptionStatus): {
     recommended: false,
     fromTier: tierName,
     toTier: null,
-    reason: 'Your current plan is sufficient for your usage',
+    reason: "Your current plan is sufficient for your usage",
   };
 }
 
@@ -162,7 +177,7 @@ export interface QuotaWidgetData {
   /** Posts remaining (null if unlimited) */
   remaining: number | null;
   /** Status color */
-  color: 'green' | 'yellow' | 'red' | 'gray';
+  color: "green" | "yellow" | "red" | "gray";
   /** Status text */
   statusText: string;
   /** Human-readable description */
@@ -178,21 +193,24 @@ export interface QuotaWidgetData {
 /**
  * Get data for rendering a quota widget
  */
-export function getQuotaWidgetData(status: SubscriptionStatus): QuotaWidgetData {
+export function getQuotaWidgetData(
+  status: SubscriptionStatus,
+): QuotaWidgetData {
   const urgency = getQuotaUrgency(status);
 
-  const colorMap: Record<typeof urgency, 'green' | 'yellow' | 'red' | 'gray'> = {
-    healthy: 'green',
-    warning: 'yellow',
-    critical: 'red',
-    blocked: 'red',
-  };
+  const colorMap: Record<typeof urgency, "green" | "yellow" | "red" | "gray"> =
+    {
+      healthy: "green",
+      warning: "yellow",
+      critical: "red",
+      blocked: "red",
+    };
 
   const statusTextMap: Record<typeof urgency, string> = {
-    healthy: 'Healthy',
-    warning: 'Warning',
-    critical: 'Critical',
-    blocked: 'Blocked',
+    healthy: "Healthy",
+    warning: "Warning",
+    critical: "Critical",
+    blocked: "Blocked",
   };
 
   return {
@@ -200,10 +218,12 @@ export function getQuotaWidgetData(status: SubscriptionStatus): QuotaWidgetData 
     limit: status.post_limit,
     percentage: status.percentage_used,
     remaining: status.posts_remaining,
-    color: status.post_limit === null ? 'gray' : colorMap[urgency],
-    statusText: status.post_limit === null ? 'Unlimited' : statusTextMap[urgency],
+    color: status.post_limit === null ? "gray" : colorMap[urgency],
+    statusText:
+      status.post_limit === null ? "Unlimited" : statusTextMap[urgency],
     description: getQuotaDescription(status),
-    showUpgrade: urgency === 'warning' || urgency === 'critical' || urgency === 'blocked',
+    showUpgrade:
+      urgency === "warning" || urgency === "critical" || urgency === "blocked",
     tierName: TIER_NAMES[status.tier],
     canPost: status.can_create_post,
   };
@@ -229,7 +249,9 @@ export interface PreSubmitCheckResult {
 /**
  * Check if a post can be created and whether to show warnings
  */
-export function getPreSubmitCheck(response: CanPostResponse): PreSubmitCheckResult {
+export function getPreSubmitCheck(
+  response: CanPostResponse,
+): PreSubmitCheckResult {
   const { allowed, status } = response;
 
   // Upgrade required - can't post at all
@@ -237,7 +259,8 @@ export function getPreSubmitCheck(response: CanPostResponse): PreSubmitCheckResu
     return {
       allowed: false,
       showWarning: true,
-      warningMessage: 'Your grace period has expired. Please upgrade your plan or delete posts to continue.',
+      warningMessage:
+        "Your grace period has expired. Please upgrade your plan or delete posts to continue.",
       upgradeRequired: true,
       status,
     };
@@ -259,7 +282,8 @@ export function getPreSubmitCheck(response: CanPostResponse): PreSubmitCheckResu
     return {
       allowed,
       showWarning: true,
-      warningMessage: 'You\'ve reached your post limit. Creating a new post will start your grace period.',
+      warningMessage:
+        "You've reached your post limit. Creating a new post will start your grace period.",
       upgradeRequired: false,
       status,
     };

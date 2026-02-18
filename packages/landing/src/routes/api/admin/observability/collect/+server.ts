@@ -9,7 +9,7 @@
 
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { isWayfinder } from "@autumnsgrove/groveengine/config";
+import { isWayfinder } from "@autumnsgrove/lattice/config";
 
 export const POST: RequestHandler = async ({ platform, locals }) => {
 	const db = platform?.env?.DB;

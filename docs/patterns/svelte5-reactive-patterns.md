@@ -1,6 +1,6 @@
 ---
 title: "Svelte 5 Reactive Patterns"
-description: "A guide to reactive patterns ($derived, $state, $effect, untrack) used across the GroveEngine codebase."
+description: "A guide to reactive patterns ($derived, $state, $effect, untrack) used across the Lattice codebase."
 category: patterns
 icon: pyramid
 lastUpdated: "2026-01-22"
@@ -8,16 +8,16 @@ lastUpdated: "2026-01-22"
 
 # Svelte 5 Reactive Patterns
 
-This document explains the reactive patterns used across the GroveEngine codebase and when to use each one.
+This document explains the reactive patterns used across the Lattice codebase and when to use each one.
 
 ## Pattern Summary
 
-| Pattern | Use Case | Example Location |
-|---------|----------|------------------|
-| `$derived()` | Read-only computed values from props | `subscribers/+page.svelte` |
-| `untrack()` | One-time initialization from props | `domains/admin/config/+page.svelte` |
-| `$effect()` unconditional | Form that resets on navigation | `engine/admin/blog/edit/+page.svelte` |
-| `$effect()` conditional | One-time setup with guard | `plant/profile/+page.svelte` |
+| Pattern                   | Use Case                             | Example Location                      |
+| ------------------------- | ------------------------------------ | ------------------------------------- |
+| `$derived()`              | Read-only computed values from props | `subscribers/+page.svelte`            |
+| `untrack()`               | One-time initialization from props   | `domains/admin/config/+page.svelte`   |
+| `$effect()` unconditional | Form that resets on navigation       | `engine/admin/blog/edit/+page.svelte` |
+| `$effect()` conditional   | One-time setup with guard            | `plant/profile/+page.svelte`          |
 
 ## Pattern Details
 
@@ -26,12 +26,14 @@ This document explains the reactive patterns used across the GroveEngine codebas
 **Use when:** You need a reactive value that's purely derived from props or other reactive sources, never mutated locally.
 
 **Example:**
+
 ```typescript
 let { data } = $props();
 let subscribers = $derived(data.subscribers); // Read-only, reactive to data changes
 ```
 
 **Files using this pattern:**
+
 - `packages/engine/src/routes/admin/subscribers/+page.svelte`
 - Various components with computed values
 
@@ -40,13 +42,17 @@ let subscribers = $derived(data.subscribers); // Read-only, reactive to data cha
 **Use when:** You want to capture the initial value of a prop but don't need the local state to update when the prop changes (e.g., settings/config pages).
 
 **Example:**
+
 ```typescript
-let maxBatches = $state(untrack(() => data.config?.max_batches || DEFAULTS.MAX_BATCHES));
+let maxBatches = $state(
+  untrack(() => data.config?.max_batches || DEFAULTS.MAX_BATCHES),
+);
 ```
 
 **Why:** The user edits these values locally, and you don't want external updates to override their edits while they're working.
 
 **Files using this pattern:**
+
 - `domains/src/routes/admin/config/+page.svelte`
 - `domains/src/routes/admin/history/+page.svelte`
 - `domains/src/routes/admin/searcher/+page.svelte`
@@ -56,6 +62,7 @@ let maxBatches = $state(untrack(() => data.config?.max_batches || DEFAULTS.MAX_B
 **Use when:** You need the form to completely reset when navigating (e.g., editing different blog posts).
 
 **Example:**
+
 ```typescript
 let title = $state("");
 let content = $state("");
@@ -70,6 +77,7 @@ $effect(() => {
 **Why:** When navigating from "Post A" to "Post B", you want the entire form to reset with Post B's data.
 
 **Files using this pattern:**
+
 - `packages/engine/src/routes/admin/blog/edit/[slug]/+page.svelte`
 
 ### 4. `$effect()` Conditional - One-time Setup
@@ -77,8 +85,9 @@ $effect(() => {
 **Use when:** You only want to initialize once, typically for onboarding/setup flows.
 
 **Example:**
+
 ```typescript
-let displayName = $state('');
+let displayName = $state("");
 
 $effect(() => {
   if (data.user?.displayName && !displayName) {
@@ -90,6 +99,7 @@ $effect(() => {
 **Why:** This is a one-time profile setup. Once the user starts editing, you don't want to override their changes.
 
 **Files using this pattern:**
+
 - `plant/src/routes/profile/+page.svelte`
 
 ## Immutable State Updates
@@ -97,6 +107,7 @@ $effect(() => {
 **IMPORTANT:** When using `$state()` with objects or arrays, always use immutable update patterns:
 
 ### ✅ Correct (Immutable)
+
 ```typescript
 let timers = $state<Record<string, number>>({});
 
@@ -109,6 +120,7 @@ timers = { ...timers, ...updated };
 ```
 
 ### ❌ Incorrect (Direct Mutation)
+
 ```typescript
 let timers = $state<Record<string, number>>({});
 
@@ -139,15 +151,17 @@ Is the value derived from reactive sources and never mutated locally?
 ## Examples from Codebase
 
 ### Subscribers Page (Read-only derived)
+
 ```typescript
 // Read-only list for display
 let subscribers = $derived(data.subscribers);
 
 // Used only for reading
-const allEmails = subscribers.map(s => s.email).join(', ');
+const allEmails = subscribers.map((s) => s.email).join(", ");
 ```
 
 ### Config Page (One-time capture)
+
 ```typescript
 // Capture initial config, user edits locally
 let maxBatches = $state(untrack(() => data.config?.max_batches || 100));
@@ -156,6 +170,7 @@ let maxBatches = $state(untrack(() => data.config?.max_batches || 100));
 ```
 
 ### Blog Edit Page (Always reset)
+
 ```typescript
 // Reset form when navigating between posts
 let title = $state("");
@@ -167,9 +182,10 @@ $effect(() => {
 ```
 
 ### Profile Setup (Initialize once)
+
 ```typescript
 // Initialize from OAuth data, but only if empty
-let displayName = $state('');
+let displayName = $state("");
 
 $effect(() => {
   if (data.user?.displayName && !displayName) {
@@ -181,6 +197,7 @@ $effect(() => {
 ## Common Mistakes
 
 ### Mistake 1: Math.random() in $derived()
+
 ```typescript
 // ❌ BAD - regenerates on every reactive update
 const id = $derived(filterId ?? `id-${Math.random()}`);
@@ -191,6 +208,7 @@ const id = $derived(filterId ?? randomId);
 ```
 
 ### Mistake 2: Direct Object Mutation
+
 ```typescript
 // ❌ BAD - won't trigger reactivity
 let timers = $state({});
@@ -201,17 +219,18 @@ timers = { ...timers, [key]: value };
 ```
 
 ### Mistake 3: Unnecessary $derived() for Static Data
+
 ```typescript
 // ❌ BAD - data is static
 const items = $derived([
-  { id: 1, name: 'Item 1' },
-  { id: 2, name: 'Item 2' }
+  { id: 1, name: "Item 1" },
+  { id: 2, name: "Item 2" },
 ]);
 
 // ✅ GOOD - just use const
 const items = [
-  { id: 1, name: 'Item 1' },
-  { id: 2, name: 'Item 2' }
+  { id: 1, name: "Item 1" },
+  { id: 2, name: "Item 2" },
 ];
 ```
 

@@ -2,7 +2,7 @@
 	import '../app.css';
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
-	import { Header, Footer } from '@autumnsgrove/groveengine/ui/chrome';
+	import { Header, Footer } from '@autumnsgrove/lattice/ui/chrome';
 	import { Search } from 'lucide-svelte';
 
 	let { children } = $props();

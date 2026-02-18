@@ -7,7 +7,7 @@
 	 */
 
 	import { invalidateAll } from '$app/navigation';
-	import { GlassCard } from '@autumnsgrove/groveengine/ui';
+	import { GlassCard } from '@autumnsgrove/lattice/ui';
 	import {
 		Package,
 		Upload,

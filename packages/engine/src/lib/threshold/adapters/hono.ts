@@ -57,7 +57,7 @@ export interface ThresholdHonoOptions {
  *
  * @example
  * ```typescript
- * import { thresholdMiddleware } from "@autumnsgrove/groveengine/threshold/hono";
+ * import { thresholdMiddleware } from "@autumnsgrove/lattice/threshold/hono";
  *
  * app.use("/api/auth/*", thresholdMiddleware({
  *   threshold,

@@ -5,10 +5,12 @@
 Journey Curio is the **second Developer Curio** for Grove. It tracks a GitHub repository's evolution over time, showing code composition, growth metrics, and AI-generated release summaries.
 
 **Key Difference from Timeline:**
+
 - **Timeline** = Daily commit activity summaries (uses GitHub Events API)
 - **Journey** = Periodic repo snapshots with full code analysis (needs git clone)
 
 **Design Decisions:**
+
 - **Scope**: Single repo per tenant (v1), multi-repo later (v2)
 - **Compute**: Firefly (ephemeral VPS) for git clone + analysis
 - **Orchestration**: Loom (Durable Objects) for state tracking
@@ -70,13 +72,13 @@ Journey Curio is the **second Developer Curio** for Grove. It tracks a GitHub re
 
 ## Why Firefly Over GitHub API
 
-| Concern | GitHub API | Firefly |
-|---------|------------|---------|
-| **Line counts** | Not available (only file list) | Exact counts via `wc -l` |
-| **Rate limits** | 5,000 req/hr, often hit | None (our own VPS) |
-| **Reliability** | 502s, timeouts, inconsistent | Rock solid (Hetzner 99.9% SLA) |
-| **Historical data** | 90-day event limit | Full git history |
-| **Cost** | Free but unreliable | ~$0.002 per analysis |
+| Concern             | GitHub API                     | Firefly                        |
+| ------------------- | ------------------------------ | ------------------------------ |
+| **Line counts**     | Not available (only file list) | Exact counts via `wc -l`       |
+| **Rate limits**     | 5,000 req/hr, often hit        | None (our own VPS)             |
+| **Reliability**     | 502s, timeouts, inconsistent   | Rock solid (Hetzner 99.9% SLA) |
+| **Historical data** | 90-day event limit             | Full git history               |
+| **Cost**            | Free but unreliable            | ~$0.002 per analysis           |
 
 **Fallback**: GitHub API mode for users who don't want to wait for Firefly boot time (~45s).
 
@@ -136,17 +138,17 @@ The magic of Journey is seeing the **historical progression** across ALL version
 
 ### Why Tag-Walking Works
 
-| Problem | Solution |
-|---------|----------|
-| **2M lines would blow up AI** | We only send 8-20 commits per tag, not the whole repo |
-| **Need historical progression** | Walking tags gives us snapshots at each version |
-| **Token limits** | Each summary is ~500 tokens in, ~300 out. Tiny. |
-| **Server time** | 30 tags × 1 min each = 30 min. We pay €0.004. Worth it. |
+| Problem                         | Solution                                                |
+| ------------------------------- | ------------------------------------------------------- |
+| **2M lines would blow up AI**   | We only send 8-20 commits per tag, not the whole repo   |
+| **Need historical progression** | Walking tags gives us snapshots at each version         |
+| **Token limits**                | Each summary is ~500 tokens in, ~300 out. Tiny.         |
+| **Server time**                 | 30 tags × 1 min each = 30 min. We pay €0.004. Worth it. |
 
 ### AI Prompt Per Tag (Scoped to Delta)
 
 ```
-You're summarizing version v0.9.6 of GroveEngine.
+You're summarizing version v0.9.6 of Lattice.
 
 Commits since v0.9.5 (11 commits):
 - feat: add Curios cabinet for visitor experience
@@ -169,28 +171,28 @@ Write a 2-3 sentence narrative summary, then list top features and fixes.
 
 Users bring their own OpenRouter key. These models are optimized for code summarization:
 
-| Model | Input $/1M | Output $/1M | Context | Notes |
-|-------|-----------|-------------|---------|-------|
-| **DeepSeek V3.2** ⭐ DEFAULT | $0.25 | $0.38 | 164K | Best value, excellent at code |
-| Kimi K2 | $0.39 | $1.90 | 262K | Great reasoning, huge context |
-| MiniMax M2.1 | $0.27 | $1.12 | 197K | Fast, good quality |
-| Claude Haiku 4.5 | $1.00 | $5.00 | 200K | Premium quality |
-| GPT-OSS 120B | $0.04 | $0.19 | 131K | Ultra cheap |
-| Qwen3 235B | $0.07 | $0.46 | 262K | Large context, budget friendly |
-| Llama 3.3 70B | $0.10 | $0.32 | 131K | Open source, reliable |
-| GLM 4.7 | $0.40 | $1.50 | 203K | Good multilingual |
-| Llama 4 Maverick | $0.15 | $0.60 | **1M** | Massive context window |
+| Model                        | Input $/1M | Output $/1M | Context | Notes                          |
+| ---------------------------- | ---------- | ----------- | ------- | ------------------------------ |
+| **DeepSeek V3.2** ⭐ DEFAULT | $0.25      | $0.38       | 164K    | Best value, excellent at code  |
+| Kimi K2                      | $0.39      | $1.90       | 262K    | Great reasoning, huge context  |
+| MiniMax M2.1                 | $0.27      | $1.12       | 197K    | Fast, good quality             |
+| Claude Haiku 4.5             | $1.00      | $5.00       | 200K    | Premium quality                |
+| GPT-OSS 120B                 | $0.04      | $0.19       | 131K    | Ultra cheap                    |
+| Qwen3 235B                   | $0.07      | $0.46       | 262K    | Large context, budget friendly |
+| Llama 3.3 70B                | $0.10      | $0.32       | 131K    | Open source, reliable          |
+| GLM 4.7                      | $0.40      | $1.50       | 203K    | Good multilingual              |
+| Llama 4 Maverick             | $0.15      | $0.60       | **1M**  | Massive context window         |
 
 ### Cost Estimate for 30-Tag Analysis
 
-| Model | Est. Total Cost |
-|-------|-----------------|
-| GPT-OSS 120B | ~$0.02 |
-| DeepSeek V3.2 | ~$0.05 |
-| Qwen3 235B | ~$0.06 |
-| Llama 3.3 70B | ~$0.08 |
-| MiniMax M2.1 | ~$0.15 |
-| Claude Haiku 4.5 | ~$0.40 |
+| Model            | Est. Total Cost |
+| ---------------- | --------------- |
+| GPT-OSS 120B     | ~$0.02          |
+| DeepSeek V3.2    | ~$0.05          |
+| Qwen3 235B       | ~$0.06          |
+| Llama 3.3 70B    | ~$0.08          |
+| MiniMax M2.1     | ~$0.15          |
+| Claude Haiku 4.5 | ~$0.40          |
 
 **Recommended for bulk processing:** DeepSeek V3.2 (default) or GPT-OSS 120B (budget)
 
@@ -213,7 +215,7 @@ CREATE TABLE IF NOT EXISTS journey_curio_config (
     github_repo_url TEXT,                   -- Full URL: https://github.com/user/repo
     github_username TEXT,                   -- Extracted from URL
     github_repo_name TEXT,                  -- Extracted from URL
-    display_name TEXT,                      -- "GroveEngine" (for UI)
+    display_name TEXT,                      -- "Lattice" (for UI)
 
     -- Credentials (encrypted at rest)
     github_token_encrypted TEXT,            -- For private repos
@@ -377,6 +379,7 @@ ON journey_jobs(tenant_id, status, created_at DESC);
 **Goal**: Build the shared Firefly library for ephemeral VPS management.
 
 **Files to Create**:
+
 ```
 packages/firefly/
 ├── src/
@@ -395,6 +398,7 @@ packages/firefly/
 ```
 
 **Key Components**:
+
 1. **ServerProvisioner** - Hetzner API abstraction (create/destroy VPS)
 2. **StateSynchronizer** - R2 state management (hydrate/persist)
 3. **IdleDetector** - Monitor activity, trigger shutdown
@@ -407,12 +411,14 @@ packages/firefly/
 **Goal**: Create the Loom DO for coordinating Journey analysis jobs.
 
 **Files to Create**:
+
 ```
 packages/durable-objects/src/
 ├── JourneyDO.ts                    # Job orchestration DO
 ```
 
 **JourneyDO Responsibilities**:
+
 - Track active analysis jobs per tenant
 - Coordinate Firefly provisioning
 - Store progress for UI polling
@@ -420,11 +426,12 @@ packages/durable-objects/src/
 - Manage job queue (one active job per tenant)
 
 **State Schema**:
+
 ```typescript
 interface JourneyDOState {
   activeJob: {
     id: string;
-    status: 'provisioning' | 'analyzing' | 'generating' | 'complete' | 'failed';
+    status: "provisioning" | "analyzing" | "generating" | "complete" | "failed";
     progress: number;
     message: string;
     fireflyInstanceId?: string;
@@ -445,6 +452,7 @@ interface JourneyDOState {
 **Goal**: Build the analysis script that runs on Firefly VPS.
 
 **Files to Create**:
+
 ```
 workers/journey-analyzer/
 ├── src/
@@ -458,6 +466,7 @@ workers/journey-analyzer/
 ```
 
 **Analysis Flow**:
+
 ```
 1. Receive job config (repo URL, tenant ID, API key)
 2. git clone --depth=1 <repo>  (or full clone for backfill)
@@ -478,6 +487,7 @@ workers/journey-analyzer/
 **Goal**: Create the D1 schema and core TypeScript library.
 
 **Files to Create**:
+
 ```
 packages/engine/migrations/021_journey_curio.sql
 
@@ -496,6 +506,7 @@ packages/engine/src/lib/curios/journey/
 **Goal**: Create REST APIs for Journey Curio.
 
 **Files to Create**:
+
 ```
 packages/engine/src/routes/api/curios/journey/
 ├── +server.ts                      # GET snapshots (public)
@@ -510,17 +521,17 @@ packages/engine/src/routes/api/curios/journey/
 
 **Endpoint Details**:
 
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| GET | `/api/curios/journey` | Public | Paginated snapshots |
-| GET | `/api/curios/journey/config` | Admin | Current config |
-| PUT | `/api/curios/journey/config` | Admin | Update config |
-| POST | `/api/curios/journey/analyze` | Admin | Trigger new analysis |
-| POST | `/api/curios/journey/ingest` | API Key | Receive Firefly results |
-| GET | `/api/curios/journey/jobs` | Admin | List recent jobs |
-| GET | `/api/curios/journey/jobs/:id` | Admin | Job progress |
-| GET | `/api/curios/journey/milestones` | Public | Version releases |
-| GET | `/api/curios/journey/growth` | Public | Growth over time |
+| Method | Path                             | Auth    | Description             |
+| ------ | -------------------------------- | ------- | ----------------------- |
+| GET    | `/api/curios/journey`            | Public  | Paginated snapshots     |
+| GET    | `/api/curios/journey/config`     | Admin   | Current config          |
+| PUT    | `/api/curios/journey/config`     | Admin   | Update config           |
+| POST   | `/api/curios/journey/analyze`    | Admin   | Trigger new analysis    |
+| POST   | `/api/curios/journey/ingest`     | API Key | Receive Firefly results |
+| GET    | `/api/curios/journey/jobs`       | Admin   | List recent jobs        |
+| GET    | `/api/curios/journey/jobs/:id`   | Admin   | Job progress            |
+| GET    | `/api/curios/journey/milestones` | Public  | Version releases        |
+| GET    | `/api/curios/journey/growth`     | Public  | Growth over time        |
 
 ---
 
@@ -529,6 +540,7 @@ packages/engine/src/routes/api/curios/journey/
 **Goal**: Create the Arbor configuration interface.
 
 **Files to Create**:
+
 ```
 packages/engine/src/routes/admin/curios/journey/
 ├── +page.svelte                    # Configuration form
@@ -536,6 +548,7 @@ packages/engine/src/routes/admin/curios/journey/
 ```
 
 **Admin UI Sections**:
+
 1. **Enable/Disable** toggle
 2. **Repository** - URL input, auto-parse username/repo
 3. **Credentials** - GitHub token (for private repos), OpenRouter key
@@ -550,6 +563,7 @@ packages/engine/src/routes/admin/curios/journey/
 **Goal**: Build the visualization components.
 
 **Files to Create**:
+
 ```
 packages/engine/src/lib/curios/journey/components/
 ├── Journey.svelte                  # Main component (orchestrates all)
@@ -570,6 +584,7 @@ packages/engine/src/lib/curios/journey/components/
 **Goal**: Create the public `/journey` page.
 
 **Files to Create**:
+
 ```
 packages/engine/src/routes/(site)/journey/
 ├── +page.svelte                    # Public Journey page
@@ -585,6 +600,7 @@ packages/engine/src/routes/(site)/journey/
 **Two Approaches**:
 
 **A. Full Historical Backfill (Firefly)**
+
 ```
 1. User clicks "Backfill History" in admin
 2. JourneyDO enqueues backfill job
@@ -595,6 +611,7 @@ packages/engine/src/routes/(site)/journey/
 ```
 
 **B. CSV Import (Quick)**
+
 ```
 1. User runs existing repo-snapshot.sh locally
 2. Uploads CSV to admin UI
@@ -609,29 +626,30 @@ packages/engine/src/routes/(site)/journey/
 ```typescript
 const journeyFireflyConfig: FireflyConfig = {
   trigger: {
-    type: 'api',  // Triggered by JourneyDO
-    source: 'journey-analyze-queue',
+    type: "api", // Triggered by JourneyDO
+    source: "journey-analyze-queue",
   },
   provisioner: {
-    provider: 'hetzner',
-    size: 'cx22',           // 2 vCPU, 4GB RAM
-    region: 'fsn1',         // EU (cheapest)
-    image: 'journey-analyzer-v1',
-    maxLifetime: 30 * 60 * 1000,  // 30 minutes max
+    provider: "hetzner",
+    size: "cx22", // 2 vCPU, 4GB RAM
+    region: "fsn1", // EU (cheapest)
+    image: "journey-analyzer-v1",
+    maxLifetime: 30 * 60 * 1000, // 30 minutes max
   },
   stateSync: {
-    storage: 'r2',
-    bucket: 'journey-workspaces',
+    storage: "r2",
+    bucket: "journey-workspaces",
     syncOnCompletion: true,
   },
   idle: {
-    threshold: 5 * 60 * 1000,     // 5 minutes idle
-    signals: ['analysis_running'],
+    threshold: 5 * 60 * 1000, // 5 minutes idle
+    signals: ["analysis_running"],
   },
 };
 ```
 
 **Cost Estimate**:
+
 - Hetzner CX22: €0.0076/hr
 - Typical analysis: 10 minutes
 - Cost per analysis: ~€0.0013 (~$0.0015)
@@ -640,23 +658,24 @@ const journeyFireflyConfig: FireflyConfig = {
 
 ## Critical Files Summary
 
-| Category | Files |
-|----------|-------|
-| **Firefly Core** | `packages/firefly/src/*` |
-| **JourneyDO** | `packages/durable-objects/src/JourneyDO.ts` |
-| **Analyzer Worker** | `workers/journey-analyzer/*` |
-| **Database** | `packages/engine/migrations/021_journey_curio.sql` |
-| **Library** | `packages/engine/src/lib/curios/journey/*` |
-| **API** | `packages/engine/src/routes/api/curios/journey/*` |
-| **Admin UI** | `packages/engine/src/routes/admin/curios/journey/*` |
-| **Components** | `packages/engine/src/lib/curios/journey/components/*` |
-| **Public Route** | `packages/engine/src/routes/(site)/journey/*` |
+| Category            | Files                                                 |
+| ------------------- | ----------------------------------------------------- |
+| **Firefly Core**    | `packages/firefly/src/*`                              |
+| **JourneyDO**       | `packages/durable-objects/src/JourneyDO.ts`           |
+| **Analyzer Worker** | `workers/journey-analyzer/*`                          |
+| **Database**        | `packages/engine/migrations/021_journey_curio.sql`    |
+| **Library**         | `packages/engine/src/lib/curios/journey/*`            |
+| **API**             | `packages/engine/src/routes/api/curios/journey/*`     |
+| **Admin UI**        | `packages/engine/src/routes/admin/curios/journey/*`   |
+| **Components**      | `packages/engine/src/lib/curios/journey/components/*` |
+| **Public Route**    | `packages/engine/src/routes/(site)/journey/*`         |
 
 ---
 
 ## Verification Plan
 
 ### 1. Firefly Core
+
 ```bash
 # Test Hetzner provisioner locally
 pnpm test:firefly --provisioner
@@ -666,19 +685,22 @@ pnpm test:firefly --provisioner
 ```
 
 ### 2. JourneyDO
+
 - Create test job via API
 - Verify state updates in DO
 - Test progress polling endpoint
 - Simulate failure and retry
 
 ### 3. Analysis Worker
+
 ```bash
 # Run analyzer locally against test repo
 cd workers/journey-analyzer
-pnpm dev --repo=https://github.com/AutumnsGrove/GroveEngine
+pnpm dev --repo=https://github.com/AutumnsGrove/Lattice
 ```
 
 ### 4. End-to-End
+
 1. Enable Journey Curio in admin
 2. Enter repo URL
 3. Click "Analyze Now"
@@ -688,6 +710,7 @@ pnpm dev --repo=https://github.com/AutumnsGrove/GroveEngine
 7. View public `/journey` page
 
 ### 5. Backfill
+
 - Test CSV import with existing `history.csv`
 - Test full historical backfill via Firefly
 - Verify all versions have AI summaries

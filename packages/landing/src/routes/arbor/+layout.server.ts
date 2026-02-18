@@ -1,7 +1,7 @@
 import { redirect, error } from "@sveltejs/kit";
 import type { LayoutServerLoad } from "./$types";
-import { loadChannelMessages } from "@autumnsgrove/groveengine/services";
-import { isWayfinder } from "@autumnsgrove/groveengine/config";
+import { loadChannelMessages } from "@autumnsgrove/lattice/services";
+import { isWayfinder } from "@autumnsgrove/lattice/config";
 
 /**
  * Admin Layout Server

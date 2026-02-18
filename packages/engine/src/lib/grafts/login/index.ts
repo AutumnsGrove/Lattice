@@ -13,13 +13,13 @@
  *
  * @example Redirect button (any Grove property — the easy way)
  * ```svelte
- * import { LoginRedirectButton } from '@autumnsgrove/groveengine/grafts/login';
+ * import { LoginRedirectButton } from '@autumnsgrove/lattice/grafts/login';
  * <LoginRedirectButton returnTo="/profile" />
  * ```
  *
  * @example Redirect via server load (for login routes)
  * ```typescript
- * import { buildLoginUrl } from '@autumnsgrove/groveengine/grafts/login';
+ * import { buildLoginUrl } from '@autumnsgrove/lattice/grafts/login';
  * throw redirect(302, buildLoginUrl(`${url.origin}/auth/callback?returnTo=/arbor`));
  * ```
  */

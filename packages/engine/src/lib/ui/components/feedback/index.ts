@@ -3,7 +3,7 @@
 // Universal inline feedback components for gathering user input.
 //
 // Usage:
-//   import { Trace } from '@autumnsgrove/groveengine/ui/feedback';
+//   import { Trace } from '@autumnsgrove/lattice/ui/feedback';
 //
 // Example:
 //   <Trace />

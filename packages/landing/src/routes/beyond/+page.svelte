@@ -18,7 +18,7 @@
 	}
 
 	// Import nature assets from engine package
-	import { StarCluster, Moon } from '@autumnsgrove/groveengine/ui/nature';
+	import { StarCluster, Moon } from '@autumnsgrove/lattice/ui/nature';
 
 	interface SubComponent {
 		name: string;

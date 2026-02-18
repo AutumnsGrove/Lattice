@@ -1,6 +1,6 @@
 import type { Handle } from "@sveltejs/kit";
 import { error } from "@sveltejs/kit";
-import { validateCSRF } from "@autumnsgrove/groveengine/utils";
+import { validateCSRF } from "@autumnsgrove/lattice/utils";
 
 /**
  * Server hooks for the Plant app

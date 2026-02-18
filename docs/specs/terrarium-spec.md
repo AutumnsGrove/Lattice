@@ -4,7 +4,7 @@ description: Visual scene composition tool for blog decorations
 category: specs
 specCategory: platform-services
 icon: pencilruler
-lastUpdated: '2026-01-05'
+lastUpdated: "2026-01-05"
 aliases: []
 tags: []
 ---
@@ -28,12 +28,12 @@ tags: []
                  Design. Arrange. Watch it grow.
 ```
 
-> *A sealed world under glass—a miniature ecosystem you design, arrange, and watch grow.*
+> _A sealed world under glass—a miniature ecosystem you design, arrange, and watch grow._
 
 **Public Name:** Terrarium
 **Internal Name:** GroveTerrarium
 **Route:** `/terrarium`
-**Repository:** `AutumnsGrove/GroveEngine` (packages/engine)
+**Repository:** `AutumnsGrove/Lattice` (packages/engine)
 
 A terrarium is a contained miniature ecosystem you design, arrange, and nurture. Moss, stones, tiny plants—all placed with intention.
 
@@ -323,22 +323,22 @@ Here's what a typical session looks like:
 
 ### Tier Access
 
-| Tier | Terrarium Access | Saved Scenes | Decorations |
-|------|------------------|--------------|-------------|
-| **Free** | View-only demo | 0 | None |
-| **Seedling** | Full access | 5 | 1 per zone |
-| **Sapling** | Full access | 20 | 3 per zone |
-| **Oak** | Full access | 100 | Unlimited + browse community |
-| **Evergreen** | Full access | Unlimited | Unlimited + share to community |
+| Tier          | Terrarium Access | Saved Scenes | Decorations                    |
+| ------------- | ---------------- | ------------ | ------------------------------ |
+| **Free**      | View-only demo   | 0            | None                           |
+| **Seedling**  | Full access      | 5            | 1 per zone                     |
+| **Sapling**   | Full access      | 20           | 3 per zone                     |
+| **Oak**       | Full access      | 100          | Unlimited + browse community   |
+| **Evergreen** | Full access      | Unlimited    | Unlimited + share to community |
 
 ---
 
 ## Timeline
 
-| Milestone | Target Phase | Contents |
-|-----------|--------------|----------|
-| **MVP (Phases 1-3)** | Full Bloom | Core canvas, assets, export, Foliage integration |
-| **Full Version** | Golden Hour | PlaygroundDO backend, community features, polish |
+| Milestone            | Target Phase | Contents                                         |
+| -------------------- | ------------ | ------------------------------------------------ |
+| **MVP (Phases 1-3)** | Full Bloom   | Core canvas, assets, export, Foliage integration |
+| **Full Version**     | Golden Hour  | PlaygroundDO backend, community features, polish |
 
 ---
 
@@ -356,23 +356,25 @@ Here's what a typical session looks like:
 Categorized sidebar with 60+ nature components.
 
 **Search & Filter:**
+
 - Search box at top filters assets by name
 - Category tabs filter by category
 - Search + category filters stack (AND logic)
 - Debounced search (150ms) for performance
 
-| Category | Components |
-|----------|------------|
-| **Trees** | TreeAspen, TreeBirch, TreeCherry, TreePine |
-| **Creatures** | Bee, Bird, Butterfly, Deer, Firefly, Owl, Rabbit, Squirrel, etc. |
-| **Botanical** | Acorn, Berry, Leaf, Vine, Fern, FallingLeavesLayer, etc. |
-| **Ground** | Bush, Mushroom, Rock, Stump, GrassTuft, Flowers, etc. |
-| **Sky** | Cloud, Moon, Star, Sun, Rainbow, etc. |
-| **Structural** | Lattice, LatticeWithVine, Birdhouse, Bridge, Lantern, etc. |
-| **Water** | Pond, Stream, LilyPad, Reeds |
-| **Weather** | Snowflake, SnowfallLayer, etc. |
+| Category       | Components                                                       |
+| -------------- | ---------------------------------------------------------------- |
+| **Trees**      | TreeAspen, TreeBirch, TreeCherry, TreePine                       |
+| **Creatures**  | Bee, Bird, Butterfly, Deer, Firefly, Owl, Rabbit, Squirrel, etc. |
+| **Botanical**  | Acorn, Berry, Leaf, Vine, Fern, FallingLeavesLayer, etc.         |
+| **Ground**     | Bush, Mushroom, Rock, Stump, GrassTuft, Flowers, etc.            |
+| **Sky**        | Cloud, Moon, Star, Sun, Rainbow, etc.                            |
+| **Structural** | Lattice, LatticeWithVine, Birdhouse, Bridge, Lantern, etc.       |
+| **Water**      | Pond, Stream, LilyPad, Reeds                                     |
+| **Weather**    | Snowflake, SnowfallLayer, etc.                                   |
 
 **Phase 1 Starter Assets (10):**
+
 - Trees: TreePine, TreeBirch
 - Structural: Lattice, LatticeWithVine, Lantern
 - Creatures: Butterfly, Firefly
@@ -460,9 +462,14 @@ interface PlacedAsset {
 }
 
 type AssetCategory =
-  | 'trees' | 'creatures' | 'botanical'
-  | 'ground' | 'sky' | 'structural'
-  | 'water' | 'weather';
+  | "trees"
+  | "creatures"
+  | "botanical"
+  | "ground"
+  | "sky"
+  | "structural"
+  | "water"
+  | "weather";
 ```
 
 ### State Management
@@ -478,17 +485,29 @@ export function createTerrariumState() {
   let animationsEnabled = $state(true);
 
   let selectedAsset = $derived(
-    scene.assets.find(a => a.id === selectedAssetId) ?? null
+    scene.assets.find((a) => a.id === selectedAssetId) ?? null,
   );
 
   // Actions
-  function addAsset(componentName: string, position: Point) { /* ... */ }
-  function updateAsset(id: string, updates: Partial<PlacedAsset>) { /* ... */ }
-  function deleteAsset(id: string) { /* ... */ }
-  function duplicateAsset(id: string) { /* ... */ }
-  function moveLayer(id: string, direction: 'up' | 'down' | 'top' | 'bottom') { /* ... */ }
+  function addAsset(componentName: string, position: Point) {
+    /* ... */
+  }
+  function updateAsset(id: string, updates: Partial<PlacedAsset>) {
+    /* ... */
+  }
+  function deleteAsset(id: string) {
+    /* ... */
+  }
+  function duplicateAsset(id: string) {
+    /* ... */
+  }
+  function moveLayer(id: string, direction: "up" | "down" | "top" | "bottom") {
+    /* ... */
+  }
 
-  return { /* expose state and actions */ };
+  return {
+    /* expose state and actions */
+  };
 }
 ```
 
@@ -513,9 +532,9 @@ export const TERRARIUM_CONFIG = {
   complexity: {
     maxComplexity: 200,
     weights: {
-      animated: 5,    // Animated assets cost 5 points
-      scaled: 2,      // Scale > 1.5 or < 0.5 costs 2 points
-      normal: 1,      // Standard assets cost 1 point
+      animated: 5, // Animated assets cost 5 points
+      scaled: 2, // Scale > 1.5 or < 0.5 costs 2 points
+      normal: 1, // Standard assets cost 1 point
     },
     warningThreshold: 0.8, // Warn at 80% budget
   },
@@ -542,8 +561,8 @@ export const TERRARIUM_CONFIG = {
   // Storage limits (per tier)
   storage: {
     // Use IndexedDB for larger storage (25MB+) vs localStorage (5-10MB)
-    backend: 'indexeddb' as const,
-    dbName: 'terrarium',
+    backend: "indexeddb" as const,
+    dbName: "terrarium",
     dbVersion: 1,
     maxSavedScenes: {
       free: 0,
@@ -566,7 +585,7 @@ export const TERRARIUM_CONFIG = {
     maxWidth: 4096,
     maxHeight: 4096,
     defaultScale: 2, // 2x for retina
-    format: 'png' as const,
+    format: "png" as const,
     // Realistic: 5-10s for complex scenes, not 3s
     expectedTimeMs: { min: 1000, typical: 5000, max: 10000 },
   },
@@ -574,9 +593,9 @@ export const TERRARIUM_CONFIG = {
   // Auto-save settings
   autoSave: {
     enabled: true,
-    debounceMs: 2000,        // Wait 2s after last change
-    maxIntervalMs: 30000,    // Force save every 30s during activity
-    showIndicator: true,     // Show "Saving..." indicator
+    debounceMs: 2000, // Wait 2s after last change
+    maxIntervalMs: 30000, // Force save every 30s during activity
+    showIndicator: true, // Show "Saving..." indicator
   },
 
   // Zone constraints for Foliage integration
@@ -584,22 +603,22 @@ export const TERRARIUM_CONFIG = {
     header: {
       recommendedAspectRatio: [16, 3] as [number, number],
       maxHeight: 200,
-      fitBehavior: 'scale' as const,
+      fitBehavior: "scale" as const,
     },
     sidebar: {
       recommendedAspectRatio: [1, 2] as [number, number],
       maxHeight: 400,
-      fitBehavior: 'scale' as const,
+      fitBehavior: "scale" as const,
     },
     footer: {
       recommendedAspectRatio: [16, 2] as [number, number],
       maxHeight: 150,
-      fitBehavior: 'scale' as const,
+      fitBehavior: "scale" as const,
     },
     background: {
       recommendedAspectRatio: null, // Free
       maxHeight: null,
-      fitBehavior: 'cover' as const,
+      fitBehavior: "cover" as const,
     },
   },
 
@@ -619,11 +638,12 @@ export type TerrariumConfig = typeof TERRARIUM_CONFIG;
 ```typescript
 // packages/engine/src/lib/utils/complexity.ts
 
-import { TERRARIUM_CONFIG } from '$lib/config/terrarium';
-import { assetRegistry } from '$lib/ui/components/terrarium/assetRegistry.generated';
-import type { PlacedAsset } from '$lib/types';
+import { TERRARIUM_CONFIG } from "$lib/config/terrarium";
+import { assetRegistry } from "$lib/ui/components/terrarium/assetRegistry.generated";
+import type { PlacedAsset } from "$lib/types";
 
-const { maxComplexity, weights, warningThreshold } = TERRARIUM_CONFIG.complexity;
+const { maxComplexity, weights, warningThreshold } =
+  TERRARIUM_CONFIG.complexity;
 
 /**
  * Calculate complexity cost for a single asset
@@ -631,21 +651,21 @@ const { maxComplexity, weights, warningThreshold } = TERRARIUM_CONFIG.complexity
  */
 export function getAssetComplexity(
   asset: PlacedAsset,
-  previousCost?: number
+  previousCost?: number,
 ): number {
   const meta = assetRegistry[asset.componentName];
 
   // Define thresholds with hysteresis buffer (±0.1)
   const SCALE_HIGH_ENTER = 1.5;
-  const SCALE_HIGH_EXIT = 1.4;  // Must drop below 1.4 to return to normal
+  const SCALE_HIGH_EXIT = 1.4; // Must drop below 1.4 to return to normal
   const SCALE_LOW_ENTER = 0.5;
-  const SCALE_LOW_EXIT = 0.6;   // Must rise above 0.6 to return to normal
+  const SCALE_LOW_EXIT = 0.6; // Must rise above 0.6 to return to normal
 
   // Determine if currently in "scaled" state (with hysteresis)
   const wasScaled = previousCost === weights.scaled;
   const isExtremeScale = wasScaled
-    ? (asset.scale > SCALE_HIGH_EXIT || asset.scale < SCALE_LOW_EXIT)  // Stay scaled until clearly normal
-    : (asset.scale > SCALE_HIGH_ENTER || asset.scale < SCALE_LOW_ENTER); // Become scaled at threshold
+    ? asset.scale > SCALE_HIGH_EXIT || asset.scale < SCALE_LOW_EXIT // Stay scaled until clearly normal
+    : asset.scale > SCALE_HIGH_ENTER || asset.scale < SCALE_LOW_ENTER; // Become scaled at threshold
 
   // Priority: animated > scaled > normal
   if (meta?.isAnimated && asset.animationEnabled) {
@@ -692,7 +712,7 @@ export function getComplexityPercentage(assets: PlacedAsset[]): number {
  */
 export function canAddAsset(
   currentAssets: PlacedAsset[],
-  newAsset: Partial<PlacedAsset>
+  newAsset: Partial<PlacedAsset>,
 ): { allowed: boolean; wouldExceed: boolean; currentUsage: number } {
   const currentComplexity = calculateSceneComplexity(currentAssets);
   const assetCost = getAssetComplexity(newAsset as PlacedAsset);
@@ -849,30 +869,30 @@ generateRegistry();
 // AUTO-GENERATED - DO NOT EDIT
 // Run `pnpm run generate:asset-registry` to regenerate
 
-import type { AssetDefinition } from './types';
+import type { AssetDefinition } from "./types";
 
-import { meta as TreePineMeta } from '../nature/trees/TreePine.svelte';
-import { meta as TreeBirchMeta } from '../nature/trees/TreeBirch.svelte';
-import { meta as FireflyMeta } from '../nature/creatures/Firefly.svelte';
+import { meta as TreePineMeta } from "../nature/trees/TreePine.svelte";
+import { meta as TreeBirchMeta } from "../nature/trees/TreeBirch.svelte";
+import { meta as FireflyMeta } from "../nature/creatures/Firefly.svelte";
 // ... all 60+ assets
 
 export const assetRegistry: Record<string, AssetDefinition> = {
   TreePine: {
-    name: 'TreePine',
+    name: "TreePine",
     ...TreePineMeta,
-    load: () => import('../nature/trees/TreePine.svelte'),
+    load: () => import("../nature/trees/TreePine.svelte"),
   },
   TreeBirch: {
-    name: 'TreeBirch',
+    name: "TreeBirch",
     ...TreeBirchMeta,
-    load: () => import('../nature/trees/TreeBirch.svelte'),
+    load: () => import("../nature/trees/TreeBirch.svelte"),
   },
   // ... all assets
 };
 
 export const assetsByCategory = {
-  trees: ['TreePine', 'TreeBirch', 'TreeCherry', 'TreeAspen'],
-  creatures: ['Bee', 'Bird', 'Butterfly', 'Deer', 'Firefly'],
+  trees: ["TreePine", "TreeBirch", "TreeCherry", "TreeAspen"],
+  creatures: ["Bee", "Bird", "Butterfly", "Deer", "Firefly"],
   // ... all categories
 };
 ```
@@ -891,6 +911,7 @@ export const assetsByCategory = {
 ### Library Choice
 
 **`dom-to-image-more`** (maintained fork of dom-to-image)
+
 - Good SVG support (nature components are SVGs)
 - Lighter than html2canvas
 - Active maintenance
@@ -900,13 +921,13 @@ export const assetsByCategory = {
 ```typescript
 // packages/engine/src/lib/ui/components/terrarium/utils/export.ts
 
-import domtoimage from 'dom-to-image-more';
-import { TERRARIUM_CONFIG } from '$lib/config/terrarium';
+import domtoimage from "dom-to-image-more";
+import { TERRARIUM_CONFIG } from "$lib/config/terrarium";
 
 export async function exportSceneAsPNG(
   canvasElement: HTMLElement,
   sceneName: string,
-  options: ExportOptions = {}
+  options: ExportOptions = {},
 ): Promise<void> {
   const {
     scale = TERRARIUM_CONFIG.export.defaultScale,
@@ -923,7 +944,7 @@ export async function exportSceneAsPNG(
 
   try {
     // 2. Wait for CSS transitions to settle
-    await new Promise(r => setTimeout(r, 100));
+    await new Promise((r) => setTimeout(r, 100));
 
     // 3. Capture
     const dataUrl = await domtoimage.toPng(canvasElement, {
@@ -932,7 +953,7 @@ export async function exportSceneAsPNG(
       height: canvasElement.offsetHeight * scale,
       style: {
         transform: `scale(${scale})`,
-        transformOrigin: 'top left',
+        transformOrigin: "top left",
       },
     });
 
@@ -947,14 +968,14 @@ export async function exportSceneAsPNG(
 }
 
 function downloadDataUrl(dataUrl: string, filename: string): void {
-  const link = document.createElement('a');
+  const link = document.createElement("a");
   link.download = filename;
   link.href = dataUrl;
   link.click();
 }
 
 function sanitizeFilename(name: string): string {
-  return name.replace(/[^a-z0-9-_]/gi, '-').toLowerCase();
+  return name.replace(/[^a-z0-9-_]/gi, "-").toLowerCase();
 }
 ```
 
@@ -964,12 +985,12 @@ function sanitizeFilename(name: string): string {
 
 ### Decoration Zones
 
-| Zone | Aspect Ratio | Max Height | Fit Behavior |
-|------|--------------|------------|--------------|
-| **Header** | 16:3 | 200px | Scale to fit width |
-| **Sidebar** | 1:2 | 400px | Scale to fit width |
-| **Footer** | 16:2 | 150px | Scale to fit width |
-| **Background** | Free | Viewport | Cover with opacity |
+| Zone           | Aspect Ratio | Max Height | Fit Behavior       |
+| -------------- | ------------ | ---------- | ------------------ |
+| **Header**     | 16:3         | 200px      | Scale to fit width |
+| **Sidebar**    | 1:2          | 400px      | Scale to fit width |
+| **Footer**     | 16:2         | 150px      | Scale to fit width |
+| **Background** | Free         | Viewport   | Cover with opacity |
 
 ### Export as Decoration Flow
 
@@ -978,7 +999,7 @@ function sanitizeFilename(name: string): string {
 async function exportAsDecoration(
   scene: TerrariumScene,
   zone: DecorationZone,
-  name: string
+  name: string,
 ): Promise<{ decorationId: string }> {
   // 1. Validate scene fits zone
   const constraints = TERRARIUM_CONFIG.zones[zone];
@@ -993,8 +1014,8 @@ async function exportAsDecoration(
   const thumbnail = await generateThumbnail(scene);
 
   // 3. Save decoration
-  const response = await fetch('/api/terrarium/decorations', {
-    method: 'POST',
+  const response = await fetch("/api/terrarium/decorations", {
+    method: "POST",
     body: JSON.stringify({
       name,
       zone,
@@ -1196,11 +1217,11 @@ Community decorations (shared by other users) must be validated before rendering
 **Schema: `packages/engine/src/lib/schemas/decoration.ts`**
 
 ```typescript
-import { z } from 'zod';
+import { z } from "zod";
 import {
   assetsByCategory,
   assetRegistry,
-} from '../ui/components/terrarium/assetRegistry.generated';
+} from "../ui/components/terrarium/assetRegistry.generated";
 
 // Get all valid component names at runtime
 const validComponentNames = Object.values(assetsByCategory).flat();
@@ -1212,12 +1233,12 @@ const validComponentNames = Object.values(assetsByCategory).flat();
 const PropSchemas: Record<string, z.ZodSchema> = {
   // Trees
   OakTree: z.object({
-    season: z.enum(['spring', 'summer', 'autumn', 'winter']).optional(),
-    size: z.enum(['small', 'medium', 'large']).optional(),
+    season: z.enum(["spring", "summer", "autumn", "winter"]).optional(),
+    size: z.enum(["small", "medium", "large"]).optional(),
   }),
   PineTree: z.object({
     snowCapped: z.boolean().optional(),
-    size: z.enum(['small', 'medium', 'large']).optional(),
+    size: z.enum(["small", "medium", "large"]).optional(),
   }),
   WillowTree: z.object({
     windSpeed: z.number().min(0).max(1).optional(),
@@ -1225,24 +1246,30 @@ const PropSchemas: Record<string, z.ZodSchema> = {
 
   // Creatures
   Firefly: z.object({
-    glowColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
+    glowColor: z
+      .string()
+      .regex(/^#[0-9a-fA-F]{6}$/)
+      .optional(),
     flickerSpeed: z.number().min(0.1).max(2).optional(),
   }),
   Butterfly: z.object({
-    wingPattern: z.enum(['monarch', 'blue', 'swallowtail']).optional(),
+    wingPattern: z.enum(["monarch", "blue", "swallowtail"]).optional(),
     flutterSpeed: z.number().min(0.5).max(2).optional(),
   }),
   Bird: z.object({
-    species: z.enum(['robin', 'bluebird', 'cardinal', 'sparrow']).optional(),
+    species: z.enum(["robin", "bluebird", "cardinal", "sparrow"]).optional(),
   }),
 
   // Botanical
   Flower: z.object({
-    color: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
-    bloomStage: z.enum(['bud', 'partial', 'full']).optional(),
+    color: z
+      .string()
+      .regex(/^#[0-9a-fA-F]{6}$/)
+      .optional(),
+    bloomStage: z.enum(["bud", "partial", "full"]).optional(),
   }),
   Mushroom: z.object({
-    variant: z.enum(['red', 'brown', 'white', 'glowing']).optional(),
+    variant: z.enum(["red", "brown", "white", "glowing"]).optional(),
   }),
   Fern: z.object({
     unfurled: z.boolean().optional(),
@@ -1254,7 +1281,7 @@ const PropSchemas: Record<string, z.ZodSchema> = {
     variant: z.number().int().min(1).max(5).optional(),
   }),
   Grass: z.object({
-    density: z.enum(['sparse', 'medium', 'dense']).optional(),
+    density: z.enum(["sparse", "medium", "dense"]).optional(),
   }),
 
   // Weather
@@ -1263,27 +1290,26 @@ const PropSchemas: Record<string, z.ZodSchema> = {
     variant: z.number().int().min(1).max(3).optional(),
   }),
   Raindrop: z.object({
-    intensity: z.enum(['light', 'medium', 'heavy']).optional(),
+    intensity: z.enum(["light", "medium", "heavy"]).optional(),
   }),
 
   // Structural
   Lattice: z.object({
-    style: z.enum(['wooden', 'metal', 'vine-covered']).optional(),
+    style: z.enum(["wooden", "metal", "vine-covered"]).optional(),
     width: z.number().min(50).max(400).optional(),
   }),
   Fence: z.object({
-    style: z.enum(['picket', 'rustic', 'stone']).optional(),
+    style: z.enum(["picket", "rustic", "stone"]).optional(),
     segments: z.number().int().min(1).max(10).optional(),
   }),
 };
 
 // Fallback for components without specific schemas
-const DefaultPropSchema = z.record(
-  z.union([z.string(), z.number(), z.boolean()])
-).refine(
-  (obj) => Object.keys(obj).length <= 10,
-  { message: 'Too many props (max 10)' }
-);
+const DefaultPropSchema = z
+  .record(z.union([z.string(), z.number(), z.boolean()]))
+  .refine((obj) => Object.keys(obj).length <= 10, {
+    message: "Too many props (max 10)",
+  });
 
 /**
  * Get prop schema for a component, with fallback
@@ -1297,7 +1323,7 @@ function getPropSchema(componentName: string): z.ZodSchema {
  */
 export function validateAssetProps(
   componentName: string,
-  props: Record<string, unknown>
+  props: Record<string, unknown>,
 ): { valid: boolean; errors?: string[] } {
   const schema = getPropSchema(componentName);
   const result = schema.safeParse(props);
@@ -1308,35 +1334,44 @@ export function validateAssetProps(
 
   return {
     valid: false,
-    errors: result.error.errors.map(e => `${e.path.join('.')}: ${e.message}`),
+    errors: result.error.errors.map((e) => `${e.path.join(".")}: ${e.message}`),
   };
 }
 
-const PlacedAssetSchema = z.object({
-  id: z.string().uuid(),
-  componentName: z.enum(validComponentNames as [string, ...string[]]),
-  category: z.enum([
-    'trees', 'creatures', 'botanical', 'ground',
-    'sky', 'structural', 'water', 'weather'
-  ]),
-  position: z.object({
-    x: z.number().min(-1000).max(5000),
-    y: z.number().min(-1000).max(5000),
-  }),
-  scale: z.number().min(0.1).max(5),
-  rotation: z.number().min(-360).max(360),
-  zIndex: z.number().int().min(0).max(1000),
-  props: z.record(z.union([z.string(), z.number(), z.boolean()])),
-  animationEnabled: z.boolean(),
-}).refine(
-  (asset) => validateAssetProps(asset.componentName, asset.props).valid,
-  (asset) => ({
-    message: `Invalid props for ${asset.componentName}: ${
-      validateAssetProps(asset.componentName, asset.props).errors?.join(', ')
-    }`,
-    path: ['props'],
+const PlacedAssetSchema = z
+  .object({
+    id: z.string().uuid(),
+    componentName: z.enum(validComponentNames as [string, ...string[]]),
+    category: z.enum([
+      "trees",
+      "creatures",
+      "botanical",
+      "ground",
+      "sky",
+      "structural",
+      "water",
+      "weather",
+    ]),
+    position: z.object({
+      x: z.number().min(-1000).max(5000),
+      y: z.number().min(-1000).max(5000),
+    }),
+    scale: z.number().min(0.1).max(5),
+    rotation: z.number().min(-360).max(360),
+    zIndex: z.number().int().min(0).max(1000),
+    props: z.record(z.union([z.string(), z.number(), z.boolean()])),
+    animationEnabled: z.boolean(),
   })
-);
+  .refine(
+    (asset) => validateAssetProps(asset.componentName, asset.props).valid,
+    (asset) => ({
+      message: `Invalid props for ${asset.componentName}: ${validateAssetProps(
+        asset.componentName,
+        asset.props,
+      ).errors?.join(", ")}`,
+      path: ["props"],
+    }),
+  );
 
 const CanvasSettingsSchema = z.object({
   width: z.number().min(200).max(4000),
@@ -1359,7 +1394,7 @@ export const TerrariumSceneSchema = z.object({
 export const DecorationSchema = z.object({
   id: z.string().uuid(),
   name: z.string().min(1).max(100),
-  zone: z.enum(['header', 'sidebar', 'footer', 'background']),
+  zone: z.enum(["header", "sidebar", "footer", "background"]),
   scene: TerrariumSceneSchema,
   options: z.object({
     opacity: z.number().min(0).max(1).default(1),
@@ -1376,8 +1411,8 @@ export type ValidatedDecoration = z.infer<typeof DecorationSchema>;
 
 ```typescript
 // packages/engine/src/routes/api/terrarium/decorations/+server.ts
-import { DecorationSchema } from '$lib/schemas/decoration';
-import { json, error } from '@sveltejs/kit';
+import { DecorationSchema } from "$lib/schemas/decoration";
+import { json, error } from "@sveltejs/kit";
 
 export async function POST({ request, locals }) {
   const body = await request.json();
@@ -1386,7 +1421,7 @@ export async function POST({ request, locals }) {
   const result = DecorationSchema.safeParse(body);
   if (!result.success) {
     throw error(400, {
-      message: 'Invalid decoration data',
+      message: "Invalid decoration data",
       errors: result.error.flatten().fieldErrors,
     });
   }
@@ -1400,12 +1435,12 @@ export async function POST({ request, locals }) {
 
 ```typescript
 // Before rendering community decorations, validate
-import { TerrariumSceneSchema } from '$lib/schemas/decoration';
+import { TerrariumSceneSchema } from "$lib/schemas/decoration";
 
 function validateScene(scene: unknown): scene is TerrariumScene {
   const result = TerrariumSceneSchema.safeParse(scene);
   if (!result.success) {
-    console.error('Invalid scene data:', result.error);
+    console.error("Invalid scene data:", result.error);
     return false;
   }
   return true;
@@ -1417,9 +1452,11 @@ function validateScene(scene: unknown): scene is TerrariumScene {
 ## Implementation Phases
 
 ### Phase 1: Playable Demo
+
 **Goal:** Something you can use and show people
 
 **Deliverables:**
+
 - `/terrarium` route with full-screen layout
 - Canvas with pan (no zoom)
 - Asset palette with 10 starter assets
@@ -1430,6 +1467,7 @@ function validateScene(scene: unknown): scene is TerrariumScene {
 - localStorage save (single scene)
 
 **Files:**
+
 ```
 packages/engine/src/lib/ui/components/terrarium/
 ├── Terrarium.svelte
@@ -1449,9 +1487,11 @@ packages/engine/src/routes/terrarium/
 ```
 
 ### Phase 2: Full Creative Tool
+
 **Goal:** Production-ready terrarium
 
 **Deliverables:**
+
 - Full asset registry (60+ via build script)
 - **Search & filter** in asset palette
 - Grid overlay + snap-to-grid toggle
@@ -1470,6 +1510,7 @@ packages/engine/src/routes/terrarium/
   - "Winter Grove" - Snow-covered trees, snowfall layer
 
 **Additional Files:**
+
 ```
 ├── GridOverlay.svelte
 ├── PropsPanel.svelte
@@ -1491,9 +1532,11 @@ scripts/
 ```
 
 ### Phase 3: Foliage Integration
+
 **Goal:** Scenes become blog decorations
 
 **Deliverables:**
+
 - "Export as Decoration" flow
 - Zone selector + preview
 - Zone constraint validation
@@ -1504,6 +1547,7 @@ scripts/
 - localStorage → PlaygroundDO migration stubs
 
 **Additional Files:**
+
 ```
 packages/engine/src/lib/ui/components/terrarium/
 ├── ExportAsDecoration.svelte
@@ -1577,13 +1621,13 @@ packages/engine/
 
 ## Performance Targets
 
-| Metric | Target | Notes |
-|--------|--------|-------|
-| Frame rate | 60fps | With ≤20 animated assets |
-| First paint | <500ms | Lighthouse |
-| Asset render | <50ms | Per asset |
-| Drag latency | <16ms | One frame |
-| Export time | 5-10s | Complex scenes (realistic target) |
+| Metric       | Target | Notes                             |
+| ------------ | ------ | --------------------------------- |
+| Frame rate   | 60fps  | With ≤20 animated assets          |
+| First paint  | <500ms | Lighthouse                        |
+| Asset render | <50ms  | Per asset                         |
+| Drag latency | <16ms  | One frame                         |
+| Export time  | 5-10s  | Complex scenes (realistic target) |
 
 ### Strategy
 
@@ -1596,6 +1640,7 @@ packages/engine/
 ### Export Performance Notes
 
 PNG export via `dom-to-image-more` is CPU-intensive:
+
 - Simple scenes (10-20 assets): 1-3 seconds
 - Medium scenes (30-50 assets): 3-5 seconds
 - Complex scenes (50+ assets, animations): 5-10 seconds
@@ -1609,10 +1654,10 @@ For non-blocking exports, offload `dom-to-image-more` processing to a Web Worker
 **Worker Implementation: `packages/engine/src/lib/workers/export.worker.ts`**
 
 ```typescript
-import domtoimage from 'dom-to-image-more';
+import domtoimage from "dom-to-image-more";
 
 interface ExportMessage {
-  type: 'export';
+  type: "export";
   nodeHtml: string;
   options: {
     width: number;
@@ -1623,7 +1668,7 @@ interface ExportMessage {
 }
 
 interface ExportResult {
-  type: 'success' | 'error';
+  type: "success" | "error";
   dataUrl?: string;
   error?: string;
 }
@@ -1633,7 +1678,7 @@ self.onmessage = async (event: MessageEvent<ExportMessage>) => {
 
   try {
     // Create an offscreen document fragment
-    const template = document.createElement('template');
+    const template = document.createElement("template");
     template.innerHTML = nodeHtml;
     const node = template.content.firstElementChild as HTMLElement;
 
@@ -1643,16 +1688,16 @@ self.onmessage = async (event: MessageEvent<ExportMessage>) => {
       height: options.height * options.scale,
       style: {
         transform: `scale(${options.scale})`,
-        transformOrigin: 'top left',
-        backgroundColor: options.backgroundColor ?? 'transparent',
+        transformOrigin: "top left",
+        backgroundColor: options.backgroundColor ?? "transparent",
       },
     });
 
-    self.postMessage({ type: 'success', dataUrl } satisfies ExportResult);
+    self.postMessage({ type: "success", dataUrl } satisfies ExportResult);
   } catch (error) {
     self.postMessage({
-      type: 'error',
-      error: error instanceof Error ? error.message : 'Export failed',
+      type: "error",
+      error: error instanceof Error ? error.message : "Export failed",
     } satisfies ExportResult);
   }
 };
@@ -1668,8 +1713,8 @@ let exportWorker: Worker | null = null;
 function getExportWorker(): Worker {
   if (!exportWorker) {
     exportWorker = new Worker(
-      new URL('../workers/export.worker.ts', import.meta.url),
-      { type: 'module' }
+      new URL("../workers/export.worker.ts", import.meta.url),
+      { type: "module" },
     );
   }
   return exportWorker;
@@ -1677,7 +1722,7 @@ function getExportWorker(): Worker {
 
 export async function exportSceneWithWorker(
   canvasNode: HTMLElement,
-  options: ExportOptions
+  options: ExportOptions,
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     const worker = getExportWorker();
@@ -1686,10 +1731,10 @@ export async function exportSceneWithWorker(
     const nodeHtml = canvasNode.outerHTML;
 
     worker.onmessage = (event: MessageEvent<ExportResult>) => {
-      if (event.data.type === 'success' && event.data.dataUrl) {
+      if (event.data.type === "success" && event.data.dataUrl) {
         resolve(event.data.dataUrl);
       } else {
-        reject(new Error(event.data.error ?? 'Export failed'));
+        reject(new Error(event.data.error ?? "Export failed"));
       }
     };
 
@@ -1698,7 +1743,7 @@ export async function exportSceneWithWorker(
     };
 
     worker.postMessage({
-      type: 'export',
+      type: "export",
       nodeHtml,
       options: {
         width: options.width,
@@ -1711,8 +1756,8 @@ export async function exportSceneWithWorker(
 }
 
 // Cleanup on page unload
-if (typeof window !== 'undefined') {
-  window.addEventListener('unload', () => {
+if (typeof window !== "undefined") {
+  window.addEventListener("unload", () => {
     exportWorker?.terminate();
     exportWorker = null;
   });
@@ -1720,6 +1765,7 @@ if (typeof window !== 'undefined') {
 ```
 
 **Benefits:**
+
 - Main thread stays responsive during export
 - User can continue interacting with UI
 - Cancel support via `worker.terminate()`
@@ -1732,13 +1778,13 @@ Worker-based export requires serializing the DOM, which adds overhead. Use adapt
 ```typescript
 // packages/engine/src/lib/utils/export-scene.ts
 
-import { calculateSceneComplexity } from './complexity-budget';
+import { calculateSceneComplexity } from "./complexity-budget";
 
 // Empirically determined crossover points (adjust based on profiling)
 const WORKER_THRESHOLD = {
-  assetCount: 20,        // More than 20 assets
-  complexity: 40,        // Complexity budget > 40 points
-  animatedAssets: 5,     // More than 5 animated assets
+  assetCount: 20, // More than 20 assets
+  complexity: 40, // Complexity budget > 40 points
+  animatedAssets: 5, // More than 5 animated assets
 };
 
 /**
@@ -1748,7 +1794,7 @@ const WORKER_THRESHOLD = {
 export function shouldUseWorker(scene: TerrariumScene): boolean {
   const assetCount = scene.assets.length;
   const complexity = calculateSceneComplexity(scene.assets);
-  const animatedCount = scene.assets.filter(a => a.animationEnabled).length;
+  const animatedCount = scene.assets.filter((a) => a.animationEnabled).length;
 
   // Use worker if ANY threshold exceeded
   return (
@@ -1764,7 +1810,7 @@ export function shouldUseWorker(scene: TerrariumScene): boolean {
 export async function exportScene(
   canvasNode: HTMLElement,
   scene: TerrariumScene,
-  options: ExportOptions
+  options: ExportOptions,
 ): Promise<string> {
   if (shouldUseWorker(scene)) {
     // Complex scene: use worker to keep UI responsive
@@ -1789,11 +1835,11 @@ export async function exportScene(
 
 ## Platform Support
 
-| Platform | Support Level | Notes |
-|----------|---------------|-------|
-| Desktop (mouse) | Full | Primary target |
-| Tablet (touch/pencil) | Basic | Drag, tap, tested on iPad |
-| Phone | Unsupported | Too small, show warning |
+| Platform              | Support Level | Notes                     |
+| --------------------- | ------------- | ------------------------- |
+| Desktop (mouse)       | Full          | Primary target            |
+| Tablet (touch/pencil) | Basic         | Drag, tap, tested on iPad |
+| Phone                 | Unsupported   | Too small, show warning   |
 
 ### Responsive Behavior
 
@@ -1815,6 +1861,7 @@ export async function exportScene(
 ### IndexedDB Storage (MVP)
 
 Use IndexedDB for client-side storage instead of localStorage:
+
 - IndexedDB supports 25MB+ (browser-dependent)
 - localStorage limited to 5-10MB
 - IndexedDB handles complex data structures better
@@ -1822,14 +1869,14 @@ Use IndexedDB for client-side storage instead of localStorage:
 **Storage Implementation: `packages/engine/src/lib/storage/terrarium-db.ts`**
 
 ```typescript
-import { openDB, type IDBPDatabase } from 'idb';
-import type { TerrariumScene } from '../types';
+import { openDB, type IDBPDatabase } from "idb";
+import type { TerrariumScene } from "../types";
 
-const DB_NAME = 'terrarium';
+const DB_NAME = "terrarium";
 const DB_VERSION = 2; // Bump when schema changes
-const SCENES_STORE = 'scenes';
-const DECORATIONS_STORE = 'decorations';
-const METADATA_STORE = 'metadata';
+const SCENES_STORE = "scenes";
+const DECORATIONS_STORE = "decorations";
+const METADATA_STORE = "metadata";
 
 let db: IDBPDatabase | null = null;
 
@@ -1842,24 +1889,27 @@ async function getDB(): Promise<IDBPDatabase> {
       if (oldVersion < 1) {
         // Initial schema
         const scenesStore = database.createObjectStore(SCENES_STORE, {
-          keyPath: 'id',
+          keyPath: "id",
         });
-        scenesStore.createIndex('updatedAt', 'updatedAt');
-        scenesStore.createIndex('name', 'name');
+        scenesStore.createIndex("updatedAt", "updatedAt");
+        scenesStore.createIndex("name", "name");
       }
 
       if (oldVersion < 2) {
         // Add decorations store and metadata
         if (!database.objectStoreNames.contains(DECORATIONS_STORE)) {
-          const decorationsStore = database.createObjectStore(DECORATIONS_STORE, {
-            keyPath: 'id',
-          });
-          decorationsStore.createIndex('zone', 'zone');
-          decorationsStore.createIndex('createdAt', 'createdAt');
+          const decorationsStore = database.createObjectStore(
+            DECORATIONS_STORE,
+            {
+              keyPath: "id",
+            },
+          );
+          decorationsStore.createIndex("zone", "zone");
+          decorationsStore.createIndex("createdAt", "createdAt");
         }
 
         if (!database.objectStoreNames.contains(METADATA_STORE)) {
-          database.createObjectStore(METADATA_STORE, { keyPath: 'key' });
+          database.createObjectStore(METADATA_STORE, { keyPath: "key" });
         }
 
         // Migrate existing scenes to add version field
@@ -1880,19 +1930,16 @@ async function getDB(): Promise<IDBPDatabase> {
     },
     blocked() {
       // Another tab has an older version open and won't close
-      console.warn('Database upgrade blocked by another tab');
+      console.warn("Database upgrade blocked by another tab");
 
       // Show persistent toast with action
-      toast.warning(
-        'Please close other Grove tabs to complete the upgrade',
-        {
-          duration: Infinity,  // Don't auto-dismiss
-          action: {
-            label: 'Retry',
-            onClick: () => window.location.reload(),
-          },
-        }
-      );
+      toast.warning("Please close other Grove tabs to complete the upgrade", {
+        duration: Infinity, // Don't auto-dismiss
+        action: {
+          label: "Retry",
+          onClick: () => window.location.reload(),
+        },
+      });
 
       // If user refuses: Scene editing works but saves fail silently
       // User can continue browsing but changes won't persist
@@ -1905,7 +1952,7 @@ async function getDB(): Promise<IDBPDatabase> {
       db = null;
 
       // Notify user their tab will refresh
-      toast.info('Updating Terrarium... refreshing in 3 seconds');
+      toast.info("Updating Terrarium... refreshing in 3 seconds");
       setTimeout(() => window.location.reload(), 3000);
     },
   });
@@ -1918,14 +1965,16 @@ export async function saveScene(scene: TerrariumScene): Promise<void> {
   await database.put(SCENES_STORE, scene);
 }
 
-export async function getScene(id: string): Promise<TerrariumScene | undefined> {
+export async function getScene(
+  id: string,
+): Promise<TerrariumScene | undefined> {
   const database = await getDB();
   return database.get(SCENES_STORE, id);
 }
 
 export async function getAllScenes(): Promise<TerrariumScene[]> {
   const database = await getDB();
-  return database.getAllFromIndex(SCENES_STORE, 'updatedAt');
+  return database.getAllFromIndex(SCENES_STORE, "updatedAt");
 }
 
 export async function deleteScene(id: string): Promise<void> {
@@ -1939,7 +1988,7 @@ export async function deleteScene(id: string): Promise<void> {
 When PlaygroundDO ships (Golden Hour):
 
 ```typescript
-import { getAllScenes } from '$lib/storage/terrarium-db';
+import { getAllScenes } from "$lib/storage/terrarium-db";
 
 async function migrateToPlaygroundDO(userId: string): Promise<void> {
   const scenes = await getAllScenes();
@@ -1948,8 +1997,8 @@ async function migrateToPlaygroundDO(userId: string): Promise<void> {
   let migrated = 0;
   for (const scene of scenes) {
     try {
-      await fetch('/api/terrarium/scenes', {
-        method: 'POST',
+      await fetch("/api/terrarium/scenes", {
+        method: "POST",
         body: JSON.stringify(scene),
       });
       migrated++;
@@ -1960,9 +2009,15 @@ async function migrateToPlaygroundDO(userId: string): Promise<void> {
 
   // Mark as migrated in IndexedDB metadata
   const database = await getDB();
-  await database.put('metadata', { key: 'migrated', value: true, migratedAt: new Date().toISOString() });
+  await database.put("metadata", {
+    key: "migrated",
+    value: true,
+    migratedAt: new Date().toISOString(),
+  });
 
-  toast.success(`Migrated ${migrated}/${scenes.length} scenes to your account!`);
+  toast.success(
+    `Migrated ${migrated}/${scenes.length} scenes to your account!`,
+  );
 }
 ```
 
@@ -1989,6 +2044,7 @@ async function migrateToPlaygroundDO(userId: string): Promise<void> {
 Terrarium provides the editing interface for **Curios** — the visitor experience features like guestbooks, cursors, shrines, and artifacts. See the [Curios Spec](./curios-spec.md) for full details on these features.
 
 Terrarium's role:
+
 - Provide UI panels for configuring curios
 - Allow placement of curios in scenes
 - Handle curio asset selection and customization
@@ -2000,29 +2056,29 @@ The curios themselves (rendering, interactivity, data storage) are handled by th
 
 ## Keyboard Shortcuts
 
-| Action | Shortcut | Notes |
-|--------|----------|-------|
-| **Selection** | | |
-| Select all | `Cmd/Ctrl + A` | Selects all assets |
-| Deselect | `Escape` | Clears selection |
-| Delete selected | `Delete` or `Backspace` | Removes selected asset |
-| **Clipboard** | | |
-| Duplicate | `Cmd/Ctrl + D` | Duplicate selected asset |
-| Copy | `Cmd/Ctrl + C` | Copy to clipboard (future) |
-| Paste | `Cmd/Ctrl + V` | Paste from clipboard (future) |
-| **Navigation** | | |
-| Pan canvas | `Space + Drag` | Hold space, then drag |
-| Pan canvas | `Middle mouse drag` | Middle button pan |
-| **Layers** | | |
-| Bring forward | `]` | Move layer up one |
-| Send backward | `[` | Move layer down one |
-| Bring to front | `Shift + ]` | Move to top layer |
-| Send to back | `Shift + [` | Move to bottom layer |
-| **View** | | |
-| Toggle grid | `G` | Show/hide snap grid |
-| Toggle animations | `A` | Enable/disable animations |
-| **Saving** | | |
-| Save scene | `Cmd/Ctrl + S` | Manual save (also auto-saves) |
+| Action            | Shortcut                | Notes                         |
+| ----------------- | ----------------------- | ----------------------------- |
+| **Selection**     |                         |                               |
+| Select all        | `Cmd/Ctrl + A`          | Selects all assets            |
+| Deselect          | `Escape`                | Clears selection              |
+| Delete selected   | `Delete` or `Backspace` | Removes selected asset        |
+| **Clipboard**     |                         |                               |
+| Duplicate         | `Cmd/Ctrl + D`          | Duplicate selected asset      |
+| Copy              | `Cmd/Ctrl + C`          | Copy to clipboard (future)    |
+| Paste             | `Cmd/Ctrl + V`          | Paste from clipboard (future) |
+| **Navigation**    |                         |                               |
+| Pan canvas        | `Space + Drag`          | Hold space, then drag         |
+| Pan canvas        | `Middle mouse drag`     | Middle button pan             |
+| **Layers**        |                         |                               |
+| Bring forward     | `]`                     | Move layer up one             |
+| Send backward     | `[`                     | Move layer down one           |
+| Bring to front    | `Shift + ]`             | Move to top layer             |
+| Send to back      | `Shift + [`             | Move to bottom layer          |
+| **View**          |                         |                               |
+| Toggle grid       | `G`                     | Show/hide snap grid           |
+| Toggle animations | `A`                     | Enable/disable animations     |
+| **Saving**        |                         |                               |
+| Save scene        | `Cmd/Ctrl + S`          | Manual save (also auto-saves) |
 
 ### Focus Management
 
@@ -2038,23 +2094,27 @@ The curios themselves (rendering, interactivity, data storage) are handled by th
 ### WCAG 2.1 AA Compliance Targets
 
 **Perceivable:**
+
 - All interactive elements have visible focus indicators
 - Color contrast ≥4.5:1 for text, ≥3:1 for graphics
 - Animation respects `prefers-reduced-motion`
 - Non-text content has text alternatives
 
 **Operable:**
+
 - All functionality available via keyboard
 - No time limits on interactions
 - Users can pause/stop animations
 - Focus order follows logical reading order
 
 **Understandable:**
+
 - Consistent navigation patterns
 - Error messages identify and explain issues
 - Labels and instructions provided
 
 **Robust:**
+
 - Valid HTML semantics
 - ARIA attributes where needed
 - Works with screen readers
@@ -2154,13 +2214,13 @@ The curios themselves (rendering, interactivity, data storage) are handled by th
 ```typescript
 // packages/engine/src/lib/ui/components/terrarium/autoSave.svelte.ts
 
-import { TERRARIUM_CONFIG } from '$lib/config/terrarium';
-import { saveScene } from '$lib/storage/terrarium-db';
+import { TERRARIUM_CONFIG } from "$lib/config/terrarium";
+import { saveScene } from "$lib/storage/terrarium-db";
 
 export function createAutoSave(getScene: () => TerrariumScene) {
   let saveTimeout: ReturnType<typeof setTimeout> | null = null;
   let intervalId: ReturnType<typeof setInterval> | null = null;
-  let lastSavedHash = '';
+  let lastSavedHash = "";
   let isSaving = $state(false);
   let lastSaved = $state<Date | null>(null);
 
@@ -2168,38 +2228,42 @@ export function createAutoSave(getScene: () => TerrariumScene) {
 
   // Stable hash using object-hash library for production reliability
   // Handles circular references, special types (Date, Map, Set), and property ordering
-  import objectHash from 'object-hash';
+  import objectHash from "object-hash";
 
   function hashScene(scene: TerrariumScene): string {
-    return objectHash({
-      assets: scene.assets,
-      canvas: scene.canvas,
-      name: scene.name,
-    }, {
-      algorithm: 'md5',
-      encoding: 'hex',
-      respectType: false,  // Treat {a:1} same as class instance with a=1
-      unorderedArrays: false,  // Asset order matters
-      unorderedObjects: true,  // Property order doesn't matter
-      unorderedSets: true,
-    });
+    return objectHash(
+      {
+        assets: scene.assets,
+        canvas: scene.canvas,
+        name: scene.name,
+      },
+      {
+        algorithm: "md5",
+        encoding: "hex",
+        respectType: false, // Treat {a:1} same as class instance with a=1
+        unorderedArrays: false, // Asset order matters
+        unorderedObjects: true, // Property order doesn't matter
+        unorderedSets: true,
+      },
+    );
   }
 
   // Alternative: Simple implementation for environments without object-hash
   // Note: Does not handle circular refs, Date objects, or Map/Set
   function hashSceneFallback(scene: TerrariumScene): string {
     const stableStringify = (obj: unknown): string => {
-      if (obj === null || typeof obj !== 'object') {
+      if (obj === null || typeof obj !== "object") {
         return JSON.stringify(obj);
       }
       if (Array.isArray(obj)) {
-        return '[' + obj.map(stableStringify).join(',') + ']';
+        return "[" + obj.map(stableStringify).join(",") + "]";
       }
       const sortedKeys = Object.keys(obj).sort();
       const pairs = sortedKeys.map(
-        key => `${JSON.stringify(key)}:${stableStringify((obj as Record<string, unknown>)[key])}`
+        (key) =>
+          `${JSON.stringify(key)}:${stableStringify((obj as Record<string, unknown>)[key])}`,
       );
-      return '{' + pairs.join(',') + '}';
+      return "{" + pairs.join(",") + "}";
     };
 
     return stableStringify({
@@ -2244,15 +2308,19 @@ export function createAutoSave(getScene: () => TerrariumScene) {
   }
 
   // Save before unload
-  if (typeof window !== 'undefined') {
-    window.addEventListener('beforeunload', () => {
+  if (typeof window !== "undefined") {
+    window.addEventListener("beforeunload", () => {
       save();
     });
   }
 
   return {
-    get isSaving() { return isSaving; },
-    get lastSaved() { return lastSaved; },
+    get isSaving() {
+      return isSaving;
+    },
+    get lastSaved() {
+      return lastSaved;
+    },
     scheduleSave,
     save,
     startInterval,
@@ -2295,14 +2363,14 @@ export function createAutoSave(getScene: () => TerrariumScene) {
 
 ### Supported Gestures
 
-| Gesture | Action | Notes |
-|---------|--------|-------|
-| **Single tap** | Select asset | Or deselect if tapping canvas |
-| **Tap + drag** | Move asset | Drag selected asset |
-| **Long press** | Context menu | Shows duplicate/delete options |
-| **Two-finger pan** | Pan canvas | Move viewport |
-| **Pinch** | Zoom canvas | Future: Canvas zoom |
-| **Two-finger rotate** | Rotate asset | Future enhancement |
+| Gesture               | Action       | Notes                          |
+| --------------------- | ------------ | ------------------------------ |
+| **Single tap**        | Select asset | Or deselect if tapping canvas  |
+| **Tap + drag**        | Move asset   | Drag selected asset            |
+| **Long press**        | Context menu | Shows duplicate/delete options |
+| **Two-finger pan**    | Pan canvas   | Move viewport                  |
+| **Pinch**             | Zoom canvas  | Future: Canvas zoom            |
+| **Two-finger rotate** | Rotate asset | Future enhancement             |
 
 ### Touch Event Handling
 
@@ -2357,7 +2425,10 @@ export function setupTouchHandlers(canvas: HTMLElement) {
       const deltaX = Math.abs(touch.clientX - touchStartPos.x);
       const deltaY = Math.abs(touch.clientY - touchStartPos.y);
 
-      if (deltaX > SCROLL_INTENT_THRESHOLD || deltaY > SCROLL_INTENT_THRESHOLD) {
+      if (
+        deltaX > SCROLL_INTENT_THRESHOLD ||
+        deltaY > SCROLL_INTENT_THRESHOLD
+      ) {
         // User is scrolling, not trying to long press
         cancelLongPress();
         touchStartPos = null;
@@ -2380,7 +2451,7 @@ export function setupTouchHandlers(canvas: HTMLElement) {
   function handleTouchEnd(e: TouchEvent) {
     cancelLongPress();
     touchState = null;
-    touchStartPos = null;  // Reset scroll detection
+    touchStartPos = null; // Reset scroll detection
   }
 
   function cancelLongPress() {
@@ -2390,14 +2461,14 @@ export function setupTouchHandlers(canvas: HTMLElement) {
     }
   }
 
-  canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
-  canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
-  canvas.addEventListener('touchend', handleTouchEnd);
+  canvas.addEventListener("touchstart", handleTouchStart, { passive: false });
+  canvas.addEventListener("touchmove", handleTouchMove, { passive: false });
+  canvas.addEventListener("touchend", handleTouchEnd);
 
   return () => {
-    canvas.removeEventListener('touchstart', handleTouchStart);
-    canvas.removeEventListener('touchmove', handleTouchMove);
-    canvas.removeEventListener('touchend', handleTouchEnd);
+    canvas.removeEventListener("touchstart", handleTouchStart);
+    canvas.removeEventListener("touchmove", handleTouchMove);
+    canvas.removeEventListener("touchend", handleTouchEnd);
   };
 }
 
@@ -2431,45 +2502,57 @@ function getTouchCenter(touches: TouchList): { x: number; y: number } {
 ```typescript
 // packages/engine/src/lib/utils/__tests__/complexity.test.ts
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from "vitest";
 import {
   getAssetComplexity,
   calculateSceneComplexity,
   canAddAsset,
   isAtWarningThreshold,
   getRemainingBudget,
-} from '../complexity';
+} from "../complexity";
 
-describe('Complexity Budget', () => {
-  const normalAsset = { componentName: 'Rock', scale: 1, animationEnabled: false };
-  const animatedAsset = { componentName: 'Firefly', scale: 1, animationEnabled: true };
-  const scaledAsset = { componentName: 'TreePine', scale: 2.0, animationEnabled: false };
+describe("Complexity Budget", () => {
+  const normalAsset = {
+    componentName: "Rock",
+    scale: 1,
+    animationEnabled: false,
+  };
+  const animatedAsset = {
+    componentName: "Firefly",
+    scale: 1,
+    animationEnabled: true,
+  };
+  const scaledAsset = {
+    componentName: "TreePine",
+    scale: 2.0,
+    animationEnabled: false,
+  };
 
-  it('calculates normal asset cost', () => {
+  it("calculates normal asset cost", () => {
     expect(getAssetComplexity(normalAsset)).toBe(1);
   });
 
-  it('calculates animated asset cost', () => {
+  it("calculates animated asset cost", () => {
     expect(getAssetComplexity(animatedAsset)).toBe(5);
   });
 
-  it('calculates scaled asset cost', () => {
+  it("calculates scaled asset cost", () => {
     expect(getAssetComplexity(scaledAsset)).toBe(2);
   });
 
-  it('calculates scene complexity', () => {
+  it("calculates scene complexity", () => {
     const assets = [normalAsset, animatedAsset, scaledAsset];
     expect(calculateSceneComplexity(assets)).toBe(8);
   });
 
-  it('prevents exceeding budget', () => {
+  it("prevents exceeding budget", () => {
     const nearMaxAssets = Array(195).fill(normalAsset);
     const result = canAddAsset(nearMaxAssets, animatedAsset);
     expect(result.allowed).toBe(false);
     expect(result.wouldExceed).toBe(true);
   });
 
-  it('detects warning threshold', () => {
+  it("detects warning threshold", () => {
     const assets = Array(160).fill(normalAsset); // 80% of 200
     expect(isAtWarningThreshold(assets)).toBe(true);
   });
@@ -2481,16 +2564,27 @@ describe('Complexity Budget', () => {
 ```typescript
 // packages/engine/src/lib/storage/__tests__/terrarium-db.test.ts
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { saveScene, getScene, getAllScenes, deleteScene } from '../terrarium-db';
-import 'fake-indexeddb/auto';
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import {
+  saveScene,
+  getScene,
+  getAllScenes,
+  deleteScene,
+} from "../terrarium-db";
+import "fake-indexeddb/auto";
 
-describe('Terrarium IndexedDB Storage', () => {
+describe("Terrarium IndexedDB Storage", () => {
   const mockScene = {
-    id: 'test-123',
-    name: 'Test Scene',
+    id: "test-123",
+    name: "Test Scene",
     version: 1,
-    canvas: { width: 800, height: 600, background: '#fff', gridEnabled: false, gridSize: 32 },
+    canvas: {
+      width: 800,
+      height: 600,
+      background: "#fff",
+      gridEnabled: false,
+      gridSize: 32,
+    },
     assets: [],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -2500,19 +2594,19 @@ describe('Terrarium IndexedDB Storage', () => {
     await deleteScene(mockScene.id);
   });
 
-  it('saves and retrieves a scene', async () => {
+  it("saves and retrieves a scene", async () => {
     await saveScene(mockScene);
     const retrieved = await getScene(mockScene.id);
     expect(retrieved).toEqual(mockScene);
   });
 
-  it('lists all scenes', async () => {
+  it("lists all scenes", async () => {
     await saveScene(mockScene);
     const all = await getAllScenes();
     expect(all.length).toBeGreaterThan(0);
   });
 
-  it('deletes a scene', async () => {
+  it("deletes a scene", async () => {
     await saveScene(mockScene);
     await deleteScene(mockScene.id);
     const retrieved = await getScene(mockScene.id);
@@ -2526,54 +2620,54 @@ describe('Terrarium IndexedDB Storage', () => {
 ```typescript
 // packages/engine/e2e/terrarium.spec.ts
 
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test.describe('Terrarium Canvas', () => {
+test.describe("Terrarium Canvas", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/terrarium');
+    await page.goto("/terrarium");
   });
 
-  test('loads the terrarium page', async ({ page }) => {
-    await expect(page.getByRole('main')).toBeVisible();
-    await expect(page.getByTestId('asset-palette')).toBeVisible();
-    await expect(page.getByTestId('canvas')).toBeVisible();
+  test("loads the terrarium page", async ({ page }) => {
+    await expect(page.getByRole("main")).toBeVisible();
+    await expect(page.getByTestId("asset-palette")).toBeVisible();
+    await expect(page.getByTestId("canvas")).toBeVisible();
   });
 
-  test('drags asset from palette to canvas', async ({ page }) => {
-    const paletteItem = page.getByTestId('palette-item-TreePine');
-    const canvas = page.getByTestId('canvas');
+  test("drags asset from palette to canvas", async ({ page }) => {
+    const paletteItem = page.getByTestId("palette-item-TreePine");
+    const canvas = page.getByTestId("canvas");
 
     await paletteItem.dragTo(canvas);
 
-    await expect(page.getByTestId('placed-asset')).toBeVisible();
+    await expect(page.getByTestId("placed-asset")).toBeVisible();
   });
 
-  test('exports scene as PNG', async ({ page }) => {
+  test("exports scene as PNG", async ({ page }) => {
     // Add an asset first
-    await page.getByTestId('palette-item-Rock').click();
-    await page.getByTestId('canvas').click();
+    await page.getByTestId("palette-item-Rock").click();
+    await page.getByTestId("canvas").click();
 
     // Export
-    const downloadPromise = page.waitForEvent('download');
-    await page.getByRole('button', { name: 'Export PNG' }).click();
+    const downloadPromise = page.waitForEvent("download");
+    await page.getByRole("button", { name: "Export PNG" }).click();
     const download = await downloadPromise;
 
     expect(download.suggestedFilename()).toMatch(/\.png$/);
   });
 
-  test('keyboard shortcuts work', async ({ page }) => {
+  test("keyboard shortcuts work", async ({ page }) => {
     // Add and select an asset
-    await page.getByTestId('palette-item-Rock').click();
-    await page.getByTestId('canvas').click();
-    await page.getByTestId('placed-asset').click();
+    await page.getByTestId("palette-item-Rock").click();
+    await page.getByTestId("canvas").click();
+    await page.getByTestId("placed-asset").click();
 
     // Duplicate with Cmd+D
-    await page.keyboard.press('Meta+d');
-    const assets = page.getByTestId('placed-asset');
+    await page.keyboard.press("Meta+d");
+    const assets = page.getByTestId("placed-asset");
     await expect(assets).toHaveCount(2);
 
     // Delete with Backspace
-    await page.keyboard.press('Backspace');
+    await page.keyboard.press("Backspace");
     await expect(assets).toHaveCount(1);
   });
 });
@@ -2584,43 +2678,43 @@ test.describe('Terrarium Canvas', () => {
 ```typescript
 // packages/engine/e2e/terrarium-a11y.spec.ts
 
-import { test, expect } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
+import { test, expect } from "@playwright/test";
+import AxeBuilder from "@axe-core/playwright";
 
-test.describe('Terrarium Accessibility', () => {
-  test('has no WCAG violations', async ({ page }) => {
-    await page.goto('/terrarium');
+test.describe("Terrarium Accessibility", () => {
+  test("has no WCAG violations", async ({ page }) => {
+    await page.goto("/terrarium");
 
     const results = await new AxeBuilder({ page })
-      .withTags(['wcag2a', 'wcag2aa'])
+      .withTags(["wcag2a", "wcag2aa"])
       .analyze();
 
     expect(results.violations).toEqual([]);
   });
 
-  test('supports keyboard navigation', async ({ page }) => {
-    await page.goto('/terrarium');
+  test("supports keyboard navigation", async ({ page }) => {
+    await page.goto("/terrarium");
 
     // Tab to palette
-    await page.keyboard.press('Tab');
-    await expect(page.getByTestId('asset-palette')).toBeFocused();
+    await page.keyboard.press("Tab");
+    await expect(page.getByTestId("asset-palette")).toBeFocused();
 
     // Arrow to navigate within palette
-    await page.keyboard.press('ArrowDown');
-    const firstItem = page.getByTestId('palette-item').first();
+    await page.keyboard.press("ArrowDown");
+    const firstItem = page.getByTestId("palette-item").first();
     await expect(firstItem).toBeFocused();
   });
 
-  test('screen reader announcements work', async ({ page }) => {
-    await page.goto('/terrarium');
+  test("screen reader announcements work", async ({ page }) => {
+    await page.goto("/terrarium");
 
     // Add an asset
-    await page.getByTestId('palette-item-Rock').click();
-    await page.getByTestId('canvas').click();
+    await page.getByTestId("palette-item-Rock").click();
+    await page.getByTestId("canvas").click();
 
     // Check live region
     const liveRegion = page.locator('[aria-live="polite"]');
-    await expect(liveRegion).toContainText('Rock added');
+    await expect(liveRegion).toContainText("Rock added");
   });
 });
 ```
@@ -2634,21 +2728,21 @@ test.describe('Terrarium Accessibility', () => {
 ```typescript
 // packages/engine/src/routes/api/terrarium/decorations/+server.ts
 
-import { rateLimit } from '$lib/middleware/rate-limit';
+import { rateLimit } from "$lib/middleware/rate-limit";
 
 const decorationRateLimit = rateLimit({
-  windowMs: 60 * 1000,  // 1 minute
+  windowMs: 60 * 1000, // 1 minute
   max: {
-    GET: 100,           // 100 reads/min
-    POST: 10,           // 10 creates/min
-    PUT: 20,            // 20 updates/min
-    DELETE: 5,          // 5 deletes/min
+    GET: 100, // 100 reads/min
+    POST: 10, // 10 creates/min
+    PUT: 20, // 20 updates/min
+    DELETE: 5, // 5 deletes/min
   },
   keyGenerator: (event) => event.locals.user?.id ?? event.getClientAddress(),
 });
 
 export async function POST(event) {
-  await decorationRateLimit(event, 'POST');
+  await decorationRateLimit(event, "POST");
   // ... rest of handler
 }
 ```
@@ -2664,29 +2758,33 @@ interface ModerationResult {
   reason?: string;
 }
 
-export async function scanDecoration(decoration: Decoration): Promise<ModerationResult> {
+export async function scanDecoration(
+  decoration: Decoration,
+): Promise<ModerationResult> {
   const flags: string[] = [];
 
   // 1. Check name for profanity
   if (await containsProfanity(decoration.name)) {
-    flags.push('profanity_in_name');
+    flags.push("profanity_in_name");
   }
 
   // 2. Validate asset counts (prevent resource abuse)
-  const animatedCount = decoration.scene.assets.filter(a => a.animationEnabled).length;
+  const animatedCount = decoration.scene.assets.filter(
+    (a) => a.animationEnabled,
+  ).length;
   if (animatedCount > 30) {
-    flags.push('excessive_animations');
+    flags.push("excessive_animations");
   }
 
   // 3. Check for suspicious patterns (e.g., all assets stacked in corner)
   if (detectSuspiciousLayout(decoration.scene.assets)) {
-    flags.push('suspicious_layout');
+    flags.push("suspicious_layout");
   }
 
   return {
     approved: flags.length === 0,
     flags,
-    reason: flags.length > 0 ? `Flagged: ${flags.join(', ')}` : undefined,
+    reason: flags.length > 0 ? `Flagged: ${flags.join(", ")}` : undefined,
   };
 }
 ```
@@ -2696,12 +2794,12 @@ export async function scanDecoration(decoration: Decoration): Promise<Moderation
 ```typescript
 // packages/engine/src/lib/utils/quota.ts
 
-import { TERRARIUM_CONFIG } from '$lib/config/terrarium';
-import type { UserTier } from '$lib/types';
+import { TERRARIUM_CONFIG } from "$lib/config/terrarium";
+import type { UserTier } from "$lib/types";
 
 export async function checkStorageQuota(
   userId: string,
-  tier: UserTier
+  tier: UserTier,
 ): Promise<{ withinQuota: boolean; used: number; max: number }> {
   const currentCount = await db.decorations.count({ authorId: userId });
   const maxAllowed = TERRARIUM_CONFIG.storage.maxSavedScenes[tier];
@@ -2713,12 +2811,15 @@ export async function checkStorageQuota(
   };
 }
 
-export async function enforceQuota(userId: string, tier: UserTier): Promise<void> {
+export async function enforceQuota(
+  userId: string,
+  tier: UserTier,
+): Promise<void> {
   const { withinQuota, used, max } = await checkStorageQuota(userId, tier);
 
   if (!withinQuota) {
     throw new QuotaExceededError(
-      `Storage quota exceeded: ${used}/${max} scenes. Upgrade your plan for more.`
+      `Storage quota exceeded: ${used}/${max} scenes. Upgrade your plan for more.`,
     );
   }
 }
@@ -2729,14 +2830,14 @@ export async function enforceQuota(userId: string, tier: UserTier): Promise<void
 ```typescript
 // packages/engine/src/lib/utils/sanitize.ts
 
-import DOMPurify from 'isomorphic-dompurify';
+import DOMPurify from "isomorphic-dompurify";
 
 /**
  * Sanitize decoration name to prevent XSS
  */
 export function sanitizeDecorationName(name: string): string {
   return DOMPurify.sanitize(name, {
-    ALLOWED_TAGS: [],  // No HTML allowed
+    ALLOWED_TAGS: [], // No HTML allowed
     ALLOWED_ATTR: [],
   }).trim();
 }
@@ -2744,13 +2845,18 @@ export function sanitizeDecorationName(name: string): string {
 /**
  * Sanitize props to prevent script injection
  */
-export function sanitizeAssetProps(props: Record<string, unknown>): Record<string, unknown> {
+export function sanitizeAssetProps(
+  props: Record<string, unknown>,
+): Record<string, unknown> {
   const sanitized: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(props)) {
-    if (typeof value === 'string') {
-      sanitized[key] = DOMPurify.sanitize(value, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
-    } else if (typeof value === 'number' || typeof value === 'boolean') {
+    if (typeof value === "string") {
+      sanitized[key] = DOMPurify.sanitize(value, {
+        ALLOWED_TAGS: [],
+        ALLOWED_ATTR: [],
+      });
+    } else if (typeof value === "number" || typeof value === "boolean") {
       sanitized[key] = value;
     }
     // Ignore other types (functions, objects with methods, etc.)
@@ -2767,21 +2873,21 @@ The `/terrarium` route requires specific CSP headers to enable canvas export whi
 **SvelteKit Hook: `packages/engine/src/hooks.server.ts`**
 
 ```typescript
-import type { Handle } from '@sveltejs/kit';
+import type { Handle } from "@sveltejs/kit";
 
 const TERRARIUM_CSP = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline'",  // Required for Svelte
-  "style-src 'self' 'unsafe-inline'",   // Required for dynamic styles
-  "img-src 'self' data: blob:",          // Allow data URLs for export
+  "script-src 'self' 'unsafe-inline'", // Required for Svelte
+  "style-src 'self' 'unsafe-inline'", // Required for dynamic styles
+  "img-src 'self' data: blob:", // Allow data URLs for export
   "font-src 'self'",
   "connect-src 'self'",
-  "frame-ancestors 'none'",              // Prevent embedding
+  "frame-ancestors 'none'", // Prevent embedding
   "base-uri 'self'",
   "form-action 'self'",
   "object-src 'none'",
   "upgrade-insecure-requests",
-].join('; ');
+].join("; ");
 
 const DEFAULT_CSP = [
   "default-src 'self'",
@@ -2791,26 +2897,27 @@ const DEFAULT_CSP = [
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",
-].join('; ');
+].join("; ");
 
 export const handle: Handle = async ({ event, resolve }) => {
   const response = await resolve(event);
 
   // Apply stricter CSP for Terrarium route
-  const csp = event.url.pathname.startsWith('/terrarium')
+  const csp = event.url.pathname.startsWith("/terrarium")
     ? TERRARIUM_CSP
     : DEFAULT_CSP;
 
-  response.headers.set('Content-Security-Policy', csp);
-  response.headers.set('X-Content-Type-Options', 'nosniff');
-  response.headers.set('X-Frame-Options', 'DENY');
-  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  response.headers.set("Content-Security-Policy", csp);
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("X-Frame-Options", "DENY");
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
 
   return response;
 };
 ```
 
 **Key CSP Decisions:**
+
 - `img-src blob:` - Required for `dom-to-image-more` canvas export
 - `script-src 'unsafe-inline'` - Required for Svelte's hydration (consider nonces for production)
 - `frame-ancestors 'none'` - Prevent clickjacking attacks on the editor
@@ -2822,7 +2929,7 @@ Decoration thumbnails must be validated before storage to prevent malicious uplo
 **Validation: `packages/engine/src/lib/utils/thumbnail-validator.ts`**
 
 ```typescript
-import { error } from '@sveltejs/kit';
+import { error } from "@sveltejs/kit";
 
 interface ThumbnailValidation {
   valid: boolean;
@@ -2831,8 +2938,8 @@ interface ThumbnailValidation {
 
 // Allowed formats (magic bytes)
 const ALLOWED_SIGNATURES = {
-  png: [0x89, 0x50, 0x4e, 0x47],  // PNG signature
-  jpeg: [0xff, 0xd8, 0xff],       // JPEG signature
+  png: [0x89, 0x50, 0x4e, 0x47], // PNG signature
+  jpeg: [0xff, 0xd8, 0xff], // JPEG signature
   webp: [0x52, 0x49, 0x46, 0x46], // RIFF (WebP container)
 };
 
@@ -2844,23 +2951,23 @@ const MIN_DIMENSIONS = { width: 100, height: 75 };
  * Validate thumbnail data URL before storage
  */
 export async function validateThumbnail(
-  dataUrl: string
+  dataUrl: string,
 ): Promise<ThumbnailValidation> {
   // 1. Check data URL format
-  if (!dataUrl.startsWith('data:image/')) {
-    return { valid: false, error: 'Invalid data URL format' };
+  if (!dataUrl.startsWith("data:image/")) {
+    return { valid: false, error: "Invalid data URL format" };
   }
 
   // 2. Extract MIME type and base64 data
   const matches = dataUrl.match(/^data:image\/(\w+);base64,(.+)$/);
   if (!matches) {
-    return { valid: false, error: 'Malformed data URL' };
+    return { valid: false, error: "Malformed data URL" };
   }
 
   const [, mimeType, base64Data] = matches;
 
   // 3. Check allowed MIME types
-  if (!['png', 'jpeg', 'webp'].includes(mimeType)) {
+  if (!["png", "jpeg", "webp"].includes(mimeType)) {
     return { valid: false, error: `Unsupported format: ${mimeType}` };
   }
 
@@ -2879,13 +2986,14 @@ export async function validateThumbnail(
     bytes[i] = binaryData.charCodeAt(i);
   }
 
-  const signature = ALLOWED_SIGNATURES[mimeType as keyof typeof ALLOWED_SIGNATURES];
+  const signature =
+    ALLOWED_SIGNATURES[mimeType as keyof typeof ALLOWED_SIGNATURES];
   const headerBytes = Array.from(bytes.slice(0, signature.length));
 
   if (!signature.every((byte, i) => headerBytes[i] === byte)) {
     return {
       valid: false,
-      error: 'File signature does not match claimed type',
+      error: "File signature does not match claimed type",
     };
   }
 
@@ -2893,23 +3001,27 @@ export async function validateThumbnail(
   try {
     const dimensions = await getImageDimensions(dataUrl);
 
-    if (dimensions.width > MAX_DIMENSIONS.width ||
-        dimensions.height > MAX_DIMENSIONS.height) {
+    if (
+      dimensions.width > MAX_DIMENSIONS.width ||
+      dimensions.height > MAX_DIMENSIONS.height
+    ) {
       return {
         valid: false,
         error: `Dimensions too large: ${dimensions.width}x${dimensions.height} (max ${MAX_DIMENSIONS.width}x${MAX_DIMENSIONS.height})`,
       };
     }
 
-    if (dimensions.width < MIN_DIMENSIONS.width ||
-        dimensions.height < MIN_DIMENSIONS.height) {
+    if (
+      dimensions.width < MIN_DIMENSIONS.width ||
+      dimensions.height < MIN_DIMENSIONS.height
+    ) {
       return {
         valid: false,
         error: `Dimensions too small: ${dimensions.width}x${dimensions.height} (min ${MIN_DIMENSIONS.width}x${MIN_DIMENSIONS.height})`,
       };
     }
   } catch (err) {
-    return { valid: false, error: 'Failed to read image dimensions' };
+    return { valid: false, error: "Failed to read image dimensions" };
   }
 
   // 7. Strip EXIF data (privacy concern)
@@ -2923,10 +3035,10 @@ export async function validateThumbnail(
  * Get image dimensions from data URL
  */
 async function getImageDimensions(
-  dataUrl: string
+  dataUrl: string,
 ): Promise<{ width: number; height: number }> {
   // Browser context
-  if (typeof window !== 'undefined' && 'createImageBitmap' in window) {
+  if (typeof window !== "undefined" && "createImageBitmap" in window) {
     const response = await fetch(dataUrl);
     const blob = await response.blob();
     const bitmap = await createImageBitmap(blob);
@@ -2936,7 +3048,7 @@ async function getImageDimensions(
   }
 
   // Server context - use probe-image-size or similar
-  throw new Error('Server-side dimension checking requires additional setup');
+  throw new Error("Server-side dimension checking requires additional setup");
 }
 ```
 
@@ -2944,7 +3056,7 @@ async function getImageDimensions(
 
 ```typescript
 // packages/engine/src/routes/api/terrarium/decorations/+server.ts
-import { validateThumbnail } from '$lib/utils/thumbnail-validator';
+import { validateThumbnail } from "$lib/utils/thumbnail-validator";
 
 export async function POST({ request, locals }) {
   const { thumbnail, ...decorationData } = await request.json();
@@ -2953,7 +3065,7 @@ export async function POST({ request, locals }) {
   const thumbnailResult = await validateThumbnail(thumbnail);
   if (!thumbnailResult.valid) {
     throw error(400, {
-      message: 'Invalid thumbnail',
+      message: "Invalid thumbnail",
       reason: thumbnailResult.error,
     });
   }
@@ -2968,27 +3080,28 @@ export async function POST({ request, locals }) {
 
 ### Scene Management
 
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| `GET` | `/api/terrarium/scenes` | List user's scenes | Required |
-| `GET` | `/api/terrarium/scenes/:id` | Get single scene | Required |
-| `POST` | `/api/terrarium/scenes` | Create new scene | Required |
-| `PUT` | `/api/terrarium/scenes/:id` | Update scene | Required |
-| `DELETE` | `/api/terrarium/scenes/:id` | Delete scene | Required |
+| Method   | Endpoint                    | Description        | Auth     |
+| -------- | --------------------------- | ------------------ | -------- |
+| `GET`    | `/api/terrarium/scenes`     | List user's scenes | Required |
+| `GET`    | `/api/terrarium/scenes/:id` | Get single scene   | Required |
+| `POST`   | `/api/terrarium/scenes`     | Create new scene   | Required |
+| `PUT`    | `/api/terrarium/scenes/:id` | Update scene       | Required |
+| `DELETE` | `/api/terrarium/scenes/:id` | Delete scene       | Required |
 
 ### Decoration Management
 
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| `GET` | `/api/terrarium/decorations` | List user's decorations | Required |
-| `GET` | `/api/terrarium/decorations/community` | Browse public decorations | Oak+ |
-| `POST` | `/api/terrarium/decorations` | Create decoration from scene | Required |
-| `POST` | `/api/terrarium/decorations/:id/publish` | Make decoration public | Evergreen |
-| `DELETE` | `/api/terrarium/decorations/:id` | Delete decoration | Required |
+| Method   | Endpoint                                 | Description                  | Auth      |
+| -------- | ---------------------------------------- | ---------------------------- | --------- |
+| `GET`    | `/api/terrarium/decorations`             | List user's decorations      | Required  |
+| `GET`    | `/api/terrarium/decorations/community`   | Browse public decorations    | Oak+      |
+| `POST`   | `/api/terrarium/decorations`             | Create decoration from scene | Required  |
+| `POST`   | `/api/terrarium/decorations/:id/publish` | Make decoration public       | Evergreen |
+| `DELETE` | `/api/terrarium/decorations/:id`         | Delete decoration            | Required  |
 
 ### Request/Response Examples
 
 **Create Scene:**
+
 ```typescript
 // POST /api/terrarium/scenes
 // Request
@@ -3027,6 +3140,7 @@ export async function POST({ request, locals }) {
 ```
 
 **Export as Decoration:**
+
 ```typescript
 // POST /api/terrarium/decorations
 // Request
@@ -3055,6 +3169,6 @@ export async function POST({ request, locals }) {
 
 ---
 
-*Spec created: January 2026*
-*Updated: January 2026 (PR feedback integration)*
-*Target: MVP by Full Bloom, Full version by Golden Hour*
+_Spec created: January 2026_
+_Updated: January 2026 (PR feedback integration)_
+_Target: MVP by Full Bloom, Full version by Golden Hour_

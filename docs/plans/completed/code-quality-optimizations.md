@@ -46,6 +46,7 @@ Three code quality improvements:
 #### Task 1.2: Check Engine Glass Components
 
 **Files to audit**:
+
 - `packages/engine/src/lib/ui/components/glass/GlassCard.svelte`
 - `packages/engine/src/lib/ui/styles/grove.css`
 - `packages/engine/src/lib/styles/tokens.css`
@@ -101,18 +102,19 @@ Ensure glass card content is wrapped in semantic elements for Reader Mode parsin
 
 CSP headers found in 4 packages:
 
-| Package | File | Status |
-|---------|------|--------|
-| Plant | `src/hooks.server.ts` | ✅ Has CSP |
-| Engine | `src/hooks.server.ts` | ✅ Has CSP |
-| Landing | `src/hooks.server.ts` | ✅ Has CSP |
-| Domains | `src/hooks.server.ts` | ✅ Has CSP |
-| Clearing | `src/hooks.server.ts` | ❓ Needs check |
-| Durable Objects | N/A | N/A (Worker) |
+| Package         | File                  | Status         |
+| --------------- | --------------------- | -------------- |
+| Plant           | `src/hooks.server.ts` | ✅ Has CSP     |
+| Engine          | `src/hooks.server.ts` | ✅ Has CSP     |
+| Landing         | `src/hooks.server.ts` | ✅ Has CSP     |
+| Domains         | `src/hooks.server.ts` | ✅ Has CSP     |
+| Clearing        | `src/hooks.server.ts` | ❓ Needs check |
+| Durable Objects | N/A                   | N/A (Worker)   |
 
 ### Current Implementation Comparison
 
 **Plant CSP**:
+
 ```typescript
 const csp = [
   "default-src 'self'",
@@ -127,11 +129,12 @@ const csp = [
 ```
 
 **Engine CSP** (more comprehensive):
+
 ```typescript
 const csp = [
   "default-src 'self'",
   "upgrade-insecure-requests",
-  `script-src ${scriptSrc}`,  // Includes dynamic unsafe-eval for Monaco/Mermaid
+  `script-src ${scriptSrc}`, // Includes dynamic unsafe-eval for Monaco/Mermaid
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' https://cdn.autumnsgrove.com https://cdn.grove.place data:",
   "font-src 'self' https://cdn.grove.place",
@@ -160,33 +163,35 @@ interface CSPOptions {
 }
 
 const DEFAULT_CSP: CSPOptions = {
-  unsafeEvalRoutes: ['/admin/blog', '/admin/pages', '/blog/'],
-  scriptSrc: ['https://challenges.cloudflare.com'],
-  connectSrc: ['https://*.grove.place', 'https://challenges.cloudflare.com'],
-  imgSrc: ['https://cdn.grove.place', 'https://cdn.autumnsgrove.com', 'data:'],
+  unsafeEvalRoutes: ["/admin/blog", "/admin/pages", "/blog/"],
+  scriptSrc: ["https://challenges.cloudflare.com"],
+  connectSrc: ["https://*.grove.place", "https://challenges.cloudflare.com"],
+  imgSrc: ["https://cdn.grove.place", "https://cdn.autumnsgrove.com", "data:"],
 };
 
 export function buildCSP(pathname: string, options: CSPOptions = {}): string {
   const opts = { ...DEFAULT_CSP, ...options };
-  const needsUnsafeEval = opts.unsafeEvalRoutes?.some(route =>
-    pathname.startsWith(route)
+  const needsUnsafeEval = opts.unsafeEvalRoutes?.some((route) =>
+    pathname.startsWith(route),
   );
 
   const scriptSrc = [
     "'self'",
     "'unsafe-inline'",
-    needsUnsafeEval ? "'unsafe-eval'" : '',
+    needsUnsafeEval ? "'unsafe-eval'" : "",
     ...(opts.scriptSrc || []),
-  ].filter(Boolean).join(' ');
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return [
     "default-src 'self'",
     "upgrade-insecure-requests",
     `script-src ${scriptSrc}`,
     "style-src 'self' 'unsafe-inline'",
-    `img-src 'self' ${opts.imgSrc?.join(' ') || ''}`,
+    `img-src 'self' ${opts.imgSrc?.join(" ") || ""}`,
     "font-src 'self' https://cdn.grove.place",
-    `connect-src 'self' ${opts.connectSrc?.join(' ') || ''}`,
+    `connect-src 'self' ${opts.connectSrc?.join(" ") || ""}`,
     "frame-src https://challenges.cloudflare.com",
     "frame-ancestors 'none'",
   ].join("; ");
@@ -199,11 +204,11 @@ Update each package to use the shared utility:
 
 ```typescript
 // In hooks.server.ts
-import { buildCSP } from '@autumnsgrove/groveengine/security';
+import { buildCSP } from "@autumnsgrove/lattice/security";
 
 const csp = buildCSP(event.url.pathname, {
   // Package-specific overrides
-  connectSrc: ['https://api.lemonsqueezy.com'],  // Plant only
+  connectSrc: ["https://api.lemonsqueezy.com"], // Plant only
 });
 
 response.headers.set("Content-Security-Policy", csp);
@@ -217,20 +222,23 @@ Check if `packages/clearing/src/hooks.server.ts` has CSP headers. If not, add th
 
 Add to AGENT.md or security docs:
 
-```markdown
+````markdown
 ## Content Security Policy
 
 All packages must set CSP headers via the shared utility:
 
 ```typescript
-import { buildCSP } from '@autumnsgrove/groveengine/security';
+import { buildCSP } from "@autumnsgrove/lattice/security";
 ```
+````
 
 **Routes needing `unsafe-eval`**:
+
 - `/admin/blog/*` - Monaco editor
 - `/admin/pages/*` - Monaco editor
 - `/blog/*` - Mermaid diagrams
-```
+
+````
 
 ### Acceptance Criteria
 
@@ -263,7 +271,7 @@ try {
 try {
   const pages = await db.prepare("SELECT * FROM pages").all();
 } catch (error) { /* graceful fallback */ }
-```
+````
 
 ### Tasks
 
@@ -281,6 +289,7 @@ grep -rn "try.*{" packages/engine/src --include="*.ts" | \
 #### Task 3.2: Audit High-Risk Files
 
 **Automated search command**:
+
 ```bash
 # Find files with multiple db.prepare in same try block
 for f in $(find packages -name "*.ts" -type f); do
@@ -295,16 +304,17 @@ done
 
 **Priority files to audit**:
 
-| File | Risk | Reason | Expected Queries |
-|------|------|--------|------------------|
-| `packages/engine/src/hooks.server.ts` | High | Runs on every request | Tenant, user, settings |
-| `packages/engine/src/routes/+page.server.ts` | High | Homepage loader | Posts, pages |
-| `packages/engine/src/routes/blog/+page.server.ts` | High | Blog listing | Posts, categories |
-| `packages/engine/src/routes/admin/+layout.server.ts` | High | Admin shell | User, tenant, perms |
-| `packages/plant/src/routes/+layout.server.ts` | High | Plant shell | User, onboarding |
-| `packages/engine/src/routes/api/curios/*/+server.ts` | Medium | Curio APIs | Config, data |
+| File                                                 | Risk   | Reason                | Expected Queries       |
+| ---------------------------------------------------- | ------ | --------------------- | ---------------------- |
+| `packages/engine/src/hooks.server.ts`                | High   | Runs on every request | Tenant, user, settings |
+| `packages/engine/src/routes/+page.server.ts`         | High   | Homepage loader       | Posts, pages           |
+| `packages/engine/src/routes/blog/+page.server.ts`    | High   | Blog listing          | Posts, categories      |
+| `packages/engine/src/routes/admin/+layout.server.ts` | High   | Admin shell           | User, tenant, perms    |
+| `packages/plant/src/routes/+layout.server.ts`        | High   | Plant shell           | User, onboarding       |
+| `packages/engine/src/routes/api/curios/*/+server.ts` | Medium | Curio APIs            | Config, data           |
 
 **Specific patterns to find**:
+
 ```typescript
 // Pattern 1: Sequential queries in same try
 try {
@@ -323,6 +333,7 @@ try {
 #### Task 3.3: Fix Identified Violations
 
 For each violation:
+
 1. Split into separate try/catch blocks
 2. Add appropriate fallback values
 3. Log errors appropriately
@@ -332,11 +343,20 @@ For each violation:
 ```typescript
 // Before
 try {
-  const tenant = await db.prepare('SELECT * FROM tenants WHERE id = ?').bind(id).first();
-  const settings = await db.prepare('SELECT * FROM settings WHERE tenant_id = ?').bind(id).all();
-  const pages = await db.prepare('SELECT * FROM pages WHERE tenant_id = ?').bind(id).all();
+  const tenant = await db
+    .prepare("SELECT * FROM tenants WHERE id = ?")
+    .bind(id)
+    .first();
+  const settings = await db
+    .prepare("SELECT * FROM settings WHERE tenant_id = ?")
+    .bind(id)
+    .all();
+  const pages = await db
+    .prepare("SELECT * FROM pages WHERE tenant_id = ?")
+    .bind(id)
+    .all();
 } catch (e) {
-  console.error('Failed to load data');
+  console.error("Failed to load data");
 }
 
 // After
@@ -345,22 +365,31 @@ let settings: Setting[] = [];
 let pages: Page[] = [];
 
 try {
-  tenant = await db.prepare('SELECT * FROM tenants WHERE id = ?').bind(id).first();
+  tenant = await db
+    .prepare("SELECT * FROM tenants WHERE id = ?")
+    .bind(id)
+    .first();
 } catch (e) {
-  console.error('Failed to load tenant:', e);
+  console.error("Failed to load tenant:", e);
 }
 
 try {
-  settings = await db.prepare('SELECT * FROM settings WHERE tenant_id = ?').bind(id).all();
+  settings = await db
+    .prepare("SELECT * FROM settings WHERE tenant_id = ?")
+    .bind(id)
+    .all();
 } catch (e) {
-  console.warn('Failed to load settings, using defaults');
+  console.warn("Failed to load settings, using defaults");
   settings = getDefaultSettings();
 }
 
 try {
-  pages = await db.prepare('SELECT * FROM pages WHERE tenant_id = ?').bind(id).all();
+  pages = await db
+    .prepare("SELECT * FROM pages WHERE tenant_id = ?")
+    .bind(id)
+    .all();
 } catch (e) {
-  console.warn('Failed to load pages');
+  console.warn("Failed to load pages");
   pages = [];
 }
 ```
@@ -381,11 +410,11 @@ Consider adding a custom ESLint rule to warn on multiple `db.prepare()` calls in
 
 ## Summary
 
-| Item | Priority | Effort | Current Status |
-|------|----------|--------|----------------|
-| Safari Reader Mode | P2 | 2-3h | Partial (domains only) |
-| CSP Headers | P2 | 3-4h | Working but inconsistent |
-| DB Query Isolation | P2 | 3-5h | Needs audit |
+| Item               | Priority | Effort | Current Status           |
+| ------------------ | -------- | ------ | ------------------------ |
+| Safari Reader Mode | P2       | 2-3h   | Partial (domains only)   |
+| CSP Headers        | P2       | 3-4h   | Working but inconsistent |
+| DB Query Isolation | P2       | 3-5h   | Needs audit              |
 
 ---
 
@@ -393,22 +422,22 @@ Consider adding a custom ESLint rule to warn on multiple `db.prepare()` calls in
 
 ### Safari Reader Mode
 
-| File | Change |
-|------|--------|
-| `packages/engine/src/lib/ui/styles/grove.css` | Add fallback |
+| File                                                           | Change           |
+| -------------------------------------------------------------- | ---------------- |
+| `packages/engine/src/lib/ui/styles/grove.css`                  | Add fallback     |
 | `packages/engine/src/lib/ui/components/glass/GlassCard.svelte` | Semantic wrapper |
 
 ### CSP Headers
 
-| File | Change |
-|------|--------|
-| `packages/engine/src/lib/security/csp.ts` | New utility |
-| `packages/*/src/hooks.server.ts` | Use shared utility |
+| File                                      | Change             |
+| ----------------------------------------- | ------------------ |
+| `packages/engine/src/lib/security/csp.ts` | New utility        |
+| `packages/*/src/hooks.server.ts`          | Use shared utility |
 
 ### DB Query Isolation
 
-| File | Change |
-|------|--------|
+| File                      | Change           |
+| ------------------------- | ---------------- |
 | Various `+page.server.ts` | Split try blocks |
 | Various `hooks.server.ts` | Split try blocks |
 

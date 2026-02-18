@@ -4,8 +4,8 @@
 // used across the Grove platform.
 //
 // Usage:
-//   import { Icons, IconLegend } from '@autumnsgrove/groveengine/ui/icons';
-//   import { stateIcons, pricingIcons, Check } from '@autumnsgrove/groveengine/ui/icons';
+//   import { Icons, IconLegend } from '@autumnsgrove/lattice/ui/icons';
+//   import { stateIcons, pricingIcons, Check } from '@autumnsgrove/lattice/ui/icons';
 
 // Custom SVG components
 export { default as Icons } from "./Icons.svelte";

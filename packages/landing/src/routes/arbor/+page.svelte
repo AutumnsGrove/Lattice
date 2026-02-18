@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { getUserDisplayName } from '@autumnsgrove/groveengine/utils';
-	import { GlassCard, GroveSwap } from '@autumnsgrove/groveengine/ui';
+	import { getUserDisplayName } from '@autumnsgrove/lattice/utils';
+	import { GlassCard, GroveSwap } from '@autumnsgrove/lattice/ui';
 	import {
 		MessageCircle,
 		AtSign,
@@ -24,7 +24,7 @@
 		Kanban,
 		Eye
 	} from 'lucide-svelte';
-	import { WAYFINDER_LINKS } from '@autumnsgrove/groveengine/config';
+	import { WAYFINDER_LINKS } from '@autumnsgrove/lattice/config';
 
 	let { data }: { data: PageData } = $props();
 
@@ -225,7 +225,7 @@
 							<Github class="w-5 h-5 text-foreground" />
 						</div>
 						<div class="flex-1 min-w-0">
-							<p class="text-sm font-sans font-medium text-foreground">GroveEngine</p>
+							<p class="text-sm font-sans font-medium text-foreground">Lattice</p>
 							<p class="text-xs text-foreground-muted font-sans">GitHub Repository</p>
 						</div>
 						<ExternalLink class="w-3.5 h-3.5 text-foreground-muted flex-shrink-0" />

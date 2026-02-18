@@ -126,11 +126,11 @@ pnpm check
 
 ## Integration
 
-Vineyard is designed to be consumed by Grove tools through the `@autumnsgrove/groveengine` package:
+Vineyard is designed to be consumed by Grove tools through the `@autumnsgrove/lattice` package:
 
 ```javascript
 // In your Grove tool
-import { VineyardLayout } from "@autumnsgrove/groveengine/vineyard";
+import { VineyardLayout } from "@autumnsgrove/lattice/vineyard";
 ```
 
 ## Architecture Decisions
@@ -153,7 +153,7 @@ Vineyard components use scoped `<style>` blocks with CSS custom properties inste
 Vineyard components previously loaded Lexend from Google Fonts (blocking render). This has been removed. Consumer apps should:
 
 ```typescript
-import { Lexend } from "@autumnsgrove/groveengine/ui/typography";
+import { Lexend } from "@autumnsgrove/lattice/ui/typography";
 ```
 
 The engine provides optimized font loading with preloading and proper fallbacks.

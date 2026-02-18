@@ -586,7 +586,7 @@ flowchart LR
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#e8f5e9', 'primaryTextColor': '#1a1a1a', 'primaryBorderColor': '#2e7d32', 'lineColor': '#2e7d32', 'background': '#ffffff'}}}%%
 mindmap
-    root(("@autumnsgrove/<br/>groveengine"))
+    root(("@autumnsgrove/<br/>lattice"))
         UI Components
             Chrome
                 Header

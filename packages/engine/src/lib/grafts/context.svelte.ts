@@ -21,7 +21,7 @@ const GRAFT_CONTEXT_KEY = Symbol("graft-context");
  * @example
  * ```svelte
  * <script lang="ts">
- *   import { setGraftContext } from '@autumnsgrove/groveengine/grafts';
+ *   import { setGraftContext } from '@autumnsgrove/lattice/grafts';
  *
  *   setGraftContext({
  *     productId: 'grove',
@@ -44,7 +44,7 @@ export function setGraftContext(context: GraftContext): void {
  * @example
  * ```svelte
  * <script lang="ts">
- *   import { getGraftContext } from '@autumnsgrove/groveengine/grafts';
+ *   import { getGraftContext } from '@autumnsgrove/lattice/grafts';
  *
  *   const context = getGraftContext();
  *   const productId = context?.productId ?? 'grove';

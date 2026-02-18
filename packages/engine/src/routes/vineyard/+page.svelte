@@ -840,7 +840,7 @@ $ npm run dev
 			<GlassCard title="Usage Examples" variant="frosted">
 				<p class="text-sm text-bark-600 mb-4">How to use font components in your code</p>
 				<div class="space-y-4">
-					<IBMPlexMono as="pre" class="p-4 bg-bark-900 rounded-lg text-cream-100 text-sm overflow-x-auto">{`import { Alagard, IBMPlexMono, Caveat } from '@autumnsgrove/groveengine/ui/typography';
+					<IBMPlexMono as="pre" class="p-4 bg-bark-900 rounded-lg text-cream-100 text-sm overflow-x-auto">{`import { Alagard, IBMPlexMono, Caveat } from '@autumnsgrove/lattice/ui/typography';
 
 // Fantasy game header
 <Alagard as="h1" class="text-4xl">Welcome to the Grove</Alagard>

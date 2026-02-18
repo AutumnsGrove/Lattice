@@ -8,6 +8,7 @@ description: Write documentation, help articles, specs, and user-facing text in 
 ## When to Activate
 
 Activate this skill when:
+
 - Writing help center articles (Waystone)
 - Drafting specs or technical documentation
 - Writing user-facing text (onboarding, tooltips, error messages)
@@ -43,9 +44,11 @@ From the project's guiding principles:
 Mix short sentences with longer ones. Vary your rhythm. Read it aloud—if it sounds monotonous, it is.
 
 **Good:**
+
 > Every new visitor asks the same question. "Is the music broken?" No. There is no music. There never has been.
 
 **Not good:**
+
 > Every new visitor asks a common question. The question is usually about whether the music system is functioning. The answer is that there is no music system. There has never been one.
 
 ---
@@ -54,12 +57,12 @@ Mix short sentences with longer ones. Vary your rhythm. Read it aloud—if it so
 
 Grove uses specific terms for community members. **Always use these in user-facing text.**
 
-| Term | Who | Context |
-|------|-----|---------|
-| **Wanderer** | Everyone | Default greeting, anonymous visitors, all users |
-| **Rooted** / **the Rooted** | Subscribers | Those who've planted their tree, paid users |
-| **Pathfinder** | Trusted guides | Appointed community helpers |
-| **Wayfinder** | Autumn (singular) | The grove keeper |
+| Term                        | Who               | Context                                         |
+| --------------------------- | ----------------- | ----------------------------------------------- |
+| **Wanderer**                | Everyone          | Default greeting, anonymous visitors, all users |
+| **Rooted** / **the Rooted** | Subscribers       | Those who've planted their tree, paid users     |
+| **Pathfinder**              | Trusted guides    | Appointed community helpers                     |
+| **Wayfinder**               | Autumn (singular) | The grove keeper                                |
 
 ### Key Rules
 
@@ -71,11 +74,13 @@ Grove uses specific terms for community members. **Always use these in user-faci
 ### Examples
 
 **Good:**
+
 - "Welcome, Wanderer."
 - "Thanks for staying rooted with us."
 - "Ask a Pathfinder. They'll show you the way."
 
 **Avoid:**
+
 - "Welcome, user."
 - "Thanks for being a subscriber."
 - "Contact an administrator."
@@ -83,8 +88,9 @@ Grove uses specific terms for community members. **Always use these in user-faci
 ### The Symmetry
 
 Wanderer → Wayfinder reflects the journey:
-- Wanderers *seek* the way (exploring, finding paths)
-- The Wayfinder *shows* the way (guiding, creating paths)
+
+- Wanderers _seek_ the way (exploring, finding paths)
+- The Wayfinder _shows_ the way (guiding, creating paths)
 
 See `docs/grove-user-identity.md` for full documentation.
 
@@ -92,9 +98,10 @@ See `docs/grove-user-identity.md` for full documentation.
 
 When writing text that includes Grove terminology in UI or content, **use GroveTerm components instead of hardcoding terms**. Grove Mode lets users toggle between standard terms (default for new visitors) and Grove terms.
 
-**For Svelte UI:** Use `GroveTerm`, `GroveSwap`, or `GroveText` components from `@autumnsgrove/groveengine/ui`.
+**For Svelte UI:** Use `GroveTerm`, `GroveSwap`, or `GroveText` components from `@autumnsgrove/lattice/ui`.
 
 **For data-driven content** (FAQ items, pricing text, help articles): Use `[[term]]` syntax. Examples:
+
 - `"Your [[bloom|posts]] are always yours."` renders "posts" when Grove Mode is OFF, "blooms" when ON
 - `"Visit your [[arbor|dashboard]] to get started."` renders "dashboard" or "Arbor"
 - `"Ask a [[pathfinder|community guide]] for help."` renders "community guide" or "Pathfinder"
@@ -122,12 +129,14 @@ These patterns make text sound like AI wrote it. Avoid them completely.
 This phrasing is deeply AI-coded. Avoid it entirely.
 
 **Never write:**
+
 - "It's not X, but Y"
 - "It's not just X, but Y"
 - "It's not merely X, but rather Y"
 - "Grove isn't just a platform, it's a home"
 
 **Instead, just say the thing:**
+
 - "Grove is a home for your words."
 - "This is where you belong."
 
@@ -135,12 +144,12 @@ This phrasing is deeply AI-coded. Avoid it entirely.
 
 These words appear in AI text at rates far higher than human writing. Avoid them:
 
-| Category | Words to Avoid |
-|----------|---------------|
+| Category       | Words to Avoid                                                                                    |
+| -------------- | ------------------------------------------------------------------------------------------------- |
 | **Adjectives** | robust, seamless, innovative, cutting-edge, transformative, intricate, captivating, comprehensive |
-| **Nouns** | tapestry, camaraderie, realm, plethora, myriad, landscape, journey (when not literal) |
-| **Verbs** | delve, foster, leverage, navigate, empower, embark, unlock, harness |
-| **Phrases** | at the end of the day, in today's world, it goes without saying, needless to say |
+| **Nouns**      | tapestry, camaraderie, realm, plethora, myriad, landscape, journey (when not literal)             |
+| **Verbs**      | delve, foster, leverage, navigate, empower, embark, unlock, harness                               |
+| **Phrases**    | at the end of the day, in today's world, it goes without saying, needless to say                  |
 
 ### Heavy Transition Words
 
@@ -161,9 +170,11 @@ These make text feel stiff and robotic:
 Don't repeat the same adjective or descriptor multiple times. AI does this constantly.
 
 **Bad:**
+
 > Grove provides a seamless experience. The seamless integration means you can seamlessly move between features.
 
 **Good:**
+
 > Grove gets out of your way. Move between features without friction.
 
 ### Generic Safe Claims
@@ -188,11 +199,13 @@ White space is your friend. Dense walls of text don't feel like home.
 Use lists when they clarify. But don't turn everything into bullets. Sometimes prose flows better.
 
 **Good use of lists:**
+
 - Specific steps in a process
 - Features that are truly parallel
 - Quick reference information
 
 **Bad use of lists:**
+
 - Narrative content broken awkwardly
 - Things that would read better as a sentence
 
@@ -219,12 +232,14 @@ Don't use callouts for things that should just be in the text.
 Grove docs often end with an italicized line. This should feel earned, not forced.
 
 **Works:**
-> *Sometimes the most radical thing you can offer is nothing at all.*
 
-> *The path becomes clear by walking it.*
+> _Sometimes the most radical thing you can offer is nothing at all._
+
+> _The path becomes clear by walking it._
 
 **Doesn't work:**
-> *And that's how you configure your settings!*
+
+> _And that's how you configure your settings!_
 
 If you can't find a poetic closer that resonates, don't force one. A clean ending is fine.
 
@@ -241,17 +256,18 @@ Grove is explicitly queer-friendly. This means:
 
 ### Concrete Examples
 
-| Avoid | Use Instead |
-|-------|-------------|
-| "Add your husband/wife" | "Add your partner" or "Add someone special" |
-| "he or she" | "they" or rephrase to avoid pronouns |
-| "Dear Sir/Madam" | "Hello" or "Hi there" |
-| "mankind" | "people" or "everyone" |
-| Examples with only straight couples | Vary your examples, or keep them neutral |
+| Avoid                               | Use Instead                                 |
+| ----------------------------------- | ------------------------------------------- |
+| "Add your husband/wife"             | "Add your partner" or "Add someone special" |
+| "he or she"                         | "they" or rephrase to avoid pronouns        |
+| "Dear Sir/Madam"                    | "Hello" or "Hi there"                       |
+| "mankind"                           | "people" or "everyone"                      |
+| Examples with only straight couples | Vary your examples, or keep them neutral    |
 
 ### In User Flows
 
 When asking for relationship info (if ever needed):
+
 - Use open text fields over dropdowns with limited options
 - Don't require titles (Mr/Mrs/Ms)
 - Let people describe themselves rather than selecting from boxes
@@ -273,6 +289,7 @@ Both should avoid AI patterns.
 ### The Voice Spectrum
 
 **API Reference (minimal warmth, maximum clarity):**
+
 ```
 POST /api/posts
 
@@ -287,6 +304,7 @@ Returns: Post object or 400 error
 ```
 
 **Internal Spec (clear, some personality):**
+
 ```
 ## Feed Caching Strategy
 
@@ -296,6 +314,7 @@ age out naturally. This keeps things fresh without hammering D1.
 ```
 
 **Getting Started Guide (full Grove voice):**
+
 ```
 ## Your First Post
 
@@ -308,6 +327,7 @@ Write something. Anything. Hit publish when it feels ready.
 ```
 
 **Onboarding Tooltip (warm but concise):**
+
 ```
 This is your dashboard. Everything you need, nothing you don't.
 ```
@@ -328,6 +348,7 @@ When things break, stay warm but be honest. Don't blame the user. Don't hide beh
 ### Examples
 
 **Good:**
+
 ```
 Couldn't save your post. Check your connection and try again.
 ```
@@ -342,6 +363,7 @@ Your draft is saved locally.
 ```
 
 **Avoid:**
+
 ```
 Oops! 😅 Looks like something went wrong! Don't worry though,
 these things happen! Please try again later!
@@ -382,6 +404,7 @@ Before finalizing any Grove documentation:
 When **grove-ui-design** or **walking-through-the-grove** need written content, invoke this skill first. The visual design and naming should match the voice.
 
 **Typical flow:**
+
 1. Design calls for new component/page text
 2. Activate `grove-documentation` for voice guidance
 3. Write the content following these principles
@@ -393,13 +416,13 @@ This skill (grove-documentation) is for **quick, functional text**: help article
 
 Use **museum-documentation** when you need **narrative, explorable documentation**:
 
-| Use grove-documentation | Use museum-documentation |
-|------------------------|-------------------------|
-| Help center articles | Knowledge base "how it works" |
-| Tooltips and labels | Codebase guided tours |
-| Error messages | System architecture explains |
-| Onboarding flows | Technical deep-dives for curious Wanderers |
-| Quick-reference guides | Exhibit-style documentation |
+| Use grove-documentation | Use museum-documentation                   |
+| ----------------------- | ------------------------------------------ |
+| Help center articles    | Knowledge base "how it works"              |
+| Tooltips and labels     | Codebase guided tours                      |
+| Error messages          | System architecture explains               |
+| Onboarding flows        | Technical deep-dives for curious Wanderers |
+| Quick-reference guides  | Exhibit-style documentation                |
 
 If the reader should **skim and act**, use this skill.
 If the reader should **explore and understand**, use museum-documentation.
@@ -418,15 +441,16 @@ Welcome. Let's get something published.
 From your admin panel, click **New Post** in the sidebar. The editor opens with a blank canvas.
 
 Write in Markdown. If you're new to it, here are the basics:
+
 - **Bold:** `**text**`
-- *Italic:* `*text*`
+- _Italic:_ `*text*`
 - Links: `[text](url)`
 
 The preview panel shows how your post will look. Toggle it with the eye icon.
 
 When you're ready, hit **Publish**. Your words are live.
 
-*The blank page isn't as scary as it looks.*
+_The blank page isn't as scary as it looks._
 ```
 
 ### Help Center Article (Bad - Obvious AI Patterns)
@@ -455,8 +479,9 @@ Ready to share your thoughts with the world? Let's get started.
 From your admin panel, click **New Post** in the sidebar. You'll see our editor—a clean, distraction-free space for your writing.
 
 Grove uses Markdown for formatting. It's not complicated—here are the basics you'll need:
+
 - **Bold:** `**text**`
-- *Italic:* `*text*`
+- _Italic:_ `*text*`
 - Links: `[text](url)`
 
 The preview panel lets you see how your post will look before publishing. When you're satisfied with your work, hit **Publish**.
@@ -465,6 +490,7 @@ Your voice matters. We can't wait to see what you create.
 ```
 
 **What's wrong:**
+
 - "Ready to share your thoughts with the world?" (generic opener)
 - "Let's get started" (overused)
 - "distraction-free space" (marketing-speak)
@@ -476,17 +502,17 @@ Your voice matters. We can't wait to see what you create.
 
 ## Quick Reference
 
-| Do | Don't |
-|----|-------|
-| Write short paragraphs | Write walls of text |
-| Use "and," "but," "so" | Use "Furthermore," "Moreover" |
-| Say what you mean | Hedge with "may," "might," "could" |
-| Vary sentence rhythm | Write uniform sentence lengths |
-| Use commas or periods | Use em-dashes |
-| Let ideas connect naturally | Force transitions everywhere |
-| Earn poetic closers | Force poetic closers |
-| Acknowledge limitations | Oversell or overpromise |
+| Do                          | Don't                              |
+| --------------------------- | ---------------------------------- |
+| Write short paragraphs      | Write walls of text                |
+| Use "and," "but," "so"      | Use "Furthermore," "Moreover"      |
+| Say what you mean           | Hedge with "may," "might," "could" |
+| Vary sentence rhythm        | Write uniform sentence lengths     |
+| Use commas or periods       | Use em-dashes                      |
+| Let ideas connect naturally | Force transitions everywhere       |
+| Earn poetic closers         | Force poetic closers               |
+| Acknowledge limitations     | Oversell or overpromise            |
 
 ---
 
-*Write like you're explaining something to a friend at 2 AM. Clear, warm, honest.*
+_Write like you're explaining something to a friend at 2 AM. Clear, warm, honest._

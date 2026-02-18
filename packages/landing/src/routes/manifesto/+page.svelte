@@ -16,7 +16,7 @@
 		Acorn,
 		Leaf,
 		TreePine
-	} from '@autumnsgrove/groveengine/ui/nature';
+	} from '@autumnsgrove/lattice/ui/nature';
 
 	// Icon for solarpunk link
 	import { SolarPanel } from 'lucide-svelte';

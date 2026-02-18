@@ -1,4 +1,4 @@
--- GroveEngine Multi-Tenant Database Schema
+-- Lattice Multi-Tenant Database Schema
 -- Target: Cloudflare D1
 -- Version: 1.0.0
 -- Created: December 1, 2025

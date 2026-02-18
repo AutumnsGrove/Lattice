@@ -1,15 +1,15 @@
-name: Deploy GroveEngine to Cloudflare Pages
+name: Deploy Lattice to Cloudflare Pages
 
 on:
   push:
     branches: [main]
     paths:
-      - 'packages/engine/**'
-      - 'packages/vineyard/**'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'docs/philosophy/grove-naming.md'  # Regenerates grove-term-manifest.json
-      - 'scripts/generate/grove-term-manifest.ts'
+      - "packages/engine/**"
+      - "packages/vineyard/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "docs/philosophy/grove-naming.md" # Regenerates grove-term-manifest.json
+      - "scripts/generate/grove-term-manifest.ts"
   workflow_dispatch:
 
 jobs:
@@ -27,9 +27,9 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
-          cache-dependency-path: '**/pnpm-lock.yaml'
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: "**/pnpm-lock.yaml"
 
       - name: Install dependencies
         run: pnpm install

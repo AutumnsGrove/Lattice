@@ -545,7 +545,7 @@ def engine_cmd(
         None, help="Engine module to filter (ui, stores, utils)"
     ),
 ) -> None:
-    """Find @autumnsgrove/groveengine imports."""
+    """Find @autumnsgrove/lattice imports."""
     from grove_find.commands.quality import engine_command
 
     engine_command(module)

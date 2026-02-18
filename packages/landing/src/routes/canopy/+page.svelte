@@ -2,12 +2,12 @@
   import Header from '$lib/components/Header.svelte';
   import Footer from '$lib/components/Footer.svelte';
   import SEO from '$lib/components/SEO.svelte';
-  import { Glass, GlassCard, Button, Input, GroveTerm } from '@autumnsgrove/groveengine/ui';
-  import { Search, Users, Leaf } from '@autumnsgrove/groveengine/ui/icons';
+  import { Glass, GlassCard, Button, Input, GroveTerm } from '@autumnsgrove/lattice/ui';
+  import { Search, Users, Leaf } from '@autumnsgrove/lattice/ui/icons';
   import {
     CANOPY_CATEGORY_LABELS,
     type CanopyCategory,
-  } from '@autumnsgrove/groveengine';
+  } from '@autumnsgrove/lattice';
 
   // Types derived from engine - defined locally for Svelte 5 runes compatibility
   interface CanopyWanderer {

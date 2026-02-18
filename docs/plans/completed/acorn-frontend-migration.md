@@ -1,18 +1,20 @@
 # Acorn Frontend Migration Plan
 
-> Moving the domain discovery frontend from GroveEngine to the Acorn repo
+> Moving the domain discovery frontend from Lattice to the Acorn repo
 
 ---
 
 ## Overview
 
 **Current State:**
+
 - Acorn backend: `AutumnsGrove/grove-acorn` (or similar)
-- Acorn frontend: `GroveEngine/domains/` ← needs to move
+- Acorn frontend: `Lattice/domains/` ← needs to move
 
 **Target State:**
+
 - Acorn backend + frontend: unified in `grove-acorn` repo
-- GroveEngine: no longer contains Acorn frontend
+- Lattice: no longer contains Acorn frontend
 
 ---
 
@@ -40,6 +42,7 @@ mkdir -p src/routes src/lib static tests .github/workflows
 ### 1.2 Add Base Configuration Files
 
 **package.json:**
+
 ```json
 {
   "name": "grove-acorn",
@@ -55,7 +58,7 @@ mkdir -p src/routes src/lib static tests .github/workflows
     "check": "svelte-check"
   },
   "dependencies": {
-    "groveengine": "^latest"
+    "lattice": "^latest"
   },
   "devDependencies": {
     "@sveltejs/adapter-cloudflare": "^latest",
@@ -68,23 +71,25 @@ mkdir -p src/routes src/lib static tests .github/workflows
 ```
 
 **svelte.config.js:**
+
 ```javascript
-import adapter from '@sveltejs/adapter-cloudflare';
+import adapter from "@sveltejs/adapter-cloudflare";
 
 /** @type {import('@sveltejs/kit').Config} */
 export default {
   kit: {
     adapter: adapter({
       routes: {
-        include: ['/*'],
-        exclude: ['<all>']
-      }
-    })
-  }
+        include: ["/*"],
+        exclude: ["<all>"],
+      },
+    }),
+  },
 };
 ```
 
 **wrangler.toml:**
+
 ```toml
 name = "grove-acorn"
 compatibility_date = "2024-01-01"
@@ -105,6 +110,7 @@ id = "your-kv-id"
 ### 1.3 Add Agent Files
 
 **CLAUDE.md:**
+
 ```markdown
 # Project Instructions
 
@@ -116,6 +122,7 @@ id = "your-kv-id"
 ```
 
 **AGENT.md:**
+
 ```markdown
 # Acorn: Domain Discovery Tool
 
@@ -129,7 +136,7 @@ the backend API and the frontend SvelteKit app.
 - **Frontend:** SvelteKit
 - **Backend:** Cloudflare Workers
 - **Database:** Cloudflare D1
-- **Auth:** Heartwood (via groveengine)
+- **Auth:** Heartwood (via lattice)
 - **AI:** [specify provider]
 
 ## Development
@@ -152,7 +159,7 @@ npm run deploy
 
 ### 2.1 Files to Copy
 
-From `GroveEngine/domains/` to `grove-acorn/`:
+From `Lattice/domains/` to `grove-acorn/`:
 
 ```
 domains/src/           → src/
@@ -163,7 +170,7 @@ domains/schema.sql     → schema.sql (or merge with existing)
 ### 2.2 Copy Commands
 
 ```bash
-# From GroveEngine directory
+# From Lattice directory
 ACORN_REPO="/path/to/grove-acorn"
 
 # Copy source files
@@ -181,7 +188,7 @@ cp domains/schema.sql "$ACORN_REPO/schema.sql.frontend"
 
 ### 2.3 Files to NOT Copy (Recreate Fresh)
 
-- `package.json` — Use new one with groveengine dependency
+- `package.json` — Use new one with lattice dependency
 - `wrangler.toml` — May need different bindings
 - `svelte.config.js` — Use standard config
 - `.env.example` — Recreate with correct variable names
@@ -190,20 +197,22 @@ cp domains/schema.sql "$ACORN_REPO/schema.sql.frontend"
 
 ## Phase 3: Update Imports
 
-### 3.1 Replace Any GroveEngine Internal Imports
+### 3.1 Replace Any Lattice Internal Imports
 
 Search for imports like:
+
 ```typescript
 // OLD (if any exist)
-import { something } from '$lib/../../packages/engine/...';
-import { something } from '../../../packages/...';
+import { something } from "$lib/../../packages/engine/...";
+import { something } from "../../../packages/...";
 ```
 
 Replace with:
+
 ```typescript
 // NEW
-import { something } from 'groveengine';
-import { something } from 'groveengine/auth';
+import { something } from "lattice";
+import { something } from "lattice/auth";
 ```
 
 ### 3.2 Update Path Aliases
@@ -215,9 +224,9 @@ In `svelte.config.js` or `vite.config.ts`, ensure `$lib` points to local lib:
 export default defineConfig({
   resolve: {
     alias: {
-      $lib: path.resolve('./src/lib')
-    }
-  }
+      $lib: path.resolve("./src/lib"),
+    },
+  },
 });
 ```
 
@@ -228,6 +237,7 @@ export default defineConfig({
 ### 4.1 Document Required Variables
 
 Create `.env.example`:
+
 ```bash
 # Acorn Environment Variables
 
@@ -301,6 +311,7 @@ npm run deploy
 ### 6.2 Configure DNS
 
 If not already configured:
+
 ```
 acorn.grove.place → Cloudflare Pages deployment
 ```
@@ -314,12 +325,12 @@ acorn.grove.place → Cloudflare Pages deployment
 
 ---
 
-## Phase 7: Cleanup GroveEngine
+## Phase 7: Cleanup Lattice
 
 ### 7.1 Remove Frontend Code
 
 ```bash
-# In GroveEngine directory
+# In Lattice directory
 git rm -r domains/
 ```
 
@@ -329,7 +340,7 @@ If `domains` is listed in `package.json` workspaces, remove it.
 
 ### 7.3 Update References
 
-Search GroveEngine for any references to `domains/` and remove or update.
+Search Lattice for any references to `domains/` and remove or update.
 
 ### 7.4 Commit Cleanup
 
@@ -344,7 +355,7 @@ git commit -m "chore: remove Acorn frontend (migrated to grove-acorn repo)"
 
 ### 8.1 Update grove-product-standards.md
 
-Change Acorn status from "⚠️ In GroveEngine" to "✓":
+Change Acorn status from "⚠️ In Lattice" to "✓":
 
 ```markdown
 | Acorn | — | ✓ | ✓ | ✓ | Complete |
@@ -360,7 +371,7 @@ Note that Acorn now lives in its own repo.
 
 If something goes wrong:
 
-1. **Keep GroveEngine domains/ until verified** — Don't delete until production is stable
+1. **Keep Lattice domains/ until verified** — Don't delete until production is stable
 2. **DNS rollback** — Point `acorn.grove.place` back to old deployment if needed
 3. **Git history** — All changes are in git, can revert
 
@@ -368,16 +379,16 @@ If something goes wrong:
 
 ## Timeline Estimate
 
-| Phase | Effort |
-|-------|--------|
-| Phase 1: Prepare repo | ~30 min |
-| Phase 2: Copy code | ~15 min |
+| Phase                   | Effort  |
+| ----------------------- | ------- |
+| Phase 1: Prepare repo   | ~30 min |
+| Phase 2: Copy code      | ~15 min |
 | Phase 3: Update imports | ~30 min |
-| Phase 4: Environment | ~15 min |
-| Phase 5: Test locally | ~1 hour |
-| Phase 6: Deploy | ~30 min |
-| Phase 7: Cleanup | ~15 min |
-| Phase 8: Documentation | ~15 min |
+| Phase 4: Environment    | ~15 min |
+| Phase 5: Test locally   | ~1 hour |
+| Phase 6: Deploy         | ~30 min |
+| Phase 7: Cleanup        | ~15 min |
+| Phase 8: Documentation  | ~15 min |
 
 **Total: ~3-4 hours** (including testing and verification)
 
@@ -395,5 +406,5 @@ After migration is complete:
 
 ---
 
-*Created: December 2025*
-*Status: Ready for execution*
+_Created: December 2025_
+_Status: Ready for execution_

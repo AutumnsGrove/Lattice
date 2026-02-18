@@ -1,7 +1,7 @@
-# GroveEngine Migration Strategy
+# Lattice Migration Strategy
 
 **Source Repository:** [AutumnsGrove](https://github.com/AutumnsGrove/AutumnsGrove)
-**Target Repository:** GroveEngine (this repo)
+**Target Repository:** Lattice (this repo)
 **Status:** Ready to Execute
 **Created:** December 1, 2025
 
@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-This document provides a detailed, executable migration strategy for extracting the blog engine from AutumnsGrove into the standalone GroveEngine platform. The goal is a clean extraction that:
+This document provides a detailed, executable migration strategy for extracting the blog engine from AutumnsGrove into the standalone Lattice platform. The goal is a clean extraction that:
 
 1. Preserves all working blog functionality
 2. Removes personal/site-specific features
@@ -56,76 +56,76 @@ AutumnsGrove/
 
 ### Routes - Keep
 
-| Route | Files | Notes |
-|-------|-------|-------|
-| `/admin/` | Layout, dashboard, blog, pages, images, settings | Core CMS functionality |
-| `/auth/` | login, logout, send-code, verify-code, me | Magic code auth |
-| `/blog/` | list, [slug], search | Blog display |
-| `/about/` | +page.svelte, +page.server.js | Static page |
-| `/contact/` | +page.svelte, +page.server.js | Static page |
-| `/rss.xml/` | +server.js | RSS feed |
+| Route       | Files                                            | Notes                  |
+| ----------- | ------------------------------------------------ | ---------------------- |
+| `/admin/`   | Layout, dashboard, blog, pages, images, settings | Core CMS functionality |
+| `/auth/`    | login, logout, send-code, verify-code, me        | Magic code auth        |
+| `/blog/`    | list, [slug], search                             | Blog display           |
+| `/about/`   | +page.svelte, +page.server.js                    | Static page            |
+| `/contact/` | +page.svelte, +page.server.js                    | Static page            |
+| `/rss.xml/` | +server.js                                       | RSS feed               |
 
 ### Routes - Remove
 
-| Route | Reason |
-|-------|--------|
-| `/dashboard/` | Personal GitHub stats dashboard |
-| `/gallery/` | Personal photo gallery (Willow photos) |
-| `/timeline/` | Personal AI-generated activity tracking |
-| `/showcase/` | Personal showcase content |
-| `/recipes/` | Optional - evaluate for future (cooking recipes) |
-| `/credits/` | Site-specific credits page |
+| Route         | Reason                                           |
+| ------------- | ------------------------------------------------ |
+| `/dashboard/` | Personal GitHub stats dashboard                  |
+| `/gallery/`   | Personal photo gallery (Willow photos)           |
+| `/timeline/`  | Personal AI-generated activity tracking          |
+| `/showcase/`  | Personal showcase content                        |
+| `/recipes/`   | Optional - evaluate for future (cooking recipes) |
+| `/credits/`   | Site-specific credits page                       |
 
 ### API Routes - Keep
 
-| Route | Files | Notes |
-|-------|-------|-------|
-| `/api/posts/` | CRUD operations | Core blog API |
-| `/api/pages/` | Page management | Static pages API |
-| `/api/images/` | upload, list, delete, filters | R2 media management |
-| `/api/settings/` | Site settings | Per-tenant config |
-| `/api/admin/settings/` | Admin settings | Protected admin API |
-| `/api/feed/` | RSS generation | Content feed |
+| Route                  | Files                         | Notes               |
+| ---------------------- | ----------------------------- | ------------------- |
+| `/api/posts/`          | CRUD operations               | Core blog API       |
+| `/api/pages/`          | Page management               | Static pages API    |
+| `/api/images/`         | upload, list, delete, filters | R2 media management |
+| `/api/settings/`       | Site settings                 | Per-tenant config   |
+| `/api/admin/settings/` | Admin settings                | Protected admin API |
+| `/api/feed/`           | RSS generation                | Content feed        |
 
 ### API Routes - Remove
 
-| Route | Reason |
-|-------|--------|
-| `/api/git/` | GitHub API integration (personal) |
-| `/api/ai/` | AI repository analysis (personal) |
-| `/api/timeline/` | Timeline generation (personal) |
-| `/api/gallery/` | Photo gallery management (personal) |
-| `/api/admin/gallery/` | Gallery admin (personal) |
-| `/api/admin/logs/` | Site logs (rebuild for multi-tenant) |
+| Route                 | Reason                               |
+| --------------------- | ------------------------------------ |
+| `/api/git/`           | GitHub API integration (personal)    |
+| `/api/ai/`            | AI repository analysis (personal)    |
+| `/api/timeline/`      | Timeline generation (personal)       |
+| `/api/gallery/`       | Photo gallery management (personal)  |
+| `/api/admin/gallery/` | Gallery admin (personal)             |
+| `/api/admin/logs/`    | Site logs (rebuild for multi-tenant) |
 
 ### Components - Keep
 
-| Component | Path | Priority | Notes |
-|-----------|------|----------|-------|
-| ContentWithGutter.svelte | lib/components/custom/ | Critical | Unique gutter annotations |
-| GutterItem.svelte | lib/components/custom/ | Critical | Individual annotation |
-| LeftGutter.svelte | lib/components/custom/ | Critical | Gutter container |
-| TableOfContents.svelte | lib/components/custom/ | Critical | Auto-generated TOC |
-| MobileTOC.svelte | lib/components/custom/ | Critical | Mobile TOC |
-| CollapsibleSection.svelte | lib/components/custom/ | High | Expandable content |
-| MarkdownEditor.svelte | lib/components/admin/ | Critical | Post editing |
-| GutterManager.svelte | lib/components/admin/ | Critical | Gutter UI |
-| ImageGallery.svelte | lib/components/gallery/ | High | In-post galleries |
-| Lightbox.svelte | lib/components/gallery/ | High | Image modal |
-| ZoomableImage.svelte | lib/components/gallery/ | High | Pan/zoom |
-| All UI components | lib/components/ui/ | High | Shadcn components |
+| Component                 | Path                    | Priority | Notes                     |
+| ------------------------- | ----------------------- | -------- | ------------------------- |
+| ContentWithGutter.svelte  | lib/components/custom/  | Critical | Unique gutter annotations |
+| GutterItem.svelte         | lib/components/custom/  | Critical | Individual annotation     |
+| LeftGutter.svelte         | lib/components/custom/  | Critical | Gutter container          |
+| TableOfContents.svelte    | lib/components/custom/  | Critical | Auto-generated TOC        |
+| MobileTOC.svelte          | lib/components/custom/  | Critical | Mobile TOC                |
+| CollapsibleSection.svelte | lib/components/custom/  | High     | Expandable content        |
+| MarkdownEditor.svelte     | lib/components/admin/   | Critical | Post editing              |
+| GutterManager.svelte      | lib/components/admin/   | Critical | Gutter UI                 |
+| ImageGallery.svelte       | lib/components/gallery/ | High     | In-post galleries         |
+| Lightbox.svelte           | lib/components/gallery/ | High     | Image modal               |
+| ZoomableImage.svelte      | lib/components/gallery/ | High     | Pan/zoom                  |
+| All UI components         | lib/components/ui/      | High     | Shadcn components         |
 
 ### Components - Remove
 
-| Component | Path | Reason |
-|-----------|------|--------|
-| ActivityOverview.svelte | lib/components/charts/ | GitHub dashboard |
-| LOCBar.svelte | lib/components/charts/ | GitHub stats |
-| RepoBreakdown.svelte | lib/components/charts/ | GitHub stats |
-| Sparkline.svelte | lib/components/charts/ | GitHub stats |
-| LogViewer.svelte | lib/components/custom/ | Personal logs |
+| Component                  | Path                   | Reason           |
+| -------------------------- | ---------------------- | ---------------- |
+| ActivityOverview.svelte    | lib/components/charts/ | GitHub dashboard |
+| LOCBar.svelte              | lib/components/charts/ | GitHub stats     |
+| RepoBreakdown.svelte       | lib/components/charts/ | GitHub stats     |
+| Sparkline.svelte           | lib/components/charts/ | GitHub stats     |
+| LogViewer.svelte           | lib/components/custom/ | Personal logs    |
 | InternalsPostViewer.svelte | lib/components/custom/ | Internal tooling |
-| IconLegend.svelte | lib/components/custom/ | Recipe-specific |
+| IconLegend.svelte          | lib/components/custom/ | Recipe-specific  |
 
 ---
 
@@ -133,23 +133,23 @@ AutumnsGrove/
 
 ### Keep (Core Engine)
 
-| File | Purpose |
-|------|---------|
+| File                        | Purpose                                  |
+| --------------------------- | ---------------------------------------- |
 | `src/lib/utils/markdown.js` | Markdown parsing, gutter content loading |
-| `src/lib/utils/csrf.js` | CSRF protection |
-| `src/lib/utils/sanitize.js` | XSS prevention (DOMPurify) |
-| `src/lib/auth/session.js` | Session management |
-| `src/lib/auth/jwt.js` | JWT signing/verification |
-| `src/hooks.server.js` | Security headers, CSRF, auth |
+| `src/lib/utils/csrf.js`     | CSRF protection                          |
+| `src/lib/utils/sanitize.js` | XSS prevention (DOMPurify)               |
+| `src/lib/auth/session.js`   | Session management                       |
+| `src/lib/auth/jwt.js`       | JWT signing/verification                 |
+| `src/hooks.server.js`       | Security headers, CSRF, auth             |
 
 ### Modify for Multi-Tenant
 
-| File | Changes Needed |
-|------|----------------|
+| File                        | Changes Needed                             |
+| --------------------------- | ------------------------------------------ |
 | `src/lib/utils/markdown.js` | Remove hardcoded paths, use tenant context |
-| `src/hooks.server.js` | Add subdomain detection, tenant context |
-| All API routes | Add tenant_id filtering |
-| All admin routes | Scope to current tenant |
+| `src/hooks.server.js`       | Add subdomain detection, tenant context    |
+| All API routes              | Add tenant_id filtering                    |
+| All admin routes            | Scope to current tenant                    |
 
 ---
 
@@ -158,6 +158,7 @@ AutumnsGrove/
 ### Current Tables (Source)
 
 **From `schema.sql` (git stats - NOT needed):**
+
 - repositories, repo_snapshots, commits, todo_snapshots
 - ai_analyses, commit_activity, daily_summaries
 - ai_usage, ai_requests, background_jobs
@@ -304,7 +305,7 @@ CREATE INDEX idx_sessions_expires ON sessions(expires_at);
 **Step 1.1: Create grove-engine directory structure**
 
 ```bash
-# In GroveEngine repo, create the engine package
+# In Lattice repo, create the engine package
 mkdir -p packages/engine/src/{routes,lib}
 mkdir -p packages/engine/src/lib/{auth,components,utils,server}
 mkdir -p packages/engine/src/routes/{admin,api,auth,blog}
@@ -405,7 +406,7 @@ cat > packages/engine/UserContent/site-config.json << 'EOF'
   },
   "site": {
     "title": "My Grove Blog",
-    "description": "A beautiful blog powered by GroveEngine",
+    "description": "A beautiful blog powered by Lattice",
     "copyright": "Your Name"
   },
   "social": {}
@@ -421,10 +422,10 @@ Add subdomain detection:
 
 ```javascript
 // At top of handle function
-const host = event.request.headers.get('host');
+const host = event.request.headers.get("host");
 const subdomain = extractSubdomain(host);
 
-if (subdomain && subdomain !== 'www' && subdomain !== 'grove') {
+if (subdomain && subdomain !== "www" && subdomain !== "grove") {
   const tenant = await getTenant(event.platform?.env?.DB, subdomain);
   if (tenant) {
     event.locals.tenant = tenant;
@@ -441,13 +442,14 @@ All API routes need tenant context:
 // Before any query
 const tenant = event.locals.tenant;
 if (!tenant) {
-  throw error(404, 'Blog not found');
+  throw error(404, "Blog not found");
 }
 
 // In queries
-const posts = await db.prepare(
-  'SELECT * FROM posts WHERE tenant_id = ? AND status = ?'
-).bind(tenant.id, 'published').all();
+const posts = await db
+  .prepare("SELECT * FROM posts WHERE tenant_id = ? AND status = ?")
+  .bind(tenant.id, "published")
+  .all();
 ```
 
 **Step 2.3: Update markdown.js**
@@ -459,9 +461,12 @@ Replace hardcoded import.meta.glob with database queries:
 // Add functions that query D1 database instead
 
 export async function getAllPosts(db, tenantId) {
-  const result = await db.prepare(
-    'SELECT * FROM posts WHERE tenant_id = ? AND status = ? ORDER BY published_at DESC'
-  ).bind(tenantId, 'published').all();
+  const result = await db
+    .prepare(
+      "SELECT * FROM posts WHERE tenant_id = ? AND status = ? ORDER BY published_at DESC",
+    )
+    .bind(tenantId, "published")
+    .all();
   return result.results;
 }
 ```
@@ -469,12 +474,14 @@ export async function getAllPosts(db, tenantId) {
 ### Phase 3: Testing & Validation (Day 6-7)
 
 **Step 3.1: Security tests**
+
 - CSRF protection still works
 - XSS sanitization intact
 - Auth flows functional
 - Rate limiting active
 
 **Step 3.2: Functionality tests**
+
 - Create/edit/delete posts
 - Upload images
 - Gutter annotations render
@@ -482,6 +489,7 @@ export async function getAllPosts(db, tenantId) {
 - RSS feed works
 
 **Step 3.3: Multi-tenant isolation tests**
+
 - Tenant A cannot see Tenant B's posts
 - API endpoints filter by tenant
 - Sessions scoped to tenant
@@ -541,16 +549,16 @@ gallery_collections, gallery_collection_images
 // scripts/export-content.js
 async function exportAutumnsGrove() {
   // Read all markdown files
-  const posts = glob.sync('UserContent/Posts/*.md');
-  const pages = glob.sync('UserContent/{About,Contact,Home}/*.md');
+  const posts = glob.sync("UserContent/Posts/*.md");
+  const pages = glob.sync("UserContent/{About,Contact,Home}/*.md");
 
   // Parse frontmatter and content
   const exportData = {
     posts: posts.map(parseMdFile),
     pages: pages.map(parseMdFile),
     gutterContent: extractGutterManifests(),
-    siteConfig: require('UserContent/site-config.json'),
-    exportedAt: new Date().toISOString()
+    siteConfig: require("UserContent/site-config.json"),
+    exportedAt: new Date().toISOString(),
   };
 
   return exportData;
@@ -563,26 +571,31 @@ async function exportAutumnsGrove() {
 // scripts/import-content.js
 async function importToTenant(db, tenantId, exportData) {
   for (const post of exportData.posts) {
-    await db.prepare(`
+    await db
+      .prepare(
+        `
       INSERT INTO posts (id, tenant_id, slug, title, description,
                         markdown_content, html_content, gutter_content,
                         tags, status, published_at, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).bind(
-      generateUUID(),
-      tenantId,
-      post.slug,
-      post.title,
-      post.description,
-      post.content,
-      renderMarkdown(post.content),
-      JSON.stringify(post.gutterContent || []),
-      JSON.stringify(post.tags || []),
-      'published',
-      post.date,
-      post.date,
-      Date.now()
-    ).run();
+    `,
+      )
+      .bind(
+        generateUUID(),
+        tenantId,
+        post.slug,
+        post.title,
+        post.description,
+        post.content,
+        renderMarkdown(post.content),
+        JSON.stringify(post.gutterContent || []),
+        JSON.stringify(post.tags || []),
+        "published",
+        post.date,
+        post.date,
+        Date.now(),
+      )
+      .run();
   }
 }
 ```
@@ -605,18 +618,21 @@ async function importToTenant(db, tenantId, exportData) {
 ## Success Criteria
 
 ### Phase 1 Complete
+
 - [ ] Clean codebase with no personal features
 - [ ] All components compile without errors
 - [ ] Basic routes respond correctly
 - [ ] Authentication flow works
 
 ### Phase 2 Complete
+
 - [ ] Multi-tenant database schema deployed
 - [ ] Subdomain routing functional
 - [ ] API endpoints filter by tenant
 - [ ] Admin panel scoped to tenant
 
 ### MVP Complete
+
 - [ ] First client (Mom) live on subdomain
 - [ ] All posts migrated successfully
 - [ ] Gutter annotations working
@@ -637,5 +653,5 @@ async function importToTenant(db, tenantId, exportData) {
 
 ---
 
-*Last Updated: December 1, 2025*
-*Status: Ready for Execution*
+_Last Updated: December 1, 2025_
+_Status: Ready for Execution_

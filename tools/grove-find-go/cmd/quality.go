@@ -10,10 +10,10 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/AutumnsGrove/GroveEngine/tools/grove-find-go/internal/config"
-	"github.com/AutumnsGrove/GroveEngine/tools/grove-find-go/internal/output"
-	"github.com/AutumnsGrove/GroveEngine/tools/grove-find-go/internal/search"
-	"github.com/AutumnsGrove/GroveEngine/tools/grove-find-go/internal/tools"
+	"github.com/AutumnsGrove/Lattice/tools/grove-find-go/internal/config"
+	"github.com/AutumnsGrove/Lattice/tools/grove-find-go/internal/output"
+	"github.com/AutumnsGrove/Lattice/tools/grove-find-go/internal/search"
+	"github.com/AutumnsGrove/Lattice/tools/grove-find-go/internal/tools"
 )
 
 // ---------------------------------------------------------------------------
@@ -423,12 +423,12 @@ func filterEnvLines(lines []string) []string {
 }
 
 // ---------------------------------------------------------------------------
-// engineCmd — Find @autumnsgrove/groveengine imports
+// engineCmd — Find @autumnsgrove/lattice imports
 // ---------------------------------------------------------------------------
 
 var engineCmd = &cobra.Command{
 	Use:   "engine [module]",
-	Short: "Find @autumnsgrove/groveengine imports",
+	Short: "Find @autumnsgrove/lattice imports",
 	Args:  cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg := config.Get()
@@ -439,7 +439,7 @@ var engineCmd = &cobra.Command{
 
 			if cfg.JSONMode {
 				out, err := search.RunRg(
-					"@autumnsgrove/groveengine/"+module,
+					"@autumnsgrove/lattice/"+module,
 					search.WithGlobs("*.{ts,js,svelte}"),
 					search.WithExtraArgs(engineExclude),
 				)
@@ -458,7 +458,7 @@ var engineCmd = &cobra.Command{
 
 			output.PrintSection(fmt.Sprintf("Engine imports from: %s", module))
 			out, err := search.RunRg(
-				"@autumnsgrove/groveengine/"+module,
+				"@autumnsgrove/lattice/"+module,
 				search.WithGlobs("*.{ts,js,svelte}"),
 				search.WithExtraArgs(engineExclude),
 			)
@@ -480,10 +480,10 @@ var engineCmd = &cobra.Command{
 			limit   int
 		}
 		sections := []engineSection{
-			{"UI Components", "@autumnsgrove/groveengine/ui", 15},
-			{"Utilities", "@autumnsgrove/groveengine/utils", 10},
-			{"Stores", "@autumnsgrove/groveengine/ui/stores", 10},
-			{"Auth", "@autumnsgrove/groveengine/auth", 10},
+			{"UI Components", "@autumnsgrove/lattice/ui", 15},
+			{"Utilities", "@autumnsgrove/lattice/utils", 10},
+			{"Stores", "@autumnsgrove/lattice/ui/stores", 10},
+			{"Auth", "@autumnsgrove/lattice/auth", 10},
 		}
 
 		if cfg.JSONMode {
@@ -506,7 +506,7 @@ var engineCmd = &cobra.Command{
 			}
 			// Apps using the engine
 			out, err := search.RunRg(
-				"@autumnsgrove/groveengine",
+				"@autumnsgrove/lattice",
 				search.WithGlobs("*.{ts,js,svelte}"),
 				search.WithExtraArgs(engineExclude),
 				search.WithFilesOnly(),
@@ -544,7 +544,7 @@ var engineCmd = &cobra.Command{
 		// Apps using the engine
 		output.PrintSection("Apps using the engine")
 		out, err := search.RunRg(
-			"@autumnsgrove/groveengine",
+			"@autumnsgrove/lattice",
 			search.WithGlobs("*.{ts,js,svelte}"),
 			search.WithExtraArgs(engineExclude),
 			search.WithFilesOnly(),

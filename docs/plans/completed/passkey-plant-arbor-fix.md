@@ -3,6 +3,7 @@
 ## Overview
 
 Two related tasks:
+
 1. **Plant Auth Section**: Add passkey login option (first) + Google (second)
 2. **Arbor Panel Bug**: Fix passkey registration/listing for accounts created via OAuth
 
@@ -11,7 +12,9 @@ Two related tasks:
 ## Task 1: Add Passkeys to Plant Auth Section
 
 ### Current State
+
 `packages/plant/src/routes/+page.svelte` (lines 362-376) uses a **custom inline auth** section:
+
 ```svelte
 <div class="space-y-3">
   <!-- Google (only option for launch) -->
@@ -26,10 +29,11 @@ Two related tasks:
 This does NOT use the `LoginGraft` component from the engine.
 
 ### Solution
+
 Replace the inline auth with `LoginGraft` configured for passkey-first:
 
 ```svelte
-import { LoginGraft } from '@autumnsgrove/groveengine/grafts/login';
+import { LoginGraft } from '@autumnsgrove/lattice/grafts/login';
 
 <LoginGraft
   providers={['passkey', 'google']}
@@ -38,6 +42,7 @@ import { LoginGraft } from '@autumnsgrove/groveengine/grafts/login';
 ```
 
 ### Files to Modify
+
 - `packages/plant/src/routes/+page.svelte`
 
 ---
@@ -56,10 +61,12 @@ import { LoginGraft } from '@autumnsgrove/groveengine/grafts/login';
 **The Bug:**
 
 1. **Passkey LIST** (`+page.server.ts:100`):
+
    ```typescript
    const accessToken = cookies.get("access_token");
    // If no access_token, returns empty passkeys (no error)
    ```
+
    → Fails silently because OAuth accounts don't have `access_token`
 
 2. **Passkey FETCH to GroveAuth** (`+page.server.ts:59`):
@@ -78,6 +85,7 @@ Update the passkey fetch to use the correct cookies:
 2. Send session via **Cookie header** (not Authorization header) to match how GroveAuth validates sessions
 
 ### Files to Modify
+
 - `packages/engine/src/routes/arbor/account/+page.server.ts`
   - Update `fetchUserPasskeys()` to use Cookie header with grove_session or better-auth cookies
 
@@ -86,12 +94,14 @@ Update the passkey fetch to use the correct cookies:
 ## Implementation Steps
 
 ### Step 1: Update Plant Auth Section
+
 1. Import `LoginGraft` from engine
 2. Replace inline auth section with `<LoginGraft providers={['passkey', 'google']} />`
 3. Remove the `GoogleIcon` SVG constant (no longer needed)
 4. Keep the surrounding UI (the "Begin your journey" card wrapper)
 
 ### Step 2: Fix Passkey Fetch in Arbor
+
 1. Update `+page.server.ts` to check for `grove_session` and `better-auth.session_token`
 2. Change fetch to use Cookie header instead of Authorization header
 3. Match the pattern used in the passkey registration endpoint
@@ -101,6 +111,7 @@ Update the passkey fetch to use the correct cookies:
 ## Testing
 
 After implementation:
+
 1. Sign out completely
 2. Sign in with Google → should have `grove_session` + `better-auth.session_token`
 3. Go to Arbor → Account page

@@ -3,8 +3,8 @@
  */
 
 import type { PageServerLoad } from "./$types";
-import { aggregateLumen } from "@autumnsgrove/groveengine/server/observability";
-import type { LumenAggregateResult } from "@autumnsgrove/groveengine/server/observability";
+import { aggregateLumen } from "@autumnsgrove/lattice/server/observability";
+import type { LumenAggregateResult } from "@autumnsgrove/lattice/server/observability";
 
 export const load: PageServerLoad = async ({ parent, platform }) => {
 	await parent();

@@ -8,7 +8,7 @@
 
 import { redirect, fail, error } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
-import { isWayfinder } from "@autumnsgrove/groveengine/config";
+import { isWayfinder } from "@autumnsgrove/lattice/config";
 
 /**
  * Helper to call Heartwood via service binding with cookie forwarding.

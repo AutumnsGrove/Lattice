@@ -6,7 +6,7 @@
  *
  * @example
  * ```typescript
- * import { type GroveErrorDef, type ErrorCategory } from '@autumnsgrove/groveengine/errors';
+ * import { type GroveErrorDef, type ErrorCategory } from '@autumnsgrove/lattice/errors';
  *
  * const MY_ERRORS = {
  *   DB_UNAVAILABLE: {

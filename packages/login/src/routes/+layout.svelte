@@ -6,8 +6,8 @@
 	 */
 
 	import '../app.css';
-	import { Logo } from '@autumnsgrove/groveengine/ui/nature';
-	import { ThemeToggle, seasonStore, themeStore } from '@autumnsgrove/groveengine/ui/chrome';
+	import { Logo } from '@autumnsgrove/lattice/ui/nature';
+	import { ThemeToggle, seasonStore, themeStore } from '@autumnsgrove/lattice/ui/chrome';
 
 	let { children } = $props();
 

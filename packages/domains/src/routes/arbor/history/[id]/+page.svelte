@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from "./$types";
 	import { untrack } from "svelte";
-	import { GlassCard, GlassButton } from "@autumnsgrove/groveengine/ui";
+	import { GlassCard, GlassButton } from "@autumnsgrove/lattice/ui";
 
 	let { data }: { data: PageData } = $props();
 

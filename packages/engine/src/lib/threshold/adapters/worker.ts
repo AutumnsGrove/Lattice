@@ -14,7 +14,7 @@ import type { Threshold } from "../threshold.js";
  * @example
  * ```typescript
  * // In a Worker fetch handler
- * import { thresholdCheck, getClientIP } from "@autumnsgrove/groveengine/threshold/worker";
+ * import { thresholdCheck, getClientIP } from "@autumnsgrove/lattice/threshold/worker";
  *
  * export default {
  *   async fetch(request, env) {

@@ -27,7 +27,7 @@
     "wrangler": "^4.64.0"
   },
   "dependencies": {
-    "@autumnsgrove/groveengine": "workspace:*",
+    "@autumnsgrove/lattice": "workspace:*",
     "lucide-svelte": "^0.563.0",
     "resend": "^4.8.0"
   }

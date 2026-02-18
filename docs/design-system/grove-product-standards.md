@@ -2,48 +2,49 @@
 title: Product Standards
 description: Design principles and product philosophy for Grove
 category: design
-lastUpdated: '2026-01-12'
+lastUpdated: "2026-01-12"
 ---
+
 # Grove Product Standards
 
-> *How we build things in the Grove.*
+> _How we build things in the Grove._
 
 ---
 
 ## Repository Architecture
 
-Grove follows a **monorepo-per-product** architecture. Each product with a public-facing domain gets its own repository that imports `groveengine` as the shared foundation.
+Grove follows a **monorepo-per-product** architecture. Each product with a public-facing domain gets its own repository that imports `lattice` as the shared foundation.
 
-> **Note:** The npm package is currently published as `groveengine`. It will be renamed to `@autumnsgrove/lattice` in a future release.
+> **Note:** The npm package is currently published as `lattice`. It will be renamed to `@autumnsgrove/lattice` in a future release.
 
 ### The Pattern
 
 ```
-GroveEngine/              ← Lattice: shared npm package
+Lattice/              ← Lattice: shared npm package
 ├── src/                  ← UI components, utilities, patterns
 ├── docs/specs/           ← Planning docs for all products (pre-implementation)
-└── package.json          ← groveengine (future: @autumnsgrove/lattice)
+└── package.json          ← lattice (future: @autumnsgrove/lattice)
 
 grove-ivy/                ← Ivy: standalone product
 ├── src/                  ← SvelteKit app
-├── package.json          ← depends on groveengine
+├── package.json          ← depends on lattice
 └── wrangler.toml         ← Cloudflare Workers config
 
 grove-amber/             ← Amber: standalone product
 ├── ...
-└── package.json          ← depends on groveengine
+└── package.json          ← depends on lattice
 ```
 
 ### What Goes Where
 
-| Content | Location |
-|---------|----------|
-| **Specs & Planning** | `GroveEngine/docs/specs/` (until implementation) |
-| **Shared UI Components** | `GroveEngine/src/` (Lattice) |
-| **Shared Utilities** | `GroveEngine/src/` (Lattice) |
-| **Product Frontend** | Product's own repo |
-| **Product Backend/Workers** | Product's own repo |
-| **Product-Specific Assets** | Product's own repo |
+| Content                     | Location                                     |
+| --------------------------- | -------------------------------------------- |
+| **Specs & Planning**        | `Lattice/docs/specs/` (until implementation) |
+| **Shared UI Components**    | `Lattice/src/` (Lattice)                     |
+| **Shared Utilities**        | `Lattice/src/` (Lattice)                     |
+| **Product Frontend**        | Product's own repo                           |
+| **Product Backend/Workers** | Product's own repo                           |
+| **Product-Specific Assets** | Product's own repo                           |
 
 ---
 
@@ -53,33 +54,33 @@ grove-amber/             ← Amber: standalone product
 
 Products with public domains that users interact with directly:
 
-| Product | Public Name | Domain | Repo |
-|---------|-------------|--------|------|
-| GroveMail | **Ivy** | ivy.grove.place | `grove-ivy` |
-| GroveStorage | **Amber** | amber.grove.place | `grove-amber` |
-| GroveSocial | **Meadow** | meadow.grove.place | `grove-meadow` |
-| GroveDomainTool | **Forage** | forage.grove.place | `grove-forage` |
-| TreasureTrove | **Trove** | trove.grove.place | `grove-trove` |
-| GroveMusic | **Aria** | aria.grove.place | `grove-aria` |
-| GroveMC | **Outpost** | mc.grove.place | `grove-outpost` |
+| Product         | Public Name | Domain             | Repo            |
+| --------------- | ----------- | ------------------ | --------------- |
+| GroveMail       | **Ivy**     | ivy.grove.place    | `grove-ivy`     |
+| GroveStorage    | **Amber**   | amber.grove.place  | `grove-amber`   |
+| GroveSocial     | **Meadow**  | meadow.grove.place | `grove-meadow`  |
+| GroveDomainTool | **Forage**  | forage.grove.place | `grove-forage`  |
+| TreasureTrove   | **Trove**   | trove.grove.place  | `grove-trove`   |
+| GroveMusic      | **Aria**    | aria.grove.place   | `grove-aria`    |
+| GroveMC         | **Outpost** | mc.grove.place     | `grove-outpost` |
 
 ### External Services (Own Repo, No User-Facing Frontend)
 
 Backend services that need isolation for security or operational reasons:
 
-| Product | Public Name | Repo | Reason |
-|---------|-------------|------|--------|
-| GroveAuth | **Heartwood** | `GroveAuth` | Security isolation |
-| GrovePatina | **Patina** | `Patina` | Operational isolation |
+| Product     | Public Name   | Repo        | Reason                |
+| ----------- | ------------- | ----------- | --------------------- |
+| GroveAuth   | **Heartwood** | `GroveAuth` | Security isolation    |
+| GrovePatina | **Patina**    | `Patina`    | Operational isolation |
 
 ### Internal/Integrated (Stay in Lattice)
 
 Features that are deeply embedded in other products:
 
-| Product | Public Name | Location | Reason |
-|---------|-------------|----------|--------|
-| GroveAnalytics | **Rings** | Integrated into admin | Not standalone |
-| GroveEngine | **Lattice** | This repo | Is the foundation |
+| Product        | Public Name | Location              | Reason            |
+| -------------- | ----------- | --------------------- | ----------------- |
+| GroveAnalytics | **Rings**   | Integrated into admin | Not standalone    |
+| Lattice        | **Lattice** | This repo             | Is the foundation |
 
 ---
 
@@ -128,7 +129,7 @@ grove-{product}/
     "check": "svelte-check"
   },
   "dependencies": {
-    "groveengine": "^latest"
+    "lattice": "^latest"
   }
 }
 ```
@@ -160,34 +161,35 @@ id = "..."
 
 ## Lattice Integration
 
-Every Grove product imports Lattice (currently `groveengine`) for shared functionality:
+Every Grove product imports Lattice (currently `lattice`) for shared functionality:
 
 ### What Lattice Provides
 
 ```typescript
 // UI Components
-import { Button, Card, Modal, Toast } from 'groveengine';
-import { GroveLayout, Sidebar, Header } from 'groveengine/layout';
+import { Button, Card, Modal, Toast } from "lattice";
+import { GroveLayout, Sidebar, Header } from "lattice/layout";
 
 // Authentication
-import { requireAuth, getUser, withHeartwood } from 'groveengine/auth';
+import { requireAuth, getUser, withHeartwood } from "lattice/auth";
 
 // Database Patterns
-import { createD1Client, withTransaction } from 'groveengine/db';
+import { createD1Client, withTransaction } from "lattice/db";
 
 // Utilities
-import { formatDate, slugify, debounce } from 'groveengine/utils';
+import { formatDate, slugify, debounce } from "lattice/utils";
 
 // Markdown
-import { renderMarkdown, parseMarkdown } from 'groveengine/markdown';
+import { renderMarkdown, parseMarkdown } from "lattice/markdown";
 
 // Theming
-import { theme, applyTheme } from 'groveengine/theme';
+import { theme, applyTheme } from "lattice/theme";
 ```
 
 ### What Products Own
 
 Products should NOT put these in Lattice:
+
 - Product-specific business logic
 - Product-specific API routes
 - Product-specific database schemas
@@ -200,6 +202,7 @@ Products should NOT put these in Lattice:
 ### Public Names (User-Facing)
 
 Single evocative words from nature/shelter themes:
+
 - Ivy, Amber, Meadow, Acorn, Trove, Aria, Outpost
 - Used in marketing, UI, documentation
 - Domain: `{name}.grove.place`
@@ -207,6 +210,7 @@ Single evocative words from nature/shelter themes:
 ### Internal Names (Developer-Facing)
 
 `Grove{Thing}` pattern for clarity:
+
 - GroveMail, GroveStorage, GroveSocial, etc.
 - Used in code, logs, debugging
 - Repo: `grove-{lowercase}` or `Grove{Thing}`
@@ -235,7 +239,7 @@ type StorageFile = { ... };
 
 ### Starting a New Product
 
-1. **Spec first**: Create spec in `GroveEngine/docs/specs/{product}-spec.md`
+1. **Spec first**: Create spec in `Lattice/docs/specs/{product}-spec.md`
 2. **Get approval**: Review spec, iterate on design
 3. **Create repo**: `grove-{product}` following standard structure
 4. **Set up CI**: GitHub Actions for Cloudflare deployment
@@ -248,12 +252,13 @@ type StorageFile = { ... };
 If a product needs new shared functionality:
 
 1. Check if it's truly reusable across products
-2. If yes → PR to GroveEngine, add to Lattice
+2. If yes → PR to Lattice, add to Lattice
 3. If no → Keep it in the product repo
 
 ### Environment Setup
 
 All Grove products use:
+
 - **Runtime:** Cloudflare Workers
 - **Framework:** SvelteKit
 - **Database:** Cloudflare D1
@@ -271,7 +276,7 @@ All authenticated routes use Heartwood:
 
 ```typescript
 // In +page.server.ts or +server.ts
-import { requireAuth } from 'groveengine/auth';
+import { requireAuth } from "lattice/auth";
 
 export const load = async ({ cookies }) => {
   const user = await requireAuth(cookies);
@@ -290,12 +295,12 @@ export const load = async ({ cookies }) => {
 All public endpoints must have rate limiting:
 
 ```typescript
-import { rateLimit } from 'groveengine/security';
+import { rateLimit } from "lattice/security";
 
 // In API route
 const allowed = await rateLimit(env.KV, request, {
   limit: 100,
-  window: '1h',
+  window: "1h",
 });
 ```
 
@@ -303,7 +308,7 @@ const allowed = await rateLimit(env.KV, request, {
 
 ## Migration Checklist
 
-When migrating a product out of GroveEngine:
+When migrating a product out of Lattice:
 
 - [ ] Create new repo with standard structure
 - [ ] Copy product-specific code (routes, components, logic)
@@ -311,27 +316,27 @@ When migrating a product out of GroveEngine:
 - [ ] Set up wrangler.toml with correct bindings
 - [ ] Configure GitHub Actions for deployment
 - [ ] Update DNS to point to new deployment
-- [ ] Remove old code from GroveEngine
+- [ ] Remove old code from Lattice
 - [ ] Update any cross-references in other products
 
 ---
 
 ## Current Status
 
-| Product | Spec | Repo | Frontend | Backend | Status |
-|---------|:----:|:----:|:--------:|:-------:|--------|
-| Ivy | ✓ | — | — | — | Spec complete |
-| Amber | ✓ | — | — | — | Spec complete |
-| Acorn | — | ✓ | ⚠️ In GroveEngine | ✓ | Needs frontend migration |
-| Heartwood | — | ✓ | ✓ | ✓ | Complete |
-| Patina | ✓ | ✓ | — | — | Spec updated, repo exists |
-| Meadow | — | — | — | — | Not started |
-| Trove | — | — | — | — | Not started |
-| Aria | — | — | — | — | Not started |
-| Outpost | — | — | — | — | Not started |
-| Rings | — | — | — | — | Will be integrated |
+| Product   | Spec | Repo |   Frontend    | Backend | Status                    |
+| --------- | :--: | :--: | :-----------: | :-----: | ------------------------- |
+| Ivy       |  ✓   |  —   |       —       |    —    | Spec complete             |
+| Amber     |  ✓   |  —   |       —       |    —    | Spec complete             |
+| Acorn     |  —   |  ✓   | ⚠️ In Lattice |    ✓    | Needs frontend migration  |
+| Heartwood |  —   |  ✓   |       ✓       |    ✓    | Complete                  |
+| Patina    |  ✓   |  ✓   |       —       |    —    | Spec updated, repo exists |
+| Meadow    |  —   |  —   |       —       |    —    | Not started               |
+| Trove     |  —   |  —   |       —       |    —    | Not started               |
+| Aria      |  —   |  —   |       —       |    —    | Not started               |
+| Outpost   |  —   |  —   |       —       |    —    | Not started               |
+| Rings     |  —   |  —   |       —       |    —    | Will be integrated        |
 
 ---
 
-*Last updated: December 2025*
-*Maintainer: Grove Engineering*
+_Last updated: December 2025_
+_Maintainer: Grove Engineering_

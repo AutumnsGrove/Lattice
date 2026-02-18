@@ -226,7 +226,7 @@ Compose box for authenticated users at top of feed:
 | Feed query builder        | `packages/meadow/src/lib/server/feed.ts:65`                |
 | Optimistic UI updates     | `packages/meadow/src/routes/feed/+page.svelte:80`          |
 | Glass card styling        | `packages/meadow/src/lib/components/PostCard.svelte`       |
-| `api.post()` client calls | `@autumnsgrove/groveengine/utils/api`                      |
+| `api.post()` client calls | `@autumnsgrove/lattice/utils/api`                          |
 
 ---
 

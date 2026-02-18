@@ -1,12 +1,12 @@
 ---
 published: false
-lastUpdated: '2026-01-25'
+lastUpdated: "2026-01-25"
 ---
 
 # Internal Names Research - Grove Ecosystem
 
 > **Research Date:** January 6, 2026
-> **Repository:** AutumnsGrove/GroveEngine
+> **Repository:** AutumnsGrove/Lattice
 > **Total Commits Analyzed:** 349
 > **Earliest Commit:** December 30, 2025 (7defa51)
 
@@ -22,63 +22,66 @@ This document maps all public-facing Grove service names to their internal coden
 
 ## Complete Public → Internal Name Mappings
 
-| Public Name | Internal Name | Domain | Repository | Status |
-|-------------|---------------|--------|------------|--------|
-| **Meadow** | GroveSocial | meadow.grove.place | - | In Development |
-| **Forage** | GroveDomainTool | forage.grove.place | [AutumnsGrove/Forage](https://github.com/AutumnsGrove/Forage) | Active |
-| **Foliage** | GroveThemes | foliage.grove.place | [AutumnsGrove/Foliage](https://github.com/AutumnsGrove/Foliage) | Active |
-| **Terrarium** | GroveTerrarium | grove.place/terrarium | - | Planned |
-| **Heartwood** | GroveAuth | heartwood.grove.place | [AutumnsGrove/GroveAuth](https://github.com/AutumnsGrove/GroveAuth) | Active |
-| **Patina** | GrovePatina | *(internal)* | [AutumnsGrove/Patina](https://github.com/AutumnsGrove/Patina) | Live |
-| **Trove** | TreasureTrove | trove.grove.place | [AutumnsGrove/TreasureTrove](https://github.com/AutumnsGrove/TreasureTrove) | Active |
-| **Outpost** | GroveMC | mc.grove.place | [AutumnsGrove/GroveMC](https://github.com/AutumnsGrove/GroveMC) | Active |
-| **Aria** | GroveMusic | aria.grove.place | [AutumnsGrove/GroveMusic](https://github.com/AutumnsGrove/GroveMusic) | Active |
-| **Lattice** | GroveEngine | npm: @autumnsgrove/lattice | [AutumnsGrove/GroveEngine](https://github.com/AutumnsGrove/GroveEngine) | Active |
-| **Plant** | Seedbed | plant.grove.place | *(integrated in GroveEngine)* | Active |
-| **Rings** | GroveAnalytics | *(integrated)* | *(integrated in GroveEngine)* | Active |
-| **Ivy** | GroveMail | ivy.grove.place | [AutumnsGrove/Ivy](https://github.com/AutumnsGrove/Ivy) | Planned |
-| **Amber** | GroveStorage | amber.grove.place | [AutumnsGrove/Amber](https://github.com/AutumnsGrove/Amber) | Planned |
-| **Shade** | GroveShade | grove.place/shade | *(integrated in GroveEngine)* | Active |
-| **Trails** | GroveTrails | username.grove.place/trail | *(integrated in GroveEngine)* | Active |
-| **Vineyard** | GroveShowcase | *.grove.place/vineyard | *(integrated in GroveEngine)* | Active |
-| **Bloom** | GroveBloom | bloom.grove.place | [AutumnsGrove/GroveBloom](https://github.com/AutumnsGrove/GroveBloom) | Planned |
-| **Mycelium** | GroveMCP | mycelium.grove.place | [AutumnsGrove/GroveMCP](https://github.com/AutumnsGrove/GroveMCP) | In Development |
-| **Vista** | GroveMonitor | vista.grove.place | [AutumnsGrove/GroveMonitor](https://github.com/AutumnsGrove/GroveMonitor) | Active |
-| **Wisp** | GroveWisp | *(integrated)* | *(integrated in GroveEngine)* | Planned |
-| **Pantry** | GroveShop | pantry.grove.place | - | Planned |
-| **Nook** | GroveNook | nook.grove.place | [AutumnsGrove/Nook](https://github.com/AutumnsGrove/Nook) | Planned |
-| **Clearing** | GroveClear | status.grove.place | *(integrated in GroveEngine)* | Active |
-| **Waystone** | GroveWaystone | *(integrated)* | *(integrated in GroveEngine)* | Planned |
-| **Reeds** | GroveReeds | *(integrated)* | *(integrated in GroveEngine)* | Planned |
-| **Porch** | GrovePorch | porch.grove.place | - | Planned |
+| Public Name   | Internal Name   | Domain                     | Repository                                                                  | Status         |
+| ------------- | --------------- | -------------------------- | --------------------------------------------------------------------------- | -------------- |
+| **Meadow**    | GroveSocial     | meadow.grove.place         | -                                                                           | In Development |
+| **Forage**    | GroveDomainTool | forage.grove.place         | [AutumnsGrove/Forage](https://github.com/AutumnsGrove/Forage)               | Active         |
+| **Foliage**   | GroveThemes     | foliage.grove.place        | [AutumnsGrove/Foliage](https://github.com/AutumnsGrove/Foliage)             | Active         |
+| **Terrarium** | GroveTerrarium  | grove.place/terrarium      | -                                                                           | Planned        |
+| **Heartwood** | GroveAuth       | heartwood.grove.place      | [AutumnsGrove/GroveAuth](https://github.com/AutumnsGrove/GroveAuth)         | Active         |
+| **Patina**    | GrovePatina     | _(internal)_               | [AutumnsGrove/Patina](https://github.com/AutumnsGrove/Patina)               | Live           |
+| **Trove**     | TreasureTrove   | trove.grove.place          | [AutumnsGrove/TreasureTrove](https://github.com/AutumnsGrove/TreasureTrove) | Active         |
+| **Outpost**   | GroveMC         | mc.grove.place             | [AutumnsGrove/GroveMC](https://github.com/AutumnsGrove/GroveMC)             | Active         |
+| **Aria**      | GroveMusic      | aria.grove.place           | [AutumnsGrove/GroveMusic](https://github.com/AutumnsGrove/GroveMusic)       | Active         |
+| **Lattice**   | Lattice         | npm: @autumnsgrove/lattice | [AutumnsGrove/Lattice](https://github.com/AutumnsGrove/Lattice)             | Active         |
+| **Plant**     | Seedbed         | plant.grove.place          | _(integrated in Lattice)_                                                   | Active         |
+| **Rings**     | GroveAnalytics  | _(integrated)_             | _(integrated in Lattice)_                                                   | Active         |
+| **Ivy**       | GroveMail       | ivy.grove.place            | [AutumnsGrove/Ivy](https://github.com/AutumnsGrove/Ivy)                     | Planned        |
+| **Amber**     | GroveStorage    | amber.grove.place          | [AutumnsGrove/Amber](https://github.com/AutumnsGrove/Amber)                 | Planned        |
+| **Shade**     | GroveShade      | grove.place/shade          | _(integrated in Lattice)_                                                   | Active         |
+| **Trails**    | GroveTrails     | username.grove.place/trail | _(integrated in Lattice)_                                                   | Active         |
+| **Vineyard**  | GroveShowcase   | \*.grove.place/vineyard    | _(integrated in Lattice)_                                                   | Active         |
+| **Bloom**     | GroveBloom      | bloom.grove.place          | [AutumnsGrove/GroveBloom](https://github.com/AutumnsGrove/GroveBloom)       | Planned        |
+| **Mycelium**  | GroveMCP        | mycelium.grove.place       | [AutumnsGrove/GroveMCP](https://github.com/AutumnsGrove/GroveMCP)           | In Development |
+| **Vista**     | GroveMonitor    | vista.grove.place          | [AutumnsGrove/GroveMonitor](https://github.com/AutumnsGrove/GroveMonitor)   | Active         |
+| **Wisp**      | GroveWisp       | _(integrated)_             | _(integrated in Lattice)_                                                   | Planned        |
+| **Pantry**    | GroveShop       | pantry.grove.place         | -                                                                           | Planned        |
+| **Nook**      | GroveNook       | nook.grove.place           | [AutumnsGrove/Nook](https://github.com/AutumnsGrove/Nook)                   | Planned        |
+| **Clearing**  | GroveClear      | status.grove.place         | _(integrated in Lattice)_                                                   | Active         |
+| **Waystone**  | GroveWaystone   | _(integrated)_             | _(integrated in Lattice)_                                                   | Planned        |
+| **Reeds**     | GroveReeds      | _(integrated)_             | _(integrated in Lattice)_                                                   | Planned        |
+| **Porch**     | GrovePorch      | porch.grove.place          | -                                                                           | Planned        |
 
 ### Additional Internal Components (Not in Public Naming Doc)
 
-| Public Name | Internal Name | Location | Notes |
-|-------------|---------------|----------|-------|
-| **Arbor** | GroveArbor | {blog}.grove.place/admin | Admin panel - added Jan 1, 2026, later removed from public naming |
-| **Thorn** | GroveThorn | *(integrated)* | Content moderation system |
-| **Songbird** | GroveSongbird | *(integrated)* | Prompt injection protection |
-| **Loom** | GroveLoom | *(integrated)* | Durable Objects architecture pattern |
-| **Prism** | GrovePrism | *(integrated)* | Design system pattern |
+| Public Name  | Internal Name | Location                 | Notes                                                             |
+| ------------ | ------------- | ------------------------ | ----------------------------------------------------------------- |
+| **Arbor**    | GroveArbor    | {blog}.grove.place/admin | Admin panel - added Jan 1, 2026, later removed from public naming |
+| **Thorn**    | GroveThorn    | _(integrated)_           | Content moderation system                                         |
+| **Songbird** | GroveSongbird | _(integrated)_           | Prompt injection protection                                       |
+| **Loom**     | GroveLoom     | _(integrated)_           | Durable Objects architecture pattern                              |
+| **Prism**    | GrovePrism    | _(integrated)_           | Design system pattern                                             |
 
 ---
 
 ## Naming Evolution Timeline
 
 ### December 30, 2025: Grove Naming System Established
+
 - **Commit:** 7defa51 - "feat: expand landing page content and fix marketing doc category"
 - **Action:** Created `docs/grove-naming.md` with initial ecosystem naming
 - **Initial Name:** "Cache" for backup system (GroveBackups repository)
 - **Established:** Complete internal names table with Grove[Thing] convention
 
 ### December 30-31, 2025: Patina Replaces Cache
+
 - **Action:** Backup system renamed from "Cache" to "Patina"
 - **Repository:** Changed from GroveBackups to Patina
 - **Reasoning:** Better nature metaphor - "a protective layer that forms over time"
 - **Commit:** Between 7defa51 and later commits updating the naming doc
 
 ### January 1, 2026: Admin Panel Named "Arbor"
+
 - **Commit:** 68ddf93 - "feat: add Grove-themed names to four specification files"
 - **Action:** Renamed `admin-panel-spec.md` → `arbor-spec.md`
 - **Public Name:** Arbor
@@ -87,18 +90,22 @@ This document maps all public-facing Grove service names to their internal coden
 - **Current Status:** Removed from public naming doc, admin panel is now unnamed/integrated
 
 ### January 1, 2026: Other Specs Named
+
 Same commit (68ddf93) also named:
+
 - **Thorn** (GroveThorn) - Content moderation
 - **Reeds** (GroveReeds) - Comments system
 - **Waystone** (GroveWaystone) - Help center
 
 ### January 4, 2026: Vineyard Standalone Deprecated
+
 - **Commit:** 29ac41e - "refactor: archive standalone vineyard and sync landing vineyard"
 - **Action:** Archived standalone vineyard.grove.place site
 - **Reason:** Vineyard integrated into landing page as /vineyard showcase
 - **Location:** `_archived/vineyard-standalone-deprecated-2026-01-04/`
 
 ### January 5, 2026: Pantry Shop Added
+
 - **Commit:** 3f99596 - "feat(naming): add Pantry shop and claim reserved subdomains"
 - **Action:** Added Pantry, Nook, Clearing, Waystone, Reeds to naming doc
 - **Public Name:** Pantry
@@ -106,6 +113,7 @@ Same commit (68ddf93) also named:
 - **Domain:** pantry.grove.place
 
 ### January 6, 2026: Echo Renamed to Porch
+
 - **Commit:** bdcdf25 - "feat(support): rename Echo to Porch, add naming skill"
 - **Previous Name:** Echo (GroveSupport) - "Voices carry across the grove"
 - **New Name:** Porch (GrovePorch) - "Front porch conversations"
@@ -114,6 +122,7 @@ Same commit (68ddf93) also named:
 - **Domain:** Changed from echo.grove.place to porch.grove.place
 
 ### January 1, 2026: Pattern Naming Evolution
+
 - **Glass → Prism**
   - Commit: d3ec579 - "docs: rename Glass pattern to Prism"
   - Reasoning: Better describes multi-faceted design system
@@ -127,32 +136,32 @@ Same commit (68ddf93) also named:
 
 ### Active Repositories (Confirmed)
 
-| Repository URL | Public Name | Internal Name | Created |
-|----------------|-------------|---------------|---------|
-| github.com/AutumnsGrove/GroveEngine | Lattice | GroveEngine | Dec 30, 2025 |
-| github.com/AutumnsGrove/GroveAuth | Heartwood | GroveAuth | Before Dec 30, 2025 |
-| github.com/AutumnsGrove/Forage | Forage | GroveDomainTool | Before Dec 30, 2025 |
-| github.com/AutumnsGrove/Foliage | Foliage | GroveThemes | Before Dec 30, 2025 |
-| github.com/AutumnsGrove/Patina | Patina | GrovePatina | ~Dec 31, 2025 |
-| github.com/AutumnsGrove/TreasureTrove | Trove | TreasureTrove | Before Dec 30, 2025 |
-| github.com/AutumnsGrove/GroveMC | Outpost | GroveMC | Before Dec 30, 2025 |
-| github.com/AutumnsGrove/GroveMusic | Aria | GroveMusic | Before Dec 30, 2025 |
-| github.com/AutumnsGrove/Ivy | Ivy | GroveMail | Before Dec 30, 2025 |
-| github.com/AutumnsGrove/Amber | Amber | GroveStorage | Before Dec 30, 2025 |
-| github.com/AutumnsGrove/GroveBloom | Bloom | GroveBloom | Before Dec 30, 2025 |
-| github.com/AutumnsGrove/GroveMCP | Mycelium | GroveMCP | Dec 30, 2025 |
-| github.com/AutumnsGrove/GroveMonitor | Vista | GroveMonitor | ~Dec 30, 2025 |
-| github.com/AutumnsGrove/Nook | Nook | GroveNook | Before Jan 5, 2026 |
+| Repository URL                        | Public Name | Internal Name   | Created             |
+| ------------------------------------- | ----------- | --------------- | ------------------- |
+| github.com/AutumnsGrove/Lattice       | Lattice     | Lattice         | Dec 30, 2025        |
+| github.com/AutumnsGrove/GroveAuth     | Heartwood   | GroveAuth       | Before Dec 30, 2025 |
+| github.com/AutumnsGrove/Forage        | Forage      | GroveDomainTool | Before Dec 30, 2025 |
+| github.com/AutumnsGrove/Foliage       | Foliage     | GroveThemes     | Before Dec 30, 2025 |
+| github.com/AutumnsGrove/Patina        | Patina      | GrovePatina     | ~Dec 31, 2025       |
+| github.com/AutumnsGrove/TreasureTrove | Trove       | TreasureTrove   | Before Dec 30, 2025 |
+| github.com/AutumnsGrove/GroveMC       | Outpost     | GroveMC         | Before Dec 30, 2025 |
+| github.com/AutumnsGrove/GroveMusic    | Aria        | GroveMusic      | Before Dec 30, 2025 |
+| github.com/AutumnsGrove/Ivy           | Ivy         | GroveMail       | Before Dec 30, 2025 |
+| github.com/AutumnsGrove/Amber         | Amber       | GroveStorage    | Before Dec 30, 2025 |
+| github.com/AutumnsGrove/GroveBloom    | Bloom       | GroveBloom      | Before Dec 30, 2025 |
+| github.com/AutumnsGrove/GroveMCP      | Mycelium    | GroveMCP        | Dec 30, 2025        |
+| github.com/AutumnsGrove/GroveMonitor  | Vista       | GroveMonitor    | ~Dec 30, 2025       |
+| github.com/AutumnsGrove/Nook          | Nook        | GroveNook       | Before Jan 5, 2026  |
 
 ### Deprecated/Archived Repositories
 
-| Repository | Status | Archived Date | Reason |
-|------------|--------|---------------|--------|
+| Repository   | Status  | Archived Date | Reason            |
+| ------------ | ------- | ------------- | ----------------- |
 | GroveBackups | Renamed | ~Dec 31, 2025 | Renamed to Patina |
 
 ### Integrated Components (No Separate Repo)
 
-These live inside the GroveEngine monorepo:
+These live inside the Lattice monorepo:
 
 - **Plant** (Seedbed) - `/plant` directory
 - **Rings** (GroveAnalytics) - Integrated in engine
@@ -174,6 +183,7 @@ These live inside the GroveEngine monorepo:
 ## Vineyard Special Case: Standalone → Integrated
 
 **History:**
+
 1. **Dec 30, 2025:** Vineyard created as external component library
    - Linked as `@autumnsgrove/vineyard` package
    - Referenced via `link:../../../Vineyard` in package.json
@@ -199,6 +209,7 @@ These live inside the GroveEngine monorepo:
 **Public Name:** Plant (established later)
 
 **Timeline:**
+
 - **Dec 30, 2025:** Internal name "Seedbed" established in grove-naming.md
 - **Later:** Public name changed to "Plant" for clarity
 - **Commit:** 50fb381 - "docs: establish Plant as public name (Seedbed as internal)"
@@ -211,10 +222,10 @@ These live inside the GroveEngine monorepo:
 
 In most cases, the internal `Grove[Thing]` names existed **before** the public nature-themed names:
 
-1. **GroveEngine → Lattice**
-   - Repository created as "GroveEngine"
+1. **Lattice → Lattice**
+   - Repository created as "Lattice"
    - Public name "Lattice" applied Dec 30, 2025
-   - npm package: `@autumnsgrove/groveengine`
+   - npm package: `@autumnsgrove/lattice`
    - Public branding: "Lattice"
 
 2. **Seedbed → Plant**
@@ -254,11 +265,13 @@ Commit 3f99596 reserved these subdomains in `grove-router`:
 ## Git History Insights
 
 ### Repository Age
+
 - **First Commit:** December 30, 2025 (commit 7defa51)
 - **Total Commits:** 349 (as of Jan 6, 2026)
 - **Age:** Approximately 7 days old
 
 ### Major Naming Milestones
+
 1. **Dec 30, 2025:** Comprehensive naming system established
 2. **Dec 31, 2025:** Patina replaces Cache
 3. **Jan 1, 2026:** Arbor, Thorn, Reeds, Waystone named
@@ -267,10 +280,13 @@ Commit 3f99596 reserved these subdomains in `grove-router`:
 6. **Jan 6, 2026:** Echo renamed to Porch
 
 ### Naming Philosophy Establishment
+
 The naming philosophy was documented from the start:
+
 > "A forest of voices. Every user is a tree in the grove."
 
 Core principles established Dec 30, 2025:
+
 - Names draw from nature: forests, growth, shelter, connection
 - Not about trees directly—about what happens in/around the forest
 - Dual naming: warm public names + functional internal names
@@ -283,6 +299,7 @@ Core principles established Dec 30, 2025:
 **Finding:** No evidence of "Groveview" as a historical name.
 
 **Prism History:**
+
 - Previously called "Glass" pattern
 - Renamed to "Prism" on Jan 1, 2026
 - Commit: d3ec579 - "docs: rename Glass pattern to Prism"
@@ -302,6 +319,7 @@ Core principles established Dec 30, 2025:
 **Skill:** `walking-through-the-grove`
 
 A naming ritual for the Grove ecosystem. Documents the process for finding nature-themed names that fit. Includes:
+
 - Reading the naming philosophy
 - Creating visualization scratchpads
 - ASCII art of the grove
@@ -318,7 +336,7 @@ This skill was created alongside the Echo → Porch rename to document the namin
 
 - **Total Services:** 26 public-facing services
 - **Active Repositories:** 14 confirmed
-- **Integrated Components:** 12+ within GroveEngine monorepo
+- **Integrated Components:** 12+ within Lattice monorepo
 - **Renamed Services:** 4 (Cache→Patina, Echo→Porch, Glass→Prism, Seedbed→Plant)
 - **Deprecated Projects:** 1 (vineyard-standalone)
 - **Documentation Start Date:** December 30, 2025
@@ -330,7 +348,7 @@ This skill was created alongside the Echo → Porch rename to document the namin
 
 This research was conducted by:
 
-1. Reading `/home/user/GroveEngine/docs/grove-naming.md` (current state)
+1. Reading `/home/user/Lattice/docs/grove-naming.md` (current state)
 2. Analyzing all `package.json` files for repository references
 3. Searching git history for:
    - First mentions of each internal name
@@ -342,6 +360,7 @@ This research was conducted by:
 6. Analyzing pattern documents for architectural naming
 
 **Commands Used:**
+
 - `git log --all --oneline --grep="pattern"`
 - `git log --all --reverse -p -S "ServiceName"`
 - `grep -r "github.com/AutumnsGrove"`
@@ -351,4 +370,4 @@ This research was conducted by:
 
 **Research Completed:** January 6, 2026
 **Researcher:** Claude (Sonnet 4.5)
-**Repository:** github.com/AutumnsGrove/GroveEngine
+**Repository:** github.com/AutumnsGrove/Lattice

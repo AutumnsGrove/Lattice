@@ -51,7 +51,7 @@ Grove's unified rate limiting SDK. One interface across every package, every fra
 
 **Public Name:** Threshold
 **Internal Name:** GroveThreshold
-**Package:** `@autumnsgrove/groveengine/threshold`
+**Package:** `@autumnsgrove/lattice/threshold`
 **Last Updated:** February 2026
 
 A threshold is the strip of wood at the bottom of a doorway. You cross it to enter. It marks where outside becomes inside, where the wild becomes the sheltered. In the grove, Threshold decides who crosses and how fast. It doesn't slam doors. It holds them open at just the right pace.
@@ -421,7 +421,7 @@ export interface ThresholdOptions {
  *
  * @example
  * ```typescript
- * import { Threshold, ThresholdKVStore } from "@autumnsgrove/groveengine/threshold";
+ * import { Threshold, ThresholdKVStore } from "@autumnsgrove/lattice/threshold";
  *
  * const threshold = new Threshold({
  *   store: new ThresholdKVStore(platform.env.CACHE),
@@ -626,7 +626,7 @@ import type { Threshold } from "../threshold.js";
  * @example
  * ```typescript
  * // In +server.ts
- * import { thresholdCheck } from "@autumnsgrove/groveengine/threshold/sveltekit";
+ * import { thresholdCheck } from "@autumnsgrove/lattice/threshold/sveltekit";
  *
  * export const POST: RequestHandler = async ({ platform, locals }) => {
  *   const denied = await thresholdCheck(threshold, {
@@ -714,7 +714,7 @@ interface ThresholdHonoOptions {
  *
  * @example
  * ```typescript
- * import { thresholdMiddleware } from "@autumnsgrove/groveengine/threshold/hono";
+ * import { thresholdMiddleware } from "@autumnsgrove/lattice/threshold/hono";
  *
  * app.use("/api/auth/*", thresholdMiddleware({
  *   threshold,
@@ -810,7 +810,7 @@ import type { Threshold } from "../threshold.js";
  * @example
  * ```typescript
  * // In a Worker fetch handler
- * import { thresholdCheck } from "@autumnsgrove/groveengine/threshold/worker";
+ * import { thresholdCheck } from "@autumnsgrove/lattice/threshold/worker";
  *
  * export default {
  *   async fetch(request, env) {
@@ -1007,7 +1007,7 @@ Abuse tracking always uses KV (it's protective, not billing-critical, and eventu
 ## Export Structure
 
 ```
-@autumnsgrove/groveengine/threshold
+@autumnsgrove/lattice/threshold
 ├── Threshold (class)
 ├── ThresholdKVStore
 ├── ThresholdD1Store
@@ -1017,15 +1017,15 @@ Abuse tracking always uses KV (it's protective, not billing-critical, and eventu
 ├── getAbuseState(), recordViolation(), isBanned(), getBanRemaining(), clearAbuseState()
 ├── types: ThresholdResult, ThresholdCheckOptions, ThresholdStore, AbuseState, ViolationResult
 
-@autumnsgrove/groveengine/threshold/sveltekit
+@autumnsgrove/lattice/threshold/sveltekit
 ├── thresholdCheck()
 ├── thresholdHeaders()
 
-@autumnsgrove/groveengine/threshold/hono
+@autumnsgrove/lattice/threshold/hono
 ├── thresholdMiddleware()
 ├── thresholdCheck()
 
-@autumnsgrove/groveengine/threshold/worker
+@autumnsgrove/lattice/threshold/worker
 ├── thresholdCheck()
 ├── getClientIP()
 ```

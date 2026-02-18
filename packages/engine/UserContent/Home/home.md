@@ -14,7 +14,7 @@ Share what visitors can expect from your blog. Topics, themes, and the type of c
 
 ## About This Site
 
-This blog is powered by **GroveEngine**, a modern static site generator built for simplicity and elegance.
+This blog is powered by **Lattice**, a modern static site generator built for simplicity and elegance.
 
 ---
 

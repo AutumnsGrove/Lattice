@@ -1,1015 +1,1449 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Grove CDN — Font Library</title>
-  <meta name="description" content="The complete font collection for Grove, a queer-friendly blogging platform. 20 carefully curated typefaces for every voice.">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Grove CDN — Font Library</title>
+    <meta
+      name="description"
+      content="The complete font collection for Grove, a queer-friendly blogging platform. 20 carefully curated typefaces for every voice."
+    />
 
-  <!-- Preload critical fonts -->
-  <link rel="preload" href="https://cdn.grove.place/fonts/Lexend-Regular.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="preload" href="https://cdn.grove.place/fonts/Fraunces-Regular.ttf" as="font" type="font/ttf" crossorigin>
+    <!-- Preload critical fonts -->
+    <link
+      rel="preload"
+      href="https://cdn.grove.place/fonts/Lexend-Regular.ttf"
+      as="font"
+      type="font/ttf"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="https://cdn.grove.place/fonts/Fraunces-Regular.ttf"
+      as="font"
+      type="font/ttf"
+      crossorigin
+    />
 
-  <style>
-    /* ═══════════════════════════════════════════════════════════════
+    <style>
+      /* ═══════════════════════════════════════════════════════════════
        FONT FACES
        ═══════════════════════════════════════════════════════════════ */
-    @font-face { font-family: 'Lexend'; src: url('https://cdn.grove.place/fonts/Lexend-Regular.ttf') format('truetype'); font-display: swap; }
-    @font-face { font-family: 'Atkinson Hyperlegible'; src: url('https://cdn.grove.place/fonts/AtkinsonHyperlegible-Regular.ttf') format('truetype'); font-display: swap; }
-    @font-face { font-family: 'OpenDyslexic'; src: url('https://cdn.grove.place/fonts/OpenDyslexic-Regular.otf') format('opentype'); font-display: swap; }
-    @font-face { font-family: 'Luciole'; src: url('https://cdn.grove.place/fonts/Luciole-Regular.ttf') format('truetype'); font-display: swap; }
-    @font-face { font-family: 'Nunito'; src: url('https://cdn.grove.place/fonts/Nunito-Regular.ttf') format('truetype'); font-display: swap; }
-    @font-face { font-family: 'Quicksand'; src: url('https://cdn.grove.place/fonts/Quicksand-Regular.ttf') format('truetype'); font-display: swap; }
-    @font-face { font-family: 'Manrope'; src: url('https://cdn.grove.place/fonts/Manrope-Regular.ttf') format('truetype'); font-display: swap; }
-    @font-face { font-family: 'Instrument Sans'; src: url('https://cdn.grove.place/fonts/InstrumentSans-Regular.ttf') format('truetype'); font-display: swap; }
-    @font-face { font-family: 'Plus Jakarta Sans'; src: url('https://cdn.grove.place/fonts/PlusJakartaSans-Regular.ttf') format('truetype'); font-display: swap; }
-    @font-face { font-family: 'Cormorant'; src: url('https://cdn.grove.place/fonts/Cormorant-Regular.ttf') format('truetype'); font-display: swap; }
-    @font-face { font-family: 'Bodoni Moda'; src: url('https://cdn.grove.place/fonts/BodoniModa-Regular.ttf') format('truetype'); font-display: swap; }
-    @font-face { font-family: 'Lora'; src: url('https://cdn.grove.place/fonts/Lora-Regular.ttf') format('truetype'); font-display: swap; }
-    @font-face { font-family: 'EB Garamond'; src: url('https://cdn.grove.place/fonts/EBGaramond-Regular.ttf') format('truetype'); font-display: swap; }
-    @font-face { font-family: 'Merriweather'; src: url('https://cdn.grove.place/fonts/Merriweather-Regular.ttf') format('truetype'); font-display: swap; }
-    @font-face { font-family: 'Fraunces'; src: url('https://cdn.grove.place/fonts/Fraunces-Regular.ttf') format('truetype'); font-display: swap; }
-    @font-face { font-family: 'IBM Plex Mono'; src: url('https://cdn.grove.place/fonts/IBMPlexMono-Regular.ttf') format('truetype'); font-display: swap; }
-    @font-face { font-family: 'Cozette'; src: url('https://cdn.grove.place/fonts/CozetteVector.ttf') format('truetype'); font-display: swap; }
-    @font-face { font-family: 'Alagard'; src: url('https://cdn.grove.place/fonts/alagard.ttf') format('truetype'); font-display: swap; }
-    @font-face { font-family: 'Calistoga'; src: url('https://cdn.grove.place/fonts/Calistoga-Regular.ttf') format('truetype'); font-display: swap; }
-    @font-face { font-family: 'Caveat'; src: url('https://cdn.grove.place/fonts/Caveat-Regular.ttf') format('truetype'); font-display: swap; }
+      @font-face {
+        font-family: "Lexend";
+        src: url("https://cdn.grove.place/fonts/Lexend-Regular.ttf")
+          format("truetype");
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "Atkinson Hyperlegible";
+        src: url("https://cdn.grove.place/fonts/AtkinsonHyperlegible-Regular.ttf")
+          format("truetype");
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "OpenDyslexic";
+        src: url("https://cdn.grove.place/fonts/OpenDyslexic-Regular.otf")
+          format("opentype");
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "Luciole";
+        src: url("https://cdn.grove.place/fonts/Luciole-Regular.ttf")
+          format("truetype");
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "Nunito";
+        src: url("https://cdn.grove.place/fonts/Nunito-Regular.ttf")
+          format("truetype");
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "Quicksand";
+        src: url("https://cdn.grove.place/fonts/Quicksand-Regular.ttf")
+          format("truetype");
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "Manrope";
+        src: url("https://cdn.grove.place/fonts/Manrope-Regular.ttf")
+          format("truetype");
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "Instrument Sans";
+        src: url("https://cdn.grove.place/fonts/InstrumentSans-Regular.ttf")
+          format("truetype");
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "Plus Jakarta Sans";
+        src: url("https://cdn.grove.place/fonts/PlusJakartaSans-Regular.ttf")
+          format("truetype");
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "Cormorant";
+        src: url("https://cdn.grove.place/fonts/Cormorant-Regular.ttf")
+          format("truetype");
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "Bodoni Moda";
+        src: url("https://cdn.grove.place/fonts/BodoniModa-Regular.ttf")
+          format("truetype");
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "Lora";
+        src: url("https://cdn.grove.place/fonts/Lora-Regular.ttf")
+          format("truetype");
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "EB Garamond";
+        src: url("https://cdn.grove.place/fonts/EBGaramond-Regular.ttf")
+          format("truetype");
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "Merriweather";
+        src: url("https://cdn.grove.place/fonts/Merriweather-Regular.ttf")
+          format("truetype");
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "Fraunces";
+        src: url("https://cdn.grove.place/fonts/Fraunces-Regular.ttf")
+          format("truetype");
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "IBM Plex Mono";
+        src: url("https://cdn.grove.place/fonts/IBMPlexMono-Regular.ttf")
+          format("truetype");
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "Cozette";
+        src: url("https://cdn.grove.place/fonts/CozetteVector.ttf")
+          format("truetype");
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "Alagard";
+        src: url("https://cdn.grove.place/fonts/alagard.ttf") format("truetype");
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "Calistoga";
+        src: url("https://cdn.grove.place/fonts/Calistoga-Regular.ttf")
+          format("truetype");
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "Caveat";
+        src: url("https://cdn.grove.place/fonts/Caveat-Regular.ttf")
+          format("truetype");
+        font-display: swap;
+      }
 
-    /* ═══════════════════════════════════════════════════════════════
+      /* ═══════════════════════════════════════════════════════════════
        CSS VARIABLES
        ═══════════════════════════════════════════════════════════════ */
-    :root {
-      /* Core palette */
-      --cream: #fefdfb;
-      --cream-warm: #faf6f0;
-      --bark: #3d2914;
-      --bark-light: #5a4028;
-      --grove: #16a34a;
-      --grove-light: #22c55e;
-      --grove-dark: #0d7a38;
+      :root {
+        /* Core palette */
+        --cream: #fefdfb;
+        --cream-warm: #faf6f0;
+        --bark: #3d2914;
+        --bark-light: #5a4028;
+        --grove: #16a34a;
+        --grove-light: #22c55e;
+        --grove-dark: #0d7a38;
 
-      /* Accent colors */
-      --amber: #d4a574;
-      --amber-soft: #e8cba8;
-      --sage: #8fb896;
-      --gold: #c9a957;
+        /* Accent colors */
+        --amber: #d4a574;
+        --amber-soft: #e8cba8;
+        --sage: #8fb896;
+        --gold: #c9a957;
 
-      /* Semantic */
-      --bg-primary: var(--cream);
-      --bg-secondary: var(--cream-warm);
-      --bg-card: rgba(255, 255, 255, 0.7);
-      --text-primary: var(--bark);
-      --text-secondary: rgba(61, 41, 20, 0.7);
-      --text-muted: rgba(61, 41, 20, 0.5);
-      --border: rgba(61, 41, 20, 0.12);
-      --border-hover: rgba(61, 41, 20, 0.25);
-      --glow: rgba(22, 163, 74, 0.15);
+        /* Semantic */
+        --bg-primary: var(--cream);
+        --bg-secondary: var(--cream-warm);
+        --bg-card: rgba(255, 255, 255, 0.7);
+        --text-primary: var(--bark);
+        --text-secondary: rgba(61, 41, 20, 0.7);
+        --text-muted: rgba(61, 41, 20, 0.5);
+        --border: rgba(61, 41, 20, 0.12);
+        --border-hover: rgba(61, 41, 20, 0.25);
+        --glow: rgba(22, 163, 74, 0.15);
 
-      /* Shadows */
-      --shadow-sm: 0 1px 3px rgba(61, 41, 20, 0.06);
-      --shadow-md: 0 4px 12px rgba(61, 41, 20, 0.08);
-      --shadow-lg: 0 8px 30px rgba(61, 41, 20, 0.1);
-      --shadow-glow: 0 0 40px rgba(22, 163, 74, 0.12);
-    }
+        /* Shadows */
+        --shadow-sm: 0 1px 3px rgba(61, 41, 20, 0.06);
+        --shadow-md: 0 4px 12px rgba(61, 41, 20, 0.08);
+        --shadow-lg: 0 8px 30px rgba(61, 41, 20, 0.1);
+        --shadow-glow: 0 0 40px rgba(22, 163, 74, 0.12);
+      }
 
-    .dark {
-      --cream: #0d1410;
-      --cream-warm: #111a15;
-      --bark: #f0ebe4;
-      --bark-light: #c9c0b4;
-      --grove: #22c55e;
-      --grove-light: #4ade80;
-      --grove-dark: #16a34a;
+      .dark {
+        --cream: #0d1410;
+        --cream-warm: #111a15;
+        --bark: #f0ebe4;
+        --bark-light: #c9c0b4;
+        --grove: #22c55e;
+        --grove-light: #4ade80;
+        --grove-dark: #16a34a;
 
-      --bg-primary: var(--cream);
-      --bg-secondary: var(--cream-warm);
-      --bg-card: rgba(20, 30, 24, 0.8);
-      --text-primary: var(--bark);
-      --text-secondary: rgba(240, 235, 228, 0.75);
-      --text-muted: rgba(240, 235, 228, 0.5);
-      --border: rgba(240, 235, 228, 0.1);
-      --border-hover: rgba(240, 235, 228, 0.2);
-      --glow: rgba(34, 197, 94, 0.2);
+        --bg-primary: var(--cream);
+        --bg-secondary: var(--cream-warm);
+        --bg-card: rgba(20, 30, 24, 0.8);
+        --text-primary: var(--bark);
+        --text-secondary: rgba(240, 235, 228, 0.75);
+        --text-muted: rgba(240, 235, 228, 0.5);
+        --border: rgba(240, 235, 228, 0.1);
+        --border-hover: rgba(240, 235, 228, 0.2);
+        --glow: rgba(34, 197, 94, 0.2);
 
-      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
-      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
-      --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.4);
-      --shadow-glow: 0 0 60px rgba(34, 197, 94, 0.15);
-    }
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+        --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
+        --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.4);
+        --shadow-glow: 0 0 60px rgba(34, 197, 94, 0.15);
+      }
 
-    /* ═══════════════════════════════════════════════════════════════
+      /* ═══════════════════════════════════════════════════════════════
        BASE STYLES
        ═══════════════════════════════════════════════════════════════ */
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-    html {
-      scroll-behavior: smooth;
-    }
+      html {
+        scroll-behavior: smooth;
+      }
 
-    body {
-      font-family: 'Lexend', system-ui, sans-serif;
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      line-height: 1.6;
-      min-height: 100vh;
-      transition: background-color 0.4s ease, color 0.4s ease;
-    }
+      body {
+        font-family: "Lexend", system-ui, sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        line-height: 1.6;
+        min-height: 100vh;
+        transition:
+          background-color 0.4s ease,
+          color 0.4s ease;
+      }
 
-    /* Vine pattern background */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      opacity: 0.4;
-      background-image: url("data:image/svg+xml,%3Csvg width='400' height='400' viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%2316a34a' stroke-linecap='round' opacity='0.15'%3E%3Cpath d='M-20 380 C40 340 20 280 70 220 S130 140 100 80' stroke-width='1.2'/%3E%3Cpath d='M420 340 C360 310 380 250 330 200 S250 130 280 70' stroke-width='1'/%3E%3Cpath d='M180 420 C160 360 190 300 170 240 S200 160 180 100' stroke-width='0.8'/%3E%3C/g%3E%3Cg fill='%2316a34a' opacity='0.08'%3E%3Cellipse cx='85' cy='190' rx='8' ry='12' transform='rotate(-30 85 190)'/%3E%3Cellipse cx='310' cy='130' rx='7' ry='10' transform='rotate(25 310 130)'/%3E%3Cellipse cx='160' cy='280' rx='6' ry='9' transform='rotate(-15 160 280)'/%3E%3C/g%3E%3C/svg%3E");
-      z-index: 0;
-    }
+      /* Vine pattern background */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        opacity: 0.4;
+        background-image: url("data:image/svg+xml,%3Csvg width='400' height='400' viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%2316a34a' stroke-linecap='round' opacity='0.15'%3E%3Cpath d='M-20 380 C40 340 20 280 70 220 S130 140 100 80' stroke-width='1.2'/%3E%3Cpath d='M420 340 C360 310 380 250 330 200 S250 130 280 70' stroke-width='1'/%3E%3Cpath d='M180 420 C160 360 190 300 170 240 S200 160 180 100' stroke-width='0.8'/%3E%3C/g%3E%3Cg fill='%2316a34a' opacity='0.08'%3E%3Cellipse cx='85' cy='190' rx='8' ry='12' transform='rotate(-30 85 190)'/%3E%3Cellipse cx='310' cy='130' rx='7' ry='10' transform='rotate(25 310 130)'/%3E%3Cellipse cx='160' cy='280' rx='6' ry='9' transform='rotate(-15 160 280)'/%3E%3C/g%3E%3C/svg%3E");
+        z-index: 0;
+      }
 
-    .dark body::before {
-      opacity: 0.5;
-    }
+      .dark body::before {
+        opacity: 0.5;
+      }
 
-    /* ═══════════════════════════════════════════════════════════════
+      /* ═══════════════════════════════════════════════════════════════
        LAYOUT
        ═══════════════════════════════════════════════════════════════ */
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 1.5rem;
-      position: relative;
-      z-index: 1;
-    }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+        position: relative;
+        z-index: 1;
+      }
 
-    /* ═══════════════════════════════════════════════════════════════
+      /* ═══════════════════════════════════════════════════════════════
        HEADER
        ═══════════════════════════════════════════════════════════════ */
-    header {
-      padding: 1.5rem 0;
-      position: sticky;
-      top: 0;
-      background: linear-gradient(to bottom, var(--bg-primary) 60%, transparent);
-      z-index: 100;
-    }
+      header {
+        padding: 1.5rem 0;
+        position: sticky;
+        top: 0;
+        background: linear-gradient(
+          to bottom,
+          var(--bg-primary) 60%,
+          transparent
+        );
+        z-index: 100;
+      }
 
-    .header-inner {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+      .header-inner {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
 
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      text-decoration: none;
-      color: var(--text-primary);
-    }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-decoration: none;
+        color: var(--text-primary);
+      }
 
-    .logo-icon {
-      width: 36px;
-      height: 36px;
-      background: linear-gradient(135deg, var(--grove) 0%, var(--grove-dark) 100%);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: var(--shadow-glow);
-    }
+      .logo-icon {
+        width: 36px;
+        height: 36px;
+        background: linear-gradient(
+          135deg,
+          var(--grove) 0%,
+          var(--grove-dark) 100%
+        );
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: var(--shadow-glow);
+      }
 
-    .logo-icon svg {
-      width: 20px;
-      height: 20px;
-      fill: white;
-    }
+      .logo-icon svg {
+        width: 20px;
+        height: 20px;
+        fill: white;
+      }
 
-    .logo-text {
-      font-family: 'Fraunces', serif;
-      font-size: 1.25rem;
-      font-weight: 500;
-      letter-spacing: -0.02em;
-    }
+      .logo-text {
+        font-family: "Fraunces", serif;
+        font-size: 1.25rem;
+        font-weight: 500;
+        letter-spacing: -0.02em;
+      }
 
-    .logo-text span {
-      color: var(--text-muted);
-      font-weight: 400;
-    }
+      .logo-text span {
+        color: var(--text-muted);
+        font-weight: 400;
+      }
 
-    .theme-toggle {
-      width: 44px;
-      height: 44px;
-      border: 1px solid var(--border);
-      background: var(--bg-card);
-      border-radius: 12px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s ease;
-      backdrop-filter: blur(8px);
-    }
+      .theme-toggle {
+        width: 44px;
+        height: 44px;
+        border: 1px solid var(--border);
+        background: var(--bg-card);
+        border-radius: 12px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        backdrop-filter: blur(8px);
+      }
 
-    .theme-toggle:hover {
-      border-color: var(--border-hover);
-      background: var(--bg-secondary);
-    }
+      .theme-toggle:hover {
+        border-color: var(--border-hover);
+        background: var(--bg-secondary);
+      }
 
-    .theme-toggle svg {
-      width: 20px;
-      height: 20px;
-      stroke: var(--text-secondary);
-      fill: none;
-      stroke-width: 1.5;
-    }
+      .theme-toggle svg {
+        width: 20px;
+        height: 20px;
+        stroke: var(--text-secondary);
+        fill: none;
+        stroke-width: 1.5;
+      }
 
-    .theme-toggle .sun { display: none; }
-    .dark .theme-toggle .sun { display: block; }
-    .dark .theme-toggle .moon { display: none; }
+      .theme-toggle .sun {
+        display: none;
+      }
+      .dark .theme-toggle .sun {
+        display: block;
+      }
+      .dark .theme-toggle .moon {
+        display: none;
+      }
 
-    /* ═══════════════════════════════════════════════════════════════
+      /* ═══════════════════════════════════════════════════════════════
        HERO
        ═══════════════════════════════════════════════════════════════ */
-    .hero {
-      padding: 4rem 0 5rem;
-      text-align: center;
-    }
-
-    .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem 1rem;
-      background: var(--glow);
-      border: 1px solid rgba(22, 163, 74, 0.2);
-      border-radius: 100px;
-      font-size: 0.875rem;
-      color: var(--grove);
-      margin-bottom: 1.5rem;
-      animation: fadeInUp 0.6s ease backwards;
-    }
-
-    .hero-badge::before {
-      content: '';
-      width: 6px;
-      height: 6px;
-      background: var(--grove);
-      border-radius: 50%;
-      animation: pulse 2s ease infinite;
-    }
-
-    .hero h1 {
-      font-family: 'Fraunces', serif;
-      font-size: clamp(2.5rem, 6vw, 4rem);
-      font-weight: 400;
-      letter-spacing: -0.03em;
-      line-height: 1.1;
-      margin-bottom: 1rem;
-      animation: fadeInUp 0.6s ease 0.1s backwards;
-    }
-
-    .hero h1 em {
-      font-style: normal;
-      color: var(--grove);
-    }
-
-    .hero p {
-      font-size: 1.125rem;
-      color: var(--text-secondary);
-      max-width: 540px;
-      margin: 0 auto 2rem;
-      animation: fadeInUp 0.6s ease 0.2s backwards;
-    }
-
-    .hero-stats {
-      display: flex;
-      justify-content: center;
-      gap: 3rem;
-      animation: fadeInUp 0.6s ease 0.3s backwards;
-    }
-
-    .stat {
-      text-align: center;
-    }
-
-    .stat-value {
-      font-family: 'Fraunces', serif;
-      font-size: 2rem;
-      font-weight: 500;
-      color: var(--grove);
-    }
-
-    .stat-label {
-      font-size: 0.875rem;
-      color: var(--text-muted);
-      margin-top: 0.25rem;
-    }
-
-    /* ═══════════════════════════════════════════════════════════════
-       CATEGORY SECTIONS
-       ═══════════════════════════════════════════════════════════════ */
-    .category {
-      margin-bottom: 4rem;
-    }
-
-    .category-header {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .category-icon {
-      width: 40px;
-      height: 40px;
-      background: var(--glow);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .category-icon svg {
-      width: 20px;
-      height: 20px;
-      stroke: var(--grove);
-      fill: none;
-      stroke-width: 1.5;
-    }
-
-    .category h2 {
-      font-family: 'Fraunces', serif;
-      font-size: 1.5rem;
-      font-weight: 500;
-      letter-spacing: -0.02em;
-    }
-
-    .category-count {
-      font-size: 0.875rem;
-      color: var(--text-muted);
-      margin-left: auto;
-    }
-
-    /* ═══════════════════════════════════════════════════════════════
-       FONT GRID
-       ═══════════════════════════════════════════════════════════════ */
-    .font-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 1.25rem;
-    }
-
-    .font-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 1.5rem;
-      backdrop-filter: blur(8px);
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .font-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: linear-gradient(90deg, var(--grove) 0%, var(--sage) 100%);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    .font-card:hover {
-      border-color: var(--border-hover);
-      box-shadow: var(--shadow-lg), var(--shadow-glow);
-      transform: translateY(-2px);
-    }
-
-    .font-card:hover::before {
-      opacity: 1;
-    }
-
-    .font-name {
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--text-muted);
-      margin-bottom: 0.75rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .font-tag {
-      font-size: 0.7rem;
-      padding: 0.2rem 0.5rem;
-      background: var(--glow);
-      color: var(--grove);
-      border-radius: 4px;
-      text-transform: none;
-      letter-spacing: 0;
-    }
-
-    .font-preview {
-      font-size: 1.75rem;
-      line-height: 1.3;
-      margin-bottom: 1rem;
-      color: var(--text-primary);
-      word-break: break-word;
-    }
-
-    .font-sample {
-      font-size: 1rem;
-      color: var(--text-secondary);
-      line-height: 1.6;
-    }
-
-    .font-meta {
-      margin-top: 1rem;
-      padding-top: 1rem;
-      border-top: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .font-file {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.75rem;
-      color: var(--text-muted);
-    }
-
-    .copy-btn {
-      padding: 0.4rem 0.75rem;
-      background: transparent;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      font-size: 0.75rem;
-      color: var(--text-secondary);
-      cursor: pointer;
-      transition: all 0.2s ease;
-      font-family: inherit;
-    }
-
-    .copy-btn:hover {
-      background: var(--glow);
-      border-color: var(--grove);
-      color: var(--grove);
-    }
-
-    .copy-btn.copied {
-      background: var(--grove);
-      border-color: var(--grove);
-      color: white;
-    }
-
-    /* ═══════════════════════════════════════════════════════════════
-       FOOTER
-       ═══════════════════════════════════════════════════════════════ */
-    footer {
-      padding: 3rem 0;
-      margin-top: 2rem;
-      border-top: 1px solid var(--border);
-      text-align: center;
-    }
-
-    footer p {
-      color: var(--text-muted);
-      font-size: 0.9rem;
-    }
-
-    footer a {
-      color: var(--grove);
-      text-decoration: none;
-      transition: opacity 0.2s ease;
-    }
-
-    footer a:hover {
-      opacity: 0.8;
-    }
-
-    .footer-links {
-      display: flex;
-      justify-content: center;
-      gap: 2rem;
-      margin-top: 1rem;
-    }
-
-    /* ═══════════════════════════════════════════════════════════════
-       ANIMATIONS
-       ═══════════════════════════════════════════════════════════════ */
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
-
-    .font-card {
-      animation: fadeInUp 0.5s ease backwards;
-    }
-
-    .category:nth-child(1) .font-card { animation-delay: calc(var(--i, 0) * 0.05s); }
-    .category:nth-child(2) .font-card { animation-delay: calc(var(--i, 0) * 0.05s + 0.1s); }
-    .category:nth-child(3) .font-card { animation-delay: calc(var(--i, 0) * 0.05s + 0.2s); }
-    .category:nth-child(4) .font-card { animation-delay: calc(var(--i, 0) * 0.05s + 0.3s); }
-    .category:nth-child(5) .font-card { animation-delay: calc(var(--i, 0) * 0.05s + 0.4s); }
-    .category:nth-child(6) .font-card { animation-delay: calc(var(--i, 0) * 0.05s + 0.5s); }
-
-    /* ═══════════════════════════════════════════════════════════════
-       RESPONSIVE
-       ═══════════════════════════════════════════════════════════════ */
-    @media (max-width: 768px) {
       .hero {
-        padding: 2.5rem 0 3rem;
+        padding: 4rem 0 5rem;
+        text-align: center;
       }
 
-      .hero-stats {
-        gap: 2rem;
+      .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: var(--glow);
+        border: 1px solid rgba(22, 163, 74, 0.2);
+        border-radius: 100px;
+        font-size: 0.875rem;
+        color: var(--grove);
+        margin-bottom: 1.5rem;
+        animation: fadeInUp 0.6s ease backwards;
       }
 
-      .stat-value {
-        font-size: 1.5rem;
-      }
-
-      .font-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .category-header {
-        flex-wrap: wrap;
-      }
-
-      .category-count {
-        width: 100%;
-        margin-left: 0;
-        margin-top: 0.5rem;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .container {
-        padding: 0 1rem;
+      .hero-badge::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        background: var(--grove);
+        border-radius: 50%;
+        animation: pulse 2s ease infinite;
       }
 
       .hero h1 {
-        font-size: 2rem;
+        font-family: "Fraunces", serif;
+        font-size: clamp(2.5rem, 6vw, 4rem);
+        font-weight: 400;
+        letter-spacing: -0.03em;
+        line-height: 1.1;
+        margin-bottom: 1rem;
+        animation: fadeInUp 0.6s ease 0.1s backwards;
+      }
+
+      .hero h1 em {
+        font-style: normal;
+        color: var(--grove);
       }
 
       .hero p {
-        font-size: 1rem;
+        font-size: 1.125rem;
+        color: var(--text-secondary);
+        max-width: 540px;
+        margin: 0 auto 2rem;
+        animation: fadeInUp 0.6s ease 0.2s backwards;
+      }
+
+      .hero-stats {
+        display: flex;
+        justify-content: center;
+        gap: 3rem;
+        animation: fadeInUp 0.6s ease 0.3s backwards;
+      }
+
+      .stat {
+        text-align: center;
+      }
+
+      .stat-value {
+        font-family: "Fraunces", serif;
+        font-size: 2rem;
+        font-weight: 500;
+        color: var(--grove);
+      }
+
+      .stat-label {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        margin-top: 0.25rem;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════
+       CATEGORY SECTIONS
+       ═══════════════════════════════════════════════════════════════ */
+      .category {
+        margin-bottom: 4rem;
+      }
+
+      .category-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .category-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--glow);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .category-icon svg {
+        width: 20px;
+        height: 20px;
+        stroke: var(--grove);
+        fill: none;
+        stroke-width: 1.5;
+      }
+
+      .category h2 {
+        font-family: "Fraunces", serif;
+        font-size: 1.5rem;
+        font-weight: 500;
+        letter-spacing: -0.02em;
+      }
+
+      .category-count {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        margin-left: auto;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════
+       FONT GRID
+       ═══════════════════════════════════════════════════════════════ */
+      .font-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 1.25rem;
+      }
+
+      .font-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 1.5rem;
+        backdrop-filter: blur(8px);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .font-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--grove) 0%, var(--sage) 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .font-card:hover {
+        border-color: var(--border-hover);
+        box-shadow: var(--shadow-lg), var(--shadow-glow);
+        transform: translateY(-2px);
+      }
+
+      .font-card:hover::before {
+        opacity: 1;
+      }
+
+      .font-name {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--text-muted);
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .font-tag {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.5rem;
+        background: var(--glow);
+        color: var(--grove);
+        border-radius: 4px;
+        text-transform: none;
+        letter-spacing: 0;
       }
 
       .font-preview {
-        font-size: 1.4rem;
+        font-size: 1.75rem;
+        line-height: 1.3;
+        margin-bottom: 1rem;
+        color: var(--text-primary);
+        word-break: break-word;
       }
-    }
 
-    /* ═══════════════════════════════════════════════════════════════
+      .font-sample {
+        font-size: 1rem;
+        color: var(--text-secondary);
+        line-height: 1.6;
+      }
+
+      .font-meta {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .font-file {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.75rem;
+        color: var(--text-muted);
+      }
+
+      .copy-btn {
+        padding: 0.4rem 0.75rem;
+        background: transparent;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-family: inherit;
+      }
+
+      .copy-btn:hover {
+        background: var(--glow);
+        border-color: var(--grove);
+        color: var(--grove);
+      }
+
+      .copy-btn.copied {
+        background: var(--grove);
+        border-color: var(--grove);
+        color: white;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════
+       FOOTER
+       ═══════════════════════════════════════════════════════════════ */
+      footer {
+        padding: 3rem 0;
+        margin-top: 2rem;
+        border-top: 1px solid var(--border);
+        text-align: center;
+      }
+
+      footer p {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+      }
+
+      footer a {
+        color: var(--grove);
+        text-decoration: none;
+        transition: opacity 0.2s ease;
+      }
+
+      footer a:hover {
+        opacity: 0.8;
+      }
+
+      .footer-links {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin-top: 1rem;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════
+       ANIMATIONS
+       ═══════════════════════════════════════════════════════════════ */
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      .font-card {
+        animation: fadeInUp 0.5s ease backwards;
+      }
+
+      .category:nth-child(1) .font-card {
+        animation-delay: calc(var(--i, 0) * 0.05s);
+      }
+      .category:nth-child(2) .font-card {
+        animation-delay: calc(var(--i, 0) * 0.05s + 0.1s);
+      }
+      .category:nth-child(3) .font-card {
+        animation-delay: calc(var(--i, 0) * 0.05s + 0.2s);
+      }
+      .category:nth-child(4) .font-card {
+        animation-delay: calc(var(--i, 0) * 0.05s + 0.3s);
+      }
+      .category:nth-child(5) .font-card {
+        animation-delay: calc(var(--i, 0) * 0.05s + 0.4s);
+      }
+      .category:nth-child(6) .font-card {
+        animation-delay: calc(var(--i, 0) * 0.05s + 0.5s);
+      }
+
+      /* ═══════════════════════════════════════════════════════════════
+       RESPONSIVE
+       ═══════════════════════════════════════════════════════════════ */
+      @media (max-width: 768px) {
+        .hero {
+          padding: 2.5rem 0 3rem;
+        }
+
+        .hero-stats {
+          gap: 2rem;
+        }
+
+        .stat-value {
+          font-size: 1.5rem;
+        }
+
+        .font-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .category-header {
+          flex-wrap: wrap;
+        }
+
+        .category-count {
+          width: 100%;
+          margin-left: 0;
+          margin-top: 0.5rem;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .container {
+          padding: 0 1rem;
+        }
+
+        .hero h1 {
+          font-size: 2rem;
+        }
+
+        .hero p {
+          font-size: 1rem;
+        }
+
+        .font-preview {
+          font-size: 1.4rem;
+        }
+      }
+
+      /* ═══════════════════════════════════════════════════════════════
        REDUCED MOTION
        ═══════════════════════════════════════════════════════════════ */
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        transition-duration: 0.01ms !important;
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          transition-duration: 0.01ms !important;
+        }
       }
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <div class="container header-inner">
-      <a href="https://grove.place" class="logo">
-        <div class="logo-icon">
-          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-        </div>
-        <div class="logo-text">Grove <span>CDN</span></div>
-      </a>
-      <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
-        <svg class="moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-        <svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-      </button>
-    </div>
-  </header>
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="container header-inner">
+        <a href="https://grove.place" class="logo">
+          <div class="logo-icon">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"
+              />
+            </svg>
+          </div>
+          <div class="logo-text">Grove <span>CDN</span></div>
+        </a>
+        <button
+          class="theme-toggle"
+          onclick="toggleTheme()"
+          aria-label="Toggle dark mode"
+        >
+          <svg class="moon" viewBox="0 0 24 24">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+          </svg>
+          <svg class="sun" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="5" />
+            <line x1="12" y1="1" x2="12" y2="3" />
+            <line x1="12" y1="21" x2="12" y2="23" />
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+            <line x1="1" y1="12" x2="3" y2="12" />
+            <line x1="21" y1="12" x2="23" y2="12" />
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+          </svg>
+        </button>
+      </div>
+    </header>
 
-  <main class="container">
-    <section class="hero">
-      <div class="hero-badge">Font Library</div>
-      <h1>Every voice deserves<br>a <em>beautiful</em> typeface</h1>
-      <p>20 carefully curated fonts for the Grove community. From accessible readers to expressive display faces—find the perfect voice for your words.</p>
-      <div class="hero-stats">
-        <div class="stat">
-          <div class="stat-value">20</div>
-          <div class="stat-label">Typefaces</div>
+    <main class="container">
+      <section class="hero">
+        <div class="hero-badge">Font Library</div>
+        <h1>Every voice deserves<br />a <em>beautiful</em> typeface</h1>
+        <p>
+          20 carefully curated fonts for the Grove community. From accessible
+          readers to expressive display faces—find the perfect voice for your
+          words.
+        </p>
+        <div class="hero-stats">
+          <div class="stat">
+            <div class="stat-value">20</div>
+            <div class="stat-label">Typefaces</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value">6</div>
+            <div class="stat-label">Categories</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value">Free</div>
+            <div class="stat-label">For all plans</div>
+          </div>
         </div>
-        <div class="stat">
-          <div class="stat-value">6</div>
-          <div class="stat-label">Categories</div>
+      </section>
+
+      <!-- Default -->
+      <section class="category">
+        <div class="category-header">
+          <div class="category-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 2L2 7l10 5 10-5-10-5z" />
+              <path d="M2 17l10 5 10-5" />
+              <path d="M2 12l10 5 10-5" />
+            </svg>
+          </div>
+          <h2>Default</h2>
+          <span class="category-count">1 font</span>
         </div>
-        <div class="stat">
-          <div class="stat-value">Free</div>
-          <div class="stat-label">For all plans</div>
+        <div class="font-grid">
+          <article class="font-card" style="--i: 0">
+            <div class="font-name">
+              Lexend
+              <span class="font-tag">Grove Default</span>
+            </div>
+            <div
+              class="font-preview"
+              style="font-family: &quot;Lexend&quot;, sans-serif"
+            >
+              The quick brown fox jumps over the lazy dog
+            </div>
+            <div
+              class="font-sample"
+              style="font-family: &quot;Lexend&quot;, sans-serif"
+            >
+              Modern, highly readable sans-serif designed for improved reading
+              proficiency.
+            </div>
+            <div class="font-meta">
+              <span class="font-file">Lexend-Regular.ttf</span>
+              <button
+                class="copy-btn"
+                onclick="copyUrl(this, 'Lexend-Regular.ttf')"
+              >
+                Copy URL
+              </button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- Accessibility -->
+      <section class="category">
+        <div class="category-header">
+          <div class="category-icon">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 8v8" />
+              <path d="M8 12h8" />
+            </svg>
+          </div>
+          <h2>Accessibility</h2>
+          <span class="category-count">3 fonts</span>
+        </div>
+        <div class="font-grid">
+          <article class="font-card" style="--i: 0">
+            <div class="font-name">Atkinson Hyperlegible</div>
+            <div
+              class="font-preview"
+              style="font-family: &quot;Atkinson Hyperlegible&quot;, sans-serif"
+            >
+              The quick brown fox jumps over the lazy dog
+            </div>
+            <div
+              class="font-sample"
+              style="font-family: &quot;Atkinson Hyperlegible&quot;, sans-serif"
+            >
+              Designed for low vision readers. Maximum character distinction for
+              improved legibility.
+            </div>
+            <div class="font-meta">
+              <span class="font-file">AtkinsonHyperlegible-Regular.ttf</span>
+              <button
+                class="copy-btn"
+                onclick="copyUrl(this, 'AtkinsonHyperlegible-Regular.ttf')"
+              >
+                Copy URL
+              </button>
+            </div>
+          </article>
+          <article class="font-card" style="--i: 1">
+            <div class="font-name">OpenDyslexic</div>
+            <div
+              class="font-preview"
+              style="font-family: &quot;OpenDyslexic&quot;, sans-serif"
+            >
+              The quick brown fox jumps over the lazy dog
+            </div>
+            <div
+              class="font-sample"
+              style="font-family: &quot;OpenDyslexic&quot;, sans-serif"
+            >
+              Weighted bottoms reduce letter confusion for dyslexic readers.
+            </div>
+            <div class="font-meta">
+              <span class="font-file">OpenDyslexic-Regular.otf</span>
+              <button
+                class="copy-btn"
+                onclick="copyUrl(this, 'OpenDyslexic-Regular.otf')"
+              >
+                Copy URL
+              </button>
+            </div>
+          </article>
+          <article class="font-card" style="--i: 2">
+            <div class="font-name">Luciole</div>
+            <div
+              class="font-preview"
+              style="font-family: &quot;Luciole&quot;, sans-serif"
+            >
+              The quick brown fox jumps over the lazy dog
+            </div>
+            <div
+              class="font-sample"
+              style="font-family: &quot;Luciole&quot;, sans-serif"
+            >
+              French accessibility font designed specifically for visually
+              impaired readers.
+            </div>
+            <div class="font-meta">
+              <span class="font-file">Luciole-Regular.ttf</span>
+              <button
+                class="copy-btn"
+                onclick="copyUrl(this, 'Luciole-Regular.ttf')"
+              >
+                Copy URL
+              </button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- Sans-Serif -->
+      <section class="category">
+        <div class="category-header">
+          <div class="category-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M4 7V4h16v3" />
+              <path d="M9 20h6" />
+              <path d="M12 4v16" />
+            </svg>
+          </div>
+          <h2>Sans-Serif</h2>
+          <span class="category-count">5 fonts</span>
+        </div>
+        <div class="font-grid">
+          <article class="font-card" style="--i: 0">
+            <div class="font-name">Nunito</div>
+            <div
+              class="font-preview"
+              style="font-family: &quot;Nunito&quot;, sans-serif"
+            >
+              The quick brown fox jumps over the lazy dog
+            </div>
+            <div
+              class="font-sample"
+              style="font-family: &quot;Nunito&quot;, sans-serif"
+            >
+              Friendly rounded sans-serif. Warm and approachable for everyday
+              reading.
+            </div>
+            <div class="font-meta">
+              <span class="font-file">Nunito-Regular.ttf</span>
+              <button
+                class="copy-btn"
+                onclick="copyUrl(this, 'Nunito-Regular.ttf')"
+              >
+                Copy URL
+              </button>
+            </div>
+          </article>
+          <article class="font-card" style="--i: 1">
+            <div class="font-name">Quicksand</div>
+            <div
+              class="font-preview"
+              style="font-family: &quot;Quicksand&quot;, sans-serif"
+            >
+              The quick brown fox jumps over the lazy dog
+            </div>
+            <div
+              class="font-sample"
+              style="font-family: &quot;Quicksand&quot;, sans-serif"
+            >
+              Geometric sans with rounded terminals. Light and airy modern feel.
+            </div>
+            <div class="font-meta">
+              <span class="font-file">Quicksand-Regular.ttf</span>
+              <button
+                class="copy-btn"
+                onclick="copyUrl(this, 'Quicksand-Regular.ttf')"
+              >
+                Copy URL
+              </button>
+            </div>
+          </article>
+          <article class="font-card" style="--i: 2">
+            <div class="font-name">Manrope</div>
+            <div
+              class="font-preview"
+              style="font-family: &quot;Manrope&quot;, sans-serif"
+            >
+              The quick brown fox jumps over the lazy dog
+            </div>
+            <div
+              class="font-sample"
+              style="font-family: &quot;Manrope&quot;, sans-serif"
+            >
+              Professional geometric sans. Clean and contemporary for modern
+              blogs.
+            </div>
+            <div class="font-meta">
+              <span class="font-file">Manrope-Regular.ttf</span>
+              <button
+                class="copy-btn"
+                onclick="copyUrl(this, 'Manrope-Regular.ttf')"
+              >
+                Copy URL
+              </button>
+            </div>
+          </article>
+          <article class="font-card" style="--i: 3">
+            <div class="font-name">Instrument Sans</div>
+            <div
+              class="font-preview"
+              style="font-family: &quot;Instrument Sans&quot;, sans-serif"
+            >
+              The quick brown fox jumps over the lazy dog
+            </div>
+            <div
+              class="font-sample"
+              style="font-family: &quot;Instrument Sans&quot;, sans-serif"
+            >
+              Low contrast sans with humanist touches. Elegant simplicity.
+            </div>
+            <div class="font-meta">
+              <span class="font-file">InstrumentSans-Regular.ttf</span>
+              <button
+                class="copy-btn"
+                onclick="copyUrl(this, 'InstrumentSans-Regular.ttf')"
+              >
+                Copy URL
+              </button>
+            </div>
+          </article>
+          <article class="font-card" style="--i: 4">
+            <div class="font-name">Plus Jakarta Sans</div>
+            <div
+              class="font-preview"
+              style="font-family: &quot;Plus Jakarta Sans&quot;, sans-serif"
+            >
+              The quick brown fox jumps over the lazy dog
+            </div>
+            <div
+              class="font-sample"
+              style="font-family: &quot;Plus Jakarta Sans&quot;, sans-serif"
+            >
+              Contemporary geometric sans. Balanced and versatile for any
+              content.
+            </div>
+            <div class="font-meta">
+              <span class="font-file">PlusJakartaSans-Regular.ttf</span>
+              <button
+                class="copy-btn"
+                onclick="copyUrl(this, 'PlusJakartaSans-Regular.ttf')"
+              >
+                Copy URL
+              </button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- Serif -->
+      <section class="category">
+        <div class="category-header">
+          <div class="category-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M4 7V4h16v3" />
+              <path d="M4 20v-3h16v3" />
+              <path d="M12 4v16" />
+            </svg>
+          </div>
+          <h2>Serif</h2>
+          <span class="category-count">6 fonts</span>
+        </div>
+        <div class="font-grid">
+          <article class="font-card" style="--i: 0">
+            <div class="font-name">Cormorant</div>
+            <div
+              class="font-preview"
+              style="font-family: &quot;Cormorant&quot;, serif"
+            >
+              The quick brown fox jumps over the lazy dog
+            </div>
+            <div
+              class="font-sample"
+              style="font-family: &quot;Cormorant&quot;, serif"
+            >
+              Elegant display serif inspired by Garamond. Refined and classic.
+            </div>
+            <div class="font-meta">
+              <span class="font-file">Cormorant-Regular.ttf</span>
+              <button
+                class="copy-btn"
+                onclick="copyUrl(this, 'Cormorant-Regular.ttf')"
+              >
+                Copy URL
+              </button>
+            </div>
+          </article>
+          <article class="font-card" style="--i: 1">
+            <div class="font-name">Bodoni Moda</div>
+            <div
+              class="font-preview"
+              style="font-family: &quot;Bodoni Moda&quot;, serif"
+            >
+              The quick brown fox jumps over the lazy dog
+            </div>
+            <div
+              class="font-sample"
+              style="font-family: &quot;Bodoni Moda&quot;, serif"
+            >
+              High contrast modern serif. Bold and sophisticated headlines.
+            </div>
+            <div class="font-meta">
+              <span class="font-file">BodoniModa-Regular.ttf</span>
+              <button
+                class="copy-btn"
+                onclick="copyUrl(this, 'BodoniModa-Regular.ttf')"
+              >
+                Copy URL
+              </button>
+            </div>
+          </article>
+          <article class="font-card" style="--i: 2">
+            <div class="font-name">Lora</div>
+            <div
+              class="font-preview"
+              style="font-family: &quot;Lora&quot;, serif"
+            >
+              The quick brown fox jumps over the lazy dog
+            </div>
+            <div
+              class="font-sample"
+              style="font-family: &quot;Lora&quot;, serif"
+            >
+              Well-balanced contemporary serif. Excellent for extended reading.
+            </div>
+            <div class="font-meta">
+              <span class="font-file">Lora-Regular.ttf</span>
+              <button
+                class="copy-btn"
+                onclick="copyUrl(this, 'Lora-Regular.ttf')"
+              >
+                Copy URL
+              </button>
+            </div>
+          </article>
+          <article class="font-card" style="--i: 3">
+            <div class="font-name">EB Garamond</div>
+            <div
+              class="font-preview"
+              style="font-family: &quot;EB Garamond&quot;, serif"
+            >
+              The quick brown fox jumps over the lazy dog
+            </div>
+            <div
+              class="font-sample"
+              style="font-family: &quot;EB Garamond&quot;, serif"
+            >
+              Revival of classic Garamond. Timeless book typography.
+            </div>
+            <div class="font-meta">
+              <span class="font-file">EBGaramond-Regular.ttf</span>
+              <button
+                class="copy-btn"
+                onclick="copyUrl(this, 'EBGaramond-Regular.ttf')"
+              >
+                Copy URL
+              </button>
+            </div>
+          </article>
+          <article class="font-card" style="--i: 4">
+            <div class="font-name">Merriweather</div>
+            <div
+              class="font-preview"
+              style="font-family: &quot;Merriweather&quot;, serif"
+            >
+              The quick brown fox jumps over the lazy dog
+            </div>
+            <div
+              class="font-sample"
+              style="font-family: &quot;Merriweather&quot;, serif"
+            >
+              Designed for screen reading. Excellent legibility at all sizes.
+            </div>
+            <div class="font-meta">
+              <span class="font-file">Merriweather-Regular.ttf</span>
+              <button
+                class="copy-btn"
+                onclick="copyUrl(this, 'Merriweather-Regular.ttf')"
+              >
+                Copy URL
+              </button>
+            </div>
+          </article>
+          <article class="font-card" style="--i: 5">
+            <div class="font-name">Fraunces</div>
+            <div
+              class="font-preview"
+              style="font-family: &quot;Fraunces&quot;, serif"
+            >
+              The quick brown fox jumps over the lazy dog
+            </div>
+            <div
+              class="font-sample"
+              style="font-family: &quot;Fraunces&quot;, serif"
+            >
+              Soft serif with "wonky" optical axes. Warm personality shines
+              through.
+            </div>
+            <div class="font-meta">
+              <span class="font-file">Fraunces-Regular.ttf</span>
+              <button
+                class="copy-btn"
+                onclick="copyUrl(this, 'Fraunces-Regular.ttf')"
+              >
+                Copy URL
+              </button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- Monospace -->
+      <section class="category">
+        <div class="category-header">
+          <div class="category-icon">
+            <svg viewBox="0 0 24 24">
+              <polyline points="4 17 10 11 4 5" />
+              <line x1="12" y1="19" x2="20" y2="19" />
+            </svg>
+          </div>
+          <h2>Monospace</h2>
+          <span class="category-count">2 fonts</span>
+        </div>
+        <div class="font-grid">
+          <article class="font-card" style="--i: 0">
+            <div class="font-name">IBM Plex Mono</div>
+            <div
+              class="font-preview"
+              style="font-family: &quot;IBM Plex Mono&quot;, monospace"
+            >
+              The quick brown fox jumps over the lazy dog
+            </div>
+            <div
+              class="font-sample"
+              style="font-family: &quot;IBM Plex Mono&quot;, monospace"
+            >
+              Corporate monospace with human warmth. Great for code blocks.
+            </div>
+            <div class="font-meta">
+              <span class="font-file">IBMPlexMono-Regular.ttf</span>
+              <button
+                class="copy-btn"
+                onclick="copyUrl(this, 'IBMPlexMono-Regular.ttf')"
+              >
+                Copy URL
+              </button>
+            </div>
+          </article>
+          <article class="font-card" style="--i: 1">
+            <div class="font-name">Cozette</div>
+            <div
+              class="font-preview"
+              style="font-family: &quot;Cozette&quot;, monospace"
+            >
+              The quick brown fox jumps over the lazy dog
+            </div>
+            <div
+              class="font-sample"
+              style="font-family: &quot;Cozette&quot;, monospace"
+            >
+              Bitmap-style vector font. Retro terminal aesthetic for tech blogs.
+            </div>
+            <div class="font-meta">
+              <span class="font-file">CozetteVector.ttf</span>
+              <button
+                class="copy-btn"
+                onclick="copyUrl(this, 'CozetteVector.ttf')"
+              >
+                Copy URL
+              </button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- Display -->
+      <section class="category">
+        <div class="category-header">
+          <div class="category-icon">
+            <svg viewBox="0 0 24 24">
+              <polygon
+                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+              />
+            </svg>
+          </div>
+          <h2>Display & Special</h2>
+          <span class="category-count">3 fonts</span>
+        </div>
+        <div class="font-grid">
+          <article class="font-card" style="--i: 0">
+            <div class="font-name">Alagard</div>
+            <div
+              class="font-preview"
+              style="font-family: &quot;Alagard&quot;, fantasy"
+            >
+              The quick brown fox jumps over the lazy dog
+            </div>
+            <div
+              class="font-sample"
+              style="font-family: &quot;Alagard&quot;, fantasy"
+            >
+              Pixel art medieval display font. Perfect for fantasy and gaming
+              content.
+            </div>
+            <div class="font-meta">
+              <span class="font-file">alagard.ttf</span>
+              <button class="copy-btn" onclick="copyUrl(this, 'alagard.ttf')">
+                Copy URL
+              </button>
+            </div>
+          </article>
+          <article class="font-card" style="--i: 1">
+            <div class="font-name">Calistoga</div>
+            <div
+              class="font-preview"
+              style="font-family: &quot;Calistoga&quot;, serif"
+            >
+              The quick brown fox jumps over the lazy dog
+            </div>
+            <div
+              class="font-sample"
+              style="font-family: &quot;Calistoga&quot;, serif"
+            >
+              Casual brush serif. Friendly headlines with hand-painted charm.
+            </div>
+            <div class="font-meta">
+              <span class="font-file">Calistoga-Regular.ttf</span>
+              <button
+                class="copy-btn"
+                onclick="copyUrl(this, 'Calistoga-Regular.ttf')"
+              >
+                Copy URL
+              </button>
+            </div>
+          </article>
+          <article class="font-card" style="--i: 2">
+            <div class="font-name">Caveat</div>
+            <div
+              class="font-preview"
+              style="font-family: &quot;Caveat&quot;, cursive"
+            >
+              The quick brown fox jumps over the lazy dog
+            </div>
+            <div
+              class="font-sample"
+              style="font-family: &quot;Caveat&quot;, cursive"
+            >
+              Handwritten script. Personal and informal for authentic voices.
+            </div>
+            <div class="font-meta">
+              <span class="font-file">Caveat-Regular.ttf</span>
+              <button
+                class="copy-btn"
+                onclick="copyUrl(this, 'Caveat-Regular.ttf')"
+              >
+                Copy URL
+              </button>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="container">
+        <p>
+          Part of <a href="https://grove.place">Grove</a> — a queer-friendly
+          space for bloggers
+        </p>
+        <div class="footer-links">
+          <a href="https://grove.place">Main Site</a>
+          <a href="https://grove.place/knowledge">Knowledge Base</a>
+          <a href="https://github.com/AutumnsGrove/Lattice">GitHub</a>
         </div>
       </div>
-    </section>
+    </footer>
 
-    <!-- Default -->
-    <section class="category">
-      <div class="category-header">
-        <div class="category-icon">
-          <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-        </div>
-        <h2>Default</h2>
-        <span class="category-count">1 font</span>
-      </div>
-      <div class="font-grid">
-        <article class="font-card" style="--i: 0">
-          <div class="font-name">
-            Lexend
-            <span class="font-tag">Grove Default</span>
-          </div>
-          <div class="font-preview" style="font-family: 'Lexend', sans-serif">
-            The quick brown fox jumps over the lazy dog
-          </div>
-          <div class="font-sample" style="font-family: 'Lexend', sans-serif">
-            Modern, highly readable sans-serif designed for improved reading proficiency.
-          </div>
-          <div class="font-meta">
-            <span class="font-file">Lexend-Regular.ttf</span>
-            <button class="copy-btn" onclick="copyUrl(this, 'Lexend-Regular.ttf')">Copy URL</button>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <!-- Accessibility -->
-    <section class="category">
-      <div class="category-header">
-        <div class="category-icon">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
-        </div>
-        <h2>Accessibility</h2>
-        <span class="category-count">3 fonts</span>
-      </div>
-      <div class="font-grid">
-        <article class="font-card" style="--i: 0">
-          <div class="font-name">Atkinson Hyperlegible</div>
-          <div class="font-preview" style="font-family: 'Atkinson Hyperlegible', sans-serif">
-            The quick brown fox jumps over the lazy dog
-          </div>
-          <div class="font-sample" style="font-family: 'Atkinson Hyperlegible', sans-serif">
-            Designed for low vision readers. Maximum character distinction for improved legibility.
-          </div>
-          <div class="font-meta">
-            <span class="font-file">AtkinsonHyperlegible-Regular.ttf</span>
-            <button class="copy-btn" onclick="copyUrl(this, 'AtkinsonHyperlegible-Regular.ttf')">Copy URL</button>
-          </div>
-        </article>
-        <article class="font-card" style="--i: 1">
-          <div class="font-name">OpenDyslexic</div>
-          <div class="font-preview" style="font-family: 'OpenDyslexic', sans-serif">
-            The quick brown fox jumps over the lazy dog
-          </div>
-          <div class="font-sample" style="font-family: 'OpenDyslexic', sans-serif">
-            Weighted bottoms reduce letter confusion for dyslexic readers.
-          </div>
-          <div class="font-meta">
-            <span class="font-file">OpenDyslexic-Regular.otf</span>
-            <button class="copy-btn" onclick="copyUrl(this, 'OpenDyslexic-Regular.otf')">Copy URL</button>
-          </div>
-        </article>
-        <article class="font-card" style="--i: 2">
-          <div class="font-name">Luciole</div>
-          <div class="font-preview" style="font-family: 'Luciole', sans-serif">
-            The quick brown fox jumps over the lazy dog
-          </div>
-          <div class="font-sample" style="font-family: 'Luciole', sans-serif">
-            French accessibility font designed specifically for visually impaired readers.
-          </div>
-          <div class="font-meta">
-            <span class="font-file">Luciole-Regular.ttf</span>
-            <button class="copy-btn" onclick="copyUrl(this, 'Luciole-Regular.ttf')">Copy URL</button>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <!-- Sans-Serif -->
-    <section class="category">
-      <div class="category-header">
-        <div class="category-icon">
-          <svg viewBox="0 0 24 24"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>
-        </div>
-        <h2>Sans-Serif</h2>
-        <span class="category-count">5 fonts</span>
-      </div>
-      <div class="font-grid">
-        <article class="font-card" style="--i: 0">
-          <div class="font-name">Nunito</div>
-          <div class="font-preview" style="font-family: 'Nunito', sans-serif">
-            The quick brown fox jumps over the lazy dog
-          </div>
-          <div class="font-sample" style="font-family: 'Nunito', sans-serif">
-            Friendly rounded sans-serif. Warm and approachable for everyday reading.
-          </div>
-          <div class="font-meta">
-            <span class="font-file">Nunito-Regular.ttf</span>
-            <button class="copy-btn" onclick="copyUrl(this, 'Nunito-Regular.ttf')">Copy URL</button>
-          </div>
-        </article>
-        <article class="font-card" style="--i: 1">
-          <div class="font-name">Quicksand</div>
-          <div class="font-preview" style="font-family: 'Quicksand', sans-serif">
-            The quick brown fox jumps over the lazy dog
-          </div>
-          <div class="font-sample" style="font-family: 'Quicksand', sans-serif">
-            Geometric sans with rounded terminals. Light and airy modern feel.
-          </div>
-          <div class="font-meta">
-            <span class="font-file">Quicksand-Regular.ttf</span>
-            <button class="copy-btn" onclick="copyUrl(this, 'Quicksand-Regular.ttf')">Copy URL</button>
-          </div>
-        </article>
-        <article class="font-card" style="--i: 2">
-          <div class="font-name">Manrope</div>
-          <div class="font-preview" style="font-family: 'Manrope', sans-serif">
-            The quick brown fox jumps over the lazy dog
-          </div>
-          <div class="font-sample" style="font-family: 'Manrope', sans-serif">
-            Professional geometric sans. Clean and contemporary for modern blogs.
-          </div>
-          <div class="font-meta">
-            <span class="font-file">Manrope-Regular.ttf</span>
-            <button class="copy-btn" onclick="copyUrl(this, 'Manrope-Regular.ttf')">Copy URL</button>
-          </div>
-        </article>
-        <article class="font-card" style="--i: 3">
-          <div class="font-name">Instrument Sans</div>
-          <div class="font-preview" style="font-family: 'Instrument Sans', sans-serif">
-            The quick brown fox jumps over the lazy dog
-          </div>
-          <div class="font-sample" style="font-family: 'Instrument Sans', sans-serif">
-            Low contrast sans with humanist touches. Elegant simplicity.
-          </div>
-          <div class="font-meta">
-            <span class="font-file">InstrumentSans-Regular.ttf</span>
-            <button class="copy-btn" onclick="copyUrl(this, 'InstrumentSans-Regular.ttf')">Copy URL</button>
-          </div>
-        </article>
-        <article class="font-card" style="--i: 4">
-          <div class="font-name">Plus Jakarta Sans</div>
-          <div class="font-preview" style="font-family: 'Plus Jakarta Sans', sans-serif">
-            The quick brown fox jumps over the lazy dog
-          </div>
-          <div class="font-sample" style="font-family: 'Plus Jakarta Sans', sans-serif">
-            Contemporary geometric sans. Balanced and versatile for any content.
-          </div>
-          <div class="font-meta">
-            <span class="font-file">PlusJakartaSans-Regular.ttf</span>
-            <button class="copy-btn" onclick="copyUrl(this, 'PlusJakartaSans-Regular.ttf')">Copy URL</button>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <!-- Serif -->
-    <section class="category">
-      <div class="category-header">
-        <div class="category-icon">
-          <svg viewBox="0 0 24 24"><path d="M4 7V4h16v3"/><path d="M4 20v-3h16v3"/><path d="M12 4v16"/></svg>
-        </div>
-        <h2>Serif</h2>
-        <span class="category-count">6 fonts</span>
-      </div>
-      <div class="font-grid">
-        <article class="font-card" style="--i: 0">
-          <div class="font-name">Cormorant</div>
-          <div class="font-preview" style="font-family: 'Cormorant', serif">
-            The quick brown fox jumps over the lazy dog
-          </div>
-          <div class="font-sample" style="font-family: 'Cormorant', serif">
-            Elegant display serif inspired by Garamond. Refined and classic.
-          </div>
-          <div class="font-meta">
-            <span class="font-file">Cormorant-Regular.ttf</span>
-            <button class="copy-btn" onclick="copyUrl(this, 'Cormorant-Regular.ttf')">Copy URL</button>
-          </div>
-        </article>
-        <article class="font-card" style="--i: 1">
-          <div class="font-name">Bodoni Moda</div>
-          <div class="font-preview" style="font-family: 'Bodoni Moda', serif">
-            The quick brown fox jumps over the lazy dog
-          </div>
-          <div class="font-sample" style="font-family: 'Bodoni Moda', serif">
-            High contrast modern serif. Bold and sophisticated headlines.
-          </div>
-          <div class="font-meta">
-            <span class="font-file">BodoniModa-Regular.ttf</span>
-            <button class="copy-btn" onclick="copyUrl(this, 'BodoniModa-Regular.ttf')">Copy URL</button>
-          </div>
-        </article>
-        <article class="font-card" style="--i: 2">
-          <div class="font-name">Lora</div>
-          <div class="font-preview" style="font-family: 'Lora', serif">
-            The quick brown fox jumps over the lazy dog
-          </div>
-          <div class="font-sample" style="font-family: 'Lora', serif">
-            Well-balanced contemporary serif. Excellent for extended reading.
-          </div>
-          <div class="font-meta">
-            <span class="font-file">Lora-Regular.ttf</span>
-            <button class="copy-btn" onclick="copyUrl(this, 'Lora-Regular.ttf')">Copy URL</button>
-          </div>
-        </article>
-        <article class="font-card" style="--i: 3">
-          <div class="font-name">EB Garamond</div>
-          <div class="font-preview" style="font-family: 'EB Garamond', serif">
-            The quick brown fox jumps over the lazy dog
-          </div>
-          <div class="font-sample" style="font-family: 'EB Garamond', serif">
-            Revival of classic Garamond. Timeless book typography.
-          </div>
-          <div class="font-meta">
-            <span class="font-file">EBGaramond-Regular.ttf</span>
-            <button class="copy-btn" onclick="copyUrl(this, 'EBGaramond-Regular.ttf')">Copy URL</button>
-          </div>
-        </article>
-        <article class="font-card" style="--i: 4">
-          <div class="font-name">Merriweather</div>
-          <div class="font-preview" style="font-family: 'Merriweather', serif">
-            The quick brown fox jumps over the lazy dog
-          </div>
-          <div class="font-sample" style="font-family: 'Merriweather', serif">
-            Designed for screen reading. Excellent legibility at all sizes.
-          </div>
-          <div class="font-meta">
-            <span class="font-file">Merriweather-Regular.ttf</span>
-            <button class="copy-btn" onclick="copyUrl(this, 'Merriweather-Regular.ttf')">Copy URL</button>
-          </div>
-        </article>
-        <article class="font-card" style="--i: 5">
-          <div class="font-name">Fraunces</div>
-          <div class="font-preview" style="font-family: 'Fraunces', serif">
-            The quick brown fox jumps over the lazy dog
-          </div>
-          <div class="font-sample" style="font-family: 'Fraunces', serif">
-            Soft serif with "wonky" optical axes. Warm personality shines through.
-          </div>
-          <div class="font-meta">
-            <span class="font-file">Fraunces-Regular.ttf</span>
-            <button class="copy-btn" onclick="copyUrl(this, 'Fraunces-Regular.ttf')">Copy URL</button>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <!-- Monospace -->
-    <section class="category">
-      <div class="category-header">
-        <div class="category-icon">
-          <svg viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
-        </div>
-        <h2>Monospace</h2>
-        <span class="category-count">2 fonts</span>
-      </div>
-      <div class="font-grid">
-        <article class="font-card" style="--i: 0">
-          <div class="font-name">IBM Plex Mono</div>
-          <div class="font-preview" style="font-family: 'IBM Plex Mono', monospace">
-            The quick brown fox jumps over the lazy dog
-          </div>
-          <div class="font-sample" style="font-family: 'IBM Plex Mono', monospace">
-            Corporate monospace with human warmth. Great for code blocks.
-          </div>
-          <div class="font-meta">
-            <span class="font-file">IBMPlexMono-Regular.ttf</span>
-            <button class="copy-btn" onclick="copyUrl(this, 'IBMPlexMono-Regular.ttf')">Copy URL</button>
-          </div>
-        </article>
-        <article class="font-card" style="--i: 1">
-          <div class="font-name">Cozette</div>
-          <div class="font-preview" style="font-family: 'Cozette', monospace">
-            The quick brown fox jumps over the lazy dog
-          </div>
-          <div class="font-sample" style="font-family: 'Cozette', monospace">
-            Bitmap-style vector font. Retro terminal aesthetic for tech blogs.
-          </div>
-          <div class="font-meta">
-            <span class="font-file">CozetteVector.ttf</span>
-            <button class="copy-btn" onclick="copyUrl(this, 'CozetteVector.ttf')">Copy URL</button>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <!-- Display -->
-    <section class="category">
-      <div class="category-header">
-        <div class="category-icon">
-          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        </div>
-        <h2>Display & Special</h2>
-        <span class="category-count">3 fonts</span>
-      </div>
-      <div class="font-grid">
-        <article class="font-card" style="--i: 0">
-          <div class="font-name">Alagard</div>
-          <div class="font-preview" style="font-family: 'Alagard', fantasy">
-            The quick brown fox jumps over the lazy dog
-          </div>
-          <div class="font-sample" style="font-family: 'Alagard', fantasy">
-            Pixel art medieval display font. Perfect for fantasy and gaming content.
-          </div>
-          <div class="font-meta">
-            <span class="font-file">alagard.ttf</span>
-            <button class="copy-btn" onclick="copyUrl(this, 'alagard.ttf')">Copy URL</button>
-          </div>
-        </article>
-        <article class="font-card" style="--i: 1">
-          <div class="font-name">Calistoga</div>
-          <div class="font-preview" style="font-family: 'Calistoga', serif">
-            The quick brown fox jumps over the lazy dog
-          </div>
-          <div class="font-sample" style="font-family: 'Calistoga', serif">
-            Casual brush serif. Friendly headlines with hand-painted charm.
-          </div>
-          <div class="font-meta">
-            <span class="font-file">Calistoga-Regular.ttf</span>
-            <button class="copy-btn" onclick="copyUrl(this, 'Calistoga-Regular.ttf')">Copy URL</button>
-          </div>
-        </article>
-        <article class="font-card" style="--i: 2">
-          <div class="font-name">Caveat</div>
-          <div class="font-preview" style="font-family: 'Caveat', cursive">
-            The quick brown fox jumps over the lazy dog
-          </div>
-          <div class="font-sample" style="font-family: 'Caveat', cursive">
-            Handwritten script. Personal and informal for authentic voices.
-          </div>
-          <div class="font-meta">
-            <span class="font-file">Caveat-Regular.ttf</span>
-            <button class="copy-btn" onclick="copyUrl(this, 'Caveat-Regular.ttf')">Copy URL</button>
-          </div>
-        </article>
-      </div>
-    </section>
-  </main>
-
-  <footer>
-    <div class="container">
-      <p>Part of <a href="https://grove.place">Grove</a> — a queer-friendly space for bloggers</p>
-      <div class="footer-links">
-        <a href="https://grove.place">Main Site</a>
-        <a href="https://grove.place/knowledge">Knowledge Base</a>
-        <a href="https://github.com/AutumnsGrove/GroveEngine">GitHub</a>
-      </div>
-    </div>
-  </footer>
-
-  <script>
-    // Theme toggle
-    function toggleTheme() {
-      document.documentElement.classList.toggle('dark');
-      localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-    }
-
-    // Initialize theme
-    (function() {
-      const saved = localStorage.getItem('theme');
-      if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.documentElement.classList.add('dark');
+    <script>
+      // Theme toggle
+      function toggleTheme() {
+        document.documentElement.classList.toggle("dark");
+        localStorage.setItem(
+          "theme",
+          document.documentElement.classList.contains("dark")
+            ? "dark"
+            : "light",
+        );
       }
-    })();
 
-    // Copy URL functionality
-    function copyUrl(btn, filename) {
-      const url = `https://cdn.grove.place/fonts/${filename}`;
-      navigator.clipboard.writeText(url).then(() => {
-        btn.textContent = 'Copied!';
-        btn.classList.add('copied');
-        setTimeout(() => {
-          btn.textContent = 'Copy URL';
-          btn.classList.remove('copied');
-        }, 2000);
-      });
-    }
-  </script>
-</body>
+      // Initialize theme
+      (function () {
+        const saved = localStorage.getItem("theme");
+        if (
+          saved === "dark" ||
+          (!saved && window.matchMedia("(prefers-color-scheme: dark)").matches)
+        ) {
+          document.documentElement.classList.add("dark");
+        }
+      })();
+
+      // Copy URL functionality
+      function copyUrl(btn, filename) {
+        const url = `https://cdn.grove.place/fonts/${filename}`;
+        navigator.clipboard.writeText(url).then(() => {
+          btn.textContent = "Copied!";
+          btn.classList.add("copied");
+          setTimeout(() => {
+            btn.textContent = "Copy URL";
+            btn.classList.remove("copied");
+          }, 2000);
+        });
+      }
+    </script>
+  </body>
 </html>

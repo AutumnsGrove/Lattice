@@ -10,8 +10,8 @@
 	import { Shield } from 'lucide-svelte';
 	import {
 		TreePine
-	} from '@autumnsgrove/groveengine/ui/nature';
-	import { greens, bark } from '@autumnsgrove/groveengine/ui/nature';
+	} from '@autumnsgrove/lattice/ui/nature';
+	import { greens, bark } from '@autumnsgrove/lattice/ui/nature';
 
 	let { season, active, index }: HeroSlideContentProps = $props();
 </script>

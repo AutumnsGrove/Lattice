@@ -20,7 +20,7 @@ We don't accept PRs that appear out of nowhere. Here's why:
 
 ### How It Works
 
-1. **Find or create an issue** — Check [existing issues](https://github.com/AutumnsGrove/GroveEngine/issues) first
+1. **Find or create an issue** — Check [existing issues](https://github.com/AutumnsGrove/Lattice/issues) first
 2. **Discuss the approach** — Comment on the issue with your plan
 3. **Get the green light** — Wait for a maintainer to approve the approach
 4. **Submit your PR** — Reference the issue number (e.g., "Fixes #123")
@@ -32,7 +32,7 @@ We don't accept PRs that appear out of nowhere. Here's why:
 
 ### 🐛 Report Bugs
 
-Found something broken? [Open a bug report](https://github.com/AutumnsGrove/GroveEngine/issues/new?template=bug_report.md) with:
+Found something broken? [Open a bug report](https://github.com/AutumnsGrove/Lattice/issues/new?template=bug_report.md) with:
 
 - Clear title describing the problem
 - Steps to reproduce
@@ -42,7 +42,7 @@ Found something broken? [Open a bug report](https://github.com/AutumnsGrove/Grov
 
 ### 💡 Suggest Features
 
-Have an idea? [Open a feature request](https://github.com/AutumnsGrove/GroveEngine/issues/new?template=feature_request.md) with:
+Have an idea? [Open a feature request](https://github.com/AutumnsGrove/Lattice/issues/new?template=feature_request.md) with:
 
 - What problem does this solve?
 - Who would use this?
@@ -52,7 +52,7 @@ Not every suggestion will be accepted—Grove has a focused vision. But we'll al
 
 ### 🔍 Test and Explore
 
-Sometimes the most valuable contribution is just *using the thing*.
+Sometimes the most valuable contribution is just _using the thing_.
 
 - Explore the site and report what feels off
 - Try edge cases and unusual workflows
@@ -70,14 +70,14 @@ Clear documentation helps everyone. You can:
 
 ### 🛠️ Write Code
 
-Ready to dive in? Check out issues labeled [`good first issue`](https://github.com/AutumnsGrove/GroveEngine/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) for beginner-friendly tasks.
+Ready to dive in? Check out issues labeled [`good first issue`](https://github.com/AutumnsGrove/Lattice/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) for beginner-friendly tasks.
 
 ## Development Setup
 
 ```bash
 # Clone the repo
-git clone https://github.com/AutumnsGrove/GroveEngine.git
-cd GroveEngine
+git clone https://github.com/AutumnsGrove/Lattice.git
+cd Lattice
 
 # Install dependencies
 pnpm install
@@ -99,7 +99,7 @@ See the [README](README.md) for more detailed setup instructions.
 - **Tailwind CSS** for styling
 - Keep functions small and focused
 - Meaningful variable names over clever ones
-- Comments for *why*, not *what*
+- Comments for _why_, not _what_
 
 We don't enforce strict linting rules—use your judgment. Write code you'd want to read six months from now.
 
@@ -114,6 +114,7 @@ We use [Conventional Commits](https://www.conventionalcommits.org/):
 ```
 
 **Types:**
+
 - `feat` – New feature
 - `fix` – Bug fix
 - `docs` – Documentation only
@@ -122,6 +123,7 @@ We use [Conventional Commits](https://www.conventionalcommits.org/):
 - `chore` – Maintenance tasks
 
 **Examples:**
+
 ```
 feat: Add dark mode toggle to settings
 fix: Correct timezone handling in post scheduler
@@ -144,17 +146,21 @@ Keep the subject line under 72 characters. Write in imperative mood ("Add featur
 
 ```markdown
 ## Summary
+
 Brief description of what this PR does.
 
 Fixes #<issue number>
 
 ## Changes
+
 - Bullet points of specific changes
 
 ## Test Plan
+
 How you verified this works.
 
 ## Screenshots (if UI changes)
+
 Before/after if applicable.
 ```
 
@@ -170,21 +176,24 @@ Before/after if applicable.
 Hey there, fellow builder! If you're an AI agent (Claude, GPT, Copilot, or otherwise) working on this project:
 
 1. **Read `AGENT.md` first.** It has project-specific instructions, conventions, and context you'll need.
-2. **Check [GitHub Issues](https://github.com/AutumnsGrove/GroveEngine/issues)** for current priorities and in-progress work.
+2. **Check [GitHub Issues](https://github.com/AutumnsGrove/Lattice/issues)** for current priorities and in-progress work.
 3. **Follow the issue-first workflow.** Don't generate PRs without a corresponding issue.
 4. **Self-identify in commits** — Use the Co-Authored-By line to identify yourself:
+
    ```
    Co-Authored-By: <Agent Name> <Model> <noreply@provider.com>
    ```
 
    Examples:
+
    ```
    Co-Authored-By: Claude Code (Opus 4.5) <noreply@anthropic.com>
    Co-Authored-By: Kilo (DeepSeek V3) <noreply@deepseek.com>
    Co-Authored-By: Kilo (MiniMax M2.1) <noreply@minimax.io>
    ```
 
-   This helps with auditing—we want to know *which* agent wrote *what*.
+   This helps with auditing—we want to know _which_ agent wrote _what_.
+
 5. **Don't over-engineer.** Do what's asked, nothing more. Resist the urge to refactor adjacent code or add "improvements" that weren't requested.
 6. **Ask for clarification** if requirements are ambiguous rather than guessing.
 7. **Respect the project's voice.** Grove has a warm, introspective tone. Match it in documentation and user-facing text.
@@ -196,9 +205,11 @@ You're part of the team. Build things that help people have their own space onli
 Grove uses a unique "forest ecosystem" of specialized skills for different tasks. Each animal has a specialty:
 
 **Predators (Precision):**
+
 - `panther-strike` — Fix single issues with surgical precision
 
 **Builders (Creation):**
+
 - `beaver-build` — Write tests and build confidence
 - `elephant-build` — Build multi-file features with momentum
 - `swan-design` — Craft elegant specifications
@@ -206,29 +217,37 @@ Grove uses a unique "forest ecosystem" of specialized skills for different tasks
 - `spider-weave` — Weave authentication webs
 
 **Scouts (Exploration):**
+
 - `bloodhound-scout` — Explore and understand codebases
 
 **Shapeshifters (UI):**
+
 - `chameleon-adapt` — Design Grove UI with glassmorphism
 
 **Gatherers (Organization):**
+
 - `bee-collect` — Create GitHub issues from TODOs
 - `owl-archive` — Write documentation
 - `raccoon-audit` — Security auditing
 
 **Speedsters:**
+
 - `fox-optimize` — Performance optimization
 
 **Heavy Lifters:**
+
 - `bear-migrate` — Data migrations
 
 **Watchers:**
+
 - `deer-sense` — Accessibility auditing
 
 **Guides:**
+
 - `robin-guide` — Navigate the skill ecosystem
 
 **Gathering Chains** combine multiple animals for complex workflows:
+
 - `gathering-feature` — Complete feature lifecycle
 - `gathering-architecture` — System design to implementation
 - `gathering-ui` — UI design + accessibility
@@ -246,11 +265,11 @@ Grove is explicitly a queer-friendly space. Bigotry, harassment, and exclusionar
 ## Questions?
 
 - Check the [docs](docs/) folder
-- Browse [existing issues](https://github.com/AutumnsGrove/GroveEngine/issues)
+- Browse [existing issues](https://github.com/AutumnsGrove/Lattice/issues)
 - Open a discussion on GitHub
 
 ---
 
 Thanks for contributing to Grove. Every issue, commit, and review helps build something meaningful.
 
-*Here's to queer-friendly infrastructure and solarpunk dreams.*
+_Here's to queer-friendly infrastructure and solarpunk dreams._

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { LayoutData } from './$types';
 	import { page } from '$app/state';
-	import { AdminHeader } from '@autumnsgrove/groveengine/ui/chrome';
+	import { AdminHeader } from '@autumnsgrove/lattice/ui/chrome';
 	import { LayoutDashboard, Search, Clock, Settings } from 'lucide-svelte';
 
 	let { data, children }: { data: LayoutData; children: any } = $props();
@@ -17,7 +17,7 @@
 	];
 
 	async function logout() {
-		await fetch('/api/auth/logout', { method: 'POST' });
+		await fetch('/api/auth/logout', { method: 'POST' }); // csrf-ok
 		window.location.href = '/';
 	}
 </script>

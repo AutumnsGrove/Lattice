@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageData } from "./$types";
-	import { GlassCard } from "@autumnsgrove/groveengine/ui";
+	import { GlassCard } from "@autumnsgrove/lattice/ui";
 	import {
 		CheckCircle2,
 		AlertTriangle,

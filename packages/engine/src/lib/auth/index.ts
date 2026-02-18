@@ -6,5 +6,5 @@
  * Only tenant verification functions remain.
  */
 
-export { verifyTenantOwnership, getVerifiedTenantId } from './session.js';
-export type { User, SessionError } from './session.js';
+export { verifyTenantOwnership, getVerifiedTenantId } from "./session.js";
+export type { User, SessionError } from "./session.js";

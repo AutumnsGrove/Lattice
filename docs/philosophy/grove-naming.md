@@ -82,7 +82,7 @@ Like "step away (unsubscribe)" in emails, Grove terms appear prominently with st
 - **UI text:** "Your Garden" / "New Bloom"
 - **Aria labels:** "blog posts" / "write new post"
 - **URLs:** `/garden` / `/garden/hello-world`
-- **Database:** Internal tables may keep standard names (like `GroveEngine` vs `Lattice`)
+- **Database:** Internal tables may keep standard names (like `Lattice` vs `Lattice`)
 
 The Grove language is what users see and feel. The standard terms remain for screen readers, search engines, and anyone who needs the familiar.
 
@@ -95,7 +95,7 @@ _The foundation everything grows from_
 ### Lattice
 
 **Core Platform** · `npm: @autumnsgrove/lattice`
-**Repository:** [AutumnsGrove/GroveEngine](https://github.com/AutumnsGrove/GroveEngine)
+**Repository:** [AutumnsGrove/Lattice](https://github.com/AutumnsGrove/Lattice)
 **AlwaysGrove**
 **Waystone:** The shared framework that powers every Grove site — UI components, design tools, and platform utilities.
 
@@ -692,7 +692,7 @@ _The cupboard is always stocked._
 ### Passage
 
 **Subdomain Routing** · _Internal infrastructure_
-**Repository:** [AutumnsGrove/GroveEngine](https://github.com/AutumnsGrove/GroveEngine/tree/main/packages/grove-router)
+**Repository:** [AutumnsGrove/Lattice](https://github.com/AutumnsGrove/Lattice/tree/main/packages/grove-router)
 **Standard:** Router
 **Waystone:** The subdomain router that sends visitors to the right Grove site when they type {you}.grove.place.
 
@@ -897,7 +897,7 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 
 | Public Name     | Internal Name   |
 | --------------- | --------------- |
-| Lattice         | GroveEngine     |
+| Lattice         | Lattice         |
 | Passage         | GroveRouter     |
 | Heartwood       | GroveAuth       |
 | Arbor           | GroveAdmin      |

@@ -24,7 +24,7 @@ export interface RenderResult {
  *
  * @example
  * ```tsx
- * import { render } from '@autumnsgrove/groveengine/email/render';
+ * import { render } from '@autumnsgrove/lattice/email/render';
  * import { WelcomeEmail } from './WelcomeEmail';
  *
  * const { html, text } = await render(

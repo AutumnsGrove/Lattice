@@ -4,7 +4,7 @@ description: Complete implementation plan for the unified email gateway
 category: plans
 planCategory: infrastructure
 icon: wind
-lastUpdated: '2026-02-02'
+lastUpdated: "2026-02-02"
 status: planned
 priority: high
 tags:
@@ -32,6 +32,7 @@ tags:
 > _Carrying messages on the wind._
 
 **This document consolidates the findings from all animal consultations:**
+
 - 🐕 Bloodhound Scout - Mapped 9+ email locations across the codebase
 - 🦅 Eagle Architect - Designed the system architecture
 - 🦢 Swan Design - Validated existing spec completeness
@@ -44,6 +45,7 @@ tags:
 Zephyr is Grove's unified email gateway. It centralizes all email sending from 9+ scattered locations into a single Cloudflare Worker with proper error handling, retries, and logging.
 
 **The Problem:**
+
 - Email sending scattered across 9+ files
 - Silent failures (the Porch bug!)
 - No retry logic
@@ -59,17 +61,17 @@ One call to Zephyr handles everything: validation, rate limiting, template rende
 
 ### Email Locations Identified (🐕 Bloodhound Scout Report)
 
-| Location | Purpose | Current Pattern | Migration Priority |
-|----------|---------|-----------------|-------------------|
-| `packages/plant/src/lib/server/send-email.ts` | Basic utility | Direct Resend | Phase 3 |
-| `packages/plant/src/lib/server/email-verification.ts` | Verification codes | Direct Resend | Phase 3 |
-| `packages/engine/src/lib/email/schedule.ts` | Welcome sequences | React Email + Resend | Phase 2 |
-| `packages/landing/src/lib/email/send.ts` | Welcome email | Direct Resend | Phase 3 |
-| `packages/engine/src/lib/server/services/trace-email.ts` | Trace notifications | Direct Resend | Phase 3 |
-| `workers/email-catchup/worker.ts` | Catch-up worker | Direct Resend | Phase 3 |
-| `packages/landing/workers/onboarding-emails/` | Old onboarding (deprecated) | Direct Resend | Phase 4 (Delete) |
-| `packages/landing/src/routes/admin/porch/[id]/+page.server.ts` | Porch replies | Direct Resend | **Phase 1 (THE BUG!)** |
-| Multiple `+page.server.ts` files | Various triggers | Direct Resend | Phase 3 |
+| Location                                                       | Purpose                     | Current Pattern      | Migration Priority     |
+| -------------------------------------------------------------- | --------------------------- | -------------------- | ---------------------- |
+| `packages/plant/src/lib/server/send-email.ts`                  | Basic utility               | Direct Resend        | Phase 3                |
+| `packages/plant/src/lib/server/email-verification.ts`          | Verification codes          | Direct Resend        | Phase 3                |
+| `packages/engine/src/lib/email/schedule.ts`                    | Welcome sequences           | React Email + Resend | Phase 2                |
+| `packages/landing/src/lib/email/send.ts`                       | Welcome email               | Direct Resend        | Phase 3                |
+| `packages/engine/src/lib/server/services/trace-email.ts`       | Trace notifications         | Direct Resend        | Phase 3                |
+| `workers/email-catchup/worker.ts`                              | Catch-up worker             | Direct Resend        | Phase 3                |
+| `packages/landing/workers/onboarding-emails/`                  | Old onboarding (deprecated) | Direct Resend        | Phase 4 (Delete)       |
+| `packages/landing/src/routes/admin/porch/[id]/+page.server.ts` | Porch replies               | Direct Resend        | **Phase 1 (THE BUG!)** |
+| Multiple `+page.server.ts` files                               | Various triggers            | Direct Resend        | Phase 3                |
 
 ### Template Systems
 
@@ -112,6 +114,7 @@ One call to Zephyr handles everything: validation, rate limiting, template rende
 ### Component Breakdown
 
 #### 1. ZephyrClient (`packages/engine/src/lib/zephyr/client.ts`)
+
 - Validates requests before sending
 - Builds properly typed payload
 - Calls Zephyr Worker via HTTP POST
@@ -119,6 +122,7 @@ One call to Zephyr handles everything: validation, rate limiting, template rende
 - Handles network errors gracefully
 
 #### 2. Zephyr Worker (`workers/zephyr/src/index.ts`)
+
 - HTTP endpoint: `POST /send`
 - Pre-processing pipeline:
   - Request validation (schema)
@@ -129,6 +133,7 @@ One call to Zephyr handles everything: validation, rate limiting, template rende
 - Post-processing: D1 logging
 
 #### 3. Database Schema (`zephyr_logs` table)
+
 ```sql
 CREATE TABLE zephyr_logs (
   id TEXT PRIMARY KEY,
@@ -161,6 +166,7 @@ CREATE UNIQUE INDEX idx_zephyr_idempotency ON zephyr_logs(idempotency_key)
 ```
 
 #### 4. Retry Strategy
+
 ```
 Attempt 1: Immediate
 Attempt 2: 1000ms delay (exponential backoff)
@@ -178,6 +184,7 @@ Circuit Breaker: 5 failures in 1 minute → pause 30s
 **Goal:** Deploy Zephyr worker, fix the Porch bug
 
 **Files to Create:**
+
 - [ ] `workers/zephyr/src/index.ts` - Worker entry point
 - [ ] `workers/zephyr/src/types.ts` - Type definitions
 - [ ] `workers/zephyr/src/handlers/send.ts` - Main send handler
@@ -195,13 +202,16 @@ Circuit Breaker: 5 failures in 1 minute → pause 30s
 - [ ] `packages/engine/src/lib/zephyr/types.ts` - Shared types
 
 **Files to Modify:**
+
 - [ ] `packages/landing/src/routes/admin/porch/[id]/+page.server.ts` - **MIGRATE TO ZEPHYR (THE FIX)**
 - [ ] `packages/engine/package.json` - Add zephyr export
 
 **Database Migration:**
+
 - [ ] Create `zephyr_logs` table in D1
 
 **Verification:**
+
 - [ ] Porch reply emails actually arrive
 - [ ] Errors are returned (not swallowed)
 - [ ] All sends logged to D1
@@ -211,6 +221,7 @@ Circuit Breaker: 5 failures in 1 minute → pause 30s
 **Goal:** Consolidate templates into React Email
 
 **Templates to Migrate:**
+
 - [ ] `verification-code` (from Plant)
 - [ ] `payment-received` (from Plant)
 - [ ] `payment-failed` (from Plant)
@@ -218,10 +229,12 @@ Circuit Breaker: 5 failures in 1 minute → pause 30s
 - [ ] Migrate onboarding sequences (already in React Email, just wire up)
 
 **Files to Modify:**
+
 - [ ] `packages/plant/src/lib/server/email-verification.ts` - Use Zephyr
 - [ ] `packages/plant/src/routes/api/webhooks/lemonsqueezy/+server.ts` - Use Zephyr for payment emails
 
 **Add:**
+
 - [ ] Template preview endpoint for testing
 
 ### Phase 3: Full Migration (Week 3)
@@ -229,6 +242,7 @@ Circuit Breaker: 5 failures in 1 minute → pause 30s
 **Goal:** All email sending goes through Zephyr
 
 **Files to Migrate:**
+
 - [ ] `packages/landing/src/lib/email/send.ts` - Welcome emails
 - [ ] `packages/engine/src/lib/email/schedule.ts` - Welcome sequences
 - [ ] `packages/engine/src/lib/server/services/trace-email.ts` - Trace notifications
@@ -241,16 +255,19 @@ Circuit Breaker: 5 failures in 1 minute → pause 30s
 **Goal:** Dashboard, monitoring, cleanup
 
 **Files to Create:**
+
 - [ ] Arbor dashboard page for email logs
 - [ ] Vista metrics integration
 
 **Files to Delete:**
+
 - [ ] `packages/landing/workers/onboarding-emails/` (deprecated)
 - [ ] `packages/plant/src/lib/server/send-email.ts` (migrated)
 - [ ] `packages/landing/src/lib/email/send.ts` (migrated)
 - [ ] Inline HTML templates (migrated)
 
 **Add:**
+
 - [ ] Circuit breaker implementation
 - [ ] Email delivery rate alerts
 
@@ -263,7 +280,13 @@ Circuit Breaker: 5 failures in 1 minute → pause 30s
 ```typescript
 interface ZephyrRequest {
   /** Email category for routing */
-  type: 'transactional' | 'notification' | 'verification' | 'sequence' | 'lifecycle' | 'broadcast';
+  type:
+    | "transactional"
+    | "notification"
+    | "verification"
+    | "sequence"
+    | "lifecycle"
+    | "broadcast";
   /** Template to render (or "raw" for pre-rendered) */
   template: string;
   /** Recipient email address */
@@ -310,20 +333,20 @@ interface ZephyrResponse {
 }
 
 type ZephyrErrorCode =
-  | 'INVALID_REQUEST'
-  | 'INVALID_TEMPLATE'
-  | 'INVALID_RECIPIENT'
-  | 'RATE_LIMITED'
-  | 'UNSUBSCRIBED'
-  | 'PROVIDER_ERROR'
-  | 'TEMPLATE_ERROR'
-  | 'CIRCUIT_OPEN';
+  | "INVALID_REQUEST"
+  | "INVALID_TEMPLATE"
+  | "INVALID_RECIPIENT"
+  | "RATE_LIMITED"
+  | "UNSUBSCRIBED"
+  | "PROVIDER_ERROR"
+  | "TEMPLATE_ERROR"
+  | "CIRCUIT_OPEN";
 ```
 
 ### Usage Example
 
 ```typescript
-import { Zephyr } from "@autumnsgrove/groveengine/zephyr";
+import { Zephyr } from "@autumnsgrove/lattice/zephyr";
 
 // Porch reply notification (THE FIX)
 const result = await Zephyr.send({
@@ -411,17 +434,20 @@ Add to `packages/engine/package.json`:
 ## Success Metrics
 
 ### Immediate (Post-Phase 1)
+
 - [ ] Porch reply emails actually arrive
 - [ ] Zero silent failures — all errors returned to caller
 - [ ] 100% of email sends logged to D1
 
 ### Short-term (Post-Phase 4)
+
 - [ ] Single `RESEND_API_KEY` location (Zephyr worker only)
 - [ ] All emails use React Email templates
 - [ ] Delivery rate visible in Arbor dashboard
 - [ ] < 100ms added latency per send
 
 ### Long-term
+
 - [ ] < 1% email failure rate
 - [ ] Automatic fallback to backup provider (future)
 - [ ] Per-tenant email analytics
@@ -431,12 +457,14 @@ Add to `packages/engine/package.json`:
 ## Cost Analysis
 
 **No additional cost** — Resend pricing remains the same:
+
 - Free tier: 3,000 emails/month
 - Paid: $0.001 per email after free tier
 
 Current volume: ~850 emails/month (~$0.85, well under free tier)
 
 **Benefits:**
+
 - Better visibility into email costs per service
 - Reduced waste through retry logic
 - Audit capability for debugging
@@ -466,7 +494,7 @@ Current volume: ~850 emails/month (~$0.85, well under free tier)
 
 ## Next Steps
 
-**Ready to begin development!** 
+**Ready to begin development!**
 
 Summon the gathering-feature skill to start the implementation:
 
@@ -478,7 +506,7 @@ Let the building begin.
 
 ---
 
-*Carrying messages on the wind.*
+_Carrying messages on the wind._
 
 **Last updated:** February 2, 2026
 **Status:** Planned - Ready for Implementation

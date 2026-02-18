@@ -7,7 +7,7 @@
  * Digest times default to 8am / 1pm / 6pm, configurable per-user.
  */
 
-import type { LumenClient } from "@autumnsgrove/groveengine/lumen";
+import type { LumenClient } from "@autumnsgrove/lattice/lumen";
 import type { EmailCategory } from "./types.js";
 
 // =============================================================================

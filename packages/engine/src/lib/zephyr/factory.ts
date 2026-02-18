@@ -6,7 +6,7 @@
  *
  * @example
  * ```typescript
- * import { createZephyrClient } from '@autumnsgrove/groveengine/zephyr';
+ * import { createZephyrClient } from '@autumnsgrove/lattice/zephyr';
  *
  * export const POST: RequestHandler = async ({ platform }) => {
  *   const zephyr = createZephyrClient(platform.env);

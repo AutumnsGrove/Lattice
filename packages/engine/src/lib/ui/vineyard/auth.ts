@@ -5,7 +5,7 @@
 
 import type { BetterAuthSessionResponse, BetterAuthProvider } from "./types.js";
 
-/** Better Auth API base URL — canonical source: @autumnsgrove/groveengine/config AUTH_HUB_URL */
+/** Better Auth API base URL — canonical source: @autumnsgrove/lattice/config AUTH_HUB_URL */
 const BETTER_AUTH_BASE_URL = "https://login.grove.place";
 
 /**
@@ -19,7 +19,7 @@ const BETTER_AUTH_BASE_URL = "https://login.grove.place";
  *
  * @example
  * ```typescript
- * import { signIn } from '@autumnsgrove/groveengine/vineyard';
+ * import { signIn } from '@autumnsgrove/lattice/vineyard';
  *
  * // Sign in with Google
  * signIn('google');
@@ -59,7 +59,7 @@ export function signIn(
  *
  * @example
  * ```typescript
- * import { getSession } from '@autumnsgrove/groveengine/vineyard';
+ * import { getSession } from '@autumnsgrove/lattice/vineyard';
  *
  * const sessionData = await getSession();
  * if (sessionData.user) {
@@ -98,7 +98,7 @@ export async function getSession(): Promise<BetterAuthSessionResponse> {
  *
  * @example
  * ```typescript
- * import { signOut } from '@autumnsgrove/groveengine/vineyard';
+ * import { signOut } from '@autumnsgrove/lattice/vineyard';
  *
  * // Sign out and redirect to home
  * await signOut();
@@ -136,7 +136,7 @@ export async function signOut(redirectTo: string = "/"): Promise<void> {
  *
  * @example
  * ```typescript
- * import { isAuthenticated } from '@autumnsgrove/groveengine/vineyard';
+ * import { isAuthenticated } from '@autumnsgrove/lattice/vineyard';
  *
  * if (await isAuthenticated()) {
  *   // Show authenticated content

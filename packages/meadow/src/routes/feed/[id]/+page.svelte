@@ -7,7 +7,7 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
 	import { page } from "$app/state";
-	import { buildLoginUrl } from "@autumnsgrove/groveengine/grafts/login";
+	import { buildLoginUrl } from "@autumnsgrove/lattice/grafts/login";
 	import { formatRelativeTime } from "$lib/utils/time";
 	import ReactionPicker from "$lib/components/ReactionPicker.svelte";
 	import SEO from "$lib/components/SEO.svelte";

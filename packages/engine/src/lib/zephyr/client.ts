@@ -6,7 +6,7 @@
  *
  * Usage:
  * ```typescript
- * import { zephyr } from '@autumnsgrove/groveengine/zephyr';
+ * import { zephyr } from '@autumnsgrove/lattice/zephyr';
  *
  * await zephyr.send({
  *   type: 'transactional',

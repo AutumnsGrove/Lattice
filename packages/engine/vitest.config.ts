@@ -5,7 +5,7 @@ import { resolve } from "path";
 const __dirname = new URL(".", import.meta.url).pathname;
 
 /**
- * Vitest Configuration for GroveEngine
+ * Vitest Configuration for Lattice
  *
  * Uses happy-dom for DOM simulation and supports both unit tests
  * and component tests. For full DO integration tests, use the

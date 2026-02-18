@@ -1,16 +1,16 @@
 # Agent Guide: Creating New Grove Sites
 
-**Purpose:** This guide helps AI agents understand and work with the GroveEngine platform to create, configure, and deploy new Grove blog sites.
+**Purpose:** This guide helps AI agents understand and work with the Lattice platform to create, configure, and deploy new Grove blog sites.
 
 **Last Updated:** December 1, 2025
 **For:** Claude, GPT, and other AI agents
-**Target Repository:** GroveEngine
+**Target Repository:** Lattice
 
 ---
 
-## 1. What is GroveEngine?
+## 1. What is Lattice?
 
-GroveEngine is a **multi-tenant blog platform** where each user gets their own subdomain (e.g., `username.grove.place`) powered by their own Cloudflare Worker deployment.
+Lattice is a **multi-tenant blog platform** where each user gets their own subdomain (e.g., `username.grove.place`) powered by their own Cloudflare Worker deployment.
 
 ### Key Characteristics
 
@@ -74,6 +74,7 @@ Cloudflare Pages
 ```
 
 **Important:** The platform uses `adapter-cloudflare` with Pages mode, NOT Workers mode. This means:
+
 - No `main = "src/worker.js"` in wrangler.toml
 - No manual asset handling (Pages does this automatically)
 - No cron triggers (use Scheduled Functions instead)
@@ -95,9 +96,9 @@ Cloudflare Pages
 #### 3.1 Clone the Engine Package
 
 ```bash
-# Clone the GroveEngine repository
-git clone https://github.com/AutumnsGrove/GroveEngine.git
-cd GroveEngine/packages/engine
+# Clone the Lattice repository
+git clone https://github.com/AutumnsGrove/Lattice.git
+cd Lattice/packages/engine
 
 # Install dependencies
 npm install
@@ -120,7 +121,7 @@ npx wrangler r2 bucket create yoursite-images
 
 #### 3.3 Configure wrangler.toml
 
-Update `/home/user/GroveEngine/packages/engine/wrangler.toml`:
+Update `/home/user/Lattice/packages/engine/wrangler.toml`:
 
 ```toml
 name = "yoursite"
@@ -203,14 +204,14 @@ npx wrangler pages deploy .svelte-kit/cloudflare --project-name=yoursite
 
 ### Core Files
 
-| File | Purpose | Critical Concepts |
-|------|---------|-------------------|
-| `src/hooks.server.js` | Request handler, auth middleware, security headers | Session verification, CSRF protection |
-| `src/lib/auth/session.js` | Session management | JWT signing/verification |
-| `src/lib/auth/jwt.js` | JWT utilities | Token creation, validation |
-| `src/lib/utils/csrf.js` | CSRF protection | Token generation, validation |
-| `src/lib/utils/markdown.js` | Markdown parsing | Gutter content loading, frontmatter |
-| `src/lib/utils/sanitize.js` | XSS prevention | DOMPurify configuration |
+| File                        | Purpose                                            | Critical Concepts                     |
+| --------------------------- | -------------------------------------------------- | ------------------------------------- |
+| `src/hooks.server.js`       | Request handler, auth middleware, security headers | Session verification, CSRF protection |
+| `src/lib/auth/session.js`   | Session management                                 | JWT signing/verification              |
+| `src/lib/auth/jwt.js`       | JWT utilities                                      | Token creation, validation            |
+| `src/lib/utils/csrf.js`     | CSRF protection                                    | Token generation, validation          |
+| `src/lib/utils/markdown.js` | Markdown parsing                                   | Gutter content loading, frontmatter   |
+| `src/lib/utils/sanitize.js` | XSS prevention                                     | DOMPurify configuration               |
 
 ### Route Structure
 
@@ -284,9 +285,9 @@ Bindings give your Worker access to Cloudflare resources. Access them via `event
 ```javascript
 // In a +page.server.js or API route
 export async function load({ platform }) {
-  const db = platform.env.POSTS_DB;        // D1 database
-  const images = platform.env.IMAGES;      // R2 bucket
-  const cache = platform.env.CACHE_KV;     // KV namespace
+  const db = platform.env.POSTS_DB; // D1 database
+  const images = platform.env.IMAGES; // R2 bucket
+  const cache = platform.env.CACHE_KV; // KV namespace
   const secret = platform.env.SESSION_SECRET; // Secret
 }
 ```
@@ -297,14 +298,17 @@ SQLite database with full SQL support:
 
 ```javascript
 // Query posts
-const result = await db.prepare(
-  'SELECT * FROM posts WHERE published = 1 ORDER BY date DESC'
-).all();
+const result = await db
+  .prepare("SELECT * FROM posts WHERE published = 1 ORDER BY date DESC")
+  .all();
 
 // Insert a post
-await db.prepare(
-  'INSERT INTO posts (title, slug, content, published, date) VALUES (?, ?, ?, ?, ?)'
-).bind(title, slug, content, 1, Date.now()).run();
+await db
+  .prepare(
+    "INSERT INTO posts (title, slug, content, published, date) VALUES (?, ?, ?, ?, ?)",
+  )
+  .bind(title, slug, content, 1, Date.now())
+  .run();
 ```
 
 **Database Schema:**
@@ -322,8 +326,8 @@ S3-compatible storage for images:
 // Upload image
 await images.put(`images/${filename}`, fileBuffer, {
   httpMetadata: {
-    contentType: 'image/jpeg'
-  }
+    contentType: "image/jpeg",
+  },
 });
 
 // Get image
@@ -340,22 +344,24 @@ Fast distributed cache:
 
 ```javascript
 // Cache API response
-await cache.put('github:stats', JSON.stringify(data), {
-  expirationTtl: 3600 // 1 hour
+await cache.put("github:stats", JSON.stringify(data), {
+  expirationTtl: 3600, // 1 hour
 });
 
 // Retrieve cached data
-const cached = await cache.get('github:stats', 'json');
+const cached = await cache.get("github:stats", "json");
 ```
 
 ### Worker Routes
 
 Cloudflare Pages automatically routes:
+
 - `/` to your SvelteKit app
 - `/api/*` to API routes
 - Static assets served from `.svelte-kit/cloudflare`
 
 For custom domains (Business plan), configure in Cloudflare Dashboard:
+
 1. Add custom domain to Pages project
 2. Set up DNS records (CNAME to pages.dev)
 3. SSL is automatic
@@ -366,26 +372,26 @@ For custom domains (Business plan), configure in Cloudflare Dashboard:
 
 ### Secrets (set via `wrangler secret put`)
 
-| Secret | Purpose | Example |
-|--------|---------|---------|
-| `SESSION_SECRET` | JWT signing key | Random 32+ char string |
+| Secret                 | Purpose                 | Example                            |
+| ---------------------- | ----------------------- | ---------------------------------- |
+| `SESSION_SECRET`       | JWT signing key         | Random 32+ char string             |
 | `ALLOWED_ADMIN_EMAILS` | Who can access `/admin` | `admin@example.com,user@gmail.com` |
-| `RESEND_API_KEY` | Send magic code emails | `re_xxxxxxxxxxxxxxxxx` |
+| `RESEND_API_KEY`       | Send magic code emails  | `re_xxxxxxxxxxxxxxxxx`             |
 
 ### Variables (set in wrangler.toml `[vars]`)
 
-| Variable | Purpose | Default |
-|----------|---------|---------|
-| `CACHE_TTL_SECONDS` | API cache duration | `3600` (1 hour) |
-| `AI_CACHE_TTL_SECONDS` | AI response cache | `21600` (6 hours) |
+| Variable               | Purpose            | Default           |
+| ---------------------- | ------------------ | ----------------- |
+| `CACHE_TTL_SECONDS`    | API cache duration | `3600` (1 hour)   |
+| `AI_CACHE_TTL_SECONDS` | AI response cache  | `21600` (6 hours) |
 
 ### Bindings (set in wrangler.toml)
 
-| Binding | Type | Purpose |
-|---------|------|---------|
-| `POSTS_DB` | D1 | Main database |
-| `IMAGES` | R2 | Media storage |
-| `CACHE_KV` | KV | Caching layer |
+| Binding    | Type | Purpose       |
+| ---------- | ---- | ------------- |
+| `POSTS_DB` | D1   | Main database |
+| `IMAGES`   | R2   | Media storage |
+| `CACHE_KV` | KV   | Caching layer |
 
 ---
 
@@ -436,6 +442,7 @@ Add site-specific components to `src/lib/components/custom/`.
 ### Adding a New Blog Post
 
 **Via Admin UI:**
+
 1. Log in at `/auth/login`
 2. Navigate to `/admin/blog`
 3. Click "New Post"
@@ -444,25 +451,32 @@ Add site-specific components to `src/lib/components/custom/`.
 6. Click "Publish"
 
 **Via Database:**
+
 ```javascript
-await db.prepare(`
+await db
+  .prepare(
+    `
   INSERT INTO posts (title, slug, content, excerpt, date, published, category, tags)
   VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-`).bind(
-  'My Post Title',
-  'my-post-title',
-  '# Content here...',
-  'A brief excerpt',
-  Date.now(),
-  1, // published
-  'tutorial',
-  'svelte,cloudflare'
-).run();
+`,
+  )
+  .bind(
+    "My Post Title",
+    "my-post-title",
+    "# Content here...",
+    "A brief excerpt",
+    Date.now(),
+    1, // published
+    "tutorial",
+    "svelte,cloudflare",
+  )
+  .run();
 ```
 
 ### Adding a New Static Page
 
 **Via Admin UI:**
+
 1. Navigate to `/admin/pages`
 2. Click "New Page"
 3. Enter title and slug
@@ -475,23 +489,25 @@ Create a new route in `src/routes/yourpage/+page.svelte`.
 ### Uploading Images
 
 **Via Admin UI:**
+
 1. Navigate to `/admin/images`
 2. Click "Upload"
 3. Select images (supports drag-and-drop)
 4. Images are stored in R2 bucket
 
 **Via API:**
+
 ```javascript
 // POST /api/images/upload
 const formData = new FormData();
-formData.append('image', file);
+formData.append("image", file);
 
-const response = await fetch('/api/images/upload', {
-  method: 'POST',
+const response = await fetch("/api/images/upload", {
+  method: "POST",
   body: formData,
   headers: {
-    'X-CSRF-Token': csrfToken
-  }
+    "X-CSRF-Token": csrfToken,
+  },
 });
 ```
 
@@ -531,7 +547,7 @@ npx wrangler pages deploy .svelte-kit/cloudflare
 ### Critical Rules
 
 1. **Don't modify core engine code directly**
-   - If you find a bug or want a feature, submit a PR to GroveEngine
+   - If you find a bug or want a feature, submit a PR to Lattice
    - Don't fork and diverge from upstream
    - Customer-specific changes should be additive, not modifications
 
@@ -577,6 +593,7 @@ npx wrangler pages deploy .svelte-kit/cloudflare
 **Cause:** Bindings not configured in wrangler.toml or not deployed correctly.
 
 **Solution:**
+
 ```bash
 # Check wrangler.toml has correct binding IDs
 # Redeploy with:
@@ -588,6 +605,7 @@ npx wrangler pages deploy .svelte-kit/cloudflare
 **Cause:** Missing or incorrect CSRF token in form submission.
 
 **Solution:**
+
 ```javascript
 // In +page.server.js, pass csrfToken to page
 export async function load({ locals }) {
@@ -595,7 +613,7 @@ export async function load({ locals }) {
 }
 
 // In form submission
-<input type="hidden" name="csrf_token" value={data.csrfToken} />
+<input type="hidden" name="csrf_token" value={data.csrfToken} />;
 ```
 
 #### "D1_ERROR: no such table"
@@ -603,6 +621,7 @@ export async function load({ locals }) {
 **Cause:** Migrations not run on D1 database.
 
 **Solution:**
+
 ```bash
 # Run all migrations
 npx wrangler d1 execute yoursite-posts --file=migrations/001_magic_codes.sql
@@ -616,6 +635,7 @@ npx wrangler d1 execute yoursite-posts --file=migrations/004_pages_table.sql
 **Cause:** R2 bucket doesn't exist or binding name is wrong.
 
 **Solution:**
+
 ```bash
 # Create bucket
 npx wrangler r2 bucket create yoursite-images
@@ -631,6 +651,7 @@ bucket_name = "yoursite-images"  # Must match bucket
 **Cause:** Missing or invalid RESEND_API_KEY.
 
 **Solution:**
+
 ```bash
 # Set the secret
 npx wrangler secret put RESEND_API_KEY
@@ -645,6 +666,7 @@ npx wrangler secret list
 **Cause:** Email not in ALLOWED_ADMIN_EMAILS list.
 
 **Solution:**
+
 ```bash
 # Update allowed emails
 npx wrangler secret put ALLOWED_ADMIN_EMAILS
@@ -656,14 +678,15 @@ npx wrangler secret put ALLOWED_ADMIN_EMAILS
 **Cause:** Incorrect configuration in svelte.config.js or wrangler.toml.
 
 **Solution:**
+
 ```javascript
 // svelte.config.js should have:
-import adapter from '@sveltejs/adapter-cloudflare';
+import adapter from "@sveltejs/adapter-cloudflare";
 
 export default {
   kit: {
-    adapter: adapter()
-  }
+    adapter: adapter(),
+  },
 };
 
 // wrangler.toml should NOT have:
@@ -675,6 +698,7 @@ export default {
 **Cause:** Gutter content files missing or incorrect path.
 
 **Solution:**
+
 ```
 UserContent/
 └── blog/
@@ -693,6 +717,7 @@ UserContent/
 **Cause:** R2 binding not set or CORS issues.
 
 **Solution:**
+
 ```bash
 # Check binding in wrangler.toml
 [[r2_buckets]]
@@ -707,7 +732,7 @@ npx wrangler r2 bucket cors put yoursite-images --cors '{"AllowedOrigins": ["*"]
 
 ## 11. Understanding the Gutter System
 
-The gutter system is a unique feature of GroveEngine. It allows annotations, asides, and commentary to appear in the margins of blog posts.
+The gutter system is a unique feature of Lattice. It allows annotations, asides, and commentary to appear in the margins of blog posts.
 
 ### How It Works
 
@@ -720,6 +745,7 @@ The gutter system is a unique feature of GroveEngine. It allows annotations, asi
 
 ```markdown
 <!-- In your post markdown -->
+
 # My Post Title
 
 This is the main content. <Gutter id="intro" />
@@ -729,6 +755,7 @@ More content here.
 
 ```markdown
 <!-- UserContent/blog/my-post-title/gutter/intro.md -->
+
 This is a side note that appears in the margin!
 ```
 
@@ -751,7 +778,7 @@ When multi-tenancy is added, the architecture will change:
 
 ```
 Shared infrastructure:
-├── One GroveEngine Worker (multi-tenant)
+├── One Lattice Worker (multi-tenant)
 ├── One D1 database (with tenant_id column)
 ├── One R2 bucket (with tenant prefix)
 └── One KV namespace (with tenant prefix)
@@ -789,9 +816,9 @@ Per-tenant:
 - [SvelteKit Docs](https://kit.svelte.dev/)
 - [Wrangler CLI Docs](https://developers.cloudflare.com/workers/wrangler/)
 
-### GroveEngine Resources
+### Lattice Resources
 
-- Repository: `https://github.com/AutumnsGrove/GroveEngine`
+- Repository: `https://github.com/AutumnsGrove/Lattice`
 - Migration Strategy: `/docs/MIGRATION-STRATEGY.md`
 - Customer Setup Guide: `/docs/guides/customer-setup.md`
 - Architecture Guide: `/docs/cloudflare-architecture-guide.md`
@@ -809,7 +836,7 @@ Per-tenant:
 **Key for agents:** Always use absolute paths from the repository root.
 
 ```
-Repository Root: /home/user/GroveEngine/
+Repository Root: /home/user/Lattice/
 
 Core Files:
 - Engine package: packages/engine/
@@ -876,7 +903,7 @@ When setting up a new Grove site, verify:
 
 ## 16. Agent Tips
 
-**For AI agents working with GroveEngine:**
+**For AI agents working with Lattice:**
 
 1. **Always read the migration strategy first** - Understanding what was extracted from AutumnsGrove helps you understand the codebase structure.
 
@@ -905,6 +932,6 @@ When setting up a new Grove site, verify:
 
 **End of Guide**
 
-This guide will be updated as GroveEngine evolves. If you encounter issues not covered here, check the migration documentation or create a GitHub issue.
+This guide will be updated as Lattice evolves. If you encounter issues not covered here, check the migration documentation or create a GitHub issue.
 
 **Happy coding!**

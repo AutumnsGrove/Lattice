@@ -5,7 +5,7 @@
  * See /pricing/full for the complete 5-tier view.
  */
 
-import { transformAllTiers } from "@autumnsgrove/groveengine/grafts/pricing";
+import { transformAllTiers } from "@autumnsgrove/lattice/grafts/pricing";
 
 export function load() {
   // Available tiers: Wanderer (free) first, then Seedling

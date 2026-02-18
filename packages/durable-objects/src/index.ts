@@ -2,7 +2,7 @@
  * Grove Durable Objects Worker
  *
  * This worker hosts all Durable Objects for the Grove Platform.
- * Other services (GroveEngine Pages, post-migrator) reference these
+ * Other services (Lattice Pages, post-migrator) reference these
  * via service bindings with script_name: "grove-durable-objects".
  *
  * Part of the Loom pattern - Grove's coordination layer.

@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **Glass Design System**: Complete implementation of glassmorphism UI across Forest, Plant, Admin, and Domains pages with browser fallbacks
-- **Typography Components**: New `@autumnsgrove/groveengine/ui/typography` package with scoped font application and showcase
+- **Typography Components**: New `@autumnsgrove/lattice/ui/typography` package with scoped font application and showcase
 - **Vineyard Showcase**: New `vineyard.grove.place` site displaying component library and asset gallery
 - **Manifesto Page**: Personal vision page with midnight bloom aesthetic and community values
 - **Workshop Page Reorganization**: Categorized sections with Grove ecosystem tools and patterns
@@ -50,7 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking Changes
 
-- **Import Paths**: Nature components now require `@autumnsgrove/groveengine/ui/nature` import instead of local paths
+- **Import Paths**: Nature components now require `@autumnsgrove/lattice/ui/nature` import instead of local paths
 - **Spec Naming**: All specification files renamed with Grove ecosystem names (affects cross-references)
 
 ## [0.8.0] - 2025-12-29
@@ -68,7 +68,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Weather**: `SnowfallLayer`, `Snowflake`, `SnowflakeFalling`
 - **Seasonal Palette System**: Complete color palette with exports for `greens`, `bark`, `earth`, `natural`, `autumn`, `pinks`, `autumnReds`, `accents`, `winter`, `spring`, `springBlossoms`, `midnightBloom`
 - **New CSS utility**: `.leaf-pattern` - elaborate vine background pattern with flowing vines, leaves, and ferns for organic atmosphere
-- **Package export**: `@autumnsgrove/groveengine/ui/nature` for importing all nature components
+- **Package export**: `@autumnsgrove/lattice/ui/nature` for importing all nature components
 
 ### Changed
 
@@ -81,8 +81,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking Changes
 
-- **Import path change**: Nature components now imported from `@autumnsgrove/groveengine/ui/nature` instead of local paths
-- Components previously at `$lib/components/nature/*` should now use `import { ... } from '@autumnsgrove/groveengine/ui/nature'`
+- **Import path change**: Nature components now imported from `@autumnsgrove/lattice/ui/nature` instead of local paths
+- Components previously at `$lib/components/nature/*` should now use `import { ... } from '@autumnsgrove/lattice/ui/nature'`
 
 ## [0.7.0] - Previous Release
 

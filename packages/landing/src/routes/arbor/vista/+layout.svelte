@@ -7,9 +7,9 @@
 	 * isVistaPage check) and renders its own ArborPanel instance with Vista nav.
 	 */
 
-	import { ArborPanel } from "@autumnsgrove/groveengine/ui/arbor";
-	import { sidebarStore } from "@autumnsgrove/groveengine/ui/arbor";
-	import { GlassConfirmDialog } from "@autumnsgrove/groveengine/ui";
+	import { ArborPanel } from "@autumnsgrove/lattice/ui/arbor";
+	import { sidebarStore } from "@autumnsgrove/lattice/ui/arbor";
+	import { GlassConfirmDialog } from "@autumnsgrove/lattice/ui";
 	import Header from "$lib/components/Header.svelte";
 	import Footer from "$lib/components/Footer.svelte";
 	import {
@@ -27,7 +27,7 @@
 		Bell,
 		ArrowLeft,
 	} from "lucide-svelte";
-	import type { ArborNavEntry } from "@autumnsgrove/groveengine/ui/arbor";
+	import type { ArborNavEntry } from "@autumnsgrove/lattice/ui/arbor";
 	import type { LayoutData } from "./$types";
 	import type { Snippet } from "svelte";
 

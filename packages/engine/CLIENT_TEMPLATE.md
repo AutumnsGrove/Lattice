@@ -1,6 +1,6 @@
 # Grove Client Site Template
 
-This guide documents how to create a site powered by `@autumnsgrove/groveengine`.
+This guide documents how to create a site powered by `@autumnsgrove/lattice`.
 
 ## Directory Structure
 
@@ -48,7 +48,7 @@ my-site/
     "preview": "vite preview"
   },
   "dependencies": {
-    "@autumnsgrove/groveengine": "^0.4.0"
+    "@autumnsgrove/lattice": "^0.4.0"
   },
   "devDependencies": {
     "@sveltejs/adapter-cloudflare": "^7.0.0",
@@ -67,55 +67,67 @@ my-site/
 
 ```javascript
 // Main UI components
-import { Button, Card, Dialog, Input, Badge } from '@autumnsgrove/groveengine/ui';
+import { Button, Card, Dialog, Input, Badge } from "@autumnsgrove/lattice/ui";
 
 // Gallery components
-import { ImageGallery, Lightbox, ZoomableImage } from '@autumnsgrove/groveengine/ui/gallery';
+import {
+  ImageGallery,
+  Lightbox,
+  ZoomableImage,
+} from "@autumnsgrove/lattice/ui/gallery";
 
 // Chart components
-import { BarChart, LineChart } from '@autumnsgrove/groveengine/ui/charts';
+import { BarChart, LineChart } from "@autumnsgrove/lattice/ui/charts";
 
 // Content components
-import { MarkdownRenderer, CodeBlock } from '@autumnsgrove/groveengine/ui/content';
+import { MarkdownRenderer, CodeBlock } from "@autumnsgrove/lattice/ui/content";
 
 // Form components
-import { SearchInput, FormField } from '@autumnsgrove/groveengine/ui/forms';
+import { SearchInput, FormField } from "@autumnsgrove/lattice/ui/forms";
 
 // Indicator components
-import { LoadingSpinner, ProgressBar, StatusBadge } from '@autumnsgrove/groveengine/ui/indicators';
+import {
+  LoadingSpinner,
+  ProgressBar,
+  StatusBadge,
+} from "@autumnsgrove/lattice/ui/indicators";
 
 // Icon components
-import { Icon } from '@autumnsgrove/groveengine/ui/icons';
+import { Icon } from "@autumnsgrove/lattice/ui/icons";
 
 // State components
-import { EmptyState, ErrorState } from '@autumnsgrove/groveengine/ui/states';
+import { EmptyState, ErrorState } from "@autumnsgrove/lattice/ui/states";
 ```
 
 ### Auth Utilities
 
 ```javascript
 // Session management
-import { validateSession, createSession, destroySession } from '@autumnsgrove/groveengine/auth';
+import {
+  validateSession,
+  createSession,
+  destroySession,
+} from "@autumnsgrove/lattice/auth";
 
 // Auth helpers
-import { hashPassword, verifyPassword } from '@autumnsgrove/groveengine/auth';
+import { hashPassword, verifyPassword } from "@autumnsgrove/lattice/auth";
 ```
 
 ### Server Utilities
 
 ```javascript
 // Logging
-import { logger, createLogger } from '@autumnsgrove/groveengine/server';
+import { logger, createLogger } from "@autumnsgrove/lattice/server";
 
 // Server helpers
-import { json, error, redirect } from '@autumnsgrove/groveengine/server';
+import { json, error, redirect } from "@autumnsgrove/lattice/server";
 ```
 
 ### General Utilities
 
 ```javascript
 // Common utilities
-import { cn, debounce, throttle } from '@autumnsgrove/groveengine/utils';
+import { cn, debounce, throttle } from "@autumnsgrove/lattice/utils";
 
 // Validation
 import {
@@ -123,30 +135,33 @@ import {
   validateURL,
   validateSlug,
   sanitizeFilename,
-  sanitizeObject
-} from '@autumnsgrove/groveengine/utils/validation';
+  sanitizeObject,
+} from "@autumnsgrove/lattice/utils/validation";
 
 // Sanitization (XSS prevention)
 import {
   sanitizeHTML,
   sanitizeSVG,
   sanitizeMarkdown,
-  sanitizeURL
-} from '@autumnsgrove/groveengine/utils/sanitize';
+  sanitizeURL,
+} from "@autumnsgrove/lattice/utils/sanitize";
 ```
 
 ### Config
 
 ```javascript
 // AI model configuration
-import { AI_MODELS, getModelConfig } from '@autumnsgrove/groveengine/config';
+import { AI_MODELS, getModelConfig } from "@autumnsgrove/lattice/config";
 ```
 
 ### Payments (Stripe)
 
 ```javascript
 // Payment utilities
-import { createCheckoutSession, handleWebhook } from '@autumnsgrove/groveengine/payments';
+import {
+  createCheckoutSession,
+  handleWebhook,
+} from "@autumnsgrove/lattice/payments";
 ```
 
 ## Styles
@@ -155,54 +170,54 @@ import { createCheckoutSession, handleWebhook } from '@autumnsgrove/groveengine/
 
 ```css
 /* Import the main Grove styles */
-@import '@autumnsgrove/groveengine/ui/styles/grove.css';
+@import "@autumnsgrove/lattice/ui/styles/grove.css";
 
 /* Or import specific token files */
-@import '@autumnsgrove/groveengine/ui/styles/tokens.css';
-@import '@autumnsgrove/groveengine/ui/styles/components.css';
+@import "@autumnsgrove/lattice/ui/styles/tokens.css";
+@import "@autumnsgrove/lattice/ui/styles/components.css";
 ```
 
 ### In Svelte Components
 
 ```svelte
 <style>
-  @import '@autumnsgrove/groveengine/ui/styles/grove.css';
+  @import '@autumnsgrove/lattice/ui/styles/grove.css';
 </style>
 ```
 
 ## tailwind.config.js
 
 ```javascript
-import grovePreset from '@autumnsgrove/groveengine/ui/tailwind';
+import grovePreset from "@autumnsgrove/lattice/ui/tailwind";
 
 /** @type {import('tailwindcss').Config} */
 export default {
   presets: [grovePreset],
   content: [
-    './src/**/*.{html,js,svelte,ts}',
+    "./src/**/*.{html,js,svelte,ts}",
     // Include engine components for Tailwind to scan
-    './node_modules/@autumnsgrove/groveengine/**/*.{html,js,svelte,ts}'
+    "./node_modules/@autumnsgrove/lattice/**/*.{html,js,svelte,ts}",
   ],
   theme: {
     extend: {
       // Your site-specific theme extensions
-    }
-  }
+    },
+  },
 };
 ```
 
 ## hooks.server.js Example
 
 ```javascript
-import { validateSession } from '@autumnsgrove/groveengine/auth';
-import { logger } from '@autumnsgrove/groveengine/server';
+import { validateSession } from "@autumnsgrove/lattice/auth";
+import { logger } from "@autumnsgrove/lattice/server";
 
 export async function handle({ event, resolve }) {
   // Validate session on protected routes
-  if (event.url.pathname.startsWith('/admin')) {
+  if (event.url.pathname.startsWith("/admin")) {
     const session = await validateSession(event);
     if (!session) {
-      return new Response('Unauthorized', { status: 401 });
+      return new Response("Unauthorized", { status: 401 });
     }
     event.locals.user = session.user;
   }
@@ -216,8 +231,8 @@ export async function handle({ event, resolve }) {
 
 ```svelte
 <script>
-  import { Button, Card } from '@autumnsgrove/groveengine/ui';
-  import '@autumnsgrove/groveengine/ui/styles/grove.css';
+  import { Button, Card } from '@autumnsgrove/lattice/ui';
+  import '@autumnsgrove/lattice/ui/styles/grove.css';
 
   let { children } = $props();
 </script>
@@ -237,10 +252,10 @@ export async function handle({ event, resolve }) {
 
 Do NOT copy these from the engine into your site:
 
-- **UI Components** - Use from `@autumnsgrove/groveengine/ui`
-- **Auth utilities** - Use from `@autumnsgrove/groveengine/auth`
-- **Server utilities** - Use from `@autumnsgrove/groveengine/server`
-- **Validation/Sanitization** - Use from `@autumnsgrove/groveengine/utils`
+- **UI Components** - Use from `@autumnsgrove/lattice/ui`
+- **Auth utilities** - Use from `@autumnsgrove/lattice/auth`
+- **Server utilities** - Use from `@autumnsgrove/lattice/server`
+- **Validation/Sanitization** - Use from `@autumnsgrove/lattice/utils`
 - **Fonts** - Use from engine's static assets
 - **Icons** - Use from engine's icon components
 - **CSS tokens** - Import from engine's styles

@@ -18,11 +18,11 @@ import {
   type LoomRoute,
   type LoomConfig,
   type LoomRequestContext,
-} from "@autumnsgrove/groveengine/loom";
+} from "@autumnsgrove/lattice/loom";
 import {
   createLumenClient,
   type LumenClient,
-} from "@autumnsgrove/groveengine/lumen";
+} from "@autumnsgrove/lattice/lumen";
 import { evaluateFilters } from "./triage/filters.js";
 import { classifyEmail, type EmailEnvelope } from "./triage/classifier.js";
 import {

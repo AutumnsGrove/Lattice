@@ -1,23 +1,29 @@
 {
-	"name": "@autumnsgrove/groveengine",
-	"version": "0.9.99",
-	"description": "Multi-tenant blog engine for Grove Platform. Features gutter annotations, markdown editing, magic code auth, and Cloudflare Workers deployment.",
+	"name": "@autumnsgrove/lattice",
+	"version": "1.0.0",
+	"description": "The shared framework powering Grove — blogging platform, glassmorphism UI components, Loom Durable Objects SDK, Lumen AI routing, auth utilities, feature flags, and email infrastructure for SvelteKit on Cloudflare Workers.",
 	"author": "AutumnsGrove",
 	"license": "AGPL-3.0-only",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/AutumnsGrove/GroveEngine.git",
+		"url": "https://github.com/AutumnsGrove/Lattice.git",
 		"directory": "packages/engine"
 	},
 	"publishConfig": {
 		"registry": "https://npm.pkg.github.com"
 	},
 	"keywords": [
+		"grove",
+		"lattice",
 		"blog",
 		"cms",
 		"sveltekit",
 		"cloudflare",
-		"multi-tenant"
+		"durable-objects",
+		"ui-components",
+		"multi-tenant",
+		"loom",
+		"ai-routing"
 	],
 	"type": "module",
 	"svelte": "./dist/index.js",
@@ -157,13 +163,13 @@
 			"types": "./dist/server/index.d.ts",
 			"default": "./dist/server/index.js"
 		},
-		"./server/observability": {
-			"types": "./dist/server/observability/index.d.ts",
-			"default": "./dist/server/observability/index.js"
-		},
 		"./server/*": {
 			"types": "./dist/server/*.d.ts",
 			"default": "./dist/server/*.js"
+		},
+		"./server/observability": {
+			"types": "./dist/server/observability/index.d.ts",
+			"default": "./dist/server/observability/index.js"
 		},
 		"./config": {
 			"types": "./dist/config/index.d.ts",

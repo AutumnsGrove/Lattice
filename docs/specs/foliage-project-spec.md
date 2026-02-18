@@ -4,7 +4,7 @@ description: Customizable themes and visual customization options
 category: specs
 specCategory: platform-services
 icon: swatchbook
-lastUpdated: '2025-12-01'
+lastUpdated: "2025-12-01"
 aliases: []
 tags:
   - themes
@@ -30,9 +30,9 @@ tags:
          rooted in the same trunk
 ```
 
-> *Every person's theme is different—all belong to one garden.*
+> _Every person's theme is different—all belong to one garden._
 
-Grove's theme system enabling visual customization from accent colors to full theme customizers. Extracted from GroveEngine to be independently testable and reusable, with progressive enhancement unlocking more features at higher tiers.
+Grove's theme system enabling visual customization from accent colors to full theme customizers. Extracted from Lattice to be independently testable and reusable, with progressive enhancement unlocking more features at higher tiers.
 
 ## Overview Section
 
@@ -41,7 +41,7 @@ Grove's theme system enabling visual customization from accent colors to full th
 **Repository:** `AutumnsGrove/Foliage`
 **Package:** `@autumnsgrove/foliage`
 
-Foliage is Grove's theme system enabling visual customization from accent colors to full theme customizers. The project is extracted from GroveEngine to be independently testable, reusable across Grove properties, and maintainable as a focused codebase.
+Foliage is Grove's theme system enabling visual customization from accent colors to full theme customizers. The project is extracted from Lattice to be independently testable, reusable across Grove properties, and maintainable as a focused codebase.
 
 ## Design Philosophy
 
@@ -52,13 +52,13 @@ Foliage is Grove's theme system enabling visual customization from accent colors
 
 ## Tier Access Matrix
 
-| Tier | Themes | Accent Color | Customizer | Community | Custom Fonts |
-|------|--------|--------------|-----------|-----------|--------------|
-| **Free** | — | — | — | — | — |
-| **Seedling** | 3 | Custom | — | — | — |
-| **Sapling** | 10 | Custom | — | — | — |
-| **Oak** | 10 | Custom | Full | Import | — |
-| **Evergreen** | 10 | Custom | Full | Import | Upload |
+| Tier          | Themes | Accent Color | Customizer | Community | Custom Fonts |
+| ------------- | ------ | ------------ | ---------- | --------- | ------------ |
+| **Free**      | —      | —            | —          | —         | —            |
+| **Seedling**  | 3      | Custom       | —          | —         | —            |
+| **Sapling**   | 10     | Custom       | —          | —         | —            |
+| **Oak**       | 10     | Custom       | Full       | Import    | —            |
+| **Evergreen** | 10     | Custom       | Full       | Import    | Upload       |
 
 ## Core Features
 
@@ -68,24 +68,25 @@ Single color tinting interactive elements including links, buttons, hover states
 
 ### 2. Curated Themes (10 Total)
 
-| # | Theme | Vibe | Layout | Tier |
-|---|-------|------|--------|------|
-| 1 | Grove | Warm, earthy, cozy | Sidebar | Seedling+ |
-| 2 | Minimal | Clean, typography-focused | No sidebar | Seedling+ |
-| 3 | Night Garden | Dark mode, gentle greens | Sidebar | Seedling+ |
-| 4 | Zine | Bold, magazine-style | Grid | Sapling+ |
-| 5 | Moodboard | Pinterest-style | Masonry | Sapling+ |
-| 6 | Typewriter | Retro, monospace, paper | Centered | Sapling+ |
-| 7 | Solarpunk | Bright, optimistic | Full-width | Sapling+ |
-| 8 | Cozy Cabin | Warm browns, intimate | Sidebar | Sapling+ |
-| 9 | Ocean | Cool blues, calm | No sidebar | Sapling+ |
-| 10 | Wildflower | Colorful, playful | Flexible | Sapling+ |
+| #   | Theme        | Vibe                      | Layout     | Tier      |
+| --- | ------------ | ------------------------- | ---------- | --------- |
+| 1   | Grove        | Warm, earthy, cozy        | Sidebar    | Seedling+ |
+| 2   | Minimal      | Clean, typography-focused | No sidebar | Seedling+ |
+| 3   | Night Garden | Dark mode, gentle greens  | Sidebar    | Seedling+ |
+| 4   | Zine         | Bold, magazine-style      | Grid       | Sapling+  |
+| 5   | Moodboard    | Pinterest-style           | Masonry    | Sapling+  |
+| 6   | Typewriter   | Retro, monospace, paper   | Centered   | Sapling+  |
+| 7   | Solarpunk    | Bright, optimistic        | Full-width | Sapling+  |
+| 8   | Cozy Cabin   | Warm browns, intimate     | Sidebar    | Sapling+  |
+| 9   | Ocean        | Cool blues, calm          | No sidebar | Sapling+  |
+| 10  | Wildflower   | Colorful, playful         | Flexible   | Sapling+  |
 
 Seedlings access three core themes (Grove, Minimal, Night Garden) representing fundamental archetypes.
 
 ### 3. Theme Customizer (Oak+)
 
 Full control over appearance with sections for:
+
 - **Colors:** Background, text, accents, borders, surfaces
 - **Typography:** Heading font, body font, sizes, line height
 - **Layout:** Sidebar toggle, max width, spacing
@@ -96,6 +97,7 @@ Full control over appearance with sections for:
 ### 4. Custom Fonts (Evergreen Only)
 
 Upload up to 10 custom fonts with specifications:
+
 - **Formats:** WOFF2 (required), WOFF (optional fallback)
 - **Size limit:** 500KB per file
 - **Storage:** R2 under user's allocation
@@ -104,6 +106,7 @@ Upload up to 10 custom fonts with specifications:
 ### 5. Community Themes (Oak+)
 
 Users share customizations with the community supporting:
+
 - Browse and import themes
 - Rating and download tracking
 - Moderation queue for quality
@@ -174,7 +177,7 @@ export interface Theme {
   name: string;
   description: string;
   thumbnail: string;
-  tier: 'seedling' | 'sapling';
+  tier: "seedling" | "sapling";
 
   colors: ThemeColors;
   fonts: ThemeFonts;
@@ -198,9 +201,15 @@ export interface ThemeFonts {
 }
 
 export interface ThemeLayout {
-  type: 'sidebar' | 'no-sidebar' | 'centered' | 'full-width' | 'grid' | 'masonry';
+  type:
+    | "sidebar"
+    | "no-sidebar"
+    | "centered"
+    | "full-width"
+    | "grid"
+    | "masonry";
   maxWidth: string;
-  spacing: 'compact' | 'comfortable' | 'spacious';
+  spacing: "compact" | "comfortable" | "spacious";
 }
 
 export interface ThemeSettings {
@@ -220,13 +229,13 @@ export interface CustomFont {
   tenantId: string;
   name: string;
   family: string;
-  category: 'sans-serif' | 'serif' | 'mono' | 'display';
+  category: "sans-serif" | "serif" | "mono" | "display";
   woff2Path: string;
   woffPath?: string;
   fileSize: number;
 }
 
-export type UserTier = 'free' | 'seedling' | 'sapling' | 'oak' | 'evergreen';
+export type UserTier = "free" | "seedling" | "sapling" | "oak" | "evergreen";
 ```
 
 ## Database Schema
@@ -300,16 +309,16 @@ CREATE INDEX idx_community_themes_status ON community_themes(status);
 CREATE INDEX idx_community_themes_creator ON community_themes(creator_tenant_id);
 ```
 
-## Integration with GroveEngine
+## Integration with Lattice
 
 ### 1. Package Export
 
 ```typescript
-// In GroveEngine's package.json exports
+// In Lattice's package.json exports
 "./foliage": "./src/lib/foliage/index.js"
 
 // Usage in tenant sites
-import { loadTheme, ThemeSelector } from '@autumnsgrove/groveengine/foliage';
+import { loadTheme, ThemeSelector } from '@autumnsgrove/lattice/foliage';
 ```
 
 ### 2. Layout Integration
@@ -317,7 +326,7 @@ import { loadTheme, ThemeSelector } from '@autumnsgrove/groveengine/foliage';
 ```svelte
 <!-- +layout.svelte -->
 <script>
-  import { loadTheme, applyThemeVariables } from '@autumnsgrove/groveengine/foliage';
+  import { loadTheme, applyThemeVariables } from '@autumnsgrove/lattice/foliage';
 
   const { data } = $props();
 
@@ -331,8 +340,8 @@ import { loadTheme, ThemeSelector } from '@autumnsgrove/groveengine/foliage';
 
 ```typescript
 // +layout.server.ts
-import { loadThemeSettings } from '@autumnsgrove/groveengine/foliage';
-import { db } from '@autumnsgrove/groveengine/services';
+import { loadThemeSettings } from "@autumnsgrove/lattice/foliage";
+import { db } from "@autumnsgrove/lattice/services";
 
 export const load = async ({ locals }) => {
   const themeSettings = await loadThemeSettings(locals.db, locals.tenant.id);
@@ -685,6 +694,7 @@ After applying theme changes, user sees side-by-side comparison.
 ## Accessibility Requirements
 
 All themes must:
+
 - Meet WCAG 2.1 AA contrast (4.5:1 for body text)
 - Have visible focus states
 - Not rely on color alone for information
@@ -703,6 +713,7 @@ export function validateThemeContrast(theme: Theme): ValidationResult;
 ## Custom CSS Security
 
 **Restrictions:**
+
 - No `@import` (prevents external resource loading)
 - No `url()` except safe font sources
 - Max 10KB
@@ -712,10 +723,11 @@ export function validateThemeContrast(theme: Theme): ValidationResult;
 // src/lib/server/css-validator.ts
 export function validateCustomCSS(css: string): ValidationResult {
   // Check size
-  if (css.length > 10240) return { valid: false, error: 'Max 10KB' };
+  if (css.length > 10240) return { valid: false, error: "Max 10KB" };
 
   // Block @import
-  if (/@import/i.test(css)) return { valid: false, error: 'No @import allowed' };
+  if (/@import/i.test(css))
+    return { valid: false, error: "No @import allowed" };
 
   // Block external URLs (except fonts)
   const urlPattern = /url\s*\([^)]+\)/gi;

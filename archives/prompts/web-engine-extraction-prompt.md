@@ -1,20 +1,22 @@
-# GroveEngine Extraction Prompt (Phase 1 of 2)
+# Lattice Extraction Prompt (Phase 1 of 2)
 
-> **Purpose:** Extract reusable engine code from AutumnsGrove website into the `@groveengine/core` package.
+> **Purpose:** Extract reusable engine code from AutumnsGrove website into the `@lattice/core` package.
 > **Next Step:** After extraction, use `implementation-prompt.md` to build remaining features.
 
 ---
 
 ## CONTEXT
 
-You are performing the first phase of building GroveEngine. This phase extracts reusable code from the existing AutumnsGrove website. A second prompt handles implementing new features required by the specs.
+You are performing the first phase of building Lattice. This phase extracts reusable code from the existing AutumnsGrove website. A second prompt handles implementing new features required by the specs.
 
 **What this prompt covers:**
+
 - Extracting and converting existing components to TypeScript
 - Restructuring code to match the package architecture
 - Setting up the npm package foundation
 
 **What the second prompt covers:**
+
 - Magic code authentication (Resend)
 - D1 database schema and queries
 - KV session management
@@ -23,28 +25,32 @@ You are performing the first phase of building GroveEngine. This phase extracts 
 - Customer repository template
 
 **Source Repository:** https://github.com/AutumnsGrove/AutumnsGrove
-**Target Package:** `@groveengine/core`
+**Target Package:** `@lattice/core`
 
 ---
 
 ## CRITICAL PRINCIPLES
 
 ### 1. TypeScript First
+
 - Convert ALL extracted JavaScript to TypeScript (strict mode)
 - Add proper type definitions for all exports
 - Use interfaces for component props
 
 ### 2. Architectural Alignment
+
 - Follow the package structure defined in `docs/specs/engine-spec.md`
 - Components go in organized subfolders: `components/blog/`, `components/layout/`, `components/ui/`
 - Server utilities go in `server/`
 
 ### 3. Clean Extraction
+
 - Extract ONLY code that aligns with the engine spec
 - Skip site-specific code (Git stats, GitHub API calls for dashboard, etc.)
 - Preserve exact functionality of extracted code
 
 ### 4. Foundation for Phase 2
+
 - Set up proper exports structure
 - Create placeholder files for features built in Phase 2
 - Ensure package.json is ready for additions
@@ -54,6 +60,7 @@ You are performing the first phase of building GroveEngine. This phase extracts 
 ## PHASE 1: SETUP & INVENTORY
 
 ### 1.1 Clone Source Repository
+
 ```bash
 git clone https://github.com/AutumnsGrove/AutumnsGrove /tmp/AutumnsGrove-source
 cd /tmp/AutumnsGrove-source
@@ -61,10 +68,10 @@ cd /tmp/AutumnsGrove-source
 
 ### 1.2 Initialize Package Structure
 
-Create the `@groveengine/core` package structure in the GroveEngine repository:
+Create the `@lattice/core` package structure in the Lattice repository:
 
 ```
-/home/user/GroveEngine/
+/home/user/Lattice/
 ├── package/
 │   ├── src/
 │   │   ├── lib/
@@ -134,6 +141,7 @@ Create the `@groveengine/core` package structure in the GroveEngine repository:
 Use TodoWrite to track extraction tasks:
 
 **Phase 1 Tasks (This Prompt):**
+
 - [ ] Clone source repository
 - [ ] Create package directory structure
 - [ ] Extract and convert UI components to TypeScript
@@ -153,15 +161,16 @@ Use TodoWrite to track extraction tasks:
 
 These components are general-purpose and reusable:
 
-| Source File | Target File | Notes |
-|-------------|-------------|-------|
-| `src/lib/components/ZoomableImage.svelte` | `package/src/lib/components/ui/ZoomableImage.svelte` | Convert to TS, add props interface |
-| `src/lib/components/Lightbox.svelte` | `package/src/lib/components/ui/Lightbox.svelte` | Convert to TS |
-| `src/lib/components/LightboxCaption.svelte` | `package/src/lib/components/ui/LightboxCaption.svelte` | Convert to TS |
-| `src/lib/components/ImageGallery.svelte` | `package/src/lib/components/ui/ImageGallery.svelte` | Convert to TS |
-| `src/lib/components/CollapsibleSection.svelte` | `package/src/lib/components/ui/CollapsibleSection.svelte` | Convert to TS |
+| Source File                                    | Target File                                               | Notes                              |
+| ---------------------------------------------- | --------------------------------------------------------- | ---------------------------------- |
+| `src/lib/components/ZoomableImage.svelte`      | `package/src/lib/components/ui/ZoomableImage.svelte`      | Convert to TS, add props interface |
+| `src/lib/components/Lightbox.svelte`           | `package/src/lib/components/ui/Lightbox.svelte`           | Convert to TS                      |
+| `src/lib/components/LightboxCaption.svelte`    | `package/src/lib/components/ui/LightboxCaption.svelte`    | Convert to TS                      |
+| `src/lib/components/ImageGallery.svelte`       | `package/src/lib/components/ui/ImageGallery.svelte`       | Convert to TS                      |
+| `src/lib/components/CollapsibleSection.svelte` | `package/src/lib/components/ui/CollapsibleSection.svelte` | Convert to TS                      |
 
 **For each component:**
+
 1. Read the source file
 2. Add TypeScript `<script lang="ts">`
 3. Define props interface
@@ -169,6 +178,7 @@ These components are general-purpose and reusable:
 5. Add JSDoc comments for exported props
 
 **Example conversion:**
+
 ```svelte
 <!-- Before (JavaScript) -->
 <script>
@@ -193,56 +203,60 @@ These components are general-purpose and reusable:
 
 These components handle content layout with the gutter system:
 
-| Source File | Target File |
-|-------------|-------------|
+| Source File                                   | Target File                                                  |
+| --------------------------------------------- | ------------------------------------------------------------ |
 | `src/lib/components/ContentWithGutter.svelte` | `package/src/lib/components/layout/ContentWithGutter.svelte` |
-| `src/lib/components/LeftGutter.svelte` | `package/src/lib/components/layout/LeftGutter.svelte` |
-| `src/lib/components/GutterItem.svelte` | `package/src/lib/components/layout/GutterItem.svelte` |
-| `src/lib/components/TableOfContents.svelte` | `package/src/lib/components/layout/TableOfContents.svelte` |
-| `src/lib/components/MobileTOC.svelte` | `package/src/lib/components/layout/MobileTOC.svelte` |
-| `src/lib/components/IconLegend.svelte` | `package/src/lib/components/layout/IconLegend.svelte` |
+| `src/lib/components/LeftGutter.svelte`        | `package/src/lib/components/layout/LeftGutter.svelte`        |
+| `src/lib/components/GutterItem.svelte`        | `package/src/lib/components/layout/GutterItem.svelte`        |
+| `src/lib/components/TableOfContents.svelte`   | `package/src/lib/components/layout/TableOfContents.svelte`   |
+| `src/lib/components/MobileTOC.svelte`         | `package/src/lib/components/layout/MobileTOC.svelte`         |
+| `src/lib/components/IconLegend.svelte`        | `package/src/lib/components/layout/IconLegend.svelte`        |
 
 **Critical: ContentWithGutter.svelte**
 
 This is the most complex component. Update internal imports:
+
 ```typescript
 // Before (in source)
-import TableOfContents from '$lib/components/TableOfContents.svelte';
-import { parseAnchor } from '$lib/utils/gutter.js';
+import TableOfContents from "$lib/components/TableOfContents.svelte";
+import { parseAnchor } from "$lib/utils/gutter.js";
 
 // After (in package)
-import TableOfContents from './TableOfContents.svelte';
-import { parseAnchor } from '../../utils/gutter';
+import TableOfContents from "./TableOfContents.svelte";
+import { parseAnchor } from "../../utils/gutter";
 ```
 
 ### 2.3 Create Component Index Files
 
 **package/src/lib/components/ui/index.ts:**
+
 ```typescript
-export { default as ZoomableImage } from './ZoomableImage.svelte';
-export { default as Lightbox } from './Lightbox.svelte';
-export { default as LightboxCaption } from './LightboxCaption.svelte';
-export { default as ImageGallery } from './ImageGallery.svelte';
-export { default as CollapsibleSection } from './CollapsibleSection.svelte';
+export { default as ZoomableImage } from "./ZoomableImage.svelte";
+export { default as Lightbox } from "./Lightbox.svelte";
+export { default as LightboxCaption } from "./LightboxCaption.svelte";
+export { default as ImageGallery } from "./ImageGallery.svelte";
+export { default as CollapsibleSection } from "./CollapsibleSection.svelte";
 ```
 
 **package/src/lib/components/layout/index.ts:**
+
 ```typescript
-export { default as ContentWithGutter } from './ContentWithGutter.svelte';
-export { default as LeftGutter } from './LeftGutter.svelte';
-export { default as GutterItem } from './GutterItem.svelte';
-export { default as TableOfContents } from './TableOfContents.svelte';
-export { default as MobileTOC } from './MobileTOC.svelte';
-export { default as IconLegend } from './IconLegend.svelte';
+export { default as ContentWithGutter } from "./ContentWithGutter.svelte";
+export { default as LeftGutter } from "./LeftGutter.svelte";
+export { default as GutterItem } from "./GutterItem.svelte";
+export { default as TableOfContents } from "./TableOfContents.svelte";
+export { default as MobileTOC } from "./MobileTOC.svelte";
+export { default as IconLegend } from "./IconLegend.svelte";
 ```
 
 **package/src/lib/components/index.ts:**
+
 ```typescript
 // UI Components
-export * from './ui';
+export * from "./ui";
 
 // Layout Components
-export * from './layout';
+export * from "./layout";
 
 // Blog Components (Phase 2)
 // export * from './blog';
@@ -310,7 +324,10 @@ export function getAnchorLabel(anchor: string): string {
 /**
  * Get items for a specific anchor
  */
-export function getItemsForAnchor(items: GutterItem[], anchor: string): GutterItem[] {
+export function getItemsForAnchor(
+  items: GutterItem[],
+  anchor: string,
+): GutterItem[] {
   // ... implementation from source
 }
 
@@ -339,7 +356,7 @@ Extract ONLY the pure parsing utilities (not file-loading functions):
 ```typescript
 // package/src/lib/utils/markdown.ts
 
-import { marked } from 'marked';
+import { marked } from "marked";
 
 export interface ParsedMarkdown {
   html: string;
@@ -386,9 +403,10 @@ export async function initializeMermaid(): Promise<void> {
 ### 3.3 Create Utils Index
 
 **package/src/lib/utils/index.ts:**
+
 ```typescript
-export * from './gutter';
-export * from './markdown';
+export * from "./gutter";
+export * from "./markdown";
 ```
 
 ---
@@ -398,6 +416,7 @@ export * from './markdown';
 ### 4.1 Core Types
 
 **package/src/lib/types/post.ts:**
+
 ```typescript
 export interface Post {
   id: string;
@@ -407,7 +426,7 @@ export interface Post {
   content: string;
   excerpt?: string;
   html?: string;
-  status: 'draft' | 'published' | 'archived';
+  status: "draft" | "published" | "archived";
   featured_image?: string;
   word_count: number;
   reading_time: number;
@@ -430,12 +449,13 @@ export interface PostListItem {
 ```
 
 **package/src/lib/types/user.ts:**
+
 ```typescript
 export interface User {
   id: string;
   email: string;
   name?: string;
-  role: 'admin' | 'editor' | 'user';
+  role: "admin" | "editor" | "user";
   avatar_url?: string;
   created_at: number;
   updated_at: number;
@@ -450,6 +470,7 @@ export interface Session {
 ```
 
 **package/src/lib/types/config.ts:**
+
 ```typescript
 export interface SiteConfig {
   name: string;
@@ -479,7 +500,7 @@ export interface ThemeConfig {
     heading: string;
     body: string;
   };
-  layout: 'sidebar' | 'no-sidebar';
+  layout: "sidebar" | "no-sidebar";
 }
 
 export interface FeatureFlags {
@@ -520,10 +541,11 @@ export interface SeoConfig {
 ```
 
 **package/src/lib/types/index.ts:**
+
 ```typescript
-export * from './post';
-export * from './user';
-export * from './config';
+export * from "./post";
+export * from "./user";
+export * from "./config";
 ```
 
 ---
@@ -533,19 +555,20 @@ export * from './config';
 ### 5.1 Theme Store
 
 **package/src/lib/stores/theme.ts:**
-```typescript
-import { writable } from 'svelte/store';
 
-export type Theme = 'light' | 'dark' | 'system';
+```typescript
+import { writable } from "svelte/store";
+
+export type Theme = "light" | "dark" | "system";
 
 function createThemeStore() {
-  const { subscribe, set, update } = writable<Theme>('system');
+  const { subscribe, set, update } = writable<Theme>("system");
 
   return {
     subscribe,
     set,
-    toggle: () => update(t => t === 'light' ? 'dark' : 'light'),
-    setSystem: () => set('system')
+    toggle: () => update((t) => (t === "light" ? "dark" : "light")),
+    setSystem: () => set("system"),
   };
 }
 
@@ -555,9 +578,10 @@ export const theme = createThemeStore();
 ### 5.2 Site Config Store
 
 **package/src/lib/stores/siteConfig.ts:**
+
 ```typescript
-import { writable } from 'svelte/store';
-import type { SiteConfig } from '../types';
+import { writable } from "svelte/store";
+import type { SiteConfig } from "../types";
 
 function createSiteConfigStore() {
   const { subscribe, set } = writable<SiteConfig | null>(null);
@@ -565,7 +589,7 @@ function createSiteConfigStore() {
   return {
     subscribe,
     set,
-    init: (config: SiteConfig) => set(config)
+    init: (config: SiteConfig) => set(config),
   };
 }
 
@@ -575,9 +599,10 @@ export const siteConfig = createSiteConfigStore();
 ### 5.3 User Store (Placeholder)
 
 **package/src/lib/stores/user.ts:**
+
 ```typescript
-import { writable } from 'svelte/store';
-import type { User } from '../types';
+import { writable } from "svelte/store";
+import type { User } from "../types";
 
 // Full implementation in Phase 2
 function createUserStore() {
@@ -586,7 +611,7 @@ function createUserStore() {
   return {
     subscribe,
     set,
-    clear: () => set(null)
+    clear: () => set(null),
   };
 }
 
@@ -596,10 +621,11 @@ export const user = createUserStore();
 ### 5.4 Stores Index
 
 **package/src/lib/stores/index.ts:**
+
 ```typescript
-export { theme } from './theme';
-export { siteConfig } from './siteConfig';
-export { user } from './user';
+export { theme } from "./theme";
+export { siteConfig } from "./siteConfig";
+export { user } from "./user";
 ```
 
 ---
@@ -610,7 +636,7 @@ export { user } from './user';
 
 ```json
 {
-  "name": "@groveengine/core",
+  "name": "@lattice/core",
   "version": "0.1.0",
   "description": "SvelteKit blog engine with gutter content system",
   "type": "module",
@@ -653,11 +679,7 @@ export { user } from './user';
   },
   "svelte": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": [
-    "dist",
-    "!dist/**/*.test.*",
-    "!dist/**/*.spec.*"
-  ],
+  "files": ["dist", "!dist/**/*.test.*", "!dist/**/*.spec.*"],
   "peerDependencies": {
     "svelte": "^5.0.0",
     "@sveltejs/kit": "^2.0.0"
@@ -688,7 +710,7 @@ export { user } from './user';
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/AutumnsGrove/GroveEngine"
+    "url": "https://github.com/AutumnsGrove/Lattice"
   }
 }
 ```
@@ -696,15 +718,15 @@ export { user } from './user';
 ### 6.2 svelte.config.js
 
 ```javascript
-import adapter from '@sveltejs/adapter-auto';
-import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
+import adapter from "@sveltejs/adapter-auto";
+import { vitePreprocess } from "@sveltejs/vite-plugin-svelte";
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
   preprocess: vitePreprocess(),
   kit: {
-    adapter: adapter()
-  }
+    adapter: adapter(),
+  },
 };
 
 export default config;
@@ -727,11 +749,11 @@ export default config;
 ### 6.4 vite.config.ts
 
 ```typescript
-import { sveltekit } from '@sveltejs/kit/vite';
-import { defineConfig } from 'vite';
+import { sveltekit } from "@sveltejs/kit/vite";
+import { defineConfig } from "vite";
 
 export default defineConfig({
-  plugins: [sveltekit()]
+  plugins: [sveltekit()],
 });
 ```
 
@@ -744,40 +766,43 @@ Create placeholder files for features implemented in Phase 2:
 ### 7.1 Server Placeholders
 
 **package/src/lib/server/auth/index.ts:**
+
 ```typescript
 // Authentication utilities - Implemented in Phase 2
 // See: docs/prompts/implementation-prompt.md
 
 export function validateSession(): never {
-  throw new Error('Not implemented - see implementation-prompt.md');
+  throw new Error("Not implemented - see implementation-prompt.md");
 }
 
 export function createSession(): never {
-  throw new Error('Not implemented - see implementation-prompt.md');
+  throw new Error("Not implemented - see implementation-prompt.md");
 }
 ```
 
 **package/src/lib/server/db/index.ts:**
+
 ```typescript
 // Database utilities - Implemented in Phase 2
 // See: docs/prompts/implementation-prompt.md
 
 export function getPosts(): never {
-  throw new Error('Not implemented - see implementation-prompt.md');
+  throw new Error("Not implemented - see implementation-prompt.md");
 }
 
 export function getPostBySlug(): never {
-  throw new Error('Not implemented - see implementation-prompt.md');
+  throw new Error("Not implemented - see implementation-prompt.md");
 }
 ```
 
 **package/src/lib/server/index.ts:**
+
 ```typescript
 // Server utilities
 // Full implementation in Phase 2
 
-export * from './auth';
-export * from './db';
+export * from "./auth";
+export * from "./db";
 // export * from './storage';
 // export * from './email';
 ```
@@ -785,6 +810,7 @@ export * from './db';
 ### 7.2 Component Placeholders
 
 **package/src/lib/components/blog/index.ts:**
+
 ```typescript
 // Blog components - Implemented in Phase 2
 // PostList, PostCard, PostView, etc.
@@ -792,6 +818,7 @@ export {};
 ```
 
 **package/src/lib/components/admin/index.ts:**
+
 ```typescript
 // Admin components - Implemented in Phase 2
 // AdminPanel, PostEditor, MediaLibrary, etc.
@@ -799,6 +826,7 @@ export {};
 ```
 
 **package/src/lib/components/auth/index.ts:**
+
 ```typescript
 // Auth components - Implemented in Phase 2
 // LoginForm, MagicCodeInput, etc.
@@ -810,22 +838,23 @@ export {};
 ## PHASE 8: CREATE MAIN EXPORTS
 
 **package/src/lib/index.ts:**
+
 ```typescript
-// @groveengine/core - Main exports
+// @lattice/core - Main exports
 
 // Types
-export type * from './types';
+export type * from "./types";
 
 // Components
-export * from './components';
+export * from "./components";
 
 // Stores
-export * from './stores';
+export * from "./stores";
 
 // Utils
-export * from './utils';
+export * from "./utils";
 
-// Note: Server utilities should be imported from '@groveengine/core/server'
+// Note: Server utilities should be imported from '@lattice/core/server'
 // to ensure proper tree-shaking and avoid client-side imports of server code
 ```
 
@@ -836,13 +865,14 @@ export * from './utils';
 ### 9.1 Build Package
 
 ```bash
-cd /home/user/GroveEngine/package
+cd /home/user/Lattice/package
 pnpm install
 pnpm run check
 pnpm run package
 ```
 
 **Verify:**
+
 - No TypeScript errors
 - All exports resolve correctly
 - `dist/` folder is created with compiled files
@@ -861,11 +891,11 @@ ls -la dist/utils/
 ## PHASE 10: COMMIT
 
 ```bash
-cd /home/user/GroveEngine
+cd /home/user/Lattice
 git add package/
 git commit -m "feat: extract and convert components from AutumnsGrove
 
-Phase 1 of GroveEngine implementation:
+Phase 1 of Lattice implementation:
 - Extract UI components (ZoomableImage, Lightbox, ImageGallery, etc.)
 - Extract layout components (ContentWithGutter, TableOfContents, etc.)
 - Extract utility functions (gutter, markdown parsing)
@@ -902,6 +932,7 @@ After completing this prompt, proceed to:
 **`docs/prompts/implementation-prompt.md`** - Phase 2: Implement remaining features
 
 This includes:
+
 - Magic code authentication with Resend
 - D1 database schema and queries
 - KV session management
@@ -912,4 +943,4 @@ This includes:
 
 ---
 
-*Last Updated: November 2025*
+_Last Updated: November 2025_

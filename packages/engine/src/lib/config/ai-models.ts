@@ -10,7 +10,7 @@ export const MAX_CONTENT_LENGTH = 100000;
 // Model pricing (per 1M tokens) - for cost estimation
 const MODEL_PRICING = {
   haiku: { input: 0.25, output: 1.25 },
-  sonnet: { input: 3.0, output: 15.0 }
+  sonnet: { input: 3.0, output: 15.0 },
 } as const;
 
 type ModelType = keyof typeof MODEL_PRICING;
@@ -27,7 +27,10 @@ export interface CostEstimate {
 /**
  * Calculate estimated cost for AI analysis
  */
-export function calculateCost(content: string, model: ModelType = 'haiku'): CostEstimate {
+export function calculateCost(
+  content: string,
+  model: ModelType = "haiku",
+): CostEstimate {
   const pricing = MODEL_PRICING[model] || MODEL_PRICING.haiku;
   const inputTokens = Math.ceil(content.length / CHARS_PER_TOKEN);
   // Estimate output tokens as ~10% of input for analysis tasks
@@ -39,7 +42,7 @@ export function calculateCost(content: string, model: ModelType = 'haiku'): Cost
   return {
     inputTokens,
     outputTokens,
-    cost: inputCost + outputCost
+    cost: inputCost + outputCost,
   };
 }
 
@@ -54,7 +57,7 @@ export interface AIModel {
  */
 export function getAvailableModels(): AIModel[] {
   return [
-    { id: 'haiku', name: 'Haiku', description: 'Fast and cost-effective' },
-    { id: 'sonnet', name: 'Sonnet', description: 'More thorough analysis' }
+    { id: "haiku", name: "Haiku", description: "Fast and cost-effective" },
+    { id: "sonnet", name: "Sonnet", description: "More thorough analysis" },
   ];
 }

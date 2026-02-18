@@ -328,7 +328,7 @@ Return a summary:
 ```bash
 # From Claude Code / agent session:
 # 1. Generate coverage report
-pnpm --filter @autumnsgrove/groveengine test -- --coverage
+pnpm --filter @autumnsgrove/lattice test -- --coverage
 
 # 2. Run orchestrator (via Task tool)
 # The orchestrator will spawn subagents automatically
@@ -420,7 +420,7 @@ export default defineConfig({
 ### Adding Test Dependencies (if missing)
 
 ```bash
-pnpm --filter @autumnsgrove/groveengine add -D \
+pnpm --filter @autumnsgrove/lattice add -D \
   @testing-library/svelte \
   @testing-library/jest-dom \
   @playwright/test
@@ -434,7 +434,7 @@ Playwright requires browser binaries to be installed separately from the npm pac
 
 ```bash
 # Install Playwright and browser binaries
-pnpm --filter @autumnsgrove/groveengine add -D @playwright/test
+pnpm --filter @autumnsgrove/lattice add -D @playwright/test
 pnpm exec playwright install
 
 # Install only specific browsers (faster, smaller)
@@ -542,7 +542,7 @@ jobs:
         run: pnpm test
 
       - name: Run tests with coverage
-        run: pnpm --filter @autumnsgrove/groveengine test -- --coverage
+        run: pnpm --filter @autumnsgrove/lattice test -- --coverage
 
       - name: Upload coverage
         uses: codecov/codecov-action@v3
@@ -609,19 +609,19 @@ jobs:
 pnpm test
 
 # Run tests for specific package
-pnpm --filter @autumnsgrove/groveengine test
+pnpm --filter @autumnsgrove/lattice test
 
 # Run tests with coverage
-pnpm --filter @autumnsgrove/groveengine test -- --coverage
+pnpm --filter @autumnsgrove/lattice test -- --coverage
 
 # Run tests in watch mode
-pnpm --filter @autumnsgrove/groveengine test -- --watch
+pnpm --filter @autumnsgrove/lattice test -- --watch
 
 # Run specific test file
-pnpm --filter @autumnsgrove/groveengine test src/lib/utils/sanitize.test.ts
+pnpm --filter @autumnsgrove/lattice test src/lib/utils/sanitize.test.ts
 
 # Run E2E tests (when configured)
-pnpm --filter @autumnsgrove/groveengine test:e2e
+pnpm --filter @autumnsgrove/lattice test:e2e
 ```
 
 ---

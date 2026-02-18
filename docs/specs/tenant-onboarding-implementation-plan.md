@@ -4,7 +4,7 @@ description: Detailed implementation guide for the onboarding flow
 category: specs
 specCategory: reference
 icon: layout
-lastUpdated: '2025-12-01'
+lastUpdated: "2025-12-01"
 aliases: []
 tags:
   - onboarding
@@ -27,7 +27,7 @@ tags:
    └─────────────────┘
 ```
 
-> *Planning the planting*
+> _Planning the planting_
 
 ---
 
@@ -43,14 +43,14 @@ tags:
 
 ### Key Decisions
 
-| Decision | Choice | Rationale |
-|----------|--------|-----------|
-| **Subdomain** | `create.grove.place` | Dedicated signup experience, separate from landing |
-| **Auth Provider** | Heartwood (GroveAuth) | Already integrated; handles Google, magic code |
-| **Auth Flow** | Heartwood first → collect profile after | Leverages existing OAuth, avoids duplicate systems |
-| **Tour Location** | `example.grove.place` + `autumnsgrove.com` | Demo site (Midnight Bloom) + real-world example |
-| **D1 Creation** | After profile completion (free) or payment (paid) | Ensures commitment before provisioning |
-| **Free Tier** | Stub implementation now, full later | Focus on paid tiers first |
+| Decision          | Choice                                            | Rationale                                          |
+| ----------------- | ------------------------------------------------- | -------------------------------------------------- |
+| **Subdomain**     | `create.grove.place`                              | Dedicated signup experience, separate from landing |
+| **Auth Provider** | Heartwood (GroveAuth)                             | Already integrated; handles Google, magic code     |
+| **Auth Flow**     | Heartwood first → collect profile after           | Leverages existing OAuth, avoids duplicate systems |
+| **Tour Location** | `example.grove.place` + `autumnsgrove.com`        | Demo site (Midnight Bloom) + real-world example    |
+| **D1 Creation**   | After profile completion (free) or payment (paid) | Ensures commitment before provisioning             |
+| **Free Tier**     | Stub implementation now, full later               | Focus on paid tiers first                          |
 
 ### Flow Diagram
 
@@ -175,6 +175,7 @@ INSERT OR IGNORE INTO reserved_usernames (username, reason) VALUES
 ```
 
 **Update to `tenants` table plan values:**
+
 - Change `plan` CHECK constraint: `('free', 'seedling', 'sapling', 'oak', 'evergreen')`
 - This requires a migration to alter the constraint
 
@@ -183,8 +184,9 @@ INSERT OR IGNORE INTO reserved_usernames (username, reason) VALUES
 ### Phase 2: Create Subdomain App (`create.grove.place`)
 
 **Directory Structure:**
+
 ```
-/home/user/GroveEngine/create/
+/home/user/Lattice/create/
 ├── src/
 │   ├── routes/
 │   │   ├── +page.svelte                    # Welcome + auth options
@@ -250,6 +252,7 @@ INSERT OR IGNORE INTO reserved_usernames (username, reason) VALUES
 ```
 
 **Functionality:**
+
 - Display auth buttons (Google, Magic Code)
 - Each button initiates Heartwood OAuth with appropriate provider
 - Store `return_to` in cookie for post-auth redirect
@@ -257,12 +260,14 @@ INSERT OR IGNORE INTO reserved_usernames (username, reason) VALUES
 #### 3.2 Auth Routes
 
 **`/auth` (GET):**
+
 - Initiate Heartwood OAuth
 - Query param: `?provider=google|email`
 - Set PKCE state cookies
 - Redirect to GroveAuth authorize endpoint
 
 **`/auth/callback` (GET):**
+
 - Exchange authorization code for tokens
 - Fetch user info from GroveAuth `/userinfo`
 - Create/update `user_onboarding` record
@@ -278,6 +283,7 @@ INSERT OR IGNORE INTO reserved_usernames (username, reason) VALUES
 ```
 
 **Functionality:**
+
 - Pre-fill email from Heartwood
 - Real-time username availability (debounced API call)
 - Show suggestions if username taken
@@ -304,6 +310,7 @@ INSERT OR IGNORE INTO reserved_usernames (username, reason) VALUES
 | Evergreen | $35 | $357 (~$29.75/mo) |
 
 **Functionality:**
+
 - Click plan → store selection → redirect to `/checkout`
 - Free tier: show "Coming soon" or redirect to waitlist
 
@@ -317,6 +324,7 @@ INSERT OR IGNORE INTO reserved_usernames (username, reason) VALUES
 ```
 
 **Functionality:**
+
 - Create Stripe Checkout session with:
   - `mode: 'subscription'`
   - `customer_email: user.email`
@@ -335,10 +343,11 @@ INSERT OR IGNORE INTO reserved_usernames (username, reason) VALUES
 ```
 
 **Functionality:**
+
 - Verify Stripe session with `?session_id`
 - If not already done by webhook:
   - Create tenant in D1
-  - Set up subdomain routing (DNS already wildcards *.grove.place)
+  - Set up subdomain routing (DNS already wildcards \*.grove.place)
   - Create default settings
   - Send welcome email
 - Redirect to `/tour` or their blog (if skipping)
@@ -346,12 +355,14 @@ INSERT OR IGNORE INTO reserved_usernames (username, reason) VALUES
 #### 3.7 Stripe Webhook (`/api/webhooks/stripe`)
 
 **Events to handle:**
+
 - `checkout.session.completed` → Create tenant, mark payment complete
 - `customer.subscription.updated` → Update plan status
 - `customer.subscription.deleted` → Mark inactive
 - `invoice.payment_failed` → Send notification
 
 **Idempotency:**
+
 - Store event ID in `webhook_events` table
 - Check before processing
 
@@ -367,61 +378,84 @@ interface CreateTenantInput {
   username: string;
   displayName: string;
   email: string;
-  plan: 'seedling' | 'sapling' | 'oak' | 'evergreen' | 'free';
+  plan: "seedling" | "sapling" | "oak" | "evergreen" | "free";
   favoriteColor?: string;
   stripeCustomerId?: string;
   stripeSubscriptionId?: string;
 }
 
-async function createTenant(db: D1Database, input: CreateTenantInput): Promise<string> {
+async function createTenant(
+  db: D1Database,
+  input: CreateTenantInput,
+): Promise<string> {
   const tenantId = crypto.randomUUID();
 
   // 1. Insert into tenants table
-  await db.prepare(`
+  await db
+    .prepare(
+      `
     INSERT INTO tenants (id, subdomain, display_name, email, plan, theme, active)
     VALUES (?, ?, ?, ?, ?, ?, 1)
-  `).bind(
-    tenantId,
-    input.username,
-    input.displayName,
-    input.email,
-    input.plan,
-    'default'
-  ).run();
+  `,
+    )
+    .bind(
+      tenantId,
+      input.username,
+      input.displayName,
+      input.email,
+      input.plan,
+      "default",
+    )
+    .run();
 
   // 2. Create platform_billing record (for paid tiers)
-  if (input.plan !== 'free') {
-    await db.prepare(`
+  if (input.plan !== "free") {
+    await db
+      .prepare(
+        `
       INSERT INTO platform_billing (id, tenant_id, plan, status, provider_customer_id, provider_subscription_id)
       VALUES (?, ?, ?, 'active', ?, ?)
-    `).bind(
-      crypto.randomUUID(),
-      tenantId,
-      input.plan,
-      input.stripeCustomerId,
-      input.stripeSubscriptionId
-    ).run();
+    `,
+      )
+      .bind(
+        crypto.randomUUID(),
+        tenantId,
+        input.plan,
+        input.stripeCustomerId,
+        input.stripeSubscriptionId,
+      )
+      .run();
   }
 
   // 3. Create default tenant_settings
   const defaultSettings = [
-    ['site_title', input.displayName],
-    ['site_description', `${input.displayName}'s blog on Grove`],
-    ['accent_color', input.favoriteColor || '#16a34a'],
+    ["site_title", input.displayName],
+    ["site_description", `${input.displayName}'s blog on Grove`],
+    ["accent_color", input.favoriteColor || "#16a34a"],
   ];
 
   for (const [key, value] of defaultSettings) {
-    await db.prepare(`
+    await db
+      .prepare(
+        `
       INSERT INTO tenant_settings (tenant_id, setting_key, setting_value)
       VALUES (?, ?, ?)
-    `).bind(tenantId, key, value).run();
+    `,
+      )
+      .bind(tenantId, key, value)
+      .run();
   }
 
   // 4. Link onboarding record to tenant
-  await db.prepare(`
+  await db
+    .prepare(
+      `
     UPDATE user_onboarding SET tenant_id = ?, updated_at = unixepoch()
     WHERE id = ?
-  `).bind(tenantId, input.onboardingId).run();
+  `,
+    )
+    .bind(tenantId, input.onboardingId)
+    .run();
 
   return tenantId;
 }
@@ -434,6 +468,7 @@ async function createTenant(db: D1Database, input: CreateTenantInput): Promise<s
 **Approach:** Redirect-based tour with progress tracking
 
 **Tour Stops:**
+
 1. `example.grove.place?tour=1` - Homepage intro
 2. `example.grove.place/post/midnight-blend?tour=2` - Blog post + vines
 3. `example.grove.place/admin?tour=3` - Admin dashboard (read-only)
@@ -443,12 +478,14 @@ async function createTenant(db: D1Database, input: CreateTenantInput): Promise<s
 7. `create.grove.place/tour/complete` - Completion + redirect
 
 **Tour UI Component:**
+
 - Floating overlay with title, description, progress
 - Next/Back/Skip buttons
 - Persists across page navigations via cookie/localStorage
 - Tour state stored in `user_onboarding` table
 
 **Implementation:**
+
 - Add `TourOverlay.svelte` component to engine
 - Check for `?tour=N` param in layout
 - Display appropriate overlay content
@@ -493,6 +530,7 @@ async function createTenant(db: D1Database, input: CreateTenantInput): Promise<s
 **Location:** Engine package (`packages/engine/src/lib/components/OnboardingChecklist.svelte`)
 
 **Behavior:**
+
 - Appears in admin sidebar when `?welcome=true` or checklist incomplete
 - Tracks 4 items:
   - ✓ Complete the tour
@@ -508,21 +546,21 @@ async function createTenant(db: D1Database, input: CreateTenantInput): Promise<s
 
 ### New Files to Create
 
-| File | Purpose |
-|------|---------|
-| `create/` (new SvelteKit app) | Entire signup subdomain |
-| `packages/engine/migrations/011_user_onboarding.sql` | New tables |
-| `packages/engine/migrations/012_update_tenant_plans.sql` | Update plan enum |
-| `packages/engine/src/lib/components/OnboardingChecklist.svelte` | Checklist widget |
-| `packages/engine/src/lib/components/TourOverlay.svelte` | Tour floating UI |
-| `landing/src/lib/email/onboarding-templates.ts` | Email templates |
+| File                                                            | Purpose                 |
+| --------------------------------------------------------------- | ----------------------- |
+| `create/` (new SvelteKit app)                                   | Entire signup subdomain |
+| `packages/engine/migrations/011_user_onboarding.sql`            | New tables              |
+| `packages/engine/migrations/012_update_tenant_plans.sql`        | Update plan enum        |
+| `packages/engine/src/lib/components/OnboardingChecklist.svelte` | Checklist widget        |
+| `packages/engine/src/lib/components/TourOverlay.svelte`         | Tour floating UI        |
+| `landing/src/lib/email/onboarding-templates.ts`                 | Email templates         |
 
 ### Files to Modify
 
-| File | Change |
-|------|--------|
+| File                              | Change                                                  |
+| --------------------------------- | ------------------------------------------------------- |
 | `landing/src/routes/+page.svelte` | Add "Start your blog" CTA linking to create.grove.place |
-| `docs/specs/seedbed-spec.md` | Update to reflect Heartwood auth approach |
+| `docs/specs/seedbed-spec.md`      | Update to reflect Heartwood auth approach               |
 
 ---
 
@@ -546,26 +584,26 @@ async function createTenant(db: D1Database, input: CreateTenantInput): Promise<s
 
 ## Questions Resolved
 
-| Question | Answer |
-|----------|--------|
-| Auth integration | Heartwood first, profile collection after |
-| Signup subdomain | `create.grove.place` |
-| Free tier | Stubs now, full implementation later |
-| Tour location | example.grove.place + autumnsgrove.com |
-| D1 creation timing | After profile (free) or payment (paid) |
+| Question           | Answer                                    |
+| ------------------ | ----------------------------------------- |
+| Auth integration   | Heartwood first, profile collection after |
+| Signup subdomain   | `create.grove.place`                      |
+| Free tier          | Stubs now, full implementation later      |
+| Tour location      | example.grove.place + autumnsgrove.com    |
+| D1 creation timing | After profile (free) or payment (paid)    |
 
 ---
 
 ## Estimated Components
 
-| Category | Count |
-|----------|-------|
-| New routes | ~12 |
-| New components | ~10 |
-| API endpoints | ~4 |
-| Database migrations | 2 |
-| Email templates | 6 |
+| Category            | Count |
+| ------------------- | ----- |
+| New routes          | ~12   |
+| New components      | ~10   |
+| API endpoints       | ~4    |
+| Database migrations | 2     |
+| Email templates     | 6     |
 
 ---
 
-*Ready for implementation. All code can be written remotely; testing and deployment when home.*
+_Ready for implementation. All code can be written remotely; testing and deployment when home._

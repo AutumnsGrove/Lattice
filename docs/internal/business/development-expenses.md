@@ -1,6 +1,6 @@
 # Grove Development Expenses
 
-This document tracks development-related expenses for the Grove project (GroveEngine/Lattice) for tax and business purposes.
+This document tracks development-related expenses for the Grove project (Lattice/Lattice) for tax and business purposes.
 
 ---
 
@@ -8,14 +8,14 @@ This document tracks development-related expenses for the Grove project (GroveEn
 
 ### Current Subscription
 
-| Field | Value |
-|-------|-------|
-| **Service** | Claude Pro / Claude Max (Anthropic) |
-| **Provider** | Anthropic PBC |
-| **Current Tier** | $200/month (Max) |
-| **Effective Date** | January 2026 |
-| **Previous Tier** | $100/month (Pro) |
-| **Business Use Percentage** | 75-80% (conservative estimate) |
+| Field                       | Value                               |
+| --------------------------- | ----------------------------------- |
+| **Service**                 | Claude Pro / Claude Max (Anthropic) |
+| **Provider**                | Anthropic PBC                       |
+| **Current Tier**            | $200/month (Max)                    |
+| **Effective Date**          | January 2026                        |
+| **Previous Tier**           | $100/month (Pro)                    |
+| **Business Use Percentage** | 75-80% (conservative estimate)      |
 
 ### Usage Context
 
@@ -29,10 +29,10 @@ Claude Code is the primary development tool for the Grove project. Approximately
 
 ### Subscription History
 
-| Date | Change | Monthly Cost | Notes |
-|------|--------|--------------|-------|
-| January 2026 | Upgrade to Max tier | $200 | First tracked month for Grove development |
-| Prior months | Pro tier | $100 | Significant usage (~$500 worth of API equivalent) but not formally tracked |
+| Date         | Change              | Monthly Cost | Notes                                                                      |
+| ------------ | ------------------- | ------------ | -------------------------------------------------------------------------- |
+| January 2026 | Upgrade to Max tier | $200         | First tracked month for Grove development                                  |
+| Prior months | Pro tier            | $100         | Significant usage (~$500 worth of API equivalent) but not formally tracked |
 
 ### Write-off Calculation
 
@@ -49,13 +49,13 @@ Actual usage is closer to 95% for Grove, but maintaining conservative estimate f
 
 ### Domain Registration (grove.place)
 
-| Field | Value |
-|-------|-------|
-| **Domain** | grove.place |
-| **Registrar** | Cloudflare (at-cost pricing, no markup) |
-| **Cost** | $17/year |
-| **Renewal Date** | December 2025 |
-| **Business Use** | 100% |
+| Field            | Value                                   |
+| ---------------- | --------------------------------------- |
+| **Domain**       | grove.place                             |
+| **Registrar**    | Cloudflare (at-cost pricing, no markup) |
+| **Cost**         | $17/year                                |
+| **Renewal Date** | December 2025                           |
+| **Business Use** | 100%                                    |
 
 Primary domain for the Grove platform. All user blogs are served from subdomains (username.grove.place).
 
@@ -63,12 +63,12 @@ Primary domain for the Grove platform. All user blogs are served from subdomains
 
 ### Email Forwarding Service
 
-| Field | Value |
-|-------|-------|
-| **Service** | Forward Email |
-| **Cost** | $36/year |
+| Field            | Value             |
+| ---------------- | ----------------- |
+| **Service**      | Forward Email     |
+| **Cost**         | $36/year          |
 | **Renewal Date** | December 26, 2025 |
-| **Business Use** | 100% |
+| **Business Use** | 100%              |
 
 Enables Grove users to create their own @grove.place email addresses (e.g., username@grove.place). Core platform feature for user identity.
 
@@ -76,13 +76,13 @@ Enables Grove users to create their own @grove.place email addresses (e.g., user
 
 ### Cloudflare Workers (Paid Tier)
 
-| Field | Value |
-|-------|-------|
-| **Service** | Cloudflare Workers Paid |
-| **Provider** | Cloudflare |
-| **Cost** | $5/month ($60/year) |
-| **Start Date** | January 3, 2026 |
-| **Business Use** | 100% |
+| Field            | Value                   |
+| ---------------- | ----------------------- |
+| **Service**      | Cloudflare Workers Paid |
+| **Provider**     | Cloudflare              |
+| **Cost**         | $5/month ($60/year)     |
+| **Start Date**   | January 3, 2026         |
+| **Business Use** | 100%                    |
 
 Powers the Grove backend infrastructure—API endpoints, authentication, and multi-tenant routing.
 
@@ -90,13 +90,13 @@ Powers the Grove backend infrastructure—API endpoints, authentication, and mul
 
 ### Mobile Hotspot (Development Internet)
 
-| Field | Value |
-|-------|-------|
-| **Service** | US Mobile Unlimited Hotspot |
-| **Provider** | US Mobile |
-| **Cost** | $199/year (promotional rate, 50% off) |
-| **Start Date** | January 4, 2026 |
-| **Business Use** | 85% |
+| Field            | Value                                 |
+| ---------------- | ------------------------------------- |
+| **Service**      | US Mobile Unlimited Hotspot           |
+| **Provider**     | US Mobile                             |
+| **Cost**         | $199/year (promotional rate, 50% off) |
+| **Start Date**   | January 4, 2026                       |
+| **Business Use** | 85%                                   |
 
 Dedicated mobile internet for remote development work. Enables productive coding sessions outside the home environment.
 
@@ -106,14 +106,14 @@ Dedicated mobile internet for remote development work. Enables productive coding
 
 ### Mailbox Service (UPS)
 
-| Field | Value |
-|-------|-------|
-| **Service** | Private Mailbox with Full Address |
-| **Provider** | UPS |
-| **Cost** | $81/quarter + $10 setup (one-time) |
-| **Start Date** | January 5, 2026 |
-| **Renewal Date** | April 5, 2026 |
-| **Business Use** | 100% |
+| Field            | Value                              |
+| ---------------- | ---------------------------------- |
+| **Service**      | Private Mailbox with Full Address  |
+| **Provider**     | UPS                                |
+| **Cost**         | $81/quarter + $10 setup (one-time) |
+| **Start Date**   | January 5, 2026                    |
+| **Renewal Date** | April 5, 2026                      |
+| **Business Use** | 100%                               |
 
 Provides a physical mailing address for Grove business correspondence. Enables receipt of vendor communications, business mail, and official documentation.
 
@@ -123,17 +123,17 @@ Provides a physical mailing address for Grove business correspondence. Enables r
 
 ## Annual Summary
 
-| Expense | Annual Cost | Business % | Deductible |
-|---------|-------------|------------|------------|
-| Claude Max | $2,400 | 75-80% | $1,800-1,920 |
-| Domain (grove.place) | $17 | 100% | $17 |
-| Forward Email | $36 | 100% | $36 |
-| Cloudflare Workers | $60 | 100% | $60 |
-| Mobile Hotspot | $199 | 85% | $169 |
-| Mailbox (UPS) | $334* | 100% | $334 |
-| **Total** | **$3,046** | — | **$2,416-2,536** |
+| Expense              | Annual Cost | Business % | Deductible       |
+| -------------------- | ----------- | ---------- | ---------------- |
+| Claude Max           | $2,400      | 75-80%     | $1,800-1,920     |
+| Domain (grove.place) | $17         | 100%       | $17              |
+| Forward Email        | $36         | 100%       | $36              |
+| Cloudflare Workers   | $60         | 100%       | $60              |
+| Mobile Hotspot       | $199        | 85%        | $169             |
+| Mailbox (UPS)        | $334\*      | 100%       | $334             |
+| **Total**            | **$3,046**  | —          | **$2,416-2,536** |
 
-*2026 includes $10 one-time setup fee; ongoing annual cost $324/year
+\*2026 includes $10 one-time setup fee; ongoing annual cost $324/year
 
 ---
 
@@ -145,5 +145,5 @@ Provides a physical mailing address for Grove business correspondence. Enables r
 
 ---
 
-*Document created: January 5, 2026*
-*Last updated: January 5, 2026*
+_Document created: January 5, 2026_
+_Last updated: January 5, 2026_

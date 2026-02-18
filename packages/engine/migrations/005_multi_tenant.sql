@@ -15,7 +15,7 @@
 --   - pages: Add tenant_id for multi-tenant support
 --   - site_settings: Add tenant_id for per-tenant configuration
 --
--- Migration Strategy: https://github.com/AutumnsGrove/GroveEngine/docs/MIGRATION-STRATEGY.md
+-- Migration Strategy: https://github.com/AutumnsGrove/Lattice/docs/MIGRATION-STRATEGY.md
 
 -- =============================================================================
 -- TENANTS TABLE

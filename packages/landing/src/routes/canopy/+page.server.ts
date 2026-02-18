@@ -1,10 +1,10 @@
 import type { PageServerLoad } from "./$types";
-import { seededShuffle, type CanopyCategory } from "@autumnsgrove/groveengine";
+import { seededShuffle, type CanopyCategory } from "@autumnsgrove/lattice";
 import {
   fetchCanopyDirectory,
   type CanopyWanderer,
   type CanopyDirectoryResult,
-} from "@autumnsgrove/groveengine/server";
+} from "@autumnsgrove/lattice/server";
 
 export interface CanopyData extends CanopyDirectoryResult {
   seed: string;

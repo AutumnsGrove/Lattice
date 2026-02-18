@@ -31,7 +31,7 @@ _The panther freezes at the edge of the clearing. Rain-damp leaves. Air thick wi
 Lock onto the target. Fetch the issue details:
 
 ```bash
-gh issue view {number} --repo AutumnsGrove/GroveEngine
+gh issue view {number} --repo AutumnsGrove/Lattice
 ```
 
 Read it carefully. Understand what draws breath in this forest. Know what "done" looks like when the dust settles and the blood mixes with earth.

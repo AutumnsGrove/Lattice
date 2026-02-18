@@ -13,8 +13,8 @@ const GITHUB_ORG = "AutumnsGrove";
 
 export const WAYFINDER_LINKS = {
   github: {
-    repo: `https://github.com/${GITHUB_ORG}/GroveEngine`,
-    issues: `https://github.com/${GITHUB_ORG}/GroveEngine/issues`,
+    repo: `https://github.com/${GITHUB_ORG}/Lattice`,
+    issues: `https://github.com/${GITHUB_ORG}/Lattice/issues`,
     project: `https://github.com/users/${GITHUB_ORG}/projects/1`,
   },
   cloudflare: {

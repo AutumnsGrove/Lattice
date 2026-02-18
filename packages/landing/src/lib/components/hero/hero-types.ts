@@ -1,4 +1,4 @@
-import type { Season } from "@autumnsgrove/groveengine/ui/nature";
+import type { Season } from "@autumnsgrove/lattice/ui/nature";
 
 export type BgVariant = "forest" | "twilight" | "dawn";
 

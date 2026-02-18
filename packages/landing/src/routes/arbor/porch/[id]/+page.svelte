@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from "$app/forms";
-	import { GlassCard, GroveSwap } from "@autumnsgrove/groveengine/ui";
+	import { GlassCard, GroveSwap } from "@autumnsgrove/lattice/ui";
 	import {
 		MessageCircle,
 		Clock,

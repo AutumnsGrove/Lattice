@@ -8,8 +8,8 @@
 
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { aggregateFirefly } from "@autumnsgrove/groveengine/server/observability";
-import { isWayfinder } from "@autumnsgrove/groveengine/config";
+import { aggregateFirefly } from "@autumnsgrove/lattice/server/observability";
+import { isWayfinder } from "@autumnsgrove/lattice/config";
 
 export const GET: RequestHandler = async ({ platform, locals }) => {
 	const db = platform?.env?.DB;

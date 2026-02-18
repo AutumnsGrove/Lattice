@@ -12,7 +12,7 @@
  * Uses the shared GroveErrorDef type from the Grove error system.
  * AuthErrorDef is a type alias for backward compatibility.
  *
- * @see https://github.com/AutumnsGrove/GroveEngine/issues/668
+ * @see https://github.com/AutumnsGrove/Lattice/issues/668
  */
 
 import type { ErrorCategory, GroveErrorDef } from "../errors/types.js";
@@ -24,7 +24,7 @@ import { logGroveError } from "../errors/helpers.js";
 
 export type { ErrorCategory };
 
-/** @deprecated Use GroveErrorDef from '@autumnsgrove/groveengine/errors' */
+/** @deprecated Use GroveErrorDef from '@autumnsgrove/lattice/errors' */
 export type AuthErrorDef = GroveErrorDef;
 
 /**

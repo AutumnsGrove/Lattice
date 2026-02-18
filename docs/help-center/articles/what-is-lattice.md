@@ -3,7 +3,7 @@ title: What is Lattice?
 description: The framework that powers every Grove blog
 category: help
 section: how-it-works
-lastUpdated: '2026-01-25'
+lastUpdated: "2026-01-25"
 keywords:
   - lattice
   - framework
@@ -69,7 +69,7 @@ Lattice is a SvelteKit application running on Cloudflare's edge network. It uses
 
 Session management, real-time features, and analytics coordination happen through Loom (our Durable Objects layer). If that sentence means nothing to you, that's fine. If it does, you might enjoy [What is Loom?](/knowledge/help/what-is-loom).
 
-The name "GroveEngine" appears in the codebase. That's the internal name. Lattice is what we call it publicly, because lattices support growth and GroveEngine sounds like middleware.
+The name "Lattice" appears in the codebase. That's the internal name. Lattice is what we call it publicly, because lattices support growth and Lattice sounds like middleware.
 
 ## Why we tell you this
 
@@ -81,4 +81,4 @@ This article exists because someone clicked a footer link and wondered what Latt
 
 ---
 
-*The best frameworks disappear into what grows on them.*
+_The best frameworks disappear into what grows on them._

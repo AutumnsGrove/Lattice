@@ -3,7 +3,7 @@
  */
 
 import type { PageServerLoad } from "./$types";
-import { getStorageMetrics } from "@autumnsgrove/groveengine/server/observability";
+import { getStorageMetrics } from "@autumnsgrove/lattice/server/observability";
 
 export const load: PageServerLoad = async ({ parent, platform }) => {
 	await parent();

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Check, Loader2, Lightbulb, ArrowRight, X } from '@autumnsgrove/groveengine/ui/icons';
-	import { GlassCard, GroveSwap } from '@autumnsgrove/groveengine/ui';
+	import { Check, Loader2, Lightbulb, ArrowRight, X } from '@autumnsgrove/lattice/ui/icons';
+	import { GlassCard, GroveSwap } from '@autumnsgrove/lattice/ui';
 
 	let { data } = $props();
 

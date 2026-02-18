@@ -1,6 +1,6 @@
 import { redirect } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
-import { isWayfinder } from "@autumnsgrove/groveengine/config";
+import { isWayfinder } from "@autumnsgrove/lattice/config";
 
 export const load: PageServerLoad = async ({ parent }) => {
   const parentData = await parent();

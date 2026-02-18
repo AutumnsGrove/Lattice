@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
-	import { seasonStore } from '@autumnsgrove/groveengine/ui/chrome';
+	import { seasonStore } from '@autumnsgrove/lattice/ui/chrome';
 	import Footer from '$lib/components/Footer.svelte';
 	import SEO from '$lib/components/SEO.svelte';
 
@@ -24,11 +24,11 @@
 		midnightBloom,
 		// Type
 		type Season
-	} from '@autumnsgrove/groveengine/ui/nature';
+	} from '@autumnsgrove/lattice/ui/nature';
 
 	// Import glass components and color utilities
-	import { Glass, GlassCard, GroveIntro } from '@autumnsgrove/groveengine/ui';
-	import { generateTierColors } from '@autumnsgrove/groveengine/ui/utils';
+	import { Glass, GlassCard, GroveIntro } from '@autumnsgrove/lattice/ui';
+	import { generateTierColors } from '@autumnsgrove/lattice/ui/utils';
 
 	// Path utilities
 	import { samplePathString } from '$lib/utils/pathUtils';

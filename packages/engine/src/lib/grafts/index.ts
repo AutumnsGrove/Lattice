@@ -6,8 +6,8 @@
  *
  * @example
  * ```typescript
- * import { isGraftEnabled, setGraftContext } from '@autumnsgrove/groveengine/grafts';
- * import { PricingGraft } from '@autumnsgrove/groveengine/grafts/pricing';
+ * import { isGraftEnabled, setGraftContext } from '@autumnsgrove/lattice/grafts';
+ * import { PricingGraft } from '@autumnsgrove/lattice/grafts/pricing';
  *
  * // Check if graft is enabled
  * const enabled = await isGraftEnabled('pricing', { productId: 'grove' });

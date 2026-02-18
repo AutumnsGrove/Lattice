@@ -137,7 +137,7 @@ Arbor becomes a **first-class engine component** — like Chrome, but for admin 
 
 ```svelte
 <script>
-  import { ArborPanel, ArborSection } from '@autumnsgrove/groveengine/ui/arbor';
+  import { ArborPanel, ArborSection } from '@autumnsgrove/lattice/ui/arbor';
 
   const navItems = [
     { href: '/arbor', label: 'Dashboard', icon: Home },
@@ -376,7 +376,7 @@ Inside each Arbor page, consumers currently rebuild section headings, descriptio
 
 ```svelte
 <script>
-  import { ArborSection } from '@autumnsgrove/groveengine/ui/arbor';
+  import { ArborSection } from '@autumnsgrove/lattice/ui/arbor';
 </script>
 
 <ArborSection
@@ -475,7 +475,7 @@ The landing's `+layout.svelte` shrinks from building UI to configuring data:
 ### Current architecture:
 
 ```
-Lattice (GroveEngine)
+Lattice (Lattice)
   └─ Chrome (Header, Footer, MobileMenu, ThemeToggle, AdminHeader)
       ├─ Used by: Landing public pages
       ├─ Used by: Engine tenant sites
@@ -488,7 +488,7 @@ Lattice (GroveEngine)
 ### Target architecture:
 
 ```
-Lattice (GroveEngine)
+Lattice (Lattice)
   └─ Chrome (Header, Footer, MobileMenu, ThemeToggle, AdminHeader)
   │   ├─ Used by: Landing public pages
   │   └─ Used by: Engine tenant sites
@@ -561,7 +561,7 @@ import {
   ArborPanel,
   ArborSection,
   ArborToggle,
-} from "@autumnsgrove/groveengine/ui/arbor";
+} from "@autumnsgrove/lattice/ui/arbor";
 
 // Types (for TypeScript consumers)
 import type {
@@ -570,13 +570,13 @@ import type {
   ArborNavDivider,
   ArborFooterLink,
   ArborPanelProps,
-} from "@autumnsgrove/groveengine/ui/arbor";
+} from "@autumnsgrove/lattice/ui/arbor";
 
 // Defaults (optional)
-import { DEFAULT_ARBOR_FOOTER_LINKS } from "@autumnsgrove/groveengine/ui/arbor";
+import { DEFAULT_ARBOR_FOOTER_LINKS } from "@autumnsgrove/lattice/ui/arbor";
 
 // Store (already exists, re-exported for convenience)
-import { sidebarStore } from "@autumnsgrove/groveengine/ui/arbor";
+import { sidebarStore } from "@autumnsgrove/lattice/ui/arbor";
 ```
 
 ---
@@ -756,7 +756,7 @@ The divider `style` prop lets consumers choose how sections are visually separat
 { kind: 'divider', label: 'Admin' }                               // Default: plain line
 ```
 
-When `style` is `'grove'`, the component renders `<GroveDivider>` (already exported from `@autumnsgrove/groveengine/ui/nature`) with sidebar-appropriate sizing (`size="xs"`, `count={3}`). When `style` is any other string, it repeats that character 3-5 times as a decorative separator. When `style` is `'line'` or omitted, it renders a simple `<hr>`.
+When `style` is `'grove'`, the component renders `<GroveDivider>` (already exported from `@autumnsgrove/lattice/ui/nature`) with sidebar-appropriate sizing (`size="xs"`, `count={3}`). When `style` is any other string, it repeats that character 3-5 times as a decorative separator. When `style` is `'line'` or omitted, it renders a simple `<hr>`.
 
 **Impact on props:** `navItems` becomes `navItems: ArborNavEntry[]`.
 

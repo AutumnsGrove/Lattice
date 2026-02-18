@@ -1,14 +1,15 @@
-# Belongs in GroveEngine
+# Belongs in Lattice
 
 **Quick Reference Guide for Claude Code & Developers**
 
-This document helps you quickly decide if code belongs in the GroveEngine package.
+This document helps you quickly decide if code belongs in the Lattice package.
 
 ---
 
-## What IS GroveEngine?
+## What IS Lattice?
 
-GroveEngine is the **business logic and domain-specific feature layer** for Grove-powered websites. It provides:
+Lattice is the **business logic and domain-specific feature layer** for Grove-powered websites. It provides:
+
 - Content management features
 - Authentication & session management
 - Payment processing
@@ -18,11 +19,12 @@ GroveEngine is the **business logic and domain-specific feature layer** for Grov
 
 ---
 
-## ✅ Belongs in GroveEngine
+## ✅ Belongs in Lattice
 
 ### Core Engine Features
 
 #### 1. Content Processing & Management
+
 - **Markdown parsing** with Mermaid diagram support
 - **Front-matter extraction** (gray-matter)
 - **Syntax highlighting** for code blocks
@@ -32,6 +34,7 @@ GroveEngine is the **business logic and domain-specific feature layer** for Grov
 - **Gallery utilities** (image layout algorithms)
 
 #### 2. Authentication & Security
+
 - **JWT token generation/validation**
 - **Session management**
 - **Magic code authentication** (6-digit codes via email)
@@ -40,12 +43,14 @@ GroveEngine is the **business logic and domain-specific feature layer** for Grov
 - **Email provider integrations** (Resend)
 
 #### 3. Payment Processing
+
 - **Payment provider abstractions** (Stripe, future providers)
 - **Subscription management**
 - **E-commerce logic** (products, inventory, cart, orders)
 - **Billing workflows**
 
 #### 4. Database & Data Models
+
 - **Database schemas** (SQL migrations)
 - **Repository patterns** (git stats tracking)
 - **Todo/task tracking** models
@@ -55,6 +60,7 @@ GroveEngine is the **business logic and domain-specific feature layer** for Grov
 #### 5. Domain-Specific UI Components
 
 **Content Components**:
+
 - `ContentWithGutter` - Grove's signature annotation layout
 - `LeftGutter` - Annotation sidebar
 - `GutterItem` - Individual annotation display
@@ -63,17 +69,20 @@ GroveEngine is the **business logic and domain-specific feature layer** for Grov
 - `CollapsibleSection` - Content collapsing
 
 **Admin Components**:
+
 - `MarkdownEditor` - Rich markdown editor with preview + Mermaid
 - `GutterManager` - Admin interface for managing annotations
 - Admin-specific wrappers (Dialog, Sheet, Select, Table, Tabs, Accordion, Toast)
 
 **Gallery Components**:
+
 - `ImageGallery` - Multi-image display with navigation
 - `Lightbox` - Full-screen image viewer
 - `ZoomableImage` - Pinch-to-zoom functionality
 - `LightboxCaption` - Image caption system
 
 #### 6. API Routes & Server Logic
+
 - **SvelteKit routes** (`/routes/**/*.svelte`)
 - **API endpoints** (`/api/**/*`)
 - **Server-side utilities** (logging, middleware)
@@ -81,6 +90,7 @@ GroveEngine is the **business logic and domain-specific feature layer** for Grov
 - **RSS feed generation**
 
 #### 7. Business Logic Utilities
+
 - **Gutter positioning algorithms** (annotation layout)
 - **Gallery layout calculations**
 - **Markdown-to-HTML conversion**
@@ -90,14 +100,16 @@ GroveEngine is the **business logic and domain-specific feature layer** for Grov
 
 ---
 
-## ❌ Does NOT Belong in GroveEngine
+## ❌ Does NOT Belong in Lattice
 
 ### Pure UI Components
+
 - Generic buttons, cards, inputs → **GroveUI**
 - Design tokens (colors, typography) → **GroveUI**
 - Layout primitives with no business logic → **GroveUI**
 
 ### Site-Specific Code
+
 - Custom routes for a specific deployment → **Site-Specific**
 - Branding/theming unique to one site → **Site-Specific**
 - Environment-specific configuration → **Site-Specific**
@@ -109,7 +121,7 @@ GroveEngine is the **business logic and domain-specific feature layer** for Grov
 ```
 Is it specific to Grove's domain logic?
 ├─ YES: Contains markdown, gutter, auth, payments, content management?
-│  └─ ✅ Belongs in GroveEngine
+│  └─ ✅ Belongs in Lattice
 │
 ├─ NO: Is it a generic UI component anyone could use?
 │  └─ ❌ Belongs in GroveUI
@@ -121,24 +133,28 @@ Is it specific to Grove's domain logic?
 ### Quick Tests
 
 **Test 1**: "Could another CMS use this exact code?"
+
 - YES → GroveUI or open-source library
-- NO → GroveEngine
+- NO → Lattice
 
 **Test 2**: "Does it handle data, authentication, or business rules?"
-- YES → GroveEngine
+
+- YES → Lattice
 - NO → GroveUI or Site-Specific
 
 **Test 3**: "Is it visual styling with no logic?"
+
 - YES → GroveUI
-- NO → Check if it's domain logic → GroveEngine
+- NO → Check if it's domain logic → Lattice
 
 ---
 
 ## Examples
 
-### ✅ Belongs in GroveEngine
+### ✅ Belongs in Lattice
 
 **Example 1: Markdown Parser**
+
 ```typescript
 // utils/markdown.js
 export function parseMarkdown(content: string) {
@@ -149,9 +165,11 @@ export function parseMarkdown(content: string) {
   return processedHTML;
 }
 ```
+
 **Why**: Domain-specific content processing with Grove's specific requirements.
 
 **Example 2: GutterManager Component**
+
 ```svelte
 <!-- components/admin/GutterManager.svelte -->
 <script>
@@ -160,9 +178,11 @@ export function parseMarkdown(content: string) {
   // Position validation
 </script>
 ```
+
 **Why**: Admin tool for Grove's annotation system - domain-specific.
 
 **Example 3: Payment Provider Abstraction**
+
 ```typescript
 // payments/provider.ts
 export interface PaymentProvider {
@@ -170,11 +190,13 @@ export interface PaymentProvider {
   processPayment(amount: number): Promise<Payment>;
 }
 ```
+
 **Why**: Business logic for payment processing - core engine feature.
 
-### ❌ Does NOT Belong in GroveEngine
+### ❌ Does NOT Belong in Lattice
 
 **Example 1: Generic Button**
+
 ```svelte
 <!-- This should be in GroveUI -->
 <script>
@@ -183,15 +205,18 @@ export interface PaymentProvider {
   // No business logic, just presentation
 </script>
 ```
+
 **Why**: Pure UI component with no Grove-specific logic.
 
 **Example 2: About Page Route**
+
 ```svelte
 <!-- This should be in site-specific code -->
 <!-- routes/about/+page.svelte -->
 <h1>About The Midnight Bloom</h1>
 <p>Specific content about this particular tea café...</p>
 ```
+
 **Why**: Specific to one website deployment.
 
 ---
@@ -199,12 +224,14 @@ export interface PaymentProvider {
 ## Red Flags: Signs Code Should Be Elsewhere
 
 ### 🚩 Probably belongs in GroveUI:
+
 - File only contains CSS/styling
 - Component has no props related to Grove features
 - Could be copy-pasted into any project without modification
 - Only imports design tokens and primitives
 
 ### 🚩 Probably belongs in Site-Specific:
+
 - Hardcoded content/copy specific to one business
 - Custom branding unique to one client
 - Environment variables for one deployment
@@ -218,7 +245,7 @@ export interface PaymentProvider {
 
 **Question**: Is this search specific to Grove's content model?
 
-- **YES** (searches markdown, uses gutter metadata, Grove-specific filters) → **GroveEngine**
+- **YES** (searches markdown, uses gutter metadata, Grove-specific filters) → **Lattice**
 - **NO** (generic search input component) → **GroveUI**
 - **NO** (search page for specific site) → **Site-Specific**
 
@@ -226,7 +253,7 @@ export interface PaymentProvider {
 
 **Question**: What does the form do?
 
-- Creates/edits Grove content (blog posts, pages, annotations) → **GroveEngine**
+- Creates/edits Grove content (blog posts, pages, annotations) → **Lattice**
 - Generic form UI components (Input, Select, Textarea) → **GroveUI**
 - Contact form with specific business info → **Site-Specific**
 
@@ -234,7 +261,7 @@ export interface PaymentProvider {
 
 **Question**: What does it integrate with?
 
-- Integrates with Grove's image processing/gallery system → **GroveEngine**
+- Integrates with Grove's image processing/gallery system → **Lattice**
 - Generic file upload UI component → **GroveUI**
 - Uploads to specific CDN/storage for one site → **Site-Specific**
 
@@ -245,31 +272,35 @@ export interface PaymentProvider {
 ### Engine Components → use → UI Module
 
 Engine components **SHOULD**:
+
 - Import generic UI components from `$lib/ui`
 - Wrap UI components with domain-specific logic
 - Provide admin-optimized variants
 
 **Example**:
+
 ```typescript
-// GroveEngine component (e.g., src/lib/components/admin/*)
-import { Card, Button } from '$lib/ui';
-import { parseMarkdown } from '$lib/utils/markdown';
+// Lattice component (e.g., src/lib/components/admin/*)
+import { Card, Button } from "$lib/ui";
+import { parseMarkdown } from "$lib/utils/markdown";
 
 // Uses UI components + adds domain logic
 ```
 
-### GroveEngine ← used by → Site Deployments
+### Lattice ← used by → Site Deployments
 
 Sites **SHOULD**:
-- Import from `@autumnsgrove/groveengine` for domain features
-- Import from `@autumnsgrove/groveengine/ui` for UI components
+
+- Import from `@autumnsgrove/lattice` for domain features
+- Import from `@autumnsgrove/lattice/ui` for UI components
 - Keep site-specific code separate
 
 **Example**:
+
 ```typescript
 // Site-specific route
-import { ContentWithGutter } from '@autumnsgrove/groveengine';
-import { Button } from '@autumnsgrove/groveengine/ui';
+import { ContentWithGutter } from "@autumnsgrove/lattice";
+import { Button } from "@autumnsgrove/lattice/ui";
 
 // Combine for site-specific page
 ```
@@ -278,43 +309,48 @@ import { Button } from '@autumnsgrove/groveengine/ui';
 
 ## File Path Patterns
 
-### Typical GroveEngine Paths
+### Typical Lattice Paths
 
 **Domain Components**:
+
 - `/packages/engine/src/lib/components/custom/*`
 - `/packages/engine/src/lib/components/admin/*`
 - `/packages/engine/src/lib/components/gallery/*`
 
 **Utilities**:
+
 - `/packages/engine/src/lib/utils/markdown.js`
 - `/packages/engine/src/lib/utils/gutter.js`
 - `/packages/engine/src/lib/utils/imageProcessor.js`
 - `/packages/engine/src/lib/utils/validation.js`
 
 **Auth & Payments**:
+
 - `/packages/engine/src/lib/auth/*`
 - `/packages/engine/src/lib/payments/*`
 
 **Database**:
+
 - `/packages/engine/src/lib/db/schema.sql`
 
 **Routes** (Engine's own demo/docs):
+
 - `/packages/engine/src/routes/**/*`
 
 ---
 
 ## Summary Checklist
 
-When adding new code to GroveEngine, verify:
+When adding new code to Lattice, verify:
 
 - [ ] Does it handle Grove-specific business logic?
 - [ ] Does it integrate with markdown, gutter, auth, or payments?
 - [ ] Does it process content or data specific to Grove?
 - [ ] Is it an admin tool for Grove features?
 - [ ] Does it contain domain-specific UI components?
-- [ ] Would it be useless without the rest of GroveEngine?
+- [ ] Would it be useless without the rest of Lattice?
 
-If you answered **YES** to any of these → ✅ **Belongs in GroveEngine**
+If you answered **YES** to any of these → ✅ **Belongs in Lattice**
 
 If all are **NO** → Check if it belongs in GroveUI or Site-Specific code instead.
 
@@ -322,6 +358,7 @@ If all are **NO** → Check if it belongs in GroveUI or Site-Specific code inste
 
 **Last Updated**: 2025-12-04
 **Related Docs**:
+
 - `BELONGS_IN_UI.md` (GroveUI decision guide)
 - `site-specific-code.md` (Site deployment guide)
 - `customer-template.md` (New project template)

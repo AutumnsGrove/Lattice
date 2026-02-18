@@ -514,7 +514,10 @@ export class SentinelDO {
     this.log("Test completed", {
       runId: this.runState.runId,
       totalOps,
-      successRate: totalOps > 0 ? ((this.runState.completedOps / totalOps) * 100).toFixed(1) : '0.0',
+      successRate:
+        totalOps > 0
+          ? ((this.runState.completedOps / totalOps) * 100).toFixed(1)
+          : "0.0",
       throughput: results.throughputOpsPerSec.toFixed(1),
     });
   }

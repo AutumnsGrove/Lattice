@@ -24,18 +24,19 @@ the goal   content   email      draft    or send
 
 ## Phase 1: HOVER
 
-*The hummingbird hovers, assessing the garden...*
+_The hummingbird hovers, assessing the garden..._
 
 Understand what kind of email we're creating:
 
-| Type | Description | Template |
-|------|-------------|----------|
-| **Sequence** | Part of automated Day 0/1/7/14/30 series | WelcomeEmail, Day*Email |
-| **Broadcast** | One-time announcement to all contacts | GroveEmail wrapper |
-| **Patch Notes** | Feature update for Rooted users | PatchNotesEmail |
-| **Custom** | Something specific | GroveEmail with custom content |
+| Type            | Description                              | Template                       |
+| --------------- | ---------------------------------------- | ------------------------------ |
+| **Sequence**    | Part of automated Day 0/1/7/14/30 series | WelcomeEmail, Day\*Email       |
+| **Broadcast**   | One-time announcement to all contacts    | GroveEmail wrapper             |
+| **Patch Notes** | Feature update for Rooted users          | PatchNotesEmail                |
+| **Custom**      | Something specific                       | GroveEmail with custom content |
 
 **Ask clarifying questions:**
+
 - What's the main message?
 - Who's the audience? (wanderer, promo, rooted, all)
 - Any specific CTAs or links?
@@ -45,7 +46,7 @@ Understand what kind of email we're creating:
 
 ## Phase 2: GATHER
 
-*Darting between flowers, collecting nectar...*
+_Darting between flowers, collecting nectar..._
 
 Gather the content:
 
@@ -59,7 +60,7 @@ Gather the content:
 
 ## Phase 3: ARRANGE
 
-*Wings humming, arranging petals into patterns...*
+_Wings humming, arranging petals into patterns..._
 
 Build the email using Grove components:
 
@@ -71,7 +72,7 @@ import {
   GroveButton,
   GroveHighlight,
   GroveDivider,
-} from '@autumnsgrove/groveengine/email/components';
+} from "@autumnsgrove/lattice/email/components";
 
 export function MyEmail() {
   return (
@@ -86,32 +87,33 @@ export function MyEmail() {
 
 **Component Reference:**
 
-| Component | Usage |
-|-----------|-------|
-| `GroveEmail` | Base wrapper with header/footer |
-| `GroveHeading` | h1/h2/h3 headings |
+| Component        | Usage                                 |
+| ---------------- | ------------------------------------- |
+| `GroveEmail`     | Base wrapper with header/footer       |
+| `GroveHeading`   | h1/h2/h3 headings                     |
 | `GroveParagraph` | Body text (use `muted` for secondary) |
-| `GroveButton` | CTA buttons (primary/secondary) |
-| `GroveHighlight` | Callout boxes (info/tip/special) |
-| `GroveDivider` | Section breaks (optional leaf) |
-| `GroveList` | Bullet/check/arrow lists |
-| `GrovePatchNote` | Feature update blocks |
+| `GroveButton`    | CTA buttons (primary/secondary)       |
+| `GroveHighlight` | Callout boxes (info/tip/special)      |
+| `GroveDivider`   | Section breaks (optional leaf)        |
+| `GroveList`      | Bullet/check/arrow lists              |
+| `GrovePatchNote` | Feature update blocks                 |
 
 ---
 
 ## Phase 4: PREVIEW
 
-*Hovering back to admire the arrangement...*
+_Hovering back to admire the arrangement..._
 
 Render and show the user:
 
 ```typescript
-import { render } from '@autumnsgrove/groveengine/email/render';
+import { render } from '@autumnsgrove/lattice/email/render';
 
 const { html, text } = await render(<MyEmail />, { plainText: true });
 ```
 
 Options for preview:
+
 - Show rendered HTML in browser (email:dev server)
 - Display key elements: subject, preview, content summary
 - Show recipient count (if broadcast)
@@ -120,24 +122,25 @@ Options for preview:
 
 ## Phase 5: SEND
 
-*A final dart, delivering the nectar...*
+_A final dart, delivering the nectar..._
 
 Options:
+
 1. **Send immediately** — Via Resend API
 2. **Schedule for later** — Use `scheduledAt` parameter
 3. **Save as draft** — Store for later editing
 4. **Export HTML** — For manual sending
 
 ```typescript
-import { sendEmail } from '@autumnsgrove/groveengine/email/schedule';
+import { sendEmail } from "@autumnsgrove/lattice/email/schedule";
 
 await sendEmail({
-  email: 'recipient@example.com',
-  subject: 'Your Subject',
+  email: "recipient@example.com",
+  subject: "Your Subject",
   html,
   text,
   resendApiKey: env.RESEND_API_KEY,
-  scheduledAt: '2024-02-01T10:00:00Z', // optional
+  scheduledAt: "2024-02-01T10:00:00Z", // optional
 });
 ```
 
@@ -146,6 +149,7 @@ await sendEmail({
 ## Grove Voice Guidelines
 
 ### DO:
+
 - Warm, personal, from Autumn
 - Use "Wanderer" for users, "Rooted" for subscribers
 - Sign off with "— Autumn"
@@ -153,6 +157,7 @@ await sendEmail({
 - Include subtle nature touches (🌿, 🌱, 🏡)
 
 ### DON'T:
+
 - "Hey there!" or generic greetings
 - "I hope this email finds you well"
 - Corporate marketing speak
@@ -160,9 +165,11 @@ await sendEmail({
 - Pushy sales language
 
 ### Note on Grove Terminology in Emails:
+
 Emails are rendered as static HTML (not Svelte components), so GroveTerm components don't apply here. Use Grove terms directly in emails (Wanderer, Rooted, etc.) since email recipients have already opted in to the Grove ecosystem by subscribing. The GroveTerm toggle system is for web UI only, where new visitors may not yet understand the vocabulary.
 
 ### Example Opening:
+
 ```
 ❌ "Hey there! We have some exciting news!"
 ✅ "A quiet update from the grove..."
@@ -179,19 +186,19 @@ Emails are rendered as static HTML (not Svelte components), so GroveTerm compone
 ## Quick Templates
 
 ### Announcement
+
 ```tsx
 <GroveEmail previewText="Big news from the grove...">
   <GroveHeading>Something New 🌿</GroveHeading>
-  <GroveParagraph>
-    I wanted to share some news with you...
-  </GroveParagraph>
+  <GroveParagraph>I wanted to share some news with you...</GroveParagraph>
   <GroveButton href="https://grove.place">Learn more</GroveButton>
 </GroveEmail>
 ```
 
 ### Patch Notes
+
 ```tsx
-import { PatchNotesEmail } from '@autumnsgrove/groveengine/email/updates';
+import { PatchNotesEmail } from "@autumnsgrove/lattice/email/updates";
 
 <PatchNotesEmail
   version="v1.2.0"
@@ -201,20 +208,17 @@ import { PatchNotesEmail } from '@autumnsgrove/groveengine/email/updates';
     { icon: "🔧", title: "Improvement", description: "...", tag: "improved" },
     { icon: "🐛", title: "Bug Fix", description: "...", tag: "fixed" },
   ]}
-/>
+/>;
 ```
 
 ### Special Offer
+
 ```tsx
 <GroveEmail previewText="A little something for you...">
   <GroveHeading>A little something for you 🎁</GroveHeading>
-  <GroveParagraph>
-    As a thank you for being here...
-  </GroveParagraph>
+  <GroveParagraph>As a thank you for being here...</GroveParagraph>
   <GroveHighlight variant="special" icon="🎁">
-    <GroveParagraph>
-      Use code WANDERER for 20% off...
-    </GroveParagraph>
+    <GroveParagraph>Use code WANDERER for 20% off...</GroveParagraph>
   </GroveHighlight>
   <GroveButton href="https://grove.place/pricing">See plans</GroveButton>
 </GroveEmail>
@@ -224,15 +228,15 @@ import { PatchNotesEmail } from '@autumnsgrove/groveengine/email/updates';
 
 ## Files Reference
 
-| File | Purpose |
-|------|---------|
-| `packages/engine/src/lib/email/components/` | Design system |
-| `packages/engine/src/lib/email/sequences/` | Automated sequences |
-| `packages/engine/src/lib/email/updates/` | Patch notes |
-| `packages/engine/src/lib/email/render.ts` | Rendering |
-| `packages/engine/src/lib/email/schedule.ts` | Scheduling |
-| `scripts/email/broadcast.ts` | CLI for broadcasts |
+| File                                        | Purpose             |
+| ------------------------------------------- | ------------------- |
+| `packages/engine/src/lib/email/components/` | Design system       |
+| `packages/engine/src/lib/email/sequences/`  | Automated sequences |
+| `packages/engine/src/lib/email/updates/`    | Patch notes         |
+| `packages/engine/src/lib/email/render.ts`   | Rendering           |
+| `packages/engine/src/lib/email/schedule.ts` | Scheduling          |
+| `scripts/email/broadcast.ts`                | CLI for broadcasts  |
 
 ---
 
-*The hummingbird's work is done. The message takes flight.* 🐦
+_The hummingbird's work is done. The message takes flight._ 🐦

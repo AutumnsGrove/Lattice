@@ -7,7 +7,7 @@
   the full admin experience for free.
 
   Usage:
-    import { ArborPanel } from '@autumnsgrove/groveengine/ui/arbor';
+    import { ArborPanel } from '@autumnsgrove/lattice/ui/arbor';
 
     <ArborPanel {navItems} {footerLinks} user={data.user} brandTitle="Admin">
       {@render children()}

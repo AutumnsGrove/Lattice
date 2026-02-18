@@ -4,7 +4,7 @@
   Pure client-side, no API needed.
 -->
 <script lang="ts">
-	import { GlassCard, Badge } from '@autumnsgrove/groveengine/ui';
+	import { GlassCard, Badge } from '@autumnsgrove/lattice/ui';
 	import { CalendarDays } from 'lucide-svelte';
 
 	const posts = [

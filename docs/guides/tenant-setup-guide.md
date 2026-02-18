@@ -29,6 +29,7 @@ VALUES (
 ```
 
 **Fields:**
+
 - `subdomain`: The URL prefix (e.g., `sarah` → `sarah.grove.place`)
 - `display_name`: Shown in the nav bar and site title
 - `email`: Owner's email for admin access
@@ -86,10 +87,10 @@ Add the new subdomain to the GroveAuth client's redirect URIs:
 
 ```bash
 # First, check current redirect URIs
-wrangler d1 execute groveauth --remote --command="SELECT redirect_uris, allowed_origins FROM clients WHERE client_id = 'groveengine';"
+wrangler d1 execute groveauth --remote --command="SELECT redirect_uris, allowed_origins FROM clients WHERE client_id = 'lattice';"
 
 # Then update with the new subdomain added
-wrangler d1 execute groveauth --remote --command="UPDATE clients SET redirect_uris = '[\"https://existing.grove.place/auth/callback\", \"https://yoursubdomain.grove.place/auth/callback\", \"http://localhost:5173/auth/callback\"]', allowed_origins = '[\"https://existing.grove.place\", \"https://yoursubdomain.grove.place\", \"http://localhost:5173\"]' WHERE client_id = 'groveengine';"
+wrangler d1 execute groveauth --remote --command="UPDATE clients SET redirect_uris = '[\"https://existing.grove.place/auth/callback\", \"https://yoursubdomain.grove.place/auth/callback\", \"http://localhost:5173/auth/callback\"]', allowed_origins = '[\"https://existing.grove.place\", \"https://yoursubdomain.grove.place\", \"http://localhost:5173\"]' WHERE client_id = 'lattice';"
 ```
 
 ## Complete Example: Creating "Jennifer's Apiary"
@@ -97,6 +98,7 @@ wrangler d1 execute groveauth --remote --command="UPDATE clients SET redirect_ur
 Here's a real example from our test tenants:
 
 ### 1. Create Tenant
+
 ```bash
 wrangler d1 execute grove-engine-db --remote --command="
 INSERT INTO tenants (id, subdomain, display_name, email, active, theme, created_at, updated_at)
@@ -114,6 +116,7 @@ VALUES (
 ```
 
 ### 2. Create Home Page
+
 ```bash
 wrangler d1 execute grove-engine-db --remote --command="
 INSERT INTO pages (slug, title, description, markdown_content, html_content, hero, tenant_id, created_at, updated_at)
@@ -151,6 +154,7 @@ FROM tenants WHERE subdomain = 'jennifer';
 ```
 
 ### 3. Create First Blog Post
+
 ```bash
 wrangler d1 execute grove-engine-db --remote --command="
 INSERT INTO posts (slug, title, description, markdown_content, html_content, tags, status, published_at, tenant_id, created_at, updated_at)
@@ -176,18 +180,19 @@ FROM tenants WHERE subdomain = 'jennifer';
 ```
 
 ### 4. Add to OAuth
+
 ```bash
-wrangler d1 execute groveauth --remote --command="UPDATE clients SET redirect_uris = '[\"https://dave.grove.place/auth/callback\", \"https://example.grove.place/auth/callback\", \"https://sarah.grove.place/auth/callback\", \"https://jennifer.grove.place/auth/callback\", \"http://localhost:5173/auth/callback\"]', allowed_origins = '[\"https://dave.grove.place\", \"https://example.grove.place\", \"https://sarah.grove.place\", \"https://jennifer.grove.place\", \"http://localhost:5173\"]' WHERE client_id = 'groveengine';"
+wrangler d1 execute groveauth --remote --command="UPDATE clients SET redirect_uris = '[\"https://dave.grove.place/auth/callback\", \"https://example.grove.place/auth/callback\", \"https://sarah.grove.place/auth/callback\", \"https://jennifer.grove.place/auth/callback\", \"http://localhost:5173/auth/callback\"]', allowed_origins = '[\"https://dave.grove.place\", \"https://example.grove.place\", \"https://sarah.grove.place\", \"https://jennifer.grove.place\", \"http://localhost:5173\"]' WHERE client_id = 'lattice';"
 ```
 
 ## Existing Test Tenants
 
-| Subdomain | Display Name | URL |
-|-----------|--------------|-----|
-| `dave` | Dave's Digital Garden | https://dave.grove.place |
-| `example` | The Midnight Bloom | https://example.grove.place |
-| `sarah` | Sarah's Garden | https://sarah.grove.place |
-| `jennifer` | Jennifer's Apiary | https://jennifer.grove.place |
+| Subdomain  | Display Name          | URL                          |
+| ---------- | --------------------- | ---------------------------- |
+| `dave`     | Dave's Digital Garden | https://dave.grove.place     |
+| `example`  | The Midnight Bloom    | https://example.grove.place  |
+| `sarah`    | Sarah's Garden        | https://sarah.grove.place    |
+| `jennifer` | Jennifer's Apiary     | https://jennifer.grove.place |
 
 ## Verification
 
@@ -200,53 +205,59 @@ After creating a tenant, verify it works:
 ## Troubleshooting
 
 ### "Tenant not found" or showing wrong content
+
 - Verify the tenant exists: `wrangler d1 execute grove-engine-db --remote --command="SELECT * FROM tenants WHERE subdomain = 'yoursubdomain';"`
 - Check the home page exists: `wrangler d1 execute grove-engine-db --remote --command="SELECT * FROM pages WHERE tenant_id = 'your-tenant-id' AND slug = 'home';"`
 
 ### OAuth redirect fails
+
 - Verify the subdomain is in the `redirect_uris` array in the GroveAuth clients table
 - Check for exact URL match (including `https://` and `/auth/callback`)
 
 ### Content not showing
+
 - Ensure `tenant_id` matches the tenant's `id` in all posts/pages
 - Check `status = 'published'` for posts
 
 ## Database Schema Reference
 
 ### tenants table
-| Column | Type | Description |
-|--------|------|-------------|
-| id | TEXT | UUID primary key |
-| subdomain | TEXT | URL prefix (unique) |
-| display_name | TEXT | Site name shown in nav |
-| email | TEXT | Owner's email |
-| active | INTEGER | 1 = active, 0 = disabled |
-| theme | TEXT | Optional theme identifier |
+
+| Column       | Type    | Description               |
+| ------------ | ------- | ------------------------- |
+| id           | TEXT    | UUID primary key          |
+| subdomain    | TEXT    | URL prefix (unique)       |
+| display_name | TEXT    | Site name shown in nav    |
+| email        | TEXT    | Owner's email             |
+| active       | INTEGER | 1 = active, 0 = disabled  |
+| theme        | TEXT    | Optional theme identifier |
 
 ### pages table
-| Column | Type | Description |
-|--------|------|-------------|
-| slug | TEXT | URL path (e.g., 'home', 'about') |
-| title | TEXT | Page title |
-| description | TEXT | Meta description |
-| markdown_content | TEXT | Raw markdown |
-| html_content | TEXT | Rendered HTML |
-| hero | TEXT | JSON hero config |
-| tenant_id | TEXT | FK to tenants.id |
+
+| Column           | Type | Description                      |
+| ---------------- | ---- | -------------------------------- |
+| slug             | TEXT | URL path (e.g., 'home', 'about') |
+| title            | TEXT | Page title                       |
+| description      | TEXT | Meta description                 |
+| markdown_content | TEXT | Raw markdown                     |
+| html_content     | TEXT | Rendered HTML                    |
+| hero             | TEXT | JSON hero config                 |
+| tenant_id        | TEXT | FK to tenants.id                 |
 
 ### posts table
-| Column | Type | Description |
-|--------|------|-------------|
-| slug | TEXT | URL path |
-| title | TEXT | Post title |
-| description | TEXT | Meta description |
-| markdown_content | TEXT | Raw markdown |
-| html_content | TEXT | Rendered HTML |
-| tags | TEXT | JSON array of tags |
-| status | TEXT | 'draft' or 'published' |
-| published_at | TEXT | ISO date string |
-| tenant_id | TEXT | FK to tenants.id |
+
+| Column           | Type | Description            |
+| ---------------- | ---- | ---------------------- |
+| slug             | TEXT | URL path               |
+| title            | TEXT | Post title             |
+| description      | TEXT | Meta description       |
+| markdown_content | TEXT | Raw markdown           |
+| html_content     | TEXT | Rendered HTML          |
+| tags             | TEXT | JSON array of tags     |
+| status           | TEXT | 'draft' or 'published' |
+| published_at     | TEXT | ISO date string        |
+| tenant_id        | TEXT | FK to tenants.id       |
 
 ---
 
-*Last updated: 2025-12-14*
+_Last updated: 2025-12-14_

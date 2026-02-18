@@ -9,16 +9,19 @@ Migrate Forage (Domain Finder) from custom local chrome to unified engine Chrome
 ## Current State
 
 ### Public Pages
+
 - **Landing page** (`/`) - No header/footer, just Gossamer background + content
 - **Login page** (`/admin/login`) - Uses LoginGraft, no chrome
 
 ### Admin Pages
+
 - **Custom horizontal tab layout** with:
   - Glass header (logo, user email, logout)
   - Horizontal tab nav (Dashboard, Searcher, History, Config)
   - Uses `glass-surface`, `glass-tabs` local CSS classes
 
 ### Engine Chrome Available
+
 - **Header.svelte** - Public nav with logo, nav items, theme toggle, mobile menu
 - **Footer.svelte** - Resources, connect, legal sections
 - **Arbor admin layout** - Collapsible sidebar, 9+ nav items (for CMS-like apps)
@@ -30,11 +33,13 @@ Migrate Forage (Domain Finder) from custom local chrome to unified engine Chrome
 Forage has only 4 admin pages vs Arbor's 9+. Two approaches:
 
 ### Option A: Adopt Arbor Sidebar
+
 - Use engine's existing sidebar admin layout
 - Consistent with engine/Plant/blog admin
 - Feels heavy for 4 pages
 
 ### Option B: Create AdminHeader Component ✓ (Recommended)
+
 - New engine component: `AdminHeader` with:
   - Logo + brand title (customizable)
   - Horizontal tab navigation
@@ -52,6 +57,7 @@ Forage has only 4 admin pages vs Arbor's 9+. Two approaches:
 **New file: `packages/engine/src/lib/ui/components/chrome/AdminHeader.svelte`**
 
 A new horizontal admin header component with:
+
 - Sticky header with glass effect
 - Logo + brand title (customizable via prop)
 - Tab navigation (passed as prop array)
@@ -61,6 +67,7 @@ A new horizontal admin header component with:
 - Mobile-responsive with horizontal scroll on tabs
 
 **Props interface:**
+
 ```typescript
 interface AdminTab {
   href: string;
@@ -71,12 +78,12 @@ interface AdminTab {
 interface Props {
   tabs: AdminTab[];
   brandTitle?: string;
-  brandLogo?: Snippet;  // Custom logo support
+  brandLogo?: Snippet; // Custom logo support
   user?: { email: string } | null;
   logoutHref?: string;
   onLogout?: () => void;
-  maxWidth?: 'default' | 'wide' | 'full';
-  accentColor?: string;  // For tab underline color
+  maxWidth?: "default" | "wide" | "full";
+  accentColor?: string; // For tab underline color
 }
 ```
 
@@ -87,8 +94,9 @@ interface Props {
 **File: `packages/engine/src/lib/ui/components/chrome/index.ts`**
 
 Add AdminHeader to exports:
+
 ```ts
-export { default as AdminHeader } from './AdminHeader.svelte';
+export { default as AdminHeader } from "./AdminHeader.svelte";
 ```
 
 ---
@@ -106,7 +114,7 @@ Add Header and Footer for public pages:
   import { page } from '$app/state';
   import { GossamerClouds } from '@autumnsgrove/gossamer/svelte';
   import '@autumnsgrove/gossamer/svelte/style.css';
-  import { Header, Footer } from '@autumnsgrove/groveengine/chrome';
+  import { Header, Footer } from '@autumnsgrove/lattice/chrome';
   import { Search } from 'lucide-svelte';
 
   let { children } = $props();
@@ -153,7 +161,7 @@ Replace custom header/tabs with AdminHeader:
 <script lang="ts">
   import type { LayoutData } from './$types';
   import { page } from '$app/state';
-  import { AdminHeader } from '@autumnsgrove/groveengine/chrome';
+  import { AdminHeader } from '@autumnsgrove/lattice/chrome';
   import { LayoutDashboard, Search, Clock, Settings } from 'lucide-svelte';
 
   let { data, children }: { data: LayoutData; children: any } = $props();
@@ -209,6 +217,7 @@ Replace custom header/tabs with AdminHeader:
 **File: `packages/domains/src/app.css`**
 
 After migration, audit and potentially remove:
+
 - `glass-surface` - Only if no longer used
 - `glass-tabs` - Only if no longer used
 
@@ -218,20 +227,21 @@ Note: Keep if used elsewhere in the codebase.
 
 ## Files to Create/Modify
 
-| File | Action | Description |
-|------|--------|-------------|
+| File                                   | Action     | Description                 |
+| -------------------------------------- | ---------- | --------------------------- |
 | `engine/.../chrome/AdminHeader.svelte` | **CREATE** | New horizontal admin header |
-| `engine/.../chrome/index.ts` | MODIFY | Export AdminHeader |
-| `engine/.../chrome/types.ts` | MODIFY | Add AdminTab type |
-| `domains/.../+layout.svelte` | MODIFY | Add Header/Footer |
-| `domains/.../admin/+layout.svelte` | MODIFY | Use AdminHeader |
-| `domains/src/app.css` | MODIFY | Remove unused classes |
+| `engine/.../chrome/index.ts`           | MODIFY     | Export AdminHeader          |
+| `engine/.../chrome/types.ts`           | MODIFY     | Add AdminTab type           |
+| `domains/.../+layout.svelte`           | MODIFY     | Add Header/Footer           |
+| `domains/.../admin/+layout.svelte`     | MODIFY     | Use AdminHeader             |
+| `domains/src/app.css`                  | MODIFY     | Remove unused classes       |
 
 ---
 
 ## AdminHeader Design Spec
 
 ### Visual Structure
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ [Logo] Brand Title                    user@email  [🌙] [→]  │
@@ -242,6 +252,7 @@ Note: Keep if used elsewhere in the codebase.
 ```
 
 ### Styling
+
 - Uses engine semantic tokens (`text-foreground`, `bg-surface`, etc.)
 - Active tab: underline with `--accent-muted` or custom `accentColor` prop
 - Glass effect: `bg-surface/95 backdrop-blur-md`
@@ -249,6 +260,7 @@ Note: Keep if used elsewhere in the codebase.
 - Mobile: horizontal scroll on tabs, hide email
 
 ### Accessibility
+
 - Tab navigation with proper ARIA
 - Focus states on all interactive elements
 - Keyboard navigation support
@@ -258,6 +270,7 @@ Note: Keep if used elsewhere in the codebase.
 ## Color Token Notes
 
 The AdminHeader uses engine tokens internally:
+
 - `text-foreground` - Main text
 - `text-foreground-muted` - Secondary text (user email, inactive tabs)
 - `bg-surface` - Background with glass effect
@@ -265,6 +278,7 @@ The AdminHeader uses engine tokens internally:
 - `accent-muted` - Active tab indicator (green by default)
 
 Forage can customize the active tab color via `accentColor` prop to use purple:
+
 ```svelte
 <AdminHeader {tabs} accentColor="var(--domain-600)" />
 ```
@@ -290,6 +304,7 @@ Or we can add a `variant` prop to switch between grove green and property-specif
 ## Copy Plan to docs/plans/planned
 
 After approval, copy this file to:
+
 ```
 docs/plans/planned/forage-chrome-migration.md
 ```

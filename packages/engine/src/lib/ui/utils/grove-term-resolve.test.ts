@@ -81,9 +81,7 @@ describe("resolveTerm", () => {
 
     it("should return the slug itself for unknown terms", () => {
       groveModeStore.disable();
-      expect(resolveTerm("nonexistent-term-xyz")).toBe(
-        "nonexistent-term-xyz",
-      );
+      expect(resolveTerm("nonexistent-term-xyz")).toBe("nonexistent-term-xyz");
     });
   });
 
@@ -96,9 +94,7 @@ describe("resolveTerm", () => {
 
     it("should return the slug itself for unknown terms", () => {
       groveModeStore.enable();
-      expect(resolveTerm("nonexistent-term-xyz")).toBe(
-        "nonexistent-term-xyz",
-      );
+      expect(resolveTerm("nonexistent-term-xyz")).toBe("nonexistent-term-xyz");
     });
   });
 

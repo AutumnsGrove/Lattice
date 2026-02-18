@@ -9,7 +9,7 @@
  *
  * @example
  * ```typescript
- * import { SentinelRunner, createSpikeProfile, createSentinelRun } from '@groveengine/core/sentinel';
+ * import { SentinelRunner, createSpikeProfile, createSentinelRun } from '@lattice/core/sentinel';
  *
  * // Create a spike test profile
  * const profile = createSpikeProfile({

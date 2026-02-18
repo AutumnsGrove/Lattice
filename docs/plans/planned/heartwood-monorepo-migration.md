@@ -4,7 +4,7 @@
 
 Heartwood (GroveAuth) currently lives in a separate repository at `~/Projects/GroveAuth`. This isolation was originally for security hardening, but in practice:
 
-1. **Forced engine bumps** — The Heartwood frontend depends on `@autumnsgrove/groveengine` via npm. Every engine change requires: bump version → publish to npm → update GroveAuth's `package.json`. Even if the fix is wrong and needs iteration, the version is already published.
+1. **Forced engine bumps** — The Heartwood frontend depends on `@autumnsgrove/lattice` via npm. Every engine change requires: bump version → publish to npm → update GroveAuth's `package.json`. Even if the fix is wrong and needs iteration, the version is already published.
 2. **Constant context-switching** — Working on auth means constantly referencing a separate project, separate terminal, separate agent context. Debugging cross-repo issues requires juggling two codebases.
 3. **Security isolation is a myth here** — The actual security hardening (rate limiting, PKCE, session encryption, CSP, audit logging, HSTS) lives in server-side code and Cloudflare infrastructure. Moving code between Git repositories doesn't change the security posture. The worker still deploys independently with its own secrets, D1 database, and KV namespace.
 
@@ -16,22 +16,23 @@ Heartwood (GroveAuth) currently lives in a separate repository at `~/Projects/Gr
 
 These decisions shape the entire migration:
 
-| Decision | Choice | Reasoning |
-|----------|--------|-----------|
-| **Package count** | ONE new package (`packages/heartwood/`) | The API worker is the only independent deployable. The dashboard UI merges into arbor. |
-| **Dashboard UI** | Merge into `/arbor` admin panel in engine | No need for two admin panels. Arbor already has auth, layout, and the AdminHeader pattern. |
-| **Internal naming** | Rename `groveauth` → `heartwood` everywhere in code | Unify on the public name. This is the chance to stop carrying two names. |
-| **Discord auth** | Drop entirely | Not using Discord for auth. Remove all Discord-related code, secrets, and config. |
-| **Worker name** | Keep `groveauth` in Cloudflare (for now) | Secrets, D1 bindings, service bindings are tied to this name. Infrastructure rename is a separate future task. |
-| **heartwood.grove.place** | Redirect to arbor or repurpose as info page | Dashboard lives in arbor now; the standalone frontend is retired. |
-| **Git history** | Copy files, don't merge history | Simpler; old repo stays archived for reference |
-| **Database** | Keep separate D1 database | Auth data isolation is genuinely valuable |
+| Decision                  | Choice                                              | Reasoning                                                                                                      |
+| ------------------------- | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| **Package count**         | ONE new package (`packages/heartwood/`)             | The API worker is the only independent deployable. The dashboard UI merges into arbor.                         |
+| **Dashboard UI**          | Merge into `/arbor` admin panel in engine           | No need for two admin panels. Arbor already has auth, layout, and the AdminHeader pattern.                     |
+| **Internal naming**       | Rename `groveauth` → `heartwood` everywhere in code | Unify on the public name. This is the chance to stop carrying two names.                                       |
+| **Discord auth**          | Drop entirely                                       | Not using Discord for auth. Remove all Discord-related code, secrets, and config.                              |
+| **Worker name**           | Keep `groveauth` in Cloudflare (for now)            | Secrets, D1 bindings, service bindings are tied to this name. Infrastructure rename is a separate future task. |
+| **heartwood.grove.place** | Redirect to arbor or repurpose as info page         | Dashboard lives in arbor now; the standalone frontend is retired.                                              |
+| **Git history**           | Copy files, don't merge history                     | Simpler; old repo stays archived for reference                                                                 |
+| **Database**              | Keep separate D1 database                           | Auth data isolation is genuinely valuable                                                                      |
 
 ---
 
 ## What Heartwood Is (Current Architecture)
 
 ### API Worker (Hono.js on Cloudflare Workers)
+
 - **Deployed to**: `auth-api.grove.place`
 - **Framework**: Hono.js (not SvelteKit)
 - **Entry**: `src/index.ts`
@@ -45,40 +46,41 @@ These decisions shape the entire migration:
 - **Secrets**: JWT keys, Google OAuth creds, Resend API key, session secret
 
 ### Frontend (SvelteKit — being dissolved into arbor)
+
 - **Currently deployed to**: `heartwood.grove.place`
 - **UI pages to migrate**: Security settings, device management, status page, CDN manager, Minecraft integration
 - **UI pages NOT needed**: Login page (already handled by LoginGraft), standalone landing page
 
 ### Key Subsystems
 
-| Subsystem | Files | Concern |
-|-----------|-------|---------|
-| **Better Auth** | `src/auth/index.ts` | OAuth, magic links, passkeys, TOTP |
-| **SessionDO** | `src/durables/SessionDO.ts`, `src/lib/sessionBridge.ts` | Per-user session limits, device tracking |
-| **Rate Limiting** | `src/middleware/rateLimit.ts`, `src/utils/constants.ts` | Token bucket per-endpoint protection |
-| **Audit Logging** | `src/db/queries.ts::createAuditLog()` | Security event recording (90-day retention) |
-| **JWT** | `src/services/jwt.ts` | RS256 signing/verification |
-| **Email** | `src/services/email.ts` (via `src/auth/`) | Magic link delivery via Resend |
-| **Subscriptions** | `src/routes/subscription.ts` | Tier management, post limits |
-| **Device Code Flow** | `src/routes/device.ts`, `src/templates/device.ts` | RFC 8628 for CLI auth |
-| **Admin API** | `src/routes/admin.ts` | Stats, user mgmt, audit log |
-| **Status Page** | `src/routes/status.ts` | Incident management |
-| **Minecraft** | `src/routes/minecraft.ts` | Server integration |
-| **CDN Manager** | `src/routes/cdn.ts` | File uploads |
+| Subsystem            | Files                                                   | Concern                                     |
+| -------------------- | ------------------------------------------------------- | ------------------------------------------- |
+| **Better Auth**      | `src/auth/index.ts`                                     | OAuth, magic links, passkeys, TOTP          |
+| **SessionDO**        | `src/durables/SessionDO.ts`, `src/lib/sessionBridge.ts` | Per-user session limits, device tracking    |
+| **Rate Limiting**    | `src/middleware/rateLimit.ts`, `src/utils/constants.ts` | Token bucket per-endpoint protection        |
+| **Audit Logging**    | `src/db/queries.ts::createAuditLog()`                   | Security event recording (90-day retention) |
+| **JWT**              | `src/services/jwt.ts`                                   | RS256 signing/verification                  |
+| **Email**            | `src/services/email.ts` (via `src/auth/`)               | Magic link delivery via Resend              |
+| **Subscriptions**    | `src/routes/subscription.ts`                            | Tier management, post limits                |
+| **Device Code Flow** | `src/routes/device.ts`, `src/templates/device.ts`       | RFC 8628 for CLI auth                       |
+| **Admin API**        | `src/routes/admin.ts`                                   | Stats, user mgmt, audit log                 |
+| **Status Page**      | `src/routes/status.ts`                                  | Incident management                         |
+| **Minecraft**        | `src/routes/minecraft.ts`                               | Server integration                          |
+| **CDN Manager**      | `src/routes/cdn.ts`                                     | File uploads                                |
 
 ### Database (D1)
 
 **Separate from grove-engine-db** — Heartwood has its own D1 database with:
 
-| Table Group | Tables |
-|-------------|--------|
+| Table Group          | Tables                                                                                  |
+| -------------------- | --------------------------------------------------------------------------------------- |
 | **Better Auth core** | `ba_user`, `ba_session`, `ba_account`, `ba_verification`, `ba_passkey`, `ba_two_factor` |
-| **OAuth** | `clients`, `allowed_emails`, `oauth_states` |
-| **Sessions** | `user_sessions` (legacy), `rate_limits`, `failed_attempts` |
-| **Subscriptions** | `user_subscriptions`, `subscription_audit_log` |
-| **Device auth** | `device_codes` |
-| **Security** | `audit_log` |
-| **Content** | `cdn_files` |
+| **OAuth**            | `clients`, `allowed_emails`, `oauth_states`                                             |
+| **Sessions**         | `user_sessions` (legacy), `rate_limits`, `failed_attempts`                              |
+| **Subscriptions**    | `user_subscriptions`, `subscription_audit_log`                                          |
+| **Device auth**      | `device_codes`                                                                          |
+| **Security**         | `audit_log`                                                                             |
+| **Content**          | `cdn_files`                                                                             |
 
 **10 migration files** (numbered 0001-0010) manage schema evolution.
 
@@ -100,13 +102,13 @@ Discord secrets (`DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`) will be removed.
 
 The engine already has auth-related code that serves as the **consumer side**:
 
-| Path | Purpose | Changes Needed |
-|------|---------|----------------|
-| `engine/src/lib/auth/` | Tenant ownership verification | None |
-| `engine/src/lib/groveauth/` | Client SDK (PKCE, errors, quotas, rate limiting, validation) | **Rename to `heartwood/`** |
-| `engine/src/routes/auth/` | OAuth callback, login page, logout | None |
-| `engine/src/lib/grafts/login/` | LoginGraft component | None |
-| Landing `hooks.server.ts` | Session validation via service binding | None |
+| Path                           | Purpose                                                      | Changes Needed             |
+| ------------------------------ | ------------------------------------------------------------ | -------------------------- |
+| `engine/src/lib/auth/`         | Tenant ownership verification                                | None                       |
+| `engine/src/lib/groveauth/`    | Client SDK (PKCE, errors, quotas, rate limiting, validation) | **Rename to `heartwood/`** |
+| `engine/src/routes/auth/`      | OAuth callback, login page, logout                           | None                       |
+| `engine/src/lib/grafts/login/` | LoginGraft component                                         | None                       |
+| Landing `hooks.server.ts`      | Session validation via service binding                       | None                       |
 
 ---
 
@@ -116,21 +118,22 @@ This is the chance to retire the internal codename and unify on the public name.
 
 ### What Gets Renamed
 
-| Location | Before | After |
-|----------|--------|-------|
-| Engine lib directory | `packages/engine/src/lib/groveauth/` | `packages/engine/src/lib/heartwood/` |
-| Engine export path | `@autumnsgrove/groveengine/groveauth` | `@autumnsgrove/groveengine/heartwood` |
-| Engine `package.json` exports | `"./groveauth": { ... }` | `"./heartwood": { ... }` |
-| All consumer imports | `from '@autumnsgrove/groveengine/groveauth'` | `from '@autumnsgrove/groveengine/heartwood'` |
-| Engine `src/lib/groveauth/` barrel | `groveauth/index.ts` | `heartwood/index.ts` |
-| Engine error module | `$lib/groveauth/errors` | `$lib/heartwood/errors` |
-| Agent docs & skills | References to "groveauth" | References to "heartwood" |
+| Location                           | Before                                   | After                                    |
+| ---------------------------------- | ---------------------------------------- | ---------------------------------------- |
+| Engine lib directory               | `packages/engine/src/lib/groveauth/`     | `packages/engine/src/lib/heartwood/`     |
+| Engine export path                 | `@autumnsgrove/lattice/groveauth`        | `@autumnsgrove/lattice/heartwood`        |
+| Engine `package.json` exports      | `"./groveauth": { ... }`                 | `"./heartwood": { ... }`                 |
+| All consumer imports               | `from '@autumnsgrove/lattice/groveauth'` | `from '@autumnsgrove/lattice/heartwood'` |
+| Engine `src/lib/groveauth/` barrel | `groveauth/index.ts`                     | `heartwood/index.ts`                     |
+| Engine error module                | `$lib/groveauth/errors`                  | `$lib/heartwood/errors`                  |
+| Agent docs & skills                | References to "groveauth"                | References to "heartwood"                |
 
 ### Files That Import from `groveauth` (need updating)
 
 Based on grep across the monorepo, ~30 files reference "groveauth":
 
 **Engine package** (~15 files):
+
 - `src/routes/auth/callback/+server.ts`
 - `src/routes/arbor/account/+page.server.ts`
 - `src/routes/arbor/account/types.ts`
@@ -145,6 +148,7 @@ Based on grep across the monorepo, ~30 files reference "groveauth":
 - Test files
 
 **Plant package** (~6 files):
+
 - `src/routes/auth/callback/+server.ts`
 - `src/routes/auth/magic-link/callback/+server.ts`
 - `src/routes/account/+page.server.ts`
@@ -153,6 +157,7 @@ Based on grep across the monorepo, ~30 files reference "groveauth":
 - `src/app.d.ts`
 
 **Other packages** (~5 files):
+
 - `packages/landing/wrangler.toml` (service binding name — keep as-is)
 - `packages/plant/wrangler.toml` (service binding name — keep as-is)
 - `packages/domains/wrangler.toml` (service binding name — keep as-is)
@@ -167,13 +172,17 @@ During the transition, add a re-export from the old path:
 
 ```typescript
 // packages/engine/src/lib/groveauth/index.ts (temporary, remove after all consumers updated)
-export * from '../heartwood/index.js';
+export * from "../heartwood/index.js";
 ```
 
 And a temporary export alias in `package.json`:
+
 ```json
 {
-  "./groveauth": { "types": "./dist/heartwood/index.d.ts", "default": "./dist/heartwood/index.js" }
+  "./groveauth": {
+    "types": "./dist/heartwood/index.d.ts",
+    "default": "./dist/heartwood/index.js"
+  }
 }
 ```
 
@@ -210,22 +219,23 @@ arbor/
 
 ### Pages to Migrate from Heartwood Frontend → Arbor
 
-| Heartwood Page | Arbor Target | Notes |
-|----------------|-------------|-------|
-| `dashboard/security/` | `arbor/account/` | **Already partially there** — arbor account has passkey/2FA. Merge any missing security settings. |
-| `dashboard/devices/` | `arbor/account/devices/` | New subsection under account |
-| `dashboard/status/` | `arbor/status/` | New arbor section — incident management, component status |
-| `dashboard/minecraft/` | `arbor/minecraft/` | New arbor section — server integration, modpack/world management |
-| `dashboard/cdn/` | `arbor/cdn/` | New arbor section — file upload/management |
-| `dashboard/+page.svelte` | `arbor/+page.svelte` | Merge any unique stats/widgets into existing arbor dashboard |
-| `login/` | **Skip** | Already handled by LoginGraft |
-| `callback/` | **Skip** | Already handled by engine's `/auth/callback` |
-| `+page.svelte` (landing) | **Skip** | No standalone Heartwood landing needed |
-| `error/` | **Skip** | Engine already has error handling |
+| Heartwood Page           | Arbor Target             | Notes                                                                                             |
+| ------------------------ | ------------------------ | ------------------------------------------------------------------------------------------------- |
+| `dashboard/security/`    | `arbor/account/`         | **Already partially there** — arbor account has passkey/2FA. Merge any missing security settings. |
+| `dashboard/devices/`     | `arbor/account/devices/` | New subsection under account                                                                      |
+| `dashboard/status/`      | `arbor/status/`          | New arbor section — incident management, component status                                         |
+| `dashboard/minecraft/`   | `arbor/minecraft/`       | New arbor section — server integration, modpack/world management                                  |
+| `dashboard/cdn/`         | `arbor/cdn/`             | New arbor section — file upload/management                                                        |
+| `dashboard/+page.svelte` | `arbor/+page.svelte`     | Merge any unique stats/widgets into existing arbor dashboard                                      |
+| `login/`                 | **Skip**                 | Already handled by LoginGraft                                                                     |
+| `callback/`              | **Skip**                 | Already handled by engine's `/auth/callback`                                                      |
+| `+page.svelte` (landing) | **Skip**                 | No standalone Heartwood landing needed                                                            |
+| `error/`                 | **Skip**                 | Engine already has error handling                                                                 |
 
 ### What This Means for `heartwood.grove.place`
 
 Options (decide during implementation):
+
 1. **Redirect to arbor** — `heartwood.grove.place` → `grove.place/arbor` (or the tenant's arbor)
 2. **Info page** — Simple "Heartwood is Grove's authentication system" page with a link to arbor
 3. **Retire the domain** — Remove the Cloudflare Pages project entirely
@@ -248,6 +258,7 @@ Recommendation: Use service binding (option 2) since arbor already has access to
 Discord OAuth is not being used. The following will be removed during migration:
 
 ### From Heartwood Worker
+
 - `DISCORD_CLIENT_ID` and `DISCORD_CLIENT_SECRET` secrets (don't copy to new package)
 - `DISCORD_CLIENT_ID` and `DISCORD_CLIENT_SECRET` from `Env` interface
 - Any Discord-specific OAuth routes or provider config in Better Auth setup
@@ -255,10 +266,12 @@ Discord OAuth is not being used. The following will be removed during migration:
 - Discord as an `OAuthProvider` type variant
 
 ### From Engine
+
 - `discord` from `OAuthProvider` type in `src/lib/heartwood/types.ts` (after rename)
 - Any Discord-specific UI in LoginGraft or login pages
 
 ### Verification
+
 After removal, grep for `discord` (case-insensitive) across both packages to catch stragglers.
 
 ---
@@ -367,7 +380,7 @@ packages/
   - Change `"./groveauth"` → `"./heartwood"`
   - Temporarily keep `"./groveauth"` as alias pointing to heartwood (remove after all consumers updated)
 - [ ] Update all engine internal imports (`$lib/groveauth/*` → `$lib/heartwood/*`)
-- [ ] Update plant package imports (`@autumnsgrove/groveengine/groveauth` → `@autumnsgrove/groveengine/heartwood`)
+- [ ] Update plant package imports (`@autumnsgrove/lattice/groveauth` → `@autumnsgrove/lattice/heartwood`)
 - [ ] Update all other consumer imports across the monorepo
 - [ ] Update grove-router references if needed
 - [ ] Run `svelte-package -o dist` in engine to rebuild exports
@@ -438,7 +451,7 @@ packages/
 ### Phase 8: Archive Old Repository
 
 - [ ] Tag final state: `git tag archived-monorepo-migration`
-- [ ] Update GroveAuth README: "This repository has been archived. Heartwood now lives in the GroveEngine monorepo at `packages/heartwood/`."
+- [ ] Update GroveAuth README: "This repository has been archived. Heartwood now lives in the Lattice monorepo at `packages/heartwood/`."
 - [ ] Archive the repository on GitHub (Settings → Archive)
 - [ ] Retire `heartwood.grove.place` Cloudflare Pages project (or redirect)
 - [ ] Remove Discord secrets from Cloudflare: `wrangler secret delete DISCORD_CLIENT_ID` / `DISCORD_CLIENT_SECRET`
@@ -448,18 +461,18 @@ packages/
 
 ## What Does NOT Change
 
-| Aspect | Before | After | Changed? |
-|--------|--------|-------|----------|
-| Worker name (Cloudflare) | `groveauth` | `groveauth` | No (infrastructure rename is future work) |
-| API domain | `auth-api.grove.place` | `auth-api.grove.place` | No |
-| D1 database | `groveauth` (ID: 45eae4c7...) | Same | No |
-| D1 database ID | `45eae4c7-8ae7-4078-9218-8e1677a4360f` | Same | No |
-| ENGINE_DB binding | `a6394da2-b7a6-48ce-b7fe-b1eb3e730e68` | Same | No |
-| KV namespace | `7cfbd9e67125405994b49ecf80a372a4` | Same | No |
-| SessionDO class | `SessionDO` | Same | No |
-| Service binding from consumer apps | `AUTH → groveauth` | Same | No |
-| Session cookies | `grove_session`, `__Secure-better-auth.session_token` | Same | No |
-| Auth flow | Better Auth + PKCE + SessionDO bridge | Same | No |
+| Aspect                             | Before                                                | After                  | Changed?                                  |
+| ---------------------------------- | ----------------------------------------------------- | ---------------------- | ----------------------------------------- |
+| Worker name (Cloudflare)           | `groveauth`                                           | `groveauth`            | No (infrastructure rename is future work) |
+| API domain                         | `auth-api.grove.place`                                | `auth-api.grove.place` | No                                        |
+| D1 database                        | `groveauth` (ID: 45eae4c7...)                         | Same                   | No                                        |
+| D1 database ID                     | `45eae4c7-8ae7-4078-9218-8e1677a4360f`                | Same                   | No                                        |
+| ENGINE_DB binding                  | `a6394da2-b7a6-48ce-b7fe-b1eb3e730e68`                | Same                   | No                                        |
+| KV namespace                       | `7cfbd9e67125405994b49ecf80a372a4`                    | Same                   | No                                        |
+| SessionDO class                    | `SessionDO`                                           | Same                   | No                                        |
+| Service binding from consumer apps | `AUTH → groveauth`                                    | Same                   | No                                        |
+| Session cookies                    | `grove_session`, `__Secure-better-auth.session_token` | Same                   | No                                        |
+| Auth flow                          | Better Auth + PKCE + SessionDO bridge                 | Same                   | No                                        |
 
 **Zero downtime.** The Cloudflare worker name stays the same. Deployments just come from a different directory.
 
@@ -467,47 +480,54 @@ packages/
 
 ## What DOES Change
 
-| Aspect | Before | After | Benefit |
-|--------|--------|-------|---------|
-| Code location | `~/Projects/GroveAuth/` | `packages/heartwood/` | Single monorepo, single context |
-| Dashboard UI | Separate site at `heartwood.grove.place` | Merged into `/arbor` admin panel | One admin panel, not two |
-| Internal naming | `groveauth` in code, `heartwood` in public | `heartwood` everywhere | No more dual naming confusion |
-| Engine import path | `@autumnsgrove/groveengine/groveauth` | `@autumnsgrove/groveengine/heartwood` | Name matches public identity |
-| Discord auth | Configured but unused | Removed | Less dead code, fewer secrets |
-| Engine dependency | `^0.9.96` (npm) | N/A (UI merged into engine directly) | No version bumping at all |
-| Secrets count | 8 | 6 | Cleaner secret management |
-| CI/CD | Separate GitHub Actions | Unified monorepo CI | One pipeline |
-| Credits page | Missing Heartwood | Heartwood listed | Proper attribution |
+| Aspect             | Before                                     | After                                | Benefit                         |
+| ------------------ | ------------------------------------------ | ------------------------------------ | ------------------------------- |
+| Code location      | `~/Projects/GroveAuth/`                    | `packages/heartwood/`                | Single monorepo, single context |
+| Dashboard UI       | Separate site at `heartwood.grove.place`   | Merged into `/arbor` admin panel     | One admin panel, not two        |
+| Internal naming    | `groveauth` in code, `heartwood` in public | `heartwood` everywhere               | No more dual naming confusion   |
+| Engine import path | `@autumnsgrove/lattice/groveauth`          | `@autumnsgrove/lattice/heartwood`    | Name matches public identity    |
+| Discord auth       | Configured but unused                      | Removed                              | Less dead code, fewer secrets   |
+| Engine dependency  | `^0.9.96` (npm)                            | N/A (UI merged into engine directly) | No version bumping at all       |
+| Secrets count      | 8                                          | 6                                    | Cleaner secret management       |
+| CI/CD              | Separate GitHub Actions                    | Unified monorepo CI                  | One pipeline                    |
+| Credits page       | Missing Heartwood                          | Heartwood listed                     | Proper attribution              |
 
 ---
 
 ## Risks & Mitigations
 
 ### Risk: Breaking worker deployment
+
 **Severity**: High
 **Mitigation**: The `wrangler.toml` is identical (same worker name, same D1 IDs, same KV IDs). Deployment is directory-agnostic — Cloudflare doesn't care where the code lives on disk.
 
 ### Risk: Import rename breaks consumers
+
 **Severity**: Medium
 **Mitigation**: The rename (`groveauth` → `heartwood`) is done in a single PR that updates all ~30 files. Temporary re-export alias from old path provides safety net. Engine rebuild (`svelte-package -o dist`) happens before consumer updates.
 
 ### Risk: Arbor UI merge introduces bugs
+
 **Severity**: Medium
 **Mitigation**: This is the highest-risk phase. Each page (devices, status, minecraft, cdn) should be migrated and tested individually. The Heartwood API endpoints are unchanged — only the UI consuming them moves.
 
 ### Risk: D1 migrations confusion
+
 **Severity**: Medium
 **Mitigation**: Migrations are idempotent SQL files. They reference the same database ID. Moving the files doesn't change what they do.
 
 ### Risk: SessionDO state
+
 **Severity**: Low
 **Mitigation**: Durable Objects are bound by class name (`SessionDO`), not by deployment source. As long as the class name and migration tags stay the same, existing DO instances persist.
 
 ### Risk: Secrets not available
+
 **Severity**: High
 **Mitigation**: Secrets are bound to the **worker name** (`groveauth`), not the repo. Since the worker name stays the same, all 6 remaining secrets stay available. Verify with `wrangler secret list` after first deployment.
 
 ### Risk: pnpm workspace conflicts
+
 **Severity**: Low
 **Mitigation**: Heartwood's dependencies (hono, drizzle-orm, jose) are unique to it — no version conflicts with other packages.
 
@@ -517,23 +537,23 @@ packages/
 
 ### heartwood (Worker) — New Dependencies to Add
 
-| Package | Version | Purpose |
-|---------|---------|---------|
-| `hono` | ^4.10.7 | HTTP framework for worker |
-| `drizzle-orm` | 0.44.5 | Database ORM (Better Auth requirement) |
-| `jose` | ^6.1.3 | JWT operations |
-| `zod` | ^4.1.13 | Input validation |
-| `better-auth` | ^1.4.10 | Auth framework |
-| `better-auth-cloudflare` | ^0.2.9 | Cloudflare adapter for Better Auth |
-| `@better-auth/passkey` | ^1.4.10 | Passkey/WebAuthn plugin |
+| Package                  | Version | Purpose                                |
+| ------------------------ | ------- | -------------------------------------- |
+| `hono`                   | ^4.10.7 | HTTP framework for worker              |
+| `drizzle-orm`            | 0.44.5  | Database ORM (Better Auth requirement) |
+| `jose`                   | ^6.1.3  | JWT operations                         |
+| `zod`                    | ^4.1.13 | Input validation                       |
+| `better-auth`            | ^1.4.10 | Auth framework                         |
+| `better-auth-cloudflare` | ^0.2.9  | Cloudflare adapter for Better Auth     |
+| `@better-auth/passkey`   | ^1.4.10 | Passkey/WebAuthn plugin                |
 
 ### Removed (Discord)
 
-| Package | Reason |
-|---------|--------|
-| Any Discord OAuth packages | Not using Discord auth |
-| `DISCORD_CLIENT_ID` secret | Removed |
-| `DISCORD_CLIENT_SECRET` secret | Removed |
+| Package                        | Reason                 |
+| ------------------------------ | ---------------------- |
+| Any Discord OAuth packages     | Not using Discord auth |
+| `DISCORD_CLIENT_ID` secret     | Removed                |
+| `DISCORD_CLIENT_SECRET` secret | Removed                |
 
 ---
 
@@ -555,16 +575,16 @@ Once Heartwood is in the monorepo, several improvements become trivial:
 
 ### What Security Properties Are Preserved
 
-| Property | How It's Maintained |
-|----------|-------------------|
-| **Isolated D1 database** | Heartwood keeps its own D1 (`groveauth`), not shared with grove-engine-db |
-| **Separate secrets** | 6 secrets bound to `groveauth` worker name, inaccessible to other packages |
+| Property                   | How It's Maintained                                                            |
+| -------------------------- | ------------------------------------------------------------------------------ |
+| **Isolated D1 database**   | Heartwood keeps its own D1 (`groveauth`), not shared with grove-engine-db      |
+| **Separate secrets**       | 6 secrets bound to `groveauth` worker name, inaccessible to other packages     |
 | **Independent deployment** | Worker deploys separately from engine; a bad engine deploy doesn't affect auth |
-| **PKCE enforcement** | Code doesn't change; PKCE is enforced in Better Auth config |
-| **Session encryption** | SessionDO + cookie encryption unchanged |
-| **Rate limiting** | All rate limits preserved in middleware |
-| **Audit logging** | All audit events still logged, 90-day retention still enforced |
-| **CSP headers** | Security headers middleware unchanged |
+| **PKCE enforcement**       | Code doesn't change; PKCE is enforced in Better Auth config                    |
+| **Session encryption**     | SessionDO + cookie encryption unchanged                                        |
+| **Rate limiting**          | All rate limits preserved in middleware                                        |
+| **Audit logging**          | All audit events still logged, 90-day retention still enforced                 |
+| **CSP headers**            | Security headers middleware unchanged                                          |
 
 ### What Improves
 
@@ -577,17 +597,17 @@ Once Heartwood is in the monorepo, several improvements become trivial:
 
 ## Estimated Scope
 
-| Phase | Effort | Risk |
-|-------|--------|------|
-| Phase 0: Preparation | ~30 min | None |
-| Phase 1: Copy worker code | ~2 hours | Low |
-| Phase 2: Internal rename | ~2 hours | Medium |
-| Phase 3: Dashboard UI → arbor | ~4 hours | Medium-High |
-| Phase 4: Docs & tests | ~1 hour | Low |
-| Phase 5: Update references | ~1 hour | Low |
-| Phase 6: CI/CD setup | ~1 hour | Medium |
-| Phase 7: Deployment verification | ~1 hour | Medium |
-| Phase 8: Archive old repo | ~30 min | None |
+| Phase                            | Effort   | Risk        |
+| -------------------------------- | -------- | ----------- |
+| Phase 0: Preparation             | ~30 min  | None        |
+| Phase 1: Copy worker code        | ~2 hours | Low         |
+| Phase 2: Internal rename         | ~2 hours | Medium      |
+| Phase 3: Dashboard UI → arbor    | ~4 hours | Medium-High |
+| Phase 4: Docs & tests            | ~1 hour  | Low         |
+| Phase 5: Update references       | ~1 hour  | Low         |
+| Phase 6: CI/CD setup             | ~1 hour  | Medium      |
+| Phase 7: Deployment verification | ~1 hour  | Medium      |
+| Phase 8: Archive old repo        | ~30 min  | None        |
 
 **Total estimated effort**: ~13 hours across 3-4 sessions
 

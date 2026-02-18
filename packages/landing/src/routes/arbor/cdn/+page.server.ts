@@ -1,6 +1,6 @@
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
-import { storage } from "@autumnsgrove/groveengine/services";
+import { storage } from "@autumnsgrove/lattice/services";
 
 export const load: PageServerLoad = async ({ parent, platform }) => {
   // Auth is handled by parent /arbor layout

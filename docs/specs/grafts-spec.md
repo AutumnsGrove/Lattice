@@ -6,7 +6,7 @@ description: >-
 category: specs
 specCategory: core-infrastructure
 icon: flag
-lastUpdated: '2026-01-20'
+lastUpdated: "2026-01-20"
 aliases: []
 tags:
   - feature-flags
@@ -36,22 +36,22 @@ tags:
          making one tree bear fruit no other can.
 ```
 
-> *A graft makes your tree bear fruit no other can.*
+> _A graft makes your tree bear fruit no other can._
 
 Grove's per-tenant customization system. Grafts are the deliberate act of joining new capabilities onto existing trees. Not plugins users upload, but trusted configurations the Wayfinder enables for specific groves.
 
 There are three types of Grafts:
 
-- **Feature Grafts** control *what* capabilities a tenant receives (flags, rollouts, tier-gating)
-- **UI Grafts** provide *how* those capabilities render (reusable components)
-- **Greenhouse mode** determines *who* gets early access (tenant classification for internal testing)
+- **Feature Grafts** control _what_ capabilities a tenant receives (flags, rollouts, tier-gating)
+- **UI Grafts** provide _how_ those capabilities render (reusable components)
+- **Greenhouse mode** determines _who_ gets early access (tenant classification for internal testing)
 
 Want JXL encoding? Feature Graft it on. Need a pricing page? Splice in the PricingGraft. Testing a feature before rollout? Put the tenant in the greenhouse.
 
 **Public Name:** Grafts
 **Internal Name:** GroveGrafts
-**Domain:** *Operator-configured*
-**Repository:** Part of [AutumnsGrove/GroveEngine](https://github.com/AutumnsGrove/GroveEngine)
+**Domain:** _Operator-configured_
+**Repository:** Part of [AutumnsGrove/Lattice](https://github.com/AutumnsGrove/Lattice)
 **Last Updated:** January 2026
 
 In orcharding, a graft joins a cutting from one tree onto the rootstock of another. The cutting grows, becomes one with the tree, yet retains what makes it special. One apple tree can bear four different varieties. One grove can serve tenants with entirely different capabilities.
@@ -64,19 +64,19 @@ Feature Grafts decide which branches grow. UI Grafts are the branches themselves
 
 Grove doesn't call them "feature flags" or "shared components." We call them grafts, and the vocabulary follows:
 
-| Term | Action | Description |
-|------|--------|-------------|
-| **Graft** | Enable | Join a feature onto a tenant's tree |
-| **Prune** | Disable | Remove a feature from a tenant |
-| **Propagate** | Percentage rollout | Roll out to a percentage of the grove |
-| **Cultivate** | Full rollout | Roll out to everyone |
-| **Cultivars** | A/B variants | Test different varieties of the same feature |
-| **Blight** | Kill switch | Emergency disable, instant effect |
-| **Took** | Status check | The graft is active and working |
-| **Splice** | Attach UI | Add a UI Graft component to a page |
+| Term          | Action             | Description                                  |
+| ------------- | ------------------ | -------------------------------------------- |
+| **Graft**     | Enable             | Join a feature onto a tenant's tree          |
+| **Prune**     | Disable            | Remove a feature from a tenant               |
+| **Propagate** | Percentage rollout | Roll out to a percentage of the grove        |
+| **Cultivate** | Full rollout       | Roll out to everyone                         |
+| **Cultivars** | A/B variants       | Test different varieties of the same feature |
+| **Blight**    | Kill switch        | Emergency disable, instant effect            |
+| **Took**      | Status check       | The graft is active and working              |
+| **Splice**    | Attach UI          | Add a UI Graft component to a page           |
 
-*"I'll graft it onto your tree at dusk."*
-*"Splice the PricingGraft into the landing page."*
+_"I'll graft it onto your tree at dusk."_
+_"Splice the PricingGraft into the landing page."_
 
 ---
 
@@ -89,7 +89,7 @@ Grove doesn't call them "feature flags" or "shared components." We call them gra
 5. **A/B testing** — Cultivar comparisons for product experiments
 6. **Audit logging** — Know who grafted what, and when
 7. **Reusable UI** — Splice consistent components across Grove properties
-8. **Engine-first** — UI Grafts live in `@autumnsgrove/groveengine`, not individual apps
+8. **Engine-first** — UI Grafts live in `@autumnsgrove/lattice`, not individual apps
 
 ---
 
@@ -301,13 +301,17 @@ CREATE INDEX idx_audit_flag ON flag_audit_log(flag_id, changed_at DESC);
 ### Check if a Graft Took
 
 ```typescript
-import { isFeatureEnabled } from '@autumnsgrove/groveengine/feature-flags';
+import { isFeatureEnabled } from "@autumnsgrove/lattice/feature-flags";
 
 // Did the JXL graft take?
-const useJxl = await isFeatureEnabled('jxl_encoding', {
-  tenantId: locals.tenantId,
-  userId: locals.user?.id
-}, platform.env);
+const useJxl = await isFeatureEnabled(
+  "jxl_encoding",
+  {
+    tenantId: locals.tenantId,
+    userId: locals.user?.id,
+  },
+  platform.env,
+);
 
 if (useJxl) {
   return encodeAsJxl(file);
@@ -317,23 +321,32 @@ if (useJxl) {
 ### Get Graft Value with Default
 
 ```typescript
-import { getFeatureValue } from '@autumnsgrove/groveengine/feature-flags';
+import { getFeatureValue } from "@autumnsgrove/lattice/feature-flags";
 
 // Get post limit, defaulting to 50
-const maxPosts = await getFeatureValue('max_posts_override', {
-  tier: locals.tenant?.tier
-}, platform.env, 50);
+const maxPosts = await getFeatureValue(
+  "max_posts_override",
+  {
+    tier: locals.tenant?.tier,
+  },
+  platform.env,
+  50,
+);
 ```
 
 ### Check Cultivar (A/B Variant)
 
 ```typescript
-import { getVariant } from '@autumnsgrove/groveengine/feature-flags';
+import { getVariant } from "@autumnsgrove/lattice/feature-flags";
 
 // Which pricing cultivar?
-const variant = await getVariant('pricing_experiment', {
-  sessionId: cookies.get('session_id')
-}, platform.env);
+const variant = await getVariant(
+  "pricing_experiment",
+  {
+    sessionId: cookies.get("session_id"),
+  },
+  platform.env,
+);
 
 // Returns 'control', 'annual_first', or 'comparison_table'
 ```
@@ -341,18 +354,18 @@ const variant = await getVariant('pricing_experiment', {
 ### Batch Evaluation
 
 ```typescript
-import { getFlags } from '@autumnsgrove/groveengine/feature-flags';
+import { getFlags } from "@autumnsgrove/lattice/feature-flags";
 
 // Evaluate multiple grafts at once
 const flags = await getFlags(
-  ['meadow_access', 'dark_mode_default', 'new_nav'],
+  ["meadow_access", "dark_mode_default", "new_nav"],
   { tenantId, tier, userId },
-  platform.env
+  platform.env,
 );
 
 return {
-  canAccessMeadow: flags.get('meadow_access')?.value ?? false,
-  darkModeDefault: flags.get('dark_mode_default')?.value ?? false,
+  canAccessMeadow: flags.get("meadow_access")?.value ?? false,
+  darkModeDefault: flags.get("dark_mode_default")?.value ?? false,
 };
 ```
 
@@ -369,7 +382,7 @@ Uses Web Crypto API (Cloudflare Workers compatible):
 async function hashToBucket(input: string): Promise<number> {
   const encoder = new TextEncoder();
   const data = encoder.encode(input);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
   const hashArray = new Uint8Array(hashBuffer);
 
   // Use first 4 bytes as uint32, mod 100 for percentage
@@ -381,9 +394,9 @@ async function hashToBucket(input: string): Promise<number> {
 async function evaluatePercentage(
   condition: { percentage: number; salt?: string },
   context: EvaluationContext,
-  flagId: string
+  flagId: string,
 ): Promise<boolean> {
-  const { percentage, salt = '' } = condition;
+  const { percentage, salt = "" } = condition;
 
   // Edge cases
   if (percentage <= 0) return false;
@@ -417,10 +430,10 @@ flag:{flag_id}:user:{user_id}            → User-specific
 ### Cache Invalidation
 
 ```typescript
-import { invalidateFlag } from '@autumnsgrove/groveengine/feature-flags';
+import { invalidateFlag } from "@autumnsgrove/lattice/feature-flags";
 
 // When admin updates a graft
-await invalidateFlag('jxl_encoding', env);
+await invalidateFlag("jxl_encoding", env);
 // Clears all KV keys with prefix flag:jxl_encoding:
 ```
 
@@ -428,7 +441,7 @@ await invalidateFlag('jxl_encoding', env);
 
 # Part II: UI Grafts
 
-UI Grafts are reusable, configurable components that can be "spliced" onto any Grove property. They live in `@autumnsgrove/groveengine` and provide consistent UI for common features like pricing, navigation, and footers.
+UI Grafts are reusable, configurable components that can be "spliced" onto any Grove property. They live in `@autumnsgrove/lattice` and provide consistent UI for common features like pricing, navigation, and footers.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -506,22 +519,22 @@ Every UI Graft registers its metadata in a central registry. This enables discov
 ```typescript
 // packages/engine/src/lib/grafts/registry.ts
 
-import { isFeatureEnabled } from '../feature-flags/index.js';
-import type { GraftId, GraftContext, GraftRegistryEntry } from './types.js';
+import { isFeatureEnabled } from "../feature-flags/index.js";
+import type { GraftId, GraftContext, GraftRegistryEntry } from "./types.js";
 
 /**
  * Registry of all available UI grafts.
  */
 export const GRAFT_REGISTRY = new Map<GraftId, GraftRegistryEntry>([
   [
-    'pricing',
+    "pricing",
     {
-      id: 'pricing',
-      name: 'Pricing Graft',
-      description: 'Reusable pricing table, cards, and checkout components',
-      featureFlagId: 'pricing_graft', // Optional: link to Feature Graft
-      version: '1.0.0',
-      status: 'stable',
+      id: "pricing",
+      name: "Pricing Graft",
+      description: "Reusable pricing table, cards, and checkout components",
+      featureFlagId: "pricing_graft", // Optional: link to Feature Graft
+      version: "1.0.0",
+      status: "stable",
     },
   ],
   // Future grafts register here
@@ -559,9 +572,14 @@ export async function isGraftEnabled(
 ```typescript
 // packages/engine/src/lib/grafts/types.ts
 
-export type GraftId = 'pricing' | 'nav' | 'footer' | 'hero' | (string & {});
+export type GraftId = "pricing" | "nav" | "footer" | "hero" | (string & {});
 
-export type ProductId = 'grove' | 'scout' | 'daily-clearing' | 'meadow' | (string & {});
+export type ProductId =
+  | "grove"
+  | "scout"
+  | "daily-clearing"
+  | "meadow"
+  | (string & {});
 
 export interface GraftRegistryEntry {
   /** Unique graft identifier */
@@ -583,7 +601,7 @@ export interface GraftRegistryEntry {
   version: string;
 
   /** Stability status */
-  status: 'stable' | 'beta' | 'experimental' | 'deprecated';
+  status: "stable" | "beta" | "experimental" | "deprecated";
 }
 
 export interface GraftContext {
@@ -630,7 +648,7 @@ An 85% reduction. Same UI, single source of truth.
 ```svelte
 <!-- packages/landing/src/routes/pricing/+page.svelte -->
 <script lang="ts">
-  import { PricingGraft } from '@autumnsgrove/groveengine/grafts/pricing';
+  import { PricingGraft } from '@autumnsgrove/lattice/grafts/pricing';
 
   let { data } = $props();
 </script>
@@ -658,13 +676,13 @@ An 85% reduction. Same UI, single source of truth.
 
 ```typescript
 // packages/landing/src/routes/pricing/+page.server.ts
-import { transformAllTiers } from '@autumnsgrove/groveengine/grafts/pricing';
+import { transformAllTiers } from "@autumnsgrove/lattice/grafts/pricing";
 
 export function load() {
   const tiers = transformAllTiers({
-    highlightTier: 'seedling',
+    highlightTier: "seedling",
     badges: {
-      seedling: 'Start Here',
+      seedling: "Start Here",
     },
     // When LemonSqueezy is configured:
     // checkoutUrls: getAllCheckoutUrls(createCheckoutConfigFromEnv(platform.env)),
@@ -779,24 +797,24 @@ The `transformTier()` and `transformAllTiers()` functions convert raw tier confi
 
 ```typescript
 interface PricingTier {
-  key: TierKey;           // 'free' | 'seedling' | 'sapling' | 'oak' | 'evergreen'
-  name: string;           // 'Seedling'
-  tagline: string;        // 'Plant your first seeds'
-  icon: TierIcon;         // 'sprout'
-  status: TierStatus;     // 'available' | 'coming_soon' | 'future' | 'deprecated'
-  bestFor: string;        // 'New writers getting started'
+  key: TierKey; // 'free' | 'seedling' | 'sapling' | 'oak' | 'evergreen'
+  name: string; // 'Seedling'
+  tagline: string; // 'Plant your first seeds'
+  icon: TierIcon; // 'sprout'
+  status: TierStatus; // 'available' | 'coming_soon' | 'future' | 'deprecated'
+  bestFor: string; // 'New writers getting started'
 
-  monthlyPrice: number;   // 8
-  annualPrice: number;    // 81.60
-  annualSavings: number;  // 15 (percentage)
+  monthlyPrice: number; // 8
+  annualPrice: number; // 81.60
+  annualSavings: number; // 15 (percentage)
 
-  limits: PricingTierLimits;    // Formatted strings: { posts: '50', storage: '1 GB', ... }
-  features: TierFeatures;       // Booleans: { blog: true, customDomain: false, ... }
-  featureStrings: string[];     // Bullet points for cards
-  supportLevel: string;         // 'Community'
+  limits: PricingTierLimits; // Formatted strings: { posts: '50', storage: '1 GB', ... }
+  features: TierFeatures; // Booleans: { blog: true, customDomain: false, ... }
+  featureStrings: string[]; // Bullet points for cards
+  supportLevel: string; // 'Community'
 
-  highlight?: boolean;          // Visual emphasis
-  badge?: string;               // 'Most Popular'
+  highlight?: boolean; // Visual emphasis
+  badge?: string; // 'Most Popular'
 
   checkoutUrls: {
     monthly?: string;
@@ -816,10 +834,15 @@ PricingGraft integrates with LemonSqueezy for payment processing. The `checkout.
 
 export interface CheckoutConfig {
   storeId: string;
-  products: Partial<Record<TierKey, {
-    monthlyVariantId?: string;
-    annualVariantId?: string;
-  }>>;
+  products: Partial<
+    Record<
+      TierKey,
+      {
+        monthlyVariantId?: string;
+        annualVariantId?: string;
+      }
+    >
+  >;
 }
 
 /**
@@ -835,26 +858,25 @@ export function getCheckoutUrl(
     successUrl?: string;
     cancelUrl?: string;
     customData?: Record<string, string>;
-  }
+  },
 ): string | undefined {
   const product = config.products[tierKey];
   if (!product) return undefined;
 
-  const variantId = period === 'monthly'
-    ? product.monthlyVariantId
-    : product.annualVariantId;
+  const variantId =
+    period === "monthly" ? product.monthlyVariantId : product.annualVariantId;
 
   if (!variantId) return undefined;
 
   const url = new URL(
-    `https://${config.storeId}.lemonsqueezy.com/checkout/buy/${variantId}`
+    `https://${config.storeId}.lemonsqueezy.com/checkout/buy/${variantId}`,
   );
 
   if (options?.email) {
-    url.searchParams.set('checkout[email]', options.email);
+    url.searchParams.set("checkout[email]", options.email);
   }
   if (options?.discountCode) {
-    url.searchParams.set('checkout[discount_code]', options.discountCode);
+    url.searchParams.set("checkout[discount_code]", options.discountCode);
   }
   // Custom data is validated to prevent XSS
   if (options?.customData) {
@@ -878,7 +900,7 @@ export function createCheckoutConfigFromEnv(env: {
   // ... other tier variants
 }): CheckoutConfig {
   return {
-    storeId: env.LEMON_SQUEEZY_STORE_ID ?? '',
+    storeId: env.LEMON_SQUEEZY_STORE_ID ?? "",
     products: {
       seedling: {
         monthlyVariantId: env.LEMON_SEEDLING_MONTHLY,
@@ -913,13 +935,13 @@ packages/engine/src/lib/grafts/nav/
 ```typescript
 // packages/engine/src/lib/grafts/registry.ts
 
-GRAFT_REGISTRY.set('nav', {
-  id: 'nav',
-  name: 'Navigation Graft',
-  description: 'Reusable navigation bar with product-specific links',
-  featureFlagId: 'nav_graft', // Optional
-  version: '1.0.0',
-  status: 'beta',
+GRAFT_REGISTRY.set("nav", {
+  id: "nav",
+  name: "Navigation Graft",
+  description: "Reusable navigation bar with product-specific links",
+  featureFlagId: "nav_graft", // Optional
+  version: "1.0.0",
+  status: "beta",
 });
 ```
 
@@ -942,14 +964,14 @@ GRAFT_REGISTRY.set('nav', {
 
 ```typescript
 // packages/engine/src/lib/grafts/index.ts
-export * from './nav/index.js';
+export * from "./nav/index.js";
 ```
 
 ---
 
 ## Package Exports
 
-UI Grafts are exported from `@autumnsgrove/groveengine`:
+UI Grafts are exported from `@autumnsgrove/lattice`:
 
 ```json
 {
@@ -972,7 +994,11 @@ UI Grafts are exported from `@autumnsgrove/groveengine`:
 
 ```typescript
 // Core graft utilities
-import { isGraftEnabled, getGraftEntry, GRAFT_REGISTRY } from '@autumnsgrove/groveengine/grafts';
+import {
+  isGraftEnabled,
+  getGraftEntry,
+  GRAFT_REGISTRY,
+} from "@autumnsgrove/lattice/grafts";
 
 // PricingGraft and utilities
 import {
@@ -983,7 +1009,7 @@ import {
   transformTier,
   transformAllTiers,
   getCheckoutUrl,
-} from '@autumnsgrove/groveengine/grafts/pricing';
+} from "@autumnsgrove/lattice/grafts/pricing";
 ```
 
 ---
@@ -1020,7 +1046,7 @@ Greenhouse mode is Grove's approach to internal testing and early access—an en
            before they're ready for the grove.
 ```
 
-> *In gardening, a greenhouse shelters seedlings from harsh conditions until they're strong enough to transplant. Features grown under glass can be observed, adjusted, and hardened before facing the wild.*
+> _In gardening, a greenhouse shelters seedlings from harsh conditions until they're strong enough to transplant. Features grown under glass can be observed, adjusted, and hardened before facing the wild._
 
 **Public Name:** Greenhouse mode
 **Internal Name:** Dave mode[^1]
@@ -1072,7 +1098,7 @@ Greenhouse mode is Grove's approach to internal testing and early access—an en
 - **Feature Grafts** are specific: individual feature flags for individual tenants
 - **Greenhouse mode** is holistic: tenant-wide classification that unlocks self-serve control
 
-A tenant in greenhouse mode doesn't need individual Feature Grafts for each experimental feature—they automatically receive features marked as `greenhouse_only: true`. This is the key distinction: greenhouse mode operates on *tenant classification*, not feature configuration.
+A tenant in greenhouse mode doesn't need individual Feature Grafts for each experimental feature—they automatically receive features marked as `greenhouse_only: true`. This is the key distinction: greenhouse mode operates on _tenant classification_, not feature configuration.
 
 ---
 
@@ -1082,7 +1108,7 @@ Greenhouse mode solves a fundamental architectural question: **where do graft co
 
 The original plan was to abstract graft controls into a separate admin panel (Arbor). But this creates friction—tenants who want to experiment with their own trees would need operator intervention for every toggle. That's not how a grove should work.
 
-**The insight:** Greenhouse mode *is* dev mode.
+**The insight:** Greenhouse mode _is_ dev mode.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -1114,14 +1140,14 @@ The original plan was to abstract graft controls into a separate admin panel (Ar
 
 **What greenhouse mode enables:**
 
-| Capability | Production | Greenhouse |
-|------------|------------|------------|
-| View active grafts | ✗ | ✓ |
-| Toggle feature grafts | ✗ | ✓ |
-| Access experimental features | ✗ | ✓ |
-| Adjust graft parameters | ✗ | ✓ |
-| See graft admin UI | ✗ | ✓ |
-| Reset to defaults | ✗ | ✓ |
+| Capability                   | Production | Greenhouse |
+| ---------------------------- | ---------- | ---------- |
+| View active grafts           | ✗          | ✓          |
+| Toggle feature grafts        | ✗          | ✓          |
+| Access experimental features | ✗          | ✓          |
+| Adjust graft parameters      | ✗          | ✓          |
+| See graft admin UI           | ✗          | ✓          |
+| Reset to defaults            | ✗          | ✓          |
 
 **Why this matters architecturally:**
 
@@ -1130,7 +1156,7 @@ The original plan was to abstract graft controls into a separate admin panel (Ar
 3. **Self-serve experimentation** — Tenants can try features without waiting for operator approval
 4. **Clean separation** — Production tenants get a curated experience; greenhouse tenants get full control
 
-*The greenhouse isn't a testing environment. It's a tinkerer's workshop.*
+_The greenhouse isn't a testing environment. It's a tinkerer's workshop._
 
 ---
 
@@ -1193,27 +1219,31 @@ CREATE INDEX idx_flags_greenhouse ON feature_flags(greenhouse_only) WHERE greenh
 ### Check if Tenant is in Greenhouse
 
 ```typescript
-import { isInGreenhouse } from '@autumnsgrove/groveengine/feature-flags';
+import { isInGreenhouse } from "@autumnsgrove/lattice/feature-flags";
 
 // Is this tenant part of the greenhouse?
 const inGreenhouse = await isInGreenhouse(locals.tenantId, platform.env);
 
 if (inGreenhouse) {
   // Show experimental UI, enable bleeding-edge features
-  console.log('🌱 Greenhouse tenant detected');
+  console.log("🌱 Greenhouse tenant detected");
 }
 ```
 
 ### Evaluate with Greenhouse Context
 
 ```typescript
-import { isFeatureEnabled } from '@autumnsgrove/groveengine/feature-flags';
+import { isFeatureEnabled } from "@autumnsgrove/lattice/feature-flags";
 
 // Greenhouse context is automatically included
-const useExperimentalEditor = await isFeatureEnabled('experimental_editor', {
-  tenantId: locals.tenantId,
-  // No need to specify greenhouse mode—it's inferred from tenant
-}, platform.env);
+const useExperimentalEditor = await isFeatureEnabled(
+  "experimental_editor",
+  {
+    tenantId: locals.tenantId,
+    // No need to specify greenhouse mode—it's inferred from tenant
+  },
+  platform.env,
+);
 
 // For greenhouse tenants, this returns true even if the feature
 // is marked greenhouse_only and has no other rules
@@ -1223,10 +1253,14 @@ const useExperimentalEditor = await isFeatureEnabled('experimental_editor', {
 
 ```typescript
 // In admin UI or migration
-await db.prepare(`
+await db
+  .prepare(
+    `
   INSERT INTO feature_flags (id, name, flag_type, default_value, greenhouse_only)
   VALUES ('experimental_editor', 'Experimental Editor', 'boolean', 'false', 1)
-`).run();
+`,
+  )
+  .run();
 ```
 
 ---
@@ -1235,16 +1269,16 @@ await db.prepare(`
 
 Building on the established Graft vocabulary:
 
-| Term | Action | Description |
-|------|--------|-------------|
-| **Greenhouse** | Tenant state | A tenant enrolled in early access testing |
-| **Under glass** | Feature state | A feature only available in the greenhouse |
-| **Transplant** | Promotion | Move a feature from greenhouse to general availability |
-| **Harden off** | Gradual rollout | Slowly expose a greenhouse feature to production |
-| **Nursery** | Group | Collection of greenhouse tenants for coordinated testing |
+| Term            | Action          | Description                                              |
+| --------------- | --------------- | -------------------------------------------------------- |
+| **Greenhouse**  | Tenant state    | A tenant enrolled in early access testing                |
+| **Under glass** | Feature state   | A feature only available in the greenhouse               |
+| **Transplant**  | Promotion       | Move a feature from greenhouse to general availability   |
+| **Harden off**  | Gradual rollout | Slowly expose a greenhouse feature to production         |
+| **Nursery**     | Group           | Collection of greenhouse tenants for coordinated testing |
 
-*"Dave's tree is in the greenhouse—they'll see the new editor first."*
-*"We're hardening off the JXL encoder this week—25% propagation."*
+_"Dave's tree is in the greenhouse—they'll see the new editor first."_
+_"We're hardening off the JXL encoder this week—25% propagation."_
 
 ---
 
@@ -1257,12 +1291,12 @@ For features that should only exist in the greenhouse until ready:
 ```typescript
 // Create a greenhouse-only feature
 const experimentalFeature = {
-  id: 'voice_posts',
-  name: 'Voice Posts',
-  description: 'Record posts as audio',
-  flag_type: 'boolean',
-  default_value: 'false',
-  greenhouse_only: true,  // Only visible to greenhouse tenants
+  id: "voice_posts",
+  name: "Voice Posts",
+  description: "Record posts as audio",
+  flag_type: "boolean",
+  default_value: "false",
+  greenhouse_only: true, // Only visible to greenhouse tenants
 };
 ```
 
@@ -1285,21 +1319,21 @@ Moving a feature from greenhouse to production:
 
 ```typescript
 // Week 1: Greenhouse only
-await setGreenhouseOnly('voice_posts', true);
+await setGreenhouseOnly("voice_posts", true);
 
 // Week 2: Add 10% propagation to production
-await addRule('voice_posts', {
-  ruleType: 'percentage',
+await addRule("voice_posts", {
+  ruleType: "percentage",
   ruleValue: { percentage: 10 },
-  resultValue: true
+  resultValue: true,
 });
 
 // Week 3: Increase to 50%
-await updateRule('voice_posts', 'percentage', { percentage: 50 });
+await updateRule("voice_posts", "percentage", { percentage: 50 });
 
 // Week 4: Full cultivation, remove greenhouse restriction
-await setGreenhouseOnly('voice_posts', false);
-await updateRule('voice_posts', 'always', true);
+await setGreenhouseOnly("voice_posts", false);
+await updateRule("voice_posts", "always", true);
 ```
 
 ---
@@ -1314,7 +1348,7 @@ Months later, when designing the internal testing mode, the obvious question aro
 
 The internal codename stuck. In commit messages and Slack channels, it's "Dave mode." In documentation and user-facing text, it's "greenhouse mode." Both names honor the same idea: a place where things are tested before they're ready for the world.
 
-*Sometimes the best names aren't discovered through careful deliberation—they're already sitting there in your git history, waiting to be recognized.*
+_Sometimes the best names aren't discovered through careful deliberation—they're already sitting there in your git history, waiting to be recognized._
 
 ---
 
@@ -1364,11 +1398,11 @@ When a graft causes problems:
 
 ### Recovery Timeline
 
-| Action | Effect Time |
-|--------|-------------|
-| Toggle master switch | 60 seconds (cache TTL) |
-| Clear KV cache | Immediate |
-| Direct D1 update + cache clear | Immediate |
+| Action                         | Effect Time            |
+| ------------------------------ | ---------------------- |
+| Toggle master switch           | 60 seconds (cache TTL) |
+| Clear KV cache                 | Immediate              |
+| Direct D1 update + cache clear | Immediate              |
 
 ---
 
@@ -1376,21 +1410,21 @@ When a graft causes problems:
 
 ### Feature Grafts
 
-| Graft ID | Type | Purpose | Example Use |
-|----------|------|---------|-------------|
-| `jxl_encoding` | percentage | JPEG XL image encoding | Propagate to 25% of grove |
-| `jxl_kill_switch` | boolean | Emergency disable for JXL | Blight switch (instant off) |
-| `meadow_access` | tier | Gate Meadow social features | Oak and Evergreen only |
-| `pricing_graft` | boolean | Gate PricingGraft rollout | Gradual UI rollout |
+| Graft ID          | Type       | Purpose                     | Example Use                 |
+| ----------------- | ---------- | --------------------------- | --------------------------- |
+| `jxl_encoding`    | percentage | JPEG XL image encoding      | Propagate to 25% of grove   |
+| `jxl_kill_switch` | boolean    | Emergency disable for JXL   | Blight switch (instant off) |
+| `meadow_access`   | tier       | Gate Meadow social features | Oak and Evergreen only      |
+| `pricing_graft`   | boolean    | Gate PricingGraft rollout   | Gradual UI rollout          |
 
 ### UI Grafts
 
-| Graft ID | Status | Purpose | Components |
-|----------|--------|---------|------------|
-| `pricing` | stable | Pricing pages for any Grove property | PricingGraft, PricingTable, PricingCard, etc. |
-| `nav` | planned | Consistent navigation | NavGraft, NavItem |
-| `footer` | planned | Consistent footer | FooterGraft, FooterLinks |
-| `hero` | planned | Customizable hero sections | HeroGraft, HeroContent |
+| Graft ID  | Status  | Purpose                              | Components                                    |
+| --------- | ------- | ------------------------------------ | --------------------------------------------- |
+| `pricing` | stable  | Pricing pages for any Grove property | PricingGraft, PricingTable, PricingCard, etc. |
+| `nav`     | planned | Consistent navigation                | NavGraft, NavItem                             |
+| `footer`  | planned | Consistent footer                    | FooterGraft, FooterLinks                      |
+| `hero`    | planned | Customizable hero sections           | HeroGraft, HeroContent                        |
 
 ---
 
@@ -1433,6 +1467,7 @@ packages/engine/src/lib/
 ## Implementation Checklist
 
 ### Phase 1: Feature Graft Infrastructure (Complete)
+
 - [x] D1 schema migration
 - [x] Type definitions
 - [x] Evaluation logic
@@ -1441,11 +1476,13 @@ packages/engine/src/lib/
 - [x] Unit tests
 
 ### Phase 2: Feature Graft Integration (Complete)
+
 - [x] JXL encoding graft
 - [x] Kill switch support
 - [x] SvelteKit hooks integration
 
 ### Phase 3: Admin UI (Planned)
+
 - [ ] Graft listing page (`/admin/grafts`)
 - [ ] Graft editor with rule builder
 - [ ] Percentage slider component
@@ -1453,11 +1490,13 @@ packages/engine/src/lib/
 - [ ] Audit log viewer
 
 ### Phase 4: Analytics (Planned)
+
 - [ ] Rings integration for graft evaluations
 - [ ] Cultivar experiment tracking
 - [ ] Conversion metrics per variant
 
 ### Phase 5: UI Grafts Infrastructure (Complete)
+
 - [x] Graft registry system
 - [x] Registry-to-Feature-Graft integration
 - [x] Package exports structure
@@ -1465,6 +1504,7 @@ packages/engine/src/lib/
 - [x] Core type definitions
 
 ### Phase 6: PricingGraft (Complete)
+
 - [x] Tier transformation utilities
 - [x] LemonSqueezy checkout integration
 - [x] PricingGraft orchestrator component
@@ -1478,12 +1518,14 @@ packages/engine/src/lib/
 - [x] Accessibility improvements
 
 ### Phase 7: Future UI Grafts (Planned)
+
 - [ ] NavGraft (consistent navigation)
 - [ ] FooterGraft (consistent footer)
 - [ ] HeroGraft (customizable hero sections)
 - [ ] TestimonialGraft (social proof components)
 
 ### Phase 8: Greenhouse Mode (Planned)
+
 - [ ] Database schema extension (`greenhouse_tenants` table)
 - [ ] `greenhouse_only` column on `feature_flags` table
 - [ ] `isInGreenhouse()` API function
@@ -1493,6 +1535,7 @@ packages/engine/src/lib/
 - [ ] Transplant workflow (greenhouse → production)
 
 ### Phase 9: Self-Serve Graft Controls (Planned)
+
 - [ ] Graft control panel in tenant dashboard (greenhouse-only visibility)
 - [ ] Toggle UI for feature grafts
 - [ ] Parameter adjustment UI for configurable grafts
@@ -1515,17 +1558,18 @@ packages/engine/src/lib/
 ## Museum Exhibit Notes
 
 > **For future inclusion in The Grafts Exhibit, Wing 5: The Personalization Wing**
-> *See [docs/museum/MUSEUM.md](/docs/museum/MUSEUM.md) for museum structure*
+> _See [docs/museum/MUSEUM.md](/docs/museum/MUSEUM.md) for museum structure_
 
 When The Grafts Exhibit is created, include this origin story for Dave Mode:
 
 > **On "Dave Mode"**: When Grafts needed a third mode for internal testing, the obvious choice emerged from Grove's history. The very first test tenant created during early development was named "Dave"—chosen as the most wonderfully mundane, generic example name imaginable. When it came time to name the internal testing mode, "Dave mode" felt perfect: unpretentious, memorable, and a small tribute to Grove's earliest days. Externally, we call it "greenhouse mode" (fitting the nature theme), but in commit messages and Slack channels, it's forever Dave mode. Sometimes the best names aren't discovered through careful deliberation—they're already sitting there in your git history, waiting to be recognized.
 
 **Exhibit placement suggestions:**
+
 - Display alongside the Graft Lexicon interactive
 - Include in the "Names That Found Us" subsection of the Naming Wing (Wing 7) cross-reference
 - Consider a "Dave's Corner" Easter egg that reveals this story when visitors click on a hidden greenhouse icon
 
 ---
 
-*Orchardists have known for centuries: the right graft makes a tree bear fruit it never could alone. The right splice makes a grove feel like home.*
+_Orchardists have known for centuries: the right graft makes a tree bear fruit it never could alone. The right splice makes a grove feel like home._

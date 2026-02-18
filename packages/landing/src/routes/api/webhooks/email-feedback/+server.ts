@@ -1,7 +1,7 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { generateId } from "@autumnsgrove/groveengine/services";
-import { GROVE_EMAILS } from "@autumnsgrove/groveengine/config";
+import { generateId } from "@autumnsgrove/lattice/services";
+import { GROVE_EMAILS } from "@autumnsgrove/lattice/config";
 import { Resend } from "resend";
 
 /**

@@ -5,7 +5,7 @@
  * Main /pricing page shows simplified view with Wanderer and Seedling.
  */
 
-import { transformAllTiers } from "@autumnsgrove/groveengine/grafts/pricing";
+import { transformAllTiers } from "@autumnsgrove/lattice/grafts/pricing";
 
 export function load() {
   // All tiers, no filters

@@ -4,11 +4,12 @@ description: Engine-first pattern that prevented 11,925 lines of duplicate code
 category: exhibit
 exhibitWing: architecture
 icon: cog
-lastUpdated: '2026-01-22'
+lastUpdated: "2026-01-22"
 ---
+
 # The Engine Room
 
-> *The pattern that prevented 11,925 lines of duplicate code.*
+> _The pattern that prevented 11,925 lines of duplicate code._
 
 ---
 
@@ -22,7 +23,7 @@ This exhibit explains the engine-first pattern. Before implementing any utility,
 
 ```
 1. CHECK: Does the engine already have this?
-   └── YES → Import from @autumnsgrove/groveengine
+   └── YES → Import from @autumnsgrove/lattice
    └── NO  → Continue to step 2
 
 2. IMPLEMENT: Add it to the engine FIRST
@@ -46,4 +47,4 @@ Grove once accumulated 11,925 lines of duplicate code because apps implemented t
 
 ---
 
-*This exhibit is under construction. The full tour is coming soon.*
+_This exhibit is under construction. The full tour is coming soon._

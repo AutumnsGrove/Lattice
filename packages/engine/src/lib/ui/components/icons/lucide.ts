@@ -2,12 +2,12 @@
  * Shared Lucide icon registry for Grove Platform.
  * Single source of truth for commonly used icons across all Grove apps.
  *
- * DO: Import icons from '@autumnsgrove/groveengine/ui/icons'
+ * DO: Import icons from '@autumnsgrove/lattice/ui/icons'
  * DON'T: Import directly from 'lucide-svelte' in app components
  *
  * @example
  * ```svelte
- * import { stateIcons, navIcons } from '@autumnsgrove/groveengine/ui/icons';
+ * import { stateIcons, navIcons } from '@autumnsgrove/lattice/ui/icons';
  *
  * <svelte:component this={stateIcons.check} class="w-5 h-5" />
  * ```

@@ -1,7 +1,7 @@
-# GroveEngine Migration Plan
+# Lattice Migration Plan
 
 **Source:** AutumnsGrove (autumnsgrove.com)
-**Target:** GroveEngine (grove.place platform)
+**Target:** Lattice (grove.place platform)
 **Status:** Planning Phase
 **Created:** November 30, 2025
 
@@ -9,7 +9,7 @@
 
 ## Overview
 
-This document outlines the strategy for extracting the blog engine from AutumnsGrove into a standalone, multi-tenant platform (GroveEngine). The goal is a smooth migration that preserves all working code while adding multi-tenant capabilities.
+This document outlines the strategy for extracting the blog engine from AutumnsGrove into a standalone, multi-tenant platform (Lattice). The goal is a smooth migration that preserves all working code while adding multi-tenant capabilities.
 
 ---
 
@@ -17,30 +17,30 @@ This document outlines the strategy for extracting the blog engine from AutumnsG
 
 ### Completed Features (Ready to Extract)
 
-| Component | Location | Extraction Priority | Notes |
-|-----------|----------|---------------------|-------|
-| **Blog Engine** | `src/routes/blog/` | Critical | Core markdown rendering, frontmatter |
-| **Gutter Annotations** | `src/lib/components/ContentWithGutter.svelte` | Critical | Unique feature, sidebar annotations |
-| **Table of Contents** | `src/lib/components/TableOfContents.svelte` | Critical | Auto-generated from headings |
-| **Admin Panel** | `src/routes/admin/` | Critical | Full CRUD for posts/pages/images |
-| **Markdown Parser** | `src/lib/utils/markdown.js` | Critical | Marked.js with custom extensions |
-| **R2 Image Hosting** | `src/routes/api/images/` | High | CDN integration, upload handling |
-| **D1 Database** | `src/lib/db/schema.sql` | High | Needs multi-tenant adaptation |
-| **Auth System** | `src/lib/auth/`, `src/routes/auth/` | High | GitHub OAuth, JWT, sessions |
-| **Security Patterns** | `src/lib/utils/csrf.js`, `hooks.server.js` | High | XSS/CSRF/rate limiting |
-| **Photo Gallery** | `src/lib/components/gallery/` | Medium | Lightbox, zoom, captions |
-| **Custom Fonts** | Admin settings, `static/fonts/` | Medium | 7 self-hosted fonts |
-| **Code Blocks** | Markdown renderer | Medium | GitHub-style with copy button |
-| **Pages System** | `src/routes/admin/pages/` | Medium | Home/About/Contact editable |
+| Component              | Location                                      | Extraction Priority | Notes                                |
+| ---------------------- | --------------------------------------------- | ------------------- | ------------------------------------ |
+| **Blog Engine**        | `src/routes/blog/`                            | Critical            | Core markdown rendering, frontmatter |
+| **Gutter Annotations** | `src/lib/components/ContentWithGutter.svelte` | Critical            | Unique feature, sidebar annotations  |
+| **Table of Contents**  | `src/lib/components/TableOfContents.svelte`   | Critical            | Auto-generated from headings         |
+| **Admin Panel**        | `src/routes/admin/`                           | Critical            | Full CRUD for posts/pages/images     |
+| **Markdown Parser**    | `src/lib/utils/markdown.js`                   | Critical            | Marked.js with custom extensions     |
+| **R2 Image Hosting**   | `src/routes/api/images/`                      | High                | CDN integration, upload handling     |
+| **D1 Database**        | `src/lib/db/schema.sql`                       | High                | Needs multi-tenant adaptation        |
+| **Auth System**        | `src/lib/auth/`, `src/routes/auth/`           | High                | GitHub OAuth, JWT, sessions          |
+| **Security Patterns**  | `src/lib/utils/csrf.js`, `hooks.server.js`    | High                | XSS/CSRF/rate limiting               |
+| **Photo Gallery**      | `src/lib/components/gallery/`                 | Medium              | Lightbox, zoom, captions             |
+| **Custom Fonts**       | Admin settings, `static/fonts/`               | Medium              | 7 self-hosted fonts                  |
+| **Code Blocks**        | Markdown renderer                             | Medium              | GitHub-style with copy button        |
+| **Pages System**       | `src/routes/admin/pages/`                     | Medium              | Home/About/Contact editable          |
 
 ### Features NOT to Extract (Personal/Site-Specific)
 
-| Component | Reason |
-|-----------|--------|
-| GitHub Dashboard | Personal feature, not needed for blog platform |
-| Timeline | Site-specific activity tracking |
-| Willow Gallery | Personal content |
-| AI Repository Analysis | GitHub-specific feature |
+| Component              | Reason                                         |
+| ---------------------- | ---------------------------------------------- |
+| GitHub Dashboard       | Personal feature, not needed for blog platform |
+| Timeline               | Site-specific activity tracking                |
+| Willow Gallery         | Personal content                               |
+| AI Repository Analysis | GitHub-specific feature                        |
 
 ### Security Status
 
@@ -53,7 +53,7 @@ This document outlines the strategy for extracting the blog engine from AutumnsG
 
 ---
 
-## Target State: GroveEngine
+## Target State: Lattice
 
 ### Multi-Tenant Architecture
 
@@ -74,6 +74,7 @@ username.grove.place/        # Individual blogs (grove-engine)
 ### Database Schema Changes
 
 **Current (Single Tenant):**
+
 ```sql
 CREATE TABLE posts (
   id INTEGER PRIMARY KEY,
@@ -85,6 +86,7 @@ CREATE TABLE posts (
 ```
 
 **Target (Multi-Tenant):**
+
 ```sql
 CREATE TABLE posts (
   id INTEGER PRIMARY KEY,
@@ -112,10 +114,10 @@ CREATE TABLE tenants (
 ```javascript
 // hooks.server.js
 export async function handle({ event, resolve }) {
-  const host = event.request.headers.get('host');
-  const subdomain = host?.split('.')[0];
+  const host = event.request.headers.get("host");
+  const subdomain = host?.split(".")[0];
 
-  if (subdomain && subdomain !== 'www' && subdomain !== 'grove') {
+  if (subdomain && subdomain !== "www" && subdomain !== "grove") {
     // This is a tenant blog
     event.locals.tenant = await getTenant(subdomain);
     event.locals.isTenantRequest = true;
@@ -138,6 +140,7 @@ export async function handle({ event, resolve }) {
 - [ ] Set up development environment variables
 
 **Files to Remove:**
+
 ```
 src/routes/dashboard/
 src/routes/timeline/
@@ -149,6 +152,7 @@ UserContent/Posts/*  (keep structure, remove personal content)
 ```
 
 **Files to Keep (Core Engine):**
+
 ```
 src/routes/blog/
 src/routes/admin/
@@ -172,6 +176,7 @@ src/lib/db/
 - [ ] Create tenant provisioning script
 
 **Key Files to Modify:**
+
 ```
 src/lib/db/schema.sql       # Add tenant tables
 src/hooks.server.js         # Subdomain routing
@@ -188,9 +193,10 @@ src/routes/admin/**         # Scope to current tenant
 - [ ] Add upgrade prompts in admin panel
 
 **Limit Enforcement Logic:**
+
 ```javascript
 async function canCreatePost(tenant) {
-  if (tenant.plan === 'professional' || tenant.plan === 'business') {
+  if (tenant.plan === "professional" || tenant.plan === "business") {
     return { allowed: true };
   }
 
@@ -198,8 +204,8 @@ async function canCreatePost(tenant) {
   if (count >= 250) {
     return {
       allowed: false,
-      reason: 'post_limit',
-      message: 'Upgrade to Professional for unlimited posts'
+      reason: "post_limit",
+      message: "Upgrade to Professional for unlimited posts",
     };
   }
   return { allowed: true };
@@ -215,6 +221,7 @@ async function canCreatePost(tenant) {
 - [ ] Add theme preview functionality
 
 **Theme Structure:**
+
 ```
 src/lib/themes/
 ├── default/
@@ -283,15 +290,15 @@ src/lib/themes/
 ```javascript
 // scripts/export-content.js
 async function exportContent(sourceDb) {
-  const posts = await sourceDb.prepare('SELECT * FROM posts').all();
-  const pages = await sourceDb.prepare('SELECT * FROM pages').all();
-  const images = await sourceDb.prepare('SELECT * FROM images').all();
+  const posts = await sourceDb.prepare("SELECT * FROM posts").all();
+  const pages = await sourceDb.prepare("SELECT * FROM pages").all();
+  const images = await sourceDb.prepare("SELECT * FROM images").all();
 
   return {
     posts: posts.results,
     pages: pages.results,
     images: images.results,
-    exported_at: new Date().toISOString()
+    exported_at: new Date().toISOString(),
   };
 }
 ```
@@ -317,44 +324,48 @@ async function importContent(targetDb, tenantId, exportData) {
 
 ### Technical Risks
 
-| Risk | Mitigation |
-|------|------------|
-| Data leakage between tenants | Per-tenant D1 databases OR strict tenant_id filtering with tests |
-| Subdomain routing failures | Comprehensive routing tests, fallback to main site |
-| Auth token cross-contamination | Tenant-scoped JWT claims, strict validation |
-| Storage quota bypass | Server-side enforcement, not client-side |
+| Risk                           | Mitigation                                                       |
+| ------------------------------ | ---------------------------------------------------------------- |
+| Data leakage between tenants   | Per-tenant D1 databases OR strict tenant_id filtering with tests |
+| Subdomain routing failures     | Comprehensive routing tests, fallback to main site               |
+| Auth token cross-contamination | Tenant-scoped JWT claims, strict validation                      |
+| Storage quota bypass           | Server-side enforcement, not client-side                         |
 
 ### Business Risks
 
-| Risk | Mitigation |
-|------|------------|
+| Risk                           | Mitigation                                              |
+| ------------------------------ | ------------------------------------------------------- |
 | Migration breaks existing site | Keep autumnsgrove.com running until grove-engine proven |
-| First beta client unhappy | Extensive testing with beta client before public launch |
-| Feature regression | Maintain comprehensive test suite from AutumnsGrove |
+| First beta client unhappy      | Extensive testing with beta client before public launch |
+| Feature regression             | Maintain comprehensive test suite from AutumnsGrove     |
 
 ---
 
 ## Success Criteria
 
 ### Phase 1 Complete When:
+
 - [ ] grove-engine repo exists with clean codebase
 - [ ] All personal features removed
 - [ ] CI/CD pipeline passing
 - [ ] Local development works
 
 ### Phase 2 Complete When:
+
 - [ ] Multiple subdomains can be created
 - [ ] Each subdomain shows its own content
 - [ ] No data leakage between tenants (tested)
 - [ ] Subdomain provisioning automated
 
 ### Phase 3 Complete When:
+
 - [ ] Plan limits enforced correctly
 - [ ] Archival system works (no data loss)
 - [ ] Usage tracking accurate
 - [ ] Upgrade prompts display correctly
 
 ### MVP Complete When:
+
 - [ ] First beta client live on subdomain
 - [ ] All existing features work
 - [ ] Admin panel fully functional
@@ -365,21 +376,21 @@ async function importContent(targetDb, tenantId, exportData) {
 
 ## Timeline Summary
 
-| Week | Phase | Key Deliverables |
-|------|-------|------------------|
-| 1 | Setup | Clean grove-engine repo, CI/CD |
-| 2-3 | Multi-tenant | Subdomain routing, tenant DB |
-| 3-4 | Plan Enforcement | Limits, archival, tracking |
-| 4-5 | Themes | 3-5 themes, selector UI |
-| 5-6 | Testing | Security tests, performance |
-| 7+ | Launch | First beta client, iterate |
+| Week | Phase            | Key Deliverables               |
+| ---- | ---------------- | ------------------------------ |
+| 1    | Setup            | Clean grove-engine repo, CI/CD |
+| 2-3  | Multi-tenant     | Subdomain routing, tenant DB   |
+| 3-4  | Plan Enforcement | Limits, archival, tracking     |
+| 4-5  | Themes           | 3-5 themes, selector UI        |
+| 5-6  | Testing          | Security tests, performance    |
+| 7+   | Launch           | First beta client, iterate     |
 
 ---
 
 ## Reference Links
 
 - **AutumnsGrove Source:** [github.com/AutumnsGrove/AutumnsGrove](https://github.com/AutumnsGrove/AutumnsGrove)
-- **GroveEngine Specs:** [docs/specs/engine-spec.md](specs/engine-spec.md)
+- **Lattice Specs:** [docs/specs/engine-spec.md](specs/engine-spec.md)
 - **Vision Document:** [THE_JOURNEY.md](https://github.com/AutumnsGrove/AutumnsGrove/blob/main/docs/THE_JOURNEY.md)
 - **Security Audit:** AutumnsGrove TODOS.md (Security & Polish Audit section)
 
@@ -392,5 +403,5 @@ async function importContent(targetDb, tenantId, exportData) {
 
 ---
 
-*Last Updated: December 1, 2025*
-*Status: Planning Complete - Ready for Execution*
+_Last Updated: December 1, 2025_
+_Status: Planning Complete - Ready for Execution_

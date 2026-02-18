@@ -110,73 +110,73 @@ Define the unified type system covering all metrics:
 ```typescript
 // Worker metrics (from Cloudflare Analytics GraphQL API)
 interface WorkerMetrics {
-  name: string;
-  requests: { total: number; success: number; error: number };
-  errorRate: number;
-  latency: { p50: number; p95: number; p99: number };
-  cpuTimeAvg: number;
-  durationAvg: number;
+	name: string;
+	requests: { total: number; success: number; error: number };
+	errorRate: number;
+	latency: { p50: number; p95: number; p99: number };
+	cpuTimeAvg: number;
+	durationAvg: number;
 }
 
 // D1 metrics
 interface D1Metrics {
-  name: string;
-  databaseId: string;
-  sizeBytes: number;
-  rowsRead: number;
-  rowsWritten: number;
-  queryCount: number;
+	name: string;
+	databaseId: string;
+	sizeBytes: number;
+	rowsRead: number;
+	rowsWritten: number;
+	queryCount: number;
 }
 
 // R2 metrics
 interface R2Metrics {
-  bucket: string;
-  objectCount: number;
-  totalSizeBytes: number;
-  classAOps: number; // PUT/POST/LIST
-  classBOps: number; // GET
+	bucket: string;
+	objectCount: number;
+	totalSizeBytes: number;
+	classAOps: number; // PUT/POST/LIST
+	classBOps: number; // GET
 }
 
 // KV metrics
 interface KVMetrics {
-  namespace: string;
-  namespaceId: string;
-  reads: number;
-  writes: number;
-  deletes: number;
-  lists: number;
+	namespace: string;
+	namespaceId: string;
+	reads: number;
+	writes: number;
+	deletes: number;
+	lists: number;
 }
 
 // Durable Object metrics (self-reported)
 interface DurableObjectMetrics {
-  className: string;
-  activeInstances: number;
-  hibernatingInstances: number;
-  totalAlarms: number;
-  storageBytes: number;
+	className: string;
+	activeInstances: number;
+	hibernatingInstances: number;
+	totalAlarms: number;
+	storageBytes: number;
 }
 
 // Cost breakdown
 interface CostBreakdown {
-  workers: number;
-  d1: { reads: number; writes: number; storage: number; total: number };
-  r2: {
-    storage: number;
-    classA: number;
-    classB: number;
-    egress: number;
-    total: number;
-  };
-  kv: { reads: number; writes: number; storage: number; total: number };
-  durableObjects: {
-    requests: number;
-    duration: number;
-    storage: number;
-    total: number;
-  };
-  ai: { neurons: number; total: number };
-  total: number;
-  period: "daily" | "monthly";
+	workers: number;
+	d1: { reads: number; writes: number; storage: number; total: number };
+	r2: {
+		storage: number;
+		classA: number;
+		classB: number;
+		egress: number;
+		total: number;
+	};
+	kv: { reads: number; writes: number; storage: number; total: number };
+	durableObjects: {
+		requests: number;
+		duration: number;
+		storage: number;
+		total: number;
+	};
+	ai: { neurons: number; total: number };
+	total: number;
+	period: "daily" | "monthly";
 }
 ```
 
@@ -360,12 +360,12 @@ Calculate estimated costs based on Cloudflare pricing.
 // Last verified: 2026-02-17
 // Source: https://developers.cloudflare.com/workers/platform/pricing/
 const CLOUDFLARE_PRICING = {
-  workers: { perMillionRequests: 0.5, freeRequests: 10_000_000 },
-  d1: { perMillionReads: 0.75, perMillionWrites: 1.0, perGBStorage: 0.75 },
-  r2: { perGBStorage: 0.015, perMillionClassA: 4.5, perMillionClassB: 0.36 },
-  kv: { perMillionReads: 0.5, perMillionWrites: 5.0, perGBStorage: 0.5 },
-  durableObjects: { perMillionRequests: 0.15, perMillionGBSeconds: 12.5 },
-  workersAI: { freeNeuronsPerDay: 10_000, perThousandNeurons: 0.011 },
+	workers: { perMillionRequests: 0.5, freeRequests: 10_000_000 },
+	d1: { perMillionReads: 0.75, perMillionWrites: 1.0, perGBStorage: 0.75 },
+	r2: { perGBStorage: 0.015, perMillionClassA: 4.5, perMillionClassB: 0.36 },
+	kv: { perMillionReads: 0.5, perMillionWrites: 5.0, perGBStorage: 0.5 },
+	durableObjects: { perMillionRequests: 0.15, perMillionGBSeconds: 12.5 },
+	workersAI: { freeNeuronsPerDay: 10_000, perThousandNeurons: 0.011 },
 } as const;
 ```
 
@@ -373,10 +373,10 @@ Also add Firefly external provider costs for Queen Firefly ephemeral servers:
 
 ```typescript
 const FIREFLY_PROVIDER_PRICING = {
-  hetzner: { cx22: 0.008 }, // per hour
-  flyio: { shared1x: 0.02 },
-  railway: { starter: 0.015 },
-  digitalocean: { s1vcpu: 0.01 },
+	hetzner: { cx22: 0.008 }, // per hour
+	flyio: { shared1x: 0.02 },
+	railway: { starter: 0.015 },
+	digitalocean: { s1vcpu: 0.01 },
 } as const;
 ```
 
@@ -434,23 +434,22 @@ The parent Arbor layout (`/arbor/+layout.svelte`) already conditionally skips Ar
 
 ```svelte
 <!-- In /arbor/+layout.svelte — add Vista to the bypass list -->
-let isLoginPage = $derived(page.url.pathname === '/arbor/login');
-let isVistaPage = $derived(page.url.pathname.startsWith('/arbor/vista'));
+let isLoginPage = $derived(page.url.pathname === '/arbor/login'); let isVistaPage = $derived(page.url.pathname.startsWith('/arbor/vista'));
 
 {#if isLoginPage}
-  {@render children()}
+	{@render children()}
 {:else if isVistaPage}
-  <!-- Vista provides its own ArborPanel chrome -->
-  <Header showSidebarToggle={true} user={headerUser} userHref="/arbor" />
-  {@render children()}
-  <div class="arbor-footer-wrapper" class:collapsed={sidebarCollapsed}>
-    <Footer />
-  </div>
+	<!-- Vista provides its own ArborPanel chrome -->
+	<Header showSidebarToggle={true} user={headerUser} userHref="/arbor" />
+	{@render children()}
+	<div class="arbor-footer-wrapper" class:collapsed={sidebarCollapsed}>
+		<Footer />
+	</div>
 {:else}
-  <!-- Standard Arbor chrome -->
-  <Header showSidebarToggle={true} user={headerUser} userHref="/arbor" />
-  <ArborPanel ...>{@render children()}</ArborPanel>
-  <Footer ... />
+	<!-- Standard Arbor chrome -->
+	<Header showSidebarToggle={true} user={headerUser} userHref="/arbor" />
+	<ArborPanel ...>{@render children()}</ArborPanel>
+	<Footer ... />
 {/if}
 ```
 
@@ -459,40 +458,45 @@ Then Vista's own layout renders its own ArborPanel:
 ```svelte
 <!-- In /arbor/vista/+layout.svelte -->
 <script lang="ts">
-  import { ArborPanel } from '@autumnsgrove/groveengine/ui/arbor';
-  import {
-    LayoutDashboard, Server, Database, HardDrive,
-    Box, DollarSign, Brain, Shield, Lock,
-    Flower2, Flame, Bell, ArrowLeft
-  } from 'lucide-svelte';
+	import { ArborPanel } from "@autumnsgrove/lattice/ui/arbor";
+	import {
+		LayoutDashboard,
+		Server,
+		Database,
+		HardDrive,
+		Box,
+		DollarSign,
+		Brain,
+		Shield,
+		Lock,
+		Flower2,
+		Flame,
+		Bell,
+		ArrowLeft,
+	} from "lucide-svelte";
 
-  const vistaNav = [
-    { href: '/arbor', label: 'Back to Admin', icon: ArrowLeft },
-    { kind: 'divider', label: 'Vista', style: 'grove' },
-    { href: '/arbor/vista', label: 'Overview', icon: LayoutDashboard },
-    { href: '/arbor/vista/workers', label: 'Workers', icon: Server },
-    { href: '/arbor/vista/databases', label: 'Databases', icon: Database },
-    { href: '/arbor/vista/storage', label: 'Storage', icon: HardDrive },
-    { href: '/arbor/vista/durable-objects', label: 'Durable Objects', icon: Box },
-    { href: '/arbor/vista/costs', label: 'Costs', icon: DollarSign },
-    { kind: 'divider', label: 'Services', style: 'line' },
-    { href: '/arbor/vista/ai', label: 'AI Usage', icon: Brain },
-    { href: '/arbor/vista/moderation', label: 'Moderation', icon: Shield },
-    { href: '/arbor/vista/warden', label: 'Warden', icon: Lock },
-    { href: '/arbor/vista/meadow', label: 'Meadow', icon: Flower2 },
-    { href: '/arbor/vista/firefly', label: 'Firefly', icon: Flame },
-    { kind: 'divider', style: 'line' },
-    { href: '/arbor/vista/alerts', label: 'Alerts', icon: Bell },
-  ];
+	const vistaNav = [
+		{ href: "/arbor", label: "Back to Admin", icon: ArrowLeft },
+		{ kind: "divider", label: "Vista", style: "grove" },
+		{ href: "/arbor/vista", label: "Overview", icon: LayoutDashboard },
+		{ href: "/arbor/vista/workers", label: "Workers", icon: Server },
+		{ href: "/arbor/vista/databases", label: "Databases", icon: Database },
+		{ href: "/arbor/vista/storage", label: "Storage", icon: HardDrive },
+		{ href: "/arbor/vista/durable-objects", label: "Durable Objects", icon: Box },
+		{ href: "/arbor/vista/costs", label: "Costs", icon: DollarSign },
+		{ kind: "divider", label: "Services", style: "line" },
+		{ href: "/arbor/vista/ai", label: "AI Usage", icon: Brain },
+		{ href: "/arbor/vista/moderation", label: "Moderation", icon: Shield },
+		{ href: "/arbor/vista/warden", label: "Warden", icon: Lock },
+		{ href: "/arbor/vista/meadow", label: "Meadow", icon: Flower2 },
+		{ href: "/arbor/vista/firefly", label: "Firefly", icon: Flame },
+		{ kind: "divider", style: "line" },
+		{ href: "/arbor/vista/alerts", label: "Alerts", icon: Bell },
+	];
 </script>
 
-<ArborPanel
-  navItems={vistaNav}
-  brandTitle="Vista"
-  user={data.user}
-  onLogout={handleLogoutClick}
->
-  {@render children()}
+<ArborPanel navItems={vistaNav} brandTitle="Vista" user={data.user} onLogout={handleLogoutClick}>
+	{@render children()}
 </ArborPanel>
 ```
 
@@ -540,7 +544,7 @@ packages/landing/src/routes/arbor/vista/
 11. **Firefly** (`firefly/+page.svelte`) - Pool dashboard: active/warm/ephemeral runners, job queue depth, ignition/fade times, session costs by provider, orphan instance alerts, R2 state sync sizes per consumer
 12. **Alerts** (`alerts/+page.svelte`) - Active alerts, threshold configuration, alert history
 
-Use engine chart components (`@autumnsgrove/groveengine/ui/charts`) and glass design pattern.
+Use engine chart components (`@autumnsgrove/lattice/ui/charts`) and glass design pattern.
 
 **Sidebar link from main Arbor:** Add to the Wayfinder section of the parent layout:
 
@@ -620,13 +624,13 @@ CF_ACCOUNT_ID = "04e847fa7655624e84414a8280b3a4d0"
 **`packages/workers/vista-collector/src/index.ts`:**
 
 ```typescript
-import { createObservabilityCollector } from "@autumnsgrove/groveengine/server/observability";
+import { createObservabilityCollector } from "@autumnsgrove/lattice/server/observability";
 
 export default {
-  async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
-    const collector = createObservabilityCollector(env);
-    ctx.waitUntil(collector.runFullCollection());
-  },
+	async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
+		const collector = createObservabilityCollector(env);
+		ctx.waitUntil(collector.runFullCollection());
+	},
 };
 ```
 

@@ -1,6 +1,6 @@
-# GroveEngine Example Site
+# Lattice Example Site
 
-**The Midnight Bloom** - A demonstration site showcasing all GroveEngine features.
+**The Midnight Bloom** - A demonstration site showcasing all Lattice features.
 
 ## Overview
 
@@ -41,6 +41,7 @@ npm run preview
 ### Automated Deployment
 
 The site deploys automatically via GitHub Actions (`.github/workflows/deploy-example-site.yml`) when:
+
 - Changes are pushed to the `main` branch
 - Changes affect `packages/example-site/` or `packages/engine/`
 
@@ -67,6 +68,7 @@ This site shares infrastructure with the main Grove platform:
 ## Features Demonstrated
 
 ### Content Features
+
 - Markdown-based blog posts
 - Gutter annotation system
 - Table of contents generation
@@ -74,12 +76,14 @@ This site shares infrastructure with the main Grove platform:
 - Static pages (About, Contact)
 
 ### Shop Features (Stubs)
+
 - Product listing page
 - Product detail pages
 - Shopping cart (UI only)
 - Category filtering
 
 ### Admin Features (Demo UI)
+
 - Dashboard with stats
 - Blog post management
 - Page management
@@ -87,6 +91,7 @@ This site shares infrastructure with the main Grove platform:
 - Site settings
 
 ### UI/UX Features
+
 - Responsive design
 - Dark/light theme toggle
 - Mobile navigation
@@ -133,7 +138,6 @@ tags:
   - tag1
   - tag2
 ---
-
 Your markdown content here...
 ```
 

@@ -123,8 +123,8 @@ CREATE TABLE IF NOT EXISTS pulse_events (
     delivery_id TEXT,                  -- GitHub X-GitHub-Delivery (idempotency)
     event_type TEXT NOT NULL,          -- push, pull_request, issues, release, etc.
     action TEXT,                       -- opened, closed, merged, created, etc.
-    repo_name TEXT NOT NULL,           -- Short name (e.g., "GroveEngine")
-    repo_full_name TEXT NOT NULL,      -- Full name (e.g., "AutumnsGrove/GroveEngine")
+    repo_name TEXT NOT NULL,           -- Short name (e.g., "Lattice")
+    repo_full_name TEXT NOT NULL,      -- Full name (e.g., "AutumnsGrove/Lattice")
     actor TEXT NOT NULL,               -- GitHub username
     title TEXT,                        -- Commit message / PR title / issue title
     ref TEXT,                          -- Branch name or tag

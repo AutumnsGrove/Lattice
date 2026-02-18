@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { GlassCard, GlassButton } from '@autumnsgrove/groveengine/ui';
+	import { GlassCard, GlassButton } from '@autumnsgrove/lattice/ui';
 
 	let { data }: { data: PageData } = $props();
 </script>

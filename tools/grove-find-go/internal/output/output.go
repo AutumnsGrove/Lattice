@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/AutumnsGrove/GroveEngine/tools/grove-find-go/internal/config"
+	"github.com/AutumnsGrove/Lattice/tools/grove-find-go/internal/config"
 )
 
 // ANSI color codes.

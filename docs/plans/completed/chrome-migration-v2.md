@@ -14,6 +14,7 @@ This is a corrected migration plan based on thorough code review of the existing
 2. Critical bugs exist in the current engine chrome components that would cause runtime failures
 
 **This plan addresses both issues** with a phased approach that:
+
 - Fixes all bugs in engine components FIRST
 - Builds and verifies the package BEFORE any consumer app changes
 - Migrates incrementally with rollback capability at each step
@@ -27,18 +28,21 @@ This is a corrected migration plan based on thorough code review of the existing
 **File**: `packages/engine/src/lib/ui/components/chrome/ThemeToggle.svelte`
 
 **Current (BROKEN)**:
+
 ```typescript
-import { theme } from '$lib/stores/theme';
+import { theme } from "$lib/stores/theme";
 ```
 
 **Problem**:
+
 - `$lib/stores/theme` maps to `src/lib/stores/theme.ts` which **does not exist**
 - Stores are located at `src/lib/ui/stores/theme.ts`
 - The build creates a wrong relative path: `../../../stores/theme` instead of `../../stores/theme`
 
 **Fix Required**:
+
 ```typescript
-import { themeStore } from '$lib/ui/stores/theme';
+import { themeStore } from "$lib/ui/stores/theme";
 ```
 
 ### Bug 2: ThemeToggle Wrong Export Name (CRITICAL)
@@ -46,29 +50,33 @@ import { themeStore } from '$lib/ui/stores/theme';
 **File**: `packages/engine/src/lib/ui/components/chrome/ThemeToggle.svelte`
 
 **Current (BROKEN)**:
+
 ```typescript
-import { theme } from '$lib/stores/theme';
-let isDark = $derived($theme === 'dark');
+import { theme } from "$lib/stores/theme";
+let isDark = $derived($theme === "dark");
 // Uses: theme.toggle()
 ```
 
 **Problem**:
+
 - Engine exports `themeStore`, not `theme`
 - Engine's `themeStore` has different API: uses `themeStore.resolvedTheme` not direct subscribe
 
 **Fix Required**:
+
 ```typescript
-import { themeStore } from '$lib/ui/stores/theme';
-let isDark = $derived($themeStore.resolvedTheme === 'dark');
+import { themeStore } from "$lib/ui/stores/theme";
+let isDark = $derived($themeStore.resolvedTheme === "dark");
 // Uses: themeStore.toggle()
 ```
 
 **OR** (Preferred - maintain landing compatibility):
 
 Create a wrapper that provides the same API as landing's `theme` store:
+
 ```typescript
 // In stores/index.ts
-export { themeStore, themeStore as theme } from './theme';
+export { themeStore, themeStore as theme } from "./theme";
 ```
 
 ### Bug 3: stores/index.ts Missing themeStore Export
@@ -76,12 +84,14 @@ export { themeStore, themeStore as theme } from './theme';
 **File**: `packages/engine/src/lib/ui/stores/index.ts`
 
 **Current**:
+
 ```typescript
 export { seasonStore } from "./season";
 // themeStore NOT exported!
 ```
 
 **Fix Required**:
+
 ```typescript
 export { seasonStore } from "./season";
 export { themeStore } from "./theme";
@@ -92,18 +102,20 @@ export { themeStore } from "./theme";
 **File**: `packages/engine/src/lib/ui/components/chrome/types.ts`
 
 **Current**:
+
 ```typescript
 export interface NavItem {
   href: string;
   label: string;
-  icon?: Component;  // Component is not imported!
+  icon?: Component; // Component is not imported!
   // ...
 }
 ```
 
 **Fix Required**:
+
 ```typescript
-import type { Component } from 'svelte';
+import type { Component } from "svelte";
 
 export interface NavItem {
   href: string;
@@ -119,68 +131,68 @@ export interface NavItem {
 
 ### Header.svelte
 
-| Aspect | Engine | Landing | Match? |
-|--------|--------|---------|--------|
-| Glassmorphism | `bg-surface/95 backdrop-blur-sm` | `bg-surface/95 backdrop-blur-sm` | ✅ |
-| Nav items | Configurable via props + defaults | Hardcoded in component | ✅ Better |
-| Season store | Uses `seasonStore` | Uses `season` | ⚠️ Different name |
-| Theme toggle | Uses `ThemeToggle` | Uses `ThemeToggle` | ✅ |
-| Mobile menu | Passes `navItems` prop | No props | ✅ Better |
+| Aspect        | Engine                            | Landing                          | Match?            |
+| ------------- | --------------------------------- | -------------------------------- | ----------------- |
+| Glassmorphism | `bg-surface/95 backdrop-blur-sm`  | `bg-surface/95 backdrop-blur-sm` | ✅                |
+| Nav items     | Configurable via props + defaults | Hardcoded in component           | ✅ Better         |
+| Season store  | Uses `seasonStore`                | Uses `season`                    | ⚠️ Different name |
+| Theme toggle  | Uses `ThemeToggle`                | Uses `ThemeToggle`               | ✅                |
+| Mobile menu   | Passes `navItems` prop            | No props                         | ✅ Better         |
 
 **Verdict**: Engine Header is a proper generalization. Works correctly.
 
 ### Footer.svelte
 
-| Aspect | Engine | Landing | Match? |
-|--------|--------|---------|--------|
-| Structure | 3-column, configurable | 3-column, hardcoded | ✅ Better |
-| Links | Via props + defaults | Hardcoded | ✅ Better |
-| Season | Uses `seasonStore` | Uses `season` | ⚠️ Different name |
-| Theme toggle | Includes `ThemeToggle` | Includes `ThemeToggle` | ✅ |
+| Aspect       | Engine                 | Landing                | Match?            |
+| ------------ | ---------------------- | ---------------------- | ----------------- |
+| Structure    | 3-column, configurable | 3-column, hardcoded    | ✅ Better         |
+| Links        | Via props + defaults   | Hardcoded              | ✅ Better         |
+| Season       | Uses `seasonStore`     | Uses `season`          | ⚠️ Different name |
+| Theme toggle | Includes `ThemeToggle` | Includes `ThemeToggle` | ✅                |
 
 **Verdict**: Engine Footer is a proper generalization. Works correctly.
 
 ### MobileMenu.svelte
 
-| Aspect | Engine | Landing | Match? |
-|--------|--------|---------|--------|
-| Items | Configurable via props | Hardcoded | ✅ Better |
-| Backdrop | `bg-black/50 backdrop-blur-sm` | `bg-black/50 backdrop-blur-sm` | ✅ |
-| Panel | `bg-surface` | `bg-surface` | ✅ |
-| Focus trap | Yes | Yes | ✅ |
+| Aspect     | Engine                         | Landing                        | Match?    |
+| ---------- | ------------------------------ | ------------------------------ | --------- |
+| Items      | Configurable via props         | Hardcoded                      | ✅ Better |
+| Backdrop   | `bg-black/50 backdrop-blur-sm` | `bg-black/50 backdrop-blur-sm` | ✅        |
+| Panel      | `bg-surface`                   | `bg-surface`                   | ✅        |
+| Focus trap | Yes                            | Yes                            | ✅        |
 
 **Verdict**: Engine MobileMenu is properly generalized. Works correctly.
 
 ### ThemeToggle.svelte
 
-| Aspect | Engine | Landing | Match? |
-|--------|--------|---------|--------|
-| Import | `$lib/stores/theme` | `$lib/stores/theme` | ❌ BROKEN |
-| Export name | Expects `theme` | Has `theme` | ❌ Wrong (engine has `themeStore`) |
-| API | `$theme === 'dark'` | `$theme === 'dark'` | ❌ Wrong (engine uses resolvedTheme) |
-| Styling | Identical | Identical | ✅ |
+| Aspect      | Engine              | Landing             | Match?                               |
+| ----------- | ------------------- | ------------------- | ------------------------------------ |
+| Import      | `$lib/stores/theme` | `$lib/stores/theme` | ❌ BROKEN                            |
+| Export name | Expects `theme`     | Has `theme`         | ❌ Wrong (engine has `themeStore`)   |
+| API         | `$theme === 'dark'` | `$theme === 'dark'` | ❌ Wrong (engine uses resolvedTheme) |
+| Styling     | Identical           | Identical           | ✅                                   |
 
 **Verdict**: ThemeToggle has critical bugs that must be fixed.
 
 ### Season Store
 
-| Aspect | Engine | Landing |
-|--------|--------|---------|
-| Export name | `seasonStore` | `season` |
-| API | `seasonStore.cycle()` | `season.cycle()` |
-| Storage key | `grove-season` | `grove-season` |
-| Default | `autumn` | `autumn` |
+| Aspect      | Engine                | Landing          |
+| ----------- | --------------------- | ---------------- |
+| Export name | `seasonStore`         | `season`         |
+| API         | `seasonStore.cycle()` | `season.cycle()` |
+| Storage key | `grove-season`        | `grove-season`   |
+| Default     | `autumn`              | `autumn`         |
 
 **Verdict**: Functionally identical, just different export names.
 
 ### Theme Store
 
-| Aspect | Engine | Landing |
-|--------|--------|---------|
-| Export name | `themeStore` | `theme` |
-| Type support | `'light' | 'dark' | 'system'` | `'light' | 'dark'` |
-| Default | `'system'` | `'dark'` |
-| API | `themeStore.toggle()`, `themeStore.resolvedTheme` | `theme.toggle()`, `$theme` |
+| Aspect       | Engine                                            | Landing                    |
+| ------------ | ------------------------------------------------- | -------------------------- | --------- | -------- | ------- |
+| Export name  | `themeStore`                                      | `theme`                    |
+| Type support | `'light'                                          | 'dark'                     | 'system'` | `'light' | 'dark'` |
+| Default      | `'system'`                                        | `'dark'`                   |
+| API          | `themeStore.toggle()`, `themeStore.resolvedTheme` | `theme.toggle()`, `$theme` |
 
 **Verdict**: Engine has more features (system preference support) but different API.
 
@@ -250,7 +262,7 @@ export { themeStore } from "./theme";
 **File**: `packages/engine/src/lib/ui/components/chrome/types.ts`
 
 ```typescript
-import type { Component } from 'svelte';
+import type { Component } from "svelte";
 
 export interface NavItem {
   href: string;
@@ -370,6 +382,7 @@ The layout doesn't render Header/Footer directly — pages do. So no changes nee
 **IMPORTANT**: Make ONE change, test, then continue.
 
 **Before**:
+
 ```svelte
 <script lang="ts">
 	import Header from '$lib/components/Header.svelte';
@@ -385,10 +398,11 @@ The layout doesn't render Header/Footer directly — pages do. So no changes nee
 ```
 
 **After**:
+
 ```svelte
 <script lang="ts">
-	import { Header, Footer, seasonStore } from '@autumnsgrove/groveengine/ui/chrome';
-	import { Logo } from '@autumnsgrove/groveengine/ui/nature';
+	import { Header, Footer, seasonStore } from '@autumnsgrove/lattice/ui/chrome';
+	import { Logo } from '@autumnsgrove/lattice/ui/nature';
 	// ...
 </script>
 
@@ -400,6 +414,7 @@ The layout doesn't render Header/Footer directly — pages do. So no changes nee
 **Test**: `pnpm dev` — verify homepage renders correctly.
 
 **Rollback if needed**:
+
 ```bash
 git checkout HEAD -- landing/src/routes/+page.svelte
 ```
@@ -407,6 +422,7 @@ git checkout HEAD -- landing/src/routes/+page.svelte
 #### Step 2.3: Migrate Other Pages
 
 Repeat Step 2.2 for each page that uses Header/Footer:
+
 - [ ] `/manifesto/+page.svelte`
 - [ ] `/vision/+page.svelte`
 - [ ] `/roadmap/+page.svelte`
@@ -438,6 +454,7 @@ rm landing/src/lib/components/ThemeToggle.svelte
 #### Step 3.2: Optionally Remove Local Stores
 
 If landing's `season` store is identical to engine's `seasonStore`, you can remove:
+
 ```bash
 rm landing/src/lib/stores/season.ts
 ```
@@ -449,6 +466,7 @@ And update imports across the app to use `seasonStore` from engine.
 ### Phase 4: Migrate Other Apps
 
 Repeat Phase 2-3 for:
+
 - [ ] Meadow
 - [ ] Clearing (uses HeaderMinimal/FooterMinimal)
 
@@ -524,30 +542,30 @@ The migration is complete when:
 
 ### Engine Files to Modify (Phase 0)
 
-| File | Change |
-|------|--------|
+| File                                                              | Change                          |
+| ----------------------------------------------------------------- | ------------------------------- |
 | `packages/engine/src/lib/ui/components/chrome/ThemeToggle.svelte` | Fix import path and export name |
-| `packages/engine/src/lib/ui/stores/index.ts` | Add themeStore export |
-| `packages/engine/src/lib/ui/components/chrome/types.ts` | Add Component type import |
+| `packages/engine/src/lib/ui/stores/index.ts`                      | Add themeStore export           |
+| `packages/engine/src/lib/ui/components/chrome/types.ts`           | Add Component type import       |
 
 ### Landing Files to Modify (Phase 2)
 
-| File | Change |
-|------|--------|
-| `landing/src/routes/+page.svelte` | Update imports |
+| File                                | Change                                        |
+| ----------------------------------- | --------------------------------------------- |
+| `landing/src/routes/+page.svelte`   | Update imports                                |
 | `landing/src/routes/*/+page.svelte` | Update imports (all pages with Header/Footer) |
 
 ### Files to Delete (Phase 3)
 
-| File | When |
-|------|------|
-| `landing/src/lib/components/Header.svelte` | After all pages migrated |
-| `landing/src/lib/components/Footer.svelte` | After all pages migrated |
-| `landing/src/lib/components/MobileMenu.svelte` | After all pages migrated |
+| File                                            | When                     |
+| ----------------------------------------------- | ------------------------ |
+| `landing/src/lib/components/Header.svelte`      | After all pages migrated |
+| `landing/src/lib/components/Footer.svelte`      | After all pages migrated |
+| `landing/src/lib/components/MobileMenu.svelte`  | After all pages migrated |
 | `landing/src/lib/components/ThemeToggle.svelte` | After all pages migrated |
 
 ---
 
-*Document created: 2026-01-05*
-*Based on: CHROME-EXTRACTION-PLAN.md, CHROME-ROLLBACK-ANALYSIS.md, and code review*
-*Ready for implementation in a new session*
+_Document created: 2026-01-05_
+_Based on: CHROME-EXTRACTION-PLAN.md, CHROME-ROLLBACK-ANALYSIS.md, and code review_
+_Ready for implementation in a new session_

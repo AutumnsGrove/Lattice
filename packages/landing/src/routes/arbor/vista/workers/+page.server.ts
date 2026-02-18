@@ -5,7 +5,7 @@
  */
 
 import type { PageServerLoad } from "./$types";
-import { getWorkerMetrics } from "@autumnsgrove/groveengine/server/observability";
+import { getWorkerMetrics } from "@autumnsgrove/lattice/server/observability";
 
 export const load: PageServerLoad = async ({ parent, platform }) => {
 	await parent();

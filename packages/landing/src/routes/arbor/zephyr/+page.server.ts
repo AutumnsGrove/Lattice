@@ -1,6 +1,6 @@
 import { redirect, fail } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
-import { isWayfinder } from "@autumnsgrove/groveengine/config";
+import { isWayfinder } from "@autumnsgrove/lattice/config";
 
 const ZEPHYR_URL = "https://grove-zephyr.m7jv4v7npb.workers.dev";
 

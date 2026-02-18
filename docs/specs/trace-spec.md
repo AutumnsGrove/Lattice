@@ -4,7 +4,7 @@ description: Universal feedback component for gathering Wanderer impressions
 category: specs
 specCategory: platform-services
 icon: footprints
-lastUpdated: '2026-01-29'
+lastUpdated: "2026-01-29"
 aliases: []
 tags:
   - feedback
@@ -36,7 +36,7 @@ tags:
               "I was here. This is what I noticed."
 ```
 
-> *Leave a trace.*
+> _Leave a trace._
 
 A small, warm invitation for Wanderers to share their impressions. Not a survey. Not a metric. Just a soft way to say "this helped" or "this didn't," with room to add a few words if you want. Every trace travels back to the Wayfinder.
 
@@ -57,11 +57,11 @@ Trace is Grove's inline feedback component. Drop it anywhere: at the bottom of a
 
 Grove has three distinct ways for Wanderers to share their voice:
 
-| System | Purpose | Interaction | Location |
-|--------|---------|-------------|----------|
+| System       | Purpose                        | Interaction              | Location    |
+| ------------ | ------------------------------ | ------------------------ | ----------- |
 | **Feedback** | Anonymous thoughts, open-ended | One-way, sentiment-based | `/feedback` |
-| **Porch** | Support conversations | Two-way, threaded | `/porch` |
-| **Trace** | Quick inline impressions | 👍/👎 + optional comment | Anywhere |
+| **Porch**    | Support conversations          | Two-way, threaded        | `/porch`    |
+| **Trace**    | Quick inline impressions       | 👍/👎 + optional comment | Anywhere    |
 
 Trace fills the gap: feedback that's too quick for a form, too contextual for a dedicated page. A Wanderer finishes reading a help article. Was it helpful? They don't want to navigate away. They just want to nod.
 
@@ -238,12 +238,12 @@ When no `id` prop is provided, Trace reads `$page.url.pathname` and normalizes i
 function buildTracePath(route: string, suffix?: string): string {
   // Clean the route
   let path = route
-    .replace(/^\/+/, '')      // Remove leading slashes
-    .replace(/\/+$/, '')      // Remove trailing slashes
-    .replace(/\//g, '-');     // Replace internal slashes with hyphens
+    .replace(/^\/+/, "") // Remove leading slashes
+    .replace(/\/+$/, "") // Remove trailing slashes
+    .replace(/\//g, "-"); // Replace internal slashes with hyphens
 
   // Handle empty route (homepage)
-  if (!path) path = 'home';
+  if (!path) path = "home";
 
   // Add suffix if provided
   if (suffix) {
@@ -256,14 +256,14 @@ function buildTracePath(route: string, suffix?: string): string {
 
 ### Path Examples
 
-| Route | Suffix | Result |
-|-------|--------|--------|
-| `/workshop` | — | `workshop` |
-| `/workshop` | `GlassCard` | `workshop:GlassCard` |
-| `/vineyard/charts` | — | `vineyard-charts` |
-| `/admin/feedback` | — | `admin-feedback` |
-| `/` | — | `home` |
-| `/knowledge/specs/trace-spec` | — | `knowledge-specs-trace-spec` |
+| Route                         | Suffix      | Result                       |
+| ----------------------------- | ----------- | ---------------------------- |
+| `/workshop`                   | —           | `workshop`                   |
+| `/workshop`                   | `GlassCard` | `workshop:GlassCard`         |
+| `/vineyard/charts`            | —           | `vineyard-charts`            |
+| `/admin/feedback`             | —           | `admin-feedback`             |
+| `/`                           | —           | `home`                       |
+| `/knowledge/specs/trace-spec` | —           | `knowledge-specs-trace-spec` |
 
 ---
 
@@ -312,9 +312,9 @@ CREATE INDEX idx_trace_dedup ON trace_feedback(source_path, ip_hash, created_at)
 ```typescript
 // Request
 interface TraceRequest {
-  sourcePath: string;     // e.g., "workshop:GlassCard"
-  vote: 'up' | 'down';
-  comment?: string;       // Max 500 characters
+  sourcePath: string; // e.g., "workshop:GlassCard"
+  vote: "up" | "down";
+  comment?: string; // Max 500 characters
 }
 
 // Response (success)
@@ -327,7 +327,7 @@ interface TraceResponse {
 interface TraceErrorResponse {
   success: false;
   error: string;
-  code: 'RATE_LIMITED' | 'INVALID_VOTE' | 'COMMENT_TOO_LONG' | 'SERVER_ERROR';
+  code: "RATE_LIMITED" | "INVALID_VOTE" | "COMMENT_TOO_LONG" | "SERVER_ERROR";
 }
 ```
 
@@ -336,47 +336,69 @@ interface TraceErrorResponse {
 ```typescript
 // routes/api/trace/+server.ts
 
-export const POST: RequestHandler = async ({ request, platform, getClientAddress }) => {
+export const POST: RequestHandler = async ({
+  request,
+  platform,
+  getClientAddress,
+}) => {
   const { sourcePath, vote, comment } = await request.json();
 
   // 1. Validate
-  if (!['up', 'down'].includes(vote)) {
-    return json({ success: false, error: 'Invalid vote', code: 'INVALID_VOTE' }, { status: 400 });
+  if (!["up", "down"].includes(vote)) {
+    return json(
+      { success: false, error: "Invalid vote", code: "INVALID_VOTE" },
+      { status: 400 },
+    );
   }
 
   if (comment && comment.length > 500) {
-    return json({ success: false, error: 'Comment too long', code: 'COMMENT_TOO_LONG' }, { status: 400 });
+    return json(
+      { success: false, error: "Comment too long", code: "COMMENT_TOO_LONG" },
+      { status: 400 },
+    );
   }
 
   // 2. Hash IP for privacy
   const ip = getClientAddress();
-  const dailySalt = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+  const dailySalt = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
   const ipHash = await hashIP(ip, dailySalt);
 
   // 3. Check rate limit (10/day per IP)
-  const todayStart = Math.floor(Date.now() / 1000) - (Date.now() / 1000 % 86400);
-  const countToday = await platform.env.DB.prepare(`
+  const todayStart =
+    Math.floor(Date.now() / 1000) - ((Date.now() / 1000) % 86400);
+  const countToday = await platform.env.DB.prepare(
+    `
     SELECT COUNT(*) as count FROM trace_feedback
     WHERE ip_hash = ? AND created_at >= ?
-  `).bind(ipHash, todayStart).first<{ count: number }>();
+  `,
+  )
+    .bind(ipHash, todayStart)
+    .first<{ count: number }>();
 
   if (countToday && countToday.count >= 10) {
-    return json({ success: false, error: 'Rate limited', code: 'RATE_LIMITED' }, { status: 429 });
+    return json(
+      { success: false, error: "Rate limited", code: "RATE_LIMITED" },
+      { status: 429 },
+    );
   }
 
   // 4. Insert
   const id = crypto.randomUUID();
-  await platform.env.DB.prepare(`
+  await platform.env.DB.prepare(
+    `
     INSERT INTO trace_feedback (id, source_path, vote, comment, ip_hash, user_agent)
     VALUES (?, ?, ?, ?, ?, ?)
-  `).bind(
-    id,
-    sourcePath,
-    vote,
-    comment || null,
-    ipHash,
-    request.headers.get('user-agent')
-  ).run();
+  `,
+  )
+    .bind(
+      id,
+      sourcePath,
+      vote,
+      comment || null,
+      ipHash,
+      request.headers.get("user-agent"),
+    )
+    .run();
 
   // 5. Send email notification
   await sendTraceNotification(platform.env.RESEND_API_KEY, {
@@ -511,13 +533,15 @@ Trace uses Grove's glassmorphism design language:
 ## Implementation Checklist
 
 ### Phase 1: Core Component
+
 - [ ] Create `packages/engine/src/lib/ui/feedback/Trace.svelte`
 - [ ] Implement path builder utility in `packages/engine/src/lib/utils/trace-path.ts`
 - [ ] Add glassmorphism styling
 - [ ] Handle all states (default, expanded, submitted, already voted)
-- [ ] Export from `@autumnsgrove/groveengine/ui/feedback`
+- [ ] Export from `@autumnsgrove/lattice/ui/feedback`
 
 ### Phase 2: Backend
+
 - [ ] Create D1 migration for `trace_feedback` table
 - [ ] Implement `POST /api/trace` endpoint
 - [ ] Add IP hashing for privacy
@@ -525,12 +549,14 @@ Trace uses Grove's glassmorphism design language:
 - [ ] Integrate Resend for email notifications
 
 ### Phase 3: Admin
+
 - [ ] Create `/admin/traces` page
 - [ ] Show traces by location with stats
 - [ ] Add mark-read functionality
 - [ ] Add filtering by vote type
 
 ### Phase 4: Polish
+
 - [ ] Add to Workshop for demo
 - [ ] Write help article for usage
 - [ ] Add Trace to bottom of key documentation pages
@@ -546,4 +572,4 @@ Trace uses Grove's glassmorphism design language:
 
 ---
 
-*The path becomes clear by walking it. Leave your trace.*
+_The path becomes clear by walking it. Leave your trace._

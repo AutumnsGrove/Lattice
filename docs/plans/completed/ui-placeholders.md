@@ -34,27 +34,28 @@ Two placeholder pages detected in the engine's `(apps)` route group. Both have c
 
 ### Key Features (From Spec)
 
-| Feature | Description |
-|---------|-------------|
-| **Service Grid** | 9 Workers, 9 D1 databases, 6 R2 buckets, 7 KV namespaces |
-| **Real-time Metrics** | Request volume, error rates, latency (p50/p95/p99) |
-| **Historical Data** | 90-day retention in D1 |
-| **Uptime Display** | GitHub-style contribution grid |
-| **Alerting** | Email notifications via Resend |
-| **Cost Tracking** | Per-resource cost breakdown |
+| Feature               | Description                                              |
+| --------------------- | -------------------------------------------------------- |
+| **Service Grid**      | 9 Workers, 9 D1 databases, 6 R2 buckets, 7 KV namespaces |
+| **Real-time Metrics** | Request volume, error rates, latency (p50/p95/p99)       |
+| **Historical Data**   | 90-day retention in D1                                   |
+| **Uptime Display**    | GitHub-style contribution grid                           |
+| **Alerting**          | Email notifications via Resend                           |
+| **Cost Tracking**     | Per-resource cost breakdown                              |
 
 ### Implementation Phases
 
 #### Phase 1: Enhanced Placeholder (Low Effort)
 
 Update the placeholder with:
+
 - Feature preview mockup
 - "Coming in Q2 2026" timeline
 - Link to public status page (Clearing)
 
 ```svelte
 <script>
-  import { GlassCard } from '@autumnsgrove/groveengine/ui';
+  import { GlassCard } from '@autumnsgrove/lattice/ui';
 </script>
 
 <div class="vista-placeholder">
@@ -123,14 +124,14 @@ Follow `docs/specs/vista-spec.md` for complete implementation.
 
 ### Key Features (From Spec)
 
-| Feature | Description |
-|---------|-------------|
-| **Quiz Interface** | Terminal-style questionnaire |
-| **AI Generation** | Domain suggestions via LLM |
-| **RDAP Checking** | Real-time availability verification |
-| **Batch Processing** | Up to 6 batches of suggestions |
-| **Pricing Display** | Registrar pricing for available domains |
-| **Follow-up Quiz** | Dynamic clarification if first results insufficient |
+| Feature              | Description                                         |
+| -------------------- | --------------------------------------------------- |
+| **Quiz Interface**   | Terminal-style questionnaire                        |
+| **AI Generation**    | Domain suggestions via LLM                          |
+| **RDAP Checking**    | Real-time availability verification                 |
+| **Batch Processing** | Up to 6 batches of suggestions                      |
+| **Pricing Display**  | Registrar pricing for available domains             |
+| **Follow-up Quiz**   | Dynamic clarification if first results insufficient |
 
 ### Implementation Phases
 
@@ -140,7 +141,7 @@ Update with terminal aesthetic preview:
 
 ```svelte
 <script>
-  import { GlassCard } from '@autumnsgrove/groveengine/ui';
+  import { GlassCard } from '@autumnsgrove/lattice/ui';
 </script>
 
 <div class="forage-placeholder terminal-aesthetic">
@@ -187,6 +188,7 @@ Follow `docs/specs/forage-spec.md` for AI-powered quiz flow.
 ## Recommended Short-Term Action
 
 For both pages, implement **Phase 1: Enhanced Placeholder** to:
+
 1. Improve user experience when discovering these routes
 2. Set expectations with timeline
 3. Showcase intended design aesthetic
@@ -198,8 +200,8 @@ For both pages, implement **Phase 1: Enhanced Placeholder** to:
 
 ## Files to Modify
 
-| File | Change |
-|------|--------|
+| File                                                     | Change               |
+| -------------------------------------------------------- | -------------------- |
 | `packages/engine/src/routes/(apps)/monitor/+page.svelte` | Enhanced placeholder |
 | `packages/engine/src/routes/(apps)/domains/+page.svelte` | Enhanced placeholder |
 

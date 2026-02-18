@@ -4,11 +4,12 @@ description: The blueprint for the Lattice Museum
 category: exhibit
 exhibitWing: entrance
 icon: layout
-lastUpdated: '2026-01-22'
+lastUpdated: "2026-01-22"
 ---
+
 # The Lattice Museum: Layout Plan
 
-> *A guided tour through how this forest grows.*
+> _A guided tour through how this forest grows._
 
 ---
 
@@ -29,18 +30,21 @@ Grove was built to have texture. The forest on the landing page isn't decoration
 That texture deserves documentation that preserves it.
 
 **The museum approach:**
+
 - Walks alongside readers instead of listing facts
-- Explains *why* before *how*
+- Explains _why_ before _how_
 - Treats the codebase as exhibits worth exploring
 - Acknowledges imperfection and lessons learned
 - Connects technical systems to the feelings they create
 
 **What this replaces:**
+
 - Dry API references (those live in specs)
 - Implementation details (those live in code comments)
 - Troubleshooting guides (those live in the help center)
 
 **What this creates:**
+
 - Understanding that sticks
 - Appreciation for design decisions
 - Patterns worth stealing
@@ -52,7 +56,7 @@ The museum exists because Grove's architecture is elegant enough to deserve a gu
 
 ## Overview
 
-The Lattice Museum transforms Grove's codebase into a welcoming experience for Wanderers. Rather than dry API references, we offer curated exhibits that explain *why* things work the way they do.
+The Lattice Museum transforms Grove's codebase into a welcoming experience for Wanderers. Rather than dry API references, we offer curated exhibits that explain _why_ things work the way they do.
 
 **Target Audience:** Wanderers of all experience levels who want to understand Grove's architecture, patterns, and philosophy.
 
@@ -110,20 +114,22 @@ The Lattice Museum transforms Grove's codebase into a welcoming experience for W
 
 **Location:** `docs/museum/architecture/`
 
-| Exhibit | Focus | Key Files |
-|---------|-------|-----------|
-| **The Foundation** | Multi-tenant architecture: one deployment, unlimited blogs | `docs/developer/architecture/` |
-| **The Engine Room** | Engine-first pattern: how we prevent 11,925 lines of duplication | `packages/engine/` |
-| **The Loom** | Durable Objects coordination layer | `docs/patterns/loom-*` |
-| **The Cloud Garden** | Cloudflare Workers, D1, KV, R2 working together | `wrangler.toml` files |
+| Exhibit              | Focus                                                            | Key Files                      |
+| -------------------- | ---------------------------------------------------------------- | ------------------------------ |
+| **The Foundation**   | Multi-tenant architecture: one deployment, unlimited blogs       | `docs/developer/architecture/` |
+| **The Engine Room**  | Engine-first pattern: how we prevent 11,925 lines of duplication | `packages/engine/`             |
+| **The Loom**         | Durable Objects coordination layer                               | `docs/patterns/loom-*`         |
+| **The Cloud Garden** | Cloudflare Workers, D1, KV, R2 working together                  | `wrangler.toml` files          |
 
 **Visitor Journey:**
+
 1. Understand the multi-tenant model (one Pages app serves all blogs)
 2. Learn why shared components live in the engine
 3. See how Durable Objects coordinate real-time state
 4. Appreciate how Cloudflare primitives compose together
 
 **ASCII Diagram to Include:**
+
 ```
   Request arrives at grove.place
            │
@@ -135,7 +141,7 @@ The Lattice Museum transforms Grove's codebase into a welcoming experience for W
            │ subdomain extracted
            ▼
     ╭─────────────╮
-    │ groveengine │  Single SvelteKit app
+    │ lattice │  Single SvelteKit app
     │    Pages    │  serves all tenants
     ╰──────┬──────╯
            │
@@ -153,14 +159,15 @@ The Lattice Museum transforms Grove's codebase into a welcoming experience for W
 
 **Location:** `docs/museum/nature/`
 
-| Exhibit | Focus | Key Files |
-|---------|-------|-----------|
-| **The Forest** | 64 SVG components with customizable Svelte props | `ui/components/nature/` |
-| **The Seasons** | Five seasons including Midnight easter egg | `ui/stores/season.ts` |
-| **The Glass Garden** | Glassmorphism design system | `ui/components/ui/Glass*` |
-| **The Typography Gallery** | 10 fonts including accessible options | `ui/components/typography/` |
+| Exhibit                    | Focus                                            | Key Files                   |
+| -------------------------- | ------------------------------------------------ | --------------------------- |
+| **The Forest**             | 64 SVG components with customizable Svelte props | `ui/components/nature/`     |
+| **The Seasons**            | Five seasons including Midnight easter egg       | `ui/stores/season.ts`       |
+| **The Glass Garden**       | Glassmorphism design system                      | `ui/components/ui/Glass*`   |
+| **The Typography Gallery** | 10 fonts including accessible options            | `ui/components/typography/` |
 
 **Visitor Journey:**
+
 1. Meet the mathematically-driven trees (Cherry, Pine, Aspen, Oak...)
 2. Discover creatures that bring the forest alive (Bee, Butterfly, Deer...)
 3. Experience seasons changing (Spring → Summer → Autumn → Winter)
@@ -180,13 +187,14 @@ The Lattice Museum transforms Grove's codebase into a welcoming experience for W
 
 **Location:** `docs/museum/trust/`
 
-| Exhibit | Focus | Key Files |
-|---------|-------|-----------|
-| **The Heartwood** | OAuth flow, how login actually works | `docs/specs/heartwood-spec.md` |
-| **The Session Gallery** | How we remember who you are | `lib/groveauth/` |
-| **The Security Checkpoint** | Rate limiting, CAPTCHA, protection | `lib/server/services/` |
+| Exhibit                     | Focus                                | Key Files                      |
+| --------------------------- | ------------------------------------ | ------------------------------ |
+| **The Heartwood**           | OAuth flow, how login actually works | `docs/specs/heartwood-spec.md` |
+| **The Session Gallery**     | How we remember who you are          | `lib/groveauth/`               |
+| **The Security Checkpoint** | Rate limiting, CAPTCHA, protection   | `lib/server/services/`         |
 
 **Visitor Journey:**
+
 1. Follow a login from "Sign in with Google" to session cookie
 2. Understand PKCE flow without cryptography degree required
 3. See how sessions refresh silently (halfway pattern)
@@ -203,14 +211,15 @@ The Lattice Museum transforms Grove's codebase into a welcoming experience for W
 
 **Location:** `docs/museum/data/`
 
-| Exhibit | Focus | Key Files |
-|---------|-------|-----------|
-| **The Filing Cabinet** | D1 database patterns | `lib/server/services/database.ts` |
-| **The Quick-Lookup Shelf** | KV caching strategies | `lib/server/services/cache.ts` |
-| **The Media Vault** | R2 storage for images and files | `lib/server/services/storage.ts` |
-| **The Query Builders** | Type-safe database helpers | `database.ts` exports |
+| Exhibit                    | Focus                           | Key Files                         |
+| -------------------------- | ------------------------------- | --------------------------------- |
+| **The Filing Cabinet**     | D1 database patterns            | `lib/server/services/database.ts` |
+| **The Quick-Lookup Shelf** | KV caching strategies           | `lib/server/services/cache.ts`    |
+| **The Media Vault**        | R2 storage for images and files | `lib/server/services/storage.ts`  |
+| **The Query Builders**     | Type-safe database helpers      | `database.ts` exports             |
 
 **Visitor Journey:**
+
 1. See how posts flow from editor → D1 → cache → browser
 2. Understand tenant isolation (your data stays yours)
 3. Learn the caching strategy (why some pages load instantly)
@@ -227,13 +236,14 @@ The Lattice Museum transforms Grove's codebase into a welcoming experience for W
 
 **Location:** `docs/museum/personalization/`
 
-| Exhibit | Focus | Key Files |
-|---------|-------|-----------|
-| **The Grafts Exhibit** | Feature flags with Grove vocabulary | `docs/specs/grafts-spec.md` |
-| **The Curios Collection** | Old-web personalization | `docs/specs/curios-spec.md` |
-| **The Theme Workshop** | How blogs get customized | Settings system |
+| Exhibit                   | Focus                               | Key Files                   |
+| ------------------------- | ----------------------------------- | --------------------------- |
+| **The Grafts Exhibit**    | Feature flags with Grove vocabulary | `docs/specs/grafts-spec.md` |
+| **The Curios Collection** | Old-web personalization             | `docs/specs/curios-spec.md` |
+| **The Theme Workshop**    | How blogs get customized            | Settings system             |
 
 **Visitor Journey:**
+
 1. Learn Grove vocabulary: Graft (enable), Prune (disable), Blight (kill switch)
 2. Discover Curios: guestbooks, hit counters, shrines, custom cursors
 3. Understand tier-gated features (Seedling → Sapling → Oak → Evergreen)
@@ -250,13 +260,14 @@ The Lattice Museum transforms Grove's codebase into a welcoming experience for W
 
 **Location:** `docs/museum/community/`
 
-| Exhibit | Focus | Key Files |
-|---------|-------|-----------|
-| **The Meadow** | Community feed where blogs share posts | `packages/meadow/` |
-| **The Landing** | How grove.place welcomes visitors | `packages/landing/` |
-| **The Clearing** | Status page and transparency | `packages/clearing/` |
+| Exhibit          | Focus                                  | Key Files            |
+| ---------------- | -------------------------------------- | -------------------- |
+| **The Meadow**   | Community feed where blogs share posts | `packages/meadow/`   |
+| **The Landing**  | How grove.place welcomes visitors      | `packages/landing/`  |
+| **The Clearing** | Status page and transparency           | `packages/clearing/` |
 
 **Visitor Journey:**
+
 1. See how individual blogs can share to the community feed
 2. Explore voting, reactions, and discovery
 3. Walk through the landing page's seasonal showcase
@@ -273,14 +284,15 @@ The Lattice Museum transforms Grove's codebase into a welcoming experience for W
 
 **Location:** `docs/museum/naming/`
 
-| Exhibit | Focus | Key Files |
-|---------|-------|-----------|
-| **The Philosophy** | Why names aren't branding, they're world-building | `docs/philosophy/grove-naming.md` |
-| **The Walk** | The ritual: how names are discovered, not invented | `docs/philosophy/walking-through-the-grove.md` |
-| **The Journeys Gallery** | 50+ naming journeys with ASCII art, rejected ideas, realizations | `docs/philosophy/naming-research/` |
-| **The Ecosystem Map** | 40+ services, each with nature metaphors that fit | `grove-naming.md` ecosystem table |
+| Exhibit                  | Focus                                                            | Key Files                                      |
+| ------------------------ | ---------------------------------------------------------------- | ---------------------------------------------- |
+| **The Philosophy**       | Why names aren't branding, they're world-building                | `docs/philosophy/grove-naming.md`              |
+| **The Walk**             | The ritual: how names are discovered, not invented               | `docs/philosophy/walking-through-the-grove.md` |
+| **The Journeys Gallery** | 50+ naming journeys with ASCII art, rejected ideas, realizations | `docs/philosophy/naming-research/`             |
+| **The Ecosystem Map**    | 40+ services, each with nature metaphors that fit                | `grove-naming.md` ecosystem table              |
 
 **Visitor Journey:**
+
 1. Understand why Grove doesn't use words like "user" or "feature flag"
 2. Learn the philosophy: "The Grove is the place. These are the things you find there."
 3. Walk through a naming journey (Loom, Heartwood, Porch)
@@ -288,6 +300,7 @@ The Lattice Museum transforms Grove's codebase into a welcoming experience for W
 5. Appreciate that rejected names teach as much as chosen ones
 
 **Featured Journeys:**
+
 - **Porch** - The origin story. Support isn't a ticket system. It's a porch conversation. This journey created the naming ritual.
 - **Lumen** - A difficult journey. Light vs. dark. The hollow center where everything flows, yet also illumination. Close between Lumen and Umbra—decided by trying names in sentences.
 - **Loom** - A walk that returned home. "Sometimes you walk through the forest looking for something new... and realize the name you started with was right all along."
@@ -302,17 +315,17 @@ The Lattice Museum transforms Grove's codebase into a welcoming experience for W
 
 **Location:** `docs/museum/glossary.md`
 
-| Term | Meaning | Why This Word |
-|------|---------|---------------|
-| **Wanderer** | Any visitor to Grove | Everyone is welcome, exploring |
-| **Rooted** | Paid subscriber | Taking root, committed |
-| **Pathfinder** | Trusted community guide | Helps others find their way |
-| **Wayfinder** | Autumn (singular) | Shows the way forward |
-| **Grafts** | Feature flags | Attaching new growth |
-| **Curios** | Personalization features | Collected treasures |
-| **Loom** | Durable Objects layer | Weaving coordination |
-| **Heartwood** | Auth system | The core of trust |
-| **Lattice** | The engine itself | Framework for growth |
+| Term           | Meaning                  | Why This Word                  |
+| -------------- | ------------------------ | ------------------------------ |
+| **Wanderer**   | Any visitor to Grove     | Everyone is welcome, exploring |
+| **Rooted**     | Paid subscriber          | Taking root, committed         |
+| **Pathfinder** | Trusted community guide  | Helps others find their way    |
+| **Wayfinder**  | Autumn (singular)        | Shows the way forward          |
+| **Grafts**     | Feature flags            | Attaching new growth           |
+| **Curios**     | Personalization features | Collected treasures            |
+| **Loom**       | Durable Objects layer    | Weaving coordination           |
+| **Heartwood**  | Auth system              | The core of trust              |
+| **Lattice**    | The engine itself        | Framework for growth           |
 
 ---
 
@@ -438,7 +451,7 @@ Without understanding this, agents will write documentation. With it, they'll pr
 
 3. **The orchestrator doesn't write.** It coordinates. It tracks which exhibits are complete, identifies conflicts or overlaps, and ensures the museum tells a coherent story.
 
-4. **Texture over thoroughness.** An exhibit that captures *why* something matters is better than one that explains every implementation detail. We're preserving the feeling of building something you're proud of.
+4. **Texture over thoroughness.** An exhibit that captures _why_ something matters is better than one that explains every implementation detail. We're preserving the feeling of building something you're proud of.
 
 ### Agent Checklist
 
@@ -449,58 +462,55 @@ Before writing, each agent should:
 - [ ] Read the museum-documentation skill (`.claude/skills/museum-documentation/SKILL.md`)
 - [ ] Explore the code/specs relevant to their exhibit
 - [ ] Understand how their exhibit connects to at least two others
-- [ ] Identify what makes their subject *textured*, not just functional
+- [ ] Identify what makes their subject _textured_, not just functional
 
 ### Exhibit Assignments
 
-| Exhibit | Wing | Key Sources |
-|---------|------|-------------|
-| foundation.md | Architecture | `docs/developer/architecture/multi-tenant-architecture.md` |
-| engine-room.md | Architecture | `packages/engine/`, engine-first pattern |
-| loom.md | Architecture | `docs/patterns/loom-durable-objects-pattern.md` |
-| cloud-garden.md | Architecture | `wrangler.toml` files, Cloudflare docs |
-| forest.md | Nature | `packages/engine/src/lib/ui/components/nature/` |
-| seasons.md | Nature | `packages/engine/src/lib/ui/stores/season.ts` |
-| glass-garden.md | Nature | `packages/engine/src/lib/ui/components/ui/Glass*` |
-| typography.md | Nature | `packages/engine/src/lib/ui/components/typography/` |
-| heartwood.md | Trust | `docs/specs/heartwood-spec.md` |
-| sessions.md | Trust | `packages/engine/src/lib/groveauth/` |
-| security.md | Trust | `packages/engine/src/lib/server/services/` |
-| filing-cabinet.md | Data | `packages/engine/src/lib/server/services/database.ts` |
-| quick-lookup.md | Data | `packages/engine/src/lib/server/services/cache.ts` |
-| media-vault.md | Data | `packages/engine/src/lib/server/services/storage.ts` |
-| query-builders.md | Data | Database helpers, typed queries |
-| grafts.md | Personalization | `docs/specs/grafts-spec.md` |
-| curios.md | Personalization | `docs/specs/curios-spec.md` |
-| themes.md | Personalization | Settings system, Foliage |
-| meadow.md | Community | `packages/meadow/` |
-| landing.md | Community | `packages/landing/` |
-| clearing.md | Community | `packages/clearing/` |
-| WING.md (naming) | Naming | `docs/philosophy/grove-naming.md` |
-| the-walk.md | Naming | `docs/philosophy/walking-through-the-grove.md` |
-| porch.md | Naming | `docs/philosophy/naming-research/grove-journey.md` |
-| lumen.md | Naming | `docs/philosophy/naming-research/ai-gateway-naming-journey.md` |
-| loom.md (naming) | Naming | `docs/philosophy/naming-research/loom-grove-journey.md` |
-| ecosystem.md | Naming | `docs/philosophy/grove-naming.md` ecosystem table |
+| Exhibit           | Wing            | Key Sources                                                    |
+| ----------------- | --------------- | -------------------------------------------------------------- |
+| foundation.md     | Architecture    | `docs/developer/architecture/multi-tenant-architecture.md`     |
+| engine-room.md    | Architecture    | `packages/engine/`, engine-first pattern                       |
+| loom.md           | Architecture    | `docs/patterns/loom-durable-objects-pattern.md`                |
+| cloud-garden.md   | Architecture    | `wrangler.toml` files, Cloudflare docs                         |
+| forest.md         | Nature          | `packages/engine/src/lib/ui/components/nature/`                |
+| seasons.md        | Nature          | `packages/engine/src/lib/ui/stores/season.ts`                  |
+| glass-garden.md   | Nature          | `packages/engine/src/lib/ui/components/ui/Glass*`              |
+| typography.md     | Nature          | `packages/engine/src/lib/ui/components/typography/`            |
+| heartwood.md      | Trust           | `docs/specs/heartwood-spec.md`                                 |
+| sessions.md       | Trust           | `packages/engine/src/lib/groveauth/`                           |
+| security.md       | Trust           | `packages/engine/src/lib/server/services/`                     |
+| filing-cabinet.md | Data            | `packages/engine/src/lib/server/services/database.ts`          |
+| quick-lookup.md   | Data            | `packages/engine/src/lib/server/services/cache.ts`             |
+| media-vault.md    | Data            | `packages/engine/src/lib/server/services/storage.ts`           |
+| query-builders.md | Data            | Database helpers, typed queries                                |
+| grafts.md         | Personalization | `docs/specs/grafts-spec.md`                                    |
+| curios.md         | Personalization | `docs/specs/curios-spec.md`                                    |
+| themes.md         | Personalization | Settings system, Foliage                                       |
+| meadow.md         | Community       | `packages/meadow/`                                             |
+| landing.md        | Community       | `packages/landing/`                                            |
+| clearing.md       | Community       | `packages/clearing/`                                           |
+| WING.md (naming)  | Naming          | `docs/philosophy/grove-naming.md`                              |
+| the-walk.md       | Naming          | `docs/philosophy/walking-through-the-grove.md`                 |
+| porch.md          | Naming          | `docs/philosophy/naming-research/grove-journey.md`             |
+| lumen.md          | Naming          | `docs/philosophy/naming-research/ai-gateway-naming-journey.md` |
+| loom.md (naming)  | Naming          | `docs/philosophy/naming-research/loom-grove-journey.md`        |
+| ecosystem.md      | Naming          | `docs/philosophy/grove-naming.md` ecosystem table              |
 
 ---
 
 ## Priority Order
 
 **Phase 1: Core Understanding**
+
 1. MUSEUM.md (entrance)
 2. Architecture Wing (foundation, engine-room)
 3. Nature Wing (seasons, forest)
 4. Naming Wing (philosophy, the-walk, featured journeys)
 5. Glossary
 
-**Phase 2: Trust & Data**
-6. Trust Wing (heartwood, sessions)
-7. Data Wing (filing-cabinet, query-builders)
+**Phase 2: Trust & Data** 6. Trust Wing (heartwood, sessions) 7. Data Wing (filing-cabinet, query-builders)
 
-**Phase 3: Personalization & Community**
-8. Personalization Wing (grafts, curios)
-9. Community Wing (meadow, landing)
+**Phase 3: Personalization & Community** 8. Personalization Wing (grafts, curios) 9. Community Wing (meadow, landing)
 
 ---
 
@@ -519,6 +529,6 @@ A Wanderer who completes the museum tour should:
 
 ---
 
-*This plan transforms technical documentation into hospitality.*
+_This plan transforms technical documentation into hospitality._
 
-*— Planned January 2026*
+_— Planned January 2026_

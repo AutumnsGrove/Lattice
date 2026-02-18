@@ -8,7 +8,7 @@
 
 ## Overview
 
-This plan outlines enhancements to the Firefly component and introduces a versatile Swarm system for nature components. The Firefly component has been identified as the most beloved component in the GroveEngine codebase, and these enhancements aim to extend its magic while maintaining the performance and accessibility standards that make it special.
+This plan outlines enhancements to the Firefly component and introduces a versatile Swarm system for nature components. The Firefly component has been identified as the most beloved component in the Lattice codebase, and these enhancements aim to extend its magic while maintaining the performance and accessibility standards that make it special.
 
 ---
 
@@ -24,6 +24,7 @@ Interestingly, "Firefly" is already a well-established pattern in Grove's infras
 - **Used By:** Bloom (AI coding agents), Outpost (gaming servers)
 
 The Firefly infrastructure pattern defines a three-phase lifecycle:
+
 1. **Ignite** — Spin up a server in response to demand
 2. **Illuminate** — Execute the work (coding, gaming, processing)
 3. **Fade** — Tear down gracefully when complete or idle
@@ -33,6 +34,7 @@ This creates a delightful meta-naming opportunity: the UI Firefly component can 
 ### The Firefly Component (UI)
 
 Current implementation in [`Firefly.svelte`](packages/engine/src/lib/ui/components/nature/creatures/Firefly.svelte):
+
 - Multi-layered bioluminescence (outer glow, inner glow, glowing abdomen)
 - Performance-optimized animations (opacity-based, not filter-based)
 - IntersectionObserver for visibility-based animation pausing
@@ -49,12 +51,13 @@ Add a `size` prop for consistent sizing across the grove.
 
 ```typescript
 interface FireflyProps {
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+  size?: "xs" | "sm" | "md" | "lg" | "xl";
   // ... existing props
 }
 ```
 
 **Implementation:**
+
 - `xs`: w-1.5 h-1.5 (tiny, distant fireflies)
 - `sm`: w-2 h-2 (default, current size)
 - `md`: w-3 h-3 (medium, foreground)
@@ -77,6 +80,7 @@ interface FireflyProps {
 ```
 
 **Behavior:**
+
 - `interactive={true}`: Firefly follows cursor movement (subtle parallax)
 - `interactive={true}` + click: Firefly bursts into brighter glow temporarily
 - Proper ARIA attributes: `role="button"`, `tabindex="0"`, `aria-label="Firefly"`
@@ -86,6 +90,7 @@ interface FireflyProps {
 **Current state:** `aria-hidden="true"` for decorative use
 
 **Enhancements:**
+
 - Export `fireflyA11yProps()` helper function for interactive mode
 - Add `aria-live` region for screen reader announcements (optional)
 - Ensure keyboard focus indicators for interactive fireflies
@@ -102,6 +107,7 @@ interface FireflyProps {
 ```
 
 **Seasonal colors:**
+
 - **Spring:** warm amber, soft green undertones
 - **Summer:** bright gold, no green (hotter)
 - **Autumn:** deep orange-red, shorter flashes
@@ -121,7 +127,7 @@ A swarm component that renders multiple fireflies with coordinated patterns. Rea
 ```svelte
 <script lang="ts">
   import Firefly from './Firefly.svelte';
-  
+
   interface SwarmProps {
     count?: number;           // Number of fireflies (default: 8)
     spread?: number;          // Spread area in rems (default: 20)
@@ -134,7 +140,7 @@ A swarm component that renders multiple fireflies with coordinated patterns. Rea
   }
 </script>
 
-<FireflySwarm 
+<FireflySwarm
   count={12}
   spread={30}
   sync={true}
@@ -146,12 +152,12 @@ A swarm component that renders multiple fireflies with coordinated patterns. Rea
 
 ### 2.3 Animation Patterns
 
-| Pattern | Description |
-|---------|-------------|
-| `random` | Each firefly has independent timing (default) |
-| `wave` | Fireflies flash in a wave pattern across the swarm |
-| `pulse` | All fireflies flash together (heartbeat) |
-| `chaos` | Bursts of activity followed by silence |
+| Pattern  | Description                                        |
+| -------- | -------------------------------------------------- |
+| `random` | Each firefly has independent timing (default)      |
+| `wave`   | Fireflies flash in a wave pattern across the swarm |
+| `pulse`  | All fireflies flash together (heartbeat)           |
+| `chaos`  | Bursts of activity followed by silence             |
 
 ### 2.4 Performance Considerations
 
@@ -180,7 +186,7 @@ A generic `Swarm<T>` component that can render any component type in swarm forma
 ```svelte
 <script lang="ts">
   import type { ComponentType } from 'svelte';
-  
+
   interface SwarmProps<T extends ComponentType> {
     component: T;           // Component to swarm
     count?: number;         // Number of instances
@@ -203,7 +209,7 @@ A generic `Swarm<T>` component that can render any component type in swarm forma
 function generateSwarmPositions(
   count: number,
   spread: number,
-  bounds: 'container' | 'viewport' | 'parent'
+  bounds: "container" | "viewport" | "parent",
 ): { x: number; y: number; delay: number }[] {
   // Poisson disk sampling for natural distribution
   // Or simple grid with jitter for performance
@@ -216,7 +222,7 @@ function generateSwarmPositions(
 ```typescript
 const SWARMABLE_COMPONENTS = {
   firefly: Firefly,
-  fireflyGlow: FireflyGlow,  // Glow-only variant
+  fireflyGlow: FireflyGlow, // Glow-only variant
   fireflySimple: FireflySimple, // Simplified for performance
   // Future: leaves, petals, birds, etc.
 } as const;
@@ -232,21 +238,21 @@ Create `Firefly.test.ts` and `FireflySwarm.test.ts`:
 
 ```typescript
 // Firefly.test.ts
-describe('Firefly', () => {
-  it('renders with default props');
-  it('applies custom colors');
-  it('pauses animation when off-screen');
-  it('respects prefers-reduced-motion');
-  it('handles interactive mode');
-  it('scales correctly with size prop');
+describe("Firefly", () => {
+  it("renders with default props");
+  it("applies custom colors");
+  it("pauses animation when off-screen");
+  it("respects prefers-reduced-motion");
+  it("handles interactive mode");
+  it("scales correctly with size prop");
 });
 
 // FireflySwarm.test.ts
-describe('FireflySwarm', () => {
-  it('renders correct number of fireflies');
-  it('applies animation pattern');
-  it('handles sync mode');
-  it('respects spread bounds');
+describe("FireflySwarm", () => {
+  it("renders correct number of fireflies");
+  it("applies animation pattern");
+  it("handles sync mode");
+  it("respects spread bounds");
 });
 ```
 
@@ -257,11 +263,11 @@ Create `Firefly.stories.svelte` and `FireflySwarm.stories.svelte`:
 ```typescript
 // Firefly.stories.svelte
 export default {
-  title: 'Nature/Firefly',
+  title: "Nature/Firefly",
   args: {
-    glowColor: '#FFD700',
-    bodyColor: '#1a1a1a',
-    intensity: 'normal',
+    glowColor: "#FFD700",
+    bodyColor: "#1a1a1a",
+    intensity: "normal",
     animate: true,
   },
 };
@@ -270,6 +276,7 @@ export default {
 ### 4.3 Documentation
 
 Update component docstrings with:
+
 - Usage examples
 - Performance tips
 - Accessibility guidelines
@@ -346,5 +353,5 @@ packages/engine/src/lib/ui/components/nature/
 
 ---
 
-*Plan created: February 2026*
-*Inspired by: The most beloved component in GroveEngine*
+_Plan created: February 2026_
+_Inspired by: The most beloved component in Lattice_

@@ -9,9 +9,9 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { VALID_REPORT_REASONS } from "$lib/server/types";
-import { validateUUID } from "@autumnsgrove/groveengine/utils/validation";
-import { createThreshold } from "@autumnsgrove/groveengine/threshold";
-import { thresholdCheck } from "@autumnsgrove/groveengine/threshold/sveltekit";
+import { validateUUID } from "@autumnsgrove/lattice/utils/validation";
+import { createThreshold } from "@autumnsgrove/lattice/threshold";
+import { thresholdCheck } from "@autumnsgrove/lattice/threshold/sveltekit";
 
 export const POST: RequestHandler = async ({
   params,

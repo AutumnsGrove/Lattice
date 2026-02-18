@@ -20,7 +20,7 @@
  *
  * @example
  * ```typescript
- * import { moderateContent } from '@autumnsgrove/groveengine/thorn';
+ * import { moderateContent } from '@autumnsgrove/lattice/thorn';
  *
  * const result = await moderateContent(userContent, {
  *   lumen,

@@ -4,11 +4,11 @@ import {
   CANOPY_CATEGORIES,
   seededShuffle,
   type CanopyCategory,
-} from "@autumnsgrove/groveengine";
+} from "@autumnsgrove/lattice";
 import {
   fetchCanopyDirectory,
   type CanopyWanderer,
-} from "@autumnsgrove/groveengine/server";
+} from "@autumnsgrove/lattice/server";
 
 /**
  * GET /api/canopy

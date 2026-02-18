@@ -1,6 +1,6 @@
 ---
 name: grove-vineyard
-description: Build a Vineyard showcase page for any Grove property using @autumnsgrove/groveengine/vineyard components. Vineyard is the consistent /vineyard route where each tool demos its features, documents its API, and shows its roadmap. Use when creating or updating a property's vineyard page.
+description: Build a Vineyard showcase page for any Grove property using @autumnsgrove/lattice/vineyard components. Vineyard is the consistent /vineyard route where each tool demos its features, documents its API, and shows its roadmap. Use when creating or updating a property's vineyard page.
 ---
 
 # Grove Vineyard Skill
@@ -8,6 +8,7 @@ description: Build a Vineyard showcase page for any Grove property using @autumn
 ## When to Activate
 
 Activate this skill when:
+
 - Creating a `/vineyard` route for a Grove property
 - Adding features or demos to an existing vineyard page
 - User mentions "vineyard", "showcase page", or "tool demo page"
@@ -28,32 +29,45 @@ forage.grove.place/vineyard     → Domain discovery showcase
 
 ## Package
 
-Vineyard lives inside the GroveEngine monorepo at `packages/vineyard` and is re-exported through the engine. No separate install needed — it comes with GroveEngine.
+Vineyard lives inside the Lattice monorepo at `packages/vineyard` and is re-exported through the engine. No separate install needed — it comes with Lattice.
 
 ```typescript
-import { VineyardLayout, FeatureCard, StatusBadge, ... } from '@autumnsgrove/groveengine/vineyard';
+import { VineyardLayout, FeatureCard, StatusBadge, ... } from '@autumnsgrove/lattice/vineyard';
 ```
 
 ## Available Components
 
-| Component | Purpose |
-|-----------|---------|
+| Component        | Purpose                                                                        |
+| ---------------- | ------------------------------------------------------------------------------ |
 | `VineyardLayout` | Full page wrapper — hero, status badge, philosophy quote, related tools footer |
-| `FeatureCard` | Showcase a feature with icon, status, description, and optional demo slot |
-| `StatusBadge` | Status pill: ready, preview, demo, coming-soon, in-development |
-| `DemoContainer` | Wrapper for interactive demos with mock data indicator |
-| `CodeExample` | Code block with language label, filename, and copy-to-clipboard |
-| `TierGate` | Tier-based access control with blur preview and upgrade prompt |
-| `RoadmapSection` | Visual timeline: built / in-progress / planned |
-| `AuthButton` | Better Auth sign in/out button |
-| `UserMenu` | User profile menu with avatar and email |
+| `FeatureCard`    | Showcase a feature with icon, status, description, and optional demo slot      |
+| `StatusBadge`    | Status pill: ready, preview, demo, coming-soon, in-development                 |
+| `DemoContainer`  | Wrapper for interactive demos with mock data indicator                         |
+| `CodeExample`    | Code block with language label, filename, and copy-to-clipboard                |
+| `TierGate`       | Tier-based access control with blur preview and upgrade prompt                 |
+| `RoadmapSection` | Visual timeline: built / in-progress / planned                                 |
+| `AuthButton`     | Better Auth sign in/out button                                                 |
+| `UserMenu`       | User profile menu with avatar and email                                        |
 
 ## Types
 
 ```typescript
-type VineyardStatus = 'ready' | 'preview' | 'demo' | 'coming-soon' | 'in-development';
-type GroveTool = 'amber' | 'ivy' | 'foliage' | 'meadow' | 'rings' | 'trails' | 'heartwood' | 'forage';
-type GroveTier = 'seedling' | 'sapling' | 'oak' | 'grove';
+type VineyardStatus =
+  | "ready"
+  | "preview"
+  | "demo"
+  | "coming-soon"
+  | "in-development";
+type GroveTool =
+  | "amber"
+  | "ivy"
+  | "foliage"
+  | "meadow"
+  | "rings"
+  | "trails"
+  | "heartwood"
+  | "forage";
+type GroveTier = "seedling" | "sapling" | "oak" | "grove";
 ```
 
 ## Minimal Implementation
@@ -67,7 +81,7 @@ Create `src/routes/vineyard/+page.svelte`:
     FeatureCard,
     RoadmapSection,
     DemoContainer
-  } from '@autumnsgrove/groveengine/vineyard';
+  } from '@autumnsgrove/lattice/vineyard';
 </script>
 
 <VineyardLayout
@@ -122,6 +136,7 @@ Create `src/routes/vineyard/+page.svelte`:
 ### VineyardLayout
 
 Handles the full page structure automatically:
+
 - **Hero**: Tool name (capitalized from `tool` prop), tagline, status badge, philosophy quote
 - **Content**: Renders children in a max-width container with padding
 - **Footer**: "Works well with" section linking related tools' vineyards
@@ -167,6 +182,7 @@ Wraps interactive demos with a header, description, and optional "Mock Data" ind
 ```
 
 When `mockData={true}`:
+
 - Shows a blue "Mock Data" pill in the header
 - Adds a dashed blue border around the demo content
 
@@ -222,7 +238,7 @@ Three-column (desktop) / stacked (mobile) timeline:
 
 ```svelte
 <script>
-  import { AuthButton, UserMenu, getSession } from '@autumnsgrove/groveengine/vineyard';
+  import { AuthButton, UserMenu, getSession } from '@autumnsgrove/lattice/vineyard';
   import { onMount } from 'svelte';
 
   let user = $state(null);
@@ -242,17 +258,18 @@ Three-column (desktop) / stacked (mobile) timeline:
 
 ## Status Badge Meanings
 
-| Status | Visual | Use When |
-|--------|--------|----------|
-| `ready` | Green solid pill | Feature is complete and stable |
-| `preview` | Amber dashed border | Functional but API may change |
-| `demo` | Blue solid pill | Interactive example, not real data |
-| `coming-soon` | Gray subtle pill | Designed but not built yet |
-| `in-development` | Orange pulsing pill | Actively being built right now |
+| Status           | Visual              | Use When                           |
+| ---------------- | ------------------- | ---------------------------------- |
+| `ready`          | Green solid pill    | Feature is complete and stable     |
+| `preview`        | Amber dashed border | Functional but API may change      |
+| `demo`           | Blue solid pill     | Interactive example, not real data |
+| `coming-soon`    | Gray subtle pill    | Designed but not built yet         |
+| `in-development` | Orange pulsing pill | Actively being built right now     |
 
 ## Design System
 
 Vineyard components use Grove's built-in aesthetic:
+
 - **Colors**: Amber tones (#f59e0b, #d97706) on stone neutrals
 - **Glass**: Semi-transparent backgrounds with backdrop-blur
 - **Typography**: Lexend font (loaded by VineyardLayout)
@@ -263,18 +280,21 @@ No additional styling framework needed — components are self-contained with sc
 ## Content Strategy
 
 ### For Ready Tools
+
 - Working demos with real or realistic mock data
 - Complete feature cards with all statuses "ready"
 - Full code examples and API reference
 - Getting started guide
 
 ### For Preview/In Development Tools
+
 - Mix of "ready" and "coming-soon" feature cards
 - Demo containers with `mockData={true}`
 - Roadmap section showing progress
 - TierGate for features not yet available
 
 ### For Coming Soon Tools
+
 - Minimal vineyard: VineyardLayout + philosophy + roadmap
 - All feature cards as "coming-soon"
 - No interactive demos needed yet
@@ -284,7 +304,7 @@ No additional styling framework needed — components are self-contained with sc
 When vineyard pages reference Grove-themed terms (tool names, feature names, user roles), use GroveTerm components to respect the user's Grove Mode setting. New visitors see standard terms by default.
 
 ```svelte
-import { GroveTerm, GroveText } from '@autumnsgrove/groveengine/ui';
+import { GroveTerm, GroveText } from '@autumnsgrove/lattice/ui';
 import groveTermManifest from '$lib/data/grove-term-manifest.json';
 
 <!-- Use GroveText for data-driven content with [[term]] syntax -->
@@ -297,6 +317,7 @@ import groveTermManifest from '$lib/data/grove-term-manifest.json';
 ## Checklist
 
 Before shipping a vineyard page:
+
 - [ ] `VineyardLayout` with correct `tool`, `tagline`, and `status`
 - [ ] At least 3 `FeatureCard` components with appropriate statuses
 - [ ] `RoadmapSection` with honest built/inProgress/planned arrays

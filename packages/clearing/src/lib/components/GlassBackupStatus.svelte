@@ -9,7 +9,7 @@
 	 * - Dark mode support
 	 * - Organic, welcoming feel
 	 */
-	import { cn } from "@autumnsgrove/groveengine/ui/utils";
+	import { cn } from "@autumnsgrove/lattice/ui/utils";
 	import type { BackupStatus } from "$lib/server/backups";
 	import { Shield, CheckCircle, AlertTriangle, Calendar, HardDrive } from "lucide-svelte";
 

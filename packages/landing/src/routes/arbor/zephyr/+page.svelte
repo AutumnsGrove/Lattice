@@ -1,9 +1,9 @@
 <script lang="ts">
 	import type { PageData, ActionData } from './$types';
 	import { enhance } from '$app/forms';
-	import { GlassCard } from '@autumnsgrove/groveengine/ui';
+	import { GlassCard } from '@autumnsgrove/lattice/ui';
 	import { Wind, Send, Check, AlertTriangle, ExternalLink, RefreshCw } from 'lucide-svelte';
-	import { ZephyrAnalytics } from '@autumnsgrove/groveengine';
+	import { ZephyrAnalytics } from '@autumnsgrove/lattice';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 

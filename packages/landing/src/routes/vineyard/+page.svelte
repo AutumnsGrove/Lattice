@@ -22,7 +22,7 @@
 		GlassCarousel,
 		GroveTerm,
 		GroveIntro,
-	} from '@autumnsgrove/groveengine/ui';
+	} from '@autumnsgrove/lattice/ui';
 
 	// Import nature assets
 	import {
@@ -37,7 +37,7 @@
 		Leaf, LeafFalling, PetalFalling, Acorn, PineCone, Berry, DandelionPuff, Vine,
 		Lattice as LatticeStructure, LatticeWithVine, Birdhouse, GardenGate, FencePost, StonePath, Bridge, Lantern,
 		greens, bark, earth, natural, autumn, pinks, autumnReds, spring, springBlossoms, winter, midnightBloom
-	} from '@autumnsgrove/groveengine/ui/nature';
+	} from '@autumnsgrove/lattice/ui/nature';
 
 	// Import typography components
 	import {
@@ -48,7 +48,7 @@
 		Alagard, Calistoga, Caveat,
 		fonts,
 		type FontId,
-	} from '@autumnsgrove/groveengine/ui/typography';
+	} from '@autumnsgrove/lattice/ui/typography';
 
 	// Typography state
 	let selectedFont = $state<FontId>('lexend');

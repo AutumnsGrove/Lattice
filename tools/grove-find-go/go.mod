@@ -1,4 +1,4 @@
-module github.com/AutumnsGrove/GroveEngine/tools/grove-find-go
+module github.com/AutumnsGrove/Lattice/tools/grove-find-go
 
 go 1.24.0
 

@@ -1,7 +1,7 @@
 ---
 title: Setting Up Woodpecker CI with Codeberg
 description: Step-by-step guide to migrating from GitHub Actions to Woodpecker on Codeberg
-lastUpdated: '2026-02-02'
+lastUpdated: "2026-02-02"
 ---
 
 # Setting Up Woodpecker CI with Codeberg
@@ -66,7 +66,7 @@ echo "Agent secret: $WOODPECKER_AGENT_SECRET"
 Create `docker-compose.yml`:
 
 ```yaml
-version: '3'
+version: "3"
 
 services:
   woodpecker-server:
@@ -74,7 +74,7 @@ services:
     restart: always
     ports:
       - "80:8000"
-      - "443:8443"  # If using HTTPS
+      - "443:8443" # If using HTTPS
     volumes:
       - woodpecker-server-data:/var/lib/woodpecker
     environment:
@@ -82,16 +82,16 @@ services:
       - WOODPECKER_OPEN=true
       - WOODPECKER_HOST=${WOODPECKER_HOST}
       - WOODPECKER_AGENT_SECRET=${WOODPECKER_AGENT_SECRET}
-      
+
       # Codeberg (Forgejo) integration
       - WOODPECKER_FORGEJO=true
       - WOODPECKER_FORGEJO_URL=https://codeberg.org
       - WOODPECKER_FORGEJO_CLIENT=${WOODPECKER_FORGEJO_CLIENT}
       - WOODPECKER_FORGEJO_SECRET=${WOODPECKER_FORGEJO_SECRET}
-      
+
       # Admin user (your Codeberg username)
       - WOODPECKER_ADMIN_AUTHS=${WOODPECKER_ADMIN}
-      
+
       # Optional: GitHub migration helpers
       - WOODPECKER_DEFAULT_CANCEL_PREVIOUS_PIPELINE_EVENTS=pull_request,push
       - WOODPECKER_ENABLE_SWAGGER=true
@@ -107,7 +107,7 @@ services:
     environment:
       - WOODPECKER_SERVER=woodpecker-server:9000
       - WOODPECKER_AGENT_SECRET=${WOODPECKER_AGENT_SECRET}
-      - WOODPECKER_MAX_WORKFLOWS=2  # Parallel jobs
+      - WOODPECKER_MAX_WORKFLOWS=2 # Parallel jobs
       - WOODPECKER_LABELS=type=static
 
 volumes:
@@ -153,7 +153,7 @@ Visit `https://ci.grove.place` (or your IP) and log in with Codeberg.
 
 1. In Woodpecker UI, go to "Repositories"
 2. Click "Add Repository"
-3. Find `AutumnsGrove/GroveEngine`
+3. Find `AutumnsGrove/Lattice`
 4. Click "Enable"
 
 ## Step 7: Create Your First Pipeline
@@ -210,6 +210,7 @@ steps:
 ## Step 8: Add Secrets
 
 In Woodpecker UI:
+
 1. Go to your repository → Settings → Secrets
 2. Add `CLOUDFLARE_API_TOKEN`
 3. Value: Your Cloudflare API token with Workers and Pages permissions
@@ -230,16 +231,16 @@ Check Woodpecker UI for the running pipeline.
 
 ### Common Patterns
 
-| GitHub Actions | Woodpecker |
-|----------------|-----------|
-| `on: [push, pull_request]` | No change (default) |
-| `runs-on: ubuntu-latest` | `image: node:20` (or any image) |
-| `steps:` | `steps:` |
-| `uses: actions/checkout@v4` | Automatic (workspace mounted) |
+| GitHub Actions                | Woodpecker                       |
+| ----------------------------- | -------------------------------- |
+| `on: [push, pull_request]`    | No change (default)              |
+| `runs-on: ubuntu-latest`      | `image: node:20` (or any image)  |
+| `steps:`                      | `steps:`                         |
+| `uses: actions/checkout@v4`   | Automatic (workspace mounted)    |
 | `uses: actions/setup-node@v4` | Use image with Node preinstalled |
-| `env:` | `environment:` |
-| `secrets.GITHUB_TOKEN` | No equivalent (use deploy keys) |
-| `matrix:` | `matrix:` (similar syntax) |
+| `env:`                        | `environment:`                   |
+| `secrets.GITHUB_TOKEN`        | No equivalent (use deploy keys)  |
+| `matrix:`                     | `matrix:` (similar syntax)       |
 
 ### Example: Matrix Builds
 
@@ -313,6 +314,7 @@ steps:
 ## Next Steps
 
 Once this is working:
+
 1. [ ] Port all GitHub Actions workflows
 2. [ ] Document any gaps or pain points
 3. [ ] Measure build times vs GitHub Actions

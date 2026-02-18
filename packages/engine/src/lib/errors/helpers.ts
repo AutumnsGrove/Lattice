@@ -6,7 +6,7 @@
  *
  * @example
  * ```typescript
- * import { logGroveError, buildErrorUrl, throwGroveError } from '@autumnsgrove/groveengine/errors';
+ * import { logGroveError, buildErrorUrl, throwGroveError } from '@autumnsgrove/lattice/errors';
  *
  * // Log with structured context
  * logGroveError('Landing', ERRORS.DB_DOWN, { path: '/blog', cause: err });

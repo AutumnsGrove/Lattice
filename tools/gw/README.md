@@ -20,7 +20,7 @@
 ╰──────────────────────────────────────────────────────────────╯
 ```
 
-> *One CLI to tend them all — Wrangler, git, and gh wrapped with agent-safe defaults.*
+> _One CLI to tend them all — Wrangler, git, and gh wrapped with agent-safe defaults._
 
 ---
 
@@ -65,6 +65,7 @@ uv run gw --help
 ```
 
 **Pro tip:** Add an alias to your shell:
+
 ```bash
 alias gw="uv run --project ~/path/to/tools/gw gw"
 ```
@@ -73,20 +74,20 @@ alias gw="uv run --project ~/path/to/tools/gw gw"
 
 ## 🎯 Command Overview
 
-| Command | What it does | Safe? |
-|---------|--------------|-------|
-| `gw status` | Show config and account info | ✅ Always |
-| `gw health` | Health check all components | ✅ Always |
-| `gw test` | Run tests | ✅ Always |
-| `gw build` | Build packages | ✅ Always |
-| `gw check` | Type check | ✅ Always |
-| `gw lint` | Lint code | ✅ Always |
-| `gw ci` | Run full CI pipeline | ✅ Always |
-| `gw deploy --write` | Deploy to Cloudflare | ⚠️ Needs `--write` |
-| `gw git commit --write` | Commit changes | ⚠️ Needs `--write` |
-| `gw git push --write` | Push to remote | ⚠️ Needs `--write` |
-| `gw d1 query --write` | Write to database | ⚠️ Needs `--write` |
-| `gw git push --write --force` | Force push | 🔴 Needs `--write --force` |
+| Command                       | What it does                 | Safe?                      |
+| ----------------------------- | ---------------------------- | -------------------------- |
+| `gw status`                   | Show config and account info | ✅ Always                  |
+| `gw health`                   | Health check all components  | ✅ Always                  |
+| `gw test`                     | Run tests                    | ✅ Always                  |
+| `gw build`                    | Build packages               | ✅ Always                  |
+| `gw check`                    | Type check                   | ✅ Always                  |
+| `gw lint`                     | Lint code                    | ✅ Always                  |
+| `gw ci`                       | Run full CI pipeline         | ✅ Always                  |
+| `gw deploy --write`           | Deploy to Cloudflare         | ⚠️ Needs `--write`         |
+| `gw git commit --write`       | Commit changes               | ⚠️ Needs `--write`         |
+| `gw git push --write`         | Push to remote               | ⚠️ Needs `--write`         |
+| `gw d1 query --write`         | Write to database            | ⚠️ Needs `--write`         |
+| `gw git push --write --force` | Force push                   | 🔴 Needs `--write --force` |
 
 ---
 
@@ -348,7 +349,7 @@ gw gh run cancel --write 12345678
 
 ```bash
 # GET requests (always safe)
-gw gh api repos/AutumnsGrove/GroveEngine
+gw gh api repos/AutumnsGrove/Lattice
 
 # POST/PATCH (needs --write)
 gw gh api --write repos/{owner}/{repo}/labels -X POST -f name="bug"
@@ -505,11 +506,11 @@ gw auth client delete --write --force abc123
 
 ## 🏷️ Global Flags
 
-| Flag | Description |
-|------|-------------|
-| `--json` | Output machine-readable JSON |
-| `--verbose` | Enable debug output |
-| `--help` | Show help message |
+| Flag        | Description                  |
+| ----------- | ---------------------------- |
+| `--json`    | Output machine-readable JSON |
+| `--verbose` | Enable debug output          |
+| `--help`    | Show help message            |
 
 **Important:** Global flags come BEFORE the command:
 
@@ -547,7 +548,7 @@ Preview what would happen without doing it:
 ```bash
 gw test --dry-run
 # DRY RUN - Would execute:
-#   Package: @autumnsgrove/groveengine
+#   Package: @autumnsgrove/lattice
 #   Directory: /path/to/packages/engine
 #   Command: pnpm run test:run
 ```
@@ -555,6 +556,7 @@ gw test --dry-run
 ### Protected Branches
 
 These branches can NEVER be force-pushed:
+
 - `main`
 - `master`
 - `production`
@@ -563,6 +565,7 @@ These branches can NEVER be force-pushed:
 ### Agent Mode
 
 When running with `GW_AGENT_MODE=1` or detected as Claude Code:
+
 - Stricter row limits (50 delete, 200 update)
 - Force operations are completely blocked
 - All operations are audit-logged
@@ -570,6 +573,7 @@ When running with `GW_AGENT_MODE=1` or detected as Claude Code:
 ### SQL Safety
 
 The database safety layer blocks:
+
 - **DDL** — CREATE, DROP, ALTER, TRUNCATE
 - **SQL injection patterns** — Stacked queries, comments
 - **Missing WHERE** — DELETE/UPDATE without WHERE
@@ -614,7 +618,7 @@ auto_link_issues = true
 
 [github]
 owner = "AutumnsGrove"
-repo = "GroveEngine"
+repo = "Lattice"
 rate_limit_warn_threshold = 100
 ```
 
@@ -743,40 +747,41 @@ Add to your Claude Code settings:
 ```
 
 Or generate the config automatically:
+
 ```bash
 gw mcp config
 ```
 
 ### Available MCP Tools
 
-| Tool | Category | Safety | Description |
-|------|----------|--------|-------------|
-| `grove_db_query` | Database | READ | Execute read-only SQL query |
-| `grove_db_tables` | Database | READ | List tables in database |
-| `grove_db_schema` | Database | READ | Get table schema |
-| `grove_tenant_lookup` | Database | READ | Look up tenant info |
-| `grove_cache_list` | Cache | READ | List cache keys |
-| `grove_cache_purge` | Cache | WRITE | Purge cache keys |
-| `grove_kv_get` | KV | READ | Get KV value |
-| `grove_r2_list` | R2 | READ | List R2 objects |
-| `grove_status` | Status | READ | Infrastructure status |
-| `grove_health` | Status | READ | Health check |
-| `grove_git_status` | Git | READ | Repository status |
-| `grove_git_log` | Git | READ | Commit history |
-| `grove_git_diff` | Git | READ | Show changes |
-| `grove_git_commit` | Git | WRITE | Create commit |
-| `grove_git_push` | Git | WRITE | Push to remote |
-| `grove_gh_pr_list` | GitHub | READ | List pull requests |
-| `grove_gh_pr_view` | GitHub | READ | View PR details |
-| `grove_gh_issue_list` | GitHub | READ | List issues |
-| `grove_gh_issue_view` | GitHub | READ | View issue details |
-| `grove_gh_run_list` | GitHub | READ | List workflow runs |
-| `grove_gh_pr_create` | GitHub | WRITE | Create pull request |
-| `grove_packages_list` | Dev | READ | List monorepo packages |
-| `grove_dev_status` | Dev | READ | Dev server status |
-| `grove_test_run` | Dev | WRITE | Run package tests |
-| `grove_build` | Dev | WRITE | Build package |
-| `grove_ci` | Dev | WRITE | Run CI pipeline |
+| Tool                  | Category | Safety | Description                 |
+| --------------------- | -------- | ------ | --------------------------- |
+| `grove_db_query`      | Database | READ   | Execute read-only SQL query |
+| `grove_db_tables`     | Database | READ   | List tables in database     |
+| `grove_db_schema`     | Database | READ   | Get table schema            |
+| `grove_tenant_lookup` | Database | READ   | Look up tenant info         |
+| `grove_cache_list`    | Cache    | READ   | List cache keys             |
+| `grove_cache_purge`   | Cache    | WRITE  | Purge cache keys            |
+| `grove_kv_get`        | KV       | READ   | Get KV value                |
+| `grove_r2_list`       | R2       | READ   | List R2 objects             |
+| `grove_status`        | Status   | READ   | Infrastructure status       |
+| `grove_health`        | Status   | READ   | Health check                |
+| `grove_git_status`    | Git      | READ   | Repository status           |
+| `grove_git_log`       | Git      | READ   | Commit history              |
+| `grove_git_diff`      | Git      | READ   | Show changes                |
+| `grove_git_commit`    | Git      | WRITE  | Create commit               |
+| `grove_git_push`      | Git      | WRITE  | Push to remote              |
+| `grove_gh_pr_list`    | GitHub   | READ   | List pull requests          |
+| `grove_gh_pr_view`    | GitHub   | READ   | View PR details             |
+| `grove_gh_issue_list` | GitHub   | READ   | List issues                 |
+| `grove_gh_issue_view` | GitHub   | READ   | View issue details          |
+| `grove_gh_run_list`   | GitHub   | READ   | List workflow runs          |
+| `grove_gh_pr_create`  | GitHub   | WRITE  | Create pull request         |
+| `grove_packages_list` | Dev      | READ   | List monorepo packages      |
+| `grove_dev_status`    | Dev      | READ   | Dev server status           |
+| `grove_test_run`      | Dev      | WRITE  | Run package tests           |
+| `grove_build`         | Dev      | WRITE  | Build package               |
+| `grove_ci`            | Dev      | WRITE  | Run CI pipeline             |
 
 ### MCP Commands
 
@@ -794,6 +799,7 @@ gw mcp config
 ### Safety in MCP Mode
 
 When running as an MCP server:
+
 - **Agent mode** is automatically enabled (`GW_AGENT_MODE=1`)
 - **Write operations** (INSERT, UPDATE, DELETE) are blocked in SQL queries
 - **Force operations** (force-push, hard reset) are completely blocked
@@ -883,7 +889,7 @@ gw completion fish > ~/.config/fish/completions/gw.fish
 ## 📚 Related
 
 - **Spec:** `docs/specs/gw-cli-spec.md`
-- **Issue:** [#348](https://github.com/AutumnsGrove/GroveEngine/issues/348)
+- **Issue:** [#348](https://github.com/AutumnsGrove/Lattice/issues/348)
 
 ---
 
@@ -892,12 +898,14 @@ gw completion fish > ~/.config/fish/completions/gw.fish
 ### "No package found"
 
 You're not in a package directory. Either:
+
 - `cd` into a package (e.g., `cd packages/engine`)
 - Use `--package engine` to specify
 
 ### "groveauth database not configured"
 
 Add it to `~/.grove/gw.toml`:
+
 ```toml
 [databases.groveauth]
 name = "groveauth"
@@ -907,6 +915,7 @@ id = "your-database-id"
 ### "Rate limit exhausted"
 
 GitHub has rate limits. Check with:
+
 ```bash
 gw gh rate-limit
 ```
@@ -916,10 +925,11 @@ Wait for reset or authenticate with a token.
 ### "Protected branch"
 
 You tried to force-push to `main`. Don't do that. Create a PR instead:
+
 ```bash
 gw gh pr create --write --title "My changes"
 ```
 
 ---
 
-*The best CLI is the one you don't have to think about. Just type `gw` and go.* 🌿
+_The best CLI is the one you don't have to think about. Just type `gw` and go._ 🌿

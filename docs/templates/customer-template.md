@@ -14,8 +14,8 @@ npm create svelte@latest my-customer-site
 cd my-customer-site
 
 # 2. Install Grove dependencies
-npm install @groveengine/ui@^0.3.0
-npm install @autumnsgrove/groveengine@^0.3.0
+npm install @lattice/ui@^0.3.0
+npm install @autumnsgrove/lattice@^0.3.0
 
 # 3. Install required peer dependencies
 npm install svelte@^5.0.0
@@ -54,7 +54,7 @@ my-customer-site/
 │   │   ├── +page.svelte             # Homepage
 │   │   ├── about/                   # About page
 │   │   ├── contact/                 # Contact page
-│   │   ├── blog/                    # Blog (uses GroveEngine)
+│   │   ├── blog/                    # Blog (uses Lattice)
 │   │   │   ├── +page.svelte         # Blog listing
 │   │   │   └── [slug]/+page.svelte  # Blog post
 │   │   └── shop/                    # Shop (if needed)
@@ -95,8 +95,8 @@ my-customer-site/
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
   },
   "dependencies": {
-    "@groveengine/ui": "^0.3.0",
-    "@autumnsgrove/groveengine": "^0.3.0"
+    "@lattice/ui": "^0.3.0",
+    "@autumnsgrove/lattice": "^0.3.0"
   },
   "devDependencies": {
     "@sveltejs/adapter-auto": "^3.0.0",
@@ -121,33 +121,33 @@ my-customer-site/
 ### tailwind.config.js
 
 ```javascript
-import grovePreset from '@groveengine/ui/tailwind';
+import grovePreset from "@lattice/ui/tailwind";
 
 /** @type {import('tailwindcss').Config} */
 export default {
   presets: [grovePreset], // Use Grove design system
   content: [
-    './src/**/*.{html,js,svelte,ts}',
+    "./src/**/*.{html,js,svelte,ts}",
     // Include Grove packages for proper Tailwind scanning
-    './node_modules/@groveengine/ui/**/*.{html,js,svelte,ts}',
-    './node_modules/@autumnsgrove/groveengine/**/*.{html,js,svelte,ts}'
+    "./node_modules/@lattice/ui/**/*.{html,js,svelte,ts}",
+    "./node_modules/@autumnsgrove/lattice/**/*.{html,js,svelte,ts}",
   ],
   theme: {
     extend: {
       // Add site-specific overrides here
       colors: {
-        brand: '#your-custom-color' // Optional: Override Grove colors
-      }
-    }
-  }
+        brand: "#your-custom-color", // Optional: Override Grove colors
+      },
+    },
+  },
 };
 ```
 
 ### svelte.config.js
 
 ```javascript
-import adapter from '@sveltejs/adapter-auto';
-import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
+import adapter from "@sveltejs/adapter-auto";
+import { vitePreprocess } from "@sveltejs/vite-plugin-svelte";
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
@@ -156,11 +156,11 @@ const config = {
   kit: {
     adapter: adapter(),
     alias: {
-      $lib: 'src/lib',
-      '@groveengine/ui': './node_modules/@groveengine/ui',
-      '@autumnsgrove/groveengine': './node_modules/@autumnsgrove/groveengine'
-    }
-  }
+      $lib: "src/lib",
+      "@lattice/ui": "./node_modules/@lattice/ui",
+      "@autumnsgrove/lattice": "./node_modules/@autumnsgrove/lattice",
+    },
+  },
 };
 
 export default config;
@@ -169,14 +169,14 @@ export default config;
 ### vite.config.js
 
 ```javascript
-import { sveltekit } from '@sveltejs/kit/vite';
-import { defineConfig } from 'vite';
+import { sveltekit } from "@sveltejs/kit/vite";
+import { defineConfig } from "vite";
 
 export default defineConfig({
   plugins: [sveltekit()],
   optimizeDeps: {
-    include: ['@groveengine/ui', '@autumnsgrove/groveengine']
-  }
+    include: ["@lattice/ui", "@autumnsgrove/lattice"],
+  },
 });
 ```
 
@@ -231,29 +231,29 @@ PUBLIC_SITE_URL="http://localhost:5173"
 ```typescript
 export const siteConfig = {
   // Business Information
-  businessName: 'My Business Name',
-  tagline: 'Your business tagline',
-  description: 'Brief description of your business',
+  businessName: "My Business Name",
+  tagline: "Your business tagline",
+  description: "Brief description of your business",
 
   // Contact Information
   contact: {
-    email: 'hello@example.com',
-    phone: '(555) 123-4567',
+    email: "hello@example.com",
+    phone: "(555) 123-4567",
     address: {
-      street: '123 Main St',
-      city: 'Portland',
-      state: 'OR',
-      zip: '97201',
-      country: 'USA'
-    }
+      street: "123 Main St",
+      city: "Portland",
+      state: "OR",
+      zip: "97201",
+      country: "USA",
+    },
   },
 
   // Social Media
   social: {
-    instagram: '@yourbusiness',
-    facebook: '/yourbusiness',
-    twitter: '@yourbusiness',
-    linkedin: '/company/yourbusiness'
+    instagram: "@yourbusiness",
+    facebook: "/yourbusiness",
+    twitter: "@yourbusiness",
+    linkedin: "/company/yourbusiness",
   },
 
   // Site Settings
@@ -262,16 +262,16 @@ export const siteConfig = {
     enableShop: false,
     enableReservations: false,
     enableGutterAnnotations: true,
-    enableAuth: false
+    enableAuth: false,
   },
 
   // SEO
   seo: {
-    defaultTitle: 'My Business Name',
-    defaultDescription: 'Brief description for search engines',
-    defaultImage: '/images/og-image.jpg',
-    twitterHandle: '@yourbusiness'
-  }
+    defaultTitle: "My Business Name",
+    defaultDescription: "Brief description for search engines",
+    defaultImage: "/images/og-image.jpg",
+    twitterHandle: "@yourbusiness",
+  },
 };
 
 // Environment-based overrides
@@ -292,16 +292,16 @@ export interface NavItem {
 }
 
 export const navigation: NavItem[] = [
-  { label: 'Home', href: '/' },
-  { label: 'About', href: '/about' },
-  { label: 'Blog', href: '/blog' },
-  { label: 'Contact', href: '/contact' }
+  { label: "Home", href: "/" },
+  { label: "About", href: "/about" },
+  { label: "Blog", href: "/blog" },
+  { label: "Contact", href: "/contact" },
 ];
 
 // Optional: Footer navigation
 export const footerNavigation: NavItem[] = [
-  { label: 'Privacy Policy', href: '/privacy' },
-  { label: 'Terms of Service', href: '/terms' }
+  { label: "Privacy Policy", href: "/privacy" },
+  { label: "Terms of Service", href: "/terms" },
 ];
 ```
 
@@ -313,7 +313,7 @@ export const footerNavigation: NavItem[] = [
 
 ```svelte
 <script lang="ts">
-  import { Button } from '@groveengine/ui/ui';
+  import { Button } from '@lattice/ui/ui';
   import { navigation } from '$lib/config/navigation';
   import { siteConfig } from '$lib/config/site';
 </script>
@@ -396,7 +396,7 @@ export const footerNavigation: NavItem[] = [
 
 ```svelte
 <script lang="ts">
-  import '@groveengine/ui/styles/grove.css';
+  import '@lattice/ui/styles/grove.css';
   import '../app.css';
 
   import Header from '$lib/components/Header.svelte';
@@ -423,7 +423,7 @@ export const footerNavigation: NavItem[] = [
 ### src/app.css
 
 ```css
-@import '@groveengine/ui/styles/grove.css';
+@import "@lattice/ui/styles/grove.css";
 
 @tailwind base;
 @tailwind components;
@@ -446,7 +446,7 @@ export const footerNavigation: NavItem[] = [
 
 ```svelte
 <script lang="ts">
-  import { Button, Card } from '@groveengine/ui/ui';
+  import { Button, Card } from '@lattice/ui/ui';
   import { siteConfig } from '$lib/config/site';
 </script>
 
@@ -488,9 +488,9 @@ export const footerNavigation: NavItem[] = [
 
 ```svelte
 <script lang="ts">
-  import { Card, Button } from '@groveengine/ui/ui';
+  import { Card, Button } from '@lattice/ui/ui';
 
-  // This would come from GroveEngine's blog system
+  // This would come from Lattice's blog system
   export let data;
 </script>
 
@@ -552,15 +552,15 @@ Customize in `navigation.ts`:
 
 ```typescript
 export const navigation: NavItem[] = [
-  { label: 'Home', href: '/' },
+  { label: "Home", href: "/" },
   {
-    label: 'Services',
-    href: '/services',
+    label: "Services",
+    href: "/services",
     children: [
-      { label: 'Service 1', href: '/services/service-1' },
-      { label: 'Service 2', href: '/services/service-2' }
-    ]
-  }
+      { label: "Service 1", href: "/services/service-1" },
+      { label: "Service 2", href: "/services/service-2" },
+    ],
+  },
 ];
 ```
 
@@ -622,7 +622,7 @@ if (import.meta.env.PROD) {
 
 ```svelte
 <script lang="ts">
-  import { ContentWithGutter, MarkdownEditor } from '@autumnsgrove/groveengine';
+  import { ContentWithGutter, MarkdownEditor } from '@autumnsgrove/lattice';
 
   export let data; // Blog post data
 </script>
@@ -636,8 +636,8 @@ if (import.meta.env.PROD) {
 
 ```svelte
 <script lang="ts">
-  import { Button } from '@groveengine/ui/ui';
-  import { addToCart } from '@autumnsgrove/groveengine/payments';
+  import { Button } from '@lattice/ui/ui';
+  import { addToCart } from '@autumnsgrove/lattice/payments';
 
   export let product;
 </script>
@@ -655,8 +655,8 @@ if (import.meta.env.PROD) {
 
 ```svelte
 <script lang="ts">
-  import { login } from '@autumnsgrove/groveengine/auth';
-  import { Input, Button } from '@groveengine/ui/ui';
+  import { login } from '@autumnsgrove/lattice/auth';
+  import { Input, Button } from '@lattice/ui/ui';
 
   let email = '';
   let password = '';
@@ -679,7 +679,7 @@ if (import.meta.env.PROD) {
 
 ### Build Errors
 
-**Issue**: `Cannot find module '@groveengine/ui'`
+**Issue**: `Cannot find module '@lattice/ui'`
 **Solution**: Run `npm install` to ensure all dependencies are installed
 
 **Issue**: Tailwind styles not applying
@@ -689,8 +689,9 @@ if (import.meta.env.PROD) {
 
 **Issue**: Components not rendering
 **Solution**: Check that imports use correct package names:
-- UI: `@groveengine/ui/ui`
-- Engine: `@autumnsgrove/groveengine`
+
+- UI: `@lattice/ui/ui`
+- Engine: `@autumnsgrove/lattice`
 
 **Issue**: Environment variables not loading
 **Solution**: Ensure `.env.local` exists and variables are prefixed with `PUBLIC_` for client-side access
@@ -700,7 +701,7 @@ if (import.meta.env.PROD) {
 ## Support & Resources
 
 - **Documentation**: See `belongs-in-engine.md`, `BELONGS_IN_UI.md`, `site-specific-code.md`
-- **Examples**: Check `/packages/example-site/` in GroveEngine repo
+- **Examples**: Check `/packages/example-site/` in Lattice repo
 - **Issues**: Report bugs to GitHub issues
 
 ---
@@ -708,5 +709,6 @@ if (import.meta.env.PROD) {
 **Last Updated**: 2025-12-03
 **Template Version**: 1.0.0
 **Compatible with**:
-- `@groveengine/ui@^0.3.0`
-- `@autumnsgrove/groveengine@^0.3.0`
+
+- `@lattice/ui@^0.3.0`
+- `@autumnsgrove/lattice@^0.3.0`

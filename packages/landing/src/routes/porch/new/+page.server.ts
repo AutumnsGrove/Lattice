@@ -3,8 +3,8 @@ import type { PageServerLoad } from "./$types";
 import {
   verifyTurnstileToken,
   generateId,
-} from "@autumnsgrove/groveengine/services";
-import { GROVE_EMAILS } from "@autumnsgrove/groveengine/config";
+} from "@autumnsgrove/lattice/services";
+import { GROVE_EMAILS } from "@autumnsgrove/lattice/config";
 import { Resend } from "resend";
 
 /**

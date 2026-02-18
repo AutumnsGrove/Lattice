@@ -112,7 +112,7 @@ export function validateUsername(username: string): void {
 export function getHeaders(token?: string): Record<string, string> {
   const headers: Record<string, string> = {
     Accept: "application/vnd.github.v3+json",
-    "User-Agent": "GroveEngine-GitDashboard",
+    "User-Agent": "Lattice-GitDashboard",
   };
   if (token) {
     headers.Authorization = `Bearer ${token}`;
@@ -124,7 +124,7 @@ export function getGraphQLHeaders(token: string): Record<string, string> {
   return {
     Authorization: `Bearer ${token}`,
     "Content-Type": "application/json",
-    "User-Agent": "GroveEngine-GitDashboard",
+    "User-Agent": "Lattice-GitDashboard",
   };
 }
 

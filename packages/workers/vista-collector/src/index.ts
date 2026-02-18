@@ -9,8 +9,8 @@
  * - Daily at midnight UTC: Cost aggregation + 90-day retention cleanup
  */
 
-import { createObservabilityCollector } from "@autumnsgrove/groveengine/server/observability";
-import type { ObservabilityEnv } from "@autumnsgrove/groveengine/server/observability";
+import { createObservabilityCollector } from "@autumnsgrove/lattice/server/observability";
+import type { ObservabilityEnv } from "@autumnsgrove/lattice/server/observability";
 
 export default {
 	async scheduled(

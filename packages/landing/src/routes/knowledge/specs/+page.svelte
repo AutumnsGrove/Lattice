@@ -2,8 +2,8 @@
   import SEO from '$lib/components/SEO.svelte';
   import Header from '$lib/components/Header.svelte';
   import Footer from '$lib/components/Footer.svelte';
-  import { GlassLegend } from '@autumnsgrove/groveengine/ui';
-  import { CategoryNav } from '@autumnsgrove/groveengine';
+  import { GlassLegend } from '@autumnsgrove/lattice/ui';
+  import { CategoryNav } from '@autumnsgrove/lattice';
   import { toolIcons, stateIcons, type ToolIconKey } from '$lib/utils/icons';
   import { kbCategoryColors } from '$lib/utils/kb-colors';
   import type { SpecCategory } from '$lib/types/docs';

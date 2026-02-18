@@ -10,7 +10,7 @@ import {
   getMockBackupStatus,
   type BackupStatus,
 } from "$lib/server/backups";
-import { loadChannelMessages } from "@autumnsgrove/groveengine/services";
+import { loadChannelMessages } from "@autumnsgrove/lattice/services";
 
 export const load: PageServerLoad = async ({ platform }) => {
   // In development without D1, return mock data

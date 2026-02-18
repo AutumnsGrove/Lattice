@@ -9,9 +9,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/AutumnsGrove/GroveEngine/tools/grove-find-go/internal/config"
-	"github.com/AutumnsGrove/GroveEngine/tools/grove-find-go/internal/output"
-	"github.com/AutumnsGrove/GroveEngine/tools/grove-find-go/internal/search"
+	"github.com/AutumnsGrove/Lattice/tools/grove-find-go/internal/config"
+	"github.com/AutumnsGrove/Lattice/tools/grove-find-go/internal/output"
+	"github.com/AutumnsGrove/Lattice/tools/grove-find-go/internal/search"
 )
 
 // excludePatterns are paths filtered from git results.

@@ -1,8 +1,8 @@
-# GroveEngine Example Site - Cloudflare Pages Configuration
+# Lattice Example Site - Cloudflare Pages Configuration
 # Deploy URL: example.grove.place
 #
 # This example site shares infrastructure with the main Grove platform
-# to demonstrate all GroveEngine features in a live environment.
+# to demonstrate all Lattice features in a live environment.
 
 name = "grove-example-site"
 compatibility_date = "2025-01-01"
@@ -74,5 +74,5 @@ TURNSTILE_SITE_KEY = "0x4AAAAAACI9p49O_VFDy3WA"
 # =============================================================================
 # - This site shares D1/R2/KV with the main Grove platform
 # - Multi-tenant isolation is handled via tenant_id in the database
-# - The example site demonstrates all GroveEngine features
+# - The example site demonstrates all Lattice features
 # - Admin panel is UI-only (no database writes in demo mode)

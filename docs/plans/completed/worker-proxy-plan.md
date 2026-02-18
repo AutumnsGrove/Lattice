@@ -3,6 +3,7 @@
 ## Context
 
 Cloudflare Pages does not support wildcard custom domains (`*.grove.place`). We need a Worker to act as a proxy/router that:
+
 1. Catches all `*.grove.place` requests
 2. Routes them to the appropriate Pages project
 3. Handles the subdomain routing we built in `hooks.server.ts`
@@ -10,6 +11,7 @@ Cloudflare Pages does not support wildcard custom domains (`*.grove.place`). We 
 ## Current State
 
 ### What's Done
+
 - `hooks.server.ts` - Subdomain routing logic (extracts subdomain, looks up tenant in D1)
 - `app.d.ts` - AppContext types for routing
 - Route groups `(tenant)/` and `(apps)/` created
@@ -18,10 +20,12 @@ Cloudflare Pages does not support wildcard custom domains (`*.grove.place`). We 
 - Wildcard DNS record `*` → `grove-lattice.pages.dev` added
 
 ### What's Blocking
+
 - Cloudflare Pages won't accept `*.grove.place` as a custom domain
 - Need a Worker to proxy wildcard requests to Pages
 
 ### Existing Infrastructure
+
 - **grove-lattice** Pages project (the main engine)
 - **groveauth** Worker for auth-api.grove.place
 - **grove-domains** Pages for domains.grove.place
@@ -53,15 +57,15 @@ export interface Env {
 
 // Subdomains that should NOT be proxied (handled by other services)
 const EXCLUDED_SUBDOMAINS = new Set([
-  'auth',        // groveauth-frontend Pages
-  'admin',       // groveauth-frontend Pages
-  'login',       // groveauth-frontend Pages
-  'domains',     // grove-domains Pages
-  'cdn',         // grove-landing Pages (R2)
-  'music',       // grovemusic Pages
-  'scout',       // scout Worker
-  'auth-api',    // groveauth Worker
-  'www',         // Redirect to root (handled in hooks)
+  "auth", // groveauth-frontend Pages
+  "admin", // groveauth-frontend Pages
+  "login", // groveauth-frontend Pages
+  "domains", // grove-domains Pages
+  "cdn", // grove-landing Pages (R2)
+  "music", // grovemusic Pages
+  "scout", // scout Worker
+  "auth-api", // groveauth Worker
+  "www", // Redirect to root (handled in hooks)
 ]);
 
 export default {
@@ -70,8 +74,8 @@ export default {
     const host = url.hostname;
 
     // Extract subdomain
-    const parts = host.split('.');
-    if (parts.length < 3 || !host.endsWith('.grove.place')) {
+    const parts = host.split(".");
+    if (parts.length < 3 || !host.endsWith(".grove.place")) {
       // Not a subdomain request, pass through
       return fetch(request);
     }
@@ -82,23 +86,23 @@ export default {
     if (EXCLUDED_SUBDOMAINS.has(subdomain)) {
       // This shouldn't happen if routes are configured correctly
       // but just in case, return 404
-      return new Response('Service handled elsewhere', { status: 404 });
+      return new Response("Service handled elsewhere", { status: 404 });
     }
 
-    // Proxy to groveengine Pages
+    // Proxy to lattice Pages
     const targetUrl = new URL(request.url);
-    targetUrl.hostname = 'grove-lattice.pages.dev';
+    targetUrl.hostname = "grove-lattice.pages.dev";
 
     // Create new request with modified URL
     const proxyRequest = new Request(targetUrl.toString(), {
       method: request.method,
       headers: request.headers,
       body: request.body,
-      redirect: 'manual',
+      redirect: "manual",
     });
 
     // Add original host header so Pages knows the real domain
-    proxyRequest.headers.set('X-Forwarded-Host', host);
+    proxyRequest.headers.set("X-Forwarded-Host", host);
 
     const response = await fetch(proxyRequest);
 
@@ -134,17 +138,17 @@ routes = [
 
 In Cloudflare Dashboard → grove.place → Rules → HTTP Routes:
 
-| Route Pattern | Service |
-|---------------|---------|
-| `auth.grove.place/*` | (none - uses Pages custom domain) |
-| `admin.grove.place/*` | (none - uses Pages custom domain) |
-| `login.grove.place/*` | (none - uses Pages custom domain) |
-| `domains.grove.place/*` | (none - uses Pages custom domain) |
-| `cdn.grove.place/*` | (none - uses Pages custom domain) |
-| `music.grove.place/*` | (none - uses Pages custom domain) |
-| `scout.grove.place/*` | scout Worker |
-| `auth-api.grove.place/*` | groveauth Worker |
-| `*.grove.place/*` | grove-router Worker |
+| Route Pattern            | Service                           |
+| ------------------------ | --------------------------------- |
+| `auth.grove.place/*`     | (none - uses Pages custom domain) |
+| `admin.grove.place/*`    | (none - uses Pages custom domain) |
+| `login.grove.place/*`    | (none - uses Pages custom domain) |
+| `domains.grove.place/*`  | (none - uses Pages custom domain) |
+| `cdn.grove.place/*`      | (none - uses Pages custom domain) |
+| `music.grove.place/*`    | (none - uses Pages custom domain) |
+| `scout.grove.place/*`    | scout Worker                      |
+| `auth-api.grove.place/*` | groveauth Worker                  |
+| `*.grove.place/*`        | grove-router Worker               |
 
 **Important:** More specific routes take precedence over wildcards!
 
@@ -154,8 +158,8 @@ The hooks file needs to read the actual hostname, not the proxied one. Update to
 
 ```typescript
 // In extractSubdomain function
-const host = request.headers.get('x-forwarded-host') ||
-             request.headers.get('host') || '';
+const host =
+  request.headers.get("x-forwarded-host") || request.headers.get("host") || "";
 ```
 
 ### Step 6: Deployment Steps
@@ -171,12 +175,14 @@ const host = request.headers.get('x-forwarded-host') ||
 **Q: How does auth work for tenant users?**
 
 The auth flow remains the same:
-1. User visits `dave.grove.place` → grove-router → groveengine Pages
+
+1. User visits `dave.grove.place` → grove-router → lattice Pages
 2. User clicks login → redirects to `auth.grove.place` (groveauth-frontend)
 3. Auth completes → redirects back to `dave.grove.place`
 4. Session cookie is set for `.grove.place` domain (works across subdomains)
 
 The cookie domain in `hooks.server.ts` is already set to `.grove.place`:
+
 ```typescript
 cookieParts.push("Domain=.grove.place");
 ```
@@ -192,11 +198,11 @@ cookieParts.push("Domain=.grove.place");
 
 ## Files to Create/Modify
 
-| File | Action |
-|------|--------|
-| `packages/grove-router/wrangler.toml` | CREATE |
-| `packages/grove-router/src/index.ts` | CREATE |
-| `packages/grove-router/package.json` | CREATE |
+| File                                  | Action                    |
+| ------------------------------------- | ------------------------- |
+| `packages/grove-router/wrangler.toml` | CREATE                    |
+| `packages/grove-router/src/index.ts`  | CREATE                    |
+| `packages/grove-router/package.json`  | CREATE                    |
 | `packages/engine/src/hooks.server.ts` | MODIFY (X-Forwarded-Host) |
 
 ## Commands to Run
@@ -212,5 +218,5 @@ wrangler deploy
 
 ---
 
-*Plan created: 2025-12-09*
-*Status: Ready for implementation*
+_Plan created: 2025-12-09_
+_Status: Ready for implementation_

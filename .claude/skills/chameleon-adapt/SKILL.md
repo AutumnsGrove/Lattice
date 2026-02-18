@@ -97,7 +97,7 @@ Content (text, cards, UI)
 **Glass Components:**
 
 ```svelte
-import { Glass, GlassCard, GlassButton, GlassOverlay } from '@groveengine/ui/ui';
+import { Glass, GlassCard, GlassButton, GlassOverlay } from '@lattice/ui/ui';
 
 <!-- Container with glass effect -->
 <Glass variant="tint" class="p-6 rounded-xl">
@@ -152,17 +152,12 @@ _The chameleon shifts its hues, matching the forest around it..._
 
 Apply the seasonal color palette:
 
-**Import from:** `@autumnsgrove/groveengine/ui/nature`
+**Import from:** `@autumnsgrove/lattice/ui/nature`
 
 **Core Palettes (Year-Round):**
 
 ```typescript
-import {
-  greens,
-  bark,
-  earth,
-  natural,
-} from "@autumnsgrove/groveengine/ui/nature";
+import { greens, bark, earth, natural } from "@autumnsgrove/lattice/ui/nature";
 
 // Greens - organized dark-to-light for depth
 greens.darkForest; // #0d4a1c - Background trees
@@ -205,7 +200,7 @@ import {
   wildflowers,
   cherryBlossoms,
   cherryBlossomsPeak,
-} from "@autumnsgrove/groveengine/ui/nature";
+} from "@autumnsgrove/lattice/ui/nature";
 
 // Spring Foliage - yellow-green new growth
 springFoliage.sprout; // #65a30d - Distant new growth
@@ -247,7 +242,7 @@ cherryBlossomsPeak.falling; // #fce7f3
 **Unified Flowers Palette:**
 
 ```typescript
-import { flowers } from "@autumnsgrove/groveengine/ui/nature";
+import { flowers } from "@autumnsgrove/lattice/ui/nature";
 
 // Use flowers.wildflower instead of accents.flower (deprecated)
 flowers.wildflower.buttercup; // #facc15 - Yellow
@@ -267,7 +262,7 @@ flowers.cherryPeak.standard; // #f472b6
 **Autumn Palette:**
 
 ```typescript
-import { autumn, autumnReds } from "@autumnsgrove/groveengine/ui/nature";
+import { autumn, autumnReds } from "@autumnsgrove/lattice/ui/nature";
 
 // Autumn - warm fall foliage (dark-to-light for depth)
 autumn.rust; // #9a3412 - Deep background
@@ -288,7 +283,7 @@ autumnReds.coral; // #fb7185 - Pale accent
 **Winter Palette:**
 
 ```typescript
-import { winter } from "@autumnsgrove/groveengine/ui/nature";
+import { winter } from "@autumnsgrove/lattice/ui/nature";
 
 // Winter - frost, snow, ice + frosted evergreens
 (winter.snow, winter.frost, winter.ice, winter.glacier);
@@ -322,7 +317,7 @@ import {
   isTreeBare,
   pickRandom,
   pickFrom,
-} from "@autumnsgrove/groveengine/ui/nature";
+} from "@autumnsgrove/lattice/ui/nature";
 
 // Get foliage colors mapped to season
 const foliage = getSeasonalGreens(season);
@@ -351,7 +346,7 @@ const specificGreen = pickFrom(greens, ["grove", "meadow"]);
 **Accent Palettes:**
 
 ```typescript
-import { accents } from "@autumnsgrove/groveengine/ui/nature";
+import { accents } from "@autumnsgrove/lattice/ui/nature";
 
 // Mushrooms - fairy tale pops of color
 (accents.mushroom.redCap,
@@ -722,7 +717,7 @@ When Grove Mode is OFF (the default for new visitors), users see familiar terms 
 **The GroveTerm Component Suite:**
 
 ```svelte
-import { GroveTerm, GroveSwap, GroveText, GroveSwapText, GroveIntro } from '@autumnsgrove/groveengine/ui';
+import { GroveTerm, GroveSwap, GroveText, GroveSwapText, GroveIntro } from '@autumnsgrove/lattice/ui';
 import groveTermManifest from '$lib/data/grove-term-manifest.json';
 ```
 
@@ -764,7 +759,7 @@ import groveTermManifest from '$lib/data/grove-term-manifest.json';
 **Grove Mode Store:**
 
 ```svelte
-import { groveModeStore } from '@autumnsgrove/groveengine/ui/stores';
+import { groveModeStore } from '@autumnsgrove/lattice/ui/stores';
 
 // Check current mode
 const isGroveMode = $derived(groveModeStore.current);

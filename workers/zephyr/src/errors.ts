@@ -19,7 +19,7 @@
  */
 
 // =============================================================================
-// TYPE (mirrors GroveErrorDef from @autumnsgrove/groveengine/errors)
+// TYPE (mirrors GroveErrorDef from @autumnsgrove/lattice/errors)
 // =============================================================================
 
 /** Who can fix this error? */

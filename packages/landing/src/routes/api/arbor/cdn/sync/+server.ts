@@ -6,7 +6,7 @@
 
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { storage } from "@autumnsgrove/groveengine/services";
+import { storage } from "@autumnsgrove/lattice/services";
 import { getUserByEmail } from "$lib/server/db";
 
 export const POST: RequestHandler = async ({ locals, platform }) => {

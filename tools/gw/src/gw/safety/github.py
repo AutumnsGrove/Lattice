@@ -69,7 +69,7 @@ class GitHubSafetyConfig:
 
     # Repository context
     owner: str = "AutumnsGrove"
-    repo: str = "GroveEngine"
+    repo: str = "Lattice"
 
     # Rate limit thresholds
     rate_limit_warn_threshold: int = 100  # Warn when remaining < this

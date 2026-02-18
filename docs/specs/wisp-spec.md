@@ -4,7 +4,7 @@ description: Ethical AI writing tool that polishes without replacing
 category: specs
 specCategory: content-community
 icon: wind
-lastUpdated: '2025-12-30'
+lastUpdated: "2025-12-30"
 aliases: []
 tags:
   - writing-assistant
@@ -29,19 +29,19 @@ tags:
           light
 ```
 
-> *A helper, not a writer—and sometimes, a good listener*
+> _A helper, not a writer—and sometimes, a good listener_
 
 ---
 
 # Wisp: Writing Assistant
 
-> *A helper, not a writer, and sometimes, a good listener.*
+> _A helper, not a writer, and sometimes, a good listener._
 
 An ethical AI writing tool that helps users polish their voice without replacing it. Wisp analyzes grammar, tone, and readability but never generates or expands content. Your words, refined, not replaced.
 
 **Public Name:** Wisp
 **Internal Name:** GroveWisp
-**Target:** GroveEngine integration
+**Target:** Lattice integration
 **Last Updated:** December 2025
 
 Like a will-o'-the-wisp in the forest: light, airy, ephemeral. Wisp appears when you need it, offers gentle guidance, and fades when you don't. It never overstays, never overwrites, never replaces your voice. A wisp of help. Nothing more, nothing less.
@@ -54,11 +54,12 @@ Wisp is Grove's ethical AI writing tool. It helps you polish your voice without 
 
 An ethical AI writing tool that helps users polish their voice without replacing it. The assistant analyzes existing content for grammar, tone, and readability - it will **never** generate, expand, or brainstorm content.
 
-**Fireside Mode** extends this philosophy for writers who freeze at the blank page. Through guided conversation, Wisp helps users discover what they want to say, and then organizes *their own words* into a draft. The fire doesn't tell the story. It just creates the space where stories emerge.
+**Fireside Mode** extends this philosophy for writers who freeze at the blank page. Through guided conversation, Wisp helps users discover what they want to say, and then organizes _their own words_ into a draft. The fire doesn't tell the story. It just creates the space where stories emerge.
 
 This specification unifies:
+
 - The original AI Writing Assistant design (AutumnsGrove)
-- The Content Moderation infrastructure patterns (GroveEngine)
+- The Content Moderation infrastructure patterns (Lattice)
 
 ---
 
@@ -66,13 +67,13 @@ This specification unifies:
 
 ### AI is a TOOL, Never a Writer
 
-| Allowed | Forbidden |
-|---------|-----------|
-| Grammar/spelling fixes | "Write a post about X" |
-| Tone analysis | "Expand this to 1000 words" |
-| Readability scoring | Auto-completion |
+| Allowed                 | Forbidden                    |
+| ----------------------- | ---------------------------- |
+| Grammar/spelling fixes  | "Write a post about X"       |
+| Tone analysis           | "Expand this to 1000 words"  |
+| Readability scoring     | Auto-completion              |
 | Word choice suggestions | Any full sentence generation |
-| Structure feedback | Content brainstorming |
+| Structure feedback      | Content brainstorming        |
 
 ### User Agency
 
@@ -85,6 +86,7 @@ This specification unifies:
 ### Privacy First
 
 Following Grove's Content Moderation privacy model:
+
 - Zero Data Retention (ZDR) from inference providers
 - Content stripped of metadata before analysis
 - Immediate deletion after review completes
@@ -98,19 +100,21 @@ Following Grove's Content Moderation privacy model:
 ### Primary Model: DeepSeek V3.2
 
 Selected for:
+
 - Open source (MIT license)
 - Large parameter count for nuanced understanding
 - Hosted by US-based providers with full privacy protections
 
 ### Approved Inference Providers
 
-| Provider | Role | ZDR Policy |
-|----------|------|------------|
-| **Fireworks AI** | Primary | Default for open models |
-| **Cerebras** | Backup | Explicit zero retention |
-| **Groq** | Tertiary | Explicit ZDR toggle |
+| Provider         | Role     | ZDR Policy              |
+| ---------------- | -------- | ----------------------- |
+| **Fireworks AI** | Primary  | Default for open models |
+| **Cerebras**     | Backup   | Explicit zero retention |
+| **Groq**         | Tertiary | Explicit ZDR toggle     |
 
 All providers must meet:
+
 - TLS 1.2+ encryption
 - SOC 2 compliance
 - No training on user data
@@ -118,6 +122,7 @@ All providers must meet:
 ### Fallback Cascade
 
 If DeepSeek V3.2 unavailable:
+
 1. Kimi K2-0905
 2. Llama 3.1 70B
 3. Llama 3.3 70B
@@ -127,10 +132,10 @@ If DeepSeek V3.2 unavailable:
 
 Instead of switching models, users select analysis depth:
 
-| Mode | Description | Token Budget | Use Case |
-|------|-------------|--------------|----------|
-| **Quick** | Lightweight prompt, essential checks | ~1,000 output | Fast iteration |
-| **Thorough** | Detailed prompt, comprehensive analysis | ~2,500 output | Final polish |
+| Mode         | Description                             | Token Budget  | Use Case       |
+| ------------ | --------------------------------------- | ------------- | -------------- |
+| **Quick**    | Lightweight prompt, essential checks    | ~1,000 output | Fast iteration |
+| **Thorough** | Detailed prompt, comprehensive analysis | ~2,500 output | Final polish   |
 
 Same model, different prompt complexity.
 
@@ -141,27 +146,30 @@ Same model, different prompt complexity.
 ### 1. Grammar Analysis (AI-Powered)
 
 **Request:**
+
 ```typescript
 interface GrammarRequest {
   content: string;
-  mode: 'quick' | 'thorough';
+  mode: "quick" | "thorough";
 }
 ```
 
 **Response:**
+
 ```typescript
 interface GrammarResult {
   suggestions: Array<{
-    original: string;        // Text with issue
-    suggestion: string;      // Proposed fix
-    reason: string;          // Brief explanation (1 sentence)
-    severity: 'error' | 'warning' | 'style';
+    original: string; // Text with issue
+    suggestion: string; // Proposed fix
+    reason: string; // Brief explanation (1 sentence)
+    severity: "error" | "warning" | "style";
   }>;
-  overallScore: number;      // 0-100 clarity score
+  overallScore: number; // 0-100 clarity score
 }
 ```
 
 **Severity Levels:**
+
 - `error` - Grammar/spelling mistakes
 - `warning` - Unclear or confusing phrasing
 - `style` - Minor improvements (use sparingly)
@@ -169,25 +177,27 @@ interface GrammarResult {
 ### 2. Tone Analysis (AI-Powered)
 
 **Request:**
+
 ```typescript
 interface ToneRequest {
   content: string;
   context?: {
     title?: string;
-    audience?: 'technical' | 'casual' | 'professional' | string;
+    audience?: "technical" | "casual" | "professional" | string;
   };
 }
 ```
 
 **Response:**
+
 ```typescript
 interface ToneResult {
-  analysis: string;          // 2-3 sentence summary
+  analysis: string; // 2-3 sentence summary
   traits: Array<{
-    trait: string;           // e.g., "formal", "warm", "technical"
-    score: number;           // 0-100
+    trait: string; // e.g., "formal", "warm", "technical"
+    score: number; // 0-100
   }>;
-  suggestions: string[];     // Max 3 observations
+  suggestions: string[]; // Max 3 observations
 }
 ```
 
@@ -197,16 +207,16 @@ Calculated entirely client-side or server-side without AI:
 
 ```typescript
 interface ReadabilityResult {
-  fleschKincaid: number;     // Grade level (e.g., 8.5)
-  readingTime: string;       // "5 min read"
+  fleschKincaid: number; // Grade level (e.g., 8.5)
+  readingTime: string; // "5 min read"
   wordCount: number;
   sentenceCount: number;
   sentenceStats: {
-    average: number;         // Words per sentence
+    average: number; // Words per sentence
     longest: number;
     shortest: number;
   };
-  suggestions: string[];     // Generated from thresholds
+  suggestions: string[]; // Generated from thresholds
 }
 ```
 
@@ -216,11 +226,11 @@ interface ReadabilityResult {
 
 ## Fireside Mode
 
-> *A good listener, not a ghostwriter.*
+> _A good listener, not a ghostwriter._
 
 ### The Problem
 
-Some people freeze at the blank page. "What do I write? Where do I start?" But those same people have no trouble *talking*: to friends, in group chats, over coffee. The ideas are there. The voice is there. The barrier is the blank page itself.
+Some people freeze at the blank page. "What do I write? Where do I start?" But those same people have no trouble _talking_: to friends, in group chats, over coffee. The ideas are there. The voice is there. The barrier is the blank page itself.
 
 ### The Solution
 
@@ -230,12 +240,12 @@ The fire doesn't tell the story. It just creates the space where stories emerge.
 
 ### Philosophy
 
-| Fireside Does | Fireside Never Does |
-|---------------|---------------------|
-| Ask thoughtful questions | Generate content from nothing |
-| Organize YOUR words into a draft | Add ideas you didn't express |
-| Smooth transitions between your thoughts | Expand beyond what you said |
-| Suggest you elaborate ("tell me more") | Take a position on your behalf |
+| Fireside Does                             | Fireside Never Does                      |
+| ----------------------------------------- | ---------------------------------------- |
+| Ask thoughtful questions                  | Generate content from nothing            |
+| Organize YOUR words into a draft          | Add ideas you didn't express             |
+| Smooth transitions between your thoughts  | Expand beyond what you said              |
+| Suggest you elaborate ("tell me more")    | Take a position on your behalf           |
 | Respect minimal answers with short drafts | Pad low-effort responses into full posts |
 
 **Core constraint:** The output cannot exceed the substance of the input. You get out what you put in.
@@ -346,24 +356,17 @@ The fire doesn't tell the story. It just creates the space where stories emerge.
 Wisp offers a rotating selection of conversation starters:
 
 **Open & Warm**
+
 1. "What's been living in your head lately?"
 2. "What surprised you this week?"
 3. "What are you excited about right now?"
 4. "What's something small that made you smile recently?"
 
-**Reflective**
-5. "What's something you've been meaning to write about but haven't found the words for?"
-6. "What would you tell a friend who asked how you're *really* doing?"
-7. "What's a thought you keep turning over?"
+**Reflective** 5. "What's something you've been meaning to write about but haven't found the words for?" 6. "What would you tell a friend who asked how you're _really_ doing?" 7. "What's a thought you keep turning over?"
 
-**Creative & Playful**
-8. "If you could ramble about anything right now, what would it be?"
-9. "What's something you wish more people understood?"
-10. "What did you learn recently that you can't stop thinking about?"
+**Creative & Playful** 8. "If you could ramble about anything right now, what would it be?" 9. "What's something you wish more people understood?" 10. "What did you learn recently that you can't stop thinking about?"
 
-**Returning Writers**
-11. "It's been a while. What's been happening in your world?"
-12. "What are you working on that you'd love to talk about?"
+**Returning Writers** 11. "It's been a while. What's been happening in your world?" 12. "What are you working on that you'd love to talk about?"
 
 Users can also skip the prompt and start with their own opening.
 
@@ -379,13 +382,14 @@ function selectStarterPrompt(userId: string, prompts: string[]): string {
 
   // Select based on seed, but skip recently used prompts
   const recentPrompts = getRecentPrompts(userId, 3); // Last 3 used
-  const available = prompts.filter(p => !recentPrompts.includes(p));
+  const available = prompts.filter((p) => !recentPrompts.includes(p));
 
   return available[seed % available.length];
 }
 ```
 
 This ensures:
+
 - Same user sees same prompt if they reload the same day
 - Different prompt each day
 - Won't repeat the last 3 prompts used
@@ -401,13 +405,13 @@ Fireside has explicit boundaries to prevent misuse:
 
 If a user attempts any of the following, Wisp declines and redirects to the conversational process:
 
-| Blocked Request | Wisp Response |
-|-----------------|---------------|
-| "Write me a post about X" | "I can't write for you, but I'd love to hear what *you* think about X. What draws you to it?" |
-| "Expand this into a full post" | "Let's talk through it instead. What's the main thing you want people to take away?" |
-| "Add some stuff about Y" | "I can only work with what you've told me. Want to tell me about Y?" |
-| "Make this sound smarter" | "Your voice is the whole point. What do you actually want to say?" |
-| "What do you think about X?" | "This is your space. What do *you* think?" |
+| Blocked Request                | Wisp Response                                                                                 |
+| ------------------------------ | --------------------------------------------------------------------------------------------- |
+| "Write me a post about X"      | "I can't write for you, but I'd love to hear what _you_ think about X. What draws you to it?" |
+| "Expand this into a full post" | "Let's talk through it instead. What's the main thing you want people to take away?"          |
+| "Add some stuff about Y"       | "I can only work with what you've told me. Want to tell me about Y?"                          |
+| "Make this sound smarter"      | "Your voice is the whole point. What do you actually want to say?"                            |
+| "What do you think about X?"   | "This is your space. What do _you_ think?"                                                    |
 
 #### Detection Strategy
 
@@ -428,19 +432,22 @@ This layered approach catches obvious cases quickly while handling subtle or nov
 
 #### Soft Constraints
 
-| Constraint | Implementation |
-|------------|----------------|
+| Constraint                 | Implementation                                                                            |
+| -------------------------- | ----------------------------------------------------------------------------------------- |
 | Minimum conversation depth | "Ready to draft" button hidden until: **3+ user messages** AND **150+ total user tokens** |
-| Input/output ratio | Draft length proportional to user input; brief answers = brief draft |
-| No opinion injection | Wisp never contributes its own ideas to the content |
-| No padding | Short responses stay short; Wisp won't embellish |
+| Input/output ratio         | Draft length proportional to user input; brief answers = brief draft                      |
+| No opinion injection       | Wisp never contributes its own ideas to the content                                       |
+| No padding                 | Short responses stay short; Wisp won't embellish                                          |
 
 #### canDraft Logic
 
 ```typescript
 function canDraft(conversation: FiresideMessage[]): boolean {
-  const userMessages = conversation.filter(m => m.role === 'user');
-  const totalUserTokens = userMessages.reduce((sum, m) => sum + estimateTokens(m.content), 0);
+  const userMessages = conversation.filter((m) => m.role === "user");
+  const totalUserTokens = userMessages.reduce(
+    (sum, m) => sum + estimateTokens(m.content),
+    0,
+  );
 
   return userMessages.length >= 3 && totalUserTokens >= 150;
 }
@@ -457,6 +464,7 @@ Every post created through Fireside includes a permanent, non-removable attribut
 ```
 
 **Implementation:**
+
 - Appended to post content at publish time
 - Stored in post metadata: `fireside_assisted: true`
 - Rendered in italics, positioned after post content
@@ -469,9 +477,12 @@ The marker's immutability is enforced at the API level, not just in the editor U
 
 ```typescript
 // In POST /api/posts and PUT /api/posts/:slug
-if (existingPost?.fireside_assisted && !content.includes('~ written fireside with Wisp ~')) {
+if (
+  existingPost?.fireside_assisted &&
+  !content.includes("~ written fireside with Wisp ~")
+) {
   // Re-append marker if removed
-  content = content.trim() + '\n\n*~ written fireside with Wisp ~*';
+  content = content.trim() + "\n\n*~ written fireside with Wisp ~*";
 }
 
 // Prevent clearing the fireside_assisted flag
@@ -490,24 +501,24 @@ This ensures the marker persists even if someone edits the post via API or datab
 
 Fireside follows the same Zero Data Retention policy as all Wisp features:
 
-| Stage | Handling |
-|-------|----------|
-| Conversation in progress | Held in session state only |
-| Draft generation | Content processed, then immediately deleted |
-| After publish/discard | All conversation data purged |
-| What's retained | Only metadata: `fireside_assisted: true`, timestamp |
+| Stage                    | Handling                                            |
+| ------------------------ | --------------------------------------------------- |
+| Conversation in progress | Held in session state only                          |
+| Draft generation         | Content processed, then immediately deleted         |
+| After publish/discard    | All conversation data purged                        |
+| What's retained          | Only metadata: `fireside_assisted: true`, timestamp |
 
-**Note:** Unlike standard Wisp analysis, Fireside conversations are *not* logged to `wisp_requests` on a per-message basis. Only the final draft generation is logged.
+**Note:** Unlike standard Wisp analysis, Fireside conversations are _not_ logged to `wisp_requests` on a per-message basis. Only the final draft generation is logged.
 
 #### Conversation Storage
 
 Conversations are stored **client-side only** during the session:
 
-| Storage Layer | Purpose | Lifetime |
-|---------------|---------|----------|
-| **Svelte component state** | Active conversation | Until component unmounts |
-| **sessionStorage** | Tab persistence | Until tab closes |
-| **Optional: Cloudflare KV** | Crash recovery | 15-minute TTL, encrypted |
+| Storage Layer               | Purpose             | Lifetime                 |
+| --------------------------- | ------------------- | ------------------------ |
+| **Svelte component state**  | Active conversation | Until component unmounts |
+| **sessionStorage**          | Tab persistence     | Until tab closes         |
+| **Optional: Cloudflare KV** | Crash recovery      | 15-minute TTL, encrypted |
 
 **Primary approach:** Client-side `sessionStorage` keyed by `fireside_session_{conversationId}`. This survives page refreshes within the same tab but is automatically cleared when the tab closes.
 
@@ -524,6 +535,7 @@ function generateConversationId(): string {
 ```
 
 This pattern ensures:
+
 - No collisions across concurrent sessions
 - Sortable by creation time (timestamp prefix)
 - Unpredictable for security (UUID suffix)
@@ -531,6 +543,7 @@ This pattern ensures:
 **Crash recovery (optional, off by default):**
 
 For users who enable it, conversations can be persisted to Cloudflare KV with:
+
 - 15-minute TTL (auto-expires)
 - Encrypted at rest
 - Keyed by `fireside_recovery:{user_id}:{session_id}`
@@ -591,16 +604,16 @@ POST /api/grove/wisp/fireside
 
 ```typescript
 interface FiresideMessage {
-  role: 'wisp' | 'user';
+  role: "wisp" | "user";
   content: string;
   timestamp: string;
 }
 
 interface FiresideChatRequest {
-  action: 'start' | 'respond' | 'draft';
-  message?: string;              // User's response (for 'respond')
-  conversation?: FiresideMessage[];  // Full history (for 'respond' and 'draft')
-  starterPrompt?: string;        // Optional custom opener (for 'start')
+  action: "start" | "respond" | "draft";
+  message?: string; // User's response (for 'respond')
+  conversation?: FiresideMessage[]; // Full history (for 'respond' and 'draft')
+  starterPrompt?: string; // Optional custom opener (for 'start')
 }
 ```
 
@@ -609,16 +622,16 @@ interface FiresideChatRequest {
 ```typescript
 // For 'start' and 'respond' actions
 interface FiresideChatResponse {
-  reply: string;                 // Wisp's next question
-  canDraft: boolean;             // Whether enough substance exists
-  conversationId: string;        // Session reference
+  reply: string; // Wisp's next question
+  canDraft: boolean; // Whether enough substance exists
+  conversationId: string; // Session reference
 }
 
 // For 'draft' action
 interface FiresideDraftResponse {
-  title: string;                 // Suggested title
-  content: string;               // Organized post content
-  marker: string;                // "~ written fireside with Wisp ~"
+  title: string; // Suggested title
+  content: string; // Organized post content
+  marker: string; // "~ written fireside with Wisp ~"
   meta: {
     tokensUsed: number;
     cost: number;
@@ -629,10 +642,16 @@ interface FiresideDraftResponse {
 // Error responses
 interface FiresideErrorResponse {
   error: true;
-  code: 'rate_limit' | 'inference_failure' | 'empty_message' | 'session_expired' | 'generation_blocked' | 'content_too_long';
-  message: string;               // Human-readable error
-  retryAfter?: number;           // Seconds until retry (for rate_limit)
-  redirectPrompt?: string;       // Suggested conversation redirect (for generation_blocked)
+  code:
+    | "rate_limit"
+    | "inference_failure"
+    | "empty_message"
+    | "session_expired"
+    | "generation_blocked"
+    | "content_too_long";
+  message: string; // Human-readable error
+  retryAfter?: number; // Seconds until retry (for rate_limit)
+  redirectPrompt?: string; // Suggested conversation redirect (for generation_blocked)
 }
 ```
 
@@ -665,6 +684,7 @@ CREATE INDEX IF NOT EXISTS idx_posts_fireside ON posts(fireside_assisted) WHERE 
 ```
 
 **Backward Compatibility:**
+
 - All new columns have sensible defaults
 - Existing posts automatically have `fireside_assisted = 0`
 - No breaking changes to existing queries
@@ -688,13 +708,13 @@ The Fireside panel replaces the standard editor when active. User can switch bac
 
 #### Keyboard Navigation
 
-| Key | Action |
-|-----|--------|
-| `Tab` | Move focus between input, buttons, and conversation bubbles |
-| `Enter` | Send message (in input) or activate focused button |
-| `Escape` | Close Fireside panel, return to editor |
-| `Cmd/Ctrl + Shift + F` | Toggle Fireside panel |
-| `Arrow Up/Down` | Navigate through conversation history |
+| Key                    | Action                                                      |
+| ---------------------- | ----------------------------------------------------------- |
+| `Tab`                  | Move focus between input, buttons, and conversation bubbles |
+| `Enter`                | Send message (in input) or activate focused button          |
+| `Escape`               | Close Fireside panel, return to editor                      |
+| `Cmd/Ctrl + Shift + F` | Toggle Fireside panel                                       |
+| `Arrow Up/Down`        | Navigate through conversation history                       |
 
 #### Screen Reader Support
 
@@ -715,7 +735,7 @@ const fireVisual = {
    (      )  and tell me what's on your mind
   ~~~~~~~~~~`,
   mobile: `🔥 Fireside with Wisp`,
-  screenReader: 'Fireside conversation mode'
+  screenReader: "Fireside conversation mode",
 };
 ```
 
@@ -738,11 +758,13 @@ Fireside has a unique attack surface: users type free-form text that becomes par
 
 2. **Prompt Structure:**
    - User content always wrapped in clear delimiters:
+
    ```
    USER MESSAGE START ---
    [user content here]
    --- USER MESSAGE END
    ```
+
    - System instructions placed before and after, never interleaved
 
 3. **Output Validation:**
@@ -760,6 +782,7 @@ Fireside has a unique attack surface: users type free-form text that becomes par
 ### Fireside Implementation Phases
 
 #### Phase F1: Core Conversation
+
 - [ ] Fireside chat endpoint (`/api/grove/wisp/fireside`)
 - [ ] Session state management (sessionStorage + optional KV)
 - [ ] Basic question-asking logic
@@ -767,6 +790,7 @@ Fireside has a unique attack surface: users type free-form text that becomes par
 - [ ] Error response handling
 
 #### Phase F2: Draft Generation
+
 - [ ] Conversation → draft prompt engineering
 - [ ] Draft preview UI
 - [ ] Transparency marker injection (server-side enforced)
@@ -774,6 +798,7 @@ Fireside has a unique attack surface: users type free-form text that becomes par
 - [ ] Database migration (`015_wisp_fireside.sql`)
 
 #### Phase F3: Guardrails
+
 - [ ] Client-side keyword pre-flight detection
 - [ ] Server-side intent classification
 - [ ] Minimum depth threshold (`canDraft` logic)
@@ -781,6 +806,7 @@ Fireside has a unique attack surface: users type free-form text that becomes par
 - [ ] "Write for me" redirect responses
 
 #### Phase F4: Polish
+
 - [ ] ASCII art for Fireside states (with mobile/emoji fallback)
 - [ ] Mobile-responsive conversation UI
 - [ ] Keyboard navigation (Tab, Enter, Escape, Arrows)
@@ -789,6 +815,7 @@ Fireside has a unique attack surface: users type free-form text that becomes par
 - [ ] Focus management
 
 #### Phase F5: Testing & Verification
+
 - [ ] **Unit tests:**
   - `canDraft` threshold logic
   - Starter prompt rotation algorithm
@@ -814,14 +841,15 @@ Fireside has a unique attack surface: users type free-form text that becomes par
 
 ### Length Limits
 
-| Limit | Value | Rationale |
-|-------|-------|-----------|
-| Max content | 50,000 chars | ~10k words, reasonable post length |
-| Target tokens | <5,000 input | Cost efficiency |
+| Limit         | Value        | Rationale                          |
+| ------------- | ------------ | ---------------------------------- |
+| Max content   | 50,000 chars | ~10k words, reasonable post length |
+| Target tokens | <5,000 input | Cost efficiency                    |
 
 ### Smart Truncation (for long content)
 
 For posts exceeding ~4,000 tokens, capture:
+
 1. Title + metadata
 2. Opening section (first ~500 words)
 3. Conclusion (last ~300 words)
@@ -832,10 +860,11 @@ This maintains accuracy for typical issues while controlling costs.
 ### Markdown Awareness
 
 Strip before analysis:
-- Code blocks (``` ... ```)
+
+- Code blocks (`...`)
 - Inline code
 - Link URLs (keep link text)
-- Markdown formatting chars (#, *, _, ~)
+- Markdown formatting chars (#, \*, \_, ~)
 - List markers
 
 ---
@@ -853,6 +882,7 @@ Wisp uses the **Songbird Pattern**: a three-layer defense system against prompt 
 See: `docs/specs/songbird-pattern.md` for full implementation details.
 
 **Fireside Mode uses Songbird for:**
+
 - Every user message in conversation
 - The final draft generation request
 
@@ -860,11 +890,11 @@ Together, Canary and Kestrel cost ~$0.0004 per request: negligible insurance aga
 
 ### Rate Limiting
 
-| Limit | Value |
-|-------|-------|
-| Requests per hour | 20 per user |
-| Monthly cost cap | $5 USD per user |
-| Warning threshold | 80% of cap |
+| Limit             | Value           |
+| ----------------- | --------------- |
+| Requests per hour | 20 per user     |
+| Monthly cost cap  | $5 USD per user |
+| Warning threshold | 80% of cap      |
 
 ### Authentication
 
@@ -879,6 +909,7 @@ Together, Canary and Kestrel cost ~$0.0004 per request: negligible insurance aga
 ### Panel Design
 
 Side panel with:
+
 - Collapsible/minimizable state
 - Content length indicator with warnings
 - Mode selector (Quick/Thorough)
@@ -902,6 +933,7 @@ Idle:                    Analyzing:               Success:
 ```
 
 Seasonal rotations for idle state:
+
 - Forest morning
 - Starry grove
 - Mountain vista
@@ -927,8 +959,8 @@ POST /api/grove/wisp
 ```typescript
 interface WispRequest {
   content: string;
-  action: 'grammar' | 'tone' | 'readability' | 'all';
-  mode?: 'quick' | 'thorough';  // Default: 'quick'
+  action: "grammar" | "tone" | "readability" | "all";
+  mode?: "quick" | "thorough"; // Default: 'quick'
   context?: {
     title?: string;
     audience?: string;
@@ -948,20 +980,20 @@ interface WispResponse {
     cost: number;
     model: string;
     provider: string;
-    mode: 'quick' | 'thorough';
+    mode: "quick" | "thorough";
   };
 }
 ```
 
 ### Error Responses
 
-| Status | Meaning |
-|--------|---------|
-| 401 | Not authenticated |
-| 403 | Feature disabled or CSRF invalid |
-| 429 | Rate limit or cost cap exceeded |
-| 400 | Invalid request (content too long, bad action) |
-| 503 | AI service unavailable (all providers down) |
+| Status | Meaning                                        |
+| ------ | ---------------------------------------------- |
+| 401    | Not authenticated                              |
+| 403    | Feature disabled or CSRF invalid               |
+| 429    | Rate limit or cost cap exceeded                |
+| 400    | Invalid request (content too long, bad action) |
+| 503    | AI service unavailable (all providers down)    |
 
 ---
 
@@ -1007,6 +1039,7 @@ Files to create/modify:
 ```
 
 **Key tasks:**
+
 - [ ] Set up Fireworks AI client with ZDR headers
 - [ ] Implement provider fallback logic
 - [ ] Port readability algorithm from existing implementation
@@ -1022,6 +1055,7 @@ Files to create:
 ```
 
 **Key tasks:**
+
 - [ ] Request validation (auth, CSRF, content length)
 - [ ] Rate limiting logic
 - [ ] Prompt construction with injection protection
@@ -1038,6 +1072,7 @@ Files to create:
 ```
 
 **Key tasks:**
+
 - [ ] Panel layout with minimize/expand states
 - [ ] ASCII vibes system with state transitions
 - [ ] Results display with tabbed interface
@@ -1053,6 +1088,7 @@ Files to modify:
 ```
 
 **Key tasks:**
+
 - [ ] Enable/disable toggle (Wisp OFF by default)
 - [ ] Default mode preference
 - [ ] Usage statistics display
@@ -1061,6 +1097,7 @@ Files to modify:
 ### Phase 5: Migration
 
 For existing AutumnsGrove implementation:
+
 - [ ] Remove `src/lib/config/ai-models.js`
 - [ ] Remove `src/routes/api/ai/writing-assist/`
 - [ ] Replace `AIWritingPanel.svelte` with engine's `WispPanel.svelte`
@@ -1073,19 +1110,20 @@ For existing AutumnsGrove implementation:
 
 Using DeepSeek V3.2 via Fireworks AI:
 
-| Usage Level | Monthly Requests | Estimated Cost |
-|-------------|------------------|----------------|
-| Light (10 posts, 3 checks) | 30 | ~$0.01 |
-| Medium (30 posts, 5 checks) | 150 | ~$0.05 |
-| Heavy (50 posts, 10 checks) | 500 | ~$0.15 |
+| Usage Level                 | Monthly Requests | Estimated Cost |
+| --------------------------- | ---------------- | -------------- |
+| Light (10 posts, 3 checks)  | 30               | ~$0.01         |
+| Medium (30 posts, 5 checks) | 150              | ~$0.05         |
+| Heavy (50 posts, 10 checks) | 500              | ~$0.15         |
 
-*Significantly cheaper than Claude models*
+_Significantly cheaper than Claude models_
 
 ---
 
 ## Testing Checklist
 
 ### Unit Tests
+
 - [ ] Readability calculation accuracy
 - [ ] Syllable counting edge cases
 - [ ] Cost calculation
@@ -1093,12 +1131,14 @@ Using DeepSeek V3.2 via Fireworks AI:
 - [ ] Markdown stripping
 
 ### Integration Tests
+
 - [ ] Full analysis flow with mock provider
 - [ ] Rate limiting enforcement
 - [ ] Provider fallback cascade
 - [ ] Settings toggle behavior
 
 ### Manual Tests
+
 - [ ] Various content lengths
 - [ ] Markdown with code blocks
 - [ ] Non-English text handling
@@ -1118,10 +1158,10 @@ Using DeepSeek V3.2 via Fireworks AI:
 ## References
 
 - [Thorn: Content Moderation](/knowledge/specs/thorn-spec)
-- [Grove Naming Guide](https://github.com/AutumnsGrove/GroveEngine/blob/main/docs/grove-naming.md)
+- [Grove Naming Guide](https://github.com/AutumnsGrove/Lattice/blob/main/docs/grove-naming.md)
 
 ---
 
-*Created: December 2025*
-*Naming approved: December 26, 2025*
-*Status: Ready for implementation*
+_Created: December 2025_
+_Naming approved: December 26, 2025_
+_Status: Ready for implementation_

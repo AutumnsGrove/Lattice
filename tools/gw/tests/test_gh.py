@@ -351,7 +351,7 @@ class TestGitHubSafetyConfig:
         """Test default configuration values."""
         config = GitHubSafetyConfig()
         assert config.owner == "AutumnsGrove"
-        assert config.repo == "GroveEngine"
+        assert config.repo == "Lattice"
         assert config.rate_limit_warn_threshold == 100
         assert config.rate_limit_block_threshold == 10
 

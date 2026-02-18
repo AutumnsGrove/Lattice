@@ -4,7 +4,7 @@ description: One identity across all Grove properties with Google OAuth and magi
 category: specs
 specCategory: platform-services
 icon: shieldcheck
-lastUpdated: '2026-01-04'
+lastUpdated: "2026-01-04"
 aliases: []
 tags:
   - authentication
@@ -126,11 +126,11 @@ GroveAuth is a centralized authentication service that handles all authenticatio
 
 ### Component Responsibilities
 
-| Component | Responsibility |
-|-----------|----------------|
-| **GroveAuth** | OAuth flows, magic code, token generation, user verification |
+| Component        | Responsibility                                                                |
+| ---------------- | ----------------------------------------------------------------------------- |
+| **GroveAuth**    | OAuth flows, magic code, token generation, user verification                  |
 | **Client Sites** | Redirect to GroveAuth, exchange codes, validate tokens, manage local sessions |
-| **groveengine** | Helper functions for client sites to integrate with GroveAuth |
+| **lattice**      | Helper functions for client sites to integrate with GroveAuth                 |
 
 ---
 
@@ -178,11 +178,13 @@ GroveAuth is a centralized authentication service that handles all authenticatio
 **Flow**: Authorization Code Grant with PKCE
 
 **Scopes Required**:
+
 - `openid`
 - `email`
 - `profile`
 
 **Data Retrieved**:
+
 - Email address (primary identifier)
 - Name (display purposes)
 - Profile picture URL (optional)
@@ -192,12 +194,14 @@ GroveAuth is a centralized authentication service that handles all authenticatio
 **Purpose**: Fallback for users who prefer email-based auth
 
 **Flow**:
+
 1. User enters email
 2. 6-digit code sent via Resend API
 3. User enters code to verify
 4. Session created on successful verification
 
 **Constraints**:
+
 - Code expires in 10 minutes
 - Rate limit: 3 codes per email per minute
 - Lockout: 5 failed attempts = 15-minute lockout
@@ -327,20 +331,20 @@ https://auth.grove.place
 
 ### Endpoints Overview
 
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
-| GET | `/login` | Login page with provider selection |
-| GET | `/oauth/google` | Initiate Google OAuth |
-| GET | `/oauth/google/callback` | Google OAuth callback |
-| POST | `/magic/send` | Send magic code email |
-| POST | `/magic/verify` | Verify magic code |
-| POST | `/token` | Exchange auth code for tokens |
-| POST | `/token/refresh` | Refresh access token |
-| POST | `/token/revoke` | Revoke refresh token |
-| GET | `/verify` | Verify access token |
-| GET | `/userinfo` | Get current user info |
-| POST | `/logout` | Logout and revoke tokens |
-| GET | `/health` | Health check |
+| Method | Endpoint                 | Purpose                            |
+| ------ | ------------------------ | ---------------------------------- |
+| GET    | `/login`                 | Login page with provider selection |
+| GET    | `/oauth/google`          | Initiate Google OAuth              |
+| GET    | `/oauth/google/callback` | Google OAuth callback              |
+| POST   | `/magic/send`            | Send magic code email              |
+| POST   | `/magic/verify`          | Verify magic code                  |
+| POST   | `/token`                 | Exchange auth code for tokens      |
+| POST   | `/token/refresh`         | Refresh access token               |
+| POST   | `/token/revoke`          | Revoke refresh token               |
+| GET    | `/verify`                | Verify access token                |
+| GET    | `/userinfo`              | Get current user info              |
+| POST   | `/logout`                | Logout and revoke tokens           |
+| GET    | `/health`                | Health check                       |
 
 ---
 
@@ -362,6 +366,7 @@ https://auth.grove.place
 **Response**: HTML login page with Google and Magic Code options
 
 **Error Responses**:
+
 - `400` - Missing required parameters
 - `400` - Invalid client_id
 - `400` - redirect_uri not registered for client
@@ -389,11 +394,13 @@ https://auth.grove.place
 | `state` | State parameter for CSRF verification |
 
 **Success Response**: `302` Redirect to client's `redirect_uri` with:
+
 ```
 {redirect_uri}?code={auth_code}&state={state}
 ```
 
 **Error Response**: `302` Redirect with error:
+
 ```
 {redirect_uri}?error=access_denied&error_description=...&state={state}
 ```
@@ -405,6 +412,7 @@ https://auth.grove.place
 **Purpose**: Send magic code to email
 
 **Request Body**:
+
 ```json
 {
   "email": "admin@example.com",
@@ -414,6 +422,7 @@ https://auth.grove.place
 ```
 
 **Success Response** (`200`):
+
 ```json
 {
   "success": true,
@@ -424,6 +433,7 @@ https://auth.grove.place
 **Note**: Always returns success to prevent email enumeration
 
 **Rate Limit Response** (`429`):
+
 ```json
 {
   "error": "rate_limit",
@@ -439,6 +449,7 @@ https://auth.grove.place
 **Purpose**: Verify magic code and get auth code
 
 **Request Body**:
+
 ```json
 {
   "email": "admin@example.com",
@@ -450,6 +461,7 @@ https://auth.grove.place
 ```
 
 **Success Response** (`200`):
+
 ```json
 {
   "success": true,
@@ -458,6 +470,7 @@ https://auth.grove.place
 ```
 
 **Error Response** (`401`):
+
 ```json
 {
   "error": "invalid_code",
@@ -466,6 +479,7 @@ https://auth.grove.place
 ```
 
 **Lockout Response** (`423`):
+
 ```json
 {
   "error": "account_locked",
@@ -481,6 +495,7 @@ https://auth.grove.place
 **Purpose**: Exchange authorization code for tokens
 
 **Request Headers**:
+
 ```
 Content-Type: application/x-www-form-urlencoded
 ```
@@ -496,6 +511,7 @@ Content-Type: application/x-www-form-urlencoded
 | `code_verifier` | No | PKCE verifier (if challenge was used) |
 
 **Success Response** (`200`):
+
 ```json
 {
   "access_token": "eyJhbGciOiJSUzI1NiIs...",
@@ -507,6 +523,7 @@ Content-Type: application/x-www-form-urlencoded
 ```
 
 **Error Response** (`400`):
+
 ```json
 {
   "error": "invalid_grant",
@@ -521,6 +538,7 @@ Content-Type: application/x-www-form-urlencoded
 **Purpose**: Get new access token using refresh token
 
 **Request Body**:
+
 ```
 grant_type=refresh_token
 refresh_token=dGhpcyBpcyBhIHJlZnJlc2g...
@@ -529,6 +547,7 @@ client_secret=xxx
 ```
 
 **Success Response** (`200`):
+
 ```json
 {
   "access_token": "eyJhbGciOiJSUzI1NiIs...",
@@ -547,6 +566,7 @@ client_secret=xxx
 **Purpose**: Revoke a refresh token
 
 **Request Body**:
+
 ```
 token=dGhpcyBpcyBhIHJlZnJlc2g...
 token_type_hint=refresh_token
@@ -555,6 +575,7 @@ client_secret=xxx
 ```
 
 **Response** (`200`):
+
 ```json
 {
   "success": true
@@ -568,11 +589,13 @@ client_secret=xxx
 **Purpose**: Verify an access token (for client sites to validate)
 
 **Request Headers**:
+
 ```
 Authorization: Bearer {access_token}
 ```
 
 **Success Response** (`200`):
+
 ```json
 {
   "active": true,
@@ -586,6 +609,7 @@ Authorization: Bearer {access_token}
 ```
 
 **Invalid Token Response** (`200`):
+
 ```json
 {
   "active": false
@@ -601,11 +625,13 @@ Authorization: Bearer {access_token}
 **Purpose**: Get current user information
 
 **Request Headers**:
+
 ```
 Authorization: Bearer {access_token}
 ```
 
 **Success Response** (`200`):
+
 ```json
 {
   "sub": "user-uuid",
@@ -617,6 +643,7 @@ Authorization: Bearer {access_token}
 ```
 
 **Error Response** (`401`):
+
 ```json
 {
   "error": "invalid_token",
@@ -631,11 +658,13 @@ Authorization: Bearer {access_token}
 **Purpose**: Logout user and revoke all tokens
 
 **Request Headers**:
+
 ```
 Authorization: Bearer {access_token}
 ```
 
 **Request Body** (optional):
+
 ```json
 {
   "redirect_uri": "https://autumnsgrove.place"
@@ -643,6 +672,7 @@ Authorization: Bearer {access_token}
 ```
 
 **Response** (`200`):
+
 ```json
 {
   "success": true,
@@ -657,6 +687,7 @@ Authorization: Bearer {access_token}
 **Purpose**: Health check endpoint
 
 **Response** (`200`):
+
 ```json
 {
   "status": "healthy",
@@ -796,15 +827,15 @@ function redirectToLogin() {
   const codeChallenge = await sha256(codeVerifier);
 
   // Store state and verifier in session/cookie
-  setCookie('auth_state', state);
-  setCookie('code_verifier', codeVerifier);
+  setCookie("auth_state", state);
+  setCookie("code_verifier", codeVerifier);
 
   const params = new URLSearchParams({
-    client_id: 'autumnsgrove',
-    redirect_uri: 'https://autumnsgrove.place/auth/callback',
+    client_id: "autumnsgrove",
+    redirect_uri: "https://autumnsgrove.place/auth/callback",
     state: state,
     code_challenge: codeChallenge,
-    code_challenge_method: 'S256'
+    code_challenge_method: "S256",
   });
 
   redirect(`https://auth.grove.place/login?${params}`);
@@ -817,51 +848,51 @@ function redirectToLogin() {
 // In your site's /auth/callback handler
 async function handleCallback(request) {
   const url = new URL(request.url);
-  const code = url.searchParams.get('code');
-  const state = url.searchParams.get('state');
-  const error = url.searchParams.get('error');
+  const code = url.searchParams.get("code");
+  const state = url.searchParams.get("state");
+  const error = url.searchParams.get("error");
 
   // Check for errors
   if (error) {
-    return redirect('/login?error=' + error);
+    return redirect("/login?error=" + error);
   }
 
   // Verify state matches
-  const savedState = getCookie('auth_state');
+  const savedState = getCookie("auth_state");
   if (state !== savedState) {
-    return redirect('/login?error=invalid_state');
+    return redirect("/login?error=invalid_state");
   }
 
   // Get code verifier
-  const codeVerifier = getCookie('code_verifier');
+  const codeVerifier = getCookie("code_verifier");
 
   // Exchange code for tokens
-  const tokenResponse = await fetch('https://auth.grove.place/token', {
-    method: 'POST',
+  const tokenResponse = await fetch("https://auth.grove.place/token", {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
+      "Content-Type": "application/x-www-form-urlencoded",
     },
     body: new URLSearchParams({
-      grant_type: 'authorization_code',
+      grant_type: "authorization_code",
       code: code,
-      redirect_uri: 'https://autumnsgrove.place/auth/callback',
-      client_id: 'autumnsgrove',
+      redirect_uri: "https://autumnsgrove.place/auth/callback",
+      client_id: "autumnsgrove",
       client_secret: env.GROVEAUTH_CLIENT_SECRET,
-      code_verifier: codeVerifier
-    })
+      code_verifier: codeVerifier,
+    }),
   });
 
   const tokens = await tokenResponse.json();
 
   if (!tokenResponse.ok) {
-    return redirect('/login?error=' + tokens.error);
+    return redirect("/login?error=" + tokens.error);
   }
 
   // Verify token and get user info
-  const userResponse = await fetch('https://auth.grove.place/userinfo', {
+  const userResponse = await fetch("https://auth.grove.place/userinfo", {
     headers: {
-      'Authorization': `Bearer ${tokens.access_token}`
-    }
+      Authorization: `Bearer ${tokens.access_token}`,
+    },
   });
 
   const user = await userResponse.json();
@@ -870,10 +901,10 @@ async function handleCallback(request) {
   const sessionToken = await createLocalSession(user, tokens);
 
   // Set session cookie and redirect to admin
-  return redirect('/admin', {
+  return redirect("/admin", {
     headers: {
-      'Set-Cookie': `session=${sessionToken}; HttpOnly; Secure; SameSite=Lax; Path=/`
-    }
+      "Set-Cookie": `session=${sessionToken}; HttpOnly; Secure; SameSite=Lax; Path=/`,
+    },
   });
 }
 ```
@@ -883,17 +914,17 @@ async function handleCallback(request) {
 ```typescript
 // In your site's hooks or middleware
 async function verifyAuth(request) {
-  const sessionToken = getCookie('session');
+  const sessionToken = getCookie("session");
 
   if (!sessionToken) {
     return null;
   }
 
   // Verify with GroveAuth
-  const response = await fetch('https://auth.grove.place/verify', {
+  const response = await fetch("https://auth.grove.place/verify", {
     headers: {
-      'Authorization': `Bearer ${sessionToken}`
-    }
+      Authorization: `Bearer ${sessionToken}`,
+    },
   });
 
   const result = await response.json();
@@ -906,12 +937,12 @@ async function verifyAuth(request) {
 }
 ```
 
-### groveengine Integration Helpers
+### lattice Integration Helpers
 
-The following helpers should be added to `@autumnsgrove/groveengine` for easy integration:
+The following helpers should be added to `@autumnsgrove/lattice` for easy integration:
 
 ```typescript
-// @autumnsgrove/groveengine/auth
+// @autumnsgrove/lattice/auth
 
 export interface GroveAuthConfig {
   clientId: string;
@@ -981,12 +1012,12 @@ export interface GroveAuthClient {
 
 ### Rate Limiting
 
-| Endpoint | Limit |
-|----------|-------|
-| `/magic/send` | 3 per email per minute, 10 per IP per minute |
-| `/magic/verify` | 5 attempts before 15-min lockout |
-| `/token` | 20 per client per minute |
-| `/verify` | 100 per client per minute |
+| Endpoint        | Limit                                        |
+| --------------- | -------------------------------------------- |
+| `/magic/send`   | 3 per email per minute, 10 per IP per minute |
+| `/magic/verify` | 5 attempts before 15-min lockout             |
+| `/token`        | 20 per client per minute                     |
+| `/verify`       | 100 per client per minute                    |
 
 ### Security Headers
 
@@ -1003,6 +1034,7 @@ Referrer-Policy: strict-origin-when-cross-origin
 ### Audit Logging
 
 Log all authentication events:
+
 - Successful logins (provider, user, client, IP)
 - Failed login attempts (email, IP, reason)
 - Token exchanges
@@ -1039,9 +1071,9 @@ database_id = "your-database-id"
 
 ### Environment Variables by Environment
 
-| Variable | Development | Production |
-|----------|-------------|------------|
-| `AUTH_BASE_URL` | `http://localhost:8787` | `https://auth.grove.place` |
+| Variable          | Development             | Production                       |
+| ----------------- | ----------------------- | -------------------------------- |
+| `AUTH_BASE_URL`   | `http://localhost:8787` | `https://auth.grove.place`       |
 | `ALLOWED_ORIGINS` | `http://localhost:5173` | `https://autumnsgrove.place,...` |
 
 ---
@@ -1162,17 +1194,17 @@ groveauth/
 
 ## Glossary
 
-| Term | Definition |
-|------|------------|
-| **Access Token** | Short-lived JWT used to access protected resources |
-| **Refresh Token** | Long-lived opaque token used to get new access tokens |
-| **Authorization Code** | Short-lived code exchanged for tokens |
-| **PKCE** | Proof Key for Code Exchange - prevents code interception |
-| **Client** | A registered application that uses GroveAuth |
-| **Provider** | Authentication method (Google, Magic Code) |
+| Term                   | Definition                                               |
+| ---------------------- | -------------------------------------------------------- |
+| **Access Token**       | Short-lived JWT used to access protected resources       |
+| **Refresh Token**      | Long-lived opaque token used to get new access tokens    |
+| **Authorization Code** | Short-lived code exchanged for tokens                    |
+| **PKCE**               | Proof Key for Code Exchange - prevents code interception |
+| **Client**             | A registered application that uses GroveAuth             |
+| **Provider**           | Authentication method (Google, Magic Code)               |
 
 ---
 
-*Spec Version: 1.0*
-*Created: 2025-01-15*
-*Author: Claude (with guidance from Autumn)*
+_Spec Version: 1.0_
+_Created: 2025-01-15_
+_Author: Claude (with guidance from Autumn)_

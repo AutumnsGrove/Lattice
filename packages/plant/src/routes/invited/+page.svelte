@@ -7,8 +7,8 @@
 	 * sign-in form so they can get started with one click.
 	 */
 
-	import { GlassCard } from "@autumnsgrove/groveengine/ui";
-	import { Sparkles, Mail, Check, Loader2, Heart, Leaf } from "@autumnsgrove/groveengine/ui/icons";
+	import { GlassCard } from "@autumnsgrove/lattice/ui";
+	import { Sparkles, Mail, Check, Loader2, Heart, Leaf } from "@autumnsgrove/lattice/ui/icons";
 
 	let { data } = $props();
 

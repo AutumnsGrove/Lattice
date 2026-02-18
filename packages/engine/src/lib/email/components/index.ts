@@ -11,7 +11,7 @@
  *   GroveButton,
  *   GroveHeading,
  *   GroveParagraph,
- * } from '@autumnsgrove/groveengine/email/components';
+ * } from '@autumnsgrove/lattice/email/components';
  *
  * export function WelcomeEmail({ name }: { name: string }) {
  *   return (

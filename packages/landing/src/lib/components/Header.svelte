@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Header as EngineHeader } from '@autumnsgrove/groveengine/ui/chrome';
+	import { Header as EngineHeader } from '@autumnsgrove/lattice/ui/chrome';
 	import {
 		LANDING_MOBILE_RESOURCE_LINKS,
 		LANDING_MOBILE_CONNECT_LINKS
-	} from '@autumnsgrove/groveengine/ui/chrome';
-	import type { MaxWidth, HeaderUser } from '@autumnsgrove/groveengine/ui/chrome';
+	} from '@autumnsgrove/lattice/ui/chrome';
+	import type { MaxWidth, HeaderUser } from '@autumnsgrove/lattice/ui/chrome';
 
 	interface Props {
 		maxWidth?: MaxWidth;
