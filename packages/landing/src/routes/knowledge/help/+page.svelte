@@ -101,7 +101,7 @@
             <!-- Articles Grid -->
             <div class="grid gap-4">
               {#each sectionArticles as article}
-                <article class="p-5 rounded-xl bg-white/80 dark:bg-bark-800/80 backdrop-blur-sm shadow-sm border border-emerald-200/50 dark:border-bark-700 hover:shadow-md hover:border-emerald-300 dark:hover:border-emerald-700/50 focus-within:shadow-md focus-within:border-emerald-300 dark:focus-within:border-emerald-700/50 transition-all motion-reduce:transition-none">
+                <article class="p-5 rounded-xl bg-white/80 dark:bg-cream-100/80 backdrop-blur-sm shadow-sm border border-emerald-200/50 dark:border-cream-300 hover:shadow-md hover:border-emerald-300 dark:hover:border-emerald-700/50 focus-within:shadow-md focus-within:border-emerald-300 dark:focus-within:border-emerald-700/50 transition-all motion-reduce:transition-none">
                   <h3 class="text-lg font-semibold text-foreground mb-2">
                     <a href="/knowledge/help/{article.slug}" class="hover:text-emerald-600 dark:hover:text-emerald-400 focus-visible:outline-none focus-visible:text-emerald-600 dark:focus-visible:text-emerald-400 transition-colors motion-reduce:transition-none">
                       {article.title}
@@ -141,12 +141,12 @@
   </section>
 
   <!-- Links -->
-  <section class="py-8 px-6 bg-white/50 dark:bg-bark-900/50 backdrop-blur-sm border-t border-divider">
+  <section class="py-8 px-6 bg-white/50 dark:bg-cream-50/50 backdrop-blur-sm border-t border-divider">
     <div class="max-w-4xl mx-auto flex flex-wrap justify-center gap-4">
-      <a href="/knowledge" class="px-4 py-2 rounded-lg bg-cream-100 dark:bg-bark-800 text-foreground-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 transition-colors motion-reduce:transition-none">
+      <a href="/knowledge" class="px-4 py-2 rounded-lg bg-cream-100 dark:bg-cream-200 text-foreground-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 transition-colors motion-reduce:transition-none">
         ← Knowledge Base
       </a>
-      <a href="/knowledge/specs" class="px-4 py-2 rounded-lg bg-cream-100 dark:bg-bark-800 text-foreground-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 transition-colors motion-reduce:transition-none">
+      <a href="/knowledge/specs" class="px-4 py-2 rounded-lg bg-cream-100 dark:bg-cream-200 text-foreground-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 transition-colors motion-reduce:transition-none">
         Technical Specs →
       </a>
     </div>

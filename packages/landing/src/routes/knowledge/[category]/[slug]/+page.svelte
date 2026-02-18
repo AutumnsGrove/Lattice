@@ -179,7 +179,7 @@
           <RelatedArticles articles={relatedArticles} />
 
           <!-- Feedback -->
-          <div class="mt-12 pt-8 border-t border-bark-200 dark:border-bark-700">
+          <div class="mt-12 pt-8 border-t border-bark-200 dark:border-cream-300">
             <Trace prompt="Was this article helpful?" />
           </div>
 

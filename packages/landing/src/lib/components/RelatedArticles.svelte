@@ -28,7 +28,7 @@
         <a
           href="/knowledge/{article.category}/{article.slug}"
           aria-label="Read article: {article.title}"
-          class="group p-4 rounded-xl bg-white/80 dark:bg-bark-800/60 backdrop-blur-sm border border-slate-200/50 dark:border-bark-700/50 hover:border-slate-300 dark:hover:border-bark-600 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-grove-green focus-visible:ring-offset-2 transition-all motion-reduce:transition-none"
+          class="group p-4 rounded-xl bg-white/80 dark:bg-cream-100/60 backdrop-blur-sm border border-slate-200/50 dark:border-cream-300/50 hover:border-slate-300 dark:hover:border-cream-400 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-grove-green focus-visible:ring-offset-2 transition-all motion-reduce:transition-none"
         >
           <div class="flex items-start gap-3">
             <div aria-hidden="true" class="w-8 h-8 rounded-lg {colors.iconBg} {colors.iconBgDark} flex items-center justify-center flex-shrink-0">
