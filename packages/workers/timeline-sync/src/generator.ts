@@ -147,7 +147,7 @@ export async function processTenantTimeline(
 
     // 4. Get historical context
     const repos = [...new Set(commits.map((c) => c.repo))];
-    let historicalContext = await getHistoricalContext(
+    const historicalContext = await getHistoricalContext(
       env.DB,
       config.tenantId,
       targetDate,

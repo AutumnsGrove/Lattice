@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { Dialog as DialogPrimitive } from 'bits-ui';
-	import { X, BookOpen, HelpCircle } from 'lucide-svelte';
-	import { cn } from '$lib/ui/utils';
-	import GlassCard from '../GlassCard.svelte';
-	import Button from '../Button.svelte';
-	import { DialogOverlay } from '$lib/ui/components/primitives/dialog';
-	import { sanitizeMarkdown } from '$lib/utils/sanitize';
-	import type { WaystoneExcerpt } from './types';
+	import { Dialog as DialogPrimitive } from "bits-ui";
+	import { X, BookOpen, HelpCircle } from "lucide-svelte";
+	import { cn } from "$lib/ui/utils";
+	import GlassCard from "../GlassCard.svelte";
+	import Button from "../Button.svelte";
+	import { DialogOverlay } from "$lib/ui/components/primitives/dialog";
+	import { sanitizeMarkdown } from "$lib/utils/sanitize";
+	import type { WaystoneExcerpt } from "./types";
 
 	/**
 	 * WaystonePopup - In-context help overlay for Waystone components
@@ -46,7 +46,7 @@
 		fullArticleUrl,
 		loading = false,
 		error = null,
-		onclose
+		onclose,
 	}: Props = $props();
 
 	function handleOpenChange(isOpen: boolean) {
@@ -71,18 +71,20 @@
 		<!-- Centered in viewport on mobile, offset for sidebar on desktop (sidebar is 256px, so offset by 128px) -->
 		<DialogPrimitive.Content
 			class={cn(
-				'fixed left-[50%] md:left-[calc(50%+128px)] top-[50%] z-grove-modal w-full max-w-lg translate-x-[-50%] translate-y-[-50%] p-4 outline-none',
-				'data-[state=open]:animate-in data-[state=closed]:animate-out',
-				'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
-				'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
-				'data-[state=closed]:slide-out-to-top-[2%] data-[state=open]:slide-in-from-top-[2%]'
+				"fixed left-[50%] md:left-[calc(50%+128px)] top-[50%] z-grove-modal w-full max-w-lg translate-x-[-50%] translate-y-[-50%] p-4 outline-none",
+				"data-[state=open]:animate-in data-[state=closed]:animate-out",
+				"data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+				"data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
+				"data-[state=closed]:slide-out-to-top-[2%] data-[state=open]:slide-in-from-top-[2%]",
 			)}
 			aria-labelledby="waystone-popup-title"
 			aria-describedby="waystone-popup-description"
 		>
 			<GlassCard variant="frosted" flush class="overflow-hidden max-h-[70vh] flex flex-col">
 				<!-- Header -->
-				<div class="flex-shrink-0 px-6 pt-5 pb-4 flex items-start gap-4 border-b border-white/20 dark:border-bark-700/30">
+				<div
+					class="flex-shrink-0 px-6 pt-5 pb-4 flex items-start gap-4 border-b border-white/20 dark:border-bark-700/30"
+				>
 					<div class="flex-shrink-0 p-2.5 rounded-full bg-accent/10 dark:bg-accent/20">
 						<HelpCircle class="w-5 h-5 text-accent-muted" />
 					</div>
@@ -145,20 +147,19 @@
 						</p>
 					{:else if excerpt}
 						<!-- Rendered first section HTML -->
-						<div
-							class="prose prose-sm prose-slate dark:prose-invert max-w-none waystone-content"
-						>
+						<div class="prose prose-sm prose-slate dark:prose-invert max-w-none waystone-content">
+							<!-- eslint-disable-next-line svelte/no-at-html-tags -- sanitized markdown output -->
 							{@html sanitizeMarkdown(excerpt.firstSection)}
 						</div>
 					{:else}
-						<p class="text-sm text-muted-foreground">
-							No help content available for this topic.
-						</p>
+						<p class="text-sm text-muted-foreground">No help content available for this topic.</p>
 					{/if}
 				</div>
 
 				<!-- Footer with link to full article - flex-shrink-0 ensures always visible -->
-				<div class="flex-shrink-0 px-6 py-4 bg-cream-100/70 dark:bg-bark-800/30 border-t border-white/20 dark:border-bark-700/30 flex items-center justify-between">
+				<div
+					class="flex-shrink-0 px-6 py-4 bg-cream-100/70 dark:bg-bark-800/30 border-t border-white/20 dark:border-bark-700/30 flex items-center justify-between"
+				>
 					<div class="flex items-center gap-2 text-sm text-muted-foreground">
 						{#if excerpt?.readingTime}
 							<BookOpen class="w-4 h-4" />
@@ -166,9 +167,7 @@
 						{/if}
 					</div>
 					<div class="flex items-center gap-3">
-						<Button variant="ghost" size="sm" onclick={handleClose}>
-							Close
-						</Button>
+						<Button variant="ghost" size="sm" onclick={handleClose}>Close</Button>
 						<a
 							href={fullArticleUrl}
 							target="_blank"
@@ -237,8 +236,8 @@
 
 	/* Respect reduced motion */
 	@media (prefers-reduced-motion: reduce) {
-		:global([data-state='open']),
-		:global([data-state='closed']) {
+		:global([data-state="open"]),
+		:global([data-state="closed"]) {
 			animation: none !important;
 		}
 	}

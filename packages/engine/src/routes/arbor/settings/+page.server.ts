@@ -34,8 +34,8 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
 
   // Wayfinder-only data for greenhouse admin
   let greenhouseTenants: GreenhouseTenant[] = [];
-  let tenantNames: Record<string, string> = {};
-  let availableTenants: Record<string, string> = {};
+  const tenantNames: Record<string, string> = {};
+  const availableTenants: Record<string, string> = {};
   let featureFlags: FeatureFlagSummary[] = [];
 
   const userIsWayfinder = isWayfinder(locals.user?.email);

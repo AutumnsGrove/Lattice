@@ -2,6 +2,7 @@
 	import { Separator as SeparatorPrimitive } from "bits-ui";
 	import { cn } from "$lib/utils";
 
+	// svelte-ignore custom_element_props_identifier
 	let {
 		ref = $bindable(null),
 		class: className,
@@ -15,7 +16,7 @@
 	class={cn(
 		"bg-border shrink-0",
 		orientation === "horizontal" ? "h-[1px] w-full" : "min-h-full w-[1px]",
-		className
+		className,
 	)}
 	{orientation}
 	{...restProps}

@@ -13,7 +13,7 @@ const mockFetch = vi.fn();
 vi.stubGlobal("fetch", mockFetch);
 
 // We'll import the default export after mocking
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 let worker: any;
 
 const VALID_RSS = `<?xml version="1.0" encoding="UTF-8"?>

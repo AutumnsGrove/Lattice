@@ -3,6 +3,7 @@
 	import ChevronDown from "@lucide/svelte/icons/chevron-down";
 	import { cn } from "$lib/utils";
 
+	// svelte-ignore custom_element_props_identifier
 	let {
 		ref = $bindable(null),
 		class: className,
@@ -19,7 +20,7 @@
 		bind:ref
 		class={cn(
 			"flex flex-1 items-center justify-between py-4 font-medium transition-all hover:underline [&[data-state=open]>svg]:rotate-180",
-			className
+			className,
 		)}
 		{...restProps}
 	>

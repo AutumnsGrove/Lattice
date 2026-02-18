@@ -2,6 +2,7 @@
 	import { Dialog as DialogPrimitive } from "bits-ui";
 	import { cn } from "$lib/utils";
 
+	// svelte-ignore custom_element_props_identifier
 	let {
 		ref = $bindable(null),
 		class: className,

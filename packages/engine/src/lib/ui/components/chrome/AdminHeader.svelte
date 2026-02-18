@@ -19,12 +19,12 @@
 	 * - Mobile-responsive with horizontal scroll on tabs
 	 */
 
-	import { page } from '$app/state';
-	import ThemeToggle from './ThemeToggle.svelte';
-	import { Logo } from '../ui';
-	import { LogOut } from 'lucide-svelte';
-	import type { AdminTab, MaxWidth } from './types';
-	import type { Snippet } from 'svelte';
+	import { page } from "$app/state";
+	import ThemeToggle from "./ThemeToggle.svelte";
+	import { Logo } from "../ui";
+	import { LogOut } from "lucide-svelte";
+	import type { AdminTab, MaxWidth } from "./types";
+	import type { Snippet } from "svelte";
 
 	interface Props {
 		/** Tab navigation items */
@@ -40,36 +40,36 @@
 		/** Logout callback function (use this OR logoutHref) */
 		onLogout?: () => void;
 		/** Content max width */
-		maxWidth?: MaxWidth | 'full';
+		maxWidth?: MaxWidth | "full";
 		/** Custom accent color for active tab indicator (CSS color value) */
 		accentColor?: string;
 	}
 
 	let {
 		tabs,
-		brandTitle = 'Admin',
+		brandTitle = "Admin",
 		brandLogo,
 		user,
 		logoutHref,
 		onLogout,
-		maxWidth = 'wide',
-		accentColor
+		maxWidth = "wide",
+		accentColor,
 	}: Props = $props();
 
 	// Determine current page for highlighting active tab
 	let currentPath = $derived(page.url.pathname);
 
-	const maxWidthClass: Record<MaxWidth | 'full', string> = {
-		narrow: 'max-w-3xl',
-		default: 'max-w-4xl',
-		wide: 'max-w-5xl',
-		full: 'max-w-7xl'
+	const maxWidthClass: Record<MaxWidth | "full", string> = {
+		narrow: "max-w-3xl",
+		default: "max-w-4xl",
+		wide: "max-w-5xl",
+		full: "max-w-7xl",
 	};
 
 	function isActiveTab(href: string): boolean {
 		// Exact match for root arbor path
-		if (href === '/arbor') {
-			return currentPath === '/arbor';
+		if (href === "/arbor") {
+			return currentPath === "/arbor";
 		}
 		// Prefix match for sub-paths
 		return currentPath.startsWith(href);
@@ -93,7 +93,9 @@
 				{:else}
 					<Logo size="md" interactive={false} />
 				{/if}
-				<span class="font-serif text-lg text-foreground group-hover:text-accent-muted transition-colors">
+				<span
+					class="font-serif text-lg text-foreground group-hover:text-accent-muted transition-colors"
+				>
 					{brandTitle}
 				</span>
 			</a>
@@ -138,13 +140,15 @@
 					href={tab.href}
 					class="flex items-center gap-2 px-4 py-3 border-b-2 text-sm font-sans font-medium whitespace-nowrap transition-colors
 						{active
-							? 'border-current text-accent-muted'
-							: 'border-transparent text-foreground-muted hover:text-foreground hover:border-foreground/20'}"
-					style={active && accentColor ? `color: ${accentColor}; border-color: ${accentColor};` : ''}
-					aria-current={active ? 'page' : undefined}
+						? 'border-current text-accent-muted'
+						: 'border-transparent text-foreground-muted hover:text-foreground hover:border-foreground/20'}"
+					style={active && accentColor
+						? `color: ${accentColor}; border-color: ${accentColor};`
+						: ""}
+					aria-current={active ? "page" : undefined}
 				>
 					{#if tab.icon}
-						<svelte:component this={tab.icon} class="w-4 h-4" />
+						<tab.icon class="w-4 h-4" />
 					{/if}
 					<span>{tab.label}</span>
 				</a>

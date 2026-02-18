@@ -28,20 +28,15 @@
 		[key: string]: unknown;
 	}
 
-	let {
-		variant = "default",
-		class: className,
-		children,
-		onclick,
-		...restProps
-	}: Props = $props();
+	// svelte-ignore custom_element_props_identifier
+	let { variant = "default", class: className, children, onclick, ...restProps }: Props = $props();
 
 	// Map tag variant to secondary styling
 	const variantMap: Record<BadgeVariant, "default" | "secondary" | "destructive"> = {
 		default: "default",
 		secondary: "secondary",
 		destructive: "destructive",
-		tag: "secondary"
+		tag: "secondary",
 	};
 
 	const shadcnVariant = $derived(variantMap[variant]);

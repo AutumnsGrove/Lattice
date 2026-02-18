@@ -19,7 +19,7 @@ interface NavPage {
 
 export const load: LayoutServerLoad = async ({ locals, platform }) => {
   // Default site settings
-  let siteSettings: SiteSettings = { font_family: "lexend" };
+  const siteSettings: SiteSettings = { font_family: "lexend" };
   // Navigation pages (pages with show_in_nav enabled)
   let navPages: NavPage[] = [];
   // Count of enabled curios (for pages admin UI - curios share the nav page limit)

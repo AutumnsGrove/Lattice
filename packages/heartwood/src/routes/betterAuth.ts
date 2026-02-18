@@ -277,7 +277,7 @@ betterAuthRoutes.all("/*", async (c) => {
         try {
           // Extract user info from response if available (for registration/deletion)
           let userId: string | undefined;
-          let details: Record<string, unknown> = {
+          const details: Record<string, unknown> = {
             statusCode: response.status,
           };
 

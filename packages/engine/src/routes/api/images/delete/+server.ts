@@ -69,7 +69,7 @@ export const DELETE: RequestHandler = async ({ request, platform, locals }) => {
     }
 
     // Comprehensive key sanitization to prevent directory traversal
-    let sanitizedKey = key
+    const sanitizedKey = key
       .replace(/\.\./g, "") // Remove parent directory traversal
       .replace(/^\/+/, "") // Remove leading slashes
       .replace(/\/\/+/g, "/") // Remove consecutive slashes

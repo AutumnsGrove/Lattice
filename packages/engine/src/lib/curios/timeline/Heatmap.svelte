@@ -16,6 +16,7 @@
 		days?: number;
 	}
 
+	// svelte-ignore custom_element_props_identifier
 	const props: Props = $props();
 
 	// Derived props for proper Svelte 5 reactivity
@@ -25,8 +26,8 @@
 	// Format date as YYYY-MM-DD in local timezone
 	function formatDateKey(date: Date): string {
 		const year = date.getFullYear();
-		const month = String(date.getMonth() + 1).padStart(2, '0');
-		const day = String(date.getDate()).padStart(2, '0');
+		const month = String(date.getMonth() + 1).padStart(2, "0");
+		const day = String(date.getDate()).padStart(2, "0");
 		return `${year}-${month}-${day}`;
 	}
 
@@ -64,7 +65,7 @@
 			week.push({
 				date: dateStr,
 				count,
-				dayOfWeek: currentDate.getDay()
+				dayOfWeek: currentDate.getDay(),
 			});
 
 			if (week.length === 7) {
@@ -84,20 +85,20 @@
 	}
 
 	function getColorClass(count: number): string {
-		if (count === 0) return 'level-0';
-		if (count <= 2) return 'level-1';
-		if (count <= 5) return 'level-2';
-		if (count <= 10) return 'level-3';
-		return 'level-4';
+		if (count === 0) return "level-0";
+		if (count <= 2) return "level-1";
+		if (count <= 5) return "level-2";
+		if (count <= 10) return "level-3";
+		return "level-4";
 	}
 
 	function formatDate(dateStr: string): string {
-		const date = new Date(dateStr + 'T00:00:00');
-		return date.toLocaleDateString('en-US', {
-			weekday: 'short',
-			month: 'short',
-			day: 'numeric',
-			year: 'numeric'
+		const date = new Date(dateStr + "T00:00:00");
+		return date.toLocaleDateString("en-US", {
+			weekday: "short",
+			month: "short",
+			day: "numeric",
+			year: "numeric",
 		});
 	}
 
@@ -226,17 +227,37 @@
 		outline: 1px solid #666;
 	}
 	/* Light mode colors - GitHub green */
-	.level-0 { background: #ebedf0; }
-	.level-1 { background: #9be9a8; }
-	.level-2 { background: #40c463; }
-	.level-3 { background: #30a14e; }
-	.level-4 { background: #216e39; }
+	.level-0 {
+		background: #ebedf0;
+	}
+	.level-1 {
+		background: #9be9a8;
+	}
+	.level-2 {
+		background: #40c463;
+	}
+	.level-3 {
+		background: #30a14e;
+	}
+	.level-4 {
+		background: #216e39;
+	}
 	/* Dark mode colors */
-	:global(.dark) .level-0 { background: #161b22; }
-	:global(.dark) .level-1 { background: #0e4429; }
-	:global(.dark) .level-2 { background: #006d32; }
-	:global(.dark) .level-3 { background: #26a641; }
-	:global(.dark) .level-4 { background: #39d353; }
+	:global(.dark) .level-0 {
+		background: #161b22;
+	}
+	:global(.dark) .level-1 {
+		background: #0e4429;
+	}
+	:global(.dark) .level-2 {
+		background: #006d32;
+	}
+	:global(.dark) .level-3 {
+		background: #26a641;
+	}
+	:global(.dark) .level-4 {
+		background: #39d353;
+	}
 	.heatmap-legend {
 		display: flex;
 		align-items: center;

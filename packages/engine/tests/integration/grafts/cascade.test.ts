@@ -548,7 +548,7 @@ describe("Grafts Error Handling", () => {
   it("continues loading other grafts when one flag fails", async () => {
     // Arrange: Set up mixed success/failure scenario
     const db = createMockD1();
-    let callCount = 0;
+    const callCount = 0;
 
     db.prepare = vi.fn((sql: string) => {
       if (sql.includes("SELECT id FROM feature_flags")) {

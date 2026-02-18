@@ -5,7 +5,7 @@
 		CardTitle,
 		CardDescription,
 		CardContent,
-		CardFooter
+		CardFooter,
 	} from "$lib/ui/components/primitives/card";
 	import type { Snippet } from "svelte";
 	import { cn } from "$lib/ui/utils";
@@ -53,6 +53,7 @@
 		[key: string]: any; // Allow any additional props to be forwarded
 	}
 
+	// svelte-ignore custom_element_props_identifier
 	let {
 		title,
 		description,
@@ -65,10 +66,7 @@
 	}: Props = $props();
 
 	const cardClass = $derived(
-		cn(
-			hoverable && "hover:shadow-lg transition-shadow cursor-pointer",
-			className
-		)
+		cn(hoverable && "hover:shadow-lg transition-shadow cursor-pointer", className),
 	);
 </script>
 

@@ -4,10 +4,15 @@
 	 *
 	 * Shows incident title, status, affected components, and timeline of updates.
 	 */
-	import { cn } from '@autumnsgrove/groveengine/ui/utils';
-	import { formatTime, formatDuration } from '$lib/utils/date';
-	import type { IncidentStatus, IncidentType, StatusUpdate, StatusComponent } from '$lib/types/status';
-	import { getIncidentStatusLabel } from '$lib/types/status';
+	import { cn } from "@autumnsgrove/groveengine/ui/utils";
+	import { formatTime, formatDuration } from "$lib/utils/date";
+	import type {
+		IncidentStatus,
+		IncidentType,
+		StatusUpdate,
+		StatusComponent,
+	} from "$lib/types/status";
+	import { getIncidentStatusLabel } from "$lib/types/status";
 	import {
 		AlertCircle,
 		AlertTriangle,
@@ -16,8 +21,8 @@
 		CheckCircle,
 		Search,
 		Eye,
-		Clock
-	} from 'lucide-svelte';
+		Clock,
+	} from "lucide-svelte";
 
 	interface Props {
 		title: string;
@@ -42,9 +47,10 @@
 		components,
 		updates,
 		expanded = false,
-		class: className
+		class: className,
 	}: Props = $props();
 
+	// svelte-ignore state_referenced_locally
 	let isExpanded = $state(expanded);
 
 	// Type icons
@@ -52,7 +58,7 @@
 		outage: AlertCircle,
 		degraded: AlertTriangle,
 		maintenance: Wrench,
-		security: ShieldAlert
+		security: ShieldAlert,
 	};
 
 	// Status icons for timeline
@@ -60,39 +66,44 @@
 		investigating: Search,
 		identified: Eye,
 		monitoring: Clock,
-		resolved: CheckCircle
+		resolved: CheckCircle,
 	};
 
 	const TypeIcon = $derived(typeIcons[type]);
 	const duration = $derived(formatDuration(startedAt, resolvedAt));
 </script>
 
-<article class={cn('glass-card overflow-hidden', className)}>
+<article class={cn("glass-card overflow-hidden", className)}>
 	<!-- Header -->
 	<button
 		type="button"
-		onclick={() => isExpanded = !isExpanded}
+		onclick={() => (isExpanded = !isExpanded)}
 		class="w-full p-4 text-left flex items-start gap-3 hover:bg-white/20 dark:hover:bg-bark-800/20 transition-colors"
 	>
-		<div class={cn(
-			'p-2 rounded-lg flex-shrink-0',
-			status === 'resolved' ? 'bg-green-500/10' : 'bg-orange-500/10'
-		)}>
-			<TypeIcon class={cn(
-				'w-5 h-5',
-				status === 'resolved' ? 'text-green-500' : 'text-orange-500'
-			)} />
+		<div
+			class={cn(
+				"p-2 rounded-lg flex-shrink-0",
+				status === "resolved" ? "bg-green-500/10" : "bg-orange-500/10",
+			)}
+		>
+			<TypeIcon
+				class={cn("w-5 h-5", status === "resolved" ? "text-green-500" : "text-orange-500")}
+			/>
 		</div>
 
 		<div class="flex-1 min-w-0">
 			<div class="flex items-start justify-between gap-2">
 				<h3 class="font-medium text-foreground">{title}</h3>
-				<span class={cn(
-					'px-2 py-0.5 text-xs font-medium rounded-full whitespace-nowrap',
-					status === 'resolved' ? 'bg-green-500/10 text-green-600 dark:text-green-400' :
-					status === 'monitoring' ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400' :
-					'bg-orange-500/10 text-orange-600 dark:text-orange-400'
-				)}>
+				<span
+					class={cn(
+						"px-2 py-0.5 text-xs font-medium rounded-full whitespace-nowrap",
+						status === "resolved"
+							? "bg-green-500/10 text-green-600 dark:text-green-400"
+							: status === "monitoring"
+								? "bg-blue-500/10 text-blue-600 dark:text-blue-400"
+								: "bg-orange-500/10 text-orange-600 dark:text-orange-400",
+					)}
+				>
 					{getIncidentStatusLabel(status)}
 				</span>
 			</div>
@@ -109,7 +120,9 @@
 			{#if components.length > 0}
 				<div class="flex flex-wrap gap-1.5 mt-2">
 					{#each components as component}
-						<span class="px-2 py-0.5 text-xs bg-cream-100 dark:bg-bark-800 rounded text-foreground-muted">
+						<span
+							class="px-2 py-0.5 text-xs bg-cream-100 dark:bg-bark-800 rounded text-foreground-muted"
+						>
 							{component.name}
 						</span>
 					{/each}
@@ -120,8 +133,8 @@
 		<!-- Expand indicator -->
 		<svg
 			class={cn(
-				'w-5 h-5 text-foreground-subtle transition-transform flex-shrink-0',
-				isExpanded && 'rotate-180'
+				"w-5 h-5 text-foreground-subtle transition-transform flex-shrink-0",
+				isExpanded && "rotate-180",
 			)}
 			viewBox="0 0 24 24"
 			fill="none"
@@ -142,14 +155,20 @@
 					{@const UpdateIcon = statusIcons[update.status as IncidentStatus] || Clock}
 					<div class="flex gap-3">
 						<div class="flex flex-col items-center">
-							<div class={cn(
-								'p-1.5 rounded-full',
-								update.status === 'resolved' ? 'bg-green-500/10' : 'bg-cream-100 dark:bg-bark-800'
-							)}>
-								<UpdateIcon class={cn(
-									'w-4 h-4',
-									update.status === 'resolved' ? 'text-green-500' : 'text-foreground-muted'
-								)} />
+							<div
+								class={cn(
+									"p-1.5 rounded-full",
+									update.status === "resolved"
+										? "bg-green-500/10"
+										: "bg-cream-100 dark:bg-bark-800",
+								)}
+							>
+								<UpdateIcon
+									class={cn(
+										"w-4 h-4",
+										update.status === "resolved" ? "text-green-500" : "text-foreground-muted",
+									)}
+								/>
 							</div>
 							{#if updates.indexOf(update) < updates.length - 1}
 								<div class="w-px flex-1 bg-cream-200 dark:bg-bark-700 my-1"></div>

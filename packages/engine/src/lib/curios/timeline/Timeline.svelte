@@ -10,8 +10,8 @@
 	 * - Pagination with "Load More"
 	 */
 
-	import MarkdownIt from 'markdown-it';
-	import { sanitizeMarkdown } from '$lib/utils';
+	import MarkdownIt from "markdown-it";
+	import { sanitizeMarkdown } from "$lib/utils";
 
 	// Local instance with breaks: true for timeline rendering
 	const timelineMd = new MarkdownIt({ breaks: true, linkify: true });
@@ -25,10 +25,10 @@
 		ChevronUp,
 		Cloud,
 		Loader2,
-		Flame
-	} from 'lucide-svelte';
-	import { GlassCard, GlassButton, Badge } from '$lib/ui';
-	import Heatmap from './Heatmap.svelte';
+		Flame,
+	} from "lucide-svelte";
+	import { GlassCard, GlassButton, Badge } from "$lib/ui";
+	import Heatmap from "./Heatmap.svelte";
 
 	interface GutterItem {
 		anchor: string;
@@ -67,12 +67,13 @@
 		total?: number;
 	}
 
+	// svelte-ignore custom_element_props_identifier
 	const props: Props = $props();
 
 	let summaries = $derived(props.summaries ?? []);
 	let activity = $derived(props.activity ?? []);
-	let githubUsername = $derived(props.githubUsername ?? '');
-	let ownerName = $derived(props.ownerName ?? 'the developer');
+	let githubUsername = $derived(props.githubUsername ?? "");
+	let ownerName = $derived(props.ownerName ?? "the developer");
 	let showHeatmap = $derived(props.showHeatmap ?? true);
 	let heatmapDays = $derived(props.heatmapDays ?? 365);
 
@@ -88,7 +89,7 @@
 			return renderedHtmlCache.get(cacheKey)!;
 		}
 		const gutterItems = summary.gutter_content ?? [];
-		const html = renderMarkdownWithGutter(summary.detailed_timeline ?? '', gutterItems);
+		const html = renderMarkdownWithGutter(summary.detailed_timeline ?? "", gutterItems);
 		renderedHtmlCache.set(cacheKey, html);
 		return html;
 	}
@@ -108,46 +109,46 @@
 		"Touching grass (the outdoor kind)",
 		"Debugging life instead of code",
 		"AFK - Away From Keyboard",
-		"Plot twist: no bugs to fix today"
+		"Plot twist: no bugs to fix today",
 	];
 
 	// Get a consistent random message for a date
 	function getRestDayMessage(date: string): string {
-		const hash = date.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+		const hash = date.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
 		return REST_DAY_MESSAGES[hash % REST_DAY_MESSAGES.length];
 	}
 
 	// Format date nicely
 	function formatDate(dateStr: string): string {
-		const date = new Date(dateStr + 'T12:00:00');
-		return date.toLocaleDateString('en-US', {
-			weekday: 'long',
-			year: 'numeric',
-			month: 'long',
-			day: 'numeric'
+		const date = new Date(dateStr + "T12:00:00");
+		return date.toLocaleDateString("en-US", {
+			weekday: "long",
+			year: "numeric",
+			month: "long",
+			day: "numeric",
 		});
 	}
 
 	// Format short date for mobile
 	function formatShortDate(dateStr: string): string {
-		const date = new Date(dateStr + 'T12:00:00');
-		return date.toLocaleDateString('en-US', {
-			weekday: 'short',
-			month: 'short',
-			day: 'numeric'
+		const date = new Date(dateStr + "T12:00:00");
+		return date.toLocaleDateString("en-US", {
+			weekday: "short",
+			month: "short",
+			day: "numeric",
 		});
 	}
 
 	// Check if date is today
 	function isToday(dateStr: string): boolean {
-		const today = new Date().toISOString().split('T')[0];
+		const today = new Date().toISOString().split("T")[0];
 		return dateStr === today;
 	}
 
 	// Format focus streak for display
 	function formatFocusStreak(summary: Summary): string | null {
 		if (!summary.focus_streak || summary.focus_streak < 2) return null;
-		const task = summary.detected_focus?.task || 'focused work';
+		const task = summary.detected_focus?.task || "focused work";
 		return `Day ${summary.focus_streak} of ${task}`;
 	}
 
@@ -157,7 +158,7 @@
 	function getGutterItemsByAnchor(gutterItems: GutterItem[]): Record<string, GutterItem[]> {
 		const grouped: Record<string, GutterItem[]> = {};
 		for (const item of gutterItems) {
-			const headerName = item.anchor?.replace(/^#+\s*/, '').trim() || 'General';
+			const headerName = item.anchor?.replace(/^#+\s*/, "").trim() || "General";
 			if (!grouped[headerName]) {
 				grouped[headerName] = [];
 			}
@@ -170,20 +171,17 @@
 	 * Render markdown to HTML with repo links and inject gutter comments
 	 */
 	function renderMarkdownWithGutter(text: string, gutterItems: GutterItem[] = []): string {
-		if (!text) return '';
+		if (!text) return "";
 
 		const gutterByHeader = getGutterItemsByAnchor(gutterItems);
 
 		// Convert ### RepoName headers to GitHub links (if username provided)
 		let withRepoLinks = text;
 		if (githubUsername) {
-			withRepoLinks = text.replace(
-				/^### (?!\[)(.+)$/gm,
-				(match, repoName) => {
-					const cleanName = repoName.trim();
-					return `### [${cleanName}](https://github.com/${githubUsername}/${cleanName})`;
-				}
-			);
+			withRepoLinks = text.replace(/^### (?!\[)(.+)$/gm, (match, repoName) => {
+				const cleanName = repoName.trim();
+				return `### [${cleanName}](https://github.com/${githubUsername}/${cleanName})`;
+			});
 		}
 
 		// Parse to HTML and sanitize
@@ -191,23 +189,29 @@
 
 		// Inject gutter comments after headers
 		for (const [headerName, items] of Object.entries(gutterByHeader)) {
-			const gutterHtml = items.map(item =>
-				`<div class="inline-gutter-comment"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg><span>${escapeHtml(item.content)}</span></div>`
-			).join('');
+			const gutterHtml = items
+				.map(
+					(item) =>
+						`<div class="inline-gutter-comment"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg><span>${escapeHtml(item.content)}</span></div>`,
+				)
+				.join("");
 
 			const linkPattern = new RegExp(
 				`(<h3>\\s*<a[^>]*>\\s*${escapeRegex(headerName)}\\s*</a>\\s*</h3>)`,
-				'i'
+				"i",
 			);
-			const plainPattern = new RegExp(
-				`(<h3>\\s*${escapeRegex(headerName)}\\s*</h3>)`,
-				'i'
-			);
+			const plainPattern = new RegExp(`(<h3>\\s*${escapeRegex(headerName)}\\s*</h3>)`, "i");
 
 			if (linkPattern.test(html)) {
-				html = html.replace(linkPattern, `$1\n<div class="header-gutter-group">${gutterHtml}</div>`);
+				html = html.replace(
+					linkPattern,
+					`$1\n<div class="header-gutter-group">${gutterHtml}</div>`,
+				);
 			} else if (plainPattern.test(html)) {
-				html = html.replace(plainPattern, `$1\n<div class="header-gutter-group">${gutterHtml}</div>`);
+				html = html.replace(
+					plainPattern,
+					`$1\n<div class="header-gutter-group">${gutterHtml}</div>`,
+				);
 			}
 		}
 
@@ -215,17 +219,17 @@
 	}
 
 	function escapeHtml(text: string): string {
-		if (!text) return '';
+		if (!text) return "";
 		return text
-			.replace(/&/g, '&amp;')
-			.replace(/</g, '&lt;')
-			.replace(/>/g, '&gt;')
-			.replace(/"/g, '&quot;')
-			.replace(/'/g, '&#039;');
+			.replace(/&/g, "&amp;")
+			.replace(/</g, "&lt;")
+			.replace(/>/g, "&gt;")
+			.replace(/"/g, "&quot;")
+			.replace(/'/g, "&#039;");
 	}
 
 	function escapeRegex(str: string): string {
-		return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+		return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 	}
 
 	function toggleCard(id: string): void {
@@ -276,7 +280,9 @@
 				<GlassCard
 					variant={isRestDay ? "muted" : "default"}
 					hoverable
-					class="timeline-card {isRestDay ? 'rest-day' : ''} {isToday(summary.summary_date) ? 'today' : ''}"
+					class="timeline-card {isRestDay ? 'rest-day' : ''} {isToday(summary.summary_date)
+						? 'today'
+						: ''}"
 				>
 					{#snippet header()}
 						<div class="card-header">
@@ -302,7 +308,8 @@
 									{/if}
 									<Badge class="commit-badge">
 										<GitCommit size={14} />
-										<span>{summary.commit_count} commit{summary.commit_count !== 1 ? 's' : ''}</span>
+										<span>{summary.commit_count} commit{summary.commit_count !== 1 ? "s" : ""}</span
+										>
 									</Badge>
 								{/if}
 							</div>
@@ -318,7 +325,7 @@
 							<div class="meta-info">
 								<span class="repos">
 									<FolderGit2 size={14} />
-									{summary.repos_active?.join(', ') || 'Unknown'}
+									{summary.repos_active?.join(", ") || "Unknown"}
 								</span>
 								{#if summary.total_additions > 0 || summary.total_deletions > 0}
 									<span class="changes">
@@ -333,6 +340,7 @@
 							{#if summary.detailed_timeline && isExpanded}
 								<div class="detailed-section">
 									<div class="detailed-timeline markdown-content">
+										<!-- eslint-disable-next-line svelte/no-at-html-tags -- sanitized markdown output -->
 										{@html getRenderedHtml(summary)}
 									</div>
 								</div>
@@ -558,7 +566,8 @@
 	:global(.dark) .meta-info {
 		color: var(--bark-700, #ccb59c);
 	}
-	.repos, .changes {
+	.repos,
+	.changes {
 		display: flex;
 		align-items: center;
 		gap: 0.35rem;
@@ -743,8 +752,12 @@
 		animation: spin 1s linear infinite;
 	}
 	@keyframes spin {
-		from { transform: rotate(0deg); }
-		to { transform: rotate(360deg); }
+		from {
+			transform: rotate(0deg);
+		}
+		to {
+			transform: rotate(360deg);
+		}
 	}
 
 	/* Footer */

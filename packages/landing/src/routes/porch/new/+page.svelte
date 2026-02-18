@@ -1,22 +1,24 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
-	import { GlassCard } from '@autumnsgrove/groveengine/ui';
-	import { TurnstileWidget } from '@autumnsgrove/groveengine/ui/forms';
-	import Header from '$lib/components/Header.svelte';
-	import { seasonStore } from '@autumnsgrove/groveengine/ui/chrome';
-	import Footer from '$lib/components/Footer.svelte';
-	import { Logo } from '@autumnsgrove/groveengine/ui/nature';
-	import { CreditCard, Wrench, User, Hand, HelpCircle } from 'lucide-svelte';
-	import type { ActionData, PageData } from './$types';
+	import { enhance } from "$app/forms";
+	import { GlassCard } from "@autumnsgrove/groveengine/ui";
+	import { TurnstileWidget } from "@autumnsgrove/groveengine/ui/forms";
+	import Header from "$lib/components/Header.svelte";
+	import { seasonStore } from "@autumnsgrove/groveengine/ui/chrome";
+	import Footer from "$lib/components/Footer.svelte";
+	import { Logo } from "@autumnsgrove/groveengine/ui/nature";
+	import { CreditCard, Wrench, User, Hand, HelpCircle } from "lucide-svelte";
+	import type { ActionData, PageData } from "./$types";
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
 	// Pre-fill from authenticated user
-	let name = $state(data.user?.name || '');
-	let email = $state(data.user?.email || '');
-	let subject = $state('');
-	let message = $state('');
-	let category = $state<'billing' | 'technical' | 'account' | 'hello' | 'other'>('other');
+	// svelte-ignore state_referenced_locally
+	let name = $state(data.user?.name || "");
+	// svelte-ignore state_referenced_locally
+	let email = $state(data.user?.email || "");
+	let subject = $state("");
+	let message = $state("");
+	let category = $state<"billing" | "technical" | "account" | "hello" | "other">("other");
 	let turnstileToken = $state<string | null>(null);
 	let submitting = $state(false);
 
@@ -29,17 +31,25 @@
 	const hasEmail = $derived(email.trim().length > 0);
 
 	const categories = [
-		{ id: 'billing', label: 'Billing', icon: CreditCard, description: 'Payments, subscriptions, refunds' },
-		{ id: 'technical', label: 'Technical', icon: Wrench, description: 'Something isn\'t working' },
-		{ id: 'account', label: 'Account', icon: User, description: 'Login, settings, data' },
-		{ id: 'hello', label: 'Just saying hi', icon: Hand, description: 'No issue, just chatting' },
-		{ id: 'other', label: 'Other', icon: HelpCircle, description: 'Anything else' },
+		{
+			id: "billing",
+			label: "Billing",
+			icon: CreditCard,
+			description: "Payments, subscriptions, refunds",
+		},
+		{ id: "technical", label: "Technical", icon: Wrench, description: "Something isn't working" },
+		{ id: "account", label: "Account", icon: User, description: "Login, settings, data" },
+		{ id: "hello", label: "Just saying hi", icon: Hand, description: "No issue, just chatting" },
+		{ id: "other", label: "Other", icon: HelpCircle, description: "Anything else" },
 	] as const;
 </script>
 
 <svelte:head>
 	<title>Start a Visit - The Porch</title>
-	<meta name="description" content="Start a support conversation with Grove. Tell us what's going on and we'll help you figure it out." />
+	<meta
+		name="description"
+		content="Start a support conversation with Grove. Tell us what's going on and we'll help you figure it out."
+	/>
 </svelte:head>
 
 <Header user={data.user} />
@@ -60,31 +70,37 @@
 		<!-- Success Message -->
 		{#if form?.success && form?.visitNumber}
 			<div role="status" aria-live="polite">
-				<GlassCard class="mb-6 bg-green-50/80 dark:bg-green-900/20 border-green-200 dark:border-green-800">
+				<GlassCard
+					class="mb-6 bg-green-50/80 dark:bg-green-900/20 border-green-200 dark:border-green-800"
+				>
 					<div class="flex items-start gap-4">
-					<div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center text-green-600 dark:text-green-400 flex-shrink-0">
-						<svg class="w-6 h-6" viewBox="0 0 20 20" fill="currentColor">
-							<path
-								fill-rule="evenodd"
-								d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
-								clip-rule="evenodd"
-							/>
-						</svg>
+						<div
+							class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center text-green-600 dark:text-green-400 flex-shrink-0"
+						>
+							<svg class="w-6 h-6" viewBox="0 0 20 20" fill="currentColor">
+								<path
+									fill-rule="evenodd"
+									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+									clip-rule="evenodd"
+								/>
+							</svg>
+						</div>
+						<div class="flex-1">
+							<h2 class="text-lg font-serif text-green-900 dark:text-green-200 mb-1">
+								Visit started!
+							</h2>
+							<p class="text-sm text-green-800 dark:text-green-300 font-sans mb-2">
+								Your visit number is <strong>{form.visitNumber}</strong>. I'll get back to you soon.
+							</p>
+							<p class="text-sm text-green-700 dark:text-green-400 font-sans">
+								You'll receive an email confirmation shortly.
+								{#if data.user}
+									<a href="/porch/visits" class="underline hover:no-underline">View your visits</a>
+								{/if}
+							</p>
+						</div>
 					</div>
-					<div class="flex-1">
-						<h2 class="text-lg font-serif text-green-900 dark:text-green-200 mb-1">Visit started!</h2>
-						<p class="text-sm text-green-800 dark:text-green-300 font-sans mb-2">
-							Your visit number is <strong>{form.visitNumber}</strong>. I'll get back to you soon.
-						</p>
-						<p class="text-sm text-green-700 dark:text-green-400 font-sans">
-							You'll receive an email confirmation shortly.
-							{#if data.user}
-								<a href="/porch/visits" class="underline hover:no-underline">View your visits</a>
-							{/if}
-						</p>
-					</div>
-				</div>
-			</GlassCard>
+				</GlassCard>
 			</div>
 		{/if}
 
@@ -93,7 +109,9 @@
 			<div role="alert">
 				<GlassCard class="mb-6 bg-red-50/80 dark:bg-red-900/20 border-red-200 dark:border-red-800">
 					<div class="flex items-start gap-4">
-						<div class="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center text-red-600 dark:text-red-400 flex-shrink-0">
+						<div
+							class="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center text-red-600 dark:text-red-400 flex-shrink-0"
+						>
 							<svg class="w-6 h-6" viewBox="0 0 20 20" fill="currentColor">
 								<path
 									fill-rule="evenodd"
@@ -133,7 +151,7 @@
 							{#each categories as cat}
 								<button
 									type="button"
-									onclick={() => category = cat.id}
+									onclick={() => (category = cat.id)}
 									aria-pressed={category === cat.id}
 									class="p-3 rounded-lg border transition-all text-left {category === cat.id
 										? 'border-grove-500 bg-grove-50 text-grove-700 dark:bg-grove-900/30 dark:text-grove-300 dark:border-grove-600'
@@ -181,9 +199,7 @@
 							class="w-full px-4 py-3 rounded-lg border border-grove-200 dark:border-cream-300 bg-white/50 dark:bg-cream-200/50 text-foreground placeholder-foreground/40 focus:outline-none focus:ring-2 focus:ring-grove-500 focus:border-transparent font-sans transition-all"
 							disabled={submitting}
 						/>
-						<p class="text-xs text-foreground/50 mt-1 font-sans">
-							So I can get back to you
-						</p>
+						<p class="text-xs text-foreground/50 mt-1 font-sans">So I can get back to you</p>
 					</div>
 
 					<!-- Subject -->
@@ -224,7 +240,13 @@
 						></textarea>
 						<div class="flex justify-between items-center mt-2 text-xs font-sans">
 							<span class="text-foreground/50">At least 10 characters</span>
-							<span class="{isValidLength ? 'text-grove-600 dark:text-grove-400' : charCount > 5000 ? 'text-red-600 dark:text-red-400' : 'text-foreground/50'}">
+							<span
+								class={isValidLength
+									? "text-grove-600 dark:text-grove-400"
+									: charCount > 5000
+										? "text-red-600 dark:text-red-400"
+										: "text-foreground/50"}
+							>
 								{charCount}/5000
 							</span>
 						</div>
@@ -233,11 +255,8 @@
 					<!-- Turnstile (only for guests) -->
 					{#if !data.user}
 						<div class="mb-6">
-							<TurnstileWidget
-								siteKey={data.turnstileKey}
-								onverify={handleTurnstileVerify}
-							/>
-							<input type="hidden" name="cf-turnstile-response" value={turnstileToken || ''} />
+							<TurnstileWidget siteKey={data.turnstileKey} onverify={handleTurnstileVerify} />
+							<input type="hidden" name="cf-turnstile-response" value={turnstileToken || ""} />
 						</div>
 					{/if}
 
@@ -249,8 +268,20 @@
 					>
 						{#if submitting}
 							<svg class="animate-spin h-5 w-5" viewBox="0 0 24 24">
-								<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
-								<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+								<circle
+									class="opacity-25"
+									cx="12"
+									cy="12"
+									r="10"
+									stroke="currentColor"
+									stroke-width="4"
+									fill="none"
+								></circle>
+								<path
+									class="opacity-75"
+									fill="currentColor"
+									d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+								></path>
 							</svg>
 							Starting visit...
 						{:else}

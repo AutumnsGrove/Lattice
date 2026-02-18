@@ -23,7 +23,9 @@
 		class: className = "",
 	}: Props = $props();
 
+	// svelte-ignore state_referenced_locally
 	let meta = $state<HumMetadata | null>(initialMetadata ?? null);
+	// svelte-ignore state_referenced_locally
 	let loading = $state(!initialMetadata);
 	let error = $state(false);
 	let trayOpen = $state(false);
@@ -43,9 +45,7 @@
 
 		(async () => {
 			try {
-				const res = await fetch(
-					`/api/hum/resolve?url=${encodeURIComponent(url)}`,
-				); // csrf-ok
+				const res = await fetch(`/api/hum/resolve?url=${encodeURIComponent(url)}`); // csrf-ok
 				if (cancelled) return;
 
 				if (!res.ok) {
@@ -112,7 +112,6 @@
 {:else if error || !meta || meta.status === "unresolved"}
 	<HumCardFallback {url} provider={meta?.provider ?? provider} class={className} />
 {:else}
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
 		class="hum-card-resolved group relative flex items-center gap-4 rounded-xl
 			bg-white/70 dark:bg-cream-100/50 backdrop-blur-md
@@ -138,7 +137,9 @@
 					class="w-full h-full object-cover"
 					loading="lazy"
 					referrerpolicy="no-referrer"
-					onerror={() => { artworkError = true; }}
+					onerror={() => {
+						artworkError = true;
+					}}
 				/>
 			</div>
 		{:else}
@@ -168,7 +169,6 @@
 		<!-- Provider badge (top-right) -->
 		<div class="absolute top-2 right-2 flex flex-col items-end gap-1">
 			{#if hasPlatformLinks}
-				<!-- svelte-ignore a11y_no_static_element_interactions -->
 				<button
 					class="rounded-md transition-transform duration-150
 						hover:scale-110

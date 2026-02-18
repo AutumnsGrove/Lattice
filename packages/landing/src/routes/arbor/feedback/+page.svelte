@@ -1,21 +1,21 @@
 <script lang="ts">
-	import type { PageData } from './$types';
-	import { enhance } from '$app/forms';
-	import { GlassCard, GroveSwap } from '@autumnsgrove/groveengine/ui';
-	import { Smile, Frown, Meh, Mail, Globe, MessageCircle } from 'lucide-svelte';
-	import type { ComponentType } from 'svelte';
+	import type { PageData } from "./$types";
+	import { enhance } from "$app/forms";
+	import { GlassCard, GroveSwap } from "@autumnsgrove/groveengine/ui";
+	import { Smile, Frown, Meh, Mail, Globe, MessageCircle } from "lucide-svelte";
+	import type { ComponentType } from "svelte";
 
 	interface Feedback {
 		id: string;
-		source: 'web' | 'email';
+		source: "web" | "email";
 		name: string | null;
 		email: string | null;
 		subject: string | null;
 		message: string;
-		sentiment: 'positive' | 'negative' | 'neutral' | null;
+		sentiment: "positive" | "negative" | "neutral" | null;
 		ip_address: string | null;
 		user_agent: string | null;
-		status: 'new' | 'read' | 'archived';
+		status: "new" | "read" | "archived";
 		read_at: number | null;
 		archived_at: number | null;
 		admin_notes: string | null;
@@ -32,12 +32,12 @@
 	let notesText = $state<Record<string, string>>({});
 
 	function formatDate(timestamp: number): string {
-		return new Date(timestamp * 1000).toLocaleDateString('en-US', {
-			month: 'short',
-			day: 'numeric',
-			year: 'numeric',
-			hour: '2-digit',
-			minute: '2-digit'
+		return new Date(timestamp * 1000).toLocaleDateString("en-US", {
+			month: "short",
+			day: "numeric",
+			year: "numeric",
+			hour: "2-digit",
+			minute: "2-digit",
 		});
 	}
 
@@ -49,7 +49,7 @@
 		const hours = Math.floor(diff / 3600000);
 		const days = Math.floor(diff / 86400000);
 
-		if (minutes < 1) return 'Just now';
+		if (minutes < 1) return "Just now";
 		if (minutes < 60) return `${minutes}m ago`;
 		if (hours < 24) return `${hours}h ago`;
 		if (days < 7) return `${days}d ago`;
@@ -60,26 +60,26 @@
 	const sentimentIcons: Record<string, ComponentType> = {
 		positive: Smile,
 		negative: Frown,
-		neutral: Meh
+		neutral: Meh,
 	};
 
 	const sentimentColors: Record<string, string> = {
-		positive: 'text-green-500 dark:text-green-400',
-		negative: 'text-red-500 dark:text-red-400',
-		neutral: 'text-amber-500 dark:text-amber-400'
+		positive: "text-green-500 dark:text-green-400",
+		negative: "text-red-500 dark:text-red-400",
+		neutral: "text-amber-500 dark:text-amber-400",
 	};
 
 	function getSentimentLabel(sentiment: string | null): string {
-		if (sentiment === 'positive') return 'Positive';
-		if (sentiment === 'negative') return 'Concern';
-		if (sentiment === 'neutral') return 'Neutral';
-		return 'None';
+		if (sentiment === "positive") return "Positive";
+		if (sentiment === "negative") return "Concern";
+		if (sentiment === "neutral") return "Neutral";
+		return "None";
 	}
 
 	// Source icon mapping (replacing emojis)
 	const sourceIcons: Record<string, ComponentType> = {
 		email: Mail,
-		web: Globe
+		web: Globe,
 	};
 
 	function toggleExpand(id: string) {
@@ -87,7 +87,7 @@
 	}
 
 	function handleRowKeydown(event: KeyboardEvent, id: string) {
-		if (event.key === 'Enter' || event.key === ' ') {
+		if (event.key === "Enter" || event.key === " ") {
 			event.preventDefault();
 			toggleExpand(id);
 		}
@@ -95,7 +95,7 @@
 
 	function startEditingNotes(id: string, currentNotes: string | null) {
 		editingNotesId = id;
-		notesText[id] = currentNotes || '';
+		notesText[id] = currentNotes || "";
 	}
 
 	function cancelEditingNotes() {
@@ -109,7 +109,9 @@
 
 <!-- Header -->
 <div class="mb-8">
-	<h1 class="text-2xl font-serif text-foreground"><GroveSwap term="wanderer">Wanderer</GroveSwap> Feedback</h1>
+	<h1 class="text-2xl font-serif text-foreground">
+		<GroveSwap term="wanderer">Wanderer</GroveSwap> Feedback
+	</h1>
 	<p class="text-foreground-muted font-sans mt-1">
 		{stats.total} total
 		{#if stats.new_count > 0}
@@ -124,7 +126,9 @@
 		<div class="text-2xl font-serif text-foreground">{stats.total}</div>
 		<div class="text-sm text-foreground-muted font-sans">Total</div>
 	</GlassCard>
-	<GlassCard class="p-4 text-center bg-green-50/50 dark:bg-green-950/20 border-green-200 dark:border-green-800">
+	<GlassCard
+		class="p-4 text-center bg-green-50/50 dark:bg-green-950/20 border-green-200 dark:border-green-800"
+	>
 		<div class="text-2xl font-serif text-green-700 dark:text-green-400">{stats.new_count}</div>
 		<div class="text-sm text-green-700/80 dark:text-green-400/80 font-sans">New</div>
 	</GlassCard>
@@ -149,26 +153,45 @@
 		<div class="overflow-hidden rounded-xl border border-grove-200 dark:border-cream-300">
 			<div class="overflow-x-auto">
 				<table class="w-full" aria-label="Wanderer feedback">
-					<thead class="bg-grove-50 dark:bg-cream-100/50 border-b border-grove-200 dark:border-cream-300">
+					<thead
+						class="bg-grove-50 dark:bg-cream-100/50 border-b border-grove-200 dark:border-cream-300"
+					>
 						<tr>
-							<th scope="col" class="text-left px-6 py-3 text-xs font-sans font-semibold text-foreground-muted uppercase tracking-wider w-12">
+							<th
+								scope="col"
+								class="text-left px-6 py-3 text-xs font-sans font-semibold text-foreground-muted uppercase tracking-wider w-12"
+							>
 								<span class="sr-only">Source</span>
 							</th>
-							<th scope="col" class="text-left px-6 py-3 text-xs font-sans font-semibold text-foreground-muted uppercase tracking-wider">
+							<th
+								scope="col"
+								class="text-left px-6 py-3 text-xs font-sans font-semibold text-foreground-muted uppercase tracking-wider"
+							>
 								From
 							</th>
-							<th scope="col" class="text-left px-6 py-3 text-xs font-sans font-semibold text-foreground-muted uppercase tracking-wider">
+							<th
+								scope="col"
+								class="text-left px-6 py-3 text-xs font-sans font-semibold text-foreground-muted uppercase tracking-wider"
+							>
 								Message
 							</th>
-							<th scope="col" class="text-left px-6 py-3 text-xs font-sans font-semibold text-foreground-muted uppercase tracking-wider">
+							<th
+								scope="col"
+								class="text-left px-6 py-3 text-xs font-sans font-semibold text-foreground-muted uppercase tracking-wider"
+							>
 								Date
 							</th>
-							<th scope="col" class="text-left px-6 py-3 text-xs font-sans font-semibold text-foreground-muted uppercase tracking-wider">
+							<th
+								scope="col"
+								class="text-left px-6 py-3 text-xs font-sans font-semibold text-foreground-muted uppercase tracking-wider"
+							>
 								Status
 							</th>
 						</tr>
 					</thead>
-					<tbody class="divide-y divide-grove-100 dark:divide-cream-300/50 bg-white dark:bg-cream-100/30">
+					<tbody
+						class="divide-y divide-grove-100 dark:divide-cream-300/50 bg-white dark:bg-cream-100/30"
+					>
 						{#each feedback as item}
 							{@const SourceIcon = sourceIcons[item.source] || Globe}
 							{@const SentimentIcon = item.sentiment ? sentimentIcons[item.sentiment] : null}
@@ -182,10 +205,8 @@
 								onkeydown={(e) => handleRowKeydown(e, item.id)}
 							>
 								<td class="px-6 py-4 text-center">
-									<span title={item.source === 'email' ? 'Email' : 'Web form'}>
-										<SourceIcon
-											class="w-5 h-5 text-foreground-muted mx-auto"
-										/>
+									<span title={item.source === "email" ? "Email" : "Web form"}>
+										<SourceIcon class="w-5 h-5 text-foreground-muted mx-auto" />
 									</span>
 								</td>
 								<td class="px-6 py-4">
@@ -198,7 +219,7 @@
 										{/if}
 										<div>
 											<div class="text-sm font-sans text-foreground font-medium">
-												{item.name || 'Anonymous Visitor'}
+												{item.name || "Anonymous Visitor"}
 											</div>
 											{#if item.email}
 												<div class="text-xs font-sans text-foreground-muted">{item.email}</div>
@@ -212,20 +233,31 @@
 											<div class="font-medium mb-1">{item.subject}</div>
 										{/if}
 										<div class="text-foreground-muted line-clamp-2">
-											{item.message.substring(0, 100)}{item.message.length > 100 ? '...' : ''}
+											{item.message.substring(0, 100)}{item.message.length > 100 ? "..." : ""}
 										</div>
 									</div>
 								</td>
 								<td class="px-6 py-4">
-									<span class="text-sm font-sans text-foreground-muted">{formatRelativeDate(item.created_at)}</span>
+									<span class="text-sm font-sans text-foreground-muted"
+										>{formatRelativeDate(item.created_at)}</span
+									>
 								</td>
 								<td class="px-6 py-4">
-									{#if item.status === 'new'}
-										<span class="text-xs font-sans bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-1 rounded">New</span>
-									{:else if item.status === 'read'}
-										<span class="text-xs font-sans bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-2 py-1 rounded">Read</span>
+									{#if item.status === "new"}
+										<span
+											class="text-xs font-sans bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-1 rounded"
+											>New</span
+										>
+									{:else if item.status === "read"}
+										<span
+											class="text-xs font-sans bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-2 py-1 rounded"
+											>Read</span
+										>
 									{:else}
-										<span class="text-xs font-sans bg-cream-100 dark:bg-cream-200 text-foreground-muted dark:text-cream-300 px-2 py-1 rounded">Archived</span>
+										<span
+											class="text-xs font-sans bg-cream-100 dark:bg-cream-200 text-foreground-muted dark:text-cream-300 px-2 py-1 rounded"
+											>Archived</span
+										>
 									{/if}
 								</td>
 							</tr>
@@ -235,10 +267,20 @@
 										<div class="max-w-3xl">
 											<!-- Full Details -->
 											<div class="mb-4 space-y-2 text-sm font-sans">
-												<div class="text-foreground"><strong>From:</strong> {item.name || 'Anonymous Visitor'} {#if item.email}({item.email}){/if}</div>
-												<div class="text-foreground"><strong>Source:</strong> {item.source === 'email' ? 'Email' : 'Web form'}</div>
+												<div class="text-foreground">
+													<strong>From:</strong>
+													{item.name || "Anonymous Visitor"}
+													{#if item.email}({item.email}){/if}
+												</div>
+												<div class="text-foreground">
+													<strong>Source:</strong>
+													{item.source === "email" ? "Email" : "Web form"}
+												</div>
 												{#if item.subject}
-													<div class="text-foreground"><strong>Subject:</strong> {item.subject}</div>
+													<div class="text-foreground">
+														<strong>Subject:</strong>
+														{item.subject}
+													</div>
 												{/if}
 												{#if item.sentiment}
 													{@const DetailSentimentIcon = sentimentIcons[item.sentiment]}
@@ -252,17 +294,25 @@
 														{getSentimentLabel(item.sentiment)}
 													</div>
 												{/if}
-												<div class="text-foreground"><strong>Submitted:</strong> {formatDate(item.created_at)}</div>
+												<div class="text-foreground">
+													<strong>Submitted:</strong>
+													{formatDate(item.created_at)}
+												</div>
 											</div>
 
 											<!-- Full Message -->
 											<GlassCard class="p-4 mb-4">
-												<p class="text-sm font-sans text-foreground whitespace-pre-wrap">{item.message}</p>
+												<p class="text-sm font-sans text-foreground whitespace-pre-wrap">
+													{item.message}
+												</p>
 											</GlassCard>
 
 											<!-- Admin Notes -->
 											<div class="mb-4">
-												<label class="block text-sm font-sans font-medium text-foreground mb-2">Admin Notes</label>
+												<!-- svelte-ignore a11y_label_has_associated_control -->
+												<label class="block text-sm font-sans font-medium text-foreground mb-2"
+													>Admin Notes</label
+												>
 												{#if editingNotesId === item.id}
 													<form method="POST" action="?/saveNotes" use:enhance>
 														<input type="hidden" name="id" value={item.id} />
@@ -292,7 +342,7 @@
 												{:else}
 													<GlassCard class="p-3 mb-2">
 														<p class="text-sm font-sans text-foreground-muted">
-															{item.admin_notes || 'No notes yet'}
+															{item.admin_notes || "No notes yet"}
 														</p>
 													</GlassCard>
 													<button
@@ -307,7 +357,7 @@
 
 											<!-- Actions -->
 											<div class="flex gap-2">
-												{#if item.status === 'new'}
+												{#if item.status === "new"}
 													<form method="POST" action="?/markRead" use:enhance>
 														<input type="hidden" name="id" value={item.id} />
 														<button
@@ -318,7 +368,7 @@
 														</button>
 													</form>
 												{/if}
-												{#if item.status !== 'archived'}
+												{#if item.status !== "archived"}
 													<form method="POST" action="?/archive" use:enhance>
 														<input type="hidden" name="id" value={item.id} />
 														<button

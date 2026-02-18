@@ -11,7 +11,7 @@ export type { Season } from "../nature/palette";
  *
  * This allows cross-package compatibility when Lucide versions differ.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 export type IconComponent =
   | Component
   | ComponentType<SvelteComponent<any>>

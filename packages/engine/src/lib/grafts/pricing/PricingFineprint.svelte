@@ -16,10 +16,7 @@
 	}: PricingFineprintProps = $props();
 
 	// All available sections with their content
-	const SECTIONS: Record<
-		FineprintSection,
-		{ title: string; content: string; detail?: string }
-	> = {
+	const SECTIONS: Record<FineprintSection, { title: string; content: string; detail?: string }> = {
 		reading: {
 			title: "Reading Blogs",
 			content:
@@ -97,17 +94,15 @@
 	};
 
 	// Which sections to display (reactive to prop changes)
-	const displaySections = $derived(
-		sections ?? (Object.keys(SECTIONS) as FineprintSection[]),
-	);
+	const displaySections = $derived(sections ?? (Object.keys(SECTIONS) as FineprintSection[]));
 
 	// Track expanded state for each section
 	// Initialize once from initial prop values (captured at mount time)
+	// svelte-ignore state_referenced_locally
 	const initialSections = sections ?? (Object.keys(SECTIONS) as FineprintSection[]);
+	// svelte-ignore state_referenced_locally
 	let expandedSections = $state<Set<FineprintSection>>(
-		defaultExpanded
-			? new Set(initialSections)
-			: new Set<FineprintSection>(),
+		defaultExpanded ? new Set(initialSections) : new Set<FineprintSection>(),
 	);
 
 	function toggleSection(section: FineprintSection) {
@@ -137,9 +132,7 @@
 					onclick={() => toggleSection(sectionKey)}
 					class="w-full flex items-center justify-between text-left group"
 				>
-					<h3
-						class="font-medium text-foreground group-hover:text-accent transition-colors"
-					>
+					<h3 class="font-medium text-foreground group-hover:text-accent transition-colors">
 						{section.title}
 					</h3>
 					<svg

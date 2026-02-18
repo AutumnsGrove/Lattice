@@ -23,15 +23,15 @@
 	 */
 
 	type OverlayVariant =
-		| "dark"      // Dark overlay (default for modals)
-		| "light"     // Light overlay
-		| "accent";   // Tinted with accent color
+		| "dark" // Dark overlay (default for modals)
+		| "light" // Light overlay
+		| "accent"; // Tinted with accent color
 
 	type BlurIntensity =
-		| "none"      // No blur
-		| "light"     // 4px blur
-		| "medium"    // 8px blur
-		| "strong";   // 12px blur
+		| "none" // No blur
+		| "light" // 4px blur
+		| "medium" // 8px blur
+		| "strong"; // 12px blur
 
 	interface Props extends Omit<HTMLAttributes<HTMLDivElement>, "class"> {
 		variant?: OverlayVariant;
@@ -42,6 +42,7 @@
 		children?: Snippet;
 	}
 
+	// svelte-ignore custom_element_props_identifier
 	let {
 		variant = "dark",
 		intensity = "light",
@@ -55,7 +56,7 @@
 	const variantClasses: Record<OverlayVariant, string> = {
 		dark: "bg-black/50 dark:bg-black/60",
 		light: "bg-white/70 dark:bg-bark-900/50",
-		accent: "bg-accent/30 dark:bg-accent/20"
+		accent: "bg-accent/30 dark:bg-accent/20",
 	};
 
 	// Blur intensities
@@ -63,7 +64,7 @@
 		none: "",
 		light: "backdrop-blur-sm",
 		medium: "backdrop-blur",
-		strong: "backdrop-blur-md"
+		strong: "backdrop-blur-md",
 	};
 
 	const computedClass = $derived(
@@ -75,8 +76,8 @@
 			// Animation classes for when used with transitions
 			"data-[state=open]:animate-in data-[state=closed]:animate-out",
 			"data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-			className
-		)
+			className,
+		),
 	);
 </script>
 

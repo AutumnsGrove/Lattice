@@ -25,6 +25,7 @@
 		class?: string;
 	}
 
+	// svelte-ignore custom_element_props_identifier
 	let { class: className, ...restProps }: Props = $props();
 </script>
 

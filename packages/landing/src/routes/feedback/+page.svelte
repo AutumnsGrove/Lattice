@@ -1,21 +1,21 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
-	import { GlassCard } from '@autumnsgrove/groveengine/ui';
-	import { TurnstileWidget } from '@autumnsgrove/groveengine/ui/forms';
-	import Header from '$lib/components/Header.svelte';
-	import { seasonStore } from '@autumnsgrove/groveengine/ui/chrome';
-	import Footer from '$lib/components/Footer.svelte';
-	import { Logo } from '@autumnsgrove/groveengine/ui/nature';
-	import { Smile, Meh, Frown } from 'lucide-svelte';
-	import type { ActionData, PageData } from './$types';
+	import { enhance } from "$app/forms";
+	import { GlassCard } from "@autumnsgrove/groveengine/ui";
+	import { TurnstileWidget } from "@autumnsgrove/groveengine/ui/forms";
+	import Header from "$lib/components/Header.svelte";
+	import { seasonStore } from "@autumnsgrove/groveengine/ui/chrome";
+	import Footer from "$lib/components/Footer.svelte";
+	import { Logo } from "@autumnsgrove/groveengine/ui/nature";
+	import { Smile, Meh, Frown } from "lucide-svelte";
+	import type { ActionData, PageData } from "./$types";
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
-	let name = $state('');
-	let email = $state('');
-	let subject = $state('');
-	let message = $state('');
-	let sentiment = $state<'positive' | 'neutral' | 'negative' | null>(null);
+	let name = $state("");
+	let email = $state("");
+	let subject = $state("");
+	let message = $state("");
+	let sentiment = $state<"positive" | "neutral" | "negative" | null>(null);
 	let turnstileToken = $state<string | null>(null);
 	let submitting = $state(false);
 
@@ -24,10 +24,10 @@
 	}
 
 	function resetForm() {
-		name = '';
-		email = '';
-		subject = '';
-		message = '';
+		name = "";
+		email = "";
+		subject = "";
+		message = "";
 		sentiment = null;
 		turnstileToken = null;
 	}
@@ -38,7 +38,10 @@
 
 <svelte:head>
 	<title>Share Your Thoughts - Grove</title>
-	<meta name="description" content="Share your thoughts, ideas, or feedback about Grove. Your voice matters here." />
+	<meta
+		name="description"
+		content="Share your thoughts, ideas, or feedback about Grove. Your voice matters here."
+	/>
 </svelte:head>
 
 <Header user={data.user} />
@@ -52,16 +55,21 @@
 			</div>
 			<h1 class="text-3xl font-serif text-foreground mb-3">Share Your Thoughts</h1>
 			<p class="text-lg text-foreground-muted font-sans max-w-xl mx-auto">
-				Grove is built for you. Whether it's a bug, an idea, or just a hello—your voice matters here. I read everything personally.
+				Grove is built for you. Whether it's a bug, an idea, or just a hello—your voice matters
+				here. I read everything personally.
 			</p>
 		</div>
 
 		<!-- Success Message -->
 		{#if form?.success}
 			<div role="status" aria-live="polite">
-				<GlassCard class="mb-6 bg-green-50/80 dark:bg-green-950/40 border-green-200 dark:border-green-800/40">
+				<GlassCard
+					class="mb-6 bg-green-50/80 dark:bg-green-950/40 border-green-200 dark:border-green-800/40"
+				>
 					<div class="flex items-start gap-4">
-						<div class="w-10 h-10 bg-green-100 dark:bg-green-900/40 rounded-lg flex items-center justify-center text-green-600 dark:text-green-400 flex-shrink-0">
+						<div
+							class="w-10 h-10 bg-green-100 dark:bg-green-900/40 rounded-lg flex items-center justify-center text-green-600 dark:text-green-400 flex-shrink-0"
+						>
 							<svg class="w-6 h-6" viewBox="0 0 20 20" fill="currentColor">
 								<path
 									fill-rule="evenodd"
@@ -71,7 +79,9 @@
 							</svg>
 						</div>
 						<div class="flex-1">
-							<h2 class="text-lg font-serif text-green-900 dark:text-green-100 mb-1">Thank you for sharing!</h2>
+							<h2 class="text-lg font-serif text-green-900 dark:text-green-100 mb-1">
+								Thank you for sharing!
+							</h2>
 							<p class="text-sm text-green-800 dark:text-green-200 font-sans">
 								Your feedback means a lot. I read everything personally. —Autumn
 							</p>
@@ -84,9 +94,13 @@
 		<!-- Error Message -->
 		{#if form?.error}
 			<div role="alert" aria-live="assertive">
-				<GlassCard class="mb-6 bg-red-50/80 dark:bg-red-950/40 border-red-200 dark:border-red-800/40">
+				<GlassCard
+					class="mb-6 bg-red-50/80 dark:bg-red-950/40 border-red-200 dark:border-red-800/40"
+				>
 					<div class="flex items-start gap-4">
-						<div class="w-10 h-10 bg-red-100 dark:bg-red-900/40 rounded-lg flex items-center justify-center text-red-600 dark:text-red-400 flex-shrink-0">
+						<div
+							class="w-10 h-10 bg-red-100 dark:bg-red-900/40 rounded-lg flex items-center justify-center text-red-600 dark:text-red-400 flex-shrink-0"
+						>
 							<svg class="w-6 h-6" viewBox="0 0 20 20" fill="currentColor">
 								<path
 									fill-rule="evenodd"
@@ -122,7 +136,9 @@
 				<!-- Name (Optional) -->
 				<div class="mb-5">
 					<label for="name" class="block text-sm font-sans font-medium text-foreground mb-2">
-						Name <span class="text-foreground/40 dark:text-foreground/55 font-normal">(optional)</span>
+						Name <span class="text-foreground/40 dark:text-foreground/55 font-normal"
+							>(optional)</span
+						>
 					</label>
 					<input
 						type="text"
@@ -138,7 +154,9 @@
 				<!-- Email (Optional) -->
 				<div class="mb-5">
 					<label for="email" class="block text-sm font-sans font-medium text-foreground mb-2">
-						Email <span class="text-foreground/40 dark:text-foreground/55 font-normal">(optional - if you'd like a reply)</span>
+						Email <span class="text-foreground/40 dark:text-foreground/55 font-normal"
+							>(optional - if you'd like a reply)</span
+						>
 					</label>
 					<input
 						type="email"
@@ -154,7 +172,9 @@
 				<!-- Subject (Optional) -->
 				<div class="mb-5">
 					<label for="subject" class="block text-sm font-sans font-medium text-foreground mb-2">
-						Subject <span class="text-foreground/40 dark:text-foreground/55 font-normal">(optional)</span>
+						Subject <span class="text-foreground/40 dark:text-foreground/55 font-normal"
+							>(optional)</span
+						>
 					</label>
 					<input
 						type="text"
@@ -169,45 +189,63 @@
 
 				<!-- Sentiment (Optional) -->
 				<div class="mb-5">
+					<!-- svelte-ignore a11y_label_has_associated_control -->
 					<label class="block text-sm font-sans font-medium text-foreground mb-3">
-						How are you feeling? <span class="text-foreground/40 dark:text-foreground/55 font-normal">(optional)</span>
+						How are you feeling? <span
+							class="text-foreground/40 dark:text-foreground/55 font-normal">(optional)</span
+						>
 					</label>
 					<div class="flex gap-3">
 						<button
 							type="button"
-							onclick={() => sentiment = sentiment === 'positive' ? null : 'positive'}
-							class="flex-1 px-4 py-3 rounded-lg border transition-all font-sans text-sm {sentiment === 'positive' ? 'border-green-500 bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-300' : 'border-grove-200 dark:border-cream-300 bg-white/50 dark:bg-cream-200/50 text-foreground/60 dark:text-foreground/70 hover:border-grove-300 dark:hover:border-cream-400'}"
+							onclick={() => (sentiment = sentiment === "positive" ? null : "positive")}
+							class="flex-1 px-4 py-3 rounded-lg border transition-all font-sans text-sm {sentiment ===
+							'positive'
+								? 'border-green-500 bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-300'
+								: 'border-grove-200 dark:border-cream-300 bg-white/50 dark:bg-cream-200/50 text-foreground/60 dark:text-foreground/70 hover:border-grove-300 dark:hover:border-cream-400'}"
 							disabled={submitting}
-							aria-label={sentiment === 'positive' ? 'Positive feedback (selected)' : 'Positive feedback'}
-							aria-pressed={sentiment === 'positive'}
+							aria-label={sentiment === "positive"
+								? "Positive feedback (selected)"
+								: "Positive feedback"}
+							aria-pressed={sentiment === "positive"}
 						>
 							<Smile class="w-6 h-6 mx-auto" />
 							<span class="block mt-1">Positive</span>
 						</button>
 						<button
 							type="button"
-							onclick={() => sentiment = sentiment === 'neutral' ? null : 'neutral'}
-							class="flex-1 px-4 py-3 rounded-lg border transition-all font-sans text-sm {sentiment === 'neutral' ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300' : 'border-grove-200 dark:border-cream-300 bg-white/50 dark:bg-cream-200/50 text-foreground/60 dark:text-foreground/70 hover:border-grove-300 dark:hover:border-cream-400'}"
+							onclick={() => (sentiment = sentiment === "neutral" ? null : "neutral")}
+							class="flex-1 px-4 py-3 rounded-lg border transition-all font-sans text-sm {sentiment ===
+							'neutral'
+								? 'border-blue-500 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300'
+								: 'border-grove-200 dark:border-cream-300 bg-white/50 dark:bg-cream-200/50 text-foreground/60 dark:text-foreground/70 hover:border-grove-300 dark:hover:border-cream-400'}"
 							disabled={submitting}
-							aria-label={sentiment === 'neutral' ? 'Neutral feedback (selected)' : 'Neutral feedback'}
-							aria-pressed={sentiment === 'neutral'}
+							aria-label={sentiment === "neutral"
+								? "Neutral feedback (selected)"
+								: "Neutral feedback"}
+							aria-pressed={sentiment === "neutral"}
 						>
 							<Meh class="w-6 h-6 mx-auto" />
 							<span class="block mt-1">Neutral</span>
 						</button>
 						<button
 							type="button"
-							onclick={() => sentiment = sentiment === 'negative' ? null : 'negative'}
-							class="flex-1 px-4 py-3 rounded-lg border transition-all font-sans text-sm {sentiment === 'negative' ? 'border-orange-500 bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300' : 'border-grove-200 dark:border-cream-300 bg-white/50 dark:bg-cream-200/50 text-foreground/60 dark:text-foreground/70 hover:border-grove-300 dark:hover:border-cream-400'}"
+							onclick={() => (sentiment = sentiment === "negative" ? null : "negative")}
+							class="flex-1 px-4 py-3 rounded-lg border transition-all font-sans text-sm {sentiment ===
+							'negative'
+								? 'border-orange-500 bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300'
+								: 'border-grove-200 dark:border-cream-300 bg-white/50 dark:bg-cream-200/50 text-foreground/60 dark:text-foreground/70 hover:border-grove-300 dark:hover:border-cream-400'}"
 							disabled={submitting}
-							aria-label={sentiment === 'negative' ? 'Concern feedback (selected)' : 'Concern feedback'}
-							aria-pressed={sentiment === 'negative'}
+							aria-label={sentiment === "negative"
+								? "Concern feedback (selected)"
+								: "Concern feedback"}
+							aria-pressed={sentiment === "negative"}
 						>
 							<Frown class="w-6 h-6 mx-auto" />
 							<span class="block mt-1">Concern</span>
 						</button>
 					</div>
-					<input type="hidden" name="sentiment" value={sentiment || ''} />
+					<input type="hidden" name="sentiment" value={sentiment || ""} />
 				</div>
 
 				<!-- Message (Required) -->
@@ -230,7 +268,13 @@
 					></textarea>
 					<div class="flex justify-between items-center mt-2 text-xs font-sans">
 						<span class="text-foreground/50 dark:text-foreground/60">At least 10 characters</span>
-						<span class="{isValidLength ? 'text-grove-600 dark:text-grove-400' : charCount > 2000 ? 'text-red-600 dark:text-red-400' : 'text-foreground/50 dark:text-foreground/60'}">
+						<span
+							class={isValidLength
+								? "text-grove-600 dark:text-grove-400"
+								: charCount > 2000
+									? "text-red-600 dark:text-red-400"
+									: "text-foreground/50 dark:text-foreground/60"}
+						>
 							{charCount}/2000
 						</span>
 					</div>
@@ -238,11 +282,8 @@
 
 				<!-- Turnstile -->
 				<div class="mb-6">
-					<TurnstileWidget
-						siteKey={data.turnstileKey}
-						onverify={handleTurnstileVerify}
-					/>
-					<input type="hidden" name="cf-turnstile-response" value={turnstileToken || ''} />
+					<TurnstileWidget siteKey={data.turnstileKey} onverify={handleTurnstileVerify} />
+					<input type="hidden" name="cf-turnstile-response" value={turnstileToken || ""} />
 				</div>
 
 				<!-- Submit Button -->
@@ -253,8 +294,20 @@
 				>
 					{#if submitting}
 						<svg class="animate-spin h-5 w-5" viewBox="0 0 24 24">
-							<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
-							<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+							<circle
+								class="opacity-25"
+								cx="12"
+								cy="12"
+								r="10"
+								stroke="currentColor"
+								stroke-width="4"
+								fill="none"
+							></circle>
+							<path
+								class="opacity-75"
+								fill="currentColor"
+								d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+							></path>
 						</svg>
 						Sending...
 					{:else}
@@ -266,7 +319,10 @@
 
 		<!-- Footer Note -->
 		<p class="text-center text-sm text-foreground-subtle font-sans mt-6">
-			You can also email <a href="mailto:feedback@grove.place" class="text-primary hover:text-primary/80 underline">feedback@grove.place</a> directly.
+			You can also email <a
+				href="mailto:feedback@grove.place"
+				class="text-primary hover:text-primary/80 underline">feedback@grove.place</a
+			> directly.
 		</p>
 	</div>
 </main>

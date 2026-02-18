@@ -63,6 +63,7 @@
 		item?: ItemRenderer;
 	}
 
+	// svelte-ignore custom_element_props_identifier
 	let {
 		images = [],
 		itemCount = 0,
@@ -198,19 +199,19 @@
 	// Keyboard navigation
 	function handleKeydown(event: KeyboardEvent) {
 		switch (event.key) {
-			case 'ArrowLeft':
+			case "ArrowLeft":
 				event.preventDefault();
 				goPrev();
 				break;
-			case 'ArrowRight':
+			case "ArrowRight":
 				event.preventDefault();
 				goNext();
 				break;
-			case 'Home':
+			case "Home":
 				event.preventDefault();
 				goTo(0);
 				break;
-			case 'End':
+			case "End":
 				event.preventDefault();
 				goTo(totalItems - 1);
 				break;
@@ -261,9 +262,9 @@
 		if (!isDragging) return;
 
 		const handleWindowMouseUp = () => handleMouseUp();
-		window.addEventListener('mouseup', handleWindowMouseUp);
+		window.addEventListener("mouseup", handleWindowMouseUp);
 
-		return () => window.removeEventListener('mouseup', handleWindowMouseUp);
+		return () => window.removeEventListener("mouseup", handleWindowMouseUp);
 	});
 
 	// Reset currentIndex if totalItems changes and current index is out of bounds
@@ -306,9 +307,11 @@
 
 	// Variant styles
 	const variantClasses = {
-		default: "bg-white/80 dark:bg-grove-950/25 backdrop-blur-md border-white/40 dark:border-grove-800/25",
-		frosted: "bg-white/85 dark:bg-grove-950/35 backdrop-blur-lg border-white/50 dark:border-grove-800/30",
-		minimal: "bg-transparent border-transparent"
+		default:
+			"bg-white/80 dark:bg-grove-950/25 backdrop-blur-md border-white/40 dark:border-grove-800/25",
+		frosted:
+			"bg-white/85 dark:bg-grove-950/35 backdrop-blur-lg border-white/50 dark:border-grove-800/30",
+		minimal: "bg-transparent border-transparent",
 	};
 
 	const containerClass = $derived(
@@ -317,167 +320,129 @@
 			"focus-visible:ring-2 focus-visible:ring-grove-500 focus-visible:ring-offset-2",
 			variant !== "minimal" && variantClasses[variant],
 			variant === "minimal" && "p-0",
-			className
-		)
+			className,
+		),
 	);
 </script>
 
 {#if totalItems > 0}
-<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-<div
-	class={containerClass}
-	role="region"
-	aria-label="Image carousel"
-	aria-roledescription="carousel"
-	tabindex="0"
-	onkeydown={handleKeydown}
-	{...restProps}
->
-	<!-- Cards stack -->
+	<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 	<div
-		class={cn("relative w-full select-none", aspectRatio === "none" && "h-full")}
-		style={aspectRatio !== "none" ? `aspect-ratio: ${aspectRatio}` : undefined}
-		ontouchstart={handleTouchStart}
-		ontouchmove={handleTouchMove}
-		ontouchend={handleTouchEnd}
-		onmousedown={handleMouseDown}
-		onmousemove={handleMouseMove}
-		onmouseup={handleMouseUp}
-		onmouseleave={handleMouseLeave}
-		role="presentation"
+		class={containerClass}
+		role="region"
+		aria-label="Image carousel"
+		aria-roledescription="carousel"
+		tabindex="0"
+		onkeydown={handleKeydown}
+		{...restProps}
 	>
-		{#each { length: totalItems } as _, index (index)}
-			<div
-				class={cn(
-					"absolute inset-0 rounded-xl overflow-hidden shadow-lg transition-all duration-[400ms] ease-out",
-					"bg-cream-50 dark:bg-bark-900",
-					isDragging && "transition-none"
-				)}
-				style={getCardStyle(index)}
-				aria-hidden={index !== currentIndex}
-			>
-				{#if images.length > 0}
-					<!-- Image mode -->
-					<img
-						src={images[index].url}
-						alt={images[index].alt}
-						class="w-full h-full object-cover"
-						draggable="false"
-						loading="lazy"
-						decoding="async"
-					/>
-					{#if images[index].caption}
-						<div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent">
-							<p class="text-white text-sm font-medium">{images[index].caption}</p>
-						</div>
+		<!-- Cards stack -->
+		<div
+			class={cn("relative w-full select-none", aspectRatio === "none" && "h-full")}
+			style={aspectRatio !== "none" ? `aspect-ratio: ${aspectRatio}` : undefined}
+			ontouchstart={handleTouchStart}
+			ontouchmove={handleTouchMove}
+			ontouchend={handleTouchEnd}
+			onmousedown={handleMouseDown}
+			onmousemove={handleMouseMove}
+			onmouseup={handleMouseUp}
+			onmouseleave={handleMouseLeave}
+			role="presentation"
+		>
+			{#each { length: totalItems } as _, index (index)}
+				<div
+					class={cn(
+						"absolute inset-0 rounded-xl overflow-hidden shadow-lg transition-all duration-[400ms] ease-out",
+						"bg-cream-50 dark:bg-bark-900",
+						isDragging && "transition-none",
+					)}
+					style={getCardStyle(index)}
+					aria-hidden={index !== currentIndex}
+				>
+					{#if images.length > 0}
+						<!-- Image mode -->
+						<img
+							src={images[index].url}
+							alt={images[index].alt}
+							class="w-full h-full object-cover"
+							draggable="false"
+							loading="lazy"
+							decoding="async"
+						/>
+						{#if images[index].caption}
+							<div
+								class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent"
+							>
+								<p class="text-white text-sm font-medium">{images[index].caption}</p>
+							</div>
+						{/if}
+					{:else if item}
+						<!-- Custom content mode -->
+						{@render item(index)}
 					{/if}
-				{:else if item}
-					<!-- Custom content mode -->
-					{@render item(index)}
-				{/if}
-			</div>
-		{/each}
-	</div>
-
-	<!-- Overlay navigation - positioned on top of slides -->
-	{#if overlayNav && totalItems > 1}
-		{#if showArrows}
-			<button
-				type="button"
-				class={cn(
-					"absolute left-4 bottom-4 z-20",
-					"w-11 h-11 rounded-full flex items-center justify-center",
-					"bg-black/15 hover:bg-black/30 active:bg-black/40",
-					"backdrop-blur-sm text-white/90 hover:text-white",
-					"shadow-sm transition-all duration-200"
-				)}
-				onclick={goPrev}
-				aria-label="Previous slide"
-			>
-				<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-					<polyline points="15 18 9 12 15 6"></polyline>
-				</svg>
-			</button>
-			<button
-				type="button"
-				class={cn(
-					"absolute right-4 bottom-4 z-20",
-					"w-11 h-11 rounded-full flex items-center justify-center",
-					"bg-black/15 hover:bg-black/30 active:bg-black/40",
-					"backdrop-blur-sm text-white/90 hover:text-white",
-					"shadow-sm transition-all duration-200"
-				)}
-				onclick={goNext}
-				aria-label="Next slide"
-			>
-				<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-					<polyline points="9 18 15 12 9 6"></polyline>
-				</svg>
-			</button>
-		{/if}
-
-		{#if showDots}
-			<div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/20 backdrop-blur-sm">
-				{#each { length: totalItems } as _, index (index)}
-					<button
-						type="button"
-						class={cn(
-							"h-2 rounded-full transition-all duration-300",
-							index === currentIndex
-								? "w-5 bg-white"
-								: "w-2 bg-white/50 hover:bg-white/70"
-						)}
-						onclick={() => goTo(index)}
-						aria-label={`Go to slide ${index + 1}`}
-						aria-current={index === currentIndex ? "true" : undefined}
-					></button>
-				{/each}
-			</div>
-		{/if}
-
-		<div class="sr-only" aria-live="polite" aria-atomic="true">
-			Slide {currentIndex + 1} of {totalItems}
+				</div>
+			{/each}
 		</div>
-	{/if}
 
-	<!-- Standard navigation - below slides -->
-	{#if !overlayNav && totalItems > 1}
-		<div class="flex items-center justify-between mt-4 px-2">
-			<!-- Previous arrow -->
+		<!-- Overlay navigation - positioned on top of slides -->
+		{#if overlayNav && totalItems > 1}
 			{#if showArrows}
 				<button
 					type="button"
 					class={cn(
-						"w-10 h-10 rounded-full flex items-center justify-center",
-						"bg-white/80 dark:bg-grove-950/40 backdrop-blur-sm",
-						"border border-white/40 dark:border-grove-800/30",
-						"text-foreground dark:text-foreground",
-						"hover:bg-white/95 dark:hover:bg-grove-950/60",
-						"transition-all duration-200",
-						"disabled:opacity-40 disabled:cursor-not-allowed"
+						"absolute left-4 bottom-4 z-20",
+						"w-11 h-11 rounded-full flex items-center justify-center",
+						"bg-black/15 hover:bg-black/30 active:bg-black/40",
+						"backdrop-blur-sm text-white/90 hover:text-white",
+						"shadow-sm transition-all duration-200",
 					)}
 					onclick={goPrev}
 					aria-label="Previous slide"
 				>
-					<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<svg
+						class="w-5 h-5"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+					>
 						<polyline points="15 18 9 12 15 6"></polyline>
 					</svg>
 				</button>
-			{:else}
-				<div></div>
+				<button
+					type="button"
+					class={cn(
+						"absolute right-4 bottom-4 z-20",
+						"w-11 h-11 rounded-full flex items-center justify-center",
+						"bg-black/15 hover:bg-black/30 active:bg-black/40",
+						"backdrop-blur-sm text-white/90 hover:text-white",
+						"shadow-sm transition-all duration-200",
+					)}
+					onclick={goNext}
+					aria-label="Next slide"
+				>
+					<svg
+						class="w-5 h-5"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+					>
+						<polyline points="9 18 15 12 9 6"></polyline>
+					</svg>
+				</button>
 			{/if}
 
-			<!-- Dots -->
 			{#if showDots}
-				<div class="flex items-center gap-2">
+				<div
+					class="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/20 backdrop-blur-sm"
+				>
 					{#each { length: totalItems } as _, index (index)}
 						<button
 							type="button"
 							class={cn(
 								"h-2 rounded-full transition-all duration-300",
-								index === currentIndex
-									? "w-6 bg-grove-600 dark:bg-grove-400"
-									: "w-2 bg-bark-300 dark:bg-bark-600 hover:bg-bark-400 dark:hover:bg-bark-500"
+								index === currentIndex ? "w-5 bg-white" : "w-2 bg-white/50 hover:bg-white/70",
 							)}
 							onclick={() => goTo(index)}
 							aria-label={`Go to slide ${index + 1}`}
@@ -487,30 +452,94 @@
 				</div>
 			{/if}
 
-			<!-- Next arrow -->
-			{#if showArrows}
-				<button
-					type="button"
-					class={cn(
-						"w-10 h-10 rounded-full flex items-center justify-center",
-						"bg-white/80 dark:bg-grove-950/40 backdrop-blur-sm",
-						"border border-white/40 dark:border-grove-800/30",
-						"text-foreground dark:text-foreground",
-						"hover:bg-white/95 dark:hover:bg-grove-950/60",
-						"transition-all duration-200",
-						"disabled:opacity-40 disabled:cursor-not-allowed"
-					)}
-					onclick={goNext}
-					aria-label="Next slide"
-				>
-					<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-						<polyline points="9 18 15 12 9 6"></polyline>
-					</svg>
-				</button>
-			{:else}
-				<div></div>
-			{/if}
-		</div>
-	{/if}
-</div>
+			<div class="sr-only" aria-live="polite" aria-atomic="true">
+				Slide {currentIndex + 1} of {totalItems}
+			</div>
+		{/if}
+
+		<!-- Standard navigation - below slides -->
+		{#if !overlayNav && totalItems > 1}
+			<div class="flex items-center justify-between mt-4 px-2">
+				<!-- Previous arrow -->
+				{#if showArrows}
+					<button
+						type="button"
+						class={cn(
+							"w-10 h-10 rounded-full flex items-center justify-center",
+							"bg-white/80 dark:bg-grove-950/40 backdrop-blur-sm",
+							"border border-white/40 dark:border-grove-800/30",
+							"text-foreground dark:text-foreground",
+							"hover:bg-white/95 dark:hover:bg-grove-950/60",
+							"transition-all duration-200",
+							"disabled:opacity-40 disabled:cursor-not-allowed",
+						)}
+						onclick={goPrev}
+						aria-label="Previous slide"
+					>
+						<svg
+							class="w-5 h-5"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+						>
+							<polyline points="15 18 9 12 15 6"></polyline>
+						</svg>
+					</button>
+				{:else}
+					<div></div>
+				{/if}
+
+				<!-- Dots -->
+				{#if showDots}
+					<div class="flex items-center gap-2">
+						{#each { length: totalItems } as _, index (index)}
+							<button
+								type="button"
+								class={cn(
+									"h-2 rounded-full transition-all duration-300",
+									index === currentIndex
+										? "w-6 bg-grove-600 dark:bg-grove-400"
+										: "w-2 bg-bark-300 dark:bg-bark-600 hover:bg-bark-400 dark:hover:bg-bark-500",
+								)}
+								onclick={() => goTo(index)}
+								aria-label={`Go to slide ${index + 1}`}
+								aria-current={index === currentIndex ? "true" : undefined}
+							></button>
+						{/each}
+					</div>
+				{/if}
+
+				<!-- Next arrow -->
+				{#if showArrows}
+					<button
+						type="button"
+						class={cn(
+							"w-10 h-10 rounded-full flex items-center justify-center",
+							"bg-white/80 dark:bg-grove-950/40 backdrop-blur-sm",
+							"border border-white/40 dark:border-grove-800/30",
+							"text-foreground dark:text-foreground",
+							"hover:bg-white/95 dark:hover:bg-grove-950/60",
+							"transition-all duration-200",
+							"disabled:opacity-40 disabled:cursor-not-allowed",
+						)}
+						onclick={goNext}
+						aria-label="Next slide"
+					>
+						<svg
+							class="w-5 h-5"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+						>
+							<polyline points="9 18 15 12 9 6"></polyline>
+						</svg>
+					</button>
+				{:else}
+					<div></div>
+				{/if}
+			</div>
+		{/if}
+	</div>
 {/if}

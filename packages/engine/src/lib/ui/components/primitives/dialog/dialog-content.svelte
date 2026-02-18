@@ -5,6 +5,7 @@
 	import * as Dialog from "./index.js";
 	import { cn } from "$lib/utils";
 
+	// svelte-ignore custom_element_props_identifier
 	let {
 		ref = $bindable(null),
 		class: className,
@@ -28,7 +29,7 @@
 			"fixed left-[50%] top-[50%] z-grove-modal grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4",
 			"border border-grove-200/50 dark:border-bark-700/50",
 			"p-6 shadow-2xl shadow-grove-900/10 dark:shadow-black/30 duration-200 sm:rounded-xl",
-			className
+			className,
 		)}
 		{...restProps}
 	>

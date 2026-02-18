@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
+	import type { Snippet } from "svelte";
 
 	interface Props {
 		title: string;
@@ -10,13 +10,14 @@
 		class?: string;
 	}
 
+	// svelte-ignore custom_element_props_identifier
 	let {
 		title,
 		defaultOpen = false,
 		open: externalOpen,
 		ontoggle,
 		children,
-		class: className = '',
+		class: className = "",
 		...restProps
 	}: Props = $props();
 

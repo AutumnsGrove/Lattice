@@ -155,7 +155,7 @@ async function resolveViaOdesli(url: string): Promise<HumMetadata | null> {
 
     if (!response.ok) return null;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const data = (await response.json()) as Record<string, any>;
 
     // Extract the best available entity
@@ -243,7 +243,7 @@ async function resolveViaOembed(
 
     if (!response.ok) return null;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const data = (await response.json()) as Record<string, any>;
 
     // oEmbed returns title and thumbnail_url
@@ -291,7 +291,7 @@ async function resolveViaItunes(url: string): Promise<HumMetadata | null> {
 
     if (!response.ok) return null;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const data = (await response.json()) as Record<string, any>;
     const result = data.results?.[0];
     if (!result) return null;

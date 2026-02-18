@@ -30,6 +30,7 @@
 	}: GreenhouseEnrollDialogProps = $props();
 
 	// Local dialog state that syncs with prop
+	// svelte-ignore state_referenced_locally
 	let dialogOpen = $state(open);
 
 	// Sync prop -> local state
@@ -50,9 +51,7 @@
 
 	// Get sorted tenant entries for the select
 	const tenantEntries = $derived(
-		Object.entries(availableTenants).sort((a, b) =>
-			a[1].localeCompare(b[1])
-		)
+		Object.entries(availableTenants).sort((a, b) => a[1].localeCompare(b[1])),
 	);
 
 	const hasAvailableTenants = $derived(tenantEntries.length > 0);
@@ -76,15 +75,17 @@
 	}
 </script>
 
-<Dialog bind:open={dialogOpen} title="Enroll in Greenhouse" description="Give a tenant early access to experimental features.">
+<Dialog
+	bind:open={dialogOpen}
+	title="Enroll in Greenhouse"
+	description="Give a tenant early access to experimental features."
+>
 	{#snippet header()}
 		<div class="dialog-header">
 			<div class="icon-wrapper">
 				<Sprout class="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
 			</div>
-			<h2 class="text-xl font-serif text-slate-800 dark:text-slate-100">
-				Enroll in Greenhouse
-			</h2>
+			<h2 class="text-xl font-serif text-slate-800 dark:text-slate-100">Enroll in Greenhouse</h2>
 			<p class="text-sm text-slate-600 dark:text-slate-400 mt-1">
 				Give a tenant early access to experimental features.
 			</p>
@@ -96,9 +97,7 @@
 		<form onsubmit={handleSubmit} class="dialog-form">
 			<!-- Tenant select -->
 			<div class="form-group">
-				<label for="tenant-select" class="form-label">
-					Select Tenant
-				</label>
+				<label for="tenant-select" class="form-label"> Select Tenant </label>
 				<select
 					id="tenant-select"
 					bind:value={selectedTenantId}
@@ -130,14 +129,8 @@
 
 			<!-- Actions -->
 			<div class="dialog-actions">
-				<Button variant="secondary" onclick={handleClose} disabled={loading}>
-					Cancel
-				</Button>
-				<Button
-					type="submit"
-					variant="primary"
-					disabled={!canSubmit}
-				>
+				<Button variant="secondary" onclick={handleClose} disabled={loading}>Cancel</Button>
+				<Button type="submit" variant="primary" disabled={!canSubmit}>
 					{#if loading}
 						Enrolling...
 					{:else}
@@ -152,9 +145,7 @@
 				All tenants are already enrolled in the greenhouse program!
 			</p>
 			<div class="dialog-actions">
-				<Button variant="secondary" onclick={handleClose}>
-					Close
-				</Button>
+				<Button variant="secondary" onclick={handleClose}>Close</Button>
 			</div>
 		</div>
 	{/if}
@@ -212,7 +203,9 @@
 		background: var(--color-surface, white);
 		color: var(--color-text, #1f2937);
 		font-size: 0.875rem;
-		transition: border-color 0.2s, box-shadow 0.2s;
+		transition:
+			border-color 0.2s,
+			box-shadow 0.2s;
 	}
 
 	.form-select:focus,

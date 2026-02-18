@@ -39,6 +39,7 @@
 		ref?: HTMLInputElement | null;
 	}
 
+	// svelte-ignore custom_element_props_identifier
 	let {
 		label,
 		error,
@@ -54,20 +55,20 @@
 	}: Props = $props();
 
 	// Generate unique ID for label association if not provided
-	// svelte-ignore state_referenced_locally - id is intentionally captured at initialization for stable IDs
+	// svelte-ignore state_referenced_locally
 	const inputId = id ?? `input-${crypto.randomUUID()}`;
 
 	const inputClass = $derived(
-		cn(
-			error && "border-destructive focus-visible:ring-destructive/20",
-			className
-		)
+		cn(error && "border-destructive focus-visible:ring-destructive/20", className),
 	);
 </script>
 
 <div class="flex flex-col gap-1.5">
 	{#if label}
-		<label for={inputId} class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+		<label
+			for={inputId}
+			class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+		>
 			{label}
 			{#if required}
 				<span class="text-destructive">*</span>
@@ -78,7 +79,7 @@
 	<!-- @ts-expect-error restProps may include files:null which ShadcnInput expects as undefined -->
 	<ShadcnInput
 		id={inputId}
-		bind:ref={ref}
+		bind:ref
 		bind:value
 		{type}
 		{placeholder}

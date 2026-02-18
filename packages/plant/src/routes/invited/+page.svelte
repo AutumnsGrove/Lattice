@@ -7,23 +7,17 @@
 	 * sign-in form so they can get started with one click.
 	 */
 
-	import { GlassCard } from '@autumnsgrove/groveengine/ui';
-	import {
-		Sparkles,
-		Mail,
-		Check,
-		Loader2,
-		Heart,
-		Leaf
-	} from '@autumnsgrove/groveengine/ui/icons';
+	import { GlassCard } from "@autumnsgrove/groveengine/ui";
+	import { Sparkles, Mail, Check, Loader2, Heart, Leaf } from "@autumnsgrove/groveengine/ui/icons";
 
 	let { data } = $props();
 
 	// UI state: 'ready' | 'sending' | 'sent' | 'error'
-	let mode = $state<'ready' | 'sending' | 'sent' | 'error'>('ready');
+	let mode = $state<"ready" | "sending" | "sent" | "error">("ready");
 	let errorMessage = $state<string | null>(null);
 
 	// Show expired notification if redirected back from an expired magic link
+	// svelte-ignore state_referenced_locally
 	let showExpiredNotice = $state(data.expired ?? false);
 
 	/**
@@ -37,26 +31,27 @@
 	 * Send the magic link to the invitee's email
 	 */
 	async function sendMagicLink() {
-		mode = 'sending';
+		mode = "sending";
 		errorMessage = null;
 		showExpiredNotice = false;
 
 		try {
-			const response = await fetch('/api/auth/magic-link', { // csrf-ok: unauthenticated invite flow
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
+			const response = await fetch("/api/auth/magic-link", {
+				// csrf-ok: unauthenticated invite flow
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ email: data.inviteEmail, inviteToken: data.token }),
 			});
 
 			if (!response.ok) {
-				const result = await response.json().catch(() => ({})) as { message?: string };
-				throw new Error(result.message || 'Failed to send magic link');
+				const result = (await response.json().catch(() => ({}))) as { message?: string };
+				throw new Error(result.message || "Failed to send magic link");
 			}
 
-			mode = 'sent';
+			mode = "sent";
 		} catch (err) {
-			mode = 'error';
-			errorMessage = err instanceof Error ? err.message : 'Something went wrong. Please try again.';
+			mode = "error";
+			errorMessage = err instanceof Error ? err.message : "Something went wrong. Please try again.";
 		}
 	}
 </script>
@@ -64,32 +59,33 @@
 <div class="space-y-8 animate-fade-in">
 	<!-- Welcome header -->
 	<section class="text-center space-y-4">
-		<div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-amber-400/20 to-orange-500/20 mb-2">
+		<div
+			class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-amber-400/20 to-orange-500/20 mb-2"
+		>
 			<Sparkles size={40} class="text-amber-500" aria-hidden="true" />
 		</div>
 
-		{#if data.inviteType === 'beta'}
-			<h1 class="text-2xl md:text-3xl font-medium text-foreground">
-				Welcome to the Grove beta
-			</h1>
+		{#if data.inviteType === "beta"}
+			<h1 class="text-2xl md:text-3xl font-medium text-foreground">Welcome to the Grove beta</h1>
 			<p class="text-foreground-muted max-w-md mx-auto leading-relaxed">
-				We're building a quiet corner of the internet for your words to grow.
-				And we'd love for you to be one of the first to try it.
+				We're building a quiet corner of the internet for your words to grow. And we'd love for you
+				to be one of the first to try it.
 			</p>
 		{:else}
-			<h1 class="text-2xl md:text-3xl font-medium text-foreground">
-				You've been invited to Grove
-			</h1>
+			<h1 class="text-2xl md:text-3xl font-medium text-foreground">You've been invited to Grove</h1>
 			<p class="text-foreground-muted max-w-md mx-auto leading-relaxed">
-				Someone believes you deserve your own space online — a place where your words
-				can grow without algorithms, ads, or tracking.
+				Someone believes you deserve your own space online — a place where your words can grow
+				without algorithms, ads, or tracking.
 			</p>
 		{/if}
 	</section>
 
 	<!-- Expired/error magic link notice -->
 	{#if showExpiredNotice}
-		<div class="max-w-md mx-auto p-4 rounded-xl bg-amber-50/80 dark:bg-amber-900/20 border border-amber-200/50 dark:border-amber-700/30 backdrop-blur-sm" role="alert">
+		<div
+			class="max-w-md mx-auto p-4 rounded-xl bg-amber-50/80 dark:bg-amber-900/20 border border-amber-200/50 dark:border-amber-700/30 backdrop-blur-sm"
+			role="alert"
+		>
 			<p class="text-sm text-amber-800 dark:text-amber-200 text-center">
 				Your sign-in link didn't work — no worries! Click below to get a fresh one.
 			</p>
@@ -105,10 +101,12 @@
 	<GlassCard variant="frosted" class="max-w-md mx-auto">
 		<!-- Tier badge -->
 		<div class="text-center mb-6">
-			<div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 mb-4">
+			<div
+				class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 mb-4"
+			>
 				<Leaf size={16} class="text-amber-500" aria-hidden="true" />
 				<span class="text-sm font-medium text-amber-600 dark:text-amber-400">
-					{#if data.inviteType === 'beta'}
+					{#if data.inviteType === "beta"}
 						Beta Tester — {displayTier(data.inviteTier)} Plan
 					{:else}
 						Complimentary {displayTier(data.inviteTier)} Account
@@ -117,7 +115,9 @@
 			</div>
 
 			{#if data.customMessage}
-				<div class="p-4 rounded-lg bg-white/50 dark:bg-bark-800/30 border border-white/20 dark:border-bark-700/20 mb-4">
+				<div
+					class="p-4 rounded-lg bg-white/50 dark:bg-bark-800/30 border border-white/20 dark:border-bark-700/20 mb-4"
+				>
 					<p class="text-foreground-muted italic">
 						"{data.customMessage}"
 					</p>
@@ -125,19 +125,20 @@
 			{/if}
 
 			<p class="text-foreground-muted text-sm">
-				A free <span class="font-medium text-primary">{displayTier(data.inviteTier)}</span> plan is waiting for you.
+				A free <span class="font-medium text-primary">{displayTier(data.inviteTier)}</span> plan is waiting
+				for you.
 			</p>
 		</div>
 
 		<!-- Magic link form -->
 		<div class="border-t border-white/20 dark:border-bark-700/20 pt-6">
-			{#if mode === 'ready' || mode === 'error'}
+			{#if mode === "ready" || mode === "error"}
 				<div class="space-y-4">
 					<div>
-						<p class="block text-sm font-medium text-foreground mb-2">
-							Your email
-						</p>
-						<div class="flex items-center gap-2 px-4 py-3 rounded-xl bg-white/60 dark:bg-bark-800/40 border border-slate-200/50 dark:border-bark-700/40">
+						<p class="block text-sm font-medium text-foreground mb-2">Your email</p>
+						<div
+							class="flex items-center gap-2 px-4 py-3 rounded-xl bg-white/60 dark:bg-bark-800/40 border border-slate-200/50 dark:border-bark-700/40"
+						>
 							<Mail size={16} class="text-foreground-subtle flex-shrink-0" aria-hidden="true" />
 							<span class="text-foreground">{data.inviteEmail}</span>
 						</div>
@@ -163,23 +164,25 @@
 						We'll send a magic link to this email. Click it to sign in — no password needed.
 					</p>
 				</div>
-
-			{:else if mode === 'sending'}
+			{:else if mode === "sending"}
 				<div class="text-center py-4 space-y-3" role="status" aria-live="polite">
 					<Loader2 size={24} class="animate-spin mx-auto text-primary" aria-hidden="true" />
 					<p class="text-foreground-muted">Sending your sign-in link...</p>
 				</div>
-
-			{:else if mode === 'sent'}
+			{:else if mode === "sent"}
 				<div class="text-center py-4 space-y-4" role="status" aria-live="polite">
-					<div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-emerald-100/50 dark:bg-emerald-900/30">
+					<div
+						class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-emerald-100/50 dark:bg-emerald-900/30"
+					>
 						<Check size={28} class="text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
 					</div>
 
 					<div>
 						<p class="font-medium text-foreground">Check your email!</p>
 						<p class="text-sm text-foreground-muted mt-1">
-							We sent a sign-in link to <span class="font-medium text-foreground">{data.inviteEmail}</span>
+							We sent a sign-in link to <span class="font-medium text-foreground"
+								>{data.inviteEmail}</span
+							>
 						</p>
 					</div>
 
@@ -189,7 +192,10 @@
 
 					<button
 						type="button"
-						onclick={() => { mode = 'ready'; errorMessage = null; }}
+						onclick={() => {
+							mode = "ready";
+							errorMessage = null;
+						}}
 						class="text-sm text-primary hover:underline min-h-[44px] px-4 inline-flex items-center"
 						aria-label="Send the sign-in link again"
 					>
@@ -204,7 +210,7 @@
 	<section class="text-center">
 		<p class="text-sm text-foreground-subtle flex items-center justify-center gap-1.5">
 			<Heart size={14} class="text-pink-400" aria-hidden="true" />
-			{#if data.inviteType === 'beta'}
+			{#if data.inviteType === "beta"}
 				Thank you for helping us grow
 			{:else}
 				A gift from someone who believes in you

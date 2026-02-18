@@ -71,6 +71,7 @@
 		class?: string;
 	}
 
+	// svelte-ignore custom_element_props_identifier
 	let {
 		items,
 		title,
@@ -85,6 +86,7 @@
 	}: Props = $props();
 
 	// Collapsible state (initial value from prop, then user-controlled)
+	// svelte-ignore state_referenced_locally
 	let isOpen = $state(defaultOpen);
 
 	// Color palette - warm grove tones
@@ -95,21 +97,23 @@
 		slate: "bg-bark-400 dark:bg-bark-500",
 		red: "bg-red-500 dark:bg-red-400",
 		purple: "bg-purple-500 dark:bg-purple-400",
-		accent: "bg-accent dark:bg-accent"
+		accent: "bg-accent dark:bg-accent",
 	};
 
 	// Variant-specific glass styles
 	const variantClasses: Record<GlassVariant, string> = {
-		default: "bg-white/80 dark:bg-bark-800/50 backdrop-blur-md border-white/40 dark:border-bark-700/40",
+		default:
+			"bg-white/80 dark:bg-bark-800/50 backdrop-blur-md border-white/40 dark:border-bark-700/40",
 		muted: "bg-white/60 dark:bg-bark-800/30 backdrop-blur border-white/20 dark:border-bark-700/30",
-		frosted: "bg-white/80 dark:bg-bark-800/70 backdrop-blur-lg border-white/50 dark:border-bark-700/40"
+		frosted:
+			"bg-white/80 dark:bg-bark-800/70 backdrop-blur-lg border-white/50 dark:border-bark-700/40",
 	};
 
 	// Layout classes
 	const layoutClasses: Record<Layout, string> = {
 		stacked: "flex flex-col gap-2",
 		inline: "flex flex-wrap gap-x-4 gap-y-2",
-		grid: "grid grid-cols-2 gap-2 sm:grid-cols-3"
+		grid: "grid grid-cols-2 gap-2 sm:grid-cols-3",
 	};
 
 	const containerClass = $derived(
@@ -117,8 +121,8 @@
 			"rounded-lg border shadow-sm",
 			variantClasses[variant],
 			compact ? "px-3 py-2" : "px-4 py-3",
-			className
-		)
+			className,
+		),
 	);
 
 	const itemsClass = $derived(layoutClasses[layout]);
@@ -136,7 +140,9 @@
 			<button
 				type="button"
 				onclick={toggle}
-				class="w-full flex items-center justify-between {compact ? 'text-xs' : 'text-sm'} font-medium text-foreground-muted hover:text-foreground transition-colors"
+				class="w-full flex items-center justify-between {compact
+					? 'text-xs'
+					: 'text-sm'} font-medium text-foreground-muted hover:text-foreground transition-colors"
 				aria-expanded={isOpen}
 			>
 				<span>{title}</span>
@@ -146,7 +152,12 @@
 					stroke="currentColor"
 					viewBox="0 0 24 24"
 				>
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M19 9l-7 7-7-7"
+					/>
 				</svg>
 			</button>
 		{:else}
@@ -168,14 +179,16 @@
 							class={cn(
 								"rounded-full flex-shrink-0",
 								compact ? "w-2 h-2" : "w-2.5 h-2.5",
-								item.colorClass ?? colorClasses[item.color ?? "slate"]
+								item.colorClass ?? colorClasses[item.color ?? "slate"],
 							)}
 						></span>
 					{/if}
 
 					{#if item.icon}
 						{@const IconComponent = item.icon}
-						<IconComponent class={cn("flex-shrink-0 text-foreground-muted", compact ? "w-3 h-3" : "w-4 h-4")} />
+						<IconComponent
+							class={cn("flex-shrink-0 text-foreground-muted", compact ? "w-3 h-3" : "w-4 h-4")}
+						/>
 					{/if}
 
 					<span class="{textSize} font-medium text-foreground">

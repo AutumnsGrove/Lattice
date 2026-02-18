@@ -6,9 +6,9 @@
 	 * Uses the Timeline component from the curios library.
 	 */
 
-	import { Calendar } from 'lucide-svelte';
-	import { Timeline } from '$lib/curios/timeline';
-	import { toast } from '$lib/ui';
+	import { Calendar } from "lucide-svelte";
+	import { Timeline } from "$lib/curios/timeline";
+	import { toast } from "$lib/ui";
 
 	interface PageData {
 		summaries: any[];
@@ -28,7 +28,9 @@
 	let { data }: { data: PageData } = $props();
 
 	// Local state for incremental loading (intentionally captures initial server data)
+	// svelte-ignore state_referenced_locally
 	const initialSummaries = data.summaries;
+	// svelte-ignore state_referenced_locally
 	const initialPagination = data.pagination;
 	let summaries = $state(initialSummaries);
 	let pagination = $state(initialPagination);
@@ -39,25 +41,28 @@
 
 		try {
 			const response = await fetch(
-				`/api/curios/timeline?limit=${pagination.limit}&offset=${newOffset}`
+				`/api/curios/timeline?limit=${pagination.limit}&offset=${newOffset}`,
 			); // csrf-ok
 
 			if (!response.ok) {
-				throw new Error('Failed to load more');
+				throw new Error("Failed to load more");
 			}
 
-			const result = await response.json() as { summaries: PageData['summaries']; pagination: PageData['pagination'] };
+			const result = (await response.json()) as {
+				summaries: PageData["summaries"];
+				pagination: PageData["pagination"];
+			};
 			summaries = [...summaries, ...result.summaries];
 			pagination = result.pagination;
 		} catch (error) {
-			toast.error('Failed to load more summaries');
-			console.error('Load more error:', error);
+			toast.error("Failed to load more summaries");
+			console.error("Load more error:", error);
 		}
 	}
 </script>
 
 <svelte:head>
-	<title>Development Timeline{data.config.ownerName ? ` - ${data.config.ownerName}` : ''}</title>
+	<title>Development Timeline{data.config.ownerName ? ` - ${data.config.ownerName}` : ""}</title>
 	<meta name="description" content="Daily development activity and progress over time" />
 </svelte:head>
 
@@ -77,7 +82,7 @@
 		{summaries}
 		activity={data.activity}
 		githubUsername={data.config.githubUsername}
-		ownerName={data.config.ownerName ?? 'the developer'}
+		ownerName={data.config.ownerName ?? "the developer"}
 		showHeatmap={true}
 		heatmapDays={365}
 		hasMore={pagination.hasMore}

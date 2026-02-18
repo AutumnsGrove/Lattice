@@ -31,7 +31,6 @@
 </script>
 
 {#if open && availableLinks.length > 0}
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
 		class="hum-platform-tray flex items-center gap-1.5 px-2 py-1.5 rounded-lg
 			bg-white/90 dark:bg-cream-100/80 backdrop-blur-lg
@@ -39,6 +38,7 @@
 			shadow-md"
 		role="menu"
 		aria-label="Listen on other platforms"
+		tabindex="0"
 		onkeydown={handleKeydown}
 	>
 		<span class="text-[10px] text-muted-foreground whitespace-nowrap mr-1">Also on</span>

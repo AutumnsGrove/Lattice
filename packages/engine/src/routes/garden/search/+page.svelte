@@ -1,7 +1,7 @@
 <script>
-	import { page } from '$app/state';
-	import { goto } from '$app/navigation';
-	import { Card, Badge, Button, ContentSearch, GroveSwap, GroveIntro } from '$lib/ui';
+	import { page } from "$app/state";
+	import { goto } from "$app/navigation";
+	import { Card, Badge, Button, ContentSearch, GroveSwap, GroveIntro } from "$lib/ui";
 
 	let { data } = $props();
 
@@ -9,19 +9,19 @@
 	const accentColor = $derived(data.siteSettings?.accent_color || null);
 
 	// Get initial values from URL params
-	const initialQuery = page.url.searchParams.get('q') || '';
-	const initialTag = page.url.searchParams.get('tag') || '';
+	const initialQuery = page.url.searchParams.get("q") || "";
+	const initialTag = page.url.searchParams.get("tag") || "";
 
 	let searchQuery = $state(initialQuery);
 	let selectedTag = $state(initialTag);
 
 	// Pre-compute lowercase searchable fields for performance
 	let postsWithLowercase = $derived.by(() => {
-		return data.posts.map(post => ({
+		return data.posts.map((post) => ({
 			...post,
 			titleLower: post.title.toLowerCase(),
 			descriptionLower: post.description.toLowerCase(),
-			tagsLower: post.tags.map(tag => tag.toLowerCase())
+			tagsLower: post.tags.map((tag) => tag.toLowerCase()),
 		}));
 	});
 
@@ -42,14 +42,15 @@
 	// Track search results from ContentSearch
 	// FIX: Initialize directly with data.posts to avoid derived state timing issues
 	// ContentSearch will update this via handleSearchChange callback
+	// svelte-ignore state_referenced_locally
 	/** @type {any[]} */
 	let searchResults = $state(
-		data.posts.map(post => ({
+		data.posts.map((post) => ({
 			...post,
 			titleLower: post.title.toLowerCase(),
 			descriptionLower: post.description.toLowerCase(),
-			tagsLower: post.tags.map(tag => tag.toLowerCase())
-		}))
+			tagsLower: post.tags.map((tag) => tag.toLowerCase()),
+		})),
 	);
 	/**
 	 * @param {string} _query
@@ -65,8 +66,8 @@
 		if (selectedTag) {
 			// FIX: Use pre-computed tagsLower for case-insensitive comparison (better performance)
 			const tagLower = selectedTag.toLowerCase();
-			return searchResults.filter(post =>
-				post.tagsLower.some((/** @type {string} */ tag) => tag === tagLower)
+			return searchResults.filter((post) =>
+				post.tagsLower.some((/** @type {string} */ tag) => tag === tagLower),
 			);
 		}
 		return searchResults;
@@ -75,17 +76,17 @@
 	// Update URL when tag filter changes
 	function updateUrl() {
 		const params = new URLSearchParams();
-		if (searchQuery.trim()) params.set('q', searchQuery.trim());
-		if (selectedTag) params.set('tag', selectedTag);
+		if (searchQuery.trim()) params.set("q", searchQuery.trim());
+		if (selectedTag) params.set("tag", selectedTag);
 
-		const newUrl = params.toString() ? `?${params.toString()}` : '/garden/search';
+		const newUrl = params.toString() ? `?${params.toString()}` : "/garden/search";
 		goto(newUrl, { replaceState: true, keepFocus: true });
 	}
 
 	/** @param {string} tag */
 	function selectTag(tag) {
 		if (selectedTag === tag) {
-			selectedTag = '';
+			selectedTag = "";
 		} else {
 			selectedTag = tag;
 		}
@@ -93,14 +94,16 @@
 	}
 
 	function clearFilters() {
-		searchQuery = '';
-		selectedTag = '';
-		goto('/garden/search', { replaceState: true });
+		searchQuery = "";
+		selectedTag = "";
+		goto("/garden/search", { replaceState: true });
 	}
 </script>
 
 <svelte:head>
-	<title>Search Garden{data.context?.type === 'tenant' ? ` - ${data.context.tenant.name}` : ''}</title>
+	<title
+		>Search Garden{data.context?.type === "tenant" ? ` - ${data.context.tenant.name}` : ""}</title
+	>
 	<meta name="description" content="Search the garden by keyword or filter by tags." />
 </svelte:head>
 
@@ -130,7 +133,9 @@
 						{#each data.allTags as tag (tag)}
 							<Badge
 								variant="tag"
-								class="accent-tag {selectedTag === tag ? 'selected-tag' : ''} cursor-pointer select-none"
+								class="accent-tag {selectedTag === tag
+									? 'selected-tag'
+									: ''} cursor-pointer select-none"
 								onclick={() => selectTag(tag)}
 								aria-label="{selectedTag === tag ? 'Remove' : 'Filter by'} tag: {tag}"
 								aria-pressed={selectedTag === tag}
@@ -148,7 +153,8 @@
 <div class="results-info">
 	{#if selectedTag || searchQuery}
 		<p>
-			Showing {filteredPosts.length} {filteredPosts.length === 1 ? 'post' : 'posts'}
+			Showing {filteredPosts.length}
+			{filteredPosts.length === 1 ? "post" : "posts"}
 			{#if selectedTag}
 				tagged with <strong>"{selectedTag}"</strong>
 			{/if}
@@ -171,13 +177,17 @@
 		{#each filteredPosts as post (post.slug)}
 			<Card hoverable>
 				<a href="/garden/{post.slug}" class="post-link">
-					<h2 class="text-xl font-semibold mb-4 text-green-800 dark:text-green-500 transition-colors">{post.title}</h2>
+					<h2
+						class="text-xl font-semibold mb-4 text-green-800 dark:text-green-500 transition-colors"
+					>
+						{post.title}
+					</h2>
 					<div class="post-meta">
 						<time datetime={post.date} class="text-sm text-foreground-subtle transition-colors">
-							{new Date(post.date).toLocaleDateString('en-US', {
-								year: 'numeric',
-								month: 'long',
-								day: 'numeric'
+							{new Date(post.date).toLocaleDateString("en-US", {
+								year: "numeric",
+								month: "long",
+								day: "numeric",
 							})}
 						</time>
 						{#if post.tags.length > 0}
@@ -186,7 +196,11 @@
 									<Badge
 										variant="tag"
 										class="accent-tag {selectedTag === tag ? 'selected-tag' : ''} cursor-pointer"
-										onclick={(e) => { e.preventDefault(); e.stopPropagation(); selectTag(tag); }}
+										onclick={(e) => {
+											e.preventDefault();
+											e.stopPropagation();
+											selectTag(tag);
+										}}
 										aria-label="{selectedTag === tag ? 'Remove' : 'Filter by'} tag: {tag}"
 										aria-pressed={selectedTag === tag}
 									>

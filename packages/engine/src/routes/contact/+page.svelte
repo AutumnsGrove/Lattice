@@ -3,7 +3,9 @@
 </script>
 
 <svelte:head>
-	<title>{data.title}{data.context?.type === 'tenant' ? ` - ${data.context.tenant.name}` : ''}</title>
+	<title
+		>{data.title}{data.context?.type === "tenant" ? ` - ${data.context.tenant.name}` : ""}</title
+	>
 	<meta name="description" content={data.description} />
 </svelte:head>
 
@@ -11,6 +13,7 @@
 	<h1>{data.title}</h1>
 
 	<div class="content">
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -- server-sanitized HTML content -->
 		{@html data.content}
 	</div>
 </article>

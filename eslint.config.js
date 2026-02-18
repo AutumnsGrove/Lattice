@@ -18,6 +18,15 @@ export default tseslint.config(
 			"**/archived/**",
 			// Generated / vendored files
 			"**/node_modules/**",
+			// Cloudflare build artifacts
+			"**/.wrangler/**",
+			// Test coverage output
+			"**/coverage/**",
+			// Python virtualenv in tools
+			"tools/glimpse/.venv/**",
+			// eslint-plugin-svelte doesn't support <svelte:boundary> yet (parser crash)
+			"**/PassageTransition.svelte",
+			"packages/landing/src/routes/vineyard/+page.svelte",
 		],
 	},
 
@@ -46,6 +55,15 @@ export default tseslint.config(
 			// CJS require() is used in some Cloudflare Worker scripts and build tools.
 			// Address gradually — warn rather than error until cleaned up.
 			"@typescript-eslint/no-require-imports": "warn",
+		},
+	},
+
+	// Tailwind / PostCSS configs use CJS require() for plugins — this is intentional
+	// and expected for the CommonJS config format these tools use.
+	{
+		files: ["**/tailwind.config.{js,cjs}", "**/postcss.config.{js,cjs}"],
+		rules: {
+			"@typescript-eslint/no-require-imports": "off",
 		},
 	},
 

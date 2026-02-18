@@ -56,7 +56,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     }
 
     const includeImages = body.includeImages !== false; // default true
-    let deliveryMethod = body.deliveryMethod || "email";
+    const deliveryMethod = body.deliveryMethod || "email";
 
     // Validate deliveryMethod
     if (!["email", "download"].includes(deliveryMethod)) {

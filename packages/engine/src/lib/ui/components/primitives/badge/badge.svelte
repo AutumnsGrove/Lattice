@@ -4,6 +4,7 @@
 	import { cn } from "$lib/utils";
 	import { badgeVariants, type BadgeVariant } from "./badge-variants";
 
+	// svelte-ignore custom_element_props_identifier
 	let {
 		ref = $bindable(null),
 		href,

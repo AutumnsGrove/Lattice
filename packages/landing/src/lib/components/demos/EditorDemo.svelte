@@ -5,14 +5,14 @@
   No API calls, no auth, pure client-side.
 -->
 <script lang="ts">
-	import { browser } from '$app/environment';
-	import MarkdownIt from 'markdown-it';
-	import { Bold, Italic, Code, Link, Heading1, Heading2, Heading3 } from 'lucide-svelte';
+	import { browser } from "$app/environment";
+	import MarkdownIt from "markdown-it";
+	import { Bold, Italic, Code, Link, Heading1, Heading2, Heading3 } from "lucide-svelte";
 
 	const md = new MarkdownIt({
 		html: false,
 		breaks: true,
-		linkify: true
+		linkify: true,
 	});
 
 	const sampleContent = `# Finding Quiet on the Internet
@@ -33,32 +33,42 @@ Here, my words grow at their own pace. No analytics telling me which posts *perf
 
 	let content = $state(sampleContent);
 	let rendered = $derived(md.render(content));
-	let activeTab = $state<'split' | 'write' | 'preview'>('split');
+	let activeTab = $state<"split" | "write" | "preview">("split");
 </script>
 
-<div class="w-full rounded-2xl overflow-hidden border border-subtle bg-white/70 dark:bg-cream-50/50 backdrop-blur-sm">
+<div
+	class="w-full rounded-2xl overflow-hidden border border-subtle bg-white/70 dark:bg-cream-50/50 backdrop-blur-sm"
+>
 	<!-- Toolbar -->
-	<div class="flex items-center justify-between px-3 py-2 border-b border-subtle bg-white/80 dark:bg-cream-100/60">
+	<div
+		class="flex items-center justify-between px-3 py-2 border-b border-subtle bg-white/80 dark:bg-cream-100/60"
+	>
 		<div class="flex items-center gap-1">
 			<!-- Mode tabs -->
 			<button
-				onclick={() => activeTab = 'write'}
+				onclick={() => (activeTab = "write")}
 				class="px-2.5 py-1 rounded text-xs font-sans transition-colors
-					{activeTab === 'write' ? 'bg-accent-subtle/30 text-accent-muted font-medium' : 'text-foreground-subtle hover:text-foreground-muted'}"
+					{activeTab === 'write'
+					? 'bg-accent-subtle/30 text-accent-muted font-medium'
+					: 'text-foreground-subtle hover:text-foreground-muted'}"
 			>
 				Write
 			</button>
 			<button
-				onclick={() => activeTab = 'split'}
+				onclick={() => (activeTab = "split")}
 				class="px-2.5 py-1 rounded text-xs font-sans transition-colors
-					{activeTab === 'split' ? 'bg-accent-subtle/30 text-accent-muted font-medium' : 'text-foreground-subtle hover:text-foreground-muted'}"
+					{activeTab === 'split'
+					? 'bg-accent-subtle/30 text-accent-muted font-medium'
+					: 'text-foreground-subtle hover:text-foreground-muted'}"
 			>
 				Split
 			</button>
 			<button
-				onclick={() => activeTab = 'preview'}
+				onclick={() => (activeTab = "preview")}
 				class="px-2.5 py-1 rounded text-xs font-sans transition-colors
-					{activeTab === 'preview' ? 'bg-accent-subtle/30 text-accent-muted font-medium' : 'text-foreground-subtle hover:text-foreground-muted'}"
+					{activeTab === 'preview'
+					? 'bg-accent-subtle/30 text-accent-muted font-medium'
+					: 'text-foreground-subtle hover:text-foreground-muted'}"
 			>
 				Preview
 			</button>
@@ -66,7 +76,7 @@ Here, my words grow at their own pace. No analytics telling me which posts *perf
 
 		<div class="flex items-center gap-2">
 			<!-- Formatting button groups (decorative, matching the real editor) -->
-			{#if activeTab !== 'preview'}
+			{#if activeTab !== "preview"}
 				<div class="hidden sm:flex items-center gap-1.5">
 					<!-- Text formatting group -->
 					<div class="fmt-group">
@@ -88,7 +98,9 @@ Here, my words grow at their own pace. No analytics telling me which posts *perf
 					</div>
 				</div>
 			{/if}
-			<span class="text-[10px] text-foreground-faint font-sans px-2 py-0.5 rounded-full bg-accent-subtle/20">
+			<span
+				class="text-[10px] text-foreground-faint font-sans px-2 py-0.5 rounded-full bg-accent-subtle/20"
+			>
 				Flow Editor
 			</span>
 		</div>
@@ -97,8 +109,12 @@ Here, my words grow at their own pace. No analytics telling me which posts *perf
 	<!-- Editor panes -->
 	<div class="flex {activeTab === 'split' ? 'flex-col sm:flex-row' : ''}" style="height: 320px;">
 		<!-- Write pane -->
-		{#if activeTab === 'write' || activeTab === 'split'}
-			<div class="{activeTab === 'split' ? 'w-full sm:w-1/2 h-1/2 sm:h-full' : 'w-full h-full'} relative">
+		{#if activeTab === "write" || activeTab === "split"}
+			<div
+				class="{activeTab === 'split'
+					? 'w-full sm:w-1/2 h-1/2 sm:h-full'
+					: 'w-full h-full'} relative"
+			>
 				<textarea
 					bind:value={content}
 					class="w-full h-full p-4 font-mono text-sm text-foreground bg-transparent resize-none
@@ -106,22 +122,35 @@ Here, my words grow at their own pace. No analytics telling me which posts *perf
 					spellcheck="false"
 					aria-label="Markdown editor"
 				></textarea>
-				{#if activeTab === 'split'}
-					<div class="absolute right-0 top-0 bottom-0 w-px bg-subtle hidden sm:block" aria-hidden="true"></div>
-					<div class="absolute left-0 right-0 bottom-0 h-px bg-subtle sm:hidden" aria-hidden="true"></div>
+				{#if activeTab === "split"}
+					<div
+						class="absolute right-0 top-0 bottom-0 w-px bg-subtle hidden sm:block"
+						aria-hidden="true"
+					></div>
+					<div
+						class="absolute left-0 right-0 bottom-0 h-px bg-subtle sm:hidden"
+						aria-hidden="true"
+					></div>
 				{/if}
 			</div>
 		{/if}
 
 		<!-- Preview pane -->
-		{#if activeTab === 'preview' || activeTab === 'split'}
-			<div class="{activeTab === 'split' ? 'w-full sm:w-1/2 h-1/2 sm:h-full' : 'w-full h-full'} overflow-y-auto">
-				<div class="p-4 prose prose-sm prose-grove max-w-none
+		{#if activeTab === "preview" || activeTab === "split"}
+			<div
+				class="{activeTab === 'split'
+					? 'w-full sm:w-1/2 h-1/2 sm:h-full'
+					: 'w-full h-full'} overflow-y-auto"
+			>
+				<div
+					class="p-4 prose prose-sm prose-grove max-w-none
 					prose-headings:font-serif prose-headings:text-foreground
 					prose-p:text-foreground-muted prose-p:leading-relaxed
 					prose-blockquote:border-accent-muted prose-blockquote:text-foreground-subtle prose-blockquote:italic
 					prose-strong:text-foreground prose-em:text-foreground-muted
-					prose-hr:border-subtle">
+					prose-hr:border-subtle"
+				>
+					<!-- eslint-disable-next-line svelte/no-at-html-tags -- sanitized markdown output -->
 					{@html rendered}
 				</div>
 			</div>

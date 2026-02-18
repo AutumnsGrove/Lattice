@@ -1,37 +1,45 @@
 <script>
-	import InternalsPostViewer from '$lib/components/custom/InternalsPostViewer.svelte';
-	import { Button, GroveSwap } from '$lib/ui';
+	import InternalsPostViewer from "$lib/components/custom/InternalsPostViewer.svelte";
+	import { Button, GroveSwap } from "$lib/ui";
 
 	let { data } = $props();
 </script>
 
 <svelte:head>
-	<title>{data.title}{data.context?.type === 'tenant' ? ` - ${data.context.tenant.name}` : ''}</title>
-	<meta name="description" content={data.description || ''} />
+	<title
+		>{data.title}{data.context?.type === "tenant" ? ` - ${data.context.tenant.name}` : ""}</title
+	>
+	<meta name="description" content={data.description || ""} />
 </svelte:head>
 
 {#if data.needsSetup}
 	<div class="setup-page">
 		<div class="setup-content">
 			<div class="setup-icon">
-				<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-					<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="64"
+					height="64"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="1.5"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				>
+					<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
 				</svg>
 			</div>
 			<h1>Welcome to {data.tenantName}</h1>
 			<p class="setup-subtitle">Your new grove is ready to be set up!</p>
 			<p class="setup-description">
-				Sign in to the <GroveSwap term="arbor" standard="dashboard">admin panel</GroveSwap> to create your first post, customize your theme,
-				and make this space your own.
+				Sign in to the <GroveSwap term="arbor" standard="dashboard">admin panel</GroveSwap> to create
+				your first post, customize your theme, and make this space your own.
 			</p>
 			<div class="setup-actions">
-				<Button href="/arbor" variant="default" size="lg">
-					Set Up Your Grove
-				</Button>
+				<Button href="/arbor" variant="default" size="lg">Set Up Your Grove</Button>
 			</div>
-			<p class="setup-hint">
-				You'll be asked to sign in with your Grove account to continue.
-			</p>
+			<p class="setup-hint">You'll be asked to sign in with your Grove account to continue.</p>
 		</div>
 	</div>
 {:else if data.hero}
@@ -39,13 +47,16 @@
 		<h1>{data.hero.title}</h1>
 		<p class="subtitle">{data.hero.subtitle}</p>
 		{#if data.hero.cta}
-			<Button href={data.hero.cta.link} variant="default" size="lg" class="cta-button">{data.hero.cta.text}</Button>
+			<Button href={data.hero.cta.link} variant="default" size="lg" class="cta-button"
+				>{data.hero.cta.text}</Button
+			>
 		{/if}
 	</div>
 {/if}
 
 {#if data.content}
 	<div class="intro">
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -- server-sanitized HTML content -->
 		{@html data.content}
 	</div>
 {/if}
@@ -53,13 +64,9 @@
 {#if data.latestPost}
 	<section class="latest-post-section">
 		<h2 class="section-title">Latest Post</h2>
-		<InternalsPostViewer
-			post={data.latestPost}
-			caption="From the garden"
-		/>
+		<InternalsPostViewer post={data.latestPost} caption="From the garden" />
 	</section>
 {/if}
-
 
 <style>
 	.setup-page {
@@ -117,7 +124,12 @@
 		transition: background 0.3s ease;
 	}
 	:global(.dark) .hero {
-		background: linear-gradient(145deg, var(--light-bg-secondary) 0%, #1a2f1a 50%, var(--status-success-bg) 100%);
+		background: linear-gradient(
+			145deg,
+			var(--light-bg-secondary) 0%,
+			#1a2f1a 50%,
+			var(--status-success-bg) 100%
+		);
 	}
 	h1 {
 		font-size: 3rem;
@@ -156,7 +168,9 @@
 		margin-bottom: 1.25rem;
 		padding-bottom: 0.5rem;
 		border-bottom: 2px solid var(--light-border-primary);
-		transition: color 0.3s ease, border-color 0.3s ease;
+		transition:
+			color 0.3s ease,
+			border-color 0.3s ease;
 	}
 	:global(.dark) .section-title {
 		color: var(--color-primary-light);

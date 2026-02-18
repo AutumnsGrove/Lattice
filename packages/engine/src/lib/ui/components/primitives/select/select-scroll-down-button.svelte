@@ -3,6 +3,7 @@
 	import { Select as SelectPrimitive, type WithoutChildrenOrChild } from "bits-ui";
 	import { cn } from "$lib/utils";
 
+	// svelte-ignore custom_element_props_identifier
 	let {
 		ref = $bindable(null),
 		class: className,

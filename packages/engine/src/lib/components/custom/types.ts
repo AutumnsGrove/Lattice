@@ -46,7 +46,7 @@ export interface CategoryNavItem {
  * Uses `unknown` to avoid strict type checking issues with different icon libraries.
  * Runtime validation is handled by `isValidIcon()`.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 export type IconComponent =
   | Component<{ class?: string }>
   | (new (...args: any[]) => any)

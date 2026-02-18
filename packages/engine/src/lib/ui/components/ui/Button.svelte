@@ -4,7 +4,14 @@
 	import type { Snippet } from "svelte";
 	import type { HTMLButtonAttributes } from "svelte/elements";
 
-	type ButtonVariant = "primary" | "secondary" | "danger" | "ghost" | "link" | "default" | "outline";
+	type ButtonVariant =
+		| "primary"
+		| "secondary"
+		| "danger"
+		| "ghost"
+		| "link"
+		| "default"
+		| "outline";
 	type ButtonSize = "sm" | "md" | "lg" | "icon";
 
 	/**
@@ -38,6 +45,7 @@
 		ref?: HTMLButtonElement | null;
 	}
 
+	// svelte-ignore custom_element_props_identifier
 	let {
 		variant = "primary",
 		size = "md",
@@ -49,14 +57,17 @@
 	}: Props = $props();
 
 	// Map our simplified variants to shadcn variants
-	const variantMap: Record<ButtonVariant, "default" | "secondary" | "destructive" | "ghost" | "link" | "outline"> = {
+	const variantMap: Record<
+		ButtonVariant,
+		"default" | "secondary" | "destructive" | "ghost" | "link" | "outline"
+	> = {
 		primary: "default",
 		secondary: "secondary",
 		danger: "destructive",
 		ghost: "ghost",
 		link: "link",
 		default: "default",
-		outline: "outline"
+		outline: "outline",
 	};
 
 	// Map our size variants to shadcn sizes
@@ -64,7 +75,7 @@
 		sm: "sm",
 		md: "default",
 		lg: "lg",
-		icon: "icon"
+		icon: "icon",
 	};
 
 	const shadcnVariant = $derived(variantMap[variant]);
@@ -73,10 +84,10 @@
 
 <!-- @ts-expect-error Complex union type from button/anchor polymorphism -->
 <ShadcnButton
-	bind:ref={ref}
+	bind:ref
 	variant={shadcnVariant}
 	size={shadcnSize}
-	disabled={disabled}
+	{disabled}
 	class={className}
 	{...restProps}
 >

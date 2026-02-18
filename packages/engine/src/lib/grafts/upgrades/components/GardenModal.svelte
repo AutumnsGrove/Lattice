@@ -5,19 +5,19 @@
 	 * Modal dialog for comparing growth stages and initiating cultivation.
 	 */
 
-	import { X, Sprout, RefreshCw, Settings } from 'lucide-svelte';
-	import type { GardenModalProps } from './types.js';
-	import type { TierKey } from '$lib/config/tiers';
-	import { transformAllTiers, type PricingTier, type BillingPeriod } from '$lib/grafts/pricing';
-	import GrowthCard from './GrowthCard.svelte';
-	import PricingToggle from '../../pricing/PricingToggle.svelte';
+	import { X, Sprout, RefreshCw, Settings } from "lucide-svelte";
+	import type { GardenModalProps } from "./types.js";
+	import type { TierKey } from "$lib/config/tiers";
+	import { transformAllTiers, type PricingTier, type BillingPeriod } from "$lib/grafts/pricing";
+	import GrowthCard from "./GrowthCard.svelte";
+	import PricingToggle from "../../pricing/PricingToggle.svelte";
 
 	let {
 		open = false,
-		currentStage = 'free',
-		flourishState = 'active',
-		billingPeriod = 'monthly' as BillingPeriod,
-		availableStages = ['seedling', 'sapling', 'oak', 'evergreen'],
+		currentStage = "free",
+		flourishState = "active",
+		billingPeriod = "monthly" as BillingPeriod,
+		availableStages = ["seedling", "sapling", "oak", "evergreen"],
 		onCultivate,
 		onTend,
 		onClose,
@@ -31,12 +31,12 @@
 		tiers.filter(
 			(t) =>
 				availableStages.includes(t.key) &&
-				['seedling', 'sapling', 'oak', 'evergreen'].includes(t.key),
+				["seedling", "sapling", "oak", "evergreen"].includes(t.key),
 		),
 	);
 
 	// Get current stage index
-	const stageOrder: TierKey[] = ['free', 'seedling', 'sapling', 'oak', 'evergreen'];
+	const stageOrder: TierKey[] = ["free", "seedling", "sapling", "oak", "evergreen"];
 	let currentIndex = $derived(stageOrder.indexOf(currentStage));
 
 	// Handle backdrop click
@@ -48,7 +48,7 @@
 
 	// Handle escape key
 	function handleKeydown(e: KeyboardEvent) {
-		if (e.key === 'Escape') {
+		if (e.key === "Escape") {
 			onClose?.();
 		}
 	}
@@ -65,9 +65,11 @@
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
 		onclick={handleBackdropClick}
+		onkeydown={handleKeydown}
 		role="dialog"
 		aria-modal="true"
 		aria-labelledby="garden-modal-title"
+		tabindex="-1"
 	>
 		<div
 			class="
@@ -96,9 +98,7 @@
 						<h2 id="garden-modal-title" class="text-xl font-serif text-foreground">
 							Cultivate Your Grove
 						</h2>
-						<p class="text-sm text-foreground-muted">
-							Help your grove flourish to the next stage
-						</p>
+						<p class="text-sm text-foreground-muted">Help your grove flourish to the next stage</p>
 					</div>
 				</div>
 
@@ -110,20 +110,22 @@
 					>
 						{currentStage.charAt(0).toUpperCase() + currentStage.slice(1)}
 					</span>
-					{#if flourishState !== 'active'}
+					{#if flourishState !== "active"}
 						<span
 							class="px-3 py-1 rounded-full text-sm font-medium {flourishState === 'past_due'
 								? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
 								: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'}"
 						>
-							{flourishState.charAt(0).toUpperCase() + flourishState.slice(1).replace('_', ' ')}
+							{flourishState.charAt(0).toUpperCase() + flourishState.slice(1).replace("_", " ")}
 						</span>
 					{/if}
 				</div>
 			</div>
 
 			<!-- Billing period toggle -->
-			<div class="p-4 border-b border-grove-200 dark:border-grove-800 bg-grove-50/50 dark:bg-grove-900/20">
+			<div
+				class="p-4 border-b border-grove-200 dark:border-grove-800 bg-grove-50/50 dark:bg-grove-900/20"
+			>
 				<PricingToggle
 					{billingPeriod}
 					savingsPercent={17}

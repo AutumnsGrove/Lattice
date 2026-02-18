@@ -3,6 +3,7 @@
 	import { Select as SelectPrimitive, type WithoutChild } from "bits-ui";
 	import { cn } from "$lib/utils";
 
+	// svelte-ignore custom_element_props_identifier
 	let {
 		ref = $bindable(null),
 		class: className,
@@ -18,7 +19,7 @@
 	{value}
 	class={cn(
 		"data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-		className
+		className,
 	)}
 	{...restProps}
 >

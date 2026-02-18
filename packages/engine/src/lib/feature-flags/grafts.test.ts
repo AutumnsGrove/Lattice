@@ -40,7 +40,7 @@ describe("Grafts API", () => {
     it("returns all enabled flags as booleans", async () => {
       // Arrange: Set up mock with multiple flags
       const mockDB = env.DB as any;
-      let callCount = 0;
+      const callCount = 0;
 
       mockDB.prepare = vi.fn((sql: string) => {
         // First call: getAllFlagIds - return list of flag IDs

@@ -88,7 +88,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     for (const key of keys) {
       try {
         // Sanitize key
-        let sanitizedKey = key
+        const sanitizedKey = key
           .replace(/\.\./g, "")
           .replace(/^\/+/, "")
           .replace(/\/\/+/g, "/")

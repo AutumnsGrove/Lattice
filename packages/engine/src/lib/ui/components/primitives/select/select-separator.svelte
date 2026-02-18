@@ -2,6 +2,7 @@
 	import { Separator as SeparatorPrimitive } from "bits-ui";
 	import { cn } from "$lib/utils";
 
+	// svelte-ignore custom_element_props_identifier
 	let {
 		ref = $bindable(null),
 		class: className,
@@ -9,4 +10,8 @@
 	}: SeparatorPrimitive.RootProps = $props();
 </script>
 
-<SeparatorPrimitive.Root bind:ref class={cn("bg-muted -mx-1 my-1 h-px", className)} {...restProps} />
+<SeparatorPrimitive.Root
+	bind:ref
+	class={cn("bg-muted -mx-1 my-1 h-px", className)}
+	{...restProps}
+/>

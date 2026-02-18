@@ -1,22 +1,22 @@
 <script>
-	import Lightbox from '$lib/ui/components/gallery/Lightbox.svelte';
-	import GlassCarousel from '$lib/ui/components/ui/GlassCarousel.svelte';
-	import EmbedWidget from '$lib/ui/components/content/EmbedWidget.svelte';
-	import { sanitizeHTML } from '$lib/utils/sanitize';
+	import Lightbox from "$lib/ui/components/gallery/Lightbox.svelte";
+	import GlassCarousel from "$lib/ui/components/ui/GlassCarousel.svelte";
+	import EmbedWidget from "$lib/ui/components/content/EmbedWidget.svelte";
+	import { sanitizeHTML } from "$lib/utils/sanitize";
 
 	let { item = {} } = $props();
 
 	let lightboxOpen = $state(false);
-	let lightboxSrc = $state('');
-	let lightboxAlt = $state('');
-	let lightboxCaption = $state('');
+	let lightboxSrc = $state("");
+	let lightboxAlt = $state("");
+	let lightboxCaption = $state("");
 
 	/**
 	 * @param {string} src
 	 * @param {string} alt
 	 * @param {string} [caption]
 	 */
-	function openLightbox(src, alt, caption = '') {
+	function openLightbox(src, alt, caption = "") {
 		lightboxSrc = src;
 		lightboxAlt = alt;
 		lightboxCaption = caption;
@@ -31,40 +31,50 @@
 	/** @param {Event} event */
 	function handleContentClick(event) {
 		const target = /** @type {HTMLElement} */ (event.target);
-		if (target.tagName === 'IMG') {
+		if (target.tagName === "IMG") {
 			const img = /** @type {HTMLImageElement} */ (target);
 			openLightbox(img.src, img.alt);
 		}
 	}
 </script>
 
-<div class="gutter-item" data-anchor={item.anchor || ''}>
-	{#if item.type === 'comment' || item.type === 'markdown'}
+<div class="gutter-item" data-anchor={item.anchor || ""}>
+	{#if item.type === "comment" || item.type === "markdown"}
 		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 		<div
 			class="gutter-comment"
 			onclick={handleContentClick}
-			onkeydown={(e) => e.key === 'Enter' && handleContentClick(e)}
+			onkeydown={(e) => e.key === "Enter" && handleContentClick(e)}
 			role="group"
 			aria-label="Gutter annotation - click images to enlarge"
 		>
+			<!-- eslint-disable-next-line svelte/no-at-html-tags -- trusted SVG content -->
 			{@html sanitizeHTML(item.content)}
 		</div>
-	{:else if item.type === 'photo' || item.type === 'image'}
+	{:else if item.type === "photo" || item.type === "image"}
 		{@const imageSrc = item.src || item.url || item.file}
 		<figure class="gutter-photo">
-			<button class="image-button" onclick={() => openLightbox(imageSrc, item.caption || 'Gutter image', item.caption || '')}>
-				<img src={imageSrc} alt={item.caption || 'Gutter image'} loading="lazy" decoding="async" />
+			<button
+				class="image-button"
+				onclick={() => openLightbox(imageSrc, item.caption || "Gutter image", item.caption || "")}
+			>
+				<img src={imageSrc} alt={item.caption || "Gutter image"} loading="lazy" decoding="async" />
 			</button>
 			{#if item.caption}
 				<figcaption>{item.caption}</figcaption>
 			{/if}
 		</figure>
-	{:else if item.type === 'gallery'}
+	{:else if item.type === "gallery"}
 		{#if item.images?.length > 0}
 			<div class="gutter-gallery">
 				<GlassCarousel
-					images={item.images.map((/** @type {{url?: string, alt?: string, caption?: string}} */ img) => ({ url: img.url || '', alt: img.alt || 'Gallery image', caption: img.caption || '' }))}
+					images={item.images.map(
+						(/** @type {{url?: string, alt?: string, caption?: string}} */ img) => ({
+							url: img.url || "",
+							alt: img.alt || "Gallery image",
+							caption: img.caption || "",
+						}),
+					)}
 					variant="frosted"
 					showArrows={false}
 					class="gutter-carousel"
@@ -75,14 +85,20 @@
 				<span>No images in gallery</span>
 			</div>
 		{/if}
-	{:else if item.type === 'emoji'}
+	{:else if item.type === "emoji"}
 		<div class="gutter-emoji">
-			<img src={item.src} alt={item.alt || 'Emoji'} title={item.alt || ''} loading="lazy" decoding="async" />
+			<img
+				src={item.src}
+				alt={item.alt || "Emoji"}
+				title={item.alt || ""}
+				loading="lazy"
+				decoding="async"
+			/>
 		</div>
-	{:else if item.type === 'embed'}
+	{:else if item.type === "embed"}
 		<div class="gutter-embed">
 			<EmbedWidget
-				url={item.embedUrl || item.url || ''}
+				url={item.embedUrl || item.url || ""}
 				provider={item.embedProvider}
 				embedUrl={item.embedHtml ? undefined : item.embedUrl}
 				embedHtml={item.embedHtml}
@@ -193,7 +209,9 @@
 		height: auto;
 		border-radius: 8px;
 		display: block;
-		transition: opacity 0.2s, transform 0.2s;
+		transition:
+			opacity 0.2s,
+			transform 0.2s;
 	}
 	/* Images in markdown comments fill their container */
 	.gutter-comment :global(img) {

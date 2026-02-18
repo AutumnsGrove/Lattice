@@ -1,20 +1,23 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { Mail, Loader2, RefreshCw, Check, ArrowRight } from 'lucide-svelte';
-	import { GlassCard } from '@autumnsgrove/groveengine/ui';
+	import { goto } from "$app/navigation";
+	import { Mail, Loader2, RefreshCw, Check, ArrowRight } from "lucide-svelte";
+	import { GlassCard } from "@autumnsgrove/groveengine/ui";
 
 	let { data } = $props();
 
 	// Form state
-	let code = $state('');
+	let code = $state("");
 	let isVerifying = $state(false);
 	let isResending = $state(false);
 	let error = $state<string | null>(null);
 	let success = $state(false);
 
 	// Rate limit state
+	// svelte-ignore state_referenced_locally
 	let canResend = $state(data.rateLimit.canResend);
+	// svelte-ignore state_referenced_locally
 	let remainingResends = $state(data.rateLimit.remainingResends);
+	// svelte-ignore state_referenced_locally
 	let retryAfterSeconds = $state(data.rateLimit.retryAfterSeconds);
 
 	// Countdown timer for retry
@@ -54,7 +57,7 @@
 	function handleCodeInput(event: Event & { currentTarget: HTMLInputElement }) {
 		const input = event.currentTarget;
 		// Only allow digits
-		const digits = input.value.replace(/\D/g, '').slice(0, 6);
+		const digits = input.value.replace(/\D/g, "").slice(0, 6);
 		code = digits;
 	}
 
@@ -66,10 +69,10 @@
 		error = null;
 
 		try {
-			const res = await fetch('/api/verify-email', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ code })
+			const res = await fetch("/api/verify-email", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ code }),
 			});
 
 			const result = (await res.json()) as {
@@ -82,17 +85,17 @@
 				success = true;
 				// Brief delay to show success state, then redirect
 				setTimeout(() => {
-					goto('/plans');
+					goto("/plans");
 				}, 1000);
 			} else {
-				error = result.error || 'Invalid code. Please try again.';
+				error = result.error || "Invalid code. Please try again.";
 				// Clear code on error for easy retry
-				if (result.errorCode === 'invalid_code') {
-					code = '';
+				if (result.errorCode === "invalid_code") {
+					code = "";
 				}
 			}
 		} catch {
-			error = 'Unable to verify code. Please try again.';
+			error = "Unable to verify code. Please try again.";
 		} finally {
 			isVerifying = false;
 		}
@@ -106,8 +109,8 @@
 		error = null;
 
 		try {
-			const res = await fetch('/api/verify-email/resend', {
-				method: 'POST'
+			const res = await fetch("/api/verify-email/resend", {
+				method: "POST",
 			});
 
 			const result = (await res.json()) as {
@@ -122,16 +125,16 @@
 					canResend = false;
 				}
 				// Clear old code
-				code = '';
+				code = "";
 			} else {
-				error = result.error || 'Unable to resend code.';
+				error = result.error || "Unable to resend code.";
 				if (result.retryAfterSeconds) {
 					canResend = false;
 					retryAfterSeconds = result.retryAfterSeconds;
 				}
 			}
 		} catch {
-			error = 'Unable to resend code. Please try again.';
+			error = "Unable to resend code. Please try again.";
 		} finally {
 			isResending = false;
 		}
@@ -141,7 +144,7 @@
 	function formatTime(seconds: number): string {
 		const mins = Math.floor(seconds / 60);
 		const secs = seconds % 60;
-		return `${mins}:${secs.toString().padStart(2, '0')}`;
+		return `${mins}:${secs.toString().padStart(2, "0")}`;
 	}
 
 	// Auto-submit when 6 digits entered
@@ -155,9 +158,7 @@
 <div class="animate-fade-in max-w-2xl mx-auto px-4 py-8">
 	<!-- Header -->
 	<div class="text-center mb-8">
-		<div
-			class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4"
-		>
+		<div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
 			{#if success}
 				<Check size={32} class="text-success" />
 			{:else}
@@ -165,7 +166,7 @@
 			{/if}
 		</div>
 		<h1 class="text-2xl md:text-3xl font-medium text-foreground mb-2">
-			{success ? 'Email verified!' : 'Check your email'}
+			{success ? "Email verified!" : "Check your email"}
 		</h1>
 		<p class="text-foreground-muted">
 			{#if success}
@@ -204,10 +205,7 @@
 							class="w-full px-4 py-4 text-center text-3xl font-mono tracking-[0.5em] rounded-lg bg-white/70 dark:bg-bark-800/50 backdrop-blur-sm border border-white/30 dark:border-bark-700/30 text-foreground placeholder:text-foreground-faint/40 transition-all focus:outline-none focus:border-primary focus:bg-white/80 dark:focus:bg-bark-800/70 focus:ring-2 focus:ring-primary/20 disabled:opacity-50"
 						/>
 						{#if isVerifying}
-							<div
-								class="absolute right-4 top-1/2 -translate-y-1/2"
-								aria-hidden="true"
-							>
+							<div class="absolute right-4 top-1/2 -translate-y-1/2" aria-hidden="true">
 								<Loader2 size={24} class="animate-spin text-primary" />
 							</div>
 						{/if}
@@ -220,7 +218,9 @@
 
 				<!-- Error Message -->
 				{#if error}
-					<div class="p-3 rounded-lg bg-error-bg border border-error text-error text-sm text-center">
+					<div
+						class="p-3 rounded-lg bg-error-bg border border-error text-error text-sm text-center"
+					>
 						{error}
 					</div>
 				{/if}
@@ -243,9 +243,7 @@
 
 				<!-- Resend Section -->
 				<div class="pt-4 border-t border-white/20 dark:border-bark-700/20">
-					<p class="text-sm text-foreground-muted text-center mb-3">
-						Didn't receive the code?
-					</p>
+					<p class="text-sm text-foreground-muted text-center mb-3">Didn't receive the code?</p>
 
 					{#if canResend}
 						<button

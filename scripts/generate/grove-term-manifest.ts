@@ -221,7 +221,7 @@ function parseGroveNaming(content: string): GroveTermManifest {
   let currentCategory: GroveTermCategory = "foundational";
   let currentTerm = "";
   let termLines: string[] = [];
-  let allTermSlugs = new Set<string>();
+  const allTermSlugs = new Set<string>();
 
   // First pass: collect all term names for cross-referencing
   for (const line of lines) {

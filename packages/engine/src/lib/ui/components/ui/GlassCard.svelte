@@ -67,11 +67,11 @@
 	 */
 
 	type GlassVariant =
-		| "default"   // Light translucent background
-		| "accent"    // Accent-colored glass
-		| "dark"      // Dark translucent background
-		| "muted"     // Very subtle, barely visible
-		| "frosted";  // Stronger blur effect, more opaque
+		| "default" // Light translucent background
+		| "accent" // Accent-colored glass
+		| "dark" // Dark translucent background
+		| "muted" // Very subtle, barely visible
+		| "frosted"; // Stronger blur effect, more opaque
 
 	/** Available Gossamer presets */
 	type GossamerPreset =
@@ -132,6 +132,7 @@
 		flush?: boolean;
 	}
 
+	// svelte-ignore custom_element_props_identifier
 	let {
 		variant = "default",
 		title,
@@ -156,8 +157,8 @@
 
 	// Determine if gossamer is a preset string or custom config
 	const isPreset = $derived(typeof gossamer === "string");
-	const gossamerPreset = $derived(isPreset ? gossamer as GossamerPreset : undefined);
-	const gossamerConfig = $derived(!isPreset && gossamer ? gossamer as GossamerConfig : undefined);
+	const gossamerPreset = $derived(isPreset ? (gossamer as GossamerPreset) : undefined);
+	const gossamerConfig = $derived(!isPreset && gossamer ? (gossamer as GossamerConfig) : undefined);
 
 	// Variant-specific styles - warm grove tones with true glass transparency
 	// See grove-ui-design skill for opacity guidelines:
@@ -170,28 +171,38 @@
 		default: `
 			bg-white/80 dark:bg-cream-100/65
 			backdrop-blur-md
-		`.trim().replace(/\s+/g, ' '),
+		`
+			.trim()
+			.replace(/\s+/g, " "),
 
 		accent: `
 			bg-accent/20 dark:bg-cream-100/25
 			backdrop-blur-md
-		`.trim().replace(/\s+/g, ' '),
+		`
+			.trim()
+			.replace(/\s+/g, " "),
 
 		dark: `
 			bg-bark-900/40 dark:bg-cream-50/50
 			backdrop-blur-md
 			text-white
-		`.trim().replace(/\s+/g, ' '),
+		`
+			.trim()
+			.replace(/\s+/g, " "),
 
 		muted: `
 			bg-white/60 dark:bg-cream-100/40
 			backdrop-blur
-		`.trim().replace(/\s+/g, ' '),
+		`
+			.trim()
+			.replace(/\s+/g, " "),
 
 		frosted: `
 			bg-white/90 dark:bg-cream-100/80
 			backdrop-blur-lg
-		`.trim().replace(/\s+/g, ' ')
+		`
+			.trim()
+			.replace(/\s+/g, " "),
 	};
 
 	// Border colors per variant - subtle, warm borders
@@ -201,16 +212,20 @@
 		accent: "border-accent/30 dark:border-cream-300/30",
 		dark: "border-bark-700/30 dark:border-cream-400/30",
 		muted: "border-white/20 dark:border-cream-300/30",
-		frosted: "border-white/50 dark:border-cream-300/40"
+		frosted: "border-white/50 dark:border-cream-300/40",
 	};
 
 	// Hover styles - slightly more visible on hover
 	const hoverClasses: Record<GlassVariant, string> = {
-		default: "hover:bg-white/90 dark:hover:bg-cream-300/50 hover:shadow-lg hover:border-white/50 dark:hover:border-cream-400/50",
-		accent: "hover:bg-accent/30 dark:hover:bg-cream-200/35 hover:shadow-lg hover:shadow-accent/10 hover:border-accent/40",
+		default:
+			"hover:bg-white/90 dark:hover:bg-cream-300/50 hover:shadow-lg hover:border-white/50 dark:hover:border-cream-400/50",
+		accent:
+			"hover:bg-accent/30 dark:hover:bg-cream-200/35 hover:shadow-lg hover:shadow-accent/10 hover:border-accent/40",
 		dark: "hover:bg-bark-900/50 dark:hover:bg-cream-50/60 hover:shadow-xl hover:border-bark-600/40",
-		muted: "hover:bg-white/70 dark:hover:bg-cream-300/40 hover:shadow-md hover:border-white/30 dark:hover:border-cream-400/40",
-		frosted: "hover:bg-white/95 dark:hover:bg-cream-300/60 hover:shadow-lg hover:border-white/60 dark:hover:border-cream-400/50"
+		muted:
+			"hover:bg-white/70 dark:hover:bg-cream-300/40 hover:shadow-md hover:border-white/30 dark:hover:border-cream-400/40",
+		frosted:
+			"hover:bg-white/95 dark:hover:bg-cream-300/60 hover:shadow-lg hover:border-white/60 dark:hover:border-cream-400/50",
 	};
 
 	const computedClass = $derived(
@@ -224,21 +239,15 @@
 			border && `border ${borderClasses[variant]}`,
 			hoverable && `cursor-pointer ${hoverClasses[variant]}`,
 			"shadow-sm",
-			className
-		)
+			className,
+		),
 	);
 
 	// Text color adjustments for dark variant
-	const titleClass = $derived(
-		variant === "dark"
-			? "text-white"
-			: "text-foreground"
-	);
+	const titleClass = $derived(variant === "dark" ? "text-white" : "text-foreground");
 
 	const descriptionClass = $derived(
-		variant === "dark"
-			? "text-cream-300"
-			: "text-muted-foreground"
+		variant === "dark" ? "text-cream-300" : "text-muted-foreground",
 	);
 </script>
 
@@ -283,12 +292,9 @@
 	{/if}
 
 	<!-- Content layer (above Gossamer) -->
-	<div class={cn(
-		gossamer && "relative z-10",
-		flush && "flex-1 flex flex-col min-h-0"
-	)}>
+	<div class={cn(gossamer && "relative z-10", flush && "flex-1 flex flex-col min-h-0")}>
 		{#if header || title || description}
-			<div class="px-6 py-4 {(children || footer) ? 'border-b border-inherit' : ''}">
+			<div class="px-6 py-4 {children || footer ? 'border-b border-inherit' : ''}">
 				{#if header}
 					{@render header()}
 				{:else}

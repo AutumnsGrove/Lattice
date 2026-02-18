@@ -25,7 +25,7 @@ export function getCSRFToken(): string | null {
 /**
  * Fetch wrapper with automatic CSRF token injection
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 export async function apiRequest<T = any>(
   url: string,
   options: RequestInit = {},
@@ -102,7 +102,7 @@ export async function apiRequest<T = any>(
 /**
  * Convenience methods for common HTTP verbs
  */
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 export const api = {
   /** GET request */
   get: <T = any>(url: string, options: RequestInit = {}) =>
@@ -136,4 +136,4 @@ export const api = {
       body: JSON.stringify(body),
     }),
 };
-/* eslint-enable @typescript-eslint/no-explicit-any */
+ 

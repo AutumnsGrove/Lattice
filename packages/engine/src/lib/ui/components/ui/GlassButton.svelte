@@ -48,6 +48,7 @@
 		ref?: HTMLButtonElement | null;
 	}
 
+	// svelte-ignore custom_element_props_identifier
 	let {
 		variant = "default",
 		size = "md",
@@ -65,7 +66,7 @@
 		accent: "primary",
 		dark: "secondary",
 		ghost: "ghost",
-		outline: "outline"
+		outline: "outline",
 	};
 
 	// Glass base classes - the glassmorphism foundation
@@ -125,7 +126,7 @@
 			hover:border-white/55 dark:hover:border-cream-400/40
 		`
 			.trim()
-			.replace(/\s+/g, " ")
+			.replace(/\s+/g, " "),
 	};
 
 	const glassClasses = $derived(cn(glassBase, glassOverlays[variant], className));

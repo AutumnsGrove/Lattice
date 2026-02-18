@@ -3,6 +3,7 @@
 	import type { HTMLAttributes } from "svelte/elements";
 	import { cn } from "$lib/utils";
 
+	// svelte-ignore custom_element_props_identifier
 	let {
 		ref = $bindable(null),
 		class: className,

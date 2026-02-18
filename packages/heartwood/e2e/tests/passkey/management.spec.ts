@@ -107,7 +107,7 @@ test.describe("Passkey Management", () => {
     ).toBeVisible({ timeout: 15000 });
 
     // Verify we have one credential
-    let credentials = await webauthn.getCredentials();
+    const credentials = await webauthn.getCredentials();
     expect(credentials).toHaveLength(1);
 
     // Find and click delete button

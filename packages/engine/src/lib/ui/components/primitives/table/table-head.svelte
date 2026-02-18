@@ -3,6 +3,7 @@
 	import type { WithElementRef } from "bits-ui";
 	import { cn } from "$lib/utils";
 
+	// svelte-ignore custom_element_props_identifier
 	let {
 		ref = $bindable(null),
 		class: className,
@@ -15,7 +16,7 @@
 	bind:this={ref}
 	class={cn(
 		"text-muted-foreground h-12 px-4 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0",
-		className
+		className,
 	)}
 	{...restProps}
 >

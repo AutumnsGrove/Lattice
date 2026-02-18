@@ -58,7 +58,7 @@
 	const accordionType = $derived(type === "single" ? "single" : "multiple");
 
 	// Build props object with collapsible - bits-ui types don't include it but it works at runtime
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	 
 	const rootProps = $derived({
 		type: accordionType,
 		class: className,

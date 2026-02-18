@@ -267,7 +267,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     if (!title) {
       title = await getNextUntitledTitle(platform.env.DB, tenantId);
     }
-    let markdownContent = data.markdown_content || "";
+    const markdownContent = data.markdown_content || "";
 
     // Validation constants
     const MAX_TITLE_LENGTH = 200;

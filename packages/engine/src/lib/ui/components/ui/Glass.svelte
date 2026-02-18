@@ -37,18 +37,18 @@
 	 */
 
 	type Variant =
-		| "surface"   // Headers, navbars - high opacity, subtle blur
-		| "overlay"   // Modal backdrops - dark, medium blur
-		| "card"      // Content cards - medium opacity, clean look
-		| "tint"      // Text containers - light background for readability
-		| "accent"    // Accent-colored glass for callouts/highlights
-		| "muted";    // Subtle background, barely visible
+		| "surface" // Headers, navbars - high opacity, subtle blur
+		| "overlay" // Modal backdrops - dark, medium blur
+		| "card" // Content cards - medium opacity, clean look
+		| "tint" // Text containers - light background for readability
+		| "accent" // Accent-colored glass for callouts/highlights
+		| "muted"; // Subtle background, barely visible
 
 	type Intensity =
-		| "none"      // No blur (just transparency)
-		| "light"     // backdrop-blur-sm (4px)
-		| "medium"    // backdrop-blur (8px)
-		| "strong";   // backdrop-blur-md (12px)
+		| "none" // No blur (just transparency)
+		| "light" // backdrop-blur-sm (4px)
+		| "medium" // backdrop-blur (8px)
+		| "strong"; // backdrop-blur-md (12px)
 
 	type Element = "div" | "section" | "article" | "aside" | "header" | "footer" | "nav" | "main";
 
@@ -107,6 +107,7 @@
 		gossamerStatic?: boolean;
 	}
 
+	// svelte-ignore custom_element_props_identifier
 	let {
 		variant = "card",
 		intensity = "light",
@@ -125,8 +126,8 @@
 
 	// Determine if gossamer is a preset string or custom config
 	const isPreset = $derived(typeof gossamer === "string");
-	const gossamerPreset = $derived(isPreset ? gossamer as GossamerPreset : undefined);
-	const gossamerConfig = $derived(!isPreset && gossamer ? gossamer as GossamerConfig : undefined);
+	const gossamerPreset = $derived(isPreset ? (gossamer as GossamerPreset) : undefined);
+	const gossamerConfig = $derived(!isPreset && gossamer ? (gossamer as GossamerConfig) : undefined);
 
 	// Background colors per variant - warm grove tones, translucent for glass effect
 	const variantClasses: Record<Variant, string> = {
@@ -146,15 +147,15 @@
 		accent: "bg-accent/25 dark:bg-accent/15",
 
 		// Barely visible, very subtle
-		muted: "bg-white/50 dark:bg-grove-950/15"
+		muted: "bg-white/50 dark:bg-grove-950/15",
 	};
 
 	// Blur intensity classes - default to medium blur for true glass effect
 	const intensityClasses: Record<Intensity, string> = {
 		none: "",
-		light: "backdrop-blur",         // 8px
-		medium: "backdrop-blur-md",     // 12px
-		strong: "backdrop-blur-lg"      // 16px
+		light: "backdrop-blur", // 8px
+		medium: "backdrop-blur-md", // 12px
+		strong: "backdrop-blur-lg", // 16px
 	};
 
 	// Border classes per variant - subtle borders that complement the glass
@@ -164,7 +165,7 @@
 		card: "border-white/40 dark:border-grove-800/25",
 		tint: "border-white/30 dark:border-grove-800/20",
 		accent: "border-accent/30 dark:border-accent/20",
-		muted: "border-white/20 dark:border-grove-800/15"
+		muted: "border-white/20 dark:border-grove-800/15",
 	};
 
 	// Shadow classes
@@ -174,7 +175,7 @@
 		card: "shadow-sm",
 		tint: "shadow-sm",
 		accent: "shadow-sm",
-		muted: ""
+		muted: "",
 	};
 
 	const computedClass = $derived(
@@ -185,8 +186,8 @@
 			intensityClasses[intensity],
 			border && `border ${borderClasses[variant]}`,
 			shadow && shadowClasses[variant],
-			className
-		)
+			className,
+		),
 	);
 </script>
 
@@ -208,11 +209,7 @@
   - Falls back gracefully to solid backgrounds in older browsers
 -->
 
-<svelte:element
-	this={element}
-	class={computedClass}
-	{...restProps}
->
+<svelte:element this={element} class={computedClass} {...restProps}>
 	{#if gossamer}
 		<!-- Gossamer ASCII background layer -->
 		{#if gossamerPreset}

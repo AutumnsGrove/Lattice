@@ -760,7 +760,7 @@ describe("Billing Module", () => {
     it("handles complete subscription lifecycle: free -> active -> inactive", async () => {
       // Start with free tier
       let db = createMockDb();
-      let prepareChain: any = {
+      const prepareChain: any = {
         bind: vi.fn().mockReturnThis(),
         first: vi
           .fn()

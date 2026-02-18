@@ -1,8 +1,8 @@
 <script>
-	import ContentWithGutter from '$lib/components/custom/ContentWithGutter.svelte';
-	import ReedsThread from '$lib/components/reeds/ReedsThread.svelte';
-	import { Button, Badge, GroveSwap, MessageSquare, MessageSquareText } from '$lib/ui';
-	import { fontMap } from '$lib/ui/tokens/fonts';
+	import ContentWithGutter from "$lib/components/custom/ContentWithGutter.svelte";
+	import ReedsThread from "$lib/components/reeds/ReedsThread.svelte";
+	import { Button, Badge, GroveSwap, MessageSquare, MessageSquareText } from "$lib/ui";
+	import { fontMap } from "$lib/ui/tokens/fonts";
 
 	let { data } = $props();
 
@@ -12,14 +12,16 @@
 	// Get the font stack for this post (null if default)
 	// Uses canonical fontMap imported from fonts.ts
 	const postFont = $derived(
-		data.post.font && data.post.font !== 'default'
-			? fontMap[data.post.font]
-			: null
+		data.post.font && data.post.font !== "default" ? fontMap[data.post.font] : null,
 	);
 </script>
 
 <svelte:head>
-	<title>{data.post.title}{data.context?.type === 'tenant' ? ` - ${data.context.tenant.name}` : ''}</title>
+	<title
+		>{data.post.title}{data.context?.type === "tenant"
+			? ` - ${data.context.tenant.name}`
+			: ""}</title
+	>
 	<meta name="description" content={data.post.description || data.post.title} />
 
 	<!-- Open Graph metadata for better content detection -->
@@ -46,19 +48,20 @@
 	{/if}
 
 	<!-- Schema.org JSON-LD structured data for articles -->
+	<!-- eslint-disable-next-line svelte/no-at-html-tags -- trusted JSON-LD script -->
 	{@html `<script type="application/ld+json">${JSON.stringify({
 		"@context": "https://schema.org",
 		"@type": "BlogPosting",
-		"headline": data.post.title,
-		"description": data.post.description || data.post.title,
-		"author": {
+		headline: data.post.title,
+		description: data.post.description || data.post.title,
+		author: {
 			"@type": "Person",
-			"name": data.post.author
+			name: data.post.author,
 		},
-		"datePublished": data.post.date,
-		"dateModified": data.post.date,
-		"keywords": data.post.tags.join(", "),
-		...(data.post.featured_image ? { "image": data.post.featured_image } : {})
+		datePublished: data.post.date,
+		dateModified: data.post.date,
+		keywords: data.post.tags.join(", "),
+		...(data.post.featured_image ? { image: data.post.featured_image } : {}),
 	})}<\/script>`}
 </svelte:head>
 
@@ -72,12 +75,29 @@
 			<!-- Navigation outside of article header for semantic clarity -->
 			<nav class="article-nav" aria-label="Article navigation">
 				<div class="nav-row">
-					<Button variant="link" href="/garden" class="!p-0">&larr; Back to <GroveSwap term="your-garden">Garden</GroveSwap></Button>
+					<Button variant="link" href="/garden" class="!p-0"
+						>&larr; Back to <GroveSwap term="your-garden">Garden</GroveSwap></Button
+					>
 					{#if data.isOwner}
-						<a href="/arbor/garden/edit/{data.post.slug}" class="edit-link" aria-label="Edit this post in Flow">
-							<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-								<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
-								<path d="m15 5 4 4"/>
+						<a
+							href="/arbor/garden/edit/{data.post.slug}"
+							class="edit-link"
+							aria-label="Edit this post in Flow"
+						>
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="14"
+								height="14"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								aria-hidden="true"
+							>
+								<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+								<path d="m15 5 4 4" />
 							</svg>
 							<span>Edit</span>
 						</a>
@@ -103,10 +123,10 @@
 						</address>
 						<span class="meta-separator" aria-hidden="true"></span>
 						<time datetime={data.post.date} class="entry-date dateline published-date">
-							{new Date(data.post.date).toLocaleDateString('en-US', {
-								year: 'numeric',
-								month: 'long',
-								day: 'numeric'
+							{new Date(data.post.date).toLocaleDateString("en-US", {
+								year: "numeric",
+								month: "long",
+								day: "numeric",
 							})}
 						</time>
 						{#if data.post.tags.length > 0}
@@ -121,19 +141,21 @@
 						{/if}
 					</div>
 
-				{#if data.commentSettings?.comments_enabled}
-					<a
-						href="#reeds"
-						class="comment-count-badge"
-						aria-label="{data.commentTotal || 0} {data.commentTotal === 1 ? 'comment' : 'comments'} — jump to discussion"
-					>
-						{#if (data.commentTotal || 0) > 0}
-							<MessageSquareText class="comment-badge-icon has-comments" />
-						{:else}
-							<MessageSquare class="comment-badge-icon" />
-						{/if}
-					</a>
-				{/if}
+					{#if data.commentSettings?.comments_enabled}
+						<a
+							href="#reeds"
+							class="comment-count-badge"
+							aria-label="{data.commentTotal || 0} {data.commentTotal === 1
+								? 'comment'
+								: 'comments'} — jump to discussion"
+						>
+							{#if (data.commentTotal || 0) > 0}
+								<MessageSquareText class="comment-badge-icon has-comments" />
+							{:else}
+								<MessageSquare class="comment-badge-icon" />
+							{/if}
+						</a>
+					{/if}
 				</div>
 			</header>
 		{/snippet}
@@ -361,7 +383,10 @@
 		border-radius: 10px;
 		color: var(--color-text-muted, #888);
 		text-decoration: none;
-		transition: color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+		transition:
+			color 0.15s ease,
+			background 0.15s ease,
+			transform 0.15s ease;
 	}
 
 	.comment-count-badge:hover {

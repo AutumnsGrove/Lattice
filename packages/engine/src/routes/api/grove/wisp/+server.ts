@@ -271,7 +271,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
     tone?: unknown;
     readability?: unknown;
   } = {};
-  let totalTokens = { input: 0, output: 0 };
+  const totalTokens = { input: 0, output: 0 };
   let totalCost = 0;
   let modelUsed: string | null = null;
   let providerUsed: string | null = null;

@@ -6,9 +6,9 @@
 	 * beta testers, and other special accounts.
 	 */
 
-	import { enhance } from '$app/forms';
-	import { goto } from '$app/navigation';
-	import { page } from '$app/state';
+	import { enhance } from "$app/forms";
+	import { goto } from "$app/navigation";
+	import { page } from "$app/state";
 	import {
 		Gift,
 		Plus,
@@ -31,21 +31,21 @@
 		EyeOff,
 		Users,
 		ArrowUpRight,
-		Zap
-	} from 'lucide-svelte';
-	import { GlassCard, GroveSwap } from '@autumnsgrove/groveengine/ui';
+		Zap,
+	} from "lucide-svelte";
+	import { GlassCard, GroveSwap } from "@autumnsgrove/groveengine/ui";
 
 	let { data, form } = $props();
 
 	// Form state
-	let newEmail = $state('');
-	let newTier = $state<string>('seedling');
-	let newInviteType = $state<'beta' | 'comped'>('beta');
-	let newMessage = $state('');
-	let newNotes = $state('');
+	let newEmail = $state("");
+	let newTier = $state<string>("seedling");
+	let newInviteType = $state<"beta" | "comped">("beta");
+	let newMessage = $state("");
+	let newNotes = $state("");
 	let isAdding = $state(false);
 	let revokeInvite = $state<{ id: string; email: string } | null>(null);
-	let revokeNotes = $state('');
+	let revokeNotes = $state("");
 	let isRevoking = $state(false);
 	let showPreview = $state(false);
 
@@ -66,8 +66,8 @@
 	}
 
 	// Promote state
-	let promoteTier = $state<string>('seedling');
-	let promoteMessage = $state('');
+	let promoteTier = $state<string>("seedling");
+	let promoteMessage = $state("");
 	let isPromoting = $state<string | null>(null); // email currently being promoted
 	let isPromotingAll = $state(false);
 	let showEligible = $state(true);
@@ -76,86 +76,89 @@
 	const emailContent = {
 		beta: {
 			subject: "You're invited to the Grove beta",
-			intro: 'We\'re building something different — a quiet corner of the internet where your words actually belong to you. No algorithms, no ads, no tracking.',
+			intro:
+				"We're building something different — a quiet corner of the internet where your words actually belong to you. No algorithms, no ads, no tracking.",
 			middle: "We'd love for you to be one of the first to try it.",
-			feedback: 'As a beta tester, your feedback helps shape what Grove becomes. Every rough edge you find makes this place better for everyone who comes after.',
-			cta: 'Join the Beta'
+			feedback:
+				"As a beta tester, your feedback helps shape what Grove becomes. Every rough edge you find makes this place better for everyone who comes after.",
+			cta: "Join the Beta",
 		},
 		comped: {
 			subject: "You've been invited to Grove",
-			intro: 'Someone believes you deserve your own corner of the internet — a quiet space where your words can grow without algorithms, ads, or tracking.',
-			middle: 'Your space is waiting whenever you\'re ready.',
+			intro:
+				"Someone believes you deserve your own corner of the internet — a quiet space where your words can grow without algorithms, ads, or tracking.",
+			middle: "Your space is waiting whenever you're ready.",
 			feedback: null,
-			cta: 'Claim Your Invite'
-		}
+			cta: "Claim Your Invite",
+		},
 	} as const;
 
 	const previewContent = $derived(emailContent[newInviteType] || emailContent.beta);
 
 	// Search state
-	let searchQuery = $state('');
-	let statusFilter = $state('');
-	let typeFilter = $state('');
+	let searchQuery = $state("");
+	let statusFilter = $state("");
+	let typeFilter = $state("");
 
 	// Sync search state with URL filters
 	$effect(() => {
-		searchQuery = data.filters.search ?? '';
-		statusFilter = data.filters.status ?? '';
-		typeFilter = data.filters.type ?? '';
+		searchQuery = data.filters.search ?? "";
+		statusFilter = data.filters.status ?? "";
+		typeFilter = data.filters.type ?? "";
 	});
 
 	const tierLabels: Record<string, string> = {
-		seedling: 'Seedling',
-		sapling: 'Sapling',
-		oak: 'Oak',
-		evergreen: 'Evergreen'
+		seedling: "Seedling",
+		sapling: "Sapling",
+		oak: "Oak",
+		evergreen: "Evergreen",
 	};
 
 	const tierColors: Record<string, string> = {
-		seedling: 'bg-green-500/20 text-green-300 border-green-500/30',
-		sapling: 'bg-teal-500/20 text-teal-300 border-teal-500/30',
-		oak: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-		evergreen: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+		seedling: "bg-green-500/20 text-green-300 border-green-500/30",
+		sapling: "bg-teal-500/20 text-teal-300 border-teal-500/30",
+		oak: "bg-amber-500/20 text-amber-300 border-amber-500/30",
+		evergreen: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
 	};
 
 	const typeLabels: Record<string, string> = {
-		beta: 'Beta',
-		comped: 'Comped'
+		beta: "Beta",
+		comped: "Comped",
 	};
 
 	const typeColors: Record<string, string> = {
-		beta: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-		comped: 'bg-purple-500/20 text-purple-300 border-purple-500/30'
+		beta: "bg-blue-500/20 text-blue-300 border-blue-500/30",
+		comped: "bg-purple-500/20 text-purple-300 border-purple-500/30",
 	};
 
 	function formatDate(timestamp: number): string {
-		return new Date(timestamp * 1000).toLocaleDateString('en-US', {
-			year: 'numeric',
-			month: 'short',
-			day: 'numeric',
-			hour: '2-digit',
-			minute: '2-digit'
+		return new Date(timestamp * 1000).toLocaleDateString("en-US", {
+			year: "numeric",
+			month: "short",
+			day: "numeric",
+			hour: "2-digit",
+			minute: "2-digit",
 		});
 	}
 
 	function applyFilters() {
 		const params = new URLSearchParams();
-		if (searchQuery) params.set('search', searchQuery);
-		if (statusFilter) params.set('status', statusFilter);
-		if (typeFilter) params.set('type', typeFilter);
+		if (searchQuery) params.set("search", searchQuery);
+		if (statusFilter) params.set("status", statusFilter);
+		if (typeFilter) params.set("type", typeFilter);
 		goto(`?${params.toString()}`, { replaceState: true });
 	}
 
 	function clearFilters() {
-		searchQuery = '';
-		statusFilter = '';
-		typeFilter = '';
-		goto('?', { replaceState: true });
+		searchQuery = "";
+		statusFilter = "";
+		typeFilter = "";
+		goto("?", { replaceState: true });
 	}
 
 	function goToPage(pageNum: number) {
 		const params = new URLSearchParams(page.url.search);
-		params.set('page', pageNum.toString());
+		params.set("page", pageNum.toString());
 		goto(`?${params.toString()}`);
 	}
 </script>
@@ -172,27 +175,33 @@
 				<Gift class="w-6 h-6 text-grove-600 dark:text-grove-400" />
 				Comped Invites
 			</h1>
-			<p class="text-foreground-muted font-sans mt-1">
-				Invite beta testers and friends to Grove
-			</p>
+			<p class="text-foreground-muted font-sans mt-1">Invite beta testers and friends to Grove</p>
 		</div>
 
 		<!-- Stats -->
 		<div class="flex flex-wrap gap-3 text-sm">
-			<div class="px-3 py-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center gap-2">
+			<div
+				class="px-3 py-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center gap-2"
+			>
 				<span class="text-blue-400 dark:text-blue-300">Beta:</span>
 				<span class="font-medium text-foreground">{data.stats.beta}</span>
 			</div>
-			<div class="px-3 py-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center gap-2">
+			<div
+				class="px-3 py-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center gap-2"
+			>
 				<span class="text-purple-400 dark:text-purple-300">Comped:</span>
 				<span class="font-medium text-foreground">{data.stats.comped}</span>
 			</div>
-			<div class="px-3 py-1.5 rounded-lg bg-yellow-500/10 border border-yellow-500/20 flex items-center gap-2">
+			<div
+				class="px-3 py-1.5 rounded-lg bg-yellow-500/10 border border-yellow-500/20 flex items-center gap-2"
+			>
 				<Clock class="w-4 h-4 text-yellow-500" />
 				<span class="text-foreground-muted">Pending:</span>
 				<span class="font-medium text-foreground">{data.stats.pending}</span>
 			</div>
-			<div class="px-3 py-1.5 rounded-lg bg-green-500/10 border border-green-500/20 flex items-center gap-2">
+			<div
+				class="px-3 py-1.5 rounded-lg bg-green-500/10 border border-green-500/20 flex items-center gap-2"
+			>
 				<CheckCircle class="w-4 h-4 text-green-500" />
 				<span class="text-foreground-muted">Used:</span>
 				<span class="font-medium text-foreground">{data.stats.used}</span>
@@ -202,31 +211,45 @@
 
 	<!-- Feedback Messages -->
 	{#if form?.success}
-		<div class="p-4 rounded-lg bg-green-500/10 border border-green-500/30 text-green-700 dark:text-green-300 flex items-center gap-2">
+		<div
+			class="p-4 rounded-lg bg-green-500/10 border border-green-500/30 text-green-700 dark:text-green-300 flex items-center gap-2"
+		>
 			<Check size={18} />
 			{form.message}
-			{#if form.emailStatus === 'sent'}
+			{#if form.emailStatus === "sent"}
 				— email sent
 			{/if}
 		</div>
-		{#if form.emailStatus === 'failed'}
-			<div class="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 flex items-center gap-2">
+		{#if form.emailStatus === "failed"}
+			<div
+				class="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 flex items-center gap-2"
+			>
 				<AlertTriangle size={18} />
-				<span>Invite created, but the email failed to send{form.emailError ? `: ${form.emailError}` : ''}. You may need to resend manually.</span>
+				<span
+					>Invite created, but the email failed to send{form.emailError
+						? `: ${form.emailError}`
+						: ""}. You may need to resend manually.</span
+				>
 			</div>
-		{:else if form.emailStatus === 'partial'}
-			<div class="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 flex items-center gap-2">
+		{:else if form.emailStatus === "partial"}
+			<div
+				class="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 flex items-center gap-2"
+			>
 				<AlertTriangle size={18} />
 				<span>Some invite emails failed to send. Check the audit log for details.</span>
 			</div>
-		{:else if form.emailStatus === 'not-configured'}
-			<div class="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 flex items-center gap-2">
+		{:else if form.emailStatus === "not-configured"}
+			<div
+				class="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 flex items-center gap-2"
+			>
 				<AlertTriangle size={18} />
 				<span>Invite created, but no email API key is configured — email was not sent.</span>
 			</div>
 		{/if}
 		{#if form.promoteErrors?.length}
-			<div class="p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-700 dark:text-red-300">
+			<div
+				class="p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-700 dark:text-red-300"
+			>
 				<div class="flex items-center gap-2 mb-2">
 					<AlertTriangle size={18} />
 					<span class="font-medium">Some promotions failed:</span>
@@ -241,7 +264,9 @@
 	{/if}
 
 	{#if form?.error}
-		<div class="p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-700 dark:text-red-300 flex items-center gap-2">
+		<div
+			class="p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-700 dark:text-red-300 flex items-center gap-2"
+		>
 			<AlertTriangle size={18} />
 			{form.error}
 		</div>
@@ -258,7 +283,9 @@
 				>
 					<Users class="w-5 h-5 text-blue-500" />
 					Email Subscribers Ready for Beta
-					<span class="px-2 py-0.5 text-xs rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30 font-sans">
+					<span
+						class="px-2 py-0.5 text-xs rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30 font-sans"
+					>
 						{data.eligibleSubscribers.length}
 					</span>
 				</button>
@@ -314,12 +341,17 @@
 				</div>
 
 				<p class="text-xs text-foreground-muted mb-3">
-					These people signed up for the email list but don't have a beta invite yet. Promoting them creates an invite and sends the beta email.
+					These people signed up for the email list but don't have a beta invite yet. Promoting them
+					creates an invite and sends the beta email.
 				</p>
 
-				<div class="divide-y divide-slate-200 dark:divide-cream-300 max-h-96 overflow-y-auto rounded-lg border border-slate-200 dark:border-cream-300">
+				<div
+					class="divide-y divide-slate-200 dark:divide-cream-300 max-h-96 overflow-y-auto rounded-lg border border-slate-200 dark:border-cream-300"
+				>
 					{#each data.eligibleSubscribers as sub}
-						<div class="px-4 py-3 flex items-center justify-between group hover:bg-slate-50 dark:hover:bg-cream-100/30">
+						<div
+							class="px-4 py-3 flex items-center justify-between group hover:bg-slate-50 dark:hover:bg-cream-100/30"
+						>
 							<div class="min-w-0">
 								<div class="flex items-center gap-2">
 									<span class="font-medium text-foreground text-sm truncate">{sub.email}</span>
@@ -328,12 +360,12 @@
 									{/if}
 								</div>
 								<div class="text-xs text-foreground-muted mt-0.5">
-									Signed up {new Date(sub.created_at).toLocaleDateString('en-US', {
-										month: 'short',
-										day: 'numeric',
-										year: 'numeric'
+									Signed up {new Date(sub.created_at).toLocaleDateString("en-US", {
+										month: "short",
+										day: "numeric",
+										year: "numeric",
 									})}
-									{#if sub.source && sub.source !== 'landing'}
+									{#if sub.source && sub.source !== "landing"}
 										<span class="ml-1">via {sub.source}</span>
 									{/if}
 								</div>
@@ -382,11 +414,13 @@
 			<GlassCard class="p-4">
 				<div class="flex flex-col sm:flex-row gap-3">
 					<div class="relative flex-1">
-						<Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground-muted" />
+						<Search
+							class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground-muted"
+						/>
 						<input
 							type="text"
 							bind:value={searchQuery}
-							onkeydown={(e) => e.key === 'Enter' && applyFilters()}
+							onkeydown={(e) => e.key === "Enter" && applyFilters()}
 							placeholder="Search by email..."
 							class="w-full pl-9 pr-4 py-2 rounded-lg bg-white/50 dark:bg-cream-100/50 border border-slate-200 dark:border-cream-300 text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-grove-500"
 						/>
@@ -440,11 +474,15 @@
 							<div class="flex items-center gap-3 min-w-0">
 								<div class="flex-shrink-0">
 									{#if invite.used_at}
-										<div class="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
+										<div
+											class="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center"
+										>
 											<CheckCircle class="w-4 h-4 text-green-500" />
 										</div>
 									{:else}
-										<div class="w-8 h-8 rounded-full bg-yellow-500/20 flex items-center justify-center">
+										<div
+											class="w-8 h-8 rounded-full bg-yellow-500/20 flex items-center justify-center"
+										>
 											<Clock class="w-4 h-4 text-yellow-500" />
 										</div>
 									{/if}
@@ -452,10 +490,16 @@
 								<div class="min-w-0">
 									<div class="flex items-center gap-2 flex-wrap">
 										<span class="font-medium text-foreground truncate">{invite.email}</span>
-										<span class="px-2 py-0.5 text-xs rounded border {typeColors[invite.invite_type] || typeColors.beta}">
+										<span
+											class="px-2 py-0.5 text-xs rounded border {typeColors[invite.invite_type] ||
+												typeColors.beta}"
+										>
 											{typeLabels[invite.invite_type] || invite.invite_type}
 										</span>
-										<span class="px-2 py-0.5 text-xs rounded border {tierColors[invite.tier] || tierColors.seedling}">
+										<span
+											class="px-2 py-0.5 text-xs rounded border {tierColors[invite.tier] ||
+												tierColors.seedling}"
+										>
 											{tierLabels[invite.tier] || invite.tier}
 										</span>
 									</div>
@@ -483,7 +527,7 @@
 										type="button"
 										onclick={() => copyInviteLink(invite.invite_token, invite.id)}
 										class="p-1.5 rounded text-foreground-muted hover:text-grove-600 hover:bg-grove-500/10 transition-colors"
-										title={copiedId === invite.id ? 'Copied!' : 'Copy invite link'}
+										title={copiedId === invite.id ? "Copied!" : "Copy invite link"}
 									>
 										{#if copiedId === invite.id}
 											<Check class="w-4 h-4 text-grove-600" />
@@ -542,10 +586,13 @@
 
 				<!-- Pagination -->
 				{#if data.pagination.totalPages > 1}
-					<div class="p-4 border-t border-slate-200 dark:border-cream-300 flex items-center justify-between">
+					<div
+						class="p-4 border-t border-slate-200 dark:border-cream-300 flex items-center justify-between"
+					>
 						<span class="text-sm text-foreground-muted">
 							Showing {(data.pagination.page - 1) * data.pagination.pageSize + 1} -
-							{Math.min(data.pagination.page * data.pagination.pageSize, data.pagination.total)} of {data.pagination.total}
+							{Math.min(data.pagination.page * data.pagination.pageSize, data.pagination.total)} of {data
+								.pagination.total}
 						</span>
 
 						<div class="flex items-center gap-1">
@@ -594,9 +641,9 @@
 							await update();
 							isAdding = false;
 							if (!form?.error) {
-								newEmail = '';
-								newMessage = '';
-								newNotes = '';
+								newEmail = "";
+								newMessage = "";
+								newNotes = "";
 							}
 						};
 					}}
@@ -607,7 +654,9 @@
 							Email Address
 						</label>
 						<div class="relative">
-							<Mail class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground-muted" />
+							<Mail
+								class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground-muted"
+							/>
 							<input
 								type="email"
 								id="email"
@@ -622,9 +671,8 @@
 
 					<!-- Invite Type -->
 					<div>
-						<label class="block text-sm font-medium text-foreground mb-2">
-							Invite Type
-						</label>
+						<!-- svelte-ignore a11y_label_has_associated_control -->
+						<label class="block text-sm font-medium text-foreground mb-2"> Invite Type </label>
 						<div class="flex gap-3">
 							<label class="flex items-center gap-2 cursor-pointer">
 								<input
@@ -648,18 +696,17 @@
 							</label>
 						</div>
 						<p class="text-xs text-foreground-muted mt-1">
-							{#if newInviteType === 'beta'}
+							{#if newInviteType === "beta"}
 								Beta testers get free access now, should convert to paid later.
 							{:else}
-								Comped <GroveSwap term="wanderer" standard="Visitors">Wanderers</GroveSwap> are free forever (special cases).
+								Comped <GroveSwap term="wanderer" standard="Visitors">Wanderers</GroveSwap> are free forever
+								(special cases).
 							{/if}
 						</p>
 					</div>
 
 					<div>
-						<label for="tier" class="block text-sm font-medium text-foreground mb-1">
-							Tier
-						</label>
+						<label for="tier" class="block text-sm font-medium text-foreground mb-1"> Tier </label>
 						<select
 							id="tier"
 							name="tier"
@@ -733,7 +780,7 @@
 						Email Preview
 					</span>
 					<span class="text-xs text-foreground-muted font-sans">
-						{showPreview ? 'Hide' : 'Show'}
+						{showPreview ? "Hide" : "Show"}
 					</span>
 				</button>
 
@@ -741,28 +788,37 @@
 					<div class="mt-4 space-y-3">
 						<!-- Subject -->
 						<div class="text-xs text-foreground-muted">
-							<span class="font-medium">Subject:</span> {previewContent.subject}
+							<span class="font-medium">Subject:</span>
+							{previewContent.subject}
 						</div>
 						<div class="text-xs text-foreground-muted">
-							<span class="font-medium">To:</span> {newEmail || 'friend@example.com'}
+							<span class="font-medium">To:</span>
+							{newEmail || "friend@example.com"}
 						</div>
 
 						<!-- Email Body Preview -->
 						<div class="rounded-xl overflow-hidden border border-slate-200 dark:border-cream-300">
 							<!-- Warm cream header -->
 							<div class="bg-[#fefdfb] px-5 py-4 text-center">
-								<div class="w-8 h-8 mx-auto rounded-full bg-grove-500/20 flex items-center justify-center">
+								<div
+									class="w-8 h-8 mx-auto rounded-full bg-grove-500/20 flex items-center justify-center"
+								>
 									<span class="text-grove-600 text-sm font-bold">G</span>
 								</div>
 							</div>
 
 							<!-- Content area with soft green background -->
-							<div class="bg-[#f0fdf4] px-5 py-4 space-y-3" style="font-family: Georgia, Cambria, 'Times New Roman', serif;">
+							<div
+								class="bg-[#f0fdf4] px-5 py-4 space-y-3"
+								style="font-family: Georgia, Cambria, 'Times New Roman', serif;"
+							>
 								<p class="text-sm text-[#3d2914]">Hey,</p>
 								<p class="text-sm text-[#3d2914] leading-relaxed">{previewContent.intro}</p>
 
 								{#if newMessage.trim()}
-									<div class="border-l-[3px] border-grove-500 pl-4 py-2 bg-grove-500/5 rounded-r-lg">
+									<div
+										class="border-l-[3px] border-grove-500 pl-4 py-2 bg-grove-500/5 rounded-r-lg"
+									>
 										<p class="text-sm text-[#3d2914] italic">"{newMessage}"</p>
 									</div>
 								{/if}
@@ -770,7 +826,9 @@
 								<p class="text-sm text-[#3d2914] leading-relaxed">{previewContent.middle}</p>
 
 								<p class="text-sm text-[#3d2914] leading-relaxed">
-									You're getting the <strong class="text-grove-600">{tierLabels[newTier] || newTier}</strong> plan, completely free.
+									You're getting the <strong class="text-grove-600"
+										>{tierLabels[newTier] || newTier}</strong
+									> plan, completely free.
 								</p>
 
 								{#if previewContent.feedback}
@@ -779,7 +837,9 @@
 
 								<!-- CTA Button -->
 								<div class="text-center pt-2">
-									<span class="inline-block px-6 py-2.5 bg-grove-600 text-white text-sm font-semibold rounded-lg">
+									<span
+										class="inline-block px-6 py-2.5 bg-grove-600 text-white text-sm font-semibold rounded-lg"
+									>
 										{previewContent.cta}
 									</span>
 								</div>
@@ -814,10 +874,10 @@
 					{#each data.auditLog as entry}
 						<div class="p-2 rounded-lg bg-cream-100 dark:bg-cream-100/50 text-sm">
 							<div class="flex items-center gap-2 flex-wrap">
-								{#if entry.action === 'create'}
+								{#if entry.action === "create"}
 									<Plus class="w-3 h-3 text-green-500" />
 									<span class="text-green-600 dark:text-green-400">Created</span>
-								{:else if entry.action === 'use'}
+								{:else if entry.action === "use"}
 									<CheckCircle class="w-3 h-3 text-blue-500" />
 									<span class="text-blue-600 dark:text-blue-400">Used</span>
 								{:else}
@@ -861,8 +921,9 @@
 			<GlassCard class="max-w-md mx-4 p-6">
 				<h3 class="text-lg font-serif text-foreground mb-2">Revoke Invite</h3>
 				<p class="text-foreground-muted mb-4">
-					Are you sure you want to revoke the invite for <span class="font-medium text-foreground">{revokeInvite.email}</span>?
-					They will need a new invite to sign up for free.
+					Are you sure you want to revoke the invite for <span class="font-medium text-foreground"
+						>{revokeInvite.email}</span
+					>? They will need a new invite to sign up for free.
 				</p>
 
 				<form
@@ -875,7 +936,7 @@
 							isRevoking = false;
 							if (!form?.error) {
 								revokeInvite = null;
-								revokeNotes = '';
+								revokeNotes = "";
 							}
 						};
 					}}
@@ -902,7 +963,7 @@
 							type="button"
 							onclick={() => {
 								revokeInvite = null;
-								revokeNotes = '';
+								revokeNotes = "";
 							}}
 							class="flex-1 px-4 py-2 rounded-lg bg-cream-200 dark:bg-cream-300 text-foreground hover:bg-cream-300 dark:hover:bg-cream-300 transition-colors"
 						>

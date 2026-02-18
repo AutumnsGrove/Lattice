@@ -2,6 +2,7 @@
 	import { cn } from "$lib/utils";
 	import { buttonVariants, type ButtonProps } from "./button-variants";
 
+	// svelte-ignore custom_element_props_identifier
 	let {
 		class: className,
 		variant = "default",
