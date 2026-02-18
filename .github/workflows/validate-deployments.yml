@@ -42,16 +42,22 @@ jobs:
         include:
           - name: grove-router
             path: packages/grove-router
+            needs-engine: false
           - name: durable-objects
             path: packages/durable-objects
+            needs-engine: true
           - name: post-migrator
             path: packages/post-migrator
+            needs-engine: false
           - name: heartwood
             path: packages/heartwood
+            needs-engine: false
           - name: clearing-monitor
             path: packages/workers/clearing-monitor
+            needs-engine: false
           - name: webhook-cleanup
             path: packages/workers/webhook-cleanup
+            needs-engine: false
 
     steps:
       - name: Checkout
@@ -69,6 +75,11 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install
+
+      - name: Build engine package (dependency)
+        if: matrix.needs-engine
+        run: pnpm run package
+        working-directory: packages/engine
 
       - name: Type check
         run: pnpm exec tsc --noEmit
