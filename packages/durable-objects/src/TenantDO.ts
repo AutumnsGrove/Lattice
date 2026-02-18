@@ -260,7 +260,7 @@ export class TenantDO extends LoomDO<TenantConfig, TenantEnv> {
     // Query D1 for full tenant data including ID
     const row = await this.env.DB.prepare(
       `
-      SELECT id, subdomain, name as displayName, theme, plan as tier, owner_id as ownerId
+      SELECT id, subdomain, display_name as displayName, theme, plan as tier, email as ownerId
       FROM tenants
       WHERE subdomain = ? AND active = 1
     `,
@@ -338,7 +338,7 @@ export class TenantDO extends LoomDO<TenantConfig, TenantEnv> {
       await this.env.DB.prepare(
         `
         UPDATE tenants
-        SET name = ?, theme = ?, updated_at = datetime('now')
+        SET display_name = ?, theme = ?, updated_at = datetime('now')
         WHERE subdomain = ?
       `,
       )
