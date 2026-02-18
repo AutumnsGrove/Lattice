@@ -336,22 +336,17 @@
 						<p class="text-sm text-foreground-subtle mt-4 text-center">
 							One-time support, no account needed.
 						</p>
-					</div>
-
-					<!-- Fallback link for those who block iframes -->
-					<noscript>
-						<div class="text-center mb-8">
+						<!-- Always-visible fallback: covers JS-off, CSP blocks, and extension-blocked iframes -->
+						<p class="text-sm text-foreground-subtle mt-1 text-center">
+							Widget not showing?
 							<a
 								href="https://ko-fi.com/autumnsgrove"
 								target="_blank"
 								rel="noopener noreferrer"
-								class="inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-accent text-accent-foreground hover:bg-accent-hover transition-colors font-sans font-medium text-lg shadow-sm hover:shadow-md min-h-[44px]"
-							>
-								<Coffee class="w-5 h-5" />
-								<span>Buy me a coffee on Ko-fi</span>
-							</a>
-						</div>
-					</noscript>
+								class="underline underline-offset-2 hover:text-foreground motion-safe:transition-colors"
+							>Open Ko-fi directly →</a>
+						</p>
+					</div>
 
 					<!-- What support goes toward -->
 					<div class="space-y-4 mb-8">
