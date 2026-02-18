@@ -13,26 +13,31 @@ The monorepo has outgrown its flat `packages/` structure. Fourteen active packag
 ## The Solution
 
 1. **Reorganize** existing packages into five categories: `apps/`, `services/`, `workers/`, `libs/`, `tools/`
-2. **Import** four external repositories: Foliage, Gossamer, Forage, Shutter
+2. **Import** six repositories: Foliage, Gossamer, Shutter, Forage, Ivy, and Amber
 3. **Update** all workspace configs, relative paths, CI workflows, and documentation
 
 ---
 
 ## Decisions (Confirmed)
 
-| Decision                                               | Answer                                                                                                                                        |
-| ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| Forage                                                 | Bring TS worker in as `services/forage/`. Python predecessor → `archives/` (preserve history, not active code).                               |
-| Shutter                                                | Bring in **both** Python and TypeScript versions together as `libs/shutter/`. Python preserves dev history; TS worker is the live version.    |
-| Foliage                                                | `libs/foliage/` as `@autumnsgrove/foliage` — separate lib, not merged into engine. Migrations fold into main D1 pipeline.                     |
-| Gossamer                                               | `libs/gossamer/` — flatten `packages/core/` from its nested monorepo. Name already `@autumnsgrove/gossamer`, no rename needed.                |
-| `example-site`, `ui`, `zig-core`                       | Artifact packages with no source. Archive to `archives/` first, then `git rm`. Must be done in Phase 1 before `packages/` is removed.         |
-| Press, Verge, Aria, Trove, Clearing (newspaper), Scout | Stay external. Truly independent projects.                                                                                                    |
-| Nook, Outpost, Bloom                                   | Stay external. Will import Lattice SDKs but don't belong here.                                                                                |
-| Directory structure                                    | `apps/`, `services/`, `workers/`, `libs/`, `tools/`                                                                                           |
-| Foliage package name                                   | Rename from `@groveengine/foliage` → `@autumnsgrove/foliage` during import. Consistent with org namespace.                                    |
-| Foliage merged into engine?                            | No. Lives in `libs/foliage/` as its own package. Engine adds `workspace:*` dep + new `./foliage` export paths. Engine has zero foliage today. |
-| npm rename to `@groveplace/lattice`                    | Separate follow-up effort, not part of this migration.                                                                                        |
+| Decision                                               | Answer                                                                                                                                                                                                                     |
+| ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Forage                                                 | Bring TS worker in as `services/forage/`. Python predecessor → `archives/` (preserve history, not active code).                                                                                                            |
+| Shutter                                                | Bring in **both** Python and TypeScript versions together as `libs/shutter/`. Python preserves dev history; TS worker is the live version.                                                                                 |
+| Foliage                                                | `libs/foliage/` as `@autumnsgrove/foliage` — separate lib, not merged into engine. Migrations fold into main D1 pipeline.                                                                                                  |
+| Gossamer                                               | `libs/gossamer/` — flatten `packages/core/` from its nested monorepo. Name already `@autumnsgrove/gossamer`, no rename needed.                                                                                             |
+| `example-site`, `ui`, `zig-core`                       | Artifact packages with no source. Archive to `archives/` first, then `git rm`. Must be done in Phase 1 before `packages/` is removed.                                                                                      |
+| Press, Verge, Aria, Trove, Clearing (newspaper), Scout | Stay external. Truly independent projects.                                                                                                                                                                                 |
+| Nook, Outpost, Bloom                                   | Stay external. Will import Lattice SDKs but don't belong here.                                                                                                                                                             |
+| Directory structure                                    | `apps/`, `services/`, `workers/`, `libs/`, `tools/`                                                                                                                                                                        |
+| Foliage package name                                   | Rename from `@groveengine/foliage` → `@autumnsgrove/foliage` during import. Consistent with org namespace.                                                                                                                 |
+| Foliage merged into engine?                            | No. Lives in `libs/foliage/` as its own package. Engine adds `workspace:*` dep + new `./foliage` export paths. Engine has zero foliage today.                                                                              |
+| Ivy                                                    | Bring in as `apps/ivy/`. Grove mail client for `@grove.place` addresses. Own D1 (`ivy-db`, `ivy_*` prefixed — stays with package, not main pipeline). Heartwood + Zephyr service bindings replace HTTP calls.              |
+| Amber (UI)                                             | Bring in as `apps/amber/`. SvelteKit frontend for unified storage management dashboard.                                                                                                                                    |
+| Amber (worker)                                         | Bring in as `services/amber/`. Always-on; manages shared `grove-storage` R2, DOs for exports, cron cleanup. ExportJobV2 → Loom SDK.                                                                                        |
+| Amber ZIP export consolidation                         | Engine's `/arbor/export/` gets warm redirect to Amber. Amber becomes the canonical "download your stuff" UX. Engine's ExportDO stays for blog-content Markdown exports (portability format) but users are guided to Amber. |
+| `auth-api.grove.place` (deprecated)                    | Both Ivy and Amber call this endpoint for session validation. Deprecated — replaced by Heartwood service binding via `login.grove.place` hub.                                                                              |
+| npm rename to `@groveplace/lattice`                    | Separate follow-up effort, not part of this migration.                                                                                                                                                                     |
 
 ---
 
@@ -98,13 +103,16 @@ GroveEngine/
 │   ├── meadow/                  #   meadow.grove.place community feed
 │   ├── terrarium/               #   terrarium.grove.place UI showcase
 │   ├── login/                   #   login.grove.place auth UI
-│   └── domains/                 #   domains.grove.place + Forage UI
+│   ├── domains/                 #   domains.grove.place + Forage UI
+│   ├── ivy/                     #   [NEW] ivy.grove.place mail client
+│   └── amber/                   #   [NEW] amber.grove.place storage management UI
 │
 ├── services/                    # Core infrastructure workers (always-on, handle requests)
 │   ├── heartwood/               #   Auth provider (OAuth + PKCE)
 │   ├── grove-router/            #   Subdomain routing proxy
 │   ├── durable-objects/         #   DO coordination layer (Loom)
 │   ├── forage/                  #   [NEW] Domain discovery AI worker
+│   ├── amber/                   #   [NEW] Unified storage management (R2, DO exports, crons)
 │   ├── zephyr/                  #   Email gateway
 │   └── pulse/                   #   GitHub webhook receiver
 │
@@ -156,28 +164,31 @@ packages:
 
 All depend on `@autumnsgrove/groveengine` via `workspace:*`. Serve UI to Wanderers.
 
-| Current Location     | New Location     | Package Name    | Notes                           |
-| -------------------- | ---------------- | --------------- | ------------------------------- |
-| `packages/landing`   | `apps/landing`   | grove-landing   | **grove.place** — the home page |
-| `packages/plant`     | `apps/plant`     | grove-plant     |                                 |
-| `packages/clearing`  | `apps/clearing`  | grove-clearing  |                                 |
-| `packages/meadow`    | `apps/meadow`    | grove-meadow    |                                 |
-| `packages/terrarium` | `apps/terrarium` | grove-terrarium |                                 |
-| `packages/login`     | `apps/login`     | grove-login     |                                 |
-| `packages/domains`   | `apps/domains`   | grove-domains   |                                 |
+| Current Location                 | New Location     | Package Name    | Notes                           |
+| -------------------------------- | ---------------- | --------------- | ------------------------------- |
+| `packages/landing`               | `apps/landing`   | grove-landing   | **grove.place** — the home page |
+| `packages/plant`                 | `apps/plant`     | grove-plant     |                                 |
+| `packages/clearing`              | `apps/clearing`  | grove-clearing  |                                 |
+| `packages/meadow`                | `apps/meadow`    | grove-meadow    |                                 |
+| `packages/terrarium`             | `apps/terrarium` | grove-terrarium |                                 |
+| `packages/login`                 | `apps/login`     | grove-login     |                                 |
+| `packages/domains`               | `apps/domains`   | grove-domains   |                                 |
+| _(external: AutumnsGrove/Ivy)_   | `apps/ivy`       | grove-ivy       | ivy.grove.place mail client     |
+| _(external: AutumnsGrove/Amber)_ | `apps/amber`     | grove-amber     | Storage management UI           |
 
 ### services/ — Core Infrastructure Workers
 
 Always-on services that handle requests. Core to the platform functioning.
 
 | Current Location                  | New Location               | Package Name          |
-| --------------------------------- | -------------------------- | --------------------- |
+| --------------------------------- | -------------------------- | --------------------- | ------------------------------------------------------- |
 | `packages/heartwood`              | `services/heartwood`       | grove-heartwood       |
 | `packages/grove-router`           | `services/grove-router`    | grove-router          |
 | `packages/durable-objects`        | `services/durable-objects` | grove-durable-objects |
 | `workers/zephyr`                  | `services/zephyr`          | grove-zephyr          |
 | `workers/pulse`                   | `services/pulse`           | grove-pulse           |
 | _(external: AutumnsGrove/Forage)_ | `services/forage`          | grove-forage          |
+| _(external: AutumnsGrove/Amber)_  | `services/amber`           | grove-amber-worker    | Worker half of Amber; routes to `amber-api.grove.place` |
 
 ### workers/ — Background & Cron Workers
 
@@ -294,6 +305,60 @@ The entire Shutter repo becomes `libs/shutter/` — no restructuring, just a cop
 - Meadow (link previews)
 - Forage (domain research)
 - Publishable as `@autumnsgrove/shutter` (the TS worker package name needs updating from `shutter-worker`)
+
+### Ivy (apps/ivy/)
+
+**Source:** `AutumnsGrove/Ivy` (available locally at `~/Documents/Projects/Ivy/` — no clone needed)
+**What it is:** Grove's first-party mail client for `@grove.place` email addresses — focused, privacy-first, Grove-integrated. Not trying to replace Gmail; scoped to Grove correspondence.
+**Why it belongs here:** It's a Grove-native first-party product. It's tightly coupled to Zephyr (email delivery) and Heartwood (auth), and stalls on the same cross-repo coordination pain as everything else.
+**What changes:** Engine `^0.9.99` → `workspace:*`. Auth and email calls become service bindings.
+
+**Integration points:**
+
+- Heartwood service binding replaces HTTP session validation (currently calling `auth-api.grove.place` — deprecated)
+- Zephyr service binding for email sending/receiving (replaces any direct Resend calls)
+- Own D1 database (`ivy-db`) with 3 migrations — all `ivy_*` prefixed. **Stays with the package** — not folded into main D1 pipeline. Ivy's DB is self-contained.
+- `postal-mime` and `bip39` remain as package dependencies (third-party, not Grove-owned)
+
+### Amber (apps/amber/ + services/amber/)
+
+**Source:** `AutumnsGrove/Amber` (available locally at `~/Documents/Projects/Amber/` — no clone needed)
+**What it is:** Grove's unified storage management — every file across every product (blog images, Ivy attachments, profile photos, custom fonts) visible and downloadable in one place. The worker manages the shared `grove-storage` R2 bucket.
+**Why it belongs here:** Amber's worker manages the R2 bucket that every other Grove service writes to. Having it external means the storage layer is disconnected from the platform that depends on it. It's core infrastructure.
+**What changes:** Two-part import — SvelteKit UI to `apps/amber/`, worker to `services/amber/`. ExportJobV2 → Loom SDK. Auth becomes Heartwood service binding. Engine `^0.6.4` → `workspace:*`.
+
+**The "inspired by Forage" DO — Loom SDK target:**
+`ExportJobV2.ts` opens with _"Architecture (inspired by Forage)"_ — it's the same alarm-based chunk processing + SQLite DO pattern. The boilerplate to eliminate: `ensureSchema()`, manual alarm scheduling, chunk offset tracking, parallel status updates to SQLite and D1. What stays: `ZipStreamer` + multipart R2 upload (streaming ZIP creation is genuinely unique and well-implemented).
+
+**The broken tier TODO — Heartwood service binding fixes it:**
+The auth middleware currently defaults every user to `'seedling'` tier regardless of actual plan, with a TODO comment:
+
+```typescript
+// TODO: Get user's subscription tier from subscription service
+// For now, default to seedling
+const tier: SubscriptionTier = "seedling";
+```
+
+A Heartwood service binding returns full user context including subscription tier. This TODO has been open since Amber was written; it gets resolved here.
+
+**ZIP export UX consolidation:**
+The engine already has a full ZIP export system at `/arbor/export/` (ExportDO in `services/durable-objects`). These serve different purposes:
+
+- **Engine's ExportDO:** exports blog content as portable Markdown + YAML frontmatter (Hugo/Jekyll/Astro/Ghost compatible) — the "take your writing somewhere else" export
+- **Amber's ExportJobV2:** exports all raw storage files by product/category — the "download everything you've ever uploaded" export
+
+These are complementary, not duplicates. The consolidation: engine's `/arbor/export/` page gets a warm redirect to Amber with context ("want to download your files? Amber is where you can see everything clearly"). Amber becomes the primary download UX. ExportDO remains for the Markdown portability export.
+
+**Note on `ZipStreamer`:** Amber's `zipStream.ts` is a well-implemented streaming ZIP utility using `fflate`. It's a candidate for extraction to a shared util (e.g., into `libs/engine/` or a future shared package) so ExportDO can also benefit from streaming multipart uploads for large exports.
+
+**Integration points:**
+
+- Heartwood service binding replaces `fetch('auth-api.grove.place/api/auth/session')` — fixes auth latency AND resolves the tier TODO
+- `grove-storage` R2 binding (shared bucket — same one all Grove services write to)
+- ExportJobV2 Durable Object → Loom SDK (alarm scheduling, state management, chunk orchestration)
+- Cron simplification: `processPendingExports` (every 5 min) becomes lightweight orphaned-job recovery rather than primary trigger
+- `apps/amber/` engine upgrade: `^0.6.4` → `workspace:*`; replace `lucide-svelte` imports with engine icons
+- Engine's `/arbor/export/` page gets redirect/pointer to Amber
 
 ---
 
@@ -611,7 +676,7 @@ pnpm -r run check
 
 ### Phase 2: Import External Services
 
-> **Goal:** Bring Foliage, Gossamer, Shutter, and Forage into the monorepo. One at a time, each verified before the next.
+> **Goal:** Bring Foliage, Gossamer, Shutter, Forage, Ivy, and Amber into the monorepo. One at a time, each verified before the next.
 
 #### 2A: Import Foliage → libs/foliage/
 
@@ -698,6 +763,82 @@ Shutter maintains both a Python and TypeScript implementation. Both come in toge
 8. Update `apps/domains/wrangler.toml` service binding to use the local Forage worker
 9. Add deploy workflow: `.github/workflows/deploy-forage.yml`
 10. Verify: build, type-check, test full quiz flow end-to-end (Loom session → Lumen AI → Zephyr email)
+
+#### 2E: Import Ivy → apps/ivy/
+
+> Ivy becomes immensely easier to develop once it's inside the monorepo. Engine upgrades land without publish cycles, auth becomes a service binding instead of an external HTTP call, and email goes through Zephyr — one gateway for the whole platform.
+
+**Steps:**
+
+1. Copy `~/Documents/Projects/Ivy/` into `apps/ivy/` (no clone needed — available locally)
+   - Preserve all source files, migrations, wrangler.toml, and package.json
+2. **Update engine dependency:** `@autumnsgrove/groveengine: ^0.9.99` → `workspace:*`
+3. **Replace `lucide-svelte` imports with engine icons** — Ivy likely imports icons directly from lucide-svelte; swap to `@autumnsgrove/groveengine/icons`
+4. **Replace auth HTTP call with Heartwood service binding:**
+   - Remove: `fetch('https://auth-api.grove.place/api/auth/session')` (deprecated endpoint)
+   - Add: Heartwood service binding in `wrangler.toml`
+   - Update auth middleware to call `env.AUTH.fetch(...)` instead of external HTTP
+5. **Wire up Zephyr service binding for email:**
+   - Add Zephyr binding to `wrangler.toml`
+   - Replace any direct Resend API calls with Zephyr service calls
+   - Ivy's email flow (send/receive for `@grove.place` addresses) routes through Zephyr, same as Heartwood
+6. **Ivy's D1 stays with the package:**
+   - D1 database: `ivy-db` with 3 migrations (all `ivy_*` prefixed, self-contained)
+   - Do NOT fold Ivy's migrations into the main D1 pipeline — Ivy's schema is scoped to Ivy, not platform-wide
+   - Keep the `ivy-db` binding in `wrangler.toml` as-is
+7. **Add deploy workflow:** `.github/workflows/deploy-ivy.yml` using the reusable `_deploy.yml` template
+8. Verify: build (`pnpm --filter apps/ivy build`), type-check, test auth flow end-to-end (session → Heartwood → response)
+
+---
+
+#### 2F: Import Amber → apps/amber/ + services/amber/
+
+> Amber is the storage layer for the entire platform. External development has meant the R2 bucket manager was disconnected from the platform that depends on it. Bringing it in means: the tier TODO finally gets resolved (four years of `'seedling'` for everyone), ExportJobV2 sheds its bespoke DO boilerplate, and the auth call to a deprecated endpoint disappears.
+
+Amber is a two-part import: SvelteKit UI to `apps/amber/` and the CF Worker to `services/amber/`.
+
+**Part A — SvelteKit UI (`apps/amber/`):**
+
+1. Copy the Amber SvelteKit root (everything _except_ the `worker/` directory) into `apps/amber/`
+2. **Update engine dependency:** `@autumnsgrove/groveengine: ^0.6.4` → `workspace:*`
+   - This is a large version jump — audit for any breaking changes between 0.6.4 and current engine
+3. **Replace `lucide-svelte` imports with engine icons** — same pattern as other apps
+4. **Add deploy workflow:** `.github/workflows/deploy-amber.yml` using the reusable `_deploy.yml` template
+5. Verify: build, type-check
+
+**Part B — CF Worker (`services/amber/`):**
+
+1. Copy `~/Documents/Projects/Amber/worker/` into `services/amber/`
+2. **Remove the `X-Test-User-ID` bypass header** from `index.ts`:
+   - This header allows unauthenticated impersonation in production — it must go before any other work
+   - Search for `X-Test-User-ID` and remove the entire bypass branch
+3. **Replace `getAuthUser()` HTTP auth with Heartwood service binding:**
+   - Remove: `fetch('https://auth-api.grove.place/api/auth/session')` (deprecated)
+   - Add Heartwood service binding to `wrangler.toml`
+   - Update the auth middleware to call `env.AUTH.fetch(...)` — same pattern as other services
+   - **This also resolves the tier TODO:** Heartwood returns full user context including subscription plan. Replace:
+     ```typescript
+     // TODO: Get user's subscription tier from subscription service
+     const tier: SubscriptionTier = "seedling";
+     ```
+     with the actual tier from Heartwood's session response. Every user gets their real plan enforced.
+4. **Replace ExportJobV2 bespoke DO orchestration with Loom SDK:**
+   - What stays: `ZipStreamer` + multipart R2 upload logic in `zipStream.ts` (well-implemented streaming ZIP — keep it)
+   - What goes: `ensureSchema()`, manual `scheduleAlarm()`, chunk offset tracking, parallel SQLite + D1 state updates
+   - Replace with Loom SDK abstractions from `services/durable-objects` — same transformation as Forage
+   - `processPendingExports` cron (`*/5 * * * *`) becomes lightweight orphaned-job recovery (Loom handles the primary trigger via alarms)
+   - `deleteExpiredTrash` and `deleteExpiredExports` crons (`0 3 * * *`) stay as-is
+5. **Add deploy workflow:** `.github/workflows/deploy-amber-worker.yml`
+6. Verify: build, type-check, test end-to-end export flow (request → ExportJobV2 via Loom → ZipStreamer → R2 multipart upload → download link)
+
+**Part C — ZIP export UX consolidation:**
+
+1. In engine's `apps/arbor/export/+page.svelte` (or equivalent), add a warm redirect/pointer to Amber:
+   - Engine's export = Markdown portability (Hugo/Jekyll/Astro/Ghost compatible, "take your writing somewhere else")
+   - Amber's export = raw file download ("download everything you've ever uploaded")
+   - The copy should feel welcoming: "Looking to download your files? Amber is where you can see everything clearly, organized by product."
+   - Keep ExportDO functional — it serves a different purpose and should remain available
+2. **Defer `ZipStreamer` extraction** — it's a good candidate for a shared util (so ExportDO could also use streaming multipart for large exports), but this is post-import work, not a blocking requirement
 
 ---
 
@@ -897,6 +1038,12 @@ Same pattern for `ci.yml`. Create a reusable `_ci.yml` with the test/check/lint 
 | **Gossamer examples lost**            | Low — useful demo code disappears                        | Gossamer's `examples/` stay in the external repo; only `core/` is imported. Acceptable.    |
 | **npm publish pipeline break**        | Medium — can't release engine                            | Verify publish workflow uses correct new path                                              |
 | **Stale path references in docs**     | Low — confusion but no breakage                          | Global search for `packages/` after migration                                              |
+| **Ivy auth to deprecated endpoint**   | High — `auth-api.grove.place` may be removed anytime     | Phase 2E step 4: replace with Heartwood service binding before deploying                   |
+| **Amber hardcoded `'seedling'` tier** | High — all users get seedling plan enforcement           | Phase 2F step B-3: Heartwood service binding returns real tier; remove TODO on day one     |
+| **Amber `X-Test-User-ID` bypass**     | Critical — unauthenticated impersonation in production   | Phase 2F step B-2: remove bypass header as the very first change; do not import without it |
+| **Amber engine version gap (0.6.4)**  | Medium — nearly a year of breaking changes to absorb     | Audit diff between 0.6.4 and current engine before updating `workspace:*`                  |
+| **Amber Loom migration complexity**   | Medium — ExportJobV2 is 400+ lines of bespoke DO code    | Keep ZipStreamer as-is; only replace orchestration layer; test export end-to-end           |
+| **ZIP consolidation UX regression**   | Low — `/arbor/export/` users may be confused by redirect | Add warm redirect with clear explanation of both export paths; keep ExportDO functional    |
 
 ---
 
@@ -953,6 +1100,19 @@ After Phase 2 (imports):
 - [ ] Python predecessor archived at `archives/GroveDomainTool-python/`
 - [ ] Artifact packages archived at `archives/example-site/`, `archives/ui/`, `archives/zig-core/`
 - [ ] No circular dependencies
+- [ ] Ivy builds and type-checks at `apps/ivy/`
+- [ ] Ivy auth flow works end-to-end (session via Heartwood service binding, NOT `auth-api.grove.place`)
+- [ ] Ivy's D1 (`ivy-db`) binding intact — 3 migrations still applied to correct database
+- [ ] Ivy Zephyr service binding connects (verify email send/receive path)
+- [ ] Amber UI builds at `apps/amber/`
+- [ ] Amber engine upgrade (`^0.6.4` → `workspace:*`) produces no type errors
+- [ ] Amber worker builds at `services/amber/`
+- [ ] `X-Test-User-ID` bypass header **completely removed** from `services/amber/` — verify with grep
+- [ ] Amber auth uses Heartwood service binding (no calls to `auth-api.grove.place`)
+- [ ] Amber tier enforcement resolved: users get actual plan tier from Heartwood, NOT hardcoded `'seedling'`
+- [ ] ExportJobV2 → Loom SDK migration passes end-to-end test (create export → chunk processing → ZIP → download link)
+- [ ] `ZipStreamer` multipart R2 upload still produces valid ZIP files
+- [ ] Engine's `/arbor/export/` page has warm redirect/pointer to Amber
 
 After Phase 3 (docs):
 
@@ -968,7 +1128,7 @@ After Phase 3 (docs):
 
 - **Phase 0 lands first as its own commit.** Tooling updates that handle both old and new layouts. Safe no-op on the current structure — if Phase 1 gets delayed, nothing breaks.
 - **Phase 1 is a single atomic commit.** Directory moves (1.1–1.6), config updates (1.7–1.12), verification (1.13). Tooling already prepared in Phase 0, so the blast radius is just the structural changes.
-- **Phase 2 can be one commit per import** (Foliage, Gossamer, Shutter, Forage separately). This keeps the blame history clean and makes rollback granular.
+- **Phase 2 can be one commit per import** (Foliage, Gossamer, Shutter, Forage, Ivy, Amber — each separately). This keeps the blame history clean and makes rollback granular. Amber is two commits: UI (`apps/amber/`) and worker (`services/amber/`) are independent deploys. **Import Amber worker only after removing `X-Test-User-ID` bypass and replacing the auth call — do not commit Amber worker with the bypass still in place.**
 - **Phase 3 is safe to do incrementally.** Docs updates can land as follow-ups without breaking anything.
 - **Test locally before pushing.** The full `pnpm install && pnpm -r run build && pnpm -r run check` cycle is non-negotiable. Also verify `gw context` and `gf --agent impact` return non-empty results.
 
