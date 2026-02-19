@@ -355,6 +355,24 @@
 		"./loom/testing": {
 			"types": "./dist/loom/test-utils.d.ts",
 			"default": "./dist/loom/test-utils.js"
+		},
+		"./foliage": {
+			"types": "./dist/foliage/index.d.ts",
+			"svelte": "./dist/foliage/index.js",
+			"default": "./dist/foliage/index.js"
+		},
+		"./foliage/themes": {
+			"types": "./dist/foliage/themes.d.ts",
+			"default": "./dist/foliage/themes.js"
+		},
+		"./foliage/components": {
+			"types": "./dist/foliage/components.d.ts",
+			"svelte": "./dist/foliage/components.js",
+			"default": "./dist/foliage/components.js"
+		},
+		"./foliage/server": {
+			"types": "./dist/foliage/server.d.ts",
+			"default": "./dist/foliage/server.js"
 		}
 	},
 	"files": [
