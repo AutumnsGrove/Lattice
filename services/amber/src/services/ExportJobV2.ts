@@ -1,15 +1,18 @@
 /**
- * ExportJob Durable Object
+ * ExportJob Durable Object (Loom SDK)
  *
  * Handles background processing of file exports to ZIP archives.
  * Uses SQLite storage for persistent state and alarm-based chunk processing.
  *
- * Architecture (inspired by Forage):
+ * Architecture:
+ * - Extends LoomDO for declarative routing, structured logging, alarm scheduling
  * - SQLite tables store job state, processed files, and missing files
  * - Alarm API drives batch processing loop
  * - State survives DO hibernation and restarts
  */
 
+import { LoomDO } from "@autumnsgrove/lattice/loom";
+import type { LoomRoute, LoomRequestContext } from "@autumnsgrove/lattice/loom";
 import { ZipStreamer, createManifest, createReadme, ZIP_CONFIG } from "./zipStream";
 import type { Env } from "../index";
 
@@ -45,175 +48,132 @@ interface ProcessedFile {
 }
 
 /**
- * ExportJob Durable Object with SQLite storage for reliable state management
+ * Export job row stored in DO SQLite
  */
-export class ExportJobV2 implements DurableObject {
-	private state: DurableObjectState;
-	private sql: SqlStorage;
-	private env: Env;
-	private initialized = false;
+interface ExportJobRow {
+	id: string;
+	user_id: string;
+	export_type: string;
+	filter_params: string | null;
+	status: string;
+	current_offset: number;
+	total_size: number;
+	file_count: number;
+	r2_key: string;
+	error: string | null;
+	created_at: string;
+	updated_at: string;
+}
 
-	constructor(state: DurableObjectState, env: Env) {
-		this.state = state;
-		this.sql = state.storage.sql;
-		this.env = env;
-		console.log("[ExportJobV2] Constructor called, DO ID:", state.id.toString());
+/**
+ * ExportJob Durable Object with Loom SDK
+ */
+export class ExportJobV2 extends LoomDO<null, Env> {
+	config() {
+		return { name: "ExportJobV2", blockOnInit: true };
 	}
 
-	/**
-	 * Initialize SQLite schema if not already done
-	 */
-	private ensureSchema(): void {
-		if (this.initialized) return;
+	schema() {
+		return `
+			CREATE TABLE IF NOT EXISTS export_job (
+				id TEXT PRIMARY KEY,
+				user_id TEXT NOT NULL,
+				export_type TEXT NOT NULL,
+				filter_params TEXT,
+				status TEXT NOT NULL DEFAULT 'pending',
+				current_offset INTEGER DEFAULT 0,
+				total_size INTEGER DEFAULT 0,
+				file_count INTEGER DEFAULT 0,
+				r2_key TEXT,
+				error TEXT,
+				created_at TEXT DEFAULT (datetime('now')),
+				updated_at TEXT DEFAULT (datetime('now'))
+			);
 
-		// Create tables for export state (sql already initialized in constructor)
-		this.sql.exec(`
-      -- Core export job tracking (single row per DO instance)
-      CREATE TABLE IF NOT EXISTS export_job (
-        id TEXT PRIMARY KEY,
-        user_id TEXT NOT NULL,
-        export_type TEXT NOT NULL,
-        filter_params TEXT,
-        status TEXT NOT NULL DEFAULT 'pending',
-        current_offset INTEGER DEFAULT 0,
-        total_size INTEGER DEFAULT 0,
-        file_count INTEGER DEFAULT 0,
-        r2_key TEXT,
-        error TEXT,
-        created_at TEXT DEFAULT (datetime('now')),
-        updated_at TEXT DEFAULT (datetime('now'))
-      );
+			CREATE TABLE IF NOT EXISTS export_files (
+				id INTEGER PRIMARY KEY AUTOINCREMENT,
+				file_id TEXT NOT NULL,
+				r2_key TEXT NOT NULL,
+				filename TEXT NOT NULL,
+				size_bytes INTEGER NOT NULL,
+				product TEXT NOT NULL,
+				category TEXT NOT NULL,
+				created_at TEXT DEFAULT (datetime('now'))
+			);
 
-      -- Processed files ready for zipping
-      CREATE TABLE IF NOT EXISTS export_files (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        file_id TEXT NOT NULL,
-        r2_key TEXT NOT NULL,
-        filename TEXT NOT NULL,
-        size_bytes INTEGER NOT NULL,
-        product TEXT NOT NULL,
-        category TEXT NOT NULL,
-        created_at TEXT DEFAULT (datetime('now'))
-      );
+			CREATE TABLE IF NOT EXISTS export_missing (
+				id INTEGER PRIMARY KEY AUTOINCREMENT,
+				r2_key TEXT NOT NULL,
+				created_at TEXT DEFAULT (datetime('now'))
+			);
 
-      -- Files that were missing in R2
-      CREATE TABLE IF NOT EXISTS export_missing (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        r2_key TEXT NOT NULL,
-        created_at TEXT DEFAULT (datetime('now'))
-      );
-
-      -- Index for faster queries
-      CREATE INDEX IF NOT EXISTS idx_export_files_r2_key ON export_files(r2_key);
-    `);
-
-		this.initialized = true;
+			CREATE INDEX IF NOT EXISTS idx_export_files_r2_key ON export_files(r2_key);
+		`;
 	}
 
-	/**
-	 * Handle HTTP requests to the Durable Object
-	 */
-	async fetch(request: Request): Promise<Response> {
-		this.ensureSchema();
-
-		const url = new URL(request.url);
-		const action = url.searchParams.get("action");
-		const exportId = url.searchParams.get("exportId");
-
-		console.log("[ExportJob] fetch() called with action:", action, "exportId:", exportId);
-
-		try {
-			if (action === "start" && exportId) {
-				return await this.handleStart(exportId);
-			}
-
-			if (action === "status") {
-				return this.handleGetStatus();
-			}
-
-			if (action === "reset") {
-				return await this.handleReset();
-			}
-
-			// Legacy sync processing - still supported as fallback
-			if (action === "process-sync" && exportId) {
-				return await this.handleProcessSync(exportId);
-			}
-
-			return new Response(JSON.stringify({ error: "Invalid action" }), {
-				status: 400,
-				headers: { "Content-Type": "application/json" },
-			});
-		} catch (error) {
-			console.error("[ExportJob] Request error:", error);
-			return new Response(JSON.stringify({ error: String(error) }), {
-				status: 500,
-				headers: { "Content-Type": "application/json" },
-			});
-		}
+	routes(): LoomRoute[] {
+		return [
+			{ method: "POST", path: "/start/:exportId", handler: (ctx) => this.handleStart(ctx) },
+			{ method: "GET", path: "/status", handler: () => this.handleGetStatus() },
+			{ method: "POST", path: "/reset", handler: () => this.handleReset() },
+			{
+				method: "POST",
+				path: "/process-sync/:exportId",
+				handler: (ctx) => this.handleProcessSync(ctx),
+			},
+		];
 	}
 
-	/**
-	 * Alarm handler - processes chunks and schedules next iteration
-	 */
-	async alarm(): Promise<void> {
-		this.ensureSchema();
-
+	protected async onAlarm(): Promise<void> {
 		const job = this.getJob();
 		if (!job) {
-			console.error("[ExportJob] Alarm fired but no job found");
+			this.log.error("Alarm fired but no job found");
 			return;
 		}
 
 		if (job.status !== "running") {
-			console.log(`[ExportJob] Job status is ${job.status}, skipping alarm`);
+			this.log.info(`Job status is ${job.status}, skipping alarm`);
 			return;
 		}
 
-		console.log(
-			"[ExportJob] Alarm processing chunk for export:",
-			job.id,
-			"offset:",
-			job.current_offset,
-		);
+		this.log.info("Alarm processing chunk", { exportId: job.id, offset: job.current_offset });
 
 		try {
-			// Process next chunk of files
 			const hasMoreChunks = await this.processChunk(job);
-			console.log(
-				"[ExportJob] Chunk processed, hasMore:",
-				hasMoreChunks,
-				"files:",
-				this.getProcessedFileCount(),
-			);
+			this.log.info("Chunk processed", {
+				hasMore: hasMoreChunks,
+				files: this.getProcessedFileCount(),
+			});
 
 			if (hasMoreChunks) {
 				// Schedule next chunk processing (2 second delay between chunks)
-				await this.scheduleAlarm(2000);
+				await this.alarms.schedule(2000);
 			} else {
-				// All chunks processed, finalize the export
-				console.log("[ExportJob] No more chunks, finalizing export...");
+				this.log.info("No more chunks, finalizing export");
 				await this.finalizeExport(job);
-				console.log("[ExportJob] Export finalized successfully");
+				this.log.info("Export finalized successfully");
 			}
 		} catch (error) {
-			console.error("[ExportJob] Alarm processing error:", error);
+			this.log.error("Alarm processing error", { error: String(error) });
 			this.updateJobStatus("failed", String(error));
 			await this.updateD1Status(job.id, "failed", String(error));
 		}
 	}
 
+	// ============================================================================
+	// Route handlers
+	// ============================================================================
+
 	/**
 	 * Start a new export job
 	 */
-	private async handleStart(exportId: string): Promise<Response> {
+	private async handleStart(ctx: LoomRequestContext): Promise<Response> {
+		const exportId = ctx.params.exportId;
+
 		// Check if job already exists
 		const existing = this.getJob();
 		if (existing) {
-			return new Response(JSON.stringify({ error: "Job already exists", job_id: existing.id }), {
-				status: 409,
-				headers: { "Content-Type": "application/json" },
-			});
+			return Response.json({ error: "Job already exists", job_id: existing.id }, { status: 409 });
 		}
 
 		// Fetch export from D1 to get metadata
@@ -221,18 +181,10 @@ export class ExportJobV2 implements DurableObject {
 			"SELECT id, user_id, export_type, filter_params FROM storage_exports WHERE id = ?",
 		)
 			.bind(exportId)
-			.first<{
-				id: string;
-				user_id: string;
-				export_type: string;
-				filter_params: string | null;
-			}>();
+			.first<{ id: string; user_id: string; export_type: string; filter_params: string | null }>();
 
 		if (!result) {
-			return new Response(JSON.stringify({ error: `Export ${exportId} not found` }), {
-				status: 404,
-				headers: { "Content-Type": "application/json" },
-			});
+			return Response.json({ error: `Export ${exportId} not found` }, { status: 404 });
 		}
 
 		// Create job in SQLite
@@ -240,7 +192,7 @@ export class ExportJobV2 implements DurableObject {
 
 		this.sql.exec(
 			`INSERT INTO export_job (id, user_id, export_type, filter_params, status, r2_key)
-       VALUES (?, ?, ?, ?, 'running', ?)`,
+			 VALUES (?, ?, ?, ?, 'running', ?)`,
 			exportId,
 			result.user_id,
 			result.export_type,
@@ -254,14 +206,11 @@ export class ExportJobV2 implements DurableObject {
 			.run();
 
 		// Schedule first alarm immediately
-		await this.scheduleAlarm(0);
+		await this.alarms.schedule(0);
 
-		console.log("[ExportJob] Job started:", exportId, "scheduled first alarm");
+		this.log.info("Job started", { exportId });
 
-		return new Response(JSON.stringify({ job_id: exportId, status: "running" }), {
-			status: 201,
-			headers: { "Content-Type": "application/json" },
-		});
+		return Response.json({ job_id: exportId, status: "running" }, { status: 201 });
 	}
 
 	/**
@@ -270,57 +219,45 @@ export class ExportJobV2 implements DurableObject {
 	private handleGetStatus(): Response {
 		const job = this.getJob();
 		if (!job) {
-			return new Response(JSON.stringify({ error: "No job found" }), {
-				status: 404,
-				headers: { "Content-Type": "application/json" },
-			});
+			return Response.json({ error: "No job found" }, { status: 404 });
 		}
 
-		const fileCount = this.getProcessedFileCount();
-		const missingCount = this.getMissingFileCount();
-
-		return new Response(
-			JSON.stringify({
-				job_id: job.id,
-				status: job.status,
-				current_offset: job.current_offset,
-				total_size: job.total_size,
-				file_count: fileCount,
-				missing_files: missingCount,
-				r2_key: job.r2_key,
-				error: job.error,
-				created_at: job.created_at,
-				updated_at: job.updated_at,
-			}),
-			{ headers: { "Content-Type": "application/json" } },
-		);
+		return Response.json({
+			job_id: job.id,
+			status: job.status,
+			current_offset: job.current_offset,
+			total_size: job.total_size,
+			file_count: this.getProcessedFileCount(),
+			missing_files: this.getMissingFileCount(),
+			r2_key: job.r2_key,
+			error: job.error,
+			created_at: job.created_at,
+			updated_at: job.updated_at,
+		});
 	}
 
 	/**
 	 * Reset DO state (clear all tables)
 	 */
-	private async handleReset(): Promise<Response> {
+	private handleReset(): Response {
 		this.sql.exec("DELETE FROM export_job");
 		this.sql.exec("DELETE FROM export_files");
 		this.sql.exec("DELETE FROM export_missing");
 
-		console.log("[ExportJob] DO state cleared via reset action");
+		this.log.info("DO state cleared via reset");
 
-		return new Response(JSON.stringify({ success: true, message: "DO state cleared" }), {
-			headers: { "Content-Type": "application/json" },
-		});
+		return Response.json({ success: true, message: "DO state cleared" });
 	}
 
 	/**
 	 * Process export synchronously (fallback for cron-based processing)
 	 */
-	private async handleProcessSync(exportId: string): Promise<Response> {
-		// Check if already processing
+	private async handleProcessSync(ctx: LoomRequestContext): Promise<Response> {
 		let job = this.getJob();
 
 		if (!job) {
 			// Initialize the job first
-			const startResponse = await this.handleStart(exportId);
+			const startResponse = await this.handleStart(ctx);
 			if (startResponse.status !== 201) {
 				return startResponse;
 			}
@@ -328,10 +265,7 @@ export class ExportJobV2 implements DurableObject {
 		}
 
 		if (!job) {
-			return new Response(JSON.stringify({ error: "Failed to create job" }), {
-				status: 500,
-				headers: { "Content-Type": "application/json" },
-			});
+			return Response.json({ error: "Failed to create job" }, { status: 500 });
 		}
 
 		// Ensure status is running
@@ -345,29 +279,22 @@ export class ExportJobV2 implements DurableObject {
 			while (hasMoreChunks) {
 				hasMoreChunks = await this.processChunk(job);
 				job = this.getJob()!; // Refresh job state
-				console.log(
-					"[ExportJob] Sync chunk processed, hasMore:",
-					hasMoreChunks,
-					"files:",
-					this.getProcessedFileCount(),
-				);
+				this.log.info("Sync chunk processed", {
+					hasMore: hasMoreChunks,
+					files: this.getProcessedFileCount(),
+				});
 			}
 
 			// Finalize
 			await this.finalizeExport(job);
 
-			return new Response(JSON.stringify({ success: true, message: "Export processed" }), {
-				headers: { "Content-Type": "application/json" },
-			});
+			return Response.json({ success: true, message: "Export processed" });
 		} catch (error) {
-			console.error("[ExportJob] Sync processing error:", error);
+			this.log.error("Sync processing error", { error: String(error) });
 			this.updateJobStatus("failed", String(error));
 			await this.updateD1Status(job.id, "failed", String(error));
 
-			return new Response(JSON.stringify({ success: false, error: String(error) }), {
-				status: 500,
-				headers: { "Content-Type": "application/json" },
-			});
+			return Response.json({ success: false, error: String(error) }, { status: 500 });
 		}
 	}
 
@@ -378,44 +305,10 @@ export class ExportJobV2 implements DurableObject {
 	/**
 	 * Get job from SQLite
 	 */
-	private getJob(): {
-		id: string;
-		user_id: string;
-		export_type: string;
-		filter_params: string | null;
-		status: ExportStatus;
-		current_offset: number;
-		total_size: number;
-		file_count: number;
-		r2_key: string;
-		error: string | null;
-		created_at: string;
-		updated_at: string;
-	} | null {
-		const rows = this.sql
-			.exec<{
-				id: string;
-				user_id: string;
-				export_type: string;
-				filter_params: string | null;
-				status: string;
-				current_offset: number;
-				total_size: number;
-				file_count: number;
-				r2_key: string;
-				error: string | null;
-				created_at: string;
-				updated_at: string;
-			}>("SELECT * FROM export_job LIMIT 1")
-			.toArray();
-
-		if (rows.length === 0) return null;
-
-		const row = rows[0];
-		return {
-			...row,
-			status: row.status as ExportStatus,
-		};
+	private getJob(): (ExportJobRow & { status: ExportStatus }) | null {
+		const row = this.sql.queryOne<ExportJobRow>("SELECT * FROM export_job LIMIT 1");
+		if (!row) return null;
+		return { ...row, status: row.status as ExportStatus };
 	}
 
 	/**
@@ -445,48 +338,37 @@ export class ExportJobV2 implements DurableObject {
 	}
 
 	/**
-	 * Schedule an alarm
-	 */
-	private async scheduleAlarm(delayMs: number): Promise<void> {
-		const time = Date.now() + delayMs;
-		await this.state.storage.setAlarm(time);
-		console.log(`[ExportJob] Scheduled alarm for ${new Date(time).toISOString()}`);
-	}
-
-	/**
 	 * Get count of processed files
 	 */
 	private getProcessedFileCount(): number {
-		const result = this.sql
-			.exec<{ count: number }>("SELECT COUNT(*) as count FROM export_files")
-			.toArray();
-		return result[0]?.count ?? 0;
+		const result = this.sql.queryOne<{ count: number }>(
+			"SELECT COUNT(*) as count FROM export_files",
+		);
+		return result?.count ?? 0;
 	}
 
 	/**
 	 * Get count of missing files
 	 */
 	private getMissingFileCount(): number {
-		const result = this.sql
-			.exec<{ count: number }>("SELECT COUNT(*) as count FROM export_missing")
-			.toArray();
-		return result[0]?.count ?? 0;
+		const result = this.sql.queryOne<{ count: number }>(
+			"SELECT COUNT(*) as count FROM export_missing",
+		);
+		return result?.count ?? 0;
 	}
 
 	/**
 	 * Get all processed files
 	 */
 	private getProcessedFiles(): ProcessedFile[] {
-		const rows = this.sql
-			.exec<{
-				file_id: string;
-				r2_key: string;
-				filename: string;
-				size_bytes: number;
-				product: string;
-				category: string;
-			}>("SELECT file_id, r2_key, filename, size_bytes, product, category FROM export_files")
-			.toArray();
+		const rows = this.sql.queryAll<{
+			file_id: string;
+			r2_key: string;
+			filename: string;
+			size_bytes: number;
+			product: string;
+			category: string;
+		}>("SELECT file_id, r2_key, filename, size_bytes, product, category FROM export_files");
 
 		return rows.map((r) => ({
 			id: r.file_id,
@@ -504,7 +386,7 @@ export class ExportJobV2 implements DurableObject {
 	private saveProcessedFile(file: ProcessedFile): void {
 		this.sql.exec(
 			`INSERT INTO export_files (file_id, r2_key, filename, size_bytes, product, category)
-       VALUES (?, ?, ?, ?, ?, ?)`,
+			 VALUES (?, ?, ?, ?, ?, ?)`,
 			file.id,
 			file.r2_key,
 			file.filename,
@@ -555,10 +437,9 @@ export class ExportJobV2 implements DurableObject {
 		total_size: number;
 	}): Promise<boolean> {
 		const filters = job.filter_params ? JSON.parse(job.filter_params) : null;
-		const query = this.buildFileQuery(job.user_id, job.export_type, filters);
-		const [baseQuery, params] = query;
+		const [baseQuery, params] = this.buildFileQuery(job.user_id, job.export_type, filters);
 
-		// Fetch batch of files
+		// Fetch batch of files from D1
 		const files = await this.env.DB.prepare(`${baseQuery} LIMIT ? OFFSET ?`)
 			.bind(...params, ZIP_CONFIG.CHUNK_FILE_LIMIT, job.current_offset)
 			.all<FileRecord>();
@@ -593,7 +474,10 @@ export class ExportJobV2 implements DurableObject {
 
 					chunkSize += file.size_bytes;
 				} catch (error) {
-					console.warn(`Failed to check file ${file.r2_key}:`, error);
+					this.log.warn("Failed to check file", {
+						r2Key: file.r2_key,
+						error: String(error),
+					});
 					this.saveMissingFile(file.r2_key);
 				}
 			});
@@ -608,7 +492,7 @@ export class ExportJobV2 implements DurableObject {
 		// Log missing files count
 		const missingCount = this.getMissingFileCount();
 		if (missingCount > 0) {
-			console.info(`Export ${job.id}: ${missingCount} files missing in R2`);
+			this.log.info("Files missing in R2", { exportId: job.id, missingCount });
 		}
 
 		// Check if we've exceeded chunk size limit or got all files
@@ -633,21 +517,21 @@ export class ExportJobV2 implements DurableObject {
 		export_type: string;
 	}): Promise<void> {
 		const processedFiles = this.getProcessedFiles();
-		console.log("[ExportJob] Finalizing export, creating ZIP with", processedFiles.length, "files");
+		this.log.info("Finalizing export, creating ZIP", { fileCount: processedFiles.length });
 
 		// Handle empty export
 		if (processedFiles.length === 0) {
-			console.log("[ExportJob] No files to export, marking as completed with 0 files");
+			this.log.info("No files to export, marking as completed with 0 files");
 			const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 			await this.env.DB.prepare(
 				`UPDATE storage_exports
-         SET status = 'completed', r2_key = NULL, expires_at = ?, size_bytes = 0, file_count = 0
-         WHERE id = ?`,
+				 SET status = 'completed', r2_key = NULL, expires_at = ?, size_bytes = 0, file_count = 0
+				 WHERE id = ?`,
 			)
 				.bind(expiresAt, job.id)
 				.run();
 			this.updateJobStatus("completed");
-			console.info(`Export ${job.id} completed with 0 files (all files missing in R2)`);
+			this.log.info("Export completed with 0 files (all missing in R2)", { exportId: job.id });
 			return;
 		}
 
@@ -663,7 +547,7 @@ export class ExportJobV2 implements DurableObject {
 			},
 		});
 
-		console.log("[ExportJob] Created multipart upload:", multipartUpload.uploadId);
+		this.log.info("Created multipart upload", { uploadId: multipartUpload.uploadId });
 
 		const uploadedParts: { partNumber: number; etag: string }[] = [];
 		let partNumber = 1;
@@ -684,7 +568,7 @@ export class ExportJobV2 implements DurableObject {
 				offset += chunk.length;
 			}
 
-			console.log(`[ExportJob] Uploading part ${partNumber}, size: ${currentBufferSize} bytes`);
+			this.log.info("Uploading part", { partNumber, size: currentBufferSize });
 			const part = await multipartUpload.uploadPart(partNumber, combined);
 			uploadedParts.push({ partNumber, etag: part.etag });
 			totalBytesUploaded += currentBufferSize;
@@ -714,11 +598,13 @@ export class ExportJobV2 implements DurableObject {
 				await zipStreamer.addTextFile("manifest.json", createManifest(manifestEntries));
 
 				// Stream files into ZIP
-				console.log("[ExportJob] Streaming", processedFiles.length, "files into ZIP");
+				this.log.info("Streaming files into ZIP", { count: processedFiles.length });
 				for (const file of processedFiles) {
 					const object = await this.env.R2_BUCKET.get(file.r2_key);
 					if (!object?.body) {
-						console.warn(`Skipping file ${file.r2_key} - not found during finalization`);
+						this.log.warn("Skipping file - not found during finalization", {
+							r2Key: file.r2_key,
+						});
 						continue;
 					}
 
@@ -732,9 +618,9 @@ export class ExportJobV2 implements DurableObject {
 
 				// Close ZIP stream
 				await zipStreamer.close();
-				console.log("[ExportJob] ZIP stream closed");
+				this.log.info("ZIP stream closed");
 			} catch (err) {
-				console.error("[ExportJob] Error writing to ZIP:", err);
+				this.log.error("Error writing to ZIP", { error: String(err) });
 				throw err;
 			}
 		})();
@@ -754,7 +640,7 @@ export class ExportJobV2 implements DurableObject {
 				}
 				// Upload final part
 				await uploadPart(true);
-				console.log("[ExportJob] Finished reading stream");
+				this.log.info("Finished reading stream");
 			} finally {
 				reader.releaseLock();
 			}
@@ -763,9 +649,7 @@ export class ExportJobV2 implements DurableObject {
 		// Wait for both to complete
 		await Promise.all([writePromise, readPromise]);
 
-		console.log(
-			`[ExportJob] Uploaded ${uploadedParts.length} parts, completing multipart upload...`,
-		);
+		this.log.info("Completing multipart upload", { parts: uploadedParts.length });
 
 		// Complete multipart upload
 		await multipartUpload.complete(uploadedParts);
@@ -774,8 +658,8 @@ export class ExportJobV2 implements DurableObject {
 		const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 		await this.env.DB.prepare(
 			`UPDATE storage_exports
-       SET status = 'completed', r2_key = ?, expires_at = ?, size_bytes = ?, file_count = ?
-       WHERE id = ?`,
+			 SET status = 'completed', r2_key = ?, expires_at = ?, size_bytes = ?, file_count = ?
+			 WHERE id = ?`,
 		)
 			.bind(job.r2_key, expiresAt, totalBytesUploaded, processedFiles.length, job.id)
 			.run();
@@ -783,9 +667,11 @@ export class ExportJobV2 implements DurableObject {
 		// Update DO status
 		this.updateJobStatus("completed");
 
-		console.info(
-			`Export ${job.id} completed: ${processedFiles.length} files, ${totalBytesUploaded} bytes (ZIP)`,
-		);
+		this.log.info("Export completed", {
+			exportId: job.id,
+			fileCount: processedFiles.length,
+			totalBytes: totalBytesUploaded,
+		});
 	}
 
 	/**
@@ -797,10 +683,10 @@ export class ExportJobV2 implements DurableObject {
 		filters: Record<string, string> | null,
 	): [string, unknown[]] {
 		const baseQuery = `
-      SELECT id, r2_key, filename, size_bytes, mime_type, product, category, created_at
-      FROM storage_files
-      WHERE user_id = ? AND deleted_at IS NULL
-    `;
+			SELECT id, r2_key, filename, size_bytes, mime_type, product, category, created_at
+			FROM storage_files
+			WHERE user_id = ? AND deleted_at IS NULL
+		`;
 
 		const params: unknown[] = [userId];
 

@@ -2,15 +2,15 @@
  * Amber Cloudflare Worker
  * API endpoints for storage management
  *
- * Uses Better Auth for session-based authentication
+ * Uses Heartwood service binding for session-based authentication
  */
 
-export interface Env {
+export interface Env extends Record<string, unknown> {
 	DB: D1Database;
 	R2_BUCKET: R2Bucket;
 	EXPORT_JOBS: DurableObjectNamespace;
-	// Better Auth configuration
-	BETTER_AUTH_BASE_URL?: string;
+	// Service bindings (Worker-to-Worker)
+	AUTH: Fetcher;
 	// CORS
 	ALLOWED_ORIGINS?: string;
 	// Stripe (deferred)
@@ -20,16 +20,13 @@ export interface Env {
 // Subscription tier type
 type SubscriptionTier = "seedling" | "sapling" | "oak" | "evergreen";
 
-// Better Auth session response
-interface BetterAuthSession {
-	user: {
+// Heartwood session validation response
+interface HeartwoodSession {
+	valid: boolean;
+	user?: {
 		id: string;
 		email: string;
 		name?: string;
-	};
-	session: {
-		id: string;
-		expiresAt: string;
 	};
 }
 
@@ -223,44 +220,38 @@ async function handleRequest(request: Request, env: Env, ctx: ExecutionContext):
 	return error("Not found", 404);
 }
 
-// Auth middleware - validates session with Better Auth
+// Auth middleware - validates session via Heartwood service binding
 async function getAuthUser(
 	request: Request,
 	env: Env,
 ): Promise<{ id: string; tier: SubscriptionTier } | null> {
-	// Get session cookie from request
 	const cookieHeader = request.headers.get("Cookie");
 	if (!cookieHeader) {
 		return null;
 	}
 
 	try {
-		const authBaseUrl = env.BETTER_AUTH_BASE_URL || "https://auth-api.grove.place";
-
-		// Forward cookies to Better Auth session endpoint
-		const sessionResponse = await fetch(`${authBaseUrl}/api/auth/session`, {
-			headers: {
-				Cookie: cookieHeader,
-			},
+		const response = await env.AUTH.fetch("https://login.grove.place/session/validate", {
+			method: "POST",
+			headers: { Cookie: cookieHeader },
 		});
 
-		if (!sessionResponse.ok) {
+		if (!response.ok) {
 			return null;
 		}
 
-		const sessionData = (await sessionResponse.json()) as BetterAuthSession;
+		const session = (await response.json()) as HeartwoodSession;
 
-		if (!sessionData.user?.id) {
+		if (!session.valid || !session.user?.id) {
 			return null;
 		}
 
-		// TODO: Get user's subscription tier from subscription service
-		// For now, default to seedling
-		// In production, this should call a subscription API to get the tier
+		// TODO: Extract tier from subscription service or Heartwood user metadata
+		// For now, default to seedling until the subscription system is designed
 		const tier: SubscriptionTier = "seedling";
 
 		return {
-			id: sessionData.user.id,
+			id: session.user.id,
 			tier,
 		};
 	} catch (err) {
@@ -629,7 +620,7 @@ route("POST", "/api/storage/export", async (request, env, ctx) => {
 	const doStub = env.EXPORT_JOBS.get(doId);
 
 	// Use waitUntil to ensure DO runs even after response
-	const doRequest = new Request(`https://fake-host/?action=process-sync&exportId=${exportId}`);
+	const doRequest = new Request(`https://fake-host/process-sync/${exportId}`, { method: "POST" });
 	ctx.waitUntil(
 		doStub
 			.fetch(doRequest)

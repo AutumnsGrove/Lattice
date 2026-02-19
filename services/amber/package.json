@@ -4,6 +4,7 @@
 	"private": true,
 	"type": "module",
 	"dependencies": {
+		"@autumnsgrove/lattice": "workspace:*",
 		"fflate": "^0.8.1"
 	},
 	"devDependencies": {

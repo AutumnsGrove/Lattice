@@ -30,7 +30,7 @@
 		Plus,
 		HardDrive,
 		Menu,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 
 	interface Props {
 		name:

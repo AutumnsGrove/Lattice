@@ -42,6 +42,11 @@ deleted_classes = []
 tag = "v4"
 new_sqlite_classes = ["ExportJobV2"]
 
+# Service bindings (Worker-to-Worker)
+[[services]]
+binding = "AUTH"
+service = "groveauth"
+
 # Durable Objects observability (logs to CF dashboard)
 [observability.logs]
 enabled = true
@@ -54,7 +59,6 @@ crons = ["*/5 * * * *", "0 3 * * *"]  # Daily at 3 AM UTC
 
 # Environment Variables
 [vars]
-BETTER_AUTH_BASE_URL = "https://auth-api.grove.place"
 ALLOWED_ORIGINS = "https://amber.grove.place"
 
 # Environment-specific settings
@@ -74,7 +78,6 @@ binding = "R2_BUCKET"
 bucket_name = "grove-storage"
 
 [env.production.vars]
-BETTER_AUTH_BASE_URL = "https://auth-api.grove.place"
 ALLOWED_ORIGINS = "https://amber.grove.place"
 
 [env.staging]
