@@ -36,19 +36,20 @@ Everything in Grove has a name. These are the pieces that make up the forest.
 
 ### Services
 
-| Name                             | Path               | What it is                                      |
-| -------------------------------- | ------------------ | ----------------------------------------------- |
-| [Heartwood](services/heartwood)  | Auth provider      | Google OAuth 2.0 + PKCE, session management     |
-| [Passage](services/grove-router) | Subdomain routing  | Routes `*.grove.place` to the right app         |
-| [Loom](services/durable-objects) | Coordination layer | Durable Objects for caching and real-time state |
+| Name                                   | Path                                     | What it is                                      |
+| -------------------------------------- | ---------------------------------------- | ----------------------------------------------- |
+| [Heartwood](services/heartwood)        | Auth provider                            | Google OAuth 2.0 + PKCE, session management     |
+| [Passage](services/grove-router)       | Subdomain routing                        | Routes `*.grove.place` to the right app         |
+| [Loom](services/durable-objects)       | Coordination layer                       | Durable Objects for caching and real-time state |
+| [OG Worker](services/og-worker)        | [og.grove.place](https://og.grove.place) | Dynamic social preview images                   |
+| [Zephyr Render](services/email-render) | Service binding                          | React Email template rendering                  |
 
 ### Workers
 
-| Name                                   | Path                                     | What it is                                        |
-| -------------------------------------- | ---------------------------------------- | ------------------------------------------------- |
-| [OG Worker](workers/og-worker)         | [og.grove.place](https://og.grove.place) | Dynamic social preview images                     |
-| [Post Migrator](workers/post-migrator) | Background cron                          | Hot/warm/cold storage tiering                     |
-| [Scheduled Workers](workers)           | Background crons                         | Health monitoring, timeline sync, webhook cleanup |
+| Name                                   | Path             | What it is                                        |
+| -------------------------------------- | ---------------- | ------------------------------------------------- |
+| [Post Migrator](workers/post-migrator) | Background cron  | Hot/warm/cold storage tiering                     |
+| [Scheduled Workers](workers)           | Background crons | Health monitoring, timeline sync, webhook cleanup |
 
 ### Libraries
 

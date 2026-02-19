@@ -12,6 +12,8 @@ on:
       - "services/durable-objects/**"
       - "workers/post-migrator/**"
       - "services/heartwood/**"
+      - "services/email-render/**"
+      - "services/og-worker/**"
       - "workers/**"
       # Pages
       - "libs/engine/**"
@@ -57,6 +59,12 @@ jobs:
             needs-engine: false
           - name: webhook-cleanup
             path: workers/webhook-cleanup
+            needs-engine: false
+          - name: email-render
+            path: services/email-render
+            needs-engine: false
+          - name: og-worker
+            path: services/og-worker
             needs-engine: false
 
     steps:

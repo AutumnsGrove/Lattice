@@ -1050,7 +1050,7 @@ Use the SEO component which handles OG meta tags:
 
 ### Files
 
-- `workers/og-worker/` — Standalone Worker (uses `workers-og`)
+- `services/og-worker/` — Standalone Worker (uses `workers-og`)
 - `landing/src/routes/api/og/+server.ts` — Proxy to og.grove.place
 - `landing/src/lib/components/SEO.svelte` — Meta tag management
 

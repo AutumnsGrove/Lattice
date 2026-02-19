@@ -547,7 +547,7 @@ Added to vineyard showcase with:
 
 ### ✅ Security Audit — CRITICAL ISSUES FIXED (2026-01-08)
 
-> **Audit Report:** `archives/audit-reports/grove-1.0-pre-release-audit.md`
+> **Audit Report:** `_archived/docs/audit-reports/grove-1.0-pre-release-audit.md`
 
 | Issue                     | Fix                                                 |
 | ------------------------- | --------------------------------------------------- |
