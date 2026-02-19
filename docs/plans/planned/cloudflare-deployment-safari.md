@@ -322,6 +322,130 @@ Add a `grove-vista-tail` worker as a `tail_consumer` on all Worker deployments:
 
 ---
 
+## Bonus Stop: The Engine Identity Crisis
+
+_The jeep rounds a kopje and there it is — the largest creature on the savanna. But something's wrong with the silhouette. It's carrying something. Two animals, one body. A library riding a deployment. Binoculars up._
+
+### What we're looking at
+
+`packages/engine` is simultaneously:
+
+1. **A shared library** published as `@autumnsgrove/lattice` with **253 export paths**, consumed by **10 packages** across 162 files
+2. **A live deployment** (`grove-lattice`) serving every tenant site, with **262 route files**, **127 API handlers**, and **121 endpoints**
+
+These are two fundamentally different things sharing one `package.json`, one directory, one build pipeline.
+
+### The library (what other packages consume)
+
+```
+src/lib/ — 539 files across 28 directories
+├── ui/          — 100+ glassmorphism components, stores, editor
+├── config/      — Colors, fonts, tiers, auth config
+├── errors/      — Signpost error system
+├── heartwood/   — Auth client, rate limiting, quotas
+├── threshold/   — Rate limiting adapters (SvelteKit, Hono, Worker)
+├── loom/        — Durable Objects SDK
+├── lumen/       — AI routing engine
+├── email/       — Email rendering (react-email + Resend)
+├── grafts/      — Pre-built feature bundles (login, pricing, greenhouse)
+├── server/      — Services, observability, database helpers
+├── vineyard/    — Component catalog system
+├── zephyr/      — Email gateway client
+└── ...22 more categories
+```
+
+**Top consumers**: Landing (65 files), Engine itself (51 files), Plant (20), Meadow (12), Durable Objects (9)
+
+**Most imported paths**: `config` (47 imports), `server/observability` (33), `services` (24), `utils` (11), `threshold` (8+8), `errors` (7)
+
+Built via `svelte-package -o dist` → published to npm.
+
+### The app (what tenants interact with)
+
+```
+src/routes/ — 262 files across 215 directories
+├── api/           — 127 API handlers (80+ for curios alone)
+│   ├── curios/    — Guestbook, gallery, badges, timeline, bookmarks...
+│   ├── admin/     — Settings, migrations, meadow
+│   ├── auth/      — Session management
+│   ├── billing/   — Stripe integration
+│   └── blooms/    — Post CRUD, reactions, view tracking
+├── (site)/        — Public pages (gallery, guestbook, pulse, timeline)
+├── (tenant)/      — Per-tenant routes
+├── [slug]/        — Dynamic blog post routes
+├── arbor/         — Admin panel (with Vista)
+├── auth/          — Auth flows
+└── ...more feature areas
+```
+
+Built via `vite build` → `.svelte-kit/cloudflare/` → deployed as Pages.
+
+### Internal-only lib modules (not exported)
+
+Some `src/lib/` modules exist solely to serve routes — never exported:
+
+| Module | Files | Lines | Purpose |
+|--------|-------|-------|---------|
+| `sentinel/` | 7 | ~3,964 | Content safety/moderation pipeline |
+| `durable-objects/` | 4 | — | Local DO helpers for routes |
+| `scribe/` | 2 | — | Writing/content helpers |
+| `types/` | 3 | — | Shared route TypeScript types |
+| `git/` | 2 | — | Git-related utilities |
+
+Sentinel alone is ~4k lines of sophisticated safety infrastructure that only 2 routes touch. It lives in the library directory but has nothing to do with being a library.
+
+### The mismatch
+
+The name "engine" implies a library — a thing that powers other things. And it IS that: `@autumnsgrove/lattice` is imported everywhere. But it's also the live application that *is the product*. Two identities:
+
+| Concern | Library | App |
+|---------|---------|-----|
+| **Name** | `@autumnsgrove/lattice` | `grove-lattice` |
+| **Purpose** | Provide shared infrastructure | Serve tenant sites |
+| **Build** | `svelte-package` → `dist/` | `vite build` → `.svelte-kit/cloudflare/` |
+| **Deploy** | Published to npm (consumed at build time) | Deployed to Cloudflare Pages (runs at request time) |
+| **Consumers** | 10 packages | Every Wanderer with a `*.grove.place` blog |
+| **Changes** | Must be backwards-compatible | Can ship breaking route changes freely |
+| **Testing** | Unit tests for exports | Integration tests for routes + API |
+
+### Why this matters for the conversion
+
+If we split the engine into **library** + **app**, the Pages-to-Workers conversion becomes cleaner:
+
+- The **library** doesn't deploy at all — it's just an npm package. No wrangler.toml needed. No Cloudflare Pages vs Workers question.
+- The **app** gets its own identity, its own wrangler.toml, and converts to a Worker cleanly. It can absorb cron workers, use smart placement, and be a first-class Vista citizen.
+- Internal-only modules (Sentinel, DO helpers, types) move to the app, not the library.
+- The library's `package.json` exports get simpler — no need for the dual `build` + `package` scripts.
+
+### What the split might look like
+
+```
+packages/
+├── engine/          ← The library (stays, loses routes)
+│   ├── src/lib/     ← All exported modules
+│   ├── package.json ← exports only, no app build
+│   └── (no routes, no wrangler.toml, no svelte.config.js)
+│
+├── [tenant-app]/    ← The app (new package, gets routes)
+│   ├── src/
+│   │   ├── routes/  ← All 262 route files
+│   │   └── lib/     ← Internal-only modules (sentinel, DO helpers, types)
+│   ├── wrangler.toml ← Worker config (not Pages!)
+│   ├── svelte.config.js
+│   └── package.json  ← imports from @autumnsgrove/lattice
+```
+
+The tenant app would need a Grove name. Some candidates that fit the forest metaphor:
+- **Canopy** — The visible surface of the forest, what Wanderers actually see and interact with
+- **Grove** — The app IS the grove itself, where people live
+- **Trunk** — The central structure everything grows from
+- **Arbor** — Already used for the admin panel name, but could expand
+- **Thicket** — A dense, living cluster of paths and content
+
+This split is a prerequisite decision that shapes the entire Workers conversion. The library doesn't need to convert — it doesn't deploy. The app converts and gains all the Worker benefits we documented above.
+
+---
+
 ## Expedition Summary
 
 ### By the numbers
@@ -359,6 +483,8 @@ Add a `grove-vista-tail` worker as a `tail_consumer` on all Worker deployments:
 
 5. **The adapter story is converging** — Cloudflare has been merging Pages and Workers. Workers Static Assets (GA since 2024) lets Workers serve static files. SvelteKit's `@sveltejs/adapter-cloudflare` may already support Worker output mode, or the transition to `adapter-cloudflare-workers` is well-documented.
 
+6. **The engine is two things pretending to be one** — A 539-file library (`@autumnsgrove/lattice`) and a 262-route deployment (`grove-lattice`) share one package. Splitting them would make the library purely a library (no deployment concerns) and give the tenant app its own clean identity as a Worker. This split is arguably the prerequisite step before converting engine to Workers — it clarifies *what* is being converted.
+
 ---
 
-_The fire dies to embers. The journal is full — 23 stops, 8 Pages observed, 15 Workers catalogued, 6 cron absorptions sketched, the whole Cloudflare landscape mapped. The Vista watchtower stands clearer now, and the path to unified observability is drawn in the dirt. Tomorrow, the animals go to work. But tonight? Tonight was the drive. And it was glorious._
+_The fire dies to embers. The journal is full — 23 stops, 8 Pages observed, 15 Workers catalogued, 6 cron absorptions sketched, 1 identity crisis documented, the whole Cloudflare landscape mapped. The Vista watchtower stands clearer now, and the path to unified observability is drawn in the dirt. Tomorrow, the animals go to work. But tonight? Tonight was the drive. And it was glorious._
