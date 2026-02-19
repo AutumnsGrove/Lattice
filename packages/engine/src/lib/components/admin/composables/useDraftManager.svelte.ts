@@ -260,15 +260,26 @@ export function useDraftManager(
     }, AUTO_SAVE_DELAY);
   }
 
+  let initialized = false;
+
   function init(initialContent: string): void {
+    // Guard: only run once per component lifecycle.
+    // The mount effect can re-run if reactive dependencies sneak in;
+    // re-initializing would re-show the draft banner after dismiss.
+    if (initialized) return;
+    initialized = true;
+
+    // Always set lastSavedContent so auto-save has a correct baseline.
+    // Without this, lastSavedContent stays "" when a draft is found,
+    // causing the auto-save to think content has changed immediately.
+    lastSavedContent = initialContent;
+
     // Check for existing draft on mount
     if (draftKey) {
       const draft = loadDraft();
       if (draft && draft.content !== initialContent) {
         storedDraft = draft;
         draftRestorePrompt = true;
-      } else {
-        lastSavedContent = initialContent;
       }
     }
   }

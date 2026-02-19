@@ -960,13 +960,13 @@
 		}
 	}
 
-	// Initialize editor on mount — untrack(content) prevents re-running on every keystroke
+	// Initialize editor on mount — untrack prevents re-running on content/ref changes.
+	// IMPORTANT: Do NOT call functions that read reactive state (like updateCursorPosition)
+	// inside this effect — it would cause init() to re-run on every keystroke, re-showing
+	// the draft banner after dismiss and breaking restore/discard on touch devices.
 	$effect(() => {
-		updateCursorPosition();
 		editorTheme.loadTheme();
 		draftManager.init(untrack(() => content));
-		// Note: editorMode is now initialized synchronously at declaration time
-		// to avoid flash of wrong mode on initial render
 
 		// Register page lifecycle handlers to prevent draft loss
 		window.addEventListener("beforeunload", handleBeforeUnload);
@@ -1632,14 +1632,10 @@
 		}
 	}
 	.draft-prompt {
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
 		background: rgba(45, 60, 45, 0.98);
 		border-bottom: 1px solid #4a7c4a;
-		z-index: 98;
 		padding: 0.5rem 0.75rem;
+		flex-shrink: 0;
 	}
 	.draft-prompt-content {
 		display: flex;
@@ -1671,14 +1667,18 @@
 		gap: 0.5rem;
 	}
 	.draft-btn {
-		padding: 0.25rem 0.5rem;
+		padding: 0.5rem 0.75rem;
+		min-height: 44px;
+		min-width: 44px;
 		border-radius: 0;
-		font-size: 0.8rem;
+		font-size: 0.85rem;
 		font-family: "JetBrains Mono", "Fira Code", monospace;
 		cursor: pointer;
 		transition: color 0.1s ease;
 		background: transparent;
 		border: none;
+		-webkit-tap-highlight-color: rgba(139, 196, 139, 0.2);
+		touch-action: manipulation;
 	}
 	.draft-btn.restore {
 		color: #8bc48b;
