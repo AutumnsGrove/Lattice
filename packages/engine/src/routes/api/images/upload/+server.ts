@@ -2,28 +2,21 @@ import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
 import { createThreshold } from "$lib/threshold/factory.js";
-import {
-  thresholdCheckWithResult,
-  thresholdHeaders,
-} from "$lib/threshold/adapters/sveltekit.js";
+import { thresholdCheckWithResult, thresholdHeaders } from "$lib/threshold/adapters/sveltekit.js";
 import { validateEnv, hasAnyEnv } from "$lib/server/env-validation.js";
 import {
-  ALLOWED_IMAGE_TYPES,
-  ALLOWED_TYPES_DISPLAY,
-  MIME_TO_EXTENSIONS,
-  isAllowedImageType,
-  validateFileSignature,
-  type AllowedImageType,
+	ALLOWED_IMAGE_TYPES,
+	ALLOWED_TYPES_DISPLAY,
+	MIME_TO_EXTENSIONS,
+	isAllowedImageType,
+	validateFileSignature,
+	type AllowedImageType,
 } from "$lib/utils/upload-validation.js";
 import { scanImage, type PetalEnv } from "$lib/server/petal/index.js";
 import { canUploadImages } from "$lib/server/upload-gate.js";
-import {
-  API_ERRORS,
-  buildErrorJson,
-  logGroveError,
-  throwGroveError,
-} from "$lib/errors";
+import { API_ERRORS, buildErrorJson, logGroveError, throwGroveError } from "$lib/errors";
 import { updateLastActivity } from "$lib/server/activity-tracking.js";
+import { generateGalleryId, parseImageFilename } from "$lib/curios/gallery";
 
 /** Maximum file size (10MB) */
 const MAX_SIZE = 10 * 1024 * 1024;
@@ -38,49 +31,40 @@ const MAX_IMAGE_PIXELS = 50_000_000;
  * Validate image dimensions by parsing file signatures
  * Prevents extremely large images that could cause memory issues
  */
-async function validateImageDimensions(
-  file: File,
-  buffer: Uint8Array,
-): Promise<void> {
-  let width = 0;
-  let height = 0;
+async function validateImageDimensions(file: File, buffer: Uint8Array): Promise<void> {
+	let width = 0;
+	let height = 0;
 
-  // PNG: dimensions at bytes 16-23 (big-endian)
-  if (file.type === "image/png" && buffer.length >= 24) {
-    width =
-      (buffer[16] << 24) | (buffer[17] << 16) | (buffer[18] << 8) | buffer[19];
-    height =
-      (buffer[20] << 24) | (buffer[21] << 16) | (buffer[22] << 8) | buffer[23];
-  }
+	// PNG: dimensions at bytes 16-23 (big-endian)
+	if (file.type === "image/png" && buffer.length >= 24) {
+		width = (buffer[16] << 24) | (buffer[17] << 16) | (buffer[18] << 8) | buffer[19];
+		height = (buffer[20] << 24) | (buffer[21] << 16) | (buffer[22] << 8) | buffer[23];
+	}
 
-  // GIF: dimensions at bytes 6-9 (little-endian)
-  if (file.type === "image/gif" && buffer.length >= 10) {
-    width = buffer[6] | (buffer[7] << 8);
-    height = buffer[8] | (buffer[9] << 8);
-  }
+	// GIF: dimensions at bytes 6-9 (little-endian)
+	if (file.type === "image/gif" && buffer.length >= 10) {
+		width = buffer[6] | (buffer[7] << 8);
+		height = buffer[8] | (buffer[9] << 8);
+	}
 
-  // For JPEG, WebP, and JPEG XL, we rely on file size validation
-  // Full dimension parsing requires walking marker tables (complex)
-  if (
-    file.type === "image/jpeg" ||
-    file.type === "image/webp" ||
-    file.type === "image/jxl"
-  ) {
-    // File size already validated (max 10MB), which is a reasonable proxy
-    return;
-  }
+	// For JPEG, WebP, and JPEG XL, we rely on file size validation
+	// Full dimension parsing requires walking marker tables (complex)
+	if (file.type === "image/jpeg" || file.type === "image/webp" || file.type === "image/jxl") {
+		// File size already validated (max 10MB), which is a reasonable proxy
+		return;
+	}
 
-  // Validate dimensions if we could parse them
-  if (width > 0 && height > 0) {
-    if (width > MAX_IMAGE_DIMENSION || height > MAX_IMAGE_DIMENSION) {
-      throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API", {
-        detail: `Image dimensions exceed maximum (${MAX_IMAGE_DIMENSION}x${MAX_IMAGE_DIMENSION}): received ${width}x${height}`,
-      });
-    }
-    if (width * height > MAX_IMAGE_PIXELS) {
-      throwGroveError(400, API_ERRORS.CONTENT_TOO_LARGE, "API");
-    }
-  }
+	// Validate dimensions if we could parse them
+	if (width > 0 && height > 0) {
+		if (width > MAX_IMAGE_DIMENSION || height > MAX_IMAGE_DIMENSION) {
+			throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API", {
+				detail: `Image dimensions exceed maximum (${MAX_IMAGE_DIMENSION}x${MAX_IMAGE_DIMENSION}): received ${width}x${height}`,
+			});
+		}
+		if (width * height > MAX_IMAGE_PIXELS) {
+			throwGroveError(400, API_ERRORS.CONTENT_TOO_LARGE, "API");
+		}
+	}
 }
 
 /**
@@ -88,334 +72,313 @@ async function validateImageDimensions(
  * Supports date-based organization, duplicate detection, and AI metadata
  */
 export const POST: RequestHandler = async ({ request, platform, locals }) => {
-  // Authentication check
-  if (!locals.user) {
-    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
-  }
+	// Authentication check
+	if (!locals.user) {
+		throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
+	}
 
-  // Tenant check (CRITICAL for security)
-  if (!locals.tenantId) {
-    throwGroveError(403, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
-  }
+	// Tenant check (CRITICAL for security)
+	if (!locals.tenantId) {
+		throwGroveError(403, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
+	}
 
-  // ========================================================================
-  // Upload Gate: image_uploads + uploads_suspended
-  // ========================================================================
-  const flagsEnv = platform?.env?.CACHE_KV
-    ? { DB: platform.env.DB!, FLAGS_KV: platform.env.CACHE_KV }
-    : null;
+	// ========================================================================
+	// Upload Gate: image_uploads + uploads_suspended
+	// ========================================================================
+	const flagsEnv = platform?.env?.CACHE_KV
+		? { DB: platform.env.DB!, FLAGS_KV: platform.env.CACHE_KV }
+		: null;
 
-  if (!flagsEnv) {
-    return json(buildErrorJson(API_ERRORS.FEATURE_DISABLED), { status: 403 });
-  }
+	if (!flagsEnv) {
+		return json(buildErrorJson(API_ERRORS.FEATURE_DISABLED), { status: 403 });
+	}
 
-  const uploadGate = await canUploadImages(
-    locals.tenantId,
-    locals.user.id,
-    flagsEnv,
-  );
-  if (!uploadGate.allowed) {
-    return json(buildErrorJson(API_ERRORS.FEATURE_DISABLED), { status: 403 });
-  }
+	const uploadGate = await canUploadImages(locals.tenantId, locals.user.id, flagsEnv);
+	if (!uploadGate.allowed) {
+		return json(buildErrorJson(API_ERRORS.FEATURE_DISABLED), { status: 403 });
+	}
 
-  // Validate required environment variables (fail-fast with actionable errors)
-  const envValidation = validateEnv(platform?.env, [
-    "DB",
-    "IMAGES",
-    "CACHE_KV",
-  ]);
-  if (!envValidation.valid) {
-    console.error(`[Image Upload] ${envValidation.message}`);
-    throwGroveError(503, API_ERRORS.UPLOAD_SERVICE_UNAVAILABLE, "API");
-  }
+	// Validate required environment variables (fail-fast with actionable errors)
+	const envValidation = validateEnv(platform?.env, ["DB", "IMAGES", "CACHE_KV"]);
+	if (!envValidation.valid) {
+		console.error(`[Image Upload] ${envValidation.message}`);
+		throwGroveError(503, API_ERRORS.UPLOAD_SERVICE_UNAVAILABLE, "API");
+	}
 
-  // Safe to access after validation
-  const db = platform!.env!.DB;
-  const images = platform!.env!.IMAGES;
-  const kv = platform!.env!.CACHE_KV;
-  const threshold = createThreshold(platform?.env, {
-    identifier: locals.user?.id,
-  });
+	// Safe to access after validation
+	const db = platform!.env!.DB;
+	const images = platform!.env!.IMAGES;
+	const kv = platform!.env!.CACHE_KV;
+	const threshold = createThreshold(platform?.env, {
+		identifier: locals.user?.id,
+	});
 
-  // Rate limit uploads (fail-closed to prevent storage abuse)
-  if (threshold) {
-    const { result, response } = await thresholdCheckWithResult(threshold, {
-      key: `upload/image:${locals.user.id}`,
-      limit: 50,
-      windowSeconds: 3600, // 1 hour
-    });
+	// Rate limit uploads (fail-closed to prevent storage abuse)
+	if (threshold) {
+		const { result, response } = await thresholdCheckWithResult(threshold, {
+			key: `upload/image:${locals.user.id}`,
+			limit: 50,
+			windowSeconds: 3600, // 1 hour
+		});
 
-    if (response) {
-      return response;
-    }
-  }
+		if (response) {
+			return response;
+		}
+	}
 
-  try {
-    const tenantId = await getVerifiedTenantId(
-      db,
-      locals.tenantId,
-      locals.user,
-    );
-    const formData = await request.formData();
-    const file = formData.get("file");
-    const customFilename = formData.get("filename") as string | null;
-    const altText = (formData.get("altText") as string) || "";
-    const description = (formData.get("description") as string) || "";
-    const hash = formData.get("hash") as string | null;
+	try {
+		const tenantId = await getVerifiedTenantId(db, locals.tenantId, locals.user);
+		const formData = await request.formData();
+		const file = formData.get("file");
+		const customFilename = formData.get("filename") as string | null;
+		const altText = (formData.get("altText") as string) || "";
+		const description = (formData.get("description") as string) || "";
+		const hash = formData.get("hash") as string | null;
 
-    // Format metadata for analytics (JXL tracking)
-    const imageFormat = formData.get("imageFormat") as string | null;
-    const originalSizeStr = formData.get("originalSize") as string | null;
-    const storedSizeStr = formData.get("storedSize") as string | null;
-    const originalSizeBytes = originalSizeStr
-      ? parseInt(originalSizeStr, 10)
-      : null;
-    const storedSizeBytes = storedSizeStr ? parseInt(storedSizeStr, 10) : null;
+		// Format metadata for analytics (JXL tracking)
+		const imageFormat = formData.get("imageFormat") as string | null;
+		const originalSizeStr = formData.get("originalSize") as string | null;
+		const storedSizeStr = formData.get("storedSize") as string | null;
+		const originalSizeBytes = originalSizeStr ? parseInt(originalSizeStr, 10) : null;
+		const storedSizeBytes = storedSizeStr ? parseInt(storedSizeStr, 10) : null;
 
-    if (!file || !(file instanceof File)) {
-      throwGroveError(400, API_ERRORS.INVALID_REQUEST_BODY, "API", {
-        detail: "file required",
-      });
-    }
+		if (!file || !(file instanceof File)) {
+			throwGroveError(400, API_ERRORS.INVALID_REQUEST_BODY, "API", {
+				detail: "file required",
+			});
+		}
 
-    // Validate file type using shared constants
-    if (!isAllowedImageType(file.type)) {
-      throwGroveError(400, API_ERRORS.INVALID_FILE, "API", {
-        detail: `Invalid file type: ${file.type}. Allowed: ${ALLOWED_TYPES_DISPLAY}`,
-      });
-    }
+		// Validate file type using shared constants
+		if (!isAllowedImageType(file.type)) {
+			throwGroveError(400, API_ERRORS.INVALID_FILE, "API", {
+				detail: `Invalid file type: ${file.type}. Allowed: ${ALLOWED_TYPES_DISPLAY}`,
+			});
+		}
 
-    // Extract and validate extension
-    const originalName = file.name;
-    const ext = originalName.split(".").pop()?.toLowerCase();
+		// Extract and validate extension
+		const originalName = file.name;
+		const ext = originalName.split(".").pop()?.toLowerCase();
 
-    if (!ext) {
-      throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API", {
-        detail: "file must have extension",
-      });
-    }
+		if (!ext) {
+			throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API", {
+				detail: "file must have extension",
+			});
+		}
 
-    const validExtensions = MIME_TO_EXTENSIONS[file.type as AllowedImageType];
-    if (!validExtensions || !validExtensions.includes(ext)) {
-      throwGroveError(400, API_ERRORS.INVALID_FILE, "API", {
-        detail: `File extension '.${ext}' does not match content type '${file.type}'`,
-      });
-    }
+		const validExtensions = MIME_TO_EXTENSIONS[file.type as AllowedImageType];
+		if (!validExtensions || !validExtensions.includes(ext)) {
+			throwGroveError(400, API_ERRORS.INVALID_FILE, "API", {
+				detail: `File extension '.${ext}' does not match content type '${file.type}'`,
+			});
+		}
 
-    // Block double extensions that might indicate attacks
-    if (originalName.match(/\.(php|js|html|htm|exe|sh|bat)\./i)) {
-      throwGroveError(400, API_ERRORS.INVALID_FILE, "API", {
-        detail: "invalid filename",
-      });
-    }
+		// Block double extensions that might indicate attacks
+		if (originalName.match(/\.(php|js|html|htm|exe|sh|bat)\./i)) {
+			throwGroveError(400, API_ERRORS.INVALID_FILE, "API", {
+				detail: "invalid filename",
+			});
+		}
 
-    // Validate file size
-    if (file.size > MAX_SIZE) {
-      throwGroveError(400, API_ERRORS.CONTENT_TOO_LARGE, "API");
-    }
+		// Validate file size
+		if (file.size > MAX_SIZE) {
+			throwGroveError(400, API_ERRORS.CONTENT_TOO_LARGE, "API");
+		}
 
-    // Read file once for both validation and upload
-    const arrayBuffer = await file.arrayBuffer();
+		// Read file once for both validation and upload
+		const arrayBuffer = await file.arrayBuffer();
 
-    // Validate magic bytes to prevent MIME type spoofing
-    // Uses the shared validateFileSignature() which handles WebP marker
-    // and AVIF ISOBMFF ftyp box checks
-    const buffer = new Uint8Array(arrayBuffer);
-    if (!validateFileSignature(buffer, file.type as AllowedImageType)) {
-      throwGroveError(400, API_ERRORS.INVALID_FILE, "API", {
-        detail: "invalid file signature - may be corrupted or spoofed",
-      });
-    }
+		// Validate magic bytes to prevent MIME type spoofing
+		// Uses the shared validateFileSignature() which handles WebP marker
+		// and AVIF ISOBMFF ftyp box checks
+		const buffer = new Uint8Array(arrayBuffer);
+		if (!validateFileSignature(buffer, file.type as AllowedImageType)) {
+			throwGroveError(400, API_ERRORS.INVALID_FILE, "API", {
+				detail: "invalid file signature - may be corrupted or spoofed",
+			});
+		}
 
-    // Validate image dimensions to prevent DoS attacks
-    await validateImageDimensions(file, buffer);
+		// Validate image dimensions to prevent DoS attacks
+		await validateImageDimensions(file, buffer);
 
-    // ========================================================================
-    // Pre-Scan Abuse Detection
-    // ========================================================================
-    // Check if user has too many recent rejected uploads BEFORE running
-    // expensive AI scans. This prevents cost abuse from malicious users
-    // repeatedly uploading violating content.
-    const rejectedKey = `upload/rejected:${locals.user.id}`;
-    if (threshold) {
-      const rejectedCheck = await thresholdCheckWithResult(threshold, {
-        key: rejectedKey,
-        limit: 5, // Max 5 rejected uploads per hour before temporary block
-        windowSeconds: 3600,
-      });
+		// ========================================================================
+		// Pre-Scan Abuse Detection
+		// ========================================================================
+		// Check if user has too many recent rejected uploads BEFORE running
+		// expensive AI scans. This prevents cost abuse from malicious users
+		// repeatedly uploading violating content.
+		const rejectedKey = `upload/rejected:${locals.user.id}`;
+		if (threshold) {
+			const rejectedCheck = await thresholdCheckWithResult(threshold, {
+				key: rejectedKey,
+				limit: 5, // Max 5 rejected uploads per hour before temporary block
+				windowSeconds: 3600,
+			});
 
-      if (rejectedCheck.response) {
-        return json(buildErrorJson(API_ERRORS.UPLOAD_RESTRICTED), {
-          status: 429,
-        });
-      }
-    }
+			if (rejectedCheck.response) {
+				return json(buildErrorJson(API_ERRORS.UPLOAD_RESTRICTED), {
+					status: 429,
+				});
+			}
+		}
 
-    // ========================================================================
-    // Petal Content Moderation (Layer 1-3)
-    // ========================================================================
-    // Run Petal scan before storing in R2. This checks:
-    // - Layer 1: CSAM detection (MANDATORY)
-    // - Layer 2: Content classification (nudity, violence, etc.)
-    // - Layer 3: Sanity checks (for try-on context)
-    //
-    // If AI binding is not available, Petal will attempt external fallback
-    // (Together.ai) if TOGETHER_API_KEY is configured.
-    const hasPetalProvider =
-      platform?.env?.AI || platform?.env?.TOGETHER_API_KEY;
+		// ========================================================================
+		// Petal Content Moderation (Layer 1-3)
+		// ========================================================================
+		// Run Petal scan before storing in R2. This checks:
+		// - Layer 1: CSAM detection (MANDATORY)
+		// - Layer 2: Content classification (nudity, violence, etc.)
+		// - Layer 3: Sanity checks (for try-on context)
+		//
+		// If AI binding is not available, Petal will attempt external fallback
+		// (Together.ai) if TOGETHER_API_KEY is configured.
+		const hasPetalProvider = platform?.env?.AI || platform?.env?.TOGETHER_API_KEY;
 
-    if (hasPetalProvider) {
-      const petalEnv: PetalEnv = {
-        AI: platform!.env!.AI,
-        DB: db,
-        CACHE_KV: kv,
-        TOGETHER_API_KEY: platform!.env!.TOGETHER_API_KEY as string | undefined,
-      };
+		if (hasPetalProvider) {
+			const petalEnv: PetalEnv = {
+				AI: platform!.env!.AI,
+				DB: db,
+				CACHE_KV: kv,
+				TOGETHER_API_KEY: platform!.env!.TOGETHER_API_KEY as string | undefined,
+			};
 
-      // Determine context from form data (default: general upload)
-      const uploadContext = (formData.get("context") as string) || "general";
-      const petalContext = ["tryon", "profile", "blog"].includes(uploadContext)
-        ? (uploadContext as "tryon" | "profile" | "blog")
-        : "general";
+			// Determine context from form data (default: general upload)
+			const uploadContext = (formData.get("context") as string) || "general";
+			const petalContext = ["tryon", "profile", "blog"].includes(uploadContext)
+				? (uploadContext as "tryon" | "profile" | "blog")
+				: "general";
 
-      const petalResult = await scanImage(
-        {
-          imageData: buffer,
-          mimeType: file.type,
-          context: petalContext,
-          userId: locals.user.id,
-          tenantId,
-          hash: hash || undefined,
-        },
-        petalEnv,
-      );
+			const petalResult = await scanImage(
+				{
+					imageData: buffer,
+					mimeType: file.type,
+					context: petalContext,
+					userId: locals.user.id,
+					tenantId,
+					hash: hash || undefined,
+				},
+				petalEnv,
+			);
 
-      if (!petalResult.allowed) {
-        // Increment rejected uploads counter for abuse detection
-        // This is best-effort - don't block the rejection if it fails
-        if (threshold) {
-          try {
-            await threshold.check({
-              key: rejectedKey,
-              limit: 5,
-              windowSeconds: 3600,
-            });
-          } catch {
-            // Non-critical - continue with rejection
-          }
-        }
+			if (!petalResult.allowed) {
+				// Increment rejected uploads counter for abuse detection
+				// This is best-effort - don't block the rejection if it fails
+				if (threshold) {
+					try {
+						await threshold.check({
+							key: rejectedKey,
+							limit: 5,
+							windowSeconds: 3600,
+						});
+					} catch {
+						// Non-critical - continue with rejection
+					}
+				}
 
-        // Return user-friendly rejection
-        // IMPORTANT: Never reveal CSAM detection reason
-        return json(
-          {
-            ...buildErrorJson(API_ERRORS.INVALID_FILE),
-            error_description: petalResult.message,
-            processingTimeMs: petalResult.processingTimeMs,
-          },
-          { status: 400 },
-        );
-      }
-    }
+				// Return user-friendly rejection
+				// IMPORTANT: Never reveal CSAM detection reason
+				return json(
+					{
+						...buildErrorJson(API_ERRORS.INVALID_FILE),
+						error_description: petalResult.message,
+						processingTimeMs: petalResult.processingTimeMs,
+					},
+					{ status: 400 },
+				);
+			}
+		}
 
-    // Check for duplicates if hash provided
-    if (hash && db) {
-      try {
-        const existing = (await db
-          .prepare(
-            "SELECT key, url FROM image_hashes WHERE hash = ? AND tenant_id = ?",
-          )
-          .bind(hash, tenantId)
-          .first()) as { key: string; url: string } | null;
+		// Check for duplicates if hash provided
+		if (hash && db) {
+			try {
+				const existing = (await db
+					.prepare("SELECT key, url FROM image_hashes WHERE hash = ? AND tenant_id = ?")
+					.bind(hash, tenantId)
+					.first()) as { key: string; url: string } | null;
 
-        if (existing) {
-          return json({
-            success: true,
-            duplicate: true,
-            url: existing.url,
-            key: existing.key,
-            message: "Duplicate image detected - using existing upload",
-          });
-        }
-      } catch (dbError) {
-        // Table might not exist yet, continue with upload
-        console.warn(
-          "[ImageUpload] Duplicate check skipped:",
-          (dbError as Error).message,
-        );
-      }
-    }
+				if (existing) {
+					return json({
+						success: true,
+						duplicate: true,
+						url: existing.url,
+						key: existing.key,
+						message: "Duplicate image detected - using existing upload",
+					});
+				}
+			} catch (dbError) {
+				// Table might not exist yet, continue with upload
+				console.warn("[ImageUpload] Duplicate check skipped:", (dbError as Error).message);
+			}
+		}
 
-    // Generate date-based path: photos/YYYY/MM/DD/
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const day = String(now.getDate()).padStart(2, "0");
-    const datePath = `photos/${year}/${month}/${day}`;
+		// Generate date-based path: photos/YYYY/MM/DD/
+		const now = new Date();
+		const year = now.getFullYear();
+		const month = String(now.getMonth() + 1).padStart(2, "0");
+		const day = String(now.getDate()).padStart(2, "0");
+		const datePath = `photos/${year}/${month}/${day}`;
 
-    // Determine filename
-    let filename: string;
-    if (customFilename) {
-      // Use AI-generated filename with correct extension for file type
-      const extMap: Record<string, string> = {
-        "image/gif": "gif",
-        "image/webp": "webp",
-        "image/png": "png",
-        "image/jpeg": "jpg",
-        "image/jxl": "jxl",
-        "image/avif": "avif",
-      };
-      const ext = extMap[file.type] || "webp";
-      filename = `${customFilename}.${ext}`;
-    } else {
-      // Sanitize original filename
-      filename = file.name
-        .toLowerCase()
-        .replace(/[^a-z0-9.-]/g, "-")
-        .replace(/-+/g, "-");
-    }
+		// Determine filename
+		let filename: string;
+		if (customFilename) {
+			// Use AI-generated filename with correct extension for file type
+			const extMap: Record<string, string> = {
+				"image/gif": "gif",
+				"image/webp": "webp",
+				"image/png": "png",
+				"image/jpeg": "jpg",
+				"image/jxl": "jxl",
+				"image/avif": "avif",
+			};
+			const ext = extMap[file.type] || "webp";
+			filename = `${customFilename}.${ext}`;
+		} else {
+			// Sanitize original filename
+			filename = file.name
+				.toLowerCase()
+				.replace(/[^a-z0-9.-]/g, "-")
+				.replace(/-+/g, "-");
+		}
 
-    // Add timestamp to prevent collisions
-    const timestamp = Date.now().toString(36);
-    const lastDot = filename.lastIndexOf(".");
-    if (lastDot > 0) {
-      filename = `${filename.substring(0, lastDot)}-${timestamp}${filename.substring(lastDot)}`;
-    } else {
-      filename = `${filename}-${timestamp}`;
-    }
+		// Add timestamp to prevent collisions
+		const timestamp = Date.now().toString(36);
+		const lastDot = filename.lastIndexOf(".");
+		if (lastDot > 0) {
+			filename = `${filename.substring(0, lastDot)}-${timestamp}${filename.substring(lastDot)}`;
+		} else {
+			filename = `${filename}-${timestamp}`;
+		}
 
-    // Build the R2 key with tenant isolation
-    const key = `${tenantId}/${datePath}/${filename}`;
+		// Build the R2 key with tenant isolation
+		const key = `${tenantId}/${datePath}/${filename}`;
 
-    // Upload to R2 with cache headers and custom metadata
-    const metadata: Record<string, string> = {};
-    if (altText) metadata.altText = altText.substring(0, 500);
-    if (description) metadata.description = description.substring(0, 1000);
-    if (hash) metadata.hash = hash;
+		// Upload to R2 with cache headers and custom metadata
+		const metadata: Record<string, string> = {};
+		if (altText) metadata.altText = altText.substring(0, 500);
+		if (description) metadata.description = description.substring(0, 1000);
+		if (hash) metadata.hash = hash;
 
-    await images.put(key, arrayBuffer, {
-      httpMetadata: {
-        contentType: file.type,
-        cacheControl: "public, max-age=31536000, immutable",
-      },
-      customMetadata: metadata,
-    });
+		await images.put(key, arrayBuffer, {
+			httpMetadata: {
+				contentType: file.type,
+				cacheControl: "public, max-age=31536000, immutable",
+			},
+			customMetadata: metadata,
+		});
 
-    // Track activity for inactivity reclamation
-    updateLastActivity(db, tenantId);
+		// Track activity for inactivity reclamation
+		updateLastActivity(db, tenantId);
 
-    // Build CDN URL - uses environment variable for flexibility
-    // Defaults to production CDN if not configured
-    const cdnBaseUrl =
-      (platform?.env?.CDN_BASE_URL as string) || "https://cdn.grove.place";
-    const cdnUrl = `${cdnBaseUrl}/${key}`;
+		// Build CDN URL - uses environment variable for flexibility
+		// Defaults to production CDN if not configured
+		const cdnBaseUrl = (platform?.env?.CDN_BASE_URL as string) || "https://cdn.grove.place";
+		const cdnUrl = `${cdnBaseUrl}/${key}`;
 
-    // Store hash for future duplicate detection with format metadata
-    if (hash && db) {
-      try {
-        await db
-          .prepare(
-            `
+		// Store hash for future duplicate detection with format metadata
+		if (hash && db) {
+			try {
+				await db
+					.prepare(
+						`
           INSERT INTO image_hashes (
             hash, key, url, tenant_id, created_at,
             image_format, original_format, original_size_bytes, stored_size_bytes
@@ -426,61 +389,91 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
             original_size_bytes = COALESCE(excluded.original_size_bytes, original_size_bytes),
             stored_size_bytes = COALESCE(excluded.stored_size_bytes, stored_size_bytes)
         `,
-          )
-          .bind(
-            hash,
-            key,
-            cdnUrl,
-            tenantId,
-            imageFormat || "webp", // Default to webp if not specified
-            file.type.split("/")[1] || null, // Extract original format from MIME type
-            originalSizeBytes,
-            storedSizeBytes,
-          )
-          .run();
-      } catch (dbError) {
-        // Non-critical, continue
-        console.warn(
-          "[ImageUpload] Hash storage skipped:",
-          (dbError as Error).message,
-        );
-      }
-    }
+					)
+					.bind(
+						hash,
+						key,
+						cdnUrl,
+						tenantId,
+						imageFormat || "webp", // Default to webp if not specified
+						file.type.split("/")[1] || null, // Extract original format from MIME type
+						originalSizeBytes,
+						storedSizeBytes,
+					)
+					.run();
+			} catch (dbError) {
+				// Non-critical, continue
+				console.warn("[ImageUpload] Hash storage skipped:", (dbError as Error).message);
+			}
+		}
 
-    // Generate copy formats
-    const safeAlt = altText || "Image";
-    const markdown = `![${safeAlt}](${cdnUrl})`;
-    const html = `<img src="${cdnUrl}" alt="${safeAlt.replace(/"/g, "&quot;")}" />`;
-    const svelte = `<img src="${cdnUrl}" alt="${safeAlt.replace(/"/g, "&quot;")}" />`;
+		// Insert into gallery_images so uploads appear on the public gallery immediately
+		// Non-blocking: gallery insert failure must NOT prevent the upload response
+		try {
+			const keyWithoutPrefix = key.startsWith(`${tenantId}/`)
+				? key.slice(tenantId.length + 1)
+				: key;
+			const parsed = parseImageFilename(keyWithoutPrefix);
 
-    return json(
-      {
-        success: true,
-        url: cdnUrl,
-        key: key,
-        filename: filename,
-        size: file.size,
-        type: file.type,
-        altText: altText || null,
-        description: description || null,
-        markdown,
-        html,
-        svelte,
-      },
-      {
-        headers: {
-          "Cache-Control": "no-store",
-        },
-      },
-    );
-  } catch (err) {
-    // Re-throw SvelteKit HTTP errors (they have status codes)
-    if ((err as { status?: number }).status) throw err;
+			await db
+				.prepare(
+					`INSERT OR IGNORE INTO gallery_images (
+						id, tenant_id, r2_key,
+						parsed_date, parsed_category, parsed_slug,
+						file_size, uploaded_at, cdn_url
+					) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+				)
+				.bind(
+					generateGalleryId(),
+					tenantId,
+					key,
+					parsed.date,
+					parsed.category,
+					parsed.slug,
+					file.size,
+					new Date().toISOString(),
+					cdnUrl,
+				)
+				.run();
+		} catch (galleryErr) {
+			// Non-critical — the sync endpoint can backfill later
+			console.warn("[ImageUpload] Gallery insert skipped:", (galleryErr as Error).message);
+		}
 
-    // Log the full error for server-side debugging
-    logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
+		// Generate copy formats
+		const safeAlt = altText || "Image";
+		const markdown = `![${safeAlt}](${cdnUrl})`;
+		const html = `<img src="${cdnUrl}" alt="${safeAlt.replace(/"/g, "&quot;")}" />`;
+		const svelte = `<img src="${cdnUrl}" alt="${safeAlt.replace(/"/g, "&quot;")}" />`;
 
-    // Return generic message to client — full error already logged above
-    throw error(500, API_ERRORS.OPERATION_FAILED.userMessage);
-  }
+		return json(
+			{
+				success: true,
+				url: cdnUrl,
+				key: key,
+				filename: filename,
+				size: file.size,
+				type: file.type,
+				altText: altText || null,
+				description: description || null,
+				markdown,
+				html,
+				svelte,
+			},
+			{
+				headers: {
+					"Cache-Control": "no-store",
+				},
+			},
+		);
+	} catch (err) {
+		// Re-throw SvelteKit HTTP errors (they have status codes)
+		if ((err as { status?: number }).status) throw err;
+
+		// Log the full error for server-side debugging
+		logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
+
+		// Return generic message to client — full error already logged above
+		throw error(500, API_ERRORS.OPERATION_FAILED.userMessage);
+	}
 };

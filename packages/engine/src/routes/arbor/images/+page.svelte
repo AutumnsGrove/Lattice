@@ -42,7 +42,7 @@
 	let imageFormat = $state(/** @type {'auto' | 'jxl' | 'webp' | 'original'} */ ("webp"));
 	let fullResolution = $state(false);
 	let jxlSupported = $state(false);
-	let useAiAnalysis = $state(true);
+	let useAiAnalysis = $state(false);
 	let showAdvanced = $state(false);
 
 	// Set initial format based on feature flag (only on first render)
