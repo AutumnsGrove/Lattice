@@ -600,6 +600,55 @@ def switch(ctx: click.Context, branch_name: str, create: bool) -> None:
 
 
 @click.command()
+@click.argument("branch_name")
+@click.option("--create", "-c", is_flag=True, help="Create branch if not exists")
+@click.option("-b", "create_b", is_flag=True, help="Create branch (git-style alias for -c)")
+@click.pass_context
+def checkout(ctx: click.Context, branch_name: str, create: bool, create_b: bool) -> None:
+    """Switch to a branch (alias for 'gw git switch').
+
+    Agents and users familiar with 'git checkout' can use this interchangeably
+    with 'gw git switch'. Both commands do the same thing.
+
+    \b
+    Examples:
+        gw git checkout main
+        gw git checkout -b new-branch     # git-style create
+        gw git checkout -c new-branch     # same thing
+    """
+    output_json = ctx.obj.get("output_json", False)
+    should_create = create or create_b
+
+    try:
+        if should_create:
+            check_git_safety("checkout", write_flag=True)
+        else:
+            check_git_safety("branch_list", write_flag=True)
+
+        git = Git()
+
+        if not git.is_repo():
+            console.print("[red]Not a git repository[/red]")
+            raise SystemExit(1)
+
+        git.checkout(branch_name, create=should_create)
+
+        if output_json:
+            console.print(json.dumps({"branch": branch_name}))
+        else:
+            console.print(f"[green]Switched to branch: {branch_name}[/green]")
+
+    except GitSafetyError as e:
+        console.print(f"[red]Safety check failed:[/red] {e.message}")
+        if e.suggestion:
+            console.print(f"[dim]{e.suggestion}[/dim]")
+        raise SystemExit(1)
+    except GitError as e:
+        console.print(f"[red]Git error:[/red] {e.message}")
+        raise SystemExit(1)
+
+
+@click.command()
 @click.argument(
     "action",
     required=False,

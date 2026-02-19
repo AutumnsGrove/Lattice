@@ -182,6 +182,7 @@ def _print_rich_status(status) -> None:
 
 
 @click.command(cls=NumericShorthandCommand)
+@click.argument("ref", required=False, default=None)
 @click.option("--limit", "-n", default=10, help="Number of commits to show")
 @click.option("--oneline", is_flag=True, help="One line per commit")
 @click.option("--author", help="Filter by author")
@@ -191,6 +192,7 @@ def _print_rich_status(status) -> None:
 @click.pass_context
 def log(
     ctx: click.Context,
+    ref: Optional[str],
     limit: int,
     oneline: bool,
     author: Optional[str],
@@ -206,6 +208,8 @@ def log(
     Examples:
         gw git log                    # Last 10 commits
         gw git log -5                 # Last 5 commits (git-style shorthand)
+        gw git log main               # Log for main branch
+        gw git log origin/main -5     # Last 5 remote main commits
         gw git log --limit 25         # More commits
         gw git log --oneline          # Compact format
         gw git log --author autumn    # Filter by author
@@ -226,6 +230,8 @@ def log(
                 args.append(f"--author={author}")
             if since:
                 args.append(f"--since={since}")
+            if ref:
+                args.append(ref)
             if file_path:
                 args.extend(["--", file_path])
             output = git.execute(args)
@@ -241,6 +247,7 @@ def log(
             author=author,
             since=since,
             file_path=file_path,
+            ref=ref,
         )
 
         if output_json:
@@ -402,8 +409,9 @@ def diff(
     "line_range",
     help="Line range (e.g., 50-75)",
 )
+@click.option("--ref", "-r", help="Blame at specific commit/branch")
 @click.pass_context
-def blame(ctx: click.Context, file_path: str, line_range: Optional[str]) -> None:
+def blame(ctx: click.Context, file_path: str, line_range: Optional[str], ref: Optional[str]) -> None:
     """Show what revision and author last modified each line.
 
     Always safe - no --write flag required.
@@ -412,6 +420,7 @@ def blame(ctx: click.Context, file_path: str, line_range: Optional[str]) -> None
     Examples:
         gw git blame src/lib/auth.ts
         gw git blame src/lib/auth.ts --line 50-75
+        gw git blame --ref main src/lib/auth.ts
     """
     output_json = ctx.obj.get("output_json", False)
 
@@ -431,7 +440,7 @@ def blame(ctx: click.Context, file_path: str, line_range: Optional[str]) -> None
                 line_start = int(parts[0])
                 line_end = int(parts[1])
 
-        output = git.blame(file_path, line_start, line_end)
+        output = git.blame(file_path, line_start, line_end, ref=ref)
 
         if output_json:
             # Parse blame output into structured data
@@ -643,12 +652,14 @@ def reflog(ctx: click.Context, limit: int) -> None:
 
 
 @click.command()
+@click.argument("ref", required=False, default="HEAD")
 @click.option("--limit", "-n", default=None, type=int, help="Limit number of authors shown")
 @click.option("--since", help="Show commits since date (e.g., 'v1.0.0', '3 months ago')")
 @click.option("--summary", "-s", is_flag=True, help="Show only commit counts")
 @click.pass_context
 def shortlog(
     ctx: click.Context,
+    ref: str,
     limit: Optional[int],
     since: Optional[str],
     summary: bool,
@@ -660,7 +671,8 @@ def shortlog(
 
     \b
     Examples:
-        gw git shortlog                        # All authors
+        gw git shortlog                        # All authors (HEAD)
+        gw git shortlog main                   # Authors on main branch
         gw git shortlog --summary              # Just counts
         gw git shortlog --since "v1.0.0"       # Since a tag
         gw git shortlog --since "3 months ago" # Recent activity
@@ -674,7 +686,7 @@ def shortlog(
             console.print("[red]Not a git repository[/red]")
             raise SystemExit(1)
 
-        args = ["shortlog", "-sne", "HEAD"]
+        args = ["shortlog", "-sne", ref]
         if since:
             args.insert(1, f"--since={since}")
 

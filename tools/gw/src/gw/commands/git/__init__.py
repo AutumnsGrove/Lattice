@@ -3,7 +3,7 @@
 import click
 
 from .read import diff, log, show, status, blame, fetch, reflog, shortlog
-from .write import add, branch, cherry_pick, commit, pull, push, stash, switch, unstage, restore, clean
+from .write import add, branch, checkout, cherry_pick, commit, pull, push, stash, switch, unstage, restore, clean
 from .danger import merge, push_force, rebase, reset
 from .shortcuts import amend, fast, save, sync, undo, wip
 from .workflows import prep, pr_prep, ship
@@ -56,6 +56,7 @@ git.add_command(push)
 git.add_command(branch)
 git.add_command(stash)
 git.add_command(switch)
+git.add_command(checkout)
 git.add_command(unstage)
 git.add_command(cherry_pick, name="cherry-pick")
 git.add_command(restore)

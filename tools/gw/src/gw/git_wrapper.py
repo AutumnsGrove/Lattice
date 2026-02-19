@@ -242,6 +242,7 @@ class Git:
         since: Optional[str] = None,
         file_path: Optional[str] = None,
         format_string: Optional[str] = None,
+        ref: Optional[str] = None,
     ) -> list[GitCommit]:
         """Get commit log.
 
@@ -252,6 +253,7 @@ class Git:
             since: Show commits since date
             file_path: Show commits for specific file
             format_string: Custom format string
+            ref: Branch, tag, or commit to show log for
 
         Returns:
             List of GitCommit objects
@@ -269,6 +271,8 @@ class Git:
             args.append(f"--author={author}")
         if since:
             args.append(f"--since={since}")
+        if ref:
+            args.append(ref)
         if file_path:
             args.extend(["--", file_path])
 
@@ -378,6 +382,7 @@ class Git:
         file_path: str,
         line_start: Optional[int] = None,
         line_end: Optional[int] = None,
+        ref: Optional[str] = None,
     ) -> str:
         """Get blame output for a file.
 
@@ -385,6 +390,7 @@ class Git:
             file_path: Path to file
             line_start: Starting line number
             line_end: Ending line number
+            ref: Branch, tag, or commit to blame at
 
         Returns:
             Blame output string
@@ -393,6 +399,9 @@ class Git:
 
         if line_start and line_end:
             args.extend(["-L", f"{line_start},{line_end}"])
+
+        if ref:
+            args.append(ref)
 
         args.append(file_path)
 
