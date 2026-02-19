@@ -417,33 +417,45 @@ If we split the engine into **library** + **app**, the Pages-to-Workers conversi
 - Internal-only modules (Sentinel, DO helpers, types) move to the app, not the library.
 - The library's `package.json` exports get simpler — no need for the dual `build` + `package` scripts.
 
-### What the split looks like: Lattice + Thicket
+### The terminology, not a rename
 
-The name was found on a walk through the grove: **Thicket**.
+Both halves are Lattice. Things grow on a lattice — one lattice is static (the library you import), one is live (the deployment serving `*.grove.place`). We don't need a new Grove name. We need clear words:
 
-A thicket is where the forest grows most dense — branches into branches, leaves overlapping, paths that fork and reconnect. Push through the outer edge and you find a world inside. The tenant app IS a thicket: 262 route files, 127 API handlers, 80+ curio endpoints, admin panels and safety systems — all growing into each other, all part of one living whole.
+| | **Lattice** (the library) | **The engine** (the deployment) |
+|---|---|---|
+| Package | `@autumnsgrove/lattice` | `grove-lattice` |
+| Lives at | `libs/engine/src/lib/` | `libs/engine/src/routes/` |
+| Build | `svelte-package` → `dist/` | `vite build` → `.svelte-kit/cloudflare/` |
+| Consumed by | 10+ packages at build time | Every Wanderer at request time |
+| Future home | `libs/lattice/` | `apps/engine/` |
 
-Lattice provides the components. Thicket weaves them dense.
+In conversation:
+- "**Lattice** exports the component" = the library
+- "**The engine** serves the route" = the deployment
+- "**Lattice** provides it, **the engine** renders it"
+
+The split happens in directory structure, not in branding. When the time comes:
 
 ```
-packages/
-├── engine/          ← Lattice (the library — stays, loses routes)
-│   ├── src/lib/     ← All exported modules (539 files)
-│   ├── package.json ← @autumnsgrove/lattice exports only
+libs/
+├── lattice/          ← The library (static lattice)
+│   ├── src/lib/      ← All exported modules (539 files)
+│   ├── package.json  ← @autumnsgrove/lattice, exports only
 │   └── (no routes, no wrangler.toml, no svelte.config.js)
-│
-├── thicket/         ← Thicket (the app — new package, gets routes)
+
+apps/
+├── engine/           ← The deployment (live lattice)
 │   ├── src/
-│   │   ├── routes/  ← All 262 route files
-│   │   └── lib/     ← Internal-only modules (sentinel, DO helpers, types)
+│   │   ├── routes/   ← All 262 route files
+│   │   └── lib/      ← Internal-only modules (sentinel, DO helpers, types)
 │   ├── wrangler.toml ← Worker config (not Pages!)
 │   ├── svelte.config.js
 │   └── package.json  ← imports from @autumnsgrove/lattice
 ```
 
-*Step into the thicket.*
+No new name needed. Both are lattice. One you build with, one you visit.
 
-This split is the prerequisite step before converting the tenant app to a Worker. The library doesn't deploy — it doesn't need conversion. Thicket deploys as a Worker and gains smart placement, cron triggers, secrets store, and full Vista observability.
+This split is the prerequisite step before converting to a Worker. The library doesn't deploy — no conversion needed. The engine converts and gains smart placement, cron triggers, secrets store, and full Vista observability.
 
 ---
 
@@ -465,7 +477,7 @@ This split is the prerequisite step before converting the tenant app to a Worker
 
 ### Recommended trek order
 
-1. **Engine → Thicket split, then Thicket to Worker** — Highest value, most bindings, best observability + latency gains. Split first, convert second.
+1. **Engine split (library + app), then app to Worker** — Highest value, most bindings, best observability + latency gains. Split `libs/engine` into `libs/lattice` + `apps/engine`, then convert the app.
 2. **Landing** — Second-highest value, hosts Vista, absorbs onboarding-emails. Validates the pattern scales.
 3. **Meadow** — Absorbs meadow-poller, gains smart placement.
 4. **Clearing** — Absorbs clearing-monitor, simple conversion.
@@ -484,7 +496,7 @@ This split is the prerequisite step before converting the tenant app to a Worker
 
 5. **The adapter story is converging** — Cloudflare has been merging Pages and Workers. Workers Static Assets (GA since 2024) lets Workers serve static files. SvelteKit's `@sveltejs/adapter-cloudflare` may already support Worker output mode, or the transition to `adapter-cloudflare-workers` is well-documented.
 
-6. **The engine is two things pretending to be one** — A 539-file library (`@autumnsgrove/lattice`) and a 262-route deployment (`grove-lattice`) share one package. The split has a name now: Lattice stays as the library, **Thicket** becomes the tenant app. The framework is invisible. The thicket is what grew.
+6. **The engine is two things pretending to be one** — A 539-file library (`@autumnsgrove/lattice`) and a 262-route deployment (`grove-lattice`) share one directory. Both are lattice — one static, one live. The split is structural (`libs/lattice` + `apps/engine`), not a rename. Same lattice, two contexts.
 
 ---
 

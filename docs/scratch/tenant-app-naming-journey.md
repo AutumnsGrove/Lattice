@@ -1,18 +1,18 @@
-# Naming Journey: The Tenant App Split
+# Naming Journey: The Engine Split
 
-> The engine is two things. The library stays Lattice. What do we call the living,
-> breathing deployment where every Wanderer's grove actually exists?
+> The engine is two things. The library stays Lattice. What do we call
+> the living, breathing deployment where every Wanderer's grove actually exists?
 
 ---
 
 ## What IS This Thing?
 
-The thing we're naming:
+The thing we're distinguishing:
 - The live SvelteKit deployment serving `*.grove.place`
 - 262 route files, 127 API handlers, 80+ curio endpoints
 - Contains Arbor (admin panel), Sentinel (safety), all public pages
 - Where Wanderers write, read, visit, and live
-- Currently fused into `packages/engine`, needs its own identity
+- Currently fused into `libs/engine` alongside the shared library
 
 **What it is, fundamentally:** A place. A living, running, serving place.
 
@@ -21,193 +21,81 @@ visits `autumn.grove.place`, this thing renders the page. When they open Arbor, 
 thing serves the admin panel. When they interact with a curio, this thing handles
 the API call. It's the medium through which every part of the grove becomes real.
 
-**What emotion should it evoke:** Home. Warmth. A living, inhabited space. Not
-infrastructure — that's Lattice's job. This is the LIFE that grows on the infrastructure.
-
 ---
 
-## The Key Relationship
-
-This is the critical insight:
-
-```
-  Lattice          ???
-  ┌──────┐    ┌─────────────┐
-  │trellis│───→│living thing │
-  │frame  │    │that grew on │
-  │work   │    │the frame    │
-  └──────┘    └─────────────┘
-  (library)    (deployment)
-```
-
-The naming doc defines Lattice as:
-
-> "A lattice is the framework that supports growth. Vines climb it.
->  Gardens are built around it. It's not the thing you see, it's the
->  thing that holds everything else up."
-
-So the app is: **the thing you see. The thing that grew on the lattice.**
-
----
-
-## Walking Through...
-
-I enter the grove. The path opens before me.
-
-I walk past the Meadow where others gather.
-I pass the Clearing where the sky is visible and status is known.
-I see Heartwood at the center, the core identity.
-Passage carried me here through the subdomain routing.
-
-Now I arrive at... a blog. Someone's blog. Autumn's grove.
-
-What do I see?
-
-Not the framework — that's invisible, like a trellis behind a wall of green.
-I see the LIVING thing. The rendered page. The garden. The curios.
-The admin panel behind the door. The safety systems watching from the shadows.
-
-I see something DENSE. Something that grew thick and tangled and alive.
-Branches woven into branches. Paths that fork and reconnect.
-127 API handlers. 80+ curio endpoints. Admin panels and auth flows
-and blog routes and RSS feeds — all growing into each other,
-all part of one living whole.
-
-Not manicured. Not sterile. Beautifully complex. Intentionally dense.
-
-I see... a thicket.
-
----
-
-## The Walk: Bower → Rejection → Thicket
+## The Walk
 
 ### Round 1: Bower (Rejected)
 
-Bower had a perfect metaphorical relationship to Lattice — a bower grows on
-a trellis. But the word doesn't *roll* in the grove. Too archaic. Catches in
-the throat. Doesn't have the simple warmth of Meadow, Clearing, Vista.
+First candidate. A bower grows on a lattice — the metaphor was perfect.
+But the word doesn't *roll* in the grove. Too archaic. Catches in the throat.
 
 The Wayfinder's verdict: "Bower is explicitly not allowed. I dislike the name
 greatly and it doesn't roll well for the grove."
 
 Lesson: the metaphor must serve the feeling, not the other way around.
 
-### Round 2: Three Candidates
+### Round 2: Glade, Hollow, Thicket
 
-**Glade** — Open, sunlit, alive. Where light reaches the forest floor.
-Beautiful word. But a glade is an *absence* — an opening, a clearing.
-The app isn't an opening. It's dense. It's full. It's bursting with routes.
+Three candidates offered. The Wayfinder chose **Thicket** — dense, living,
+beautifully tangled. "Step into the thicket." Has energy. Has texture.
 
-**Hollow** — Sheltered, storied, fairy-tale energy.
-But "hollow" means empty. The opposite of what this app is.
+### Round 3: Wait — Both Are Lattice
 
-**Thicket** — Dense, living, beautifully tangled.
-"Step into the thicket." Has energy. Has texture.
-Implies richness, complexity, the vibrant tangle of a real blog
-with curios and routes and admin panels all woven together.
+Then the sharper insight landed:
 
-**The Wayfinder chose Thicket.**
+> "It's not the WORST thing that it's named lattice because things grow on
+> a lattice. The engine is the lattice, and deployment itself is also a
+> lattice. We are getting things off of one lattice and using the other.
+> One is static, one is live."
 
----
+The cost of a full rename (creating `packages/thicket`, updating every
+import, new deploy config, new CI workflows, new docs) would be massive
+for what is essentially a structural separation, not a new identity.
 
-## Why Thicket Fits
-
-A thicket is a dense group of bushes, small trees, and undergrowth growing
-closely together. In nature:
-
-- Thickets are full of LIFE — birds nest in them, animals shelter in them
-- They have texture, depth, complexity
-- They're not manicured — they're beautifully wild, but not random
-- You push through the branches and discover things inside
-- A thicket provides SHELTER through density — not a single wall, but
-  a thousand interwoven branches
-
-The tenant app IS a thicket:
-- 262 route files woven together
-- 127 API handlers branching in every direction
-- 80+ curio endpoints — guestbooks, galleries, badges, timelines
-- Arbor (admin) growing alongside public pages
-- Sentinel (safety) watching from the shadows
-- Auth flows, billing routes, RSS feeds, blog posts — all dense, all alive
-
-The relationship to Lattice:
-- A lattice provides structure. A thicket is what grows when that
-  structure disappears beneath abundant, intertwined life.
-- You can't see the lattice anymore — the thicket has covered it entirely.
-  But it's still there, holding everything up.
-
-```
-     🌿🌸🍃🌿🌸🍃🌿🌸🍃🌿
-    🍃  T H I C K E T  🍃
-   🌿  routes, APIs, curios  🌿
-  🌸   admin, safety, blogs   🌸
- 🍃    all dense and alive     🍃
-  🌿     woven together      🌿
-   🌸      262 routes       🌸
-    🍃     127 handlers    🍃
-     🌿🌸🍃🌿🌸🍃🌿🌸🍃🌿
-  ════╪════╪════╪════╪════╪════
-      │    │    │    │    │
-      │  L A T T I C E   │
-      │  (still there,   │
-      │   beneath it all) │
-  ────┴────┴────┴────┴────┴────
-```
-
-### The Sound Test
-
-"Heartwood, Passage, Meadow, Clearing, Vista, **Thicket**."
-
-It fits. Two syllables. The "th" is soft (like the forest), the "ick" has
-energy (like the life inside), the "et" is crisp (like a twig snapping
-underfoot). It rolls.
-
-"Deploy Thicket." — clean
-"Thicket routes." — clean
-"Thicket API." — clean
-"Lattice provides components. Thicket renders them." — clear distinction
-
-### The Tagline Test
-
-> "Thicket is where the grove grows dense and alive."
-> "Thicket is the living tangle of every grove."
-> "Step into the thicket."
-
-All work. "Step into the thicket" is the best — an invitation, not a description.
+Both halves ARE lattice. The trellis in the shed is lattice. The trellis
+in the garden, covered in vines and life, is also lattice. Same material,
+different context. One you build with, one you visit.
 
 ---
 
-## The Entry
+## The Answer: A Terminology Split, Not a Name
 
-### Thicket
+No new Grove name needed. Just clear words:
 
-**The Living Grove** · `*.grove.place`
-**Internal Name:** GroveThicket
-**Standard:** Application Server
-**Waystone:** The deployment that serves every Grove blog — routes, pages, APIs,
-the admin panel, and safety systems, all woven dense and alive.
+| | **Lattice** (the library) | **The engine** (the deployment) |
+|---|---|---|
+| Package | `@autumnsgrove/lattice` | `grove-lattice` |
+| Lives at | `libs/engine/src/lib/` | `libs/engine/src/routes/` |
+| Build | `svelte-package` → `dist/` | `vite build` → `.svelte-kit/cloudflare/` |
+| Consumed by | 10+ packages at build time | Every Wanderer at request time |
+| Future home | `libs/lattice/` | `apps/engine/` |
 
-A thicket is where the forest grows most dense — branches into branches,
-leaves overlapping, paths that fork and reconnect. Birds nest in it.
-Animals shelter in it. Push through the outer edge and you find a world
-inside: more life per square foot than anywhere else in the forest.
+In conversation:
+- "**Lattice** exports the component" = the library
+- "**The engine** serves the route" = the deployment
+- "**Lattice** provides it, **the engine** renders it"
 
-Thicket is the SvelteKit deployment that renders every `*.grove.place` site.
-262 routes, 127 API handlers, 80+ curio endpoints — guestbooks, galleries,
-timelines, badges — all growing into each other, all part of one living whole.
-When someone visits your grove, Thicket serves the page. When you open Arbor,
-Thicket runs the admin panel. When Sentinel watches for harm, it watches from
-inside the thicket. Lattice provides the components. Thicket weaves them dense.
+When the physical split happens:
+- `libs/lattice/` — the library (static lattice, `@autumnsgrove/lattice`)
+- `apps/engine/` — the deployment (live lattice, `grove-lattice`)
 
-The framework is invisible. The thicket is what grew.
+Both are lattice. One you build with, one you visit.
 
-*Step into the thicket.*
+---
 
-### Conflict Check
+## Names Considered (Archive)
 
-- `thicket` — not used anywhere in the codebase as a service/feature name
-- No tech products called "Thicket" in our space
-- Not in the domain blocklist yet (will need to add `thicket` to reserve it)
-- `packages/thicket` — clean, available
-- `grove-thicket` — clean script name
-- `thicket.grove.place` — available (could host Vineyard page)
+For the record, the names explored during the walk:
+
+| Name | Relationship to Lattice | Why Not |
+|------|------------------------|---------|
+| **Bower** | A bower grows on a lattice/trellis | Too archaic, doesn't roll well |
+| **Glade** | Open clearing where light reaches ground | An absence, not a structure; too similar to Clearing |
+| **Hollow** | Sheltered depression in landscape | "Hollow" means empty |
+| **Thicket** | Dense, living cluster of growth | Good name, but the whole premise was wrong — we don't need a new name |
+| **Stand** | A forestry unit of trees | Too many non-forest meanings |
+
+The walk was valuable. We explored the space thoroughly enough to realize
+the right answer wasn't a name at all — it was clarity about what we
+already have.
