@@ -17,11 +17,11 @@ Activate this skill when:
 
 ## Files Involved
 
-| File                                                                | Purpose                                 |
-| ------------------------------------------------------------------- | --------------------------------------- |
-| `.github/waystone-inventory.json`                                   | Source of truth for waystone placements |
-| `packages/engine/src/lib/ui/components/ui/waystone/Waystone.svelte` | Component source                        |
-| `docs/specs/waystone-spec.md`                                       | Waystone system specification           |
+| File                                                            | Purpose                                 |
+| --------------------------------------------------------------- | --------------------------------------- |
+| `.github/waystone-inventory.json`                               | Source of truth for waystone placements |
+| `libs/engine/src/lib/ui/components/ui/waystone/Waystone.svelte` | Component source                        |
+| `docs/specs/waystone-spec.md`                                   | Waystone system specification           |
 
 ## Inventory Structure
 
@@ -29,29 +29,29 @@ The inventory tracks waystones by slug, with each slug containing its instances:
 
 ```json
 {
-  "waystones": {
-    "total": 15,
-    "breakdown": {
-      "engine": 15,
-      "login": 0,
-      "landing": 0
-    },
-    "bySlugs": 10
-  },
-  "slugs": [
-    {
-      "slug": "what-is-rings",
-      "usageCount": 2,
-      "instances": [
-        {
-          "file": "packages/engine/src/routes/arbor/analytics/+page.svelte",
-          "label": "Learn about Rings",
-          "placement": "page-header",
-          "size": "sm"
-        }
-      ]
-    }
-  ]
+	"waystones": {
+		"total": 15,
+		"breakdown": {
+			"engine": 15,
+			"login": 0,
+			"landing": 0
+		},
+		"bySlugs": 10
+	},
+	"slugs": [
+		{
+			"slug": "what-is-rings",
+			"usageCount": 2,
+			"instances": [
+				{
+					"file": "libs/engine/src/routes/arbor/analytics/+page.svelte",
+					"label": "Learn about Rings",
+					"placement": "page-header",
+					"size": "sm"
+				}
+			]
+		}
+	]
 }
 ```
 
@@ -139,19 +139,19 @@ gw git commit --write -m "docs: update waystone inventory
 
 ```bash
 # Count all waystone instances across all packages
-rg '<Waystone' packages/ --type svelte | wc -l
+rg '<Waystone' apps/ libs/ services/ workers/ --type svelte | wc -l
 
 # List all unique slugs in use
-rg 'slug="([^"]+)"' packages/ --type svelte -o -r '$1' | sort -u
+rg 'slug="([^"]+)"' apps/ libs/ services/ workers/ --type svelte -o -r '$1' | sort -u
 
-# Count instances per package
-for pkg in engine login landing plant meadow; do
-  count=$(rg '<Waystone' "packages/$pkg" --type svelte 2>/dev/null | wc -l | tr -d ' ')
-  echo "$pkg: $count"
+# Count instances per directory
+for dir in apps libs services workers; do
+  count=$(rg '<Waystone' "$dir" --type svelte 2>/dev/null | wc -l | tr -d ' ')
+  echo "$dir: $count"
 done
 
 # Find waystones with specific placement patterns
-rg '<Waystone' packages/ --type svelte -B 2 -A 2
+rg '<Waystone' apps/ libs/ services/ workers/ --type svelte -B 2 -A 2
 ```
 
 ## Adding a New Waystone (Full Checklist)

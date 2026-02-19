@@ -66,22 +66,22 @@ Build the email using Grove components:
 
 ```tsx
 import {
-  GroveEmail,
-  GroveHeading,
-  GroveParagraph,
-  GroveButton,
-  GroveHighlight,
-  GroveDivider,
+	GroveEmail,
+	GroveHeading,
+	GroveParagraph,
+	GroveButton,
+	GroveHighlight,
+	GroveDivider,
 } from "@autumnsgrove/lattice/email/components";
 
 export function MyEmail() {
-  return (
-    <GroveEmail previewText="Your preview text here">
-      <GroveHeading>Your Heading 🌿</GroveHeading>
-      <GroveParagraph>Your content...</GroveParagraph>
-      <GroveButton href="https://grove.place">CTA Text</GroveButton>
-    </GroveEmail>
-  );
+	return (
+		<GroveEmail previewText="Your preview text here">
+			<GroveHeading>Your Heading 🌿</GroveHeading>
+			<GroveParagraph>Your content...</GroveParagraph>
+			<GroveButton href="https://grove.place">CTA Text</GroveButton>
+		</GroveEmail>
+	);
 }
 ```
 
@@ -135,12 +135,12 @@ Options:
 import { sendEmail } from "@autumnsgrove/lattice/email/schedule";
 
 await sendEmail({
-  email: "recipient@example.com",
-  subject: "Your Subject",
-  html,
-  text,
-  resendApiKey: env.RESEND_API_KEY,
-  scheduledAt: "2024-02-01T10:00:00Z", // optional
+	email: "recipient@example.com",
+	subject: "Your Subject",
+	html,
+	text,
+	resendApiKey: env.RESEND_API_KEY,
+	scheduledAt: "2024-02-01T10:00:00Z", // optional
 });
 ```
 
@@ -189,9 +189,9 @@ Emails are rendered as static HTML (not Svelte components), so GroveTerm compone
 
 ```tsx
 <GroveEmail previewText="Big news from the grove...">
-  <GroveHeading>Something New 🌿</GroveHeading>
-  <GroveParagraph>I wanted to share some news with you...</GroveParagraph>
-  <GroveButton href="https://grove.place">Learn more</GroveButton>
+	<GroveHeading>Something New 🌿</GroveHeading>
+	<GroveParagraph>I wanted to share some news with you...</GroveParagraph>
+	<GroveButton href="https://grove.place">Learn more</GroveButton>
 </GroveEmail>
 ```
 
@@ -201,13 +201,13 @@ Emails are rendered as static HTML (not Svelte components), so GroveTerm compone
 import { PatchNotesEmail } from "@autumnsgrove/lattice/email/updates";
 
 <PatchNotesEmail
-  version="v1.2.0"
-  date="February 2024"
-  notes={[
-    { icon: "✨", title: "New Feature", description: "...", tag: "new" },
-    { icon: "🔧", title: "Improvement", description: "...", tag: "improved" },
-    { icon: "🐛", title: "Bug Fix", description: "...", tag: "fixed" },
-  ]}
+	version="v1.2.0"
+	date="February 2024"
+	notes={[
+		{ icon: "✨", title: "New Feature", description: "...", tag: "new" },
+		{ icon: "🔧", title: "Improvement", description: "...", tag: "improved" },
+		{ icon: "🐛", title: "Bug Fix", description: "...", tag: "fixed" },
+	]}
 />;
 ```
 
@@ -215,12 +215,12 @@ import { PatchNotesEmail } from "@autumnsgrove/lattice/email/updates";
 
 ```tsx
 <GroveEmail previewText="A little something for you...">
-  <GroveHeading>A little something for you 🎁</GroveHeading>
-  <GroveParagraph>As a thank you for being here...</GroveParagraph>
-  <GroveHighlight variant="special" icon="🎁">
-    <GroveParagraph>Use code WANDERER for 20% off...</GroveParagraph>
-  </GroveHighlight>
-  <GroveButton href="https://grove.place/pricing">See plans</GroveButton>
+	<GroveHeading>A little something for you 🎁</GroveHeading>
+	<GroveParagraph>As a thank you for being here...</GroveParagraph>
+	<GroveHighlight variant="special" icon="🎁">
+		<GroveParagraph>Use code WANDERER for 20% off...</GroveParagraph>
+	</GroveHighlight>
+	<GroveButton href="https://grove.place/pricing">See plans</GroveButton>
 </GroveEmail>
 ```
 
@@ -228,14 +228,14 @@ import { PatchNotesEmail } from "@autumnsgrove/lattice/email/updates";
 
 ## Files Reference
 
-| File                                        | Purpose             |
-| ------------------------------------------- | ------------------- |
-| `packages/engine/src/lib/email/components/` | Design system       |
-| `packages/engine/src/lib/email/sequences/`  | Automated sequences |
-| `packages/engine/src/lib/email/updates/`    | Patch notes         |
-| `packages/engine/src/lib/email/render.ts`   | Rendering           |
-| `packages/engine/src/lib/email/schedule.ts` | Scheduling          |
-| `scripts/email/broadcast.ts`                | CLI for broadcasts  |
+| File                                    | Purpose             |
+| --------------------------------------- | ------------------- |
+| `libs/engine/src/lib/email/components/` | Design system       |
+| `libs/engine/src/lib/email/sequences/`  | Automated sequences |
+| `libs/engine/src/lib/email/updates/`    | Patch notes         |
+| `libs/engine/src/lib/email/render.ts`   | Rendering           |
+| `libs/engine/src/lib/email/schedule.ts` | Scheduling          |
+| `scripts/email/broadcast.ts`            | CLI for broadcasts  |
 
 ---
 

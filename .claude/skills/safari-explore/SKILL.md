@@ -49,7 +49,7 @@ What are you reviewing? Name every item:
 ```bash
 # Examples — adapt to what you're actually reviewing:
 gf --agent search "curios"           # Find all curio-related files
-ls packages/                          # All packages in the monorepo
+ls apps/ libs/ services/ workers/   # All packages in the monorepo
 gf --agent search "admin page"       # All admin pages
 ```
 

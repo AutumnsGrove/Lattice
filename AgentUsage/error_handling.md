@@ -41,13 +41,13 @@ toast.error(message)     ← User sees warm, actionable feedback
 
 ## Error Catalogs
 
-| Catalog        | Prefix            | Codes | Import Path                        |
-| -------------- | ----------------- | ----- | ---------------------------------- |
-| `API_ERRORS`   | `GROVE-API-XXX`   | 37    | `@autumnsgrove/lattice/errors`     |
-| `ARBOR_ERRORS` | `GROVE-ARBOR-XXX` | 13    | `@autumnsgrove/lattice/errors`     |
-| `SITE_ERRORS`  | `GROVE-SITE-XXX`  | 14    | `@autumnsgrove/lattice/errors`     |
-| `AUTH_ERRORS`  | `HW-AUTH-XXX`     | 16    | `@autumnsgrove/lattice/heartwood`  |
-| `PLANT_ERRORS` | `PLANT-XXX`       | 11    | `packages/plant/src/lib/errors.ts` |
+| Catalog        | Prefix            | Codes | Import Path                       |
+| -------------- | ----------------- | ----- | --------------------------------- |
+| `API_ERRORS`   | `GROVE-API-XXX`   | 37    | `@autumnsgrove/lattice/errors`    |
+| `ARBOR_ERRORS` | `GROVE-ARBOR-XXX` | 13    | `@autumnsgrove/lattice/errors`    |
+| `SITE_ERRORS`  | `GROVE-SITE-XXX`  | 14    | `@autumnsgrove/lattice/errors`    |
+| `AUTH_ERRORS`  | `HW-AUTH-XXX`     | 16    | `@autumnsgrove/lattice/heartwood` |
+| `PLANT_ERRORS` | `PLANT-XXX`       | 11    | `apps/plant/src/lib/errors.ts`    |
 
 **Total: ~91 structured error codes across 5 catalogs.**
 
@@ -57,10 +57,10 @@ Every error code is a `GroveErrorDef`:
 
 ```typescript
 interface GroveErrorDef {
-  code: string; // "GROVE-API-040"
-  category: ErrorCategory; // "user" | "admin" | "bug"
-  userMessage: string; // Safe, warm — shown to users
-  adminMessage: string; // Detailed — for logs only
+	code: string; // "GROVE-API-040"
+	category: ErrorCategory; // "user" | "admin" | "bug"
+	userMessage: string; // Safe, warm — shown to users
+	adminMessage: string; // Detailed — for logs only
 }
 ```
 
@@ -82,21 +82,21 @@ interface GroveErrorDef {
 
 ```typescript
 import {
-  API_ERRORS,
-  ARBOR_ERRORS,
-  SITE_ERRORS,
-  throwGroveError,
-  logGroveError,
-  buildErrorJson,
-  buildErrorUrl,
+	API_ERRORS,
+	ARBOR_ERRORS,
+	SITE_ERRORS,
+	throwGroveError,
+	logGroveError,
+	buildErrorJson,
+	buildErrorUrl,
 } from "@autumnsgrove/lattice/errors";
 
 // For auth errors:
 import {
-  AUTH_ERRORS,
-  getAuthError,
-  logAuthError,
-  buildErrorParams,
+	AUTH_ERRORS,
+	getAuthError,
+	logAuthError,
+	buildErrorParams,
 } from "@autumnsgrove/lattice/heartwood";
 ```
 
@@ -104,19 +104,19 @@ import {
 
 ```typescript
 export const POST: RequestHandler = async ({ request, locals, platform }) => {
-  if (!locals.user) {
-    logGroveError("Engine", API_ERRORS.UNAUTHORIZED, { path: "/api/posts" });
-    return json(buildErrorJson(API_ERRORS.UNAUTHORIZED), { status: 401 });
-  }
+	if (!locals.user) {
+		logGroveError("Engine", API_ERRORS.UNAUTHORIZED, { path: "/api/posts" });
+		return json(buildErrorJson(API_ERRORS.UNAUTHORIZED), { status: 401 });
+	}
 
-  const body = schema.safeParse(await request.json());
-  if (!body.success) {
-    return json(buildErrorJson(API_ERRORS.INVALID_REQUEST_BODY), {
-      status: 400,
-    });
-  }
+	const body = schema.safeParse(await request.json());
+	if (!body.success) {
+		return json(buildErrorJson(API_ERRORS.INVALID_REQUEST_BODY), {
+			status: 400,
+		});
+	}
 
-  // ... business logic
+	// ... business logic
 };
 ```
 
@@ -124,11 +124,11 @@ export const POST: RequestHandler = async ({ request, locals, platform }) => {
 
 ```typescript
 export const load: PageServerLoad = async ({ params, locals }) => {
-  const post = await getPost(params.slug);
-  if (!post) {
-    throwGroveError(404, SITE_ERRORS.POST_NOT_FOUND, "Engine");
-  }
-  return { post };
+	const post = await getPost(params.slug);
+	if (!post) {
+		throwGroveError(404, SITE_ERRORS.POST_NOT_FOUND, "Engine");
+	}
+	return { post };
 };
 ```
 
@@ -136,9 +136,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 ```typescript
 if (errorParam) {
-  const authError = getAuthError(errorParam);
-  logAuthError(authError, { path: "/auth/callback", ip });
-  redirect(302, buildErrorUrl(authError, "/login"));
+	const authError = getAuthError(errorParam);
+	logAuthError(authError, { path: "/auth/callback", ip });
+	redirect(302, buildErrorUrl(authError, "/login"));
 }
 ```
 
@@ -173,7 +173,7 @@ import { toast } from "@autumnsgrove/lattice/ui";
 ```typescript
 const response = await apiRequest("/api/posts", { method: "POST", body });
 if (response.ok) {
-  toast.success("Post published!");
+	toast.success("Post published!");
 }
 ```
 
@@ -181,10 +181,10 @@ if (response.ok) {
 
 ```typescript
 try {
-  await apiRequest("/api/posts", { method: "DELETE" });
-  toast.success("Post deleted");
+	await apiRequest("/api/posts", { method: "DELETE" });
+	toast.success("Post deleted");
 } catch (err) {
-  toast.error(err instanceof Error ? err.message : "Something went wrong");
+	toast.error(err instanceof Error ? err.message : "Something went wrong");
 }
 ```
 
@@ -192,9 +192,9 @@ try {
 
 ```typescript
 toast.promise(apiRequest("/api/export", { method: "POST" }), {
-  loading: "Exporting your data...",
-  success: "Export complete!",
-  error: "Export failed. Please try again.",
+	loading: "Exporting your data...",
+	success: "Export complete!",
+	error: "Export failed. Please try again.",
 });
 ```
 
@@ -203,12 +203,12 @@ toast.promise(apiRequest("/api/export", { method: "POST" }), {
 ```typescript
 const id = toast.loading("Saving changes...");
 try {
-  await apiRequest("/api/settings", { method: "PUT", body });
-  toast.dismiss(id);
-  toast.success("Settings saved!");
+	await apiRequest("/api/settings", { method: "PUT", body });
+	toast.dismiss(id);
+	toast.success("Settings saved!");
 } catch (err) {
-  toast.dismiss(id);
-  toast.error("Failed to save settings");
+	toast.dismiss(id);
+	toast.error("Failed to save settings");
 }
 ```
 
@@ -293,10 +293,10 @@ MEDIA_UPLOAD_FAILED: {
 
 ## Related Resources
 
-- **Error system source:** `packages/engine/src/lib/errors/`
-- **Auth errors source:** `packages/engine/src/lib/heartwood/errors.ts`
-- **Plant errors source:** `packages/plant/src/lib/errors.ts`
-- **Toast source:** `packages/engine/src/lib/ui/components/ui/toast.ts`
+- **Error system source:** `libs/engine/src/lib/errors/`
+- **Auth errors source:** `libs/engine/src/lib/heartwood/errors.ts`
+- **Plant errors source:** `apps/plant/src/lib/errors.ts`
+- **Toast source:** `libs/engine/src/lib/ui/components/ui/toast.ts`
 - **Signpost developer docs:** `docs/developer/signpost-error-codes.md`
 - **API utility (`apiRequest`):** Each package's `$lib/utils/api.ts`
 

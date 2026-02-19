@@ -38,17 +38,17 @@ pnpm build             # Build for production
 
 ```svelte
 <script>
-  let count = $state(0);
-  let user = $state({ name: 'Alice', age: 30 });
-  let items = $state(['apple', 'banana']);
+	let count = $state(0);
+	let user = $state({ name: "Alice", age: 30 });
+	let items = $state(["apple", "banana"]);
 </script>
 
 <button onclick={() => count++}>
-  Clicked {count} times
+	Clicked {count} times
 </button>
 
 <button onclick={() => user.age++}>
-  {user.name} is {user.age}
+	{user.name} is {user.age}
 </button>
 ```
 
@@ -58,15 +58,15 @@ pnpm build             # Build for production
 
 ```svelte
 <script>
-  let count = $state(0);
-  let doubled = $derived(count * 2);
+	let count = $state(0);
+	let doubled = $derived(count * 2);
 
-  // For complex computations
-  let summary = $derived.by(() => {
-    const total = items.length;
-    const done = items.filter(i => i.done).length;
-    return `${done}/${total}`;
-  });
+	// For complex computations
+	let summary = $derived.by(() => {
+		const total = items.length;
+		const done = items.filter((i) => i.done).length;
+		return `${done}/${total}`;
+	});
 </script>
 ```
 
@@ -74,17 +74,17 @@ pnpm build             # Build for production
 
 ```svelte
 <script>
-  let count = $state(0);
+	let count = $state(0);
 
-  $effect(() => {
-    console.log(`Count is ${count}`);
-    document.title = `Count: ${count}`;
+	$effect(() => {
+		console.log(`Count is ${count}`);
+		document.title = `Count: ${count}`;
 
-    // Cleanup function
-    return () => {
-      console.log('Cleanup');
-    };
-  });
+		// Cleanup function
+		return () => {
+			console.log("Cleanup");
+		};
+	});
 </script>
 ```
 
@@ -93,7 +93,7 @@ pnpm build             # Build for production
 ```svelte
 <!-- Button.svelte -->
 <script>
-  let { label, disabled = false, onclick } = $props();
+	let { label, disabled = false, onclick } = $props();
 </script>
 
 <button {disabled} {onclick}>{label}</button>
@@ -103,13 +103,13 @@ pnpm build             # Build for production
 
 ```svelte
 <script lang="ts">
-  interface Props {
-    label: string;
-    disabled?: boolean;
-    onclick?: () => void;
-  }
+	interface Props {
+		label: string;
+		disabled?: boolean;
+		onclick?: () => void;
+	}
 
-  let { label, disabled = false, onclick }: Props = $props();
+	let { label, disabled = false, onclick }: Props = $props();
 </script>
 ```
 
@@ -128,21 +128,21 @@ pnpm build             # Build for production
 ```javascript
 // src/routes/posts/+page.server.js
 export async function load({ fetch }) {
-  const response = await fetch("/api/posts");
-  return { posts: await response.json() };
+	const response = await fetch("/api/posts");
+	return { posts: await response.json() };
 }
 ```
 
 ```svelte
 <!-- src/routes/posts/+page.svelte -->
 <script>
-  let { data } = $props();
+	let { data } = $props();
 </script>
 
 {#each data.posts as post}
-  <article>
-    <h2>{post.title}</h2>
-  </article>
+	<article>
+		<h2>{post.title}</h2>
+	</article>
 {/each}
 ```
 
@@ -153,33 +153,33 @@ export async function load({ fetch }) {
 import { fail, redirect } from "@sveltejs/kit";
 
 export const actions = {
-  default: async ({ request, cookies }) => {
-    const data = await request.formData();
-    const email = data.get("email");
+	default: async ({ request, cookies }) => {
+		const data = await request.formData();
+		const email = data.get("email");
 
-    if (!email) {
-      return fail(400, { missing: true });
-    }
+		if (!email) {
+			return fail(400, { missing: true });
+		}
 
-    cookies.set("session", token, { path: "/" });
-    throw redirect(303, "/dashboard");
-  },
+		cookies.set("session", token, { path: "/" });
+		throw redirect(303, "/dashboard");
+	},
 };
 ```
 
 ```svelte
 <!-- +page.svelte -->
 <script>
-  import { enhance } from '$app/forms';
-  let { form } = $props();
+	import { enhance } from "$app/forms";
+	let { form } = $props();
 </script>
 
 <form method="POST" use:enhance>
-  <input name="email" value={form?.email ?? ''} />
-  {#if form?.missing}
-    <p class="error">Email required</p>
-  {/if}
-  <button>Submit</button>
+	<input name="email" value={form?.email ?? ""} />
+	{#if form?.missing}
+		<p class="error">Email required</p>
+	{/if}
+	<button>Submit</button>
 </form>
 ```
 
@@ -190,14 +190,14 @@ export const actions = {
 import { json } from "@sveltejs/kit";
 
 export async function GET({ url }) {
-  const posts = await getPosts();
-  return json(posts);
+	const posts = await getPosts();
+	return json(posts);
 }
 
 export async function POST({ request }) {
-  const data = await request.json();
-  const post = await createPost(data);
-  return json(post, { status: 201 });
+	const data = await request.json();
+	const post = await createPost(data);
+	return json(post, { status: 201 });
 }
 ```
 
@@ -249,9 +249,9 @@ toast.error(err instanceof Error ? err.message : "Something went wrong");
 
 // Async operations
 toast.promise(apiRequest("/api/export", { method: "POST" }), {
-  loading: "Exporting...",
-  success: "Done!",
-  error: "Export failed.",
+	loading: "Exporting...",
+	success: "Done!",
+	error: "Export failed.",
 });
 
 // Multi-step flows
@@ -267,10 +267,10 @@ toast.success("Saved!");
 
 ```typescript
 import {
-  API_ERRORS,
-  buildErrorJson,
-  throwGroveError,
-  logGroveError,
+	API_ERRORS,
+	buildErrorJson,
+	throwGroveError,
+	logGroveError,
 } from "@autumnsgrove/lattice/errors";
 
 // API route: return structured error
@@ -303,8 +303,8 @@ When building Grove UI that includes nature-themed terminology, always use the G
 
 ```svelte
 <script lang="ts">
-  import { GroveTerm, GroveSwap, GroveText } from '@autumnsgrove/lattice/ui';
-  import groveTermManifest from '$lib/data/grove-term-manifest.json';
+	import { GroveTerm, GroveSwap, GroveText } from "@autumnsgrove/lattice/ui";
+	import groveTermManifest from "$lib/data/grove-term-manifest.json";
 </script>
 
 <!-- Interactive term with popup definition -->
@@ -314,10 +314,13 @@ When building Grove UI that includes nature-themed terminology, always use the G
 <GroveSwap term="arbor" manifest={groveTermManifest} />
 
 <!-- Parse [[term]] syntax in data strings -->
-<GroveText content="Your [[bloom|posts]] live in your [[garden|blog]]." manifest={groveTermManifest} />
+<GroveText
+	content="Your [[bloom|posts]] live in your [[garden|blog]]."
+	manifest={groveTermManifest}
+/>
 ```
 
-See `packages/engine/src/lib/ui/components/ui/groveterm/` for component source and `chameleon-adapt` skill for full UI design guidance.
+See `libs/engine/src/lib/ui/components/ui/groveterm/` for component source and `chameleon-adapt` skill for full UI design guidance.
 
 ## Related Resources
 

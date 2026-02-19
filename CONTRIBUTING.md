@@ -83,7 +83,7 @@ cd Lattice
 pnpm install
 
 # Start the engine dev server
-cd packages/engine
+cd libs/engine
 pnpm dev
 
 # Or with Cloudflare bindings (D1, R2, KV)

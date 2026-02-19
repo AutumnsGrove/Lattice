@@ -94,9 +94,9 @@ if [ -f "package.json" ]; then
     # Generate types for engine package first (required by other packages)
     # The engine exports types from ./dist/ which is gitignored
     echo -e "${YELLOW}🔧 Generating engine package types...${NC}"
-    if [ -d "packages/engine" ] && [ -f "packages/engine/package.json" ]; then
+    if [ -d "libs/engine" ] && [ -f "libs/engine/package.json" ]; then
         (
-            cd "packages/engine"
+            cd "libs/engine"
             $PKG_MANAGER run build:package > /dev/null 2>&1
         )
         echo -e "   ${GREEN}✓ Types generated${NC}"
@@ -106,13 +106,14 @@ if [ -f "package.json" ]; then
     # Core packages to type check (most critical, frequently changed)
     # Other packages (domains, vineyard, og-worker, durable-objects, post-migrator)
     # are checked in CI — they're more stable and rarely break in isolation
-    PACKAGES=(
-        "engine"          # Core library - everything depends on this
-        "landing"         # Public site - frequently updated
-        "meadow"          # User app - active development
-        "plant"           # Blog rendering
-        "clearing"        # Admin dashboard
-        "terrarium"       # Tenant management
+    # Map package names to their directories in the new monorepo structure
+    declare -A PKG_DIRS=(
+        ["engine"]="libs/engine"
+        ["landing"]="apps/landing"
+        ["meadow"]="apps/meadow"
+        ["plant"]="apps/plant"
+        ["clearing"]="apps/clearing"
+        ["terrarium"]="apps/terrarium"
     )
 
     # Create temp directory for output files
@@ -122,15 +123,16 @@ if [ -f "package.json" ]; then
     # Cleanup on exit
     trap "rm -rf '$PREPUSH_TMP'" EXIT
 
-    echo -e "${YELLOW}🔍 Type checking ${#PACKAGES[@]} packages (sequential)...${NC}"
+    echo -e "${YELLOW}🔍 Type checking ${#PKG_DIRS[@]} packages (sequential)...${NC}"
 
     # Run type checks sequentially
-    for pkg in "${PACKAGES[@]}"; do
-        if [ -d "packages/$pkg" ] && [ -f "packages/$pkg/package.json" ]; then
+    for pkg in "${!PKG_DIRS[@]}"; do
+        pkg_dir="${PKG_DIRS[$pkg]}"
+        if [ -d "$pkg_dir" ] && [ -f "$pkg_dir/package.json" ]; then
             # Check if package has a 'check' script
-            if grep -q '"check"' "packages/$pkg/package.json" 2>/dev/null; then
+            if grep -q '"check"' "$pkg_dir/package.json" 2>/dev/null; then
                 (
-                    cd "packages/$pkg"
+                    cd "$pkg_dir"
                     $PKG_MANAGER check > "$PREPUSH_TMP/${pkg}.out" 2>&1
                     echo $? > "$PREPUSH_TMP/${pkg}.exit"
                 )
@@ -140,7 +142,7 @@ if [ -f "package.json" ]; then
 
     # Collect results and report status
     declare -a failed_packages
-    for pkg in "${PACKAGES[@]}"; do
+    for pkg in "${!PKG_DIRS[@]}"; do
         if [ -f "$PREPUSH_TMP/${pkg}.exit" ]; then
             result=$(cat "$PREPUSH_TMP/${pkg}.exit")
             printf "   → %-15s " "$pkg:"

@@ -1,6 +1,6 @@
 # Monorepo Restructure Plan
 
-> **Status:** Planning
+> **Status:** Phase 1 complete (ae296505), Phase 1.5 in progress — documentation updates
 > **Created:** 2026-02-17
 > **Scope:** Reorganize GroveEngine from flat `packages/` into categorized directories; import Forage, Shutter, Foliage, and Gossamer.
 
@@ -409,6 +409,8 @@ These don't need to happen during the migration, but become possible afterward:
 
 ### Phase 0: Preparatory Tooling Updates
 
+> **Completed** (bbfd215c, 36be1740) — gw and gf updated to support both layouts.
+
 > **Goal:** Make gw and gf work with _both_ old and new directory layouts. This lands as its own commit _before_ any packages move, so it's a safe no-op if we need to abort Phase 1.
 
 **Step 0.1 — Update `gw` tool to scan both old and new directories:**
@@ -451,6 +453,8 @@ This commit is safe to land independently. If Phase 1 gets delayed or aborted, g
 ---
 
 ### Phase 1: Create Structure & Move Existing Packages
+
+> **Completed** (ae296505) — All 20 packages moved, workspace configs updated, CI workflows updated.
 
 > **Goal:** Reorganize without breaking anything. No new code. Tooling already updated in Phase 0.
 

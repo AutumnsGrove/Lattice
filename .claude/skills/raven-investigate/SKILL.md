@@ -84,7 +84,7 @@ Look for these markers to identify the stack. Check ALL that apply:
 find . -maxdepth 3 -type d -not -path '*/node_modules/*' -not -path '*/.git/*' -not -path '*/vendor/*' -not -path '*/venv/*' | head -80
 
 # Is it a monorepo?
-ls packages/ apps/ services/ 2>/dev/null
+ls apps/ services/ workers/ libs/ 2>/dev/null
 ```
 
 Identify:
