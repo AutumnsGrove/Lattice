@@ -80,8 +80,13 @@ export const load: PageServerLoad = async ({ params }) => {
     }
   }
 
+  // Strip raw markdown content from the client payload — it's only needed for
+  // server-side rendering. The page component uses doc.html and doc.headers.
+  // For code-heavy specs like lattice-spec this saves ~47 KB of transfer.
+  const { content: _rawMarkdown, ...docForClient } = doc;
+
   return {
-    doc,
+    doc: docForClient,
     relatedArticles,
     groveTermEntry,
   };

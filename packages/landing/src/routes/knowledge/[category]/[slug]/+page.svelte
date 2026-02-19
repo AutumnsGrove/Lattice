@@ -44,34 +44,23 @@
 							: "Legal & Policies"),
 	);
 
-	/**
-	 * Decode HTML entities safely without innerHTML
-	 * Handles common entities: &amp; &lt; &gt; &quot; &#39;
-	 */
-	function decodeHtmlEntities(text: string): string {
-		return text
-			.replace(/&amp;/g, "&")
-			.replace(/&lt;/g, "<")
-			.replace(/&gt;/g, ">")
-			.replace(/&quot;/g, '"')
-			.replace(/&#39;/g, "'");
-	}
-
 	// Setup copy button functionality for code blocks
 	$effect(() => {
 		if (!browser) return;
 
 		const handleCopyClick = async (event: Event) => {
 			const button = event.currentTarget as HTMLElement;
-			const codeText = button.getAttribute("data-code");
+			// Read code from the sibling <pre><code> element's textContent
+			// This is simpler and more reliable than storing content in data-code attributes,
+			// which duplicated every code block's content in the HTML and inflated page size
+			const wrapper = button.closest(".code-block-wrapper");
+			const codeElement = wrapper?.querySelector("pre code");
+			const codeText = codeElement?.textContent;
 
 			if (!codeText) return;
 
 			try {
-				// Decode HTML entities back to original text safely
-				const decodedText = decodeHtmlEntities(codeText);
-
-				await navigator.clipboard.writeText(decodedText);
+				await navigator.clipboard.writeText(codeText);
 
 				// Update button text and style to show success
 				const copyText = button.querySelector(".copy-text");

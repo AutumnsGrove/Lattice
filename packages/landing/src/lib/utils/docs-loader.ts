@@ -50,6 +50,9 @@ md.renderer.rules.heading_open = function (tokens, idx, options, _env, self) {
 };
 
 // Code block renderer - wraps code blocks with GitHub-style header and copy button
+// Note: Copy button reads code from the <code> element's textContent at click time,
+// avoiding the need to duplicate content in a data-code attribute (which inflated
+// page size significantly for code-heavy specs like lattice-spec).
 md.renderer.rules.fence = function (tokens, idx) {
   const token = tokens[idx];
   const code = token.content;
@@ -59,7 +62,7 @@ md.renderer.rules.fence = function (tokens, idx) {
   return `<div class="code-block-wrapper">
   <div class="code-block-header">
     <span class="code-block-language">${lang}</span>
-    <button class="code-block-copy" aria-label="Copy code to clipboard" data-code="${escapedCode}">
+    <button class="code-block-copy" aria-label="Copy code to clipboard">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M5.75 4.75H10.25V1.75H5.75V4.75ZM5.75 4.75H2.75V14.25H10.25V11.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         <rect x="5.75" y="4.75" width="7.5" height="9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
