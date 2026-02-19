@@ -1,4 +1,6 @@
 packages:
-  - 'packages/*'
-  - 'packages/workers/*'
-  - 'workers/*'
+  - "apps/*"
+  - "services/*"
+  - "workers/*"
+  - "libs/*"
+  - "libs/shutter/cloudflare"

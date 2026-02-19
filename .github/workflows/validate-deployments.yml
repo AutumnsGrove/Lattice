@@ -8,19 +8,19 @@ on:
     branches: [main]
     paths:
       # Workers
-      - "packages/grove-router/**"
-      - "packages/durable-objects/**"
-      - "packages/post-migrator/**"
-      - "packages/heartwood/**"
-      - "packages/workers/**"
+      - "services/grove-router/**"
+      - "services/durable-objects/**"
+      - "workers/post-migrator/**"
+      - "services/heartwood/**"
+      - "workers/**"
       # Pages
-      - "packages/engine/**"
-      - "packages/landing/**"
-      - "packages/clearing/**"
-      - "packages/domains/**"
-      - "packages/plant/**"
-      - "packages/terrarium/**"
-      - "packages/meadow/**"
+      - "libs/engine/**"
+      - "apps/landing/**"
+      - "apps/clearing/**"
+      - "apps/domains/**"
+      - "apps/plant/**"
+      - "apps/terrarium/**"
+      - "apps/meadow/**"
       # Root config changes affect all
       - "package.json"
       - "pnpm-lock.yaml"
@@ -41,22 +41,22 @@ jobs:
       matrix:
         include:
           - name: grove-router
-            path: packages/grove-router
+            path: services/grove-router
             needs-engine: false
           - name: durable-objects
-            path: packages/durable-objects
+            path: services/durable-objects
             needs-engine: true
           - name: post-migrator
-            path: packages/post-migrator
+            path: workers/post-migrator
             needs-engine: false
           - name: heartwood
-            path: packages/heartwood
+            path: services/heartwood
             needs-engine: false
           - name: clearing-monitor
-            path: packages/workers/clearing-monitor
+            path: workers/clearing-monitor
             needs-engine: false
           - name: webhook-cleanup
-            path: packages/workers/webhook-cleanup
+            path: workers/webhook-cleanup
             needs-engine: false
 
     steps:
@@ -79,7 +79,7 @@ jobs:
       - name: Build engine package (dependency)
         if: matrix.needs-engine
         run: pnpm run package
-        working-directory: packages/engine
+        working-directory: libs/engine
 
       - name: Type check
         run: pnpm exec tsc --noEmit
@@ -108,31 +108,31 @@ jobs:
       matrix:
         include:
           - name: engine
-            path: packages/engine
+            path: libs/engine
             project: grove-lattice
             needs-engine: false
           - name: landing
-            path: packages/landing
+            path: apps/landing
             project: grove-landing
             needs-engine: true
           - name: clearing
-            path: packages/clearing
+            path: apps/clearing
             project: grove-clearing
             needs-engine: true
           - name: domains
-            path: packages/domains
+            path: apps/domains
             project: forage
             needs-engine: true
           - name: plant
-            path: packages/plant
+            path: apps/plant
             project: grove-plant
             needs-engine: true
           - name: terrarium
-            path: packages/terrarium
+            path: apps/terrarium
             project: grove-terrarium
             needs-engine: true
           - name: meadow
-            path: packages/meadow
+            path: apps/meadow
             project: grove-meadow
             needs-engine: true
 
@@ -156,7 +156,7 @@ jobs:
       - name: Build engine package (dependency)
         if: matrix.needs-engine
         run: pnpm run package
-        working-directory: packages/engine
+        working-directory: libs/engine
 
       - name: Build ${{ matrix.name }}
         run: pnpm run build

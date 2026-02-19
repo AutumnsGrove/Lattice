@@ -214,7 +214,13 @@ def _fmt_all(output_json: bool, check_only: bool, verbose: bool, dry_run: bool =
         else:
             cmd.append("--write")
         cmd.extend([
+            # Old layout
             "packages/*/src/**/*.{ts,js,svelte,css}",
+            # New categorized layout
+            "apps/*/src/**/*.{ts,js,svelte,css}",
+            "services/*/src/**/*.{ts,js,svelte,css}",
+            "workers/*/src/**/*.{ts,js,svelte,css}",
+            "libs/*/src/**/*.{ts,js,svelte,css}",
             "**/*.json",
             "--ignore-path", ".gitignore",
         ])

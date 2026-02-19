@@ -49,12 +49,12 @@ Grove uses conventional commits enforced by `gw`:
 
 Changes should be categorized by package:
 
-- `packages/engine/` — Core framework changes (highest impact — affects all consumers)
-- `packages/landing/` — Marketing site
-- `packages/meadow/` — Community feed
-- `packages/plant/` — Subscription/billing
-- `packages/heartwood/` — Auth backend
-- Other packages: `clearing`, `terrarium`, `login`, `workers`
+- `libs/engine/` — Core framework changes (highest impact — affects all consumers)
+- `apps/landing/` — Marketing site
+- `apps/meadow/` — Community feed
+- `apps/plant/` — Subscription/billing
+- `services/heartwood/` — Auth backend
+- Other packages: `apps/clearing`, `apps/terrarium`, `apps/login`, `workers`
 
 # Output Format
 
@@ -67,11 +67,11 @@ Branch: [current] → [target]
 
 ### Changes by Package
 
-**packages/engine/ (HIGH IMPACT)**
+**libs/engine/ (HIGH IMPACT)**
 - `src/lib/ui/GlassCard.svelte:42-78` — Added hover animation prop
 - `src/lib/utils/cn.ts:12` — New variant helper
 
-**packages/landing/**
+**apps/landing/**
 - `src/routes/+page.svelte:15-30` — Updated hero section
 
 ### Impact Categories

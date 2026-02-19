@@ -24,38 +24,38 @@ Everything in Grove has a name. These are the pieces that make up the forest.
 
 ### Apps
 
-| Name                            | Path                                             | What it is                                  |
-| ------------------------------- | ------------------------------------------------ | ------------------------------------------- |
-| [Landing](packages/landing)     | [grove.place](https://grove.place)               | The home page, the heart of Grove           |
-| [Plant](packages/plant)         | plant.grove.place                                | Where new Wanderers plant their grove       |
-| [Meadow](packages/meadow)       | meadow.grove.place                               | Community feed, chronological, no algorithm |
-| [Forage](packages/domains)      | forage.grove.place                               | AI-powered domain discovery                 |
-| [Clearing](packages/clearing)   | [status.grove.place](https://status.grove.place) | Status page for the whole forest            |
-| [Terrarium](packages/terrarium) | terrarium.grove.place                            | Admin and testing sandbox                   |
-| [Login](packages/login)         | login.grove.place                                | Unified auth hub                            |
+| Name                        | Path                                             | What it is                                  |
+| --------------------------- | ------------------------------------------------ | ------------------------------------------- |
+| [Landing](apps/landing)     | [grove.place](https://grove.place)               | The home page, the heart of Grove           |
+| [Plant](apps/plant)         | plant.grove.place                                | Where new Wanderers plant their grove       |
+| [Meadow](apps/meadow)       | meadow.grove.place                               | Community feed, chronological, no algorithm |
+| [Forage](apps/domains)      | forage.grove.place                               | AI-powered domain discovery                 |
+| [Clearing](apps/clearing)   | [status.grove.place](https://status.grove.place) | Status page for the whole forest            |
+| [Terrarium](apps/terrarium) | terrarium.grove.place                            | Admin and testing sandbox                   |
+| [Login](apps/login)         | login.grove.place                                | Unified auth hub                            |
 
 ### Services
 
 | Name                             | Path               | What it is                                      |
 | -------------------------------- | ------------------ | ----------------------------------------------- |
-| [Heartwood](packages/heartwood)  | Auth provider      | Google OAuth 2.0 + PKCE, session management     |
-| [Passage](packages/grove-router) | Subdomain routing  | Routes `*.grove.place` to the right app         |
-| [Loom](packages/durable-objects) | Coordination layer | Durable Objects for caching and real-time state |
+| [Heartwood](services/heartwood)  | Auth provider      | Google OAuth 2.0 + PKCE, session management     |
+| [Passage](services/grove-router) | Subdomain routing  | Routes `*.grove.place` to the right app         |
+| [Loom](services/durable-objects) | Coordination layer | Durable Objects for caching and real-time state |
 
 ### Workers
 
-| Name                                    | Path                                     | What it is                                        |
-| --------------------------------------- | ---------------------------------------- | ------------------------------------------------- |
-| [OG Worker](packages/og-worker)         | [og.grove.place](https://og.grove.place) | Dynamic social preview images                     |
-| [Post Migrator](packages/post-migrator) | Background cron                          | Hot/warm/cold storage tiering                     |
-| [Scheduled Workers](packages/workers)   | Background crons                         | Health monitoring, timeline sync, webhook cleanup |
+| Name                                   | Path                                     | What it is                                        |
+| -------------------------------------- | ---------------------------------------- | ------------------------------------------------- |
+| [OG Worker](workers/og-worker)         | [og.grove.place](https://og.grove.place) | Dynamic social preview images                     |
+| [Post Migrator](workers/post-migrator) | Background cron                          | Hot/warm/cold storage tiering                     |
+| [Scheduled Workers](workers)           | Background crons                         | Health monitoring, timeline sync, webhook cleanup |
 
 ### Libraries
 
-| Name                          | Path                     | What it is                                                  |
-| ----------------------------- | ------------------------ | ----------------------------------------------------------- |
-| [Lattice](packages/engine)    | `@autumnsgrove/lattice`  | The core framework. The thing that holds everything else up |
-| [Vineyard](packages/vineyard) | `@autumnsgrove/vineyard` | Component showcase for every Grove property                 |
+| Name                      | Path                     | What it is                                                  |
+| ------------------------- | ------------------------ | ----------------------------------------------------------- |
+| [Lattice](libs/engine)    | `@autumnsgrove/lattice`  | The core framework. The thing that holds everything else up |
+| [Vineyard](libs/vineyard) | `@autumnsgrove/vineyard` | Component showcase for every Grove property                 |
 
 ---
 

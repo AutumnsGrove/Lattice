@@ -35,7 +35,7 @@ npm config set //registry.npmjs.org/:_authToken=npm_YOUR_TOKEN_HERE
 
 ## Publishing
 
-From `packages/engine`:
+From `libs/engine`:
 
 ```bash
 pnpm run package && npm publish --access public

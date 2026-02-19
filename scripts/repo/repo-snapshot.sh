@@ -174,7 +174,7 @@ echo -e " ${GREEN}✓${NC}"
 echo -n "  Measuring bundle size..."
 # Try to get bundle size from existing dist folder
 BUNDLE_SIZE_KB=0
-ENGINE_DIST="packages/engine/dist"
+ENGINE_DIST="libs/engine/dist"
 if [ -d "$ENGINE_DIST" ]; then
     BUNDLE_SIZE_KB=$(du -sk "$ENGINE_DIST" 2>/dev/null | cut -f1 || echo 0)
 fi

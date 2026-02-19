@@ -1,0 +1,91 @@
+# Wrangler Commands for Grove Domain Tool Worker
+#
+# Run these commands from the worker/ directory
+# Make sure you're logged in first: wrangler login
+
+# ============================================
+# INITIAL SETUP
+# ============================================
+
+# Install dependencies
+npm install
+
+# Generate TypeScript types (optional)
+npx wrangler types
+
+# ============================================
+# SET SECRETS (run before first deployment)
+# ============================================
+
+# Required: Anthropic API key for Claude
+npx wrangler secret put ANTHROPIC_API_KEY
+
+# Optional: Resend API key for emails
+npx wrangler secret put RESEND_API_KEY
+
+# Optional: Kimi API key for parallel AI provider
+npx wrangler secret put KIMI_API_KEY
+
+# ============================================
+# LOCAL DEVELOPMENT
+# ============================================
+
+# Start local development server (http://localhost:8787)
+npx wrangler dev
+
+# ============================================
+# DEPLOY TO DEVELOPMENT
+# ============================================
+
+npx wrangler deploy --env dev
+
+# ============================================
+# DEPLOY TO PRODUCTION
+# ============================================
+
+npx wrangler deploy
+
+# ============================================
+# MONITORING
+# ============================================
+
+# View live logs (production)
+npx wrangler tail
+
+# View live logs (development)
+npx wrangler tail --env dev
+
+# ============================================
+# ROLLBACK (if something goes wrong)
+# ============================================
+
+# List deployments
+npx wrangler deployments list
+
+# Rollback to previous deployment
+npx wrangler rollback
+
+# ============================================
+# TESTING THE DEPLOYED WORKER
+# ============================================
+
+# Health check (replace YOUR_SUBDOMAIN with your actual subdomain)
+curl https://grove-domain-tool-dev.YOUR_SUBDOMAIN.workers.dev/health
+
+# Start a search
+curl -X POST https://grove-domain-tool-dev.YOUR_SUBDOMAIN.workers.dev/api/search \
+  -H "Content-Type: application/json" \
+  -d '{
+    "client_id": "test-client",
+    "quiz_responses": {
+      "business_name": "Test Business",
+      "tld_preferences": ["com", "io"],
+      "vibe": "professional"
+    }
+  }'
+
+# Check status (replace JOB_ID with actual job ID)
+curl https://grove-domain-tool-dev.YOUR_SUBDOMAIN.workers.dev/api/status?job_id=JOB_ID
+
+# Get results
+curl https://grove-domain-tool-dev.YOUR_SUBDOMAIN.workers.dev/api/results?job_id=JOB_ID

@@ -1,0 +1,51 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+package-lock.json
+
+# Build outputs
+.svelte-kit/
+build/
+dist/
+
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+secrets.json
+.dev.vars
+
+# Cloudflare
+.wrangler/
+.mf/
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Cache
+__pycache__/
+.cache/
+
+# Claude Code
+.claude/
+
+# BaseProject backups
+.baseproject-backup-*/
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Misc
+*.local

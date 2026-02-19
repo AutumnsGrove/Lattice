@@ -1,0 +1,45 @@
+# Secrets (never commit)
+secrets.json
+.env
+.env.*
+
+# Dependencies
+node_modules/
+.pnpm-store/
+__pycache__/
+
+# Build output
+.svelte-kit/
+build/
+dist/
+.wrangler/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Claude Code
+.claude/*
+!.claude/skills/
+
+# BaseProject backups
+.baseproject-backup-*/
+
+# Test coverage
+coverage/
+
+# Local D1 database
+.wrangler/state/
+
+# Cloudflare
+.dev.vars

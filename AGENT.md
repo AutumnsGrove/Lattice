@@ -82,7 +82,7 @@ bun x tsc --noEmit        # Type check
 
 # Start any app locally (auto-creates local D1/KV/R2)
 cd landing && bun run dev
-cd packages/engine && bun run dev
+cd libs/engine && bun run dev
 ```
 
 **Why this works:** Bun uses the `node_modules` that pnpm creates—no separate lockfile needed. The `bun.lock` file is gitignored since pnpm-lock.yaml is the source of truth for CI.
@@ -96,7 +96,7 @@ Payments are processed through Stripe. Products and prices are managed in the St
 **Setup:**
 
 1. Products already exist in [Stripe Dashboard](https://dashboard.stripe.com/products)
-2. Price IDs are hardcoded in `packages/plant/src/lib/server/stripe.ts`
+2. Price IDs are hardcoded in `apps/plant/src/lib/server/stripe.ts`
 3. Set 2 secrets in Cloudflare Dashboard: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`
 
 **Full instructions:** `docs/setup/stripe-setup.md`
@@ -111,13 +111,13 @@ Apps auto-deploy via GitHub Actions on push to main. Resource IDs are hardcoded 
 
 - **Default Font:** Lexend — used across all Grove properties (landing, engine, blogs)
 - **Font Fallback:** All font mappings should fall back to `lexend`, not other fonts
-- **Available Fonts:** See `packages/engine/static/fonts/` for the full collection
+- **Available Fonts:** See `libs/engine/static/fonts/` for the full collection
 
 ### ⚠️ CRITICAL: Tailwind Preset Required
 
 **All consumer apps MUST use the engine's Tailwind preset.**
 
-The engine provides a shared Tailwind preset (`packages/engine/src/lib/ui/tailwind.preset.js`) that defines:
+The engine provides a shared Tailwind preset (`libs/engine/src/lib/ui/tailwind.preset.js`) that defines:
 
 - Custom z-index scale (`z-grove-mobile-menu`, `z-grove-fab`, etc.)
 - Grove color palette, typography, animations
@@ -126,14 +126,14 @@ The engine provides a shared Tailwind preset (`packages/engine/src/lib/ui/tailwi
 **Every app's `tailwind.config.js` must include:**
 
 ```javascript
-import grovePreset from "../engine/src/lib/ui/tailwind.preset.js";
+import grovePreset from "../../libs/engine/src/lib/ui/tailwind.preset.js";
 
 export default {
 	presets: [grovePreset],
 	content: [
 		"./src/**/*.{html,js,svelte,ts}",
 		// REQUIRED: Scan engine components for Tailwind classes
-		"../engine/src/lib/**/*.{html,js,svelte,ts}",
+		"../../libs/engine/src/lib/**/*.{html,js,svelte,ts}",
 	],
 	// ... rest of config
 };
@@ -528,7 +528,7 @@ Write a brief description of what the PR does and why. No specific format requir
    └── NO  → Continue to step 2
 
 2. IMPLEMENT: Add it to the engine FIRST
-   └── packages/engine/src/lib/...
+   └── libs/engine/src/lib/...
    └── Export it properly in package.json
 
 3. IMPORT: Then use it from the engine in your app
@@ -589,16 +589,16 @@ import { TreePine } from "@autumnsgrove/lattice/ui/nature";
 
 ### When You Need Something New
 
-1. **Check the engine exports:** `grep -r "export" packages/engine/src/lib/`
+1. **Check the engine exports:** `grep -r "export" libs/engine/src/lib/`
 2. **If it doesn't exist:** Add it to the engine, not the app
-3. **Export it properly:** Update `packages/engine/package.json` exports
+3. **Export it properly:** Update `libs/engine/package.json` exports
 4. **Then import it:** Use in your app via `@autumnsgrove/lattice/...`
 
 ### Quick Engine Export Check
 
 ```bash
 # See all engine exports
-cat packages/engine/package.json | grep -A2 '"\./'
+cat libs/engine/package.json | grep -A2 '"\./'
 ```
 
 ---
@@ -723,7 +723,7 @@ page loads. Parallelizing reduced this to 1.5-2.5 seconds (~60% improvement).
 
 #### Typed Query Builders (database.ts)
 
-**Use the typed helpers in `packages/engine/src/lib/server/services/database.ts`** instead of raw SQL.
+**Use the typed helpers in `libs/engine/src/lib/server/services/database.ts`** instead of raw SQL.
 
 ```typescript
 import {
@@ -788,7 +788,7 @@ SvelteKit CSRF → Origin ≠ Host → 403 Forbidden!
 **The fix:** Configure `csrf.trustedOrigins` in `svelte.config.js`:
 
 ```javascript
-// packages/engine/svelte.config.js
+// libs/engine/svelte.config.js
 kit: {
   csrf: {
     checkOrigin: true,
@@ -1052,13 +1052,13 @@ import {
 
 **Error Catalogs:**
 
-| Catalog        | Prefix            | Import                             |
-| -------------- | ----------------- | ---------------------------------- |
-| `API_ERRORS`   | `GROVE-API-XXX`   | `@autumnsgrove/lattice/errors`     |
-| `ARBOR_ERRORS` | `GROVE-ARBOR-XXX` | `@autumnsgrove/lattice/errors`     |
-| `SITE_ERRORS`  | `GROVE-SITE-XXX`  | `@autumnsgrove/lattice/errors`     |
-| `AUTH_ERRORS`  | `HW-AUTH-XXX`     | `@autumnsgrove/lattice/heartwood`  |
-| `PLANT_ERRORS` | `PLANT-XXX`       | `packages/plant/src/lib/errors.ts` |
+| Catalog        | Prefix            | Import                            |
+| -------------- | ----------------- | --------------------------------- |
+| `API_ERRORS`   | `GROVE-API-XXX`   | `@autumnsgrove/lattice/errors`    |
+| `ARBOR_ERRORS` | `GROVE-ARBOR-XXX` | `@autumnsgrove/lattice/errors`    |
+| `SITE_ERRORS`  | `GROVE-SITE-XXX`  | `@autumnsgrove/lattice/errors`    |
+| `AUTH_ERRORS`  | `HW-AUTH-XXX`     | `@autumnsgrove/lattice/heartwood` |
+| `PLANT_ERRORS` | `PLANT-XXX`       | `apps/plant/src/lib/errors.ts`    |
 
 **Number ranges:** 001-019 infrastructure, 020-039 auth, 040-059 business logic, 060-079 rate limiting, 080-099 internal
 

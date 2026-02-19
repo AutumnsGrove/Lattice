@@ -4,8 +4,8 @@ on:
   push:
     branches: [main]
     paths:
-      - 'packages/clearing/**'
-      - 'packages/engine/**'
+      - "apps/clearing/**"
+      - "libs/engine/**"
   workflow_dispatch:
 
 jobs:
@@ -23,29 +23,29 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
-          cache-dependency-path: '**/pnpm-lock.yaml'
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: "**/pnpm-lock.yaml"
 
       - name: Install dependencies
         run: pnpm install
 
       - name: Package engine (workspace dependency)
         run: pnpm package
-        working-directory: packages/engine
+        working-directory: libs/engine
 
       - name: Run tests
         run: pnpm test:run
-        working-directory: packages/clearing
+        working-directory: apps/clearing
 
       - name: Build status page
         run: pnpm run build
-        working-directory: packages/clearing
+        working-directory: apps/clearing
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy packages/clearing/.svelte-kit/cloudflare --project-name=grove-clearing
+          command: pages deploy apps/clearing/.svelte-kit/cloudflare --project-name=grove-clearing
           packageManager: pnpm

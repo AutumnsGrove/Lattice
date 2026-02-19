@@ -1,0 +1,95 @@
+[project]
+name = "grove-shutter"
+version = "1.0.0"
+description = "LLM-powered web content extraction with prompt injection defense. Open. Capture. Close."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [
+    { name = "Grove Engine", email = "contact@grove.place" }
+]
+keywords = [
+    "llm",
+    "web-scraping",
+    "content-extraction",
+    "prompt-injection",
+    "security",
+    "ai-agents",
+    "openrouter",
+    "web-fetch",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Security",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
+
+dependencies = [
+    "httpx>=0.27.0",
+    "typer>=0.12.0",
+    "pydantic>=2.0.0",
+    "tavily-python>=0.3.0",  # Optional for enhanced fetching
+    "trafilatura>=1.6.0",  # HTML extraction and text conversion
+    "tomli>=2.0.0",  # TOML parsing for config files
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "black>=24.0.0",
+    "ruff>=0.3.0",
+    "mypy>=1.8.0",
+]
+
+[project.scripts]
+shutter = "grove_shutter.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/AutumnsGrove/Shutter"
+Documentation = "https://github.com/AutumnsGrove/Shutter/blob/main/docs/SPEC.md"
+Repository = "https://github.com/AutumnsGrove/Shutter"
+Issues = "https://github.com/AutumnsGrove/Shutter/issues"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/grove_shutter"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+include = '\.pyi?$'
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+select = ["E", "F", "I", "N", "W", "UP"]
+ignore = []
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true

@@ -5,11 +5,11 @@ on:
     branches:
       - main
     paths:
-      - 'packages/landing/**'
-      - 'packages/engine/**'
-      - 'docs/help-center/**'
-      - 'docs/legal/**'
-      - 'docs/specs/**'
+      - "apps/landing/**"
+      - "libs/engine/**"
+      - "docs/help-center/**"
+      - "docs/legal/**"
+      - "docs/specs/**"
   workflow_run:
     workflows: ["Auto-tag on Version Bump"]
     types:
@@ -18,7 +18,7 @@ on:
 
 defaults:
   run:
-    working-directory: packages/landing
+    working-directory: apps/landing
 
 jobs:
   deploy:
@@ -42,9 +42,9 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
-          cache-dependency-path: '**/pnpm-lock.yaml'
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: "**/pnpm-lock.yaml"
 
       - name: Install dependencies
         run: pnpm install
@@ -52,18 +52,18 @@ jobs:
 
       - name: Build engine package
         run: pnpm run package
-        working-directory: packages/engine
+        working-directory: libs/engine
 
       - name: Build
         run: pnpm run build
 
       - name: Type check
         run: pnpm check
-        working-directory: packages/landing
+        working-directory: apps/landing
 
       - name: Run tests
         run: pnpm test:run
-        working-directory: packages/landing
+        working-directory: apps/landing
 
       - name: Run Database Migrations
         uses: cloudflare/wrangler-action@v3
@@ -71,7 +71,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: d1 migrations apply grove-engine-db --remote
-          workingDirectory: packages/landing
+          workingDirectory: apps/landing
           packageManager: pnpm
 
       - name: Deploy to Cloudflare Pages
@@ -80,5 +80,5 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy .svelte-kit/cloudflare --project-name=grove-landing
-          workingDirectory: packages/landing
+          workingDirectory: apps/landing
           packageManager: pnpm

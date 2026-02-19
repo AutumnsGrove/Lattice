@@ -4,11 +4,11 @@ on:
   push:
     branches: [main]
     paths:
-      - "packages/durable-objects/**"
-      - "packages/engine/src/lib/durable-objects/**"
-      - "packages/engine/src/lib/loom/**"
-      - "packages/engine/src/lib/lumen/**"
-      - "packages/engine/src/lib/zephyr/**"
+      - "services/durable-objects/**"
+      - "libs/engine/src/lib/durable-objects/**"
+      - "libs/engine/src/lib/loom/**"
+      - "libs/engine/src/lib/lumen/**"
+      - "libs/engine/src/lib/zephyr/**"
   workflow_dispatch:
 
 jobs:
@@ -36,17 +36,17 @@ jobs:
 
       - name: Build engine package (dependency)
         run: pnpm run package
-        working-directory: packages/engine
+        working-directory: libs/engine
 
       - name: Type check
         run: pnpm exec tsc --noEmit
-        working-directory: packages/durable-objects
+        working-directory: services/durable-objects
 
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: packages/durable-objects
+          workingDirectory: services/durable-objects
           command: deploy
           packageManager: pnpm

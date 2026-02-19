@@ -5,18 +5,18 @@ on:
     branches:
       - main
     paths:
-      - 'packages/engine/package.json'
+      - "libs/engine/package.json"
   workflow_dispatch:
     inputs:
       force_snapshot:
-        description: 'Force snapshot generation even without version change'
+        description: "Force snapshot generation even without version change"
         required: false
-        default: 'false'
+        default: "false"
         type: boolean
       backfill_summaries:
-        description: 'Backfill AI summaries for all historical versions'
+        description: "Backfill AI summaries for all historical versions"
         required: false
-        default: 'false'
+        default: "false"
         type: boolean
 
 permissions:
@@ -30,17 +30,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Full history for accurate commit count
+          fetch-depth: 0 # Full history for accurate commit count
 
       - name: Check for version change
         id: version
         run: |
           # Get current version
-          CURRENT=$(jq -r '.version' packages/engine/package.json)
+          CURRENT=$(jq -r '.version' libs/engine/package.json)
           echo "current=$CURRENT" >> $GITHUB_OUTPUT
 
           # Get previous version
-          git show HEAD~1:packages/engine/package.json > /tmp/prev-package.json 2>/dev/null || echo '{"version":"0.0.0"}' > /tmp/prev-package.json
+          git show HEAD~1:libs/engine/package.json > /tmp/prev-package.json 2>/dev/null || echo '{"version":"0.0.0"}' > /tmp/prev-package.json
           PREVIOUS=$(jq -r '.version' /tmp/prev-package.json)
           echo "previous=$PREVIOUS" >> $GITHUB_OUTPUT
 
@@ -113,9 +113,9 @@ jobs:
         if: steps.snapshot.outcome == 'success'
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
-          cache-dependency-path: '**/pnpm-lock.yaml'
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: "**/pnpm-lock.yaml"
 
       - name: Calculate package size
         if: steps.snapshot.outcome == 'success'
@@ -136,7 +136,7 @@ jobs:
           echo "Installing dependencies..."
           pnpm install || { echo "Failed to install dependencies"; exit 1; }
 
-          cd packages/engine
+          cd libs/engine
           echo "Building package..."
           pnpm run package || { echo "Failed to build package"; exit 1; }
 
@@ -228,21 +228,21 @@ jobs:
         if: steps.snapshot.outcome == 'success'
         run: |
           # Ensure landing data directory exists
-          mkdir -p packages/landing/static/data
+          mkdir -p apps/landing/static/data
 
           # Copy the history CSV so the /journey page can display it
-          cp snapshots/history.csv packages/landing/static/data/history.csv
+          cp snapshots/history.csv apps/landing/static/data/history.csv
 
           # Copy release summaries so the /roadmap page can display them
           if [ -d snapshots/summaries ]; then
-            mkdir -p packages/landing/static/data/summaries
-            cp -r snapshots/summaries/* packages/landing/static/data/summaries/ 2>/dev/null || echo "No summaries to copy"
+            mkdir -p apps/landing/static/data/summaries
+            cp -r snapshots/summaries/* apps/landing/static/data/summaries/ 2>/dev/null || echo "No summaries to copy"
           fi
 
           # Copy word frequencies so the /journey page can display them
           if [ -d snapshots/word-frequencies ]; then
-            mkdir -p packages/landing/static/data/word-frequencies
-            cp -r snapshots/word-frequencies/* packages/landing/static/data/word-frequencies/ 2>/dev/null || echo "No word frequencies to copy"
+            mkdir -p apps/landing/static/data/word-frequencies
+            cp -r snapshots/word-frequencies/* apps/landing/static/data/word-frequencies/ 2>/dev/null || echo "No word frequencies to copy"
           fi
 
       - name: Commit and push snapshot
@@ -252,7 +252,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           # Add snapshot files, summaries, and landing data
-          git add snapshots/ packages/landing/static/data/
+          git add snapshots/ apps/landing/static/data/
 
           # Check if there are changes to commit
           if git diff --staged --quiet; then
@@ -291,16 +291,16 @@ jobs:
 
       - name: Sync to landing page
         run: |
-          mkdir -p packages/landing/static/data/summaries
-          cp -r snapshots/summaries/* packages/landing/static/data/summaries/
-          echo "📦 Synced summaries to packages/landing/static/data/summaries/"
-          ls -1 packages/landing/static/data/summaries/
+          mkdir -p apps/landing/static/data/summaries
+          cp -r snapshots/summaries/* apps/landing/static/data/summaries/
+          echo "📦 Synced summaries to apps/landing/static/data/summaries/"
+          ls -1 apps/landing/static/data/summaries/
 
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add snapshots/summaries/ packages/landing/static/data/summaries/
+          git add snapshots/summaries/ apps/landing/static/data/summaries/
 
           if git diff --staged --quiet; then
             echo "No new summaries generated"
@@ -311,4 +311,3 @@ jobs:
           git commit -m "docs: backfill $NEW_COUNT historical release summaries"
           git push origin main
           echo "Pushed $NEW_COUNT new summaries to main"
-

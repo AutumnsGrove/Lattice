@@ -1,0 +1,49 @@
+name: Deploy Forage Worker
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "services/forage/**"
+      - "libs/engine/src/lib/loom/**"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy to Cloudflare Workers
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: "**/pnpm-lock.yaml"
+
+      - name: Install dependencies
+        run: pnpm install
+        working-directory: .
+
+      - name: Build engine package (dependency)
+        run: pnpm run package
+        working-directory: libs/engine
+
+      - name: Type check
+        run: pnpm exec tsc --noEmit
+        working-directory: services/forage
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: services/forage
+          command: deploy
+          packageManager: pnpm

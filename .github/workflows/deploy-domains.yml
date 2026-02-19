@@ -5,13 +5,13 @@ on:
     branches:
       - main
     paths:
-      - 'packages/domains/**'
-      - 'packages/engine/**'
+      - "apps/domains/**"
+      - "libs/engine/**"
   workflow_dispatch:
 
 defaults:
   run:
-    working-directory: packages/domains
+    working-directory: apps/domains
 
 jobs:
   deploy:
@@ -30,9 +30,9 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
-          cache-dependency-path: '**/pnpm-lock.yaml'
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: "**/pnpm-lock.yaml"
 
       - name: Install dependencies
         run: pnpm install
@@ -40,14 +40,14 @@ jobs:
 
       - name: Build engine package
         run: pnpm run package
-        working-directory: packages/engine
+        working-directory: libs/engine
 
       - name: Build
         run: pnpm run build
 
       - name: Type check
         run: pnpm check
-        working-directory: packages/domains
+        working-directory: apps/domains
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
@@ -55,5 +55,5 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy .svelte-kit/cloudflare --project-name=forage
-          workingDirectory: packages/domains
+          workingDirectory: apps/domains
           packageManager: pnpm

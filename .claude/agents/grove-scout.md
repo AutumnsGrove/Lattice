@@ -42,19 +42,21 @@ gf --agent git churn                # Most frequently changed files
 # Monorepo Structure
 
 ```
-packages/
+libs/
   engine/       — Core framework (@autumnsgrove/lattice) — highest impact
+apps/
   landing/      — Marketing site (grove.place)
   meadow/       — Community feed
   plant/        — Subscription management
   clearing/     — Status page
   terrarium/    — Minecraft panel
   login/        — Auth hub (login.grove.place)
+services/
   heartwood/    — Auth backend (Hono API)
-  workers/      — Cloudflare Workers
-    grove-router/
-    vista-collector/
-    durable-objects/
+workers/        — Cloudflare Workers
+  grove-router/
+  vista-collector/
+  durable-objects/
 docs/           — Specs, plans, patterns
 tools/          — gw, gf, hooks
 AgentUsage/     — Agent documentation
@@ -64,11 +66,11 @@ AgentUsage/     — Agent documentation
 
 Understand cross-package dependencies:
 
-- **engine** → imported by ALL consumer packages
-- **heartwood** → accessed via service binding, not direct import
+- **libs/engine** → imported by ALL consumer packages
+- **services/heartwood** → accessed via service binding, not direct import
 - **workers/grove-router** → proxies subdomain traffic to engine
-- **landing** → standalone, imports from engine only
-- **plant/meadow/clearing/terrarium** → import from engine, may share patterns
+- **apps/landing** → standalone, imports from engine only
+- **apps/plant/apps/meadow/apps/clearing/apps/terrarium** → import from engine, may share patterns
 
 # Output Format
 
@@ -80,11 +82,11 @@ Understand cross-package dependencies:
 
 ### Findings by Package
 
-**packages/engine/** (X matches)
+**libs/engine/** (X matches)
 - `src/lib/ui/GlassCard.svelte:42` — Component definition
 - `src/lib/utils/cn.ts:5` — Utility function
 
-**packages/landing/** (Y matches)
+**apps/landing/** (Y matches)
 - `src/routes/+page.svelte:18` — Usage in hero section
 
 ### Cross-Package Impact

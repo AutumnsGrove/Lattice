@@ -375,17 +375,9 @@ func runMigrationsCommand() error {
 				relDir = path
 			}
 
-			parts := strings.Split(relDir, string(filepath.Separator))
-			pkgName := relDir
-			for i, part := range parts {
-				if part == "packages" && i+1 < len(parts) {
-					pkgName = parts[i+1]
-					break
-				}
-				if part == "workers" && i+1 < len(parts) {
-					pkgName = "workers/" + parts[i+1]
-					break
-				}
+			pkgName := extractPackageFromPath(relDir)
+			if pkgName == "" {
+				pkgName = relDir
 			}
 
 			groups = append(groups, migrationGroup{
@@ -921,14 +913,34 @@ func runDepsCommand(pkg string) error {
 
 	if pkg != "" {
 		// Validate package name -- reject path traversal attempts.
-		if strings.Contains(pkg, "..") || strings.Contains(pkg, "/") {
-			output.PrintWarning("Invalid package name -- must be a simple name like 'engine'")
+		if strings.Contains(pkg, "..") {
+			output.PrintWarning("Invalid package name")
 			return nil
 		}
 
-		packageDir := filepath.Join(cfg.GroveRoot, "packages", pkg)
-		if info, err := os.Stat(packageDir); err != nil || !info.IsDir() {
-			output.PrintWarning(fmt.Sprintf("Package not found: packages/%s", pkg))
+		// Find package directory. Supports both bare names (engine → packages/engine)
+		// and prefixed names (apps/landing → apps/landing).
+		var packageDir string
+		if strings.Contains(pkg, "/") {
+			// Prefixed name — validate the category directory.
+			parts := strings.SplitN(pkg, "/", 3)
+			if len(parts) < 2 || !isPackageDir(parts[0]) {
+				output.PrintWarning(fmt.Sprintf("Unknown package category: %s", pkg))
+				return nil
+			}
+			packageDir = filepath.Join(cfg.GroveRoot, pkg)
+		} else {
+			// Bare name — search all category directories, packages/ first.
+			for _, dir := range packageDirs {
+				candidate := filepath.Join(cfg.GroveRoot, dir, pkg)
+				if info, err := os.Stat(candidate); err == nil && info.IsDir() {
+					packageDir = candidate
+					break
+				}
+			}
+		}
+		if packageDir == "" {
+			output.PrintWarning(fmt.Sprintf("Package not found: %s", pkg))
 			return nil
 		}
 
@@ -1027,20 +1039,8 @@ func runDepsCommand(pkg string) error {
 			continue
 		}
 
-		parts := strings.Split(fp, string(filepath.Separator))
-
 		// Determine source package.
-		var source string
-		for i, part := range parts {
-			if part == "packages" && i+1 < len(parts) {
-				source = parts[i+1]
-				break
-			}
-			if part == "workers" && i+1 < len(parts) {
-				source = "workers/" + parts[i+1]
-				break
-			}
-		}
+		source := extractPackageFromPath(fp)
 
 		if source == "" {
 			continue
@@ -1130,19 +1130,9 @@ func runDepsCommand(pkg string) error {
 func extractPackageNames(rgOutput string, excludePkg string) []string {
 	packages := make(map[string]bool)
 	for _, line := range search.SplitLines(rgOutput) {
-		parts := strings.Split(line, string(filepath.Separator))
-		for i, part := range parts {
-			if part == "packages" && i+1 < len(parts) {
-				pkg := parts[i+1]
-				if pkg != excludePkg {
-					packages[pkg] = true
-				}
-				break
-			}
-			if part == "workers" && i+1 < len(parts) {
-				packages["workers/"+parts[i+1]] = true
-				break
-			}
+		pkg := extractPackageFromPath(line)
+		if pkg != "" && pkg != excludePkg {
+			packages[pkg] = true
 		}
 	}
 

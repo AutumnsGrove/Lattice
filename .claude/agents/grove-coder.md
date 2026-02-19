@@ -118,11 +118,11 @@ fetch("/api/endpoint", { method: "POST" }); // eslint: csrf-ok needed
 
 | Package   | Path                  | Purpose                                               |
 | --------- | --------------------- | ----------------------------------------------------- |
-| engine    | `packages/engine/`    | Core framework (import via `@autumnsgrove/lattice/*`) |
-| landing   | `packages/landing/`   | Marketing site                                        |
-| meadow    | `packages/meadow/`    | Community feed                                        |
-| plant     | `packages/plant/`     | Subscriptions                                         |
-| heartwood | `packages/heartwood/` | Auth backend (Hono)                                   |
+| engine    | `libs/engine/`        | Core framework (import via `@autumnsgrove/lattice/*`) |
+| landing   | `apps/landing/`       | Marketing site                                        |
+| meadow    | `apps/meadow/`        | Community feed                                        |
+| plant     | `apps/plant/`         | Subscriptions                                         |
+| heartwood | `services/heartwood/` | Auth backend (Hono)                                   |
 
 # Implementation Process
 

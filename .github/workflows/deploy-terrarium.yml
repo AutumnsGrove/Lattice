@@ -5,13 +5,13 @@ on:
     branches:
       - main
     paths:
-      - 'packages/terrarium/**'
-      - 'packages/engine/**'
+      - "apps/terrarium/**"
+      - "libs/engine/**"
   workflow_dispatch:
 
 defaults:
   run:
-    working-directory: packages/terrarium
+    working-directory: apps/terrarium
 
 jobs:
   deploy:
@@ -32,9 +32,9 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
-          cache-dependency-path: '**/pnpm-lock.yaml'
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: "**/pnpm-lock.yaml"
 
       - name: Install dependencies
         run: pnpm install
@@ -42,14 +42,14 @@ jobs:
 
       - name: Build engine package
         run: pnpm run package
-        working-directory: packages/engine
+        working-directory: libs/engine
 
       - name: Build
         run: pnpm run build
 
       - name: Type check
         run: pnpm check
-        working-directory: packages/terrarium
+        working-directory: apps/terrarium
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
@@ -57,5 +57,5 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy .svelte-kit/cloudflare --project-name=grove-terrarium
-          workingDirectory: packages/terrarium
+          workingDirectory: apps/terrarium
           packageManager: pnpm

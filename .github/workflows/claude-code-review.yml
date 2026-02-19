@@ -97,7 +97,7 @@ jobs:
             ## Grove-Specific Patterns
 
             Watch for these project-specific concerns:
-            - **Engine-first**: New utilities should go in `packages/engine`, not duplicated in apps
+            - **Engine-first**: New utilities should go in `libs/engine`, not duplicated in apps
             - **Multi-tenant safety**: Queries must scope by `tenant_id`, never leak cross-tenant data
             - **Cloudflare bindings**: D1/KV/R2 accessed correctly via `platform.env`
             - **Isolated queries**: Independent DB queries should use `Promise.all()`, not sequential awaits
@@ -107,4 +107,3 @@ jobs:
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://code.claude.com/docs/en/cli-reference for available options
           claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*)"'
-

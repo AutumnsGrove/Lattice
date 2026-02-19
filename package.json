@@ -23,7 +23,7 @@
 		"test:heartwood": "pnpm --filter grove-heartwood test:run",
 		"test:router": "pnpm --filter grove-router test:run",
 		"test:shell": "bats scripts/repo/tests/",
-		"email:preview": "NODE_PATH=packages/engine/node_modules bun run scripts/email/preview.tsx",
+		"email:preview": "NODE_PATH=libs/engine/node_modules bun run scripts/email/preview.tsx",
 		"lint": "oxlint . && eslint .",
 		"lint:strict": "oxlint --deny-warnings && eslint .",
 		"lint:fix": "eslint . --fix",
@@ -44,58 +44,58 @@
 		"typescript-eslint": "^8.0.0",
 		"wrangler": "^4.64.0"
 	},
-	"main": "./packages/engine/dist/index.js",
-	"types": "./packages/engine/dist/index.d.ts",
-	"svelte": "./packages/engine/dist/index.js",
+	"main": "./libs/engine/dist/index.js",
+	"types": "./libs/engine/dist/index.d.ts",
+	"svelte": "./libs/engine/dist/index.js",
 	"exports": {
 		".": {
-			"types": "./packages/engine/dist/index.d.ts",
-			"svelte": "./packages/engine/dist/index.js",
-			"default": "./packages/engine/dist/index.js"
+			"types": "./libs/engine/dist/index.d.ts",
+			"svelte": "./libs/engine/dist/index.js",
+			"default": "./libs/engine/dist/index.js"
 		},
 		"./components/custom/*": {
-			"types": "./packages/engine/dist/components/custom/*.svelte.d.ts",
-			"svelte": "./packages/engine/dist/components/custom/*.svelte"
+			"types": "./libs/engine/dist/components/custom/*.svelte.d.ts",
+			"svelte": "./libs/engine/dist/components/custom/*.svelte"
 		},
 		"./components/admin/*": {
-			"types": "./packages/engine/dist/components/admin/*.svelte.d.ts",
-			"svelte": "./packages/engine/dist/components/admin/*.svelte"
+			"types": "./libs/engine/dist/components/admin/*.svelte.d.ts",
+			"svelte": "./libs/engine/dist/components/admin/*.svelte"
 		},
 		"./components/gallery/*": {
-			"types": "./packages/engine/dist/components/gallery/*.svelte.d.ts",
-			"svelte": "./packages/engine/dist/components/gallery/*.svelte"
+			"types": "./libs/engine/dist/components/gallery/*.svelte.d.ts",
+			"svelte": "./libs/engine/dist/components/gallery/*.svelte"
 		},
 		"./components/ui": {
-			"types": "./packages/engine/dist/components/ui/index.d.ts",
-			"svelte": "./packages/engine/dist/components/ui/index.js"
+			"types": "./libs/engine/dist/components/ui/index.d.ts",
+			"svelte": "./libs/engine/dist/components/ui/index.js"
 		},
 		"./utils/*": {
-			"types": "./packages/engine/dist/utils/*.d.ts",
-			"default": "./packages/engine/dist/utils/*.js"
+			"types": "./libs/engine/dist/utils/*.d.ts",
+			"default": "./libs/engine/dist/utils/*.js"
 		},
 		"./auth/*": {
-			"types": "./packages/engine/dist/auth/*.d.ts",
-			"default": "./packages/engine/dist/auth/*.js"
+			"types": "./libs/engine/dist/auth/*.d.ts",
+			"default": "./libs/engine/dist/auth/*.js"
 		},
 		"./server/*": {
-			"types": "./packages/engine/dist/server/*.d.ts",
-			"default": "./packages/engine/dist/server/*.js"
+			"types": "./libs/engine/dist/server/*.d.ts",
+			"default": "./libs/engine/dist/server/*.js"
 		},
 		"./payments": {
-			"types": "./packages/engine/dist/payments/index.d.ts",
-			"default": "./packages/engine/dist/payments/index.js"
+			"types": "./libs/engine/dist/payments/index.d.ts",
+			"default": "./libs/engine/dist/payments/index.js"
 		},
 		"./payments/*": {
-			"types": "./packages/engine/dist/payments/*.d.ts",
-			"default": "./packages/engine/dist/payments/*.js"
+			"types": "./libs/engine/dist/payments/*.d.ts",
+			"default": "./libs/engine/dist/payments/*.js"
 		},
 		"./heartwood": {
-			"types": "./packages/engine/dist/heartwood/index.d.ts",
-			"default": "./packages/engine/dist/heartwood/index.js"
+			"types": "./libs/engine/dist/heartwood/index.d.ts",
+			"default": "./libs/engine/dist/heartwood/index.js"
 		},
 		"./groveauth": {
-			"types": "./packages/engine/dist/heartwood/index.d.ts",
-			"default": "./packages/engine/dist/heartwood/index.js"
+			"types": "./libs/engine/dist/heartwood/index.d.ts",
+			"default": "./libs/engine/dist/heartwood/index.js"
 		}
 	},
 	"overrides": {
@@ -110,7 +110,10 @@
 		"undici": ">=7.18.2"
 	},
 	"workspaces": [
-		"packages/*",
-		"packages/workers/*"
+		"apps/*",
+		"services/*",
+		"workers/*",
+		"libs/*",
+		"libs/shutter/cloudflare"
 	]
 }

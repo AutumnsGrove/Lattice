@@ -1,0 +1,20 @@
+name = "shutter"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+
+[vars]
+ENVIRONMENT = "production"
+
+# D1 Database - run: wrangler d1 create shutter-offenders
+# Then update database_id below
+[[d1_databases]]
+binding = "DB"
+database_name = "shutter-offenders"
+database_id = "056aeb20-48d5-405a-bebc-e167817df0c0"
+
+# Secrets (set via wrangler secret put):
+# wrangler secret put OPENROUTER_API_KEY
+# wrangler secret put TAVILY_API_KEY (optional)
+
+# Custom domain (configure after initial deploy)
+# routes = [{ pattern = "shutter.grove.place", custom_domain = true }]

@@ -5,13 +5,13 @@ on:
     branches:
       - main
     paths:
-      - "packages/meadow/**"
-      - "packages/engine/**"
+      - "apps/meadow/**"
+      - "libs/engine/**"
   workflow_dispatch:
 
 defaults:
   run:
-    working-directory: packages/meadow
+    working-directory: apps/meadow
 
 jobs:
   deploy:
@@ -42,14 +42,14 @@ jobs:
 
       - name: Build engine package
         run: pnpm run package
-        working-directory: packages/engine
+        working-directory: libs/engine
 
       - name: Build
         run: pnpm run build
 
       - name: Type check
         run: pnpm check
-        working-directory: packages/meadow
+        working-directory: apps/meadow
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
@@ -57,5 +57,5 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy .svelte-kit/cloudflare --project-name=grove-meadow
-          workingDirectory: packages/meadow
+          workingDirectory: apps/meadow
           packageManager: pnpm

@@ -48,23 +48,23 @@ bun x tsc --noEmit
 
 ## Running Apps
 
-Each package in `packages/` is a standalone SvelteKit app or Cloudflare Worker.
+The monorepo is organized into `apps/`, `libs/`, `services/`, and `workers/`.
 
 ```bash
 # Engine (core blog platform)
-cd packages/engine && pnpm dev
+cd libs/engine && pnpm dev
 
 # Landing page (grove.place)
-cd packages/landing && pnpm dev
+cd apps/landing && pnpm dev
 
 # Forage frontend (domain search)
-cd packages/domains && pnpm dev
+cd apps/domains && pnpm dev
 
 # Plant (tenant blog management)
-cd packages/plant && pnpm dev
+cd apps/plant && pnpm dev
 
-# Any package follows the same pattern
-cd packages/<name> && pnpm dev
+# Any app follows the same pattern
+cd apps/<name> && pnpm dev
 ```
 
 ### With Cloudflare Bindings
@@ -72,7 +72,7 @@ cd packages/<name> && pnpm dev
 To run the engine with local D1, KV, and R2 bindings (mimics production):
 
 ```bash
-cd packages/engine
+cd libs/engine
 pnpm dev:wrangler
 ```
 
@@ -84,10 +84,10 @@ This uses `wrangler dev` under the hood and creates local D1/KV/R2 stores automa
 
 ### Migrations
 
-The engine uses Cloudflare D1 (SQLite). Migrations live in `packages/engine/migrations/`.
+The engine uses Cloudflare D1 (SQLite). Migrations live in `libs/engine/migrations/`.
 
 ```bash
-cd packages/engine
+cd libs/engine
 
 # Apply migrations locally
 wrangler d1 migrations apply grove-engine-db --local
@@ -99,7 +99,7 @@ wrangler d1 migrations apply grove-engine-db --remote
 ### Creating Migrations
 
 ```bash
-cd packages/engine
+cd libs/engine
 wrangler d1 migrations create grove-engine-db "description-of-change"
 ```
 
@@ -112,7 +112,7 @@ This creates a new `.sql` file in `migrations/`. Write your SQL, then apply loca
 All test commands run from the engine package:
 
 ```bash
-cd packages/engine
+cd libs/engine
 
 pnpm test              # Run tests (Vitest, watch mode)
 pnpm test:run          # Run once (CI-friendly)
@@ -127,11 +127,11 @@ pnpm test:ui           # Vitest UI (browser-based)
 
 ```bash
 # Build the engine npm package
-cd packages/engine
+cd libs/engine
 pnpm build:package
 
 # Build any app for deployment
-cd packages/<name>
+cd apps/<name>
 pnpm build
 ```
 
@@ -142,7 +142,7 @@ pnpm build
 Payments are processed through Stripe. Products and prices are managed in the Stripe Dashboard.
 
 1. Products exist in the [Stripe Dashboard](https://dashboard.stripe.com/products)
-2. Price IDs are configured in `packages/plant/src/lib/server/stripe.ts`
+2. Price IDs are configured in `apps/plant/src/lib/server/stripe.ts`
 3. Required secrets (set in Cloudflare Dashboard): `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`
 
 Full setup instructions: [`docs/setup/stripe-setup.md`](docs/setup/stripe-setup.md)
@@ -156,7 +156,7 @@ Apps auto-deploy via GitHub Actions on push to `main`. Each app's `wrangler.toml
 Manual deployment for any package:
 
 ```bash
-cd packages/<name>
+cd apps/<name>
 pnpm build && wrangler pages deploy .svelte-kit/cloudflare --project-name <project>
 ```
 
@@ -168,15 +168,15 @@ All consumer apps **must** use the engine's shared Tailwind preset. Without it, 
 
 ```javascript
 // tailwind.config.js in any app
-import grovePreset from "../engine/src/lib/ui/tailwind.preset.js";
+import grovePreset from "../../libs/engine/src/lib/ui/tailwind.preset.js";
 
 export default {
-  presets: [grovePreset],
-  content: [
-    "./src/**/*.{html,js,svelte,ts}",
-    // REQUIRED: scan engine components for Tailwind classes
-    "../engine/src/lib/**/*.{html,js,svelte,ts}",
-  ],
+	presets: [grovePreset],
+	content: [
+		"./src/**/*.{html,js,svelte,ts}",
+		// REQUIRED: scan engine components for Tailwind classes
+		"../../libs/engine/src/lib/**/*.{html,js,svelte,ts}",
+	],
 };
 ```
 
@@ -186,27 +186,36 @@ export default {
 
 ```
 Lattice/
-├── packages/
-│   ├── engine/           # @autumnsgrove/lattice — core engine
-│   ├── landing/          # Marketing site (grove.place)
-│   ├── heartwood/        # Authentication service
-│   ├── plant/            # Tenant blog management
-│   ├── meadow/           # Community feed
-│   ├── domains/          # Forage frontend (domain search)
-│   ├── clearing/         # Status page
-│   ├── terrarium/        # Admin & testing interface
-│   ├── grove-router/     # Subdomain routing Worker
-│   ├── og-worker/        # OG image generation
-│   ├── durable-objects/  # Cloudflare Durable Objects
-│   ├── post-migrator/    # Storage migration Worker
-│   ├── vineyard/         # Component showcase library
-│   ├── workers/          # Scheduled workers
-
-├── docs/                 # Specs, patterns, guides
-├── AgentUsage/           # Agent workflow documentation
-├── AGENT.md              # Agent instructions
-├── CONTRIBUTING.md       # Contribution guidelines
-└── CLAUDE.md             # Claude Code configuration
+├── apps/
+│   ├── amber/             # Media storage frontend
+│   ├── clearing/          # Status page
+│   ├── domains/           # Forage frontend (domain search)
+│   ├── ivy/               # Link in bio
+│   ├── landing/           # Marketing site (grove.place)
+│   ├── login/             # Auth login page
+│   ├── meadow/            # Community feed
+│   ├── plant/             # Tenant blog management
+│   ├── terrarium/         # Admin & testing interface
+├── libs/
+│   ├── engine/            # @autumnsgrove/lattice — core engine
+│   ├── foliage/           # Theme system
+│   ├── gossamer/          # Shared utilities
+│   ├── shutter/           # Image processing
+│   ├── vineyard/          # Component showcase library
+├── services/
+│   ├── amber/             # Storage API worker
+│   ├── durable-objects/   # Cloudflare Durable Objects
+│   ├── forage/            # Domain search service
+│   ├── grove-router/      # Subdomain routing Worker
+│   ├── heartwood/         # Authentication service
+│   ├── pulse/             # Analytics service
+│   ├── zephyr/            # Email gateway
+├── workers/               # Scheduled/utility workers
+├── docs/                  # Specs, patterns, guides
+├── AgentUsage/            # Agent workflow documentation
+├── AGENT.md               # Agent instructions
+├── CONTRIBUTING.md         # Contribution guidelines
+└── CLAUDE.md              # Claude Code configuration
 ```
 
 ---

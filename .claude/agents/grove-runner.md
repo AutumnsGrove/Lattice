@@ -39,24 +39,24 @@ pnpm run package                           # Build engine dist/ (in packages/eng
 
 ## Monorepo Structure
 
-The project is a monorepo with packages in `packages/`:
+The project is a monorepo with packages in `libs/` and `apps/`:
 
-- `packages/engine/` — Core framework (@autumnsgrove/lattice)
-- `packages/landing/` — Marketing site (grove.place)
-- `packages/meadow/` — Community feed
-- `packages/plant/` — Subscription management
-- `packages/clearing/` — Status page
-- `packages/terrarium/` — Minecraft panel
-- `packages/login/` — Auth hub
-- `packages/heartwood/` — Auth backend (Hono)
-- `packages/workers/` — Cloudflare Workers
+- `libs/engine/` — Core framework (@autumnsgrove/lattice)
+- `apps/landing/` — Marketing site (grove.place)
+- `apps/meadow/` — Community feed
+- `apps/plant/` — Subscription management
+- `apps/clearing/` — Status page
+- `apps/terrarium/` — Minecraft panel
+- `apps/login/` — Auth hub
+- `services/heartwood/` — Auth backend (Hono)
+- `workers/` — Cloudflare Workers
 
 ## Engine Rebuild
 
 If type errors reference stale engine types:
 
 ```bash
-cd packages/engine && pnpm run package
+cd libs/engine && pnpm run package
 ```
 
 # Output Format

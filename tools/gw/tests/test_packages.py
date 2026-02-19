@@ -7,9 +7,11 @@ from unittest.mock import patch, MagicMock
 import pytest
 
 from gw.packages import (
+    PACKAGE_DIRS,
     Package,
     PackageType,
     Monorepo,
+    extract_package_from_path,
     find_monorepo_root,
     detect_package_type,
     load_package,
@@ -351,3 +353,148 @@ class TestCurrentPackageDetection:
 
         assert pkg is not None
         assert pkg.name == "test-pkg"
+
+
+# ============================================================================
+# extract_package_from_path Tests
+# ============================================================================
+
+
+class TestExtractPackageFromPath:
+    """Tests for extracting package identifiers from file paths."""
+
+    def test_old_layout_packages_dir(self) -> None:
+        """Old layout: packages/engine/src/foo.ts → 'engine'."""
+        assert extract_package_from_path("packages/engine/src/foo.ts") == "engine"
+
+    def test_old_layout_packages_root_file(self) -> None:
+        """Old layout: packages/landing/package.json → 'landing'."""
+        assert extract_package_from_path("packages/landing/package.json") == "landing"
+
+    def test_new_layout_apps(self) -> None:
+        """New layout: apps/landing/src/foo.ts → 'apps/landing'."""
+        assert extract_package_from_path("apps/landing/src/foo.ts") == "apps/landing"
+
+    def test_new_layout_services(self) -> None:
+        """New layout: services/heartwood/src/index.ts → 'services/heartwood'."""
+        assert extract_package_from_path("services/heartwood/src/index.ts") == "services/heartwood"
+
+    def test_new_layout_libs(self) -> None:
+        """New layout: libs/engine/src/lib/ui/GlassCard.svelte → 'libs/engine'."""
+        assert extract_package_from_path("libs/engine/src/lib/ui/GlassCard.svelte") == "libs/engine"
+
+    def test_workers_dir(self) -> None:
+        """Workers: workers/zephyr/src/index.ts → 'workers/zephyr'."""
+        assert extract_package_from_path("workers/zephyr/src/index.ts") == "workers/zephyr"
+
+    def test_tools_dir(self) -> None:
+        """Tools: tools/gw/src/gw/packages.py → 'tools/gw'."""
+        assert extract_package_from_path("tools/gw/src/gw/packages.py") == "tools/gw"
+
+    def test_root_file_returns_none(self) -> None:
+        """Root files don't belong to a package."""
+        assert extract_package_from_path("package.json") is None
+
+    def test_unknown_dir_returns_none(self) -> None:
+        """Unrecognized top-level dirs return None."""
+        assert extract_package_from_path("docs/plans/migration.md") is None
+
+    def test_empty_path_returns_none(self) -> None:
+        """Edge case: empty string."""
+        assert extract_package_from_path("") is None
+
+
+# ============================================================================
+# New Layout Discovery Tests
+# ============================================================================
+
+
+class TestNewLayoutDiscovery:
+    """Tests for discovering packages in the new categorized layout."""
+
+    def test_discover_in_apps_dir(self, tmp_path: Path) -> None:
+        """Test discovering SvelteKit apps in apps/ directory."""
+        apps_dir = tmp_path / "apps"
+        apps_dir.mkdir()
+
+        landing = apps_dir / "landing"
+        landing.mkdir()
+        (landing / "package.json").write_text('{"name": "grove-landing"}')
+        (landing / "svelte.config.js").write_text("")
+
+        packages = discover_packages(tmp_path)
+
+        assert len(packages) == 1
+        assert packages[0].name == "grove-landing"
+        assert packages[0].package_type == PackageType.SVELTEKIT
+
+    def test_discover_in_services_dir(self, tmp_path: Path) -> None:
+        """Test discovering workers in services/ directory."""
+        services_dir = tmp_path / "services"
+        services_dir.mkdir()
+
+        heartwood = services_dir / "heartwood"
+        heartwood.mkdir()
+        (heartwood / "package.json").write_text('{"name": "grove-heartwood"}')
+        (heartwood / "wrangler.toml").write_text("")
+
+        packages = discover_packages(tmp_path)
+
+        assert len(packages) == 1
+        assert packages[0].name == "grove-heartwood"
+        assert packages[0].package_type == PackageType.WORKER
+
+    def test_discover_in_libs_dir(self, tmp_path: Path) -> None:
+        """Test discovering libraries in libs/ directory."""
+        libs_dir = tmp_path / "libs"
+        libs_dir.mkdir()
+
+        engine = libs_dir / "engine"
+        engine.mkdir()
+        (engine / "package.json").write_text('{"name": "@autumnsgrove/lattice"}')
+
+        packages = discover_packages(tmp_path)
+
+        assert len(packages) == 1
+        assert packages[0].name == "@autumnsgrove/lattice"
+        assert packages[0].package_type == PackageType.LIBRARY
+
+    def test_discover_both_layouts_simultaneously(self, tmp_path: Path) -> None:
+        """Test that both old and new layouts are discovered together."""
+        # Old layout
+        packages_dir = tmp_path / "packages"
+        packages_dir.mkdir()
+        old_pkg = packages_dir / "engine"
+        old_pkg.mkdir()
+        (old_pkg / "package.json").write_text('{"name": "engine"}')
+
+        # New layout
+        apps_dir = tmp_path / "apps"
+        apps_dir.mkdir()
+        new_pkg = apps_dir / "landing"
+        new_pkg.mkdir()
+        (new_pkg / "package.json").write_text('{"name": "landing"}')
+        (new_pkg / "svelte.config.js").write_text("")
+
+        packages = discover_packages(tmp_path)
+
+        names = {p.name for p in packages}
+        assert "engine" in names
+        assert "landing" in names
+        assert len(packages) == 2
+
+    def test_no_duplicate_discovery(self, tmp_path: Path) -> None:
+        """Test that the same package isn't discovered twice."""
+        # Create workers/ at root level
+        workers_dir = tmp_path / "workers"
+        workers_dir.mkdir()
+        worker = workers_dir / "zephyr"
+        worker.mkdir()
+        (worker / "package.json").write_text('{"name": "zephyr"}')
+        (worker / "wrangler.toml").write_text("")
+
+        packages = discover_packages(tmp_path)
+
+        # Should only appear once even though workers/ is scanned
+        zephyr_pkgs = [p for p in packages if p.name == "zephyr"]
+        assert len(zephyr_pkgs) == 1

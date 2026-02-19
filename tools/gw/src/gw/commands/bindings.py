@@ -11,6 +11,7 @@ try:
 except ImportError:
     import tomli as tomllib
 
+from ..packages import PACKAGE_DIRS
 from ..ui import console, create_table, info, warning
 
 
@@ -33,20 +34,14 @@ def parse_wrangler_config(config_path: Path) -> dict[str, Any]:
 
     # Extract package name from path
     parts = config_path.parts
-    if "packages" in parts:
-        idx = parts.index("packages")
-        if idx + 1 < len(parts):
-            package = parts[idx + 1]
-        else:
-            package = config_path.parent.name
-    elif "workers" in parts:
-        idx = parts.index("workers")
-        if idx + 1 < len(parts):
-            package = f"workers/{parts[idx + 1]}"
-        else:
-            package = config_path.parent.name
-    else:
-        package = config_path.parent.name
+    package = config_path.parent.name  # fallback
+    for i, part in enumerate(parts):
+        if part in PACKAGE_DIRS and i + 1 < len(parts):
+            if part == "packages":
+                package = parts[i + 1]
+            else:
+                package = f"{part}/{parts[i + 1]}"
+            break
 
     result = {
         "name": data.get("name", "unknown"),

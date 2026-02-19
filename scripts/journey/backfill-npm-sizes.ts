@@ -19,7 +19,7 @@
  * CSV Path Resolution:
  *   1. --csv argument (if provided)
  *   2. snapshots/history.csv (CI/workflow location)
- *   3. packages/landing/static/data/history.csv (local dev location)
+ *   3. apps/landing/static/data/history.csv (local dev location)
  */
 
 import * as fs from "node:fs";
@@ -35,7 +35,7 @@ const GROVE_ROOT = path.resolve(import.meta.dirname, "../..");
 // Possible CSV locations (in order of preference)
 const CSV_PATHS = [
 	path.join(GROVE_ROOT, "snapshots/history.csv"), // CI/workflow location
-	path.join(GROVE_ROOT, "packages/landing/static/data/history.csv"), // Local dev location
+	path.join(GROVE_ROOT, "apps/landing/static/data/history.csv"), // Local dev location
 ];
 
 const NPM_PACKAGE_NAME = "@autumnsgrove/lattice";

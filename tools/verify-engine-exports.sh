@@ -31,10 +31,10 @@ fi
 
 # Paths (relative to repo root)
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || echo ".")"
-ENGINE_UI="$REPO_ROOT/packages/engine/src/lib/ui"
+ENGINE_UI="$REPO_ROOT/libs/engine/src/lib/ui"
 COMPONENTS_DIR="$ENGINE_UI/components"
 ROOT_INDEX="$ENGINE_UI/index.ts"
-PACKAGE_JSON="$REPO_ROOT/packages/engine/package.json"
+PACKAGE_JSON="$REPO_ROOT/libs/engine/package.json"
 
 if [ ! -d "$COMPONENTS_DIR" ]; then
     echo -e "${RED}✗ Engine components directory not found: $COMPONENTS_DIR${NC}"

@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+pnpm-lock.yaml
+
+# Build outputs
+dist/
+.svelte-kit/
+
+# Environment and secrets
+secrets.json
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.claude/*
+!.claude/skills/
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Test coverage
+coverage/
+
+# BaseProject backups
+.baseproject-backup-*/

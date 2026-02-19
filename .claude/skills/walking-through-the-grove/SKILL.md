@@ -5,7 +5,7 @@ description: Find the right Grove-themed name for a new service or feature. Use 
 
 # Walking Through the Grove
 
-A naming ritual for the Grove ecosystem. Use this when you need to find a name that *fits*—not just a clever pun, but something that belongs in this forest.
+A naming ritual for the Grove ecosystem. Use this when you need to find a name that _fits_—not just a clever pun, but something that belongs in this forest.
 
 ## When to Activate
 
@@ -16,7 +16,7 @@ A naming ritual for the Grove ecosystem. Use this when you need to find a name t
 
 ## The Process
 
-This is a *journey*, not a checklist. Take your time.
+This is a _journey_, not a checklist. Take your time.
 
 ### Step 1: Read the Naming Philosophy
 
@@ -26,10 +26,11 @@ cat docs/grove-naming.md
 ```
 
 Read the entire document. Don't skim. Let it sink in:
+
 - "A forest of voices. Every user is a tree in the grove."
 - Names aren't branding—they're the language of an ecosystem
 - Things that grow, shelter, connect
-- Not about trees directly—about what happens *in and around* the forest
+- Not about trees directly—about what happens _in and around_ the forest
 
 ### Step 2: Create a Scratchpad
 
@@ -41,6 +42,7 @@ mkdir -p docs/scratch
 ```
 
 This scratchpad is where you think out loud. Include:
+
 - ASCII art visualizations
 - Questions you're asking yourself
 - Rejected ideas and why
@@ -60,6 +62,7 @@ In your scratchpad, draw the grove. ASCII art helps:
 ```
 
 Place the existing services in the visualization:
+
 - Where is Meadow? (the open social space)
 - Where is Heartwood? (the core identity)
 - Where is Ivy? (climbing, connecting)
@@ -70,12 +73,14 @@ Place the existing services in the visualization:
 Don't ask "where does it go?" first. Ask:
 
 **What is it, fundamentally?**
+
 - Is it a place? (Meadow, Nook, Clearing)
 - Is it an object/process? (Amber, Bloom, Patina)
 - Is it a feature of the tree? (Foliage, Heartwood, Rings)
 - Is it a connection? (Ivy, Mycelium, Reeds)
 
 **What does it DO in the user's life?**
+
 - Protect? (Shade, Patina)
 - Connect? (Ivy, Meadow, Reeds)
 - Store? (Amber, Trove)
@@ -83,6 +88,7 @@ Don't ask "where does it go?" first. Ask:
 - Create? (Terrarium, Foliage)
 
 **What emotion should it evoke?**
+
 - Warmth?
 - Safety?
 - Discovery?
@@ -125,11 +131,11 @@ Based on your walk, list 5-10 candidates. For each:
 
 A good Grove name should complete this sentence naturally:
 
-> "[Name] is where you _______________."
+> "[Name] is where you **\*\***\_\_\_**\*\***."
 
 Or:
 
-> "[Name] is the _______________."
+> "[Name] is the **\*\***\_\_\_**\*\***."
 
 If you can't write a poetic one-liner, the name might not fit.
 
@@ -139,18 +145,20 @@ Once you've found the name, write it in Grove style:
 
 ```markdown
 ## [Name]
+
 **[Tagline]** · `[domain].grove.place`
 
 [2-3 sentences explaining what this thing IS in the real world—
 the natural metaphor. Then 2-3 sentences explaining what it does
 in Grove. End with the feeling it should evoke.]
 
-*[A poetic one-liner in italics]*
+_[A poetic one-liner in italics]_
 ```
 
 ### Step 9: Check for Conflicts
 
 Before finalizing:
+
 - Search the codebase for the name
 - Check if the subdomain concept conflicts with existing services
 - Make sure it's not too similar to existing names
@@ -159,9 +167,10 @@ Before finalizing:
 ### Step 10: Implement
 
 Update all the files:
+
 1. `docs/grove-naming.md` — Add the full entry
 2. `docs/philosophy/grove-naming.md` — Update source (generates manifest)
-3. `packages/grove-router/src/index.ts` — Claim subdomain
+3. `services/grove-router/src/index.ts` — Claim subdomain
 4. `plant/src/routes/api/check-username/+server.ts` — Reserve username
 5. Workshop page if applicable
 6. Icons if applicable
@@ -173,7 +182,7 @@ Update all the files:
 
 From the naming document:
 
-> "These names share common ground: nature, shelter, things that grow. But none of them are *about* trees directly. They're about what happens in and around the forest."
+> "These names share common ground: nature, shelter, things that grow. But none of them are _about_ trees directly. They're about what happens in and around the forest."
 
 > "The Grove is the place. These are the things you find there."
 
@@ -186,14 +195,16 @@ The name should feel **inevitable**—like it was always there, waiting to be di
 The problem: We need a name for support tickets.
 
 **First attempts (rejected):**
+
 - Echo → "echo chamber" feels like shouting into void, no one listening
-- Feather, Flare, Dove → These are about *sending* something
-- But support isn't about sending—it's about *connecting*
+- Feather, Flare, Dove → These are about _sending_ something
+- But support isn't about sending—it's about _connecting_
 
 **The walk:**
+
 > I'm in the grove. Something's wrong with my tree. I need help.
 > Waystone gives me self-service guides. Clearing shows me status.
-> But I need to actually *talk* to someone.
+> But I need to actually _talk_ to someone.
 >
 > What do I do?
 >
@@ -208,7 +219,7 @@ Support isn't a ticket system. It's a porch conversation.
 > A porch on a cabin in the woods. You come up the steps. You sit down.
 > The grove keeper comes out. You talk.
 
-*"Have a seat on the porch. We'll figure it out together."*
+_"Have a seat on the porch. We'll figure it out together."_
 
 ---
 

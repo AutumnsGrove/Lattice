@@ -1,0 +1,84 @@
+# Worker configuration for Forage
+name = "forage"
+main = "src/index.ts"
+compatibility_date = "2024-11-01"
+
+# Durable Objects binding - SQLite-backed (FREE tier)
+[[durable_objects.bindings]]
+name = "SEARCH_JOB"
+class_name = "SearchJobDO"
+
+# Workers AI binding (for Cloudflare AI models like Llama 4 Scout)
+[ai]
+binding = "AI"
+
+# D1 Database binding for job index
+[[d1_databases]]
+binding = "DB"
+database_name = "forage-jobs"
+database_id = "cd493112-a901-4f6d-aadf-a5ca78929557"
+
+# Migrations for Durable Objects
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["SearchJobDO"]
+
+# Service bindings (Worker-to-Worker)
+[[services]]
+binding = "AUTH"
+service = "groveauth"
+
+[[services]]
+binding = "ZEPHYR"
+service = "grove-zephyr"
+
+# Durable Objects observability (logs to CF dashboard)
+[observability.logs]
+enabled = true
+head_sampling_rate = 1
+invocation_logs = true
+
+# Environment variables (secrets should be set via wrangler secret)
+[vars]
+ENVIRONMENT = "production"
+MAX_BATCHES = "6"
+TARGET_RESULTS = "25"
+# Provider selection: openrouter (primary, ZDR compliant), deepseek (fallback)
+DRIVER_PROVIDER = "openrouter"
+SWARM_PROVIDER = "openrouter"
+# RDAP checker selection: rdap (traditional), cerebras (AI-powered)
+USE_CEREBRAS_RDAP = "false"
+
+# Development environment
+[env.dev]
+name = "forage-dev"
+
+[[env.dev.durable_objects.bindings]]
+name = "SEARCH_JOB"
+class_name = "SearchJobDO"
+
+[env.dev.ai]
+binding = "AI"
+
+[[env.dev.migrations]]
+tag = "v1"
+new_sqlite_classes = ["SearchJobDO"]
+
+[env.dev.vars]
+ENVIRONMENT = "development"
+MAX_BATCHES = "2"
+TARGET_RESULTS = "25"
+DRIVER_PROVIDER = "openrouter"
+SWARM_PROVIDER = "openrouter"
+USE_CEREBRAS_RDAP = "false"
+
+# Secrets to configure:
+# - OPENROUTER_API_KEY: API key for OpenRouter (primary, ZDR compliant)
+# - DEEPSEEK_API_KEY: API key for DeepSeek (fallback only)
+# - ZEPHYR_API_KEY: API key for Zephyr email service binding
+#
+# Set with: wrangler secret put OPENROUTER_API_KEY
+#
+# Provider hierarchy:
+# - openrouter: OpenRouter proxy to DeepSeek V3.2 ($0.28/$0.42 per M tokens) - PRIMARY
+# - deepseek: DeepSeek V3.2 direct ($0.28/$0.42 per M tokens) - FALLBACK

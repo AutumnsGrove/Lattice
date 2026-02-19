@@ -45,7 +45,7 @@ By default, Grove Mode is OFF for new visitors. They see familiar terms: "Posts"
 **The Component Suite:**
 
 ```svelte
-import { GroveTerm, GroveSwap, GroveText, GroveSwapText, GroveIntro } from '@autumnsgrove/lattice/ui';
+import {(GroveTerm, GroveSwap, GroveText, GroveSwapText, GroveIntro)} from '@autumnsgrove/lattice/ui';
 import groveTermManifest from '$lib/data/grove-term-manifest.json';
 ```
 
@@ -70,7 +70,10 @@ import groveTermManifest from '$lib/data/grove-term-manifest.json';
 <GroveSwap term="arbor" manifest={groveTermManifest} />
 
 <!-- Parse [[term]] syntax in data strings (ideal for FAQ items, pricing, etc.) -->
-<GroveText content="Your [[bloom|posts]] live in your [[garden|blog]]." manifest={groveTermManifest} />
+<GroveText
+	content="Your [[bloom|posts]] live in your [[garden|blog]]."
+	manifest={groveTermManifest}
+/>
 
 <!-- Page intro banner: "we call it the Meadow" -->
 <GroveIntro term="meadow" manifest={groveTermManifest} />
@@ -85,7 +88,7 @@ import groveTermManifest from '$lib/data/grove-term-manifest.json';
 - **Use `[[term]]` syntax** for data-driven content (FAQ items, pricing fineprint, feature lists).
 - **Grove Mode store**: `groveModeStore` from `@autumnsgrove/lattice/ui/stores`. Toggle lives in the footer.
 
-See `docs/grove-user-identity.md` for the full identity language documentation and `packages/engine/src/lib/ui/components/ui/groveterm/` for component source.
+See `docs/grove-user-identity.md` for the full identity language documentation and `libs/engine/src/lib/ui/components/ui/groveterm/` for component source.
 
 ---
 
@@ -108,17 +111,15 @@ Content (text, cards, UI)
 ### Glass Components
 
 ```svelte
-import { Glass, GlassCard, GlassButton, GlassOverlay } from '@lattice/ui/ui';
+import {(Glass, GlassCard, GlassButton, GlassOverlay)} from '@lattice/ui/ui';
 
 <!-- Container with glass effect -->
 <Glass variant="tint" class="p-6 rounded-xl">
-  <p>Readable text over busy backgrounds</p>
+	<p>Readable text over busy backgrounds</p>
 </Glass>
 
 <!-- Card with glass styling -->
-<GlassCard title="Settings" variant="default" hoverable>
-  Content here
-</GlassCard>
+<GlassCard title="Settings" variant="default" hoverable>Content here</GlassCard>
 
 <!-- Glass button -->
 <GlassButton variant="accent">Subscribe</GlassButton>
@@ -148,8 +149,10 @@ import { Glass, GlassCard, GlassButton, GlassOverlay } from '@lattice/ui/ui';
 ### Key Pattern: Sticky Navigation
 
 ```svelte
-<nav class="sticky top-[73px] z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-divider">
-  <!-- Navigation content -->
+<nav
+	class="sticky top-[73px] z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-divider"
+>
+	<!-- Navigation content -->
 </nav>
 ```
 
@@ -162,12 +165,9 @@ Grove uses four seasons, each with distinct colors, weather effects, and moods.
 ### Season Detection
 
 ```svelte
-import { season } from '$lib/stores/season';
-
-const isSpring = $derived($season === 'spring');
-const isAutumn = $derived($season === 'autumn');
-const isWinter = $derived($season === 'winter');
-// Summer is the default (no flag needed)
+import {season} from '$lib/stores/season'; const isSpring = $derived($season === 'spring'); const isAutumn
+= $derived($season === 'autumn'); const isWinter = $derived($season === 'winter'); // Summer is the default
+(no flag needed)
 ```
 
 ### Color Palette System
@@ -195,31 +195,21 @@ bark.warmBark; // #6B4423 - Pine, cedar
 bark.lightBark; // #8b6914 - Young trees
 
 // Earth - ground elements
-(earth.soil,
-  earth.mud,
-  earth.clay,
-  earth.sand,
-  earth.stone,
-  earth.pebble,
-  earth.slate);
+(earth.soil, earth.mud, earth.clay, earth.sand, earth.stone, earth.pebble, earth.slate);
 
 // Natural - cream and off-whites
-(natural.cream,
-  natural.aspenBark,
-  natural.bone,
-  natural.mushroom,
-  natural.birchWhite);
+(natural.cream, natural.aspenBark, natural.bone, natural.mushroom, natural.birchWhite);
 ```
 
 #### Spring Palettes
 
 ```typescript
 import {
-  springFoliage,
-  springSky,
-  wildflowers,
-  cherryBlossoms,
-  cherryBlossomsPeak,
+	springFoliage,
+	springSky,
+	wildflowers,
+	cherryBlossoms,
+	cherryBlossomsPeak,
 } from "@autumnsgrove/lattice/ui/nature";
 
 // Spring Foliage - yellow-green new growth
@@ -328,9 +318,7 @@ autumnReds.coral; // #fb7185 - Pale accent
 import { accents, wildflowers } from "@autumnsgrove/lattice/ui/nature";
 
 // Mushrooms - fairy tale pops of color
-(accents.mushroom.redCap,
-  accents.mushroom.orangeCap,
-  accents.mushroom.brownCap);
+(accents.mushroom.redCap, accents.mushroom.orangeCap, accents.mushroom.brownCap);
 (accents.mushroom.spots, accents.mushroom.gill);
 
 // Firefly - bioluminescence
@@ -340,29 +328,16 @@ import { accents, wildflowers } from "@autumnsgrove/lattice/ui/nature";
 (accents.berry.ripe, accents.berry.elderberry, accents.berry.red);
 
 // Water - cool blue spectrum
-(accents.water.surface,
-  accents.water.deep,
-  accents.water.shallow,
-  accents.water.lily);
+(accents.water.surface, accents.water.deep, accents.water.shallow, accents.water.lily);
 
 // Sky - time of day
-(accents.sky.dayLight,
-  accents.sky.dayMid,
-  accents.sky.sunset,
-  accents.sky.night,
-  accents.sky.star);
+(accents.sky.dayLight, accents.sky.dayMid, accents.sky.sunset, accents.sky.night, accents.sky.star);
 
 // Birds - species-specific colors
-(accents.bird.cardinalRed,
-  accents.bird.cardinalMask,
-  accents.bird.cardinalBeak);
-(accents.bird.chickadeeCap,
-  accents.bird.chickadeeBody,
-  accents.bird.chickadeeBelly);
+(accents.bird.cardinalRed, accents.bird.cardinalMask, accents.bird.cardinalBeak);
+(accents.bird.chickadeeCap, accents.bird.chickadeeBody, accents.bird.chickadeeBelly);
 (accents.bird.robinBody, accents.bird.robinBreast, accents.bird.robinBeak);
-(accents.bird.bluebirdBody,
-  accents.bird.bluebirdWing,
-  accents.bird.bluebirdBreast);
+(accents.bird.bluebirdBody, accents.bird.bluebirdWing, accents.bird.bluebirdBreast);
 
 // NOTE: accents.flower is deprecated - use flowers.wildflower instead
 ```
@@ -371,11 +346,11 @@ import { accents, wildflowers } from "@autumnsgrove/lattice/ui/nature";
 
 ```typescript
 import {
-  getSeasonalGreens,
-  getCherryColors,
-  isTreeBare,
-  pickRandom,
-  pickFrom,
+	getSeasonalGreens,
+	getCherryColors,
+	isTreeBare,
+	pickRandom,
+	pickFrom,
 } from "@autumnsgrove/lattice/ui/nature";
 
 // Get foliage colors mapped to season
@@ -394,7 +369,7 @@ const cherryColors = getCherryColors(season);
 
 // Check if deciduous tree is bare
 if (isTreeBare("cherry", "winter")) {
-  /* no foliage */
+	/* no foliage */
 }
 
 // Random color selection for natural variation
@@ -428,17 +403,22 @@ import { spring, pinks, springBlossoms } from "@autumnsgrove/lattice/ui/nature";
 ```svelte
 <!-- Winter: Snowfall -->
 {#if isWinter}
-  <SnowfallLayer count={40} zIndex={5} opacity={{ min: 0.4, max: 0.8 }} spawnDelay={8} />
+	<SnowfallLayer count={40} zIndex={5} opacity={{ min: 0.4, max: 0.8 }} spawnDelay={8} />
 {/if}
 
 <!-- Spring: Cherry blossom petals -->
 {#if isSpring}
-  <FallingPetalsLayer count={80} zIndex={100} opacity={{ min: 0.5, max: 0.9 }} />
+	<FallingPetalsLayer count={80} zIndex={100} opacity={{ min: 0.5, max: 0.9 }} />
 {/if}
 
 <!-- Autumn: Falling leaves (tied to trees) -->
 {#if isAutumn}
-  <FallingLeavesLayer trees={forestTrees} season={$season} minLeavesPerTree={2} maxLeavesPerTree={4} />
+	<FallingLeavesLayer
+		trees={forestTrees}
+		season={$season}
+		minLeavesPerTree={2}
+		maxLeavesPerTree={4}
+	/>
 {/if}
 ```
 
@@ -471,52 +451,49 @@ The forest should feel alive and different every visit.
 
 ```typescript
 interface GeneratedTree {
-  id: number;
-  x: number; // percentage from left (5-93% to avoid edges)
-  size: number; // base width in pixels
-  aspectRatio: number; // height = size * aspectRatio (1.0-1.5 range)
-  treeType: TreeType; // 'logo' | 'pine' | 'cherry' | 'aspen' | 'birch'
-  opacity: number; // 0.5-0.9 for depth
-  zIndex: number; // larger trees = higher z-index
+	id: number;
+	x: number; // percentage from left (5-93% to avoid edges)
+	size: number; // base width in pixels
+	aspectRatio: number; // height = size * aspectRatio (1.0-1.5 range)
+	treeType: TreeType; // 'logo' | 'pine' | 'cherry' | 'aspen' | 'birch'
+	opacity: number; // 0.5-0.9 for depth
+	zIndex: number; // larger trees = higher z-index
 }
 
 // Aspect ratio creates natural height variation
 const TREE_ASPECT_RATIO_RANGE = { min: 1.0, max: 1.5 };
 
 function generateSectionTrees(count: number): GeneratedTree[] {
-  const trees: GeneratedTree[] = [];
-  const usedPositions: number[] = [];
+	const trees: GeneratedTree[] = [];
+	const usedPositions: number[] = [];
 
-  for (let i = 0; i < count; i++) {
-    // Find non-overlapping position
-    let x: number;
-    let attempts = 0;
-    do {
-      x = 5 + Math.random() * 88;
-      attempts++;
-    } while (
-      usedPositions.some((pos) => Math.abs(pos - x) < 8) &&
-      attempts < 20
-    );
-    usedPositions.push(x);
+	for (let i = 0; i < count; i++) {
+		// Find non-overlapping position
+		let x: number;
+		let attempts = 0;
+		do {
+			x = 5 + Math.random() * 88;
+			attempts++;
+		} while (usedPositions.some((pos) => Math.abs(pos - x) < 8) && attempts < 20);
+		usedPositions.push(x);
 
-    const size = 80 + Math.random() * 80;
-    const aspectRatio = 1.0 + Math.random() * 0.5;
-    const opacity = 0.5 + Math.random() * 0.4;
-    const zIndex = size > 130 ? 3 : size > 100 ? 2 : 1;
+		const size = 80 + Math.random() * 80;
+		const aspectRatio = 1.0 + Math.random() * 0.5;
+		const opacity = 0.5 + Math.random() * 0.4;
+		const zIndex = size > 130 ? 3 : size > 100 ? 2 : 1;
 
-    trees.push({
-      id: i,
-      x,
-      size,
-      aspectRatio,
-      treeType: pickRandom(treeTypes),
-      opacity,
-      zIndex,
-    });
-  }
+		trees.push({
+			id: i,
+			x,
+			size,
+			aspectRatio,
+			treeType: pickRandom(treeTypes),
+			opacity,
+			zIndex,
+		});
+	}
 
-  return trees.sort((a, b) => a.x - b.x);
+	return trees.sort((a, b) => a.x - b.x);
 }
 ```
 
@@ -530,9 +507,9 @@ function generateSectionTrees(count: number): GeneratedTree[] {
 
 ```svelte
 {#each forestTrees as tree (tree.id)}
-  <div
-    class="absolute"
-    style="
+	<div
+		class="absolute"
+		style="
       left: {tree.x}%;
       bottom: 0;
       width: {tree.size}px;
@@ -541,19 +518,19 @@ function generateSectionTrees(count: number): GeneratedTree[] {
       z-index: {tree.zIndex};
       transform: translateX(-50%);
     "
-  >
-    {#if tree.treeType === 'logo'}
-      <Logo class="w-full h-full" season={$season} animate />
-    {:else if tree.treeType === 'pine'}
-      <TreePine class="w-full h-full" season={$season} animate />
-    {:else if tree.treeType === 'cherry'}
-      <TreeCherry class="w-full h-full" season={$season} animate />
-    {:else if tree.treeType === 'aspen'}
-      <TreeAspen class="w-full h-full" season={$season} animate />
-    {:else if tree.treeType === 'birch'}
-      <TreeBirch class="w-full h-full" season={$season} animate />
-    {/if}
-  </div>
+	>
+		{#if tree.treeType === "logo"}
+			<Logo class="w-full h-full" season={$season} animate />
+		{:else if tree.treeType === "pine"}
+			<TreePine class="w-full h-full" season={$season} animate />
+		{:else if tree.treeType === "cherry"}
+			<TreeCherry class="w-full h-full" season={$season} animate />
+		{:else if tree.treeType === "aspen"}
+			<TreeAspen class="w-full h-full" season={$season} animate />
+		{:else if tree.treeType === "birch"}
+			<TreeBirch class="w-full h-full" season={$season} animate />
+		{/if}
+	</div>
 {/each}
 ```
 
@@ -561,12 +538,12 @@ function generateSectionTrees(count: number): GeneratedTree[] {
 
 ```typescript
 function calculateDensity(): number {
-  const width = window.innerWidth;
-  if (width < 768) return 1; // Mobile: base count
-  if (width < 1024) return 1.3; // Tablet
-  if (width < 1440) return 1.8; // Desktop
-  if (width < 2560) return 2.5; // Large desktop
-  return 3.5; // Ultrawide
+	const width = window.innerWidth;
+	if (width < 768) return 1; // Mobile: base count
+	if (width < 1024) return 1.3; // Tablet
+	if (width < 1440) return 1.8; // Desktop
+	if (width < 2560) return 2.5; // Large desktop
+	return 3.5; // Ultrawide
 }
 ```
 
@@ -622,14 +599,14 @@ ls landing/src/lib/components/nature/creatures/
 ```svelte
 <!-- Winter birds -->
 {#if isWinter}
-  <Cardinal facing="right" style="..." />
-  <Chickadee facing="left" style="..." />
+	<Cardinal facing="right" style="..." />
+	<Chickadee facing="left" style="..." />
 {/if}
 
 <!-- Spring birds -->
 {#if isSpring}
-  <Robin facing="right" style="..." />
-  <Bluebird facing="left" style="..." />
+	<Robin facing="right" style="..." />
+	<Bluebird facing="left" style="..." />
 {/if}
 ```
 
@@ -655,19 +632,19 @@ midnightBloom.softGold; // #fcd34d - Fairy lights
 
 ```svelte
 <section class="bg-gradient-to-b from-orange-950/50 via-purple-950 to-slate-950">
-  <!-- Stars -->
-  <StarCluster count={12} class="absolute top-12 left-[10%]" />
+	<!-- Stars -->
+	<StarCluster count={12} class="absolute top-12 left-[10%]" />
 
-  <!-- Moon -->
-  <Moon phase="waning-crescent" class="absolute top-20 right-[15%] w-16 h-16 opacity-60" />
+	<!-- Moon -->
+	<Moon phase="waning-crescent" class="absolute top-20 right-[15%] w-16 h-16 opacity-60" />
 
-  <!-- Fireflies -->
-  <Firefly count={8} class="absolute inset-0" />
+	<!-- Fireflies -->
+	<Firefly count={8} class="absolute inset-0" />
 
-  <!-- Content with purple glass -->
-  <blockquote class="bg-purple-900/30 backdrop-blur-sm border border-purple-700/30 rounded-lg p-6">
-    <p class="text-purple-200 italic">Dreamy quote here...</p>
-  </blockquote>
+	<!-- Content with purple glass -->
+	<blockquote class="bg-purple-900/30 backdrop-blur-sm border border-purple-700/30 rounded-lg p-6">
+		<p class="text-purple-200 italic">Dreamy quote here...</p>
+	</blockquote>
 </section>
 ```
 
@@ -678,7 +655,7 @@ midnightBloom.softGold; // #fcd34d - Fairy lights
 **NEVER** use emojis. **ALWAYS** use Lucide icons.
 
 ```svelte
-import { MapPin, Check, Leaf, Trees, Mail } from 'lucide-svelte';
+import {(MapPin, Check, Leaf, Trees, Mail)} from 'lucide-svelte';
 
 <!-- Good -->
 <MapPin class="w-4 h-4" />
@@ -743,41 +720,41 @@ Create a consistent icon map at the top of each component/page that uses icons:
 ```typescript
 // landing/src/lib/utils/icons.ts - Centralized icon registry
 import {
-  Mail,
-  HardDrive,
-  Palette,
-  ShieldCheck,
-  Cloud,
-  SearchCode,
-  Archive,
-  Upload,
-  MessagesSquare,
-  Github,
-  Check,
-  X,
-  Loader2,
-  FileText,
-  Tag,
-  Sprout,
-  Heart,
-  ExternalLink,
-  MapPin, // ... etc
+	Mail,
+	HardDrive,
+	Palette,
+	ShieldCheck,
+	Cloud,
+	SearchCode,
+	Archive,
+	Upload,
+	MessagesSquare,
+	Github,
+	Check,
+	X,
+	Loader2,
+	FileText,
+	Tag,
+	Sprout,
+	Heart,
+	ExternalLink,
+	MapPin, // ... etc
 } from "lucide-svelte";
 
 export const featureIcons = {
-  mail: Mail,
-  harddrive: HardDrive,
-  palette: Palette,
-  shieldcheck: ShieldCheck,
-  cloud: Cloud,
-  searchcode: SearchCode,
-  // ... all mapped icons
+	mail: Mail,
+	harddrive: HardDrive,
+	palette: Palette,
+	shieldcheck: ShieldCheck,
+	cloud: Cloud,
+	searchcode: SearchCode,
+	// ... all mapped icons
 } as const;
 
 export const stateIcons = {
-  success: Check,
-  error: X,
-  loading: Loader2,
+	success: Check,
+	error: X,
+	loading: Loader2,
 } as const;
 ```
 
@@ -785,11 +762,11 @@ Then use in components:
 
 ```svelte
 <script lang="ts">
-  import { featureIcons } from '$lib/utils/icons';
+	import { featureIcons } from "$lib/utils/icons";
 </script>
 
 {#each features as feature}
-  <svelte:component this={featureIcons[feature.icon]} class="w-5 h-5" />
+	<svelte:component this={featureIcons[feature.icon]} class="w-5 h-5" />
 {/each}
 ```
 
@@ -813,12 +790,12 @@ Then use in components:
 ```svelte
 <!-- Inline with text -->
 <span class="inline-flex items-center gap-1.5">
-  <Leaf class="w-4 h-4" /> Feature name
+	<Leaf class="w-4 h-4" /> Feature name
 </span>
 
 <!-- Button icon -->
 <button class="p-2">
-  <Menu class="w-5 h-5" />
+	<Menu class="w-5 h-5" />
 </button>
 
 <!-- Large decorative -->
@@ -855,25 +832,25 @@ curl -s https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/tree-pi
 ```typescript
 // TreePine - conifer silhouette
 const treePine = {
-  canopy:
-    "m17 14 3 3.3a1 1 0 0 1-.7 1.7H4.7a1 1 0 0 1-.7-1.7L7 14h-.3a1 1 0 0 1-.7-1.7L9 9h-.2A1 1 0 0 1 8 7.3L12 3l4 4.3a1 1 0 0 1-.8 1.7H15l3 3.3a1 1 0 0 1-.7 1.7H17Z",
-  trunk: "M12 22v-3",
+	canopy:
+		"m17 14 3 3.3a1 1 0 0 1-.7 1.7H4.7a1 1 0 0 1-.7-1.7L7 14h-.3a1 1 0 0 1-.7-1.7L9 9h-.2A1 1 0 0 1 8 7.3L12 3l4 4.3a1 1 0 0 1-.8 1.7H15l3 3.3a1 1 0 0 1-.7 1.7H17Z",
+	trunk: "M12 22v-3",
 };
 
 // TreeDeciduous - deciduous/round tree
 const treeDeciduous = {
-  canopy:
-    "M8 19a4 4 0 0 1-2.24-7.32A3.5 3.5 0 0 1 9 6.03V6a3 3 0 1 1 6 0v.04a3.5 3.5 0 0 1 3.24 5.65A4 4 0 0 1 16 19Z",
-  trunk: "M12 19v3",
+	canopy:
+		"M8 19a4 4 0 0 1-2.24-7.32A3.5 3.5 0 0 1 9 6.03V6a3 3 0 1 1 6 0v.04a3.5 3.5 0 0 1 3.24 5.65A4 4 0 0 1 16 19Z",
+	trunk: "M12 19v3",
 };
 
 // Moon - crescent moon
 const moon =
-  "M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401";
+	"M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401";
 
 // Flame - campfire/hearth
 const flame =
-  "M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4";
+	"M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4";
 ```
 
 ### Composing with SVG Transforms
@@ -882,24 +859,36 @@ Use `<g transform="...">` to position, scale, and rotate icons:
 
 ```svelte
 <svg viewBox="0 0 48 32" fill="none">
-  <!-- Left tree (larger, foreground) -->
-  <g transform="translate(2, 4) scale(0.85)"
-     stroke={color} stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d={treePine.canopy} />
-    <path d={treePine.trunk} />
-  </g>
+	<!-- Left tree (larger, foreground) -->
+	<g
+		transform="translate(2, 4) scale(0.85)"
+		stroke={color}
+		stroke-width="2"
+		stroke-linecap="round"
+		stroke-linejoin="round"
+	>
+		<path d={treePine.canopy} />
+		<path d={treePine.trunk} />
+	</g>
 
-  <!-- Right tree (smaller, background, tilted) -->
-  <g transform="translate(20, 8) scale(0.65) rotate(-5, 12, 12)"
-     stroke={color} stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-     opacity="0.7">
-    <path d={treePine.canopy} />
-    <path d={treePine.trunk} />
-  </g>
+	<!-- Right tree (smaller, background, tilted) -->
+	<g
+		transform="translate(20, 8) scale(0.65) rotate(-5, 12, 12)"
+		stroke={color}
+		stroke-width="2"
+		stroke-linecap="round"
+		stroke-linejoin="round"
+		opacity="0.7"
+	>
+		<path d={treePine.canopy} />
+		<path d={treePine.trunk} />
+	</g>
 
-  <!-- Add simple custom elements sparingly -->
-  <circle cx="30" cy="10" r="1.5" fill={glowColor} opacity="0.8" /> <!-- firefly -->
-  <path d="M2 28h44" stroke={color} stroke-width="1.5" opacity="0.3" /> <!-- ground -->
+	<!-- Add simple custom elements sparingly -->
+	<circle cx="30" cy="10" r="1.5" fill={glowColor} opacity="0.8" />
+	<!-- firefly -->
+	<path d="M2 28h44" stroke={color} stroke-width="1.5" opacity="0.3" />
+	<!-- ground -->
 </svg>
 ```
 
@@ -949,12 +938,12 @@ Desktop navigation items that don't fit should go to a mobile sheet menu:
 
 ```svelte
 <!-- Mobile menu button (visible md:hidden) -->
-<button onclick={() => mobileMenuOpen = true} class="md:hidden p-2">
-  <Menu class="w-5 h-5" />
+<button onclick={() => (mobileMenuOpen = true)} class="md:hidden p-2">
+	<Menu class="w-5 h-5" />
 </button>
 
 <!-- Sheet menu -->
-<MobileMenu bind:open={mobileMenuOpen} onClose={() => mobileMenuOpen = false} />
+<MobileMenu bind:open={mobileMenuOpen} onClose={() => (mobileMenuOpen = false)} />
 ```
 
 ### Decorative Elements on Mobile
@@ -975,7 +964,7 @@ Desktop navigation items that don't fit should go to a mobile sheet menu:
 
 <!-- Skip complex effects for reduced-motion -->
 {#if !prefersReducedMotion}
-  <FallingLeavesLayer ... />
+	<FallingLeavesLayer ... />
 {/if}
 ```
 
@@ -1049,19 +1038,19 @@ Use the SEO component which handles OG meta tags:
 
 ```svelte
 <script>
-  import SEO from '$lib/components/SEO.svelte';
+	import SEO from "$lib/components/SEO.svelte";
 </script>
 
 <SEO
-  title="Page Title"
-  description="Page description for search engines"
-  ogImage="/api/og?title=Page%20Title&subtitle=Custom%20subtitle"
+	title="Page Title"
+	description="Page description for search engines"
+	ogImage="/api/og?title=Page%20Title&subtitle=Custom%20subtitle"
 />
 ```
 
 ### Files
 
-- `packages/og-worker/` — Standalone Worker (uses `workers-og`)
+- `workers/og-worker/` — Standalone Worker (uses `workers-og`)
 - `landing/src/routes/api/og/+server.ts` — Proxy to og.grove.place
 - `landing/src/lib/components/SEO.svelte` — Meta tag management
 

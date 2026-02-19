@@ -42,7 +42,7 @@ Parse the diagnostic output and report:
 If type errors reference stale engine types (e.g., "Property does not exist on type" for recently added engine exports):
 
 ```bash
-cd packages/engine && pnpm run package
+cd libs/engine && pnpm run package
 ```
 
 Then re-run verification.

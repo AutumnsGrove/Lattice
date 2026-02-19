@@ -1,0 +1,71 @@
+# Ivy - Cloudflare Workers Configuration
+# https://developers.cloudflare.com/workers/wrangler/configuration/
+
+name = "ivy"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Build settings for SvelteKit
+[build]
+command = "pnpm build"
+
+# Development settings
+[dev]
+port = 5173
+
+# D1 Database
+[[d1_databases]]
+binding = "DB"
+database_name = "ivy-db"
+database_id = "57738720-bc43-4a7f-ad5b-ceb86b3c0542"
+migrations_dir = "migrations"
+
+# R2 Storage
+[[r2_buckets]]
+binding = "R2"
+bucket_name = "ivy-storage"
+
+# KV Namespace (for rate limiting, caching)
+[[kv_namespaces]]
+binding = "KV"
+id = "a325ec2e391543f7b9b77e25aa3da977"
+
+# Durable Object binding (TriageDO hosted in grove-durable-objects)
+[[durable_objects.bindings]]
+name = "TRIAGE"
+class_name = "TriageDO"
+script_name = "grove-durable-objects"
+
+# Heartwood auth service binding (Worker-to-Worker)
+[[services]]
+binding = "AUTH"
+service = "groveauth"
+
+# Zephyr service binding (email delivery)
+[[services]]
+binding = "ZEPHYR"
+service = "grove-zephyr"
+
+# Workers AI binding (for Lumen classification)
+[ai]
+binding = "AI"
+
+# Environment variables (use secrets for sensitive values)
+[vars]
+ENVIRONMENT = "development"
+
+# Secrets (set via wrangler secret put)
+# FORWARD_EMAIL_API_KEY
+# WEBHOOK_SECRET
+# OPENROUTER_API_KEY
+# ZEPHYR_API_KEY
+# OWNER_EMAIL
+
+# Production environment
+[env.production]
+vars = { ENVIRONMENT = "production" }
+
+# Scheduled triggers (for queue processing)
+[triggers]
+crons = ["* * * * *"]  # Every minute - process send queue
