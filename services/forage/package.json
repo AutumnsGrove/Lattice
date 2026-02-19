@@ -8,6 +8,9 @@
 		"tail": "wrangler tail",
 		"types": "wrangler types"
 	},
+	"dependencies": {
+		"@autumnsgrove/lattice": "workspace:*"
+	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20241127.0",
 		"typescript": "^5.6.3",

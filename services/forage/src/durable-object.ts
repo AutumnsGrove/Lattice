@@ -1,10 +1,13 @@
 /**
  * SearchJobDO - Durable Object for managing domain search jobs
  *
- * Uses SQLite for persistence (FREE tier compatible).
+ * Uses Loom SDK for standardized DO patterns: declarative routing,
+ * structured logging, alarm scheduling, and SQL helpers.
  * Implements alarm-based batch chaining for long-running searches.
  */
 
+import { LoomDO } from "@autumnsgrove/lattice/loom";
+import type { LoomRoute, LoomConfig, LoomRequestContext } from "@autumnsgrove/lattice/loom";
 import type {
 	Env,
 	SearchJob,
@@ -23,26 +26,18 @@ import { getBatchPricing, type DomainPrice } from "./pricing";
 import { getProvider, type ProviderName } from "./providers";
 import { sendResultsEmail, sendFollowupEmail } from "./email";
 
-export class SearchJobDO implements DurableObject {
-	private state: DurableObjectState;
-	private sql: SqlStorage;
-	private env: Env;
-	private initialized = false;
+/** State tracked by the DO across requests */
+interface SearchJobState {
+	job: SearchJob | null;
+}
 
-	constructor(state: DurableObjectState, env: Env) {
-		this.state = state;
-		this.sql = state.storage.sql;
-		this.env = env;
+export class SearchJobDO extends LoomDO<SearchJobState, Env> {
+	config(): LoomConfig {
+		return { name: "SearchJobDO", blockOnInit: true };
 	}
 
-	/**
-	 * Initialize SQLite schema if not already done
-	 */
-	private async ensureSchema(): Promise<void> {
-		if (this.initialized) return;
-
-		// Create tables
-		this.sql.exec(`
+	schema(): string {
+		return `
       -- Core job tracking (single row per DO instance)
       CREATE TABLE IF NOT EXISTS search_job (
         id TEXT PRIMARY KEY,
@@ -88,68 +83,34 @@ export class SearchJobDO implements DurableObject {
         content TEXT NOT NULL,
         created_at TEXT DEFAULT (datetime('now'))
       );
-    `);
-
-		this.initialized = true;
+    `;
 	}
 
-	/**
-	 * Handle incoming requests
-	 */
-	async fetch(request: Request): Promise<Response> {
-		await this.ensureSchema();
-
-		const url = new URL(request.url);
-		const path = url.pathname;
-
-		try {
-			// Route requests
-			if (request.method === "POST" && path === "/start") {
-				return this.handleStart(request);
-			}
-			if (request.method === "GET" && path === "/status") {
-				return this.handleGetStatus();
-			}
-			if (request.method === "GET" && path === "/results") {
-				return this.handleGetResults();
-			}
-			if (request.method === "POST" && path === "/resume") {
-				return this.handleResume(request);
-			}
-			if (request.method === "GET" && path === "/followup") {
-				return this.handleGetFollowup();
-			}
-			if (request.method === "POST" && path === "/cancel") {
-				return this.handleCancel();
-			}
-			if (request.method === "GET" && path === "/stream") {
-				return this.handleStream();
-			}
-
-			return new Response("Not found", { status: 404 });
-		} catch (error) {
-			console.error("Request error:", error);
-			return new Response(JSON.stringify({ error: String(error) }), {
-				status: 500,
-				headers: { "Content-Type": "application/json" },
-			});
-		}
+	routes(): LoomRoute[] {
+		return [
+			{ method: "POST", path: "/start", handler: (ctx) => this.handleStart(ctx) },
+			{ method: "GET", path: "/status", handler: () => this.handleGetStatus() },
+			{ method: "GET", path: "/results", handler: () => this.handleGetResults() },
+			{ method: "POST", path: "/resume", handler: (ctx) => this.handleResume(ctx) },
+			{ method: "GET", path: "/followup", handler: () => this.handleGetFollowup() },
+			{ method: "POST", path: "/cancel", handler: () => this.handleCancel() },
+			{ method: "GET", path: "/stream", handler: () => this.handleStream() },
+		];
 	}
 
-	/**
-	 * Handle alarm - process next batch
-	 */
-	async alarm(): Promise<void> {
-		await this.ensureSchema();
+	// ============================================================================
+	// Alarm handler
+	// ============================================================================
 
+	protected async onAlarm(): Promise<void> {
 		const job = this.getJob();
 		if (!job) {
-			console.error("Alarm fired but no job found");
+			this.log.error("Alarm fired but no job found");
 			return;
 		}
 
 		if (job.status !== "running") {
-			console.log(`Job status is ${job.status}, skipping alarm`);
+			this.log.info(`Job status is ${job.status}, skipping alarm`);
 			return;
 		}
 
@@ -166,25 +127,25 @@ export class SearchJobDO implements DurableObject {
 			const targetResults = parseInt(this.env.TARGET_RESULTS || "25", 10);
 			const goodResults = this.getGoodResultsCount();
 
-			console.log(
+			this.log.info(
 				`Batch ${updatedJob.batch_num} complete: ${result.domains_available} available, ${goodResults} total good`,
 			);
 
 			if (goodResults >= targetResults) {
 				// Success!
 				this.updateJobStatus("complete");
-				console.log(`Search complete with ${goodResults} good results`);
+				this.log.info(`Search complete with ${goodResults} good results`);
 
 				// Send results email if client_email is provided
 				await this.sendCompletionEmail(updatedJob);
 
 				// Clean up DO storage - workflow complete
 				await this.state.storage.deleteAll();
-				console.log(`[SearchJobDO] Workflow complete, storage cleared`);
+				this.log.info("Workflow complete, storage cleared");
 			} else if (updatedJob.batch_num >= maxBatches) {
 				// Need follow-up
 				this.updateJobStatus("needs_followup");
-				console.log(`Max batches reached, needs follow-up`);
+				this.log.info("Max batches reached, needs follow-up");
 
 				// Generate follow-up quiz
 				await this.generateFollowupQuiz(updatedJob);
@@ -193,23 +154,27 @@ export class SearchJobDO implements DurableObject {
 				await this.sendFollowupQuizEmail(updatedJob);
 			} else {
 				// Schedule next batch (10 second delay between batches)
-				await this.scheduleAlarm(10 * 1000);
+				await this.alarms.schedule(10 * 1000);
 			}
 		} catch (error) {
-			console.error("Batch processing error:", error);
+			this.log.error(`Batch processing error: ${error}`);
 			this.updateJobStatus("failed", String(error));
 
 			// Clean up DO storage - workflow failed
 			await this.state.storage.deleteAll();
-			console.log(`[SearchJobDO] Workflow failed, storage cleared`);
+			this.log.info("Workflow failed, storage cleared");
 		}
 	}
+
+	// ============================================================================
+	// Route handlers
+	// ============================================================================
 
 	/**
 	 * Start a new search job
 	 */
-	private async handleStart(request: Request): Promise<Response> {
-		const body = (await request.json()) as {
+	private async handleStart(ctx: LoomRequestContext): Promise<Response> {
+		const body = (await ctx.request.json()) as {
 			job_id: string;
 			client_id: string;
 			quiz_responses: InitialQuizResponse;
@@ -220,10 +185,7 @@ export class SearchJobDO implements DurableObject {
 		// Check if job already exists
 		const existing = this.getJob();
 		if (existing) {
-			return new Response(JSON.stringify({ error: "Job already exists", job_id: existing.id }), {
-				status: 409,
-				headers: { "Content-Type": "application/json" },
-			});
+			return Response.json({ error: "Job already exists", job_id: existing.id }, { status: 409 });
 		}
 
 		// Create job with optional provider overrides
@@ -238,12 +200,9 @@ export class SearchJobDO implements DurableObject {
 		);
 
 		// Start first batch immediately via alarm
-		await this.scheduleAlarm(0);
+		await this.alarms.schedule(0);
 
-		return new Response(JSON.stringify({ job_id: body.job_id, status: "running" }), {
-			status: 201,
-			headers: { "Content-Type": "application/json" },
-		});
+		return Response.json({ job_id: body.job_id, status: "running" }, { status: 201 });
 	}
 
 	/**
@@ -252,10 +211,7 @@ export class SearchJobDO implements DurableObject {
 	private handleGetStatus(): Response {
 		const job = this.getJob();
 		if (!job) {
-			return new Response(JSON.stringify({ error: "No job found" }), {
-				status: 404,
-				headers: { "Content-Type": "application/json" },
-			});
+			return Response.json({ error: "No job found" }, { status: 404 });
 		}
 
 		const domainsChecked = this.getTotalDomainsChecked();
@@ -263,21 +219,18 @@ export class SearchJobDO implements DurableObject {
 		const availableDomains = this.getAvailableDomainsCount();
 		const tokens = this.getTokenUsage();
 
-		return new Response(
-			JSON.stringify({
-				job_id: job.id,
-				status: job.status,
-				batch_num: job.batch_num,
-				domains_checked: domainsChecked,
-				domains_available: availableDomains,
-				good_results: goodResults,
-				input_tokens: tokens.input,
-				output_tokens: tokens.output,
-				created_at: job.created_at,
-				updated_at: job.updated_at,
-			}),
-			{ headers: { "Content-Type": "application/json" } },
-		);
+		return Response.json({
+			job_id: job.id,
+			status: job.status,
+			batch_num: job.batch_num,
+			domains_checked: domainsChecked,
+			domains_available: availableDomains,
+			good_results: goodResults,
+			input_tokens: tokens.input,
+			output_tokens: tokens.output,
+			created_at: job.created_at,
+			updated_at: job.updated_at,
+		});
 	}
 
 	/**
@@ -286,21 +239,16 @@ export class SearchJobDO implements DurableObject {
 	private handleGetResults(): Response {
 		const job = this.getJob();
 		if (!job) {
-			return new Response(JSON.stringify({ error: "No job found" }), {
-				status: 404,
-				headers: { "Content-Type": "application/json" },
-			});
+			return Response.json({ error: "No job found" }, { status: 404 });
 		}
 
 		// Get all available domains, sorted by score then price
-		const results = this.sql
-			.exec(
-				`SELECT * FROM domain_results
+		const results = this.sql.queryAll<DomainResult>(
+			`SELECT * FROM domain_results
        WHERE status = 'available'
        ORDER BY score DESC, price_cents ASC NULLS LAST
        LIMIT 50`,
-			)
-			.toArray() as unknown as DomainResult[];
+		);
 
 		// Format results with pricing display
 		const formattedResults = results.map((r) => ({
@@ -308,7 +256,6 @@ export class SearchJobDO implements DurableObject {
 			flags: typeof r.flags === "string" ? JSON.parse(r.flags) : r.flags,
 			evaluation_data:
 				typeof r.evaluation_data === "string" ? JSON.parse(r.evaluation_data) : r.evaluation_data,
-			// Add formatted price for display
 			price_display: r.price_cents ? `$${(r.price_cents / 100).toFixed(2)}/yr` : "Price unknown",
 			pricing_category: r.price_cents
 				? r.price_cents <= 3000
@@ -325,44 +272,35 @@ export class SearchJobDO implements DurableObject {
 		// Token usage
 		const usage = this.getTokenUsage();
 
-		return new Response(
-			JSON.stringify({
-				job_id: job.id,
-				status: job.status,
-				batch_num: job.batch_num,
-				domains: formattedResults,
-				total_checked: this.getTotalDomainsChecked(),
-				pricing_summary: pricingSummary,
-				usage: {
-					input_tokens: usage.input,
-					output_tokens: usage.output,
-					total_tokens: usage.input + usage.output,
-				},
-			}),
-			{ headers: { "Content-Type": "application/json" } },
-		);
+		return Response.json({
+			job_id: job.id,
+			status: job.status,
+			batch_num: job.batch_num,
+			domains: formattedResults,
+			total_checked: this.getTotalDomainsChecked(),
+			pricing_summary: pricingSummary,
+			usage: {
+				input_tokens: usage.input,
+				output_tokens: usage.output,
+				total_tokens: usage.input + usage.output,
+			},
+		});
 	}
 
 	/**
 	 * Resume search with follow-up responses
 	 */
-	private async handleResume(request: Request): Promise<Response> {
+	private async handleResume(ctx: LoomRequestContext): Promise<Response> {
 		const job = this.getJob();
 		if (!job) {
-			return new Response(JSON.stringify({ error: "No job found" }), {
-				status: 404,
-				headers: { "Content-Type": "application/json" },
-			});
+			return Response.json({ error: "No job found" }, { status: 404 });
 		}
 
 		if (job.status !== "needs_followup") {
-			return new Response(JSON.stringify({ error: "Job not awaiting follow-up" }), {
-				status: 400,
-				headers: { "Content-Type": "application/json" },
-			});
+			return Response.json({ error: "Job not awaiting follow-up" }, { status: 400 });
 		}
 
-		const body = (await request.json()) as { followup_responses: FollowupQuizResponse };
+		const body = (await ctx.request.json()) as { followup_responses: FollowupQuizResponse };
 
 		// Update job with follow-up responses
 		this.sql.exec(
@@ -376,33 +314,24 @@ export class SearchJobDO implements DurableObject {
 		);
 
 		// Resume with new batch
-		await this.scheduleAlarm(0);
+		await this.alarms.schedule(0);
 
-		return new Response(JSON.stringify({ job_id: job.id, status: "running" }), {
-			headers: { "Content-Type": "application/json" },
-		});
+		return Response.json({ job_id: job.id, status: "running" });
 	}
 
 	/**
 	 * Cancel a running job
 	 */
-	private handleCancel(): Response {
+	private async handleCancel(): Promise<Response> {
 		const job = this.getJob();
 		if (!job) {
-			return new Response(JSON.stringify({ error: "No job found" }), {
-				status: 404,
-				headers: { "Content-Type": "application/json" },
-			});
+			return Response.json({ error: "No job found" }, { status: 404 });
 		}
 
 		if (job.status !== "running" && job.status !== "pending") {
-			return new Response(
-				JSON.stringify({
-					error: "Job not running",
-					status: job.status,
-					job_id: job.id,
-				}),
-				{ status: 400, headers: { "Content-Type": "application/json" } },
+			return Response.json(
+				{ error: "Job not running", status: job.status, job_id: job.id },
+				{ status: 400 },
 			);
 		}
 
@@ -411,16 +340,13 @@ export class SearchJobDO implements DurableObject {
 
 		// Clean up DO storage - workflow cancelled
 		await this.state.storage.deleteAll();
-		console.log(`[SearchJobDO] Workflow cancelled, storage cleared`);
+		this.log.info("Workflow cancelled, storage cleared");
 
-		return new Response(
-			JSON.stringify({
-				job_id: job.id,
-				status: "cancelled",
-				message: "Job cancelled successfully",
-			}),
-			{ headers: { "Content-Type": "application/json" } },
-		);
+		return Response.json({
+			job_id: job.id,
+			status: "cancelled",
+			message: "Job cancelled successfully",
+		});
 	}
 
 	/**
@@ -429,28 +355,19 @@ export class SearchJobDO implements DurableObject {
 	private handleGetFollowup(): Response {
 		const job = this.getJob();
 		if (!job) {
-			return new Response(JSON.stringify({ error: "No job found" }), {
-				status: 404,
-				headers: { "Content-Type": "application/json" },
-			});
+			return Response.json({ error: "No job found" }, { status: 404 });
 		}
 
 		// Get the most recent follow-up quiz artifact
-		const artifacts = this.sql
-			.exec(
-				`SELECT * FROM search_artifacts
+		const artifact = this.sql.queryOne<SearchArtifact>(
+			`SELECT * FROM search_artifacts
        WHERE artifact_type = 'followup_quiz'
        ORDER BY created_at DESC
        LIMIT 1`,
-			)
-			.toArray() as unknown as SearchArtifact[];
-		const artifact = artifacts[0];
+		);
 
 		if (!artifact) {
-			return new Response(JSON.stringify({ error: "No follow-up quiz available" }), {
-				status: 404,
-				headers: { "Content-Type": "application/json" },
-			});
+			return Response.json({ error: "No follow-up quiz available" }, { status: 404 });
 		}
 
 		return new Response(artifact.content, {
@@ -460,18 +377,13 @@ export class SearchJobDO implements DurableObject {
 
 	/**
 	 * SSE stream for real-time progress updates
-	 * Includes recent domains and domain_idea status for live streaming
 	 */
 	private handleStream(): Response {
 		const job = this.getJob();
 		if (!job) {
-			return new Response(JSON.stringify({ error: "No job found" }), {
-				status: 404,
-				headers: { "Content-Type": "application/json" },
-			});
+			return Response.json({ error: "No job found" }, { status: 404 });
 		}
 
-		// Return current state as SSE event
 		const domainsChecked = this.getTotalDomainsChecked();
 		const goodResults = this.getGoodResultsCount();
 		const availableDomains = this.getAvailableDomainsCount();
@@ -512,25 +424,22 @@ export class SearchJobDO implements DurableObject {
 	// ============================================================================
 
 	private getJob(): SearchJob | null {
-		const rows = this.sql
-			.exec<{
-				id: string;
-				client_id: string;
-				status: string;
-				batch_num: number;
-				quiz_responses: string;
-				followup_responses: string | null;
-				driver_provider: string | null;
-				swarm_provider: string | null;
-				created_at: string;
-				updated_at: string;
-				error: string | null;
-			}>("SELECT * FROM search_job LIMIT 1")
-			.toArray();
+		const row = this.sql.queryOne<{
+			id: string;
+			client_id: string;
+			status: string;
+			batch_num: number;
+			quiz_responses: string;
+			followup_responses: string | null;
+			driver_provider: string | null;
+			swarm_provider: string | null;
+			created_at: string;
+			updated_at: string;
+			error: string | null;
+		}>("SELECT * FROM search_job LIMIT 1");
 
-		if (rows.length === 0) return null;
+		if (!row) return null;
 
-		const row = rows[0];
 		return {
 			id: row.id,
 			client_id: row.client_id,
@@ -584,55 +493,47 @@ export class SearchJobDO implements DurableObject {
 	}
 
 	private getTokenUsage(): { input: number; output: number } {
-		const result = this.sql
-			.exec<{
-				total_input_tokens: number;
-				total_output_tokens: number;
-			}>("SELECT total_input_tokens, total_output_tokens FROM search_job LIMIT 1")
-			.toArray();
+		const result = this.sql.queryOne<{
+			total_input_tokens: number;
+			total_output_tokens: number;
+		}>("SELECT total_input_tokens, total_output_tokens FROM search_job LIMIT 1");
 		return {
-			input: result[0]?.total_input_tokens ?? 0,
-			output: result[0]?.total_output_tokens ?? 0,
+			input: result?.total_input_tokens ?? 0,
+			output: result?.total_output_tokens ?? 0,
 		};
 	}
 
 	private getTotalDomainsChecked(): number {
-		const result = this.sql
-			.exec<{ count: number }>("SELECT COUNT(*) as count FROM domain_results")
-			.toArray();
-		return result[0]?.count ?? 0;
+		const result = this.sql.queryOne<{ count: number }>(
+			"SELECT COUNT(*) as count FROM domain_results",
+		);
+		return result?.count ?? 0;
 	}
 
 	private getAvailableDomainsCount(): number {
-		const result = this.sql
-			.exec<{
-				count: number;
-			}>("SELECT COUNT(*) as count FROM domain_results WHERE status = 'available'")
-			.toArray();
-		return result[0]?.count ?? 0;
+		const result = this.sql.queryOne<{ count: number }>(
+			"SELECT COUNT(*) as count FROM domain_results WHERE status = 'available'",
+		);
+		return result?.count ?? 0;
 	}
 
 	private getGoodResultsCount(): number {
-		const result = this.sql
-			.exec<{ count: number }>(
-				`SELECT COUNT(*) as count FROM domain_results
+		const result = this.sql.queryOne<{ count: number }>(
+			`SELECT COUNT(*) as count FROM domain_results
        WHERE status = 'available' AND score >= 0.8`,
-			)
-			.toArray();
-		return result[0]?.count ?? 0;
+		);
+		return result?.count ?? 0;
 	}
 
 	private getCheckedDomains(): string[] {
-		const results = this.sql
-			.exec<{ domain: string }>("SELECT domain FROM domain_results")
-			.toArray();
+		const results = this.sql.queryAll<{ domain: string }>("SELECT domain FROM domain_results");
 		return results.map((r) => r.domain);
 	}
 
 	private getAvailableDomains(): string[] {
-		const results = this.sql
-			.exec<{ domain: string }>("SELECT domain FROM domain_results WHERE status = 'available'")
-			.toArray();
+		const results = this.sql.queryAll<{ domain: string }>(
+			"SELECT domain FROM domain_results WHERE status = 'available'",
+		);
 		return results.map((r) => r.domain);
 	}
 
@@ -640,26 +541,24 @@ export class SearchJobDO implements DurableObject {
 	 * Get recent available domains for live streaming effect
 	 */
 	private getRecentAvailableDomains(limit: number = 10): DomainResult[] {
-		const results = this.sql
-			.exec<{
-				id: number;
-				batch_num: number;
-				domain: string;
-				tld: string;
-				status: string;
-				price_cents: number | null;
-				score: number;
-				flags: string;
-				evaluation_data: string | null;
-				created_at: string;
-			}>(
-				`SELECT * FROM domain_results
+		const results = this.sql.queryAll<{
+			id: number;
+			batch_num: number;
+			domain: string;
+			tld: string;
+			status: string;
+			price_cents: number | null;
+			score: number;
+			flags: string;
+			evaluation_data: string | null;
+			created_at: string;
+		}>(
+			`SELECT * FROM domain_results
        WHERE status = 'available'
        ORDER BY id DESC
        LIMIT ?`,
-				limit,
-			)
-			.toArray();
+			limit,
+		);
 
 		return results.map((r) => ({
 			id: r.id,
@@ -683,32 +582,28 @@ export class SearchJobDO implements DurableObject {
 		checked: boolean;
 		price_cents?: number;
 	} {
-		const results = this.sql
-			.exec<{
-				status: string;
-				price_cents: number | null;
-			}>(
-				"SELECT status, price_cents FROM domain_results WHERE LOWER(domain) = ? LIMIT 1",
-				domainIdea.toLowerCase(),
-			)
-			.toArray();
+		const result = this.sql.queryOne<{
+			status: string;
+			price_cents: number | null;
+		}>(
+			"SELECT status, price_cents FROM domain_results WHERE LOWER(domain) = ? LIMIT 1",
+			domainIdea.toLowerCase(),
+		);
 
-		if (results.length === 0) {
+		if (!result) {
 			return { available: false, checked: false };
 		}
 
 		return {
-			available: results[0].status === "available",
+			available: result.status === "available",
 			checked: true,
-			price_cents: results[0].price_cents ?? undefined,
+			price_cents: result.price_cents ?? undefined,
 		};
 	}
 
 	private getPricingSummary(): Record<string, number> {
-		const rows = this.sql
-			.exec<{ category: string; count: number }>(
-				`
-      SELECT
+		const rows = this.sql.queryAll<{ category: string; count: number }>(
+			`SELECT
         CASE
           WHEN price_cents IS NULL THEN 'unknown'
           WHEN price_cents <= 3000 THEN 'bundled'
@@ -719,10 +614,8 @@ export class SearchJobDO implements DurableObject {
         COUNT(*) as count
       FROM domain_results
       WHERE status = 'available'
-      GROUP BY category
-    `,
-			)
-			.toArray();
+      GROUP BY category`,
+		);
 
 		const summary: Record<string, number> = {
 			bundled: 0,
@@ -737,12 +630,6 @@ export class SearchJobDO implements DurableObject {
 		}
 
 		return summary;
-	}
-
-	private async scheduleAlarm(delayMs: number): Promise<void> {
-		const time = Date.now() + delayMs;
-		await this.state.storage.setAlarm(time);
-		console.log(`Scheduled alarm for ${new Date(time).toISOString()}`);
 	}
 
 	private saveDomainResult(result: DomainResult): void {
@@ -761,7 +648,7 @@ export class SearchJobDO implements DurableObject {
 				result.evaluation_data ? JSON.stringify(result.evaluation_data) : null,
 			);
 		} catch (error) {
-			console.error(`Failed to save domain result for ${result.domain}:`, error);
+			this.log.error(`Failed to save domain result for ${result.domain}: ${error}`);
 		}
 	}
 
@@ -774,6 +661,10 @@ export class SearchJobDO implements DurableObject {
 			artifact.content,
 		);
 	}
+
+	// ============================================================================
+	// Core batch processing logic
+	// ============================================================================
 
 	/**
 	 * Process a single batch - the main orchestration logic
@@ -819,10 +710,10 @@ export class SearchJobDO implements DurableObject {
 					}
 				: undefined;
 
-		console.log(`Processing batch ${batchNum} for "${quiz.business_name}"`);
+		this.log.info(`Processing batch ${batchNum} for "${quiz.business_name}"`);
 
-		// Step 1: Generate candidates via Driver agent (OpenRouter primary, DeepSeek fallback)
-		console.log(`Step 1: Generating candidates using ${driverProviderName}...`);
+		// Step 1: Generate candidates via Driver agent
+		this.log.info(`Step 1: Generating candidates using ${driverProviderName}...`);
 		const driverResult = await generateCandidates(driverProvider, {
 			businessName: quiz.business_name,
 			tldPreferences: quiz.tld_preferences,
@@ -837,7 +728,7 @@ export class SearchJobDO implements DurableObject {
 		});
 
 		this.addTokenUsage(driverResult.inputTokens, driverResult.outputTokens);
-		console.log(`Generated ${driverResult.candidates.length} candidates`);
+		this.log.info(`Generated ${driverResult.candidates.length} candidates`);
 
 		// Filter out already checked domains
 		const checkedSet = new Set(checkedDomains.map((d) => d.toLowerCase()));
@@ -846,7 +737,7 @@ export class SearchJobDO implements DurableObject {
 		);
 
 		if (newCandidates.length === 0) {
-			console.log("No new candidates to evaluate");
+			this.log.info("No new candidates to evaluate");
 			return {
 				batch_num: batchNum,
 				candidates_generated: driverResult.candidates.length,
@@ -859,7 +750,7 @@ export class SearchJobDO implements DurableObject {
 		}
 
 		// Step 2: Evaluate candidates via Swarm agent
-		console.log(
+		this.log.info(
 			`Step 2: Evaluating ${newCandidates.length} candidates using ${swarmProviderName}...`,
 		);
 		const swarmResult = await evaluateDomains(swarmProvider, {
@@ -872,7 +763,7 @@ export class SearchJobDO implements DurableObject {
 
 		// Filter to worth-checking domains
 		const worthChecking = filterWorthChecking(swarmResult.evaluations);
-		console.log(`${worthChecking.length} domains worth checking`);
+		this.log.info(`${worthChecking.length} domains worth checking`);
 
 		if (worthChecking.length === 0) {
 			// Save all as not worth checking
@@ -901,15 +792,15 @@ export class SearchJobDO implements DurableObject {
 		}
 
 		// Step 3: Check availability via RDAP or Cerebras
-		console.log(`Step 3: Checking availability for ${worthChecking.length} domains...`);
+		this.log.info(`Step 3: Checking availability for ${worthChecking.length} domains...`);
 		const domainsToCheck = worthChecking.map((e) => e.domain);
 		let rdapResults: DomainCheckResult[];
 		if (this.env.USE_CEREBRAS_RDAP === "true") {
-			console.log("Using Cerebras RDAP checker");
+			this.log.info("Using Cerebras RDAP checker");
 			const cerebrasChecker = new CerebrasRDAPChecker(this.env);
 			rdapResults = await cerebrasChecker.checkDomains(domainsToCheck);
 		} else {
-			console.log("Using traditional RDAP checker");
+			this.log.info("Using traditional RDAP checker");
 			rdapResults = await checkDomainsParallel(domainsToCheck, 5, 500);
 		}
 
@@ -918,13 +809,15 @@ export class SearchJobDO implements DurableObject {
 			.filter((r) => r.status === "available")
 			.map((r) => r.domain);
 
-		console.log(`Step 4: Getting pricing for ${availableDomainsList.length} available domains...`);
+		this.log.info(
+			`Step 4: Getting pricing for ${availableDomainsList.length} available domains...`,
+		);
 		let pricingMap = new Map<string, DomainPrice>();
 		try {
 			pricingMap = await getBatchPricing(availableDomainsList);
-			console.log(`Got pricing for ${pricingMap.size} domains`);
+			this.log.info(`Got pricing for ${pricingMap.size} domains`);
 		} catch (error) {
-			console.warn("Failed to fetch pricing, continuing without:", error);
+			this.log.warn(`Failed to fetch pricing, continuing without: ${error}`);
 		}
 
 		// Map evaluations by domain for quick lookup
@@ -991,7 +884,7 @@ export class SearchJobDO implements DurableObject {
 			}
 		}
 
-		console.log(
+		this.log.info(
 			`Batch ${batchNum} complete: ${domainsAvailable} available, ${newGoodResults} good`,
 		);
 
@@ -1048,7 +941,7 @@ export class SearchJobDO implements DurableObject {
 	}
 
 	// ============================================================================
-	// Email methods
+	// Email methods (via Zephyr service binding)
 	// ============================================================================
 
 	/**
@@ -1056,21 +949,19 @@ export class SearchJobDO implements DurableObject {
 	 */
 	private async sendCompletionEmail(job: SearchJob): Promise<void> {
 		const clientEmail = job.quiz_responses.client_email;
-		if (!clientEmail || !this.env.RESEND_API_KEY) {
-			console.log("Skipping results email: no client_email or RESEND_API_KEY");
+		if (!clientEmail || !this.env.ZEPHYR || !this.env.ZEPHYR_API_KEY) {
+			this.log.info("Skipping results email: no client_email or Zephyr config");
 			return;
 		}
 
 		try {
 			// Get top available domains
-			const domains = this.sql
-				.exec(
-					`SELECT * FROM domain_results
+			const domains = this.sql.queryAll<DomainResult>(
+				`SELECT * FROM domain_results
          WHERE status = 'available'
          ORDER BY score DESC, price_cents ASC NULLS LAST
          LIMIT 20`,
-				)
-				.toArray() as unknown as DomainResult[];
+			);
 
 			// Format domains for email
 			const formattedDomains = domains.map((d) => ({
@@ -1083,7 +974,7 @@ export class SearchJobDO implements DurableObject {
 			const resultsUrl = `${baseUrl}/results/${job.id}`;
 			const bookingUrl = `${baseUrl}/booking`;
 
-			await sendResultsEmail(this.env.RESEND_API_KEY, {
+			await sendResultsEmail(this.env.ZEPHYR, this.env.ZEPHYR_API_KEY, {
 				client_email: clientEmail,
 				business_name: job.quiz_responses.business_name,
 				domains: formattedDomains,
@@ -1091,9 +982,9 @@ export class SearchJobDO implements DurableObject {
 				booking_url: bookingUrl,
 			});
 
-			console.log(`Sent results email to ${clientEmail}`);
+			this.log.info(`Sent results email to ${clientEmail}`);
 		} catch (error) {
-			console.error("Failed to send results email:", error);
+			this.log.error(`Failed to send results email: ${error}`);
 			// Don't fail the job if email fails
 		}
 	}
@@ -1103,8 +994,8 @@ export class SearchJobDO implements DurableObject {
 	 */
 	private async sendFollowupQuizEmail(job: SearchJob): Promise<void> {
 		const clientEmail = job.quiz_responses.client_email;
-		if (!clientEmail || !this.env.RESEND_API_KEY) {
-			console.log("Skipping follow-up email: no client_email or RESEND_API_KEY");
+		if (!clientEmail || !this.env.ZEPHYR || !this.env.ZEPHYR_API_KEY) {
+			this.log.info("Skipping follow-up email: no client_email or Zephyr config");
 			return;
 		}
 
@@ -1112,7 +1003,7 @@ export class SearchJobDO implements DurableObject {
 			const baseUrl = "https://domains.grove.place";
 			const quizUrl = `${baseUrl}/followup/${job.id}`;
 
-			await sendFollowupEmail(this.env.RESEND_API_KEY, {
+			await sendFollowupEmail(this.env.ZEPHYR, this.env.ZEPHYR_API_KEY, {
 				client_email: clientEmail,
 				business_name: job.quiz_responses.business_name,
 				quiz_url: quizUrl,
@@ -1120,9 +1011,9 @@ export class SearchJobDO implements DurableObject {
 				domains_checked: this.getTotalDomainsChecked(),
 			});
 
-			console.log(`Sent follow-up email to ${clientEmail}`);
+			this.log.info(`Sent follow-up email to ${clientEmail}`);
 		} catch (error) {
-			console.error("Failed to send follow-up email:", error);
+			this.log.error(`Failed to send follow-up email: ${error}`);
 			// Don't fail the job if email fails
 		}
 	}
@@ -1131,17 +1022,13 @@ export class SearchJobDO implements DurableObject {
 	 * Generate follow-up quiz when search needs refinement
 	 */
 	private async generateFollowupQuiz(job: SearchJob): Promise<void> {
-		console.log(`[Followup] Generating follow-up quiz for job ${job.id}`);
+		this.log.info(`Generating follow-up quiz for job ${job.id}`);
 
 		try {
-			// Get search context
 			const domainsChecked = this.getTotalDomainsChecked();
 			const goodResults = this.getGoodResultsCount();
-			const availableDomains = this.getAvailableDomains();
-			const checkedDomains = this.getCheckedDomains();
 			const targetResults = parseInt(this.env.TARGET_RESULTS || "25", 10);
 
-			// Create follow-up quiz based on search results
 			const followupQuiz = {
 				job_id: job.id,
 				questions: [
@@ -1183,20 +1070,15 @@ export class SearchJobDO implements DurableObject {
 				},
 			};
 
-			// Save as artifact
 			this.saveArtifact({
 				batch_num: job.batch_num,
 				artifact_type: "followup_quiz",
 				content: JSON.stringify(followupQuiz),
 			});
 
-			console.log(
-				`[Followup] Generated follow-up quiz with ${followupQuiz.questions.length} questions`,
-			);
+			this.log.info(`Generated follow-up quiz with ${followupQuiz.questions.length} questions`);
 		} catch (error) {
-			console.error(`[Followup] Failed to generate follow-up quiz:`, error);
-			// Don't fail the job if quiz generation fails - just log the error
-			// The frontend will handle the missing quiz gracefully
+			this.log.error(`Failed to generate follow-up quiz: ${error}`);
 		}
 	}
 }

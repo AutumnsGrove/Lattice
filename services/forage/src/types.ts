@@ -6,12 +6,16 @@
 // Environment bindings
 // ============================================================================
 
-export interface Env {
+export interface Env extends Record<string, unknown> {
 	// Durable Object bindings
 	SEARCH_JOB: DurableObjectNamespace;
 
 	// D1 Database for job index
 	DB: D1Database;
+
+	// Service bindings (Worker-to-Worker)
+	AUTH: Fetcher;
+	ZEPHYR: Fetcher;
 
 	// AI binding (for Cloudflare Workers AI)
 	AI?: Ai;
@@ -21,7 +25,7 @@ export interface Env {
 	DEEPSEEK_API_KEY?: string;
 	KIMI_API_KEY?: string;
 	OPENROUTER_API_KEY?: string;
-	RESEND_API_KEY?: string;
+	ZEPHYR_API_KEY?: string;
 
 	// Provider configuration
 	DRIVER_PROVIDER?: string; // deepseek | openrouter

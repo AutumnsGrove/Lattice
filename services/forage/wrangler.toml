@@ -23,6 +23,15 @@ database_id = "cd493112-a901-4f6d-aadf-a5ca78929557"
 tag = "v1"
 new_sqlite_classes = ["SearchJobDO"]
 
+# Service bindings (Worker-to-Worker)
+[[services]]
+binding = "AUTH"
+service = "groveauth"
+
+[[services]]
+binding = "ZEPHYR"
+service = "grove-zephyr"
+
 # Durable Objects observability (logs to CF dashboard)
 [observability.logs]
 enabled = true
@@ -66,7 +75,7 @@ USE_CEREBRAS_RDAP = "false"
 # Secrets to configure:
 # - OPENROUTER_API_KEY: API key for OpenRouter (primary, ZDR compliant)
 # - DEEPSEEK_API_KEY: API key for DeepSeek (fallback only)
-# - RESEND_API_KEY: API key for email sending
+# - ZEPHYR_API_KEY: API key for Zephyr email service binding
 #
 # Set with: wrangler secret put OPENROUTER_API_KEY
 #

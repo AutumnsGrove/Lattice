@@ -1,40 +1,45 @@
 /**
- * Email integration with Resend
+ * Email integration via Zephyr service binding
  *
  * Terminal-aesthetic email templates for domain search results and follow-up quizzes.
+ * Sends through Grove's Zephyr email worker (Worker-to-Worker, no public API key needed).
  */
 
 import type { DomainResult, ResultsEmailData, FollowupEmailData } from "./types";
 
-const RESEND_API_URL = "https://api.resend.com/emails";
-
 /**
- * Send an email via Resend API
+ * Send an email via Zephyr service binding
  */
 export async function sendEmail(
+	zephyr: Fetcher,
 	apiKey: string,
 	to: string,
 	subject: string,
 	html: string,
-	from: string = "Grove Domain Search <domains@grove.place>",
-): Promise<{ id: string }> {
-	const response = await fetch(RESEND_API_URL, {
+	from: string = "domains@grove.place",
+	fromName: string = "Grove Domain Search",
+): Promise<{ success: boolean; messageId?: string }> {
+	const response = await zephyr.fetch("https://zephyr.internal/send", {
 		method: "POST",
 		headers: {
-			Authorization: `Bearer ${apiKey}`,
 			"Content-Type": "application/json",
+			"X-API-Key": apiKey,
 		},
 		body: JSON.stringify({
-			from,
-			to: [to],
+			type: "transactional",
+			template: "raw",
+			to,
 			subject,
 			html,
+			from,
+			fromName,
+			source: "forage",
 		}),
 	});
 
 	if (!response.ok) {
 		const error = await response.text();
-		throw new Error(`Resend API error: ${error}`);
+		throw new Error(`Zephyr send error: ${error}`);
 	}
 
 	return response.json();
@@ -219,27 +224,29 @@ grove.place • domain setup • ${new Date().toISOString().split("T")[0]}
 }
 
 /**
- * Send results email
+ * Send results email via Zephyr
  */
 export async function sendResultsEmail(
+	zephyr: Fetcher,
 	apiKey: string,
 	data: ResultsEmailData,
-): Promise<{ id: string }> {
+): Promise<{ success: boolean; messageId?: string }> {
 	const html = generateResultsEmail(data);
-	const subject = `🎉 Your domains are ready: ${data.business_name}`;
+	const subject = `Your domains are ready: ${data.business_name}`;
 
-	return sendEmail(apiKey, data.client_email, subject, html);
+	return sendEmail(zephyr, apiKey, data.client_email, subject, html);
 }
 
 /**
- * Send follow-up email
+ * Send follow-up email via Zephyr
  */
 export async function sendFollowupEmail(
+	zephyr: Fetcher,
 	apiKey: string,
 	data: FollowupEmailData,
-): Promise<{ id: string }> {
+): Promise<{ success: boolean; messageId?: string }> {
 	const html = generateFollowupEmail(data);
 	const subject = `Quick question about your domain search: ${data.business_name}`;
 
-	return sendEmail(apiKey, data.client_email, subject, html);
+	return sendEmail(zephyr, apiKey, data.client_email, subject, html);
 }
