@@ -342,7 +342,7 @@ describe("High-Level Operations", () => {
 	});
 
 	it("should change password successfully", async () => {
-		const { emailKey, encryptedEmailKey, salt } = await setupNewUser(TEST_PASSWORD);
+		const { emailKey } = await setupNewUser(TEST_PASSWORD);
 
 		// Encrypt some data
 		const testData = "password change test";

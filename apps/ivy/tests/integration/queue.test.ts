@@ -4,7 +4,7 @@
  * Tests the delayed send queue and unsend functionality.
  */
 
-import { describe, it, expect } from "vitest";
+import { describe, it } from "vitest";
 
 describe("Send Queue", () => {
 	it.todo("should queue email with delay");

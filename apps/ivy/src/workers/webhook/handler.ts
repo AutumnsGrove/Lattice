@@ -6,9 +6,7 @@
  * immediately writes to the buffer and returns 200.
  */
 
-import { encryptJSON } from "$lib/crypto";
 import type { IvyWebhookBuffer, WebhookPayload, DecryptedEnvelope } from "$lib/types";
-import { arrayBufferToBase64, base64ToArrayBuffer } from "$lib/crypto";
 
 export interface WebhookHandlerEnv {
 	DB: D1Database;

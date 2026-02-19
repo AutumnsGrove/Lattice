@@ -4,7 +4,7 @@
  * Tests the incoming email webhook flow.
  */
 
-import { describe, it, expect } from "vitest";
+import { describe, it } from "vitest";
 
 describe("Webhook Handler", () => {
 	it.todo("should verify valid webhook signature");

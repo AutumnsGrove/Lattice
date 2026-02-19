@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { timingSafeEqual, formatDate } from "$lib/utils";
+import { timingSafeEqual } from "$lib/utils";
 
 describe("timingSafeEqual", () => {
 	it("should return true for equal arrays", () => {
