@@ -1,0 +1,83 @@
+# Amber Worker Configuration
+
+name = "amber-worker"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+compatibility_flags = ["nodejs_compat"]
+
+# D1 Database
+[[d1_databases]]
+binding = "DB"
+database_name = "amber"
+database_id = "f688021b-a986-495a-94bb-352354768a22"
+
+# R2 Bucket
+[[r2_buckets]]
+binding = "R2_BUCKET"
+bucket_name = "grove-storage"  # Run: wrangler r2 bucket create grove-storage
+
+# Durable Objects
+[[durable_objects.bindings]]
+name = "EXPORT_JOBS"
+class_name = "ExportJobV2"
+script_name = "amber-worker"
+
+# Migrations (required for first DO deployment)
+[[migrations]]
+tag = "v1"
+new_classes = ["ExportJob"]
+
+[[migrations]]
+tag = "v2"
+new_classes = []
+deleted_classes = []
+
+[[migrations]]
+tag = "v3"
+renamed_classes = []
+deleted_classes = []
+
+# v4: Create ExportJobV2 with SQLite storage (new class, keeping old for now)
+[[migrations]]
+tag = "v4"
+new_sqlite_classes = ["ExportJobV2"]
+
+# Durable Objects observability (logs to CF dashboard)
+[observability.logs]
+enabled = true
+head_sampling_rate = 1
+invocation_logs = true
+
+# Cron Triggers
+[triggers]
+crons = ["*/5 * * * *", "0 3 * * *"]  # Daily at 3 AM UTC
+
+# Environment Variables
+[vars]
+BETTER_AUTH_BASE_URL = "https://auth-api.grove.place"
+ALLOWED_ORIGINS = "https://amber.grove.place"
+
+# Environment-specific settings
+[env.production]
+name = "amber-worker"
+routes = [
+  { pattern = "amber-api.grove.place/*", zone_name = "grove.place" }
+]
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "amber"
+database_id = "f688021b-a986-495a-94bb-352354768a22"
+
+[[env.production.r2_buckets]]
+binding = "R2_BUCKET"
+bucket_name = "grove-storage"
+
+[env.production.vars]
+BETTER_AUTH_BASE_URL = "https://auth-api.grove.place"
+ALLOWED_ORIGINS = "https://amber.grove.place"
+
+[env.staging]
+name = "amber-worker-staging"
+[env.staging.vars]
+ALLOWED_ORIGINS = "https://amber-staging.grove.place,http://localhost:5173"

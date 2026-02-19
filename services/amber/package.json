@@ -1,0 +1,14 @@
+{
+	"name": "grove-amber-worker",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"dependencies": {
+		"fflate": "^0.8.1"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^4.0.0",
+		"typescript": "^5.0.0",
+		"wrangler": "^3.0.0"
+	}
+}
