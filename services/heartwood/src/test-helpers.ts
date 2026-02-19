@@ -57,32 +57,32 @@ RQIDAQAB
  * Supports chaining: db.prepare().bind().first()/all()/run()
  */
 export function createMockDb(
-  overrides: {
-    first?: unknown;
-    all?: { results: unknown[] };
-    run?: { success: boolean };
-  } = {},
+	overrides: {
+		first?: unknown;
+		all?: { results: unknown[] };
+		run?: { success: boolean };
+	} = {},
 ) {
-  const defaults = {
-    first: null,
-    all: { results: [] },
-    run: { success: true },
-    ...overrides,
-  };
+	const defaults = {
+		first: null,
+		all: { results: [] },
+		run: { success: true },
+		...overrides,
+	};
 
-  return {
-    prepare: vi.fn().mockReturnValue({
-      bind: vi.fn().mockReturnValue({
-        first: vi.fn().mockResolvedValue(defaults.first),
-        all: vi.fn().mockResolvedValue(defaults.all),
-        run: vi.fn().mockResolvedValue(defaults.run),
-      }),
-      first: vi.fn().mockResolvedValue(defaults.first),
-      all: vi.fn().mockResolvedValue(defaults.all),
-      run: vi.fn().mockResolvedValue(defaults.run),
-    }),
-    withSession: vi.fn().mockReturnThis(),
-  };
+	return {
+		prepare: vi.fn().mockReturnValue({
+			bind: vi.fn().mockReturnValue({
+				first: vi.fn().mockResolvedValue(defaults.first),
+				all: vi.fn().mockResolvedValue(defaults.all),
+				run: vi.fn().mockResolvedValue(defaults.run),
+			}),
+			first: vi.fn().mockResolvedValue(defaults.first),
+			all: vi.fn().mockResolvedValue(defaults.all),
+			run: vi.fn().mockResolvedValue(defaults.run),
+		}),
+		withSession: vi.fn().mockReturnThis(),
+	};
 }
 
 /**
@@ -90,35 +90,35 @@ export function createMockDb(
  * Pass an array of responses; each prepare() call consumes the next one.
  */
 export function createSequentialMockDb(
-  responses: Array<{
-    first?: unknown;
-    all?: { results: unknown[] };
-    run?: { success: boolean };
-  }>,
+	responses: Array<{
+		first?: unknown;
+		all?: { results: unknown[] };
+		run?: { success: boolean };
+	}>,
 ) {
-  let callIndex = 0;
+	let callIndex = 0;
 
-  return {
-    prepare: vi.fn().mockImplementation(() => {
-      const response = responses[callIndex] ?? {
-        first: null,
-        all: { results: [] },
-        run: { success: true },
-      };
-      callIndex++;
-      return {
-        bind: vi.fn().mockReturnValue({
-          first: vi.fn().mockResolvedValue(response.first ?? null),
-          all: vi.fn().mockResolvedValue(response.all ?? { results: [] }),
-          run: vi.fn().mockResolvedValue(response.run ?? { success: true }),
-        }),
-        first: vi.fn().mockResolvedValue(response.first ?? null),
-        all: vi.fn().mockResolvedValue(response.all ?? { results: [] }),
-        run: vi.fn().mockResolvedValue(response.run ?? { success: true }),
-      };
-    }),
-    withSession: vi.fn().mockReturnThis(),
-  };
+	return {
+		prepare: vi.fn().mockImplementation(() => {
+			const response = responses[callIndex] ?? {
+				first: null,
+				all: { results: [] },
+				run: { success: true },
+			};
+			callIndex++;
+			return {
+				bind: vi.fn().mockReturnValue({
+					first: vi.fn().mockResolvedValue(response.first ?? null),
+					all: vi.fn().mockResolvedValue(response.all ?? { results: [] }),
+					run: vi.fn().mockResolvedValue(response.run ?? { success: true }),
+				}),
+				first: vi.fn().mockResolvedValue(response.first ?? null),
+				all: vi.fn().mockResolvedValue(response.all ?? { results: [] }),
+				run: vi.fn().mockResolvedValue(response.run ?? { success: true }),
+			};
+		}),
+		withSession: vi.fn().mockReturnThis(),
+	};
 }
 
 // =============================================================================
@@ -130,33 +130,36 @@ export function createSequentialMockDb(
  * Uses the static RSA test keys and sensible defaults.
  */
 export function createMockEnv(overrides: Partial<Env> = {}): Env {
-  const mockDb = createMockDb();
+	const mockDb = createMockDb();
 
-  return {
-    DB: mockDb as unknown as D1Database,
-    ENGINE_DB: createMockDb() as unknown as D1Database,
-    SESSION_KV: {
-      get: vi.fn().mockResolvedValue(null),
-      put: vi.fn().mockResolvedValue(undefined),
-      delete: vi.fn().mockResolvedValue(undefined),
-      list: vi.fn().mockResolvedValue({ keys: [] }),
-      getWithMetadata: vi
-        .fn()
-        .mockResolvedValue({ value: null, metadata: null }),
-    } as unknown as KVNamespace,
-    SESSIONS: {} as unknown as DurableObjectNamespace,
-    CDN_BUCKET: {} as unknown as R2Bucket,
-    AUTH_BASE_URL: "https://auth.grove.place",
-    ENVIRONMENT: "test",
-    CDN_URL: "https://cdn.grove.place",
-    JWT_PRIVATE_KEY: TEST_RSA_PRIVATE_KEY,
-    JWT_PUBLIC_KEY: TEST_RSA_PUBLIC_KEY,
-    GOOGLE_CLIENT_ID: "test-google-client-id",
-    GOOGLE_CLIENT_SECRET: "test-google-client-secret",
-    RESEND_API_KEY: "test-resend-api-key",
-    SESSION_SECRET: "test-session-secret-at-least-32-chars",
-    ...overrides,
-  };
+	return {
+		DB: mockDb as unknown as D1Database,
+		ENGINE_DB: createMockDb() as unknown as D1Database,
+		SESSION_KV: {
+			get: vi.fn().mockResolvedValue(null),
+			put: vi.fn().mockResolvedValue(undefined),
+			delete: vi.fn().mockResolvedValue(undefined),
+			list: vi.fn().mockResolvedValue({ keys: [] }),
+			getWithMetadata: vi.fn().mockResolvedValue({ value: null, metadata: null }),
+		} as unknown as KVNamespace,
+		SESSIONS: {} as unknown as DurableObjectNamespace,
+		CDN_BUCKET: {} as unknown as R2Bucket,
+		AUTH_BASE_URL: "https://auth.grove.place",
+		ENVIRONMENT: "test",
+		CDN_URL: "https://cdn.grove.place",
+		JWT_PRIVATE_KEY: TEST_RSA_PRIVATE_KEY,
+		JWT_PUBLIC_KEY: TEST_RSA_PUBLIC_KEY,
+		GOOGLE_CLIENT_ID: "test-google-client-id",
+		GOOGLE_CLIENT_SECRET: "test-google-client-secret",
+		RESEND_API_KEY: "test-resend-api-key",
+		SESSION_SECRET: "test-session-secret-at-least-32-chars",
+		ZEPHYR_URL: "https://zephyr.test.grove.place",
+		ZEPHYR_API_KEY: "test-zephyr-api-key",
+		ZEPHYR: {
+			fetch: vi.fn().mockResolvedValue(new Response("OK")),
+		},
+		...overrides,
+	};
 }
 
 // =============================================================================
@@ -164,28 +167,28 @@ export function createMockEnv(overrides: Partial<Env> = {}): Env {
 // =============================================================================
 
 export const TEST_USER = {
-  id: "user-test-123",
-  email: "test@grove.place",
-  name: "Test User",
-  avatar_url: null,
-  provider: "magic_code" as const,
-  provider_id: null,
-  is_admin: 0,
-  created_at: "2025-01-01T00:00:00.000Z",
-  last_login: "2025-01-15T00:00:00.000Z",
+	id: "user-test-123",
+	email: "test@grove.place",
+	name: "Test User",
+	avatar_url: null,
+	provider: "magic_code" as const,
+	provider_id: null,
+	is_admin: 0,
+	created_at: "2025-01-01T00:00:00.000Z",
+	last_login: "2025-01-15T00:00:00.000Z",
 };
 
 export const TEST_CLIENT = {
-  id: "client-test-456",
-  name: "Test App",
-  client_id: "test-app",
-  client_secret_hash: "", // Will be set dynamically per test
-  redirect_uris: JSON.stringify(["https://app.example.com/callback"]),
-  allowed_origins: JSON.stringify(["https://app.example.com"]),
-  domain: "example.com",
-  is_internal_service: 0,
-  created_at: "2025-01-01T00:00:00.000Z",
-  updated_at: "2025-01-01T00:00:00.000Z",
+	id: "client-test-456",
+	name: "Test App",
+	client_id: "test-app",
+	client_secret_hash: "", // Will be set dynamically per test
+	redirect_uris: JSON.stringify(["https://app.example.com/callback"]),
+	allowed_origins: JSON.stringify(["https://app.example.com"]),
+	domain: "example.com",
+	is_internal_service: 0,
+	created_at: "2025-01-01T00:00:00.000Z",
+	updated_at: "2025-01-01T00:00:00.000Z",
 };
 
 // =============================================================================
@@ -196,41 +199,41 @@ export const TEST_CLIENT = {
  * Create a form-encoded body string from params
  */
 export function formBody(params: Record<string, string>): string {
-  return new URLSearchParams(params).toString();
+	return new URLSearchParams(params).toString();
 }
 
 /**
  * Create a Request with form-encoded body
  */
 export function createFormRequest(
-  url: string,
-  params: Record<string, string>,
-  headers: Record<string, string> = {},
+	url: string,
+	params: Record<string, string>,
+	headers: Record<string, string> = {},
 ): Request {
-  return new Request(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      ...headers,
-    },
-    body: formBody(params),
-  });
+	return new Request(url, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/x-www-form-urlencoded",
+			...headers,
+		},
+		body: formBody(params),
+	});
 }
 
 /**
  * Create a Request with JSON body
  */
 export function createJsonRequest(
-  url: string,
-  body: unknown,
-  headers: Record<string, string> = {},
+	url: string,
+	body: unknown,
+	headers: Record<string, string> = {},
 ): Request {
-  return new Request(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...headers,
-    },
-    body: JSON.stringify(body),
-  });
+	return new Request(url, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+			...headers,
+		},
+		body: JSON.stringify(body),
+	});
 }

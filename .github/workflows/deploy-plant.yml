@@ -5,13 +5,13 @@ on:
     branches:
       - main
     paths:
-      - "packages/plant/**"
-      - "packages/engine/**"
+      - "apps/plant/**"
+      - "libs/engine/**"
   workflow_dispatch:
 
 defaults:
   run:
-    working-directory: packages/plant
+    working-directory: apps/plant
 
 jobs:
   deploy:
@@ -42,18 +42,18 @@ jobs:
 
       - name: Build engine package
         run: pnpm run package
-        working-directory: packages/engine
+        working-directory: libs/engine
 
       - name: Build
         run: pnpm run build
 
       - name: Type check
         run: pnpm check
-        working-directory: packages/plant
+        working-directory: apps/plant
 
       - name: Run tests
         run: pnpm test:run
-        working-directory: packages/plant
+        working-directory: apps/plant
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
@@ -61,7 +61,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy .svelte-kit/cloudflare --project-name=grove-plant
-          workingDirectory: packages/plant
+          workingDirectory: apps/plant
           packageManager: pnpm
 
       - name: Health Check - Stripe Payments

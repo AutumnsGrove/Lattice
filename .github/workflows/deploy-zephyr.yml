@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'workers/zephyr/**'
+      - "services/zephyr/**"
   workflow_dispatch:
 
 jobs:
@@ -25,9 +25,9 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
-          cache-dependency-path: '**/pnpm-lock.yaml'
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: "**/pnpm-lock.yaml"
 
       - name: Install dependencies
         run: pnpm install
@@ -35,18 +35,18 @@ jobs:
 
       - name: Type check
         run: pnpm run typecheck
-        working-directory: workers/zephyr
+        working-directory: services/zephyr
 
       - name: Run tests
         run: pnpm run test:run
-        working-directory: workers/zephyr
+        working-directory: services/zephyr
 
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: workers/zephyr
+          workingDirectory: services/zephyr
           command: deploy
           packageManager: pnpm
         # Secrets (RESEND_API_KEY, ZEPHYR_API_KEY, BLUESKY_HANDLE, BLUESKY_APP_PASSWORD)

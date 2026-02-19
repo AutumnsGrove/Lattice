@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "packages/workers/meadow-poller/**"
+      - "workers/meadow-poller/**"
   workflow_dispatch:
 
 jobs:
@@ -32,17 +32,17 @@ jobs:
 
       - name: Type check
         run: pnpm exec tsc --noEmit
-        working-directory: packages/workers/meadow-poller
+        working-directory: workers/meadow-poller
 
       - name: Run tests
         run: pnpm test
-        working-directory: packages/workers/meadow-poller
+        working-directory: workers/meadow-poller
 
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: packages/workers/meadow-poller
+          workingDirectory: workers/meadow-poller
           command: deploy
           packageManager: pnpm

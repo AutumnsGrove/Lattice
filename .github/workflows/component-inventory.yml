@@ -4,11 +4,11 @@ on:
   # Run on PRs that touch component directories
   pull_request:
     paths:
-      - 'packages/engine/src/lib/ui/components/**/*.svelte'
+      - "libs/engine/src/lib/ui/components/**/*.svelte"
 
   # Run weekly on Tuesday mornings
   schedule:
-    - cron: '0 9 * * 2'
+    - cron: "0 9 * * 2"
 
   # Allow manual trigger
   workflow_dispatch:
@@ -25,7 +25,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Full history needed for git diff against base branch
+          fetch-depth: 0 # Full history needed for git diff against base branch
 
       - name: Count components and compare to inventory
         id: count-components
@@ -42,7 +42,7 @@ jobs:
           LAST_UPDATED=$(jq -r '.lastUpdated' .github/component-inventory.json)
 
           # Count actual components
-          COMPONENT_DIR="packages/engine/src/lib/ui/components"
+          COMPONENT_DIR="libs/engine/src/lib/ui/components"
           ACTUAL_TOTAL=$(find "$COMPONENT_DIR" -name "*.svelte" -type f | wc -l | tr -d ' ')
 
           echo "📊 Component Count Results"
@@ -114,7 +114,7 @@ jobs:
         shell: bash
         run: |
           # Get list of newly added .svelte files in this PR
-          NEW_FILES=$(git diff --name-only --diff-filter=A origin/${{ github.base_ref }}...HEAD -- 'packages/engine/src/lib/ui/components/**/*.svelte' 2>/dev/null || echo "")
+          NEW_FILES=$(git diff --name-only --diff-filter=A origin/${{ github.base_ref }}...HEAD -- 'libs/engine/src/lib/ui/components/**/*.svelte' 2>/dev/null || echo "")
 
           if [ -n "$NEW_FILES" ]; then
             echo "new_files<<EOF" >> $GITHUB_OUTPUT
@@ -273,11 +273,11 @@ jobs:
 
             \`\`\`bash
             # Total count
-            find packages/engine/src/lib/ui/components -name "*.svelte" | wc -l
+            find libs/engine/src/lib/ui/components -name "*.svelte" | wc -l
 
             # Per-category counts
             for dir in primitives nature ui typography chrome terrarium gallery charts content states forms indicators icons; do
-              echo "$dir: $(find packages/engine/src/lib/ui/components/$dir -name '*.svelte' 2>/dev/null | wc -l)"
+              echo "$dir: $(find libs/engine/src/lib/ui/components/$dir -name '*.svelte' 2>/dev/null | wc -l)"
             done
             \`\`\`
 

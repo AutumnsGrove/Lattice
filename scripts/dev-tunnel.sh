@@ -97,8 +97,8 @@ EOF
 
     echo ""
     ok "Setup complete! Next steps:"
-    echo "  1. Copy .env.local.example to .env.local in packages/landing/"
-    echo "     cp packages/landing/.env.local.example packages/landing/.env.local"
+    echo "  1. Copy .env.local.example to .env.local in apps/landing/"
+    echo "     cp apps/landing/.env.local.example apps/landing/.env.local"
     echo "  2. Uncomment VITE_AUTH_API_URL in .env.local"
     echo "  3. Add https://dev.grove.place/api/auth/callback/google to Google Console"
     echo "  4. Run: ./scripts/dev-tunnel.sh"
@@ -140,7 +140,7 @@ cmd_run() {
     info "Starting Grove dev tunnel..."
     info "  $HOSTNAME -> localhost:$LOCAL_PORT"
     echo ""
-    warn "Make sure 'bun run dev' is running in packages/landing/"
+    warn "Make sure 'bun run dev' is running in apps/landing/"
     warn "Then visit https://$HOSTNAME in your browser"
     echo ""
 

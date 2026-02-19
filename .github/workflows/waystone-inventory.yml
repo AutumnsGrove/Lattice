@@ -4,7 +4,8 @@ on:
   # Run on PRs that touch Svelte files (waystones can be added anywhere)
   pull_request:
     paths:
-      - "packages/**/*.svelte"
+      - "apps/**/*.svelte"
+      - "libs/**/*.svelte"
 
   # Run weekly on Thursday mornings
   schedule:
@@ -42,12 +43,12 @@ jobs:
           EXPECTED_SLUGS=$(jq -r '.waystones.bySlugs' .github/waystone-inventory.json)
           LAST_UPDATED=$(jq -r '.lastUpdated' .github/waystone-inventory.json)
 
-          # Count actual <Waystone instances across all packages
+          # Count actual <Waystone instances across all packages (apps and libs)
           # Exclude component implementation files (waystone/ dir and ui/Waystone.svelte wrapper)
-          ACTUAL_TOTAL=$(grep -r '<Waystone' packages/ --include="*.svelte" | grep -v 'ui/components/ui/waystone' | grep -v 'ui/Waystone.svelte' | wc -l | tr -d ' ') || ACTUAL_TOTAL=0
+          ACTUAL_TOTAL=$(grep -r '<Waystone' apps/ libs/ --include="*.svelte" 2>/dev/null | grep -v 'ui/components/ui/waystone' | grep -v 'ui/Waystone.svelte' | wc -l | tr -d ' ') || ACTUAL_TOTAL=0
 
           # Count unique slugs (exclude component files)
-          ACTUAL_SLUGS=$(grep -roP 'slug="[^"]+"' packages/ --include="*.svelte" | grep -v 'ui/components/ui/waystone' | grep -v 'ui/Waystone.svelte' | grep -oP '"[^"]+"' | sort -u | wc -l | tr -d ' ') || ACTUAL_SLUGS=0
+          ACTUAL_SLUGS=$(grep -roP 'slug="[^"]+"' apps/ libs/ --include="*.svelte" 2>/dev/null | grep -v 'ui/components/ui/waystone' | grep -v 'ui/Waystone.svelte' | grep -oP '"[^"]+"' | sort -u | wc -l | tr -d ' ') || ACTUAL_SLUGS=0
 
           echo "Waystone Count Results"
           echo "======================"
@@ -67,8 +68,11 @@ jobs:
           for pkg in engine login landing plant meadow; do
             EXPECTED=$(jq -r ".waystones.breakdown.$pkg // 0" .github/waystone-inventory.json)
             ACTUAL=0
-            if [ -d "packages/$pkg" ]; then
-              ACTUAL=$(grep -r '<Waystone' "packages/$pkg" --include="*.svelte" 2>/dev/null | grep -v 'ui/components/ui/waystone' | grep -v 'ui/Waystone.svelte' | wc -l | tr -d ' ') || ACTUAL=0
+            # Check both apps and libs directories (engine is in libs/)
+            if [ "$pkg" = "engine" ] && [ -d "libs/$pkg" ]; then
+              ACTUAL=$(grep -r '<Waystone' "libs/$pkg" --include="*.svelte" 2>/dev/null | grep -v 'ui/components/ui/waystone' | grep -v 'ui/Waystone.svelte' | wc -l | tr -d ' ') || ACTUAL=0
+            elif [ -d "apps/$pkg" ]; then
+              ACTUAL=$(grep -r '<Waystone' "apps/$pkg" --include="*.svelte" 2>/dev/null | grep -v 'ui/components/ui/waystone' | grep -v 'ui/Waystone.svelte' | wc -l | tr -d ' ') || ACTUAL=0
             fi
             PKG_DIFF=$((ACTUAL - EXPECTED))
 
@@ -116,7 +120,7 @@ jobs:
         shell: bash
         run: |
           # Get list of changed .svelte files in this PR that now contain <Waystone
-          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- 'packages/**/*.svelte' 2>/dev/null || echo "")
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- 'apps/**/*.svelte' 'libs/**/*.svelte' 2>/dev/null || echo "")
 
           NEW_WAYSTONE_FILES=""
           if [ -n "$CHANGED_FILES" ]; then
@@ -291,15 +295,16 @@ jobs:
 
             \`\`\`bash
             # Total count (excluding component implementation files)
-            grep -r '<Waystone' packages/ --include="*.svelte" | grep -v 'ui/components/ui/waystone' | grep -v 'ui/Waystone.svelte' | wc -l
+            grep -r '<Waystone' apps/ libs/ --include="*.svelte" 2>/dev/null | grep -v 'ui/components/ui/waystone' | grep -v 'ui/Waystone.svelte' | wc -l
 
             # Per-package counts
-            for pkg in engine login landing plant meadow; do
-              echo "$pkg: $(grep -r '<Waystone' "packages/$pkg" --include="*.svelte" 2>/dev/null | grep -v 'ui/components/ui/waystone' | grep -v 'ui/Waystone.svelte' | wc -l)"
+            for pkg in login landing plant meadow; do
+              echo "$pkg: $(grep -r '<Waystone' "apps/$pkg" --include="*.svelte" 2>/dev/null | grep -v 'ui/components/ui/waystone' | grep -v 'ui/Waystone.svelte' | wc -l)"
             done
+            echo "engine: $(grep -r '<Waystone' "libs/engine" --include="*.svelte" 2>/dev/null | grep -v 'ui/components/ui/waystone' | grep -v 'ui/Waystone.svelte' | wc -l)"
 
             # List unique slugs (excluding component files)
-            grep -roP 'slug="[^"]+"' packages/ --include="*.svelte" | grep -v 'ui/components/ui/waystone' | grep -v 'ui/Waystone.svelte' | sort -u
+            grep -roP 'slug="[^"]+"' apps/ libs/ --include="*.svelte" 2>/dev/null | grep -v 'ui/components/ui/waystone' | grep -v 'ui/Waystone.svelte' | sort -u
             \`\`\`
 
             ---

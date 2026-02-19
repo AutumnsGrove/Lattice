@@ -4,12 +4,12 @@ on:
   # Run on PRs that touch migrations or feature-flags code
   pull_request:
     paths:
-      - 'packages/engine/migrations/*.sql'
-      - 'packages/engine/src/lib/feature-flags/**'
+      - "libs/engine/migrations/*.sql"
+      - "libs/engine/src/lib/feature-flags/**"
 
   # Run weekly on Wednesday mornings
   schedule:
-    - cron: '0 9 * * 3'
+    - cron: "0 9 * * 3"
 
   # Allow manual trigger
   workflow_dispatch:
@@ -45,7 +45,7 @@ jobs:
           LAST_UPDATED=$(jq -r '.lastUpdated' .github/graft-inventory.json)
 
           # Count actual INSERT statements for feature_flags in migrations
-          MIGRATION_DIR="packages/engine/migrations"
+          MIGRATION_DIR="libs/engine/migrations"
 
           # The SQL format spans multiple lines:
           #   INSERT OR IGNORE INTO feature_flags (id, ...)
@@ -109,7 +109,7 @@ jobs:
         run: |
           # Get new flag IDs from changed migration files
           # Look for added lines (starting with +) that contain flag IDs after VALUES
-          NEW_GRAFTS=$(git diff origin/${{ github.base_ref }}...HEAD -- 'packages/engine/migrations/*.sql' | \
+          NEW_GRAFTS=$(git diff origin/${{ github.base_ref }}...HEAD -- 'libs/engine/migrations/*.sql' | \
             awk '/^\+[[:space:]]*'"'"'[a-z_]+'"'"',?$/ { gsub(/[+[:space:]'"'"',]/, ""); print }' | \
             sort -u || echo "")
 
@@ -242,7 +242,7 @@ jobs:
 
             \`\`\`bash
             # List all flag IDs from migrations
-            awk '/INSERT OR IGNORE INTO feature_flags/{f=1;next} f&&/VALUES/{v=1;next} v&&/^[[:space:]]*'"'"'[a-z_]+/{gsub(/[[:space:]'"'"',]/,"");print;f=0;v=0}' packages/engine/migrations/*.sql | sort -u
+            awk '/INSERT OR IGNORE INTO feature_flags/{f=1;next} f&&/VALUES/{v=1;next} v&&/^[[:space:]]*'"'"'[a-z_]+/{gsub(/[[:space:]'"'"',]/,"");print;f=0;v=0}' libs/engine/migrations/*.sql | sort -u
 
             # Query production D1
             pnpm exec wrangler d1 execute grove-engine-db --remote --command="SELECT id, name, greenhouse_only FROM feature_flags ORDER BY id;"

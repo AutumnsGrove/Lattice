@@ -34,7 +34,7 @@ DB_NAME=${DB_NAME:-grove-db}
 echo ""
 echo "Step 1: Running database migration..."
 echo "--------------------------------------"
-wrangler d1 execute "$DB_NAME" --file=packages/engine/migrations/014_wisp.sql
+wrangler d1 execute "$DB_NAME" --file=libs/engine/migrations/014_wisp.sql
 echo "Migration complete!"
 
 echo ""
@@ -64,7 +64,7 @@ fi
 echo ""
 echo "Step 3: Adding default settings..."
 echo "--------------------------------------"
-wrangler d1 execute "$DB_NAME" --file=packages/engine/migrations/014_wisp_settings.sql
+wrangler d1 execute "$DB_NAME" --file=libs/engine/migrations/014_wisp_settings.sql
 echo "Settings added!"
 
 echo ""

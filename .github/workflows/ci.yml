@@ -35,13 +35,13 @@ jobs:
 
       - name: Sync SvelteKit (generate tsconfig)
         run: |
-          for config in packages/*/svelte.config.*; do
+          for config in apps/*/svelte.config.* services/*/svelte.config.* workers/*/svelte.config.* libs/*/svelte.config.*; do
             (cd "$(dirname "$config")" && pnpm exec svelte-kit sync) || true
           done
 
       - name: Build engine package (for workspace imports)
         run: pnpm package
-        working-directory: packages/engine
+        working-directory: libs/engine
 
       - name: Run all tests
         run: pnpm test
@@ -80,26 +80,26 @@ jobs:
 
       - name: Sync SvelteKit (generate tsconfig)
         run: |
-          for config in packages/*/svelte.config.*; do
+          for config in apps/*/svelte.config.* services/*/svelte.config.* workers/*/svelte.config.* libs/*/svelte.config.*; do
             (cd "$(dirname "$config")" && pnpm exec svelte-kit sync) || true
           done
 
       - name: Build engine package (required for self-referencing imports)
         run: pnpm package
-        working-directory: packages/engine
+        working-directory: libs/engine
 
       - name: Type check engine
         run: pnpm check
-        working-directory: packages/engine
+        working-directory: libs/engine
 
       - name: Type check landing
         run: pnpm check
-        working-directory: packages/landing
+        working-directory: apps/landing
 
       - name: Type check heartwood
         run: pnpm exec tsc --noEmit
-        working-directory: packages/heartwood
+        working-directory: services/heartwood
 
       - name: Type check durable-objects
         run: pnpm exec tsc --noEmit
-        working-directory: packages/durable-objects
+        working-directory: services/durable-objects

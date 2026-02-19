@@ -1,0 +1,749 @@
+{
+  "your-grove": {
+    "slug": "your-grove",
+    "term": "Grove",
+    "category": "foundational",
+    "tagline": "Your Space",
+    "definition": "Your personal blog and website on Grove — your corner of the internet, at {you}.grove.place.",
+    "usageExample": "\"Welcome to my grove.\"\n\"Come visit Autumn's grove.\"",
+    "alwaysGrove": true
+  },
+  "your-garden": {
+    "slug": "your-garden",
+    "term": "Garden",
+    "category": "foundational",
+    "tagline": "The Collection",
+    "definition": "Your blog's main page — where all your posts are listed for visitors to browse.",
+    "usageExample": "\"Browse my garden.\"\n\"New blooms in the garden.\"",
+    "seeAlso": [
+      "blooms",
+      "plant",
+      "wander"
+    ],
+    "standardTerm": "Blog"
+  },
+  "blooms": {
+    "slug": "blooms",
+    "term": "Blooms",
+    "category": "foundational",
+    "tagline": "Your Writing",
+    "definition": "Your blog posts — the things you write and publish on your Grove site.",
+    "usageExample": "\"Read my latest bloom.\"\n\"I wrote a new bloom this morning.\"\n\"Their garden has beautiful blooms.\"",
+    "seeAlso": [
+      "flow",
+      "press"
+    ],
+    "standardTerm": "Posts"
+  },
+  "lattice": {
+    "slug": "lattice",
+    "term": "Lattice",
+    "category": "foundational",
+    "tagline": "Core Platform",
+    "definition": "The shared framework that powers every Grove site — UI components, design tools, and platform utilities.",
+    "seeAlso": [
+      "flow",
+      "vines"
+    ],
+    "alwaysGrove": true
+  },
+  "arbor": {
+    "slug": "arbor",
+    "term": "Arbor",
+    "category": "platform",
+    "tagline": "Admin Panel",
+    "definition": "Your blog's admin dashboard — where you write posts, manage pages, upload images, and configure settings.",
+    "standardTerm": "Dashboard"
+  },
+  "plant": {
+    "slug": "plant",
+    "term": "Plant",
+    "category": "platform",
+    "tagline": "Onboarding",
+    "definition": "Grove's signup and setup flow — takes you from first visit to publishing your first post.",
+    "seeAlso": [
+      "flow"
+    ],
+    "standardTerm": "Onboarding"
+  },
+  "loam": {
+    "slug": "loam",
+    "term": "Loam",
+    "category": "platform",
+    "tagline": "Name Protection",
+    "definition": "Checks usernames and domains for reserved words, impersonation, and harmful content before you can claim them.",
+    "standardTerm": "Name Protection"
+  },
+  "amber": {
+    "slug": "amber",
+    "term": "Amber",
+    "category": "platform",
+    "tagline": "Storage Management",
+    "definition": "Your file storage manager — see what's using space, download your uploads, and clean up what you don't need.",
+    "standardTerm": "Storage"
+  },
+  "foliage": {
+    "slug": "foliage",
+    "term": "Foliage",
+    "category": "platform",
+    "tagline": "Theming System",
+    "definition": "Your blog's visual theme — colors, fonts, and seasonal styles that control how your site looks.",
+    "standardTerm": "Themes"
+  },
+  "curios": {
+    "slug": "curios",
+    "term": "Curios",
+    "category": "platform",
+    "tagline": "Cabinet of Wonders",
+    "definition": "Fun extras for your blog — guestbooks, hit counters, link gardens, custom cursors, and other old-web touches that make your space feel lived in.",
+    "seeAlso": [
+      "foliage",
+      "terrarium"
+    ],
+    "standardTerm": "Custom Pages"
+  },
+  "burrow": {
+    "slug": "burrow",
+    "term": "Burrow",
+    "category": "platform",
+    "tagline": "Cross-Property Access",
+    "definition": "A way to give trusted people access to another Grove site without making them create a separate account.",
+    "seeAlso": [
+      "arbor",
+      "wander",
+      "passage",
+      "wanderer"
+    ],
+    "standardTerm": "Cross-Site Access"
+  },
+  "rings": {
+    "slug": "rings",
+    "term": "Rings",
+    "category": "platform",
+    "tagline": "Analytics",
+    "definition": "Private analytics for your blog — who's reading, what resonates, how your site grows over time. Only you can see them.",
+    "standardTerm": "Analytics"
+  },
+  "clearing": {
+    "slug": "clearing",
+    "term": "Clearing",
+    "category": "platform",
+    "tagline": "Status Page",
+    "definition": "Grove's public status page — check here to see if services are running normally or if something's down.",
+    "standardTerm": "Status Page"
+  },
+  "porch": {
+    "slug": "porch",
+    "term": "Porch",
+    "category": "platform",
+    "tagline": "Front Porch Conversations",
+    "definition": "Where you go to get help or ask a question — Grove's support system.",
+    "standardTerm": "Support"
+  },
+  "wisp": {
+    "slug": "wisp",
+    "term": "Wisp",
+    "category": "platform",
+    "tagline": "Writing Assistant",
+    "definition": "A writing assistant that checks grammar, tone, and readability — without generating or rewriting your content.",
+    "seeAlso": [
+      "forests",
+      "fireside"
+    ],
+    "standardTerm": "Writing Assistant"
+  },
+  "trails": {
+    "slug": "trails",
+    "term": "Trails",
+    "category": "platform",
+    "tagline": "Personal Roadmaps",
+    "definition": "Public roadmaps you can share — milestones, phases, and progress on whatever you're building.",
+    "seeAlso": [
+      "oak",
+      "evergreen"
+    ],
+    "standardTerm": "Project Roadmaps"
+  },
+  "trace": {
+    "slug": "trace",
+    "term": "Trace",
+    "category": "platform",
+    "tagline": "Inline Feedback",
+    "definition": "A small feedback widget that lets visitors say whether something was helpful, with room for a short note.",
+    "seeAlso": [
+      "wander",
+      "press",
+      "wanderer",
+      "wayfinder"
+    ]
+  },
+  "centennial": {
+    "slug": "centennial",
+    "term": "Centennial",
+    "category": "platform",
+    "tagline": "100-Year Preservation",
+    "definition": "After 12 months of paid membership, your grove.place URL stays online for 100 years — even if you stop paying.",
+    "seeAlso": [
+      "plant",
+      "shade",
+      "sapling",
+      "oak"
+    ],
+    "standardTerm": "100-Year Preservation"
+  },
+  "vineyard": {
+    "slug": "vineyard",
+    "term": "Vineyard",
+    "category": "platform",
+    "tagline": "Component Showcase",
+    "definition": "Grove's component showcase — a live gallery of every UI piece, nature asset, and design tool available in the platform.",
+    "seeAlso": [
+      "lattice",
+      "vines"
+    ],
+    "standardTerm": "Showcase"
+  },
+  "flow": {
+    "slug": "flow",
+    "term": "Flow",
+    "category": "content",
+    "tagline": "The Writing Sanctuary",
+    "definition": "Grove's blog editor — a distraction-free Markdown writing space inside your admin dashboard.",
+    "seeAlso": [
+      "blooms",
+      "arbor"
+    ],
+    "alwaysGrove": true
+  },
+  "terrarium": {
+    "slug": "terrarium",
+    "term": "Terrarium",
+    "category": "content",
+    "tagline": "Creative Canvas",
+    "definition": "A drag-and-drop canvas where you arrange nature components into scenes, then use them as decorations on your blog.",
+    "seeAlso": [
+      "lattice",
+      "plant",
+      "foliage",
+      "flow"
+    ],
+    "standardTerm": "Creative Canvas"
+  },
+  "weave": {
+    "slug": "weave",
+    "term": "Weave",
+    "category": "content",
+    "tagline": "Visual Composition Studio",
+    "definition": "A node-graph editor inside Terrarium for creating animations and diagrams by connecting components together.",
+    "seeAlso": [
+      "trace",
+      "terrarium"
+    ],
+    "standardTerm": "Visual Composer"
+  },
+  "reverie": {
+    "slug": "reverie",
+    "term": "Reverie",
+    "category": "content",
+    "tagline": "Composition Layer",
+    "definition": "An AI layer that translates your intent (\"make it cozy\", \"add something that glows\") into actual component arrangements for your blog.",
+    "seeAlso": [
+      "foliage",
+      "terrarium",
+      "scribe"
+    ]
+  },
+  "scribe": {
+    "slug": "scribe",
+    "term": "Scribe",
+    "category": "content",
+    "tagline": "Voice Transcription",
+    "definition": "Voice-to-text for the blog editor — hold a button, speak, and your words appear as text at the cursor.",
+    "seeAlso": [
+      "flow",
+      "press",
+      "lumen",
+      "vines"
+    ],
+    "alwaysGrove": true
+  },
+  "reeds": {
+    "slug": "reeds",
+    "term": "Reeds",
+    "category": "content",
+    "tagline": "Comments System",
+    "definition": "Blog comments — supports private replies to the author and public threaded conversations.",
+    "standardTerm": "Comments"
+  },
+  "thorn": {
+    "slug": "thorn",
+    "term": "Thorn",
+    "category": "content",
+    "tagline": "Content Moderation",
+    "definition": "Automated content moderation that scans for harmful material — without storing or training on your content.",
+    "standardTerm": "Content Moderation"
+  },
+  "canopy": {
+    "slug": "canopy",
+    "term": "Canopy",
+    "category": "content",
+    "tagline": "The Visible Grove",
+    "definition": "Grove's opt-in directory — browse who's growing here, discover other wanderers, and find your people.",
+    "seeAlso": [
+      "flow"
+    ],
+    "standardTerm": "Directory"
+  },
+  "meadow": {
+    "slug": "meadow",
+    "term": "Meadow",
+    "category": "content",
+    "tagline": "The Social Layer",
+    "definition": "A social feed where you follow other Grove blogs and see their posts in chronological order — no algorithms.",
+    "seeAlso": [
+      "canopy"
+    ],
+    "standardTerm": "Community Feed"
+  },
+  "notes": {
+    "slug": "notes",
+    "term": "Notes",
+    "category": "content",
+    "tagline": "Short-Form Posts",
+    "definition": "Quick thoughts you leave in the Meadow. Short-form posts, up to 500 characters, written directly on the community feed.",
+    "usageExample": "\"I left a note in the meadow.\"\n\"Her notes are always worth reading.\"",
+    "seeAlso": [
+      "blooms",
+      "flow",
+      "canopy",
+      "meadow"
+    ],
+    "standardTerm": "Posts / Status Updates"
+  },
+  "forests": {
+    "slug": "forests",
+    "term": "Forests",
+    "category": "content",
+    "tagline": "Community Groves",
+    "definition": "Themed community directories where similar blogs are grouped together — like GeoCities neighborhoods, but with Grove's nature-first naming.",
+    "seeAlso": [
+      "foliage",
+      "wander"
+    ],
+    "standardTerm": "Communities"
+  },
+  "wander": {
+    "slug": "wander",
+    "term": "Wander",
+    "category": "content",
+    "tagline": "Immersive Discovery",
+    "definition": "An immersive 3D experience where you walk through a virtual forest and discover other people's Grove sites.",
+    "seeAlso": [
+      "terrarium",
+      "oak"
+    ],
+    "standardTerm": "Discovery"
+  },
+  "grafts": {
+    "slug": "grafts",
+    "term": "Grafts",
+    "category": "tools",
+    "tagline": "Feature Customization",
+    "definition": "Per-blog feature flags that the grove keeper enables for specific sites — like turning on new capabilities or beta features.",
+    "seeAlso": [
+      "plant",
+      "aria",
+      "wayfinder"
+    ],
+    "standardTerm": "Feature Flags"
+  },
+  "waystone": {
+    "slug": "waystone",
+    "term": "Waystone",
+    "category": "tools",
+    "tagline": "Help Center",
+    "definition": "Contextual help markers throughout Grove — tap one to see what a term or feature means without leaving the page.",
+    "standardTerm": "Help Center"
+  },
+  "gossamer": {
+    "slug": "gossamer",
+    "term": "Gossamer",
+    "category": "tools",
+    "tagline": "ASCII Visual Effects",
+    "definition": "An open-source visual effects library — ASCII patterns, ambient textures, and atmospheric backgrounds for websites.",
+    "seeAlso": [
+      "etch"
+    ],
+    "alwaysGrove": true
+  },
+  "ivy": {
+    "slug": "ivy",
+    "term": "Ivy",
+    "category": "tools",
+    "tagline": "Email",
+    "definition": "A privacy-focused email client for your @grove.place address — encrypted and minimal.",
+    "seeAlso": [
+      "lattice"
+    ],
+    "standardTerm": "Email"
+  },
+  "verge": {
+    "slug": "verge",
+    "term": "Verge",
+    "category": "tools",
+    "tagline": "Remote Coding Infrastructure",
+    "definition": "Serverless remote coding infrastructure — ephemeral compute environments that spin up, do the work, and disappear.",
+    "standardTerm": "Domain Manager"
+  },
+  "forage": {
+    "slug": "forage",
+    "term": "Forage",
+    "category": "tools",
+    "tagline": "Domain Discovery",
+    "definition": "An AI-powered domain search tool — describe your project and get a curated list of available domain names.",
+    "seeAlso": [
+      "plant"
+    ],
+    "standardTerm": "Domain Search"
+  },
+  "nook": {
+    "slug": "nook",
+    "term": "Nook",
+    "category": "tools",
+    "tagline": "Private Video Sharing",
+    "definition": "A private video sharing space for small friend groups — faces auto-blurred, content processed locally before sharing.",
+    "standardTerm": "Link in Bio"
+  },
+  "shutter": {
+    "slug": "shutter",
+    "term": "Shutter",
+    "category": "tools",
+    "tagline": "Web Content Distillation",
+    "definition": "A web content distillation service — give it a URL and a question, get clean focused content back instead of raw HTML noise."
+  },
+  "outpost": {
+    "slug": "outpost",
+    "term": "Outpost",
+    "category": "tools",
+    "tagline": "Minecraft Server",
+    "definition": "An on-demand Minecraft server for friends — spins up when someone wants to play, shuts down when idle to save costs.",
+    "standardTerm": "Game Server"
+  },
+  "aria": {
+    "slug": "aria",
+    "term": "Aria",
+    "category": "tools",
+    "tagline": "Music Curation",
+    "definition": "A music discovery tool — give it a song you love, and it builds a playlist of tracks with similar sonic DNA, with explanations for each pick."
+  },
+  "hum": {
+    "slug": "hum",
+    "term": "Hum",
+    "category": "tools",
+    "tagline": "Music Link Previews",
+    "definition": "Music link previews in your posts — paste a Spotify or Apple Music URL and it becomes a beautiful card with album art, track info, and cross-platform links.",
+    "usageExample": "\"I added a hum to my latest bloom.\"\n\"That hum card for the new album looks gorgeous.\"",
+    "seeAlso": [
+      "blooms",
+      "canopy",
+      "aria"
+    ],
+    "standardTerm": "Music Widget"
+  },
+  "etch": {
+    "slug": "etch",
+    "term": "Etch",
+    "category": "tools",
+    "tagline": "Link Saving & Highlights",
+    "definition": "Your personal link library — save URLs, highlight text, tag what matters, and find it all later.",
+    "seeAlso": [
+      "trace",
+      "wander",
+      "passage",
+      "press"
+    ],
+    "standardTerm": "Blog Importer"
+  },
+  "trove": {
+    "slug": "trove",
+    "term": "Trove",
+    "category": "tools",
+    "tagline": "Library Book Discovery",
+    "definition": "A library book discovery tool — point your camera at a shelf and see which books match your taste.",
+    "standardTerm": "Collections"
+  },
+  "heartwood": {
+    "slug": "heartwood",
+    "term": "Heartwood",
+    "category": "operations",
+    "tagline": "Authentication",
+    "definition": "Grove's login and identity system — one account that works across every Grove property.",
+    "standardTerm": "Authentication"
+  },
+  "pantry": {
+    "slug": "pantry",
+    "term": "Pantry",
+    "category": "operations",
+    "tagline": "Shop & Provisioning",
+    "definition": "Grove's shop — subscriptions, merchandise, credits, and gift cards.",
+    "seeAlso": [
+      "press"
+    ],
+    "standardTerm": "Data Store"
+  },
+  "passage": {
+    "slug": "passage",
+    "term": "Passage",
+    "category": "operations",
+    "tagline": "Subdomain Routing",
+    "definition": "The subdomain router that sends visitors to the right Grove site when they type {you}.grove.place.",
+    "seeAlso": [
+      "lattice"
+    ],
+    "standardTerm": "Router"
+  },
+  "petal": {
+    "slug": "petal",
+    "term": "Petal",
+    "category": "operations",
+    "tagline": "Content Safety",
+    "definition": "Image safety scanning — checks every uploaded photo and media file for harmful content before it appears on your site.",
+    "seeAlso": [
+      "blooms",
+      "lumen"
+    ],
+    "standardTerm": "Image Moderation"
+  },
+  "warden": {
+    "slug": "warden",
+    "term": "Warden",
+    "category": "operations",
+    "tagline": "External API Gateway",
+    "definition": "The API gateway that handles outbound requests to third-party services, keeping API keys secure and never exposed.",
+    "seeAlso": [
+      "scribe"
+    ],
+    "standardTerm": "API Gateway"
+  },
+  "press": {
+    "slug": "press",
+    "term": "Press",
+    "category": "operations",
+    "tagline": "Image Processing CLI",
+    "definition": "An image processing tool — converts photos to web format, generates alt text with AI, deduplicates, and uploads to storage.",
+    "seeAlso": [
+      "scribe"
+    ],
+    "standardTerm": "Build System"
+  },
+  "vista": {
+    "slug": "vista",
+    "term": "Vista",
+    "category": "operations",
+    "tagline": "Infrastructure Observability",
+    "definition": "Infrastructure monitoring — tracks health, latency, errors, and costs across all Grove services with real-time dashboards.",
+    "seeAlso": [
+      "rings",
+      "clearing",
+      "canopy",
+      "etch"
+    ],
+    "standardTerm": "Monitoring"
+  },
+  "patina": {
+    "slug": "patina",
+    "term": "Patina",
+    "category": "operations",
+    "tagline": "Backup System",
+    "definition": "Automated nightly backups of every Grove database, with weekly archives and 12 weeks of history.",
+    "seeAlso": [
+      "press"
+    ],
+    "standardTerm": "Backups"
+  },
+  "mycelium": {
+    "slug": "mycelium",
+    "term": "Mycelium",
+    "category": "operations",
+    "tagline": "MCP Server",
+    "definition": "Grove's MCP server — lets AI assistants read your posts, manage files, and interact with Grove services through a single interface.",
+    "seeAlso": [
+      "amber",
+      "seedling"
+    ],
+    "standardTerm": "MCP Server"
+  },
+  "lumen": {
+    "slug": "lumen",
+    "term": "Lumen",
+    "category": "operations",
+    "tagline": "AI Gateway",
+    "definition": "The AI gateway that routes all AI requests to the right model, with rate limiting, data scrubbing, and usage logging.",
+    "seeAlso": [
+      "wisp",
+      "flow",
+      "thorn",
+      "fireside"
+    ],
+    "standardTerm": "AI Gateway"
+  },
+  "zephyr": {
+    "slug": "zephyr",
+    "term": "Zephyr",
+    "category": "operations",
+    "tagline": "Email Gateway",
+    "definition": "The email delivery service that sends all Grove emails — onboarding, notifications, support replies — with retries and templates.",
+    "seeAlso": [
+      "porch",
+      "flow",
+      "wander",
+      "lumen"
+    ],
+    "standardTerm": "Email Gateway"
+  },
+  "shade": {
+    "slug": "shade",
+    "term": "Shade",
+    "category": "operations",
+    "tagline": "AI Content Protection",
+    "definition": "Grove's defense against AI scrapers and data harvesters — robots.txt, meta tags, rate limiting, and legal protections working together.",
+    "seeAlso": [
+      "canopy"
+    ],
+    "alwaysGrove": true
+  },
+  "wanderer": {
+    "slug": "wanderer",
+    "term": "Wanderer",
+    "category": "foundational",
+    "tagline": "Everyone who enters the grove.",
+    "definition": "Anyone visiting Grove, whether they have an account or not — the default word for \"visitor\" or \"user\" here.",
+    "usageExample": "\"Welcome, Wanderer.\"",
+    "seeAlso": [
+      "wander"
+    ],
+    "standardTerm": "Visitor"
+  },
+  "rooted": {
+    "slug": "rooted",
+    "term": "Rooted",
+    "category": "foundational",
+    "tagline": "Those who've planted their tree.",
+    "definition": "Someone who's signed up, paid, and created their own Grove blog — what other platforms would call a \"subscriber.\"",
+    "usageExample": "\"You've taken root. Welcome home.\"",
+    "seeAlso": [
+      "plant",
+      "scribe",
+      "wander"
+    ],
+    "standardTerm": "Subscriber"
+  },
+  "pathfinder": {
+    "slug": "pathfinder",
+    "term": "Pathfinder",
+    "category": "foundational",
+    "tagline": "Trusted guides appointed by the Wayfinder.",
+    "definition": "A trusted community volunteer who helps other Grove members — appointed by the Wayfinder, similar to a moderator.",
+    "usageExample": "\"Ask a Pathfinder. They'll show you the way.\"",
+    "seeAlso": [
+      "wander",
+      "wanderer",
+      "wayfinder"
+    ],
+    "standardTerm": "Trusted Guide"
+  },
+  "wayfinder": {
+    "slug": "wayfinder",
+    "term": "Wayfinder",
+    "category": "foundational",
+    "tagline": "Autumn. Singular.",
+    "definition": "Autumn — the person who built and runs Grove. There is one Wayfinder.",
+    "usageExample": "\"The Wayfinder welcomes you to the grove.\"",
+    "seeAlso": [
+      "wander",
+      "wanderer"
+    ],
+    "standardTerm": "Grove Keeper"
+  },
+  "seedling": {
+    "slug": "seedling",
+    "term": "Seedling",
+    "category": "foundational",
+    "tagline": "Starter Tier",
+    "definition": "Grove's entry-level plan ($8/month) — 50 posts, 1 GB storage, and curated themes to get started.",
+    "seeAlso": [
+      "blooms",
+      "plant"
+    ],
+    "standardTerm": "Starter"
+  },
+  "sapling": {
+    "slug": "sapling",
+    "term": "Sapling",
+    "category": "foundational",
+    "tagline": "Growth Tier",
+    "definition": "Grove's mid-tier plan ($12/month) — more storage, more themes, email forwarding, and Centennial eligibility.",
+    "seeAlso": [
+      "centennial",
+      "etch"
+    ],
+    "standardTerm": "Growth"
+  },
+  "oak": {
+    "slug": "oak",
+    "term": "Oak",
+    "category": "foundational",
+    "tagline": "Pro Tier",
+    "definition": "Grove's pro plan ($25/month) — unlimited posts, theme customizer, custom domain, and analytics.",
+    "seeAlso": [
+      "blooms",
+      "canopy"
+    ],
+    "standardTerm": "Pro"
+  },
+  "evergreen": {
+    "slug": "evergreen",
+    "term": "Evergreen",
+    "category": "foundational",
+    "tagline": "Ultra Tier",
+    "definition": "Grove's top-tier plan ($35/month) — everything Grove offers, including custom fonts, dedicated support, and a domain included.",
+    "standardTerm": "Ultra"
+  },
+  "workshop": {
+    "slug": "workshop",
+    "term": "Workshop",
+    "category": "platform",
+    "tagline": "Internal Services",
+    "definition": "A behind-the-scenes directory of all the internal services that power Grove — for curious visitors who want to see how it works.",
+    "seeAlso": [
+      "wander",
+      "wanderer"
+    ],
+    "standardTerm": "Internal Services"
+  },
+  "fireside": {
+    "slug": "fireside",
+    "term": "Fireside",
+    "category": "platform",
+    "tagline": "Focus Mode",
+    "definition": "A conversational writing mode — Wisp asks you questions, you answer naturally, and your words get organized into a draft.",
+    "seeAlso": [
+      "wisp"
+    ],
+    "standardTerm": "Focus Mode"
+  },
+  "vines": {
+    "slug": "vines",
+    "term": "Vines",
+    "category": "platform",
+    "tagline": "Sidebar Links",
+    "definition": "Sidebar widgets alongside your blog posts — related links, callouts, annotations, and other contextual content in the margins.",
+    "seeAlso": [
+      "lattice",
+      "flow",
+      "meadow",
+      "notes"
+    ],
+    "standardTerm": "Sidebar Links"
+  }
+}

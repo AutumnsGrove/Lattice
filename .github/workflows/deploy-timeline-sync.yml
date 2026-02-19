@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'packages/workers/timeline-sync/**'
+      - "workers/timeline-sync/**"
   workflow_dispatch:
 
 jobs:
@@ -22,9 +22,9 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
-          cache-dependency-path: '**/pnpm-lock.yaml'
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: "**/pnpm-lock.yaml"
 
       - name: Install dependencies
         run: pnpm install
@@ -32,14 +32,14 @@ jobs:
 
       - name: Type check
         run: pnpm exec tsc --noEmit
-        working-directory: packages/workers/timeline-sync
+        working-directory: workers/timeline-sync
 
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: packages/workers/timeline-sync
+          workingDirectory: workers/timeline-sync
           command: deploy
           packageManager: pnpm
         # KEK is bound via Cloudflare Secrets Store in wrangler.toml

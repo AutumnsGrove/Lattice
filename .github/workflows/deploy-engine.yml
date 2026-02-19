@@ -4,8 +4,8 @@ on:
   push:
     branches: [main]
     paths:
-      - "packages/engine/**"
-      - "packages/vineyard/**"
+      - "libs/engine/**"
+      - "libs/vineyard/**"
       - "package.json"
       - "pnpm-lock.yaml"
       - "docs/philosophy/grove-naming.md" # Regenerates grove-term-manifest.json
@@ -35,29 +35,29 @@ jobs:
         run: pnpm install
 
       - name: Build engine package (required for self-referencing imports)
-        working-directory: packages/engine
+        working-directory: libs/engine
         run: pnpm package
 
       - name: Run tests
         run: pnpm test:run
-        working-directory: packages/engine
+        working-directory: libs/engine
 
       - name: Build engine for deployment
-        working-directory: packages/engine
+        working-directory: libs/engine
         run: pnpm run build
 
       - name: Build vineyard (workspace dependency)
         run: pnpm package
-        working-directory: packages/vineyard
+        working-directory: libs/vineyard
 
       - name: Type check
         run: pnpm check
-        working-directory: packages/engine
+        working-directory: libs/engine
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy packages/engine/.svelte-kit/cloudflare --project-name=grove-lattice
+          command: pages deploy libs/engine/.svelte-kit/cloudflare --project-name=grove-lattice
           packageManager: pnpm
