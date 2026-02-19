@@ -6,6 +6,7 @@ from contextlib import contextmanager
 from datetime import datetime, timezone
 from typing import Generator
 
+import click
 from rich.console import Console
 from rich.panel import Panel
 from rich.spinner import Spinner
@@ -13,6 +14,143 @@ from rich.table import Table
 from rich.text import Text
 
 console = Console()
+
+# Grove-themed color palette (nature-inspired, single source of truth)
+GROVE_COLORS = {
+    "forest_green": "green",
+    "bark_brown": "bright_black",
+    "sky_blue": "blue",
+    "sunset_orange": "orange3",
+    "leaf_yellow": "yellow",
+    "river_cyan": "cyan",
+    "moss": "green3",
+    "blossom_pink": "magenta",
+}
+
+
+# ── Cozy Group ────────────────────────────────────────────────────────
+#
+# Reusable Click group class that renders categorized Rich panels.
+# Use cls=CozyGroup with any @click.group() to get warm help output.
+#
+# Categories format: dict[str, tuple[title, color, list[tuple[name, desc]]]]
+#   e.g. {"read": ("📖 Read", "green", [("list", "List all"), ...])}
+
+
+class CozyGroup(click.Group):
+    """Click group with categorized Rich panel help display.
+
+    Usage:
+        @click.group(cls=CozyGroup, cozy_categories={...})
+        def my_group():
+            '''Group description.'''
+            pass
+    """
+
+    def __init__(
+        self,
+        *args,
+        cozy_categories: dict | None = None,
+        cozy_show_safety: bool = True,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+        self.cozy_categories = cozy_categories or {}
+        self.cozy_show_safety = cozy_show_safety
+
+    def format_help(self, ctx: click.Context, formatter: click.HelpFormatter) -> None:
+        """Override to show categorized help with Rich panels."""
+        # Header
+        cmd_path = ctx.command_path
+        subtitle = self.help.split("\n")[0].strip() if self.help else ""
+
+        header = Text()
+        header.append(cmd_path, f"bold {GROVE_COLORS['forest_green']}")
+        if subtitle:
+            header.append(f" — {subtitle}\n", "dim")
+        else:
+            header.append("\n")
+        console.print(header)
+
+        # Category panels
+        for _key, (title, color, commands) in self.cozy_categories.items():
+            table = Table(show_header=False, box=None, padding=(0, 1))
+            table.add_column("Command", style=f"bold {color}", width=14)
+            table.add_column("Description", style="dim")
+
+            for cmd_name, cmd_desc in commands:
+                table.add_row(f"  {cmd_name}", cmd_desc)
+
+            panel = Panel(
+                table,
+                title=f"[bold {color}]{title}[/bold {color}]",
+                border_style=color,
+                padding=(0, 1),
+            )
+            console.print(panel)
+
+        # Safety tiers footer (optional)
+        if self.cozy_show_safety:
+            tips = Text()
+            tips.append("\U0001f6e1\ufe0f  ", GROVE_COLORS["leaf_yellow"])
+            tips.append("Safety Tiers:\n", "bold")
+            tips.append("  READ     ", f"bold {GROVE_COLORS['forest_green']}")
+            tips.append("Always safe — no flags needed\n", "dim")
+            tips.append("  WRITE    ", f"bold {GROVE_COLORS['leaf_yellow']}")
+            tips.append("Requires ", "dim")
+            tips.append("--write", f"bold {GROVE_COLORS['leaf_yellow']}")
+            tips.append(" flag\n", "dim")
+            tips.append("  DANGER   ", "bold red")
+            tips.append("Requires ", "dim")
+            tips.append("--write --force", "bold red")
+            tips.append("\n", "dim")
+
+            tips_panel = Panel(
+                tips,
+                border_style=GROVE_COLORS["leaf_yellow"],
+                padding=(0, 1),
+            )
+            console.print(tips_panel)
+
+        console.print()
+
+
+# ── Git-specific UI helpers ───────────────────────────────────────────
+
+
+def git_error(msg: str) -> None:
+    """Print a git error and exit."""
+    console.print(f"[red]Git error:[/red] {msg}")
+
+
+def safety_error(msg: str, suggestion: str | None = None) -> None:
+    """Print a safety check failure with optional suggestion."""
+    console.print(f"[red]Safety check failed:[/red] {msg}")
+    if suggestion:
+        console.print(f"[dim]{suggestion}[/dim]")
+
+
+def action(verb: str, detail: str) -> None:
+    """Print a successful action (e.g. 'Committed', 'Pushed')."""
+    console.print(f"[green]{verb}:[/green] {detail}")
+
+
+def hint(msg: str) -> None:
+    """Print a dim hint or suggestion."""
+    console.print(f"[dim]{msg}[/dim]")
+
+
+def step(ok: bool, msg: str) -> None:
+    """Print a step result line with ✓ or ✗ icon."""
+    icon = "✓" if ok else "✗"
+    color = "green" if ok else "red"
+    console.print(f"  [{color}]{icon}[/{color}] {msg}")
+
+
+def not_a_repo() -> None:
+    """Print 'Not a git repository' and exit."""
+    console.print("[red]Not a git repository[/red]")
+    raise SystemExit(1)
 
 
 def relative_time(iso_str: str) -> str:

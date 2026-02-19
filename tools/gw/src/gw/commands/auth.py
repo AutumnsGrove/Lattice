@@ -7,23 +7,31 @@ from typing import Optional
 import click
 
 from ..config import GWConfig
-from ..ui import console, create_table, error, info, success, warning
+from ..ui import GROVE_COLORS, CozyGroup, console, create_table, error, info, success, warning
 from ..wrangler import Wrangler, WranglerError
 
+AUTH_CATEGORIES = {
+    "read": (
+        "\U0001f4d6 Read (Always Safe)",
+        GROVE_COLORS["forest_green"],
+        [
+            ("check", "Check Cloudflare auth status"),
+            ("client", "OAuth client management"),
+        ],
+    ),
+    "write": (
+        "\u270f\ufe0f  Write (Require --write)",
+        GROVE_COLORS["leaf_yellow"],
+        [
+            ("login", "Log in to Cloudflare"),
+        ],
+    ),
+}
 
-@click.group()
+
+@click.group(cls=CozyGroup, cozy_categories=AUTH_CATEGORIES)
 def auth() -> None:
-    """Manage authentication.
-
-    Cloudflare authentication and OAuth client management.
-
-    \b
-    Examples:
-        gw auth check                      # Check Cloudflare auth
-        gw auth login                      # Login to Cloudflare
-        gw auth client list                # List OAuth clients
-        gw auth client create --write      # Create new client
-    """
+    """Authentication management."""
     pass
 
 

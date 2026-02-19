@@ -13,22 +13,33 @@ from ..completions import (
     generate_fish_completion,
     generate_zsh_completion,
 )
-from ..ui import console, error, info, success, warning
+from ..ui import GROVE_COLORS, CozyGroup, console, error, info, success, warning
 
 
-@click.group()
+COMPLETION_CATEGORIES = {
+    "setup": (
+        "\U0001f527 Setup",
+        GROVE_COLORS["bark_brown"],
+        [
+            ("install", "Auto-detect and install completions"),
+            ("uninstall", "Remove installed completions"),
+        ],
+    ),
+    "generate": (
+        "\u2728 Generate",
+        GROVE_COLORS["river_cyan"],
+        [
+            ("bash", "Generate bash completion script"),
+            ("zsh", "Generate zsh completion script"),
+            ("fish", "Generate fish completion script"),
+        ],
+    ),
+}
+
+
+@click.group(cls=CozyGroup, cozy_categories=COMPLETION_CATEGORIES, cozy_show_safety=False)
 def completion() -> None:
-    """Generate shell completions.
-
-    Tab-complete commands, subcommands, and options.
-
-    \b
-    Examples:
-        gw completion install         # Auto-detect and install
-        gw completion bash            # Generate bash script
-        gw completion zsh             # Generate zsh script
-        gw completion fish            # Generate fish script
-    """
+    """Shell completion generation."""
     pass
 
 

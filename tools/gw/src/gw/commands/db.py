@@ -9,8 +9,28 @@ import click
 
 from ..config import GWConfig
 from ..safety import AGENT_SAFE_CONFIG, SafetyConfig, SafetyViolationError, validate_sql
-from ..ui import console, create_panel, create_table, error, info, success, warning
+from ..ui import GROVE_COLORS, CozyGroup, console, create_panel, create_table, error, info, success, warning
 from ..wrangler import Wrangler, WranglerError
+
+D1_CATEGORIES = {
+    "read": (
+        "\U0001f4d6 Read (Always Safe)",
+        GROVE_COLORS["forest_green"],
+        [
+            ("list", "List all databases"),
+            ("tables", "List tables in a database"),
+            ("schema", "Show schema for a table"),
+            ("query", "Execute a read-only SQL query"),
+        ],
+    ),
+    "write": (
+        "\u270f\ufe0f  Write (Require --write)",
+        GROVE_COLORS["leaf_yellow"],
+        [
+            ("migrate", "Execute a SQL migration file"),
+        ],
+    ),
+}
 
 
 def parse_wrangler_json(output: str) -> list[dict[str, Any]]:
@@ -24,14 +44,10 @@ def parse_wrangler_json(output: str) -> list[dict[str, Any]]:
         return []
 
 
-@click.group()
+@click.group(cls=CozyGroup, cozy_categories=D1_CATEGORIES)
 @click.pass_context
 def d1(ctx: click.Context) -> None:
-    """D1 database operations.
-
-    Query databases, list tables, and inspect schemas with safety guards.
-    All queries are read-only by default.
-    """
+    """D1 database operations."""
     pass
 
 

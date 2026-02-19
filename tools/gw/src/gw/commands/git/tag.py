@@ -4,14 +4,12 @@ import json
 from typing import Optional
 
 import click
-from rich.console import Console
 from rich.syntax import Syntax
 from rich.table import Table
 
 from ...git_wrapper import Git, GitError
 from ...safety.git import GitSafetyError, check_git_safety
-
-console = Console()
+from ...ui import console, action, git_error, hint, not_a_repo, safety_error
 
 
 @click.group()
@@ -52,8 +50,7 @@ def tag_list(ctx: click.Context, sort_by: str, limit: Optional[int]) -> None:
         git = Git()
 
         if not git.is_repo():
-            console.print("[red]Not a git repository[/red]")
-            raise SystemExit(1)
+            not_a_repo()
 
         # Sort flags
         sort_flag = {
@@ -101,7 +98,7 @@ def tag_list(ctx: click.Context, sort_by: str, limit: Optional[int]) -> None:
         console.print(f"\n[dim]{len(tags)} tag(s)[/dim]")
 
     except GitError as e:
-        console.print(f"[red]Git error:[/red] {e.message}")
+        git_error(e.message)
         raise SystemExit(1)
 
 
@@ -123,8 +120,7 @@ def tag_show(ctx: click.Context, name: str) -> None:
         git = Git()
 
         if not git.is_repo():
-            console.print("[red]Not a git repository[/red]")
-            raise SystemExit(1)
+            not_a_repo()
 
         output = git.execute(["show", name])
 
@@ -135,7 +131,7 @@ def tag_show(ctx: click.Context, name: str) -> None:
             console.print(syntax)
 
     except GitError as e:
-        console.print(f"[red]Git error:[/red] {e.message}")
+        git_error(e.message)
         raise SystemExit(1)
 
 
@@ -162,17 +158,14 @@ def tag_create(ctx: click.Context, write: bool, message: Optional[str], ref: Opt
     try:
         check_git_safety("tag_create", write_flag=write)
     except GitSafetyError as e:
-        console.print(f"[red]Safety check failed:[/red] {e.message}")
-        if e.suggestion:
-            console.print(f"[dim]{e.suggestion}[/dim]")
+        safety_error(e.message, e.suggestion)
         raise SystemExit(1)
 
     try:
         git = Git()
 
         if not git.is_repo():
-            console.print("[red]Not a git repository[/red]")
-            raise SystemExit(1)
+            not_a_repo()
 
         args = ["tag"]
         if message:
@@ -194,13 +187,13 @@ def tag_create(ctx: click.Context, write: bool, message: Optional[str], ref: Opt
             }))
         else:
             tag_type = "Annotated tag" if message else "Lightweight tag"
-            console.print(f"[green]{tag_type} created:[/green] {name}")
+            action(f"{tag_type} created", name)
             if message:
-                console.print(f"[dim]Message: {message}[/dim]")
-            console.print(f"[dim]Push with: gw git push --write origin {name}[/dim]")
+                hint(f"Message: {message}")
+            hint(f"Push with: gw git push --write origin {name}")
 
     except GitError as e:
-        console.print(f"[red]Git error:[/red] {e.message}")
+        git_error(e.message)
         raise SystemExit(1)
 
 
@@ -223,26 +216,23 @@ def tag_delete(ctx: click.Context, write: bool, name: str) -> None:
     try:
         check_git_safety("tag_delete", write_flag=write)
     except GitSafetyError as e:
-        console.print(f"[red]Safety check failed:[/red] {e.message}")
-        if e.suggestion:
-            console.print(f"[dim]{e.suggestion}[/dim]")
+        safety_error(e.message, e.suggestion)
         raise SystemExit(1)
 
     try:
         git = Git()
 
         if not git.is_repo():
-            console.print("[red]Not a git repository[/red]")
-            raise SystemExit(1)
+            not_a_repo()
 
         git.execute(["tag", "-d", name])
 
         if output_json:
             console.print(json.dumps({"deleted": name}))
         else:
-            console.print(f"[green]Deleted tag:[/green] {name}")
-            console.print(f"[dim]To remove from remote: git push origin --delete {name}[/dim]")
+            action("Deleted tag", name)
+            hint(f"To remove from remote: git push origin --delete {name}")
 
     except GitError as e:
-        console.print(f"[red]Git error:[/red] {e.message}")
+        git_error(e.message)
         raise SystemExit(1)

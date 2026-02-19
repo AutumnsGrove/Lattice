@@ -4,7 +4,6 @@ import json
 from typing import Optional
 
 import click
-from rich.console import Console
 from rich.panel import Panel
 from rich.prompt import Confirm, Prompt
 
@@ -16,8 +15,7 @@ from ...safety.git import (
     is_agent_mode,
     is_protected_branch,
 )
-
-console = Console()
+from ...ui import console, action, git_error, hint, not_a_repo, safety_error
 
 
 @click.command("force-push")
@@ -48,8 +46,7 @@ def push_force(
         git = Git()
 
         if not git.is_repo():
-            console.print("[red]Not a git repository[/red]")
-            raise SystemExit(1)
+            not_a_repo()
 
         target_branch = branch or git.current_branch()
 
@@ -61,9 +58,7 @@ def push_force(
                 target_branch=target_branch,
             )
         except GitSafetyError as e:
-            console.print(f"[red]Safety check failed:[/red] {e.message}")
-            if e.suggestion:
-                console.print(f"[dim]{e.suggestion}[/dim]")
+            safety_error(e.message, e.suggestion)
             raise SystemExit(1)
 
         # Additional warning and confirmation
@@ -98,10 +93,10 @@ def push_force(
                 "force": True,
             }))
         else:
-            console.print(f"[green]Force pushed to {remote}/{target_branch}[/green]")
+            action("Force pushed to", f"{remote}/{target_branch}")
 
     except GitError as e:
-        console.print(f"[red]Git error:[/red] {e.message}")
+        git_error(e.message)
         raise SystemExit(1)
 
 
@@ -150,15 +145,12 @@ def reset(
         git = Git()
 
         if not git.is_repo():
-            console.print("[red]Not a git repository[/red]")
-            raise SystemExit(1)
+            not_a_repo()
 
         try:
             check_git_safety(operation, write_flag=write, force_flag=force)
         except GitSafetyError as e:
-            console.print(f"[red]Safety check failed:[/red] {e.message}")
-            if e.suggestion:
-                console.print(f"[dim]{e.suggestion}[/dim]")
+            safety_error(e.message, e.suggestion)
             raise SystemExit(1)
 
         # For hard reset, show what will be lost and confirm
@@ -200,10 +192,10 @@ def reset(
                 "mode": mode,
             }))
         else:
-            console.print(f"[green]Reset to {ref} ({mode})[/green]")
+            action("Reset to", f"{ref} ({mode})")
 
     except GitError as e:
-        console.print(f"[red]Git error:[/red] {e.message}")
+        git_error(e.message)
         raise SystemExit(1)
 
 
@@ -239,8 +231,7 @@ def rebase(
         git = Git()
 
         if not git.is_repo():
-            console.print("[red]Not a git repository[/red]")
-            raise SystemExit(1)
+            not_a_repo()
 
         # Continue/abort are safer operations
         if continue_rebase or abort_rebase:
@@ -253,9 +244,7 @@ def rebase(
             try:
                 check_git_safety("rebase", write_flag=write, force_flag=force)
             except GitSafetyError as e:
-                console.print(f"[red]Safety check failed:[/red] {e.message}")
-                if e.suggestion:
-                    console.print(f"[dim]{e.suggestion}[/dim]")
+                safety_error(e.message, e.suggestion)
                 raise SystemExit(1)
 
             # Warning and confirmation
@@ -290,18 +279,16 @@ def rebase(
             }))
         else:
             if continue_rebase:
-                console.print("[green]Rebase continued[/green]")
+                action("Rebase", "continued")
             elif abort_rebase:
-                console.print("[green]Rebase aborted[/green]")
+                action("Rebase", "aborted")
             else:
-                console.print(f"[green]Rebased onto {onto}[/green]")
+                action("Rebased onto", onto)
 
     except GitError as e:
-        console.print(f"[red]Git error:[/red] {e.message}")
+        git_error(e.message)
         if "conflict" in e.stderr.lower():
-            console.print(
-                "[dim]Hint: Resolve conflicts, then 'gw git rebase --write --continue'[/dim]"
-            )
+            hint("Resolve conflicts, then 'gw git rebase --write --continue'")
         raise SystemExit(1)
 
 
@@ -340,25 +327,20 @@ def merge(
         git = Git()
 
         if not git.is_repo():
-            console.print("[red]Not a git repository[/red]")
-            raise SystemExit(1)
+            not_a_repo()
 
         current_branch = git.current_branch()
 
         # Check if merging into protected branch in agent mode
         config = GitSafetyConfig()
         if is_agent_mode() and is_protected_branch(current_branch, config):
-            console.print(
-                f"[red]Cannot merge into protected branch '{current_branch}' in agent mode[/red]"
-            )
+            git_error(f"Cannot merge into protected branch '{current_branch}' in agent mode")
             raise SystemExit(1)
 
         try:
             check_git_safety("merge", write_flag=write, force_flag=force)
         except GitSafetyError as e:
-            console.print(f"[red]Safety check failed:[/red] {e.message}")
-            if e.suggestion:
-                console.print(f"[dim]{e.suggestion}[/dim]")
+            safety_error(e.message, e.suggestion)
             raise SystemExit(1)
 
         if abort_merge:
@@ -366,7 +348,7 @@ def merge(
             if output_json:
                 console.print(json.dumps({"action": "aborted"}))
             else:
-                console.print("[green]Merge aborted[/green]")
+                action("Merge", "aborted")
             return
 
         # Check for potential conflicts
@@ -403,21 +385,17 @@ def merge(
                 "squash": squash,
             }))
         else:
-            console.print(f"[green]Merged {branch} into {current_branch}[/green]")
+            action("Merged", f"{branch} into {current_branch}")
             if squash:
-                console.print(
-                    "[dim]Squashed - don't forget to commit[/dim]"
-                )
+                hint("Squashed - don't forget to commit")
 
     except GitError as e:
-        console.print(f"[red]Git error:[/red] {e.message}")
+        git_error(e.message)
         if "conflict" in e.stderr.lower():
             conflicted = git.get_conflicted_files()
             if conflicted:
                 console.print("\n[yellow]Conflicted files:[/yellow]")
                 for f in conflicted:
                     console.print(f"  {f}")
-            console.print(
-                "\n[dim]Resolve conflicts, then commit. Or 'gw git merge --write --abort'[/dim]"
-            )
+            hint("\nResolve conflicts, then commit. Or 'gw git merge --write --abort'")
         raise SystemExit(1)

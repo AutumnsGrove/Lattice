@@ -4,13 +4,12 @@ import json
 from typing import Optional
 
 import click
-from rich.console import Console
+from rich.panel import Panel
 from rich.table import Table
 
 from ...git_wrapper import Git, GitError
 from ...safety.git import GitSafetyError, check_git_safety
-
-console = Console()
+from ...ui import console, action, git_error, not_a_repo, safety_error
 
 
 @click.group()
@@ -48,8 +47,7 @@ def remote_list(ctx: click.Context) -> None:
         git = Git()
 
         if not git.is_repo():
-            console.print("[red]Not a git repository[/red]")
-            raise SystemExit(1)
+            not_a_repo()
 
         output = git.execute(["remote", "-v"])
 
@@ -88,7 +86,7 @@ def remote_list(ctx: click.Context) -> None:
         console.print(table)
 
     except GitError as e:
-        console.print(f"[red]Git error:[/red] {e.message}")
+        git_error(e.message)
         raise SystemExit(1)
 
 
@@ -111,18 +109,17 @@ def remote_show(ctx: click.Context, name: str) -> None:
         git = Git()
 
         if not git.is_repo():
-            console.print("[red]Not a git repository[/red]")
-            raise SystemExit(1)
+            not_a_repo()
 
         output = git.execute(["remote", "show", name])
 
         if output_json:
             console.print(json.dumps({"remote": name, "details": output.strip()}))
         else:
-            console.print(output)
+            console.print(Panel(output.strip(), title=f"[bold]Remote: {name}[/bold]", border_style="green"))
 
     except GitError as e:
-        console.print(f"[red]Git error:[/red] {e.message}")
+        git_error(e.message)
         raise SystemExit(1)
 
 
@@ -146,27 +143,24 @@ def remote_add(ctx: click.Context, write: bool, name: str, url: str) -> None:
     try:
         check_git_safety("remote_add", write_flag=write)
     except GitSafetyError as e:
-        console.print(f"[red]Safety check failed:[/red] {e.message}")
-        if e.suggestion:
-            console.print(f"[dim]{e.suggestion}[/dim]")
+        safety_error(e.message, e.suggestion)
         raise SystemExit(1)
 
     try:
         git = Git()
 
         if not git.is_repo():
-            console.print("[red]Not a git repository[/red]")
-            raise SystemExit(1)
+            not_a_repo()
 
         git.execute(["remote", "add", name, url])
 
         if output_json:
             console.print(json.dumps({"added": name, "url": url}))
         else:
-            console.print(f"[green]Added remote:[/green] {name} → {url}")
+            action("Added remote", f"{name} → {url}")
 
     except GitError as e:
-        console.print(f"[red]Git error:[/red] {e.message}")
+        git_error(e.message)
         raise SystemExit(1)
 
 
@@ -188,27 +182,24 @@ def remote_remove(ctx: click.Context, write: bool, name: str) -> None:
     try:
         check_git_safety("remote_remove", write_flag=write)
     except GitSafetyError as e:
-        console.print(f"[red]Safety check failed:[/red] {e.message}")
-        if e.suggestion:
-            console.print(f"[dim]{e.suggestion}[/dim]")
+        safety_error(e.message, e.suggestion)
         raise SystemExit(1)
 
     try:
         git = Git()
 
         if not git.is_repo():
-            console.print("[red]Not a git repository[/red]")
-            raise SystemExit(1)
+            not_a_repo()
 
         git.execute(["remote", "remove", name])
 
         if output_json:
             console.print(json.dumps({"removed": name}))
         else:
-            console.print(f"[green]Removed remote:[/green] {name}")
+            action("Removed remote", name)
 
     except GitError as e:
-        console.print(f"[red]Git error:[/red] {e.message}")
+        git_error(e.message)
         raise SystemExit(1)
 
 
@@ -231,25 +222,22 @@ def remote_rename(ctx: click.Context, write: bool, old_name: str, new_name: str)
     try:
         check_git_safety("remote_rename", write_flag=write)
     except GitSafetyError as e:
-        console.print(f"[red]Safety check failed:[/red] {e.message}")
-        if e.suggestion:
-            console.print(f"[dim]{e.suggestion}[/dim]")
+        safety_error(e.message, e.suggestion)
         raise SystemExit(1)
 
     try:
         git = Git()
 
         if not git.is_repo():
-            console.print("[red]Not a git repository[/red]")
-            raise SystemExit(1)
+            not_a_repo()
 
         git.execute(["remote", "rename", old_name, new_name])
 
         if output_json:
             console.print(json.dumps({"renamed": old_name, "to": new_name}))
         else:
-            console.print(f"[green]Renamed remote:[/green] {old_name} → {new_name}")
+            action("Renamed remote", f"{old_name} → {new_name}")
 
     except GitError as e:
-        console.print(f"[red]Git error:[/red] {e.message}")
+        git_error(e.message)
         raise SystemExit(1)

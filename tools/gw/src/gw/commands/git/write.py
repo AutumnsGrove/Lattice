@@ -5,7 +5,6 @@ import os
 from typing import Optional
 
 import click
-from rich.console import Console
 from rich.panel import Panel
 from rich.prompt import Confirm, Prompt
 from rich.table import Table
@@ -20,17 +19,16 @@ from ...safety.git import (
     is_agent_mode,
     validate_conventional_commit,
 )
-
-console = Console()
+from ...ui import console, action, git_error, hint, not_a_repo, safety_error
 
 
 def require_write(ctx: click.Context) -> None:
     """Check that --write flag is provided."""
     write_flag = ctx.params.get("write", False)
     if not write_flag:
-        console.print(
-            "[yellow]This operation modifies the repository.[/yellow]\n"
-            "Add [bold]--write[/bold] flag to confirm."
+        safety_error(
+            "This operation modifies the repository.",
+            "Add --write flag to confirm.",
         )
         raise SystemExit(1)
 
@@ -56,17 +54,14 @@ def add(ctx: click.Context, write: bool, all_files: bool, paths: tuple[str, ...]
     try:
         check_git_safety("add", write_flag=write)
     except GitSafetyError as e:
-        console.print(f"[red]Safety check failed:[/red] {e.message}")
-        if e.suggestion:
-            console.print(f"[dim]{e.suggestion}[/dim]")
+        safety_error(e.message, e.suggestion)
         raise SystemExit(1)
 
     try:
         git = Git()
 
         if not git.is_repo():
-            console.print("[red]Not a git repository[/red]")
-            raise SystemExit(1)
+            not_a_repo()
 
         # If staging all, confirm with user
         if all_files or (len(paths) == 1 and paths[0] == "."):
@@ -88,12 +83,12 @@ def add(ctx: click.Context, write: bool, all_files: bool, paths: tuple[str, ...]
             console.print(json.dumps({"staged": list(paths) if paths else ["all"]}))
         else:
             if all_files:
-                console.print("[green]Staged all changes[/green]")
+                action("Staged", "all changes")
             else:
-                console.print(f"[green]Staged {len(paths)} file(s)[/green]")
+                action("Staged", f"{len(paths)} file(s)")
 
     except GitError as e:
-        console.print(f"[red]Git error:[/red] {e.message}")
+        git_error(e.message)
         raise SystemExit(1)
 
 
@@ -117,17 +112,14 @@ def unstage(ctx: click.Context, write: bool, all_files: bool, paths: tuple[str, 
     try:
         check_git_safety("unstage", write_flag=write)
     except GitSafetyError as e:
-        console.print(f"[red]Safety check failed:[/red] {e.message}")
-        if e.suggestion:
-            console.print(f"[dim]{e.suggestion}[/dim]")
+        safety_error(e.message, e.suggestion)
         raise SystemExit(1)
 
     try:
         git = Git()
 
         if not git.is_repo():
-            console.print("[red]Not a git repository[/red]")
-            raise SystemExit(1)
+            not_a_repo()
 
         if all_files:
             git.execute(["reset", "HEAD"])
@@ -140,10 +132,10 @@ def unstage(ctx: click.Context, write: bool, all_files: bool, paths: tuple[str, 
         if output_json:
             console.print(json.dumps({"unstaged": list(paths) if paths else ["all"]}))
         else:
-            console.print("[green]Files unstaged[/green]")
+            action("Unstaged", "all files" if all_files else f"{len(paths)} file(s)")
 
     except GitError as e:
-        console.print(f"[red]Git error:[/red] {e.message}")
+        git_error(e.message)
         raise SystemExit(1)
 
 
@@ -182,23 +174,20 @@ def commit(
     try:
         check_git_safety("commit", write_flag=write)
     except GitSafetyError as e:
-        console.print(f"[red]Safety check failed:[/red] {e.message}")
-        if e.suggestion:
-            console.print(f"[dim]{e.suggestion}[/dim]")
+        safety_error(e.message, e.suggestion)
         raise SystemExit(1)
 
     try:
         git = Git()
 
         if not git.is_repo():
-            console.print("[red]Not a git repository[/red]")
-            raise SystemExit(1)
+            not_a_repo()
 
         # Check for staged changes
         status = git.status()
         if not status.staged:
             console.print("[yellow]No staged changes to commit[/yellow]")
-            console.print("[dim]Use 'gw git add --write <files>' to stage changes[/dim]")
+            hint("Use 'gw git add --write <files>' to stage changes")
             raise SystemExit(1)
 
         config = GitSafetyConfig()
@@ -235,13 +224,13 @@ def commit(
                 "issue": issue,
             }))
         else:
-            console.print(f"[green]Committed:[/green] {message.split(chr(10))[0]}")
-            console.print(f"[dim]Hash: {commit_hash[:8]}[/dim]")
+            action("Committed", message.split(chr(10))[0])
+            hint(f"Hash: {commit_hash[:8]}")
             if issue:
-                console.print(f"[dim]Linked to issue #{issue}[/dim]")
+                hint(f"Linked to issue #{issue}")
 
     except GitError as e:
-        console.print(f"[red]Git error:[/red] {e.message}")
+        git_error(e.message)
         raise SystemExit(1)
 
 
@@ -330,17 +319,14 @@ def push(
     try:
         check_git_safety("push", write_flag=write)
     except GitSafetyError as e:
-        console.print(f"[red]Safety check failed:[/red] {e.message}")
-        if e.suggestion:
-            console.print(f"[dim]{e.suggestion}[/dim]")
+        safety_error(e.message, e.suggestion)
         raise SystemExit(1)
 
     try:
         git = Git()
 
         if not git.is_repo():
-            console.print("[red]Not a git repository[/red]")
-            raise SystemExit(1)
+            not_a_repo()
 
         current_branch = branch or git.current_branch()
 
@@ -357,34 +343,26 @@ def push(
                 "branch": current_branch,
             }))
         else:
-            console.print(f"[green]Pushed to {remote}/{current_branch}[/green]")
+            action("Pushed to", f"{remote}/{current_branch}")
 
     except GitError as e:
         stderr = e.stderr.lower()
         # Pre-push hook failures — now detectable because execute() includes
         # subprocess stdout in the error (hooks write diagnostics there).
         if "pre-push" in stderr:
-            console.print("[red]Push blocked by pre-push hook[/red]")
+            git_error("Push blocked by pre-push hook")
             if e.stderr.strip():
                 console.print(f"\n{e.stderr.strip()}")
-            console.print(
-                "\n[dim]Fix the issues reported above, then push again.\n"
-                "To bypass: git push --no-verify[/dim]"
-            )
-        # Remote has newer commits that need to be integrated
+            hint("Fix the issues reported above, then push again.\nTo bypass: git push --no-verify")
         elif "non-fast-forward" in stderr or "fetch first" in stderr:
-            console.print("[red]Remote has newer commits[/red]")
-            console.print(
-                "[dim]Run 'gw git sync --write' to rebase and push, "
-                "or 'gw git push --write --force-with-lease' to overwrite.[/dim]"
-            )
-        # Other rejection (permissions, protected branch, etc.)
+            git_error("Remote has newer commits")
+            hint("Run 'gw git sync --write' to rebase and push, or 'gw git push --write --force-with-lease' to overwrite.")
         elif "rejected" in stderr or "failed to push" in stderr:
-            console.print("[red]Push rejected[/red]")
+            git_error("Push rejected")
             if e.stderr.strip():
                 console.print(f"\n{e.stderr.strip()}")
         else:
-            console.print(f"[red]Push failed:[/red] {e.stderr.strip() or e.message}")
+            git_error(e.stderr.strip() or e.message)
         raise SystemExit(1)
 
 
@@ -416,17 +394,14 @@ def pull(
     try:
         check_git_safety("pull", write_flag=write)
     except GitSafetyError as e:
-        console.print(f"[red]Safety check failed:[/red] {e.message}")
-        if e.suggestion:
-            console.print(f"[dim]{e.suggestion}[/dim]")
+        safety_error(e.message, e.suggestion)
         raise SystemExit(1)
 
     try:
         git = Git()
 
         if not git.is_repo():
-            console.print("[red]Not a git repository[/red]")
-            raise SystemExit(1)
+            not_a_repo()
 
         current_branch = branch or git.current_branch()
 
@@ -439,25 +414,20 @@ def pull(
                 "rebase": rebase,
             }))
         else:
-            console.print(f"[green]Pulled from {remote}/{current_branch}[/green]")
+            action("Pulled from", f"{remote}/{current_branch}")
             if rebase:
-                console.print("[dim]Used rebase strategy[/dim]")
+                hint("Used rebase strategy")
 
     except GitError as e:
         stderr = e.stderr.lower()
         if "conflict" in stderr:
-            console.print("[red]Pull failed: merge conflicts[/red]")
-            console.print(
-                "[dim]Resolve conflicts, then 'gw git add --write' "
-                "and 'gw git commit --write'[/dim]"
-            )
+            git_error("Pull failed: merge conflicts")
+            hint("Resolve conflicts, then 'gw git add --write' and 'gw git commit --write'")
         elif "not possible" in stderr and "unstaged" in stderr:
-            console.print("[red]Pull failed: uncommitted changes would be overwritten[/red]")
-            console.print(
-                "[dim]Commit or stash your changes first, then try again.[/dim]"
-            )
+            git_error("Pull failed: uncommitted changes would be overwritten")
+            hint("Commit or stash your changes first, then try again.")
         else:
-            console.print(f"[red]Pull failed:[/red] {e.stderr.strip() or e.message}")
+            git_error(e.stderr.strip() or e.message)
         raise SystemExit(1)
 
 
@@ -493,8 +463,7 @@ def branch(
         git = Git()
 
         if not git.is_repo():
-            console.print("[red]Not a git repository[/red]")
-            raise SystemExit(1)
+            not_a_repo()
 
         # List branches (read-only)
         if list_branches or (not name and not delete):
@@ -515,7 +484,25 @@ def branch(
                         })
                 console.print(json.dumps({"branches": branches}))
             else:
-                console.print(output)
+                table = Table(title="Branches", border_style="green")
+                table.add_column("", width=2)
+                table.add_column("Branch", style="cyan")
+                table.add_column("Hash", style="yellow", width=9)
+                table.add_column("Subject", style="dim")
+
+                for line in output.strip().split("\n"):
+                    if not line.strip():
+                        continue
+                    is_current = line.startswith("*")
+                    indicator = "[green]*[/green]" if is_current else ""
+                    parts = line.lstrip("* ").split(None, 2)
+                    name = parts[0] if len(parts) > 0 else ""
+                    hash_val = parts[1] if len(parts) > 1 else ""
+                    subject = parts[2] if len(parts) > 2 else ""
+                    branch_style = "bold green" if is_current else "cyan"
+                    table.add_row(indicator, f"[{branch_style}]{name}[/{branch_style}]", hash_val, subject)
+
+                console.print(table)
             return
 
         # Create or delete branch
@@ -538,17 +525,17 @@ def branch(
             if output_json:
                 console.print(json.dumps({"deleted": name}))
             else:
-                console.print(f"[green]Deleted branch: {name}[/green]")
+                action("Deleted branch", name)
         else:
             git.branch_create(name, start_point)
             if output_json:
                 console.print(json.dumps({"created": name}))
             else:
-                console.print(f"[green]Created branch: {name}[/green]")
-                console.print(f"[dim]Switch with: gw git switch {name}[/dim]")
+                action("Created branch", name)
+                hint(f"Switch with: gw git switch {name}")
 
     except GitError as e:
-        console.print(f"[red]Git error:[/red] {e.message}")
+        git_error(e.message)
         raise SystemExit(1)
 
 
@@ -579,23 +566,20 @@ def switch(ctx: click.Context, branch_name: str, create: bool) -> None:
         git = Git()
 
         if not git.is_repo():
-            console.print("[red]Not a git repository[/red]")
-            raise SystemExit(1)
+            not_a_repo()
 
         git.switch(branch_name, create=create)
 
         if output_json:
             console.print(json.dumps({"branch": branch_name}))
         else:
-            console.print(f"[green]Switched to branch: {branch_name}[/green]")
+            action("Switched to", branch_name)
 
     except GitSafetyError as e:
-        console.print(f"[red]Safety check failed:[/red] {e.message}")
-        if e.suggestion:
-            console.print(f"[dim]{e.suggestion}[/dim]")
+        safety_error(e.message, e.suggestion)
         raise SystemExit(1)
     except GitError as e:
-        console.print(f"[red]Git error:[/red] {e.message}")
+        git_error(e.message)
         raise SystemExit(1)
 
 
@@ -628,23 +612,20 @@ def checkout(ctx: click.Context, branch_name: str, create: bool, create_b: bool)
         git = Git()
 
         if not git.is_repo():
-            console.print("[red]Not a git repository[/red]")
-            raise SystemExit(1)
+            not_a_repo()
 
         git.checkout(branch_name, create=should_create)
 
         if output_json:
             console.print(json.dumps({"branch": branch_name}))
         else:
-            console.print(f"[green]Switched to branch: {branch_name}[/green]")
+            action("Switched to", branch_name)
 
     except GitSafetyError as e:
-        console.print(f"[red]Safety check failed:[/red] {e.message}")
-        if e.suggestion:
-            console.print(f"[dim]{e.suggestion}[/dim]")
+        safety_error(e.message, e.suggestion)
         raise SystemExit(1)
     except GitError as e:
-        console.print(f"[red]Git error:[/red] {e.message}")
+        git_error(e.message)
         raise SystemExit(1)
 
 
@@ -709,8 +690,7 @@ def stash(
         git = Git()
 
         if not git.is_repo():
-            console.print("[red]Not a git repository[/red]")
-            raise SystemExit(1)
+            not_a_repo()
 
         # List stashes (read-only)
         if list_stashes:
@@ -754,19 +734,19 @@ def stash(
             if output_json:
                 console.print(json.dumps({"popped": index}))
             else:
-                console.print(f"[green]Popped stash@{{{index}}}[/green]")
+                action("Popped", f"stash@{{{index}}}")
         elif apply_stash:
             git.stash_apply(index)
             if output_json:
                 console.print(json.dumps({"applied": index}))
             else:
-                console.print(f"[green]Applied stash@{{{index}}}[/green]")
+                action("Applied", f"stash@{{{index}}}")
         elif drop:
             git.stash_drop(index)
             if output_json:
                 console.print(json.dumps({"dropped": index}))
             else:
-                console.print(f"[green]Dropped stash@{{{index}}}[/green]")
+                action("Dropped", f"stash@{{{index}}}")
         else:
             # SAFETY: Warn when stash is called non-interactively.
             # AI agents should NEVER stash user WIP to work around
@@ -788,12 +768,12 @@ def stash(
             if output_json:
                 console.print(json.dumps({"stashed": True, "message": message}))
             else:
-                console.print("[green]Stashed changes[/green]")
+                action("Stashed", "changes")
                 if message:
-                    console.print(f"[dim]Message: {message}[/dim]")
+                    hint(f"Message: {message}")
 
     except GitError as e:
-        console.print(f"[red]Git error:[/red] {e.message}")
+        git_error(e.message)
         raise SystemExit(1)
 
 
@@ -816,25 +796,22 @@ def cherry_pick(ctx: click.Context, write: bool, commits: tuple[str, ...]) -> No
     try:
         check_git_safety("commit", write_flag=write)
     except GitSafetyError as e:
-        console.print(f"[red]Safety check failed:[/red] {e.message}")
-        if e.suggestion:
-            console.print(f"[dim]{e.suggestion}[/dim]")
+        safety_error(e.message, e.suggestion)
         raise SystemExit(1)
 
     try:
         git = Git()
 
         if not git.is_repo():
-            console.print("[red]Not a git repository[/red]")
-            raise SystemExit(1)
+            not_a_repo()
 
         # Validate commits exist before attempting cherry-pick
         for commit_ref in commits:
             try:
                 git.execute(["cat-file", "-t", commit_ref])
             except GitError:
-                console.print(f"[red]Commit not found:[/red] {commit_ref}")
-                console.print("[dim]Verify the commit hash exists with: gw git log[/dim]")
+                git_error(f"Commit not found: {commit_ref}")
+                hint("Verify the commit hash exists with: gw git log")
                 raise SystemExit(1)
 
         # Apply cherry-pick
@@ -851,22 +828,17 @@ def cherry_pick(ctx: click.Context, write: bool, commits: tuple[str, ...]) -> No
             }))
         else:
             for h in applied:
-                console.print(f"[green]Cherry-picked:[/green] {h}")
+                action("Cherry-picked", h)
             if len(applied) > 1:
-                console.print(f"[dim]Applied {len(applied)} commits[/dim]")
+                hint(f"Applied {len(applied)} commits")
 
     except GitError as e:
         stderr = e.stderr.lower()
         if "conflict" in stderr:
-            console.print("[red]Cherry-pick conflict[/red]")
-            console.print(
-                "[dim]Resolve conflicts, then:\n"
-                "  git add <resolved-files>\n"
-                "  git cherry-pick --continue\n\n"
-                "Or abort with: git cherry-pick --abort[/dim]"
-            )
+            git_error("Cherry-pick conflict")
+            hint("Resolve conflicts, then:\n  git add <resolved-files>\n  git cherry-pick --continue\n\nOr abort with: git cherry-pick --abort")
         else:
-            console.print(f"[red]Git error:[/red] {e.message}")
+            git_error(e.message)
         raise SystemExit(1)
 
 
@@ -900,17 +872,14 @@ def restore(
     try:
         check_git_safety("restore", write_flag=write)
     except GitSafetyError as e:
-        console.print(f"[red]Safety check failed:[/red] {e.message}")
-        if e.suggestion:
-            console.print(f"[dim]{e.suggestion}[/dim]")
+        safety_error(e.message, e.suggestion)
         raise SystemExit(1)
 
     try:
         git = Git()
 
         if not git.is_repo():
-            console.print("[red]Not a git repository[/red]")
-            raise SystemExit(1)
+            not_a_repo()
 
         # Warn when restoring everything
         if "." in paths and not staged and not output_json:
@@ -937,13 +906,13 @@ def restore(
                 "source": source,
             }))
         else:
-            action = "Unstaged" if staged else "Restored"
-            console.print(f"[green]{action} {len(paths)} path(s)[/green]")
+            verb = "Unstaged" if staged else "Restored"
+            action(verb, f"{len(paths)} path(s)")
             if source:
-                console.print(f"[dim]From: {source}[/dim]")
+                hint(f"From: {source}")
 
     except GitError as e:
-        console.print(f"[red]Git error:[/red] {e.message}")
+        git_error(e.message)
         raise SystemExit(1)
 
 
@@ -995,8 +964,7 @@ def clean(
         git = Git()
 
         if not git.is_repo():
-            console.print("[red]Not a git repository[/red]")
-            raise SystemExit(1)
+            not_a_repo()
 
         args = ["clean"]
 
@@ -1049,10 +1017,10 @@ def clean(
                     for line in lines:
                         cleaned = line.replace("Removing ", "").strip()
                         console.print(f"[red]Removed:[/red] {cleaned}")
-                    console.print(f"\n[green]Cleaned {len(lines)} file(s)[/green]")
+                    action("Cleaned", f"{len(lines)} file(s)")
                 else:
                     console.print("[dim]Nothing to clean — working tree is tidy[/dim]")
 
     except GitError as e:
-        console.print(f"[red]Git error:[/red] {e.message}")
+        git_error(e.message)
         raise SystemExit(1)

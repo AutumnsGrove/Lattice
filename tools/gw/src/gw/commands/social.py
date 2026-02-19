@@ -9,7 +9,7 @@ from typing import Optional
 import click
 
 from ..config import GWConfig
-from ..ui import console, create_panel, create_table, error, info, success, warning
+from ..ui import GROVE_COLORS, CozyGroup, console, create_panel, create_table, error, info, success, warning
 
 
 ZEPHYR_URL = "https://grove-zephyr.m7jv4v7npb.workers.dev"
@@ -81,19 +81,30 @@ def _zephyr_request(
         raise click.ClickException(f"Connection failed: {e.reason}")
 
 
-@click.group()
+SOCIAL_CATEGORIES = {
+    "read": (
+        "\U0001f4d6 Read (Always Safe)",
+        GROVE_COLORS["forest_green"],
+        [
+            ("status", "Show platform status and health"),
+            ("history", "Show recent broadcast history"),
+            ("setup", "Show platform setup instructions"),
+        ],
+    ),
+    "write": (
+        "\u270f\ufe0f  Write (Require --write)",
+        GROVE_COLORS["leaf_yellow"],
+        [
+            ("post", "Post content to social platforms"),
+        ],
+    ),
+}
+
+
+@click.group(cls=CozyGroup, cozy_categories=SOCIAL_CATEGORIES)
 @click.pass_context
 def social(ctx: click.Context) -> None:
-    """Social cross-posting via Zephyr.
-
-    Scatter your content on the wind — post to Bluesky (and more, soon).
-
-    \\b
-    Examples:
-        gw social post --write "Hello from the grove!"
-        gw social status
-        gw social history
-    """
+    """Social cross-posting via Zephyr."""
     pass
 
 
@@ -118,7 +129,7 @@ def social_post(
 
     Requires --write flag.
 
-    \\b
+    \b
     Examples:
         gw social post --write "Just shipped cross-posting!"
         gw social post --write --platform bluesky "Hello world"
@@ -208,7 +219,7 @@ def social_status(ctx: click.Context) -> None:
 
     Always safe — no --write flag required.
 
-    \\b
+    \b
     Examples:
         gw social status
     """
@@ -264,7 +275,7 @@ def social_history(ctx: click.Context, limit: int) -> None:
 
     Always safe — no --write flag required.
 
-    \\b
+    \b
     Examples:
         gw social history
         gw social history -n 20
@@ -290,7 +301,7 @@ def social_history(ctx: click.Context, limit: int) -> None:
 def social_setup(ctx: click.Context) -> None:
     """Show setup instructions for social platforms.
 
-    \\b
+    \b
     Examples:
         gw social setup
     """

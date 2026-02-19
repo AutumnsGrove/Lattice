@@ -6,23 +6,26 @@ from typing import Optional
 import click
 
 from ..config import GWConfig
-from ..ui import console, create_table, error, info, success, warning
+from ..ui import GROVE_COLORS, CozyGroup, console, create_table, error, info, success, warning
 from ..wrangler import Wrangler, WranglerError
 
+DO_CATEGORIES = {
+    "read": (
+        "\U0001f4d6 Read (Always Safe)",
+        GROVE_COLORS["forest_green"],
+        [
+            ("list", "List DO namespaces"),
+            ("info", "Show namespace info"),
+            ("alarm", "Check alarm status"),
+        ],
+    ),
+}
 
-@click.group()
+
+@click.group(cls=CozyGroup, cozy_categories=DO_CATEGORIES, cozy_show_safety=False)
 @click.pass_context
 def do(ctx: click.Context) -> None:
-    """Durable Objects operations.
-
-    Inspect Durable Object namespaces and instances.
-    All operations are read-only for safety.
-
-    \b
-    Examples:
-        gw do list                    # List DO namespaces
-        gw do info TENANT_SESSIONS    # Show namespace info
-    """
+    """Durable Objects operations."""
     pass
 
 

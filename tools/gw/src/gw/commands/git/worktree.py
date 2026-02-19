@@ -9,14 +9,11 @@ from pathlib import Path
 from typing import Optional
 
 import click
-from rich.console import Console
 from rich.table import Table
 
-from ...ui import success, error, info, warning, is_interactive
+from ...ui import console, success, error, info, warning, is_interactive, safety_error
 from ...gh_wrapper import GitHub, GitHubError
 from ...safety.git import GitSafetyError, check_git_safety
-
-console = Console()
 
 # Worktree directory name (inside repo, gitignored)
 WORKTREE_DIR = ".gw-worktrees"
@@ -167,9 +164,7 @@ def worktree_create(ctx: click.Context, ref: str, write: bool, new: bool, no_ins
     try:
         check_git_safety("worktree_create", write_flag=write)
     except GitSafetyError as e:
-        error(f"Safety check failed: {e.message}")
-        if e.suggestion:
-            console.print(f"[dim]{e.suggestion}[/dim]")
+        safety_error(e.message, e.suggestion)
         raise SystemExit(1)
 
     branch_name, worktree_name, ref_type = resolve_ref(ref)
@@ -424,9 +419,7 @@ def worktree_remove(ctx: click.Context, ref: str, write: bool, force: bool) -> N
     try:
         check_git_safety("worktree_remove", write_flag=write, force_flag=force)
     except GitSafetyError as e:
-        error(f"Safety check failed: {e.message}")
-        if e.suggestion:
-            console.print(f"[dim]{e.suggestion}[/dim]")
+        safety_error(e.message, e.suggestion)
         raise SystemExit(1)
 
     _, worktree_name, _ = resolve_ref(ref)
@@ -492,7 +485,7 @@ def worktree_prune(ctx: click.Context, write: bool, merged: bool) -> None:
     try:
         check_git_safety("worktree_prune", write_flag=write)
     except GitSafetyError as e:
-        error(f"Safety check failed: {e.message}")
+        safety_error(e.message, e.suggestion)
         raise SystemExit(1)
 
     # First, run git worktree prune to clean up stale refs
@@ -568,7 +561,7 @@ def worktree_clean(ctx: click.Context, write: bool, force: bool) -> None:
     try:
         check_git_safety("worktree_clean", write_flag=write, force_flag=force)
     except GitSafetyError as e:
-        error(f"Safety check failed: {e.message}")
+        safety_error(e.message, e.suggestion)
         raise SystemExit(1)
 
     base = get_worktree_base()
@@ -755,9 +748,7 @@ def worktree_finish(ctx: click.Context, ref: str, write: bool, push: bool, delet
     try:
         check_git_safety("worktree_finish", write_flag=write)
     except GitSafetyError as e:
-        error(f"Safety check failed: {e.message}")
-        if e.suggestion:
-            console.print(f"[dim]{e.suggestion}[/dim]")
+        safety_error(e.message, e.suggestion)
         raise SystemExit(1)
 
     _, worktree_name, _ = resolve_ref(ref)

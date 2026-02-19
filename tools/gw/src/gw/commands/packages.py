@@ -12,22 +12,27 @@ from ..packages import (
     detect_current_package,
     load_monorepo,
 )
-from ..ui import console, create_table, error, info, success
+from ..ui import GROVE_COLORS, CozyGroup, console, create_table, error, info, success
 
 
-@click.group()
+PACKAGES_CATEGORIES = {
+    "read": (
+        "\U0001f4d6 Read (Always Safe)",
+        GROVE_COLORS["forest_green"],
+        [
+            ("list", "List all packages in the monorepo"),
+            ("info", "Show detailed package info"),
+            ("current", "Show current package from working dir"),
+            ("deps", "List package dependencies"),
+        ],
+    ),
+}
+
+
+@click.group(cls=CozyGroup, cozy_categories=PACKAGES_CATEGORIES, cozy_show_safety=False)
 @click.pass_context
 def packages(ctx: click.Context) -> None:
-    """Monorepo package discovery.
-
-    Inspect packages in the Lattice monorepo.
-
-    \b
-    Examples:
-        gw packages list               # List all packages
-        gw packages info               # Info about current package
-        gw packages info engine        # Info about specific package
-    """
+    """Monorepo package discovery."""
     pass
 
 

@@ -6,22 +6,32 @@ from typing import Optional
 import click
 
 from ..config import GWConfig
-from ..ui import console, create_table, error, info, success, warning
+from ..ui import GROVE_COLORS, CozyGroup, console, create_table, error, info, success, warning
 from ..wrangler import Wrangler, WranglerError
 
+EMAIL_CATEGORIES = {
+    "read": (
+        "\U0001f4d6 Read (Always Safe)",
+        GROVE_COLORS["forest_green"],
+        [
+            ("status", "Check email routing status"),
+            ("rules", "List email routing rules"),
+        ],
+    ),
+    "write": (
+        "\u270f\ufe0f  Write (Require --write)",
+        GROVE_COLORS["leaf_yellow"],
+        [
+            ("test", "Send a test email"),
+        ],
+    ),
+}
 
-@click.group()
+
+@click.group(cls=CozyGroup, cozy_categories=EMAIL_CATEGORIES)
 @click.pass_context
 def email(ctx: click.Context) -> None:
-    """Email routing operations.
-
-    Test and inspect Cloudflare Email Routing configuration.
-
-    \b
-    Examples:
-        gw email status            # Check email routing status
-        gw email test --write      # Send a test email
-    """
+    """Email routing operations."""
     pass
 
 

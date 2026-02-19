@@ -2,33 +2,44 @@
 
 import click
 
+from ...ui import GROVE_COLORS, CozyGroup
 from .pr import pr
 from .issue import issue
 from .run import run
 from .api import api, rate_limit
 from .project import project
 
+GH_CATEGORIES = {
+    "core": (
+        "\U0001f4cb Core",
+        GROVE_COLORS["river_cyan"],
+        [
+            ("pr", "Pull request operations"),
+            ("issue", "Issue operations"),
+        ],
+    ),
+    "ci": (
+        "\u26a1 CI/CD",
+        GROVE_COLORS["leaf_yellow"],
+        [
+            ("run", "Workflow run operations"),
+        ],
+    ),
+    "management": (
+        "\U0001f527 Management",
+        GROVE_COLORS["bark_brown"],
+        [
+            ("project", "Project board operations"),
+            ("api", "Raw GitHub API requests"),
+            ("rate-limit", "Check API rate limit status"),
+        ],
+    ),
+}
 
-@click.group()
+
+@click.group(cls=CozyGroup, cozy_categories=GH_CATEGORIES)
 def gh() -> None:
-    """GitHub operations with safety guards.
-
-    Grove-aware GitHub CLI wrapper with rate limit awareness,
-    project board integration, and agent-safe defaults.
-
-    \b
-    Safety Tiers:
-    - READ:        list, view, status (always safe)
-    - WRITE:       create, comment, edit (require --write)
-    - DESTRUCTIVE: merge, close, delete (require --write, may need confirmation)
-
-    \b
-    Examples:
-        gw gh pr list              # List open PRs
-        gw gh pr view 123          # View PR details
-        gw gh pr create --write    # Create a PR
-        gw gh issue list           # List open issues
-    """
+    """GitHub operations with safety guards."""
     pass
 
 

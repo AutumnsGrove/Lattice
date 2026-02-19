@@ -5,15 +5,13 @@ import re
 from typing import Optional
 
 import click
-from rich.console import Console
 from rich.panel import Panel
 from rich.syntax import Syntax
 from rich.table import Table
 from rich.text import Text
 
 from ...git_wrapper import Git, GitError
-
-console = Console()
+from ...ui import console, git_error, not_a_repo
 
 
 class NumericShorthandCommand(click.Command):
@@ -50,8 +48,7 @@ def status(ctx: click.Context, short: bool, porcelain: bool) -> None:
         git = Git()
 
         if not git.is_repo():
-            console.print("[red]Not a git repository[/red]")
-            raise SystemExit(1)
+            not_a_repo()
 
         git_status = git.status()
 
@@ -76,7 +73,7 @@ def status(ctx: click.Context, short: bool, porcelain: bool) -> None:
             _print_rich_status(git_status)
 
     except GitError as e:
-        console.print(f"[red]Git error:[/red] {e.message}")
+        git_error(e.message)
         raise SystemExit(1)
 
 
@@ -221,8 +218,7 @@ def log(
         git = Git()
 
         if not git.is_repo():
-            console.print("[red]Not a git repository[/red]")
-            raise SystemExit(1)
+            not_a_repo()
 
         if graph:
             args = ["log", f"-{limit}", "--graph", "--oneline", "--decorate", "--color=never"]
@@ -272,21 +268,24 @@ def log(
                     f"[yellow]{commit.short_hash}[/yellow] {commit.subject}"
                 )
         else:
+            table = Table(border_style="green", show_lines=False, padding=(0, 1))
+            table.add_column("Hash", style="yellow", width=9)
+            table.add_column("Message")
+            table.add_column("Author", style="dim", width=18)
+            table.add_column("Date", style="dim", width=16)
+
             for commit in commits:
-                console.print(
-                    f"[yellow]commit {commit.hash}[/yellow]"
+                table.add_row(
+                    commit.short_hash,
+                    commit.subject,
+                    commit.author,
+                    commit.date[:16] if len(commit.date) > 16 else commit.date,
                 )
-                console.print(f"Author: {commit.author} <{commit.author_email}>")
-                console.print(f"Date:   {commit.date}")
-                console.print()
-                console.print(f"    {commit.subject}")
-                if commit.body:
-                    for line in commit.body.strip().split("\n"):
-                        console.print(f"    {line}")
-                console.print()
+
+            console.print(table)
 
     except GitError as e:
-        console.print(f"[red]Git error:[/red] {e.message}")
+        git_error(e.message)
         raise SystemExit(1)
 
 
@@ -344,8 +343,7 @@ def diff(
         git = Git()
 
         if not git.is_repo():
-            console.print("[red]Not a git repository[/red]")
-            raise SystemExit(1)
+            not_a_repo()
 
         git_diff = git.diff(
             staged=staged,
@@ -397,7 +395,7 @@ def diff(
             console.print(syntax)
 
     except GitError as e:
-        console.print(f"[red]Git error:[/red] {e.message}")
+        git_error(e.message)
         raise SystemExit(1)
 
 
@@ -428,8 +426,7 @@ def blame(ctx: click.Context, file_path: str, line_range: Optional[str], ref: Op
         git = Git()
 
         if not git.is_repo():
-            console.print("[red]Not a git repository[/red]")
-            raise SystemExit(1)
+            not_a_repo()
 
         line_start = None
         line_end = None
@@ -450,12 +447,12 @@ def blame(ctx: click.Context, file_path: str, line_range: Optional[str], ref: Op
             console.print(json.dumps({"lines": lines}, indent=2))
             return
 
-        # Show blame output with syntax highlighting
+        # Show blame output with syntax highlighting in a Panel
         syntax = Syntax(output, "text", theme="monokai", line_numbers=False)
-        console.print(syntax)
+        console.print(Panel(syntax, title=f"[bold]Blame: {file_path}[/bold]", border_style="green"))
 
     except GitError as e:
-        console.print(f"[red]Git error:[/red] {e.message}")
+        git_error(e.message)
         raise SystemExit(1)
 
 
@@ -481,8 +478,7 @@ def show(ctx: click.Context, ref: str, stat_only: bool) -> None:
         git = Git()
 
         if not git.is_repo():
-            console.print("[red]Not a git repository[/red]")
-            raise SystemExit(1)
+            not_a_repo()
 
         output = git.show(ref, stat_only)
 
@@ -495,7 +491,7 @@ def show(ctx: click.Context, ref: str, stat_only: bool) -> None:
         console.print(syntax)
 
     except GitError as e:
-        console.print(f"[red]Git error:[/red] {e.message}")
+        git_error(e.message)
         raise SystemExit(1)
 
 
@@ -533,8 +529,7 @@ def fetch(
         git = Git()
 
         if not git.is_repo():
-            console.print("[red]Not a git repository[/red]")
-            raise SystemExit(1)
+            not_a_repo()
 
         args = ["fetch"]
 
@@ -560,15 +555,16 @@ def fetch(
             }
             console.print(json.dumps(data))
         else:
+            from ...ui import action, hint
             target = "all remotes" if all_remotes else remote
             if branch:
                 target = f"{remote}/{branch}"
-            console.print(f"[green]Fetched from {target}[/green]")
+            action("Fetched from", target)
             if prune:
-                console.print("[dim]Pruned stale remote-tracking branches[/dim]")
+                hint("Pruned stale remote-tracking branches")
 
     except GitError as e:
-        console.print(f"[red]Git error:[/red] {e.message}")
+        git_error(e.message)
         raise SystemExit(1)
 
 
@@ -593,8 +589,7 @@ def reflog(ctx: click.Context, limit: int) -> None:
         git = Git()
 
         if not git.is_repo():
-            console.print("[red]Not a git repository[/red]")
-            raise SystemExit(1)
+            not_a_repo()
 
         output = git.execute([
             "reflog", "show",
@@ -647,7 +642,7 @@ def reflog(ctx: click.Context, limit: int) -> None:
         console.print(f"\n[dim]Showing {limit} most recent entries[/dim]")
 
     except GitError as e:
-        console.print(f"[red]Git error:[/red] {e.message}")
+        git_error(e.message)
         raise SystemExit(1)
 
 
@@ -683,8 +678,7 @@ def shortlog(
         git = Git()
 
         if not git.is_repo():
-            console.print("[red]Not a git repository[/red]")
-            raise SystemExit(1)
+            not_a_repo()
 
         args = ["shortlog", "-sne", ref]
         if since:
@@ -728,5 +722,5 @@ def shortlog(
         console.print(f"\n[dim]{total} commits from {len(authors)} contributor(s)[/dim]")
 
     except GitError as e:
-        console.print(f"[red]Git error:[/red] {e.message}")
+        git_error(e.message)
         raise SystemExit(1)

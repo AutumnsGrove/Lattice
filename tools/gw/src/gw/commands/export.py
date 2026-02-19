@@ -10,8 +10,28 @@ from typing import Any
 import click
 
 from ..config import GWConfig
-from ..ui import console, create_panel, create_table, error, info, success, warning
+from ..ui import GROVE_COLORS, CozyGroup, console, create_panel, create_table, error, info, success, warning
 from ..wrangler import Wrangler, WranglerError
+
+EXPORT_CATEGORIES = {
+    "read": (
+        "\U0001f4d6 Read (Always Safe)",
+        GROVE_COLORS["forest_green"],
+        [
+            ("list", "List recent exports"),
+            ("status", "Check export status"),
+        ],
+    ),
+    "write": (
+        "\u270f\ufe0f  Write (Require --write)",
+        GROVE_COLORS["leaf_yellow"],
+        [
+            ("start", "Trigger a new export"),
+            ("download", "Download export zip from R2"),
+            ("cleanup", "Clean expired exports"),
+        ],
+    ),
+}
 
 
 def parse_wrangler_json(output: str) -> list[dict[str, Any]]:
@@ -63,23 +83,10 @@ def _resolve_database(config: GWConfig, database: str) -> str:
 ACTIVE_STATUSES = ("pending", "querying", "assembling", "uploading", "notifying")
 
 
-@click.group()
+@click.group(cls=CozyGroup, cozy_categories=EXPORT_CATEGORIES)
 @click.pass_context
 def export(ctx: click.Context) -> None:
-    """Zip data export operations.
-
-    List, trigger, download, and clean up tenant data exports.
-    Read operations are always safe. Write operations require --write flag.
-
-    \b
-    Examples:
-        gw export list                       # List recent exports
-        gw export list autumn                # Exports for a tenant
-        gw export status <export-id>         # Check export status
-        gw export start autumn --write       # Trigger new export
-        gw export download <id> --write      # Download zip from R2
-        gw export cleanup --write            # Clean expired exports
-    """
+    """Zip data export operations."""
     pass
 
 

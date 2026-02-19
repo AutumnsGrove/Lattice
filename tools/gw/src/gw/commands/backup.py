@@ -7,24 +7,39 @@ import click
 from rich.prompt import Confirm
 
 from ..config import GWConfig
-from ..ui import console, create_table, error, info, success, warning
+from ..ui import GROVE_COLORS, CozyGroup, console, create_table, error, info, success, warning
 from ..wrangler import Wrangler, WranglerError
 
+BACKUP_CATEGORIES = {
+    "read": (
+        "\U0001f4d6 Read (Always Safe)",
+        GROVE_COLORS["forest_green"],
+        [
+            ("list", "List available backups"),
+            ("download", "Download a backup file"),
+        ],
+    ),
+    "write": (
+        "\u270f\ufe0f  Write (Require --write)",
+        GROVE_COLORS["leaf_yellow"],
+        [
+            ("create", "Create a database backup"),
+        ],
+    ),
+    "destructive": (
+        "\U0001f525 Restore (--write --force)",
+        "red",
+        [
+            ("restore", "Restore database from backup"),
+        ],
+    ),
+}
 
-@click.group()
+
+@click.group(cls=CozyGroup, cozy_categories=BACKUP_CATEGORIES)
 @click.pass_context
 def backup(ctx: click.Context) -> None:
-    """D1 database backup operations.
-
-    Create, list, and restore database backups with safety guards.
-    Create and restore operations require --write flag.
-
-    \b
-    Examples:
-        gw backup list                       # List backups
-        gw backup create --write             # Create backup
-        gw backup restore --write --force ID # Restore backup
-    """
+    """D1 database backup operations."""
     pass
 
 

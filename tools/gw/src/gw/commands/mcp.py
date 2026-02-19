@@ -4,31 +4,31 @@ import json
 
 import click
 
-from ..ui import console, create_panel, error, info, success
+from ..ui import GROVE_COLORS, CozyGroup, console, create_panel, error, info, success
 
 
-@click.group()
+MCP_CATEGORIES = {
+    "setup": (
+        "\U0001f527 Setup",
+        GROVE_COLORS["bark_brown"],
+        [
+            ("serve", "Start MCP server (stdio transport)"),
+            ("config", "Show Claude Code configuration snippet"),
+        ],
+    ),
+    "read": (
+        "\U0001f4d6 Read (Always Safe)",
+        GROVE_COLORS["forest_green"],
+        [
+            ("tools", "List available MCP tools"),
+        ],
+    ),
+}
+
+
+@click.group(cls=CozyGroup, cozy_categories=MCP_CATEGORIES, cozy_show_safety=False)
 def mcp() -> None:
-    """MCP server for Claude Code integration.
-
-    Expose gw commands as MCP tools that Claude Code can call directly.
-
-    \b
-    Setup in Claude Code settings.json:
-        {
-            "mcpServers": {
-                "grove-wrap": {
-                    "command": "gw",
-                    "args": ["mcp", "serve"]
-                }
-            }
-        }
-
-    \b
-    Examples:
-        gw mcp serve       # Start MCP server (stdio transport)
-        gw mcp tools       # List available MCP tools
-    """
+    """MCP server for Claude Code integration."""
     pass
 
 

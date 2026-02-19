@@ -7,27 +7,41 @@ from typing import Optional
 import click
 
 from ..config import GWConfig
-from ..ui import console, create_table, error, info, success, warning
+from ..ui import GROVE_COLORS, CozyGroup, console, create_table, error, info, success, warning
 from ..wrangler import Wrangler, WranglerError
 
+R2_CATEGORIES = {
+    "read": (
+        "\U0001f4d6 Read (Always Safe)",
+        GROVE_COLORS["forest_green"],
+        [
+            ("list", "List all R2 buckets"),
+            ("ls", "List objects in a bucket"),
+            ("get", "Download an object"),
+        ],
+    ),
+    "write": (
+        "\u270f\ufe0f  Write (Require --write)",
+        GROVE_COLORS["leaf_yellow"],
+        [
+            ("create", "Create a new bucket"),
+            ("put", "Upload an object"),
+        ],
+    ),
+    "destructive": (
+        "\U0001f525 Delete (--write --force)",
+        "red",
+        [
+            ("rm", "Delete an object"),
+        ],
+    ),
+}
 
-@click.group()
+
+@click.group(cls=CozyGroup, cozy_categories=R2_CATEGORIES)
 @click.pass_context
 def r2(ctx: click.Context) -> None:
-    """R2 object storage operations.
-
-    Manage Cloudflare R2 buckets and objects with safety guards.
-    Read operations are always safe. Write operations require --write flag.
-    Delete operations require --write --force flags.
-
-    \b
-    Examples:
-        gw r2 list                      # List all buckets
-        gw r2 create --write new-bucket # Create a bucket
-        gw r2 ls grove-media            # List objects in bucket
-        gw r2 get grove-media path/file # Download an object
-        gw r2 put --write bucket file   # Upload an object
-    """
+    """R2 object storage operations."""
     pass
 
 

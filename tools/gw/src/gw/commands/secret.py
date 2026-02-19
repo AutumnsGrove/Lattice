@@ -18,8 +18,44 @@ import sys
 import click
 
 from ..secrets_vault import SecretsVault, VaultError, get_vault_password
-from ..ui import console, create_table, error, info, success, warning
+from ..ui import GROVE_COLORS, CozyGroup, console, create_table, error, info, success, warning
 from ..wrangler import Wrangler, WranglerError
+
+SECRET_CATEGORIES = {
+    "setup": (
+        "\U0001f511 Setup",
+        GROVE_COLORS["river_cyan"],
+        [
+            ("init", "Initialize the secrets vault"),
+        ],
+    ),
+    "read": (
+        "\U0001f4d6 Read (Always Safe)",
+        GROVE_COLORS["forest_green"],
+        [
+            ("list", "List all secrets (names only)"),
+            ("reveal", "Show a secret value"),
+            ("exists", "Check if a secret exists"),
+        ],
+    ),
+    "write": (
+        "\u270f\ufe0f  Write (Require --write)",
+        GROVE_COLORS["leaf_yellow"],
+        [
+            ("set", "Store a secret"),
+            ("generate", "Generate and store a secure key"),
+            ("delete", "Delete a secret"),
+        ],
+    ),
+    "deploy": (
+        "\U0001f680 Deploy",
+        GROVE_COLORS["blossom_pink"],
+        [
+            ("apply", "Apply secrets to a Worker"),
+            ("sync", "Sync all secrets to a Worker"),
+        ],
+    ),
+}
 
 
 def _get_vault(ctx: click.Context) -> SecretsVault:
@@ -40,18 +76,10 @@ def _get_vault(ctx: click.Context) -> SecretsVault:
     return vault
 
 
-@click.group()
+@click.group(cls=CozyGroup, cozy_categories=SECRET_CATEGORIES)
 @click.pass_context
 def secret(ctx: click.Context) -> None:
-    """Agent-safe secrets management.
-
-    Store secrets locally in an encrypted vault and apply them to
-    Cloudflare Workers without exposing values.
-
-    The vault is stored at ~/.grove/secrets.enc and requires a
-    password to access. Set GW_VAULT_PASSWORD environment variable
-    to avoid prompts.
-    """
+    """Agent-safe secrets management."""
     pass
 
 

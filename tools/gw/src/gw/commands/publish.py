@@ -7,33 +7,30 @@ from pathlib import Path
 from typing import Optional
 
 import click
-from rich.console import Console
 from rich.panel import Panel
 from rich.prompt import Confirm
 
-from ..ui import success, error, info, warning, is_interactive
+from ..ui import GROVE_COLORS, CozyGroup, console, success, error, info, warning, is_interactive
 from ..packages import load_monorepo
-
-console = Console()
 
 # Registry configurations
 GITHUB_REGISTRY = "https://npm.pkg.github.com"
 NPM_REGISTRY = "https://registry.npmjs.org"
 
+PUBLISH_CATEGORIES = {
+    "write": (
+        "\u270f\ufe0f  Write (Require --write)",
+        GROVE_COLORS["leaf_yellow"],
+        [
+            ("npm", "Publish package to npm with registry swap"),
+        ],
+    ),
+}
 
-@click.group()
+
+@click.group(cls=CozyGroup, cozy_categories=PUBLISH_CATEGORIES)
 def publish() -> None:
-    """Publish packages to registries.
-
-    Handles the registry swap workflow for publishing to npm while
-    keeping GitHub Packages as the default.
-
-    \\b
-    Examples:
-        gw publish npm --bump patch        # Bump patch, publish to npm
-        gw publish npm --bump minor        # Bump minor version
-        gw publish npm --dry-run           # Preview without publishing
-    """
+    """Publish packages to registries."""
     pass
 
 
@@ -60,7 +57,7 @@ def npm_publish(
 
     This command automates the npm publish workflow:
 
-    \\b
+    \b
     1. Bump version in package.json
     2. Swap publishConfig to npm registry
     3. Build the package
@@ -71,7 +68,7 @@ def npm_publish(
 
     The --write flag is required to actually execute (safety first!).
 
-    \\b
+    \b
     Examples:
         gw publish npm --bump patch --write     # Patch bump and publish
         gw publish npm --bump minor --write     # Minor bump and publish

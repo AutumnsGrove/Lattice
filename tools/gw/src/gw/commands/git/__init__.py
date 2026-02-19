@@ -2,6 +2,8 @@
 
 import click
 
+from ...ui import GROVE_COLORS, CozyGroup
+
 from .read import diff, log, show, status, blame, fetch, reflog, shortlog
 from .write import add, branch, checkout, cherry_pick, commit, pull, push, stash, switch, unstage, restore, clean
 from .danger import merge, push_force, rebase, reset
@@ -12,29 +14,87 @@ from .remote import remote
 from .tag import tag
 from .config_cmd import git_config
 
+# Command categories for the categorized help display
+GIT_CATEGORIES = {
+    "read": (
+        "\U0001f4d6 Read (Always Safe)",
+        GROVE_COLORS["forest_green"],
+        [
+            ("status", "Show working tree status"),
+            ("log", "Show commit log"),
+            ("diff", "Show changes between commits"),
+            ("show", "Show commit details"),
+            ("blame", "Show line-by-line authorship"),
+            ("fetch", "Fetch refs from remote"),
+            ("reflog", "Show reference log"),
+            ("shortlog", "Summarize commits by author"),
+        ],
+    ),
+    "write": (
+        "\u270f\ufe0f  Write (Require --write)",
+        GROVE_COLORS["leaf_yellow"],
+        [
+            ("add", "Stage files for commit"),
+            ("commit", "Create a commit"),
+            ("push", "Push commits to remote"),
+            ("pull", "Pull changes from remote"),
+            ("branch", "Create, delete, or list branches"),
+            ("switch", "Switch to a branch"),
+            ("checkout", "Switch to a branch (alias)"),
+            ("stash", "Stash changes for later"),
+            ("unstage", "Unstage files"),
+            ("restore", "Restore working tree files"),
+            ("cherry-pick", "Cherry-pick commits"),
+        ],
+    ),
+    "dangerous": (
+        "\U0001f525 Dangerous (--write --force)",
+        "red",
+        [
+            ("force-push", "Force push to remote"),
+            ("reset", "Reset HEAD to a state"),
+            ("rebase", "Rebase onto another branch"),
+            ("merge", "Merge a branch"),
+            ("clean", "Remove untracked files"),
+        ],
+    ),
+    "shortcuts": (
+        "\u26a1 Shortcuts",
+        GROVE_COLORS["river_cyan"],
+        [
+            ("save", "Quick save: stage all + WIP commit"),
+            ("wip", "WIP commit (skips hooks)"),
+            ("fast", "Fast commit + push (skips hooks)"),
+            ("sync", "Fetch, rebase, and push"),
+            ("undo", "Undo last commit (keep staged)"),
+            ("amend", "Amend last commit message"),
+        ],
+    ),
+    "workflows": (
+        "\U0001f680 Workflows",
+        GROVE_COLORS["blossom_pink"],
+        [
+            ("ship", "Format, check, commit, and push"),
+            ("prep", "Preflight check (dry run)"),
+            ("pr-prep", "PR preparation report"),
+        ],
+    ),
+    "management": (
+        "\U0001f527 Management",
+        GROVE_COLORS["bark_brown"],
+        [
+            ("worktree", "Manage git worktrees"),
+            ("remote", "Manage remote repositories"),
+            ("tag", "Manage tags"),
+            ("config", "View and set git config"),
+        ],
+    ),
+}
 
-@click.group()
+
+@click.group(cls=CozyGroup, cozy_categories=GIT_CATEGORIES)
 def git() -> None:
-    """Git operations with safety guards.
-
-    Grove-aware git operations with Conventional Commits enforcement,
-    protected branch detection, and agent-safe defaults.
-
-    \b
-    Safety Tiers:
-    - READ:      status, log, diff, blame, show, fetch, reflog, shortlog (always safe)
-    - WRITE:     commit, push, pull, add, branch, restore, tag, config (require --write)
-    - DANGEROUS: force-push, reset, rebase, clean (require --write --force)
-    - PROTECTED: Force-push to main/production (always blocked)
-
-    \b
-    Examples:
-        gw git status              # Always safe
-        gw git log --limit 5       # Always safe
-        gw git fetch --prune       # Always safe
-        gw git commit --write -m "feat: add feature"
-        gw git push --write
-    """
+    """Git operations with safety guards."""
     pass
 
 

@@ -4,13 +4,11 @@ import json
 from typing import Optional
 
 import click
-from rich.console import Console
 from rich.table import Table
 
 from ...git_wrapper import Git, GitError
 from ...safety.git import GitSafetyError, check_git_safety
-
-console = Console()
+from ...ui import console, action, git_error, safety_error
 
 
 @click.group("config")
@@ -84,7 +82,7 @@ def config_list(ctx: click.Context, global_scope: bool, local_scope: bool) -> No
         console.print(table)
 
     except GitError as e:
-        console.print(f"[red]Git error:[/red] {e.message}")
+        git_error(e.message)
         raise SystemExit(1)
 
 
@@ -123,7 +121,7 @@ def config_get(ctx: click.Context, key: str) -> None:
             console.print(f"[cyan]{key}[/cyan] = {value}")
 
     except GitError as e:
-        console.print(f"[red]Git error:[/red] {e.message}")
+        git_error(e.message)
         raise SystemExit(1)
 
 
@@ -149,9 +147,7 @@ def config_set(ctx: click.Context, write: bool, global_scope: bool, key: str, va
     try:
         check_git_safety("config_set", write_flag=write)
     except GitSafetyError as e:
-        console.print(f"[red]Safety check failed:[/red] {e.message}")
-        if e.suggestion:
-            console.print(f"[dim]{e.suggestion}[/dim]")
+        safety_error(e.message, e.suggestion)
         raise SystemExit(1)
 
     try:
@@ -168,8 +164,8 @@ def config_set(ctx: click.Context, write: bool, global_scope: bool, key: str, va
             console.print(json.dumps({"key": key, "value": value, "global": global_scope}))
         else:
             scope = "global" if global_scope else "local"
-            console.print(f"[green]Set ({scope}):[/green] {key} = {value}")
+            action(f"Set ({scope})", f"{key} = {value}")
 
     except GitError as e:
-        console.print(f"[red]Git error:[/red] {e.message}")
+        git_error(e.message)
         raise SystemExit(1)

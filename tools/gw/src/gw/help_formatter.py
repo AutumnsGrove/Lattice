@@ -7,21 +7,9 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
-from .ui import create_panel
+from .ui import GROVE_COLORS, create_panel
 
 console = Console()
-
-# Grove-themed color palette (nature-inspired colors supported by Rich)
-GROVE_COLORS = {
-    "forest_green": "green",           # Forest green for growth
-    "bark_brown": "bright_black",      # Dark earth tone
-    "sky_blue": "blue",                # Clear sky
-    "sunset_orange": "orange3",       # Warm sunset
-    "leaf_yellow": "yellow",           # Leaf color
-    "river_cyan": "cyan",             # River water
-    "moss": "green3",                 # Moss green
-    "blossom_pink": "magenta",        # Cherry blossom
-}
 
 
 # Command categories with Grove-themed colors and descriptions

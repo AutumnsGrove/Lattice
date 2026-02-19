@@ -2,6 +2,7 @@
 
 import click
 
+from ...ui import GROVE_COLORS, CozyGroup
 from .server import dev_start, dev_stop, dev_restart, dev_logs
 from .test import test
 from .build import build
@@ -11,23 +12,49 @@ from .ci import ci
 from .reinstall import reinstall
 from .format import fmt
 
+DEV_CATEGORIES = {
+    "server": (
+        "\U0001f5a5\ufe0f  Dev Server",
+        GROVE_COLORS["river_cyan"],
+        [
+            ("start", "Start dev server for current package"),
+            ("stop", "Stop a running dev server"),
+            ("restart", "Restart a dev server"),
+            ("logs", "Show dev server logs"),
+        ],
+    ),
+    "quality": (
+        "\u2705 Quality",
+        GROVE_COLORS["forest_green"],
+        [
+            ("test", "Run tests"),
+            ("check", "Run type checking"),
+            ("lint", "Lint code"),
+            ("fmt", "Format code"),
+        ],
+    ),
+    "build": (
+        "\U0001f4e6 Build & Ship",
+        GROVE_COLORS["leaf_yellow"],
+        [
+            ("build", "Build packages"),
+            ("ci", "Run full CI pipeline locally"),
+        ],
+    ),
+    "tools": (
+        "\U0001f527 Tools",
+        GROVE_COLORS["bark_brown"],
+        [
+            ("reinstall", "Reinstall gw as a UV tool"),
+        ],
+    ),
+}
 
-@click.group()
+
+@click.group(cls=CozyGroup, cozy_categories=DEV_CATEGORIES, cozy_show_safety=False)
 @click.pass_context
 def dev(ctx: click.Context) -> None:
-    """Development tools for the monorepo.
-
-    Run development servers, tests, builds, and checks with smart
-    package detection. Commands auto-detect the current package
-    from your working directory.
-
-    \b
-    Examples:
-        gw dev start                 # Start dev server for current package
-        gw dev test                  # Run tests for current package
-        gw dev build --all           # Build all packages
-        gw dev check                 # Type check current package
-    """
+    """Development tools for the monorepo."""
     pass
 
 

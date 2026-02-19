@@ -20,14 +20,12 @@ from pathlib import Path
 from typing import Optional
 
 import click
-from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
 from ..git_wrapper import Git, GitError
 from ..packages import load_monorepo, find_monorepo_root
-
-console = Console()
+from ..ui import console, git_error, not_a_repo
 
 
 def _get_affected_packages(file_paths: list[str]) -> list[str]:
@@ -109,7 +107,7 @@ def context(ctx: click.Context) -> None:
             if output_json:
                 console.print(json.dumps({"error": "Not a git repository"}))
             else:
-                console.print("[red]Not a git repository[/red]")
+                not_a_repo()
             raise SystemExit(1)
 
         # Gather all context in one pass
@@ -179,7 +177,7 @@ def context(ctx: click.Context) -> None:
         if output_json:
             console.print(json.dumps({"error": e.message}))
         else:
-            console.print(f"[red]Git error:[/red] {e.message}")
+            git_error(e.message)
         raise SystemExit(1)
 
 

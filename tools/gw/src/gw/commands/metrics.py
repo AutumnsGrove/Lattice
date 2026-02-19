@@ -9,7 +9,7 @@ from typing import Any, Optional
 
 import click
 
-from ..ui import console, create_table, create_panel, error, info, success, warning
+from ..ui import GROVE_COLORS, CozyGroup, console, create_table, create_panel, error, info, success, warning
 
 
 # Metrics database path
@@ -214,23 +214,31 @@ def get_summary(days: int = 7) -> dict[str, Any]:
         return {"error": str(e)}
 
 
-@click.group(invoke_without_command=True)
+METRICS_CATEGORIES = {
+    "read": (
+        "\U0001f4d6 Read (Always Safe)",
+        GROVE_COLORS["forest_green"],
+        [
+            ("summary", "Show usage summary"),
+            ("errors", "Show recent errors"),
+            ("export", "Export metrics as JSON"),
+            ("ui", "Launch web dashboard"),
+        ],
+    ),
+    "write": (
+        "\u270f\ufe0f  Write (Require --write)",
+        GROVE_COLORS["leaf_yellow"],
+        [
+            ("clear", "Clear metrics data"),
+        ],
+    ),
+}
+
+
+@click.group(cls=CozyGroup, invoke_without_command=True, cozy_categories=METRICS_CATEGORIES)
 @click.pass_context
 def metrics(ctx: click.Context) -> None:
-    """View usage metrics and statistics.
-
-    Track how gw commands are being used, success rates,
-    error patterns, and performance.
-
-    \\b
-    Examples:
-        gw metrics                # Show summary
-        gw metrics summary        # Show 7-day summary
-        gw metrics summary --days 30  # Show 30-day summary
-        gw metrics errors         # Show recent errors
-        gw metrics export         # Export as JSON
-        gw metrics clear --write  # Clear all metrics
-    """
+    """Usage metrics and statistics."""
     if ctx.invoked_subcommand is None:
         ctx.invoke(metrics_summary)
 

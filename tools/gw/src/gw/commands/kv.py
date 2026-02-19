@@ -6,25 +6,34 @@ from typing import Any, Optional
 import click
 
 from ..config import GWConfig
-from ..ui import console, create_panel, create_table, error, info, success, warning
+from ..ui import GROVE_COLORS, CozyGroup, console, create_panel, create_table, error, info, success, warning
 from ..wrangler import Wrangler, WranglerError
 
+KV_CATEGORIES = {
+    "read": (
+        "\U0001f4d6 Read (Always Safe)",
+        GROVE_COLORS["forest_green"],
+        [
+            ("list", "List all KV namespaces"),
+            ("keys", "List keys in a namespace"),
+            ("get", "Get a value"),
+        ],
+    ),
+    "write": (
+        "\u270f\ufe0f  Write (Require --write)",
+        GROVE_COLORS["leaf_yellow"],
+        [
+            ("put", "Set a value"),
+            ("delete", "Delete a key"),
+        ],
+    ),
+}
 
-@click.group()
+
+@click.group(cls=CozyGroup, cozy_categories=KV_CATEGORIES)
 @click.pass_context
 def kv(ctx: click.Context) -> None:
-    """KV namespace operations.
-
-    Manage Cloudflare Workers KV key-value storage with safety guards.
-    Read operations are always safe. Write operations require --write flag.
-
-    \b
-    Examples:
-        gw kv list                    # List all namespaces
-        gw kv keys cache              # List keys in 'cache' namespace
-        gw kv get cache session:123   # Get a key
-        gw kv put --write cache key value  # Set a key
-    """
+    """KV namespace operations."""
     pass
 
 

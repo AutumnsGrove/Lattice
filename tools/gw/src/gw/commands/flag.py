@@ -7,29 +7,38 @@ from typing import Optional
 import click
 
 from ..config import GWConfig
-from ..ui import console, create_table, error, info, success, warning
+from ..ui import GROVE_COLORS, CozyGroup, console, create_table, error, info, success, warning
 from ..wrangler import Wrangler, WranglerError
 
 
 # Default flags namespace alias
 FLAGS_NAMESPACE = "flags"
 
+FLAG_CATEGORIES = {
+    "read": (
+        "\U0001f4d6 Read (Always Safe)",
+        GROVE_COLORS["forest_green"],
+        [
+            ("list", "List all feature flags"),
+            ("get", "Get a flag value"),
+        ],
+    ),
+    "write": (
+        "\u270f\ufe0f  Write (Require --write)",
+        GROVE_COLORS["leaf_yellow"],
+        [
+            ("enable", "Enable a feature flag"),
+            ("disable", "Disable a feature flag"),
+            ("delete", "Delete a feature flag"),
+        ],
+    ),
+}
 
-@click.group()
+
+@click.group(cls=CozyGroup, cozy_categories=FLAG_CATEGORIES)
 @click.pass_context
 def flag(ctx: click.Context) -> None:
-    """Feature flag operations.
-
-    Manage feature flags stored in KV with safety guards.
-    Read operations are always safe. Write operations require --write flag.
-
-    \b
-    Examples:
-        gw flag list                     # List all flags
-        gw flag get dark_mode            # Get flag value
-        gw flag enable --write dark_mode # Enable a flag
-        gw flag disable --write beta_ui  # Disable a flag
-    """
+    """Feature flag operations."""
     pass
 
 

@@ -11,8 +11,26 @@ from typing import Any
 import click
 
 from ..config import GWConfig
-from ..ui import console, create_table, error, info, success, warning
+from ..ui import GROVE_COLORS, CozyGroup, console, create_table, error, info, success, warning
 from ..wrangler import Wrangler, WranglerError
+
+CACHE_CATEGORIES = {
+    "read": (
+        "\U0001f4d6 Read (Always Safe)",
+        GROVE_COLORS["forest_green"],
+        [
+            ("list", "List cache keys from KV"),
+            ("stats", "Show cache statistics"),
+        ],
+    ),
+    "write": (
+        "\u270f\ufe0f  Write (Require --write)",
+        GROVE_COLORS["leaf_yellow"],
+        [
+            ("purge", "Purge cache entries"),
+        ],
+    ),
+}
 
 
 def parse_wrangler_json(output: str) -> list[dict[str, Any]]:
@@ -26,14 +44,10 @@ def parse_wrangler_json(output: str) -> list[dict[str, Any]]:
         return []
 
 
-@click.group()
+@click.group(cls=CozyGroup, cozy_categories=CACHE_CATEGORIES)
 @click.pass_context
 def cache(ctx: click.Context) -> None:
-    """Cache management for KV and CDN.
-
-    List and purge cache entries from Cloudflare KV namespaces
-    and the CDN edge cache.
-    """
+    """Cache management for KV and CDN."""
     pass
 
 

@@ -6,8 +6,34 @@ from typing import Any
 import click
 
 from ..config import GWConfig
-from ..ui import console, create_panel, create_table, error, info, success, warning
+from ..ui import GROVE_COLORS, CozyGroup, console, create_panel, create_table, error, info, success, warning
 from ..wrangler import Wrangler, WranglerError
+
+TENANT_CATEGORIES = {
+    "read": (
+        "\U0001f4d6 Read (Always Safe)",
+        GROVE_COLORS["forest_green"],
+        [
+            ("list", "List all tenants"),
+            ("lookup", "Look up a tenant"),
+            ("stats", "Show tenant statistics"),
+        ],
+    ),
+    "write": (
+        "\u270f\ufe0f  Write (Require --write)",
+        GROVE_COLORS["leaf_yellow"],
+        [
+            ("create", "Create a new tenant"),
+        ],
+    ),
+    "destructive": (
+        "\U0001f525 Destructive (--write --force)",
+        "red",
+        [
+            ("delete", "Delete a tenant and all data"),
+        ],
+    ),
+}
 
 
 def parse_wrangler_json(output: str) -> list[dict[str, Any]]:
@@ -45,13 +71,10 @@ def format_timestamp(ts: int | None) -> str:
         return str(ts)
 
 
-@click.group()
+@click.group(cls=CozyGroup, cozy_categories=TENANT_CATEGORIES)
 @click.pass_context
 def tenant(ctx: click.Context) -> None:
     """Tenant lookup and management.
-
-    Find tenants by subdomain, email, or ID. View tenant statistics
-    and usage information.
     """
     pass
 

@@ -13,7 +13,6 @@ from pathlib import Path
 from typing import Optional
 
 import click
-from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
@@ -26,9 +25,8 @@ from ...safety.git import (
     extract_issue_number,
     validate_conventional_commit,
 )
+from ...ui import console, action, git_error, hint, not_a_repo, safety_error, step
 from ..context import _get_affected_packages
-
-console = Console()
 
 
 def _get_staged_file_paths(git: Git) -> list[str]:
@@ -185,17 +183,14 @@ def ship(
     try:
         check_git_safety("commit", write_flag=write)
     except GitSafetyError as e:
-        console.print(f"[red]Safety check failed:[/red] {e.message}")
-        if e.suggestion:
-            console.print(f"[dim]{e.suggestion}[/dim]")
+        safety_error(e.message, e.suggestion)
         raise SystemExit(1)
 
     try:
         git = Git()
 
         if not git.is_repo():
-            console.print("[red]Not a git repository[/red]")
-            raise SystemExit(1)
+            not_a_repo()
 
         # Auto-stage if --all is passed
         if stage_all:
@@ -252,9 +247,7 @@ def ship(
             fmt_ok, fmt_msg = _run_format_on_staged(git, output_json)
             results.append(("Format", fmt_ok, fmt_msg))
             if not output_json:
-                icon = "✓" if fmt_ok else "✗"
-                color = "green" if fmt_ok else "yellow"
-                console.print(f"  [{color}]{icon}[/{color}] {fmt_msg}")
+                step(fmt_ok, fmt_msg)
             # Format failures are warnings, not blockers
         else:
             results.append(("Format", True, "Skipped"))
@@ -266,9 +259,7 @@ def ship(
             check_ok, check_msg = _run_type_check(staged_files, output_json)
             results.append(("Check", check_ok, check_msg))
             if not output_json:
-                icon = "✓" if check_ok else "⚠"
-                color = "green" if check_ok else "yellow"
-                console.print(f"  [{color}]{icon}[/{color}] {check_msg}")
+                step(check_ok, check_msg)
             # Type check failures are warnings for ship (prep is stricter)
         else:
             results.append(("Check", True, "Skipped"))
@@ -279,7 +270,7 @@ def ship(
         commit_hash = git.commit(message)
         results.append(("Commit", True, f"Hash: {commit_hash[:8]}"))
         if not output_json:
-            console.print(f"  [green]✓[/green] Committed: {message.split(chr(10))[0]}")
+            step(True, f"Committed: {message.split(chr(10))[0]}")
 
         # Step 4: Push
         if not output_json:
@@ -289,21 +280,18 @@ def ship(
             git.push(remote=remote, branch=current_branch, set_upstream=True)
             results.append(("Push", True, f"{remote}/{current_branch}"))
             if not output_json:
-                console.print(f"  [green]✓[/green] Pushed to {remote}/{current_branch}")
+                step(True, f"Pushed to {remote}/{current_branch}")
         except GitError as push_err:
             push_stderr = push_err.stderr.lower()
             if "non-fast-forward" in push_stderr or "fetch first" in push_stderr:
-                console.print("[red]Push failed: remote has newer commits[/red]")
-                console.print(
-                    "[dim]Run 'gw git sync --write' to rebase and push, "
-                    "or pull first with 'gw git pull --write'[/dim]"
-                )
+                git_error("Push failed: remote has newer commits")
+                hint("Run 'gw git sync --write' to rebase and push, or pull first with 'gw git pull --write'")
             elif "pre-push" in push_stderr:
-                console.print("[red]Push blocked by pre-push hook[/red]")
+                git_error("Push blocked by pre-push hook")
                 if push_err.stderr.strip():
                     console.print(f"\n{push_err.stderr.strip()}")
             else:
-                console.print(f"[red]Push failed:[/red] {push_err.stderr.strip() or push_err.message}")
+                git_error(push_err.stderr.strip() or push_err.message)
             results.append(("Push", False, push_err.message))
             raise SystemExit(1)
 
@@ -324,10 +312,10 @@ def ship(
         else:
             console.print(f"\n[bold green]Shipped![/bold green] {commit_hash[:8]} → {remote}/{current_branch}")
             if issue:
-                console.print(f"[dim]Linked to issue #{issue}[/dim]")
+                hint(f"Linked to issue #{issue}")
 
     except GitError as e:
-        console.print(f"[red]Git error:[/red] {e.message}")
+        git_error(e.message)
         raise SystemExit(1)
 
 
@@ -354,8 +342,7 @@ def prep(ctx: click.Context) -> None:
         git = Git()
 
         if not git.is_repo():
-            console.print("[red]Not a git repository[/red]")
-            raise SystemExit(1)
+            not_a_repo()
 
         status = git.status()
         staged_files = [path for _, path in status.staged]
@@ -401,7 +388,7 @@ def prep(ctx: click.Context) -> None:
                 console.print(json.dumps({"ready": False, "reason": "Nothing staged"}))
             else:
                 console.print("[yellow]Nothing staged — nothing to ship[/yellow]")
-                console.print("[dim]Stage changes: gw git add --write <files>[/dim]")
+                hint("Stage changes: gw git add --write <files>")
             raise SystemExit(1)
 
         # Check 1: Prettier formatting
@@ -443,9 +430,7 @@ def prep(ctx: click.Context) -> None:
                 fmt_msg = "Format check timed out"
 
         if not output_json:
-            icon = "✓" if fmt_ok else "✗"
-            color = "green" if fmt_ok else "red"
-            console.print(f"  [{color}]{icon}[/{color}] Format: {fmt_msg}")
+            step(fmt_ok, f"Format: {fmt_msg}")
 
         # Check 2: Type checking
         if not output_json:
@@ -456,9 +441,7 @@ def prep(ctx: click.Context) -> None:
             all_pass = False
 
         if not output_json:
-            icon = "✓" if check_ok else "✗"
-            color = "green" if check_ok else "red"
-            console.print(f"  [{color}]{icon}[/{color}] Types: {check_msg}")
+            step(check_ok, f"Types: {check_msg}")
 
         # Summary
         if output_json:
@@ -476,16 +459,16 @@ def prep(ctx: click.Context) -> None:
             console.print()
             if all_pass:
                 console.print("[bold green]Ready to ship![/bold green]")
-                console.print("[dim]Run: gw git ship --write -m \"type(scope): message\"[/dim]")
+                hint("Run: gw git ship --write -m \"type(scope): message\"")
             else:
                 console.print("[bold red]Not ready — fix issues above before shipping[/bold red]")
                 if not fmt_ok:
-                    console.print("[dim]Format fix: gw fmt[/dim]")
+                    hint("Format fix: gw fmt")
 
         raise SystemExit(0 if all_pass else 1)
 
     except GitError as e:
-        console.print(f"[red]Git error:[/red] {e.message}")
+        git_error(e.message)
         raise SystemExit(1)
 
 
@@ -513,8 +496,7 @@ def pr_prep(ctx: click.Context, base: str) -> None:
     try:
         git = Git()
         if not git.is_repo():
-            console.print("[red]Not a git repository[/red]")
-            raise SystemExit(1)
+            not_a_repo()
 
         status = git.status()
         current_branch = git.current_branch()
@@ -646,5 +628,5 @@ def pr_prep(ctx: click.Context, base: str) -> None:
         if output_json:
             console.print(json.dumps({"error": e.message}))
         else:
-            console.print(f"[red]Git error:[/red] {e.message}")
+            git_error(e.message)
         raise SystemExit(1)

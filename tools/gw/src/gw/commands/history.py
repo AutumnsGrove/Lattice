@@ -8,7 +8,7 @@ from typing import Any, Optional
 
 import click
 
-from ..ui import console, create_table, error, info, success, warning
+from ..ui import GROVE_COLORS, CozyGroup, console, create_table, error, info, success, warning
 
 
 # History database path
@@ -73,21 +73,31 @@ def record_command(
         pass
 
 
-@click.group(invoke_without_command=True)
+HISTORY_CATEGORIES = {
+    "read": (
+        "\U0001f4d6 Read (Always Safe)",
+        GROVE_COLORS["forest_green"],
+        [
+            ("list", "Show command history"),
+            ("search", "Search command history"),
+            ("show", "Show entry details"),
+        ],
+    ),
+    "write": (
+        "\u270f\ufe0f  Write (Require --write)",
+        GROVE_COLORS["leaf_yellow"],
+        [
+            ("run", "Re-run a command from history"),
+            ("clear", "Clear command history"),
+        ],
+    ),
+}
+
+
+@click.group(cls=CozyGroup, invoke_without_command=True, cozy_categories=HISTORY_CATEGORIES)
 @click.pass_context
 def history(ctx: click.Context) -> None:
-    """View and manage command history.
-
-    Track previous commands and re-run them easily.
-
-    \b
-    Examples:
-        gw history                # Show recent commands
-        gw history --writes       # Show only write operations
-        gw history search cache   # Search history
-        gw history run 5          # Re-run command #5
-        gw history clear          # Clear history
-    """
+    """Command history and replay."""
     if ctx.invoked_subcommand is None:
         ctx.invoke(history_list)
 
