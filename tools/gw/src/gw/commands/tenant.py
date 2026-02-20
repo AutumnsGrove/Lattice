@@ -260,8 +260,8 @@ def tenant_stats(ctx: click.Context, subdomain: str, database: str) -> None:
     except WranglerError:
         stats["counts"]["pages"] = "?"
 
-    # Count images and calculate actual storage from image_hashes
-    # (matches Arbor account page — NOT the stale tenants.storage_used_bytes)
+    # Count images and calculate actual storage from gallery_images
+    # (gallery_images is the primary image store — image_hashes only tracks dedup)
     try:
         result = wrangler.execute(
             [
@@ -271,7 +271,7 @@ def tenant_stats(ctx: click.Context, subdomain: str, database: str) -> None:
                 "--remote",
                 "--json",
                 "--command",
-                f"SELECT COUNT(*) as count, COALESCE(SUM(COALESCE(stored_size_bytes, 0)), 0) as total_bytes FROM image_hashes WHERE tenant_id = '{tenant_id}'",
+                f"SELECT COUNT(*) as count, COALESCE(SUM(COALESCE(file_size, 0)), 0) as total_bytes FROM gallery_images WHERE tenant_id = '{tenant_id}'",
             ]
         )
         count_rows = parse_wrangler_json(result)
