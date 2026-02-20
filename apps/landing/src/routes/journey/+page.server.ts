@@ -2,16 +2,17 @@ import historyData from "../../../static/data/history.csv?raw";
 import { safeParseInt, parseTimestampToDate } from "$lib/utils/journey";
 
 /**
- * CSV Schema (18 columns):
+ * CSV Schema (23 columns):
  * timestamp, label, git_hash, total_code_lines, svelte_lines, ts_lines,
  * js_lines, css_lines, doc_words, doc_lines, total_files, directories,
- * estimated_tokens, commits, test_files, test_lines, bundle_size_kb, npm_unpacked_size
+ * estimated_tokens, commits, test_files, test_lines, bundle_size_kb,
+ * npm_unpacked_size, py_lines, go_lines, sql_lines, sh_lines, tsx_lines
  *
- * IMPORTANT: This schema uses hardcoded column indexes (0-17) in parseCSV().
+ * IMPORTANT: This schema uses hardcoded column indexes (0-22) in parseCSV().
  * New columns MUST be added at the end to maintain backward compatibility.
  * If you add a column in the middle, all subsequent indexes will break.
  */
-const EXPECTED_COLUMNS = 18;
+const EXPECTED_COLUMNS = 23;
 
 interface VersionSummary {
   version: string;
@@ -73,6 +74,11 @@ interface SnapshotData {
   testLines: number;
   bundleSizeKb: number;
   npmUnpackedSize: number;
+  pyLines: number;
+  goLines: number;
+  sqlLines: number;
+  shLines: number;
+  tsxLines: number;
   date: string;
 }
 
@@ -124,6 +130,11 @@ function parseCSV(csv: string): SnapshotData[] {
       testLines: safeParseInt(values[15]),
       bundleSizeKb: safeParseInt(values[16]),
       npmUnpackedSize: safeParseInt(values[17]),
+      pyLines: safeParseInt(values[18]),
+      goLines: safeParseInt(values[19]),
+      sqlLines: safeParseInt(values[20]),
+      shLines: safeParseInt(values[21]),
+      tsxLines: safeParseInt(values[22]),
       date: parseTimestampToDate(values[0]),
     });
   }

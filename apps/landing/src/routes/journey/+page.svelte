@@ -66,21 +66,31 @@
 	}
 
 	// Calculate percentages for the language bar
-	// Colors from Grove seasonal palettes:
+	// Colors from Grove palettes — each language gets a unique, visually distinct color:
+	// - TypeScript: accents.water.deep (deep blue)
 	// - Svelte: autumn vermillion (warm orange-red)
-	// - TypeScript: accents.water.deep (water blue)
+	// - Python: grove meadow green
+	// - Go: accents.sky.surface (sky blue, distinct from TS deep blue)
+	// - SQL: spring crocus violet
 	// - JavaScript: autumn amber (warm yellow)
 	// - CSS: cherryBlossoms.light (blossom pink)
+	// - Shell: earth.stone (warm gray)
+	// - TSX: autumn.rose (coral red)
 	const languageBreakdown = $derived(() => {
 		if (!data.latest) return [];
 		const total = data.latest.totalCodeLines;
 		if (total === 0) return [];
 		return [
-			{ name: 'Svelte', lines: data.latest.svelteLines, color: 'bg-[#e54d2e]', pct: Math.round((data.latest.svelteLines / total) * 100) },
 			{ name: 'TypeScript', lines: data.latest.tsLines, color: 'bg-[#0284c7]', pct: Math.round((data.latest.tsLines / total) * 100) },
+			{ name: 'Svelte', lines: data.latest.svelteLines, color: 'bg-[#e54d2e]', pct: Math.round((data.latest.svelteLines / total) * 100) },
+			{ name: 'Python', lines: data.latest.pyLines, color: 'bg-[#22c55e]', pct: Math.round((data.latest.pyLines / total) * 100) },
+			{ name: 'Go', lines: data.latest.goLines, color: 'bg-[#7dd3fc]', pct: Math.round((data.latest.goLines / total) * 100) },
+			{ name: 'SQL', lines: data.latest.sqlLines, color: 'bg-[#a78bfa]', pct: Math.round((data.latest.sqlLines / total) * 100) },
 			{ name: 'JavaScript', lines: data.latest.jsLines, color: 'bg-[#f59e0b]', pct: Math.round((data.latest.jsLines / total) * 100) },
-			{ name: 'CSS', lines: data.latest.cssLines, color: 'bg-[#f472b6]', pct: Math.round((data.latest.cssLines / total) * 100) }
-		];
+			{ name: 'CSS', lines: data.latest.cssLines, color: 'bg-[#f472b6]', pct: Math.round((data.latest.cssLines / total) * 100) },
+			{ name: 'Shell', lines: data.latest.shLines, color: 'bg-[#78716c]', pct: Math.round((data.latest.shLines / total) * 100) },
+			{ name: 'TSX', lines: data.latest.tsxLines, color: 'bg-[#f43f5e]', pct: Math.round((data.latest.tsxLines / total) * 100) }
+		].filter(lang => lang.lines > 0);
 	});
 
 	// Get max values for chart scaling
@@ -101,11 +111,16 @@
 		const total = snapshot.totalCodeLines;
 		if (total === 0) return [];
 		return [
-			{ name: 'Svelte', pct: Math.round((snapshot.svelteLines / total) * 100), color: 'bg-[#e54d2e]' },
 			{ name: 'TypeScript', pct: Math.round((snapshot.tsLines / total) * 100), color: 'bg-[#0284c7]' },
+			{ name: 'Svelte', pct: Math.round((snapshot.svelteLines / total) * 100), color: 'bg-[#e54d2e]' },
+			{ name: 'Python', pct: Math.round(((snapshot.pyLines || 0) / total) * 100), color: 'bg-[#22c55e]' },
+			{ name: 'Go', pct: Math.round(((snapshot.goLines || 0) / total) * 100), color: 'bg-[#7dd3fc]' },
+			{ name: 'SQL', pct: Math.round(((snapshot.sqlLines || 0) / total) * 100), color: 'bg-[#a78bfa]' },
 			{ name: 'JavaScript', pct: Math.round((snapshot.jsLines / total) * 100), color: 'bg-[#f59e0b]' },
-			{ name: 'CSS', pct: Math.round((snapshot.cssLines / total) * 100), color: 'bg-[#f472b6]' }
-		];
+			{ name: 'CSS', pct: Math.round((snapshot.cssLines / total) * 100), color: 'bg-[#f472b6]' },
+			{ name: 'Shell', pct: Math.round(((snapshot.shLines || 0) / total) * 100), color: 'bg-[#78716c]' },
+			{ name: 'TSX', pct: Math.round(((snapshot.tsxLines || 0) / total) * 100), color: 'bg-[#f43f5e]' }
+		].filter(lang => lang.pct > 0);
 	}
 
 	// Get max doc lines for chart scaling
@@ -218,11 +233,11 @@
 					</div>
 
 					<!-- Legend -->
-					<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+					<div class="flex flex-wrap gap-x-5 gap-y-2 justify-center">
 						{#each languageBreakdown() as lang}
 							<div class="flex items-center gap-2">
-								<div class="w-3 h-3 rounded-full {lang.color}"></div>
-								<span class="text-sm font-sans text-foreground-muted">
+								<div class="w-3 h-3 rounded-full {lang.color} shrink-0"></div>
+								<span class="text-sm font-sans text-foreground-muted whitespace-nowrap">
 									{lang.name} <span class="text-foreground-faint">({lang.pct}%)</span>
 								</span>
 							</div>

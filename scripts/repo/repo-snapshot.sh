@@ -8,11 +8,11 @@
 # Usage: ./scripts/repo-snapshot.sh [optional-label]
 # Example: ./scripts/repo-snapshot.sh "post-auth-refactor"
 #
-# CSV Schema (17 columns):
+# CSV Schema (23 columns):
 #   1. timestamp         - YYYY-MM-DD_HH-MM-SS format
 #   2. label             - Snapshot label (version tag or custom name)
 #   3. git_hash          - Short git commit hash
-#   4. total_code_lines  - Total lines across all code files
+#   4. total_code_lines  - Total lines across all counted languages
 #   5. svelte_lines      - Lines of Svelte code
 #   6. ts_lines          - Lines of TypeScript code
 #   7. js_lines          - Lines of JavaScript code
@@ -26,6 +26,12 @@
 #   15. test_files       - Number of test files (*.test.ts, *.spec.ts, etc.)
 #   16. test_lines       - Total lines in test files
 #   17. bundle_size_kb   - Engine bundle size in KB (0 if build unavailable)
+#   18. npm_unpacked_size - NPM package unpacked size in bytes
+#   19. py_lines         - Lines of Python code
+#   20. go_lines         - Lines of Go code
+#   21. sql_lines        - Lines of SQL code
+#   22. sh_lines         - Lines of Shell script code
+#   23. tsx_lines        - Lines of TSX/JSX code
 #
 
 set -e
@@ -136,6 +142,31 @@ CSS_LINES=$(count_lines "*.css")
 CSS_FILES=$(count_files "*.css")
 echo -e " ${GREEN}✓${NC}"
 
+echo -n "  Counting Python..."
+PY_LINES=$(count_lines "*.py")
+PY_FILES=$(count_files "*.py")
+echo -e " ${GREEN}✓${NC}"
+
+echo -n "  Counting Go..."
+GO_LINES=$(count_lines "*.go")
+GO_FILES=$(count_files "*.go")
+echo -e " ${GREEN}✓${NC}"
+
+echo -n "  Counting SQL..."
+SQL_LINES=$(count_lines "*.sql")
+SQL_FILES=$(count_files "*.sql")
+echo -e " ${GREEN}✓${NC}"
+
+echo -n "  Counting Shell..."
+SH_LINES=$(count_lines "*.sh")
+SH_FILES=$(count_files "*.sh")
+echo -e " ${GREEN}✓${NC}"
+
+echo -n "  Counting TSX..."
+TSX_LINES=$(count_lines "*.tsx")
+TSX_FILES=$(count_files "*.tsx")
+echo -e " ${GREEN}✓${NC}"
+
 echo -n "  Counting Documentation..."
 MD_LINES=0
 MD_WORDS=0
@@ -181,7 +212,7 @@ fi
 echo -e " ${GREEN}✓${NC}"
 
 echo -n "  Analyzing code characters..."
-CODE_CHARS=$(find . \( -name "*.ts" -o -name "*.js" -o -name "*.svelte" -o -name "*.css" -o -name "*.html" \) ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" ! -path "*/.svelte-kit/*" -type f -exec cat {} + 2>/dev/null | wc -c | tr -d ' ')
+CODE_CHARS=$(find . \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.svelte" -o -name "*.css" -o -name "*.py" -o -name "*.go" -o -name "*.sql" -o -name "*.sh" -o -name "*.html" \) ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" ! -path "*/.svelte-kit/*" -type f -exec cat {} + 2>/dev/null | wc -c | tr -d ' ')
 echo -e " ${GREEN}✓${NC}"
 
 echo -n "  Counting directories..."
@@ -194,9 +225,9 @@ GIT_BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
 GIT_HASH=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 echo -e " ${GREEN}✓${NC}"
 
-# Calculate totals
-TOTAL_CODE_LINES=$((TS_LINES + SVELTE_LINES + JS_LINES + CSS_LINES))
-TOTAL_FILES=$((TS_FILES + SVELTE_FILES + JS_FILES + CSS_FILES + MD_FILES + JSON_FILES))
+# Calculate totals (all Tier 1 + Tier 2 languages)
+TOTAL_CODE_LINES=$((TS_LINES + SVELTE_LINES + JS_LINES + CSS_LINES + PY_LINES + GO_LINES + SQL_LINES + SH_LINES + TSX_LINES))
+TOTAL_FILES=$((TS_FILES + SVELTE_FILES + JS_FILES + CSS_FILES + PY_FILES + GO_FILES + SQL_FILES + SH_FILES + TSX_FILES + MD_FILES + JSON_FILES))
 TOTAL_CHARS=$((CODE_CHARS + MD_CHARS))
 ESTIMATED_TOKENS=$((TOTAL_CHARS / 4))
 
@@ -206,11 +237,21 @@ if [ "$TOTAL_CODE_LINES" -gt 0 ]; then
     TS_PCT=$((TS_LINES * 100 / TOTAL_CODE_LINES))
     JS_PCT=$((JS_LINES * 100 / TOTAL_CODE_LINES))
     CSS_PCT=$((CSS_LINES * 100 / TOTAL_CODE_LINES))
+    PY_PCT=$((PY_LINES * 100 / TOTAL_CODE_LINES))
+    GO_PCT=$((GO_LINES * 100 / TOTAL_CODE_LINES))
+    SQL_PCT=$((SQL_LINES * 100 / TOTAL_CODE_LINES))
+    SH_PCT=$((SH_LINES * 100 / TOTAL_CODE_LINES))
+    TSX_PCT=$((TSX_LINES * 100 / TOTAL_CODE_LINES))
 else
     SVELTE_PCT=0
     TS_PCT=0
     JS_PCT=0
     CSS_PCT=0
+    PY_PCT=0
+    GO_PCT=0
+    SQL_PCT=0
+    SH_PCT=0
+    TSX_PCT=0
 fi
 
 # Book pages estimate (roughly 500 words per page)
@@ -226,6 +267,11 @@ SVELTE_LINES_FMT=$(format_number $SVELTE_LINES)
 TS_LINES_FMT=$(format_number $TS_LINES)
 JS_LINES_FMT=$(format_number $JS_LINES)
 CSS_LINES_FMT=$(format_number $CSS_LINES)
+PY_LINES_FMT=$(format_number $PY_LINES)
+GO_LINES_FMT=$(format_number $GO_LINES)
+SQL_LINES_FMT=$(format_number $SQL_LINES)
+SH_LINES_FMT=$(format_number $SH_LINES)
+TSX_LINES_FMT=$(format_number $TSX_LINES)
 MD_LINES_FMT=$(format_number $MD_LINES)
 MD_WORDS_FMT=$(format_number $MD_WORDS)
 TOTAL_CHARS_FMT=$(format_number $TOTAL_CHARS)
@@ -289,17 +335,32 @@ cat > "$FILENAME" << SNAPSHOT
 │                        CODE COMPOSITION BY LANGUAGE                         │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
+│   TypeScript $(generate_bar $TS_LINES $TOTAL_CODE_LINES)  ${TS_LINES_FMT}   │
+│   (${TS_PCT}%)                                                                      │
+│                                                                             │
 │   Svelte     $(generate_bar $SVELTE_LINES $TOTAL_CODE_LINES)  ${SVELTE_LINES_FMT}   │
 │   (${SVELTE_PCT}%)                                                                  │
 │                                                                             │
-│   TypeScript $(generate_bar $TS_LINES $TOTAL_CODE_LINES)  ${TS_LINES_FMT}   │
-│   (${TS_PCT}%)                                                                      │
+│   Python     $(generate_bar $PY_LINES $TOTAL_CODE_LINES)  ${PY_LINES_FMT}   │
+│   (${PY_PCT}%)                                                                      │
+│                                                                             │
+│   Go         $(generate_bar $GO_LINES $TOTAL_CODE_LINES)  ${GO_LINES_FMT}   │
+│   (${GO_PCT}%)                                                                      │
+│                                                                             │
+│   SQL        $(generate_bar $SQL_LINES $TOTAL_CODE_LINES)  ${SQL_LINES_FMT}   │
+│   (${SQL_PCT}%)                                                                     │
 │                                                                             │
 │   JavaScript $(generate_bar $JS_LINES $TOTAL_CODE_LINES)  ${JS_LINES_FMT}   │
 │   (${JS_PCT}%)                                                                      │
 │                                                                             │
 │   CSS        $(generate_bar $CSS_LINES $TOTAL_CODE_LINES)  ${CSS_LINES_FMT}   │
 │   (${CSS_PCT}%)                                                                     │
+│                                                                             │
+│   Shell      $(generate_bar $SH_LINES $TOTAL_CODE_LINES)  ${SH_LINES_FMT}   │
+│   (${SH_PCT}%)                                                                      │
+│                                                                             │
+│   TSX        $(generate_bar $TSX_LINES $TOTAL_CODE_LINES)  ${TSX_LINES_FMT}   │
+│   (${TSX_PCT}%)                                                                     │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 
@@ -356,15 +417,18 @@ cat > "$FILENAME" << SNAPSHOT
 │                                                                             │
 │             Lattice/                                                    │
 │             │                                                               │
-│             ├── packages/                                                   │
-│             │   ├── 🌲 engine ────────── Core CMS engine                    │
-│             │   ├── 🌿 example-site ──── Demo/test site                     │
-│             │   └── 🛤️  grove-router ──── Routing library                   │
+│             ├── apps/ ─────────────────── Applications                      │
+│             │   ├── 🌍 landing ────────── Marketing & journey               │
+│             │   └── 🌱 plant ──────────── Subscription management           │
 │             │                                                               │
-│             ├── landing/ ─────────────── Marketing site                     │
-│             ├── docs/ ────────────────── Specifications                     │
-│             ├── AgentUsage/ ──────────── Dev workflows                      │
-│             └── archives/ ────────────── Historical docs                    │
+│             ├── libs/ ─────────────────── Shared libraries                  │
+│             │   └── 🌲 engine ─────────── Core CMS engine                   │
+│             │                                                               │
+│             ├── services/ ─────────────── Backend services                  │
+│             ├── workers/ ──────────────── Cloudflare Workers                │
+│             ├── tools/ ────────────────── Dev tooling (gw, gf)             │
+│             ├── docs/ ─────────────────── Specifications                    │
+│             └── scripts/ ──────────────── Automation & CI                   │
 │                                                                             │
 │             📂 ${TOTAL_DIRS} directories total                                        │
 │                                                                             │
@@ -411,10 +475,15 @@ cat > "$FILENAME" << SNAPSHOT
 | Metric | Value |
 |--------|-------|
 | Total Code Lines | ${TOTAL_CODE_LINES} |
-| Svelte Lines | ${SVELTE_LINES} |
 | TypeScript Lines | ${TS_LINES} |
+| Svelte Lines | ${SVELTE_LINES} |
+| Python Lines | ${PY_LINES} |
+| Go Lines | ${GO_LINES} |
+| SQL Lines | ${SQL_LINES} |
 | JavaScript Lines | ${JS_LINES} |
 | CSS Lines | ${CSS_LINES} |
+| Shell Lines | ${SH_LINES} |
+| TSX Lines | ${TSX_LINES} |
 | Documentation Words | ${MD_WORDS} |
 | Documentation Lines | ${MD_LINES} |
 | Total Files | ${TOTAL_FILES} |
@@ -430,11 +499,11 @@ SNAPSHOT
 
 # Create CSV header if file doesn't exist
 if [ ! -f "$CSV_FILE" ]; then
-    echo "timestamp,label,git_hash,total_code_lines,svelte_lines,ts_lines,js_lines,css_lines,doc_words,doc_lines,total_files,directories,estimated_tokens,commits,test_files,test_lines,bundle_size_kb" > "$CSV_FILE"
+    echo "timestamp,label,git_hash,total_code_lines,svelte_lines,ts_lines,js_lines,css_lines,doc_words,doc_lines,total_files,directories,estimated_tokens,commits,test_files,test_lines,bundle_size_kb,npm_unpacked_size,py_lines,go_lines,sql_lines,sh_lines,tsx_lines" > "$CSV_FILE"
 fi
 
-# Append data row
-echo "${TIMESTAMP},${LABEL},${GIT_HASH},${TOTAL_CODE_LINES},${SVELTE_LINES},${TS_LINES},${JS_LINES},${CSS_LINES},${MD_WORDS},${MD_LINES},${TOTAL_FILES},${TOTAL_DIRS},${ESTIMATED_TOKENS},${GIT_COMMITS},${TEST_FILES},${TEST_LINES},${BUNDLE_SIZE_KB}" >> "$CSV_FILE"
+# Append data row (23 columns)
+echo "${TIMESTAMP},${LABEL},${GIT_HASH},${TOTAL_CODE_LINES},${SVELTE_LINES},${TS_LINES},${JS_LINES},${CSS_LINES},${MD_WORDS},${MD_LINES},${TOTAL_FILES},${TOTAL_DIRS},${ESTIMATED_TOKENS},${GIT_COMMITS},${TEST_FILES},${TEST_LINES},${BUNDLE_SIZE_KB},0,${PY_LINES},${GO_LINES},${SQL_LINES},${SH_LINES},${TSX_LINES}" >> "$CSV_FILE"
 
 # ============================================================================
 # OUTPUT SUMMARY
@@ -449,7 +518,7 @@ echo -e "  📄 Snapshot: ${CYAN}${FILENAME}${NC}"
 echo -e "  📊 History:  ${CYAN}${CSV_FILE}${NC}"
 echo ""
 echo -e "  ${YELLOW}Quick Stats:${NC}"
-echo -e "    • ${TOTAL_CODE_FMT} lines of code"
+echo -e "    • ${TOTAL_CODE_FMT} lines of code (9 languages)"
 echo -e "    • ${MD_WORDS_FMT} words of documentation"
 echo -e "    • ~${ESTIMATED_TOKENS_FMT} estimated tokens"
 echo -e "    • ${TOTAL_FILES} files across ${TOTAL_DIRS} directories"

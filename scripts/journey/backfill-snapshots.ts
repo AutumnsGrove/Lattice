@@ -55,6 +55,12 @@ interface RawCSVRow {
 	test_files: number;
 	test_lines: number;
 	bundle_size_kb: number;
+	npm_unpacked_size: number;
+	py_lines: number;
+	go_lines: number;
+	sql_lines: number;
+	sh_lines: number;
+	tsx_lines: number;
 }
 
 /**
@@ -88,6 +94,11 @@ interface LanguageBreakdown {
 	typescript: number;
 	javascript: number;
 	css: number;
+	python: number;
+	go: number;
+	sql: number;
+	shell: number;
+	tsx: number;
 }
 
 /**
@@ -227,9 +238,9 @@ function loadCSV(): RawCSVRow[] {
 	for (let i = 0; i < dataLines.length; i++) {
 		const values = dataLines[i].split(",");
 
-		if (values.length !== 17) {
+		if (values.length !== 23) {
 			console.warn(
-				`      WARNING: Skipping line ${i + 2}: expected 17 columns, got ${values.length}`,
+				`      WARNING: Skipping line ${i + 2}: expected 23 columns, got ${values.length}`,
 			);
 			continue;
 		}
@@ -252,6 +263,12 @@ function loadCSV(): RawCSVRow[] {
 			test_files: safeParseInt(values[14]),
 			test_lines: safeParseInt(values[15]),
 			bundle_size_kb: safeParseInt(values[16]),
+			npm_unpacked_size: safeParseInt(values[17]),
+			py_lines: safeParseInt(values[18]),
+			go_lines: safeParseInt(values[19]),
+			sql_lines: safeParseInt(values[20]),
+			sh_lines: safeParseInt(values[21]),
+			tsx_lines: safeParseInt(values[22]),
 		});
 	}
 
@@ -312,12 +329,17 @@ function transformRow(
 	// Generate deterministic ID
 	const id = generateSnapshotId(row.timestamp, row.label, row.git_hash);
 
-	// Create language breakdown
+	// Create language breakdown (all 9 languages)
 	const languageBreakdown: LanguageBreakdown = {
 		svelte: row.svelte_lines,
 		typescript: row.ts_lines,
 		javascript: row.js_lines,
 		css: row.css_lines,
+		python: row.py_lines,
+		go: row.go_lines,
+		sql: row.sql_lines,
+		shell: row.sh_lines,
+		tsx: row.tsx_lines,
 	};
 
 	// Validate language breakdown sums reasonably
@@ -325,7 +347,12 @@ function transformRow(
 		languageBreakdown.svelte +
 		languageBreakdown.typescript +
 		languageBreakdown.javascript +
-		languageBreakdown.css;
+		languageBreakdown.css +
+		languageBreakdown.python +
+		languageBreakdown.go +
+		languageBreakdown.sql +
+		languageBreakdown.shell +
+		languageBreakdown.tsx;
 
 	if (languageSum > row.total_code_lines * 1.1) {
 		issues.push(
