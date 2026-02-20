@@ -8,6 +8,8 @@ declare global {
 				id: string;
 				email: string;
 				name: string | null;
+				tenantId: string | null;
+				subdomain: string | null;
 			} | null;
 			/** Set when auth validation fails — distinguishes "logged out" from "auth broken" */
 			authError?: string;

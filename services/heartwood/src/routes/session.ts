@@ -18,6 +18,7 @@ import {
 	getClientByClientId,
 	getUserClientPreference,
 	getUserSubscription,
+	getTenantByEmail,
 	isEmailAdmin,
 } from "../db/queries.js";
 import { hashSecret, timingSafeEqual } from "../utils/crypto.js";
@@ -92,7 +93,10 @@ session.post("/validate", async (c) => {
 
 			if (user) {
 				const isAdmin = user.is_admin === 1 || isEmailAdmin(user.email);
-				const subscription = await getUserSubscription(db, parsedSession.userId);
+				const [subscription, tenant] = await Promise.all([
+					getUserSubscription(db, parsedSession.userId),
+					getTenantByEmail(c.env.ENGINE_DB, user.email),
+				]);
 
 				return c.json({
 					valid: true,
@@ -103,6 +107,8 @@ session.post("/validate", async (c) => {
 						avatarUrl: user.avatar_url,
 						isAdmin,
 						tier: subscription?.tier || "seedling",
+						tenantId: tenant?.tenantId ?? null,
+						subdomain: tenant?.subdomain ?? null,
 					},
 					session: {
 						id: parsedSession.sessionId,
@@ -127,7 +133,10 @@ session.post("/validate", async (c) => {
 
 				if (user) {
 					const isAdmin = user.is_admin === 1 || isEmailAdmin(user.email);
-					const subscription = await getUserSubscription(db, payload.sub);
+					const [subscription, tenant] = await Promise.all([
+						getUserSubscription(db, payload.sub),
+						getTenantByEmail(c.env.ENGINE_DB, user.email),
+					]);
 
 					return c.json({
 						valid: true,
@@ -138,6 +147,8 @@ session.post("/validate", async (c) => {
 							avatarUrl: user.avatar_url,
 							isAdmin,
 							tier: subscription?.tier || "seedling",
+							tenantId: tenant?.tenantId ?? null,
+							subdomain: tenant?.subdomain ?? null,
 						},
 						session: null, // No DO session for JWT auth
 					});
@@ -159,7 +170,10 @@ session.post("/validate", async (c) => {
 			const user = await getUserById(db, sessionData.user_id);
 			if (user) {
 				const isAdmin = user.is_admin === 1 || isEmailAdmin(user.email);
-				const subscription = await getUserSubscription(db, sessionData.user_id);
+				const [subscription, tenant] = await Promise.all([
+					getUserSubscription(db, sessionData.user_id),
+					getTenantByEmail(c.env.ENGINE_DB, user.email),
+				]);
 
 				return c.json({
 					valid: true,
@@ -170,6 +184,8 @@ session.post("/validate", async (c) => {
 						avatarUrl: user.avatar_url,
 						isAdmin,
 						tier: subscription?.tier || "seedling",
+						tenantId: tenant?.tenantId ?? null,
+						subdomain: tenant?.subdomain ?? null,
 					},
 					session: null, // No DO session for legacy auth
 				});
@@ -181,7 +197,10 @@ session.post("/validate", async (c) => {
 	// This handles sessions created via OAuth through Better Auth
 	const betterAuthUser = await validateBetterAuthSession(c.req.raw, c.env);
 	if (betterAuthUser) {
-		const subscription = await getUserSubscription(db, betterAuthUser.id);
+		const [subscription, tenant] = await Promise.all([
+			getUserSubscription(db, betterAuthUser.id),
+			getTenantByEmail(c.env.ENGINE_DB, betterAuthUser.email),
+		]);
 
 		return c.json({
 			valid: true,
@@ -192,6 +211,8 @@ session.post("/validate", async (c) => {
 				avatarUrl: betterAuthUser.image || "",
 				isAdmin: betterAuthUser.isAdmin,
 				tier: subscription?.tier || "seedling",
+				tenantId: tenant?.tenantId ?? null,
+				subdomain: tenant?.subdomain ?? null,
 			},
 			session: null, // Better Auth manages its own sessions
 		});
@@ -693,7 +714,10 @@ session.post("/validate-service", async (c) => {
 	}
 
 	const isAdmin = user.is_admin === 1 || isEmailAdmin(user.email);
-	const subscription = await getUserSubscription(db, parsedSession.userId);
+	const [subscription, tenant] = await Promise.all([
+		getUserSubscription(db, parsedSession.userId),
+		getTenantByEmail(c.env.ENGINE_DB, user.email),
+	]);
 
 	return c.json({
 		valid: true,
@@ -704,6 +728,8 @@ session.post("/validate-service", async (c) => {
 			avatarUrl: user.avatar_url,
 			isAdmin,
 			tier: subscription?.tier || "seedling",
+			tenantId: tenant?.tenantId ?? null,
+			subdomain: tenant?.subdomain ?? null,
 		},
 		session: {
 			id: parsedSession.sessionId,

@@ -82,22 +82,9 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 	const contentHtml =
 		typeof payload.content_html === "string" ? sanitizeNoteHtml(payload.content_html) : null;
 
-	// Resolve the user's tenant for FK constraint on meadow_posts.tenant_id
-	// Match by email — reliable across all auth paths (SessionDO, JWT, Better Auth)
-	let tenantId = "";
-	let authorSubdomain = "";
-	try {
-		const tenant = await db
-			.prepare("SELECT id, subdomain FROM tenants WHERE email = ? AND active = 1 LIMIT 1")
-			.bind(locals.user.email)
-			.first<{ id: string; subdomain: string }>();
-		if (tenant) {
-			tenantId = tenant.id;
-			authorSubdomain = tenant.subdomain ?? "";
-		}
-	} catch (err) {
-		console.error("[Notes API] Tenant lookup failed:", err);
-	}
+	// Tenant info flows from Heartwood session validation — no local DB lookup needed
+	const tenantId = locals.user.tenantId || "";
+	const authorSubdomain = locals.user.subdomain || "";
 
 	if (!tenantId) {
 		return json(

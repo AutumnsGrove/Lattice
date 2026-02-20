@@ -72,6 +72,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 						name: string;
 						avatarUrl: string;
 						isAdmin: boolean;
+						tenantId: string | null;
+						subdomain: string | null;
 					};
 				};
 
@@ -80,6 +82,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 						id: data.user.id,
 						email: data.user.email,
 						name: data.user.name || null,
+						tenantId: data.user.tenantId ?? null,
+						subdomain: data.user.subdomain ?? null,
 					};
 				}
 			}
