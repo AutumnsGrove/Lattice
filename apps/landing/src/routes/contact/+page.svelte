@@ -1,11 +1,11 @@
 <script lang="ts">
-	import Header from '$lib/components/Header.svelte';
-	import { seasonStore } from '@autumnsgrove/lattice/ui/chrome';
-	import Footer from '$lib/components/Footer.svelte';
-	import { GroveTerm } from '@autumnsgrove/lattice/ui';
-	import SEO from '$lib/components/SEO.svelte';
-	import { Logo } from '@autumnsgrove/lattice/ui/nature';
-	import { Mail, ExternalLink, Heart, Compass } from 'lucide-svelte';
+	import Header from "$lib/components/Header.svelte";
+	import { seasonStore } from "@autumnsgrove/lattice/ui/chrome";
+	import Footer from "$lib/components/Footer.svelte";
+	import { GroveTerm } from "@autumnsgrove/lattice/ui";
+	import SEO from "$lib/components/SEO.svelte";
+	import { Logo } from "@autumnsgrove/lattice/ui/nature";
+	import { Mail, ExternalLink, Heart, Compass, Shield } from "lucide-svelte";
 
 	let { data } = $props();
 </script>
@@ -26,9 +26,7 @@
 				<Logo size="xl" season={seasonStore.current} class="mx-auto" />
 			</div>
 			<h1 class="text-3xl md:text-4xl font-serif text-foreground mb-3">Hello there</h1>
-			<p class="text-lg text-foreground-muted font-sans mb-4">
-				I'm Autumn, and I built Grove.
-			</p>
+			<p class="text-lg text-foreground-muted font-sans mb-4">I'm Autumn, and I built Grove.</p>
 			<a
 				href="/knowledge/help/wanderers-and-pathfinders"
 				class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent-subtle/20 text-sm text-accent-muted hover:bg-accent-subtle/30 hover:text-accent transition-colors"
@@ -53,10 +51,13 @@
 
 			<div class="prose prose-grove max-w-none text-center">
 				<p class="text-foreground-muted font-sans leading-relaxed mb-4">
-					Grove started as a vision and a dream—a quiet corner of the internet where words could grow without being harvested. Where community means connection, not competition. Where your writing belongs to you.
+					Grove started as a vision and a dream—a quiet corner of the internet where words could
+					grow without being harvested. Where community means connection, not competition. Where
+					your writing belongs to you.
 				</p>
 				<p class="text-foreground-muted font-sans leading-relaxed mb-4">
-					I'm literally one girl building all of this. Every line of code, every design decision, every word you read here—that's me.
+					I'm literally one girl building all of this. Every line of code, every design decision,
+					every word you read here—that's me.
 				</p>
 				<p class="text-foreground-muted font-sans leading-relaxed">
 					I'm damn proud of what we're growing here. And I'd love to hear from you.
@@ -77,7 +78,11 @@
 					<Mail class="w-5 h-5 text-accent-muted" />
 				</div>
 				<div class="flex-1">
-					<p class="font-sans font-medium text-foreground group-hover:text-accent-muted transition-colors">Email me</p>
+					<p
+						class="font-sans font-medium text-foreground group-hover:text-accent-muted transition-colors"
+					>
+						Email me
+					</p>
 					<p class="text-sm text-foreground-subtle">autumn@grove.place</p>
 				</div>
 			</a>
@@ -93,7 +98,11 @@
 					<ExternalLink class="w-5 h-5 text-accent-muted" />
 				</div>
 				<div class="flex-1">
-					<p class="font-sans font-medium text-foreground group-hover:text-accent-muted transition-colors">Read my blog</p>
+					<p
+						class="font-sans font-medium text-foreground group-hover:text-accent-muted transition-colors"
+					>
+						Read my blog
+					</p>
 					<p class="text-sm text-foreground-subtle">Development updates, thoughts, and stories</p>
 				</div>
 			</a>
@@ -107,8 +116,30 @@
 					<Heart class="w-5 h-5 text-accent-muted" />
 				</div>
 				<div class="flex-1">
-					<p class="font-sans font-medium text-foreground group-hover:text-accent-muted transition-colors">Support Grove</p>
+					<p
+						class="font-sans font-medium text-foreground group-hover:text-accent-muted transition-colors"
+					>
+						Support Grove
+					</p>
 					<p class="text-sm text-foreground-subtle">Help keep the forest growing</p>
+				</div>
+			</a>
+
+			<!-- Security -->
+			<a
+				href="/security"
+				class="flex items-center gap-4 p-4 rounded-xl border border-default bg-surface hover:bg-surface-hover transition-colors group"
+			>
+				<div class="p-3 rounded-lg bg-accent-subtle/20">
+					<Shield class="w-5 h-5 text-accent-muted" />
+				</div>
+				<div class="flex-1">
+					<p
+						class="font-sans font-medium text-foreground group-hover:text-accent-muted transition-colors"
+					>
+						Report a vulnerability
+					</p>
+					<p class="text-sm text-foreground-subtle">Found a security issue? Let me know</p>
 				</div>
 			</a>
 		</div>
