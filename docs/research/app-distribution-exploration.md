@@ -105,9 +105,9 @@ We don't need native features for their own sake. Grove is deliberately anti-not
 
 ```json
 {
-  "server": {
-    "url": "https://grove.place"
-  }
+	"server": {
+		"url": "https://grove.place"
+	}
 }
 ```
 
@@ -197,19 +197,21 @@ For Android, TWA is genuinely zero-maintenance — the app updates when the webs
 1. **Add service workers** — We have none currently. Both tracks benefit from offline caching.
 2. **Add `adapter-static` build config** — The iOS track needs this. Create a separate SvelteKit config or a build-time flag.
 3. **Decouple API calls** — Mobile app can't use `+server.ts` routes in a static build. API calls need to go to the hosted Cloudflare API directly.
-4. **Get a Mac** — iOS builds require Xcode, which only runs on macOS. Cloud Mac services (MacStadium) are an alternative at ~$50-80/mo.
+4. **Add CORS headers to API routes** — Cloudflare Workers currently assume same-origin requests. A Capacitor WebView hitting `https://meadow.grove.place/api/feed` is cross-origin — API routes need `Access-Control-Allow-Origin` headers and proper preflight handling.
+5. **Set up Digital Asset Links** — TWA requires `.well-known/assetlinks.json` on the domain, plus a Lighthouse score of 80+ for the PWA quality bar.
+6. **Get a Mac** — iOS builds require Xcode, which only runs on macOS. Cloud Mac services (MacStadium) are an alternative at ~$50-80/mo.
 
 ---
 
 ## Cost Summary
 
-| Approach | Year 1 | Ongoing/Year |
-|---|---|---|
-| PWA only (status quo) | $0 | $0 |
-| + TWA for Android | $25 | $0 |
-| + Capacitor for iOS | $124 ($99 + $25) | $99 |
-| + Capgo OTA updates | $268 ($124 + $144) | $243 |
-| Managed service (MobiLoud) | $2,500+ | $2,500+ |
+| Approach                   | Year 1             | Ongoing/Year |
+| -------------------------- | ------------------ | ------------ |
+| PWA only (status quo)      | $0                 | $0           |
+| + TWA for Android          | $25                | $0           |
+| + Capacitor for iOS        | $124 ($99 + $25)   | $99          |
+| + Capgo OTA updates        | $268 ($124 + $144) | $243         |
+| Managed service (MobiLoud) | $2,500+            | $2,500+      |
 
 The managed service option (MobiLoud, Median.co) handles wrapper building, native features, and Apple review for you. It trades money for time — potentially worth it if dealing with Xcode and Apple reviewers would pull focus from building the actual product. MobiLoud guarantees App Store approval.
 
@@ -249,6 +251,7 @@ We have PWA manifests and icons but **no service workers** anywhere. We need one
 SvelteKit has built-in service worker support via `src/service-worker.ts`. This is maybe 60-80 lines of code.
 
 **Files to create:**
+
 - `apps/meadow/src/service-worker.ts` (start with Meadow since it's the social hub)
 - Eventually one per app that goes into the mobile build
 
@@ -269,13 +272,13 @@ What we need is a shared API client that:
 
 ```typescript
 // Current (web, relative URL, cookies automatic):
-const res = await fetch('/api/feed?filter=latest', {
-  credentials: 'include'
+const res = await fetch("/api/feed?filter=latest", {
+	credentials: "include",
 });
 
 // Mobile (absolute URL, explicit auth token):
-const res = await fetch('https://meadow.grove.place/api/feed?filter=latest', {
-  headers: { Authorization: `Bearer ${token}` }
+const res = await fetch("https://meadow.grove.place/api/feed?filter=latest", {
+	headers: { Authorization: `Bearer ${token}` },
 });
 ```
 
@@ -302,11 +305,14 @@ We need Heartwood to also support **bearer tokens**:
 4. API routes accept either cookies (web) OR bearer tokens (mobile)
 
 **Files to modify:**
+
 - `services/groveauth/` — add token issuance endpoint, add bearer token validation
 - `apps/meadow/src/hooks.server.ts` — accept `Authorization` header as alternative to cookie
 - Same pattern for every app's `hooks.server.ts`
 
 This is the most significant piece of work, but it also makes the API more versatile for future integrations (third-party clients, CLI tools, etc.).
+
+**WebView OAuth caveat:** The standard Google OAuth redirect flow won't work inside a Capacitor WebView — a browser redirect can't close the WebView and return a token to the app. The mobile flow needs either `@capacitor/browser` with a deep-link callback URL (custom scheme like `grove://auth/callback`) or `ASWebAuthenticationSession` on iOS. This is real implementation work that should be scoped alongside the Heartwood bearer token changes.
 
 #### 4. Dual Build Configuration
 
@@ -327,13 +333,20 @@ const isMobile = process.env.BUILD_TARGET === 'mobile';
 const config = {
   kit: {
     adapter: isMobile ? adapterStatic({ fallback: 'index.html' }) : adapterCloudflare({...}),
-    // In mobile mode, disable SSR so everything runs client-side
-    ...(isMobile && { ssr: false })
   }
 };
 ```
 
+Note: SvelteKit's `ssr` setting is not a kit config option — it's controlled per-route via `+layout.ts`. For the mobile build, add a root layout file:
+
+```typescript
+// src/routes/+layout.ts (only in mobile builds)
+export const ssr = false;
+export const prerender = true;
+```
+
 **Files to modify:**
+
 - `apps/meadow/svelte.config.js` (and whichever apps go into the mobile build)
 - Add `adapter-static` as a dev dependency
 
@@ -368,22 +381,14 @@ The native features (biometrics, share sheet, status bar, haptics) are mostly pl
 ### Implementation Order (Phased)
 
 **Phase 1: Foundation** (web-only, benefits everyone)
+
 1. Add service workers for offline support
 2. Add bearer token auth to Heartwood (alongside existing cookie auth)
 3. Create shared API client in engine
 
-**Phase 2: Android** (quickest store win)
-4. Ensure PWA manifest + service worker score 80+ on Lighthouse
-5. Package as TWA via Bubblewrap
-6. Submit to Google Play ($25)
+**Phase 2: Android** (quickest store win) 4. Ensure PWA manifest + service worker score 80+ on Lighthouse 5. Package as TWA via Bubblewrap 6. Submit to Google Play ($25)
 
-**Phase 3: iOS** (the real goal)
-7. Add `adapter-static` dual build config
-8. Initialize Capacitor project
-9. Integrate native plugins (biometrics, share, status bar, haptics)
-10. Add selective notifications (replies, mentions — not engagement bait)
-11. Register for Apple Developer Program ($99)
-12. Build in Xcode, submit to App Store
+**Phase 3: iOS** (the real goal) 7. Add `adapter-static` dual build config 8. Initialize Capacitor project 9. Integrate native plugins (biometrics, share, status bar, haptics) 10. Add selective notifications (replies, mentions — not engagement bait) 11. Register for Apple Developer Program ($99) 12. Build in Xcode, submit to App Store
 
 Phase 1 improves the web experience too. Phase 2 is a quick win. Phase 3 is where the real effort lives but is entirely achievable.
 
