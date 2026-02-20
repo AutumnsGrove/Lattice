@@ -116,6 +116,7 @@ export const actions: Actions = {
 		const showMoodLog = formData.has("showMoodLog") ? 1 : 0;
 
 		try {
+			// Try with show_mood_log column (requires migration 084)
 			await db
 				.prepare(
 					`INSERT INTO mood_ring_config (tenant_id, mode, manual_mood, manual_color, color_scheme, display_style, show_mood_log, updated_at)
@@ -134,6 +135,35 @@ export const actions: Actions = {
 
 			return { success: true, configSaved: true };
 		} catch (error) {
+			// Fallback: save without show_mood_log if column doesn't exist yet
+			const errMsg = error instanceof Error ? error.message : String(error);
+			if (errMsg.includes("show_mood_log")) {
+				try {
+					await db
+						.prepare(
+							`INSERT INTO mood_ring_config (tenant_id, mode, manual_mood, manual_color, color_scheme, display_style, updated_at)
+               VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+               ON CONFLICT(tenant_id) DO UPDATE SET
+                 mode = excluded.mode,
+                 manual_mood = excluded.manual_mood,
+                 manual_color = excluded.manual_color,
+                 color_scheme = excluded.color_scheme,
+                 display_style = excluded.display_style,
+                 updated_at = datetime('now')`,
+						)
+						.bind(tenantId, mode, manualMood, manualColor, colorScheme, displayStyle)
+						.run();
+
+					return { success: true, configSaved: true };
+				} catch (fallbackError) {
+					logGroveError("Arbor", ARBOR_ERRORS.SAVE_FAILED, { cause: fallbackError });
+					return fail(500, {
+						error: ARBOR_ERRORS.SAVE_FAILED.userMessage,
+						error_code: ARBOR_ERRORS.SAVE_FAILED.code,
+					});
+				}
+			}
+
 			logGroveError("Arbor", ARBOR_ERRORS.SAVE_FAILED, { cause: error });
 			return fail(500, {
 				error: ARBOR_ERRORS.SAVE_FAILED.userMessage,
