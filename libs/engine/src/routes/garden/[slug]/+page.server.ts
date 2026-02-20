@@ -144,6 +144,8 @@ export const load: PageServerLoad = async ({ params, locals, platform, setHeader
 						...post,
 						font: "default",
 						author: authorName,
+						created_at: undefined,
+						updated_at: undefined,
 					},
 					isOwner: isOwner || false,
 					comments: [],
