@@ -308,7 +308,7 @@ export const load: PageServerLoad = async ({ locals, platform, parent, cookies }
 		billingError,
 		usage: tenant
 			? {
-					// Use actual storage from image_hashes, not stale tenants.storage_used
+					// Use actual storage from gallery_images.file_size, not stale tenants.storage_used
 					storageUsed: storageUsedBytes,
 					storageLimit: tierConfig.limits.storage,
 					// Use actual post count from posts table, not stale tenants.post_count
