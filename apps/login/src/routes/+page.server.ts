@@ -112,15 +112,18 @@ export const actions: Actions = {
 				body: JSON.stringify({ provider: "google", callbackURL }),
 				redirect: "manual",
 			});
-		} catch {
+		} catch (fetchErr) {
+			console.error("[Google OAuth] Service binding fetch error:", fetchErr);
 			return fail(503, {
 				provider: "google" as const,
 				error: "Could not reach auth service. Please try again.",
 			});
 		}
 
-		// Better Auth responds with 302 → Google OAuth authorization URL.
-		if (response.status === 301 || response.status === 302) {
+		// Better Auth responds with a redirect → Google OAuth authorization URL.
+		// Accept standard redirect statuses (not 304/305/306 which aren't redirects).
+		const isRedirect = [301, 302, 303, 307, 308].includes(response.status);
+		if (isRedirect) {
 			const location = response.headers.get("location");
 			if (location) {
 				// Forward oauth_state and any other cookies Better Auth set during setup.
@@ -139,22 +142,35 @@ export const actions: Actions = {
 			}
 		}
 
-		// Log what Heartwood returned for debugging non-redirect responses
+		// Non-redirect response — Heartwood returned an error or unexpected response.
+		// Log full details for debugging (visible in Cloudflare real-time logs).
+		let responseBody = "";
+		try {
+			responseBody = await response.text();
+		} catch {
+			/* ignore read errors */
+		}
 		console.error(
 			"[Google OAuth] Unexpected response from Heartwood:",
 			response.status,
 			response.headers.get("content-type"),
 		);
-		try {
-			const body = await response.text();
-			console.error("[Google OAuth] Response body:", body.slice(0, 500));
-		} catch {
-			/* ignore read errors */
+		console.error("[Google OAuth] Response body:", responseBody.slice(0, 500));
+
+		// Surface more detail in the user-facing error based on the status.
+		let userError: string;
+		if (response.status >= 500) {
+			userError =
+				"Google sign-in failed to start — the auth service returned an error. Please try again shortly.";
+		} else if (response.status === 429) {
+			userError = "Too many sign-in attempts. Please wait a moment and try again.";
+		} else {
+			userError = "Google sign-in failed to start. Please try again.";
 		}
 
 		return fail(500, {
 			provider: "google" as const,
-			error: "Google sign-in failed to start. Please try again.",
+			error: userError,
 		});
 	},
 
@@ -198,7 +214,8 @@ export const actions: Actions = {
 				},
 				body: JSON.stringify({ email, callbackURL }),
 			});
-		} catch {
+		} catch (fetchErr) {
+			console.error("[Magic Link] Service binding fetch error:", fetchErr);
 			return fail(503, {
 				provider: "email" as const,
 				error: "Could not reach auth service. Please try again.",
@@ -207,10 +224,25 @@ export const actions: Actions = {
 		}
 
 		if (!response.ok) {
-			let message = "Failed to send magic link. Please try again.";
-			// Only surface Heartwood's message for 4xx errors (client errors the user can act on).
-			// 5xx errors are server-side — use the generic message to avoid leaking internals.
-			if (response.status >= 400 && response.status < 500) {
+			// Log the raw response for debugging
+			console.error("[Magic Link] Heartwood error:", response.status);
+
+			let message: string;
+			if (response.status >= 500) {
+				// 5xx — auth service error; don't leak internals
+				try {
+					const body = await response.text();
+					console.error("[Magic Link] Response body:", body.slice(0, 500));
+				} catch {
+					/* ignore */
+				}
+				message =
+					"Magic link could not be sent — the auth service returned an error. Please try again shortly.";
+			} else if (response.status === 429) {
+				message = "Too many attempts. Please wait a moment before requesting another link.";
+			} else {
+				// 4xx — surface Heartwood's message (client errors the user can act on)
+				message = "Failed to send magic link. Please try again.";
 				try {
 					const body = (await response.json()) as { message?: string };
 					if (body.message) message = body.message;

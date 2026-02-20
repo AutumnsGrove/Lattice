@@ -100,12 +100,27 @@ If you didn't request this, you can safely ignore this email.
  * @returns Configured Better Auth instance
  */
 export function createAuth(env: Env, cf?: CloudflareGeolocation) {
+	// Validate critical env vars early — fail loudly instead of crashing mid-flow.
+	// These are set via wrangler.toml [vars] or `wrangler secret put`.
+	// If missing after a migration, the error message here tells ops exactly what to fix.
+	if (!env.DB) throw new Error("[createAuth] Missing DB binding (D1 groveauth database)");
+	if (!env.AUTH_BASE_URL) throw new Error("[createAuth] Missing AUTH_BASE_URL env var");
+	if (!env.SESSION_SECRET) throw new Error("[createAuth] Missing SESSION_SECRET secret");
+	if (!env.GOOGLE_CLIENT_ID || !env.GOOGLE_CLIENT_SECRET) {
+		console.warn(
+			"[createAuth] Missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET — Google OAuth will fail",
+		);
+	}
+
 	// Create Drizzle instance for D1 with schema
 	const db = drizzle(env.DB, { schema });
 	const groveDb = createDbSession(env);
+	if (!env.ZEPHYR_API_KEY) {
+		console.warn("[createAuth] Missing ZEPHYR_API_KEY — magic link emails will fail");
+	}
 	const zephyr = new ZephyrClient({
-		baseUrl: env.ZEPHYR_URL,
-		apiKey: env.ZEPHYR_API_KEY,
+		baseUrl: env.ZEPHYR_URL || "https://grove-zephyr.m7jv4v7npb.workers.dev",
+		apiKey: env.ZEPHYR_API_KEY || "",
 		fetcher: env.ZEPHYR, // Service binding for direct worker-to-worker routing
 	});
 
