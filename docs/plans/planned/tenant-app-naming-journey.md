@@ -8,6 +8,7 @@
 ## What IS This Thing?
 
 The thing we're distinguishing:
+
 - The live SvelteKit deployment serving `*.grove.place`
 - 262 route files, 127 API handlers, 80+ curio endpoints
 - Contains Arbor (admin panel), Sentinel (safety), all public pages
@@ -28,7 +29,7 @@ the API call. It's the medium through which every part of the grove becomes real
 ### Round 1: Bower (Rejected)
 
 First candidate. A bower grows on a lattice — the metaphor was perfect.
-But the word doesn't *roll* in the grove. Too archaic. Catches in the throat.
+But the word doesn't _roll_ in the grove. Too archaic. Catches in the throat.
 
 The Wayfinder's verdict: "Bower is explicitly not allowed. I dislike the name
 greatly and it doesn't roll well for the grove."
@@ -63,21 +64,23 @@ different context. One you build with, one you visit.
 
 No new Grove name needed. Just clear words:
 
-| | **Lattice** (the library) | **The engine** (the deployment) |
-|---|---|---|
-| Package | `@autumnsgrove/lattice` | `grove-lattice` |
-| Lives at | `libs/engine/src/lib/` | `libs/engine/src/routes/` |
-| Build | `svelte-package` → `dist/` | `vite build` → `.svelte-kit/cloudflare/` |
-| Consumed by | 10+ packages at build time | Every Wanderer at request time |
-| Future home | `libs/lattice/` | `apps/engine/` |
+|             | **Lattice** (the library)  | **The engine** (the deployment)          |
+| ----------- | -------------------------- | ---------------------------------------- |
+| Package     | `@autumnsgrove/lattice`    | `grove-lattice`                          |
+| Lives at    | `libs/engine/src/lib/`     | `libs/engine/src/routes/`                |
+| Build       | `svelte-package` → `dist/` | `vite build` → `.svelte-kit/cloudflare/` |
+| Consumed by | 10+ packages at build time | Every Wanderer at request time           |
+| Future home | `libs/engine/`             | `apps/engine/`                           |
 
 In conversation:
+
 - "**Lattice** exports the component" = the library
 - "**The engine** serves the route" = the deployment
 - "**Lattice** provides it, **the engine** renders it"
 
 When the physical split happens:
-- `libs/lattice/` — the library (static lattice, `@autumnsgrove/lattice`)
+
+- `libs/engine/` — the library (static lattice, `@autumnsgrove/lattice`)
 - `apps/engine/` — the deployment (live lattice, `grove-lattice`)
 
 Both are lattice. One you build with, one you visit.
@@ -88,13 +91,13 @@ Both are lattice. One you build with, one you visit.
 
 For the record, the names explored during the walk:
 
-| Name | Relationship to Lattice | Why Not |
-|------|------------------------|---------|
-| **Bower** | A bower grows on a lattice/trellis | Too archaic, doesn't roll well |
-| **Glade** | Open clearing where light reaches ground | An absence, not a structure; too similar to Clearing |
-| **Hollow** | Sheltered depression in landscape | "Hollow" means empty |
-| **Thicket** | Dense, living cluster of growth | Good name, but the whole premise was wrong — we don't need a new name |
-| **Stand** | A forestry unit of trees | Too many non-forest meanings |
+| Name        | Relationship to Lattice                  | Why Not                                                               |
+| ----------- | ---------------------------------------- | --------------------------------------------------------------------- |
+| **Bower**   | A bower grows on a lattice/trellis       | Too archaic, doesn't roll well                                        |
+| **Glade**   | Open clearing where light reaches ground | An absence, not a structure; too similar to Clearing                  |
+| **Hollow**  | Sheltered depression in landscape        | "Hollow" means empty                                                  |
+| **Thicket** | Dense, living cluster of growth          | Good name, but the whole premise was wrong — we don't need a new name |
+| **Stand**   | A forestry unit of trees                 | Too many non-forest meanings                                          |
 
 The walk was valuable. We explored the space thoroughly enough to realize
 the right answer wasn't a name at all — it was clarity about what we
