@@ -1,0 +1,77 @@
+name: Security.txt Annual Review
+
+on:
+  # Run yearly on January 15th
+  schedule:
+    - cron: "0 9 15 1 *"
+
+  # Allow manual trigger
+  workflow_dispatch:
+
+jobs:
+  create-review-issue:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+
+    steps:
+      - name: Check for existing open issue
+        id: check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'security,maintenance'
+            });
+
+            const existing = issues.data.some(issue =>
+              issue.title.includes('security.txt')
+            );
+
+            core.setOutput('exists', existing.toString());
+
+      - name: Create annual review issue
+        if: steps.check.outputs.exists == 'false'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const year = new Date().getFullYear();
+
+            const body = `## Annual security.txt Review
+
+            It's been a year — time to review our security disclosure page and contact info.
+
+            ### Checklist
+
+            - [ ] **Contact email** — Is \`security@grove.place\` still the right address?
+            - [ ] **Policy content** — Does the /security page still reflect our current disclosure policy?
+            - [ ] **Scope** — Are all Grove properties and subdomains covered?
+            - [ ] **Response times** — Are the stated response times still realistic?
+            - [ ] **"Please Don't" section** — Anything to add or update?
+            - [ ] **RFC 9116 fields** — Review the \`/.well-known/security.txt\` endpoint for accuracy
+            - [ ] **Email routing** — Confirm \`security@grove.place\` is properly configured in Resend
+
+            ### Files to review
+
+            - \`apps/landing/src/routes/security/+page.svelte\` — Styled disclosure page
+            - \`apps/landing/src/routes/security/+page.server.ts\` — Form handler and email templates
+            - \`apps/landing/src/routes/.well-known/security.txt/+server.ts\` — RFC 9116 plaintext endpoint
+            - \`libs/engine/src/lib/config/emails.ts\` — Email config (\`GROVE_EMAILS.security\`)
+
+            ### Note
+
+            The \`Expires\` field in \`/.well-known/security.txt\` is generated dynamically (1 year from each request), so it stays fresh automatically. This review is about the *content and policy*, not the expiration date.
+
+            ---
+            *This issue was automatically created by the security-txt-review workflow.*`.replace(/            /g, '');
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Review security.txt and disclosure policy (${year})`,
+              body: body,
+              labels: ['security', 'maintenance']
+            });
