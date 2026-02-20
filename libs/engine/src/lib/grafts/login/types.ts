@@ -22,17 +22,17 @@ export type AuthProvider = "google" | "github" | "email" | "passkey";
  * Configuration for a single auth provider.
  */
 export interface ProviderConfig {
-  /** Provider identifier */
-  id: AuthProvider;
+	/** Provider identifier */
+	id: AuthProvider;
 
-  /** Human-readable provider name */
-  name: string;
+	/** Human-readable provider name */
+	name: string;
 
-  /** Whether this provider is currently available */
-  available: boolean;
+	/** Whether this provider is currently available */
+	available: boolean;
 
-  /** Optional description for the provider */
-  description?: string;
+	/** Optional description for the provider */
+	description?: string;
 }
 
 // =============================================================================
@@ -52,65 +52,65 @@ export type LoginVariant = "default" | "compact" | "fullpage";
  * cookie after the callback.
  */
 export interface LoginGraftProps extends BaseGraftProps {
-  /**
-   * Which providers to show (order matters for display).
-   * Defaults to ['google', 'passkey', 'email'] for all fully supported providers.
-   */
-  providers?: AuthProvider[];
+	/**
+	 * Which providers to show (order matters for display).
+	 * Defaults to ['google', 'passkey', 'email'] for all fully supported providers.
+	 */
+	providers?: AuthProvider[];
 
-  /**
-   * URL to redirect after successful authentication.
-   * Defaults to '/arbor'.
-   */
-  returnTo?: string;
+	/**
+	 * URL to redirect after successful authentication.
+	 * Defaults to '/arbor'.
+	 */
+	returnTo?: string;
 
-  /**
-   * Client ID for OAuth (for multi-tenant scenarios).
-   * @deprecated Better Auth uses the origin domain for client identification.
-   */
-  clientId?: string;
+	/**
+	 * Client ID for OAuth (for multi-tenant scenarios).
+	 * @deprecated Better Auth uses the origin domain for client identification.
+	 */
+	clientId?: string;
 
-  /**
-   * Display variant.
-   * - 'default': Card with providers and optional header/footer
-   * - 'compact': Minimal button only
-   * - 'fullpage': Centered card with logo and branding
-   */
-  variant?: LoginVariant;
+	/**
+	 * Display variant.
+	 * - 'default': Card with providers and optional header/footer
+	 * - 'compact': Minimal button only
+	 * - 'fullpage': Centered card with logo and branding
+	 */
+	variant?: LoginVariant;
 
-  /**
-   * Base URL for the login endpoint.
-   * @deprecated Better Auth redirects directly to GROVEAUTH_URLS.socialSignIn.
-   * This prop is ignored in the Better Auth flow.
-   */
-  loginUrl?: string;
+	/**
+	 * Base URL for the login endpoint.
+	 * @deprecated Better Auth redirects directly to GROVEAUTH_URLS.socialSignIn.
+	 * This prop is ignored in the Better Auth flow.
+	 */
+	loginUrl?: string;
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // Customization snippets
-  // ─────────────────────────────────────────────────────────────────────────
+	// ─────────────────────────────────────────────────────────────────────────
+	// Customization snippets
+	// ─────────────────────────────────────────────────────────────────────────
 
-  /** Custom header content above the provider buttons */
-  header?: Snippet;
+	/** Custom header content above the provider buttons */
+	header?: Snippet;
 
-  /** Custom footer content below the provider buttons */
-  footer?: Snippet;
+	/** Custom footer content below the provider buttons */
+	footer?: Snippet;
 
-  /** Custom content for the logo area (fullpage variant only) */
-  logo?: Snippet;
+	/** Custom content for the logo area (fullpage variant only) */
+	logo?: Snippet;
 }
 
 /**
  * Props for ProviderIcon component.
  */
 export interface ProviderIconProps {
-  /** Which provider icon to show */
-  provider: AuthProvider;
+	/** Which provider icon to show */
+	provider: AuthProvider;
 
-  /** Icon size in pixels */
-  size?: number;
+	/** Icon size in pixels */
+	size?: number;
 
-  /** Additional CSS classes */
-  class?: string;
+	/** Additional CSS classes */
+	class?: string;
 }
 
 // =============================================================================
@@ -121,31 +121,31 @@ export interface ProviderIconProps {
  * Result of a successful passkey authentication.
  */
 export interface PasskeyAuthResult {
-  /** Whether authentication was successful */
-  success: boolean;
+	/** Whether authentication was successful */
+	success: boolean;
 
-  /** URL to redirect to after successful auth */
-  redirectTo?: string;
+	/** URL to redirect to after successful auth */
+	redirectTo?: string;
 
-  /** Error message if authentication failed */
-  error?: string;
+	/** Error message if authentication failed */
+	error?: string;
 }
 
 /**
  * Props for PasskeyButton component.
  */
 export interface PasskeyButtonProps extends BaseGraftProps {
-  /** URL to redirect after successful authentication */
-  returnTo?: string;
+	/** URL to redirect after successful authentication */
+	returnTo?: string;
 
-  /** Callback fired on successful authentication */
-  onSuccess?: (result: PasskeyAuthResult) => void;
+	/** Callback fired on successful authentication */
+	onSuccess?: (result: PasskeyAuthResult) => void;
 
-  /** Callback fired on authentication error */
-  onError?: (error: string) => void;
+	/** Callback fired on authentication error */
+	onError?: (error: string) => void;
 
-  /** Button size variant */
-  size?: "sm" | "md" | "lg";
+	/** Button size variant */
+	size?: "sm" | "md" | "lg";
 }
 
 // =============================================================================
@@ -156,28 +156,28 @@ export interface PasskeyButtonProps extends BaseGraftProps {
  * Configuration for createLoginHandler factory.
  */
 export interface LoginHandlerConfig {
-  /**
-   * OAuth client ID registered with GroveAuth.
-   */
-  clientId: string;
+	/**
+	 * OAuth client ID registered with GroveAuth.
+	 */
+	clientId: string;
 
-  /**
-   * Base URL for GroveAuth login page.
-   * @example 'https://auth.grove.place'
-   */
-  authUrl: string;
+	/**
+	 * Base URL for GroveAuth login page.
+	 * @example 'https://auth.grove.place'
+	 */
+	authUrl: string;
 
-  /**
-   * Default OAuth provider if none specified in request.
-   * @default 'google'
-   */
-  defaultProvider?: AuthProvider;
+	/**
+	 * Default OAuth provider if none specified in request.
+	 * @default 'google'
+	 */
+	defaultProvider?: AuthProvider;
 
-  /**
-   * Default URL to redirect to after successful auth.
-   * @default '/arbor'
-   */
-  defaultReturnTo?: string;
+	/**
+	 * Default URL to redirect to after successful auth.
+	 * @default '/arbor'
+	 */
+	defaultReturnTo?: string;
 }
 
 /**
@@ -190,42 +190,51 @@ export interface LoginHandlerConfig {
  * - cookieDomain: Better Auth sets cookies with correct domain
  */
 export interface CallbackHandlerConfig {
-  /**
-   * OAuth client ID registered with GroveAuth.
-   * @deprecated Better Auth uses origin for client identification.
-   */
-  clientId?: string;
+	/**
+	 * OAuth client ID registered with GroveAuth.
+	 * @deprecated Better Auth uses origin for client identification.
+	 */
+	clientId?: string;
 
-  /**
-   * Environment variable name for the client secret.
-   * @deprecated No token exchange needed - Better Auth handles it.
-   */
-  clientSecretEnvVar?: string;
+	/**
+	 * Environment variable name for the client secret.
+	 * @deprecated No token exchange needed - Better Auth handles it.
+	 */
+	clientSecretEnvVar?: string;
 
-  /**
-   * Base URL for GroveAuth token API.
-   * @deprecated Better Auth handles the full flow.
-   */
-  authApiUrl?: string;
+	/**
+	 * Base URL for GroveAuth token API.
+	 * @deprecated Better Auth handles the full flow.
+	 */
+	authApiUrl?: string;
 
-  /**
-   * Default URL to redirect to after successful auth.
-   * @default '/arbor'
-   */
-  defaultReturnTo?: string;
+	/**
+	 * Default URL to redirect to after successful auth.
+	 * @default '/arbor'
+	 */
+	defaultReturnTo?: string;
 
-  /**
-   * Cookie domain for cross-subdomain auth.
-   * @deprecated Better Auth sets cookies with correct domain.
-   */
-  cookieDomain?: string;
+	/**
+	 * Cookie domain for cross-subdomain auth.
+	 * @deprecated Better Auth sets cookies with correct domain.
+	 */
+	cookieDomain?: string;
 
-  /**
-   * KV namespace key for rate limiting.
-   * If not provided, rate limiting is disabled.
-   * @default 'CACHE_KV'
-   */
-  rateLimitKvKey?: string;
+	/**
+	 * KV namespace key for rate limiting.
+	 * If not provided, rate limiting is disabled.
+	 * @default 'CACHE_KV'
+	 */
+	rateLimitKvKey?: string;
+
+	/**
+	 * URL to redirect to on auth errors (OAuth failures, missing sessions).
+	 * Defaults to the login hub: 'https://login.grove.place'
+	 *
+	 * Properties that want a custom error page can set this to a local route.
+	 * The error code and message are appended as query parameters.
+	 */
+	errorRedirect?: string;
 }
 
 // =============================================================================
@@ -236,23 +245,23 @@ export interface CallbackHandlerConfig {
  * PKCE (Proof Key for Code Exchange) values for OAuth.
  */
 export interface PKCEValues {
-  /** Random string used to generate the challenge */
-  codeVerifier: string;
+	/** Random string used to generate the challenge */
+	codeVerifier: string;
 
-  /** SHA-256 hash of the verifier, base64url encoded */
-  codeChallenge: string;
+	/** SHA-256 hash of the verifier, base64url encoded */
+	codeChallenge: string;
 }
 
 /**
  * Auth state stored in cookies during OAuth flow.
  */
 export interface AuthCookieState {
-  /** CSRF protection state value */
-  state: string;
+	/** CSRF protection state value */
+	state: string;
 
-  /** PKCE code verifier */
-  codeVerifier: string;
+	/** PKCE code verifier */
+	codeVerifier: string;
 
-  /** URL to redirect to after auth */
-  returnTo: string;
+	/** URL to redirect to after auth */
+	returnTo: string;
 }

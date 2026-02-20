@@ -28,53 +28,53 @@ md.use(groveTermPlugin);
  * Gets content from after the title (# heading) to the first ## heading.
  */
 function extractFirstSection(markdownContent: string): string {
-  // Remove the title line (# heading)
-  const lines = markdownContent.split("\n");
-  let startIndex = 0;
+	// Remove the title line (# heading)
+	const lines = markdownContent.split("\n");
+	let startIndex = 0;
 
-  // Find where content starts (after first # heading or at beginning)
-  for (let i = 0; i < lines.length; i++) {
-    if (lines[i].match(/^#\s+/)) {
-      startIndex = i + 1;
-      break;
-    }
-  }
+	// Find where content starts (after first # heading or at beginning)
+	for (let i = 0; i < lines.length; i++) {
+		if (lines[i].match(/^#\s+/)) {
+			startIndex = i + 1;
+			break;
+		}
+	}
 
-  // Find the first ## heading (section break)
-  let endIndex = lines.length;
-  for (let i = startIndex; i < lines.length; i++) {
-    if (lines[i].match(/^##\s+/)) {
-      endIndex = i;
-      break;
-    }
-  }
+	// Find the first ## heading (section break)
+	let endIndex = lines.length;
+	for (let i = startIndex; i < lines.length; i++) {
+		if (lines[i].match(/^##\s+/)) {
+			endIndex = i;
+			break;
+		}
+	}
 
-  // Extract the first section
-  const firstSectionLines = lines.slice(startIndex, endIndex);
-  const firstSection = firstSectionLines.join("\n").trim();
+	// Extract the first section
+	const firstSectionLines = lines.slice(startIndex, endIndex);
+	const firstSection = firstSectionLines.join("\n").trim();
 
-  // Handle video embeds - replace with placeholder
-  const cleanedSection = firstSection
-    .replace(/!\[video\][^\n]*/gi, "") // Remove video embeds
-    .replace(/\n{3,}/g, "\n\n"); // Collapse multiple newlines
+	// Handle video embeds - replace with placeholder
+	const cleanedSection = firstSection
+		.replace(/!\[video\][^\n]*/gi, "") // Remove video embeds
+		.replace(/\n{3,}/g, "\n\n"); // Collapse multiple newlines
 
-  return cleanedSection;
+	return cleanedSection;
 }
 
 /**
  * Check if content contains images
  */
 function hasImages(content: string): boolean {
-  return /!\[(?!video)[^\]]*\]\([^)]+\)/.test(content);
+	return /!\[(?!video)[^\]]*\]\([^)]+\)/.test(content);
 }
 
 /**
  * Calculate reading time for full article
  */
 function calculateReadingTime(content: string): number {
-  const wordsPerMinute = 200;
-  const wordCount = content.split(/\s+/).length;
-  return Math.ceil(wordCount / wordsPerMinute);
+	const wordsPerMinute = 200;
+	const wordCount = content.split(/\s+/).length;
+	return Math.ceil(wordCount / wordsPerMinute);
 }
 
 /**
@@ -82,94 +82,95 @@ function calculateReadingTime(content: string): number {
  * These are the articles commonly linked from Waystones in the admin panel.
  */
 const WAYSTONE_ARTICLE_SLUGS = [
-  "choosing-a-theme",
-  "custom-fonts",
-  "what-is-rings",
-  "what-are-trails",
-  "what-is-journey",
-  "what-is-gallery",
-  "what-are-curios",
-  "how-grove-protects-your-content",
-  "how-grove-protects-your-secrets", // Used in Timeline curio
-  "exporting-your-content",
-  "formatting-your-posts",
-  "data-portability",
-  "understanding-your-privacy",
-  "what-is-arbor",
-  "what-is-amber",
-  "what-is-sentinel",
-  "what-is-flow",
-  "what-is-heartwood",
-  "what-is-plant",
-  "what-is-greenhouse",
-  "what-is-scribe",
-  "what-is-prism",
-  "what-are-grafts",
-  "what-are-vines",
-  "account-deletion",
-  "sessions-and-cookies",
-  "image-upload-failures", // Used in Arbor image upload error state
-  "what-is-hum", // Hum music link previews
-  "what-is-pulse", // Pulse GitHub activity curio
-  "using-curios-in-content", // Curio directives cheatsheet for editors
+	"choosing-a-theme",
+	"custom-fonts",
+	"what-is-rings",
+	"what-are-trails",
+	"what-is-journey",
+	"what-is-gallery",
+	"what-are-curios",
+	"how-grove-protects-your-content",
+	"how-grove-protects-your-secrets", // Used in Timeline curio
+	"exporting-your-content",
+	"formatting-your-posts",
+	"data-portability",
+	"understanding-your-privacy",
+	"what-is-arbor",
+	"what-is-amber",
+	"what-is-sentinel",
+	"what-is-flow",
+	"what-is-heartwood",
+	"what-is-plant",
+	"what-is-greenhouse",
+	"what-is-scribe",
+	"what-is-prism",
+	"what-are-grafts",
+	"what-are-vines",
+	"account-deletion",
+	"sessions-and-cookies",
+	"what-are-passkeys", // Used in login page Waystone ("What's a passkey?")
+	"image-upload-failures", // Used in Arbor image upload error state
+	"what-is-hum", // Hum music link previews
+	"what-is-pulse", // Pulse GitHub activity curio
+	"using-curios-in-content", // Curio directives cheatsheet for editors
 ];
 
 // Generate entries for all waystone-linked articles
 export const entries: EntryGenerator = () => {
-  return WAYSTONE_ARTICLE_SLUGS.map((slug) => ({ slug }));
+	return WAYSTONE_ARTICLE_SLUGS.map((slug) => ({ slug }));
 };
 
 export const GET: RequestHandler = async ({ params }) => {
-  const { slug } = params;
+	const { slug } = params;
 
-  // Validate slug
-  if (!slug || slug.includes("..") || slug.includes("/")) {
-    throw error(400, "Invalid slug");
-  }
+	// Validate slug
+	if (!slug || slug.includes("..") || slug.includes("/")) {
+		throw error(400, "Invalid slug");
+	}
 
-  // Only serve excerpts for waystone-linked articles
-  if (!WAYSTONE_ARTICLE_SLUGS.includes(slug)) {
-    throw error(404, "Article not found");
-  }
+	// Only serve excerpts for waystone-linked articles
+	if (!WAYSTONE_ARTICLE_SLUGS.includes(slug)) {
+		throw error(404, "Article not found");
+	}
 
-  // Find the document
-  const doc = findDocBySlug(slug, "help");
-  if (!doc) {
-    throw error(404, "Article not found");
-  }
+	// Find the document
+	const doc = findDocBySlug(slug, "help");
+	if (!doc) {
+		throw error(404, "Article not found");
+	}
 
-  // Get file path and read content
-  const filePath = getDocFilePath(slug, "help");
-  if (!filePath) {
-    throw error(404, "Article not found");
-  }
+	// Get file path and read content
+	const filePath = getDocFilePath(slug, "help");
+	if (!filePath) {
+		throw error(404, "Article not found");
+	}
 
-  try {
-    const content = readFileSync(filePath, "utf-8");
-    const { data: frontmatter, content: markdownContent } = matter(content);
+	try {
+		const content = readFileSync(filePath, "utf-8");
+		const { data: frontmatter, content: markdownContent } = matter(content);
 
-    // Extract first section
-    const firstSectionMarkdown = extractFirstSection(markdownContent);
-    const firstSectionHtml = md.render(firstSectionMarkdown);
+		// Extract first section
+		const firstSectionMarkdown = extractFirstSection(markdownContent);
+		const firstSectionHtml = md.render(firstSectionMarkdown);
 
-    // Build response
-    const excerpt = {
-      slug,
-      title: frontmatter.title || doc.title,
-      description: frontmatter.description || doc.description || "",
-      firstSection: firstSectionHtml,
-      readingTime: calculateReadingTime(markdownContent),
-      hasMedia: hasImages(firstSectionMarkdown),
-    };
+		// Build response
+		const excerpt = {
+			slug,
+			title: frontmatter.title || doc.title,
+			description: frontmatter.description || doc.description || "",
+			firstSection: firstSectionHtml,
+			readingTime: calculateReadingTime(markdownContent),
+			hasMedia: hasImages(firstSectionMarkdown),
+		};
 
-    return json(excerpt, {
-      headers: {
-        // Cache for 1 day (excerpts rarely change)
-        "Cache-Control": "public, max-age=86400, s-maxage=86400",
-      },
-    });
-  } catch (e) {
-    console.error(`Error generating excerpt for ${slug}:`, e);
-    throw error(500, "Failed to generate excerpt");
-  }
+		return json(excerpt, {
+			headers: {
+				// Cache for 1 day (excerpts rarely change)
+				"Cache-Control": "public, max-age=86400, s-maxage=86400",
+			},
+		});
+	} catch (e) {
+		console.error(`Error generating excerpt for ${slug}:`, e);
+		throw error(500, "Failed to generate excerpt");
+	}
 };
