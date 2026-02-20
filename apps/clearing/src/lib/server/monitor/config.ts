@@ -96,9 +96,10 @@ export const INCIDENT_THRESHOLDS = {
 export const REQUEST_TIMEOUT = 10000;
 
 /**
- * Email sender address for alert notifications
+ * Email sender for alert notifications
  */
-export const EMAIL_FROM = "Grove Status <status@grove.place>";
+export const EMAIL_FROM_ADDRESS = "status@grove.place";
+export const EMAIL_FROM_NAME = "Grove Status";
 
 /**
  * Status priority for determining "worst status of the day"

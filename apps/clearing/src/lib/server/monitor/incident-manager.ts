@@ -6,9 +6,10 @@
  */
 
 import type { HealthCheckResult } from "./health-checks";
-import { INCIDENT_THRESHOLDS, EMAIL_FROM } from "./config";
+import { INCIDENT_THRESHOLDS, EMAIL_FROM_ADDRESS, EMAIL_FROM_NAME } from "./config";
 import { generateUUID } from "./utils";
 import { updateTodayWorstStatus } from "./daily-history";
+import { createZephyrClient } from "@autumnsgrove/lattice/zephyr";
 
 /**
  * State tracked in KV for each component
@@ -27,7 +28,8 @@ export interface ComponentState {
 export interface IncidentEnv {
 	DB: D1Database;
 	MONITOR_KV: KVNamespace;
-	RESEND_API_KEY?: string;
+	ZEPHYR_URL?: string;
+	ZEPHYR_API_KEY?: string;
 	ALERT_EMAIL?: string;
 }
 
@@ -69,31 +71,31 @@ function getIncidentDetails(status: HealthCheckResult["status"]): {
 }
 
 /**
- * Send email notification via Resend
+ * Send email notification via Zephyr email gateway
  */
 async function sendEmailAlert(env: IncidentEnv, subject: string, body: string): Promise<void> {
-	if (!env.RESEND_API_KEY) {
-		console.log("[Clearing Monitor] No RESEND_API_KEY configured, skipping email");
+	if (!env.ZEPHYR_URL) {
+		console.log("[Clearing Monitor] No ZEPHYR_URL configured, skipping email");
 		return;
 	}
 
 	try {
-		const response = await fetch("https://api.resend.com/emails", {
-			method: "POST",
-			headers: {
-				Authorization: `Bearer ${env.RESEND_API_KEY}`,
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				from: EMAIL_FROM,
-				to: [env.ALERT_EMAIL || "alerts@grove.place"],
-				subject,
-				text: body,
-			}),
+		const zephyr = createZephyrClient(env);
+		const result = await zephyr.sendRaw({
+			to: env.ALERT_EMAIL || "alerts@grove.place",
+			subject,
+			text: body,
+			from: EMAIL_FROM_ADDRESS,
+			fromName: EMAIL_FROM_NAME,
+			type: "notification",
 		});
 
-		if (!response.ok) {
-			console.error("[Clearing Monitor] Failed to send email:", await response.text());
+		if (!result.success) {
+			console.error(
+				"[Clearing Monitor] Failed to send email:",
+				result.errorCode,
+				result.errorMessage,
+			);
 		}
 	} catch (err) {
 		console.error("[Clearing Monitor] Email error:", err);

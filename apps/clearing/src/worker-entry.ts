@@ -22,7 +22,8 @@ import { recordDailyHistory, cleanupOldHistory } from "./lib/server/monitor/dail
 interface MonitorEnv {
 	DB: D1Database;
 	MONITOR_KV: KVNamespace;
-	RESEND_API_KEY?: string;
+	ZEPHYR_URL?: string;
+	ZEPHYR_API_KEY?: string;
 	ALERT_EMAIL?: string;
 }
 

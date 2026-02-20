@@ -52,4 +52,4 @@ id = "82d6537525d345f1981924bfd082248f"
 
 # Secrets (configured via wrangler secret put):
 # - SENTINEL_API_KEY: API key for Sentinel status updates
-# - RESEND_API_KEY: Email notifications for incidents (optional)
+# - ZEPHYR_API_KEY: API key for Zephyr email gateway (incident alerts)

@@ -18,8 +18,8 @@ declare global {
 				CDN_URL?: string;
 				/** API key for Sentinel to report status updates */
 				SENTINEL_API_KEY?: string;
-				/** Resend API key for email notifications */
-				RESEND_API_KEY?: string;
+				/** Zephyr email gateway API key */
+				ZEPHYR_API_KEY?: string;
 				/** Email address for alert notifications */
 				ALERT_EMAIL?: string;
 				/** Zephyr email gateway URL */

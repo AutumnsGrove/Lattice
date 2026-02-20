@@ -78,7 +78,8 @@ describe("processHealthCheckResult - State Machine", () => {
 		env = {
 			DB: createMockDB(),
 			MONITOR_KV: createMockKV(),
-			RESEND_API_KEY: undefined,
+			ZEPHYR_URL: undefined,
+			ZEPHYR_API_KEY: undefined,
 			ALERT_EMAIL: undefined,
 		};
 	});
@@ -288,7 +289,7 @@ describe("processHealthCheckResult - State Machine", () => {
 	});
 });
 
-describe("sendEmailAlert", () => {
+describe("sendEmailAlert (via Zephyr)", () => {
 	let env: IncidentEnv;
 
 	beforeEach(() => {
@@ -296,12 +297,13 @@ describe("sendEmailAlert", () => {
 		env = {
 			DB: createMockDB(),
 			MONITOR_KV: createMockKV(),
-			RESEND_API_KEY: undefined,
+			ZEPHYR_URL: undefined,
+			ZEPHYR_API_KEY: undefined,
 			ALERT_EMAIL: undefined,
 		};
 	});
 
-	it("should skip when no RESEND_API_KEY", async () => {
+	it("should skip when no ZEPHYR_URL", async () => {
 		const fetchSpy = vi.spyOn(globalThis, "fetch");
 
 		// Process a result that would trigger incident creation + email
@@ -315,20 +317,20 @@ describe("sendEmailAlert", () => {
 
 		await processHealthCheckResult(env, createUnhealthyResult());
 
-		// fetch should NOT have been called for Resend API
-		const resendCalls = fetchSpy.mock.calls.filter((call) =>
-			String(call[0]).includes("resend.com"),
-		);
-		expect(resendCalls.length).toBe(0);
+		// fetch should NOT have been called (no Zephyr URL configured)
+		expect(fetchSpy).not.toHaveBeenCalled();
 	});
 
-	it("should call Resend API with correct payload", async () => {
-		env.RESEND_API_KEY = "test-api-key";
+	it("should send email via Zephyr with correct payload", async () => {
+		env.ZEPHYR_URL = "https://grove-zephyr.test.workers.dev";
+		env.ZEPHYR_API_KEY = "test-api-key";
 		env.ALERT_EMAIL = "test@grove.place";
 
 		const fetchSpy = vi
 			.spyOn(globalThis, "fetch")
-			.mockResolvedValue(new Response(JSON.stringify({ id: "email-123" }), { status: 200 }));
+			.mockResolvedValue(
+				new Response(JSON.stringify({ success: true, messageId: "msg-123" }), { status: 200 }),
+			);
 
 		(env.MONITOR_KV.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 			consecutiveFailures: 2,
@@ -343,18 +345,21 @@ describe("sendEmailAlert", () => {
 		// Wait for fire-and-forget email to complete
 		await new Promise((resolve) => setTimeout(resolve, 50));
 
-		const resendCalls = fetchSpy.mock.calls.filter((call) =>
-			String(call[0]).includes("resend.com"),
+		const zephyrCalls = fetchSpy.mock.calls.filter((call) =>
+			String(call[0]).includes("grove-zephyr"),
 		);
-		expect(resendCalls.length).toBe(1);
+		expect(zephyrCalls.length).toBe(1);
 
-		const body = JSON.parse(resendCalls[0][1]?.body as string);
-		expect(body.to).toEqual(["test@grove.place"]);
+		const body = JSON.parse(zephyrCalls[0][1]?.body as string);
+		expect(body.to).toBe("test@grove.place");
 		expect(body.subject).toContain("[Grove] Incident:");
+		expect(body.type).toBe("notification");
+		expect(body.template).toBe("raw");
 	});
 
 	it("should not throw on email failure", async () => {
-		env.RESEND_API_KEY = "test-api-key";
+		env.ZEPHYR_URL = "https://grove-zephyr.test.workers.dev";
+		env.ZEPHYR_API_KEY = "test-api-key";
 
 		vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("Network error"));
 
