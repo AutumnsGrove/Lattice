@@ -83,17 +83,13 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 		typeof payload.content_html === "string" ? sanitizeNoteHtml(payload.content_html) : null;
 
 	// Resolve the user's tenant for FK constraint on meadow_posts.tenant_id
-	// locals.user.id is the Heartwood user ID → maps to users.groveauth_id → users.tenant_id → tenants.id
+	// Match by email — reliable across all auth paths (SessionDO, JWT, Better Auth)
 	let tenantId = "";
 	let authorSubdomain = "";
 	try {
 		const tenant = await db
-			.prepare(
-				`SELECT t.id, t.subdomain FROM users u
-         JOIN tenants t ON u.tenant_id = t.id
-         WHERE u.groveauth_id = ? AND t.active = 1 LIMIT 1`,
-			)
-			.bind(locals.user.id)
+			.prepare("SELECT id, subdomain FROM tenants WHERE email = ? AND active = 1 LIMIT 1")
+			.bind(locals.user.email)
 			.first<{ id: string; subdomain: string }>();
 		if (tenant) {
 			tenantId = tenant.id;
