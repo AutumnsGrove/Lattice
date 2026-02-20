@@ -99,8 +99,8 @@ export class ForwardEmailClient {
 			throw new Error(`Forward Email API error: ${response.status} - ${error}`);
 		}
 
-		const result = await response.json();
-		return { messageId: result.id || result.messageId };
+		const result = (await response.json()) as { id?: string; messageId?: string };
+		return { messageId: result.id || result.messageId || "" };
 	}
 
 	/**

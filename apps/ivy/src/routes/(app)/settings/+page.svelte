@@ -3,10 +3,10 @@
 	import { theme, currentUser } from "$lib/stores";
 	import { onMount } from "svelte";
 
-	let unsendDelay = "10";
-	let signature = "";
-	let notifyNewMail = true;
-	let notifyNewsletter = false;
+	let unsendDelay = $state("10");
+	let signature = $state("");
+	let notifyNewMail = $state(true);
+	let notifyNewsletter = $state(false);
 
 	function toggleTheme() {
 		theme.update((t) => {
@@ -56,7 +56,12 @@
 		try {
 			const res = await fetch("/api/settings", { credentials: "include" }); // csrf-ok
 			if (res.ok) {
-				const data = await res.json();
+				const data = (await res.json()) as {
+					digest_times?: string[];
+					digest_timezone?: string;
+					digest_recipient?: string;
+					digest_enabled?: boolean;
+				};
 				digestTimes = data.digest_times || ["08:00", "13:00", "18:00"];
 				digestTimezone = data.digest_timezone || "America/New_York";
 				digestRecipient = data.digest_recipient || "";
@@ -72,7 +77,7 @@
 		try {
 			const res = await fetch("/api/triage/filters", { credentials: "include" }); // csrf-ok
 			if (res.ok) {
-				const data = await res.json();
+				const data = (await res.json()) as { filters?: FilterRule[] };
 				filters = data.filters || [];
 			}
 		} catch (err) {
@@ -663,8 +668,7 @@
 	}
 
 	.setting-card.danger {
-		border-color: var(--color-error);
-		border-opacity: 0.3;
+		border-color: color-mix(in srgb, var(--color-error) 30%, transparent);
 	}
 
 	.setting-item {

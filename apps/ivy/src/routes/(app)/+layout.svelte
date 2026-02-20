@@ -210,8 +210,16 @@
 
 <!-- Compose Modal -->
 {#if $isComposing}
-	<div class="modal-backdrop" onclick={() => isComposing.set(false)}>
-		<div class="compose-modal" onclick={(e) => e.stopPropagation()}>
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	<div class="modal-backdrop" role="presentation" onclick={() => isComposing.set(false)}>
+		<div
+			class="compose-modal"
+			role="dialog"
+			aria-modal="true"
+			aria-label="Compose new message"
+			tabindex="-1"
+			onclick={(e) => e.stopPropagation()}
+		>
 			<div class="compose-header">
 				<h2>New Message</h2>
 				<button class="icon-btn" onclick={() => isComposing.set(false)}>

@@ -35,7 +35,7 @@ export async function encrypt(data: ArrayBuffer, key: CryptoKey): Promise<ArrayB
 	result.set(iv, 0);
 	result.set(new Uint8Array(ciphertext), IV_LENGTH);
 
-	return result.buffer;
+	return result.buffer as ArrayBuffer;
 }
 
 /**
@@ -73,7 +73,7 @@ export async function deriveWrapperKey(password: string, salt: Uint8Array): Prom
 	return crypto.subtle.deriveKey(
 		{
 			name: "PBKDF2",
-			salt,
+			salt: salt as Uint8Array<ArrayBuffer>,
 			iterations: PBKDF2_ITERATIONS,
 			hash: "SHA-256",
 		},
@@ -131,12 +131,14 @@ export async function recoveryPhraseToKey(phrase: string[]): Promise<CryptoKey> 
 	// The salt is fixed because recovery needs to be deterministic
 	const fixedSalt = new TextEncoder().encode("ivy-recovery-salt-v1");
 
-	const seedKey = await crypto.subtle.importKey("raw", seed, "PBKDF2", false, ["deriveKey"]);
+	const seedKey = await crypto.subtle.importKey("raw", new Uint8Array(seed), "PBKDF2", false, [
+		"deriveKey",
+	]);
 
 	return crypto.subtle.deriveKey(
 		{
 			name: "PBKDF2",
-			salt: fixedSalt,
+			salt: fixedSalt as Uint8Array<ArrayBuffer>,
 			iterations: PBKDF2_ITERATIONS,
 			hash: "SHA-256",
 		},
@@ -184,7 +186,7 @@ export async function unwrapKey(
 		"raw",
 		wrappedKey,
 		wrapperKey,
-		{ name: "AES-GCM", iv },
+		{ name: "AES-GCM", iv: iv as Uint8Array<ArrayBuffer> },
 		{ name: "AES-GCM", length: AES_KEY_LENGTH },
 		true, // Extractable
 		["encrypt", "decrypt"],
@@ -200,7 +202,7 @@ export async function unwrapKey(
  */
 export async function encryptString(text: string, key: CryptoKey): Promise<string> {
 	const data = new TextEncoder().encode(text);
-	const encrypted = await encrypt(data.buffer, key);
+	const encrypted = await encrypt(data.buffer as ArrayBuffer, key);
 	return arrayBufferToBase64(encrypted);
 }
 
@@ -253,7 +255,7 @@ export function base64ToArrayBuffer(base64: string): ArrayBuffer {
 	for (let i = 0; i < binary.length; i++) {
 		bytes[i] = binary.charCodeAt(i);
 	}
-	return bytes.buffer;
+	return bytes.buffer as ArrayBuffer;
 }
 
 /**
@@ -283,7 +285,7 @@ export function serializeWrappedKey(wrapped: ArrayBuffer, iv: Uint8Array): strin
 	const combined = new Uint8Array(IV_LENGTH + wrapped.byteLength);
 	combined.set(iv, 0);
 	combined.set(new Uint8Array(wrapped), IV_LENGTH);
-	return arrayBufferToBase64(combined.buffer);
+	return arrayBufferToBase64(combined.buffer as ArrayBuffer);
 }
 
 /**
@@ -295,7 +297,7 @@ export function deserializeWrappedKey(serialized: string): {
 } {
 	const data = new Uint8Array(base64ToArrayBuffer(serialized));
 	const iv = data.slice(0, IV_LENGTH);
-	const wrapped = data.slice(IV_LENGTH).buffer;
+	const wrapped = data.slice(IV_LENGTH).buffer as ArrayBuffer;
 	return { wrapped, iv };
 }
 
@@ -331,7 +333,7 @@ export async function setupNewUser(password: string): Promise<{
 		emailKey,
 		recoveryPhrase,
 		encryptedEmailKey,
-		salt: arrayBufferToBase64(salt.buffer),
+		salt: arrayBufferToBase64(salt.buffer as ArrayBuffer),
 	};
 }
 
@@ -373,6 +375,6 @@ export async function changePassword(
 
 	return {
 		encryptedEmailKey,
-		salt: arrayBufferToBase64(salt.buffer),
+		salt: arrayBufferToBase64(salt.buffer as ArrayBuffer),
 	};
 }

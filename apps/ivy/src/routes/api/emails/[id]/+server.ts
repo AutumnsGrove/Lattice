@@ -107,7 +107,7 @@ export const PUT: RequestHandler = async ({ params, request, locals, platform })
 	}
 
 	try {
-		const body = await request.json();
+		const body = (await request.json()) as Record<string, unknown>;
 		const updates: string[] = [];
 		const bindings: (string | number)[] = [];
 
@@ -118,7 +118,7 @@ export const PUT: RequestHandler = async ({ params, request, locals, platform })
 
 		if (body.category !== undefined) {
 			updates.push("category = ?");
-			bindings.push(body.category);
+			bindings.push(body.category as string);
 		}
 
 		if (updates.length === 0) {

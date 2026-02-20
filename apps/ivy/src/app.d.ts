@@ -4,17 +4,14 @@ declare global {
 	namespace App {
 		// interface Error {}
 		interface Locals {
-			user?: {
+			user: {
 				id: string;
 				email: string;
-				name?: string;
-				image?: string;
-			};
-			session?: {
-				id: string;
-				userId: string;
-				expiresAt: number;
-			};
+				name: string | null;
+			} | null;
+			session: {
+				valid: boolean;
+			} | null;
 			isOwner: boolean;
 		}
 		// interface PageData {}
@@ -25,6 +22,7 @@ declare global {
 				R2: R2Bucket;
 				KV: KVNamespace;
 				AI: Ai;
+				AUTH: Fetcher;
 				TRIAGE: DurableObjectNamespace;
 				ZEPHYR: {
 					fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;

@@ -75,7 +75,7 @@ export const PUT: RequestHandler = async ({ request, locals, platform }) => {
 	}
 
 	try {
-		const body = await request.json();
+		const body = (await request.json()) as Record<string, unknown>;
 		const updates: string[] = [];
 		const bindings: (string | number)[] = [];
 
@@ -92,12 +92,12 @@ export const PUT: RequestHandler = async ({ request, locals, platform }) => {
 
 		if (body.digest_timezone !== undefined) {
 			updates.push("digest_timezone = ?");
-			bindings.push(body.digest_timezone);
+			bindings.push(body.digest_timezone as string);
 		}
 
 		if (body.digest_recipient !== undefined) {
 			updates.push("digest_recipient = ?");
-			bindings.push(body.digest_recipient);
+			bindings.push(body.digest_recipient as string);
 		}
 
 		if (body.digest_enabled !== undefined) {

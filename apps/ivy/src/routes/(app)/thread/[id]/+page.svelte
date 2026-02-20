@@ -84,7 +84,7 @@
 		],
 	};
 
-	$: messages = mockMessages[threadId] || [
+	$: messages = mockMessages[threadId ?? ""] || [
 		{
 			id: "m1",
 			from: { name: thread?.participants[0] || "Unknown", email: "unknown@grove.place" },
@@ -172,7 +172,9 @@
 							</div>
 						{:else}
 							<div class="recipient-info">
-								to {message.to.map((t) => (t.name === "You" ? "me" : t.name)).join(", ")}
+								to {message.to
+									.map((t: { name: string; email: string }) => (t.name === "You" ? "me" : t.name))
+									.join(", ")}
 							</div>
 						{/if}
 					</div>
