@@ -38,7 +38,7 @@ cat snapshots/summaries/v0.9.0.json
 
 ## How It Works
 
-When you bump the version in `packages/engine/package.json` and push to main:
+When you bump the version in `libs/engine/package.json` and push to main:
 
 1. ✅ GitHub Action auto-tags the release
 2. ✅ Generates repository snapshot (existing)

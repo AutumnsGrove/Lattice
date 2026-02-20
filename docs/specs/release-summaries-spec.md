@@ -56,7 +56,7 @@ This system automatically generates 2-4 sentence summaries for each version rele
 
 ```
 ┌─────────────────┐
-│  Version Bump   │  Developer updates packages/engine/package.json
+│  Version Bump   │  Developer updates libs/engine/package.json
 └────────┬────────┘
          │
          ▼
@@ -275,7 +275,7 @@ If the LLM API call fails:
 
 Summaries are generated automatically when:
 
-1. Developer bumps version in `packages/engine/package.json`
+1. Developer bumps version in `libs/engine/package.json`
 2. Changes are pushed to `main` branch
 3. Auto-tag workflow detects version change
 4. Creates git tag (e.g., `v0.9.0`)

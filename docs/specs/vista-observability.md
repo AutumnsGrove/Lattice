@@ -27,10 +27,10 @@ lastUpdated: "2026-02-18"
 ### Where it lives
 
 ```
-packages/engine/src/lib/server/observability/   Core library (shared types, collectors, aggregators, costs, scheduler)
-packages/workers/vista-collector/               Standalone cron Worker (collects on schedule, also accepts manual POST)
-packages/landing/src/routes/arbor/vista/        Dashboard UI (12 pages inside Arbor's admin panel)
-packages/landing/src/routes/api/admin/observability/  Admin-only API endpoints
+libs/engine/src/lib/server/observability/   Core library (shared types, collectors, aggregators, costs, scheduler)
+services/workers/vista-collector/               Standalone cron Worker (collects on schedule, also accepts manual POST)
+apps/landing/src/routes/arbor/vista/        Dashboard UI (12 pages inside Arbor's admin panel)
+apps/landing/src/routes/api/admin/observability/  Admin-only API endpoints
 ```
 
 The observability library is in the **engine** package so it can be imported by any consumer. The dashboard lives in the **landing** package alongside the rest of Arbor — no separate deployment, no separate D1 or KV provisioning.
@@ -49,10 +49,10 @@ grove-vista-collector (cron Worker)
         └── Step 6: 90-day retention cleanup (daily midnight cron only)
               └── All writes to grove-engine-db (D1)
 
-packages/landing API routes (GET /api/admin/observability/*)
+apps/landing API routes (GET /api/admin/observability/*)
   └── Read from grove-engine-db → serve to dashboard
 
-packages/landing Arbor Vista pages (/arbor/vista/*)
+apps/landing Arbor Vista pages (/arbor/vista/*)
   └── Load data from API routes → render with glass design system
 ```
 
@@ -102,7 +102,7 @@ The `CF_ACCOUNT_ID` is non-sensitive and hardcoded in `wrangler.toml` as a `[var
 The collector is a standalone Cloudflare Worker. After setting the secret:
 
 ```bash
-# From packages/workers/vista-collector/
+# From services/workers/vista-collector/
 wrangler deploy
 ```
 

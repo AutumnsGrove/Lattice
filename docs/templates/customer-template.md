@@ -701,7 +701,7 @@ if (import.meta.env.PROD) {
 ## Support & Resources
 
 - **Documentation**: See `belongs-in-engine.md`, `BELONGS_IN_UI.md`, `site-specific-code.md`
-- **Examples**: Check `/packages/example-site/` in Lattice repo
+- **Examples**: Check `/apps/example-site/` in Lattice repo
 - **Issues**: Report bugs to GitHub issues
 
 ---

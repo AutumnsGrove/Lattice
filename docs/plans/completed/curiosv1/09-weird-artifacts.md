@@ -1,6 +1,6 @@
 # Curio: Weird Artifacts
 
-> *Click the thing and something unexpected happens.*
+> _Click the thing and something unexpected happens._
 
 **Priority:** Tier 3 — Ship Incrementally
 **Complexity:** Medium (many small components)
@@ -45,27 +45,30 @@ CREATE INDEX idx_artifacts_tenant ON artifacts(tenant_id);
 ## Artifact Types
 
 ### Mystical
-| Artifact | Description |
-|----------|-------------|
-| `Magic8Ball` | Click to shake, get an answer. Customizable answer pool. |
-| `TarotCard` | Random daily card draw with meaning. Seeded by date (consistent per day). |
-| `FortuneCookie` | Crack open for a daily fortune. |
-| `CrystalBall` | Swirling animated mist (decorative). |
-| `GlowingRunes` | Animated symbols (decorative). |
+
+| Artifact        | Description                                                               |
+| --------------- | ------------------------------------------------------------------------- |
+| `Magic8Ball`    | Click to shake, get an answer. Customizable answer pool.                  |
+| `TarotCard`     | Random daily card draw with meaning. Seeded by date (consistent per day). |
+| `FortuneCookie` | Crack open for a daily fortune.                                           |
+| `CrystalBall`   | Swirling animated mist (decorative).                                      |
+| `GlowingRunes`  | Animated symbols (decorative).                                            |
 
 ### Interactive
-| Artifact | Description |
-|----------|-------------|
+
+| Artifact     | Description                                        |
+| ------------ | -------------------------------------------------- |
 | `DiceRoller` | Click to roll. Configurable: d4, d6, d8, d12, d20. |
-| `CoinFlip` | Heads or tails with flip animation. |
+| `CoinFlip`   | Heads or tails with flip animation.                |
 
 ### Classic Web
-| Artifact | Description |
-|----------|-------------|
-| `MarqueeText` | Scrolling messages (CSS animation, not `<marquee>`). |
-| `BlinkingNew` | The "NEW!" blinker. |
-| `RainbowDivider` | Colorful separator lines. |
-| `EmailButton` | Retro "Email Me!" button. |
+
+| Artifact         | Description                                          |
+| ---------------- | ---------------------------------------------------- |
+| `MarqueeText`    | Scrolling messages (CSS animation, not `<marquee>`). |
+| `BlinkingNew`    | The "NEW!" blinker.                                  |
+| `RainbowDivider` | Colorful separator lines.                            |
+| `EmailButton`    | Retro "Email Me!" button.                            |
 
 ---
 
@@ -74,7 +77,7 @@ CREATE INDEX idx_artifacts_tenant ON artifacts(tenant_id);
 Each artifact is a self-contained Svelte component:
 
 ```
-packages/engine/src/lib/curios/artifacts/
+libs/engine/src/lib/curios/artifacts/
 ├── index.ts
 ├── Magic8Ball.svelte
 ├── TarotCard.svelte
@@ -114,11 +117,11 @@ Add the rest over time.
 
 ## Tier Logic
 
-| Tier | Artifacts | Types |
-|------|----------|-------|
-| Seedling | 2 | Decorative only (Runes, Dividers) |
-| Sapling | 5 | All types |
-| Oak+ | Unlimited | All types |
+| Tier     | Artifacts | Types                             |
+| -------- | --------- | --------------------------------- |
+| Seedling | 2         | Decorative only (Runes, Dividers) |
+| Sapling  | 5         | All types                         |
+| Oak+     | Unlimited | All types                         |
 
 ---
 
@@ -135,4 +138,4 @@ Add the rest over time.
 
 ---
 
-*Reach into the cabinet. What will you find?*
+_Reach into the cabinet. What will you find?_

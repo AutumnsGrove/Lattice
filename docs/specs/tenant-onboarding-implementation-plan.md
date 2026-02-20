@@ -90,7 +90,7 @@ tags:
 **New Migration: `011_user_onboarding.sql`**
 
 ```sql
--- User onboarding state (stored in landing D1, linked to tenant)
+-- User onboarding state (stored in engine D1, linked to tenant)
 CREATE TABLE IF NOT EXISTS user_onboarding (
   id TEXT PRIMARY KEY,
 
@@ -374,90 +374,80 @@ INSERT OR IGNORE INTO reserved_usernames (username, reason) VALUES
 
 ```typescript
 interface CreateTenantInput {
-  onboardingId: string;
-  username: string;
-  displayName: string;
-  email: string;
-  plan: "seedling" | "sapling" | "oak" | "evergreen" | "free";
-  favoriteColor?: string;
-  stripeCustomerId?: string;
-  stripeSubscriptionId?: string;
+	onboardingId: string;
+	username: string;
+	displayName: string;
+	email: string;
+	plan: "seedling" | "sapling" | "oak" | "evergreen" | "free";
+	favoriteColor?: string;
+	stripeCustomerId?: string;
+	stripeSubscriptionId?: string;
 }
 
-async function createTenant(
-  db: D1Database,
-  input: CreateTenantInput,
-): Promise<string> {
-  const tenantId = crypto.randomUUID();
+async function createTenant(db: D1Database, input: CreateTenantInput): Promise<string> {
+	const tenantId = crypto.randomUUID();
 
-  // 1. Insert into tenants table
-  await db
-    .prepare(
-      `
+	// 1. Insert into tenants table
+	await db
+		.prepare(
+			`
     INSERT INTO tenants (id, subdomain, display_name, email, plan, theme, active)
     VALUES (?, ?, ?, ?, ?, ?, 1)
   `,
-    )
-    .bind(
-      tenantId,
-      input.username,
-      input.displayName,
-      input.email,
-      input.plan,
-      "default",
-    )
-    .run();
+		)
+		.bind(tenantId, input.username, input.displayName, input.email, input.plan, "default")
+		.run();
 
-  // 2. Create platform_billing record (for paid tiers)
-  if (input.plan !== "free") {
-    await db
-      .prepare(
-        `
+	// 2. Create platform_billing record (for paid tiers)
+	if (input.plan !== "free") {
+		await db
+			.prepare(
+				`
       INSERT INTO platform_billing (id, tenant_id, plan, status, provider_customer_id, provider_subscription_id)
       VALUES (?, ?, ?, 'active', ?, ?)
     `,
-      )
-      .bind(
-        crypto.randomUUID(),
-        tenantId,
-        input.plan,
-        input.stripeCustomerId,
-        input.stripeSubscriptionId,
-      )
-      .run();
-  }
+			)
+			.bind(
+				crypto.randomUUID(),
+				tenantId,
+				input.plan,
+				input.stripeCustomerId,
+				input.stripeSubscriptionId,
+			)
+			.run();
+	}
 
-  // 3. Create default tenant_settings
-  const defaultSettings = [
-    ["site_title", input.displayName],
-    ["site_description", `${input.displayName}'s blog on Grove`],
-    ["accent_color", input.favoriteColor || "#16a34a"],
-  ];
+	// 3. Create default tenant_settings
+	const defaultSettings = [
+		["site_title", input.displayName],
+		["site_description", `${input.displayName}'s blog on Grove`],
+		["accent_color", input.favoriteColor || "#16a34a"],
+	];
 
-  for (const [key, value] of defaultSettings) {
-    await db
-      .prepare(
-        `
+	for (const [key, value] of defaultSettings) {
+		await db
+			.prepare(
+				`
       INSERT INTO tenant_settings (tenant_id, setting_key, setting_value)
       VALUES (?, ?, ?)
     `,
-      )
-      .bind(tenantId, key, value)
-      .run();
-  }
+			)
+			.bind(tenantId, key, value)
+			.run();
+	}
 
-  // 4. Link onboarding record to tenant
-  await db
-    .prepare(
-      `
+	// 4. Link onboarding record to tenant
+	await db
+		.prepare(
+			`
     UPDATE user_onboarding SET tenant_id = ?, updated_at = unixepoch()
     WHERE id = ?
   `,
-    )
-    .bind(tenantId, input.onboardingId)
-    .run();
+		)
+		.bind(tenantId, input.onboardingId)
+		.run();
 
-  return tenantId;
+	return tenantId;
 }
 ```
 
@@ -527,7 +517,7 @@ async function createTenant(
 
 ### Phase 7: Onboarding Checklist Component
 
-**Location:** Engine package (`packages/engine/src/lib/components/OnboardingChecklist.svelte`)
+**Location:** Engine package (`libs/engine/src/lib/components/OnboardingChecklist.svelte`)
 
 **Behavior:**
 
@@ -546,21 +536,21 @@ async function createTenant(
 
 ### New Files to Create
 
-| File                                                            | Purpose                 |
-| --------------------------------------------------------------- | ----------------------- |
-| `create/` (new SvelteKit app)                                   | Entire signup subdomain |
-| `packages/engine/migrations/011_user_onboarding.sql`            | New tables              |
-| `packages/engine/migrations/012_update_tenant_plans.sql`        | Update plan enum        |
-| `packages/engine/src/lib/components/OnboardingChecklist.svelte` | Checklist widget        |
-| `packages/engine/src/lib/components/TourOverlay.svelte`         | Tour floating UI        |
-| `landing/src/lib/email/onboarding-templates.ts`                 | Email templates         |
+| File                                                        | Purpose                 |
+| ----------------------------------------------------------- | ----------------------- |
+| `create/` (new SvelteKit app)                               | Entire signup subdomain |
+| `libs/engine/migrations/011_user_onboarding.sql`            | New tables              |
+| `libs/engine/migrations/012_update_tenant_plans.sql`        | Update plan enum        |
+| `libs/engine/src/lib/components/OnboardingChecklist.svelte` | Checklist widget        |
+| `libs/engine/src/lib/components/TourOverlay.svelte`         | Tour floating UI        |
+| `apps/landing/src/lib/email/onboarding-templates.ts`        | Email templates         |
 
 ### Files to Modify
 
-| File                              | Change                                                  |
-| --------------------------------- | ------------------------------------------------------- |
-| `landing/src/routes/+page.svelte` | Add "Start your blog" CTA linking to create.grove.place |
-| `docs/specs/seedbed-spec.md`      | Update to reflect Heartwood auth approach               |
+| File                                   | Change                                                  |
+| -------------------------------------- | ------------------------------------------------------- |
+| `apps/landing/src/routes/+page.svelte` | Add "Start your blog" CTA linking to create.grove.place |
+| `docs/specs/seedbed-spec.md`           | Update to reflect Heartwood auth approach               |
 
 ---
 

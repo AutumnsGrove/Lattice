@@ -392,7 +392,7 @@ Need an animation that isn't in the preset? Here's how to add it properly.
 
 ### Adding to the Preset
 
-Edit `packages/engine/src/lib/ui/tailwind.preset.js`:
+Edit `libs/engine/src/lib/ui/tailwind.preset.js`:
 
 ```javascript
 // In the animation section
@@ -472,7 +472,7 @@ For elements that both animate on entrance and respond to interaction:
 All animations are defined in:
 
 ```
-packages/engine/src/lib/ui/tailwind.preset.js
+libs/engine/src/lib/ui/tailwind.preset.js
 ```
 
 The preset is automatically included when apps import the Grove Tailwind configuration. See `AGENT.md` for integration details.

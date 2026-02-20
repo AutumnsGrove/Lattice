@@ -34,7 +34,7 @@ scripts/generate/analyze-doc-keywords.ts  ← NEW
 snapshots/word-frequencies/v{X.Y.Z}.json  ← NEW
            │
            ▼  (sync step)
-packages/landing/static/data/word-frequencies/  ← NEW
+apps/landing/static/data/word-frequencies/  ← NEW
            │
            ▼
 +page.server.ts loads via import.meta.glob()
@@ -98,13 +98,13 @@ Add after `repo-snapshot.sh`:
 
 - name: Sync word frequencies
   run: |
-    mkdir -p packages/landing/static/data/word-frequencies
-    cp snapshots/word-frequencies/*.json packages/landing/static/data/word-frequencies/
+    mkdir -p apps/landing/static/data/word-frequencies
+    cp snapshots/word-frequencies/*.json apps/landing/static/data/word-frequencies/
 ```
 
 ### Phase 3: Server-Side Loading
 
-**File:** `packages/landing/src/routes/journey/+page.server.ts`
+**File:** `apps/landing/src/routes/journey/+page.server.ts`
 
 ```typescript
 // Load word frequency files (similar to summaries)
@@ -138,7 +138,7 @@ export function load() {
 
 ### Phase 4: UI Component
 
-**File:** `packages/landing/src/routes/journey/+page.svelte`
+**File:** `apps/landing/src/routes/journey/+page.svelte`
 
 Add new section after "Documentation" and before "Milestones":
 
@@ -198,10 +198,10 @@ const sections = [
 |------|--------|
 | `scripts/generate/analyze-doc-keywords.ts` | **NEW** - Word frequency analysis |
 | `.github/workflows/auto-tag.yml` | Add keyword analysis step |
-| `packages/landing/src/routes/journey/+page.server.ts` | Load word frequency JSON |
-| `packages/landing/src/routes/journey/+page.svelte` | Add visualization section |
+| `apps/landing/src/routes/journey/+page.server.ts` | Load word frequency JSON |
+| `apps/landing/src/routes/journey/+page.svelte` | Add visualization section |
 | `snapshots/word-frequencies/` | **NEW** directory for JSON output |
-| `packages/landing/static/data/word-frequencies/` | **NEW** synced data |
+| `apps/landing/static/data/word-frequencies/` | **NEW** synced data |
 
 ---
 

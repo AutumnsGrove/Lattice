@@ -32,24 +32,16 @@ pnpm add @autumnsgrove/vineyard
 
 ```svelte
 <script>
-  import {
-    VineyardLayout,
-    FeatureCard,
-    StatusBadge
-  } from '@autumnsgrove/vineyard/vineyard';
+	import { VineyardLayout, FeatureCard, StatusBadge } from "@autumnsgrove/vineyard/vineyard";
 </script>
 
-<VineyardLayout
-  tool="amber"
-  tagline="Your files, preserved"
-  status="preview"
->
-  <FeatureCard
-    title="Storage Overview"
-    description="See usage across posts and media"
-    status="ready"
-    icon="HardDrive"
-  />
+<VineyardLayout tool="amber" tagline="Your files, preserved" status="preview">
+	<FeatureCard
+		title="Storage Overview"
+		description="See usage across posts and media"
+		status="ready"
+		icon="HardDrive"
+	/>
 </VineyardLayout>
 ```
 
@@ -57,28 +49,28 @@ pnpm add @autumnsgrove/vineyard
 
 ```svelte
 <script>
-  import {
-    VineyardLayout,
-    AuthButton,
-    UserMenu,
-    getSession
-  } from '@autumnsgrove/vineyard/vineyard';
-  import { onMount } from 'svelte';
+	import {
+		VineyardLayout,
+		AuthButton,
+		UserMenu,
+		getSession,
+	} from "@autumnsgrove/vineyard/vineyard";
+	import { onMount } from "svelte";
 
-  let user = $state(null);
+	let user = $state(null);
 
-  onMount(async () => {
-    const session = await getSession();
-    user = session.user;
-  });
+	onMount(async () => {
+		const session = await getSession();
+		user = session.user;
+	});
 </script>
 
 <VineyardLayout tool="amber" tagline="Your files, preserved" status="preview">
-  {#if user}
-    <UserMenu />
-  {:else}
-    <AuthButton provider="google" />
-  {/if}
+	{#if user}
+		<UserMenu />
+	{:else}
+		<AuthButton provider="google" />
+	{/if}
 </VineyardLayout>
 ```
 
@@ -144,7 +136,7 @@ Vineyard components use scoped `<style>` blocks with CSS custom properties inste
 3. **Encapsulation**: Styles are scoped to components, preventing leakage and conflicts
 4. **Portability**: Can be used in non-Tailwind projects or published as standalone package
 
-**For Grove apps**: The engine's Tailwind preset (`packages/engine/src/lib/ui/tailwind.preset.js`) is still required for engine components, but Vineyard components function independently.
+**For Grove apps**: The engine's Tailwind preset (`libs/engine/src/lib/ui/tailwind.preset.js`) is still required for engine components, but Vineyard components function independently.
 
 **Trade-off**: Slightly larger bundle size compared to Tailwind utility classes, but gains developer experience and portability.
 

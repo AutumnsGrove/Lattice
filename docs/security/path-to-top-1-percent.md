@@ -92,56 +92,56 @@ CREATE INDEX idx_audit_timestamp ON audit_log(timestamp);
 **Code Example:**
 
 ```typescript
-// packages/landing/src/lib/server/audit.ts
+// libs/landing/src/lib/server/audit.ts
 export async function logAuditEvent(
-  db: D1Database,
-  event: {
-    actorId: string;
-    actorEmail: string;
-    actionType: string;
-    resourceType: string;
-    resourceId: string;
-    oldValue?: any;
-    newValue?: any;
-    ipAddress?: string;
-    userAgent?: string;
-  },
+	db: D1Database,
+	event: {
+		actorId: string;
+		actorEmail: string;
+		actionType: string;
+		resourceType: string;
+		resourceId: string;
+		oldValue?: any;
+		newValue?: any;
+		ipAddress?: string;
+		userAgent?: string;
+	},
 ) {
-  await db
-    .prepare(
-      `INSERT INTO audit_log (
+	await db
+		.prepare(
+			`INSERT INTO audit_log (
         id, timestamp, actor_id, actor_email, action_type,
         resource_type, resource_id, old_value, new_value,
         ip_address, user_agent
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    )
-    .bind(
-      crypto.randomUUID(),
-      Date.now(),
-      event.actorId,
-      event.actorEmail,
-      event.actionType,
-      event.resourceType,
-      event.resourceId,
-      event.oldValue ? JSON.stringify(event.oldValue) : null,
-      event.newValue ? JSON.stringify(event.newValue) : null,
-      event.ipAddress || null,
-      event.userAgent || null,
-    )
-    .run();
+		)
+		.bind(
+			crypto.randomUUID(),
+			Date.now(),
+			event.actorId,
+			event.actorEmail,
+			event.actionType,
+			event.resourceType,
+			event.resourceId,
+			event.oldValue ? JSON.stringify(event.oldValue) : null,
+			event.newValue ? JSON.stringify(event.newValue) : null,
+			event.ipAddress || null,
+			event.userAgent || null,
+		)
+		.run();
 }
 
 // Usage in admin actions
 await logAuditEvent(platform.env.DB, {
-  actorId: locals.user.id,
-  actorEmail: locals.user.email,
-  actionType: "suspend_uploads",
-  resourceType: "tenant",
-  resourceId: tenantId,
-  oldValue: { uploads_suspended: false },
-  newValue: { uploads_suspended: true },
-  ipAddress: request.headers.get("cf-connecting-ip"),
-  userAgent: request.headers.get("user-agent"),
+	actorId: locals.user.id,
+	actorEmail: locals.user.email,
+	actionType: "suspend_uploads",
+	resourceType: "tenant",
+	resourceId: tenantId,
+	oldValue: { uploads_suspended: false },
+	newValue: { uploads_suspended: true },
+	ipAddress: request.headers.get("cf-connecting-ip"),
+	userAgent: request.headers.get("user-agent"),
 });
 ```
 
@@ -157,81 +157,81 @@ await logAuditEvent(platform.env.DB, {
 **Implementation:**
 
 ```typescript
-// packages/workers/security-monitor/src/index.ts
+// libs/workers/security-monitor/src/index.ts
 export default {
-  async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
-    // Run every 5 minutes
-    const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
+	async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
+		// Run every 5 minutes
+		const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
 
-    // Check for brute force attacks
-    const failedLogins = await env.DB.prepare(
-      `SELECT ip_address, COUNT(*) as attempts
+		// Check for brute force attacks
+		const failedLogins = await env.DB.prepare(
+			`SELECT ip_address, COUNT(*) as attempts
        FROM auth_attempts
        WHERE success = 0 AND timestamp > ?
        GROUP BY ip_address
        HAVING attempts > 10`,
-    )
-      .bind(fiveMinutesAgo)
-      .all();
+		)
+			.bind(fiveMinutesAgo)
+			.all();
 
-    if (failedLogins.results.length > 0) {
-      await sendAlert(env, {
-        severity: "HIGH",
-        title: "Brute Force Attack Detected",
-        ips: failedLogins.results.map((r) => r.ip_address),
-      });
-    }
+		if (failedLogins.results.length > 0) {
+			await sendAlert(env, {
+				severity: "HIGH",
+				title: "Brute Force Attack Detected",
+				ips: failedLogins.results.map((r) => r.ip_address),
+			});
+		}
 
-    // Check for privilege escalation attempts
-    const suspiciousAuthz = await env.DB.prepare(
-      `SELECT user_id, COUNT(*) as attempts
+		// Check for privilege escalation attempts
+		const suspiciousAuthz = await env.DB.prepare(
+			`SELECT user_id, COUNT(*) as attempts
        FROM authz_failures
        WHERE timestamp > ? AND reason = 'tenant_ownership_failed'
        GROUP BY user_id
        HAVING attempts > 5`,
-    )
-      .bind(fiveMinutesAgo)
-      .all();
+		)
+			.bind(fiveMinutesAgo)
+			.all();
 
-    if (suspiciousAuthz.results.length > 0) {
-      await sendAlert(env, {
-        severity: "CRITICAL",
-        title: "Privilege Escalation Attempt",
-        users: suspiciousAuthz.results.map((r) => r.user_id),
-      });
-    }
+		if (suspiciousAuthz.results.length > 0) {
+			await sendAlert(env, {
+				severity: "CRITICAL",
+				title: "Privilege Escalation Attempt",
+				users: suspiciousAuthz.results.map((r) => r.user_id),
+			});
+		}
 
-    // Check for suspicious admin actions
-    const adminActions = await env.DB.prepare(
-      `SELECT COUNT(*) as count
+		// Check for suspicious admin actions
+		const adminActions = await env.DB.prepare(
+			`SELECT COUNT(*) as count
        FROM audit_log
        WHERE timestamp > ? AND action_type IN ('delete_tenant', 'disable_account')
        AND actor_id != ?`, // Not the main admin
-    )
-      .bind(fiveMinutesAgo, env.WAYFINDER_ID)
-      .first();
+		)
+			.bind(fiveMinutesAgo, env.WAYFINDER_ID)
+			.first();
 
-    if (adminActions.count > 5) {
-      await sendAlert(env, {
-        severity: "HIGH",
-        title: "Unusual Admin Activity",
-        count: adminActions.count,
-      });
-    }
-  },
+		if (adminActions.count > 5) {
+			await sendAlert(env, {
+				severity: "HIGH",
+				title: "Unusual Admin Activity",
+				count: adminActions.count,
+			});
+		}
+	},
 };
 
 async function sendAlert(env: Env, alert: any) {
-  // Send to Discord, Slack, PagerDuty, etc.
-  await fetch(env.ALERT_WEBHOOK_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      ...alert,
-      timestamp: new Date().toISOString(),
-      environment: env.ENVIRONMENT,
-    }),
-  });
+	// Send to Discord, Slack, PagerDuty, etc.
+	await fetch(env.ALERT_WEBHOOK_URL, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({
+			...alert,
+			timestamp: new Date().toISOString(),
+			environment: env.ENVIRONMENT,
+		}),
+	});
 }
 ```
 
@@ -290,11 +290,7 @@ async function sendAlert(env: Env, alert: any) {
         "automergeType": "pr",
         "requiredStatusChecks": ["ci", "security-scan"],
       },
-      {
-        "matchUpdateTypes": ["minor"],
-        "automerge": false,
-        "reviewers": ["@AutumnsGrove"],
-      },
+      { "matchUpdateTypes": ["minor"], "automerge": false, "reviewers": ["@AutumnsGrove"] },
       {
         "matchUpdateTypes": ["major"],
         "automerge": false,
@@ -303,10 +299,7 @@ async function sendAlert(env: Env, alert: any) {
       },
     ],
   "lockFileMaintenance":
-    {
-      "enabled": true,
-      "schedule": ["before 3am on the first day of the month"],
-    },
+    { "enabled": true, "schedule": ["before 3am on the first day of the month"] },
 }
 ```
 
@@ -329,7 +322,7 @@ async function sendAlert(env: Env, alert: any) {
 **Fix Plant CSP:**
 
 ```typescript
-// packages/plant/src/hooks.server.ts
+// libs/plant/src/hooks.server.ts
 // BEFORE (unsafe):
 "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com",
 
@@ -415,21 +408,21 @@ echo "✅ All secrets rotated successfully"
 **Implementation:**
 
 ```typescript
-// packages/engine/svelte.config.js
+// libs/engine/svelte.config.js
 export default {
-  kit: {
-    csp: {
-      directives: {
-        "script-src": [
-          "self",
-          "'nonce-{NONCE}'",
-          // CDN resources with SRI hashes
-          "sha256-abc123...", // jsdelivr Monaco bundle
-          "sha256-def456...", // jsdelivr Mermaid bundle
-        ],
-      },
-    },
-  },
+	kit: {
+		csp: {
+			directives: {
+				"script-src": [
+					"self",
+					"'nonce-{NONCE}'",
+					// CDN resources with SRI hashes
+					"sha256-abc123...", // jsdelivr Monaco bundle
+					"sha256-def456...", // jsdelivr Mermaid bundle
+				],
+			},
+		},
+	},
 };
 ```
 
@@ -447,11 +440,11 @@ curl -s https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js | \
 ```json
 // package.json
 {
-  "overrides": {
-    // Pin vulnerable transitive deps
-    "cookie": "0.7.2", // Fix CVE-2024-XXXX
-    "esbuild": "^0.21.6" // Fix CORS issue
-  }
+	"overrides": {
+		// Pin vulnerable transitive deps
+		"cookie": "0.7.2", // Fix CVE-2024-XXXX
+		"esbuild": "^0.21.6" // Fix CORS issue
+	}
 }
 ```
 

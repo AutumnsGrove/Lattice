@@ -15,19 +15,22 @@ Transform Waystones from "eject to KB" links into in-context glass overlays that
 
 ### What Exists Today
 
-**Waystone Component** (`packages/engine/src/lib/ui/components/ui/Waystone.svelte`)
+**Waystone Component** (`libs/engine/src/lib/ui/components/ui/Waystone.svelte`)
+
 - Simple `<a>` tag with `?` icon
 - Opens `https://grove.place/knowledge/help/{slug}` in new tab
 - Used in 10+ admin panel locations
 - Already accessible (44×44px touch target, screen reader labels, reduced-motion support)
 
 **KB Article Structure** (150+ articles in `/docs/`)
+
 - YAML frontmatter + Markdown
 - Auto-generated: reading time, excerpts (200 char), table of contents
 - Build-time rendered (no runtime filesystem on Cloudflare Workers)
 - Average article: 3-15 KB, ~5 min read time
 
 **Existing Overlay Patterns**
+
 - `GlassConfirmDialog` — bits-ui Dialog + GlassCard (focus trap, escape, ARIA)
 - `GlassOverlay` — Backdrop component with blur variants
 - `DialogOverlay` primitive for consistent backdrop styling
@@ -41,6 +44,7 @@ Transform Waystones from "eject to KB" links into in-context glass overlays that
 **Answer: Reuse with smart extraction.**
 
 Articles already have:
+
 - `description` field (1-sentence summary)
 - Auto-generated `excerpt` (first paragraph, 200 chars)
 - Structured headings for TOC
@@ -52,6 +56,7 @@ Articles already have:
 **Answer: First section + "Read full article" link.**
 
 Reasoning:
+
 - Full articles are 5+ min reads — too long for overlay context
 - First section typically contains the "what is this" answer
 - Power users can click through for depth
@@ -83,16 +88,17 @@ This avoids network requests for common help lookups while keeping bundle size r
 
 ```typescript
 interface WaystoneExcerpt {
-  slug: string;
-  title: string;
-  description: string;        // From frontmatter
-  firstSection: string;       // Content from H1 to first H2
-  readingTime: number;        // Minutes for full article
-  hasMedia: boolean;          // Affects overlay sizing
+	slug: string;
+	title: string;
+	description: string; // From frontmatter
+	firstSection: string; // Content from H1 to first H2
+	readingTime: number; // Minutes for full article
+	hasMedia: boolean; // Affects overlay sizing
 }
 ```
 
 **Extraction algorithm:**
+
 1. Parse frontmatter for `title`, `description`
 2. Find first `## ` heading (or end of content)
 3. Extract content between `# Title` and first `## `
@@ -102,11 +108,13 @@ interface WaystoneExcerpt {
 ### Article Requirements for Waystones
 
 Not all KB articles need Waystone excerpts. Target articles that:
+
 - Answer "what is this?" questions
 - Explain features visible in the admin panel
 - Are linked from existing Waystone placements
 
 **Current Waystone-linked articles** (from integration plan):
+
 - `custom-fonts`, `choosing-a-theme`, `what-is-rings`
 - `what-are-trails`, `what-is-journey`, `what-is-gallery`
 - `what-are-curios`, `how-grove-protects-your-secrets`
@@ -117,6 +125,7 @@ Not all KB articles need Waystone excerpts. Target articles that:
 **Decision: Auto-truncate, no new field.**
 
 Reasoning:
+
 - Adding `short` field to 150+ articles is high maintenance
 - First section + description provides consistent quality
 - Writers already structure articles with "what is it" at top
@@ -159,7 +168,7 @@ Runtime:
 ### API Endpoint (new)
 
 ```typescript
-// packages/engine/src/routes/api/kb/excerpt/[slug]/+server.ts
+// libs/engine/src/routes/api/kb/excerpt/[slug]/+server.ts
 GET /api/kb/excerpt/{slug}
 
 Response:
@@ -175,7 +184,7 @@ Response:
 ### Manifest Structure
 
 ```typescript
-// Generated at build: packages/engine/static/waystone-manifest.json
+// Generated at build: libs/engine/static/waystone-manifest.json
 {
   "custom-fonts": {
     title: "Custom Fonts",
@@ -193,14 +202,14 @@ Response:
 
 ### Overlay Specifications
 
-| Property | Value | Reasoning |
-|----------|-------|-----------|
-| **Width** | `max-w-lg` (512px) | Readable line length |
-| **Max Height** | `max-h-[70vh]` | Prevents full-screen takeover |
-| **Backdrop** | `GlassOverlay` dark variant | Consistent with dialogs |
-| **Animation** | `fade-in` + `slide-up` | Feels like rising from the Waystone |
-| **Z-index** | `z-grove-modal` | Below Arbor sidebar |
-| **Mobile** | Full-width bottom sheet | Touch-friendly dismiss |
+| Property       | Value                       | Reasoning                           |
+| -------------- | --------------------------- | ----------------------------------- |
+| **Width**      | `max-w-lg` (512px)          | Readable line length                |
+| **Max Height** | `max-h-[70vh]`              | Prevents full-screen takeover       |
+| **Backdrop**   | `GlassOverlay` dark variant | Consistent with dialogs             |
+| **Animation**  | `fade-in` + `slide-up`      | Feels like rising from the Waystone |
+| **Z-index**    | `z-grove-modal`             | Below Arbor sidebar                 |
+| **Mobile**     | Full-width bottom sheet     | Touch-friendly dismiss              |
 
 ### Visual Treatment
 
@@ -237,6 +246,7 @@ Response:
 ## Implementation Phases
 
 ### Phase 1: Content Pipeline (This Issue)
+
 1. ✅ Document KB article structure
 2. ✅ Identify Waystone-linked articles
 3. ✅ Design excerpt extraction strategy
@@ -244,18 +254,21 @@ Response:
 5. Add excerpt API endpoint
 
 ### Phase 2: Component Development (#861)
+
 1. Create `WaystonePopup.svelte`
 2. Build on bits-ui Dialog + GlassCard
 3. Handle loading states, errors
 4. Mobile bottom sheet variant
 
 ### Phase 3: Integration (#863)
+
 1. Modify `Waystone.svelte` to use popup
 2. Add fallback for no-JS
 3. Keyboard navigation
 4. Analytics tracking (Rings)
 
 ### Phase 4: Polish
+
 1. Animation refinement
 2. Preloading on hover
 3. Cache warming strategy
@@ -265,13 +278,13 @@ Response:
 
 ## Files to Modify/Create
 
-| File | Action | Purpose |
-|------|--------|---------|
-| `packages/landing/src/lib/server/waystone-excerpts.ts` | Create | Generate excerpt manifest |
-| `packages/engine/src/routes/api/kb/excerpt/[slug]/+server.ts` | Create | Excerpt API |
-| `packages/engine/src/lib/ui/components/ui/WaystonePopup.svelte` | Create | Popup component |
-| `packages/engine/src/lib/ui/components/ui/Waystone.svelte` | Modify | Add popup trigger |
-| `packages/engine/static/waystone-manifest.json` | Create | Build artifact |
+| File                                                        | Action | Purpose                   |
+| ----------------------------------------------------------- | ------ | ------------------------- |
+| `apps/landing/src/lib/server/waystone-excerpts.ts`          | Create | Generate excerpt manifest |
+| `libs/engine/src/routes/api/kb/excerpt/[slug]/+server.ts`   | Create | Excerpt API               |
+| `libs/engine/src/lib/ui/components/ui/WaystonePopup.svelte` | Create | Popup component           |
+| `libs/engine/src/lib/ui/components/ui/Waystone.svelte`      | Modify | Add popup trigger         |
+| `libs/engine/static/waystone-manifest.json`                 | Create | Build artifact            |
 
 ---
 
@@ -287,10 +300,10 @@ Response:
 
 ## Design Decisions (Confirmed)
 
-| Decision | Choice | Reasoning |
-|----------|--------|-----------|
-| **Mobile pattern** | Bottom sheet | Natural touch interaction, thumb-friendly dismiss, modern mobile pattern |
-| **Preload behavior** | On hover | Content feels instant, better perceived performance |
+| Decision             | Choice       | Reasoning                                                                |
+| -------------------- | ------------ | ------------------------------------------------------------------------ |
+| **Mobile pattern**   | Bottom sheet | Natural touch interaction, thumb-friendly dismiss, modern mobile pattern |
+| **Preload behavior** | On hover     | Content feels instant, better perceived performance                      |
 
 ### Mobile Bottom Sheet Specs
 
@@ -317,10 +330,10 @@ Response:
 ```typescript
 // On Waystone hover (desktop) or focus (keyboard)
 function handlePointerEnter() {
-  // Start fetching after 150ms delay (avoids flash hovers)
-  preloadTimer = setTimeout(() => {
-    prefetchExcerpt(slug);
-  }, 150);
+	// Start fetching after 150ms delay (avoids flash hovers)
+	preloadTimer = setTimeout(() => {
+		prefetchExcerpt(slug);
+	}, 150);
 }
 
 // Cache in memory for session
@@ -329,4 +342,4 @@ const excerptCache = new Map<string, WaystoneExcerpt>();
 
 ---
 
-*The Eagle has surveyed the territory. The path forward is clear.* 🦅
+_The Eagle has surveyed the territory. The path forward is clear._ 🦅

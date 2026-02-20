@@ -2,7 +2,7 @@
 
 ## Context
 
-You are implementing a Feature Flags Admin UI for the Grove platform. The backend evaluation engine has already been built in Lattice (`packages/engine/src/lib/feature-flags/`). Now we need the admin interface to create, edit, and manage feature flags.
+You are implementing a Feature Flags Admin UI for the Grove platform. The backend evaluation engine has already been built in Lattice (`libs/engine/src/lib/feature-flags/`). Now we need the admin interface to create, edit, and manage feature flags.
 
 **Repository**: https://github.com/AutumnsGrove/GroveAuth (frontend in `frontend/` directory)
 **Location**: `/dashboard/flags/` routes
@@ -238,48 +238,48 @@ Add to `frontend/src/lib/types/` or inline:
 
 ```typescript
 interface FeatureFlag {
-  id: string;
-  name: string;
-  description?: string;
-  flagType: "boolean" | "percentage" | "variant" | "tier" | "json";
-  defaultValue: unknown;
-  enabled: boolean;
-  cacheTtl?: number;
-  rules: FlagRule[];
-  createdAt: string;
-  updatedAt: string;
-  createdBy?: string;
-  updatedBy?: string;
+	id: string;
+	name: string;
+	description?: string;
+	flagType: "boolean" | "percentage" | "variant" | "tier" | "json";
+	defaultValue: unknown;
+	enabled: boolean;
+	cacheTtl?: number;
+	rules: FlagRule[];
+	createdAt: string;
+	updatedAt: string;
+	createdBy?: string;
+	updatedBy?: string;
 }
 
 interface FlagRule {
-  id: number;
-  flagId: string;
-  priority: number;
-  ruleType: "tenant" | "tier" | "percentage" | "user" | "time" | "always";
-  ruleValue: Record<string, unknown>;
-  resultValue: unknown;
-  enabled: boolean;
-  createdAt: string;
+	id: number;
+	flagId: string;
+	priority: number;
+	ruleType: "tenant" | "tier" | "percentage" | "user" | "time" | "always";
+	ruleValue: Record<string, unknown>;
+	resultValue: unknown;
+	enabled: boolean;
+	createdAt: string;
 }
 
 interface FlagAuditEntry {
-  id: number;
-  flagId: string;
-  action:
-    | "create"
-    | "update"
-    | "delete"
-    | "enable"
-    | "disable"
-    | "rule_add"
-    | "rule_update"
-    | "rule_delete";
-  oldValue?: unknown;
-  newValue?: unknown;
-  changedBy?: string;
-  changedAt: string;
-  reason?: string;
+	id: number;
+	flagId: string;
+	action:
+		| "create"
+		| "update"
+		| "delete"
+		| "enable"
+		| "disable"
+		| "rule_add"
+		| "rule_update"
+		| "rule_delete";
+	oldValue?: unknown;
+	newValue?: unknown;
+	changedBy?: string;
+	changedAt: string;
+	reason?: string;
 }
 ```
 
@@ -289,8 +289,9 @@ Add to existing dashboard sidebar in `frontend/src/routes/dashboard/+layout.svel
 
 ```svelte
 <a href="/dashboard/flags" class="nav-item">
-  <Flag class="nav-icon" />  <!-- lucide-svelte -->
-  <span>Feature Flags</span>
+	<Flag class="nav-icon" />
+	<!-- lucide-svelte -->
+	<span>Feature Flags</span>
 </a>
 ```
 

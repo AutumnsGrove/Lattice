@@ -1,10 +1,10 @@
 ---
 title: Canopy — Wanderer Directory
-description: 'Opt-in directory where wanderers list themselves for others to discover'
+description: "Opt-in directory where wanderers list themselves for others to discover"
 category: specs
 specCategory: content-community
 icon: book-user
-lastUpdated: '2026-02-08'
+lastUpdated: "2026-02-08"
 aliases: []
 tags:
   - discovery
@@ -32,14 +32,14 @@ tags:
                  that's okay too.
 ```
 
-> *See who's growing here.*
+> _See who's growing here._
 
 Grove's opt-in wanderer directory. Browse who's here, discover other writers, and find your people — without algorithms, without ranking, without performance metrics. Just trees, reaching up, visible to anyone who looks.
 
 **Public Name:** Canopy
 **Internal Name:** GroveDirectory
 **Domain:** `grove.place/canopy`
-**Location:** Landing app (`packages/landing/`)
+**Location:** Landing app (`apps/landing/`)
 
 The canopy is what you see when you look at a forest from above. Every tree's crown is visible — distinct shapes, different colors, each one reaching toward the light in its own way. Canopy is the first rung of discovery: before Forests group people by interest, before Meadow lets you follow their words, Canopy simply shows you who's here.
 
@@ -59,13 +59,14 @@ Canopy is a public directory page on the Landing site (`grove.place/canopy`) tha
   is here     community    their words
 ```
 
-Canopy is the foundation. You can't discover communities if you can't first discover *people*.
+Canopy is the foundation. You can't discover communities if you can't first discover _people_.
 
 ---
 
 ## Architecture
 
 ### Tech Stack
+
 - **Runtime:** Cloudflare Pages (Landing SvelteKit app)
 - **Database:** Cloudflare D1 (`grove-engine-db` — shared with all apps)
 - **Cache:** None initially (server-rendered on every request)
@@ -76,7 +77,7 @@ Canopy is the foundation. You can't discover communities if you can't first disc
 Canopy is a **route in Landing**, not a standalone property:
 
 ```
-packages/landing/
+apps/landing/
   src/routes/canopy/
     +page.server.ts    # Server load: query directory from D1
     +page.svelte       # Directory grid with search/filter UI
@@ -85,7 +86,7 @@ packages/landing/
 Settings controls live in the **engine admin** (Arbor):
 
 ```
-packages/engine/
+libs/engine/
   src/routes/arbor/settings/
     # New section: "Canopy" with opt-in toggle, tagline, categories
 ```
@@ -113,30 +114,30 @@ All Canopy data lives in the existing `tenant_settings` key-value table. No new 
 
 ### Settings Keys
 
-| Key | Type | Default | Description |
-|-----|------|---------|-------------|
-| `canopy_visible` | `"true"` / `"false"` | `"false"` | Opt-in: show this grove in the Canopy |
-| `canopy_banner` | string (max 160 chars) | `""` | Your Banner: why should someone visit your grove? (Standard: Bio) |
-| `canopy_categories` | JSON string array | `"[]"` | Selected categories (from predefined list + custom) |
-| `canopy_show_forests` | `"true"` / `"false"` | `"true"` | Show which Forests this wanderer is active in |
+| Key                   | Type                   | Default   | Description                                                       |
+| --------------------- | ---------------------- | --------- | ----------------------------------------------------------------- |
+| `canopy_visible`      | `"true"` / `"false"`   | `"false"` | Opt-in: show this grove in the Canopy                             |
+| `canopy_banner`       | string (max 160 chars) | `""`      | Your Banner: why should someone visit your grove? (Standard: Bio) |
+| `canopy_categories`   | JSON string array      | `"[]"`    | Selected categories (from predefined list + custom)               |
+| `canopy_show_forests` | `"true"` / `"false"`   | `"true"`  | Show which Forests this wanderer is active in                     |
 
 ### Predefined Categories
 
 ```typescript
 const CANOPY_CATEGORIES = [
-  'writing',
-  'photography',
-  'art',
-  'code',
-  'music',
-  'poetry',
-  'gaming',
-  'food',
-  'travel',
-  'science',
-  'queer',
-  'journal',
-  'other'
+	"writing",
+	"photography",
+	"art",
+	"code",
+	"music",
+	"poetry",
+	"gaming",
+	"food",
+	"travel",
+	"science",
+	"queer",
+	"journal",
+	"other",
 ] as const;
 ```
 
@@ -145,6 +146,7 @@ When a wanderer selects "other", they provide a custom tag. Custom tags submitte
 ### Eligibility Requirements
 
 A grove appears in the Canopy when ALL of:
+
 1. `canopy_visible` is `"true"` (opt-in)
 2. Tenant is `active = 1` (not suspended)
 3. Tenant has at least **1 published bloom** (post_count >= 1)
@@ -154,6 +156,7 @@ A grove appears in the Canopy when ALL of:
 ## Directory Page
 
 ### URL
+
 `grove.place/canopy`
 
 ### Query
@@ -268,29 +271,31 @@ The toggle, tagline field, and categories are saved as individual keys in `tenan
 Returns the directory listing for the Canopy page.
 
 **Query params:**
+
 - `category` (optional): Filter by category
 - `q` (optional): Search query (matches display_name and banner)
 
 **Response:**
+
 ```json
 {
-  "wanderers": [
-    {
-      "subdomain": "autumn",
-      "display_name": "Autumn",
-      "avatar_url": "https://cdn.grove.place/avatars/...",
-      "banner": "Building a forest, one tree at a time.",
-      "categories": ["code", "queer"],
-      "bloom_count": 47,
-      "forests": ["The Prism", "The Terminal"]
-    }
-  ],
-  "total": 1,
-  "categories": [
-    { "name": "writing", "count": 12 },
-    { "name": "photography", "count": 8 },
-    { "name": "queer", "count": 6 }
-  ]
+	"wanderers": [
+		{
+			"subdomain": "autumn",
+			"display_name": "Autumn",
+			"avatar_url": "https://cdn.grove.place/avatars/...",
+			"banner": "Building a forest, one tree at a time.",
+			"categories": ["code", "queer"],
+			"bloom_count": 47,
+			"forests": ["The Prism", "The Terminal"]
+		}
+	],
+	"total": 1,
+	"categories": [
+		{ "name": "writing", "count": 12 },
+		{ "name": "photography", "count": 8 },
+		{ "name": "queer", "count": 6 }
+	]
 }
 ```
 
@@ -311,6 +316,7 @@ Canopy settings are saved through the existing tenant settings API. No new endpo
 ### What's Visible
 
 Only information the wanderer explicitly provides:
+
 - Display name (already public on their grove)
 - Subdomain (already public)
 - Avatar (already public)
@@ -331,21 +337,25 @@ No email addresses. No real names unless the wanderer chooses to use one as thei
 ## Migration Path
 
 ### Phase 1: MVP (this spec)
+
 - Opt-in toggle, tagline, predefined categories in settings
 - Static directory page at `grove.place/canopy`
 - Search and category filtering
 - Daily random shuffle
 
 ### Phase 2: Forests Integration
+
 - Show Forest memberships on directory cards
 - "Also in: The Prism, The Terminal" badges
 - Link between Canopy and Forest directory pages
 
 ### Phase 3: Meadow Integration
+
 - "Follow" button on Canopy cards (when Meadow exists)
 - Canopy cards link to Meadow profiles
 
 ### Phase 4: Rich Profiles
+
 - Optional: show latest bloom title on card
 - Optional: show Terrarium scene thumbnail
 - Optional: seasonal decoration on card based on theme
@@ -355,21 +365,24 @@ No email addresses. No real names unless the wanderer chooses to use one as thei
 ## Implementation Plan
 
 ### Database Changes
+
 No migrations needed — uses existing `tenant_settings` key-value table.
 
 ### Files to Create/Modify
 
 **New files:**
+
 ```
-packages/landing/src/routes/canopy/+page.server.ts
-packages/landing/src/routes/canopy/+page.svelte
-packages/engine/src/lib/config/canopy-categories.ts
+apps/landing/src/routes/canopy/+page.server.ts
+apps/landing/src/routes/canopy/+page.svelte
+libs/engine/src/lib/config/canopy-categories.ts
 ```
 
 **Modified files:**
+
 ```
-packages/engine/src/routes/arbor/settings/   # Add Canopy section
-packages/engine/src/routes/api/settings/     # Handle new setting keys
+libs/engine/src/routes/arbor/settings/   # Add Canopy section
+libs/engine/src/routes/api/settings/     # Handle new setting keys
 ```
 
 ### Settings API Changes
@@ -378,10 +391,10 @@ The existing settings API already handles arbitrary key-value pairs. The only ch
 
 ```typescript
 const CANOPY_SETTINGS = {
-  canopy_visible: { type: 'boolean', default: 'false' },
-  canopy_banner: { type: 'string', maxLength: 160, default: '' }, // Grove: "Banner", Standard: "Bio"
-  canopy_categories: { type: 'json', default: '[]' },
-  canopy_show_forests: { type: 'boolean', default: 'true' },
+	canopy_visible: { type: "boolean", default: "false" },
+	canopy_banner: { type: "string", maxLength: 160, default: "" }, // Grove: "Banner", Standard: "Bio"
+	canopy_categories: { type: "json", default: "[]" },
+	canopy_show_forests: { type: "boolean", default: "true" },
 } as const;
 ```
 
@@ -415,14 +428,14 @@ Not a sterile directory. Not a social media feed. Just a warm, browseable collec
 
 ## Relationship to Existing Features
 
-| Feature | Relationship |
-|---------|-------------|
-| **Forests** | Canopy shows ALL trees; Forests show themed groups. Canopy cards can display Forest memberships. |
-| **Meadow** | Canopy is browse/discover; Meadow is follow/read. Canopy is the entry point that leads to Meadow follows. |
-| **Wander** | Canopy is a flat directory; Wander is an immersive 3D walk. Both are discovery, different modalities. |
-| **Foliage** | A wanderer's Foliage theme could influence how their Canopy card looks (future). |
-| **Arbor** | Settings live in Arbor. The "Canopy" section is a new tab/section in blog settings. |
+| Feature     | Relationship                                                                                              |
+| ----------- | --------------------------------------------------------------------------------------------------------- |
+| **Forests** | Canopy shows ALL trees; Forests show themed groups. Canopy cards can display Forest memberships.          |
+| **Meadow**  | Canopy is browse/discover; Meadow is follow/read. Canopy is the entry point that leads to Meadow follows. |
+| **Wander**  | Canopy is a flat directory; Wander is an immersive 3D walk. Both are discovery, different modalities.     |
+| **Foliage** | A wanderer's Foliage theme could influence how their Canopy card looks (future).                          |
+| **Arbor**   | Settings live in Arbor. The "Canopy" section is a new tab/section in blog settings.                       |
 
 ---
 
-*See who's growing here.* 🌲
+_See who's growing here._ 🌲

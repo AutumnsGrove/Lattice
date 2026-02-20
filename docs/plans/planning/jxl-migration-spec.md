@@ -57,7 +57,7 @@ Grove's image compression pipeline currently uses WebP format. With JPEG XL (JXL
 
 ### Client-Side Processing
 
-**File:** `packages/engine/src/lib/utils/imageProcessor.ts`
+**File:** `libs/engine/src/lib/utils/imageProcessor.ts`
 
 Current flow:
 
@@ -81,7 +81,7 @@ Upload processed blob to R2
 
 ### Server-Side Upload
 
-**File:** `packages/engine/src/routes/api/images/upload/+server.ts`
+**File:** `libs/engine/src/routes/api/images/upload/+server.ts`
 
 - Accepts: `image/jpeg`, `image/png`, `image/gif`, `image/webp`
 - Magic byte validation for each type
@@ -90,7 +90,7 @@ Upload processed blob to R2
 
 ### Storage Service
 
-**File:** `packages/engine/src/lib/server/services/storage.ts`
+**File:** `libs/engine/src/lib/server/services/storage.ts`
 
 - `ALLOWED_CONTENT_TYPES` includes: jpeg, png, gif, webp, avif
 - Cache control: `public, max-age=31536000, immutable` for images
@@ -98,7 +98,7 @@ Upload processed blob to R2
 
 ### Admin UI
 
-**File:** `packages/engine/src/routes/admin/images/+page.svelte`
+**File:** `libs/engine/src/routes/admin/images/+page.svelte`
 
 - "Convert to WebP" toggle (default: on)
 - Quality slider (10-100%, default: 80%)
@@ -360,7 +360,7 @@ function getAdaptiveEffort(): number {
 
 ### Phase 3: Update Upload Endpoint (with Enhanced Validation)
 
-**File:** `packages/engine/src/routes/api/images/upload/+server.ts`
+**File:** `libs/engine/src/routes/api/images/upload/+server.ts`
 
 ```typescript
 // Add JXL to allowed types
@@ -424,7 +424,7 @@ const MIME_TO_EXTENSIONS: Record<string, string[]> = {
 
 ### Phase 4: Update Storage Service (with Security Headers)
 
-**File:** `packages/engine/src/lib/server/services/storage.ts`
+**File:** `libs/engine/src/lib/server/services/storage.ts`
 
 ```typescript
 const ALLOWED_CONTENT_TYPES = new Set([
@@ -454,7 +454,7 @@ function getImageHeaders(contentType: string): Record<string, string> {
 
 ### Phase 5: Update Admin UI
 
-**File:** `packages/engine/src/routes/admin/images/+page.svelte`
+**File:** `libs/engine/src/routes/admin/images/+page.svelte`
 
 Replace the "Convert to WebP" toggle with a format selector:
 
@@ -639,7 +639,7 @@ The `Vary: Accept` header is **critical** for correct CDN caching:
 
 ### Phase 8: Gallery Utilities Update
 
-**File:** `packages/engine/src/lib/utils/gallery.ts`
+**File:** `libs/engine/src/lib/utils/gallery.ts`
 
 ```typescript
 // Add .jxl to supported extensions
@@ -943,18 +943,18 @@ async function handleImageRequest(request: Request, env: Env) {
 
 | File                                                      | Change                             |
 | --------------------------------------------------------- | ---------------------------------- |
-| `packages/engine/package.json`                            | Add `@jsquash/jxl` dependency      |
-| `packages/engine/src/lib/utils/imageProcessor.ts`         | Add JXL encoding, format detection |
-| `packages/engine/src/routes/api/images/upload/+server.ts` | Add JXL MIME type, magic bytes     |
-| `packages/engine/src/lib/server/services/storage.ts`      | Add JXL to allowed types           |
-| `packages/engine/src/routes/admin/images/+page.svelte`    | Format selector UI                 |
-| `packages/engine/src/lib/utils/gallery.ts`                | Add `.jxl` extension               |
+| `libs/engine/package.json`                            | Add `@jsquash/jxl` dependency      |
+| `libs/engine/src/lib/utils/imageProcessor.ts`         | Add JXL encoding, format detection |
+| `libs/engine/src/routes/api/images/upload/+server.ts` | Add JXL MIME type, magic bytes     |
+| `libs/engine/src/lib/server/services/storage.ts`      | Add JXL to allowed types           |
+| `libs/engine/src/routes/admin/images/+page.svelte`    | Format selector UI                 |
+| `libs/engine/src/lib/utils/gallery.ts`                | Add `.jxl` extension               |
 
 ### Files to Create
 
 | File                                   | Purpose                           |
 | -------------------------------------- | --------------------------------- |
-| `packages/engine/src/lib/utils/jxl.ts` | JXL-specific utilities (optional) |
+| `libs/engine/src/lib/utils/jxl.ts` | JXL-specific utilities (optional) |
 
 ### Documentation to Update
 

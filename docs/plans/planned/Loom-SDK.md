@@ -10,14 +10,14 @@ Grove has 7 Durable Objects across 2 packages that all manually implement ~150 l
 
 ---
 
-## Phase 1: Core SDK (`packages/engine/src/lib/loom/`)
+## Phase 1: Core SDK (`libs/engine/src/lib/loom/`)
 
 Create the SDK following the Threshold directory pattern.
 
 ### Files to Create
 
 ```
-packages/engine/src/lib/loom/
+libs/engine/src/lib/loom/
 ├── index.ts              — Barrel export (public API surface)
 ├── types.ts              — Core interfaces (LoomRoute, LoomRequestContext, etc.)
 ├── base.ts               — LoomDO<TState, TEnv> base class
@@ -99,14 +99,14 @@ Supports `:param` segments (replaces manual `path.split("/").pop()`). ~30 lines 
 
 ### Error Catalog (`errors.ts`)
 
-Uses existing `GroveErrorDef` from `packages/engine/src/lib/errors/types.ts`:
+Uses existing `GroveErrorDef` from `libs/engine/src/lib/errors/types.ts`:
 
 - `GROVE-LOOM-001` through `GROVE-LOOM-049` — infrastructure/routing/persist/alarm/websocket errors
 - `LoomResponse` object: `.json()`, `.success()`, `.notFound()`, `.badRequest()`, `.error()`
 
 ### Package Exports
 
-Add to `packages/engine/package.json`:
+Add to `libs/engine/package.json`:
 
 ```json
 "./loom": {
@@ -189,7 +189,7 @@ Order by increasing complexity:
 
 ## Phase 4: Consolidate Type Exports
 
-Merge existing `packages/engine/src/lib/durable-objects/` type files into `loom/`:
+Merge existing `libs/engine/src/lib/durable-objects/` type files into `loom/`:
 
 - Move `TenantDO.ts`, `PostMetaDO.ts`, `PostContentDO.ts` types into `loom/types.ts` or colocated type files
 - Update barrel export in `loom/index.ts` to re-export all DO types
@@ -201,13 +201,13 @@ Merge existing `packages/engine/src/lib/durable-objects/` type files into `loom/
 
 | File                                            | Role                                                      |
 | ----------------------------------------------- | --------------------------------------------------------- |
-| `packages/engine/src/lib/threshold/`            | Pattern template (directory structure, exports, adapters) |
-| `packages/engine/src/lib/errors/types.ts`       | `GroveErrorDef` interface for error catalog               |
-| `packages/engine/package.json`                  | Export map (add `./loom` entries)                         |
-| `packages/durable-objects/src/PostContentDO.ts` | First migration target (353 lines → ~120)                 |
-| `packages/durable-objects/src/TenantDO.ts`      | Second migration (exercises alarms + locks)               |
-| `packages/durable-objects/src/PostMetaDO.ts`    | Third migration (exercises WebSocket)                     |
-| `packages/engine/src/lib/durable-objects/`      | Existing type re-exports (consolidate into loom/)         |
+| `libs/engine/src/lib/threshold/`            | Pattern template (directory structure, exports, adapters) |
+| `libs/engine/src/lib/errors/types.ts`       | `GroveErrorDef` interface for error catalog               |
+| `libs/engine/package.json`                  | Export map (add `./loom` entries)                         |
+| `services/durable-objects/src/PostContentDO.ts` | First migration target (353 lines → ~120)                 |
+| `services/durable-objects/src/TenantDO.ts`      | Second migration (exercises alarms + locks)               |
+| `services/durable-objects/src/PostMetaDO.ts`    | Third migration (exercises WebSocket)                     |
+| `libs/engine/src/lib/durable-objects/`      | Existing type re-exports (consolidate into loom/)         |
 
 ---
 

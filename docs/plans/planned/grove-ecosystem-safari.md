@@ -9,7 +9,7 @@
 
 ## Ecosystem Overview
 
-**18 packages** in `packages/`, **2711+ commits** on main, **63 hand-drawn SVG nature components**, **47 named tools** across 8 Workshop categories. One warm forest.
+**18 packages** in the monorepo, **2711+ commits** on main, **63 hand-drawn SVG nature components**, **47 named tools** across 8 Workshop categories. One warm forest.
 
 ### Packages by type
 
@@ -96,7 +96,7 @@ Every tool has a nature metaphor that actually works as documentation — Heartw
 **Infrastructure:**
 
 - [x] Monorepo with `pnpm` workspaces, `bun` for local execution
-- [x] Engine-first pattern — shared components in `packages/engine/`, consumed via `@autumnsgrove/lattice/*`
+- [x] Engine-first pattern — shared components in `libs/engine/`, consumed via `@autumnsgrove/lattice/*`
 - [x] Export chain: `package.json` exports → barrel files → individual components
 - [x] Cloudflare-first: Workers, D1, KV, R2, Durable Objects
 - [x] Custom tooling: `gf` (Go, ~40ms) for codebase search, `gw` for infrastructure CLI
@@ -201,7 +201,7 @@ Every tool has a nature metaphor that actually works as documentation — Heartw
 
 ### Safari findings
 
-(`packages/landing/src/routes/workshop/+page.svelte` — ~1100 lines)
+(`apps/landing/src/routes/workshop/+page.svelte` — ~1100 lines)
 
 - [x] 8 categories: Core Infrastructure, Core Services, Creative Studio, Support & Insights, Content & Community, Standalone Tools, Operations, Patterns
 - [x] Each tool has: name, tagline, description, status, icon, domain, integration notes, GitHub/spec/help links, sub-components
@@ -230,7 +230,7 @@ Every tool has a nature metaphor that actually works as documentation — Heartw
 
 ### Safari findings
 
-(`packages/engine/src/routes/arbor/+page.svelte`)
+(`libs/engine/src/routes/arbor/+page.svelte`)
 
 - [x] Stats in GlassCard tiles: Blooms count, Words Written, Top Tags, Account Age
 - [x] Quick actions grid for common tasks
@@ -247,7 +247,7 @@ Every tool has a nature metaphor that actually works as documentation — Heartw
 
 ### Safari findings
 
-(`packages/engine/src/routes/arbor/garden/+page.svelte`)
+(`libs/engine/src/routes/arbor/garden/+page.svelte`)
 
 - [x] Post list with GlassCard table styling
 - [x] Draft/published status indicators
@@ -264,7 +264,7 @@ Every tool has a nature metaphor that actually works as documentation — Heartw
 
 ### Safari findings
 
-(`packages/engine/src/routes/arbor/garden/new/+page.svelte` — 820 lines)
+(`libs/engine/src/routes/arbor/garden/new/+page.svelte` — 820 lines)
 
 **Writing surface:**
 
@@ -299,7 +299,7 @@ Every tool has a nature metaphor that actually works as documentation — Heartw
 
 ### Safari findings
 
-(`packages/engine/src/routes/arbor/analytics/+page.svelte` — 109 lines)
+(`libs/engine/src/routes/arbor/analytics/+page.svelte` — 109 lines)
 
 - [x] Coming in "Full Bloom (Early Summer)" phase
 - [x] Philosophy: "Private by Default. Delayed by Design."
@@ -317,7 +317,7 @@ Every tool has a nature metaphor that actually works as documentation — Heartw
 
 ### Safari findings
 
-(`packages/engine/src/routes/arbor/images/+page.svelte` — 2047 lines)
+(`libs/engine/src/routes/arbor/images/+page.svelte` — 2047 lines)
 
 - [x] Drag-and-drop upload with per-file progress tracking
 - [x] AI Analysis toggle for smart naming, descriptions, and alt text generation
@@ -338,7 +338,7 @@ Every tool has a nature metaphor that actually works as documentation — Heartw
 
 ### Safari findings
 
-(`packages/engine/src/routes/arbor/curios/+page.svelte` — 533 lines)
+(`libs/engine/src/routes/arbor/curios/+page.svelte` — 533 lines)
 
 | Category    | Curios                                                                            |
 | ----------- | --------------------------------------------------------------------------------- |
@@ -361,7 +361,7 @@ Every tool has a nature metaphor that actually works as documentation — Heartw
 
 ### Safari findings
 
-(`packages/engine/src/routes/arbor/settings/+page.svelte` — 1741 lines)
+(`libs/engine/src/routes/arbor/settings/+page.svelte` — 1741 lines)
 
 - [x] **Profile Photo** — Upload with preview
 - [x] **Preferences** — Grove Mode toggle (standard vs grove-speak)
@@ -381,7 +381,7 @@ Every tool has a nature metaphor that actually works as documentation — Heartw
 
 ### Safari findings
 
-(`packages/meadow/src/routes/+page.svelte` — 211 lines)
+(`apps/meadow/src/routes/+page.svelte` — 211 lines)
 
 - [x] Seasonal logo, tagline "Where the forest opens up"
 - [x] 4 philosophy cards: opt-in, chronological, private voting, authentic reactions
@@ -396,7 +396,7 @@ Every tool has a nature metaphor that actually works as documentation — Heartw
 
 ### Safari findings
 
-(`packages/meadow/src/routes/feed/+page.svelte` — 273 lines)
+(`apps/meadow/src/routes/feed/+page.svelte` — 273 lines)
 
 - [x] ComposeBox at top (auth-gated) — "Leave a note in the meadow..."
 - [x] FeedFilters: All, Notes, Blooms, Popular, Hot, Top, Following
@@ -474,7 +474,7 @@ Every tool has a nature metaphor that actually works as documentation — Heartw
 
 ### Safari findings
 
-(`packages/meadow/src/routes/feed/[id]/+page.svelte` — 310 lines)
+(`apps/meadow/src/routes/feed/[id]/+page.svelte` — 310 lines)
 
 - [x] Full article in `glass-grove` card with author header, content, tags, reaction counts
 - [x] Note view: rich HTML or plain text with `whitespace-pre-wrap`
@@ -491,7 +491,7 @@ Every tool has a nature metaphor that actually works as documentation — Heartw
 
 ### Safari findings
 
-(`packages/plant/` — 7 page routes, 14 API endpoints, ~2,469 lines server code)
+(`apps/plant/` — 7 page routes, 14 API endpoints, ~2,469 lines server code)
 
 **Onboarding flow (linear):**
 
@@ -522,7 +522,7 @@ Every tool has a nature metaphor that actually works as documentation — Heartw
 
 ### Safari findings
 
-(`packages/clearing/` — 8 routes, 7 components, ~3,500 lines total)
+(`apps/clearing/` — 8 routes, 7 components, ~3,500 lines total)
 
 **What it monitors:**
 
@@ -559,7 +559,7 @@ Every tool has a nature metaphor that actually works as documentation — Heartw
 
 ### Safari findings
 
-(`packages/terrarium/` — 133 lines routing; engine canvas system — ~2,961 lines)
+(`apps/terrarium/` — 133 lines routing; engine canvas system — ~2,961 lines)
 
 **What's built and working:**
 
@@ -590,7 +590,7 @@ Every tool has a nature metaphor that actually works as documentation — Heartw
 
 ### Safari findings
 
-(`packages/heartwood/` — 14 route files, 30 unit tests, 4 E2E suites)
+(`services/heartwood/` — 14 route files, 30 unit tests, 4 E2E suites)
 
 **Authentication methods:**
 
@@ -636,7 +636,7 @@ Every tool has a nature metaphor that actually works as documentation — Heartw
 
 ### Safari findings
 
-(`packages/login/` — 9 route files, ~25 total files)
+(`apps/login/` — 9 route files, ~25 total files)
 
 - [x] Glassmorphic card: "Welcome back, Wanderer" with three sign-in options
 - [x] Google OAuth (with colors icon), Passkey (with Waystone tooltip), Email magic link
@@ -657,7 +657,7 @@ Every tool has a nature metaphor that actually works as documentation — Heartw
 
 ### Safari findings
 
-(`packages/grove-router/src/index.ts` — 313 lines)
+(`services/grove-router/src/index.ts` — 313 lines)
 
 - [x] Maps subdomains to service bindings: `plant` → Pages project, `cdn` → R2, `auth` → login hub, `{username}` → tenant blog
 - [x] R2 serving with content-type detection and XSS prevention via Content-Disposition headers
@@ -672,7 +672,7 @@ Every tool has a nature metaphor that actually works as documentation — Heartw
 
 ### Safari findings
 
-(`packages/og-worker/src/index.ts` — 803 lines)
+(`services/og-worker/src/index.ts` — 803 lines)
 
 - [x] `workers-og` (Satori) for image generation
 - [x] Multi-layer font caching: memory → KV → CDN → Google Fonts fallback
@@ -688,7 +688,7 @@ Every tool has a nature metaphor that actually works as documentation — Heartw
 
 ### Safari findings
 
-(`packages/post-migrator/src/index.ts` — 682 lines)
+(`workers/post-migrator/src/index.ts` — 682 lines)
 
 - [x] Designed to migrate post content D1 → R2 based on view counts and age
 - [x] Tier-based thresholds (evergreen posts stay hot longer)
@@ -703,7 +703,7 @@ Every tool has a nature metaphor that actually works as documentation — Heartw
 
 ### Safari findings
 
-(`packages/durable-objects/` — 45-line index, ~2000+ lines across DOs)
+(`services/durable-objects/` — 45-line index, ~2000+ lines across DOs)
 
 | DO                | Lines | Purpose                                                     |
 | ----------------- | ----- | ----------------------------------------------------------- |
@@ -723,7 +723,7 @@ Every tool has a nature metaphor that actually works as documentation — Heartw
 
 ### Safari findings
 
-(`packages/workers/`)
+(`workers/`)
 
 | Worker               | Schedule     | Job                                                                             |
 | -------------------- | ------------ | ------------------------------------------------------------------------------- |
@@ -742,7 +742,7 @@ The **meadow-poller** is how Blooms get into the Meadow feed — it's the RSS in
 
 ### Safari findings
 
-(`packages/domains/`)
+(`apps/domains/`)
 
 - [x] Auth via Heartwood SessionDO with D1 session fallback
 - [x] AI-powered "vibe check" for domain suggestions
@@ -758,7 +758,7 @@ The **meadow-poller** is how Blooms get into the Meadow feed — it's the RSS in
 
 ### Safari findings
 
-(`packages/vineyard/`)
+(`libs/vineyard/`)
 
 - [x] VineyardLayout (222 lines) — Hero + branding
 - [x] FeatureCard — Status badges + demos
@@ -775,7 +775,7 @@ Three packages with no source code:
 
 - **zig-core** — Placeholder for future Zig performance experiments
 - **example-site** — Was a demo SvelteKit site, source files removed
-- **ui** — Placeholder (actual UI lives in `packages/engine/src/lib/ui/`)
+- **ui** — Placeholder (actual UI lives in `libs/engine/src/lib/ui/`)
 
 ---
 

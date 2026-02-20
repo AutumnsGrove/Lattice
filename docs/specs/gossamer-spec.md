@@ -37,7 +37,7 @@ type: tech-spec
                       ╰─────────────╯
 ```
 
-> *Threads of light.*
+> _Threads of light._
 
 A system of 2D ASCII visual effects for Grove's Glass UI. Gossamer brings warmth and whimsy through character-based visuals: floating clouds, gentle patterns, ambient backgrounds, and image transformations. Simple, charming, performant.
 
@@ -75,6 +75,7 @@ Gossamer is an **open source project** published to NPM. While born in the Grove
 ### The Vision
 
 ASCII art effects that feel like they belong in Grove:
+
 - **Warm, not cold** — soft characters, gentle animations
 - **Whimsical, not sterile** — organic patterns, not grids
 - **Performant, not heavy** — 2D Canvas, not WebGL (for now)
@@ -82,12 +83,12 @@ ASCII art effects that feel like they belong in Grove:
 
 ### Why ASCII?
 
-| Benefit | Explanation |
-|---------|-------------|
-| **Renders fast** | No images to load, just characters on canvas |
-| **Scales perfectly** | Characters are resolution-independent |
-| **Feels handmade** | ASCII has an inherent warmth, a lo-fi charm |
-| **No design work** | Character sets already exist—just choose wisely |
+| Benefit              | Explanation                                        |
+| -------------------- | -------------------------------------------------- |
+| **Renders fast**     | No images to load, just characters on canvas       |
+| **Scales perfectly** | Characters are resolution-independent              |
+| **Feels handmade**   | ASCII has an inherent warmth, a lo-fi charm        |
+| **No design work**   | Character sets already exist—just choose wisely    |
 | **Unique aesthetic** | Stands out from the React gradient blur blob crowd |
 
 ### Inspiration Sources
@@ -115,13 +116,13 @@ Brightness:  ░░░░░░░░░░░░░░░░   →   Character:
 
 **Standard character sets (light → dark):**
 
-| Name | Characters | Best For |
-|------|------------|----------|
-| **Standard** | ` .:-+*=%@#` | General purpose |
-| **Dense** | ` .',:;clodxkO0KXNWM` | High detail |
-| **Minimal** | ` .:*#` | Clean, simple |
-| **Grove** | ` ·∙•◦○◉●` | Organic, soft |
-| **Nature** | ` .~≈∿⌇☘🌿` | Decorative, themed |
+| Name         | Characters            | Best For           |
+| ------------ | --------------------- | ------------------ |
+| **Standard** | ` .:-+*=%@#`          | General purpose    |
+| **Dense**    | ` .',:;clodxkO0KXNWM` | High detail        |
+| **Minimal**  | ` .:*#`               | Clean, simple      |
+| **Grove**    | ` ·∙•◦○◉●`            | Organic, soft      |
+| **Nature**   | ` .~≈∿⌇☘🌿`           | Decorative, themed |
 
 ### Brightness Calculation
 
@@ -163,31 +164,33 @@ Floating, organic patterns for backgrounds. Think: clouds drifting, fog rolling,
 ```
 
 **Use cases:**
+
 - Glass UI card backgrounds
 - Hero section ambiance
 - Loading state texture
 - Empty state backgrounds
 
 **Props:**
+
 ```typescript
 interface GossamerCloudProps {
-  // Pattern generation
-  pattern?: 'perlin' | 'simplex' | 'waves' | 'static';
-  frequency?: number;          // Pattern scale (default: 0.05)
-  amplitude?: number;          // Pattern intensity (default: 1.0)
+	// Pattern generation
+	pattern?: "perlin" | "simplex" | "waves" | "static";
+	frequency?: number; // Pattern scale (default: 0.05)
+	amplitude?: number; // Pattern intensity (default: 1.0)
 
-  // Appearance
-  characters?: string;         // Character set (default: ' .:-+*')
-  color?: string;              // Character color (default: 'currentColor')
-  opacity?: number;            // Overall opacity (default: 0.3)
+	// Appearance
+	characters?: string; // Character set (default: ' .:-+*')
+	color?: string; // Character color (default: 'currentColor')
+	opacity?: number; // Overall opacity (default: 0.3)
 
-  // Animation
-  animated?: boolean;          // Enable animation (default: true)
-  speed?: number;              // Animation speed (default: 0.5)
+	// Animation
+	animated?: boolean; // Enable animation (default: true)
+	speed?: number; // Animation speed (default: 0.5)
 
-  // Performance
-  cellSize?: number;           // Grid cell size (default: 12)
-  fps?: number;                // Frame rate cap (default: 30)
+	// Performance
+	cellSize?: number; // Grid cell size (default: 12)
+	fps?: number; // Frame rate cap (default: 30)
 }
 ```
 
@@ -205,31 +208,33 @@ Original:                    ASCII:
 ```
 
 **Use cases:**
+
 - Avatar hover effects
 - Image galleries with ASCII previews
 - Print-friendly image representations
 - Artistic transformations
 
 **Props:**
+
 ```typescript
 interface GossamerImageProps {
-  src: string;                 // Image source
-  alt: string;                 // Alt text (required for a11y)
+	src: string; // Image source
+	alt: string; // Alt text (required for a11y)
 
-  // Rendering
-  characters?: string;         // Character set
-  cellSize?: number;           // Detail level (smaller = more detail)
-  color?: string | boolean;    // Mono color or preserve image colors
-  invert?: boolean;            // Flip brightness mapping
+	// Rendering
+	characters?: string; // Character set
+	cellSize?: number; // Detail level (smaller = more detail)
+	color?: string | boolean; // Mono color or preserve image colors
+	invert?: boolean; // Flip brightness mapping
 
-  // Display
-  width?: number;              // Output width
-  height?: number;             // Output height
-  preserveAspectRatio?: boolean;
+	// Display
+	width?: number; // Output width
+	height?: number; // Output height
+	preserveAspectRatio?: boolean;
 
-  // Interaction
-  showOriginalOnHover?: boolean;  // Reveal image on hover
-  transitionDuration?: number;    // Fade duration (ms)
+	// Interaction
+	showOriginalOnHover?: boolean; // Reveal image on hover
+	transitionDuration?: number; // Fade duration (ms)
 }
 ```
 
@@ -248,6 +253,7 @@ Gossamer:      ▓▓▓▓  ▓▓▓▓  ▓▓▓▓  ▓   ▓  ▓▓▓▓
 ```
 
 **Use cases:**
+
 - Hero titles
 - Section headers
 - Decorative typography
@@ -270,23 +276,24 @@ Composite ASCII effects over existing content.
 ```
 
 **Props:**
+
 ```typescript
 interface GossamerOverlayProps {
-  // Blend mode
-  blendMode?: 'overlay' | 'multiply' | 'screen' | 'soft-light';
+	// Blend mode
+	blendMode?: "overlay" | "multiply" | "screen" | "soft-light";
 
-  // Masking
-  maskSource?: 'content' | 'custom';
-  maskElement?: HTMLElement;
+	// Masking
+	maskSource?: "content" | "custom";
+	maskElement?: HTMLElement;
 
-  // Appearance
-  characters?: string;
-  color?: string;
-  opacity?: number;
+	// Appearance
+	characters?: string;
+	color?: string;
+	opacity?: number;
 
-  // Animation
-  animated?: boolean;
-  pattern?: string;
+	// Animation
+	animated?: boolean;
+	pattern?: string;
 }
 ```
 
@@ -303,6 +310,7 @@ ASCII-styled borders and frames for containers.
 ```
 
 **Border styles:**
+
 ```
 Simple:     ·····        Dots:      . . . .
             ·   ·                   .     .
@@ -371,32 +379,32 @@ github.com/AutumnsGrove/Gossamer/
 
 ### NPM Packages
 
-| Package | Description | Status |
-|---------|-------------|--------|
-| `gossamer` | Core vanilla JS library | v1.0 |
-| `@gossamer/svelte` | Svelte component wrappers | v1.0 |
-| `@gossamer/react` | React component wrappers | Planned |
-| `@gossamer/vue` | Vue component wrappers | Planned |
+| Package            | Description               | Status  |
+| ------------------ | ------------------------- | ------- |
+| `gossamer`         | Core vanilla JS library   | v1.0    |
+| `@gossamer/svelte` | Svelte component wrappers | v1.0    |
+| `@gossamer/react`  | React component wrappers  | Planned |
+| `@gossamer/vue`    | Vue component wrappers    | Planned |
 
 ### Grove Integration
 
-Grove uses `@gossamer/svelte` as a dependency in `packages/engine`:
+Grove uses `@gossamer/svelte` as a dependency in `libs/engine`:
 
 ```json
-// packages/engine/package.json
+// libs/engine/package.json
 {
-  "dependencies": {
-    "@gossamer/svelte": "^1.0.0"
-  }
+	"dependencies": {
+		"@gossamer/svelte": "^1.0.0"
+	}
 }
 ```
 
 Re-exported from the engine for convenience:
 
 ```typescript
-// packages/engine/src/lib/ui/components/gossamer/index.ts
-export * from '@gossamer/svelte';
-export { grovePresets } from './grove-presets';  // Grove-specific presets
+// libs/engine/src/lib/ui/components/gossamer/index.ts
+export * from "@gossamer/svelte";
+export { grovePresets } from "./grove-presets"; // Grove-specific presets
 ```
 
 ### Component Hierarchy
@@ -429,44 +437,29 @@ export { grovePresets } from './grove-presets';  // Grove-specific presets
 
 ```svelte
 <script>
-  import { GossamerClouds, GossamerImage } from '$lib/ui/components/gossamer';
+	import { GossamerClouds, GossamerImage } from "$lib/ui/components/gossamer";
 </script>
 
 <!-- Ambient background -->
-<GossamerClouds
-  pattern="perlin"
-  characters=" ·∙•"
-  color="var(--grove-green)"
-  opacity={0.15}
-/>
+<GossamerClouds pattern="perlin" characters=" ·∙•" color="var(--grove-green)" opacity={0.15} />
 
 <!-- Image transformation -->
-<GossamerImage
-  src="/avatar.jpg"
-  alt="User avatar"
-  cellSize={4}
-  showOriginalOnHover
-/>
+<GossamerImage src="/avatar.jpg" alt="User avatar" cellSize={4} showOriginalOnHover />
 ```
 
 ### With Glass UI
 
 ```svelte
 <script>
-  import { GlassCard } from '$lib/ui/components/ui';
-  import { GossamerClouds } from '$lib/ui/components/gossamer';
+	import { GlassCard } from "$lib/ui/components/ui";
+	import { GossamerClouds } from "$lib/ui/components/gossamer";
 </script>
 
 <GlassCard variant="frosted">
-  <GossamerClouds
-    slot="background"
-    pattern="waves"
-    opacity={0.1}
-    animated
-  />
+	<GossamerClouds slot="background" pattern="waves" opacity={0.1} animated />
 
-  <h2>Card Title</h2>
-  <p>Card content with subtle ASCII background</p>
+	<h2>Card Title</h2>
+	<p>Card content with subtle ASCII background</p>
 </GlassCard>
 ```
 
@@ -474,7 +467,7 @@ export { grovePresets } from './grove-presets';  // Grove-specific presets
 
 ```svelte
 <script>
-  import { GossamerClouds, presets } from '$lib/ui/components/gossamer';
+	import { GossamerClouds, presets } from "$lib/ui/components/gossamer";
 </script>
 
 <!-- Using a preset -->
@@ -483,24 +476,20 @@ export { grovePresets } from './grove-presets';  // Grove-specific presets
 <GossamerClouds preset="autumn-leaves" />
 
 <!-- Presets with overrides -->
-<GossamerClouds
-  preset="grove-mist"
-  speed={0.3}
-  opacity={0.2}
-/>
+<GossamerClouds preset="grove-mist" speed={0.3} opacity={0.2} />
 ```
 
 ### Available Presets
 
-| Preset | Description | Characters | Animation |
-|--------|-------------|------------|-----------|
-| `grove-mist` | Soft fog effect | `·∙•◦` | Slow drift |
-| `grove-fireflies` | Twinkling points | `·*✦✧` | Random flicker |
-| `grove-rain` | Gentle rain lines | `│\|/` | Downward flow |
-| `winter-snow` | Falling snow | `·∙*❄` | Drift + fall |
-| `autumn-leaves` | Scattered leaves | `🍂·∙` | Tumble |
-| `spring-petals` | Floating petals | `·✿❀` | Float + spin |
-| `summer-heat` | Heat shimmer | `~≈∿` | Wave distortion |
+| Preset            | Description       | Characters | Animation       |
+| ----------------- | ----------------- | ---------- | --------------- |
+| `grove-mist`      | Soft fog effect   | `·∙•◦`     | Slow drift      |
+| `grove-fireflies` | Twinkling points  | `·*✦✧`     | Random flicker  |
+| `grove-rain`      | Gentle rain lines | `│\|/`     | Downward flow   |
+| `winter-snow`     | Falling snow      | `·∙*❄`     | Drift + fall    |
+| `autumn-leaves`   | Scattered leaves  | `🍂·∙`     | Tumble          |
+| `spring-petals`   | Floating petals   | `·✿❀`      | Float + spin    |
+| `summer-heat`     | Heat shimmer      | `~≈∿`      | Wave distortion |
 
 ---
 
@@ -512,99 +501,101 @@ export { grovePresets } from './grove-presets';  // Grove-specific presets
 // core/renderer.ts
 
 export interface RenderConfig {
-  canvas: HTMLCanvasElement;
-  characters: string;
-  cellSize: number;
-  color: string;
-  brightness: (r: number, g: number, b: number) => number;
+	canvas: HTMLCanvasElement;
+	characters: string;
+	cellSize: number;
+	color: string;
+	brightness: (r: number, g: number, b: number) => number;
 }
 
 export class GossamerRenderer {
-  private ctx: CanvasRenderingContext2D;
-  private config: RenderConfig;
-  private animationId: number | null = null;
+	private ctx: CanvasRenderingContext2D;
+	private config: RenderConfig;
+	private animationId: number | null = null;
 
-  constructor(canvas: HTMLCanvasElement, config: Partial<RenderConfig>) {
-    this.ctx = canvas.getContext('2d')!;
-    this.config = {
-      canvas,
-      characters: ' .:-+*=%@#',
-      cellSize: 8,
-      color: '#22c55e',
-      brightness: (r, g, b) => 0.21 * r + 0.72 * g + 0.07 * b,
-      ...config
-    };
-  }
+	constructor(canvas: HTMLCanvasElement, config: Partial<RenderConfig>) {
+		this.ctx = canvas.getContext("2d")!;
+		this.config = {
+			canvas,
+			characters: " .:-+*=%@#",
+			cellSize: 8,
+			color: "#22c55e",
+			brightness: (r, g, b) => 0.21 * r + 0.72 * g + 0.07 * b,
+			...config,
+		};
+	}
 
-  // Render a single frame from image data
-  renderFrame(imageData: ImageData): void {
-    const { canvas, characters, cellSize, color } = this.config;
-    const { width, height, data } = imageData;
+	// Render a single frame from image data
+	renderFrame(imageData: ImageData): void {
+		const { canvas, characters, cellSize, color } = this.config;
+		const { width, height, data } = imageData;
 
-    this.ctx.clearRect(0, 0, canvas.width, canvas.height);
-    this.ctx.fillStyle = color;
-    this.ctx.font = `${cellSize}px monospace`;
-    this.ctx.textBaseline = 'top';
+		this.ctx.clearRect(0, 0, canvas.width, canvas.height);
+		this.ctx.fillStyle = color;
+		this.ctx.font = `${cellSize}px monospace`;
+		this.ctx.textBaseline = "top";
 
-    for (let y = 0; y < height; y += cellSize) {
-      for (let x = 0; x < width; x += cellSize) {
-        const brightness = this.getCellBrightness(data, x, y, width, cellSize);
-        const charIndex = Math.floor(brightness * characters.length / 255);
-        const char = characters[Math.min(charIndex, characters.length - 1)];
+		for (let y = 0; y < height; y += cellSize) {
+			for (let x = 0; x < width; x += cellSize) {
+				const brightness = this.getCellBrightness(data, x, y, width, cellSize);
+				const charIndex = Math.floor((brightness * characters.length) / 255);
+				const char = characters[Math.min(charIndex, characters.length - 1)];
 
-        this.ctx.fillText(char, x, y);
-      }
-    }
-  }
+				this.ctx.fillText(char, x, y);
+			}
+		}
+	}
 
-  private getCellBrightness(
-    data: Uint8ClampedArray,
-    x: number, y: number,
-    width: number, cellSize: number
-  ): number {
-    let total = 0;
-    let count = 0;
+	private getCellBrightness(
+		data: Uint8ClampedArray,
+		x: number,
+		y: number,
+		width: number,
+		cellSize: number,
+	): number {
+		let total = 0;
+		let count = 0;
 
-    for (let cy = 0; cy < cellSize; cy++) {
-      for (let cx = 0; cx < cellSize; cx++) {
-        const px = ((y + cy) * width + (x + cx)) * 4;
-        if (px < data.length) {
-          total += this.config.brightness(data[px], data[px + 1], data[px + 2]);
-          count++;
-        }
-      }
-    }
+		for (let cy = 0; cy < cellSize; cy++) {
+			for (let cx = 0; cx < cellSize; cx++) {
+				const px = ((y + cy) * width + (x + cx)) * 4;
+				if (px < data.length) {
+					total += this.config.brightness(data[px], data[px + 1], data[px + 2]);
+					count++;
+				}
+			}
+		}
 
-    return count > 0 ? total / count : 0;
-  }
+		return count > 0 ? total / count : 0;
+	}
 
-  // Animation loop
-  startAnimation(updateFn: (time: number) => ImageData, fps: number = 30): void {
-    const interval = 1000 / fps;
-    let lastTime = 0;
+	// Animation loop
+	startAnimation(updateFn: (time: number) => ImageData, fps: number = 30): void {
+		const interval = 1000 / fps;
+		let lastTime = 0;
 
-    const animate = (time: number) => {
-      if (time - lastTime >= interval) {
-        const imageData = updateFn(time);
-        this.renderFrame(imageData);
-        lastTime = time;
-      }
-      this.animationId = requestAnimationFrame(animate);
-    };
+		const animate = (time: number) => {
+			if (time - lastTime >= interval) {
+				const imageData = updateFn(time);
+				this.renderFrame(imageData);
+				lastTime = time;
+			}
+			this.animationId = requestAnimationFrame(animate);
+		};
 
-    this.animationId = requestAnimationFrame(animate);
-  }
+		this.animationId = requestAnimationFrame(animate);
+	}
 
-  stopAnimation(): void {
-    if (this.animationId) {
-      cancelAnimationFrame(this.animationId);
-      this.animationId = null;
-    }
-  }
+	stopAnimation(): void {
+		if (this.animationId) {
+			cancelAnimationFrame(this.animationId);
+			this.animationId = null;
+		}
+	}
 
-  destroy(): void {
-    this.stopAnimation();
-  }
+	destroy(): void {
+		this.stopAnimation();
+	}
 }
 ```
 
@@ -615,77 +606,81 @@ export class GossamerRenderer {
 
 // Simple Perlin-like noise for organic patterns
 export function perlinNoise2D(x: number, y: number, frequency: number): number {
-  const xi = Math.floor(x * frequency);
-  const yi = Math.floor(y * frequency);
-  const xf = (x * frequency) - xi;
-  const yf = (y * frequency) - yi;
+	const xi = Math.floor(x * frequency);
+	const yi = Math.floor(y * frequency);
+	const xf = x * frequency - xi;
+	const yf = y * frequency - yi;
 
-  // Gradient vectors at corners
-  const n00 = dotGridGradient(xi, yi, x * frequency, y * frequency);
-  const n10 = dotGridGradient(xi + 1, yi, x * frequency, y * frequency);
-  const n01 = dotGridGradient(xi, yi + 1, x * frequency, y * frequency);
-  const n11 = dotGridGradient(xi + 1, yi + 1, x * frequency, y * frequency);
+	// Gradient vectors at corners
+	const n00 = dotGridGradient(xi, yi, x * frequency, y * frequency);
+	const n10 = dotGridGradient(xi + 1, yi, x * frequency, y * frequency);
+	const n01 = dotGridGradient(xi, yi + 1, x * frequency, y * frequency);
+	const n11 = dotGridGradient(xi + 1, yi + 1, x * frequency, y * frequency);
 
-  // Interpolate
-  const fadeX = fade(xf);
-  const fadeY = fade(yf);
+	// Interpolate
+	const fadeX = fade(xf);
+	const fadeY = fade(yf);
 
-  const nx0 = lerp(n00, n10, fadeX);
-  const nx1 = lerp(n01, n11, fadeX);
+	const nx0 = lerp(n00, n10, fadeX);
+	const nx1 = lerp(n01, n11, fadeX);
 
-  return lerp(nx0, nx1, fadeY);
+	return lerp(nx0, nx1, fadeY);
 }
 
 // Wave pattern
 export function wavePattern(
-  x: number, y: number,
-  time: number,
-  config: { frequency: number; amplitude: number; speed: number }
+	x: number,
+	y: number,
+	time: number,
+	config: { frequency: number; amplitude: number; speed: number },
 ): number {
-  const { frequency, amplitude, speed } = config;
-  return Math.sin(x * frequency + time * speed) *
-         Math.cos(y * frequency + time * speed * 0.7) *
-         amplitude;
+	const { frequency, amplitude, speed } = config;
+	return (
+		Math.sin(x * frequency + time * speed) *
+		Math.cos(y * frequency + time * speed * 0.7) *
+		amplitude
+	);
 }
 
 // Generate pattern image data
 export function generatePatternData(
-  width: number, height: number,
-  pattern: 'perlin' | 'waves' | 'static',
-  time: number = 0,
-  config: PatternConfig
+	width: number,
+	height: number,
+	pattern: "perlin" | "waves" | "static",
+	time: number = 0,
+	config: PatternConfig,
 ): ImageData {
-  const data = new Uint8ClampedArray(width * height * 4);
+	const data = new Uint8ClampedArray(width * height * 4);
 
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      let value: number;
+	for (let y = 0; y < height; y++) {
+		for (let x = 0; x < width; x++) {
+			let value: number;
 
-      switch (pattern) {
-        case 'perlin':
-          value = perlinNoise2D(x + time * config.speed, y, config.frequency);
-          break;
-        case 'waves':
-          value = wavePattern(x, y, time, config);
-          break;
-        case 'static':
-        default:
-          value = Math.random();
-      }
+			switch (pattern) {
+				case "perlin":
+					value = perlinNoise2D(x + time * config.speed, y, config.frequency);
+					break;
+				case "waves":
+					value = wavePattern(x, y, time, config);
+					break;
+				case "static":
+				default:
+					value = Math.random();
+			}
 
-      // Normalize to 0-255
-      const brightness = Math.floor((value + 1) * 0.5 * 255 * config.amplitude);
-      const clamped = Math.max(0, Math.min(255, brightness));
+			// Normalize to 0-255
+			const brightness = Math.floor((value + 1) * 0.5 * 255 * config.amplitude);
+			const clamped = Math.max(0, Math.min(255, brightness));
 
-      const i = (y * width + x) * 4;
-      data[i] = clamped;     // R
-      data[i + 1] = clamped; // G
-      data[i + 2] = clamped; // B
-      data[i + 3] = 255;     // A
-    }
-  }
+			const i = (y * width + x) * 4;
+			data[i] = clamped; // R
+			data[i + 1] = clamped; // G
+			data[i + 2] = clamped; // B
+			data[i + 3] = 255; // A
+		}
+	}
 
-  return new ImageData(data, width, height);
+	return new ImageData(data, width, height);
 }
 ```
 
@@ -694,84 +689,79 @@ export function generatePatternData(
 ```svelte
 <!-- GossamerClouds.svelte -->
 <script lang="ts">
-  import { onMount, onDestroy } from 'svelte';
-  import { GossamerRenderer } from './core/renderer';
-  import { generatePatternData } from './core/patterns';
-  import type { PatternConfig } from './core/patterns';
+	import { onMount, onDestroy } from "svelte";
+	import { GossamerRenderer } from "./core/renderer";
+	import { generatePatternData } from "./core/patterns";
+	import type { PatternConfig } from "./core/patterns";
 
-  // Props
-  export let pattern: 'perlin' | 'waves' | 'static' = 'perlin';
-  export let characters: string = ' ·∙•◦';
-  export let color: string = 'currentColor';
-  export let opacity: number = 0.3;
-  export let animated: boolean = true;
-  export let speed: number = 0.5;
-  export let frequency: number = 0.05;
-  export let amplitude: number = 1.0;
-  export let cellSize: number = 12;
-  export let fps: number = 30;
+	// Props
+	export let pattern: "perlin" | "waves" | "static" = "perlin";
+	export let characters: string = " ·∙•◦";
+	export let color: string = "currentColor";
+	export let opacity: number = 0.3;
+	export let animated: boolean = true;
+	export let speed: number = 0.5;
+	export let frequency: number = 0.05;
+	export let amplitude: number = 1.0;
+	export let cellSize: number = 12;
+	export let fps: number = 30;
 
-  let canvas: HTMLCanvasElement;
-  let renderer: GossamerRenderer;
-  let width = 0;
-  let height = 0;
+	let canvas: HTMLCanvasElement;
+	let renderer: GossamerRenderer;
+	let width = 0;
+	let height = 0;
 
-  onMount(() => {
-    const resizeObserver = new ResizeObserver(entries => {
-      const entry = entries[0];
-      width = entry.contentRect.width;
-      height = entry.contentRect.height;
-      canvas.width = width;
-      canvas.height = height;
+	onMount(() => {
+		const resizeObserver = new ResizeObserver((entries) => {
+			const entry = entries[0];
+			width = entry.contentRect.width;
+			height = entry.contentRect.height;
+			canvas.width = width;
+			canvas.height = height;
 
-      if (renderer) {
-        renderer.destroy();
-      }
+			if (renderer) {
+				renderer.destroy();
+			}
 
-      renderer = new GossamerRenderer(canvas, { characters, cellSize, color });
+			renderer = new GossamerRenderer(canvas, { characters, cellSize, color });
 
-      if (animated) {
-        const config: PatternConfig = { frequency, amplitude, speed };
-        renderer.startAnimation(
-          (time) => generatePatternData(width, height, pattern, time * 0.001, config),
-          fps
-        );
-      } else {
-        const config: PatternConfig = { frequency, amplitude, speed: 0 };
-        const imageData = generatePatternData(width, height, pattern, 0, config);
-        renderer.renderFrame(imageData);
-      }
-    });
+			if (animated) {
+				const config: PatternConfig = { frequency, amplitude, speed };
+				renderer.startAnimation(
+					(time) => generatePatternData(width, height, pattern, time * 0.001, config),
+					fps,
+				);
+			} else {
+				const config: PatternConfig = { frequency, amplitude, speed: 0 };
+				const imageData = generatePatternData(width, height, pattern, 0, config);
+				renderer.renderFrame(imageData);
+			}
+		});
 
-    resizeObserver.observe(canvas.parentElement!);
+		resizeObserver.observe(canvas.parentElement!);
 
-    return () => {
-      resizeObserver.disconnect();
-      renderer?.destroy();
-    };
-  });
+		return () => {
+			resizeObserver.disconnect();
+			renderer?.destroy();
+		};
+	});
 
-  onDestroy(() => {
-    renderer?.destroy();
-  });
+	onDestroy(() => {
+		renderer?.destroy();
+	});
 </script>
 
-<canvas
-  bind:this={canvas}
-  class="gossamer-clouds"
-  style:opacity
-  aria-hidden="true"
-/>
+<canvas bind:this={canvas} class="gossamer-clouds" style:opacity aria-hidden="true" />
 
 <style>
-  .gossamer-clouds {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 0;
-  }
+	.gossamer-clouds {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		pointer-events: none;
+		z-index: 0;
+	}
 </style>
 ```
 
@@ -820,14 +810,8 @@ Gossamer components have first-class Glass UI support:
 ```svelte
 <!-- Glass card with Gossamer background -->
 <GlassCard variant="frosted" class="relative overflow-hidden">
-  <GossamerClouds
-    slot="background"
-    preset="grove-mist"
-    class="absolute inset-0"
-  />
-  <div class="relative z-10">
-    Content here
-  </div>
+	<GossamerClouds slot="background" preset="grove-mist" class="absolute inset-0" />
+	<div class="relative z-10">Content here</div>
 </GlassCard>
 ```
 
@@ -838,14 +822,9 @@ For the scene builder, Gossamer provides:
 ```svelte
 <!-- Terrarium scene with ASCII atmosphere -->
 <Terrarium>
-  <GossamerOverlay
-    slot="atmosphere"
-    pattern="perlin"
-    opacity={0.05}
-    blendMode="soft-light"
-  />
+	<GossamerOverlay slot="atmosphere" pattern="perlin" opacity={0.05} blendMode="soft-light" />
 
-  <!-- Scene elements go here -->
+	<!-- Scene elements go here -->
 </Terrarium>
 ```
 
@@ -855,12 +834,12 @@ For the scene builder, Gossamer provides:
 
 ### Guidelines
 
-| Factor | Recommendation |
-|--------|----------------|
-| **Cell size** | 8-16px for backgrounds, 4-8px for images |
-| **FPS** | 30fps max for ambient, 60fps for interactive |
-| **Canvas size** | Match container, avoid upscaling |
-| **Animation** | Pause when not visible (Intersection Observer) |
+| Factor          | Recommendation                                 |
+| --------------- | ---------------------------------------------- |
+| **Cell size**   | 8-16px for backgrounds, 4-8px for images       |
+| **FPS**         | 30fps max for ambient, 60fps for interactive   |
+| **Canvas size** | Match container, avoid upscaling               |
+| **Animation**   | Pause when not visible (Intersection Observer) |
 
 ### Visibility-Based Animation
 
@@ -868,25 +847,25 @@ For the scene builder, Gossamer provides:
 // utils/performance.ts
 
 export function createVisibilityObserver(
-  element: HTMLElement,
-  onVisible: () => void,
-  onHidden: () => void
+	element: HTMLElement,
+	onVisible: () => void,
+	onHidden: () => void,
 ): IntersectionObserver {
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          onVisible();
-        } else {
-          onHidden();
-        }
-      });
-    },
-    { threshold: 0.1 }
-  );
+	const observer = new IntersectionObserver(
+		(entries) => {
+			entries.forEach((entry) => {
+				if (entry.isIntersecting) {
+					onVisible();
+				} else {
+					onHidden();
+				}
+			});
+		},
+		{ threshold: 0.1 },
+	);
 
-  observer.observe(element);
-  return observer;
+	observer.observe(element);
+	return observer;
 }
 ```
 
@@ -903,34 +882,31 @@ export function createVisibilityObserver(
 
 ### Requirements
 
-| Requirement | Implementation |
-|-------------|----------------|
+| Requirement         | Implementation                              |
+| ------------------- | ------------------------------------------- |
 | **Decorative only** | `aria-hidden="true"` on all canvas elements |
-| **Reduced motion** | Respect `prefers-reduced-motion` |
-| **No information** | Never convey meaning through Gossamer alone |
-| **Focus visible** | Gossamer never obscures focus indicators |
+| **Reduced motion**  | Respect `prefers-reduced-motion`            |
+| **No information**  | Never convey meaning through Gossamer alone |
+| **Focus visible**   | Gossamer never obscures focus indicators    |
 
 ### Reduced Motion Support
 
 ```svelte
 <script>
-  import { browser } from '$app/environment';
+	import { browser } from "$app/environment";
 
-  let prefersReducedMotion = false;
+	let prefersReducedMotion = false;
 
-  if (browser) {
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    prefersReducedMotion = mediaQuery.matches;
-    mediaQuery.addEventListener('change', (e) => {
-      prefersReducedMotion = e.matches;
-    });
-  }
+	if (browser) {
+		const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+		prefersReducedMotion = mediaQuery.matches;
+		mediaQuery.addEventListener("change", (e) => {
+			prefersReducedMotion = e.matches;
+		});
+	}
 </script>
 
-<GossamerClouds
-  animated={!prefersReducedMotion}
-  {...$$props}
-/>
+<GossamerClouds animated={!prefersReducedMotion} {...$$props} />
 ```
 
 ---
@@ -938,6 +914,7 @@ export function createVisibilityObserver(
 ## Implementation Checklist
 
 ### Phase M1: Core Foundation
+
 - [ ] Create component directory structure
 - [ ] Implement `GossamerRenderer` class
 - [ ] Implement brightness calculation utilities
@@ -946,6 +923,7 @@ export function createVisibilityObserver(
 - [ ] Add FPS limiting and animation loop
 
 ### Phase M2: Primary Components
+
 - [ ] Build `GossamerClouds.svelte` with all props
 - [ ] Build `GossamerImage.svelte` with image loading
 - [ ] Implement resize handling with ResizeObserver
@@ -953,12 +931,14 @@ export function createVisibilityObserver(
 - [ ] Create preset system and initial presets
 
 ### Phase M3: Extended Components
+
 - [ ] Build `GossamerText.svelte` for text effects
 - [ ] Build `GossamerOverlay.svelte` for compositing
 - [ ] Build `GossamerBorder.svelte` for ASCII borders
 - [ ] Add blend mode support
 
 ### Phase M4: Integration
+
 - [ ] Create Glass UI integration helpers
 - [ ] Add slot support for GlassCard backgrounds
 - [ ] Build Terrarium integration example
@@ -966,6 +946,7 @@ export function createVisibilityObserver(
 - [ ] Add to engine component exports
 
 ### Phase M5: Polish & Documentation
+
 - [ ] Accessibility audit (aria-hidden, reduced motion)
 - [ ] Performance profiling and optimization
 - [ ] Create usage documentation
@@ -973,6 +954,7 @@ export function createVisibilityObserver(
 - [ ] Add TypeScript types to exports
 
 ### Phase M6: Future (v2)
+
 - [ ] Research Threlte/Three.js integration
 - [ ] Explore WebGL shader-based rendering
 - [ ] Add 3D ASCII post-processing effects
@@ -983,20 +965,26 @@ export function createVisibilityObserver(
 ## Proof of Concept Ideas
 
 ### POC 1: Static Cloud Background
+
 Simplest implementation to validate the approach:
+
 - Single canvas with perlin noise
 - No animation
 - Hardcoded character set
 - Drop into Glass card as background
 
 ### POC 2: Animated Mist
+
 Add animation loop:
+
 - Time-based pattern offset
 - FPS limiting
 - Reduced motion support
 
 ### POC 3: Image to ASCII
+
 Prove the image transformation:
+
 - Load image to hidden canvas
 - Extract pixel data
 - Render as ASCII
@@ -1014,6 +1002,6 @@ Prove the image transformation:
 
 ---
 
-*Created: January 2026*
-*Status: Specification Draft*
-*Next: POC implementation*
+_Created: January 2026_
+_Status: Specification Draft_
+_Next: POC implementation_

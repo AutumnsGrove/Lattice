@@ -145,48 +145,44 @@ Threshold splits into three layers:
 ### The Core Interface
 
 ```typescript
-// packages/engine/src/lib/threshold/types.ts
+// libs/engine/src/lib/threshold/types.ts
 
 /** Result from any rate limit check, regardless of storage backend */
 export interface ThresholdResult {
-  allowed: boolean;
-  remaining: number;
-  resetAt: number; // Unix timestamp (seconds)
-  retryAfter?: number; // Seconds until reset (only when denied)
+	allowed: boolean;
+	remaining: number;
+	resetAt: number; // Unix timestamp (seconds)
+	retryAfter?: number; // Seconds until reset (only when denied)
 }
 
 /** Configuration for a single rate limit check */
 export interface ThresholdCheckOptions {
-  /** Unique key identifying what's being limited (e.g., "auth/login:192.168.1.1") */
-  key: string;
-  /** Maximum requests allowed in the window */
-  limit: number;
-  /** Time window in seconds */
-  windowSeconds: number;
-  /**
-   * Fail behavior on storage errors.
-   * - "open" (default): Allow request, log error
-   * - "closed": Deny request with 503. Use for auth-critical paths.
-   */
-  failMode?: "open" | "closed";
+	/** Unique key identifying what's being limited (e.g., "auth/login:192.168.1.1") */
+	key: string;
+	/** Maximum requests allowed in the window */
+	limit: number;
+	/** Time window in seconds */
+	windowSeconds: number;
+	/**
+	 * Fail behavior on storage errors.
+	 * - "open" (default): Allow request, log error
+	 * - "closed": Deny request with 503. Use for auth-critical paths.
+	 */
+	failMode?: "open" | "closed";
 }
 
 /** Storage adapter interface. All backends implement this. */
 export interface ThresholdStore {
-  check(options: ThresholdCheckOptions): Promise<ThresholdResult>;
+	check(options: ThresholdCheckOptions): Promise<ThresholdResult>;
 }
 ```
 
 ### Storage Adapters
 
 ```typescript
-// packages/engine/src/lib/threshold/stores/kv.ts
+// libs/engine/src/lib/threshold/stores/kv.ts
 
-import type {
-  ThresholdStore,
-  ThresholdCheckOptions,
-  ThresholdResult,
-} from "../types.js";
+import type { ThresholdStore, ThresholdCheckOptions, ThresholdResult } from "../types.js";
 
 /**
  * KV-backed rate limiting. Fast, global, eventually consistent.
@@ -196,91 +192,78 @@ import type {
  * due to read-modify-write races. Acceptable for protective limits.
  */
 export class ThresholdKVStore implements ThresholdStore {
-  constructor(
-    private kv: KVNamespace,
-    private namespace = "threshold",
-  ) {}
+	constructor(
+		private kv: KVNamespace,
+		private namespace = "threshold",
+	) {}
 
-  async check(options: ThresholdCheckOptions): Promise<ThresholdResult> {
-    const fullKey = `${this.namespace}:${options.key}`;
-    const now = Math.floor(Date.now() / 1000);
+	async check(options: ThresholdCheckOptions): Promise<ThresholdResult> {
+		const fullKey = `${this.namespace}:${options.key}`;
+		const now = Math.floor(Date.now() / 1000);
 
-    try {
-      const data = await this.kv.get<{ count: number; resetAt: number }>(
-        fullKey,
-        "json",
-      );
+		try {
+			const data = await this.kv.get<{ count: number; resetAt: number }>(fullKey, "json");
 
-      // New window or expired window
-      if (!data || data.resetAt <= now) {
-        const resetAt = now + options.windowSeconds;
-        await this.kv.put(fullKey, JSON.stringify({ count: 1, resetAt }), {
-          expirationTtl: options.windowSeconds,
-        });
-        return { allowed: true, remaining: options.limit - 1, resetAt };
-      }
+			// New window or expired window
+			if (!data || data.resetAt <= now) {
+				const resetAt = now + options.windowSeconds;
+				await this.kv.put(fullKey, JSON.stringify({ count: 1, resetAt }), {
+					expirationTtl: options.windowSeconds,
+				});
+				return { allowed: true, remaining: options.limit - 1, resetAt };
+			}
 
-      // Over limit
-      if (data.count >= options.limit) {
-        return {
-          allowed: false,
-          remaining: 0,
-          resetAt: data.resetAt,
-          retryAfter: data.resetAt - now,
-        };
-      }
+			// Over limit
+			if (data.count >= options.limit) {
+				return {
+					allowed: false,
+					remaining: 0,
+					resetAt: data.resetAt,
+					retryAfter: data.resetAt - now,
+				};
+			}
 
-      // Increment
-      await this.kv.put(
-        fullKey,
-        JSON.stringify({ count: data.count + 1, resetAt: data.resetAt }),
-        { expirationTtl: data.resetAt - now },
-      );
+			// Increment
+			await this.kv.put(fullKey, JSON.stringify({ count: data.count + 1, resetAt: data.resetAt }), {
+				expirationTtl: data.resetAt - now,
+			});
 
-      return {
-        allowed: true,
-        remaining: options.limit - data.count - 1,
-        resetAt: data.resetAt,
-      };
-    } catch (error) {
-      return this.handleError(error, options, now);
-    }
-  }
+			return {
+				allowed: true,
+				remaining: options.limit - data.count - 1,
+				resetAt: data.resetAt,
+			};
+		} catch (error) {
+			return this.handleError(error, options, now);
+		}
+	}
 
-  private handleError(
-    error: unknown,
-    options: ThresholdCheckOptions,
-    now: number,
-  ): ThresholdResult {
-    console.error(
-      "[threshold:kv] Storage error, failing",
-      options.failMode ?? "open",
-      error,
-    );
+	private handleError(
+		error: unknown,
+		options: ThresholdCheckOptions,
+		now: number,
+	): ThresholdResult {
+		console.error("[threshold:kv] Storage error, failing", options.failMode ?? "open", error);
 
-    if (options.failMode === "closed") {
-      return {
-        allowed: false,
-        remaining: 0,
-        resetAt: now + 30,
-        retryAfter: 30,
-      };
-    }
+		if (options.failMode === "closed") {
+			return {
+				allowed: false,
+				remaining: 0,
+				resetAt: now + 30,
+				retryAfter: 30,
+			};
+		}
 
-    // Fail open
-    return { allowed: true, remaining: options.limit, resetAt: 0 };
-  }
+		// Fail open
+		return { allowed: true, remaining: options.limit, resetAt: 0 };
+	}
 }
 ```
 
 ```typescript
-// packages/engine/src/lib/threshold/stores/d1.ts
+// libs/engine/src/lib/threshold/stores/d1.ts
 
-import type {
-  ThresholdStore,
-  ThresholdCheckOptions,
-  ThresholdResult,
-} from "../types.js";
+import type { ThresholdStore, ThresholdCheckOptions, ThresholdResult } from "../types.js";
 
 /**
  * D1-backed rate limiting. Strongly consistent, central.
@@ -294,20 +277,20 @@ import type {
  *   );
  */
 export class ThresholdD1Store implements ThresholdStore {
-  constructor(private db: D1Database) {}
+	constructor(private db: D1Database) {}
 
-  async check(options: ThresholdCheckOptions): Promise<ThresholdResult> {
-    const nowSeconds = Math.floor(Date.now() / 1000);
-    const windowStart = nowSeconds - options.windowSeconds;
+	async check(options: ThresholdCheckOptions): Promise<ThresholdResult> {
+		const nowSeconds = Math.floor(Date.now() / 1000);
+		const windowStart = nowSeconds - options.windowSeconds;
 
-    try {
-      // Single atomic statement: insert-or-increment with window expiry.
-      // If the key doesn't exist or the window has expired, start fresh at count=1.
-      // If the key exists within the current window, increment count.
-      // Returns the resulting row so we can compute remaining/resetAt.
-      const row = await this.db
-        .prepare(
-          `INSERT INTO rate_limits (key, count, window_start)
+		try {
+			// Single atomic statement: insert-or-increment with window expiry.
+			// If the key doesn't exist or the window has expired, start fresh at count=1.
+			// If the key exists within the current window, increment count.
+			// Returns the resulting row so we can compute remaining/resetAt.
+			const row = await this.db
+				.prepare(
+					`INSERT INTO rate_limits (key, count, window_start)
            VALUES (?, 1, ?)
            ON CONFLICT(key) DO UPDATE SET
              count = CASE
@@ -319,101 +302,81 @@ export class ThresholdD1Store implements ThresholdStore {
                ELSE window_start
              END
            RETURNING count, window_start`,
-        )
-        .bind(options.key, nowSeconds, windowStart, windowStart)
-        .first<{ count: number; window_start: number }>();
+				)
+				.bind(options.key, nowSeconds, windowStart, windowStart)
+				.first<{ count: number; window_start: number }>();
 
-      if (!row) {
-        // Should never happen with RETURNING, but fail safely
-        return this.handleError(
-          new Error("RETURNING clause returned no row"),
-          options,
-          nowSeconds,
-        );
-      }
+			if (!row) {
+				// Should never happen with RETURNING, but fail safely
+				return this.handleError(new Error("RETURNING clause returned no row"), options, nowSeconds);
+			}
 
-      const resetAt = row.window_start + options.windowSeconds;
+			const resetAt = row.window_start + options.windowSeconds;
 
-      if (row.count > options.limit) {
-        return {
-          allowed: false,
-          remaining: 0,
-          resetAt,
-          retryAfter: resetAt - nowSeconds,
-        };
-      }
+			if (row.count > options.limit) {
+				return {
+					allowed: false,
+					remaining: 0,
+					resetAt,
+					retryAfter: resetAt - nowSeconds,
+				};
+			}
 
-      return {
-        allowed: true,
-        remaining: options.limit - row.count,
-        resetAt,
-      };
-    } catch (error) {
-      return this.handleError(error, options, nowSeconds);
-    }
-  }
+			return {
+				allowed: true,
+				remaining: options.limit - row.count,
+				resetAt,
+			};
+		} catch (error) {
+			return this.handleError(error, options, nowSeconds);
+		}
+	}
 
-  private handleError(
-    error: unknown,
-    options: ThresholdCheckOptions,
-    nowSeconds: number,
-  ): ThresholdResult {
-    console.error(
-      "[threshold:d1] Storage error, failing",
-      options.failMode ?? "open",
-      error,
-    );
+	private handleError(
+		error: unknown,
+		options: ThresholdCheckOptions,
+		nowSeconds: number,
+	): ThresholdResult {
+		console.error("[threshold:d1] Storage error, failing", options.failMode ?? "open", error);
 
-    if (options.failMode === "closed") {
-      return {
-        allowed: false,
-        remaining: 0,
-        resetAt: nowSeconds + 30,
-        retryAfter: 30,
-      };
-    }
+		if (options.failMode === "closed") {
+			return {
+				allowed: false,
+				remaining: 0,
+				resetAt: nowSeconds + 30,
+				retryAfter: 30,
+			};
+		}
 
-    return { allowed: true, remaining: options.limit, resetAt: 0 };
-  }
+		return { allowed: true, remaining: options.limit, resetAt: 0 };
+	}
 }
 ```
 
 ### The Threshold Class
 
 ````typescript
-// packages/engine/src/lib/threshold/threshold.ts
+// libs/engine/src/lib/threshold/threshold.ts
 
-import type {
-  ThresholdStore,
-  ThresholdResult,
-  ThresholdCheckOptions,
-} from "./types.js";
-import type {
-  TierKey,
-  TierRateLimits,
-  RateLimitConfig,
-} from "../config/tiers.js";
+import type { ThresholdStore, ThresholdResult, ThresholdCheckOptions } from "./types.js";
+import type { TierKey, TierRateLimits, RateLimitConfig } from "../config/tiers.js";
 import { TIERS } from "../config/tiers.js";
+import { ENDPOINT_RATE_LIMITS, ENDPOINT_MAP, type EndpointKey } from "./config.js";
 import {
-  ENDPOINT_RATE_LIMITS,
-  ENDPOINT_MAP,
-  type EndpointKey,
-} from "./config.js";
-import {
-  type AbuseState,
-  type ViolationResult,
-  getAbuseState,
-  recordViolation,
-  isBanned,
-  getBanRemaining,
-  clearAbuseState,
+	type AbuseState,
+	type ViolationResult,
+	getAbuseState,
+	recordViolation,
+	isBanned,
+	getBanRemaining,
+	clearAbuseState,
 } from "./abuse.js";
 
 export interface ThresholdOptions {
-  /** Primary storage backend */
-  store: ThresholdStore;
-  /** Optional KV for abuse tracking (falls back to skipping abuse checks) */
-  abuseKV?: KVNamespace;
+	/** Primary storage backend */
+	store: ThresholdStore;
+	/** Optional KV for abuse tracking (falls back to skipping abuse checks) */
+	abuseKV?: KVNamespace;
 }
 
 /**
@@ -442,138 +405,138 @@ export interface ThresholdOptions {
  * ```
  */
 export class Threshold {
-  private store: ThresholdStore;
-  private abuseKV?: KVNamespace;
+	private store: ThresholdStore;
+	private abuseKV?: KVNamespace;
 
-  constructor(options: ThresholdOptions) {
-    this.store = options.store;
-    this.abuseKV = options.abuseKV;
-  }
+	constructor(options: ThresholdOptions) {
+		this.store = options.store;
+		this.abuseKV = options.abuseKV;
+	}
 
-  // ===========================================================================
-  // Core Check
-  // ===========================================================================
+	// ===========================================================================
+	// Core Check
+	// ===========================================================================
 
-  /** Check a rate limit. The lowest-level call. */
-  async check(options: ThresholdCheckOptions): Promise<ThresholdResult> {
-    return this.store.check(options);
-  }
+	/** Check a rate limit. The lowest-level call. */
+	async check(options: ThresholdCheckOptions): Promise<ThresholdResult> {
+		return this.store.check(options);
+	}
 
-  // ===========================================================================
-  // Tier-Aware Check
-  // ===========================================================================
+	// ===========================================================================
+	// Tier-Aware Check
+	// ===========================================================================
 
-  /**
-   * Check rate limit based on subscription tier.
-   * Looks up limits from the unified tier config.
-   */
-  async checkTier(
-    tier: TierKey,
-    category: keyof TierRateLimits,
-    identifier: string,
-  ): Promise<ThresholdResult> {
-    const config = TIERS[tier].rateLimits[category];
-    return this.store.check({
-      key: `tier:${tier}:${category}:${identifier}`,
-      limit: config.limit,
-      windowSeconds: config.windowSeconds,
-    });
-  }
+	/**
+	 * Check rate limit based on subscription tier.
+	 * Looks up limits from the unified tier config.
+	 */
+	async checkTier(
+		tier: TierKey,
+		category: keyof TierRateLimits,
+		identifier: string,
+	): Promise<ThresholdResult> {
+		const config = TIERS[tier].rateLimits[category];
+		return this.store.check({
+			key: `tier:${tier}:${category}:${identifier}`,
+			limit: config.limit,
+			windowSeconds: config.windowSeconds,
+		});
+	}
 
-  // ===========================================================================
-  // Endpoint-Aware Check
-  // ===========================================================================
+	// ===========================================================================
+	// Endpoint-Aware Check
+	// ===========================================================================
 
-  /**
-   * Check rate limit for a specific endpoint.
-   * Maps method + path to endpoint presets.
-   */
-  async checkEndpoint(
-    method: string,
-    pathname: string,
-    identifier: string,
-    overrides?: Partial<RateLimitConfig>,
-  ): Promise<ThresholdResult> {
-    const mapKey = `${method}:${pathname}`;
-    const endpointKey: EndpointKey = ENDPOINT_MAP[mapKey] ?? "default";
-    const config = ENDPOINT_RATE_LIMITS[endpointKey];
+	/**
+	 * Check rate limit for a specific endpoint.
+	 * Maps method + path to endpoint presets.
+	 */
+	async checkEndpoint(
+		method: string,
+		pathname: string,
+		identifier: string,
+		overrides?: Partial<RateLimitConfig>,
+	): Promise<ThresholdResult> {
+		const mapKey = `${method}:${pathname}`;
+		const endpointKey: EndpointKey = ENDPOINT_MAP[mapKey] ?? "default";
+		const config = ENDPOINT_RATE_LIMITS[endpointKey];
 
-    return this.store.check({
-      key: `ep:${endpointKey}:${identifier}`,
-      limit: overrides?.limit ?? config.limit,
-      windowSeconds: overrides?.windowSeconds ?? config.windowSeconds,
-      failMode: endpointKey.startsWith("auth/") ? "closed" : "open",
-    });
-  }
+		return this.store.check({
+			key: `ep:${endpointKey}:${identifier}`,
+			limit: overrides?.limit ?? config.limit,
+			windowSeconds: overrides?.windowSeconds ?? config.windowSeconds,
+			failMode: endpointKey.startsWith("auth/") ? "closed" : "open",
+		});
+	}
 
-  // ===========================================================================
-  // Tenant Check
-  // ===========================================================================
+	// ===========================================================================
+	// Tenant Check
+	// ===========================================================================
 
-  /**
-   * Check rate limit for a tenant based on their subscription tier.
-   * Categorizes the request automatically from method + path.
-   */
-  async checkTenant(
-    tenantId: string,
-    tier: TierKey,
-    method: string,
-    pathname: string,
-  ): Promise<ThresholdResult> {
-    const category = categorizeRequest(method, pathname);
-    return this.checkTier(tier, category, `tenant:${tenantId}`);
-  }
+	/**
+	 * Check rate limit for a tenant based on their subscription tier.
+	 * Categorizes the request automatically from method + path.
+	 */
+	async checkTenant(
+		tenantId: string,
+		tier: TierKey,
+		method: string,
+		pathname: string,
+	): Promise<ThresholdResult> {
+		const category = categorizeRequest(method, pathname);
+		return this.checkTier(tier, category, `tenant:${tenantId}`);
+	}
 
-  // ===========================================================================
-  // Abuse Tracking
-  // ===========================================================================
+	// ===========================================================================
+	// Abuse Tracking
+	// ===========================================================================
 
-  /**
-   * Check if a user is banned before performing a rate limit check.
-   * Requires abuseKV to be configured.
-   */
-  async checkWithAbuse(
-    options: ThresholdCheckOptions,
-    userId: string,
-  ): Promise<ThresholdResult & { warning?: boolean; banned?: boolean }> {
-    // Check ban status first
-    if (this.abuseKV) {
-      const state = await getAbuseState(this.abuseKV, userId);
-      if (isBanned(state)) {
-        return {
-          allowed: false,
-          remaining: 0,
-          resetAt: state.bannedUntil!,
-          retryAfter: getBanRemaining(state),
-          banned: true,
-        };
-      }
-    }
+	/**
+	 * Check if a user is banned before performing a rate limit check.
+	 * Requires abuseKV to be configured.
+	 */
+	async checkWithAbuse(
+		options: ThresholdCheckOptions,
+		userId: string,
+	): Promise<ThresholdResult & { warning?: boolean; banned?: boolean }> {
+		// Check ban status first
+		if (this.abuseKV) {
+			const state = await getAbuseState(this.abuseKV, userId);
+			if (isBanned(state)) {
+				return {
+					allowed: false,
+					remaining: 0,
+					resetAt: state.bannedUntil!,
+					retryAfter: getBanRemaining(state),
+					banned: true,
+				};
+			}
+		}
 
-    // Perform rate limit check
-    const result = await this.store.check(options);
+		// Perform rate limit check
+		const result = await this.store.check(options);
 
-    // Record violation if denied
-    if (!result.allowed && this.abuseKV) {
-      const violation = await recordViolation(this.abuseKV, userId);
-      return {
-        ...result,
-        warning: violation.warning,
-        banned: violation.banned,
-      };
-    }
+		// Record violation if denied
+		if (!result.allowed && this.abuseKV) {
+			const violation = await recordViolation(this.abuseKV, userId);
+			return {
+				...result,
+				warning: violation.warning,
+				banned: violation.banned,
+			};
+		}
 
-    return result;
-  }
+		return result;
+	}
 
-  /**
-   * Clear abuse state for a user. Admin action.
-   */
-  async clearAbuse(userId: string): Promise<void> {
-    if (this.abuseKV) {
-      await clearAbuseState(this.abuseKV, userId);
-    }
-  }
+	/**
+	 * Clear abuse state for a user. Admin action.
+	 */
+	async clearAbuse(userId: string): Promise<void> {
+		if (this.abuseKV) {
+			await clearAbuseState(this.abuseKV, userId);
+		}
+	}
 }
 
 // =============================================================================
@@ -584,28 +547,25 @@ export class Threshold {
  * Determine the rate limit category for a request.
  * Used by checkTenant() to auto-categorize.
  */
-export function categorizeRequest(
-  method: string,
-  pathname: string,
-): keyof TierRateLimits {
-  if (
-    pathname.startsWith("/api/ai/") ||
-    pathname.startsWith("/api/wisp") ||
-    pathname.startsWith("/api/grove/wisp")
-  ) {
-    return "ai";
-  }
-  if (
-    pathname.startsWith("/api/upload") ||
-    pathname.startsWith("/api/images") ||
-    pathname.startsWith("/api/cdn")
-  ) {
-    return "uploads";
-  }
-  if (["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
-    return "writes";
-  }
-  return "requests";
+export function categorizeRequest(method: string, pathname: string): keyof TierRateLimits {
+	if (
+		pathname.startsWith("/api/ai/") ||
+		pathname.startsWith("/api/wisp") ||
+		pathname.startsWith("/api/grove/wisp")
+	) {
+		return "ai";
+	}
+	if (
+		pathname.startsWith("/api/upload") ||
+		pathname.startsWith("/api/images") ||
+		pathname.startsWith("/api/cdn")
+	) {
+		return "uploads";
+	}
+	if (["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
+		return "writes";
+	}
+	return "requests";
 }
 ````
 
@@ -614,7 +574,7 @@ export function categorizeRequest(
 #### SvelteKit Adapter
 
 ````typescript
-// packages/engine/src/lib/threshold/adapters/sveltekit.ts
+// libs/engine/src/lib/threshold/adapters/sveltekit.ts
 
 import { json } from "@sveltejs/kit";
 import type { ThresholdResult } from "../types.js";
@@ -641,72 +601,68 @@ import type { Threshold } from "../threshold.js";
  * ```
  */
 export async function thresholdCheck(
-  threshold: Threshold,
-  options: Parameters<Threshold["check"]>[0],
+	threshold: Threshold,
+	options: Parameters<Threshold["check"]>[0],
 ): Promise<Response | null> {
-  const result = await threshold.check(options);
+	const result = await threshold.check(options);
 
-  if (!result.allowed) {
-    return json(
-      {
-        error: "rate_limited",
-        message:
-          "You're moving faster than we can keep up! Take a moment and try again soon.",
-        retryAfter: result.retryAfter,
-        resetAt: new Date(result.resetAt * 1000).toISOString(),
-      },
-      {
-        status: 429,
-        headers: thresholdHeaders(result, options.limit),
-      },
-    );
-  }
+	if (!result.allowed) {
+		return json(
+			{
+				error: "rate_limited",
+				message: "You're moving faster than we can keep up! Take a moment and try again soon.",
+				retryAfter: result.retryAfter,
+				resetAt: new Date(result.resetAt * 1000).toISOString(),
+			},
+			{
+				status: 429,
+				headers: thresholdHeaders(result, options.limit),
+			},
+		);
+	}
 
-  return null;
+	return null;
 }
 
 /**
  * Generate rate limit headers for any response.
  */
-export function thresholdHeaders(
-  result: ThresholdResult,
-  limit: number,
-): Record<string, string> {
-  const headers: Record<string, string> = {
-    "X-RateLimit-Limit": String(limit),
-    "X-RateLimit-Remaining": String(result.remaining),
-    "X-RateLimit-Reset": String(result.resetAt),
-  };
+export function thresholdHeaders(result: ThresholdResult, limit: number): Record<string, string> {
+	const headers: Record<string, string> = {
+		"X-RateLimit-Limit": String(limit),
+		"X-RateLimit-Remaining": String(result.remaining),
+		"X-RateLimit-Reset": String(result.resetAt),
+	};
 
-  if (!result.allowed && result.retryAfter) {
-    headers["Retry-After"] = String(result.retryAfter);
-  }
+	if (!result.allowed && result.retryAfter) {
+		headers["Retry-After"] = String(result.retryAfter);
+	}
 
-  return headers;
+	return headers;
 }
 ````
 
 #### Hono Adapter
 
 ````typescript
-// packages/engine/src/lib/threshold/adapters/hono.ts
+// libs/engine/src/lib/threshold/adapters/hono.ts
 
 import type { MiddlewareHandler, Context } from "hono";
 import type { Threshold } from "../threshold.js";
 
 interface ThresholdHonoOptions {
-  /** The Threshold instance */
-  threshold: Threshold;
-  /** Rate limit amount */
-  limit: number;
-  /** Window in seconds */
-  windowSeconds: number;
-  /** Key prefix for this middleware */
-  keyPrefix: string;
-  /** Extract the rate limit key from the request context. Return null to skip. */
-  getKey: (c: Context) => string | null;
-  /** Fail mode for storage errors */
-  failMode?: "open" | "closed";
+	/** The Threshold instance */
+	threshold: Threshold;
+	/** Rate limit amount */
+	limit: number;
+	/** Window in seconds */
+	windowSeconds: number;
+	/** Key prefix for this middleware */
+	keyPrefix: string;
+	/** Extract the rate limit key from the request context. Return null to skip. */
+	getKey: (c: Context) => string | null;
+	/** Fail mode for storage errors */
+	failMode?: "open" | "closed";
 }
 
 /**
@@ -726,45 +682,43 @@ interface ThresholdHonoOptions {
  * }));
  * ```
  */
-export function thresholdMiddleware(
-  options: ThresholdHonoOptions,
-): MiddlewareHandler {
-  return async (c, next) => {
-    // Skip in test environment
-    if ((c.env as Record<string, string>)?.ENVIRONMENT === "test") {
-      return next();
-    }
+export function thresholdMiddleware(options: ThresholdHonoOptions): MiddlewareHandler {
+	return async (c, next) => {
+		// Skip in test environment
+		if ((c.env as Record<string, string>)?.ENVIRONMENT === "test") {
+			return next();
+		}
 
-    const keyPart = options.getKey(c);
-    if (!keyPart) return next();
+		const keyPart = options.getKey(c);
+		if (!keyPart) return next();
 
-    const result = await options.threshold.check({
-      key: `${options.keyPrefix}:${keyPart}`,
-      limit: options.limit,
-      windowSeconds: options.windowSeconds,
-      failMode: options.failMode,
-    });
+		const result = await options.threshold.check({
+			key: `${options.keyPrefix}:${keyPart}`,
+			limit: options.limit,
+			windowSeconds: options.windowSeconds,
+			failMode: options.failMode,
+		});
 
-    // Always set headers
-    c.header("X-RateLimit-Limit", String(options.limit));
-    c.header("X-RateLimit-Remaining", String(result.remaining));
-    c.header("X-RateLimit-Reset", String(result.resetAt));
+		// Always set headers
+		c.header("X-RateLimit-Limit", String(options.limit));
+		c.header("X-RateLimit-Remaining", String(result.remaining));
+		c.header("X-RateLimit-Reset", String(result.resetAt));
 
-    if (!result.allowed) {
-      const retryAfter = result.retryAfter ?? 60;
-      c.header("Retry-After", String(retryAfter));
-      return c.json(
-        {
-          error: "rate_limited",
-          message: "Too many requests. Please try again later.",
-          retry_after: retryAfter,
-        },
-        429,
-      );
-    }
+		if (!result.allowed) {
+			const retryAfter = result.retryAfter ?? 60;
+			c.header("Retry-After", String(retryAfter));
+			return c.json(
+				{
+					error: "rate_limited",
+					message: "Too many requests. Please try again later.",
+					retry_after: retryAfter,
+				},
+				429,
+			);
+		}
 
-    return next();
-  };
+		return next();
+	};
 }
 
 /**
@@ -772,34 +726,34 @@ export function thresholdMiddleware(
  * Use when you need more control than middleware provides.
  */
 export async function thresholdCheck(
-  threshold: Threshold,
-  keyPrefix: string,
-  keyPart: string,
-  limit: number,
-  windowSeconds: number,
+	threshold: Threshold,
+	keyPrefix: string,
+	keyPart: string,
+	limit: number,
+	windowSeconds: number,
 ): Promise<{ allowed: boolean; remaining: number; retryAfter?: number }> {
-  const result = await threshold.check({
-    key: `${keyPrefix}:${keyPart}`,
-    limit,
-    windowSeconds,
-  });
+	const result = await threshold.check({
+		key: `${keyPrefix}:${keyPart}`,
+		limit,
+		windowSeconds,
+	});
 
-  if (!result.allowed) {
-    return {
-      allowed: false,
-      remaining: 0,
-      retryAfter: result.retryAfter,
-    };
-  }
+	if (!result.allowed) {
+		return {
+			allowed: false,
+			remaining: 0,
+			retryAfter: result.retryAfter,
+		};
+	}
 
-  return { allowed: true, remaining: result.remaining };
+	return { allowed: true, remaining: result.remaining };
 }
 ````
 
 #### Bare Worker Adapter
 
 ````typescript
-// packages/engine/src/lib/threshold/adapters/worker.ts
+// libs/engine/src/lib/threshold/adapters/worker.ts
 
 import type { ThresholdResult } from "../types.js";
 import type { Threshold } from "../threshold.js";
@@ -826,44 +780,44 @@ import type { Threshold } from "../threshold.js";
  * ```
  */
 export async function thresholdCheck(
-  threshold: Threshold,
-  options: Parameters<Threshold["check"]>[0],
+	threshold: Threshold,
+	options: Parameters<Threshold["check"]>[0],
 ): Promise<Response | null> {
-  const result = await threshold.check(options);
+	const result = await threshold.check(options);
 
-  if (!result.allowed) {
-    return new Response(
-      JSON.stringify({
-        error: "rate_limited",
-        message: "Too many requests. Please try again later.",
-        retryAfter: result.retryAfter,
-      }),
-      {
-        status: 429,
-        headers: {
-          "Content-Type": "application/json",
-          "Retry-After": String(result.retryAfter ?? 60),
-          "X-RateLimit-Limit": String(options.limit),
-          "X-RateLimit-Remaining": "0",
-          "X-RateLimit-Reset": String(result.resetAt),
-        },
-      },
-    );
-  }
+	if (!result.allowed) {
+		return new Response(
+			JSON.stringify({
+				error: "rate_limited",
+				message: "Too many requests. Please try again later.",
+				retryAfter: result.retryAfter,
+			}),
+			{
+				status: 429,
+				headers: {
+					"Content-Type": "application/json",
+					"Retry-After": String(result.retryAfter ?? 60),
+					"X-RateLimit-Limit": String(options.limit),
+					"X-RateLimit-Remaining": "0",
+					"X-RateLimit-Reset": String(result.resetAt),
+				},
+			},
+		);
+	}
 
-  return null;
+	return null;
 }
 
 /**
  * Get client IP from Cloudflare request headers.
  */
 export function getClientIP(request: Request): string {
-  return (
-    request.headers.get("cf-connecting-ip") ||
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    request.headers.get("x-real-ip") ||
-    "unknown"
-  );
+	return (
+		request.headers.get("cf-connecting-ip") ||
+		request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+		request.headers.get("x-real-ip") ||
+		"unknown"
+	);
 }
 ````
 
@@ -876,7 +830,7 @@ export function getClientIP(request: Request): string {
 All endpoint rate limits live in one file. This is the single source of truth.
 
 ```typescript
-// packages/engine/src/lib/threshold/config.ts
+// libs/engine/src/lib/threshold/config.ts
 
 import type { RateLimitConfig } from "../config/tiers.js";
 
@@ -887,69 +841,69 @@ export type EndpointKey = keyof typeof ENDPOINT_RATE_LIMITS;
  * Applied in addition to tier-based limits.
  */
 export const ENDPOINT_RATE_LIMITS = {
-  // Auth endpoints (most sensitive, fail closed)
-  "auth/login": { limit: 5, windowSeconds: 300 },
-  "auth/callback": { limit: 10, windowSeconds: 300 },
-  "auth/token": { limit: 20, windowSeconds: 60 },
-  "auth/password-reset": { limit: 3, windowSeconds: 3600 },
-  "auth/magic-link": { limit: 5, windowSeconds: 900 },
-  "auth/verify": { limit: 100, windowSeconds: 60 },
+	// Auth endpoints (most sensitive, fail closed)
+	"auth/login": { limit: 5, windowSeconds: 300 },
+	"auth/callback": { limit: 10, windowSeconds: 300 },
+	"auth/token": { limit: 20, windowSeconds: 60 },
+	"auth/password-reset": { limit: 3, windowSeconds: 3600 },
+	"auth/magic-link": { limit: 5, windowSeconds: 900 },
+	"auth/verify": { limit: 100, windowSeconds: 60 },
 
-  // Passkey endpoints
-  "auth/passkey-register": { limit: 5, windowSeconds: 3600 },
-  "auth/passkey-delete": { limit: 10, windowSeconds: 3600 },
-  "auth/passkey-auth": { limit: 20, windowSeconds: 60 },
+	// Passkey endpoints
+	"auth/passkey-register": { limit: 5, windowSeconds: 3600 },
+	"auth/passkey-delete": { limit: 10, windowSeconds: 3600 },
+	"auth/passkey-auth": { limit: 20, windowSeconds: 60 },
 
-  // Session endpoints
-  "session/validate": { limit: 30, windowSeconds: 60 },
-  "session/revoke": { limit: 30, windowSeconds: 60 },
-  "session/revoke-all": { limit: 3, windowSeconds: 3600 },
-  "session/list": { limit: 30, windowSeconds: 60 },
-  "session/delete": { limit: 20, windowSeconds: 60 },
-  "session/check": { limit: 60, windowSeconds: 60 },
-  "session/service": { limit: 100, windowSeconds: 60 },
+	// Session endpoints
+	"session/validate": { limit: 30, windowSeconds: 60 },
+	"session/revoke": { limit: 30, windowSeconds: 60 },
+	"session/revoke-all": { limit: 3, windowSeconds: 3600 },
+	"session/list": { limit: 30, windowSeconds: 60 },
+	"session/delete": { limit: 20, windowSeconds: 60 },
+	"session/check": { limit: 60, windowSeconds: 60 },
+	"session/service": { limit: 100, windowSeconds: 60 },
 
-  // Device code flow
-  "device/init": { limit: 10, windowSeconds: 60 },
-  "device/poll": { limit: 12, windowSeconds: 60 },
+	// Device code flow
+	"device/init": { limit: 10, windowSeconds: 60 },
+	"device/poll": { limit: 12, windowSeconds: 60 },
 
-  // Admin endpoints
-  "admin/general": { limit: 30, windowSeconds: 60 },
+	// Admin endpoints
+	"admin/general": { limit: 30, windowSeconds: 60 },
 
-  // Subscription endpoints
-  "subscription/read": { limit: 30, windowSeconds: 60 },
-  "subscription/write": { limit: 10, windowSeconds: 60 },
+	// Subscription endpoints
+	"subscription/read": { limit: 30, windowSeconds: 60 },
+	"subscription/write": { limit: 10, windowSeconds: 60 },
 
-  // Write endpoints
-  "posts/create": { limit: 10, windowSeconds: 3600 },
-  "posts/update": { limit: 30, windowSeconds: 3600 },
-  "comments/create": { limit: 20, windowSeconds: 300 },
+	// Write endpoints
+	"posts/create": { limit: 10, windowSeconds: 3600 },
+	"posts/update": { limit: 30, windowSeconds: 3600 },
+	"comments/create": { limit: 20, windowSeconds: 300 },
 
-  // Upload endpoints
-  "upload/image": { limit: 20, windowSeconds: 3600 },
-  "upload/media": { limit: 10, windowSeconds: 3600 },
+	// Upload endpoints
+	"upload/image": { limit: 20, windowSeconds: 3600 },
+	"upload/media": { limit: 10, windowSeconds: 3600 },
 
-  // AI endpoints (expensive)
-  "ai/wisp": { limit: 50, windowSeconds: 86400 },
-  "ai/fireside": { limit: 50, windowSeconds: 86400 },
-  "ai/draft": { limit: 20, windowSeconds: 86400 },
+	// AI endpoints (expensive)
+	"ai/wisp": { limit: 50, windowSeconds: 86400 },
+	"ai/fireside": { limit: 50, windowSeconds: 86400 },
+	"ai/draft": { limit: 20, windowSeconds: 86400 },
 
-  // Data operations
-  "export/data": { limit: 10, windowSeconds: 3600 },
-  "export/zip-start": { limit: 3, windowSeconds: 86400 },
-  "billing/operations": { limit: 20, windowSeconds: 3600 },
+	// Data operations
+	"export/data": { limit: 10, windowSeconds: 3600 },
+	"export/zip-start": { limit: 3, windowSeconds: 86400 },
+	"billing/operations": { limit: 20, windowSeconds: 3600 },
 
-  // Feedback
-  "trace/submit": { limit: 10, windowSeconds: 86400 },
+	// Feedback
+	"trace/submit": { limit: 10, windowSeconds: 86400 },
 
-  // Username checking (anti-enumeration)
-  "check/username": { limit: 30, windowSeconds: 60 },
+	// Username checking (anti-enumeration)
+	"check/username": { limit: 30, windowSeconds: 60 },
 
-  // OG image generation
-  "og/generate": { limit: 100, windowSeconds: 3600 },
+	// OG image generation
+	"og/generate": { limit: 100, windowSeconds: 3600 },
 
-  // Default for unspecified endpoints
-  default: { limit: 100, windowSeconds: 60 },
+	// Default for unspecified endpoints
+	default: { limit: 100, windowSeconds: 60 },
 } as const satisfies Record<string, RateLimitConfig>;
 
 /**
@@ -957,36 +911,36 @@ export const ENDPOINT_RATE_LIMITS = {
  * Extend this as new endpoints are added.
  */
 export const ENDPOINT_MAP: Record<string, EndpointKey> = {
-  "POST:/api/auth/login": "auth/login",
-  "POST:/api/auth/token": "auth/token",
-  "POST:/api/auth/password-reset": "auth/password-reset",
-  "POST:/api/auth/magic-link": "auth/magic-link",
-  "POST:/api/blooms": "posts/create",
-  "PUT:/api/blooms": "posts/update",
-  "PATCH:/api/blooms": "posts/update",
-  "POST:/api/posts": "posts/create",
-  "PUT:/api/posts": "posts/update",
-  "PATCH:/api/posts": "posts/update",
-  "POST:/api/comments": "comments/create",
-  "POST:/api/upload": "upload/image",
-  "POST:/api/images": "upload/image",
-  "POST:/api/grove/wisp": "ai/wisp",
-  "POST:/api/ai/wisp": "ai/wisp",
-  "POST:/api/ai/fireside": "ai/fireside",
-  "POST:/api/ai/draft": "ai/draft",
-  "POST:/api/export": "export/data",
-  "POST:/api/export/start": "export/zip-start",
-  "POST:/api/billing": "billing/operations",
-  "PATCH:/api/billing": "billing/operations",
-  "PUT:/api/billing": "billing/operations",
-  "POST:/api/trace": "trace/submit",
-  "GET:/api/check-username": "check/username",
+	"POST:/api/auth/login": "auth/login",
+	"POST:/api/auth/token": "auth/token",
+	"POST:/api/auth/password-reset": "auth/password-reset",
+	"POST:/api/auth/magic-link": "auth/magic-link",
+	"POST:/api/blooms": "posts/create",
+	"PUT:/api/blooms": "posts/update",
+	"PATCH:/api/blooms": "posts/update",
+	"POST:/api/posts": "posts/create",
+	"PUT:/api/posts": "posts/update",
+	"PATCH:/api/posts": "posts/update",
+	"POST:/api/comments": "comments/create",
+	"POST:/api/upload": "upload/image",
+	"POST:/api/images": "upload/image",
+	"POST:/api/grove/wisp": "ai/wisp",
+	"POST:/api/ai/wisp": "ai/wisp",
+	"POST:/api/ai/fireside": "ai/fireside",
+	"POST:/api/ai/draft": "ai/draft",
+	"POST:/api/export": "export/data",
+	"POST:/api/export/start": "export/zip-start",
+	"POST:/api/billing": "billing/operations",
+	"PATCH:/api/billing": "billing/operations",
+	"PUT:/api/billing": "billing/operations",
+	"POST:/api/trace": "trace/submit",
+	"GET:/api/check-username": "check/username",
 };
 ```
 
 ### Tier Limits
 
-Tier-based rate limits are NOT duplicated here. They live in the unified tier config at `packages/engine/src/lib/config/tiers.ts` and Threshold reads them directly. This means tier limits stay in sync with pricing, features, and display automatically.
+Tier-based rate limits are NOT duplicated here. They live in the unified tier config at `libs/engine/src/lib/config/tiers.ts` and Threshold reads them directly. This means tier limits stay in sync with pricing, features, and display automatically.
 
 ---
 
@@ -1034,22 +988,22 @@ Abuse tracking always uses KV (it's protective, not billing-critical, and eventu
 
 ```json
 {
-  "./threshold": {
-    "types": "./dist/threshold/index.d.ts",
-    "default": "./dist/threshold/index.js"
-  },
-  "./threshold/sveltekit": {
-    "types": "./dist/threshold/adapters/sveltekit.d.ts",
-    "default": "./dist/threshold/adapters/sveltekit.js"
-  },
-  "./threshold/hono": {
-    "types": "./dist/threshold/adapters/hono.d.ts",
-    "default": "./dist/threshold/adapters/hono.js"
-  },
-  "./threshold/worker": {
-    "types": "./dist/threshold/adapters/worker.d.ts",
-    "default": "./dist/threshold/adapters/worker.js"
-  }
+	"./threshold": {
+		"types": "./dist/threshold/index.d.ts",
+		"default": "./dist/threshold/index.js"
+	},
+	"./threshold/sveltekit": {
+		"types": "./dist/threshold/adapters/sveltekit.d.ts",
+		"default": "./dist/threshold/adapters/sveltekit.js"
+	},
+	"./threshold/hono": {
+		"types": "./dist/threshold/adapters/hono.d.ts",
+		"default": "./dist/threshold/adapters/hono.js"
+	},
+	"./threshold/worker": {
+		"types": "./dist/threshold/adapters/worker.d.ts",
+		"default": "./dist/threshold/adapters/worker.js"
+	}
 }
 ```
 
@@ -1128,10 +1082,10 @@ Every 429 response, regardless of framework, uses this shape:
 
 ```json
 {
-  "error": "rate_limited",
-  "message": "You're moving faster than we can keep up! Take a moment and try again soon.",
-  "retryAfter": 45,
-  "resetAt": "2026-02-15T12:00:00.000Z"
+	"error": "rate_limited",
+	"message": "You're moving faster than we can keep up! Take a moment and try again soon.",
+	"retryAfter": 45,
+	"resetAt": "2026-02-15T12:00:00.000Z"
 }
 ```
 
@@ -1196,7 +1150,7 @@ All tests use Vitest. KV and D1 mocked with miniflare or simple mocks. No real C
 
 ### Phase 1: Build the SDK
 
-- [ ] Create `packages/engine/src/lib/threshold/` directory
+- [ ] Create `libs/engine/src/lib/threshold/` directory
 - [ ] `types.ts` — ThresholdResult, ThresholdCheckOptions, ThresholdStore
 - [ ] `stores/kv.ts` — ThresholdKVStore
 - [ ] `stores/d1.ts` — ThresholdD1Store

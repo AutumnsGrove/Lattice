@@ -117,7 +117,7 @@ The Lattice Museum transforms Grove's codebase into a welcoming experience for W
 | Exhibit              | Focus                                                            | Key Files                      |
 | -------------------- | ---------------------------------------------------------------- | ------------------------------ |
 | **The Foundation**   | Multi-tenant architecture: one deployment, unlimited blogs       | `docs/developer/architecture/` |
-| **The Engine Room**  | Engine-first pattern: how we prevent 11,925 lines of duplication | `packages/engine/`             |
+| **The Engine Room**  | Engine-first pattern: how we prevent 11,925 lines of duplication | `libs/engine/`                 |
 | **The Loom**         | Durable Objects coordination layer                               | `docs/patterns/loom-*`         |
 | **The Cloud Garden** | Cloudflare Workers, D1, KV, R2 working together                  | `wrangler.toml` files          |
 
@@ -262,9 +262,9 @@ The Lattice Museum transforms Grove's codebase into a welcoming experience for W
 
 | Exhibit          | Focus                                  | Key Files            |
 | ---------------- | -------------------------------------- | -------------------- |
-| **The Meadow**   | Community feed where blogs share posts | `packages/meadow/`   |
-| **The Landing**  | How grove.place welcomes visitors      | `packages/landing/`  |
-| **The Clearing** | Status page and transparency           | `packages/clearing/` |
+| **The Meadow**   | Community feed where blogs share posts | `apps/meadow/`   |
+| **The Landing**  | How grove.place welcomes visitors      | `apps/landing/`  |
+| **The Clearing** | Status page and transparency           | `apps/clearing/` |
 
 **Visitor Journey:**
 
@@ -469,26 +469,26 @@ Before writing, each agent should:
 | Exhibit           | Wing            | Key Sources                                                    |
 | ----------------- | --------------- | -------------------------------------------------------------- |
 | foundation.md     | Architecture    | `docs/developer/architecture/multi-tenant-architecture.md`     |
-| engine-room.md    | Architecture    | `packages/engine/`, engine-first pattern                       |
+| engine-room.md    | Architecture    | `libs/engine/`, engine-first pattern                           |
 | loom.md           | Architecture    | `docs/patterns/loom-durable-objects-pattern.md`                |
 | cloud-garden.md   | Architecture    | `wrangler.toml` files, Cloudflare docs                         |
-| forest.md         | Nature          | `packages/engine/src/lib/ui/components/nature/`                |
-| seasons.md        | Nature          | `packages/engine/src/lib/ui/stores/season.ts`                  |
-| glass-garden.md   | Nature          | `packages/engine/src/lib/ui/components/ui/Glass*`              |
-| typography.md     | Nature          | `packages/engine/src/lib/ui/components/typography/`            |
+| forest.md         | Nature          | `libs/engine/src/lib/ui/components/nature/`                    |
+| seasons.md        | Nature          | `libs/engine/src/lib/ui/stores/season.ts`                      |
+| glass-garden.md   | Nature          | `libs/engine/src/lib/ui/components/ui/Glass*`                  |
+| typography.md     | Nature          | `libs/engine/src/lib/ui/components/typography/`                |
 | heartwood.md      | Trust           | `docs/specs/heartwood-spec.md`                                 |
-| sessions.md       | Trust           | `packages/engine/src/lib/groveauth/`                           |
-| security.md       | Trust           | `packages/engine/src/lib/server/services/`                     |
-| filing-cabinet.md | Data            | `packages/engine/src/lib/server/services/database.ts`          |
-| quick-lookup.md   | Data            | `packages/engine/src/lib/server/services/cache.ts`             |
-| media-vault.md    | Data            | `packages/engine/src/lib/server/services/storage.ts`           |
+| sessions.md       | Trust           | `libs/engine/src/lib/groveauth/`                               |
+| security.md       | Trust           | `libs/engine/src/lib/server/services/`                         |
+| filing-cabinet.md | Data            | `libs/engine/src/lib/server/services/database.ts`              |
+| quick-lookup.md   | Data            | `libs/engine/src/lib/server/services/cache.ts`                 |
+| media-vault.md    | Data            | `libs/engine/src/lib/server/services/storage.ts`               |
 | query-builders.md | Data            | Database helpers, typed queries                                |
 | grafts.md         | Personalization | `docs/specs/grafts-spec.md`                                    |
 | curios.md         | Personalization | `docs/specs/curios-spec.md`                                    |
 | themes.md         | Personalization | Settings system, Foliage                                       |
-| meadow.md         | Community       | `packages/meadow/`                                             |
-| landing.md        | Community       | `packages/landing/`                                            |
-| clearing.md       | Community       | `packages/clearing/`                                           |
+| meadow.md         | Community       | `apps/meadow/`                                             |
+| landing.md        | Community       | `apps/landing/`                                            |
+| clearing.md       | Community       | `apps/clearing/`                                           |
 | WING.md (naming)  | Naming          | `docs/philosophy/grove-naming.md`                              |
 | the-walk.md       | Naming          | `docs/philosophy/walking-through-the-grove.md`                 |
 | porch.md          | Naming          | `docs/philosophy/naming-research/grove-journey.md`             |

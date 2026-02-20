@@ -23,7 +23,7 @@ Meadow's social feed consumes RSS from Grove tenant blogs. But the current RSS i
 
 ### What exists today
 
-**File:** `packages/engine/src/routes/api/feed/+server.ts` (128 lines)
+**File:** `libs/engine/src/routes/api/feed/+server.ts` (128 lines)
 
 The current feed:
 
@@ -47,7 +47,7 @@ The current feed:
 
 **Approach:** Rewrite `/api/feed/+server.ts` to query D1 as the primary source, with a filesystem fallback for sites that haven't migrated. Add `<content:encoded>` with full rendered HTML.
 
-#### Changes to `packages/engine/src/routes/api/feed/+server.ts`
+#### Changes to `libs/engine/src/routes/api/feed/+server.ts`
 
 ```
 Primary path (D1):
@@ -200,7 +200,7 @@ For v1, all active tenants with a blog-capable plan are polled. A future `meadow
 cd packages/meadow && pnpm add fast-xml-parser
 ```
 
-**Parser module:** `packages/meadow/src/lib/server/rss-parser.ts`
+**Parser module:** `apps/meadow/src/lib/server/rss-parser.ts`
 
 ```typescript
 // Conceptual shape — not final code
@@ -239,7 +239,7 @@ Key parsing considerations:
 
 #### 2c. Polling Worker
 
-**File:** `packages/meadow/src/lib/server/poll-feeds.ts`
+**File:** `apps/meadow/src/lib/server/poll-feeds.ts`
 
 The cron handler that orchestrates polling:
 
@@ -285,7 +285,7 @@ TTL: 7 days (auto-cleanup for removed tenants)
 
 #### 2d. Wrangler Configuration
 
-**Add to `packages/meadow/wrangler.toml`:**
+**Add to `apps/meadow/wrangler.toml`:**
 
 ```toml
 [triggers]
@@ -301,7 +301,7 @@ id = "..."  # Create via wrangler kv:namespace create MEADOW_KV
   id = "..."
 ```
 
-**Add to `packages/meadow/src/app.d.ts`:**
+**Add to `apps/meadow/src/app.d.ts`:**
 
 ```typescript
 declare global {
@@ -324,7 +324,7 @@ declare global {
 
 #### 2e. Database: meadow_posts table
 
-**Migration:** `packages/engine/migrations/075_meadow_social.sql`
+**Migration:** `libs/engine/migrations/075_meadow_social.sql`
 
 ```sql
 -- Meadow social feed tables
@@ -379,7 +379,7 @@ Note: `score` and `reaction_counts` live on the post row for read performance. T
 - [ ] Update `app.d.ts` with KV, AUTH, and Locals types
 - [ ] Write unit tests for RSS parser (valid feed, missing content:encoded, malformed XML, empty feed)
 - [ ] Write integration test for poll-feeds (mock fetch, verify D1 upserts)
-- [ ] Add `@jsquash/jxl` vite exclusion to `packages/meadow/vite.config.ts`
+- [ ] Add `@jsquash/jxl` vite exclusion to `apps/meadow/vite.config.ts`
 - [ ] Test with real tenant feed after Job 1 is deployed
 
 **Estimated time:** 2-3 hours. The parser is the most delicate part. Polling is mechanical.
@@ -429,7 +429,7 @@ A `PostCard` component that renders a single feed item. This is the visual heart
 
 ### Component structure
 
-**File:** `packages/meadow/src/lib/components/PostCard.svelte`
+**File:** `apps/meadow/src/lib/components/PostCard.svelte`
 
 ```
 Props:
@@ -502,9 +502,9 @@ interface MeadowPost {
 
 ### Relative timestamp utility
 
-**File:** `packages/meadow/src/lib/utils/time.ts`
+**File:** `apps/meadow/src/lib/utils/time.ts`
 
-The blogroll curio already has `formatPostDate()` in `packages/engine/src/lib/curios/blogroll/index.ts`. We can either:
+The blogroll curio already has `formatPostDate()` in `libs/engine/src/lib/curios/blogroll/index.ts`. We can either:
 
 1. Import it from the engine (it's already exported)
 2. Copy and adapt it for Meadow's needs

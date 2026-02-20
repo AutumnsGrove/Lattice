@@ -77,23 +77,23 @@ Zephyr Social extends the existing Zephyr email gateway with social cross-postin
 ```typescript
 // One call. Every platform.
 const result = await Zephyr.broadcast({
-  channel: "social",
-  content: "Just shipped a new feature for Grove. 🌿",
-  platforms: ["bluesky", "mastodon"],
-  scheduledAt: "2026-02-08T09:00:00Z",
+	channel: "social",
+	content: "Just shipped a new feature for Grove. 🌿",
+	platforms: ["bluesky", "mastodon"],
+	scheduledAt: "2026-02-08T09:00:00Z",
 });
 
 // Long-form? Syndicate a blog post with canonical URL
 const result = await Zephyr.broadcast({
-  channel: "social",
-  content: blogPost.excerpt,
-  platforms: ["bluesky", "mastodon", "devto"],
-  longForm: {
-    title: blogPost.title,
-    body: blogPost.markdown,
-    canonicalUrl: `https://grove.place/blog/${blogPost.slug}`,
-    tags: blogPost.tags,
-  },
+	channel: "social",
+	content: blogPost.excerpt,
+	platforms: ["bluesky", "mastodon", "devto"],
+	longForm: {
+		title: blogPost.title,
+		body: blogPost.markdown,
+		canonicalUrl: `https://grove.place/blog/${blogPost.slug}`,
+		tags: blogPost.tags,
+	},
 });
 ```
 
@@ -198,53 +198,53 @@ Every social provider implements the same contract:
 
 ```typescript
 interface SocialProvider {
-  /** Platform identifier */
-  platform: SocialPlatform;
+	/** Platform identifier */
+	platform: SocialPlatform;
 
-  /** Post short-form content */
-  post(content: SocialContent): Promise<SocialDelivery>;
+	/** Post short-form content */
+	post(content: SocialContent): Promise<SocialDelivery>;
 
-  /** Publish long-form article (optional, not all platforms support it) */
-  publish?(article: ArticleContent): Promise<SocialDelivery>;
+	/** Publish long-form article (optional, not all platforms support it) */
+	publish?(article: ArticleContent): Promise<SocialDelivery>;
 
-  /** Check if credentials are valid */
-  healthCheck(): Promise<boolean>;
+	/** Check if credentials are valid */
+	healthCheck(): Promise<boolean>;
 }
 
 interface SocialContent {
-  /** The text to post */
-  text: string;
-  /** Optional link to include */
-  url?: string;
-  /** Optional alt text for link preview */
-  altText?: string;
+	/** The text to post */
+	text: string;
+	/** Optional link to include */
+	url?: string;
+	/** Optional alt text for link preview */
+	altText?: string;
 }
 
 interface ArticleContent {
-  title: string;
-  body: string;
-  canonicalUrl: string;
-  tags?: string[];
-  series?: string;
-  published?: boolean;
+	title: string;
+	body: string;
+	canonicalUrl: string;
+	tags?: string[];
+	series?: string;
+	published?: boolean;
 }
 
 interface SocialDelivery {
-  success: boolean;
-  platform: SocialPlatform;
-  /** Platform-specific post ID */
-  postId?: string;
-  /** URL to the published post */
-  postUrl?: string;
-  /** True when the platform was silently skipped (e.g., DEV.to without longForm) */
-  skipped?: boolean;
-  /** Human-readable reason for skip */
-  skipReason?: string;
-  error?: {
-    code: string;
-    message: string;
-    retryable: boolean;
-  };
+	success: boolean;
+	platform: SocialPlatform;
+	/** Platform-specific post ID */
+	postId?: string;
+	/** URL to the published post */
+	postUrl?: string;
+	/** True when the platform was silently skipped (e.g., DEV.to without longForm) */
+	skipped?: boolean;
+	/** Human-readable reason for skip */
+	skipReason?: string;
+	error?: {
+		code: string;
+		message: string;
+		retryable: boolean;
+	};
 }
 ```
 
@@ -257,26 +257,26 @@ Bluesky uses the AT Protocol. Auth is a simple app password (no OAuth dance).
 import { BskyAgent } from "@atproto/api";
 
 export class BlueskyProvider implements SocialProvider {
-  platform = "bluesky" as const;
-  private agent: BskyAgent;
+	platform = "bluesky" as const;
+	private agent: BskyAgent;
 
-  async post(content: SocialContent): Promise<SocialDelivery> {
-    await this.ensureSession();
+	async post(content: SocialContent): Promise<SocialDelivery> {
+		await this.ensureSession();
 
-    const record = await this.agent.post({
-      text: content.text,
-      ...(content.url && {
-        facets: this.buildLinkFacets(content.text, content.url),
-      }),
-    });
+		const record = await this.agent.post({
+			text: content.text,
+			...(content.url && {
+				facets: this.buildLinkFacets(content.text, content.url),
+			}),
+		});
 
-    return {
-      success: true,
-      platform: "bluesky",
-      postId: record.uri,
-      postUrl: this.buildPostUrl(record.uri),
-    };
-  }
+		return {
+			success: true,
+			platform: "bluesky",
+			postId: record.uri,
+			postUrl: this.buildPostUrl(record.uri),
+		};
+	}
 }
 ```
 
@@ -289,30 +289,28 @@ Standard REST API. One-time OAuth setup gives a long-lived bearer token.
 ```typescript
 // providers/mastodon.ts
 export class MastodonProvider implements SocialProvider {
-  platform = "mastodon" as const;
+	platform = "mastodon" as const;
 
-  async post(content: SocialContent): Promise<SocialDelivery> {
-    const status = content.url
-      ? `${content.text}\n\n${content.url}`
-      : content.text;
+	async post(content: SocialContent): Promise<SocialDelivery> {
+		const status = content.url ? `${content.text}\n\n${content.url}` : content.text;
 
-    const response = await fetch(`${this.instanceUrl}/api/v1/statuses`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${this.accessToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ status }),
-    });
+		const response = await fetch(`${this.instanceUrl}/api/v1/statuses`, {
+			method: "POST",
+			headers: {
+				Authorization: `Bearer ${this.accessToken}`,
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({ status }),
+		});
 
-    const data = await response.json();
-    return {
-      success: true,
-      platform: "mastodon",
-      postId: data.id,
-      postUrl: data.url,
-    };
-  }
+		const data = await response.json();
+		return {
+			success: true,
+			platform: "mastodon",
+			postId: data.id,
+			postUrl: data.url,
+		};
+	}
 }
 ```
 
@@ -325,47 +323,47 @@ For long-form blog syndication. Posts articles with canonical URLs pointing back
 ```typescript
 // providers/devto.ts
 export class DevtoProvider implements SocialProvider {
-  platform = "devto" as const;
+	platform = "devto" as const;
 
-  async publish(article: ArticleContent): Promise<SocialDelivery> {
-    const response = await fetch("https://dev.to/api/articles", {
-      method: "POST",
-      headers: {
-        "api-key": this.apiKey,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        article: {
-          title: article.title,
-          body_markdown: article.body,
-          canonical_url: article.canonicalUrl,
-          tags: article.tags?.slice(0, 4), // DEV.to max 4 tags
-          series: article.series,
-          published: article.published ?? false,
-        },
-      }),
-    });
+	async publish(article: ArticleContent): Promise<SocialDelivery> {
+		const response = await fetch("https://dev.to/api/articles", {
+			method: "POST",
+			headers: {
+				"api-key": this.apiKey,
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				article: {
+					title: article.title,
+					body_markdown: article.body,
+					canonical_url: article.canonicalUrl,
+					tags: article.tags?.slice(0, 4), // DEV.to max 4 tags
+					series: article.series,
+					published: article.published ?? false,
+				},
+			}),
+		});
 
-    const data = await response.json();
-    return {
-      success: true,
-      platform: "devto",
-      postId: String(data.id),
-      postUrl: data.url,
-    };
-  }
+		const data = await response.json();
+		return {
+			success: true,
+			platform: "devto",
+			postId: String(data.id),
+			postUrl: data.url,
+		};
+	}
 
-  async post(content: SocialContent): Promise<SocialDelivery> {
-    // DEV.to is article-only. Short posts silently skip this platform.
-    // Returns skipped status instead of an error — the broadcast handler
-    // excludes skipped platforms from the attempted/failed counts.
-    return {
-      success: true,
-      platform: "devto",
-      skipped: true,
-      skipReason: "DEV.to only supports long-form articles",
-    };
-  }
+	async post(content: SocialContent): Promise<SocialDelivery> {
+		// DEV.to is article-only. Short posts silently skip this platform.
+		// Returns skipped status instead of an error — the broadcast handler
+		// excludes skipped platforms from the attempted/failed counts.
+		return {
+			success: true,
+			platform: "devto",
+			skipped: true,
+			skipReason: "DEV.to only supports long-form articles",
+		};
+	}
 }
 ```
 
@@ -381,67 +379,67 @@ The broadcast API mirrors email's `send()` but for social content.
 
 ```typescript
 interface BroadcastRequest {
-  /** Channel identifier */
-  channel: "social";
+	/** Channel identifier */
+	channel: "social";
 
-  /** The content to post */
-  content: string;
+	/** The content to post */
+	content: string;
 
-  /** Target platforms (or "all" for every configured platform) */
-  platforms: SocialPlatform[] | "all";
+	/** Target platforms (or "all" for every configured platform) */
+	platforms: SocialPlatform[] | "all";
 
-  /** Optional long-form content for article-supporting platforms */
-  longForm?: {
-    title: string;
-    body: string;
-    canonicalUrl: string;
-    tags?: string[];
-    series?: string;
-    /** Post as draft on platforms that support it (DEV.to) */
-    draft?: boolean;
-  };
+	/** Optional long-form content for article-supporting platforms */
+	longForm?: {
+		title: string;
+		body: string;
+		canonicalUrl: string;
+		tags?: string[];
+		series?: string;
+		/** Post as draft on platforms that support it (DEV.to) */
+		draft?: boolean;
+	};
 
-  /** Schedule for later (ISO timestamp) */
-  scheduledAt?: string;
+	/** Schedule for later (ISO timestamp) */
+	scheduledAt?: string;
 
-  /** Prevent duplicate posts. If omitted, a fallback key is generated
-   *  from hash(content + platforms + scheduled_at) to catch accidental dupes. */
-  idempotencyKey?: string;
+	/** Prevent duplicate posts. If omitted, a fallback key is generated
+	 *  from hash(content + platforms + scheduled_at) to catch accidental dupes. */
+	idempotencyKey?: string;
 
-  /** Metadata for logging */
-  metadata?: {
-    tenant?: string;
-    source?: string;
-    correlationId?: string;
-    /** Link back to the content in Grove */
-    groveUrl?: string;
-  };
+	/** Metadata for logging */
+	metadata?: {
+		tenant?: string;
+		source?: string;
+		correlationId?: string;
+		/** Link back to the content in Grove */
+		groveUrl?: string;
+	};
 }
 
 interface BroadcastResponse {
-  success: boolean;
-  /** True when at least one platform succeeded but not all */
-  partial: boolean;
-  /** Per-platform delivery results */
-  deliveries: SocialDelivery[];
-  /** Summary counts */
-  summary: {
-    attempted: number;
-    succeeded: number;
-    failed: number;
-  };
-  metadata: {
-    broadcastId: string;
-    latencyMs: number;
-  };
+	success: boolean;
+	/** True when at least one platform succeeded but not all */
+	partial: boolean;
+	/** Per-platform delivery results */
+	deliveries: SocialDelivery[];
+	/** Summary counts */
+	summary: {
+		attempted: number;
+		succeeded: number;
+		failed: number;
+	};
+	metadata: {
+		broadcastId: string;
+		latencyMs: number;
+	};
 }
 
 type SocialPlatform =
-  | "bluesky"
-  | "mastodon"
-  | "devto"
-  | "linkedin" // Phase 2
-  | "threads"; // Phase 2
+	| "bluesky"
+	| "mastodon"
+	| "devto"
+	| "linkedin" // Phase 2
+	| "threads"; // Phase 2
 ```
 
 ### Content Adaptation
@@ -450,12 +448,12 @@ Content transforms to fit each platform's constraints. The adapter trims, reform
 
 ```typescript
 interface ContentAdapter {
-  /** Adapt content for a specific platform */
-  adapt(
-    content: string,
-    platform: SocialPlatform,
-    options?: { url?: string; longForm?: boolean },
-  ): string;
+	/** Adapt content for a specific platform */
+	adapt(
+		content: string,
+		platform: SocialPlatform,
+		options?: { url?: string; longForm?: boolean },
+	): string;
 }
 ```
 
@@ -496,38 +494,38 @@ import { Zephyr } from "@autumnsgrove/lattice/zephyr";
 
 // Quick thought, post to short-form platforms
 const result = await Zephyr.broadcast({
-  channel: "social",
-  content:
-    "Building in public is scary and wonderful. Today I shipped cross-posting from code. The wind carries more than letters now. 🌿",
-  platforms: ["bluesky", "mastodon"],
+	channel: "social",
+	content:
+		"Building in public is scary and wonderful. Today I shipped cross-posting from code. The wind carries more than letters now. 🌿",
+	platforms: ["bluesky", "mastodon"],
 });
 
 // Blog post syndication: teaser to social, full article to DEV.to
 const result = await Zephyr.broadcast({
-  channel: "social",
-  content:
-    "New post: Why I Left Big Tech to Build a Forest\n\nOn leaving the algorithm behind and planting something real.",
-  platforms: ["bluesky", "mastodon", "devto"],
-  longForm: {
-    title: "Why I Left Big Tech to Build a Forest",
-    body: fullMarkdownContent,
-    canonicalUrl: "https://grove.place/blog/why-i-left-big-tech",
-    tags: ["indie-web", "building-in-public", "queer-tech"],
-  },
-  metadata: {
-    source: "engine-blog-hook",
-    groveUrl: "https://grove.place/blog/why-i-left-big-tech",
-  },
+	channel: "social",
+	content:
+		"New post: Why I Left Big Tech to Build a Forest\n\nOn leaving the algorithm behind and planting something real.",
+	platforms: ["bluesky", "mastodon", "devto"],
+	longForm: {
+		title: "Why I Left Big Tech to Build a Forest",
+		body: fullMarkdownContent,
+		canonicalUrl: "https://grove.place/blog/why-i-left-big-tech",
+		tags: ["indie-web", "building-in-public", "queer-tech"],
+	},
+	metadata: {
+		source: "engine-blog-hook",
+		groveUrl: "https://grove.place/blog/why-i-left-big-tech",
+	},
 });
 
 // Scheduled launch announcement
 const result = await Zephyr.broadcast({
-  channel: "social",
-  content:
-    "Grove is open for signups. A forest for your words. Come find your clearing. 🌲\n\nhttps://grove.place",
-  platforms: "all",
-  scheduledAt: "2026-03-01T14:00:00Z",
-  idempotencyKey: "launch-announcement-2026-03-01",
+	channel: "social",
+	content:
+		"Grove is open for signups. A forest for your words. Come find your clearing. 🌲\n\nhttps://grove.place",
+	platforms: "all",
+	scheduledAt: "2026-03-01T14:00:00Z",
+	idempotencyKey: "launch-announcement-2026-03-01",
 });
 ```
 
@@ -555,30 +553,30 @@ X-API-Key: <ZEPHYR_API_KEY>
 
 ```json
 {
-  "success": true,
-  "deliveries": [
-    {
-      "success": true,
-      "platform": "bluesky",
-      "postId": "at://did:plc:.../app.bsky.feed.post/...",
-      "postUrl": "https://bsky.app/profile/.../post/..."
-    },
-    {
-      "success": true,
-      "platform": "mastodon",
-      "postId": "123456789",
-      "postUrl": "https://mastodon.social/@autumn/123456789"
-    }
-  ],
-  "summary": {
-    "attempted": 2,
-    "succeeded": 2,
-    "failed": 0
-  },
-  "metadata": {
-    "broadcastId": "brd_abc123",
-    "latencyMs": 1240
-  }
+	"success": true,
+	"deliveries": [
+		{
+			"success": true,
+			"platform": "bluesky",
+			"postId": "at://did:plc:.../app.bsky.feed.post/...",
+			"postUrl": "https://bsky.app/profile/.../post/..."
+		},
+		{
+			"success": true,
+			"platform": "mastodon",
+			"postId": "123456789",
+			"postUrl": "https://mastodon.social/@autumn/123456789"
+		}
+	],
+	"summary": {
+		"attempted": 2,
+		"succeeded": 2,
+		"failed": 0
+	},
+	"metadata": {
+		"broadcastId": "brd_abc123",
+		"latencyMs": 1240
+	}
 }
 ```
 
@@ -603,9 +601,9 @@ X-API-Key: <ZEPHYR_API_KEY>
 
 ```json
 {
-  "queued": true,
-  "broadcastId": "brd_def456",
-  "scheduledAt": "2026-02-10T09:00:00Z"
+	"queued": true,
+	"broadcastId": "brd_def456",
+	"scheduledAt": "2026-02-10T09:00:00Z"
 }
 ```
 
@@ -619,13 +617,13 @@ List configured platforms and their health.
 
 ```json
 {
-  "platforms": [
-    { "name": "bluesky", "configured": true, "healthy": true },
-    { "name": "mastodon", "configured": true, "healthy": true },
-    { "name": "devto", "configured": true, "healthy": true },
-    { "name": "linkedin", "configured": false },
-    { "name": "threads", "configured": false }
-  ]
+	"platforms": [
+		{ "name": "bluesky", "configured": true, "healthy": true },
+		{ "name": "mastodon", "configured": true, "healthy": true },
+		{ "name": "devto", "configured": true, "healthy": true },
+		{ "name": "linkedin", "configured": false },
+		{ "name": "threads", "configured": false }
+	]
 }
 ```
 
@@ -763,11 +761,11 @@ Social platforms have their own rate limits. Zephyr respects them with per-platf
 
 ```typescript
 const SOCIAL_RATE_LIMITS: Record<SocialPlatform, RateLimitConfig> = {
-  bluesky: { perMinute: 10, perDay: 100 },
-  mastodon: { perMinute: 10, perDay: 100 },
-  devto: { perMinute: 2, perDay: 20 },
-  linkedin: { perMinute: 5, perDay: 50 },
-  threads: { perMinute: 5, perDay: 50 },
+	bluesky: { perMinute: 10, perDay: 100 },
+	mastodon: { perMinute: 10, perDay: 100 },
+	devto: { perMinute: 2, perDay: 20 },
+	linkedin: { perMinute: 5, perDay: 50 },
+	threads: { perMinute: 5, perDay: 50 },
 };
 ```
 
@@ -906,37 +904,37 @@ workers/zephyr/src/
 ### Engine Client Extension
 
 ```typescript
-// packages/engine/src/lib/zephyr/index.ts
+// libs/engine/src/lib/zephyr/index.ts
 // Add broadcast method to existing ZephyrClient
 
 export class ZephyrClient {
-  // ... existing email methods ...
+	// ... existing email methods ...
 
-  /** Broadcast content to social platforms */
-  async broadcast(request: BroadcastRequest): Promise<BroadcastResponse> {
-    const response = await fetch(`${this.baseUrl}/broadcast`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-API-Key": this.apiKey,
-      },
-      body: JSON.stringify(request),
-    });
-    return response.json();
-  }
+	/** Broadcast content to social platforms */
+	async broadcast(request: BroadcastRequest): Promise<BroadcastResponse> {
+		const response = await fetch(`${this.baseUrl}/broadcast`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				"X-API-Key": this.apiKey,
+			},
+			body: JSON.stringify(request),
+		});
+		return response.json();
+	}
 
-  /** Queue a broadcast for scheduled delivery */
-  async queueBroadcast(request: BroadcastRequest): Promise<QueuedResponse> {
-    const response = await fetch(`${this.baseUrl}/broadcast/queue`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-API-Key": this.apiKey,
-      },
-      body: JSON.stringify(request),
-    });
-    return response.json();
-  }
+	/** Queue a broadcast for scheduled delivery */
+	async queueBroadcast(request: BroadcastRequest): Promise<QueuedResponse> {
+		const response = await fetch(`${this.baseUrl}/broadcast/queue`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				"X-API-Key": this.apiKey,
+			},
+			body: JSON.stringify(request),
+		});
+		return response.json();
+	}
 }
 ```
 

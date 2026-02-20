@@ -164,7 +164,7 @@ CREATE INDEX idx_digest_sent ON ivy_digest_log(sent_at DESC);
 - Already wired pattern via Loom — deterministic IDs, SQLite storage, alarm chains.
 - Multi-tenant ready: `triage:{userId}` means each user gets their own DO when Ivy goes public.
 
-### 2a. New DO: `TriageDO` in `packages/durable-objects/`
+### 2a. New DO: `TriageDO` in `services/durable-objects/`
 
 - **ID pattern:** `triage:{userId}` (single user for now, multi-tenant ready)
 - **SQLite tables (DO-local):**
@@ -177,7 +177,7 @@ CREATE INDEX idx_digest_sent ON ivy_digest_log(sent_at DESC);
 - **Lumen integration:** `createLumenClient({ openrouterApiKey: this.env.OPENROUTER_API_KEY, ai: this.env.AI, db: this.env.DB })`
 - **Zephyr integration:** Service binding `this.env.ZEPHYR`
 
-### 2b. Add TriageDO to `packages/durable-objects/wrangler.toml`
+### 2b. Add TriageDO to `services/durable-objects/wrangler.toml`
 
 ```toml
 [[durable_objects.bindings]]
@@ -209,14 +209,14 @@ binding = "AI"
 
 ## Phase 3: Core Triage Logic (inside TriageDO)
 
-### 3a. Filters: `packages/durable-objects/src/triage/filters.ts`
+### 3a. Filters: `services/durable-objects/src/triage/filters.ts`
 
 - `evaluateFilters(sender, db)` → `FilterResult | null`
 - Runs BEFORE AI classification (saves Lumen cost on known junk)
 - Default blocklist: instagram.com, facebook.com, facebookmail.com, linkedin.com, x.com, tiktok.com, pinterest.com
 - CRUD functions for filter management (backed by Ivy's D1 `ivy_triage_filters` table)
 
-### 3b. Classifier: `packages/durable-objects/src/triage/classifier.ts`
+### 3b. Classifier: `services/durable-objects/src/triage/classifier.ts`
 
 - `classifyEmail(envelope, lumen)` → `ClassificationResult`
 - Sends only metadata to Lumen (from, subject, 300-char snippet) — never full body
@@ -224,7 +224,7 @@ binding = "AI"
 - Returns: `{ category, confidence, reason, suggestedAction, topics }`
 - Fallback to "uncategorized" on parse failure
 
-### 3c. Digest: `packages/durable-objects/src/triage/digest.ts`
+### 3c. Digest: `services/durable-objects/src/triage/digest.ts`
 
 - `getDigestEmails(db, since)` — query unread since last digest, grouped by category
 - `generateDigest(emails, lumen)` — send to Lumen for natural language briefing
@@ -340,11 +340,11 @@ event.waitUntil(
 | `Ivy/vite.config.ts`                                | Add @jsquash/jxl exclusion                      |
 | `Ivy/src/migrations/0003_triage_system.sql`         | New schema                                      |
 | `Ivy/src/lib/types/index.ts`                        | New types                                       |
-| `packages/durable-objects/src/TriageDO.ts`          | **New** — Loom DO for email processing + digest |
-| `packages/durable-objects/src/triage/filters.ts`    | **New** — blocklist/allowlist                   |
-| `packages/durable-objects/src/triage/classifier.ts` | **New** — Lumen AI classification               |
-| `packages/durable-objects/src/triage/digest.ts`     | **New** — digest generation + scheduling        |
-| `packages/durable-objects/wrangler.toml`            | Add TriageDO migration                          |
+| `services/durable-objects/src/TriageDO.ts`          | **New** — Loom DO for email processing + digest |
+| `services/durable-objects/src/triage/filters.ts`    | **New** — blocklist/allowlist                   |
+| `services/durable-objects/src/triage/classifier.ts` | **New** — Lumen AI classification               |
+| `services/durable-objects/src/triage/digest.ts`     | **New** — digest generation + scheduling        |
+| `services/durable-objects/wrangler.toml`            | Add TriageDO migration                          |
 | `Ivy/wrangler.toml`                                 | Add TRIAGE DO, ZEPHYR, AI bindings              |
 | `Ivy/src/routes/api/webhook/incoming/+server.ts`    | Hand off to TriageDO                            |
 | `Ivy/src/hooks.server.ts`                           | Owner auth check                                |

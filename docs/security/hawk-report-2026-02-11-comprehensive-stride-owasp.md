@@ -68,17 +68,13 @@ Grove demonstrates **excellent security practices** across most attack surfaces.
 **Evidence:**
 
 ```typescript
-// From packages/engine/src/hooks.server.ts
+// From libs/engine/src/hooks.server.ts
 // Tenant context resolved at request boundary
 const tenant = await getTenantConfig(subdomain, event.platform);
 event.locals.tenantId = tenant.id;
 
 // From API handlers - ownership verification
-const tenantId = await getVerifiedTenantId(
-  platform.env.DB,
-  locals.tenantId,
-  locals.user,
-);
+const tenantId = await getVerifiedTenantId(platform.env.DB, locals.tenantId, locals.user);
 ```
 
 **Minor Observations:**
@@ -108,14 +104,11 @@ const tenantId = await getVerifiedTenantId(
 **Evidence:**
 
 ```typescript
-// From packages/heartwood/src/lib/session.ts:346
+// From services/heartwood/src/lib/session.ts:346
 return `grove_session=${value}; Path=/; HttpOnly; Secure; SameSite=Lax; Domain=.grove.place; Max-Age=${maxAgeSeconds}`;
 
-// From packages/engine/src/hooks.server.ts:699
-response.headers.set(
-  "Strict-Transport-Security",
-  "max-age=31536000; includeSubDomains; preload",
-);
+// From libs/engine/src/hooks.server.ts:699
+response.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
 ```
 
 **Observations:**
@@ -145,13 +138,13 @@ response.headers.set(
 **Evidence:**
 
 ```typescript
-// From packages/engine/src/hooks.server.ts:193-198
+// From libs/engine/src/hooks.server.ts:193-198
 const tenant = await db
-  .prepare(
-    "SELECT id, subdomain, display_name, email, theme, plan FROM tenants WHERE subdomain = ? AND active = 1",
-  )
-  .bind(subdomain) // ✅ Parameterized
-  .first();
+	.prepare(
+		"SELECT id, subdomain, display_name, email, theme, plan FROM tenants WHERE subdomain = ? AND active = 1",
+	)
+	.bind(subdomain) // ✅ Parameterized
+	.first();
 ```
 
 **Observations:**
@@ -179,10 +172,10 @@ const tenant = await db
 **Evidence:**
 
 ```typescript
-// From packages/engine/src/lib/feature-flags/upload-gate.ts
+// From libs/engine/src/lib/feature-flags/upload-gate.ts
 // Fail-closed: assume suspended on error
 if (!flagsEnv) {
-  return { allowed: false, reason: "graft_check_failed" };
+	return { allowed: false, reason: "graft_check_failed" };
 }
 ```
 
@@ -216,19 +209,19 @@ if (!flagsEnv) {
 **Evidence:**
 
 ```typescript
-// From packages/engine/src/hooks.server.ts:654-662
+// From libs/engine/src/hooks.server.ts:654-662
 const cspNonce = crypto.randomUUID().replace(/-/g, "");
 const response = await resolve(event, {
-  transformPageChunk: ({ html }) => {
-    // Inject nonce into ALL script tags
-    return html.replace(/<script(?=[\s>])/g, `<script nonce="${cspNonce}"`);
-  },
+	transformPageChunk: ({ html }) => {
+		// Inject nonce into ALL script tags
+		return html.replace(/<script(?=[\s>])/g, `<script nonce="${cspNonce}"`);
+	},
 });
 ```
 
 **Weaknesses:**
 
-- MEDIUM: Plant app still uses `'unsafe-inline'` for scripts (packages/plant/src/hooks.server.ts:46)
+- MEDIUM: Plant app still uses `'unsafe-inline'` for scripts (apps/plant/src/hooks.server.ts:46)
 - LOW: Some routes need `'unsafe-eval'` for Monaco Editor and Mermaid.js (documented and justified)
 
 **Score: 8.5/10** — Excellent headers, minor CSP gaps
@@ -297,7 +290,7 @@ const response = await resolve(event, {
 **Evidence:**
 
 ```typescript
-// From packages/heartwood/src/routes/session.ts:263-267
+// From services/heartwood/src/routes/session.ts:263-267
 // Complete session cleanup on logout
 "access_token=; Path=/; HttpOnly; Secure; SameSite=Strict; Domain=.grove.place; Max-Age=0",
 "refresh_token=; Path=/; HttpOnly; Secure; SameSite=Strict; Domain=.grove.place; Max-Age=0",
@@ -333,13 +326,13 @@ const response = await resolve(event, {
 **Evidence:**
 
 ```typescript
-// From packages/engine/src/hooks.server.ts:584-648
+// From libs/engine/src/hooks.server.ts:584-648
 // Comprehensive CSRF validation
 if (["POST", "PUT", "DELETE", "PATCH"].includes(event.request.method)) {
-  // ... proxy-aware origin validation + token fallback
-  if (!validateCSRF(event.request, false, { csrfToken, expectedToken })) {
-    throwGroveError(403, SITE_ERRORS.INVALID_ORIGIN, "Site");
-  }
+	// ... proxy-aware origin validation + token fallback
+	if (!validateCSRF(event.request, false, { csrfToken, expectedToken })) {
+		throwGroveError(403, SITE_ERRORS.INVALID_ORIGIN, "Site");
+	}
 }
 ```
 
@@ -373,10 +366,10 @@ if (["POST", "PUT", "DELETE", "PATCH"].includes(event.request.method)) {
 **Evidence:**
 
 ```typescript
-// From packages/domains/src/hooks.server.ts:138
+// From apps/domains/src/hooks.server.ts:138
 console.error("[Auth] SessionDO validation error:", err);
 
-// From packages/engine/src/hooks.server.ts:509
+// From libs/engine/src/hooks.server.ts:509
 console.error("[Auth] SessionDO validation error:", err);
 ```
 
@@ -403,12 +396,12 @@ console.error("[Auth] SessionDO validation error:", err);
 **Evidence:**
 
 ```typescript
-// From packages/engine/src/hooks.server.ts (subdomain extraction)
+// From libs/engine/src/hooks.server.ts (subdomain extraction)
 // SECURITY: Use raw Host header (not x-forwarded-host) for localhost detection
 // to prevent production bypass via spoofed forwarded headers
 const rawHost = request.headers.get("host") || "";
 if (rawHost.includes("localhost") || rawHost.includes("127.0.0.1")) {
-  // Only allow x-subdomain header in local dev
+	// Only allow x-subdomain header in local dev
 }
 ```
 
@@ -825,13 +818,13 @@ pnpm update @react-email/code-block  # Fixes prismjs XSS
 
 **2. Fix Plant CSP Unsafe-Inline (MEDIUM)**
 
-- File: `packages/plant/src/hooks.server.ts:46`
+- File: `apps/plant/src/hooks.server.ts:46`
 - Change: Implement nonce-based script-src like engine
 - Impact: Strengthens XSS protection
 
 **3. Add Audit Logging for Admin Actions (LOW)**
 
-- File: `packages/landing/src/routes/arbor/uploads/+page.server.ts`
+- File: `apps/landing/src/routes/arbor/uploads/+page.server.ts`
 - Add: `console.log(\`[Admin] \${locals.user.email} \${action} tenant \${tenantId}\`)`
 - Benefit: Attribution for suspension changes
 

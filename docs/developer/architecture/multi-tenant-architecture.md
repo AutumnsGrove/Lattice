@@ -244,15 +244,15 @@ tenant_settings (tenant_id, setting_key, setting_value)
 
 ## Files to Create/Modify
 
-| File                                                              | Action | Purpose                      |
-| ----------------------------------------------------------------- | ------ | ---------------------------- |
-| `packages/engine/src/lib/data/posts.ts`                           | CREATE | D1 post queries with caching |
-| `packages/engine/src/lib/data/pages.ts`                           | CREATE | D1 page queries with caching |
-| `packages/engine/src/lib/data/cache.ts`                           | CREATE | KV caching utilities         |
-| `packages/engine/src/routes/(tenant)/+layout.server.ts`           | CREATE | Tenant layout loader         |
-| `packages/engine/src/routes/(tenant)/+page.server.ts`             | CREATE | Home page loader             |
-| `packages/engine/src/routes/(tenant)/blog/+page.server.ts`        | CREATE | Blog list loader             |
-| `packages/engine/src/routes/(tenant)/blog/[slug]/+page.server.ts` | CREATE | Single post loader           |
+| File                                                          | Action | Purpose                      |
+| ------------------------------------------------------------- | ------ | ---------------------------- |
+| `libs/engine/src/lib/data/posts.ts`                           | CREATE | D1 post queries with caching |
+| `libs/engine/src/lib/data/pages.ts`                           | CREATE | D1 page queries with caching |
+| `libs/engine/src/lib/data/cache.ts`                           | CREATE | KV caching utilities         |
+| `libs/engine/src/routes/(tenant)/+layout.server.ts`           | CREATE | Tenant layout loader         |
+| `libs/engine/src/routes/(tenant)/+page.server.ts`             | CREATE | Home page loader             |
+| `libs/engine/src/routes/(tenant)/blog/+page.server.ts`        | CREATE | Blog list loader             |
+| `libs/engine/src/routes/(tenant)/blog/[slug]/+page.server.ts` | CREATE | Single post loader           |
 
 ---
 

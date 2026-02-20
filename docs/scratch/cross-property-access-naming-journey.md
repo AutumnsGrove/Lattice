@@ -202,7 +202,7 @@ Dave wants to help moderate The Prism? Burrow him in. The passage opens. He arri
 - `burrow_sessions` — active burrow connections
 
 **Key files to create/modify:**
-- `packages/engine/src/lib/burrow/` — core burrow logic
+- `libs/engine/src/lib/burrow/` — core burrow logic
 - `docs/specs/burrow-spec.md` — full specification
 - `docs/philosophy/grove-naming.md` — add entry
 

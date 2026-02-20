@@ -100,13 +100,13 @@ Legend: **!** = likely threat, **?** = needs investigation, **.** = low risk
 
 #### [HAWK-001] Plan Selection Allows Skipping Onboarding Steps
 
-| Field          | Value                                                          |
-| -------------- | -------------------------------------------------------------- |
-| **Severity**   | MEDIUM                                                         |
-| **Domain**     | Authorization                                                  |
-| **Location**   | `packages/plant/src/routes/api/select-plan/+server.ts:103-126` |
-| **Confidence** | HIGH                                                           |
-| **OWASP**      | A01:2021 Broken Access Control                                 |
+| Field          | Value                                                      |
+| -------------- | ---------------------------------------------------------- |
+| **Severity**   | MEDIUM                                                     |
+| **Domain**     | Authorization                                              |
+| **Location**   | `apps/plant/src/routes/api/select-plan/+server.ts:103-126` |
+| **Confidence** | HIGH                                                       |
+| **OWASP**      | A01:2021 Broken Access Control                             |
 
 **Description:**
 The plan selection API updates the onboarding record with the selected plan without validating that the user has completed previous onboarding steps. While `shouldSkipCheckout()` correctly gates free tier creation, the plan can be set before completing username selection, email verification, etc.
@@ -116,19 +116,19 @@ The plan selection API updates the onboarding record with the selected plan with
 ```typescript
 // Line 103-115: Plan is saved without checking onboarding step
 await db
-  .prepare(
-    `UPDATE user_onboarding
+	.prepare(
+		`UPDATE user_onboarding
      SET plan_selected = ?,
          plan_billing_cycle = ?,
          ...
      WHERE id = ?`,
-  )
-  .bind(plan, billingCycle, onboardingId)
-  .run();
+	)
+	.bind(plan, billingCycle, onboardingId)
+	.run();
 
 // Free tier creation at line 133 correctly checks shouldSkipCheckout
 if (shouldSkipCheckout(plan)) {
-  // ... creates tenant immediately
+	// ... creates tenant immediately
 }
 ```
 
@@ -145,15 +145,15 @@ Add sequential validation before plan selection:
 ```typescript
 // Check required onboarding steps are complete
 const onboarding = await db
-  .prepare("SELECT step_completed FROM user_onboarding WHERE id = ?")
-  .bind(onboardingId)
-  .first();
+	.prepare("SELECT step_completed FROM user_onboarding WHERE id = ?")
+	.bind(onboardingId)
+	.first();
 
 const requiredSteps = ["username", "email", "display_name"];
 for (const step of requiredSteps) {
-  if (!onboarding[`${step}_completed`]) {
-    return json({ error: `Complete ${step} first` }, { status: 400 });
-  }
+	if (!onboarding[`${step}_completed`]) {
+		return json({ error: `Complete ${step} first` }, { status: 400 });
+	}
 }
 ```
 
@@ -163,13 +163,13 @@ for (const step of requiredSteps) {
 
 #### [HAWK-002] Tenant ID Parameter Allows Implicit Tenant Access
 
-| Field          | Value                                                       |
-| -------------- | ----------------------------------------------------------- |
-| **Severity**   | MEDIUM                                                      |
-| **Domain**     | Authorization                                               |
-| **Location**   | `packages/engine/src/routes/api/billing/+server.ts:597-605` |
-| **Confidence** | HIGH                                                        |
-| **OWASP**      | A01:2021 Broken Access Control                              |
+| Field          | Value                                                   |
+| -------------- | ------------------------------------------------------- |
+| **Severity**   | MEDIUM                                                  |
+| **Domain**     | Authorization                                           |
+| **Location**   | `libs/engine/src/routes/api/billing/+server.ts:597-605` |
+| **Confidence** | HIGH                                                    |
+| **OWASP**      | A01:2021 Broken Access Control                          |
 
 **Description:**
 The billing API accepts `tenant_id` as a query parameter, allowing users to access billing records for tenants they don't own. While `getVerifiedTenantId()` performs ownership verification, the pattern of accepting arbitrary tenant IDs from user input is concerning.
@@ -180,11 +180,7 @@ The billing API accepts `tenant_id` as a query parameter, allowing users to acce
 // Lines 597-605
 const requestedTenantId = url.searchParams.get("tenant_id") || locals.tenantId;
 
-const tenantId = await getVerifiedTenantId(
-  platform.env.DB,
-  requestedTenantId,
-  locals.user,
-);
+const tenantId = await getVerifiedTenantId(platform.env.DB, requestedTenantId, locals.user);
 ```
 
 The `getVerifiedTenantId()` function correctly throws 403 if the user doesn't own the tenant. However:
@@ -217,7 +213,7 @@ The `getVerifiedTenantId()` function correctly throws 403 if the user doesn't ow
 | -------------- | --------------------------------------------- |
 | **Severity**   | LOW                                           |
 | **Domain**     | CSRF Protection                               |
-| **Location**   | `packages/engine/src/lib/utils/csrf.ts:16-18` |
+| **Location**   | `libs/engine/src/lib/utils/csrf.ts:16-18`     |
 | **Confidence** | HIGH                                          |
 | **OWASP**      | A08:2021 Software and Data Integrity Failures |
 
@@ -228,7 +224,7 @@ Unauthenticated CSRF tokens use `crypto.randomUUID()` without HMAC protection.
 
 ```typescript
 export function generateCSRFToken(): string {
-  return crypto.randomUUID();
+	return crypto.randomUUID();
 }
 ```
 
@@ -243,20 +239,16 @@ Consider HMAC for unauthenticated flows:
 
 ```typescript
 export async function generateCSRFToken(secret: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const key = await crypto.subtle.importKey(
-    "raw",
-    encoder.encode(secret),
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign"],
-  );
-  const signature = await crypto.subtle.sign(
-    "HMAC",
-    key,
-    encoder.encode(crypto.randomUUID()),
-  );
-  // ... convert to hex
+	const encoder = new TextEncoder();
+	const key = await crypto.subtle.importKey(
+		"raw",
+		encoder.encode(secret),
+		{ name: "HMAC", hash: "SHA-256" },
+		false,
+		["sign"],
+	);
+	const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(crypto.randomUUID()));
+	// ... convert to hex
 }
 ```
 
@@ -266,13 +258,13 @@ export async function generateCSRFToken(secret: string): Promise<string> {
 
 #### [HAWK-004] Webhook Retention May Exceed Compliance Requirements
 
-| Field          | Value                                                        |
-| -------------- | ------------------------------------------------------------ |
-| **Severity**   | LOW                                                          |
-| **Domain**     | Data Protection                                              |
-| **Location**   | `packages/engine/src/lib/utils/webhook-sanitizer.ts:307-311` |
-| **Confidence** | HIGH                                                         |
-| **OWASP**      | A02:2021 Cryptographic Failures                              |
+| Field          | Value                                                    |
+| -------------- | -------------------------------------------------------- |
+| **Severity**   | LOW                                                      |
+| **Domain**     | Data Protection                                          |
+| **Location**   | `libs/engine/src/lib/utils/webhook-sanitizer.ts:307-311` |
+| **Confidence** | HIGH                                                     |
+| **OWASP**      | A02:2021 Cryptographic Failures                          |
 
 **Description:**
 Webhooks are retained for 120 days. While PII is sanitized, some metadata may still be sensitive.
@@ -281,8 +273,8 @@ Webhooks are retained for 120 days. While PII is sanitized, some metadata may st
 
 ```typescript
 export function calculateWebhookExpiry(): number {
-  const RETENTION_DAYS = 120;
-  // ...
+	const RETENTION_DAYS = 120;
+	// ...
 }
 ```
 
@@ -304,13 +296,13 @@ export function calculateWebhookExpiry(): number {
 
 #### [HAWK-005] No Explicit Validation of Plan-to-Price Mapping
 
-| Field          | Value                                           |
-| -------------- | ----------------------------------------------- |
-| **Severity**   | LOW                                             |
-| **Domain**     | Input Validation                                |
-| **Location**   | `packages/plant/src/lib/server/stripe.ts:65-74` |
-| **Confidence** | MEDIUM                                          |
-| **OWASP**      | A03:2021 Injection                              |
+| Field          | Value                                       |
+| -------------- | ------------------------------------------- |
+| **Severity**   | LOW                                         |
+| **Domain**     | Input Validation                            |
+| **Location**   | `apps/plant/src/lib/server/stripe.ts:65-74` |
+| **Confidence** | MEDIUM                                      |
+| **OWASP**      | A03:2021 Injection                          |
 
 **Description:**
 Price ID lookup uses the plan key directly without validating the plan exists in the PAID_TIERS list.
@@ -339,12 +331,12 @@ export function getPriceId(plan: PlanId, billingCycle: BillingCycle): string {
 import { PAID_TIERS } from "@autumnsgrove/lattice/config";
 
 export function getPriceId(plan: PlanId, billingCycle: BillingCycle): string {
-  // Explicitly validate plan is a paid tier
-  if (!PAID_TIERS.includes(plan)) {
-    throw new Error(`Invalid paid tier: ${plan}`);
-  }
-  const priceId = STRIPE_PRICES[plan]?.[billingCycle];
-  // ...
+	// Explicitly validate plan is a paid tier
+	if (!PAID_TIERS.includes(plan)) {
+		throw new Error(`Invalid paid tier: ${plan}`);
+	}
+	const priceId = STRIPE_PRICES[plan]?.[billingCycle];
+	// ...
 }
 ```
 
@@ -354,13 +346,13 @@ export function getPriceId(plan: PlanId, billingCycle: BillingCycle): string {
 
 #### [HAWK-006] Checkout URL Construction Uses User Input
 
-| Field          | Value                                                   |
-| -------------- | ------------------------------------------------------- |
-| **Severity**   | LOW                                                     |
-| **Domain**     | Input Validation                                        |
-| **Location**   | `packages/engine/src/routes/api/billing/+server.ts:428` |
-| **Confidence** | HIGH                                                    |
-| **OWASP**      | A03:2021 Injection                                      |
+| Field          | Value                                               |
+| -------------- | --------------------------------------------------- |
+| **Severity**   | LOW                                                 |
+| **Domain**     | Input Validation                                    |
+| **Location**   | `libs/engine/src/routes/api/billing/+server.ts:428` |
+| **Confidence** | HIGH                                                |
+| **OWASP**      | A03:2021 Injection                                  |
 
 **Description:**
 The checkout endpoint accepts `successUrl` and `cancelUrl` from the request body.

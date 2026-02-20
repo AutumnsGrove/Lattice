@@ -35,7 +35,7 @@ The `grove-webhook-cleanup` worker is a scheduled Cloudflare Worker that automat
 ## Worker Location
 
 ```
-packages/workers/webhook-cleanup/
+workers/webhook-cleanup/
 ├── src/
 │   └── index.ts      # Worker implementation
 ├── wrangler.toml     # Cloudflare configuration
@@ -56,7 +56,7 @@ packages/workers/webhook-cleanup/
 ### Deploy Command
 
 ```bash
-cd packages/workers/webhook-cleanup
+cd workers/webhook-cleanup
 wrangler deploy
 ```
 
@@ -186,7 +186,7 @@ wrangler triggers list
 
 **Fix:** Redeploy the worker:
 ```bash
-cd packages/workers/webhook-cleanup
+cd workers/webhook-cleanup
 wrangler deploy
 ```
 

@@ -17,7 +17,7 @@ Site-specific code is anything that:
 
 **Examples of sites**:
 
-- `packages/example-site/` - The Midnight Bloom Tea Café demo
+- `apps/example-site/` - The Midnight Bloom Tea Café demo
 - `landing/` - grove.place marketing site
 - Customer sites (client deployments)
 

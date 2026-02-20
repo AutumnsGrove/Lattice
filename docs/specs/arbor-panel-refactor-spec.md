@@ -43,7 +43,7 @@ tags:
 
 ### Engine Arbor (the good one)
 
-**Location:** `packages/engine/src/routes/arbor/+layout.svelte` (787 lines)
+**Location:** `libs/engine/src/routes/arbor/+layout.svelte` (787 lines)
 
 The engine's Arbor is a full sidebar-based admin panel with rich behavior:
 
@@ -68,7 +68,7 @@ The engine's Arbor is a full sidebar-based admin panel with rich behavior:
 
 ### Landing Arbor (the disconnected one)
 
-**Location:** `packages/landing/src/routes/arbor/+layout.svelte` (109 lines)
+**Location:** `apps/landing/src/routes/arbor/+layout.svelte` (109 lines)
 
 The landing's Arbor uses `AdminHeader` — a completely different navigation paradigm:
 
@@ -92,7 +92,7 @@ The landing's Arbor uses `AdminHeader` — a completely different navigation par
 
 ### AdminHeader (the current landing component)
 
-**Location:** `packages/engine/src/lib/ui/components/chrome/AdminHeader.svelte` (161 lines)
+**Location:** `libs/engine/src/lib/ui/components/chrome/AdminHeader.svelte` (161 lines)
 
 This was designed for "simple admin tools with 4-6 pages" — it says so in its own docstring. The landing outgrew it with 14+ tabs but kept using it anyway. It provides:
 
@@ -525,7 +525,7 @@ The engine route files (`/arbor/+layout.svelte`) become thin wrappers that impor
 ### New export path:
 
 ```json
-// packages/engine/package.json
+// libs/engine/package.json
 {
   "exports": {
     "./ui/arbor": {
@@ -539,7 +539,7 @@ The engine route files (`/arbor/+layout.svelte`) become thin wrappers that impor
 ### File structure:
 
 ```
-packages/engine/src/lib/ui/components/arbor/
+libs/engine/src/lib/ui/components/arbor/
   ├── index.ts               # Barrel exports
   ├── types.ts               # ArborNavEntry, ArborNavItem, ArborNavDivider, ArborFooterLink, etc.
   ├── defaults.ts            # Default footer links, default config
@@ -585,7 +585,7 @@ import { sidebarStore } from "@autumnsgrove/lattice/ui/arbor";
 
 ### Phase 1: Extract engine sidebar into ArborPanel component
 
-1. Create `packages/engine/src/lib/ui/components/arbor/` directory
+1. Create `libs/engine/src/lib/ui/components/arbor/` directory
 2. Define types in `types.ts` (ArborNavItem, ArborFooterLink, etc.)
 3. Extract the sidebar markup+styles from engine's `+layout.svelte` into `ArborPanel.svelte`
 4. Include all states: expanded, collapsed, hovered, mobile open, mobile closed
@@ -701,7 +701,7 @@ export { default as ArborToggle } from "./ArborToggle.svelte";
 **Impact on component tree:**
 
 ```
-packages/engine/src/lib/ui/components/arbor/
+libs/engine/src/lib/ui/components/arbor/
   ├── ArborToggle.svelte    ← NEW: standalone toggle button for any header
   └── ... (rest of components)
 ```

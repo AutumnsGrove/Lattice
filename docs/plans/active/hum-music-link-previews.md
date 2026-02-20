@@ -1,6 +1,6 @@
 # Hum: Universal Music Link Previews
 
-> *Share a song. The grove hums along.*
+> _Share a song. The grove hums along._
 
 **Priority:** Tier 2 — Build Next
 **Complexity:** Medium
@@ -11,7 +11,7 @@
 
 ## What
 
-When someone pastes a music link into a post — Apple Music, Spotify, YouTube Music, Tidal, Deezer, SoundCloud, Bandcamp, whatever — it transforms into a beautiful, Grove-branded preview card. Album art, track name, artist, source platform. Click it, and it opens in the original service. No ugly bare URLs. No clunky provider iframes. Just a clean, warm card that says *"here's what I'm listening to."*
+When someone pastes a music link into a post — Apple Music, Spotify, YouTube Music, Tidal, Deezer, SoundCloud, Bandcamp, whatever — it transforms into a beautiful, Grove-branded preview card. Album art, track name, artist, source platform. Click it, and it opens in the original service. No ugly bare URLs. No clunky provider iframes. Just a clean, warm card that says _"here's what I'm listening to."_
 
 ## Why
 
@@ -19,7 +19,7 @@ Sharing music is one of the most intimate, human things we do online. "Listen to
 
 Hum solves this by creating a **unified music card** — same beautiful design regardless of where the link came from. An Apple Music link and a Spotify link for the same song should feel equally at home in the grove. The source matters (we show it), but it doesn't dictate the design.
 
-This is also the kind of feature that makes Grove feel *alive* and *opinionated*. Most platforms just linkify URLs. We make them hum.
+This is also the kind of feature that makes Grove feel _alive_ and _opinionated_. Most platforms just linkify URLs. We make them hum.
 
 ---
 
@@ -45,16 +45,16 @@ We use cross-platform APIs to resolve metadata, falling back gracefully when a s
 
 ## Supported Providers
 
-| Provider | URL Pattern | Priority |
-|----------|-------------|----------|
-| Apple Music | `music.apple.com/{cc}/{type}/{slug}/{id}` | Phase 1 |
-| Spotify | `open.spotify.com/{type}/{id}` | Phase 1 |
-| YouTube Music | `music.youtube.com/watch?v={id}` | Phase 1 |
-| SoundCloud | `soundcloud.com/{user}/{track}` | Phase 1 |
-| Tidal | `tidal.com/browse/{type}/{id}` | Phase 2 |
-| Deezer | `deezer.com/{type}/{id}` | Phase 2 |
-| Amazon Music | `music.amazon.com/{type}/{id}` | Phase 3 |
-| Bandcamp | `{artist}.bandcamp.com/{type}/{slug}` | Future (needs OG scraping) |
+| Provider      | URL Pattern                               | Priority                   |
+| ------------- | ----------------------------------------- | -------------------------- |
+| Apple Music   | `music.apple.com/{cc}/{type}/{slug}/{id}` | Phase 1                    |
+| Spotify       | `open.spotify.com/{type}/{id}`            | Phase 1                    |
+| YouTube Music | `music.youtube.com/watch?v={id}`          | Phase 1                    |
+| SoundCloud    | `soundcloud.com/{user}/{track}`           | Phase 1                    |
+| Tidal         | `tidal.com/browse/{type}/{id}`            | Phase 2                    |
+| Deezer        | `deezer.com/{type}/{id}`                  | Phase 2                    |
+| Amazon Music  | `music.amazon.com/{type}/{id}`            | Phase 3                    |
+| Bandcamp      | `{artist}.bandcamp.com/{type}/{slug}`     | Future (needs OG scraping) |
 
 Phase 1 covers the providers you and your friends actually use. Phase 2 and 3 add coverage as demand appears — the architecture supports adding new providers by dropping a regex + URL extractor into the registry.
 
@@ -153,7 +153,7 @@ Incoming URL
 
 ### Why this cascade order?
 
-**Odesli first** because it resolves *any* music URL from *any* provider in one call, and it returns cross-platform links as a bonus. If Odesli is down or rate-limited, we fall back to each provider's own free API. If *that* fails, the card still renders — it just shows the provider logo and a clean link instead of album art.
+**Odesli first** because it resolves _any_ music URL from _any_ provider in one call, and it returns cross-platform links as a bonus. If Odesli is down or rate-limited, we fall back to each provider's own free API. If _that_ fails, the card still renders — it just shows the provider logo and a clean link instead of album art.
 
 ---
 
@@ -163,40 +163,40 @@ Incoming URL
 
 ```typescript
 interface HumMetadata {
-  /** The original URL that was shared */
-  sourceUrl: string;
-  /** Which provider the link came from */
-  provider: HumProvider;
-  /** Content type */
-  type: "track" | "album" | "playlist" | "artist" | "unknown";
-  /** Track or album title */
-  title: string | null;
-  /** Artist name */
-  artist: string | null;
-  /** Album name (if available and different from title) */
-  album: string | null;
-  /** Album artwork URL (proxied through our CDN) */
-  artworkUrl: string | null;
-  /** High-res artwork URL for OG images */
-  artworkUrlLarge: string | null;
-  /** Cross-platform links (from Odesli) */
-  platformLinks: Partial<Record<HumProvider, string>>;
-  /** When this metadata was resolved */
-  resolvedAt: string;
-  /** Resolution quality */
-  status: "resolved" | "partial" | "unresolved";
+	/** The original URL that was shared */
+	sourceUrl: string;
+	/** Which provider the link came from */
+	provider: HumProvider;
+	/** Content type */
+	type: "track" | "album" | "playlist" | "artist" | "unknown";
+	/** Track or album title */
+	title: string | null;
+	/** Artist name */
+	artist: string | null;
+	/** Album name (if available and different from title) */
+	album: string | null;
+	/** Album artwork URL (proxied through our CDN) */
+	artworkUrl: string | null;
+	/** High-res artwork URL for OG images */
+	artworkUrlLarge: string | null;
+	/** Cross-platform links (from Odesli) */
+	platformLinks: Partial<Record<HumProvider, string>>;
+	/** When this metadata was resolved */
+	resolvedAt: string;
+	/** Resolution quality */
+	status: "resolved" | "partial" | "unresolved";
 }
 
 type HumProvider =
-  | "apple-music"
-  | "spotify"
-  | "youtube-music"
-  | "soundcloud"
-  | "bandcamp"
-  | "tidal"
-  | "deezer"
-  | "amazon-music"
-  | "unknown";
+	| "apple-music"
+	| "spotify"
+	| "youtube-music"
+	| "soundcloud"
+	| "bandcamp"
+	| "tidal"
+	| "deezer"
+	| "amazon-music"
+	| "unknown";
 ```
 
 ### KV Cache
@@ -217,32 +217,26 @@ No D1 table needed. This is pure cache — if KV expires, we re-fetch. Music met
 
 ```typescript
 const HUM_PATTERNS: Record<HumProvider, RegExp[]> = {
-  "apple-music": [
-    /^https?:\/\/music\.apple\.com\/[a-z]{2}\/(album|playlist|music-video)\/[^/]+\/[a-zA-Z0-9.]+/,
-    /^https?:\/\/music\.apple\.com\/[a-z]{2}\/artist\/[^/]+\/\d+/,
-  ],
-  "spotify": [
-    /^https?:\/\/open\.spotify\.com\/(track|album|playlist|episode|show|artist)\/[a-zA-Z0-9]+/,
-  ],
-  "youtube-music": [
-    /^https?:\/\/music\.youtube\.com\/watch\?v=[a-zA-Z0-9_-]+/,
-    /^https?:\/\/music\.youtube\.com\/playlist\?list=[a-zA-Z0-9_-]+/,
-  ],
-  "soundcloud": [
-    /^https?:\/\/(www\.)?soundcloud\.com\/[a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+/,
-  ],
-  "bandcamp": [
-    /^https?:\/\/[a-zA-Z0-9_-]+\.bandcamp\.com\/(track|album)\/[a-zA-Z0-9_-]+/,
-  ],
-  "tidal": [
-    /^https?:\/\/(www\.|listen\.)?tidal\.com\/(browse\/)?(track|album|playlist|artist)\/[a-zA-Z0-9-]+/,
-  ],
-  "deezer": [
-    /^https?:\/\/(www\.)?deezer\.com\/(track|album|playlist|artist)\/\d+/,
-  ],
-  "amazon-music": [
-    /^https?:\/\/music\.amazon\.(com|co\.\w+)\/(albums|tracks|playlists)\/[a-zA-Z0-9]+/,
-  ],
+	"apple-music": [
+		/^https?:\/\/music\.apple\.com\/[a-z]{2}\/(album|playlist|music-video)\/[^/]+\/[a-zA-Z0-9.]+/,
+		/^https?:\/\/music\.apple\.com\/[a-z]{2}\/artist\/[^/]+\/\d+/,
+	],
+	spotify: [
+		/^https?:\/\/open\.spotify\.com\/(track|album|playlist|episode|show|artist)\/[a-zA-Z0-9]+/,
+	],
+	"youtube-music": [
+		/^https?:\/\/music\.youtube\.com\/watch\?v=[a-zA-Z0-9_-]+/,
+		/^https?:\/\/music\.youtube\.com\/playlist\?list=[a-zA-Z0-9_-]+/,
+	],
+	soundcloud: [/^https?:\/\/(www\.)?soundcloud\.com\/[a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+/],
+	bandcamp: [/^https?:\/\/[a-zA-Z0-9_-]+\.bandcamp\.com\/(track|album)\/[a-zA-Z0-9_-]+/],
+	tidal: [
+		/^https?:\/\/(www\.|listen\.)?tidal\.com\/(browse\/)?(track|album|playlist|artist)\/[a-zA-Z0-9-]+/,
+	],
+	deezer: [/^https?:\/\/(www\.)?deezer\.com\/(track|album|playlist|artist)\/\d+/],
+	"amazon-music": [
+		/^https?:\/\/music\.amazon\.(com|co\.\w+)\/(albums|tracks|playlists)\/[a-zA-Z0-9]+/,
+	],
 };
 ```
 
@@ -256,18 +250,18 @@ This means detection happens at **write time** (when the post is saved), not at 
 
 ## Components
 
-| Component | Purpose |
-|-----------|---------|
-| `HumCard.svelte` | Main display — artwork, title, artist, provider badge |
-| `HumCardSkeleton.svelte` | Loading state (shimmer animation matching card layout) |
-| `HumCardFallback.svelte` | Unresolved state — provider logo + styled link |
-| `HumProviderBadge.svelte` | Small provider logo (Apple, Spotify, etc.) |
-| `HumPlatformTray.svelte` | Slide-out tray showing cross-platform links |
+| Component                 | Purpose                                                |
+| ------------------------- | ------------------------------------------------------ |
+| `HumCard.svelte`          | Main display — artwork, title, artist, provider badge  |
+| `HumCardSkeleton.svelte`  | Loading state (shimmer animation matching card layout) |
+| `HumCardFallback.svelte`  | Unresolved state — provider logo + styled link         |
+| `HumProviderBadge.svelte` | Small provider logo (Apple, Spotify, etc.)             |
+| `HumPlatformTray.svelte`  | Slide-out tray showing cross-platform links            |
 
 ### Component location
 
 ```
-packages/engine/src/lib/ui/components/content/hum/
+libs/engine/src/lib/ui/components/content/hum/
 ├── index.ts
 ├── types.ts
 ├── HumCard.svelte
@@ -315,9 +309,9 @@ packages/engine/src/lib/ui/components/content/hum/
 
 ## API Endpoint
 
-| Method | Route | Purpose | Auth |
-|--------|-------|---------|------|
-| `GET` | `/api/hum/resolve?url={encoded}` | Resolve metadata for a music URL | Public (rate-limited) |
+| Method | Route                            | Purpose                          | Auth                  |
+| ------ | -------------------------------- | -------------------------------- | --------------------- |
+| `GET`  | `/api/hum/resolve?url={encoded}` | Resolve metadata for a music URL | Public (rate-limited) |
 
 ### Rate limiting
 
@@ -329,19 +323,19 @@ packages/engine/src/lib/ui/components/content/hum/
 
 ```json
 {
-  "status": "resolved",
-  "provider": "apple-music",
-  "type": "track",
-  "title": "Running Up That Hill",
-  "artist": "Kate Bush",
-  "album": "Hounds of Love",
-  "artworkUrl": "https://cdn.grove.place/hum/abc123.jpg",
-  "sourceUrl": "https://music.apple.com/us/album/running-up-that-hill/1558627166?i=1558627175",
-  "platformLinks": {
-    "spotify": "https://open.spotify.com/track/75FEaRjZTKLhTrFGsfMUXR",
-    "youtube-music": "https://music.youtube.com/watch?v=...",
-    "tidal": "https://tidal.com/browse/track/..."
-  }
+	"status": "resolved",
+	"provider": "apple-music",
+	"type": "track",
+	"title": "Running Up That Hill",
+	"artist": "Kate Bush",
+	"album": "Hounds of Love",
+	"artworkUrl": "https://cdn.grove.place/hum/abc123.jpg",
+	"sourceUrl": "https://music.apple.com/us/album/running-up-that-hill/1558627166?i=1558627175",
+	"platformLinks": {
+		"spotify": "https://open.spotify.com/track/75FEaRjZTKLhTrFGsfMUXR",
+		"youtube-music": "https://music.youtube.com/watch?v=...",
+		"tidal": "https://tidal.com/browse/track/..."
+	}
 }
 ```
 
@@ -367,12 +361,12 @@ Can migrate to R2 later if permanence or storage costs become a concern — but 
 
 ### 1. Markdown-it Plugin
 
-**File:** `packages/engine/src/lib/utils/markdown-hum.ts` (new)
+**File:** `libs/engine/src/lib/utils/markdown-hum.ts` (new)
 
 Register on the `md` instance in `markdown.ts`:
 
 ```typescript
-import { humPlugin } from './markdown-hum';
+import { humPlugin } from "./markdown-hum";
 
 const md = new MarkdownIt({ html: true, linkify: true, breaks: false });
 md.use(humPlugin);
@@ -382,37 +376,37 @@ The plugin hooks into `core` rules (after linkify runs) and walks the token stre
 
 ### 2. Sanitizer allowlist
 
-**File:** `packages/engine/src/lib/utils/sanitize.ts`
+**File:** `libs/engine/src/lib/utils/sanitize.ts`
 
 Add `div` to `ALLOWED_TAGS` (already present) and ensure these data attributes pass through:
 
 ```typescript
 ALLOWED_ATTR: [
-  // ... existing ...
-  "data-hum-url",
-  "data-hum-provider",
-]
+	// ... existing ...
+	"data-hum-url",
+	"data-hum-provider",
+];
 ```
 
 ### 3. Client-side hydration
 
-**File:** `packages/engine/src/lib/components/custom/ContentWithGutter.svelte`
+**File:** `libs/engine/src/lib/components/custom/ContentWithGutter.svelte`
 
 Add a `$effect` that finds `.hum-card` elements in the rendered content and mounts `HumCard` into each one:
 
 ```typescript
 $effect(() => {
-  const cards = contentEl?.querySelectorAll('.hum-card[data-hum-url]');
-  cards?.forEach(card => {
-    const url = card.getAttribute('data-hum-url');
-    if (url) mountHumCard(card, url);
-  });
+	const cards = contentEl?.querySelectorAll(".hum-card[data-hum-url]");
+	cards?.forEach((card) => {
+		const url = card.getAttribute("data-hum-url");
+		if (url) mountHumCard(card, url);
+	});
 });
 ```
 
 ### 4. oEmbed provider registry
 
-**File:** `packages/engine/src/lib/server/services/oembed-providers.ts`
+**File:** `libs/engine/src/lib/server/services/oembed-providers.ts`
 
 Add Apple Music, YouTube Music, Tidal, Deezer, Bandcamp to the existing registry. This isn't strictly needed for Hum (we use our own card, not iframes), but keeps the registry complete for any future gutter embed use.
 
@@ -453,18 +447,18 @@ Add Apple Music, YouTube Music, Tidal, Deezer, Bandcamp to the existing registry
 
 ## Edge Cases
 
-| Scenario | Handling |
-|----------|----------|
-| Odesli API is down | Fall back to provider-specific API |
-| All APIs fail | Render `HumCardFallback` — styled link with provider logo |
-| URL is valid music link but for a removed track | Show card with "Track unavailable" + provider logo |
-| Same song shared from different providers | Each renders its own card (cross-platform links shown if available) |
-| User shares a playlist with 200 tracks | Card shows playlist artwork + title + track count, not individual tracks |
+| Scenario                                              | Handling                                                                                                         |
+| ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Odesli API is down                                    | Fall back to provider-specific API                                                                               |
+| All APIs fail                                         | Render `HumCardFallback` — styled link with provider logo                                                        |
+| URL is valid music link but for a removed track       | Show card with "Track unavailable" + provider logo                                                               |
+| Same song shared from different providers             | Each renders its own card (cross-platform links shown if available)                                              |
+| User shares a playlist with 200 tracks                | Card shows playlist artwork + title + track count, not individual tracks                                         |
 | Non-music YouTube link matched by YouTube Music regex | YouTube Music URLs use `music.youtube.com`, regular YouTube uses `youtube.com` — different domains, no collision |
-| Link is in a markdown `[text](url)` with custom text | Plugin detects the href, replaces the full link with a hum card (the custom text becomes the fallback) |
-| Multiple music links in one post | Each gets its own card, fetched in parallel |
-| Image-heavy post with many cards | Cards lazy-load artwork (IntersectionObserver) |
-| KV cache miss + API rate limit hit | Queue and retry with backoff; serve fallback card immediately |
+| Link is in a markdown `[text](url)` with custom text  | Plugin detects the href, replaces the full link with a hum card (the custom text becomes the fallback)           |
+| Multiple music links in one post                      | Each gets its own card, fetched in parallel                                                                      |
+| Image-heavy post with many cards                      | Cards lazy-load artwork (IntersectionObserver)                                                                   |
+| KV cache miss + API rate limit hit                    | Queue and retry with backoff; serve fallback card immediately                                                    |
 
 ---
 
@@ -472,8 +466,8 @@ Add Apple Music, YouTube Music, Tidal, Deezer, Bandcamp to the existing registry
 
 **Hum** and **Now Playing** are complementary, not competing:
 
-- **Now Playing** = live status widget ("I'm listening to this *right now*"), lives in vine slots, updates via polling
-- **Hum** = content enhancement ("I want to share this song *in this post*"), lives inline in post content, static after render
+- **Now Playing** = live status widget ("I'm listening to this _right now_"), lives in vine slots, updates via polling
+- **Hum** = content enhancement ("I want to share this song _in this post_"), lives inline in post content, static after render
 
 They share some infrastructure (provider logos, artwork proxying, possibly the artwork cache), but serve different purposes. A future integration could let the Now Playing curio automatically create a "recently listened" feed that uses Hum cards — but that's Phase 3 territory.
 
@@ -505,12 +499,12 @@ They share some infrastructure (provider logos, artwork proxying, possibly the a
 
 ## Notes
 
-Don't overthink Phase 1. The magic is in the *detection + beautiful card*, not in supporting every edge case from day one. Get Apple Music + Spotify working with Odesli, make the card look gorgeous, ship it. Everything else is iteration.
+Don't overthink Phase 1. The magic is in the _detection + beautiful card_, not in supporting every edge case from day one. Get Apple Music + Spotify working with Odesli, make the card look gorgeous, ship it. Everything else is iteration.
 
 A hum is the ambient music of a living forest — bees in the undergrowth, wind through the canopy, the vibration of everything being alive. It's also what you do when a song won't leave your head. Not a performance. Not something you rehearse. Just music, living in you, leaking out. That's what this feature is. You paste a link, and the grove hums along.
 
-*The forest was always humming. We just made it visible.*
+_The forest was always humming. We just made it visible._
 
 ---
 
-*Last updated: February 8, 2026*
+_Last updated: February 8, 2026_

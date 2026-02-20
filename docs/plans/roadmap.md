@@ -459,7 +459,7 @@ Wisp is Grove's ethical AI writing assistant. It helps polish your voice without
 
 ### Deployment Tasks (Pre-Launch)
 
-- [ ] Run database migration: `wrangler d1 execute <db> --file=packages/engine/migrations/014_wisp.sql`
+- [ ] Run database migration: `wrangler d1 execute <db> --file=libs/engine/migrations/014_wisp.sql`
 - [ ] Set Fireworks AI API key: `wrangler secret put FIREWORKS_API_KEY`
 - [ ] (Optional) Set backup provider keys: `CEREBRAS_API_KEY`, `GROQ_API_KEY`
 - [ ] Add default settings to D1: `wisp_enabled=false`, `wisp_mode=quick`
@@ -495,7 +495,7 @@ Wisp is Grove's ethical AI writing assistant. It helps polish your voice without
 ### Key Files
 
 ```
-packages/engine/
+libs/engine/
 ├── src/lib/config/wisp.js           # Model config, pricing
 ├── src/lib/server/inference-client.js # Shared inference client
 ├── src/lib/utils/readability.js      # Local calculations

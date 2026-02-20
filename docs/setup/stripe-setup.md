@@ -8,14 +8,15 @@ Complete guide for configuring Stripe payments for Grove's plant.grove.place sig
 
 Grove uses Stripe for subscription billing with 4 plans:
 
-| Plan | Monthly | Yearly (15% off) |
-|------|---------|------------------|
-| Seedling | $8 | $81.60 |
-| Sapling | $12 | $122.40 |
-| Oak | $25 | $255 |
-| Evergreen | $35 | $357 |
+| Plan      | Monthly | Yearly (15% off) |
+| --------- | ------- | ---------------- |
+| Seedling  | $8      | $81.60           |
+| Sapling   | $12     | $122.40          |
+| Oak       | $25     | $255             |
+| Evergreen | $35     | $357             |
 
 **Secrets Required: Only 2!**
+
 - `STRIPE_SECRET_KEY`
 - `STRIPE_WEBHOOK_SECRET`
 
@@ -33,6 +34,7 @@ Products should already exist in your Stripe Dashboard.
 4. Copy the **Price ID** (starts with `price_`)
 
 You need 8 price IDs total:
+
 - Seedling Monthly + Yearly
 - Sapling Monthly + Yearly
 - Oak Monthly + Yearly
@@ -42,26 +44,26 @@ You need 8 price IDs total:
 
 ## Step 2: Update Price IDs in Code
 
-Edit `packages/plant/src/lib/server/stripe.ts`:
+Edit `apps/plant/src/lib/server/stripe.ts`:
 
 ```typescript
 export const STRIPE_PRICES = {
-  seedling: {
-    monthly: "price_YOUR_SEEDLING_MONTHLY_ID",
-    yearly: "price_YOUR_SEEDLING_YEARLY_ID",
-  },
-  sapling: {
-    monthly: "price_YOUR_SAPLING_MONTHLY_ID",
-    yearly: "price_YOUR_SAPLING_YEARLY_ID",
-  },
-  oak: {
-    monthly: "price_YOUR_OAK_MONTHLY_ID",
-    yearly: "price_YOUR_OAK_YEARLY_ID",
-  },
-  evergreen: {
-    monthly: "price_YOUR_EVERGREEN_MONTHLY_ID",
-    yearly: "price_YOUR_EVERGREEN_YEARLY_ID",
-  },
+	seedling: {
+		monthly: "price_YOUR_SEEDLING_MONTHLY_ID",
+		yearly: "price_YOUR_SEEDLING_YEARLY_ID",
+	},
+	sapling: {
+		monthly: "price_YOUR_SAPLING_MONTHLY_ID",
+		yearly: "price_YOUR_SAPLING_YEARLY_ID",
+	},
+	oak: {
+		monthly: "price_YOUR_OAK_MONTHLY_ID",
+		yearly: "price_YOUR_OAK_YEARLY_ID",
+	},
+	evergreen: {
+		monthly: "price_YOUR_EVERGREEN_MONTHLY_ID",
+		yearly: "price_YOUR_EVERGREEN_YEARLY_ID",
+	},
 } as const;
 ```
 
@@ -104,10 +106,10 @@ export const STRIPE_PRICES = {
 2. Navigate to: **Workers & Pages → grove-plant → Settings → Variables and Secrets**
 3. Add these secrets:
 
-| Variable | Value | Type |
-|----------|-------|------|
-| `STRIPE_SECRET_KEY` | `sk_live_...` or `sk_test_...` | Secret |
-| `STRIPE_WEBHOOK_SECRET` | `whsec_...` | Secret |
+| Variable                | Value                          | Type   |
+| ----------------------- | ------------------------------ | ------ |
+| `STRIPE_SECRET_KEY`     | `sk_live_...` or `sk_test_...` | Secret |
+| `STRIPE_WEBHOOK_SECRET` | `whsec_...`                    | Secret |
 
 4. Click **"Save"**
 
@@ -129,6 +131,7 @@ export const STRIPE_PRICES = {
 ## Step 7: Test the Integration
 
 ### Test Checkout Flow
+
 1. Deploy to preview or use local dev
 2. Go through the signup flow
 3. Select a plan
@@ -137,16 +140,17 @@ export const STRIPE_PRICES = {
 
 ### Test Cards
 
-| Card Number | Scenario |
-|-------------|----------|
-| `4242 4242 4242 4242` | Successful payment |
-| `4000 0025 0000 3155` | 3D Secure authentication |
+| Card Number           | Scenario                      |
+| --------------------- | ----------------------------- |
+| `4242 4242 4242 4242` | Successful payment            |
+| `4000 0025 0000 3155` | 3D Secure authentication      |
 | `4000 0000 0000 9995` | Declined (insufficient funds) |
-| `4000 0000 0000 0341` | Declined (card declined) |
+| `4000 0000 0000 0341` | Declined (card declined)      |
 
 Use any future expiration date and any 3-digit CVC.
 
 ### Verify Webhook
+
 Check Stripe Dashboard → Developers → Webhooks → [Your endpoint] to see webhook delivery status.
 
 ---
@@ -168,18 +172,22 @@ To comp a friend (100% free subscription):
 ## Troubleshooting
 
 ### "No such price" Error
+
 - Verify price IDs in `stripe.ts` match your Stripe Dashboard
 - Make sure you're using the correct mode (test vs live)
 
 ### Webhook Signature Invalid
+
 - Verify `STRIPE_WEBHOOK_SECRET` matches the signing secret in Stripe Dashboard
 - Make sure you copied the secret from the correct webhook endpoint
 
 ### Checkout Returns 500
+
 - Check Cloudflare logs for the actual error
 - Verify `STRIPE_SECRET_KEY` is set in Cloudflare Dashboard
 
 ### Test Locally with Stripe CLI
+
 ```bash
 # Install Stripe CLI
 brew install stripe/stripe-cli/stripe
@@ -197,13 +205,13 @@ stripe listen --forward-to localhost:5173/api/webhooks/stripe
 
 ## File Reference
 
-| File | Purpose |
-|------|---------|
-| `packages/plant/src/lib/server/stripe.ts` | Price IDs and Stripe API helpers |
-| `packages/plant/src/routes/checkout/+server.ts` | Creates checkout sessions |
-| `packages/plant/src/routes/api/webhooks/stripe/+server.ts` | Handles Stripe webhook events |
-| `packages/plant/src/routes/success/+page.server.ts` | Handles successful payment redirect |
+| File                                                   | Purpose                             |
+| ------------------------------------------------------ | ----------------------------------- |
+| `apps/plant/src/lib/server/stripe.ts`                  | Price IDs and Stripe API helpers    |
+| `apps/plant/src/routes/checkout/+server.ts`            | Creates checkout sessions           |
+| `apps/plant/src/routes/api/webhooks/stripe/+server.ts` | Handles Stripe webhook events       |
+| `apps/plant/src/routes/success/+page.server.ts`        | Handles successful payment redirect |
 
 ---
 
-*Last updated: February 2026*
+_Last updated: February 2026_

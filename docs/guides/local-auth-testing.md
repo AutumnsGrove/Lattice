@@ -43,12 +43,12 @@ The only code change: making `GROVEAUTH_URLS` in the engine read from an env var
 
 ## Prerequisites
 
-| Requirement | Check |
-|-------------|-------|
-| macOS with Homebrew | `brew --version` |
-| cloudflared CLI | `brew install cloudflared` |
-| Cloudflare login | `cloudflared login` (one-time, opens browser) |
-| Google Console access | For adding the dev redirect URI |
+| Requirement           | Check                                         |
+| --------------------- | --------------------------------------------- |
+| macOS with Homebrew   | `brew --version`                              |
+| cloudflared CLI       | `brew install cloudflared`                    |
+| Cloudflare login      | `cloudflared login` (one-time, opens browser) |
+| Google Console access | For adding the dev redirect URI               |
 
 ---
 
@@ -75,11 +75,13 @@ This opens your browser to authorize cloudflared with your Cloudflare account. I
 ```
 
 This does three things:
+
 1. Creates a named tunnel called `grove-dev` (persists across sessions)
 2. Writes a tunnel config to `~/.cloudflared/config-grove-dev.yml`
 3. Creates a DNS CNAME record: `dev.grove.place` → your tunnel
 
 You should see output like:
+
 ```
 [tunnel] Setting up Grove dev tunnel...
 [tunnel] Tunnel created (ID: abc123...)
@@ -91,10 +93,10 @@ You should see output like:
 ### 4. Set Up the Environment Variable
 
 ```bash
-cp packages/landing/.env.local.example packages/landing/.env.local
+cp apps/landing/.env.local.example apps/landing/.env.local
 ```
 
-Then edit `packages/landing/.env.local` and uncomment the line:
+Then edit `apps/landing/.env.local` and uncomment the line:
 
 ```
 VITE_AUTH_API_URL=https://dev.grove.place
@@ -130,6 +132,7 @@ Two terminals, every time:
 ```
 
 Wait for the connection confirmation:
+
 ```
 [tunnel] Starting Grove dev tunnel...
 [tunnel]   dev.grove.place -> localhost:5173
@@ -138,7 +141,7 @@ Wait for the connection confirmation:
 ### Terminal 2: Start the Dev Server
 
 ```bash
-cd packages/landing && bun run dev
+cd apps/landing && bun run dev
 ```
 
 ### Test It
@@ -221,16 +224,19 @@ brew install cloudflared
 ### "Unable to connect" or tunnel won't start
 
 Make sure you've logged in:
+
 ```bash
 cloudflared login
 ```
 
 Then check the tunnel exists:
+
 ```bash
 ./scripts/dev-tunnel.sh status
 ```
 
 If the tunnel is missing, run setup again:
+
 ```bash
 ./scripts/dev-tunnel.sh setup
 ```
@@ -238,6 +244,7 @@ If the tunnel is missing, run setup again:
 ### Google says "redirect_uri_mismatch"
 
 The redirect URI in Google Console doesn't match. Make sure you've added exactly:
+
 ```
 https://dev.grove.place/api/auth/callback/google
 ```
@@ -247,13 +254,15 @@ No trailing slash, `https` not `http`.
 ### dev.grove.place loads but auth still hits production
 
 Your `.env.local` isn't being read. Check:
-1. The file exists at `packages/landing/.env.local`
+
+1. The file exists at `apps/landing/.env.local`
 2. The `VITE_AUTH_API_URL` line is uncommented
 3. You restarted `bun run dev` after creating/editing the file (Vite reads env files at startup)
 
 ### Cookies aren't persisting after login
 
 Check browser dev tools → Application → Cookies. The session cookie should have:
+
 - **Domain**: `.grove.place` (with leading dot)
 - **Secure**: Yes
 - **SameSite**: Lax
@@ -272,24 +281,23 @@ For the curious — here's what actually changed to make this work.
 
 ### The One Code Change
 
-In `packages/engine/src/lib/grafts/login/config.ts`:
+In `libs/engine/src/lib/grafts/login/config.ts`:
 
 ```typescript
 // Before: hardcoded
 export const GROVEAUTH_URLS = {
-  api: "https://auth-api.grove.place",
-  socialSignIn: "https://auth-api.grove.place/api/auth/sign-in/social",
-  magicLink: "https://auth-api.grove.place/api/auth/sign-in/magic-link",
+	api: "https://auth-api.grove.place",
+	socialSignIn: "https://auth-api.grove.place/api/auth/sign-in/social",
+	magicLink: "https://auth-api.grove.place/api/auth/sign-in/magic-link",
 };
 
 // After: env-aware with production fallback
-const AUTH_API_BASE =
-  import.meta.env.VITE_AUTH_API_URL ?? "https://auth-api.grove.place";
+const AUTH_API_BASE = import.meta.env.VITE_AUTH_API_URL ?? "https://auth-api.grove.place";
 
 export const GROVEAUTH_URLS = {
-  api: AUTH_API_BASE,
-  socialSignIn: `${AUTH_API_BASE}/api/auth/sign-in/social`,
-  magicLink: `${AUTH_API_BASE}/api/auth/sign-in/magic-link`,
+	api: AUTH_API_BASE,
+	socialSignIn: `${AUTH_API_BASE}/api/auth/sign-in/social`,
+	magicLink: `${AUTH_API_BASE}/api/auth/sign-in/magic-link`,
 };
 ```
 
@@ -297,14 +305,14 @@ export const GROVEAUTH_URLS = {
 
 ### What Didn't Need to Change
 
-| Component | Why It Already Worked |
-|-----------|----------------------|
-| Heartwood trusted origins | `https://*.grove.place` wildcard covers `dev.grove.place` |
-| Cookie domain | `.grove.place` (leading dot) covers all subdomains |
-| CORS middleware | `isGroveSubdomain()` checks `*.grove.place` dynamically |
-| LoginGraft callback URL | Uses `window.location.origin` — resolves to `https://dev.grove.place` through tunnel |
-| GroveAuthClient (server) | Uses service bindings, not public URLs |
+| Component                 | Why It Already Worked                                                                |
+| ------------------------- | ------------------------------------------------------------------------------------ |
+| Heartwood trusted origins | `https://*.grove.place` wildcard covers `dev.grove.place`                            |
+| Cookie domain             | `.grove.place` (leading dot) covers all subdomains                                   |
+| CORS middleware           | `isGroveSubdomain()` checks `*.grove.place` dynamically                              |
+| LoginGraft callback URL   | Uses `window.location.origin` — resolves to `https://dev.grove.place` through tunnel |
+| GroveAuthClient (server)  | Uses service bindings, not public URLs                                               |
 
 ---
 
-*Last updated: 2026-02-06*
+_Last updated: 2026-02-06_

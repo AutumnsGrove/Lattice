@@ -92,7 +92,7 @@ The current bloom editor (create and edit) forces authors through a 280px metada
 | `components/admin/MarkdownEditor.svelte`          | Editor component     | ~800  |
 | `components/admin/GutterManager.svelte`           | Vines/gutter sidebar | ~400  |
 
-All paths relative to `packages/engine/src/`.
+All paths relative to `libs/engine/src/`.
 
 **Data relationships mapped:**
 

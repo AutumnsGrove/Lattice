@@ -323,7 +323,7 @@
 
 **DB Safety Layer Completed:**
 
-- ✅ Designed safe DB abstraction layer (`packages/engine/src/lib/server/services/database-safety.ts`)
+- ✅ Designed safe DB abstraction layer (`libs/engine/src/lib/server/services/database-safety.ts`)
 - ✅ Added query validation/sanitization (blocks DDL, stacked queries)
 - ✅ Added destructive operation safeguards (row limits, protected tables, WHERE required)
 - ✅ Comprehensive test coverage (30 tests in `database-safety.test.ts`)
@@ -365,7 +365,7 @@
 
 **CODE COMPLETE:**
 
-- ✅ Created LemonSqueezyProvider in `packages/engine/src/lib/payments/lemonsqueezy/`
+- ✅ Created LemonSqueezyProvider in `libs/engine/src/lib/payments/lemonsqueezy/`
 - ✅ Wired up provider factory
 - ✅ Created checkout handler (`plant/src/routes/checkout/+server.ts`)
 - ✅ Created webhook handler (`plant/src/routes/api/webhooks/lemonsqueezy/+server.ts`)
@@ -477,7 +477,7 @@ try { const b = await db.prepare(...).all(); } catch {}
 ### ✅ Glass Design System Overhaul — 100% COMPLETE
 
 > **Design System Docs:** `docs/patterns/prism-pattern.md`
-> **Components:** 8 glass components in `packages/engine/src/lib/ui/components/ui/Glass*.svelte`
+> **Components:** 8 glass components in `libs/engine/src/lib/ui/components/ui/Glass*.svelte`
 
 | Area                | Status |
 | ------------------- | ------ |

@@ -15,7 +15,7 @@ Integrate the existing AES-256-GCM encryption module to encrypt sensitive tokens
 
 ### Encryption Module (Ready)
 
-**Location**: `packages/engine/src/lib/server/encryption.ts`
+**Location**: `libs/engine/src/lib/server/encryption.ts`
 
 ```typescript
 // Available functions
@@ -26,6 +26,7 @@ safeDecryptToken(encrypted: string | null, keyHex: string | undefined): Promise<
 ```
 
 **Features**:
+
 - AES-256-GCM (authenticated encryption)
 - Web Crypto API (Cloudflare Workers compatible)
 - Random IV per encryption (same plaintext produces different ciphertext)
@@ -35,9 +36,9 @@ safeDecryptToken(encrypted: string | null, keyHex: string | undefined): Promise<
 
 ### Tokens Currently Stored Plaintext
 
-| Token Type | Location | Table | Column |
-|------------|----------|-------|--------|
-| GitHub PAT | Journey Curio | `journey_config` | `github_token` |
+| Token Type         | Location      | Table            | Column           |
+| ------------------ | ------------- | ---------------- | ---------------- |
+| GitHub PAT         | Journey Curio | `journey_config` | `github_token`   |
 | OpenRouter API Key | Journey Curio | `journey_config` | `openrouter_key` |
 
 ### Environment Secret Required
@@ -53,32 +54,32 @@ TOKEN_ENCRYPTION_KEY=<generate with: openssl rand -hex 32>
 
 ### Phase 1: Wire Encryption into Journey Curio
 
-**File**: `packages/engine/src/routes/api/curios/journey/config/+server.ts`
+**File**: `libs/engine/src/routes/api/curios/journey/config/+server.ts`
 
 #### Task 1.1: Add Encryption on Token Save (POST)
 
 ```typescript
 // Line ~168 - Current TODO marker
-import { encryptToken } from '$lib/server/encryption';
+import { encryptToken } from "$lib/server/encryption";
 
 // Before INSERT/UPDATE, encrypt tokens
 const encryptedGithubToken = githubToken
-  ? await encryptToken(githubToken, platform.env.TOKEN_ENCRYPTION_KEY)
-  : null;
+	? await encryptToken(githubToken, platform.env.TOKEN_ENCRYPTION_KEY)
+	: null;
 const encryptedOpenrouterKey = openrouterKey
-  ? await encryptToken(openrouterKey, platform.env.TOKEN_ENCRYPTION_KEY)
-  : null;
+	? await encryptToken(openrouterKey, platform.env.TOKEN_ENCRYPTION_KEY)
+	: null;
 ```
 
 #### Task 1.2: Add Decryption on Token Read (GET)
 
 ```typescript
-import { safeDecryptToken } from '$lib/server/encryption';
+import { safeDecryptToken } from "$lib/server/encryption";
 
 // After SELECT, decrypt tokens
 const decryptedGithubToken = await safeDecryptToken(
-  row.github_token,
-  platform.env.TOKEN_ENCRYPTION_KEY
+	row.github_token,
+	platform.env.TOKEN_ENCRYPTION_KEY,
 );
 ```
 
@@ -89,8 +90,8 @@ Currently, tokens are validated via external API calls. Ensure validation happen
 ```typescript
 // Validate before encrypting
 if (githubToken) {
-  const isValid = await validateGithubToken(githubToken);
-  if (!isValid) throw new Error('Invalid GitHub token');
+	const isValid = await validateGithubToken(githubToken);
+	if (!isValid) throw new Error("Invalid GitHub token");
 }
 const encrypted = await encryptToken(githubToken, key);
 ```
@@ -99,7 +100,7 @@ const encrypted = await encryptToken(githubToken, key);
 
 #### Task 2.1: Add to Wrangler Config
 
-**File**: `packages/engine/wrangler.toml`
+**File**: `libs/engine/wrangler.toml`
 
 ```toml
 [vars]
@@ -113,17 +114,20 @@ const encrypted = await encryptToken(githubToken, key);
 
 **File**: Update `docs/setup/secrets.md` or create if missing
 
-```markdown
+````markdown
 ## TOKEN_ENCRYPTION_KEY
 
 Used for encrypting API tokens in D1 database.
 
 **Generate**:
+
 ```bash
 openssl rand -hex 32
 ```
+````
 
 **Set in production**:
+
 ```bash
 cd packages/engine
 wrangler secret put TOKEN_ENCRYPTION_KEY
@@ -131,10 +135,12 @@ wrangler secret put TOKEN_ENCRYPTION_KEY
 
 **Local development**:
 Add to `.dev.vars`:
+
 ```
 TOKEN_ENCRYPTION_KEY=<your-key>
 ```
-```
+
+````
 
 ### Phase 3: Migration Strategy for Existing Data
 
@@ -142,23 +148,24 @@ If any production data exists with plaintext tokens:
 
 #### Task 3.1: Create Migration Script
 
-**File**: `packages/engine/scripts/migrate-encrypt-tokens.ts`
+**File**: `libs/engine/scripts/migrate-encrypt-tokens.ts`
 
 ```typescript
 /**
  * One-time migration to encrypt existing plaintext tokens.
  *
- * Run with: npx tsx packages/engine/scripts/migrate-encrypt-tokens.ts
+ * Run with: npx tsx libs/engine/scripts/migrate-encrypt-tokens.ts
  *
  * Note: This TypeScript migration script uses the D1 API to re-encrypt tokens.
  * safeDecryptToken() handles both encrypted and plaintext, so migration can
  * happen gradually with no downtime.
  */
-```
+````
 
 #### Task 3.2: Verify Migration
 
 After running migration:
+
 1. Query a record
 2. Verify it has `base64:base64` format
 3. Verify decryption returns original plaintext
@@ -167,11 +174,11 @@ After running migration:
 
 When adding new integrations, apply the same pattern:
 
-| Future Integration | Encrypted Column |
-|--------------------|------------------|
-| OAuth refresh tokens | `refresh_token` |
+| Future Integration      | Encrypted Column |
+| ----------------------- | ---------------- |
+| OAuth refresh tokens    | `refresh_token`  |
 | Webhook signing secrets | `webhook_secret` |
-| Third-party API keys | `api_key` |
+| Third-party API keys    | `api_key`        |
 
 ---
 
@@ -179,41 +186,41 @@ When adding new integrations, apply the same pattern:
 
 ### Migration Tests (New)
 
-**File**: `packages/engine/src/lib/server/encryption.test.ts` (extend)
+**File**: `libs/engine/src/lib/server/encryption.test.ts` (extend)
 
 ```typescript
-describe('Migration Scenarios', () => {
-  it('should handle mixed plaintext and encrypted tokens in same table', async () => {
-    // Simulate gradual migration state
-  });
+describe("Migration Scenarios", () => {
+	it("should handle mixed plaintext and encrypted tokens in same table", async () => {
+		// Simulate gradual migration state
+	});
 
-  it('should gracefully handle corrupted/invalid encrypted data', async () => {
-    // Return null, don't throw
-  });
+	it("should gracefully handle corrupted/invalid encrypted data", async () => {
+		// Return null, don't throw
+	});
 
-  it('should handle missing encryption key gracefully', async () => {
-    // safeDecryptToken with undefined key returns null
-  });
+	it("should handle missing encryption key gracefully", async () => {
+		// safeDecryptToken with undefined key returns null
+	});
 });
 ```
 
 ### Backward Compatibility Tests
 
 ```typescript
-describe('Backward Compatibility', () => {
-  it('should decrypt tokens encrypted with current format', async () => {});
-  it('should return plaintext unchanged when not encrypted', async () => {});
-  it('should detect encrypted vs plaintext via isEncryptedToken()', async () => {});
+describe("Backward Compatibility", () => {
+	it("should decrypt tokens encrypted with current format", async () => {});
+	it("should return plaintext unchanged when not encrypted", async () => {});
+	it("should detect encrypted vs plaintext via isEncryptedToken()", async () => {});
 });
 ```
 
 ### Integration Tests
 
 ```typescript
-describe('Journey Config Integration', () => {
-  it('should encrypt token on POST and decrypt on GET', async () => {});
-  it('should validate token before encryption', async () => {});
-  it('should handle token deletion (__CLEAR__ value)', async () => {});
+describe("Journey Config Integration", () => {
+	it("should encrypt token on POST and decrypt on GET", async () => {});
+	it("should validate token before encryption", async () => {});
+	it("should handle token deletion (__CLEAR__ value)", async () => {});
 });
 ```
 
@@ -241,12 +248,14 @@ describe('Journey Config Integration', () => {
 **Decision**: Use a single `TOKEN_ENCRYPTION_KEY` for all tenants.
 
 **Rationale**:
+
 - Simplifies key management and rotation
 - D1 already provides tenant isolation at the row level
 - Per-tenant keys would require key-per-tenant storage, complicating backup/restore
 - Tokens are already scoped to tenant via foreign keys
 
 **Trade-offs**:
+
 - Single point of compromise (mitigated by Cloudflare Secrets security)
 - Key rotation affects all tenants simultaneously
 
@@ -300,17 +309,17 @@ The module uses `crypto.getRandomValues()` for IV generation (12 bytes per encry
 
 ## Files to Modify
 
-| File | Change |
-|------|--------|
-| `packages/engine/src/routes/api/curios/journey/config/+server.ts` | Add encrypt/decrypt calls |
-| `packages/engine/wrangler.toml` | Document secret requirement |
-| `docs/setup/secrets.md` | Add TOKEN_ENCRYPTION_KEY docs |
-| `.dev.vars.example` | Add example for local dev |
+| File                                                          | Change                        |
+| ------------------------------------------------------------- | ----------------------------- |
+| `libs/engine/src/routes/api/curios/journey/config/+server.ts` | Add encrypt/decrypt calls     |
+| `libs/engine/wrangler.toml`                                   | Document secret requirement   |
+| `docs/setup/secrets.md`                                       | Add TOKEN_ENCRYPTION_KEY docs |
+| `.dev.vars.example`                                           | Add example for local dev     |
 
 ---
 
 ## Related Documents
 
-- Security documentation: `packages/engine/src/lib/curios/journey/SECURITY.md`
-- Encryption module: `packages/engine/src/lib/server/encryption.ts`
-- Encryption tests: `packages/engine/src/lib/server/encryption.test.ts`
+- Security documentation: `libs/engine/src/lib/curios/journey/SECURITY.md`
+- Encryption module: `libs/engine/src/lib/server/encryption.ts`
+- Encryption tests: `libs/engine/src/lib/server/encryption.test.ts`

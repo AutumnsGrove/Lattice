@@ -76,22 +76,22 @@ Before v1 launch, achieve:
 **Framework:** Vitest
 
 ```typescript
-// Example: packages/engine/src/lib/utils/slugify.test.ts
+// Example: libs/engine/src/lib/utils/slugify.test.ts
 import { describe, it, expect } from "vitest";
 import { slugify } from "./slugify";
 
 describe("slugify", () => {
-  it("converts spaces to hyphens", () => {
-    expect(slugify("Hello World")).toBe("hello-world");
-  });
+	it("converts spaces to hyphens", () => {
+		expect(slugify("Hello World")).toBe("hello-world");
+	});
 
-  it("removes special characters", () => {
-    expect(slugify("Hello, World!")).toBe("hello-world");
-  });
+	it("removes special characters", () => {
+		expect(slugify("Hello, World!")).toBe("hello-world");
+	});
 
-  it("handles unicode characters", () => {
-    expect(slugify("Café au lait")).toBe("cafe-au-lait");
-  });
+	it("handles unicode characters", () => {
+		expect(slugify("Café au lait")).toBe("cafe-au-lait");
+	});
 });
 ```
 
@@ -104,21 +104,21 @@ describe("slugify", () => {
 **Framework:** Vitest + @testing-library/svelte
 
 ```typescript
-// Example: packages/engine/src/lib/ui/components/ui/GlassCard.test.ts
+// Example: libs/engine/src/lib/ui/components/ui/GlassCard.test.ts
 import { describe, it, expect } from "vitest";
 import { render } from "@testing-library/svelte";
 import GlassCard from "./GlassCard.svelte";
 
 describe("GlassCard", () => {
-  it("renders with default variant", () => {
-    const { container } = render(GlassCard);
-    expect(container.querySelector(".glass-card")).toBeTruthy();
-  });
+	it("renders with default variant", () => {
+		const { container } = render(GlassCard);
+		expect(container.querySelector(".glass-card")).toBeTruthy();
+	});
 
-  it("applies frosted variant styles", () => {
-    const { container } = render(GlassCard, { props: { variant: "frosted" } });
-    expect(container.querySelector(".glass-frosted")).toBeTruthy();
-  });
+	it("applies frosted variant styles", () => {
+		const { container } = render(GlassCard, { props: { variant: "frosted" } });
+		expect(container.querySelector(".glass-frosted")).toBeTruthy();
+	});
 });
 ```
 
@@ -131,20 +131,20 @@ describe("GlassCard", () => {
 **Framework:** Vitest with mocked environment
 
 ```typescript
-// Example: packages/engine/tests/integration/auth.test.ts
+// Example: libs/engine/tests/integration/auth.test.ts
 import { describe, it, expect, beforeEach } from "vitest";
 import { mockEnv } from "../utils/setup";
 
 describe("Auth API", () => {
-  beforeEach(() => {
-    mockEnv.DB._tables.clear();
-  });
+	beforeEach(() => {
+		mockEnv.DB._tables.clear();
+	});
 
-  it("creates session on successful login", async () => {
-    const response = await fetch("/api/auth/callback?code=test");
-    expect(response.status).toBe(302);
-    expect(response.headers.get("set-cookie")).toContain("session=");
-  });
+	it("creates session on successful login", async () => {
+		const response = await fetch("/api/auth/callback?code=test");
+		expect(response.status).toBe(302);
+		expect(response.headers.get("set-cookie")).toContain("session=");
+	});
 });
 ```
 
@@ -161,20 +161,20 @@ describe("Auth API", () => {
 import { test, expect } from "@playwright/test";
 
 test("user can sign up and create first post", async ({ page }) => {
-  await page.goto("/");
-  await page.click("text=Get Started");
+	await page.goto("/");
+	await page.click("text=Get Started");
 
-  // Complete signup flow
-  await page.fill("[name=email]", "test@example.com");
-  await page.click("text=Continue with Google");
+	// Complete signup flow
+	await page.fill("[name=email]", "test@example.com");
+	await page.click("text=Continue with Google");
 
-  // Verify dashboard loaded
-  await expect(page.locator("h1")).toContainText("Dashboard");
+	// Verify dashboard loaded
+	await expect(page.locator("h1")).toContainText("Dashboard");
 
-  // Create a post
-  await page.click("text=New Post");
-  await page.fill("[name=title]", "My First Post");
-  await expect(page.locator(".post-editor")).toBeVisible();
+	// Create a post
+	await page.click("text=New Post");
+	await page.fill("[name=title]", "My First Post");
+	await expect(page.locator(".post-editor")).toBeVisible();
 });
 ```
 
@@ -183,7 +183,7 @@ test("user can sign up and create first post", async ({ page }) => {
 ## Directory Structure
 
 ```
-packages/engine/
+libs/engine/
 ├── src/lib/
 │   ├── utils/
 │   │   ├── sanitize.ts
@@ -374,8 +374,8 @@ When things go wrong during test generation, follow these protocols:
 
 ```bash
 # If test generation causes widespread failures:
-git checkout -- packages/engine/src/  # Revert test files
-git clean -fd packages/engine/tests/  # Remove new test files
+git checkout -- libs/engine/src/  # Revert test files
+git clean -fd libs/engine/tests/  # Remove new test files
 
 # Or selectively revert:
 git checkout HEAD -- path/to/broken.test.ts
@@ -387,7 +387,7 @@ git checkout HEAD -- path/to/broken.test.ts
 
 ### Mock Environment (Already Implemented)
 
-**Location:** `packages/engine/tests/utils/setup.ts`
+**Location:** `libs/engine/tests/utils/setup.ts`
 
 Provides mocks for:
 
@@ -399,21 +399,21 @@ Provides mocks for:
 
 ### Vitest Configuration
 
-**Location:** `packages/engine/vitest.config.ts`
+**Location:** `libs/engine/vitest.config.ts`
 
 ```typescript
 export default defineConfig({
-  plugins: [svelte({ hot: false })],
-  test: {
-    globals: true,
-    environment: "happy-dom",
-    include: ["src/**/*.test.ts", "tests/**/*.test.ts"],
-    setupFiles: ["./tests/utils/setup.ts"],
-    coverage: {
-      provider: "v8",
-      reporter: ["text", "json", "html"],
-    },
-  },
+	plugins: [svelte({ hot: false })],
+	test: {
+		globals: true,
+		environment: "happy-dom",
+		include: ["src/**/*.test.ts", "tests/**/*.test.ts"],
+		setupFiles: ["./tests/utils/setup.ts"],
+		coverage: {
+			provider: "v8",
+			reporter: ["text", "json", "html"],
+		},
+	},
 });
 ```
 
@@ -445,35 +445,35 @@ pnpm exec playwright install chromium firefox  # Chrome + Firefox
 **Configuration:** Create `playwright.config.ts` in the engine package:
 
 ```typescript
-// packages/engine/playwright.config.ts
+// libs/engine/playwright.config.ts
 import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
-  testDir: "./tests/e2e",
-  fullyParallel: true,
-  forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
-  reporter: "html",
-  use: {
-    baseURL: "http://localhost:5173",
-    trace: "on-first-retry",
-  },
-  projects: [
-    {
-      name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
-    },
-    {
-      name: "Mobile Safari",
-      use: { ...devices["iPhone 13"] },
-    },
-  ],
-  webServer: {
-    command: "pnpm dev",
-    url: "http://localhost:5173",
-    reuseExistingServer: !process.env.CI,
-  },
+	testDir: "./tests/e2e",
+	fullyParallel: true,
+	forbidOnly: !!process.env.CI,
+	retries: process.env.CI ? 2 : 0,
+	workers: process.env.CI ? 1 : undefined,
+	reporter: "html",
+	use: {
+		baseURL: "http://localhost:5173",
+		trace: "on-first-retry",
+	},
+	projects: [
+		{
+			name: "chromium",
+			use: { ...devices["Desktop Chrome"] },
+		},
+		{
+			name: "Mobile Safari",
+			use: { ...devices["iPhone 13"] },
+		},
+	],
+	webServer: {
+		command: "pnpm dev",
+		url: "http://localhost:5173",
+		reuseExistingServer: !process.env.CI,
+	},
 });
 ```
 
@@ -497,10 +497,10 @@ pnpm exec playwright show-report
 
 ```json
 {
-  "scripts": {
-    "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
-  }
+	"scripts": {
+		"test:e2e": "playwright test",
+		"test:e2e:ui": "playwright test --ui"
+	}
 }
 ```
 
@@ -547,7 +547,7 @@ jobs:
       - name: Upload coverage
         uses: codecov/codecov-action@v3
         with:
-          file: ./packages/engine/coverage/coverage-final.json
+          file: ./libs/engine/coverage/coverage-final.json
 ```
 
 ---

@@ -346,8 +346,8 @@ API routes (`/api/*`) return structured JSON:
 
 ```json
 {
-  "error": "Please sign in to continue.",
-  "error_code": "GROVE-API-020"
+	"error": "Please sign in to continue.",
+	"error_code": "GROVE-API-020"
 }
 ```
 
@@ -442,11 +442,11 @@ MY_NEW_ERROR: {
 ```typescript
 // For JSON API routes:
 return json(
-  {
-    error: API_ERRORS.MY_NEW_ERROR.userMessage,
-    error_code: API_ERRORS.MY_NEW_ERROR.code,
-  },
-  { status: 400 },
+	{
+		error: API_ERRORS.MY_NEW_ERROR.userMessage,
+		error_code: API_ERRORS.MY_NEW_ERROR.code,
+	},
+	{ status: 400 },
 );
 
 // For page routes:
@@ -470,7 +470,7 @@ The tests auto-validate format, uniqueness, category values, and message content
 ### File Locations
 
 ```
-packages/engine/src/lib/errors/
+libs/engine/src/lib/errors/
   types.ts          GroveErrorDef, ErrorCategory
   helpers.ts        logGroveError, buildErrorUrl, buildErrorJson, throwGroveError
   api-errors.ts     GROVE-API-* catalog
@@ -479,10 +479,10 @@ packages/engine/src/lib/errors/
   index.ts          Barrel export (all of the above)
   integrity.test.ts 489 auto-generated tests
 
-packages/engine/src/lib/heartwood/errors.ts
+libs/engine/src/lib/heartwood/errors.ts
   HW-AUTH-* catalog (AuthErrorDef = GroveErrorDef)
 
-packages/plant/src/lib/errors.ts
+apps/plant/src/lib/errors.ts
   PLANT-* catalog (PlantErrorDef = GroveErrorDef)
 ```
 
@@ -493,10 +493,7 @@ packages/plant/src/lib/errors.ts
 import { API_ERRORS, logGroveError, throwGroveError } from "$lib/errors";
 
 // From other packages (via engine export)
-import {
-  type GroveErrorDef,
-  logGroveError,
-} from "@autumnsgrove/lattice/errors";
+import { type GroveErrorDef, logGroveError } from "@autumnsgrove/lattice/errors";
 
 // Heartwood (local)
 import { AUTH_ERRORS, logAuthError } from "../errors.js";
@@ -511,10 +508,10 @@ import { PLANT_ERRORS, logPlantError } from "$lib/errors";
 type ErrorCategory = "user" | "admin" | "bug";
 
 interface GroveErrorDef {
-  code: string; // "GROVE-API-040"
-  category: ErrorCategory;
-  userMessage: string; // Warm, safe for display
-  adminMessage: string; // Detailed, for logs
+	code: string; // "GROVE-API-040"
+	category: ErrorCategory;
+	userMessage: string; // Warm, safe for display
+	adminMessage: string; // Detailed, for logs
 }
 ```
 

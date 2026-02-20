@@ -51,7 +51,7 @@ username.grove.place (individual blog)
 ├── Own D1 database (or shared with tenant_id)
 ├── Own R2 bucket (namespaced by tenant)
 ├── Own KV namespace (sessions, cache)
-└── Powered by packages/engine
+└── Powered by libs/engine
 ```
 
 ### Current State (Phase 0.1)
@@ -98,7 +98,7 @@ Cloudflare Pages
 ```bash
 # Clone the Lattice repository
 git clone https://github.com/AutumnsGrove/Lattice.git
-cd Lattice/packages/engine
+cd Lattice/libs/engine
 
 # Install dependencies
 npm install
@@ -121,7 +121,7 @@ npx wrangler r2 bucket create yoursite-images
 
 #### 3.3 Configure wrangler.toml
 
-Update `/home/user/Lattice/packages/engine/wrangler.toml`:
+Update `/home/user/Lattice/libs/engine/wrangler.toml`:
 
 ```toml
 name = "yoursite"
@@ -154,7 +154,7 @@ AI_CACHE_TTL_SECONDS = "21600"
 
 ```bash
 # Navigate to engine directory
-cd packages/engine
+cd libs/engine
 
 # Run each migration in order
 npx wrangler d1 execute yoursite-posts --file=migrations/001_magic_codes.sql
@@ -285,10 +285,10 @@ Bindings give your Worker access to Cloudflare resources. Access them via `event
 ```javascript
 // In a +page.server.js or API route
 export async function load({ platform }) {
-  const db = platform.env.POSTS_DB; // D1 database
-  const images = platform.env.IMAGES; // R2 bucket
-  const cache = platform.env.CACHE_KV; // KV namespace
-  const secret = platform.env.SESSION_SECRET; // Secret
+	const db = platform.env.POSTS_DB; // D1 database
+	const images = platform.env.IMAGES; // R2 bucket
+	const cache = platform.env.CACHE_KV; // KV namespace
+	const secret = platform.env.SESSION_SECRET; // Secret
 }
 ```
 
@@ -298,17 +298,13 @@ SQLite database with full SQL support:
 
 ```javascript
 // Query posts
-const result = await db
-  .prepare("SELECT * FROM posts WHERE published = 1 ORDER BY date DESC")
-  .all();
+const result = await db.prepare("SELECT * FROM posts WHERE published = 1 ORDER BY date DESC").all();
 
 // Insert a post
 await db
-  .prepare(
-    "INSERT INTO posts (title, slug, content, published, date) VALUES (?, ?, ?, ?, ?)",
-  )
-  .bind(title, slug, content, 1, Date.now())
-  .run();
+	.prepare("INSERT INTO posts (title, slug, content, published, date) VALUES (?, ?, ?, ?, ?)")
+	.bind(title, slug, content, 1, Date.now())
+	.run();
 ```
 
 **Database Schema:**
@@ -325,9 +321,9 @@ S3-compatible storage for images:
 ```javascript
 // Upload image
 await images.put(`images/${filename}`, fileBuffer, {
-  httpMetadata: {
-    contentType: "image/jpeg",
-  },
+	httpMetadata: {
+		contentType: "image/jpeg",
+	},
 });
 
 // Get image
@@ -345,7 +341,7 @@ Fast distributed cache:
 ```javascript
 // Cache API response
 await cache.put("github:stats", JSON.stringify(data), {
-  expirationTtl: 3600, // 1 hour
+	expirationTtl: 3600, // 1 hour
 });
 
 // Retrieve cached data
@@ -454,23 +450,23 @@ Add site-specific components to `src/lib/components/custom/`.
 
 ```javascript
 await db
-  .prepare(
-    `
+	.prepare(
+		`
   INSERT INTO posts (title, slug, content, excerpt, date, published, category, tags)
   VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 `,
-  )
-  .bind(
-    "My Post Title",
-    "my-post-title",
-    "# Content here...",
-    "A brief excerpt",
-    Date.now(),
-    1, // published
-    "tutorial",
-    "svelte,cloudflare",
-  )
-  .run();
+	)
+	.bind(
+		"My Post Title",
+		"my-post-title",
+		"# Content here...",
+		"A brief excerpt",
+		Date.now(),
+		1, // published
+		"tutorial",
+		"svelte,cloudflare",
+	)
+	.run();
 ```
 
 ### Adding a New Static Page
@@ -503,11 +499,11 @@ const formData = new FormData();
 formData.append("image", file);
 
 const response = await fetch("/api/images/upload", {
-  method: "POST",
-  body: formData,
-  headers: {
-    "X-CSRF-Token": csrfToken,
-  },
+	method: "POST",
+	body: formData,
+	headers: {
+		"X-CSRF-Token": csrfToken,
+	},
 });
 ```
 
@@ -609,7 +605,7 @@ npx wrangler pages deploy .svelte-kit/cloudflare
 ```javascript
 // In +page.server.js, pass csrfToken to page
 export async function load({ locals }) {
-  return { csrfToken: locals.csrfToken };
+	return { csrfToken: locals.csrfToken };
 }
 
 // In form submission
@@ -684,9 +680,9 @@ npx wrangler secret put ALLOWED_ADMIN_EMAILS
 import adapter from "@sveltejs/adapter-cloudflare";
 
 export default {
-  kit: {
-    adapter: adapter(),
-  },
+	kit: {
+		adapter: adapter(),
+	},
 };
 
 // wrangler.toml should NOT have:
@@ -839,33 +835,33 @@ Per-tenant:
 Repository Root: /home/user/Lattice/
 
 Core Files:
-- Engine package: packages/engine/
-- Wrangler config: packages/engine/wrangler.toml
-- Server hooks: packages/engine/src/hooks.server.js
-- Root layout: packages/engine/src/routes/+layout.svelte
+- Engine package: libs/engine/
+- Wrangler config: libs/engine/wrangler.toml
+- Server hooks: libs/engine/src/hooks.server.js
+- Root layout: libs/engine/src/routes/+layout.svelte
 
 Authentication:
-- Session utils: packages/engine/src/lib/auth/session.js
-- JWT utils: packages/engine/src/lib/auth/jwt.js
-- Auth routes: packages/engine/src/routes/auth/
+- Session utils: libs/engine/src/lib/auth/session.js
+- JWT utils: libs/engine/src/lib/auth/jwt.js
+- Auth routes: libs/engine/src/routes/auth/
 
 Admin CMS:
-- Admin routes: packages/engine/src/routes/admin/
-- Post editor: packages/engine/src/lib/components/admin/MarkdownEditor.svelte
-- Gutter manager: packages/engine/src/lib/components/admin/GutterManager.svelte
+- Admin routes: libs/engine/src/routes/admin/
+- Post editor: libs/engine/src/lib/components/admin/MarkdownEditor.svelte
+- Gutter manager: libs/engine/src/lib/components/admin/GutterManager.svelte
 
 Custom Components:
-- Gutter system: packages/engine/src/lib/components/custom/ContentWithGutter.svelte
-- Table of contents: packages/engine/src/lib/components/custom/TableOfContents.svelte
+- Gutter system: libs/engine/src/lib/components/custom/ContentWithGutter.svelte
+- Table of contents: libs/engine/src/lib/components/custom/TableOfContents.svelte
 
 Database:
-- Migrations: packages/engine/migrations/
-- DB utilities: packages/engine/src/lib/db/
+- Migrations: libs/engine/migrations/
+- DB utilities: libs/engine/src/lib/db/
 
 Utilities:
-- Markdown parser: packages/engine/src/lib/utils/markdown.js
-- CSRF protection: packages/engine/src/lib/utils/csrf.js
-- Sanitization: packages/engine/src/lib/utils/sanitize.js
+- Markdown parser: libs/engine/src/lib/utils/markdown.js
+- CSRF protection: libs/engine/src/lib/utils/csrf.js
+- Sanitization: libs/engine/src/lib/utils/sanitize.js
 
 Documentation:
 - Main README: README.md

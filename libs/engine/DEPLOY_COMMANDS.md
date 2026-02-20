@@ -16,7 +16,7 @@ npx wrangler kv:namespace create FLAGS_KV
 # id = "abc123def456..."
 ```
 
-Copy the ID from the output and update `packages/engine/wrangler.toml`:
+Copy the ID from the output and update `libs/engine/wrangler.toml`:
 
 ```toml
 [[kv_namespaces]]
@@ -29,12 +29,12 @@ id = "YOUR_ACTUAL_ID_HERE"  # Replace PLACEHOLDER_CREATE_WITH_WRANGLER
 ```bash
 # Preview migration (dry run)
 npx wrangler d1 execute grove-engine-db \
-  --file=packages/engine/migrations/018_feature_flags.sql \
+  --file=libs/engine/migrations/018_feature_flags.sql \
   --local
 
 # Run on production
 npx wrangler d1 execute grove-engine-db \
-  --file=packages/engine/migrations/018_feature_flags.sql \
+  --file=libs/engine/migrations/018_feature_flags.sql \
   --remote
 ```
 

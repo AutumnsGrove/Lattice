@@ -25,7 +25,7 @@ Before building individual curios, we need shared pieces that benefit all of the
 
 A single source of truth for all curios — what exists, their metadata, and requirements.
 
-### File: `packages/engine/src/lib/curios/registry.ts`
+### File: `libs/engine/src/lib/curios/registry.ts`
 
 ```typescript
 export type CurioCategory = 'interactive' | 'decoration' | 'integration' | 'media' | 'social';
@@ -94,40 +94,40 @@ export function getCuriosByPlacement(placement: CurioPlacement): CurioDefinition
 
 The system that renders curios in page gutters.
 
-### File: `packages/engine/src/lib/curios/VinePlacement.svelte`
+### File: `libs/engine/src/lib/curios/VinePlacement.svelte`
 
 A layout component that reads the tenant's curio placement config and renders enabled curios in the correct slots.
 
 ```svelte
 <!-- Usage in a layout -->
 <div class="page-layout">
-  <VineSlot position="left-vine" {tenantId} />
+	<VineSlot position="left-vine" {tenantId} />
 
-  <main class="content">
-    <slot />
-  </main>
+	<main class="content">
+		<slot />
+	</main>
 
-  <VineSlot position="right-vine" {tenantId} />
+	<VineSlot position="right-vine" {tenantId} />
 </div>
 ```
 
-### File: `packages/engine/src/lib/curios/VineSlot.svelte`
+### File: `libs/engine/src/lib/curios/VineSlot.svelte`
 
 Renders all curios assigned to a specific vine position for the current tenant.
 
 ```svelte
 <script>
-  // Reads tenant's curio_placements from DB
-  // Dynamically imports only the components needed
-  // Renders them in order
+	// Reads tenant's curio_placements from DB
+	// Dynamically imports only the components needed
+	// Renders them in order
 </script>
 
 <aside class="vine vine-{position}" aria-label="Site widgets">
-  {#each enabledCurios as curio}
-    <CurioWrapper {curio}>
-      <svelte:component this={curio.component} {tenantId} />
-    </CurioWrapper>
-  {/each}
+	{#each enabledCurios as curio}
+		<CurioWrapper {curio}>
+			<svelte:component this={curio.component} {tenantId} />
+		</CurioWrapper>
+	{/each}
 </aside>
 ```
 
@@ -137,11 +137,11 @@ Curio components are lazy-loaded to avoid bundle bloat:
 
 ```typescript
 const CURIO_LOADERS: Record<string, () => Promise<any>> = {
-  hitcounter: () => import('./hitcounter/HitCounter.svelte'),
-  nowplaying: () => import('./nowplaying/NowPlayingCompact.svelte'),
-  activitystatus: () => import('./activitystatus/ActivityStatusInline.svelte'),
-  moodring: () => import('./moodring/MoodRing.svelte'),
-  // Each curio may have different components for vine vs dedicated placement
+	hitcounter: () => import("./hitcounter/HitCounter.svelte"),
+	nowplaying: () => import("./nowplaying/NowPlayingCompact.svelte"),
+	activitystatus: () => import("./activitystatus/ActivityStatusInline.svelte"),
+	moodring: () => import("./moodring/MoodRing.svelte"),
+	// Each curio may have different components for vine vs dedicated placement
 };
 ```
 
@@ -152,16 +152,15 @@ const CURIO_LOADERS: Record<string, () => Promise<any>> = {
 ### Server-Side: Middleware
 
 ```typescript
-// packages/engine/src/lib/server/curios/tier-check.ts
+// libs/engine/src/lib/server/curios/tier-check.ts
 export function canUseCurio(tenantTier: SubscriptionTier, curioId: string): boolean {
-  const curio = CURIO_REGISTRY[curioId];
-  if (!curio) return false;
-  return TIER_ORDER.indexOf(tenantTier) >= TIER_ORDER.indexOf(curio.minTier);
+	const curio = CURIO_REGISTRY[curioId];
+	if (!curio) return false;
+	return TIER_ORDER.indexOf(tenantTier) >= TIER_ORDER.indexOf(curio.minTier);
 }
 
 export function getAvailableCurios(tenantTier: SubscriptionTier): CurioDefinition[] {
-  return Object.values(CURIO_REGISTRY)
-    .filter(c => canUseCurio(tenantTier, c.id));
+	return Object.values(CURIO_REGISTRY).filter((c) => canUseCurio(tenantTier, c.id));
 }
 ```
 
@@ -187,6 +186,7 @@ In the admin hub, curios above the tenant's tier show as locked with an upgrade 
 The central management page where tenants see all curios, enable/disable them, and configure placement.
 
 **Layout:**
+
 - Grid of curio cards, grouped by category
 - Each card shows: icon, name, description, tier requirement
 - Toggle switch for enabled/disabled
@@ -195,6 +195,7 @@ The central management page where tenants see all curios, enable/disable them, a
 - Locked curios show tier badge + upgrade CTA
 
 **Data Flow:**
+
 1. Load tenant's `curio_settings` from D1
 2. Cross-reference with `CURIO_REGISTRY`
 3. Check tenant tier for availability
@@ -204,33 +205,34 @@ The central management page where tenants see all curios, enable/disable them, a
 
 ## 5. Curio Wrapper Component
 
-### File: `packages/engine/src/lib/curios/CurioWrapper.svelte`
+### File: `libs/engine/src/lib/curios/CurioWrapper.svelte`
 
 Wraps every curio with shared behavior:
 
 ```svelte
 <script>
-  export let curio: CurioDefinition;
-  export let loading = false;
-  export let error: string | null = null;
+	export let curio: CurioDefinition;
+	export let loading = false;
+	export let error: string | null = null;
 </script>
 
 {#if loading}
-  <div class="curio-skeleton" aria-busy="true">...</div>
+	<div class="curio-skeleton" aria-busy="true">...</div>
 {:else if error}
-  <div class="curio-error" role="alert">{error}</div>
+	<div class="curio-error" role="alert">{error}</div>
 {:else}
-  <div
-    class="curio-container curio-{curio.id}"
-    data-curio={curio.id}
-    data-placement={curio.defaultPlacement}
-  >
-    <slot />
-  </div>
+	<div
+		class="curio-container curio-{curio.id}"
+		data-curio={curio.id}
+		data-placement={curio.defaultPlacement}
+	>
+		<slot />
+	</div>
 {/if}
 ```
 
 **Responsibilities:**
+
 - Loading skeleton while lazy-loading
 - Error boundary (catch and display gracefully)
 - `prefers-reduced-motion` detection passed as context
@@ -261,6 +263,7 @@ CREATE INDEX idx_curio_settings_enabled ON curio_settings(tenant_id, enabled);
 ```
 
 **Fields:**
+
 - `tenant_id` + `curio_id` = composite primary key
 - `enabled` — Is this curio active?
 - `placement` — Which vine slot (maps to `CurioPlacement` type)
@@ -280,6 +283,7 @@ CREATE INDEX idx_curio_settings_enabled ON curio_settings(tenant_id, enabled);
 7. Wire placement system into existing site layouts
 
 After this, each individual curio just needs to:
+
 - Add its entry to the registry
 - Create its migration
 - Build its components
@@ -288,4 +292,4 @@ After this, each individual curio just needs to:
 
 ---
 
-*The trellis goes up before the vines grow.*
+_The trellis goes up before the vines grow._

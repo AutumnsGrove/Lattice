@@ -18,7 +18,7 @@ Five enhancements to the Plant onboarding flow, listed in priority order:
 5. **Reserved username data** (P3 - Already 90% complete)
 
 **Spec**: `docs/specs/plant-spec.md`
-**Location**: `packages/plant/src/routes/`
+**Location**: `apps/plant/src/routes/`
 
 ---
 
@@ -36,7 +36,7 @@ Users can complete signup without verifying their email address. This allows:
 
 #### Task 1.1: Create Verification Code Table
 
-**File**: `packages/plant/migrations/XXX_email_verification.sql`
+**File**: `apps/plant/migrations/XXX_email_verification.sql`
 
 ```sql
 CREATE TABLE IF NOT EXISTS email_verifications (
@@ -58,7 +58,7 @@ CREATE INDEX idx_email_verifications_code ON email_verifications(code);
 
 #### Task 1.2: Create Verification Page
 
-**File**: `packages/plant/src/routes/verify-email/+page.svelte`
+**File**: `apps/plant/src/routes/verify-email/+page.svelte`
 
 ```svelte
 <script lang="ts">
@@ -102,7 +102,7 @@ CREATE INDEX idx_email_verifications_code ON email_verifications(code);
 
 #### Task 1.3: Create Server Actions
 
-**File**: `packages/plant/src/routes/verify-email/+page.server.ts`
+**File**: `apps/plant/src/routes/verify-email/+page.server.ts`
 
 ```typescript
 import { fail, redirect } from "@sveltejs/kit";
@@ -169,7 +169,7 @@ export const actions = {
 
 #### Task 1.4: Send Verification Email
 
-**File**: `packages/plant/src/lib/server/email.ts`
+**File**: `apps/plant/src/lib/server/email.ts`
 
 ```typescript
 import { Resend } from "resend";
@@ -195,7 +195,7 @@ export async function sendVerificationEmail(
 
 #### Task 1.5: Gate Plan Selection on Verification
 
-**File**: `packages/plant/src/routes/plans/+page.server.ts`
+**File**: `apps/plant/src/routes/plans/+page.server.ts`
 
 ```typescript
 export const load = async ({ locals }) => {
@@ -231,7 +231,7 @@ No tracking of onboarding completion steps. Users may miss important setup tasks
 
 #### Task 2.1: Create Checklist Table
 
-**File**: `packages/engine/migrations/XXX_onboarding_checklist.sql`
+**File**: `libs/engine/migrations/XXX_onboarding_checklist.sql`
 
 ```sql
 CREATE TABLE IF NOT EXISTS onboarding_checklist (
@@ -267,7 +267,7 @@ export const ONBOARDING_STEPS = [
 
 #### Task 2.3: Create Checklist Widget
 
-**File**: `packages/engine/src/lib/ui/components/admin/OnboardingChecklist.svelte`
+**File**: `libs/engine/src/lib/ui/components/admin/OnboardingChecklist.svelte`
 
 Already exists with basic structure. Enhance with:
 
@@ -298,7 +298,7 @@ Uses browser `confirm()` for destructive actions. This:
 
 #### Task 3.1: Create ConfirmDialog Component
 
-**File**: `packages/engine/src/lib/ui/components/dialogs/ConfirmDialog.svelte`
+**File**: `libs/engine/src/lib/ui/components/dialogs/ConfirmDialog.svelte`
 
 ```svelte
 <script lang="ts">
@@ -344,7 +344,7 @@ Uses browser `confirm()` for destructive actions. This:
 
 #### Task 3.2: Create useConfirm Composable
 
-**File**: `packages/engine/src/lib/ui/composables/useConfirm.svelte.ts`
+**File**: `libs/engine/src/lib/ui/composables/useConfirm.svelte.ts`
 
 ```typescript
 import { mount } from "svelte";
@@ -455,16 +455,16 @@ Ensure all interactive elements have minimum 44x44px touch targets:
 
 - Migration 012: `reserved_usernames` table with 70 entries
 - Migration 017: 450+ entries across 7 categories
-- TypeScript blocklist: `packages/engine/src/lib/config/domain-blocklist.ts` (865 lines)
-- Offensive blocklist: `packages/engine/src/lib/config/offensive-blocklist.ts` (802 lines)
-- API endpoint: `packages/plant/src/routes/api/check-username/+server.ts` (281 lines)
-- Comprehensive tests: `packages/engine/src/lib/config/domain-blocklist.test.ts` (321 lines)
+- TypeScript blocklist: `libs/engine/src/lib/config/domain-blocklist.ts` (865 lines)
+- Offensive blocklist: `libs/engine/src/lib/config/offensive-blocklist.ts` (802 lines)
+- API endpoint: `apps/plant/src/routes/api/check-username/+server.ts` (281 lines)
+- Comprehensive tests: `libs/engine/src/lib/config/domain-blocklist.test.ts` (321 lines)
 
 ### Remaining Work
 
 #### Task 5.1: Create Admin UI for Reserved Usernames
 
-**File**: `packages/engine/src/routes/admin/reserved-usernames/+page.svelte`
+**File**: `libs/engine/src/routes/admin/reserved-usernames/+page.svelte`
 
 - List all reserved usernames with search/filter
 - Add new reserved username
@@ -488,7 +488,7 @@ CREATE TABLE IF NOT EXISTS reserved_usernames_audit (
 
 #### Task 5.3: Create Offensive Blocklist Tests
 
-**File**: `packages/engine/src/lib/config/offensive-blocklist.test.ts`
+**File**: `libs/engine/src/lib/config/offensive-blocklist.test.ts`
 
 Test cases needed:
 
@@ -522,16 +522,16 @@ Test cases needed:
 
 | File                                                                     | Type   | Item |
 | ------------------------------------------------------------------------ | ------ | ---- |
-| `packages/plant/migrations/XXX_email_verification.sql`                   | New    | #1   |
-| `packages/plant/src/routes/verify-email/+page.svelte`                    | New    | #1   |
-| `packages/plant/src/routes/verify-email/+page.server.ts`                 | New    | #1   |
-| `packages/plant/src/lib/server/email.ts`                                 | Modify | #1   |
-| `packages/engine/migrations/XXX_onboarding_checklist.sql`                | New    | #2   |
-| `packages/engine/src/lib/ui/components/admin/OnboardingChecklist.svelte` | Modify | #2   |
-| `packages/engine/src/lib/ui/components/dialogs/ConfirmDialog.svelte`     | New    | #3   |
-| `packages/engine/src/lib/ui/composables/useConfirm.svelte.ts`            | New    | #3   |
-| `packages/engine/src/routes/admin/reserved-usernames/+page.svelte`       | New    | #5   |
-| `packages/engine/src/lib/config/offensive-blocklist.test.ts`             | New    | #5   |
+| `apps/plant/migrations/XXX_email_verification.sql`                   | New    | #1   |
+| `apps/plant/src/routes/verify-email/+page.svelte`                    | New    | #1   |
+| `apps/plant/src/routes/verify-email/+page.server.ts`                 | New    | #1   |
+| `apps/plant/src/lib/server/email.ts`                                 | Modify | #1   |
+| `libs/engine/migrations/XXX_onboarding_checklist.sql`                | New    | #2   |
+| `libs/engine/src/lib/ui/components/admin/OnboardingChecklist.svelte` | Modify | #2   |
+| `libs/engine/src/lib/ui/components/dialogs/ConfirmDialog.svelte`     | New    | #3   |
+| `libs/engine/src/lib/ui/composables/useConfirm.svelte.ts`            | New    | #3   |
+| `libs/engine/src/routes/admin/reserved-usernames/+page.svelte`       | New    | #5   |
+| `libs/engine/src/lib/config/offensive-blocklist.test.ts`             | New    | #5   |
 
 ---
 
@@ -539,5 +539,5 @@ Test cases needed:
 
 - Plant spec: `docs/specs/plant-spec.md`
 - Loam spec: `docs/specs/loam-spec.md`
-- Domain blocklist: `packages/engine/src/lib/config/domain-blocklist.ts`
-- Offensive blocklist: `packages/engine/src/lib/config/offensive-blocklist.ts`
+- Domain blocklist: `libs/engine/src/lib/config/domain-blocklist.ts`
+- Offensive blocklist: `libs/engine/src/lib/config/offensive-blocklist.ts`

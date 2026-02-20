@@ -105,13 +105,13 @@ Blooms POST                       │  Tier-based limits check
 
 #### [HAWK-010] verifiedTenantId ReferenceError in Billing PATCH Handler
 
-| Field          | Value                                                             |
-| -------------- | ----------------------------------------------------------------- |
-| **Severity**   | HIGH                                                              |
-| **Domain**     | Authorization                                                     |
-| **Location**   | `packages/engine/src/routes/api/billing/+server.ts:550, 571, 596` |
-| **Confidence** | HIGH                                                              |
-| **OWASP**      | A01:2021 Broken Access Control                                    |
+| Field          | Value                                                         |
+| -------------- | ------------------------------------------------------------- |
+| **Severity**   | HIGH                                                          |
+| **Domain**     | Authorization                                                 |
+| **Location**   | `libs/engine/src/routes/api/billing/+server.ts:550, 571, 596` |
+| **Confidence** | HIGH                                                          |
+| **OWASP**      | A01:2021 Broken Access Control                                |
 
 **Description:**
 The billing PATCH handler (cancel/resume subscription) calls `getVerifiedTenantId()` at line 550 but discards the return value. The variable `verifiedTenantId` is then referenced at lines 571 and 596 without being defined, causing a `ReferenceError` at runtime.
@@ -140,11 +140,7 @@ await getVerifiedTenantId(platform.env.DB, tenantId, locals.user);
 
 ```typescript
 // Line 550: Capture the return value
-const verifiedTenantId = await getVerifiedTenantId(
-  platform.env.DB,
-  tenantId,
-  locals.user,
-);
+const verifiedTenantId = await getVerifiedTenantId(platform.env.DB, tenantId, locals.user);
 ```
 
 **Status:** Fix before merge — breaks core billing operations
@@ -155,13 +151,13 @@ const verifiedTenantId = await getVerifiedTenantId(
 
 #### [HAWK-011] returnTo URL Not Validated Against Allowlist
 
-| Field          | Value                                                                |
-| -------------- | -------------------------------------------------------------------- |
-| **Severity**   | MEDIUM                                                               |
-| **Domain**     | Input Validation                                                     |
-| **Location**   | `packages/engine/src/lib/grafts/upgrades/server/api/tend.ts:143-148` |
-| **Confidence** | HIGH                                                                 |
-| **OWASP**      | A01:2021 Broken Access Control                                       |
+| Field          | Value                                                            |
+| -------------- | ---------------------------------------------------------------- |
+| **Severity**   | MEDIUM                                                           |
+| **Domain**     | Input Validation                                                 |
+| **Location**   | `libs/engine/src/lib/grafts/upgrades/server/api/tend.ts:143-148` |
+| **Confidence** | HIGH                                                             |
+| **OWASP**      | A01:2021 Broken Access Control                                   |
 
 **Description:**
 The `constructReturnUrl()` function in tend.ts passes the user-supplied `returnTo` parameter directly as the portal return URL without any validation or allowlisting.
@@ -171,10 +167,10 @@ The `constructReturnUrl()` function in tend.ts passes the user-supplied `returnT
 ```typescript
 // Line 143-148: returnTo passed through without validation
 function constructReturnUrl(appUrl: string, returnTo?: string): string {
-  if (returnTo) {
-    return returnTo; // ← User-controlled, no validation
-  }
-  return `${appUrl}/garden`;
+	if (returnTo) {
+		return returnTo; // ← User-controlled, no validation
+	}
+	return `${appUrl}/garden`;
 }
 ```
 
@@ -190,16 +186,16 @@ The same pattern appears in cultivate.ts at `constructSuccessUrl()` (line 254) a
 
 ```typescript
 function constructReturnUrl(appUrl: string, returnTo?: string): string {
-  if (returnTo) {
-    // Ensure returnTo is a relative path or matches our domain
-    if (returnTo.startsWith("/")) {
-      return `${appUrl}${returnTo}`;
-    }
-    if (returnTo.startsWith(appUrl)) {
-      return returnTo;
-    }
-  }
-  return `${appUrl}/garden`;
+	if (returnTo) {
+		// Ensure returnTo is a relative path or matches our domain
+		if (returnTo.startsWith("/")) {
+			return `${appUrl}${returnTo}`;
+		}
+		if (returnTo.startsWith(appUrl)) {
+			return returnTo;
+		}
+	}
+	return `${appUrl}/garden`;
 }
 ```
 
@@ -209,13 +205,13 @@ function constructReturnUrl(appUrl: string, returnTo?: string): string {
 
 #### [HAWK-012] API Response Field Mismatch — shedUrl vs url
 
-| Field          | Value                                                         |
-| -------------- | ------------------------------------------------------------- |
-| **Severity**   | MEDIUM                                                        |
-| **Domain**     | Input Validation                                              |
-| **Location**   | `packages/engine/src/routes/arbor/account/+page.svelte:87-88` |
-| **Confidence** | HIGH                                                          |
-| **OWASP**      | A04:2021 Insecure Design                                      |
+| Field          | Value                                                     |
+| -------------- | --------------------------------------------------------- |
+| **Severity**   | MEDIUM                                                    |
+| **Domain**     | Input Validation                                          |
+| **Location**   | `libs/engine/src/routes/arbor/account/+page.svelte:87-88` |
+| **Confidence** | HIGH                                                      |
+| **OWASP**      | A04:2021 Insecure Design                                  |
 
 **Description:**
 The arbor account page reads `response.url` from the tend API response, but `TendResponse` type defines the field as `shedUrl`. This causes a runtime failure where users cannot access the billing portal from the account page.
@@ -261,13 +257,13 @@ if (response.shedUrl) {
 
 #### [HAWK-013] IP Rate Limit Race Condition in select-plan
 
-| Field          | Value                                                  |
-| -------------- | ------------------------------------------------------ |
-| **Severity**   | MEDIUM                                                 |
-| **Domain**     | Race Conditions                                        |
-| **Location**   | `packages/plant/src/routes/api/select-plan/+server.ts` |
-| **Confidence** | MEDIUM                                                 |
-| **OWASP**      | A04:2021 Insecure Design                               |
+| Field          | Value                                              |
+| -------------- | -------------------------------------------------- |
+| **Severity**   | MEDIUM                                             |
+| **Domain**     | Race Conditions                                    |
+| **Location**   | `libs/plant/src/routes/api/select-plan/+server.ts` |
+| **Confidence** | MEDIUM                                             |
+| **OWASP**      | A04:2021 Insecure Design                           |
 
 **Description:**
 The free plan creation flow runs the IP limit check and the `payment_completed` DB update in parallel. If the IP check rejects the request, the user's `payment_completed` flag may already be set to `1`, leaving their onboarding record in an inconsistent state.
@@ -287,13 +283,13 @@ Run the IP check BEFORE the `payment_completed` update, not in parallel. The IP 
 
 #### [HAWK-019] "wanderer" vs "free" Key Mismatch in Component stageNames
 
-| Field          | Value                                                                                                                            |
-| -------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| **Severity**   | MEDIUM                                                                                                                           |
-| **Domain**     | Input Validation                                                                                                                 |
-| **Location**   | `packages/engine/src/lib/grafts/upgrades/components/CurrentStageBadge.svelte:14,34-35,64` and `GardenStatus.svelte:27,49-50,157` |
-| **Confidence** | HIGH                                                                                                                             |
-| **OWASP**      | A04:2021 Insecure Design                                                                                                         |
+| Field          | Value                                                                                                                        |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| **Severity**   | MEDIUM                                                                                                                       |
+| **Domain**     | Input Validation                                                                                                             |
+| **Location**   | `libs/engine/src/lib/grafts/upgrades/components/CurrentStageBadge.svelte:14,34-35,64` and `GardenStatus.svelte:27,49-50,157` |
+| **Confidence** | HIGH                                                                                                                         |
+| **OWASP**      | A04:2021 Insecure Design                                                                                                     |
 
 **Description:**
 Both `CurrentStageBadge` and `GardenStatus` components use `"wanderer"` as the key in their `stageNames` Record and as the default prop value. But `TierKey` is defined as `"free" | "seedling" | "sapling" | "oak" | "evergreen"` — there is no `"wanderer"` value. The `stageNames` is typed as `Record<TierKey, string>`, so the `wanderer` key should be a compile error. In practice, the real data from the billing API will return `"free"` as the plan key.
@@ -324,9 +320,9 @@ Replace `"wanderer"` with `"free"` in all component maps, or add a display name 
 
 ```typescript
 const stageNames: Record<TierKey, string> = {
-  free: "Wanderer", // Display name differs from key
-  seedling: "Seedling",
-  // ...
+	free: "Wanderer", // Display name differs from key
+	seedling: "Seedling",
+	// ...
 };
 ```
 
@@ -338,13 +334,13 @@ const stageNames: Record<TierKey, string> = {
 
 #### [HAWK-014] Dead Code: getStagePriceId Uses process.env
 
-| Field          | Value                                                                     |
-| -------------- | ------------------------------------------------------------------------- |
-| **Severity**   | LOW                                                                       |
-| **Domain**     | Code Quality                                                              |
-| **Location**   | `packages/engine/src/lib/grafts/upgrades/server/api/cultivate.ts:228-249` |
-| **Confidence** | HIGH                                                                      |
-| **OWASP**      | N/A                                                                       |
+| Field          | Value                                                                 |
+| -------------- | --------------------------------------------------------------------- |
+| **Severity**   | LOW                                                                   |
+| **Domain**     | Code Quality                                                          |
+| **Location**   | `libs/engine/src/lib/grafts/upgrades/server/api/cultivate.ts:228-249` |
+| **Confidence** | HIGH                                                                  |
+| **OWASP**      | N/A                                                                   |
 
 **Description:**
 The `getStagePriceId()` function at the bottom of cultivate.ts references `process.env` which is not available in Cloudflare Workers. The function is never called — the cultivate handler uses `getPlantingUrl()` from config instead.
@@ -364,13 +360,13 @@ Remove the dead function. The `getPlantingUrl()` from config.ts correctly uses t
 
 #### [HAWK-015] GraftId Type Doesn't Include "upgrades" Explicitly
 
-| Field          | Value                                     |
-| -------------- | ----------------------------------------- |
-| **Severity**   | LOW                                       |
-| **Domain**     | Type Safety                               |
-| **Location**   | `packages/engine/src/lib/grafts/types.ts` |
-| **Confidence** | HIGH                                      |
-| **OWASP**      | N/A                                       |
+| Field          | Value                                 |
+| -------------- | ------------------------------------- |
+| **Severity**   | LOW                                   |
+| **Domain**     | Type Safety                           |
+| **Location**   | `libs/engine/src/lib/grafts/types.ts` |
+| **Confidence** | HIGH                                  |
+| **OWASP**      | N/A                                   |
 
 **Description:**
 The `GraftId` type union only explicitly lists `"pricing"` with a `(string & {})` catch-all. The "upgrades" graft ID is accepted via the catch-all but lacks autocomplete and type narrowing in consuming code.
@@ -390,13 +386,13 @@ Add `"upgrades"` to the `GraftId` union type.
 
 #### [HAWK-016] Duplicate BaseGraftProps in Component Types
 
-| Field          | Value                                                               |
-| -------------- | ------------------------------------------------------------------- |
-| **Severity**   | LOW                                                                 |
-| **Domain**     | Code Quality                                                        |
-| **Location**   | `packages/engine/src/lib/grafts/upgrades/components/types.ts:18-21` |
-| **Confidence** | HIGH                                                                |
-| **OWASP**      | N/A                                                                 |
+| Field          | Value                                                           |
+| -------------- | --------------------------------------------------------------- |
+| **Severity**   | LOW                                                             |
+| **Domain**     | Code Quality                                                    |
+| **Location**   | `libs/engine/src/lib/grafts/upgrades/components/types.ts:18-21` |
+| **Confidence** | HIGH                                                            |
+| **OWASP**      | N/A                                                             |
 
 **Description:**
 The UpgradesGraft component types define their own `BaseGraftProps` (just `class?: string`) instead of importing from the shared graft types which includes `context?: GraftContext`. This shadows the core type and omits graft context support.
@@ -416,13 +412,13 @@ Import `BaseGraftProps` from `../types.js` or extend the shared version.
 
 #### [HAWK-017] isCompedAccount Mock Shape Mismatch in Tests
 
-| Field          | Value                                                          |
-| -------------- | -------------------------------------------------------------- |
-| **Severity**   | LOW                                                            |
-| **Domain**     | Testing                                                        |
-| **Location**   | `packages/engine/src/lib/grafts/upgrades/upgrades.test.ts:256` |
-| **Confidence** | HIGH                                                           |
-| **OWASP**      | N/A                                                            |
+| Field          | Value                                                      |
+| -------------- | ---------------------------------------------------------- |
+| **Severity**   | LOW                                                        |
+| **Domain**     | Testing                                                    |
+| **Location**   | `libs/engine/src/lib/grafts/upgrades/upgrades.test.ts:256` |
+| **Confidence** | HIGH                                                       |
+| **OWASP**      | N/A                                                        |
 
 **Description:**
 The test mocks `isCompedAccount` to return `false` directly, but the actual function returns `{ isComped: boolean }`. This means the tests don't verify the destructuring pattern used in the handlers.
@@ -455,13 +451,13 @@ vi.mocked(isCompedAccount).mockResolvedValue({ isComped: false });
 
 #### [HAWK-018] export \* Pattern in UpgradesGraft index.ts
 
-| Field          | Value                                                    |
-| -------------- | -------------------------------------------------------- |
-| **Severity**   | LOW                                                      |
-| **Domain**     | Code Quality                                             |
-| **Location**   | `packages/engine/src/lib/grafts/upgrades/index.ts:13-17` |
-| **Confidence** | HIGH                                                     |
-| **OWASP**      | N/A                                                      |
+| Field          | Value                                                |
+| -------------- | ---------------------------------------------------- |
+| **Severity**   | LOW                                                  |
+| **Domain**     | Code Quality                                         |
+| **Location**   | `libs/engine/src/lib/grafts/upgrades/index.ts:13-17` |
+| **Confidence** | HIGH                                                 |
+| **OWASP**      | N/A                                                  |
 
 **Description:**
 The UpgradesGraft index.ts uses `export * from "./types"` and `export * from "./components/index.js"` which re-exports everything. The PricingGraft uses explicit named exports, providing better control over the public API surface.

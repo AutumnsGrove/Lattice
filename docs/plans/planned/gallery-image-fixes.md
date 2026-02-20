@@ -49,7 +49,7 @@ Images cannot be deleted from the Arbor gallery. The delete button triggers a 40
 The delete endpoint enforces strict tenant isolation:
 
 ```typescript
-// packages/engine/src/routes/api/images/delete/+server.ts:119-126
+// libs/engine/src/routes/api/images/delete/+server.ts:119-126
 const expectedPrefix = `${tenantId}/`;
 if (!sanitizedKey.startsWith(expectedPrefix)) {
   console.warn(`Tenant isolation violation: user ${locals.user?.id} attempted to delete ${sanitizedKey}`);
@@ -115,8 +115,8 @@ Query the database to verify tenant ownership before allowing deletion of legacy
 
 | File | Change |
 |------|--------|
-| `packages/engine/src/routes/arbor/images/+page.svelte` | CSS update for mobile grid layout |
-| `packages/engine/src/routes/api/images/delete/+server.ts` | Update tenant isolation logic |
+| `libs/engine/src/routes/arbor/images/+page.svelte` | CSS update for mobile grid layout |
+| `libs/engine/src/routes/api/images/delete/+server.ts` | Update tenant isolation logic |
 
 ---
 

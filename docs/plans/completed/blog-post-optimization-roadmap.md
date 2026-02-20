@@ -170,27 +170,24 @@ CREATE TABLE stats (
 
 ```typescript
 class PostMetaDO extends DurableObject {
-  // Reactions (atomic, instant)
-  async toggleReaction(
-    userId: string,
-    type: string,
-  ): Promise<{ added: boolean; newCount: number }>;
-  async getReactionCounts(): Promise<Record<string, number>>;
+	// Reactions (atomic, instant)
+	async toggleReaction(userId: string, type: string): Promise<{ added: boolean; newCount: number }>;
+	async getReactionCounts(): Promise<Record<string, number>>;
 
-  // Comments (buffered)
-  async addComment(comment: Comment): Promise<void>;
-  async getComments(limit: number, cursor?: string): Promise<Comment[]>;
+	// Comments (buffered)
+	async addComment(comment: Comment): Promise<void>;
+	async getComments(limit: number, cursor?: string): Promise<Comment[]>;
 
-  // Presence
-  async getPresence(): Promise<{ count: number; viewers?: string[] }>;
-  async trackView(userId?: string): Promise<void>;
+	// Presence
+	async getPresence(): Promise<{ count: number; viewers?: string[] }>;
+	async trackView(userId?: string): Promise<void>;
 
-  // Stats
-  async getStats(): Promise<PostStats>;
-  async recordEdit(): Promise<void>;
+	// Stats
+	async getStats(): Promise<PostStats>;
+	async recordEdit(): Promise<void>;
 
-  // WebSocket for real-time updates
-  async fetch(request: Request): Promise<Response>;
+	// WebSocket for real-time updates
+	async fetch(request: Request): Promise<Response>;
 }
 ```
 
@@ -241,35 +238,31 @@ CREATE TABLE drafts (
 
 ```typescript
 class PostContentDO extends DurableObject {
-  // Content retrieval (checks D1 vs R2)
-  async getContent(): Promise<{
-    markdown: string;
-    html: string;
-    version: number;
-  }>;
+	// Content retrieval (checks D1 vs R2)
+	async getContent(): Promise<{
+		markdown: string;
+		html: string;
+		version: number;
+	}>;
 
-  // Content updates
-  async saveContent(
-    markdown: string,
-    html: string,
-    userId: string,
-  ): Promise<{ version: number }>;
+	// Content updates
+	async saveContent(markdown: string, html: string, userId: string): Promise<{ version: number }>;
 
-  // Draft sync (cross-device)
-  async saveDraft(draft: Draft, deviceId: string): Promise<void>;
-  async getDraft(deviceId: string): Promise<Draft | null>;
-  async listDrafts(): Promise<Draft[]>;
+	// Draft sync (cross-device)
+	async saveDraft(draft: Draft, deviceId: string): Promise<void>;
+	async getDraft(deviceId: string): Promise<Draft | null>;
+	async listDrafts(): Promise<Draft[]>;
 
-  // Storage migration
-  async getStorageLocation(): Promise<{
-    location: "d1" | "r2" | "r2_archived";
-    r2Key?: string;
-  }>;
-  async migrateToR2(r2Key: string): Promise<void>;
-  async migrateToD1(): Promise<void>;
+	// Storage migration
+	async getStorageLocation(): Promise<{
+		location: "d1" | "r2" | "r2_archived";
+		r2Key?: string;
+	}>;
+	async migrateToR2(r2Key: string): Promise<void>;
+	async migrateToD1(): Promise<void>;
 
-  // Version history
-  async getVersions(limit: number): Promise<ContentVersion[]>;
+	// Version history
+	async getVersions(limit: number): Promise<ContentVersion[]>;
 }
 ```
 
@@ -296,48 +289,48 @@ class PostContentDO extends DurableObject {
 
 #### 1.1 Add Cache-Control Headers
 
-**File:** `packages/engine/src/routes/blog/[slug]/+page.server.ts`
+**File:** `libs/engine/src/routes/blog/[slug]/+page.server.ts`
 
 ```typescript
 export async function load({ params, locals, setHeaders }) {
-  const { subdomain } = locals;
-  const post = await getPostWithCache(params.slug, subdomain);
+	const { subdomain } = locals;
+	const post = await getPostWithCache(params.slug, subdomain);
 
-  if (!post) {
-    throw error(404, "Post not found");
-  }
+	if (!post) {
+		throw error(404, "Post not found");
+	}
 
-  // Public posts: aggressive edge caching
-  if (post.status === "published") {
-    setHeaders({
-      "Cache-Control": "public, max-age=300, s-maxage=300", // Browser: 5 min
-      "CDN-Cache-Control": "max-age=3600, stale-while-revalidate=86400", // Edge: 1 hour, stale: 24h
-      Vary: "Cookie", // Vary by auth state (owner sees edit buttons)
-    });
-  } else {
-    // Drafts: never cache
-    setHeaders({
-      "Cache-Control": "private, no-cache, no-store, must-revalidate",
-    });
-  }
+	// Public posts: aggressive edge caching
+	if (post.status === "published") {
+		setHeaders({
+			"Cache-Control": "public, max-age=300, s-maxage=300", // Browser: 5 min
+			"CDN-Cache-Control": "max-age=3600, stale-while-revalidate=86400", // Edge: 1 hour, stale: 24h
+			Vary: "Cookie", // Vary by auth state (owner sees edit buttons)
+		});
+	} else {
+		// Drafts: never cache
+		setHeaders({
+			"Cache-Control": "private, no-cache, no-store, must-revalidate",
+		});
+	}
 
-  return { post };
+	return { post };
 }
 ```
 
-**File:** `packages/engine/src/routes/blog/+page.server.ts` (blog list)
+**File:** `libs/engine/src/routes/blog/+page.server.ts` (blog list)
 
 ```typescript
 export async function load({ locals, setHeaders }) {
-  const { subdomain } = locals;
-  const posts = await getPostListWithCache(subdomain);
+	const { subdomain } = locals;
+	const posts = await getPostListWithCache(subdomain);
 
-  setHeaders({
-    "Cache-Control": "public, max-age=300, s-maxage=600", // Browser: 5 min, Edge: 10 min
-    "CDN-Cache-Control": "max-age=600, stale-while-revalidate=3600",
-  });
+	setHeaders({
+		"Cache-Control": "public, max-age=300, s-maxage=600", // Browser: 5 min, Edge: 10 min
+		"CDN-Cache-Control": "max-age=600, stale-while-revalidate=3600",
+	});
 
-  return { posts };
+	return { posts };
 }
 ```
 
@@ -345,64 +338,58 @@ export async function load({ locals, setHeaders }) {
 
 #### 1.2 Implement KV Caching Layer
 
-**File:** `packages/engine/src/lib/server/services/posts.ts`
+**File:** `libs/engine/src/lib/server/services/posts.ts`
 
 ```typescript
 import { cache } from "$lib/server/services/cache";
 
 interface CachedPost {
-  id: string;
-  slug: string;
-  title: string;
-  html_content: string;
-  markdown_content: string;
-  description: string;
-  tags: string[];
-  gutter_content: any;
-  published_at: number;
-  status: string;
-  storage_location: "d1" | "r2" | "r2_archived";
-  r2_key?: string;
+	id: string;
+	slug: string;
+	title: string;
+	html_content: string;
+	markdown_content: string;
+	description: string;
+	tags: string[];
+	gutter_content: any;
+	published_at: number;
+	status: string;
+	storage_location: "d1" | "r2" | "r2_archived";
+	r2_key?: string;
 }
 
-export async function getPostWithCache(
-  slug: string,
-  tenantId: string,
-): Promise<CachedPost | null> {
-  const cacheKey = `posts:${tenantId}:${slug}`;
+export async function getPostWithCache(slug: string, tenantId: string): Promise<CachedPost | null> {
+	const cacheKey = `posts:${tenantId}:${slug}`;
 
-  // Try KV cache first (5 min TTL for published, no cache for drafts)
-  const cached = await cache.get<CachedPost>(cacheKey);
-  if (cached) {
-    console.log(`[Cache HIT] ${cacheKey}`);
-    return cached;
-  }
+	// Try KV cache first (5 min TTL for published, no cache for drafts)
+	const cached = await cache.get<CachedPost>(cacheKey);
+	if (cached) {
+		console.log(`[Cache HIT] ${cacheKey}`);
+		return cached;
+	}
 
-  console.log(`[Cache MISS] ${cacheKey}`);
+	console.log(`[Cache MISS] ${cacheKey}`);
 
-  // Fetch from storage (D1 or R2)
-  const post = await fetchPostFromStorage(slug, tenantId);
+	// Fetch from storage (D1 or R2)
+	const post = await fetchPostFromStorage(slug, tenantId);
 
-  if (!post) {
-    return null;
-  }
+	if (!post) {
+		return null;
+	}
 
-  // Cache published posts only (drafts are too volatile)
-  if (post.status === "published") {
-    await cache.set(cacheKey, post, { ttl: 300 }); // 5 min
-  }
+	// Cache published posts only (drafts are too volatile)
+	if (post.status === "published") {
+		await cache.set(cacheKey, post, { ttl: 300 }); // 5 min
+	}
 
-  return post;
+	return post;
 }
 
-async function fetchPostFromStorage(
-  slug: string,
-  tenantId: string,
-): Promise<CachedPost | null> {
-  // Get metadata from D1 (always)
-  const meta = await db
-    .prepare(
-      `
+async function fetchPostFromStorage(slug: string, tenantId: string): Promise<CachedPost | null> {
+	// Get metadata from D1 (always)
+	const meta = await db
+		.prepare(
+			`
     SELECT
       id, slug, title, description, tags, published_at, status,
       storage_location, r2_key,
@@ -410,90 +397,87 @@ async function fetchPostFromStorage(
     FROM posts
     WHERE slug = ? AND tenant_id = ?
   `,
-    )
-    .bind(slug, tenantId)
-    .first();
+		)
+		.bind(slug, tenantId)
+		.first();
 
-  if (!meta) {
-    return null;
-  }
+	if (!meta) {
+		return null;
+	}
 
-  // If content is in D1, we already have it
-  if (meta.storage_location === "d1" || !meta.storage_location) {
-    return meta as CachedPost;
-  }
+	// If content is in D1, we already have it
+	if (meta.storage_location === "d1" || !meta.storage_location) {
+		return meta as CachedPost;
+	}
 
-  // If content is in R2, fetch it
-  if (
-    meta.storage_location === "r2" ||
-    meta.storage_location === "r2_archived"
-  ) {
-    const r2Object = await env.IMAGES.get(meta.r2_key);
+	// If content is in R2, fetch it
+	if (meta.storage_location === "r2" || meta.storage_location === "r2_archived") {
+		const r2Object = await env.IMAGES.get(meta.r2_key);
 
-    if (!r2Object) {
-      console.error(`[R2 ERROR] Missing object: ${meta.r2_key}`);
-      return null;
-    }
+		if (!r2Object) {
+			console.error(`[R2 ERROR] Missing object: ${meta.r2_key}`);
+			return null;
+		}
 
-    const content = (await r2Object.json()) as {
-      markdown: string;
-      html: string;
-      migratedAt: number;
-    };
+		const content = (await r2Object.json()) as {
+			markdown: string;
+			html: string;
+			migratedAt: number;
+		};
 
-    return {
-      ...meta,
-      markdown_content: content.markdown,
-      html_content: content.html,
-    } as CachedPost;
-  }
+		return {
+			...meta,
+			markdown_content: content.markdown,
+			html_content: content.html,
+		} as CachedPost;
+	}
 
-  return meta as CachedPost;
+	return meta as CachedPost;
 }
 
 export async function getPostListWithCache(
-  tenantId: string,
-  status: "published" | "all" = "published",
+	tenantId: string,
+	status: "published" | "all" = "published",
 ): Promise<CachedPost[]> {
-  const cacheKey = `posts:list:${tenantId}:${status}`;
+	const cacheKey = `posts:list:${tenantId}:${status}`;
 
-  // Try KV cache first (15 min TTL)
-  const cached = await cache.get<CachedPost[]>(cacheKey);
-  if (cached) {
-    console.log(`[Cache HIT] ${cacheKey}`);
-    return cached;
-  }
+	// Try KV cache first (15 min TTL)
+	const cached = await cache.get<CachedPost[]>(cacheKey);
+	if (cached) {
+		console.log(`[Cache HIT] ${cacheKey}`);
+		return cached;
+	}
 
-  console.log(`[Cache MISS] ${cacheKey}`);
+	console.log(`[Cache MISS] ${cacheKey}`);
 
-  // Fetch from D1 (metadata only, no content)
-  const query =
-    status === "published"
-      ? `SELECT id, slug, title, description, tags, published_at, status
+	// Fetch from D1 (metadata only, no content)
+	const query =
+		status === "published"
+			? `SELECT id, slug, title, description, tags, published_at, status
        FROM posts
        WHERE tenant_id = ? AND status = 'published'
        ORDER BY published_at DESC`
-      : `SELECT id, slug, title, description, tags, published_at, status
+			: `SELECT id, slug, title, description, tags, published_at, status
        FROM posts
        WHERE tenant_id = ?
        ORDER BY published_at DESC`;
 
-  const posts = await db.prepare(query).bind(tenantId).all();
+	const posts = await db.prepare(query).bind(tenantId).all();
 
-  // Cache for 15 minutes
-  await cache.set(cacheKey, posts.results, { ttl: 900 });
+	// Cache for 15 minutes
+	await cache.set(cacheKey, posts.results, { ttl: 900 });
 
-  return posts.results as CachedPost[];
+	return posts.results as CachedPost[];
 }
 
 // Invalidation (call when post is published/updated/deleted)
 export async function invalidatePostCache(slug: string, tenantId: string) {
-  await cache.del(`posts:${tenantId}:${slug}`);
-  await cache.del(`posts:list:${tenantId}:published`);
-  await cache.del(`posts:list:${tenantId}:all`);
+	await cache.del(`posts:${tenantId}:${slug}`);
+	await cache.del(`posts:list:${tenantId}:published`);
+	await cache.del(`posts:list:${tenantId}:all`);
 
-  // Also purge CDN cache if needed
-  // TODO: Implement Cloudflare Cache API purge
+	// Also purge CDN cache if needed
+	// TODO: Implement Cloudflare Cache API purge
 }
 ```
 
@@ -501,57 +485,48 @@ export async function invalidatePostCache(slug: string, tenantId: string) {
 
 #### 1.3 Cache Invalidation on Updates
 
-**File:** `packages/engine/src/routes/api/posts/[slug]/+server.ts`
+**File:** `libs/engine/src/routes/api/posts/[slug]/+server.ts`
 
 ```typescript
 import { invalidatePostCache } from "$lib/server/services/posts";
 
 export async function PUT({ request, params, locals }) {
-  const { slug } = params;
-  const { subdomain, user } = locals;
+	const { slug } = params;
+	const { subdomain, user } = locals;
 
-  // ... existing update logic ...
+	// ... existing update logic ...
 
-  await db
-    .prepare(
-      `
+	await db
+		.prepare(
+			`
     UPDATE posts
     SET title = ?, markdown_content = ?, html_content = ?,
         description = ?, tags = ?, updated_at = ?
     WHERE slug = ? AND tenant_id = ?
   `,
-    )
-    .bind(
-      title,
-      markdown,
-      html,
-      description,
-      JSON.stringify(tags),
-      Date.now(),
-      slug,
-      subdomain,
-    )
-    .run();
+		)
+		.bind(title, markdown, html, description, JSON.stringify(tags), Date.now(), slug, subdomain)
+		.run();
 
-  // Invalidate caches
-  await invalidatePostCache(slug, subdomain);
+	// Invalidate caches
+	await invalidatePostCache(slug, subdomain);
 
-  return json({ success: true });
+	return json({ success: true });
 }
 
 export async function DELETE({ params, locals }) {
-  const { slug } = params;
-  const { subdomain } = locals;
+	const { slug } = params;
+	const { subdomain } = locals;
 
-  await db
-    .prepare(`DELETE FROM posts WHERE slug = ? AND tenant_id = ?`)
-    .bind(slug, subdomain)
-    .run();
+	await db
+		.prepare(`DELETE FROM posts WHERE slug = ? AND tenant_id = ?`)
+		.bind(slug, subdomain)
+		.run();
 
-  // Invalidate caches
-  await invalidatePostCache(slug, subdomain);
+	// Invalidate caches
+	await invalidatePostCache(slug, subdomain);
 
-  return json({ success: true });
+	return json({ success: true });
 }
 ```
 
@@ -581,25 +556,25 @@ export async function DELETE({ params, locals }) {
 
 ### 2.1 Create TenantDO Class
 
-**File:** `packages/engine/src/lib/durable-objects/TenantDO.ts`
+**File:** `libs/engine/src/lib/durable-objects/TenantDO.ts`
 
 ```typescript
 export class TenantDO extends DurableObject {
-  private config: TenantConfig | null = null;
-  private configLoadedAt: number = 0;
-  private analyticsBuffer: AnalyticsEvent[] = [];
-  private drafts: Map<string, Draft> = new Map();
+	private config: TenantConfig | null = null;
+	private configLoadedAt: number = 0;
+	private analyticsBuffer: AnalyticsEvent[] = [];
+	private drafts: Map<string, Draft> = new Map();
 
-  constructor(ctx: DurableObjectState, env: Env) {
-    super(ctx, env);
-    this.ctx.blockConcurrencyWhile(async () => {
-      await this.initializeStorage();
-    });
-  }
+	constructor(ctx: DurableObjectState, env: Env) {
+		super(ctx, env);
+		this.ctx.blockConcurrencyWhile(async () => {
+			await this.initializeStorage();
+		});
+	}
 
-  async initializeStorage() {
-    // Create tables if they don't exist
-    await this.ctx.storage.sql.exec(`
+	async initializeStorage() {
+		// Create tables if they don't exist
+		await this.ctx.storage.sql.exec(`
       CREATE TABLE IF NOT EXISTS config (
         key TEXT PRIMARY KEY,
         value TEXT NOT NULL,
@@ -622,272 +597,261 @@ export class TenantDO extends DurableObject {
       );
     `);
 
-    // Load config into memory
-    await this.refreshConfig();
-  }
+		// Load config into memory
+		await this.refreshConfig();
+	}
 
-  async refreshConfig() {
-    // Load from DO storage first (fastest)
-    const stored = await this.ctx.storage.sql
-      .exec("SELECT value FROM config WHERE key = 'tenant_config'")
-      .one();
+	async refreshConfig() {
+		// Load from DO storage first (fastest)
+		const stored = await this.ctx.storage.sql
+			.exec("SELECT value FROM config WHERE key = 'tenant_config'")
+			.one();
 
-    if (stored) {
-      this.config = JSON.parse(stored.value as string);
-      this.configLoadedAt = Date.now();
-      return;
-    }
+		if (stored) {
+			this.config = JSON.parse(stored.value as string);
+			this.configLoadedAt = Date.now();
+			return;
+		}
 
-    // If not in DO storage, load from D1 and cache
-    const tenantId = this.getTenantIdFromObjectId();
-    const row = await this.env.DB.prepare(
-      `
+		// If not in DO storage, load from D1 and cache
+		const tenantId = this.getTenantIdFromObjectId();
+		const row = await this.env.DB.prepare(
+			`
       SELECT subdomain, display_name, theme, tier, limits
       FROM tenants
       WHERE subdomain = ?
     `,
-    )
-      .bind(tenantId)
-      .first();
+		)
+			.bind(tenantId)
+			.first();
 
-    if (row) {
-      this.config = row as unknown as TenantConfig;
+		if (row) {
+			this.config = row as unknown as TenantConfig;
 
-      // Store in DO for next time
-      await this.ctx.storage.sql.exec(
-        "INSERT OR REPLACE INTO config (key, value, updated_at) VALUES (?, ?, ?)",
-        "tenant_config",
-        JSON.stringify(this.config),
-        Date.now(),
-      );
+			// Store in DO for next time
+			await this.ctx.storage.sql.exec(
+				"INSERT OR REPLACE INTO config (key, value, updated_at) VALUES (?, ?, ?)",
+				"tenant_config",
+				JSON.stringify(this.config),
+				Date.now(),
+			);
 
-      this.configLoadedAt = Date.now();
-    }
-  }
+			this.configLoadedAt = Date.now();
+		}
+	}
 
-  async fetch(request: Request): Promise<Response> {
-    const url = new URL(request.url);
-    const path = url.pathname;
+	async fetch(request: Request): Promise<Response> {
+		const url = new URL(request.url);
+		const path = url.pathname;
 
-    // API routing
-    if (path === "/config") {
-      return this.handleGetConfig();
-    }
+		// API routing
+		if (path === "/config") {
+			return this.handleGetConfig();
+		}
 
-    if (path === "/config/update" && request.method === "POST") {
-      return this.handleUpdateConfig(request);
-    }
+		if (path === "/config/update" && request.method === "POST") {
+			return this.handleUpdateConfig(request);
+		}
 
-    if (path.startsWith("/drafts/")) {
-      const slug = path.split("/").pop();
+		if (path.startsWith("/drafts/")) {
+			const slug = path.split("/").pop();
 
-      if (request.method === "GET") {
-        return this.handleGetDraft(slug!);
-      }
+			if (request.method === "GET") {
+				return this.handleGetDraft(slug!);
+			}
 
-      if (request.method === "PUT") {
-        return this.handleSaveDraft(slug!, request);
-      }
+			if (request.method === "PUT") {
+				return this.handleSaveDraft(slug!, request);
+			}
 
-      if (request.method === "DELETE") {
-        return this.handleDeleteDraft(slug!);
-      }
-    }
+			if (request.method === "DELETE") {
+				return this.handleDeleteDraft(slug!);
+			}
+		}
 
-    if (path === "/drafts" && request.method === "GET") {
-      return this.handleListDrafts();
-    }
+		if (path === "/drafts" && request.method === "GET") {
+			return this.handleListDrafts();
+		}
 
-    if (path === "/analytics" && request.method === "POST") {
-      return this.handleRecordEvent(request);
-    }
+		if (path === "/analytics" && request.method === "POST") {
+			return this.handleRecordEvent(request);
+		}
 
-    return new Response("Not found", { status: 404 });
-  }
+		return new Response("Not found", { status: 404 });
+	}
 
-  async handleGetConfig(): Promise<Response> {
-    // Refresh if stale (older than 5 minutes)
-    if (Date.now() - this.configLoadedAt > 300000) {
-      await this.refreshConfig();
-    }
+	async handleGetConfig(): Promise<Response> {
+		// Refresh if stale (older than 5 minutes)
+		if (Date.now() - this.configLoadedAt > 300000) {
+			await this.refreshConfig();
+		}
 
-    if (!this.config) {
-      return new Response("Tenant not found", { status: 404 });
-    }
+		if (!this.config) {
+			return new Response("Tenant not found", { status: 404 });
+		}
 
-    return Response.json(this.config);
-  }
+		return Response.json(this.config);
+	}
 
-  async handleUpdateConfig(request: Request): Promise<Response> {
-    const updates = await request.json();
+	async handleUpdateConfig(request: Request): Promise<Response> {
+		const updates = await request.json();
 
-    // Merge with existing config
-    this.config = { ...this.config, ...updates };
+		// Merge with existing config
+		this.config = { ...this.config, ...updates };
 
-    // Update DO storage
-    await this.ctx.storage.sql.exec(
-      "INSERT OR REPLACE INTO config (key, value, updated_at) VALUES (?, ?, ?)",
-      "tenant_config",
-      JSON.stringify(this.config),
-      Date.now(),
-    );
+		// Update DO storage
+		await this.ctx.storage.sql.exec(
+			"INSERT OR REPLACE INTO config (key, value, updated_at) VALUES (?, ?, ?)",
+			"tenant_config",
+			JSON.stringify(this.config),
+			Date.now(),
+		);
 
-    // Update D1 (source of truth)
-    const tenantId = this.getTenantIdFromObjectId();
-    await this.env.DB.prepare(
-      `
+		// Update D1 (source of truth)
+		const tenantId = this.getTenantIdFromObjectId();
+		await this.env.DB.prepare(
+			`
       UPDATE tenants
       SET display_name = ?, theme = ?, updated_at = ?
       WHERE subdomain = ?
     `,
-    )
-      .bind(
-        this.config.display_name,
-        JSON.stringify(this.config.theme),
-        Date.now(),
-        tenantId,
-      )
-      .run();
+		)
+			.bind(this.config.display_name, JSON.stringify(this.config.theme), Date.now(), tenantId)
+			.run();
 
-    this.configLoadedAt = Date.now();
+		this.configLoadedAt = Date.now();
 
-    return Response.json({ success: true });
-  }
+		return Response.json({ success: true });
+	}
 
-  async handleSaveDraft(slug: string, request: Request): Promise<Response> {
-    const draft = (await request.json()) as Draft;
+	async handleSaveDraft(slug: string, request: Request): Promise<Response> {
+		const draft = (await request.json()) as Draft;
 
-    // Save to DO storage
-    await this.ctx.storage.sql.exec(
-      `
+		// Save to DO storage
+		await this.ctx.storage.sql.exec(
+			`
       INSERT OR REPLACE INTO drafts (slug, markdown, metadata, last_saved, device_id)
       VALUES (?, ?, ?, ?, ?)
     `,
-      slug,
-      draft.content,
-      JSON.stringify(draft.metadata),
-      Date.now(),
-      draft.deviceId,
-    );
+			slug,
+			draft.content,
+			JSON.stringify(draft.metadata),
+			Date.now(),
+			draft.deviceId,
+		);
 
-    // Update in-memory cache
-    this.drafts.set(slug, draft);
+		// Update in-memory cache
+		this.drafts.set(slug, draft);
 
-    return Response.json({ success: true, lastSaved: Date.now() });
-  }
+		return Response.json({ success: true, lastSaved: Date.now() });
+	}
 
-  async handleGetDraft(slug: string): Promise<Response> {
-    // Check memory first
-    if (this.drafts.has(slug)) {
-      return Response.json(this.drafts.get(slug));
-    }
+	async handleGetDraft(slug: string): Promise<Response> {
+		// Check memory first
+		if (this.drafts.has(slug)) {
+			return Response.json(this.drafts.get(slug));
+		}
 
-    // Check storage
-    const row = await this.ctx.storage.sql
-      .exec("SELECT * FROM drafts WHERE slug = ?", slug)
-      .one();
+		// Check storage
+		const row = await this.ctx.storage.sql.exec("SELECT * FROM drafts WHERE slug = ?", slug).one();
 
-    if (!row) {
-      return new Response("Draft not found", { status: 404 });
-    }
+		if (!row) {
+			return new Response("Draft not found", { status: 404 });
+		}
 
-    const draft = {
-      content: row.markdown,
-      metadata: JSON.parse(row.metadata as string),
-      lastSaved: row.last_saved,
-      deviceId: row.device_id,
-    };
+		const draft = {
+			content: row.markdown,
+			metadata: JSON.parse(row.metadata as string),
+			lastSaved: row.last_saved,
+			deviceId: row.device_id,
+		};
 
-    this.drafts.set(slug, draft);
+		this.drafts.set(slug, draft);
 
-    return Response.json(draft);
-  }
+		return Response.json(draft);
+	}
 
-  async handleListDrafts(): Promise<Response> {
-    const rows = await this.ctx.storage.sql
-      .exec(
-        "SELECT slug, last_saved, device_id FROM drafts ORDER BY last_saved DESC",
-      )
-      .toArray();
+	async handleListDrafts(): Promise<Response> {
+		const rows = await this.ctx.storage.sql
+			.exec("SELECT slug, last_saved, device_id FROM drafts ORDER BY last_saved DESC")
+			.toArray();
 
-    return Response.json(rows);
-  }
+		return Response.json(rows);
+	}
 
-  async handleDeleteDraft(slug: string): Promise<Response> {
-    await this.ctx.storage.sql.exec("DELETE FROM drafts WHERE slug = ?", slug);
-    this.drafts.delete(slug);
+	async handleDeleteDraft(slug: string): Promise<Response> {
+		await this.ctx.storage.sql.exec("DELETE FROM drafts WHERE slug = ?", slug);
+		this.drafts.delete(slug);
 
-    return Response.json({ success: true });
-  }
+		return Response.json({ success: true });
+	}
 
-  async handleRecordEvent(request: Request): Promise<Response> {
-    const event = (await request.json()) as AnalyticsEvent;
+	async handleRecordEvent(request: Request): Promise<Response> {
+		const event = (await request.json()) as AnalyticsEvent;
 
-    // Buffer in memory
-    this.analyticsBuffer.push(event);
+		// Buffer in memory
+		this.analyticsBuffer.push(event);
 
-    // If buffer is large, flush immediately
-    if (this.analyticsBuffer.length >= 100) {
-      await this.flushAnalytics();
-    } else {
-      // Otherwise, schedule flush via alarm
-      const alarmTime = await this.ctx.storage.getAlarm();
-      if (!alarmTime) {
-        await this.ctx.storage.setAlarm(Date.now() + 60000); // 1 min
-      }
-    }
+		// If buffer is large, flush immediately
+		if (this.analyticsBuffer.length >= 100) {
+			await this.flushAnalytics();
+		} else {
+			// Otherwise, schedule flush via alarm
+			const alarmTime = await this.ctx.storage.getAlarm();
+			if (!alarmTime) {
+				await this.ctx.storage.setAlarm(Date.now() + 60000); // 1 min
+			}
+		}
 
-    return Response.json({ success: true });
-  }
+		return Response.json({ success: true });
+	}
 
-  async alarm() {
-    // Flush analytics buffer to D1
-    await this.flushAnalytics();
-  }
+	async alarm() {
+		// Flush analytics buffer to D1
+		await this.flushAnalytics();
+	}
 
-  async flushAnalytics() {
-    if (this.analyticsBuffer.length === 0) return;
+	async flushAnalytics() {
+		if (this.analyticsBuffer.length === 0) return;
 
-    const events = this.analyticsBuffer.splice(0, this.analyticsBuffer.length);
+		const events = this.analyticsBuffer.splice(0, this.analyticsBuffer.length);
 
-    // Batch insert to D1
-    const tenantId = this.getTenantIdFromObjectId();
+		// Batch insert to D1
+		const tenantId = this.getTenantIdFromObjectId();
 
-    // TODO: Implement analytics table and batch insert
-    console.log(
-      `[TenantDO] Flushing ${events.length} analytics events for ${tenantId}`,
-    );
+		// TODO: Implement analytics table and batch insert
+		console.log(`[TenantDO] Flushing ${events.length} analytics events for ${tenantId}`);
 
-    // For now, just log (implement analytics table in Phase 3)
-  }
+		// For now, just log (implement analytics table in Phase 3)
+	}
 
-  private getTenantIdFromObjectId(): string {
-    // Extract tenant ID from DO object ID
-    // Format: tenant:{subdomain}
-    const idString = this.ctx.id.toString();
-    return idString.replace("tenant:", "");
-  }
+	private getTenantIdFromObjectId(): string {
+		// Extract tenant ID from DO object ID
+		// Format: tenant:{subdomain}
+		const idString = this.ctx.id.toString();
+		return idString.replace("tenant:", "");
+	}
 }
 
 interface TenantConfig {
-  subdomain: string;
-  display_name: string;
-  theme: any;
-  tier: "seedling" | "sapling" | "oak" | "evergreen";
-  limits: any;
+	subdomain: string;
+	display_name: string;
+	theme: any;
+	tier: "seedling" | "sapling" | "oak" | "evergreen";
+	limits: any;
 }
 
 interface Draft {
-  content: string;
-  metadata: any;
-  lastSaved: number;
-  deviceId: string;
+	content: string;
+	metadata: any;
+	lastSaved: number;
+	deviceId: string;
 }
 
 interface AnalyticsEvent {
-  type: string;
-  data: any;
-  timestamp: number;
+	type: string;
+	data: any;
+	timestamp: number;
 }
 ```
 
@@ -895,7 +859,7 @@ interface AnalyticsEvent {
 
 ### 2.2 Update wrangler.toml
 
-**File:** `packages/engine/wrangler.toml`
+**File:** `libs/engine/wrangler.toml`
 
 ```toml
 # ... existing config ...
@@ -913,21 +877,21 @@ tag = "v1"
 new_classes = ["TenantDO"]
 ```
 
-**File:** `packages/engine/src/app.d.ts`
+**File:** `libs/engine/src/app.d.ts`
 
 ```typescript
 declare global {
-  namespace App {
-    interface Platform {
-      env: {
-        DB: D1Database;
-        CACHE_KV: KVNamespace;
-        IMAGES: R2Bucket;
-        AUTH: Fetcher;
-        TENANTS: DurableObjectNamespace; // Add this
-      };
-    }
-  }
+	namespace App {
+		interface Platform {
+			env: {
+				DB: D1Database;
+				CACHE_KV: KVNamespace;
+				IMAGES: R2Bucket;
+				AUTH: Fetcher;
+				TENANTS: DurableObjectNamespace; // Add this
+			};
+		}
+	}
 }
 ```
 
@@ -935,36 +899,36 @@ declare global {
 
 ### 2.3 Integrate TenantDO into Routes
 
-**File:** `packages/engine/src/hooks.server.ts`
+**File:** `libs/engine/src/hooks.server.ts`
 
 ```typescript
 export async function handle({ event, resolve }) {
-  const subdomain = extractSubdomain(event.request);
+	const subdomain = extractSubdomain(event.request);
 
-  if (!subdomain) {
-    return new Response("Invalid subdomain", { status: 400 });
-  }
+	if (!subdomain) {
+		return new Response("Invalid subdomain", { status: 400 });
+	}
 
-  // Get TenantDO
-  const tenantDO = event.platform.env.TENANTS.get(
-    event.platform.env.TENANTS.idFromName(`tenant:${subdomain}`),
-  );
+	// Get TenantDO
+	const tenantDO = event.platform.env.TENANTS.get(
+		event.platform.env.TENANTS.idFromName(`tenant:${subdomain}`),
+	);
 
-  // Fetch config from DO (cached, fast)
-  const configResponse = await tenantDO.fetch("https://do/config");
+	// Fetch config from DO (cached, fast)
+	const configResponse = await tenantDO.fetch("https://do/config");
 
-  if (!configResponse.ok) {
-    return new Response("Tenant not found", { status: 404 });
-  }
+	if (!configResponse.ok) {
+		return new Response("Tenant not found", { status: 404 });
+	}
 
-  const config = await configResponse.json();
+	const config = await configResponse.json();
 
-  // Attach to locals
-  event.locals.subdomain = subdomain;
-  event.locals.tenantConfig = config;
-  event.locals.tenantDO = tenantDO;
+	// Attach to locals
+	event.locals.subdomain = subdomain;
+	event.locals.tenantConfig = config;
+	event.locals.tenantDO = tenantDO;
 
-  return resolve(event);
+	return resolve(event);
 }
 ```
 
@@ -972,114 +936,111 @@ export async function handle({ event, resolve }) {
 
 ### 2.4 Draft Auto-Save API
 
-**File:** `packages/engine/src/routes/api/drafts/[slug]/+server.ts`
+**File:** `libs/engine/src/routes/api/drafts/[slug]/+server.ts`
 
 ```typescript
 export async function GET({ params, locals }) {
-  const { slug } = params;
-  const { tenantDO } = locals;
+	const { slug } = params;
+	const { tenantDO } = locals;
 
-  const response = await tenantDO.fetch(`https://do/drafts/${slug}`);
+	const response = await tenantDO.fetch(`https://do/drafts/${slug}`);
 
-  if (!response.ok) {
-    throw error(404, "Draft not found");
-  }
+	if (!response.ok) {
+		throw error(404, "Draft not found");
+	}
 
-  const draft = await response.json();
-  return json(draft);
+	const draft = await response.json();
+	return json(draft);
 }
 
 export async function PUT({ params, request, locals }) {
-  const { slug } = params;
-  const { tenantDO } = locals;
+	const { slug } = params;
+	const { tenantDO } = locals;
 
-  const draft = await request.json();
+	const draft = await request.json();
 
-  const response = await tenantDO.fetch(`https://do/drafts/${slug}`, {
-    method: "PUT",
-    body: JSON.stringify(draft),
-  });
+	const response = await tenantDO.fetch(`https://do/drafts/${slug}`, {
+		method: "PUT",
+		body: JSON.stringify(draft),
+	});
 
-  const result = await response.json();
-  return json(result);
+	const result = await response.json();
+	return json(result);
 }
 
 export async function DELETE({ params, locals }) {
-  const { slug } = params;
-  const { tenantDO } = locals;
+	const { slug } = params;
+	const { tenantDO } = locals;
 
-  await tenantDO.fetch(`https://do/drafts/${slug}`, {
-    method: "DELETE",
-  });
+	await tenantDO.fetch(`https://do/drafts/${slug}`, {
+		method: "DELETE",
+	});
 
-  return json({ success: true });
+	return json({ success: true });
 }
 ```
 
-**File:** `packages/engine/src/routes/admin/blog/new/+page.svelte` (client-side)
+**File:** `libs/engine/src/routes/admin/blog/new/+page.svelte` (client-side)
 
 ```typescript
 let draftSyncInterval: number;
 
 onMount(async () => {
-  // Load draft from localStorage first (instant)
-  const localDraft = localStorage.getItem(`draft-${slug}`);
-  if (localDraft) {
-    const parsed = JSON.parse(localDraft);
-    content = parsed.content;
-  }
+	// Load draft from localStorage first (instant)
+	const localDraft = localStorage.getItem(`draft-${slug}`);
+	if (localDraft) {
+		const parsed = JSON.parse(localDraft);
+		content = parsed.content;
+	}
 
-  // Then check server for newer version
-  try {
-    const response = await fetch(`/api/drafts/${slug}`);
-    if (response.ok) {
-      const serverDraft = await response.json();
+	// Then check server for newer version
+	try {
+		const response = await fetch(`/api/drafts/${slug}`);
+		if (response.ok) {
+			const serverDraft = await response.json();
 
-      if (
-        !localDraft ||
-        serverDraft.lastSaved > JSON.parse(localDraft).lastSaved
-      ) {
-        // Server version is newer
-        if (localDraft && content !== serverDraft.content) {
-          // Show conflict dialog
-          showDraftConflict(localDraft, serverDraft);
-        } else {
-          content = serverDraft.content;
-        }
-      }
-    }
-  } catch (err) {
-    console.error("Failed to load server draft:", err);
-  }
+			if (!localDraft || serverDraft.lastSaved > JSON.parse(localDraft).lastSaved) {
+				// Server version is newer
+				if (localDraft && content !== serverDraft.content) {
+					// Show conflict dialog
+					showDraftConflict(localDraft, serverDraft);
+				} else {
+					content = serverDraft.content;
+				}
+			}
+		}
+	} catch (err) {
+		console.error("Failed to load server draft:", err);
+	}
 
-  // Auto-save to server every 30 seconds
-  draftSyncInterval = setInterval(async () => {
-    if (content && contentChanged) {
-      await saveDraftToServer();
-    }
-  }, 30000);
+	// Auto-save to server every 30 seconds
+	draftSyncInterval = setInterval(async () => {
+		if (content && contentChanged) {
+			await saveDraftToServer();
+		}
+	}, 30000);
 });
 
 onDestroy(() => {
-  clearInterval(draftSyncInterval);
+	clearInterval(draftSyncInterval);
 });
 
 async function saveDraftToServer() {
-  try {
-    await fetch(`/api/drafts/${slug}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        content,
-        metadata: { title, description, tags },
-        deviceId: getDeviceId(),
-      }),
-    });
+	try {
+		await fetch(`/api/drafts/${slug}`, {
+			method: "PUT",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				content,
+				metadata: { title, description, tags },
+				deviceId: getDeviceId(),
+			}),
+		});
 
-    console.log("[Draft] Synced to server");
-  } catch (err) {
-    console.error("[Draft] Server sync failed:", err);
-  }
+		console.log("[Draft] Synced to server");
+	} catch (err) {
+		console.error("[Draft] Server sync failed:", err);
+	}
 }
 ```
 
@@ -1110,28 +1071,28 @@ async function saveDraftToServer() {
 
 ### 3.1 Create PostMetaDO
 
-**File:** `packages/engine/src/lib/durable-objects/PostMetaDO.ts`
+**File:** `libs/engine/src/lib/durable-objects/PostMetaDO.ts`
 
 ```typescript
 export class PostMetaDO extends DurableObject {
-  private reactionCounts: Map<string, number> = new Map();
-  private activeViewers: Map<string, WebSocket> = new Map();
-  private stats: PostStats = {
-    viewCount: 0,
-    uniqueViewers30d: 0,
-    lastViewedAt: 0,
-    lastEditedAt: 0,
-  };
+	private reactionCounts: Map<string, number> = new Map();
+	private activeViewers: Map<string, WebSocket> = new Map();
+	private stats: PostStats = {
+		viewCount: 0,
+		uniqueViewers30d: 0,
+		lastViewedAt: 0,
+		lastEditedAt: 0,
+	};
 
-  constructor(ctx: DurableObjectState, env: Env) {
-    super(ctx, env);
-    this.ctx.blockConcurrencyWhile(async () => {
-      await this.initializeStorage();
-    });
-  }
+	constructor(ctx: DurableObjectState, env: Env) {
+		super(ctx, env);
+		this.ctx.blockConcurrencyWhile(async () => {
+			await this.initializeStorage();
+		});
+	}
 
-  async initializeStorage() {
-    await this.ctx.storage.sql.exec(`
+	async initializeStorage() {
+		await this.ctx.storage.sql.exec(`
       CREATE TABLE IF NOT EXISTS reactions (
         user_id TEXT NOT NULL,
         reaction_type TEXT NOT NULL,
@@ -1159,240 +1120,234 @@ export class PostMetaDO extends DurableObject {
       );
     `);
 
-    // Load reaction counts into memory
-    const counts = await this.ctx.storage.sql
-      .exec("SELECT reaction_type, count FROM reaction_counts")
-      .toArray();
+		// Load reaction counts into memory
+		const counts = await this.ctx.storage.sql
+			.exec("SELECT reaction_type, count FROM reaction_counts")
+			.toArray();
 
-    counts.forEach((row) => {
-      this.reactionCounts.set(row.reaction_type as string, row.count as number);
-    });
+		counts.forEach((row) => {
+			this.reactionCounts.set(row.reaction_type as string, row.count as number);
+		});
 
-    // Load stats
-    const statsRows = await this.ctx.storage.sql
-      .exec("SELECT key, value FROM stats")
-      .toArray();
+		// Load stats
+		const statsRows = await this.ctx.storage.sql.exec("SELECT key, value FROM stats").toArray();
 
-    statsRows.forEach((row) => {
-      this.stats[row.key as keyof PostStats] = row.value as number;
-    });
-  }
+		statsRows.forEach((row) => {
+			this.stats[row.key as keyof PostStats] = row.value as number;
+		});
+	}
 
-  async fetch(request: Request): Promise<Response> {
-    const url = new URL(request.url);
-    const path = url.pathname;
+	async fetch(request: Request): Promise<Response> {
+		const url = new URL(request.url);
+		const path = url.pathname;
 
-    // WebSocket upgrade for real-time updates
-    if (url.pathname === "/ws") {
-      const upgradeHeader = request.headers.get("Upgrade");
-      if (upgradeHeader !== "websocket") {
-        return new Response("Expected websocket", { status: 426 });
-      }
+		// WebSocket upgrade for real-time updates
+		if (url.pathname === "/ws") {
+			const upgradeHeader = request.headers.get("Upgrade");
+			if (upgradeHeader !== "websocket") {
+				return new Response("Expected websocket", { status: 426 });
+			}
 
-      const webSocketPair = new WebSocketPair();
-      const [client, server] = Object.values(webSocketPair);
+			const webSocketPair = new WebSocketPair();
+			const [client, server] = Object.values(webSocketPair);
 
-      this.ctx.acceptWebSocket(server);
+			this.ctx.acceptWebSocket(server);
 
-      // Track presence
-      const userId = url.searchParams.get("userId") || "anonymous";
-      this.activeViewers.set(userId, server);
+			// Track presence
+			const userId = url.searchParams.get("userId") || "anonymous";
+			this.activeViewers.set(userId, server);
 
-      // Broadcast presence update
-      this.broadcastPresence();
+			// Broadcast presence update
+			this.broadcastPresence();
 
-      return new Response(null, {
-        status: 101,
-        webSocket: client,
-      });
-    }
+			return new Response(null, {
+				status: 101,
+				webSocket: client,
+			});
+		}
 
-    // API routing
-    if (path === "/reactions" && request.method === "POST") {
-      return this.handleToggleReaction(request);
-    }
+		// API routing
+		if (path === "/reactions" && request.method === "POST") {
+			return this.handleToggleReaction(request);
+		}
 
-    if (path === "/reactions" && request.method === "GET") {
-      return this.handleGetReactions();
-    }
+		if (path === "/reactions" && request.method === "GET") {
+			return this.handleGetReactions();
+		}
 
-    if (path === "/view" && request.method === "POST") {
-      return this.handleTrackView(request);
-    }
+		if (path === "/view" && request.method === "POST") {
+			return this.handleTrackView(request);
+		}
 
-    if (path === "/stats" && request.method === "GET") {
-      return this.handleGetStats();
-    }
+		if (path === "/stats" && request.method === "GET") {
+			return this.handleGetStats();
+		}
 
-    return new Response("Not found", { status: 404 });
-  }
+		return new Response("Not found", { status: 404 });
+	}
 
-  async handleToggleReaction(request: Request): Promise<Response> {
-    const { userId, reactionType } = await request.json();
+	async handleToggleReaction(request: Request): Promise<Response> {
+		const { userId, reactionType } = await request.json();
 
-    // Check if user already reacted
-    const existing = await this.ctx.storage.sql
-      .exec(
-        "SELECT 1 FROM reactions WHERE user_id = ? AND reaction_type = ?",
-        userId,
-        reactionType,
-      )
-      .one();
+		// Check if user already reacted
+		const existing = await this.ctx.storage.sql
+			.exec("SELECT 1 FROM reactions WHERE user_id = ? AND reaction_type = ?", userId, reactionType)
+			.one();
 
-    let added: boolean;
+		let added: boolean;
 
-    if (existing) {
-      // Remove reaction
-      await this.ctx.storage.sql.exec(
-        "DELETE FROM reactions WHERE user_id = ? AND reaction_type = ?",
-        userId,
-        reactionType,
-      );
+		if (existing) {
+			// Remove reaction
+			await this.ctx.storage.sql.exec(
+				"DELETE FROM reactions WHERE user_id = ? AND reaction_type = ?",
+				userId,
+				reactionType,
+			);
 
-      // Decrement count
-      const currentCount = this.reactionCounts.get(reactionType) || 0;
-      const newCount = Math.max(0, currentCount - 1);
-      this.reactionCounts.set(reactionType, newCount);
+			// Decrement count
+			const currentCount = this.reactionCounts.get(reactionType) || 0;
+			const newCount = Math.max(0, currentCount - 1);
+			this.reactionCounts.set(reactionType, newCount);
 
-      await this.ctx.storage.sql.exec(
-        "UPDATE reaction_counts SET count = ? WHERE reaction_type = ?",
-        newCount,
-        reactionType,
-      );
+			await this.ctx.storage.sql.exec(
+				"UPDATE reaction_counts SET count = ? WHERE reaction_type = ?",
+				newCount,
+				reactionType,
+			);
 
-      added = false;
-    } else {
-      // Add reaction
-      await this.ctx.storage.sql.exec(
-        "INSERT INTO reactions (user_id, reaction_type, created_at) VALUES (?, ?, ?)",
-        userId,
-        reactionType,
-        Date.now(),
-      );
+			added = false;
+		} else {
+			// Add reaction
+			await this.ctx.storage.sql.exec(
+				"INSERT INTO reactions (user_id, reaction_type, created_at) VALUES (?, ?, ?)",
+				userId,
+				reactionType,
+				Date.now(),
+			);
 
-      // Increment count
-      const currentCount = this.reactionCounts.get(reactionType) || 0;
-      const newCount = currentCount + 1;
-      this.reactionCounts.set(reactionType, newCount);
+			// Increment count
+			const currentCount = this.reactionCounts.get(reactionType) || 0;
+			const newCount = currentCount + 1;
+			this.reactionCounts.set(reactionType, newCount);
 
-      await this.ctx.storage.sql.exec(
-        "INSERT OR REPLACE INTO reaction_counts (reaction_type, count) VALUES (?, ?)",
-        reactionType,
-        newCount,
-      );
+			await this.ctx.storage.sql.exec(
+				"INSERT OR REPLACE INTO reaction_counts (reaction_type, count) VALUES (?, ?)",
+				reactionType,
+				newCount,
+			);
 
-      added = true;
-    }
+			added = true;
+		}
 
-    const newCount = this.reactionCounts.get(reactionType) || 0;
+		const newCount = this.reactionCounts.get(reactionType) || 0;
 
-    // Broadcast to all connected viewers
-    this.broadcast({
-      type: "reaction",
-      reactionType,
-      count: newCount,
-      added,
-    });
+		// Broadcast to all connected viewers
+		this.broadcast({
+			type: "reaction",
+			reactionType,
+			count: newCount,
+			added,
+		});
 
-    return Response.json({ added, newCount });
-  }
+		return Response.json({ added, newCount });
+	}
 
-  async handleGetReactions(): Promise<Response> {
-    const counts = Object.fromEntries(this.reactionCounts);
-    return Response.json(counts);
-  }
+	async handleGetReactions(): Promise<Response> {
+		const counts = Object.fromEntries(this.reactionCounts);
+		return Response.json(counts);
+	}
 
-  async handleTrackView(request: Request): Promise<Response> {
-    const { userId } = await request.json();
+	async handleTrackView(request: Request): Promise<Response> {
+		const { userId } = await request.json();
 
-    this.stats.viewCount += 1;
-    this.stats.lastViewedAt = Date.now();
+		this.stats.viewCount += 1;
+		this.stats.lastViewedAt = Date.now();
 
-    await this.ctx.storage.sql.exec(
-      "INSERT OR REPLACE INTO stats (key, value) VALUES ('viewCount', ?)",
-      this.stats.viewCount,
-    );
+		await this.ctx.storage.sql.exec(
+			"INSERT OR REPLACE INTO stats (key, value) VALUES ('viewCount', ?)",
+			this.stats.viewCount,
+		);
 
-    await this.ctx.storage.sql.exec(
-      "INSERT OR REPLACE INTO stats (key, value) VALUES ('lastViewedAt', ?)",
-      this.stats.lastViewedAt,
-    );
+		await this.ctx.storage.sql.exec(
+			"INSERT OR REPLACE INTO stats (key, value) VALUES ('lastViewedAt', ?)",
+			this.stats.lastViewedAt,
+		);
 
-    return Response.json({ success: true });
-  }
+		return Response.json({ success: true });
+	}
 
-  async handleGetStats(): Promise<Response> {
-    return Response.json(this.stats);
-  }
+	async handleGetStats(): Promise<Response> {
+		return Response.json(this.stats);
+	}
 
-  webSocketMessage(ws: WebSocket, message: string) {
-    try {
-      const data = JSON.parse(message);
+	webSocketMessage(ws: WebSocket, message: string) {
+		try {
+			const data = JSON.parse(message);
 
-      if (data.type === "typing") {
-        // Broadcast typing indicator
-        this.broadcast({ type: "typing", userId: data.userId }, ws);
-      }
-    } catch (err) {
-      console.error("[PostMetaDO] WebSocket message error:", err);
-    }
-  }
+			if (data.type === "typing") {
+				// Broadcast typing indicator
+				this.broadcast({ type: "typing", userId: data.userId }, ws);
+			}
+		} catch (err) {
+			console.error("[PostMetaDO] WebSocket message error:", err);
+		}
+	}
 
-  webSocketClose(ws: WebSocket, code: number, reason: string) {
-    // Remove from active viewers
-    for (const [userId, socket] of this.activeViewers.entries()) {
-      if (socket === ws) {
-        this.activeViewers.delete(userId);
-        break;
-      }
-    }
+	webSocketClose(ws: WebSocket, code: number, reason: string) {
+		// Remove from active viewers
+		for (const [userId, socket] of this.activeViewers.entries()) {
+			if (socket === ws) {
+				this.activeViewers.delete(userId);
+				break;
+			}
+		}
 
-    this.broadcastPresence();
-  }
+		this.broadcastPresence();
+	}
 
-  broadcast(message: any, exclude?: WebSocket) {
-    const serialized = JSON.stringify(message);
+	broadcast(message: any, exclude?: WebSocket) {
+		const serialized = JSON.stringify(message);
 
-    for (const [userId, ws] of this.activeViewers.entries()) {
-      if (ws !== exclude) {
-        try {
-          ws.send(serialized);
-        } catch (err) {
-          console.error(`[PostMetaDO] Failed to send to ${userId}:`, err);
-        }
-      }
-    }
-  }
+		for (const [userId, ws] of this.activeViewers.entries()) {
+			if (ws !== exclude) {
+				try {
+					ws.send(serialized);
+				} catch (err) {
+					console.error(`[PostMetaDO] Failed to send to ${userId}:`, err);
+				}
+			}
+		}
+	}
 
-  broadcastPresence() {
-    this.broadcast({
-      type: "presence",
-      count: this.activeViewers.size,
-    });
-  }
+	broadcastPresence() {
+		this.broadcast({
+			type: "presence",
+			count: this.activeViewers.size,
+		});
+	}
 
-  async alarm() {
-    // Flush stats to D1 periodically (every hour)
-    console.log("[PostMetaDO] Flushing stats to D1");
+	async alarm() {
+		// Flush stats to D1 periodically (every hour)
+		console.log("[PostMetaDO] Flushing stats to D1");
 
-    const postId = this.getPostIdFromObjectId();
+		const postId = this.getPostIdFromObjectId();
 
-    // TODO: Implement D1 stats table and flush
-  }
+		// TODO: Implement D1 stats table and flush
+	}
 
-  private getPostIdFromObjectId(): { tenantId: string; postId: string } {
-    // Format: post-meta:{tenantId}:{postId}
-    const idString = this.ctx.id.toString();
-    const [_, tenantId, postId] = idString.split(":");
-    return { tenantId, postId };
-  }
+	private getPostIdFromObjectId(): { tenantId: string; postId: string } {
+		// Format: post-meta:{tenantId}:{postId}
+		const idString = this.ctx.id.toString();
+		const [_, tenantId, postId] = idString.split(":");
+		return { tenantId, postId };
+	}
 }
 
 interface PostStats {
-  viewCount: number;
-  uniqueViewers30d: number;
-  lastViewedAt: number;
-  lastEditedAt: number;
+	viewCount: number;
+	uniqueViewers30d: number;
+	lastViewedAt: number;
+	lastEditedAt: number;
 }
 ```
 
@@ -1400,143 +1355,143 @@ interface PostStats {
 
 ### 3.2 Create PostContentDO
 
-**File:** `packages/engine/src/lib/durable-objects/PostContentDO.ts`
+**File:** `libs/engine/src/lib/durable-objects/PostContentDO.ts`
 
 ```typescript
 export class PostContentDO extends DurableObject {
-  private cachedContent: { markdown: string; html: string } | null = null;
-  private storageLocation: "d1" | "r2" | "r2_archived" = "d1";
-  private r2Key: string | null = null;
+	private cachedContent: { markdown: string; html: string } | null = null;
+	private storageLocation: "d1" | "r2" | "r2_archived" = "d1";
+	private r2Key: string | null = null;
 
-  async fetch(request: Request): Promise<Response> {
-    const url = new URL(request.url);
-    const path = url.pathname;
+	async fetch(request: Request): Promise<Response> {
+		const url = new URL(request.url);
+		const path = url.pathname;
 
-    if (path === "/content" && request.method === "GET") {
-      return this.handleGetContent();
-    }
+		if (path === "/content" && request.method === "GET") {
+			return this.handleGetContent();
+		}
 
-    if (path === "/content" && request.method === "PUT") {
-      return this.handleSaveContent(request);
-    }
+		if (path === "/content" && request.method === "PUT") {
+			return this.handleSaveContent(request);
+		}
 
-    if (path === "/migrate/r2" && request.method === "POST") {
-      return this.handleMigrateToR2(request);
-    }
+		if (path === "/migrate/r2" && request.method === "POST") {
+			return this.handleMigrateToR2(request);
+		}
 
-    if (path === "/migrate/d1" && request.method === "POST") {
-      return this.handleMigrateToD1();
-    }
+		if (path === "/migrate/d1" && request.method === "POST") {
+			return this.handleMigrateToD1();
+		}
 
-    return new Response("Not found", { status: 404 });
-  }
+		return new Response("Not found", { status: 404 });
+	}
 
-  async handleGetContent(): Promise<Response> {
-    // Check cache first
-    if (this.cachedContent) {
-      return Response.json(this.cachedContent);
-    }
+	async handleGetContent(): Promise<Response> {
+		// Check cache first
+		if (this.cachedContent) {
+			return Response.json(this.cachedContent);
+		}
 
-    const { tenantId, postId } = this.getPostIdFromObjectId();
+		const { tenantId, postId } = this.getPostIdFromObjectId();
 
-    // Get metadata from D1
-    const meta = await this.env.DB.prepare(
-      `
+		// Get metadata from D1
+		const meta = await this.env.DB.prepare(
+			`
       SELECT storage_location, r2_key, markdown_content, html_content
       FROM posts
       WHERE id = ? AND tenant_id = ?
     `,
-    )
-      .bind(postId, tenantId)
-      .first();
+		)
+			.bind(postId, tenantId)
+			.first();
 
-    if (!meta) {
-      return new Response("Post not found", { status: 404 });
-    }
+		if (!meta) {
+			return new Response("Post not found", { status: 404 });
+		}
 
-    this.storageLocation = meta.storage_location || "d1";
-    this.r2Key = meta.r2_key;
+		this.storageLocation = meta.storage_location || "d1";
+		this.r2Key = meta.r2_key;
 
-    if (this.storageLocation === "d1") {
-      this.cachedContent = {
-        markdown: meta.markdown_content,
-        html: meta.html_content,
-      };
-    } else {
-      // Fetch from R2
-      const r2Object = await this.env.IMAGES.get(this.r2Key!);
+		if (this.storageLocation === "d1") {
+			this.cachedContent = {
+				markdown: meta.markdown_content,
+				html: meta.html_content,
+			};
+		} else {
+			// Fetch from R2
+			const r2Object = await this.env.IMAGES.get(this.r2Key!);
 
-      if (!r2Object) {
-        return new Response("Content not found in R2", { status: 404 });
-      }
+			if (!r2Object) {
+				return new Response("Content not found in R2", { status: 404 });
+			}
 
-      const content = await r2Object.json();
-      this.cachedContent = {
-        markdown: content.markdown,
-        html: content.html,
-      };
-    }
+			const content = await r2Object.json();
+			this.cachedContent = {
+				markdown: content.markdown,
+				html: content.html,
+			};
+		}
 
-    return Response.json(this.cachedContent);
-  }
+		return Response.json(this.cachedContent);
+	}
 
-  async handleSaveContent(request: Request): Promise<Response> {
-    const { markdown, html, userId } = await request.json();
+	async handleSaveContent(request: Request): Promise<Response> {
+		const { markdown, html, userId } = await request.json();
 
-    const { tenantId, postId } = this.getPostIdFromObjectId();
+		const { tenantId, postId } = this.getPostIdFromObjectId();
 
-    // Save to D1
-    await this.env.DB.prepare(
-      `
+		// Save to D1
+		await this.env.DB.prepare(
+			`
       UPDATE posts
       SET markdown_content = ?, html_content = ?, updated_at = ?
       WHERE id = ? AND tenant_id = ?
     `,
-    )
-      .bind(markdown, html, Date.now(), postId, tenantId)
-      .run();
+		)
+			.bind(markdown, html, Date.now(), postId, tenantId)
+			.run();
 
-    // Update cache
-    this.cachedContent = { markdown, html };
+		// Update cache
+		this.cachedContent = { markdown, html };
 
-    // Invalidate KV cache
-    await this.env.CACHE_KV.delete(`posts:${tenantId}:${postId}`);
+		// Invalidate KV cache
+		await this.env.CACHE_KV.delete(`posts:${tenantId}:${postId}`);
 
-    return Response.json({ success: true });
-  }
+		return Response.json({ success: true });
+	}
 
-  async handleMigrateToR2(request: Request): Promise<Response> {
-    const { r2Key } = await request.json();
+	async handleMigrateToR2(request: Request): Promise<Response> {
+		const { r2Key } = await request.json();
 
-    if (!this.cachedContent) {
-      await this.handleGetContent();
-    }
+		if (!this.cachedContent) {
+			await this.handleGetContent();
+		}
 
-    if (!this.cachedContent) {
-      return new Response("No content to migrate", { status: 400 });
-    }
+		if (!this.cachedContent) {
+			return new Response("No content to migrate", { status: 400 });
+		}
 
-    const { tenantId, postId } = this.getPostIdFromObjectId();
+		const { tenantId, postId } = this.getPostIdFromObjectId();
 
-    // Upload to R2
-    await this.env.IMAGES.put(
-      r2Key,
-      JSON.stringify({
-        markdown: this.cachedContent.markdown,
-        html: this.cachedContent.html,
-        migratedAt: Date.now(),
-      }),
-      {
-        httpMetadata: {
-          contentType: "application/json",
-          cacheControl: "public, max-age=31536000, immutable",
-        },
-      },
-    );
+		// Upload to R2
+		await this.env.IMAGES.put(
+			r2Key,
+			JSON.stringify({
+				markdown: this.cachedContent.markdown,
+				html: this.cachedContent.html,
+				migratedAt: Date.now(),
+			}),
+			{
+				httpMetadata: {
+					contentType: "application/json",
+					cacheControl: "public, max-age=31536000, immutable",
+				},
+			},
+		);
 
-    // Update D1 metadata
-    await this.env.DB.prepare(
-      `
+		// Update D1 metadata
+		await this.env.DB.prepare(
+			`
       UPDATE posts
       SET storage_location = 'r2',
           r2_key = ?,
@@ -1544,32 +1499,32 @@ export class PostContentDO extends DurableObject {
           html_content = NULL
       WHERE id = ? AND tenant_id = ?
     `,
-    )
-      .bind(r2Key, postId, tenantId)
-      .run();
+		)
+			.bind(r2Key, postId, tenantId)
+			.run();
 
-    this.storageLocation = "r2";
-    this.r2Key = r2Key;
+		this.storageLocation = "r2";
+		this.r2Key = r2Key;
 
-    console.log(`[PostContentDO] Migrated ${postId} to R2: ${r2Key}`);
+		console.log(`[PostContentDO] Migrated ${postId} to R2: ${r2Key}`);
 
-    return Response.json({ success: true, r2Key });
-  }
+		return Response.json({ success: true, r2Key });
+	}
 
-  async handleMigrateToD1(): Promise<Response> {
-    if (!this.cachedContent) {
-      await this.handleGetContent();
-    }
+	async handleMigrateToD1(): Promise<Response> {
+		if (!this.cachedContent) {
+			await this.handleGetContent();
+		}
 
-    if (!this.cachedContent) {
-      return new Response("No content to migrate", { status: 400 });
-    }
+		if (!this.cachedContent) {
+			return new Response("No content to migrate", { status: 400 });
+		}
 
-    const { tenantId, postId } = this.getPostIdFromObjectId();
+		const { tenantId, postId } = this.getPostIdFromObjectId();
 
-    // Move content back to D1
-    await this.env.DB.prepare(
-      `
+		// Move content back to D1
+		await this.env.DB.prepare(
+			`
       UPDATE posts
       SET storage_location = 'd1',
           markdown_content = ?,
@@ -1577,29 +1532,24 @@ export class PostContentDO extends DurableObject {
           r2_key = NULL
       WHERE id = ? AND tenant_id = ?
     `,
-    )
-      .bind(
-        this.cachedContent.markdown,
-        this.cachedContent.html,
-        postId,
-        tenantId,
-      )
-      .run();
+		)
+			.bind(this.cachedContent.markdown, this.cachedContent.html, postId, tenantId)
+			.run();
 
-    this.storageLocation = "d1";
-    this.r2Key = null;
+		this.storageLocation = "d1";
+		this.r2Key = null;
 
-    console.log(`[PostContentDO] Migrated ${postId} back to D1`);
+		console.log(`[PostContentDO] Migrated ${postId} back to D1`);
 
-    return Response.json({ success: true });
-  }
+		return Response.json({ success: true });
+	}
 
-  private getPostIdFromObjectId(): { tenantId: string; postId: string } {
-    // Format: post-content:{tenantId}:{postId}
-    const idString = this.ctx.id.toString();
-    const [_, tenantId, postId] = idString.split(":");
-    return { tenantId, postId };
-  }
+	private getPostIdFromObjectId(): { tenantId: string; postId: string } {
+		// Format: post-content:{tenantId}:{postId}
+		const idString = this.ctx.id.toString();
+		const [_, tenantId, postId] = idString.split(":");
+		return { tenantId, postId };
+	}
 }
 ```
 
@@ -1607,7 +1557,7 @@ export class PostContentDO extends DurableObject {
 
 ### 3.3 Update D1 Schema
 
-**File:** `packages/engine/migrations/006_post_storage.sql`
+**File:** `libs/engine/migrations/006_post_storage.sql`
 
 ```sql
 -- Add storage location tracking
@@ -1646,7 +1596,7 @@ CREATE INDEX idx_posts_published_age ON posts(published_at, storage_location);
 
 ### 4.1 Create Migration Worker
 
-**File:** `packages/engine/src/lib/workers/post-migrator.ts`
+**File:** `libs/engine/src/lib/workers/post-migrator.ts`
 
 ```typescript
 /**
@@ -1659,18 +1609,18 @@ CREATE INDEX idx_posts_published_age ON posts(published_at, storage_location);
  */
 
 export async function migratePostsToTiers(env: Env) {
-  console.log("[Migrator] Starting post tier migration...");
+	console.log("[Migrator] Starting post tier migration...");
 
-  const now = Date.now();
-  const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
-  const oneYearAgo = now - 365 * 24 * 60 * 60 * 1000;
+	const now = Date.now();
+	const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
+	const oneYearAgo = now - 365 * 24 * 60 * 60 * 1000;
 
-  // =============================================
-  // WARM TIER: Move posts older than 30 days to R2
-  // =============================================
+	// =============================================
+	// WARM TIER: Move posts older than 30 days to R2
+	// =============================================
 
-  const warmCandidates = await env.DB.prepare(
-    `
+	const warmCandidates = await env.DB.prepare(
+		`
     SELECT id, tenant_id, slug
     FROM posts
     WHERE storage_location = 'd1'
@@ -1681,24 +1631,22 @@ export async function migratePostsToTiers(env: Env) {
     ORDER BY published_at ASC
     LIMIT 100  -- Batch size
   `,
-  )
-    .bind(thirtyDaysAgo, thirtyDaysAgo)
-    .all();
+	)
+		.bind(thirtyDaysAgo, thirtyDaysAgo)
+		.all();
 
-  console.log(
-    `[Migrator] Found ${warmCandidates.results.length} posts for WARM migration`,
-  );
+	console.log(`[Migrator] Found ${warmCandidates.results.length} posts for WARM migration`);
 
-  for (const post of warmCandidates.results) {
-    await migratePostToR2(env, post, "r2");
-  }
+	for (const post of warmCandidates.results) {
+		await migratePostToR2(env, post, "r2");
+	}
 
-  // =============================================
-  // COLD TIER: Move archived or 1+ year old posts
-  // =============================================
+	// =============================================
+	// COLD TIER: Move archived or 1+ year old posts
+	// =============================================
 
-  const coldCandidates = await env.DB.prepare(
-    `
+	const coldCandidates = await env.DB.prepare(
+		`
     SELECT id, tenant_id, slug
     FROM posts
     WHERE storage_location IN ('d1', 'r2')
@@ -1709,24 +1657,22 @@ export async function migratePostsToTiers(env: Env) {
     ORDER BY published_at ASC
     LIMIT 100
   `,
-  )
-    .bind(oneYearAgo)
-    .all();
+	)
+		.bind(oneYearAgo)
+		.all();
 
-  console.log(
-    `[Migrator] Found ${coldCandidates.results.length} posts for COLD migration`,
-  );
+	console.log(`[Migrator] Found ${coldCandidates.results.length} posts for COLD migration`);
 
-  for (const post of coldCandidates.results) {
-    await migratePostToR2(env, post, "r2_archived");
-  }
+	for (const post of coldCandidates.results) {
+		await migratePostToR2(env, post, "r2_archived");
+	}
 
-  // =============================================
-  // HOT TIER: Move popular posts back to D1
-  // =============================================
+	// =============================================
+	// HOT TIER: Move popular posts back to D1
+	// =============================================
 
-  const hotCandidates = await env.DB.prepare(
-    `
+	const hotCandidates = await env.DB.prepare(
+		`
     SELECT id, tenant_id, slug
     FROM posts
     WHERE storage_location = 'r2'
@@ -1735,72 +1681,61 @@ export async function migratePostsToTiers(env: Env) {
       AND last_accessed_at > ?  -- Recent activity
     LIMIT 50
   `,
-  )
-    .bind(thirtyDaysAgo)
-    .all();
+	)
+		.bind(thirtyDaysAgo)
+		.all();
 
-  console.log(
-    `[Migrator] Found ${hotCandidates.results.length} posts for HOT migration`,
-  );
+	console.log(`[Migrator] Found ${hotCandidates.results.length} posts for HOT migration`);
 
-  for (const post of hotCandidates.results) {
-    await migratePostToD1(env, post);
-  }
+	for (const post of hotCandidates.results) {
+		await migratePostToD1(env, post);
+	}
 
-  console.log("[Migrator] Migration complete");
+	console.log("[Migrator] Migration complete");
 }
 
 async function migratePostToR2(
-  env: Env,
-  post: { id: string; tenant_id: string; slug: string },
-  tier: "r2" | "r2_archived",
+	env: Env,
+	post: { id: string; tenant_id: string; slug: string },
+	tier: "r2" | "r2_archived",
 ) {
-  // Get PostContentDO
-  const contentDO = env.POST_CONTENT.get(
-    env.POST_CONTENT.idFromName(`post-content:${post.tenant_id}:${post.id}`),
-  );
+	// Get PostContentDO
+	const contentDO = env.POST_CONTENT.get(
+		env.POST_CONTENT.idFromName(`post-content:${post.tenant_id}:${post.id}`),
+	);
 
-  const r2Key = `posts/${post.tenant_id}/${tier === "r2_archived" ? "archived/" : ""}${post.slug}.json`;
+	const r2Key = `posts/${post.tenant_id}/${tier === "r2_archived" ? "archived/" : ""}${post.slug}.json`;
 
-  // Trigger migration
-  const response = await contentDO.fetch("https://do/migrate/r2", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ r2Key }),
-  });
+	// Trigger migration
+	const response = await contentDO.fetch("https://do/migrate/r2", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ r2Key }),
+	});
 
-  if (response.ok) {
-    console.log(`[Migrator] ✓ Migrated ${post.slug} to ${tier}`);
-  } else {
-    console.error(
-      `[Migrator] ✗ Failed to migrate ${post.slug}:`,
-      await response.text(),
-    );
-  }
+	if (response.ok) {
+		console.log(`[Migrator] ✓ Migrated ${post.slug} to ${tier}`);
+	} else {
+		console.error(`[Migrator] ✗ Failed to migrate ${post.slug}:`, await response.text());
+	}
 }
 
-async function migratePostToD1(
-  env: Env,
-  post: { id: string; tenant_id: string; slug: string },
-) {
-  // Get PostContentDO
-  const contentDO = env.POST_CONTENT.get(
-    env.POST_CONTENT.idFromName(`post-content:${post.tenant_id}:${post.id}`),
-  );
+async function migratePostToD1(env: Env, post: { id: string; tenant_id: string; slug: string }) {
+	// Get PostContentDO
+	const contentDO = env.POST_CONTENT.get(
+		env.POST_CONTENT.idFromName(`post-content:${post.tenant_id}:${post.id}`),
+	);
 
-  // Trigger migration
-  const response = await contentDO.fetch("https://do/migrate/d1", {
-    method: "POST",
-  });
+	// Trigger migration
+	const response = await contentDO.fetch("https://do/migrate/d1", {
+		method: "POST",
+	});
 
-  if (response.ok) {
-    console.log(`[Migrator] ✓ Moved ${post.slug} back to HOT (D1)`);
-  } else {
-    console.error(
-      `[Migrator] ✗ Failed to move ${post.slug} to D1:`,
-      await response.text(),
-    );
-  }
+	if (response.ok) {
+		console.log(`[Migrator] ✓ Moved ${post.slug} back to HOT (D1)`);
+	} else {
+		console.error(`[Migrator] ✗ Failed to move ${post.slug} to D1:`, await response.text());
+	}
 }
 ```
 
@@ -1810,7 +1745,7 @@ async function migratePostToD1(
 
 **Note:** Cloudflare Pages doesn't support cron triggers. You need a separate Worker for this.
 
-**File:** `packages/post-migrator/wrangler.toml`
+**File:** `workers/post-migrator/wrangler.toml`
 
 ```toml
 name = "grove-post-migrator"
@@ -1841,17 +1776,17 @@ class_name = "PostContentDO"
 script_name = "lattice"
 ```
 
-**File:** `packages/post-migrator/src/index.ts`
+**File:** `workers/post-migrator/src/index.ts`
 
 ```typescript
 import { migratePostsToTiers } from "../../engine/src/lib/workers/post-migrator";
 
 export default {
-  async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
-    console.log("[Cron] Starting scheduled post migration");
+	async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
+		console.log("[Cron] Starting scheduled post migration");
 
-    ctx.waitUntil(migratePostsToTiers(env));
-  },
+		ctx.waitUntil(migratePostsToTiers(env));
+	},
 };
 ```
 
@@ -1859,55 +1794,50 @@ export default {
 
 ### 4.3 Update Post Access to Track Views
 
-**File:** `packages/engine/src/lib/server/services/posts.ts`
+**File:** `libs/engine/src/lib/server/services/posts.ts`
 
 ```typescript
-export async function getPostWithCache(
-  slug: string,
-  tenantId: string,
-): Promise<CachedPost | null> {
-  const cacheKey = `posts:${tenantId}:${slug}`;
+export async function getPostWithCache(slug: string, tenantId: string): Promise<CachedPost | null> {
+	const cacheKey = `posts:${tenantId}:${slug}`;
 
-  // ... existing cache logic ...
+	// ... existing cache logic ...
 
-  const post = await fetchPostFromStorage(slug, tenantId);
+	const post = await fetchPostFromStorage(slug, tenantId);
 
-  if (!post) {
-    return null;
-  }
+	if (!post) {
+		return null;
+	}
 
-  // Track access time (async, don't await)
-  trackPostAccess(post.id, tenantId).catch((err) => {
-    console.error("[Posts] Failed to track access:", err);
-  });
+	// Track access time (async, don't await)
+	trackPostAccess(post.id, tenantId).catch((err) => {
+		console.error("[Posts] Failed to track access:", err);
+	});
 
-  // ... rest of function ...
+	// ... rest of function ...
 
-  return post;
+	return post;
 }
 
 async function trackPostAccess(postId: string, tenantId: string) {
-  // Update last_accessed_at in D1
-  await db
-    .prepare(
-      `
+	// Update last_accessed_at in D1
+	await db
+		.prepare(
+			`
     UPDATE posts
     SET last_accessed_at = ?
     WHERE id = ? AND tenant_id = ?
   `,
-    )
-    .bind(Date.now(), postId, tenantId)
-    .run();
+		)
+		.bind(Date.now(), postId, tenantId)
+		.run();
 
-  // Also track view in PostMetaDO (for real-time stats)
-  const metaDO = env.POST_META.get(
-    env.POST_META.idFromName(`post-meta:${tenantId}:${postId}`),
-  );
+	// Also track view in PostMetaDO (for real-time stats)
+	const metaDO = env.POST_META.get(env.POST_META.idFromName(`post-meta:${tenantId}:${postId}`));
 
-  await metaDO.fetch("https://do/view", {
-    method: "POST",
-    body: JSON.stringify({ userId: "anonymous" }),
-  });
+	await metaDO.fetch("https://do/view", {
+		method: "POST",
+		body: JSON.stringify({ userId: "anonymous" }),
+	});
 }
 ```
 
@@ -1945,193 +1875,193 @@ Exception: Post goes viral on Day 100
 
 ### 5.1 Create FeedDO
 
-**File:** `packages/engine/src/lib/durable-objects/FeedDO.ts`
+**File:** `libs/engine/src/lib/durable-objects/FeedDO.ts`
 
 ```typescript
 export class FeedDO extends DurableObject {
-  private feedItems: FeedItem[] = [];
-  private following: Set<string> = new Set();
+	private feedItems: FeedItem[] = [];
+	private following: Set<string> = new Set();
 
-  async fetch(request: Request): Promise<Response> {
-    const url = new URL(request.url);
-    const path = url.pathname;
+	async fetch(request: Request): Promise<Response> {
+		const url = new URL(request.url);
+		const path = url.pathname;
 
-    if (path === "/feed" && request.method === "GET") {
-      return this.handleGetFeed(url.searchParams);
-    }
+		if (path === "/feed" && request.method === "GET") {
+			return this.handleGetFeed(url.searchParams);
+		}
 
-    if (path === "/prefetch" && request.method === "POST") {
-      return this.handlePrefetchFeed(request);
-    }
+		if (path === "/prefetch" && request.method === "POST") {
+			return this.handlePrefetchFeed(request);
+		}
 
-    if (path === "/following" && request.method === "PUT") {
-      return this.handleUpdateFollowing(request);
-    }
+		if (path === "/following" && request.method === "PUT") {
+			return this.handleUpdateFollowing(request);
+		}
 
-    return new Response("Not found", { status: 404 });
-  }
+		return new Response("Not found", { status: 404 });
+	}
 
-  async handleGetFeed(params: URLSearchParams): Promise<Response> {
-    const limit = parseInt(params.get("limit") || "50");
-    const cursor = params.get("cursor");
-    const sortBy = params.get("sortBy") || "recent";
+	async handleGetFeed(params: URLSearchParams): Promise<Response> {
+		const limit = parseInt(params.get("limit") || "50");
+		const cursor = params.get("cursor");
+		const sortBy = params.get("sortBy") || "recent";
 
-    // Load from DO storage if empty
-    if (this.feedItems.length === 0) {
-      await this.loadFeedFromStorage();
-    }
+		// Load from DO storage if empty
+		if (this.feedItems.length === 0) {
+			await this.loadFeedFromStorage();
+		}
 
-    // Paginate
-    let items = this.feedItems;
+		// Paginate
+		let items = this.feedItems;
 
-    if (sortBy === "relevance") {
-      items = [...items].sort((a, b) => b.score - a.score);
-    } else {
-      items = [...items].sort((a, b) => b.created_at - a.created_at);
-    }
+		if (sortBy === "relevance") {
+			items = [...items].sort((a, b) => b.score - a.score);
+		} else {
+			items = [...items].sort((a, b) => b.created_at - a.created_at);
+		}
 
-    const startIndex = cursor ? parseInt(cursor) : 0;
-    const endIndex = startIndex + limit;
-    const page = items.slice(startIndex, endIndex);
+		const startIndex = cursor ? parseInt(cursor) : 0;
+		const endIndex = startIndex + limit;
+		const page = items.slice(startIndex, endIndex);
 
-    return Response.json({
-      items: page,
-      nextCursor: endIndex < items.length ? String(endIndex) : null,
-    });
-  }
+		return Response.json({
+			items: page,
+			nextCursor: endIndex < items.length ? String(endIndex) : null,
+		});
+	}
 
-  async handlePrefetchFeed(request: Request): Promise<Response> {
-    const { postIds } = (await request.json()) as { postIds: string[] };
+	async handlePrefetchFeed(request: Request): Promise<Response> {
+		const { postIds } = (await request.json()) as { postIds: string[] };
 
-    console.log(`[FeedDO] Prefetching ${postIds.length} posts`);
+		console.log(`[FeedDO] Prefetching ${postIds.length} posts`);
 
-    // Batch fetch post metadata and content
-    const posts = await this.batchFetchPosts(postIds);
+		// Batch fetch post metadata and content
+		const posts = await this.batchFetchPosts(postIds);
 
-    // Store in feed
-    for (const post of posts) {
-      this.feedItems.push({
-        post_id: post.id,
-        tenant_id: post.tenant_id,
-        author_id: post.author_id,
-        score: this.calculateRelevanceScore(post),
-        created_at: post.published_at,
-        cached_preview: {
-          title: post.title,
-          description: post.description,
-          author_name: post.author_name,
-          tags: post.tags,
-        },
-        reaction_counts: post.reaction_counts || {},
-        added_at: Date.now(),
-      });
-    }
+		// Store in feed
+		for (const post of posts) {
+			this.feedItems.push({
+				post_id: post.id,
+				tenant_id: post.tenant_id,
+				author_id: post.author_id,
+				score: this.calculateRelevanceScore(post),
+				created_at: post.published_at,
+				cached_preview: {
+					title: post.title,
+					description: post.description,
+					author_name: post.author_name,
+					tags: post.tags,
+				},
+				reaction_counts: post.reaction_counts || {},
+				added_at: Date.now(),
+			});
+		}
 
-    // Persist to DO storage
-    await this.saveFeedToStorage();
+		// Persist to DO storage
+		await this.saveFeedToStorage();
 
-    return Response.json({ prefetched: posts.length });
-  }
+		return Response.json({ prefetched: posts.length });
+	}
 
-  async batchFetchPosts(postIds: string[]): Promise<any[]> {
-    // TODO: Implement batch fetch from D1 + PostContentDO
-    // For now, stub
-    return [];
-  }
+	async batchFetchPosts(postIds: string[]): Promise<any[]> {
+		// TODO: Implement batch fetch from D1 + PostContentDO
+		// For now, stub
+		return [];
+	}
 
-  calculateRelevanceScore(post: any): number {
-    // Simple scoring algorithm
-    let score = 0;
+	calculateRelevanceScore(post: any): number {
+		// Simple scoring algorithm
+		let score = 0;
 
-    // Recency (0-100)
-    const age = Date.now() - post.published_at;
-    const daysSincePublished = age / (24 * 60 * 60 * 1000);
-    score += Math.max(0, 100 - daysSincePublished);
+		// Recency (0-100)
+		const age = Date.now() - post.published_at;
+		const daysSincePublished = age / (24 * 60 * 60 * 1000);
+		score += Math.max(0, 100 - daysSincePublished);
 
-    // Engagement (0-100)
-    const totalReactions = Object.values(post.reaction_counts || {}).reduce(
-      (sum: number, count: any) => sum + (count as number),
-      0,
-    );
-    score += Math.min(100, totalReactions);
+		// Engagement (0-100)
+		const totalReactions = Object.values(post.reaction_counts || {}).reduce(
+			(sum: number, count: any) => sum + (count as number),
+			0,
+		);
+		score += Math.min(100, totalReactions);
 
-    // TODO: Add personalization based on user interests
+		// TODO: Add personalization based on user interests
 
-    return score;
-  }
+		return score;
+	}
 
-  async loadFeedFromStorage() {
-    const rows = await this.ctx.storage.sql
-      .exec("SELECT * FROM feed_items ORDER BY created_at DESC LIMIT 500")
-      .toArray();
+	async loadFeedFromStorage() {
+		const rows = await this.ctx.storage.sql
+			.exec("SELECT * FROM feed_items ORDER BY created_at DESC LIMIT 500")
+			.toArray();
 
-    this.feedItems = rows.map((row) => ({
-      post_id: row.post_id as string,
-      tenant_id: row.tenant_id as string,
-      author_id: row.author_id as string,
-      score: row.score as number,
-      created_at: row.created_at as number,
-      cached_preview: JSON.parse(row.cached_preview as string),
-      reaction_counts: JSON.parse(row.reaction_counts as string),
-      added_at: row.added_at as number,
-    }));
-  }
+		this.feedItems = rows.map((row) => ({
+			post_id: row.post_id as string,
+			tenant_id: row.tenant_id as string,
+			author_id: row.author_id as string,
+			score: row.score as number,
+			created_at: row.created_at as number,
+			cached_preview: JSON.parse(row.cached_preview as string),
+			reaction_counts: JSON.parse(row.reaction_counts as string),
+			added_at: row.added_at as number,
+		}));
+	}
 
-  async saveFeedToStorage() {
-    // Truncate to last 500 items
-    const itemsToSave = this.feedItems.slice(0, 500);
+	async saveFeedToStorage() {
+		// Truncate to last 500 items
+		const itemsToSave = this.feedItems.slice(0, 500);
 
-    await this.ctx.storage.sql.exec("DELETE FROM feed_items");
+		await this.ctx.storage.sql.exec("DELETE FROM feed_items");
 
-    for (const item of itemsToSave) {
-      await this.ctx.storage.sql.exec(
-        `
+		for (const item of itemsToSave) {
+			await this.ctx.storage.sql.exec(
+				`
         INSERT INTO feed_items (
           post_id, tenant_id, author_id, score, created_at,
           cached_preview, reaction_counts, added_at
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `,
-        item.post_id,
-        item.tenant_id,
-        item.author_id,
-        item.score,
-        item.created_at,
-        JSON.stringify(item.cached_preview),
-        JSON.stringify(item.reaction_counts),
-        item.added_at,
-      );
-    }
-  }
+				item.post_id,
+				item.tenant_id,
+				item.author_id,
+				item.score,
+				item.created_at,
+				JSON.stringify(item.cached_preview),
+				JSON.stringify(item.reaction_counts),
+				item.added_at,
+			);
+		}
+	}
 
-  async handleUpdateFollowing(request: Request): Promise<Response> {
-    const { userId, action } = await request.json();
+	async handleUpdateFollowing(request: Request): Promise<Response> {
+		const { userId, action } = await request.json();
 
-    if (action === "follow") {
-      this.following.add(userId);
-    } else {
-      this.following.delete(userId);
-    }
+		if (action === "follow") {
+			this.following.add(userId);
+		} else {
+			this.following.delete(userId);
+		}
 
-    // TODO: Rebuild feed based on new following list
+		// TODO: Rebuild feed based on new following list
 
-    return Response.json({ success: true });
-  }
+		return Response.json({ success: true });
+	}
 }
 
 interface FeedItem {
-  post_id: string;
-  tenant_id: string;
-  author_id: string;
-  score: number;
-  created_at: number;
-  cached_preview: {
-    title: string;
-    description: string;
-    author_name: string;
-    tags: string[];
-  };
-  reaction_counts: Record<string, number>;
-  added_at: number;
+	post_id: string;
+	tenant_id: string;
+	author_id: string;
+	score: number;
+	created_at: number;
+	cached_preview: {
+		title: string;
+		description: string;
+		author_name: string;
+		tags: string[];
+	};
+	reaction_counts: Record<string, number>;
+	added_at: number;
 }
 ```
 
@@ -2139,32 +2069,32 @@ interface FeedItem {
 
 ### 5.2 Meadow Feed Endpoint
 
-**File:** `packages/engine/src/routes/api/meadow/feed/+server.ts`
+**File:** `libs/engine/src/routes/api/meadow/feed/+server.ts`
 
 ```typescript
 export async function GET({ locals, url }) {
-  const { user } = locals;
+	const { user } = locals;
 
-  if (!user) {
-    throw error(401, "Unauthorized");
-  }
+	if (!user) {
+		throw error(401, "Unauthorized");
+	}
 
-  // Get user's FeedDO
-  const feedDO = locals.platform.env.FEEDS.get(
-    locals.platform.env.FEEDS.idFromName(`feed:${user.id}`),
-  );
+	// Get user's FeedDO
+	const feedDO = locals.platform.env.FEEDS.get(
+		locals.platform.env.FEEDS.idFromName(`feed:${user.id}`),
+	);
 
-  const limit = url.searchParams.get("limit") || "50";
-  const cursor = url.searchParams.get("cursor") || "";
-  const sortBy = url.searchParams.get("sortBy") || "recent";
+	const limit = url.searchParams.get("limit") || "50";
+	const cursor = url.searchParams.get("cursor") || "";
+	const sortBy = url.searchParams.get("sortBy") || "recent";
 
-  const response = await feedDO.fetch(
-    `https://do/feed?limit=${limit}&cursor=${cursor}&sortBy=${sortBy}`,
-  );
+	const response = await feedDO.fetch(
+		`https://do/feed?limit=${limit}&cursor=${cursor}&sortBy=${sortBy}`,
+	);
 
-  const feed = await response.json();
+	const feed = await response.json();
 
-  return json(feed);
+	return json(feed);
 }
 ```
 

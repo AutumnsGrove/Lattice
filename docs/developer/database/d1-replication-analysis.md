@@ -2,25 +2,27 @@
 
 ## Summary
 
-| Metric | Value |
-|--------|-------|
-| Total D1 queries found | ~45 |
-| Read queries | ~25 (56%) |
-| Write queries | ~20 (44%) |
-| High-frequency reads | 4 (session/user validation per request) |
-| Databases in use | 1 shared (`grove-engine-db`) |
+| Metric                 | Value                                   |
+| ---------------------- | --------------------------------------- |
+| Total D1 queries found | ~45                                     |
+| Read queries           | ~25 (56%)                               |
+| Write queries          | ~20 (44%)                               |
+| High-frequency reads   | 4 (session/user validation per request) |
+| Databases in use       | 1 shared (`grove-engine-db`)            |
 
 ## Recommendation: PREPARE for Replication
 
 **Current recommendation**: Adopt D1 Sessions API patterns now, enable replication later.
 
 **Reasoning**:
+
 1. Geographic distribution is uncertain (early stages)
 2. Sessions API provides consistency benefits regardless of replication
 3. The codebase patterns work with or without replication enabled
 4. When you have global users, flipping on replication is a config change
 
 **Enable replication when**:
+
 - You have measurable traffic from outside the US
 - You observe D1 latency in Cloudflare analytics
 - You approach ~500+ QPS on read-heavy endpoints
@@ -31,11 +33,11 @@
 
 All production applications share a single D1 database:
 
-| Location | Binding | Database Name | Database ID |
-|----------|---------|---------------|-------------|
-| `domains/wrangler.toml` | `DB` | `grove-engine-db` | `a6394da2-...` |
-| `landing/wrangler.toml` | `DB` | `grove-engine-db` | `a6394da2-...` |
-| `packages/example-site/wrangler.toml` | `POSTS_DB` | `grove-engine-db` | `a6394da2-...` |
+| Location                          | Binding    | Database Name     | Database ID    |
+| --------------------------------- | ---------- | ----------------- | -------------- |
+| `domains/wrangler.toml`           | `DB`       | `grove-engine-db` | `a6394da2-...` |
+| `landing/wrangler.toml`           | `DB`       | `grove-engine-db` | `a6394da2-...` |
+| `apps/example-site/wrangler.toml` | `POSTS_DB` | `grove-engine-db` | `a6394da2-...` |
 
 This shared database pattern is fine - replication is configured per-database, not per-worker.
 
@@ -47,78 +49,76 @@ This shared database pattern is fine - replication is configured per-database, n
 
 These queries run on **every authenticated HTTP request** and are the highest-value targets:
 
-| Function | File:Line | Query Type | Impact |
-|----------|-----------|------------|--------|
-| Session lookup | `landing/src/hooks.server.ts:29` | SELECT | Every request |
-| User lookup | `landing/src/hooks.server.ts:41` | SELECT | Every request |
-| `getSession()` | `domains/src/lib/server/db.ts:190` | SELECT | Every request |
-| `getUserById()` | `domains/src/lib/server/db.ts:108` | SELECT | Every request |
+| Function        | File:Line                          | Query Type | Impact        |
+| --------------- | ---------------------------------- | ---------- | ------------- |
+| Session lookup  | `landing/src/hooks.server.ts:29`   | SELECT     | Every request |
+| User lookup     | `landing/src/hooks.server.ts:41`   | SELECT     | Every request |
+| `getSession()`  | `domains/src/lib/server/db.ts:190` | SELECT     | Every request |
+| `getUserById()` | `domains/src/lib/server/db.ts:108` | SELECT     | Every request |
 
 **Current pattern** (without Sessions API):
+
 ```typescript
 // hooks.server.ts - runs every request
 const session = await db
-  .prepare('SELECT * FROM sessions WHERE id = ? AND expires_at > datetime("now")')
-  .bind(sessionId)
-  .first();
+	.prepare('SELECT * FROM sessions WHERE id = ? AND expires_at > datetime("now")')
+	.bind(sessionId)
+	.first();
 
-const user = await db
-  .prepare('SELECT * FROM users WHERE id = ?')
-  .bind(session.user_id)
-  .first();
+const user = await db.prepare("SELECT * FROM users WHERE id = ?").bind(session.user_id).first();
 ```
 
 ### Read-Heavy: Product Catalog (Public Browsing)
 
-| Function | File:Line | Query Type | Frequency |
-|----------|-----------|------------|-----------|
-| `getProducts()` | `shop.ts:185` | SELECT | Catalog pages |
-| `getProductBySlug()` | `shop.ts:242` | SELECT | Product pages |
-| `getProductById()` | `shop.ts:264` | SELECT | Product details |
-| `getProductVariants()` | `shop.ts:428` | SELECT | Per product |
-| `getVariantById()` | `shop.ts:440` | SELECT | Cart/checkout |
+| Function               | File:Line     | Query Type | Frequency       |
+| ---------------------- | ------------- | ---------- | --------------- |
+| `getProducts()`        | `shop.ts:185` | SELECT     | Catalog pages   |
+| `getProductBySlug()`   | `shop.ts:242` | SELECT     | Product pages   |
+| `getProductById()`     | `shop.ts:264` | SELECT     | Product details |
+| `getProductVariants()` | `shop.ts:428` | SELECT     | Per product     |
+| `getVariantById()`     | `shop.ts:440` | SELECT     | Cart/checkout   |
 
 These are excellent replication candidates - many users reading the same catalog.
 
 ### Read-Heavy: CDN File Metadata
 
-| Function | File:Line | Query Type | Frequency |
-|----------|-----------|------------|-----------|
-| `getCdnFile()` | `landing/db.ts:235` | SELECT | Media serving |
-| `getCdnFileByKey()` | `landing/db.ts:240` | SELECT | Media lookups |
-| `listCdnFiles()` | `landing/db.ts:248` | SELECT + COUNT | Admin browsing |
-| `listAllCdnFiles()` | `landing/db.ts:278` | SELECT + COUNT | Admin browsing |
-| `getCdnFolders()` | `landing/db.ts:319` | SELECT DISTINCT | Folder nav |
+| Function            | File:Line           | Query Type      | Frequency      |
+| ------------------- | ------------------- | --------------- | -------------- |
+| `getCdnFile()`      | `landing/db.ts:235` | SELECT          | Media serving  |
+| `getCdnFileByKey()` | `landing/db.ts:240` | SELECT          | Media lookups  |
+| `listCdnFiles()`    | `landing/db.ts:248` | SELECT + COUNT  | Admin browsing |
+| `listAllCdnFiles()` | `landing/db.ts:278` | SELECT + COUNT  | Admin browsing |
+| `getCdnFolders()`   | `landing/db.ts:319` | SELECT DISTINCT | Folder nav     |
 
 ### Read-Heavy: Domain Search (During Active Searches)
 
-| Function | File:Line | Query Type | Frequency |
-|----------|-----------|------------|-----------|
-| `getSearchJob()` | `domains/db.ts:434` | SELECT | Status polling |
-| `listSearchJobs()` | `domains/db.ts:445` | SELECT + COUNT | History page |
-| `getJobResults()` | `domains/db.ts:624` | SELECT | Results display |
-| `getActiveConfig()` | `domains/db.ts:670` | SELECT | Config load |
+| Function            | File:Line           | Query Type     | Frequency       |
+| ------------------- | ------------------- | -------------- | --------------- |
+| `getSearchJob()`    | `domains/db.ts:434` | SELECT         | Status polling  |
+| `listSearchJobs()`  | `domains/db.ts:445` | SELECT + COUNT | History page    |
+| `getJobResults()`   | `domains/db.ts:624` | SELECT         | Results display |
+| `getActiveConfig()` | `domains/db.ts:670` | SELECT         | Config load     |
 
 ### Write Operations (No Replication Benefit)
 
-| Function | File | Type | Frequency |
-|----------|------|------|-----------|
-| `createSession()` | both db.ts | INSERT | Login only |
-| `deleteSession()` | both db.ts | DELETE | Logout |
-| `updateSessionTokens()` | domains/db.ts | UPDATE | Token refresh |
-| `createMagicCode()` | both db.ts | INSERT | Auth flow |
-| `createSearchJob()` | domains/db.ts | INSERT | Search start |
-| `updateSearchJobStatus()` | domains/db.ts | UPDATE | Job progress |
-| `saveDomainResults()` | domains/db.ts | INSERT (batch) | Search results |
-| `createProduct()` | shop.ts | INSERT | Admin only |
-| `updateProduct()` | shop.ts | UPDATE | Admin only |
-| `deleteProduct()` | shop.ts | DELETE | Admin only |
-| `createVariant()` | shop.ts | INSERT | Admin only |
-| `updateVariant()` | shop.ts | UPDATE | Admin only |
-| `createOrder()` | shop.ts | INSERT | Checkout |
-| `updateOrderStatus()` | shop.ts | UPDATE | Fulfillment |
-| `createCdnFile()` | landing/db.ts | INSERT | Upload |
-| `deleteCdnFile()` | landing/db.ts | DELETE | Admin only |
+| Function                  | File          | Type           | Frequency      |
+| ------------------------- | ------------- | -------------- | -------------- |
+| `createSession()`         | both db.ts    | INSERT         | Login only     |
+| `deleteSession()`         | both db.ts    | DELETE         | Logout         |
+| `updateSessionTokens()`   | domains/db.ts | UPDATE         | Token refresh  |
+| `createMagicCode()`       | both db.ts    | INSERT         | Auth flow      |
+| `createSearchJob()`       | domains/db.ts | INSERT         | Search start   |
+| `updateSearchJobStatus()` | domains/db.ts | UPDATE         | Job progress   |
+| `saveDomainResults()`     | domains/db.ts | INSERT (batch) | Search results |
+| `createProduct()`         | shop.ts       | INSERT         | Admin only     |
+| `updateProduct()`         | shop.ts       | UPDATE         | Admin only     |
+| `deleteProduct()`         | shop.ts       | DELETE         | Admin only     |
+| `createVariant()`         | shop.ts       | INSERT         | Admin only     |
+| `updateVariant()`         | shop.ts       | UPDATE         | Admin only     |
+| `createOrder()`           | shop.ts       | INSERT         | Checkout       |
+| `updateOrderStatus()`     | shop.ts       | UPDATE         | Fulfillment    |
+| `createCdnFile()`         | landing/db.ts | INSERT         | Upload         |
+| `deleteCdnFile()`         | landing/db.ts | DELETE         | Admin only     |
 
 ---
 
@@ -128,16 +128,17 @@ These are excellent replication candidates - many users reading the same catalog
 
 These functions read then write, which can cause issues with eventual consistency:
 
-| Function | Pattern | Risk | Mitigation |
-|----------|---------|------|------------|
-| `getOrCreateUser()` | SELECT then INSERT | Duplicate user if replica is stale | Use Sessions API with `first_unconditional` constraint |
-| `verifyMagicCode()` | SELECT then UPDATE | Could verify already-used code | Use Sessions API to ensure fresh read |
-| `getOrCreateCustomer()` | SELECT then INSERT | Duplicate customer | Use Sessions API with `first_unconditional` constraint |
-| `updateConfig()` | SELECT then INSERT/UPDATE | Config race condition | Use Sessions API |
+| Function                | Pattern                   | Risk                               | Mitigation                                             |
+| ----------------------- | ------------------------- | ---------------------------------- | ------------------------------------------------------ |
+| `getOrCreateUser()`     | SELECT then INSERT        | Duplicate user if replica is stale | Use Sessions API with `first_unconditional` constraint |
+| `verifyMagicCode()`     | SELECT then UPDATE        | Could verify already-used code     | Use Sessions API to ensure fresh read                  |
+| `getOrCreateCustomer()` | SELECT then INSERT        | Duplicate customer                 | Use Sessions API with `first_unconditional` constraint |
+| `updateConfig()`        | SELECT then INSERT/UPDATE | Config race condition              | Use Sessions API                                       |
 
 ### Token Refresh Race Condition
 
 In `domains/hooks.server.ts:93-135`, there's a pattern where:
+
 1. Read session from D1
 2. Check if token needs refresh
 3. Refresh token externally
@@ -152,6 +153,7 @@ With replicas, step 1 could read stale data. This needs Sessions API to ensure w
 ### Phase 1: Authentication Hooks (Highest Impact)
 
 Files to modify:
+
 - `domains/src/hooks.server.ts`
 - `landing/src/hooks.server.ts`
 
@@ -160,7 +162,8 @@ These run on every request. Even a small latency improvement here multiplies acr
 ### Phase 2: Shop Product Reads
 
 Files to modify:
-- `packages/engine/src/lib/payments/shop.ts`
+
+- `libs/engine/src/lib/payments/shop.ts`
 
 Functions: `getProducts`, `getProductBySlug`, `getProductById`, `getProductVariants`
 
@@ -169,6 +172,7 @@ Public catalog browsing is read-heavy with many users viewing the same data.
 ### Phase 3: CDN File Metadata
 
 Files to modify:
+
 - `landing/src/lib/server/db.ts`
 
 Functions: `getCdnFile`, `getCdnFileByKey`, `listCdnFiles`
@@ -193,12 +197,12 @@ Lower priority - domain search operations, config loading, etc.
 
 ## D1 Limits to Keep in Mind
 
-| Limit | Value | Notes |
-|-------|-------|-------|
-| Max QPS | ~1000 at 1ms/query | Single-threaded |
-| Max query duration | 30 seconds | Individual queries |
-| Max database size | 10 GB (paid) | Unlikely to hit |
-| Queries per Worker invocation | 1,000 (paid) | Very high limit |
+| Limit                         | Value              | Notes              |
+| ----------------------------- | ------------------ | ------------------ |
+| Max QPS                       | ~1000 at 1ms/query | Single-threaded    |
+| Max query duration            | 30 seconds         | Individual queries |
+| Max database size             | 10 GB (paid)       | Unlikely to hit    |
+| Queries per Worker invocation | 1,000 (paid)       | Very high limit    |
 
 If you approach these limits, read replication can help distribute read load. Monitor in Cloudflare dashboard.
 

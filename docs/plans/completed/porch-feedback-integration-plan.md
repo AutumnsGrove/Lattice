@@ -13,11 +13,11 @@
 
 Grove now has three support/help components at various stages:
 
-| Component | Status | Purpose |
-|-----------|--------|---------|
-| **Waystone** | ✅ Done | Contextual `?` icons linking to KB articles |
-| **Feedback** | ✅ Done | Quick, informal thoughts from Wanderers |
-| **Porch** | 📋 Spec'd | Full support conversations with threading |
+| Component    | Status    | Purpose                                     |
+| ------------ | --------- | ------------------------------------------- |
+| **Waystone** | ✅ Done   | Contextual `?` icons linking to KB articles |
+| **Feedback** | ✅ Done   | Quick, informal thoughts from Wanderers     |
+| **Porch**    | 📋 Spec'd | Full support conversations with threading   |
 
 This plan analyzes how to finish the support system by integrating existing components with the Porch spec.
 
@@ -26,18 +26,22 @@ This plan analyzes how to finish the support system by integrating existing comp
 ## Current State Analysis
 
 ### Waystone (Self-Service Layer)
-**Location**: `packages/engine/src/lib/ui/components/ui/Waystone.svelte`
+
+**Location**: `libs/engine/src/lib/ui/components/ui/Waystone.svelte`
 
 Contextual help icons that link to Knowledge Base articles. Already deployed in:
+
 - Admin sidebar (Help Center link)
 - Settings pages (Typography, Accent Color)
 
 **Expansion needed**: More Waystones throughout the interface as articles are written.
 
 ### Feedback System (Casual Thoughts Layer)
-**Location**: `packages/landing/src/routes/feedback/`
+
+**Location**: `apps/landing/src/routes/feedback/`
 
 What's built:
+
 - Web form at `/feedback` with sentiment selector (😊/😐/😟)
 - Admin view at `/admin/feedback` with filters, search, notes
 - D1 table `feedback` with migration 0004
@@ -48,9 +52,11 @@ What's built:
 **Not yet configured**: Email webhook for `feedback@grove.place` (requires Cloudflare Email Routing dashboard setup)
 
 ### Porch Spec (Conversation Layer)
+
 **Location**: `docs/specs/porch-spec.md`
 
 The spec defines a full-featured support system:
+
 - Visit numbers (PORCH-2026-00001)
 - Two-way threading (user ↔ Autumn)
 - Categories: billing, technical, account, just saying hi, other
@@ -97,12 +103,14 @@ The spec defines a full-featured support system:
 ### Decision 1: Package Structure
 
 **Option A: New package `packages/porch`**
+
 - Pro: Matches spec (`porch.grove.place`), clean separation
 - Pro: Own D1 database, independent scaling
 - Con: More deployment complexity, new wrangler.toml
 - Con: Auth needs cross-domain handling
 
 **Option B: Extend landing at `grove.place/porch`** (Recommended)
+
 - Pro: Shares existing D1, Resend, auth infrastructure
 - Pro: Admin views consolidated in one place
 - Pro: Simpler deployment (already deploying landing)
@@ -115,29 +123,34 @@ The spec defines a full-featured support system:
 ### Decision 2: Feedback ↔ Porch Relationship
 
 **Option A: Keep completely separate**
+
 - Feedback = thoughts about Grove itself
 - Porch = help with specific problems
 - No crossover, separate admin views
 
 **Option B: Merge feedback INTO Porch**
+
 - Remove standalone feedback form
 - Porch's "just saying hi" category becomes feedback
 - All communication in one system
 - Con: Loses anonymous feedback (Porch needs email)
 
 **Option C: Keep separate with escalation path** (Recommended)
+
 - Feedback stays for quick, anonymous thoughts
 - Add "Need more help? Start a Porch conversation" CTA on feedback success
 - Feedback admin can "escalate to Porch" if reply needed
 - Porch links to KB articles via Waystone before submitting
 
 **Recommendation**: Option C. The systems serve different purposes:
+
 - Feedback: "I love this!" / "This button is confusing" (no reply needed)
 - Porch: "I can't log in" / "Billing question" (reply needed)
 
 ### Decision 3: Porch MVP Scope
 
 Full Porch Phase 1 spec includes:
+
 - [ ] Visit creation with categories/priority
 - [ ] Visit history for authenticated users
 - [ ] Message threading
@@ -148,10 +161,12 @@ Full Porch Phase 1 spec includes:
 - [ ] Metrics dashboard
 
 **MVP Option A: Everything in Phase 1**
+
 - Full spec implementation
 - 2-3 weeks of development
 
 **MVP Option B: Core conversations only** (Recommended for launch)
+
 - [ ] Visit creation (web form)
 - [ ] Visit list for authenticated users
 - [ ] Message threading (web only)
@@ -159,6 +174,7 @@ Full Porch Phase 1 spec includes:
 - [ ] Email notifications (outbound only)
 
 Defer to post-launch:
+
 - File attachments
 - Email threading (inbound replies)
 - Saved responses
@@ -174,6 +190,7 @@ Assuming recommendations are accepted (Option B + C + MVP B):
 ### Phase 1: Foundation (Days 1-2)
 
 **Database setup:**
+
 ```sql
 -- Add to landing migrations as 0005_porch.sql
 CREATE TABLE porch_visits (
@@ -210,12 +227,13 @@ CREATE INDEX idx_porch_messages_visit ON porch_messages(visit_id);
 ```
 
 **KV for visit numbering:**
+
 - Key: `porch:visit_sequence:2026`
 - Atomic increment for PORCH-2026-XXXXX
 
 ### Phase 2: User-Facing Routes (Days 3-5)
 
-**Routes to create in `packages/landing/src/routes/porch/`:**
+**Routes to create in `apps/landing/src/routes/porch/`:**
 
 ```
 /porch                    → Landing page ("Have a seat on the porch")
@@ -225,6 +243,7 @@ CREATE INDEX idx_porch_messages_visit ON porch_messages(visit_id);
 ```
 
 **Visit creation flow:**
+
 1. Check auth status (Heartwood)
 2. If authenticated: pre-fill email, show visit history link
 3. If guest: require email, optional name
@@ -236,7 +255,7 @@ CREATE INDEX idx_porch_messages_visit ON porch_messages(visit_id);
 
 ### Phase 3: Admin Interface (Days 6-7)
 
-**Routes to create in `packages/landing/src/routes/admin/porch/`:**
+**Routes to create in `apps/landing/src/routes/admin/porch/`:**
 
 ```
 /admin/porch             → All visits dashboard (filters, search)
@@ -244,6 +263,7 @@ CREATE INDEX idx_porch_messages_visit ON porch_messages(visit_id);
 ```
 
 **Admin features:**
+
 - Filter by status (open, pending, resolved)
 - Filter by category
 - Search by subject, email
@@ -255,12 +275,14 @@ CREATE INDEX idx_porch_messages_visit ON porch_messages(visit_id);
 ### Phase 4: Integration (Day 8)
 
 **Cross-linking:**
+
 1. Feedback success message → "Need more help? Start a Porch conversation"
 2. KB articles → "Still stuck? Ask on the Porch" CTA
 3. Admin sidebar → Add Porch link alongside Feedback
 4. Settings pages → Waystone for support article, link to Porch
 
 **Email notifications:**
+
 - User submits visit → Autumn gets email notification
 - Autumn replies → User gets email with reply + link to conversation
 - Use existing Resend setup from landing
@@ -268,6 +290,7 @@ CREATE INDEX idx_porch_messages_visit ON porch_messages(visit_id);
 ### Phase 5: Polish (Days 9-10)
 
 **UX refinements:**
+
 - Warm copy throughout ("Thanks for stopping by", "We'll figure it out")
 - Status badges with Grove colors
 - Mobile-responsive conversation view
@@ -278,7 +301,7 @@ CREATE INDEX idx_porch_messages_visit ON porch_messages(visit_id);
 ## File Structure
 
 ```
-packages/landing/
+apps/landing/
 ├── migrations/
 │   └── 0005_porch.sql                      # NEW
 ├── src/routes/
@@ -347,20 +370,21 @@ Inbound email replies (Resend webhook) are deferred:
 
 ## Integration Points
 
-| System | How Porch Uses It |
-|--------|-------------------|
-| **Heartwood** | User auth, pre-fill email, visit history access |
-| **D1** | Store visits and messages (landing's existing D1) |
-| **Resend** | Email notifications (already configured in landing) |
-| **KV** | Visit number sequence counter |
-| **Waystone** | Link to help articles before/during visit |
-| **Feedback** | Escalation path from feedback → porch |
+| System        | How Porch Uses It                                   |
+| ------------- | --------------------------------------------------- |
+| **Heartwood** | User auth, pre-fill email, visit history access     |
+| **D1**        | Store visits and messages (landing's existing D1)   |
+| **Resend**    | Email notifications (already configured in landing) |
+| **KV**        | Visit number sequence counter                       |
+| **Waystone**  | Link to help articles before/during visit           |
+| **Feedback**  | Escalation path from feedback → porch               |
 
 ---
 
 ## Success Criteria
 
 **Launch ready when:**
+
 - [ ] Wanderers can start visits at `/porch/new`
 - [ ] Authenticated users see visit history at `/porch/visits`
 - [ ] Users can view conversation and add replies
@@ -398,8 +422,8 @@ Inbound email replies (Resend webhook) are deferred:
 
 1. **Get decisions** on the three decision points above
 2. **Create migration** (0005_porch.sql)
-3. **Build user routes** (/porch/*)
-4. **Build admin routes** (/admin/porch/*)
+3. **Build user routes** (/porch/\*)
+4. **Build admin routes** (/admin/porch/\*)
 5. **Add cross-links** between feedback, KB, and porch
 6. **Test end-to-end** flow
 7. **Deploy and run migration**
@@ -411,6 +435,7 @@ Inbound email replies (Resend webhook) are deferred:
 ### Implementation Summary (January 28, 2026)
 
 **Decisions Made:**
+
 - ✅ Porch lives in landing at `/porch/*` (not separate package)
 - ✅ Feedback remains separate (no merge)
 - ✅ MVP scope: Core conversations, no attachments/inbound email
@@ -418,7 +443,7 @@ Inbound email replies (Resend webhook) are deferred:
 **Files Created:**
 
 ```
-packages/landing/
+apps/landing/
 ├── migrations/
 │   └── 0005_porch.sql                      # D1 schema
 └── src/routes/
@@ -441,11 +466,12 @@ packages/landing/
             ├── +page.svelte               # Admin reply view
             └── +page.server.ts            # Reply + status + notes
 
-packages/engine/
+libs/engine/
 └── src/routes/admin/+layout.svelte        # Added Porch link to Arbor
 ```
 
 **Features Implemented:**
+
 - Visit creation with categories (billing, technical, account, hello, other)
 - Visit numbering: PORCH-2026-XXXXX
 - Two-way messaging (visitor ↔ Autumn)
@@ -457,6 +483,7 @@ packages/engine/
 - Arbor panel integration (Get Support link)
 
 **Deferred to v2:**
+
 - File attachments (R2)
 - Inbound email threading (Resend webhook)
 - Saved responses
@@ -464,10 +491,11 @@ packages/engine/
 - Ivy integration (Phase 2)
 
 **To Deploy:**
-1. Run migration: `wrangler d1 execute grove-engine-db --file=packages/landing/migrations/0005_porch.sql --remote`
+
+1. Run migration: `wrangler d1 execute grove-engine-db --file=apps/landing/migrations/0005_porch.sql --remote`
 2. Deploy landing: `cd packages/landing && pnpm deploy`
 3. Deploy engine: `cd packages/engine && pnpm deploy`
 
 ---
 
-*Have a seat on the porch. We'll figure it out together.*
+_Have a seat on the porch. We'll figure it out together._

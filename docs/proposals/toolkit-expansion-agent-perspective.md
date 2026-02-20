@@ -69,21 +69,21 @@ Neither `gw status` nor `gf briefing` gives me this. `gw status` is infrastructu
 
 ```json
 {
-  "branch": "feat/123-session-refresh",
-  "issue": 123,
-  "tracking": "origin/feat/123-session-refresh",
-  "ahead": 2,
-  "behind": 0,
-  "staged": ["src/lib/auth.ts", "src/lib/session.ts"],
-  "unstaged": ["src/routes/+layout.server.ts"],
-  "untracked": [],
-  "affected_packages": ["engine"],
-  "recent_commits": [
-    { "hash": "abc1234", "message": "feat(auth): add refresh token logic" },
-    { "hash": "def5678", "message": "feat(auth): scaffold session types" }
-  ],
-  "todos_in_changed_files": 2,
-  "ci_status": "passing"
+	"branch": "feat/123-session-refresh",
+	"issue": 123,
+	"tracking": "origin/feat/123-session-refresh",
+	"ahead": 2,
+	"behind": 0,
+	"staged": ["src/lib/auth.ts", "src/lib/session.ts"],
+	"unstaged": ["src/routes/+layout.server.ts"],
+	"untracked": [],
+	"affected_packages": ["engine"],
+	"recent_commits": [
+		{ "hash": "abc1234", "message": "feat(auth): add refresh token logic" },
+		{ "hash": "def5678", "message": "feat(auth): scaffold session types" }
+	],
+	"todos_in_changed_files": 2,
+	"ci_status": "passing"
 }
 ```
 
@@ -111,13 +111,13 @@ $ gf impact --agent src/lib/server/services/database.ts
 === Impact Analysis: database.ts ===
 
 --- Direct Importers (14 files) ---
-packages/engine/src/routes/api/posts/+server.ts
-packages/engine/src/routes/api/tenants/+server.ts
+libs/engine/src/routes/api/posts/+server.ts
+libs/engine/src/routes/api/tenants/+server.ts
 ...
 
 --- Test Coverage ---
-packages/engine/tests/unit/database.test.ts  (direct)
-packages/engine/tests/integration/api.test.ts  (indirect, via posts route)
+libs/engine/tests/unit/database.test.ts  (direct)
+libs/engine/tests/integration/api.test.ts  (indirect, via posts route)
 
 --- Route Exposure ---
 /api/posts (GET, POST)
@@ -165,20 +165,20 @@ content. The `--json` mode exists in config but very few commands implement it.
 
 ```json
 {
-  "matches": [
-    {
-      "file": "src/lib/auth.ts",
-      "line": 45,
-      "content": "const session = await getSession(cookies);"
-    },
-    {
-      "file": "src/lib/auth.ts",
-      "line": 89,
-      "content": "if (!session) throw redirect(302, '/login');"
-    }
-  ],
-  "total": 2,
-  "files_matched": 1
+	"matches": [
+		{
+			"file": "src/lib/auth.ts",
+			"line": 45,
+			"content": "const session = await getSession(cookies);"
+		},
+		{
+			"file": "src/lib/auth.ts",
+			"line": 89,
+			"content": "if (!session) throw redirect(302, '/login');"
+		}
+	],
+	"total": 2,
+	"files_matched": 1
 }
 ```
 
@@ -232,12 +232,12 @@ rate limit checks, each producing output I have to parse.
 
 ```json
 [
-  { "title": "fix: Cache invalidation race", "labels": ["bug", "engine"] },
-  {
-    "title": "feat: Add export button to dashboard",
-    "labels": ["enhancement"]
-  },
-  { "title": "chore: Update Svelte to 5.x", "labels": ["chore", "deps"] }
+	{ "title": "fix: Cache invalidation race", "labels": ["bug", "engine"] },
+	{
+		"title": "feat: Add export button to dashboard",
+		"labels": ["enhancement"]
+	},
+	{ "title": "chore: Update Svelte to 5.x", "labels": ["chore", "deps"] }
 ]
 ```
 
@@ -284,19 +284,19 @@ When it's time to create a PR, I need:
 
 ```json
 {
-  "branch": "feat/123-session-refresh",
-  "base": "main",
-  "commits": 5,
-  "files_changed": 12,
-  "insertions": 340,
-  "deletions": 85,
-  "packages": ["engine"],
-  "issues_referenced": [123],
-  "tests_passing": true,
-  "pushed": true,
-  "suggested_title": "feat(auth): add session refresh",
-  "suggested_body": "Implements session refresh tokens for Heartwood auth...",
-  "ready": true
+	"branch": "feat/123-session-refresh",
+	"base": "main",
+	"commits": 5,
+	"files_changed": 12,
+	"insertions": 340,
+	"deletions": 85,
+	"packages": ["engine"],
+	"issues_referenced": [123],
+	"tests_passing": true,
+	"pushed": true,
+	"suggested_title": "feat(auth): add session refresh",
+	"suggested_body": "Implements session refresh tokens for Heartwood auth...",
+	"ready": true
 }
 ```
 
@@ -320,15 +320,15 @@ the error output:
 
 ```json
 {
-  "failed_step": "check",
-  "errors": [
-    {
-      "file": "src/lib/auth.ts",
-      "line": 45,
-      "message": "Type 'string | undefined' is not assignable to type 'string'",
-      "code": "TS2322"
-    }
-  ]
+	"failed_step": "check",
+	"errors": [
+		{
+			"file": "src/lib/auth.ts",
+			"line": 45,
+			"message": "Type 'string | undefined' is not assignable to type 'string'",
+			"code": "TS2322"
+		}
+	]
 }
 ```
 

@@ -27,6 +27,7 @@ Migrate CDN URLs from `cdn.autumnsgrove.com` to `cdn.grove.place` with proper mu
 ```
 
 **Why Option C (Hybrid)?**
+
 - Single domain is simpler to manage (no wildcard SSL complexity)
 - Path-based routing is clear and predictable
 - Tenant isolation already built into R2 keys
@@ -36,58 +37,62 @@ Migrate CDN URLs from `cdn.autumnsgrove.com` to `cdn.grove.place` with proper mu
 ## Current Implementation
 
 ### R2 Key Structure (Already Correct!)
+
 ```typescript
-// packages/engine/src/routes/api/images/upload/+server.ts:304
+// libs/engine/src/routes/api/images/upload/+server.ts:304
 const key = `${tenantId}/${datePath}/${filename}`;
 // Results in: alice/photos/2025/01/19/sunset.webp
 ```
 
 ### Tenant Resolution (Already Correct!)
+
 ```typescript
 // Tenant ID = subdomain (human-readable!)
-const tenantId = event.url.hostname.split('.')[0];
+const tenantId = event.url.hostname.split(".")[0];
 // alice.grove.place → 'alice'
 ```
 
 ### CSP Headers (Partially Prepared!)
+
 ```typescript
-// packages/engine/src/hooks.server.ts:548
+// libs/engine/src/hooks.server.ts:548
 // Already includes both domains - just remove the old one after migration
-"img-src 'self' https://cdn.autumnsgrove.com https://cdn.grove.place data:"
+"img-src 'self' https://cdn.autumnsgrove.com https://cdn.grove.place data:";
 ```
 
 ## Migration Tasks
 
 ### Phase 1: Infrastructure Setup
 
-| # | Task | Effort | Notes |
-|---|------|--------|-------|
-| 1.1 | Create cdn.grove.place CNAME in Cloudflare DNS | 5m | Point to R2 public bucket URL |
-| 1.2 | Configure R2 bucket custom domain | 10m | Link cdn.grove.place to IMAGES bucket |
-| 1.3 | Verify SSL certificate provision | 5m | Cloudflare handles automatically |
-| 1.4 | Test CDN access with new domain | 10m | `curl https://cdn.grove.place/test/...` |
+| #   | Task                                           | Effort | Notes                                   |
+| --- | ---------------------------------------------- | ------ | --------------------------------------- |
+| 1.1 | Create cdn.grove.place CNAME in Cloudflare DNS | 5m     | Point to R2 public bucket URL           |
+| 1.2 | Configure R2 bucket custom domain              | 10m    | Link cdn.grove.place to IMAGES bucket   |
+| 1.3 | Verify SSL certificate provision               | 5m     | Cloudflare handles automatically        |
+| 1.4 | Test CDN access with new domain                | 10m    | `curl https://cdn.grove.place/test/...` |
 
 ### Phase 2: Code Updates
 
-| # | Task | File | Line |
-|---|------|------|------|
-| 2.1 | Update upload CDN URL | `packages/engine/src/routes/api/images/upload/+server.ts` | 321 |
-| 2.2 | Update list CDN URL | `packages/engine/src/routes/api/images/list/+server.ts` | 94 |
-| 2.3 | Clean CSP headers | `packages/engine/src/hooks.server.ts` | 548 |
-| 2.4 | Update GutterManager placeholder | `packages/engine/src/lib/components/admin/GutterManager.svelte` | 506 |
+| #   | Task                             | File                                                        | Line |
+| --- | -------------------------------- | ----------------------------------------------------------- | ---- |
+| 2.1 | Update upload CDN URL            | `libs/engine/src/routes/api/images/upload/+server.ts`       | 321  |
+| 2.2 | Update list CDN URL              | `libs/engine/src/routes/api/images/list/+server.ts`         | 94   |
+| 2.3 | Clean CSP headers                | `libs/engine/src/hooks.server.ts`                           | 548  |
+| 2.4 | Update GutterManager placeholder | `libs/engine/src/lib/components/admin/GutterManager.svelte` | 506  |
 
 ### Phase 3: Test & Documentation Updates
 
-| # | Task | File |
-|---|------|------|
-| 3.1 | Update test fixtures | `packages/engine/src/lib/server/services/tenant-isolation.test.ts` |
-| 3.2 | Update any documentation | Various |
+| #   | Task                     | File                                                           |
+| --- | ------------------------ | -------------------------------------------------------------- |
+| 3.1 | Update test fixtures     | `libs/engine/src/lib/server/services/tenant-isolation.test.ts` |
+| 3.2 | Update any documentation | Various                                                        |
 
 ## Code Changes
 
 ### 2.1 Upload CDN URL
+
 ```typescript
-// packages/engine/src/routes/api/images/upload/+server.ts:321
+// libs/engine/src/routes/api/images/upload/+server.ts:321
 // FROM:
 const cdnUrl = `https://cdn.autumnsgrove.com/${key}`;
 // TO:
@@ -95,8 +100,9 @@ const cdnUrl = `https://cdn.grove.place/${key}`;
 ```
 
 ### 2.2 List CDN URL
+
 ```typescript
-// packages/engine/src/routes/api/images/list/+server.ts:94
+// libs/engine/src/routes/api/images/list/+server.ts:94
 // FROM:
 url: `https://cdn.autumnsgrove.com/${obj.key}`,
 // TO:
@@ -104,8 +110,9 @@ url: `https://cdn.grove.place/${obj.key}`,
 ```
 
 ### 2.3 CSP Headers
+
 ```typescript
-// packages/engine/src/hooks.server.ts:548
+// libs/engine/src/hooks.server.ts:548
 // FROM:
 "img-src 'self' https://cdn.autumnsgrove.com https://cdn.grove.place data:",
 // TO:
@@ -118,7 +125,7 @@ Consider extracting CDN_DOMAIN to environment variable for flexibility:
 
 ```typescript
 // Option: Environment variable approach (future enhancement)
-const CDN_DOMAIN = platform?.env?.CDN_DOMAIN || 'cdn.grove.place';
+const CDN_DOMAIN = platform?.env?.CDN_DOMAIN || "cdn.grove.place";
 const cdnUrl = `https://${CDN_DOMAIN}/${key}`;
 ```
 
@@ -127,6 +134,7 @@ For now, hardcoding `cdn.grove.place` is fine since it's a permanent domain.
 ## Rollback Strategy
 
 If issues arise after migration:
+
 1. CSP already allows both domains (can revert code without CSP change)
 2. R2 bucket is unchanged - same keys work with either domain
 3. DNS change can be reverted in minutes
@@ -145,12 +153,12 @@ If issues arise after migration:
 
 ## Total Effort
 
-| Phase | Time |
-|-------|------|
-| Infrastructure Setup | 30 min |
-| Code Updates | 15 min |
-| Testing & Verification | 15 min |
-| **Total** | **~1 hour** |
+| Phase                  | Time        |
+| ---------------------- | ----------- |
+| Infrastructure Setup   | 30 min      |
+| Code Updates           | 15 min      |
+| Testing & Verification | 15 min      |
+| **Total**              | **~1 hour** |
 
 ## Notes
 

@@ -39,7 +39,7 @@ Cloudflare Pages does not support wildcard custom domains (`*.grove.place`). We 
 Create a new Worker called `grove-router` in the project:
 
 ```
-packages/grove-router/
+workers/grove-router/
 ├── wrangler.toml
 ├── src/
 │   └── index.ts
@@ -49,77 +49,77 @@ packages/grove-router/
 ### Step 2: Worker Code
 
 ```typescript
-// packages/grove-router/src/index.ts
+// workers/grove-router/src/index.ts
 
 export interface Env {
-  // No bindings needed - pure proxy
+	// No bindings needed - pure proxy
 }
 
 // Subdomains that should NOT be proxied (handled by other services)
 const EXCLUDED_SUBDOMAINS = new Set([
-  "auth", // groveauth-frontend Pages
-  "admin", // groveauth-frontend Pages
-  "login", // groveauth-frontend Pages
-  "domains", // grove-domains Pages
-  "cdn", // grove-landing Pages (R2)
-  "music", // grovemusic Pages
-  "scout", // scout Worker
-  "auth-api", // groveauth Worker
-  "www", // Redirect to root (handled in hooks)
+	"auth", // groveauth-frontend Pages
+	"admin", // groveauth-frontend Pages
+	"login", // groveauth-frontend Pages
+	"domains", // grove-domains Pages
+	"cdn", // grove-landing Pages (R2)
+	"music", // grovemusic Pages
+	"scout", // scout Worker
+	"auth-api", // groveauth Worker
+	"www", // Redirect to root (handled in hooks)
 ]);
 
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
-    const url = new URL(request.url);
-    const host = url.hostname;
+	async fetch(request: Request, env: Env): Promise<Response> {
+		const url = new URL(request.url);
+		const host = url.hostname;
 
-    // Extract subdomain
-    const parts = host.split(".");
-    if (parts.length < 3 || !host.endsWith(".grove.place")) {
-      // Not a subdomain request, pass through
-      return fetch(request);
-    }
+		// Extract subdomain
+		const parts = host.split(".");
+		if (parts.length < 3 || !host.endsWith(".grove.place")) {
+			// Not a subdomain request, pass through
+			return fetch(request);
+		}
 
-    const subdomain = parts[0];
+		const subdomain = parts[0];
 
-    // Skip excluded subdomains (they have their own routes)
-    if (EXCLUDED_SUBDOMAINS.has(subdomain)) {
-      // This shouldn't happen if routes are configured correctly
-      // but just in case, return 404
-      return new Response("Service handled elsewhere", { status: 404 });
-    }
+		// Skip excluded subdomains (they have their own routes)
+		if (EXCLUDED_SUBDOMAINS.has(subdomain)) {
+			// This shouldn't happen if routes are configured correctly
+			// but just in case, return 404
+			return new Response("Service handled elsewhere", { status: 404 });
+		}
 
-    // Proxy to lattice Pages
-    const targetUrl = new URL(request.url);
-    targetUrl.hostname = "grove-lattice.pages.dev";
+		// Proxy to lattice Pages
+		const targetUrl = new URL(request.url);
+		targetUrl.hostname = "grove-lattice.pages.dev";
 
-    // Create new request with modified URL
-    const proxyRequest = new Request(targetUrl.toString(), {
-      method: request.method,
-      headers: request.headers,
-      body: request.body,
-      redirect: "manual",
-    });
+		// Create new request with modified URL
+		const proxyRequest = new Request(targetUrl.toString(), {
+			method: request.method,
+			headers: request.headers,
+			body: request.body,
+			redirect: "manual",
+		});
 
-    // Add original host header so Pages knows the real domain
-    proxyRequest.headers.set("X-Forwarded-Host", host);
+		// Add original host header so Pages knows the real domain
+		proxyRequest.headers.set("X-Forwarded-Host", host);
 
-    const response = await fetch(proxyRequest);
+		const response = await fetch(proxyRequest);
 
-    // Return response with CORS headers if needed
-    return new Response(response.body, {
-      status: response.status,
-      statusText: response.statusText,
-      headers: response.headers,
-    });
-  },
+		// Return response with CORS headers if needed
+		return new Response(response.body, {
+			status: response.status,
+			statusText: response.statusText,
+			headers: response.headers,
+		});
+	},
 };
 ```
 
 ### Step 3: Wrangler Configuration
 
 ```toml
-# packages/grove-router/wrangler.toml
+# workers/grove-router/wrangler.toml
 
 name = "grove-router"
 main = "src/index.ts"
@@ -158,8 +158,7 @@ The hooks file needs to read the actual hostname, not the proxied one. Update to
 
 ```typescript
 // In extractSubdomain function
-const host =
-  request.headers.get("x-forwarded-host") || request.headers.get("host") || "";
+const host = request.headers.get("x-forwarded-host") || request.headers.get("host") || "";
 ```
 
 ### Step 6: Deployment Steps
@@ -200,10 +199,10 @@ cookieParts.push("Domain=.grove.place");
 
 | File                                  | Action                    |
 | ------------------------------------- | ------------------------- |
-| `packages/grove-router/wrangler.toml` | CREATE                    |
-| `packages/grove-router/src/index.ts`  | CREATE                    |
-| `packages/grove-router/package.json`  | CREATE                    |
-| `packages/engine/src/hooks.server.ts` | MODIFY (X-Forwarded-Host) |
+| `services/grove-router/wrangler.toml` | CREATE                    |
+| `services/grove-router/src/index.ts`  | CREATE                    |
+| `services/grove-router/package.json`  | CREATE                    |
+| `libs/engine/src/hooks.server.ts` | MODIFY (X-Forwarded-Host) |
 
 ## Commands to Run
 

@@ -37,8 +37,8 @@ The posts API endpoints check for authentication but don't verify the user owns 
 
 ### Files to Modify
 
-1. `/packages/engine/src/routes/api/posts/+server.ts`
-2. `/packages/engine/src/routes/api/posts/[slug]/+server.ts`
+1. `/libs/engine/src/routes/api/posts/+server.ts`
+2. `/libs/engine/src/routes/api/posts/[slug]/+server.ts`
 
 ### Current Code (Problem)
 
@@ -109,8 +109,8 @@ Same issue as posts - pages API doesn't verify tenant ownership.
 
 ### Files to Modify
 
-1. `/packages/engine/src/routes/api/pages/+server.ts`
-2. `/packages/engine/src/routes/api/pages/[slug]/+server.ts`
+1. `/libs/engine/src/routes/api/pages/+server.ts`
+2. `/libs/engine/src/routes/api/pages/[slug]/+server.ts`
 
 ### Required Fix
 
@@ -120,11 +120,7 @@ Apply the exact same pattern as Task 1.1:
 import { getVerifiedTenantId } from "$lib/auth/session.js";
 
 // In each handler (POST, PUT, DELETE):
-const tenantId = await getVerifiedTenantId(
-  platform.env.DB,
-  locals.tenantId,
-  locals.user,
-);
+const tenantId = await getVerifiedTenantId(platform.env.DB, locals.tenantId, locals.user);
 ```
 
 ### Verification Steps
@@ -143,7 +139,7 @@ const tenantId = await getVerifiedTenantId(
 
 ### Files to Modify
 
-1. `/packages/engine/src/routes/api/admin/settings/+server.ts`
+1. `/libs/engine/src/routes/api/admin/settings/+server.ts`
 
 ### Current Code (Problem)
 
@@ -198,10 +194,10 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
 
 ### Files to Modify
 
-1. `/packages/engine/src/routes/api/images/upload/+server.ts`
-2. `/packages/engine/src/routes/api/images/delete/+server.ts`
-3. `/packages/engine/src/routes/api/images/list/+server.ts`
-4. `/packages/engine/src/routes/api/images/analyze/+server.ts`
+1. `/libs/engine/src/routes/api/images/upload/+server.ts`
+2. `/libs/engine/src/routes/api/images/delete/+server.ts`
+3. `/libs/engine/src/routes/api/images/list/+server.ts`
+4. `/libs/engine/src/routes/api/images/analyze/+server.ts`
 
 ### Required Fix Pattern
 
@@ -209,11 +205,7 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
 import { getVerifiedTenantId } from "$lib/auth/session.js";
 
 // At the start of each handler after auth check:
-const tenantId = await getVerifiedTenantId(
-  platform.env.DB,
-  locals.tenantId,
-  locals.user,
-);
+const tenantId = await getVerifiedTenantId(platform.env.DB, locals.tenantId, locals.user);
 
 // Replace all uses of locals.tenantId with tenantId
 ```
@@ -247,7 +239,7 @@ const key = `${tenantId}/${datePath}/${filename}`;
 
 ### Files to Modify
 
-1. `/packages/engine/src/routes/admin/+layout.server.ts`
+1. `/libs/engine/src/routes/admin/+layout.server.ts`
 
 ### Current Code (Problem)
 
@@ -319,7 +311,7 @@ The AI image analyze endpoint calls Claude API (~$0.003/request) with NO rate li
 
 ### Files to Modify
 
-1. `/packages/engine/src/routes/api/images/analyze/+server.ts`
+1. `/libs/engine/src/routes/api/images/analyze/+server.ts`
 
 ### Current Code (Problem)
 
@@ -395,7 +387,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
 ### Files to Modify
 
-1. `/packages/engine/src/routes/api/images/upload/+server.ts`
+1. `/libs/engine/src/routes/api/images/upload/+server.ts`
 
 ### Required Fix
 
@@ -403,40 +395,39 @@ Add after authentication checks (around line 44):
 
 ```typescript
 import {
-  checkRateLimit,
-  buildRateLimitKey,
-  rateLimitHeaders,
+	checkRateLimit,
+	buildRateLimitKey,
+	rateLimitHeaders,
 } from "$lib/server/rate-limits/middleware.js";
 
 // Add after auth/tenant checks:
 const kv = platform?.env?.CACHE_KV;
 if (kv) {
-  const { allowed, remaining, resetAt, response } = await checkRateLimit({
-    kv,
-    key: buildRateLimitKey("upload/image", locals.user.id),
-    limit: 50, // 50 uploads per hour
-    windowSeconds: 3600,
-    namespace: "upload-ratelimit",
-  });
+	const { allowed, remaining, resetAt, response } = await checkRateLimit({
+		kv,
+		key: buildRateLimitKey("upload/image", locals.user.id),
+		limit: 50, // 50 uploads per hour
+		windowSeconds: 3600,
+		namespace: "upload-ratelimit",
+	});
 
-  if (response) {
-    return new Response(
-      JSON.stringify({
-        error: "rate_limited",
-        message:
-          "Upload limit reached. Please wait before uploading more images.",
-        remaining: 0,
-        resetAt: new Date(resetAt * 1000).toISOString(),
-      }),
-      {
-        status: 429,
-        headers: {
-          "Content-Type": "application/json",
-          ...rateLimitHeaders({ remaining, resetAt, allowed }, 50),
-        },
-      },
-    );
-  }
+	if (response) {
+		return new Response(
+			JSON.stringify({
+				error: "rate_limited",
+				message: "Upload limit reached. Please wait before uploading more images.",
+				remaining: 0,
+				resetAt: new Date(resetAt * 1000).toISOString(),
+			}),
+			{
+				status: 429,
+				headers: {
+					"Content-Type": "application/json",
+					...rateLimitHeaders({ remaining, resetAt, allowed }, 50),
+				},
+			},
+		);
+	}
 }
 ```
 
@@ -456,7 +447,7 @@ if (kv) {
 
 ### Files to Modify
 
-1. `/packages/engine/src/hooks.server.ts`
+1. `/libs/engine/src/hooks.server.ts`
 
 ### Location
 
@@ -468,10 +459,7 @@ Add after the existing security headers (around line 392):
 
 ```typescript
 // Add HSTS header for HTTPS enforcement
-response.headers.set(
-  "Strict-Transport-Security",
-  "max-age=31536000; includeSubDomains; preload",
-);
+response.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
 ```
 
 ### Verification Steps
@@ -505,39 +493,33 @@ Find the `handle` function and add headers before returning:
 import type { Handle } from "@sveltejs/kit";
 
 export const handle: Handle = async ({ event, resolve }) => {
-  // ... existing auth/session logic ...
+	// ... existing auth/session logic ...
 
-  const response = await resolve(event);
+	const response = await resolve(event);
 
-  // ✅ Add security headers
-  response.headers.set("X-Frame-Options", "DENY");
-  response.headers.set("X-Content-Type-Options", "nosniff");
-  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-  response.headers.set(
-    "Permissions-Policy",
-    "geolocation=(), microphone=(), camera=()",
-  );
-  response.headers.set(
-    "Strict-Transport-Security",
-    "max-age=31536000; includeSubDomains; preload",
-  );
+	// ✅ Add security headers
+	response.headers.set("X-Frame-Options", "DENY");
+	response.headers.set("X-Content-Type-Options", "nosniff");
+	response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+	response.headers.set("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
+	response.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
 
-  // CSP for landing page
-  const csp = [
-    "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com",
-    "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' https://cdn.grove.place data:",
-    "font-src 'self' https://cdn.grove.place",
-    "connect-src 'self' https://*.grove.place https://challenges.cloudflare.com",
-    "frame-src https://challenges.cloudflare.com",
-    "frame-ancestors 'none'",
-    "upgrade-insecure-requests",
-  ].join("; ");
+	// CSP for landing page
+	const csp = [
+		"default-src 'self'",
+		"script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com",
+		"style-src 'self' 'unsafe-inline'",
+		"img-src 'self' https://cdn.grove.place data:",
+		"font-src 'self' https://cdn.grove.place",
+		"connect-src 'self' https://*.grove.place https://challenges.cloudflare.com",
+		"frame-src https://challenges.cloudflare.com",
+		"frame-ancestors 'none'",
+		"upgrade-insecure-requests",
+	].join("; ");
 
-  response.headers.set("Content-Security-Policy", csp);
+	response.headers.set("Content-Security-Policy", csp);
 
-  return response;
+	return response;
 };
 ```
 
@@ -568,14 +550,14 @@ For Plant (payments/onboarding):
 
 ```typescript
 const csp = [
-  "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' https://js.stripe.com https://challenges.cloudflare.com",
-  "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' https://cdn.grove.place data:",
-  "frame-src https://js.stripe.com https://challenges.cloudflare.com",
-  "connect-src 'self' https://*.grove.place https://api.stripe.com",
-  "frame-ancestors 'none'",
-  "upgrade-insecure-requests",
+	"default-src 'self'",
+	"script-src 'self' 'unsafe-inline' https://js.stripe.com https://challenges.cloudflare.com",
+	"style-src 'self' 'unsafe-inline'",
+	"img-src 'self' https://cdn.grove.place data:",
+	"frame-src https://js.stripe.com https://challenges.cloudflare.com",
+	"connect-src 'self' https://*.grove.place https://api.stripe.com",
+	"frame-ancestors 'none'",
+	"upgrade-insecure-requests",
 ].join("; ");
 ```
 
@@ -583,14 +565,14 @@ For Domains:
 
 ```typescript
 const csp = [
-  "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com",
-  "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' https://cdn.grove.place data:",
-  "connect-src 'self' https://*.grove.place",
-  "frame-src https://challenges.cloudflare.com",
-  "frame-ancestors 'none'",
-  "upgrade-insecure-requests",
+	"default-src 'self'",
+	"script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com",
+	"style-src 'self' 'unsafe-inline'",
+	"img-src 'self' https://cdn.grove.place data:",
+	"connect-src 'self' https://*.grove.place",
+	"frame-src https://challenges.cloudflare.com",
+	"frame-ancestors 'none'",
+	"upgrade-insecure-requests",
 ].join("; ");
 ```
 
@@ -620,8 +602,8 @@ const csp = [
 ```typescript
 // Lines 6-11 - Debug logging exposes env keys
 console.log("Environment check:", {
-  hasDB: !!platform?.env?.DB,
-  envKeys: Object.keys(platform?.env || {}), // ❌ Exposes all env variable names
+	hasDB: !!platform?.env?.DB,
+	envKeys: Object.keys(platform?.env || {}), // ❌ Exposes all env variable names
 });
 ```
 
@@ -635,11 +617,11 @@ Remove the debug logging entirely, or sanitize it:
 
 // Option B: If debugging needed, only log boolean flags
 if (process.env.NODE_ENV === "development") {
-  console.log("Environment check:", {
-    hasDB: !!platform?.env?.DB,
-    hasResend: !!platform?.env?.RESEND_API_KEY,
-    // Don't log key names or values
-  });
+	console.log("Environment check:", {
+		hasDB: !!platform?.env?.DB,
+		hasResend: !!platform?.env?.RESEND_API_KEY,
+		// Don't log key names or values
+	});
 }
 ```
 
@@ -697,9 +679,9 @@ console.error("[Webhook] Error processing event:", error);
 // AFTER (safe):
 console.log(`[Webhook] Tenant created successfully`, { eventId: event.id });
 console.error("[Webhook] Error processing event", {
-  eventId: event.id,
-  eventType: event.type,
-  errorType: error instanceof Error ? error.name : "Unknown",
+	eventId: event.id,
+	eventType: event.type,
+	errorType: error instanceof Error ? error.name : "Unknown",
 });
 ```
 
@@ -707,29 +689,25 @@ console.error("[Webhook] Error processing event", {
 
 ```typescript
 // /plant/src/lib/server/logger.ts
-export function logWebhook(
-  message: string,
-  metadata: Record<string, unknown> = {},
-) {
-  // Strip any PII from metadata
-  const safeMetadata = Object.fromEntries(
-    Object.entries(metadata).filter(
-      ([key]) =>
-        !["email", "username", "customer", "name"].includes(key.toLowerCase()),
-    ),
-  );
-  console.log(`[Webhook] ${message}`, JSON.stringify(safeMetadata));
+export function logWebhook(message: string, metadata: Record<string, unknown> = {}) {
+	// Strip any PII from metadata
+	const safeMetadata = Object.fromEntries(
+		Object.entries(metadata).filter(
+			([key]) => !["email", "username", "customer", "name"].includes(key.toLowerCase()),
+		),
+	);
+	console.log(`[Webhook] ${message}`, JSON.stringify(safeMetadata));
 }
 
 export function logWebhookError(
-  message: string,
-  error: unknown,
-  metadata: Record<string, unknown> = {},
+	message: string,
+	error: unknown,
+	metadata: Record<string, unknown> = {},
 ) {
-  console.error(`[Webhook] ${message}`, {
-    errorType: error instanceof Error ? error.name : "Unknown",
-    ...metadata,
-  });
+	console.error(`[Webhook] ${message}`, {
+		errorType: error instanceof Error ? error.name : "Unknown",
+		...metadata,
+	});
 }
 ```
 
@@ -772,7 +750,7 @@ const SEEDLING_PRICE_ID = "price_1234567890abcdef";
 // AFTER:
 const SEEDLING_PRICE_ID = platform?.env?.STRIPE_SEEDLING_PRICE_ID;
 if (!SEEDLING_PRICE_ID) {
-  throw new Error("STRIPE_SEEDLING_PRICE_ID not configured");
+	throw new Error("STRIPE_SEEDLING_PRICE_ID not configured");
 }
 ```
 
@@ -860,7 +838,7 @@ yarn-error.log*
 
 ### Files to Modify
 
-1. `/packages/engine/src/routes/verify/+page.server.ts`
+1. `/libs/engine/src/routes/verify/+page.server.ts`
 
 ### Current Code (Problem)
 
@@ -879,18 +857,18 @@ const returnTo = url.searchParams.get("returnTo") || "/";
 
 // Only allow relative paths or same-origin URLs
 function isValidRedirect(target: string): boolean {
-  // Allow relative paths
-  if (target.startsWith("/") && !target.startsWith("//")) {
-    return true;
-  }
+	// Allow relative paths
+	if (target.startsWith("/") && !target.startsWith("//")) {
+		return true;
+	}
 
-  // Allow same-origin absolute URLs
-  try {
-    const targetUrl = new URL(target, url.origin);
-    return targetUrl.origin === url.origin;
-  } catch {
-    return false;
-  }
+	// Allow same-origin absolute URLs
+	try {
+		const targetUrl = new URL(target, url.origin);
+		return targetUrl.origin === url.origin;
+	} catch {
+		return false;
+	}
 }
 
 const safeRedirect = isValidRedirect(returnTo) ? returnTo : "/";
@@ -929,43 +907,40 @@ headers: {
 
 ```typescript
 export const OPTIONS: RequestHandler = async ({ request }) => {
-  const origin = request.headers.get("Origin");
+	const origin = request.headers.get("Origin");
 
-  // Validate origin against allowlist
-  const isAllowed =
-    origin &&
-    (origin === "https://grove.place" ||
-      origin === "https://www.grove.place" ||
-      /^https:\/\/[\w-]+\.grove\.place$/.test(origin));
+	// Validate origin against allowlist
+	const isAllowed =
+		origin &&
+		(origin === "https://grove.place" ||
+			origin === "https://www.grove.place" ||
+			/^https:\/\/[\w-]+\.grove\.place$/.test(origin));
 
-  return new Response(null, {
-    headers: {
-      "Access-Control-Allow-Origin": isAllowed ? origin : "https://grove.place",
-      "Access-Control-Allow-Methods": "GET, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
-      "Access-Control-Max-Age": "86400",
-      Vary: "Origin", // Important for caching
-    },
-  });
+	return new Response(null, {
+		headers: {
+			"Access-Control-Allow-Origin": isAllowed ? origin : "https://grove.place",
+			"Access-Control-Allow-Methods": "GET, OPTIONS",
+			"Access-Control-Allow-Headers": "Content-Type",
+			"Access-Control-Max-Age": "86400",
+			Vary: "Origin", // Important for caching
+		},
+	});
 };
 
 export const GET: RequestHandler = async ({ request, params, platform }) => {
-  const origin = request.headers.get("Origin");
-  const isAllowed =
-    origin &&
-    (origin === "https://grove.place" ||
-      /^https:\/\/[\w-]+\.grove\.place$/.test(origin));
+	const origin = request.headers.get("Origin");
+	const isAllowed =
+		origin && (origin === "https://grove.place" || /^https:\/\/[\w-]+\.grove\.place$/.test(origin));
 
-  // ... existing GET logic ...
+	// ... existing GET logic ...
 
-  return new Response(body, {
-    headers: {
-      // ... other headers ...
-      "Access-Control-Allow-Origin":
-        isAllowed && origin ? origin : "https://grove.place",
-      Vary: "Origin",
-    },
-  });
+	return new Response(body, {
+		headers: {
+			// ... other headers ...
+			"Access-Control-Allow-Origin": isAllowed && origin ? origin : "https://grove.place",
+			Vary: "Origin",
+		},
+	});
 };
 ```
 
@@ -985,7 +960,7 @@ export const GET: RequestHandler = async ({ request, params, platform }) => {
 
 ### Files to Modify
 
-1. `/packages/grove-router/src/index.ts`
+1. `/services/grove-router/src/index.ts`
 
 ### Location
 
@@ -998,24 +973,21 @@ Apply the same origin validation pattern as Task 4.2.
 ```typescript
 // Add helper function
 function validateOrigin(origin: string | null): string {
-  if (!origin) return "https://grove.place";
+	if (!origin) return "https://grove.place";
 
-  if (
-    origin === "https://grove.place" ||
-    origin === "https://www.grove.place" ||
-    /^https:\/\/[\w-]+\.grove\.place$/.test(origin)
-  ) {
-    return origin;
-  }
+	if (
+		origin === "https://grove.place" ||
+		origin === "https://www.grove.place" ||
+		/^https:\/\/[\w-]+\.grove\.place$/.test(origin)
+	) {
+		return origin;
+	}
 
-  return "https://grove.place";
+	return "https://grove.place";
 }
 
 // Use in headers
-headers.set(
-  "Access-Control-Allow-Origin",
-  validateOrigin(request.headers.get("Origin")),
-);
+headers.set("Access-Control-Allow-Origin", validateOrigin(request.headers.get("Origin")));
 headers.set("Vary", "Origin");
 ```
 
@@ -1034,15 +1006,15 @@ SVG files can contain JavaScript and are an XSS vector.
 
 ### Files to Modify
 
-1. `/packages/engine/src/lib/server/services/storage.ts`
+1. `/libs/engine/src/lib/server/services/storage.ts`
 
 ### Current Code (Problem)
 
 ```typescript
 // Line 135
 const ALLOWED_CONTENT_TYPES = new Set([
-  "image/svg+xml", // ❌ XSS risk
-  // ...
+	"image/svg+xml", // ❌ XSS risk
+	// ...
 ]);
 ```
 
@@ -1050,21 +1022,21 @@ const ALLOWED_CONTENT_TYPES = new Set([
 
 ```typescript
 const ALLOWED_CONTENT_TYPES = new Set([
-  "image/jpeg",
-  "image/png",
-  "image/gif",
-  "image/webp",
-  // 'image/svg+xml', // Removed - XSS risk. Re-enable only with proper sanitization.
-  "application/json",
-  // Consider removing JS types too:
-  // 'text/javascript',
-  // 'application/javascript',
+	"image/jpeg",
+	"image/png",
+	"image/gif",
+	"image/webp",
+	// 'image/svg+xml', // Removed - XSS risk. Re-enable only with proper sanitization.
+	"application/json",
+	// Consider removing JS types too:
+	// 'text/javascript',
+	// 'application/javascript',
 ]);
 ```
 
 ### Also Update Upload Endpoint Validation
 
-In `/packages/engine/src/routes/api/images/upload/+server.ts`:
+In `/libs/engine/src/routes/api/images/upload/+server.ts`:
 
 ```typescript
 // Line 21 - ensure SVG not in allowed types
@@ -1088,7 +1060,7 @@ const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
 
 ### Files to Modify
 
-1. `/packages/engine/src/routes/api/images/upload/+server.ts`
+1. `/libs/engine/src/routes/api/images/upload/+server.ts`
 
 ### Location
 
@@ -1101,10 +1073,10 @@ After MIME type validation (around line 126).
 
 // Map of MIME types to valid extensions
 const MIME_TO_EXTENSIONS: Record<string, string[]> = {
-  "image/jpeg": ["jpg", "jpeg"],
-  "image/png": ["png"],
-  "image/gif": ["gif"],
-  "image/webp": ["webp"],
+	"image/jpeg": ["jpg", "jpeg"],
+	"image/png": ["png"],
+	"image/gif": ["gif"],
+	"image/webp": ["webp"],
 };
 
 // Extract and validate extension
@@ -1112,20 +1084,17 @@ const originalName = file.name;
 const ext = originalName.split(".").pop()?.toLowerCase();
 
 if (!ext) {
-  throw error(400, "File must have an extension");
+	throw error(400, "File must have an extension");
 }
 
 const validExtensions = MIME_TO_EXTENSIONS[file.type];
 if (!validExtensions || !validExtensions.includes(ext)) {
-  throw error(
-    400,
-    `File extension '${ext}' does not match content type '${file.type}'`,
-  );
+	throw error(400, `File extension '${ext}' does not match content type '${file.type}'`);
 }
 
 // Also block double extensions that might indicate attacks
 if (originalName.match(/\.(php|js|html|htm|exe|sh|bat)\./i)) {
-  throw error(400, "Invalid file name");
+	throw error(400, "Invalid file name");
 }
 ```
 
@@ -1152,12 +1121,12 @@ Dynamic column names in UPDATE statements create SQL injection risk.
 
 ### Files to Modify
 
-1. `/packages/engine/src/lib/payments/shop.ts`
+1. `/libs/engine/src/lib/payments/shop.ts`
 
 ### Search for Dynamic Column Names
 
 ```bash
-grep -n "UPDATE.*SET" packages/engine/src/lib/payments/shop.ts
+grep -n "UPDATE.*SET" libs/engine/src/lib/payments/shop.ts
 ```
 
 ### Required Fix Pattern
@@ -1167,43 +1136,35 @@ grep -n "UPDATE.*SET" packages/engine/src/lib/payments/shop.ts
 const columns = Object.keys(data);
 const setClause = columns.map((col) => `${col} = ?`).join(", ");
 await db
-  .prepare(`UPDATE products SET ${setClause} WHERE id = ?`)
-  .bind(...values)
-  .run();
+	.prepare(`UPDATE products SET ${setClause} WHERE id = ?`)
+	.bind(...values)
+	.run();
 
 // AFTER (safe):
-const ALLOWED_COLUMNS = new Set([
-  "name",
-  "description",
-  "price",
-  "active",
-  "updated_at",
-]);
+const ALLOWED_COLUMNS = new Set(["name", "description", "price", "active", "updated_at"]);
 
 function buildSafeUpdate(data: Record<string, unknown>): {
-  setClause: string;
-  values: unknown[];
+	setClause: string;
+	values: unknown[];
 } {
-  const entries = Object.entries(data).filter(([key]) =>
-    ALLOWED_COLUMNS.has(key),
-  );
+	const entries = Object.entries(data).filter(([key]) => ALLOWED_COLUMNS.has(key));
 
-  if (entries.length === 0) {
-    throw new Error("No valid columns to update");
-  }
+	if (entries.length === 0) {
+		throw new Error("No valid columns to update");
+	}
 
-  const setClause = entries.map(([key]) => `${key} = ?`).join(", ");
-  const values = entries.map(([, value]) => value);
+	const setClause = entries.map(([key]) => `${key} = ?`).join(", ");
+	const values = entries.map(([, value]) => value);
 
-  return { setClause, values };
+	return { setClause, values };
 }
 
 // Usage:
 const { setClause, values } = buildSafeUpdate(data);
 await db
-  .prepare(`UPDATE products SET ${setClause} WHERE id = ?`)
-  .bind(...values, id)
-  .run();
+	.prepare(`UPDATE products SET ${setClause} WHERE id = ?`)
+	.bind(...values, id)
+	.run();
 ```
 
 ### Apply to All Dynamic Updates
@@ -1211,7 +1172,7 @@ await db
 Search and fix all occurrences:
 
 ```bash
-grep -rn "UPDATE.*\${" packages/engine/src/lib/payments/
+grep -rn "UPDATE.*\${" libs/engine/src/lib/payments/
 ```
 
 ### Verification Steps
@@ -1257,79 +1218,72 @@ ON tenants(onboarding_id) WHERE onboarding_id IS NOT NULL;
 ```typescript
 // In tenant.ts - createTenantForOnboarding function
 export async function createTenantForOnboarding(
-  db: D1Database,
-  onboarding: OnboardingRecord,
-  stripeData: StripeData,
+	db: D1Database,
+	onboarding: OnboardingRecord,
+	stripeData: StripeData,
 ): Promise<{ created: boolean; tenantId: string }> {
-  // First, try to get existing tenant
-  const existing = await db
-    .prepare(
-      "SELECT tenant_id FROM user_onboarding WHERE id = ? AND tenant_id IS NOT NULL",
-    )
-    .bind(onboarding.id)
-    .first();
+	// First, try to get existing tenant
+	const existing = await db
+		.prepare("SELECT tenant_id FROM user_onboarding WHERE id = ? AND tenant_id IS NOT NULL")
+		.bind(onboarding.id)
+		.first();
 
-  if (existing?.tenant_id) {
-    return { created: false, tenantId: existing.tenant_id as string };
-  }
+	if (existing?.tenant_id) {
+		return { created: false, tenantId: existing.tenant_id as string };
+	}
 
-  // Use transaction for atomic creation
-  const tenantId = crypto.randomUUID();
+	// Use transaction for atomic creation
+	const tenantId = crypto.randomUUID();
 
-  try {
-    await db.batch([
-      db
-        .prepare(
-          `
+	try {
+		await db.batch([
+			db
+				.prepare(
+					`
         INSERT INTO tenants (id, subdomain, email, display_name, active, created_at)
         VALUES (?, ?, ?, ?, 1, datetime('now'))
       `,
-        )
-        .bind(
-          tenantId,
-          onboarding.username,
-          onboarding.email,
-          onboarding.username,
-        ),
+				)
+				.bind(tenantId, onboarding.username, onboarding.email, onboarding.username),
 
-      db
-        .prepare(
-          `
+			db
+				.prepare(
+					`
         UPDATE user_onboarding
         SET tenant_id = ?, status = 'completed', completed_at = datetime('now')
         WHERE id = ? AND tenant_id IS NULL
       `,
-        )
-        .bind(tenantId, onboarding.id),
-    ]);
+				)
+				.bind(tenantId, onboarding.id),
+		]);
 
-    // Verify the update actually happened (tenant_id was null)
-    const verification = await db
-      .prepare("SELECT tenant_id FROM user_onboarding WHERE id = ?")
-      .bind(onboarding.id)
-      .first();
+		// Verify the update actually happened (tenant_id was null)
+		const verification = await db
+			.prepare("SELECT tenant_id FROM user_onboarding WHERE id = ?")
+			.bind(onboarding.id)
+			.first();
 
-    if (verification?.tenant_id !== tenantId) {
-      // Another process created the tenant first - use theirs
-      // Clean up our orphaned tenant
-      await db.prepare("DELETE FROM tenants WHERE id = ?").bind(tenantId).run();
-      return { created: false, tenantId: verification?.tenant_id as string };
-    }
+		if (verification?.tenant_id !== tenantId) {
+			// Another process created the tenant first - use theirs
+			// Clean up our orphaned tenant
+			await db.prepare("DELETE FROM tenants WHERE id = ?").bind(tenantId).run();
+			return { created: false, tenantId: verification?.tenant_id as string };
+		}
 
-    return { created: true, tenantId };
-  } catch (error) {
-    // Unique constraint violation - another process won
-    const existing = await db
-      .prepare("SELECT tenant_id FROM user_onboarding WHERE id = ?")
-      .bind(onboarding.id)
-      .first();
+		return { created: true, tenantId };
+	} catch (error) {
+		// Unique constraint violation - another process won
+		const existing = await db
+			.prepare("SELECT tenant_id FROM user_onboarding WHERE id = ?")
+			.bind(onboarding.id)
+			.first();
 
-    if (existing?.tenant_id) {
-      return { created: false, tenantId: existing.tenant_id as string };
-    }
+		if (existing?.tenant_id) {
+			return { created: false, tenantId: existing.tenant_id as string };
+		}
 
-    throw error;
-  }
+		throw error;
+	}
 }
 ```
 
@@ -1354,7 +1308,7 @@ Both should use this function and handle `created: false` gracefully.
 
 ### Files to Modify
 
-1. Create migration: `/packages/engine/migrations/007_image_hashes_tenant.sql`
+1. Create migration: `/libs/engine/migrations/007_image_hashes_tenant.sql`
 
 ### Migration SQL
 
@@ -1378,22 +1332,22 @@ CREATE UNIQUE INDEX idx_image_hashes_unique ON image_hashes(tenant_id, hash);
 
 ### Update Upload Endpoint Query
 
-In `/packages/engine/src/routes/api/images/upload/+server.ts`:
+In `/libs/engine/src/routes/api/images/upload/+server.ts`:
 
 ```typescript
 // Line ~97-100 - Fix the query to use tenant_id
 const existing = (await platform.env.DB.prepare(
-  "SELECT key, url FROM image_hashes WHERE hash = ? AND tenant_id = ?",
+	"SELECT key, url FROM image_hashes WHERE hash = ? AND tenant_id = ?",
 )
-  .bind(hash, tenantId)
-  .first()) as { key: string; url: string } | null;
+	.bind(hash, tenantId)
+	.first()) as { key: string; url: string } | null;
 
 // Line ~175-180 - Fix the insert to include tenant_id
 await platform.env.DB.prepare(
-  "INSERT INTO image_hashes (hash, key, url, tenant_id) VALUES (?, ?, ?, ?)",
+	"INSERT INTO image_hashes (hash, key, url, tenant_id) VALUES (?, ?, ?, ?)",
 )
-  .bind(hash, key, finalUrl, tenantId)
-  .run();
+	.bind(hash, key, finalUrl, tenantId)
+	.run();
 ```
 
 ### Verification Steps
@@ -1424,7 +1378,7 @@ Timing differences reveal whether an email is in the admin list.
 ```typescript
 // Non-admin returns immediately (fast)
 if (adminEmails.length > 0 && !adminEmails.includes(normalizedEmail)) {
-  return json({ success: true, message: "..." });
+	return json({ success: true, message: "..." });
 }
 // Admin path does DB + email operations (slow)
 ```
@@ -1433,53 +1387,53 @@ if (adminEmails.length > 0 && !adminEmails.includes(normalizedEmail)) {
 
 ```typescript
 export const POST: RequestHandler = async ({ request, platform }) => {
-  const startTime = Date.now();
-  const MINIMUM_RESPONSE_TIME_MS = 200; // Consistent timing
+	const startTime = Date.now();
+	const MINIMUM_RESPONSE_TIME_MS = 200; // Consistent timing
 
-  // ... existing validation code ...
+	// ... existing validation code ...
 
-  // Helper to ensure consistent response timing
-  async function respondWithTiming(response: Response): Promise<Response> {
-    const elapsed = Date.now() - startTime;
-    if (elapsed < MINIMUM_RESPONSE_TIME_MS) {
-      await new Promise((r) =>
-        setTimeout(r, MINIMUM_RESPONSE_TIME_MS - elapsed + Math.random() * 50),
-      );
-    }
-    return response;
-  }
+	// Helper to ensure consistent response timing
+	async function respondWithTiming(response: Response): Promise<Response> {
+		const elapsed = Date.now() - startTime;
+		if (elapsed < MINIMUM_RESPONSE_TIME_MS) {
+			await new Promise((r) =>
+				setTimeout(r, MINIMUM_RESPONSE_TIME_MS - elapsed + Math.random() * 50),
+			);
+		}
+		return response;
+	}
 
-  // Non-admin check
-  if (adminEmails.length > 0 && !adminEmails.includes(normalizedEmail)) {
-    return respondWithTiming(
-      json({
-        success: true,
-        message: "If this email is registered, a code has been sent",
-      }),
-    );
-  }
+	// Non-admin check
+	if (adminEmails.length > 0 && !adminEmails.includes(normalizedEmail)) {
+		return respondWithTiming(
+			json({
+				success: true,
+				message: "If this email is registered, a code has been sent",
+			}),
+		);
+	}
 
-  // Admin flow
-  try {
-    await getOrCreateUser(DB, normalizedEmail);
-    await createMagicCode(DB, normalizedEmail);
-    // ... send email ...
+	// Admin flow
+	try {
+		await getOrCreateUser(DB, normalizedEmail);
+		await createMagicCode(DB, normalizedEmail);
+		// ... send email ...
 
-    return respondWithTiming(
-      json({
-        success: true,
-        message: "If this email is registered, a code has been sent",
-      }),
-    );
-  } catch (error) {
-    // Even errors should have consistent timing
-    return respondWithTiming(
-      json({
-        success: true,
-        message: "If this email is registered, a code has been sent",
-      }),
-    );
-  }
+		return respondWithTiming(
+			json({
+				success: true,
+				message: "If this email is registered, a code has been sent",
+			}),
+		);
+	} catch (error) {
+		// Even errors should have consistent timing
+		return respondWithTiming(
+			json({
+				success: true,
+				message: "If this email is registered, a code has been sent",
+			}),
+		);
+	}
 };
 ```
 
@@ -1491,14 +1445,14 @@ const kv = platform?.env?.CACHE_KV;
 const clientIp = request.headers.get("CF-Connecting-IP") || "unknown";
 
 if (kv) {
-  const { response } = await checkRateLimit({
-    kv,
-    key: `magic-link:${clientIp}`,
-    limit: 10, // 10 requests per 5 minutes
-    windowSeconds: 300,
-    namespace: "auth-ratelimit",
-  });
-  if (response) return response;
+	const { response } = await checkRateLimit({
+		kv,
+		key: `magic-link:${clientIp}`,
+		limit: 10, // 10 requests per 5 minutes
+		windowSeconds: 300,
+		namespace: "auth-ratelimit",
+	});
+	if (response) return response;
 }
 ```
 
@@ -1520,7 +1474,7 @@ if (kv) {
 
 ### Files to Modify
 
-1. `/packages/engine/src/hooks.server.ts`
+1. `/libs/engine/src/hooks.server.ts`
 2. `/landing/src/hooks.server.ts`
 3. `/plant/src/hooks.server.ts`
 4. `/domains/src/hooks.server.ts`
@@ -1531,9 +1485,9 @@ Add `upgrade-insecure-requests` to CSP in each file:
 
 ```typescript
 const csp = [
-  "default-src 'self'",
-  "upgrade-insecure-requests", // ✅ Add this
-  // ... rest of directives
+	"default-src 'self'",
+	"upgrade-insecure-requests", // ✅ Add this
+	// ... rest of directives
 ].join("; ");
 ```
 
@@ -1552,7 +1506,7 @@ CSP allows `unsafe-eval` globally for Mermaid diagrams, but it should only be en
 
 ### Files to Modify
 
-1. `/packages/engine/src/hooks.server.ts`
+1. `/libs/engine/src/hooks.server.ts`
 
 ### Required Fix
 
@@ -1562,19 +1516,17 @@ CSP allows `unsafe-eval` globally for Mermaid diagrams, but it should only be en
 // Routes that need unsafe-eval for Mermaid diagrams
 const MERMAID_ROUTES = ["/blog/", "/docs/", "/admin/blog/"];
 
-const needsUnsafeEval = MERMAID_ROUTES.some((route) =>
-  event.url.pathname.includes(route),
-);
+const needsUnsafeEval = MERMAID_ROUTES.some((route) => event.url.pathname.includes(route));
 
 const scriptSrc = needsUnsafeEval
-  ? "'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://challenges.cloudflare.com"
-  : "'self' 'unsafe-inline' https://challenges.cloudflare.com";
+	? "'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://challenges.cloudflare.com"
+	: "'self' 'unsafe-inline' https://challenges.cloudflare.com";
 
 const csp = [
-  "default-src 'self'",
-  `script-src ${scriptSrc}`,
-  "style-src 'self' 'unsafe-inline'",
-  // ... rest of directives
+	"default-src 'self'",
+	`script-src ${scriptSrc}`,
+	"style-src 'self' 'unsafe-inline'",
+	// ... rest of directives
 ].join("; ");
 ```
 
@@ -1595,7 +1547,7 @@ const csp = [
 
 ### Files to Modify
 
-1. `/packages/grove-router/src/index.ts`
+1. `/services/grove-router/src/index.ts`
 
 ### Location
 
@@ -1610,14 +1562,9 @@ headers.set("Cache-Control", "public, max-age=31536000");
 headers.set("X-Content-Type-Options", "nosniff"); // ✅ Add
 
 // Force download for potentially dangerous types
-const DANGEROUS_TYPES = [
-  "image/svg+xml",
-  "text/html",
-  "application/pdf",
-  "text/javascript",
-];
+const DANGEROUS_TYPES = ["image/svg+xml", "text/html", "application/pdf", "text/javascript"];
 if (DANGEROUS_TYPES.includes(contentType)) {
-  headers.set("Content-Disposition", "attachment"); // ✅ Add
+	headers.set("Content-Disposition", "attachment"); // ✅ Add
 }
 ```
 
@@ -1632,7 +1579,7 @@ if (DANGEROUS_TYPES.includes(contentType)) {
 
 ### Create Shared Utility
 
-1. Create file: `/packages/engine/src/lib/server/cookies.ts`
+1. Create file: `/libs/engine/src/lib/server/cookies.ts`
 
 ```typescript
 /**
@@ -1640,48 +1587,47 @@ if (DANGEROUS_TYPES.includes(contentType)) {
  */
 
 export interface CookieOptions {
-  name: string;
-  value: string;
-  maxAge: number;
-  sameSite?: "strict" | "lax" | "none";
-  httpOnly?: boolean;
-  path?: string;
+	name: string;
+	value: string;
+	maxAge: number;
+	sameSite?: "strict" | "lax" | "none";
+	httpOnly?: boolean;
+	path?: string;
 }
 
 export function buildCookieHeader(options: CookieOptions, url: URL): string {
-  const isProduction =
-    url.hostname !== "localhost" && url.hostname !== "127.0.0.1";
-  const isGrovePlatform = url.hostname.endsWith("grove.place");
+	const isProduction = url.hostname !== "localhost" && url.hostname !== "127.0.0.1";
+	const isGrovePlatform = url.hostname.endsWith("grove.place");
 
-  const parts = [
-    `${options.name}=${options.value}`,
-    `Path=${options.path || "/"}`,
-    `Max-Age=${options.maxAge}`,
-  ];
+	const parts = [
+		`${options.name}=${options.value}`,
+		`Path=${options.path || "/"}`,
+		`Max-Age=${options.maxAge}`,
+	];
 
-  if (options.httpOnly !== false) {
-    parts.push("HttpOnly");
-  }
+	if (options.httpOnly !== false) {
+		parts.push("HttpOnly");
+	}
 
-  if (isProduction) {
-    parts.push("Secure");
-  }
+	if (isProduction) {
+		parts.push("Secure");
+	}
 
-  parts.push(`SameSite=${options.sameSite || "Lax"}`);
+	parts.push(`SameSite=${options.sameSite || "Lax"}`);
 
-  // Only set domain for production Grove platform
-  if (isProduction && isGrovePlatform) {
-    parts.push("Domain=.grove.place");
-  }
+	// Only set domain for production Grove platform
+	if (isProduction && isGrovePlatform) {
+		parts.push("Domain=.grove.place");
+	}
 
-  return parts.join("; ");
+	return parts.join("; ");
 }
 ```
 
 ### Update Files to Use Utility
 
-- `/packages/engine/src/routes/api/verify/turnstile/+server.ts`
-- `/packages/engine/src/routes/auth/callback/+server.ts`
+- `/libs/engine/src/routes/api/verify/turnstile/+server.ts`
+- `/libs/engine/src/routes/auth/callback/+server.ts`
 - `/landing/src/routes/auth/callback/+server.ts`
 
 ---
@@ -1697,104 +1643,100 @@ export function buildCookieHeader(options: CookieOptions, url: URL): string {
 
 ### Files to Create
 
-1. `/packages/engine/src/routes/api/posts/posts.security.test.ts`
+1. `/libs/engine/src/routes/api/posts/posts.security.test.ts`
 
 ```typescript
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { POST, PUT, DELETE } from "./+server";
-import {
-  GET as GET_SLUG,
-  PUT as PUT_SLUG,
-  DELETE as DELETE_SLUG,
-} from "./[slug]/+server";
+import { GET as GET_SLUG, PUT as PUT_SLUG, DELETE as DELETE_SLUG } from "./[slug]/+server";
 
 describe("Posts API - Cross-Tenant Security", () => {
-  const mockDb = {
-    prepare: vi.fn().mockReturnValue({
-      bind: vi.fn().mockReturnValue({
-        first: vi.fn(),
-        run: vi.fn(),
-        all: vi.fn(),
-      }),
-    }),
-  };
+	const mockDb = {
+		prepare: vi.fn().mockReturnValue({
+			bind: vi.fn().mockReturnValue({
+				first: vi.fn(),
+				run: vi.fn(),
+				all: vi.fn(),
+			}),
+		}),
+	};
 
-  const aliceUser = { id: "alice-123", email: "alice@example.com" };
-  const bobTenantId = "bob-tenant-456";
+	const aliceUser = { id: "alice-123", email: "alice@example.com" };
+	const bobTenantId = "bob-tenant-456";
 
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
 
-  describe("POST /api/posts", () => {
-    it("rejects authenticated user creating post on unowned tenant", async () => {
-      // Setup: Alice is authenticated, but Bob's tenant from subdomain
-      const mockPlatform = { env: { DB: mockDb } };
-      const mockLocals = { user: aliceUser, tenantId: bobTenantId };
-      const mockRequest = {
-        json: async () => ({ title: "Hacked!", content: "test" }),
-      };
+	describe("POST /api/posts", () => {
+		it("rejects authenticated user creating post on unowned tenant", async () => {
+			// Setup: Alice is authenticated, but Bob's tenant from subdomain
+			const mockPlatform = { env: { DB: mockDb } };
+			const mockLocals = { user: aliceUser, tenantId: bobTenantId };
+			const mockRequest = {
+				json: async () => ({ title: "Hacked!", content: "test" }),
+			};
 
-      // Mock: Alice doesn't own Bob's tenant
-      mockDb.prepare().bind().first.mockResolvedValue(null);
+			// Mock: Alice doesn't own Bob's tenant
+			mockDb.prepare().bind().first.mockResolvedValue(null);
 
-      // Execute
-      await expect(
-        POST({
-          request: mockRequest as any,
-          platform: mockPlatform as any,
-          locals: mockLocals as any,
-        } as any),
-      ).rejects.toThrow(/forbidden|unauthorized|access denied/i);
-    });
+			// Execute
+			await expect(
+				POST({
+					request: mockRequest as any,
+					platform: mockPlatform as any,
+					locals: mockLocals as any,
+				} as any),
+			).rejects.toThrow(/forbidden|unauthorized|access denied/i);
+		});
 
-    it("allows authenticated user creating post on owned tenant", async () => {
-      const mockPlatform = { env: { DB: mockDb } };
-      const mockLocals = { user: aliceUser, tenantId: "alice-tenant-123" };
-      const mockRequest = {
-        json: async () => ({ title: "My Post", content: "test" }),
-      };
+		it("allows authenticated user creating post on owned tenant", async () => {
+			const mockPlatform = { env: { DB: mockDb } };
+			const mockLocals = { user: aliceUser, tenantId: "alice-tenant-123" };
+			const mockRequest = {
+				json: async () => ({ title: "My Post", content: "test" }),
+			};
 
-      // Mock: Alice owns this tenant
-      mockDb.prepare().bind().first.mockResolvedValue({
-        id: "alice-tenant-123",
-        email: "alice@example.com",
-      });
+			// Mock: Alice owns this tenant
+			mockDb.prepare().bind().first.mockResolvedValue({
+				id: "alice-tenant-123",
+				email: "alice@example.com",
+			});
 
-      // Should not throw
-      const result = await POST({
-        request: mockRequest as any,
-        platform: mockPlatform as any,
-        locals: mockLocals as any,
-      } as any);
+			// Should not throw
+			const result = await POST({
+				request: mockRequest as any,
+				platform: mockPlatform as any,
+				locals: mockLocals as any,
+			} as any);
 
-      expect(result.status).toBe(201);
-    });
-  });
+			expect(result.status).toBe(201);
+		});
+	});
 
-  describe("DELETE /api/posts/[slug]", () => {
-    it("rejects authenticated user deleting post on unowned tenant", async () => {
-      const mockPlatform = { env: { DB: mockDb } };
-      const mockLocals = { user: aliceUser, tenantId: bobTenantId };
+	describe("DELETE /api/posts/[slug]", () => {
+		it("rejects authenticated user deleting post on unowned tenant", async () => {
+			const mockPlatform = { env: { DB: mockDb } };
+			const mockLocals = { user: aliceUser, tenantId: bobTenantId };
 
-      mockDb.prepare().bind().first.mockResolvedValue(null); // Alice doesn't own Bob's tenant
+			mockDb.prepare().bind().first.mockResolvedValue(null); // Alice doesn't own Bob's tenant
 
-      await expect(
-        DELETE_SLUG({
-          platform: mockPlatform as any,
-          locals: mockLocals as any,
-          params: { slug: "bobs-post" },
-        } as any),
-      ).rejects.toThrow(/forbidden|unauthorized|access denied/i);
-    });
-  });
+			await expect(
+				DELETE_SLUG({
+					platform: mockPlatform as any,
+					locals: mockLocals as any,
+					params: { slug: "bobs-post" },
+				} as any),
+			).rejects.toThrow(/forbidden|unauthorized|access denied/i);
+		});
+	});
 });
 ```
 
 ### Run Tests
 
 ```bash
-pnpm test:run packages/engine/src/routes/api/posts/posts.security.test.ts
+pnpm test:run libs/engine/src/routes/api/posts/posts.security.test.ts
 ```
 
 ---
@@ -1808,36 +1750,36 @@ pnpm test:run packages/engine/src/routes/api/posts/posts.security.test.ts
 
 ### Files to Create
 
-1. `/packages/engine/src/routes/api/images/analyze/analyze.security.test.ts`
+1. `/libs/engine/src/routes/api/images/analyze/analyze.security.test.ts`
 
 ```typescript
 import { describe, it, expect, vi } from "vitest";
 
 describe("AI Analyze Endpoint - Rate Limiting", () => {
-  it("blocks requests after limit exceeded", async () => {
-    const mockKv = {
-      get: vi.fn(),
-      put: vi.fn(),
-    };
+	it("blocks requests after limit exceeded", async () => {
+		const mockKv = {
+			get: vi.fn(),
+			put: vi.fn(),
+		};
 
-    // Simulate limit reached
-    mockKv.get.mockResolvedValue(
-      JSON.stringify({
-        count: 20,
-        resetAt: Date.now() + 86400000,
-      }),
-    );
+		// Simulate limit reached
+		mockKv.get.mockResolvedValue(
+			JSON.stringify({
+				count: 20,
+				resetAt: Date.now() + 86400000,
+			}),
+		);
 
-    // ... test implementation
-  });
+		// ... test implementation
+	});
 
-  it("includes rate limit headers in response", async () => {
-    // ... test implementation
-  });
+	it("includes rate limit headers in response", async () => {
+		// ... test implementation
+	});
 
-  it("allows requests within limit", async () => {
-    // ... test implementation
-  });
+	it("allows requests within limit", async () => {
+		// ... test implementation
+	});
 });
 ```
 

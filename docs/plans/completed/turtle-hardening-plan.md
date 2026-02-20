@@ -4,7 +4,7 @@
 
 Grove Engine has strong security foundations — parameterized queries, three-layer CSRF, nonce-based CSP, AES-256-GCM encryption, DOMPurify + sanitize-html sanitization, and comprehensive rate limiting. This plan organizes a **systematic, section-by-section audit** to find gaps between the armor plates and seal them. Each section is one session: audit, fix, document.
 
-**Scope:** `packages/engine/` + `/Users/autumn/Documents/Projects/GroveAuth/` (for auth/session code)
+**Scope:** `libs/engine/` + `/Users/autumn/Documents/Projects/GroveAuth/` (for auth/session code)
 **Approach:** Audit + Fix Together — fix findings within each session, file issues for larger work
 **Pacing:** One section per session (~6 sessions)
 

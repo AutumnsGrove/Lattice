@@ -10,9 +10,9 @@
 
 Create a centralized `UpgradesGraft` module for consistent upgrade and cultivation management across all Grove properties. Currently, the growth logic is scattered across the orchard:
 
-- `packages/plant/src/routes/api/select-plan/+server.ts` — First planting (onboarding)
-- `packages/plant/src/lib/server/stripe.ts` — Payment tending
-- `packages/engine/src/routes/api/billing/+server.ts` — Garden management
+- `apps/plant/src/routes/api/select-plan/+server.ts` — First planting (onboarding)
+- `apps/plant/src/lib/server/stripe.ts` — Payment tending
+- `libs/engine/src/routes/api/billing/+server.ts` — Garden management
 
 Following the successful `LoginGraft` pattern, UpgradesGraft will provide:
 
@@ -94,15 +94,15 @@ Help your grove grow to the next stage.
 ```typescript
 // Request body
 interface CultivateRequest {
-  targetStage: TierKey; // 'seedling', 'sapling', 'oak', 'evergreen'
-  billingCycle: "monthly" | "annual";
-  returnTo?: string; // Where to return after planting
+	targetStage: TierKey; // 'seedling', 'sapling', 'oak', 'evergreen'
+	billingCycle: "monthly" | "annual";
+	returnTo?: string; // Where to return after planting
 }
 
 // Response
 interface CultivateResponse {
-  plantingUrl: string; // Redirect here to begin
-  sessionId?: string; // Track the growth
+	plantingUrl: string; // Redirect here to begin
+	sessionId?: string; // Track the growth
 }
 ```
 
@@ -122,12 +122,12 @@ Open the garden shed for self-service management.
 ```typescript
 // Request body
 interface TendRequest {
-  returnTo: string; // Return to your grove after tending
+	returnTo: string; // Return to your grove after tending
 }
 
 // Response
 interface TendResponse {
-  shedUrl: string; // Redirect to the garden shed
+	shedUrl: string; // Redirect to the garden shed
 }
 ```
 
@@ -154,17 +154,17 @@ Check how your grove is flourishing.
 ```typescript
 // Response
 interface GrowthStatus {
-  currentStage: TierKey;
-  flourishState: "active" | "trialing" | "past_due" | "resting" | "pruned";
-  currentPeriodEnd: string | null;
-  pruningScheduled: boolean; // Cancel at period end
-  trialEnd: string | null;
-  isComped: boolean; // Gifted grove
-  wateringMethod?: {
-    // Payment method
-    source: string; // Card brand
-    lastDigits: string; // Last 4 digits
-  };
+	currentStage: TierKey;
+	flourishState: "active" | "trialing" | "past_due" | "resting" | "pruned";
+	currentPeriodEnd: string | null;
+	pruningScheduled: boolean; // Cancel at period end
+	trialEnd: string | null;
+	isComped: boolean; // Gifted grove
+	wateringMethod?: {
+		// Payment method
+		source: string; // Card brand
+		lastDigits: string; // Last 4 digits
+	};
 }
 ```
 
@@ -178,25 +178,20 @@ Display a growth stage for nurturing with action button.
 
 ```svelte
 <script>
-  import { PricingCTA } from '@autumnsgrove/lattice/grafts/pricing';
+	import { PricingCTA } from "@autumnsgrove/lattice/grafts/pricing";
 </script>
 
-<PricingCTA
-  tier={tier}
-  billingPeriod={billingPeriod}
-  variant="primary"
-  onPlant={handlePlanting}
-/>
+<PricingCTA {tier} {billingPeriod} variant="primary" onPlant={handlePlanting} />
 ```
 
 |**Props:**
 
 ```typescript
 interface GrowthCardProps {
-  tier: PricingTier;
-  currentTier?: TierKey; // Show "Current Stage" if matches
-  billingPeriod: BillingPeriod;
-  onPlant?: (tier: TierKey, period: BillingPeriod) => void;
+	tier: PricingTier;
+	currentTier?: TierKey; // Show "Current Stage" if matches
+	billingPeriod: BillingPeriod;
+	onPlant?: (tier: TierKey, period: BillingPeriod) => void;
 }
 ```
 
@@ -206,20 +201,13 @@ Modal with stage comparison for nurturing your grove.
 
 ```svelte
 <script>
-  import { GrowthCard, PricingToggle } from '@autumnsgrove/lattice/grafts/upgrades';
+	import { GrowthCard, PricingToggle } from "@autumnsgrove/lattice/grafts/upgrades";
 </script>
 
-<PricingToggle
-  billingPeriod={billingPeriod}
-  onPeriodChange={setBillingPeriod}
-/>
+<PricingToggle {billingPeriod} onPeriodChange={setBillingPeriod} />
 
 {#each availableTiers as tier}
-  <GrowthCard
-    {tier}
-    {billingPeriod}
-    currentTier={userTier}
-  />
+	<GrowthCard {tier} {billingPeriod} currentTier={userTier} />
 {/each}
 ```
 
@@ -229,14 +217,14 @@ Show user's current growth stage with nurture CTAs.
 
 ```svelte
 <script>
-  import { NurtureCTA } from '@autumnsgrove/lattice/grafts/upgrades';
+	import { NurtureCTA } from "@autumnsgrove/lattice/grafts/upgrades";
 </script>
 
 <div class="current-stage">
-  <span class="stage-name">{TIERS[currentTier].display.name}</span>
-  {#if canNurture}
-    <NurtureCTA tier={nextTier} />
-  {/if}
+	<span class="stage-name">{TIERS[currentTier].display.name}</span>
+	{#if canNurture}
+		<NurtureCTA tier={nextTier} />
+	{/if}
 </div>
 ```
 
@@ -245,42 +233,40 @@ Show user's current growth stage with nurture CTAs.
 Following the `LoginGraft` pattern, configuration is environment-driven — like preparing your seed catalog for the season:
 
 ```typescript
-// packages/engine/src/lib/grafts/upgrades/config.ts
+// libs/engine/src/lib/grafts/upgrades/config.ts
 
 export interface UpgradesConfig {
-  /** Planting URLs by stage and billing cycle */
-  plantingUrls: Record<TierKey, { monthly?: string; annual?: string }>;
-  /** Stripe secret key (from environment) */
-  stripeSecretKey: string;
-  /** Garden shed URL */
-  gardenShedUrl: string;
+	/** Planting URLs by stage and billing cycle */
+	plantingUrls: Record<TierKey, { monthly?: string; annual?: string }>;
+	/** Stripe secret key (from environment) */
+	stripeSecretKey: string;
+	/** Garden shed URL */
+	gardenShedUrl: string;
 }
 
 /**
  * Create the seed catalog from environment variables
  */
-export function createUpgradeConfig(
-  env: Record<string, string | undefined>,
-): UpgradesConfig {
-  return {
-    plantingUrls: {
-      seedling: {
-        monthly: env.STRIPE_PLANT_SEEDLING_MONTHLY,
-        annual: env.STRIPE_PLANT_SEEDLING_YEARLY,
-      },
-      sapling: {
-        /* ... */
-      },
-      oak: {
-        /* ... */
-      },
-      evergreen: {
-        /* ... */
-      },
-    },
-    stripeSecretKey: env.STRIPE_SECRET_KEY ?? "",
-    gardenShedUrl: `${env.APP_URL ?? "https://grove.place"}/api/grafts/upgrades/tend`,
-  };
+export function createUpgradeConfig(env: Record<string, string | undefined>): UpgradesConfig {
+	return {
+		plantingUrls: {
+			seedling: {
+				monthly: env.STRIPE_PLANT_SEEDLING_MONTHLY,
+				annual: env.STRIPE_PLANT_SEEDLING_YEARLY,
+			},
+			sapling: {
+				/* ... */
+			},
+			oak: {
+				/* ... */
+			},
+			evergreen: {
+				/* ... */
+			},
+		},
+		stripeSecretKey: env.STRIPE_SECRET_KEY ?? "",
+		gardenShedUrl: `${env.APP_URL ?? "https://grove.place"}/api/grafts/upgrades/tend`,
+	};
 }
 ```
 
@@ -288,9 +274,9 @@ export function createUpgradeConfig(
 
 ### Phase 1: Prepare the Soil (Extract Server-Side API)
 
-1. **Create graft skeleton** (`packages/engine/src/lib/grafts/upgrades/`)
-2. **Migrate first planting logic** from `plant/src/routes/api/select-plan/+server.ts`
-3. **Migrate garden management** from `engine/src/routes/api/billing/+server.ts`
+1. **Create graft skeleton** (`libs/engine/src/lib/grafts/upgrades/`)
+2. **Migrate first planting logic** from `apps/plant/src/routes/api/select-plan/+server.ts`
+3. **Migrate garden management** from `libs/engine/src/routes/api/billing/+server.ts`
 4. **Create unified planting handler** supporting both new groves and growth
 
 ### Phase 2: Plant the Seeds (Create Client Components)
@@ -305,7 +291,7 @@ export function createUpgradeConfig(
 
 1. **Replace `/api/select-plan/+server.ts`** with graft API call
 2. **Update planting flow** to use graft components
-3. **Remove duplicated payment logic** from `plant/lib/server/stripe.ts`
+3. **Remove duplicated payment logic** from `apps/plant/lib/server/stripe.ts`
 
 ### Phase 4: Growth for Existing Groves (Integrate with Arbor)
 
@@ -331,23 +317,23 @@ export function createUpgradeConfig(
 
 ```svelte
 <script>
-  import { GrowthCard } from '@autumnsgrove/lattice/grafts/upgrades';
+	import { GrowthCard } from "@autumnsgrove/lattice/grafts/upgrades";
 </script>
 
 {#each availableStages as stage}
-  <GrowthCard
-    {stage}
-    billingCycle={billingCycle}
-    currentStage={yourStage}
-    onPlant={async (stage, cycle) => {
-      const res = await fetch('/api/grafts/upgrades/cultivate', {
-        method: 'POST',
-        body: JSON.stringify({ targetStage: stage, billingCycle: cycle }),
-      });
-      const { plantingUrl } = await res.json();
-      window.location.href = plantingUrl;
-    }}
-  />
+	<GrowthCard
+		{stage}
+		{billingCycle}
+		currentStage={yourStage}
+		onPlant={async (stage, cycle) => {
+			const res = await fetch("/api/grafts/upgrades/cultivate", {
+				method: "POST",
+				body: JSON.stringify({ targetStage: stage, billingCycle: cycle }),
+			});
+			const { plantingUrl } = await res.json();
+			window.location.href = plantingUrl;
+		}}
+	/>
 {/each}
 ```
 
@@ -355,17 +341,21 @@ export function createUpgradeConfig(
 
 ```svelte
 <script>
-  import { CurrentStageBadge, GardenModal } from '@autumnsgrove/lattice/grafts/upgrades';
+	import { CurrentStageBadge, GardenModal } from "@autumnsgrove/lattice/grafts/upgrades";
 </script>
 
 <CurrentStageBadge currentStage={yourStage} />
 
 {#if showGardenModal}
-  <GardenModal
-    currentStage={yourStage}
-    onCultivate={(stage) => { /* redirect to planting */ }}
-    onTend={() => { /* open garden shed */ }}
-  />
+	<GardenModal
+		currentStage={yourStage}
+		onCultivate={(stage) => {
+			/* redirect to planting */
+		}}
+		onTend={() => {
+			/* open garden shed */
+		}}
+	/>
 {/if}
 ```
 
@@ -403,13 +393,13 @@ The billing subsystem has been surveyed using the Hawk security methodology. The
 
 ### Critical Security Controls to Preserve
 
-| Control                            | Location                                          | Purpose                                             |
-| ---------------------------------- | ------------------------------------------------- | --------------------------------------------------- |
-| **Webhook Signature Verification** | `plant/src/routes/api/webhooks/stripe/+server.ts` | HMAC-SHA256 verification of Stripe events           |
-| **Tenant Isolation**               | `engine/src/lib/auth/session.ts:58`               | Ownership verification before any tenant operation  |
-| **Rate Limiting**                  | `engine/src/lib/server/rate-limits.ts`            | 20 ops/hour for billing, 3 free accounts/IP/30 days |
-| **CSRF Validation**                | `engine/src/lib/utils/csrf.ts`                    | Origin/referer validation for API requests          |
-| **PIl Sanitization**               | `engine/src/lib/utils/webhook-sanitizer.ts`       | Removes PII before logging webhook payloads         |
+| Control                            | Location                                               | Purpose                                             |
+| ---------------------------------- | ------------------------------------------------------ | --------------------------------------------------- |
+| **Webhook Signature Verification** | `apps/plant/src/routes/api/webhooks/stripe/+server.ts` | HMAC-SHA256 verification of Stripe events           |
+| **Tenant Isolation**               | `libs/engine/src/lib/auth/session.ts:58`               | Ownership verification before any tenant operation  |
+| **Rate Limiting**                  | `libs/engine/src/lib/server/rate-limits.ts`            | 20 ops/hour for billing, 3 free accounts/IP/30 days |
+| **CSRF Validation**                | `libs/engine/src/lib/utils/csrf.ts`                    | Origin/referer validation for API requests          |
+| **PIl Sanitization**               | `libs/engine/src/lib/utils/webhook-sanitizer.ts`       | Removes PII before logging webhook payloads         |
 
 ### Validation Requirements
 
@@ -457,7 +447,7 @@ When building UpgradesGraft:
 ### New Files
 
 ```
-packages/engine/src/lib/grafts/upgrades/
+libs/engine/src/lib/grafts/upgrades/
 ├── index.ts                    # Main export (seed catalog)
 ├── types.ts                    # TypeScript interfaces (growth stages)
 ├── config.ts                   # Configuration & environment handling
@@ -469,7 +459,7 @@ packages/engine/src/lib/grafts/upgrades/
     ├── planting.ts             # Planting session creation
     └── garden.ts               # Garden utilities
 
-packages/engine/src/lib/grafts/pricing/
+libs/engine/src/lib/grafts/pricing/
 └── components/
     ├── GrowthCard.svelte
     ├── GardenModal.svelte
@@ -480,12 +470,12 @@ packages/engine/src/lib/grafts/pricing/
 ### Modified Files
 
 ```
-packages/engine/src/routes/api/billing/+server.ts  # Migrate to graft
-packages/engine/src/routes/api/grafts/
+libs/engine/src/routes/api/billing/+server.ts  # Migrate to graft
+libs/engine/src/routes/api/grafts/
   └── upgrades/+server.ts                          # New combined endpoint
-packages/plant/src/routes/api/select-plan/+server.ts  # Use graft
-packages/plant/src/lib/server/stripe.ts           # Remove duplicated code
-packages/plant/src/routes/checkout/+page.server.ts # Use graft
+apps/plant/src/routes/api/select-plan/+server.ts  # Use graft
+apps/plant/src/lib/server/stripe.ts           # Remove duplicated code
+apps/plant/src/routes/checkout/+page.server.ts # Use graft
 ```
 
 ## Acceptance Criteria: Ready for the Grove

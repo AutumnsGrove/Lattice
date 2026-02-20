@@ -305,16 +305,16 @@ import { isFeatureEnabled } from "@autumnsgrove/lattice/feature-flags";
 
 // Did the JXL graft take?
 const useJxl = await isFeatureEnabled(
-  "jxl_encoding",
-  {
-    tenantId: locals.tenantId,
-    userId: locals.user?.id,
-  },
-  platform.env,
+	"jxl_encoding",
+	{
+		tenantId: locals.tenantId,
+		userId: locals.user?.id,
+	},
+	platform.env,
 );
 
 if (useJxl) {
-  return encodeAsJxl(file);
+	return encodeAsJxl(file);
 }
 ```
 
@@ -325,12 +325,12 @@ import { getFeatureValue } from "@autumnsgrove/lattice/feature-flags";
 
 // Get post limit, defaulting to 50
 const maxPosts = await getFeatureValue(
-  "max_posts_override",
-  {
-    tier: locals.tenant?.tier,
-  },
-  platform.env,
-  50,
+	"max_posts_override",
+	{
+		tier: locals.tenant?.tier,
+	},
+	platform.env,
+	50,
 );
 ```
 
@@ -341,11 +341,11 @@ import { getVariant } from "@autumnsgrove/lattice/feature-flags";
 
 // Which pricing cultivar?
 const variant = await getVariant(
-  "pricing_experiment",
-  {
-    sessionId: cookies.get("session_id"),
-  },
-  platform.env,
+	"pricing_experiment",
+	{
+		sessionId: cookies.get("session_id"),
+	},
+	platform.env,
 );
 
 // Returns 'control', 'annual_first', or 'comparison_table'
@@ -358,14 +358,14 @@ import { getFlags } from "@autumnsgrove/lattice/feature-flags";
 
 // Evaluate multiple grafts at once
 const flags = await getFlags(
-  ["meadow_access", "dark_mode_default", "new_nav"],
-  { tenantId, tier, userId },
-  platform.env,
+	["meadow_access", "dark_mode_default", "new_nav"],
+	{ tenantId, tier, userId },
+	platform.env,
 );
 
 return {
-  canAccessMeadow: flags.get("meadow_access")?.value ?? false,
-  darkModeDefault: flags.get("dark_mode_default")?.value ?? false,
+	canAccessMeadow: flags.get("meadow_access")?.value ?? false,
+	darkModeDefault: flags.get("dark_mode_default")?.value ?? false,
 };
 ```
 
@@ -380,41 +380,41 @@ Uses Web Crypto API (Cloudflare Workers compatible):
 ```typescript
 // Same identifier always gets same bucket
 async function hashToBucket(input: string): Promise<number> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(input);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  const hashArray = new Uint8Array(hashBuffer);
+	const encoder = new TextEncoder();
+	const data = encoder.encode(input);
+	const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+	const hashArray = new Uint8Array(hashBuffer);
 
-  // Use first 4 bytes as uint32, mod 100 for percentage
-  const view = new DataView(hashArray.buffer);
-  const uint32 = view.getUint32(0, false); // big-endian
-  return uint32 % 100;
+	// Use first 4 bytes as uint32, mod 100 for percentage
+	const view = new DataView(hashArray.buffer);
+	const uint32 = view.getUint32(0, false); // big-endian
+	return uint32 % 100;
 }
 
 async function evaluatePercentage(
-  condition: { percentage: number; salt?: string },
-  context: EvaluationContext,
-  flagId: string,
+	condition: { percentage: number; salt?: string },
+	context: EvaluationContext,
+	flagId: string,
 ): Promise<boolean> {
-  const { percentage, salt = "" } = condition;
+	const { percentage, salt = "" } = condition;
 
-  // Edge cases
-  if (percentage <= 0) return false;
-  if (percentage >= 100) return true;
+	// Edge cases
+	if (percentage <= 0) return false;
+	if (percentage >= 100) return true;
 
-  // Priority: userId > tenantId > sessionId
-  const identifier = context.userId ?? context.tenantId ?? context.sessionId;
+	// Priority: userId > tenantId > sessionId
+	const identifier = context.userId ?? context.tenantId ?? context.sessionId;
 
-  if (!identifier) {
-    // No identifier - fail safe, don't randomly assign
-    console.warn(`No identifier for percentage rollout of "${flagId}"`);
-    return false;
-  }
+	if (!identifier) {
+		// No identifier - fail safe, don't randomly assign
+		console.warn(`No identifier for percentage rollout of "${flagId}"`);
+		return false;
+	}
 
-  // Hash with flag-specific salt for independence between flags
-  const hashInput = `${flagId}:${salt}:${identifier}`;
-  const bucket = await hashToBucket(hashInput);
-  return bucket < percentage;
+	// Hash with flag-specific salt for independence between flags
+	const hashInput = `${flagId}:${salt}:${identifier}`;
+	const bucket = await hashToBucket(hashInput);
+	return bucket < percentage;
 }
 ```
 
@@ -474,7 +474,7 @@ UI Grafts are reusable, configurable components that can be "spliced" onto any G
 │                         UI Graft System                             │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
-│   packages/engine/src/lib/grafts/                                   │
+│   libs/engine/src/lib/grafts/                                       │
 │   ├── index.ts              # Public exports                        │
 │   ├── types.ts              # Core types (GraftId, GraftContext)    │
 │   ├── registry.ts           # Graft registry & isGraftEnabled()     │
@@ -517,7 +517,7 @@ UI Grafts are reusable, configurable components that can be "spliced" onto any G
 Every UI Graft registers its metadata in a central registry. This enables discovery, versioning, and optional Feature Graft integration.
 
 ```typescript
-// packages/engine/src/lib/grafts/registry.ts
+// libs/engine/src/lib/grafts/registry.ts
 
 import { isFeatureEnabled } from "../feature-flags/index.js";
 import type { GraftId, GraftContext, GraftRegistryEntry } from "./types.js";
@@ -526,96 +526,88 @@ import type { GraftId, GraftContext, GraftRegistryEntry } from "./types.js";
  * Registry of all available UI grafts.
  */
 export const GRAFT_REGISTRY = new Map<GraftId, GraftRegistryEntry>([
-  [
-    "pricing",
-    {
-      id: "pricing",
-      name: "Pricing Graft",
-      description: "Reusable pricing table, cards, and checkout components",
-      featureFlagId: "pricing_graft", // Optional: link to Feature Graft
-      version: "1.0.0",
-      status: "stable",
-    },
-  ],
-  // Future grafts register here
+	[
+		"pricing",
+		{
+			id: "pricing",
+			name: "Pricing Graft",
+			description: "Reusable pricing table, cards, and checkout components",
+			featureFlagId: "pricing_graft", // Optional: link to Feature Graft
+			version: "1.0.0",
+			status: "stable",
+		},
+	],
+	// Future grafts register here
 ]);
 
 /**
  * Check if a UI graft should render based on its linked Feature Graft.
  */
-export async function isGraftEnabled(
-  graftId: GraftId,
-  context: GraftContext,
-): Promise<boolean> {
-  const entry = GRAFT_REGISTRY.get(graftId);
+export async function isGraftEnabled(graftId: GraftId, context: GraftContext): Promise<boolean> {
+	const entry = GRAFT_REGISTRY.get(graftId);
 
-  // Unknown graft - don't render
-  if (!entry) return false;
+	// Unknown graft - don't render
+	if (!entry) return false;
 
-  // No feature flag linked - always enabled
-  if (!entry.featureFlagId) return true;
+	// No feature flag linked - always enabled
+	if (!entry.featureFlagId) return true;
 
-  // No env provided - can't check flags, default to enabled
-  if (!context.env) return true;
+	// No env provided - can't check flags, default to enabled
+	if (!context.env) return true;
 
-  // Check the linked Feature Graft
-  return isFeatureEnabled(
-    entry.featureFlagId,
-    { tenantId: context.tenantId, tier: context.tier },
-    context.env,
-  );
+	// Check the linked Feature Graft
+	return isFeatureEnabled(
+		entry.featureFlagId,
+		{ tenantId: context.tenantId, tier: context.tier },
+		context.env,
+	);
 }
 ```
 
 ### Registry Entry Type
 
 ```typescript
-// packages/engine/src/lib/grafts/types.ts
+// libs/engine/src/lib/grafts/types.ts
 
 export type GraftId = "pricing" | "nav" | "footer" | "hero" | (string & {});
 
-export type ProductId =
-  | "grove"
-  | "scout"
-  | "daily-clearing"
-  | "meadow"
-  | (string & {});
+export type ProductId = "grove" | "scout" | "daily-clearing" | "meadow" | (string & {});
 
 export interface GraftRegistryEntry {
-  /** Unique graft identifier */
-  id: GraftId;
+	/** Unique graft identifier */
+	id: GraftId;
 
-  /** Human-readable name */
-  name: string;
+	/** Human-readable name */
+	name: string;
 
-  /** Description of what this graft does */
-  description: string;
+	/** Description of what this graft does */
+	description: string;
 
-  /**
-   * Optional feature flag ID that controls this graft's availability.
-   * If specified, isGraftEnabled() checks this flag before allowing render.
-   */
-  featureFlagId?: string;
+	/**
+	 * Optional feature flag ID that controls this graft's availability.
+	 * If specified, isGraftEnabled() checks this flag before allowing render.
+	 */
+	featureFlagId?: string;
 
-  /** Semantic version */
-  version: string;
+	/** Semantic version */
+	version: string;
 
-  /** Stability status */
-  status: "stable" | "beta" | "experimental" | "deprecated";
+	/** Stability status */
+	status: "stable" | "beta" | "experimental" | "deprecated";
 }
 
 export interface GraftContext {
-  /** Which product this graft is rendering for */
-  productId: ProductId;
+	/** Which product this graft is rendering for */
+	productId: ProductId;
 
-  /** Optional tenant ID for multi-tenant scenarios */
-  tenantId?: string;
+	/** Optional tenant ID for multi-tenant scenarios */
+	tenantId?: string;
 
-  /** Optional tier for tier-gated rendering */
-  tier?: TierKey;
+	/** Optional tier for tier-gated rendering */
+	tier?: TierKey;
 
-  /** Optional feature flags environment */
-  env?: FeatureFlagsEnv;
+	/** Optional feature flags environment */
+	env?: FeatureFlagsEnv;
 }
 ```
 
@@ -630,15 +622,15 @@ PricingGraft provides a complete pricing page solution: tier cards, comparison t
 Before PricingGraft, each Grove property duplicated pricing UI:
 
 ```
-packages/landing/src/routes/pricing/+page.svelte    → 543 lines
-packages/scout/src/routes/pricing/+page.svelte      → 487 lines (similar)
-packages/meadow/src/routes/pricing/+page.svelte     → 512 lines (similar)
+apps/landing/src/routes/pricing/+page.svelte    → 543 lines
+apps/scout/src/routes/pricing/+page.svelte      → 487 lines (similar)
+apps/meadow/src/routes/pricing/+page.svelte     → 512 lines (similar)
 ```
 
 After PricingGraft:
 
 ```
-packages/landing/src/routes/pricing/+page.svelte    → 82 lines
+apps/landing/src/routes/pricing/+page.svelte    → 82 lines
 ```
 
 An 85% reduction. Same UI, single source of truth.
@@ -646,49 +638,44 @@ An 85% reduction. Same UI, single source of truth.
 ### Splicing PricingGraft
 
 ```svelte
-<!-- packages/landing/src/routes/pricing/+page.svelte -->
+<!-- apps/landing/src/routes/pricing/+page.svelte -->
 <script lang="ts">
-  import { PricingGraft } from '@autumnsgrove/lattice/grafts/pricing';
+	import { PricingGraft } from "@autumnsgrove/lattice/grafts/pricing";
 
-  let { data } = $props();
+	let { data } = $props();
 </script>
 
-<PricingGraft
-  productId="grove"
-  tiers={data.tiers}
-  showComparison={true}
-  showFineprint={true}
->
-  {#snippet header()}
-    <h1 class="text-4xl font-display">Find Your Perfect Grove</h1>
-    <p class="text-bark/70">Choose the plan that fits your creative journey</p>
-  {/snippet}
+<PricingGraft productId="grove" tiers={data.tiers} showComparison={true} showFineprint={true}>
+	{#snippet header()}
+		<h1 class="text-4xl font-display">Find Your Perfect Grove</h1>
+		<p class="text-bark/70">Choose the plan that fits your creative journey</p>
+	{/snippet}
 
-  {#snippet footer()}
-    <p class="text-sm text-foreground-muted">
-      Questions? <a href="/contact">Reach out</a>. We're happy to help.
-    </p>
-  {/snippet}
+	{#snippet footer()}
+		<p class="text-sm text-foreground-muted">
+			Questions? <a href="/contact">Reach out</a>. We're happy to help.
+		</p>
+	{/snippet}
 </PricingGraft>
 ```
 
 ### Server-Side Tier Transformation
 
 ```typescript
-// packages/landing/src/routes/pricing/+page.server.ts
+// apps/landing/src/routes/pricing/+page.server.ts
 import { transformAllTiers } from "@autumnsgrove/lattice/grafts/pricing";
 
 export function load() {
-  const tiers = transformAllTiers({
-    highlightTier: "seedling",
-    badges: {
-      seedling: "Start Here",
-    },
-    // When LemonSqueezy is configured:
-    // checkoutUrls: getAllCheckoutUrls(createCheckoutConfigFromEnv(platform.env)),
-  });
+	const tiers = transformAllTiers({
+		highlightTier: "seedling",
+		badges: {
+			seedling: "Start Here",
+		},
+		// When LemonSqueezy is configured:
+		// checkoutUrls: getAllCheckoutUrls(createCheckoutConfigFromEnv(platform.env)),
+	});
 
-  return { tiers };
+	return { tiers };
 }
 ```
 
@@ -757,37 +744,37 @@ export function load() {
 
 ```typescript
 interface PricingGraftProps extends BaseGraftProps {
-  /** Which product this pricing is for */
-  productId: ProductId;
+	/** Which product this pricing is for */
+	productId: ProductId;
 
-  /** Tiers to display (transformed for display) */
-  tiers: PricingTier[];
+	/** Tiers to display (transformed for display) */
+	tiers: PricingTier[];
 
-  /** Default billing period selection */
-  defaultPeriod?: BillingPeriod; // 'monthly' | 'annual'
+	/** Default billing period selection */
+	defaultPeriod?: BillingPeriod; // 'monthly' | 'annual'
 
-  /** Show the full comparison table */
-  showComparison?: boolean;
+	/** Show the full comparison table */
+	showComparison?: boolean;
 
-  /** Show the fine print section */
-  showFineprint?: boolean;
+	/** Show the fine print section */
+	showFineprint?: boolean;
 
-  /** Show the billing period toggle */
-  showToggle?: boolean;
+	/** Show the billing period toggle */
+	showToggle?: boolean;
 
-  /** Show cards instead of/alongside table */
-  showCards?: boolean;
+	/** Show cards instead of/alongside table */
+	showCards?: boolean;
 
-  // Customization snippets (Svelte 5)
-  header?: Snippet;
-  tierBadge?: Snippet<[PricingTier]>;
-  tierFooter?: Snippet<[PricingTier]>;
-  afterTable?: Snippet;
-  footer?: Snippet;
+	// Customization snippets (Svelte 5)
+	header?: Snippet;
+	tierBadge?: Snippet<[PricingTier]>;
+	tierFooter?: Snippet<[PricingTier]>;
+	afterTable?: Snippet;
+	footer?: Snippet;
 
-  // Events
-  onCheckout?: (tier: TierKey, period: BillingPeriod) => void;
-  onPeriodChange?: (period: BillingPeriod) => void;
+	// Events
+	onCheckout?: (tier: TierKey, period: BillingPeriod) => void;
+	onPeriodChange?: (period: BillingPeriod) => void;
 }
 ```
 
@@ -797,29 +784,29 @@ The `transformTier()` and `transformAllTiers()` functions convert raw tier confi
 
 ```typescript
 interface PricingTier {
-  key: TierKey; // 'free' | 'seedling' | 'sapling' | 'oak' | 'evergreen'
-  name: string; // 'Seedling'
-  tagline: string; // 'Plant your first seeds'
-  icon: TierIcon; // 'sprout'
-  status: TierStatus; // 'available' | 'coming_soon' | 'future' | 'deprecated'
-  bestFor: string; // 'New writers getting started'
+	key: TierKey; // 'free' | 'seedling' | 'sapling' | 'oak' | 'evergreen'
+	name: string; // 'Seedling'
+	tagline: string; // 'Plant your first seeds'
+	icon: TierIcon; // 'sprout'
+	status: TierStatus; // 'available' | 'coming_soon' | 'future' | 'deprecated'
+	bestFor: string; // 'New writers getting started'
 
-  monthlyPrice: number; // 8
-  annualPrice: number; // 81.60
-  annualSavings: number; // 15 (percentage)
+	monthlyPrice: number; // 8
+	annualPrice: number; // 81.60
+	annualSavings: number; // 15 (percentage)
 
-  limits: PricingTierLimits; // Formatted strings: { posts: '50', storage: '1 GB', ... }
-  features: TierFeatures; // Booleans: { blog: true, customDomain: false, ... }
-  featureStrings: string[]; // Bullet points for cards
-  supportLevel: string; // 'Community'
+	limits: PricingTierLimits; // Formatted strings: { posts: '50', storage: '1 GB', ... }
+	features: TierFeatures; // Booleans: { blog: true, customDomain: false, ... }
+	featureStrings: string[]; // Bullet points for cards
+	supportLevel: string; // 'Community'
 
-  highlight?: boolean; // Visual emphasis
-  badge?: string; // 'Most Popular'
+	highlight?: boolean; // Visual emphasis
+	badge?: string; // 'Most Popular'
 
-  checkoutUrls: {
-    monthly?: string;
-    annual?: string;
-  };
+	checkoutUrls: {
+		monthly?: string;
+		annual?: string;
+	};
 }
 ```
 
@@ -830,85 +817,82 @@ interface PricingTier {
 PricingGraft integrates with LemonSqueezy for payment processing. The `checkout.ts` module generates secure checkout URLs.
 
 ```typescript
-// packages/engine/src/lib/grafts/pricing/checkout.ts
+// libs/engine/src/lib/grafts/pricing/checkout.ts
 
 export interface CheckoutConfig {
-  storeId: string;
-  products: Partial<
-    Record<
-      TierKey,
-      {
-        monthlyVariantId?: string;
-        annualVariantId?: string;
-      }
-    >
-  >;
+	storeId: string;
+	products: Partial<
+		Record<
+			TierKey,
+			{
+				monthlyVariantId?: string;
+				annualVariantId?: string;
+			}
+		>
+	>;
 }
 
 /**
  * Generate a LemonSqueezy checkout URL.
  */
 export function getCheckoutUrl(
-  config: CheckoutConfig,
-  tierKey: TierKey,
-  period: BillingPeriod,
-  options?: {
-    email?: string;
-    discountCode?: string;
-    successUrl?: string;
-    cancelUrl?: string;
-    customData?: Record<string, string>;
-  },
+	config: CheckoutConfig,
+	tierKey: TierKey,
+	period: BillingPeriod,
+	options?: {
+		email?: string;
+		discountCode?: string;
+		successUrl?: string;
+		cancelUrl?: string;
+		customData?: Record<string, string>;
+	},
 ): string | undefined {
-  const product = config.products[tierKey];
-  if (!product) return undefined;
+	const product = config.products[tierKey];
+	if (!product) return undefined;
 
-  const variantId =
-    period === "monthly" ? product.monthlyVariantId : product.annualVariantId;
+	const variantId = period === "monthly" ? product.monthlyVariantId : product.annualVariantId;
 
-  if (!variantId) return undefined;
+	if (!variantId) return undefined;
 
-  const url = new URL(
-    `https://${config.storeId}.lemonsqueezy.com/checkout/buy/${variantId}`,
-  );
+	const url = new URL(`https://${config.storeId}.lemonsqueezy.com/checkout/buy/${variantId}`);
 
-  if (options?.email) {
-    url.searchParams.set("checkout[email]", options.email);
-  }
-  if (options?.discountCode) {
-    url.searchParams.set("checkout[discount_code]", options.discountCode);
-  }
-  // Custom data is validated to prevent XSS
-  if (options?.customData) {
-    for (const [key, value] of Object.entries(options.customData)) {
-      if (/^[a-zA-Z0-9_-]+$/.test(key)) {
-        url.searchParams.set(`checkout[custom][${key}]`, value);
-      }
-    }
-  }
+	if (options?.email) {
+		url.searchParams.set("checkout[email]", options.email);
+	}
+	if (options?.discountCode) {
+		url.searchParams.set("checkout[discount_code]", options.discountCode);
+	}
+	// Custom data is validated to prevent XSS
+	if (options?.customData) {
+		for (const [key, value] of Object.entries(options.customData)) {
+			if (/^[a-zA-Z0-9_-]+$/.test(key)) {
+				url.searchParams.set(`checkout[custom][${key}]`, value);
+			}
+		}
+	}
 
-  return url.toString();
+	return url.toString();
 }
 
 /**
  * Create checkout config from environment variables.
  */
 export function createCheckoutConfigFromEnv(env: {
-  LEMON_SQUEEZY_STORE_ID?: string;
-  LEMON_SEEDLING_MONTHLY?: string;
-  LEMON_SEEDLING_ANNUAL?: string;
-  // ... other tier variants
+	LEMON_SQUEEZY_STORE_ID?: string;
+	LEMON_SEEDLING_MONTHLY?: string;
+	LEMON_SEEDLING_ANNUAL?: string;
+	// ... other tier variants
 }): CheckoutConfig {
-  return {
-    storeId: env.LEMON_SQUEEZY_STORE_ID ?? "",
-    products: {
-      seedling: {
-        monthlyVariantId: env.LEMON_SEEDLING_MONTHLY,
-        annualVariantId: env.LEMON_SEEDLING_ANNUAL,
-      },
-      // ... other tiers
-    },
-  };
+	return {
+		storeId: env.LEMON_SQUEEZY_STORE_ID ?? "",
+		products: {
+			seedling: {
+				monthlyVariantId: env.LEMON_SEEDLING_MONTHLY,
+				annualVariantId: env.LEMON_SEEDLING_ANNUAL,
+			},
+			// ... other tiers
+		},
+	};
 }
 ```
 
@@ -921,7 +905,7 @@ To add a new UI Graft (e.g., NavGraft):
 ### 1. Create the folder structure
 
 ```
-packages/engine/src/lib/grafts/nav/
+libs/engine/src/lib/grafts/nav/
 ├── index.ts              # Public exports
 ├── types.ts              # Nav-specific types
 ├── config.ts             # Configuration helpers
@@ -933,37 +917,37 @@ packages/engine/src/lib/grafts/nav/
 ### 2. Register in the graft registry
 
 ```typescript
-// packages/engine/src/lib/grafts/registry.ts
+// libs/engine/src/lib/grafts/registry.ts
 
 GRAFT_REGISTRY.set("nav", {
-  id: "nav",
-  name: "Navigation Graft",
-  description: "Reusable navigation bar with product-specific links",
-  featureFlagId: "nav_graft", // Optional
-  version: "1.0.0",
-  status: "beta",
+	id: "nav",
+	name: "Navigation Graft",
+	description: "Reusable navigation bar with product-specific links",
+	featureFlagId: "nav_graft", // Optional
+	version: "1.0.0",
+	status: "beta",
 });
 ```
 
 ### 3. Add package.json exports
 
 ```json
-// packages/engine/package.json
+// libs/engine/package.json
 {
-  "exports": {
-    "./grafts/nav": {
-      "types": "./dist/grafts/nav/index.d.ts",
-      "svelte": "./dist/grafts/nav/index.js",
-      "default": "./dist/grafts/nav/index.js"
-    }
-  }
+	"exports": {
+		"./grafts/nav": {
+			"types": "./dist/grafts/nav/index.d.ts",
+			"svelte": "./dist/grafts/nav/index.js",
+			"default": "./dist/grafts/nav/index.js"
+		}
+	}
 }
 ```
 
 ### 4. Export from the main grafts index
 
 ```typescript
-// packages/engine/src/lib/grafts/index.ts
+// libs/engine/src/lib/grafts/index.ts
 export * from "./nav/index.js";
 ```
 
@@ -975,18 +959,18 @@ UI Grafts are exported from `@autumnsgrove/lattice`:
 
 ```json
 {
-  "exports": {
-    "./grafts": {
-      "types": "./dist/grafts/index.d.ts",
-      "svelte": "./dist/grafts/index.js",
-      "default": "./dist/grafts/index.js"
-    },
-    "./grafts/pricing": {
-      "types": "./dist/grafts/pricing/index.d.ts",
-      "svelte": "./dist/grafts/pricing/index.js",
-      "default": "./dist/grafts/pricing/index.js"
-    }
-  }
+	"exports": {
+		"./grafts": {
+			"types": "./dist/grafts/index.d.ts",
+			"svelte": "./dist/grafts/index.js",
+			"default": "./dist/grafts/index.js"
+		},
+		"./grafts/pricing": {
+			"types": "./dist/grafts/pricing/index.d.ts",
+			"svelte": "./dist/grafts/pricing/index.js",
+			"default": "./dist/grafts/pricing/index.js"
+		}
+	}
 }
 ```
 
@@ -994,21 +978,17 @@ UI Grafts are exported from `@autumnsgrove/lattice`:
 
 ```typescript
 // Core graft utilities
-import {
-  isGraftEnabled,
-  getGraftEntry,
-  GRAFT_REGISTRY,
-} from "@autumnsgrove/lattice/grafts";
+import { isGraftEnabled, getGraftEntry, GRAFT_REGISTRY } from "@autumnsgrove/lattice/grafts";
 
 // PricingGraft and utilities
 import {
-  PricingGraft,
-  PricingTable,
-  PricingCard,
-  PricingToggle,
-  transformTier,
-  transformAllTiers,
-  getCheckoutUrl,
+	PricingGraft,
+	PricingTable,
+	PricingCard,
+	PricingToggle,
+	transformTier,
+	transformAllTiers,
+	getCheckoutUrl,
 } from "@autumnsgrove/lattice/grafts/pricing";
 ```
 
@@ -1225,8 +1205,8 @@ import { isInGreenhouse } from "@autumnsgrove/lattice/feature-flags";
 const inGreenhouse = await isInGreenhouse(locals.tenantId, platform.env);
 
 if (inGreenhouse) {
-  // Show experimental UI, enable bleeding-edge features
-  console.log("🌱 Greenhouse tenant detected");
+	// Show experimental UI, enable bleeding-edge features
+	console.log("🌱 Greenhouse tenant detected");
 }
 ```
 
@@ -1237,12 +1217,12 @@ import { isFeatureEnabled } from "@autumnsgrove/lattice/feature-flags";
 
 // Greenhouse context is automatically included
 const useExperimentalEditor = await isFeatureEnabled(
-  "experimental_editor",
-  {
-    tenantId: locals.tenantId,
-    // No need to specify greenhouse mode—it's inferred from tenant
-  },
-  platform.env,
+	"experimental_editor",
+	{
+		tenantId: locals.tenantId,
+		// No need to specify greenhouse mode—it's inferred from tenant
+	},
+	platform.env,
 );
 
 // For greenhouse tenants, this returns true even if the feature
@@ -1254,13 +1234,13 @@ const useExperimentalEditor = await isFeatureEnabled(
 ```typescript
 // In admin UI or migration
 await db
-  .prepare(
-    `
+	.prepare(
+		`
   INSERT INTO feature_flags (id, name, flag_type, default_value, greenhouse_only)
   VALUES ('experimental_editor', 'Experimental Editor', 'boolean', 'false', 1)
 `,
-  )
-  .run();
+	)
+	.run();
 ```
 
 ---
@@ -1291,12 +1271,12 @@ For features that should only exist in the greenhouse until ready:
 ```typescript
 // Create a greenhouse-only feature
 const experimentalFeature = {
-  id: "voice_posts",
-  name: "Voice Posts",
-  description: "Record posts as audio",
-  flag_type: "boolean",
-  default_value: "false",
-  greenhouse_only: true, // Only visible to greenhouse tenants
+	id: "voice_posts",
+	name: "Voice Posts",
+	description: "Record posts as audio",
+	flag_type: "boolean",
+	default_value: "false",
+	greenhouse_only: true, // Only visible to greenhouse tenants
 };
 ```
 
@@ -1323,9 +1303,9 @@ await setGreenhouseOnly("voice_posts", true);
 
 // Week 2: Add 10% propagation to production
 await addRule("voice_posts", {
-  ruleType: "percentage",
-  ruleValue: { percentage: 10 },
-  resultValue: true,
+	ruleType: "percentage",
+	ruleValue: { percentage: 10 },
+	resultValue: true,
 });
 
 // Week 3: Increase to 50%
@@ -1371,8 +1351,8 @@ database_id = "your-database-id"
 
 ```typescript
 interface FeatureFlagsEnv {
-  DB: D1Database;
-  FLAGS_KV: KVNamespace;
+	DB: D1Database;
+	FLAGS_KV: KVNamespace;
 }
 ```
 
@@ -1431,7 +1411,7 @@ When a graft causes problems:
 ## Project Structure
 
 ```
-packages/engine/src/lib/
+libs/engine/src/lib/
 ├── feature-flags/            # Feature Grafts
 │   ├── index.ts              # Public API exports
 │   ├── types.ts              # TypeScript interfaces

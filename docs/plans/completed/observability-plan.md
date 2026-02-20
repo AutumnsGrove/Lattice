@@ -54,10 +54,10 @@ The v1.0 readiness audit also flagged **rate limiter KV failure (fail-open)** as
 Vista's observability module will be built directly in GroveEngine:
 
 - Metrics storage in grove-engine-db (same D1 database, new tables)
-- Collector services in `packages/engine/src/lib/server/observability/`
+- Collector services in `libs/engine/src/lib/server/observability/`
 - Dashboard pages in the Arbor admin panel at `/arbor/observability/`
 - API endpoints at `/api/admin/observability/`
-- DO instrumentation in `packages/durable-objects/`
+- DO instrumentation in `services/durable-objects/`
 - Reuses existing Heartwood auth (admin-only, no separate OAuth client needed)
 
 This means no separate deployment, no separate D1/KV provisioning, no cross-service auth dance. Just build, deploy the engine, and observability ships with it.
@@ -81,7 +81,7 @@ The collectors need a Cloudflare API token to query the Analytics GraphQL API, D
 **What you need to provision — exactly two things:**
 
 1. `CF_OBSERVABILITY_TOKEN` — the new read-only API token (sensitive, goes in vault)
-2. `CF_ACCOUNT_ID` — `04e847fa7655624e84414a8280b3a4d0` — already hardcoded in `packages/engine/src/lib/config/links.ts`; not sensitive, goes in `[vars]` in the collector's `wrangler.toml`, no vault needed
+2. `CF_ACCOUNT_ID` — `04e847fa7655624e84414a8280b3a4d0` — already hardcoded in `libs/engine/src/lib/config/links.ts`; not sensitive, goes in `[vars]` in the collector's `wrangler.toml`, no vault needed
 
 **How to store and deploy the token (using gw secrets vault):**
 
@@ -103,7 +103,7 @@ gw secret apply CF_OBSERVABILITY_TOKEN --worker grove-vista-collector
 
 ### Step 1: Observability Types & Constants
 
-**File:** `packages/engine/src/lib/server/observability/types.ts`
+**File:** `libs/engine/src/lib/server/observability/types.ts`
 
 Define the unified type system covering all metrics:
 
@@ -190,7 +190,7 @@ Also define the full service registry (updated to include Warden, Meadow, and Qu
 
 ### Step 2: D1 Migration for Observability Tables
 
-**File:** `packages/engine/migrations/XXXX_observability_metrics.sql`
+**File:** `libs/engine/migrations/XXXX_observability_metrics.sql`
 
 Add tables to grove-engine-db for storing collected metrics:
 
@@ -332,7 +332,7 @@ CREATE INDEX idx_obs_alerts_unresolved ON observability_alerts(resolved_at) WHER
 
 ### Step 3: Cloudflare API Collector Service
 
-**File:** `packages/engine/src/lib/server/observability/collectors/`
+**File:** `libs/engine/src/lib/server/observability/collectors/`
 
 Build collector modules that query Cloudflare APIs:
 
@@ -350,7 +350,7 @@ The Cloudflare Analytics GraphQL API endpoint is `https://api.cloudflare.com/cli
 
 ### Step 4: Cost Calculator
 
-**File:** `packages/engine/src/lib/server/observability/costs.ts`
+**File:** `libs/engine/src/lib/server/observability/costs.ts`
 
 Calculate estimated costs based on Cloudflare pricing.
 
@@ -384,7 +384,7 @@ A future enhancement could move these to a D1 table editable from the admin dash
 
 ### Step 5: Existing Data Aggregation Service
 
-**File:** `packages/engine/src/lib/server/observability/aggregators/`
+**File:** `libs/engine/src/lib/server/observability/aggregators/`
 
 Surface data that already exists in D1:
 
@@ -399,7 +399,7 @@ Surface data that already exists in D1:
 
 ### Step 6: Observability API Endpoints
 
-**Routes:** `packages/landing/src/routes/api/admin/observability/`
+**Routes:** `apps/landing/src/routes/api/admin/observability/`
 
 Admin-only API endpoints (require Wayfinder auth). These live in the **landing** package since the dashboard is in the landing's Arbor:
 
@@ -424,7 +424,7 @@ The server-side observability library (types, collectors, aggregators, cost calc
 
 ### Step 7: Vista Dashboard — Own Chrome in Landing's Arbor
 
-**Routes:** `packages/landing/src/routes/arbor/vista/`
+**Routes:** `apps/landing/src/routes/arbor/vista/`
 
 Vista lives inside the landing's Arbor admin panel but gets its **own ArborPanel chrome** — a dedicated sidebar with 12 sub-pages, its own brand title, and its own navigation. This is a new pattern: a "sub-arbor" that takes over the full layout when you enter it.
 
@@ -512,7 +512,7 @@ Then Vista's own layout renders its own ArborPanel:
 **Route structure:**
 
 ```
-packages/landing/src/routes/arbor/vista/
+apps/landing/src/routes/arbor/vista/
 ├── +layout.svelte           (Vista chrome — own ArborPanel)
 ├── +layout.server.ts        (optional: load overview data)
 ├── +page.svelte             (Overview dashboard)
@@ -584,16 +584,16 @@ Also add a `/do-metrics` endpoint on the durable-objects worker that aggregates 
 
 ### Step 9: Cron Collection Job
 
-**The collector is a dedicated standalone worker** — `packages/workers/vista-collector/` — not bolted onto the landing or engine deployment. This follows the same pattern as `grove-clearing-monitor` and `grove-meadow-poller`: isolated lifecycle, isolated bindings, no coupling to the landing deploy.
+**The collector is a dedicated standalone worker** — `workers/vista-collector/` — not bolted onto the landing or engine deployment. This follows the same pattern as `grove-clearing-monitor` and `grove-meadow-poller`: isolated lifecycle, isolated bindings, no coupling to the landing deploy.
 
 **Files:**
 
-- `packages/workers/vista-collector/src/index.ts` — Worker entry point + scheduled handler
-- `packages/workers/vista-collector/wrangler.toml` — Bindings, cron triggers, vars
-- `packages/engine/src/lib/server/observability/scheduler.ts` — Collection orchestrator (imported by the worker)
-- `packages/engine/src/routes/api/admin/observability/collect/+server.ts` — Manual trigger endpoint (already in Step 6)
+- `workers/vista-collector/src/index.ts` — Worker entry point + scheduled handler
+- `workers/vista-collector/wrangler.toml` — Bindings, cron triggers, vars
+- `libs/engine/src/lib/server/observability/scheduler.ts` — Collection orchestrator (imported by the worker)
+- `libs/engine/src/routes/api/admin/observability/collect/+server.ts` — Manual trigger endpoint (already in Step 6)
 
-**`packages/workers/vista-collector/wrangler.toml`:**
+**`workers/vista-collector/wrangler.toml`:**
 
 ```toml
 # Grove Vista Collector
@@ -621,7 +621,7 @@ CF_ACCOUNT_ID = "04e847fa7655624e84414a8280b3a4d0"
 # CF_OBSERVABILITY_TOKEN
 ```
 
-**`packages/workers/vista-collector/src/index.ts`:**
+**`workers/vista-collector/src/index.ts`:**
 
 ```typescript
 import { createObservabilityCollector } from "@autumnsgrove/lattice/server/observability";
@@ -707,29 +707,29 @@ These aren't new services to build — they're alert thresholds and aggregation 
 
 | File                                                                              | Purpose                                                            |
 | --------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| `packages/engine/src/lib/server/observability/types.ts`                           | All observability types, service registry, constants               |
-| `packages/engine/src/lib/server/observability/index.ts`                           | Main orchestrator — coordinates all collectors and aggregators     |
-| `packages/engine/src/lib/server/observability/costs.ts`                           | Cloudflare + Firefly provider pricing calculator                   |
-| `packages/engine/src/lib/server/observability/collectors/cloudflare-analytics.ts` | CF GraphQL API collector                                           |
-| `packages/engine/src/lib/server/observability/collectors/d1-collector.ts`         | D1 metrics via API                                                 |
-| `packages/engine/src/lib/server/observability/collectors/r2-collector.ts`         | R2 metrics via API                                                 |
-| `packages/engine/src/lib/server/observability/collectors/kv-collector.ts`         | KV metrics via API (includes KV health check for rate limiter M-5) |
-| `packages/engine/src/lib/server/observability/collectors/health-checker.ts`       | Worker health pings                                                |
-| `packages/engine/src/lib/server/observability/collectors/do-collector.ts`         | DO status aggregation (graceful uninstrumented fallback)           |
-| `packages/engine/src/lib/server/observability/aggregators/lumen-aggregator.ts`    | Existing Lumen data                                                |
-| `packages/engine/src/lib/server/observability/aggregators/petal-aggregator.ts`    | Existing Petal data                                                |
-| `packages/engine/src/lib/server/observability/aggregators/thorn-aggregator.ts`    | Existing Thorn data                                                |
-| `packages/engine/src/lib/server/observability/aggregators/sentinel-aggregator.ts` | Existing Sentinel data                                             |
-| `packages/engine/src/lib/server/observability/aggregators/clearing-aggregator.ts` | Existing Clearing data                                             |
-| `packages/engine/src/lib/server/observability/aggregators/warden-aggregator.ts`   | Warden audit log, auth metrics, upstream API health                |
-| `packages/engine/src/lib/server/observability/aggregators/meadow-aggregator.ts`   | Feed health, polling status, engagement, report queue              |
-| `packages/engine/src/lib/server/observability/aggregators/firefly-aggregator.ts`  | Pool status, job queue, session costs, orphan detection            |
-| `packages/engine/migrations/XXXX_observability_metrics.sql`                       | D1 schema for metrics storage                                      |
-| `packages/landing/src/routes/api/admin/observability/[...routes]`                 | API endpoints (14 GET + 2 POST)                                    |
-| `packages/landing/src/routes/arbor/vista/+layout.svelte`                          | Vista chrome — own ArborPanel with 12-page nav                     |
-| `packages/landing/src/routes/arbor/vista/[...pages]`                              | Dashboard UI (12 pages)                                            |
-| `packages/landing/src/routes/arbor/+layout.svelte`                                | Modified — adds Vista bypass + sidebar link                        |
-| `packages/durable-objects/src/*/metrics.ts`                                       | DO self-reporting additions                                        |
+| `libs/engine/src/lib/server/observability/types.ts`                           | All observability types, service registry, constants               |
+| `libs/engine/src/lib/server/observability/index.ts`                           | Main orchestrator — coordinates all collectors and aggregators     |
+| `libs/engine/src/lib/server/observability/costs.ts`                           | Cloudflare + Firefly provider pricing calculator                   |
+| `libs/engine/src/lib/server/observability/collectors/cloudflare-analytics.ts` | CF GraphQL API collector                                           |
+| `libs/engine/src/lib/server/observability/collectors/d1-collector.ts`         | D1 metrics via API                                                 |
+| `libs/engine/src/lib/server/observability/collectors/r2-collector.ts`         | R2 metrics via API                                                 |
+| `libs/engine/src/lib/server/observability/collectors/kv-collector.ts`         | KV metrics via API (includes KV health check for rate limiter M-5) |
+| `libs/engine/src/lib/server/observability/collectors/health-checker.ts`       | Worker health pings                                                |
+| `libs/engine/src/lib/server/observability/collectors/do-collector.ts`         | DO status aggregation (graceful uninstrumented fallback)           |
+| `libs/engine/src/lib/server/observability/aggregators/lumen-aggregator.ts`    | Existing Lumen data                                                |
+| `libs/engine/src/lib/server/observability/aggregators/petal-aggregator.ts`    | Existing Petal data                                                |
+| `libs/engine/src/lib/server/observability/aggregators/thorn-aggregator.ts`    | Existing Thorn data                                                |
+| `libs/engine/src/lib/server/observability/aggregators/sentinel-aggregator.ts` | Existing Sentinel data                                             |
+| `libs/engine/src/lib/server/observability/aggregators/clearing-aggregator.ts` | Existing Clearing data                                             |
+| `libs/engine/src/lib/server/observability/aggregators/warden-aggregator.ts`   | Warden audit log, auth metrics, upstream API health                |
+| `libs/engine/src/lib/server/observability/aggregators/meadow-aggregator.ts`   | Feed health, polling status, engagement, report queue              |
+| `libs/engine/src/lib/server/observability/aggregators/firefly-aggregator.ts`  | Pool status, job queue, session costs, orphan detection            |
+| `libs/engine/migrations/XXXX_observability_metrics.sql`                       | D1 schema for metrics storage                                      |
+| `apps/landing/src/routes/api/admin/observability/[...routes]`                 | API endpoints (14 GET + 2 POST)                                    |
+| `apps/landing/src/routes/arbor/vista/+layout.svelte`                          | Vista chrome — own ArborPanel with 12-page nav                     |
+| `apps/landing/src/routes/arbor/vista/[...pages]`                              | Dashboard UI (12 pages)                                            |
+| `apps/landing/src/routes/arbor/+layout.svelte`                                | Modified — adds Vista bypass + sidebar link                        |
+| `services/durable-objects/src/*/metrics.ts`                                       | DO self-reporting additions                                        |
 
 ---
 

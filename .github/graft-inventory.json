@@ -1,152 +1,152 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "1.0.0",
-  "description": "Tracks feature flag (graft) inventory for documentation and drift detection",
-  "lastUpdated": "2026-02-11",
-  "lastAuditedBy": "claude/upload-gate-redesign",
-  "grafts": {
-    "total": 15,
-    "breakdown": {
-      "platform": 11,
-      "greenhouse": 4
-    },
-    "byType": {
-      "boolean": 14,
-      "number": 1
-    }
-  },
-  "flags": [
-    {
-      "id": "fireside_mode",
-      "name": "Fireside Mode",
-      "type": "boolean",
-      "greenhouseOnly": true,
-      "migration": "040_fireside_scribe_grafts.sql",
-      "description": "AI-assisted writing prompts in the blog editor"
-    },
-    {
-      "id": "image_uploads",
-      "name": "Image Uploads",
-      "type": "boolean",
-      "greenhouseOnly": false,
-      "migration": "055_upload_gate_redesign.sql",
-      "description": "Master switch for image upload functionality"
-    },
-    {
-      "id": "image_uploads_enabled",
-      "name": "Image Uploads Enabled (Legacy)",
-      "type": "boolean",
-      "greenhouseOnly": false,
-      "migration": "031_petal_upload_gate.sql",
-      "description": "Legacy master gate for image uploads (superseded by image_uploads + uploads_suspended)"
-    },
-    {
-      "id": "jxl_encoding",
-      "name": "JPEG XL Encoding",
-      "type": "boolean",
-      "greenhouseOnly": false,
-      "migration": "020_feature_flags.sql",
-      "description": "Enable JPEG XL image compression for uploads"
-    },
-    {
-      "id": "jxl_kill_switch",
-      "name": "JXL Kill Switch",
-      "type": "boolean",
-      "greenhouseOnly": false,
-      "migration": "020_feature_flags.sql",
-      "description": "Emergency disable for JPEG XL (no caching, instant effect)"
-    },
-    {
-      "id": "jxl_rollout_percentage",
-      "name": "JPEG XL Rollout Percentage",
-      "type": "number",
-      "greenhouseOnly": false,
-      "migration": "023_jxl_format_tracking.sql",
-      "description": "Percentage of tenants receiving JXL encoding"
-    },
-    {
-      "id": "meadow_access",
-      "name": "Meadow Access",
-      "type": "boolean",
-      "greenhouseOnly": false,
-      "migration": "020_feature_flags.sql",
-      "description": "Enable Meadow social features (tier-gated)"
-    },
-    {
-      "id": "petal_moderation",
-      "name": "Petal Image Moderation",
-      "type": "boolean",
-      "greenhouseOnly": false,
-      "migration": "030_petal.sql",
-      "description": "4-layer image moderation system"
-    },
-    {
-      "id": "petal_photodna_enabled",
-      "name": "PhotoDNA Hash Detection",
-      "type": "boolean",
-      "greenhouseOnly": false,
-      "migration": "031_petal_upload_gate.sql",
-      "description": "PhotoDNA hash-based CSAM detection is integrated"
-    },
-    {
-      "id": "petal_tryon_strict",
-      "name": "Petal Try-On Strict Mode",
-      "type": "boolean",
-      "greenhouseOnly": false,
-      "migration": "030_petal.sql",
-      "description": "Strict validation for try-on detection"
-    },
-    {
-      "id": "photo_gallery",
-      "name": "Photo Gallery (Deprecated)",
-      "type": "boolean",
-      "greenhouseOnly": true,
-      "migration": "049_photo_gallery_graft.sql",
-      "description": "DEPRECATED: Disabled by migration 055. Superseded by image_uploads + uploads_suspended",
-      "deprecated": true
-    },
-    {
-      "id": "reeds_comments",
-      "name": "Reeds Comments",
-      "type": "boolean",
-      "greenhouseOnly": true,
-      "migration": "052_reeds_comments_graft.sql",
-      "description": "Enable threaded comments on blog posts with moderation, blocking, and private replies"
-    },
-    {
-      "id": "scribe_mode",
-      "name": "Scribe Mode",
-      "type": "boolean",
-      "greenhouseOnly": true,
-      "migration": "040_fireside_scribe_grafts.sql",
-      "description": "Voice-to-text transcription in the blog editor"
-    },
-    {
-      "id": "thorn_moderation",
-      "name": "Thorn Text Moderation",
-      "type": "boolean",
-      "greenhouseOnly": false,
-      "migration": "044_thorn_moderation_log.sql",
-      "description": "AI-powered text content moderation"
-    },
-    {
-      "id": "uploads_suspended",
-      "name": "Uploads Suspended",
-      "type": "boolean",
-      "greenhouseOnly": false,
-      "migration": "055_upload_gate_redesign.sql",
-      "description": "Per-tenant upload suspension. Default true (suspended). Add tenant rule with result_value=false to unsuspend."
-    }
-  ],
-  "migrations": {
-    "path": "packages/engine/migrations",
-    "pattern": "INSERT OR IGNORE INTO feature_flags"
-  },
-  "typeDefinitions": {
-    "knownGraftId": "packages/engine/src/lib/feature-flags/grafts.ts"
-  },
-  "documentation": {
-    "guide": "docs/guides/adding-grafts-and-flags.md",
-    "spec": "docs/specs/grafts-spec.md"
-  }
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"version": "1.0.0",
+	"description": "Tracks feature flag (graft) inventory for documentation and drift detection",
+	"lastUpdated": "2026-02-11",
+	"lastAuditedBy": "claude/upload-gate-redesign",
+	"grafts": {
+		"total": 15,
+		"breakdown": {
+			"platform": 11,
+			"greenhouse": 4
+		},
+		"byType": {
+			"boolean": 14,
+			"number": 1
+		}
+	},
+	"flags": [
+		{
+			"id": "fireside_mode",
+			"name": "Fireside Mode",
+			"type": "boolean",
+			"greenhouseOnly": true,
+			"migration": "040_fireside_scribe_grafts.sql",
+			"description": "AI-assisted writing prompts in the blog editor"
+		},
+		{
+			"id": "image_uploads",
+			"name": "Image Uploads",
+			"type": "boolean",
+			"greenhouseOnly": false,
+			"migration": "055_upload_gate_redesign.sql",
+			"description": "Master switch for image upload functionality"
+		},
+		{
+			"id": "image_uploads_enabled",
+			"name": "Image Uploads Enabled (Legacy)",
+			"type": "boolean",
+			"greenhouseOnly": false,
+			"migration": "031_petal_upload_gate.sql",
+			"description": "Legacy master gate for image uploads (superseded by image_uploads + uploads_suspended)"
+		},
+		{
+			"id": "jxl_encoding",
+			"name": "JPEG XL Encoding",
+			"type": "boolean",
+			"greenhouseOnly": false,
+			"migration": "020_feature_flags.sql",
+			"description": "Enable JPEG XL image compression for uploads"
+		},
+		{
+			"id": "jxl_kill_switch",
+			"name": "JXL Kill Switch",
+			"type": "boolean",
+			"greenhouseOnly": false,
+			"migration": "020_feature_flags.sql",
+			"description": "Emergency disable for JPEG XL (no caching, instant effect)"
+		},
+		{
+			"id": "jxl_rollout_percentage",
+			"name": "JPEG XL Rollout Percentage",
+			"type": "number",
+			"greenhouseOnly": false,
+			"migration": "023_jxl_format_tracking.sql",
+			"description": "Percentage of tenants receiving JXL encoding"
+		},
+		{
+			"id": "meadow_access",
+			"name": "Meadow Access",
+			"type": "boolean",
+			"greenhouseOnly": false,
+			"migration": "020_feature_flags.sql",
+			"description": "Enable Meadow social features (tier-gated)"
+		},
+		{
+			"id": "petal_moderation",
+			"name": "Petal Image Moderation",
+			"type": "boolean",
+			"greenhouseOnly": false,
+			"migration": "030_petal.sql",
+			"description": "4-layer image moderation system"
+		},
+		{
+			"id": "petal_photodna_enabled",
+			"name": "PhotoDNA Hash Detection",
+			"type": "boolean",
+			"greenhouseOnly": false,
+			"migration": "031_petal_upload_gate.sql",
+			"description": "PhotoDNA hash-based CSAM detection is integrated"
+		},
+		{
+			"id": "petal_tryon_strict",
+			"name": "Petal Try-On Strict Mode",
+			"type": "boolean",
+			"greenhouseOnly": false,
+			"migration": "030_petal.sql",
+			"description": "Strict validation for try-on detection"
+		},
+		{
+			"id": "photo_gallery",
+			"name": "Photo Gallery (Deprecated)",
+			"type": "boolean",
+			"greenhouseOnly": true,
+			"migration": "049_photo_gallery_graft.sql",
+			"description": "DEPRECATED: Disabled by migration 055. Superseded by image_uploads + uploads_suspended",
+			"deprecated": true
+		},
+		{
+			"id": "reeds_comments",
+			"name": "Reeds Comments",
+			"type": "boolean",
+			"greenhouseOnly": true,
+			"migration": "052_reeds_comments_graft.sql",
+			"description": "Enable threaded comments on blog posts with moderation, blocking, and private replies"
+		},
+		{
+			"id": "scribe_mode",
+			"name": "Scribe Mode",
+			"type": "boolean",
+			"greenhouseOnly": true,
+			"migration": "040_fireside_scribe_grafts.sql",
+			"description": "Voice-to-text transcription in the blog editor"
+		},
+		{
+			"id": "thorn_moderation",
+			"name": "Thorn Text Moderation",
+			"type": "boolean",
+			"greenhouseOnly": false,
+			"migration": "044_thorn_moderation_log.sql",
+			"description": "AI-powered text content moderation"
+		},
+		{
+			"id": "uploads_suspended",
+			"name": "Uploads Suspended",
+			"type": "boolean",
+			"greenhouseOnly": false,
+			"migration": "055_upload_gate_redesign.sql",
+			"description": "Per-tenant upload suspension. Default true (suspended). Add tenant rule with result_value=false to unsuspend."
+		}
+	],
+	"migrations": {
+		"path": "libs/engine/migrations",
+		"pattern": "INSERT OR IGNORE INTO feature_flags"
+	},
+	"typeDefinitions": {
+		"knownGraftId": "libs/engine/src/lib/feature-flags/grafts.ts"
+	},
+	"documentation": {
+		"guide": "docs/guides/adding-grafts-and-flags.md",
+		"spec": "docs/specs/grafts-spec.md"
+	}
 }

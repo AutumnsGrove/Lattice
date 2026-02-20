@@ -2,13 +2,13 @@
 
 > **Lattice is not a blog engine. It's a platform SDK.**
 > **Aesthetic principle**: Every subsystem has its own Grove name and character.
-> **Scope**: Full survey of `packages/engine/src/lib/` — every module, every export path, architecture intent.
+> **Scope**: Full survey of `libs/engine/src/lib/` — every module, every export path, architecture intent.
 
 ---
 
 ## 🗺️ Route Map
 
-**Territory:** `packages/engine/src/lib/` — 30+ top-level modules
+**Territory:** `libs/engine/src/lib/` — 30+ top-level modules
 **Package:** `@autumnsgrove/lattice` v1.0.0 (AGPL-3.0-only, GitHub Package Registry)
 **Terrain type:** SDK subsystems, UI components, server utilities, AI tools
 **Stops driven:** 22 major subsystems
@@ -330,7 +330,7 @@ Completely absent. Lumen is the AI backbone of every Grove feature that uses AI 
 - [x] **Testing**: `./loom/testing` — mock helpers
 - [x] **Error constants**: `LOOM_ERRORS`, `LoomResponse`
 
-Actual DO classes live in `packages/durable-objects/` (separate worker), Loom provides the base class.
+Actual DO classes live in `services/durable-objects/` (separate worker), Loom provides the base class.
 
 #### Design spec (safari-approved)
 
@@ -592,7 +592,7 @@ Spec barely mentions utilities. The CSRF pattern (`apiRequest` from `./utils/api
 - [x] **TenantDO** (types only): `TenantConfig`, `TierLimits`, `Draft`, `DraftMetadata`, `AnalyticsEvent`
 - [x] **PostMetaDO** (class + types): `PostMeta`, `ReactionCounts`, `ReactionEvent`, `PresenceInfo`
 - [x] **PostContentDO** (class + types): `PostContent`, `ContentUpdate`
-- Note: Actual DO instances deployed in `packages/durable-objects/` (separate worker), referenced via `script_name` binding
+- Note: Actual DO instances deployed in `services/durable-objects/` (separate worker), referenced via `script_name` binding
 
 ---
 

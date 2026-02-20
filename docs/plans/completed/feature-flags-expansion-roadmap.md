@@ -47,20 +47,20 @@ Grove has **13+ features** either built or nearly built that are waiting for saf
 
 ### What's Already Deployed
 
-| Component | Status |
-|-----------|--------|
-| D1 Schema (018_feature_flags.sql) | ✅ Deployed |
-| FLAGS_KV namespace | ✅ Created |
-| wrangler.toml binding | ✅ Configured |
-| Seed flags (3) | ✅ Inserted |
+| Component                         | Status        |
+| --------------------------------- | ------------- |
+| D1 Schema (018_feature_flags.sql) | ✅ Deployed   |
+| FLAGS_KV namespace                | ✅ Created    |
+| wrangler.toml binding             | ✅ Configured |
+| Seed flags (3)                    | ✅ Inserted   |
 
 ### Current Seeded Flags
 
-| ID | Name | Enabled | Purpose |
-|----|------|---------|---------|
-| `jxl_encoding` | JPEG XL Encoding | ❌ (0) | Percentage rollout for new image format |
-| `jxl_kill_switch` | JXL Kill Switch | ✅ (1) | Emergency disable (enabled = JXL OFF) |
-| `meadow_access` | Meadow Access | ❌ (0) | Tier-gated social features |
+| ID                | Name             | Enabled | Purpose                                 |
+| ----------------- | ---------------- | ------- | --------------------------------------- |
+| `jxl_encoding`    | JPEG XL Encoding | ❌ (0)  | Percentage rollout for new image format |
+| `jxl_kill_switch` | JXL Kill Switch  | ✅ (1)  | Emergency disable (enabled = JXL OFF)   |
+| `meadow_access`   | Meadow Access    | ❌ (0)  | Tier-gated social features              |
 
 ---
 
@@ -107,53 +107,53 @@ After thorough exploration of TODOS.md, specs, and existing code, we identified 
 
 For gradual feature deployment with deterministic user bucketing.
 
-| Flag ID | Default | Use Case |
-|---------|---------|----------|
-| `jxl_encoding` | 0% | JPEG XL image compression |
-| `new_editor_beta` | 0% | Rich text editor v2 |
+| Flag ID           | Default | Use Case                  |
+| ----------------- | ------- | ------------------------- |
+| `jxl_encoding`    | 0%      | JPEG XL image compression |
+| `new_editor_beta` | 0%      | Rich text editor v2       |
 
 ### Category 2: Kill Switches
 
 Emergency disables — **enabled = feature OFF**. No caching, instant effect.
 
-| Flag ID | Default | What it kills |
-|---------|---------|---------------|
-| `jxl_kill_switch` | ON | JXL encoding (safety valve) |
-| `payments_kill_switch` | OFF | All payment processing |
-| `uploads_kill_switch` | OFF | Image/file uploads |
+| Flag ID                | Default | What it kills               |
+| ---------------------- | ------- | --------------------------- |
+| `jxl_kill_switch`      | ON      | JXL encoding (safety valve) |
+| `payments_kill_switch` | OFF     | All payment processing      |
+| `uploads_kill_switch`  | OFF     | Image/file uploads          |
 
 ### Category 3: Tier-Gated Features
 
 Premium features controlled by subscription tier.
 
-| Flag ID | Tiers | Feature |
-|---------|-------|---------|
-| `meadow_access` | oak, evergreen | Social features |
-| `custom_domains` | oak, evergreen | Custom domain support |
-| `custom_fonts` | evergreen | Font uploads |
-| `theme_customizer` | sapling+ | Advanced theming |
+| Flag ID            | Tiers          | Feature               |
+| ------------------ | -------------- | --------------------- |
+| `meadow_access`    | oak, evergreen | Social features       |
+| `custom_domains`   | oak, evergreen | Custom domain support |
+| `custom_fonts`     | evergreen      | Font uploads          |
+| `theme_customizer` | sapling+       | Advanced theming      |
 
 ### Category 5: Beta Access
 
 Tenant-list gated for invite-only features.
 
-| Flag ID | Access | Feature |
-|---------|--------|---------|
-| `trails_beta` | Tenant list | Personal roadmaps |
-| `ivy_beta` | Tenant list | Email service |
-| `clearing_admin` | Tenant list | Status page admin |
+| Flag ID           | Access      | Feature             |
+| ----------------- | ----------- | ------------------- |
+| `trails_beta`     | Tenant list | Personal roadmaps   |
+| `ivy_beta`        | Tenant list | Email service       |
+| `clearing_admin`  | Tenant list | Status page admin   |
 | `rings_dashboard` | Tenant list | Analytics dashboard |
 
 ### Category 6: Infrastructure Toggles
 
 Enable/disable infrastructure components independently.
 
-| Flag ID | Default | Component |
-|---------|---------|-----------|
-| `durable_objects_sessions` | OFF | SessionDO for auth |
-| `durable_objects_tenants` | OFF | TenantDO for caching |
-| `durable_objects_posts` | OFF | PostMetaDO/PostContentDO |
-| `rate_limiting_strict` | OFF | Enforce tier rate limits |
+| Flag ID                    | Default | Component                |
+| -------------------------- | ------- | ------------------------ |
+| `durable_objects_sessions` | OFF     | SessionDO for auth       |
+| `durable_objects_tenants`  | OFF     | TenantDO for caching     |
+| `durable_objects_posts`    | OFF     | PostMetaDO/PostContentDO |
+| `rate_limiting_strict`     | OFF     | Enforce tier rate limits |
 
 ---
 
@@ -168,18 +168,23 @@ Enable/disable infrastructure components independently.
 **Current State:** Routes return 503 "Coming Soon"
 
 **Files:**
-- `packages/engine/src/routes/api/shop/+server.ts`
-- `packages/engine/src/routes/[username]/shop/+page.svelte`
+
+- `libs/engine/src/routes/api/shop/+server.ts`
+- `libs/engine/src/routes/[username]/shop/+page.svelte`
 
 ```typescript
 // In shop route loader
-const shopEnabled = await isFeatureEnabled('shop_enabled', {
-  tenantId: locals.tenantId,
-  tier: locals.tenant?.tier
-}, platform.env);
+const shopEnabled = await isFeatureEnabled(
+	"shop_enabled",
+	{
+		tenantId: locals.tenantId,
+		tier: locals.tenant?.tier,
+	},
+	platform.env,
+);
 
 if (!shopEnabled) {
-  throw redirect(302, '/upgrade?feature=shop');
+	throw redirect(302, "/upgrade?feature=shop");
 }
 ```
 
@@ -198,31 +203,32 @@ if (!shopEnabled) {
 
 **Architecture:** 5 DO types, each with independent flag.
 
-| Flag | DO Class | Purpose |
-|------|----------|---------|
-| `durable_objects_sessions` | SessionDO | Auth session management |
-| `durable_objects_tenants` | TenantDO | Tenant config caching |
-| `durable_objects_post_meta` | PostMetaDO | Reactions, views, presence |
-| `durable_objects_post_content` | PostContentDO | Content caching |
-| `durable_objects_analytics` | AnalyticsDO | Event buffering |
+| Flag                           | DO Class      | Purpose                    |
+| ------------------------------ | ------------- | -------------------------- |
+| `durable_objects_sessions`     | SessionDO     | Auth session management    |
+| `durable_objects_tenants`      | TenantDO      | Tenant config caching      |
+| `durable_objects_post_meta`    | PostMetaDO    | Reactions, views, presence |
+| `durable_objects_post_content` | PostContentDO | Content caching            |
+| `durable_objects_analytics`    | AnalyticsDO   | Event buffering            |
 
 **Integration Pattern:**
 
 ```typescript
 // In hooks.server.ts
-const useSessionDO = await isFeatureEnabled('durable_objects_sessions', {}, env);
+const useSessionDO = await isFeatureEnabled("durable_objects_sessions", {}, env);
 
 if (useSessionDO) {
-  // Use Durable Object for session
-  const sessionDO = env.SESSIONS.get(env.SESSIONS.idFromName(sessionId));
-  session = await sessionDO.fetch('/validate');
+	// Use Durable Object for session
+	const sessionDO = env.SESSIONS.get(env.SESSIONS.idFromName(sessionId));
+	session = await sessionDO.fetch("/validate");
 } else {
-  // Fall back to D1 direct query
-  session = await validateSessionD1(sessionId, env.DB);
+	// Fall back to D1 direct query
+	session = await validateSessionD1(sessionId, env.DB);
 }
 ```
 
 **Rollout Order:**
+
 1. `durable_objects_sessions` — Highest impact, test first
 2. `durable_objects_tenants` — Config caching
 3. `durable_objects_post_meta` — Hot data (reactions)
@@ -249,13 +255,17 @@ if (useSessionDO) {
 
 ```typescript
 // In domain setup flow
-const canUseCustomDomain = await isFeatureEnabled('custom_domains', {
-  tenantId,
-  tier: tenant.tier
-}, env);
+const canUseCustomDomain = await isFeatureEnabled(
+	"custom_domains",
+	{
+		tenantId,
+		tier: tenant.tier,
+	},
+	env,
+);
 
 if (!canUseCustomDomain) {
-  return { error: 'Custom domains require Oak or Evergreen plan' };
+	return { error: "Custom domains require Oak or Evergreen plan" };
 }
 ```
 
@@ -267,26 +277,31 @@ if (!canUseCustomDomain) {
 
 **Current State:** Rate limit system built, not enforced.
 
-**Files:** `packages/engine/src/lib/server/rate-limits/`
+**Files:** `libs/engine/src/lib/server/rate-limits/`
 
 **Phases:**
+
 1. **Monitor only** — Log violations, don't block
 2. **Soft enforce** — 429 with generous buffer
 3. **Strict enforce** — Hard limits per tier
 
 ```typescript
 // In rate limit middleware
-const strictMode = await isFeatureEnabled('rate_limiting_strict', {
-  tenantId
-}, env);
+const strictMode = await isFeatureEnabled(
+	"rate_limiting_strict",
+	{
+		tenantId,
+	},
+	env,
+);
 
 if (isRateLimited) {
-  if (strictMode) {
-    return new Response('Too Many Requests', { status: 429 });
-  } else {
-    // Log but allow
-    console.warn(`Rate limit exceeded for ${tenantId}, not enforced`);
-  }
+	if (strictMode) {
+		return new Response("Too Many Requests", { status: 429 });
+	} else {
+		// Log but allow
+		console.warn(`Rate limit exceeded for ${tenantId}, not enforced`);
+	}
 }
 ```
 
@@ -443,14 +458,18 @@ VALUES
 For on/off features:
 
 ```typescript
-import { isFeatureEnabled } from '$lib/feature-flags';
+import { isFeatureEnabled } from "$lib/feature-flags";
 
 export async function load({ locals, platform }) {
-  const commentsEnabled = await isFeatureEnabled('comments_enabled', {
-    tenantId: locals.tenantId
-  }, platform.env);
+	const commentsEnabled = await isFeatureEnabled(
+		"comments_enabled",
+		{
+			tenantId: locals.tenantId,
+		},
+		platform.env,
+	);
 
-  return { commentsEnabled };
+	return { commentsEnabled };
 }
 ```
 
@@ -459,14 +478,18 @@ export async function load({ locals, platform }) {
 For premium features:
 
 ```typescript
-const canAccess = await isFeatureEnabled('meadow_access', {
-  tenantId: locals.tenantId,
-  tier: locals.tenant?.tier,  // Critical: pass tier for rule evaluation
-  userId: locals.user?.id
-}, platform.env);
+const canAccess = await isFeatureEnabled(
+	"meadow_access",
+	{
+		tenantId: locals.tenantId,
+		tier: locals.tenant?.tier, // Critical: pass tier for rule evaluation
+		userId: locals.user?.id,
+	},
+	platform.env,
+);
 
 if (!canAccess) {
-  throw redirect(302, '/upgrade?feature=meadow');
+	throw redirect(302, "/upgrade?feature=meadow");
 }
 ```
 
@@ -476,13 +499,17 @@ For gradual deployments:
 
 ```typescript
 // User/tenant gets deterministic bucket assignment
-const useJxl = await isFeatureEnabled('jxl_encoding', {
-  tenantId: locals.tenantId,  // Same tenant always gets same result
-  userId: locals.user?.id
-}, platform.env);
+const useJxl = await isFeatureEnabled(
+	"jxl_encoding",
+	{
+		tenantId: locals.tenantId, // Same tenant always gets same result
+		userId: locals.user?.id,
+	},
+	platform.env,
+);
 
 // Check kill switch first (no caching)
-const killed = await isFeatureEnabled('jxl_kill_switch', {}, platform.env);
+const killed = await isFeatureEnabled("jxl_kill_switch", {}, platform.env);
 if (killed) return processAsWebP(file);
 
 if (useJxl) return processAsJxl(file);
@@ -495,17 +522,21 @@ For invite-only features:
 
 ```typescript
 // Admin UI: Add tenant to beta list
-await addFlagRule('trails_beta', {
-  ruleType: 'tenant',
-  ruleValue: { tenantIds: ['tenant-abc', 'tenant-xyz'] },
-  resultValue: true,
-  priority: 50
+await addFlagRule("trails_beta", {
+	ruleType: "tenant",
+	ruleValue: { tenantIds: ["tenant-abc", "tenant-xyz"] },
+	resultValue: true,
+	priority: 50,
 });
 
 // In route:
-const hasBetaAccess = await isFeatureEnabled('trails_beta', {
-  tenantId: locals.tenantId
-}, platform.env);
+const hasBetaAccess = await isFeatureEnabled(
+	"trails_beta",
+	{
+		tenantId: locals.tenantId,
+	},
+	platform.env,
+);
 ```
 
 ---
@@ -525,31 +556,31 @@ const hasBetaAccess = await isFeatureEnabled('trails_beta', {
 
 **Goal:** Integrate flags with existing features
 
-| Flag | Integration |
-|------|-------------|
-| `jxl_encoding` | imageProcessor.ts |
-| `shop_enabled` | Shop routes |
-| `comments_enabled` | Comments system |
+| Flag               | Integration       |
+| ------------------ | ----------------- |
+| `jxl_encoding`     | imageProcessor.ts |
+| `shop_enabled`     | Shop routes       |
+| `comments_enabled` | Comments system   |
 
 ### Phase 3: Tier-Gating (Week 3)
 
 **Goal:** Premium features properly gated
 
-| Flag | Feature |
-|------|---------|
-| `meadow_access` | Meadow routes |
-| `custom_domains` | Domain setup |
-| `custom_fonts` | Font upload |
+| Flag             | Feature       |
+| ---------------- | ------------- |
+| `meadow_access`  | Meadow routes |
+| `custom_domains` | Domain setup  |
+| `custom_fonts`   | Font upload   |
 
 ### Phase 4: Beta Programs (Week 4+)
 
 **Goal:** Invite-only features accessible to beta users
 
-| Flag | Beta Program |
-|------|--------------|
-| `trails_beta` | Trails early access |
-| `ivy_beta` | Ivy email beta |
-| `rings_dashboard` | Analytics preview |
+| Flag              | Beta Program        |
+| ----------------- | ------------------- |
+| `trails_beta`     | Trails early access |
+| `ivy_beta`        | Ivy email beta      |
+| `rings_dashboard` | Analytics preview   |
 
 ---
 
@@ -562,25 +593,17 @@ Add to admin sidebar:
 ```svelte
 <!-- Quick toggle for common flags -->
 <div class="quick-flags">
-  <h3>Quick Toggles</h3>
+	<h3>Quick Toggles</h3>
 
-  <FlagToggle
-    id="jxl_encoding"
-    label="JXL Encoding"
-    description="JPEG XL image compression"
-  />
+	<FlagToggle id="jxl_encoding" label="JXL Encoding" description="JPEG XL image compression" />
 
-  <FlagToggle
-    id="shop_enabled"
-    label="Shop Feature"
-    description="E-commerce functionality"
-  />
+	<FlagToggle id="shop_enabled" label="Shop Feature" description="E-commerce functionality" />
 
-  <FlagToggle
-    id="rate_limiting_strict"
-    label="Strict Rate Limits"
-    description="Enforce tier limits"
-  />
+	<FlagToggle
+		id="rate_limiting_strict"
+		label="Strict Rate Limits"
+		description="Enforce tier limits"
+	/>
 </div>
 ```
 
@@ -616,13 +639,13 @@ Trails Beta Access
 
 ## Success Metrics
 
-| Metric | Target |
-|--------|--------|
-| Flag evaluation latency (cached) | < 5ms |
-| Flag evaluation latency (uncached) | < 50ms |
-| Cache hit rate | > 95% |
-| Admin UI response time | < 200ms |
-| Zero downtime deployments | 100% |
+| Metric                             | Target  |
+| ---------------------------------- | ------- |
+| Flag evaluation latency (cached)   | < 5ms   |
+| Flag evaluation latency (uncached) | < 50ms  |
+| Cache hit rate                     | > 95%   |
+| Admin UI response time             | < 200ms |
+| Zero downtime deployments          | 100%    |
 
 ---
 
@@ -636,6 +659,6 @@ Trails Beta Access
 
 ---
 
-*Document version: 1.0*
-*Created: 2026-01-13*
-*Author: Claude (AI-assisted planning)*
+_Document version: 1.0_
+_Created: 2026-01-13_
+_Author: Claude (AI-assisted planning)_

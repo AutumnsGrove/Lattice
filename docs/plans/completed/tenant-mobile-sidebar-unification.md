@@ -18,7 +18,7 @@ Unify the mobile sidebar experience across Grove properties by removing the inli
 
 **Tenant sites (\*.grove.place)** use inline implementation:
 
-- `packages/engine/src/routes/+layout.svelte` has ~100 lines of inline mobile menu code (lines 324-358)
+- `libs/engine/src/routes/+layout.svelte` has ~100 lines of inline mobile menu code (lines 324-358)
 - Basic dropdown animation instead of slide-out
 - Plain text links, no icons, no sections, no glassmorphism
 - ~200 lines of supporting inline CSS
@@ -63,23 +63,23 @@ The chrome components exist and work beautifully. Tenants simply don't use them.
 
 ### Phase 1: Extend Header Component
 
-**File: `packages/engine/src/lib/ui/components/chrome/Header.svelte`**
+**File: `libs/engine/src/lib/ui/components/chrome/Header.svelte`**
 
 Add optional search functionality that tenants need:
 
 ```typescript
 interface Props {
-  // Existing props...
-  navItems?: NavItem[];
-  resourceLinks?: FooterLink[];
-  connectLinks?: FooterLink[];
-  brandTitle?: string;
-  maxWidth?: "default" | "wide" | "full";
+	// Existing props...
+	navItems?: NavItem[];
+	resourceLinks?: FooterLink[];
+	connectLinks?: FooterLink[];
+	brandTitle?: string;
+	maxWidth?: "default" | "wide" | "full";
 
-  // NEW: Search support for tenant sites
-  searchEnabled?: boolean;
-  searchPlaceholder?: string;
-  onSearch?: (query: string) => void;
+	// NEW: Search support for tenant sites
+	searchEnabled?: boolean;
+	searchPlaceholder?: string;
+	onSearch?: (query: string) => void;
 }
 ```
 
@@ -93,7 +93,7 @@ Implementation notes:
 
 ### Phase 2: Create Tenant Nav Builder Utility
 
-**New file: `packages/engine/src/lib/ui/components/chrome/tenant-nav.ts`**
+**New file: `libs/engine/src/lib/ui/components/chrome/tenant-nav.ts`**
 
 Utility to transform tenant database data into `NavItem[]` format:
 
@@ -102,52 +102,52 @@ import type { NavItem } from "./types";
 import { Home, BookOpen, Image, Clock, User } from "lucide-svelte";
 
 interface TenantNavPage {
-  slug: string;
-  title: string;
+	slug: string;
+	title: string;
 }
 
 interface TenantNavOptions {
-  siteName: string;
-  navPages?: TenantNavPage[];
-  showTimeline?: boolean;
-  showGallery?: boolean;
+	siteName: string;
+	navPages?: TenantNavPage[];
+	showTimeline?: boolean;
+	showGallery?: boolean;
 }
 
 const PAGE_ICONS: Record<string, typeof Home> = {
-  home: Home,
-  blog: BookOpen,
-  gallery: Image,
-  timeline: Clock,
-  about: User,
+	home: Home,
+	blog: BookOpen,
+	gallery: Image,
+	timeline: Clock,
+	about: User,
 };
 
 export function buildTenantNavItems(options: TenantNavOptions): NavItem[] {
-  const items: NavItem[] = [
-    { href: "/", label: "Home", icon: Home },
-    { href: "/blog", label: "Blog", icon: BookOpen },
-  ];
+	const items: NavItem[] = [
+		{ href: "/", label: "Home", icon: Home },
+		{ href: "/blog", label: "Blog", icon: BookOpen },
+	];
 
-  // Add optional sections based on tenant config
-  if (options.showTimeline) {
-    items.push({ href: "/timeline", label: "Timeline", icon: Clock });
-  }
-  if (options.showGallery) {
-    items.push({ href: "/gallery", label: "Gallery", icon: Image });
-  }
+	// Add optional sections based on tenant config
+	if (options.showTimeline) {
+		items.push({ href: "/timeline", label: "Timeline", icon: Clock });
+	}
+	if (options.showGallery) {
+		items.push({ href: "/gallery", label: "Gallery", icon: Image });
+	}
 
-  // Add custom nav pages from database
-  for (const page of options.navPages ?? []) {
-    items.push({
-      href: `/${page.slug}`,
-      label: page.title,
-      icon: PAGE_ICONS[page.slug.toLowerCase()] ?? undefined,
-    });
-  }
+	// Add custom nav pages from database
+	for (const page of options.navPages ?? []) {
+		items.push({
+			href: `/${page.slug}`,
+			label: page.title,
+			icon: PAGE_ICONS[page.slug.toLowerCase()] ?? undefined,
+		});
+	}
 
-  // About always last
-  items.push({ href: "/about", label: "About", icon: User });
+	// About always last
+	items.push({ href: "/about", label: "About", icon: User });
 
-  return items;
+	return items;
 }
 ```
 
@@ -155,7 +155,7 @@ export function buildTenantNavItems(options: TenantNavOptions): NavItem[] {
 
 ### Phase 3: Update Chrome Exports
 
-**File: `packages/engine/src/lib/ui/components/chrome/index.ts`**
+**File: `libs/engine/src/lib/ui/components/chrome/index.ts`**
 
 Add new exports:
 
@@ -174,7 +174,7 @@ export type { TenantNavOptions, TenantNavPage } from "./tenant-nav";
 
 ### Phase 4: Refactor Tenant Layout
 
-**File: `packages/engine/src/routes/+layout.svelte`**
+**File: `libs/engine/src/routes/+layout.svelte`**
 
 This is the main change. Replace the inline header/mobile-menu implementation with chrome components.
 
@@ -182,25 +182,25 @@ This is the main change. Replace the inline header/mobile-menu implementation wi
 
 ```svelte
 <header class="site-header">
-  <nav class="nav-container">
-    <a href="/" class="logo">{siteName}</a>
-    <div class="nav-links desktop-nav">
-      <a href="/">Home</a>
-      <a href="/blog">Blog</a>
-      <!-- ... more inline links ... -->
-    </div>
-    <Button class="hamburger-btn" onclick={() => mobileMenuOpen = !mobileMenuOpen}>
-      <!-- hamburger icon -->
-    </Button>
-  </nav>
+	<nav class="nav-container">
+		<a href="/" class="logo">{siteName}</a>
+		<div class="nav-links desktop-nav">
+			<a href="/">Home</a>
+			<a href="/blog">Blog</a>
+			<!-- ... more inline links ... -->
+		</div>
+		<Button class="hamburger-btn" onclick={() => (mobileMenuOpen = !mobileMenuOpen)}>
+			<!-- hamburger icon -->
+		</Button>
+	</nav>
 
-  <!-- 50+ lines of inline mobile menu -->
-  <div class="mobile-menu" class:open={mobileMenuOpen}>
-    <div class="mobile-nav-links">
-      <a href="/">Home</a>
-      <!-- ... -->
-    </div>
-  </div>
+	<!-- 50+ lines of inline mobile menu -->
+	<div class="mobile-menu" class:open={mobileMenuOpen}>
+		<div class="mobile-nav-links">
+			<a href="/">Home</a>
+			<!-- ... -->
+		</div>
+	</div>
 </header>
 
 <!-- 200+ lines of inline CSS for header/mobile-menu -->
@@ -215,32 +215,34 @@ This is the main change. Replace the inline header/mobile-menu implementation wi
 
 ```svelte
 <script lang="ts">
-  import { Header, Footer, buildTenantNavItems } from '@autumnsgrove/lattice/ui/chrome';
-  import { goto } from '$app/navigation';
+	import { Header, Footer, buildTenantNavItems } from "@autumnsgrove/lattice/ui/chrome";
+	import { goto } from "$app/navigation";
 
-  // ... existing data/props ...
+	// ... existing data/props ...
 
-  // Build nav items from tenant config
-  const navItems = $derived(buildTenantNavItems({
-    siteName: siteName,
-    navPages: data.navPages,
-    showTimeline: data.tenant?.showTimeline,
-    showGallery: data.tenant?.showGallery,
-  }));
+	// Build nav items from tenant config
+	const navItems = $derived(
+		buildTenantNavItems({
+			siteName: siteName,
+			navPages: data.navPages,
+			showTimeline: data.tenant?.showTimeline,
+			showGallery: data.tenant?.showGallery,
+		}),
+	);
 
-  function handleSearch(query: string) {
-    goto(`/blog?search=${encodeURIComponent(query)}`);
-  }
+	function handleSearch(query: string) {
+		goto(`/blog?search=${encodeURIComponent(query)}`);
+	}
 </script>
 
 <Header
-  {navItems}
-  brandTitle={siteName}
-  searchEnabled={true}
-  searchPlaceholder="Search posts..."
-  onSearch={handleSearch}
-  resourceLinks={[]}
-  connectLinks={[]}
+	{navItems}
+	brandTitle={siteName}
+	searchEnabled={true}
+	searchPlaceholder="Search posts..."
+	onSearch={handleSearch}
+	resourceLinks={[]}
+	connectLinks={[]}
 />
 
 <!-- Rest of layout content -->
@@ -360,8 +362,8 @@ This makes the intent clearer than passing empty arrays.
 
 **Test file locations:**
 
-- `packages/engine/src/lib/ui/components/chrome/tenant-nav.test.ts`
-- `packages/engine/src/lib/ui/components/chrome/Header.test.ts` (extend existing or create)
+- `libs/engine/src/lib/ui/components/chrome/tenant-nav.test.ts`
+- `libs/engine/src/lib/ui/components/chrome/Header.test.ts` (extend existing or create)
 
 ### Phase 6: Cleanup
 
@@ -412,16 +414,16 @@ After this unification:
 
 ### Chrome Components (the good ones)
 
-- `packages/engine/src/lib/ui/components/chrome/Header.svelte`
-- `packages/engine/src/lib/ui/components/chrome/MobileMenu.svelte`
-- `packages/engine/src/lib/ui/components/chrome/types.ts`
-- `packages/engine/src/lib/ui/components/chrome/defaults.ts`
+- `libs/engine/src/lib/ui/components/chrome/Header.svelte`
+- `libs/engine/src/lib/ui/components/chrome/MobileMenu.svelte`
+- `libs/engine/src/lib/ui/components/chrome/types.ts`
+- `libs/engine/src/lib/ui/components/chrome/defaults.ts`
 
 ### Tenant Layout (needs refactor)
 
-- `packages/engine/src/routes/+layout.svelte`
+- `libs/engine/src/routes/+layout.svelte`
 
 ### Landing Usage (reference for how chrome is used)
 
-- `packages/landing/src/routes/+page.svelte`
-- `packages/landing/src/routes/manifesto/+page.svelte`
+- `apps/landing/src/routes/+page.svelte`
+- `apps/landing/src/routes/manifesto/+page.svelte`

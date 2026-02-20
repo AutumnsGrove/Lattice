@@ -294,7 +294,7 @@ Free tiers attract abuse. Here's how we handle it.
 
 ### Config Change (tiers.ts)
 
-The free tier already exists in `packages/engine/src/lib/config/tiers.ts` with `status: "coming_soon"`. The primary change is enabling blog access and setting limits.
+The free tier already exists in `libs/engine/src/lib/config/tiers.ts` with `status: "coming_soon"`. The primary change is enabling blog access and setting limits.
 
 ```
   Current Free Tier          Wanderer Plan (Proposed)

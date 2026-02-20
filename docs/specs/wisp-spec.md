@@ -149,8 +149,8 @@ Same model, different prompt complexity.
 
 ```typescript
 interface GrammarRequest {
-  content: string;
-  mode: "quick" | "thorough";
+	content: string;
+	mode: "quick" | "thorough";
 }
 ```
 
@@ -158,13 +158,13 @@ interface GrammarRequest {
 
 ```typescript
 interface GrammarResult {
-  suggestions: Array<{
-    original: string; // Text with issue
-    suggestion: string; // Proposed fix
-    reason: string; // Brief explanation (1 sentence)
-    severity: "error" | "warning" | "style";
-  }>;
-  overallScore: number; // 0-100 clarity score
+	suggestions: Array<{
+		original: string; // Text with issue
+		suggestion: string; // Proposed fix
+		reason: string; // Brief explanation (1 sentence)
+		severity: "error" | "warning" | "style";
+	}>;
+	overallScore: number; // 0-100 clarity score
 }
 ```
 
@@ -180,11 +180,11 @@ interface GrammarResult {
 
 ```typescript
 interface ToneRequest {
-  content: string;
-  context?: {
-    title?: string;
-    audience?: "technical" | "casual" | "professional" | string;
-  };
+	content: string;
+	context?: {
+		title?: string;
+		audience?: "technical" | "casual" | "professional" | string;
+	};
 }
 ```
 
@@ -192,12 +192,12 @@ interface ToneRequest {
 
 ```typescript
 interface ToneResult {
-  analysis: string; // 2-3 sentence summary
-  traits: Array<{
-    trait: string; // e.g., "formal", "warm", "technical"
-    score: number; // 0-100
-  }>;
-  suggestions: string[]; // Max 3 observations
+	analysis: string; // 2-3 sentence summary
+	traits: Array<{
+		trait: string; // e.g., "formal", "warm", "technical"
+		score: number; // 0-100
+	}>;
+	suggestions: string[]; // Max 3 observations
 }
 ```
 
@@ -207,16 +207,16 @@ Calculated entirely client-side or server-side without AI:
 
 ```typescript
 interface ReadabilityResult {
-  fleschKincaid: number; // Grade level (e.g., 8.5)
-  readingTime: string; // "5 min read"
-  wordCount: number;
-  sentenceCount: number;
-  sentenceStats: {
-    average: number; // Words per sentence
-    longest: number;
-    shortest: number;
-  };
-  suggestions: string[]; // Generated from thresholds
+	fleschKincaid: number; // Grade level (e.g., 8.5)
+	readingTime: string; // "5 min read"
+	wordCount: number;
+	sentenceCount: number;
+	sentenceStats: {
+		average: number; // Words per sentence
+		longest: number;
+		shortest: number;
+	};
+	suggestions: string[]; // Generated from thresholds
 }
 ```
 
@@ -376,15 +376,15 @@ Prompts are selected pseudorandomly to feel fresh without true randomness:
 
 ```typescript
 function selectStarterPrompt(userId: string, prompts: string[]): string {
-  // Combine user ID with current date for daily rotation
-  const today = new Date().toISOString().slice(0, 10); // "2025-01-01"
-  const seed = hashString(`${userId}:${today}`);
+	// Combine user ID with current date for daily rotation
+	const today = new Date().toISOString().slice(0, 10); // "2025-01-01"
+	const seed = hashString(`${userId}:${today}`);
 
-  // Select based on seed, but skip recently used prompts
-  const recentPrompts = getRecentPrompts(userId, 3); // Last 3 used
-  const available = prompts.filter((p) => !recentPrompts.includes(p));
+	// Select based on seed, but skip recently used prompts
+	const recentPrompts = getRecentPrompts(userId, 3); // Last 3 used
+	const available = prompts.filter((p) => !recentPrompts.includes(p));
 
-  return available[seed % available.length];
+	return available[seed % available.length];
 }
 ```
 
@@ -443,13 +443,10 @@ This layered approach catches obvious cases quickly while handling subtle or nov
 
 ```typescript
 function canDraft(conversation: FiresideMessage[]): boolean {
-  const userMessages = conversation.filter((m) => m.role === "user");
-  const totalUserTokens = userMessages.reduce(
-    (sum, m) => sum + estimateTokens(m.content),
-    0,
-  );
+	const userMessages = conversation.filter((m) => m.role === "user");
+	const totalUserTokens = userMessages.reduce((sum, m) => sum + estimateTokens(m.content), 0);
 
-  return userMessages.length >= 3 && totalUserTokens >= 150;
+	return userMessages.length >= 3 && totalUserTokens >= 150;
 }
 ```
 
@@ -477,17 +474,14 @@ The marker's immutability is enforced at the API level, not just in the editor U
 
 ```typescript
 // In POST /api/posts and PUT /api/posts/:slug
-if (
-  existingPost?.fireside_assisted &&
-  !content.includes("~ written fireside with Wisp ~")
-) {
-  // Re-append marker if removed
-  content = content.trim() + "\n\n*~ written fireside with Wisp ~*";
+if (existingPost?.fireside_assisted && !content.includes("~ written fireside with Wisp ~")) {
+	// Re-append marker if removed
+	content = content.trim() + "\n\n*~ written fireside with Wisp ~*";
 }
 
 // Prevent clearing the fireside_assisted flag
 if (existingPost?.fireside_assisted) {
-  updates.fireside_assisted = true; // Cannot be unset
+	updates.fireside_assisted = true; // Cannot be unset
 }
 ```
 
@@ -526,10 +520,10 @@ Conversations are stored **client-side only** during the session:
 
 ```typescript
 function generateConversationId(): string {
-  // Collision-resistant: timestamp + random UUID
-  const timestamp = Date.now();
-  const uuid = crypto.randomUUID();
-  return `${timestamp}-${uuid}`;
+	// Collision-resistant: timestamp + random UUID
+	const timestamp = Date.now();
+	const uuid = crypto.randomUUID();
+	return `${timestamp}-${uuid}`;
 }
 // Example: "1704067200000-550e8400-e29b-41d4-a716-446655440000"
 ```
@@ -604,16 +598,16 @@ POST /api/grove/wisp/fireside
 
 ```typescript
 interface FiresideMessage {
-  role: "wisp" | "user";
-  content: string;
-  timestamp: string;
+	role: "wisp" | "user";
+	content: string;
+	timestamp: string;
 }
 
 interface FiresideChatRequest {
-  action: "start" | "respond" | "draft";
-  message?: string; // User's response (for 'respond')
-  conversation?: FiresideMessage[]; // Full history (for 'respond' and 'draft')
-  starterPrompt?: string; // Optional custom opener (for 'start')
+	action: "start" | "respond" | "draft";
+	message?: string; // User's response (for 'respond')
+	conversation?: FiresideMessage[]; // Full history (for 'respond' and 'draft')
+	starterPrompt?: string; // Optional custom opener (for 'start')
 }
 ```
 
@@ -622,36 +616,36 @@ interface FiresideChatRequest {
 ```typescript
 // For 'start' and 'respond' actions
 interface FiresideChatResponse {
-  reply: string; // Wisp's next question
-  canDraft: boolean; // Whether enough substance exists
-  conversationId: string; // Session reference
+	reply: string; // Wisp's next question
+	canDraft: boolean; // Whether enough substance exists
+	conversationId: string; // Session reference
 }
 
 // For 'draft' action
 interface FiresideDraftResponse {
-  title: string; // Suggested title
-  content: string; // Organized post content
-  marker: string; // "~ written fireside with Wisp ~"
-  meta: {
-    tokensUsed: number;
-    cost: number;
-    model: string;
-  };
+	title: string; // Suggested title
+	content: string; // Organized post content
+	marker: string; // "~ written fireside with Wisp ~"
+	meta: {
+		tokensUsed: number;
+		cost: number;
+		model: string;
+	};
 }
 
 // Error responses
 interface FiresideErrorResponse {
-  error: true;
-  code:
-    | "rate_limit"
-    | "inference_failure"
-    | "empty_message"
-    | "session_expired"
-    | "generation_blocked"
-    | "content_too_long";
-  message: string; // Human-readable error
-  retryAfter?: number; // Seconds until retry (for rate_limit)
-  redirectPrompt?: string; // Suggested conversation redirect (for generation_blocked)
+	error: true;
+	code:
+		| "rate_limit"
+		| "inference_failure"
+		| "empty_message"
+		| "session_expired"
+		| "generation_blocked"
+		| "content_too_long";
+	message: string; // Human-readable error
+	retryAfter?: number; // Seconds until retry (for rate_limit)
+	redirectPrompt?: string; // Suggested conversation redirect (for generation_blocked)
 }
 ```
 
@@ -659,7 +653,7 @@ interface FiresideErrorResponse {
 
 ### Fireside Database Additions
 
-**Migration file:** `packages/engine/migrations/015_wisp_fireside.sql`
+**Migration file:** `libs/engine/migrations/015_wisp_fireside.sql`
 
 ```sql
 -- 015_wisp_fireside.sql
@@ -729,13 +723,13 @@ The ASCII fire art may not render well on all devices. Fallback strategy:
 
 ```typescript
 const fireVisual = {
-  desktop: `
+	desktop: `
      ~  ~
     (    )  sit by the fire
    (      )  and tell me what's on your mind
   ~~~~~~~~~~`,
-  mobile: `🔥 Fireside with Wisp`,
-  screenReader: "Fireside conversation mode",
+	mobile: `🔥 Fireside with Wisp`,
+	screenReader: "Fireside conversation mode",
 };
 ```
 
@@ -958,13 +952,13 @@ POST /api/grove/wisp
 
 ```typescript
 interface WispRequest {
-  content: string;
-  action: "grammar" | "tone" | "readability" | "all";
-  mode?: "quick" | "thorough"; // Default: 'quick'
-  context?: {
-    title?: string;
-    audience?: string;
-  };
+	content: string;
+	action: "grammar" | "tone" | "readability" | "all";
+	mode?: "quick" | "thorough"; // Default: 'quick'
+	context?: {
+		title?: string;
+		audience?: string;
+	};
 }
 ```
 
@@ -972,16 +966,16 @@ interface WispRequest {
 
 ```typescript
 interface WispResponse {
-  grammar?: GrammarResult;
-  tone?: ToneResult;
-  readability?: ReadabilityResult;
-  meta: {
-    tokensUsed: number;
-    cost: number;
-    model: string;
-    provider: string;
-    mode: "quick" | "thorough";
-  };
+	grammar?: GrammarResult;
+	tone?: ToneResult;
+	readability?: ReadabilityResult;
+	meta: {
+		tokensUsed: number;
+		cost: number;
+		model: string;
+		provider: string;
+		mode: "quick" | "thorough";
+	};
 }
 ```
 
@@ -1030,11 +1024,11 @@ CREATE INDEX IF NOT EXISTS idx_wisp_created
 
 ```
 Files to create/modify:
-├── packages/engine/src/lib/config/
+├── libs/engine/src/lib/config/
 │   └── wisp.js                    # Model config, provider URLs, pricing
-├── packages/engine/src/lib/server/
+├── libs/engine/src/lib/server/
 │   └── inference-client.js        # Generic inference client (shared with content-mod)
-├── packages/engine/src/lib/utils/
+├── libs/engine/src/lib/utils/
 │   └── readability.js             # Local readability calculations
 ```
 
@@ -1049,7 +1043,7 @@ Files to create/modify:
 
 ```
 Files to create:
-├── packages/engine/src/routes/api/grove/
+├── libs/engine/src/routes/api/grove/
 │   └── wisp/
 │       └── +server.js             # Main endpoint
 ```
@@ -1066,7 +1060,7 @@ Files to create:
 
 ```
 Files to create:
-├── packages/engine/src/lib/components/
+├── libs/engine/src/lib/components/
 │   └── WispPanel.svelte           # Main panel component
 │   └── WispButton.svelte          # Toolbar integration button
 ```
@@ -1083,7 +1077,7 @@ Files to create:
 
 ```
 Files to modify:
-├── packages/engine/src/lib/components/
+├── libs/engine/src/lib/components/
 │   └── SettingsPanel.svelte       # Add Wisp toggle + mode selector
 ```
 
@@ -1150,7 +1144,7 @@ _Significantly cheaper than Claude models_
 ## Resolved Questions
 
 1. **Naming:** ✅ **Wisp**: light, airy, ephemeral. Like a will-o'-the-wisp. Internal: `GroveWisp`
-2. **Scope:** ✅ Lives at engine level (`packages/engine/`) for all Grove sites
+2. **Scope:** ✅ Lives at engine level (`libs/engine/`) for all Grove sites
 3. **Sharing:** ✅ Yes. Inference client shared with Content Moderation in `src/lib/server/inference-client.js`
 
 ---

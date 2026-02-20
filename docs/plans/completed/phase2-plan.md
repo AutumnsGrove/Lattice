@@ -27,26 +27,26 @@
 ### Files to Modify (13)
 
 **Token System (3 files):**
-1. `packages/engine/src/lib/styles/tokens.css` - Add primitive Grove palette
-2. `packages/engine/src/lib/ui/tailwind.preset.js` - Reference CSS vars instead of hex
-3. `packages/engine/tailwind.config.js` - Ensure proper variable mapping
+1. `libs/engine/src/lib/styles/tokens.css` - Add primitive Grove palette
+2. `libs/engine/src/lib/ui/tailwind.preset.js` - Reference CSS vars instead of hex
+3. `libs/engine/tailwind.config.js` - Ensure proper variable mapping
 
 **Component Styles (10 files - highest impact):**
 These have the most hardcoded colors:
-1. `packages/engine/src/routes/admin/images/+page.svelte` (17 hex colors)
-2. `packages/engine/src/routes/admin/blog/new/+page.svelte`
-3. `packages/engine/src/routes/admin/blog/edit/[slug]/+page.svelte`
-4. `packages/engine/src/routes/admin/pages/+page.svelte`
-5. `packages/engine/src/lib/components/admin/MarkdownEditor.svelte`
-6. `packages/engine/src/routes/(apps)/domains/+page.svelte` (syntax highlighting colors)
-7. `packages/engine/src/routes/blog/[slug]/+page.svelte`
-8. `packages/engine/src/routes/+error.svelte`
-9. `packages/engine/src/routes/+layout.svelte`
-10. `packages/engine/src/routes/+page.svelte`
+1. `libs/engine/src/routes/admin/images/+page.svelte` (17 hex colors)
+2. `libs/engine/src/routes/admin/blog/new/+page.svelte`
+3. `libs/engine/src/routes/admin/blog/edit/[slug]/+page.svelte`
+4. `libs/engine/src/routes/admin/pages/+page.svelte`
+5. `libs/engine/src/lib/components/admin/MarkdownEditor.svelte`
+6. `libs/engine/src/routes/(apps)/domains/+page.svelte` (syntax highlighting colors)
+7. `libs/engine/src/routes/blog/[slug]/+page.svelte`
+8. `libs/engine/src/routes/+error.svelte`
+9. `libs/engine/src/routes/+layout.svelte`
+10. `libs/engine/src/routes/+page.svelte`
 
 ### Files to Delete (2)
-1. `packages/engine/src/lib/ui/styles/tokens.css` - Duplicate of tailwind.preset.js colors
-2. `packages/engine/src/lib/ui/styles/grove.css` - Assess if any unique styles needed
+1. `libs/engine/src/lib/ui/styles/tokens.css` - Duplicate of tailwind.preset.js colors
+2. `libs/engine/src/lib/ui/styles/grove.css` - Assess if any unique styles needed
 
 ---
 

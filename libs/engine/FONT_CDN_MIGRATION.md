@@ -10,10 +10,10 @@ This document provides instructions for migrating font files from local static s
 
 Fonts are currently stored in:
 
-- `packages/engine/static/fonts/` (engine package)
+- `libs/engine/static/fonts/` (engine package)
 - `landing/static/fonts/` (landing site)
 
-Font-face declarations in `packages/engine/src/routes/+layout.svelte` are configured to load from CDN but will need the fonts uploaded first.
+Font-face declarations in `libs/engine/src/routes/+layout.svelte` are configured to load from CDN but will need the fonts uploaded first.
 
 ## Step 1: Upload Fonts to R2
 
@@ -26,27 +26,27 @@ cd /path/to/Lattice
 # Upload each font file to R2 bucket
 # Replace 'grove-cdn' with your R2 bucket name
 
-# From packages/engine/static/fonts/
-wrangler r2 object put grove-cdn/fonts/alagard.ttf --file packages/engine/static/fonts/alagard.ttf
-wrangler r2 object put grove-cdn/fonts/AtkinsonHyperlegible-Regular.ttf --file packages/engine/static/fonts/AtkinsonHyperlegible-Regular.ttf
-wrangler r2 object put grove-cdn/fonts/BodoniModa-Regular.ttf --file packages/engine/static/fonts/BodoniModa-Regular.ttf
-wrangler r2 object put grove-cdn/fonts/Calistoga-Regular.ttf --file packages/engine/static/fonts/Calistoga-Regular.ttf
-wrangler r2 object put grove-cdn/fonts/Caveat-Regular.ttf --file packages/engine/static/fonts/Caveat-Regular.ttf
-wrangler r2 object put grove-cdn/fonts/Cormorant-Regular.ttf --file packages/engine/static/fonts/Cormorant-Regular.ttf
-wrangler r2 object put grove-cdn/fonts/CozetteVector.ttf --file packages/engine/static/fonts/CozetteVector.ttf
-wrangler r2 object put grove-cdn/fonts/EBGaramond-Regular.ttf --file packages/engine/static/fonts/EBGaramond-Regular.ttf
-wrangler r2 object put grove-cdn/fonts/Fraunces-Regular.ttf --file packages/engine/static/fonts/Fraunces-Regular.ttf
-wrangler r2 object put grove-cdn/fonts/IBMPlexMono-Regular.ttf --file packages/engine/static/fonts/IBMPlexMono-Regular.ttf
-wrangler r2 object put grove-cdn/fonts/InstrumentSans-Regular.ttf --file packages/engine/static/fonts/InstrumentSans-Regular.ttf
-wrangler r2 object put grove-cdn/fonts/Lexend-Regular.ttf --file packages/engine/static/fonts/Lexend-Regular.ttf
-wrangler r2 object put grove-cdn/fonts/Lora-Regular.ttf --file packages/engine/static/fonts/Lora-Regular.ttf
-wrangler r2 object put grove-cdn/fonts/Luciole-Regular.ttf --file packages/engine/static/fonts/Luciole-Regular.ttf
-wrangler r2 object put grove-cdn/fonts/Manrope-Regular.ttf --file packages/engine/static/fonts/Manrope-Regular.ttf
-wrangler r2 object put grove-cdn/fonts/Merriweather-Regular.ttf --file packages/engine/static/fonts/Merriweather-Regular.ttf
-wrangler r2 object put grove-cdn/fonts/Nunito-Regular.ttf --file packages/engine/static/fonts/Nunito-Regular.ttf
-wrangler r2 object put grove-cdn/fonts/OpenDyslexic-Regular.otf --file packages/engine/static/fonts/OpenDyslexic-Regular.otf
-wrangler r2 object put grove-cdn/fonts/PlusJakartaSans-Regular.ttf --file packages/engine/static/fonts/PlusJakartaSans-Regular.ttf
-wrangler r2 object put grove-cdn/fonts/Quicksand-Regular.ttf --file packages/engine/static/fonts/Quicksand-Regular.ttf
+# From libs/engine/static/fonts/
+wrangler r2 object put grove-cdn/fonts/alagard.ttf --file libs/engine/static/fonts/alagard.ttf
+wrangler r2 object put grove-cdn/fonts/AtkinsonHyperlegible-Regular.ttf --file libs/engine/static/fonts/AtkinsonHyperlegible-Regular.ttf
+wrangler r2 object put grove-cdn/fonts/BodoniModa-Regular.ttf --file libs/engine/static/fonts/BodoniModa-Regular.ttf
+wrangler r2 object put grove-cdn/fonts/Calistoga-Regular.ttf --file libs/engine/static/fonts/Calistoga-Regular.ttf
+wrangler r2 object put grove-cdn/fonts/Caveat-Regular.ttf --file libs/engine/static/fonts/Caveat-Regular.ttf
+wrangler r2 object put grove-cdn/fonts/Cormorant-Regular.ttf --file libs/engine/static/fonts/Cormorant-Regular.ttf
+wrangler r2 object put grove-cdn/fonts/CozetteVector.ttf --file libs/engine/static/fonts/CozetteVector.ttf
+wrangler r2 object put grove-cdn/fonts/EBGaramond-Regular.ttf --file libs/engine/static/fonts/EBGaramond-Regular.ttf
+wrangler r2 object put grove-cdn/fonts/Fraunces-Regular.ttf --file libs/engine/static/fonts/Fraunces-Regular.ttf
+wrangler r2 object put grove-cdn/fonts/IBMPlexMono-Regular.ttf --file libs/engine/static/fonts/IBMPlexMono-Regular.ttf
+wrangler r2 object put grove-cdn/fonts/InstrumentSans-Regular.ttf --file libs/engine/static/fonts/InstrumentSans-Regular.ttf
+wrangler r2 object put grove-cdn/fonts/Lexend-Regular.ttf --file libs/engine/static/fonts/Lexend-Regular.ttf
+wrangler r2 object put grove-cdn/fonts/Lora-Regular.ttf --file libs/engine/static/fonts/Lora-Regular.ttf
+wrangler r2 object put grove-cdn/fonts/Luciole-Regular.ttf --file libs/engine/static/fonts/Luciole-Regular.ttf
+wrangler r2 object put grove-cdn/fonts/Manrope-Regular.ttf --file libs/engine/static/fonts/Manrope-Regular.ttf
+wrangler r2 object put grove-cdn/fonts/Merriweather-Regular.ttf --file libs/engine/static/fonts/Merriweather-Regular.ttf
+wrangler r2 object put grove-cdn/fonts/Nunito-Regular.ttf --file libs/engine/static/fonts/Nunito-Regular.ttf
+wrangler r2 object put grove-cdn/fonts/OpenDyslexic-Regular.otf --file libs/engine/static/fonts/OpenDyslexic-Regular.otf
+wrangler r2 object put grove-cdn/fonts/PlusJakartaSans-Regular.ttf --file libs/engine/static/fonts/PlusJakartaSans-Regular.ttf
+wrangler r2 object put grove-cdn/fonts/Quicksand-Regular.ttf --file libs/engine/static/fonts/Quicksand-Regular.ttf
 ```
 
 ### Batch Upload Script
@@ -58,7 +58,7 @@ Create and run this script for batch upload:
 # upload-fonts-to-r2.sh
 
 BUCKET="grove-cdn"
-FONTS_DIR="packages/engine/static/fonts"
+FONTS_DIR="libs/engine/static/fonts"
 
 for font in "$FONTS_DIR"/*; do
   filename=$(basename "$font")
@@ -101,19 +101,19 @@ Once CDN is verified working:
 
 ```bash
 # Remove font files from static directories
-rm -rf packages/engine/static/fonts/*.ttf
-rm -rf packages/engine/static/fonts/*.otf
+rm -rf libs/engine/static/fonts/*.ttf
+rm -rf libs/engine/static/fonts/*.otf
 rm -rf landing/static/fonts/*.ttf
 rm -rf landing/static/fonts/*.otf
 ```
 
 ## Step 5: Update package.json (Optional)
 
-Consider excluding fonts from the npm package in `packages/engine/package.json`:
+Consider excluding fonts from the npm package in `libs/engine/package.json`:
 
 ```json
 {
-  "files": ["dist", "!dist/**/*.test.*"]
+	"files": ["dist", "!dist/**/*.test.*"]
 }
 ```
 

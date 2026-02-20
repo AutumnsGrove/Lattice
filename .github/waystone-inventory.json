@@ -1,247 +1,247 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "1.0.0",
-  "description": "Tracks Waystone (contextual help marker) usage across all Grove packages for documentation and drift detection",
-  "lastUpdated": "2026-02-16",
-  "lastAuditedBy": "claude/fix-waystone-inventory-CS8hN",
-  "waystones": {
-    "total": 20,
-    "breakdown": {
-      "engine": 18,
-      "login": 2,
-      "landing": 0,
-      "plant": 0,
-      "meadow": 0
-    },
-    "bySlugs": 14
-  },
-  "slugs": [
-    {
-      "slug": "what-is-rings",
-      "usageCount": 2,
-      "instances": [
-        {
-          "file": "packages/engine/src/routes/arbor/analytics/+page.svelte",
-          "label": "Learn about Rings",
-          "placement": "page-header",
-          "size": "sm"
-        },
-        {
-          "file": "packages/engine/src/routes/arbor/account/FeaturesCard.svelte",
-          "label": "Learn about Rings analytics",
-          "placement": "feature-card",
-          "size": "sm"
-        }
-      ]
-    },
-    {
-      "slug": "what-are-trails",
-      "usageCount": 2,
-      "instances": [
-        {
-          "file": "packages/engine/src/routes/arbor/timeline/+page.svelte",
-          "label": "Learn about Trails",
-          "placement": "page-header",
-          "size": "sm"
-        },
-        {
-          "file": "packages/engine/src/routes/arbor/account/FeaturesCard.svelte",
-          "label": "Learn about Trail",
-          "placement": "feature-card",
-          "size": "sm"
-        }
-      ]
-    },
-    {
-      "slug": "what-are-curios",
-      "usageCount": 2,
-      "instances": [
-        {
-          "file": "packages/engine/src/routes/arbor/curios/+page.svelte",
-          "label": "Learn about Curios",
-          "placement": "page-header",
-          "size": "sm"
-        },
-        {
-          "file": "packages/engine/src/routes/arbor/account/FeaturesCard.svelte",
-          "label": "Learn about Curios",
-          "placement": "feature-card",
-          "size": "sm"
-        }
-      ]
-    },
-    {
-      "slug": "what-is-gallery",
-      "usageCount": 1,
-      "instances": [
-        {
-          "file": "packages/engine/src/routes/arbor/curios/gallery/+page.svelte",
-          "label": "Learn about Gallery",
-          "placement": "page-header",
-          "size": "sm"
-        }
-      ]
-    },
-    {
-      "slug": "what-is-journey",
-      "usageCount": 1,
-      "instances": [
-        {
-          "file": "packages/engine/src/routes/arbor/curios/journey/+page.svelte",
-          "label": "Learn about Journey",
-          "placement": "page-header",
-          "size": "sm"
-        }
-      ]
-    },
-    {
-      "slug": "exporting-your-content",
-      "usageCount": 1,
-      "instances": [
-        {
-          "file": "packages/engine/src/routes/arbor/account/DataExportCard.svelte",
-          "label": "Learn about data portability",
-          "placement": "section-header",
-          "size": "sm"
-        }
-      ]
-    },
-    {
-      "slug": "how-grove-protects-your-secrets",
-      "usageCount": 2,
-      "instances": [
-        {
-          "file": "packages/engine/src/routes/arbor/curios/timeline/+page.svelte",
-          "label": "How we protect your tokens",
-          "placement": "inline-help",
-          "size": "sm"
-        },
-        {
-          "file": "packages/engine/src/routes/arbor/curios/timeline/+page.svelte",
-          "label": "How we protect your keys",
-          "placement": "inline-help",
-          "size": "sm"
-        }
-      ]
-    },
-    {
-      "slug": "image-upload-failures",
-      "usageCount": 1,
-      "instances": [
-        {
-          "file": "packages/engine/src/routes/arbor/images/+page.svelte",
-          "label": "Troubleshoot upload issues",
-          "placement": "error-context",
-          "size": "sm"
-        }
-      ]
-    },
-    {
-      "slug": "custom-fonts",
-      "usageCount": 1,
-      "instances": [
-        {
-          "file": "packages/engine/src/routes/arbor/settings/+page.svelte",
-          "label": "Learn about fonts",
-          "placement": "section-header",
-          "size": "sm"
-        }
-      ]
-    },
-    {
-      "slug": "choosing-a-theme",
-      "usageCount": 1,
-      "instances": [
-        {
-          "file": "packages/engine/src/routes/arbor/settings/+page.svelte",
-          "label": "Learn about themes",
-          "placement": "section-header",
-          "size": "sm"
-        }
-      ]
-    },
-    {
-      "slug": "greenhouse-features",
-      "usageCount": 1,
-      "instances": [
-        {
-          "file": "packages/engine/src/lib/grafts/greenhouse/GraftControlPanel.svelte",
-          "label": "Learn about experimental features",
-          "placement": "panel-header",
-          "size": "sm"
-        }
-      ]
-    },
-    {
-      "slug": "what-are-passkeys",
-      "usageCount": 1,
-      "instances": [
-        {
-          "file": "packages/login/src/routes/+page.svelte",
-          "label": "What's a passkey?",
-          "placement": "auth-context",
-          "size": "sm"
-        }
-      ]
-    },
-    {
-      "slug": "using-curios-in-content",
-      "usageCount": 3,
-      "instances": [
-        {
-          "file": "packages/engine/src/routes/arbor/garden/new/+page.svelte",
-          "line": 225,
-          "label": "Curio directives",
-          "placement": "inline-help",
-          "size": "sm"
-        },
-        {
-          "file": "packages/engine/src/routes/arbor/garden/edit/[slug]/+page.svelte",
-          "line": 295,
-          "label": "Curio directives",
-          "placement": "inline-help",
-          "size": "sm"
-        },
-        {
-          "file": "packages/engine/src/routes/arbor/pages/edit/[slug]/+page.svelte",
-          "line": 191,
-          "label": "Curio directives",
-          "placement": "inline-help",
-          "size": "sm",
-          "inline": true
-        }
-      ]
-    },
-    {
-      "slug": "understanding-your-privacy",
-      "usageCount": 1,
-      "instances": [
-        {
-          "file": "packages/login/src/routes/+page.svelte",
-          "label": "How we protect your data",
-          "placement": "auth-context",
-          "size": "sm"
-        }
-      ]
-    }
-  ],
-  "placementTypes": {
-    "page-header": "Beside <h1> titles on major admin pages",
-    "section-header": "Beside <h2> section titles within pages",
-    "feature-card": "Inside feature showcase cards",
-    "inline-help": "Inline with paragraph text for contextual hints",
-    "error-context": "Within error messages linking to troubleshooting",
-    "panel-header": "In panel/control headers",
-    "auth-context": "Near auth-related UI for trust building"
-  },
-  "component": {
-    "source": "packages/engine/src/lib/ui/components/ui/waystone/Waystone.svelte",
-    "popup": "packages/engine/src/lib/ui/components/ui/waystone/WaystonePopup.svelte",
-    "types": "packages/engine/src/lib/ui/components/ui/waystone/types.ts"
-  },
-  "documentation": {
-    "spec": "docs/specs/waystone-spec.md",
-    "helpArticle": "docs/help-center/articles/what-are-waystones.md",
-    "integrationPlan": "docs/plans/completed/waystone-integration-plan.md"
-  }
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"version": "1.0.0",
+	"description": "Tracks Waystone (contextual help marker) usage across all Grove packages for documentation and drift detection",
+	"lastUpdated": "2026-02-20",
+	"lastAuditedBy": "claude/daily-standup-audit",
+	"waystones": {
+		"total": 20,
+		"breakdown": {
+			"engine": 18,
+			"login": 2,
+			"landing": 0,
+			"plant": 0,
+			"meadow": 0
+		},
+		"bySlugs": 14
+	},
+	"slugs": [
+		{
+			"slug": "what-is-rings",
+			"usageCount": 2,
+			"instances": [
+				{
+					"file": "libs/engine/src/routes/arbor/analytics/+page.svelte",
+					"label": "Learn about Rings",
+					"placement": "page-header",
+					"size": "sm"
+				},
+				{
+					"file": "libs/engine/src/routes/arbor/account/FeaturesCard.svelte",
+					"label": "Learn about Rings analytics",
+					"placement": "feature-card",
+					"size": "sm"
+				}
+			]
+		},
+		{
+			"slug": "what-are-trails",
+			"usageCount": 2,
+			"instances": [
+				{
+					"file": "libs/engine/src/routes/arbor/timeline/+page.svelte",
+					"label": "Learn about Trails",
+					"placement": "page-header",
+					"size": "sm"
+				},
+				{
+					"file": "libs/engine/src/routes/arbor/account/FeaturesCard.svelte",
+					"label": "Learn about Trail",
+					"placement": "feature-card",
+					"size": "sm"
+				}
+			]
+		},
+		{
+			"slug": "what-are-curios",
+			"usageCount": 2,
+			"instances": [
+				{
+					"file": "libs/engine/src/routes/arbor/curios/+page.svelte",
+					"label": "Learn about Curios",
+					"placement": "page-header",
+					"size": "sm"
+				},
+				{
+					"file": "libs/engine/src/routes/arbor/account/FeaturesCard.svelte",
+					"label": "Learn about Curios",
+					"placement": "feature-card",
+					"size": "sm"
+				}
+			]
+		},
+		{
+			"slug": "what-is-gallery",
+			"usageCount": 1,
+			"instances": [
+				{
+					"file": "libs/engine/src/routes/arbor/curios/gallery/+page.svelte",
+					"label": "Learn about Gallery",
+					"placement": "page-header",
+					"size": "sm"
+				}
+			]
+		},
+		{
+			"slug": "what-is-journey",
+			"usageCount": 1,
+			"instances": [
+				{
+					"file": "libs/engine/src/routes/arbor/curios/journey/+page.svelte",
+					"label": "Learn about Journey",
+					"placement": "page-header",
+					"size": "sm"
+				}
+			]
+		},
+		{
+			"slug": "exporting-your-content",
+			"usageCount": 1,
+			"instances": [
+				{
+					"file": "libs/engine/src/routes/arbor/account/DataExportCard.svelte",
+					"label": "Learn about data portability",
+					"placement": "section-header",
+					"size": "sm"
+				}
+			]
+		},
+		{
+			"slug": "how-grove-protects-your-secrets",
+			"usageCount": 2,
+			"instances": [
+				{
+					"file": "libs/engine/src/routes/arbor/curios/timeline/+page.svelte",
+					"label": "How we protect your tokens",
+					"placement": "inline-help",
+					"size": "sm"
+				},
+				{
+					"file": "libs/engine/src/routes/arbor/curios/timeline/+page.svelte",
+					"label": "How we protect your keys",
+					"placement": "inline-help",
+					"size": "sm"
+				}
+			]
+		},
+		{
+			"slug": "image-upload-failures",
+			"usageCount": 1,
+			"instances": [
+				{
+					"file": "libs/engine/src/routes/arbor/images/+page.svelte",
+					"label": "Troubleshoot upload issues",
+					"placement": "error-context",
+					"size": "sm"
+				}
+			]
+		},
+		{
+			"slug": "custom-fonts",
+			"usageCount": 1,
+			"instances": [
+				{
+					"file": "libs/engine/src/routes/arbor/settings/+page.svelte",
+					"label": "Learn about fonts",
+					"placement": "section-header",
+					"size": "sm"
+				}
+			]
+		},
+		{
+			"slug": "choosing-a-theme",
+			"usageCount": 1,
+			"instances": [
+				{
+					"file": "libs/engine/src/routes/arbor/settings/+page.svelte",
+					"label": "Learn about themes",
+					"placement": "section-header",
+					"size": "sm"
+				}
+			]
+		},
+		{
+			"slug": "greenhouse-features",
+			"usageCount": 1,
+			"instances": [
+				{
+					"file": "libs/engine/src/lib/grafts/greenhouse/GraftControlPanel.svelte",
+					"label": "Learn about experimental features",
+					"placement": "panel-header",
+					"size": "sm"
+				}
+			]
+		},
+		{
+			"slug": "what-are-passkeys",
+			"usageCount": 1,
+			"instances": [
+				{
+					"file": "apps/login/src/routes/+page.svelte",
+					"label": "What's a passkey?",
+					"placement": "auth-context",
+					"size": "sm"
+				}
+			]
+		},
+		{
+			"slug": "using-curios-in-content",
+			"usageCount": 3,
+			"instances": [
+				{
+					"file": "libs/engine/src/routes/arbor/garden/new/+page.svelte",
+					"line": 225,
+					"label": "Curio directives",
+					"placement": "inline-help",
+					"size": "sm"
+				},
+				{
+					"file": "libs/engine/src/routes/arbor/garden/edit/[slug]/+page.svelte",
+					"line": 295,
+					"label": "Curio directives",
+					"placement": "inline-help",
+					"size": "sm"
+				},
+				{
+					"file": "libs/engine/src/routes/arbor/pages/edit/[slug]/+page.svelte",
+					"line": 191,
+					"label": "Curio directives",
+					"placement": "inline-help",
+					"size": "sm",
+					"inline": true
+				}
+			]
+		},
+		{
+			"slug": "understanding-your-privacy",
+			"usageCount": 1,
+			"instances": [
+				{
+					"file": "apps/login/src/routes/+page.svelte",
+					"label": "How we protect your data",
+					"placement": "auth-context",
+					"size": "sm"
+				}
+			]
+		}
+	],
+	"placementTypes": {
+		"page-header": "Beside <h1> titles on major admin pages",
+		"section-header": "Beside <h2> section titles within pages",
+		"feature-card": "Inside feature showcase cards",
+		"inline-help": "Inline with paragraph text for contextual hints",
+		"error-context": "Within error messages linking to troubleshooting",
+		"panel-header": "In panel/control headers",
+		"auth-context": "Near auth-related UI for trust building"
+	},
+	"component": {
+		"source": "libs/engine/src/lib/ui/components/ui/waystone/Waystone.svelte",
+		"popup": "libs/engine/src/lib/ui/components/ui/waystone/WaystonePopup.svelte",
+		"types": "libs/engine/src/lib/ui/components/ui/waystone/types.ts"
+	},
+	"documentation": {
+		"spec": "docs/specs/waystone-spec.md",
+		"helpArticle": "docs/help-center/articles/what-are-waystones.md",
+		"integrationPlan": "docs/plans/completed/waystone-integration-plan.md"
+	}
 }

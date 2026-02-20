@@ -55,7 +55,7 @@ Timeline and Journey use **polling** (cron workers calling GitHub API with store
 
 ## Component 1: Curio Registration
 
-**File:** `packages/engine/src/lib/curios/registry.ts`
+**File:** `libs/engine/src/lib/curios/registry.ts`
 
 ```typescript
 const pulse: CurioDefinition = {
@@ -77,7 +77,7 @@ const pulse: CurioDefinition = {
 
 ## Component 2: D1 Schema
 
-**Migration:** `packages/engine/migrations/XXX_pulse_curio.sql`
+**Migration:** `libs/engine/migrations/XXX_pulse_curio.sql`
 
 Following the engine migration chain (like Timeline 024, Journey 025). Next available number.
 
@@ -221,7 +221,7 @@ CREATE INDEX idx_pulse_hourly_tenant_date
 
 **Location:** `workers/pulse/`
 
-A dedicated Cloudflare Worker. Same pattern as `workers/email-catchup/` and `packages/workers/timeline-sync/`.
+A dedicated Cloudflare Worker. Same pattern as `workers/email-catchup/` and `workers/timeline-sync/`.
 
 ### Why a Dedicated Worker
 
@@ -383,12 +383,12 @@ If the KV key has expired (stale), recompute from D1 `pulse_events` for today. T
 
 ## Component 5: Engine Library Module
 
-**Location:** `packages/engine/src/lib/curios/pulse/`
+**Location:** `libs/engine/src/lib/curios/pulse/`
 
 ### Types & Defaults
 
 ```typescript
-// packages/engine/src/lib/curios/pulse/index.ts
+// libs/engine/src/lib/curios/pulse/index.ts
 
 export interface PulseConfig {
   tenantId: string;
@@ -448,7 +448,7 @@ export const PULSE_DEFAULTS = {
 
 ## Component 6: API Endpoints
 
-**Location:** `packages/engine/src/routes/api/curios/pulse/`
+**Location:** `libs/engine/src/routes/api/curios/pulse/`
 
 Following the exact pattern of Timeline and Journey.
 
@@ -509,7 +509,7 @@ Response: {
 
 ## Component 7: Arbor Admin UI
 
-**Location:** `packages/engine/src/routes/arbor/curios/pulse/`
+**Location:** `libs/engine/src/routes/arbor/curios/pulse/`
 
 ### Sections
 
@@ -555,7 +555,7 @@ Response: {
 
 ### Svelte Components (Engine)
 
-**Location:** `packages/engine/src/lib/curios/pulse/`
+**Location:** `libs/engine/src/lib/curios/pulse/`
 
 | Component               | Purpose                                    |
 | ----------------------- | ------------------------------------------ |
@@ -571,7 +571,7 @@ Following the engine-first pattern — components live in the engine, imported b
 
 ### Page Route (Tenant Site)
 
-**Location:** `packages/engine/src/routes/(site)/pulse/`
+**Location:** `libs/engine/src/routes/(site)/pulse/`
 
 ```typescript
 // +page.server.ts
@@ -743,40 +743,40 @@ This is a simple landing route, not a curio route — it reads from Autumn's ten
 
 | File                                                         | Purpose                         |
 | ------------------------------------------------------------ | ------------------------------- |
-| `packages/engine/src/lib/curios/pulse/index.ts`              | Types, defaults, config helpers |
-| `packages/engine/src/lib/curios/pulse/Pulse.svelte`          | Full page component             |
-| `packages/engine/src/lib/curios/pulse/PulseCompact.svelte`   | Vine widget                     |
-| `packages/engine/src/lib/curios/pulse/PulseIndicator.svelte` | Active/inactive dot             |
-| `packages/engine/src/lib/curios/pulse/PulseStats.svelte`     | Stats card row                  |
-| `packages/engine/src/lib/curios/pulse/PulseHeatmap.svelte`   | Activity heatmap                |
-| `packages/engine/src/lib/curios/pulse/PulseFeed.svelte`      | Event feed                      |
-| `packages/engine/src/lib/curios/pulse/PulseTrends.svelte`    | Trend charts                    |
+| `libs/engine/src/lib/curios/pulse/index.ts`              | Types, defaults, config helpers |
+| `libs/engine/src/lib/curios/pulse/Pulse.svelte`          | Full page component             |
+| `libs/engine/src/lib/curios/pulse/PulseCompact.svelte`   | Vine widget                     |
+| `libs/engine/src/lib/curios/pulse/PulseIndicator.svelte` | Active/inactive dot             |
+| `libs/engine/src/lib/curios/pulse/PulseStats.svelte`     | Stats card row                  |
+| `libs/engine/src/lib/curios/pulse/PulseHeatmap.svelte`   | Activity heatmap                |
+| `libs/engine/src/lib/curios/pulse/PulseFeed.svelte`      | Event feed                      |
+| `libs/engine/src/lib/curios/pulse/PulseTrends.svelte`    | Trend charts                    |
 
 ### Engine (Routes)
 
 | File                                                            | Purpose              |
 | --------------------------------------------------------------- | -------------------- |
-| `packages/engine/src/routes/api/curios/pulse/+server.ts`        | Public events API    |
-| `packages/engine/src/routes/api/curios/pulse/config/+server.ts` | Config GET/PUT       |
-| `packages/engine/src/routes/api/curios/pulse/stats/+server.ts`  | Aggregated stats API |
-| `packages/engine/src/routes/(site)/pulse/+page.server.ts`       | Page data loader     |
-| `packages/engine/src/routes/(site)/pulse/+page.svelte`          | Public page          |
-| `packages/engine/src/routes/arbor/curios/pulse/+page.svelte`    | Admin config UI      |
-| `packages/engine/src/routes/arbor/curios/pulse/+page.server.ts` | Admin data loader    |
+| `libs/engine/src/routes/api/curios/pulse/+server.ts`        | Public events API    |
+| `libs/engine/src/routes/api/curios/pulse/config/+server.ts` | Config GET/PUT       |
+| `libs/engine/src/routes/api/curios/pulse/stats/+server.ts`  | Aggregated stats API |
+| `libs/engine/src/routes/(site)/pulse/+page.server.ts`       | Page data loader     |
+| `libs/engine/src/routes/(site)/pulse/+page.svelte`          | Public page          |
+| `libs/engine/src/routes/arbor/curios/pulse/+page.svelte`    | Admin config UI      |
+| `libs/engine/src/routes/arbor/curios/pulse/+page.server.ts` | Admin data loader    |
 
 ### Migration
 
 | File                                             | Purpose                |
 | ------------------------------------------------ | ---------------------- |
-| `packages/engine/migrations/XXX_pulse_curio.sql` | All 4 tables + indexes |
+| `libs/engine/migrations/XXX_pulse_curio.sql` | All 4 tables + indexes |
 
 ## Files to Modify
 
 | File                                                   | Change                              |
 | ------------------------------------------------------ | ----------------------------------- |
-| `packages/engine/src/lib/curios/registry.ts`           | Register pulse curio                |
-| `packages/engine/src/routes/arbor/curios/+page.svelte` | Add Pulse card to hub               |
-| `packages/workers/webhook-cleanup/src/index.ts`        | Add 90-day cleanup for pulse tables |
+| `libs/engine/src/lib/curios/registry.ts`           | Register pulse curio                |
+| `libs/engine/src/routes/arbor/curios/+page.svelte` | Add Pulse card to hub               |
+| `workers/webhook-cleanup/src/index.ts`        | Add 90-day cleanup for pulse tables |
 | `pnpm-workspace.yaml`                                  | Add `workers/pulse`                 |
 
 ---

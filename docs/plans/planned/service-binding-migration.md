@@ -35,8 +35,8 @@ The router (`packages/grove-router`) proxies requests to Workers via public URLs
 
 ### Changes
 
-1. **`packages/grove-router/wrangler.toml`** — Add 5 `[[services]]` entries
-2. **`packages/grove-router/src/index.ts`** — Update route map to include binding references. When proxying, check if target has a binding and use `binding.fetch()` instead of `fetch(proxyRequest)`
+1. **`services/grove-router/wrangler.toml`** — Add 5 `[[services]]` entries
+2. **`services/grove-router/src/index.ts`** — Update route map to include binding references. When proxying, check if target has a binding and use `binding.fetch()` instead of `fetch(proxyRequest)`
 
 ### Pattern
 
@@ -71,8 +71,8 @@ Pages projects (engine, plant, landing) call Zephyr via the `ZephyrClient` using
 ### Changes per package
 
 1. **`wrangler.toml`** (engine, plant, landing) — Add `[[services]]` binding for `grove-zephyr`
-2. **`packages/engine/src/lib/zephyr/client.ts`** — Add optional `fetcher?: Fetcher` to `ZephyrConfig`. When present, use `fetcher.fetch()` instead of global `fetch()`
-3. **`packages/engine/src/lib/zephyr/factory.ts`** — Update `createZephyrClient()` to accept platform env and extract binding
+2. **`libs/engine/src/lib/zephyr/client.ts`** — Add optional `fetcher?: Fetcher` to `ZephyrConfig`. When present, use `fetcher.fetch()` instead of global `fetch()`
+3. **`libs/engine/src/lib/zephyr/factory.ts`** — Update `createZephyrClient()` to accept platform env and extract binding
 4. **Call sites** — Pass `platform.env.ZEPHYR` where available (server-side code only)
 
 ### Pattern (matches existing AUTH pattern)

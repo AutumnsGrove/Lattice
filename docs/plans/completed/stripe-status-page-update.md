@@ -7,12 +7,14 @@ Grove has been approved by Stripe! This plan updates the Clearing status page to
 ## Scope
 
 **In scope:**
+
 - Update Payments component description from "LemonSqueezy" to "Stripe"
 - Change Payments component status from `maintenance` to `operational`
 - Implement real Stripe API health check in the health endpoint
 - Update mock data to reflect Stripe
 
 **Out of scope:**
+
 - Removing LemonSqueezy code entirely (it remains as backup)
 - Adding Stripe icons (none exist in the codebase currently)
 - Webhook delivery tracking UI (future enhancement)
@@ -22,9 +24,11 @@ Grove has been approved by Stripe! This plan updates the Clearing status page to
 ## Files to Modify
 
 ### 1. Database Migration (NEW FILE)
-**Path:** `packages/clearing/migrations/0009_update_payments_to_stripe.sql`
+
+**Path:** `apps/clearing/migrations/0009_update_payments_to_stripe.sql`
 
 Update the Payments component in D1 to reflect Stripe:
+
 ```sql
 UPDATE status_components
 SET
@@ -35,11 +39,13 @@ WHERE id = 'comp_payments';
 ```
 
 ### 2. Health Endpoint Update
-**Path:** `packages/engine/src/routes/api/health/payments/+server.ts`
+
+**Path:** `libs/engine/src/routes/api/health/payments/+server.ts`
 
 Current: Returns static `maintenance` status with LemonSqueezy message.
 
 Change to:
+
 - Check if `STRIPE_SECRET_KEY` is configured
 - Make lightweight Stripe API call (`GET /v1/balance`) to verify connectivity
 - Check if `STRIPE_WEBHOOK_SECRET` is configured
@@ -48,9 +54,11 @@ Change to:
 - Return `unhealthy` if Stripe API unreachable
 
 ### 3. Mock Data Update
-**Path:** `packages/clearing/src/routes/+page.server.ts`
+
+**Path:** `apps/clearing/src/routes/+page.server.ts`
 
 Lines 160-170: Update the mock data for local development:
+
 ```typescript
 {
   id: "comp_payments",
@@ -69,35 +77,36 @@ Lines 160-170: Update the mock data for local development:
 
 ### Health Check Logic
 
-**Key distinction:** Configuration issues ≠ outages. Missing secrets means *we* haven't configured things, not that Stripe is down.
+**Key distinction:** Configuration issues ≠ outages. Missing secrets means _we_ haven't configured things, not that Stripe is down.
 
-| Condition | Status | HTTP | Meaning |
-|-----------|--------|------|---------|
-| All configured + Stripe reachable | `healthy` | 200 | Payments fully operational |
-| Stripe works, webhook secret missing | `degraded` | 200 | Payments work, webhooks won't |
-| Secrets not configured | `maintenance` | 203 | Config issue, not an outage |
-| Stripe API unreachable | `unhealthy` | 503 | Actual Stripe outage |
+| Condition                            | Status        | HTTP | Meaning                       |
+| ------------------------------------ | ------------- | ---- | ----------------------------- |
+| All configured + Stripe reachable    | `healthy`     | 200  | Payments fully operational    |
+| Stripe works, webhook secret missing | `degraded`    | 200  | Payments work, webhooks won't |
+| Secrets not configured               | `maintenance` | 203  | Config issue, not an outage   |
+| Stripe API unreachable               | `unhealthy`   | 503  | Actual Stripe outage          |
 
 ```typescript
 // Pseudo-code for the health check
 if (!hasSecretKey) {
-  // No API key = config issue, not outage
-  return { status: "maintenance", httpStatus: 203 };
+	// No API key = config issue, not outage
+	return { status: "maintenance", httpStatus: 203 };
 } else if (!apiReachable) {
-  // Have key but Stripe down = real outage
-  return { status: "unhealthy", httpStatus: 503 };
+	// Have key but Stripe down = real outage
+	return { status: "unhealthy", httpStatus: 503 };
 } else if (!hasWebhookSecret) {
-  // Stripe works but webhooks won't
-  return { status: "degraded", httpStatus: 200 };
+	// Stripe works but webhooks won't
+	return { status: "degraded", httpStatus: 200 };
 } else {
-  // Everything good!
-  return { status: "healthy", httpStatus: 200 };
+	// Everything good!
+	return { status: "healthy", httpStatus: 200 };
 }
 ```
 
 ### Why `GET /v1/balance`?
 
 This endpoint is:
+
 - Lightweight (minimal data returned)
 - Read-only (no side effects)
 - Fast (typically <200ms)
@@ -109,6 +118,7 @@ This endpoint is:
 ## Verification Plan
 
 ### 1. Local Testing
+
 ```bash
 # Start clearing in dev mode
 cd packages/clearing && bun run dev
@@ -118,6 +128,7 @@ cd packages/clearing && bun run dev
 ```
 
 ### 2. Health Endpoint Testing
+
 ```bash
 # Test the health endpoint directly (requires STRIPE_SECRET_KEY)
 curl http://localhost:5174/api/health/payments | jq
@@ -136,9 +147,10 @@ curl http://localhost:5174/api/health/payments | jq
 ```
 
 ### 3. Production Deployment
+
 1. Run the migration on production D1:
    ```bash
-   gw db migrate --write packages/clearing/migrations/0009_update_payments_to_stripe.sql
+   gw db migrate --write apps/clearing/migrations/0009_update_payments_to_stripe.sql
    ```
 2. Deploy engine with updated health endpoint
 3. Deploy clearing (mock data update)
@@ -149,6 +161,7 @@ curl http://localhost:5174/api/health/payments | jq
 ## Rollback Plan
 
 If Stripe integration issues are discovered:
+
 1. Create migration `0010_revert_payments_to_maintenance.sql`
 2. Revert health endpoint to return `maintenance` status
 3. This can be done quickly without code deployment (just migration)
@@ -158,6 +171,7 @@ If Stripe integration issues are discovered:
 ## Acceptance Criteria Checklist
 
 From the issue:
+
 - [x] Update status indicators to show Stripe integration status
 - [x] Add payment processor health check (Stripe API connectivity)
 - [x] Update any Lemon Squeezy references to Stripe

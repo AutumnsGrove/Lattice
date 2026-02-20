@@ -126,7 +126,7 @@ The JWT access token does not include a `nbf` (not-before) claim. This would pre
 No `kid` (Key ID) header or JWKS rotation mechanism. If keys need rotating, all outstanding tokens would become invalid simultaneously. Acceptable at current scale — document rotation procedure when needed.
 
 ### Encryption Module Duplication
-`encryption.ts` is duplicated between `packages/engine` and `packages/workers/timeline-sync`. Both are currently identical. Consider importing from engine to prevent drift, or add a cross-reference comment.
+`encryption.ts` is duplicated between `packages/engine` and `workers/timeline-sync`. Both are currently identical. Consider importing from engine to prevent drift, or add a cross-reference comment.
 
 ### `safeDecryptToken` Plaintext Passthrough
 The migration helper `safeDecryptToken` passes through plaintext tokens that don't match the encrypted format. This is intentional for v1→v2 migration but means an attacker with DB write access could bypass decryption by inserting plaintext. Acceptable given that DB write access is already a total compromise.

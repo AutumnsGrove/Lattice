@@ -306,99 +306,99 @@ CREATE INDEX idx_sessions_expires ON sessions(expires_at);
 
 ```bash
 # In Lattice repo, create the engine package
-mkdir -p packages/engine/src/{routes,lib}
-mkdir -p packages/engine/src/lib/{auth,components,utils,server}
-mkdir -p packages/engine/src/routes/{admin,api,auth,blog}
-mkdir -p packages/engine/migrations
-mkdir -p packages/engine/static/fonts
+mkdir -p libs/engine/src/{routes,lib}
+mkdir -p libs/engine/src/lib/{auth,components,utils,server}
+mkdir -p libs/engine/src/routes/{admin,api,auth,blog}
+mkdir -p libs/engine/migrations
+mkdir -p libs/engine/static/fonts
 ```
 
 **Step 1.2: Copy core files from source**
 
 ```bash
 # Auth system
-cp -r source/src/lib/auth/* packages/engine/src/lib/auth/
+cp -r source/src/lib/auth/* libs/engine/src/lib/auth/
 
 # Core utilities
-cp source/src/lib/utils/markdown.js packages/engine/src/lib/utils/
-cp source/src/lib/utils/csrf.js packages/engine/src/lib/utils/
-cp source/src/lib/utils/sanitize.js packages/engine/src/lib/utils/
+cp source/src/lib/utils/markdown.js libs/engine/src/lib/utils/
+cp source/src/lib/utils/csrf.js libs/engine/src/lib/utils/
+cp source/src/lib/utils/sanitize.js libs/engine/src/lib/utils/
 
 # Components - Custom (gutter, TOC)
-cp -r source/src/lib/components/custom/* packages/engine/src/lib/components/custom/
+cp -r source/src/lib/components/custom/* libs/engine/src/lib/components/custom/
 # Remove: LogViewer.svelte, InternalsPostViewer.svelte, IconLegend.svelte
 
 # Components - Admin
-cp -r source/src/lib/components/admin/* packages/engine/src/lib/components/admin/
+cp -r source/src/lib/components/admin/* libs/engine/src/lib/components/admin/
 
 # Components - Gallery (for posts)
-cp -r source/src/lib/components/gallery/* packages/engine/src/lib/components/gallery/
+cp -r source/src/lib/components/gallery/* libs/engine/src/lib/components/gallery/
 
 # Components - UI (shadcn)
-cp -r source/src/lib/components/ui/* packages/engine/src/lib/components/ui/
+cp -r source/src/lib/components/ui/* libs/engine/src/lib/components/ui/
 
 # Routes - Blog
-cp -r source/src/routes/blog/* packages/engine/src/routes/blog/
+cp -r source/src/routes/blog/* libs/engine/src/routes/blog/
 
 # Routes - Admin (selective)
-cp source/src/routes/admin/+layout.* packages/engine/src/routes/admin/
-cp source/src/routes/admin/+page.svelte packages/engine/src/routes/admin/
-cp -r source/src/routes/admin/blog/* packages/engine/src/routes/admin/blog/
-cp -r source/src/routes/admin/pages/* packages/engine/src/routes/admin/pages/
-cp -r source/src/routes/admin/images/* packages/engine/src/routes/admin/images/
-cp -r source/src/routes/admin/settings/* packages/engine/src/routes/admin/settings/
+cp source/src/routes/admin/+layout.* libs/engine/src/routes/admin/
+cp source/src/routes/admin/+page.svelte libs/engine/src/routes/admin/
+cp -r source/src/routes/admin/blog/* libs/engine/src/routes/admin/blog/
+cp -r source/src/routes/admin/pages/* libs/engine/src/routes/admin/pages/
+cp -r source/src/routes/admin/images/* libs/engine/src/routes/admin/images/
+cp -r source/src/routes/admin/settings/* libs/engine/src/routes/admin/settings/
 
 # Routes - Auth
-cp -r source/src/routes/auth/* packages/engine/src/routes/auth/
+cp -r source/src/routes/auth/* libs/engine/src/routes/auth/
 
 # Routes - API (selective)
-cp -r source/src/routes/api/posts/* packages/engine/src/routes/api/posts/
-cp -r source/src/routes/api/pages/* packages/engine/src/routes/api/pages/
-cp -r source/src/routes/api/images/* packages/engine/src/routes/api/images/
-cp -r source/src/routes/api/settings/* packages/engine/src/routes/api/settings/
-cp -r source/src/routes/api/feed/* packages/engine/src/routes/api/feed/
+cp -r source/src/routes/api/posts/* libs/engine/src/routes/api/posts/
+cp -r source/src/routes/api/pages/* libs/engine/src/routes/api/pages/
+cp -r source/src/routes/api/images/* libs/engine/src/routes/api/images/
+cp -r source/src/routes/api/settings/* libs/engine/src/routes/api/settings/
+cp -r source/src/routes/api/feed/* libs/engine/src/routes/api/feed/
 
 # Static pages
-cp -r source/src/routes/about/* packages/engine/src/routes/about/
-cp -r source/src/routes/contact/* packages/engine/src/routes/contact/
+cp -r source/src/routes/about/* libs/engine/src/routes/about/
+cp -r source/src/routes/contact/* libs/engine/src/routes/contact/
 
 # RSS feed
-cp -r source/src/routes/rss.xml/* packages/engine/src/routes/rss.xml/
+cp -r source/src/routes/rss.xml/* libs/engine/src/routes/rss.xml/
 
 # Core hooks
-cp source/src/hooks.server.js packages/engine/src/
+cp source/src/hooks.server.js libs/engine/src/
 
 # Styles
-cp -r source/src/lib/styles/* packages/engine/src/lib/styles/
+cp -r source/src/lib/styles/* libs/engine/src/lib/styles/
 
 # Static assets (fonts)
-cp -r source/static/fonts/* packages/engine/static/fonts/
+cp -r source/static/fonts/* libs/engine/static/fonts/
 
 # Tailwind configs
-cp source/tailwind.config.js packages/engine/
-cp source/tailwind.typography.config.js packages/engine/
-cp source/postcss.config.js packages/engine/
+cp source/tailwind.config.js libs/engine/
+cp source/tailwind.typography.config.js libs/engine/
+cp source/postcss.config.js libs/engine/
 ```
 
 **Step 1.3: Remove unwanted files**
 
 ```bash
 # Remove from copied components
-rm -f packages/engine/src/lib/components/custom/LogViewer.svelte
-rm -f packages/engine/src/lib/components/custom/InternalsPostViewer.svelte
-rm -f packages/engine/src/lib/components/custom/IconLegend.svelte
+rm -f libs/engine/src/lib/components/custom/LogViewer.svelte
+rm -f libs/engine/src/lib/components/custom/InternalsPostViewer.svelte
+rm -f libs/engine/src/lib/components/custom/IconLegend.svelte
 
 # Remove charts (GitHub dashboard specific)
-rm -rf packages/engine/src/lib/components/charts/
+rm -rf libs/engine/src/lib/components/charts/
 ```
 
 **Step 1.4: Create template UserContent**
 
 ```bash
-mkdir -p packages/engine/UserContent/{Posts,About,Contact,Home}
+mkdir -p libs/engine/UserContent/{Posts,About,Contact,Home}
 
 # Create empty template files
-cat > packages/engine/UserContent/site-config.json << 'EOF'
+cat > libs/engine/UserContent/site-config.json << 'EOF'
 {
   "owner": {
     "name": "Your Name",

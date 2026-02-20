@@ -66,7 +66,7 @@ Waystones should feel like helpful signposts, not intrusive tooltips:
 
 ### 1.1 Component Specification
 
-**Location:** `packages/engine/src/lib/ui/components/ui/Waystone.svelte`
+**Location:** `libs/engine/src/lib/ui/components/ui/Waystone.svelte`
 
 **Props:**
 | Prop | Type | Required | Description |
@@ -100,109 +100,104 @@ Waystones should feel like helpful signposts, not intrusive tooltips:
 ```svelte
 <!-- Waystone.svelte -->
 <script lang="ts">
-  import { HelpCircle } from 'lucide-svelte';
-  import { cn } from '$lib/ui/utils';
+	import { HelpCircle } from "lucide-svelte";
+	import { cn } from "$lib/ui/utils";
 
-  interface Props {
-    slug: string;
-    label?: string;
-    size?: 'sm' | 'md';
-    inline?: boolean;
-    class?: string;
-  }
+	interface Props {
+		slug: string;
+		label?: string;
+		size?: "sm" | "md";
+		inline?: boolean;
+		class?: string;
+	}
 
-  let {
-    slug,
-    label = 'Learn more',
-    size = 'sm',
-    inline = false,
-    class: className
-  }: Props = $props();
+	let {
+		slug,
+		label = "Learn more",
+		size = "sm",
+		inline = false,
+		class: className,
+	}: Props = $props();
 
-  // Determine if we're on a tenant domain or grove.place
-  const helpBaseUrl = '/help';
+	// Determine if we're on a tenant domain or grove.place
+	const helpBaseUrl = "/help";
 </script>
 
 <a
-  href="{helpBaseUrl}/{slug}"
-  target="_blank"
-  rel="noopener"
-  class={cn(
-    'waystone',
-    `waystone--${size}`,
-    inline && 'waystone--inline',
-    className
-  )}
-  title={label}
+	href="{helpBaseUrl}/{slug}"
+	target="_blank"
+	rel="noopener"
+	class={cn("waystone", `waystone--${size}`, inline && "waystone--inline", className)}
+	title={label}
 >
-  <span class="sr-only">Help: {label}</span>
-  <HelpCircle class="waystone-icon" />
+	<span class="sr-only">Help: {label}</span>
+	<HelpCircle class="waystone-icon" />
 </a>
 
 <style>
-  .waystone {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    background: var(--glass-bg, var(--color-surface));
-    border: 1px solid var(--color-border);
-    color: var(--color-text-muted);
-    text-decoration: none;
-    transition: all 0.15s ease;
-    flex-shrink: 0;
-  }
+	.waystone {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 50%;
+		background: var(--glass-bg, var(--color-surface));
+		border: 1px solid var(--color-border);
+		color: var(--color-text-muted);
+		text-decoration: none;
+		transition: all 0.15s ease;
+		flex-shrink: 0;
+	}
 
-  .waystone--sm {
-    width: 20px;
-    height: 20px;
-  }
+	.waystone--sm {
+		width: 20px;
+		height: 20px;
+	}
 
-  .waystone--md {
-    width: 24px;
-    height: 24px;
-  }
+	.waystone--md {
+		width: 24px;
+		height: 24px;
+	}
 
-  .waystone--inline {
-    margin-left: 0.5rem;
-    vertical-align: middle;
-  }
+	.waystone--inline {
+		margin-left: 0.5rem;
+		vertical-align: middle;
+	}
 
-  .waystone:hover,
-  .waystone:focus-visible {
-    background: var(--color-accent, var(--color-primary));
-    border-color: var(--color-accent, var(--color-primary));
-    color: white;
-  }
+	.waystone:hover,
+	.waystone:focus-visible {
+		background: var(--color-accent, var(--color-primary));
+		border-color: var(--color-accent, var(--color-primary));
+		color: white;
+	}
 
-  .waystone:focus-visible {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
-  }
+	.waystone:focus-visible {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 2px;
+	}
 
-  :global(.waystone-icon) {
-    width: 14px;
-    height: 14px;
-  }
+	:global(.waystone-icon) {
+		width: 14px;
+		height: 14px;
+	}
 
-  .waystone--md :global(.waystone-icon) {
-    width: 16px;
-    height: 16px;
-  }
+	.waystone--md :global(.waystone-icon) {
+		width: 16px;
+		height: 16px;
+	}
 </style>
 ```
 
 ### 1.3 Export from Engine
 
-Add to `packages/engine/package.json` exports:
+Add to `libs/engine/package.json` exports:
 
 ```json
 {
-  "./ui": "./src/lib/ui/components/ui/index.ts"
+	"./ui": "./src/lib/ui/components/ui/index.ts"
 }
 ```
 
-Add to `packages/engine/src/lib/ui/components/ui/index.ts`:
+Add to `libs/engine/src/lib/ui/components/ui/index.ts`:
 
 ```typescript
 export { default as Waystone } from "./Waystone.svelte";
@@ -275,8 +270,8 @@ For GlassCard sections, add waystone adjacent to the `<h2>`:
 
 ```svelte
 <GlassCard variant="frosted" class="mb-6">
-  <h2>Typography</h2>
-  <p class="section-description">Choose the font family...</p>
+	<h2>Typography</h2>
+	<p class="section-description">Choose the font family...</p>
 </GlassCard>
 ```
 
@@ -284,11 +279,11 @@ For GlassCard sections, add waystone adjacent to the `<h2>`:
 
 ```svelte
 <GlassCard variant="frosted" class="mb-6">
-  <div class="section-header">
-    <h2>Typography</h2>
-    <Waystone slug="customization/custom-fonts" label="Learn about fonts" />
-  </div>
-  <p class="section-description">Choose the font family...</p>
+	<div class="section-header">
+		<h2>Typography</h2>
+		<Waystone slug="customization/custom-fonts" label="Learn about fonts" />
+	</div>
+	<p class="section-description">Choose the font family...</p>
 </GlassCard>
 ```
 
@@ -296,9 +291,9 @@ For GlassCard sections, add waystone adjacent to the `<h2>`:
 
 ```css
 .section-header {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
 }
 ```
 
@@ -308,8 +303,8 @@ For settings that need inline help:
 
 ```svelte
 <label>
-  Accent Color
-  <Waystone slug="customization/custom-accent-colors" inline />
+	Accent Color
+	<Waystone slug="customization/custom-accent-colors" inline />
 </label>
 ```
 
@@ -319,13 +314,9 @@ For editor toolbars, use a dedicated help icon:
 
 ```svelte
 <div class="toolbar">
-  <!-- existing tools -->
-  <div class="toolbar-spacer"></div>
-  <Waystone
-    slug="writing/the-markdown-editor"
-    label="Editor help"
-    size="md"
-  />
+	<!-- existing tools -->
+	<div class="toolbar-spacer"></div>
+	<Waystone slug="writing/the-markdown-editor" label="Editor help" size="md" />
 </div>
 ```
 
@@ -338,7 +329,7 @@ For editor toolbars, use a dedicated help icon:
 Create help routes in the engine to serve articles on tenant domains:
 
 ```
-packages/engine/src/routes/help/
+libs/engine/src/routes/help/
 ├── +page.svelte              # Help center index
 ├── +page.server.ts           # Load categories and featured articles
 ├── [category]/
@@ -379,61 +370,61 @@ Create `HelpArticle.svelte` to render markdown with Grove styling.
 > - Allows safe markdown-to-HTML tags only (headings, lists, code, links, images, blockquotes)
 
 ```svelte
-<!-- packages/engine/src/lib/components/help/HelpArticle.svelte -->
+<!-- libs/engine/src/lib/components/help/HelpArticle.svelte -->
 <script lang="ts">
-  import { sanitizeMarkdown } from '@autumnsgrove/lattice/utils';
-  import '$lib/styles/content.css';
+	import { sanitizeMarkdown } from "@autumnsgrove/lattice/utils";
+	import "$lib/styles/content.css";
 
-  interface Props {
-    title: string;
-    content: string;
-    lastUpdated?: string;
-    category?: string;
-    related?: Array<{ slug: string; title: string }>;
-    error?: string;
-  }
+	interface Props {
+		title: string;
+		content: string;
+		lastUpdated?: string;
+		category?: string;
+		related?: Array<{ slug: string; title: string }>;
+		error?: string;
+	}
 
-  let { title, content, lastUpdated, category, related, error }: Props = $props();
+	let { title, content, lastUpdated, category, related, error }: Props = $props();
 </script>
 
 {#if error}
-  <div class="article-error" role="alert">
-    <h1>Article not found</h1>
-    <p>We couldn't load this article. It may have been moved or removed.</p>
-    <p>
-      <a href="/help">Browse all help articles</a> or try searching for what you need.
-    </p>
-  </div>
+	<div class="article-error" role="alert">
+		<h1>Article not found</h1>
+		<p>We couldn't load this article. It may have been moved or removed.</p>
+		<p>
+			<a href="/help">Browse all help articles</a> or try searching for what you need.
+		</p>
+	</div>
 {:else}
-  <article class="help-article">
-    <header>
-      {#if category}
-        <a href="/help/{category}" class="category-link">{category}</a>
-      {/if}
-      <h1>{title}</h1>
-    </header>
+	<article class="help-article">
+		<header>
+			{#if category}
+				<a href="/help/{category}" class="category-link">{category}</a>
+			{/if}
+			<h1>{title}</h1>
+		</header>
 
-    <div class="content prose">
-      {@html sanitizeMarkdown(content)}
-    </div>
+		<div class="content prose">
+			{@html sanitizeMarkdown(content)}
+		</div>
 
-    {#if related?.length}
-      <aside class="related-articles">
-        <h2>Related Articles</h2>
-        <ul>
-          {#each related as article}
-            <li><a href="/help/{article.slug}">{article.title}</a></li>
-          {/each}
-        </ul>
-      </aside>
-    {/if}
+		{#if related?.length}
+			<aside class="related-articles">
+				<h2>Related Articles</h2>
+				<ul>
+					{#each related as article}
+						<li><a href="/help/{article.slug}">{article.title}</a></li>
+					{/each}
+				</ul>
+			</aside>
+		{/if}
 
-    {#if lastUpdated}
-      <footer>
-        <p class="last-updated">Last updated: {lastUpdated}</p>
-      </footer>
-    {/if}
-  </article>
+		{#if lastUpdated}
+			<footer>
+				<p class="last-updated">Last updated: {lastUpdated}</p>
+			</footer>
+		{/if}
+	</article>
 {/if}
 ```
 
@@ -549,7 +540,7 @@ const helpBaseUrl = 'https://grove.place/help';
 **Option 2: Link to tenant /help if available** (Better UX)
 
 ```svelte
-const helpBaseUrl = '/help';  // Relative to current domain
+const helpBaseUrl = '/help'; // Relative to current domain
 ```
 
 - Pros: Stays in user context
@@ -600,154 +591,162 @@ Include feedback on every article page. Simple thumbs up/down with Lucide icons 
 
 ### Component: `ArticleFeedback.svelte`
 
-**Location:** `packages/engine/src/lib/components/help/ArticleFeedback.svelte`
+**Location:** `libs/engine/src/lib/components/help/ArticleFeedback.svelte`
 
 ```svelte
 <script lang="ts">
-  import { ThumbsUp, ThumbsDown } from 'lucide-svelte';
-  import { enhance } from '$app/forms';
+	import { ThumbsUp, ThumbsDown } from "lucide-svelte";
+	import { enhance } from "$app/forms";
 
-  interface Props {
-    articleSlug: string;
-  }
+	interface Props {
+		articleSlug: string;
+	}
 
-  let { articleSlug }: Props = $props();
-  let submitted = $state(false);
-  let feedback = $state<'helpful' | 'not_helpful' | null>(null);
+	let { articleSlug }: Props = $props();
+	let submitted = $state(false);
+	let feedback = $state<"helpful" | "not_helpful" | null>(null);
 </script>
 
 {#if !submitted}
-  <div class="article-feedback" role="group" aria-label="Article feedback">
-    <p class="feedback-prompt">Was this helpful?</p>
-    <div class="feedback-buttons">
-      <form method="POST" action="/help/feedback" use:enhance={() => {
-        return async ({ result, update }) => {
-          if (result.type === 'success') {
-            submitted = true;
-            feedback = 'helpful';
-          }
-          await update({ reset: false });
-        };
-      }}>
-        <input type="hidden" name="slug" value={articleSlug} />
-        <input type="hidden" name="helpful" value="true" />
-        <button
-          type="submit"
-          class="feedback-btn feedback-btn--up"
-          aria-label="Yes, this was helpful"
-        >
-          <ThumbsUp class="feedback-icon" />
-        </button>
-      </form>
+	<div class="article-feedback" role="group" aria-label="Article feedback">
+		<p class="feedback-prompt">Was this helpful?</p>
+		<div class="feedback-buttons">
+			<form
+				method="POST"
+				action="/help/feedback"
+				use:enhance={() => {
+					return async ({ result, update }) => {
+						if (result.type === "success") {
+							submitted = true;
+							feedback = "helpful";
+						}
+						await update({ reset: false });
+					};
+				}}
+			>
+				<input type="hidden" name="slug" value={articleSlug} />
+				<input type="hidden" name="helpful" value="true" />
+				<button
+					type="submit"
+					class="feedback-btn feedback-btn--up"
+					aria-label="Yes, this was helpful"
+				>
+					<ThumbsUp class="feedback-icon" />
+				</button>
+			</form>
 
-      <form method="POST" action="/help/feedback" use:enhance={() => {
-        return async ({ result, update }) => {
-          if (result.type === 'success') {
-            submitted = true;
-            feedback = 'not_helpful';
-          }
-          await update({ reset: false });
-        };
-      }}>
-        <input type="hidden" name="slug" value={articleSlug} />
-        <input type="hidden" name="helpful" value="false" />
-        <button
-          type="submit"
-          class="feedback-btn feedback-btn--down"
-          aria-label="No, this wasn't helpful"
-        >
-          <ThumbsDown class="feedback-icon" />
-        </button>
-      </form>
-    </div>
-  </div>
+			<form
+				method="POST"
+				action="/help/feedback"
+				use:enhance={() => {
+					return async ({ result, update }) => {
+						if (result.type === "success") {
+							submitted = true;
+							feedback = "not_helpful";
+						}
+						await update({ reset: false });
+					};
+				}}
+			>
+				<input type="hidden" name="slug" value={articleSlug} />
+				<input type="hidden" name="helpful" value="false" />
+				<button
+					type="submit"
+					class="feedback-btn feedback-btn--down"
+					aria-label="No, this wasn't helpful"
+				>
+					<ThumbsDown class="feedback-icon" />
+				</button>
+			</form>
+		</div>
+	</div>
 {:else}
-  <div class="article-feedback article-feedback--submitted" aria-live="polite">
-    <p class="feedback-thanks">
-      {#if feedback === 'helpful'}
-        Thanks for the feedback!
-      {:else}
-        Thanks — we'll work on improving this.
-      {/if}
-    </p>
-  </div>
+	<div class="article-feedback article-feedback--submitted" aria-live="polite">
+		<p class="feedback-thanks">
+			{#if feedback === "helpful"}
+				Thanks for the feedback!
+			{:else}
+				Thanks — we'll work on improving this.
+			{/if}
+		</p>
+	</div>
 {/if}
 
 <style>
-  .article-feedback {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1rem 0;
-    border-top: 1px solid var(--color-border);
-    margin-top: 2rem;
-  }
+	.article-feedback {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		padding: 1rem 0;
+		border-top: 1px solid var(--color-border);
+		margin-top: 2rem;
+	}
 
-  .feedback-prompt {
-    font-size: 0.875rem;
-    color: var(--color-text-muted);
-    margin: 0;
-  }
+	.feedback-prompt {
+		font-size: 0.875rem;
+		color: var(--color-text-muted);
+		margin: 0;
+	}
 
-  .feedback-buttons {
-    display: flex;
-    gap: 0.5rem;
-  }
+	.feedback-buttons {
+		display: flex;
+		gap: 0.5rem;
+	}
 
-  .feedback-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;  /* Minimum touch target */
-    height: 44px;
-    padding: 0.5rem;
-    border: 1px solid var(--color-border);
-    border-radius: var(--border-radius-button);
-    background: var(--glass-bg, var(--color-surface));
-    color: var(--color-text-muted);
-    cursor: pointer;
-    transition: all 0.15s ease;
-  }
+	.feedback-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 44px; /* Minimum touch target */
+		height: 44px;
+		padding: 0.5rem;
+		border: 1px solid var(--color-border);
+		border-radius: var(--border-radius-button);
+		background: var(--glass-bg, var(--color-surface));
+		color: var(--color-text-muted);
+		cursor: pointer;
+		transition: all 0.15s ease;
+	}
 
-  .feedback-btn:hover {
-    border-color: var(--color-primary);
-    color: var(--color-primary);
-  }
+	.feedback-btn:hover {
+		border-color: var(--color-primary);
+		color: var(--color-primary);
+	}
 
-  .feedback-btn--up:hover {
-    background: var(--color-success-bg, #dcfce7);
-    border-color: var(--color-success, #16a34a);
-    color: var(--color-success, #16a34a);
-  }
+	.feedback-btn--up:hover {
+		background: var(--color-success-bg, #dcfce7);
+		border-color: var(--color-success, #16a34a);
+		color: var(--color-success, #16a34a);
+	}
 
-  .feedback-btn--down:hover {
-    background: var(--color-warning-bg, #fef3c7);
-    border-color: var(--color-warning, #d97706);
-    color: var(--color-warning, #d97706);
-  }
+	.feedback-btn--down:hover {
+		background: var(--color-warning-bg, #fef3c7);
+		border-color: var(--color-warning, #d97706);
+		color: var(--color-warning, #d97706);
+	}
 
-  .feedback-btn:focus-visible {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
-  }
+	.feedback-btn:focus-visible {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 2px;
+	}
 
-  :global(.feedback-icon) {
-    width: 1.25rem;
-    height: 1.25rem;
-  }
+	:global(.feedback-icon) {
+		width: 1.25rem;
+		height: 1.25rem;
+	}
 
-  .feedback-thanks {
-    font-size: 0.875rem;
-    color: var(--color-text-muted);
-    margin: 0;
-    font-style: italic;
-  }
+	.feedback-thanks {
+		font-size: 0.875rem;
+		color: var(--color-text-muted);
+		margin: 0;
+		font-style: italic;
+	}
 </style>
 ```
 
 ### Feedback API Endpoint
 
-**Location:** `packages/engine/src/routes/help/feedback/+server.ts`
+**Location:** `libs/engine/src/routes/help/feedback/+server.ts`
 
 ```typescript
 import { json } from "@sveltejs/kit";
@@ -757,47 +756,47 @@ import type { RequestHandler } from "./$types";
 // Each path segment must: start with alphanumeric, contain only [a-z0-9\-], end with alphanumeric
 // Note: Only hyphens allowed (not underscores) to match existing article slug conventions
 function isValidSlug(slug: string): boolean {
-  if (!slug || slug.length > 200) return false;
-  if (slug.includes("..")) return false;
-  if (slug.startsWith("/") || slug.endsWith("/")) return false;
+	if (!slug || slug.length > 200) return false;
+	if (slug.includes("..")) return false;
+	if (slug.startsWith("/") || slug.endsWith("/")) return false;
 
-  const segments = slug.split("/");
-  for (const segment of segments) {
-    // Single char segments must be alphanumeric
-    if (segment.length === 1) {
-      if (!/^[a-z0-9]$/.test(segment)) return false;
-    } else {
-      // Multi-char segments must start/end with alphanumeric, middle can have hyphens only
-      if (!/^[a-z0-9][a-z0-9\-]*[a-z0-9]$/.test(segment)) return false;
-    }
-  }
-  return true;
+	const segments = slug.split("/");
+	for (const segment of segments) {
+		// Single char segments must be alphanumeric
+		if (segment.length === 1) {
+			if (!/^[a-z0-9]$/.test(segment)) return false;
+		} else {
+			// Multi-char segments must start/end with alphanumeric, middle can have hyphens only
+			if (!/^[a-z0-9][a-z0-9\-]*[a-z0-9]$/.test(segment)) return false;
+		}
+	}
+	return true;
 }
 
 export const POST: RequestHandler = async ({ request, platform, locals }) => {
-  const data = await request.formData();
-  const slug = data.get("slug") as string;
-  const helpful = data.get("helpful") === "true";
+	const data = await request.formData();
+	const slug = data.get("slug") as string;
+	const helpful = data.get("helpful") === "true";
 
-  if (!slug || !isValidSlug(slug)) {
-    return json({ error: "Invalid article slug" }, { status: 400 });
-  }
+	if (!slug || !isValidSlug(slug)) {
+		return json({ error: "Invalid article slug" }, { status: 400 });
+	}
 
-  // Store feedback in D1
-  const db = platform?.env?.DB;
-  if (db) {
-    await db
-      .prepare(
-        `
+	// Store feedback in D1
+	const db = platform?.env?.DB;
+	if (db) {
+		await db
+			.prepare(
+				`
       INSERT INTO help_article_feedback (article_slug, helpful, created_at)
       VALUES (?, ?, datetime('now'))
     `,
-      )
-      .bind(slug, helpful ? 1 : 0)
-      .run();
-  }
+			)
+			.bind(slug, helpful ? 1 : 0)
+			.run();
+	}
 
-  return json({ success: true });
+	return json({ success: true });
 };
 ```
 
@@ -824,30 +823,30 @@ Each article page includes an "Edit on GitHub" link for community contributions:
 
 ```svelte
 <script lang="ts">
-  // Additional imports for HelpArticle.svelte footer
-  import { Pencil } from 'lucide-svelte';
-  import ArticleFeedback from './ArticleFeedback.svelte';
+	// Additional imports for HelpArticle.svelte footer
+	import { Pencil } from "lucide-svelte";
+	import ArticleFeedback from "./ArticleFeedback.svelte";
 </script>
 
 <!-- In HelpArticle.svelte footer -->
 <footer class="article-footer">
-  <div class="footer-meta">
-    {#if lastUpdated}
-      <p class="last-updated">Last updated: {lastUpdated}</p>
-    {/if}
+	<div class="footer-meta">
+		{#if lastUpdated}
+			<p class="last-updated">Last updated: {lastUpdated}</p>
+		{/if}
 
-    <a
-      href="https://github.com/AutumnsGrove/Lattice/edit/main/docs/help-center/articles/{slug}.md"
-      target="_blank"
-      rel="noopener"
-      class="edit-link"
-    >
-      <Pencil class="edit-icon" />
-      Edit on GitHub
-    </a>
-  </div>
+		<a
+			href="https://github.com/AutumnsGrove/Lattice/edit/main/docs/help-center/articles/{slug}.md"
+			target="_blank"
+			rel="noopener"
+			class="edit-link"
+		>
+			<Pencil class="edit-icon" />
+			Edit on GitHub
+		</a>
+	</div>
 
-  <ArticleFeedback articleSlug={slug} />
+	<ArticleFeedback articleSlug={slug} />
 </footer>
 ```
 

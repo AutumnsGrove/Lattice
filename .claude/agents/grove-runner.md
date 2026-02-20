@@ -34,7 +34,7 @@ gw test                                    # Test
 
 # Package Management
 pnpm install                               # Install/sync dependencies
-pnpm run package                           # Build engine dist/ (in packages/engine/)
+pnpm run package                           # Build engine dist/ (in libs/engine/)
 ```
 
 ## Monorepo Structure

@@ -2,7 +2,7 @@
 
 ## Context
 
-Phase 1 built the Threshold SDK at `packages/engine/src/lib/threshold/`. Phase 2 migrates all **29 engine-internal files** that import from the old `$lib/server/rate-limits/` system to use the new Threshold SDK instead. The old `rate-limits/` directory stays as a deprecated re-export shim until Phase 5 cleanup.
+Phase 1 built the Threshold SDK at `libs/engine/src/lib/threshold/`. Phase 2 migrates all **29 engine-internal files** that import from the old `$lib/server/rate-limits/` system to use the new Threshold SDK instead. The old `rate-limits/` directory stays as a deprecated re-export shim until Phase 5 cleanup.
 
 **What changes:** Every engine route that does `checkRateLimit({ kv, key, ... })` switches to `createThreshold(env) → thresholdCheck(threshold, { key, ... })`. Same behavior, same headers, same status codes.
 

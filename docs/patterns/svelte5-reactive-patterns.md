@@ -34,7 +34,7 @@ let subscribers = $derived(data.subscribers); // Read-only, reactive to data cha
 
 **Files using this pattern:**
 
-- `packages/engine/src/routes/admin/subscribers/+page.svelte`
+- `libs/engine/src/routes/admin/subscribers/+page.svelte`
 - Various components with computed values
 
 ### 2. `untrack()` - One-time Initialization
@@ -78,7 +78,7 @@ $effect(() => {
 
 **Files using this pattern:**
 
-- `packages/engine/src/routes/admin/blog/edit/[slug]/+page.svelte`
+- `libs/engine/src/routes/admin/blog/edit/[slug]/+page.svelte`
 
 ### 4. `$effect()` Conditional - One-time Setup
 

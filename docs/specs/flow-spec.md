@@ -4,7 +4,7 @@ description: The immersive Markdown editor where words take shape
 category: specs
 specCategory: platform-services
 icon: drafting-compass
-lastUpdated: '2026-01-25'
+lastUpdated: "2026-01-25"
 aliases: []
 tags:
   - markdown-editor
@@ -28,13 +28,13 @@ tags:
          ╱
 ```
 
-> *Where the current carries you, and the only sound is the rhythm of your thoughts.*
+> _Where the current carries you, and the only sound is the rhythm of your thoughts._
 
 ---
 
 # Flow: The Writing Sanctuary
 
-> *A place to lose yourself in words.*
+> _A place to lose yourself in words._
 
 Flow is Grove's immersive Markdown editor—the space inside Arbor where Wanderers compose their blog posts. It's not just a text field with formatting buttons. It's a sanctuary designed around one belief: **the best writing happens when the world fades away.**
 
@@ -75,20 +75,21 @@ Flow is the Markdown editor embedded in every Grove admin panel. When a Wanderer
 
 ### What Flow Provides
 
-| Feature | Purpose |
-|---------|---------|
-| **Three editor modes** | Write (source), Split (50/50), Preview (read-only) |
-| **Zen mode** | Full-screen distraction-free writing |
-| **Typewriter scrolling** | Centers cursor vertically for focused writing |
-| **Draft auto-save** | Never lose work—localStorage backup every few seconds |
-| **Image upload** | Drag/drop or paste images directly into content |
-| **Floating toolbar** | Medium-style formatting on text selection |
-| **Status bar** | Word count, line count, reading time, save status |
-| **Fireside mode** | Conversational drafting via Wisp integration |
+| Feature                  | Purpose                                               |
+| ------------------------ | ----------------------------------------------------- |
+| **Three editor modes**   | Write (source), Split (50/50), Preview (read-only)    |
+| **Zen mode**             | Full-screen distraction-free writing                  |
+| **Typewriter scrolling** | Centers cursor vertically for focused writing         |
+| **Draft auto-save**      | Never lose work—localStorage backup every few seconds |
+| **Image upload**         | Drag/drop or paste images directly into content       |
+| **Floating toolbar**     | Medium-style formatting on text selection             |
+| **Status bar**           | Word count, line count, reading time, save status     |
+| **Fireside mode**        | Conversational drafting via Wisp integration          |
 
 ### Who Uses Flow
 
 Every Grove Wanderer who publishes content. Flow handles:
+
 - Blog posts (primary use case)
 - Static pages (About, Contact, etc.)
 - Any long-form Markdown content
@@ -100,6 +101,7 @@ Every Grove Wanderer who publishes content. Flow handles:
 ### Distraction-Free by Design
 
 Flow hides complexity until you need it:
+
 - Toolbar appears only when text is selected
 - Status bar shows information without demanding attention
 - Zen mode removes everything but your words
@@ -107,6 +109,7 @@ Flow hides complexity until you need it:
 ### Writer-First, Features-Second
 
 Every feature serves the writing experience:
+
 - Auto-save eliminates anxiety about losing work
 - Mode switching is instant (no page reloads)
 - Keyboard shortcuts match what writers already know
@@ -114,6 +117,7 @@ Every feature serves the writing experience:
 ### Immersive, Not Overwhelming
 
 Flow creates focus without feeling clinical:
+
 - Monospace font for the editor (JetBrains Mono)
 - Proportional font for preview (system sans-serif)
 - Subtle visual feedback (current line highlighting, save indicators)
@@ -122,6 +126,7 @@ Flow creates focus without feeling clinical:
 ### Your Voice, Your Way
 
 Flow accommodates different writing styles:
+
 - **Raw markdown writers**: Stay in Write mode, see your syntax
 - **Visual thinkers**: Use Split mode to see rendered output
 - **Reviewers**: Preview mode for read-through before publish
@@ -239,13 +244,13 @@ Zen mode strips away everything except your words. No sidebar. No distractions. 
 
 ### Features in Zen Mode
 
-| Feature | Behavior |
-|---------|----------|
-| **Full screen** | Editor fills entire viewport |
-| **Typewriter scrolling** | Automatically enabled—cursor stays centered |
-| **Toolbar** | Still accessible but faded (30% opacity until hover) |
-| **Status bar** | Still accessible but faded (50% opacity until hover) |
-| **Exit** | Press `Escape` or click minimize button |
+| Feature                  | Behavior                                             |
+| ------------------------ | ---------------------------------------------------- |
+| **Full screen**          | Editor fills entire viewport                         |
+| **Typewriter scrolling** | Automatically enabled—cursor stays centered          |
+| **Toolbar**              | Still accessible but faded (30% opacity until hover) |
+| **Status bar**           | Still accessible but faded (50% opacity until hover) |
+| **Exit**                 | Press `Escape` or click minimize button              |
 
 ### Entering Zen Mode
 
@@ -278,7 +283,7 @@ This mimics the experience of a typewriter, where your eyes stay in one place wh
 
 Fireside is a conversational writing mode powered by [Wisp](/knowledge/specs/wisp-spec). Instead of facing a blank page, you have a conversation with Wisp, and your words get organized into a draft.
 
-> *A good listener, not a ghostwriter.*
+> _A good listener, not a ghostwriter._
 
 ### When It's Available
 
@@ -290,7 +295,7 @@ Fireside mode appears only when the editor is empty. If you already have content
 2. Wisp asks a thoughtful opening question
 3. You respond naturally, as if talking to a friend
 4. After 3+ exchanges with enough substance, "Ready to draft" becomes available
-5. Wisp organizes *your words* into a cohesive post
+5. Wisp organizes _your words_ into a cohesive post
 6. You review, edit, and decide whether to publish
 
 ### The Transparency Marker
@@ -298,10 +303,11 @@ Fireside mode appears only when the editor is empty. If you already have content
 Every post created through Fireside includes:
 
 ```markdown
-*~ written fireside with Wisp ~*
+_~ written fireside with Wisp ~_
 ```
 
 This marker is:
+
 - Appended automatically at publish time
 - Stored in post metadata (`fireside_assisted: true`)
 - Cannot be removed (enforced at API level)
@@ -345,12 +351,12 @@ When you return to an editor with an unsaved draft:
 
 The status bar shows draft state:
 
-| Indicator | Meaning |
-|-----------|---------|
-| `Saving draft...` | Currently writing to localStorage |
-| `Draft saved ✓` | Successfully saved |
-| `Unsaved` | Changes exist that haven't been saved |
-| `Saving...` | Server save in progress |
+| Indicator         | Meaning                               |
+| ----------------- | ------------------------------------- |
+| `Saving draft...` | Currently writing to localStorage     |
+| `Draft saved ✓`   | Successfully saved                    |
+| `Unsaved`         | Changes exist that haven't been saved |
+| `Saving...`       | Server save in progress               |
 
 ---
 
@@ -374,6 +380,7 @@ Drag images directly into the editor:
 ### Paste from Clipboard
 
 Copy an image and paste (`Cmd/Ctrl + V`) directly into the editor. Flow:
+
 1. Detects the clipboard contains an image
 2. Creates a timestamped filename (`pasted-1706234567890.png`)
 3. Uploads to R2 storage
@@ -396,6 +403,7 @@ Copy an image and paste (`Cmd/Ctrl + V`) directly into the editor. Flow:
 ```
 
 Errors display briefly:
+
 ```
 ┌─────────────────────────────────────────┐
 │  ! Upload failed: File too large        │
@@ -420,15 +428,15 @@ When you select text, a floating toolbar appears above the selection:
 
 ### Available Actions
 
-| Button | Action | Result |
-|--------|--------|--------|
-| **B** | Bold | `**text**` |
-| **I** | Italic | `_text_` |
-| **</>** | Inline code | `` `text` `` |
-| **🔗** | Link | `[text](url)` |
-| **H1** | Heading 1 | `# ` at line start |
-| **H2** | Heading 2 | `## ` at line start |
-| **H3** | Heading 3 | `### ` at line start |
+| Button  | Action      | Result               |
+| ------- | ----------- | -------------------- |
+| **B**   | Bold        | `**text**`           |
+| **I**   | Italic      | `_text_`             |
+| **</>** | Inline code | `` `text` ``         |
+| **🔗**  | Link        | `[text](url)`        |
+| **H1**  | Heading 1   | `# ` at line start   |
+| **H2**  | Heading 2   | `## ` at line start  |
+| **H3**  | Heading 3   | `### ` at line start |
 
 ### Behavior
 
@@ -452,24 +460,24 @@ The status bar provides at-a-glance information without demanding attention:
 
 ### Left Side (Statistics)
 
-| Stat | Description |
-|------|-------------|
-| `Ln X, Col Y` | Current cursor position |
-| `N lines` | Total line count |
-| `N words` | Total word count |
+| Stat          | Description                      |
+| ------------- | -------------------------------- |
+| `Ln X, Col Y` | Current cursor position          |
+| `N lines`     | Total line count                 |
+| `N words`     | Total word count                 |
 | `~N min read` | Estimated reading time (200 wpm) |
 
 ### Right Side (State)
 
-| Indicator | Meaning |
-|-----------|---------|
-| `Source` / `Split` / `Preview` | Current editor mode |
-| `Typewriter` | Typewriter scrolling is active |
-| `Saving...` | Server save in progress |
-| `Saving draft...` | localStorage save in progress |
-| `Draft saved ✓` | Draft successfully saved |
-| `Unsaved` | Unsaved changes exist |
-| `Markdown` | No special state (default) |
+| Indicator                      | Meaning                        |
+| ------------------------------ | ------------------------------ |
+| `Source` / `Split` / `Preview` | Current editor mode            |
+| `Typewriter`                   | Typewriter scrolling is active |
+| `Saving...`                    | Server save in progress        |
+| `Saving draft...`              | localStorage save in progress  |
+| `Draft saved ✓`                | Draft successfully saved       |
+| `Unsaved`                      | Unsaved changes exist          |
+| `Markdown`                     | No special state (default)     |
 
 ---
 
@@ -477,31 +485,31 @@ The status bar provides at-a-glance information without demanding attention:
 
 ### Text Formatting
 
-| Shortcut | Action |
-|----------|--------|
+| Shortcut       | Action            |
+| -------------- | ----------------- |
 | `Cmd/Ctrl + B` | Bold (`**text**`) |
 | `Cmd/Ctrl + I` | Italic (`_text_`) |
 
 ### Editor Control
 
-| Shortcut | Action |
-|----------|--------|
-| `Cmd/Ctrl + S` | Save to server |
-| `Cmd/Ctrl + 1` | Switch to Write mode |
-| `Cmd/Ctrl + 2` | Switch to Split mode |
-| `Cmd/Ctrl + 3` | Switch to Preview mode |
-| `Cmd/Ctrl + P` | Cycle through modes |
-| `Cmd/Ctrl + Shift + Enter` | Toggle Zen mode |
-| `Cmd/Ctrl + Shift + F` | Toggle Fireside mode |
-| `Tab` | Insert 2 spaces (indentation) |
-| `Escape` | Exit Zen mode / Exit Fireside |
+| Shortcut                   | Action                        |
+| -------------------------- | ----------------------------- |
+| `Cmd/Ctrl + S`             | Save to server                |
+| `Cmd/Ctrl + 1`             | Switch to Write mode          |
+| `Cmd/Ctrl + 2`             | Switch to Split mode          |
+| `Cmd/Ctrl + 3`             | Switch to Preview mode        |
+| `Cmd/Ctrl + P`             | Cycle through modes           |
+| `Cmd/Ctrl + Shift + Enter` | Toggle Zen mode               |
+| `Cmd/Ctrl + Shift + F`     | Toggle Fireside mode          |
+| `Tab`                      | Insert 2 spaces (indentation) |
+| `Escape`                   | Exit Zen mode / Exit Fireside |
 
 ### Navigation
 
-| Shortcut | Action |
-|----------|--------|
-| Standard text navigation | Works as expected |
-| Scroll sync | Preview follows editor scroll position |
+| Shortcut                 | Action                                 |
+| ------------------------ | -------------------------------------- |
+| Standard text navigation | Works as expected                      |
+| Scroll sync              | Preview follows editor scroll position |
 
 ---
 
@@ -511,24 +519,24 @@ Flow uses [markdown-it](https://github.com/markdown-it/markdown-it) for renderin
 
 ### Supported Features
 
-| Feature | Syntax | Rendered |
-|---------|--------|----------|
-| **Bold** | `**text**` | **text** |
-| **Italic** | `_text_` or `*text*` | *text* |
-| **Headings** | `# H1` through `###### H6` | Proper hierarchy |
-| **Links** | `[text](url)` | Clickable link |
-| **Images** | `![alt](url)` | Rendered image |
-| **Code (inline)** | `` `code` `` | Monospace |
-| **Code blocks** | ` ``` ` fenced | Syntax highlighting |
-| **Blockquotes** | `> quote` | Indented quote |
-| **Lists** | `- item` or `1. item` | Bulleted/numbered |
-| **Horizontal rules** | `---` | Divider line |
-| **Auto-linking** | URLs become clickable | Enabled |
+| Feature              | Syntax                     | Rendered            |
+| -------------------- | -------------------------- | ------------------- |
+| **Bold**             | `**text**`                 | **text**            |
+| **Italic**           | `_text_` or `*text*`       | _text_              |
+| **Headings**         | `# H1` through `###### H6` | Proper hierarchy    |
+| **Links**            | `[text](url)`              | Clickable link      |
+| **Images**           | `![alt](url)`              | Rendered image      |
+| **Code (inline)**    | `` `code` ``               | Monospace           |
+| **Code blocks**      | ` ``` ` fenced             | Syntax highlighting |
+| **Blockquotes**      | `> quote`                  | Indented quote      |
+| **Lists**            | `- item` or `1. item`      | Bulleted/numbered   |
+| **Horizontal rules** | `---`                      | Divider line        |
+| **Auto-linking**     | URLs become clickable      | Enabled             |
 
 ### What's Disabled
 
-| Feature | Reason |
-|---------|--------|
+| Feature  | Reason                    |
+| -------- | ------------------------- |
 | Raw HTML | Security (XSS prevention) |
 
 All content is sanitized through `sanitizeMarkdown()` before rendering to prevent XSS attacks.
@@ -546,16 +554,17 @@ All content is sanitized through `sanitizeMarkdown()` before rendering to preven
 
 ### Screen Reader Support
 
-| Element | Announcement |
-|---------|-------------|
-| Editor | `role="application"` with label "Markdown editor with live preview" |
-| Floating toolbar | `role="toolbar"` with label "Text formatting toolbar" |
-| Line numbers | `aria-hidden="true"` (decorative) |
-| Mode buttons | Descriptive `aria-label` for each |
+| Element          | Announcement                                                        |
+| ---------------- | ------------------------------------------------------------------- |
+| Editor           | `role="application"` with label "Markdown editor with live preview" |
+| Floating toolbar | `role="toolbar"` with label "Text formatting toolbar"               |
+| Line numbers     | `aria-hidden="true"` (decorative)                                   |
+| Mode buttons     | Descriptive `aria-label` for each                                   |
 
 ### Reduced Motion
 
 Respects `prefers-reduced-motion`:
+
 - Toolbar animations disabled
 - Scroll behavior uses `auto` instead of `smooth`
 
@@ -572,12 +581,12 @@ Respects `prefers-reduced-motion`:
 
 ### Key Files
 
-| File | Purpose |
-|------|---------|
-| `packages/engine/src/lib/components/admin/MarkdownEditor.svelte` | Main editor component (~1700 lines) |
-| ~~`FloatingToolbar.svelte`~~ | Removed — formatting buttons moved to MarkdownEditor's persistent toolbar |
-| `packages/engine/src/lib/components/admin/FiresideChat.svelte` | Fireside conversation UI |
-| `packages/engine/src/lib/components/admin/composables/` | Editor composables (draft manager, themes) |
+| File                                                         | Purpose                                                                   |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------- |
+| `libs/engine/src/lib/components/admin/MarkdownEditor.svelte` | Main editor component (~1700 lines)                                       |
+| ~~`FloatingToolbar.svelte`~~                                 | Removed — formatting buttons moved to MarkdownEditor's persistent toolbar |
+| `libs/engine/src/lib/components/admin/FiresideChat.svelte`   | Fireside conversation UI                                                  |
+| `libs/engine/src/lib/components/admin/composables/`          | Editor composables (draft manager, themes)                                |
 
 ### Component Architecture
 
@@ -594,10 +603,10 @@ MarkdownEditor.svelte
 
 ### Composables
 
-| Composable | Purpose |
-|------------|---------|
+| Composable        | Purpose                               |
+| ----------------- | ------------------------------------- |
 | `useDraftManager` | localStorage draft saving/restoration |
-| `useEditorTheme` | Editor theme management |
+| `useEditorTheme`  | Editor theme management               |
 
 ### State Management
 
@@ -619,6 +628,6 @@ Flow uses Svelte 5 runes (`$state`, `$derived`, `$effect`) for reactive state:
 
 ---
 
-*Spec Version: 1.0*
-*Created: January 2026*
-*Status: Documentation of existing feature*
+_Spec Version: 1.0_
+_Created: January 2026_
+_Status: Documentation of existing feature_

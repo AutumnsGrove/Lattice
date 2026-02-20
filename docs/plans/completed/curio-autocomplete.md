@@ -28,13 +28,13 @@ User types :: -> oninput detects trigger -> dropdown opens
 
 ## Step 1: Curio Metadata Constant
 
-**File:** `packages/engine/src/lib/utils/markdown-directives.ts`
+**File:** `libs/engine/src/lib/utils/markdown-directives.ts`
 
 Added `CURIO_METADATA` array alongside existing `CURIO_DIRECTIVES` with `id`, `name`, `requiresArg`, and optional `system` flag.
 
 ## Step 2: Shared Server Utility for Curio Status
 
-**Created:** `packages/engine/src/lib/server/curio-status.ts`
+**Created:** `libs/engine/src/lib/server/curio-status.ts`
 
 Extracted `queryEnabled()` / `queryExists()` helpers from `arbor/pages/+page.server.ts` into a reusable `loadCurioStatus()` function. Refactored `arbor/pages/+page.server.ts` to import from this utility.
 
@@ -54,13 +54,13 @@ Extracted `queryEnabled()` / `queryExists()` helpers from `arbor/pages/+page.ser
 
 ## Step 4: Autocomplete Component
 
-**Created:** `packages/engine/src/lib/components/admin/CurioAutocomplete.svelte`
+**Created:** `libs/engine/src/lib/components/admin/CurioAutocomplete.svelte`
 
 Standalone dropdown with glassmorphism styling, keyboard navigation, filtering, and configured/unconfigured status dots.
 
 ## Step 5: Wire Autocomplete into MarkdownEditor
 
-**Modified:** `packages/engine/src/lib/components/admin/MarkdownEditor.svelte`
+**Modified:** `libs/engine/src/lib/components/admin/MarkdownEditor.svelte`
 
 - Added `configuredCurios` prop
 - `::` trigger detection via `checkCurioTrigger()` in oninput

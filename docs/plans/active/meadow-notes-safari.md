@@ -26,7 +26,7 @@ Meadow currently supports exactly one content type: RSS-syndicated blog posts ("
 
 ### Safari findings: What exists today
 
-**Migration 076** (`packages/engine/migrations/076_meadow_social.sql`):
+**Migration 076** (`libs/engine/migrations/076_meadow_social.sql`):
 
 - [x] Solid table structure with proper indexes
 - [x] `UNIQUE(tenant_id, guid)` constraint for dedup
@@ -89,7 +89,7 @@ CREATE INDEX IF NOT EXISTS idx_meadow_posts_type
 
 ### Safari findings: What exists today
 
-**`packages/meadow/src/lib/types/post.ts`** (24 lines):
+**`apps/meadow/src/lib/types/post.ts`** (24 lines):
 
 - [x] Clean interface with user interaction state
 - [x] Good separation of engagement data
@@ -98,7 +98,7 @@ CREATE INDEX IF NOT EXISTS idx_meadow_posts_type
 - [ ] **No `userId` field** — Note authors need user-level identity
 - [ ] **`title` is non-nullable string** — Notes may have no title
 
-**`packages/meadow/src/lib/server/types.ts`** (127 lines):
+**`apps/meadow/src/lib/server/types.ts`** (127 lines):
 
 - [x] Good `PostRow` → `MeadowPost` transformer
 - [x] FeedFilter union covers all algorithms
@@ -111,12 +111,12 @@ CREATE INDEX IF NOT EXISTS idx_meadow_posts_type
 
 ```typescript
 export interface MeadowPost {
-  // ... existing fields ...
-  postType: "bloom" | "note";
-  body: string | null; // Note text content (null for Blooms)
-  userId: string | null; // Note author's user ID (null for Blooms)
-  // Make title optional for Notes
-  title: string; // Empty string for Notes, real title for Blooms
+	// ... existing fields ...
+	postType: "bloom" | "note";
+	body: string | null; // Note text content (null for Blooms)
+	userId: string | null; // Note author's user ID (null for Blooms)
+	// Make title optional for Notes
+	title: string; // Empty string for Notes, real title for Blooms
 }
 ```
 
@@ -124,10 +124,10 @@ export interface MeadowPost {
 
 ```typescript
 export interface PostRow {
-  // ... existing fields ...
-  post_type: string;
-  user_id: string | null;
-  body: string | null;
+	// ... existing fields ...
+	post_type: string;
+	user_id: string | null;
+	body: string | null;
 }
 ```
 
@@ -154,7 +154,7 @@ userId: row.user_id ?? null,
 
 ### Safari findings: What exists today
 
-**`packages/meadow/src/lib/server/feed.ts`**:
+**`apps/meadow/src/lib/server/feed.ts`**:
 
 - [x] 5 feed algorithms working (all, popular, hot, top, following)
 - [x] LEFT JOINs for user interaction state
@@ -172,14 +172,14 @@ Feed queries don't need to change for the default "all" view — Notes and Bloom
 
 ```typescript
 export type FeedFilter =
-  | "all" // Both Notes and Blooms
-  | "notes" // Notes only
-  | "blooms" // Blooms only
-  | "popular"
-  | "hot"
-  | "top"
-  | "following"
-  | "bookmarks";
+	| "all" // Both Notes and Blooms
+	| "notes" // Notes only
+	| "blooms" // Blooms only
+	| "popular"
+	| "hot"
+	| "top"
+	| "following"
+	| "bookmarks";
 ```
 
 **Query modifications:**
@@ -247,7 +247,7 @@ export type FeedFilter =
 
 ### Safari findings: What exists today
 
-**`packages/meadow/src/lib/components/PostCard.svelte`** (172 lines):
+**`apps/meadow/src/lib/components/PostCard.svelte`** (172 lines):
 
 - [x] GlassCard-based, dark mode support, reduced motion
 - [x] Author header with avatar, name, time
@@ -319,7 +319,7 @@ export type FeedFilter =
 
 ### Safari findings: What exists today
 
-**`packages/meadow/src/routes/feed/+page.svelte`** (251 lines):
+**`apps/meadow/src/routes/feed/+page.svelte`** (251 lines):
 
 - [x] FeedFilters tab bar
 - [x] PostCard list with load-more pagination
@@ -373,7 +373,7 @@ Recommendation: Add "Notes" and "Blooms" as filter tabs alongside the existing o
 
 ### Safari findings: What exists today
 
-**`packages/meadow/src/routes/feed/[id]/+page.svelte`** + `+page.server.ts`:
+**`apps/meadow/src/routes/feed/[id]/+page.svelte`** + `+page.server.ts`:
 
 - [x] Loads single post with full `content_html`
 - [x] Renders Bloom content

@@ -24,22 +24,22 @@ The webhook sanitizer uses a **whitelist approach** - only explicitly allowed fi
 
 ### Explicitly Blocked (Never Stored)
 
-| Category | Fields | Risk Level |
-|----------|--------|------------|
-| **User Identity** | `user_email`, `user_name`, `customer_email`, `customer_name` | High |
-| **Payment Details** | `card_brand`, `card_last_four` | High (PCI DSS) |
-| **Address Data** | `billing_address`, `city`, `region`, `country`, `zip`, `state` | High (GDPR) |
-| **Sensitive URLs** | `receipt_url`, `update_payment_method_url`, `customer_portal_url` | Medium |
+| Category            | Fields                                                            | Risk Level     |
+| ------------------- | ----------------------------------------------------------------- | -------------- |
+| **User Identity**   | `user_email`, `user_name`, `customer_email`, `customer_name`      | High           |
+| **Payment Details** | `card_brand`, `card_last_four`                                    | High (PCI DSS) |
+| **Address Data**    | `billing_address`, `city`, `region`, `country`, `zip`, `state`    | High (GDPR)    |
+| **Sensitive URLs**  | `receipt_url`, `update_payment_method_url`, `customer_portal_url` | Medium         |
 
 ### What We Keep (Safe Fields)
 
-| Category | Fields | Why Safe |
-|----------|--------|----------|
-| **Identifiers** | `customer_id`, `product_id`, `variant_id`, `order_id`, `subscription_id` | Internal IDs, not PII |
-| **Status** | `status`, `payment_status` | Business logic needed |
-| **Product Info** | `product_name`, `variant_name` | Not user data |
-| **Timestamps** | `created_at`, `updated_at`, `renews_at`, `ends_at` | Audit trail |
-| **Financial** | `total`, `subtotal`, `tax`, `currency` | No card details |
+| Category         | Fields                                                                   | Why Safe              |
+| ---------------- | ------------------------------------------------------------------------ | --------------------- |
+| **Identifiers**  | `customer_id`, `product_id`, `variant_id`, `order_id`, `subscription_id` | Internal IDs, not PII |
+| **Status**       | `status`, `payment_status`                                               | Business logic needed |
+| **Product Info** | `product_name`, `variant_name`                                           | Not user data         |
+| **Timestamps**   | `created_at`, `updated_at`, `renews_at`, `ends_at`                       | Audit trail           |
+| **Financial**    | `total`, `subtotal`, `tax`, `currency`                                   | No card details       |
 
 ---
 
@@ -48,7 +48,7 @@ The webhook sanitizer uses a **whitelist approach** - only explicitly allowed fi
 ### Sanitizer Location
 
 ```
-packages/engine/src/lib/utils/webhook-sanitizer.ts
+libs/engine/src/lib/utils/webhook-sanitizer.ts
 ```
 
 ### Key Functions
@@ -67,33 +67,33 @@ calculateWebhookExpiry(): number
 ### Usage in Webhook Handler
 
 ```typescript
-// In packages/plant/src/routes/api/webhooks/lemonsqueezy/+server.ts
+// In libs/plant/src/routes/api/webhooks/lemonsqueezy/+server.ts
 
 const sanitizedPayload = sanitizeWebhookPayload(event);
 
 // If sanitization fails, log and preserve minimal safe data
 if (!sanitizedPayload) {
-  console.warn("[Webhook] PII sanitization failed for event:", eventName);
+	console.warn("[Webhook] PII sanitization failed for event:", eventName);
 }
 
 const payloadToStore = sanitizedPayload
-  ? JSON.stringify(sanitizedPayload)
-  : JSON.stringify({
-      meta: { event_name: eventName, test_mode: event.meta?.test_mode },
-      data: { id: event.data?.id, type: event.data?.type },
-      _sanitization_failed: true,
-    });
+	? JSON.stringify(sanitizedPayload)
+	: JSON.stringify({
+			meta: { event_name: eventName, test_mode: event.meta?.test_mode },
+			data: { id: event.data?.id, type: event.data?.type },
+			_sanitization_failed: true,
+		});
 ```
 
 ---
 
 ## Retention Policy
 
-| Aspect | Value | Rationale |
-|--------|-------|-----------|
-| **Retention Period** | 120 days | Balance between debugging needs and data minimization |
-| **Cleanup Schedule** | Daily at 3:00 AM UTC | Low-traffic period |
-| **Cleanup Worker** | `grove-webhook-cleanup` | Dedicated Cloudflare Worker |
+| Aspect               | Value                   | Rationale                                             |
+| -------------------- | ----------------------- | ----------------------------------------------------- |
+| **Retention Period** | 120 days                | Balance between debugging needs and data minimization |
+| **Cleanup Schedule** | Daily at 3:00 AM UTC    | Low-traffic period                                    |
+| **Cleanup Worker**   | `grove-webhook-cleanup` | Dedicated Cloudflare Worker                           |
 
 ### Why 120 Days?
 
@@ -107,18 +107,18 @@ const payloadToStore = sanitizedPayload
 
 ### GDPR (General Data Protection Regulation)
 
-| Principle | How We Comply |
-|-----------|---------------|
-| **Data Minimization** (Art. 5) | Whitelist-only approach strips unnecessary data |
-| **Storage Limitation** (Art. 5) | 120-day automatic deletion |
+| Principle                       | How We Comply                                        |
+| ------------------------------- | ---------------------------------------------------- |
+| **Data Minimization** (Art. 5)  | Whitelist-only approach strips unnecessary data      |
+| **Storage Limitation** (Art. 5) | 120-day automatic deletion                           |
 | **Purpose Limitation** (Art. 5) | Only store what's needed for subscription management |
 
 ### PCI DSS (Payment Card Industry)
 
-| Requirement | How We Comply |
-|-------------|---------------|
-| **Don't store card data** | `card_brand`, `card_last_four` explicitly blocked |
-| **Minimize data retention** | Automatic 120-day cleanup |
+| Requirement                 | How We Comply                                     |
+| --------------------------- | ------------------------------------------------- |
+| **Don't store card data**   | `card_brand`, `card_last_four` explicitly blocked |
+| **Minimize data retention** | Automatic 120-day cleanup                         |
 
 ---
 
@@ -126,12 +126,12 @@ const payloadToStore = sanitizedPayload
 
 ### Threat Model
 
-| Threat | Mitigation |
-|--------|------------|
-| **Data breach** | PII already stripped; blast radius minimized |
-| **Malformed webhook** | `safeJsonParse` prevents crashes; graceful fallback |
-| **Schema changes** | Type validation for critical fields; warning logs |
-| **Retention violations** | Automatic cleanup with indexed queries |
+| Threat                   | Mitigation                                          |
+| ------------------------ | --------------------------------------------------- |
+| **Data breach**          | PII already stripped; blast radius minimized        |
+| **Malformed webhook**    | `safeJsonParse` prevents crashes; graceful fallback |
+| **Schema changes**       | Type validation for critical fields; warning logs   |
+| **Retention violations** | Automatic cleanup with indexed queries              |
 
 ### Monitoring
 
@@ -142,6 +142,7 @@ When sanitization fails, a warning is logged:
 ```
 
 **If you see this frequently**, LemonSqueezy may have changed their webhook schema. Check:
+
 1. Their changelog for API updates
 2. The sanitizer's type validation logic
 3. Test with a sample webhook to identify the issue
@@ -157,6 +158,7 @@ pnpm test:run -- src/lib/utils/webhook-sanitizer.test.ts
 ```
 
 25 tests cover:
+
 - PII detection for all sensitive fields
 - Whitelist preservation logic
 - Edge cases (null, undefined, invalid input)
@@ -186,8 +188,8 @@ If LemonSqueezy adds new fields you need to preserve:
 2. **Add to whitelist** in `webhook-sanitizer.ts`:
    ```typescript
    const ATTRIBUTES_WHITELIST = new Set([
-     // ... existing fields
-     "new_safe_field",
+   	// ... existing fields
+   	"new_safe_field",
    ]);
    ```
 3. **Update types** in `SanitizedAttributes` interface

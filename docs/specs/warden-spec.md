@@ -48,7 +48,7 @@ Grove's external API gateway. Every outbound request to third-party services pas
 **Internal Name:** GroveWarden
 **Domain:** `warden.grove.place`
 **Worker:** `workers/warden/`
-**SDK:** `@autumnsgrove/lattice/warden` (in `packages/engine/src/lib/warden/`)
+**SDK:** `@autumnsgrove/lattice/warden` (in `libs/engine/src/lib/warden/`)
 **Last Updated:** February 2026
 
 A warden guards what matters. In Grove, that's your secrets. Agents operating in environments you don't control (remote servers, third-party platforms, training pipelines) can't be trusted with raw credentials. Warden stands at the gate: agents request actions, Warden validates, injects the key, executes, and returns results. The agent gets what it asked for. The key never travels.
@@ -71,23 +71,23 @@ Warden is Grove's unified external API gateway: a single interface that proxies 
 ```typescript
 // Before: Agent holds the key (dangerous)
 const response = await fetch("https://api.github.com/repos", {
-  headers: { Authorization: `Bearer ${GITHUB_TOKEN}` }, // 💀 exposed
+	headers: { Authorization: `Bearer ${GITHUB_TOKEN}` }, // 💀 exposed
 });
 
 // After: Agent describes intent, Warden executes
 const issue = await warden.github.createIssue({
-  owner: "autumnsgrove",
-  repo: "grove-engine",
-  title: "Bug: Login redirect fails",
-  body: "Steps to reproduce...",
-  labels: ["bug", "auth"],
+	owner: "autumnsgrove",
+	repo: "grove-engine",
+	title: "Bug: Login redirect fails",
+	body: "Steps to reproduce...",
+	labels: ["bug", "auth"],
 });
 
 // Or via generic interface for dynamic usage
 const result = await warden.request({
-  service: "github",
-  action: "create_issue",
-  params: { owner: "autumnsgrove", repo: "grove-engine", title: "Bug fix" },
+	service: "github",
+	action: "create_issue",
+	params: { owner: "autumnsgrove", repo: "grove-engine", title: "Bug fix" },
 });
 ```
 
@@ -301,15 +301,15 @@ The SDK automatically selects the auth path based on configuration:
 ```typescript
 // Service binding available → API key auth (fast path)
 const warden = createWardenClient({
-  WARDEN: env.WARDEN, // Service binding present
-  WARDEN_API_KEY: env.WARDEN_API_KEY,
+	WARDEN: env.WARDEN, // Service binding present
+	WARDEN_API_KEY: env.WARDEN_API_KEY,
 });
 
 // No service binding → challenge-response auth
 const warden = createWardenClient({
-  WARDEN_URL: "https://warden.grove.place",
-  WARDEN_AGENT_ID: env.WARDEN_AGENT_ID,
-  WARDEN_AGENT_SECRET: env.WARDEN_AGENT_SECRET,
+	WARDEN_URL: "https://warden.grove.place",
+	WARDEN_AGENT_ID: env.WARDEN_AGENT_ID,
+	WARDEN_AGENT_SECRET: env.WARDEN_AGENT_SECRET,
 });
 ```
 
@@ -375,44 +375,44 @@ Actions map to specific API endpoints with Zod validation:
 
 ```typescript
 const serviceActions = {
-  github: {
-    list_repos: {
-      method: "GET",
-      path: "/user/repos",
-      scope: "read",
-      params: z.object({
-        type: z.enum(["all", "owner", "member"]).optional(),
-        sort: z.enum(["created", "updated", "pushed", "full_name"]).optional(),
-      }),
-    },
-    create_issue: {
-      method: "POST",
-      path: "/repos/{owner}/{repo}/issues",
-      scope: "write",
-      params: z.object({
-        owner: z.string(),
-        repo: z.string(),
-        title: z.string(),
-        body: z.string().optional(),
-        labels: z.array(z.string()).optional(),
-      }),
-    },
-    // ... more actions
-  },
+	github: {
+		list_repos: {
+			method: "GET",
+			path: "/user/repos",
+			scope: "read",
+			params: z.object({
+				type: z.enum(["all", "owner", "member"]).optional(),
+				sort: z.enum(["created", "updated", "pushed", "full_name"]).optional(),
+			}),
+		},
+		create_issue: {
+			method: "POST",
+			path: "/repos/{owner}/{repo}/issues",
+			scope: "write",
+			params: z.object({
+				owner: z.string(),
+				repo: z.string(),
+				title: z.string(),
+				body: z.string().optional(),
+				labels: z.array(z.string()).optional(),
+			}),
+		},
+		// ... more actions
+	},
 
-  tavily: {
-    search: {
-      method: "POST",
-      path: "/search",
-      scope: "search",
-      params: z.object({
-        query: z.string(),
-        search_depth: z.enum(["basic", "advanced"]).optional(),
-        max_results: z.number().max(20).optional(),
-      }),
-    },
-    // ... more actions
-  },
+	tavily: {
+		search: {
+			method: "POST",
+			path: "/search",
+			scope: "search",
+			params: z.object({
+				query: z.string(),
+				search_depth: z.enum(["basic", "advanced"]).optional(),
+				max_results: z.number().max(20).optional(),
+			}),
+		},
+		// ... more actions
+	},
 };
 ```
 
@@ -425,21 +425,21 @@ New services are added by defining a service handler:
 import { defineService } from "../lib/service";
 
 export const newService = defineService({
-  name: "newservice",
-  baseUrl: "https://api.newservice.com",
-  authMethod: "bearer", // or "api-key-header", "basic"
-  credentialKey: "NEWSERVICE_TOKEN", // Worker env secret name
+	name: "newservice",
+	baseUrl: "https://api.newservice.com",
+	authMethod: "bearer", // or "api-key-header", "basic"
+	credentialKey: "NEWSERVICE_TOKEN", // Worker env secret name
 
-  actions: {
-    some_action: {
-      method: "POST",
-      path: "/v1/action",
-      scope: "write",
-      params: z.object({
-        /* ... */
-      }),
-    },
-  },
+	actions: {
+		some_action: {
+			method: "POST",
+			path: "/v1/action",
+			scope: "write",
+			params: z.object({
+				/* ... */
+			}),
+		},
+	},
 });
 ```
 
@@ -452,7 +452,7 @@ The Warden SDK lives in the engine, following the same pattern as Zephyr and Fir
 ### Package Location
 
 ```
-packages/engine/src/lib/warden/
+libs/engine/src/lib/warden/
 ├── index.ts              # Barrel exports
 ├── types.ts              # All interfaces and type definitions
 ├── client.ts             # WardenClient class
@@ -482,73 +482,67 @@ Exported as `@autumnsgrove/lattice/warden` through the engine's `package.json` e
 export type WardenAuthMode = "service-binding" | "challenge-response";
 
 export interface WardenConfig {
-  /** Warden Worker URL (for external auth). */
-  baseUrl?: string;
+	/** Warden Worker URL (for external auth). */
+	baseUrl?: string;
 
-  /** API key for service binding auth (internal). */
-  apiKey?: string;
+	/** API key for service binding auth (internal). */
+	apiKey?: string;
 
-  /** Agent ID for challenge-response auth (external). */
-  agentId?: string;
+	/** Agent ID for challenge-response auth (external). */
+	agentId?: string;
 
-  /** Agent secret for challenge-response auth (external). Never transmitted. */
-  agentSecret?: string;
+	/** Agent secret for challenge-response auth (external). Never transmitted. */
+	agentSecret?: string;
 
-  /** Service binding for Worker-to-Worker calls. */
-  fetcher?: {
-    fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
-  };
+	/** Service binding for Worker-to-Worker calls. */
+	fetcher?: {
+		fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+	};
 }
 
 // ─── Request / Response ────────────────────────────────────────────
 
-export type ServiceType =
-  | "github"
-  | "cloudflare"
-  | "tavily"
-  | "exa"
-  | "resend"
-  | "lemonsqueezy";
+export type ServiceType = "github" | "cloudflare" | "tavily" | "exa" | "resend" | "lemonsqueezy";
 
 export interface WardenRequest {
-  service: ServiceType;
-  action: string;
-  params?: Record<string, unknown>;
-  /** Optional tenant context for per-tenant credential lookup. */
-  tenantId?: string;
+	service: ServiceType;
+	action: string;
+	params?: Record<string, unknown>;
+	/** Optional tenant context for per-tenant credential lookup. */
+	tenantId?: string;
 }
 
 export interface WardenResponse<T = unknown> {
-  success: boolean;
-  data?: T;
-  error?: WardenError;
-  metadata: {
-    service: string;
-    action: string;
-    latencyMs: number;
-    rateLimitRemaining?: number;
-  };
+	success: boolean;
+	data?: T;
+	error?: WardenError;
+	metadata: {
+		service: string;
+		action: string;
+		latencyMs: number;
+		rateLimitRemaining?: number;
+	};
 }
 
 // ─── Errors ────────────────────────────────────────────────────────
 
 export type WardenErrorCode =
-  | "AUTH_FAILED"
-  | "INVALID_NONCE"
-  | "SCOPE_DENIED"
-  | "RATE_LIMITED"
-  | "SERVICE_ERROR"
-  | "INVALID_ACTION"
-  | "VALIDATION_ERROR"
-  | "NETWORK_ERROR"
-  | "INTERNAL_ERROR";
+	| "AUTH_FAILED"
+	| "INVALID_NONCE"
+	| "SCOPE_DENIED"
+	| "RATE_LIMITED"
+	| "SERVICE_ERROR"
+	| "INVALID_ACTION"
+	| "VALIDATION_ERROR"
+	| "NETWORK_ERROR"
+	| "INTERNAL_ERROR";
 
 export interface WardenError {
-  code: WardenErrorCode;
-  message: string;
-  service?: string;
-  scope?: string;
-  retryAfter?: number;
+	code: WardenErrorCode;
+	message: string;
+	service?: string;
+	scope?: string;
+	retryAfter?: number;
 }
 ```
 
@@ -557,12 +551,7 @@ export interface WardenError {
 ```typescript
 // client.ts
 
-import type {
-  WardenConfig,
-  WardenRequest,
-  WardenResponse,
-  WardenAuthMode,
-} from "./types";
+import type { WardenConfig, WardenRequest, WardenResponse, WardenAuthMode } from "./types";
 import { generateSignature } from "./crypto";
 import { GitHubService } from "./services/github";
 import { TavilyService } from "./services/tavily";
@@ -572,168 +561,158 @@ import { ResendService } from "./services/resend";
 import { LemonSqueezyService } from "./services/lemonsqueezy";
 
 export class WardenClient {
-  private baseUrl: string;
-  private authMode: WardenAuthMode;
-  private apiKey?: string;
-  private agentId?: string;
-  private agentSecret?: string;
-  private fetcher?: WardenConfig["fetcher"];
+	private baseUrl: string;
+	private authMode: WardenAuthMode;
+	private apiKey?: string;
+	private agentId?: string;
+	private agentSecret?: string;
+	private fetcher?: WardenConfig["fetcher"];
 
-  // ─── Type-Safe Service Accessors ───────────────────────────────
-  readonly github: GitHubService;
-  readonly cloudflare: CloudflareService;
-  readonly tavily: TavilyService;
-  readonly exa: ExaService;
-  readonly resend: ResendService;
-  readonly lemonsqueezy: LemonSqueezyService;
+	// ─── Type-Safe Service Accessors ───────────────────────────────
+	readonly github: GitHubService;
+	readonly cloudflare: CloudflareService;
+	readonly tavily: TavilyService;
+	readonly exa: ExaService;
+	readonly resend: ResendService;
+	readonly lemonsqueezy: LemonSqueezyService;
 
-  constructor(config: WardenConfig) {
-    this.baseUrl = (config.baseUrl || "https://warden.grove.place").replace(
-      /\/$/,
-      "",
-    );
-    this.apiKey = config.apiKey;
-    this.agentId = config.agentId;
-    this.agentSecret = config.agentSecret;
-    this.fetcher = config.fetcher;
+	constructor(config: WardenConfig) {
+		this.baseUrl = (config.baseUrl || "https://warden.grove.place").replace(/\/$/, "");
+		this.apiKey = config.apiKey;
+		this.agentId = config.agentId;
+		this.agentSecret = config.agentSecret;
+		this.fetcher = config.fetcher;
 
-    // Auto-detect auth mode
-    this.authMode =
-      config.fetcher || config.apiKey
-        ? "service-binding"
-        : "challenge-response";
+		// Auto-detect auth mode
+		this.authMode = config.fetcher || config.apiKey ? "service-binding" : "challenge-response";
 
-    // Initialize per-service accessors (pass `this.request` as the executor)
-    const executor = this.request.bind(this);
-    this.github = new GitHubService(executor);
-    this.cloudflare = new CloudflareService(executor);
-    this.tavily = new TavilyService(executor);
-    this.exa = new ExaService(executor);
-    this.resend = new ResendService(executor);
-    this.lemonsqueezy = new LemonSqueezyService(executor);
-  }
+		// Initialize per-service accessors (pass `this.request` as the executor)
+		const executor = this.request.bind(this);
+		this.github = new GitHubService(executor);
+		this.cloudflare = new CloudflareService(executor);
+		this.tavily = new TavilyService(executor);
+		this.exa = new ExaService(executor);
+		this.resend = new ResendService(executor);
+		this.lemonsqueezy = new LemonSqueezyService(executor);
+	}
 
-  /**
-   * Generic request interface.
-   * Use for dynamic/runtime-determined service calls.
-   * For static usage, prefer the type-safe service accessors.
-   */
-  async request<T = unknown>(req: WardenRequest): Promise<WardenResponse<T>> {
-    try {
-      if (this.authMode === "service-binding") {
-        return await this.executeServiceBinding<T>(req);
-      } else {
-        return await this.executeChallengeResponse<T>(req);
-      }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      return {
-        success: false,
-        error: {
-          code: "NETWORK_ERROR",
-          message: `Warden request failed: ${message}`,
-        },
-        metadata: {
-          service: req.service,
-          action: req.action,
-          latencyMs: 0,
-        },
-      };
-    }
-  }
+	/**
+	 * Generic request interface.
+	 * Use for dynamic/runtime-determined service calls.
+	 * For static usage, prefer the type-safe service accessors.
+	 */
+	async request<T = unknown>(req: WardenRequest): Promise<WardenResponse<T>> {
+		try {
+			if (this.authMode === "service-binding") {
+				return await this.executeServiceBinding<T>(req);
+			} else {
+				return await this.executeChallengeResponse<T>(req);
+			}
+		} catch (error) {
+			const message = error instanceof Error ? error.message : String(error);
+			return {
+				success: false,
+				error: {
+					code: "NETWORK_ERROR",
+					message: `Warden request failed: ${message}`,
+				},
+				metadata: {
+					service: req.service,
+					action: req.action,
+					latencyMs: 0,
+				},
+			};
+		}
+	}
 
-  /**
-   * Check Warden health and service status.
-   */
-  async health(): Promise<{
-    status: string;
-    services: string[];
-    agents: number;
-  } | null> {
-    try {
-      const doFetch = this.fetcher?.fetch ?? fetch;
-      const response = await doFetch(`${this.baseUrl}/health`);
-      if (!response.ok) return null;
-      return (await response.json()) as {
-        status: string;
-        services: string[];
-        agents: number;
-      };
-    } catch {
-      return null;
-    }
-  }
+	/**
+	 * Check Warden health and service status.
+	 */
+	async health(): Promise<{
+		status: string;
+		services: string[];
+		agents: number;
+	} | null> {
+		try {
+			const doFetch = this.fetcher?.fetch ?? fetch;
+			const response = await doFetch(`${this.baseUrl}/health`);
+			if (!response.ok) return null;
+			return (await response.json()) as {
+				status: string;
+				services: string[];
+				agents: number;
+			};
+		} catch {
+			return null;
+		}
+	}
 
-  // ─── Internal: Service Binding Auth ────────────────────────────
+	// ─── Internal: Service Binding Auth ────────────────────────────
 
-  private async executeServiceBinding<T>(
-    req: WardenRequest,
-  ): Promise<WardenResponse<T>> {
-    const doFetch = this.fetcher?.fetch ?? fetch;
-    const response = await doFetch(`${this.baseUrl}/request`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-API-Key": this.apiKey || "",
-      },
-      body: JSON.stringify(req),
-    });
+	private async executeServiceBinding<T>(req: WardenRequest): Promise<WardenResponse<T>> {
+		const doFetch = this.fetcher?.fetch ?? fetch;
+		const response = await doFetch(`${this.baseUrl}/request`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				"X-API-Key": this.apiKey || "",
+			},
+			body: JSON.stringify(req),
+		});
 
-    return (await response.json()) as WardenResponse<T>;
-  }
+		return (await response.json()) as WardenResponse<T>;
+	}
 
-  // ─── Internal: Challenge-Response Auth ─────────────────────────
+	// ─── Internal: Challenge-Response Auth ─────────────────────────
 
-  private async executeChallengeResponse<T>(
-    req: WardenRequest,
-  ): Promise<WardenResponse<T>> {
-    if (!this.agentId || !this.agentSecret) {
-      return {
-        success: false,
-        error: {
-          code: "AUTH_FAILED",
-          message: "Agent ID and secret required for challenge-response auth",
-        },
-        metadata: { service: req.service, action: req.action, latencyMs: 0 },
-      };
-    }
+	private async executeChallengeResponse<T>(req: WardenRequest): Promise<WardenResponse<T>> {
+		if (!this.agentId || !this.agentSecret) {
+			return {
+				success: false,
+				error: {
+					code: "AUTH_FAILED",
+					message: "Agent ID and secret required for challenge-response auth",
+				},
+				metadata: { service: req.service, action: req.action, latencyMs: 0 },
+			};
+		}
 
-    // Step 1: Fetch nonce
-    const nonceResponse = await fetch(`${this.baseUrl}/nonce`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ agentId: this.agentId }),
-    });
+		// Step 1: Fetch nonce
+		const nonceResponse = await fetch(`${this.baseUrl}/nonce`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ agentId: this.agentId }),
+		});
 
-    if (!nonceResponse.ok) {
-      return {
-        success: false,
-        error: { code: "AUTH_FAILED", message: "Failed to obtain nonce" },
-        metadata: { service: req.service, action: req.action, latencyMs: 0 },
-      };
-    }
+		if (!nonceResponse.ok) {
+			return {
+				success: false,
+				error: { code: "AUTH_FAILED", message: "Failed to obtain nonce" },
+				metadata: { service: req.service, action: req.action, latencyMs: 0 },
+			};
+		}
 
-    const { nonce } = (await nonceResponse.json()) as { nonce: string };
+		const { nonce } = (await nonceResponse.json()) as { nonce: string };
 
-    // Step 2: Generate HMAC signature
-    const signature = await generateSignature(this.agentSecret, nonce);
+		// Step 2: Generate HMAC signature
+		const signature = await generateSignature(this.agentSecret, nonce);
 
-    // Step 3: Execute authenticated request
-    const response = await fetch(`${this.baseUrl}/request`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...req,
-        agent: {
-          id: this.agentId,
-          nonce,
-          signature,
-        },
-      }),
-    });
+		// Step 3: Execute authenticated request
+		const response = await fetch(`${this.baseUrl}/request`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				...req,
+				agent: {
+					id: this.agentId,
+					nonce,
+					signature,
+				},
+			}),
+		});
 
-    return (await response.json()) as WardenResponse<T>;
-  }
+		return (await response.json()) as WardenResponse<T>;
+	}
 }
 ```
 
@@ -772,21 +751,21 @@ const DEFAULT_WARDEN_URL = "https://warden.grove.place";
  * ```
  */
 export function createWardenClient(env: {
-  WARDEN_URL?: string;
-  WARDEN_API_KEY?: string;
-  WARDEN_AGENT_ID?: string;
-  WARDEN_AGENT_SECRET?: string;
-  WARDEN?: {
-    fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
-  };
+	WARDEN_URL?: string;
+	WARDEN_API_KEY?: string;
+	WARDEN_AGENT_ID?: string;
+	WARDEN_AGENT_SECRET?: string;
+	WARDEN?: {
+		fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+	};
 }): WardenClient {
-  return new WardenClient({
-    baseUrl: env.WARDEN_URL || DEFAULT_WARDEN_URL,
-    apiKey: env.WARDEN_API_KEY,
-    agentId: env.WARDEN_AGENT_ID,
-    agentSecret: env.WARDEN_AGENT_SECRET,
-    fetcher: env.WARDEN,
-  });
+	return new WardenClient({
+		baseUrl: env.WARDEN_URL || DEFAULT_WARDEN_URL,
+		apiKey: env.WARDEN_API_KEY,
+		agentId: env.WARDEN_AGENT_ID,
+		agentSecret: env.WARDEN_AGENT_SECRET,
+		fetcher: env.WARDEN,
+	});
 }
 ````
 
@@ -802,126 +781,112 @@ import type { WardenRequest, WardenResponse } from "../types";
 type RequestExecutor = <T>(req: WardenRequest) => Promise<WardenResponse<T>>;
 
 export class GitHubService {
-  constructor(private execute: RequestExecutor) {}
+	constructor(private execute: RequestExecutor) {}
 
-  async listRepos(params?: {
-    type?: "all" | "owner" | "member";
-    sort?: "created" | "updated" | "pushed" | "full_name";
-  }) {
-    return this.execute({
-      service: "github",
-      action: "list_repos",
-      params,
-    });
-  }
+	async listRepos(params?: {
+		type?: "all" | "owner" | "member";
+		sort?: "created" | "updated" | "pushed" | "full_name";
+	}) {
+		return this.execute({
+			service: "github",
+			action: "list_repos",
+			params,
+		});
+	}
 
-  async createIssue(params: {
-    owner: string;
-    repo: string;
-    title: string;
-    body?: string;
-    labels?: string[];
-    assignees?: string[];
-  }) {
-    return this.execute({
-      service: "github",
-      action: "create_issue",
-      params,
-    });
-  }
+	async createIssue(params: {
+		owner: string;
+		repo: string;
+		title: string;
+		body?: string;
+		labels?: string[];
+		assignees?: string[];
+	}) {
+		return this.execute({
+			service: "github",
+			action: "create_issue",
+			params,
+		});
+	}
 
-  async getIssue(params: {
-    owner: string;
-    repo: string;
-    issue_number: number;
-  }) {
-    return this.execute({
-      service: "github",
-      action: "get_issue",
-      params,
-    });
-  }
+	async getIssue(params: { owner: string; repo: string; issue_number: number }) {
+		return this.execute({
+			service: "github",
+			action: "get_issue",
+			params,
+		});
+	}
 
-  async createComment(params: {
-    owner: string;
-    repo: string;
-    issue_number: number;
-    body: string;
-  }) {
-    return this.execute({
-      service: "github",
-      action: "create_comment",
-      params,
-    });
-  }
+	async createComment(params: { owner: string; repo: string; issue_number: number; body: string }) {
+		return this.execute({
+			service: "github",
+			action: "create_comment",
+			params,
+		});
+	}
 
-  async listWorkflowRuns(params: {
-    owner: string;
-    repo: string;
-    workflow_id?: string;
-    status?: "queued" | "in_progress" | "completed";
-  }) {
-    return this.execute({
-      service: "github",
-      action: "list_workflow_runs",
-      params,
-    });
-  }
+	async listWorkflowRuns(params: {
+		owner: string;
+		repo: string;
+		workflow_id?: string;
+		status?: "queued" | "in_progress" | "completed";
+	}) {
+		return this.execute({
+			service: "github",
+			action: "list_workflow_runs",
+			params,
+		});
+	}
 
-  async triggerWorkflow(params: {
-    owner: string;
-    repo: string;
-    workflow_id: string;
-    ref: string;
-    inputs?: Record<string, string>;
-  }) {
-    return this.execute({
-      service: "github",
-      action: "trigger_workflow",
-      params,
-    });
-  }
+	async triggerWorkflow(params: {
+		owner: string;
+		repo: string;
+		workflow_id: string;
+		ref: string;
+		inputs?: Record<string, string>;
+	}) {
+		return this.execute({
+			service: "github",
+			action: "trigger_workflow",
+			params,
+		});
+	}
 }
 
 // services/tavily.ts
 
 export class TavilyService {
-  constructor(private execute: RequestExecutor) {}
+	constructor(private execute: RequestExecutor) {}
 
-  async search(params: {
-    query: string;
-    searchDepth?: "basic" | "advanced";
-    maxResults?: number;
-    includeDomains?: string[];
-    excludeDomains?: string[];
-  }) {
-    return this.execute({
-      service: "tavily",
-      action: "search",
-      params,
-    });
-  }
+	async search(params: {
+		query: string;
+		searchDepth?: "basic" | "advanced";
+		maxResults?: number;
+		includeDomains?: string[];
+		excludeDomains?: string[];
+	}) {
+		return this.execute({
+			service: "tavily",
+			action: "search",
+			params,
+		});
+	}
 
-  async extract(params: { urls: string[]; format?: "markdown" | "text" }) {
-    return this.execute({
-      service: "tavily",
-      action: "extract",
-      params,
-    });
-  }
+	async extract(params: { urls: string[]; format?: "markdown" | "text" }) {
+		return this.execute({
+			service: "tavily",
+			action: "extract",
+			params,
+		});
+	}
 
-  async crawl(params: {
-    url: string;
-    maxDepth?: number;
-    maxBreadth?: number;
-    limit?: number;
-  }) {
-    return this.execute({
-      service: "tavily",
-      action: "crawl",
-      params,
-    });
-  }
+	async crawl(params: { url: string; maxDepth?: number; maxBreadth?: number; limit?: number }) {
+		return this.execute({
+			service: "tavily",
+			action: "crawl",
+			params,
+		});
+	}
 }
 
 // Similar patterns for ExaService, CloudflareService,
@@ -936,13 +901,13 @@ export class TavilyService {
 export { WardenClient } from "./client";
 export { createWardenClient } from "./factory";
 export type {
-  WardenConfig,
-  WardenRequest,
-  WardenResponse,
-  WardenError,
-  WardenErrorCode,
-  WardenAuthMode,
-  ServiceType,
+	WardenConfig,
+	WardenRequest,
+	WardenResponse,
+	WardenError,
+	WardenErrorCode,
+	WardenAuthMode,
+	ServiceType,
 } from "./types";
 ```
 
@@ -954,51 +919,51 @@ import { createWardenClient } from "@autumnsgrove/lattice/warden";
 // ─── In a SvelteKit server route (service binding) ────────────────
 
 export const POST: RequestHandler = async ({ platform }) => {
-  const warden = createWardenClient(platform.env);
+	const warden = createWardenClient(platform.env);
 
-  // Type-safe: full autocomplete on params
-  const issue = await warden.github.createIssue({
-    owner: "autumnsgrove",
-    repo: "grove-engine",
-    title: "Automated: weekly dependency audit",
-    labels: ["maintenance"],
-  });
+	// Type-safe: full autocomplete on params
+	const issue = await warden.github.createIssue({
+		owner: "autumnsgrove",
+		repo: "grove-engine",
+		title: "Automated: weekly dependency audit",
+		labels: ["maintenance"],
+	});
 
-  if (!issue.success) {
-    return json({ error: issue.error }, { status: 500 });
-  }
+	if (!issue.success) {
+		return json({ error: issue.error }, { status: 500 });
+	}
 
-  return json({ issueUrl: issue.data.html_url });
+	return json({ issueUrl: issue.data.html_url });
 };
 
 // ─── In Queen Firefly (service binding) ───────────────────────────
 
 const warden = createWardenClient(env);
 const runs = await warden.github.listWorkflowRuns({
-  owner: "autumnsgrove",
-  repo: "grove-engine",
-  status: "completed",
+	owner: "autumnsgrove",
+	repo: "grove-engine",
+	status: "completed",
 });
 
 // ─── In gw CLI (challenge-response) ──────────────────────────────
 
 const warden = createWardenClient({
-  WARDEN_URL: "https://warden.grove.place",
-  WARDEN_AGENT_ID: agentId,
-  WARDEN_AGENT_SECRET: agentSecret,
+	WARDEN_URL: "https://warden.grove.place",
+	WARDEN_AGENT_ID: agentId,
+	WARDEN_AGENT_SECRET: agentSecret,
 });
 
 const results = await warden.tavily.search({
-  query: "cloudflare workers durable objects patterns",
-  maxResults: 10,
+	query: "cloudflare workers durable objects patterns",
+	maxResults: 10,
 });
 
 // ─── Generic interface for dynamic usage ─────────────────────────
 
 const result = await warden.request({
-  service: "github",
-  action: "create_issue",
-  params: { owner, repo, title, body },
+	service: "github",
+	action: "create_issue",
+	params: { owner, repo, title, body },
 });
 ```
 
@@ -1041,16 +1006,12 @@ lemonsqueezy:read  → View billing, subscriptions, orders
 ### Scope Validation
 
 ```typescript
-function validateScope(
-  agentScopes: string[],
-  service: string,
-  action: string,
-): boolean {
-  const requiredScope = serviceActions[service][action].scope;
-  const fullScope = `${service}:${requiredScope}`;
-  const wildcardScope = `${service}:*`;
+function validateScope(agentScopes: string[], service: string, action: string): boolean {
+	const requiredScope = serviceActions[service][action].scope;
+	const fullScope = `${service}:${requiredScope}`;
+	const wildcardScope = `${service}:*`;
 
-  return agentScopes.includes(fullScope) || agentScopes.includes(wildcardScope);
+	return agentScopes.includes(fullScope) || agentScopes.includes(wildcardScope);
 }
 ```
 
@@ -1078,21 +1039,21 @@ gw secret apply EXA_API_KEY --worker grove-warden
 ```typescript
 // Warden credential resolution
 async function resolveCredential(
-  service: ServiceType,
-  tenantId: string | undefined,
-  env: Env,
+	service: ServiceType,
+	tenantId: string | undefined,
+	env: Env,
 ): Promise<string> {
-  if (tenantId) {
-    // Per-tenant: use envelope encryption
-    const secrets = await createSecretsManager(env);
-    const key = await secrets.getSecret(tenantId, `${service}_token`);
-    if (key) return key;
-    // Fall through to global if tenant has no override
-  }
+	if (tenantId) {
+		// Per-tenant: use envelope encryption
+		const secrets = await createSecretsManager(env);
+		const key = await secrets.getSecret(tenantId, `${service}_token`);
+		if (key) return key;
+		// Fall through to global if tenant has no override
+	}
 
-  // Global: from worker env secrets
-  const envKey = SERVICE_CREDENTIAL_MAP[service];
-  return env[envKey];
+	// Global: from worker env secrets
+	const envKey = SERVICE_CREDENTIAL_MAP[service];
+	return env[envKey];
 }
 ```
 
@@ -1103,22 +1064,22 @@ Keys can be rotated without agent disruption:
 ```typescript
 // Warden supports multiple active keys per service during rotation
 const serviceKeys = {
-  github: {
-    primary: env.GITHUB_TOKEN,
-    secondary: env.GITHUB_TOKEN_ROTATING, // Optional, used during rotation
-  },
+	github: {
+		primary: env.GITHUB_TOKEN,
+		secondary: env.GITHUB_TOKEN_ROTATING, // Optional, used during rotation
+	},
 };
 
 // If primary fails with 401, try secondary
 async function executeWithFallback(service: string, request: Request) {
-  try {
-    return await execute(serviceKeys[service].primary, request);
-  } catch (e) {
-    if (e.status === 401 && serviceKeys[service].secondary) {
-      return await execute(serviceKeys[service].secondary, request);
-    }
-    throw e;
-  }
+	try {
+		return await execute(serviceKeys[service].primary, request);
+	} catch (e) {
+		if (e.status === 401 && serviceKeys[service].secondary) {
+			return await execute(serviceKeys[service].secondary, request);
+		}
+		throw e;
+	}
 }
 ```
 
@@ -1128,14 +1089,14 @@ Every credential access is logged (without the credential itself):
 
 ```typescript
 await auditLog({
-  agentId: agent.id,
-  service: "github",
-  action: "create_issue",
-  timestamp: Date.now(),
-  success: true,
-  latencyMs: 234,
-  authMode: "service-binding", // or "challenge-response"
-  tenantId: request.tenantId || null,
+	agentId: agent.id,
+	service: "github",
+	action: "create_issue",
+	timestamp: Date.now(),
+	success: true,
+	latencyMs: 234,
+	authMode: "service-binding", // or "challenge-response"
+	tenantId: request.tenantId || null,
 });
 ```
 
@@ -1147,9 +1108,9 @@ await auditLog({
 
 ```typescript
 const defaultLimits = {
-  rpm: 60, // Requests per minute
-  daily: 1000, // Requests per day
-  concurrent: 5, // Max concurrent requests
+	rpm: 60, // Requests per minute
+	daily: 1000, // Requests per day
+	concurrent: 5, // Max concurrent requests
 };
 
 // Custom limits set at agent registration
@@ -1162,12 +1123,12 @@ Respects upstream API limits:
 
 ```typescript
 const serviceLimits = {
-  github: { rpm: 5000, daily: null }, // GitHub's own limits
-  tavily: { rpm: 100, daily: 1000 }, // Based on plan
-  exa: { rpm: 60, daily: 500 }, // Based on plan
-  cloudflare: { rpm: 1200, daily: null }, // CF API limits
-  resend: { rpm: 100, daily: null }, // Based on plan
-  lemonsqueezy: { rpm: 60, daily: null },
+	github: { rpm: 5000, daily: null }, // GitHub's own limits
+	tavily: { rpm: 100, daily: 1000 }, // Based on plan
+	exa: { rpm: 60, daily: 500 }, // Based on plan
+	cloudflare: { rpm: 1200, daily: null }, // CF API limits
+	resend: { rpm: 100, daily: null }, // Based on plan
+	lemonsqueezy: { rpm: 60, daily: null },
 };
 ```
 
@@ -1210,15 +1171,15 @@ Nonces stored in KV with TTL. Rate limit counters stored in KV with minute/day w
 
 ```typescript
 type WardenErrorCode =
-  | "AUTH_FAILED" // Invalid signature, expired nonce, bad API key
-  | "INVALID_NONCE" // Nonce expired, already used, or malformed
-  | "SCOPE_DENIED" // Agent lacks required scope for this action
-  | "RATE_LIMITED" // Agent or service rate limit exceeded
-  | "SERVICE_ERROR" // Upstream API returned an error (sanitized)
-  | "INVALID_ACTION" // Unknown service or action name
-  | "VALIDATION_ERROR" // Request params failed Zod validation
-  | "NETWORK_ERROR" // SDK couldn't reach Warden
-  | "INTERNAL_ERROR"; // Unexpected server error
+	| "AUTH_FAILED" // Invalid signature, expired nonce, bad API key
+	| "INVALID_NONCE" // Nonce expired, already used, or malformed
+	| "SCOPE_DENIED" // Agent lacks required scope for this action
+	| "RATE_LIMITED" // Agent or service rate limit exceeded
+	| "SERVICE_ERROR" // Upstream API returned an error (sanitized)
+	| "INVALID_ACTION" // Unknown service or action name
+	| "VALIDATION_ERROR" // Request params failed Zod validation
+	| "NETWORK_ERROR" // SDK couldn't reach Warden
+	| "INTERNAL_ERROR"; // Unexpected server error
 ```
 
 ### Error Responses
@@ -1270,17 +1231,17 @@ Responses are sanitized before returning to agents:
 
 ```typescript
 function scrubResponse(response: unknown, service: string): unknown {
-  const sensitiveFields = [
-    "token",
-    "api_key",
-    "apiKey",
-    "secret",
-    "password",
-    "authorization",
-    "x-api-key",
-  ];
+	const sensitiveFields = [
+		"token",
+		"api_key",
+		"apiKey",
+		"secret",
+		"password",
+		"authorization",
+		"x-api-key",
+	];
 
-  return deepOmit(response, sensitiveFields);
+	return deepOmit(response, sensitiveFields);
 }
 ```
 
@@ -1289,13 +1250,9 @@ function scrubResponse(response: unknown, service: string): unknown {
 ```typescript
 // Remove any URLs that might contain tokens
 function sanitizeUrls(data: unknown): unknown {
-  const tokenPatterns = [
-    /[?&]token=[^&]+/gi,
-    /[?&]api_key=[^&]+/gi,
-    /[?&]access_token=[^&]+/gi,
-  ];
+	const tokenPatterns = [/[?&]token=[^&]+/gi, /[?&]api_key=[^&]+/gi, /[?&]access_token=[^&]+/gi];
 
-  return deepReplace(data, tokenPatterns, "[REDACTED]");
+	return deepReplace(data, tokenPatterns, "[REDACTED]");
 }
 ```
 
@@ -1713,7 +1670,7 @@ export default app;
 
 ### Phase 5: SDK (Engine)
 
-- [ ] Create `packages/engine/src/lib/warden/` directory
+- [ ] Create `libs/engine/src/lib/warden/` directory
 - [ ] Define types in `types.ts`
 - [ ] Implement `WardenClient` with dual auth auto-detection
 - [ ] Implement `generateSignature()` in `crypto.ts`
@@ -1744,7 +1701,7 @@ export default app;
 
 ### Phase 8: Consumer Integration
 
-- [ ] Add `WARDEN` service binding to Lattice (`packages/engine/wrangler.toml`)
+- [ ] Add `WARDEN` service binding to Lattice (`libs/engine/wrangler.toml`)
 - [ ] Add `WARDEN` service binding to Queen Firefly
 - [ ] Wire Arbor admin pages to use Warden for GitHub operations
 - [ ] Update MCP server configuration to use Warden SDK

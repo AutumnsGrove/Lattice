@@ -1,66 +1,66 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "1.0.0",
-  "description": "Tracks engine component counts for documentation freshness checks",
-  "lastUpdated": "2026-02-16",
-  "lastAuditedBy": "v1.0 readiness audit (claude/audit-for-v1-release-pQeKZ)",
-  "components": {
-    "total": 236,
-    "breakdown": {
-      "primitives": 45,
-      "nature": 65,
-      "ui": 44,
-      "typography": 11,
-      "chrome": 8,
-      "arbor": 7,
-      "terrarium": 7,
-      "gallery": 4,
-      "charts": 4,
-      "content": 27,
-      "states": 4,
-      "forms": 3,
-      "feedback": 1,
-      "indicators": 3,
-      "icons": 3
-    },
-    "paths": {
-      "primitives": "packages/engine/src/lib/ui/components/primitives",
-      "nature": "packages/engine/src/lib/ui/components/nature",
-      "ui": "packages/engine/src/lib/ui/components/ui",
-      "typography": "packages/engine/src/lib/ui/components/typography",
-      "chrome": "packages/engine/src/lib/ui/components/chrome",
-      "arbor": "packages/engine/src/lib/ui/components/arbor",
-      "terrarium": "packages/engine/src/lib/ui/components/terrarium",
-      "gallery": "packages/engine/src/lib/ui/components/gallery",
-      "charts": "packages/engine/src/lib/ui/components/charts",
-      "content": "packages/engine/src/lib/ui/components/content",
-      "states": "packages/engine/src/lib/ui/components/states",
-      "forms": "packages/engine/src/lib/ui/components/forms",
-      "feedback": "packages/engine/src/lib/ui/components/feedback",
-      "indicators": "packages/engine/src/lib/ui/components/indicators",
-      "icons": "packages/engine/src/lib/ui/components/icons"
-    }
-  },
-  "adminComponents": {
-    "total": 8,
-    "path": "packages/engine/src/lib/components/admin",
-    "items": [
-      "MarkdownEditor.svelte",
-      "PhotoPicker.svelte",
-      "FiresideChat.svelte",
-      "VoiceInput.svelte",
-      "GutterManager.svelte",
-      "LumenAnalytics.svelte",
-      "ZephyrAnalytics.svelte",
-      "SafetyMonitoring.svelte"
-    ]
-  },
-  "utilities": {
-    "markdownPlugins": ["markdown-hum.ts", "markdown-directives.ts"]
-  },
-  "documentation": {
-    "componentReference": "docs/design-system/COMPONENT-REFERENCE.md",
-    "plan": "docs/plans/planned/documentation-plan.md",
-    "status": "planned"
-  }
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"version": "1.0.0",
+	"description": "Tracks engine component counts for documentation freshness checks",
+	"lastUpdated": "2026-02-16",
+	"lastAuditedBy": "v1.0 readiness audit (claude/audit-for-v1-release-pQeKZ)",
+	"components": {
+		"total": 236,
+		"breakdown": {
+			"primitives": 45,
+			"nature": 65,
+			"ui": 44,
+			"typography": 11,
+			"chrome": 8,
+			"arbor": 7,
+			"terrarium": 7,
+			"gallery": 4,
+			"charts": 4,
+			"content": 27,
+			"states": 4,
+			"forms": 3,
+			"feedback": 1,
+			"indicators": 3,
+			"icons": 3
+		},
+		"paths": {
+			"primitives": "libs/engine/src/lib/ui/components/primitives",
+			"nature": "libs/engine/src/lib/ui/components/nature",
+			"ui": "libs/engine/src/lib/ui/components/ui",
+			"typography": "libs/engine/src/lib/ui/components/typography",
+			"chrome": "libs/engine/src/lib/ui/components/chrome",
+			"arbor": "libs/engine/src/lib/ui/components/arbor",
+			"terrarium": "libs/engine/src/lib/ui/components/terrarium",
+			"gallery": "libs/engine/src/lib/ui/components/gallery",
+			"charts": "libs/engine/src/lib/ui/components/charts",
+			"content": "libs/engine/src/lib/ui/components/content",
+			"states": "libs/engine/src/lib/ui/components/states",
+			"forms": "libs/engine/src/lib/ui/components/forms",
+			"feedback": "libs/engine/src/lib/ui/components/feedback",
+			"indicators": "libs/engine/src/lib/ui/components/indicators",
+			"icons": "libs/engine/src/lib/ui/components/icons"
+		}
+	},
+	"adminComponents": {
+		"total": 8,
+		"path": "libs/engine/src/lib/components/admin",
+		"items": [
+			"MarkdownEditor.svelte",
+			"PhotoPicker.svelte",
+			"FiresideChat.svelte",
+			"VoiceInput.svelte",
+			"GutterManager.svelte",
+			"LumenAnalytics.svelte",
+			"ZephyrAnalytics.svelte",
+			"SafetyMonitoring.svelte"
+		]
+	},
+	"utilities": {
+		"markdownPlugins": ["markdown-hum.ts", "markdown-directives.ts"]
+	},
+	"documentation": {
+		"componentReference": "docs/design-system/COMPONENT-REFERENCE.md",
+		"plan": "docs/plans/planned/documentation-plan.md",
+		"status": "planned"
+	}
 }

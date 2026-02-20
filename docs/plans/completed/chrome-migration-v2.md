@@ -25,7 +25,7 @@ This is a corrected migration plan based on thorough code review of the existing
 
 ### Bug 1: ThemeToggle Import Path (CRITICAL)
 
-**File**: `packages/engine/src/lib/ui/components/chrome/ThemeToggle.svelte`
+**File**: `libs/engine/src/lib/ui/components/chrome/ThemeToggle.svelte`
 
 **Current (BROKEN)**:
 
@@ -47,7 +47,7 @@ import { themeStore } from "$lib/ui/stores/theme";
 
 ### Bug 2: ThemeToggle Wrong Export Name (CRITICAL)
 
-**File**: `packages/engine/src/lib/ui/components/chrome/ThemeToggle.svelte`
+**File**: `libs/engine/src/lib/ui/components/chrome/ThemeToggle.svelte`
 
 **Current (BROKEN)**:
 
@@ -81,7 +81,7 @@ export { themeStore, themeStore as theme } from "./theme";
 
 ### Bug 3: stores/index.ts Missing themeStore Export
 
-**File**: `packages/engine/src/lib/ui/stores/index.ts`
+**File**: `libs/engine/src/lib/ui/stores/index.ts`
 
 **Current**:
 
@@ -99,16 +99,16 @@ export { themeStore } from "./theme";
 
 ### Bug 4: types.ts Missing Component Type Import
 
-**File**: `packages/engine/src/lib/ui/components/chrome/types.ts`
+**File**: `libs/engine/src/lib/ui/components/chrome/types.ts`
 
 **Current**:
 
 ```typescript
 export interface NavItem {
-  href: string;
-  label: string;
-  icon?: Component; // Component is not imported!
-  // ...
+	href: string;
+	label: string;
+	icon?: Component; // Component is not imported!
+	// ...
 }
 ```
 
@@ -118,10 +118,10 @@ export interface NavItem {
 import type { Component } from "svelte";
 
 export interface NavItem {
-  href: string;
-  label: string;
-  icon?: Component;
-  // ...
+	href: string;
+	label: string;
+	icon?: Component;
+	// ...
 }
 ```
 
@@ -206,24 +206,32 @@ export interface NavItem {
 
 #### Step 0.1: Fix ThemeToggle.svelte
 
-**File**: `packages/engine/src/lib/ui/components/chrome/ThemeToggle.svelte`
+**File**: `libs/engine/src/lib/ui/components/chrome/ThemeToggle.svelte`
 
 ```svelte
 <script lang="ts">
-	import { themeStore } from '$lib/ui/stores/theme';
+	import { themeStore } from "$lib/ui/stores/theme";
 
-	let isDark = $derived($themeStore.resolvedTheme === 'dark');
+	let isDark = $derived($themeStore.resolvedTheme === "dark");
 </script>
 
 <button
 	onclick={() => themeStore.toggle()}
 	class="p-2 rounded-lg text-foreground-subtle hover:text-accent-muted hover:bg-surface transition-colors"
-	aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-	title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+	aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+	title={isDark ? "Switch to light mode" : "Switch to dark mode"}
 >
 	{#if isDark}
 		<!-- Sun icon -->
-		<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+		<svg
+			class="w-5 h-5"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="2"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+		>
 			<circle cx="12" cy="12" r="5" />
 			<line x1="12" y1="1" x2="12" y2="3" />
 			<line x1="12" y1="21" x2="12" y2="23" />
@@ -236,7 +244,15 @@ export interface NavItem {
 		</svg>
 	{:else}
 		<!-- Moon icon -->
-		<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+		<svg
+			class="w-5 h-5"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="2"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+		>
 			<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
 		</svg>
 	{/if}
@@ -245,7 +261,7 @@ export interface NavItem {
 
 #### Step 0.2: Fix stores/index.ts
 
-**File**: `packages/engine/src/lib/ui/stores/index.ts`
+**File**: `libs/engine/src/lib/ui/stores/index.ts`
 
 ```typescript
 /**
@@ -259,23 +275,23 @@ export { themeStore } from "./theme";
 
 #### Step 0.3: Fix types.ts
 
-**File**: `packages/engine/src/lib/ui/components/chrome/types.ts`
+**File**: `libs/engine/src/lib/ui/components/chrome/types.ts`
 
 ```typescript
 import type { Component } from "svelte";
 
 export interface NavItem {
-  href: string;
-  label: string;
-  icon?: Component;
-  external?: boolean;
+	href: string;
+	label: string;
+	icon?: Component;
+	external?: boolean;
 }
 
 export interface FooterLink {
-  href: string;
-  label: string;
-  icon?: Component;
-  external?: boolean;
+	href: string;
+	label: string;
+	icon?: Component;
+	external?: boolean;
 }
 
 export type MaxWidth = "narrow" | "default" | "wide";
@@ -385,10 +401,10 @@ The layout doesn't render Header/Footer directly — pages do. So no changes nee
 
 ```svelte
 <script lang="ts">
-	import Header from '$lib/components/Header.svelte';
-	import Footer from '$lib/components/Footer.svelte';
-	import Logo from '$lib/components/Logo.svelte';
-	import { season } from '$lib/stores/season';
+	import Header from "$lib/components/Header.svelte";
+	import Footer from "$lib/components/Footer.svelte";
+	import Logo from "$lib/components/Logo.svelte";
+	import { season } from "$lib/stores/season";
 	// ...
 </script>
 
@@ -401,8 +417,8 @@ The layout doesn't render Header/Footer directly — pages do. So no changes nee
 
 ```svelte
 <script lang="ts">
-	import { Header, Footer, seasonStore } from '@autumnsgrove/lattice/ui/chrome';
-	import { Logo } from '@autumnsgrove/lattice/ui/nature';
+	import { Header, Footer, seasonStore } from "@autumnsgrove/lattice/ui/chrome";
+	import { Logo } from "@autumnsgrove/lattice/ui/nature";
 	// ...
 </script>
 
@@ -542,18 +558,18 @@ The migration is complete when:
 
 ### Engine Files to Modify (Phase 0)
 
-| File                                                              | Change                          |
-| ----------------------------------------------------------------- | ------------------------------- |
-| `packages/engine/src/lib/ui/components/chrome/ThemeToggle.svelte` | Fix import path and export name |
-| `packages/engine/src/lib/ui/stores/index.ts`                      | Add themeStore export           |
-| `packages/engine/src/lib/ui/components/chrome/types.ts`           | Add Component type import       |
+| File                                                          | Change                          |
+| ------------------------------------------------------------- | ------------------------------- |
+| `libs/engine/src/lib/ui/components/chrome/ThemeToggle.svelte` | Fix import path and export name |
+| `libs/engine/src/lib/ui/stores/index.ts`                      | Add themeStore export           |
+| `libs/engine/src/lib/ui/components/chrome/types.ts`           | Add Component type import       |
 
 ### Landing Files to Modify (Phase 2)
 
-| File                                | Change                                        |
-| ----------------------------------- | --------------------------------------------- |
-| `landing/src/routes/+page.svelte`   | Update imports                                |
-| `landing/src/routes/*/+page.svelte` | Update imports (all pages with Header/Footer) |
+| File                                     | Change                                        |
+| ---------------------------------------- | --------------------------------------------- |
+| `apps/landing/src/routes/+page.svelte`   | Update imports                                |
+| `apps/landing/src/routes/*/+page.svelte` | Update imports (all pages with Header/Footer) |
 
 ### Files to Delete (Phase 3)
 

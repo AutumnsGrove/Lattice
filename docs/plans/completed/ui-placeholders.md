@@ -17,7 +17,7 @@ Two placeholder pages detected in the engine's `(apps)` route group. Both have c
 
 ### Current State
 
-**File**: `packages/engine/src/routes/(apps)/monitor/+page.svelte`
+**File**: `libs/engine/src/routes/(apps)/monitor/+page.svelte`
 
 ```svelte
 <!-- Current placeholder -->
@@ -107,7 +107,7 @@ Follow `docs/specs/vista-spec.md` for complete implementation.
 
 ### Current State
 
-**File**: `packages/engine/src/routes/(apps)/domains/+page.svelte`
+**File**: `libs/engine/src/routes/(apps)/domains/+page.svelte`
 
 ```svelte
 <!-- Current placeholder -->
@@ -202,8 +202,8 @@ For both pages, implement **Phase 1: Enhanced Placeholder** to:
 
 | File                                                     | Change               |
 | -------------------------------------------------------- | -------------------- |
-| `packages/engine/src/routes/(apps)/monitor/+page.svelte` | Enhanced placeholder |
-| `packages/engine/src/routes/(apps)/domains/+page.svelte` | Enhanced placeholder |
+| `libs/engine/src/routes/(apps)/monitor/+page.svelte` | Enhanced placeholder |
+| `libs/engine/src/routes/(apps)/domains/+page.svelte` | Enhanced placeholder |
 
 ---
 
@@ -211,5 +211,5 @@ For both pages, implement **Phase 1: Enhanced Placeholder** to:
 
 - Vista spec: `docs/specs/vista-spec.md`
 - Forage spec: `docs/specs/forage-spec.md`
-- Clearing (status page): `packages/clearing/`
-- Grove UI components: `packages/engine/src/lib/ui/`
+- Clearing (status page): `apps/clearing/`
+- Grove UI components: `libs/engine/src/lib/ui/`

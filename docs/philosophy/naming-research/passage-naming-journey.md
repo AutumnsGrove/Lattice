@@ -1189,7 +1189,7 @@ Passage is how the grove makes the impossible feel inevitable. One domain, infin
 
 ## Implementation Checklist
 
-- [ ] Rename `packages/grove-router/` → `packages/passage/`
+- [ ] Rename `services/grove-router/` → `packages/passage/`
 - [ ] Update `wrangler.toml` worker name
 - [ ] Update imports and references across codebase
 - [ ] Add entry to `docs/philosophy/grove-naming.md`

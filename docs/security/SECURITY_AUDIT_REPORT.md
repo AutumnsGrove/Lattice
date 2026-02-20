@@ -78,15 +78,15 @@ API endpoints check for authentication (`locals.user`) and tenant context (`loca
 
 **Affected Files:**
 
-- `/packages/engine/src/routes/api/posts/+server.ts`
-- `/packages/engine/src/routes/api/posts/[slug]/+server.ts`
-- `/packages/engine/src/routes/api/pages/+server.ts`
-- `/packages/engine/src/routes/api/pages/[slug]/+server.ts`
-- `/packages/engine/src/routes/api/admin/settings/+server.ts`
-- `/packages/engine/src/routes/api/images/upload/+server.ts`
-- `/packages/engine/src/routes/api/images/delete/+server.ts`
-- `/packages/engine/src/routes/api/images/list/+server.ts`
-- `/packages/engine/src/routes/api/images/analyze/+server.ts`
+- `/libs/engine/src/routes/api/posts/+server.ts`
+- `/libs/engine/src/routes/api/posts/[slug]/+server.ts`
+- `/libs/engine/src/routes/api/pages/+server.ts`
+- `/libs/engine/src/routes/api/pages/[slug]/+server.ts`
+- `/libs/engine/src/routes/api/admin/settings/+server.ts`
+- `/libs/engine/src/routes/api/images/upload/+server.ts`
+- `/libs/engine/src/routes/api/images/delete/+server.ts`
+- `/libs/engine/src/routes/api/images/list/+server.ts`
+- `/libs/engine/src/routes/api/images/analyze/+server.ts`
 
 **Attack Scenario:**
 
@@ -104,11 +104,7 @@ API endpoints check for authentication (`locals.user`) and tenant context (`loca
 import { getVerifiedTenantId } from "$lib/auth/session.js";
 
 // In every mutation handler:
-const tenantId = await getVerifiedTenantId(
-  platform.env.DB,
-  locals.tenantId,
-  locals.user,
-);
+const tenantId = await getVerifiedTenantId(platform.env.DB, locals.tenantId, locals.user);
 ```
 
 ---
@@ -123,7 +119,7 @@ The `/verify` endpoint accepts a `returnTo` parameter that is not validated, all
 
 **Affected Files:**
 
-- `/packages/engine/src/routes/verify/+page.server.ts` (lines 20-21)
+- `/libs/engine/src/routes/verify/+page.server.ts` (lines 20-21)
 
 **Current Code:**
 
@@ -154,8 +150,8 @@ Environment variable keys are logged in production, potentially exposing sensiti
 
 ```typescript
 console.log("Environment check:", {
-  hasDB: !!platform?.env?.DB,
-  envKeys: Object.keys(platform?.env || {}), // ❌ Exposes env keys
+	hasDB: !!platform?.env?.DB,
+	envKeys: Object.keys(platform?.env || {}), // ❌ Exposes env keys
 });
 ```
 
@@ -175,7 +171,7 @@ SVG files are in `ALLOWED_CONTENT_TYPES` but are not sanitized. SVG can contain 
 
 **Affected Files:**
 
-- `/packages/engine/src/lib/server/services/storage.ts` (line 135)
+- `/libs/engine/src/lib/server/services/storage.ts` (line 135)
 
 **Attack Vector:**
 
@@ -201,8 +197,8 @@ The `image_hashes` table schema is missing the `tenant_id` column, but code atte
 
 **Affected Files:**
 
-- `/packages/engine/migrations/006_image_hashes.sql` (lines 4-13)
-- `/packages/engine/src/routes/api/images/upload/+server.ts` (lines 97-100)
+- `/libs/engine/migrations/006_image_hashes.sql` (lines 4-13)
+- `/libs/engine/src/routes/api/images/upload/+server.ts` (lines 97-100)
 
 **Impact:** Tenant A's duplicate detection could return Tenant B's image URLs
 
@@ -243,7 +239,7 @@ The AI image analyze endpoint calls Claude API (~$0.003/request) with no rate li
 
 **Affected Files:**
 
-- `/packages/engine/src/routes/api/images/analyze/+server.ts`
+- `/libs/engine/src/routes/api/images/analyze/+server.ts`
 
 **Impact:** Unlimited API cost exposure
 
@@ -261,7 +257,7 @@ No application sets the `Strict-Transport-Security` header, leaving users vulner
 
 **Affected Files:**
 
-- `/packages/engine/src/hooks.server.ts`
+- `/libs/engine/src/hooks.server.ts`
 - `/landing/src/hooks.server.ts`
 - `/plant/src/hooks.server.ts`
 - `/domains/src/hooks.server.ts`
@@ -271,10 +267,7 @@ No application sets the `Strict-Transport-Security` header, leaving users vulner
 **Remediation:**
 
 ```typescript
-response.headers.set(
-  "Strict-Transport-Security",
-  "max-age=31536000; includeSubDomains; preload",
-);
+response.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
 ```
 
 ---
@@ -310,7 +303,7 @@ Both webhook and success page attempt tenant creation with only existence check,
 
 Dynamic UPDATE statements with unvalidated column names create SQL injection risk.
 
-**Files:** `/packages/engine/src/lib/payments/shop.ts` (3 locations)
+**Files:** `/libs/engine/src/lib/payments/shop.ts` (3 locations)
 
 ---
 
@@ -333,7 +326,7 @@ The landing and domains apps have inconsistent CSRF protection compared to the m
 
 Admin layout server loads tenant data based on `locals.tenantId` without verifying ownership.
 
-**Files:** `/packages/engine/src/routes/admin/+layout.server.ts` (lines 20-48)
+**Files:** `/libs/engine/src/routes/admin/+layout.server.ts` (lines 20-48)
 
 ---
 
@@ -366,7 +359,7 @@ CDN endpoints use `Access-Control-Allow-Origin: *`, allowing any website to embe
 **Files:**
 
 - `/landing/src/routes/cdn/[...path]/+server.ts` (line 38)
-- `/packages/grove-router/src/index.ts` (line 152)
+- `/services/grove-router/src/index.ts` (line 152)
 
 ---
 
@@ -390,7 +383,7 @@ Landing, plant, and domains apps lack security headers (X-Frame-Options, CSP, et
 
 CSP includes `unsafe-eval` for all pages due to Mermaid diagrams, even where not needed.
 
-**Files:** `/packages/engine/src/hooks.server.ts` (line 400)
+**Files:** `/libs/engine/src/hooks.server.ts` (line 400)
 
 ---
 
@@ -410,7 +403,7 @@ Timing differences reveal whether email is in admin list.
 
 50-100 uploads per hour should be enforced to prevent storage abuse.
 
-**Files:** `/packages/engine/src/routes/api/images/upload/+server.ts`
+**Files:** `/libs/engine/src/routes/api/images/upload/+server.ts`
 
 ---
 
@@ -420,7 +413,7 @@ Timing differences reveal whether email is in admin list.
 
 MIME type validated but extension can be anything, allowing `malicious.php.jpg`.
 
-**Files:** `/packages/engine/src/routes/api/images/upload/+server.ts` (lines 126-143)
+**Files:** `/libs/engine/src/routes/api/images/upload/+server.ts` (lines 126-143)
 
 ---
 
@@ -432,8 +425,8 @@ POST/PUT/DELETE on posts and pages have no rate limiting.
 
 **Files:**
 
-- `/packages/engine/src/routes/api/posts/+server.ts`
-- `/packages/engine/src/routes/api/pages/+server.ts`
+- `/libs/engine/src/routes/api/posts/+server.ts`
+- `/libs/engine/src/routes/api/pages/+server.ts`
 
 ---
 
@@ -475,7 +468,7 @@ The audit identified numerous security strengths that demonstrate mature securit
 
 ### 1. TenantDb Wrapper (Excellent)
 
-**Location:** `/packages/engine/src/lib/server/services/database.ts`
+**Location:** `/libs/engine/src/lib/server/services/database.ts`
 
 The `TenantDb` class provides excellent defense-in-depth:
 
@@ -494,8 +487,8 @@ All user-generated content is sanitized through DOMPurify before storage and dis
 
 **Location:**
 
-- `/packages/engine/src/routes/api/images/upload/+server.ts`
-- `/packages/engine/src/lib/server/services/tenant-isolation.test.ts`
+- `/libs/engine/src/routes/api/images/upload/+server.ts`
+- `/libs/engine/src/lib/server/services/tenant-isolation.test.ts`
 
 - All R2 keys prefixed with `{tenant_id}/`
 - Path traversal protection
@@ -504,7 +497,7 @@ All user-generated content is sanitized through DOMPurify before storage and dis
 
 ### 4. CSRF Protection (Good in Engine)
 
-**Location:** `/packages/engine/src/hooks.server.ts`
+**Location:** `/libs/engine/src/hooks.server.ts`
 
 - Token-based validation on mutations
 - Origin validation for auth flows
@@ -533,7 +526,7 @@ All database queries use parameterized queries through D1's `prepare().bind()` p
 
 ### 8. Turnstile Bot Protection (Good)
 
-**Location:** `/packages/engine/src/lib/server/services/turnstile.ts`
+**Location:** `/libs/engine/src/lib/server/services/turnstile.ts`
 
 - HMAC-SHA256 cookie signing
 - Cloudflare Turnstile verification
@@ -570,19 +563,19 @@ Clear instructions for secrets management with template files showing structure 
 
 ### 13. Wisp AI Cost Caps (Good)
 
-**Location:** `/packages/engine/src/routes/api/grove/wisp/+server.ts`
+**Location:** `/libs/engine/src/routes/api/grove/wisp/+server.ts`
 
 Monthly cost tracking and enforcement (though error handling needs improvement).
 
 ### 14. Graduated Abuse Response (Good)
 
-**Location:** `/packages/engine/src/lib/server/rate-limits/abuse.ts`
+**Location:** `/libs/engine/src/lib/server/rate-limits/abuse.ts`
 
 Warning → shadow ban → full ban system with violation decay.
 
 ### 15. Comprehensive Database Schema (Good)
 
-**Location:** `/packages/engine/migrations/005_multi_tenant.sql`
+**Location:** `/libs/engine/migrations/005_multi_tenant.sql`
 
 - Tenant foreign keys with CASCADE delete
 - Unique constraints scoped to tenant

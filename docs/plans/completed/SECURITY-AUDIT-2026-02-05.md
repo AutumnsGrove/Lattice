@@ -2,7 +2,7 @@
 
 **Date:** 2026-02-05
 **Auditor:** Claude Opus 4.6 (automated)
-**Scope:** Full codebase — packages/engine, packages/plant, packages/landing, packages/domains, packages/grove-router, packages/meadow, packages/clearing, packages/terrarium, packages/vineyard, workers/
+**Scope:** Full codebase — libs/engine, apps/plant, apps/landing, apps/domains, services/grove-router, apps/meadow, apps/clearing, apps/terrarium, libs/vineyard, workers/
 **Branch:** claude/security-audit-pIxZe
 
 ---
@@ -27,16 +27,16 @@ That said, several findings warrant attention — ranging from medium-severity i
 
 ### H-1: CSRF Token Cookie Not HttpOnly — Readable by XSS
 
-**Location:** `packages/engine/src/hooks.server.ts:576-588`
+**Location:** `libs/engine/src/hooks.server.ts:576-588`
 
 The `csrf_token` cookie is set without the `HttpOnly` flag:
 
 ```typescript
 const cookieParts = [
-  `csrf_token=${csrfToken}`,
-  "Path=/",
-  "Max-Age=604800", // 7 days
-  "SameSite=Lax",
+	`csrf_token=${csrfToken}`,
+	"Path=/",
+	"Max-Age=604800", // 7 days
+	"SameSite=Lax",
 ];
 ```
 
@@ -54,23 +54,17 @@ const cookieParts = [
 
 ### H-2: Server-Side HTML Sanitizer Uses Regex (Bypassable)
 
-**Location:** `packages/engine/src/lib/utils/sanitize.ts:72-204`
+**Location:** `libs/engine/src/lib/utils/sanitize.ts:72-204`
 
 The server-side (SSR) sanitization fallback uses regex-based HTML stripping instead of a DOM parser. The code acknowledges this is a fallback because DOMPurify requires a DOM (not available in Cloudflare Workers). However, regex-based HTML sanitization is notoriously bypassable:
 
 ```typescript
 function sanitizeServerSafe(html: string): string {
-  // Normalize whitespace in tag names to prevent bypass via newlines/tabs
-  sanitized = sanitized.replace(
-    /<([\s]*s[\s]*c[\s]*r[\s]*i[\s]*p[\s]*t)/gi,
-    "<script",
-  );
-  // Strip script tags with content (closed tags)
-  sanitized = sanitized.replace(
-    /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
-    "",
-  );
-  // ...
+	// Normalize whitespace in tag names to prevent bypass via newlines/tabs
+	sanitized = sanitized.replace(/<([\s]*s[\s]*c[\s]*r[\s]*i[\s]*p[\s]*t)/gi, "<script");
+	// Strip script tags with content (closed tags)
+	sanitized = sanitized.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
+	// ...
 }
 ```
 
@@ -104,7 +98,7 @@ This won't catch: `<img src=x onerror = alert(1)>` (spaces around `=` with no qu
 
 ### M-1: `trustedOrigins: ["*"]` Disables SvelteKit's Built-in CSRF
 
-**Location:** `packages/engine/svelte.config.js:22`, `packages/plant/svelte.config.js:17`
+**Location:** `libs/engine/svelte.config.js:22`, `apps/plant/svelte.config.js:17`
 
 Both the engine and plant apps set `csrf.trustedOrigins` to `["*"]`:
 
@@ -128,13 +122,13 @@ This completely disables SvelteKit's built-in CSRF origin checking. The code com
 
 ### M-2: `validateCSRF()` Passes When Origin Header Is Absent
 
-**Location:** `packages/engine/src/lib/utils/csrf.ts:33-112`
+**Location:** `libs/engine/src/lib/utils/csrf.ts:33-112`
 
 The `validateCSRF()` function returns `true` when no `Origin` header is present:
 
 ```typescript
 if (origin) {
-  // ... validation logic ...
+	// ... validation logic ...
 }
 // Falls through to return true if no origin
 if (debug) console.log("[validateCSRF] PASSED");
@@ -154,14 +148,14 @@ Some browsers and HTTP clients (particularly for non-CORS requests like simple f
 
 ### M-3: Cross-Tenant CSRF Token Scope
 
-**Location:** `packages/engine/src/hooks.server.ts:582-585`
+**Location:** `libs/engine/src/hooks.server.ts:582-585`
 
 The CSRF cookie is scoped to `Domain=.grove.place`:
 
 ```typescript
 if (isProduction) {
-  cookieParts.push("Secure");
-  cookieParts.push("Domain=.grove.place");
+	cookieParts.push("Secure");
+	cookieParts.push("Domain=.grove.place");
 }
 ```
 
@@ -178,16 +172,16 @@ This means a CSRF token set by `autumn.grove.place` is readable by `evil-tenant.
 
 ### M-4: Local Dev Subdomain Simulation via Header/Query Param
 
-**Location:** `packages/engine/src/hooks.server.ts:63-77`
+**Location:** `libs/engine/src/hooks.server.ts:63-77`
 
 In local development, subdomain routing can be controlled via an `x-subdomain` header or `?subdomain=` query parameter:
 
 ```typescript
 if (host.includes("localhost") || host.includes("127.0.0.1")) {
-  const headerSubdomain = request.headers.get("x-subdomain");
-  if (headerSubdomain) return headerSubdomain;
-  const paramSubdomain = url.searchParams.get("subdomain");
-  if (paramSubdomain) return paramSubdomain;
+	const headerSubdomain = request.headers.get("x-subdomain");
+	if (headerSubdomain) return headerSubdomain;
+	const paramSubdomain = url.searchParams.get("subdomain");
+	if (paramSubdomain) return paramSubdomain;
 }
 ```
 
@@ -202,7 +196,7 @@ if (host.includes("localhost") || host.includes("127.0.0.1")) {
 
 ### M-5: Rate Limiter Fails Open on KV Errors
 
-**Location:** `packages/engine/src/lib/server/rate-limits/middleware.ts:61-73`
+**Location:** `libs/engine/src/lib/server/rate-limits/middleware.ts:61-73`
 
 ```typescript
 try {
@@ -230,7 +224,7 @@ If KV is unavailable (outage, misconfiguration), all rate limits are effectively
 
 ### L-1: `unsafe-inline` in script-src CSP Directive
 
-**Location:** `packages/engine/src/hooks.server.ts:609`
+**Location:** `libs/engine/src/hooks.server.ts:609`
 
 All packages include `'unsafe-inline'` in their script-src CSP:
 
@@ -246,15 +240,15 @@ This weakens XSS protection because any injected inline script will be allowed b
 
 ### L-2: `unsafe-eval` Allowed on Broad Route Patterns
 
-**Location:** `packages/engine/src/hooks.server.ts:273-279`
+**Location:** `libs/engine/src/hooks.server.ts:273-279`
 
 ```typescript
 function needsUnsafeEval(pathname: string): boolean {
-  return (
-    pathname.startsWith("/arbor/") ||
-    /^\/[^/]+$/.test(pathname) || // Root tenant pages like /about
-    pathname.includes("/preview")
-  );
+	return (
+		pathname.startsWith("/arbor/") ||
+		/^\/[^/]+$/.test(pathname) || // Root tenant pages like /about
+		pathname.includes("/preview")
+	);
 }
 ```
 
@@ -266,11 +260,11 @@ The pattern `/^\/[^/]+$/` matches ALL single-segment paths (`/anything`), which 
 
 ### L-3: Error Messages May Leak Internal Details
 
-**Location:** `packages/engine/src/routes/api/images/upload/+server.ts:525-528`
+**Location:** `libs/engine/src/routes/api/images/upload/+server.ts:525-528`
 
 ```typescript
 if (err instanceof Error) {
-  errorMessage = `Upload failed: ${err.message}`;
+	errorMessage = `Upload failed: ${err.message}`;
 }
 throw error(500, errorMessage);
 ```
@@ -283,15 +277,15 @@ The raw `err.message` from internal errors (R2, database) is forwarded to the cl
 
 ### L-4: Stripe Checkout `customer_email` Logging
 
-**Location:** `packages/plant/src/lib/server/stripe.ts:127-133`
+**Location:** `apps/plant/src/lib/server/stripe.ts:127-133`
 
 ```typescript
 console.log("[Stripe] Creating checkout session:", {
-  priceId,
-  email: customerEmail,
-  onboardingId,
-  plan,
-  billingCycle,
+	priceId,
+	email: customerEmail,
+	onboardingId,
+	plan,
+	billingCycle,
 });
 ```
 
@@ -303,7 +297,7 @@ Customer email addresses are logged in plaintext. In Cloudflare Workers, these l
 
 ### L-5: `x-subdomain` Header Not Validated Against Subdomain Format
 
-**Location:** `packages/engine/src/hooks.server.ts:67-68`
+**Location:** `libs/engine/src/hooks.server.ts:67-68`
 
 The `x-subdomain` header value from localhost requests is not passed through `isValidSubdomain()` validation before being used:
 
@@ -320,14 +314,14 @@ The subdomain is validated later in `getTenantConfig()`, but if other code uses 
 
 ### L-6: `secureCompare` Length Leak
 
-**Location:** `packages/plant/src/lib/server/stripe.ts:282-293`
+**Location:** `apps/plant/src/lib/server/stripe.ts:282-293`
 
 ```typescript
 function secureCompare(a: string, b: string): boolean {
-  if (a.length !== b.length) {
-    return false; // Early return leaks length information
-  }
-  // ...
+	if (a.length !== b.length) {
+		return false; // Early return leaks length information
+	}
+	// ...
 }
 ```
 
@@ -339,7 +333,7 @@ The early return on length mismatch leaks whether the expected and actual signat
 
 ### L-7: Landing App Missing CSRF Protection for State-Changing Requests
 
-**Location:** `packages/landing/src/hooks.server.ts`
+**Location:** `apps/landing/src/hooks.server.ts`
 
 The landing app's hooks.server.ts handles authentication but has no CSRF protection for form actions or API endpoints.
 
@@ -349,7 +343,7 @@ The landing app's hooks.server.ts handles authentication but has no CSRF protect
 
 ### L-8: Domains App Session Cookie Deletion Missing `secure` Flag
 
-**Location:** `packages/domains/src/hooks.server.ts:159`
+**Location:** `apps/domains/src/hooks.server.ts:159`
 
 ```typescript
 event.cookies.delete("session", { path: "/" });

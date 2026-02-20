@@ -69,24 +69,24 @@ Zephyr is Grove's unified email gateway: a single Cloudflare Worker that handles
 // Before: Scattered, inconsistent, silent failures
 const resend = new Resend(env.RESEND_API_KEY);
 await resend.emails.send({
-  from: "Grove <hello@grove.place>", // inconsistent
-  to: recipient,
-  subject: "...",
-  html: "...",
+	from: "Grove <hello@grove.place>", // inconsistent
+	to: recipient,
+	subject: "...",
+	html: "...",
 });
 // Error? Logged and forgotten.
 
 // After: One call, retries, logging, error surfacing
 const result = await Zephyr.send({
-  type: "transactional",
-  template: "porch-reply",
-  to: recipient,
-  data: { content, visitId },
+	type: "transactional",
+	template: "porch-reply",
+	to: recipient,
+	data: { content, visitId },
 });
 
 if (!result.success) {
-  // Error is RETURNED, not swallowed
-  return fail(500, { error: "Failed to send notification" });
+	// Error is RETURNED, not swallowed
+	return fail(500, { error: "Failed to send notification" });
 }
 ```
 
@@ -227,66 +227,66 @@ Marketing can afford to miss occasionally. Tracking helps optimize content. Sing
 
 ```typescript
 interface ZephyrRequest {
-  /** Email category for routing */
-  type: EmailType;
-  /** Template to render (or "raw" for pre-rendered) */
-  template: string;
-  /** Recipient email address */
-  to: string;
-  /** Template data for personalization */
-  data?: Record<string, unknown>;
-  /** Override from address */
-  from?: string;
-  /** Override subject line */
-  subject?: string;
-  /** Pre-rendered HTML (when template is "raw") */
-  html?: string;
-  /** Pre-rendered text (when template is "raw") */
-  text?: string;
-  /** Schedule for later delivery (ISO timestamp) */
-  scheduledAt?: string;
-  /** Idempotency key to prevent duplicates */
-  idempotencyKey?: string;
-  /** Metadata for logging */
-  metadata?: {
-    tenant?: string;
-    source?: string;
-    correlationId?: string;
-  };
+	/** Email category for routing */
+	type: EmailType;
+	/** Template to render (or "raw" for pre-rendered) */
+	template: string;
+	/** Recipient email address */
+	to: string;
+	/** Template data for personalization */
+	data?: Record<string, unknown>;
+	/** Override from address */
+	from?: string;
+	/** Override subject line */
+	subject?: string;
+	/** Pre-rendered HTML (when template is "raw") */
+	html?: string;
+	/** Pre-rendered text (when template is "raw") */
+	text?: string;
+	/** Schedule for later delivery (ISO timestamp) */
+	scheduledAt?: string;
+	/** Idempotency key to prevent duplicates */
+	idempotencyKey?: string;
+	/** Metadata for logging */
+	metadata?: {
+		tenant?: string;
+		source?: string;
+		correlationId?: string;
+	};
 }
 
 interface ZephyrResponse {
-  success: boolean;
-  messageId?: string;
-  error?: {
-    code: ZephyrErrorCode;
-    message: string;
-    retryable: boolean;
-  };
-  metadata: {
-    provider: string;
-    attempts: number;
-    latencyMs: number;
-  };
+	success: boolean;
+	messageId?: string;
+	error?: {
+		code: ZephyrErrorCode;
+		message: string;
+		retryable: boolean;
+	};
+	metadata: {
+		provider: string;
+		attempts: number;
+		latencyMs: number;
+	};
 }
 
 type EmailType =
-  | "transactional"
-  | "notification"
-  | "verification"
-  | "sequence"
-  | "lifecycle"
-  | "broadcast";
+	| "transactional"
+	| "notification"
+	| "verification"
+	| "sequence"
+	| "lifecycle"
+	| "broadcast";
 
 type ZephyrErrorCode =
-  | "INVALID_REQUEST"
-  | "INVALID_TEMPLATE"
-  | "INVALID_RECIPIENT"
-  | "RATE_LIMITED"
-  | "UNSUBSCRIBED"
-  | "PROVIDER_ERROR"
-  | "TEMPLATE_ERROR"
-  | "CIRCUIT_OPEN";
+	| "INVALID_REQUEST"
+	| "INVALID_TEMPLATE"
+	| "INVALID_RECIPIENT"
+	| "RATE_LIMITED"
+	| "UNSUBSCRIBED"
+	| "PROVIDER_ERROR"
+	| "TEMPLATE_ERROR"
+	| "CIRCUIT_OPEN";
 ```
 
 ### Usage Examples
@@ -296,56 +296,56 @@ import { Zephyr } from "@autumnsgrove/lattice/zephyr";
 
 // Porch reply notification (THE FIX)
 const result = await Zephyr.send({
-  type: "notification",
-  template: "porch-reply",
-  to: recipientEmail,
-  data: {
-    content: replyContent,
-    visitId: visit.id,
-    visitNumber: visit.visit_number,
-    subject: visit.subject,
-  },
-  metadata: {
-    source: "porch-admin",
-    correlationId: visit.id,
-  },
+	type: "notification",
+	template: "porch-reply",
+	to: recipientEmail,
+	data: {
+		content: replyContent,
+		visitId: visit.id,
+		visitNumber: visit.visit_number,
+		subject: visit.subject,
+	},
+	metadata: {
+		source: "porch-admin",
+		correlationId: visit.id,
+	},
 });
 
 if (!result.success) {
-  // NOW WE KNOW IT FAILED
-  console.error("Porch reply email failed:", result.error);
-  return { replySuccess: true, emailFailed: true };
+	// NOW WE KNOW IT FAILED
+	console.error("Porch reply email failed:", result.error);
+	return { replySuccess: true, emailFailed: true };
 }
 
 // Verification code
 const result = await Zephyr.send({
-  type: "verification",
-  template: "verification",
-  to: userEmail,
-  data: {
-    code: verificationCode,
-    expiresIn: "15 minutes",
-  },
+	type: "verification",
+	template: "verification",
+	to: userEmail,
+	data: {
+		code: verificationCode,
+		expiresIn: "15 minutes",
+	},
 });
 
 // Onboarding sequence (scheduled)
 const result = await Zephyr.send({
-  type: "sequence",
-  template: "day-7",
-  to: userEmail,
-  data: { name: userName, audienceType: "wanderer" },
-  scheduledAt: addDays(new Date(), 7).toISOString(),
-  idempotencyKey: `${userId}-day7-${signupDate}`,
+	type: "sequence",
+	template: "day-7",
+	to: userEmail,
+	data: { name: userName, audienceType: "wanderer" },
+	scheduledAt: addDays(new Date(), 7).toISOString(),
+	idempotencyKey: `${userId}-day7-${signupDate}`,
 });
 
 // Raw HTML (for legacy templates during migration)
 const result = await Zephyr.send({
-  type: "transactional",
-  template: "raw",
-  to: recipient,
-  subject: "Custom Email",
-  html: preRenderedHtml,
-  text: preRenderedText,
+	type: "transactional",
+	template: "raw",
+	to: recipient,
+	subject: "Custom Email",
+	html: preRenderedHtml,
+	text: preRenderedText,
 });
 ```
 
@@ -359,21 +359,20 @@ Before processing, Zephyr validates every request:
 
 ```typescript
 const validation = {
-  // Required fields
-  required: ["type", "template", "to"],
+	// Required fields
+	required: ["type", "template", "to"],
 
-  // Email format validation
-  email: (to: string) => isValidEmail(to),
+	// Email format validation
+	email: (to: string) => isValidEmail(to),
 
-  // Template existence check
-  template: (name: string) => templates.has(name) || name === "raw",
+	// Template existence check
+	template: (name: string) => templates.has(name) || name === "raw",
 
-  // Type validity
-  type: (t: string) => emailTypes.includes(t),
+	// Type validity
+	type: (t: string) => emailTypes.includes(t),
 
-  // Raw template requires html
-  rawRequiresHtml: (req: ZephyrRequest) =>
-    req.template !== "raw" || (req.html && req.subject),
+	// Raw template requires html
+	rawRequiresHtml: (req: ZephyrRequest) => req.template !== "raw" || (req.html && req.subject),
 };
 ```
 
@@ -383,12 +382,12 @@ Per-tenant rate limits prevent abuse:
 
 ```typescript
 const rateLimits = {
-  transactional: { rpm: 60, daily: 1000 },
-  notification: { rpm: 60, daily: 1000 },
-  verification: { rpm: 10, daily: 100 },
-  sequence: { rpm: 100, daily: 5000 },
-  lifecycle: { rpm: 60, daily: 500 },
-  broadcast: { rpm: 1000, daily: 10000 },
+	transactional: { rpm: 60, daily: 1000 },
+	notification: { rpm: 60, daily: 1000 },
+	verification: { rpm: 10, daily: 100 },
+	sequence: { rpm: 100, daily: 5000 },
+	lifecycle: { rpm: 60, daily: 500 },
+	broadcast: { rpm: 1000, daily: 10000 },
 };
 
 // Checked before sending
@@ -401,19 +400,19 @@ Before any email leaves, check the unsubscribe list:
 
 ```typescript
 const isUnsubscribed = await db
-  .prepare("SELECT 1 FROM unsubscribes WHERE email = ?")
-  .bind(to)
-  .first();
+	.prepare("SELECT 1 FROM unsubscribes WHERE email = ?")
+	.bind(to)
+	.first();
 
 if (isUnsubscribed) {
-  return {
-    success: false,
-    error: {
-      code: "UNSUBSCRIBED",
-      message: "Recipient has unsubscribed",
-      retryable: false,
-    },
-  };
+	return {
+		success: false,
+		error: {
+			code: "UNSUBSCRIBED",
+			message: "Recipient has unsubscribed",
+			retryable: false,
+		},
+	};
 }
 ```
 
@@ -425,39 +424,39 @@ if (isUnsubscribed) {
 
 ```typescript
 type ZephyrError =
-  | { code: "INVALID_REQUEST"; message: string; field?: string }
-  | { code: "INVALID_TEMPLATE"; template: string }
-  | { code: "INVALID_RECIPIENT"; reason: "malformed" | "blocklisted" }
-  | { code: "RATE_LIMITED"; retryAfter: number }
-  | { code: "UNSUBSCRIBED"; email: string; unsubscribedAt: string }
-  | { code: "PROVIDER_ERROR"; provider: string; message: string }
-  | { code: "TEMPLATE_ERROR"; template: string; message: string }
-  | { code: "CIRCUIT_OPEN"; provider: string; opensAt: string };
+	| { code: "INVALID_REQUEST"; message: string; field?: string }
+	| { code: "INVALID_TEMPLATE"; template: string }
+	| { code: "INVALID_RECIPIENT"; reason: "malformed" | "blocklisted" }
+	| { code: "RATE_LIMITED"; retryAfter: number }
+	| { code: "UNSUBSCRIBED"; email: string; unsubscribedAt: string }
+	| { code: "PROVIDER_ERROR"; provider: string; message: string }
+	| { code: "TEMPLATE_ERROR"; template: string; message: string }
+	| { code: "CIRCUIT_OPEN"; provider: string; opensAt: string };
 ```
 
 ### Retry Strategy
 
 ```typescript
 const retryConfig = {
-  maxAttempts: 3,
-  baseDelayMs: 1000,
-  maxDelayMs: 30000,
-  backoffMultiplier: 2,
+	maxAttempts: 3,
+	baseDelayMs: 1000,
+	maxDelayMs: 30000,
+	backoffMultiplier: 2,
 
-  // Only retry on transient errors
-  retryable: [
-    "PROVIDER_ERROR", // Resend 5xx
-    "CIRCUIT_OPEN", // Will retry after circuit closes
-  ],
+	// Only retry on transient errors
+	retryable: [
+		"PROVIDER_ERROR", // Resend 5xx
+		"CIRCUIT_OPEN", // Will retry after circuit closes
+	],
 
-  // Never retry these
-  nonRetryable: [
-    "INVALID_REQUEST",
-    "INVALID_TEMPLATE",
-    "INVALID_RECIPIENT",
-    "UNSUBSCRIBED",
-    "RATE_LIMITED", // Respect rate limits
-  ],
+	// Never retry these
+	nonRetryable: [
+		"INVALID_REQUEST",
+		"INVALID_TEMPLATE",
+		"INVALID_RECIPIENT",
+		"UNSUBSCRIBED",
+		"RATE_LIMITED", // Respect rate limits
+	],
 };
 
 // Retry flow:
@@ -472,10 +471,10 @@ Protects against cascading failures when Resend is having issues:
 
 ```typescript
 const circuitConfig = {
-  failureThreshold: 5, // Failures before opening
-  windowMs: 60000, // 1 minute window
-  cooldownMs: 30000, // 30 seconds before retry
-  halfOpenRequests: 2, // Test requests in half-open state
+	failureThreshold: 5, // Failures before opening
+	windowMs: 60000, // 1 minute window
+	cooldownMs: 30000, // 30 seconds before retry
+	halfOpenRequests: 2, // Test requests in half-open state
 };
 
 // Circuit states:
@@ -572,15 +571,15 @@ Prevent duplicate sends with idempotency keys:
 ```typescript
 // Check if we've already processed this key
 const existing = await db
-  .prepare("SELECT id, success FROM zephyr_logs WHERE idempotency_key = ?")
-  .bind(idempotencyKey)
-  .first();
+	.prepare("SELECT id, success FROM zephyr_logs WHERE idempotency_key = ?")
+	.bind(idempotencyKey)
+	.first();
 
 if (existing) {
-  // Return cached result
-  return existing.success
-    ? { success: true, messageId: existing.id, cached: true }
-    : { success: false, error: cached.error, cached: true };
+	// Return cached result
+	return existing.success
+		? { success: true, messageId: existing.id, cached: true }
+		: { success: false, error: cached.error, cached: true };
 }
 ```
 
@@ -592,16 +591,16 @@ if (existing) {
 
 ```typescript
 const resend = {
-  baseUrl: "https://api.resend.com",
-  apiKey: env.RESEND_API_KEY,
-  defaultFrom: {
-    transactional: "Grove <hello@grove.place>",
-    notification: "Grove Porch <porch@grove.place>",
-    verification: "Grove <hello@grove.place>",
-    sequence: "Autumn <autumn@grove.place>",
-    lifecycle: "Grove <hello@grove.place>",
-    broadcast: "Autumn <autumn@grove.place>",
-  },
+	baseUrl: "https://api.resend.com",
+	apiKey: env.RESEND_API_KEY,
+	defaultFrom: {
+		transactional: "Grove <hello@grove.place>",
+		notification: "Grove Porch <porch@grove.place>",
+		verification: "Grove <hello@grove.place>",
+		sequence: "Autumn <autumn@grove.place>",
+		lifecycle: "Grove <hello@grove.place>",
+		broadcast: "Autumn <autumn@grove.place>",
+	},
 };
 ```
 
@@ -610,15 +609,15 @@ const resend = {
 ```typescript
 // Amazon SES (planned)
 const ses = {
-  region: "us-east-1",
-  credentials: env.AWS_CREDENTIALS,
-  // Use for: High volume, cost optimization
+	region: "us-east-1",
+	credentials: env.AWS_CREDENTIALS,
+	// Use for: High volume, cost optimization
 };
 
 // Postmark (planned)
 const postmark = {
-  apiToken: env.POSTMARK_API_TOKEN,
-  // Use for: Deliverability-critical emails
+	apiToken: env.POSTMARK_API_TOKEN,
+	// Use for: Deliverability-critical emails
 };
 ```
 
@@ -626,18 +625,18 @@ const postmark = {
 
 ```typescript
 const fallbackChains = {
-  transactional: [
-    { provider: "resend", priority: 1 },
-    { provider: "ses", priority: 2 }, // future
-  ],
-  verification: [
-    { provider: "resend", priority: 1 },
-    // No fallback - verification must be fast
-  ],
-  broadcast: [
-    { provider: "resend", priority: 1 },
-    { provider: "ses", priority: 2 }, // future - cost optimization
-  ],
+	transactional: [
+		{ provider: "resend", priority: 1 },
+		{ provider: "ses", priority: 2 }, // future
+	],
+	verification: [
+		{ provider: "resend", priority: 1 },
+		// No fallback - verification must be fast
+	],
+	broadcast: [
+		{ provider: "resend", priority: 1 },
+		{ provider: "ses", priority: 2 }, // future - cost optimization
+	],
 };
 ```
 
@@ -680,7 +679,7 @@ workers/zephyr/
 ├── wrangler.toml
 └── package.json
 
-packages/engine/src/lib/zephyr/
+libs/engine/src/lib/zephyr/
 ├── index.ts                  # Public exports & client
 └── types.ts                  # Shared types (re-exported)
 ```
@@ -689,12 +688,12 @@ packages/engine/src/lib/zephyr/
 
 ```json
 {
-  "exports": {
-    "./zephyr": {
-      "types": "./dist/lib/zephyr/index.d.ts",
-      "import": "./dist/lib/zephyr/index.js"
-    }
-  }
+	"exports": {
+		"./zephyr": {
+			"types": "./dist/lib/zephyr/index.d.ts",
+			"import": "./dist/lib/zephyr/index.js"
+		}
+	}
 }
 ```
 
@@ -764,10 +763,10 @@ packages/engine/src/lib/zephyr/
 
 ### Phase 3: Full Migration
 
-- [ ] Migrate `packages/landing/src/lib/email/send.ts`
-- [ ] Migrate `packages/plant/src/lib/server/send-email.ts`
-- [ ] Migrate `packages/engine/src/lib/email/schedule.ts`
-- [ ] Migrate `packages/plant/.../email-verification.ts`
+- [ ] Migrate `apps/landing/src/lib/email/send.ts`
+- [ ] Migrate `apps/plant/src/lib/server/send-email.ts`
+- [ ] Migrate `libs/engine/src/lib/email/schedule.ts`
+- [ ] Migrate `apps/plant/.../email-verification.ts`
 - [ ] Migrate LemonSqueezy webhook email triggers
 - [ ] Migrate feedback forwarding
 

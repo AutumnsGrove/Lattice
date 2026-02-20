@@ -105,10 +105,10 @@ import { C2paManifestReader } from '@trustnxt/c2pa-ts';
 
 | File | Change |
 |------|--------|
-| `packages/engine/src/lib/server/petal/layer0-c2pa.ts` | **NEW** - C2PA extraction |
-| `packages/engine/src/lib/server/petal/types.ts` | Add `C2PAResult`, extend `PetalResult` |
-| `packages/engine/src/lib/server/petal/index.ts` | Call Layer 0 in `scanImage()` |
-| `packages/engine/package.json` | Add `@trustnxt/c2pa-ts` dependency |
+| `libs/engine/src/lib/server/petal/layer0-c2pa.ts` | **NEW** - C2PA extraction |
+| `libs/engine/src/lib/server/petal/types.ts` | Add `C2PAResult`, extend `PetalResult` |
+| `libs/engine/src/lib/server/petal/index.ts` | Call Layer 0 in `scanImage()` |
+| `libs/engine/package.json` | Add `@trustnxt/c2pa-ts` dependency |
 
 ### Type Definitions
 

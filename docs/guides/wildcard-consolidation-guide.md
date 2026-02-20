@@ -76,7 +76,7 @@ domains.grove.place  →  domains Pages project
 ## 📁 Recommended Route Structure
 
 ```
-packages/engine/src/routes/
+libs/engine/src/routes/
 ├── +layout.svelte              # Root layout
 ├── +layout.server.ts           # Load tenant context
 ├── +page.svelte                # Landing page (grove.place only)
@@ -124,107 +124,105 @@ import type { Handle } from "@sveltejs/kit";
 
 // Reserved subdomains that route to internal apps
 const RESERVED_SUBDOMAINS: Record<string, string> = {
-  www: "/", // Redirect to root
-  auth: "/auth", // Auth app
-  admin: "/admin", // Platform admin
-  api: "/api", // API routes
-  domains: "/(apps)/domains", // Domain search tool
-  monitor: "/(apps)/monitor", // GroveMonitor
-  cdn: null, // Handled by R2 directly
-  staging: null, // Staging environment flag
+	www: "/", // Redirect to root
+	auth: "/auth", // Auth app
+	admin: "/admin", // Platform admin
+	api: "/api", // API routes
+	domains: "/(apps)/domains", // Domain search tool
+	monitor: "/(apps)/monitor", // GroveMonitor
+	cdn: null, // Handled by R2 directly
+	staging: null, // Staging environment flag
 };
 
 // Subdomains that are separate Workers (not consolidated)
 const EXTERNAL_WORKERS = ["scout", "music", "search"];
 
 export const handle: Handle = async ({ event, resolve }) => {
-  const host = event.request.headers.get("host") || "";
-  const parts = host.split(".");
+	const host = event.request.headers.get("host") || "";
+	const parts = host.split(".");
 
-  // Extract subdomain (handle both grove.place and localhost)
-  let subdomain: string | null = null;
+	// Extract subdomain (handle both grove.place and localhost)
+	let subdomain: string | null = null;
 
-  if (host.includes("grove.place")) {
-    // Production: *.grove.place
-    subdomain = parts.length > 2 ? parts[0] : null;
-  } else if (host.includes("localhost") || host.includes("127.0.0.1")) {
-    // Local dev: Check for subdomain simulation via header or query
-    subdomain =
-      event.request.headers.get("x-subdomain") ||
-      event.url.searchParams.get("subdomain") ||
-      null;
-  }
+	if (host.includes("grove.place")) {
+		// Production: *.grove.place
+		subdomain = parts.length > 2 ? parts[0] : null;
+	} else if (host.includes("localhost") || host.includes("127.0.0.1")) {
+		// Local dev: Check for subdomain simulation via header or query
+		subdomain =
+			event.request.headers.get("x-subdomain") || event.url.searchParams.get("subdomain") || null;
+	}
 
-  // No subdomain = landing page (grove.place)
-  if (!subdomain || subdomain === "grove") {
-    event.locals.context = { type: "landing" };
-    return resolve(event);
-  }
+	// No subdomain = landing page (grove.place)
+	if (!subdomain || subdomain === "grove") {
+		event.locals.context = { type: "landing" };
+		return resolve(event);
+	}
 
-  // Check if it's a reserved subdomain
-  if (subdomain in RESERVED_SUBDOMAINS) {
-    const routePrefix = RESERVED_SUBDOMAINS[subdomain];
+	// Check if it's a reserved subdomain
+	if (subdomain in RESERVED_SUBDOMAINS) {
+		const routePrefix = RESERVED_SUBDOMAINS[subdomain];
 
-    if (routePrefix === null) {
-      // External handling (CDN, etc.)
-      return new Response("Not handled by this worker", { status: 404 });
-    }
+		if (routePrefix === null) {
+			// External handling (CDN, etc.)
+			return new Response("Not handled by this worker", { status: 404 });
+		}
 
-    if (subdomain === "www") {
-      // Redirect www to root
-      return new Response(null, {
-        status: 301,
-        headers: { Location: `https://grove.place${event.url.pathname}` },
-      });
-    }
+		if (subdomain === "www") {
+			// Redirect www to root
+			return new Response(null, {
+				status: 301,
+				headers: { Location: `https://grove.place${event.url.pathname}` },
+			});
+		}
 
-    event.locals.context = {
-      type: "app",
-      app: subdomain,
-      routePrefix,
-    };
-    return resolve(event);
-  }
+		event.locals.context = {
+			type: "app",
+			app: subdomain,
+			routePrefix,
+		};
+		return resolve(event);
+	}
 
-  // Check if it's an external worker (not consolidated yet)
-  if (EXTERNAL_WORKERS.includes(subdomain)) {
-    // These are handled by separate Workers, shouldn't hit this
-    return new Response("Service not found", { status: 404 });
-  }
+	// Check if it's an external worker (not consolidated yet)
+	if (EXTERNAL_WORKERS.includes(subdomain)) {
+		// These are handled by separate Workers, shouldn't hit this
+		return new Response("Service not found", { status: 404 });
+	}
 
-  // Must be a tenant subdomain - look up in D1
-  const db = event.platform?.env?.DB;
-  if (!db) {
-    console.error("D1 not available");
-    return new Response("Database unavailable", { status: 503 });
-  }
+	// Must be a tenant subdomain - look up in D1
+	const db = event.platform?.env?.DB;
+	if (!db) {
+		console.error("D1 not available");
+		return new Response("Database unavailable", { status: 503 });
+	}
 
-  const tenant = await db
-    .prepare("SELECT * FROM tenants WHERE subdomain = ? AND active = 1")
-    .bind(subdomain)
-    .first();
+	const tenant = await db
+		.prepare("SELECT * FROM tenants WHERE subdomain = ? AND active = 1")
+		.bind(subdomain)
+		.first();
 
-  if (!tenant) {
-    // Subdomain not registered
-    event.locals.context = { type: "not_found", subdomain };
-    // Could redirect to signup or show 404
-    return new Response("Blog not found", { status: 404 });
-  }
+	if (!tenant) {
+		// Subdomain not registered
+		event.locals.context = { type: "not_found", subdomain };
+		// Could redirect to signup or show 404
+		return new Response("Blog not found", { status: 404 });
+	}
 
-  // Valid tenant - set context
-  event.locals.context = {
-    type: "tenant",
-    tenant: {
-      id: tenant.id,
-      subdomain: tenant.subdomain,
-      name: tenant.name,
-      theme: tenant.theme_config ? JSON.parse(tenant.theme_config) : null,
-      ownerId: tenant.owner_id,
-    },
-  };
-  event.locals.tenantId = tenant.id;
+	// Valid tenant - set context
+	event.locals.context = {
+		type: "tenant",
+		tenant: {
+			id: tenant.id,
+			subdomain: tenant.subdomain,
+			name: tenant.name,
+			theme: tenant.theme_config ? JSON.parse(tenant.theme_config) : null,
+			ownerId: tenant.owner_id,
+		},
+	};
+	event.locals.tenantId = tenant.id;
 
-  return resolve(event);
+	return resolve(event);
 };
 ```
 
@@ -236,40 +234,40 @@ export const handle: Handle = async ({ event, resolve }) => {
 // src/app.d.ts
 
 declare global {
-  namespace App {
-    interface Locals {
-      context: AppContext;
-      tenantId?: string;
-    }
+	namespace App {
+		interface Locals {
+			context: AppContext;
+			tenantId?: string;
+		}
 
-    interface Platform {
-      env?: {
-        DB: D1Database;
-        MEDIA: R2Bucket;
-        CACHE: KVNamespace;
-      };
-    }
-  }
+		interface Platform {
+			env?: {
+				DB: D1Database;
+				MEDIA: R2Bucket;
+				CACHE: KVNamespace;
+			};
+		}
+	}
 }
 
 type AppContext =
-  | { type: "landing" }
-  | { type: "app"; app: string; routePrefix: string }
-  | { type: "tenant"; tenant: TenantInfo }
-  | { type: "not_found"; subdomain: string };
+	| { type: "landing" }
+	| { type: "app"; app: string; routePrefix: string }
+	| { type: "tenant"; tenant: TenantInfo }
+	| { type: "not_found"; subdomain: string };
 
 interface TenantInfo {
-  id: string;
-  subdomain: string;
-  name: string;
-  theme: ThemeConfig | null;
-  ownerId: string;
+	id: string;
+	subdomain: string;
+	name: string;
+	theme: ThemeConfig | null;
+	ownerId: string;
 }
 
 interface ThemeConfig {
-  primary: string;
-  secondary?: string;
-  font?: string;
+	primary: string;
+	secondary?: string;
+	font?: string;
 }
 
 export {};
@@ -318,25 +316,25 @@ mv src/routes/domains/* src/routes/(apps)/domains/
 ```svelte
 <!-- src/routes/+layout.svelte -->
 <script lang="ts">
-  import { page } from '$app/stores';
+	import { page } from "$app/stores";
 
-  $: context = $page.data.context;
+	$: context = $page.data.context;
 </script>
 
-{#if context?.type === 'landing'}
-  <LandingLayout>
-    <slot />
-  </LandingLayout>
-{:else if context?.type === 'tenant'}
-  <TenantLayout tenant={context.tenant}>
-    <slot />
-  </TenantLayout>
-{:else if context?.type === 'app'}
-  <AppLayout app={context.app}>
-    <slot />
-  </AppLayout>
+{#if context?.type === "landing"}
+	<LandingLayout>
+		<slot />
+	</LandingLayout>
+{:else if context?.type === "tenant"}
+	<TenantLayout tenant={context.tenant}>
+		<slot />
+	</TenantLayout>
+{:else if context?.type === "app"}
+	<AppLayout app={context.app}>
+		<slot />
+	</AppLayout>
 {:else}
-  <slot />
+	<slot />
 {/if}
 ```
 

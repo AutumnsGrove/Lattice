@@ -70,54 +70,57 @@ Petal is Grove's 4-layer image content moderation system. This implementation le
 
 ## Files Created
 
-### Core Petal Module (`packages/engine/src/lib/server/petal/`)
+### Core Petal Module (`libs/engine/src/lib/server/petal/`)
 
-| File | Purpose |
-|------|---------|
-| `index.ts` | Main exports, `scanImage()` entry point |
-| `types.ts` | TypeScript interfaces and types |
-| `vision-client.ts` | Vision inference with provider fallback |
-| `layer1-csam.ts` | CSAM detection and NCMEC reporting |
-| `layer2-classify.ts` | Content classification |
-| `layer3-sanity.ts` | Context-specific validation |
-| `layer4-output.ts` | AI output verification |
-| `logging.ts` | Security event logging (hashes only) |
+| File                 | Purpose                                 |
+| -------------------- | --------------------------------------- |
+| `index.ts`           | Main exports, `scanImage()` entry point |
+| `types.ts`           | TypeScript interfaces and types         |
+| `vision-client.ts`   | Vision inference with provider fallback |
+| `layer1-csam.ts`     | CSAM detection and NCMEC reporting      |
+| `layer2-classify.ts` | Content classification                  |
+| `layer3-sanity.ts`   | Context-specific validation             |
+| `layer4-output.ts`   | AI output verification                  |
+| `logging.ts`         | Security event logging (hashes only)    |
 
-### Configuration (`packages/engine/src/lib/config/`)
+### Configuration (`libs/engine/src/lib/config/`)
 
-| File | Purpose |
-|------|---------|
+| File       | Purpose                                          |
+| ---------- | ------------------------------------------------ |
 | `petal.ts` | Provider config, categories, thresholds, prompts |
 
 ### Database Migration
 
-| File | Purpose |
-|------|---------|
+| File                       | Purpose                                          |
+| -------------------------- | ------------------------------------------------ |
 | `migrations/030_petal.sql` | Account flags, security logs, NCMEC queue tables |
 
 ### Modified Files
 
-| File | Change |
-|------|--------|
-| `wrangler.toml` | Added `[ai]` binding for Workers AI |
-| `src/lib/server/env-validation.ts` | Added `AI` and `TOGETHER_API_KEY` to interface |
-| `src/routes/api/images/upload/+server.ts` | Integrated Petal scan before R2 storage |
+| File                                      | Change                                         |
+| ----------------------------------------- | ---------------------------------------------- |
+| `wrangler.toml`                           | Added `[ai]` binding for Workers AI            |
+| `src/lib/server/env-validation.ts`        | Added `AI` and `TOGETHER_API_KEY` to interface |
+| `src/routes/api/images/upload/+server.ts` | Integrated Petal scan before R2 storage        |
 
 ---
 
 ## Pre-Deployment Steps
 
 ### 1. Enable Cloudflare CSAM Scanning Tool (Manual)
+
 - Cloudflare Dashboard → Caching → Configuration
 - Enable for `grove.place` and `cdn.autumnsgrove.com`
 - Set notification email: `safety@grove.place`
 
 ### 2. Run Database Migration
+
 ```bash
 npx wrangler d1 execute grove-engine-db --file=migrations/030_petal.sql --remote
 ```
 
 ### 3. (Optional) Set Together.ai API Key for Fallback
+
 ```bash
 npx wrangler secret put TOGETHER_API_KEY
 ```
@@ -127,16 +130,19 @@ npx wrangler secret put TOGETHER_API_KEY
 ## Provider Configuration
 
 ### Primary: Cloudflare Workers AI
+
 - **Model:** `@cf/meta/llama-4-scout-17b-16e-instruct`
 - **Free tier:** 10,000 neurons/day
 - **Paid:** $0.27/M input, $0.85/M output
 - **ZDR:** Inherent (data never leaves Cloudflare)
 
 ### Fallback: Llama 3.2 Vision (Workers AI)
+
 - **Model:** `@cf/meta/llama-3.2-11b-vision-instruct`
 - **Cheaper:** $0.049/M input
 
 ### External Fallback: Together.ai
+
 - Only if Workers AI unavailable
 - Requires `TOGETHER_API_KEY` secret
 
@@ -145,6 +151,7 @@ npx wrangler secret put TOGETHER_API_KEY
 ## Content Categories
 
 ### Blocked (Immediate Rejection)
+
 - `nudity` - Full/partial nudity
 - `sexual` - Sexually explicit content
 - `violence` - Gore, weapons
@@ -154,35 +161,39 @@ npx wrangler secret put TOGETHER_API_KEY
 - `hate_symbols` - Hate symbols
 
 ### Review (Context-Dependent)
+
 - `swimwear` - Blocked for try-on
 - `underwear` - Blocked for try-on
 - `revealing` - Blocked for try-on
 
 ### Allowed
+
 - `appropriate` - Safe content
 
 ---
 
 ## Confidence Thresholds
 
-| Confidence | Action |
-|------------|--------|
-| ≥ 0.9 | Block with certainty |
-| 0.8-0.89 | Block, log for review |
-| 0.7-0.79 | Context check required |
-| < 0.7 | Allow, monitor patterns |
+| Confidence | Action                  |
+| ---------- | ----------------------- |
+| ≥ 0.9      | Block with certainty    |
+| 0.8-0.89   | Block, log for review   |
+| 0.7-0.79   | Context check required  |
+| < 0.7      | Allow, monitor patterns |
 
 ---
 
 ## Account Flagging
 
 ### CSAM Detection
+
 - Immediate upload block
 - Requires Wayfinder manual review
 - Never reveals reason to user
 - NCMEC report queued (24-hour deadline)
 
 ### Content Violations
+
 - After 3 blocked uploads in 30 days
 - Account flagged for review
 - Can still browse, cannot upload
@@ -191,12 +202,12 @@ npx wrangler secret put TOGETHER_API_KEY
 
 ## Cost Projections
 
-| Volume | Workers AI Cost | Notes |
-|--------|-----------------|-------|
-| ~300/day | **FREE** | Covered by free tier |
-| 1,000 images | ~$1.40 | After free tier |
-| 10,000 images | ~$14.00 | |
-| 100,000 images | ~$140.00 | |
+| Volume         | Workers AI Cost | Notes                |
+| -------------- | --------------- | -------------------- |
+| ~300/day       | **FREE**        | Covered by free tier |
+| 1,000 images   | ~$1.40          | After free tier      |
+| 10,000 images  | ~$14.00         |                      |
+| 100,000 images | ~$140.00        |                      |
 
 ---
 
@@ -231,4 +242,4 @@ npx wrangler secret put TOGETHER_API_KEY
 
 ---
 
-*Implementation completed January 2026*
+_Implementation completed January 2026_

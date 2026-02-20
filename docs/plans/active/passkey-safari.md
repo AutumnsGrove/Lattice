@@ -54,8 +54,8 @@ Plant already does the right thing: it redirects `/auth/setup-passkey` to `https
 
 **Files**:
 
-- `packages/engine/src/routes/arbor/account/passkey-utils.ts:110` (registration)
-- `packages/engine/src/lib/grafts/login/passkey-authenticate.ts:220` (authentication)
+- `libs/engine/src/routes/arbor/account/passkey-utils.ts:110` (registration)
+- `libs/engine/src/lib/grafts/login/passkey-authenticate.ts:220` (authentication)
 
 **What happens**:
 When the WebAuthn ceremony runs on `autumn.grove.place`, the browser embeds `origin: "https://autumn.grove.place"` into `clientDataJSON`. Heartwood validates this against:
@@ -78,8 +78,8 @@ Origin mismatch → **Heartwood rejects the credential**. Every time. On every s
 
 **Files**:
 
-- `packages/engine/src/routes/api/passkey/register-options/+server.ts:38-41`
-- `packages/engine/src/routes/api/passkey/verify-registration/+server.ts:62-70`
+- `libs/engine/src/routes/api/passkey/register-options/+server.ts:38-41`
+- `libs/engine/src/routes/api/passkey/verify-registration/+server.ts:62-70`
 
 **What happens**:
 The engine sends `Cookie: grove_session=${groveSession}` to Heartwood. But Better Auth identifies users via `better-auth.session_token`, not `grove_session`. `grove_session` is a custom SessionDO token that Better Auth has no knowledge of.
@@ -104,8 +104,8 @@ Result: Better Auth returns 401 "Unauthorized" or "User not found" because it ca
 
 **Files**:
 
-- `packages/engine/src/routes/api/passkey/authenticate/options/+server.ts:79`
-- `packages/engine/src/routes/api/passkey/authenticate/verify/+server.ts:124`
+- `libs/engine/src/routes/api/passkey/authenticate/options/+server.ts:79`
+- `libs/engine/src/routes/api/passkey/authenticate/verify/+server.ts:124`
 
 **What happens**:
 These routes use `fetch()` instead of `platform.env.AUTH.fetch()` (service binding). The register routes correctly use the service binding for the `grove_session` path, but the authenticate routes don't — they go over the public internet.
@@ -128,9 +128,9 @@ The bare `fetch()` targets `${authBaseUrl}/api/auth/passkey/generate-authenticat
 
 **Files**:
 
-- `packages/engine/wrangler.toml:140` → `GROVEAUTH_URL = "https://auth.grove.place"`
-- `packages/heartwood/wrangler.toml:43` → Heartwood's domain is `auth-api.grove.place`
-- `packages/engine/src/lib/config/auth.ts:15` → `AUTH_HUB_URL = "https://login.grove.place"`
+- `libs/engine/wrangler.toml:140` → `GROVEAUTH_URL = "https://auth.grove.place"`
+- `services/heartwood/wrangler.toml:43` → Heartwood's domain is `auth-api.grove.place`
+- `libs/engine/src/lib/config/auth.ts:15` → `AUTH_HUB_URL = "https://login.grove.place"`
 
 **What happens**:
 When bare `fetch()` is used (BUG 3), the URL is `https://auth.grove.place/api/auth/passkey/...`.
@@ -144,17 +144,17 @@ The `fetchUserPasskeys()` in `+page.server.ts:80` also uses bare `fetch()` with 
 
 ### BUG 5: Engine Verify Route Expects Non-Standard Response Format (HIGH)
 
-**File**: `packages/engine/src/routes/api/passkey/authenticate/verify/+server.ts:156-163`
+**File**: `libs/engine/src/routes/api/passkey/authenticate/verify/+server.ts:156-163`
 
 **What happens**:
 The route expects this from Heartwood:
 
 ```json
 {
-  "verified": true,
-  "accessToken": "jwt...",
-  "refreshToken": "...",
-  "user": { "id": "...", "email": "..." }
+	"verified": true,
+	"accessToken": "jwt...",
+	"refreshToken": "...",
+	"user": { "id": "...", "email": "..." }
 }
 ```
 
@@ -175,14 +175,14 @@ The engine then tries to set its own `access_token` and `refresh_token` cookies 
 
 ### BUG 6: `GET /api/passkey` Only Accepts Legacy JWT (MEDIUM)
 
-**File**: `packages/engine/src/routes/api/passkey/+server.ts:20-22`
+**File**: `libs/engine/src/routes/api/passkey/+server.ts:20-22`
 
 **What happens**:
 
 ```typescript
 const accessToken = cookies.get("access_token");
 if (!accessToken) {
-  throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
+	throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
 }
 ```
 
@@ -194,7 +194,7 @@ Only checks `access_token` (legacy JWT). Users who signed in via Better Auth (OA
 
 ### BUG 7: Possible HTTP Method Mismatch (MEDIUM)
 
-**File**: `packages/engine/src/routes/api/passkey/register-options/+server.ts:34`
+**File**: `libs/engine/src/routes/api/passkey/register-options/+server.ts:34`
 
 **What happens**:
 
@@ -218,8 +218,8 @@ If Better Auth expects POST, the GET request returns 404 or 405. Need to verify 
 
 Two independent implementations:
 
-- `packages/engine/src/lib/utils/webauthn.ts` → `base64urlToBuffer()`, `bufferToBase64url()`
-- `packages/engine/src/lib/grafts/login/passkey-authenticate.ts` → `arrayBufferToBase64Url()`, `base64UrlToArrayBuffer()`
+- `libs/engine/src/lib/utils/webauthn.ts` → `base64urlToBuffer()`, `bufferToBase64url()`
+- `libs/engine/src/lib/grafts/login/passkey-authenticate.ts` → `arrayBufferToBase64Url()`, `base64UrlToArrayBuffer()`
 
 Same logic, different names, different files. Should consolidate.
 
@@ -227,13 +227,13 @@ Same logic, different names, different files. Should consolidate.
 
 If we fix the architecture by redirecting all ceremonies to `login.grove.place`, these engine routes become dead code:
 
-- `packages/engine/src/routes/api/passkey/register-options/+server.ts`
-- `packages/engine/src/routes/api/passkey/verify-registration/+server.ts`
-- `packages/engine/src/routes/api/passkey/authenticate/options/+server.ts`
-- `packages/engine/src/routes/api/passkey/authenticate/verify/+server.ts`
-- `packages/engine/src/routes/api/passkey/[id]/+server.ts`
-- `packages/engine/src/routes/arbor/account/passkey-utils.ts`
-- Parts of `packages/engine/src/lib/grafts/login/passkey-authenticate.ts`
+- `libs/engine/src/routes/api/passkey/register-options/+server.ts`
+- `libs/engine/src/routes/api/passkey/verify-registration/+server.ts`
+- `libs/engine/src/routes/api/passkey/authenticate/options/+server.ts`
+- `libs/engine/src/routes/api/passkey/authenticate/verify/+server.ts`
+- `libs/engine/src/routes/api/passkey/[id]/+server.ts`
+- `libs/engine/src/routes/arbor/account/passkey-utils.ts`
+- Parts of `libs/engine/src/lib/grafts/login/passkey-authenticate.ts`
 
 That's ~800 lines of custom WebAuthn proxy code that should be replaced by redirects.
 
@@ -270,7 +270,7 @@ Arbor Account "Add Passkey" button
     → redirect back to arbor account page
 ```
 
-Plant already does this! See `packages/plant/src/routes/auth/setup-passkey/+page.server.ts`.
+Plant already does this! See `apps/plant/src/routes/auth/setup-passkey/+page.server.ts`.
 
 ### Authentication Flow (signing in with passkey)
 
@@ -317,7 +317,7 @@ The Login Graft's passkey button redirects to `login.grove.place/?redirect=<curr
 
 ### Passkey Delete Flow
 
-Currently in `packages/engine/src/routes/api/passkey/[id]/+server.ts` — needs same session cookie fixes as the other routes. Or, if we redirect management to login.grove.place, this becomes dead code too.
+Currently in `libs/engine/src/routes/api/passkey/[id]/+server.ts` — needs same session cookie fixes as the other routes. Or, if we redirect management to login.grove.place, this becomes dead code too.
 
 ---
 

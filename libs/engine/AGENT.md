@@ -27,7 +27,7 @@ username.grove.place/     # Individual blog (THIS ENGINE)
 ## Key Directories
 
 ```
-packages/engine/
+libs/engine/
 ├── src/
 │   ├── routes/           # SvelteKit routes
 │   │   ├── admin/        # CMS admin panel

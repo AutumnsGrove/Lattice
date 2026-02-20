@@ -2,7 +2,7 @@
 title: Visual Assets Wishlist
 description: Marketing images, screenshots, and visual content needed across Grove
 category: marketing
-lastUpdated: '2026-02-05'
+lastUpdated: "2026-02-05"
 ---
 
 # Visual Assets Wishlist
@@ -16,22 +16,24 @@ lastUpdated: '2026-02-05'
 ## Current Assets
 
 ### Hero Carousel (Landing Page) - Live Svelte Components
-Located: `packages/landing/src/lib/components/hero/`
+
+Located: `apps/landing/src/lib/components/hero/`
 Replaced static PNGs with season-aware live components (#956).
 
-| Slide | Component | Headline | Visual Scene |
-|-------|-----------|----------|-------------|
-| 1 | HeroRefuge | "A grove for people who lost their groves" | Logo, TreePine, TreeCherry, Fireflies, Mushroom |
-| 2 | HeroOwnership | "Your words. Your space. Forever." | TreeAspen, GardenGate, Butterfly, Fern, Bush |
-| 3 | HeroShade | "Your words are not a dataset" | Dense canopy, Cardinal, falling Leaves, Bushes |
-| 4 | HeroCentennial | "Some trees outlive the people who planted them" | Large TreePine, Lantern, StonePath, Stars |
-| 5 | HeroCommunity | "The internet should feel like home" | Pond, Reeds, LilyPad, TreeBirch, Robin, Rabbit |
+| Slide | Component      | Headline                                         | Visual Scene                                    |
+| ----- | -------------- | ------------------------------------------------ | ----------------------------------------------- |
+| 1     | HeroRefuge     | "A grove for people who lost their groves"       | Logo, TreePine, TreeCherry, Fireflies, Mushroom |
+| 2     | HeroOwnership  | "Your words. Your space. Forever."               | TreeAspen, GardenGate, Butterfly, Fern, Bush    |
+| 3     | HeroShade      | "Your words are not a dataset"                   | Dense canopy, Cardinal, falling Leaves, Bushes  |
+| 4     | HeroCentennial | "Some trees outlive the people who planted them" | Large TreePine, Lantern, StonePath, Stars       |
+| 5     | HeroCommunity  | "The internet should feel like home"             | Pond, Reeds, LilyPad, TreeBirch, Robin, Rabbit  |
 
 ---
 
 ## Needed: Product Screenshots
 
 ### Flow Editor
+
 The writing experience is a key selling point. Show it off.
 
 - [ ] **Clean editor view** - Empty or minimal post, showing the calm interface
@@ -40,6 +42,7 @@ The writing experience is a key selling point. Show it off.
 - [ ] **Dark mode editor** - Midnight theme writing experience
 
 ### Live Grove Examples
+
 Show what a finished blog actually looks like.
 
 - [ ] **Example blog homepage** - Posts listed with forest decorations
@@ -49,6 +52,7 @@ Show what a finished blog actually looks like.
 - [ ] **Dark mode blog** - Midnight theme in action
 
 ### Gallery Curio
+
 Visual storytelling features.
 
 - [ ] **Gallery grid view** - Multiple images in masonry/grid layout
@@ -56,6 +60,7 @@ Visual storytelling features.
 - [ ] **Gallery on mobile** - Touch-friendly gallery experience
 
 ### Arbor Admin Dashboard
+
 For users curious about the backend.
 
 - [ ] **Dashboard overview** - Stats, recent posts, quick actions
@@ -64,6 +69,7 @@ For users curious about the backend.
 - [ ] **Analytics view** - Privacy-respecting stats (if applicable)
 
 ### Shade Protection
+
 Visualizing the AI protection.
 
 - [ ] **Shade badge/indicator** - The protection status UI
@@ -75,6 +81,7 @@ Visualizing the AI protection.
 ## Needed: Marketing Graphics
 
 ### Vision Page
+
 The `/vision` page could use compelling visuals.
 
 - [ ] **"The internet used to be a garden"** - Nostalgic web visualization
@@ -83,10 +90,12 @@ The `/vision` page could use compelling visuals.
 - [ ] **100-year timeline** - Centennial guarantee visualization
 
 ### Pricing Page
+
 - [ ] **Tier comparison visual** - Seedling/Oak/Evergreen growth metaphor
 - [ ] **Value props icons** - Custom illustrations for each feature
 
 ### Forest Page (Directory)
+
 - [ ] **Example grove cards** - How blogs appear in the directory
 - [ ] **Forest visualization** - The community as a literal forest
 
@@ -95,11 +104,13 @@ The `/vision` page could use compelling visuals.
 ## Needed: Social Media Assets
 
 ### Open Graph Images
+
 - [ ] **Default OG image** - Already exists, but could have variants
 - [ ] **Seasonal OG variants** - Spring/summer/autumn/winter versions
 - [ ] **Feature-specific OG** - For sharing specific feature pages
 
 ### Social Posts
+
 - [ ] **Quote cards** - Shareable images with Grove philosophy quotes
 - [ ] **Feature spotlights** - Individual feature announcements
 - [ ] **Comparison graphics** - "Grove vs [platform]" style content
@@ -109,6 +120,7 @@ The `/vision` page could use compelling visuals.
 ## Needed: Onboarding/Tutorial
 
 ### Plant.grove.place Onboarding
+
 - [ ] **Step 1: Choose your name** - Domain selection UI
 - [ ] **Step 2: Pick your season** - Theme selection
 - [ ] **Step 3: Write your first post** - Getting started
@@ -119,17 +131,20 @@ The `/vision` page could use compelling visuals.
 ## Technical Notes
 
 ### Image Specifications
+
 - **Carousel images**: 1920x1080 or 16:9 ratio, PNG preferred
 - **Screenshots**: 2x resolution for retina, PNG
 - **OG images**: 1200x630 standard
 - **Social posts**: Platform-specific sizes
 
 ### Storage Locations
+
 - Marketing images: `assets/carousel/`, `assets/marketing/`
-- Static for landing: `packages/landing/static/assets/`
+- Static for landing: `apps/landing/static/assets/`
 - Shared across properties: Consider CDN or R2 bucket
 
 ### Accessibility
+
 - All images need descriptive alt text
 - Avoid text-heavy images (or provide text alternative)
 - Ensure sufficient contrast for any overlaid text
@@ -139,19 +154,14 @@ The `/vision` page could use compelling visuals.
 ## Priority Queue
 
 **High Priority** (needed for launch):
+
 1. Flow Editor screenshots (clean + in-use)
 2. Live Grove example (at least one polished example)
 3. Mobile views (editor + blog)
 
-**Medium Priority** (nice to have):
-4. Gallery Curio showcase
-5. Seasonal theme variations
-6. Arbor dashboard glimpse
+**Medium Priority** (nice to have): 4. Gallery Curio showcase 5. Seasonal theme variations 6. Arbor dashboard glimpse
 
-**Lower Priority** (post-launch):
-7. Social media asset library
-8. Onboarding screenshots
-9. Video content stills
+**Lower Priority** (post-launch): 7. Social media asset library 8. Onboarding screenshots 9. Video content stills
 
 ---
 
@@ -164,4 +174,4 @@ The `/vision` page could use compelling visuals.
 
 ---
 
-*Last updated: 2026-02-05*
+_Last updated: 2026-02-05_

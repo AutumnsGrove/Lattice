@@ -86,8 +86,8 @@ Every quarter, perform a brief review of high-churn documentation areas:
 ### Quarterly Review Checklist
 
 1. **Check `last_verified` dates** — Any article over 90 days old should be spot-checked
-2. **Verify pricing table** — Compare docs to `packages/engine/src/lib/config/tiers.ts`
-3. **Check admin navigation** — Compare docs to `packages/engine/src/routes/admin/+layout.svelte`
+2. **Verify pricing table** — Compare docs to `libs/engine/src/lib/config/tiers.ts`
+3. **Check admin navigation** — Compare docs to `libs/engine/src/routes/admin/+layout.svelte`
 4. **Spot-check screenshots** — If we add screenshots, verify they match current UI
 
 ### Running the Review
@@ -120,11 +120,11 @@ When verifying documentation, check these authoritative sources:
 
 | Documentation Claim | Verify Against |
 |--------------------|----------------|
-| Tier limits (posts, storage) | `packages/engine/src/lib/config/tiers.ts` |
-| Font availability | `packages/engine/src/lib/config/presets.ts` |
-| Admin navigation | `packages/engine/src/routes/admin/+layout.svelte` |
-| Auth flow | `packages/engine/src/hooks.server.ts` |
-| API endpoints | `packages/engine/src/routes/api/` |
+| Tier limits (posts, storage) | `libs/engine/src/lib/config/tiers.ts` |
+| Font availability | `libs/engine/src/lib/config/presets.ts` |
+| Admin navigation | `libs/engine/src/routes/admin/+layout.svelte` |
+| Auth flow | `libs/engine/src/hooks.server.ts` |
+| API endpoints | `libs/engine/src/routes/api/` |
 
 ---
 

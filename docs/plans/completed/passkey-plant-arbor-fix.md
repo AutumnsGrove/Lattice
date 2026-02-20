@@ -13,7 +13,7 @@ Two related tasks:
 
 ### Current State
 
-`packages/plant/src/routes/+page.svelte` (lines 362-376) uses a **custom inline auth** section:
+`apps/plant/src/routes/+page.svelte` (lines 362-376) uses a **custom inline auth** section:
 
 ```svelte
 <div class="space-y-3">
@@ -43,7 +43,7 @@ import { LoginGraft } from '@autumnsgrove/lattice/grafts/login';
 
 ### Files to Modify
 
-- `packages/plant/src/routes/+page.svelte`
+- `apps/plant/src/routes/+page.svelte`
 
 ---
 
@@ -86,7 +86,7 @@ Update the passkey fetch to use the correct cookies:
 
 ### Files to Modify
 
-- `packages/engine/src/routes/arbor/account/+page.server.ts`
+- `libs/engine/src/routes/arbor/account/+page.server.ts`
   - Update `fetchUserPasskeys()` to use Cookie header with grove_session or better-auth cookies
 
 ---

@@ -42,10 +42,10 @@
 
 ### Step 1: Create the Migration
 
-Create a new migration file in `packages/engine/migrations/`:
+Create a new migration file in `libs/engine/migrations/`:
 
 ```sql
--- packages/engine/migrations/XXX_my_feature.sql
+-- libs/engine/migrations/XXX_my_feature.sql
 -- ============================================================================
 -- Migration XXX: My Feature Flag
 -- ============================================================================
@@ -77,7 +77,7 @@ INSERT OR IGNORE INTO feature_flags (
 
 ```bash
 # Apply to production D1
-npx wrangler d1 execute grove-engine-db --remote --file=packages/engine/migrations/XXX_my_feature.sql
+npx wrangler d1 execute grove-engine-db --remote --file=libs/engine/migrations/XXX_my_feature.sql
 
 # Verify it was created
 npx wrangler d1 execute grove-engine-db --remote --command="SELECT * FROM feature_flags WHERE id = 'my_feature';"
@@ -85,16 +85,16 @@ npx wrangler d1 execute grove-engine-db --remote --command="SELECT * FROM featur
 
 ### Step 3: Add to Known Grafts (Type Safety)
 
-Update `packages/engine/src/lib/feature-flags/grafts.ts`:
+Update `libs/engine/src/lib/feature-flags/grafts.ts`:
 
 ```typescript
 export type KnownGraftId =
-  | "fireside_mode"
-  | "scribe_mode"
-  | "meadow_access"
-  | "jxl_encoding"
-  | "jxl_kill_switch"
-  | "my_feature"; // Add your new flag
+	| "fireside_mode"
+	| "scribe_mode"
+	| "meadow_access"
+	| "jxl_encoding"
+	| "jxl_kill_switch"
+	| "my_feature"; // Add your new flag
 ```
 
 ### Step 4: Use in Code
@@ -104,19 +104,19 @@ import { isGraftEnabled } from "@autumnsgrove/lattice/feature-flags";
 
 // In a +page.server.ts or +layout.server.ts
 export const load: PageServerLoad = async ({ parent, platform }) => {
-  const parentData = await parent();
+	const parentData = await parent();
 
-  // Option A: Check from cascaded grafts (preferred - no extra DB call)
-  const myFeatureEnabled = parentData.grafts?.my_feature ?? false;
+	// Option A: Check from cascaded grafts (preferred - no extra DB call)
+	const myFeatureEnabled = parentData.grafts?.my_feature ?? false;
 
-  // Option B: Direct check (use sparingly - adds DB/KV call)
-  const myFeatureEnabled = await isGraftEnabled(
-    "my_feature",
-    { tenantId: locals.tenantId, inGreenhouse: parentData.inGreenhouse },
-    { DB: platform.env.DB, FLAGS_KV: platform.env.FLAGS_KV },
-  );
+	// Option B: Direct check (use sparingly - adds DB/KV call)
+	const myFeatureEnabled = await isGraftEnabled(
+		"my_feature",
+		{ tenantId: locals.tenantId, inGreenhouse: parentData.inGreenhouse },
+		{ DB: platform.env.DB, FLAGS_KV: platform.env.FLAGS_KV },
+	);
 
-  return { myFeatureEnabled };
+	return { myFeatureEnabled };
 };
 ```
 
@@ -292,8 +292,8 @@ In code, check kill switch first:
 ```typescript
 const killSwitch = await isFeatureEnabled("my_feature_kill_switch", ctx, env);
 if (killSwitch) {
-  // Feature is killed - skip everything
-  return fallbackBehavior();
+	// Feature is killed - skip everything
+	return fallbackBehavior();
 }
 
 // Normal feature logic...
@@ -303,7 +303,7 @@ if (killSwitch) {
 
 ## Checklist: Adding a New Flag
 
-- [ ] Create migration file in `packages/engine/migrations/`
+- [ ] Create migration file in `libs/engine/migrations/`
 - [ ] Choose appropriate `flag_type` (boolean, percentage, tier, etc.)
 - [ ] Set `enabled` (0 = globally off, 1 = evaluate rules)
 - [ ] Set `greenhouse_only` if it's an experimental feature
@@ -317,16 +317,16 @@ if (killSwitch) {
 
 ## File Reference
 
-| File                                                     | Purpose                                  |
-| -------------------------------------------------------- | ---------------------------------------- |
-| `packages/engine/migrations/`                            | SQL migrations that create flags         |
-| `packages/engine/src/lib/feature-flags/types.ts`         | Type definitions                         |
-| `packages/engine/src/lib/feature-flags/grafts.ts`        | `getEnabledGrafts()`, `isGraftEnabled()` |
-| `packages/engine/src/lib/feature-flags/evaluate.ts`      | Core evaluation logic                    |
-| `packages/engine/src/lib/feature-flags/greenhouse.ts`    | Greenhouse enrollment                    |
-| `packages/engine/src/lib/feature-flags/tenant-grafts.ts` | Self-serve controls                      |
-| `packages/engine/src/lib/feature-flags/admin.ts`         | Admin UI functions                       |
-| `docs/specs/grafts-spec.md`                              | Full specification                       |
+| File                                                 | Purpose                                  |
+| ---------------------------------------------------- | ---------------------------------------- |
+| `libs/engine/migrations/`                            | SQL migrations that create flags         |
+| `libs/engine/src/lib/feature-flags/types.ts`         | Type definitions                         |
+| `libs/engine/src/lib/feature-flags/grafts.ts`        | `getEnabledGrafts()`, `isGraftEnabled()` |
+| `libs/engine/src/lib/feature-flags/evaluate.ts`      | Core evaluation logic                    |
+| `libs/engine/src/lib/feature-flags/greenhouse.ts`    | Greenhouse enrollment                    |
+| `libs/engine/src/lib/feature-flags/tenant-grafts.ts` | Self-serve controls                      |
+| `libs/engine/src/lib/feature-flags/admin.ts`         | Admin UI functions                       |
+| `docs/specs/grafts-spec.md`                          | Full specification                       |
 
 ---
 
@@ -336,7 +336,7 @@ if (killSwitch) {
 
 ```svelte
 {#if data.grafts.my_feature}
-  <MyFeatureComponent />
+	<MyFeatureComponent />
 {/if}
 ```
 
@@ -345,7 +345,7 @@ if (killSwitch) {
 ```typescript
 // In +server.ts
 if (grafts.enhanced_uploads) {
-  return handleEnhancedUpload(request);
+	return handleEnhancedUpload(request);
 }
 return handleBasicUpload(request);
 ```

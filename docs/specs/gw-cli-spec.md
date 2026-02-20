@@ -655,7 +655,7 @@ gw whoami
 # ├─────────────────────────────────────────────────────────────────┤
 # │ Current Project                                                │
 # │   Directory: /Users/autumn/Documents/Projects/Lattice      │
-# │   Wrangler Config: packages/engine/wrangler.toml               │
+# │   Wrangler Config: libs/engine/wrangler.toml                   │
 # │   Default DB: grove-engine-db                                  │
 # ├─────────────────────────────────────────────────────────────────┤
 # │ Secrets Vault                                                  │
@@ -1249,11 +1249,10 @@ gw gh rate-limit
 │     Monorepo-aware development. Package-scoped commands.       │
 │     CI parity. One command to rule them all.                   │
 │                                                                 │
-│         packages/                                               │
-│         ├── engine/     →  gw dev engine                        │
-│         ├── landing/    →  gw test landing                      │
-│         ├── router/     →  gw build router                      │
-│         └── greenhouse/ →  gw check greenhouse                  │
+│         libs/engine/ → gw dev engine                             │
+│         apps/landing/ → gw test landing                        │
+│         services/router/ → gw build router                     │
+│         apps/greenhouse/ → gw check greenhouse                 │
 │                                                                 │
 ╰─────────────────────────────────────────────────────────────────╯
 ```
@@ -1478,13 +1477,13 @@ gw ci --continue-on-error
 ```bash
 # gw automatically detects package from current directory:
 
-cd packages/engine
+cd libs/engine
 gw test                               # Runs engine tests
 
-cd packages/landing
+cd apps/landing
 gw dev                                # Starts landing dev server
 
-cd packages/greenhouse/src/lib
+cd apps/greenhouse/src/lib
 gw check                              # Checks greenhouse types
 
 # Or specify explicitly from anywhere:
@@ -1634,7 +1633,7 @@ amber = "amber"
 
 # Package-specific settings
 [packages.engine]
-path = "packages/engine"
+path = "libs/engine"
 dev_port = 8787
 dev_command = "wrangler dev"
 test_command = "vitest run"
@@ -1642,7 +1641,7 @@ build_command = "wrangler deploy --dry-run"
 type_check_command = "tsc --noEmit"
 
 [packages.landing]
-path = "packages/landing"
+path = "apps/landing"
 dev_port = 5173
 dev_command = "npm run dev"
 test_command = "vitest run"
@@ -1650,7 +1649,7 @@ build_command = "npm run build"
 type_check_command = "svelte-check"
 
 [packages.greenhouse]
-path = "packages/greenhouse"
+path = "apps/greenhouse"
 dev_port = 5174
 dev_command = "npm run dev"
 test_command = "vitest run"
@@ -1964,7 +1963,7 @@ gwci                   # Run CI locally: gw ci
 ## Directory Structure
 
 ```
-tools/gw/
+tools/grove-wrap/
 ├── pyproject.toml          # UV project config
 ├── src/
 │   └── gw/

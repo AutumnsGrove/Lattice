@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-**Target:** `packages/login/` — login.grove.place Unified Auth Hub
+**Target:** `apps/login/` — login.grove.place Unified Auth Hub
 **Scope:** Full subsystem audit of the new login package, including its trust relationship with Heartwood (GroveAuth)
 **Date:** 2026-02-10
 **Assessor:** Hawk Survey (automated security assessment)
@@ -87,13 +87,13 @@ login.grove.place responses      │  Heartwood (GroveAuth) via service binding
 
 #### [HAWK-001] Rate Limiting Disabled on Auth Endpoints
 
-| Field          | Value                                                                                                          |
-| -------------- | -------------------------------------------------------------------------------------------------------------- |
-| **Severity**   | MEDIUM                                                                                                         |
-| **Domain**     | Rate Limiting & Resource Controls                                                                              |
-| **Location**   | `packages/login/src/routes/api/auth/[...path]/+server.ts` (proxy) + `packages/heartwood/src/auth/index.ts:113` |
-| **Confidence** | HIGH                                                                                                           |
-| **OWASP**      | A07:2021 Identification and Authentication Failures                                                            |
+| Field          | Value                                                                                                  |
+| -------------- | ------------------------------------------------------------------------------------------------------ |
+| **Severity**   | MEDIUM                                                                                                 |
+| **Domain**     | Rate Limiting & Resource Controls                                                                      |
+| **Location**   | `apps/login/src/routes/api/auth/[...path]/+server.ts` (proxy) + `apps/heartwood/src/auth/index.ts:113` |
+| **Confidence** | HIGH                                                                                                   |
+| **OWASP**      | A07:2021 Identification and Authentication Failures                                                    |
 
 **Description:**
 Better Auth's built-in rate limiting is explicitly disabled in Heartwood (`rateLimit.enabled: false`). The login proxy forwards all requests without any rate limiting. This means auth-sensitive endpoints (login, registration, magic link requests, passkey challenges) have no protection against brute-force or abuse.
@@ -113,13 +113,13 @@ Confirm where rate limiting is applied (Cloudflare WAF rules, Heartwood router m
 
 #### [HAWK-002] CSP Allows `'unsafe-inline'` for Scripts
 
-| Field          | Value                                   |
-| -------------- | --------------------------------------- |
-| **Severity**   | MEDIUM                                  |
-| **Domain**     | HTTP Security                           |
-| **Location**   | `packages/login/src/hooks.server.ts:53` |
-| **Confidence** | HIGH                                    |
-| **OWASP**      | A05:2021 Security Misconfiguration      |
+| Field          | Value                               |
+| -------------- | ----------------------------------- |
+| **Severity**   | MEDIUM                              |
+| **Domain**     | HTTP Security                       |
+| **Location**   | `apps/login/src/hooks.server.ts:53` |
+| **Confidence** | HIGH                                |
+| **OWASP**      | A05:2021 Security Misconfiguration  |
 
 **Description:**
 The Content-Security-Policy header includes `script-src 'self' 'unsafe-inline'`, which allows execution of inline `<script>` tags. This weakens CSP's XSS protection — if an attacker finds any injection vector, inline scripts will execute.
@@ -144,13 +144,13 @@ Use nonce-based CSP. SvelteKit supports CSP nonces via `%sveltekit.nonce%` in `a
 
 #### [HAWK-003] Unused D1 Database Binding (Least Privilege Violation)
 
-| Field          | Value                               |
-| -------------- | ----------------------------------- |
-| **Severity**   | MEDIUM                              |
-| **Domain**     | Infrastructure Security             |
-| **Location**   | `packages/login/wrangler.toml:7-10` |
-| **Confidence** | HIGH                                |
-| **OWASP**      | A05:2021 Security Misconfiguration  |
+| Field          | Value                              |
+| -------------- | ---------------------------------- |
+| **Severity**   | MEDIUM                             |
+| **Domain**     | Infrastructure Security            |
+| **Location**   | `apps/login/wrangler.toml:7-10`    |
+| **Confidence** | HIGH                               |
+| **OWASP**      | A05:2021 Security Misconfiguration |
 
 **Description:**
 The login worker has a D1 database binding (`DB`) to `grove-engine-db` configured in `wrangler.toml`, but no code in the login package references it. The `app.d.ts` type declarations don't even include `DB` in `Platform.env`. This gives the login service unnecessary read/write access to the shared database.
@@ -170,7 +170,7 @@ No source file imports or references `platform.env.DB`.
 If the proxy or any route handler is compromised (e.g., via a vulnerability in better-auth or a future code change), the attacker has direct database access they shouldn't have. The login service should only need the AUTH service binding.
 
 **Remediation:**
-Remove the `[[d1_databases]]` section from `packages/login/wrangler.toml`.
+Remove the `[[d1_databases]]` section from `apps/login/wrangler.toml`.
 
 **Needs Manual Verification:** No — visible in code and config.
 
@@ -180,13 +180,13 @@ Remove the `[[d1_databases]]` section from `packages/login/wrangler.toml`.
 
 #### [HAWK-004] Dual CSRF Validation with Inconsistent Allowlists
 
-| Field          | Value                                                                                |
-| -------------- | ------------------------------------------------------------------------------------ |
-| **Severity**   | LOW                                                                                  |
-| **Domain**     | CSRF Protection                                                                      |
-| **Location**   | `packages/login/src/hooks.server.ts:13-18` + `packages/login/svelte.config.js:14-20` |
-| **Confidence** | HIGH                                                                                 |
-| **OWASP**      | A08:2021 Software and Data Integrity Failures                                        |
+| Field          | Value                                                                        |
+| -------------- | ---------------------------------------------------------------------------- |
+| **Severity**   | LOW                                                                          |
+| **Domain**     | CSRF Protection                                                              |
+| **Location**   | `apps/login/src/hooks.server.ts:13-18` + `apps/login/svelte.config.js:14-20` |
+| **Confidence** | HIGH                                                                         |
+| **OWASP**      | A08:2021 Software and Data Integrity Failures                                |
 
 **Description:**
 Two independent CSRF validation mechanisms run for every state-changing request, with different allowlists:
@@ -203,13 +203,13 @@ Choose one CSRF mechanism. Recommended: Remove the custom hooks.server.ts CSRF c
 
 #### [HAWK-005] Response Header Forwarding is Overly Permissive
 
-| Field          | Value                                                             |
-| -------------- | ----------------------------------------------------------------- |
-| **Severity**   | LOW                                                               |
-| **Domain**     | HTTP Security                                                     |
-| **Location**   | `packages/login/src/routes/api/auth/[...path]/+server.ts:100-105` |
-| **Confidence** | MEDIUM                                                            |
-| **OWASP**      | A05:2021 Security Misconfiguration                                |
+| Field          | Value                                                         |
+| -------------- | ------------------------------------------------------------- |
+| **Severity**   | LOW                                                           |
+| **Domain**     | HTTP Security                                                 |
+| **Location**   | `apps/login/src/routes/api/auth/[...path]/+server.ts:100-105` |
+| **Confidence** | MEDIUM                                                        |
+| **OWASP**      | A05:2021 Security Misconfiguration                            |
 
 **Description:**
 The proxy forwards ALL response headers from Heartwood except `transfer-encoding` and `connection`. If Heartwood were misconfigured or compromised, it could inject arbitrary headers into login.grove.place responses (e.g., `Access-Control-Allow-Origin: *`, or malicious `Set-Cookie` values).
@@ -218,9 +218,9 @@ The proxy forwards ALL response headers from Heartwood except `transfer-encoding
 
 ```typescript
 response.headers.forEach((value, key) => {
-  if (!SKIP_RESPONSE_HEADERS.has(key.toLowerCase())) {
-    responseHeaders.append(key, value);
-  }
+	if (!SKIP_RESPONSE_HEADERS.has(key.toLowerCase())) {
+		responseHeaders.append(key, value);
+	}
 });
 ```
 
@@ -234,13 +234,13 @@ Consider an allowlist of forwarded response headers: `Content-Type`, `Set-Cookie
 
 #### [HAWK-006] No Request Body Size Limit on Proxy
 
-| Field          | Value                                                           |
-| -------------- | --------------------------------------------------------------- |
-| **Severity**   | LOW                                                             |
-| **Domain**     | Rate Limiting & Resource Controls                               |
-| **Location**   | `packages/login/src/routes/api/auth/[...path]/+server.ts:93-96` |
-| **Confidence** | MEDIUM                                                          |
-| **OWASP**      | A05:2021 Security Misconfiguration                              |
+| Field          | Value                                                       |
+| -------------- | ----------------------------------------------------------- |
+| **Severity**   | LOW                                                         |
+| **Domain**     | Rate Limiting & Resource Controls                           |
+| **Location**   | `apps/login/src/routes/api/auth/[...path]/+server.ts:93-96` |
+| **Confidence** | MEDIUM                                                      |
+| **OWASP**      | A05:2021 Security Misconfiguration                          |
 
 **Description:**
 The proxy calls `request.arrayBuffer()` on non-GET/HEAD requests without checking body size first. Cloudflare Workers have a 100MB request body limit, and Heartwood may have its own limits, but no explicit limit exists at the proxy layer.
@@ -255,13 +255,13 @@ Add a `Content-Length` check before reading the body (e.g., reject bodies over 1
 
 #### [HAWK-007] Full Cookie Forwarding to Service Binding
 
-| Field          | Value                                                           |
-| -------------- | --------------------------------------------------------------- |
-| **Severity**   | LOW                                                             |
-| **Domain**     | Session & Cookie Security                                       |
-| **Location**   | `packages/login/src/routes/api/auth/[...path]/+server.ts:73-76` |
-| **Confidence** | MEDIUM                                                          |
-| **OWASP**      | A05:2021 Security Misconfiguration                              |
+| Field          | Value                                                       |
+| -------------- | ----------------------------------------------------------- |
+| **Severity**   | LOW                                                         |
+| **Domain**     | Session & Cookie Security                                   |
+| **Location**   | `apps/login/src/routes/api/auth/[...path]/+server.ts:73-76` |
+| **Confidence** | MEDIUM                                                      |
+| **OWASP**      | A05:2021 Security Misconfiguration                          |
 
 **Description:**
 `cookies.getAll()` forwards every cookie from the browser request to Heartwood, not just auth-related ones. This includes any first-party cookies set on `login.grove.place` (analytics, preferences, etc.) and cross-subdomain cookies from `.grove.place`.
@@ -278,12 +278,12 @@ Filter cookies to only forward known auth cookie names: `better-auth.session_tok
 
 #### [HAWK-008] Cookie Presence-Only Auth Guard
 
-| Field          | Value                                                                                                            |
-| -------------- | ---------------------------------------------------------------------------------------------------------------- |
-| **Severity**   | INFO                                                                                                             |
-| **Domain**     | Authentication Security                                                                                          |
-| **Location**   | `packages/login/src/routes/callback/+server.ts:25-27`, `packages/login/src/routes/passkey/+page.server.ts:14-16` |
-| **Confidence** | HIGH                                                                                                             |
+| Field          | Value                                                                                                    |
+| -------------- | -------------------------------------------------------------------------------------------------------- |
+| **Severity**   | INFO                                                                                                     |
+| **Domain**     | Authentication Security                                                                                  |
+| **Location**   | `apps/login/src/routes/callback/+server.ts:25-27`, `apps/login/src/routes/passkey/+page.server.ts:14-16` |
+| **Confidence** | HIGH                                                                                                     |
 
 **Description:**
 Session checks in the callback and passkey page guard only verify cookie existence, not token validity. An expired or revoked session token that still exists as a cookie passes the gate. The actual API call to Heartwood would fail, but the user sees a confusing error on the passkey page instead of being redirected to sign-in.
@@ -294,12 +294,12 @@ This is by design — the login package has no DB binding and cannot validate to
 
 #### [HAWK-009] `isDev` Parameter Never Used in Production
 
-| Field          | Value                                   |
-| -------------- | --------------------------------------- |
-| **Severity**   | INFO                                    |
-| **Domain**     | Input Validation                        |
-| **Location**   | `packages/login/src/lib/redirect.ts:31` |
-| **Confidence** | HIGH                                    |
+| Field          | Value                               |
+| -------------- | ----------------------------------- |
+| **Severity**   | INFO                                |
+| **Domain**     | Input Validation                    |
+| **Location**   | `apps/login/src/lib/redirect.ts:31` |
+| **Confidence** | HIGH                                |
 
 **Description:**
 `validateRedirectUrl(url, isDev)` accepts an `isDev` parameter defaulting to `false`, but no call site in the package ever passes `true`. The localhost/127.0.0.1 dev patterns are effectively dead code in the deployed app. This is actually correct behavior — production should never allow localhost redirects — but the parameter exists for test flexibility.
@@ -308,12 +308,12 @@ This is by design — the login package has no DB binding and cannot validate to
 
 #### [HAWK-010] Passkey rpID Scoped to Parent Domain
 
-| Field          | Value                                      |
-| -------------- | ------------------------------------------ |
-| **Severity**   | INFO                                       |
-| **Domain**     | Authentication Security                    |
-| **Location**   | `packages/heartwood/src/auth/index.ts:280` |
-| **Confidence** | HIGH                                       |
+| Field          | Value                                  |
+| -------------- | -------------------------------------- |
+| **Severity**   | INFO                                   |
+| **Domain**     | Authentication Security                |
+| **Location**   | `apps/heartwood/src/auth/index.ts:280` |
+| **Confidence** | HIGH                                   |
 
 **Description:**
 Passkey `rpID` is set to `grove.place` (parent domain), meaning passkeys registered on `login.grove.place` are valid for authentication on any `*.grove.place` subdomain. This is intentional for the cross-subdomain auth model but creates a trust equivalence — a compromised subdomain could trigger passkey authentication prompts for any user.

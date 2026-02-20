@@ -61,22 +61,22 @@ One call to Zephyr handles everything: validation, rate limiting, template rende
 
 ### Email Locations Identified (🐕 Bloodhound Scout Report)
 
-| Location                                                       | Purpose                     | Current Pattern      | Migration Priority     |
-| -------------------------------------------------------------- | --------------------------- | -------------------- | ---------------------- |
-| `packages/plant/src/lib/server/send-email.ts`                  | Basic utility               | Direct Resend        | Phase 3                |
-| `packages/plant/src/lib/server/email-verification.ts`          | Verification codes          | Direct Resend        | Phase 3                |
-| `packages/engine/src/lib/email/schedule.ts`                    | Welcome sequences           | React Email + Resend | Phase 2                |
-| `packages/landing/src/lib/email/send.ts`                       | Welcome email               | Direct Resend        | Phase 3                |
-| `packages/engine/src/lib/server/services/trace-email.ts`       | Trace notifications         | Direct Resend        | Phase 3                |
-| `workers/email-catchup/worker.ts`                              | Catch-up worker             | Direct Resend        | Phase 3                |
-| `packages/landing/workers/onboarding-emails/`                  | Old onboarding (deprecated) | Direct Resend        | Phase 4 (Delete)       |
-| `packages/landing/src/routes/admin/porch/[id]/+page.server.ts` | Porch replies               | Direct Resend        | **Phase 1 (THE BUG!)** |
-| Multiple `+page.server.ts` files                               | Various triggers            | Direct Resend        | Phase 3                |
+| Location                                                   | Purpose                     | Current Pattern      | Migration Priority     |
+| ---------------------------------------------------------- | --------------------------- | -------------------- | ---------------------- |
+| `apps/plant/src/lib/server/send-email.ts`                  | Basic utility               | Direct Resend        | Phase 3                |
+| `apps/plant/src/lib/server/email-verification.ts`          | Verification codes          | Direct Resend        | Phase 3                |
+| `libs/engine/src/lib/email/schedule.ts`                    | Welcome sequences           | React Email + Resend | Phase 2                |
+| `apps/landing/src/lib/email/send.ts`                       | Welcome email               | Direct Resend        | Phase 3                |
+| `libs/engine/src/lib/server/services/trace-email.ts`       | Trace notifications         | Direct Resend        | Phase 3                |
+| `workers/email-catchup/worker.ts`                          | Catch-up worker             | Direct Resend        | Phase 3                |
+| `apps/landing/workers/onboarding-emails/`                  | Old onboarding (deprecated) | Direct Resend        | Phase 4 (Delete)       |
+| `apps/landing/src/routes/admin/porch/[id]/+page.server.ts` | Porch replies               | Direct Resend        | **Phase 1 (THE BUG!)** |
+| Multiple `+page.server.ts` files                           | Various triggers            | Direct Resend        | Phase 3                |
 
 ### Template Systems
 
-1. **React Email** (modern) - `packages/engine/src/lib/email/` sequences
-2. **Inline HTML** (legacy) - `packages/plant/src/lib/server/email-templates.ts`
+1. **React Email** (modern) - `libs/engine/src/lib/email/` sequences
+2. **Inline HTML** (legacy) - `apps/plant/src/lib/server/email-templates.ts`
 3. **Inline HTML** (legacy) - Onboarding worker
 
 **Decision:** Migrate all to React Email over time. Start with `porch-reply` template in Phase 1.
@@ -113,7 +113,7 @@ One call to Zephyr handles everything: validation, rate limiting, template rende
 
 ### Component Breakdown
 
-#### 1. ZephyrClient (`packages/engine/src/lib/zephyr/client.ts`)
+#### 1. ZephyrClient (`libs/engine/src/lib/zephyr/client.ts`)
 
 - Validates requests before sending
 - Builds properly typed payload
@@ -197,14 +197,14 @@ Circuit Breaker: 5 failures in 1 minute → pause 30s
 - [ ] `workers/zephyr/src/logging/d1.ts` - D1 log writer
 - [ ] `workers/zephyr/wrangler.toml` - Worker config
 - [ ] `workers/zephyr/package.json` - Dependencies
-- [ ] `packages/engine/src/lib/zephyr/index.ts` - Public exports
-- [ ] `packages/engine/src/lib/zephyr/client.ts` - ZephyrClient
-- [ ] `packages/engine/src/lib/zephyr/types.ts` - Shared types
+- [ ] `libs/engine/src/lib/zephyr/index.ts` - Public exports
+- [ ] `libs/engine/src/lib/zephyr/client.ts` - ZephyrClient
+- [ ] `libs/engine/src/lib/zephyr/types.ts` - Shared types
 
 **Files to Modify:**
 
-- [ ] `packages/landing/src/routes/admin/porch/[id]/+page.server.ts` - **MIGRATE TO ZEPHYR (THE FIX)**
-- [ ] `packages/engine/package.json` - Add zephyr export
+- [ ] `apps/landing/src/routes/admin/porch/[id]/+page.server.ts` - **MIGRATE TO ZEPHYR (THE FIX)**
+- [ ] `libs/engine/package.json` - Add zephyr export
 
 **Database Migration:**
 
@@ -230,8 +230,8 @@ Circuit Breaker: 5 failures in 1 minute → pause 30s
 
 **Files to Modify:**
 
-- [ ] `packages/plant/src/lib/server/email-verification.ts` - Use Zephyr
-- [ ] `packages/plant/src/routes/api/webhooks/lemonsqueezy/+server.ts` - Use Zephyr for payment emails
+- [ ] `apps/plant/src/lib/server/email-verification.ts` - Use Zephyr
+- [ ] `apps/plant/src/routes/api/webhooks/lemonsqueezy/+server.ts` - Use Zephyr for payment emails
 
 **Add:**
 
@@ -243,10 +243,10 @@ Circuit Breaker: 5 failures in 1 minute → pause 30s
 
 **Files to Migrate:**
 
-- [ ] `packages/landing/src/lib/email/send.ts` - Welcome emails
-- [ ] `packages/engine/src/lib/email/schedule.ts` - Welcome sequences
-- [ ] `packages/engine/src/lib/server/services/trace-email.ts` - Trace notifications
-- [ ] `packages/landing/src/routes/api/webhooks/email-feedback/+server.ts` - Feedback forwarding
+- [ ] `apps/landing/src/lib/email/send.ts` - Welcome emails
+- [ ] `libs/engine/src/lib/email/schedule.ts` - Welcome sequences
+- [ ] `libs/engine/src/lib/server/services/trace-email.ts` - Trace notifications
+- [ ] `apps/landing/src/routes/api/webhooks/email-feedback/+server.ts` - Feedback forwarding
 - [ ] `workers/email-catchup/worker.ts` - Catch-up worker
 - [ ] All remaining `+page.server.ts` files with email
 
@@ -261,9 +261,9 @@ Circuit Breaker: 5 failures in 1 minute → pause 30s
 
 **Files to Delete:**
 
-- [ ] `packages/landing/workers/onboarding-emails/` (deprecated)
-- [ ] `packages/plant/src/lib/server/send-email.ts` (migrated)
-- [ ] `packages/landing/src/lib/email/send.ts` (migrated)
+- [ ] `apps/landing/workers/onboarding-emails/` (deprecated)
+- [ ] `apps/plant/src/lib/server/send-email.ts` (migrated)
+- [ ] `apps/landing/src/lib/email/send.ts` (migrated)
 - [ ] Inline HTML templates (migrated)
 
 **Add:**
@@ -279,38 +279,32 @@ Circuit Breaker: 5 failures in 1 minute → pause 30s
 
 ```typescript
 interface ZephyrRequest {
-  /** Email category for routing */
-  type:
-    | "transactional"
-    | "notification"
-    | "verification"
-    | "sequence"
-    | "lifecycle"
-    | "broadcast";
-  /** Template to render (or "raw" for pre-rendered) */
-  template: string;
-  /** Recipient email address */
-  to: string;
-  /** Template data for personalization */
-  data?: Record<string, unknown>;
-  /** Override from address */
-  from?: string;
-  /** Override subject line */
-  subject?: string;
-  /** Pre-rendered HTML (when template is "raw") */
-  html?: string;
-  /** Pre-rendered text (when template is "raw") */
-  text?: string;
-  /** Schedule for later delivery (ISO timestamp) */
-  scheduledAt?: string;
-  /** Idempotency key to prevent duplicates */
-  idempotencyKey?: string;
-  /** Metadata for logging */
-  metadata?: {
-    tenant?: string;
-    source?: string;
-    correlationId?: string;
-  };
+	/** Email category for routing */
+	type: "transactional" | "notification" | "verification" | "sequence" | "lifecycle" | "broadcast";
+	/** Template to render (or "raw" for pre-rendered) */
+	template: string;
+	/** Recipient email address */
+	to: string;
+	/** Template data for personalization */
+	data?: Record<string, unknown>;
+	/** Override from address */
+	from?: string;
+	/** Override subject line */
+	subject?: string;
+	/** Pre-rendered HTML (when template is "raw") */
+	html?: string;
+	/** Pre-rendered text (when template is "raw") */
+	text?: string;
+	/** Schedule for later delivery (ISO timestamp) */
+	scheduledAt?: string;
+	/** Idempotency key to prevent duplicates */
+	idempotencyKey?: string;
+	/** Metadata for logging */
+	metadata?: {
+		tenant?: string;
+		source?: string;
+		correlationId?: string;
+	};
 }
 ```
 
@@ -318,29 +312,29 @@ interface ZephyrRequest {
 
 ```typescript
 interface ZephyrResponse {
-  success: boolean;
-  messageId?: string;
-  error?: {
-    code: ZephyrErrorCode;
-    message: string;
-    retryable: boolean;
-  };
-  metadata: {
-    provider: string;
-    attempts: number;
-    latencyMs: number;
-  };
+	success: boolean;
+	messageId?: string;
+	error?: {
+		code: ZephyrErrorCode;
+		message: string;
+		retryable: boolean;
+	};
+	metadata: {
+		provider: string;
+		attempts: number;
+		latencyMs: number;
+	};
 }
 
 type ZephyrErrorCode =
-  | "INVALID_REQUEST"
-  | "INVALID_TEMPLATE"
-  | "INVALID_RECIPIENT"
-  | "RATE_LIMITED"
-  | "UNSUBSCRIBED"
-  | "PROVIDER_ERROR"
-  | "TEMPLATE_ERROR"
-  | "CIRCUIT_OPEN";
+	| "INVALID_REQUEST"
+	| "INVALID_TEMPLATE"
+	| "INVALID_RECIPIENT"
+	| "RATE_LIMITED"
+	| "UNSUBSCRIBED"
+	| "PROVIDER_ERROR"
+	| "TEMPLATE_ERROR"
+	| "CIRCUIT_OPEN";
 ```
 
 ### Usage Example
@@ -350,25 +344,25 @@ import { Zephyr } from "@autumnsgrove/lattice/zephyr";
 
 // Porch reply notification (THE FIX)
 const result = await Zephyr.send({
-  type: "notification",
-  template: "porch-reply",
-  to: recipientEmail,
-  data: {
-    content: replyContent,
-    visitId: visit.id,
-    visitNumber: visit.visit_number,
-    subject: visit.subject,
-  },
-  metadata: {
-    source: "porch-admin",
-    correlationId: visit.id,
-  },
+	type: "notification",
+	template: "porch-reply",
+	to: recipientEmail,
+	data: {
+		content: replyContent,
+		visitId: visit.id,
+		visitNumber: visit.visit_number,
+		subject: visit.subject,
+	},
+	metadata: {
+		source: "porch-admin",
+		correlationId: visit.id,
+	},
 });
 
 if (!result.success) {
-  // NOW WE KNOW IT FAILED
-  console.error("Porch reply email failed:", result.error);
-  return { replySuccess: true, emailFailed: true };
+	// NOW WE KNOW IT FAILED
+	console.error("Porch reply email failed:", result.error);
+	return { replySuccess: true, emailFailed: true };
 }
 ```
 
@@ -406,7 +400,7 @@ workers/zephyr/
 ├── wrangler.toml
 └── package.json
 
-packages/engine/src/lib/zephyr/
+libs/engine/src/lib/zephyr/
 ├── index.ts                  # Public exports & client
 ├── client.ts                 # ZephyrClient class
 └── types.ts                  # Shared types (re-exported)
@@ -416,16 +410,16 @@ packages/engine/src/lib/zephyr/
 
 ## Package Exports
 
-Add to `packages/engine/package.json`:
+Add to `libs/engine/package.json`:
 
 ```json
 {
-  "exports": {
-    "./zephyr": {
-      "types": "./dist/lib/zephyr/index.d.ts",
-      "import": "./dist/lib/zephyr/index.js"
-    }
-  }
+	"exports": {
+		"./zephyr": {
+			"types": "./dist/lib/zephyr/index.d.ts",
+			"import": "./dist/lib/zephyr/index.js"
+		}
+	}
 }
 ```
 

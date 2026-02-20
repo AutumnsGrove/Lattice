@@ -9,15 +9,15 @@
 
 ## Current State
 
-| Component                 | Status                    | Location                                                   |
-| ------------------------- | ------------------------- | ---------------------------------------------------------- |
-| KV-based `rateLimit()`    | ✅ Implemented            | `packages/engine/src/lib/server/services/cache.ts:392-451` |
-| Client-side `RateLimiter` | ✅ Implemented & Exported | `packages/engine/src/lib/groveauth/rate-limit.ts`          |
-| Quota UI components       | ✅ Implemented & Exported | `packages/engine/src/lib/components/quota/`                |
-| Tier-based config         | ❌ Not implemented        | —                                                          |
-| Rate limit middleware     | ❌ Not implemented        | —                                                          |
-| Graduated response        | ❌ Not implemented        | —                                                          |
-| Server exports            | ❌ Not exported           | `cache.rateLimit` is internal only                         |
+| Component                 | Status                    | Location                                               |
+| ------------------------- | ------------------------- | ------------------------------------------------------ |
+| KV-based `rateLimit()`    | ✅ Implemented            | `libs/engine/src/lib/server/services/cache.ts:392-451` |
+| Client-side `RateLimiter` | ✅ Implemented & Exported | `libs/engine/src/lib/groveauth/rate-limit.ts`          |
+| Quota UI components       | ✅ Implemented & Exported | `libs/engine/src/lib/components/quota/`                |
+| Tier-based config         | ❌ Not implemented        | —                                                      |
+| Rate limit middleware     | ❌ Not implemented        | —                                                      |
+| Graduated response        | ❌ Not implemented        | —                                                      |
+| Server exports            | ❌ Not exported           | `cache.rateLimit` is internal only                     |
 
 ---
 
@@ -63,12 +63,12 @@ Each task is self-contained and can be executed independently by an agent.
 
 **Files to modify:**
 
-- `packages/engine/src/lib/server/index.ts` (create if doesn't exist)
-- `packages/engine/package.json` (add export)
+- `libs/engine/src/lib/server/index.ts` (create if doesn't exist)
+- `libs/engine/package.json` (add export)
 
 **Steps:**
 
-1. Create `packages/engine/src/lib/server/index.ts` with exports:
+1. Create `libs/engine/src/lib/server/index.ts` with exports:
    ```typescript
    export { rateLimit } from "./services/cache";
    ```
@@ -91,7 +91,7 @@ Each task is self-contained and can be executed independently by an agent.
 
 **Files to create:**
 
-- `packages/engine/src/lib/server/rate-limits/config.ts`
+- `libs/engine/src/lib/server/rate-limits/config.ts`
 
 **Implementation:**
 
@@ -101,40 +101,40 @@ Each task is self-contained and can be executed independently by an agent.
  * Each category specifies both the limit and the time window.
  */
 export const TIER_RATE_LIMITS = {
-  seedling: {
-    requests: { limit: 100, windowSeconds: 60 },
-    writes: { limit: 50, windowSeconds: 3600 },
-    uploads: { limit: 10, windowSeconds: 86400 },
-    ai: { limit: 25, windowSeconds: 86400 },
-  },
-  sapling: {
-    requests: { limit: 500, windowSeconds: 60 },
-    writes: { limit: 200, windowSeconds: 3600 },
-    uploads: { limit: 50, windowSeconds: 86400 },
-    ai: { limit: 100, windowSeconds: 86400 },
-  },
-  oak: {
-    requests: { limit: 1000, windowSeconds: 60 },
-    writes: { limit: 500, windowSeconds: 3600 },
-    uploads: { limit: 200, windowSeconds: 86400 },
-    ai: { limit: 500, windowSeconds: 86400 },
-  },
-  evergreen: {
-    requests: { limit: 5000, windowSeconds: 60 },
-    writes: { limit: 2000, windowSeconds: 3600 },
-    uploads: { limit: 1000, windowSeconds: 86400 },
-    ai: { limit: 2500, windowSeconds: 86400 },
-  },
+	seedling: {
+		requests: { limit: 100, windowSeconds: 60 },
+		writes: { limit: 50, windowSeconds: 3600 },
+		uploads: { limit: 10, windowSeconds: 86400 },
+		ai: { limit: 25, windowSeconds: 86400 },
+	},
+	sapling: {
+		requests: { limit: 500, windowSeconds: 60 },
+		writes: { limit: 200, windowSeconds: 3600 },
+		uploads: { limit: 50, windowSeconds: 86400 },
+		ai: { limit: 100, windowSeconds: 86400 },
+	},
+	oak: {
+		requests: { limit: 1000, windowSeconds: 60 },
+		writes: { limit: 500, windowSeconds: 3600 },
+		uploads: { limit: 200, windowSeconds: 86400 },
+		ai: { limit: 500, windowSeconds: 86400 },
+	},
+	evergreen: {
+		requests: { limit: 5000, windowSeconds: 60 },
+		writes: { limit: 2000, windowSeconds: 3600 },
+		uploads: { limit: 1000, windowSeconds: 86400 },
+		ai: { limit: 2500, windowSeconds: 86400 },
+	},
 } as const;
 
 export const ENDPOINT_RATE_LIMITS = {
-  "auth/login": { limit: 5, windowSeconds: 300 },
-  "auth/token": { limit: 10, windowSeconds: 60 },
-  "posts/create": { limit: 10, windowSeconds: 3600 },
-  "comments/create": { limit: 20, windowSeconds: 300 },
-  "upload/image": { limit: 20, windowSeconds: 3600 },
-  "ai/wisp": { limit: 50, windowSeconds: 86400 },
-  default: { limit: 100, windowSeconds: 60 },
+	"auth/login": { limit: 5, windowSeconds: 300 },
+	"auth/token": { limit: 10, windowSeconds: 60 },
+	"posts/create": { limit: 10, windowSeconds: 3600 },
+	"comments/create": { limit: 20, windowSeconds: 300 },
+	"upload/image": { limit: 20, windowSeconds: 3600 },
+	"ai/wisp": { limit: 50, windowSeconds: 86400 },
+	default: { limit: 100, windowSeconds: 60 },
 } as const;
 
 export type SubscriptionTier = keyof typeof TIER_RATE_LIMITS;
@@ -152,7 +152,7 @@ export type EndpointKey = keyof typeof ENDPOINT_RATE_LIMITS;
 
 **Files to modify:**
 
-- `packages/engine/src/lib/server/services/cache.ts`
+- `libs/engine/src/lib/server/services/cache.ts`
 
 **Changes:**
 
@@ -161,9 +161,9 @@ export type EndpointKey = keyof typeof ENDPOINT_RATE_LIMITS;
    ```typescript
    /** Result from a rate limit check */
    export interface RateLimitResult {
-     allowed: boolean;
-     remaining: number;
-     resetAt: number;
+   	allowed: boolean;
+   	remaining: number;
+   	resetAt: number;
    }
    ```
 
@@ -192,7 +192,7 @@ export type EndpointKey = keyof typeof ENDPOINT_RATE_LIMITS;
 
 **Files to create:**
 
-- `packages/engine/src/lib/server/rate-limits/middleware.ts`
+- `libs/engine/src/lib/server/rate-limits/middleware.ts`
 
 **Implementation:**
 
@@ -201,16 +201,16 @@ import { json } from "@sveltejs/kit";
 import { rateLimit, type RateLimitResult } from "../services/cache";
 
 export interface RateLimitMiddlewareOptions {
-  kv: KVNamespace;
-  key: string;
-  limit: number;
-  windowSeconds: number;
-  namespace?: string;
+	kv: KVNamespace;
+	key: string;
+	limit: number;
+	windowSeconds: number;
+	namespace?: string;
 }
 
 export interface RateLimitCheckResult {
-  result: RateLimitResult;
-  response?: Response;
+	result: RateLimitResult;
+	response?: Response;
 }
 
 /**
@@ -231,64 +231,58 @@ export interface RateLimitCheckResult {
  * ```
  */
 export async function checkRateLimit(
-  options: RateLimitMiddlewareOptions,
+	options: RateLimitMiddlewareOptions,
 ): Promise<RateLimitCheckResult> {
-  let result: RateLimitResult;
+	let result: RateLimitResult;
 
-  try {
-    result = await rateLimit(options.kv, options.key, {
-      limit: options.limit,
-      windowSeconds: options.windowSeconds,
-      namespace: options.namespace,
-    });
-  } catch (error) {
-    // Fail open: allow request if rate limit check fails
-    console.error("[rate-limit] KV error, failing open:", error);
-    return {
-      result: { allowed: true, remaining: options.limit, resetAt: 0 },
-    };
-  }
+	try {
+		result = await rateLimit(options.kv, options.key, {
+			limit: options.limit,
+			windowSeconds: options.windowSeconds,
+			namespace: options.namespace,
+		});
+	} catch (error) {
+		// Fail open: allow request if rate limit check fails
+		console.error("[rate-limit] KV error, failing open:", error);
+		return {
+			result: { allowed: true, remaining: options.limit, resetAt: 0 },
+		};
+	}
 
-  if (!result.allowed) {
-    const retryAfter = Math.max(
-      0,
-      result.resetAt - Math.floor(Date.now() / 1000),
-    );
-    const response = json(
-      {
-        error: "rate_limited",
-        message: "Too many requests. Please try again later.",
-        retryAfter,
-        resetAt: new Date(result.resetAt * 1000).toISOString(),
-      },
-      {
-        status: 429,
-        headers: {
-          "Retry-After": String(retryAfter),
-          "X-RateLimit-Limit": String(options.limit),
-          "X-RateLimit-Remaining": "0",
-          "X-RateLimit-Reset": String(result.resetAt),
-        },
-      },
-    );
-    return { result, response };
-  }
+	if (!result.allowed) {
+		const retryAfter = Math.max(0, result.resetAt - Math.floor(Date.now() / 1000));
+		const response = json(
+			{
+				error: "rate_limited",
+				message: "Too many requests. Please try again later.",
+				retryAfter,
+				resetAt: new Date(result.resetAt * 1000).toISOString(),
+			},
+			{
+				status: 429,
+				headers: {
+					"Retry-After": String(retryAfter),
+					"X-RateLimit-Limit": String(options.limit),
+					"X-RateLimit-Remaining": "0",
+					"X-RateLimit-Reset": String(result.resetAt),
+				},
+			},
+		);
+		return { result, response };
+	}
 
-  return { result };
+	return { result };
 }
 
 /**
  * Generate rate limit headers to add to successful responses.
  */
-export function rateLimitHeaders(
-  result: RateLimitResult,
-  limit: number,
-): Record<string, string> {
-  return {
-    "X-RateLimit-Limit": String(limit),
-    "X-RateLimit-Remaining": String(result.remaining),
-    "X-RateLimit-Reset": String(result.resetAt),
-  };
+export function rateLimitHeaders(result: RateLimitResult, limit: number): Record<string, string> {
+	return {
+		"X-RateLimit-Limit": String(limit),
+		"X-RateLimit-Remaining": String(result.remaining),
+		"X-RateLimit-Reset": String(result.resetAt),
+	};
 }
 ````
 
@@ -302,7 +296,7 @@ export function rateLimitHeaders(
 
 **Files to create:**
 
-- `packages/engine/src/lib/server/rate-limits/endpoint.ts`
+- `libs/engine/src/lib/server/rate-limits/endpoint.ts`
 
 **Implementation:**
 
@@ -314,12 +308,12 @@ import { ENDPOINT_RATE_LIMITS, type EndpointKey } from "./config";
  * Extend this as new endpoints are added.
  */
 const ENDPOINT_MAP: Record<string, EndpointKey> = {
-  "POST:/api/auth/login": "auth/login",
-  "POST:/api/auth/token": "auth/token",
-  "POST:/api/posts": "posts/create",
-  "POST:/api/comments": "comments/create",
-  "POST:/api/upload": "upload/image",
-  "POST:/api/grove/wisp": "ai/wisp",
+	"POST:/api/auth/login": "auth/login",
+	"POST:/api/auth/token": "auth/token",
+	"POST:/api/posts": "posts/create",
+	"POST:/api/comments": "comments/create",
+	"POST:/api/upload": "upload/image",
+	"POST:/api/grove/wisp": "ai/wisp",
 };
 
 /**
@@ -327,22 +321,19 @@ const ENDPOINT_MAP: Record<string, EndpointKey> = {
  * Returns default limits if endpoint is not explicitly configured.
  */
 export function getEndpointLimit(
-  method: string,
-  pathname: string,
+	method: string,
+	pathname: string,
 ): { limit: number; windowSeconds: number } {
-  const key = `${method}:${pathname}`;
-  const endpointKey = ENDPOINT_MAP[key] ?? "default";
-  return ENDPOINT_RATE_LIMITS[endpointKey];
+	const key = `${method}:${pathname}`;
+	const endpointKey = ENDPOINT_MAP[key] ?? "default";
+	return ENDPOINT_RATE_LIMITS[endpointKey];
 }
 
 /**
  * Build a rate limit key from endpoint and identifier.
  */
-export function buildRateLimitKey(
-  endpoint: string,
-  identifier: string,
-): string {
-  return `${endpoint}:${identifier}`;
+export function buildRateLimitKey(endpoint: string, identifier: string): string {
+	return `${endpoint}:${identifier}`;
 }
 ```
 
@@ -356,17 +347,13 @@ export function buildRateLimitKey(
 
 **Files to create:**
 
-- `packages/engine/src/lib/server/rate-limits/tenant.ts`
+- `libs/engine/src/lib/server/rate-limits/tenant.ts`
 
 **Implementation:**
 
 ````typescript
 import { rateLimit, type RateLimitResult } from "../services/cache";
-import {
-  TIER_RATE_LIMITS,
-  type SubscriptionTier,
-  type RateLimitCategory,
-} from "./config";
+import { TIER_RATE_LIMITS, type SubscriptionTier, type RateLimitCategory } from "./config";
 
 /**
  * Check rate limit for a tenant based on their subscription tier.
@@ -384,38 +371,35 @@ import {
  * ```
  */
 export async function checkTenantRateLimit(
-  kv: KVNamespace,
-  tenantId: string,
-  tier: SubscriptionTier,
-  category: RateLimitCategory,
+	kv: KVNamespace,
+	tenantId: string,
+	tier: SubscriptionTier,
+	category: RateLimitCategory,
 ): Promise<RateLimitResult> {
-  const tierConfig = TIER_RATE_LIMITS[tier];
-  const categoryConfig = tierConfig[category];
+	const tierConfig = TIER_RATE_LIMITS[tier];
+	const categoryConfig = tierConfig[category];
 
-  return rateLimit(kv, `tenant:${tenantId}:${category}`, {
-    limit: categoryConfig.limit,
-    windowSeconds: categoryConfig.windowSeconds,
-    namespace: "tenant-ratelimit",
-  });
+	return rateLimit(kv, `tenant:${tenantId}:${category}`, {
+		limit: categoryConfig.limit,
+		windowSeconds: categoryConfig.windowSeconds,
+		namespace: "tenant-ratelimit",
+	});
 }
 
 /**
  * Determine the rate limit category for a request based on method and path.
  */
-export function categorizeRequest(
-  method: string,
-  pathname: string,
-): RateLimitCategory {
-  if (pathname.includes("/api/ai/") || pathname.includes("/api/wisp")) {
-    return "ai";
-  }
-  if (pathname.includes("/api/upload") || pathname.includes("/api/images")) {
-    return "uploads";
-  }
-  if (method === "POST" || method === "PUT" || method === "DELETE") {
-    return "writes";
-  }
-  return "requests";
+export function categorizeRequest(method: string, pathname: string): RateLimitCategory {
+	if (pathname.includes("/api/ai/") || pathname.includes("/api/wisp")) {
+		return "ai";
+	}
+	if (pathname.includes("/api/upload") || pathname.includes("/api/images")) {
+		return "uploads";
+	}
+	if (method === "POST" || method === "PUT" || method === "DELETE") {
+		return "writes";
+	}
+	return "requests";
 }
 ````
 
@@ -436,7 +420,7 @@ export function categorizeRequest(
 
 **Files to create:**
 
-- `packages/engine/src/lib/server/rate-limits/abuse.ts`
+- `libs/engine/src/lib/server/rate-limits/abuse.ts`
 
 **Implementation:**
 
@@ -444,9 +428,9 @@ export function categorizeRequest(
 import type { KVNamespace } from "@cloudflare/workers-types";
 
 export interface AbuseState {
-  violations: number;
-  lastViolation: number;
-  bannedUntil: number | null;
+	violations: number;
+	lastViolation: number;
+	bannedUntil: number | null;
 }
 
 const VIOLATION_DECAY_SECONDS = 86400; // 24 hours
@@ -458,31 +442,28 @@ const BAN_DURATION_SECONDS = 86400; // 24 hours
  * Get abuse state for a user.
  * Returns fresh state if violations have decayed (>24h since last violation).
  */
-export async function getAbuseState(
-  kv: KVNamespace,
-  userId: string,
-): Promise<AbuseState> {
-  const key = `abuse:${userId}`;
+export async function getAbuseState(kv: KVNamespace, userId: string): Promise<AbuseState> {
+	const key = `abuse:${userId}`;
 
-  try {
-    const data = await kv.get<AbuseState>(key, "json");
+	try {
+		const data = await kv.get<AbuseState>(key, "json");
 
-    if (!data) {
-      return { violations: 0, lastViolation: 0, bannedUntil: null };
-    }
+		if (!data) {
+			return { violations: 0, lastViolation: 0, bannedUntil: null };
+		}
 
-    const now = Math.floor(Date.now() / 1000);
+		const now = Math.floor(Date.now() / 1000);
 
-    // Decay: reset violations if last violation was > 24h ago
-    if (now - data.lastViolation > VIOLATION_DECAY_SECONDS) {
-      return { violations: 0, lastViolation: 0, bannedUntil: null };
-    }
+		// Decay: reset violations if last violation was > 24h ago
+		if (now - data.lastViolation > VIOLATION_DECAY_SECONDS) {
+			return { violations: 0, lastViolation: 0, bannedUntil: null };
+		}
 
-    return data;
-  } catch (error) {
-    console.error("[abuse] Failed to get abuse state:", error);
-    return { violations: 0, lastViolation: 0, bannedUntil: null };
-  }
+		return data;
+	} catch (error) {
+		console.error("[abuse] Failed to get abuse state:", error);
+		return { violations: 0, lastViolation: 0, bannedUntil: null };
+	}
 }
 
 /**
@@ -498,67 +479,67 @@ export async function getAbuseState(
  * for abuse tracking purposes.
  */
 export async function recordViolation(
-  kv: KVNamespace,
-  userId: string,
+	kv: KVNamespace,
+	userId: string,
 ): Promise<{ warning: boolean; banned: boolean; bannedUntil: number | null }> {
-  const state = await getAbuseState(kv, userId);
-  const now = Math.floor(Date.now() / 1000);
+	const state = await getAbuseState(kv, userId);
+	const now = Math.floor(Date.now() / 1000);
 
-  const newViolations = state.violations + 1;
-  let bannedUntil: number | null = null;
+	const newViolations = state.violations + 1;
+	let bannedUntil: number | null = null;
 
-  // Graduated response
-  if (newViolations >= BAN_THRESHOLD) {
-    bannedUntil = now + BAN_DURATION_SECONDS;
-  }
+	// Graduated response
+	if (newViolations >= BAN_THRESHOLD) {
+		bannedUntil = now + BAN_DURATION_SECONDS;
+	}
 
-  const newState: AbuseState = {
-    violations: newViolations,
-    lastViolation: now,
-    bannedUntil,
-  };
+	const newState: AbuseState = {
+		violations: newViolations,
+		lastViolation: now,
+		bannedUntil,
+	};
 
-  try {
-    await kv.put(`abuse:${userId}`, JSON.stringify(newState), {
-      expirationTtl: VIOLATION_DECAY_SECONDS * 2,
-    });
-  } catch (error) {
-    console.error("[abuse] Failed to record violation:", error);
-  }
+	try {
+		await kv.put(`abuse:${userId}`, JSON.stringify(newState), {
+			expirationTtl: VIOLATION_DECAY_SECONDS * 2,
+		});
+	} catch (error) {
+		console.error("[abuse] Failed to record violation:", error);
+	}
 
-  // Log for monitoring/alerting
-  console.log(
-    JSON.stringify({
-      event: "rate_limit_violation",
-      userId,
-      violations: newViolations,
-      banned: bannedUntil !== null,
-      timestamp: new Date().toISOString(),
-    }),
-  );
+	// Log for monitoring/alerting
+	console.log(
+		JSON.stringify({
+			event: "rate_limit_violation",
+			userId,
+			violations: newViolations,
+			banned: bannedUntil !== null,
+			timestamp: new Date().toISOString(),
+		}),
+	);
 
-  return {
-    warning: newViolations < BAN_THRESHOLD,
-    banned: bannedUntil !== null,
-    bannedUntil,
-  };
+	return {
+		warning: newViolations < BAN_THRESHOLD,
+		banned: bannedUntil !== null,
+		bannedUntil,
+	};
 }
 
 /**
  * Check if a user is currently banned.
  */
 export function isBanned(state: AbuseState): boolean {
-  if (!state.bannedUntil) return false;
-  return Math.floor(Date.now() / 1000) < state.bannedUntil;
+	if (!state.bannedUntil) return false;
+	return Math.floor(Date.now() / 1000) < state.bannedUntil;
 }
 
 /**
  * Get remaining ban time in seconds, or 0 if not banned.
  */
 export function getBanRemaining(state: AbuseState): number {
-  if (!state.bannedUntil) return 0;
-  const remaining = state.bannedUntil - Math.floor(Date.now() / 1000);
-  return Math.max(0, remaining);
+	if (!state.bannedUntil) return 0;
+	const remaining = state.bannedUntil - Math.floor(Date.now() / 1000);
+	return Math.max(0, remaining);
 }
 ```
 
@@ -572,28 +553,21 @@ export function getBanRemaining(state: AbuseState): number {
 
 **Files to create:**
 
-- `packages/engine/src/lib/server/rate-limits/index.ts`
+- `libs/engine/src/lib/server/rate-limits/index.ts`
 
 **Implementation:**
 
 ```typescript
 // Configuration
 export { TIER_RATE_LIMITS, ENDPOINT_RATE_LIMITS } from "./config";
-export type {
-  SubscriptionTier,
-  RateLimitCategory,
-  EndpointKey,
-} from "./config";
+export type { SubscriptionTier, RateLimitCategory, EndpointKey } from "./config";
 
 // Core rate limiting (re-exported from cache for convenience)
 export { rateLimit, type RateLimitResult } from "../services/cache";
 
 // Middleware helpers
 export { checkRateLimit, rateLimitHeaders } from "./middleware";
-export type {
-  RateLimitMiddlewareOptions,
-  RateLimitCheckResult,
-} from "./middleware";
+export type { RateLimitMiddlewareOptions, RateLimitCheckResult } from "./middleware";
 
 // Endpoint helpers
 export { getEndpointLimit, buildRateLimitKey } from "./endpoint";
@@ -602,12 +576,7 @@ export { getEndpointLimit, buildRateLimitKey } from "./endpoint";
 export { checkTenantRateLimit, categorizeRequest } from "./tenant";
 
 // Abuse tracking (graduated response) - Phase 2
-export {
-  getAbuseState,
-  recordViolation,
-  isBanned,
-  getBanRemaining,
-} from "./abuse";
+export { getAbuseState, recordViolation, isBanned, getBanRemaining } from "./abuse";
 export type { AbuseState } from "./abuse";
 ```
 
@@ -621,7 +590,7 @@ export type { AbuseState } from "./abuse";
 
 **Files to modify:**
 
-- `packages/engine/src/lib/server/index.ts`
+- `libs/engine/src/lib/server/index.ts`
 
 **Implementation:**
 
@@ -643,7 +612,7 @@ export * from "./rate-limits/index";
 
 **Files to modify:**
 
-- `packages/engine/package.json`
+- `libs/engine/package.json`
 
 **Changes:**
 
@@ -681,7 +650,7 @@ The new format is more structured and includes machine-readable `retryAfter`. Up
 
 **Files to modify:**
 
-- `packages/engine/src/routes/api/grove/wisp/+server.ts`
+- `libs/engine/src/routes/api/grove/wisp/+server.ts`
 
 **Changes:**
 Replace the rate limiting block (approximately lines 120-134) with:
@@ -691,15 +660,15 @@ import { checkRateLimit } from "$lib/server/rate-limits";
 
 // In the POST handler, replace existing rate limit code:
 if (kv) {
-  const { result, response } = await checkRateLimit({
-    kv,
-    key: `wisp:${locals.user.id}`,
-    limit: RATE_LIMIT.maxRequestsPerHour,
-    windowSeconds: RATE_LIMIT.windowSeconds,
-    namespace: "wisp",
-  });
+	const { result, response } = await checkRateLimit({
+		kv,
+		key: `wisp:${locals.user.id}`,
+		limit: RATE_LIMIT.maxRequestsPerHour,
+		windowSeconds: RATE_LIMIT.windowSeconds,
+		namespace: "wisp",
+	});
 
-  if (response) return response;
+	if (response) return response;
 }
 ```
 
@@ -713,9 +682,9 @@ if (kv) {
 
 **Files to create:**
 
-- `packages/engine/src/lib/server/rate-limits/config.test.ts`
-- `packages/engine/src/lib/server/rate-limits/abuse.test.ts`
-- `packages/engine/src/lib/server/rate-limits/middleware.test.ts`
+- `libs/engine/src/lib/server/rate-limits/config.test.ts`
+- `libs/engine/src/lib/server/rate-limits/abuse.test.ts`
+- `libs/engine/src/lib/server/rate-limits/middleware.test.ts`
 
 **Test Framework:** Vitest with miniflare for KV mocking.
 
@@ -723,19 +692,19 @@ if (kv) {
 
 ```typescript
 describe("TIER_RATE_LIMITS", () => {
-  it("all tiers have all categories");
-  it("all categories have limit and windowSeconds");
-  it("higher tiers have higher limits");
+	it("all tiers have all categories");
+	it("all categories have limit and windowSeconds");
+	it("higher tiers have higher limits");
 });
 
 describe("ENDPOINT_RATE_LIMITS", () => {
-  it("has default fallback");
-  it("auth endpoints have stricter limits than default");
+	it("has default fallback");
+	it("auth endpoints have stricter limits than default");
 });
 
 describe("getEndpointLimit", () => {
-  it("returns correct limit for known endpoints");
-  it("returns default for unknown endpoints");
+	it("returns correct limit for known endpoints");
+	it("returns default for unknown endpoints");
 });
 ```
 
@@ -743,24 +712,24 @@ describe("getEndpointLimit", () => {
 
 ```typescript
 describe("getAbuseState", () => {
-  it("returns fresh state for new users");
-  it("returns stored state within decay window");
-  it("resets state after decay period (24h)");
-  it("handles KV errors gracefully");
+	it("returns fresh state for new users");
+	it("returns stored state within decay window");
+	it("resets state after decay period (24h)");
+	it("handles KV errors gracefully");
 });
 
 describe("recordViolation", () => {
-  it("increments violation count");
-  it("returns warning for violations 1-4");
-  it("returns banned for violation 5+");
-  it("sets bannedUntil to 24h from now");
-  it("logs violation events");
+	it("increments violation count");
+	it("returns warning for violations 1-4");
+	it("returns banned for violation 5+");
+	it("sets bannedUntil to 24h from now");
+	it("logs violation events");
 });
 
 describe("isBanned", () => {
-  it("returns false when bannedUntil is null");
-  it("returns false when ban has expired");
-  it("returns true when ban is active");
+	it("returns false when bannedUntil is null");
+	it("returns false when ban has expired");
+	it("returns true when ban is active");
 });
 ```
 
@@ -768,24 +737,21 @@ describe("isBanned", () => {
 
 ```typescript
 describe("checkRateLimit", () => {
-  it("allows requests under limit");
-  it("returns 429 response when limit exceeded");
-  it("includes proper headers in 429 response");
-  it("fails open on KV errors");
+	it("allows requests under limit");
+	it("returns 429 response when limit exceeded");
+	it("includes proper headers in 429 response");
+	it("fails open on KV errors");
 });
 
 describe("rateLimitHeaders", () => {
-  it("returns correct header values");
+	it("returns correct header values");
 });
 ```
 
 **Mock Setup:**
 
 ```typescript
-import {
-  createExecutionContext,
-  waitOnExecutionContext,
-} from "cloudflare:test";
+import { createExecutionContext, waitOnExecutionContext } from "cloudflare:test";
 // Or use miniflare for local KV simulation
 ```
 
@@ -799,7 +765,7 @@ import {
 
 **Files to modify:**
 
-- `packages/engine/README.md` (add section)
+- `libs/engine/README.md` (add section)
 
 **Content to add:**
 
@@ -826,16 +792,16 @@ id = "your-kv-namespace-id"
 import { checkRateLimit } from "@autumnsgrove/lattice/server";
 
 export async function POST({ request, platform, locals }) {
-  const { result, response } = await checkRateLimit({
-    kv: platform.env.CACHE,
-    key: `endpoint:${locals.user.id}`,
-    limit: 10,
-    windowSeconds: 60,
-  });
+	const { result, response } = await checkRateLimit({
+		kv: platform.env.CACHE,
+		key: `endpoint:${locals.user.id}`,
+		limit: 10,
+		windowSeconds: 60,
+	});
 
-  if (response) return response; // 429 with headers
+	if (response) return response; // 429 with headers
 
-  // Process request...
+	// Process request...
 }
 ```
 
@@ -844,10 +810,7 @@ export async function POST({ request, platform, locals }) {
 For multi-tenant applications with subscription tiers:
 
 ```typescript
-import {
-  checkTenantRateLimit,
-  categorizeRequest,
-} from "@autumnsgrove/lattice/server";
+import { checkTenantRateLimit, categorizeRequest } from "@autumnsgrove/lattice/server";
 
 // Determine tenant from request
 const tenantId = event.url.hostname.split(".")[0]; // e.g., 'alice' from alice.grove.place
@@ -858,7 +821,7 @@ const category = categorizeRequest(request.method, event.url.pathname);
 
 const result = await checkTenantRateLimit(kv, tenantId, tier, category);
 if (!result.allowed) {
-  return json({ error: "Rate limit exceeded" }, { status: 429 });
+	return json({ error: "Rate limit exceeded" }, { status: 429 });
 }
 ```
 
@@ -887,10 +850,10 @@ When rate limited, the response includes:
 
 ```json
 {
-  "error": "rate_limited",
-  "message": "Too many requests. Please try again later.",
-  "retryAfter": 45,
-  "resetAt": "2026-01-04T12:00:00.000Z"
+	"error": "rate_limited",
+	"message": "Too many requests. Please try again later.",
+	"retryAfter": 45,
+	"resetAt": "2026-01-04T12:00:00.000Z"
 }
 ```
 

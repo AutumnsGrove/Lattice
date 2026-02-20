@@ -30,7 +30,7 @@ Layer 3 (front): Glass text overlay (anchored bottom-left)
 
 ## File Changes (in order)
 
-### 1. `packages/engine/src/lib/ui/components/ui/GlassCarousel.svelte`
+### 1. `libs/engine/src/lib/ui/components/ui/GlassCarousel.svelte`
 
 **Add `aspectRatio` prop** (non-breaking, default preserves current behavior):
 
@@ -39,7 +39,7 @@ Layer 3 (front): Glass text overlay (anchored bottom-left)
 - Support special value `"none"` → no aspect-ratio set, container uses parent height instead
 - **After this change**: rebuild engine with `svelte-package -o dist`
 
-### 2. `packages/landing/src/lib/components/hero/HeroSlide.svelte`
+### 2. `apps/landing/src/lib/components/hero/HeroSlide.svelte`
 
 **Replace two-panel grid with layered stack:**
 
@@ -47,31 +47,35 @@ Layer 3 (front): Glass text overlay (anchored bottom-left)
 <!-- Old: grid-rows-[40%_60%] splitting scene/text -->
 <!-- New: stacked layers -->
 <div class="relative w-full h-full overflow-hidden bg-gradient-to-br {gradientClass}">
-  <!-- Layer 1: Full-bleed scene -->
-  <div class="absolute inset-0" aria-hidden="true">
-    {@render scene()}
-  </div>
+	<!-- Layer 1: Full-bleed scene -->
+	<div class="absolute inset-0" aria-hidden="true">
+		{@render scene()}
+	</div>
 
-  <!-- Layer 2: Gradient veil for text readability -->
-  <div class="absolute inset-0 pointer-events-none
+	<!-- Layer 2: Gradient veil for text readability -->
+	<div
+		class="absolute inset-0 pointer-events-none
     bg-gradient-to-t from-white/80 via-white/40 to-transparent
     dark:from-slate-900/85 dark:via-slate-900/40 dark:to-transparent
     md:bg-gradient-to-r md:from-white/80 md:via-white/30 md:to-transparent
-    md:dark:from-slate-900/85 md:dark:via-slate-900/30 md:dark:to-transparent">
-  </div>
+    md:dark:from-slate-900/85 md:dark:via-slate-900/30 md:dark:to-transparent"
+	></div>
 
-  <!-- Layer 3: Glass text overlay -->
-  <div class="absolute bottom-0 left-0 right-0 md:right-auto md:top-0 md:w-[55%]
+	<!-- Layer 3: Glass text overlay -->
+	<div
+		class="absolute bottom-0 left-0 right-0 md:right-auto md:top-0 md:w-[55%]
     flex flex-col justify-end md:justify-center
-    p-5 pb-6 md:p-8 lg:p-10">
-    <Lexend as="div" class="flex flex-col gap-2.5 md:gap-3">
-      {@render text()}
-    </Lexend>
-  </div>
+    p-5 pb-6 md:p-8 lg:p-10"
+	>
+		<Lexend as="div" class="flex flex-col gap-2.5 md:gap-3">
+			{@render text()}
+		</Lexend>
+	</div>
 </div>
 ```
 
 Key changes:
+
 - Scene is `absolute inset-0` (fills entire slide)
 - Gradient veil: bottom-to-top on mobile (text at bottom), left-to-right on desktop (text on left)
 - Text overlay: anchored bottom on mobile, left column on desktop
@@ -82,6 +86,7 @@ Key changes:
 **Recompose scene elements** for full-canvas layout:
 
 Common pattern for all 5 slides:
+
 - **Increase element sizes** ~25-30% (they now have the full slide as canvas)
 - **Spread wider** — elements can use 0-100% of width instead of being confined to a 45% panel
 - **Weight rightward on desktop** — since text overlays the left, cluster nature elements center-right
@@ -89,15 +94,17 @@ Common pattern for all 5 slides:
 - **Keep seasonal props** and `animate={active}` as-is
 
 Files:
-- `packages/landing/src/lib/components/hero/HeroRefuge.svelte`
-- `packages/landing/src/lib/components/hero/HeroOwnership.svelte`
-- `packages/landing/src/lib/components/hero/HeroShade.svelte`
-- `packages/landing/src/lib/components/hero/HeroCentennial.svelte`
-- `packages/landing/src/lib/components/hero/HeroCommunity.svelte`
 
-### 4. `packages/landing/src/routes/+page.svelte`
+- `apps/landing/src/lib/components/hero/HeroRefuge.svelte`
+- `apps/landing/src/lib/components/hero/HeroOwnership.svelte`
+- `apps/landing/src/lib/components/hero/HeroShade.svelte`
+- `apps/landing/src/lib/components/hero/HeroCentennial.svelte`
+- `apps/landing/src/lib/components/hero/HeroCommunity.svelte`
+
+### 4. `apps/landing/src/routes/+page.svelte`
 
 **Carousel usage update:**
+
 ```svelte
 <GlassCarousel
   itemCount={5}
@@ -115,6 +122,7 @@ Files:
 - Heights give comfortable room: 280px phone → 420px desktop
 
 **Fix broken feature grid links (lines 46-69):**
+
 - `'/knowledge/features/flow-editor'` → `'/knowledge/help/what-is-flow'`
 - `'/knowledge/features/shade'` → `'/knowledge/help/what-is-shade'`
 - `'/knowledge/features/domains'` → `'/pricing'` (no domains article exists)
@@ -125,9 +133,10 @@ Files:
 - `HeroShade.svelte` line 30: `href="/knowledge/features/shade"` → `href="/knowledge/help/what-is-shade"`
 - `HeroCentennial.svelte` line 30: `href="/knowledge/features/centennial"` → `href="/knowledge/help/what-is-centennial"`
 
-### 6. `packages/landing/src/lib/components/hero/hero.test.ts`
+### 6. `apps/landing/src/lib/components/hero/hero.test.ts`
 
 Update test expectations for corrected URLs:
+
 - `ctaHref: "/knowledge/features/shade"` → `"/knowledge/help/what-is-shade"`
 - `ctaHref: "/knowledge/features/centennial"` → `"/knowledge/help/what-is-centennial"`
 

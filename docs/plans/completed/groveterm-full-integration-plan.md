@@ -277,7 +277,7 @@ Markdown Text → [Parse] → AST → [Plugin Transform] → Modified AST → [R
 ### The Plugin
 
 ```typescript
-// packages/engine/src/lib/utils/remark-groveterm.ts
+// libs/engine/src/lib/utils/remark-groveterm.ts
 import { visit } from "unist-util-visit";
 import type { Root, Text } from "mdast";
 

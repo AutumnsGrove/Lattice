@@ -74,26 +74,26 @@ A lightweight, Cloudflare-native feature flag system that supports:
 
 ### Immediate (Blocks JXL Migration)
 
-| Use Case | Flag Type | Description |
-|----------|-----------|-------------|
-| JXL encoding | Percentage rollout | Enable JPEG XL for X% of image uploads |
-| JXL kill switch | Global boolean | Instantly disable JXL if issues arise |
+| Use Case        | Flag Type          | Description                            |
+| --------------- | ------------------ | -------------------------------------- |
+| JXL encoding    | Percentage rollout | Enable JPEG XL for X% of image uploads |
+| JXL kill switch | Global boolean     | Instantly disable JXL if issues arise  |
 
 ### Near-term
 
-| Use Case | Flag Type | Description |
-|----------|-----------|-------------|
-| New editor beta | Tenant boolean | Enable new editor for specific beta tenants |
-| Dark mode default | Percentage | Roll out dark mode preference gradually |
-| Meadow access | Tier boolean | Gate Meadow features by subscription tier |
+| Use Case          | Flag Type      | Description                                 |
+| ----------------- | -------------- | ------------------------------------------- |
+| New editor beta   | Tenant boolean | Enable new editor for specific beta tenants |
+| Dark mode default | Percentage     | Roll out dark mode preference gradually     |
+| Meadow access     | Tier boolean   | Gate Meadow features by subscription tier   |
 
 ### Future
 
-| Use Case | Flag Type | Description |
-|----------|-----------|-------------|
-| AI features | Tier + percentage | Oak+ tiers, 50% rollout initially |
-| Pricing experiment | A/B variant | Test different pricing displays |
-| Holiday themes | Time-based | Enable seasonal themes during holidays |
+| Use Case           | Flag Type         | Description                            |
+| ------------------ | ----------------- | -------------------------------------- |
+| AI features        | Tier + percentage | Oak+ tiers, 50% rollout initially      |
+| Pricing experiment | A/B variant       | Test different pricing displays        |
+| Holiday themes     | Time-based        | Enable seasonal themes during holidays |
 
 ---
 
@@ -101,14 +101,14 @@ A lightweight, Cloudflare-native feature flag system that supports:
 
 ### Options Evaluated
 
-| Option | Pros | Cons |
-|--------|------|------|
-| **D1 only** | Simple, SQL queries | Too slow for every request (50-100ms) |
-| **KV only** | Fast reads (1-5ms) | No admin UI, hard to query |
-| **D1 + KV cache** | Fast + queryable | Two systems to manage |
-| **Durable Objects** | Real-time, atomic | Overkill for read-heavy flags |
-| **LaunchDarkly/Statsig** | Feature-rich | External dependency, cost, privacy |
-| **Environment variables** | Zero latency | Requires deployment to change |
+| Option                    | Pros                | Cons                                  |
+| ------------------------- | ------------------- | ------------------------------------- |
+| **D1 only**               | Simple, SQL queries | Too slow for every request (50-100ms) |
+| **KV only**               | Fast reads (1-5ms)  | No admin UI, hard to query            |
+| **D1 + KV cache**         | Fast + queryable    | Two systems to manage                 |
+| **Durable Objects**       | Real-time, atomic   | Overkill for read-heavy flags         |
+| **LaunchDarkly/Statsig**  | Feature-rich        | External dependency, cost, privacy    |
+| **Environment variables** | Zero latency        | Requires deployment to change         |
 
 ### Chosen: D1 + KV Hybrid
 
@@ -227,64 +227,64 @@ Examples:
 ### Type Definitions
 
 ```typescript
-// packages/engine/src/lib/feature-flags/types.ts
+// libs/engine/src/lib/feature-flags/types.ts
 
-export type FlagType = 'boolean' | 'percentage' | 'variant' | 'tier' | 'json';
+export type FlagType = "boolean" | "percentage" | "variant" | "tier" | "json";
 
 export type RuleType =
-  | 'tenant'      // Specific tenant IDs
-  | 'tier'        // Subscription tiers
-  | 'percentage'  // Gradual rollout
-  | 'user'        // Specific user IDs
-  | 'time'        // Time-based (start/end dates)
-  | 'always';     // Catch-all default
+	| "tenant" // Specific tenant IDs
+	| "tier" // Subscription tiers
+	| "percentage" // Gradual rollout
+	| "user" // Specific user IDs
+	| "time" // Time-based (start/end dates)
+	| "always"; // Catch-all default
 
 export interface FeatureFlag {
-  id: string;
-  name: string;
-  description?: string;
-  flagType: FlagType;
-  defaultValue: unknown;
-  enabled: boolean;
-  rules: FlagRule[];
-  createdAt: Date;
-  updatedAt: Date;
+	id: string;
+	name: string;
+	description?: string;
+	flagType: FlagType;
+	defaultValue: unknown;
+	enabled: boolean;
+	rules: FlagRule[];
+	createdAt: Date;
+	updatedAt: Date;
 }
 
 export interface FlagRule {
-  id: number;
-  flagId: string;
-  priority: number;
-  ruleType: RuleType;
-  ruleValue: RuleCondition;
-  resultValue: unknown;
-  enabled: boolean;
+	id: number;
+	flagId: string;
+	priority: number;
+	ruleType: RuleType;
+	ruleValue: RuleCondition;
+	resultValue: unknown;
+	enabled: boolean;
 }
 
 // Rule conditions vary by type
 export type RuleCondition =
-  | { tenantIds: string[] }                           // tenant rule
-  | { tiers: TierKey[] }                              // tier rule
-  | { percentage: number; salt?: string }             // percentage rule
-  | { userIds: string[] }                             // user rule
-  | { startDate?: string; endDate?: string }          // time rule
-  | Record<string, never>;                            // always rule (empty)
+	| { tenantIds: string[] } // tenant rule
+	| { tiers: TierKey[] } // tier rule
+	| { percentage: number; salt?: string } // percentage rule
+	| { userIds: string[] } // user rule
+	| { startDate?: string; endDate?: string } // time rule
+	| Record<string, never>; // always rule (empty)
 
 export interface EvaluationContext {
-  tenantId?: string;
-  userId?: string;
-  tier?: TierKey;
-  sessionId?: string;    // For anonymous percentage rollouts
-  attributes?: Record<string, unknown>;  // Custom attributes
+	tenantId?: string;
+	userId?: string;
+	tier?: TierKey;
+	sessionId?: string; // For anonymous percentage rollouts
+	attributes?: Record<string, unknown>; // Custom attributes
 }
 
 export interface EvaluationResult<T = unknown> {
-  value: T;
-  flagId: string;
-  matched: boolean;
-  matchedRuleId?: number;
-  evaluatedAt: Date;
-  cached: boolean;
+	value: T;
+	flagId: string;
+	matched: boolean;
+	matchedRuleId?: number;
+	evaluatedAt: Date;
+	cached: boolean;
 }
 ```
 
@@ -295,21 +295,21 @@ export interface EvaluationResult<T = unknown> {
 ### Core Functions
 
 ```typescript
-// packages/engine/src/lib/feature-flags/index.ts
+// libs/engine/src/lib/feature-flags/index.ts
 
-import type { EvaluationContext, EvaluationResult, FeatureFlag } from './types.js';
+import type { EvaluationContext, EvaluationResult, FeatureFlag } from "./types.js";
 
 /**
  * Check if a boolean feature is enabled
  * Most common use case - simple on/off flags
  */
 export async function isFeatureEnabled(
-  flagId: string,
-  context: EvaluationContext,
-  env: Env
+	flagId: string,
+	context: EvaluationContext,
+	env: Env,
 ): Promise<boolean> {
-  const result = await evaluateFlag<boolean>(flagId, context, env);
-  return result.value === true;
+	const result = await evaluateFlag<boolean>(flagId, context, env);
+	return result.value === true;
 }
 
 /**
@@ -317,13 +317,13 @@ export async function isFeatureEnabled(
  * For percentage rollouts, variants, or JSON configs
  */
 export async function getFeatureValue<T>(
-  flagId: string,
-  context: EvaluationContext,
-  env: Env,
-  defaultValue: T
+	flagId: string,
+	context: EvaluationContext,
+	env: Env,
+	defaultValue: T,
 ): Promise<T> {
-  const result = await evaluateFlag<T>(flagId, context, env);
-  return result.matched ? result.value : defaultValue;
+	const result = await evaluateFlag<T>(flagId, context, env);
+	return result.matched ? result.value : defaultValue;
 }
 
 /**
@@ -331,12 +331,12 @@ export async function getFeatureValue<T>(
  * Returns the variant key (e.g., 'control', 'treatment_a', 'treatment_b')
  */
 export async function getVariant(
-  flagId: string,
-  context: EvaluationContext,
-  env: Env
+	flagId: string,
+	context: EvaluationContext,
+	env: Env,
 ): Promise<string> {
-  const result = await evaluateFlag<string>(flagId, context, env);
-  return result.value ?? 'control';
+	const result = await evaluateFlag<string>(flagId, context, env);
+	return result.value ?? "control";
 }
 
 /**
@@ -344,14 +344,12 @@ export async function getVariant(
  * Efficient for pages that need multiple flags
  */
 export async function evaluateFlags(
-  flagIds: string[],
-  context: EvaluationContext,
-  env: Env
+	flagIds: string[],
+	context: EvaluationContext,
+	env: Env,
 ): Promise<Map<string, EvaluationResult>> {
-  const results = await Promise.all(
-    flagIds.map(id => evaluateFlag(id, context, env))
-  );
-  return new Map(flagIds.map((id, i) => [id, results[i]]));
+	const results = await Promise.all(flagIds.map((id) => evaluateFlag(id, context, env)));
+	return new Map(flagIds.map((id, i) => [id, results[i]]));
 }
 
 /**
@@ -359,11 +357,11 @@ export async function evaluateFlags(
  * Handles caching, rule evaluation, and logging
  */
 export async function evaluateFlag<T>(
-  flagId: string,
-  context: EvaluationContext,
-  env: Env
+	flagId: string,
+	context: EvaluationContext,
+	env: Env,
 ): Promise<EvaluationResult<T>> {
-  // Implementation details in Evaluation Logic section
+	// Implementation details in Evaluation Logic section
 }
 ```
 
@@ -371,76 +369,84 @@ export async function evaluateFlag<T>(
 
 ```typescript
 // In image processor (JXL rollout)
-import { isFeatureEnabled } from '$lib/feature-flags';
+import { isFeatureEnabled } from "$lib/feature-flags";
 
 export async function processImage(file: File, env: Env, context: EvaluationContext) {
-  const useJxl = await isFeatureEnabled('jxl_encoding', context, env);
+	const useJxl = await isFeatureEnabled("jxl_encoding", context, env);
 
-  if (useJxl) {
-    return encodeAsJxl(file);
-  }
-  return encodeAsWebp(file);
+	if (useJxl) {
+		return encodeAsJxl(file);
+	}
+	return encodeAsWebp(file);
 }
 
 // In layout (tier-based feature)
-import { isFeatureEnabled } from '$lib/feature-flags';
+import { isFeatureEnabled } from "$lib/feature-flags";
 
 export async function load({ locals, platform }) {
-  const canAccessMeadow = await isFeatureEnabled('meadow_access', {
-    tenantId: locals.tenantId,
-    tier: locals.tenant?.tier,
-    userId: locals.user?.id
-  }, platform.env);
+	const canAccessMeadow = await isFeatureEnabled(
+		"meadow_access",
+		{
+			tenantId: locals.tenantId,
+			tier: locals.tenant?.tier,
+			userId: locals.user?.id,
+		},
+		platform.env,
+	);
 
-  return { canAccessMeadow };
+	return { canAccessMeadow };
 }
 
 // A/B test for pricing page
-import { getVariant } from '$lib/feature-flags';
+import { getVariant } from "$lib/feature-flags";
 
 export async function load({ cookies, platform }) {
-  const pricingVariant = await getVariant('pricing_experiment', {
-    sessionId: cookies.get('session_id')
-  }, platform.env);
+	const pricingVariant = await getVariant(
+		"pricing_experiment",
+		{
+			sessionId: cookies.get("session_id"),
+		},
+		platform.env,
+	);
 
-  // Returns 'control', 'annual_first', or 'comparison_table'
-  return { pricingVariant };
+	// Returns 'control', 'annual_first', or 'comparison_table'
+	return { pricingVariant };
 }
 ```
 
 ### SvelteKit Hook Integration
 
 ```typescript
-// packages/engine/src/hooks.server.ts
+// libs/engine/src/hooks.server.ts
 
-import { evaluateFlags } from '$lib/feature-flags';
+import { evaluateFlags } from "$lib/feature-flags";
 
 // Pre-evaluate common flags for all requests
-const COMMON_FLAGS = ['meadow_access', 'dark_mode_default', 'new_nav'];
+const COMMON_FLAGS = ["meadow_access", "dark_mode_default", "new_nav"];
 
 export async function handle({ event, resolve }) {
-  // ... existing auth/tenant logic ...
+	// ... existing auth/tenant logic ...
 
-  // Evaluate common flags once per request
-  const context = {
-    tenantId: event.locals.tenantId,
-    userId: event.locals.user?.id,
-    tier: event.locals.tenant?.tier,
-    sessionId: event.cookies.get('session_id')
-  };
+	// Evaluate common flags once per request
+	const context = {
+		tenantId: event.locals.tenantId,
+		userId: event.locals.user?.id,
+		tier: event.locals.tenant?.tier,
+		sessionId: event.cookies.get("session_id"),
+	};
 
-  const flags = await evaluateFlags(COMMON_FLAGS, context, event.platform.env);
-  event.locals.flags = flags;
+	const flags = await evaluateFlags(COMMON_FLAGS, context, event.platform.env);
+	event.locals.flags = flags;
 
-  return resolve(event);
+	return resolve(event);
 }
 
 // Access in any route
 export async function load({ locals }) {
-  const { flags } = locals;
-  return {
-    canAccessMeadow: flags.get('meadow_access')?.value ?? false
-  };
+	const { flags } = locals;
+	return {
+		canAccessMeadow: flags.get("meadow_access")?.value ?? false,
+	};
 }
 ```
 
@@ -451,166 +457,166 @@ export async function load({ locals }) {
 ### Rule Evaluation Algorithm
 
 ```typescript
-// packages/engine/src/lib/feature-flags/evaluate.ts
+// libs/engine/src/lib/feature-flags/evaluate.ts
 
 export async function evaluateFlag<T>(
-  flagId: string,
-  context: EvaluationContext,
-  env: Env
+	flagId: string,
+	context: EvaluationContext,
+	env: Env,
 ): Promise<EvaluationResult<T>> {
-  const startTime = performance.now();
+	const startTime = performance.now();
 
-  // 1. Check KV cache first
-  const cacheKey = buildCacheKey(flagId, context);
-  const cached = await env.FLAGS_KV.get(cacheKey, 'json');
+	// 1. Check KV cache first
+	const cacheKey = buildCacheKey(flagId, context);
+	const cached = await env.FLAGS_KV.get(cacheKey, "json");
 
-  if (cached && !isCacheExpired(cached)) {
-    return { ...cached, cached: true };
-  }
+	if (cached && !isCacheExpired(cached)) {
+		return { ...cached, cached: true };
+	}
 
-  // 2. Load flag from D1
-  const flag = await loadFlagWithRules(flagId, env.DB);
+	// 2. Load flag from D1
+	const flag = await loadFlagWithRules(flagId, env.DB);
 
-  if (!flag) {
-    // Unknown flag - return safe default
-    return {
-      value: false as T,
-      flagId,
-      matched: false,
-      evaluatedAt: new Date(),
-      cached: false
-    };
-  }
+	if (!flag) {
+		// Unknown flag - return safe default
+		return {
+			value: false as T,
+			flagId,
+			matched: false,
+			evaluatedAt: new Date(),
+			cached: false,
+		};
+	}
 
-  // 3. Check master kill switch
-  if (!flag.enabled) {
-    return cacheAndReturn(cacheKey, {
-      value: flag.defaultValue as T,
-      flagId,
-      matched: false,
-      evaluatedAt: new Date(),
-      cached: false
-    }, env);
-  }
+	// 3. Check master kill switch
+	if (!flag.enabled) {
+		return cacheAndReturn(
+			cacheKey,
+			{
+				value: flag.defaultValue as T,
+				flagId,
+				matched: false,
+				evaluatedAt: new Date(),
+				cached: false,
+			},
+			env,
+		);
+	}
 
-  // 4. Evaluate rules in priority order
-  const sortedRules = flag.rules
-    .filter(r => r.enabled)
-    .sort((a, b) => b.priority - a.priority);
+	// 4. Evaluate rules in priority order
+	const sortedRules = flag.rules.filter((r) => r.enabled).sort((a, b) => b.priority - a.priority);
 
-  for (const rule of sortedRules) {
-    const matches = evaluateRule(rule, context);
+	for (const rule of sortedRules) {
+		const matches = evaluateRule(rule, context);
 
-    if (matches) {
-      return cacheAndReturn(cacheKey, {
-        value: rule.resultValue as T,
-        flagId,
-        matched: true,
-        matchedRuleId: rule.id,
-        evaluatedAt: new Date(),
-        cached: false
-      }, env);
-    }
-  }
+		if (matches) {
+			return cacheAndReturn(
+				cacheKey,
+				{
+					value: rule.resultValue as T,
+					flagId,
+					matched: true,
+					matchedRuleId: rule.id,
+					evaluatedAt: new Date(),
+					cached: false,
+				},
+				env,
+			);
+		}
+	}
 
-  // 5. No rules matched - use default
-  return cacheAndReturn(cacheKey, {
-    value: flag.defaultValue as T,
-    flagId,
-    matched: false,
-    evaluatedAt: new Date(),
-    cached: false
-  }, env);
+	// 5. No rules matched - use default
+	return cacheAndReturn(
+		cacheKey,
+		{
+			value: flag.defaultValue as T,
+			flagId,
+			matched: false,
+			evaluatedAt: new Date(),
+			cached: false,
+		},
+		env,
+	);
 }
 
 function evaluateRule(rule: FlagRule, context: EvaluationContext): boolean {
-  switch (rule.ruleType) {
-    case 'tenant':
-      return evaluateTenantRule(rule.ruleValue, context);
-    case 'tier':
-      return evaluateTierRule(rule.ruleValue, context);
-    case 'percentage':
-      return evaluatePercentageRule(rule.ruleValue, context);
-    case 'user':
-      return evaluateUserRule(rule.ruleValue, context);
-    case 'time':
-      return evaluateTimeRule(rule.ruleValue);
-    case 'always':
-      return true;
-    default:
-      return false;
-  }
+	switch (rule.ruleType) {
+		case "tenant":
+			return evaluateTenantRule(rule.ruleValue, context);
+		case "tier":
+			return evaluateTierRule(rule.ruleValue, context);
+		case "percentage":
+			return evaluatePercentageRule(rule.ruleValue, context);
+		case "user":
+			return evaluateUserRule(rule.ruleValue, context);
+		case "time":
+			return evaluateTimeRule(rule.ruleValue);
+		case "always":
+			return true;
+		default:
+			return false;
+	}
 }
 ```
 
 ### Percentage Rollout (Deterministic Hashing)
 
 ```typescript
-// packages/engine/src/lib/feature-flags/percentage.ts
+// libs/engine/src/lib/feature-flags/percentage.ts
 
-import { createHash } from 'crypto';
+import { createHash } from "crypto";
 
 /**
  * Deterministic percentage evaluation
  * Same user/tenant always gets same result for same flag
  */
 function evaluatePercentageRule(
-  condition: { percentage: number; salt?: string },
-  context: EvaluationContext
+	condition: { percentage: number; salt?: string },
+	context: EvaluationContext,
 ): boolean {
-  const { percentage, salt = '' } = condition;
+	const { percentage, salt = "" } = condition;
 
-  // Build stable identifier
-  // Priority: userId > tenantId > sessionId
-  const identifier = context.userId
-    ?? context.tenantId
-    ?? context.sessionId
-    ?? '';
+	// Build stable identifier
+	// Priority: userId > tenantId > sessionId
+	const identifier = context.userId ?? context.tenantId ?? context.sessionId ?? "";
 
-  if (!identifier) {
-    // No identifier - random assignment (not recommended)
-    return Math.random() * 100 < percentage;
-  }
+	if (!identifier) {
+		// No identifier - random assignment (not recommended)
+		return Math.random() * 100 < percentage;
+	}
 
-  // Hash identifier with flag-specific salt for independence
-  const hash = createHash('sha256')
-    .update(`${salt}:${identifier}`)
-    .digest();
+	// Hash identifier with flag-specific salt for independence
+	const hash = createHash("sha256").update(`${salt}:${identifier}`).digest();
 
-  // Use first 4 bytes as uint32, mod 100 for percentage
-  const bucket = hash.readUInt32BE(0) % 100;
+	// Use first 4 bytes as uint32, mod 100 for percentage
+	const bucket = hash.readUInt32BE(0) % 100;
 
-  return bucket < percentage;
+	return bucket < percentage;
 }
 
 /**
  * Get exact bucket for debugging/logging
  */
 export function getUserBucket(flagId: string, identifier: string): number {
-  const hash = createHash('sha256')
-    .update(`${flagId}:${identifier}`)
-    .digest();
-  return hash.readUInt32BE(0) % 100;
+	const hash = createHash("sha256").update(`${flagId}:${identifier}`).digest();
+	return hash.readUInt32BE(0) % 100;
 }
 ```
 
 ### Tier-Based Evaluation
 
 ```typescript
-// packages/engine/src/lib/feature-flags/tier.ts
+// libs/engine/src/lib/feature-flags/tier.ts
 
-import { TIER_ORDER, type TierKey } from '../config/tiers.js';
+import { TIER_ORDER, type TierKey } from "../config/tiers.js";
 
-function evaluateTierRule(
-  condition: { tiers: TierKey[] },
-  context: EvaluationContext
-): boolean {
-  if (!context.tier) return false;
+function evaluateTierRule(condition: { tiers: TierKey[] }, context: EvaluationContext): boolean {
+	if (!context.tier) return false;
 
-  const { tiers } = condition;
+	const { tiers } = condition;
 
-  // Check if user's tier is in allowed list
-  return tiers.includes(context.tier);
+	// Check if user's tier is in allowed list
+	return tiers.includes(context.tier);
 }
 
 /**
@@ -618,9 +624,9 @@ function evaluateTierRule(
  * Useful for "oak_and_above" type rules
  */
 export function isTierAtLeast(userTier: TierKey, minimumTier: TierKey): boolean {
-  const userIndex = TIER_ORDER.indexOf(userTier);
-  const minIndex = TIER_ORDER.indexOf(minimumTier);
-  return userIndex >= minIndex;
+	const userIndex = TIER_ORDER.indexOf(userTier);
+	const minIndex = TIER_ORDER.indexOf(minimumTier);
+	return userIndex >= minIndex;
 }
 ```
 
@@ -633,211 +639,184 @@ export function isTierAtLeast(userTier: TierKey, minimumTier: TierKey): boolean 
 Location: `/admin/flags` (new route in engine admin panel)
 
 ```svelte
-<!-- packages/engine/src/routes/admin/flags/+page.svelte -->
+<!-- libs/engine/src/routes/admin/flags/+page.svelte -->
 <script lang="ts">
-  import { GlassCard, GlassButton, GlassInput } from '$lib/ui/components/ui';
-  import { Toggle, Badge } from '$lib/ui/components/ui';
+	import { GlassCard, GlassButton, GlassInput } from "$lib/ui/components/ui";
+	import { Toggle, Badge } from "$lib/ui/components/ui";
 
-  let { data } = $props();
-  let flags = $state(data.flags);
-  let search = $state('');
+	let { data } = $props();
+	let flags = $state(data.flags);
+	let search = $state("");
 
-  const filteredFlags = $derived(
-    flags.filter(f =>
-      f.name.toLowerCase().includes(search.toLowerCase()) ||
-      f.id.toLowerCase().includes(search.toLowerCase())
-    )
-  );
+	const filteredFlags = $derived(
+		flags.filter(
+			(f) =>
+				f.name.toLowerCase().includes(search.toLowerCase()) ||
+				f.id.toLowerCase().includes(search.toLowerCase()),
+		),
+	);
 </script>
 
 <div class="p-6 space-y-6">
-  <header class="flex justify-between items-center">
-    <div>
-      <h1 class="text-2xl font-semibold">Feature Flags</h1>
-      <p class="text-grove-600 dark:text-grove-400">
-        Control feature rollouts and experiments
-      </p>
-    </div>
-    <GlassButton href="/admin/flags/new">
-      Create Flag
-    </GlassButton>
-  </header>
+	<header class="flex justify-between items-center">
+		<div>
+			<h1 class="text-2xl font-semibold">Feature Flags</h1>
+			<p class="text-grove-600 dark:text-grove-400">Control feature rollouts and experiments</p>
+		</div>
+		<GlassButton href="/admin/flags/new">Create Flag</GlassButton>
+	</header>
 
-  <GlassCard>
-    <GlassInput
-      bind:value={search}
-      placeholder="Search flags..."
-      class="mb-4"
-    />
+	<GlassCard>
+		<GlassInput bind:value={search} placeholder="Search flags..." class="mb-4" />
 
-    <table class="w-full">
-      <thead class="glass-surface">
-        <tr>
-          <th class="text-left p-3">Flag</th>
-          <th class="text-left p-3">Type</th>
-          <th class="text-left p-3">Status</th>
-          <th class="text-left p-3">Rules</th>
-          <th class="text-left p-3">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {#each filteredFlags as flag}
-          <tr class="border-t border-white/10">
-            <td class="p-3">
-              <div class="font-medium">{flag.name}</div>
-              <div class="text-sm text-gray-500">{flag.id}</div>
-            </td>
-            <td class="p-3">
-              <Badge variant={flag.flagType}>{flag.flagType}</Badge>
-            </td>
-            <td class="p-3">
-              <Toggle
-                checked={flag.enabled}
-                onchange={() => toggleFlag(flag.id)}
-              />
-            </td>
-            <td class="p-3">
-              {flag.rules.length} rule{flag.rules.length !== 1 ? 's' : ''}
-            </td>
-            <td class="p-3">
-              <GlassButton variant="ghost" href="/admin/flags/{flag.id}">
-                Edit
-              </GlassButton>
-            </td>
-          </tr>
-        {/each}
-      </tbody>
-    </table>
-  </GlassCard>
+		<table class="w-full">
+			<thead class="glass-surface">
+				<tr>
+					<th class="text-left p-3">Flag</th>
+					<th class="text-left p-3">Type</th>
+					<th class="text-left p-3">Status</th>
+					<th class="text-left p-3">Rules</th>
+					<th class="text-left p-3">Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				{#each filteredFlags as flag}
+					<tr class="border-t border-white/10">
+						<td class="p-3">
+							<div class="font-medium">{flag.name}</div>
+							<div class="text-sm text-gray-500">{flag.id}</div>
+						</td>
+						<td class="p-3">
+							<Badge variant={flag.flagType}>{flag.flagType}</Badge>
+						</td>
+						<td class="p-3">
+							<Toggle checked={flag.enabled} onchange={() => toggleFlag(flag.id)} />
+						</td>
+						<td class="p-3">
+							{flag.rules.length} rule{flag.rules.length !== 1 ? "s" : ""}
+						</td>
+						<td class="p-3">
+							<GlassButton variant="ghost" href="/admin/flags/{flag.id}">Edit</GlassButton>
+						</td>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+	</GlassCard>
 </div>
 ```
 
 ### Flag Editor
 
 ```svelte
-<!-- packages/engine/src/routes/admin/flags/[id]/+page.svelte -->
+<!-- libs/engine/src/routes/admin/flags/[id]/+page.svelte -->
 <script lang="ts">
-  import RuleEditor from './RuleEditor.svelte';
-  import PercentageSlider from './PercentageSlider.svelte';
-  import TierSelector from './TierSelector.svelte';
-  import TenantPicker from './TenantPicker.svelte';
+	import RuleEditor from "./RuleEditor.svelte";
+	import PercentageSlider from "./PercentageSlider.svelte";
+	import TierSelector from "./TierSelector.svelte";
+	import TenantPicker from "./TenantPicker.svelte";
 
-  let { data } = $props();
-  let flag = $state(data.flag);
-  let rules = $state(data.rules);
-  let showAddRule = $state(false);
-  let changeReason = $state('');
+	let { data } = $props();
+	let flag = $state(data.flag);
+	let rules = $state(data.rules);
+	let showAddRule = $state(false);
+	let changeReason = $state("");
 </script>
 
 <div class="p-6 max-w-4xl mx-auto space-y-6">
-  <GlassCard>
-    <h2 class="text-xl font-semibold mb-4">Flag Settings</h2>
+	<GlassCard>
+		<h2 class="text-xl font-semibold mb-4">Flag Settings</h2>
 
-    <div class="space-y-4">
-      <GlassInput
-        label="Flag ID"
-        value={flag.id}
-        disabled
-        hint="Cannot be changed after creation"
-      />
+		<div class="space-y-4">
+			<GlassInput
+				label="Flag ID"
+				value={flag.id}
+				disabled
+				hint="Cannot be changed after creation"
+			/>
 
-      <GlassInput
-        label="Display Name"
-        bind:value={flag.name}
-      />
+			<GlassInput label="Display Name" bind:value={flag.name} />
 
-      <GlassInput
-        label="Description"
-        bind:value={flag.description}
-        multiline
-      />
+			<GlassInput label="Description" bind:value={flag.description} multiline />
 
-      <div class="flex items-center justify-between p-4 bg-white/5 rounded-lg">
-        <div>
-          <div class="font-medium">Master Kill Switch</div>
-          <div class="text-sm text-gray-500">
-            When disabled, flag always returns default value
-          </div>
-        </div>
-        <Toggle bind:checked={flag.enabled} />
-      </div>
+			<div class="flex items-center justify-between p-4 bg-white/5 rounded-lg">
+				<div>
+					<div class="font-medium">Master Kill Switch</div>
+					<div class="text-sm text-gray-500">When disabled, flag always returns default value</div>
+				</div>
+				<Toggle bind:checked={flag.enabled} />
+			</div>
 
-      <div>
-        <label class="block text-sm font-medium mb-2">Default Value</label>
-        {#if flag.flagType === 'boolean'}
-          <Toggle bind:checked={flag.defaultValue} />
-        {:else if flag.flagType === 'percentage'}
-          <PercentageSlider bind:value={flag.defaultValue} />
-        {:else}
-          <GlassInput bind:value={flag.defaultValue} />
-        {/if}
-      </div>
-    </div>
-  </GlassCard>
+			<div>
+				<label class="block text-sm font-medium mb-2">Default Value</label>
+				{#if flag.flagType === "boolean"}
+					<Toggle bind:checked={flag.defaultValue} />
+				{:else if flag.flagType === "percentage"}
+					<PercentageSlider bind:value={flag.defaultValue} />
+				{:else}
+					<GlassInput bind:value={flag.defaultValue} />
+				{/if}
+			</div>
+		</div>
+	</GlassCard>
 
-  <GlassCard>
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-xl font-semibold">Rules</h2>
-      <GlassButton onclick={() => showAddRule = true}>
-        Add Rule
-      </GlassButton>
-    </div>
+	<GlassCard>
+		<div class="flex justify-between items-center mb-4">
+			<h2 class="text-xl font-semibold">Rules</h2>
+			<GlassButton onclick={() => (showAddRule = true)}>Add Rule</GlassButton>
+		</div>
 
-    <p class="text-sm text-gray-500 mb-4">
-      Rules are evaluated in priority order (highest first).
-      First matching rule determines the flag value.
-    </p>
+		<p class="text-sm text-gray-500 mb-4">
+			Rules are evaluated in priority order (highest first). First matching rule determines the flag
+			value.
+		</p>
 
-    <div class="space-y-3">
-      {#each rules.sort((a, b) => b.priority - a.priority) as rule}
-        <RuleEditor
-          {rule}
-          flagType={flag.flagType}
-          onupdate={(r) => updateRule(r)}
-          ondelete={() => deleteRule(rule.id)}
-        />
-      {/each}
+		<div class="space-y-3">
+			{#each rules.sort((a, b) => b.priority - a.priority) as rule}
+				<RuleEditor
+					{rule}
+					flagType={flag.flagType}
+					onupdate={(r) => updateRule(r)}
+					ondelete={() => deleteRule(rule.id)}
+				/>
+			{/each}
 
-      {#if rules.length === 0}
-        <div class="text-center py-8 text-gray-500">
-          No rules configured. Flag will always return default value.
-        </div>
-      {/if}
-    </div>
-  </GlassCard>
+			{#if rules.length === 0}
+				<div class="text-center py-8 text-gray-500">
+					No rules configured. Flag will always return default value.
+				</div>
+			{/if}
+		</div>
+	</GlassCard>
 
-  <GlassCard>
-    <h2 class="text-xl font-semibold mb-4">Save Changes</h2>
+	<GlassCard>
+		<h2 class="text-xl font-semibold mb-4">Save Changes</h2>
 
-    <GlassInput
-      label="Change Reason (optional)"
-      bind:value={changeReason}
-      placeholder="Why are you making this change?"
-      hint="Recorded in audit log"
-    />
+		<GlassInput
+			label="Change Reason (optional)"
+			bind:value={changeReason}
+			placeholder="Why are you making this change?"
+			hint="Recorded in audit log"
+		/>
 
-    <div class="flex gap-3 mt-4">
-      <GlassButton variant="primary" onclick={saveFlag}>
-        Save Changes
-      </GlassButton>
-      <GlassButton variant="ghost" href="/admin/flags">
-        Cancel
-      </GlassButton>
-    </div>
-  </GlassCard>
+		<div class="flex gap-3 mt-4">
+			<GlassButton variant="primary" onclick={saveFlag}>Save Changes</GlassButton>
+			<GlassButton variant="ghost" href="/admin/flags">Cancel</GlassButton>
+		</div>
+	</GlassCard>
 
-  <!-- Audit Log -->
-  <GlassCard>
-    <h2 class="text-xl font-semibold mb-4">Audit Log</h2>
-    <div class="space-y-2 text-sm">
-      {#each data.auditLog as entry}
-        <div class="flex justify-between p-2 bg-white/5 rounded">
-          <span>{entry.action} by {entry.changed_by}</span>
-          <span class="text-gray-500">{formatDate(entry.changed_at)}</span>
-        </div>
-      {/each}
-    </div>
-  </GlassCard>
+	<!-- Audit Log -->
+	<GlassCard>
+		<h2 class="text-xl font-semibold mb-4">Audit Log</h2>
+		<div class="space-y-2 text-sm">
+			{#each data.auditLog as entry}
+				<div class="flex justify-between p-2 bg-white/5 rounded">
+					<span>{entry.action} by {entry.changed_by}</span>
+					<span class="text-gray-500">{formatDate(entry.changed_at)}</span>
+				</div>
+			{/each}
+		</div>
+	</GlassCard>
 </div>
 ```
 
@@ -914,99 +893,97 @@ Location: `/admin/flags` (new route in engine admin panel)
 ### KV Cache Design
 
 ```typescript
-// packages/engine/src/lib/feature-flags/cache.ts
+// libs/engine/src/lib/feature-flags/cache.ts
 
 const DEFAULT_TTL = 60; // seconds
-const INSTANT_FLAGS = new Set(['jxl_kill_switch', 'maintenance_mode']); // No caching
+const INSTANT_FLAGS = new Set(["jxl_kill_switch", "maintenance_mode"]); // No caching
 
 interface CachedValue<T> {
-  value: T;
-  flagId: string;
-  matched: boolean;
-  matchedRuleId?: number;
-  evaluatedAt: string;
-  expiresAt: string;
+	value: T;
+	flagId: string;
+	matched: boolean;
+	matchedRuleId?: number;
+	evaluatedAt: string;
+	expiresAt: string;
 }
 
 export function buildCacheKey(flagId: string, context: EvaluationContext): string {
-  // Build deterministic cache key from context
-  const parts = ['flag', flagId];
+	// Build deterministic cache key from context
+	const parts = ["flag", flagId];
 
-  if (context.tenantId) parts.push('tenant', context.tenantId);
-  if (context.tier) parts.push('tier', context.tier);
-  if (context.userId) parts.push('user', context.userId);
+	if (context.tenantId) parts.push("tenant", context.tenantId);
+	if (context.tier) parts.push("tier", context.tier);
+	if (context.userId) parts.push("user", context.userId);
 
-  // If no context, use 'global'
-  if (parts.length === 2) parts.push('global');
+	// If no context, use 'global'
+	if (parts.length === 2) parts.push("global");
 
-  return parts.join(':');
+	return parts.join(":");
 }
 
 export async function cacheResult<T>(
-  key: string,
-  result: EvaluationResult<T>,
-  env: Env
+	key: string,
+	result: EvaluationResult<T>,
+	env: Env,
 ): Promise<void> {
-  // Skip caching for instant flags
-  if (INSTANT_FLAGS.has(result.flagId)) return;
+	// Skip caching for instant flags
+	if (INSTANT_FLAGS.has(result.flagId)) return;
 
-  const ttl = await getFlagTTL(result.flagId, env);
-  const cached: CachedValue<T> = {
-    ...result,
-    evaluatedAt: result.evaluatedAt.toISOString(),
-    expiresAt: new Date(Date.now() + ttl * 1000).toISOString()
-  };
+	const ttl = await getFlagTTL(result.flagId, env);
+	const cached: CachedValue<T> = {
+		...result,
+		evaluatedAt: result.evaluatedAt.toISOString(),
+		expiresAt: new Date(Date.now() + ttl * 1000).toISOString(),
+	};
 
-  await env.FLAGS_KV.put(key, JSON.stringify(cached), {
-    expirationTtl: ttl
-  });
+	await env.FLAGS_KV.put(key, JSON.stringify(cached), {
+		expirationTtl: ttl,
+	});
 }
 
 export async function invalidateFlag(flagId: string, env: Env): Promise<void> {
-  // List all keys for this flag and delete them
-  const list = await env.FLAGS_KV.list({ prefix: `flag:${flagId}:` });
+	// List all keys for this flag and delete them
+	const list = await env.FLAGS_KV.list({ prefix: `flag:${flagId}:` });
 
-  await Promise.all(
-    list.keys.map(key => env.FLAGS_KV.delete(key.name))
-  );
+	await Promise.all(list.keys.map((key) => env.FLAGS_KV.delete(key.name)));
 
-  console.log(`Invalidated ${list.keys.length} cache entries for flag ${flagId}`);
+	console.log(`Invalidated ${list.keys.length} cache entries for flag ${flagId}`);
 }
 ```
 
 ### Cache Invalidation Triggers
 
 ```typescript
-// packages/engine/src/routes/admin/flags/[id]/+page.server.ts
+// libs/engine/src/routes/admin/flags/[id]/+page.server.ts
 
 export const actions = {
-  save: async ({ request, params, platform }) => {
-    const formData = await request.formData();
-    const flagId = params.id;
+	save: async ({ request, params, platform }) => {
+		const formData = await request.formData();
+		const flagId = params.id;
 
-    // Update D1
-    await updateFlagInD1(flagId, formData, platform.env.DB);
+		// Update D1
+		await updateFlagInD1(flagId, formData, platform.env.DB);
 
-    // Invalidate KV cache
-    await invalidateFlag(flagId, platform.env);
+		// Invalidate KV cache
+		await invalidateFlag(flagId, platform.env);
 
-    // Log to audit
-    await logFlagChange(flagId, 'update', formData.get('reason'), platform.env.DB);
+		// Log to audit
+		await logFlagChange(flagId, "update", formData.get("reason"), platform.env.DB);
 
-    return { success: true };
-  },
+		return { success: true };
+	},
 
-  toggle: async ({ params, platform }) => {
-    const flagId = params.id;
+	toggle: async ({ params, platform }) => {
+		const flagId = params.id;
 
-    // Toggle enabled state
-    await toggleFlagEnabled(flagId, platform.env.DB);
+		// Toggle enabled state
+		await toggleFlagEnabled(flagId, platform.env.DB);
 
-    // Invalidate immediately
-    await invalidateFlag(flagId, platform.env);
+		// Invalidate immediately
+		await invalidateFlag(flagId, platform.env);
 
-    return { success: true };
-  }
+		return { success: true };
+	},
 };
 ```
 
@@ -1017,82 +994,92 @@ export const actions = {
 ### 1. JXL Migration
 
 ```typescript
-// packages/engine/src/lib/utils/imageProcessor.ts
+// libs/engine/src/lib/utils/imageProcessor.ts
 
-import { isFeatureEnabled } from '$lib/feature-flags';
+import { isFeatureEnabled } from "$lib/feature-flags";
 
 export async function processImage(
-  file: File,
-  options: ProcessImageOptions,
-  context: { env: Env; tenantId?: string; userId?: string }
+	file: File,
+	options: ProcessImageOptions,
+	context: { env: Env; tenantId?: string; userId?: string },
 ): Promise<ProcessedImageResult> {
-  // Check kill switch first (no caching, instant response)
-  const isKilled = await isFeatureEnabled('jxl_kill_switch', {}, context.env);
-  if (isKilled) {
-    return processImageAsWebP(file, options);
-  }
+	// Check kill switch first (no caching, instant response)
+	const isKilled = await isFeatureEnabled("jxl_kill_switch", {}, context.env);
+	if (isKilled) {
+		return processImageAsWebP(file, options);
+	}
 
-  // Check percentage rollout
-  const useJxl = await isFeatureEnabled('jxl_encoding', {
-    tenantId: context.tenantId,
-    userId: context.userId
-  }, context.env);
+	// Check percentage rollout
+	const useJxl = await isFeatureEnabled(
+		"jxl_encoding",
+		{
+			tenantId: context.tenantId,
+			userId: context.userId,
+		},
+		context.env,
+	);
 
-  if (useJxl && await supportsJxlEncoding()) {
-    return processImageAsJxl(file, options);
-  }
+	if (useJxl && (await supportsJxlEncoding())) {
+		return processImageAsJxl(file, options);
+	}
 
-  return processImageAsWebP(file, options);
+	return processImageAsWebP(file, options);
 }
 ```
 
 ### 2. Tier-Based Features
 
 ```typescript
-// packages/engine/src/routes/meadow/+layout.server.ts
+// libs/engine/src/routes/meadow/+layout.server.ts
 
-import { isFeatureEnabled } from '$lib/feature-flags';
-import { redirect } from '@sveltejs/kit';
+import { isFeatureEnabled } from "$lib/feature-flags";
+import { redirect } from "@sveltejs/kit";
 
 export async function load({ locals, platform }) {
-  const canAccessMeadow = await isFeatureEnabled('meadow_access', {
-    tenantId: locals.tenantId,
-    tier: locals.tenant?.tier,
-    userId: locals.user?.id
-  }, platform.env);
+	const canAccessMeadow = await isFeatureEnabled(
+		"meadow_access",
+		{
+			tenantId: locals.tenantId,
+			tier: locals.tenant?.tier,
+			userId: locals.user?.id,
+		},
+		platform.env,
+	);
 
-  if (!canAccessMeadow) {
-    throw redirect(302, '/upgrade?feature=meadow');
-  }
+	if (!canAccessMeadow) {
+		throw redirect(302, "/upgrade?feature=meadow");
+	}
 
-  return { /* meadow data */ };
+	return {
+		/* meadow data */
+	};
 }
 ```
 
 ### 3. Analytics Integration (Rings)
 
 ```typescript
-// packages/engine/src/lib/feature-flags/analytics.ts
+// libs/engine/src/lib/feature-flags/analytics.ts
 
-import { trackEvent } from '$lib/analytics/rings';
+import { trackEvent } from "$lib/analytics/rings";
 
 export async function logFlagEvaluation(
-  result: EvaluationResult,
-  context: EvaluationContext
+	result: EvaluationResult,
+	context: EvaluationContext,
 ): Promise<void> {
-  // Only log non-cached evaluations to reduce volume
-  if (result.cached) return;
+	// Only log non-cached evaluations to reduce volume
+	if (result.cached) return;
 
-  await trackEvent({
-    event: 'flag_evaluation',
-    flagId: result.flagId,
-    value: result.value,
-    matched: result.matched,
-    matchedRuleId: result.matchedRuleId,
-    tenantId: context.tenantId,
-    tier: context.tier,
-    // Don't log userId for privacy
-  });
+	await trackEvent({
+		event: "flag_evaluation",
+		flagId: result.flagId,
+		value: result.value,
+		matched: result.matched,
+		matchedRuleId: result.matchedRuleId,
+		tenantId: context.tenantId,
+		tier: context.tier,
+		// Don't log userId for privacy
+	});
 }
 
 // Dashboard query for flag effectiveness
@@ -1111,28 +1098,32 @@ const FLAG_ANALYTICS_QUERY = `
 ### 4. A/B Testing
 
 ```typescript
-// packages/engine/src/routes/pricing/+page.server.ts
+// libs/engine/src/routes/pricing/+page.server.ts
 
-import { getVariant } from '$lib/feature-flags';
+import { getVariant } from "$lib/feature-flags";
 
 export async function load({ cookies, platform }) {
-  // Get pricing page variant
-  const variant = await getVariant('pricing_experiment', {
-    sessionId: cookies.get('session_id')
-  }, platform.env);
+	// Get pricing page variant
+	const variant = await getVariant(
+		"pricing_experiment",
+		{
+			sessionId: cookies.get("session_id"),
+		},
+		platform.env,
+	);
 
-  // Track exposure for analytics
-  await trackExposure('pricing_experiment', variant, platform.env);
+	// Track exposure for analytics
+	await trackExposure("pricing_experiment", variant, platform.env);
 
-  // Return variant-specific data
-  switch (variant) {
-    case 'annual_first':
-      return { showAnnualFirst: true, showComparison: false };
-    case 'comparison_table':
-      return { showAnnualFirst: false, showComparison: true };
-    default: // 'control'
-      return { showAnnualFirst: false, showComparison: false };
-  }
+	// Return variant-specific data
+	switch (variant) {
+		case "annual_first":
+			return { showAnnualFirst: true, showComparison: false };
+		case "comparison_table":
+			return { showAnnualFirst: false, showComparison: true };
+		default: // 'control'
+			return { showAnnualFirst: false, showComparison: false };
+	}
 }
 ```
 
@@ -1145,28 +1136,33 @@ export async function load({ cookies, platform }) {
 **Goal:** Basic flag evaluation working without admin UI
 
 #### Step 1.1: Create D1 Schema
+
 ```bash
 # Create migration
-touch packages/engine/migrations/XXX_feature_flags.sql
+touch libs/engine/migrations/XXX_feature_flags.sql
 ```
 
 #### Step 1.2: Create Type Definitions
+
 ```bash
 # Create types file
-touch packages/engine/src/lib/feature-flags/types.ts
+touch libs/engine/src/lib/feature-flags/types.ts
 ```
 
 #### Step 1.3: Implement Evaluation Logic
+
 ```bash
 # Core evaluation functions
-touch packages/engine/src/lib/feature-flags/evaluate.ts
-touch packages/engine/src/lib/feature-flags/percentage.ts
-touch packages/engine/src/lib/feature-flags/cache.ts
-touch packages/engine/src/lib/feature-flags/index.ts
+touch libs/engine/src/lib/feature-flags/evaluate.ts
+touch libs/engine/src/lib/feature-flags/percentage.ts
+touch libs/engine/src/lib/feature-flags/cache.ts
+touch libs/engine/src/lib/feature-flags/index.ts
 ```
 
 #### Step 1.4: Add KV Binding
+
 Update `wrangler.toml`:
+
 ```toml
 [[kv_namespaces]]
 binding = "FLAGS_KV"
@@ -1174,8 +1170,9 @@ id = "xxx"  # Create in Cloudflare Dashboard
 ```
 
 #### Step 1.5: Write Unit Tests
+
 ```bash
-touch packages/engine/src/lib/feature-flags/evaluate.test.ts
+touch libs/engine/src/lib/feature-flags/evaluate.test.ts
 ```
 
 ### Phase 2: Admin UI (3-4 hours)
@@ -1183,23 +1180,26 @@ touch packages/engine/src/lib/feature-flags/evaluate.test.ts
 **Goal:** Basic flag management interface
 
 #### Step 2.1: Create Admin Routes
+
 ```bash
-mkdir -p packages/engine/src/routes/admin/flags
-touch packages/engine/src/routes/admin/flags/+page.svelte
-touch packages/engine/src/routes/admin/flags/+page.server.ts
-touch packages/engine/src/routes/admin/flags/[id]/+page.svelte
-touch packages/engine/src/routes/admin/flags/[id]/+page.server.ts
-touch packages/engine/src/routes/admin/flags/new/+page.svelte
+mkdir -p libs/engine/src/routes/admin/flags
+touch libs/engine/src/routes/admin/flags/+page.svelte
+touch libs/engine/src/routes/admin/flags/+page.server.ts
+touch libs/engine/src/routes/admin/flags/[id]/+page.svelte
+touch libs/engine/src/routes/admin/flags/[id]/+page.server.ts
+touch libs/engine/src/routes/admin/flags/new/+page.svelte
 ```
 
 #### Step 2.2: Create UI Components
+
 ```bash
-touch packages/engine/src/routes/admin/flags/RuleEditor.svelte
-touch packages/engine/src/routes/admin/flags/PercentageSlider.svelte
-touch packages/engine/src/routes/admin/flags/TierSelector.svelte
+touch libs/engine/src/routes/admin/flags/RuleEditor.svelte
+touch libs/engine/src/routes/admin/flags/PercentageSlider.svelte
+touch libs/engine/src/routes/admin/flags/TierSelector.svelte
 ```
 
 #### Step 2.3: Add Navigation Link
+
 Update admin sidebar to include flags link.
 
 ### Phase 3: Integration (2-3 hours)
@@ -1207,6 +1207,7 @@ Update admin sidebar to include flags link.
 **Goal:** Connect to existing systems
 
 #### Step 3.1: Create Initial Flags
+
 ```sql
 -- Seed data for initial flags
 INSERT INTO feature_flags (id, name, description, flag_type, default_value, enabled)
@@ -1217,9 +1218,11 @@ VALUES
 ```
 
 #### Step 3.2: Update JXL Migration Code
+
 Integrate feature flag checks into image processor.
 
 #### Step 3.3: Add Hooks Integration
+
 Pre-evaluate common flags in server hooks.
 
 ### Phase 4: Polish (1-2 hours)
@@ -1239,165 +1242,177 @@ Pre-evaluate common flags in server hooks.
 ### Unit Tests
 
 ```typescript
-// packages/engine/src/lib/feature-flags/evaluate.test.ts
+// libs/engine/src/lib/feature-flags/evaluate.test.ts
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { evaluateFlag, isFeatureEnabled } from './index';
-import { createMockEnv } from '../test-utils';
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { evaluateFlag, isFeatureEnabled } from "./index";
+import { createMockEnv } from "../test-utils";
 
-describe('Feature Flags', () => {
-  let mockEnv: ReturnType<typeof createMockEnv>;
+describe("Feature Flags", () => {
+	let mockEnv: ReturnType<typeof createMockEnv>;
 
-  beforeEach(() => {
-    mockEnv = createMockEnv();
-  });
+	beforeEach(() => {
+		mockEnv = createMockEnv();
+	});
 
-  describe('isFeatureEnabled', () => {
-    it('returns false for unknown flags', async () => {
-      const result = await isFeatureEnabled('unknown_flag', {}, mockEnv);
-      expect(result).toBe(false);
-    });
+	describe("isFeatureEnabled", () => {
+		it("returns false for unknown flags", async () => {
+			const result = await isFeatureEnabled("unknown_flag", {}, mockEnv);
+			expect(result).toBe(false);
+		});
 
-    it('returns default value when flag is disabled', async () => {
-      mockEnv.DB.prepare.mockReturnValueOnce({
-        first: () => ({ enabled: 0, default_value: 'true' })
-      });
+		it("returns default value when flag is disabled", async () => {
+			mockEnv.DB.prepare.mockReturnValueOnce({
+				first: () => ({ enabled: 0, default_value: "true" }),
+			});
 
-      const result = await isFeatureEnabled('test_flag', {}, mockEnv);
-      expect(result).toBe(true); // default_value
-    });
+			const result = await isFeatureEnabled("test_flag", {}, mockEnv);
+			expect(result).toBe(true); // default_value
+		});
 
-    it('caches results in KV', async () => {
-      mockEnv.DB.prepare.mockReturnValueOnce({
-        first: () => ({ enabled: 1, default_value: 'true', flag_type: 'boolean' })
-      });
+		it("caches results in KV", async () => {
+			mockEnv.DB.prepare.mockReturnValueOnce({
+				first: () => ({ enabled: 1, default_value: "true", flag_type: "boolean" }),
+			});
 
-      await isFeatureEnabled('test_flag', {}, mockEnv);
+			await isFeatureEnabled("test_flag", {}, mockEnv);
 
-      expect(mockEnv.FLAGS_KV.put).toHaveBeenCalledWith(
-        expect.stringContaining('flag:test_flag'),
-        expect.any(String),
-        expect.objectContaining({ expirationTtl: 60 })
-      );
-    });
-  });
+			expect(mockEnv.FLAGS_KV.put).toHaveBeenCalledWith(
+				expect.stringContaining("flag:test_flag"),
+				expect.any(String),
+				expect.objectContaining({ expirationTtl: 60 }),
+			);
+		});
+	});
 
-  describe('percentage rollout', () => {
-    it('is deterministic for same identifier', async () => {
-      // Flag with 50% rollout
-      mockEnv.DB.prepare.mockReturnValue({
-        first: () => ({
-          enabled: 1,
-          default_value: 'false',
-          flag_type: 'boolean'
-        }),
-        all: () => ({
-          results: [{
-            rule_type: 'percentage',
-            rule_value: JSON.stringify({ percentage: 50 }),
-            result_value: 'true',
-            enabled: 1,
-            priority: 1
-          }]
-        })
-      });
+	describe("percentage rollout", () => {
+		it("is deterministic for same identifier", async () => {
+			// Flag with 50% rollout
+			mockEnv.DB.prepare.mockReturnValue({
+				first: () => ({
+					enabled: 1,
+					default_value: "false",
+					flag_type: "boolean",
+				}),
+				all: () => ({
+					results: [
+						{
+							rule_type: "percentage",
+							rule_value: JSON.stringify({ percentage: 50 }),
+							result_value: "true",
+							enabled: 1,
+							priority: 1,
+						},
+					],
+				}),
+			});
 
-      const context = { userId: 'user123' };
+			const context = { userId: "user123" };
 
-      // Same user should always get same result
-      const results = await Promise.all([
-        isFeatureEnabled('test_rollout', context, mockEnv),
-        isFeatureEnabled('test_rollout', context, mockEnv),
-        isFeatureEnabled('test_rollout', context, mockEnv),
-      ]);
+			// Same user should always get same result
+			const results = await Promise.all([
+				isFeatureEnabled("test_rollout", context, mockEnv),
+				isFeatureEnabled("test_rollout", context, mockEnv),
+				isFeatureEnabled("test_rollout", context, mockEnv),
+			]);
 
-      // All results should be identical
-      expect(results.every(r => r === results[0])).toBe(true);
-    });
+			// All results should be identical
+			expect(results.every((r) => r === results[0])).toBe(true);
+		});
 
-    it('distributes approximately correctly over population', async () => {
-      // Test statistical distribution
-      const results = [];
-      for (let i = 0; i < 1000; i++) {
-        const result = await isFeatureEnabled('test_rollout', {
-          userId: `user_${i}`
-        }, mockEnv);
-        results.push(result);
-      }
+		it("distributes approximately correctly over population", async () => {
+			// Test statistical distribution
+			const results = [];
+			for (let i = 0; i < 1000; i++) {
+				const result = await isFeatureEnabled(
+					"test_rollout",
+					{
+						userId: `user_${i}`,
+					},
+					mockEnv,
+				);
+				results.push(result);
+			}
 
-      const enabledCount = results.filter(Boolean).length;
-      // Should be ~500 (50%), allow 10% variance
-      expect(enabledCount).toBeGreaterThan(400);
-      expect(enabledCount).toBeLessThan(600);
-    });
-  });
+			const enabledCount = results.filter(Boolean).length;
+			// Should be ~500 (50%), allow 10% variance
+			expect(enabledCount).toBeGreaterThan(400);
+			expect(enabledCount).toBeLessThan(600);
+		});
+	});
 
-  describe('tier rules', () => {
-    it('matches correct tiers', async () => {
-      mockEnv.DB.prepare.mockReturnValue({
-        first: () => ({ enabled: 1, default_value: 'false', flag_type: 'boolean' }),
-        all: () => ({
-          results: [{
-            rule_type: 'tier',
-            rule_value: JSON.stringify({ tiers: ['oak', 'evergreen'] }),
-            result_value: 'true',
-            enabled: 1,
-            priority: 1
-          }]
-        })
-      });
+	describe("tier rules", () => {
+		it("matches correct tiers", async () => {
+			mockEnv.DB.prepare.mockReturnValue({
+				first: () => ({ enabled: 1, default_value: "false", flag_type: "boolean" }),
+				all: () => ({
+					results: [
+						{
+							rule_type: "tier",
+							rule_value: JSON.stringify({ tiers: ["oak", "evergreen"] }),
+							result_value: "true",
+							enabled: 1,
+							priority: 1,
+						},
+					],
+				}),
+			});
 
-      const oakResult = await isFeatureEnabled('premium_feature', { tier: 'oak' }, mockEnv);
-      const seedlingResult = await isFeatureEnabled('premium_feature', { tier: 'seedling' }, mockEnv);
+			const oakResult = await isFeatureEnabled("premium_feature", { tier: "oak" }, mockEnv);
+			const seedlingResult = await isFeatureEnabled(
+				"premium_feature",
+				{ tier: "seedling" },
+				mockEnv,
+			);
 
-      expect(oakResult).toBe(true);
-      expect(seedlingResult).toBe(false);
-    });
-  });
+			expect(oakResult).toBe(true);
+			expect(seedlingResult).toBe(false);
+		});
+	});
 });
 ```
 
 ### Integration Tests
 
 ```typescript
-// packages/engine/src/lib/feature-flags/integration.test.ts
+// libs/engine/src/lib/feature-flags/integration.test.ts
 
-describe('Flag Admin Integration', () => {
-  it('creates flag and evaluates correctly', async () => {
-    // Create flag via API
-    await fetch('/admin/api/flags', {
-      method: 'POST',
-      body: JSON.stringify({
-        id: 'test_flag',
-        name: 'Test Flag',
-        flagType: 'boolean',
-        defaultValue: false,
-        enabled: true
-      })
-    });
+describe("Flag Admin Integration", () => {
+	it("creates flag and evaluates correctly", async () => {
+		// Create flag via API
+		await fetch("/admin/api/flags", {
+			method: "POST",
+			body: JSON.stringify({
+				id: "test_flag",
+				name: "Test Flag",
+				flagType: "boolean",
+				defaultValue: false,
+				enabled: true,
+			}),
+		});
 
-    // Add rule
-    await fetch('/admin/api/flags/test_flag/rules', {
-      method: 'POST',
-      body: JSON.stringify({
-        ruleType: 'tenant',
-        ruleValue: { tenantIds: ['tenant1'] },
-        resultValue: true,
-        priority: 1
-      })
-    });
+		// Add rule
+		await fetch("/admin/api/flags/test_flag/rules", {
+			method: "POST",
+			body: JSON.stringify({
+				ruleType: "tenant",
+				ruleValue: { tenantIds: ["tenant1"] },
+				resultValue: true,
+				priority: 1,
+			}),
+		});
 
-    // Evaluate
-    const result1 = await isFeatureEnabled('test_flag', { tenantId: 'tenant1' }, env);
-    const result2 = await isFeatureEnabled('test_flag', { tenantId: 'tenant2' }, env);
+		// Evaluate
+		const result1 = await isFeatureEnabled("test_flag", { tenantId: "tenant1" }, env);
+		const result2 = await isFeatureEnabled("test_flag", { tenantId: "tenant2" }, env);
 
-    expect(result1).toBe(true);
-    expect(result2).toBe(false);
-  });
+		expect(result1).toBe(true);
+		expect(result2).toBe(false);
+	});
 
-  it('invalidates cache on update', async () => {
-    // ... test cache invalidation
-  });
+	it("invalidates cache on update", async () => {
+		// ... test cache invalidation
+	});
 });
 ```
 
@@ -1462,13 +1477,13 @@ If feature flags are causing outages:
 
 ### Potential v2 Features
 
-| Feature | Use Case | Complexity |
-|---------|----------|------------|
-| Scheduled activation | Holiday features | Low |
-| Webhook notifications | Slack alerts on changes | Low |
-| Flag dependencies | Feature A requires Feature B | Medium |
-| Geographic targeting | Enable by country/region | Medium |
-| Staged rollout | Auto-ramp 10% → 25% → 50% → 100% | High |
+| Feature               | Use Case                         | Complexity |
+| --------------------- | -------------------------------- | ---------- |
+| Scheduled activation  | Holiday features                 | Low        |
+| Webhook notifications | Slack alerts on changes          | Low        |
+| Flag dependencies     | Feature A requires Feature B     | Medium     |
+| Geographic targeting  | Enable by country/region         | Medium     |
+| Staged rollout        | Auto-ramp 10% → 25% → 50% → 100% | High       |
 
 ---
 
@@ -1487,6 +1502,6 @@ The system is intentionally simple - it solves Grove's immediate needs (JXL roll
 
 ---
 
-*Document version: 1.0*
-*Created: 2026-01-13*
-*Author: Claude (AI-assisted planning)*
+_Document version: 1.0_
+_Created: 2026-01-13_
+_Author: Claude (AI-assisted planning)_

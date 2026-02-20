@@ -13,7 +13,7 @@ cloudflared login
 ./scripts/dev-tunnel.sh setup
 
 # Copy env file and uncomment VITE_AUTH_API_URL
-cp packages/landing/.env.local.example packages/landing/.env.local
+cp apps/landing/.env.local.example apps/landing/.env.local
 
 # Day-to-day: two terminals
 ./scripts/dev-tunnel.sh              # Terminal 1: tunnel
@@ -86,7 +86,7 @@ Add OAuth redirect URI for local development:
 
 ### A. Environment-Aware Auth URLs
 
-`packages/engine/src/lib/grafts/login/config.ts` now reads `VITE_AUTH_API_URL`:
+`libs/engine/src/lib/grafts/login/config.ts` now reads `VITE_AUTH_API_URL`:
 
 ```typescript
 const AUTH_API_BASE =
@@ -99,26 +99,26 @@ export const GROVEAUTH_URLS = {
 };
 ```
 
-Set in `packages/landing/.env.local`:
+Set in `apps/landing/.env.local`:
 ```
 VITE_AUTH_API_URL=https://dev.grove.place
 ```
 
-An example file is provided at `packages/landing/.env.local.example`.
+An example file is provided at `apps/landing/.env.local.example`.
 
 ### B. Trusted Origins — No Changes Needed
 
-Heartwood already uses `https://*.grove.place` wildcard in `trustedOrigins`, which covers `dev.grove.place`. Verified in `packages/heartwood/src/auth/index.ts:113`.
+Heartwood already uses `https://*.grove.place` wildcard in `trustedOrigins`, which covers `dev.grove.place`. Verified in `services/heartwood/src/auth/index.ts:113`.
 
 ### C. Cookie Domain — No Changes Needed
 
 The cookie domain `.grove.place` (with leading dot) already covers all subdomains including `dev.grove.place`. Verified in both:
-- `packages/heartwood/src/auth/index.ts:157` (Better Auth cross-subdomain config)
-- `packages/engine/src/lib/grafts/login/server/origin.ts:77` (getCookieDomain)
+- `services/heartwood/src/auth/index.ts:157` (Better Auth cross-subdomain config)
+- `libs/engine/src/lib/grafts/login/server/origin.ts:77` (getCookieDomain)
 
 ### D. CORS — No Changes Needed
 
-The `isGroveSubdomain()` function in `packages/heartwood/src/middleware/cors.ts:52` already allows any `*.grove.place` HTTPS origin.
+The `isGroveSubdomain()` function in `services/heartwood/src/middleware/cors.ts:52` already allows any `*.grove.place` HTTPS origin.
 
 ### E. LoginGraft — No Changes Needed
 

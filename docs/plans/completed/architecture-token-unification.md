@@ -1,4 +1,5 @@
 # Design Token Unification Architecture Plan
+
 ## Issue #660: Unify design token system between tokens.css and Tailwind config
 
 ---
@@ -54,23 +55,26 @@ Keep `tokens.css` as the **semantic layer** but flatten the variable chain to el
 ## File Structure Changes
 
 ### Modified Files
-| File | Change | Reason |
-|------|--------|--------|
-| `packages/engine/src/lib/styles/tokens.css` | **FLATTEN** - Replace `hsl(var(--x))` with direct HSL values | Eliminate cascade failures |
-| `packages/engine/src/app.css` | Keep as-is (shadcn base) | shadcn compatibility |
-| `packages/engine/tailwind.config.js` | Update to reference flattened tokens | Consistent mapping |
-| `packages/engine/src/lib/ui/tailwind.preset.js` | Merge Grove colors into preset | Single Tailwind config |
+
+| File                                        | Change                                                       | Reason                     |
+| ------------------------------------------- | ------------------------------------------------------------ | -------------------------- |
+| `libs/engine/src/lib/styles/tokens.css`     | **FLATTEN** - Replace `hsl(var(--x))` with direct HSL values | Eliminate cascade failures |
+| `libs/engine/src/app.css`                   | Keep as-is (shadcn base)                                     | shadcn compatibility       |
+| `libs/engine/tailwind.config.js`            | Update to reference flattened tokens                         | Consistent mapping         |
+| `libs/engine/src/lib/ui/tailwind.preset.js` | Merge Grove colors into preset                               | Single Tailwind config     |
 
 ### Deleted Files
-| File | Reason |
-|------|--------|
-| `packages/engine/src/lib/ui/styles/tokens.css` | Consolidate into main tokens.css |
-| `packages/engine/src/lib/ui/styles/grove.css` | Merge styles into appropriate locations |
+
+| File                                       | Reason                                  |
+| ------------------------------------------ | --------------------------------------- |
+| `libs/engine/src/lib/ui/styles/tokens.css` | Consolidate into main tokens.css        |
+| `libs/engine/src/lib/ui/styles/grove.css`  | Merge styles into appropriate locations |
 
 ### New Files
-| File | Purpose |
-|------|---------|
-| `docs/design/tokens.md` | Token system documentation |
+
+| File                       | Purpose                       |
+| -------------------------- | ----------------------------- |
+| `docs/design/tokens.md`    | Token system documentation    |
 | `scripts/verify-tokens.js` | CI check for hardcoded colors |
 
 ---
@@ -78,30 +82,34 @@ Keep `tokens.css` as the **semantic layer** but flatten the variable chain to el
 ## Migration Phases
 
 ### Phase 1: Flatten the Token Bridge (PANNER-STRIKE scope)
+
 **Effort: Medium** | **Risk: Low**
 
 1. Update `tokens.css` to use direct HSL values:
+
    ```css
    /* BEFORE (broken cascade) */
    --color-text: hsl(var(--foreground));
    --color-text-muted: hsl(var(--muted-foreground));
-   
+
    /* AFTER (flat, reliable) */
    --color-text: hsl(0 0% 20%);
    --color-text-muted: hsl(25 32% 33%);
    ```
 
 2. Update dark mode values in same file:
+
    ```css
    .dark {
-     --color-text: hsl(0 0% 94%);
-     --color-text-muted: hsl(25 20% 60%);
+   	--color-text: hsl(0 0% 94%);
+   	--color-text-muted: hsl(25 20% 60%);
    }
    ```
 
 3. Test in Svelte scoped styles to verify cascade works
 
 ### Phase 2: Consolidate Grove Tokens (ELEPHANT-BUILD scope)
+
 **Effort: Large** | **Risk: Medium**
 
 1. Merge `lib/ui/styles/tokens.css` colors into flattened `tokens.css`
@@ -115,6 +123,7 @@ Keep `tokens.css` as the **semantic layer** but flatten the variable chain to el
    ```
 
 ### Phase 3: Cleanup & Documentation (PANTHER-STRIKE scope)
+
 **Effort: Small** | **Risk: Low**
 
 1. Delete deprecated token files
@@ -136,12 +145,12 @@ Based on the scope analysis:
 
 ## Risk Assessment
 
-| Risk | Likelihood | Mitigation |
-|------|------------|------------|
-| Breaking visual appearance | Medium | Test in both light/dark modes, compare screenshots |
-| Missing edge cases in hardcoded colors | High | Use grep to find all hex values before/after |
-| shadcn component styling breaks | Low | Keep app.css unchanged, only flatten tokens.css |
-| Build/bundle size increase | Low | CSS variables don't increase bundle size |
+| Risk                                   | Likelihood | Mitigation                                         |
+| -------------------------------------- | ---------- | -------------------------------------------------- |
+| Breaking visual appearance             | Medium     | Test in both light/dark modes, compare screenshots |
+| Missing edge cases in hardcoded colors | High       | Use grep to find all hex values before/after       |
+| shadcn component styling breaks        | Low        | Keep app.css unchanged, only flatten tokens.css    |
+| Build/bundle size increase             | Low        | CSS variables don't increase bundle size           |
 
 ---
 

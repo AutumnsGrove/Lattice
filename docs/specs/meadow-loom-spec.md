@@ -417,7 +417,7 @@ async rehydrate(db: D1Database, postId: string): Promise<void> {
 ### Meadow (consumer)
 
 ```toml
-# packages/meadow/wrangler.toml
+# apps/meadow/wrangler.toml
 
 # Existing bindings
 [[d1_databases]]
@@ -442,7 +442,7 @@ service = "grove-durable-objects"
 ### Durable Objects Worker (host)
 
 ```toml
-# packages/durable-objects/wrangler.toml
+# services/durable-objects/wrangler.toml
 # Add to existing migrations
 
 [[migrations]]

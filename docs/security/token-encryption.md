@@ -5,11 +5,13 @@ Grove encrypts sensitive API tokens (GitHub, OpenRouter, etc.) at rest using AES
 ## Overview
 
 **What's encrypted:**
+
 - GitHub Personal Access Tokens (Journey, Timeline curios)
 - OpenRouter API keys (Timeline curio)
 - Any future sensitive credentials stored in D1
 
 **Encryption details:**
+
 - Algorithm: AES-256-GCM (authenticated encryption)
 - Key: 256-bit (64 hex characters)
 - IV: 12 bytes, randomly generated per encryption
@@ -28,6 +30,7 @@ openssl rand -hex 32
 ```
 
 This outputs a 64-character hex string like:
+
 ```
 a1b2c3d4e5f6...  (64 characters total)
 ```
@@ -36,7 +39,7 @@ a1b2c3d4e5f6...  (64 characters total)
 
 ### 2. Add to Local Development
 
-Create or edit `packages/engine/.dev.vars`:
+Create or edit `libs/engine/.dev.vars`:
 
 ```env
 TOKEN_ENCRYPTION_KEY=your_64_character_hex_key_here
@@ -98,6 +101,7 @@ This allows zero-downtime migration. Old plaintext tokens work immediately and g
 ## Key Rotation
 
 **When to rotate:**
+
 - Key may have been exposed
 - Regular security policy (e.g., annual rotation)
 - Employee with key access leaves
@@ -107,6 +111,7 @@ This allows zero-downtime migration. Old plaintext tokens work immediately and g
 Key rotation requires re-encrypting all tokens. There's no automatic process—it must be done manually.
 
 **Step 1: Generate new key**
+
 ```bash
 openssl rand -hex 32
 # Save this as NEW_KEY
@@ -125,29 +130,36 @@ const NEW_KEY = "new_key_here";
 const configs = await db.prepare("SELECT * FROM timeline_curio_config").all();
 
 for (const config of configs.results) {
-  // Decrypt with old key
-  const githubToken = await safeDecryptToken(config.github_token_encrypted, OLD_KEY);
-  const openrouterKey = await safeDecryptToken(config.openrouter_key_encrypted, OLD_KEY);
+	// Decrypt with old key
+	const githubToken = await safeDecryptToken(config.github_token_encrypted, OLD_KEY);
+	const openrouterKey = await safeDecryptToken(config.openrouter_key_encrypted, OLD_KEY);
 
-  // Re-encrypt with new key
-  const newGithubToken = githubToken ? await encryptToken(githubToken, NEW_KEY) : null;
-  const newOpenrouterKey = openrouterKey ? await encryptToken(openrouterKey, NEW_KEY) : null;
+	// Re-encrypt with new key
+	const newGithubToken = githubToken ? await encryptToken(githubToken, NEW_KEY) : null;
+	const newOpenrouterKey = openrouterKey ? await encryptToken(openrouterKey, NEW_KEY) : null;
 
-  // Update database
-  await db.prepare(`
+	// Update database
+	await db
+		.prepare(
+			`
     UPDATE timeline_curio_config
     SET github_token_encrypted = ?, openrouter_key_encrypted = ?
     WHERE tenant_id = ?
-  `).bind(newGithubToken, newOpenrouterKey, config.tenant_id).run();
+  `,
+		)
+		.bind(newGithubToken, newOpenrouterKey, config.tenant_id)
+		.run();
 }
 ```
 
 **Step 3: Update secrets**
+
 1. Update `TOKEN_ENCRYPTION_KEY` in Cloudflare Dashboard
 2. Update `.dev.vars` locally
 3. Deploy
 
 **Step 4: Verify**
+
 - Test that existing configs still work
 - Check logs for decryption failures
 
@@ -168,13 +180,13 @@ This is disruptive but not catastrophic—no data is permanently lost, just inac
 
 Columns storing encrypted tokens use the `_encrypted` suffix to indicate they should contain encrypted data (or plaintext during migration):
 
-| Table | Column | Contents |
-|-------|--------|----------|
-| `timeline_curio_config` | `github_token_encrypted` | GitHub PAT |
+| Table                   | Column                     | Contents           |
+| ----------------------- | -------------------------- | ------------------ |
+| `timeline_curio_config` | `github_token_encrypted`   | GitHub PAT         |
 | `timeline_curio_config` | `openrouter_key_encrypted` | OpenRouter API key |
-| `journey_curio_config` | `github_token_encrypted` | GitHub PAT |
-| `journey_curio_config` | `openrouter_key_encrypted` | OpenRouter API key |
-| `git_dashboard_config` | `github_token_encrypted` | GitHub PAT |
+| `journey_curio_config`  | `github_token_encrypted`   | GitHub PAT         |
+| `journey_curio_config`  | `openrouter_key_encrypted` | OpenRouter API key |
+| `git_dashboard_config`  | `github_token_encrypted`   | GitHub PAT         |
 
 **Note:** During migration, these columns may temporarily hold plaintext. The `_encrypted` suffix means "should be encrypted" not "is encrypted."
 
@@ -187,6 +199,7 @@ Columns storing encrypted tokens use the `_encrypted` suffix to indicate they sh
 **Cause:** Token is encrypted but key is missing or wrong.
 
 **Fix:**
+
 1. Verify `TOKEN_ENCRYPTION_KEY` is set in environment
 2. Verify it's the same key used to encrypt
 3. If key was changed, user must re-enter their token
@@ -202,6 +215,7 @@ Columns storing encrypted tokens use the `_encrypted` suffix to indicate they sh
 **Cause:** Either the token expired/was revoked on GitHub's side, or the encryption key changed.
 
 **Diagnosis:**
+
 1. Check if `TOKEN_ENCRYPTION_KEY` was recently changed
 2. Ask user to re-enter their token (will encrypt with current key)
 

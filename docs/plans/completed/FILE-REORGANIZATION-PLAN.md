@@ -35,7 +35,7 @@
 
 ### ✅ Phase 4: Migration Numbering Fix
 
-- Fixed 4 collision pairs in packages/engine/migrations/
+- Fixed 4 collision pairs in libs/engine/migrations/
 - Renumbered all migrations to sequential 001-024
 
 ### ✅ Phase 5: App Directory Deduplication (commit `9b96872`)
@@ -48,7 +48,7 @@
 
 ### ✅ Phase 6: Structural Moves
 
-- Moved `domains/` → `packages/domains/`
+- Moved `domains/` → `apps/domains/`
 - Moved `clearing/`, `meadow/`, `plant/`, `landing/` → `packages/`
 - Removed empty `vineyard/` directory
 - Organized scripts/ into db/, deploy/, generate/, repo/ subdirectories
@@ -181,7 +181,7 @@ These files are foundational and must remain at the repository root:
 
 ### Migration Numbering Fix
 
-**Location**: `packages/engine/migrations/`
+**Location**: `libs/engine/migrations/`
 
 **Step 1: Audit Current State (REQUIRED)**
 
@@ -189,10 +189,10 @@ Before renumbering, dynamically audit the migrations directory:
 
 ```bash
 # List all migrations sorted by number prefix
-ls -1 packages/engine/migrations/*.sql | sort -t'_' -k1 -n
+ls -1 libs/engine/migrations/*.sql | sort -t'_' -k1 -n
 
 # Find duplicates by prefix number
-ls -1 packages/engine/migrations/*.sql | sed 's/.*\/\([0-9]*\)_.*/\1/' | sort | uniq -d
+ls -1 libs/engine/migrations/*.sql | sed 's/.*\/\([0-9]*\)_.*/\1/' | sort | uniq -d
 ```
 
 Document the actual collisions found before proceeding. The example below is based on exploration findings, but **verify current state first**.
@@ -226,14 +226,14 @@ Current                              → New Name
 
 ```bash
 # Preserve git history when renaming
-git mv packages/engine/migrations/014_wisp_settings.sql packages/engine/migrations/015_wisp_settings.sql
+git mv libs/engine/migrations/014_wisp_settings.sql libs/engine/migrations/015_wisp_settings.sql
 ```
 
 **Step 4: Verify No Gaps After Renumbering**
 
 ```bash
 # Extract all migration numbers and check for gaps
-ls -1 packages/engine/migrations/*.sql | \
+ls -1 libs/engine/migrations/*.sql | \
   sed 's/.*\/0*\([0-9]*\)_.*/\1/' | \
   sort -n | \
   awk 'NR>1 && $1!=prev+1 {print "Gap between " prev " and " $1} {prev=$1}'
@@ -249,7 +249,7 @@ Also check for duplicate `010_*` migrations and renumber if found.
    - Development setup instructions
    - Deployment order (durable-objects → engine → workers)
 
-2. **Create `packages/grove-router/README.md`**:
+2. **Create `services/grove-router/README.md`**:
    - Purpose: Subdomain routing for \*.grove.place
    - How routing decisions are made
    - Configuration options
@@ -261,16 +261,16 @@ Also check for duplicate `010_*` migrations and renumber if found.
 
 ```json
 {
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
-  }
+	"compilerOptions": {
+		"target": "ES2022",
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"lib": ["ES2022", "DOM", "DOM.Iterable"],
+		"strict": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true
+	}
 }
 ```
 
@@ -280,9 +280,9 @@ Update each package's `tsconfig.json` to extend this base config.
 
 **Rename for clarity**:
 
-- `packages/engine/src/lib/ui/components/ui/` → `packages/engine/src/lib/ui/components/glass/`
+- `libs/engine/src/lib/ui/components/ui/` → `libs/engine/src/lib/ui/components/glass/`
 - Update all imports referencing this path
-- Update exports in `packages/engine/src/lib/ui/components/index.ts`
+- Update exports in `libs/engine/src/lib/ui/components/index.ts`
 
 **⚠️ Breaking Change Warning**
 
@@ -291,7 +291,7 @@ This rename changes import paths. If the engine package is published to npm:
 1. **Before renaming**: Check current published version (`npm view @autumnsgrove/lattice version`)
 2. **Add backward compatibility** (temporary):
    ```typescript
-   // In packages/engine/src/lib/ui/components/index.ts
+   // In libs/engine/src/lib/ui/components/index.ts
    // Re-export from new location with old name for transition period
    export * from "./glass";
    export * as ui from "./glass"; // Deprecated alias
@@ -515,8 +515,8 @@ Before deleting any local components, verify the engine package exports them cor
 
 ```bash
 # Step 1: Check engine package exports
-grep -r "export.*from.*nature" packages/engine/src/lib/ui/index.ts
-grep -r "export.*from.*nature" packages/engine/src/lib/index.ts
+grep -r "export.*from.*nature" libs/engine/src/lib/ui/index.ts
+grep -r "export.*from.*nature" libs/engine/src/lib/index.ts
 
 # Step 2: Create a test file to verify imports work
 cat > /tmp/test-import.ts << 'EOF'
@@ -556,7 +556,7 @@ Same as landing - completed in same commit. Also included `clearing/` app.
 
 **Action**:
 
-1. Move font declarations to `packages/engine/src/lib/ui/styles/fonts.css`
+1. Move font declarations to `libs/engine/src/lib/ui/styles/fonts.css`
 2. Export from engine package
 3. Update `landing/src/app.css` to import:
    ```css
@@ -579,13 +579,7 @@ CSS `@import` can block parallel font downloads, potentially impacting page load
 
 ```html
 <!-- app.html -->
-<link
-  rel="preload"
-  href="/fonts/lexend.woff2"
-  as="font"
-  type="font/woff2"
-  crossorigin
-/>
+<link rel="preload" href="/fonts/lexend.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="/styles/fonts.css" />
 ```
 
@@ -624,7 +618,7 @@ cat domains/wrangler.toml 2>/dev/null | grep -E "^name|^route|pages_build"
 **Action**:
 
 1. Audit references (commands above)
-2. Move using git: `git mv domains/ packages/domains/`
+2. Move using git: `git mv domains/ apps/domains/`
 3. Update `pnpm-workspace.yaml` if needed
 4. Update any workflow paths in `.github/workflows/`
 5. Update any import paths found in audit
@@ -759,9 +753,9 @@ Repository management tools.
 
 ### Phase 4: Packages Improvements ✅
 
-1. ✅ Fix migration numbering in `packages/engine/migrations/` (001-024 sequential)
+1. ✅ Fix migration numbering in `libs/engine/migrations/` (001-024 sequential)
 2. ⬚ Create `packages/README.md` (optional - skipped)
-3. ⬚ Create `packages/grove-router/README.md` (optional - skipped)
+3. ⬚ Create `services/grove-router/README.md` (optional - skipped)
 4. ⬚ Create `tsconfig.base.json` (optional - skipped, packages work independently)
 5. ⬚ Rename `ui/components/ui/` → `ui/components/glass/` (deferred - breaking change)
 
@@ -775,7 +769,7 @@ Repository management tools.
 
 ### Phase 6: Structural Moves ✅
 
-1. ✅ Move `domains/` → `packages/domains/`
+1. ✅ Move `domains/` → `apps/domains/`
 2. ✅ Move `clearing/`, `meadow/`, `plant/`, `landing/` → `packages/`
 3. ✅ Remove empty `vineyard/` directory
 4. ✅ Update workspace configuration (`packages/*` glob)
@@ -854,13 +848,13 @@ Consider adding path aliases to `tsconfig.base.json` for cleaner imports after r
 
 ```json
 {
-  "compilerOptions": {
-    "paths": {
-      "$lib/*": ["./src/lib/*"],
-      "@grove/ui/*": ["./packages/engine/src/lib/ui/*"],
-      "@grove/types/*": ["./packages/engine/src/lib/types/*"]
-    }
-  }
+	"compilerOptions": {
+		"paths": {
+			"$lib/*": ["./src/lib/*"],
+			"@grove/ui/*": ["./libs/engine/src/lib/ui/*"],
+			"@grove/types/*": ["./libs/engine/src/lib/types/*"]
+		}
+	}
 }
 ```
 

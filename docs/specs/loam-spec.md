@@ -47,9 +47,9 @@ This document defines the comprehensive domain/username blocklist policy impleme
 
 ### Validation Location
 
-- **Primary endpoint:** `plant/src/routes/api/check-username/+server.ts`
-- **Database table:** `reserved_usernames` (packages/engine/migrations/011_user_onboarding.sql)
-- **Router config:** `packages/grove-router/src/index.ts`
+- **Primary endpoint:** `apps/plant/src/routes/api/check-username/+server.ts`
+- **Database table:** `reserved_usernames` (libs/engine/migrations/011_user_onboarding.sql)
+- **Router config:** `services/grove-router/src/index.ts`
 
 ### Existing Rules
 
@@ -366,10 +366,10 @@ CREATE INDEX idx_reserved_reason ON reserved_usernames(reason);
 
 ```json
 {
-  "available": false,
-  "username": "requested-name",
-  "error": "This username is not available",
-  "suggestions": null
+	"available": false,
+	"username": "requested-name",
+	"error": "This username is not available",
+	"suggestions": null
 }
 ```
 
@@ -379,10 +379,10 @@ CREATE INDEX idx_reserved_reason ON reserved_usernames(reason);
 
 ```json
 {
-  "available": false,
-  "username": "meadow",
-  "error": "This username is reserved",
-  "suggestions": ["meadow-writes", "meadow-blog", "meadow-2026"]
+	"available": false,
+	"username": "meadow",
+	"error": "This username is reserved",
+	"suggestions": ["meadow-writes", "meadow-blog", "meadow-2026"]
 }
 ```
 
@@ -390,10 +390,10 @@ CREATE INDEX idx_reserved_reason ON reserved_usernames(reason);
 
 ```json
 {
-  "available": false,
-  "username": "coolblogger",
-  "error": "This username is already taken",
-  "suggestions": ["coolblogger-writes", "coolblogger-blog", "coolblogger-place"]
+	"available": false,
+	"username": "coolblogger",
+	"error": "This username is already taken",
+	"suggestions": ["coolblogger-writes", "coolblogger-blog", "coolblogger-place"]
 }
 ```
 
@@ -450,7 +450,7 @@ This policy implements:
 - [Acceptable Use Policy](../legal/acceptable-use-policy.md)
 - [Grove Naming System](../grove-naming.md)
 - [Shade Spec](./shade-spec.md) — AI protection patterns
-- [User Onboarding Migration](../../packages/engine/migrations/011_user_onboarding.sql)
+- [User Onboarding Migration](../../libs/engine/migrations/011_user_onboarding.sql)
 
 ---
 

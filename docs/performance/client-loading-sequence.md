@@ -57,8 +57,13 @@ Added to `app.html` for faster first paint:
 <link rel="dns-prefetch" href="https://cdn.grove.place" />
 
 <!-- Preload critical font -->
-<link rel="preload" href="https://cdn.grove.place/fonts/Lexend-Regular.ttf"
-      as="font" type="font/ttf" crossorigin />
+<link
+	rel="preload"
+	href="https://cdn.grove.place/fonts/Lexend-Regular.ttf"
+	as="font"
+	type="font/ttf"
+	crossorigin
+/>
 ```
 
 ### Why These Hints Matter
@@ -70,49 +75,51 @@ Added to `app.html` for faster first paint:
 ## Font Loading Strategy
 
 ### Before (All fonts loaded eagerly)
+
 - 10 @font-face declarations in critical CSS
 - All fonts downloaded regardless of usage
 - ~500KB+ potential font downloads
 
 ### After (Lazy loading)
+
 - Only Lexend in critical path (~100KB)
 - Optional fonts loaded on-demand via dynamic import
 - Triggered only when tenant uses non-default font
 
 ```typescript
 // +layout.svelte
-if (selectedFont !== 'lexend' && !optionalFontsLoaded) {
-  import('$lib/styles/fonts-optional.css');
-  optionalFontsLoaded = true;
+if (selectedFont !== "lexend" && !optionalFontsLoaded) {
+	import("$lib/styles/fonts-optional.css");
+	optionalFontsLoaded = true;
 }
 ```
 
 ### Font Files
 
-| Font | Location | When Loaded |
-|------|----------|-------------|
-| Lexend | Critical CSS | Always (default) |
-| Atkinson Hyperlegible | fonts-optional.css | On demand |
-| OpenDyslexic | fonts-optional.css | On demand |
-| Quicksand | fonts-optional.css | On demand |
-| Plus Jakarta Sans | fonts-optional.css | On demand |
-| IBM Plex Mono | fonts-optional.css | On demand |
-| Cozette | fonts-optional.css | On demand |
-| Alagard | fonts-optional.css | On demand |
-| Calistoga | fonts-optional.css | On demand |
-| Caveat | fonts-optional.css | On demand |
+| Font                  | Location           | When Loaded      |
+| --------------------- | ------------------ | ---------------- |
+| Lexend                | Critical CSS       | Always (default) |
+| Atkinson Hyperlegible | fonts-optional.css | On demand        |
+| OpenDyslexic          | fonts-optional.css | On demand        |
+| Quicksand             | fonts-optional.css | On demand        |
+| Plus Jakarta Sans     | fonts-optional.css | On demand        |
+| IBM Plex Mono         | fonts-optional.css | On demand        |
+| Cozette               | fonts-optional.css | On demand        |
+| Alagard               | fonts-optional.css | On demand        |
+| Calistoga             | fonts-optional.css | On demand        |
+| Caveat                | fonts-optional.css | On demand        |
 
 ## Performance Characteristics
 
 ### What's Render-Blocking
 
-| Resource | Blocking? | Notes |
-|----------|-----------|-------|
-| Theme script | Yes (intentional) | Prevents FOUC |
-| app.css | Yes | Contains Tailwind + variables |
-| Lexend font | No | Uses font-display: swap |
-| Optional fonts | No | Lazy-loaded |
-| Gossamer CSS | No | Only loaded with GlassCard |
+| Resource       | Blocking?         | Notes                         |
+| -------------- | ----------------- | ----------------------------- |
+| Theme script   | Yes (intentional) | Prevents FOUC                 |
+| app.css        | Yes               | Contains Tailwind + variables |
+| Lexend font    | No                | Uses font-display: swap       |
+| Optional fonts | No                | Lazy-loaded                   |
+| Gossamer CSS   | No                | Only loaded with GlassCard    |
 
 ### D1 Query Optimization
 
@@ -135,6 +142,7 @@ const navPages = await db.prepare("SELECT...").all();
 ## Gossamer (ASCII Canvas)
 
 Gossamer components are NOT render-blocking because:
+
 1. CSS is imported only when GlassCard is used
 2. Canvas rendering happens after first paint
 3. Animation loop runs on requestAnimationFrame
@@ -157,13 +165,13 @@ Gossamer components are NOT render-blocking because:
 
 ## Related Files
 
-- `packages/engine/src/app.html` - Resource hints
-- `packages/engine/src/routes/+layout.svelte` - Font loading logic
-- `packages/engine/src/routes/+layout.server.ts` - Parallel D1 queries
-- `packages/engine/src/hooks.server.ts` - Server-side processing
-- `packages/engine/src/lib/styles/fonts-optional.css` - Lazy-loaded fonts
+- `libs/engine/src/app.html` - Resource hints
+- `libs/engine/src/routes/+layout.svelte` - Font loading logic
+- `libs/engine/src/routes/+layout.server.ts` - Parallel D1 queries
+- `libs/engine/src/hooks.server.ts` - Server-side processing
+- `libs/engine/src/lib/styles/fonts-optional.css` - Lazy-loaded fonts
 
 ---
 
-*Last updated: 2026-01-30*
-*Issue: #633*
+_Last updated: 2026-01-30_
+_Issue: #633_

@@ -11,7 +11,7 @@
 ### Key Findings
 
 | Severity | Count |
-|----------|-------|
+| -------- | ----- |
 | Critical | 0     |
 | High     | 0     |
 | Medium   | 2     |
@@ -19,6 +19,7 @@
 | Info     | 4     |
 
 ### Top 3 Risks
+
 1. **[MEDIUM] `timingSafeEqual` leaks key length via early return** — Allows attackers to determine the exact length of the valid API key through timing analysis
 2. **[MEDIUM] `/templates` endpoint has no auth** — Pre-existing issue (not introduced by this PR) that leaks internal template names to unauthenticated callers
 3. **[LOW] Idempotency check fails open** — D1 outage during idempotency check could result in duplicate social media posts
@@ -29,24 +30,24 @@
 
 ### Scope Definition
 
-| Field | Value |
-|-------|-------|
-| **Target** | Zephyr Social Broadcast subsystem |
-| **Boundary** | New broadcast API endpoints, Bluesky provider, Arbor admin UI, gw CLI command |
-| **Environment** | Production (Cloudflare Workers) |
-| **Tech Stack** | Hono (Worker), @atproto/api (Bluesky), SvelteKit (UI), Python/Click (CLI) |
-| **Access Level** | Code review only |
+| Field            | Value                                                                         |
+| ---------------- | ----------------------------------------------------------------------------- |
+| **Target**       | Zephyr Social Broadcast subsystem                                             |
+| **Boundary**     | New broadcast API endpoints, Bluesky provider, Arbor admin UI, gw CLI command |
+| **Environment**  | Production (Cloudflare Workers)                                               |
+| **Tech Stack**   | Hono (Worker), @atproto/api (Bluesky), SvelteKit (UI), Python/Click (CLI)     |
+| **Access Level** | Code review only                                                              |
 
 ### STRIDE Analysis
 
-| Component | S | T | R | I | D | E | Priority |
-|-----------|---|---|---|---|---|---|----------|
-| Auth middleware (X-API-Key) | ? | . | . | ? | . | . | MEDIUM |
-| Broadcast handler | . | . | . | . | ? | . | LOW |
-| Bluesky provider | . | . | . | ? | . | . | LOW |
-| Arbor admin UI | . | . | . | . | . | . | LOW |
-| gw CLI | . | . | . | ? | . | . | LOW |
-| Content adapter | . | . | . | . | . | . | LOW |
+| Component                   | S   | T   | R   | I   | D   | E   | Priority |
+| --------------------------- | --- | --- | --- | --- | --- | --- | -------- |
+| Auth middleware (X-API-Key) | ?   | .   | .   | ?   | .   | .   | MEDIUM   |
+| Broadcast handler           | .   | .   | .   | .   | ?   | .   | LOW      |
+| Bluesky provider            | .   | .   | .   | ?   | .   | .   | LOW      |
+| Arbor admin UI              | .   | .   | .   | .   | .   | .   | LOW      |
+| gw CLI                      | .   | .   | .   | ?   | .   | .   | LOW      |
+| Content adapter             | .   | .   | .   | .   | .   | .   | LOW      |
 
 Legend: **!** = likely threat, **?** = needs investigation, **.** = low risk
 
@@ -70,14 +71,14 @@ SvelteKit Server                 │  Zephyr Worker (service binding)
 
 ### Data Classification
 
-| Data Type | Classification | Storage | Notes |
-|-----------|---------------|---------|-------|
-| Bluesky app password | CRITICAL | Cloudflare Secret | Never in code, never logged |
-| Zephyr API key | CRITICAL | Cloudflare Secret | Validated via timing-safe compare |
-| Bluesky session token | HIGH | Worker memory (cached) | Cleared on auth failure |
-| Broadcast content | MEDIUM | D1 (zephyr_broadcasts) | User-authored social content |
-| Post URLs | LOW | D1 (zephyr_social_deliveries) | Public Bluesky post links |
-| Wayfinder emails | LOW | Hardcoded in source | Admin email allowlist |
+| Data Type             | Classification | Storage                       | Notes                             |
+| --------------------- | -------------- | ----------------------------- | --------------------------------- |
+| Bluesky app password  | CRITICAL       | Cloudflare Secret             | Never in code, never logged       |
+| Zephyr API key        | CRITICAL       | Cloudflare Secret             | Validated via timing-safe compare |
+| Bluesky session token | HIGH           | Worker memory (cached)        | Cleared on auth failure           |
+| Broadcast content     | MEDIUM         | D1 (zephyr_broadcasts)        | User-authored social content      |
+| Post URLs             | LOW            | D1 (zephyr_social_deliveries) | Public Bluesky post links         |
+| Wayfinder emails      | LOW            | Hardcoded in source           | Admin email allowlist             |
 
 ---
 
@@ -87,24 +88,25 @@ SvelteKit Server                 │  Zephyr Worker (service binding)
 
 #### [HAWK-001] `timingSafeEqual` Leaks API Key Length via Early Return
 
-| Field | Value |
-|-------|-------|
-| **Severity** | MEDIUM |
-| **Domain** | Authentication (D1) |
-| **Location** | `workers/zephyr/src/middleware/auth.ts:23-26` |
-| **Confidence** | HIGH |
-| **OWASP** | A07:2021 Identification and Authentication Failures |
+| Field          | Value                                               |
+| -------------- | --------------------------------------------------- |
+| **Severity**   | MEDIUM                                              |
+| **Domain**     | Authentication (D1)                                 |
+| **Location**   | `workers/zephyr/src/middleware/auth.ts:23-26`       |
+| **Confidence** | HIGH                                                |
+| **OWASP**      | A07:2021 Identification and Authentication Failures |
 
 **Description:**
 The `timingSafeEqual` function returns `false` immediately when string lengths differ, before performing the constant-time comparison. This leaks the length of the valid API key through timing differences — an attacker can determine the exact key length by measuring response times with keys of varying lengths.
 
 **Evidence:**
+
 ```typescript
 function timingSafeEqual(a: string, b: string): boolean {
-  if (a.length !== b.length) {
-    return false;  // ← Immediate return leaks length
-  }
-  // ... constant-time comparison follows
+	if (a.length !== b.length) {
+		return false; // ← Immediate return leaks length
+	}
+	// ... constant-time comparison follows
 }
 ```
 
@@ -116,18 +118,18 @@ Hash both inputs with SHA-256 before comparing (guarantees equal-length inputs):
 
 ```typescript
 async function timingSafeEqual(a: string, b: string): Promise<boolean> {
-  const encoder = new TextEncoder();
-  const [hashA, hashB] = await Promise.all([
-    crypto.subtle.digest("SHA-256", encoder.encode(a)),
-    crypto.subtle.digest("SHA-256", encoder.encode(b)),
-  ]);
-  const viewA = new Uint8Array(hashA);
-  const viewB = new Uint8Array(hashB);
-  let result = 0;
-  for (let i = 0; i < viewA.length; i++) {
-    result |= viewA[i] ^ viewB[i];
-  }
-  return result === 0;
+	const encoder = new TextEncoder();
+	const [hashA, hashB] = await Promise.all([
+		crypto.subtle.digest("SHA-256", encoder.encode(a)),
+		crypto.subtle.digest("SHA-256", encoder.encode(b)),
+	]);
+	const viewA = new Uint8Array(hashA);
+	const viewB = new Uint8Array(hashB);
+	let result = 0;
+	for (let i = 0; i < viewA.length; i++) {
+		result |= viewA[i] ^ viewB[i];
+	}
+	return result === 0;
 }
 ```
 
@@ -139,18 +141,19 @@ async function timingSafeEqual(a: string, b: string): Promise<boolean> {
 
 #### [HAWK-002] `/templates` Endpoint Has No Authentication
 
-| Field | Value |
-|-------|-------|
-| **Severity** | MEDIUM |
-| **Domain** | Authorization (D2) |
-| **Location** | `workers/zephyr/src/index.ts:42-48` |
-| **Confidence** | HIGH |
-| **OWASP** | A01:2021 Broken Access Control |
+| Field          | Value                               |
+| -------------- | ----------------------------------- |
+| **Severity**   | MEDIUM                              |
+| **Domain**     | Authorization (D2)                  |
+| **Location**   | `workers/zephyr/src/index.ts:42-48` |
+| **Confidence** | HIGH                                |
+| **OWASP**      | A01:2021 Broken Access Control      |
 
 **Description:**
 The `GET /templates` endpoint lists all available email template names without requiring `authMiddleware`. While this only returns template names (not template content or data), it reveals internal system information to unauthenticated callers.
 
 **Evidence:**
+
 ```typescript
 // All other state-changing or data endpoints use authMiddleware:
 app.post("/send", authMiddleware, sendHandler);
@@ -159,8 +162,8 @@ app.get("/broadcast/platforms", authMiddleware, platformsHandler);
 
 // But /templates is wide open:
 app.get("/templates", async (c) => {
-  const { TEMPLATES } = await import("./templates");
-  return c.json({ templates: Object.keys(TEMPLATES), version: "1.0.0" });
+	const { TEMPLATES } = await import("./templates");
+	return c.json({ templates: Object.keys(TEMPLATES), version: "1.0.0" });
 });
 ```
 
@@ -169,6 +172,7 @@ Low — template names are not sensitive. But information disclosure helps attac
 
 **Remediation:**
 Add `authMiddleware` to the endpoint:
+
 ```typescript
 app.get("/templates", authMiddleware, async (c) => { ... });
 ```
@@ -183,18 +187,19 @@ app.get("/templates", authMiddleware, async (c) => { ... });
 
 #### [HAWK-003] Idempotency Check Fails Open
 
-| Field | Value |
-|-------|-------|
-| **Severity** | LOW |
-| **Domain** | Data Protection (D4) |
-| **Location** | `workers/zephyr/src/handlers/broadcast.ts:251-254` |
-| **Confidence** | HIGH |
-| **OWASP** | A04:2021 Insecure Design |
+| Field          | Value                                              |
+| -------------- | -------------------------------------------------- |
+| **Severity**   | LOW                                                |
+| **Domain**     | Data Protection (D4)                               |
+| **Location**   | `workers/zephyr/src/handlers/broadcast.ts:251-254` |
+| **Confidence** | HIGH                                               |
+| **OWASP**      | A04:2021 Insecure Design                           |
 
 **Description:**
 If the D1 idempotency query throws an error (e.g., D1 outage), the handler logs the error and proceeds to create a new broadcast anyway. This means a D1 outage could result in duplicate social media posts.
 
 **Evidence:**
+
 ```typescript
 } catch (err) {
   // Idempotency check failed — proceed anyway (fail-open)
@@ -214,13 +219,13 @@ This is a deliberate design choice (fail-open) and is acceptable for social post
 
 #### [HAWK-004] Hardcoded Zephyr Worker URL in Three Locations
 
-| Field | Value |
-|-------|-------|
-| **Severity** | LOW |
-| **Domain** | Data Protection (D4) |
-| **Location** | `packages/engine/src/lib/zephyr/client.ts:265`, `packages/landing/src/routes/arbor/zephyr/+page.server.ts:6`, `tools/gw/src/gw/commands/social.py:15` |
-| **Confidence** | HIGH |
-| **OWASP** | A05:2021 Security Misconfiguration |
+| Field          | Value                                                                                                                                         |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Severity**   | LOW                                                                                                                                           |
+| **Domain**     | Data Protection (D4)                                                                                                                          |
+| **Location**   | `libs/engine/src/lib/zephyr/client.ts:265`, `libs/landing/src/routes/arbor/zephyr/+page.server.ts:6`, `tools/gw/src/gw/commands/social.py:15` |
+| **Confidence** | HIGH                                                                                                                                          |
+| **OWASP**      | A05:2021 Security Misconfiguration                                                                                                            |
 
 **Description:**
 The Zephyr Worker URL (`https://grove-zephyr.m7jv4v7npb.workers.dev`) is hardcoded in three separate files. This is a Cloudflare Workers subdomain, not a credential, but it means the URL is discoverable and changes require updating multiple files.
@@ -237,13 +242,13 @@ Consider centralizing this URL as an environment variable or engine config const
 
 #### [HAWK-005] Module-Level Mutable State in Bluesky Provider
 
-| Field | Value |
-|-------|-------|
-| **Severity** | LOW |
-| **Domain** | Infrastructure (D11) |
-| **Location** | `workers/zephyr/src/providers/bluesky.ts:22-26,64-65` |
-| **Confidence** | MEDIUM |
-| **OWASP** | N/A |
+| Field          | Value                                                 |
+| -------------- | ----------------------------------------------------- |
+| **Severity**   | LOW                                                   |
+| **Domain**     | Infrastructure (D11)                                  |
+| **Location**   | `workers/zephyr/src/providers/bluesky.ts:22-26,64-65` |
+| **Confidence** | MEDIUM                                                |
+| **OWASP**      | N/A                                                   |
 
 **Description:**
 `circuitState`, `cachedAgent`, and `sessionExpiresAt` are module-level globals. In Cloudflare Workers, isolate lifetimes are unpredictable — these work correctly within a single isolate but reset across cold starts. The session cache could theoretically become stale if an isolate lives longer than the AT Protocol session.
@@ -265,8 +270,9 @@ No change needed. This is the standard pattern for Workers and works correctly. 
 All D1 queries across the entire feature use parameterized `.bind()` — zero string concatenation in SQL. This is exemplary protection against SQL injection.
 
 **Locations:**
+
 - `workers/zephyr/src/handlers/broadcast.ts:197-200,398-416,420-441`
-- `packages/landing/src/routes/arbor/zephyr/+page.server.ts:34-45`
+- `libs/landing/src/routes/arbor/zephyr/+page.server.ts:34-45`
 
 ---
 
@@ -281,12 +287,13 @@ The `sanitizeError()` function strips password, token, and Bearer patterns from 
 #### [HAWK-008] Positive: Double Authorization Gate on Admin UI
 
 The Arbor Zephyr page uses two-layer authorization:
+
 1. **Load function:** `parent().isWayfinder` check (redirects non-admins)
 2. **Form action:** `locals.user` existence + `WAYFINDER_EMAILS` email check
 
 This prevents both unauthorized page access and action execution.
 
-**Location:** `packages/landing/src/routes/arbor/zephyr/+page.server.ts:9-11,78-82`
+**Location:** `libs/landing/src/routes/arbor/zephyr/+page.server.ts:9-11,78-82`
 
 ---
 
@@ -300,46 +307,50 @@ The CLI's `secrets.json` file (used for API key storage) is properly gitignored,
 
 ## Domain Scorecard
 
-| Domain | Rating | Findings | Notes |
-|--------|--------|----------|-------|
-| Authentication | PARTIAL | 1 finding | timingSafeEqual length leak (pre-existing) |
-| Authorization | PARTIAL | 1 finding | /templates endpoint unauthenticated (pre-existing) |
-| Input Validation | PASS | 0 findings | Content length, metadata truncation, platform allowlist |
-| Data Protection | PASS | 1 finding | Fail-open idempotency (deliberate design) |
-| HTTP Security | PASS | 0 findings | Server-to-server only, no CORS needed |
-| CSRF Protection | PASS | 0 findings | SvelteKit form actions use progressive enhancement |
-| Session Security | PASS | 0 findings | N/A for API key auth pattern |
-| File Uploads | N/A | 0 findings | No file uploads in this feature |
-| Rate Limiting | PASS | 0 findings | Circuit breaker on provider, Cloudflare built-in |
-| Multi-Tenant | PASS | 0 findings | Single-tenant design (Wayfinder-only) |
-| Infrastructure | PASS | 1 finding | Module-level state (standard Workers pattern) |
-| Exotic Vectors | PASS | 0 findings | No prototype pollution, SSRF, or injection vectors |
-| Supply Chain | PASS | 0 findings | @atproto/api is the official Bluesky SDK |
+| Domain           | Rating  | Findings   | Notes                                                   |
+| ---------------- | ------- | ---------- | ------------------------------------------------------- |
+| Authentication   | PARTIAL | 1 finding  | timingSafeEqual length leak (pre-existing)              |
+| Authorization    | PARTIAL | 1 finding  | /templates endpoint unauthenticated (pre-existing)      |
+| Input Validation | PASS    | 0 findings | Content length, metadata truncation, platform allowlist |
+| Data Protection  | PASS    | 1 finding  | Fail-open idempotency (deliberate design)               |
+| HTTP Security    | PASS    | 0 findings | Server-to-server only, no CORS needed                   |
+| CSRF Protection  | PASS    | 0 findings | SvelteKit form actions use progressive enhancement      |
+| Session Security | PASS    | 0 findings | N/A for API key auth pattern                            |
+| File Uploads     | N/A     | 0 findings | No file uploads in this feature                         |
+| Rate Limiting    | PASS    | 0 findings | Circuit breaker on provider, Cloudflare built-in        |
+| Multi-Tenant     | PASS    | 0 findings | Single-tenant design (Wayfinder-only)                   |
+| Infrastructure   | PASS    | 1 finding  | Module-level state (standard Workers pattern)           |
+| Exotic Vectors   | PASS    | 0 findings | No prototype pollution, SSRF, or injection vectors      |
+| Supply Chain     | PASS    | 0 findings | @atproto/api is the official Bluesky SDK                |
 
 ---
 
 ## Items Requiring Manual Verification
 
-| ID | Finding | What to Test | Confidence in Code Analysis |
-|----|---------|-------------|---------------------------|
-| — | Rate limiting effectiveness | Send many rapid requests to `/broadcast` and measure if Cloudflare rate limiting kicks in | MEDIUM |
-| — | Bluesky session refresh | Let a cached session age past 90 minutes and verify re-authentication works | MEDIUM |
+| ID  | Finding                     | What to Test                                                                              | Confidence in Code Analysis |
+| --- | --------------------------- | ----------------------------------------------------------------------------------------- | --------------------------- |
+| —   | Rate limiting effectiveness | Send many rapid requests to `/broadcast` and measure if Cloudflare rate limiting kicks in | MEDIUM                      |
+| —   | Bluesky session refresh     | Let a cached session age past 90 minutes and verify re-authentication works               | MEDIUM                      |
 
 ---
 
 ## Remediation Priority
 
 ### Immediate (fix before next deploy)
-*None — no critical or high findings.*
+
+_None — no critical or high findings._
 
 ### Short-term (fix within 1 week)
+
 - HAWK-001: Fix `timingSafeEqual` length leak (pre-existing, low practical risk)
 - HAWK-002: Add auth to `/templates` endpoint (pre-existing, low impact)
 
 ### Medium-term (track and plan)
+
 - HAWK-004: Centralize Zephyr Worker URL into config
 
 ### Accepted Risk
+
 - HAWK-003: Fail-open idempotency (deliberate design choice, acceptable for social posting)
 - HAWK-005: Module-level state (standard Workers pattern, works correctly)
 
@@ -363,4 +374,4 @@ The two MEDIUM findings (HAWK-001, HAWK-002) are both **pre-existing issues** in
 
 ---
 
-*The hawk has spoken. Every path surveyed, every shadow examined.* 🦅
+_The hawk has spoken. Every path surveyed, every shadow examined._ 🦅

@@ -8,19 +8,19 @@
 
 ## Turtle Checklist
 
-| # | Check | Status | Notes |
-|---|-------|--------|-------|
-| 1 | Lock file committed and reviewed | PASS | `pnpm-lock.yaml` tracked in git, regenerated with `--force` after updates |
-| 2 | pnpm audit clean (or documented exceptions) | FIXED | 16 → 6 vulnerabilities. Remaining 6 are dev/build-time only (documented below) |
-| 3 | No unnecessary dependencies | PASS | All deps serve clear purposes; no orphan packages found |
-| 4 | Dependency versions pinned | INFO | All use floating `^` ranges. Root `overrides` enforce minimums for known CVEs. Acceptable for active development; tighten before v1 |
-| 5 | Security headers complete on all services | FIXED | Heartwood HSTS was missing `preload`; now consistent across all 4 packages |
-| 6 | Cookie attributes reviewed across all cookies | PASS | All session cookies: HttpOnly, Secure, SameSite=Lax, Domain=.grove.place. CSRF cookie intentionally omits HttpOnly (JS-readable). See details below |
-| 7 | No dangling DNS records | INFO | Cannot verify from local environment; requires Cloudflare dashboard review |
-| 8 | Cloudflare secrets properly scoped | PASS | All 16 wrangler.toml files use `wrangler secret put` for sensitive values. Zero hardcoded secrets. Turnstile site keys (public) are the only values in `[vars]` |
-| 9 | Service worker scope restricted | N/A | No service workers registered anywhere in the codebase. PWA plan exists in `docs/plans/` but is not implemented |
-| 10 | No eval()/new Function() in source | PASS | Zero instances found across all `.ts`, `.js`, `.svelte` files under `packages/` |
-| 11 | No postinstall/preinstall scripts | PASS | No install hooks in any package.json — eliminates supply-chain script injection vector |
+| #   | Check                                         | Status | Notes                                                                                                                                                           |
+| --- | --------------------------------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Lock file committed and reviewed              | PASS   | `pnpm-lock.yaml` tracked in git, regenerated with `--force` after updates                                                                                       |
+| 2   | pnpm audit clean (or documented exceptions)   | FIXED  | 16 → 6 vulnerabilities. Remaining 6 are dev/build-time only (documented below)                                                                                  |
+| 3   | No unnecessary dependencies                   | PASS   | All deps serve clear purposes; no orphan packages found                                                                                                         |
+| 4   | Dependency versions pinned                    | INFO   | All use floating `^` ranges. Root `overrides` enforce minimums for known CVEs. Acceptable for active development; tighten before v1                             |
+| 5   | Security headers complete on all services     | FIXED  | Heartwood HSTS was missing `preload`; now consistent across all 4 packages                                                                                      |
+| 6   | Cookie attributes reviewed across all cookies | PASS   | All session cookies: HttpOnly, Secure, SameSite=Lax, Domain=.grove.place. CSRF cookie intentionally omits HttpOnly (JS-readable). See details below             |
+| 7   | No dangling DNS records                       | INFO   | Cannot verify from local environment; requires Cloudflare dashboard review                                                                                      |
+| 8   | Cloudflare secrets properly scoped            | PASS   | All 16 wrangler.toml files use `wrangler secret put` for sensitive values. Zero hardcoded secrets. Turnstile site keys (public) are the only values in `[vars]` |
+| 9   | Service worker scope restricted               | N/A    | No service workers registered anywhere in the codebase. PWA plan exists in `docs/plans/` but is not implemented                                                 |
+| 10  | No eval()/new Function() in source            | PASS   | Zero instances found across all `.ts`, `.js`, `.svelte` files under `libs/`                                                                                     |
+| 11  | No postinstall/preinstall scripts             | PASS   | No install hooks in any package.json — eliminates supply-chain script injection vector                                                                          |
 
 ---
 
@@ -33,8 +33,9 @@
 **Fix:** Added `; preload` to Heartwood HSTS header. Updated corresponding test assertion.
 
 **Files:**
-- `packages/heartwood/src/utils/constants.ts`
-- `packages/heartwood/src/middleware/security.test.ts`
+
+- `libs/heartwood/src/utils/constants.ts`
+- `libs/heartwood/src/middleware/security.test.ts`
 
 ### FIX-S6-02: 10 Dependency Vulnerabilities Resolved (HIGH)
 
@@ -42,18 +43,19 @@
 
 **Fixes applied:**
 
-| Package | Before | After | CVE Type |
-|---------|--------|-------|----------|
-| `@sveltejs/kit` | 2.49.2 | 2.50.2 | Memory amplification DoS + prerender SSRF |
-| `svelte` | 5.46.1 | 5.48.6 | XSS vulnerability |
-| `wrangler` (root) | 4.54.0 | 4.63.0 | OS Command Injection in `pages deploy` |
-| `@cloudflare/vitest-pool-workers` | 0.12.1 | 0.12.2 | Resolved transitive devalue DoS |
-| `devalue` (override) | 5.5.0 | >=5.6.2 | DoS via memory/CPU exhaustion (2 CVEs) |
-| `undici` (override) | 7.14.0 | >=7.18.2 | Unbounded decompression DoS |
-| `@isaacs/brace-expansion` (override) | 5.0.0 | >=5.0.1 | Uncontrolled resource consumption |
-| `prismjs` (override) | 1.29.0 | >=1.30.0 | DOM Clobbering |
+| Package                              | Before | After    | CVE Type                                  |
+| ------------------------------------ | ------ | -------- | ----------------------------------------- |
+| `@sveltejs/kit`                      | 2.49.2 | 2.50.2   | Memory amplification DoS + prerender SSRF |
+| `svelte`                             | 5.46.1 | 5.48.6   | XSS vulnerability                         |
+| `wrangler` (root)                    | 4.54.0 | 4.63.0   | OS Command Injection in `pages deploy`    |
+| `@cloudflare/vitest-pool-workers`    | 0.12.1 | 0.12.2   | Resolved transitive devalue DoS           |
+| `devalue` (override)                 | 5.5.0  | >=5.6.2  | DoS via memory/CPU exhaustion (2 CVEs)    |
+| `undici` (override)                  | 7.14.0 | >=7.18.2 | Unbounded decompression DoS               |
+| `@isaacs/brace-expansion` (override) | 5.0.0  | >=5.0.1  | Uncontrolled resource consumption         |
+| `prismjs` (override)                 | 1.29.0 | >=1.30.0 | DOM Clobbering                            |
 
 **Root override additions** (`package.json`):
+
 ```json
 "overrides": {
   "@isaacs/brace-expansion": ">=5.0.1",
@@ -67,15 +69,16 @@
 
 All remaining vulnerabilities are **dev/build-time only** — they cannot reach production Cloudflare Workers runtime:
 
-| Package | Severity | Via | Why Not Fixable |
-|---------|----------|-----|-----------------|
-| `@isaacs/brace-expansion@5.0.0` | HIGH | `react-email > glob > minimatch` | Nested in react-email's dep tree; override doesn't reach |
-| `esbuild@0.21.5` | MODERATE | `vite@5.4.21` internal dep | vite pins old esbuild; dev server only |
-| `prismjs@1.29.0` | MODERATE | `@react-email/code-block` | Email template rendering worker; override doesn't reach |
-| `undici@5.29.0` | MODERATE | `wrangler@3.x` in workers/ | Legacy wrangler v3 in email-render/zephyr workers |
-| `cookie@0.6.0` | LOW | `@sveltejs/kit@2.50.2` | Kit's own dep; awaiting upstream bump |
+| Package                         | Severity | Via                              | Why Not Fixable                                          |
+| ------------------------------- | -------- | -------------------------------- | -------------------------------------------------------- |
+| `@isaacs/brace-expansion@5.0.0` | HIGH     | `react-email > glob > minimatch` | Nested in react-email's dep tree; override doesn't reach |
+| `esbuild@0.21.5`                | MODERATE | `vite@5.4.21` internal dep       | vite pins old esbuild; dev server only                   |
+| `prismjs@1.29.0`                | MODERATE | `@react-email/code-block`        | Email template rendering worker; override doesn't reach  |
+| `undici@5.29.0`                 | MODERATE | `wrangler@3.x` in workers/       | Legacy wrangler v3 in email-render/zephyr workers        |
+| `cookie@0.6.0`                  | LOW      | `@sveltejs/kit@2.50.2`           | Kit's own dep; awaiting upstream bump                    |
 
 **Risk assessment:** These are acceptable because:
+
 1. None ship to production — they run during build/test/email-render only
 2. DoS vulnerabilities in build tools have minimal impact (no external attacker can trigger them)
 3. The esbuild CVE affects the dev server only (not production)
@@ -87,14 +90,14 @@ All remaining vulnerabilities are **dev/build-time only** — they cannot reach 
 
 ### Header Consistency Across All Packages
 
-| Header | Engine | Heartwood | Plant | Landing |
-|--------|--------|-----------|-------|---------|
+| Header                      | Engine                                         | Heartwood                                      | Plant                                          | Landing                                        |
+| --------------------------- | ---------------------------------------------- | ---------------------------------------------- | ---------------------------------------------- | ---------------------------------------------- |
 | `Strict-Transport-Security` | `max-age=31536000; includeSubDomains; preload` | `max-age=31536000; includeSubDomains; preload` | `max-age=31536000; includeSubDomains; preload` | `max-age=31536000; includeSubDomains; preload` |
-| `X-Content-Type-Options` | `nosniff` | `nosniff` | `nosniff` | `nosniff` |
-| `X-Frame-Options` | `DENY` | `DENY` | `DENY` | `DENY` |
-| `Referrer-Policy` | `strict-origin-when-cross-origin` | `strict-origin-when-cross-origin` | `strict-origin-when-cross-origin` | `strict-origin-when-cross-origin` |
-| `Permissions-Policy` | `geolocation=(), microphone=(), camera=()` | `geolocation=(), microphone=(), camera=()` | `geolocation=(), microphone=(), camera=()` | `geolocation=(), microphone=(), camera=()` |
-| `Content-Security-Policy` | Nonce-based, per-route `unsafe-eval` | Strict `default-src 'self'` | `unsafe-inline` + Lemon Squeezy | `unsafe-inline` + Turnstile |
+| `X-Content-Type-Options`    | `nosniff`                                      | `nosniff`                                      | `nosniff`                                      | `nosniff`                                      |
+| `X-Frame-Options`           | `DENY`                                         | `DENY`                                         | `DENY`                                         | `DENY`                                         |
+| `Referrer-Policy`           | `strict-origin-when-cross-origin`              | `strict-origin-when-cross-origin`              | `strict-origin-when-cross-origin`              | `strict-origin-when-cross-origin`              |
+| `Permissions-Policy`        | `geolocation=(), microphone=(), camera=()`     | `geolocation=(), microphone=(), camera=()`     | `geolocation=(), microphone=(), camera=()`     | `geolocation=(), microphone=(), camera=()`     |
+| `Content-Security-Policy`   | Nonce-based, per-route `unsafe-eval`           | Strict `default-src 'self'`                    | `unsafe-inline` + Lemon Squeezy                | `unsafe-inline` + Turnstile                    |
 
 All five core headers are now consistent across all four packages.
 
@@ -107,11 +110,11 @@ All five core headers are now consistent across all four packages.
 
 ### Missing Optional Headers
 
-| Header | Status | Reason |
-|--------|--------|--------|
-| `Cross-Origin-Opener-Policy` | Not set | Would prevent cross-origin `window.opener` — low-effort addition for future |
+| Header                         | Status  | Reason                                                                      |
+| ------------------------------ | ------- | --------------------------------------------------------------------------- |
+| `Cross-Origin-Opener-Policy`   | Not set | Would prevent cross-origin `window.opener` — low-effort addition for future |
 | `Cross-Origin-Embedder-Policy` | Not set | Would break Turnstile iframes and CDN resources without `crossorigin` attrs |
-| `Cross-Origin-Resource-Policy` | Not set | Would break CDN image loading without careful per-route configuration |
+| `Cross-Origin-Resource-Policy` | Not set | Would break CDN image loading without careful per-route configuration       |
 
 COOP is a future improvement candidate. COEP/CORP are intentionally absent due to third-party resource compatibility.
 
@@ -121,20 +124,20 @@ COOP is a future improvement candidate. COEP/CORP are intentionally absent due t
 
 ### Session Cookies
 
-| Cookie | HttpOnly | Secure | SameSite | Domain | Max-Age | Notes |
-|--------|----------|--------|----------|--------|---------|-------|
-| `grove_session` | YES | YES | Lax | `.grove.place` | 604800 (7d) | Primary session cookie, AES-256-GCM encrypted |
-| `access_token` | YES | YES | Strict | `.grove.place` | — | JWT access token (clear-on-logout) |
-| `refresh_token` | YES | YES | Strict | `.grove.place` | — | Refresh token (clear-on-logout) |
-| `better-auth.session_token` | YES | YES | Lax | `.grove.place` | — | Better Auth session (clear-on-logout) |
-| `__Secure-better-auth.session_token` | YES | YES | Lax | `.grove.place` | — | Better Auth secure prefix variant |
-| `better-auth.oauth_state` | YES | YES | None | `.grove.place` | — | OAuth state (SameSite=None required for cross-origin POST) |
+| Cookie                               | HttpOnly | Secure | SameSite | Domain         | Max-Age     | Notes                                                      |
+| ------------------------------------ | -------- | ------ | -------- | -------------- | ----------- | ---------------------------------------------------------- |
+| `grove_session`                      | YES      | YES    | Lax      | `.grove.place` | 604800 (7d) | Primary session cookie, AES-256-GCM encrypted              |
+| `access_token`                       | YES      | YES    | Strict   | `.grove.place` | —           | JWT access token (clear-on-logout)                         |
+| `refresh_token`                      | YES      | YES    | Strict   | `.grove.place` | —           | Refresh token (clear-on-logout)                            |
+| `better-auth.session_token`          | YES      | YES    | Lax      | `.grove.place` | —           | Better Auth session (clear-on-logout)                      |
+| `__Secure-better-auth.session_token` | YES      | YES    | Lax      | `.grove.place` | —           | Better Auth secure prefix variant                          |
+| `better-auth.oauth_state`            | YES      | YES    | None     | `.grove.place` | —           | OAuth state (SameSite=None required for cross-origin POST) |
 
 ### CSRF Cookie
 
-| Cookie | HttpOnly | Secure | SameSite | Domain | Max-Age | Notes |
-|--------|----------|--------|----------|--------|---------|-------|
-| `csrf_token` | **NO** | Prod only | Lax | **Not set** | 86400/3600 | Intentionally JS-readable. Domain unset = subdomain-scoped (prevents cross-tenant sharing per S4 fix) |
+| Cookie       | HttpOnly | Secure    | SameSite | Domain      | Max-Age    | Notes                                                                                                 |
+| ------------ | -------- | --------- | -------- | ----------- | ---------- | ----------------------------------------------------------------------------------------------------- |
+| `csrf_token` | **NO**   | Prod only | Lax      | **Not set** | 86400/3600 | Intentionally JS-readable. Domain unset = subdomain-scoped (prevents cross-tenant sharing per S4 fix) |
 
 ### Design Notes
 
@@ -155,15 +158,15 @@ All sensitive values are documented as `wrangler secret put` items in comments. 
 
 ### Bindings Summary
 
-| Binding Type | Count | Notes |
-|-------------|-------|-------|
-| D1 Databases | 12 services | All share `grove-engine-db` (intentional multi-tenant architecture) |
-| KV Namespaces | 7 services | Used for caching, rate limits, feature flags, sessions |
-| R2 Buckets | 5 services | CDN, images, cold storage, backups |
-| Durable Objects | 3 services | Session, Tenant, Post management |
-| Service Bindings | 4 services | AUTH binding for Worker-to-Worker auth |
-| AI Binding | 1 service | Engine only |
-| Cron Triggers | 6 workers | Various schedules, see note below |
+| Binding Type     | Count       | Notes                                                               |
+| ---------------- | ----------- | ------------------------------------------------------------------- |
+| D1 Databases     | 12 services | All share `grove-engine-db` (intentional multi-tenant architecture) |
+| KV Namespaces    | 7 services  | Used for caching, rate limits, feature flags, sessions              |
+| R2 Buckets       | 5 services  | CDN, images, cold storage, backups                                  |
+| Durable Objects  | 3 services  | Session, Tenant, Post management                                    |
+| Service Bindings | 4 services  | AUTH binding for Worker-to-Worker auth                              |
+| AI Binding       | 1 service   | Engine only                                                         |
+| Cron Triggers    | 6 workers   | Various schedules, see note below                                   |
 
 ### Cron Schedule Note
 
@@ -201,16 +204,16 @@ All packages use floating `^` ranges. The root `package.json` enforces minimum v
 
 ## Defense-in-Depth Verification
 
-| Function | Layer 1 | Layer 2 | Layer 3 |
-|----------|---------|---------|---------|
-| Prevent dependency attacks | Lock file committed | Root overrides for CVE floors | No postinstall scripts |
-| Enforce transport security | HSTS with preload | Cloudflare TLS enforcement | `upgrade-insecure-requests` in CSP |
-| Prevent clickjacking | X-Frame-Options: DENY | CSP frame-ancestors: 'none' | SameSite cookies |
-| Protect cookie integrity | HttpOnly + Secure | SameSite=Lax | Domain scoping (CSRF per-subdomain) |
-| Prevent secret leakage | Wrangler secrets (encrypted) | .gitignore coverage | No secrets in vars/code |
+| Function                   | Layer 1                      | Layer 2                       | Layer 3                             |
+| -------------------------- | ---------------------------- | ----------------------------- | ----------------------------------- |
+| Prevent dependency attacks | Lock file committed          | Root overrides for CVE floors | No postinstall scripts              |
+| Enforce transport security | HSTS with preload            | Cloudflare TLS enforcement    | `upgrade-insecure-requests` in CSP  |
+| Prevent clickjacking       | X-Frame-Options: DENY        | CSP frame-ancestors: 'none'   | SameSite cookies                    |
+| Protect cookie integrity   | HttpOnly + Secure            | SameSite=Lax                  | Domain scoping (CSRF per-subdomain) |
+| Prevent secret leakage     | Wrangler secrets (encrypted) | .gitignore coverage           | No secrets in vars/code             |
 
 All critical functions have 3 defense layers. **The shell holds.**
 
 ---
 
-*The turtle endures. Defense runs deep.* 🐢
+_The turtle endures. Defense runs deep._ 🐢

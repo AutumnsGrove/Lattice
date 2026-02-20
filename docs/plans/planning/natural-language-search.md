@@ -323,7 +323,7 @@ Response:
 
 #### 1.1 Discovery Opt-Out System
 
-**Database Schema** (`packages/engine/migrations/XXX_discovery_settings.sql`):
+**Database Schema** (`libs/engine/migrations/XXX_discovery_settings.sql`):
 
 ```sql
 CREATE TABLE IF NOT EXISTS discovery_settings (
@@ -335,7 +335,7 @@ CREATE TABLE IF NOT EXISTS discovery_settings (
 );
 ```
 
-**Admin UI** (`packages/engine/src/routes/arbor/settings/discovery/+page.svelte`):
+**Admin UI** (`libs/engine/src/routes/arbor/settings/discovery/+page.svelte`):
 
 ```svelte
 <Glass variant="card" class="p-6">

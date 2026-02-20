@@ -113,8 +113,8 @@ Verify no overflow, proper stacking, touch targets >= 44x44px.
 
 | File                                       | Change                                |
 | ------------------------------------------ | ------------------------------------- |
-| `packages/landing/src/routes/+page.svelte` | Spacing, GlassCard migration, btn fix |
-| `packages/landing/src/app.css`             | Add `.btn-secondary` definition       |
+| `apps/landing/src/routes/+page.svelte` | Spacing, GlassCard migration, btn fix |
+| `apps/landing/src/app.css`             | Add `.btn-secondary` definition       |
 
 ---
 
@@ -122,7 +122,7 @@ Verify no overflow, proper stacking, touch targets >= 44x44px.
 
 ### B1. Create `GlassComparisonTable` Engine Component
 
-**Location:** `packages/engine/src/lib/ui/components/ui/GlassComparisonTable.svelte`
+**Location:** `libs/engine/src/lib/ui/components/ui/GlassComparisonTable.svelte`
 
 **Props:**
 
@@ -174,7 +174,7 @@ interface Props {
 
 ### B2. Export from Engine
 
-Add to `packages/engine/src/lib/ui/components/ui/index.ts`:
+Add to `libs/engine/src/lib/ui/components/ui/index.ts`:
 
 ```typescript
 export { default as GlassComparisonTable } from "./GlassComparisonTable.svelte";
@@ -232,9 +232,9 @@ Updated section order:
 
 | File                                                                   | Change                        |
 | ---------------------------------------------------------------------- | ----------------------------- |
-| `packages/engine/src/lib/ui/components/ui/GlassComparisonTable.svelte` | NEW -- engine component       |
-| `packages/engine/src/lib/ui/components/ui/index.ts`                    | Export new component          |
-| `packages/landing/src/routes/+page.svelte`                             | Add comparison data + section |
+| `libs/engine/src/lib/ui/components/ui/GlassComparisonTable.svelte` | NEW -- engine component       |
+| `libs/engine/src/lib/ui/components/ui/index.ts`                    | Export new component          |
+| `apps/landing/src/routes/+page.svelte`                             | Add comparison data + section |
 
 ---
 

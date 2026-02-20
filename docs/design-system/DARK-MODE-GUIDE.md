@@ -300,10 +300,10 @@ The dark mode glass uses green-tinted bark colors (`rgba(20, 30, 25)`) rather th
 
 ## Related Resources
 
-- **Tokens Reference**: `/packages/engine/src/lib/styles/tokens.css`
-- **App CSS Variables**: `/packages/engine/src/app.css`
-- **Theme Store**: `/packages/engine/src/lib/ui/stores/theme.ts`
-- **ThemeToggle Component**: `/packages/engine/src/lib/ui/components/chrome/ThemeToggle.svelte`
+- **Tokens Reference**: `/libs/engine/src/lib/styles/tokens.css`
+- **App CSS Variables**: `/libs/engine/src/app.css`
+- **Theme Store**: `/libs/engine/src/lib/ui/stores/theme.ts`
+- **ThemeToggle Component**: `/libs/engine/src/lib/ui/components/chrome/ThemeToggle.svelte`
 
 ---
 

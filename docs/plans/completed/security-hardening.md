@@ -10,6 +10,7 @@
 ## Overview
 
 Two security improvements for defense-in-depth:
+
 1. **Webhook Payload Sanitization** - Strip PII from stored webhook payloads and implement retention policy
 2. **JSON Parsing Safety** - Standardize safe JSON parsing across the codebase
 
@@ -23,7 +24,7 @@ Two security improvements for defense-in-depth:
 
 LemonSqueezy webhook handler stores **complete raw JSON payloads** including PII:
 
-**File**: `packages/plant/src/routes/api/webhooks/lemonsqueezy/+server.ts` (Line 87)
+**File**: `apps/plant/src/routes/api/webhooks/lemonsqueezy/+server.ts` (Line 87)
 
 ```typescript
 // Current - stores entire payload
@@ -35,13 +36,13 @@ await db.prepare(
 
 ### PII in Stored Payloads
 
-| Field | Source | Risk Level |
-|-------|--------|------------|
-| `user_email` | Subscription attributes | High |
-| `user_name` | Subscription/Order attributes | High |
-| `card_brand`, `card_last_four` | Payment details | Medium |
-| `city`, `region`, `country` | Customer location | Medium |
-| `billing_address` | Checkout data | High |
+| Field                          | Source                        | Risk Level |
+| ------------------------------ | ----------------------------- | ---------- |
+| `user_email`                   | Subscription attributes       | High       |
+| `user_name`                    | Subscription/Order attributes | High       |
+| `card_brand`, `card_last_four` | Payment details               | Medium     |
+| `city`, `region`, `country`    | Customer location             | Medium     |
+| `billing_address`              | Checkout data                 | High       |
 
 ### Compliance Risks
 
@@ -55,7 +56,7 @@ await db.prepare(
 
 ### Task 1.1: Create Payload Sanitization Utility
 
-**File**: `packages/engine/src/lib/utils/webhook-sanitizer.ts`
+**File**: `libs/engine/src/lib/utils/webhook-sanitizer.ts`
 
 ```typescript
 /**
@@ -64,43 +65,43 @@ await db.prepare(
  */
 
 interface SanitizedPayload {
-  // Keep: IDs and references
-  id: string;
-  event_id: string;
-  customer_id: number;
-  subscription_id?: number;
-  order_id?: number;
-  product_id?: number;
-  variant_id?: number;
+	// Keep: IDs and references
+	id: string;
+	event_id: string;
+	customer_id: number;
+	subscription_id?: number;
+	order_id?: number;
+	product_id?: number;
+	variant_id?: number;
 
-  // Keep: Status and timestamps
-  status: string;
-  event_name: string;
-  created_at: string;
-  updated_at?: string;
-  renews_at?: string;
-  ends_at?: string;
+	// Keep: Status and timestamps
+	status: string;
+	event_name: string;
+	created_at: string;
+	updated_at?: string;
+	renews_at?: string;
+	ends_at?: string;
 
-  // Keep: Non-PII business data
-  product_name?: string;
-  variant_name?: string;
+	// Keep: Non-PII business data
+	product_name?: string;
+	variant_name?: string;
 
-  // Strip: All PII fields
-  // user_email, user_name, card_*, billing_*, city, region, country
+	// Strip: All PII fields
+	// user_email, user_name, card_*, billing_*, city, region, country
 }
 
 export function sanitizeWebhookPayload(rawPayload: unknown): SanitizedPayload {
-  // Implementation: whitelist approach (only keep known-safe fields)
+	// Implementation: whitelist approach (only keep known-safe fields)
 }
 
 export function sanitizeLemonSqueezyPayload(payload: LemonSqueezyWebhookPayload): SanitizedPayload {
-  // LemonSqueezy-specific sanitization
+	// LemonSqueezy-specific sanitization
 }
 ```
 
 ### Task 1.2: Update LemonSqueezy Webhook Handler
 
-**File**: `packages/plant/src/routes/api/webhooks/lemonsqueezy/+server.ts`
+**File**: `apps/plant/src/routes/api/webhooks/lemonsqueezy/+server.ts`
 
 ```typescript
 import { sanitizeLemonSqueezyPayload } from '$lib/utils/webhook-sanitizer';
@@ -116,7 +117,7 @@ await db.prepare(
 
 ### Task 1.3: Add Expiration Column
 
-**File**: `packages/engine/migrations/026_webhook_retention.sql`
+**File**: `libs/engine/migrations/026_webhook_retention.sql`
 
 ```sql
 -- Add expires_at column for TTL
@@ -137,7 +138,7 @@ ON webhook_events(expires_at);
 
 **Option A: Cloudflare Cron Trigger**
 
-**File**: `packages/engine/src/routes/api/cron/cleanup-webhooks/+server.ts`
+**File**: `libs/engine/src/routes/api/cron/cleanup-webhooks/+server.ts`
 
 ```typescript
 // Invoked by cron trigger in wrangler.toml
@@ -145,18 +146,22 @@ ON webhook_events(expires_at);
 // crons = ["0 3 * * *"]  // Daily at 3am UTC
 
 export async function GET({ platform }) {
-  const db = platform.env.DB;
+	const db = platform.env.DB;
 
-  const result = await db.prepare(`
+	const result = await db
+		.prepare(
+			`
     DELETE FROM webhook_events
     WHERE expires_at < unixepoch()
     LIMIT 1000
-  `).run();
+  `,
+		)
+		.run();
 
-  return json({
-    deleted: result.meta.changes,
-    timestamp: new Date().toISOString()
-  });
+	return json({
+		deleted: result.meta.changes,
+		timestamp: new Date().toISOString(),
+	});
 }
 ```
 
@@ -168,49 +173,54 @@ Use Cloudflare Queues for batched deletion if volume is high.
 
 ```typescript
 // Set expires_at to 120 days from now (aligns with chargeback windows)
-const expiresAt = Math.floor(Date.now() / 1000) + (120 * 24 * 60 * 60);
+const expiresAt = Math.floor(Date.now() / 1000) + 120 * 24 * 60 * 60;
 
-await db.prepare(`
+await db
+	.prepare(
+		`
   INSERT INTO webhook_events (id, provider, event_type, payload, created_at, expires_at)
   VALUES (?, 'lemonsqueezy', ?, ?, unixepoch(), ?)
-`).bind(id, eventName, sanitizedPayload, expiresAt).run();
+`,
+	)
+	.bind(id, eventName, sanitizedPayload, expiresAt)
+	.run();
 ```
 
 ---
 
 ## Test Specification (Webhooks)
 
-**File**: `packages/engine/src/lib/utils/webhook-sanitizer.test.ts`
+**File**: `libs/engine/src/lib/utils/webhook-sanitizer.test.ts`
 
 ```typescript
-describe('sanitizeLemonSqueezyPayload', () => {
-  it('should strip user_email from payload', () => {
-    const input = { data: { attributes: { user_email: 'test@example.com', status: 'active' } } };
-    const result = sanitizeLemonSqueezyPayload(input);
-    expect(result.user_email).toBeUndefined();
-    expect(result.status).toBe('active');
-  });
+describe("sanitizeLemonSqueezyPayload", () => {
+	it("should strip user_email from payload", () => {
+		const input = { data: { attributes: { user_email: "test@example.com", status: "active" } } };
+		const result = sanitizeLemonSqueezyPayload(input);
+		expect(result.user_email).toBeUndefined();
+		expect(result.status).toBe("active");
+	});
 
-  it('should strip user_name from payload', () => {});
-  it('should strip card_brand and card_last_four', () => {});
-  it('should strip billing_address fields', () => {});
-  it('should strip city, region, country', () => {});
+	it("should strip user_name from payload", () => {});
+	it("should strip card_brand and card_last_four", () => {});
+	it("should strip billing_address fields", () => {});
+	it("should strip city, region, country", () => {});
 
-  it('should preserve customer_id for reconciliation', () => {});
-  it('should preserve subscription_id for debugging', () => {});
-  it('should preserve product_id and variant_id', () => {});
-  it('should preserve status and timestamps', () => {});
-  it('should preserve event metadata (event_name, event_id)', () => {});
+	it("should preserve customer_id for reconciliation", () => {});
+	it("should preserve subscription_id for debugging", () => {});
+	it("should preserve product_id and variant_id", () => {});
+	it("should preserve status and timestamps", () => {});
+	it("should preserve event metadata (event_name, event_id)", () => {});
 
-  it('should handle missing optional fields gracefully', () => {});
-  it('should handle malformed payload without throwing', () => {});
-  it('should return empty object for null/undefined input', () => {});
+	it("should handle missing optional fields gracefully", () => {});
+	it("should handle malformed payload without throwing", () => {});
+	it("should return empty object for null/undefined input", () => {});
 });
 
-describe('Webhook Retention', () => {
-  it('should set expires_at to 120 days from created_at', () => {});
-  it('should cleanup expired webhooks on cron run', () => {});
-  it('should respect LIMIT to avoid long-running queries', () => {});
+describe("Webhook Retention", () => {
+	it("should set expires_at to 120 days from created_at", () => {});
+	it("should cleanup expired webhooks on cron run", () => {});
+	it("should respect LIMIT to avoid long-running queries", () => {});
 });
 ```
 
@@ -234,41 +244,38 @@ describe('Webhook Retention', () => {
 
 ### Existing Utility
 
-**File**: `packages/engine/src/lib/utils/json.ts`
+**File**: `libs/engine/src/lib/utils/json.ts`
 
 ```typescript
-export function safeJsonParse<T>(
-  str: string | null | undefined,
-  fallback: T = [] as T
-): T {
-  if (!str) return fallback;
-  try {
-    return JSON.parse(str) as T;
-  } catch (e) {
-    console.warn('Failed to parse JSON:', e instanceof Error ? e.message : String(e));
-    return fallback;
-  }
+export function safeJsonParse<T>(str: string | null | undefined, fallback: T = [] as T): T {
+	if (!str) return fallback;
+	try {
+		return JSON.parse(str) as T;
+	} catch (e) {
+		console.warn("Failed to parse JSON:", e instanceof Error ? e.message : String(e));
+		return fallback;
+	}
 }
 ```
 
 ### Audit Results
 
-| Category | Count |
-|----------|-------|
-| Total `JSON.parse` calls | 105 |
-| Using `safeJsonParse` | 35 |
-| Wrapped in try/catch | ~40 |
+| Category                   | Count   |
+| -------------------------- | ------- |
+| Total `JSON.parse` calls   | 105     |
+| Using `safeJsonParse`      | 35      |
+| Wrapped in try/catch       | ~40     |
 | **Unsafe (no protection)** | **~30** |
 
 ### High-Priority Unsafe Locations
 
-| File | Line(s) | Context |
-|------|---------|---------|
-| `src/lib/payments/shop.ts` | 1219-1324 | Payment/product data (7 calls) |
-| `src/routes/(site)/timeline/+page.server.ts` | 105-110 | Timeline display (4 calls) |
-| `src/routes/api/curios/timeline/*.ts` | Various | Timeline API endpoints (8 calls) |
-| `src/routes/admin/blog/*.ts` | Various | Admin blog editor (3 calls) |
-| `src/lib/curios/timeline/context.ts` | 303-304 | Timeline context (2 calls) |
+| File                                         | Line(s)   | Context                          |
+| -------------------------------------------- | --------- | -------------------------------- |
+| `src/lib/payments/shop.ts`                   | 1219-1324 | Payment/product data (7 calls)   |
+| `src/routes/(site)/timeline/+page.server.ts` | 105-110   | Timeline display (4 calls)       |
+| `src/routes/api/curios/timeline/*.ts`        | Various   | Timeline API endpoints (8 calls) |
+| `src/routes/admin/blog/*.ts`                 | Various   | Admin blog editor (3 calls)      |
+| `src/lib/curios/timeline/context.ts`         | 303-304   | Timeline context (2 calls)       |
 
 ---
 
@@ -276,7 +283,7 @@ export function safeJsonParse<T>(
 
 ### Task 2.1: Enhance safeJsonParse Utility
 
-**File**: `packages/engine/src/lib/utils/json.ts`
+**File**: `libs/engine/src/lib/utils/json.ts`
 
 ```typescript
 /**
@@ -292,25 +299,25 @@ export function safeJsonParse<T>(
  * const config = safeJsonParse(raw, { theme: 'dark' }, { silent: true });
  */
 export function safeJsonParse<T>(
-  str: string | null | undefined,
-  fallback: T,
-  options?: {
-    /** Suppress console.warn on parse failure */
-    silent?: boolean;
-    /** Context for debugging (e.g., "user settings") */
-    context?: string;
-  }
+	str: string | null | undefined,
+	fallback: T,
+	options?: {
+		/** Suppress console.warn on parse failure */
+		silent?: boolean;
+		/** Context for debugging (e.g., "user settings") */
+		context?: string;
+	},
 ): T {
-  if (!str) return fallback;
-  try {
-    return JSON.parse(str) as T;
-  } catch (e) {
-    if (!options?.silent) {
-      const ctx = options?.context ? ` (${options.context})` : '';
-      console.warn(`Failed to parse JSON${ctx}:`, e instanceof Error ? e.message : String(e));
-    }
-    return fallback;
-  }
+	if (!str) return fallback;
+	try {
+		return JSON.parse(str) as T;
+	} catch (e) {
+		if (!options?.silent) {
+			const ctx = options?.context ? ` (${options.context})` : "";
+			console.warn(`Failed to parse JSON${ctx}:`, e instanceof Error ? e.message : String(e));
+		}
+		return fallback;
+	}
 }
 
 /**
@@ -318,24 +325,24 @@ export function safeJsonParse<T>(
  * Useful when you need to distinguish "no value" from "invalid value".
  */
 export function tryJsonParse<T>(str: string | null | undefined): T | null {
-  if (!str) return null;
-  try {
-    return JSON.parse(str) as T;
-  } catch {
-    return null;
-  }
+	if (!str) return null;
+	try {
+		return JSON.parse(str) as T;
+	} catch {
+		return null;
+	}
 }
 ```
 
 ### Task 2.2: Add to Engine Exports
 
-**File**: `packages/engine/package.json` (verify export exists)
+**File**: `libs/engine/package.json` (verify export exists)
 
 ```json
 {
-  "exports": {
-    "./utils": "./src/lib/utils/index.ts"
-  }
+	"exports": {
+		"./utils": "./src/lib/utils/index.ts"
+	}
 }
 ```
 
@@ -356,7 +363,7 @@ export function tryJsonParse<T>(str: string | null | undefined): T | null {
 const metadata = JSON.parse(row.metadata);
 
 // After
-import { safeJsonParse } from '$lib/utils/json';
+import { safeJsonParse } from "$lib/utils/json";
 const metadata = safeJsonParse(row.metadata, {});
 ```
 
@@ -395,23 +402,23 @@ rules: {
 
 ### Webhook Sanitization
 
-| File | Change |
-|------|--------|
-| `packages/engine/src/lib/utils/webhook-sanitizer.ts` | New file |
-| `packages/plant/src/routes/api/webhooks/lemonsqueezy/+server.ts` | Use sanitizer |
-| `packages/engine/migrations/026_webhook_retention.sql` | New migration |
-| `packages/engine/src/routes/api/cron/cleanup-webhooks/+server.ts` | New endpoint |
-| `packages/engine/wrangler.toml` | Add cron trigger |
+| File                                                              | Change           |
+| ----------------------------------------------------------------- | ---------------- |
+| `libs/engine/src/lib/utils/webhook-sanitizer.ts`              | New file         |
+| `apps/plant/src/routes/api/webhooks/lemonsqueezy/+server.ts`  | Use sanitizer    |
+| `libs/engine/migrations/026_webhook_retention.sql`            | New migration    |
+| `libs/engine/src/routes/api/cron/cleanup-webhooks/+server.ts` | New endpoint     |
+| `libs/engine/wrangler.toml`                                   | Add cron trigger |
 
 ### JSON Safety
 
-| File | Change |
-|------|--------|
-| `packages/engine/src/lib/utils/json.ts` | Enhance utility |
-| `packages/engine/src/lib/payments/shop.ts` | 7 fixes |
-| `packages/engine/src/routes/api/curios/timeline/*.ts` | 8 fixes |
-| `packages/engine/src/routes/(site)/timeline/+page.server.ts` | 4 fixes |
-| Multiple admin routes | Various fixes |
+| File                                                         | Change          |
+| ------------------------------------------------------------ | --------------- |
+| `libs/engine/src/lib/utils/json.ts`                      | Enhance utility |
+| `libs/engine/src/lib/payments/shop.ts`                   | 7 fixes         |
+| `libs/engine/src/routes/api/curios/timeline/*.ts`        | 8 fixes         |
+| `libs/engine/src/routes/(site)/timeline/+page.server.ts` | 4 fixes         |
+| Multiple admin routes                                        | Various fixes   |
 
 ---
 

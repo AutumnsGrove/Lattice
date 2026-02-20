@@ -45,9 +45,9 @@ This enables zero-downtime migration from plaintext to encrypted storage.
 ## Related Files
 
 - `docs/security/token-encryption.md` - Key setup, rotation, troubleshooting
-- `packages/engine/src/lib/server/encryption.ts` - Encryption implementation
-- `packages/engine/src/lib/server/encryption.test.ts` - Unit tests (35 tests)
-- `packages/engine/src/lib/server/encryption.integration.test.ts` - Integration tests (21 tests)
-- `packages/engine/migrations/025_journey_curio.sql` - Schema definition
-- `packages/engine/src/routes/api/curios/journey/config/+server.ts` - Token handling
-- `packages/engine/src/lib/curios/journey/index.ts` - `CLEAR_TOKEN_VALUE` constant
+- `libs/engine/src/lib/server/encryption.ts` - Encryption implementation
+- `libs/engine/src/lib/server/encryption.test.ts` - Unit tests (35 tests)
+- `libs/engine/src/lib/server/encryption.integration.test.ts` - Integration tests (21 tests)
+- `libs/engine/migrations/025_journey_curio.sql` - Schema definition
+- `libs/engine/src/routes/api/curios/journey/config/+server.ts` - Token handling
+- `libs/engine/src/lib/curios/journey/index.ts` - `CLEAR_TOKEN_VALUE` constant

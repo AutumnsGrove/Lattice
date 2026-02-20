@@ -38,6 +38,7 @@ User clicks "Manage Payment Method" → API returns 500 → error message displa
 ### Blast Radius
 
 This isn't just the payment method button. The same guard exists on:
+
 - **POST** `/api/billing` (checkout) — line 402
 - **PATCH** `/api/billing` (cancel/resume/change plan) — line 595
 - **PUT** `/api/billing` (billing portal) — line 817
@@ -79,13 +80,13 @@ every other caller in the codebase, and the GroveAuth API rejects it.
 
 Every other caller uses Bearer token or the service binding. The page server is the outlier:
 
-| Caller | Auth Method |
-|--------|-------------|
-| **Page server** (`+page.server.ts:83`) | `Cookie` header via raw `fetch()` — **broken** |
-| API route (`/api/passkey/+server.ts:38`) | `Authorization: Bearer ${access_token}` |
-| Register options (`register-options/+server.ts:42`) | Service binding `platform.env.AUTH.fetch()` |
-| Heartwood client (`client.ts:923`) | `Authorization: Bearer ${accessToken}` |
-| Plant (`plant/account/+page.server.ts:58`) | `Authorization: Bearer ${accessToken}` |
+| Caller                                              | Auth Method                                    |
+| --------------------------------------------------- | ---------------------------------------------- |
+| **Page server** (`+page.server.ts:83`)              | `Cookie` header via raw `fetch()` — **broken** |
+| API route (`/api/passkey/+server.ts:38`)            | `Authorization: Bearer ${access_token}`        |
+| Register options (`register-options/+server.ts:42`) | Service binding `platform.env.AUTH.fetch()`    |
+| Heartwood client (`client.ts:923`)                  | `Authorization: Bearer ${accessToken}`         |
+| Plant (`plant/account/+page.server.ts:58`)          | `Authorization: Bearer ${accessToken}`         |
 
 ### Why It Fails
 
@@ -158,7 +159,7 @@ in the production database. The correct column is `nav_order`.
 
 ### Fix
 
-**One-line change** in `packages/engine/src/routes/api/export/+server.ts:251`:
+**One-line change** in `libs/engine/src/routes/api/export/+server.ts:251`:
 
 ```diff
 -         ORDER BY display_order ASC`,
@@ -174,11 +175,11 @@ pages table definition to prevent future confusion.
 
 ## Action Plan
 
-| # | Issue | Fix Type | Where |
-|---|-------|----------|-------|
-| 1 | Stripe key missing | Infra/config | Cloudflare Dashboard |
-| 2 | Passkey auth inconsistency | Code (service binding) | `+page.server.ts` fetchUserPasskeys |
-| 3 | Export column mismatch | Code (one-line) | `api/export/+server.ts:251` |
+| #   | Issue                      | Fix Type               | Where                               |
+| --- | -------------------------- | ---------------------- | ----------------------------------- |
+| 1   | Stripe key missing         | Infra/config           | Cloudflare Dashboard                |
+| 2   | Passkey auth inconsistency | Code (service binding) | `+page.server.ts` fetchUserPasskeys |
+| 3   | Export column mismatch     | Code (one-line)        | `api/export/+server.ts:251`         |
 
 Issues 2 and 3 can be fixed in code. Issue 1 is purely infrastructure.
 
@@ -187,17 +188,17 @@ Issues 2 and 3 can be fixed in code. Issue 1 is purely infrastructure.
 ## Related Files
 
 ```
-packages/engine/src/routes/arbor/account/+page.svelte
-packages/engine/src/routes/arbor/account/+page.server.ts
-packages/engine/src/routes/arbor/account/PaymentMethodCard.svelte
-packages/engine/src/routes/arbor/account/PasskeyCard.svelte
-packages/engine/src/routes/arbor/account/DataExportCard.svelte
-packages/engine/src/routes/api/billing/+server.ts
-packages/engine/src/routes/api/export/+server.ts
-packages/engine/src/routes/api/passkey/+server.ts
-packages/engine/src/routes/api/passkey/register-options/+server.ts
-packages/engine/src/lib/errors/api-errors.ts
-packages/engine/src/lib/auth/session.ts
-packages/engine/migrations/019_page_navigation.sql
+libs/engine/src/routes/arbor/account/+page.svelte
+libs/engine/src/routes/arbor/account/+page.server.ts
+libs/engine/src/routes/arbor/account/PaymentMethodCard.svelte
+libs/engine/src/routes/arbor/account/PasskeyCard.svelte
+libs/engine/src/routes/arbor/account/DataExportCard.svelte
+libs/engine/src/routes/api/billing/+server.ts
+libs/engine/src/routes/api/export/+server.ts
+libs/engine/src/routes/api/passkey/+server.ts
+libs/engine/src/routes/api/passkey/register-options/+server.ts
+libs/engine/src/lib/errors/api-errors.ts
+libs/engine/src/lib/auth/session.ts
+libs/engine/migrations/019_page_navigation.sql
 docs/developer/database/schema/multi-tenant-schema.sql
 ```

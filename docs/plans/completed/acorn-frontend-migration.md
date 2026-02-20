@@ -45,28 +45,28 @@ mkdir -p src/routes src/lib static tests .github/workflows
 
 ```json
 {
-  "name": "grove-acorn",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "dev": "vite dev",
-    "build": "vite build",
-    "preview": "wrangler pages dev",
-    "deploy": "wrangler pages deploy .svelte-kit/cloudflare",
-    "test": "vitest",
-    "lint": "eslint .",
-    "check": "svelte-check"
-  },
-  "dependencies": {
-    "lattice": "^latest"
-  },
-  "devDependencies": {
-    "@sveltejs/adapter-cloudflare": "^latest",
-    "@sveltejs/kit": "^latest",
-    "svelte": "^latest",
-    "vite": "^latest",
-    "vitest": "^latest"
-  }
+	"name": "grove-acorn",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"preview": "wrangler pages dev",
+		"deploy": "wrangler pages deploy .svelte-kit/cloudflare",
+		"test": "vitest",
+		"lint": "eslint .",
+		"check": "svelte-check"
+	},
+	"dependencies": {
+		"lattice": "^latest"
+	},
+	"devDependencies": {
+		"@sveltejs/adapter-cloudflare": "^latest",
+		"@sveltejs/kit": "^latest",
+		"svelte": "^latest",
+		"vite": "^latest",
+		"vitest": "^latest"
+	}
 }
 ```
 
@@ -77,14 +77,14 @@ import adapter from "@sveltejs/adapter-cloudflare";
 
 /** @type {import('@sveltejs/kit').Config} */
 export default {
-  kit: {
-    adapter: adapter({
-      routes: {
-        include: ["/*"],
-        exclude: ["<all>"],
-      },
-    }),
-  },
+	kit: {
+		adapter: adapter({
+			routes: {
+				include: ["/*"],
+				exclude: ["<all>"],
+			},
+		}),
+	},
 };
 ```
 
@@ -159,7 +159,7 @@ npm run deploy
 
 ### 2.1 Files to Copy
 
-From `Lattice/domains/` to `grove-acorn/`:
+From `Lattice/apps/domains/` to `grove-acorn/`:
 
 ```
 domains/src/           → src/
@@ -203,7 +203,7 @@ Search for imports like:
 
 ```typescript
 // OLD (if any exist)
-import { something } from "$lib/../../packages/engine/...";
+import { something } from "$lib/../../libs/engine/...";
 import { something } from "../../../packages/...";
 ```
 
@@ -222,11 +222,11 @@ In `svelte.config.js` or `vite.config.ts`, ensure `$lib` points to local lib:
 ```javascript
 // vite.config.ts
 export default defineConfig({
-  resolve: {
-    alias: {
-      $lib: path.resolve("./src/lib"),
-    },
-  },
+	resolve: {
+		alias: {
+			$lib: path.resolve("./src/lib"),
+		},
+	},
 });
 ```
 

@@ -75,18 +75,33 @@ You don't admire a lattice. You build on it, and watch what grows.
 
 ### Deployment Model
 
-Lattice lives in the Grove monorepo at `packages/engine/`. Every other Grove package imports from it directly via workspace resolution during development, and from the published npm package in production CI.
+Lattice lives in the Grove monorepo at `libs/engine/`. Every other Grove package imports from it directly via workspace resolution during development, and from the published npm package in production CI.
 
 ```
-packages/
+libs/
 ├── engine/          ← @autumnsgrove/lattice (this package)
+├── gossamer/        ← imports from @autumnsgrove/lattice
+├── foliage/         ← imports from @autumnsgrove/lattice
+├── vineyard/        ← imports from @autumnsgrove/lattice
+
+apps/
 ├── landing/         ← imports from @autumnsgrove/lattice
 ├── meadow/          ← imports from @autumnsgrove/lattice
 ├── plant/           ← imports from @autumnsgrove/lattice
 ├── clearing/        ← imports from @autumnsgrove/lattice
 ├── terrarium/       ← imports from @autumnsgrove/lattice
 ├── heartwood/       ← Grove's auth service (separate Hono worker)
-└── durable-objects/ ← Grove's DO worker (separate Cloudflare Worker)
+└── domains/         ← Domain management app
+
+services/
+├── durable-objects/ ← Grove's DO worker (separate Cloudflare Worker)
+├── heartwood/       ← (if applicable to services)
+├── forage/          ← Service app
+├── zephyr/          ← Service app
+├── grove-router/    ← Router service
+├── og-worker/       ← OG image generation
+├── email-render/    ← Email rendering
+└── pulse/           ← Analytics service
 ```
 
 Consumer packages each have their own Cloudflare resources (D1, KV, R2) and deploy as independent Workers or Pages projects.
@@ -112,77 +127,77 @@ Lattice uses ~47 named export paths for tree-shaking. Each subsystem has its own
 
 ```json
 {
-  ".": "Main barrel — components, UI, heartwood client, utils",
-  "./ui": "Full Grove design system",
-  "./ui/editor": "Tiptap-based markdown editor",
-  "./ui/arbor": "Admin panel UI components",
-  "./ui/chrome": "Header, Footer, MobileMenu, ThemeToggle",
-  "./ui/stores": "Svelte stores (theme, etc.)",
-  "./ui/gallery": "Image gallery components",
-  "./ui/charts": "Chart components",
-  "./ui/content": "Content display components",
-  "./ui/content/hum": "Hum variant content components",
-  "./ui/content/curios": "Curio display components (Svelte)",
-  "./ui/feedback": "Toast, alerts, loading states",
-  "./ui/forms": "Form controls and wrappers",
-  "./ui/indicators": "Status indicators, badges",
-  "./ui/icons": "Lucide icon wrapper",
-  "./ui/states": "Empty/error/loading state components",
-  "./ui/typography": "Font wrapper components",
-  "./ui/nature": "Seasonal nature components (botanical, sky, etc.)",
-  "./ui/nature/*": "Individual nature subsystems",
-  "./ui/tokens": "Design tokens",
-  "./ui/utils": "UI utility functions",
-  "./ui/styles": "grove.css (Tailwind base styles)",
-  "./ui/tailwind": "Tailwind preset",
-  "./ui/terrarium": "Terrarium-specific UI",
-  "./vineyard": "Vineyard components",
-  "./utils": "Client-side utility functions",
-  "./utils/*": "Individual utility modules",
-  "./auth": "Session management utilities",
-  "./auth/*": "Individual auth modules",
-  "./server": "Server-side utilities (rate limits, logger, canopy dir)",
-  "./server/*": "Individual server modules",
-  "./config": "Platform configuration constants",
-  "./config/*": "Individual config modules",
-  "./config/terrarium": "Terrarium-specific config",
-  "./payments": "Abstract payment provider types",
-  "./services": "Server services",
-  "./heartwood": "GroveAuth OAuth client",
-  "./groveauth": "Alias for ./heartwood",
-  "./feature-flags": "Feature flag evaluation engine",
-  "./curios": "Curio types, logic, developer curio components",
-  "./curios/timeline": "Timeline curio (AI daily summaries)",
-  "./curios/timeline/voices": "Timeline voice presets",
-  "./curios/gallery": "Gallery curio",
-  "./grafts": "UI Graft registry and context",
-  "./grafts/pricing": "Pricing page graft",
-  "./grafts/login": "Login UI graft",
-  "./grafts/login/server": "Login server utilities",
-  "./grafts/greenhouse": "Greenhouse beta access graft",
-  "./grafts/uploads": "Upload management graft",
-  "./grafts/upgrades": "Upgrade flow graft",
-  "./lumen": "AI inference gateway",
-  "./threshold": "Rate limiting SDK",
-  "./threshold/sveltekit": "Threshold SvelteKit adapter",
-  "./threshold/hono": "Threshold Hono adapter",
-  "./threshold/worker": "Threshold raw Worker adapter",
-  "./thorn": "Content moderation",
-  "./email": "Email infrastructure (components, types, templates)",
-  "./email/components": "Grove-branded React Email components",
-  "./email/render": "Email rendering utilities",
-  "./email/sequences": "Onboarding email sequences",
-  "./email/types": "Email type definitions",
-  "./email/updates": "Patch notes and announcement emails",
-  "./email/schedule": "Resend scheduling utilities",
-  "./email/urls": "Email link generation",
-  "./email/porch": "Subscription lifecycle emails",
-  "./zephyr": "Email + social broadcasting client",
-  "./errors": "Typed error system",
-  "./loom": "Durable Object framework base",
-  "./loom/sveltekit": "Loom SvelteKit adapter",
-  "./loom/worker": "Loom raw Worker adapter",
-  "./loom/testing": "Loom test utilities"
+	".": "Main barrel — components, UI, heartwood client, utils",
+	"./ui": "Full Grove design system",
+	"./ui/editor": "Tiptap-based markdown editor",
+	"./ui/arbor": "Admin panel UI components",
+	"./ui/chrome": "Header, Footer, MobileMenu, ThemeToggle",
+	"./ui/stores": "Svelte stores (theme, etc.)",
+	"./ui/gallery": "Image gallery components",
+	"./ui/charts": "Chart components",
+	"./ui/content": "Content display components",
+	"./ui/content/hum": "Hum variant content components",
+	"./ui/content/curios": "Curio display components (Svelte)",
+	"./ui/feedback": "Toast, alerts, loading states",
+	"./ui/forms": "Form controls and wrappers",
+	"./ui/indicators": "Status indicators, badges",
+	"./ui/icons": "Lucide icon wrapper",
+	"./ui/states": "Empty/error/loading state components",
+	"./ui/typography": "Font wrapper components",
+	"./ui/nature": "Seasonal nature components (botanical, sky, etc.)",
+	"./ui/nature/*": "Individual nature subsystems",
+	"./ui/tokens": "Design tokens",
+	"./ui/utils": "UI utility functions",
+	"./ui/styles": "grove.css (Tailwind base styles)",
+	"./ui/tailwind": "Tailwind preset",
+	"./ui/terrarium": "Terrarium-specific UI",
+	"./vineyard": "Vineyard components",
+	"./utils": "Client-side utility functions",
+	"./utils/*": "Individual utility modules",
+	"./auth": "Session management utilities",
+	"./auth/*": "Individual auth modules",
+	"./server": "Server-side utilities (rate limits, logger, canopy dir)",
+	"./server/*": "Individual server modules",
+	"./config": "Platform configuration constants",
+	"./config/*": "Individual config modules",
+	"./config/terrarium": "Terrarium-specific config",
+	"./payments": "Abstract payment provider types",
+	"./services": "Server services",
+	"./heartwood": "GroveAuth OAuth client",
+	"./groveauth": "Alias for ./heartwood",
+	"./feature-flags": "Feature flag evaluation engine",
+	"./curios": "Curio types, logic, developer curio components",
+	"./curios/timeline": "Timeline curio (AI daily summaries)",
+	"./curios/timeline/voices": "Timeline voice presets",
+	"./curios/gallery": "Gallery curio",
+	"./grafts": "UI Graft registry and context",
+	"./grafts/pricing": "Pricing page graft",
+	"./grafts/login": "Login UI graft",
+	"./grafts/login/server": "Login server utilities",
+	"./grafts/greenhouse": "Greenhouse beta access graft",
+	"./grafts/uploads": "Upload management graft",
+	"./grafts/upgrades": "Upgrade flow graft",
+	"./lumen": "AI inference gateway",
+	"./threshold": "Rate limiting SDK",
+	"./threshold/sveltekit": "Threshold SvelteKit adapter",
+	"./threshold/hono": "Threshold Hono adapter",
+	"./threshold/worker": "Threshold raw Worker adapter",
+	"./thorn": "Content moderation",
+	"./email": "Email infrastructure (components, types, templates)",
+	"./email/components": "Grove-branded React Email components",
+	"./email/render": "Email rendering utilities",
+	"./email/sequences": "Onboarding email sequences",
+	"./email/types": "Email type definitions",
+	"./email/updates": "Patch notes and announcement emails",
+	"./email/schedule": "Resend scheduling utilities",
+	"./email/urls": "Email link generation",
+	"./email/porch": "Subscription lifecycle emails",
+	"./zephyr": "Email + social broadcasting client",
+	"./errors": "Typed error system",
+	"./loom": "Durable Object framework base",
+	"./loom/sveltekit": "Loom SvelteKit adapter",
+	"./loom/worker": "Loom raw Worker adapter",
+	"./loom/testing": "Loom test utilities"
 }
 ```
 
@@ -206,9 +221,9 @@ Auth uses PKCE-based OAuth. There are no magic codes, no Resend-based email auth
 import { createGroveAuthClient } from "@autumnsgrove/lattice/heartwood";
 
 const auth = createGroveAuthClient({
-  clientId: "your-client-id",
-  clientSecret: env.GROVEAUTH_CLIENT_SECRET,
-  redirectUri: "https://yoursite.grove.place/auth/callback",
+	clientId: "your-client-id",
+	clientSecret: env.GROVEAUTH_CLIENT_SECRET,
+	redirectUri: "https://yoursite.grove.place/auth/callback",
 });
 
 // Generate login URL (PKCE)
@@ -218,19 +233,16 @@ const { url, state, codeVerifier } = await auth.getLoginUrl();
 const tokens = await auth.exchangeCode(code, codeVerifier);
 
 // Check if user can post (quota check)
-const { allowed, status } = await auth.canUserCreatePost(
-  tokens.access_token,
-  userId,
-);
+const { allowed, status } = await auth.canUserCreatePost(tokens.access_token, userId);
 ```
 
 #### PKCE Helpers
 
 ```typescript
 import {
-  generateCodeVerifier,
-  generateCodeChallenge,
-  generateState,
+	generateCodeVerifier,
+	generateCodeChallenge,
+	generateState,
 } from "@autumnsgrove/lattice/heartwood";
 ```
 
@@ -238,12 +250,12 @@ import {
 
 ```typescript
 import {
-  getQuotaWidgetData,
-  getPreSubmitCheck,
-  getQuotaDescription,
-  getQuotaUrgency,
-  getSuggestedActions,
-  getUpgradeRecommendation,
+	getQuotaWidgetData,
+	getPreSubmitCheck,
+	getQuotaDescription,
+	getQuotaUrgency,
+	getSuggestedActions,
+	getUpgradeRecommendation,
 } from "@autumnsgrove/lattice/heartwood";
 
 // Powers the QuotaWidget component
@@ -252,7 +264,7 @@ const widgetData = getQuotaWidgetData(subscription);
 // Call before submit to warn users at limit
 const check = getPreSubmitCheck(subscription);
 if (!check.canPost) {
-  // show upgrade prompt
+	// show upgrade prompt
 }
 ```
 
@@ -262,7 +274,7 @@ if (!check.canPost) {
 import { RateLimiter, withRateLimit } from "@autumnsgrove/lattice/heartwood";
 
 await withRateLimit(limiter, "operation-key", async () => {
-  await doExpensiveThing();
+	await doExpensiveThing();
 });
 ```
 
@@ -272,17 +284,17 @@ await withRateLimit(limiter, "operation-key", async () => {
 type SubscriptionTier = "free" | "seedling" | "sapling" | "oak" | "evergreen";
 
 interface UserSubscription {
-  tier: SubscriptionTier;
-  status: SubscriptionStatus;
-  postsUsed: number;
-  postsLimit: number;
+	tier: SubscriptionTier;
+	status: SubscriptionStatus;
+	postsUsed: number;
+	postsLimit: number;
 }
 
 interface CanPostResponse {
-  allowed: boolean;
-  status: "ok" | "near_limit" | "at_limit" | "over_limit";
-  postsUsed: number;
-  postsLimit: number;
+	allowed: boolean;
+	status: "ok" | "near_limit" | "at_limit" | "over_limit";
+	postsUsed: number;
+	postsLimit: number;
 }
 
 // Passkeys, 2FA, linked accounts — all typed in ./heartwood/types.ts
@@ -291,11 +303,7 @@ interface CanPostResponse {
 #### Auth Error System
 
 ```typescript
-import {
-  AUTH_ERRORS,
-  getAuthError,
-  buildErrorParams,
-} from "@autumnsgrove/lattice/heartwood";
+import { AUTH_ERRORS, getAuthError, buildErrorParams } from "@autumnsgrove/lattice/heartwood";
 
 const error = getAuthError("INVALID_SESSION");
 const params = buildErrorParams(error, context);
@@ -305,8 +313,8 @@ const params = buildErrorParams(error, context);
 
 ```typescript
 import {
-  getStatusColorFromPercentage,
-  getAlertVariantFromColor,
+	getStatusColorFromPercentage,
+	getAlertVariantFromColor,
 } from "@autumnsgrove/lattice/heartwood";
 
 const color = getStatusColorFromPercentage((postsUsed / postsLimit) * 100); // 'green' | 'yellow' | 'orange' | 'red'
@@ -324,24 +332,21 @@ Threshold is the unified rate limiting SDK used across all Grove workers. Three 
 #### Quick Start
 
 ```typescript
-import {
-  createThreshold,
-  ThresholdKVStore,
-} from "@autumnsgrove/lattice/threshold";
+import { createThreshold, ThresholdKVStore } from "@autumnsgrove/lattice/threshold";
 
 const threshold = createThreshold({
-  store: new ThresholdKVStore(env.KV),
-  keyPrefix: "rl:",
+	store: new ThresholdKVStore(env.KV),
+	keyPrefix: "rl:",
 });
 
 const result = await threshold.check({
-  key: clientIp,
-  limit: 60,
-  windowSeconds: 60,
+	key: clientIp,
+	limit: 60,
+	windowSeconds: 60,
 });
 
 if (!result.allowed) {
-  return new Response("Rate limited", { status: 429 });
+	return new Response("Rate limited", { status: 429 });
 }
 ```
 
@@ -349,9 +354,9 @@ if (!result.allowed) {
 
 ```typescript
 import {
-  ThresholdKVStore, // Cloudflare KV — fastest, approximate
-  ThresholdD1Store, // D1 — exact counts, audit trail
-  ThresholdDOStore, // Durable Object — exact, consistent, for hot paths
+	ThresholdKVStore, // Cloudflare KV — fastest, approximate
+	ThresholdD1Store, // D1 — exact counts, audit trail
+	ThresholdDOStore, // Durable Object — exact, consistent, for hot paths
 } from "@autumnsgrove/lattice/threshold";
 ```
 
@@ -372,10 +377,7 @@ import { applyThreshold } from "@autumnsgrove/lattice/threshold/worker";
 #### Endpoint Configuration
 
 ```typescript
-import {
-  ENDPOINT_RATE_LIMITS,
-  getEndpointLimit,
-} from "@autumnsgrove/lattice/threshold";
+import { ENDPOINT_RATE_LIMITS, getEndpointLimit } from "@autumnsgrove/lattice/threshold";
 
 // Pre-configured limits for all Grove API endpoints
 const limit = getEndpointLimit("/api/posts");
@@ -385,10 +387,10 @@ const limit = getEndpointLimit("/api/posts");
 
 ```typescript
 import {
-  recordViolation,
-  isBanned,
-  getBanRemaining,
-  clearAbuseState,
+	recordViolation,
+	isBanned,
+	getBanRemaining,
+	clearAbuseState,
 } from "@autumnsgrove/lattice/threshold";
 
 await recordViolation(store, ip, "rate_limit_exceeded");
@@ -403,7 +405,7 @@ const banned = await isBanned(store, ip);
 
 Loom is Grove's base framework for Cloudflare Durable Objects. Every Grove DO extends `LoomDO`. The framework handles routing, storage, WebSockets, alarms, logging, and concurrency — so individual DOs focus on their domain logic.
 
-Actual DO classes live in `packages/durable-objects/` (deployed as a separate Cloudflare Worker). Lattice provides the base class, types, and factory helpers.
+Actual DO classes live in `services/durable-objects/` (deployed as a separate Cloudflare Worker). Lattice provides the base class, types, and factory helpers.
 
 #### Base Class
 
@@ -411,20 +413,16 @@ Actual DO classes live in `packages/durable-objects/` (deployed as a separate Cl
 import { LoomDO } from "@autumnsgrove/lattice/loom";
 
 export class MyDO extends LoomDO {
-  async handleRequest(ctx: LoomRequestContext): Promise<Response> {
-    return LoomResponse.json({ ok: true });
-  }
+	async handleRequest(ctx: LoomRequestContext): Promise<Response> {
+		return LoomResponse.json({ ok: true });
+	}
 }
 ```
 
 #### Storage Utilities
 
 ```typescript
-import {
-  SqlHelper,
-  JsonStore,
-  safeJsonParse,
-} from "@autumnsgrove/lattice/loom";
+import { SqlHelper, JsonStore, safeJsonParse } from "@autumnsgrove/lattice/loom";
 
 // SqlHelper wraps DO's SQL storage with typed helpers
 // JsonStore provides key/value JSON storage over DO storage
@@ -482,10 +480,10 @@ import { createMockLoomDO } from "@autumnsgrove/lattice/loom/testing";
 
 | DO              | Purpose                                              | Location                    |
 | --------------- | ---------------------------------------------------- | --------------------------- |
-| `TenantDO`      | Per-tenant config, drafts, analytics events          | `packages/durable-objects/` |
-| `PostMetaDO`    | Per-post reactions, view counts, presence (hot data) | `packages/durable-objects/` |
-| `PostContentDO` | Per-post content caching (warm data, hibernates)     | `packages/durable-objects/` |
-| `SentinelDO`    | Long-running load tests (> 30s Worker CPU limit)     | `packages/engine/sentinel/` |
+| `TenantDO`      | Per-tenant config, drafts, analytics events          | `services/durable-objects/` |
+| `PostMetaDO`    | Per-post reactions, view counts, presence (hot data) | `services/durable-objects/` |
+| `PostContentDO` | Per-post content caching (warm data, hibernates)     | `services/durable-objects/` |
+| `SentinelDO`    | Long-running load tests (> 30s Worker CPU limit)     | `libs/engine/sentinel/`     |
 
 ---
 
@@ -508,43 +506,40 @@ Lumen automatically falls back to Cloudflare AI when OpenRouter fails.
 import { createLumenClient } from "@autumnsgrove/lattice/lumen";
 
 const lumen = createLumenClient({
-  openrouterApiKey: env.OPENROUTER_API_KEY,
-  ai: env.AI, // Cloudflare AI binding
-  db: env.DB, // D1 for quota tracking
+	openrouterApiKey: env.OPENROUTER_API_KEY,
+	ai: env.AI, // Cloudflare AI binding
+	db: env.DB, // D1 for quota tracking
 });
 
 // Text generation
 const response = await lumen.run(
-  {
-    task: "generation",
-    input: "Write a haiku about fog",
-    tenant: tenantId,
-  },
-  "seedling",
+	{
+		task: "generation",
+		input: "Write a haiku about fog",
+		tenant: tenantId,
+	},
+	"seedling",
 );
 
 // Streaming
 for await (const chunk of lumen.stream(
-  {
-    task: "chat",
-    input: messages,
-    tenant: tenantId,
-  },
-  "seedling",
+	{
+		task: "chat",
+		input: messages,
+		tenant: tenantId,
+	},
+	"seedling",
 )) {
-  process.stdout.write(chunk.content);
+	process.stdout.write(chunk.content);
 }
 
 // Embeddings
-const { embedding } = await lumen.embed(
-  { input: text, tenant: tenantId },
-  "seedling",
-);
+const { embedding } = await lumen.embed({ input: text, tenant: tenantId }, "seedling");
 
 // Moderation (used by Thorn)
 const { flagged, categories } = await lumen.moderate(
-  { content: text, tenant: tenantId },
-  "seedling",
+	{ content: text, tenant: tenantId },
+	"seedling",
 );
 ```
 
@@ -552,23 +547,19 @@ const { flagged, categories } = await lumen.moderate(
 
 ```typescript
 type LumenTask =
-  | "generation" // Open-ended text generation
-  | "summary" // Summarization
-  | "chat" // Multi-turn conversation
-  | "image" // Image generation (Shutter)
-  | "code" // Code generation/analysis
-  | "moderation" // Content safety (used by Thorn)
-  | "embedding"; // Text embeddings
+	| "generation" // Open-ended text generation
+	| "summary" // Summarization
+	| "chat" // Multi-turn conversation
+	| "image" // Image generation (Shutter)
+	| "code" // Code generation/analysis
+	| "moderation" // Content safety (used by Thorn)
+	| "embedding"; // Text embeddings
 ```
 
 #### Quota Management
 
 ```typescript
-import {
-  getTierQuota,
-  wouldExceedQuota,
-  LUMEN_QUOTAS,
-} from "@autumnsgrove/lattice/lumen";
+import { getTierQuota, wouldExceedQuota, LUMEN_QUOTAS } from "@autumnsgrove/lattice/lumen";
 
 const quota = getTierQuota("seedling", "generation");
 const wouldExceed = wouldExceedQuota(currentUsage, estimatedTokens, quota);
@@ -628,14 +619,14 @@ Thorn wraps Lumen's moderation task with config-driven thresholds and graduated 
 import { moderateContent } from "@autumnsgrove/lattice/thorn";
 
 const result = await moderateContent(userContent, {
-  lumen,
-  tenant: tenantId,
-  contentType: "post", // 'post' | 'comment' | 'profile_update'
+	lumen,
+	tenant: tenantId,
+	contentType: "post", // 'post' | 'comment' | 'profile_update'
 });
 
 if (!result.allowed) {
-  // result.action: 'review' | 'flag' | 'block'
-  // result.categories: string[] — what triggered moderation
+	// result.action: 'review' | 'flag' | 'block'
+	// result.categories: string[] — what triggered moderation
 }
 ```
 
@@ -663,12 +654,12 @@ ctx.waitUntil(moderatePublishedContent({ postId, content, lumen, db, tenant }));
 
 ```typescript
 import {
-  logModerationEvent,
-  flagContent,
-  getRecentEvents,
-  getFlaggedContent,
-  updateFlagStatus,
-  getStats,
+	logModerationEvent,
+	flagContent,
+	getRecentEvents,
+	getFlaggedContent,
+	updateFlagStatus,
+	getStats,
 } from "@autumnsgrove/lattice/thorn";
 
 // Get flagged content for admin review
@@ -693,10 +684,10 @@ A Cloudflare-native feature flag engine. Flags are stored in D1 and cached in KV
 
 ```typescript
 import {
-  isFeatureEnabled,
-  getFeatureValue,
-  getVariant,
-  getFlags,
+	isFeatureEnabled,
+	getFeatureValue,
+	getVariant,
+	getFlags,
 } from "@autumnsgrove/lattice/feature-flags";
 
 // Boolean check
@@ -710,22 +701,18 @@ const variant = await getVariant("pricing_experiment", { sessionId }, env);
 // Returns 'control', 'treatment_a', etc.
 
 // Batch evaluation (more efficient for page loads)
-const flags = await getFlags(
-  ["meadow_access", "new_nav"],
-  { tenantId, tier },
-  env,
-);
+const flags = await getFlags(["meadow_access", "new_nav"], { tenantId, tier }, env);
 ```
 
 #### Evaluation Context
 
 ```typescript
 interface EvaluationContext {
-  tenantId?: string;
-  userId?: string;
-  tier?: string;
-  sessionId?: string;
-  email?: string;
+	tenantId?: string;
+	userId?: string;
+	tier?: string;
+	sessionId?: string;
+	email?: string;
 }
 ```
 
@@ -744,10 +731,10 @@ interface EvaluationContext {
 
 ```typescript
 import {
-  isInGreenhouse,
-  enrollInGreenhouse,
-  getGreenhouseTenants,
-  toggleGreenhouseStatus,
+	isInGreenhouse,
+	enrollInGreenhouse,
+	getGreenhouseTenants,
+	toggleGreenhouseStatus,
 } from "@autumnsgrove/lattice/feature-flags";
 
 // Enroll a tenant in beta testing
@@ -761,9 +748,9 @@ Grafts are named feature flags with known IDs. They're loaded once per request a
 
 ```typescript
 import {
-  getEnabledGrafts,
-  isGraftEnabled,
-  type KnownGraftId,
+	getEnabledGrafts,
+	isGraftEnabled,
+	type KnownGraftId,
 } from "@autumnsgrove/lattice/feature-flags";
 
 // Load all grafts for a request (in +layout.server.ts)
@@ -779,8 +766,8 @@ In Svelte: `const flag = $derived(grafts?.flag_id ?? false)`
 
 ```typescript
 import {
-  getUploadSuspensionStatus,
-  setUploadSuspension,
+	getUploadSuspensionStatus,
+	setUploadSuspension,
 } from "@autumnsgrove/lattice/feature-flags";
 
 // Suspend uploads for a tenant (admin action)
@@ -791,8 +778,8 @@ await setUploadSuspension(db, tenantId, { suspended: true, reason: "abuse" });
 
 ```typescript
 import {
-  getTenantControllableGrafts,
-  setTenantGraftOverride,
+	getTenantControllableGrafts,
+	setTenantGraftOverride,
 } from "@autumnsgrove/lattice/feature-flags";
 
 // Let tenants toggle their own optional features
@@ -803,10 +790,7 @@ await setTenantGraftOverride(db, tenantId, "dark_mode_default", true);
 #### Admin (Cultivate Mode)
 
 ```typescript
-import {
-  getFeatureFlags,
-  setFlagEnabled,
-} from "@autumnsgrove/lattice/feature-flags";
+import { getFeatureFlags, setFlagEnabled } from "@autumnsgrove/lattice/feature-flags";
 
 const flags = await getFeatureFlags(db);
 await setFlagEnabled(db, kv, "jxl_encoding", true);
@@ -823,11 +807,7 @@ await setFlagEnabled(db, kv, "jxl_encoding", true);
 #### Registry
 
 ```typescript
-import {
-  GRAFT_REGISTRY,
-  getGraftEntry,
-  getAllGrafts,
-} from "@autumnsgrove/lattice/grafts";
+import { GRAFT_REGISTRY, getGraftEntry, getAllGrafts } from "@autumnsgrove/lattice/grafts";
 
 const entry = getGraftEntry("pricing");
 // { id, productId, status: 'enabled' | 'disabled' | 'beta', ... }
@@ -871,16 +851,16 @@ const zephyr = createZephyrClient({ apiKey: env.ZEPHYR_API_KEY });
 
 // Send a transactional email
 await zephyr.send({
-  to: user.email,
-  type: "welcome",
-  data: { name: user.name },
+	to: user.email,
+	type: "welcome",
+	data: { name: user.name },
 });
 
 // Broadcast a post to connected social accounts
 const result = await zephyr.broadcast({
-  postId: post.id,
-  content: post.content,
-  platforms: ["mastodon", "bluesky"],
+	postId: post.id,
+	content: post.content,
+	platforms: ["mastodon", "bluesky"],
 });
 
 // result.success = true only if ALL platforms succeeded
@@ -904,14 +884,14 @@ If a platform is structurally incompatible with the content (e.g., long-form onl
 
 **Import:** `@autumnsgrove/lattice/curios` (plus individual paths for some)
 
-Curios are the delightful, weird, personality-giving widgets that make a Grove site feel alive. They range from guestbooks and hit counters to AI-powered GitHub activity summaries. Every curio has its own type definitions, server logic, and test coverage in `packages/engine/src/lib/curios/`.
+Curios are the delightful, weird, personality-giving widgets that make a Grove site feel alive. They range from guestbooks and hit counters to AI-powered GitHub activity summaries. Every curio has its own type definitions, server logic, and test coverage in `libs/engine/src/lib/curios/`.
 
 Curio UI components live separately in `@autumnsgrove/lattice/ui/content/curios`.
 
 #### Architecture
 
 ```
-packages/engine/src/lib/
+libs/engine/src/lib/
 ├── curios/
 │   ├── timeline/       ← logic, AI integration, voice presets
 │   ├── journey/        ← logic, GitHub repo analysis
@@ -936,22 +916,22 @@ AI-powered daily summaries of GitHub activity. The most complex curio.
 
 ```typescript
 import {
-  getOpenRouterModels,
-  validateOpenRouterKey,
-  buildVoicedPrompt,
-  getAllVoices,
-  getVoice,
-  parseAIResponse,
-  DEFAULT_TIMELINE_CONFIG,
+	getOpenRouterModels,
+	validateOpenRouterKey,
+	buildVoicedPrompt,
+	getAllVoices,
+	getVoice,
+	parseAIResponse,
+	DEFAULT_TIMELINE_CONFIG,
 } from "@autumnsgrove/lattice/curios/timeline";
 
 // Voice presets for generating summaries
 import {
-  professional,
-  quest,
-  casual,
-  poetic,
-  minimal,
+	professional,
+	quest,
+	casual,
+	poetic,
+	minimal,
 } from "@autumnsgrove/lattice/curios/timeline";
 
 // Build a voiced prompt for the AI
@@ -964,13 +944,13 @@ Live development heartbeat from GitHub webhooks. Svelte components included:
 
 ```typescript
 import {
-  Pulse,
-  PulseCompact,
-  PulseIndicator,
-  PulseStats,
-  PulseHeatmap,
-  PulseFeed,
-  PulseTrends,
+	Pulse,
+	PulseCompact,
+	PulseIndicator,
+	PulseStats,
+	PulseHeatmap,
+	PulseFeed,
+	PulseTrends,
 } from "@autumnsgrove/lattice/curios";
 ```
 
@@ -1093,8 +1073,8 @@ The grove color scale is **inverted in dark mode**: `grove-50` = deep green, `gr
 import preset from "@autumnsgrove/lattice/ui/tailwind";
 
 export default {
-  presets: [preset],
-  // ...
+	presets: [preset],
+	// ...
 };
 ```
 
@@ -1115,18 +1095,14 @@ Grove's email system is built on React Email + Resend. There's a full design sys
 #### Components
 
 ```tsx
-import {
-  GroveEmail,
-  GroveButton,
-  GroveHeading,
-} from "@autumnsgrove/lattice/email/components";
+import { GroveEmail, GroveButton, GroveHeading } from "@autumnsgrove/lattice/email/components";
 import { render } from "@autumnsgrove/lattice/email/render";
 
 const html = await render(
-  <GroveEmail subject="Welcome">
-    <GroveHeading>Your grove is ready.</GroveHeading>
-    <GroveButton href="https://grove.place">Open your grove</GroveButton>
-  </GroveEmail>,
+	<GroveEmail subject="Welcome">
+		<GroveHeading>Your grove is ready.</GroveHeading>
+		<GroveButton href="https://grove.place">Open your grove</GroveButton>
+	</GroveEmail>,
 );
 ```
 
@@ -1168,8 +1144,8 @@ import { apiRequest } from "@autumnsgrove/lattice/utils";
 
 // Instead of bare fetch('/api/posts', { method: 'POST', ... })
 const result = await apiRequest("/api/posts", {
-  method: "POST",
-  body: JSON.stringify({ title, content }),
+	method: "POST",
+	body: JSON.stringify({ title, content }),
 });
 ```
 
@@ -1185,11 +1161,7 @@ import { renderMarkdown, parseMarkdown } from "@autumnsgrove/lattice/utils";
 #### Image Processing
 
 ```typescript
-import {
-  encodeAsJxl,
-  convertToWebP,
-  processHeic,
-} from "@autumnsgrove/lattice/utils";
+import { encodeAsJxl, convertToWebP, processHeic } from "@autumnsgrove/lattice/utils";
 // JXL encoding via @jsquash/jxl, WebP conversion, HEIC support
 ```
 

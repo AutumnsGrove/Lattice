@@ -189,20 +189,20 @@ Trace fills the gap: feedback that's too quick for a form, too contextual for a 
 
 ```typescript
 interface TraceProps {
-  /** Override auto-detected path. Format: "route:suffix" */
-  id?: string;
+	/** Override auto-detected path. Format: "route:suffix" */
+	id?: string;
 
-  /** Show optional comment field (default: true) */
-  showComment?: boolean;
+	/** Show optional comment field (default: true) */
+	showComment?: boolean;
 
-  /** Component size variant (default: "md") */
-  size?: "sm" | "md";
+	/** Component size variant (default: "md") */
+	size?: "sm" | "md";
 
-  /** Custom prompt text (default: "Was this helpful?") */
-  prompt?: string;
+	/** Custom prompt text (default: "Was this helpful?") */
+	prompt?: string;
 
-  /** Additional CSS classes */
-  class?: string;
+	/** Additional CSS classes */
+	class?: string;
 }
 ```
 
@@ -236,21 +236,21 @@ When no `id` prop is provided, Trace reads `$page.url.pathname` and normalizes i
 
 ```typescript
 function buildTracePath(route: string, suffix?: string): string {
-  // Clean the route
-  let path = route
-    .replace(/^\/+/, "") // Remove leading slashes
-    .replace(/\/+$/, "") // Remove trailing slashes
-    .replace(/\//g, "-"); // Replace internal slashes with hyphens
+	// Clean the route
+	let path = route
+		.replace(/^\/+/, "") // Remove leading slashes
+		.replace(/\/+$/, "") // Remove trailing slashes
+		.replace(/\//g, "-"); // Replace internal slashes with hyphens
 
-  // Handle empty route (homepage)
-  if (!path) path = "home";
+	// Handle empty route (homepage)
+	if (!path) path = "home";
 
-  // Add suffix if provided
-  if (suffix) {
-    path = `${path}:${suffix}`;
-  }
+	// Add suffix if provided
+	if (suffix) {
+		path = `${path}:${suffix}`;
+	}
 
-  return path;
+	return path;
 }
 ```
 
@@ -312,22 +312,22 @@ CREATE INDEX idx_trace_dedup ON trace_feedback(source_path, ip_hash, created_at)
 ```typescript
 // Request
 interface TraceRequest {
-  sourcePath: string; // e.g., "workshop:GlassCard"
-  vote: "up" | "down";
-  comment?: string; // Max 500 characters
+	sourcePath: string; // e.g., "workshop:GlassCard"
+	vote: "up" | "down";
+	comment?: string; // Max 500 characters
 }
 
 // Response (success)
 interface TraceResponse {
-  success: true;
-  id: string;
+	success: true;
+	id: string;
 }
 
 // Response (error)
 interface TraceErrorResponse {
-  success: false;
-  error: string;
-  code: "RATE_LIMITED" | "INVALID_VOTE" | "COMMENT_TOO_LONG" | "SERVER_ERROR";
+	success: false;
+	error: string;
+	code: "RATE_LIMITED" | "INVALID_VOTE" | "COMMENT_TOO_LONG" | "SERVER_ERROR";
 }
 ```
 
@@ -336,78 +336,60 @@ interface TraceErrorResponse {
 ```typescript
 // routes/api/trace/+server.ts
 
-export const POST: RequestHandler = async ({
-  request,
-  platform,
-  getClientAddress,
-}) => {
-  const { sourcePath, vote, comment } = await request.json();
+export const POST: RequestHandler = async ({ request, platform, getClientAddress }) => {
+	const { sourcePath, vote, comment } = await request.json();
 
-  // 1. Validate
-  if (!["up", "down"].includes(vote)) {
-    return json(
-      { success: false, error: "Invalid vote", code: "INVALID_VOTE" },
-      { status: 400 },
-    );
-  }
+	// 1. Validate
+	if (!["up", "down"].includes(vote)) {
+		return json({ success: false, error: "Invalid vote", code: "INVALID_VOTE" }, { status: 400 });
+	}
 
-  if (comment && comment.length > 500) {
-    return json(
-      { success: false, error: "Comment too long", code: "COMMENT_TOO_LONG" },
-      { status: 400 },
-    );
-  }
+	if (comment && comment.length > 500) {
+		return json(
+			{ success: false, error: "Comment too long", code: "COMMENT_TOO_LONG" },
+			{ status: 400 },
+		);
+	}
 
-  // 2. Hash IP for privacy
-  const ip = getClientAddress();
-  const dailySalt = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
-  const ipHash = await hashIP(ip, dailySalt);
+	// 2. Hash IP for privacy
+	const ip = getClientAddress();
+	const dailySalt = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+	const ipHash = await hashIP(ip, dailySalt);
 
-  // 3. Check rate limit (10/day per IP)
-  const todayStart =
-    Math.floor(Date.now() / 1000) - ((Date.now() / 1000) % 86400);
-  const countToday = await platform.env.DB.prepare(
-    `
+	// 3. Check rate limit (10/day per IP)
+	const todayStart = Math.floor(Date.now() / 1000) - ((Date.now() / 1000) % 86400);
+	const countToday = await platform.env.DB.prepare(
+		`
     SELECT COUNT(*) as count FROM trace_feedback
     WHERE ip_hash = ? AND created_at >= ?
   `,
-  )
-    .bind(ipHash, todayStart)
-    .first<{ count: number }>();
+	)
+		.bind(ipHash, todayStart)
+		.first<{ count: number }>();
 
-  if (countToday && countToday.count >= 10) {
-    return json(
-      { success: false, error: "Rate limited", code: "RATE_LIMITED" },
-      { status: 429 },
-    );
-  }
+	if (countToday && countToday.count >= 10) {
+		return json({ success: false, error: "Rate limited", code: "RATE_LIMITED" }, { status: 429 });
+	}
 
-  // 4. Insert
-  const id = crypto.randomUUID();
-  await platform.env.DB.prepare(
-    `
+	// 4. Insert
+	const id = crypto.randomUUID();
+	await platform.env.DB.prepare(
+		`
     INSERT INTO trace_feedback (id, source_path, vote, comment, ip_hash, user_agent)
     VALUES (?, ?, ?, ?, ?, ?)
   `,
-  )
-    .bind(
-      id,
-      sourcePath,
-      vote,
-      comment || null,
-      ipHash,
-      request.headers.get("user-agent"),
-    )
-    .run();
+	)
+		.bind(id, sourcePath, vote, comment || null, ipHash, request.headers.get("user-agent"))
+		.run();
 
-  // 5. Send email notification
-  await sendTraceNotification(platform.env.RESEND_API_KEY, {
-    sourcePath,
-    vote,
-    comment,
-  });
+	// 5. Send email notification
+	await sendTraceNotification(platform.env.RESEND_API_KEY, {
+		sourcePath,
+		vote,
+		comment,
+	});
 
-  return json({ success: true, id });
+	return json({ success: true, id });
 };
 ```
 
@@ -487,34 +469,34 @@ Trace uses Grove's glassmorphism design language:
 
 ```css
 .trace-container {
-  /* Glass effect */
-  @apply bg-grove-glass/30 backdrop-blur-sm;
-  @apply border border-grove-glass-border;
-  @apply rounded-xl p-4;
+	/* Glass effect */
+	@apply bg-grove-glass/30 backdrop-blur-sm;
+	@apply border border-grove-glass-border;
+	@apply rounded-xl p-4;
 
-  /* Subtle presence */
-  @apply text-center;
+	/* Subtle presence */
+	@apply text-center;
 }
 
 .trace-button {
-  /* Soft, inviting buttons */
-  @apply px-6 py-3 rounded-lg;
-  @apply bg-grove-glass/50 hover:bg-grove-glass/70;
-  @apply border border-grove-glass-border;
-  @apply transition-all duration-200;
-  @apply text-2xl; /* For emoji */
+	/* Soft, inviting buttons */
+	@apply px-6 py-3 rounded-lg;
+	@apply bg-grove-glass/50 hover:bg-grove-glass/70;
+	@apply border border-grove-glass-border;
+	@apply transition-all duration-200;
+	@apply text-2xl; /* For emoji */
 }
 
 .trace-button:hover {
-  @apply scale-105;
+	@apply scale-105;
 }
 
 .trace-button.selected {
-  @apply bg-grove-accent/20 border-grove-accent;
+	@apply bg-grove-accent/20 border-grove-accent;
 }
 
 .trace-tagline {
-  @apply text-sm text-foreground-muted italic mt-3;
+	@apply text-sm text-foreground-muted italic mt-3;
 }
 ```
 
@@ -534,8 +516,8 @@ Trace uses Grove's glassmorphism design language:
 
 ### Phase 1: Core Component
 
-- [ ] Create `packages/engine/src/lib/ui/feedback/Trace.svelte`
-- [ ] Implement path builder utility in `packages/engine/src/lib/utils/trace-path.ts`
+- [ ] Create `libs/engine/src/lib/ui/feedback/Trace.svelte`
+- [ ] Implement path builder utility in `libs/engine/src/lib/utils/trace-path.ts`
 - [ ] Add glassmorphism styling
 - [ ] Handle all states (default, expanded, submitted, already voted)
 - [ ] Export from `@autumnsgrove/lattice/ui/feedback`

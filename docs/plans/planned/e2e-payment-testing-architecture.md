@@ -357,7 +357,7 @@ The token is:
 Cleans up test tenant and related data:
 
 ```typescript
-// packages/plant/src/routes/api/e2e/cleanup/+server.ts
+// apps/plant/src/routes/api/e2e/cleanup/+server.ts
 
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
@@ -435,7 +435,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 Health check for E2E environment:
 
 ```typescript
-// packages/plant/src/routes/api/e2e/status/+server.ts
+// apps/plant/src/routes/api/e2e/status/+server.ts
 
 export const GET: RequestHandler = async ({ platform }) => {
   const db = platform?.env?.DB;
@@ -789,14 +789,14 @@ on:
   push:
     branches: [main]
     paths:
-      - "packages/plant/**"
-      - "packages/engine/src/routes/api/billing/**"
-      - "packages/engine/src/lib/payments/**"
+      - "apps/plant/**"
+      - "libs/engine/src/routes/api/billing/**"
+      - "libs/engine/src/lib/payments/**"
 
   pull_request:
     paths:
-      - "packages/plant/**"
-      - "packages/engine/src/routes/api/billing/**"
+      - "apps/plant/**"
+      - "libs/engine/src/routes/api/billing/**"
 
   # Run daily at 6 AM UTC
   schedule:
@@ -857,7 +857,7 @@ jobs:
 The E2E test results can be displayed on Clearing:
 
 ```typescript
-// packages/clearing/src/routes/+page.server.ts
+// apps/clearing/src/routes/+page.server.ts
 
 // Add E2E test status
 const e2eStatus = await fetch(
@@ -992,7 +992,7 @@ function validateE2EAccess(request: Request, env: Env) {
 
 - [Testing Infrastructure Spec](../docs/specs/testing-spec.md)
 - [Heartwood Auth Spec](../docs/specs/heartwood-spec.md)
-- [Plant Onboarding Flow](../packages/plant/README.md)
+- [Plant Onboarding Flow](../apps/plant/README.md)
 - [Stripe Setup Guide](../docs/setup/stripe-setup.md)
 
 ---

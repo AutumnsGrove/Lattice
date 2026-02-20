@@ -31,9 +31,9 @@ Reuse Landing's proven dual-auth strategy. Everything downstream depends on `loc
 
 | File                                                  | Action                                                                      | Reference                                   |
 | ----------------------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------- |
-| `packages/meadow/src/hooks.server.ts`                 | **Create** — Heartwood SessionDO (primary) + D1 fallback, CSRF on mutations | `packages/landing/src/hooks.server.ts`      |
-| `packages/meadow/src/routes/auth/callback/+server.ts` | **Create** — `createCallbackHandler({ defaultReturnTo: "/feed" })`          | `@autumnsgrove/lattice/grafts/login/server` |
-| `packages/meadow/src/routes/+layout.server.ts`        | **Modify** — Add `user: locals.user` to returned data                       | Already returns `messages`                  |
+| `apps/meadow/src/hooks.server.ts`                 | **Create** — Heartwood SessionDO (primary) + D1 fallback, CSRF on mutations | `apps/landing/src/hooks.server.ts`      |
+| `apps/meadow/src/routes/auth/callback/+server.ts` | **Create** — `createCallbackHandler({ defaultReturnTo: "/feed" })`          | `@autumnsgrove/lattice/grafts/login/server` |
+| `apps/meadow/src/routes/+layout.server.ts`        | **Modify** — Add `user: locals.user` to returned data                       | Already returns `messages`                  |
 
 Key imports:
 
@@ -45,7 +45,7 @@ Key imports:
 
 Thin query functions over D1. Each file isolates one concern.
 
-**New directory:** `packages/meadow/src/lib/server/`
+**New directory:** `apps/meadow/src/lib/server/`
 
 | File           | Key Functions                                                 | Notes                                                                                                                           |
 | -------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
@@ -56,7 +56,7 @@ Thin query functions over D1. Each file isolates one concern.
 | `bookmarks.ts` | `toggleBookmark()`                                            | INSERT or DELETE, returns new boolean state                                                                                     |
 | `follows.ts`   | `followBlog()`, `unfollowBlog()`, `getFollowing()`            | Powers "Following" filter tab                                                                                                   |
 
-**New file:** `packages/meadow/src/lib/constants/reactions.ts` (~30 lines)
+**New file:** `apps/meadow/src/lib/constants/reactions.ts` (~30 lines)
 
 10 warm emojis per spec (no angry):
 
@@ -79,7 +79,7 @@ Plus `MEADOW_REACTIONS` Set + `isValidReaction()` guard (same pattern as guestbo
 
 RESTful SvelteKit routes. Auth-required endpoints return 401 for anon. Rate limiting via IP-hash pattern (ref: guestbook curio).
 
-**Feed endpoints** (`packages/meadow/src/routes/api/feed/`):
+**Feed endpoints** (`apps/meadow/src/routes/api/feed/`):
 
 | Route                      | Methods      | Purpose                     | Auth     |
 | -------------------------- | ------------ | --------------------------- | -------- |
@@ -89,7 +89,7 @@ RESTful SvelteKit routes. Auth-required endpoints return 401 for anon. Rate limi
 | `[id]/bookmark/+server.ts` | POST         | Toggle bookmark             | Required |
 | `[id]/report/+server.ts`   | POST         | Report with reason          | Required |
 
-**User endpoints** (`packages/meadow/src/routes/api/`):
+**User endpoints** (`apps/meadow/src/routes/api/`):
 
 | Route                          | Methods      | Purpose               | Auth     |
 | ------------------------------ | ------------ | --------------------- | -------- |
@@ -172,14 +172,14 @@ Phase 1 (Auth) ─────────→ Phase 2 (Service Layer + Constants
 
 | Pattern                 | File                                                             |
 | ----------------------- | ---------------------------------------------------------------- |
-| Auth hooks              | `packages/landing/src/hooks.server.ts`                           |
-| Auth callback           | `packages/landing/src/routes/auth/callback/+server.ts`           |
-| buildLoginUrl           | `packages/engine/src/lib/grafts/login/config.ts`                 |
-| createCallbackHandler   | `packages/engine/src/lib/grafts/login/server/callback.ts`        |
-| Pagination pattern      | `packages/engine/src/routes/api/curios/guestbook/+server.ts`     |
-| Emoji validation        | `packages/engine/src/lib/curios/guestbook/index.ts`              |
-| Rate limiting (IP-hash) | `packages/engine/src/routes/api/curios/guestbook/+server.ts:192` |
-| Client API calls        | `packages/engine/src/lib/utils/api.ts` (api.post, api.get)       |
+| Auth hooks              | `apps/landing/src/hooks.server.ts`                           |
+| Auth callback           | `apps/landing/src/routes/auth/callback/+server.ts`           |
+| buildLoginUrl           | `libs/engine/src/lib/grafts/login/config.ts`                 |
+| createCallbackHandler   | `libs/engine/src/lib/grafts/login/server/callback.ts`        |
+| Pagination pattern      | `libs/engine/src/routes/api/curios/guestbook/+server.ts`     |
+| Emoji validation        | `libs/engine/src/lib/curios/guestbook/index.ts`              |
+| Rate limiting (IP-hash) | `libs/engine/src/routes/api/curios/guestbook/+server.ts:192` |
+| Client API calls        | `libs/engine/src/lib/utils/api.ts` (api.post, api.get)       |
 | Error responses         | `@autumnsgrove/lattice/errors` (buildErrorJson, API_ERRORS)      |
 
 ## Summary

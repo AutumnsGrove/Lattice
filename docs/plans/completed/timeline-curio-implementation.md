@@ -5,6 +5,7 @@
 Transform the existing Timeline page from AutumnsGrove into the **first Developer Curio** - a reusable, configurable tool that any developer can enable on their Grove site to get AI-generated daily summaries of their GitHub activity.
 
 **Key Decisions:**
+
 - **Hosting**: Grove-hosted (primary) + self-deploy template (power users)
 - **AI Provider**: OpenRouter (BYOK - Bring Your Own Key)
 - **Voice System**: 5 presets + custom prompt option
@@ -29,6 +30,7 @@ Transform the existing Timeline page from AutumnsGrove into the **first Develope
    - Keep Anthropic/CF for AutumnsGrove's own timeline (backwards compat)
 
 ### OpenRouter Config Pattern
+
 ```javascript
 {
   provider: 'openrouter',
@@ -45,23 +47,24 @@ Transform the existing Timeline page from AutumnsGrove into the **first Develope
 
 ### Files to Create
 
-1. **Create** `workers/daily-summary/voices/index.js`
+1. **Create** `services/daily-summary/voices/index.js`
    - Export all voice presets
    - Voice selector utility function
 
-2. **Create** `workers/daily-summary/voices/presets/`
+2. **Create** `services/daily-summary/voices/presets/`
    - `professional.js` - Clean, technical (current AutumnsGrove style)
    - `quest.js` - RPG/adventure style ("Day 3 of the Great Refactoring Quest...")
    - `casual.js` - Friendly, conversational ("Hey! Pretty productive day...")
    - `poetic.js` - Lyrical, contemplative ("In the quiet hours, code took shape...")
    - `minimal.js` - Just the facts, bullet points only
 
-3. **Modify** `workers/daily-summary/prompts.js`
+3. **Modify** `services/daily-summary/prompts.js`
    - Accept voice preset as parameter
    - Support custom prompt override
    - Maintain backward compatibility with current system
 
 ### Voice Preset Interface
+
 ```javascript
 {
   id: 'quest',
@@ -81,7 +84,8 @@ Transform the existing Timeline page from AutumnsGrove into the **first Develope
 
 ### Migration Files to Create
 
-1. **Create** `packages/engine/migrations/0XX_timeline_curio_settings.sql`
+1. **Create** `libs/engine/migrations/0XX_timeline_curio_settings.sql`
+
 ```sql
 -- Timeline curio configuration per tenant
 CREATE TABLE IF NOT EXISTS timeline_curio_config (
@@ -132,12 +136,12 @@ ON timeline_summaries(tenant_id, summary_date DESC);
 
 ### Files to Create
 
-1. **Create** `packages/engine/src/routes/admin/curios/+page.svelte`
+1. **Create** `libs/engine/src/routes/admin/curios/+page.svelte`
    - Curios overview page (list of available curios)
    - Shows which curios are enabled
    - Tier-based limits display
 
-2. **Create** `packages/engine/src/routes/admin/curios/timeline/+page.svelte`
+2. **Create** `libs/engine/src/routes/admin/curios/timeline/+page.svelte`
    - Timeline configuration form
    - GitHub token input (with secure storage)
    - OpenRouter key input
@@ -147,14 +151,14 @@ ON timeline_summaries(tenant_id, summary_date DESC);
    - Repos include/exclude configuration
    - Test button ("Generate today's summary")
 
-3. **Create** `packages/engine/src/routes/admin/curios/timeline/+page.server.ts`
+3. **Create** `libs/engine/src/routes/admin/curios/timeline/+page.server.ts`
    - Load current config
    - Save config (with encryption for tokens)
    - Validate inputs
 
 ### Files to Modify
 
-1. **Modify** `packages/engine/src/routes/admin/+layout.svelte`
+1. **Modify** `libs/engine/src/routes/admin/+layout.svelte`
    - Add "Curios" section to sidebar navigation
    - Icon: Sparkles or similar
 
@@ -166,20 +170,20 @@ ON timeline_summaries(tenant_id, summary_date DESC);
 
 ### Files to Create
 
-1. **Create** `packages/engine/src/routes/api/curios/timeline/+server.ts`
+1. **Create** `libs/engine/src/routes/api/curios/timeline/+server.ts`
    - GET: Fetch timeline summaries (paginated)
    - Public read access (for embedding)
 
-2. **Create** `packages/engine/src/routes/api/curios/timeline/config/+server.ts`
+2. **Create** `libs/engine/src/routes/api/curios/timeline/config/+server.ts`
    - GET: Fetch current config (admin only)
    - PUT: Update config (admin only)
    - Handles encryption/decryption of tokens
 
-3. **Create** `packages/engine/src/routes/api/curios/timeline/generate/+server.ts`
+3. **Create** `libs/engine/src/routes/api/curios/timeline/generate/+server.ts`
    - POST: Manually trigger summary generation (admin only)
    - For testing and on-demand generation
 
-4. **Create** `packages/engine/src/routes/api/curios/timeline/activity/+server.ts`
+4. **Create** `libs/engine/src/routes/api/curios/timeline/activity/+server.ts`
    - GET: Fetch activity heatmap data
    - Cached for performance
 
@@ -204,14 +208,15 @@ ON timeline_summaries(tenant_id, summary_date DESC);
    - Store in tenant-scoped table
 
 ### Cron Strategy
+
 ```javascript
 // Option A: Single cron, process all tenants
 scheduled: async (event, env) => {
-  const enabledTenants = await getEnabledTenants(env.DB);
-  for (const tenant of enabledTenants) {
-    await processTenantSummary(tenant, env);
-  }
-}
+	const enabledTenants = await getEnabledTenants(env.DB);
+	for (const tenant of enabledTenants) {
+		await processTenantSummary(tenant, env);
+	}
+};
 
 // Option B: Per-tenant scheduling (respects timezone)
 // More complex but better for different timezones
@@ -225,32 +230,33 @@ scheduled: async (event, env) => {
 
 ### Files to Create
 
-1. **Create** `packages/engine/src/lib/curios/Timeline/Timeline.svelte`
+1. **Create** `libs/engine/src/lib/curios/Timeline/Timeline.svelte`
    - Main timeline component (adapted from AutumnsGrove)
    - Accepts tenant context
    - Configurable styling
    - Responsive design
 
-2. **Create** `packages/engine/src/lib/curios/Timeline/index.ts`
+2. **Create** `libs/engine/src/lib/curios/Timeline/index.ts`
    - Export component and types
 
-3. **Create** `packages/engine/src/routes/(site)/timeline/+page.svelte`
+3. **Create** `libs/engine/src/routes/(site)/timeline/+page.svelte`
    - Public timeline page
    - Uses Timeline component
    - Loads data from API
 
-4. **Create** `packages/engine/src/routes/(site)/timeline/+page.server.ts`
+4. **Create** `libs/engine/src/routes/(site)/timeline/+page.server.ts`
    - Load timeline data for current tenant
    - Handle 404 if timeline not enabled
 
 ### Component Props
+
 ```typescript
 interface TimelineProps {
-  summaries: TimelineSummary[];
-  activity?: ActivityData;
-  voicePreset?: string;
-  showActivity?: boolean;
-  limit?: number;
+	summaries: TimelineSummary[];
+	activity?: ActivityData;
+	voicePreset?: string;
+	showActivity?: boolean;
+	limit?: number;
 }
 ```
 
@@ -278,22 +284,23 @@ interface TimelineProps {
 
 ## Critical Files Summary
 
-| Category | Files |
-|----------|-------|
-| **OpenRouter** | `workers/daily-summary/providers/openrouter.js` |
-| **Voices** | `workers/daily-summary/voices/*.js` |
-| **Database** | `packages/engine/migrations/0XX_timeline_curio_settings.sql` |
-| **Admin UI** | `packages/engine/src/routes/admin/curios/**` |
-| **API** | `packages/engine/src/routes/api/curios/timeline/**` |
-| **Worker** | `workers/daily-summary/index.js`, `tenant-processor.js` |
-| **Component** | `packages/engine/src/lib/curios/Timeline/**` |
-| **Route** | `packages/engine/src/routes/(site)/timeline/**` |
+| Category       | Files                                                        |
+| -------------- | ------------------------------------------------------------ |
+| **OpenRouter** | `workers/daily-summary/providers/openrouter.js`              |
+| **Voices**     | `workers/daily-summary/voices/*.js`                          |
+| **Database**   | `libs/engine/migrations/0XX_timeline_curio_settings.sql` |
+| **Admin UI**   | `libs/engine/src/routes/admin/curios/**`                 |
+| **API**        | `libs/engine/src/routes/api/curios/timeline/**`          |
+| **Worker**     | `workers/daily-summary/index.js`, `tenant-processor.js`      |
+| **Component**  | `libs/engine/src/lib/curios/Timeline/**`                 |
+| **Route**      | `libs/engine/src/routes/(site)/timeline/**`              |
 
 ---
 
 ## Verification Plan
 
 ### 1. OpenRouter Integration
+
 ```bash
 # Test OpenRouter provider directly
 curl -X POST https://openrouter.ai/api/v1/chat/completions \
@@ -302,29 +309,34 @@ curl -X POST https://openrouter.ai/api/v1/chat/completions \
 ```
 
 ### 2. Voice Presets
+
 - Generate test summaries with each voice preset
 - Compare output tone and style
 - Verify gutter comments match voice
 
 ### 3. Admin UI
+
 - Enable Timeline Curio in Arbor
 - Configure GitHub token + OpenRouter key
 - Select voice preset
 - Test "Generate Now" button
 
 ### 4. Multi-Tenant Worker
+
 - Create test tenant with Timeline enabled
 - Trigger manual generation
 - Verify summary appears in database
 - Check no cross-tenant data leakage
 
 ### 5. Public Route
+
 - Visit `/timeline` on test site
 - Verify summaries render correctly
 - Test pagination
 - Check mobile responsiveness
 
 ### 6. End-to-End
+
 - Full flow: Enable curio → Configure → Generate → View
 - Wait for scheduled cron (or trigger manually)
 - Verify daily summary appears next day
@@ -417,8 +429,8 @@ POST /api/curios/timeline/backfill/cancel/:jobId
 
 ### Files to Create (v1.1)
 
-- `packages/engine/src/lib/curios/timeline/backfill/queue-producer.ts`
-- `packages/engine/src/lib/curios/timeline/backfill/queue-consumer.ts`
-- `packages/engine/src/lib/curios/timeline/backfill/loom-do.ts`
-- `packages/engine/src/routes/api/curios/timeline/backfill/start/+server.ts`
-- `packages/engine/src/routes/api/curios/timeline/backfill/status/[jobId]/+server.ts`
+- `libs/engine/src/lib/curios/timeline/backfill/queue-producer.ts`
+- `libs/engine/src/lib/curios/timeline/backfill/queue-consumer.ts`
+- `libs/engine/src/lib/curios/timeline/backfill/loom-do.ts`
+- `libs/engine/src/routes/api/curios/timeline/backfill/start/+server.ts`
+- `libs/engine/src/routes/api/curios/timeline/backfill/status/[jobId]/+server.ts`

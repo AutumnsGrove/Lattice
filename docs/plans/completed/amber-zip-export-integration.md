@@ -46,8 +46,8 @@ Copy Amber's export utilities directly into Lattice rather than using service bi
 
 **Files to port:**
 
-- `ExportJobV2.ts` → `packages/engine/src/lib/server/services/export/ExportJob.ts`
-- `zipStream.ts` → `packages/engine/src/lib/server/services/export/zipStream.ts`
+- `ExportJobV2.ts` → `libs/engine/src/lib/server/services/export/ExportJob.ts`
+- `zipStream.ts` → `libs/engine/src/lib/server/services/export/zipStream.ts`
 
 ---
 
@@ -86,7 +86,7 @@ CREATE INDEX IF NOT EXISTS idx_tenant_exports_expiry ON tenant_exports(status, e
 
 #### 1.1 Create Export Service Module
 
-**Location:** `packages/engine/src/lib/server/services/export/`
+**Location:** `libs/engine/src/lib/server/services/export/`
 
 ```
 export/
@@ -145,7 +145,7 @@ pnpm add fflate
 
 #### 2.1 Start Export
 
-**Route:** `packages/engine/src/routes/api/export/+server.ts`
+**Route:** `libs/engine/src/routes/api/export/+server.ts`
 
 ```typescript
 // POST /api/export
@@ -153,136 +153,133 @@ pnpm add fflate
 // Response: { export_id, status: 'pending', message: '...' } (202 Accepted)
 
 export const POST: RequestHandler = async ({ request, locals, platform }) => {
-  const tenantId = locals.tenantId;
-  if (!tenantId) return error(401, "Unauthorized");
+	const tenantId = locals.tenantId;
+	if (!tenantId) return error(401, "Unauthorized");
 
-  const { type, filters } = await request.json();
+	const { type, filters } = await request.json();
 
-  // Check for existing in-progress export
-  const existing = await platform.env.DB.prepare(
-    `
+	// Check for existing in-progress export
+	const existing = await platform.env.DB.prepare(
+		`
     SELECT id FROM tenant_exports
     WHERE tenant_id = ? AND status IN ('pending', 'processing')
   `,
-  )
-    .bind(tenantId)
-    .first();
+	)
+		.bind(tenantId)
+		.first();
 
-  if (existing) {
-    return error(409, "An export is already in progress");
-  }
+	if (existing) {
+		return error(409, "An export is already in progress");
+	}
 
-  // Create export record
-  const exportId = crypto.randomUUID();
-  await platform.env.DB.prepare(
-    `
+	// Create export record
+	const exportId = crypto.randomUUID();
+	await platform.env.DB.prepare(
+		`
     INSERT INTO tenant_exports (id, tenant_id, export_type, filter_params)
     VALUES (?, ?, ?, ?)
   `,
-  )
-    .bind(exportId, tenantId, type, JSON.stringify(filters || {}))
-    .run();
+	)
+		.bind(exportId, tenantId, type, JSON.stringify(filters || {}))
+		.run();
 
-  // Trigger Durable Object (fire-and-forget)
-  const doId = platform.env.EXPORT_JOBS.idFromName(exportId);
-  const doStub = platform.env.EXPORT_JOBS.get(doId);
-  platform.context.waitUntil(
-    doStub.fetch(
-      new Request(
-        `https://internal/?action=start&exportId=${exportId}&tenantId=${tenantId}`,
-      ),
-    ),
-  );
+	// Trigger Durable Object (fire-and-forget)
+	const doId = platform.env.EXPORT_JOBS.idFromName(exportId);
+	const doStub = platform.env.EXPORT_JOBS.get(doId);
+	platform.context.waitUntil(
+		doStub.fetch(
+			new Request(`https://internal/?action=start&exportId=${exportId}&tenantId=${tenantId}`),
+		),
+	);
 
-  return json({ export_id: exportId, status: "pending" }, { status: 202 });
+	return json({ export_id: exportId, status: "pending" }, { status: 202 });
 };
 ```
 
 #### 2.2 Poll Status
 
-**Route:** `packages/engine/src/routes/api/export/[id]/+server.ts`
+**Route:** `libs/engine/src/routes/api/export/[id]/+server.ts`
 
 ```typescript
 // GET /api/export/:id
 // Response: { id, status, r2_key?, size_bytes?, file_count?, error_message?, ... }
 
 export const GET: RequestHandler = async ({ params, locals, platform }) => {
-  const tenantId = locals.tenantId;
-  const exportId = params.id;
+	const tenantId = locals.tenantId;
+	const exportId = params.id;
 
-  const record = await platform.env.DB.prepare(
-    `
+	const record = await platform.env.DB.prepare(
+		`
     SELECT * FROM tenant_exports WHERE id = ? AND tenant_id = ?
   `,
-  )
-    .bind(exportId, tenantId)
-    .first();
+	)
+		.bind(exportId, tenantId)
+		.first();
 
-  if (!record) return error(404, "Export not found");
+	if (!record) return error(404, "Export not found");
 
-  return json(record);
+	return json(record);
 };
 ```
 
 #### 2.3 Get Download URL
 
-**Route:** `packages/engine/src/routes/api/export/[id]/download/+server.ts`
+**Route:** `libs/engine/src/routes/api/export/[id]/download/+server.ts`
 
 ```typescript
 // GET /api/export/:id/download
 // Response: { download_url, expires_at, size_bytes, file_count }
 
 export const GET: RequestHandler = async ({ params, locals, platform }) => {
-  const record = await platform.env.DB.prepare(
-    `
+	const record = await platform.env.DB.prepare(
+		`
     SELECT * FROM tenant_exports WHERE id = ? AND tenant_id = ?
   `,
-  )
-    .bind(params.id, locals.tenantId)
-    .first();
+	)
+		.bind(params.id, locals.tenantId)
+		.first();
 
-  if (!record) return error(404, "Export not found");
-  if (record.status !== "completed") return error(400, "Export not ready");
-  if (new Date(record.expires_at) < new Date())
-    return error(410, "Export expired");
+	if (!record) return error(404, "Export not found");
+	if (record.status !== "completed") return error(400, "Export not ready");
+	if (new Date(record.expires_at) < new Date()) return error(410, "Export expired");
 
-  return json({
-    download_url: `/api/export/download/${encodeURIComponent(record.r2_key)}`,
-    expires_at: record.expires_at,
-    size_bytes: record.size_bytes,
-    file_count: record.file_count,
-  });
+	return json({
+		download_url: `/api/export/download/${encodeURIComponent(record.r2_key)}`,
+		expires_at: record.expires_at,
+		size_bytes: record.size_bytes,
+		file_count: record.file_count,
+	});
 };
 ```
 
 #### 2.4 Stream Download
 
-**Route:** `packages/engine/src/routes/api/export/download/[...key]/+server.ts`
+**Route:** `libs/engine/src/routes/api/export/download/[...key]/+server.ts`
 
 ```typescript
 // GET /api/export/download/:key
 // Response: Binary ZIP stream
 
 export const GET: RequestHandler = async ({ params, locals, platform }) => {
-  const r2Key = decodeURIComponent(params.key);
+	const r2Key = decodeURIComponent(params.key);
 
-  // Verify ownership via key pattern (exports/{tenantId}/...)
-  if (!r2Key.startsWith(`exports/${locals.tenantId}/`)) {
-    return error(403, "Forbidden");
-  }
+	// Verify ownership via key pattern (exports/{tenantId}/...)
+	if (!r2Key.startsWith(`exports/${locals.tenantId}/`)) {
+		return error(403, "Forbidden");
+	}
 
-  const object = await platform.env.R2_BUCKET.get(r2Key);
-  if (!object) return error(404, "File not found");
+	const object = await platform.env.R2_BUCKET.get(r2Key);
+	if (!object) return error(404, "File not found");
 
-  const filename = r2Key.split("/").pop() || "export.zip";
+	const filename = r2Key.split("/").pop() || "export.zip";
 
-  return new Response(object.body, {
-    headers: {
-      "Content-Type": "application/zip",
-      "Content-Disposition": `attachment; filename="${filename}"`,
-      "Content-Length": object.size.toString(),
-    },
-  });
+	return new Response(object.body, {
+		headers: {
+			"Content-Type": "application/zip",
+			"Content-Disposition": `attachment; filename="${filename}"`,
+			"Content-Length": object.size.toString(),
+		},
+	});
 };
 ```
 
@@ -294,22 +291,20 @@ export const GET: RequestHandler = async ({ params, locals, platform }) => {
 
 ```typescript
 function postToMarkdown(post: Post): string {
-  const frontmatter = {
-    title: post.title,
-    slug: post.slug,
-    date: post.published_at,
-    tags: JSON.parse(post.tags || "[]"),
-    status: post.status,
-    excerpt: post.excerpt,
-  };
+	const frontmatter = {
+		title: post.title,
+		slug: post.slug,
+		date: post.published_at,
+		tags: JSON.parse(post.tags || "[]"),
+		status: post.status,
+		excerpt: post.excerpt,
+	};
 
-  return `---
+	return `---
 ${Object.entries(frontmatter)
-  .filter(([_, v]) => v != null)
-  .map(
-    ([k, v]) => `${k}: ${typeof v === "string" ? `"${v}"` : JSON.stringify(v)}`,
-  )
-  .join("\n")}
+	.filter(([_, v]) => v != null)
+	.map(([k, v]) => `${k}: ${typeof v === "string" ? `"${v}"` : JSON.stringify(v)}`)
+	.join("\n")}
 ---
 
 ${post.content}
@@ -341,27 +336,27 @@ grove-export-{username}-{date}.zip
 
 ```json
 {
-  "version": "1.0",
-  "exported_at": "2026-01-16T12:00:00.000Z",
-  "tenant": {
-    "id": "tenant-uuid",
-    "subdomain": "username"
-  },
-  "summary": {
-    "total_files": 42,
-    "total_size_bytes": 15728640,
-    "posts": 25,
-    "pages": 5,
-    "media": 12
-  },
-  "files": [
-    {
-      "path": "posts/2026-01-15-my-first-post.md",
-      "type": "post",
-      "size_bytes": 2048,
-      "original_id": "post-uuid"
-    }
-  ]
+	"version": "1.0",
+	"exported_at": "2026-01-16T12:00:00.000Z",
+	"tenant": {
+		"id": "tenant-uuid",
+		"subdomain": "username"
+	},
+	"summary": {
+		"total_files": 42,
+		"total_size_bytes": 15728640,
+		"posts": 25,
+		"pages": 5,
+		"media": 12
+	},
+	"files": [
+		{
+			"path": "posts/2026-01-15-my-first-post.md",
+			"type": "post",
+			"size_bytes": 2048,
+			"original_id": "post-uuid"
+		}
+	]
 }
 ```
 
@@ -398,62 +393,60 @@ Visit https://grove.place/knowledge/exporting-your-content for help.
 
 #### 4.1 Update DataExportCard.svelte
 
-**Location:** `packages/engine/src/routes/admin/account/DataExportCard.svelte`
+**Location:** `libs/engine/src/routes/admin/account/DataExportCard.svelte`
 
 Replace immediate download with async flow:
 
 ```svelte
 <script lang="ts">
-  let exportStatus: 'idle' | 'pending' | 'processing' | 'completed' | 'failed' = 'idle';
-  let exportId: string | null = null;
-  let pollInterval: number | null = null;
-  let exportData: { size_bytes?: number; file_count?: number; download_url?: string } = {};
+	let exportStatus: "idle" | "pending" | "processing" | "completed" | "failed" = "idle";
+	let exportId: string | null = null;
+	let pollInterval: number | null = null;
+	let exportData: { size_bytes?: number; file_count?: number; download_url?: string } = {};
 
-  async function startExport(type: string) {
-    exportStatus = 'pending';
-    const res = await fetch('/api/export', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type })
-    });
-    const data = await res.json();
-    exportId = data.export_id;
-    pollInterval = setInterval(pollStatus, 3000);
-  }
+	async function startExport(type: string) {
+		exportStatus = "pending";
+		const res = await fetch("/api/export", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ type }),
+		});
+		const data = await res.json();
+		exportId = data.export_id;
+		pollInterval = setInterval(pollStatus, 3000);
+	}
 
-  async function pollStatus() {
-    const res = await fetch(`/api/export/${exportId}`);
-    const data = await res.json();
-    exportStatus = data.status;
+	async function pollStatus() {
+		const res = await fetch(`/api/export/${exportId}`);
+		const data = await res.json();
+		exportStatus = data.status;
 
-    if (data.status === 'completed') {
-      clearInterval(pollInterval!);
-      const dlRes = await fetch(`/api/export/${exportId}/download`);
-      exportData = await dlRes.json();
-    } else if (data.status === 'failed') {
-      clearInterval(pollInterval!);
-    }
-  }
+		if (data.status === "completed") {
+			clearInterval(pollInterval!);
+			const dlRes = await fetch(`/api/export/${exportId}/download`);
+			exportData = await dlRes.json();
+		} else if (data.status === "failed") {
+			clearInterval(pollInterval!);
+		}
+	}
 </script>
 
-{#if exportStatus === 'idle'}
-  <GlassButton on:click={() => startExport('full')}>
-    Export All Data
-  </GlassButton>
-{:else if exportStatus === 'pending' || exportStatus === 'processing'}
-  <div class="flex items-center gap-2">
-    <Loader2 class="animate-spin" />
-    <span>Preparing your export...</span>
-  </div>
-{:else if exportStatus === 'completed'}
-  <div class="space-y-2">
-    <p class="text-green-600">Export ready! {exportData.file_count} files, {formatBytes(exportData.size_bytes)}</p>
-    <GlassButton href={exportData.download_url} download>
-      Download ZIP
-    </GlassButton>
-  </div>
-{:else if exportStatus === 'failed'}
-  <p class="text-red-600">Export failed. Please try again.</p>
+{#if exportStatus === "idle"}
+	<GlassButton on:click={() => startExport("full")}>Export All Data</GlassButton>
+{:else if exportStatus === "pending" || exportStatus === "processing"}
+	<div class="flex items-center gap-2">
+		<Loader2 class="animate-spin" />
+		<span>Preparing your export...</span>
+	</div>
+{:else if exportStatus === "completed"}
+	<div class="space-y-2">
+		<p class="text-green-600">
+			Export ready! {exportData.file_count} files, {formatBytes(exportData.size_bytes)}
+		</p>
+		<GlassButton href={exportData.download_url} download>Download ZIP</GlassButton>
+	</div>
+{:else if exportStatus === "failed"}
+	<p class="text-red-600">Export failed. Please try again.</p>
 {/if}
 ```
 
@@ -477,44 +470,42 @@ crons = [
 // In worker entry point or scheduled handler
 
 async function processPendingExports(env: Env) {
-  const pending = await env.DB.prepare(
-    `
+	const pending = await env.DB.prepare(
+		`
     SELECT id, tenant_id FROM tenant_exports
     WHERE status = 'pending'
        OR (status = 'processing' AND r2_key IS NULL
            AND created_at < datetime('now', '-2 minutes'))
     LIMIT 5
   `,
-  ).all();
+	).all();
 
-  for (const exp of pending.results) {
-    const doId = env.EXPORT_JOBS.idFromName(exp.id);
-    const doStub = env.EXPORT_JOBS.get(doId);
-    await doStub.fetch(
-      new Request(
-        `https://internal/?action=process-sync&exportId=${exp.id}&tenantId=${exp.tenant_id}`,
-      ),
-    );
-  }
+	for (const exp of pending.results) {
+		const doId = env.EXPORT_JOBS.idFromName(exp.id);
+		const doStub = env.EXPORT_JOBS.get(doId);
+		await doStub.fetch(
+			new Request(
+				`https://internal/?action=process-sync&exportId=${exp.id}&tenantId=${exp.tenant_id}`,
+			),
+		);
+	}
 }
 
 async function deleteExpiredExports(env: Env) {
-  const expired = await env.DB.prepare(
-    `
+	const expired = await env.DB.prepare(
+		`
     SELECT id, r2_key FROM tenant_exports
     WHERE status = 'completed' AND expires_at < datetime('now')
     LIMIT 50
   `,
-  ).all();
+	).all();
 
-  for (const exp of expired.results) {
-    if (exp.r2_key) {
-      await env.R2_BUCKET.delete(exp.r2_key);
-    }
-    await env.DB.prepare("DELETE FROM tenant_exports WHERE id = ?")
-      .bind(exp.id)
-      .run();
-  }
+	for (const exp of expired.results) {
+		if (exp.r2_key) {
+			await env.R2_BUCKET.delete(exp.r2_key);
+		}
+		await env.DB.prepare("DELETE FROM tenant_exports WHERE id = ?").bind(exp.id).run();
+	}
 }
 ```
 
@@ -568,7 +559,7 @@ async function deleteExpiredExports(env: Env) {
 
 ## Wrangler Configuration
 
-Add to `packages/engine/wrangler.toml`:
+Add to `libs/engine/wrangler.toml`:
 
 ```toml
 # Durable Objects
@@ -610,14 +601,14 @@ async alarm() {
 
 ```typescript
 const ZIP_CONFIG = {
-  COMPRESSION_LEVEL: 0, // Store only, no compression (Worker CPU limits)
+	COMPRESSION_LEVEL: 0, // Store only, no compression (Worker CPU limits)
 };
 
 // Stream directly from R2 to ZIP output
 await zipStreamer.addFile({
-  filename: path,
-  data: r2Object.body, // ReadableStream, not buffer
-  size: file.size_bytes,
+	filename: path,
+	data: r2Object.body, // ReadableStream, not buffer
+	size: file.size_bytes,
 });
 ```
 
@@ -628,8 +619,8 @@ const MIN_PART_SIZE = 5 * 1024 * 1024; // 5MB minimum for R2
 
 // Buffer chunks until >= 5MB, then upload part
 if (currentSize >= MIN_PART_SIZE) {
-  const part = await multipartUpload.uploadPart(partNumber++, combined);
-  uploadedParts.push({ partNumber, etag: part.etag });
+	const part = await multipartUpload.uploadPart(partNumber++, combined);
+	uploadedParts.push({ partNumber, etag: part.etag });
 }
 ```
 

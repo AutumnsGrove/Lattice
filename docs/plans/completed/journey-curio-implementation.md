@@ -413,7 +413,7 @@ packages/firefly/
 **Files to Create**:
 
 ```
-packages/durable-objects/src/
+services/durable-objects/src/
 ├── JourneyDO.ts                    # Job orchestration DO
 ```
 
@@ -489,9 +489,9 @@ workers/journey-analyzer/
 **Files to Create**:
 
 ```
-packages/engine/migrations/021_journey_curio.sql
+libs/engine/migrations/021_journey_curio.sql
 
-packages/engine/src/lib/curios/journey/
+libs/engine/src/lib/curios/journey/
 ├── index.ts                        # Main exports
 ├── types.ts                        # TypeScript interfaces
 ├── config.ts                       # Default config, validation
@@ -508,7 +508,7 @@ packages/engine/src/lib/curios/journey/
 **Files to Create**:
 
 ```
-packages/engine/src/routes/api/curios/journey/
+libs/engine/src/routes/api/curios/journey/
 ├── +server.ts                      # GET snapshots (public)
 ├── config/+server.ts               # GET/PUT config (admin)
 ├── analyze/+server.ts              # POST trigger analysis (admin)
@@ -542,7 +542,7 @@ packages/engine/src/routes/api/curios/journey/
 **Files to Create**:
 
 ```
-packages/engine/src/routes/admin/curios/journey/
+libs/engine/src/routes/admin/curios/journey/
 ├── +page.svelte                    # Configuration form
 └── +page.server.ts                 # Load/save config
 ```
@@ -565,7 +565,7 @@ packages/engine/src/routes/admin/curios/journey/
 **Files to Create**:
 
 ```
-packages/engine/src/lib/curios/journey/components/
+libs/engine/src/lib/curios/journey/components/
 ├── Journey.svelte                  # Main component (orchestrates all)
 ├── GrowthChart.svelte              # Stacked bar chart over time
 ├── LanguageBar.svelte              # Code composition breakdown
@@ -586,7 +586,7 @@ packages/engine/src/lib/curios/journey/components/
 **Files to Create**:
 
 ```
-packages/engine/src/routes/(site)/journey/
+libs/engine/src/routes/(site)/journey/
 ├── +page.svelte                    # Public Journey page
 └── +page.server.ts                 # Load snapshots, config
 ```
@@ -661,14 +661,14 @@ const journeyFireflyConfig: FireflyConfig = {
 | Category            | Files                                                 |
 | ------------------- | ----------------------------------------------------- |
 | **Firefly Core**    | `packages/firefly/src/*`                              |
-| **JourneyDO**       | `packages/durable-objects/src/JourneyDO.ts`           |
+| **JourneyDO**       | `services/durable-objects/src/JourneyDO.ts`           |
 | **Analyzer Worker** | `workers/journey-analyzer/*`                          |
-| **Database**        | `packages/engine/migrations/021_journey_curio.sql`    |
-| **Library**         | `packages/engine/src/lib/curios/journey/*`            |
-| **API**             | `packages/engine/src/routes/api/curios/journey/*`     |
-| **Admin UI**        | `packages/engine/src/routes/admin/curios/journey/*`   |
-| **Components**      | `packages/engine/src/lib/curios/journey/components/*` |
-| **Public Route**    | `packages/engine/src/routes/(site)/journey/*`         |
+| **Database**        | `libs/engine/migrations/021_journey_curio.sql`    |
+| **Library**         | `libs/engine/src/lib/curios/journey/*`            |
+| **API**             | `libs/engine/src/routes/api/curios/journey/*`     |
+| **Admin UI**        | `libs/engine/src/routes/admin/curios/journey/*`   |
+| **Components**      | `libs/engine/src/lib/curios/journey/components/*` |
+| **Public Route**    | `libs/engine/src/routes/(site)/journey/*`         |
 
 ---
 

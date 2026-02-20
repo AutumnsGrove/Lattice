@@ -15,11 +15,11 @@ Grove Mode is the accessibility toggle that swaps Grove's nature-themed vocabula
 
 **Verified component locations:**
 
-- `GroveIntro` → `packages/engine/src/lib/ui/components/ui/groveterm/GroveIntro.svelte` (exported from `groveterm/index.ts`)
+- `GroveIntro` → `libs/engine/src/lib/ui/components/ui/groveterm/GroveIntro.svelte` (exported from `groveterm/index.ts`)
 - `GroveTerm` / `GroveSwap` / `GroveText` / `GroveSwapText` → same directory
-- `groveModeStore` → `packages/engine/src/lib/ui/stores/grove-mode.svelte.ts`
-- `grove-term-manifest.json` → `packages/engine/src/lib/data/grove-term-manifest.json`
-- Engine Footer (with Grove Mode toggle) → `packages/engine/src/lib/ui/components/chrome/Footer.svelte`
+- `groveModeStore` → `libs/engine/src/lib/ui/stores/grove-mode.svelte.ts`
+- `grove-term-manifest.json` → `libs/engine/src/lib/data/grove-term-manifest.json`
+- Engine Footer (with Grove Mode toggle) → `libs/engine/src/lib/ui/components/chrome/Footer.svelte`
 
 **What this plan covers:** Closing every remaining gap across all monorepo packages so Grove Mode is complete end-to-end — every user-facing Grove term wrapped, every package site using the shared chrome Footer (with the toggle), and every Grove-named page showing a `GroveIntro` banner.
 
@@ -57,45 +57,45 @@ Grove Mode is the accessibility toggle that swaps Grove's nature-themed vocabula
 
 | File                                              | Line(s) | Current               | Fix                                                                                                    |
 | ------------------------------------------------- | ------- | --------------------- | ------------------------------------------------------------------------------------------------------ |
-| `packages/engine/src/routes/arbor/+layout.svelte` | 84      | `Arbor (admin panel)` | Wrap "Arbor" with `GroveSwap` → "Dashboard" when OFF. Swap "(admin panel)" to "(dashboard)" or remove. |
-| `packages/engine/src/routes/arbor/+layout.svelte` | 107     | `Dashboard` nav label | Replace with `GroveSwap term="arbor"` → shows "Dashboard" when OFF, "Arbor" when ON                    |
-| `packages/engine/src/routes/arbor/+layout.svelte` | 109-111 | `Garden` nav label    | Replace with `GroveSwap term="your-garden"` → shows "Blog" when OFF                                    |
+| `libs/engine/src/routes/arbor/+layout.svelte` | 84      | `Arbor (admin panel)` | Wrap "Arbor" with `GroveSwap` → "Dashboard" when OFF. Swap "(admin panel)" to "(dashboard)" or remove. |
+| `libs/engine/src/routes/arbor/+layout.svelte` | 107     | `Dashboard` nav label | Replace with `GroveSwap term="arbor"` → shows "Dashboard" when OFF, "Arbor" when ON                    |
+| `libs/engine/src/routes/arbor/+layout.svelte` | 109-111 | `Garden` nav label    | Replace with `GroveSwap term="your-garden"` → shows "Blog" when OFF                                    |
 
 ### 1B: Dashboard / Arbor Headings
 
 | File                                                     | Line(s) | Current                               | Fix                                                                   |
 | -------------------------------------------------------- | ------- | ------------------------------------- | --------------------------------------------------------------------- |
-| `packages/engine/src/routes/arbor/+page.svelte`          | 81      | `<h1>Dashboard</h1>`                  | Wrap with `GroveSwap term="arbor"`                                    |
-| `packages/engine/src/routes/arbor/+page.svelte`          | 172     | `Manage Garden`                       | Wrap with `GroveSwap term="your-garden"` → "Manage Blog" when OFF     |
-| `packages/engine/src/routes/arbor/safety/+page.svelte`   | 90      | `Safety Dashboard`                    | Consider whether "Safety Dashboard" is standard enough to leave as-is |
-| `packages/engine/src/routes/(apps)/monitor/+page.svelte` | 45      | `Infrastructure Monitoring Dashboard` | Standard term — likely leave as-is                                    |
+| `libs/engine/src/routes/arbor/+page.svelte`          | 81      | `<h1>Dashboard</h1>`                  | Wrap with `GroveSwap term="arbor"`                                    |
+| `libs/engine/src/routes/arbor/+page.svelte`          | 172     | `Manage Garden`                       | Wrap with `GroveSwap term="your-garden"` → "Manage Blog" when OFF     |
+| `libs/engine/src/routes/arbor/safety/+page.svelte`   | 90      | `Safety Dashboard`                    | Consider whether "Safety Dashboard" is standard enough to leave as-is |
+| `libs/engine/src/routes/(apps)/monitor/+page.svelte` | 45      | `Infrastructure Monitoring Dashboard` | Standard term — likely leave as-is                                    |
 
 ### 1C: Garden (Blog) Pages
 
 | File                                                               | Line(s) | Current                | Fix                                     |
 | ------------------------------------------------------------------ | ------- | ---------------------- | --------------------------------------- |
-| `packages/engine/src/routes/garden/+page.svelte`                   | 41      | `<h1>Garden</h1>`      | `GroveSwap term="your-garden"` → "Blog" |
-| `packages/engine/src/routes/garden/search/+page.svelte`            | 95      | `Search Garden`        | `GroveSwap` → "Search Blog"             |
-| `packages/engine/src/routes/garden/[slug]/+page.svelte`            | 74      | `Back to Garden`       | `GroveSwap` → "Back to Blog"            |
-| `packages/engine/src/routes/+layout.svelte`                        | 93      | `Garden Not Found`     | `GroveSwap` → "Blog Not Found"          |
-| `packages/engine/src/routes/arbor/garden/+page.svelte`             | 140     | `How the Garden Works` | `GroveSwap` → "How the Blog Works"      |
-| `packages/engine/src/routes/arbor/garden/edit/[slug]/+page.svelte` | 232     | `Back to Garden`       | `GroveSwap` → "Back to Blog"            |
-| `packages/engine/src/routes/arbor/garden/new/+page.svelte`         | 150     | `Back to Garden`       | `GroveSwap` → "Back to Blog"            |
+| `libs/engine/src/routes/garden/+page.svelte`                   | 41      | `<h1>Garden</h1>`      | `GroveSwap term="your-garden"` → "Blog" |
+| `libs/engine/src/routes/garden/search/+page.svelte`            | 95      | `Search Garden`        | `GroveSwap` → "Search Blog"             |
+| `libs/engine/src/routes/garden/[slug]/+page.svelte`            | 74      | `Back to Garden`       | `GroveSwap` → "Back to Blog"            |
+| `libs/engine/src/routes/+layout.svelte`                        | 93      | `Garden Not Found`     | `GroveSwap` → "Blog Not Found"          |
+| `libs/engine/src/routes/arbor/garden/+page.svelte`             | 140     | `How the Garden Works` | `GroveSwap` → "How the Blog Works"      |
+| `libs/engine/src/routes/arbor/garden/edit/[slug]/+page.svelte` | 232     | `Back to Garden`       | `GroveSwap` → "Back to Blog"            |
+| `libs/engine/src/routes/arbor/garden/new/+page.svelte`         | 150     | `Back to Garden`       | `GroveSwap` → "Back to Blog"            |
 
 ### 1D: Bloom (Post) References
 
 | File                                                               | Line(s)            | Current                                                 | Fix                                        |
 | ------------------------------------------------------------------ | ------------------ | ------------------------------------------------------- | ------------------------------------------ |
-| `packages/engine/src/routes/arbor/garden/new/+page.svelte`         | 151                | `New Bloom` heading                                     | `GroveSwap term="blooms"` → "New Post"     |
-| `packages/engine/src/routes/arbor/garden/new/+page.svelte`         | 158                | `Save Bloom` button                                     | `GroveSwap` → "Save Post"                  |
-| `packages/engine/src/routes/arbor/garden/new/+page.svelte`         | 174                | `Bloom Details`                                         | `GroveSwap` → "Post Details"               |
-| `packages/engine/src/routes/arbor/garden/new/+page.svelte`         | 193                | `Your Bloom Title` placeholder                          | `GroveSwap` → "Your Post Title"            |
-| `packages/engine/src/routes/arbor/garden/new/+page.svelte`         | 131                | `Bloom created!` toast                                  | `GroveSwap` or conditional string          |
-| `packages/engine/src/routes/arbor/garden/edit/[slug]/+page.svelte` | 234                | `Edit Bloom` heading                                    | `GroveSwap` → "Edit Post"                  |
-| `packages/engine/src/routes/arbor/garden/edit/[slug]/+page.svelte` | 289                | `Bloom Details`                                         | `GroveSwap` → "Post Details"               |
-| `packages/engine/src/routes/arbor/garden/edit/[slug]/+page.svelte` | 309                | `Your Bloom Title` placeholder                          | `GroveSwap` → "Your Post Title"            |
-| `packages/engine/src/routes/arbor/garden/edit/[slug]/+page.svelte` | 515                | `Delete Bloom` dialog                                   | `GroveSwap` → "Delete Post"                |
-| `packages/engine/src/routes/arbor/garden/edit/[slug]/+page.svelte` | 132, 181, 183, 206 | Toast messages (`Bloom saved`, `Bloom published`, etc.) | Conditional strings using `groveModeStore` |
+| `libs/engine/src/routes/arbor/garden/new/+page.svelte`         | 151                | `New Bloom` heading                                     | `GroveSwap term="blooms"` → "New Post"     |
+| `libs/engine/src/routes/arbor/garden/new/+page.svelte`         | 158                | `Save Bloom` button                                     | `GroveSwap` → "Save Post"                  |
+| `libs/engine/src/routes/arbor/garden/new/+page.svelte`         | 174                | `Bloom Details`                                         | `GroveSwap` → "Post Details"               |
+| `libs/engine/src/routes/arbor/garden/new/+page.svelte`         | 193                | `Your Bloom Title` placeholder                          | `GroveSwap` → "Your Post Title"            |
+| `libs/engine/src/routes/arbor/garden/new/+page.svelte`         | 131                | `Bloom created!` toast                                  | `GroveSwap` or conditional string          |
+| `libs/engine/src/routes/arbor/garden/edit/[slug]/+page.svelte` | 234                | `Edit Bloom` heading                                    | `GroveSwap` → "Edit Post"                  |
+| `libs/engine/src/routes/arbor/garden/edit/[slug]/+page.svelte` | 289                | `Bloom Details`                                         | `GroveSwap` → "Post Details"               |
+| `libs/engine/src/routes/arbor/garden/edit/[slug]/+page.svelte` | 309                | `Your Bloom Title` placeholder                          | `GroveSwap` → "Your Post Title"            |
+| `libs/engine/src/routes/arbor/garden/edit/[slug]/+page.svelte` | 515                | `Delete Bloom` dialog                                   | `GroveSwap` → "Delete Post"                |
+| `libs/engine/src/routes/arbor/garden/edit/[slug]/+page.svelte` | 132, 181, 183, 206 | Toast messages (`Bloom saved`, `Bloom published`, etc.) | Conditional strings using `groveModeStore` |
 
 **Note on toasts:** Toast messages are strings passed to `toast.success()`, not rendered Svelte. These need a helper function:
 
@@ -116,26 +116,26 @@ Consider creating this as a shared utility in the engine: `resolveTermString(gro
 
 | File                                                           | Line(s)  | Current                                    | Fix                                                                                                                                             |
 | -------------------------------------------------------------- | -------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `packages/engine/src/routes/auth/login/+page.svelte`           | 43       | `'Admin Panel'` / `'Welcome, Wanderer'`    | Swap "Admin Panel" → `GroveSwap term="arbor"` with "Dashboard" text. "Welcome, Wanderer" → `GroveSwap term="wanderer"` with "Welcome" when OFF. |
-| `packages/engine/src/routes/auth/login/+page.svelte`           | 46       | `Sign in to access the admin panel`        | Swap "admin panel" → conditional                                                                                                                |
-| `packages/engine/src/lib/grafts/login/LoginGraft.svelte`       | 180      | `Welcome back, Wanderer`                   | `GroveSwap` → "Welcome back" when OFF                                                                                                           |
-| `packages/engine/src/routes/arbor/curios/gallery/+page.svelte` | 230, 251 | `for most Wanderers` / `for all Wanderers` | `GroveSwap` → "for most visitors"                                                                                                               |
-| `packages/engine/src/routes/+page.svelte`                      | 24       | `Sign in to the admin panel`               | Swap "admin panel" → conditional                                                                                                                |
+| `libs/engine/src/routes/auth/login/+page.svelte`           | 43       | `'Admin Panel'` / `'Welcome, Wanderer'`    | Swap "Admin Panel" → `GroveSwap term="arbor"` with "Dashboard" text. "Welcome, Wanderer" → `GroveSwap term="wanderer"` with "Welcome" when OFF. |
+| `libs/engine/src/routes/auth/login/+page.svelte`           | 46       | `Sign in to access the admin panel`        | Swap "admin panel" → conditional                                                                                                                |
+| `libs/engine/src/lib/grafts/login/LoginGraft.svelte`       | 180      | `Welcome back, Wanderer`                   | `GroveSwap` → "Welcome back" when OFF                                                                                                           |
+| `libs/engine/src/routes/arbor/curios/gallery/+page.svelte` | 230, 251 | `for most Wanderers` / `for all Wanderers` | `GroveSwap` → "for most visitors"                                                                                                               |
+| `libs/engine/src/routes/+page.svelte`                      | 24       | `Sign in to the admin panel`               | Swap "admin panel" → conditional                                                                                                                |
 
 ### 1F: Trails
 
 | File                                                           | Line(s)  | Current                                         | Fix                                                                                   |
 | -------------------------------------------------------------- | -------- | ----------------------------------------------- | ------------------------------------------------------------------------------------- |
-| `packages/engine/src/routes/arbor/timeline/+page.svelte`       | 163, 165 | `Trails wind through...` / `Trails provides...` | `GroveSwap` in the first mention → "Roadmaps"; leave the prose as descriptive context |
-| `packages/engine/src/routes/arbor/account/FeaturesCard.svelte` | 44       | `Trail` label                                   | `GroveSwap term="trails"` → "Roadmap"                                                 |
+| `libs/engine/src/routes/arbor/timeline/+page.svelte`       | 163, 165 | `Trails wind through...` / `Trails provides...` | `GroveSwap` in the first mention → "Roadmaps"; leave the prose as descriptive context |
+| `libs/engine/src/routes/arbor/account/FeaturesCard.svelte` | 44       | `Trail` label                                   | `GroveSwap term="trails"` → "Roadmap"                                                 |
 
 ### 1G: "Coming in Full Bloom" Pattern
 
 | File                                                           | Line(s) | Current                               | Fix                                                                |
 | -------------------------------------------------------------- | ------- | ------------------------------------- | ------------------------------------------------------------------ |
-| `packages/engine/src/routes/arbor/analytics/+page.svelte`      | 22      | `Coming in Full Bloom (Early Summer)` | This is marketing/seasonal copy, not a term swap. **Leave as-is.** |
-| `packages/engine/src/routes/arbor/curios/journey/+page.svelte` | 41      | Same                                  | **Leave as-is.**                                                   |
-| `packages/engine/src/routes/(apps)/domains/+page.svelte`       | 112     | Same                                  | **Leave as-is.**                                                   |
+| `libs/engine/src/routes/arbor/analytics/+page.svelte`      | 22      | `Coming in Full Bloom (Early Summer)` | This is marketing/seasonal copy, not a term swap. **Leave as-is.** |
+| `libs/engine/src/routes/arbor/curios/journey/+page.svelte` | 41      | Same                                  | **Leave as-is.**                                                   |
+| `libs/engine/src/routes/(apps)/domains/+page.svelte`       | 112     | Same                                  | **Leave as-is.**                                                   |
 
 > "Coming in Full Bloom" is a seasonal release metaphor, not a togglable term. It's self-explanatory in context.
 
@@ -143,7 +143,7 @@ Consider creating this as a shared utility in the engine: `resolveTermString(gro
 
 | File                                                   | Line(s) | Current                                   | Fix                                                      |
 | ------------------------------------------------------ | ------- | ----------------------------------------- | -------------------------------------------------------- |
-| `packages/engine/src/routes/arbor/garden/+page.svelte` | 57      | `This admin panel is publicly accessible` | Swap "admin panel" → use `GroveSwap` or conditional text |
+| `libs/engine/src/routes/arbor/garden/+page.svelte` | 57      | `This admin panel is publicly accessible` | Swap "admin panel" → use `GroveSwap` or conditional text |
 
 **Phase 1 estimated scope:** ~39 edits across ~12 files.
 
@@ -155,7 +155,7 @@ Consider creating this as a shared utility in the engine: `resolveTermString(gro
 
 ### 2A: Workshop Page (Highest Density)
 
-The Workshop page (`packages/landing/src/routes/workshop/+page.svelte`) is the single densest page needing attention. Tool names already use `termSlug` for resolution, but the **description text** within each tool card contains hardcoded Grove terms.
+The Workshop page (`apps/landing/src/routes/workshop/+page.svelte`) is the single densest page needing attention. Tool names already use `termSlug` for resolution, but the **description text** within each tool card contains hardcoded Grove terms.
 
 **Strategy:** Workshop tool definitions are data objects with string `description` fields. These strings are rendered at line ~1133 in the workshop page as:
 
@@ -190,14 +190,14 @@ Similarly, the `integration` field strings (e.g., `"for all Wanderers"`) are ren
 
 | File                                                            | Term                               | Line(s) | Fix                                         |
 | --------------------------------------------------------------- | ---------------------------------- | ------- | ------------------------------------------- |
-| `packages/landing/src/routes/arbor/+page.svelte`                | "Wanderer Feedback"                | 42      | `GroveSwap` → "Visitor Feedback"            |
-| `packages/landing/src/routes/arbor/+page.svelte`                | "conversations from Wanderers"     | 96      | `GroveSwap` → "conversations from visitors" |
-| `packages/landing/src/routes/arbor/+page.svelte`                | "The Porch" heading                | 94      | `GroveSwap` → "Support"                     |
-| `packages/landing/src/routes/arbor/comped-invites/+page.svelte` | "Comped Wanderers"                 | 401     | `GroveSwap` → "Comped visitors"             |
-| `packages/landing/src/routes/arbor/feedback/+page.svelte`       | "Wanderer feedback" aria-label     | 151     | `GroveSwap` or conditional                  |
-| `packages/landing/src/routes/arbor/porch/[id]/+page.svelte`     | "Wanderer" fallback name           | 85      | Conditional string                          |
-| `packages/landing/src/routes/vision/+page.svelte`               | "Every Wanderer is a tree"         | 85      | `GroveSwap` → "Every visitor is a tree"     |
-| `packages/landing/src/routes/porch/visits/+page.svelte`         | "conversations with the Wayfinder" | 49      | `GroveSwap` → "conversations with support"  |
+| `apps/landing/src/routes/arbor/+page.svelte`                | "Wanderer Feedback"                | 42      | `GroveSwap` → "Visitor Feedback"            |
+| `apps/landing/src/routes/arbor/+page.svelte`                | "conversations from Wanderers"     | 96      | `GroveSwap` → "conversations from visitors" |
+| `apps/landing/src/routes/arbor/+page.svelte`                | "The Porch" heading                | 94      | `GroveSwap` → "Support"                     |
+| `apps/landing/src/routes/arbor/comped-invites/+page.svelte` | "Comped Wanderers"                 | 401     | `GroveSwap` → "Comped visitors"             |
+| `apps/landing/src/routes/arbor/feedback/+page.svelte`       | "Wanderer feedback" aria-label     | 151     | `GroveSwap` or conditional                  |
+| `apps/landing/src/routes/arbor/porch/[id]/+page.svelte`     | "Wanderer" fallback name           | 85      | Conditional string                          |
+| `apps/landing/src/routes/vision/+page.svelte`               | "Every Wanderer is a tree"         | 85      | `GroveSwap` → "Every visitor is a tree"     |
+| `apps/landing/src/routes/porch/visits/+page.svelte`         | "conversations with the Wayfinder" | 49      | `GroveSwap` → "conversations with support"  |
 
 **Phase 2 estimated scope:** ~26 edits across ~8 files.
 
@@ -209,13 +209,13 @@ Similarly, the `integration` field strings (e.g., `"for all Wanderers"`) are ren
 
 ### 3A: Chrome Unification
 
-Plant currently has a **custom inline header and footer** in `packages/plant/src/routes/+layout.svelte`. It does NOT use the engine's shared `Header` or `Footer` components.
+Plant currently has a **custom inline header and footer** in `apps/plant/src/routes/+layout.svelte`. It does NOT use the engine's shared `Header` or `Footer` components.
 
 **Action:** Replace Plant's custom footer with the engine's shared `Footer` component. This gives Plant the Grove Mode toggle automatically.
 
 **Files to modify:**
 
-- `packages/plant/src/routes/+layout.svelte` — Remove inline footer (lines ~179-196), import and render `Footer` from `@autumnsgrove/lattice/ui/chrome`
+- `apps/plant/src/routes/+layout.svelte` — Remove inline footer (lines ~179-196), import and render `Footer` from `@autumnsgrove/lattice/ui/chrome`
 
 **Note on header:** Plant's header has onboarding-specific step indicators integrated. Replacing the header may not be straightforward — evaluate whether the engine's `Header` can accommodate the step indicator via slots or props. If not, keep Plant's custom header but ensure the footer is unified.
 
@@ -223,8 +223,8 @@ Plant currently has a **custom inline header and footer** in `packages/plant/src
 
 | File                                                           | Term        | Line(s) | Fix                                                        |
 | -------------------------------------------------------------- | ----------- | ------- | ---------------------------------------------------------- |
-| `packages/plant/src/lib/components/OnboardingChecklist.svelte` | "Wanderer"  | 172     | `GroveSwap` → "Let's get started" (drop the term when OFF) |
-| `packages/plant/src/routes/comped/+page.svelte`                | "Wanderers" | 80      | `GroveSwap` → "visitors" or "early supporters"             |
+| `apps/plant/src/lib/components/OnboardingChecklist.svelte` | "Wanderer"  | 172     | `GroveSwap` → "Let's get started" (drop the term when OFF) |
+| `apps/plant/src/routes/comped/+page.svelte`                | "Wanderers" | 80      | `GroveSwap` → "visitors" or "early supporters"             |
 
 **Phase 3 estimated scope:** Footer swap (1 file), ~2 term edits.
 
@@ -236,14 +236,14 @@ Plant currently has a **custom inline header and footer** in `packages/plant/src
 
 ### 4A: Chrome Unification
 
-Meadow **uses the engine's Header** but has a **custom Footer** at `packages/meadow/src/lib/components/Footer.svelte`.
+Meadow **uses the engine's Header** but has a **custom Footer** at `apps/meadow/src/lib/components/Footer.svelte`.
 
 **Action:** Replace Meadow's custom `Footer` with the engine's shared `Footer` component. This gives Meadow the Grove Mode toggle.
 
 **Files to modify:**
 
-- `packages/meadow/src/routes/+page.svelte` — Replace local Footer import with engine Footer
-- `packages/meadow/src/lib/components/Footer.svelte` — Can be deleted after migration (or kept as reference temporarily)
+- `apps/meadow/src/routes/+page.svelte` — Replace local Footer import with engine Footer
+- `apps/meadow/src/lib/components/Footer.svelte` — Can be deleted after migration (or kept as reference temporarily)
 
 **Note:** The custom footer has a tagline "Where the forest opens up." — this drops in favor of the standard Grove tagline ("A place to Be"). See Cross-Cutting Concerns > Chrome Footer Unification for rationale.
 
@@ -251,10 +251,10 @@ Meadow **uses the engine's Header** but has a **custom Footer** at `packages/mea
 
 | File                                                    | Term                     | Line(s)                   | Fix                                                                                                                                        |
 | ------------------------------------------------------- | ------------------------ | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `packages/meadow/src/routes/+page.svelte`               | "Meadow" in headings     | 43, 59, 79, 149, 156, 182 | `GroveSwap term="meadow"` → "Community Feed" in key headings. The product name in narrative prose can stay as-is where it reads naturally. |
-| `packages/meadow/src/routes/+page.svelte`               | "clearing in the forest" | 83                        | `GroveSwap term="clearing"` for "clearing" → "status page"                                                                                 |
-| `packages/meadow/src/routes/+page.svelte`               | "Grove" (brand)          | throughout                | **Leave as-is** — brand name, always shown                                                                                                 |
-| `packages/meadow/src/lib/components/EmailSignup.svelte` | "when Grove blooms"      | 62                        | Poetic/marketing copy — **leave as-is**                                                                                                    |
+| `apps/meadow/src/routes/+page.svelte`               | "Meadow" in headings     | 43, 59, 79, 149, 156, 182 | `GroveSwap term="meadow"` → "Community Feed" in key headings. The product name in narrative prose can stay as-is where it reads naturally. |
+| `apps/meadow/src/routes/+page.svelte`               | "clearing in the forest" | 83                        | `GroveSwap term="clearing"` for "clearing" → "status page"                                                                                 |
+| `apps/meadow/src/routes/+page.svelte`               | "Grove" (brand)          | throughout                | **Leave as-is** — brand name, always shown                                                                                                 |
+| `apps/meadow/src/lib/components/EmailSignup.svelte` | "when Grove blooms"      | 62                        | Poetic/marketing copy — **leave as-is**                                                                                                    |
 
 **Phase 4 estimated scope:** Footer swap (2 files), ~8 term edits.
 
@@ -266,15 +266,15 @@ Meadow **uses the engine's Header** but has a **custom Footer** at `packages/mea
 
 ### 5A: Chrome Unification
 
-Clearing **uses the engine's Header** but has a **custom Footer** at `packages/clearing/src/lib/components/Footer.svelte`.
+Clearing **uses the engine's Header** but has a **custom Footer** at `apps/clearing/src/lib/components/Footer.svelte`.
 
 **Action:** Replace Clearing's custom `Footer` with the engine's shared `Footer` component.
 
 **Files to modify:**
 
-- `packages/clearing/src/routes/+page.svelte` — Replace local Footer import with engine Footer
-- `packages/clearing/src/routes/incidents/[slug]/+page.svelte` — Same
-- `packages/clearing/src/lib/components/Footer.svelte` — Can be deleted after migration
+- `apps/clearing/src/routes/+page.svelte` — Replace local Footer import with engine Footer
+- `apps/clearing/src/routes/incidents/[slug]/+page.svelte` — Same
+- `apps/clearing/src/lib/components/Footer.svelte` — Can be deleted after migration
 
 **Note:** Clearing's custom footer has a description "A clearing in the forest where you can see what's happening." — this drops in favor of the standard Grove tagline. See Cross-Cutting Concerns > Chrome Footer Unification for rationale.
 
@@ -284,7 +284,7 @@ Clearing has **no hardcoded identity terms** (Wanderer, Rooted, etc.). The only 
 
 | File                                        | Term                            | Fix                                                |
 | ------------------------------------------- | ------------------------------- | -------------------------------------------------- |
-| `packages/clearing/src/routes/+page.svelte` | `brandTitle="Status"` on Header | Already using the standard term. No change needed. |
+| `apps/clearing/src/routes/+page.svelte` | `brandTitle="Status"` on Header | Already using the standard term. No change needed. |
 
 **Phase 5 estimated scope:** Footer swap (3 files), ~0 term edits.
 
@@ -347,7 +347,7 @@ The component handles all logic internally:
 Add a reactive helper function to the engine:
 
 ```typescript
-// packages/engine/src/lib/ui/utils/grove-term-resolve.ts
+// libs/engine/src/lib/ui/utils/grove-term-resolve.ts
 
 import { groveModeStore } from "../stores/grove-mode.svelte";
 import manifest from "../../data/grove-term-manifest.json";
@@ -421,7 +421,7 @@ These are a separate concern from the Grove Mode toggle work because they're abo
 **Issue body should include:**
 
 - Reference to `docs/audits/grove-lexicon-audit.md` for the full hit list
-- Key files: `packages/engine/src/routes/arbor/garden/new/+page.svelte`, `packages/engine/src/routes/arbor/garden/edit/[slug]/+page.svelte`, `packages/durable-objects/src/tiers.ts`, `packages/engine/src/lib/components/admin/MarkdownEditor.svelte`
+- Key files: `libs/engine/src/routes/arbor/garden/new/+page.svelte`, `libs/engine/src/routes/arbor/garden/edit/[slug]/+page.svelte`, `services/durable-objects/src/tiers.ts`, `libs/engine/src/lib/components/admin/MarkdownEditor.svelte`
 - Dependency: Requires this Grove Mode rollout to be complete first (shared `resolveTermString` utility needs to exist)
 - Label: `chore`
 

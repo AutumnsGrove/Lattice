@@ -329,11 +329,11 @@ When you see an error code:
 When you need a new error:
 
 1. Pick the right catalog file:
-   - `packages/engine/src/lib/errors/api-errors.ts` for API routes
-   - `packages/engine/src/lib/errors/arbor-errors.ts` for admin pages
-   - `packages/engine/src/lib/errors/site-errors.ts` for public pages
-   - `packages/engine/src/lib/heartwood/errors.ts` for auth
-   - `packages/plant/src/lib/errors.ts` for onboarding
+   - `libs/engine/src/lib/errors/api-errors.ts` for API routes
+   - `libs/engine/src/lib/errors/arbor-errors.ts` for admin pages
+   - `libs/engine/src/lib/errors/site-errors.ts` for public pages
+   - `libs/engine/src/lib/heartwood/errors.ts` for auth
+   - `apps/plant/src/lib/errors.ts` for onboarding
 
 2. Choose a number in the right range (001-019, 020-039, etc.). Don't reuse numbers.
 
@@ -351,13 +351,13 @@ When you need a new error:
 
 | Catalog | File |
 |---------|------|
-| API errors | `packages/engine/src/lib/errors/api-errors.ts` |
-| Arbor errors | `packages/engine/src/lib/errors/arbor-errors.ts` |
-| Site errors | `packages/engine/src/lib/errors/site-errors.ts` |
-| Heartwood auth | `packages/engine/src/lib/heartwood/errors.ts` |
-| Plant onboarding | `packages/plant/src/lib/errors.ts` |
-| Shared types | `packages/engine/src/lib/errors/types.ts` |
-| Shared helpers | `packages/engine/src/lib/errors/helpers.ts` |
-| Integrity tests | `packages/engine/src/lib/errors/integrity.test.ts` |
+| API errors | `libs/engine/src/lib/errors/api-errors.ts` |
+| Arbor errors | `libs/engine/src/lib/errors/arbor-errors.ts` |
+| Site errors | `libs/engine/src/lib/errors/site-errors.ts` |
+| Heartwood auth | `libs/engine/src/lib/heartwood/errors.ts` |
+| Plant onboarding | `apps/plant/src/lib/errors.ts` |
+| Shared types | `libs/engine/src/lib/errors/types.ts` |
+| Shared helpers | `libs/engine/src/lib/errors/helpers.ts` |
+| Integrity tests | `libs/engine/src/lib/errors/integrity.test.ts` |
 
 *The signpost stands at every crossroad. Read the code. Find the path.*

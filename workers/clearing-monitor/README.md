@@ -12,20 +12,20 @@ This Cloudflare Worker runs on a cron schedule to:
 ## Prerequisites
 
 - KV namespace already created (ID in `wrangler.toml`)
-- D1 database with status tables migrated (`packages/clearing/migrations/0001_status_tables.sql`)
+- D1 database with status tables migrated (`apps/clearing/migrations/0001_status_tables.sql`)
 
 ## Setup
 
 ### 1. Set the Resend API key (optional, for email alerts)
 
 ```bash
-pnpm -C packages/workers/clearing-monitor exec wrangler secret put RESEND_API_KEY
+pnpm -C workers/clearing-monitor exec wrangler secret put RESEND_API_KEY
 ```
 
 ### 2. Deploy
 
 ```bash
-pnpm -C packages/workers/clearing-monitor deploy
+pnpm -C workers/clearing-monitor deploy
 ```
 
 ## Manual Testing
@@ -42,25 +42,25 @@ curl -X POST https://grove-clearing-monitor.<your-subdomain>.workers.dev/daily
 
 ## Configuration
 
-| Variable | Source | Description |
-|----------|--------|-------------|
-| `ALERT_EMAIL` | `wrangler.toml` | Email recipient for alerts (default: `alerts@grove.place`) |
-| `RESEND_API_KEY` | Secret | Resend API key for sending emails (optional) |
+| Variable         | Source          | Description                                                |
+| ---------------- | --------------- | ---------------------------------------------------------- |
+| `ALERT_EMAIL`    | `wrangler.toml` | Email recipient for alerts (default: `alerts@grove.place`) |
+| `RESEND_API_KEY` | Secret          | Resend API key for sending emails (optional)               |
 
 ## Development
 
 ```bash
 # Local dev server
-pnpm -C packages/workers/clearing-monitor dev
+pnpm -C workers/clearing-monitor dev
 
 # Run tests
-pnpm -C packages/workers/clearing-monitor test
+pnpm -C workers/clearing-monitor test
 
 # Type check
-pnpm -C packages/workers/clearing-monitor exec tsc --noEmit
+pnpm -C workers/clearing-monitor exec tsc --noEmit
 
 # Dry-run deploy (validates config)
-pnpm -C packages/workers/clearing-monitor exec wrangler deploy --dry-run
+pnpm -C workers/clearing-monitor exec wrangler deploy --dry-run
 ```
 
 ## Troubleshooting
@@ -69,4 +69,4 @@ pnpm -C packages/workers/clearing-monitor exec wrangler deploy --dry-run
 - **Health checks timing out**: Default timeout is 10s; check if target services are responding
 - **Incidents not auto-resolving**: Requires 2 consecutive healthy checks (4 minutes minimum)
 - **Daily history missing**: Check D1 migration has the `UNIQUE(component_id, date)` constraint
-- **View live logs**: `pnpm -C packages/workers/clearing-monitor tail`
+- **View live logs**: `pnpm -C workers/clearing-monitor tail`

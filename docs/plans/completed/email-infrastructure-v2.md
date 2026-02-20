@@ -47,7 +47,7 @@ Complete overhaul of Grove's automated email infrastructure. Replaced the outdat
 ## Files Created
 
 ```
-packages/engine/src/lib/email/
+libs/engine/src/lib/email/
 ├── components/
 │   ├── GroveEmail.tsx          # Base wrapper with header/footer
 │   ├── GroveButton.tsx         # CTA button (grove-green)
@@ -102,7 +102,7 @@ The `/go/*` handler redirects authenticated users to their specific arbor panel.
 
 ## Database Migration
 
-Created `packages/landing/migrations/0006_email_audience_segmentation.sql`:
+Created `apps/landing/migrations/0006_email_audience_segmentation.sql`:
 
 - Added `audience_type` column (default: 'wanderer')
 - Added `sequence_stage` column

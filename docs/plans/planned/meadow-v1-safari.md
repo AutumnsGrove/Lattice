@@ -40,7 +40,7 @@
 
 ### Safari findings: What exists today
 
-**Migrations** (`packages/engine/migrations/`, 74 files):
+**Migrations** (`libs/engine/migrations/`, 74 files):
 
 - [x] Shared `grove-engine-db` D1 database — all packages use it
 - [x] `tenants` table exists (migration 013) with `plan` tiers
@@ -199,7 +199,7 @@ CREATE INDEX idx_meadow_reports_unresolved ON meadow_reports(resolved) WHERE res
 
 ### Safari findings: What exists today
 
-**`packages/meadow/wrangler.toml`** (16 lines):
+**`apps/meadow/wrangler.toml`** (16 lines):
 
 - [x] `name = "grove-meadow"` — correct worker name
 - [x] `compatibility_date = "2025-01-01"` — fine
@@ -212,7 +212,7 @@ CREATE INDEX idx_meadow_reports_unresolved ON meadow_reports(resolved) WHERE res
 - [ ] **No CACHE_KV binding** — the callback handler expects this for rate limiting
 - [ ] **No environment-specific vars** — no `AUTH_URL`, `LOGIN_URL`, etc.
 
-**`packages/meadow/src/app.d.ts`** (17 lines):
+**`apps/meadow/src/app.d.ts`** (17 lines):
 
 - [x] `Platform.env.DB` typed as `D1Database`
 - [ ] **No KV type** — needs `CACHE_KV: KVNamespace`
@@ -251,23 +251,23 @@ AUTH_URL = "https://login.grove.place"
 
 ```typescript
 declare global {
-  namespace App {
-    interface Locals {
-      user: {
-        id: string;
-        name?: string;
-        email: string;
-        avatarUrl?: string;
-      } | null;
-    }
-    interface Platform {
-      env: {
-        DB: D1Database;
-        CACHE_KV: KVNamespace;
-        AUTH: Fetcher;
-      };
-    }
-  }
+	namespace App {
+		interface Locals {
+			user: {
+				id: string;
+				name?: string;
+				email: string;
+				avatarUrl?: string;
+			} | null;
+		}
+		interface Platform {
+			env: {
+				DB: D1Database;
+				CACHE_KV: KVNamespace;
+				AUTH: Fetcher;
+			};
+		}
+	}
 }
 ```
 
@@ -321,27 +321,27 @@ src/lib/server/
 
 ```typescript
 export interface MeadowPost {
-  id: string;
-  tenant_id: string;
-  blog_subdomain: string;
-  title: string;
-  excerpt: string;
-  slug: string;
-  post_url: string;
-  tags: string[];
-  published_at: number;
-  ingested_at: number;
-  upvote_count: number;
-  downvote_count: number;
-  net_score: number;
-  reaction_count: number;
-  visible: boolean;
+	id: string;
+	tenant_id: string;
+	blog_subdomain: string;
+	title: string;
+	excerpt: string;
+	slug: string;
+	post_url: string;
+	tags: string[];
+	published_at: number;
+	ingested_at: number;
+	upvote_count: number;
+	downvote_count: number;
+	net_score: number;
+	reaction_count: number;
+	visible: boolean;
 }
 
 export interface FeedPost extends MeadowPost {
-  user_vote?: "up" | "down" | null;
-  user_bookmarked?: boolean;
-  user_reactions?: string[]; // emoji_ids the current user has used
+	user_vote?: "up" | "down" | null;
+	user_bookmarked?: boolean;
+	user_reactions?: string[]; // emoji_ids the current user has used
 }
 
 export type FeedFilter = "all" | "popular" | "hot" | "top" | "following";
@@ -354,14 +354,14 @@ export type ReportReason = "spam" | "harassment" | "misinformation" | "other";
 
 ```typescript
 export async function getFeed(
-  db: D1Database,
-  opts: {
-    filter: FeedFilter;
-    period?: TimePeriod;
-    userId?: string;
-    page?: number;
-    limit?: number;
-  },
+	db: D1Database,
+	opts: {
+		filter: FeedFilter;
+		period?: TimePeriod;
+		userId?: string;
+		page?: number;
+		limit?: number;
+	},
 ): Promise<{ posts: FeedPost[]; hasMore: boolean }>;
 ```
 
@@ -397,7 +397,7 @@ Each query left-joins `meadow_votes` and `meadow_bookmarks` to hydrate `user_vot
 
 - [ ] **No RSS parsing code anywhere** in the monorepo
 - [ ] **`fast-xml-parser` not installed** — not in any package.json
-- [x] RSS _generation_ exists in engine (`packages/engine/src/routes/api/feed/+server.ts`) — manual XML template literals
+- [x] RSS _generation_ exists in engine (`libs/engine/src/routes/api/feed/+server.ts`) — manual XML template literals
 - [x] RSS generation also in clearing — same pattern
 - [x] Known feed URL pattern: `https://{subdomain}.grove.place/feed.xml`
 
@@ -425,9 +425,7 @@ src/lib/rss/
 // Primary: https://{subdomain}.grove.place/feed.xml
 // Fallback: /rss.xml, /feed, /rss
 // Timeout: 10 seconds per probe
-export async function discoverFeedUrl(
-  subdomain: string,
-): Promise<string | null>;
+export async function discoverFeedUrl(subdomain: string): Promise<string | null>;
 ```
 
 Simple — try the primary URL, fall back if needed. Cache discovered URLs in KV to avoid re-probing.
@@ -714,11 +712,11 @@ Props:
 
 ```typescript
 interface PostCardProps {
-  post: FeedPost;
-  onVote: (postId: string, type: VoteType) => void;
-  onReaction: (postId: string, emojiId: string) => void;
-  onBookmark: (postId: string) => void;
-  showAuthorStats?: boolean; // For post author viewing own stats
+	post: FeedPost;
+	onVote: (postId: string, type: VoteType) => void;
+	onReaction: (postId: string, emojiId: string) => void;
+	onBookmark: (postId: string) => void;
+	showAuthorStats?: boolean; // For post author viewing own stats
 }
 ```
 
@@ -813,9 +811,9 @@ import { buildLoginUrl } from "@autumnsgrove/lattice/grafts/login";
 import { sanitizeReturnTo } from "@autumnsgrove/lattice/utils";
 
 export const load = async ({ url }) => {
-  const returnTo = sanitizeReturnTo(url.searchParams.get("redirect"), "/feed");
-  const callbackUrl = `${url.origin}/auth/callback?returnTo=${encodeURIComponent(returnTo)}`;
-  throw redirect(302, buildLoginUrl(callbackUrl));
+	const returnTo = sanitizeReturnTo(url.searchParams.get("redirect"), "/feed");
+	const callbackUrl = `${url.origin}/auth/callback?returnTo=${encodeURIComponent(returnTo)}`;
+	throw redirect(302, buildLoginUrl(callbackUrl));
 };
 ```
 
@@ -825,10 +823,7 @@ Any route that needs auth:
 
 ```typescript
 if (!locals.user) {
-  throw redirect(
-    302,
-    `/auth/login?redirect=${encodeURIComponent(url.pathname)}`,
-  );
+	throw redirect(302, `/auth/login?redirect=${encodeURIComponent(url.pathname)}`);
 }
 ```
 
@@ -882,16 +877,16 @@ if (!locals.user) {
 ```typescript
 // src/lib/constants/reactions.ts
 export const REACTION_EMOJIS = {
-  heart: { emoji: "❤️", label: "Love" },
-  yellow_heart: { emoji: "💛", label: "Warm" },
-  green_heart: { emoji: "💚", label: "Growth" },
-  blue_heart: { emoji: "💙", label: "Calm" },
-  purple_heart: { emoji: "💜", label: "Creative" },
-  laugh: { emoji: "😂", label: "Joy" },
-  surprised: { emoji: "😮", label: "Wow" },
-  sad: { emoji: "😢", label: "Moved" },
-  sparkle: { emoji: "✨", label: "Magic" },
-  seedling: { emoji: "🌱", label: "Growing" },
+	heart: { emoji: "❤️", label: "Love" },
+	yellow_heart: { emoji: "💛", label: "Warm" },
+	green_heart: { emoji: "💚", label: "Growth" },
+	blue_heart: { emoji: "💙", label: "Calm" },
+	purple_heart: { emoji: "💜", label: "Creative" },
+	laugh: { emoji: "😂", label: "Joy" },
+	surprised: { emoji: "😮", label: "Wow" },
+	sad: { emoji: "😢", label: "Moved" },
+	sparkle: { emoji: "✨", label: "Magic" },
+	seedling: { emoji: "🌱", label: "Growing" },
 } as const;
 ```
 

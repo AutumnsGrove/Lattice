@@ -67,14 +67,14 @@ We maintain **one npm package** with modular exports:
 
 ```json
 {
-  "name": "@autumnsgrove/lattice",
-  "exports": {
-    ".": "./dist/index.js",
-    "./ui": "./dist/ui/index.js",
-    "./foliage": "./dist/foliage/index.js",
-    "./thorn": "./dist/thorn/index.js",
-    "./songbird": "./dist/songbird/index.js"
-  }
+	"name": "@autumnsgrove/lattice",
+	"exports": {
+		".": "./dist/index.js",
+		"./ui": "./dist/ui/index.js",
+		"./foliage": "./dist/foliage/index.js",
+		"./thorn": "./dist/thorn/index.js",
+		"./songbird": "./dist/songbird/index.js"
+	}
 }
 ```
 
@@ -176,7 +176,7 @@ These are designed to be:
 ┌─────────────────────────────────────────────────────────────┐
 │                    Lattice (Monorepo)                    │
 ├─────────────────────────────────────────────────────────────┤
-│  packages/engine/     │  landing/        │  plant/          │
+│  libs/engine/     │  landing/        │  plant/          │
 │  └── @autumnsgrove/   │  grove.place     │  plant.grove.    │
 │      lattice          │  marketing       │  place           │
 │      ├── /ui          │                  │  onboarding      │
@@ -256,35 +256,35 @@ When deciding where something should live:
 
 ## Naming Reference
 
-| Public Name        | Internal Name    | Location                         |
-| ------------------ | ---------------- | -------------------------------- |
-| Lattice            | Lattice          | packages/engine                  |
-| Plant              | Seedbed          | plant/                           |
-| Foliage            | GroveThemes      | packages/engine/src/lib/foliage  |
-| Thorn              | GroveThorn       | packages/engine/src/lib/thorn    |
-| Songbird           | GroveSongbird    | packages/engine/src/lib/songbird |
-| Rings              | GroveAnalytics   | packages/engine/src/lib/rings    |
-| Reeds              | GroveReeds       | packages/engine/src/lib/reeds    |
-| Shade              | GroveShade       | packages/engine/src/lib/shade    |
-| Trails             | GroveTrails      | packages/engine/src/lib/trails   |
-| Wisp               | GroveWisp        | packages/engine/src/lib/wisp     |
-| Arbor              | GroveArbor       | packages/engine/src/lib/arbor    |
-| Heartwood          | GroveAuth        | AutumnsGrove/GroveAuth           |
-| Meadow             | GroveSocial      | AutumnsGrove/GroveSocial         |
-| Bloom              | GroveBloom       | AutumnsGrove/GroveBloom          |
-| Mycelium           | GroveMCP         | AutumnsGrove/GroveMCP            |
-| Ivy                | GroveMail        | AutumnsGrove/Ivy                 |
-| Amber              | GroveStorage     | AutumnsGrove/Amber               |
-| Vista              | GroveMonitor     | AutumnsGrove/GroveMonitor        |
-| Clearing           | GroveClear       | AutumnsGrove/GroveClear          |
-| Patina             | GrovePatina      | AutumnsGrove/Patina              |
-| Forage             | GroveDomainTool  | AutumnsGrove/Forage              |
-| Nook               | GroveNook        | AutumnsGrove/Nook                |
-| Outpost            | GroveMC          | AutumnsGrove/GroveMC             |
-| Aria               | GroveMusic       | AutumnsGrove/GroveMusic          |
-| Trove              | TreasureTrove    | AutumnsGrove/TreasureTrove       |
-| The Daily Clearing | AgenticNewspaper | AutumnsGrove/AgenticNewspaper    |
-| Scout              | GroveScout       | AutumnsGrove/GroveScout          |
+| Public Name        | Internal Name    | Location                      |
+| ------------------ | ---------------- | ----------------------------- |
+| Lattice            | Lattice          | libs/engine                   |
+| Plant              | Seedbed          | apps/plant                    |
+| Foliage            | GroveThemes      | libs/engine/src/lib/foliage   |
+| Thorn              | GroveThorn       | libs/engine/src/lib/thorn     |
+| Songbird           | GroveSongbird    | libs/engine/src/lib/songbird  |
+| Rings              | GroveAnalytics   | libs/engine/src/lib/rings     |
+| Reeds              | GroveReeds       | libs/engine/src/lib/reeds     |
+| Shade              | GroveShade       | libs/engine/src/lib/shade     |
+| Trails             | GroveTrails      | libs/engine/src/lib/trails    |
+| Wisp               | GroveWisp        | libs/engine/src/lib/wisp      |
+| Arbor              | GroveArbor       | libs/engine/src/lib/arbor     |
+| Heartwood          | GroveAuth        | AutumnsGrove/GroveAuth        |
+| Meadow             | GroveSocial      | AutumnsGrove/GroveSocial      |
+| Bloom              | GroveBloom       | AutumnsGrove/GroveBloom       |
+| Mycelium           | GroveMCP         | AutumnsGrove/GroveMCP         |
+| Ivy                | GroveMail        | AutumnsGrove/Ivy              |
+| Amber              | GroveStorage     | AutumnsGrove/Amber            |
+| Vista              | GroveMonitor     | AutumnsGrove/GroveMonitor     |
+| Clearing           | GroveClear       | AutumnsGrove/GroveClear       |
+| Patina             | GrovePatina      | AutumnsGrove/Patina           |
+| Forage             | GroveDomainTool  | AutumnsGrove/Forage           |
+| Nook               | GroveNook        | AutumnsGrove/Nook             |
+| Outpost            | GroveMC          | AutumnsGrove/GroveMC          |
+| Aria               | GroveMusic       | AutumnsGrove/GroveMusic       |
+| Trove              | TreasureTrove    | AutumnsGrove/TreasureTrove    |
+| The Daily Clearing | AgenticNewspaper | AutumnsGrove/AgenticNewspaper |
+| Scout              | GroveScout       | AutumnsGrove/GroveScout       |
 
 ---
 
@@ -312,7 +312,7 @@ The npm package should be renamed from `@autumnsgrove/lattice` to `@groveplace/l
 #### 1. Update the Engine Package
 
 ```bash
-# packages/engine/package.json
+# libs/engine/package.json
 ```
 
 Change:
@@ -359,9 +359,9 @@ Change:
 
 ```json
 {
-  "dependencies": {
-    "@autumnsgrove/lattice": "workspace:*"
-  }
+	"dependencies": {
+		"@autumnsgrove/lattice": "workspace:*"
+	}
 }
 ```
 
@@ -369,9 +369,9 @@ To:
 
 ```json
 {
-  "dependencies": {
-    "@groveplace/lattice": "workspace:*"
-  }
+	"dependencies": {
+		"@groveplace/lattice": "workspace:*"
+	}
 }
 ```
 
@@ -418,7 +418,7 @@ npm deprecate @autumnsgrove/lattice "Moved to @groveplace/lattice"
 ### Checklist
 
 - [ ] Create `groveplace` organization on npm
-- [ ] Update `packages/engine/package.json` name to `@groveplace/lattice`
+- [ ] Update `libs/engine/package.json` name to `@groveplace/lattice`
 - [ ] Update `landing/package.json` dependency
 - [ ] Update `plant/package.json` dependency
 - [ ] Search/replace all imports in `.svelte` files
@@ -439,17 +439,17 @@ After renaming, the package exports should look like:
 
 ```json
 {
-  "name": "@groveplace/lattice",
-  "exports": {
-    ".": "./dist/index.js",
-    "./ui": "./dist/ui/index.js",
-    "./ui/nature": "./dist/ui/nature/index.js",
-    "./ui/glass": "./dist/ui/glass/index.js",
-    "./foliage": "./dist/foliage/index.js",
-    "./thorn": "./dist/thorn/index.js",
-    "./songbird": "./dist/songbird/index.js",
-    "./services": "./dist/services/index.js"
-  }
+	"name": "@groveplace/lattice",
+	"exports": {
+		".": "./dist/index.js",
+		"./ui": "./dist/ui/index.js",
+		"./ui/nature": "./dist/ui/nature/index.js",
+		"./ui/glass": "./dist/ui/glass/index.js",
+		"./foliage": "./dist/foliage/index.js",
+		"./thorn": "./dist/thorn/index.js",
+		"./songbird": "./dist/songbird/index.js",
+		"./services": "./dist/services/index.js"
+	}
 }
 ```
 

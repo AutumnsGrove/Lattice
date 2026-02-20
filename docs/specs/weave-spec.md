@@ -531,16 +531,16 @@ Diagram nodes use Grove's glass component system for consistent styling:
 
 ```svelte
 <script>
-  import { GlassCard } from '@lattice/ui/ui';
-  import { Database, Zap, Cloud } from 'lucide-svelte';
+	import { GlassCard } from "@lattice/ui/ui";
+	import { Database, Zap, Cloud } from "lucide-svelte";
 </script>
 
 <!-- Glass card node in diagram -->
 <GlassCard variant="card" hoverable class="w-40">
-  <div class="flex items-center gap-2">
-    <Database class="w-5 h-5" />
-    <span>Database</span>
-  </div>
+	<div class="flex items-center gap-2">
+		<Database class="w-5 h-5" />
+		<span>Database</span>
+	</div>
 </GlassCard>
 ```
 
@@ -560,32 +560,32 @@ Standard icons for common diagram concepts:
 ```typescript
 // Recommended icon mappings
 const diagramIcons = {
-  // Infrastructure
-  database: Database,
-  server: Server,
-  cloud: Cloud,
-  storage: HardDrive,
+	// Infrastructure
+	database: Database,
+	server: Server,
+	cloud: Cloud,
+	storage: HardDrive,
 
-  // Actions
-  process: Zap,
-  transform: ArrowRightLeft,
-  filter: Filter,
+	// Actions
+	process: Zap,
+	transform: ArrowRightLeft,
+	filter: Filter,
 
-  // Data
-  input: ArrowDownToLine,
-  output: ArrowUpFromLine,
-  queue: ListOrdered,
+	// Data
+	input: ArrowDownToLine,
+	output: ArrowUpFromLine,
+	queue: ListOrdered,
 
-  // Control
-  decision: GitBranch,
-  loop: RefreshCw,
-  start: Play,
-  end: Square,
+	// Control
+	decision: GitBranch,
+	loop: RefreshCw,
+	start: Play,
+	end: Square,
 
-  // Security
-  auth: ShieldCheck,
-  lock: Lock,
-  key: Key,
+	// Security
+	auth: ShieldCheck,
+	lock: Lock,
+	key: Key,
 } as const;
 ```
 
@@ -609,7 +609,7 @@ const diagramIcons = {
 
 ```svelte
 <script>
-  import { Cloud, Zap, Database } from 'lucide-svelte';
+	import { Cloud, Zap, Database } from "lucide-svelte";
 </script>
 ```
 
@@ -624,9 +624,9 @@ For persistence, wrap diagram/animation data in D1 batch operations using the Lo
 ```typescript
 // Example: Save diagram with all nodes and connections in one batch
 await loom.batch([
-  db.insert(diagrams).values({ id, name, userId }),
-  ...nodes.map((node) => db.insert(diagramNodes).values(node)),
-  ...connections.map((conn) => db.insert(diagramConnections).values(conn)),
+	db.insert(diagrams).values({ id, name, userId }),
+	...nodes.map((node) => db.insert(diagramNodes).values(node)),
+	...connections.map((conn) => db.insert(diagramConnections).values(conn)),
 ]);
 ```
 
@@ -639,7 +639,7 @@ Benefits:
 ### Shared Engine Components
 
 ```
-packages/engine/src/lib/ui/components/
+libs/engine/src/lib/ui/components/
 ├── node-graph/                 # Shared foundation
 │   ├── Grid.svelte            # Snap grid system
 │   ├── Connection.svelte      # Line/arrow rendering
@@ -742,10 +742,10 @@ SVG files can contain executable JavaScript. All SVG exports must:
 import DOMPurify from "dompurify";
 
 const safeSvg = DOMPurify.sanitize(svgString, {
-  USE_PROFILES: { svg: true },
-  ADD_TAGS: ["use"], // Allow internal use refs only
-  FORBID_ATTR: ["onclick", "onload", "onerror", "onmouseover"],
-  FORBID_TAGS: ["script", "foreignObject"],
+	USE_PROFILES: { svg: true },
+	ADD_TAGS: ["use"], // Allow internal use refs only
+	FORBID_ATTR: ["onclick", "onload", "onerror", "onmouseover"],
+	FORBID_TAGS: ["script", "foreignObject"],
 });
 ```
 

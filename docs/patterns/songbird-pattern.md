@@ -467,7 +467,7 @@ Content Moderation uses Songbird for:
 
 ## Implementation Checklist
 
-- [ ] Create `packages/engine/src/lib/server/songbird.ts`
+- [ ] Create `libs/engine/src/lib/server/songbird.ts`
 - [ ] Implement Canary check function
 - [ ] Implement Kestrel check with context configuration
 - [ ] Create Songbird pipeline wrapper

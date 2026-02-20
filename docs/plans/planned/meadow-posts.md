@@ -12,7 +12,7 @@ Notes are short-form posts written directly on Meadow. Up to 500 characters, no 
 
 ## Phase 1: Migration 078 — Schema
 
-**New file:** `packages/engine/migrations/078_meadow_notes_support.sql`
+**New file:** `libs/engine/migrations/078_meadow_notes_support.sql`
 
 ```sql
 ALTER TABLE meadow_posts ADD COLUMN post_type TEXT NOT NULL DEFAULT 'bloom';
@@ -38,7 +38,7 @@ CREATE INDEX IF NOT EXISTS idx_meadow_posts_type
 
 ## Phase 2: Types
 
-**Modify:** `packages/meadow/src/lib/types/post.ts`
+**Modify:** `apps/meadow/src/lib/types/post.ts`
 
 Add to `MeadowPost` interface:
 
@@ -48,7 +48,7 @@ body: string | null;
 userId: string | null;
 ```
 
-**Modify:** `packages/meadow/src/lib/server/types.ts`
+**Modify:** `apps/meadow/src/lib/server/types.ts`
 
 Add to `PostRow` interface:
 
@@ -74,12 +74,12 @@ userId: row.user_id ?? null,
 
 ## Phase 3: Service Layer
 
-**Modify:** `packages/meadow/src/lib/server/feed.ts`
+**Modify:** `apps/meadow/src/lib/server/feed.ts`
 
 - Add `post_type` filter to `getFeed()` WHERE clause when filter is `"notes"` or `"blooms"`
 - Pattern: `AND post_type = ?` with bind param
 
-**New file:** `packages/meadow/src/lib/server/notes.ts`
+**New file:** `apps/meadow/src/lib/server/notes.ts`
 
 ```typescript
 export async function createNote(db, userId, body, tags?): Promise<MeadowPost>;
@@ -103,7 +103,7 @@ export async function deleteNote(db, userId, noteId): Promise<boolean>;
 
 ## Phase 4: API Endpoints
 
-**New file:** `packages/meadow/src/routes/api/notes/+server.ts`
+**New file:** `apps/meadow/src/routes/api/notes/+server.ts`
 
 - **POST** — Create a Note
   - Auth required (`locals.user`)
@@ -111,7 +111,7 @@ export async function deleteNote(db, userId, noteId): Promise<boolean>;
   - Validate: `body` required, 1-500 chars trimmed, `tags` optional max 5 items each max 30 chars
   - Returns `{ success: true, post: MeadowPost }`
 
-**New file:** `packages/meadow/src/routes/api/notes/[id]/+server.ts`
+**New file:** `apps/meadow/src/routes/api/notes/[id]/+server.ts`
 
 - **DELETE** — Delete your own Note
   - Auth required
@@ -119,7 +119,7 @@ export async function deleteNote(db, userId, noteId): Promise<boolean>;
   - Verify ownership (user_id match)
   - Returns `{ success: true, deleted: true }`
 
-**Modify:** `packages/meadow/src/routes/api/feed/+server.ts`
+**Modify:** `apps/meadow/src/routes/api/feed/+server.ts`
 
 - Accept `filter=notes` and `filter=blooms` query params (already handled by FeedFilter union change in Phase 2)
 
@@ -127,7 +127,7 @@ export async function deleteNote(db, userId, noteId): Promise<boolean>;
 
 ## Phase 5: PostCard — Conditional Rendering
 
-**Modify:** `packages/meadow/src/lib/components/PostCard.svelte`
+**Modify:** `apps/meadow/src/lib/components/PostCard.svelte`
 
 Add conditional rendering based on `post.postType`:
 
@@ -148,7 +148,7 @@ Add conditional rendering based on `post.postType`:
 
 ## Phase 6: ComposeBox + Feed Page
 
-**New file:** `packages/meadow/src/lib/components/ComposeBox.svelte`
+**New file:** `apps/meadow/src/lib/components/ComposeBox.svelte`
 
 Compose box for authenticated users at top of feed:
 
@@ -157,16 +157,16 @@ Compose box for authenticated users at top of feed:
 - Wires to `POST /api/notes`
 - On success: collapses, prepends new Note to feed optimistically
 
-**Modify:** `packages/meadow/src/routes/feed/+page.svelte`
+**Modify:** `apps/meadow/src/routes/feed/+page.svelte`
 
 - Import and render ComposeBox above PostCard list (only when `data.user` exists)
 - Handle `oncreated` event from ComposeBox to prepend new post to feed array
 
-**Modify:** `packages/meadow/src/lib/components/FeedFilters.svelte`
+**Modify:** `apps/meadow/src/lib/components/FeedFilters.svelte`
 
 - Add "Notes" and "Blooms" tabs to the filter list
 
-**Modify:** `packages/meadow/src/routes/feed/+page.server.ts`
+**Modify:** `apps/meadow/src/routes/feed/+page.server.ts`
 
 - Pass `filter=notes` / `filter=blooms` through to service layer (already works if FeedFilter union is extended)
 
@@ -174,12 +174,12 @@ Compose box for authenticated users at top of feed:
 
 ## Phase 7: Detail Page
 
-**Modify:** `packages/meadow/src/routes/feed/[id]/+page.svelte`
+**Modify:** `apps/meadow/src/routes/feed/[id]/+page.svelte`
 
 - If `post.postType === 'note'`: render `post.body` as main content (large text, no HTML), show delete button if `post.userId === data.user?.id`
 - If `post.postType === 'bloom'`: keep current `{@html post.contentHtml}` rendering
 
-**Modify:** `packages/meadow/src/routes/feed/[id]/+page.server.ts`
+**Modify:** `apps/meadow/src/routes/feed/[id]/+page.server.ts`
 
 - Include new columns in SELECT query (`post_type`, `user_id`, `body`)
 
@@ -195,21 +195,21 @@ Compose box for authenticated users at top of feed:
 
 | Action     | File                                                      | Phase |
 | ---------- | --------------------------------------------------------- | ----- |
-| **Create** | `packages/engine/migrations/078_meadow_notes_support.sql` | 1     |
-| **Modify** | `packages/meadow/src/lib/types/post.ts`                   | 2     |
-| **Modify** | `packages/meadow/src/lib/server/types.ts`                 | 2     |
-| **Modify** | `packages/meadow/src/lib/server/feed.ts`                  | 3     |
-| **Create** | `packages/meadow/src/lib/server/notes.ts`                 | 3     |
-| **Create** | `packages/meadow/src/routes/api/notes/+server.ts`         | 4     |
-| **Create** | `packages/meadow/src/routes/api/notes/[id]/+server.ts`    | 4     |
-| **Modify** | `packages/meadow/src/routes/api/feed/+server.ts`          | 4     |
-| **Modify** | `packages/meadow/src/lib/components/PostCard.svelte`      | 5     |
-| **Create** | `packages/meadow/src/lib/components/ComposeBox.svelte`    | 6     |
-| **Modify** | `packages/meadow/src/routes/feed/+page.svelte`            | 6     |
-| **Modify** | `packages/meadow/src/lib/components/FeedFilters.svelte`   | 6     |
-| **Modify** | `packages/meadow/src/routes/feed/+page.server.ts`         | 6     |
-| **Modify** | `packages/meadow/src/routes/feed/[id]/+page.svelte`       | 7     |
-| **Modify** | `packages/meadow/src/routes/feed/[id]/+page.server.ts`    | 7     |
+| **Create** | `libs/engine/migrations/078_meadow_notes_support.sql` | 1     |
+| **Modify** | `apps/meadow/src/lib/types/post.ts`                   | 2     |
+| **Modify** | `apps/meadow/src/lib/server/types.ts`                 | 2     |
+| **Modify** | `apps/meadow/src/lib/server/feed.ts`                  | 3     |
+| **Create** | `apps/meadow/src/lib/server/notes.ts`                 | 3     |
+| **Create** | `apps/meadow/src/routes/api/notes/+server.ts`         | 4     |
+| **Create** | `apps/meadow/src/routes/api/notes/[id]/+server.ts`    | 4     |
+| **Modify** | `apps/meadow/src/routes/api/feed/+server.ts`          | 4     |
+| **Modify** | `apps/meadow/src/lib/components/PostCard.svelte`      | 5     |
+| **Create** | `apps/meadow/src/lib/components/ComposeBox.svelte`    | 6     |
+| **Modify** | `apps/meadow/src/routes/feed/+page.svelte`            | 6     |
+| **Modify** | `apps/meadow/src/lib/components/FeedFilters.svelte`   | 6     |
+| **Modify** | `apps/meadow/src/routes/feed/+page.server.ts`         | 6     |
+| **Modify** | `apps/meadow/src/routes/feed/[id]/+page.svelte`       | 7     |
+| **Modify** | `apps/meadow/src/routes/feed/[id]/+page.server.ts`    | 7     |
 
 **New files:** 4 | **Modified files:** 11 | **Estimated new lines:** ~500
 
@@ -219,13 +219,13 @@ Compose box for authenticated users at top of feed:
 
 | Pattern                   | Source File                                                |
 | ------------------------- | ---------------------------------------------------------- |
-| Auth check + 401 response | `packages/meadow/src/routes/api/feed/[id]/vote/+server.ts` |
+| Auth check + 401 response | `apps/meadow/src/routes/api/feed/[id]/vote/+server.ts` |
 | Threshold rate limiting   | Same file — `createThreshold()` + `thresholdCheck()`       |
-| Service layer D1 queries  | `packages/meadow/src/lib/server/votes.ts`                  |
-| `rowToPost()` transform   | `packages/meadow/src/lib/server/types.ts:88`               |
-| Feed query builder        | `packages/meadow/src/lib/server/feed.ts:65`                |
-| Optimistic UI updates     | `packages/meadow/src/routes/feed/+page.svelte:80`          |
-| Glass card styling        | `packages/meadow/src/lib/components/PostCard.svelte`       |
+| Service layer D1 queries  | `apps/meadow/src/lib/server/votes.ts`                  |
+| `rowToPost()` transform   | `apps/meadow/src/lib/server/types.ts:88`               |
+| Feed query builder        | `apps/meadow/src/lib/server/feed.ts:65`                |
+| Optimistic UI updates     | `apps/meadow/src/routes/feed/+page.svelte:80`          |
+| Glass card styling        | `apps/meadow/src/lib/components/PostCard.svelte`       |
 | `api.post()` client calls | `@autumnsgrove/lattice/utils/api`                          |
 
 ---
@@ -234,7 +234,7 @@ Compose box for authenticated users at top of feed:
 
 1. `pnpm install` (no new deps)
 2. Apply migration 078 locally (or verify schema via wrangler d1)
-3. Type check: `npx svelte-check --tsconfig ./tsconfig.json` in `packages/meadow/`
+3. Type check: `npx svelte-check --tsconfig ./tsconfig.json` in `apps/meadow/`
 4. Manual test flow:
    - Visit `/feed` logged in -> ComposeBox visible
    - Write a note -> appears in feed optimistically

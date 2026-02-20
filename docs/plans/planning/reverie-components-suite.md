@@ -382,7 +382,7 @@ These components are **more** important to make accessible, not less. Dreams are
 For Reverie to compose these, they need to be discoverable:
 
 ```typescript
-// packages/engine/src/lib/reverie/dreamscape-registry.ts
+// libs/engine/src/lib/reverie/dreamscape-registry.ts
 
 export interface DreamscapeComponent {
   id: string;
@@ -675,7 +675,7 @@ Add the negative space components:
 ## The Dreamscape Registry
 
 ```typescript
-// packages/engine/src/lib/reverie/dreamscape-registry.ts
+// libs/engine/src/lib/reverie/dreamscape-registry.ts
 
 export const DREAMSCAPE_REGISTRY: Record<string, DreamscapeComponent> = {
   // Liminal

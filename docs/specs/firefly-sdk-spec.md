@@ -56,7 +56,7 @@ The Firefly SDK is a TypeScript library for provisioning ephemeral servers acros
 
 **Public Name:** Firefly SDK
 **Internal Name:** GroveFirefly
-**Package:** `@autumnsgrove/lattice/firefly`
+**Package:** `@autumnsgrove/lattice/firefly` (in `libs/engine/src/lib/firefly/`)
 **Pattern Reference:** [[firefly-pattern|Firefly: Ephemeral Server Pattern]]
 **Consumers:** Queen (CI), Bloom, Outpost, Journey, Verge
 
@@ -730,7 +730,7 @@ For nearly all Grove use cases, Firefly costs dramatically less than always-on h
 ## File Structure
 
 ```
-packages/engine/src/lib/firefly/
+libs/engine/src/lib/firefly/
 ├── index.ts              # Barrel exports
 ├── types.ts              # All interfaces (FireflyProvider, ServerConfig, etc.)
 ├── firefly.ts            # Core Firefly orchestrator class
@@ -754,7 +754,7 @@ The SDK lives in the engine package. Published as `@autumnsgrove/lattice/firefly
 
 ### Phase 1: Core SDK
 
-- [ ] Create `packages/engine/src/lib/firefly/` directory structure
+- [ ] Create `libs/engine/src/lib/firefly/` directory structure
 - [ ] Define all interfaces in `types.ts`
 - [ ] Implement `Firefly` orchestrator class (ignite/fade lifecycle)
 - [ ] Implement `FireflyProvider` abstract base class

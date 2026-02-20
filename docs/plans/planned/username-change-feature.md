@@ -40,7 +40,7 @@ CREATE INDEX idx_username_history_user ON username_history(user_id);
 
 #### 1.2 Username Change Service
 ```typescript
-// packages/engine/src/lib/server/services/username-change.ts
+// libs/engine/src/lib/server/services/username-change.ts
 
 interface UsernameChangeResult {
   success: boolean;
@@ -194,15 +194,15 @@ Changing your username will:
 ## Files to Create/Modify
 
 ### New Files
-- `packages/engine/migrations/0XX_username_history.sql`
-- `packages/engine/src/lib/server/services/username-change.ts`
-- `packages/engine/src/lib/server/services/username-change.test.ts`
-- `packages/engine/src/routes/admin/settings/username/+page.svelte`
-- `packages/engine/src/routes/admin/settings/username/+page.server.ts`
+- `libs/engine/migrations/0XX_username_history.sql`
+- `libs/engine/src/lib/server/services/username-change.ts`
+- `libs/engine/src/lib/server/services/username-change.test.ts`
+- `libs/engine/src/routes/admin/settings/username/+page.svelte`
+- `libs/engine/src/routes/admin/settings/username/+page.server.ts`
 
 ### Modified Files
-- `packages/engine/src/hooks.server.ts` (add redirect check)
-- `packages/engine/src/routes/admin/settings/+page.svelte` (add link to username section)
+- `libs/engine/src/hooks.server.ts` (add redirect check)
+- `libs/engine/src/routes/admin/settings/+page.svelte` (add link to username section)
 
 ## Not In Scope (V1 of this feature)
 

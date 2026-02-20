@@ -8,7 +8,7 @@ Heartwood (GroveAuth) currently lives in a separate repository at `~/Projects/Gr
 2. **Constant context-switching** — Working on auth means constantly referencing a separate project, separate terminal, separate agent context. Debugging cross-repo issues requires juggling two codebases.
 3. **Security isolation is a myth here** — The actual security hardening (rate limiting, PKCE, session encryption, CSP, audit logging, HSTS) lives in server-side code and Cloudflare infrastructure. Moving code between Git repositories doesn't change the security posture. The worker still deploys independently with its own secrets, D1 database, and KV namespace.
 
-**After migration**: The Heartwood API worker becomes `packages/heartwood/` in the monorepo. The Heartwood admin UI merges into the existing arbor admin panel. The internal codename "GroveAuth" is retired in favor of the public name "Heartwood" everywhere.
+**After migration**: The Heartwood API worker becomes `services/heartwood/` in the monorepo. The Heartwood admin UI merges into the existing arbor admin panel. The internal codename "GroveAuth" is retired in favor of the public name "Heartwood" everywhere.
 
 ---
 
@@ -18,7 +18,7 @@ These decisions shape the entire migration:
 
 | Decision                  | Choice                                              | Reasoning                                                                                                      |
 | ------------------------- | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| **Package count**         | ONE new package (`packages/heartwood/`)             | The API worker is the only independent deployable. The dashboard UI merges into arbor.                         |
+| **Package count**         | ONE new package (`services/heartwood/`)             | The API worker is the only independent deployable. The dashboard UI merges into arbor.                         |
 | **Dashboard UI**          | Merge into `/arbor` admin panel in engine           | No need for two admin panels. Arbor already has auth, layout, and the AdminHeader pattern.                     |
 | **Internal naming**       | Rename `groveauth` → `heartwood` everywhere in code | Unify on the public name. This is the chance to stop carrying two names.                                       |
 | **Discord auth**          | Drop entirely                                       | Not using Discord for auth. Remove all Discord-related code, secrets, and config.                              |
@@ -120,7 +120,7 @@ This is the chance to retire the internal codename and unify on the public name.
 
 | Location                           | Before                                   | After                                    |
 | ---------------------------------- | ---------------------------------------- | ---------------------------------------- |
-| Engine lib directory               | `packages/engine/src/lib/groveauth/`     | `packages/engine/src/lib/heartwood/`     |
+| Engine lib directory               | `libs/engine/src/lib/groveauth/`     | `libs/engine/src/lib/heartwood/`     |
 | Engine export path                 | `@autumnsgrove/lattice/groveauth`        | `@autumnsgrove/lattice/heartwood`        |
 | Engine `package.json` exports      | `"./groveauth": { ... }`                 | `"./heartwood": { ... }`                 |
 | All consumer imports               | `from '@autumnsgrove/lattice/groveauth'` | `from '@autumnsgrove/lattice/heartwood'` |
@@ -158,11 +158,11 @@ Based on grep across the monorepo, ~30 files reference "groveauth":
 
 **Other packages** (~5 files):
 
-- `packages/landing/wrangler.toml` (service binding name — keep as-is)
-- `packages/plant/wrangler.toml` (service binding name — keep as-is)
-- `packages/domains/wrangler.toml` (service binding name — keep as-is)
-- `packages/grove-router/src/index.ts`
-- `packages/grove-router/tests/router.test.ts`
+- `apps/landing/wrangler.toml` (service binding name — keep as-is)
+- `apps/plant/wrangler.toml` (service binding name — keep as-is)
+- `apps/domains/wrangler.toml` (service binding name — keep as-is)
+- `services/grove-router/src/index.ts`
+- `services/grove-router/tests/router.test.ts`
 
 **Note**: `wrangler.toml` service bindings (`service = "groveauth"`) stay as-is because they reference the Cloudflare worker name, which remains `groveauth` for now.
 
@@ -171,7 +171,7 @@ Based on grep across the monorepo, ~30 files reference "groveauth":
 During the transition, add a re-export from the old path:
 
 ```typescript
-// packages/engine/src/lib/groveauth/index.ts (temporary, remove after all consumers updated)
+// libs/engine/src/lib/groveauth/index.ts (temporary, remove after all consumers updated)
 export * from "../heartwood/index.js";
 ```
 
@@ -192,7 +192,7 @@ Remove these after all consumers are updated (same PR ideally).
 
 ## Dashboard UI → Arbor Merge
 
-Instead of creating a separate `heartwood-ui` package, the Heartwood frontend dashboard pages merge into the existing arbor admin panel at `packages/engine/src/routes/arbor/`.
+Instead of creating a separate `heartwood-ui` package, the Heartwood frontend dashboard pages merge into the existing arbor admin panel at `libs/engine/src/routes/arbor/`.
 
 ### Current Arbor Structure
 
@@ -356,9 +356,9 @@ packages/
 
 **Goal**: Get the Heartwood API worker building inside the monorepo.
 
-- [ ] Create `packages/heartwood/` directory
+- [ ] Create `services/heartwood/` directory
 - [ ] Copy GroveAuth `src/`, `migrations/`, `e2e/`, `wrangler.toml`, `tsconfig.json`, `vitest.config.ts`, `worker-configuration.d.ts`
-- [ ] Create `packages/heartwood/package.json`:
+- [ ] Create `services/heartwood/package.json`:
   - Name: `grove-heartwood`
   - Private: true
   - Dependencies: better-auth, hono, drizzle-orm, jose, zod (no Discord packages)
@@ -366,17 +366,17 @@ packages/
   - Strip `DISCORD_CLIENT_ID` / `DISCORD_CLIENT_SECRET` from Env types and wrangler.toml
   - Remove Discord provider config from Better Auth setup
   - Remove Discord references from OAuth service
-- [ ] Add `packages/heartwood/` to `pnpm-workspace.yaml`
+- [ ] Add `services/heartwood/` to `pnpm-workspace.yaml`
 - [ ] Run `pnpm install` from root
-- [ ] Verify `packages/heartwood/` builds: `cd packages/heartwood && pnpm run typecheck`
+- [ ] Verify `services/heartwood/` builds: `cd packages/heartwood && pnpm run typecheck`
 - [ ] Verify tests pass: `cd packages/heartwood && pnpm run test:run`
 
 ### Phase 2: Internal Rename (groveauth → heartwood)
 
 **Goal**: Unify naming across the monorepo.
 
-- [ ] Rename `packages/engine/src/lib/groveauth/` → `packages/engine/src/lib/heartwood/`
-- [ ] Update `packages/engine/package.json` exports:
+- [ ] Rename `libs/engine/src/lib/groveauth/` → `libs/engine/src/lib/heartwood/`
+- [ ] Update `libs/engine/package.json` exports:
   - Change `"./groveauth"` → `"./heartwood"`
   - Temporarily keep `"./groveauth"` as alias pointing to heartwood (remove after all consumers updated)
 - [ ] Update all engine internal imports (`$lib/groveauth/*` → `$lib/heartwood/*`)
@@ -420,15 +420,15 @@ packages/
 ### Phase 5: Update References & Housekeeping
 
 - [ ] Update `.claude/skills/heartwood-auth` skill to reference new package locations
-- [ ] Update `AGENT.md` references — remove all `~/Projects/GroveAuth/` paths, update to `packages/heartwood/`
+- [ ] Update `AGENT.md` references — remove all `~/Projects/GroveAuth/` paths, update to `services/heartwood/`
 - [ ] Update the turtle hardening plan (`docs/plans/planned/turtle-hardening-plan.md`) which references `GroveAuth/` paths
 - [ ] Update agent memory (`MEMORY.md`) with new paths
-- [ ] **Update credits page** (`packages/landing/src/routes/credits/+page.svelte`) — add Heartwood as a package/component
+- [ ] **Update credits page** (`apps/landing/src/routes/credits/+page.svelte`) — add Heartwood as a package/component
 - [ ] Rename "GroveAuth" to "Heartwood" in any remaining user-facing or developer-facing text
 
 ### Phase 6: CI/CD Setup
 
-- [ ] Add `packages/heartwood/` to GitHub Actions workflows
+- [ ] Add `services/heartwood/` to GitHub Actions workflows
   - Worker deployment: `cd packages/heartwood && wrangler deploy`
   - Type checking: `cd packages/heartwood && pnpm run typecheck`
   - Tests: `cd packages/heartwood && pnpm run test:run`
@@ -438,7 +438,7 @@ packages/
 
 ### Phase 7: Deployment Verification
 
-- [ ] Deploy `packages/heartwood/` to Cloudflare Workers — verify `auth-api.grove.place` responds
+- [ ] Deploy `services/heartwood/` to Cloudflare Workers — verify `auth-api.grove.place` responds
 - [ ] Test full OAuth flow: Google sign-in → callback → session created
 - [ ] Test session validation from engine: `POST /session/validate` via service binding
 - [ ] Test passkey registration and authentication
@@ -451,7 +451,7 @@ packages/
 ### Phase 8: Archive Old Repository
 
 - [ ] Tag final state: `git tag archived-monorepo-migration`
-- [ ] Update GroveAuth README: "This repository has been archived. Heartwood now lives in the Lattice monorepo at `packages/heartwood/`."
+- [ ] Update GroveAuth README: "This repository has been archived. Heartwood now lives in the Lattice monorepo at `services/heartwood/`."
 - [ ] Archive the repository on GitHub (Settings → Archive)
 - [ ] Retire `heartwood.grove.place` Cloudflare Pages project (or redirect)
 - [ ] Remove Discord secrets from Cloudflare: `wrangler secret delete DISCORD_CLIENT_ID` / `DISCORD_CLIENT_SECRET`
@@ -482,7 +482,7 @@ packages/
 
 | Aspect             | Before                                     | After                                | Benefit                         |
 | ------------------ | ------------------------------------------ | ------------------------------------ | ------------------------------- |
-| Code location      | `~/Projects/GroveAuth/`                    | `packages/heartwood/`                | Single monorepo, single context |
+| Code location      | `~/Projects/GroveAuth/`                    | `services/heartwood/`                | Single monorepo, single context |
 | Dashboard UI       | Separate site at `heartwood.grove.place`   | Merged into `/arbor` admin panel     | One admin panel, not two        |
 | Internal naming    | `groveauth` in code, `heartwood` in public | `heartwood` everywhere               | No more dual naming confusion   |
 | Engine import path | `@autumnsgrove/lattice/groveauth`          | `@autumnsgrove/lattice/heartwood`    | Name matches public identity    |

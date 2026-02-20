@@ -33,7 +33,7 @@ This creates a delightful meta-naming opportunity: the UI Firefly component can 
 
 ### The Firefly Component (UI)
 
-Current implementation in [`Firefly.svelte`](packages/engine/src/lib/ui/components/nature/creatures/Firefly.svelte):
+Current implementation in [`Firefly.svelte`](libs/engine/src/lib/ui/components/nature/creatures/Firefly.svelte):
 
 - Multi-layered bioluminescence (outer glow, inner glow, glowing abdomen)
 - Performance-optimized animations (opacity-based, not filter-based)
@@ -306,7 +306,7 @@ This creates a unified metaphor: "Let your code glow like fireflies in the grove
 ## File Structure
 
 ```
-packages/engine/src/lib/ui/components/nature/
+libs/engine/src/lib/ui/components/nature/
 ├── creatures/
 │   ├── Firefly.svelte          # Enhanced Firefly
 │   ├── FireflySwarm.svelte     # NEW: Swarm component

@@ -101,7 +101,7 @@ Collapsible content panels.
 
 Dark mode is fully implemented via CSS variables but not documented:
 
-**File**: `packages/engine/src/lib/styles/tokens.css`
+**File**: `libs/engine/src/lib/styles/tokens.css`
 
 ```css
 :root {
@@ -495,8 +495,8 @@ keyframes: {
 
 ## Related Files
 
-- Tailwind preset: `packages/engine/src/lib/ui/tailwind.preset.js`
-- CSS tokens: `packages/engine/src/lib/styles/tokens.css`
-- Typography README: `packages/engine/src/lib/ui/components/typography/README.md`
-- Grove CSS: `packages/engine/src/lib/ui/styles/grove.css`
+- Tailwind preset: `libs/engine/src/lib/ui/tailwind.preset.js`
+- CSS tokens: `libs/engine/src/lib/styles/tokens.css`
+- Typography README: `libs/engine/src/lib/ui/components/typography/README.md`
+- Grove CSS: `libs/engine/src/lib/ui/styles/grove.css`
 ```

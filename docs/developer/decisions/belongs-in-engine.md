@@ -158,11 +158,11 @@ Is it specific to Grove's domain logic?
 ```typescript
 // utils/markdown.js
 export function parseMarkdown(content: string) {
-  // Mermaid diagram support
-  // Syntax highlighting
-  // Front-matter extraction
-  // HTML sanitization
-  return processedHTML;
+	// Mermaid diagram support
+	// Syntax highlighting
+	// Front-matter extraction
+	// HTML sanitization
+	return processedHTML;
 }
 ```
 
@@ -173,9 +173,9 @@ export function parseMarkdown(content: string) {
 ```svelte
 <!-- components/admin/GutterManager.svelte -->
 <script>
-  // Admin interface for managing gutter annotations
-  // CRUD operations on annotations
-  // Position validation
+	// Admin interface for managing gutter annotations
+	// CRUD operations on annotations
+	// Position validation
 </script>
 ```
 
@@ -186,8 +186,8 @@ export function parseMarkdown(content: string) {
 ```typescript
 // payments/provider.ts
 export interface PaymentProvider {
-  createSubscription(plan: Plan): Promise<Subscription>;
-  processPayment(amount: number): Promise<Payment>;
+	createSubscription(plan: Plan): Promise<Subscription>;
+	processPayment(amount: number): Promise<Payment>;
 }
 ```
 
@@ -200,9 +200,9 @@ export interface PaymentProvider {
 ```svelte
 <!-- This should be in GroveUI -->
 <script>
-  export let variant = 'primary';
-  export let size = 'md';
-  // No business logic, just presentation
+	export let variant = "primary";
+	export let size = "md";
+	// No business logic, just presentation
 </script>
 ```
 
@@ -313,29 +313,29 @@ import { Button } from "@autumnsgrove/lattice/ui";
 
 **Domain Components**:
 
-- `/packages/engine/src/lib/components/custom/*`
-- `/packages/engine/src/lib/components/admin/*`
-- `/packages/engine/src/lib/components/gallery/*`
+- `/libs/engine/src/lib/components/custom/*`
+- `/libs/engine/src/lib/components/admin/*`
+- `/libs/engine/src/lib/components/gallery/*`
 
 **Utilities**:
 
-- `/packages/engine/src/lib/utils/markdown.js`
-- `/packages/engine/src/lib/utils/gutter.js`
-- `/packages/engine/src/lib/utils/imageProcessor.js`
-- `/packages/engine/src/lib/utils/validation.js`
+- `/libs/engine/src/lib/utils/markdown.js`
+- `/libs/engine/src/lib/utils/gutter.js`
+- `/libs/engine/src/lib/utils/imageProcessor.js`
+- `/libs/engine/src/lib/utils/validation.js`
 
 **Auth & Payments**:
 
-- `/packages/engine/src/lib/auth/*`
-- `/packages/engine/src/lib/payments/*`
+- `/libs/engine/src/lib/auth/*`
+- `/libs/engine/src/lib/payments/*`
 
 **Database**:
 
-- `/packages/engine/src/lib/db/schema.sql`
+- `/libs/engine/src/lib/db/schema.sql`
 
 **Routes** (Engine's own demo/docs):
 
-- `/packages/engine/src/routes/**/*`
+- `/libs/engine/src/routes/**/*`
 
 ---
 

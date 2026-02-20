@@ -155,7 +155,7 @@ Meadow is the community layer of Grove. It provides a social feed where Wanderer
 ### Project Structure
 
 ```
-packages/meadow/
+apps/meadow/
 ├── src/
 │   ├── app.css                     # Color system, fonts, glassmorphism
 │   ├── app.d.ts                    # Platform types (D1, KV, AUTH, Locals)
@@ -423,13 +423,13 @@ Using `fast-xml-parser` for RSS 2.0 parsing. Grove's own RSS generator uses stan
 
 ```typescript
 interface ParsedPost {
-  guid: string; // <guid> or fall back to <link>
-  title: string; // <title>
-  excerpt: string; // <description>, stripped of HTML, truncated to 200 chars
-  slug: string; // Extracted from <link> URL path
-  postUrl: string; // <link>
-  publishedAt: number; // <pubDate> parsed to Unix seconds
-  tags: string[]; // <category> elements
+	guid: string; // <guid> or fall back to <link>
+	title: string; // <title>
+	excerpt: string; // <description>, stripped of HTML, truncated to 200 chars
+	slug: string; // Extracted from <link> URL path
+	postUrl: string; // <link>
+	publishedAt: number; // <pubDate> parsed to Unix seconds
+	tags: string[]; // <category> elements
 }
 ```
 
@@ -575,11 +575,11 @@ Each post in the feed renders as a `GlassCard` with `hoverable` enabled:
 
 ```typescript
 interface PostCardProps {
-  post: FeedPost;
-  onVote: (postId: string) => void;
-  onReaction: (postId: string, emojiId: string) => void;
-  onBookmark: (postId: string) => void;
-  showAuthorStats?: boolean;
+	post: FeedPost;
+	onVote: (postId: string) => void;
+	onReaction: (postId: string, emojiId: string) => void;
+	onBookmark: (postId: string) => void;
+	showAuthorStats?: boolean;
 }
 ```
 
@@ -604,12 +604,12 @@ let loadingMore = $state(false);
 let hasMore = $state(true);
 
 async function loadMore() {
-  if (loadingMore || !hasMore) return;
-  loadingMore = true;
-  const result = await api.get(`/api/feed?filter=${filter}&page=${++page}`);
-  posts = [...posts, ...result.data.posts];
-  hasMore = result.data.hasMore;
-  loadingMore = false;
+	if (loadingMore || !hasMore) return;
+	loadingMore = true;
+	const result = await api.get(`/api/feed?filter=${filter}&page=${++page}`);
+	posts = [...posts, ...result.data.posts];
+	hasMore = result.data.hasMore;
+	loadingMore = false;
 }
 ```
 
@@ -693,16 +693,16 @@ No angry emojis. No thumbs down. No eye-roll. This is a space for encouragement.
 ```typescript
 // src/lib/constants/reactions.ts
 export const REACTION_EMOJIS = {
-  heart: { emoji: "❤️", label: "Love" },
-  yellow_heart: { emoji: "💛", label: "Warm" },
-  green_heart: { emoji: "💚", label: "Growth" },
-  blue_heart: { emoji: "💙", label: "Calm" },
-  purple_heart: { emoji: "💜", label: "Creative" },
-  laugh: { emoji: "😂", label: "Joy" },
-  surprised: { emoji: "😮", label: "Wow" },
-  sad: { emoji: "😢", label: "Moved" },
-  sparkle: { emoji: "✨", label: "Magic" },
-  seedling: { emoji: "🌱", label: "Growing" },
+	heart: { emoji: "❤️", label: "Love" },
+	yellow_heart: { emoji: "💛", label: "Warm" },
+	green_heart: { emoji: "💚", label: "Growth" },
+	blue_heart: { emoji: "💙", label: "Calm" },
+	purple_heart: { emoji: "💜", label: "Creative" },
+	laugh: { emoji: "😂", label: "Joy" },
+	surprised: { emoji: "😮", label: "Wow" },
+	sad: { emoji: "😢", label: "Moved" },
+	sparkle: { emoji: "✨", label: "Magic" },
+	seedling: { emoji: "🌱", label: "Growing" },
 } as const;
 ```
 
@@ -823,9 +823,9 @@ import { buildLoginUrl } from "@autumnsgrove/lattice/grafts/login";
 import { sanitizeReturnTo } from "@autumnsgrove/lattice/utils";
 
 export const load = async ({ url }) => {
-  const returnTo = sanitizeReturnTo(url.searchParams.get("redirect"), "/feed");
-  const callbackUrl = `${url.origin}/auth/callback?returnTo=${encodeURIComponent(returnTo)}`;
-  throw redirect(302, buildLoginUrl(callbackUrl));
+	const returnTo = sanitizeReturnTo(url.searchParams.get("redirect"), "/feed");
+	const callbackUrl = `${url.origin}/auth/callback?returnTo=${encodeURIComponent(returnTo)}`;
+	throw redirect(302, buildLoginUrl(callbackUrl));
 };
 ```
 
@@ -847,23 +847,23 @@ export const load = async ({ url }) => {
 ```typescript
 // app.d.ts
 declare global {
-  namespace App {
-    interface Locals {
-      user: {
-        id: string;
-        name?: string;
-        email: string;
-        avatarUrl?: string;
-      } | null;
-    }
-    interface Platform {
-      env: {
-        DB: D1Database;
-        CACHE_KV: KVNamespace;
-        AUTH: Fetcher;
-      };
-    }
-  }
+	namespace App {
+		interface Locals {
+			user: {
+				id: string;
+				name?: string;
+				email: string;
+				avatarUrl?: string;
+			} | null;
+		}
+		interface Platform {
+			env: {
+				DB: D1Database;
+				CACHE_KV: KVNamespace;
+				AUTH: Fetcher;
+			};
+		}
+	}
 }
 ```
 

@@ -79,8 +79,8 @@ A signpost at a fork in the trail tells you which path leads where. You don't ha
 
 **What exists today:**
 
-- `HW-AUTH-XXX` in `packages/engine/src/lib/heartwood/errors.ts` (complete)
-- `PLANT-XXX` in `packages/plant/src/lib/errors.ts` (complete)
+- `HW-AUTH-XXX` in `libs/engine/src/lib/heartwood/errors.ts` (complete)
+- `PLANT-XXX` in `apps/plant/src/lib/errors.ts` (complete)
 - ~750 hardcoded error strings everywhere else
 
 **What we're building:**
@@ -98,13 +98,13 @@ A signpost at a fork in the trail tells you which path leads where. You don't ha
 ### Shared Foundation in Engine
 
 ```
-packages/engine/src/lib/errors/
+libs/engine/src/lib/errors/
   types.ts       shared GroveErrorDef, ErrorCategory
   helpers.ts     logGroveError(), buildErrorUrl(), buildErrorJson(), throwGroveError()
   index.ts       barrel export
 ```
 
-Export path in `packages/engine/package.json`:
+Export path in `libs/engine/package.json`:
 
 ```json
 "./errors": {
@@ -183,15 +183,15 @@ export interface GroveErrorDef {
 
 | Package               | Prefix            | File Location                                     |
 | --------------------- | ----------------- | ------------------------------------------------- |
-| Engine (API routes)   | `GROVE-API-XXX`   | `packages/engine/src/lib/errors/api-errors.ts`    |
-| Engine (Arbor admin)  | `GROVE-ARBOR-XXX` | `packages/engine/src/lib/errors/arbor-errors.ts`  |
-| Engine (Public pages) | `GROVE-SITE-XXX`  | `packages/engine/src/lib/errors/site-errors.ts`   |
+| Engine (API routes)   | `GROVE-API-XXX`   | `libs/engine/src/lib/errors/api-errors.ts`    |
+| Engine (Arbor admin)  | `GROVE-ARBOR-XXX` | `libs/engine/src/lib/errors/arbor-errors.ts`  |
+| Engine (Public pages) | `GROVE-SITE-XXX`  | `libs/engine/src/lib/errors/site-errors.ts`   |
 | Heartwood (Auth)      | `HW-AUTH-XXX`     | **Already exists**                                |
-| Heartwood (Sessions)  | `HW-SESS-XXX`     | `packages/heartwood/src/errors/session-errors.ts` |
+| Heartwood (Sessions)  | `HW-SESS-XXX`     | `services/heartwood/src/errors/session-errors.ts` |
 | Plant (Onboarding)    | `PLANT-XXX`       | **Already exists**                                |
-| Landing               | `GROVE-LAND-XXX`  | `packages/landing/src/lib/errors.ts`              |
-| Domains               | `GROVE-DOM-XXX`   | `packages/domains/src/lib/errors.ts`              |
-| Clearing              | `GROVE-CLR-XXX`   | `packages/clearing/src/lib/errors.ts`             |
+| Landing               | `GROVE-LAND-XXX`  | `apps/landing/src/lib/errors.ts`              |
+| Domains               | `GROVE-DOM-XXX`   | `apps/domains/src/lib/errors.ts`              |
+| Clearing              | `GROVE-CLR-XXX`   | `apps/clearing/src/lib/errors.ts`             |
 
 ---
 
@@ -279,7 +279,7 @@ Client-side helper. Wraps `toast.error(error.userMessage, { description: error.c
 To surface error codes through SvelteKit's error pages:
 
 ```typescript
-// packages/engine/src/app.d.ts
+// libs/engine/src/app.d.ts
 declare global {
   namespace App {
     interface Error {
@@ -299,7 +299,7 @@ Then `+error.svelte` renders the code in monospace when present. Same visual pat
 
 Three login pages (Engine, Domains, Landing) and Plant's homepage all render nearly identical error display markup. Extract to a shared engine component:
 
-`packages/engine/src/lib/ui/components/feedback/ErrorNotice.svelte`
+`libs/engine/src/lib/ui/components/feedback/ErrorNotice.svelte`
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -346,7 +346,7 @@ The Lumen AI error system uses a class-based pattern (`LumenError extends Error`
 
 **Cannot be parallelized. Foundation for everything.**
 
-1. Create `packages/engine/src/lib/errors/` (types.ts, helpers.ts, index.ts)
+1. Create `libs/engine/src/lib/errors/` (types.ts, helpers.ts, index.ts)
 2. Add `"./errors"` to engine `package.json` exports
 3. Run `svelte-package -o dist`
 4. Migrate heartwood/errors.ts to use shared types (type alias, no behavioral change)
@@ -355,12 +355,12 @@ The Lumen AI error system uses a class-based pattern (`LumenError extends Error`
 
 **Key files:**
 
-- `packages/engine/src/lib/errors/types.ts` (new)
-- `packages/engine/src/lib/errors/helpers.ts` (new)
-- `packages/engine/src/lib/errors/index.ts` (new)
-- `packages/engine/package.json` (add export)
-- `packages/engine/src/lib/heartwood/errors.ts` (migrate types)
-- `packages/plant/src/lib/errors.ts` (migrate types)
+- `libs/engine/src/lib/errors/types.ts` (new)
+- `libs/engine/src/lib/errors/helpers.ts` (new)
+- `libs/engine/src/lib/errors/index.ts` (new)
+- `libs/engine/package.json` (add export)
+- `libs/engine/src/lib/heartwood/errors.ts` (migrate types)
+- `apps/plant/src/lib/errors.ts` (migrate types)
 
 ### Phase 1: Engine Error Catalogs + App.Error
 
@@ -388,7 +388,7 @@ For each: create `src/lib/errors.ts`, define error catalog, replace hardcoded st
 
 **Can run alongside Phase 2.**
 
-1. Create `packages/heartwood/src/errors/session-errors.ts`
+1. Create `services/heartwood/src/errors/session-errors.ts`
 2. Create Hono `jsonError()` helper
 3. Replace `c.json({ error: "..." })` calls
 

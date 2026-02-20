@@ -170,30 +170,36 @@ These are the promotional and sharing-ready assets. Build these after launch wee
 These are the little details that make screenshots shine:
 
 **Resolution & Quality:**
+
 - Use 2x resolution for retina-quality screenshots (set device pixel ratio to 2 in DevTools)
 - Save all screenshots as PNG for lossless quality
 - Aim for 1920px+ width for desktop captures (they'll scale down cleanly)
 
 **Mobile Testing:**
+
 - Use Chrome DevTools device toolbar
 - iPhone dimensions: 375×812 (standard modern width)
 - Test responsiveness at this size before capturing
 
 **Seasonal Cycling:**
+
 - On any Grove instance, click the logo in the navigation to cycle through seasons
 - Use this to capture all 4 seasonal variants without rebuilding
 
 **Image Uploads:**
+
 - You can now upload screenshots directly via the Arbor image gallery (admin panel)
 - This keeps everything organized in one place
 - Document the upload date in this checklist as you go
 
 **File Organization:**
-- Store original high-res screenshots in: `packages/landing/static/assets/screenshots/`
+
+- Store original high-res screenshots in: `apps/landing/static/assets/screenshots/`
 - Name them descriptively: `flow-editor-light-split-view.png`, `grove-blog-autumn-homepage.png`
 - Keep variants clearly labeled: `-light`, `-dark`, `-mobile`, `-spring`, etc.
 
 **Before Posting:**
+
 - Check that sensitive info isn't visible (personal names, emails, etc.)
 - Verify text is readable at thumbnail size
 - Ensure no debug tools or console errors visible
@@ -204,34 +210,34 @@ These are the little details that make screenshots shine:
 
 Quick reference: where each screenshot lives once captured.
 
-| Screenshot | Primary Use | Secondary Use | Tier |
-|---|---|---|---|
-| Flow Editor split view (light) | Landing hero | What is Flow article | 1 |
-| Flow Editor write mode | What is Flow docs | — | 1 |
-| Flow Editor mobile | Landing mobile showcase | — | 1 |
-| Blog homepage (light) | Landing showcase | What is Grove article | 1 |
-| Blog homepage mobile | Landing mobile showcase | — | 1 |
-| Blog post single (light) | Landing + docs | What is Grove article | 1 |
-| Flow Editor Zen (midnight) | What is Flow | Flow advanced guide | 2 |
-| Flow Editor split view (dark) | What is Flow | Dark mode docs | 2 |
-| Blog 4 seasons | Vision/philosophy page | Seasonal guide | 2 |
-| Blog dark/midnight | Landing + docs | Dark mode guide | 2 |
-| Gallery grid | What is Gallery article | — | 2 |
-| Gallery lightbox | What is Gallery showcase | — | 2 |
-| Gallery mobile | What is Gallery mobile guide | — | 2 |
-| Arbor dashboard | Landing "what you get" | Admin docs | 2 |
-| Fireside chat mode | Flow advanced guide | — | 3 |
-| Image upload | Adding media guide | — | 3 |
-| Arbor posts list | Admin user guide | — | 3 |
-| Arbor settings | Setup guide | — | 3 |
-| Shade indicator | What is Shade article | Privacy guide | 3 |
-| Onboarding name | Getting started guide | — | 3 |
-| Onboarding season | Aesthetic guide | — | 3 |
-| OG image default | Meta tags (auto) | Social sharing | 4 |
-| OG images seasonal | Meta tags (dynamic) | Social sharing | 4 |
-| Quote cards (5x) | Social media posts | Marketing materials | 4 |
-| Feature graphics | Social promotions | Email campaigns | 4 |
-| Video stills | Email + social | Marketing | 4 |
+| Screenshot                     | Primary Use                  | Secondary Use         | Tier |
+| ------------------------------ | ---------------------------- | --------------------- | ---- |
+| Flow Editor split view (light) | Landing hero                 | What is Flow article  | 1    |
+| Flow Editor write mode         | What is Flow docs            | —                     | 1    |
+| Flow Editor mobile             | Landing mobile showcase      | —                     | 1    |
+| Blog homepage (light)          | Landing showcase             | What is Grove article | 1    |
+| Blog homepage mobile           | Landing mobile showcase      | —                     | 1    |
+| Blog post single (light)       | Landing + docs               | What is Grove article | 1    |
+| Flow Editor Zen (midnight)     | What is Flow                 | Flow advanced guide   | 2    |
+| Flow Editor split view (dark)  | What is Flow                 | Dark mode docs        | 2    |
+| Blog 4 seasons                 | Vision/philosophy page       | Seasonal guide        | 2    |
+| Blog dark/midnight             | Landing + docs               | Dark mode guide       | 2    |
+| Gallery grid                   | What is Gallery article      | —                     | 2    |
+| Gallery lightbox               | What is Gallery showcase     | —                     | 2    |
+| Gallery mobile                 | What is Gallery mobile guide | —                     | 2    |
+| Arbor dashboard                | Landing "what you get"       | Admin docs            | 2    |
+| Fireside chat mode             | Flow advanced guide          | —                     | 3    |
+| Image upload                   | Adding media guide           | —                     | 3    |
+| Arbor posts list               | Admin user guide             | —                     | 3    |
+| Arbor settings                 | Setup guide                  | —                     | 3    |
+| Shade indicator                | What is Shade article        | Privacy guide         | 3    |
+| Onboarding name                | Getting started guide        | —                     | 3    |
+| Onboarding season              | Aesthetic guide              | —                     | 3    |
+| OG image default               | Meta tags (auto)             | Social sharing        | 4    |
+| OG images seasonal             | Meta tags (dynamic)          | Social sharing        | 4    |
+| Quote cards (5x)               | Social media posts           | Marketing materials   | 4    |
+| Feature graphics               | Social promotions            | Email campaigns       | 4    |
+| Video stills                   | Email + social               | Marketing             | 4    |
 
 ---
 
@@ -240,6 +246,7 @@ Quick reference: where each screenshot lives once captured.
 Keep this updated as you capture. It's easier to spot what's missing when you mark what's done.
 
 ### Tier 1 (Launch Day — Feb 14)
+
 - [ ] Flow Editor split view (light)
 - [ ] Flow Editor write mode
 - [ ] Flow Editor mobile
@@ -247,9 +254,10 @@ Keep this updated as you capture. It's easier to spot what's missing when you ma
 - [ ] Blog homepage mobile
 - [ ] Blog post single
 
-**Status: ___/6 complete**
+**Status: \_\_\_/6 complete**
 
 ### Tier 2 (First Week)
+
 - [ ] Flow Editor Zen (midnight)
 - [ ] Flow Editor dark split
 - [ ] Blog 4 seasons (spring, summer, autumn, winter)
@@ -259,9 +267,10 @@ Keep this updated as you capture. It's easier to spot what's missing when you ma
 - [ ] Gallery mobile
 - [ ] Arbor dashboard
 
-**Status: ___/8 complete**
+**Status: \_\_\_/8 complete**
 
 ### Tier 3 (Post-Launch)
+
 - [ ] Fireside chat mode
 - [ ] Image upload
 - [ ] Arbor posts list
@@ -270,16 +279,17 @@ Keep this updated as you capture. It's easier to spot what's missing when you ma
 - [ ] Onboarding name
 - [ ] Onboarding season
 
-**Status: ___/7 complete**
+**Status: \_\_\_/7 complete**
 
 ### Tier 4 (Generated Assets)
+
 - [ ] OG image default
 - [ ] OG images seasonal (4x)
 - [ ] Quote cards (5x)
 - [ ] Feature graphics
 - [ ] Video stills
 
-**Status: ___/13 complete**
+**Status: \_\_\_/13 complete**
 
 ---
 
@@ -292,4 +302,4 @@ Keep this updated as you capture. It's easier to spot what's missing when you ma
 
 ---
 
-*Last updated: February 6, 2026*
+_Last updated: February 6, 2026_

@@ -166,12 +166,8 @@ These components should live in Lattice (`@autumnsgrove/lattice`) for reuse acro
 ### VineyardLayout
 
 ```svelte
-<VineyardLayout
-  tool="amber"
-  tagline="Your files, preserved"
-  status="preview"
->
-  <slot />
+<VineyardLayout tool="amber" tagline="Your files, preserved" status="preview">
+	<slot />
 </VineyardLayout>
 ```
 
@@ -179,12 +175,12 @@ These components should live in Lattice (`@autumnsgrove/lattice`) for reuse acro
 
 ```svelte
 <FeatureCard
-  title="Storage Overview"
-  description="See usage across posts and media"
-  status="ready"
-  icon="HardDrive"
+	title="Storage Overview"
+	description="See usage across posts and media"
+	status="ready"
+	icon="HardDrive"
 >
-  <DemoComponent slot="demo" />
+	<DemoComponent slot="demo" />
 </FeatureCard>
 ```
 
@@ -198,22 +194,19 @@ These components should live in Lattice (`@autumnsgrove/lattice`) for reuse acro
 
 ```svelte
 <DemoContainer
-  title="Theme Picker Demo"
-  description="Try switching between curated themes"
-  mockData={true}
+	title="Theme Picker Demo"
+	description="Try switching between curated themes"
+	mockData={true}
 >
-  <ThemePicker themes={sampleThemes} />
+	<ThemePicker themes={sampleThemes} />
 </DemoContainer>
 ```
 
 ### CodeExample
 
 ```svelte
-<CodeExample
-  language="typescript"
-  filename="src/routes/+layout.svelte"
->
-  {codeString}
+<CodeExample language="typescript" filename="src/routes/+layout.svelte">
+	{codeString}
 </CodeExample>
 ```
 
@@ -221,8 +214,8 @@ These components should live in Lattice (`@autumnsgrove/lattice`) for reuse acro
 
 ```svelte
 <TierGate required="oak" current={userTier}>
-  <AdvancedFeature />
-  <UpgradePrompt slot="fallback" />
+	<AdvancedFeature />
+	<UpgradePrompt slot="fallback" />
 </TierGate>
 ```
 
@@ -230,9 +223,9 @@ These components should live in Lattice (`@autumnsgrove/lattice`) for reuse acro
 
 ```svelte
 <RoadmapSection
-  built={['Core storage view', 'Usage breakdown']}
-  inProgress={['Export functionality']}
-  planned={['Bulk delete', 'Storage alerts']}
+	built={["Core storage view", "Usage breakdown"]}
+	inProgress={["Export functionality"]}
+	planned={["Bulk delete", "Storage alerts"]}
 />
 ```
 
@@ -325,7 +318,7 @@ src/routes/vineyard/
 Add to Lattice:
 
 ```
-packages/engine/src/lib/ui/components/vineyard/
+libs/engine/src/lib/ui/components/vineyard/
 ├── VineyardLayout.svelte
 ├── FeatureCard.svelte
 ├── StatusBadge.svelte
@@ -340,13 +333,13 @@ Export from `@autumnsgrove/lattice/vineyard`:
 
 ```typescript
 export {
-  VineyardLayout,
-  FeatureCard,
-  StatusBadge,
-  DemoContainer,
-  CodeExample,
-  TierGate,
-  RoadmapSection,
+	VineyardLayout,
+	FeatureCard,
+	StatusBadge,
+	DemoContainer,
+	CodeExample,
+	TierGate,
+	RoadmapSection,
 } from "./components/vineyard";
 ```
 

@@ -22,14 +22,14 @@ Build an **automated monitoring system** that actively monitors Grove's 6 compon
 
 ## Components to Monitor
 
-| Component | Health Endpoint | Check Type |
-|-----------|----------------|------------|
-| Blog Engine | `https://example.grove.place/api/health` | Deep (D1 query) |
-| CDN | `HEAD https://cdn.grove.place/health-check.txt` | Shallow |
-| Authentication | `https://auth.grove.place/health` | Deep (Heartwood) |
-| Meadow | `https://meadow.grove.place/api/health` | Deep |
-| Payments | `https://grove.place/api/health/payments` | Shallow |
-| API (DOs) | `https://grove-durable-objects.workers.dev/health` | Shallow |
+| Component      | Health Endpoint                                    | Check Type       |
+| -------------- | -------------------------------------------------- | ---------------- |
+| Blog Engine    | `https://example.grove.place/api/health`           | Deep (D1 query)  |
+| CDN            | `HEAD https://cdn.grove.place/health-check.txt`    | Shallow          |
+| Authentication | `https://auth.grove.place/health`                  | Deep (Heartwood) |
+| Meadow         | `https://meadow.grove.place/api/health`            | Deep             |
+| Payments       | `https://grove.place/api/health/payments`          | Shallow          |
+| API (DOs)      | `https://grove-durable-objects.workers.dev/health` | Shallow          |
 
 ## Implementation Phases
 
@@ -37,12 +37,12 @@ Build an **automated monitoring system** that actively monitors Grove's 6 compon
 
 **Create health endpoints on each service:**
 
-1. **`packages/engine/src/routes/api/health/+server.ts`** - Engine health
+1. **`libs/engine/src/routes/api/health/+server.ts`** - Engine health
    - Check D1 connectivity
    - Check KV connectivity
    - Return standardized response: `{ status, service, checks[], timestamp }`
 
-2. **`packages/engine/src/routes/api/health/payments/+server.ts`** - Payment subsystem
+2. **`libs/engine/src/routes/api/health/payments/+server.ts`** - Payment subsystem
    - Verify payment config exists
    - Shallow check (don't call Stripe/Lemon)
 
@@ -52,10 +52,10 @@ Build an **automated monitoring system** that actively monitors Grove's 6 compon
 
 ### Phase 2: Monitor Cron Worker (Week 2)
 
-**Create `packages/workers/clearing-monitor/`:**
+**Create `services/clearing-monitor/`:**
 
 ```
-packages/workers/clearing-monitor/
+services/clearing-monitor/
 ├── src/
 │   ├── index.ts              # Main cron handler
 │   ├── config.ts             # Component URLs, thresholds
@@ -68,6 +68,7 @@ packages/workers/clearing-monitor/
 ```
 
 **Wrangler config:**
+
 ```toml
 name = "grove-clearing-monitor"
 [triggers]
@@ -84,23 +85,27 @@ binding = "MONITOR_KV"
 ### Phase 3: Status Logic
 
 **Latency thresholds (configurable per component):**
+
 - `operational`: < 500ms
 - `degraded`: 500-1500ms
 - `partial_outage`: 1500-3000ms
 - `major_outage`: > 3000ms or HTTP error
 
 **False positive mitigation:**
+
 - **3 consecutive failures** → Create incident
 - **2 consecutive successes** → Resolve incident
 - Store state in KV: `monitor:{component_id}` → `{ consecutiveFailures, activeIncidentId }`
 
 **Incident creation flow:**
+
 1. Insert into `status_incidents` (investigating, auto-generated title)
 2. Link to component via `status_incident_components`
 3. Add initial update to `status_updates`
 4. Update `status_components.current_status`
 
 **Daily history (midnight cron):**
+
 - Query incidents that overlapped with yesterday
 - Determine worst status of the day
 - Upsert into `status_daily_history`
@@ -108,35 +113,38 @@ binding = "MONITOR_KV"
 ### Phase 4: Testing (Week 3)
 
 **Test files:**
+
 - `tests/health-checks.test.ts` - Mock fetch, verify latency classification
 - `tests/incident-manager.test.ts` - Consecutive failure logic
 - `tests/daily-history.test.ts` - Aggregation logic
 
-**Use existing mock patterns** from `packages/engine/tests/utils/setup.ts`
+**Use existing mock patterns** from `libs/engine/tests/utils/setup.ts`
 
 ### Phase 5: CI/CD
 
 **Create `.github/workflows/deploy-clearing-monitor.yml`:**
-- Trigger on `packages/workers/clearing-monitor/**` changes
+
+- Trigger on `services/clearing-monitor/**` changes
 - Run tests
 - Deploy via wrangler
 
 ### Phase 6: Email Notifications (Resend)
 
 **Add email alerts in incident-manager.ts:**
+
 ```typescript
 // When incident created:
 await sendEmail({
-  to: 'alerts@grove.place',
-  subject: `[Grove] Incident: ${componentName} - ${status}`,
-  body: `Automated monitoring detected an issue...`
+	to: "alerts@grove.place",
+	subject: `[Grove] Incident: ${componentName} - ${status}`,
+	body: `Automated monitoring detected an issue...`,
 });
 
 // When incident resolved:
 await sendEmail({
-  to: 'alerts@grove.place',
-  subject: `[Grove] Resolved: ${componentName} back to operational`,
-  body: `Service has recovered...`
+	to: "alerts@grove.place",
+	subject: `[Grove] Resolved: ${componentName} back to operational`,
+	body: `Service has recovered...`,
 });
 ```
 
@@ -145,42 +153,44 @@ await sendEmail({
 ### Phase 7: External Monitoring (UptimeRobot)
 
 **UptimeRobot** - free external uptime monitoring as backup:
+
 - **Free tier**: 50 monitors total, 5-minute intervals, email alerts
 - **Cost**: $0/month
 
 **Setup 6 monitors:**
 
-| Monitor Name | URL | Alert Contact |
-|--------------|-----|---------------|
-| Grove Engine | `https://example.grove.place/api/health` | Your email |
-| Grove CDN | `https://cdn.grove.place/health-check.txt` | Your email |
-| Grove Auth | `https://auth.grove.place/health` | Your email |
-| Grove Meadow | `https://meadow.grove.place/api/health` | Your email |
-| Grove Status | `https://status.grove.place` | Your email |
-| Grove Landing | `https://grove.place` | Your email |
+| Monitor Name  | URL                                        | Alert Contact |
+| ------------- | ------------------------------------------ | ------------- |
+| Grove Engine  | `https://example.grove.place/api/health`   | Your email    |
+| Grove CDN     | `https://cdn.grove.place/health-check.txt` | Your email    |
+| Grove Auth    | `https://auth.grove.place/health`          | Your email    |
+| Grove Meadow  | `https://meadow.grove.place/api/health`    | Your email    |
+| Grove Status  | `https://status.grove.place`               | Your email    |
+| Grove Landing | `https://grove.place`                      | Your email    |
 
 **Why both?**
+
 - **Internal monitor**: Detailed health data, 2-min checks, auto-incident creation, feeds The Clearing
 - **UptimeRobot** (external): Independent backup, runs outside Cloudflare, catches issues internal monitor might miss
 
 ## Key Files to Create
 
-| File | Purpose |
-|------|---------|
-| `packages/workers/clearing-monitor/src/index.ts` | Main cron worker |
-| `packages/workers/clearing-monitor/wrangler.toml` | Worker config with crons |
-| `packages/engine/src/routes/api/health/+server.ts` | Engine health endpoint |
-| `packages/engine/src/routes/api/health/payments/+server.ts` | Payments health |
-| `.github/workflows/deploy-clearing-monitor.yml` | CI/CD for monitor |
+| File                                                    | Purpose                  |
+| ------------------------------------------------------- | ------------------------ |
+| `services/clearing-monitor/src/index.ts`                | Main cron worker         |
+| `services/clearing-monitor/wrangler.toml`               | Worker config with crons |
+| `libs/engine/src/routes/api/health/+server.ts`          | Engine health endpoint   |
+| `libs/engine/src/routes/api/health/payments/+server.ts` | Payments health          |
+| `.github/workflows/deploy-clearing-monitor.yml`         | CI/CD for monitor        |
 
 ## Key Files to Reference
 
-| File | Purpose |
-|------|---------|
-| `packages/clearing/src/lib/server/status.ts` | Existing D1 queries |
-| `packages/clearing/src/lib/types/status.ts` | Status type definitions |
-| `packages/clearing/migrations/0001_status_tables.sql` | D1 schema |
-| `packages/workers/webhook-cleanup/` | Existing cron worker pattern |
+| File                                                  | Purpose                      |
+| ----------------------------------------------------- | ---------------------------- |
+| `apps/clearing/src/lib/server/status.ts`          | Existing D1 queries          |
+| `apps/clearing/src/lib/types/status.ts`           | Status type definitions      |
+| `apps/clearing/migrations/0001_status_tables.sql` | D1 schema                    |
+| `workers/webhook-cleanup/`                   | Existing cron worker pattern |
 
 ## Verification
 

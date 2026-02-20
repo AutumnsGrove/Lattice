@@ -69,15 +69,15 @@ Lumen is Grove's unified AI gateway: a single interface that routes all AI reque
 ```typescript
 // Before: Scattered, hardcoded
 const response = await fetch("https://openrouter.ai/api/v1/chat", {
-  headers: { Authorization: `Bearer ${OPENROUTER_KEY}` },
-  body: JSON.stringify({ model: "deepseek/deepseek-chat", messages }),
+	headers: { Authorization: `Bearer ${OPENROUTER_KEY}` },
+	body: JSON.stringify({ model: "deepseek/deepseek-chat", messages }),
 });
 
 // After: One call, intelligent routing
 const response = await Lumen.inference({
-  task: "moderation",
-  input: userContent,
-  tenant: tenantId,
+	task: "moderation",
+	input: userContent,
+	tenant: tenantId,
 });
 ```
 
@@ -202,39 +202,39 @@ Cloudflare Workers AI provides Whisper models at zero cost. The turbo variant of
 
 ```typescript
 interface LumenRequest {
-  task: TaskType;
-  input: string | Message[];
-  tenant?: string;
-  options?: {
-    model?: string; // Override default model
-    maxTokens?: number;
-    temperature?: number;
-    stream?: boolean;
-    metadata?: Record<string, string>;
-  };
+	task: TaskType;
+	input: string | Message[];
+	tenant?: string;
+	options?: {
+		model?: string; // Override default model
+		maxTokens?: number;
+		temperature?: number;
+		stream?: boolean;
+		metadata?: Record<string, string>;
+	};
 }
 
 interface LumenResponse {
-  content: string;
-  metadata: {
-    model: string;
-    provider: string;
-    inputTokens: number;
-    outputTokens: number;
-    latencyMs: number;
-    cached: boolean;
-  };
+	content: string;
+	metadata: {
+		model: string;
+		provider: string;
+		inputTokens: number;
+		outputTokens: number;
+		latencyMs: number;
+		cached: boolean;
+	};
 }
 
 type TaskType =
-  | "moderation"
-  | "generation"
-  | "summary"
-  | "embedding"
-  | "chat"
-  | "image"
-  | "code"
-  | "transcription";
+	| "moderation"
+	| "generation"
+	| "summary"
+	| "embedding"
+	| "chat"
+	| "image"
+	| "code"
+	| "transcription";
 ```
 
 ### Usage Examples
@@ -244,47 +244,47 @@ import { Lumen } from "@autumnsgrove/lattice/lumen";
 
 // Content moderation (Thorn)
 const safety = await Lumen.inference({
-  task: "moderation",
-  input: userSubmittedContent,
-  tenant: "autumn",
+	task: "moderation",
+	input: userSubmittedContent,
+	tenant: "autumn",
 });
 
 if (!safety.content.includes("safe")) {
-  throw new Error("Content flagged for review");
+	throw new Error("Content flagged for review");
 }
 
 // Writing assistance (Wisp)
 const suggestions = await Lumen.inference({
-  task: "generation",
-  input: [
-    {
-      role: "system",
-      content: "You are a writing assistant. Suggest improvements.",
-    },
-    { role: "user", content: draftText },
-  ],
-  tenant: "autumn",
-  options: { maxTokens: 500 },
+	task: "generation",
+	input: [
+		{
+			role: "system",
+			content: "You are a writing assistant. Suggest improvements.",
+		},
+		{ role: "user", content: draftText },
+	],
+	tenant: "autumn",
+	options: { maxTokens: 500 },
 });
 
 // Timeline summary
 const summary = await Lumen.inference({
-  task: "summary",
-  input: `Summarize these commits:\n${commitMessages.join("\n")}`,
-  tenant: "autumn",
+	task: "summary",
+	input: `Summarize these commits:\n${commitMessages.join("\n")}`,
+	tenant: "autumn",
 });
 
 // Embedding for search
 const embedding = await Lumen.inference({
-  task: "embedding",
-  input: "How do I customize my theme?",
+	task: "embedding",
+	input: "How do I customize my theme?",
 });
 
 // Voice transcription (Scribe)
 const transcript = await Lumen.transcribe({
-  audio: audioData, // Uint8Array
-  tenant: "autumn",
-  options: { mode: "draft" }, // "raw" or "draft"
+	audio: audioData, // Uint8Array
+	tenant: "autumn",
+	options: { mode: "draft" }, // "raw" or "draft"
 });
 // transcript.text, transcript.gutterContent (for draft mode)
 ```
@@ -293,13 +293,13 @@ const transcript = await Lumen.transcribe({
 
 ```typescript
 const stream = await Lumen.inference({
-  task: "chat",
-  input: messages,
-  options: { stream: true },
+	task: "chat",
+	input: messages,
+	options: { stream: true },
 });
 
 for await (const chunk of stream) {
-  process.stdout.write(chunk.content);
+	process.stdout.write(chunk.content);
 }
 ```
 
@@ -315,9 +315,9 @@ Lumen handles voice-to-text transcription via Cloudflare Workers AI's Whisper mo
 
 ```typescript
 const result = await lumen.transcribe({
-  audio: audioData,
-  tenant: "autumn",
-  options: { mode: "raw" },
+	audio: audioData,
+	tenant: "autumn",
+	options: { mode: "raw" },
 });
 // result.text = "Hello world, this is exactly what was said."
 // result.wordCount = 8
@@ -328,9 +328,9 @@ const result = await lumen.transcribe({
 
 ```typescript
 const result = await lumen.transcribe({
-  audio: audioData,
-  tenant: "autumn",
-  options: { mode: "draft" },
+	audio: audioData,
+	tenant: "autumn",
+	options: { mode: "draft" },
 });
 // result.text = "Cleaned, structured transcript."
 // result.rawTranscript = "Original unstructured transcript with um, uh..."
@@ -407,14 +407,14 @@ Before any request leaves Grove:
 
 ```typescript
 const scrubbed = await scrubPII(input, {
-  patterns: [
-    "email", // user@domain.com → [EMAIL]
-    "phone", // +1-555-123-4567 → [PHONE]
-    "ssn", // 123-45-6789 → [SSN]
-    "creditCard", // 4111... → [CARD]
-    "ipAddress", // 192.168.1.1 → [IP]
-  ],
-  customPatterns: tenant.piiPatterns, // Per-tenant rules
+	patterns: [
+		"email", // user@domain.com → [EMAIL]
+		"phone", // +1-555-123-4567 → [PHONE]
+		"ssn", // 123-45-6789 → [SSN]
+		"creditCard", // 4111... → [CARD]
+		"ipAddress", // 192.168.1.1 → [IP]
+	],
+	customPatterns: tenant.piiPatterns, // Per-tenant rules
 });
 ```
 
@@ -424,10 +424,10 @@ Per-tenant and per-task limits:
 
 ```typescript
 const limits = {
-  moderation: { rpm: 1000, daily: 50000 },
-  generation: { rpm: 100, daily: 5000 },
-  chat: { rpm: 60, daily: 2000 },
-  image: { rpm: 10, daily: 100 },
+	moderation: { rpm: 1000, daily: 50000 },
+	generation: { rpm: 100, daily: 5000 },
+	chat: { rpm: 60, daily: 2000 },
+	image: { rpm: 10, daily: 100 },
 };
 
 // Checked before routing
@@ -479,14 +479,14 @@ Every request is logged (without content) for:
 
 ```typescript
 await logUsage({
-  tenant,
-  task,
-  model: response.metadata.model,
-  inputTokens: response.metadata.inputTokens,
-  outputTokens: response.metadata.outputTokens,
-  latencyMs: response.metadata.latencyMs,
-  cached: response.metadata.cached,
-  timestamp: Date.now(),
+	tenant,
+	task,
+	model: response.metadata.model,
+	inputTokens: response.metadata.inputTokens,
+	outputTokens: response.metadata.outputTokens,
+	latencyMs: response.metadata.latencyMs,
+	cached: response.metadata.cached,
+	timestamp: Date.now(),
 });
 ```
 
@@ -532,30 +532,30 @@ Lumen uses just two providers: OpenRouter as the universal gateway for all prima
 
 ```typescript
 const openRouter = {
-  baseUrl: "https://openrouter.ai/api/v1",
-  apiKey: env.OPENROUTER_API_KEY,
-  models: {
-    // Generation/Chat/Summary
-    generation: "deepseek/deepseek-v3.2",
-    chat: "deepseek/deepseek-v3.2",
-    summary: "deepseek/deepseek-v3.2",
-    // Moderation
-    moderation: "meta-llama/llama-guard-4-12b",
-    // Image
-    image: "google/gemini-2.5-flash",
-    // Code
-    code: "deepseek/deepseek-v3.2",
-    // Embeddings
-    embedding: "baai/bge-m3",
-    // Fallback models
-    fallback_chat: "moonshotai/kimi-k2-0905",
-    fallback_vision: "anthropic/claude-haiku-4.5",
-    fallback_embed: "qwen/qwen3-embedding-8b",
-  },
-  headers: {
-    "HTTP-Referer": "https://grove.place",
-    "X-Title": "Grove",
-  },
+	baseUrl: "https://openrouter.ai/api/v1",
+	apiKey: env.OPENROUTER_API_KEY,
+	models: {
+		// Generation/Chat/Summary
+		generation: "deepseek/deepseek-v3.2",
+		chat: "deepseek/deepseek-v3.2",
+		summary: "deepseek/deepseek-v3.2",
+		// Moderation
+		moderation: "meta-llama/llama-guard-4-12b",
+		// Image
+		image: "google/gemini-2.5-flash",
+		// Code
+		code: "deepseek/deepseek-v3.2",
+		// Embeddings
+		embedding: "baai/bge-m3",
+		// Fallback models
+		fallback_chat: "moonshotai/kimi-k2-0905",
+		fallback_vision: "anthropic/claude-haiku-4.5",
+		fallback_embed: "qwen/qwen3-embedding-8b",
+	},
+	headers: {
+		"HTTP-Referer": "https://grove.place",
+		"X-Title": "Grove",
+	},
 };
 ```
 
@@ -563,12 +563,12 @@ const openRouter = {
 
 ```typescript
 const workersAI = {
-  binding: env.AI, // Cloudflare Workers AI binding
-  models: {
-    moderation: "@cf/meta/llama-guard-3-8b", // Fallback moderation
-    moderation_alt: "@hf/google/shieldgemma-2b", // Tertiary moderation
-    embedding: "@cf/baai/bge-base-en-v1.5", // Fallback embeddings
-  },
+	binding: env.AI, // Cloudflare Workers AI binding
+	models: {
+		moderation: "@cf/meta/llama-guard-3-8b", // Fallback moderation
+		moderation_alt: "@hf/google/shieldgemma-2b", // Tertiary moderation
+		embedding: "@cf/baai/bge-base-en-v1.5", // Fallback embeddings
+	},
 };
 ```
 
@@ -580,52 +580,52 @@ const workersAI = {
 
 ```typescript
 type LumenError =
-  | { code: "RATE_LIMITED"; retryAfter: number }
-  | { code: "QUOTA_EXCEEDED"; task: TaskType; limit: number }
-  | { code: "PROVIDER_ERROR"; provider: string; message: string }
-  | { code: "INVALID_TASK"; task: string }
-  | { code: "PII_DETECTED"; fields: string[] }
-  | { code: "CONTENT_BLOCKED"; reason: string };
+	| { code: "RATE_LIMITED"; retryAfter: number }
+	| { code: "QUOTA_EXCEEDED"; task: TaskType; limit: number }
+	| { code: "PROVIDER_ERROR"; provider: string; message: string }
+	| { code: "INVALID_TASK"; task: string }
+	| { code: "PII_DETECTED"; fields: string[] }
+	| { code: "CONTENT_BLOCKED"; reason: string };
 ```
 
 ### Fallback Chain
 
 ```typescript
 const fallbackChains = {
-  generation: [
-    { provider: "openrouter", model: "deepseek/deepseek-v3.2" },
-    { provider: "openrouter", model: "moonshotai/kimi-k2-0905" },
-    { provider: "openrouter", model: "meta-llama/llama-3.3-70b-instruct" },
-  ],
-  moderation: [
-    { provider: "openrouter", model: "meta-llama/llama-guard-4-12b" },
-    { provider: "cloudflare-ai", model: "@cf/meta/llama-guard-3-8b" },
-    { provider: "cloudflare-ai", model: "@hf/google/shieldgemma-2b" },
-  ],
-  image: [
-    { provider: "openrouter", model: "google/gemini-2.5-flash" },
-    { provider: "openrouter", model: "anthropic/claude-haiku-4.5" },
-  ],
-  embedding: [
-    { provider: "openrouter", model: "baai/bge-m3" },
-    { provider: "openrouter", model: "qwen/qwen3-embedding-8b" },
-    { provider: "cloudflare-ai", model: "@cf/baai/bge-base-en-v1.5" },
-  ],
-  transcription: [
-    { provider: "cloudflare-ai", model: "@cf/openai/whisper-large-v3-turbo" },
-    { provider: "cloudflare-ai", model: "@cf/openai/whisper" },
-    { provider: "cloudflare-ai", model: "@cf/openai/whisper-tiny-en" },
-  ],
+	generation: [
+		{ provider: "openrouter", model: "deepseek/deepseek-v3.2" },
+		{ provider: "openrouter", model: "moonshotai/kimi-k2-0905" },
+		{ provider: "openrouter", model: "meta-llama/llama-3.3-70b-instruct" },
+	],
+	moderation: [
+		{ provider: "openrouter", model: "meta-llama/llama-guard-4-12b" },
+		{ provider: "cloudflare-ai", model: "@cf/meta/llama-guard-3-8b" },
+		{ provider: "cloudflare-ai", model: "@hf/google/shieldgemma-2b" },
+	],
+	image: [
+		{ provider: "openrouter", model: "google/gemini-2.5-flash" },
+		{ provider: "openrouter", model: "anthropic/claude-haiku-4.5" },
+	],
+	embedding: [
+		{ provider: "openrouter", model: "baai/bge-m3" },
+		{ provider: "openrouter", model: "qwen/qwen3-embedding-8b" },
+		{ provider: "cloudflare-ai", model: "@cf/baai/bge-base-en-v1.5" },
+	],
+	transcription: [
+		{ provider: "cloudflare-ai", model: "@cf/openai/whisper-large-v3-turbo" },
+		{ provider: "cloudflare-ai", model: "@cf/openai/whisper" },
+		{ provider: "cloudflare-ai", model: "@cf/openai/whisper-tiny-en" },
+	],
 };
 
 // If primary fails, try fallbacks in order
 for (const { provider, model } of fallbackChains[task]) {
-  try {
-    return await callProvider(provider, model, input);
-  } catch (e) {
-    if (isRetryable(e)) continue;
-    throw e;
-  }
+	try {
+		return await callProvider(provider, model, input);
+	} catch (e) {
+		if (isRetryable(e)) continue;
+		throw e;
+	}
 }
 ```
 
@@ -636,7 +636,7 @@ for (const { provider, model } of fallbackChains[task]) {
 ### File Structure
 
 ```
-packages/engine/src/lib/lumen/
+libs/engine/src/lib/lumen/
 ├── index.ts              # Public exports & factory
 ├── types.ts              # Type definitions (includes ScribeMode, GutterItem)
 ├── client.ts             # LumenClient class (includes transcribe())
@@ -662,12 +662,12 @@ packages/engine/src/lib/lumen/
 
 ```json
 {
-  "exports": {
-    "./lumen": {
-      "types": "./dist/lib/lumen/index.d.ts",
-      "import": "./dist/lib/lumen/index.js"
-    }
-  }
+	"exports": {
+		"./lumen": {
+			"types": "./dist/lib/lumen/index.d.ts",
+			"import": "./dist/lib/lumen/index.js"
+		}
+	}
 }
 ```
 
@@ -722,7 +722,7 @@ packages/engine/src/lib/lumen/
 
 ### Phase 1: Foundation
 
-- [ ] Create `packages/engine/src/lib/lumen/` structure
+- [ ] Create `libs/engine/src/lib/lumen/` structure
 - [ ] Define types and interfaces
 - [ ] Implement task router
 - [ ] Add Workers AI provider (moderation, embeddings)

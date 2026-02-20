@@ -4,7 +4,7 @@ description: Content management and site administration interface
 category: specs
 specCategory: platform-services
 icon: dashboard
-lastUpdated: '2025-12-24'
+lastUpdated: "2025-12-24"
 aliases: []
 tags:
   - admin-panel
@@ -26,7 +26,7 @@ tags:
               Where you tend what you've grown.
 ```
 
-> *The structured framework where growth is tended.*
+> _The structured framework where growth is tended._
 
 Grove's blogger admin panel where users manage content, customize their site, and configure settings. Designed to be minimal and anxiety-free with quick navigation, instant saves, and a warm aesthetic matching Grove's cozy tea-shop vibe.
 
@@ -89,7 +89,7 @@ The Grove Admin Panel is where bloggers manage their content, customize their si
 ### File Structure
 
 ```
-packages/engine/src/routes/admin/
+libs/engine/src/routes/admin/
 ├── +layout.svelte          # Admin layout with sidebar
 ├── +layout.server.ts       # Auth check, user data
 ├── +page.svelte            # Dashboard
@@ -111,7 +111,7 @@ packages/engine/src/routes/admin/
 ### Shared Components
 
 ```
-packages/engine/src/lib/components/admin/
+libs/engine/src/lib/components/admin/
 ├── MarkdownEditor.svelte   # WYSIWYG-ish markdown editor
 ├── GutterManager.svelte    # Line gutters for editor
 └── ImageUploader.svelte    # Drag-drop image upload
@@ -175,14 +175,14 @@ packages/engine/src/lib/components/admin/
 
 ### Section Descriptions
 
-| Section | Purpose |
-|---------|---------|
-| **Dashboard** | Quick overview, system health, quick actions |
-| **Blog Posts** | List, create, edit, delete blog posts |
-| **Pages** | Static pages (About, Contact, etc.) |
-| **CDN Uploader** | Upload images directly to media library |
-| **Messages** | Platform status, announcements (NEW) |
-| **Settings** | Site configuration, appearance, account |
+| Section          | Purpose                                      |
+| ---------------- | -------------------------------------------- |
+| **Dashboard**    | Quick overview, system health, quick actions |
+| **Blog Posts**   | List, create, edit, delete blog posts        |
+| **Pages**        | Static pages (About, Contact, etc.)          |
+| **CDN Uploader** | Upload images directly to media library      |
+| **Messages**     | Platform status, announcements (NEW)         |
+| **Settings**     | Site configuration, appearance, account      |
 
 ---
 
@@ -193,12 +193,14 @@ packages/engine/src/lib/components/admin/
 The landing page after login. Intentionally simple.
 
 **Displays:**
+
 - Quick system health indicators (D1, KV, R2 status)
 - Quick action cards (New Post, Upload Image, View Site)
 - Recent activity summary (last 5 posts)
 - Active platform messages (if any)
 
 **Does NOT display:**
+
 - Visitor counts
 - Real-time analytics
 - Engagement metrics
@@ -211,6 +213,7 @@ The landing page after login. Intentionally simple.
 List view of all blog posts with actions.
 
 **Features:**
+
 - Table view: Title, Date, Tags, Status, Actions
 - Filters: Published, Drafts, All
 - Sort: Date (newest first)
@@ -218,6 +221,7 @@ List view of all blog posts with actions.
 - "New Post" button (prominent)
 
 **Post Editor:**
+
 - Markdown editor with toolbar
 - Live preview (toggle)
 - Autosave to local storage
@@ -230,6 +234,7 @@ List view of all blog posts with actions.
 Same as Blog Posts, but for static pages.
 
 **Differences:**
+
 - No date display
 - No tags
 - Pages appear in navigation (configurable)
@@ -240,6 +245,7 @@ Same as Blog Posts, but for static pages.
 Direct upload to R2 storage.
 
 **Features:**
+
 - Drag-and-drop upload area
 - Paste from clipboard
 - Progress indicator
@@ -248,6 +254,7 @@ Direct upload to R2 storage.
 - File type restrictions (images only in v1)
 
 **Upload Flow:**
+
 1. User drops/selects file
 2. Client validates (type, size)
 3. Upload to `/api/upload` endpoint
@@ -260,22 +267,26 @@ Direct upload to R2 storage.
 Site configuration divided into sections.
 
 **Site Settings:**
+
 - Blog title
 - Blog description
 - Social links (Twitter, Mastodon, GitHub, etc.)
 
 **Appearance:**
+
 - Theme mode (Light / Dark / System)
 - Accent color picker
 - Font selection (plan-dependent)
 
 **Account:**
+
 - Email (display only, changed via Heartwood)
 - Current plan
 - Data export
 - Danger zone (delete account)
 
 **Cache Management:**
+
 - Clear all cache button
 - System health check
 
@@ -296,22 +307,24 @@ Also displayed on Dashboard when there are active messages.
 ### Data Source
 
 Pulls from the shared D1 database:
+
 - `status_incidents` (active incidents)
 - `status_scheduled` (upcoming maintenance)
 - `status_updates` (incident updates)
 
 ### Display Types
 
-| Type | Icon | Display Duration |
-|------|------|------------------|
-| Active Incident | ⚠️ | Until resolved |
-| Scheduled Maintenance | 🔧 | Until completed |
-| Resolved Incident | ✓ | 24 hours after resolution |
-| Announcement | 📢 | As configured |
+| Type                  | Icon | Display Duration          |
+| --------------------- | ---- | ------------------------- |
+| Active Incident       | ⚠️   | Until resolved            |
+| Scheduled Maintenance | 🔧   | Until completed           |
+| Resolved Incident     | ✓    | 24 hours after resolution |
+| Announcement          | 📢   | As configured             |
 
 ### UI Design
 
 **On Dashboard (Summary):**
+
 ```
 ┌────────────────────────────────────────────────────────────────┐
 │ 📢 Messages                                                    │
@@ -323,6 +336,7 @@ Pulls from the shared D1 database:
 ```
 
 **Messages Page (Full View):**
+
 ```
 ┌────────────────────────────────────────────────────────────────┐
 │ Messages                                                       │
@@ -379,6 +393,7 @@ Pulls from the shared D1 database:
 ### Badge Indicator
 
 When there are active incidents or upcoming maintenance:
+
 - Sidebar "Messages" item shows notification dot
 - Dashboard shows message summary card
 
@@ -388,10 +403,10 @@ When there are active incidents or upcoming maintenance:
 
 ### Responsive Breakpoints
 
-| Breakpoint | Behavior |
-|------------|----------|
-| < 768px | Mobile layout (hamburger nav) |
-| ≥ 768px | Desktop layout (sidebar visible) |
+| Breakpoint | Behavior                         |
+| ---------- | -------------------------------- |
+| < 768px    | Mobile layout (hamburger nav)    |
+| ≥ 768px    | Desktop layout (sidebar visible) |
 
 ### Mobile-Specific Adjustments
 
@@ -455,13 +470,13 @@ When there are active incidents or upcoming maintenance:
 
 ### Components
 
-| Component | Usage |
-|-----------|-------|
-| `Button` | Primary, secondary, danger variants |
-| `Card` | Content containers with optional title |
-| `Badge` | Tags, status indicators |
-| `Spinner` | Loading states |
-| `Toast` | Notifications (success, error) |
+| Component | Usage                                  |
+| --------- | -------------------------------------- |
+| `Button`  | Primary, secondary, danger variants    |
+| `Card`    | Content containers with optional title |
+| `Badge`   | Tags, status indicators                |
+| `Spinner` | Loading states                         |
+| `Toast`   | Notifications (success, error)         |
 
 ---
 
@@ -469,18 +484,18 @@ When there are active incidents or upcoming maintenance:
 
 ### Endpoints Used
 
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/api/posts` | GET | List all posts |
-| `/api/posts` | POST | Create new post |
-| `/api/posts/:slug` | GET | Get single post |
-| `/api/posts/:slug` | PUT | Update post |
-| `/api/posts/:slug` | DELETE | Delete post |
-| `/api/pages` | GET/POST | Pages CRUD |
-| `/api/upload` | POST | Upload to R2 |
-| `/api/settings` | GET/PUT | Site settings |
-| `/api/admin/cache/clear` | POST | Clear KV cache |
-| `/api/status/messages` | GET | Platform messages (NEW) |
+| Endpoint                 | Method   | Purpose                 |
+| ------------------------ | -------- | ----------------------- |
+| `/api/posts`             | GET      | List all posts          |
+| `/api/posts`             | POST     | Create new post         |
+| `/api/posts/:slug`       | GET      | Get single post         |
+| `/api/posts/:slug`       | PUT      | Update post             |
+| `/api/posts/:slug`       | DELETE   | Delete post             |
+| `/api/pages`             | GET/POST | Pages CRUD              |
+| `/api/upload`            | POST     | Upload to R2            |
+| `/api/settings`          | GET/PUT  | Site settings           |
+| `/api/admin/cache/clear` | POST     | Clear KV cache          |
+| `/api/status/messages`   | GET      | Platform messages (NEW) |
 
 ### API Client
 
@@ -506,18 +521,19 @@ export const api = {
 
 ### Planned Features
 
-| Feature | Priority | Description |
-|---------|----------|-------------|
-| **Comments moderation** | High | Approve/reject/delete comments |
-| **Analytics (basic)** | Medium | Aggregate page views, no tracking |
-| **Scheduled posts** | Medium | Publish at future date/time |
-| **Custom domain settings** | Medium | Configure custom domain (Oak+) |
-| **Theme customizer** | Low | Advanced appearance options (Oak+) |
-| **Sidebar links (Vines)** | Low | Manage sidebar link list |
+| Feature                    | Priority | Description                        |
+| -------------------------- | -------- | ---------------------------------- |
+| **Comments moderation**    | High     | Approve/reject/delete comments     |
+| **Analytics (basic)**      | Medium   | Aggregate page views, no tracking  |
+| **Scheduled posts**        | Medium   | Publish at future date/time        |
+| **Custom domain settings** | Medium   | Configure custom domain (Oak+)     |
+| **Theme customizer**       | Low      | Advanced appearance options (Oak+) |
+| **Sidebar links (Vines)**  | Low      | Manage sidebar link list           |
 
 ### Messages Panel Expansion
 
 Future versions may include:
+
 - Personal notifications (new comment, new reply)
 - Tips and onboarding messages
 - Feature announcements
@@ -529,6 +545,7 @@ Future versions may include:
 ### Current State
 
 The admin panel exists and is functional for:
+
 - ✅ Blog post management
 - ✅ Page management
 - ✅ CDN uploads
@@ -552,6 +569,6 @@ The admin panel exists and is functional for:
 
 ---
 
-*Spec Version: 1.0*
-*Created: 2025-12-24*
-*Author: Claude (based on existing codebase exploration)*
+_Spec Version: 1.0_
+_Created: 2025-12-24_
+_Author: Claude (based on existing codebase exploration)_

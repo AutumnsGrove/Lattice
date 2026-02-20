@@ -130,7 +130,7 @@ It's documented now so the idea doesn't get lost, and so future decisions can ke
 
 - `/forest` page - The current static forest scene
 - `docs/promo-video-concept.md` - Video concept with similar organic themes
-- `packages/engine/src/lib/components/ui/nature/` - Tree and atmosphere components
+- `libs/engine/src/lib/components/ui/nature/` - Tree and atmosphere components
 
 ---
 

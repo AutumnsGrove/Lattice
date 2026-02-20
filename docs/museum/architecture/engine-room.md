@@ -27,7 +27,7 @@ This exhibit explains the engine-first pattern. Before implementing any utility,
    └── NO  → Continue to step 2
 
 2. IMPLEMENT: Add it to the engine FIRST
-   └── packages/engine/src/lib/...
+   └── libs/engine/src/lib/...
 
 3. IMPORT: Then use it from the engine in your app
 ```
