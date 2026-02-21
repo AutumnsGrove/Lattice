@@ -293,7 +293,7 @@ When a task spans multiple specialties, gatherings orchestrate the right animals
 | `gathering-architecture` | Eagle → Crow → Swan → Elephant                    | System design → challenge → spec → build |
 | `gathering-ui`           | Chameleon → Deer                                  | UI design + accessibility        |
 | `gathering-security`     | Spider → Raccoon → Turtle                         | Auth + audit + hardening         |
-| `gathering-migration`    | Bear → Bloodhound                                 | Data migration + codebase nav    |
+| `gathering-migration`    | Bloodhound → Bear                                 | Scout territory → migrate data   |
 | `gathering-planning`     | Bee → Badger                                      | Idea capture → board organization|
 
 ---

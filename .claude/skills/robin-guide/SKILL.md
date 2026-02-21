@@ -458,8 +458,8 @@ When the drum sounds, animals gather:
                            Raccoon → Deer → Fox → Owl
                            (Complete feature lifecycle, secure by design)
 
-🌲 /gathering-architecture Eagle → Swan → Elephant
-                           (System design to implementation)
+🌲 /gathering-architecture Eagle → Crow → Swan → Elephant
+                           (System design → challenge → spec → build)
 
 🌲 /gathering-ui          Chameleon → Deer
                            (UI design + accessibility)
@@ -467,8 +467,8 @@ When the drum sounds, animals gather:
 🌲 /gathering-security    Spider → Raccoon → Turtle
                            (Auth + security audit + hardening)
 
-🌲 /gathering-migration   Bear → Bloodhound
-                           (Safe data movement)
+🌲 /gathering-migration   Bloodhound → Bear
+                           (Scout territory → migrate data)
 
 🌲 /gathering-planning    Bee → Badger
                            (Ideas → issues → organized backlog)

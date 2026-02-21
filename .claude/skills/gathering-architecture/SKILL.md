@@ -84,6 +84,7 @@ Receive and parse the request:
 > This will involve:
 >
 > - 🦅 Eagle designing the high-level architecture
+> - 🐦‍⬛ Crow challenging the design before it's cast in spec
 > - 🦢 Swan writing the detailed specification
 > - 🐘 Elephant implementing the foundation
 >
