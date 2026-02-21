@@ -165,8 +165,20 @@ export const load: PageServerLoad = async ({ params, locals, platform, setHeader
 		if ((err as { status?: number })?.status) {
 			throw err;
 		}
-		// Log and rethrow as 500
-		console.error("Blog post load error:", err);
+		// Diagnostic logging — captures error type, message, and cause chain
+		const errName = err instanceof Error ? err.constructor.name : typeof err;
+		const errMessage = err instanceof Error ? err.message : String(err);
+		const errCause =
+			err instanceof Error && "cause" in err
+				? (err as Error & { cause?: unknown }).cause
+				: undefined;
+		console.error(`[garden/${slug}] POST_LOAD_FAILED — ${errName}: ${errMessage}`, {
+			tenantId,
+			hasKV: !!platform?.env?.CACHE_KV,
+			hasDB: !!platform?.env?.DB,
+			cause: errCause,
+			stack: err instanceof Error ? err.stack : undefined,
+		});
 		throwGroveError(500, SITE_ERRORS.POST_LOAD_FAILED, "Site");
 	}
 };

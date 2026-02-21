@@ -76,7 +76,15 @@
 	<!-- Config Form -->
 	<GlassCard class="config-card">
 		<h2>Settings</h2>
-		<form method="POST" action="?/saveConfig" use:enhance>
+		<form
+			method="POST"
+			action="?/saveConfig"
+			use:enhance={() => {
+				return async ({ update }) => {
+					await update({ reset: false });
+				};
+			}}
+		>
 			<div class="form-grid">
 				<div class="form-field">
 					<label for="mode">Mode</label>
