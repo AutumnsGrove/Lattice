@@ -390,7 +390,45 @@ Already partially in our CLAUDE.md via the obra/superpowers lineage, but worth r
 
 ---
 
-## 7. What NOT to Copy
+## 7. Deep-Dive: Security & DevOps Chain
+
+Scout report on 8 additional skills plus Common Ground and superpowers research:
+
+### The Operational Reliability Chain
+
+Five skills form a coherent pipeline mapping to Grove's infrastructure maturity:
+
+```
+secure-code-guardian → security-reviewer → devops-engineer → sre-engineer → chaos-engineer
+(write secure code)    (audit existing)     (deploy safely)   (define SLOs)   (stress test)
+```
+
+**secure-code-guardian**: "Thinks defensively, assumes all input is malicious." Not a checklist — a mindset. OWASP reference has copy-paste TypeScript with `// Bad` / `// Good` annotations. Our `turtle-harden` could adopt this annotated pattern library format.
+
+**devops-engineer**: "Three hats" model (Build / Deploy / Ops) — maps to Grove: Wrangler builds, Cloudflare Workers deployment, D1/KV/R2 reliability.
+
+**sre-engineer**: Key insight — "sustainable reliability that enables feature velocity." Reliability isn't the opposite of shipping; it's what allows shipping to continue. Error budget as policy object.
+
+**chaos-engineer**: "Steady state first" — you can't know a system degraded unless you documented what normal looks like. Grove-relevant: "What happens when D1 is unavailable?", "What does the editor do if KV cache is cold?"
+
+### MCP Developer — Future Grove Opportunity
+
+A Grove MCP server exposing posts, seasonal themes, or notifications to Claude agents would enable powerful content workflows. SSE transport is the right choice for Cloudflare Workers.
+
+### Common Ground — Architectural Elegance
+
+The **immutable type + mutable tier** separation:
+- **Types** (stated/inferred/assumed/uncertain) = audit trail, cannot be changed
+- **Tiers** (ESTABLISHED/WORKING/OPEN) = confidence levels, user-adjustable
+- The reasoning graph (`--graph`) externalizes Claude's decision tree into a manipulable Mermaid diagram
+
+### Prompt Engineer — If Grove Builds AI Features
+
+Treats prompts as versioned engineering artifacts. Evaluation frameworks are first-class citizens. If Grove builds AI writing assistance, this skill's patterns should be the standard.
+
+---
+
+## 8. What NOT to Copy
 
 ### 7a. Generic Language Skills
 Their 12 language-specialist skills (Python Pro, Go Pro, etc.) are generic. We're a SvelteKit/TypeScript/Cloudflare shop. We don't need a Go Pro or Rust Engineer skill — we have `svelte5-development` which is far more specific and useful for us.
