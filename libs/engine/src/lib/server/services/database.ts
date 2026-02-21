@@ -81,10 +81,17 @@ export function generateId(): string {
 }
 
 /**
- * Get current timestamp in ISO format
+ * Get current timestamp in ISO format (for session expiry, tokens, etc.)
  */
 export function now(): string {
 	return new Date().toISOString();
+}
+
+/**
+ * Get current Unix timestamp in seconds (for D1 INTEGER columns: created_at, updated_at)
+ */
+export function unixNow(): number {
+	return Math.floor(Date.now() / 1000);
 }
 
 /**
@@ -451,13 +458,13 @@ export async function insert(
 	validateColumnNames(Object.keys(data));
 
 	const id = options?.id ?? generateId();
-	const timestamp = now();
+	const timestamp = unixNow();
 
 	const dataWithMeta = {
 		id,
-		...data,
 		created_at: timestamp,
 		updated_at: timestamp,
+		...data,
 	};
 
 	const columns = Object.keys(dataWithMeta);
@@ -523,13 +530,13 @@ export async function upsert(
 	validateColumnNames(Object.keys(data));
 
 	const id = options?.id ?? data.id ?? generateId();
-	const timestamp = now();
+	const timestamp = unixNow();
 
 	const dataWithMeta = {
 		id,
-		...data,
 		created_at: timestamp,
 		updated_at: timestamp,
+		...data,
 	};
 
 	const columns = Object.keys(dataWithMeta);
@@ -580,8 +587,8 @@ export async function update(
 	validateColumnNames(Object.keys(data));
 
 	const dataWithTimestamp = {
+		updated_at: unixNow(),
 		...data,
-		updated_at: now(),
 	};
 
 	const setClauses = Object.keys(dataWithTimestamp)
