@@ -27,6 +27,9 @@ dist/
 .vscode/
 .idea/
 
+# Agent session state (per-session, not shared)
+.claude/ground.md
+
 # Bun (local speed tools only - pnpm is source of truth for CI/deployments)
 # Use: pnpm install/add/remove for dependencies
 # Use: bun x <tool> for fast local execution (prettier, tsc, etc.)

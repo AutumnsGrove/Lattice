@@ -1,11 +1,11 @@
 ---
 name: gathering-architecture
-description: The drum sounds. Eagle, Swan, and Elephant gather for system architecture. Use when designing major systems from vision to implementation.
+description: The drum sounds. Eagle, Crow, Swan, and Elephant gather for system architecture. Use when designing major systems from vision to implementation.
 ---
 
 # Gathering Architecture 🌲🦅
 
-The drum echoes high in the canopy. The Eagle soars above, seeing the forest's patterns. The Swan glides across the lake, elegant designs taking form. The Elephant moves below, building what was envisioned. Together they transform a clearing into a cathedral of code—systems that stand for seasons.
+The drum echoes high in the canopy. The Eagle soars above, seeing the forest's patterns. The Crow perches nearby, tilting its head at what others won't question. The Swan glides across the lake, elegant designs taking form. The Elephant moves below, building what was envisioned. Together they transform a clearing into a cathedral of code—systems that stand for seasons.
 
 ## When to Summon
 
@@ -49,8 +49,9 @@ Request  Animals    Work       Design   Defined
 ### Animals Mobilized
 
 1. **🦅 Eagle** — Design system architecture from 10,000 feet
-2. **🦢 Swan** — Write detailed technical specifications
-3. **🐘 Elephant** — Implement the architectural foundation
+2. **🐦‍⬛ Crow** — Challenge the design before it's cast in code
+3. **🦢 Swan** — Write detailed technical specifications
+4. **🐘 Elephant** — Implement the architectural foundation
 
 ---
 
@@ -99,16 +100,17 @@ Dispatch in sequence:
 **Dispatch Order:**
 
 ```
-Eagle ──→ Swan ──→ Elephant
-  │         │           │
-  │         │           │
-Design    Write      Build
-System    Spec       Foundation
+Eagle ──→ Crow ──→ Swan ──→ Elephant
+  │         │        │           │
+  │         │        │           │
+Design   Challenge  Write      Build
+System   Design    Spec       Foundation
 ```
 
 **Dependencies:**
 
-- Eagle must complete before Swan (needs architecture vision)
+- Eagle must complete before Crow (needs architecture to challenge)
+- Crow must complete before Swan (design strengthened before specifying)
 - Swan must complete before Elephant (needs detailed spec)
 
 ---
@@ -130,11 +132,20 @@ Handoff: architecture overview (system boundaries, component interactions, techn
 
 ---
 
+**🐦‍⬛ CROW — CHALLENGE**
+
+Load skill: `crow-reason`
+
+Execute the Crow in Red Team mode against the Eagle's architecture overview. Challenge assumptions, find weak points, stress-test boundaries. The Crow's Roost summary feeds into the Swan — design decisions are strengthened before they're cast in spec.
+Handoff: strengthened architecture with Roost summary (challenges resolved, risks acknowledged) → Swan for specification
+
+---
+
 **🦢 SWAN — SPECIFY**
 
 Load skill: `swan-design`
 
-Execute the full Swan workflow using the Eagle's architecture overview.
+Execute the full Swan workflow using the Eagle's architecture overview, strengthened by the Crow's challenges.
 Handoff: complete technical specification (API contracts, database schema, flow diagrams, implementation checklist) → Elephant for foundation building
 
 ---
@@ -155,6 +166,7 @@ _The structure stands. Each animal verifies their work..._
 **Validation Checklist:**
 
 - [ ] Eagle: Architecture addresses all requirements
+- [ ] Crow: Design challenged and strengthened
 - [ ] Swan: Specification is complete and implementable
 - [ ] Elephant: Foundation is solid and tested
 
@@ -164,7 +176,12 @@ _The structure stands. Each animal verifies their work..._
 After Eagle:
   → Review architecture with stakeholders
   → Confirm boundaries and trade-offs
-  → Approve before Swan begins
+  → Approve before Crow challenges
+
+After Crow:
+  → Review Roost summary
+  → Confirm which challenges are resolved vs accepted risks
+  → Approve strengthened design before Swan begins
 
 After Swan:
   → Review spec for completeness
@@ -192,7 +209,7 @@ _The gathering ends. Architecture stands ready..._
 
 ### Animals Mobilized
 
-🦅 Eagle → 🦢 Swan → 🐘 Elephant
+🦅 Eagle → 🐦‍⬛ Crow → 🦢 Swan → 🐘 Elephant
 
 ### Architecture Decisions
 
@@ -231,11 +248,12 @@ _The forest has a new landmark._ 🌲
 
 1. 🌲 **SUMMON** — "Mobilizing for: Notification system. Send email, push, SMS to users. Scale: millions of notifications/day."
 
-2. 🌲 **ORGANIZE** — "Sequence: Eagle (architecture) → Swan (spec) → Elephant (foundation)"
+2. 🌲 **ORGANIZE** — "Sequence: Eagle (architecture) → Crow (challenge) → Swan (spec) → Elephant (foundation)"
 
 3. 🌲 **EXECUTE** —
    - 🦅 Eagle: "Event-driven: App emits events → Queue → Workers → Providers. Scales horizontally."
-   - 🦢 Swan: "Complete spec with flow diagrams, API contracts, provider adapter interface"
+   - 🐦‍⬛ Crow: "Red Team mode. Challenged: operational complexity for small team, eventual consistency with account deletion, microservice gravity. Strengthened: modular monolith with clean service boundary, extract later."
+   - 🦢 Swan: "Complete spec incorporating Crow's strengthened position, with flow diagrams, API contracts, provider adapter interface"
    - 🐘 Elephant: "Event bus, queue infrastructure, base notification service, database schema"
 
 4. 🌲 **VALIDATE** — "Architecture handles scale, spec complete, foundation tested"
