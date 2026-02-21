@@ -60,10 +60,11 @@ skill: "git-workflows"
 | [rich_formatting.md](rich_formatting.md) | Terminal output with Rich library | Building CLI tools, enhancing print output |
 | [svelte5_guide.md](svelte5_guide.md) | Svelte 5 with runes and SvelteKit | Building Svelte web applications |
 
-### Documentation
+### Design & Documentation
 
 | Guide | Description | When to Use |
 |-------|-------------|-------------|
+| [design_context.md](design_context.md) | Brand personality, aesthetic direction, design principles | Building UI, writing user-facing text, aesthetic decisions |
 | [documentation_standards.md](documentation_standards.md) | Writing style, formats, templates | Creating or updating documentation |
 
 ### Infrastructure
@@ -162,5 +163,5 @@ For new projects, use these skills in order:
 
 ---
 
-*Last updated: 2025-12-22*
-*Total guides: 26*
+*Last updated: 2026-02-21*
+*Total guides: 27*

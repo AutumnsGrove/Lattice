@@ -41,6 +41,11 @@ Understand the request:
 - Explore code? → Bloodhound
 - Design UI? → Chameleon
 - Write docs? → Owl
+- Debug something broken? → Mole
+- Challenge a plan? → Crow
+- Surface assumptions? → Groundhog
+- Respond to PR feedback? → Lynx
+- Audit an unfamiliar codebase? → Raven
 - Something else? → Keep listening
 
 **How specific is the task?**
@@ -90,6 +95,20 @@ Assess the situation:
 │  ─────────            ─────────           ────────────         │
 │  Raccoon-Audit        Turtle-Harden       Hawk-Survey          │
 │  (secrets/cleanup)    (defense in depth)  (full audit/report)  │
+│                                           Raven-Investigate    │
+│                                           (cross-codebase)     │
+│                                                              │
+│  🐦‍⬛ THINKERS         ⛏️ DEBUGGERS        🐈‍⬛ REVIEWERS        │
+│  ──────────           ──────────          ──────────          │
+│  Crow-Reason          Mole-Debug          Lynx-Repair          │
+│  (critical thinking)  (systematic debug)  (PR feedback)        │
+│  Groundhog-Surface                                             │
+│  (assumptions)                                                 │
+│                                                              │
+│  🦅 APPRAISERS        🚙 EXPLORERS        🦅 CLEANERS           │
+│  ────────────         ──────────          ─────────           │
+│  Osprey-Appraise      Safari-Explore      Vulture-Sweep        │
+│  (estimates/quotes)   (systematic review) (issue cleanup)      │
 │                                                              │
 └──────────────────────────────────────────────────────────────┘
 ```
@@ -150,6 +169,30 @@ What do you need to do?
 │
 ├─ Organize the project board? ─→ 🦡 Badger-Triage
 │   "Size and prioritize my backlog"
+│
+├─ Debug something broken? ────→ ⛏️ Mole-Debug
+│   "Tests fail and nobody knows why"
+│
+├─ Challenge a plan/decision? ─→ 🐦‍⬛ Crow-Reason
+│   "Is this really the right approach?"
+│
+├─ Surface assumptions? ───────→ 🐿️ Groundhog-Surface
+│   "What are we assuming here?"
+│
+├─ Respond to PR feedback? ────→ 🐈‍⬛ Lynx-Repair
+│   "Address these review comments"
+│
+├─ Audit unfamiliar codebase? ─→ 🐦‍⬛ Raven-Investigate
+│   "What's the security posture?"
+│
+├─ Estimate/quote a project? ──→ 🦅 Osprey-Appraise
+│   "How long will this take?"
+│
+├─ Review a collection? ───────→ 🚙 Safari-Explore
+│   "Review all our API endpoints"
+│
+├─ Clean up stale issues? ─────→ 🦅 Vulture-Sweep
+│   "Close implemented/outdated issues"
 │
 └─ Complex multi-step work? ─────→ 🌲 Use a Gathering
 ```
@@ -367,6 +410,42 @@ Use guiding metaphors:
 │     Organize the hive—size, prioritize, plan milestones            │
 │     Use: Project board triage, sprint planning, timelines          │
 │                                                                    │
+│  ⛏️ mole-debug                                                     │
+│     Follow vibrations to their source with systematic precision    │
+│     Use: Debugging broken things, hypothesis-driven investigation  │
+│                                                                    │
+│  🐦‍⬛ crow-reason                                                   │
+│     Steelman your position, then find the cracks                   │
+│     Use: Critical reasoning, pre-mortems, red-teaming              │
+│                                                                    │
+│  🐿️ groundhog-surface                                              │
+│     Pop up and look around—what's real, what's assumed?            │
+│     Use: Surfacing assumptions, validating decisions               │
+│                                                                    │
+│  🐈‍⬛ lynx-repair                                                   │
+│     Review PR feedback with discerning judgment                    │
+│     Use: Responding to code review comments                        │
+│                                                                    │
+│  🐦‍⬛ raven-investigate                                             │
+│     Cross-codebase security detective with parallel sub-agents     │
+│     Use: Auditing unfamiliar codebases, security posture reports   │
+│                                                                    │
+│  🦅 osprey-appraise                                                │
+│     Turn audits into professional proposals with precision         │
+│     Use: Project estimates, scoping, pricing quotes                │
+│                                                                    │
+│  🚙 safari-explore                                                 │
+│     Drive across the savanna, reviewing each stop systematically   │
+│     Use: Reviewing collections, systematic polishing               │
+│                                                                    │
+│  🦅 vulture-sweep                                                  │
+│     Circle high, spot what's dead or decaying, clean it up         │
+│     Use: Closing stale issues, consolidating duplicates            │
+│                                                                    │
+│  🌿 druid                                                          │
+│     The keeper who summons new animals into the forest             │
+│     Use: Creating new skills, growing the ecosystem                │
+│                                                                    │
 └────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -379,8 +458,8 @@ When the drum sounds, animals gather:
                            Raccoon → Deer → Fox → Owl
                            (Complete feature lifecycle, secure by design)
 
-🌲 /gathering-architecture Eagle → Swan → Elephant
-                           (System design to implementation)
+🌲 /gathering-architecture Eagle → Crow → Swan → Elephant
+                           (System design → challenge → spec → build)
 
 🌲 /gathering-ui          Chameleon → Deer
                            (UI design + accessibility)
@@ -388,8 +467,8 @@ When the drum sounds, animals gather:
 🌲 /gathering-security    Spider → Raccoon → Turtle
                            (Auth + security audit + hardening)
 
-🌲 /gathering-migration   Bear → Bloodhound
-                           (Safe data movement)
+🌲 /gathering-migration   Bloodhound → Bear
+                           (Scout territory → migrate data)
 
 🌲 /gathering-planning    Bee → Badger
                            (Ideas → issues → organized backlog)

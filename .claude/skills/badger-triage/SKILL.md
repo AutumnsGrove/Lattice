@@ -5,7 +5,7 @@ description: Organize the hive that Bee collected. The badger methodically sorts
 
 # Badger Triage 🦡
 
-The badger maintains the burrow. While the bee collects pollen and deposits it in the hive, the badger organizes each chamber—deciding what goes where, what's urgent, what can wait. Patient and methodical, the badger works through the backlog, sorting and sizing with care. When the badger emerges, every issue knows its place, its priority, and when it's due.
+The badger maintains the burrow. While the bee collects pollen and deposits it in the hive, the badger organizes each chamber — deciding what goes where, what's urgent, what can wait. Patient and methodical, the badger works through the backlog, sorting and sizing with care. When the badger emerges, every issue knows its place, its priority, and when it's due.
 
 ## When to Activate
 
@@ -35,45 +35,13 @@ Hive     Theme    User      Project  Changed
 
 _The badger digs into the hive, surveying what needs organizing..._
 
-Fetch issues that need triage:
+Fetch and assess issues that need triage.
 
-```bash
-# Get all open issues with their project field values
-gh api graphql -f query='
-query {
-  repository(owner: "AutumnsGrove", name: "Lattice") {
-    issues(first: 100, states: OPEN) {
-      nodes {
-        number
-        title
-        labels(first: 10) {
-          nodes { name }
-        }
-        projectItems(first: 1) {
-          nodes {
-            id
-            fieldValues(first: 10) {
-              nodes {
-                ... on ProjectV2ItemFieldSingleSelectValue {
-                  name
-                  field { ... on ProjectV2SingleSelectField { name } }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}'
-```
+- Query all open issues with their current project field values (see GraphQL reference)
+- Identify untriaged issues: no Size, no Priority, Status is Backlog but might be Ready, missing target dates
+- Group findings for presentation
 
-**Identify untriaged issues:**
-
-- No Size assigned
-- No Priority assigned
-- Status is "Backlog" but could be "Ready"
-- Missing target dates
+**Reference:** Load `references/github-graphql.md` for the GraphQL query to fetch open issues with field values
 
 **Output:** List of issues needing attention, grouped for discussion
 
@@ -83,31 +51,13 @@ query {
 
 _The badger sorts the findings into manageable batches..._
 
-Group issues by theme for efficient triage:
-
-**Grouping strategies:**
+Group issues by theme for efficient triage — 5 to 10 issues per batch is comfortable.
 
 - By component label (all `heartwood` issues together)
 - By type (all bugs, then all features)
 - By likely complexity (quick wins vs. deep work)
 
-**Batch size:** 5-10 issues at a time for comfortable discussion
-
-**Example batch:**
-
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│  BATCH 1: Heartwood Authentication (5 issues)                       │
-├──────┬─────────────────────────────────────────────┬───────┬────────┤
-│ #    │ Title                                       │ Size  │ Priority│
-├──────┼─────────────────────────────────────────────┼───────┼────────┤
-│ #412 │ Add session refresh endpoint                │   ?   │   ?    │
-│ #415 │ Fix token expiry edge case                  │   ?   │   ?    │
-│ #418 │ Support multiple OAuth providers            │   ?   │   ?    │
-│ #421 │ Add logout confirmation dialog              │   ?   │   ?    │
-│ #425 │ Implement "remember me" checkbox            │   ?   │   ?    │
-└──────┴─────────────────────────────────────────────┴───────┴────────┘
-```
+Present each batch as a clear table with current values and question marks where sizing/priority is needed.
 
 **Output:** Organized batches ready for interactive triage
 
@@ -117,66 +67,14 @@ Group issues by theme for efficient triage:
 
 _The badger presents each batch, discussing with the wanderer..._
 
-**Interactive triage flow:**
+For each batch, use AskUserQuestion to have a conversation — suggest, then confirm.
 
-For each batch, use AskUserQuestion to have a conversation:
+- Propose sizes based on scope: "This bug fix looks like XS or S?"
+- Propose priorities based on type and urgency: "Bugs should usually be First Focus or Next Up"
+- Ask which issues should move from Backlog to Ready
+- Present options: Approve suggested / Adjust / Skip batch
 
-**Size Discussion:**
-
-```
-These 5 heartwood issues need sizing. Based on the titles, I'm guessing:
-
-#412 "Add session refresh endpoint" — feels like S or M?
-#415 "Fix token expiry edge case" — probably XS (bug fix)?
-#418 "Support multiple OAuth providers" — this feels L or XL?
-#421 "Add logout confirmation dialog" — likely XS or S?
-#425 "Implement remember me checkbox" — maybe S?
-
-[Present options: Approve suggested / Adjust / Skip batch]
-```
-
-**Priority Discussion:**
-
-```
-Now for priority. These are all auth-related. Thinking:
-
-#415 (bug fix) — First Focus? Bugs should be squashed early.
-#412 (refresh endpoint) — Next Up? Important for UX.
-#418 (multi-provider) — In Time? Nice to have but not blocking.
-#421, #425 — Far Off? Polish features for later.
-
-[Present options: Approve suggested / Adjust / Skip batch]
-```
-
-**Status Discussion:**
-
-```
-Should any of these move from Backlog to Ready?
-
-I'd suggest moving #415 (the bug) and #412 (refresh endpoint) to Ready.
-The others can stay in Backlog until you're closer to working on auth.
-
-[Present options: Move suggested / Choose different ones / Leave all in Backlog]
-```
-
-**Size Reference:**
-
-| Size | Scope                                                  |
-| ---- | ------------------------------------------------------ |
-| XS   | < 1 hour. Single file, obvious fix.                    |
-| S    | 1-3 hours. Small feature, few files.                   |
-| M    | Half day to full day. Multiple files, some complexity. |
-| L    | 2-3 days. Significant feature, cross-cutting.          |
-| XL   | Week+. Major feature, architectural impact.            |
-
-**Priority Reference:**
-
-| Priority    | Meaning                                 |
-| ----------- | --------------------------------------- |
-| First Focus | Work on this NOW. Blocking or urgent.   |
-| Next Up     | In the queue. Will be first focus soon. |
-| In Time     | Important but not urgent. Plan for it.  |
-| Far Off     | Someday/maybe. Keep in backlog.         |
+**Reference:** Load `references/sizing-guide.md` for XS/S/M/L/XL definitions, priority meanings, and sizing heuristics
 
 **Output:** User-approved sizes, priorities, and status changes
 
@@ -186,59 +84,13 @@ The others can stay in Backlog until you're closer to working on auth.
 
 _The badger considers the calendar, planning when work is due..._
 
-If user wants to work with timelines:
+If the user wants milestone planning or target dates:
 
-**Milestone Mode:**
+- Offer to create new milestones (sprint, launch) or assign to existing ones
+- Suggest target dates based on issue size and dependencies
+- Ask before creating any milestone — these are explicit commitments
 
-```
-Would you like to assign these to a milestone?
-
-Existing milestones: [none yet]
-
-Options:
-- Create a new milestone (e.g., "v1.0 Launch", "February Sprint")
-- Just set target dates on individual issues
-- Skip timeline planning for this batch
-```
-
-**Creating milestones:**
-
-```bash
-gh api repos/AutumnsGrove/Lattice/milestones \
-  --method POST \
-  -f title="v1.0 Launch" \
-  -f description="Core functionality ready for public use" \
-  -f due_on="2026-03-15T00:00:00Z"
-```
-
-**Setting target dates:**
-
-```bash
-# Update project item field for Target date
-gh api graphql -f query='
-mutation {
-  updateProjectV2ItemFieldValue(
-    input: {
-      projectId: "PVT_kwHOAiMO684BNUxo"
-      itemId: "ITEM_ID"
-      fieldId: "PVTF_lAHOAiMO684BNUxozg8WnIE"
-      value: { date: "2026-02-15" }
-    }
-  ) { projectV2Item { id } }
-}'
-```
-
-**Timeline Discussion:**
-
-```
-For the issues we just sized:
-
-#415 (XS bug) — Could be done by Feb 5?
-#412 (S endpoint) — Maybe Feb 10?
-#418 (L multi-provider) — This needs more time. Mid-March?
-
-Want me to set these target dates?
-```
+**Reference:** Load `references/timeline-planning.md` for milestone creation commands, target date GraphQL mutations, sprint planning flow, and the bee-badger workflow
 
 **Output:** Milestones created, target dates assigned
 
@@ -248,61 +100,9 @@ Want me to set these target dates?
 
 _The badger updates the burrow, placing each item where it belongs..._
 
-Execute the agreed-upon changes:
+Execute all agreed-upon changes via GraphQL mutations — sizes, priorities, statuses, and target dates.
 
-**Update Size:**
-
-```bash
-gh api graphql -f query='
-mutation {
-  updateProjectV2ItemFieldValue(
-    input: {
-      projectId: "PVT_kwHOAiMO684BNUxo"
-      itemId: "PVTI_..."
-      fieldId: "PVTSSF_lAHOAiMO684BNUxozg8WnH4"
-      value: { singleSelectOptionId: "f784b110" }
-    }
-  ) { projectV2Item { id } }
-}'
-```
-
-**Update Priority:**
-
-```bash
-gh api graphql -f query='
-mutation {
-  updateProjectV2ItemFieldValue(
-    input: {
-      projectId: "PVT_kwHOAiMO684BNUxo"
-      itemId: "PVTI_..."
-      fieldId: "PVTSSF_lAHOAiMO684BNUxozg8WnH0"
-      value: { singleSelectOptionId: "aa1d5ead" }
-    }
-  ) { projectV2Item { id } }
-}'
-```
-
-**Update Status:**
-
-```bash
-gh api graphql -f query='
-mutation {
-  updateProjectV2ItemFieldValue(
-    input: {
-      projectId: "PVT_kwHOAiMO684BNUxo"
-      itemId: "PVTI_..."
-      fieldId: "PVTSSF_lAHOAiMO684BNUxozg8Wm9E"
-      value: { singleSelectOptionId: "61e4505c" }
-    }
-  ) { projectV2Item { id } }
-}'
-```
-
-**Assign Milestone:**
-
-```bash
-gh issue edit 415 --milestone "v1.0 Launch"
-```
+**Reference:** Load `references/github-graphql.md` for the full mutation templates for size, priority, status, and date fields
 
 **Output:** All changes applied to GitHub project
 
@@ -312,94 +112,32 @@ gh issue edit 415 --milestone "v1.0 Launch"
 
 _The badger emerges, reporting what was organized..._
 
+Summarize what changed:
+
 ```
 🦡 BADGER TRIAGE COMPLETE
 
-## Session Summary
+Issues triaged: N
+Sized: N | Prioritized: N | Moved to Ready: N | Target dates set: N
 
-### Issues Triaged: 23
+First Focus: #XXX, #XXX
+Next Up: #XXX, #XXX
 
-| Status Change | Count |
-|---------------|-------|
-| Sized         | 18    |
-| Prioritized   | 23    |
-| Backlog → Ready | 7   |
-| Target dates set | 12 |
-
-### By Priority
-
-| Priority | Issues |
-|----------|--------|
-| First Focus | #415, #412, #389 |
-| Next Up | #418, #421, #390, #391 |
-| In Time | 8 issues |
-| Far Off | 8 issues |
-
-### Milestones Updated
-
-| Milestone | Issues Assigned | Due Date |
-|-----------|-----------------|----------|
-| v1.0 Launch | 12 | Mar 15 |
-| February Sprint | 7 | Feb 28 |
-
-### Still Untriaged: 15
-
-These issues need more context or decisions:
-- #430 "Improve performance" (too vague to size)
-- #445 "Consider alternative auth" (needs design decision)
-
----
-
-The burrow is organized. Ready for the next dig!
+Still untriaged: N (need more context)
 ```
 
+**Output:** Clear summary of the session's work
+
 ---
 
-## Project Field Reference
+## Reference Routing Table
 
-**Project ID:** `PVT_kwHOAiMO684BNUxo`
-
-### Status Options
-
-| Name        | ID         |
-| ----------- | ---------- |
-| Backlog     | `f75ad846` |
-| Ready       | `61e4505c` |
-| In progress | `47fc9ee4` |
-| In review   | `df73e18b` |
-| Done        | `98236657` |
-
-**Field ID:** `PVTSSF_lAHOAiMO684BNUxozg8Wm9E`
-
-### Priority Options
-
-| Name        | ID         |
-| ----------- | ---------- |
-| First Focus | `aa1d5ead` |
-| Next Up     | `c92ef786` |
-| In Time     | `88c3eb14` |
-| Far Off     | `ce4748e6` |
-
-**Field ID:** `PVTSSF_lAHOAiMO684BNUxozg8WnH0`
-
-### Size Options
-
-| Name | ID         |
-| ---- | ---------- |
-| XS   | `6c6483d2` |
-| S    | `f784b110` |
-| M    | `7515a9f1` |
-| L    | `817d0097` |
-| XL   | `db339eb2` |
-
-**Field ID:** `PVTSSF_lAHOAiMO684BNUxozg8WnH4`
-
-### Date Fields
-
-| Name        | Field ID                       |
-| ----------- | ------------------------------ |
-| Start date  | `PVTF_lAHOAiMO684BNUxozg8WnIA` |
-| Target date | `PVTF_lAHOAiMO684BNUxozg8WnIE` |
+| Phase | Reference | Load When |
+|-------|-----------|-----------|
+| DIG | `references/github-graphql.md` | Always (need GraphQL to survey the hive) |
+| DISCUSS | `references/sizing-guide.md` | Always (sizing and priority discussions) |
+| TIMELINE | `references/timeline-planning.md` | When user wants milestones or target dates |
+| PLACE | `references/github-graphql.md` | Always (need mutations to update GitHub) |
 
 ---
 
@@ -446,41 +184,9 @@ Use burrow metaphors:
 
 ---
 
-## Triage Modes
-
-### Quick Triage
-
-"Just size and prioritize what's obvious"
-
-- Focuses on issues that clearly fit a size/priority
-- Skips anything ambiguous for later discussion
-- Fast path for backlog grooming
-
-### Deep Triage
-
-"Let's really organize this"
-
-- Full discussion on each batch
-- Includes timeline planning
-- Sets up milestones and target dates
-- Moves items between columns thoughtfully
-
-### Sprint Planning
-
-"What should I work on next?"
-
-- Focuses on moving items to "Ready" and "In Progress"
-- Prioritizes by First Focus and Next Up
-- Sets near-term target dates
-- Ideal for weekly planning sessions
-
----
-
 ## Example Triage Session
 
-**User says:**
-
-> /badger-triage — I've got a bunch of new issues from bee-collect, let's organize them
+**User:** "/badger-triage — I've got a bunch of new issues from bee-collect, let's organize them"
 
 **Badger flow:**
 
@@ -488,17 +194,9 @@ Use burrow metaphors:
 
 2. 🦡 **SORT** — "Grouping by component. First batch: 5 lattice issues, then 4 heartwood, then 9 misc."
 
-3. 🦡 **DISCUSS** — Interactive conversation:
-   - "These lattice issues look like infrastructure. Sizing thoughts?"
-   - User adjusts a few sizes
-   - "Priority? I'd suggest most are 'In Time' since they're not blocking."
-   - User marks one as "First Focus"
-   - "Move any to Ready?"
-   - User picks 3 for Ready
+3. 🦡 **DISCUSS** — "These lattice issues look like infrastructure. Sizing thoughts? I'd suggest most are M or L..." (interactive back-and-forth)
 
 4. 🦡 **TIMELINE** — "Want to set target dates or create a milestone for these?"
-   - User creates "February Sprint" milestone
-   - Assigns the 3 Ready items
 
 5. 🦡 **PLACE** — Updates all 18 issues via GraphQL
 
@@ -506,26 +204,13 @@ Use burrow metaphors:
 
 ---
 
-## Working with Bee
+## Triage Modes
 
-The bee and badger are a perfect pair:
-
-```
-🐝 Bee-Collect          🦡 Badger-Triage
-───────────────         ────────────────
-Brain dump    →         Raw issues
-    ↓                       ↓
-Parse TODOs   →         Survey hive
-    ↓                       ↓
-Create issues →         Size & prioritize
-    ↓                       ↓
-Deposit in hive →       Place in burrow
-```
-
-**Typical workflow:**
-
-1. `/bee-collect` — dump your ideas, bee creates issues
-2. `/badger-triage` — badger organizes what bee collected
+| Mode | Focus |
+|------|-------|
+| Quick Triage | Size/prioritize what's obvious; skip ambiguous |
+| Deep Triage | Full discussion, timeline planning, milestone setup |
+| Sprint Planning | Move items to Ready, set near-term target dates |
 
 ---
 
