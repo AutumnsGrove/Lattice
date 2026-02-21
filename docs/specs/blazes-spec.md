@@ -376,14 +376,25 @@ Blazes have no animation. They're static badges. No `prefers-reduced-motion` con
 
 ### Color contrast
 
-| Mode | Type | Background | Text | Ratio |
-|------|------|-----------|------|-------|
-| Light | Bloom | `grove-50` (#f0fdf4) | `grove-700` (#15803d) | ~7.5:1 |
-| Light | Note | `amber-50` (#fffbeb) | `amber-700` (#b45309) | ~6.8:1 |
-| Dark | Bloom | `grove-900/30` | `grove-300` (#86efac) | ~5.2:1 |
-| Dark | Note | `amber-900/30` | `amber-300` (#fcd34d) | ~5.5:1 |
+**Light mode** — solid backgrounds, verifiable ratios:
 
-All combinations exceed WCAG AA (4.5:1 for small text). The light mode combinations exceed AAA (7:1).
+| Type | Background | Text | Ratio |
+|------|-----------|------|-------|
+| Bloom | `grove-50` (#f0fdf4) | `grove-700` (#15803d) | ~7.5:1 |
+| Note | `amber-50` (#fffbeb) | `amber-700` (#b45309) | ~6.8:1 |
+
+Both exceed WCAG AAA (7:1).
+
+**Dark mode** — alpha backgrounds, ratios depend on the rendered surface:
+
+| Type | Background | Text |
+|------|-----------|------|
+| Bloom | `grove-900/30` | `grove-300` |
+| Note | `amber-900/30` | `amber-300` |
+
+The `/30` backgrounds are 30% alpha and blend with whatever is beneath them — in practice, the PostCard's glass surface (`dark:bg-cream-100/65` with `backdrop-blur-md`). The effective composite color depends on the card surface, the page background behind the blur, and any decorative elements. Exact contrast ratios can't be stated without knowing the final rendered color.
+
+**Implementation note:** Verify dark mode ratios in browser devtools against the actual rendered composite. If any pairing falls below WCAG AA (4.5:1), replace the alpha background with its resolved solid equivalent on the standard card surface. Grove's dark mode CSS variables invert the scale (`grove-900` becomes light, `grove-300` becomes dark), so double-check that the text color lands on the readable end of the spectrum.
 
 ### Touch targets
 
@@ -444,7 +455,7 @@ import { Link } from "lucide-svelte";
 ### Phase 2: Polish
 
 - [ ] Test with screen reader (VoiceOver, NVDA)
-- [ ] Verify color contrast ratios with browser devtools
+- [ ] Verify dark mode contrast ratios against rendered card surface (see [Color contrast](#color-contrast))
 - [ ] Test in feed with mixed content (All tab)
 - [ ] Test in filtered views (Notes tab, Blooms tab)
 - [ ] Check that the blaze doesn't push the header to two lines on narrow viewports
