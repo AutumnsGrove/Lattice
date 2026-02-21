@@ -124,6 +124,81 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 		fetcher: env.ZEPHYR, // Service binding for direct worker-to-worker routing
 	});
 
+	// Extract withCloudflare config so we can deep-merge session/advanced
+	// instead of letting Heartwood's keys silently replace them.
+	// withCloudflare sets: session.storeSessionInDatabase, advanced.ipAddress.ipAddressHeaders
+	const cfConfig = withCloudflare(
+		{
+			autoDetectIpAddress: true,
+			geolocationTracking: true,
+			cf: cf || {}, // Cloudflare request context for geolocation
+			d1: {
+				db: db as any, // Bridge drizzle-orm version mismatch (0.45 vs 0.44)
+				options: {
+					usePlural: false, // ba_user, ba_session, etc. (not plural)
+					debugLogs: true, // Enable debug logging to see errors
+				},
+			},
+			// kv: env.SESSION_KV,  // Disabled: KV session bug (PR #7583) - sessions lack ID field
+		},
+		{
+			// Better Auth's built-in rate limiting — catch-all safety net.
+			// Grove's Hono middleware rate limiters (rateLimit.ts) provide tight
+			// per-endpoint controls on sensitive routes (magic link, passkey, admin).
+			// This layer catches everything else (OAuth, sign-up, etc.).
+			// See HAWK-001 in docs/security/hawk-report-2026-02-10-login-auth-hub.md
+			// Uses customStorage to reuse the existing rate_limits D1 table.
+			rateLimit: {
+				enabled: true,
+				window: 60,
+				max: 100,
+				customRules: {
+					"/sign-in/*": { window: 60, max: 20 },
+					"/sign-up/*": { window: 60, max: 10 },
+					"/callback/*": { window: 60, max: 30 },
+				},
+				customStorage: {
+					get: async (key) => {
+						try {
+							const row = await env.DB.prepare(
+								"SELECT count, window_start FROM rate_limits WHERE key = ?",
+							)
+								.bind(`ba:${key}`)
+								.first<{ count: number; window_start: string }>();
+							if (!row) return null;
+							return {
+								key: `ba:${key}`,
+								count: row.count,
+								lastRequest: new Date(row.window_start).getTime(),
+							};
+						} catch {
+							return null;
+						}
+					},
+					set: async (key, value) => {
+						try {
+							await env.DB.prepare(
+								`INSERT INTO rate_limits (key, count, window_start)
+                   VALUES (?, ?, ?)
+                   ON CONFLICT(key) DO UPDATE SET count = ?, window_start = ?`,
+							)
+								.bind(
+									`ba:${key}`,
+									value.count,
+									new Date(value.lastRequest).toISOString(),
+									value.count,
+									new Date(value.lastRequest).toISOString(),
+								)
+								.run();
+						} catch {
+							// Rate limit storage failure shouldn't block auth requests
+						}
+					},
+				},
+			},
+		},
+	);
+
 	return betterAuth({
 		// Base URL for auth endpoints
 		baseURL: env.AUTH_BASE_URL,
@@ -135,81 +210,13 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 		// Wildcard covers all tenant subdomains (Better Auth uses internal wildcardMatch())
 		trustedOrigins: ["https://autumnsgrove.com", "https://*.grove.place"],
 
-		// Database configuration via better-auth-cloudflare
-		...withCloudflare(
-			{
-				autoDetectIpAddress: true,
-				geolocationTracking: true,
-				cf: cf || {}, // Cloudflare request context for geolocation
-				d1: {
-					db: db as any, // Bridge drizzle-orm version mismatch (0.45 vs 0.44)
-					options: {
-						usePlural: false, // ba_user, ba_session, etc. (not plural)
-						debugLogs: true, // Enable debug logging to see errors
-					},
-				},
-				// kv: env.SESSION_KV,  // Disabled: KV session bug (PR #7583) - sessions lack ID field
-			},
-			{
-				// Better Auth's built-in rate limiting — catch-all safety net.
-				// Grove's Hono middleware rate limiters (rateLimit.ts) provide tight
-				// per-endpoint controls on sensitive routes (magic link, passkey, admin).
-				// This layer catches everything else (OAuth, sign-up, etc.).
-				// See HAWK-001 in docs/security/hawk-report-2026-02-10-login-auth-hub.md
-				// Uses customStorage to reuse the existing rate_limits D1 table.
-				rateLimit: {
-					enabled: true,
-					window: 60,
-					max: 100,
-					customRules: {
-						"/sign-in/*": { window: 60, max: 20 },
-						"/sign-up/*": { window: 60, max: 10 },
-						"/callback/*": { window: 60, max: 30 },
-					},
-					customStorage: {
-						get: async (key) => {
-							try {
-								const row = await env.DB.prepare(
-									"SELECT count, window_start FROM rate_limits WHERE key = ?",
-								)
-									.bind(`ba:${key}`)
-									.first<{ count: number; window_start: string }>();
-								if (!row) return null;
-								return {
-									key: `ba:${key}`,
-									count: row.count,
-									lastRequest: new Date(row.window_start).getTime(),
-								};
-							} catch {
-								return null;
-							}
-						},
-						set: async (key, value) => {
-							try {
-								await env.DB.prepare(
-									`INSERT INTO rate_limits (key, count, window_start)
-                   VALUES (?, ?, ?)
-                   ON CONFLICT(key) DO UPDATE SET count = ?, window_start = ?`,
-								)
-									.bind(
-										`ba:${key}`,
-										value.count,
-										new Date(value.lastRequest).toISOString(),
-										value.count,
-										new Date(value.lastRequest).toISOString(),
-									)
-									.run();
-							} catch {
-								// Rate limit storage failure shouldn't block auth requests
-							}
-						},
-					},
-				},
-			},
-		),
+		// Database, plugins, rate limiting from withCloudflare
+		...cfConfig,
 
-		// Session configuration with custom table name
+		// Session configuration — deep-merged with withCloudflare's session config
+		// (preserves storeSessionInDatabase from geolocation tracking)
 		session: {
+			...cfConfig.session,
 			modelName: "ba_session", // Map to our ba_session table
 			// 7 days session expiry
 			expiresIn: 7 * 24 * 60 * 60,
@@ -222,8 +229,10 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 			},
 		},
 
-		// Cookie configuration for cross-subdomain auth
+		// Cookie configuration — deep-merged with withCloudflare's advanced config
+		// (preserves ipAddress.ipAddressHeaders for Cloudflare IP detection)
 		advanced: {
+			...cfConfig.advanced,
 			crossSubDomainCookies: {
 				enabled: true,
 				domain: ".grove.place",

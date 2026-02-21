@@ -120,25 +120,45 @@ export const actions: Actions = {
 			});
 		}
 
+		// Forward Set-Cookie headers from Heartwood (e.g. oauth_state).
+		// Cloudflare Workers' Headers supports getAll() for set-cookie specifically.
+		const forwardCookies = () => {
+			const cfHeaders = response.headers as unknown as {
+				getAll?(name: string): string[];
+			};
+			const setCookies = cfHeaders.getAll?.("set-cookie") ?? [];
+			for (const raw of setCookies) {
+				const parsed = parseRawSetCookie(raw);
+				if (parsed) {
+					cookies.set(parsed.name, parsed.value, parsed.options);
+				}
+			}
+		};
+
 		// Better Auth responds with a redirect → Google OAuth authorization URL.
 		// Accept standard redirect statuses (not 304/305/306 which aren't redirects).
 		const isRedirect = [301, 302, 303, 307, 308].includes(response.status);
 		if (isRedirect) {
 			const location = response.headers.get("location");
 			if (location) {
-				// Forward oauth_state and any other cookies Better Auth set during setup.
-				// Cloudflare Workers' Headers supports getAll() for set-cookie specifically.
-				const cfHeaders = response.headers as unknown as {
-					getAll?(name: string): string[];
-				};
-				const setCookies = cfHeaders.getAll?.("set-cookie") ?? [];
-				for (const raw of setCookies) {
-					const parsed = parseRawSetCookie(raw);
-					if (parsed) {
-						cookies.set(parsed.name, parsed.value, parsed.options);
-					}
-				}
+				forwardCookies();
 				throw redirect(302, location);
+			}
+		}
+
+		// Better Auth returns 200 JSON when the request uses Content-Type: application/json.
+		// The JSON body contains { url, redirect: true } — we follow the URL ourselves.
+		if (response.ok) {
+			try {
+				const body = (await response.json()) as { url?: string; redirect?: boolean };
+				if (body.url && body.redirect) {
+					forwardCookies();
+					throw redirect(302, body.url);
+				}
+			} catch (err) {
+				// Re-throw SvelteKit redirects (thrown by redirect(), not returned)
+				if ((err as any)?.status && (err as any)?.location) throw err;
+				// JSON parse failed — fall through to error handling
 			}
 		}
 
