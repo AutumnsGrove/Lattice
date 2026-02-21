@@ -368,6 +368,7 @@ Update the Lumen SDK to support three modes (following the Warden factory patter
 
 ```typescript
 // Mode 1: In-process (current behavior, for engine routes)
+// SvelteKit callers pass platform.env.*; standalone workers pass env.* directly
 const lumen = createLumenClient({
   openrouterApiKey: env.OPENROUTER_API_KEY,
   ai: env.AI,
