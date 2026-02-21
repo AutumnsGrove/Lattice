@@ -142,9 +142,10 @@ The goal isn't to eliminate CF dependency (that's unrealistic and wasteful). It'
    - Write a "Break Glass: Moving Off Cloudflare" document that maps every CF service to its portable equivalent (Workers → AWS Lambda/Deno Deploy, D1 → Turso/PlanetScale, R2 → S3/Backblaze, KV → Redis/Upstash, DOs → Redis pub/sub or Fly machines)
    - Not because you plan to migrate. Because you _could_. And documenting it keeps you honest about the coupling.
 
-3. **Thin the Durable Object dependency.**
-   - DOs are the hardest to migrate. Audit which DOs are essential coordination and which could be replaced by D1 + polling.
-   - For new features, prefer D1-based patterns over new DOs where possible.
+3. **Accept the Durable Object reality.**
+   - DOs are the hardest to migrate — and honestly, they may be irreplaceable for what Grove needs. The Loom SDK depends on DOs for coordination. Even the Firefly SDK (ephemeral servers) uses Loom underneath to track instance state. There's no serverless alternative that provides the same guarantees: persistent WebSocket connections, transactional state, and guaranteed single-instance execution.
+   - **The honest position:** DOs are the tightest coupling to Cloudflare. No realistic alternative exists today. If CF ever becomes hostile, this is the hardest piece to migrate — likely requiring a stateful server (Fly.io, Railway) rather than a serverless equivalent.
+   - **Mitigation:** Keep DO logic isolated behind clean interfaces (the Loom SDK already does this). If a migration is ever needed, the _interface_ stays the same; only the _implementation_ changes. Document the DO contract clearly so a future reimplementation is possible even if painful.
 
 4. **Monitor the relationship.**
    - Track CF spend monthly. Set alerts for unexpected increases.
@@ -200,9 +201,12 @@ But the deeper question is: **Is "you can download a ZIP" enough?**
 
 **Commitment: The Escape Hatch Principle — Your Data Leaves Before You Do**
 
-1. **Automated periodic exports.**
-   - Offer an optional "backup to your own storage" feature. Users connect their own S3 bucket, Google Drive, or Dropbox, and Grove pushes encrypted backups on a schedule.
-   - This means your data exists _outside_ Grove at all times. If Grove vanishes overnight, you already have everything.
+1. **Automated periodic exports via Amber.**
+   - Amber (Grove's media/export service) already handles export generation. Extend it to run automated backups on a configurable schedule — weekly, monthly, or custom.
+   - **Internal backup:** Every export is stored in the user's Amber storage automatically. Your latest backup is always sitting there, ready to download, without you having to remember to request one.
+   - **External sync:** Users can optionally connect external storage providers — iCloud, Google Drive, Dropbox, Mega, S3-compatible buckets — and Amber pushes encrypted backups to them on the same schedule. Abstract the provider interface so adding a new one is a config addition, not a code rewrite.
+   - **Email-based retrieval:** Allow data exports to be requested by emailing a dedicated address (e.g., `export@grove.place`) from the email associated with your account. If `dave@grove.place` emails asking for Dave's data, he gets a bundled ZIP. If he asks for Sarah's data, the response says "you can only access your own data" — without confirming or denying Sarah's existence (protecting identity disclosure).
+   - This means your data exists _outside_ Grove at all times, through multiple channels. If Grove vanishes overnight, you already have everything — in your Amber archive, in your external cloud storage, or retrievable by a simple email.
    - This is the single most powerful anti-lock-in feature possible. It transforms "you can export" into "your data already lives somewhere you control."
 
 2. **Export includes everything needed to reconstruct.**
@@ -211,8 +215,8 @@ But the deeper question is: **Is "you can download a ZIP" enough?**
    - Include a `migration-guide.md` in every export that says "here's how to import this into [Hugo/Ghost/WordPress/Eleventy]."
 
 3. **RSS as the escape valve.**
-   - Grove already has RSS. RSS IS the anti-lock-in technology. Any feed reader, any aggregator, any tool that speaks RSS can consume Grove content without any special API.
-   - Enhance RSS feeds to include full post content (not just excerpts), ensuring the complete text is always accessible through an open standard.
+   - Grove already has RSS with full post content (not just excerpts) — this is already shipped and working. RSS IS the anti-lock-in technology. Any feed reader, any aggregator, any tool that speaks RSS can consume Grove content without any special API.
+   - The complete text is already accessible through an open standard. No Grove-specific tooling required.
    - RSS means: even if Grove blocks every AI crawler, any _human_ with a feed reader gets the full content. The protection is against mass automated harvesting, not against reading.
 
 4. **Don't build a public bulk API. That's correct.**
@@ -275,6 +279,15 @@ Signature: [ed25519 signature using author's key]
 - A simple verification tool (web page or CLI) can confirm: "This post was published by this author at this time on Grove."
 - The signing key is generated per-user and stored encrypted. The user can download their private key.
 - **This isn't blockchain. This isn't a protocol. It's PGP-level simplicity applied to blog posts.** Anyone can verify. No special infrastructure needed.
+
+**Implementation sketch:**
+
+- **Key generation:** On account creation, generate an Ed25519 keypair. Store the private key encrypted (user's auth token as derivation input). The public key is published at `username.grove.place/.well-known/grove-author.json`.
+- **Signing flow:** On publish/update, hash the post content (title + body + published timestamp) with SHA-256, then sign the hash with the author's private key. Store the signature alongside the post metadata.
+- **Verification:** Anyone with the public key (published at `.well-known/`) can verify the signature against the content hash. A standalone `verify.grove.place` page lets you paste exported content and check signatures without any Grove account.
+- **Key rotation:** If a user changes auth or requests a new key, the old key is archived (not deleted) so historical signatures remain verifiable. A key history endpoint lists all public keys with validity periods.
+- **Export integration:** Every exported post includes its signature block. The export ZIP includes the full public key and a `verify.html` that runs signature checks locally in the browser — zero server dependency.
+- **What this proves:** "This specific text was published by this specific author at this specific time, and has not been modified since." That's provenance. That's ownership. That travels with your words forever, regardless of what happens to Grove.
 
 #### 4b. Portable Author Identity (Medium-Term)
 
@@ -436,7 +449,7 @@ Grove's position should be explicit and principled:
 
 - **Keep iterating on Shade.** The 8-layer approach is strong. Keep the offender database current. Monitor for new AI crawler user agents.
 - **Cloudflare's AI bot blocking** will keep improving. Ride that wave.
-- **Legal teeth.** The TOS prohibition on AI scraping should reference specific legal frameworks (CFAA, EU Database Directive, DMCA) and state that Grove will pursue enforcement.
+- **Legal teeth.** The TOS prohibition on AI scraping should reference specific legal frameworks (CFAA, EU Database Directive, DMCA) and state that Grove will pursue enforcement. This language should also appear in `docs/legal/data-portability-separation.md` and the public-facing help center — making the protection stance visible everywhere a user might look, not buried in TOS fine print.
 
 #### 6b. Address the RSS Exposure
 
@@ -445,7 +458,7 @@ Grove's position should be explicit and principled:
   - Full content (default — open web principle)
   - Excerpt only (for users who want tighter control)
   - Disabled (for users who want no syndication)
-- **RSS analytics in Rings.** Let users see how many subscribers their feed has and flag unusual patterns (sudden spike in subscribers = possible scraping).
+- **RSS analytics across Rings and Vista.** Let users see how many subscribers their feed has and flag unusual patterns (sudden spike in subscribers = possible scraping). Vista's broader traffic analysis can correlate RSS access patterns with known scraper behavior — and automatically block repeat offenders at the Shade layer. Give users the most choice: notification-only mode ("someone suspicious is hitting your feed"), auto-block mode ("block them and tell me"), or manual review mode ("flag them but let me decide"). The goal is user sovereignty over their own feed, not platform-level decisions made on their behalf.
 
 #### 6c. Accept the Tradeoff Honestly
 
@@ -474,7 +487,7 @@ _The fire crackles. Stars emerge above the acacia trees. The journal is full —
 | Growing (good bones, meaningful additions needed) | 2 — Export system, Anti-capture commitments |
 | Wilting (needs real work) | 2 — Cloudflare contingency, True ownership tooling |
 | Barren | 0 |
-| Actionable items | 18 |
+| Actionable items | 22 |
 
 ### The Core Insight
 
@@ -506,16 +519,18 @@ Grove does the opposite: no protocol pretense, but genuine structural alignment.
 4. Add RSS rate-limiting to Shade
 
 **Soon (Phase 2, Post-Launch):**
-5. Content signing with Ed25519 keys per user
-6. `.well-known/author.json` for portable identity
-7. Automated external backup (user-connected S3/GDrive/Dropbox)
-8. Dead man's switch fund and mechanism
+5. Content signing with Ed25519 keys per user (confirmed priority — this is the provenance breakthrough)
+6. `.well-known/grove-author.json` for portable identity + signature verification
+7. Automated Amber backups with external provider sync (iCloud, GDrive, Dropbox, Mega, S3)
+8. Email-based export retrieval (`export@grove.place` with identity verification)
+9. Dead man's switch fund and mechanism
 
 **Later (Phase 3, When Scale Justifies):**
-9. Annual sovereignty audit (public report)
-10. `did:web` support for custom domain users
-11. Export verification tool (web-based signature checker)
-12. Durable Object dependency audit and thinning
+10. Annual sovereignty audit (public report)
+11. `did:web` support for custom domain users
+12. Export verification tool (`verify.grove.place` — web-based signature checker)
+13. RSS analytics in Vista with auto-blocking of scraper patterns
+14. AI protection language in all legal docs (portability policy, help center, TOS)
 
 ### Cross-Cutting Themes
 
@@ -529,7 +544,7 @@ Grove does the opposite: no protocol pretense, but genuine structural alignment.
 
 ---
 
-_The fire dies to embers. The journal is full — 6 stops, 18 actionable items, the whole landscape mapped. The savanna is quiet except for the distant sound of something large and slow moving through the grass. It could be the future. It could be something else entirely._
+_The fire dies to embers. The journal is full — 6 stops, 22 actionable items, the whole landscape mapped. The savanna is quiet except for the distant sound of something large and slow moving through the grass. It could be the future. It could be something else entirely._
 
 _Tomorrow, the animals go to work. But tonight? Tonight was the drive. And it was glorious._ 🚙
 
