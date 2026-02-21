@@ -113,7 +113,7 @@ const response = await Lumen.inference({
 │  ┌────────────────────────────────┴───────────────────────────────────────┐  │
 │  │                          Task Router                                   │  │
 │  │                                                                        │  │
-│  │   task: "moderation"  → LlamaGuard 4 (OpenRouter)                      │  │
+│  │   task: "moderation"  → GPT-oss Safeguard 20B (OpenRouter)             │  │
 │  │   task: "generation"  → DeepSeek v3.2 (OpenRouter)                     │  │
 │  │   task: "summary"     → DeepSeek v3.2 (OpenRouter)                     │  │
 │  │   task: "embedding"   → BGE-M3 (OpenRouter)                            │  │
@@ -146,9 +146,9 @@ const response = await Lumen.inference({
 │  │           OpenRouter             │  │      Cloudflare Workers AI       │  │
 │  │          (Primary)               │  │          (Fallback)              │  │
 │  │                                  │  │                                  │  │
-│  │  DeepSeek v3.2    Kimi K2        │  │  LlamaGuard 3    ShieldGemma     │  │
-│  │  Gemini Flash     Claude Haiku   │  │  BGE Base                        │  │
-│  │  LlamaGuard 4     Llama 3.3 70B  │  │                                  │  │
+│  │  GPT-oss Safeg.   Kimi K2        │  │  LlamaGuard 3    ShieldGemma     │  │
+│  │  DeepSeek v3.2    Gemini Flash   │  │  BGE Base                        │  │
+│  │  LlamaGuard 4     Claude Haiku   │  │                                  │  │
 │  │  BGE-M3           Qwen3 Embed    │  │                                  │  │
 │  └──────────────────────────────────┘  └──────────────────────────────────┘  │
 │                                                                              │
@@ -165,7 +165,7 @@ Lumen routes requests based on task type, selecting the optimal model for each j
 
 | Task            | Primary Model          | Provider      | Fallback Chain                       | Use Case              |
 | --------------- | ---------------------- | ------------- | ------------------------------------ | --------------------- |
-| `moderation`    | LlamaGuard 4 12B       | OpenRouter    | LlamaGuard 3 (CF) → ShieldGemma (CF) | Content safety checks |
+| `moderation`    | GPT-oss Safeguard 20B  | OpenRouter    | LlamaGuard 4 12B → DeepSeek V3.2      | Content safety checks |
 | `generation`    | DeepSeek v3.2          | OpenRouter    | Kimi K2 → Llama 3.3 70B              | Long-form writing     |
 | `summary`       | DeepSeek v3.2          | OpenRouter    | Kimi K2 → Llama 3.3 70B              | Summarization         |
 | `embedding`     | BGE-M3                 | OpenRouter    | Qwen3 Embed → BGE Base (CF)          | Vector embeddings     |
@@ -176,8 +176,8 @@ Lumen routes requests based on task type, selecting the optimal model for each j
 
 ### Why This Routing?
 
-**Moderation (LlamaGuard 4):**
-LlamaGuard 4 is the latest purpose-built content safety model, now available on OpenRouter. Using a general model like DeepSeek for moderation is like hiring a PhD to check IDs at the door. LlamaGuard returns structured safety decisions with high accuracy. CF Workers AI provides LlamaGuard 3 as a reliable fallback.
+**Moderation (GPT-oss Safeguard 20B):**
+GPT-oss Safeguard 20B is OpenAI's purpose-built safety reasoning model (Apache 2.0). It interprets Grove's moderation policy at inference time via chain-of-thought reasoning, returning real confidence scores and audit-ready reasoning traces. LlamaGuard 4 12B serves as first fallback (fast binary classifier), with DeepSeek V3.2 as a general-purpose last resort. All three models route through OpenRouter.
 
 **Generation/Chat/Summary (DeepSeek v3.2):**
 DeepSeek v3.2 offers excellent quality at $0.25/$0.38 per million tokens. Kimi K2 provides strong reasoning as first fallback, with Llama 3.3 70B as a reliable tertiary option. All via OpenRouter for unified access.
@@ -540,7 +540,7 @@ const openRouter = {
 		chat: "deepseek/deepseek-v3.2",
 		summary: "deepseek/deepseek-v3.2",
 		// Moderation
-		moderation: "meta-llama/llama-guard-4-12b",
+		moderation: "openai/gpt-oss-safeguard-20b",
 		// Image
 		image: "google/gemini-2.5-flash",
 		// Code
@@ -565,8 +565,8 @@ const openRouter = {
 const workersAI = {
 	binding: env.AI, // Cloudflare Workers AI binding
 	models: {
-		moderation: "@cf/meta/llama-guard-3-8b", // Fallback moderation
-		moderation_alt: "@hf/google/shieldgemma-2b", // Tertiary moderation
+		moderation: "@cf/meta/llama-guard-3-8b", // CF-local moderation (not in primary cascade)
+		moderation_alt: "@hf/google/shieldgemma-2b", // Legacy tertiary (not in primary cascade)
 		embedding: "@cf/baai/bge-base-en-v1.5", // Fallback embeddings
 	},
 };
@@ -598,9 +598,9 @@ const fallbackChains = {
 		{ provider: "openrouter", model: "meta-llama/llama-3.3-70b-instruct" },
 	],
 	moderation: [
+		{ provider: "openrouter", model: "openai/gpt-oss-safeguard-20b" },
 		{ provider: "openrouter", model: "meta-llama/llama-guard-4-12b" },
-		{ provider: "cloudflare-ai", model: "@cf/meta/llama-guard-3-8b" },
-		{ provider: "cloudflare-ai", model: "@hf/google/shieldgemma-2b" },
+		{ provider: "openrouter", model: "deepseek/deepseek-v3.2" },
 	],
 	image: [
 		{ provider: "openrouter", model: "google/gemini-2.5-flash" },
@@ -695,7 +695,8 @@ libs/engine/src/lib/lumen/
 | Tertiary                | Llama 3.3 70B    | $0.10 | $0.32  |
 | Image                   | Gemini 2.5 Flash | $0.15 | $0.60  |
 | Image Fallback          | Claude Haiku 4.5 | $1.00 | $5.00  |
-| Moderation              | LlamaGuard 4     | $0.10 | $0.10  |
+| Moderation              | GPT-oss Safeg.   | $0.075| $0.30  |
+| Moderation Fallback     | LlamaGuard 4     | $0.10 | $0.10  |
 | Embedding               | BGE-M3           | $0.02 | -      |
 | Embedding Fallback      | Qwen3 Embed      | $0.02 | -      |
 | CF Workers AI           | All models       | Free  | Free   |
@@ -760,7 +761,8 @@ libs/engine/src/lib/lumen/
 - [Cloudflare Workers AI](https://developers.cloudflare.com/workers-ai/)
 - [Cloudflare AI Gateway](https://developers.cloudflare.com/ai-gateway/)
 - [OpenRouter API](https://openrouter.ai/docs)
-- [LlamaGuard 3](https://ai.meta.com/research/publications/llama-guard-llm-based-input-output-safeguard-for-human-ai-conversations/)
+- [GPT-oss Safeguard](https://openai.com/index/introducing-gpt-oss-safeguard/)
+- [LlamaGuard 4](https://ai.meta.com/research/publications/llama-guard-llm-based-input-output-safeguard-for-human-ai-conversations/)
 - [Grove Naming Guide](/docs/philosophy/grove-naming.md)
 
 ---

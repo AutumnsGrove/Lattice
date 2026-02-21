@@ -63,6 +63,145 @@ interface OpenRouterStreamChunk {
 }
 
 // =============================================================================
+// MODERATION CONSTANTS
+// =============================================================================
+
+/**
+ * Grove's moderation policy for policy-based safety models.
+ *
+ * Structured following GPT-oss-safeguard best practices:
+ * Instructions → Definitions → Criteria → Output Format
+ * Kept within 400-600 tokens for optimal reasoning performance.
+ *
+ * This policy is used by GPT-oss-safeguard-20b (primary) and DeepSeek V3.2
+ * (third-layer fallback). It maps directly to Grove's category taxonomy so
+ * Thorn's threshold engine can operate on real confidence scores.
+ */
+const GROVE_MODERATION_POLICY = `You are a content safety classifier for Grove, a personal blogging platform for queer creators and indie writers.
+
+## Instructions
+Classify the provided content against the categories below. Return a JSON object with your assessment. Use chain-of-thought reasoning internally but only output the final JSON.
+
+## Category Definitions
+- violence: Threats, graphic violence, incitement to violence, or glorification of violent acts
+- illegal: Content facilitating illegal activities (fraud, trafficking, controlled substances)
+- self_harm: Content promoting, instructing, or glorifying self-harm or suicide
+- sexual: Explicit sexual content without appropriate content warnings
+- hate: Hate speech targeting protected characteristics (race, ethnicity, religion, gender, sexuality, disability)
+- harassment: Targeted harassment, bullying, doxxing, or intimidation of specific individuals
+- dangerous: Instructions for weapons, explosives, or activities posing serious physical danger
+
+## Important Context
+- Personal expression about marginalized identities (LGBTQ+, disability, racial justice) is ALLOWED — these are NOT hate speech or political violations
+- Artistic nudity and mature themes are allowed WITH content warnings
+- Political opinions and lived experiences are allowed; political campaigning and election misinformation are not
+- Consider context and intent, not just keywords — a blog post discussing violence in history is not a violation
+
+## Output Format
+Respond with ONLY valid JSON:
+{"safe": true} if content is clearly safe, or:
+{"safe": false, "categories": ["category_name"], "confidence": 0.95, "reason": "Brief explanation"}
+
+The confidence score (0.0-1.0) reflects how certain you are that a violation exists. Use values above 0.9 only when the violation is unambiguous.`;
+
+/**
+ * Build the user-role prompt with content to classify.
+ * Static policy is in the system prompt; dynamic content goes here.
+ */
+function buildModerationPrompt(content: string): string {
+  return `Classify the following content:\n\n${content}`;
+}
+
+/**
+ * Parse a policy-based moderation response (JSON format).
+ * Handles both safe ({"safe": true}) and unsafe responses with categories.
+ */
+function parsePolicyModerationResponse(response: string): {
+  safe: boolean;
+  categories: string[];
+  confidence: number;
+} {
+  try {
+    // Extract JSON from response (model may include reasoning before/after)
+    const jsonMatch = response.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      // No JSON found — treat as safe with low confidence (will trigger review)
+      return { safe: true, categories: [], confidence: 0.5 };
+    }
+
+    const parsed = JSON.parse(jsonMatch[0]) as {
+      safe?: boolean;
+      categories?: string[];
+      confidence?: number;
+      reason?: string;
+    };
+
+    if (parsed.safe === true || parsed.safe === undefined) {
+      return { safe: true, categories: [], confidence: 1.0 };
+    }
+
+    // Validate and normalize categories against Grove's taxonomy
+    const validCategories = new Set([
+      "violence",
+      "illegal",
+      "self_harm",
+      "sexual",
+      "hate",
+      "harassment",
+      "dangerous",
+    ]);
+
+    const categories = (parsed.categories ?? []).filter((cat) =>
+      validCategories.has(cat),
+    );
+
+    // Clamp confidence to [0, 1]
+    const confidence = Math.max(
+      0,
+      Math.min(1, parsed.confidence ?? 0.8),
+    );
+
+    return {
+      safe: false,
+      categories,
+      confidence,
+    };
+  } catch {
+    // JSON parse failed — treat as safe with low confidence
+    return { safe: true, categories: [], confidence: 0.5 };
+  }
+}
+
+/**
+ * Map LlamaGuard S-codes to Grove's category taxonomy.
+ * Multiple S-codes can map to the same Grove category.
+ */
+const LLAMAGUARD_TO_GROVE_CATEGORIES: Record<string, string> = {
+  S1: "violence",
+  S2: "illegal",
+  S3: "sexual",
+  S4: "illegal", // Child exploitation → illegal (highest severity)
+  S5: "harassment", // Defamation → harassment
+  S6: "dangerous", // Specialized advice → dangerous
+  S7: "harassment", // Privacy → harassment
+  S8: "illegal", // IP violations → illegal
+  S9: "dangerous", // Indiscriminate weapons → dangerous
+  S10: "hate",
+  S11: "self_harm",
+  S12: "sexual",
+  S13: "dangerous", // Elections → dangerous
+};
+
+/**
+ * Check if a model ID is a LlamaGuard variant.
+ * LlamaGuard uses a unique prompt/response format (safe/unsafe + S-codes).
+ */
+function isLlamaGuardModel(model: string): boolean {
+  const lower = model.toLowerCase();
+  return lower.includes("llama-guard") || lower.includes("llamaguard");
+}
+
+// =============================================================================
 // PROVIDER IMPLEMENTATION
 // =============================================================================
 
@@ -391,14 +530,61 @@ export class OpenRouterProvider implements LumenProvider {
   // ===========================================================================
 
   /**
-   * Run content moderation via OpenRouter using LlamaGuard
-   * Uses the chat completion API with LlamaGuard model
+   * Run content moderation via OpenRouter.
+   *
+   * Supports two model families:
+   * - **Policy-based** (GPT-oss-safeguard, DeepSeek, etc.): Receives Grove's
+   *   moderation policy and returns structured JSON with categories, confidence,
+   *   and reasoning. This is the preferred approach — it returns real confidence
+   *   scores and maps directly to Grove's category taxonomy.
+   * - **LlamaGuard**: Uses Meta's specialized prompt format, returns binary
+   *   safe/unsafe with S-codes. Confidence is estimated (not model-provided).
    */
   async moderate(
     model: string,
     content: string,
   ): Promise<{ safe: boolean; categories: string[]; confidence: number }> {
-    // LlamaGuard uses a specific prompt format
+    // LlamaGuard models use their own prompt format
+    if (isLlamaGuardModel(model)) {
+      return this.moderateWithLlamaGuard(model, content);
+    }
+
+    // All other models use the policy-based approach
+    return this.moderateWithPolicy(model, content);
+  }
+
+  /**
+   * Policy-based moderation for GPT-oss-safeguard, DeepSeek, and other
+   * general-purpose or safety-tuned models.
+   *
+   * Provides Grove's moderation policy directly and asks for structured JSON.
+   * Returns real confidence scores and Grove-native category names.
+   */
+  private async moderateWithPolicy(
+    model: string,
+    content: string,
+  ): Promise<{ safe: boolean; categories: string[]; confidence: number }> {
+    const response = await this.inference(
+      model,
+      [
+        { role: "system", content: GROVE_MODERATION_POLICY },
+        { role: "user", content: buildModerationPrompt(content) },
+      ],
+      { maxTokens: 512, temperature: 0 },
+    );
+
+    return parsePolicyModerationResponse(response.content);
+  }
+
+  /**
+   * LlamaGuard-specific moderation using Meta's prompt format.
+   * Returns binary safe/unsafe with S-code categories.
+   * Confidence is estimated since LlamaGuard doesn't provide scores.
+   */
+  private async moderateWithLlamaGuard(
+    model: string,
+    content: string,
+  ): Promise<{ safe: boolean; categories: string[]; confidence: number }> {
     const moderationPrompt = `<|begin_of_text|><|start_header_id|>user<|end_header_id|>
 
 Task: Check if there is unsafe content in 'User' messages in conversations according to our safety policy with the below categories.
@@ -440,20 +626,25 @@ Provide your safety assessment for User in the above conversation:
     const lines = responseText.split("\n").map((l) => l.trim());
     const isSafe = lines[0] === "safe";
 
+    // Map LlamaGuard S-codes to Grove categories
     const categories: string[] = [];
     if (!isSafe && lines.length > 1) {
-      // Parse categories like "S1, S10" or "S1,S10"
       const categoryLine = lines[1];
       const matches = categoryLine.match(/s\d+/gi);
       if (matches) {
-        categories.push(...matches.map((m) => m.toUpperCase()));
+        for (const code of matches) {
+          const mapped =
+            LLAMAGUARD_TO_GROVE_CATEGORIES[code.toUpperCase()] ?? code;
+          categories.push(mapped);
+        }
       }
     }
 
     return {
       safe: isSafe,
       categories,
-      confidence: 1.0, // LlamaGuard doesn't provide confidence scores
+      // LlamaGuard doesn't provide confidence — estimate conservatively
+      confidence: isSafe ? 1.0 : 0.85,
     };
   }
 

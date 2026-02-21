@@ -16,7 +16,7 @@
  * Each task has a primary provider and fallback chain configured in config.ts.
  */
 export type LumenTask =
-  | "moderation" // Content safety → LlamaGuard (CF Workers AI)
+  | "moderation" // Content safety → GPT-oss Safeguard (OpenRouter)
   | "generation" // Text generation → DeepSeek (OpenRouter)
   | "summary" // Summarization → DeepSeek (OpenRouter)
   | "embedding" // Vector embeddings → bge-base (CF Workers AI)

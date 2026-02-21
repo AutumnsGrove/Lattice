@@ -95,11 +95,21 @@ describe("Task Routing", () => {
         "cloudflare-ai": createMockProvider("cloudflare-ai"),
       };
 
-      // Moderation has CF as fallback
-      const result = routeTask("moderation", providers);
+      // Embedding has CF as fallback
+      const result = routeTask("embedding", providers);
 
       expect(result.provider).toBe("cloudflare-ai");
-      expect(result.model).toBe(MODELS.CF_LLAMAGUARD_3);
+    });
+
+    it("should throw when moderation has no OpenRouter provider", () => {
+      const providers: ProviderRegistry = {
+        // Moderation cascade is all-OpenRouter, so CF-only won't help
+        "cloudflare-ai": createMockProvider("cloudflare-ai"),
+      };
+
+      expect(() => routeTask("moderation", providers)).toThrow(
+        "No providers available",
+      );
     });
 
     it("should throw when no providers are available", () => {
@@ -195,7 +205,8 @@ describe("Fallback Execution", () => {
   });
 
   describe("executeWithFallback - Fallback Behavior", () => {
-    it("should fallback when primary fails", async () => {
+    it("should fallback to second model when primary fails", async () => {
+      // Embedding has cross-provider fallback (OpenRouter → CF)
       const providers: ProviderRegistry = {
         openrouter: createMockProvider("openrouter", {
           shouldFail: true,
@@ -204,10 +215,8 @@ describe("Fallback Execution", () => {
         "cloudflare-ai": createMockProvider("cloudflare-ai"),
       };
 
-      // For generation, fallbacks are also OpenRouter models, but for moderation
-      // the fallback is CF, so let's test that
       const result = await executeWithFallback(
-        "moderation",
+        "embedding",
         [{ role: "user", content: "Test" }],
         providers,
       );
@@ -215,26 +224,28 @@ describe("Fallback Execution", () => {
       expect(result.provider).toBe("cloudflare-ai");
     });
 
-    it("should try entire fallback chain", async () => {
-      // Create providers where first two fail, third succeeds
+    it("should try all models in all-OpenRouter cascade", async () => {
+      // Moderation cascade is all-OpenRouter:
+      // GPT-oss Safeguard → LlamaGuard 4 → DeepSeek V3.2
+      // When the provider itself fails, all three attempts fail
       const failingOpenRouter = createMockProvider("openrouter", {
         shouldFail: true,
       });
-      const workingCF = createMockProvider("cloudflare-ai");
 
       const providers: ProviderRegistry = {
         openrouter: failingOpenRouter,
-        "cloudflare-ai": workingCF,
       };
 
-      // Moderation: OpenRouter LlamaGuard4 (fail) → CF LlamaGuard3 (succeed)
-      const result = await executeWithFallback(
-        "moderation",
-        [{ role: "user", content: "Test" }],
-        providers,
-      );
+      await expect(
+        executeWithFallback(
+          "moderation",
+          [{ role: "user", content: "Test" }],
+          providers,
+        ),
+      ).rejects.toThrow(AllProvidersFailedError);
 
-      expect(result.provider).toBe("cloudflare-ai");
+      // Should have tried all 3 models in the cascade (primary + 2 fallbacks)
+      expect(failingOpenRouter.inference).toHaveBeenCalledTimes(3);
     });
 
     it("should throw AllProvidersFailedError when all fail", async () => {
@@ -242,10 +253,6 @@ describe("Fallback Execution", () => {
         openrouter: createMockProvider("openrouter", {
           shouldFail: true,
           failMessage: "OR error",
-        }),
-        "cloudflare-ai": createMockProvider("cloudflare-ai", {
-          shouldFail: true,
-          failMessage: "CF error",
         }),
       };
 
@@ -264,10 +271,6 @@ describe("Fallback Execution", () => {
           shouldFail: true,
           failMessage: "OR error",
         }),
-        "cloudflare-ai": createMockProvider("cloudflare-ai", {
-          shouldFail: true,
-          failMessage: "CF error",
-        }),
       };
 
       try {
@@ -280,11 +283,9 @@ describe("Fallback Execution", () => {
       } catch (err) {
         expect(err).toBeInstanceOf(AllProvidersFailedError);
         const error = err as AllProvidersFailedError;
-        expect(error.attempts.length).toBeGreaterThanOrEqual(2);
-        expect(error.attempts.some((a) => a.provider === "openrouter")).toBe(
-          true,
-        );
-        expect(error.attempts.some((a) => a.provider === "cloudflare-ai")).toBe(
+        // All 3 models in the cascade attempted through OpenRouter
+        expect(error.attempts.length).toBe(3);
+        expect(error.attempts.every((a) => a.provider === "openrouter")).toBe(
           true,
         );
       }
@@ -358,9 +359,6 @@ describe("Specialized Execution", () => {
     it("should use primary moderation provider", async () => {
       const providers: ProviderRegistry = {
         openrouter: createMockProvider("openrouter", { hasModerate: true }),
-        "cloudflare-ai": createMockProvider("cloudflare-ai", {
-          hasModerate: true,
-        }),
       };
 
       const result = await executeModeration("test content", providers);
@@ -369,20 +367,18 @@ describe("Specialized Execution", () => {
       expect(result.safe).toBe(true);
     });
 
-    it("should fallback when primary fails", async () => {
+    it("should try all cascade models when provider fails", async () => {
+      // All moderation models route through OpenRouter
       const providers: ProviderRegistry = {
         openrouter: createMockProvider("openrouter", {
           hasModerate: true,
           shouldFail: true,
         }),
-        "cloudflare-ai": createMockProvider("cloudflare-ai", {
-          hasModerate: true,
-        }),
       };
 
-      const result = await executeModeration("test content", providers);
-
-      expect(result.provider).toBe("cloudflare-ai");
+      await expect(
+        executeModeration("test content", providers),
+      ).rejects.toThrow(AllProvidersFailedError);
     });
 
     it("should skip providers without moderate method", async () => {
@@ -393,9 +389,10 @@ describe("Specialized Execution", () => {
         }),
       };
 
-      const result = await executeModeration("test content", providers);
-
-      expect(result.provider).toBe("cloudflare-ai");
+      // OpenRouter skipped (no moderate), CF not in moderation cascade
+      await expect(
+        executeModeration("test content", providers),
+      ).rejects.toThrow(AllProvidersFailedError);
     });
 
     it("should respect model override", async () => {

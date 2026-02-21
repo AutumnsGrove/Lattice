@@ -282,8 +282,8 @@ export async function executeEmbedding(
 }
 
 /**
- * Execute a moderation request with fallback chain
- * Tries OpenRouter (LlamaGuard 4) first, falls back to Cloudflare AI
+ * Execute a moderation request with fallback chain.
+ * GPT-oss Safeguard 20B → LlamaGuard 4 12B → DeepSeek V3.2 (all OpenRouter).
  */
 export async function executeModeration(
   content: string,

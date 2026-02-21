@@ -19,7 +19,10 @@ import type { ThornResult, ThornOptions } from "./types.js";
  * Moderate text content using Lumen's moderation task.
  *
  * Flow:
- * 1. Send content to Lumen's moderation task (LlamaGuard 4 → LlamaGuard 3 → ShieldGemma)
+ * 1. Send content to Lumen's moderation task
+ *    Primary: GPT-oss Safeguard 20B (policy-based safety reasoning with confidence scores)
+ *    Fallback: LlamaGuard 4 12B (binary safe/unsafe classification)
+ *    Last resort: DeepSeek V3.2 (general-purpose with policy prompt)
  * 2. Map the moderation result through Thorn's threshold configuration
  * 3. Return a decision based on content type and category confidence
  *

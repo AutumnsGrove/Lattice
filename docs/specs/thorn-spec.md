@@ -140,10 +140,11 @@ Grove uses automated content moderation to enforce our [Acceptable Use Policy](/
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │         SONGBIRD: ROBIN (Production Moderation)                 │
-│         INFERENCE API (Fireworks AI / Cerebras / Groq)          │
+│         INFERENCE API (OpenRouter)                              │
 │  - Zero Data Retention enabled                                  │
 │  - TLS 1.2+ encryption in transit                               │
-│  - Model: DeepSeek V3.2 (open source, MIT license)              │
+│  - Primary: GPT-oss Safeguard 20B (specialized safety model)   │
+│  - Fallback: LlamaGuard 4 12B → DeepSeek V3.2                  │
 │  - No content logged by provider                                │
 └─────────────────────────────────────────────────────────────────┘
                               │
@@ -194,13 +195,11 @@ Grove uses automated content moderation to enforce our [Acceptable Use Policy](/
 
 ### 3.1 Approved Providers
 
-| Provider         | Models Available                      | ZDR Support                    | Compliance             | Status   |
-| ---------------- | ------------------------------------- | ------------------------------ | ---------------------- | -------- |
-| **Fireworks AI** | DeepSeek V3.2, Kimi K2, Llama 3.1 70B | Yes (default for open models)  | SOC 2 Type II, HIPAA   | Primary  |
-| **Cerebras**     | Llama 3.3 70B, GPT-OSS-120B           | Yes (US-based, zero retention) | Trust Center available | Backup   |
-| **Groq**         | Llama 3.3 70B, Kimi K2                | Yes (explicit toggle)          | SOC 2, HIPAA           | Tertiary |
+| Provider         | Models Routed Through                                        | ZDR Support                    | Status   |
+| ---------------- | ------------------------------------------------------------ | ------------------------------ | -------- |
+| **OpenRouter**   | GPT-oss Safeguard 20B, LlamaGuard 4 12B, DeepSeek V3.2     | Yes (ZDR partners)             | Primary  |
 
-**Note:** Groq deprecated Llama 3.1 70B in January 2025 in favor of Llama 3.3 70B. Fireworks AI is the only provider offering all three primary models (DeepSeek V3.2, Kimi K2, and Llama 3.1).
+**Note:** All moderation models are accessed via OpenRouter's unified API, which routes to ZDR-enabled inference providers (Groq, Together, etc.). This simplifies key management and provider failover — Lumen handles model cascade, OpenRouter handles provider routing.
 
 ### 3.2 Provider Requirements Checklist
 
@@ -213,84 +212,77 @@ Before using any provider, verify:
 - [ ] **Open source model** - Model must be open source with permissive license
 - [ ] **SOC 2 compliance** - Provider must have SOC 2 certification
 
-### 3.3 Why These Providers?
+### 3.3 Why OpenRouter?
 
-**Fireworks AI (Primary):**
+**OpenRouter as unified gateway:**
 
-- ZDR is default for open models (no opt-in required)
-- SOC 2 Type II and HIPAA compliant
-- AES-256 encryption at rest, TLS 1.2+ in transit
-- Explicit policy: "We do not log or store prompt or generation data"
-- **Only provider with all three primary models** (DeepSeek V3.2, Kimi K2, Llama 3.1)
+- Single API key manages access to all models (GPT-oss Safeguard, LlamaGuard, DeepSeek)
+- ZDR partnerships with inference providers (Groq, Together, etc.)
+- Automatic provider routing — if one inference provider is down, OpenRouter routes to another
+- TLS 1.2+ encryption in transit
+- Transparent pricing with per-model cost tracking
+- Model availability dashboard for monitoring
 
-**Cerebras (Backup):**
-
-- 100% US-based AI datacenters with zero data retention
-- Ultra-fast inference (~2100 tokens/sec for Llama 3.3 70B, ~3000 tokens/sec for GPT-OSS-120B)
-- Trust Center available for compliance documentation
-- Offers unique models like GPT-OSS-120B (120B parameters, open source)
-
-**Groq (Tertiary):**
-
-- Explicit Zero Data Retention toggle in console
-- No logging by default
-- Ultra-fast inference (LPU hardware)
-- Clear data processing documentation
-- Note: Llama 3.1 70B deprecated; use Llama 3.3 70B instead
+**Underlying inference providers** (managed by OpenRouter):
+- **Groq** — LPU hardware, ultra-fast inference, explicit ZDR toggle, SOC 2 compliant
+- **Together AI** — ZDR enabled, SOC 2 Type II, serves GPT-oss Safeguard and LlamaGuard
+- Other ZDR-enabled providers as OpenRouter adds them
 
 ### 3.4 Excluded Providers
 
 | Provider                 | Reason                                           |
 | ------------------------ | ------------------------------------------------ |
 | DeepSeek API (direct)    | China-based servers, no ZDR, trains on user data |
-| OpenAI                   | Closed source, may use data for training         |
-| Anthropic                | Closed source, may use data for training         |
+| OpenAI API (direct)      | No ZDR guarantee for open models via direct API  |
 | Any provider without ZDR | Does not meet privacy requirements               |
 
 ---
 
 ## 4. Model Selection
 
-### 4.1 Primary Model: DeepSeek V3.2
+### 4.1 Primary Model: GPT-oss Safeguard 20B
 
-**Model:** [DeepSeek V3.2](https://huggingface.co/deepseek-ai/DeepSeek-V3.2)
+**Model:** [GPT-oss Safeguard 20B](https://openrouter.ai/openai/gpt-oss-safeguard-20b)
+**OpenRouter ID:** `openai/gpt-oss-safeguard-20b`
 
-**Why DeepSeek V3.2:**
+**Why GPT-oss Safeguard 20B:**
 
-- Open source ([MIT license](https://huggingface.co/deepseek-ai/DeepSeek-V3.2))
-- Large parameter count = nuanced understanding
-- Strong reasoning capabilities for context-aware moderation
-- Available through privacy-respecting providers
-- No licensing restrictions on commercial use
-
-**Note on Model Origin:**
-DeepSeek V3.2 is developed by a Chinese company, but the model itself is open source and hosted by US-based providers (Fireworks AI, Groq) with Zero Data Retention. Your content never touches DeepSeek's infrastructure; only the open-source model weights are used, running entirely on US servers with full privacy protections.
+- **Specialized for safety classification** — fine-tuned from GPT-oss specifically for content moderation, unlike general-purpose models that may drift during inference
+- **Policy-based reasoning** — interprets Grove's moderation policy at inference time via chain-of-thought reasoning, providing audit-ready reasoning traces
+- **Real confidence scores** — returns actual model confidence (0.0-1.0), enabling Thorn's graduated threshold system to work as designed
+- Open source ([Apache 2.0 license](https://huggingface.co/openai/gpt-oss-safeguard-20b))
+- Mixture-of-Experts architecture (21B parameters, 3.6B active per forward pass) — fast inference on single GPU
+- Available through OpenRouter with ZDR (Zero Data Retention) support
 
 **Model Configuration:**
 
 ```json
 {
-	"model": "deepseek-v3.2",
-	"temperature": 0.1,
-	"max_tokens": 500,
-	"top_p": 0.95
+	"model": "openai/gpt-oss-safeguard-20b",
+	"temperature": 0,
+	"max_tokens": 512
 }
 ```
 
-Low temperature ensures consistent, predictable responses for moderation decisions.
+Zero temperature ensures deterministic, consistent classification decisions. Max tokens increased to 512 to accommodate chain-of-thought reasoning output.
+
+**Why not DeepSeek V3.2 as primary?**
+DeepSeek V3.2 is a general-purpose model. While capable of moderation tasks, it was not specifically tuned for safety classification. General-purpose models can drift during inference — they may hallucinate categories, assign inconsistent confidence scores, or be susceptible to jailbreak-style prompts in the content being moderated. GPT-oss Safeguard was specifically trained to resist these failure modes.
 
 ### 4.2 Fallback Models
 
-If DeepSeek V3.2 is unavailable, use in this order:
+If GPT-oss Safeguard 20B is unavailable, use in this order:
 
-| Priority     | Model                                                                     | HuggingFace                         | Provider IDs                                                                                       | License           |
-| ------------ | ------------------------------------------------------------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------- | ----------------- |
-| 1st fallback | [Kimi K2-0905](https://huggingface.co/moonshotai/Kimi-K2-Instruct-0905)   | `moonshotai/Kimi-K2-Instruct-0905`  | Fireworks: `accounts/fireworks/models/kimi-k2-instruct` / Groq: `moonshotai/Kimi-K2-Instruct-0905` | Modified MIT      |
-| 2nd fallback | [Llama 3.1 70B](https://huggingface.co/meta-llama/Llama-3.1-70B-Instruct) | `meta-llama/Llama-3.1-70B-Instruct` | Fireworks: `accounts/fireworks/models/llama-v3p1-70b-instruct`                                     | Llama 3.1 License |
-| 3rd fallback | [Llama 3.3 70B](https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct) | `meta-llama/Llama-3.3-70B-Instruct` | Cerebras: `llama-3.3-70b` / Groq: `llama-3.3-70b-versatile`                                        | Llama 3.3 License |
-| 4th fallback | GPT-OSS-120B                                                              | —                                   | Cerebras: `gpt-oss-120b` / Groq: `gpt-oss-120b`                                                    | Open Source       |
+| Priority     | Model                                                                      | OpenRouter ID                      | Architecture          | License           |
+| ------------ | -------------------------------------------------------------------------- | ---------------------------------- | --------------------- | ----------------- |
+| 1st fallback | [LlamaGuard 4 12B](https://huggingface.co/meta-llama/Llama-Guard-4-12B)   | `meta-llama/llama-guard-4-12b`     | Safety classifier     | Llama 4 License   |
+| 2nd fallback | [DeepSeek V3.2](https://huggingface.co/deepseek-ai/DeepSeek-V3.2)         | `deepseek/deepseek-v3.2`          | General-purpose (MoE) | MIT               |
 
-Same provider requirements (ZDR, US hosting) apply to all models. Provider failover order: Fireworks AI → Cerebras → Groq.
+**Fallback strategy:**
+- **LlamaGuard 4 12B** — Specialized safety classifier from Meta. Fast and reliable but provides binary safe/unsafe with S-codes (no confidence scores). Confidence is estimated at 0.85 for unsafe content.
+- **DeepSeek V3.2** — General-purpose model used with Grove's policy prompt. Last resort when specialized models are unavailable. Returns confidence scores via policy-based prompting.
+
+All models are accessed via OpenRouter with ZDR (Zero Data Retention) enabled. Provider failover is handled by Lumen's cascade system — if a model returns an error, the next model in the chain is tried automatically.
 
 ### 4.3 Cost Estimation
 
@@ -320,34 +312,31 @@ This approach maintains moderation accuracy while keeping costs predictable. Ver
 
 If sampled paragraphs show concerning patterns (e.g., borderline scores), the system will trigger a full-content review. Users may also report content that automated review missed, which triggers targeted review of the flagged section.
 
-**Model pricing comparison (per million tokens):**
+**Model pricing comparison (per million tokens, via OpenRouter):**
 
-| Model         | Fireworks            | Cerebras              | Groq                 |
-| ------------- | -------------------- | --------------------- | -------------------- |
-| DeepSeek V3.2 | $0.56 in / $1.68 out | —                     | —                    |
-| Kimi K2-0905  | $0.60 in / $2.50 out | —                     | $1.00 in / $3.00 out |
-| Llama 3.1 70B | Available            | —                     | Deprecated           |
-| Llama 3.3 70B | $0.90 in / $0.90 out | ~$0.59 in / $0.79 out | $0.59 in / $0.79 out |
-| GPT-OSS-120B  | —                    | $0.25 in / $0.69 out  | $0.15 in / $0.60 out |
+| Model                    | Input    | Output   | Type                |
+| ------------------------ | -------- | -------- | ------------------- |
+| GPT-oss Safeguard 20B   | $0.075   | $0.30    | Specialized safety  |
+| LlamaGuard 4 12B        | $0.10    | $0.10    | Safety classifier   |
+| DeepSeek V3.2            | $0.25    | $0.38    | General-purpose     |
 
-**Cost per review by model (~1,700 input tokens, ~150 output tokens):**
+**Cost per review by model (~1,700 input tokens, ~300 output tokens):**
 
-| Model         | Fireworks | Cerebras | Groq     |
-| ------------- | --------- | -------- | -------- |
-| DeepSeek V3.2 | ~$0.0012  | —        | —        |
-| Kimi K2-0905  | ~$0.0014  | —        | ~$0.0022 |
-| Llama 3.3 70B | ~$0.0017  | ~$0.0011 | ~$0.0011 |
-| GPT-OSS-120B  | —         | ~$0.0005 | ~$0.0004 |
+| Model                    | Cost/Review  | Notes                                       |
+| ------------------------ | ------------ | ------------------------------------------- |
+| GPT-oss Safeguard 20B   | ~$0.00022    | Cheapest; includes chain-of-thought output  |
+| LlamaGuard 4 12B        | ~$0.00019    | Slightly cheaper but no confidence scores   |
+| DeepSeek V3.2            | ~$0.00054    | Most expensive; general-purpose overhead    |
 
-**Monthly cost projections (using DeepSeek V3.2 on Fireworks):**
+**Monthly cost projections (using GPT-oss Safeguard 20B via OpenRouter):**
 
 | Posts/Month | Robin (Moderation) | Songbird (Canary + Kestrel) | Total    |
 | ----------- | ------------------ | --------------------------- | -------- |
-| 1,000       | ~$1.20             | ~$0.40                      | ~$1.60   |
-| 10,000      | ~$12.00            | ~$4.00                      | ~$16.00  |
-| 100,000     | ~$120.00           | ~$40.00                     | ~$160.00 |
+| 1,000       | ~$0.22             | ~$0.10                      | ~$0.32   |
+| 10,000      | ~$2.20             | ~$1.00                      | ~$3.20   |
+| 100,000     | ~$22.00            | ~$10.00                     | ~$32.00  |
 
-_Note: Add ~5% overhead for edge case secondary reviews (Robin only, Songbird validation already passed). Fallback to Cerebras/Groq models may have different costs; see pricing table above. Songbird overhead adds ~25% to total cost (~$0.40 of $1.60) but provides essential prompt injection protection._
+_Note: GPT-oss Safeguard 20B is significantly cheaper than DeepSeek V3.2 for moderation (~60% cost reduction) while being purpose-built for the task. Songbird overhead adds ~30% to total cost. Add ~5% for edge case secondary reviews._
 
 ---
 
@@ -458,7 +447,7 @@ Respond in JSON format only.
 ```
 
 **Language Support:**
-This system is currently optimized for **English content**. Multi-language support is planned for future development. Non-English content will still be processed, but accuracy may vary. The underlying model (DeepSeek V3.2) has multilingual capabilities that can assist with translation and context, but manual review guidelines are English-only at this time.
+This system is currently optimized for **English content**. Multi-language support is planned for future development. Non-English content will still be processed, but accuracy may vary. The primary model (GPT-oss Safeguard 20B) performs best on English content; non-English accuracy depends on the model's training distribution. Manual review guidelines are English-only at this time.
 
 ---
 

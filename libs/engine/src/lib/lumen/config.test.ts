@@ -56,6 +56,7 @@ describe("Model Definitions", () => {
     expect(MODELS.GEMINI_FLASH).toContain("gemini");
 
     // Moderation
+    expect(MODELS.GPT_OSS_SAFEGUARD).toContain("gpt-oss-safeguard");
     expect(MODELS.LLAMAGUARD_4).toContain("llama-guard");
 
     // Embeddings
@@ -155,17 +156,26 @@ describe("Task-Specific Configuration", () => {
   });
 
   describe("Moderation Task", () => {
-    it("should use LlamaGuard 4 as primary", () => {
-      expect(TASK_REGISTRY.moderation.primaryModel).toBe(MODELS.LLAMAGUARD_4);
+    it("should use GPT-oss Safeguard as primary", () => {
+      expect(TASK_REGISTRY.moderation.primaryModel).toBe(
+        MODELS.GPT_OSS_SAFEGUARD,
+      );
     });
 
-    it("should have Cloudflare fallbacks", () => {
+    it("should have LlamaGuard 4 and DeepSeek V3 as fallbacks", () => {
       const fallbacks = TASK_REGISTRY.moderation.fallbackChain;
-      const hasCFFallback = fallbacks.some(
-        (f) => f.provider === "cloudflare-ai",
-      );
 
-      expect(hasCFFallback).toBe(true);
+      expect(fallbacks[0].model).toBe(MODELS.LLAMAGUARD_4);
+      expect(fallbacks[1].model).toBe(MODELS.DEEPSEEK_V3);
+    });
+
+    it("should use all-OpenRouter cascade", () => {
+      expect(TASK_REGISTRY.moderation.primaryProvider).toBe("openrouter");
+
+      const fallbacks = TASK_REGISTRY.moderation.fallbackChain;
+      for (const fallback of fallbacks) {
+        expect(fallback.provider).toBe("openrouter");
+      }
     });
 
     it("should use temperature 0 for consistency", () => {
@@ -302,6 +312,7 @@ describe("getModelsForProvider", () => {
 
     expect(models).toContain(MODELS.DEEPSEEK_V3);
     expect(models).toContain(MODELS.CLAUDE_HAIKU);
+    expect(models).toContain(MODELS.GPT_OSS_SAFEGUARD);
     expect(models).toContain(MODELS.LLAMAGUARD_4);
     expect(models).toContain(MODELS.BGE_M3);
   });
@@ -310,7 +321,6 @@ describe("getModelsForProvider", () => {
     const models = getModelsForProvider("cloudflare-ai");
 
     expect(models).toContain(MODELS.CF_BGE_BASE);
-    expect(models).toContain(MODELS.CF_LLAMAGUARD_3);
   });
 
   it("should deduplicate models", () => {

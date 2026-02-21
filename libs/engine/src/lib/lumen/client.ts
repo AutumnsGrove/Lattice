@@ -337,7 +337,7 @@ export class LumenClient {
 
   /**
    * Check content for safety.
-   * Uses OpenRouter (LlamaGuard 4) with Cloudflare AI fallback.
+   * Uses OpenRouter: GPT-oss Safeguard 20B → LlamaGuard 4 → DeepSeek V3.2.
    */
   async moderate(
     request: LumenModerationRequest,

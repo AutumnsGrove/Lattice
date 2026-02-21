@@ -79,7 +79,10 @@ export const MODELS = {
   // OpenRouter Models - Moderation
   // ─────────────────────────────────────────────────────────────────────────────
 
-  /** Content moderation - LlamaGuard 4 12B (latest, most accurate) */
+  /** Content moderation - GPT-oss Safeguard 20B (policy-based safety reasoning) */
+  GPT_OSS_SAFEGUARD: "openai/gpt-oss-safeguard-20b",
+
+  /** Content moderation fallback - LlamaGuard 4 12B (safety classification) */
   LLAMAGUARD_4: "meta-llama/llama-guard-4-12b",
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -142,6 +145,7 @@ export const MODEL_COSTS: Record<string, { input: number; output: number }> = {
   [MODELS.GEMINI_FLASH]: { input: 0.15, output: 0.6 },
 
   // Moderation (OpenRouter)
+  [MODELS.GPT_OSS_SAFEGUARD]: { input: 0.075, output: 0.3 },
   [MODELS.LLAMAGUARD_4]: { input: 0.1, output: 0.1 },
 
   // Embeddings (OpenRouter)
@@ -200,16 +204,22 @@ export interface TaskConfig {
  */
 export const TASK_REGISTRY: Record<LumenTask, TaskConfig> = {
   // ─────────────────────────────────────────────────────────────────────────────
-  // Content Moderation (OpenRouter primary, CF Workers fallback)
+  // Content Moderation (GPT-oss Safeguard → LlamaGuard 4 → DeepSeek V3.2)
+  //
+  // Primary: GPT-oss Safeguard 20B — specialized safety reasoning model with
+  //   policy-based classification and chain-of-thought reasoning. Returns
+  //   confidence scores and audit-ready reasoning traces.
+  // Fallback 1: LlamaGuard 4 12B — fast binary safety classifier (safe/unsafe).
+  // Fallback 2: DeepSeek V3.2 — general-purpose model as last resort.
   // ─────────────────────────────────────────────────────────────────────────────
   moderation: {
-    primaryModel: MODELS.LLAMAGUARD_4,
+    primaryModel: MODELS.GPT_OSS_SAFEGUARD,
     primaryProvider: "openrouter",
     fallbackChain: [
-      { provider: "cloudflare-ai", model: MODELS.CF_LLAMAGUARD_3 },
-      { provider: "cloudflare-ai", model: MODELS.CF_SHIELDGEMMA },
+      { provider: "openrouter", model: MODELS.LLAMAGUARD_4 },
+      { provider: "openrouter", model: MODELS.DEEPSEEK_V3 },
     ],
-    defaultMaxTokens: 256,
+    defaultMaxTokens: 512,
     defaultTemperature: 0,
     description: "Content safety classification",
   },
