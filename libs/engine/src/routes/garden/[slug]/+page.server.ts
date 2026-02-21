@@ -165,18 +165,33 @@ export const load: PageServerLoad = async ({ params, locals, platform, setHeader
 		if ((err as { status?: number })?.status) {
 			throw err;
 		}
-		// Diagnostic logging — captures error type, message, and cause chain
+		// Diagnostic logging — deep-extracts cause chain (CacheError wraps the real error)
 		const errName = err instanceof Error ? err.constructor.name : typeof err;
 		const errMessage = err instanceof Error ? err.message : String(err);
-		const errCause =
+		// CacheError stores cause as a property; Error objects serialize to {} so extract manually
+		const rawCause =
 			err instanceof Error && "cause" in err
 				? (err as Error & { cause?: unknown }).cause
 				: undefined;
+		const causeInfo =
+			rawCause instanceof Error
+				? { name: rawCause.constructor.name, message: rawCause.message, stack: rawCause.stack }
+				: rawCause;
+		// Go one deeper — if the cause itself has a cause (e.g., CacheError → Error → root)
+		const deepCause =
+			rawCause instanceof Error && "cause" in rawCause
+				? (rawCause as Error & { cause?: unknown }).cause
+				: undefined;
+		const deepCauseInfo =
+			deepCause instanceof Error
+				? { name: deepCause.constructor.name, message: deepCause.message, stack: deepCause.stack }
+				: deepCause;
 		console.error(`[garden/${slug}] POST_LOAD_FAILED — ${errName}: ${errMessage}`, {
 			tenantId,
 			hasKV: !!platform?.env?.CACHE_KV,
 			hasDB: !!platform?.env?.DB,
-			cause: errCause,
+			cause: causeInfo,
+			deepCause: deepCauseInfo,
 			stack: err instanceof Error ? err.stack : undefined,
 		});
 		throwGroveError(500, SITE_ERRORS.POST_LOAD_FAILED, "Site");
