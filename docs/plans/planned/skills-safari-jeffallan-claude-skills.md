@@ -13,8 +13,8 @@
 **License**: MIT (everything is fair game)
 **Lineage**: Adapted behavioral patterns from [obra/superpowers](https://github.com/obra/superpowers)
 
-**Our ecosystem**: 65 skills in `.claude/skills/`
-**20 animals**, **6 gatherings**, **~40 utility/Grove-specific skills**
+**Our ecosystem**: 68 entries in `.claude/skills/`
+**24 animals** + 1 anomalous flat file (hummingbird), **6 gatherings**, **37 utility/Grove-specific skills**
 
 ---
 
@@ -139,30 +139,43 @@ Some exceptions (hummingbird-compose.md is a standalone file, not a directory).
 **No reference routing tables**. Everything loads at once.
 **Rich narrative voice**. Immersive, themed, fun.
 
-### 2b. The Animal Kingdom (20 Animals)
+### 2b. The Animal Kingdom (24 Animals + Hummingbird)
 
-| Animal | Role | Equivalent External Skill |
-|--------|------|--------------------------|
-| Panther | Surgical issue fixing | — (no equivalent) |
-| Elephant | Multi-file feature building | Fullstack Guardian (loosely) |
-| Bloodhound | Codebase exploration | Spec Miner (partially) |
-| Eagle | System architecture | Architecture Designer |
-| Fox | Performance optimization | — (monitoring-expert loosely) |
-| Turtle | Security hardening | Secure Code Guardian |
-| Raccoon | Security auditing | Security Reviewer |
-| Beaver | Test building | Test Master |
-| Owl | Documentation archiving | Code Documenter |
-| Swan | Spec/design writing | Feature Forge (partially) |
-| Deer | Accessibility sensing | — (no equivalent) |
-| Spider | Auth web weaving | — (no equivalent) |
-| Robin | Skill guide/navigator | — (no equivalent) |
-| Hawk | Comprehensive security survey | Security Reviewer (broader) |
-| Raven | Cross-codebase security investigation | — (no equivalent) |
-| Lynx | PR review feedback | Code Reviewer (loosely) |
-| Osprey | Project estimator | — (no equivalent) |
-| Vulture | Issue board cleanup | — (no equivalent) |
-| Bear | Data migration | Legacy Modernizer (loosely) |
-| Hummingbird | Quick composition | — (no equivalent) |
+| Animal | Lines | Role | Equivalent External Skill |
+|--------|-------|------|--------------------------|
+| Panther | ~215 | Surgical issue fixing (6 phases) | — (no equivalent) |
+| Elephant | ~563 | Multi-file feature building | Fullstack Guardian (loosely) |
+| Bloodhound | ~427 | Codebase exploration | Spec Miner (partially) |
+| Eagle | ~342 | System architecture | Architecture Designer |
+| Fox | ~487 | Performance optimization | — (monitoring-expert loosely) |
+| **Turtle** | **~1,118** | **Security hardening (19 exotic vectors)** | Secure Code Guardian |
+| Raccoon | ~425 | Security auditing | Security Reviewer |
+| Beaver | ~486 | Test building (Testing Trophy) | Test Master |
+| Owl | ~557 | Documentation archiving (Grove voice) | Code Documenter |
+| Swan | ~519 | Spec/design writing (ASCII art) | Feature Forge (partially) |
+| Deer | ~669 | Accessibility sensing (WCAG 2.1 AA) | — (no equivalent) |
+| Spider | ~716 | Auth web weaving (OAuth/PKCE) | — (no equivalent) |
+| Robin | ~421 | Skill guide/navigator | — (no equivalent) |
+| **Hawk** | **~992** | **Comprehensive security survey (14 domains, STRIDE)** | Security Reviewer (broader) |
+| **Raven** | **~847** | **Cross-codebase security (6 parallel sub-agents)** | — (no equivalent) |
+| Lynx | ~515 | PR review feedback (author-side) | Code Reviewer (loosely) |
+| Osprey | ~673 | Project estimator (proposals) | — (no equivalent) |
+| Vulture | ~430 | Issue board cleanup | — (no equivalent) |
+| Bear | ~573 | Data migration (Kysely, batch) | Legacy Modernizer (loosely) |
+| **Chameleon** | **~883** | **UI theming (glassmorphism, seasons)** | — (no equivalent) |
+| Badger | ~533 | Issue triage/prioritization (6 phases) | — (no equivalent) |
+| Bee | ~390 | Brain dump → GitHub issues | — (no equivalent) |
+| Druid | ~607 | Meta: creates new animals | — (no equivalent) |
+| Safari | ~428 | Systematic collection review | — (no equivalent) |
+| Hummingbird | ~243 | Email composition (flat file) | — (no equivalent) |
+
+**Size champions** (progressive disclosure candidates):
+- turtle-harden: 1,118 lines (19 exotic attack vectors)
+- hawk-survey: 992 lines (14 audit domains)
+- chameleon-adapt: 883 lines (extensive palette/component reference)
+- raven-investigate: 847 lines (6-sub-agent parallel fan-out)
+
+**Druid ecosystem map is STALE**: Lists 18 animals, actual count is 24+1. Missing from map: safari-explore, osprey-appraise, hawk-survey, raven-investigate, lynx-repair, hummingbird-compose. Emoji mismatch: Druid uses cat emoji for Lynx; actual lynx-repair uses black cat emoji.
 
 ### 2c. Gatherings (Multi-Animal Compositions)
 
