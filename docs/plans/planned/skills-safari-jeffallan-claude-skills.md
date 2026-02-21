@@ -454,8 +454,8 @@ Their skills are efficient but clinical. "Expert debugger applying systematic me
 | Metric | Count |
 |--------|-------|
 | Total stops (external skills examined) | 66 |
-| Deep-read skills | 12 |
-| Reference files examined | ~30 |
+| Deep-read skills | 20 |
+| Reference files examined | ~50 |
 | Thriving (worth stealing) | 5 (The Fool, Common Ground, Debugging Wizard, Feature Forge, Spec Miner) |
 | Growing (patterns to adopt) | 6 (progressive disclosure, routing tables, constraints, verification, 1% rule, description trap) |
 | Wilting (partially useful) | 15 (language/framework skills with some reference content worth browsing) |
@@ -490,6 +490,38 @@ Both ecosystems draw from obra/superpowers. We should read the source directly t
 
 **Theme 5: Community vs. Bespoke**
 Their repo is MIT, community-facing, generic. Ours is bespoke, personality-driven, Grove-specific. Neither is wrong — they serve different purposes. But we can steal their engineering without losing our soul.
+
+### Top 8 borrowable micro-patterns (from deep-read analysis)
+
+These are specific, implementation-ready patterns — not broad concepts but concrete techniques:
+
+1. **Three-Fix Threshold** (debugging-wizard) — After 3 failed fixes in different locations, stop debugging and question the architecture. Named escape hatch for stuck loops.
+
+2. **Two-step mode selection with signal mapping** (the-fool) — Category first ("Question assumptions" / "Build counter-arguments"), then refine. Maps user language signals ("I'm about to commit to X" → Dialectic, "Studies show..." → Evidence Audit) to modes.
+
+3. **Pre-discovery subagent launches** (feature-forge) — Before the main workflow starts, launch Task subagents with relevant skills to front-load technical context. The interview then focuses on decisions, not exploration.
+
+4. **Observed vs. inferred distinction** (spec-miner) — Hard constraint: mark every finding as "observed" (code evidence) or "inferred" (interpretation). Prevents hallucinated documentation.
+
+5. **Anti-pattern reference format** (test-master) — Name the anti-pattern, show bad code, show good code, explain the fix. The `testing-anti-patterns.md` (232 lines) is the most practically useful reference in the set.
+
+6. **Receiving-feedback perspective** (code-reviewer) — Six-Step Process for *handling* review feedback as the author: Read → Restate → Check codebase → Evaluate → Respond → Implement one at a time. Most review skills only cover the reviewer side.
+
+7. **Explicit skill handoff protocol** (fullstack-guardian) — "Hand off to Test Master for QA, DevOps for deployment." Treats skills as a pipeline, not isolated prompts.
+
+8. **Pre-computed quantified NFR targets** (architecture-designer) — 99% availability = 3.65 days/year downtime, 99.999% = 5.26 minutes. Having the math pre-computed removes lookup friction.
+
+### The sister-skill pattern
+
+Feature Forge (forward: requirements → spec) and Spec Miner (backward: code → spec) produce the same artifact (EARS-format specs) from opposite directions. This **sister-skill pattern** is elegant and worth replicating:
+
+| Forward Skill | Backward Skill | Shared Artifact |
+|--------------|---------------|-----------------|
+| Feature Forge | Spec Miner | EARS-format specification |
+| *Swan Design* | *Bloodhound Scout* | *Could share a spec format* |
+| *Beaver Build* | *— (no reverse)* | *Test suites* |
+
+Our Swan (writes specs forward) and Bloodhound (explores backward) could adopt a shared output format to become sister skills.
 
 ---
 
