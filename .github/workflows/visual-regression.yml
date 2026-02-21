@@ -1,0 +1,242 @@
+name: Visual Regression Tests
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "apps/landing/**"
+      - "libs/engine/src/**"
+      - "libs/foliage/**"
+      - "**/*.svelte"
+      - "**/*.css"
+      - "**/*.pcss"
+
+  # Allow engineers to update baselines by commenting /update-snapshots
+  issue_comment:
+    types: [created]
+
+  workflow_dispatch:
+    inputs:
+      update-snapshots:
+        description: "Update baseline screenshots"
+        type: boolean
+        default: false
+
+concurrency:
+  group: visual-regression-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Handle /update-snapshots comment on PRs
+  update-snapshots:
+    name: Update Baselines
+    if: >-
+      github.event_name == 'issue_comment' &&
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '/update-snapshots')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Get PR branch
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+            core.setOutput('ref', pr.head.ref);
+            core.setOutput('sha', pr.head.sha);
+
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.pr.outputs.ref }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: "**/pnpm-lock.yaml"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build engine package
+        run: pnpm run package
+        working-directory: libs/engine
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Update snapshots
+        run: npx playwright test --config=.github/visual-regression/playwright.config.ts --update-snapshots
+
+      - name: Commit updated snapshots
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "test: update visual regression baselines [bot]"
+          file_pattern: ".github/visual-regression/snapshots/**"
+
+      - name: React to comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.reactions.createForIssueComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: context.payload.comment.id,
+              content: 'rocket',
+            });
+
+  # Main visual regression test
+  visual-test:
+    name: Screenshot Comparison
+    if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: "**/pnpm-lock.yaml"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build engine package
+        run: pnpm run package
+        working-directory: libs/engine
+
+      - name: Build landing for preview
+        run: pnpm run build
+        working-directory: apps/landing
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run visual regression tests
+        id: visual-test
+        run: |
+          npx playwright test \
+            --config=.github/visual-regression/playwright.config.ts \
+            2>&1 | tee playwright-output.txt
+          echo "exit_code=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-regression-report
+          path: .github/visual-regression/test-results/
+          retention-days: 14
+
+      - name: Upload HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-regression-html-report
+          path: .github/visual-regression/playwright-report/
+          retention-days: 14
+
+      - name: Build PR comment
+        id: comment
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const testFailed = '${{ steps.visual-test.outputs.exit_code }}' !== '0';
+
+            let body = '## 📸 Visual Regression Report\n\n';
+
+            if (!testFailed) {
+              body += '**All screenshots match baselines.** No visual regressions detected.\n\n';
+              body += '| Status | Pages Tested | Modes |\n';
+              body += '| --- | --- | --- |\n';
+              body += '| ✅ Passed | Landing (home, about, help, pricing) | Light + Dark |\n';
+            } else {
+              body += '**Visual differences detected.** Screenshots differ from baselines.\n\n';
+              body += '⚠️ Review the screenshot diffs in the [test artifacts]';
+              body += `(${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}) `;
+              body += 'to determine if changes are intentional.\n\n';
+
+              body += '### What to do\n\n';
+              body += '- **Changes look correct?** Comment `/update-snapshots` to regenerate baselines\n';
+              body += '- **Changes are a bug?** Fix the visual regression in your PR\n\n';
+
+              body += '> The test report contains side-by-side diffs showing exactly what changed.\n';
+              body += '> Download the `visual-regression-html-report` artifact for the full interactive report.\n';
+            }
+
+            body += '\n---\n';
+            body += '<details><summary>Pages & modes tested</summary>\n\n';
+            body += '| Page | Light Mode | Dark Mode |\n';
+            body += '| --- | --- | --- |\n';
+            body += '| `/` (Home) | ✅ | ✅ |\n';
+            body += '| `/about` | ✅ | ✅ |\n';
+            body += '| `/help` | ✅ | ✅ |\n';
+            body += '| `/pricing` | ✅ | ✅ |\n';
+            body += '\n</details>\n';
+
+            core.setOutput('body', body);
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = `${{ steps.comment.outputs.body }}`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existing = comments.find(c =>
+              c.user.type === 'Bot' && c.body.includes('Visual Regression Report')
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
+
+      - name: Fail if visual differences detected
+        if: steps.visual-test.outputs.exit_code != '0'
+        run: |
+          echo "::error::Visual regression detected. Review the screenshot diffs in the artifacts."
+          echo "Comment /update-snapshots on the PR to accept the changes."
+          exit 1

@@ -1,0 +1,150 @@
+name: Lighthouse CI
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "apps/landing/**"
+      - "apps/clearing/**"
+      - "apps/plant/**"
+      - "libs/engine/**"
+
+  workflow_dispatch:
+    inputs:
+      urls:
+        description: "Comma-separated URLs to audit (overrides auto-detection)"
+        required: false
+        type: string
+
+concurrency:
+  group: lighthouse-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lighthouse:
+    name: Performance Audit
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: "**/pnpm-lock.yaml"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build engine package
+        run: pnpm run package
+        working-directory: libs/engine
+
+      - name: Build landing
+        run: pnpm run build
+        working-directory: apps/landing
+
+      - name: Run Lighthouse CI
+        id: lighthouse
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          configPath: .github/lighthouse/lighthouserc.json
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+      - name: Format Lighthouse Results
+        id: results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const results = ${{ steps.lighthouse.outputs.manifest }};
+            const links = ${{ steps.lighthouse.outputs.links }};
+
+            if (!results || results.length === 0) {
+              core.setOutput('comment', '');
+              return;
+            }
+
+            const scoreEmoji = (score) => {
+              if (score >= 0.9) return '🟢';
+              if (score >= 0.5) return '🟡';
+              return '🔴';
+            };
+
+            const formatScore = (score) => {
+              const pct = Math.round(score * 100);
+              return `${scoreEmoji(score)} ${pct}`;
+            };
+
+            let body = '## 🔦 Lighthouse Performance Report\n\n';
+            body += '| Page | Performance | Accessibility | Best Practices | SEO |\n';
+            body += '| --- | --- | --- | --- | --- |\n';
+
+            for (const result of results) {
+              const url = new URL(result.url);
+              const path = url.pathname === '/' ? '/' : url.pathname;
+              const perf = formatScore(result.summary.performance);
+              const a11y = formatScore(result.summary.accessibility);
+              const bp = formatScore(result.summary['best-practices']);
+              const seo = formatScore(result.summary.seo);
+
+              body += `| \`${path}\` | ${perf} | ${a11y} | ${bp} | ${seo} |\n`;
+            }
+
+            body += '\n';
+            body += '**Thresholds:** Performance ≥ 80 · Accessibility ≥ 90 · Best Practices ≥ 85 · SEO ≥ 85\n\n';
+
+            if (Object.keys(links).length > 0) {
+              body += '<details><summary>Full Reports</summary>\n\n';
+              for (const [url, link] of Object.entries(links)) {
+                const path = new URL(url).pathname;
+                body += `- [\`${path}\`](${link})\n`;
+              }
+              body += '\n</details>\n';
+            }
+
+            core.setOutput('comment', body);
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request' && steps.results.outputs.comment != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = `${{ steps.results.outputs.comment }}`;
+
+            // Find existing Lighthouse comment to update
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existing = comments.find(c =>
+              c.user.type === 'Bot' && c.body.includes('Lighthouse Performance Report')
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
