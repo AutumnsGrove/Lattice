@@ -111,82 +111,26 @@ UI             Accessibility
 
 _The glade transforms..._
 
-Execute each phase:
+Execute each phase by loading and running each animal's dedicated skill:
+
+---
 
 **🦎 CHAMELEON — ADAPT**
 
-```
-"Reading the light, sketching the form..."
+Load skill: `chameleon-adapt`
 
-Phase: READ
-- Determine season and emotional tone
-- Choose decoration level (minimal/moderate/full)
+Execute the full Chameleon workflow for [the page/component being designed], applying Grove's glassmorphism, seasonal palette, and nature decorations.
+Handoff: complete Svelte components (glass variants, seasonal decorations, GroveTerm usage, mobile-responsive, reduced motion support) → Deer for accessibility audit
 
-Phase: SKETCH
-- Build glassmorphism structure
-- Layer: Background → Decorations → Glass → Content
-
-Phase: COLOR
-- Apply seasonal palette
-- Import from @autumnsgrove/lattice/ui/nature
-
-Phase: TEXTURE
-- Add randomized forests if appropriate
-- Weather effects (snow, petals, leaves)
-- Seasonal birds
-- Lucide icons
-
-Phase: ADAPT
-- Mobile responsive
-- Reduced motion support
-- Touch targets 44px minimum
-- Dark mode variants
-- GroveTerm components for all Grove terminology
-  (never hardcode — use GroveTerm, GroveSwap, GroveText)
-  ([[term]] syntax for data-driven content strings)
-
-Output:
-- Complete Svelte components
-- Styled with Tailwind
-- Glass variants applied
-- Seasonal decorations
-- Grove terminology uses GroveTerm V2 components
-```
+---
 
 **🦌 DEER — SENSE**
 
-```
-"Listening for barriers, scanning the path..."
+Load skill: `deer-sense`
 
-Phase: LISTEN
-- Understand user needs
-- WCAG AA standard
-
-Phase: SCAN
-- Automated scan with axe-core
-- Lighthouse accessibility audit
-
-Phase: TEST
-- Keyboard navigation test
-- Screen reader test (VoiceOver/NVDA)
-- Zoom to 200%
-- Reduced motion check
-
-Phase: GUIDE
-- Fix any issues found
-- Add ARIA labels where needed
-- Ensure focus management
-- Proper heading structure
-
-Phase: PROTECT
-- ESLint jsx-a11y plugin
-- axe-core in CI
-
-Output:
-- Accessibility audit report
-- Issues fixed
-- Documentation of a11y features
-```
+Execute the full Deer workflow on everything the Chameleon produced.
+If issues are found: return to Chameleon for fixes, then Deer re-audits. Repeat until clean.
+Handoff: accessibility-verified components → VALIDATE phase
 
 ---
 

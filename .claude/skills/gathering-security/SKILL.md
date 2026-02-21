@@ -177,128 +177,36 @@ Auth       Secrets     Defenses
 
 _The web is woven. The audit begins. The shell hardens..._
 
-Execute each animal's phase:
+Execute each animal's phase by loading and running their dedicated skill:
+
+---
 
 **🕷️ SPIDER — WEAVE**
 
-```
-"Spinning the authentication threads..."
+Load skill: `spider-weave`
 
-Phase: SPIN
-- Choose auth pattern (OAuth 2.0 + PKCE, JWT, Session)
-- Set up infrastructure (client registration, secrets)
+Execute the full Spider workflow for [the auth system being implemented].
+Handoff: working authentication system (OAuth flow, session management, protected routes, CSRF protection) → Raccoon for audit
 
-Phase: CONNECT
-- Implement OAuth flow (login/callback)
-- Session/token management
-- User info fetching
-
-Phase: SECURE
-- Route protection middleware
-- CSRF protection
-- Rate limiting
-- Security headers
-
-Phase: TEST
-- Auth flow end-to-end
-- Error handling
-- Edge cases
-
-Phase: BIND
-- Documentation
-- Environment variables
-- Monitoring
-
-Output:
-- Working authentication system
-- Protected routes
-- Session management
-```
+---
 
 **🦝 RACCOON — AUDIT**
 
-```
-"Rummaging through every corner..."
+Load skill: `raccoon-audit`
 
-Phase: RUMMAGE
-- Search for secrets in code
-- Check git history
-- Scan dependencies for vulnerabilities
+Execute the full Raccoon workflow on the entire codebase, with particular attention to the Spider's auth implementation.
+If secrets found or auth issues discovered → Spider patches → Raccoon re-verifies.
+Handoff: clean audit report (no secrets, vulnerabilities patched, dead code removed, pre-commit hooks installed) → Turtle for hardening
 
-Phase: INSPECT
-- Validate auth implementation
-- Check input validation
-- Review access controls
-- Examine error messages
-
-Phase: SANITIZE
-- Remove any secrets found
-- Rotate exposed credentials
-- Patch vulnerabilities
-
-Phase: PURGE
-- Clean git history if needed
-- Remove dead code
-- Clear old tokens
-
-Phase: VERIFY
-- Re-scan for secrets
-- Verify fixes
-- Install pre-commit hooks
-
-Output:
-- Security audit report
-- Issues fixed
-- Preventive measures in place
-```
+---
 
 **🐢 TURTLE — HARDEN**
 
-```
-"Withdrawing to study the terrain..."
+Load skill: `turtle-harden`
 
-Phase: WITHDRAW
-- Survey the attack surface
-- Map all entry/exit points
-- Catalog data flows
-- Identify tech-stack-specific risks
-
-Phase: LAYER
-- Input validation (Zod schemas, allowlists)
-- Output encoding (context-aware)
-- Parameterized queries (zero concatenation)
-- Type safety (strict mode, no 'any')
-- Error handling (generic messages, no leaks)
-
-Phase: FORTIFY
-- Security headers (CSP, HSTS, X-Frame-Options, etc.)
-- CORS strict configuration
-- Session/cookie hardening
-- CSRF enforcement
-- Rate limiting
-- Multi-tenant isolation
-- File upload security
-- Data protection (encryption, least privilege)
-
-Phase: SIEGE
-- Test for exotic attacks:
-  Prototype pollution, timing attacks, race conditions,
-  ReDoS, SSRF bypasses, CRLF injection, Unicode attacks,
-  deserialization, postMessage vulns, WebSocket hijacking,
-  CSS injection, SVG XSS, cache poisoning, HTTP verb
-  tampering, second-order vulnerabilities, supply chain
-
-Phase: SEAL
-- Defense-in-depth compliance (2+ layers per critical function)
-- Logging & monitoring verification
-- Final scan for remaining issues
-- Generate hardening report
-
-Output:
-- Defense-in-depth verified
-- Exotic attack vectors tested
-- Complete hardening report
-```
+Execute the full Turtle workflow on the codebase, including auth routes, API endpoints, and data flows.
+If deep vulnerabilities found in auth → Spider patches → Turtle re-verifies. Maximum 3 iterations per issue.
+Handoff: hardening report (defense-in-depth verified, exotic vectors tested, all layers applied) → VALIDATE phase
 
 ---
 

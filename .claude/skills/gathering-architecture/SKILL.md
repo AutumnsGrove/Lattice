@@ -117,62 +117,34 @@ System    Spec       Foundation
 
 _The architecture takes form from sky to earth..._
 
-Execute each phase:
+Execute each phase by loading and running each animal's dedicated skill:
+
+---
 
 **🦅 EAGLE — DESIGN**
 
-```
-"Soaring above to see the whole system..."
+Load skill: `eagle-architect`
 
-Output:
-- System boundaries defined
-- Component interactions mapped
-- Technology choices documented
-- Scale and constraints identified
-- Nature metaphor chosen
+Execute the full Eagle workflow focused on [the system being designed].
+Handoff: architecture overview (system boundaries, component interactions, technology choices, scale constraints, nature metaphor, ADRs) → Swan for specification
 
-Artifacts:
-- Architecture overview document
-- System diagrams
-- ADR (Architecture Decision Records)
-```
+---
 
 **🦢 SWAN — SPECIFY**
 
-```
-"Gliding across to craft the specification..."
+Load skill: `swan-design`
 
-Output:
-- Detailed technical specification
-- API contracts defined
-- Database schema designed
-- Flow diagrams created
-- ASCII art header
-- Implementation checklist
+Execute the full Swan workflow using the Eagle's architecture overview.
+Handoff: complete technical specification (API contracts, database schema, flow diagrams, implementation checklist) → Elephant for foundation building
 
-Artifacts:
-- tech-spec.md with all required sections
-- Interface definitions
-- Migration plan (if applicable)
-```
+---
 
 **🐘 ELEPHANT — BUILD**
 
-```
-"Building the foundation with unstoppable momentum..."
+Load skill: `elephant-build`
 
-Output:
-- Core infrastructure implemented
-- Base classes/modules created
-- API skeleton established
-- Database migrations written
-- Essential tests included
-
-Artifacts:
-- Working codebase
-- Foundation tests
-- Setup documentation
-```
+Execute the full Elephant workflow using the Swan's technical specification as the build plan.
+Handoff: working foundation (core infrastructure, base modules, API skeleton, database migrations, essential tests) → VALIDATE phase
 
 ---
 

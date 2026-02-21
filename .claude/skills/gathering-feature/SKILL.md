@@ -139,107 +139,78 @@ Security is not a phase you bolt on after testing — it shapes _what_ you build
 
 _The animals work. The forest transforms..._
 
-Execute each phase:
+Execute each phase by loading and running each animal's dedicated skill:
+
+---
 
 **🐕 BLOODHOUND — SCOUT**
 
-```
-"Scouting the codebase for [feature]..."
+Load skill: `bloodhound-scout`
 
-Output:
-- Files that will need changes
-- Patterns to follow
-- Integration points identified
-- Potential obstacles found
-```
+Execute the full Bloodhound workflow focused on [the feature being built].
+Handoff: territory map (files to change, patterns found, integration points, potential obstacles) → Elephant
+
+---
 
 **🐘 ELEPHANT — BUILD**
 
-```
-"Building [feature] with momentum..."
+Load skill: `elephant-build`
 
-Output:
-- All required files created/modified
-- Frontend components
-- Backend API endpoints
-- Database schema changes
-- Integration wired
-```
+Execute the full Elephant workflow using the Bloodhound's territory map.
+Handoff: complete list of built files (components, endpoints, schema changes, wired integrations) → Turtle for hardening
+
+---
 
 **🐢 TURTLE — HARDEN**
 
-```
-"Withdrawing to study what was built..."
+Load skill: `turtle-harden`
 
-Output:
-- Input validation added (Zod schemas on all endpoints)
-- Output encoding verified (context-aware)
-- Parameterized queries enforced (zero concatenation)
-- Security headers configured (CSP, HSTS, etc.)
-- Error handling hardened (generic messages, no leaks)
-- Defense-in-depth layers applied
-```
+Execute the full Turtle workflow on everything the Elephant built.
+Handoff: hardened code (input validation, output encoding, parameterized queries, security headers, error handling) → Beaver for testing
+
+---
 
 **🦫 BEAVER — TEST**
 
-```
-"Building test dams for confidence..."
+Load skill: `beaver-build`
 
-Output:
-- Integration tests for user flows
-- Unit tests for complex logic
-- Security regression tests (from Turtle's hardening)
-- Edge case coverage
-- All tests passing
-```
+Execute the full Beaver workflow on the hardened code, including security regression tests from Turtle's hardening.
+Handoff: test results and coverage summary → Raccoon, Deer, Fox (parallel)
 
-**🦝 RACCOON — AUDIT**
+---
 
-```
-"Rummaging for security risks..."
+**🦝 RACCOON — AUDIT** _(parallel with Deer and Fox)_
 
-Output:
-- Secrets scan (none found)
-- Vulnerability check (clean)
-- Input validation verified
-- Auth checks confirmed
-```
+Load skill: `raccoon-audit`
 
-**🦌 DEER — SENSE**
+Execute the full Raccoon workflow on the completed feature.
+Handoff: audit findings resolved → Owl
 
-```
-"Sensing accessibility barriers..."
+---
 
-Output:
-- Keyboard navigation works
-- Screen reader compatible
-- Color contrast passes
-- Reduced motion respected
-```
+**🦌 DEER — SENSE** _(parallel with Raccoon and Fox)_
 
-**🦊 FOX — OPTIMIZE**
+Load skill: `deer-sense`
 
-```
-"Hunting for performance gains..."
+Execute the full Deer workflow on all UI produced by the Elephant and Chameleon.
+Handoff: accessibility findings resolved → Owl
 
-Output:
-- Bundle size optimized
-- Database queries fast
-- Images optimized
-- Caching implemented
-```
+---
+
+**🦊 FOX — OPTIMIZE** _(parallel with Raccoon and Deer)_
+
+Load skill: `fox-optimize`
+
+Execute the full Fox workflow targeting the new feature's bundle, queries, and assets.
+Handoff: performance findings resolved → Owl
+
+---
 
 **🦉 OWL — ARCHIVE**
 
-```
-"Archiving knowledge for the forest..."
+Load skill: `owl-archive`
 
-Output:
-- Help documentation written
-- API documentation updated
-- Code comments added
-- README updated
-```
+Execute the full Owl workflow, documenting everything built, hardened, tested, and optimized in this gathering.
 
 ---
 

@@ -78,34 +78,12 @@ Receive and parse the brain dump:
 
 _The bee buzzes from flower to flower..._
 
-Execute bee-collect workflow:
-
 **🐝 BEE — COLLECT**
 
-```
-Input: Raw brain dump, TODOs, ideas
+Load skill: `bee-collect`
 
-Process:
-1. BUZZ — Parse into discrete items
-2. INSPECT — Explore codebase for context
-3. CHECK — Verify no duplicates exist
-4. DEPOSIT — Create issues with full context
-
-Output:
-- X new issues created
-- Y duplicates skipped
-- Each issue has:
-  - Clear title (imperative mood)
-  - Acceptance criteria
-  - Component labels
-  - Technical context
-```
-
-**Handoff to Badger:**
-
-> "🐝 Collection complete. Created [X] new issues.
->
-> Handing off to 🦡 Badger for organization..."
+Execute the full Bee BUZZ → INSPECT → CHECK → DEPOSIT workflow on [the brain dump / ideas provided].
+Handoff: list of newly created issue numbers and titles (plus any duplicates skipped) → Badger for organization
 
 ---
 
@@ -113,36 +91,12 @@ Output:
 
 _The badger emerges, ready to organize the burrow..._
 
-Execute badger-triage workflow:
-
 **🦡 BADGER — TRIAGE**
 
-```
-Input: Newly created issues (plus any existing untriaged)
+Load skill: `badger-triage`
 
-Process:
-1. DIG — Survey issues needing attention
-2. SORT — Group into batches by theme
-3. DISCUSS — Interactive sizing/prioritization (5-10 at a time)
-4. TIMELINE — Set milestones and target dates (optional)
-5. PLACE — Update GitHub project fields
-
-Output:
-- All issues sized (XS/S/M/L/XL)
-- All issues prioritized (First Focus/Next Up/In Time/Far Off)
-- Ready items moved from Backlog
-- Milestones assigned (if requested)
-- Target dates set (if requested)
-```
-
-**Discussion Flow:**
-
-The badger will present batches and ask:
-
-- "These 5 issues need sizing. Here's my guess based on the content..."
-- "What priority should these have?"
-- "Should any move from Backlog to Ready?"
-- "Want to assign these to a milestone?"
+Execute the full Badger DIG → SORT → DISCUSS → TIMELINE → PLACE workflow on all issues the Bee created (plus any pre-existing untriaged issues).
+Handoff: organized board (all issues sized, prioritized, ready items moved, milestones set) → COMPLETE phase
 
 ---
 

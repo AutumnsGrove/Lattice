@@ -109,77 +109,25 @@ Territory      Data
 
 _The paths are known. The migration begins..._
 
-Execute each phase:
+Execute each phase by loading and running each animal's dedicated skill:
+
+---
 
 **🐕 BLOODHOUND — SCOUT**
 
-```
-"Sniffing out every trail, every connection..."
+Load skill: `bloodhound-scout`
 
-Phase: SCENT
-- Identify source and destination
-- Find all tables/collections involved
+Execute the full Bloodhound SCENT → TRACK → HUNT → REPORT → RETURN workflow focused on [the data being migrated]: tables, foreign key relationships, code references, orphaned records, and edge cases.
+Handoff: complete territory map (data relationship map, affected files, migration risk assessment, edge case documentation) → Bear
 
-Phase: TRACK
-- Trace foreign key relationships
-- Find code that references the data
-- Map dependencies
-
-Phase: HUNT
-- Deep dive into complex relationships
-- Identify orphaned records
-- Find edge cases
-
-Phase: REPORT
-- Document all findings
-- Create relationship diagrams
-- List all files that need updates
-
-Phase: RETURN
-- Hand off complete map to Bear
-
-Output:
-- Data relationship map
-- List of affected files
-- Migration risk assessment
-- Edge case documentation
-```
+---
 
 **🐻 BEAR — MIGRATE**
 
-```
-"Waking from slumber, moving with strength..."
+Load skill: `bear-migrate`
 
-Phase: WAKE
-- Create migration plan
-- Set up tools
-- Prepare rollback strategy
-
-Phase: GATHER
-- Backup all data
-- Inventory data quality
-- Document row counts
-
-Phase: MOVE
-- Transform data in batches
-- Handle relationships carefully
-- Process in correct order
-
-Phase: HIBERNATE
-- Verify row counts match
-- Check data integrity
-- Validate relationships
-
-Phase: VERIFY
-- Application tests pass
-- Queries work correctly
-- Performance acceptable
-
-Output:
-- Migrated data
-- Validation reports
-- Updated codebase
-```
+Execute the full Bear WAKE → GATHER → MOVE → HIBERNATE → VERIFY workflow using the Bloodhound's territory map as the migration plan.
+Handoff: migration complete (migrated data, validation reports, updated codebase) → VALIDATE phase
 
 ---
 
