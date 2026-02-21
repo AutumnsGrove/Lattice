@@ -328,12 +328,20 @@ async function fetchAndProcessPost(
 		}
 	}
 
+	// Safe date conversion — D1 timestamps may be stored as strings or non-numeric values.
+	// new Date(NaN).toISOString() throws RangeError: Invalid time value, so guard each conversion.
+	const safeDate = (value: unknown): string | undefined => {
+		if (value == null) return undefined;
+		const num = Number(value);
+		if (!Number.isFinite(num)) return undefined;
+		const d = new Date(num * 1000);
+		return Number.isNaN(d.getTime()) ? undefined : d.toISOString();
+	};
+
 	return {
 		slug: post.slug as string,
 		title: post.title as string,
-		date: post.published_at
-			? new Date(post.published_at * 1000).toISOString()
-			: new Date().toISOString(),
+		date: safeDate(post.published_at) ?? new Date().toISOString(),
 		tags,
 		description: (post.description as string) || "",
 		content: processedHtml,
@@ -342,11 +350,7 @@ async function fetchAndProcessPost(
 		font: (post.font as string) || "default",
 		author: authorName,
 		featured_image: (post.featured_image as string) || undefined,
-		created_at: post.created_at
-			? new Date((post.created_at as number) * 1000).toISOString()
-			: undefined,
-		updated_at: post.updated_at
-			? new Date((post.updated_at as number) * 1000).toISOString()
-			: undefined,
+		created_at: safeDate(post.created_at),
+		updated_at: safeDate(post.updated_at),
 	};
 }

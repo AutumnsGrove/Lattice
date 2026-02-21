@@ -49,9 +49,9 @@ These principles came directly from the user and shape every decision below:
 
 ## Phase 1: Drop Dead Weight
 
-**Effort:** Low | **Impact:** -9 tables, -3000+ lines of dead code | **Risk:** None
+**Effort:** Low | **Impact:** -9 tables, -3000+ lines dead code, -2500+ lines LemonSqueezy | **Risk:** None
 
-### What to Drop
+### 1A. Shop Table Removal
 
 The shop/e-commerce tables from migration `007_shop_payments.sql`. The audit confirmed:
 
@@ -104,6 +104,70 @@ DROP TABLE IF EXISTS products;
 ### Pantry Future
 
 When Pantry is built, the spec at `docs/specs/pantry-spec.md` already defines a new schema with `pantry_`-prefixed tables (`pantry_products`, `pantry_orders`, etc.). These will live in their own `grove-pantry-db` — not back in the engine monolith.
+
+### 1B. LemonSqueezy Cleanup
+
+We've migrated to Stripe. All LemonSqueezy-specific code is dead weight. The audit found **68 files** with LS references (12 active code, 1 migration, 55 docs/archived).
+
+#### Code to Delete
+
+| File / Directory                                             | Lines | Purpose                                                         |
+| ------------------------------------------------------------ | ----: | --------------------------------------------------------------- |
+| `libs/engine/src/lib/payments/lemonsqueezy/` (6 files)       |  ~800 | Full LS provider: client, provider, types, tests, index         |
+| `apps/plant/src/lib/server/lemonsqueezy.ts`                  |  ~150 | LS config, variant IDs, checkout creation, webhook verification |
+| `apps/plant/src/routes/api/webhooks/lemonsqueezy/+server.ts` |  ~200 | LS webhook handler (entire route)                               |
+
+#### Code to Update (remove LS references, keep the rest)
+
+| File                                             | What to Change                            |
+| ------------------------------------------------ | ----------------------------------------- |
+| `libs/engine/src/lib/payments/index.ts`          | Remove LS provider export/registration    |
+| `libs/engine/src/lib/grafts/pricing/checkout.ts` | Remove LS checkout path (Stripe-only now) |
+| `libs/engine/src/routes/arbor/account/utils.ts`  | Remove LS-specific account logic          |
+| `apps/plant/src/routes/success/+page.server.ts`  | Remove LS success handling                |
+
+#### Database Columns to Drop
+
+Migration `022_lemonsqueezy_migration.sql` added 3 columns + 3 indexes to `user_onboarding`:
+
+```sql
+-- Migration: 085b_drop_lemonsqueezy_columns.sql
+-- Remove LemonSqueezy columns from user_onboarding (migrated to Stripe)
+
+-- SQLite doesn't support DROP COLUMN directly in older versions,
+-- but D1 uses modern SQLite that does support it.
+ALTER TABLE user_onboarding DROP COLUMN lemonsqueezy_customer_id;
+ALTER TABLE user_onboarding DROP COLUMN lemonsqueezy_subscription_id;
+ALTER TABLE user_onboarding DROP COLUMN lemonsqueezy_checkout_id;
+
+DROP INDEX IF EXISTS idx_onboarding_ls_subscription;
+DROP INDEX IF EXISTS idx_onboarding_ls_customer;
+DROP INDEX IF EXISTS idx_onboarding_ls_checkout;
+```
+
+#### Environment Variables to Remove
+
+These can be cleaned from wrangler configs, `.dev.vars`, and any secrets:
+
+- `LEMON_SQUEEZY_API_KEY`
+- `LEMON_SQUEEZY_STORE_ID`
+- `LEMON_SQUEEZY_WEBHOOK_SECRET`
+- `LEMON_SQUEEZY_*_VARIANT_MONTHLY` / `LEMON_SQUEEZY_*_VARIANT_YEARLY` (8 variant IDs across 4 tiers)
+
+#### Documentation to Archive/Remove
+
+55 files reference LemonSqueezy across docs/plans/specs. Key ones:
+
+- `docs/plans/completed/payment-migration-stripe-to-lemonsqueezy.md` — archive or delete
+- `docs/plans/completed/grove-payment-migration.md` — archive or delete
+- `_archived/docs/lemonsqueezy-setup-archived-2026-02-02.md` — already archived, can delete
+- Various spec files mentioning LS as an option — update to reflect Stripe-only reality
+
+#### What to Keep
+
+- `platform_billing` table — already uses provider-agnostic columns (`provider_customer_id`, `provider_subscription_id`), works with Stripe
+- `webhook_events` table — `provider` column supports multiple providers, still used by Stripe
+- Any Stripe-specific code — this is the active payment provider
 
 ---
 
@@ -387,24 +451,29 @@ Landing still actively uses its own `users`, `sessions`, `magic_codes` tables in
 | ------------------------------ | :----: | :----: | :------: |
 | `grove-engine-db` tables       |  ~120  |  ~62   | **-48%** |
 | Dead shop tables               |   9    |   0    |  **-9**  |
+| LemonSqueezy columns dropped   |   3    |   0    |  **-3**  |
+| LemonSqueezy indexes dropped   |   3    |   0    |  **-3**  |
 | Observability tables in engine |   10   |   0    | **-10**  |
 | Curio tables in engine         |   39   |   0    | **-39**  |
 | Total D1 databases             |   9    |   11   |    +2    |
-| Dead code lines removed        |   0    | ~3000+ |          |
+| Dead code lines removed        |   0    | ~5500+ |          |
+| Dead LS code files removed     |   0    |   8+   |          |
+| Dead LS env vars removed       |   0    |   11   |          |
 
 ### Phasing and Dependencies
 
 ```
-Phase 1: Drop Shop     ──→ No dependencies. Do it now.
+Phase 1A: Drop Shop     ──→ No dependencies. Do it now.
+Phase 1B: Drop LS       ──→ No dependencies. Do alongside 1A.
               │
-Phase 2: Extract Obs   ──→ Independent of Phase 1.
+Phase 2: Extract Obs    ──→ Independent of Phase 1.
               │              Can run in parallel.
 Phase 3: Extract Curios ──→ Largest effort. Start after
-                             Phase 1 proves the pattern.
+                             Phase 2 proves the pattern.
 Phase 4: Hygiene        ──→ Any time.
 ```
 
-Phases 1 and 2 can be done in parallel. Phase 3 is the big one and should wait until the extraction pattern is proven by Phase 2 (smaller scope, same technique).
+Phase 1 (both A and B) and Phase 2 can be done in parallel. Phase 3 is the big one and should wait until the extraction pattern is proven by Phase 2 (smaller scope, same technique).
 
 ---
 
