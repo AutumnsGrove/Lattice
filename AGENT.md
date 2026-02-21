@@ -34,12 +34,6 @@ Grove uses specific terms for community members. **Always use these in user-faci
 - The symmetry: Wanderers _seek_ the way, the Wayfinder _shows_ the way
 - Identity is separate from subscription tiers (Seedling/Sapling/Oak/Evergreen)
 
-**Examples:**
-
-- "Welcome, Wanderer." (not "Welcome, user")
-- "Thanks for staying rooted with us." (not "Thanks for being a subscriber")
-- "Ask a Pathfinder—they'll show you the way."
-
 See `docs/grove-user-identity.md` for full documentation.
 
 ---
@@ -62,9 +56,7 @@ Multi-tenant blog platform where users get their own blogs on subdomains (userna
 - **Styling:** Tailwind CSS
 - **Package Manager:** pnpm (CI/deployments) + bun (local dev speed)
 
-## Infrastructure & Deployment
-
-### Local Development
+## Local Development
 
 **Hybrid pnpm + bun workflow:** Use pnpm for dependency management (keeps lockfile in sync with CI), use bun for fast local execution.
 
@@ -72,34 +64,21 @@ Multi-tenant blog platform where users get their own blogs on subdomains (userna
 # DEPENDENCIES - Always use pnpm (syncs with CI)
 pnpm install              # Install all deps
 pnpm add <package>        # Add a package
-pnpm remove <package>     # Remove a package
 
 # LOCAL EXECUTION - Use bun for speed (10-50x faster)
 bun run dev               # Start dev server
 bun run build             # Build locally
 bun x prettier --write .  # Run prettier
 bun x tsc --noEmit        # Type check
-
-# Start any app locally (auto-creates local D1/KV/R2)
-cd landing && bun run dev
-cd libs/engine && bun run dev
 ```
 
-**Why this works:** Bun uses the `node_modules` that pnpm creates—no separate lockfile needed. The `bun.lock` file is gitignored since pnpm-lock.yaml is the source of truth for CI.
+**Why this works:** Bun uses the `node_modules` that pnpm creates—no separate lockfile needed.
 
-**⚠️ Avoid:** `bun install` or `bun add` — these would update bun.lock instead of pnpm-lock.yaml, causing drift between local and CI environments.
+**Avoid:** `bun install` or `bun add` — these update bun.lock instead of pnpm-lock.yaml, causing drift.
 
 ### Stripe Configuration
 
-Payments are processed through Stripe. Products and prices are managed in the Stripe Dashboard.
-
-**Setup:**
-
-1. Products already exist in [Stripe Dashboard](https://dashboard.stripe.com/products)
-2. Price IDs are hardcoded in `apps/plant/src/lib/server/stripe.ts`
-3. Set 2 secrets in Cloudflare Dashboard: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`
-
-**Full instructions:** `docs/setup/stripe-setup.md`
+Products and prices are managed in Stripe Dashboard. Price IDs are hardcoded in `apps/plant/src/lib/server/stripe.ts`. Set 2 secrets in Cloudflare: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`. Full instructions: `docs/setup/stripe-setup.md`
 
 ### Production Deployment
 
@@ -109,19 +88,15 @@ Apps auto-deploy via GitHub Actions on push to main. Resource IDs are hardcoded 
 
 ### Typography
 
-- **Default Font:** Lexend — used across all Grove properties (landing, engine, blogs)
+- **Default Font:** Lexend — used across all Grove properties
 - **Font Fallback:** All font mappings should fall back to `lexend`, not other fonts
 - **Available Fonts:** See `libs/engine/static/fonts/` for the full collection
 
-### ⚠️ CRITICAL: Tailwind Preset Required
+### CRITICAL: Tailwind Preset Required
 
 **All consumer apps MUST use the engine's Tailwind preset.**
 
-The engine provides a shared Tailwind preset (`libs/engine/src/lib/ui/tailwind.preset.js`) that defines:
-
-- Custom z-index scale (`z-grove-mobile-menu`, `z-grove-fab`, etc.)
-- Grove color palette, typography, animations
-- Shared design tokens and utilities
+The engine provides a shared Tailwind preset (`libs/engine/src/lib/ui/tailwind.preset.js`) that defines custom z-index scale, Grove color palette, typography, animations, and shared design tokens.
 
 **Every app's `tailwind.config.js` must include:**
 
@@ -135,20 +110,16 @@ export default {
 		// REQUIRED: Scan engine components for Tailwind classes
 		"../../libs/engine/src/lib/**/*.{html,js,svelte,ts}",
 	],
-	// ... rest of config
 };
 ```
 
-**Why this matters:** Engine components use custom Tailwind utilities like `z-grove-mobile-menu`. Without the preset, Tailwind doesn't know what these classes mean and won't generate CSS for them—causing invisible styling bugs that are hard to debug (elements render but stack incorrectly, animations don't work, etc.).
-
-This lesson learned the hard way: the mobile menu z-index fix (#367) only worked in the engine because other apps weren't importing the preset that defines `z-grove-mobile-menu`.
+**Why this matters:** Engine components use custom Tailwind utilities like `z-grove-mobile-menu`. Without the preset, Tailwind won't generate CSS for them—causing invisible styling bugs.
 
 ## Architecture Notes
 
 - Multi-tenant architecture with subdomain routing
 - Cloudflare-first infrastructure (Workers, D1, KV, R2)
 - Phase-based development: Lattice → Multi-tenant → Website → Meadow → Polish
-- First client: TBD (Mom's site completed with mock data)
 
 ### Key Architecture Documents
 
@@ -162,170 +133,20 @@ This lesson learned the hard way: the mobile menu z-index fix (#367) only worked
 
 ## Essential Instructions (Always Follow)
 
-### 🌲 Grove Wrap (gw) — MANDATORY CLI
+### Grove Wrap (gw) — Required CLI
 
-> **STOP. Before running ANY git, gh, wrangler, or dev command, use `gw` instead.**
-
-Grove Wrap (`gw`) is the **required CLI** for all infrastructure operations. It wraps Wrangler, git, and GitHub CLI with agent-safe defaults, database protection, and audit logging.
-
-#### Installation (REQUIRED for Remote Agents)
-
-If you're running in a remote/cloud environment without gw installed:
+All git, GitHub, and Cloudflare operations go through `gw`. Write operations require `--write`. The `enforce-gw` hook blocks raw commands automatically.
 
 ```bash
-# 1. Navigate to the gw tool directory
-cd tools/gw
-
-# 2. Install dependencies (requires uv)
-uv sync
-
-# 3. Verify installation
-uv run gw --help
-
-# 4. (Optional) See available commands
-uv run gw doctor
+gw context                              # Start every session here
+gw git ship --write -a -m "feat: msg"   # Auto-stage + format + check + commit + push
+gw ci --affected --fail-fast --diagnose # Verify before committing
+gw git pr-prep                          # PR readiness report
 ```
 
-**For local development**, gw should already be available. Just run:
+Run `gw --help` for full commands. See `AgentUsage/git_guide.md` for details.
 
-```bash
-cd tools/gw && uv run gw --help
-```
-
-> ⚠️ **DO NOT proceed with git/gh/wrangler commands until gw is installed and working.**
-
-#### Why gw is Mandatory
-
-| Raw Command           | Problem                             | gw Equivalent                         |
-| --------------------- | ----------------------------------- | ------------------------------------- |
-| `git push --force`    | Can destroy remote history          | `gw git push --write` (force blocked) |
-| `git commit -m "x"`   | No conventional commits enforcement | `gw git commit --write -m "feat: x"`  |
-| `wrangler d1 execute` | Requires UUIDs, no safety           | `gw db query "SELECT..."`             |
-| `gh pr create`        | No safety tier                      | `gw gh pr create --write`             |
-| `pnpm test`           | Manual package detection            | `gw test` (auto-detects package)      |
-
-#### Command Categories
-
-```bash
-# AGENT — Start every session here
-gw context                              # One-shot session snapshot (branch, changes, packages)
-gw --json context                       # JSON snapshot for structured parsing
-
-# DATABASE (D1, KV, R2) — Read-only by default
-gw db query "SELECT * FROM tenants"     # Safe read
-gw db query --write "UPDATE..."         # Requires --write flag
-gw db tables                            # List tables
-gw db schema tenants                    # Show schema
-gw tenant lookup autumn                 # Tenant info
-gw cache list                           # Cache keys
-gw cache purge --tenant autumn          # Purge (write op)
-
-# GIT — Safety tiers enforced
-gw git status                           # Always safe
-gw git log                              # Always safe
-gw git diff                             # Always safe
-gw git commit --write -m "feat: ..."    # Requires --write
-gw git push --write                     # Requires --write
-gw git save --write                     # Quick add + WIP commit
-gw git sync --write                     # Fetch + rebase + push
-gw git ship --write -a -m "type: msg"   # Auto-stage + format + check + commit + push
-gw git pr-prep                          # Full PR readiness report
-
-# GITHUB — Rate-limit aware
-gw gh pr list                           # Always safe
-gw gh pr view 123                       # Always safe
-gw gh pr create --write                 # Requires --write
-gw gh issue list                        # Always safe
-gw gh issue batch --write --from-json f # Batch create issues from JSON
-gw gh run list                          # CI status
-
-# DEV TOOLS — Auto-detects package from cwd
-gw test                                 # Run tests
-gw build                                # Build package
-gw check                                # Type check
-gw lint                                 # Lint
-gw ci                                   # Full CI pipeline locally
-gw ci --affected                        # CI only for changed packages
-gw ci --affected --fail-fast            # Fast feedback: stop on first failure
-gw ci --diagnose                        # Structured error diagnostics on failure
-
-# DIAGNOSTICS
-gw status                               # Infrastructure overview
-gw health                               # Service health
-gw doctor                               # Diagnose issues
-gw whoami                               # Current context
-```
-
-#### Blocked Operations (Agent Mode)
-
-When running as an MCP server or with `GW_AGENT_MODE=1`, these are **completely blocked**:
-
-```bash
-# ❌ BLOCKED — Cannot run these in agent mode
-gw git push --write --force             # Force push
-gw git reset --write --force            # Hard reset
-gw db query --write "DROP TABLE..."     # DDL operations
-gw db query --write "DELETE FROM users" # Protected tables
-```
-
-#### MCP Server Integration
-
-gw runs as an MCP server for Claude Code, exposing 34+ tools including git operations, codebase search, impact analysis, and session context:
-
-```json
-{
-	"mcpServers": {
-		"grove-wrap": {
-			"command": "gw",
-			"args": ["mcp", "serve"]
-		}
-	}
-}
-```
-
-Key MCP tools: `grove_context` (session snapshot), `grove_git_ship` (commit+push), `grove_git_prep` (preflight), `grove_search` (codebase search), `grove_impact` (file impact analysis), `grove_find_usage`/`grove_find_definition`/`grove_find_routes` (code navigation).
-
-When using the MCP server, all safety restrictions apply automatically.
-
-#### ⚠️ NEVER Use Raw Commands
-
-```bash
-# ❌ WRONG — Raw commands bypass safety
-git commit -m "whatever"
-git push origin main
-wrangler d1 execute grove-engine-db --command "DELETE FROM posts"
-gh pr create
-
-# ✅ CORRECT — gw commands with safety
-gw git commit --write -m "feat(auth): add session refresh"
-gw git push --write
-gw db query --write "DELETE FROM posts WHERE id = 'abc'"
-gw gh pr create --write --title "feat: add feature"
-```
-
-#### Quick Reference
-
-| Task                | Command                                   |
-| ------------------- | ----------------------------------------- |
-| Session snapshot    | `gw context` (start every session here)   |
-| See all commands    | `gw --help`                               |
-| Database help       | `gw db --help`                            |
-| Git help            | `gw git --help`                           |
-| GitHub help         | `gw gh --help`                            |
-| MCP tools list      | `gw mcp tools`                            |
-| Check health        | `gw doctor`                               |
-| Commit + push       | `gw git ship --write -a -m "type: msg"`   |
-| PR readiness        | `gw git pr-prep`                          |
-| Preflight check     | `gw git prep`                             |
-| Cherry-pick         | `gw git cherry-pick --write <hash>`       |
-| Format code         | `gw fmt`                                  |
-| CI (changed only)   | `gw ci --affected --fail-fast`            |
-| Batch create issues | `gw gh issue batch --write --from-json f` |
-| Impact analysis     | `gf impact src/lib/auth.ts`               |
-| Find tests for file | `gf test-for src/lib/auth.ts`             |
-| Diff summary        | `gf diff-summary`                         |
-
----
+**Note:** `--write` is auto-implied for interactive terminal sessions but required for agents/CI/MCP. DANGEROUS-tier operations (`--write --force`) are never auto-implied.
 
 ### Core Behavior
 
@@ -334,191 +155,76 @@ gw gh pr create --write --title "feat: add feature"
 - ALWAYS prefer editing existing files to creating new ones
 - NEVER proactively create documentation files (\*.md) or README files unless explicitly requested
 
-### ⚠️ MANDATORY: Agent Self-Verification Protocol
+### MANDATORY: Agent Self-Verification Protocol
 
-**After making ANY code changes, you MUST verify your work before committing.** Do not commit broken code. Do not assume your changes are correct. CI catches errors that cost the user time to circle back and fix — verify locally first.
-
-**The Verification Sequence:**
+**After making ANY code changes, you MUST verify your work before committing.** Do not commit broken code.
 
 ```bash
-# Step 1: Ensure dependencies are in sync (catches missing/outdated packages)
+# Step 1: Ensure dependencies are in sync
 pnpm install
 
-# Step 2: Run affected-only CI — lint, check, test, build on ONLY the packages you touched
+# Step 2: Run affected-only CI
 gw ci --affected --fail-fast --diagnose
 ```
 
-**What this does:**
+**When verification fails:** Read diagnostics, fix errors, re-run, repeat until clean, THEN commit.
 
-- `pnpm install` — Syncs `node_modules` with `pnpm-lock.yaml`. Required after adding/removing deps or changing `package.json`.
-- `gw ci --affected` — Detects which packages have changes on the current branch and runs the full pipeline (lint → check → test → build) only on those packages. Not all 10+ packages — just the ones you touched.
-- `--fail-fast` — Stops on the first failure so you get fast feedback instead of waiting for everything.
-- `--diagnose` — Provides structured error output with file:line locations so you can fix issues quickly.
+**When to run:** After completing code changes (before commit), after PR review feedback (before push), after multi-file refactoring.
 
-**When verification fails:**
+**When to skip:** Documentation-only changes (.md files only), configuration-only changes.
 
-1. Read the diagnostic output carefully
-2. Fix the errors in your code
-3. Re-run verification (`gw ci --affected --fail-fast --diagnose`)
-4. Repeat until clean
-5. THEN commit
-
-**When to run verification:**
-
-- After completing all code changes for a feature or fix (before committing)
-- After addressing PR review feedback (before pushing)
-- After any refactoring that touches multiple files
-- Before running `gw git ship` or `gw git commit`
-
-**When you can skip verification:**
-
-- Documentation-only changes (`.md` files only, no code)
-- Configuration-only changes where no build/check applies
-- When `gw git ship` is used (it runs format + check automatically, but does NOT run tests or build — so prefer the full verification)
-
-**This is non-negotiable.** Every animal skill, every gathering, every code-modifying workflow must end with verification before commit. If you skip this and CI fails, you've wasted the user's time.
+**This is non-negotiable.** Every workflow must end with verification before commit.
 
 ### Naming Conventions
 
 - **Directories**: Use CamelCase (e.g., `VideoProcessor`, `AudioTools`, `DataAnalysis`)
-- **Date-based paths**: Use skewer-case with YYYY-MM-DD (e.g., `logs-2025-01-15`, `backup-2025-12-31`)
+- **Date-based paths**: Use skewer-case with YYYY-MM-DD (e.g., `logs-2025-01-15`)
 - **No spaces or underscores** in directory names (except date-based paths)
 
 ### Task Tracking (GitHub Issues)
 
 - **All tasks are tracked in [GitHub Issues](https://github.com/AutumnsGrove/Lattice/issues)** — not in local files
 - **Check open issues** when starting a session to understand current priorities
-- **Use labels** to filter by component (heartwood, lattice, amber, etc.) or type (bug, feature, enhancement)
-- **Close issues** when work is complete — reference the issue number in commit messages (e.g., `fixes #123`)
-- **Create new issues** for discovered work instead of adding TODO comments in code
-- **Bulk issue creation** — When the user dumps a batch of TODOs, use skill: `grove-issues` to parse, deduplicate, and create properly structured issues
-- **Check `COMPLETED.md`** for historical context on past decisions (frozen archive, pre-Jan 2026)
+- **Close issues** when work is complete — reference the issue number in commits (e.g., `fixes #123`)
+- **Bulk issue creation** — Use skill: `grove-issues` to parse brain dumps into structured issues
 
-### Contributing
+### Git Workflow
 
-- **See `CONTRIBUTING.md`** for PR guidelines, commit conventions, and the AI agent section
-- Keep Grove's warm, community-focused voice in documentation and user-facing text
-
-### Git Workflow Essentials
-
-> **⚠️ MANDATORY:** Use `gw git` commands, not raw git. See the gw section above.
-
-**Start every session with context:**
-
-```bash
-gw context                        # One-shot snapshot: branch, changes, packages, TODOs
-```
-
-**After completing major changes, commit your work using gw:**
-
-```bash
-# The fastest path: auto-stage all + format + check + commit + push
-gw git ship --write -a -m "feat(auth): add session refresh"
-
-# Or step by step:
-gw git add --write src/lib/auth.ts
-gw git commit --write -m "feat(auth): add session refresh"
-gw git push --write
-```
+> **Use `gw git` commands, not raw git.** See gw section above.
 
 **Conventional Commits Format (enforced by gw):**
 
 ```bash
 <type>(<scope>): <brief description>
+# Types: feat, fix, docs, refactor, test, chore, perf
 ```
 
-**Common Types:** `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `perf`
-
-**Examples using gw:**
+**Daily workflow:**
 
 ```bash
-gw git commit --write -m "feat: add user authentication"
-gw git commit --write -m "fix(ui): correct timezone bug"
-gw git commit --write -m "docs: update README"
+gw context                                    # Start here
+gw git ship --write -a -m "feat(auth): msg"   # Commit + push
+gw git pr-prep                                # Before creating PRs
 ```
 
-**Quick shortcuts:**
+See `AgentUsage/git_guide.md` for complete reference.
 
-```bash
-gw git save --write              # Stage all + WIP commit
-gw git sync --write              # Fetch + rebase + push
-gw git wip --write               # WIP commit (skips hooks)
-gw git ship --write -a -m "t: x" # Auto-stage + format + check + commit + push
-gw git pr-prep                   # Full PR readiness report
-gw git prep                      # Preflight check (dry run of ship)
-gw git cherry-pick --write <hash> # Cherry-pick commits safely
-```
+### Claude Code Hooks
 
-> **Preferred workflow:** Start with `gw context`, use `gw git ship -a` for everyday commit+push, and `gw git pr-prep` before creating PRs. Use `gw git fast` only as an emergency escape hatch when hooks need bypassing.
+Two hooks are registered in `~/.claude/settings.json`:
 
-**Before creating a PR:**
-
-```bash
-gw git pr-prep                   # Checks: commits, diff stats, push status, suggested title
-gw ci --affected --fail-fast     # Run CI only for changed packages
-```
-
-**For complete details:** See `AgentUsage/git_guide.md` and `gw git --help`
-
-#### Claude Code Hooks (Active Enforcement)
-
-Two hooks enforce gw usage and auto-format code. These are registered in `~/.claude/settings.json`.
-
-**PreToolUse: `enforce-gw.py`** — Blocks raw write commands and redirects to gw:
-
-- Git writes (`git commit`, `git push`, `git add`, etc.) → redirected to `gw git ...`
-- GitHub writes (`gh pr create`, `gh issue close`, etc.) → redirected to `gw gh ...`
-- Wrangler writes (`wrangler deploy`, `wrangler secret put`, etc.) → redirected to `gw deploy`, etc.
-- Dev tool writes (`prettier --write`, `eslint`) → redirected to `gw fmt`, `gw lint`
-- **Exceptions:** `wrangler d1 *` (all D1 commands allowed), all read-only operations allowed
-- Git reads (`git status`, `git log`, `git diff`, `git show`, `git blame`) pass through
-
-**PostToolUse: `auto-format.py`** — Auto-runs Prettier after every Edit/Write:
-
-- Triggers on `.ts`, `.js`, `.svelte`, `.css`, `.json`, `.html`, `.md` files
-- Uses `bun x prettier --write` for speed
-- Never blocks — formatting failures are silent (pre-commit hook is the safety net)
-- Eliminates formatting detours at commit time
-
-#### `--write` Flag Behavior
-
-The `--write` flag is **auto-implied for interactive terminal sessions** (humans typing commands).
-Agents, CI, and MCP still require explicit `--write` for WRITE-tier operations.
-DANGEROUS-tier operations (`--write --force`) are never auto-implied.
-
-```bash
-# Human at terminal — --write auto-implied for WRITE tier
-gw git add .                           # Just works
-gw git commit -m "feat: x"            # Just works
-gw git push                            # Just works
-
-# Agent/CI/MCP — --write still required
-gw git add --write .                   # Required
-gw git commit --write -m "feat: x"    # Required
-gw git push --write                    # Required
-
-# DANGEROUS tier — always requires --write --force (no auto-imply)
-gw git reset --write --force           # Always explicit
-```
+- **PreToolUse `enforce-gw.py`** — Blocks raw git/gh/wrangler write commands, redirects to gw equivalents
+- **PostToolUse `auto-format.py`** — Auto-runs Prettier after every Edit/Write on supported file types
 
 ### Pull Requests
 
-Use conventional commits format for PR titles:
-
-```
-feat: Add dark mode toggle
-fix: Correct timezone bug
-```
-
-Write a brief description of what the PR does and why. No specific format required.
+Use conventional commits format for PR titles. Write a brief description of what the PR does and why.
 
 ---
 
-## 🌲 Engine-First Pattern (CRITICAL)
+## Engine-First Pattern (CRITICAL)
 
 > **The engine exists to prevent duplication. USE IT.**
-
-### The Rule
 
 **Before implementing ANY utility, component, or pattern in an app:**
 
@@ -529,15 +235,10 @@ Write a brief description of what the PR does and why. No specific format requir
 
 2. IMPLEMENT: Add it to the engine FIRST
    └── libs/engine/src/lib/...
-   └── Export it properly in package.json
 
 3. IMPORT: Then use it from the engine in your app
    └── import { thing } from '@autumnsgrove/lattice/...'
 ```
-
-### Why This Matters
-
-We just deleted **11,925 lines** of duplicate code that accumulated because apps implemented their own versions instead of using or extending the engine. Never again.
 
 ### What the Engine Provides
 
@@ -547,7 +248,7 @@ We just deleted **11,925 lines** of duplicate code that accumulated because apps
 | **UI Utilities**      | `@autumnsgrove/lattice/ui/utils`      | `cn()` (with tailwind-merge) |
 | **Stores**            | `@autumnsgrove/lattice/ui/stores`     | `seasonStore`, `themeStore`  |
 | **Nature Components** | `@autumnsgrove/lattice/ui/nature`     | Trees, creatures, palette    |
-| **Glass UI**          | `@autumnsgrove/lattice/ui`            | GlassCard, GlassButton       |
+| **Glass UI**          | `@autumnsgrove/lattice/ui`            | GlassCard, GlassButton      |
 | **General Utils**     | `@autumnsgrove/lattice/utils`         | csrf, sanitize, markdown     |
 | **Content**           | `@autumnsgrove/lattice/ui/content`    | ContentWithGutter, TOC       |
 | **Forms**             | `@autumnsgrove/lattice/ui/forms`      | Form components              |
@@ -556,476 +257,57 @@ We just deleted **11,925 lines** of duplicate code that accumulated because apps
 | **Icons**             | `@autumnsgrove/lattice/ui/icons`      | Icon components              |
 | **Typography**        | `@autumnsgrove/lattice/ui/typography` | Text components              |
 | **Auth**              | `@autumnsgrove/lattice/auth`          | Authentication utilities     |
+| **Errors**            | `@autumnsgrove/lattice/errors`        | Signpost error codes         |
 
 ### Common Violations (Don't Do These)
 
 ```typescript
 // ❌ BAD - Creating local utilities
-// landing/src/lib/utils/cn.ts
-export function cn(...classes) {
-	return classes.filter(Boolean).join(" ");
-}
+export function cn(...classes) { return classes.filter(Boolean).join(" "); }
 
 // ✅ GOOD - Import from engine
 import { cn } from "@autumnsgrove/lattice/ui/utils";
 ```
 
-```typescript
-// ❌ BAD - Local store implementations
-// meadow/src/lib/stores/season.ts
-export const season = createSeasonStore();
-
-// ✅ GOOD - Import from engine
-import { seasonStore } from "@autumnsgrove/lattice/ui/stores";
-```
-
-```typescript
-// ❌ BAD - Copying components locally
-// landing/src/lib/components/nature/TreePine.svelte
-
-// ✅ GOOD - Import from engine
-import { TreePine } from "@autumnsgrove/lattice/ui/nature";
-```
-
-### When You Need Something New
-
-1. **Check the engine exports:** `grep -r "export" libs/engine/src/lib/`
-2. **If it doesn't exist:** Add it to the engine, not the app
-3. **Export it properly:** Update `libs/engine/package.json` exports
-4. **Then import it:** Use in your app via `@autumnsgrove/lattice/...`
-
 ### Quick Engine Export Check
 
 ```bash
-# See all engine exports
 cat libs/engine/package.json | grep -A2 '"\./'
 ```
 
 ---
 
-## When to Use Skills
+## Skills
 
-**This project uses Claude Code Skills for specialized workflows. Invoke skills using the Skill tool when you encounter these situations:**
+Skills are invoked via the Skill tool. Each skill's description explains when to use it. For help choosing a skill, invoke skill: `robin-guide`.
 
-### Authentication
+Skills live in `.claude/skills/` — lean instruction files with deep references loaded on demand.
 
-- **When adding sign-in to a Grove app** → Use skill: `heartwood-auth`
-- **When protecting admin routes** → Use skill: `heartwood-auth`
-- **When validating user sessions** → Use skill: `heartwood-auth`
-- **When integrating with Heartwood (GroveAuth)** → Use skill: `heartwood-auth`
+### Gathering Chains (Multi-Animal Workflows)
 
-### Secrets & API Keys
+When a task spans multiple specialties, gatherings orchestrate the right animals in sequence:
 
-- **When managing API keys or secrets** → Use skill: `secrets-management`
-- **Before implementing secrets loading** → Use skill: `secrets-management`
-- **When integrating external APIs** → Use skill: `api-integration`
-
-### Cloudflare Development
-
-- **For D1 database queries** → Use `gw db` commands (see gw section above)
-- **For KV operations** → Use `gw kv` commands
-- **For R2 operations** → Use `gw r2` commands
-- **For cache operations** → Use `gw cache` commands
-- **When deploying to Cloudflare** → Use `gw deploy --write` or skill: `cloudflare-deployment`
-- **When setting up Cloudflare MCP server** → Use skill: `cloudflare-deployment`
-
-### Package Management
-
-- **When using UV package manager** → Use skill: `uv-package-manager`
-- **Before creating pyproject.toml** → Use skill: `uv-package-manager`
-- **When managing Python dependencies** → Use skill: `uv-package-manager`
-
-### Version Control
-
-- **For all git operations** → Use `gw git` commands (see gw section above)
-- **Before making a git commit** → `gw git commit --write -m "type: message"`
-- **Before creating a pull request** → `gw gh pr create --write`
-- **For git workflow and branching** → Use skill: `git-workflows` for guidance
-- **When setting up git hooks** → Use skill: `git-hooks`
-
-### Database Management
-
-- **When working with databases** → Use skill: `database-management`
-- **Before implementing data persistence** → Use skill: `database-management`
-- **For database.py template** → Use skill: `database-management`
-
-#### ⚠️ CRITICAL: Isolate Database Queries
-
-**NEVER put multiple independent database queries in the same try/catch block.**
-One failing query will block all subsequent queries, causing cascading failures.
-
-```typescript
-// ❌ BAD - cascading failure pattern
-try {
-	const settings = await db.prepare("SELECT * FROM settings").all(); // If table missing, this fails...
-	const pages = await db.prepare("SELECT * FROM pages").all(); // ...and this NEVER runs!
-} catch (error) {}
-
-// ✅ GOOD - isolated query pattern
-try {
-	const settings = await db.prepare("SELECT * FROM settings").all();
-} catch (error) {
-	/* graceful fallback */
-}
-
-try {
-	const pages = await db.prepare("SELECT * FROM pages").all();
-} catch (error) {
-	/* graceful fallback */
-}
-```
-
-This lesson learned the hard way: a missing `site_settings` table silently blocked
-the `pages` query for hours because they shared a try/catch block.
-
-#### ⚠️ CRITICAL: Parallelize Independent Queries
-
-**NEVER run independent database queries sequentially when they can run in parallel.**
-Each D1 query has 100-300ms network latency. Sequential queries stack this latency.
-
-```typescript
-// ❌ BAD - sequential queries (900ms+ for 3 queries)
-const settings = await db.prepare("SELECT * FROM settings").bind(tenantId).all();
-const pages = await db.prepare("SELECT * FROM pages").bind(tenantId).all();
-const config = await db.prepare("SELECT * FROM config").bind(tenantId).first();
-
-// ✅ GOOD - parallel queries with individual error handling (~300ms total)
-const [settings, pages, config] = await Promise.all([
-	db
-		.prepare("SELECT * FROM settings")
-		.bind(tenantId)
-		.all()
-		.catch((err) => {
-			console.warn("Settings failed:", err);
-			return null;
-		}),
-	db
-		.prepare("SELECT * FROM pages")
-		.bind(tenantId)
-		.all()
-		.catch((err) => {
-			console.warn("Pages failed:", err);
-			return null;
-		}),
-	db
-		.prepare("SELECT * FROM config")
-		.bind(tenantId)
-		.first()
-		.catch((err) => null),
-]);
-```
-
-This lesson learned the hard way: sequential queries in layout files caused 4-6 second
-page loads. Parallelizing reduced this to 1.5-2.5 seconds (~60% improvement).
-
-**When to parallelize:** Queries that don't depend on each other's results.
-**When NOT to:** Query B needs Query A's result (e.g., get user, then get user's posts).
-
-#### Typed Query Builders (database.ts)
-
-**Use the typed helpers in `libs/engine/src/lib/server/services/database.ts`** instead of raw SQL.
-
-```typescript
-import {
-	queryOne,
-	queryMany,
-	execute,
-	findById,
-	findByIdOrThrow,
-	insert,
-	upsert,
-	update,
-	deleteWhere,
-	deleteById,
-	exists,
-	count,
-	getTenantDb,
-} from "$lib/server/services/database";
-
-// ✅ GOOD - typed query helpers with validation
-const user = await findById<User>(db, "users", userId);
-const posts = await queryMany<Post>(db, "SELECT * FROM posts WHERE status = ?", ["published"]);
-
-// ✅ GOOD - insert with auto-generated ID and timestamps
-const newId = await insert(db, "posts", {
-	title: "Hello World",
-	content: "My first post",
-});
-
-// ✅ GOOD - upsert (insert or replace)
-await upsert(db, "settings", { id: "theme", value: "dark" });
-
-// ✅ GOOD - multi-tenant operations (automatic tenant scoping)
-const tenantDb = getTenantDb(db, { tenantId: locals.tenant.id });
-const posts = await tenantDb.queryMany<Post>("posts", "status = ?", ["published"]);
-// Automatically adds: WHERE tenant_id = ? AND status = ?
-```
-
-**Key Benefits:**
-
-- **SQL injection prevention** - Table/column names validated against alphanumeric pattern
-- **Type safety** - Generic types for query results
-- **Auto timestamps** - `created_at`/`updated_at` handled automatically
-- **Tenant isolation** - `TenantDb` enforces multi-tenant boundaries
-
-#### ⚠️ CRITICAL: Multi-Tenant Proxy & CSRF Validation
-
-**SvelteKit's built-in CSRF protection fails behind proxies like grove-router.**
-
-Grove uses a multi-tenant architecture where `*.grove.place` subdomains are routed through
-`grove-router` (a Cloudflare Worker proxy) to the main engine. This causes CSRF failures:
-
-```
-Browser → autumn.grove.place (Origin: https://autumn.grove.place)
-                ↓
-grove-router → sets X-Forwarded-Host: autumn.grove.place
-                ↓
-Engine Worker → sees Host: internal-worker.pages.dev
-                ↓
-SvelteKit CSRF → Origin ≠ Host → 403 Forbidden!
-```
-
-**The fix:** Configure `csrf.trustedOrigins` in `svelte.config.js`:
-
-```javascript
-// libs/engine/svelte.config.js
-kit: {
-  csrf: {
-    checkOrigin: true,
-    trustedOrigins: [
-      "https://grove.place",
-      "https://*.grove.place",  // Wildcards supported!
-      "http://localhost:5173",  // Local dev
-    ],
-  },
-}
-```
-
-This lesson learned the hard way: Timeline Curio config saves returned 403 for 3-4 days
-because SvelteKit compared the browser's `Origin` header against the proxied `Host` header.
-The `X-Forwarded-Host` header was correctly set by grove-router, but SvelteKit's CSRF
-validation doesn't use it — you must explicitly whitelist trusted origins.
-
-**Key insight:** When debugging 403s on form actions behind a proxy:
-
-1. Check if `Origin` header matches what SvelteKit expects
-2. Look at `X-Forwarded-Host` vs `Host` headers
-3. Configure `csrf.trustedOrigins` for your proxy setup
-
-### Research & Analysis
-
-- **When researching technology decisions** → Use skill: `research-strategy`
-- **When analyzing unfamiliar codebases** → Use skill: `research-strategy`
-- **For systematic investigation** → Use skill: `research-strategy`
-
-### Testing
-
-- **To run tests** → Use `gw test` (auto-detects package from cwd)
-- **To run full CI locally** → Use `gw ci`
-- **CI for changed packages only** → Use `gw ci --affected --fail-fast`
-- **Structured error output on failure** → Use `gw ci --diagnose`
-- **When deciding what to test or reviewing test quality** → Use skill: `grove-testing`
-- **Before writing JavaScript/TypeScript tests** → Use skill: `javascript-testing`
-- **Before writing Python tests** → Use skill: `python-testing`
-- **Before writing Go tests** → Use skill: `go-testing`
-- **Before writing Rust tests** → Use skill: `rust-testing`
-
-### Code Quality
-
-- **When formatting or linting code** → Use skill: `code-quality`
-- **Before major code changes** → Use skill: `code-quality`
-- **For Black, Ruff, mypy usage** → Use skill: `code-quality`
-
-### Project Setup & Infrastructure
-
-- **When starting a new project** → Use skill: `project-scaffolding`
-- **Setting up CI/CD pipelines** → Use skill: `cicd-automation`
-- **When containerizing applications** → Use skill: `docker-workflows`
-
-### Web Development
-
-- **When building Svelte 5 applications** → Use skill: `svelte5-development`
-- **For SvelteKit routing and forms** → Use skill: `svelte5-development`
-
-### Grove UI Design
-
-- **When creating or enhancing Grove pages** → Use skill: `grove-ui-design`
-- **When adding decorative nature elements** → Use skill: `grove-ui-design`
-- **When implementing glassmorphism effects** → Use skill: `grove-ui-design`
-- **When working with seasonal themes** → Use skill: `grove-ui-design`
-- **When building navigation patterns** → Use skill: `grove-ui-design`
-
-### Grove Documentation
-
-- **When writing help center articles** → Use skill: `grove-documentation`
-- **When drafting specs or technical docs** → Use skill: `grove-documentation`
-- **When writing user-facing text** → Use skill: `grove-documentation`
-- **When writing onboarding, tooltips, or error messages** → Use skill: `grove-documentation`
-- **When reviewing docs for voice consistency** → Use skill: `grove-documentation`
-
-### Grove Specifications
-
-- **When creating new technical specifications** → Use skill: `grove-spec-writing`
-- **When reviewing specs for completeness** → Use skill: `grove-spec-writing`
-- **When standardizing spec formatting** → Use skill: `grove-spec-writing`
-
-### Museum Documentation
-
-- **When writing documentation meant to be read by Wanderers** → Use skill: `museum-documentation`
-- **When creating "how it works" content for knowledge base** → Use skill: `museum-documentation`
-- **When documenting a codebase or system for curious visitors** → Use skill: `museum-documentation`
-- **When writing elegant, narrative-driven technical explanations** → Use skill: `museum-documentation`
-
-### Grove Naming
-
-- **When naming a new service or feature** → Use skill: `walking-through-the-grove`
-- **When finding a Grove-themed name** → Use skill: `walking-through-the-grove`
-
-### Animal Skills (The Forest Ecosystem)
-
-Grove's development workflow is organized as a forest ecosystem. Each animal has a specialty:
-
-**Predators (Precision & Focus):**
-
-- **When fixing a single specific issue** → Use skill: `panther-strike`
-
-**Builders (Creation & Testing):**
-
-- **When writing tests** → Use skill: `beaver-build`
-- **When building multi-file features** → Use skill: `elephant-build`
-- **When writing technical specifications** → Use skill: `swan-design`
-- **When designing system architecture** → Use skill: `eagle-architect`
-- **When integrating authentication** → Use skill: `spider-weave`
-
-**Shapeshifters (UI & Design):**
-
-- **When designing Grove UI with glassmorphism** → Use skill: `chameleon-adapt`
-
-**Investigators (Cross-Codebase Security):**
-
-- **When auditing ANY codebase's security posture** → Use skill: `raven-investigate`
-- **When offering security review services** → Use skill: `raven-investigate`
-- **When needing a rapid, parallel security assessment** → Use skill: `raven-investigate`
-
-**Appraisers (Business & Estimation):**
-
-- **When quoting remediation or repair work** → Use skill: `osprey-appraise`
-- **When producing a client proposal from audit findings** → Use skill: `osprey-appraise`
-- **When estimating project scope and timeline** → Use skill: `osprey-appraise`
-
-**Scouts (Exploration):**
-
-- **When exploring unfamiliar codebases** → Use skill: `bloodhound-scout`
-
-**Gatherers (Organization & Knowledge):**
-
-- **When writing documentation** → Use skill: `owl-archive`
-- **When creating GitHub issues from TODOs** → Use skill: `bee-collect`
-- **When security auditing** → Use skill: `raccoon-audit`
-
-**Speedsters (Performance):**
-
-- **When optimizing performance** → Use skill: `fox-optimize`
-
-**Heavy Lifters (Data):**
-
-- **When migrating data** → Use skill: `bear-migrate`
-
-**Watchers (Quality):**
-
-- **When auditing accessibility** → Use skill: `deer-sense`
-- **When hardening code for security by design** → Use skill: `turtle-harden`
-- **When auditing for deep/subtle vulnerabilities** → Use skill: `turtle-harden`
-
-**Guides (Navigation):**
-
-- **When unsure which skill to use** → Use skill: `robin-guide`
-
-**Gathering Chains (Multi-Animal Workflows):**
-
-- **For complete feature lifecycle** → Use skill: `gathering-feature`
-- **For system architecture** → Use skill: `gathering-architecture`
-- **For UI + accessibility** → Use skill: `gathering-ui`
-- **For auth + security** → Use skill: `gathering-security`
-- **For data migration** → Use skill: `gathering-migration`
-
-### Package Publishing
-
-- **When publishing to npm** → Use skill: `npm-publish`
-- **Before npm package releases** → Use skill: `npm-publish`
-
-### CLI Development
-
-- **When building terminal interfaces** → Use skill: `rich-terminal-output`
-- **For Rich library patterns** → Use skill: `rich-terminal-output`
+| Gathering                | Animals                                           | Use When                         |
+| ------------------------ | ------------------------------------------------- | -------------------------------- |
+| `gathering-feature`      | Bloodhound → Elephant → Turtle → Beaver → Owl    | Full feature lifecycle           |
+| `gathering-architecture` | Eagle → Swan → Elephant                           | System design → spec → build     |
+| `gathering-ui`           | Chameleon → Deer                                  | UI design + accessibility        |
+| `gathering-security`     | Spider → Raccoon → Turtle                         | Auth + audit + hardening         |
+| `gathering-migration`    | Bear → Bloodhound                                 | Data migration + codebase nav    |
+| `gathering-planning`     | Bee → Badger                                      | Idea capture → board organization|
 
 ---
 
-## Quick Reference
-
-### How to Use Skills
-
-Skills are invoked using the Skill tool. When a situation matches a skill trigger:
-
-1. Invoke the skill by name (e.g., `skill: "secrets-management"`)
-2. The skill will expand with detailed instructions
-3. Follow the skill's guidance for the specific task
-
-### Security Basics
-
-- Store API keys in `secrets.json` (NEVER commit)
-- Add `secrets.json` to `.gitignore` immediately
-- Provide `secrets_template.json` for setup
-- Use environment variables as fallbacks
-
-### Available Skills Reference
-
-| Skill                       | Purpose                                                |
-| --------------------------- | ------------------------------------------------------ |
-| `heartwood-auth`            | Heartwood (GroveAuth) integration, sign-in, sessions   |
-| `secrets-management`        | API keys, credentials, secrets.json                    |
-| `api-integration`           | External REST API integration                          |
-| `database-management`       | SQLite, database.py patterns                           |
-| `git-workflows`             | Commits, branching, conventional commits               |
-| `git-hooks`                 | Pre-commit hooks setup                                 |
-| `uv-package-manager`        | Python dependencies with UV                            |
-| `grove-testing`             | Testing philosophy, what/when to test                  |
-| `python-testing`            | pytest, fixtures, mocking                              |
-| `javascript-testing`        | Vitest/Jest testing                                    |
-| `go-testing`                | Go testing patterns                                    |
-| `rust-testing`              | Cargo test patterns                                    |
-| `code-quality`              | Black, Ruff, mypy                                      |
-| `project-scaffolding`       | New project setup                                      |
-| `cicd-automation`           | GitHub Actions workflows                               |
-| `docker-workflows`          | Containerization                                       |
-| `cloudflare-deployment`     | Workers, KV, R2, D1                                    |
-| `svelte5-development`       | Svelte 5 with runes                                    |
-| `rich-terminal-output`      | Terminal UI with Rich                                  |
-| `grove-ui-design`           | Glassmorphism, seasons, forests, warm UI               |
-| `grove-documentation`       | Grove voice, help articles, user-facing text           |
-| `grove-spec-writing`        | Technical specifications with Grove formatting         |
-| `museum-documentation`      | Elegant, narrative documentation for Wanderers         |
-| `walking-through-the-grove` | Finding Grove-themed names for new services            |
-| `grove-issues`              | Parse brain dumps into structured GitHub issues        |
-| `npm-publish`               | npm package publishing workflow                        |
-| `turtle-harden`             | Security hardening, defense in depth, secure by design |
-| `raven-investigate`         | Cross-codebase security audit with parallel fan-out    |
-| `osprey-appraise`           | Project estimation, quoting, and client proposals      |
-| `research-strategy`         | Systematic research                                    |
-
----
-
-## Code Style Guidelines
+## Code Style
 
 ### Function & Variable Naming
 
 - Use meaningful, descriptive names
 - Keep functions small and focused on single responsibilities
-- Add docstrings to functions and classes
 
 ### Error Handling (Signpost Standard)
 
-**MANDATORY: Every error MUST use a Signpost error code.** Bare `throw new Error()` or `throw error(500, 'message')` is not acceptable in Grove code.
+**MANDATORY: Every error MUST use a Signpost error code.** Bare `throw new Error()` is not acceptable.
 
 **Import:**
 
@@ -1041,7 +323,7 @@ import {
 } from "@autumnsgrove/lattice/errors";
 ```
 
-**Quick Reference — Which Helper Where:**
+**Which Helper Where:**
 
 | Context                        | Helper              | Example                                                                    |
 | ------------------------------ | ------------------- | -------------------------------------------------------------------------- |
@@ -1060,126 +342,88 @@ import {
 | `AUTH_ERRORS`  | `HW-AUTH-XXX`     | `@autumnsgrove/lattice/heartwood` |
 | `PLANT_ERRORS` | `PLANT-XXX`       | `apps/plant/src/lib/errors.ts`    |
 
-**Number ranges:** 001-019 infrastructure, 020-039 auth, 040-059 business logic, 060-079 rate limiting, 080-099 internal
-
 **Client-Side Feedback (Toast):**
 
 ```typescript
 import { toast } from "@autumnsgrove/lattice/ui";
 
-// After successful action
 toast.success("Post published!");
-
-// After failed action
 toast.error(err instanceof Error ? err.message : "Something went wrong");
-
-// Async operations
 toast.promise(apiRequest("/api/export", { method: "POST" }), {
 	loading: "Exporting...",
 	success: "Export complete!",
 	error: "Export failed.",
 });
-
-// Multi-step flows
-const id = toast.loading("Saving...");
-// ... later
-toast.dismiss(id);
-toast.success("Saved!");
 ```
 
-**When NOT to use toast:** form validation errors (use `fail()` + inline display), page load failures (`+error.svelte` handles these), persistent admin notices (use GroveMessages)
-
-**Error Handling Checklist:**
-
-```
-[ ] Server errors use a Signpost code from the appropriate catalog
-[ ] API routes return buildErrorJson() — never ad-hoc JSON
-[ ] Page loads use throwGroveError() for expected errors
-[ ] logGroveError() called for all server-side errors
-[ ] Client actions show toast.success() or toast.error()
-[ ] New error codes follow number ranges and have warm userMessage
-[ ] adminMessage never reaches the client
-```
+**When NOT to use toast:** form validation errors (use `fail()` + inline), page load failures (`+error.svelte`), persistent notices (use GroveMessages)
 
 See `AgentUsage/error_handling.md` for the full reference.
 
 ### File Organization
 
 - Group related functionality into modules
-- Use consistent import ordering:
-  1. Standard library
-  2. Third-party packages
-  3. Local imports
+- Import ordering: standard library → third-party → local imports
 - Keep configuration separate from logic
 
----
+### Database Query Patterns
 
-## Communication Style
+**Isolate independent queries** — never put multiple in the same try/catch:
 
-- Be concise but thorough
-- Explain reasoning for significant decisions
-- Ask for clarification when requirements are ambiguous
-- Proactively suggest improvements when appropriate
+```typescript
+// ❌ BAD - one failure blocks all
+try {
+	const settings = await db.prepare("SELECT * FROM settings").all();
+	const pages = await db.prepare("SELECT * FROM pages").all();
+} catch (error) {}
+
+// ✅ GOOD - isolated with individual fallbacks
+const [settings, pages] = await Promise.all([
+	db.prepare("SELECT * FROM settings").all().catch(() => null),
+	db.prepare("SELECT * FROM pages").all().catch(() => null),
+]);
+```
+
+**Use typed query builders** from `libs/engine/src/lib/server/services/database.ts` instead of raw SQL. See `AgentUsage/db_usage.md` for details.
+
+### Multi-Tenant CSRF
+
+SvelteKit's built-in CSRF fails behind `grove-router` proxy. Configure `csrf.trustedOrigins` in `svelte.config.js`:
+
+```javascript
+kit: {
+  csrf: {
+    checkOrigin: true,
+    trustedOrigins: ["https://grove.place", "https://*.grove.place", "http://localhost:5173"],
+  },
+}
+```
 
 ---
 
 ## Agent Ecosystem
 
-Grove uses a **two-layer agent architecture** for specialized task delegation. Agents handle focused responsibilities so the main conversation stays clean and context-efficient.
+Grove uses specialized subagents. **Prefer Grove agents** (`.claude/agents/`) over generic ones — they know gw/gf, Lattice conventions, and the monorepo.
 
-### Layer 1: User-Level Agents (`~/.claude/agents/`)
+| Task                 | Agent              |
+| -------------------- | ------------------ |
+| Run CI               | **grove-runner**   |
+| Analyze git          | **grove-git**      |
+| Code changes         | **grove-coder**    |
+| Search code          | **grove-scout**    |
+| Verify before commit | **grove-verifier** |
 
-Generic agents portable across all projects:
-
-| Agent                       | Role     | Purpose                                                               |
-| --------------------------- | -------- | --------------------------------------------------------------------- |
-| **house-bash**              | Executor | Runs commands, reports output. Never edits files or fixes failures.   |
-| **house-git**               | Observer | Analyzes diffs, commits, branches. READ-ONLY — never runs git writes. |
-| **house-research**          | Observer | Searches 20+ files, returns condensed findings.                       |
-| **haiku-coder**             | Actor    | Small code patches (0-250 lines). No Bash access — cannot run tests.  |
-| **web-research-specialist** | Observer | Web search and URL content extraction.                                |
-
-### Layer 2: Grove-Specific Agents (`.claude/agents/`)
-
-Project agents that know gw/gf, Lattice conventions, Signpost errors, and the monorepo:
-
-| Agent              | Role     | Purpose                                                                            |
-| ------------------ | -------- | ---------------------------------------------------------------------------------- |
-| **grove-runner**   | Executor | CI/build/test via `gw ci`. Never edits files or fixes failures.                    |
-| **grove-git**      | Observer | Git analysis via `gw git`/`gf`. Knows conventional commits and package boundaries. |
-| **grove-coder**    | Actor    | Code patches with engine-first imports, Signpost errors, cn(), Svelte 5 runes.     |
-| **grove-scout**    | Observer | Codebase exploration via `gf`. Impact analysis, usage tracing, TODO discovery.     |
-| **grove-verifier** | Executor | Pre-commit gate. Runs CI and delivers PASS/FAIL verdict. Never fixes.              |
-
-### Agent Selection
-
-**Prefer Grove agents** when working in this monorepo — they know the conventions:
-
-| Task                 | Generic        | Grove (Preferred)  |
-| -------------------- | -------------- | ------------------ |
-| Run CI               | house-bash     | **grove-runner**   |
-| Analyze git          | house-git      | **grove-git**      |
-| Code changes         | haiku-coder    | **grove-coder**    |
-| Search code          | house-research | **grove-scout**    |
-| Verify before commit | house-bash     | **grove-verifier** |
-
-**Full reference:** `AgentUsage/house_agents.md`
+Full reference: `AgentUsage/house_agents.md`
 
 ---
 
 ## Additional Resources
 
-### Skills Documentation
-
-Skills are the primary way to access specialized knowledge. Use the Skill tool to invoke them.
-Skills are located in `.claude/skills/` and provide concise, actionable guidance.
-
-### Extended Documentation
-
-For in-depth reference beyond what skills provide, see:
-**`AgentUsage/README.md`** - Master index of detailed documentation
+- **Skills:** `.claude/skills/` — primary mechanism for specialized workflows
+- **Extended docs:** `AgentUsage/README.md` — master index of detailed documentation
+- **Design context:** `AgentUsage/design_context.md` — brand, aesthetic, principles
 
 ---
 
-_Last updated: 2026-02-18_
+_Last updated: 2026-02-21_
 _Model: Claude Opus 4.6_
