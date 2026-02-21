@@ -55,6 +55,7 @@ Grove specifications define the architecture, interfaces, and implementation det
 | **[Grafts](grafts-spec.md)** | Per-tenant feature customization | **Active** | All services |
 | **[Website](website-spec.md)** | Public marketing site & landing pages | Active | Lattice, Engine |
 | **[Meadow](meadow-spec.md)** | Community feed & social features | Planned | Lattice, PostDO |
+| **[Blazes](blazes-spec.md)** | Content type indicators for Meadow | Planned | Meadow |
 
 ### Monitoring & Analytics
 
@@ -253,6 +254,7 @@ graph TB
 
 ### Phase 3: Community & Growth (Q1 2026)
 - [ ] Meadow community feed
+  - [ ] Blazes content type indicators
 - [ ] Bloom newsletters
 - [ ] Arbor theme marketplace
 - [ ] Thorn security scanning
@@ -348,6 +350,7 @@ Each specification should include:
 
 | Date | Version | Changes |
 |------|---------|---------|
+| 2026-02-21 | 2.7 | Added Blazes spec (content type indicators for Meadow) |
 | 2026-01-25 | 2.6 | Added Flow spec (Markdown editor documentation); corrected Arbor description |
 | 2026-01-20 | 2.5 | Added Grafts spec (feature customization system) |
 | 2026-01-14 | 2.4 | Added 19 missing specs: Heartwood, Plant, Weave, Curios, Forage, Ivy, Loam, Press, Seasons, Versioning, Shade, Centennial, Wisp, Release Summaries, Forests, Wander, Trails, Customer Repository, Fiction House Publishing |
@@ -400,5 +403,5 @@ Links to related documents.
 
 ---
 
-*Last Updated: January 2026*  
+*Last Updated: February 2026*
 *Part of the Grove Technical Documentation*
