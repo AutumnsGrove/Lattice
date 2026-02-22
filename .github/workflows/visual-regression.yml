@@ -174,7 +174,6 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const fs = require('fs');
             const testFailed = '${{ steps.visual-test.outputs.exit_code }}' !== '0';
 
             let body = '## 📸 Visual Regression Report\n\n';

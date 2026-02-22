@@ -49,9 +49,11 @@ runs:
 
     - name: Install dependencies
       shell: bash
+      env:
+        INSTALL_FILTER: ${{ inputs.install-filter }}
       run: |
-        if [ -n "${{ inputs.install-filter }}" ]; then
-          pnpm install ${{ inputs.install-filter }}
+        if [ -n "$INSTALL_FILTER" ]; then
+          pnpm install $INSTALL_FILTER
         else
           pnpm install
         fi
