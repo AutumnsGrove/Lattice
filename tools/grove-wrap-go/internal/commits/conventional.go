@@ -16,6 +16,14 @@ var DefaultTypes = []string{
 	"test", "chore", "perf", "ci", "build", "revert",
 }
 
+// Pre-compiled regex for the default conventional commit format.
+var defaultConventionalRe = regexp.MustCompile(
+	`(?i)^(` + strings.Join(DefaultTypes, "|") + `)(\(.+\))?!?: .+`,
+)
+
+// Pre-compiled regex for issue number extraction.
+var defaultIssueRe = regexp.MustCompile(`(?:^|/)(\d+)[-_]`)
+
 // Validate checks a commit message against conventional commits format.
 // Returns (ok, errorMessage).
 func Validate(message string, types []string, format string) (bool, string) {
@@ -36,21 +44,28 @@ func Validate(message string, types []string, format string) (bool, string) {
 	}
 
 	// Conventional commits format: type(scope)!?: description
-	if len(types) == 0 {
-		types = DefaultTypes
-	}
-	pattern := `^(` + strings.Join(types, "|") + `)(\(.+\))?!?: .+`
-	re, err := regexp.Compile("(?i)" + pattern)
-	if err != nil {
-		return false, fmt.Sprintf("invalid type pattern: %v", err)
+	var re *regexp.Regexp
+	if len(types) == 0 || sameTypes(types, DefaultTypes) {
+		re = defaultConventionalRe
+	} else {
+		pattern := `(?i)^(` + strings.Join(types, "|") + `)(\(.+\))?!?: .+`
+		var err error
+		re, err = regexp.Compile(pattern)
+		if err != nil {
+			return false, fmt.Sprintf("invalid type pattern: %v", err)
+		}
 	}
 
 	if !re.MatchString(firstLine) {
+		effectiveTypes := types
+		if len(effectiveTypes) == 0 {
+			effectiveTypes = DefaultTypes
+		}
 		return false, fmt.Sprintf(
 			"commit message must follow Conventional Commits format: type(scope): description\n"+
 				"Valid types: %s\n"+
 				"Example: feat(auth): add OAuth2 PKCE flow",
-			strings.Join(types, ", "),
+			strings.Join(effectiveTypes, ", "),
 		)
 	}
 
@@ -59,6 +74,19 @@ func Validate(message string, types []string, format string) (bool, string) {
 	}
 
 	return true, ""
+}
+
+// sameTypes checks if two type slices are identical.
+func sameTypes(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
 }
 
 // Format builds a conventional commit message from parts.
@@ -83,14 +111,17 @@ func Format(commitType, description string, scope string, body string, breaking 
 }
 
 // ExtractIssueNumber extracts an issue number from a branch name.
-// Pattern: (^|/)(\d+)[-_] (e.g., "feat/123-add-auth" → 123)
+// Pattern: (^|/)(\d+)[-_] (e.g., "feat/123-add-auth" -> 123)
 func ExtractIssueNumber(branch string, pattern string) int {
+	var re *regexp.Regexp
 	if pattern == "" {
-		pattern = `(?:^|/)(\d+)[-_]`
-	}
-	re, err := regexp.Compile(pattern)
-	if err != nil {
-		return 0
+		re = defaultIssueRe
+	} else {
+		var err error
+		re, err = regexp.Compile(pattern)
+		if err != nil {
+			return 0
+		}
 	}
 	m := re.FindStringSubmatch(branch)
 	if len(m) > 1 {

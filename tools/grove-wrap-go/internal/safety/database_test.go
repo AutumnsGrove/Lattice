@@ -138,7 +138,7 @@ func TestEstimateRows(t *testing.T) {
 		{"DELETE FROM posts WHERE tenant_id = 'abc' AND slug = 'test' AND version = 1", 1},
 		{"DELETE FROM posts WHERE status = 'draft'", 100},
 		{"DELETE FROM posts WHERE status = 'draft' LIMIT 10", 10},
-		{"DELETE FROM posts", 10000}, // no WHERE
+		{"DELETE FROM posts", defaultRowEstimate}, // no WHERE
 	}
 
 	for _, tt := range tests {

@@ -44,6 +44,10 @@ var (
 // Queries longer than this are rejected to prevent resource exhaustion.
 const MaxQueryLength = 65536
 
+// defaultRowEstimate is the conservative fallback when we can't determine
+// how many rows a query affects. High values fail safely.
+const defaultRowEstimate = 10000
+
 // ValidateSQL checks a SQL query against database safety rules.
 func ValidateSQL(sql string, protectedTables []string, maxDeleteRows, maxUpdateRows int, skipRowLimits bool) error {
 	if len(sql) > MaxQueryLength {
@@ -214,13 +218,13 @@ func estimateRows(sql string) int {
 	}
 
 	if !strings.Contains(upper, "WHERE") {
-		return 10000
+		return defaultRowEstimate
 	}
 
 	// Extract WHERE clause
 	m := reWhereClause.FindStringSubmatch(upper)
 	if len(m) < 2 {
-		return 10000
+		return defaultRowEstimate
 	}
 	where := m[1]
 
@@ -232,8 +236,17 @@ func estimateRows(sql string) int {
 	// WHERE id IN (...) → count items
 	inMatch := reIDIn.FindStringSubmatch(where)
 	if len(inMatch) > 1 {
-		items := strings.Split(inMatch[1], ",")
-		return len(items)
+		raw := strings.Split(inMatch[1], ",")
+		count := 0
+		for _, item := range raw {
+			if strings.TrimSpace(item) != "" {
+				count++
+			}
+		}
+		if count == 0 {
+			count = 1
+		}
+		return count
 	}
 
 	// Count equality conditions
@@ -248,5 +261,5 @@ func estimateRows(sql string) int {
 		return 100
 	}
 
-	return 10000
+	return defaultRowEstimate
 }
