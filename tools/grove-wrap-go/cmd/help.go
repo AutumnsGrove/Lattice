@@ -44,6 +44,10 @@ var rootHelpCategories = []ui.HelpCategory{
 			{Name: "r2", Desc: "R2 object storage"},
 			{Name: "deploy", Desc: "Cloudflare deployment"},
 			{Name: "logs", Desc: "Worker log streaming"},
+			{Name: "flag", Desc: "Feature flag management"},
+			{Name: "backup", Desc: "D1 database backups"},
+			{Name: "do", Desc: "Durable Object operations"},
+			{Name: "email", Desc: "Email routing operations"},
 		},
 	},
 	{
