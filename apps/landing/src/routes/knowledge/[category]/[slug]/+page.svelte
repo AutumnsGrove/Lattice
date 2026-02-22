@@ -86,8 +86,8 @@
 			}
 		};
 
-		articleRef.addEventListener("click", handleCopyClick);
-		return () => articleRef.removeEventListener("click", handleCopyClick);
+		articleRef!.addEventListener("click", handleCopyClick);
+		return () => articleRef!.removeEventListener("click", handleCopyClick);
 	});
 </script>
 
@@ -168,7 +168,10 @@
 					{/if}
 
 					<!-- Article Content -->
-					<article bind:this={articleRef} class="content-body prose prose-bark dark:prose-invert max-w-none">
+					<article
+						bind:this={articleRef}
+						class="content-body prose prose-bark dark:prose-invert max-w-none"
+					>
 						<!-- eslint-disable-next-line svelte/no-at-html-tags -- sanitized markdown output -->
 						{@html doc.html ||
 							`<p class="text-foreground-muted leading-relaxed">${doc.excerpt}</p>`}
