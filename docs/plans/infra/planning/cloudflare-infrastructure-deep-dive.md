@@ -1,3 +1,11 @@
+---
+title: "Grove x Cloudflare Infrastructure — The Deep Dive"
+description: "Technical reference for Durable Objects, Queues, Workflows, and their application patterns in the Grove ecosystem"
+category: infra
+status: planning
+created: 2026-02-21
+---
+
 # Grove × Cloudflare Infrastructure — The Deep Dive
 
 > *A knowledge document for Grove's internal forest. Synthesized from research & exploration — February 2026.*

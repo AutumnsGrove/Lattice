@@ -1,3 +1,11 @@
+---
+title: "Cloudflare Deep Dive Safari — Research vs Reality"
+description: "A 9-stop safari comparing Cloudflare research with actual codebase reality across Queues, Workflows, DOs, and deployment patterns"
+category: safari
+status: planned
+created: 2026-02-21
+---
+
 # Cloudflare Deep Dive Safari — Research vs Reality
 
 > *The research painted a map. The codebase told the truth. This journal records where they agree, where they diverge, and what actually matters.*

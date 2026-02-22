@@ -1,3 +1,11 @@
+---
+title: "Petal Image Moderation — Deep Dive Reference"
+description: "Full architecture reference for Petal's 4-layer image moderation pipeline: CSAM detection, content classification, sanity checks, and output verification"
+category: features
+status: planning
+created: 2026-02-21
+---
+
 # Petal Image Moderation — Deep Dive Reference
 
 > *Four layers of protection, from CSAM detection to AI output verification. This document captures the full architecture for reference.*

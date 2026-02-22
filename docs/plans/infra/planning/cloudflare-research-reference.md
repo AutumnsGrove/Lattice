@@ -1,3 +1,11 @@
+---
+title: "Cloudflare Research — Consolidated Reference"
+description: "Consolidated reference from three safaris and one deep dive covering the full Cloudflare adoption roadmap, deployment landscape, and moderation stack"
+category: infra
+status: planning
+created: 2026-02-21
+---
+
 # Cloudflare Research — Consolidated Reference
 
 > *The full map, drawn from three safaris and one deep dive. Everything in one place for quick reference.*
