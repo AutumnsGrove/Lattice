@@ -500,6 +500,7 @@
 	let showNewBlazeForm = $state(false);
 	let newBlazeSlug = $state("");
 	let newBlazeLabel = $state("");
+	let slugManuallyEdited = $state(false);
 	let newBlazeIcon = $state("Bell");
 	let newBlazeColor = $state("sky");
 	let savingBlaze = $state(false);
@@ -524,9 +525,9 @@
 		fetchBlazes();
 	});
 
-	/** Auto-generate slug from label */
+	/** Auto-generate slug from label (unless user manually edited the slug) */
 	$effect(() => {
-		if (newBlazeLabel && showNewBlazeForm) {
+		if (newBlazeLabel && showNewBlazeForm && !slugManuallyEdited) {
 			newBlazeSlug = newBlazeLabel
 				.toLowerCase()
 				.replace(/[^a-z0-9\s-]/g, "")
@@ -557,6 +558,7 @@
 			newBlazeLabel = "";
 			newBlazeIcon = "Bell";
 			newBlazeColor = "sky";
+			slugManuallyEdited = false;
 			await fetchBlazes();
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : "Failed to create blaze");
@@ -1183,6 +1185,7 @@
 								type="text"
 								id="blaze-slug"
 								bind:value={newBlazeSlug}
+								oninput={() => (slugManuallyEdited = true)}
 								placeholder="e.g. late-night-thoughts"
 								class="form-input"
 								maxlength="40"

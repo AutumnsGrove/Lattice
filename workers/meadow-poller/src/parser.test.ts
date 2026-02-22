@@ -36,71 +36,67 @@ const VALID_FEED = `<?xml version="1.0" encoding="UTF-8"?>
 </rss>`;
 
 describe("parseFeed", () => {
-  it("parses a valid RSS 2.0 feed with content:encoded", () => {
-    const feed = parseFeed(VALID_FEED);
+	it("parses a valid RSS 2.0 feed with content:encoded", () => {
+		const feed = parseFeed(VALID_FEED);
 
-    expect(feed.title).toBe("Test Blog");
-    expect(feed.link).toBe("https://test.grove.place");
-    expect(feed.description).toBe("A test blog");
-    expect(feed.items).toHaveLength(2);
-  });
+		expect(feed.title).toBe("Test Blog");
+		expect(feed.link).toBe("https://test.grove.place");
+		expect(feed.description).toBe("A test blog");
+		expect(feed.items).toHaveLength(2);
+	});
 
-  it("extracts content:encoded from CDATA", () => {
-    const feed = parseFeed(VALID_FEED);
-    const first = feed.items[0];
+	it("extracts content:encoded from CDATA", () => {
+		const feed = parseFeed(VALID_FEED);
+		const first = feed.items[0];
 
-    expect(first.contentEncoded).toBe("<p>Full HTML content here.</p>");
-  });
+		expect(first.contentEncoded).toBe("<p>Full HTML content here.</p>");
+	});
 
-  it("handles items without content:encoded", () => {
-    const feed = parseFeed(VALID_FEED);
-    const second = feed.items[1];
+	it("handles items without content:encoded", () => {
+		const feed = parseFeed(VALID_FEED);
+		const second = feed.items[1];
 
-    expect(second.contentEncoded).toBeNull();
-    expect(second.description).toBe("Another post");
-  });
+		expect(second.contentEncoded).toBeNull();
+		expect(second.description).toBe("Another post");
+	});
 
-  it("extracts multiple categories", () => {
-    const feed = parseFeed(VALID_FEED);
-    const first = feed.items[0];
+	it("extracts multiple categories", () => {
+		const feed = parseFeed(VALID_FEED);
+		const first = feed.items[0];
 
-    expect(first.categories).toEqual(["tech", "svelte"]);
-  });
+		expect(first.categories).toEqual(["tech", "svelte"]);
+	});
 
-  it("extracts enclosure URL", () => {
-    const feed = parseFeed(VALID_FEED);
-    const first = feed.items[0];
+	it("extracts enclosure URL", () => {
+		const feed = parseFeed(VALID_FEED);
+		const first = feed.items[0];
 
-    expect(first.enclosureUrl).toBe("https://test.grove.place/images/hero.jpg");
-  });
+		expect(first.enclosureUrl).toBe("https://test.grove.place/images/hero.jpg");
+	});
 
-  it("extracts guid from isPermaLink element", () => {
-    const feed = parseFeed(VALID_FEED);
+	it("extracts guid from isPermaLink element", () => {
+		const feed = parseFeed(VALID_FEED);
 
-    expect(feed.items[0].guid).toBe(
-      "https://test.grove.place/garden/hello-world",
-    );
-  });
+		expect(feed.items[0].guid).toBe("https://test.grove.place/garden/hello-world");
+	});
 
-  it("extracts pubDate", () => {
-    const feed = parseFeed(VALID_FEED);
+	it("extracts pubDate", () => {
+		const feed = parseFeed(VALID_FEED);
 
-    expect(feed.items[0].pubDate).toBe("Sat, 15 Feb 2026 12:00:00 GMT");
-  });
+		expect(feed.items[0].pubDate).toBe("Sat, 15 Feb 2026 12:00:00 GMT");
+	});
 
-  it("throws on malformed XML", () => {
-    expect(() => parseFeed("<not><valid>xml")).toThrow();
-  });
+	it("throws on malformed XML", () => {
+		expect(() => parseFeed("<not><valid>xml")).toThrow();
+	});
 
-  it("throws on missing channel structure", () => {
-    const xml = `<?xml version="1.0"?><feed><entry>test</entry></feed>`;
-    expect(() => parseFeed(xml)).toThrow(
-      "Invalid RSS feed: missing <rss><channel> structure",
-    );
-  });
+	it("throws on missing channel structure", () => {
+		const xml = `<?xml version="1.0"?><feed><entry>test</entry></feed>`;
+		expect(() => parseFeed(xml)).toThrow("Invalid RSS feed: missing <rss><channel> structure");
+	});
 
-  it("handles empty feed (no items)", () => {
-    const xml = `<?xml version="1.0"?>
+	it("handles empty feed (no items)", () => {
+		const xml = `<?xml version="1.0"?>
 <rss version="2.0">
   <channel>
     <title>Empty Blog</title>
@@ -109,13 +105,13 @@ describe("parseFeed", () => {
   </channel>
 </rss>`;
 
-    const feed = parseFeed(xml);
-    expect(feed.title).toBe("Empty Blog");
-    expect(feed.items).toHaveLength(0);
-  });
+		const feed = parseFeed(xml);
+		expect(feed.title).toBe("Empty Blog");
+		expect(feed.items).toHaveLength(0);
+	});
 
-  it("handles single item feed (ensures array normalization)", () => {
-    const xml = `<?xml version="1.0"?>
+	it("handles single item feed (ensures array normalization)", () => {
+		const xml = `<?xml version="1.0"?>
 <rss version="2.0">
   <channel>
     <title>Solo Blog</title>
@@ -128,13 +124,13 @@ describe("parseFeed", () => {
   </channel>
 </rss>`;
 
-    const feed = parseFeed(xml);
-    expect(feed.items).toHaveLength(1);
-    expect(feed.items[0].title).toBe("Only Post");
-  });
+		const feed = parseFeed(xml);
+		expect(feed.items).toHaveLength(1);
+		expect(feed.items[0].title).toBe("Only Post");
+	});
 
-  it("does not resolve XXE entities", () => {
-    const xml = `<?xml version="1.0"?>
+	it("does not resolve XXE entities", () => {
+		const xml = `<?xml version="1.0"?>
 <!DOCTYPE rss [
   <!ENTITY xxe SYSTEM "file:///etc/passwd">
 ]>
@@ -146,18 +142,18 @@ describe("parseFeed", () => {
   </channel>
 </rss>`;
 
-    // Should either throw or return the entity reference as-is (not resolved)
-    try {
-      const feed = parseFeed(xml);
-      // If it parses, the entity should NOT be resolved to file contents
-      expect(feed.title).not.toContain("root:");
-    } catch {
-      // Throwing is also acceptable — malformed from parser's perspective
-    }
-  });
+		// Should either throw or return the entity reference as-is (not resolved)
+		try {
+			const feed = parseFeed(xml);
+			// If it parses, the entity should NOT be resolved to file contents
+			expect(feed.title).not.toContain("root:");
+		} catch {
+			// Throwing is also acceptable — malformed from parser's perspective
+		}
+	});
 
-  it("strips HTML tags from title and description", () => {
-    const xml = `<?xml version="1.0"?>
+	it("strips HTML tags from title and description", () => {
+		const xml = `<?xml version="1.0"?>
 <rss version="2.0">
   <channel>
     <title>Blog</title>
@@ -171,17 +167,17 @@ describe("parseFeed", () => {
   </channel>
 </rss>`;
 
-    const feed = parseFeed(xml);
-    const item = feed.items[0];
+		const feed = parseFeed(xml);
+		const item = feed.items[0];
 
-    // HTML should be stripped from text fields
-    expect(item.title).not.toContain("<b>");
-    expect(item.description).not.toContain("<p>");
-    expect(item.description).not.toContain("<img");
-  });
+		// HTML should be stripped from text fields
+		expect(item.title).not.toContain("<b>");
+		expect(item.description).not.toContain("<p>");
+		expect(item.description).not.toContain("<img");
+	});
 
-  it("falls back to link when guid is missing", () => {
-    const xml = `<?xml version="1.0"?>
+	it("falls back to link when guid is missing", () => {
+		const xml = `<?xml version="1.0"?>
 <rss version="2.0">
   <channel>
     <title>Blog</title>
@@ -195,12 +191,12 @@ describe("parseFeed", () => {
   </channel>
 </rss>`;
 
-    const feed = parseFeed(xml);
-    expect(feed.items[0].guid).toBe("https://test.grove.place/garden/no-guid");
-  });
+		const feed = parseFeed(xml);
+		expect(feed.items[0].guid).toBe("https://test.grove.place/garden/no-guid");
+	});
 
-  it("strips HTML from categories", () => {
-    const xml = `<?xml version="1.0"?>
+	it("strips HTML from categories", () => {
+		const xml = `<?xml version="1.0"?>
 <rss version="2.0">
   <channel>
     <title>Blog</title>
@@ -215,12 +211,12 @@ describe("parseFeed", () => {
   </channel>
 </rss>`;
 
-    const feed = parseFeed(xml);
-    expect(feed.items[0].categories).toEqual(["bold-tag", "clean-tag"]);
-  });
+		const feed = parseFeed(xml);
+		expect(feed.items[0].categories).toEqual(["bold-tag", "clean-tag"]);
+	});
 
-  it("extracts grove:blaze from Grove RSS namespace", () => {
-    const xml = `<?xml version="1.0"?>
+	it("extracts grove:blaze from Grove RSS namespace", () => {
+		const xml = `<?xml version="1.0"?>
 <rss version="2.0" xmlns:grove="https://grove.place/xmlns/grove/1.0">
   <channel>
     <title>Blog</title>
@@ -234,18 +230,18 @@ describe("parseFeed", () => {
   </channel>
 </rss>`;
 
-    const feed = parseFeed(xml);
-    expect(feed.items[0].blaze).toBe("food-review");
-  });
+		const feed = parseFeed(xml);
+		expect(feed.items[0].blaze).toBe("food-review");
+	});
 
-  it("returns null blaze when grove:blaze is absent", () => {
-    const feed = parseFeed(VALID_FEED);
-    expect(feed.items[0].blaze).toBeNull();
-    expect(feed.items[1].blaze).toBeNull();
-  });
+	it("returns null blaze when grove:blaze is absent", () => {
+		const feed = parseFeed(VALID_FEED);
+		expect(feed.items[0].blaze).toBeNull();
+		expect(feed.items[1].blaze).toBeNull();
+	});
 
-  it("rejects invalid blaze slugs (XSS attempt)", () => {
-    const xml = `<?xml version="1.0"?>
+	it("rejects invalid blaze slugs (XSS attempt)", () => {
+		const xml = `<?xml version="1.0"?>
 <rss version="2.0" xmlns:grove="https://grove.place/xmlns/grove/1.0">
   <channel>
     <title>Blog</title>
@@ -259,13 +255,13 @@ describe("parseFeed", () => {
   </channel>
 </rss>`;
 
-    const feed = parseFeed(xml);
-    // Invalid slug format — should be silently dropped
-    expect(feed.items[0].blaze).toBeNull();
-  });
+		const feed = parseFeed(xml);
+		// Invalid slug format — should be silently dropped
+		expect(feed.items[0].blaze).toBeNull();
+	});
 
-  it("rejects blaze slugs with uppercase or spaces", () => {
-    const xml = `<?xml version="1.0"?>
+	it("rejects blaze slugs with uppercase or spaces", () => {
+		const xml = `<?xml version="1.0"?>
 <rss version="2.0" xmlns:grove="https://grove.place/xmlns/grove/1.0">
   <channel>
     <title>Blog</title>
@@ -279,7 +275,27 @@ describe("parseFeed", () => {
   </channel>
 </rss>`;
 
-    const feed = parseFeed(xml);
-    expect(feed.items[0].blaze).toBeNull();
-  });
+		const feed = parseFeed(xml);
+		expect(feed.items[0].blaze).toBeNull();
+	});
+
+	it("rejects blaze slugs exceeding 40 characters", () => {
+		const longSlug = "a" + "-bbbbb".repeat(8); // 49 chars, valid pattern but too long
+		const xml = `<?xml version="1.0"?>
+<rss version="2.0" xmlns:grove="https://grove.place/xmlns/grove/1.0">
+  <channel>
+    <title>Blog</title>
+    <link>https://test.grove.place</link>
+    <description>Desc</description>
+    <item>
+      <title>Post</title>
+      <link>https://test.grove.place/garden/post</link>
+      <grove:blaze>${longSlug}</grove:blaze>
+    </item>
+  </channel>
+</rss>`;
+
+		const feed = parseFeed(xml);
+		expect(feed.items[0].blaze).toBeNull();
+	});
 });

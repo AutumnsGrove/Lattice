@@ -155,26 +155,22 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 			throwGroveError(403, API_ERRORS.USAGE_LIMIT_REACHED, "API");
 		}
 
-		// Check for slug conflict within tenant
-		const existing = await platform.env.DB.prepare(
-			"SELECT id FROM blaze_definitions WHERE tenant_id = ? AND slug = ?",
-		)
-			.bind(tenantId, slug)
-			.first();
-
-		if (existing) {
-			throwGroveError(409, API_ERRORS.VALIDATION_FAILED, "API");
-		}
-
-		// Generate ID and insert
+		// Generate ID and insert — rely on UNIQUE constraint for conflict detection
 		const id = `blaze-${tenantId}-${slug}`;
 		const nextOrder = (countResult?.count ?? 0) + 1;
 
-		await platform.env.DB.prepare(
-			"INSERT INTO blaze_definitions (id, tenant_id, slug, label, icon, color, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?)",
-		)
-			.bind(id, tenantId, slug, label, icon, color, nextOrder)
-			.run();
+		try {
+			await platform.env.DB.prepare(
+				"INSERT INTO blaze_definitions (id, tenant_id, slug, label, icon, color, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?)",
+			)
+				.bind(id, tenantId, slug, label, icon, color, nextOrder)
+				.run();
+		} catch (insertErr) {
+			if (String(insertErr).includes("UNIQUE")) {
+				throwGroveError(409, API_ERRORS.SLUG_CONFLICT, "API");
+			}
+			throw insertErr;
+		}
 
 		return json(
 			{
