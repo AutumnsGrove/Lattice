@@ -9,12 +9,14 @@
 // =============================================================================
 
 export interface Env {
-  /** D1 database (grove-engine-db) */
-  DB: D1Database;
-  /** Key Encryption Key from Cloudflare Secrets Store (hex string) */
-  GROVE_KEK: string;
-  /** Optional fallback OpenRouter key if tenant key fails */
-  OPENROUTER_API_KEY?: string;
+	/** Core D1 database (grove-engine-db) — tenants, tenant_secrets */
+	DB: D1Database;
+	/** Curio D1 database (grove-curios-db) — timeline_* and all curio tables */
+	CURIO_DB: D1Database;
+	/** Key Encryption Key from Cloudflare Secrets Store (hex string) */
+	GROVE_KEK: string;
+	/** Optional fallback OpenRouter key if tenant key fails */
+	OPENROUTER_API_KEY?: string;
 }
 
 // =============================================================================
@@ -23,41 +25,41 @@ export interface Env {
 
 /** Raw row from timeline_curio_config table */
 export interface TenantConfigRow {
-  tenant_id: string;
-  github_username: string;
-  openrouter_model: string;
-  voice_preset: string;
-  custom_system_prompt: string | null;
-  custom_summary_instructions: string | null;
-  custom_gutter_style: string | null;
-  repos_include: string | null;
-  repos_exclude: string | null;
-  timezone: string;
-  owner_name: string | null;
+	tenant_id: string;
+	github_username: string;
+	openrouter_model: string;
+	voice_preset: string;
+	custom_system_prompt: string | null;
+	custom_summary_instructions: string | null;
+	custom_gutter_style: string | null;
+	repos_include: string | null;
+	repos_exclude: string | null;
+	timezone: string;
+	owner_name: string | null;
 }
 
 /** Parsed tenant configuration */
 export interface TenantConfig {
-  tenantId: string;
-  githubUsername: string;
-  openrouterModel: string;
-  voicePreset: string;
-  customSystemPrompt: string | null;
-  customSummaryInstructions: string | null;
-  customGutterStyle: string | null;
-  reposInclude: string[] | null;
-  reposExclude: string[] | null;
-  timezone: string;
-  ownerName: string | null;
+	tenantId: string;
+	githubUsername: string;
+	openrouterModel: string;
+	voicePreset: string;
+	customSystemPrompt: string | null;
+	customSummaryInstructions: string | null;
+	customGutterStyle: string | null;
+	reposInclude: string[] | null;
+	reposExclude: string[] | null;
+	timezone: string;
+	ownerName: string | null;
 }
 
 /** Historical context row from database */
 export interface HistoricalContextRow {
-  summary_date: string;
-  context_brief: string | null;
-  detected_focus: string | null;
-  brief_summary: string | null;
-  commit_count: number;
+	summary_date: string;
+	context_brief: string | null;
+	detected_focus: string | null;
+	brief_summary: string | null;
+	commit_count: number;
 }
 
 // =============================================================================
@@ -65,35 +67,35 @@ export interface HistoricalContextRow {
 // =============================================================================
 
 export interface GitHubRepo {
-  name: string;
-  full_name: string;
-  fork: boolean;
-  pushed_at: string;
+	name: string;
+	full_name: string;
+	fork: boolean;
+	pushed_at: string;
 }
 
 export interface GitHubCommitDetail {
-  sha: string;
-  commit: {
-    message: string;
-    author: {
-      date: string;
-      name: string;
-      email: string;
-    };
-  };
-  stats?: {
-    additions: number;
-    deletions: number;
-  };
+	sha: string;
+	commit: {
+		message: string;
+		author: {
+			date: string;
+			name: string;
+			email: string;
+		};
+	};
+	stats?: {
+		additions: number;
+		deletions: number;
+	};
 }
 
 export interface Commit {
-  sha: string;
-  repo: string;
-  message: string;
-  timestamp: string;
-  additions: number;
-  deletions: number;
+	sha: string;
+	repo: string;
+	message: string;
+	timestamp: string;
+	additions: number;
+	deletions: number;
 }
 
 // =============================================================================
@@ -101,22 +103,22 @@ export interface Commit {
 // =============================================================================
 
 export interface GutterComment {
-  anchor: string;
-  type: "comment";
-  content: string;
+	anchor: string;
+	type: "comment";
+	content: string;
 }
 
 export interface VoicePreset {
-  id: string;
-  name: string;
-  systemPrompt: string;
-  buildPrompt: (commits: Commit[], date: string, ownerName?: string) => string;
+	id: string;
+	name: string;
+	systemPrompt: string;
+	buildPrompt: (commits: Commit[], date: string, ownerName?: string) => string;
 }
 
 export interface CustomVoiceConfig {
-  systemPrompt?: string;
-  summaryInstructions?: string;
-  gutterStyle?: string;
+	systemPrompt?: string;
+	summaryInstructions?: string;
+	gutterStyle?: string;
 }
 
 // =============================================================================
@@ -124,52 +126,52 @@ export interface CustomVoiceConfig {
 // =============================================================================
 
 export type TaskType =
-  | "security work"
-  | "migration"
-  | "refactoring"
-  | "testing improvements"
-  | "documentation"
-  | "UI/UX work"
-  | "API development"
-  | "authentication"
-  | "performance optimization"
-  | "deployment/CI work"
-  | "database work"
-  | "bug fixes";
+	| "security work"
+	| "migration"
+	| "refactoring"
+	| "testing improvements"
+	| "documentation"
+	| "UI/UX work"
+	| "API development"
+	| "authentication"
+	| "performance optimization"
+	| "deployment/CI work"
+	| "database work"
+	| "bug fixes";
 
 export interface ContextBrief {
-  date: string;
-  mainFocus: string;
-  repos: string[];
-  linesChanged: number;
-  commitCount: number;
-  detectedTask: TaskType | null;
+	date: string;
+	mainFocus: string;
+	repos: string[];
+	linesChanged: number;
+	commitCount: number;
+	detectedTask: TaskType | null;
 }
 
 export interface DetectedFocus {
-  task: TaskType;
-  startDate: string;
-  repos: string[];
+	task: TaskType;
+	startDate: string;
+	repos: string[];
 }
 
 export interface TaskContinuation {
-  task: TaskType;
-  startDate: string;
-  dayCount: number;
+	task: TaskType;
+	startDate: string;
+	dayCount: number;
 }
 
 export interface HistoricalContextEntry {
-  date: string;
-  brief: ContextBrief | null;
-  focus: DetectedFocus | null;
-  briefSummary: string | null;
+	date: string;
+	brief: ContextBrief | null;
+	focus: DetectedFocus | null;
+	briefSummary: string | null;
 }
 
 export interface SummaryContextData {
-  contextBrief: ContextBrief;
-  detectedFocus: DetectedFocus | null;
-  continuationOf: string | null;
-  focusStreak: number;
+	contextBrief: ContextBrief;
+	detectedFocus: DetectedFocus | null;
+	continuationOf: string | null;
+	focusStreak: number;
 }
 
 // =============================================================================
@@ -177,18 +179,18 @@ export interface SummaryContextData {
 // =============================================================================
 
 export interface GenerationResult {
-  success: boolean;
-  tenantId: string;
-  date: string;
-  commitCount?: number;
-  error?: string;
+	success: boolean;
+	tenantId: string;
+	date: string;
+	commitCount?: number;
+	error?: string;
 }
 
 export interface ParsedAIResponse {
-  success: boolean;
-  brief: string;
-  detailed: string;
-  gutter: GutterComment[];
+	success: boolean;
+	brief: string;
+	detailed: string;
+	gutter: GutterComment[];
 }
 
 // =============================================================================

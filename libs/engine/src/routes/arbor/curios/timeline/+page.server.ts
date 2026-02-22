@@ -32,7 +32,7 @@ interface TimelineConfigRow {
 }
 
 export const load: PageServerLoad = async ({ platform, locals }) => {
-	const db = platform?.env?.DB;
+	const db = platform?.env?.CURIO_DB;
 	const tenantId = locals.tenantId;
 
 	if (!db || !tenantId) {
@@ -131,7 +131,7 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 export const actions: Actions = {
 	save: async ({ request, platform, locals }) => {
 		console.warn("[Timeline Config] Save action called");
-		const db = platform?.env?.DB;
+		const db = platform?.env?.CURIO_DB;
 		const tenantId = locals.tenantId;
 		console.warn("[Timeline Config] tenantId:", tenantId, "db:", !!db);
 

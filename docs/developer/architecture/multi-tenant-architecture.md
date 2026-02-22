@@ -48,10 +48,10 @@
                           │
           ┌───────────────┼───────────────┐
           ▼               ▼               ▼
-      ┌───────┐      ┌───────┐      ┌───────┐
-      │  D1   │      │  R2   │      │  KV   │
-      │(data) │      │(media)│      │(cache)│
-      └───────┘      └───────┘      └───────┘
+    ┌────────┐ ┌────────┐ ┌────────┐ ┌───────┐ ┌───────┐
+    │  D1    │ │  D1    │ │  D1    │ │  R2   │ │  KV   │
+    │(engine)│ │(curios)│ │ (obs)  │ │(media)│ │(cache)│
+    └────────┘ └────────┘ └────────┘ └───────┘ └───────┘
 ```
 
 ## Key Design Decisions
@@ -146,6 +146,36 @@ tenant_settings (tenant_id, setting_key, setting_value)
 - Layout loads tenant settings
 - CSS variables set based on settings
 - Theme components render accordingly
+
+### 6. Database Extraction (February 2026)
+
+The original architecture used a single `grove-engine-db` for everything. As the platform grew to 120+ tables, we extracted two bounded contexts into their own D1 databases:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                   lattice Pages                              │
+├─────────────────────────────────────────────────────────────┤
+│  hooks.server.ts → TenantDO → grove-engine-db (DB)          │
+│                                                              │
+│  Curio routes    → grove-curios-db (CURIO_DB)                │
+│  Vista routes    → grove-observability-db (OBS_DB)           │
+│  Everything else → grove-engine-db (DB)                      │
+└─────────────────────────────────────────────────────────────┘
+          │               │               │
+          ▼               ▼               ▼
+      ┌───────┐      ┌───────┐      ┌───────┐
+      │engine │      │curios │      │ obs   │
+      │ (DB)  │      │(CURIO │      │(OBS   │
+      │78 tbl │      │  _DB) │      │  _DB) │
+      │       │      │45 tbl │      │16 tbl │
+      └───────┘      └───────┘      └───────┘
+```
+
+**Key design decision:** Curio routes get `tenantId` from `locals.tenantId` (set by hooks via TenantDO/engine-db). They never need to query engine-db for tenant verification. The only change is which D1 binding they use for curio SQL queries.
+
+**Cross-DB routes:** Three timeline routes (save-token, generate, backfill) need both databases — `DB` for SecretsManager (reads `tenant_secrets`/`tenants`) and `CURIO_DB` for timeline data tables.
+
+**Workers:** `workers/timeline-sync` has dual bindings (`DB` + `CURIO_DB`). `workers/vista-collector` only binds `OBS_DB`.
 
 ## Cost Analysis
 

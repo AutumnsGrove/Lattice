@@ -16,206 +16,190 @@
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import type { Commit } from "$lib/curios/timeline";
-import {
-  getTimelineToken,
-  TIMELINE_SECRET_KEYS,
-} from "$lib/curios/timeline/secrets.server";
+import { getTimelineToken, TIMELINE_SECRET_KEYS } from "$lib/curios/timeline/secrets.server";
 import { createThreshold } from "$lib/threshold/factory.js";
 import { thresholdCheck } from "$lib/threshold/adapters/sveltekit.js";
 import { API_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
 
 interface ConfigRow {
-  github_username: string;
-  github_token_encrypted: string;
-  repos_include: string | null;
-  repos_exclude: string | null;
+	github_username: string;
+	github_token_encrypted: string;
+	repos_include: string | null;
+	repos_exclude: string | null;
 }
 
 interface GitHubRepo {
-  name: string;
-  full_name: string;
-  fork: boolean;
-  pushed_at: string;
+	name: string;
+	full_name: string;
+	fork: boolean;
+	pushed_at: string;
 }
 
 interface GitHubCommitDetail {
-  sha: string;
-  commit: {
-    message: string;
-    author: {
-      date: string;
-      name: string;
-      email: string;
-    };
-  };
-  stats?: {
-    additions: number;
-    deletions: number;
-  };
+	sha: string;
+	commit: {
+		message: string;
+		author: {
+			date: string;
+			name: string;
+			email: string;
+		};
+	};
+	stats?: {
+		additions: number;
+		deletions: number;
+	};
 }
 
 interface BackfillRequest {
-  startDate: string;
-  endDate?: string;
-  repoLimit?: number;
+	startDate: string;
+	endDate?: string;
+	repoLimit?: number;
 }
 
 export const POST: RequestHandler = async ({ request, platform, locals }) => {
-  const db = platform?.env?.DB;
-  const tenantId = locals.tenantId;
-  const user = locals.user;
+	const db = platform?.env?.DB; // Core DB for SecretsManager (tenant_secrets, tenants)
+	const curioDb = platform?.env?.CURIO_DB; // Curio DB for timeline_* tables
+	const tenantId = locals.tenantId;
+	const user = locals.user;
 
-  if (!db) {
-    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
-  }
+	if (!db || !curioDb) {
+		throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
+	}
 
-  if (!tenantId) {
-    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
-  }
+	if (!tenantId) {
+		throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
+	}
 
-  if (!user) {
-    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
-  }
+	if (!user) {
+		throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
+	}
 
-  // Rate limit backfill (bulk GitHub API operation)
-  const threshold = createThreshold(platform?.env, {
-    identifier: locals.user?.id,
-  });
-  if (threshold) {
-    const denied = await thresholdCheck(threshold, {
-      key: `ai/timeline-backfill:${user.id}`,
-      limit: 5,
-      windowSeconds: 86400, // 24 hours
-      failMode: "closed",
-    });
-    if (denied) return denied;
-  }
+	// Rate limit backfill (bulk GitHub API operation)
+	const threshold = createThreshold(platform?.env, {
+		identifier: locals.user?.id,
+	});
+	if (threshold) {
+		const denied = await thresholdCheck(threshold, {
+			key: `ai/timeline-backfill:${user.id}`,
+			limit: 5,
+			windowSeconds: 86400, // 24 hours
+			failMode: "closed",
+		});
+		if (denied) return denied;
+	}
 
-  const body = (await request.json()) as BackfillRequest;
-  const {
-    startDate, // YYYY-MM-DD - how far back to go
-    endDate, // YYYY-MM-DD - defaults to today
-    repoLimit = 10, // Max repos to process (rate limiting)
-  } = body;
+	const body = (await request.json()) as BackfillRequest;
+	const {
+		startDate, // YYYY-MM-DD - how far back to go
+		endDate, // YYYY-MM-DD - defaults to today
+		repoLimit = 10, // Max repos to process (rate limiting)
+	} = body;
 
-  if (!startDate) {
-    throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
-  }
+	if (!startDate) {
+		throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
+	}
 
-  // Fetch config
-  const config = await db
-    .prepare(
-      `SELECT
+	// Fetch config (timeline_curio_config lives in curio DB)
+	const config = await curioDb
+		.prepare(
+			`SELECT
         github_username,
         github_token_encrypted,
         repos_include,
         repos_exclude
       FROM timeline_curio_config
       WHERE tenant_id = ?`,
-    )
-    .bind(tenantId)
-    .first<ConfigRow>();
+		)
+		.bind(tenantId)
+		.first<ConfigRow>();
 
-  if (!config) {
-    throwGroveError(400, API_ERRORS.FEATURE_DISABLED, "API");
-  }
+	if (!config) {
+		throwGroveError(400, API_ERRORS.FEATURE_DISABLED, "API");
+	}
 
-  // Get token using SecretsManager (preferred) with legacy fallback
-  const env = {
-    DB: db,
-    GROVE_KEK: platform?.env?.GROVE_KEK,
-    TOKEN_ENCRYPTION_KEY: platform?.env?.TOKEN_ENCRYPTION_KEY,
-  };
+	// Get token using SecretsManager (preferred) with legacy fallback
+	const env = {
+		DB: db,
+		GROVE_KEK: platform?.env?.GROVE_KEK,
+		TOKEN_ENCRYPTION_KEY: platform?.env?.TOKEN_ENCRYPTION_KEY,
+	};
 
-  const githubResult = await getTimelineToken(
-    env,
-    tenantId,
-    TIMELINE_SECRET_KEYS.GITHUB_TOKEN,
-    config.github_token_encrypted,
-  );
+	const githubResult = await getTimelineToken(
+		env,
+		tenantId,
+		TIMELINE_SECRET_KEYS.GITHUB_TOKEN,
+		config.github_token_encrypted,
+	);
 
-  if (githubResult.migrated) {
-    console.log(
-      `[Timeline Backfill] Auto-migrated GitHub token to SecretsManager`,
-    );
-  }
+	if (githubResult.migrated) {
+		console.log(`[Timeline Backfill] Auto-migrated GitHub token to SecretsManager`);
+	}
 
-  const githubToken = githubResult.token;
+	const githubToken = githubResult.token;
 
-  if (!githubToken) {
-    logGroveError("API", API_ERRORS.UPSTREAM_ERROR, {
-      detail: "GitHub token missing",
-    });
-    throwGroveError(500, API_ERRORS.UPSTREAM_ERROR, "API");
-  }
+	if (!githubToken) {
+		logGroveError("API", API_ERRORS.UPSTREAM_ERROR, {
+			detail: "GitHub token missing",
+		});
+		throwGroveError(500, API_ERRORS.UPSTREAM_ERROR, "API");
+	}
 
-  const includeRepos = config.repos_include
-    ? JSON.parse(config.repos_include)
-    : null;
-  const excludeRepos = config.repos_exclude
-    ? JSON.parse(config.repos_exclude)
-    : null;
-  const end = endDate ?? new Date().toISOString().split("T")[0];
+	const includeRepos = config.repos_include ? JSON.parse(config.repos_include) : null;
+	const excludeRepos = config.repos_exclude ? JSON.parse(config.repos_exclude) : null;
+	const end = endDate ?? new Date().toISOString().split("T")[0];
 
-  try {
-    // Step 1: Get user's repos
-    const repos = await fetchUserRepos(
-      config.github_username,
-      githubToken,
-      includeRepos,
-      excludeRepos,
-      repoLimit,
-    );
+	try {
+		// Step 1: Get user's repos
+		const repos = await fetchUserRepos(
+			config.github_username,
+			githubToken,
+			includeRepos,
+			excludeRepos,
+			repoLimit,
+		);
 
-    // Step 2: For each repo, fetch commits in date range
-    const commitsByDate = new Map<string, Commit[]>();
-    let totalCommits = 0;
-    let processedRepos = 0;
+		// Step 2: For each repo, fetch commits in date range
+		const commitsByDate = new Map<string, Commit[]>();
+		let totalCommits = 0;
+		let processedRepos = 0;
 
-    for (const repo of repos) {
-      const repoCommits = await fetchRepoCommits(
-        repo.full_name,
-        config.github_username,
-        githubToken,
-        startDate,
-        end,
-      );
+		for (const repo of repos) {
+			const repoCommits = await fetchRepoCommits(
+				repo.full_name,
+				config.github_username,
+				githubToken,
+				startDate,
+				end,
+			);
 
-      totalCommits += repoCommits.length;
-      processedRepos++;
+			totalCommits += repoCommits.length;
+			processedRepos++;
 
-      // Group commits by date
-      for (const commit of repoCommits) {
-        const commitDate = (commit.timestamp ?? commit.date ?? "").split(
-          "T",
-        )[0];
-        if (!commitDate) continue; // Skip commits without dates
-        if (!commitsByDate.has(commitDate)) {
-          commitsByDate.set(commitDate, []);
-        }
-        commitsByDate.get(commitDate)!.push(commit);
-      }
+			// Group commits by date
+			for (const commit of repoCommits) {
+				const commitDate = (commit.timestamp ?? commit.date ?? "").split("T")[0];
+				if (!commitDate) continue; // Skip commits without dates
+				if (!commitsByDate.has(commitDate)) {
+					commitsByDate.set(commitDate, []);
+				}
+				commitsByDate.get(commitDate)!.push(commit);
+			}
 
-      // Rate limit: 1 repo per second to avoid hitting GitHub limits
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-    }
+			// Rate limit: 1 repo per second to avoid hitting GitHub limits
+			await new Promise((resolve) => setTimeout(resolve, 1000));
+		}
 
-    // Step 3: Store activity data for each date
-    let datesStored = 0;
-    for (const [date, commits] of commitsByDate) {
-      const repos = [...new Set(commits.map((c) => c.repo))];
-      const totalAdditions = commits.reduce(
-        (sum, c) => sum + (c.additions ?? 0),
-        0,
-      );
-      const totalDeletions = commits.reduce(
-        (sum, c) => sum + (c.deletions ?? 0),
-        0,
-      );
+		// Step 3: Store activity data for each date
+		let datesStored = 0;
+		for (const [date, commits] of commitsByDate) {
+			const repos = [...new Set(commits.map((c) => c.repo))];
+			const totalAdditions = commits.reduce((sum, c) => sum + (c.additions ?? 0), 0);
+			const totalDeletions = commits.reduce((sum, c) => sum + (c.deletions ?? 0), 0);
 
-      await db
-        .prepare(
-          `INSERT INTO timeline_activity (
+			await curioDb
+				.prepare(
+					`INSERT INTO timeline_activity (
             tenant_id,
             activity_date,
             commit_count,
@@ -228,75 +212,68 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
             repos_active = excluded.repos_active,
             lines_added = MAX(timeline_activity.lines_added, excluded.lines_added),
             lines_deleted = MAX(timeline_activity.lines_deleted, excluded.lines_deleted)`,
-        )
-        .bind(
-          tenantId,
-          date,
-          commits.length,
-          JSON.stringify(repos),
-          totalAdditions,
-          totalDeletions,
-        )
-        .run();
+				)
+				.bind(tenantId, date, commits.length, JSON.stringify(repos), totalAdditions, totalDeletions)
+				.run();
 
-      datesStored++;
-    }
+			datesStored++;
+		}
 
-    return json({
-      success: true,
-      message: `Backfilled ${totalCommits} commits across ${processedRepos} repos`,
-      stats: {
-        totalCommits,
-        processedRepos,
-        datesWithActivity: datesStored,
-        dateRange: { start: startDate, end },
-      },
-    });
-  } catch (err) {
-    logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
-    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
-  }
+		return json({
+			success: true,
+			message: `Backfilled ${totalCommits} commits across ${processedRepos} repos`,
+			stats: {
+				totalCommits,
+				processedRepos,
+				datesWithActivity: datesStored,
+				dateRange: { start: startDate, end },
+			},
+		});
+	} catch (err) {
+		logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
+		throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
+	}
 };
 
 /**
  * Fetch user's repositories, filtered by include/exclude lists.
  */
 async function fetchUserRepos(
-  username: string,
-  token: string,
-  includeRepos: string[] | null,
-  excludeRepos: string[] | null,
-  limit: number,
+	username: string,
+	token: string,
+	includeRepos: string[] | null,
+	excludeRepos: string[] | null,
+	limit: number,
 ): Promise<GitHubRepo[]> {
-  const response = await fetch(
-    `https://api.github.com/users/${username}/repos?per_page=100&sort=pushed&type=owner`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/vnd.github.v3+json",
-        "User-Agent": "Lattice-Timeline-Curio",
-      },
-    },
-  );
+	const response = await fetch(
+		`https://api.github.com/users/${username}/repos?per_page=100&sort=pushed&type=owner`,
+		{
+			headers: {
+				Authorization: `Bearer ${token}`,
+				Accept: "application/vnd.github.v3+json",
+				"User-Agent": "Lattice-Timeline-Curio",
+			},
+		},
+	);
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch repos: ${response.status}`);
-  }
+	if (!response.ok) {
+		throw new Error(`Failed to fetch repos: ${response.status}`);
+	}
 
-  let repos = (await response.json()) as GitHubRepo[];
+	let repos = (await response.json()) as GitHubRepo[];
 
-  // Filter by include/exclude
-  if (includeRepos) {
-    repos = repos.filter((r) => includeRepos.includes(r.name));
-  }
-  if (excludeRepos) {
-    repos = repos.filter((r) => !excludeRepos.includes(r.name));
-  }
+	// Filter by include/exclude
+	if (includeRepos) {
+		repos = repos.filter((r) => includeRepos.includes(r.name));
+	}
+	if (excludeRepos) {
+		repos = repos.filter((r) => !excludeRepos.includes(r.name));
+	}
 
-  // Exclude forks by default
-  repos = repos.filter((r) => !r.fork);
+	// Exclude forks by default
+	repos = repos.filter((r) => !r.fork);
 
-  return repos.slice(0, limit);
+	return repos.slice(0, limit);
 }
 
 /**
@@ -304,80 +281,78 @@ async function fetchUserRepos(
  * Uses the Commits API which has no 90-day limit.
  */
 async function fetchRepoCommits(
-  repoFullName: string,
-  authorUsername: string,
-  token: string,
-  since: string,
-  until: string,
+	repoFullName: string,
+	authorUsername: string,
+	token: string,
+	since: string,
+	until: string,
 ): Promise<Commit[]> {
-  const commits: Commit[] = [];
-  let page = 1;
-  const perPage = 100;
+	const commits: Commit[] = [];
+	let page = 1;
+	const perPage = 100;
 
-  // The Commits API uses ISO8601 dates
-  const sinceDate = `${since}T00:00:00Z`;
-  const untilDate = `${until}T23:59:59Z`;
+	// The Commits API uses ISO8601 dates
+	const sinceDate = `${since}T00:00:00Z`;
+	const untilDate = `${until}T23:59:59Z`;
 
-  while (true) {
-    const url = new URL(`https://api.github.com/repos/${repoFullName}/commits`);
-    url.searchParams.set("author", authorUsername);
-    url.searchParams.set("since", sinceDate);
-    url.searchParams.set("until", untilDate);
-    url.searchParams.set("per_page", String(perPage));
-    url.searchParams.set("page", String(page));
+	while (true) {
+		const url = new URL(`https://api.github.com/repos/${repoFullName}/commits`);
+		url.searchParams.set("author", authorUsername);
+		url.searchParams.set("since", sinceDate);
+		url.searchParams.set("until", untilDate);
+		url.searchParams.set("per_page", String(perPage));
+		url.searchParams.set("page", String(page));
 
-    const response = await fetch(url.toString(), {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/vnd.github.v3+json",
-        "User-Agent": "Lattice-Timeline-Curio",
-      },
-    });
+		const response = await fetch(url.toString(), {
+			headers: {
+				Authorization: `Bearer ${token}`,
+				Accept: "application/vnd.github.v3+json",
+				"User-Agent": "Lattice-Timeline-Curio",
+			},
+		});
 
-    if (!response.ok) {
-      // Repo might be empty or inaccessible
-      if (response.status === 409) {
-        // Empty repository
-        break;
-      }
-      console.warn(
-        `Failed to fetch commits for ${repoFullName}: ${response.status}`,
-      );
-      break;
-    }
+		if (!response.ok) {
+			// Repo might be empty or inaccessible
+			if (response.status === 409) {
+				// Empty repository
+				break;
+			}
+			console.warn(`Failed to fetch commits for ${repoFullName}: ${response.status}`);
+			break;
+		}
 
-    const pageCommits = (await response.json()) as GitHubCommitDetail[];
+		const pageCommits = (await response.json()) as GitHubCommitDetail[];
 
-    if (pageCommits.length === 0) {
-      break;
-    }
+		if (pageCommits.length === 0) {
+			break;
+		}
 
-    // Extract repo name from full name
-    const repoName = repoFullName.split("/")[1];
+		// Extract repo name from full name
+		const repoName = repoFullName.split("/")[1];
 
-    for (const commit of pageCommits) {
-      commits.push({
-        sha: commit.sha,
-        message: commit.commit.message,
-        repo: repoName,
-        timestamp: commit.commit.author.date,
-        // Note: stats require an additional API call per commit
-        // For backfill we skip this to avoid rate limits
-        additions: 0,
-        deletions: 0,
-      });
-    }
+		for (const commit of pageCommits) {
+			commits.push({
+				sha: commit.sha,
+				message: commit.commit.message,
+				repo: repoName,
+				timestamp: commit.commit.author.date,
+				// Note: stats require an additional API call per commit
+				// For backfill we skip this to avoid rate limits
+				additions: 0,
+				deletions: 0,
+			});
+		}
 
-    // Check if there are more pages
-    if (pageCommits.length < perPage) {
-      break;
-    }
+		// Check if there are more pages
+		if (pageCommits.length < perPage) {
+			break;
+		}
 
-    page++;
+		page++;
 
-    // Rate limit between pages
-    await new Promise((resolve) => setTimeout(resolve, 100));
-  }
+		// Rate limit between pages
+		await new Promise((resolve) => setTimeout(resolve, 100));
+	}
 
-  return commits;
+	return commits;
 }

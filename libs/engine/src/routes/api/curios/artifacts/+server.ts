@@ -28,7 +28,7 @@ interface ArtifactRow {
 }
 
 export const GET: RequestHandler = async ({ platform, locals }) => {
-	const db = platform?.env?.DB;
+	const db = platform?.env?.CURIO_DB;
 	const tenantId = locals.tenantId;
 
 	if (!db) {
@@ -66,7 +66,7 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
 };
 
 export const POST: RequestHandler = async ({ request, platform, locals }) => {
-	const db = platform?.env?.DB;
+	const db = platform?.env?.CURIO_DB;
 	const tenantId = locals.tenantId;
 
 	if (!db) {

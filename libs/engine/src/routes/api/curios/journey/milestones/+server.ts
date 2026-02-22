@@ -34,7 +34,7 @@ interface MilestoneRow {
 }
 
 export const GET: RequestHandler = async ({ url, platform, locals }) => {
-	const db = platform?.env?.DB;
+	const db = platform?.env?.CURIO_DB;
 	const tenantId = locals.tenantId;
 
 	if (!db) {

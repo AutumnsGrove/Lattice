@@ -21,6 +21,11 @@ binding = "OBS_DB"
 database_name = "grove-observability-db"
 database_id = "59e70f9e-8f9c-4021-96e5-1e130e753766"
 
+[[d1_databases]]
+binding = "CURIO_DB"
+database_name = "grove-curios-db"
+database_id = "b03756ad-30d7-427a-9a1b-ec2f6478fcbd"
+
 # GroveAuth Service Binding (Heartwood - fast session validation)
 [[services]]
 binding = "AUTH"

@@ -28,7 +28,7 @@ interface EntryRow {
 }
 
 export const load: PageServerLoad = async ({ platform, locals }) => {
-	const db = platform?.env?.DB;
+	const db = platform?.env?.CURIO_DB;
 	const tenantId = locals.tenantId;
 
 	if (!db) {

@@ -31,7 +31,7 @@ interface PlacementRow {
 }
 
 export const GET: RequestHandler = async ({ platform, locals, url }) => {
-	const db = platform?.env?.DB;
+	const db = platform?.env?.CURIO_DB;
 	const tenantId = locals.tenantId;
 
 	if (!db) {
@@ -75,7 +75,7 @@ export const GET: RequestHandler = async ({ platform, locals, url }) => {
 };
 
 export const POST: RequestHandler = async ({ request, platform, locals }) => {
-	const db = platform?.env?.DB;
+	const db = platform?.env?.CURIO_DB;
 	const tenantId = locals.tenantId;
 
 	if (!db) {

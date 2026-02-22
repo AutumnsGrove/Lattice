@@ -39,7 +39,7 @@ interface VoteRow {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const GET: RequestHandler = async ({ params, request, platform, locals }) => {
-	const db = platform?.env?.DB;
+	const db = platform?.env?.CURIO_DB;
 	const tenantId = locals.tenantId;
 
 	if (!db) {
@@ -130,7 +130,7 @@ export const GET: RequestHandler = async ({ params, request, platform, locals })
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const POST: RequestHandler = async ({ params, request, platform, locals }) => {
-	const db = platform?.env?.DB;
+	const db = platform?.env?.CURIO_DB;
 	const tenantId = locals.tenantId;
 
 	if (!db) {
@@ -242,7 +242,7 @@ export const POST: RequestHandler = async ({ params, request, platform, locals }
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const DELETE: RequestHandler = async ({ params, platform, locals }) => {
-	const db = platform?.env?.DB;
+	const db = platform?.env?.CURIO_DB;
 	const tenantId = locals.tenantId;
 
 	if (!db) {

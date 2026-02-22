@@ -22,6 +22,11 @@ binding = "DB"
 database_name = "grove-engine-db"
 database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
 
+[[d1_databases]]
+binding = "CURIO_DB"
+database_name = "grove-curios-db"
+database_id = "b03756ad-30d7-427a-9a1b-ec2f6478fcbd"
+
 # =============================================================================
 # Envelope Encryption - Key Encryption Key (KEK)
 # =============================================================================

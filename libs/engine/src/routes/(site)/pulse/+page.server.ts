@@ -63,7 +63,7 @@ interface HourlyRow {
 }
 
 export const load: PageServerLoad = async ({ platform, locals }) => {
-	const db = platform?.env?.DB;
+	const db = platform?.env?.CURIO_DB;
 	const kv = platform?.env?.CACHE_KV;
 
 	// Landing mode: use the engine's own tenant ID for dogfooding

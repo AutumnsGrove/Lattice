@@ -1,12 +1,15 @@
 ---
 title: "Database Consolidation Architecture"
-status: planned
+status: completed
 category: infra
+completed: "2026-02-22"
 ---
 
 # Database Consolidation Architecture
 
 > _From this height, the boundaries are obvious._
+>
+> **Status: COMPLETE.** All three phases executed February 2026. `grove-engine-db` dropped from ~123 tables to 78. Two new databases created: `grove-curios-db` (45 tables) and `grove-observability-db` (16 tables).
 
 ```
                     ┌─────────────────────────────────────┐
@@ -14,13 +17,9 @@ category: infra
                     │                                     │
                     │  ┌─────┐ ┌───────┐ ┌──────┐        │
                     │  │Core │ │Curios │ │ Obs  │        │
-                    │  │ 37  │ │  39   │ │  10  │        │
+                    │  │ 62  │ │  45   │ │  16  │        │
                     │  └─────┘ └───────┘ └──────┘        │
-                    │  ┌─────┐ ┌───────┐ ┌──────┐        │
-                    │  │Shop │ │Social │ │Other │        │
-                    │  │  9☠ │ │  12   │ │  13  │        │
-                    │  └─────┘ └───────┘ └──────┘        │
-                    │                         ~120 tables │
+                    │                         ~123 tables │
                     └─────────────────────────────────────┘
                                     │
                                     ▼
@@ -30,12 +29,16 @@ category: infra
     │grove-engine │    │grove-curios  │    │grove-observability│
     │    -db      │    │    -db       │    │       -db        │
     │             │    │              │    │                  │
-    │  Core  37   │    │  Curios  39  │    │  Vista     10   │
-    │  Social 12  │    │              │    │                  │
-    │  Other 13   │    │  (all curio  │    │  (metrics,       │
-    │             │    │   widgets)   │    │   health,        │
-    │   ~62 tables│    │              │    │   costs,         │
-    │  (-48%)     │    │              │    │   alerts)        │
+    │  Core  78   │    │  Curios  45  │    │  Vista     16   │
+    │             │    │              │    │                  │
+    │  (tenants,  │    │  (all curio  │    │  (metrics,       │
+    │   posts,    │    │   widgets)   │    │   health,        │
+    │   auth,     │    │              │    │   costs,         │
+    │   billing,  │    │              │    │   alerts,        │
+    │   sentinel) │    │              │    │   sentinel)      │
+    │             │    │              │    │                  │
+    │  78 tables  │    │  45 tables   │    │  16 tables       │
+    │  (-37%)     │    │              │    │                  │
     └─────────────┘    └──────────────┘    └──────────────────┘
 ```
 
@@ -53,9 +56,10 @@ These principles came directly from the user and shape every decision below:
 
 ---
 
-## Phase 1: Drop Dead Weight
+## Phase 1: Drop Dead Weight (COMPLETED)
 
 **Effort:** Low | **Impact:** -9 tables, -3000+ lines dead code, -2500+ lines LemonSqueezy | **Risk:** None
+**Completed:** 2026-02 | **Migration:** `085_drop_shop_tables.sql` applied to production
 
 ### 1A. Shop Table Removal
 
@@ -177,9 +181,13 @@ These can be cleaned from wrangler configs, `.dev.vars`, and any secrets:
 
 ---
 
-## Phase 2: Extract Observability
+## Phase 2: Extract Observability (COMPLETED)
 
-**Effort:** Medium | **Impact:** -10 tables from engine-db | **Risk:** Low
+**Effort:** Medium | **Impact:** -16 tables from engine-db (10 vista + 6 sentinel) | **Risk:** Low
+**Completed:** 2026-02 | **Database:** `grove-observability-db` (`59e70f9e-8f9c-4021-96e5-1e130e753766`)
+**Schema:** `libs/engine/migrations/observability/001_initial_schema.sql` | **Drop:** `087_drop_observability_tables.sql`
+
+> **Implementation note:** During execution, sentinel tables (6) were also moved to `grove-observability-db` since SentinelDO's stress testing reads from observability tables, not application tables directly. This gave OBS_DB 16 tables total instead of the planned 10.
 
 ### Why Extract
 
@@ -261,9 +269,13 @@ Binding name:  OBS_DB
 
 ---
 
-## Phase 3: Extract Curios
+## Phase 3: Extract Curios (COMPLETED)
 
-**Effort:** High | **Impact:** -39 tables from engine-db | **Risk:** Medium
+**Effort:** High | **Impact:** -45 tables from engine-db | **Risk:** Medium
+**Completed:** 2026-02-22 | **Database:** `grove-curios-db` (`b03756ad-30d7-427a-9a1b-ec2f6478fcbd`)
+**Schema:** `libs/engine/migrations/curios/001_initial_schema.sql` | **Drop:** `088_drop_curio_tables.sql`
+
+> **Implementation note:** Actual table count was 45 (not 39 as originally estimated). Additional tables discovered during migration compilation: `gallery_collection_images`, `nowplaying_history`, `hit_counter_visitors`, `badge_definitions`, `custom_badges`, `journey_snapshots`, `journey_summaries`, `journey_jobs` (replacing the planned `journey_milestones`). The cross-DB dual-binding pattern for timeline routes (save-token, generate, backfill) was more complex than anticipated — these routes need both `DB` (SecretsManager/Lumen for `tenant_secrets`/`tenants`) and `CURIO_DB` (timeline tables). ~91 files were modified total.
 
 ### The Decision
 
@@ -433,53 +445,67 @@ Landing still actively uses its own `users`, `sessions`, `magic_codes` tables in
 
 ---
 
-## Final State
+## Final State (Verified 2026-02-22)
 
-### Database Map (After All Phases)
+### Database Map
 
-| Database                 | Tables  | Owner                   | Purpose                                                                            |
-| ------------------------ | :-----: | ----------------------- | ---------------------------------------------------------------------------------- |
-| `grove-engine-db`        | **~62** | libs/engine             | Core platform (tenants, posts, pages, auth, social, moderation, billing, sentinel) |
-| `grove-curios-db`        | **~39** | libs/engine (curios)    | All curio widget data                                                              |
-| `grove-observability-db` | **~10** | workers/vista-collector | Platform monitoring metrics                                                        |
-| `groveauth`              |   ~22   | services/heartwood      | Authentication (Better Auth)                                                       |
-| `ivy-db`                 |   ~10   | apps/ivy                | Email client                                                                       |
-| `zephyr-logs`            |   ~5    | services/zephyr         | Email delivery                                                                     |
-| `forage-jobs`            |   ~2    | services/forage         | Domain search                                                                      |
-| `amber`                  |   ~4    | services/amber          | Storage management                                                                 |
-| `grove-warden`           |    2    | workers/warden          | Agent auth                                                                         |
-| `grove-backups-db`       |    ?    | apps/clearing           | Backup metadata                                                                    |
-| `shutter-offenders`      |    1    | libs/shutter            | Image moderation                                                                   |
+| Database | ID | Tables | Binding | Owner | Purpose |
+| --- | --- | :---: | --- | --- | --- |
+| `grove-engine-db` | `a6394da2-b7a6-48ce-b7fe-b1eb3e730e68` | **78** | `DB` | libs/engine | Core platform (tenants, posts, pages, auth, social, moderation, billing) |
+| `grove-curios-db` | `b03756ad-30d7-427a-9a1b-ec2f6478fcbd` | **45** | `CURIO_DB` | libs/engine (curios) | All curio widget config & data |
+| `grove-observability-db` | `59e70f9e-8f9c-4021-96e5-1e130e753766` | **16** | `OBS_DB` | workers/vista-collector | Platform monitoring + sentinel |
+| `groveauth` | — | ~22 | `DB` | services/heartwood | Authentication (Better Auth) |
+| `ivy-db` | — | ~10 | `DB` | apps/ivy | Email client |
+| `zephyr-logs` | — | ~5 | `DB` | services/zephyr | Email delivery |
+| `forage-jobs` | — | ~2 | `DB` | services/forage | Domain search |
+| `amber` | — | ~4 | `DB` | services/amber | Storage management |
+| `grove-warden` | — | 2 | `DB` | workers/warden | Agent auth |
+| `grove-backups-db` | — | ? | `DB` | apps/clearing | Backup metadata |
+| `shutter-offenders` | — | 1 | `DB` | libs/shutter | Image moderation |
 
-### The Numbers
-
-| Metric                         | Before | After  |  Change  |
-| ------------------------------ | :----: | :----: | :------: |
-| `grove-engine-db` tables       |  ~120  |  ~62   | **-48%** |
-| Dead shop tables               |   9    |   0    |  **-9**  |
-| LemonSqueezy columns dropped   |   3    |   0    |  **-3**  |
-| LemonSqueezy indexes dropped   |   3    |   0    |  **-3**  |
-| Observability tables in engine |   10   |   0    | **-10**  |
-| Curio tables in engine         |   39   |   0    | **-39**  |
-| Total D1 databases             |   9    |   11   |    +2    |
-| Dead code lines removed        |   0    | ~5500+ |          |
-| Dead LS code files removed     |   0    |   8+   |          |
-| Dead LS env vars removed       |   0    |   11   |          |
-
-### Phasing and Dependencies
+### Binding Map (Multi-DB Apps)
 
 ```
-Phase 1A: Drop Shop     ──→ No dependencies. Do it now.
-Phase 1B: Drop LS       ──→ No dependencies. Do alongside 1A.
+apps/landing/wrangler.toml:
+  DB       → grove-engine-db      (core platform)
+  OBS_DB   → grove-observability-db (vista dashboard)
+  CURIO_DB → grove-curios-db      (curio routes)
+
+workers/timeline-sync/wrangler.toml:
+  DB       → grove-engine-db      (SecretsManager: tenant_secrets, tenants)
+  CURIO_DB → grove-curios-db      (timeline_* tables)
+```
+
+### The Numbers (Actual)
+
+| Metric | Before | After | Change |
+| --- | :---: | :---: | :---: |
+| `grove-engine-db` tables | ~123 | 78 | **-37%** |
+| Shop tables dropped (Phase 1) | 9 | 0 | **-9** |
+| Observability tables extracted (Phase 2) | 16 | 0 | **-16** |
+| Curio tables extracted (Phase 3) | 45 | 0 | **-45** |
+| Total D1 databases | 9 | 11 | +2 |
+| Files modified (Phase 3) | 0 | ~91 | |
+| Data rows migrated (Phase 3) | — | 398 | |
+
+### Phase Execution Order (Actual)
+
+```
+Phase 1: Drop Shop Tables   ──→ DONE (migration 085)
               │
-Phase 2: Extract Obs    ──→ Independent of Phase 1.
-              │              Can run in parallel.
-Phase 3: Extract Curios ──→ Largest effort. Start after
-                             Phase 2 proves the pattern.
-Phase 4: Hygiene        ──→ Any time.
+Phase 2: Extract Observability ──→ DONE (16 tables → grove-observability-db)
+              │
+Phase 3: Extract Curios      ──→ DONE (45 tables → grove-curios-db)
+              │
+Phase 4: Hygiene             ──→ Remaining (LS cleanup, migration numbering)
 ```
 
-Phase 1 (both A and B) and Phase 2 can be done in parallel. Phase 3 is the big one and should wait until the extraction pattern is proven by Phase 2 (smaller scope, same technique).
+### Lessons Learned
+
+1. **Table counts in planning docs are always wrong.** Plan said 39 curio tables, reality was 45. ALTER TABLE modifications across multiple migrations had to be merged into the unified schema.
+2. **Cross-DB routes are the hard part.** The mechanical `DB → CURIO_DB` swap across 80+ files was trivial. The 3 timeline routes needing dual bindings (SecretsManager on core DB, curio tables on CURIO_DB) required careful analysis.
+3. **D1 UNION ALL has a strict limit.** Can't count rows across 20+ tables in one query. Had to iterate individually.
+4. **The extraction pattern proved repeatable.** Phase 2 (OBS_DB) established the pattern; Phase 3 (CURIO_DB) scaled it to 45 tables and ~91 files with confidence.
 
 ---
 
@@ -500,4 +526,6 @@ Phase 1 (both A and B) and Phase 2 can be done in parallel. Phase 3 is the big o
 
 ---
 
-_The blueprint holds. From this height, every boundary is clear. The river of curio data flows to its own lake. The watchtowers of observability stand on their own hill. And the engine — lighter, focused, purposeful — does what it was always meant to do: serve the grove._
+_The blueprint held. From this height, every boundary is clear. The river of curio data flows to its own lake. The watchtowers of observability stand on their own hill. And the engine — lighter, focused, purposeful — does what it was always meant to do: serve the grove._
+
+_Completed February 22, 2026. grove-engine-db: 123 → 78 tables. The forest breathes easier._

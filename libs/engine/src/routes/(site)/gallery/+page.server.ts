@@ -53,7 +53,7 @@ const GALLERY_DEFAULTS = {
 };
 
 export const load: PageServerLoad = async ({ platform, locals }) => {
-	const db = platform?.env?.DB;
+	const db = platform?.env?.CURIO_DB;
 	const kv = platform?.env?.CACHE_KV;
 	const tenantId = locals.tenantId;
 

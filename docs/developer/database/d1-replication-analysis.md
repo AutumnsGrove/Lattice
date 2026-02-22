@@ -8,7 +8,7 @@
 | Read queries           | ~25 (56%)                               |
 | Write queries          | ~20 (44%)                               |
 | High-frequency reads   | 4 (session/user validation per request) |
-| Databases in use       | 1 shared (`grove-engine-db`)            |
+| Databases in use       | 3 (`grove-engine-db`, `grove-curios-db`, `grove-observability-db`) |
 
 ## Recommendation: PREPARE for Replication
 
@@ -31,15 +31,24 @@
 
 ## Database Inventory
 
-All production applications share a single D1 database:
+Production applications use three D1 databases (extracted February 2026):
 
-| Location                          | Binding    | Database Name     | Database ID    |
-| --------------------------------- | ---------- | ----------------- | -------------- |
-| `domains/wrangler.toml`           | `DB`       | `grove-engine-db` | `a6394da2-...` |
-| `landing/wrangler.toml`           | `DB`       | `grove-engine-db` | `a6394da2-...` |
-| `apps/example-site/wrangler.toml` | `POSTS_DB` | `grove-engine-db` | `a6394da2-...` |
+| Database | Binding | Tables | Primary Writers | Primary Readers |
+|----------|---------|--------|-----------------|-----------------|
+| `grove-engine-db` | `DB` | 78 | All apps | All apps |
+| `grove-curios-db` | `CURIO_DB` | 45 | Engine curio routes, timeline-sync worker | Engine curio/site routes |
+| `grove-observability-db` | `OBS_DB` | 16 | Vista collector worker | Landing vista dashboard |
 
-This shared database pattern is fine - replication is configured per-database, not per-worker.
+### Multi-Database Binding Map
+
+| Location | `DB` | `CURIO_DB` | `OBS_DB` |
+|----------|:----:|:----------:|:--------:|
+| `apps/landing/wrangler.toml` | Yes | Yes | Yes |
+| `apps/domains/wrangler.toml` | Yes | — | — |
+| `workers/timeline-sync/wrangler.toml` | Yes | Yes | — |
+| `workers/vista-collector/wrangler.toml` | — | — | Yes |
+
+Replication, if enabled, is configured per-database. The three-database split means each can be replicated independently based on its read/write profile. `grove-curios-db` (read-heavy public pages) and `grove-observability-db` (read-heavy dashboards) are strong replication candidates. `grove-engine-db` has the most mixed read-write patterns.
 
 ---
 
@@ -69,6 +78,8 @@ const user = await db.prepare("SELECT * FROM users WHERE id = ?").bind(session.u
 ```
 
 ### Read-Heavy: Product Catalog (Public Browsing)
+
+> **Note:** Shop tables were dropped in Phase 1 of the database consolidation (February 2026). These queries no longer exist.
 
 | Function               | File:Line     | Query Type | Frequency       |
 | ---------------------- | ------------- | ---------- | --------------- |
@@ -110,13 +121,6 @@ These are excellent replication candidates - many users reading the same catalog
 | `createSearchJob()`       | domains/db.ts | INSERT         | Search start   |
 | `updateSearchJobStatus()` | domains/db.ts | UPDATE         | Job progress   |
 | `saveDomainResults()`     | domains/db.ts | INSERT (batch) | Search results |
-| `createProduct()`         | shop.ts       | INSERT         | Admin only     |
-| `updateProduct()`         | shop.ts       | UPDATE         | Admin only     |
-| `deleteProduct()`         | shop.ts       | DELETE         | Admin only     |
-| `createVariant()`         | shop.ts       | INSERT         | Admin only     |
-| `updateVariant()`         | shop.ts       | UPDATE         | Admin only     |
-| `createOrder()`           | shop.ts       | INSERT         | Checkout       |
-| `updateOrderStatus()`     | shop.ts       | UPDATE         | Fulfillment    |
 | `createCdnFile()`         | landing/db.ts | INSERT         | Upload         |
 | `deleteCdnFile()`         | landing/db.ts | DELETE         | Admin only     |
 

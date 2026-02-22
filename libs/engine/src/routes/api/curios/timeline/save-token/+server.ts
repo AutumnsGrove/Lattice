@@ -15,10 +15,11 @@ import {
 import { API_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
 
 export const POST: RequestHandler = async ({ request, platform, locals }) => {
-	const db = platform?.env?.DB;
+	const db = platform?.env?.DB; // Core DB for SecretsManager (tenant_secrets, tenants)
+	const curioDb = platform?.env?.CURIO_DB; // Curio DB for timeline_curio_config
 	const tenantId = locals.tenantId;
 
-	if (!db) {
+	if (!db || !curioDb) {
 		throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
 	}
 
@@ -63,7 +64,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 		const saveResult = await setTimelineToken(env, tenantId, keyName, tokenValue);
 
 		// Write to legacy column (overwrite any old v1: value)
-		await db
+		await curioDb
 			.prepare(
 				`UPDATE timeline_curio_config
 				 SET ${columnName} = ?, updated_at = strftime('%s', 'now')
@@ -78,7 +79,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 		);
 
 		// Read it back to verify it's retrievable
-		const row = await db
+		const row = await curioDb
 			.prepare(`SELECT ${columnName} FROM timeline_curio_config WHERE tenant_id = ?`)
 			.bind(tenantId)
 			.first<Record<string, string | null>>();

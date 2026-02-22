@@ -22,7 +22,7 @@ interface ExistingImage {
 }
 
 export const POST: RequestHandler = async ({ platform, locals }) => {
-	const db = platform?.env?.DB;
+	const db = platform?.env?.CURIO_DB;
 	const tenantId = locals.tenantId;
 
 	// Check authentication (admin only)

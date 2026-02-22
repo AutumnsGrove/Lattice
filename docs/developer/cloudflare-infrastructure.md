@@ -12,7 +12,7 @@ Grove is built entirely on Cloudflare's edge infrastructure. This guide covers t
 |---------|---------|-------------|
 | **Workers** | Compute | API routes, server-side rendering |
 | **Pages** | Static hosting + Workers | Main site deployment |
-| **D1** | SQLite database | Posts, users, settings |
+| **D1** | SQLite database | 3 databases: core (posts, users), curios (widgets), observability (metrics) |
 | **KV** | Key-value cache | Config, sessions, content cache |
 | **R2** | Object storage | Images, media uploads |
 | **Durable Objects** | Stateful coordination | Rate limiting, real-time features |
@@ -119,7 +119,7 @@ Assuming typical blog: 5,000 pageviews/month, 100 images (50 MB), 3 KV reads per
 
 ## Data Isolation
 
-### D1: Shared Database + tenant_id
+### D1: Shared Databases + tenant_id
 
 Every table has a `tenant_id` column. Every query filters by it.
 
@@ -141,6 +141,50 @@ tenant:dave:settings
 tenants/{tenantId}/media/{year}/{month}/{filename}
 tenants/dave/media/2026/01/photo.jpg
 ```
+
+---
+
+## Multiple D1 Databases
+
+As of February 2026, Grove uses three D1 databases with clear ownership boundaries:
+
+| Database | Binding | Tables | Purpose |
+|----------|---------|--------|---------|
+| `grove-engine-db` | `DB` | 78 | Core platform: tenants, posts, pages, auth, social, billing, sentinel |
+| `grove-curios-db` | `CURIO_DB` | 45 | Curio widgets: timeline, gallery, guestbook, polls, mood ring, etc. |
+| `grove-observability-db` | `OBS_DB` | 16 | Platform monitoring: metrics, health checks, costs, alerts |
+
+### Binding Pattern
+
+Most routes use a single database. Cross-concern routes use dual bindings:
+
+```typescript
+// Simple curio route — single binding
+const curioDb = platform?.env?.CURIO_DB;
+const gallery = await curioDb.prepare('SELECT * FROM gallery_images WHERE tenant_id = ?')
+  .bind(tenantId).all();
+
+// Timeline generate — dual binding (needs secrets from core DB + curio tables)
+const db = platform?.env?.DB;         // SecretsManager reads tenant_secrets, tenants
+const curioDb = platform?.env?.CURIO_DB; // Timeline tables
+const config = await curioDb.prepare('SELECT * FROM timeline_curio_config WHERE tenant_id = ?')
+  .bind(tenantId).first();
+const token = await getTimelineToken({ DB: db, ... }, tenantId, ...);
+```
+
+### Which Apps Bind Which Databases
+
+| App / Worker | `DB` | `CURIO_DB` | `OBS_DB` | Notes |
+|---|:---:|:---:|:---:|---|
+| `apps/landing` | Yes | Yes | Yes | Serves curio routes + vista dashboard |
+| `workers/timeline-sync` | Yes | Yes | — | SecretsManager (DB) + timeline tables (CURIO_DB) |
+| `workers/vista-collector` | — | — | Yes | Only needs observability tables |
+| `apps/domains` | Yes | — | — | Core DB only |
+| `apps/plant` | Yes | — | — | Core DB only |
+
+### Cost Implications
+
+D1 databases are free to create on Cloudflare. The paid tier charges per-row read/write across all databases combined, so splitting tables across databases has zero cost impact. The benefit is organizational: each database has a clear owner and can be managed independently.
 
 ---
 

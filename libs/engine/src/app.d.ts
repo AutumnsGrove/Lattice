@@ -54,6 +54,9 @@ declare global {
 				/** Observability D1 database (grove-observability-db) — Vista metrics */
 				OBS_DB?: D1Database;
 
+				/** Curio widget D1 database (grove-curios-db) — all curio tables */
+				CURIO_DB?: D1Database;
+
 				/** KV Namespace for caching */
 				CACHE_KV: KVNamespace;
 

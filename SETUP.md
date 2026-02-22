@@ -82,28 +82,46 @@ This uses `wrangler dev` under the hood and creates local D1/KV/R2 stores automa
 
 ## Database
 
-### Migrations
+### D1 Databases (3 total)
 
-The engine uses Cloudflare D1 (SQLite). Migrations live in `libs/engine/migrations/`.
+The platform uses three Cloudflare D1 databases, split by domain:
+
+| Database                 | Binding    | Tables | Migrations                                   | Content                              |
+| ------------------------ | ---------- | ------ | -------------------------------------------- | ------------------------------------ |
+| `grove-engine-db`        | `DB`       | ~78    | `libs/engine/migrations/*.sql`               | Core: auth, tenants, pages, billing  |
+| `grove-curios-db`        | `CURIO_DB` | 45     | `libs/engine/migrations/curios/*.sql`        | Curio widgets (timeline, gallery...) |
+| `grove-observability-db` | `OBS_DB`   | 16     | `libs/engine/migrations/observability/*.sql` | Sentinel + Vista monitoring          |
+
+### Migrations
 
 ```bash
 cd libs/engine
 
-# Apply migrations locally
-wrangler d1 migrations apply grove-engine-db --local
+# Core database (grove-engine-db)
+wrangler d1 migrations apply grove-engine-db --local    # Local
+wrangler d1 migrations apply grove-engine-db --remote   # Production
 
-# Apply migrations to production
-wrangler d1 migrations apply grove-engine-db --remote
+# Curios database (grove-curios-db)
+wrangler d1 execute grove-curios-db --local --file=migrations/curios/001_initial_schema.sql
+wrangler d1 execute grove-curios-db --remote --file=migrations/curios/001_initial_schema.sql
+
+# Observability database (grove-observability-db)
+wrangler d1 execute grove-observability-db --local --file=migrations/observability/001_initial_schema.sql
+wrangler d1 execute grove-observability-db --remote --file=migrations/observability/001_initial_schema.sql
 ```
 
 ### Creating Migrations
 
 ```bash
 cd libs/engine
+
+# Core database — uses wrangler's built-in migration system
 wrangler d1 migrations create grove-engine-db "description-of-change"
 ```
 
 This creates a new `.sql` file in `migrations/`. Write your SQL, then apply locally to test.
+
+For curios or observability databases, create `.sql` files directly in their respective migration directories.
 
 ---
 

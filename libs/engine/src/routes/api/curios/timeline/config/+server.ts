@@ -9,67 +9,64 @@
 
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import {
-  DEFAULT_TIMELINE_CONFIG,
-  CLEAR_TOKEN_VALUE,
-} from "$lib/curios/timeline";
+import { DEFAULT_TIMELINE_CONFIG, CLEAR_TOKEN_VALUE } from "$lib/curios/timeline";
 import { encryptToken } from "$lib/server/encryption";
 import { API_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
 
 interface ConfigRow {
-  enabled: number;
-  github_username: string | null;
-  github_token_encrypted: string | null;
-  openrouter_key_encrypted: string | null;
-  openrouter_model: string;
-  voice_preset: string;
-  custom_system_prompt: string | null;
-  custom_summary_instructions: string | null;
-  custom_gutter_style: string | null;
-  repos_include: string | null;
-  repos_exclude: string | null;
-  timezone: string;
-  owner_name: string | null;
-  updated_at: number;
+	enabled: number;
+	github_username: string | null;
+	github_token_encrypted: string | null;
+	openrouter_key_encrypted: string | null;
+	openrouter_model: string;
+	voice_preset: string;
+	custom_system_prompt: string | null;
+	custom_summary_instructions: string | null;
+	custom_gutter_style: string | null;
+	repos_include: string | null;
+	repos_exclude: string | null;
+	timezone: string;
+	owner_name: string | null;
+	updated_at: number;
 }
 
 interface ConfigUpdateRequest {
-  enabled?: boolean;
-  githubUsername?: string;
-  githubToken?: string;
-  openrouterKey?: string;
-  openrouterModel?: string;
-  voicePreset?: string;
-  customSystemPrompt?: string;
-  customSummaryInstructions?: string;
-  customGutterStyle?: string;
-  reposInclude?: string[];
-  reposExclude?: string[];
-  timezone?: string;
-  ownerName?: string;
+	enabled?: boolean;
+	githubUsername?: string;
+	githubToken?: string;
+	openrouterKey?: string;
+	openrouterModel?: string;
+	voicePreset?: string;
+	customSystemPrompt?: string;
+	customSummaryInstructions?: string;
+	customGutterStyle?: string;
+	reposInclude?: string[];
+	reposExclude?: string[];
+	timezone?: string;
+	ownerName?: string;
 }
 
 export const GET: RequestHandler = async ({ platform, locals }) => {
-  const db = platform?.env?.DB;
-  const tenantId = locals.tenantId;
-  const user = locals.user;
+	const db = platform?.env?.CURIO_DB;
+	const tenantId = locals.tenantId;
+	const user = locals.user;
 
-  if (!db) {
-    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
-  }
+	if (!db) {
+		throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
+	}
 
-  if (!tenantId) {
-    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
-  }
+	if (!tenantId) {
+		throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
+	}
 
-  // Require authentication for config access
-  if (!user) {
-    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
-  }
+	// Require authentication for config access
+	if (!user) {
+		throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
+	}
 
-  const config = await db
-    .prepare(
-      `SELECT
+	const config = await db
+		.prepare(
+			`SELECT
         enabled,
         github_username,
         github_token_encrypted,
@@ -86,166 +83,152 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
         updated_at
       FROM timeline_curio_config
       WHERE tenant_id = ?`,
-    )
-    .bind(tenantId)
-    .first<ConfigRow>();
+		)
+		.bind(tenantId)
+		.first<ConfigRow>();
 
-  if (!config) {
-    // Return defaults if no config exists
-    return json({
-      config: {
-        ...DEFAULT_TIMELINE_CONFIG,
-        githubUsername: null,
-        customSystemPrompt: null,
-        customSummaryInstructions: null,
-        customGutterStyle: null,
-        reposInclude: null,
-        reposExclude: null,
-        ownerName: null,
-        hasGithubToken: false,
-        hasOpenrouterKey: false,
-        updatedAt: null,
-      },
-    });
-  }
+	if (!config) {
+		// Return defaults if no config exists
+		return json({
+			config: {
+				...DEFAULT_TIMELINE_CONFIG,
+				githubUsername: null,
+				customSystemPrompt: null,
+				customSummaryInstructions: null,
+				customGutterStyle: null,
+				reposInclude: null,
+				reposExclude: null,
+				ownerName: null,
+				hasGithubToken: false,
+				hasOpenrouterKey: false,
+				updatedAt: null,
+			},
+		});
+	}
 
-  // Transform to camelCase, don't expose encrypted tokens
-  return json({
-    config: {
-      enabled: Boolean(config.enabled),
-      githubUsername: config.github_username,
-      openrouterModel: config.openrouter_model,
-      voicePreset: config.voice_preset,
-      customSystemPrompt: config.custom_system_prompt,
-      customSummaryInstructions: config.custom_summary_instructions,
-      customGutterStyle: config.custom_gutter_style,
-      reposInclude: config.repos_include
-        ? JSON.parse(config.repos_include)
-        : null,
-      reposExclude: config.repos_exclude
-        ? JSON.parse(config.repos_exclude)
-        : null,
-      timezone: config.timezone,
-      ownerName: config.owner_name,
-      // Indicate if tokens are set without exposing them
-      hasGithubToken: Boolean(config.github_token_encrypted),
-      hasOpenrouterKey: Boolean(config.openrouter_key_encrypted),
-      updatedAt: config.updated_at,
-    },
-  });
+	// Transform to camelCase, don't expose encrypted tokens
+	return json({
+		config: {
+			enabled: Boolean(config.enabled),
+			githubUsername: config.github_username,
+			openrouterModel: config.openrouter_model,
+			voicePreset: config.voice_preset,
+			customSystemPrompt: config.custom_system_prompt,
+			customSummaryInstructions: config.custom_summary_instructions,
+			customGutterStyle: config.custom_gutter_style,
+			reposInclude: config.repos_include ? JSON.parse(config.repos_include) : null,
+			reposExclude: config.repos_exclude ? JSON.parse(config.repos_exclude) : null,
+			timezone: config.timezone,
+			ownerName: config.owner_name,
+			// Indicate if tokens are set without exposing them
+			hasGithubToken: Boolean(config.github_token_encrypted),
+			hasOpenrouterKey: Boolean(config.openrouter_key_encrypted),
+			updatedAt: config.updated_at,
+		},
+	});
 };
 
 export const PUT: RequestHandler = async ({ request, platform, locals }) => {
-  const db = platform?.env?.DB;
-  const tenantId = locals.tenantId;
-  const user = locals.user;
+	const db = platform?.env?.CURIO_DB;
+	const tenantId = locals.tenantId;
+	const user = locals.user;
 
-  if (!db) {
-    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
-  }
+	if (!db) {
+		throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
+	}
 
-  if (!tenantId) {
-    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
-  }
+	if (!tenantId) {
+		throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
+	}
 
-  if (!user) {
-    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
-  }
+	if (!user) {
+		throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
+	}
 
-  const body = (await request.json()) as ConfigUpdateRequest;
+	const body = (await request.json()) as ConfigUpdateRequest;
 
-  const {
-    enabled,
-    githubUsername,
-    githubToken,
-    openrouterKey,
-    openrouterModel,
-    voicePreset,
-    customSystemPrompt,
-    customSummaryInstructions,
-    customGutterStyle,
-    reposInclude,
-    reposExclude,
-    timezone,
-    ownerName,
-  } = body;
+	const {
+		enabled,
+		githubUsername,
+		githubToken,
+		openrouterKey,
+		openrouterModel,
+		voicePreset,
+		customSystemPrompt,
+		customSummaryInstructions,
+		customGutterStyle,
+		reposInclude,
+		reposExclude,
+		timezone,
+		ownerName,
+	} = body;
 
-  // Validate required fields when enabling
-  if (enabled && !githubUsername?.trim()) {
-    throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
-  }
+	// Validate required fields when enabling
+	if (enabled && !githubUsername?.trim()) {
+		throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
+	}
 
-  // Length limits on free-text fields (defense against storage abuse)
-  if (customSystemPrompt && customSystemPrompt.length > 10_000) {
-    throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
-  }
-  if (customSummaryInstructions && customSummaryInstructions.length > 5_000) {
-    throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
-  }
-  if (customGutterStyle && customGutterStyle.length > 2_000) {
-    throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
-  }
-  if (ownerName && ownerName.length > 200) {
-    throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
-  }
-  if (githubUsername && githubUsername.length > 100) {
-    throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
-  }
-  if (timezone && timezone.length > 100) {
-    throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
-  }
+	// Length limits on free-text fields (defense against storage abuse)
+	if (customSystemPrompt && customSystemPrompt.length > 10_000) {
+		throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
+	}
+	if (customSummaryInstructions && customSummaryInstructions.length > 5_000) {
+		throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
+	}
+	if (customGutterStyle && customGutterStyle.length > 2_000) {
+		throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
+	}
+	if (ownerName && ownerName.length > 200) {
+		throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
+	}
+	if (githubUsername && githubUsername.length > 100) {
+		throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
+	}
+	if (timezone && timezone.length > 100) {
+		throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
+	}
 
-  // Parse repo lists if arrays
-  const reposIncludeJson =
-    Array.isArray(reposInclude) && reposInclude.length > 0
-      ? JSON.stringify(reposInclude)
-      : null;
-  const reposExcludeJson =
-    Array.isArray(reposExclude) && reposExclude.length > 0
-      ? JSON.stringify(reposExclude)
-      : null;
+	// Parse repo lists if arrays
+	const reposIncludeJson =
+		Array.isArray(reposInclude) && reposInclude.length > 0 ? JSON.stringify(reposInclude) : null;
+	const reposExcludeJson =
+		Array.isArray(reposExclude) && reposExclude.length > 0 ? JSON.stringify(reposExclude) : null;
 
-  try {
-    // Encrypt tokens before storing
-    // Token handling: null = preserve existing, "" = clear, "value" = set new
-    const encryptionKey = platform?.env?.TOKEN_ENCRYPTION_KEY;
+	try {
+		// Encrypt tokens before storing
+		// Token handling: null = preserve existing, "" = clear, "value" = set new
+		const encryptionKey = platform?.env?.TOKEN_ENCRYPTION_KEY;
 
-    // Determine token values: CLEAR_TOKEN_VALUE -> "", actual token -> encrypt, undefined -> null (preserve)
-    let githubTokenForDb: string | null = null;
-    let openrouterKeyForDb: string | null = null;
+		// Determine token values: CLEAR_TOKEN_VALUE -> "", actual token -> encrypt, undefined -> null (preserve)
+		let githubTokenForDb: string | null = null;
+		let openrouterKeyForDb: string | null = null;
 
-    if (githubToken === CLEAR_TOKEN_VALUE) {
-      // Explicit clear request - use empty string to trigger CASE NULL
-      githubTokenForDb = "";
-    } else if (githubToken?.trim()) {
-      // New token value - encrypt it
-      const rawToken = githubToken.trim();
-      githubTokenForDb = encryptionKey
-        ? await encryptToken(rawToken, encryptionKey)
-        : rawToken;
-    }
-    // else: null/undefined = preserve existing (COALESCE handles this)
+		if (githubToken === CLEAR_TOKEN_VALUE) {
+			// Explicit clear request - use empty string to trigger CASE NULL
+			githubTokenForDb = "";
+		} else if (githubToken?.trim()) {
+			// New token value - encrypt it
+			const rawToken = githubToken.trim();
+			githubTokenForDb = encryptionKey ? await encryptToken(rawToken, encryptionKey) : rawToken;
+		}
+		// else: null/undefined = preserve existing (COALESCE handles this)
 
-    if (openrouterKey === CLEAR_TOKEN_VALUE) {
-      // Explicit clear request
-      openrouterKeyForDb = "";
-    } else if (openrouterKey?.trim()) {
-      // New token value - encrypt it
-      const rawKey = openrouterKey.trim();
-      openrouterKeyForDb = encryptionKey
-        ? await encryptToken(rawKey, encryptionKey)
-        : rawKey;
-    }
+		if (openrouterKey === CLEAR_TOKEN_VALUE) {
+			// Explicit clear request
+			openrouterKeyForDb = "";
+		} else if (openrouterKey?.trim()) {
+			// New token value - encrypt it
+			const rawKey = openrouterKey.trim();
+			openrouterKeyForDb = encryptionKey ? await encryptToken(rawKey, encryptionKey) : rawKey;
+		}
 
-    if (!encryptionKey && (githubToken?.trim() || openrouterKey?.trim())) {
-      console.warn(
-        "TOKEN_ENCRYPTION_KEY not set - tokens will be stored unencrypted",
-      );
-    }
+		if (!encryptionKey && (githubToken?.trim() || openrouterKey?.trim())) {
+			console.warn("TOKEN_ENCRYPTION_KEY not set - tokens will be stored unencrypted");
+		}
 
-    await db
-      .prepare(
-        `INSERT INTO timeline_curio_config (
+		await db
+			.prepare(
+				`INSERT INTO timeline_curio_config (
           tenant_id,
           enabled,
           github_username,
@@ -283,28 +266,28 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
           timezone = excluded.timezone,
           owner_name = excluded.owner_name,
           updated_at = strftime('%s', 'now')`,
-      )
-      .bind(
-        tenantId,
-        enabled ? 1 : 0,
-        githubUsername?.trim() || null,
-        githubTokenForDb,
-        openrouterKeyForDb,
-        openrouterModel || DEFAULT_TIMELINE_CONFIG.openrouterModel,
-        voicePreset || DEFAULT_TIMELINE_CONFIG.voicePreset,
-        customSystemPrompt?.trim() || null,
-        customSummaryInstructions?.trim() || null,
-        customGutterStyle?.trim() || null,
-        reposIncludeJson,
-        reposExcludeJson,
-        timezone || DEFAULT_TIMELINE_CONFIG.timezone,
-        ownerName?.trim() || null,
-      )
-      .run();
+			)
+			.bind(
+				tenantId,
+				enabled ? 1 : 0,
+				githubUsername?.trim() || null,
+				githubTokenForDb,
+				openrouterKeyForDb,
+				openrouterModel || DEFAULT_TIMELINE_CONFIG.openrouterModel,
+				voicePreset || DEFAULT_TIMELINE_CONFIG.voicePreset,
+				customSystemPrompt?.trim() || null,
+				customSummaryInstructions?.trim() || null,
+				customGutterStyle?.trim() || null,
+				reposIncludeJson,
+				reposExcludeJson,
+				timezone || DEFAULT_TIMELINE_CONFIG.timezone,
+				ownerName?.trim() || null,
+			)
+			.run();
 
-    return json({ success: true });
-  } catch (err) {
-    logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
-    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
-  }
+		return json({ success: true });
+	} catch (err) {
+		logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
+		throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
+	}
 };

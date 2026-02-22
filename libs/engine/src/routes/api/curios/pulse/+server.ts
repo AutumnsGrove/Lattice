@@ -30,7 +30,7 @@ interface EventRow {
 }
 
 export const GET: RequestHandler = async ({ url, platform, locals }) => {
-	const db = platform?.env?.DB;
+	const db = platform?.env?.CURIO_DB;
 	const kv = platform?.env?.CACHE_KV;
 	const tenantId = locals.tenantId;
 

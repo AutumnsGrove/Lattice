@@ -72,7 +72,7 @@ function rowToLink(row: LinkRow): LinkItemRecord {
 }
 
 export const load: PageServerLoad = async ({ platform, locals }) => {
-	const db = platform?.env?.DB;
+	const db = platform?.env?.CURIO_DB;
 	const tenantId = locals.tenantId;
 
 	if (!db || !tenantId) {
@@ -126,7 +126,7 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 
 export const actions: Actions = {
 	createGarden: async ({ request, platform, locals }) => {
-		const db = platform?.env?.DB;
+		const db = platform?.env?.CURIO_DB;
 		const tenantId = locals.tenantId;
 
 		if (!db || !tenantId) {
@@ -167,7 +167,7 @@ export const actions: Actions = {
 	},
 
 	updateGarden: async ({ request, platform, locals }) => {
-		const db = platform?.env?.DB;
+		const db = platform?.env?.CURIO_DB;
 		const tenantId = locals.tenantId;
 
 		if (!db || !tenantId) {
@@ -207,7 +207,7 @@ export const actions: Actions = {
 	},
 
 	deleteGarden: async ({ request, platform, locals }) => {
-		const db = platform?.env?.DB;
+		const db = platform?.env?.CURIO_DB;
 		const tenantId = locals.tenantId;
 
 		if (!db || !tenantId) {
@@ -242,7 +242,7 @@ export const actions: Actions = {
 	},
 
 	addLink: async ({ request, platform, locals }) => {
-		const db = platform?.env?.DB;
+		const db = platform?.env?.CURIO_DB;
 		const tenantId = locals.tenantId;
 
 		if (!db || !tenantId) {
@@ -300,7 +300,7 @@ export const actions: Actions = {
 	},
 
 	removeLink: async ({ request, platform, locals }) => {
-		const db = platform?.env?.DB;
+		const db = platform?.env?.CURIO_DB;
 		const tenantId = locals.tenantId;
 
 		if (!db || !tenantId) {

@@ -6,12 +6,12 @@
  */
 
 import type {
-  Env,
-  TenantConfig,
-  TenantConfigRow,
-  Commit,
-  GenerationResult,
-  CustomVoiceConfig,
+	Env,
+	TenantConfig,
+	TenantConfigRow,
+	Commit,
+	GenerationResult,
+	CustomVoiceConfig,
 } from "./config";
 import { DEFAULT_OPENROUTER_MODEL } from "./config";
 import { createSecretsManager } from "./secrets-manager";
@@ -19,12 +19,12 @@ import { fetchGitHubCommits, fetchCommitStats } from "./github";
 import { callOpenRouter, parseAIResponse } from "./openrouter";
 import { buildVoicedPrompt } from "./voices";
 import {
-  getHistoricalContext,
-  detectTaskFromText,
-  detectContinuation,
-  formatHistoricalContextForPrompt,
-  formatContinuationForPrompt,
-  buildSummaryContextData,
+	getHistoricalContext,
+	detectTaskFromText,
+	detectContinuation,
+	formatHistoricalContextForPrompt,
+	formatContinuationForPrompt,
+	buildSummaryContextData,
 } from "./context";
 
 // =============================================================================
@@ -34,13 +34,11 @@ import {
 /**
  * Get all enabled tenants with valid configuration.
  */
-export async function getEnabledTenants(
-  db: D1Database,
-): Promise<TenantConfig[]> {
-  // Query enabled tenants - secrets are stored separately in tenant_secrets table
-  const result = await db
-    .prepare(
-      `
+export async function getEnabledTenants(curioDb: D1Database): Promise<TenantConfig[]> {
+	// Query enabled tenants - secrets are stored separately in tenant_secrets table
+	const result = await curioDb
+		.prepare(
+			`
       SELECT
         tenant_id,
         github_username,
@@ -56,10 +54,10 @@ export async function getEnabledTenants(
       FROM timeline_curio_config
       WHERE enabled = 1
     `,
-    )
-    .all<TenantConfigRow>();
+		)
+		.all<TenantConfigRow>();
 
-  return (result.results || []).map(parseConfigRow);
+	return (result.results || []).map(parseConfigRow);
 }
 
 /**
@@ -67,174 +65,151 @@ export async function getEnabledTenants(
  * Isolated error handling so failures don't affect other tenants.
  */
 export async function processTenantTimeline(
-  config: TenantConfig,
-  targetDate: string,
-  env: Env,
+	config: TenantConfig,
+	targetDate: string,
+	env: Env,
 ): Promise<GenerationResult> {
-  const logPrefix = `[${config.tenantId}]`;
+	const logPrefix = `[${config.tenantId}]`;
 
-  try {
-    // 0. Check if summary already exists (skip regeneration)
-    const existing = await env.DB.prepare(
-      `SELECT 1 FROM timeline_summaries
+	try {
+		// 0. Check if summary already exists (skip regeneration)
+		const existing = await env.CURIO_DB.prepare(
+			`SELECT 1 FROM timeline_summaries
        WHERE tenant_id = ? AND summary_date = ? AND commit_count > 0`,
-    )
-      .bind(config.tenantId, targetDate)
-      .first();
+		)
+			.bind(config.tenantId, targetDate)
+			.first();
 
-    if (existing) {
-      console.log(
-        `${logPrefix} Summary already exists for ${targetDate}, skipping`,
-      );
-      return {
-        success: true,
-        tenantId: config.tenantId,
-        date: targetDate,
-        commitCount: 0,
-      };
-    }
+		if (existing) {
+			console.log(`${logPrefix} Summary already exists for ${targetDate}, skipping`);
+			return {
+				success: true,
+				tenantId: config.tenantId,
+				date: targetDate,
+				commitCount: 0,
+			};
+		}
 
-    // 1. Get API tokens from envelope encryption system
-    const secrets = createSecretsManager(env.DB, env.GROVE_KEK);
+		// 1. Get API tokens from envelope encryption system
+		const secrets = createSecretsManager(env.DB, env.GROVE_KEK);
 
-    if (!secrets) {
-      throw new Error(
-        "GROVE_KEK not configured - cannot decrypt tenant secrets",
-      );
-    }
+		if (!secrets) {
+			throw new Error("GROVE_KEK not configured - cannot decrypt tenant secrets");
+		}
 
-    // Fetch tokens from tenant_secrets table
-    const [githubToken, openrouterKey] = await Promise.all([
-      secrets.safeGetSecret(config.tenantId, "timeline_github_token"),
-      secrets.safeGetSecret(config.tenantId, "timeline_openrouter_key"),
-    ]);
+		// Fetch tokens from tenant_secrets table
+		const [githubToken, openrouterKey] = await Promise.all([
+			secrets.safeGetSecret(config.tenantId, "timeline_github_token"),
+			secrets.safeGetSecret(config.tenantId, "timeline_openrouter_key"),
+		]);
 
-    if (!githubToken) {
-      throw new Error(
-        "GitHub token not found in tenant_secrets (key: timeline_github_token)",
-      );
-    }
+		if (!githubToken) {
+			throw new Error("GitHub token not found in tenant_secrets (key: timeline_github_token)");
+		}
 
-    if (!openrouterKey) {
-      throw new Error(
-        "OpenRouter API key not found in tenant_secrets (key: timeline_openrouter_key)",
-      );
-    }
+		if (!openrouterKey) {
+			throw new Error(
+				"OpenRouter API key not found in tenant_secrets (key: timeline_openrouter_key)",
+			);
+		}
 
-    // 2. Fetch GitHub commits
-    console.log(`${logPrefix} Fetching commits for ${targetDate}...`);
-    const commits = await fetchGitHubCommits(
-      config,
-      githubToken,
-      targetDate,
-      env.DB,
-    );
+		// 2. Fetch GitHub commits
+		console.log(`${logPrefix} Fetching commits for ${targetDate}...`);
+		const commits = await fetchGitHubCommits(config, githubToken, targetDate, env.CURIO_DB);
 
-    if (commits.length === 0) {
-      console.log(`${logPrefix} No commits for ${targetDate}, skipping`);
-      return {
-        success: true,
-        tenantId: config.tenantId,
-        date: targetDate,
-        commitCount: 0,
-      };
-    }
+		if (commits.length === 0) {
+			console.log(`${logPrefix} No commits for ${targetDate}, skipping`);
+			return {
+				success: true,
+				tenantId: config.tenantId,
+				date: targetDate,
+				commitCount: 0,
+			};
+		}
 
-    console.log(`${logPrefix} Found ${commits.length} commits`);
+		console.log(`${logPrefix} Found ${commits.length} commits`);
 
-    // 3. Enrich commits with stats
-    await fetchCommitStats(commits, config.githubUsername, githubToken);
+		// 3. Enrich commits with stats
+		await fetchCommitStats(commits, config.githubUsername, githubToken);
 
-    // 4. Get historical context
-    const repos = [...new Set(commits.map((c) => c.repo))];
-    const historicalContext = await getHistoricalContext(
-      env.DB,
-      config.tenantId,
-      targetDate,
-    );
+		// 4. Get historical context
+		const repos = [...new Set(commits.map((c) => c.repo))];
+		const historicalContext = await getHistoricalContext(env.CURIO_DB, config.tenantId, targetDate);
 
-    // Pre-detect task type for continuation detection
-    const commitText = commits.map((c) => c.message).join(" ");
-    const preDetectedTask = detectTaskFromText(commitText);
+		// Pre-detect task type for continuation detection
+		const commitText = commits.map((c) => c.message).join(" ");
+		const preDetectedTask = detectTaskFromText(commitText);
 
-    // Check for multi-day continuation
-    const continuation = detectContinuation(historicalContext, preDetectedTask);
+		// Check for multi-day continuation
+		const continuation = detectContinuation(historicalContext, preDetectedTask);
 
-    // Build prompt context
-    let promptContext: {
-      historicalContext?: string;
-      continuationNote?: string;
-    } | null = null;
-    if (historicalContext.length > 0 || continuation) {
-      promptContext = {
-        historicalContext: formatHistoricalContextForPrompt(historicalContext),
-        continuationNote: formatContinuationForPrompt(continuation),
-      };
-    }
+		// Build prompt context
+		let promptContext: {
+			historicalContext?: string;
+			continuationNote?: string;
+		} | null = null;
+		if (historicalContext.length > 0 || continuation) {
+			promptContext = {
+				historicalContext: formatHistoricalContextForPrompt(historicalContext),
+				continuationNote: formatContinuationForPrompt(continuation),
+			};
+		}
 
-    console.log(
-      `${logPrefix} Context: task=${preDetectedTask || "none"}, continuation=${continuation?.startDate || "none"}, history=${historicalContext.length} days`,
-    );
+		console.log(
+			`${logPrefix} Context: task=${preDetectedTask || "none"}, continuation=${continuation?.startDate || "none"}, history=${historicalContext.length} days`,
+		);
 
-    // 5. Build voiced prompt
-    const customConfig: CustomVoiceConfig | null =
-      config.voicePreset === "custom"
-        ? {
-            systemPrompt: config.customSystemPrompt ?? undefined,
-            summaryInstructions: config.customSummaryInstructions ?? undefined,
-            gutterStyle: config.customGutterStyle ?? undefined,
-          }
-        : null;
+		// 5. Build voiced prompt
+		const customConfig: CustomVoiceConfig | null =
+			config.voicePreset === "custom"
+				? {
+						systemPrompt: config.customSystemPrompt ?? undefined,
+						summaryInstructions: config.customSummaryInstructions ?? undefined,
+						gutterStyle: config.customGutterStyle ?? undefined,
+					}
+				: null;
 
-    const { systemPrompt, userPrompt } = buildVoicedPrompt(
-      config.voicePreset,
-      commits,
-      targetDate,
-      config.ownerName ?? "the developer",
-      customConfig,
-      promptContext,
-    );
+		const { systemPrompt, userPrompt } = buildVoicedPrompt(
+			config.voicePreset,
+			commits,
+			targetDate,
+			config.ownerName ?? "the developer",
+			customConfig,
+			promptContext,
+		);
 
-    // 6. Call OpenRouter
-    console.log(
-      `${logPrefix} Calling OpenRouter (${config.openrouterModel})...`,
-    );
-    const aiResult = await callOpenRouter(
-      systemPrompt,
-      userPrompt,
-      config.openrouterModel || DEFAULT_OPENROUTER_MODEL,
-      openrouterKey,
-    );
+		// 6. Call OpenRouter
+		console.log(`${logPrefix} Calling OpenRouter (${config.openrouterModel})...`);
+		const aiResult = await callOpenRouter(
+			systemPrompt,
+			userPrompt,
+			config.openrouterModel || DEFAULT_OPENROUTER_MODEL,
+			openrouterKey,
+		);
 
-    // 7. Parse AI response
-    const parsed = parseAIResponse(aiResult.content);
+		// 7. Parse AI response
+		const parsed = parseAIResponse(aiResult.content);
 
-    // 8. Build context data for storage
-    const contextData = buildSummaryContextData(
-      { brief: parsed.brief, detailed: parsed.detailed },
-      commits,
-      targetDate,
-      historicalContext,
-      preDetectedTask,
-    );
+		// 8. Build context data for storage
+		const contextData = buildSummaryContextData(
+			{ brief: parsed.brief, detailed: parsed.detailed },
+			commits,
+			targetDate,
+			historicalContext,
+			preDetectedTask,
+		);
 
-    // 9. Calculate stats
-    const totalAdditions = commits.reduce(
-      (sum, c) => sum + (c.additions ?? 0),
-      0,
-    );
-    const totalDeletions = commits.reduce(
-      (sum, c) => sum + (c.deletions ?? 0),
-      0,
-    );
+		// 9. Calculate stats
+		const totalAdditions = commits.reduce((sum, c) => sum + (c.additions ?? 0), 0);
+		const totalDeletions = commits.reduce((sum, c) => sum + (c.deletions ?? 0), 0);
 
-    // 10. Store to database (parallel writes for performance)
-    const summaryId = `${config.tenantId}-${targetDate}`;
+		// 10. Store to database (parallel writes for performance)
+		const summaryId = `${config.tenantId}-${targetDate}`;
 
-    await Promise.all([
-      // Store summary
-      env.DB.prepare(
-        `INSERT INTO timeline_summaries (
+		await Promise.all([
+			// Store summary (curio table)
+			env.CURIO_DB.prepare(
+				`INSERT INTO timeline_summaries (
           id,
           tenant_id,
           summary_date,
@@ -268,32 +243,30 @@ export async function processTenantTimeline(
           continuation_of = excluded.continuation_of,
           focus_streak = excluded.focus_streak,
           created_at = strftime('%s', 'now')`,
-      )
-        .bind(
-          summaryId,
-          config.tenantId,
-          targetDate,
-          parsed.brief,
-          parsed.detailed,
-          JSON.stringify(parsed.gutter),
-          commits.length,
-          JSON.stringify(repos),
-          totalAdditions,
-          totalDeletions,
-          aiResult.usage.model,
-          config.voicePreset,
-          JSON.stringify(contextData.contextBrief),
-          contextData.detectedFocus
-            ? JSON.stringify(contextData.detectedFocus)
-            : null,
-          contextData.continuationOf,
-          contextData.focusStreak,
-        )
-        .run(),
+			)
+				.bind(
+					summaryId,
+					config.tenantId,
+					targetDate,
+					parsed.brief,
+					parsed.detailed,
+					JSON.stringify(parsed.gutter),
+					commits.length,
+					JSON.stringify(repos),
+					totalAdditions,
+					totalDeletions,
+					aiResult.usage.model,
+					config.voicePreset,
+					JSON.stringify(contextData.contextBrief),
+					contextData.detectedFocus ? JSON.stringify(contextData.detectedFocus) : null,
+					contextData.continuationOf,
+					contextData.focusStreak,
+				)
+				.run(),
 
-      // Update activity table
-      env.DB.prepare(
-        `INSERT INTO timeline_activity (
+			// Update activity table (curio table)
+			env.CURIO_DB.prepare(
+				`INSERT INTO timeline_activity (
           tenant_id,
           activity_date,
           commit_count,
@@ -306,20 +279,20 @@ export async function processTenantTimeline(
           repos_active = excluded.repos_active,
           lines_added = excluded.lines_added,
           lines_deleted = excluded.lines_deleted`,
-      )
-        .bind(
-          config.tenantId,
-          targetDate,
-          commits.length,
-          JSON.stringify(repos),
-          totalAdditions,
-          totalDeletions,
-        )
-        .run(),
+			)
+				.bind(
+					config.tenantId,
+					targetDate,
+					commits.length,
+					JSON.stringify(repos),
+					totalAdditions,
+					totalDeletions,
+				)
+				.run(),
 
-      // Log AI usage
-      env.DB.prepare(
-        `INSERT INTO timeline_ai_usage (
+			// Log AI usage (curio table)
+			env.CURIO_DB.prepare(
+				`INSERT INTO timeline_ai_usage (
           tenant_id,
           used_at,
           model,
@@ -327,38 +300,38 @@ export async function processTenantTimeline(
           output_tokens,
           cost_usd
         ) VALUES (?, strftime('%s', 'now'), ?, ?, ?, ?)`,
-      )
-        .bind(
-          config.tenantId,
-          aiResult.usage.model,
-          aiResult.usage.inputTokens,
-          aiResult.usage.outputTokens,
-          aiResult.usage.cost,
-        )
-        .run(),
-    ]);
+			)
+				.bind(
+					config.tenantId,
+					aiResult.usage.model,
+					aiResult.usage.inputTokens,
+					aiResult.usage.outputTokens,
+					aiResult.usage.cost,
+				)
+				.run(),
+		]);
 
-    console.log(
-      `${logPrefix} Generated summary: ${commits.length} commits, ${totalAdditions}+ ${totalDeletions}-`,
-    );
+		console.log(
+			`${logPrefix} Generated summary: ${commits.length} commits, ${totalAdditions}+ ${totalDeletions}-`,
+		);
 
-    return {
-      success: true,
-      tenantId: config.tenantId,
-      date: targetDate,
-      commitCount: commits.length,
-    };
-  } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : String(err);
-    console.error(`${logPrefix} Failed:`, errorMessage);
+		return {
+			success: true,
+			tenantId: config.tenantId,
+			date: targetDate,
+			commitCount: commits.length,
+		};
+	} catch (err) {
+		const errorMessage = err instanceof Error ? err.message : String(err);
+		console.error(`${logPrefix} Failed:`, errorMessage);
 
-    return {
-      success: false,
-      tenantId: config.tenantId,
-      date: targetDate,
-      error: errorMessage,
-    };
-  }
+		return {
+			success: false,
+			tenantId: config.tenantId,
+			date: targetDate,
+			error: errorMessage,
+		};
+	}
 }
 
 // =============================================================================
@@ -370,29 +343,29 @@ export async function processTenantTimeline(
  * Handles null, empty string, and invalid JSON gracefully.
  */
 function safeParseJsonArray(value: string | null): string[] | null {
-  if (!value || value.trim() === "") return null;
-  try {
-    return JSON.parse(value);
-  } catch {
-    return null;
-  }
+	if (!value || value.trim() === "") return null;
+	try {
+		return JSON.parse(value);
+	} catch {
+		return null;
+	}
 }
 
 /**
  * Parse a raw database row into a TenantConfig object.
  */
 function parseConfigRow(row: TenantConfigRow): TenantConfig {
-  return {
-    tenantId: row.tenant_id,
-    githubUsername: row.github_username,
-    openrouterModel: row.openrouter_model,
-    voicePreset: row.voice_preset,
-    customSystemPrompt: row.custom_system_prompt,
-    customSummaryInstructions: row.custom_summary_instructions,
-    customGutterStyle: row.custom_gutter_style,
-    reposInclude: safeParseJsonArray(row.repos_include),
-    reposExclude: safeParseJsonArray(row.repos_exclude),
-    timezone: row.timezone,
-    ownerName: row.owner_name,
-  };
+	return {
+		tenantId: row.tenant_id,
+		githubUsername: row.github_username,
+		openrouterModel: row.openrouter_model,
+		voicePreset: row.voice_preset,
+		customSystemPrompt: row.custom_system_prompt,
+		customSummaryInstructions: row.custom_summary_instructions,
+		customGutterStyle: row.custom_gutter_style,
+		reposInclude: safeParseJsonArray(row.repos_include),
+		reposExclude: safeParseJsonArray(row.repos_exclude),
+		timezone: row.timezone,
+		ownerName: row.owner_name,
+	};
 }

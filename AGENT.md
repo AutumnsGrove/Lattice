@@ -121,13 +121,29 @@ export default {
 - Cloudflare-first infrastructure (Workers, D1, KV, R2)
 - Phase-based development: Lattice → Multi-tenant → Website → Meadow → Polish
 
+### D1 Database Architecture (3 databases)
+
+| Database                 | Binding    | Tables | Purpose                                              |
+| ------------------------ | ---------- | ------ | ---------------------------------------------------- |
+| `grove-engine-db`        | `DB`       | ~78    | Core: auth, tenants, pages, billing, platform config |
+| `grove-curios-db`        | `CURIO_DB` | 45     | Curio widgets: timeline, gallery, guestbook, etc.    |
+| `grove-observability-db` | `OBS_DB`   | 16     | Observability: sentinel monitoring, vista analytics  |
+
+**Binding rules:**
+
+- **Curio routes** (`/api/curios/*`, `/arbor/curios/*`, `/(site)/timeline|gallery|guestbook|pulse`) → use `platform?.env?.CURIO_DB`
+- **Observability routes** (`/api/sentinel/*`, `/api/vista/*`) → use `platform?.env?.OBS_DB`
+- **Everything else** (auth, tenants, pages, billing) → use `platform?.env?.DB`
+- **Cross-DB routes** (e.g., timeline generate/backfill/save-token) need **both** `DB` and `CURIO_DB` — `DB` for SecretsManager, `CURIO_DB` for curio tables
+
 ### Key Architecture Documents
 
-| Document                                        | Purpose                                                                      |
-| ----------------------------------------------- | ---------------------------------------------------------------------------- |
-| `docs/patterns/loom-durable-objects-pattern.md` | Loom DO coordination layer for auth, tenant coordination, D1 batching        |
-| `docs/specs/rings-spec.md`                      | Rings analytics system with privacy-first design and DO integration          |
-| `docs/grove-ai-gateway-integration.md`          | Cloudflare AI Gateway integration for per-tenant AI quotas and observability |
+| Document                                                            | Purpose                                                                      |
+| ------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `docs/plans/infra/completed/database-consolidation-architecture.md` | 3-phase database extraction plan (completed Feb 2026)                        |
+| `docs/patterns/loom-durable-objects-pattern.md`                     | Loom DO coordination layer for auth, tenant coordination, D1 batching        |
+| `docs/specs/rings-spec.md`                                          | Rings analytics system with privacy-first design and DO integration          |
+| `docs/grove-ai-gateway-integration.md`                              | Cloudflare AI Gateway integration for per-tenant AI quotas and observability |
 
 ---
 
@@ -248,7 +264,7 @@ Use conventional commits format for PR titles. Write a brief description of what
 | **UI Utilities**      | `@autumnsgrove/lattice/ui/utils`      | `cn()` (with tailwind-merge) |
 | **Stores**            | `@autumnsgrove/lattice/ui/stores`     | `seasonStore`, `themeStore`  |
 | **Nature Components** | `@autumnsgrove/lattice/ui/nature`     | Trees, creatures, palette    |
-| **Glass UI**          | `@autumnsgrove/lattice/ui`            | GlassCard, GlassButton      |
+| **Glass UI**          | `@autumnsgrove/lattice/ui`            | GlassCard, GlassButton       |
 | **General Utils**     | `@autumnsgrove/lattice/utils`         | csrf, sanitize, markdown     |
 | **Content**           | `@autumnsgrove/lattice/ui/content`    | ContentWithGutter, TOC       |
 | **Forms**             | `@autumnsgrove/lattice/ui/forms`      | Form components              |
@@ -263,7 +279,9 @@ Use conventional commits format for PR titles. Write a brief description of what
 
 ```typescript
 // ❌ BAD - Creating local utilities
-export function cn(...classes) { return classes.filter(Boolean).join(" "); }
+export function cn(...classes) {
+	return classes.filter(Boolean).join(" ");
+}
 
 // ✅ GOOD - Import from engine
 import { cn } from "@autumnsgrove/lattice/ui/utils";
@@ -287,14 +305,14 @@ Skills live in `.claude/skills/` — lean instruction files with deep references
 
 When a task spans multiple specialties, gatherings orchestrate the right animals in sequence:
 
-| Gathering                | Animals                                           | Use When                         |
-| ------------------------ | ------------------------------------------------- | -------------------------------- |
-| `gathering-feature`      | Bloodhound → Elephant → Turtle → Beaver → Owl    | Full feature lifecycle           |
-| `gathering-architecture` | Eagle → Crow → Swan → Elephant                    | System design → challenge → spec → build |
-| `gathering-ui`           | Chameleon → Deer                                  | UI design + accessibility        |
-| `gathering-security`     | Spider → Raccoon → Turtle                         | Auth + audit + hardening         |
-| `gathering-migration`    | Bloodhound → Bear                                 | Scout territory → migrate data   |
-| `gathering-planning`     | Bee → Badger                                      | Idea capture → board organization|
+| Gathering                | Animals                                       | Use When                                 |
+| ------------------------ | --------------------------------------------- | ---------------------------------------- |
+| `gathering-feature`      | Bloodhound → Elephant → Turtle → Beaver → Owl | Full feature lifecycle                   |
+| `gathering-architecture` | Eagle → Crow → Swan → Elephant                | System design → challenge → spec → build |
+| `gathering-ui`           | Chameleon → Deer                              | UI design + accessibility                |
+| `gathering-security`     | Spider → Raccoon → Turtle                     | Auth + audit + hardening                 |
+| `gathering-migration`    | Bloodhound → Bear                             | Scout territory → migrate data           |
+| `gathering-planning`     | Bee → Badger                                  | Idea capture → board organization        |
 
 ---
 
@@ -366,7 +384,20 @@ See `AgentUsage/error_handling.md` for the full reference.
 - Import ordering: standard library → third-party → local imports
 - Keep configuration separate from logic
 
-### Database Query Patterns
+### Database Query Patterns (Multi-DB)
+
+**Choose the right binding** — see [D1 Database Architecture](#d1-database-architecture-3-databases) above.
+
+```typescript
+// Standard curio route — single binding
+const db = platform?.env?.CURIO_DB;
+if (!db) throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
+
+// Cross-DB route (e.g., timeline generate) — dual binding
+const db = platform?.env?.DB; // Core: SecretsManager, tenants
+const curioDb = platform?.env?.CURIO_DB; // Curios: timeline_*, gallery_*, etc.
+if (!db || !curioDb) throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
+```
 
 **Isolate independent queries** — never put multiple in the same try/catch:
 
@@ -379,12 +410,18 @@ try {
 
 // ✅ GOOD - isolated with individual fallbacks
 const [settings, pages] = await Promise.all([
-	db.prepare("SELECT * FROM settings").all().catch(() => null),
-	db.prepare("SELECT * FROM pages").all().catch(() => null),
+	db
+		.prepare("SELECT * FROM settings")
+		.all()
+		.catch(() => null),
+	db
+		.prepare("SELECT * FROM pages")
+		.all()
+		.catch(() => null),
 ]);
 ```
 
-**Use typed query builders** from `libs/engine/src/lib/server/services/database.ts` instead of raw SQL. See `AgentUsage/db_usage.md` for details.
+**Use typed query builders** from `libs/engine/src/lib/server/services/database.ts` instead of raw SQL.
 
 ### Multi-Tenant CSRF
 
@@ -425,5 +462,5 @@ Full reference: `AgentUsage/house_agents.md`
 
 ---
 
-_Last updated: 2026-02-21_
+_Last updated: 2026-02-22_
 _Model: Claude Opus 4.6_

@@ -35,7 +35,7 @@ interface MoodLogRow {
 }
 
 export const load: PageServerLoad = async ({ platform, locals }) => {
-	const db = platform?.env?.DB;
+	const db = platform?.env?.CURIO_DB;
 	const tenantId = locals.tenantId;
 
 	if (!db || !tenantId) {
@@ -87,7 +87,7 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 
 export const actions: Actions = {
 	saveConfig: async ({ request, platform, locals }) => {
-		const db = platform?.env?.DB;
+		const db = platform?.env?.CURIO_DB;
 		const tenantId = locals.tenantId;
 
 		if (!db || !tenantId) {
@@ -173,7 +173,7 @@ export const actions: Actions = {
 	},
 
 	logMood: async ({ request, platform, locals }) => {
-		const db = platform?.env?.DB;
+		const db = platform?.env?.CURIO_DB;
 		const tenantId = locals.tenantId;
 
 		if (!db || !tenantId) {

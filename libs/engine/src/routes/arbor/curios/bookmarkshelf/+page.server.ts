@@ -35,7 +35,7 @@ interface BookmarkRow {
 }
 
 export const load: PageServerLoad = async ({ platform, locals }) => {
-	const db = platform?.env?.DB;
+	const db = platform?.env?.CURIO_DB;
 	const tenantId = locals.tenantId;
 
 	if (!db || !tenantId) {
@@ -113,7 +113,7 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 
 export const actions: Actions = {
 	addShelf: async ({ request, platform, locals }) => {
-		const db = platform?.env?.DB;
+		const db = platform?.env?.CURIO_DB;
 		const tenantId = locals.tenantId;
 
 		if (!db || !tenantId) {
@@ -164,7 +164,7 @@ export const actions: Actions = {
 	},
 
 	addBookmark: async ({ request, platform, locals }) => {
-		const db = platform?.env?.DB;
+		const db = platform?.env?.CURIO_DB;
 		const tenantId = locals.tenantId;
 
 		if (!db || !tenantId) {
@@ -252,7 +252,7 @@ export const actions: Actions = {
 	},
 
 	removeShelf: async ({ request, platform, locals }) => {
-		const db = platform?.env?.DB;
+		const db = platform?.env?.CURIO_DB;
 		const tenantId = locals.tenantId;
 
 		if (!db || !tenantId) {
@@ -282,7 +282,7 @@ export const actions: Actions = {
 	},
 
 	removeBookmark: async ({ request, platform, locals }) => {
-		const db = platform?.env?.DB;
+		const db = platform?.env?.CURIO_DB;
 		const tenantId = locals.tenantId;
 
 		if (!db || !tenantId) {
