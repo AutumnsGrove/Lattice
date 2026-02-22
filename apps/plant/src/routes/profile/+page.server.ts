@@ -21,6 +21,8 @@ const ProfileSchema = z.object({
 	interests: z.string().optional().default("[]"),
 });
 
+const InterestsSchema = z.array(z.string()).max(20);
+
 export const load: PageServerLoad = async ({ parent }) => {
 	const { user, onboarding } = await parent();
 
@@ -110,7 +112,6 @@ export const actions: Actions = {
 		}
 
 		// ─── Parse interests (validated with Zod) ────────────────────────
-		const InterestsSchema = z.array(z.string()).max(20);
 		let interests: string[] = [];
 		try {
 			const parsed = interestsRaw ? JSON.parse(interestsRaw) : [];

@@ -1126,6 +1126,10 @@ importers:
         version: 4.64.0(@cloudflare/workers-types@4.20260210.0)
 
   services/pulse:
+    dependencies:
+      zod:
+        specifier: ^3.24.2
+        version: 3.25.76
     devDependencies:
       '@cloudflare/workers-types':
         specifier: ^4.20251128.0

@@ -4,8 +4,17 @@
  * Writes normalized events to D1 and updates KV hot cache for fast reads.
  */
 
+import { z } from "zod";
 import type { Env, NormalizedEvent } from "./types";
 import { asPushData } from "./types";
+
+const TodayStatsSchema = z.object({
+	commits: z.number().default(0),
+	prsMerged: z.number().default(0),
+	issuesClosed: z.number().default(0),
+	linesAdded: z.number().default(0),
+	linesRemoved: z.number().default(0),
+});
 
 /**
  * Store a normalized event in D1 and update KV caches.
@@ -110,15 +119,12 @@ async function updateActiveStatus(
 
 async function updateTodayStats(env: Env, tenantId: string, event: NormalizedEvent): Promise<void> {
 	const key = `pulse:${tenantId}:today`;
-	const existing = (await env.KV.get(key, "json")) as Record<string, number> | null;
+	const raw = await env.KV.get(key, "text");
+	const parsed = raw ? TodayStatsSchema.safeParse(JSON.parse(raw)) : null;
 
-	const today = existing ?? {
-		commits: 0,
-		prsMerged: 0,
-		issuesClosed: 0,
-		linesAdded: 0,
-		linesRemoved: 0,
-	};
+	const today = parsed?.success
+		? parsed.data
+		: { commits: 0, prsMerged: 0, issuesClosed: 0, linesAdded: 0, linesRemoved: 0 };
 
 	// Increment relevant counters
 	if (event.eventType === "push") {
