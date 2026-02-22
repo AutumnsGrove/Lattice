@@ -11,12 +11,7 @@
 import type { PageServerLoad } from "./$types";
 import { SITE_ERRORS, throwGroveError } from "$lib/errors";
 import { canUploadImages } from "$lib/server/upload-gate.js";
-import {
-	getAvailableYears,
-	getAvailableCategories,
-	type GalleryTagRecord,
-	type GalleryCollectionRecord,
-} from "$lib/curios/gallery";
+import { type GalleryTagRecord } from "$lib/curios/gallery";
 
 interface ImageRow {
 	id: string;
@@ -37,31 +32,12 @@ interface ImageRow {
 	is_featured: number;
 }
 
-interface TagRow {
-	id: string;
-	name: string;
-	slug: string;
-	color: string;
-	description: string | null;
-	sort_order: number;
-}
-
 interface ImageTagRow {
 	image_id: string;
 	tag_id: string;
 	tag_name: string;
 	tag_slug: string;
 	tag_color: string;
-}
-
-interface CollectionRow {
-	id: string;
-	name: string;
-	slug: string;
-	description: string | null;
-	cover_image_id: string | null;
-	display_order: number;
-	is_public: number;
 }
 
 /** Sensible defaults — no curio config table needed */
@@ -72,8 +48,6 @@ const GALLERY_DEFAULTS = {
 	showDates: true,
 	showTags: true,
 	enableLightbox: true,
-	enableSearch: true,
-	enableFilters: true,
 	gridStyle: "mood-board",
 	thumbnailSize: "medium",
 };
@@ -127,8 +101,8 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 
 	const sortOrder = GALLERY_DEFAULTS.sortOrder;
 
-	// Run images, allTags, collections, and image-tags queries in parallel
-	const [imagesResult, allTagsResult, collectionsResult, imageTagsResult] = await Promise.all([
+	// Run images and image-tags queries in parallel
+	const [imagesResult, imageTagsResult] = await Promise.all([
 		db
 			.prepare(
 				`SELECT
@@ -151,25 +125,6 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 				console.warn("Gallery images query failed:", err);
 				return { results: [] as ImageRow[] };
 			}),
-
-		db
-			.prepare(
-				`SELECT id, name, slug, color, description, sort_order
-         FROM gallery_tags WHERE tenant_id = ? ORDER BY sort_order, name`,
-			)
-			.bind(tenantId)
-			.all<TagRow>()
-			.catch(() => ({ results: [] as TagRow[] })),
-
-		db
-			.prepare(
-				`SELECT id, name, slug, description, cover_image_id, display_order, is_public
-         FROM gallery_collections WHERE tenant_id = ? AND is_public = 1
-         ORDER BY display_order, name`,
-			)
-			.bind(tenantId)
-			.all<CollectionRow>()
-			.catch(() => ({ results: [] as CollectionRow[] })),
 
 		db
 			.prepare(
@@ -222,41 +177,8 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 		tags: tagsByImageId.get(row.id) || [],
 	}));
 
-	const tags: GalleryTagRecord[] = (allTagsResult.results ?? []).map((row) => ({
-		id: row.id,
-		tenantId,
-		name: row.name,
-		slug: row.slug,
-		color: row.color,
-		description: row.description,
-		sortOrder: row.sort_order,
-		createdAt: 0,
-	}));
-
-	const collections: GalleryCollectionRecord[] = (collectionsResult.results ?? []).map((row) => ({
-		id: row.id,
-		tenantId,
-		name: row.name,
-		slug: row.slug,
-		description: row.description,
-		coverImageId: row.cover_image_id,
-		displayOrder: row.display_order,
-		isPublic: Boolean(row.is_public),
-		createdAt: 0,
-		updatedAt: 0,
-	}));
-
-	const categories = getAvailableCategories(images);
-	const years = getAvailableYears(images);
-
 	return {
 		images,
-		filters: {
-			categories,
-			years,
-			tags,
-			collections,
-		},
 		config: {
 			title,
 			description,
