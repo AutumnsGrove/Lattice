@@ -3,7 +3,7 @@ title: Understanding the Admin Panel
 description: A tour of your Grove admin dashboard
 category: help
 section: customization
-lastUpdated: '2025-12-24'
+lastUpdated: '2026-02-22'
 keywords:
   - admin
   - dashboard
@@ -53,7 +53,9 @@ Pages work almost identically to posts, just without dates or feed placement.
 
 ### [[curios|Curios]]
 
-[[curios|Curios]] are short-form thoughts and updates—like tweets or status updates. They're perfect for quick observations, links you want to share, or thoughts that don't need a full blog post.
+[[curios|Curios]] are embeddable widgets and interactive elements you can add to your blog — hit counters, guestbooks, mood rings, now-playing badges, and more. Think of them as the fun, personal touches that make your site feel alive.
+
+> **Note:** Curios are actively being built. Some are available now, with more arriving over time.
 
 ### Images
 

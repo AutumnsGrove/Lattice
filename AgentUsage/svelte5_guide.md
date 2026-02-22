@@ -1,5 +1,102 @@
 # Svelte 5 Development Guide
 
+## Lattice: Engine-First Patterns
+
+> **IMPORTANT:** In the Lattice monorepo, components live in the engine (`libs/engine/`) and apps consume them. Follow these patterns for all Svelte work.
+
+### Engine-First Imports
+
+```svelte
+<!-- Use path-based imports from the engine package -->
+<script lang="ts">
+  import { GlassCard } from '@autumnsgrove/lattice/ui';
+  import { Footer, ThemeToggle, MobileMenu } from '@autumnsgrove/lattice/ui/chrome';
+  import { Logo } from '@autumnsgrove/lattice/ui/nature';
+  import { seasonStore, themeStore } from '@autumnsgrove/lattice/ui/chrome';
+</script>
+```
+
+### Tailwind Configuration (Required)
+
+Every app **must** include the engine preset and scan engine components:
+
+```javascript
+// tailwind.config.js
+import grovePreset from "../../libs/engine/src/lib/ui/tailwind.preset.js";
+
+export default {
+  presets: [grovePreset],
+  content: [
+    "./src/**/*.{html,js,svelte,ts}",
+    "../../libs/engine/src/lib/**/*.{html,js,svelte,ts}", // Scan engine
+  ],
+  darkMode: "class",
+};
+```
+
+### Snippet Pattern (Svelte 5)
+
+Grove components use Svelte 5 snippets for composition:
+
+```svelte
+<GlassCarousel {itemCount}>
+  {#snippet item(index: number)}
+    <HeroOwnership season={seasonStore.current} active={true} {index} />
+  {/snippet}
+</GlassCarousel>
+```
+
+### Rune Patterns in Practice
+
+```svelte
+<script lang="ts">
+  import { page } from '$app/state';
+
+  let { children, data } = $props();
+  let mobileMenuOpen = $state(false);
+  let currentPath = $derived(page.url.pathname);
+  let expandedItems = $state<Set<string>>(new Set());
+
+  // Trigger reactivity on Set mutations
+  function toggleItem(id: string) {
+    expandedItems.has(id) ? expandedItems.delete(id) : expandedItems.add(id);
+    expandedItems = new Set(expandedItems);
+  }
+</script>
+```
+
+### Component Props with Snippets
+
+```svelte
+<script lang="ts">
+  import type { Snippet } from "svelte";
+  import { cn } from "$lib/ui/utils";
+
+  interface Props {
+    variant?: "default" | "dark";
+    header?: Snippet;
+    footer?: Snippet;
+    children?: Snippet;
+  }
+
+  let { variant = "default", header, children, ...restProps }: Props = $props();
+  const computedClass = $derived(cn("rounded-xl", variantClasses[variant]));
+</script>
+
+<div class={computedClass} {...restProps}>
+  {#if header}{@render header()}{/if}
+  {#if children}{@render children?.()}{/if}
+</div>
+```
+
+---
+
+## Generic Svelte 5 Reference
+
+The rest of this guide covers standard Svelte 5 and SvelteKit patterns. In Lattice, always use engine-first imports and the Tailwind preset above.
+
+---
+
 ## Overview
 
 Svelte 5 is a component framework that compiles your code to highly efficient JavaScript at build time. Unlike virtual DOM frameworks, Svelte surgically updates the DOM when state changes, resulting in smaller bundles and faster runtime performance.

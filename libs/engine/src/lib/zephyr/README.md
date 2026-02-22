@@ -45,7 +45,7 @@ The client automatically reads from environment variables:
 
 | Variable              | Description         | Default                                       |
 | --------------------- | ------------------- | --------------------------------------------- |
-| `VITE_ZEPHYR_URL`     | Zephyr worker URL   | `https://grove-zephyr.m7jv4v7npb.workers.dev` |
+| `VITE_ZEPHYR_URL`     | Zephyr worker URL   | (use service binding in production) |
 | `VITE_ZEPHYR_API_KEY` | Your API key        | —                                             |
 | `PUBLIC_ZEPHYR_URL`   | Alternative URL var | —                                             |
 | `ZEPHYR_API_KEY`      | Alternative key var | —                                             |
@@ -55,9 +55,11 @@ The client automatically reads from environment variables:
 ```typescript
 import { ZephyrClient } from '@autumnsgrove/lattice/zephyr';
 
+// In production, use the ZEPHYR service binding instead of a URL.
+// Direct URL is only for local development.
 const client = new ZephyrClient({
-  baseUrl: 'https://grove-zephyr.m7jv4v7npb.workers.dev',
-  apiKey: 'your-api-key-here'
+  baseUrl: env.ZEPHYR_URL || 'http://localhost:8787',
+  apiKey: env.ZEPHYR_API_KEY,
 });
 
 const result = await client.send({...});

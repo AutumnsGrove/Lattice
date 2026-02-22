@@ -1,5 +1,13 @@
 # Git Pre-Commit Hooks Setup Guide
 
+## Lattice Note
+
+> **Lattice does NOT use traditional git hooks.** Pre-commit enforcement is handled via Claude Code hooks instead:
+> - `PreToolUse enforce-gw.py` — Blocks raw git/gh/wrangler write commands
+> - `PostToolUse auto-format.py` — Auto-runs Prettier after Edit/Write operations
+>
+> The guide below is generic BaseProject reference and does not apply to the Lattice monorepo.
+
 ## Overview
 
 Git hooks are scripts that automatically run at specific points in your Git workflow. They help maintain code quality, enforce standards, and catch issues before they enter your repository. This guide covers installing and using the comprehensive hooks provided in this template.

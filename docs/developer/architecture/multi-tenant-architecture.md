@@ -1,7 +1,9 @@
 # Multi-Tenant Architecture Plan
 
-> **Status:** Planning (2025-12-10)
+> **Status:** Implemented (original plan: 2025-12-10, live as of early 2026)
 > **Goal:** Single deployment serving all tenants, like YouTube/Twitter
+>
+> This architecture is now live. grove-router handles subdomain routing, Plant serves all tenants from one deployment, D1 stores per-tenant content, and TenantDO coordinates caching. The open questions below have been addressed (search via planned Vectorize, rate limiting via Threshold DO, custom domains via grove-router).
 
 ## The Problem
 
@@ -257,4 +259,4 @@ tenant_settings (tenant_id, setting_key, setting_value)
 ---
 
 _Created: 2025-12-10_
-_Status: Planning - awaiting implementation_
+_Status: Implemented — multi-tenant architecture is live_

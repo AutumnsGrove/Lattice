@@ -1,5 +1,106 @@
 # Cloudflare Development Guide
 
+## Lattice: Cloudflare Architecture
+
+> **IMPORTANT:** Lattice runs entirely on Cloudflare. All services use Workers, D1, R2, KV, and Durable Objects. Use `gw` for deployments — never raw `wrangler` commands.
+
+### Service Architecture
+
+```
+grove-router (wildcard *.grove.place)
+  ├── Service Bindings → Scout, Auth API, Mycelium, OG, Warden
+  └── R2 → CDN, Media
+
+heartwood (auth) → D1 (groveauth), D1 (grove-engine-db), KV (sessions)
+durable-objects → TenantDO, PostMetaDO, PostContentDO, ThresholdDO, ExportDO, TriageDO
+```
+
+### Durable Objects: Loom Pattern
+
+All DOs extend `LoomDO` from the engine for standardized patterns:
+
+```typescript
+import { LoomDO } from "@autumnsgrove/lattice/loom";
+import type { LoomRoute, LoomConfig } from "@autumnsgrove/lattice/loom";
+
+export class MyDO extends LoomDO<MyState, Env> {
+  config(): LoomConfig { return { name: "MyDO", blockOnInit: true }; }
+
+  schema(): string {
+    return `CREATE TABLE IF NOT EXISTS items (id TEXT PRIMARY KEY, data TEXT);`;
+  }
+
+  routes(): LoomRoute[] {
+    return [
+      { method: "GET", path: "/status", handler: () => this.handleStatus() },
+      { method: "POST", path: "/action", handler: (ctx) => this.handleAction(ctx) },
+    ];
+  }
+
+  protected async onAlarm(): Promise<void> {
+    // Alarm-based batch processing
+    await this.alarms.schedule(10 * 1000); // Chain next batch
+  }
+}
+```
+
+### Env Bindings Type Pattern
+
+```typescript
+export interface Env {
+  DB: D1Database;              // D1 database
+  SESSION_KV: KVNamespace;     // KV for session cache
+  CDN_BUCKET: R2Bucket;        // R2 storage
+  SESSIONS: DurableObjectNamespace;  // DO binding
+  ZEPHYR: { fetch: (input: RequestInfo, init?: RequestInit) => Promise<Response> }; // Service binding
+  AUTH_BASE_URL: string;       // Env var
+  JWT_PRIVATE_KEY: string;     // Secret (via wrangler secret put)
+}
+```
+
+### Wrangler Config Patterns
+
+```toml
+# D1 binding
+[[d1_databases]]
+binding = "DB"
+database_name = "grove-engine-db"
+database_id = "..."
+
+# DO with SQLite migrations
+[[durable_objects.bindings]]
+name = "TENANTS"
+class_name = "TenantDO"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["TenantDO"]
+
+# Service binding (worker-to-worker, no DNS/TLS overhead)
+[[services]]
+binding = "ZEPHYR"
+service = "grove-zephyr"
+```
+
+### Hono API Pattern
+
+All Workers use Hono with type-safe env:
+
+```typescript
+import { Hono } from "hono";
+const app = new Hono<{ Bindings: Env }>();
+app.use("*", securityHeaders);
+app.route("/api/auth", betterAuth);
+```
+
+---
+
+## Generic Cloudflare Reference
+
+The rest of this guide covers standard Cloudflare/wrangler patterns. In Lattice, always use the Loom SDK for DOs and `gw` for deployments.
+
+---
+
 ## Overview
 
 This guide covers working with Cloudflare services using both the official Cloudflare MCP (Model Context Protocol) server and traditional wrangler CLI workflows. The MCP server simplifies complex operations through natural language, while wrangler provides direct command-line control.
