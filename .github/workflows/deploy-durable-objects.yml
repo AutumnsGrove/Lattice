@@ -11,6 +11,10 @@ on:
       - "libs/engine/src/lib/zephyr/**"
   workflow_dispatch:
 
+permissions:
+  contents: read
+  deployments: write
+
 jobs:
   deploy:
     uses: ./.github/workflows/_deploy-worker.yml

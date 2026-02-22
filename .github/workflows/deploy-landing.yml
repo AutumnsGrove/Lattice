@@ -14,6 +14,10 @@ on:
     types: [completed]
   workflow_dispatch:
 
+permissions:
+  contents: read
+  deployments: write
+
 jobs:
   deploy:
     # Skip if triggered by failed workflow_run
