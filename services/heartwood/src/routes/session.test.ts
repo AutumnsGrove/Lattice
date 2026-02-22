@@ -15,6 +15,7 @@ vi.mock("../db/queries.js", () => ({
 	getClientByClientId: vi.fn(),
 	getUserClientPreference: vi.fn(),
 	getUserSubscription: vi.fn().mockResolvedValue(null),
+	getTenantByEmail: vi.fn().mockResolvedValue(null),
 	isEmailAdmin: vi.fn().mockReturnValue(false),
 	checkRateLimit: vi.fn(),
 }));

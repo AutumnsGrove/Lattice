@@ -16,6 +16,8 @@ declare global {
 		interface Platform {
 			env: {
 				DB: D1Database;
+				/** Observability D1 database (grove-observability-db) — Vista metrics */
+				OBS_DB?: D1Database;
 				CDN_BUCKET: R2Bucket;
 				CDN_URL: string;
 				/** @deprecated Use ZEPHYR_API_KEY instead */

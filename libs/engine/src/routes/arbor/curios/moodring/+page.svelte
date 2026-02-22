@@ -133,6 +133,7 @@
 
 			<!-- Shape Picker Grid -->
 			<div class="form-field shape-field">
+				<!-- svelte-ignore a11y_label_has_associated_control -->
 				<label>Display Shape</label>
 				<div class="shape-picker-grid">
 					{#each DISPLAY_STYLE_OPTIONS as opt}
