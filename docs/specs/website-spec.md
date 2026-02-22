@@ -1,886 +1,586 @@
 ---
-title: Grove Website Specification
-description: Marketing site and client management platform
-category: specs
-specCategory: reference
-icon: globe
-lastUpdated: "2025-11-21"
 aliases: []
+date created: Saturday, February 21st 2026
+date modified: Saturday, February 21st 2026
 tags:
-  - marketing
+  - plant
+  - onboarding
   - billing
-  - client-management
+  - auth
+type: tech-spec
 ---
 
 ```
-        🌸 WELCOME 🌸
-      _______________
-     /               \
-    |   🌿       🌿   |
-    |                 |
-    |    GROVE.       |
-    |     PLACE       |
-    |                 |
-    |   🌿  ⟿  🌿    |
-     \_______·_______/
-         |     |
-         |     |
-    ~~~~~|~~~~~|~~~~~
+          🌱         🌱
+         /|\        /|\
+        / | \      / | \
+       /  |  \    /  |  \
+      ·   |   ·  ·   |   ·
+          |          |
+     ─────┴──────────┴─────
+    ╱                       ╲
+   ╱    welcome, wanderer    ╲
+  ╱   your grove is waiting   ╲
+ ╱─────────────────────────────╲
+ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+ ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+ ·····························
 ```
 
-> _The entrance to the grove_
+> _The front door to the grove. Come in, take root, grow._
 
----
+# Plant: Grove Onboarding
 
-# Grove Website — Technical Specification
+> _The front door to the grove. Come in, take root, grow._
 
-The main marketing site and client management platform for Grove. Handles marketing, client acquisition, onboarding, billing via Stripe, and provides a dashboard for clients to manage their blogs across the platform.
+Plant is Grove's onboarding application. It guides new Wanderers from their first sign-in through profile creation, plan selection, payment, and tenant provisioning. By the end of the flow, a new blog exists at `username.grove.place` and a welcome email sequence has begun.
 
-**Project:** Grove Website - Main Site & Client Management  
-**Repository:** `grove-website`  
-**Type:** Marketing & Management Platform  
-**Purpose:** Marketing, client signup, billing, and blog management dashboard
+**Public Name:** Plant
+**Internal Name:** grove-plant
+**Domain:** `grove.place/` (served via grove-router)
+**Location:** `apps/plant/` in the Lattice monorepo
+**Last Updated:** February 2026
+
+Plant is a seedling pushing through soil. It is the first thing a Wanderer touches. The soil is Lattice's shared infrastructure (Engine, Heartwood, Zephyr). Plant does not carry its own weight. It reaches upward and lets the roots do the work.
 
 ---
 
 ## Overview
 
-Grove Website is the main marketing site and client management platform for Grove. It handles marketing, client acquisition, onboarding, billing, and provides a dashboard for clients to manage their blogs. It's the business layer that sits on top of Lattice.
+### What This Is
+
+Plant is a SvelteKit app deployed as Cloudflare Pages. It handles the onboarding funnel: authenticate via Heartwood, build a profile, verify email, pick a plan, pay via Stripe, and provision a tenant. Plant is a thin frontend over Engine's shared D1 database and Heartwood's auth service.
+
+### Goals
+
+- Guide Wanderers through onboarding with warmth and clarity
+- Collect profile, plan, and payment information in a linear flow
+- Provision tenants automatically on completion
+- Kick off the welcome email sequence via Zephyr
+- Support invited (beta) and comped (free premium) flows alongside the standard path
+
+### Non-Goals (Out of Scope)
+
+- Marketing pages (handled by Landing at `apps/landing/`)
+- Admin panel and tenant management (handled by Arbor in `apps/landing/`)
+- Blog editing, post management, or content features (handled by Engine)
+- Support and feedback (handled by the Porch, see `docs/specs/porch-spec.md`)
+- File storage and media management (handled by Amber, see `docs/specs/amber-spec.md`)
 
 ---
 
 ## Architecture
 
+### System Context
+
+```
+Wanderer's Browser
+      │
+      ▼
+grove-router (wildcard *.grove.place)
+      │
+      ├── grove.place/* ──────────────────→ Plant (apps/plant/)
+      ├── login.grove.place/* ────────────→ Heartwood (services/heartwood/)
+      ├── username.grove.place/* ─────────→ Engine (libs/engine/)
+      └── porch.grove.place/* ────────────→ Porch
+```
+
+### Service Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                         Plant (grove-plant)                         │
+│                         CF Pages · SvelteKit                        │
+│                                                                     │
+│  ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌───────────┐         │
+│  │  Profile  │  │  Plans    │  │ Checkout  │  │  Success  │         │
+│  │  +page    │  │  +page    │  │  +page    │  │  +page    │         │
+│  └─────┬─────┘  └─────┬─────┘  └─────┬─────┘  └─────┬─────┘         │
+│        │               │               │            │               │
+│        └───────────────┴───────────────┴────────────┘               │
+│                                │                                    │
+└────────────────────────────────┼────────────────────────────────────┘
+                                 │
+              ┌──────────────────┼──────────────────┐
+              │                  │                  │
+              ▼                  ▼                  ▼
+     ┌────────────────┐ ┌───────────────┐ ┌────────────────┐
+     │   Heartwood    │ │   Engine D1   │ │    Zephyr      │
+     │  (AUTH binding)│ │  (DB binding) │ │(ZEPHYR binding)│
+     │                │ │               │ │                │
+     │ Google OAuth   │ │ user_onboard  │ │ Welcome seq    │
+     │ Magic links    │ │ tenants       │ │ Day 1,7,14,30  │
+     │ Passkeys       │ │ billing       │ │ Beta invites   │
+     │ 2FA (TOTP)     │ │ site_settings │ │                │
+     └────────────────┘ └───────────────┘ └────────────────┘
+              │
+              ▼
+     ┌────────────────┐
+     │   KV Namespace │
+     │                │
+     │ Rate limiting  │
+     │ (email verify) │
+     └────────────────┘
+```
+
 ### Tech Stack
 
-- **Framework:** SvelteKit 2.0+
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS + Custom Design System
-- **Database:** Cloudflare D1 (client data, subscriptions, support tickets)
-- **Storage:** Cloudflare KV (caching, session data)
-- **Payments:** Stripe
-- **Auth:** Magic links (6-digit email codes via Resend)
-- **Email:** Resend (transactional emails)
-- **Hosting:** Cloudflare Pages
+| Component      | Technology                     | Why                                              |
+| -------------- | ------------------------------ | ------------------------------------------------ |
+| Framework      | SvelteKit 2.0+                 | Lattice standard, SSR + client hydration         |
+| Deployment     | Cloudflare Pages               | Edge-deployed, integrates with D1/KV/R2 bindings |
+| Database       | D1 (shared `grove-engine-db`)  | Single source of truth across all Grove services |
+| Auth           | Heartwood (Better Auth 1.4.18) | Google OAuth, magic links, passkeys, 2FA         |
+| Payments       | Stripe (hosted checkout)       | PCI compliant, auto tax, promo codes             |
+| Email          | Zephyr gateway (Resend)        | React email templates, scheduled delivery        |
+| Bot Protection | Shade (Cloudflare Turnstile)   | Bot mitigation on auth and verification flows    |
+| Rate Limiting  | KV Namespace                   | Throttle email verification and API abuse        |
+| Styling        | Tailwind CSS (Lattice preset)  | Shared design tokens, Grove color palette        |
+| Font           | Lexend                         | Grove's standard typeface                        |
+| Components     | `@autumnsgrove/lattice/ui`     | GlassCard, Logo, Footer, ThemeToggle, Icons      |
+| Errors         | Signpost (PLANT_ERRORS)        | Structured error codes with catalog              |
 
-### Project Structure
+### Bindings (wrangler.toml)
+
+| Binding  | Type    | Target            | Purpose                          |
+| -------- | ------- | ----------------- | -------------------------------- |
+| `DB`     | D1      | `grove-engine-db` | Shared database for all services |
+| `AUTH`   | Service | `groveauth`       | Heartwood session validation     |
+| `ZEPHYR` | Service | `grove-zephyr`    | Email gateway                    |
+| `KV`     | KV      | (namespace)       | Rate limiting                    |
+
+### Secrets (Cloudflare Dashboard)
+
+- `GROVEAUTH_URL` — Heartwood URL (`https://login.grove.place`)
+- `GROVEAUTH_CLIENT_ID` — OAuth client ID (`grove-plant`)
+- `GROVEAUTH_CLIENT_SECRET` — OAuth client secret
+- `STRIPE_SECRET_KEY` — Stripe API key
+- `STRIPE_PUBLISHABLE_KEY` — Stripe public key
+- `STRIPE_WEBHOOK_SECRET` — Webhook signature verification
+- `RESEND_API_KEY` — Email delivery
+- `TURNSTILE_SECRET_KEY` — Shade bot protection
+
+---
+
+## Authentication
+
+Plant does not handle auth directly. All authentication flows through Heartwood (`services/heartwood/`), Grove's auth service built on Better Auth 1.4.18.
+
+### Auth Methods
+
+| Method       | Status | Flow                                                                 |
+| ------------ | ------ | -------------------------------------------------------------------- |
+| Google OAuth | Live   | Primary. Redirect to Heartwood, OAuth2 + PKCE, callback with session |
+| Magic Links  | Live   | Secondary. 10-minute expiry, delivered via Zephyr                    |
+| Passkeys     | Live   | WebAuthn registration and authentication                             |
+| 2FA (TOTP)   | Live   | Time-based one-time passwords                                        |
+
+### Session Model
+
+Heartwood issues dual session tokens:
+
+1. `better-auth.session_token` — Better Auth's session cookie
+2. `grove_session` — SessionDO bridge token for cross-service validation
+
+Plant validates sessions by calling `AUTH.fetch("/session/validate")` via service binding. The layout server load (`+layout.server.ts`) checks for `onboarding_id` and `access_token` cookies to determine onboarding state.
+
+### Auth Flow
 
 ```
-grove-website/
-├── src/
-│   ├── lib/
-│   │   ├── components/
-│   │   │   ├── marketing/
-│   │   │   │   ├── Hero.svelte
-│   │   │   │   ├── Features.svelte
-│   │   │   │   ├── PricingTable.svelte
-│   │   │   │   └── Testimonials.svelte
-│   │   │   ├── dashboard/
-│   │   │   │   ├── BlogList.svelte
-│   │   │   │   ├── StatsCard.svelte
-│   │   │   │   ├── SupportTicket.svelte
-│   │   │   │   └── UpgradePrompt.svelte
-│   │   │   └── forms/
-│   │   │       ├── SignupForm.svelte
-│   │   │       ├── LoginForm.svelte
-│   │   │       └── SupportForm.svelte
-│   │   ├── utils/
-│   │   │   ├── stripe.ts
-│   │   │   ├── email.ts
-│   │   │   └── billing.ts
-│   │   ├── api/
-│   │   │   ├── clients.ts
-│   │   │   ├── subscriptions.ts
-│   │   │   └── support.ts
-│   │   └── auth/
-│   │       ├── lucia.ts
-│   │       └── sessions.ts
-│   ├── routes/
-│   │   ├── +layout.svelte       # Main site layout
-│   │   ├── +page.svelte         # Homepage
-│   │   ├── pricing/+page.svelte
-│   │   ├── features/+page.svelte
-│   │   ├── examples/+page.svelte
-│   │   ├── signup/+page.svelte
-│   │   ├── login/+page.svelte
-│   │   ├── dashboard/
-│   │   │   ├── +layout.svelte   # Dashboard layout (auth required)
-│   │   │   ├── +page.svelte     # Dashboard home
-│   │   │   ├── blogs/
-│   │   │   │   ├── +page.svelte # Blog management
-│   │   │   │   └── new/+page.svelte # Create new blog
-│   │   │   ├── billing/+page.svelte
-│   │   │   ├── support/+page.svelte
-│   │   │   └── settings/+page.svelte
-│   │   └── api/
-│   │       ├── webhooks/
-│   │       │   └── stripe/+server.ts
-│   │       └── support/+server.ts
-│   └── app.d.ts
-├── static/
-├── tests/
-└── package.json
+Wanderer clicks "Sign in with Google"
+    │
+    ▼
+Redirect to login.grove.place/oauth/google
+    │
+    ▼
+Google OAuth consent screen
+    │
+    ▼
+Callback to login.grove.place/auth/callback
+    │
+    ▼
+Heartwood creates session, sets cookies
+    │
+    ▼
+Redirect back to grove.place
+    │
+    ▼
+Plant creates user_onboarding row, sets onboarding_id cookie
+    │
+    ▼
+Onboarding begins at /profile
+```
+
+There are no passwords anywhere in Grove. The system is completely passwordless.
+
+---
+
+## Onboarding Flow
+
+The core of Plant. A 6-step linear flow tracked by the `user_onboarding` table. Each step gates the next. The layout server determines the current step on every page load and redirects accordingly.
+
+### Flow Diagram
+
+```
+  ┌─────────┐    ┌─────────┐    ┌──────────┐    ┌─────────┐    ┌──────────┐    ┌─────────┐
+  │  Auth   │───▶│ Profile │───▶│  Verify  │───▶│  Plans  │───▶│ Checkout │───▶│ Success │
+  │         │    │         │    │  Email   │    │         │    │          │    │  /Tour  │
+  └─────────┘    └─────────┘    └──────────┘    └─────────┘    └──────────┘    └─────────┘
+  Sign in via    Display name   Magic link      Wanderer or    Stripe hosted   createTenant()
+  Heartwood      Username       verification    Seedling       checkout        Welcome emails
+  (Google/       Favorite                       (2 of 5        (skipped for    Blog live at
+   magic link)   color                          tiers live)    free plan)      user.grove.place
+```
+
+### Step Details
+
+**Step 1: Auth** (`/` → redirects to Heartwood)
+
+The Wanderer signs in via Google OAuth or magic link. On successful auth, Heartwood redirects back. Plant creates a `user_onboarding` row with `groveauth_id` and `email`, sets the `onboarding_id` cookie, and redirects to `/profile`.
+
+**Step 2: Profile** (`/profile`)
+
+- Display name (required)
+- Username (required, becomes subdomain, checked against `reserved_usernames`)
+- Favorite color (optional, used for personalization)
+
+Username availability checked via `GET /api/check-username`. Saved via `POST /api/save-profile`. Sets `profile_completed_at` timestamp.
+
+**Step 3: Verify Email** (`/verify-email`)
+
+Magic link sent to the Wanderer's email via Zephyr. 10-minute expiry. Verification checked via `POST /api/verify-email`. Rate limited via KV to prevent abuse. Resend available via `POST /api/verify-email/resend`.
+
+Sets `email_verified = true`, `email_verified_at`, and `email_verified_via` (magic-link or oauth).
+
+**Step 4: Plans** (`/plans`)
+
+Two plans currently available:
+
+- **Wanderer** (free) — 25 posts, 100 MB storage
+- **Seedling** ($8/mo, $81.60/yr) — 100 posts, 1 GB storage
+
+Three more tiers are defined but not yet live (see Tiers section below).
+
+Saved via `POST /api/select-plan`. Sets `plan_selected` and `plan_billing_cycle`.
+
+**Step 5: Checkout** (`/checkout`)
+
+Skipped entirely for the free (Wanderer) plan. For paid plans, creates a Stripe Checkout Session via `createCheckoutSession()` and redirects to Stripe's hosted checkout. On success, Stripe sends a webhook. Sets `payment_completed_at`.
+
+**Step 6: Success / Tour** (`/success`, `/tour`)
+
+Calls `createTenant()` to provision the blog. This:
+
+1. Inserts into `tenants` (subdomain = username, plan, active)
+2. Inserts into `platform_billing` (subscription status, period dates)
+3. Inserts into `site_settings` (4 default settings: site_title, site_description, theme, accent_color)
+4. Creates default home page and about page
+5. Links `user_onboarding.tenant_id`
+
+Then schedules the welcome email sequence via `scheduleWelcomeSequence()`.
+
+The Wanderer can take a tour or skip to their new blog at `username.grove.place`.
+
+### Alternate Flows
+
+**Invited Flow** (`/invited`)
+
+Beta invite codes. Wanderer enters a code, validates against the database, and proceeds through onboarding with the invited plan pre-selected.
+
+**Comped Flow** (`/comped`)
+
+Free premium access. Wanderer claims a comped slot via `POST /api/claim-comped`. Skips checkout, gets a paid tier for free.
+
+### State Machine
+
+The `user_onboarding` table tracks progress with timestamps:
+
+```sql
+profile_completed_at   → NULL until profile saved
+email_verified         → 0 until verified
+email_verified_at      → NULL until verified
+plan_selected          → NULL until plan chosen
+payment_completed_at   → NULL until paid (or plan is free)
+tenant_id              → NULL until tenant provisioned
+tour_completed_at      → NULL until tour done
+tour_skipped           → 0 until skipped
+```
+
+The layout server (`+layout.server.ts`) reads these fields and computes the current step:
+
+```
+if (!profile_completed_at) → "profile"
+else if (!email_verified) → "verify-email"
+else if (!plan_selected) → "plans"
+else if (!payment_completed_at && plan !== "free") → "checkout"
+else if (!tenant_id) → "success"
+else if (!tour_completed_at && !tour_skipped) → "tour"
+else → "success"
 ```
 
 ---
 
-## Core Features
+## Route Structure
 
-### 1. Marketing Pages
+### Pages
 
-**Homepage (`grove.place`):**
+| Route                 | Purpose                       | Auth Required |
+| --------------------- | ----------------------------- | ------------- |
+| `/`                   | Landing / auth redirect       | No            |
+| `/profile`            | Display name, username, color | Yes           |
+| `/verify-email`       | Email verification            | Yes           |
+| `/plans`              | Plan selection                | Yes           |
+| `/checkout`           | Stripe checkout redirect      | Yes           |
+| `/success`            | Tenant provisioning           | Yes           |
+| `/tour`               | Guided tour of new blog       | Yes           |
+| `/invited`            | Beta invite code entry        | Yes           |
+| `/comped`             | Claim comped access           | Yes           |
+| `/account`            | Post-onboarding account page  | Yes           |
+| `/auth/setup-passkey` | WebAuthn passkey registration | Yes           |
 
-- Hero section with value proposition
-- Feature highlights (cheap, simple, community-owned)
-- Social proof (testimonials, example blogs)
-- Clear call-to-action ("Start Your Blog")
-- Pricing preview
+### API Routes
 
-**Features Page (`grove.place/features`):**
-
-- Detailed feature list
-- Comparison with competitors
-- Screenshots of admin panel
-- Theme showcase
-- RSS & ownership benefits
-
-**Pricing Page (`grove.place/pricing`):**
-
-- Clear tier comparison table (Free, Seedling, Sapling, Oak, Evergreen)
-- FAQ section
-- Money-back guarantee
-- "Most Popular" badge on Sapling plan
-
-**Examples Page (`grove.place/examples`):**
-
-- Showcase real client blogs (with permission)
-- Different use cases (personal, portfolio, business)
-- "See it in action" links
-
-### 2. Client Signup & Onboarding
-
-**Signup Flow:**
-
-1. Choose plan (Free/Seedling/Sapling/Oak/Evergreen)
-2. Enter email address
-3. Receive 6-digit code via email
-4. Enter code to verify & create account
-5. Enter billing info (Stripe) - except Free tier
-6. Choose subdomain (availability check) - except Free tier
-7. Blog created automatically - except Free tier
-8. Welcome email with next steps
-
-**Onboarding Email Sequence:**
-
-- **Immediately:** Welcome + login credentials
-- **Day 1:** Admin panel walkthrough video
-- **Day 3:** First post tutorial
-- **Day 7:** Tips for growing your blog
-- **Day 14:** Check-in + support offer
-- **Day 30:** Upgrade prompt (if on Seedling)
-
-### 3. Client Dashboard
-
-**Dashboard Home:**
-
-- Welcome message
-- Quick stats (posts, views if analytics enabled)
-- Recent activity
-- Upgrade prompts (if applicable)
-- Support ticket status
-
-**Blog Management:**
-
-- List of all blogs (for clients with multiple)
-- Create new blog (subdomain selection)
-- Blog settings (title, description, theme)
-- Post management (view all posts, quick edit)
-- Media library access
-- RSS feed URL
-- Custom domain setup (Oak+)
-
-**Billing Management:**
-
-- Current plan details
-- Usage metrics (post count, storage used)
-- Upgrade/downgrade options
-- Payment method management
-- Invoice history & download
-- Cancel subscription
-
-**Support:**
-
-- Submit support ticket
-- View ticket history
-- Knowledge base access
-- Live chat (future)
-- Book support session (paid)
-
-**Settings:**
-
-- Profile information
-- Email preferences
-- Password change
-- Two-factor auth (future)
-- Data export
-- Account deletion
-
-### 4. Billing & Subscriptions
-
-**Plans & Features:**
-
-| Feature            | Free      | Seedling   | Sapling     | Oak        | Evergreen                 |
-| ------------------ | --------- | ---------- | ----------- | ---------- | ------------------------- |
-| Monthly Price      | $0        | $8         | $12         | $25        | $35                       |
-| Yearly Price       | —         | $82        | $122        | $255       | $357                      |
-| Blog               | —         | ✓          | ✓           | ✓          | ✓                         |
-| Blog Posts         | —         | 50         | 250         | Unlimited  | Unlimited                 |
-| Storage            | —         | 1 GB       | 5 GB        | 20 GB      | 100 GB                    |
-| Themes             | —         | 3 + accent | 10 + accent | Customizer | Customizer + Custom Fonts |
-| Community Themes   | —         | —          | —           | ✓          | ✓                         |
-| Meadow             | ✓         | ✓          | ✓           | ✓          | ✓                         |
-| Public Comments    | 20/week   | Unlimited  | Unlimited   | Unlimited  | Unlimited                 |
-| Custom Domain      | —         | —          | —           | BYOD       | ✓                         |
-| @grove.place Email | —         | —          | Forward     | Full       | Full                      |
-| Support            | Community | Community  | Email       | Priority   | 8hrs + Priority           |
-| CDN                | ❌        | ✅         | ✅          | ✅         | ✅                        |
-| Analytics          | Basic     | Basic      | Standard    | Advanced   | Advanced                  |
-| Priority Support   | ❌        | ❌         | ❌          | ✅         | ✅                        |
-
-**Billing Cycle:**
-
-- Monthly billing (default)
-- Annual billing (2 months free)
-- Prorated upgrades
-- Full refund within 30 days
-
-**Stripe Integration:**
-
-- Subscription management
-- Automatic renewals
-- Failed payment handling
-- Dunning management (3 emails over 7 days)
-- Invoice generation
-- Tax support (US only initially)
-
-### 5. Subdomain Provisioning
-
-**Automated Process:**
-
-1. Client chooses subdomain during signup
-2. Check availability (API call to Cloudflare)
-3. Create DNS record (CNAME to pages)
-4. Initialize D1 database for tenant
-5. Create default config & sample post
-6. Deploy blog instance
-7. Send welcome email with admin URL
-
-**Subdomain Rules:**
-
-- Must be 3-63 characters
-- Only letters, numbers, hyphens
-- Cannot start/end with hyphen
-- Must be unique across all clients
-- Reserved subdomains: admin, support, billing, api
-
-**Custom Domains (Oak+):**
-
-- **Oak:** Bring Your Own Domain (BYOD) - connect your existing domain
-- **Evergreen:** Domain search service included, registration up to $100/year
-- Add domain to Cloudflare
-- Configure DNS records
-- Set up SSL certificate
-- Update blog config
-- Redirect subdomain to custom domain
-
-### 6. Support Ticket System
-
-**Ticket Categories:**
-
-- Technical Issue
-- Billing Question
-- Feature Request
-- General Question
-
-**Ticket Workflow:**
-
-1. Client submits ticket via dashboard
-2. Auto-reply with ticket number & expected response time
-3. You receive email notification
-4. Respond within SLA (48 hours for Seedling, 24 hours for Sapling, 12 hours for Oak, 4 hours for Evergreen)
-5. Client receives email update
-6. Resolve ticket, client confirms
-
-**SLA by Plan:**
-
-- Free: Help Center only (no SLA)
-- Seedling: 48-hour first response
-- Sapling: 24-hour first response
-- Oak: 12-hour first response
-- Evergreen: 4-hour first response
-
-**Escalation:**
-
-- Unresolved after 3 days → Escalate to email
-- Unresolved after 7 days → Offer video call
-- Critical issues (site down) → Immediate response
-
-### 7. Admin Interface (For You)
-
-**Client Management:**
-
-- View all clients
-- Search & filter by plan, status, signup date
-- Edit client details
-- Impersonate client (for support)
-- Suspend/activate accounts
-- View client blogs
-
-**Billing Admin:**
-
-- View all subscriptions
-- Process refunds
-- Manual invoice generation
-- Coupon code management
-- Revenue dashboard
-- Failed payment tracking
-
-**Support Admin:**
-
-- View all support tickets
-- Assign priority
-- Track response times
-- Create canned responses
-- View support metrics
-
-**System Admin:**
-
-- Provision new subdomains manually
-- View system health
-- Monitor resource usage
-- Run database migrations
-- View logs
+| Route                                      | Method | Purpose                         |
+| ------------------------------------------ | ------ | ------------------------------- |
+| `/auth`                                    | GET    | Initiate OAuth flow             |
+| `/auth/callback`                           | GET    | OAuth callback from Heartwood   |
+| `/auth/magic-link/callback`                | GET    | Magic link callback             |
+| `/api/auth/magic-link`                     | POST   | Request magic link              |
+| `/api/check-username`                      | GET    | Username availability check     |
+| `/api/save-profile`                        | POST   | Save profile data               |
+| `/api/verify-email`                        | POST   | Submit email verification       |
+| `/api/verify-email/resend`                 | POST   | Resend verification email       |
+| `/api/select-plan`                         | POST   | Save plan selection             |
+| `/api/claim-comped`                        | POST   | Claim comped access             |
+| `/api/webhooks/stripe`                     | POST   | Stripe webhook handler          |
+| `/api/health/payments`                     | GET    | Payment system health check     |
+| `/api/account/passkey/register-options`    | POST   | WebAuthn registration options   |
+| `/api/account/passkey/verify-registration` | POST   | Verify passkey registration     |
+| `/api/passkey/authenticate/options`        | POST   | WebAuthn auth options           |
+| `/api/passkey/authenticate/verify`         | POST   | Verify passkey authentication   |
+| `/success/check`                           | GET    | Poll tenant provisioning status |
 
 ---
 
-## Database Schema
+## Billing
 
-### Clients Table
+### Tier System
 
-```sql
-CREATE TABLE clients (
-  id TEXT PRIMARY KEY,
-  email TEXT UNIQUE NOT NULL,
-  name TEXT,
+`libs/engine/src/lib/config/tiers.ts` (620 lines) is the single source of truth for all tier configuration. Each tier defines limits, features, rate limits, pricing, display names, and support levels.
 
-  -- Auth
-  password_hash TEXT NOT NULL,
-  email_verified BOOLEAN DEFAULT FALSE,
-  email_verification_token TEXT,
-  password_reset_token TEXT,
-  password_reset_expires INTEGER,
+| Tier      | Grove Name | Monthly | Yearly  | Posts | Storage | Status      |
+| --------- | ---------- | ------- | ------- | ----- | ------- | ----------- |
+| Free      | Wanderer   | $0      | —       | 25    | 100 MB  | Live        |
+| Seedling  | Seedling   | $8      | $81.60  | 100   | 1 GB    | Live        |
+| Sapling   | Sapling    | $12     | $122.40 | 250   | 5 GB    | Coming Soon |
+| Oak       | Oak        | $25     | $255    | 1000  | 20 GB   | Future      |
+| Evergreen | Evergreen  | $35     | $357    | 10000 | 100 GB  | Future      |
 
-  -- Billing
-  stripe_customer_id TEXT,
-  stripe_subscription_id TEXT,
-  plan TEXT DEFAULT 'seedling', -- 'free', 'seedling', 'sapling', 'oak', 'evergreen'
-  billing_cycle TEXT DEFAULT 'monthly', -- 'monthly', 'annual'
-  status TEXT DEFAULT 'active', -- 'active', 'canceled', 'past_due'
+Only the first two tiers (Wanderer and Seedling) are currently available for selection.
 
-  -- Timestamps
-  created_at INTEGER NOT NULL,
-  updated_at INTEGER NOT NULL,
+### Tier Features Matrix
 
-  -- Support
-  support_hours_used INTEGER DEFAULT 0,
-  support_hours_limit INTEGER DEFAULT 10, -- Month 1 limit
+| Feature       | Wanderer  | Seedling  | Sapling     | Oak        | Evergreen     |
+| ------------- | --------- | --------- | ----------- | ---------- | ------------- |
+| Blog          | Yes       | Yes       | Yes         | Yes        | Yes           |
+| Meadow access | Yes       | Yes       | Yes         | Yes        | Yes           |
+| Drafts        | 5         | 15        | 50          | 200        | Unlimited     |
+| Themes        | 3         | 5         | 10          | All        | All+Custom    |
+| Nav pages     | 3         | 5         | 10          | 25         | Unlimited     |
+| Custom domain | No        | No        | No          | Yes (BYOD) | Yes           |
+| Email (Ivy)   | No        | No        | Forwarding  | Full       | Full          |
+| AI writing    | No        | No        | 5,000 words | 25,000     | 100,000       |
+| Analytics     | Basic     | Basic     | Standard    | Advanced   | Advanced      |
+| Support       | Community | Community | Email       | Priority   | 8hrs+Priority |
 
-  -- Metadata
-  ip_address TEXT,
-  user_agent TEXT
-);
+### Stripe Integration
 
-CREATE INDEX idx_clients_email ON clients(email);
-CREATE INDEX idx_clients_stripe_customer ON clients(stripe_customer_id);
-CREATE INDEX idx_clients_plan ON clients(plan);
-CREATE INDEX idx_clients_status ON clients(status);
-```
+`apps/plant/src/lib/server/stripe.ts` (480 lines) handles all payment operations.
 
-### Blogs Table
+**Key functions:**
 
-```sql
-CREATE TABLE blogs (
-  id TEXT PRIMARY KEY,
-  client_id TEXT NOT NULL,
+- `createCheckoutSession()` — Creates Stripe hosted checkout with metadata, auto tax collection, promo code support
+- `verifyWebhookSignature()` — HMAC-SHA256 verification with constant-time comparison
+- `createBillingPortalSession()` — Self-service billing management
+- `mapSubscriptionStatus()` — Maps Stripe statuses to Grove statuses
 
-  -- Identity
-  title TEXT NOT NULL,
-  description TEXT,
-  subdomain TEXT UNIQUE NOT NULL,
-  custom_domain TEXT UNIQUE,
+**Price IDs** are hardcoded in the Stripe module (safe to commit, not secrets).
 
-  -- Configuration
-  theme TEXT DEFAULT 'default',
-  config TEXT, -- JSON string of blog config
+**Webhook Events Handled:**
 
-  -- Limits & Usage
-  post_limit INTEGER DEFAULT 250,
-  current_post_count INTEGER DEFAULT 0,
-  storage_limit INTEGER DEFAULT 5, -- GB
-  storage_used INTEGER DEFAULT 0, -- MB
+| Event                           | Action                                   |
+| ------------------------------- | ---------------------------------------- |
+| `checkout.session.completed`    | Mark payment complete, update onboarding |
+| `customer.subscription.updated` | Sync plan/status changes                 |
+| `customer.subscription.deleted` | Mark subscription canceled               |
+| `invoice.payment_succeeded`     | Log successful payment                   |
+| `invoice.payment_failed`        | Log failed payment, notify               |
 
-  -- Status
-  status TEXT DEFAULT 'active', -- 'active', 'suspended', 'archived'
-
-  -- Timestamps
-  created_at INTEGER NOT NULL,
-  updated_at INTEGER NOT NULL,
-
-  FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE
-);
-
-CREATE INDEX idx_blogs_client ON blogs(client_id);
-CREATE INDEX idx_blogs_subdomain ON blogs(subdomain);
-CREATE INDEX idx_blogs_custom_domain ON blogs(custom_domain);
-CREATE INDEX idx_blogs_status ON blogs(status);
-```
-
-### Subscriptions Table
-
-```sql
-CREATE TABLE subscriptions (
-  id TEXT PRIMARY KEY,
-  client_id TEXT NOT NULL,
-  stripe_subscription_id TEXT UNIQUE NOT NULL,
-
-  -- Plan details
-  plan TEXT NOT NULL,
-  billing_cycle TEXT NOT NULL,
-  amount INTEGER NOT NULL, -- cents
-  currency TEXT DEFAULT 'usd',
-
-  -- Status
-  status TEXT DEFAULT 'active', -- 'active', 'canceled', 'past_due', 'unpaid'
-
-  -- Dates
-  current_period_start INTEGER NOT NULL,
-  current_period_end INTEGER NOT NULL,
-  canceled_at INTEGER,
-  created_at INTEGER NOT NULL,
-
-  FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE
-);
-
-CREATE INDEX idx_subscriptions_client ON subscriptions(client_id);
-CREATE INDEX idx_subscriptions_stripe ON subscriptions(stripe_subscription_id);
-CREATE INDEX idx_subscriptions_status ON subscriptions(status);
-```
-
-### Invoices Table
-
-```sql
-CREATE TABLE invoices (
-  id TEXT PRIMARY KEY,
-  client_id TEXT NOT NULL,
-  stripe_invoice_id TEXT UNIQUE NOT NULL,
-
-  -- Amount
-  amount_due INTEGER NOT NULL, -- cents
-  amount_paid INTEGER NOT NULL,
-  currency TEXT DEFAULT 'usd',
-
-  -- Status
-  status TEXT NOT NULL, -- 'draft', 'open', 'paid', 'void', 'uncollectible'
-
-  -- Dates
-  due_date INTEGER,
-  paid_at INTEGER,
-  created_at INTEGER NOT NULL,
-
-  -- PDF
-  invoice_pdf TEXT, -- URL to PDF
-
-  FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE
-);
-
-CREATE INDEX idx_invoices_client ON invoices(client_id);
-CREATE INDEX idx_invoices_stripe ON invoices(stripe_invoice_id);
-CREATE INDEX idx_invoices_status ON invoices(status);
-CREATE INDEX idx_invoices_due ON invoices(due_date);
-```
-
-### Support Tickets Table
-
-```sql
-CREATE TABLE support_tickets (
-  id TEXT PRIMARY KEY,
-  client_id TEXT NOT NULL,
-
-  -- Ticket details
-  subject TEXT NOT NULL,
-  description TEXT NOT NULL,
-  category TEXT NOT NULL, -- 'technical', 'billing', 'feature', 'general'
-
-  -- Status
-  status TEXT DEFAULT 'open', -- 'open', 'in_progress', 'resolved', 'closed'
-  priority TEXT DEFAULT 'medium', -- 'low', 'medium', 'high', 'urgent'
-
-  -- Tracking
-  assigned_to TEXT, -- Your user ID
-  response_time INTEGER, -- minutes to first response
-  resolution_time INTEGER, -- minutes to resolution
-
-  -- Timestamps
-  created_at INTEGER NOT NULL,
-  updated_at INTEGER NOT NULL,
-  resolved_at INTEGER,
-
-  FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE
-);
-
-CREATE INDEX idx_tickets_client ON support_tickets(client_id);
-CREATE INDEX idx_tickets_status ON support_tickets(status);
-CREATE INDEX idx_tickets_priority ON support_tickets(priority);
-CREATE INDEX idx_tickets_assigned ON support_tickets(assigned_to);
-```
-
-### Ticket Messages Table
-
-```sql
-CREATE TABLE ticket_messages (
-  id TEXT PRIMARY KEY,
-  ticket_id TEXT NOT NULL,
-  author_id TEXT NOT NULL, -- client_id or your admin ID
-
-  message TEXT NOT NULL,
-  is_internal BOOLEAN DEFAULT FALSE, -- For your notes
-
-  created_at INTEGER NOT NULL,
-
-  FOREIGN KEY (ticket_id) REFERENCES support_tickets(id) ON DELETE CASCADE,
-  FOREIGN KEY (author_id) REFERENCES clients(id) ON DELETE CASCADE
-);
-
-CREATE INDEX idx_messages_ticket ON ticket_messages(ticket_id);
-CREATE INDEX idx_messages_created ON ticket_messages(created_at DESC);
-```
-
----
-
-## API Endpoints
-
-### Client API
-
-**Create Client:**
-
-```typescript
-POST /api/clients
-Body: {
-  email: string;
-  password: string;
-  name?: string;
-  plan: 'free' | 'seedling' | 'sapling' | 'oak' | 'evergreen';
-  billing_cycle: 'monthly' | 'annual';
-}
-Response: { success: boolean; client: Client; stripe_url?: string }
-```
-
-**Get Client:**
-
-```typescript
-GET / api / clients / me;
-Auth: Required;
-Response: Client;
-```
-
-**Update Client:**
-
-```typescript
-PUT / api / clients / me;
-Auth: Required;
-Body: Partial<Client>;
-Response: {
-  success: boolean;
-  client: Client;
-}
-```
-
-**Delete Client:**
-
-```typescript
-DELETE / api / clients / me;
-Auth: Required;
-Response: {
-  success: boolean;
-}
-```
-
-### Blog API
-
-**Create Blog:**
-
-```typescript
-POST /api/blogs
-Auth: Required
-Body: {
-  title: string;
-  description?: string;
-  subdomain: string;
-  theme?: string;
-}
-Response: { success: boolean; blog: Blog }
-```
-
-**Get My Blogs:**
-
-```typescript
-GET /api/blogs
-Auth: Required
-Response: { blogs: Blog[] }
-```
-
-**Update Blog:**
-
-```typescript
-PUT / api / blogs / [id];
-Auth: Required;
-Body: Partial<Blog>;
-Response: {
-  success: boolean;
-  blog: Blog;
-}
-```
-
-**Delete Blog:**
-
-```typescript
-DELETE / api / blogs / [id];
-Auth: Required;
-Response: {
-  success: boolean;
-}
-```
-
-### Subscription API
-
-**Create Subscription:**
-
-```typescript
-POST /api/subscriptions
-Auth: Required
-Body: {
-  plan: 'free' | 'seedling' | 'sapling' | 'oak' | 'evergreen';
-  billing_cycle: 'monthly' | 'annual';
-  payment_method: string; // Stripe payment method ID
-}
-Response: { success: boolean; subscription: Subscription; client_secret?: string }
-```
-
-**Get Subscription:**
-
-```typescript
-GET / api / subscriptions / current;
-Auth: Required;
-Response: Subscription;
-```
-
-**Update Subscription:**
-
-```typescript
-PUT /api/subscriptions/[id]
-Auth: Required
-Body: {
-  plan?: string;
-  billing_cycle?: string;
-}
-Response: { success: boolean; subscription: Subscription }
-```
-
-**Cancel Subscription:**
-
-```typescript
-DELETE / api / subscriptions / [id];
-Auth: Required;
-Response: {
-  success: boolean;
-}
-```
-
-### Support API
-
-**Create Ticket:**
-
-```typescript
-POST /api/support/tickets
-Auth: Required
-Body: {
-  subject: string;
-  description: string;
-  category: 'technical' | 'billing' | 'feature' | 'general';
-  priority?: 'low' | 'medium' | 'high' | 'urgent';
-}
-Response: { success: boolean; ticket: SupportTicket }
-```
-
-**Get My Tickets:**
-
-```typescript
-GET /api/support/tickets
-Auth: Required
-Query: { status?: string; page?: number }
-Response: { tickets: SupportTicket[]; total: number }
-```
-
-**Add Message:**
-
-```typescript
-POST / api / support / tickets / [id] / messages;
-Auth: Required;
-Body: {
-  message: string;
-}
-Response: {
-  success: boolean;
-  message: TicketMessage;
-}
-```
-
----
-
-## Stripe Integration
-
-### Webhooks
-
-**Endpoint:** `POST /api/webhooks/stripe`
-
-**Events Handled:**
-
-- `customer.subscription.created` - New subscription
-- `customer.subscription.updated` - Plan change, billing cycle change
-- `customer.subscription.deleted` - Cancellation
-- `invoice.payment_succeeded` - Payment received
-- `invoice.payment_failed` - Payment failed
-- `customer.deleted` - Customer deleted
+**Idempotency:** The `webhook_events` table stores processed event IDs to prevent duplicate handling.
 
 ### Payment Flow
 
-1. **Checkout:**
-   - Client selects plan
-   - Redirect to Stripe Checkout
-   - Payment collected
-   - Webhook creates subscription in database
-
-2. **Recurring Payments:**
-   - Stripe charges automatically
-   - Webhook updates invoice status
-   - Email receipt sent to client
-
-3. **Failed Payments:**
-   - Stripe retries 3 times over 7 days
-   - Each failure sends email to client
-   - After final failure, subscription marked 'past_due'
-   - Grace period of 7 days, then suspension
-
----
-
-## Email Templates
-
-### Welcome Email
-
-**Trigger:** Account created
-**Content:**
-
-- Welcome message
-- Login URL
-- Admin panel URL
-- Getting started guide
-- Support contact info
-
-### Payment Receipt
-
-**Trigger:** Invoice paid
-**Content:**
-
-- Amount paid
-- Period covered
-- Invoice PDF link
-- Update payment method link
-
-### Payment Failed
-
-**Trigger:** Payment fails
-**Content:**
-
-- Amount due
-- Retry date
-- Update payment method link
-- Support contact info
-
-### Subscription Canceled
-
-**Trigger:** Subscription canceled
-**Content:**
-
-- Confirmation of cancellation
-- Service end date
-- Data export instructions
-- Reactivation option (within 30 days)
-
-### Support Ticket Created
-
-**Trigger:** Ticket submitted
-**Content:**
-
-- Ticket number
-- Subject & description
-- Expected response time
-- View ticket link
-
-### Support Ticket Updated
-
-**Trigger:** You reply to ticket
-**Content:**
-
-- Ticket number
-- Your message
-- View ticket link
-- Reply instructions
+```
+Wanderer selects Seedling plan
+    │
+    ▼
+POST /api/select-plan
+    │ saves plan_selected, plan_billing_cycle
+    ▼
+GET /checkout
+    │ +page.server.ts calls createCheckoutSession()
+    ▼
+Redirect to Stripe hosted checkout
+    │ Stripe collects payment
+    ▼
+Stripe webhook: checkout.session.completed
+    │ POST /api/webhooks/stripe
+    │ verifyWebhookSignature()
+    │ check webhook_events for idempotency
+    │ update user_onboarding.payment_completed_at
+    ▼
+Wanderer returns to /success
+    │ createTenant() provisions blog
+    ▼
+Blog live at username.grove.place
+```
 
 ---
 
-## Admin Dashboard (For You)
+## Subdomain Provisioning
 
-**Client Overview:**
+The spec used to describe DNS record creation, cert setup, and manual provisioning steps. Reality is much simpler.
 
-- Total clients: X
-- Active subscriptions: X
-- Monthly Recurring Revenue (MRR): $X
-- New clients this month: X
-- Churned clients this month: X
+### How It Actually Works
 
-**Revenue Dashboard:**
+`grove-router` (`services/grove-router/`) catches all `*.grove.place` requests. When a request arrives for `username.grove.place`, grove-router looks up the `tenants` table for a matching subdomain and proxies to Engine. No DNS changes. No certificate management. No manual steps.
 
-- MRR trend (chart)
-- ARR (Annual Run Rate)
-- Average Revenue Per User (ARPU)
-- Failed payments this month
-- Outstanding invoices
+**Provisioning = inserting a row.**
 
-**Support Dashboard:**
+```
+createTenant(db, { username, plan, groveauthId })
+    │
+    ├── INSERT INTO tenants (subdomain = username, plan, active = true)
+    ├── INSERT INTO platform_billing (subscription status, period dates)
+    ├── INSERT INTO site_settings (title, description, theme, accent_color)
+    ├── INSERT INTO pages (home page, about page)
+    └── UPDATE user_onboarding SET tenant_id = new_tenant_id
+    │
+    ▼
+username.grove.place is immediately live
+grove-router resolves it on the next request
+```
 
-- Open tickets: X
-- Overdue tickets: X
-- Average response time: X hours
-- Average resolution time: X hours
-- Tickets by category (chart)
+### Username Rules
 
-**System Health:**
+- Checked against `reserved_usernames` table (protects system subdomains like `login`, `api`, `admin`)
+- Must be unique across all tenants
+- Validated client-side and server-side via `/api/check-username`
 
-- Active blogs: X
-- Total posts: X
-- Storage used: X GB
-- Bandwidth this month: X GB
-- API requests: X
+---
+
+## Email Sequences
+
+Plant triggers the welcome email sequence on successful onboarding via `scheduleWelcomeSequence()` in `libs/engine/src/lib/email/schedule.ts`.
+
+### Sequence
+
+| Email   | Timing    | Template           |
+| ------- | --------- | ------------------ |
+| Welcome | Immediate | `WelcomeEmail.tsx` |
+| Day 1   | +1 day    | `Day1Email.tsx`    |
+| Day 7   | +7 days   | `Day7Email.tsx`    |
+| Day 14  | +14 days  | `Day14Email.tsx`   |
+| Day 30  | +30 days  | `Day30Email.tsx`   |
+
+Templates are React email components in `libs/engine/src/lib/email/sequences/`. Delivery via Zephyr (Resend gateway) with Resend's native `scheduled_at` for delayed sends. Idempotency keys prevent duplicate emails.
+
+A separate `BetaInviteEmail.tsx` exists for the invited flow.
+
+---
+
+## Data Schema
+
+Plant does not have its own database. It shares `grove-engine-db` (D1) with all Grove services. The tables Plant reads from and writes to:
+
+### user_onboarding
+
+The state machine for the onboarding flow. One row per signup attempt.
+
+```sql
+CREATE TABLE user_onboarding (
+  id TEXT PRIMARY KEY,
+  groveauth_id TEXT NOT NULL,
+  email TEXT NOT NULL,
+  display_name TEXT,
+  username TEXT,
+  favorite_color TEXT,
+  interests TEXT,              -- JSON array
+  profile_completed_at INTEGER,
+  email_verified INTEGER DEFAULT 0,
+  email_verified_at INTEGER,
+  email_verified_via TEXT,     -- 'magic-link' or 'oauth'
+  plan_selected TEXT,          -- 'free', 'seedling', etc.
+  plan_billing_cycle TEXT,     -- 'monthly' or 'yearly'
+  stripe_customer_id TEXT,
+  stripe_checkout_session_id TEXT,
+  payment_completed_at INTEGER,
+  tenant_id TEXT,
+  tour_completed_at INTEGER,
+  tour_skipped INTEGER DEFAULT 0,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL
+);
+```
+
+### tenants
+
+Created by `createTenant()` on successful onboarding. Multi-tenant record for the blog.
+
+### platform_billing
+
+Subscription status, provider references, billing period dates. Created alongside the tenant.
+
+### reserved_usernames
+
+System-protected subdomains. Checked during username selection.
+
+### webhook_events
+
+Stripe webhook idempotency. Stores processed event IDs to prevent duplicate handling.
+
+---
+
+## Error Handling
+
+Plant uses the Signpost error system. All errors use structured codes from the `PLANT_ERRORS` catalog (`apps/plant/src/lib/errors.ts`, 216 lines).
+
+### Error Catalog
+
+| Code Range    | Category            | Examples                                             |
+| ------------- | ------------------- | ---------------------------------------------------- |
+| PLANT-001–019 | Service/Binding     | DB unavailable, AUTH unavailable, Zephyr unavailable |
+| PLANT-020–039 | Session/Auth        | No session, invalid session, OAuth failed            |
+| PLANT-040–059 | Database/Onboarding | Onboarding not found, username taken, plan invalid   |
+| PLANT-080–099 | Internal            | Unexpected errors, configuration issues              |
+
+### Error Handling Pattern
+
+```typescript
+import { PLANT_ERRORS } from "$lib/errors";
+import { buildErrorJson, logGroveError } from "@autumnsgrove/lattice/errors";
+
+// API route
+if (!session) {
+	return json(buildErrorJson(PLANT_ERRORS.NO_SESSION), { status: 401 });
+}
+
+// Server logging
+logGroveError("Plant", PLANT_ERRORS.DB_QUERY_FAILED, {
+	path: "/api/save-profile",
+	cause: error,
+});
+```
 
 ---
 
@@ -888,185 +588,118 @@ Response: {
 
 ### Authentication
 
-- Email/password with bcrypt hashing
-- Email verification required
-- Password reset via email
-- Session management with secure cookies
-- Rate limiting on login attempts (5 attempts per 15 min)
+- All auth via Heartwood. No local auth logic.
+- Session validation on every authenticated page load via layout server
+- Dual session tokens (`better-auth.session_token` + `grove_session`)
+- Zero passwords. Completely passwordless.
 
-### Authorization
+### Bot Protection
 
-- Clients can only access their own data
-- Admin can impersonate clients for support
-- API endpoints validate permissions
-- Row-level security in database
+- Shade (Cloudflare Turnstile) on auth and verification flows
+- Turnstile site key in `wrangler.toml`, secret key in dashboard
 
-### Data Protection
+### CSRF
 
-- Encrypt sensitive data at rest
-- HTTPS only
-- Secure cookie flags
-- CSRF protection
-- XSS prevention
+- SvelteKit's built-in CSRF with trusted origins: `grove.place`, `*.grove.place`, `localhost`
+- Additional origin validation in `hooks.server.ts`
 
-### Compliance
+### Rate Limiting
 
-- GDPR compliant (data export, deletion)
-- Privacy policy
-- Terms of service
-- Cookie consent banner
-- Data processing agreements
+- KV-based rate limiting on email verification endpoints
+- Prevents abuse of magic link and verification code flows
 
----
+### Webhook Security
 
-## Performance
+- Stripe webhook signature verification using HMAC-SHA256
+- Constant-time comparison to prevent timing attacks
+- Idempotency via `webhook_events` table
 
-### Caching
+### Data Isolation
 
-- KV cache for client configs (5 min TTL)
-- KV cache for subscription data (1 min TTL)
-- Edge cache for marketing pages (1 hour)
-- No cache for dashboard (real-time data)
-
-### Optimization
-
-- Lazy load dashboard components
-- Paginate lists (clients, tickets, invoices)
-- Debounce search inputs
-- Optimize images
-- Minimize JavaScript bundle
-
-### Monitoring
-
-- Track page load times
-- Monitor API response times
-- Error tracking (Sentry)
-- Uptime monitoring
+- Onboarding data scoped by `onboarding_id` cookie (not shared between sessions)
+- Tenant data scoped by `tenant_id` after provisioning
+- No cross-tenant data access possible through Plant
 
 ---
 
-## Analytics & Metrics
+## Support
 
-**Business Metrics:**
+Plant does not include a support system. Support is handled by the Porch (`porch.grove.place`), Grove's dedicated support and feedback application.
 
-- Signup conversion rate
-- Trial to paid conversion
-- Churn rate
-- Average Customer Lifetime Value (LTV)
-- Customer Acquisition Cost (CAC)
-- LTV:CAC ratio (target > 3:1)
-
-**Product Metrics:**
-
-- Daily Active Users (DAU)
-- Posts created per day
-- Support tickets per day
-- Average response time
-- Client satisfaction (NPS)
-
-**Technical Metrics:**
-
-- Page load times
-- API response times
-- Error rates
-- Database query performance
-- Bandwidth usage
+The Porch provides warm, conversation-style support. Not tickets and SLAs, but porch conversations with the grove keeper. See `docs/specs/porch-spec.md` for the full specification.
 
 ---
 
-## Support & SLA
+## UI Components
 
-**Support Hours:**
+Plant uses Lattice's shared component library. No custom design system.
 
-- Email: 9 AM - 6 PM EST, Mon-Fri
-- Response times by plan (see above)
-- Emergency support for site outages
+### From `@autumnsgrove/lattice`
 
-**SLA Guarantees:**
+| Component             | Import Path                       | Usage                   |
+| --------------------- | --------------------------------- | ----------------------- |
+| `GlassCard`           | `@autumnsgrove/lattice/ui`        | Step containers         |
+| `Logo`                | `@autumnsgrove/lattice/ui/chrome` | Header branding         |
+| `Footer`              | `@autumnsgrove/lattice/ui/chrome` | Page footer             |
+| `ThemeToggle`         | `@autumnsgrove/lattice/ui/chrome` | Light/dark mode         |
+| `LoginRedirectButton` | `@autumnsgrove/lattice/ui`        | OAuth sign-in buttons   |
+| Icons                 | `@autumnsgrove/lattice/ui/icons`  | UI icons                |
+| Pricing utilities     | `@autumnsgrove/lattice/ui`        | Plan cards, comparisons |
 
-- 99.9% uptime
-- Daily backups
-- 30-day money-back guarantee
-- Data export within 7 days of request
+### Design Standards
 
-**Support Process:**
-
-1. Ticket submitted via dashboard
-2. Auto-acknowledgment email
-3. Triage & assignment
-4. Response within SLA
-5. Resolution & confirmation
-6. Follow-up survey
-
----
-
-## Legal & Compliance
-
-**Required Pages:**
-
-- Terms of Service
-- Privacy Policy
-- Acceptable Use Policy
-- Cookie Policy
-- DMCA Policy
-- Data Processing Agreement (GDPR)
-
-**Data Retention:**
-
-- Client data: Until account deletion
-- Invoices: 7 years (tax requirement)
-- Support tickets: 2 years
-- Logs: 30 days
-- Backups: 30 days
-
-**Client Rights:**
-
-- Right to access data
-- Right to rectify data
-- Right to delete data
-- Right to data portability
-- Right to object to processing
+- **Font:** Lexend (Grove's standard)
+- **Styling:** Tailwind CSS via Lattice preset (`libs/engine/src/lib/ui/tailwind.preset.js`)
+- **Theme:** Nature-themed glassmorphism with seasonal depth
+- **Aesthetic:** Studio Ghibli warmth meets indie bookshop
 
 ---
 
-## Future Enhancements
+## Implementation Status
 
-See `TODOS.md` for full roadmap including:
+### Complete
 
-- Affiliate program
-- White-label agency plan
-- Advanced analytics
-- Team collaboration
-- Mobile app
+- [x] Google OAuth flow via Heartwood
+- [x] Magic link authentication
+- [x] Passkey registration and authentication
+- [x] Profile step (display name, username, favorite color)
+- [x] Email verification with rate-limited resend
+- [x] Plan selection (Wanderer and Seedling)
+- [x] Stripe checkout integration with hosted checkout
+- [x] Webhook handling with signature verification and idempotency
+- [x] Tenant provisioning via `createTenant()`
+- [x] Welcome email sequence (Welcome, Day1, Day7, Day14, Day30)
+- [x] Invited flow (beta invite codes)
+- [x] Comped flow (free premium)
+- [x] Tour page
+- [x] Account page
+- [x] PLANT_ERRORS catalog (14 error definitions)
+- [x] Shade (Turnstile) bot protection
+- [x] CSRF protection with trusted origins
+- [x] KV rate limiting
 
----
+### Planned
 
-## Success Metrics
-
-**Launch Goals (Month 1):**
-
-- [ ] 10 client signups
-- [ ] 70% email verification rate
-- [ ] 50% complete onboarding
-- [ ] < 5% churn in first month
-- [ ] Average setup time < 1 hour
-
-**Growth Goals (Month 3):**
-
-- [ ] 30 active clients
-- [ ] $500 MRR
-- [ ] < 10% churn
-- [ ] < 15 hours support per week total
-- [ ] 80% client satisfaction
-
-**Scale Goals (Month 6):**
-
-- [ ] 100 active clients
-- [ ] $2,000 MRR
-- [ ] < 5% churn
-- [ ] < 30 hours support per week total
-- [ ] Consider hiring part-time support
+- [ ] Sapling tier ($12/mo) — status: `coming_soon`
+- [ ] Oak tier ($25/mo) — status: `future`
+- [ ] Evergreen tier ($35/mo) — status: `future`
+- [ ] Custom domain setup flow (Oak+)
+- [ ] Billing portal integration in account page
+- [ ] Account deletion flow
+- [ ] Data export from account page
+- [ ] Onboarding analytics (funnel tracking, drop-off analysis)
 
 ---
 
-_Last Updated: November 2025_
+## Related Specs
+
+| Spec                | Relationship                                             |
+| ------------------- | -------------------------------------------------------- |
+| `porch-spec.md`     | Support system. Plant links to it, does not replicate it |
+| `amber-spec.md`     | Storage system. Tracks files uploaded via Engine         |
+| `heartwood-spec.md` | Auth service. Plant delegates all auth here              |
+| `rings-spec.md`     | Analytics. Onboarding funnel metrics                     |
+
+---
+
+_A seedling breaks through. The soil is warm. The roots are deep. Welcome to the grove._
