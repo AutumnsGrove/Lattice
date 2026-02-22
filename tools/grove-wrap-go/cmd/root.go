@@ -47,6 +47,8 @@ func init() {
 
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(doctorCmd)
+
+	setupCozyHelp()
 }
 
 var versionCmd = &cobra.Command{
