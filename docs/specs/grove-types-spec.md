@@ -6,6 +6,7 @@ specCategory: core-infrastructure
 icon: shield-check
 date created: Sunday, February 22nd 2026
 date modified: Sunday, February 22nd 2026
+lastUpdated: 2026-02-22
 aliases:
   - rootwork
   - type-safety
@@ -405,16 +406,20 @@ Add Zod validation to the highest-traffic form actions first. Each route is inde
 
 Add Zod schemas for external webhook payloads. Start with pulse (GitHub) and plant (Stripe).
 
-**GitHub webhook schema** (for `services/pulse/src/store.ts`):
+**Pulse store event schema** (for `services/pulse/src/store.ts`):
+
+This validates the pulse store's internal event shape after ingestion, not the raw GitHub push webhook. The raw webhook arrives with a `commits` array of objects; by the time it reaches the store, it's been aggregated into numeric fields.
 
 ```typescript
-const GitHubPushEvent = z.object({
+const PulseStoreEvent = z.object({
   commits: z.number().optional().default(1),
   additions: z.number().optional().default(0),
   deletions: z.number().optional().default(0),
   sha: z.string().optional(),
 });
 ```
+
+For the raw GitHub webhook shape (validated at the ingestion boundary), see the [ShipTypes DX Safari](../../safaris/planned/shiptypes-dx-safari.md#webhook-schemas).
 
 Stripe already provides typed event objects via the SDK. Validate the signature (already done) and narrow the event type to access typed fields.
 
