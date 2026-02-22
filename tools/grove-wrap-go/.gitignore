@@ -1,0 +1,10 @@
+# Built binary
+gw
+gw.exe
+
+# Distribution binaries
+dist/
+
+# Go build cache
+*.test
+*.out
