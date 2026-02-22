@@ -1,9 +1,9 @@
 {
 	"lastUpdated": "2026-02-22",
 	"docs": {
-		"total": 323,
+		"total": 330,
 		"breakdown": {
-			"specs": 75,
+			"specs": 81,
 			"help": 98,
 			"legal": 6,
 			"marketing": 20,
@@ -11,7 +11,8 @@
 			"philosophy": 69,
 			"design": 9,
 			"exhibit": 37,
-			"research": 1
+			"research": 1,
+			"playbooks": 1
 		},
 		"paths": {
 			"specs": "docs/specs",
@@ -22,7 +23,8 @@
 			"philosophy": "docs/philosophy",
 			"design": "docs/design-system",
 			"exhibit": "docs/museum",
-			"research": "docs/research"
+			"research": "docs/research",
+			"playbooks": "docs/playbooks"
 		}
 	},
 	"freshnessThreshold": {
