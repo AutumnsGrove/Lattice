@@ -102,27 +102,31 @@ var statusCmd = &cobra.Command{
 		// Databases
 		if len(cfg.Databases) > 0 {
 			fmt.Println()
-			fmt.Println(ui.SubtitleStyle.Render("  Databases"))
+			headers := []string{"Alias", "Name", "ID"}
+			var rows [][]string
 			for alias, db := range cfg.Databases {
 				id := db.ID
 				if len(id) > 8 {
 					id = id[:8] + "…"
 				}
-				fmt.Printf("    %-16s %s  (%s)\n", alias, db.Name, id)
+				rows = append(rows, []string{alias, db.Name, id})
 			}
+			fmt.Print(ui.RenderTable("Databases", headers, rows))
 		}
 
 		// KV Namespaces
 		if len(cfg.KVNamespaces) > 0 {
 			fmt.Println()
-			fmt.Println(ui.SubtitleStyle.Render("  KV Namespaces"))
+			headers := []string{"Alias", "Name", "ID"}
+			var rows [][]string
 			for alias, ns := range cfg.KVNamespaces {
 				id := ns.ID
 				if len(id) > 8 {
 					id = id[:8] + "…"
 				}
-				fmt.Printf("    %-16s %s  (%s)\n", alias, ns.Name, id)
+				rows = append(rows, []string{alias, ns.Name, id})
 			}
+			fmt.Print(ui.RenderTable("KV Namespaces", headers, rows))
 		}
 
 		// R2 Buckets

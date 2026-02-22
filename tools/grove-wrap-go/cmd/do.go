@@ -58,14 +58,12 @@ var doListCmd = &cobra.Command{
 			return nil
 		}
 
-		ui.PrintHeader(fmt.Sprintf("Durable Objects (%s)", worker))
+		headers := []string{"Binding", "Class", "Description"}
+		var rows [][]string
 		for _, d := range knownDurableObjects {
-			ui.PrintKeyValue(
-				fmt.Sprintf("  %-20s", d.Binding),
-				fmt.Sprintf("%-20s %s", d.Class, d.Description),
-			)
+			rows = append(rows, []string{d.Binding, d.Class, d.Description})
 		}
-		fmt.Println()
+		fmt.Print(ui.RenderTable(fmt.Sprintf("Durable Objects (%s)", worker), headers, rows))
 		ui.Muted("  DO list is based on known bindings. Check wrangler.toml for definitive list.")
 
 		return nil
@@ -147,8 +145,21 @@ var doAlarmCmd = &cobra.Command{
 	},
 }
 
+var doHelpCategories = []ui.HelpCategory{
+	{Title: "Read (Always Safe)", Icon: "📖", Style: ui.SafeReadStyle, Commands: []ui.HelpCommand{
+		{Name: "list", Desc: "List Durable Object namespaces"},
+		{Name: "info", Desc: "Show DO namespace info"},
+		{Name: "alarm", Desc: "Inspect DO alarms"},
+	}},
+}
+
 func init() {
 	rootCmd.AddCommand(doCmd)
+
+	doCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+		output := ui.RenderCozyHelp("gw do", "Durable Object operations", doHelpCategories, true)
+		fmt.Print(output)
+	})
 
 	// do list
 	doListCmd.Flags().StringP("worker", "w", "grove-durable-objects", "Worker name")

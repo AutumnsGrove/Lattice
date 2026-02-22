@@ -81,25 +81,28 @@ var r2ListCmd = &cobra.Command{
 
 		// Show configured buckets
 		if len(cfg.R2Buckets) > 0 {
-			ui.PrintHeader("Configured Buckets")
+			headers := []string{"Bucket"}
+			var rows [][]string
 			for _, b := range cfg.R2Buckets {
-				ui.PrintKeyValue("  ", b.Name)
+				rows = append(rows, []string{b.Name})
 			}
-			fmt.Println()
+			fmt.Print(ui.RenderTable("Configured Buckets", headers, rows))
 		}
 
 		// Show remote buckets
 		var buckets []map[string]interface{}
 		if err := json.Unmarshal([]byte(output), &buckets); err == nil && len(buckets) > 0 {
-			ui.PrintHeader("Remote R2 Buckets")
+			headers := []string{"Bucket", "Created"}
+			var rows [][]string
 			for _, b := range buckets {
 				name := fmt.Sprintf("%v", b["name"])
 				created := ""
 				if c, ok := b["creation_date"].(string); ok && len(c) >= 10 {
 					created = c[:10]
 				}
-				ui.PrintKeyValue(fmt.Sprintf("  %-24s", name), created)
+				rows = append(rows, []string{name, created})
 			}
+			fmt.Print(ui.RenderTable("Remote R2 Buckets", headers, rows))
 		}
 
 		return nil
@@ -200,7 +203,8 @@ var r2LsCmd = &cobra.Command{
 			return nil
 		}
 
-		ui.PrintHeader(fmt.Sprintf("Objects in %s (%d)", bucket, len(objects)))
+		headers := []string{"Key", "Size", "Modified"}
+		var rows [][]string
 		for _, obj := range objects {
 			key := fmt.Sprintf("%v", obj["key"])
 			size := 0.0
@@ -213,11 +217,9 @@ var r2LsCmd = &cobra.Command{
 			} else if m, ok := obj["uploaded"].(string); ok && len(m) >= 10 {
 				modified = m[:10]
 			}
-			ui.PrintKeyValue(
-				fmt.Sprintf("  %-40s", key),
-				fmt.Sprintf("%8s  %s", formatSize(size), modified),
-			)
+			rows = append(rows, []string{key, formatSize(size), modified})
 		}
+		fmt.Print(ui.RenderTable(fmt.Sprintf("Objects in %s", bucket), headers, rows))
 
 		return nil
 	},
@@ -369,8 +371,26 @@ var r2RmCmd = &cobra.Command{
 	},
 }
 
+var r2HelpCategories = []ui.HelpCategory{
+	{Title: "Read (Always Safe)", Icon: "📖", Style: ui.SafeReadStyle, Commands: []ui.HelpCommand{
+		{Name: "list", Desc: "List R2 buckets"},
+		{Name: "ls", Desc: "List objects in a bucket"},
+	}},
+	{Title: "Write (--write)", Icon: "✏️", Style: ui.SafeWriteStyle, Commands: []ui.HelpCommand{
+		{Name: "create", Desc: "Create an R2 bucket"},
+		{Name: "get", Desc: "Download an object"},
+		{Name: "put", Desc: "Upload an object"},
+		{Name: "rm", Desc: "Delete an object"},
+	}},
+}
+
 func init() {
 	rootCmd.AddCommand(r2Cmd)
+
+	r2Cmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+		output := ui.RenderCozyHelp("gw r2", "R2 object storage", r2HelpCategories, true)
+		fmt.Print(output)
+	})
 
 	// r2 list
 	r2Cmd.AddCommand(r2ListCmd)

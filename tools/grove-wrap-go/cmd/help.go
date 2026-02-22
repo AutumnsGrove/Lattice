@@ -35,6 +35,22 @@ var rootHelpCategories = []ui.HelpCategory{
 		},
 	},
 	{
+		Title: "Social",
+		Icon:  "\U0001f4e3",
+		Style: ui.SafeWriteStyle,
+		Commands: []ui.HelpCommand{
+			{Name: "social", Desc: "Social broadcasting via Zephyr"},
+		},
+	},
+	{
+		Title: "Publishing",
+		Icon:  "\U0001f4e6",
+		Style: ui.SafeWriteStyle,
+		Commands: []ui.HelpCommand{
+			{Name: "publish", Desc: "Package publishing to npm"},
+		},
+	},
+	{
 		Title: "Infrastructure",
 		Icon:  "☁️",
 		Style: ui.SafeWriteStyle,

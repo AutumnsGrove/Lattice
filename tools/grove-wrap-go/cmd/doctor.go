@@ -18,55 +18,53 @@ var doctorCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg := config.Get()
 
-		fmt.Println(ui.TitleStyle.Render("gw doctor"))
+		// Version info panel
+		fmt.Print(ui.RenderInfoPanel("gw doctor", [][2]string{
+			{"version", Version + " (go)"},
+			{"go", runtime.Version()},
+			{"platform", runtime.GOOS + "/" + runtime.GOARCH},
+			{"grove root", cfg.GroveRoot},
+			{"config", config.ConfigPath()},
+			{"agent mode", fmt.Sprintf("%v", cfg.AgentMode)},
+		}))
 		fmt.Println()
 
-		// Version info
-		fmt.Printf("  gw version:  %s (go)\n", Version)
-		fmt.Printf("  go version:  %s\n", runtime.Version())
-		fmt.Printf("  platform:    %s/%s\n", runtime.GOOS, runtime.GOARCH)
-		fmt.Printf("  grove root:  %s\n", cfg.GroveRoot)
-		fmt.Printf("  config file: %s\n", config.ConfigPath())
-		fmt.Printf("  agent mode:  %v\n", cfg.AgentMode)
-		fmt.Println()
-
-		// Check dependencies
-		fmt.Println(ui.TitleStyle.Render("Dependencies"))
-		fmt.Println()
-
+		// Dependency checks
 		allOK := true
+		var steps []ui.StepItem
 
 		// git
 		if result, err := gwexec.Git("--version"); err == nil && result.OK() {
-			ui.Step(true, fmt.Sprintf("git: %s", firstLine(result.Stdout)))
+			steps = append(steps, ui.StepItem{OK: true, Label: fmt.Sprintf("git: %s", firstLine(result.Stdout))})
 		} else {
-			ui.Step(false, "git: not found")
+			steps = append(steps, ui.StepItem{OK: false, Label: "git: not found"})
 			allOK = false
 		}
 
 		// gh
 		if result, err := gwexec.GH("--version"); err == nil && result.OK() {
-			ui.Step(true, fmt.Sprintf("gh: %s", firstLine(result.Stdout)))
+			steps = append(steps, ui.StepItem{OK: true, Label: fmt.Sprintf("gh: %s", firstLine(result.Stdout))})
 		} else {
-			ui.Step(false, "gh: not found")
+			steps = append(steps, ui.StepItem{OK: false, Label: "gh: not found"})
 			allOK = false
 		}
 
 		// wrangler
 		if gwexec.IsWranglerAvailable() {
-			ui.Step(true, "wrangler: available")
+			steps = append(steps, ui.StepItem{OK: true, Label: "wrangler: available"})
 		} else {
-			ui.Step(false, "wrangler: not found")
+			steps = append(steps, ui.StepItem{OK: false, Label: "wrangler: not found"})
 		}
 
 		// git repo
 		if gwexec.IsGitRepo() {
 			branch, _ := gwexec.CurrentBranch()
-			ui.Step(true, fmt.Sprintf("git repo: yes (branch: %s)", branch))
+			steps = append(steps, ui.StepItem{OK: true, Label: fmt.Sprintf("git repo: yes (branch: %s)", branch)})
 		} else {
-			ui.Step(false, "git repo: not inside a git repository")
+			steps = append(steps, ui.StepItem{OK: false, Label: "git repo: not inside a git repository"})
 		}
 
+		fmt.Print(ui.RenderStepList("Dependencies", steps))
 		fmt.Println()
 
 		if allOK {

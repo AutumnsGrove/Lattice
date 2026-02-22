@@ -130,19 +130,17 @@ var gitShipCmd = &cobra.Command{
 		}
 
 		// Rich output
-		fmt.Println(ui.TitleStyle.Render("gw git ship"))
-		fmt.Println()
+		var uiSteps []ui.StepItem
 		for _, s := range steps {
-			ui.Step(s.ok, s.name)
+			uiSteps = append(uiSteps, ui.StepItem{OK: s.ok, Label: s.name})
 		}
-		fmt.Println()
+		fmt.Print(ui.RenderStepList("gw git ship", uiSteps))
+
 		if commitOK && pushOK {
-			ui.Action("Shipped", hash+" "+msg)
-			ui.Action("Pushed", branch+" → origin/"+branch)
+			fmt.Print(ui.RenderSuccessPanel("Shipped", hash+" "+msg+"\n"+branch+" → origin/"+branch))
 		} else if commitOK {
 			ui.Action("Committed", hash+" "+msg)
-			ui.Warning("Push failed: " + pushErr)
-			ui.Hint("Try: gw git push --write")
+			fmt.Print(ui.RenderWarningPanel("Push Failed", pushErr+"\nTry: gw git push --write"))
 		}
 		return nil
 	},
@@ -214,28 +212,31 @@ var gitPrepCmd = &cobra.Command{
 			})
 		}
 
-		fmt.Println(ui.TitleStyle.Render("gw git prep"))
+		fmt.Print(ui.RenderInfoPanel("gw git prep", [][2]string{
+			{"branch", branch},
+			{"staged", fmt.Sprintf("%d", staged)},
+			{"unstaged", fmt.Sprintf("%d", unstaged)},
+			{"untracked", fmt.Sprintf("%d", untracked)},
+		}))
 		fmt.Println()
 
-		fmt.Printf("  Branch:     %s\n", ui.CommandStyle.Render(branch))
-		fmt.Printf("  Staged:     %d   Unstaged: %d   Untracked: %d\n", staged, unstaged, untracked)
-		fmt.Println()
-
-		ui.Step(staged > 0, "Files staged")
-		ui.Step(formatOK, "Formatting")
-		ui.Step(checkOK, "Type checking")
+		prepSteps := []ui.StepItem{
+			{OK: staged > 0, Label: "Files staged"},
+			{OK: formatOK, Label: "Formatting"},
+			{OK: checkOK, Label: "Type checking"},
+		}
+		fmt.Print(ui.RenderStepList("Checks", prepSteps))
 		fmt.Println()
 
 		if ready {
-			ui.Success("Ready to ship!")
-			ui.Hint("Run: gw git ship --write -m \"type: message\"")
+			fmt.Print(ui.RenderSuccessPanel("Ready", "Ready to ship!\nRun: gw git ship --write -m \"type: message\""))
 		} else {
-			ui.Error("Not ready")
+			issueText := ""
 			for _, issue := range issues {
-				fmt.Printf("    • %s\n", issue)
+				issueText += "• " + issue + "\n"
 			}
+			fmt.Print(ui.RenderErrorPanel("Not Ready", "Checks failed", issueText))
 		}
-		fmt.Println()
 		return nil
 	},
 }
@@ -309,54 +310,48 @@ var gitPRPrepCmd = &cobra.Command{
 			})
 		}
 
-		fmt.Println(ui.TitleStyle.Render("gw git pr-prep"))
-		fmt.Println()
-
-		fmt.Printf("  Branch:   %s → %s\n", ui.CommandStyle.Render(branch), gitPRPrepBase)
-		fmt.Printf("  Commits:  %s\n", commitCount)
-		fmt.Printf("  Files:    %d changed\n", len(changedFiles))
-
+		pairs := [][2]string{
+			{"branch", branch + " → " + gitPRPrepBase},
+			{"commits", commitCount},
+			{"files", fmt.Sprintf("%d changed", len(changedFiles))},
+		}
 		if len(packages) > 0 {
-			fmt.Printf("  Packages: %s\n", strings.Join(packages, ", "))
+			pairs = append(pairs, [2]string{"packages", strings.Join(packages, ", ")})
 		}
 		if len(issues) > 0 {
-			fmt.Printf("  Issues:   %s\n", strings.Join(issues, ", "))
+			pairs = append(pairs, [2]string{"issues", strings.Join(issues, ", ")})
 		}
-
-		fmt.Println()
-
-		// Diff stat summary
 		if diffStatOut != "" {
-			lines := strings.Split(strings.TrimSpace(diffStatOut), "\n")
-			if len(lines) > 0 {
-				// Show just the summary line (last line)
-				summary := lines[len(lines)-1]
-				fmt.Printf("  %s\n", strings.TrimSpace(summary))
+			statLines := strings.Split(strings.TrimSpace(diffStatOut), "\n")
+			if len(statLines) > 0 {
+				pairs = append(pairs, [2]string{"diff", strings.TrimSpace(statLines[len(statLines)-1])})
 			}
 		}
-
+		fmt.Print(ui.RenderInfoPanel("gw git pr-prep", pairs))
 		fmt.Println()
 
-		// Readiness
-		ui.Step(!uncommitted, "All changes committed")
-		ui.Step(!unpushed, "All commits pushed")
+		readinessSteps := []ui.StepItem{
+			{OK: !uncommitted, Label: "All changes committed"},
+			{OK: !unpushed, Label: "All commits pushed"},
+		}
+		fmt.Print(ui.RenderStepList("Readiness", readinessSteps))
 		fmt.Println()
 
 		if ready {
-			ui.Success("Ready for PR!")
+			fmt.Print(ui.RenderSuccessPanel("Ready", "Ready for PR!"))
 		} else {
-			ui.Warning("Not ready")
+			suggestion := ""
 			if uncommitted {
-				ui.Hint("Commit changes: gw git ship --write -m \"type: message\"")
+				suggestion += "Commit changes: gw git ship --write -m \"type: message\"\n"
 			}
 			if unpushed {
-				ui.Hint("Push commits: gw git push --write")
+				suggestion += "Push commits: gw git push --write"
 			}
+			fmt.Print(ui.RenderWarningPanel("Not Ready", suggestion))
 		}
 
 		if suggestedTitle != "" {
-			fmt.Println()
-			fmt.Printf("  Suggested title: %s\n", ui.CommandStyle.Render(suggestedTitle))
+			fmt.Printf("\n  Suggested title: %s\n", ui.CommandStyle.Render(suggestedTitle))
 		}
 
 		fmt.Println()

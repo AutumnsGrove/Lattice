@@ -342,23 +342,27 @@ var gitBranchCmd = &cobra.Command{
 				return printJSON(branches)
 			}
 
-			fmt.Println(ui.TitleStyle.Render("gw git branch"))
-			fmt.Println()
 			current, _ := gwexec.CurrentBranch()
+			headers := []string{"Branch", "Hash", "Subject"}
+			var rows [][]string
 			for _, line := range result.Lines() {
 				parts := strings.SplitN(line, " ", 3)
 				name := parts[0]
-				marker := "  "
+				marker := ""
 				if name == current {
 					marker = "* "
-					name = ui.CommandStyle.Render(name)
+				}
+				hash := ""
+				subject := ""
+				if len(parts) >= 2 {
+					hash = parts[1]
 				}
 				if len(parts) >= 3 {
-					fmt.Printf("  %s%-30s %s  %s\n", marker, name, ui.HintStyle.Render(parts[1]), parts[2])
-				} else {
-					fmt.Printf("  %s%s\n", marker, name)
+					subject = parts[2]
 				}
+				rows = append(rows, []string{marker + name, hash, subject})
 			}
+			fmt.Print(ui.RenderTable("gw git branch", headers, rows))
 			return nil
 		}
 

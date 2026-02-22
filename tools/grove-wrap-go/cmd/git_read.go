@@ -136,8 +136,8 @@ var gitLogCmd = &cobra.Command{
 		}
 
 		// Table output
-		fmt.Println(ui.TitleStyle.Render("gw git log"))
-		fmt.Println()
+		headers := []string{"Hash", "Message", "Author", "Date"}
+		var rows [][]string
 		lines := strings.Split(strings.TrimSpace(result.Stdout), "\n")
 		for _, line := range lines {
 			if line == "" {
@@ -145,15 +145,11 @@ var gitLogCmd = &cobra.Command{
 			}
 			parts := strings.SplitN(line, "|", 6)
 			if len(parts) < 6 {
-				fmt.Println(line)
 				continue
 			}
-			hash := ui.HintStyle.Render(parts[1])
-			msg := parts[5]
-			author := ui.DescStyle.Render(parts[2])
-			date := ui.HintStyle.Render(formatDateShort(parts[4]))
-			fmt.Printf("  %s  %-50s  %s  %s\n", hash, msg, author, date)
+			rows = append(rows, []string{parts[1], parts[5], parts[2], formatDateShort(parts[4])})
 		}
+		fmt.Print(ui.RenderTable("gw git log", headers, rows))
 		return nil
 	},
 }
@@ -406,8 +402,8 @@ var gitReflogCmd = &cobra.Command{
 		}
 
 		// Table output
-		fmt.Println(ui.TitleStyle.Render("gw git reflog"))
-		fmt.Println()
+		headers := []string{"Hash", "Ref", "Action", "Date"}
+		var rows [][]string
 		lines := strings.Split(strings.TrimSpace(result.Stdout), "\n")
 		for _, line := range lines {
 			if line == "" {
@@ -415,15 +411,11 @@ var gitReflogCmd = &cobra.Command{
 			}
 			parts := strings.SplitN(line, "|", 4)
 			if len(parts) < 4 {
-				fmt.Println(line)
 				continue
 			}
-			hash := ui.HintStyle.Render(parts[0])
-			ref := ui.CommandStyle.Render(parts[1])
-			action := parts[2]
-			when := ui.HintStyle.Render(formatDateShort(parts[3]))
-			fmt.Printf("  %s  %-18s  %-40s  %s\n", hash, ref, action, when)
+			rows = append(rows, []string{parts[0], parts[1], parts[2], formatDateShort(parts[3])})
 		}
+		fmt.Print(ui.RenderTable("gw git reflog", headers, rows))
 		return nil
 	},
 }

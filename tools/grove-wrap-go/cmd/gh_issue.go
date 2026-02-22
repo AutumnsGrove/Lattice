@@ -468,8 +468,27 @@ var issueCommentsCmd = &cobra.Command{
 	},
 }
 
+var issueHelpCategories = []ui.HelpCategory{
+	{Title: "Read (Always Safe)", Icon: "📖", Style: ui.SafeReadStyle, Commands: []ui.HelpCommand{
+		{Name: "list", Desc: "List issues"},
+		{Name: "view", Desc: "View issue details"},
+		{Name: "comments", Desc: "List all comments"},
+	}},
+	{Title: "Write (--write)", Icon: "✏️", Style: ui.SafeWriteStyle, Commands: []ui.HelpCommand{
+		{Name: "create", Desc: "Create an issue"},
+		{Name: "comment", Desc: "Add a comment"},
+		{Name: "close", Desc: "Close an issue"},
+		{Name: "reopen", Desc: "Reopen an issue"},
+	}},
+}
+
 func init() {
 	ghCmd.AddCommand(issueCmd)
+
+	issueCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+		output := ui.RenderCozyHelp("gw gh issue", "issue operations", issueHelpCategories, true)
+		fmt.Print(output)
+	})
 
 	// issue list
 	issueListCmd.Flags().String("state", "open", "Filter by state (open, closed, all)")

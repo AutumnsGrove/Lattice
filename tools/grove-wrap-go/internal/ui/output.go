@@ -58,8 +58,5 @@ func PrintKeyValue(key, value string) {
 
 // SafetyError prints a safety check failure with an optional suggestion.
 func SafetyError(msg string, suggestion string) {
-	Error("Safety check failed: " + msg)
-	if suggestion != "" {
-		Hint(suggestion)
-	}
+	fmt.Print(RenderErrorPanel("Safety Check Failed", msg, suggestion))
 }

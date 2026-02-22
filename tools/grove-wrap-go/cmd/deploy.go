@@ -76,13 +76,21 @@ var deployCmd = &cobra.Command{
 			fmt.Println(string(data))
 		} else {
 			if dryRun {
-				ui.Info("Dry-run deployment preview:")
+				pairs := [][2]string{
+					{"worker", worker},
+					{"mode", "dry-run"},
+				}
+				if env != "" {
+					pairs = append(pairs, [2]string{"environment", env})
+				}
+				fmt.Print(ui.RenderInfoPanel("Deploy Preview", pairs))
 				fmt.Println(result.Stdout)
 			} else {
-				ui.Success(fmt.Sprintf("Deployed: %s", worker))
+				content := fmt.Sprintf("Deployed: %s", worker)
 				if env != "" {
-					ui.Muted(fmt.Sprintf("Environment: %s", env))
+					content += fmt.Sprintf("\nEnvironment: %s", env)
 				}
+				fmt.Print(ui.RenderSuccessPanel("Deploy", content))
 			}
 		}
 		return nil

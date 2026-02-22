@@ -617,18 +617,8 @@ var prChecksCmd = &cobra.Command{
 			}
 		}
 
-		ui.PrintHeader(fmt.Sprintf("PR #%s Checks", number))
-		if passed > 0 {
-			fmt.Printf("  %d passed", passed)
-		}
-		if failed > 0 {
-			fmt.Printf("  %d failed", failed)
-		}
-		if pending > 0 {
-			fmt.Printf("  %d pending", pending)
-		}
-		fmt.Println()
-
+		headers := []string{"Check", "Status"}
+		var rows [][]string
 		for _, c := range checks {
 			name, _ := c["name"].(string)
 			conclusion, _ := c["conclusion"].(string)
@@ -652,8 +642,11 @@ var prChecksCmd = &cobra.Command{
 			if status == "" {
 				status = state
 			}
-			fmt.Printf("  %s %-40s %s\n", icon, name, status)
+			rows = append(rows, []string{icon + " " + name, status})
 		}
+
+		summary := fmt.Sprintf("%d passed, %d failed, %d pending", passed, failed, pending)
+		fmt.Print(ui.RenderTable(fmt.Sprintf("PR #%s Checks — %s", number, summary), headers, rows))
 
 		return nil
 	},
@@ -761,8 +754,30 @@ var prCommentsCmd = &cobra.Command{
 	},
 }
 
+var prHelpCategories = []ui.HelpCategory{
+	{Title: "Read (Always Safe)", Icon: "📖", Style: ui.SafeReadStyle, Commands: []ui.HelpCommand{
+		{Name: "list", Desc: "List pull requests"},
+		{Name: "view", Desc: "View pull request details"},
+		{Name: "checks", Desc: "Show CI/CD check status"},
+		{Name: "diff", Desc: "View code changes"},
+		{Name: "comments", Desc: "List all comments"},
+	}},
+	{Title: "Write (--write)", Icon: "✏️", Style: ui.SafeWriteStyle, Commands: []ui.HelpCommand{
+		{Name: "create", Desc: "Create a pull request"},
+		{Name: "comment", Desc: "Add a comment"},
+		{Name: "review", Desc: "Review a pull request"},
+		{Name: "merge", Desc: "Merge a pull request"},
+		{Name: "close", Desc: "Close without merging"},
+	}},
+}
+
 func init() {
 	ghCmd.AddCommand(prCmd)
+
+	prCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+		output := ui.RenderCozyHelp("gw gh pr", "pull request operations", prHelpCategories, true)
+		fmt.Print(output)
+	})
 
 	// pr list
 	prListCmd.Flags().String("state", "open", "Filter by state (open, closed, merged, all)")

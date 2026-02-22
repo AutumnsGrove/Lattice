@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -67,27 +68,17 @@ var healthCmd = &cobra.Command{
 		}
 
 		// Rich output
-		fmt.Println(ui.TitleStyle.Render("gw health"))
-		fmt.Println()
-
-		if healthy {
-			ui.Step(true, "System healthy")
-		} else {
-			ui.Step(false, "System has issues")
+		steps := []ui.StepItem{
+			{OK: checks["wrangler_installed"], Label: "Wrangler installed"},
+			{OK: checks["wrangler_authenticated"], Label: "Wrangler authenticated"},
+			{OK: checks["config_exists"], Label: "Config file present"},
+			{OK: checks["databases_configured"], Label: "Databases configured"},
 		}
-		fmt.Println()
-
-		ui.Step(checks["wrangler_installed"], "Wrangler installed")
-		ui.Step(checks["wrangler_authenticated"], "Wrangler authenticated")
-		ui.Step(checks["config_exists"], "Config file present")
-		ui.Step(checks["databases_configured"], "Databases configured")
+		fmt.Print(ui.RenderStepList("gw health", steps))
 
 		if len(issues) > 0 {
-			fmt.Println()
-			fmt.Println(ui.SubtitleStyle.Render("  Issues"))
-			for _, issue := range issues {
-				fmt.Printf("    • %s\n", issue)
-			}
+			issueText := strings.Join(issues, "\n• ")
+			fmt.Print(ui.RenderWarningPanel("Issues", "• "+issueText))
 		}
 
 		fmt.Println()

@@ -132,25 +132,23 @@ var d1ListCmd = &cobra.Command{
 
 		// Show configured databases
 		if len(cfg.Databases) > 0 {
-			ui.PrintHeader("Configured Databases")
+			headers := []string{"Alias", "Name", "ID"}
+			var rows [][]string
 			for alias, db := range cfg.Databases {
-				ui.PrintKeyValue(
-					fmt.Sprintf("%-12s", alias),
-					fmt.Sprintf("%s  (%s)", db.Name, db.ID),
-				)
+				rows = append(rows, []string{alias, db.Name, db.ID})
 			}
-			fmt.Println()
+			fmt.Print(ui.RenderTable("Configured Databases", headers, rows))
 		}
 
 		// Show remote databases
 		var dbs []map[string]interface{}
 		if err := json.Unmarshal([]byte(output), &dbs); err == nil && len(dbs) > 0 {
-			ui.PrintHeader("Remote D1 Databases")
+			headers := []string{"Name", "ID"}
+			var rows [][]string
 			for _, db := range dbs {
-				name := fmt.Sprintf("%v", db["name"])
-				uuid := fmt.Sprintf("%v", db["uuid"])
-				ui.PrintKeyValue(fmt.Sprintf("%-24s", name), uuid)
+				rows = append(rows, []string{fmt.Sprintf("%v", db["name"]), fmt.Sprintf("%v", db["uuid"])})
 			}
+			fmt.Print(ui.RenderTable("Remote D1 Databases", headers, rows))
 		}
 
 		return nil
@@ -189,15 +187,13 @@ var d1TablesCmd = &cobra.Command{
 			return nil
 		}
 
-		ui.PrintHeader(fmt.Sprintf("Tables in %s", dbName))
-		if len(tables) == 0 {
-			ui.Muted("No tables found")
-			return nil
-		}
+		headers := []string{"Table"}
+		var rows [][]string
 		for _, t := range tables {
 			name, _ := t["name"].(string)
-			ui.PrintKeyValue("  ", name)
+			rows = append(rows, []string{name})
 		}
+		fmt.Print(ui.RenderTable(fmt.Sprintf("Tables in %s", dbName), headers, rows))
 
 		return nil
 	},
@@ -246,27 +242,24 @@ var d1SchemaCmd = &cobra.Command{
 			return nil
 		}
 
-		ui.PrintHeader(fmt.Sprintf("Schema: %s.%s", dbName, tableName))
+		headers := []string{"Column", "Type", "Nullable", "PK"}
+		var rows [][]string
 		for _, col := range columns {
 			name := fmt.Sprintf("%v", col["name"])
 			colType := fmt.Sprintf("%v", col["type"])
 			notnull, _ := col["notnull"].(float64)
 			pk, _ := col["pk"].(float64)
-
 			nullable := "YES"
 			if notnull == 1 {
 				nullable = "NO"
 			}
 			pkStr := ""
 			if pk > 0 {
-				pkStr = " PK"
+				pkStr = "YES"
 			}
-
-			ui.PrintKeyValue(
-				fmt.Sprintf("  %-20s", name),
-				fmt.Sprintf("%-12s nullable: %s%s", colType, nullable, pkStr),
-			)
+			rows = append(rows, []string{name, colType, nullable, pkStr})
 		}
+		fmt.Print(ui.RenderTable(fmt.Sprintf("Schema: %s.%s", dbName, tableName), headers, rows))
 
 		return nil
 	},
@@ -533,8 +526,25 @@ func isValidIdentifier(s string) bool {
 	return true
 }
 
+var d1HelpCategories = []ui.HelpCategory{
+	{Title: "Read (Always Safe)", Icon: "📖", Style: ui.SafeReadStyle, Commands: []ui.HelpCommand{
+		{Name: "list", Desc: "List D1 databases"},
+		{Name: "tables", Desc: "List tables in a database"},
+		{Name: "schema", Desc: "Show table schema"},
+	}},
+	{Title: "Write (--write)", Icon: "✏️", Style: ui.SafeWriteStyle, Commands: []ui.HelpCommand{
+		{Name: "query", Desc: "Execute a SQL query"},
+		{Name: "migrate", Desc: "Execute a SQL migration file"},
+	}},
+}
+
 func init() {
 	rootCmd.AddCommand(d1Cmd)
+
+	d1Cmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+		output := ui.RenderCozyHelp("gw d1", "D1 database operations", d1HelpCategories, true)
+		fmt.Print(output)
+	})
 
 	// d1 list
 	d1Cmd.AddCommand(d1ListCmd)

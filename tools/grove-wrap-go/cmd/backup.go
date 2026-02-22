@@ -62,7 +62,8 @@ var backupListCmd = &cobra.Command{
 			return nil
 		}
 
-		ui.PrintHeader(fmt.Sprintf("Backups for %s (%d)", dbName, len(backups)))
+		headers := []string{"ID", "Created", "State"}
+		rows := make([][]string, 0, len(backups))
 		for _, b := range backups {
 			id := fmt.Sprintf("%v", b["id"])
 			if len(id) > 12 {
@@ -76,12 +77,9 @@ var backupListCmd = &cobra.Command{
 				created = strings.ReplaceAll(c, "T", " ")
 			}
 			state := fmt.Sprintf("%v", b["state"])
-
-			ui.PrintKeyValue(
-				fmt.Sprintf("  %-16s", id),
-				fmt.Sprintf("%-20s %s", created, state),
-			)
+			rows = append(rows, []string{id, created, state})
 		}
+		fmt.Print(ui.RenderTable(fmt.Sprintf("Backups for %s", dbName), headers, rows))
 
 		return nil
 	},
@@ -238,8 +236,26 @@ var backupRestoreCmd = &cobra.Command{
 	},
 }
 
+var backupHelpCategories = []ui.HelpCategory{
+	{Title: "Read (Always Safe)", Icon: "📖", Style: ui.SafeReadStyle, Commands: []ui.HelpCommand{
+		{Name: "list", Desc: "List database backups"},
+	}},
+	{Title: "Write (--write)", Icon: "✏️", Style: ui.SafeWriteStyle, Commands: []ui.HelpCommand{
+		{Name: "create", Desc: "Create a database backup"},
+		{Name: "download", Desc: "Download a database backup"},
+	}},
+	{Title: "Danger (--write --force)", Icon: "⚠️", Style: ui.DangerStyle, Commands: []ui.HelpCommand{
+		{Name: "restore", Desc: "Restore a database from backup"},
+	}},
+}
+
 func init() {
 	rootCmd.AddCommand(backupCmd)
+
+	backupCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+		output := ui.RenderCozyHelp("gw backup", "D1 database backups", backupHelpCategories, true)
+		fmt.Print(output)
+	})
 
 	// backup list
 	backupListCmd.Flags().StringP("db", "d", "lattice", "Database alias or name")

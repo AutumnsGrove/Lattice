@@ -75,7 +75,15 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Print version",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("gw version %s (go)\n", Version)
+		cfg := config.Get()
+		if cfg.JSONMode {
+			fmt.Printf(`{"version":"%s","runtime":"go"}`+"\n", Version)
+			return
+		}
+		fmt.Print(ui.RenderInfoPanel("gw", [][2]string{
+			{"version", Version},
+			{"runtime", "go"},
+		}))
 	},
 }
 

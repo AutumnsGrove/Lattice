@@ -138,8 +138,23 @@ var emailTestCmd = &cobra.Command{
 	},
 }
 
+var emailHelpCategories = []ui.HelpCategory{
+	{Title: "Read (Always Safe)", Icon: "📖", Style: ui.SafeReadStyle, Commands: []ui.HelpCommand{
+		{Name: "status", Desc: "Check email routing status"},
+		{Name: "rules", Desc: "List email routing rules"},
+	}},
+	{Title: "Write (--write)", Icon: "✏️", Style: ui.SafeWriteStyle, Commands: []ui.HelpCommand{
+		{Name: "test", Desc: "Send a test email"},
+	}},
+}
+
 func init() {
 	rootCmd.AddCommand(emailCmd)
+
+	emailCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+		output := ui.RenderCozyHelp("gw email", "email routing operations", emailHelpCategories, true)
+		fmt.Print(output)
+	})
 
 	// email status
 	emailCmd.AddCommand(emailStatusCmd)

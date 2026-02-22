@@ -82,25 +82,23 @@ var kvListCmd = &cobra.Command{
 
 		// Show configured namespaces
 		if len(cfg.KVNamespaces) > 0 {
-			ui.PrintHeader("Configured Namespaces")
+			headers := []string{"Alias", "Name", "ID"}
+			var rows [][]string
 			for alias, ns := range cfg.KVNamespaces {
-				ui.PrintKeyValue(
-					fmt.Sprintf("%-12s", alias),
-					fmt.Sprintf("%s  (%s)", ns.Name, ns.ID),
-				)
+				rows = append(rows, []string{alias, ns.Name, ns.ID})
 			}
-			fmt.Println()
+			fmt.Print(ui.RenderTable("Configured Namespaces", headers, rows))
 		}
 
 		// Show remote namespaces
 		var namespaces []map[string]interface{}
 		if err := json.Unmarshal([]byte(output), &namespaces); err == nil && len(namespaces) > 0 {
-			ui.PrintHeader("Remote KV Namespaces")
+			headers := []string{"Title", "ID"}
+			var rows [][]string
 			for _, ns := range namespaces {
-				title := fmt.Sprintf("%v", ns["title"])
-				id := fmt.Sprintf("%v", ns["id"])
-				ui.PrintKeyValue(fmt.Sprintf("%-30s", title), id)
+				rows = append(rows, []string{fmt.Sprintf("%v", ns["title"]), fmt.Sprintf("%v", ns["id"])})
 			}
+			fmt.Print(ui.RenderTable("Remote KV Namespaces", headers, rows))
 		}
 
 		return nil
@@ -158,7 +156,8 @@ var kvKeysCmd = &cobra.Command{
 			return nil
 		}
 
-		ui.PrintHeader(fmt.Sprintf("Keys in %s (%d)", args[0], len(keys)))
+		headers := []string{"Key", "Metadata"}
+		var rows [][]string
 		for _, k := range keys {
 			name := fmt.Sprintf("%v", k["name"])
 			meta := ""
@@ -167,10 +166,11 @@ var kvKeysCmd = &cobra.Command{
 				if len(ms) > 30 {
 					ms = ms[:27] + "..."
 				}
-				meta = fmt.Sprintf("  (%s)", ms)
+				meta = ms
 			}
-			ui.PrintKeyValue("  ", name+meta)
+			rows = append(rows, []string{name, meta})
 		}
+		fmt.Print(ui.RenderTable(fmt.Sprintf("Keys in %s", args[0]), headers, rows))
 
 		return nil
 	},
@@ -361,8 +361,25 @@ var kvDeleteCmd = &cobra.Command{
 	},
 }
 
+var kvHelpCategories = []ui.HelpCategory{
+	{Title: "Read (Always Safe)", Icon: "📖", Style: ui.SafeReadStyle, Commands: []ui.HelpCommand{
+		{Name: "list", Desc: "List KV namespaces"},
+		{Name: "keys", Desc: "List keys in a namespace"},
+		{Name: "get", Desc: "Get a value from KV"},
+	}},
+	{Title: "Write (--write)", Icon: "✏️", Style: ui.SafeWriteStyle, Commands: []ui.HelpCommand{
+		{Name: "put", Desc: "Write a value to KV"},
+		{Name: "delete", Desc: "Delete a key from KV"},
+	}},
+}
+
 func init() {
 	rootCmd.AddCommand(kvCmd)
+
+	kvCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+		output := ui.RenderCozyHelp("gw kv", "KV storage operations", kvHelpCategories, true)
+		fmt.Print(output)
+	})
 
 	// kv list
 	kvCmd.AddCommand(kvListCmd)

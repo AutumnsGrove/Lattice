@@ -76,19 +76,14 @@ var packagesCmd = &cobra.Command{
 		}
 		sort.Strings(typeOrder)
 
+		headers := []string{"Package", "Type", "Scripts"}
+		var rows [][]string
 		for _, t := range typeOrder {
-			group := grouped[t]
-			fmt.Printf("  %s (%d)\n", ui.SubtitleStyle.Render(t), len(group))
-			for _, p := range group {
-				scripts := availableScripts(p.Scripts)
-				if scripts != "" {
-					fmt.Printf("    %-30s %s\n", p.Name, ui.HintStyle.Render(scripts))
-				} else {
-					fmt.Printf("    %s\n", p.Name)
-				}
+			for _, p := range grouped[t] {
+				rows = append(rows, []string{p.Name, t, availableScripts(p.Scripts)})
 			}
-			fmt.Println()
 		}
+		fmt.Print(ui.RenderTable("Packages", headers, rows))
 
 		fmt.Printf("  Total: %d packages\n", len(pkgs))
 		fmt.Println()

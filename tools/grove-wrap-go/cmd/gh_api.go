@@ -117,10 +117,8 @@ var ghRateLimitCmd = &cobra.Command{
 			return nil
 		}
 
-		ui.PrintHeader("GitHub API Rate Limits")
-		fmt.Printf("  %-15s %8s %8s %8s\n", "Resource", "Used", "Remaining", "Limit")
-		fmt.Printf("  %-15s %8s %8s %8s\n", "--------", "----", "---------", "-----")
-
+		headers := []string{"Resource", "Used", "Remaining", "Limit"}
+		var rows [][]string
 		var lowResources, exhaustedResources []string
 
 		for name, v := range resources {
@@ -150,8 +148,9 @@ var ghRateLimitCmd = &cobra.Command{
 				lowResources = append(lowResources, name)
 			}
 
-			fmt.Printf("  %-15s %8d %8d %8d\n", name, used, remaining, limit)
+			rows = append(rows, []string{name, fmt.Sprintf("%d", used), fmt.Sprintf("%d", remaining), fmt.Sprintf("%d", limit)})
 		}
+		fmt.Print(ui.RenderTable("GitHub API Rate Limits", headers, rows))
 
 		if len(exhaustedResources) > 0 {
 			fmt.Printf("\n  Exhausted: %s\n", strings.Join(exhaustedResources, ", "))

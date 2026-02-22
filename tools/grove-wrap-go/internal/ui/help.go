@@ -27,7 +27,7 @@ func RenderCozyHelp(cmdPath, subtitle string, categories []HelpCategory, showSaf
 	var b strings.Builder
 
 	// Header
-	header := TitleStyle.Render(cmdPath)
+	header := HeaderStyle.Render(cmdPath)
 	if subtitle != "" {
 		header += " " + SubtitleStyle.Render("— "+subtitle)
 	}

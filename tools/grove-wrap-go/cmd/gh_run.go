@@ -403,8 +403,25 @@ var runCancelCmd = &cobra.Command{
 	},
 }
 
+var runHelpCategories = []ui.HelpCategory{
+	{Title: "Read (Always Safe)", Icon: "📖", Style: ui.SafeReadStyle, Commands: []ui.HelpCommand{
+		{Name: "list", Desc: "List workflow runs"},
+		{Name: "view", Desc: "View run details with job breakdown"},
+		{Name: "watch", Desc: "Watch a run in progress"},
+	}},
+	{Title: "Write (--write)", Icon: "✏️", Style: ui.SafeWriteStyle, Commands: []ui.HelpCommand{
+		{Name: "rerun", Desc: "Rerun a workflow"},
+		{Name: "cancel", Desc: "Cancel a workflow run"},
+	}},
+}
+
 func init() {
 	ghCmd.AddCommand(runCmd)
+
+	runCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+		output := ui.RenderCozyHelp("gw gh run", "workflow run operations", runHelpCategories, true)
+		fmt.Print(output)
+	})
 
 	// run list
 	runListCmd.Flags().StringP("workflow", "w", "", "Filter by workflow file name")

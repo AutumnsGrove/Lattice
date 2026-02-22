@@ -120,17 +120,16 @@ var flagListCmd = &cobra.Command{
 			return nil
 		}
 
-		ui.PrintHeader(fmt.Sprintf("Feature Flags (%d)", len(flags)))
+		headers := []string{"Name", "Status"}
+		var rows [][]string
 		for _, f := range flags {
 			status := "○ OFF"
 			if f.Enabled {
 				status = "● ON"
 			}
-			ui.PrintKeyValue(
-				fmt.Sprintf("  %-24s", f.Name),
-				status,
-			)
+			rows = append(rows, []string{f.Name, status})
 		}
+		fmt.Print(ui.RenderTable("Feature Flags", headers, rows))
 
 		return nil
 	},
@@ -350,8 +349,27 @@ var flagDeleteCmd = &cobra.Command{
 	},
 }
 
+var flagHelpCategories = []ui.HelpCategory{
+	{Title: "Read (Always Safe)", Icon: "📖", Style: ui.SafeReadStyle, Commands: []ui.HelpCommand{
+		{Name: "list", Desc: "List feature flags"},
+		{Name: "get", Desc: "Get a flag's status and value"},
+	}},
+	{Title: "Write (--write)", Icon: "✏️", Style: ui.SafeWriteStyle, Commands: []ui.HelpCommand{
+		{Name: "enable", Desc: "Enable a feature flag"},
+		{Name: "disable", Desc: "Disable a feature flag"},
+	}},
+	{Title: "Danger (--write --force)", Icon: "⚠️", Style: ui.DangerStyle, Commands: []ui.HelpCommand{
+		{Name: "delete", Desc: "Delete a feature flag"},
+	}},
+}
+
 func init() {
 	rootCmd.AddCommand(flagCmd)
+
+	flagCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+		output := ui.RenderCozyHelp("gw flag", "feature flag management", flagHelpCategories, true)
+		fmt.Print(output)
+	})
 
 	// flag list
 	flagListCmd.Flags().StringP("prefix", "p", "", "Filter flags by prefix")

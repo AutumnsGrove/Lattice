@@ -99,3 +99,68 @@ var (
 	DescStyle = lipgloss.NewStyle().
 			Foreground(DimGray)
 )
+
+// Table styles for Grove-themed data tables.
+var (
+	TableHeaderStyle = lipgloss.NewStyle().
+				Bold(true).
+				Foreground(ForestGreen).
+				Padding(0, 1)
+
+	TableBorderStyle = lipgloss.NewStyle().
+				Foreground(MossGreen)
+
+	TableRowEvenStyle = lipgloss.NewStyle().
+				Padding(0, 1)
+
+	TableRowOddStyle = lipgloss.NewStyle().
+				Padding(0, 1).
+				Foreground(lipgloss.Color("#e0e0e0"))
+)
+
+// Panel title and variant styles.
+var (
+	PanelTitleStyle = lipgloss.NewStyle().
+			Bold(true).
+			Foreground(ForestGreen).
+			Padding(0, 1)
+
+	WarningPanelStyle = lipgloss.NewStyle().
+				BorderStyle(lipgloss.RoundedBorder()).
+				BorderForeground(LeafYellow).
+				Padding(0, 1)
+
+	ErrorPanelStyle = lipgloss.NewStyle().
+			BorderStyle(lipgloss.RoundedBorder()).
+			BorderForeground(DangerRed).
+			Padding(0, 1)
+
+	SuccessPanelStyle = lipgloss.NewStyle().
+				BorderStyle(lipgloss.RoundedBorder()).
+				BorderForeground(ForestGreen).
+				Padding(0, 1)
+)
+
+// Badge styles for inline status indicators.
+var (
+	BadgeSuccess = lipgloss.NewStyle().
+			Bold(true).
+			Foreground(lipgloss.Color("#ffffff")).
+			Background(ForestGreen).
+			Padding(0, 1)
+
+	BadgeWarning = lipgloss.NewStyle().
+			Bold(true).
+			Foreground(lipgloss.Color("#ffffff")).
+			Background(LeafYellow).
+			Padding(0, 1)
+
+	BadgeError = lipgloss.NewStyle().
+			Bold(true).
+			Foreground(lipgloss.Color("#ffffff")).
+			Background(DangerRed).
+			Padding(0, 1)
+)
+
+// Spinner style for animated indicators.
+var SpinnerStyle = lipgloss.NewStyle().Foreground(ForestGreen)
