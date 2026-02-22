@@ -129,9 +129,15 @@ var ghRateLimitCmd = &cobra.Command{
 				continue
 			}
 
-			limit := int(r["limit"].(float64))
-			used := int(r["used"].(float64))
-			remaining := int(r["remaining"].(float64))
+			limitF, ok1 := r["limit"].(float64)
+			usedF, ok2 := r["used"].(float64)
+			remainingF, ok3 := r["remaining"].(float64)
+			if !ok1 || !ok2 || !ok3 {
+				continue
+			}
+			limit := int(limitF)
+			used := int(usedF)
+			remaining := int(remainingF)
 
 			warnThreshold := cfg.GitHub.RateLimitWarnThreshold
 			if warnThreshold == 0 {

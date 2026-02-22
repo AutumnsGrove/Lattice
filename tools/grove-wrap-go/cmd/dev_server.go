@@ -53,13 +53,20 @@ func logFile(pkg string) string {
 	return filepath.Join(devPidDir(), pkg+".log")
 }
 
-// readPid reads a PID from a PID file.
+// readPid reads a PID from a PID file and validates it.
 func readPid(pkg string) (int, error) {
 	data, err := os.ReadFile(pidFile(pkg))
 	if err != nil {
 		return 0, err
 	}
-	return strconv.Atoi(strings.TrimSpace(string(data)))
+	pid, err := strconv.Atoi(strings.TrimSpace(string(data)))
+	if err != nil {
+		return 0, fmt.Errorf("invalid PID in file: %w", err)
+	}
+	if pid <= 0 {
+		return 0, fmt.Errorf("invalid PID: %d", pid)
+	}
+	return pid, nil
 }
 
 // isProcessRunning checks if a process with the given PID exists.
@@ -188,6 +195,10 @@ var devStopCmd = &cobra.Command{
 					continue
 				}
 				name := strings.TrimSuffix(e.Name(), ".pid")
+				// Reject path traversal in filenames from PID directory
+				if strings.Contains(name, "..") || strings.ContainsAny(name, "/\\") {
+					continue
+				}
 				if pid, err := readPid(name); err == nil {
 					if isProcessRunning(pid) {
 						syscall.Kill(-pid, syscall.SIGTERM)
