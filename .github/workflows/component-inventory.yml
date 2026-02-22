@@ -186,7 +186,7 @@ jobs:
             3. If significant, add to \`docs/design-system/COMPONENT-REFERENCE.md\` (when created)
 
             ---
-            *This check helps keep our component documentation accurate. See \`docs/plans/planned/documentation-plan.md\` for the full component cataloging plan.*`;
+            *This check helps keep our component documentation accurate. See \`docs/plans/tooling/planned/documentation-plan.md\` for the full component cataloging plan.*`;
 
             github.rest.issues.createComment({
               owner: context.repo.owner,
@@ -267,7 +267,7 @@ jobs:
 
             - \`.github/component-inventory.json\` - Update counts and \`lastUpdated\`
             - \`TODOS.md\` - Update component count reference if changed
-            - \`docs/plans/planned/documentation-plan.md\` - Review if scope changed
+            - \`docs/plans/tooling/planned/documentation-plan.md\` - Review if scope changed
 
             ### How to Get Current Counts
 

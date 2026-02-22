@@ -168,7 +168,7 @@ The initial comprehensive review was completed on January 16, 2026:
 
 - **44 articles reviewed** (40 help center + 4 legal policies)
 - **25 articles updated** to fix inaccuracies
-- **Plan document**: `docs/plans/completed/documentation-accuracy-review.md`
+- **Plan document**: `docs/plans/tooling/completed/documentation-accuracy-review.md`
 
 ---
 

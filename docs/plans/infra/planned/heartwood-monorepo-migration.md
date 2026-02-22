@@ -427,7 +427,7 @@ packages/
 
 - [ ] Update `.claude/skills/heartwood-auth` skill to reference new package locations
 - [ ] Update `AGENT.md` references — remove all `~/Projects/GroveAuth/` paths, update to `services/heartwood/`
-- [ ] Update the turtle hardening plan (`docs/plans/planned/turtle-hardening-plan.md`) which references `GroveAuth/` paths
+- [ ] Update the turtle hardening plan (`docs/plans/security/completed/turtle-hardening-plan.md`) which references `GroveAuth/` paths
 - [ ] Update agent memory (`MEMORY.md`) with new paths
 - [ ] **Update credits page** (`apps/landing/src/routes/credits/+page.svelte`) — add Heartwood as a package/component
 - [ ] Rename "GroveAuth" to "Heartwood" in any remaining user-facing or developer-facing text
