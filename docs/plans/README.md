@@ -1,36 +1,62 @@
 # Planning Documents
 
-This directory organizes planning documentation through its lifecycle.
+This directory organizes planning documentation by **category** and **lifecycle stage**.
+
+## Structure
+
+```
+docs/plans/
+  features/          Product features, UI, meadow, curios, waystones, grafts
+  infra/             Cloudflare, D1, auth, email, CDN, workers, payments
+  security/          Audits, hardening, encryption, remediation
+  tooling/           gf, gw, claude skills, testing, DX
+
+docs/safaris/        Safari expedition journals (separate from plans)
+```
+
+Each category contains lifecycle subdirectories:
+
+```
+category/
+  planning/    Active research, incomplete specs, open questions
+  planned/     Fully specified, ready for implementation
+  active/      Currently being implemented
+  completed/   Done — kept for historical reference
+```
+
+Not every category has every lifecycle folder — only the ones with files in them.
 
 ## Workflow
 
 ```
-planning/ ──→ planned/ ──→ completed/
-   ↑            ↑            ↑
-   │            │            │
- Active      Ready for    Implemented
- research    implementation
+planning/ --> planned/ --> active/ --> completed/
+    |             |           |            |
+  Research    Specified    In-flight    Shipped
 ```
 
-## Directories
+## Frontmatter
 
-### `planning/`
-Documents actively being researched or designed. May be incomplete or have open questions.
+Planned and active files use YAML frontmatter for at-a-glance context:
 
-### `planned/`
-Fully specified documents ready for implementation. All questions resolved, implementation approach defined.
+```yaml
+---
+title: "Human-readable title"
+status: planned | active | planning
+category: features | infra | security | tooling | safari
+---
+```
 
-### `completed/`
-Implemented plans kept for historical reference. Useful for understanding past decisions.
+## Safaris
+
+Safari expedition journals live in `docs/safaris/`, not here. They're observational
+audit documents produced by the `/safari-explore` skill — valuable reference material
+but distinct from implementation plans.
 
 ## Moving Documents
 
-When a plan is ready for implementation:
-1. Review for completeness
-2. Move from `planning/` to `planned/`
-3. Update any cross-references
+When a plan advances through the lifecycle:
 
-When implementation is complete:
-1. Move from `planned/` to `completed/`
-2. Add completion date to document header
-3. Link to relevant code/PRs if applicable
+1. Move the file to the next lifecycle directory within its category
+2. Update the `status` field in frontmatter
+3. For completed plans, add a completion date if useful
+4. Link to relevant PRs/code if applicable

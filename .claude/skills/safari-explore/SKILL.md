@@ -83,7 +83,8 @@ What are you looking at per item? Define this upfront so every stop is consisten
 **Create the journal file:**
 
 ```bash
-# The expedition journal lives in docs/plans/
+# The expedition journal lives in docs/safaris/
+# Active safaris go in docs/safaris/active/, planned in docs/safaris/planned/
 # Name it after the safari: curio-safari.md, admin-safari.md, etc.
 ```
 
@@ -312,8 +313,8 @@ Compile the full expedition journal:
 **Write the journal to disk:**
 
 ```bash
-# The journal goes in docs/plans/planned/ or docs/plans/active/
-# depending on whether implementation starts immediately
+# The journal goes in docs/safaris/active/ or docs/safaris/planned/
+# Active = implementation starts soon, Planned = queued for later
 ```
 
 **Final safari narration:**
