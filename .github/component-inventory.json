@@ -60,7 +60,7 @@
 	},
 	"documentation": {
 		"componentReference": "docs/design-system/COMPONENT-REFERENCE.md",
-		"plan": "docs/plans/planned/documentation-plan.md",
+		"plan": "docs/plans/tooling/planned/documentation-plan.md",
 		"status": "planned"
 	}
 }

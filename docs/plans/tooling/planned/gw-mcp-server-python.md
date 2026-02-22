@@ -217,7 +217,19 @@ The MCP server always runs in agent mode. `GW_AGENT_MODE=1` is set automatically
 - SELECT only. No INSERT, UPDATE, DELETE, or DDL through `grove_db_query`
 - Row limits: 50 delete, 200 update (if write tools are added later)
 - Protected tables: users, tenants, subscriptions, payments, sessions
-- SQL injection pattern detection (stacked queries, comment attacks)
+- SQL injection pattern detection (see validation rules below)
+
+**D1 SQL Validation Rules (for `grove_db_query`):**
+
+The MCP server validates all SQL before passing it to `wrangler d1 execute`. These rules are implemented as pre-compiled regex patterns with early returns:
+
+1. **Statement allowlist:** Only `SELECT` is permitted. The query (after stripping leading whitespace) must begin with `SELECT` (case-insensitive). All other statement types (INSERT, UPDATE, DELETE, CREATE, DROP, ALTER, TRUNCATE, PRAGMA) are rejected.
+2. **Semicolon blocking:** Reject any query containing `;` outside of string literals. This prevents stacked queries (`SELECT 1; DROP TABLE users`).
+3. **Comment stripping:** Reject queries containing SQL comments (`--`, `/*`, `*/`). These are used in injection attacks to hide malicious payloads.
+4. **UNION injection:** Reject queries containing `UNION` (case-insensitive) unless it appears inside a string literal. UNION-based injection is the primary read-path attack vector.
+5. **Subquery depth limit:** Reject queries with more than 2 levels of nested parentheses. Prevents resource exhaustion via deeply nested subqueries.
+6. **Protected table enforcement:** Even for SELECT, certain tables are blocked from direct query: `sessions`, `auth_tokens`. These contain sensitive authentication data.
+7. **Result row limit:** Append `LIMIT 1000` if the query does not already contain a LIMIT clause. Prevents accidental full-table scans on large tables.
 
 **Git Safety:**
 - READ tools work without flags
@@ -246,15 +258,22 @@ The MCP server calls the Go `gw` binary as a subprocess with `--json` output:
 ```python
 import subprocess, json
 
-def run_gw(*args) -> dict:
-    result = subprocess.run(
-        ["gw", "--json", "--agent", *args],
-        capture_output=True, text=True
-    )
-    if result.returncode != 0:
-        return {"error": result.stderr.strip()}
-    return json.loads(result.stdout)
+def run_gw(*args, timeout: int = 30) -> dict:
+    try:
+        result = subprocess.run(
+            ["gw", "--json", "--agent", *args],
+            capture_output=True, text=True, timeout=timeout
+        )
+        if result.returncode != 0:
+            return {"error": result.stderr.strip()}
+        return json.loads(result.stdout)
+    except subprocess.TimeoutExpired:
+        return {"error": f"gw timed out after {timeout}s"}
+    except json.JSONDecodeError as e:
+        return {"error": f"gw returned non-JSON output: {e}"}
 ```
+
+The `--json` flag guarantees structured output from the Go binary, but the error handling is defensive: timeouts prevent hangs on long-running operations, and JSONDecodeError catches edge cases where warnings or banners leak into stdout.
 
 This is clean for several reasons:
 
@@ -262,6 +281,7 @@ This is clean for several reasons:
 2. **Safety enforcement in Go.** The Go binary enforces safety tiers. The MCP server does not need to re-implement them.
 3. **Go binary startup is fast.** At <50ms, subprocess overhead is negligible compared to the actual operation (git, wrangler, gh calls).
 4. **Testable independently.** Mock `subprocess.run` in tests.
+5. **Timeout protection.** Default 30s prevents indefinite hangs on network operations.
 
 ### When to Call Go Binary vs Direct
 
@@ -271,7 +291,7 @@ Some operations skip the Go binary and call tools directly:
 |-----------|-------------|-------------|-----|
 | Git operations | ✓ | | Safety tier enforcement |
 | GitHub operations | ✓ | | Rate limit tracking |
-| D1 queries | | `wrangler d1 execute` | SQL validation in MCP server is sufficient |
+| D1 queries | | `wrangler d1 execute` | MCP server applies its own SQL validation rules (see Safety section) |
 | KV/R2/Cache | | `wrangler kv:*` | Simple pass-through, no safety logic needed |
 | Status/Health | ✓ | | Aggregation logic lives in Go binary |
 | Dev tools | ✓ | | Package detection + runner logic |

@@ -79,7 +79,7 @@
 			"migration": null,
 			"path": null,
 			"placements": ["dedicated", "right-vine"],
-			"plan": "docs/plans/planning/curios/01-guestbook.md",
+			"plan": "docs/plans/features/planned/curios/04-guestbook.md",
 			"description": "Visitor signatures with moderation and multiple styles"
 		},
 		{
@@ -92,7 +92,7 @@
 			"migration": null,
 			"path": null,
 			"placements": ["footer-vine", "left-vine", "right-vine", "floating"],
-			"plan": "docs/plans/planning/curios/02-hit-counter.md",
+			"plan": "docs/plans/features/planned/curios/01-hit-counter.md",
 			"description": "Nostalgic page view counter with multiple display styles"
 		},
 		{
@@ -105,7 +105,7 @@
 			"migration": null,
 			"path": null,
 			"placements": ["floating", "header-vine", "right-vine"],
-			"plan": "docs/plans/planning/curios/03-status-badges.md",
+			"plan": "docs/plans/features/planned/curios/10-status-badge.md",
 			"description": "Site status indicators (Under Construction, Just Planted, etc.)"
 		},
 		{
@@ -118,7 +118,7 @@
 			"migration": null,
 			"path": null,
 			"placements": ["header-vine", "right-vine", "floating"],
-			"plan": "docs/plans/planning/curios/04-activity-status.md",
+			"plan": "docs/plans/features/planned/curios/09-activity-status.md",
 			"description": "Discord-style 'currently doing' indicator with presets and auto-sources"
 		},
 		{
@@ -131,7 +131,7 @@
 			"migration": null,
 			"path": null,
 			"placements": ["dedicated", "right-vine"],
-			"plan": "docs/plans/planning/curios/05-link-gardens.md",
+			"plan": "docs/plans/features/planned/curios/08-link-garden-merged.md",
 			"description": "Curated link collections with 88x31 buttons and multiple layouts"
 		},
 		{
@@ -144,7 +144,7 @@
 			"migration": null,
 			"path": null,
 			"placements": ["left-vine", "right-vine", "footer-vine", "floating"],
-			"plan": "docs/plans/planning/curios/06-now-playing.md",
+			"plan": "docs/plans/features/planned/curios/03-now-playing.md",
 			"description": "Spotify/Last.fm currently listening display with album art"
 		},
 		{
@@ -157,7 +157,7 @@
 			"migration": null,
 			"path": null,
 			"placements": ["dedicated", "right-vine", "inline"],
-			"plan": "docs/plans/planning/curios/07-polls.md",
+			"plan": "docs/plans/features/planned/curios/13-polls.md",
 			"description": "Interactive voting with live results, embeddable in blog posts"
 		},
 		{
@@ -170,7 +170,7 @@
 			"migration": null,
 			"path": null,
 			"placements": ["footer-vine", "right-vine", "floating"],
-			"plan": "docs/plans/planning/curios/08-webring-hub.md",
+			"plan": "docs/plans/features/planned/curios/07-webring.md",
 			"description": "Webring navigation bar with classic Prev/Hub/Next links"
 		},
 		{
@@ -183,7 +183,7 @@
 			"migration": null,
 			"path": null,
 			"placements": ["right-vine", "left-vine", "floating"],
-			"plan": "docs/plans/planning/curios/09-weird-artifacts.md",
+			"plan": "docs/plans/features/planned/curios/12-artifacts.md",
 			"description": "Interactive chaos objects — Magic 8-Ball, fortune cookies, dice, tarot"
 		},
 		{
@@ -196,7 +196,7 @@
 			"migration": null,
 			"path": null,
 			"placements": ["global"],
-			"plan": "docs/plans/planning/curios/10-custom-cursors.md",
+			"plan": "docs/plans/features/planned/curios/15-cursors.md",
 			"description": "Custom cursor themes with trail effects"
 		},
 		{
@@ -209,7 +209,7 @@
 			"migration": null,
 			"path": null,
 			"placements": ["right-vine", "left-vine", "floating"],
-			"plan": "docs/plans/planning/curios/11-mood-ring.md",
+			"plan": "docs/plans/features/planned/curios/02-mood-ring.md",
 			"description": "Visual mood indicator with time-based, seasonal, and manual modes"
 		},
 		{
@@ -222,7 +222,7 @@
 			"migration": null,
 			"path": null,
 			"placements": ["dedicated", "right-vine"],
-			"plan": "docs/plans/planning/curios/12-blogroll.md",
+			"plan": "docs/plans/features/planned/curios/06-blogroll.md",
 			"description": "RSS-powered blog recommendations with latest post display"
 		},
 		{
@@ -235,7 +235,7 @@
 			"migration": null,
 			"path": null,
 			"placements": ["right-vine", "header-vine", "dedicated"],
-			"plan": "docs/plans/planning/curios/13-badges.md",
+			"plan": "docs/plans/features/planned/curios/05-badges.md",
 			"description": "Collectible achievement and profile badges with auto-award and custom creation"
 		},
 		{
@@ -248,7 +248,7 @@
 			"migration": null,
 			"path": null,
 			"placements": ["global"],
-			"plan": "docs/plans/planning/curios/14-ambient-sounds.md",
+			"plan": "docs/plans/features/planned/curios/16-ambient.md",
 			"description": "Optional background audio — nature sounds, lo-fi, seasonal ambiance"
 		},
 		{
@@ -261,7 +261,7 @@
 			"migration": null,
 			"path": null,
 			"placements": ["dedicated", "right-vine"],
-			"plan": "docs/plans/planning/curios/15-bookmark-shelf.md",
+			"plan": "docs/plans/features/planned/curios/11-shelves.md",
 			"description": "Visual bookshelf-style reading list and link library"
 		},
 		{
@@ -274,7 +274,7 @@
 			"migration": null,
 			"path": null,
 			"placements": ["dedicated", "right-vine"],
-			"plan": "docs/plans/planning/curios/16-personal-shrines.md",
+			"plan": "docs/plans/features/planned/curios/14-shrines.md",
 			"description": "Dedication boards for things you love — memorial, fandom, gratitude"
 		},
 		{
@@ -287,7 +287,7 @@
 			"migration": null,
 			"path": null,
 			"placements": ["inline"],
-			"plan": "docs/plans/planning/curios/17-clip-art.md",
+			"plan": "docs/plans/features/planned/curios/17-clip-art.md",
 			"description": "Decorative drag-and-drop assets for page decoration"
 		},
 		{
@@ -300,13 +300,13 @@
 			"migration": null,
 			"path": null,
 			"placements": [],
-			"plan": "docs/plans/planning/curios/18-custom-uploads.md",
+			"plan": "docs/plans/features/planned/curios/18-custom-uploads.md",
 			"description": "User image storage for customizing other curios"
 		}
 	],
 	"sharedInfrastructure": {
 		"status": "planned",
-		"plan": "docs/plans/planning/curios/00-shared-infrastructure.md",
+		"plan": "docs/plans/features/completed/curiosv1/00-shared-infrastructure.md",
 		"components": [
 			"Curio Registry (registry.ts)",
 			"Vine Placement System (VinePlacement.svelte, VineSlot.svelte)",
@@ -326,7 +326,7 @@
 	},
 	"documentation": {
 		"spec": "docs/specs/curios-spec.md",
-		"plans": "docs/plans/planning/curios/",
+		"plans": "docs/plans/features/planned/curios/",
 		"helpArticle": "docs/help-center/articles/what-are-curios.md",
 		"museum": "docs/museum/personalization/curios.md"
 	},
