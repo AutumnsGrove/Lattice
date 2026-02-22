@@ -85,8 +85,8 @@ export class ZipStreamer {
 		// Use synchronous ZipDeflate (AsyncZipDeflate requires Web Workers which CF doesn't have)
 		const deflate = new ZipDeflate(entry.filename, {
 			level: ZIP_CONFIG.COMPRESSION_LEVEL,
-			mtime: entry.mtime?.getTime(),
 		});
+		if (entry.mtime) deflate.mtime = entry.mtime;
 
 		this.zip.add(deflate);
 
@@ -136,9 +136,8 @@ export class ZipStreamer {
 		const encoder = new TextEncoder();
 		const data = encoder.encode(content);
 
-		const passthrough = new ZipPassThrough(filename, {
-			mtime: new Date(),
-		});
+		const passthrough = new ZipPassThrough(filename);
+		passthrough.mtime = new Date();
 
 		this.zip.add(passthrough);
 		passthrough.push(data);

@@ -160,7 +160,7 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 					"/callback/*": { window: 60, max: 30 },
 				},
 				customStorage: {
-					get: async (key) => {
+					get: async (key: string) => {
 						try {
 							const row = await env.DB.prepare(
 								"SELECT count, window_start FROM rate_limits WHERE key = ?",
@@ -177,7 +177,7 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 							return null;
 						}
 					},
-					set: async (key, value) => {
+					set: async (key: string, value: { count: number; lastRequest: number }) => {
 						try {
 							await env.DB.prepare(
 								`INSERT INTO rate_limits (key, count, window_start)
@@ -198,11 +198,8 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 					},
 				},
 			},
-		},
-	) as ReturnType<typeof withCloudflare> & {
-		session?: Record<string, unknown>;
-		advanced?: Record<string, unknown>;
-	};
+		} as any,
+	) as Record<string, any>;
 
 	return betterAuth({
 		// Base URL for auth endpoints

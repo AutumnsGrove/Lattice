@@ -99,8 +99,8 @@ describe("ZIP Stream Utilities", () => {
 	});
 
 	describe("ZIP_CONFIG", () => {
-		it("should have COMPRESSION_LEVEL set to 6", () => {
-			expect(ZIP_CONFIG.COMPRESSION_LEVEL).toBe(6);
+		it("should have COMPRESSION_LEVEL set to 0 (store only)", () => {
+			expect(ZIP_CONFIG.COMPRESSION_LEVEL).toBe(0);
 		});
 
 		it("should have CHUNK_SIZE_BYTES set to 50MB", () => {

@@ -667,7 +667,7 @@ route("GET", "/api/storage/export/:id/download", async (request, env, ctx, param
        WHERE id = ? AND user_id = ? AND status = 'completed'`,
 	)
 		.bind(params.id, user.id)
-		.first<{ r2_key: string; expires_at: string }>();
+		.first<{ r2_key: string; expires_at: string; size_bytes: number; file_count: number }>();
 
 	if (!exp) return error("Export not found or not ready", 404);
 
