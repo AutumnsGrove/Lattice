@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -26,12 +27,10 @@ const maxGHLimit = 1000
 
 // validateGHNumber validates a PR/issue number argument.
 func validateGHNumber(s string) error {
-	n, err := fmt.Sscanf(s, "%d", new(int))
-	if err != nil || n != 1 {
+	num, err := strconv.Atoi(s)
+	if err != nil {
 		return fmt.Errorf("invalid number: %q", s)
 	}
-	var num int
-	fmt.Sscanf(s, "%d", &num)
 	if num <= 0 {
 		return fmt.Errorf("number must be positive, got %d", num)
 	}
@@ -40,12 +39,10 @@ func validateGHNumber(s string) error {
 
 // validateRunID validates a workflow run ID argument.
 func validateRunID(s string) error {
-	n, err := fmt.Sscanf(s, "%d", new(int))
-	if err != nil || n != 1 {
+	num, err := strconv.Atoi(s)
+	if err != nil {
 		return fmt.Errorf("invalid run ID: %q", s)
 	}
-	var num int
-	fmt.Sscanf(s, "%d", &num)
 	if num <= 0 {
 		return fmt.Errorf("run ID must be positive, got %d", num)
 	}
