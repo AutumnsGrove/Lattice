@@ -46,7 +46,7 @@ Every post in the Grove gets two blaze slots. The first is automatic: Bloom or N
 **Internal Name:** Blaze (component), BlazeDefinition (type)
 **Domain:** Engine-level (cross-app)
 **Parent Spec:** [Meadow](./meadow-spec.md)
-**Status:** Planned
+**Status:** Implemented
 **Last Updated:** February 2026
 
 A trail blaze is a painted mark on a tree. A rectangle of color that tells hikers which path they're on. Blue blaze, white blaze, yellow blaze. Each trail has its own. You don't read a blaze. You scan for it, confirm the color, and move on. The smallest possible wayfinding signal.
