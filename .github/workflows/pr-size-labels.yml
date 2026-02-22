@@ -1,0 +1,87 @@
+name: PR Size Labels
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  label:
+    name: Label PR Size
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Assign size label
+        uses: pascalgn/size-label-action@v0.5.5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Grove-themed size labels:
+          #   seed     = tiny change (0-9 lines)
+          #   sprout   = small change (10-49 lines)
+          #   sapling  = medium change (50-199 lines)
+          #   tree     = large change (200-799 lines)
+          #   grove    = very large change (800+ lines)
+          IGNORED: |
+            pnpm-lock.yaml
+            **/*.snap
+            .github/visual-regression/snapshots/**
+          SIZES: >
+            {
+              "0":   "size/seed",
+              "10":  "size/sprout",
+              "50":  "size/sapling",
+              "200": "size/tree",
+              "800": "size/grove"
+            }
+
+      - name: Warn on very large PRs
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+
+            const totalChanges = pr.additions + pr.deletions;
+
+            // Only warn on truly large PRs (800+ lines)
+            if (totalChanges >= 800) {
+              const { data: comments } = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+              });
+
+              const hasWarning = comments.some(c =>
+                c.user.type === 'Bot' && c.body.includes('grove-sized PR')
+              );
+
+              if (!hasWarning) {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  body: [
+                    `### 🌳 This is a grove-sized PR`,
+                    '',
+                    `**${totalChanges.toLocaleString()} lines** changed across **${pr.changed_files} files**.`,
+                    '',
+                    'Large PRs are harder to review thoroughly. Consider splitting into smaller, focused PRs when possible.',
+                    '',
+                    '| Size | Lines | Label |',
+                    '| --- | --- | --- |',
+                    '| Seed | 0–9 | `size/seed` |',
+                    '| Sprout | 10–49 | `size/sprout` |',
+                    '| Sapling | 50–199 | `size/sapling` |',
+                    '| Tree | 200–799 | `size/tree` |',
+                    '| **Grove** | **800+** | **`size/grove`** |',
+                  ].join('\n'),
+                });
+              }
+            }
