@@ -34,6 +34,7 @@ var issueListCmd = &cobra.Command{
 
 		ghArgs := []string{"issue", "list"}
 		ghArgs = append(ghArgs, ghRepoArgs()...)
+		limit = clampGHLimit(limit)
 		ghArgs = append(ghArgs, "--state", state, "--limit", fmt.Sprintf("%d", limit))
 		ghArgs = append(ghArgs, "--json", "number,title,state,author,url,labels")
 
@@ -110,6 +111,9 @@ var issueViewCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg := config.Get()
 		number := args[0]
+		if err := validateGHNumber(number); err != nil {
+			return err
+		}
 		showComments, _ := cmd.Flags().GetBool("comments")
 
 		ghArgs := []string{"issue", "view", number}
@@ -294,6 +298,9 @@ var issueCommentCmd = &cobra.Command{
 
 		cfg := config.Get()
 		number := args[0]
+		if err := validateGHNumber(number); err != nil {
+			return err
+		}
 		body, _ := cmd.Flags().GetString("body")
 
 		if body == "" {
@@ -334,6 +341,9 @@ var issueCloseCmd = &cobra.Command{
 
 		cfg := config.Get()
 		number := args[0]
+		if err := validateGHNumber(number); err != nil {
+			return err
+		}
 		reason, _ := cmd.Flags().GetString("reason")
 		comment, _ := cmd.Flags().GetString("comment")
 
@@ -379,6 +389,9 @@ var issueReopenCmd = &cobra.Command{
 
 		cfg := config.Get()
 		number := args[0]
+		if err := validateGHNumber(number); err != nil {
+			return err
+		}
 
 		ghArgs := []string{"issue", "reopen", number}
 		ghArgs = append(ghArgs, ghRepoArgs()...)
@@ -410,6 +423,9 @@ var issueCommentsCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg := config.Get()
 		number := args[0]
+		if err := validateGHNumber(number); err != nil {
+			return err
+		}
 
 		ghArgs := []string{"issue", "view", number}
 		ghArgs = append(ghArgs, ghRepoArgs()...)

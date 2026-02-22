@@ -45,6 +45,10 @@ func resolvePackageDir(pkg string) (string, error) {
 	if pkg == "" {
 		return os.Getwd()
 	}
+	// Reject path traversal and shell metacharacters in package names
+	if strings.Contains(pkg, "..") || strings.ContainsAny(pkg, "/\\;|&`$()") {
+		return "", fmt.Errorf("invalid package name: %q", pkg)
+	}
 	cfg := config.Get()
 	root := cfg.GroveRoot
 	for _, prefix := range []string{"packages", "apps", "services", "workers", "libs", "tools"} {

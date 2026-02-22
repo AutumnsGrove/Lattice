@@ -32,6 +32,7 @@ var runListCmd = &cobra.Command{
 
 		ghArgs := []string{"run", "list"}
 		ghArgs = append(ghArgs, ghRepoArgs()...)
+		limit = clampGHLimit(limit)
 		ghArgs = append(ghArgs, "--limit", fmt.Sprintf("%d", limit))
 		ghArgs = append(ghArgs, "--json",
 			"databaseId,displayTitle,status,conclusion,workflowName,headBranch,event,createdAt,url,headSha")
@@ -158,6 +159,9 @@ var runViewCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg := config.Get()
 		runID := args[0]
+		if err := validateRunID(runID); err != nil {
+			return err
+		}
 		showLog, _ := cmd.Flags().GetBool("log")
 		logFailed, _ := cmd.Flags().GetBool("log-failed")
 		noLogs, _ := cmd.Flags().GetBool("no-logs")
@@ -293,6 +297,9 @@ var runWatchCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		runID := args[0]
+		if err := validateRunID(runID); err != nil {
+			return err
+		}
 		ui.Muted(fmt.Sprintf("Watching run %s...", runID))
 
 		ghArgs := []string{"run", "watch", runID}
@@ -323,6 +330,9 @@ var runRerunCmd = &cobra.Command{
 
 		cfg := config.Get()
 		runID := args[0]
+		if err := validateRunID(runID); err != nil {
+			return err
+		}
 		failedOnly, _ := cmd.Flags().GetBool("failed")
 
 		ghArgs := []string{"run", "rerun", runID}
@@ -368,6 +378,9 @@ var runCancelCmd = &cobra.Command{
 
 		cfg := config.Get()
 		runID := args[0]
+		if err := validateRunID(runID); err != nil {
+			return err
+		}
 
 		ghArgs := []string{"run", "cancel", runID}
 		ghArgs = append(ghArgs, ghRepoArgs()...)

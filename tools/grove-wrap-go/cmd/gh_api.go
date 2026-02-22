@@ -32,6 +32,14 @@ DELETE requires --write --force.`,
 
 		method = strings.ToUpper(method)
 
+		// Validate endpoint — reject empty, shell metacharacters
+		if endpoint == "" {
+			return fmt.Errorf("endpoint required")
+		}
+		if strings.ContainsAny(endpoint, ";|&`$()") {
+			return fmt.Errorf("endpoint contains invalid characters")
+		}
+
 		// Safety check based on HTTP method
 		tier := safety.APITierFromMethod(method)
 		switch tier {

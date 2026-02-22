@@ -21,6 +21,48 @@ func requireGHSafety(operation string) error {
 	)
 }
 
+// maxGHLimit is the maximum limit for list operations.
+const maxGHLimit = 1000
+
+// validateGHNumber validates a PR/issue number argument.
+func validateGHNumber(s string) error {
+	n, err := fmt.Sscanf(s, "%d", new(int))
+	if err != nil || n != 1 {
+		return fmt.Errorf("invalid number: %q", s)
+	}
+	var num int
+	fmt.Sscanf(s, "%d", &num)
+	if num <= 0 {
+		return fmt.Errorf("number must be positive, got %d", num)
+	}
+	return nil
+}
+
+// validateRunID validates a workflow run ID argument.
+func validateRunID(s string) error {
+	n, err := fmt.Sscanf(s, "%d", new(int))
+	if err != nil || n != 1 {
+		return fmt.Errorf("invalid run ID: %q", s)
+	}
+	var num int
+	fmt.Sscanf(s, "%d", &num)
+	if num <= 0 {
+		return fmt.Errorf("run ID must be positive, got %d", num)
+	}
+	return nil
+}
+
+// clampGHLimit clamps a list limit to [1, maxGHLimit].
+func clampGHLimit(limit int) int {
+	if limit < 1 {
+		return 1
+	}
+	if limit > maxGHLimit {
+		return maxGHLimit
+	}
+	return limit
+}
+
 // ghRepoArgs returns the --repo flag for gh CLI if configured.
 func ghRepoArgs() []string {
 	cfg := config.Get()
@@ -59,6 +101,7 @@ var prListCmd = &cobra.Command{
 
 		ghArgs := []string{"pr", "list"}
 		ghArgs = append(ghArgs, ghRepoArgs()...)
+		limit = clampGHLimit(limit)
 		ghArgs = append(ghArgs, "--state", state, "--limit", fmt.Sprintf("%d", limit))
 
 		fields := []string{"number", "title", "state", "author", "url", "isDraft", "labels"}
@@ -121,6 +164,9 @@ var prViewCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg := config.Get()
 		number := args[0]
+		if err := validateGHNumber(number); err != nil {
+			return err
+		}
 		showComments, _ := cmd.Flags().GetBool("comments")
 
 		ghArgs := []string{"pr", "view", number}
@@ -305,6 +351,9 @@ var prCommentCmd = &cobra.Command{
 
 		cfg := config.Get()
 		number := args[0]
+		if err := validateGHNumber(number); err != nil {
+			return err
+		}
 		body, _ := cmd.Flags().GetString("body")
 
 		if body == "" {
@@ -345,6 +394,9 @@ var prReviewCmd = &cobra.Command{
 
 		cfg := config.Get()
 		number := args[0]
+		if err := validateGHNumber(number); err != nil {
+			return err
+		}
 		approve, _ := cmd.Flags().GetBool("approve")
 		requestChanges, _ := cmd.Flags().GetBool("request-changes")
 		commentOnly, _ := cmd.Flags().GetBool("comment")
@@ -402,6 +454,9 @@ var prMergeCmd = &cobra.Command{
 
 		cfg := config.Get()
 		number := args[0]
+		if err := validateGHNumber(number); err != nil {
+			return err
+		}
 		squash, _ := cmd.Flags().GetBool("squash")
 		rebase, _ := cmd.Flags().GetBool("rebase")
 		auto, _ := cmd.Flags().GetBool("auto")
@@ -470,6 +525,9 @@ var prCloseCmd = &cobra.Command{
 
 		cfg := config.Get()
 		number := args[0]
+		if err := validateGHNumber(number); err != nil {
+			return err
+		}
 		comment, _ := cmd.Flags().GetString("comment")
 
 		ghArgs := []string{"pr", "close", number}
@@ -505,6 +563,9 @@ var prChecksCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg := config.Get()
 		number := args[0]
+		if err := validateGHNumber(number); err != nil {
+			return err
+		}
 		watch, _ := cmd.Flags().GetBool("watch")
 
 		if watch {
@@ -610,6 +671,9 @@ var prDiffCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg := config.Get()
 		number := args[0]
+		if err := validateGHNumber(number); err != nil {
+			return err
+		}
 		stat, _ := cmd.Flags().GetBool("stat")
 		nameOnly, _ := cmd.Flags().GetBool("name-only")
 
@@ -647,6 +711,9 @@ var prCommentsCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg := config.Get()
 		number := args[0]
+		if err := validateGHNumber(number); err != nil {
+			return err
+		}
 		reviewOnly, _ := cmd.Flags().GetBool("review-only")
 
 		ghArgs := []string{"pr", "view", number}
