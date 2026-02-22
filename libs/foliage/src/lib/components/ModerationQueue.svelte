@@ -1001,7 +1001,10 @@
 			class="modal-content"
 			onclick={(e) => e.stopPropagation()}
 			role="dialog"
+			tabindex="-1"
+			aria-modal="true"
 			aria-labelledby="preview-title"
+			onkeydown={(e) => e.stopPropagation()}
 		>
 			<div class="modal-header">
 				<h2 id="preview-title">Preview: {previewTheme.name}</h2>
@@ -1051,7 +1054,10 @@
 			class="modal-content"
 			onclick={(e) => e.stopPropagation()}
 			role="dialog"
+			tabindex="-1"
+			aria-modal="true"
 			aria-labelledby="status-change-title"
+			onkeydown={(e) => e.stopPropagation()}
 		>
 			<div class="modal-header">
 				<h2 id="status-change-title">

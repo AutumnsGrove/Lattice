@@ -168,6 +168,7 @@
 						</div>
 						{#if message.isCollapsed}
 							<div class="message-preview">
+								<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 								{@html message.body.replace(/<[^>]*>/g, " ").slice(0, 100)}...
 							</div>
 						{:else}
@@ -188,6 +189,7 @@
 
 				{#if !message.isCollapsed}
 					<div class="message-body">
+						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 						{@html message.body}
 					</div>
 

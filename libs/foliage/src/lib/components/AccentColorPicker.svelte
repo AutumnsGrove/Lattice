@@ -21,8 +21,8 @@
 		showContrast = true,
 	}: Props = $props();
 
-	// Local state for hex input
-	let hexInput = $state(value);
+	// Local state for hex input (initialized to default; $effect below syncs from prop)
+	let hexInput = $state("#16a34a");
 	let isValidHex = $state(true);
 
 	// Preset color swatches - based on grove palette and common accent colors

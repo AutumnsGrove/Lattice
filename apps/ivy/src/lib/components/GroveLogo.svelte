@@ -9,9 +9,9 @@
 	 * The trunk defaults to Grove's classic bark brown (#5d4037).
 	 */
 
-	import type { SVGAttributes } from "svelte/elements";
-
-	interface Props extends SVGAttributes<SVGSVGElement> {
+	interface Props {
+		/** CSS class */
+		class?: string;
 		/** Size in pixels */
 		size?: number;
 		/** Foliage color - defaults to currentColor (inherits accent) */
@@ -22,14 +22,7 @@
 		monochrome?: boolean;
 	}
 
-	let {
-		class: className = "",
-		size = 24,
-		color,
-		trunkColor,
-		monochrome = false,
-		...restProps
-	}: Props = $props();
+	let { class: className = "", size = 24, color, trunkColor, monochrome = false }: Props = $props();
 
 	// Classic bark brown from the nature palette
 	const BARK_BROWN = "#5d4037";
@@ -40,7 +33,6 @@
 </script>
 
 <svg
-	{...restProps}
 	class={className}
 	width={size}
 	height={size}

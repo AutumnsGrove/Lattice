@@ -1,6 +1,5 @@
 // src/lib/server/font-uploader.ts
 // Upload and manage custom fonts with R2 and D1
-/* eslint-disable no-undef */
 
 import type { CustomFont } from "../types.js";
 

@@ -2,6 +2,7 @@
 	// ThemeCustomizer.svelte
 	// Full theme customization panel (Oak+ tier)
 
+	import { untrack } from "svelte";
 	import type { Theme, ThemeSettings, ThemeColors, ThemeFonts, ThemeLayout } from "../types.js";
 	import ColorPanel from "./ColorPanel.svelte";
 	import TypographyPanel from "./TypographyPanel.svelte";
@@ -21,23 +22,19 @@
 	type TabId = "colors" | "typography" | "layout" | "css";
 	let activeTab = $state<TabId>("colors");
 
-	// Local state for all customizations
-	let localColors = $state<ThemeColors>({
-		...baseTheme.colors,
-		...settings.customColors,
-	});
-
-	let localFonts = $state<ThemeFonts>({
-		...baseTheme.fonts,
-		...settings.customTypography,
-	});
-
-	let localLayout = $state<ThemeLayout>({
-		...baseTheme.layout,
-		...settings.customLayout,
-	});
-
-	let localCustomCSS = $state<string>(settings.customCSS || baseTheme.customCSS || "");
+	// Local editable state — untrack prevents the linter from flagging prop refs in $state()
+	let localColors = $state<ThemeColors>(
+		untrack(() => ({ ...baseTheme.colors, ...settings.customColors })),
+	);
+	let localFonts = $state<ThemeFonts>(
+		untrack(() => ({ ...baseTheme.fonts, ...settings.customTypography })),
+	);
+	let localLayout = $state<ThemeLayout>(
+		untrack(() => ({ ...baseTheme.layout, ...settings.customLayout })),
+	);
+	let localCustomCSS = $state<string>(
+		untrack(() => settings.customCSS || baseTheme.customCSS || ""),
+	);
 	let cssIsValid = $state<boolean>(true);
 
 	// Track if there are unsaved changes
@@ -146,7 +143,7 @@
 	</header>
 
 	<!-- Tabs -->
-	<nav class="tabs" role="tablist" aria-label="Theme customization sections">
+	<div class="tabs" role="tablist" aria-label="Theme customization sections">
 		{#each tabs as tab}
 			<button
 				type="button"
@@ -163,7 +160,7 @@
 				<span class="tab-label">{tab.label}</span>
 			</button>
 		{/each}
-	</nav>
+	</div>
 
 	<!-- Tab Panels -->
 	<div class="tab-content">
