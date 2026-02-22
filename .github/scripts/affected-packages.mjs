@@ -211,9 +211,7 @@ function getChangedFiles() {
 
 function fileToPackage(file) {
 	// Match apps/X/**, services/X/**, workers/X/**, libs/X/**
-	const match = file.match(
-		/^(apps|services|workers|libs)\/([^/]+)\//,
-	);
+	const match = file.match(/^(apps|services|workers|libs)\/([^/]+)\//);
 	if (match) {
 		return `${match[1]}/${match[2]}`;
 	}
@@ -285,17 +283,13 @@ for (const file of changedFiles) {
 }
 
 // Resolve transitive dependents
-const affected = runAll
-	? new Set(Object.keys(PACKAGES))
-	: resolveAffected(directlyChanged);
+const affected = runAll ? new Set(Object.keys(PACKAGES)) : resolveAffected(directlyChanged);
 
 // Check if engine build is needed — only if engine itself or an actual
 // engine dependent is affected (not every arbitrary package)
 const engineDependents = new Set(DEPENDENTS["libs/engine"] || []);
 const needsEngine =
-	runAll ||
-	affected.has("libs/engine") ||
-	[...affected].some((pkg) => engineDependents.has(pkg));
+	runAll || affected.has("libs/engine") || [...affected].some((pkg) => engineDependents.has(pkg));
 
 // Build matrices for GitHub Actions
 const testMatrix = [];
@@ -312,6 +306,7 @@ for (const pkg of [...affected].sort()) {
 		testMatrix.push({
 			package: pkg,
 			name: pkg.split("/").pop(),
+			isSvelteKit: meta.isSvelteKit,
 		});
 	}
 

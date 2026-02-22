@@ -88,6 +88,11 @@ jobs:
         with:
           build-engine: ${{ needs.detect.outputs.needs-engine }}
 
+      - name: Sync SvelteKit
+        if: matrix.isSvelteKit
+        run: pnpm exec svelte-kit sync
+        working-directory: ${{ matrix.package }}
+
       - name: Run tests
         run: pnpm test:run
         working-directory: ${{ matrix.package }}

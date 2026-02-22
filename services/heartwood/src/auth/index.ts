@@ -127,6 +127,8 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 	// Extract withCloudflare config so we can deep-merge session/advanced
 	// instead of letting Heartwood's keys silently replace them.
 	// withCloudflare sets: session.storeSessionInDatabase, advanced.ipAddress.ipAddressHeaders
+	// Note: withCloudflare generates session/advanced at runtime but its types
+	// don't reflect this (WithCloudflareAuth only adds `plugins`). Cast to access them.
 	const cfConfig = withCloudflare(
 		{
 			autoDetectIpAddress: true,
@@ -197,7 +199,10 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 				},
 			},
 		},
-	);
+	) as ReturnType<typeof withCloudflare> & {
+		session?: Record<string, unknown>;
+		advanced?: Record<string, unknown>;
+	};
 
 	return betterAuth({
 		// Base URL for auth endpoints

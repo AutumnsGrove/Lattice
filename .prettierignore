@@ -1,0 +1,20 @@
+# Build outputs
+dist/
+build/
+.svelte-kit/
+
+# Dependencies
+node_modules/
+
+# Package manager
+pnpm-lock.yaml
+
+# Generated
+*.min.js
+*.min.css
+
+# Archived code
+_archived/
+
+# Documentation (specs/plans contain pseudo-code that breaks embedded parsers)
+docs/
