@@ -471,6 +471,111 @@
 
 		savingMeadow = false;
 	}
+
+	// =========================================================================
+	// BLAZES — Custom Content Markers
+	// =========================================================================
+
+	import { Blaze } from "$lib/ui/components/indicators";
+	import {
+		GLOBAL_BLAZE_DEFAULTS,
+		VALID_BLAZE_ICONS,
+		VALID_BLAZE_COLORS,
+		BLAZE_COLORS,
+		resolveLucideIcon,
+	} from "$lib/blazes";
+
+	/**
+	 * @typedef {Object} BlazeItem
+	 * @property {string} slug
+	 * @property {string} label
+	 * @property {string} icon
+	 * @property {string} color
+	 * @property {'global' | 'tenant'} scope
+	 */
+
+	/** @type {BlazeItem[]} */
+	let customBlazes = $state([]);
+	let loadingBlazes = $state(true);
+	let showNewBlazeForm = $state(false);
+	let newBlazeSlug = $state("");
+	let newBlazeLabel = $state("");
+	let newBlazeIcon = $state("Bell");
+	let newBlazeColor = $state("sky");
+	let savingBlaze = $state(false);
+	/** @type {string | null} */
+	let deletingBlazeSlug = $state(null);
+
+	async function fetchBlazes() {
+		loadingBlazes = true;
+		try {
+			const result = await api.get("/api/blazes");
+			customBlazes = (result.blazes || []).filter(
+				(/** @type {BlazeItem} */ b) => b.scope === "tenant",
+			);
+		} catch (error) {
+			console.error("Failed to fetch blazes:", error);
+			customBlazes = [];
+		}
+		loadingBlazes = false;
+	}
+
+	$effect(() => {
+		fetchBlazes();
+	});
+
+	/** Auto-generate slug from label */
+	$effect(() => {
+		if (newBlazeLabel && showNewBlazeForm) {
+			newBlazeSlug = newBlazeLabel
+				.toLowerCase()
+				.replace(/[^a-z0-9\s-]/g, "")
+				.replace(/\s+/g, "-")
+				.replace(/-+/g, "-")
+				.replace(/^-|-$/g, "");
+		}
+	});
+
+	async function createBlaze() {
+		if (!newBlazeSlug || !newBlazeLabel) {
+			toast.error("Label and slug are required");
+			return;
+		}
+
+		savingBlaze = true;
+		try {
+			await api.post("/api/blazes", {
+				slug: newBlazeSlug,
+				label: newBlazeLabel,
+				icon: newBlazeIcon,
+				color: newBlazeColor,
+			});
+
+			toast.success(`Blaze "${newBlazeLabel}" created!`);
+			showNewBlazeForm = false;
+			newBlazeSlug = "";
+			newBlazeLabel = "";
+			newBlazeIcon = "Bell";
+			newBlazeColor = "sky";
+			await fetchBlazes();
+		} catch (error) {
+			toast.error(error instanceof Error ? error.message : "Failed to create blaze");
+		}
+		savingBlaze = false;
+	}
+
+	/** @param {string} blazeSlug */
+	async function deleteBlaze(blazeSlug) {
+		deletingBlazeSlug = blazeSlug;
+		try {
+			await api.delete(`/api/blazes/${blazeSlug}`);
+			toast.success("Blaze deleted");
+			await fetchBlazes();
+		} catch (error) {
+			toast.error(error instanceof Error ? error.message : "Failed to delete blaze");
+		}
+		deletingBlazeSlug = null;
+	}
 </script>
 
 <div class="settings">
@@ -1011,6 +1116,122 @@
 				{savingMeadow ? "Saving..." : "Save Meadow Settings"}
 			</Button>
 		</div>
+	</GlassCard>
+
+	<!-- Blazes — Custom Content Markers -->
+	<GlassCard variant="frosted" class="mb-6">
+		<div class="section-header">
+			<h2>Blazes</h2>
+			<Waystone slug="blazes" label="What are blazes?" size="sm" />
+		</div>
+		<p class="section-description">
+			Small markers that tell readers what your posts are about. The 8 default blazes are always
+			available. You can create up to 20 custom blazes for your garden.
+		</p>
+
+		<!-- Global defaults (read-only display) -->
+		<div class="blaze-defaults-row">
+			{#each GLOBAL_BLAZE_DEFAULTS as blazeDef}
+				<Blaze definition={blazeDef} />
+			{/each}
+		</div>
+
+		<!-- Custom blazes -->
+		{#if loadingBlazes}
+			<div class="sessions-loading">
+				<Spinner />
+			</div>
+		{:else}
+			{#if customBlazes.length > 0}
+				<h3 class="blaze-subsection-title">Your custom blazes</h3>
+				<div class="custom-blazes-list">
+					{#each customBlazes as blaze (blaze.slug)}
+						<div class="custom-blaze-item">
+							<Blaze definition={blaze} />
+							<span class="custom-blaze-slug">{blaze.slug}</span>
+							<Button
+								variant="danger"
+								size="sm"
+								onclick={() => deleteBlaze(blaze.slug)}
+								disabled={deletingBlazeSlug === blaze.slug}
+							>
+								{deletingBlazeSlug === blaze.slug ? "Deleting..." : "Delete"}
+							</Button>
+						</div>
+					{/each}
+				</div>
+			{/if}
+
+			{#if showNewBlazeForm}
+				<div class="new-blaze-form">
+					<h3 class="blaze-subsection-title">Create a custom blaze</h3>
+					<div class="blaze-form-fields">
+						<div class="form-group">
+							<label for="blaze-label">Label</label>
+							<input
+								type="text"
+								id="blaze-label"
+								bind:value={newBlazeLabel}
+								placeholder="e.g. Late Night Thoughts"
+								class="form-input"
+								maxlength="30"
+							/>
+						</div>
+						<div class="form-group">
+							<label for="blaze-slug">Slug</label>
+							<input
+								type="text"
+								id="blaze-slug"
+								bind:value={newBlazeSlug}
+								placeholder="e.g. late-night-thoughts"
+								class="form-input"
+								maxlength="40"
+							/>
+						</div>
+						<div class="form-group">
+							<label for="blaze-icon">Icon</label>
+							<select id="blaze-icon" bind:value={newBlazeIcon} class="form-input">
+								{#each VALID_BLAZE_ICONS as iconName}
+									<option value={iconName}>{iconName}</option>
+								{/each}
+							</select>
+						</div>
+						<div class="form-group">
+							<label for="blaze-color">Color</label>
+							<select id="blaze-color" bind:value={newBlazeColor} class="form-input">
+								{#each VALID_BLAZE_COLORS as colorName}
+									<option value={colorName}>{colorName}</option>
+								{/each}
+							</select>
+						</div>
+					</div>
+					{#if newBlazeLabel && newBlazeSlug}
+						<div class="blaze-preview">
+							<span class="blaze-preview-label">Preview:</span>
+							<Blaze
+								definition={{ label: newBlazeLabel, icon: newBlazeIcon, color: newBlazeColor }}
+							/>
+						</div>
+					{/if}
+					<div class="button-row">
+						<Button variant="outline" onclick={() => (showNewBlazeForm = false)}>Cancel</Button>
+						<Button
+							variant="primary"
+							onclick={createBlaze}
+							disabled={savingBlaze || !newBlazeLabel || !newBlazeSlug}
+						>
+							{savingBlaze ? "Creating..." : "Create Blaze"}
+						</Button>
+					</div>
+				</div>
+			{:else if customBlazes.length < 20}
+				<div class="button-row">
+					<Button variant="outline" onclick={() => (showNewBlazeForm = true)}>
+						<Leaf size={16} /> Create Custom Blaze
+					</Button>
+				</div>
+			{/if}
+		{/if}
 	</GlassCard>
 
 	<!-- Active Sessions / Security -->
@@ -1658,5 +1879,68 @@
 	}
 	.canopy-toggle {
 		margin-bottom: 1.5rem;
+	}
+
+	/* Blazes management */
+	.blaze-defaults-row {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.35rem;
+		margin-bottom: 1rem;
+	}
+	.blaze-subsection-title {
+		font-size: 0.9rem;
+		font-weight: 600;
+		color: var(--color-text-muted);
+		margin: 1rem 0 0.5rem;
+	}
+	.custom-blazes-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		margin-bottom: 1rem;
+	}
+	.custom-blaze-item {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0.5rem 0.75rem;
+		background: var(--color-bg-secondary);
+		border-radius: var(--border-radius-small);
+		transition: background-color 0.3s;
+	}
+	.custom-blaze-slug {
+		font-family: monospace;
+		font-size: 0.75rem;
+		color: var(--color-text-subtle);
+		flex: 1;
+	}
+	.new-blaze-form {
+		padding: 1rem;
+		margin-top: 0.5rem;
+		background: var(--color-bg-secondary);
+		border-radius: var(--border-radius-small);
+		transition: background-color 0.3s;
+	}
+	.blaze-form-fields {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 0.75rem;
+		margin-bottom: 0.75rem;
+	}
+	.blaze-preview {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin-bottom: 0.75rem;
+	}
+	.blaze-preview-label {
+		font-size: 0.8rem;
+		color: var(--color-text-subtle);
+	}
+	@media (max-width: 600px) {
+		.blaze-form-fields {
+			grid-template-columns: 1fr;
+		}
 	}
 </style>

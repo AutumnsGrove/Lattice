@@ -892,18 +892,18 @@ Custom blaze creation is rate-limited to prevent abuse. 20 definitions per tenan
 
 ### Phase 5: Garden integration
 
-- [ ] Add blaze picker to post editor (Flow/Markdown)
-- [ ] Wire blaze field into post create/update API
+- [x] Add blaze picker to post editor (Flow/Markdown)
+- [x] Wire blaze field into post create/update API
 - [ ] Test blaze persistence through publish/edit cycle
 
 ### Phase 6: Custom blaze management
 
-- [ ] Create `/api/blazes` GET endpoint (list available)
-- [ ] Create `/api/blazes` POST endpoint (create custom)
-- [ ] Create `/api/blazes/:slug` DELETE endpoint
-- [ ] Add blaze management UI to garden settings
-- [ ] Validate slug format, label length, icon whitelist, color whitelist
-- [ ] Enforce 20-definition-per-tenant soft cap
+- [x] Create `/api/blazes` GET endpoint (list available)
+- [x] Create `/api/blazes` POST endpoint (create custom)
+- [x] Create `/api/blazes/:slug` DELETE endpoint
+- [x] Add blaze management UI to garden settings
+- [x] Validate slug format, label length, icon whitelist, color whitelist
+- [x] Enforce 20-definition-per-tenant soft cap
 
 ### Phase 7: Polish
 

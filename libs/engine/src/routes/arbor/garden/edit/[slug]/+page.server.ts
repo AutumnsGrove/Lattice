@@ -6,107 +6,105 @@ import matter from "@11ty/gray-matter";
 import type { PageServerLoad } from "./$types.js";
 
 interface PostRecord {
-  slug: string;
-  title: string;
-  status?: string;
-  tags?: string;
-  description?: string;
-  markdown_content?: string;
-  html_content?: string;
-  gutter_content?: string;
-  last_synced?: string;
-  updated_at?: string | number;
-  published_at?: string | number;
-  created_at?: string | number;
+	slug: string;
+	title: string;
+	status?: string;
+	tags?: string;
+	description?: string;
+	markdown_content?: string;
+	html_content?: string;
+	gutter_content?: string;
+	last_synced?: string;
+	updated_at?: string | number;
+	published_at?: string | number;
+	created_at?: string | number;
+	blaze?: string | null;
 }
 
 export const load: PageServerLoad = async ({ params, platform, locals }) => {
-  // Auth check happens in admin layout
-  // Feature flags (grafts) are loaded by admin layout and cascaded via data.grafts
-  const { slug } = params;
+	// Auth check happens in admin layout
+	// Feature flags (grafts) are loaded by admin layout and cascaded via data.grafts
+	const { slug } = params;
 
-  if (!slug) {
-    throwGroveError(400, ARBOR_ERRORS.FIELD_REQUIRED, "Arbor");
-  }
+	if (!slug) {
+		throwGroveError(400, ARBOR_ERRORS.FIELD_REQUIRED, "Arbor");
+	}
 
-  // Require tenant context for multi-tenant data access
-  if (!locals.tenantId) {
-    console.error("[Edit Post] No tenant ID found");
-    throwGroveError(403, ARBOR_ERRORS.TENANT_CONTEXT_REQUIRED, "Arbor");
-  }
+	// Require tenant context for multi-tenant data access
+	if (!locals.tenantId) {
+		console.error("[Edit Post] No tenant ID found");
+		throwGroveError(403, ARBOR_ERRORS.TENANT_CONTEXT_REQUIRED, "Arbor");
+	}
 
-  // Try D1 first using TenantDb for proper tenant scoping
-  if (platform?.env?.DB) {
-    try {
-      const tenantDb = getTenantDb(platform.env.DB, {
-        tenantId: locals.tenantId,
-      });
+	// Try D1 first using TenantDb for proper tenant scoping
+	if (platform?.env?.DB) {
+		try {
+			const tenantDb = getTenantDb(platform.env.DB, {
+				tenantId: locals.tenantId,
+			});
 
-      const post = await tenantDb.queryOne<PostRecord>("posts", "slug = ?", [
-        slug,
-      ]);
+			const post = await tenantDb.queryOne<PostRecord>("posts", "slug = ?", [slug]);
 
-      if (post) {
-        const curios = await loadCurioStatus(platform.env.DB, locals.tenantId);
-        return {
-          source: "d1",
-          post: {
-            ...post,
-            tags: post.tags ? JSON.parse(post.tags as string) : [],
-            gutter_content: post.gutter_content || "[]",
-          },
-          curios,
-        };
-      }
-    } catch (err) {
-      console.error("[Edit Post] D1 fetch error:", err);
-      // Fall through to filesystem fallback
-    }
-  }
+			if (post) {
+				const curios = await loadCurioStatus(platform.env.DB, locals.tenantId);
+				return {
+					source: "d1",
+					post: {
+						...post,
+						tags: post.tags ? JSON.parse(post.tags as string) : [],
+						gutter_content: post.gutter_content || "[]",
+					},
+					curios,
+				};
+			}
+		} catch (err) {
+			console.error("[Edit Post] D1 fetch error:", err);
+			// Fall through to filesystem fallback
+		}
+	}
 
-  // Fallback to filesystem - need to read raw markdown
-  try {
-    // Use Vite's import.meta.glob to access raw markdown files
-    const modules = import.meta.glob("/UserContent/Posts/*.md", {
-      eager: true,
-      query: "?raw",
-      import: "default",
-    }) as Record<string, string>;
+	// Fallback to filesystem - need to read raw markdown
+	try {
+		// Use Vite's import.meta.glob to access raw markdown files
+		const modules = import.meta.glob("/UserContent/Posts/*.md", {
+			eager: true,
+			query: "?raw",
+			import: "default",
+		}) as Record<string, string>;
 
-    // Find the matching file
-    const entry = Object.entries(modules).find(([filepath]) => {
-      const filename = filepath.split("/").pop();
-      if (!filename) return false;
-      const fileSlug = filename.replace(".md", "");
-      return fileSlug === slug;
-    });
+		// Find the matching file
+		const entry = Object.entries(modules).find(([filepath]) => {
+			const filename = filepath.split("/").pop();
+			if (!filename) return false;
+			const fileSlug = filename.replace(".md", "");
+			return fileSlug === slug;
+		});
 
-    if (!entry) {
-      throwGroveError(404, ARBOR_ERRORS.RESOURCE_NOT_FOUND, "Arbor");
-    }
+		if (!entry) {
+			throwGroveError(404, ARBOR_ERRORS.RESOURCE_NOT_FOUND, "Arbor");
+		}
 
-    const rawContent = entry[1] as string;
-    const { data, content: markdownContent } = matter(rawContent);
+		const rawContent = entry[1] as string;
+		const { data, content: markdownContent } = matter(rawContent);
 
-    // TODO: Load gutter content from UserContent/Posts/{slug}/gutter/manifest.json
-    // For now, return empty gutter for filesystem posts
-    return {
-      source: "filesystem",
-      post: {
-        slug,
-        title: (data.title as string) || "Untitled",
-        date: (data.date as string) || new Date().toISOString().split("T")[0],
-        tags: (data.tags as string[]) || [],
-        description: (data.description as string) || "",
-        markdown_content: markdownContent,
-        gutter_content: "[]",
-      },
-      curios: [],
-    };
-  } catch (err) {
-    if (err && typeof err === "object" && "status" in err && err.status === 404)
-      throw err;
-    console.error("Filesystem fetch error:", err);
-    throwGroveError(500, ARBOR_ERRORS.LOAD_FAILED, "Arbor", { cause: err });
-  }
+		// TODO: Load gutter content from UserContent/Posts/{slug}/gutter/manifest.json
+		// For now, return empty gutter for filesystem posts
+		return {
+			source: "filesystem",
+			post: {
+				slug,
+				title: (data.title as string) || "Untitled",
+				date: (data.date as string) || new Date().toISOString().split("T")[0],
+				tags: (data.tags as string[]) || [],
+				description: (data.description as string) || "",
+				markdown_content: markdownContent,
+				gutter_content: "[]",
+			},
+			curios: [],
+		};
+	} catch (err) {
+		if (err && typeof err === "object" && "status" in err && err.status === 404) throw err;
+		console.error("Filesystem fetch error:", err);
+		throwGroveError(500, ARBOR_ERRORS.LOAD_FAILED, "Arbor", { cause: err });
+	}
 };

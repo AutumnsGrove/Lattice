@@ -59,6 +59,7 @@ interface PostInput {
 	featured_image?: string;
 	meadow_exclude?: number;
 	republish?: boolean;
+	blaze?: string | null;
 }
 
 /**
@@ -357,6 +358,20 @@ export const PUT: RequestHandler = async ({ params, request, platform, locals })
 			published_at = unixNow;
 		}
 
+		// Validate blaze slug if provided (null clears it)
+		let blazeSlug: string | null | undefined;
+		if (data.blaze !== undefined) {
+			if (data.blaze === null || data.blaze === "") {
+				blazeSlug = null;
+			} else {
+				const trimmed = data.blaze.trim();
+				if (trimmed.length > 40 || !/^[a-z0-9][a-z0-9-]*[a-z0-9]$/.test(trimmed)) {
+					throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
+				}
+				blazeSlug = trimmed;
+			}
+		}
+
 		// Build update object
 		const updateData: Record<string, unknown> = {
 			title,
@@ -370,6 +385,11 @@ export const PUT: RequestHandler = async ({ params, request, platform, locals })
 			updated_at: unixNow,
 			featured_image: data.featured_image || null,
 		};
+
+		// Include blaze if provided (undefined = not sent, null = clear, string = set)
+		if (blazeSlug !== undefined) {
+			updateData.blaze = blazeSlug;
+		}
 
 		// Include meadow_exclude if provided
 		if (data.meadow_exclude !== undefined) {

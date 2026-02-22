@@ -36,6 +36,7 @@ interface PostInput {
 	status?: "draft" | "published";
 	featured_image?: string;
 	meadow_exclude?: number;
+	blaze?: string;
 }
 
 /**
@@ -331,6 +332,14 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 		const wordCount = markdownContent ? markdownContent.split(/\s+/).filter(Boolean).length : 0;
 		const readingTime = Math.ceil(wordCount / 200); // ~200 words per minute
 
+		// Validate blaze slug if provided
+		const blazeSlug = data.blaze?.trim() || null;
+		if (blazeSlug) {
+			if (blazeSlug.length > 40 || !/^[a-z0-9][a-z0-9-]*[a-z0-9]$/.test(blazeSlug)) {
+				throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
+			}
+		}
+
 		// Insert using TenantDb (automatically adds tenant_id and generates id)
 		// Note: created_at and updated_at are auto-added by TenantDb.insert()
 		await tenantDb.insert("posts", {
@@ -348,6 +357,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 			fireside_assisted: data.fireside_assisted || 0,
 			featured_image: data.featured_image || null,
 			meadow_exclude: data.meadow_exclude ?? 0,
+			blaze: blazeSlug,
 			// Set published_at on direct publish (skipping draft stage) so RSS and
 			// meadow poller see the correct timestamp instead of NULL.
 			...(data.status === "published" ? { published_at: Math.floor(Date.now() / 1000) } : {}),
