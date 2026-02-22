@@ -75,12 +75,12 @@ export const load: PageServerLoad = async ({ parent, platform, params }) => {
         .bind(id)
         .first<{ count: number }>()
         .catch(() => ({ count: 0 })),
-      DB.prepare("SELECT COUNT(*) as count FROM media WHERE tenant_id = ?")
+      DB.prepare("SELECT COUNT(*) as count FROM gallery_images WHERE tenant_id = ?")
         .bind(id)
         .first<{ count: number }>()
         .catch(() => ({ count: 0 })),
       DB.prepare(
-        "SELECT COALESCE(SUM(size), 0) as total FROM media WHERE tenant_id = ?",
+        "SELECT COALESCE(SUM(COALESCE(file_size, 0)), 0) as total FROM gallery_images WHERE tenant_id = ?",
       )
         .bind(id)
         .first<{ total: number }>()
