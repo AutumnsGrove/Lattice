@@ -46,12 +46,29 @@ export class MockKV implements GroveKV {
 		value: string | ArrayBuffer | ReadableStream,
 		options?: KVPutOptions,
 	): Promise<void> {
-		const stringValue =
-			typeof value === "string"
-				? value
-				: value instanceof ArrayBuffer
-					? new TextDecoder().decode(value)
-					: "";
+		let stringValue: string;
+		if (typeof value === "string") {
+			stringValue = value;
+		} else if (value instanceof ArrayBuffer) {
+			stringValue = new TextDecoder().decode(value);
+		} else {
+			// Read the stream so mock behavior matches production KV
+			const reader = value.getReader();
+			const chunks: Uint8Array[] = [];
+			for (;;) {
+				const { done, value: chunk } = await reader.read();
+				if (done) break;
+				chunks.push(chunk as Uint8Array);
+			}
+			const totalLength = chunks.reduce((sum, c) => sum + c.length, 0);
+			const merged = new Uint8Array(totalLength);
+			let offset = 0;
+			for (const chunk of chunks) {
+				merged.set(chunk, offset);
+				offset += chunk.length;
+			}
+			stringValue = new TextDecoder().decode(merged);
+		}
 
 		let expiration = options?.expiration;
 		if (!expiration && options?.expirationTtl) {

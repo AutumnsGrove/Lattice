@@ -22,9 +22,9 @@ export class CloudflareConfig implements GroveConfig {
 		const value = this.env[key];
 		if (value === undefined || value === null) {
 			logGroveError("ServerSDK", SRV_ERRORS.CONFIG_MISSING, {
-				detail: key,
+				detail: `Key: ${key}`,
 			});
-			throw new Error(`${SRV_ERRORS.CONFIG_MISSING.adminMessage} Key: ${key}`);
+			throw new Error(SRV_ERRORS.CONFIG_MISSING.adminMessage);
 		}
 		return String(value);
 	}

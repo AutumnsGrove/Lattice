@@ -5,6 +5,8 @@
  * Cloudflare fires cron trigger events.
  */
 
+import { logGroveError } from "@autumnsgrove/lattice/errors";
+import { SRV_ERRORS } from "../errors.js";
 import type {
 	GroveScheduler,
 	ScheduleHandler,
@@ -58,7 +60,12 @@ export class CloudflareScheduler implements GroveScheduler {
 				scheduledTime,
 				cron,
 			});
+			return;
 		}
+
+		logGroveError("ServerSDK", SRV_ERRORS.SCHEDULE_UNMATCHED, {
+			detail: `cron: ${cron}`,
+		});
 	}
 
 	schedules(): ScheduleInfo[] {

@@ -78,7 +78,7 @@ export class CloudflareKV implements GroveKV {
 		}
 
 		try {
-			await this.kv.put(key, value as string, {
+			await this.kv.put(key, value, {
 				expirationTtl: options?.expirationTtl,
 				expiration: options?.expiration,
 				metadata: options?.metadata,

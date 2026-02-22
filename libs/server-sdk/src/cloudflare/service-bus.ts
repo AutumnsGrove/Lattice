@@ -43,9 +43,9 @@ export class CloudflareServiceBus implements GroveServiceBus {
 		const binding = this.bindings[service];
 		if (!binding) {
 			logGroveError("ServerSDK", SRV_ERRORS.SERVICE_NOT_FOUND, {
-				detail: service,
+				detail: `Service: ${service}`,
 			});
-			throw new Error(`${SRV_ERRORS.SERVICE_NOT_FOUND.adminMessage} Service: ${service}`);
+			throw new Error(SRV_ERRORS.SERVICE_NOT_FOUND.adminMessage);
 		}
 
 		try {
@@ -65,7 +65,28 @@ export class CloudflareServiceBus implements GroveServiceBus {
 
 			const response = await binding.fetch(url, init);
 
-			const data = (await response.json()) as T;
+			let data: T;
+			const contentType = response.headers.get("content-type") ?? "";
+			if (contentType.includes("application/json")) {
+				data = (await response.json()) as T;
+			} else {
+				const text = await response.text();
+				if (!response.ok) {
+					logGroveError("ServerSDK", SRV_ERRORS.SERVICE_CALL_FAILED, {
+						detail: `${request.method} ${service}${request.path} returned ${response.status}: ${text.slice(0, 200)}`,
+					});
+					throw new Error(SRV_ERRORS.SERVICE_CALL_FAILED.adminMessage);
+				}
+				// Try parsing as JSON even without Content-Type header
+				try {
+					data = JSON.parse(text) as T;
+				} catch {
+					logGroveError("ServerSDK", SRV_ERRORS.SERVICE_CALL_FAILED, {
+						detail: `${request.method} ${service}${request.path} returned non-JSON body (${response.status})`,
+					});
+					throw new Error(SRV_ERRORS.SERVICE_CALL_FAILED.adminMessage);
+				}
+			}
 
 			return {
 				status: response.status,

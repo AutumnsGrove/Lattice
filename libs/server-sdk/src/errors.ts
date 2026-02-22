@@ -62,6 +62,13 @@ export const SRV_ERRORS = {
 		adminMessage: "GroveContext initialization failed. Check all bindings.",
 	},
 
+	SCHEDULE_UNMATCHED: {
+		code: "SRV-007",
+		category: "admin" as const,
+		userMessage: "A scheduled task could not be processed.",
+		adminMessage: "No handler registered for cron expression. Check scheduler registration.",
+	},
+
 	// ─────────────────────────────────────────────────────────────────────────
 	// Business Logic / Operations (040-059)
 	// ─────────────────────────────────────────────────────────────────────────
