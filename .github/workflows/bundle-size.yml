@@ -67,7 +67,7 @@ jobs:
         run: |
           cd __base
           pnpm install
-          pnpm run package --filter @autumnsgrove/lattice || true
+          pnpm --filter @autumnsgrove/lattice run package || true
           cd apps/landing && pnpm run build || true
 
       - name: Measure base bundle sizes
