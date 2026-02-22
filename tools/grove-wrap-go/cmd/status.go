@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -144,20 +143,9 @@ var statusCmd = &cobra.Command{
 	},
 }
 
-// extractCFField is a specialized field extractor for Cloudflare whoami output.
+// extractCFField delegates to extractField for Cloudflare whoami output.
 func extractCFField(text, key string) string {
-	for _, line := range strings.Split(text, "\n") {
-		lower := strings.ToLower(line)
-		if strings.Contains(lower, key) {
-			if idx := strings.Index(line, ":"); idx >= 0 {
-				return strings.TrimSpace(line[idx+1:])
-			}
-			if idx := strings.Index(line, "="); idx >= 0 {
-				return strings.TrimSpace(line[idx+1:])
-			}
-		}
-	}
-	return ""
+	return extractField(text, key)
 }
 
 func init() {
