@@ -544,39 +544,39 @@ rg "export (interface|type) (SubscriptionTier|UserSubscription|TokenResponse)" -
 
 ## Implementation Checklist
 
-- [ ] **Phase 1: Unify types**
-  - [ ] Reconcile `SubscriptionTier` definition (resolve oak/canopy/platform)
-  - [ ] Move canonical types to heartwood, engine re-exports
-  - [ ] Align `UserInfo.provider` type
-  - [ ] Merge `AuthError.message?` upstream
-  - [ ] Unify `TIER_POST_LIMITS` derivation
-  - [ ] Update all import paths in consumer apps
+- [x] **Phase 1: Unify types**
+  - [x] Reconcile `SubscriptionTier` definition — added `oak` to Heartwood, aligned post limits
+  - [x] Engine heartwood types derive from unified tier config (already correct)
+  - [x] `UserInfo.provider` already aligned (both use `AuthProvider = "google" | "magic_code"`)
+  - [x] Merged `AuthError.message?` into Heartwood types
+  - [x] Unified `TIER_POST_LIMITS` — Heartwood now matches engine config values
+  - [x] Updated tier order in `db/queries.ts`, `subscription.ts`, and tests
 
-- [ ] **Phase 2: Type utilities**
-  - [ ] Create `parseFormData()` utility
-  - [ ] Create `isRedirect()` / `isHttpError()` type guards
-  - [ ] Create `createTypedCacheReader()` wrapper
-  - [ ] Export from `@autumnsgrove/lattice/server`
-  - [ ] Add tests for each utility
+- [x] **Phase 2: Type utilities**
+  - [x] Created `parseFormData()` utility with Zod validation
+  - [x] Created `isRedirect()` / `isHttpError()` type guards (hardened in Turtle phase)
+  - [x] Created `createTypedCacheReader()` wrapper and `safeJsonParse()`
+  - [x] Exported from `@autumnsgrove/lattice/server`
+  - [x] Added 23 tests across 3 test files
 
-- [ ] **Phase 3: Form action schemas (top 5)**
-  - [ ] `arbor/garden/new/+page.server.ts`
-  - [ ] `arbor/settings/+page.server.ts`
-  - [ ] `plant/checkout/+page.server.ts`
-  - [ ] `plant/profile/+page.server.ts`
-  - [ ] One curios route (prove the pattern for widgets)
+- [x] **Phase 3: Form action schemas (top 5)**
+  - [ ] `arbor/garden/new/+page.server.ts` — no form actions yet (load-only)
+  - [ ] `arbor/settings/+page.server.ts` — 8 actions, deferred (large scope)
+  - [ ] `plant/checkout/+page.server.ts` — load-only, no form actions
+  - [x] `plant/profile/+page.server.ts` — ProfileSchema replaces manual validation
+  - [x] `arbor/curios/gallery/+page.server.ts` — GalleryConfigSchema (17 fields)
 
-- [ ] **Phase 4: Webhook schemas**
-  - [ ] GitHub push/PR event schemas for pulse
-  - [ ] Stripe webhook event narrowing for plant
+- [x] **Phase 4: Webhook schemas**
+  - [x] `PushEventData` interface and `asPushData()` accessor for pulse
+  - [ ] Stripe webhook event narrowing for plant (deferred — separate service)
 
-- [ ] **Phase 5: Cache boundary**
-  - [ ] Pulse page cache reads
-  - [ ] Any other `(cacheData as any)` patterns
+- [x] **Phase 5: Cache boundary**
+  - [x] Pulse API route: `PulseActiveSchema`, `PulseTodaySchema`, `PulseStreakSchema`
+  - [x] Replaced `as typeof` casts with `safeJsonParse()` validation
 
 - [ ] **Phase 6: Version mismatch tracking**
-  - [ ] Annotate drizzle-orm bridge cast in heartwood
-  - [ ] Annotate any other legitimate version bridge casts
+  - [ ] Annotate drizzle-orm bridge cast in heartwood (deferred — no drizzle found)
+  - [ ] Annotate any other legitimate version bridge casts (ongoing)
 
 ---
 
