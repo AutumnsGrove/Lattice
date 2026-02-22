@@ -4,6 +4,10 @@
 # parameters. The calling workflow still appears as its own entry in the
 # Actions tab with full step-level logs — zero observability loss.
 #
+# NOTE: Reusable workflows cannot use local composite actions (like
+# grove-setup) because GitHub pre-validates action references before
+# checkout. Setup steps are inlined here instead.
+#
 # Usage (thin shim):
 #   jobs:
 #     deploy:
@@ -75,16 +79,41 @@ jobs:
       deployments: write
 
     steps:
+      # ── Inline grove-setup (can't use composite action in reusable workflow) ──
       - name: Checkout
+        if: inputs.checkout-ref == ''
         uses: actions/checkout@v4
 
-      - name: Setup workspace
-        uses: ./.github/actions/grove-setup
+      - name: Checkout (specific ref)
+        if: inputs.checkout-ref != ''
+        uses: actions/checkout@v4
         with:
-          build-engine: ${{ inputs.needs-engine && 'true' || 'false' }}
-          build-foliage: ${{ inputs.needs-foliage && 'true' || 'false' }}
-          checkout-ref: ${{ inputs.checkout-ref }}
+          ref: ${{ inputs.checkout-ref }}
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: "**/pnpm-lock.yaml"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build foliage
+        if: inputs.needs-foliage
+        run: pnpm run build
+        working-directory: libs/foliage
+
+      - name: Build engine
+        if: inputs.needs-engine
+        run: pnpm run package
+        working-directory: libs/engine
+
+      # ── App build & deploy ──────────────────────────────────────────────
       - name: Type check
         if: inputs.run-typecheck
         run: pnpm check
