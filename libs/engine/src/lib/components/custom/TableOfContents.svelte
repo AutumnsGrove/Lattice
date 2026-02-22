@@ -46,10 +46,21 @@
 		return () => observer.disconnect();
 	}
 
-	// Set up scroll tracking (runs on mount and when headers change)
+	// Defer scroll tracking so it doesn't block initial render.
+	// For specs with many headers, synchronous observer setup freezes the main thread.
 	$effect(() => {
-		const cleanup = setupScrollTracking();
-		return cleanup;
+		let cleanup: (() => void) | undefined;
+		const schedule = typeof requestIdleCallback !== 'undefined' ? requestIdleCallback : (cb: IdleRequestCallback) => setTimeout(cb, 0) as unknown as number;
+		const cancel = typeof cancelIdleCallback !== 'undefined' ? cancelIdleCallback : (id: number) => clearTimeout(id);
+
+		const id = schedule(() => {
+			cleanup = setupScrollTracking();
+		});
+
+		return () => {
+			cancel(id);
+			cleanup?.();
+		};
 	});
 
 	function scrollToHeader(id: string) {

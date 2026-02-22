@@ -136,15 +136,24 @@
 		}
 	});
 
+	// Defer IntersectionObserver setup so it doesn't block initial render.
+	// Event listeners for click-outside/keyboard are cheap — keep those synchronous.
 	$effect(() => {
-		const cleanup = setupScrollTracking();
+		let observerCleanup: (() => void) | undefined;
+		const schedule = typeof requestIdleCallback !== 'undefined' ? requestIdleCallback : (cb: IdleRequestCallback) => setTimeout(cb, 0) as unknown as number;
+		const cancel = typeof cancelIdleCallback !== 'undefined' ? cancelIdleCallback : (id: number) => clearTimeout(id);
 
-		// Add event listeners
+		const id = schedule(() => {
+			observerCleanup = setupScrollTracking();
+		});
+
+		// Event listeners are lightweight — no need to defer
 		document.addEventListener('click', handleClickOutside);
 		document.addEventListener('keydown', handleKeydown);
 
 		return () => {
-			if (cleanup) cleanup();
+			cancel(id);
+			observerCleanup?.();
 			document.removeEventListener('click', handleClickOutside);
 			document.removeEventListener('keydown', handleKeydown);
 		};
