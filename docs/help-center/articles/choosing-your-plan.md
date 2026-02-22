@@ -3,7 +3,7 @@ title: Choosing Your Plan
 description: Understanding Grove's pricing tiers and features
 category: help
 section: getting-started
-lastUpdated: "2025-12-01"
+lastUpdated: "2026-02-22"
 keywords:
   - plan
   - pricing
@@ -35,6 +35,7 @@ A quiet clearing to try your hand at writing — no credit card, no commitment. 
 
 - Up to 25 blog posts
 - 100 MB storage for images
+- All 10 fonts
 - Your own grove.place address
 - RSS feed
 - [[meadow]] access for browsing and reacting

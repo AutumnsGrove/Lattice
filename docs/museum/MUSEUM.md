@@ -75,7 +75,7 @@ One deployment serves unlimited blogs. One engine prevents duplication. Cloudfla
 
 The visual and emotional language of Grove.
 
-64 mathematically-driven SVG components create a living forest. Five seasons shift the mood. Glass surfaces layer over organic backgrounds. Ten font choices respect every reader.
+65 mathematically-driven SVG components create a living forest. Five seasons shift the mood. Glass surfaces layer over organic backgrounds. Ten font choices respect every reader.
 
 **Exhibits:**
 - The Forest (trees, creatures, weather)

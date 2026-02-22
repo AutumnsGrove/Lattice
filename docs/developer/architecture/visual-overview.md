@@ -68,56 +68,47 @@ This document contains visual diagrams and charts to help understand the Grove p
 
 ![Pricing Structure](../assets/visuals/grove-pricing.png)
 
-**Pricing Tiers:**
+**Pricing Tiers (source of truth: `libs/engine/src/lib/config/tiers.ts`):**
 
-### Free - $0/month
-- Meadow access (community feed)
-- 20 public comments per week
-- No blog publishing
-- Community support
+### Wanderer (Free) - $0/month
+- 25 blog posts, 100 MB storage
+- All 10 fonts
+- Your blog at `username.grove.place`
+- RSS feed, Meadow access
+- No credit card needed
 
 ### Seedling - $8/month
-- 50 blog posts
-- 1GB storage for images and media
-- Your blog at `username.grove.place`
-- 3 themes + custom accent color
-- Unlimited comments on other blogs
-- Community support via documentation
+- 100 blog posts, 1 GB storage
+- All 10 fonts + accent color
+- 3 curated themes (coming soon)
+- Unlimited comments
+- Community support
 
-### Sapling - $12/month
-- 250 blog posts
-- 5GB storage
-- Your blog at `username.grove.place`
-- 10 themes + custom accent color
-- Email forwarding to `you@grove.place`
+### Sapling - $12/month (coming soon)
+- Unlimited blog posts, 5 GB storage
+- All 10 fonts + accent color
+- All 10 curated themes (coming soon)
+- Email forwarding (`you@grove.place`)
+- Centennial eligible
 - Email support
 
-### Oak - $25/month
-- Unlimited blog posts
-- 20GB storage
+### Oak - $25/month (coming soon)
+- Unlimited blog posts, 20 GB storage
+- All 10 fonts + accent color
+- Theme customizer (coming soon)
 - Bring Your Own Domain (BYOD)
-- Theme customizer (full control over colors, fonts, layout)
-- Community themes (browse and import user-created themes)
 - Full email: send and receive as `you@grove.place`
-- Full analytics dashboard
-- Priority email support
+- Analytics
+- Priority support
 
-### Evergreen - $35/month
-- Unlimited blog posts
-- 100GB storage
-- Custom domain included (we find and register it for you)
-- Theme customizer + custom font uploads
-- Community themes
-- Full email: send and receive as `you@grove.place`
-- Full analytics dashboard
-- 8 hours of support included (first month)
-- Priority support with faster response times
-
-**Add-on Services:**
-- Additional themes: $49/theme
-- Custom theme design: $299
-- Platform migration: $149
-- Extra storage: $5/month per 10GB
+### Evergreen - $35/month (coming soon)
+- Unlimited blog posts, 100 GB storage
+- All 10 fonts + custom font uploads
+- Theme customizer (coming soon)
+- Domain included (we register it for you)
+- Full email
+- Analytics
+- 8 hrs/mo dedicated support
 
 ---
 

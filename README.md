@@ -33,30 +33,44 @@ Everything in Grove has a name. These are the pieces that make up the forest.
 | [Clearing](apps/clearing)   | [status.grove.place](https://status.grove.place) | Status page for the whole forest            |
 | [Terrarium](apps/terrarium) | terrarium.grove.place                            | Admin and testing sandbox                   |
 | [Login](apps/login)         | login.grove.place                                | Unified auth hub                            |
+| [Amber](apps/amber)         | amber.grove.place                                | Media storage frontend                      |
+| [Ivy](apps/ivy)             | ivy.grove.place                                  | Zero-knowledge email client                 |
 
 ### Services
 
-| Name                                   | Path                                     | What it is                                      |
-| -------------------------------------- | ---------------------------------------- | ----------------------------------------------- |
-| [Heartwood](services/heartwood)        | Auth provider                            | Google OAuth 2.0 + PKCE, session management     |
-| [Passage](services/grove-router)       | Subdomain routing                        | Routes `*.grove.place` to the right app         |
-| [Loom](services/durable-objects)       | Coordination layer                       | Durable Objects for caching and real-time state |
-| [OG Worker](services/og-worker)        | [og.grove.place](https://og.grove.place) | Dynamic social preview images                   |
-| [Zephyr Render](services/email-render) | Service binding                          | React Email template rendering                  |
+| Name                                    | Path                                     | What it is                                       |
+| --------------------------------------- | ---------------------------------------- | ------------------------------------------------ |
+| [Heartwood](services/heartwood)         | Auth provider                            | OAuth 2.0 + PKCE, magic links, passkeys          |
+| [Grove Router](services/grove-router)   | Subdomain routing                        | Routes `*.grove.place` to the right app          |
+| [Loom](services/durable-objects)        | Coordination layer                       | Durable Objects for caching and real-time state  |
+| [Amber](services/amber)                 | Storage API                              | Media upload, processing, and CDN delivery       |
+| [Forage](services/forage)               | Domain service                           | Domain availability search and registration      |
+| [Pulse](services/pulse)                 | Analytics                                | Privacy-respecting visitor analytics             |
+| [Zephyr](services/zephyr)              | Email gateway                            | Transactional email delivery                     |
+| [Zephyr Render](services/email-render)  | Service binding                          | React Email template rendering                   |
+| [OG Worker](services/og-worker)         | [og.grove.place](https://og.grove.place) | Dynamic social preview images                    |
 
 ### Workers
 
-| Name                                   | Path             | What it is                                        |
-| -------------------------------------- | ---------------- | ------------------------------------------------- |
-| [Post Migrator](workers/post-migrator) | Background cron  | Hot/warm/cold storage tiering                     |
-| [Scheduled Workers](workers)           | Background crons | Health monitoring, timeline sync, webhook cleanup |
+| Name                                         | Path            | What it is                               |
+| -------------------------------------------- | --------------- | ---------------------------------------- |
+| [Post Migrator](workers/post-migrator)       | Background cron | Hot/warm/cold storage tiering            |
+| [Timeline Sync](workers/timeline-sync)       | Background cron | Meadow timeline synchronization          |
+| [Webhook Cleanup](workers/webhook-cleanup)   | Background cron | Expired webhook purge                    |
+| [Meadow Poller](workers/meadow-poller)       | Background cron | Community feed polling                   |
+| [Email Catchup](workers/email-catchup)       | Background cron | Email delivery retry                     |
+| [Vista Collector](workers/vista-collector)   | Background cron | Analytics aggregation                    |
+| [Warden](workers/warden)                     | Background cron | Health monitoring and alerting           |
 
 ### Libraries
 
-| Name                      | Path                     | What it is                                                  |
-| ------------------------- | ------------------------ | ----------------------------------------------------------- |
-| [Lattice](libs/engine)    | `@autumnsgrove/lattice`  | The core framework. The thing that holds everything else up |
-| [Vineyard](libs/vineyard) | `@autumnsgrove/vineyard` | Component showcase for every Grove property                 |
+| Name                        | Path                                  | What it is                                                  |
+| --------------------------- | ------------------------------------- | ----------------------------------------------------------- |
+| [Lattice](libs/engine)      | `@autumnsgrove/lattice`               | The core framework. The thing that holds everything else up |
+| [Foliage](libs/foliage)     | `@autumnsgrove/lattice/foliage`       | Theme system — personal expression with guardrails          |
+| [Gossamer](libs/gossamer)   | `@autumnsgrove/gossamer`              | Shared utilities across the monorepo                        |
+| [Shutter](libs/shutter)     | `@autumnsgrove/shutter`               | Image processing and optimization                           |
+| [Vineyard](libs/vineyard)   | `@autumnsgrove/vineyard`              | Component showcase for every Grove property                 |
 
 ---
 

@@ -686,7 +686,7 @@ The scaffolding that holds every Grove page together.
 ```svelte
 <script>
   import { Header, Footer, ThemeToggle, MobileMenu } from '@autumnsgrove/lattice/ui/chrome';
-  import { seasonStore, themeStore } from '@autumnsgrove/lattice/ui/chrome';
+  import { seasonStore, themeStore } from '@autumnsgrove/lattice/ui/stores';
 </script>
 
 <Header

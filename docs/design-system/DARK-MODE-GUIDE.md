@@ -201,7 +201,7 @@ The dark mode glass uses green-tinted bark colors (`rgba(20, 30, 25)`) rather th
 1. **UI Toggle** - Use the `ThemeToggle` component in the navigation
 
    ```svelte
-   import { ThemeToggle } from '@autumnsgrove/lattice/ui/components/chrome';
+   import { ThemeToggle } from '@autumnsgrove/lattice/ui/chrome';
    ```
 
 2. **DevTools** - In Chrome/Firefox DevTools:

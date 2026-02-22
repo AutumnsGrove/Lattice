@@ -30,7 +30,7 @@ This isn't privacy theater. It's privacy by architecture.
 
 ## How it works
 
-When you sign up for Oak tier or above, you get a `yourname@grove.place` email address. Ivy is the client for reading and sending from that address.
+Email access depends on your tier. Sapling ($12/mo) includes email forwarding to your `@grove.place` address. Oak ($25/mo) and Evergreen ($35/mo) get a full mailbox — send and receive. Ivy is the client for managing that inbox.
 
 **Zero-knowledge architecture** — Your emails are encrypted with keys that only you control. We store encrypted blobs. Without your key, they're meaningless noise.
 

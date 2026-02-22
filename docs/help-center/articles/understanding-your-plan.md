@@ -3,7 +3,7 @@ title: Understanding Your Plan
 description: What's included in each Grove plan and how limits work
 category: help
 section: account-billing
-lastUpdated: "2026-01-03"
+lastUpdated: "2026-02-22"
 keywords:
   - plan
   - limits
@@ -28,7 +28,7 @@ Here's what each Grove plan includes—and what happens when you approach your l
 | **Price**         |   Free   |   $8/mo   |   $12/mo   |       $25/mo        |         $35/mo          |
 | **Posts**         |    25    |    100    | Unlimited  |      Unlimited      |        Unlimited        |
 | **Storage**       |  100 MB  |   1 GB    |    5 GB    |        20 GB        |         100 GB          |
-| **Fonts**         |    —     |  All 10   |   All 10   |       All 10        | All 10 + custom uploads |
+| **Fonts**         | All 10   |  All 10   |   All 10   |       All 10        | All 10 + custom uploads |
 | **Themes**        |    —     | 3 curated |   All 10   | All 10 + customizer |   All 10 + customizer   |
 | **Custom domain** |    —     |     —     |     —      |        BYOD         |        Included         |
 | **Email**         |    —     |     —     | Forwarding |    Full mailbox     |      Full mailbox       |
@@ -98,6 +98,7 @@ Whether you're on Wanderer or Evergreen, every Grove blog includes:
 Your first steps:
 
 - 25 posts, 100 MB storage
+- All 10 fonts
 - Your own grove.place address
 - Markdown editor with live preview and autosave
 - RSS feed

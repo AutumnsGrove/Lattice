@@ -190,7 +190,7 @@ Lattice/
 │   ├── amber/             # Media storage frontend
 │   ├── clearing/          # Status page
 │   ├── domains/           # Forage frontend (domain search)
-│   ├── ivy/               # Link in bio
+│   ├── ivy/               # Zero-knowledge email client
 │   ├── landing/           # Marketing site (grove.place)
 │   ├── login/             # Auth login page
 │   ├── meadow/            # Community feed

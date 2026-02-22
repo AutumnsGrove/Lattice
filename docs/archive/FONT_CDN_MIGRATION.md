@@ -1,6 +1,8 @@
 # Font CDN Migration Instructions
 
 > **Status:** COMPLETED (2025-12-21) - All fonts now served from cdn.grove.place
+>
+> **Note:** Local font files in `libs/engine/static/fonts/` are intentionally kept as a backup. Do not delete them.
 
 ## Overview
 

@@ -8,11 +8,13 @@
 
 Lattice is implementing posting limits based on user tiers. GroveAuth needs to track subscription data for each user so that Lattice can check limits before allowing post creation.
 
-**Tier Limits:**
+**Tier Limits (source of truth: `libs/engine/src/lib/config/tiers.ts`):**
 
-- `starter`: 250 posts
-- `professional`: 2,000 posts
-- `business`: unlimited
+- `free` (Wanderer): 25 posts
+- `seedling`: 100 posts
+- `sapling`: unlimited
+- `oak`: unlimited
+- `evergreen`: unlimited
 
 ---
 
@@ -27,7 +29,7 @@ Create `src/db/migrations/001_user_subscriptions.sql`:
 CREATE TABLE IF NOT EXISTS user_subscriptions (
   id TEXT PRIMARY KEY,
   user_id TEXT UNIQUE NOT NULL,
-  tier TEXT NOT NULL DEFAULT 'starter' CHECK (tier IN ('starter', 'professional', 'business')),
+  tier TEXT NOT NULL DEFAULT 'free' CHECK (tier IN ('free', 'seedling', 'sapling', 'oak', 'evergreen')),
   post_limit INTEGER,                     -- NULL = unlimited
   post_count INTEGER NOT NULL DEFAULT 0,
   grace_period_start TEXT,
@@ -73,7 +75,7 @@ Add at the end of the file:
 // SUBSCRIPTION TYPES
 // =============================================================================
 
-export type SubscriptionTier = "starter" | "professional" | "business";
+export type SubscriptionTier = "free" | "seedling" | "sapling" | "oak" | "evergreen";
 
 export interface UserSubscription {
   id: string;
@@ -115,9 +117,11 @@ export type SubscriptionAuditEventType =
   | "custom_domain_removed";
 
 export const TIER_POST_LIMITS: Record<SubscriptionTier, number | null> = {
-  starter: 250,
-  professional: 2000,
-  business: null,
+  free: 25,
+  seedling: 100,
+  sapling: null, // unlimited
+  oak: null,
+  evergreen: null,
 };
 
 export interface SubscriptionStatus {
@@ -162,7 +166,7 @@ export async function getUserSubscription(
 export async function createUserSubscription(
   db: D1Database,
   userId: string,
-  tier: SubscriptionTier = "starter",
+  tier: SubscriptionTier = "free",
 ): Promise<UserSubscription> {
   const id = generateUUID();
   const postLimit = TIER_POST_LIMITS[tier];
@@ -191,7 +195,7 @@ export async function getOrCreateUserSubscription(
 ): Promise<UserSubscription> {
   const existing = await getUserSubscription(db, userId);
   if (existing) return existing;
-  return createUserSubscription(db, userId, "starter");
+  return createUserSubscription(db, userId, "free");
 }
 
 export async function incrementPostCount(

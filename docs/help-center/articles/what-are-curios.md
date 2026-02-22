@@ -27,6 +27,8 @@ Curios brings that energy back.
 
 Your cabinet of wonders. Guestbooks where visitors leave their mark. Shrines dedicated to things you love. Custom cursors that follow visitors around the page. Under-construction badges, link gardens, hit counters—all the delightful chaos of the old web, curated for the modern one.
 
+> **Coming soon.** Curios is currently being designed and built. The features described below are planned for a future release.
+
 ## Why Curios exists
 
 Modern websites often feel anonymous. Templates that could belong to anyone. Smooth, polished, interchangeable. There's nothing wrong with polish, but something gets lost when every site feels like a product page.

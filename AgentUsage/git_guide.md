@@ -1,21 +1,32 @@
 # Git Guide - Unified Workflow and Commit Standards
 
-## Overview
+## Lattice: Use `gw` (Grove Wrap)
 
-A comprehensive git workflow guide emphasizing safety, clean history, and standardized commit messages using Conventional Commits format.
+> **IMPORTANT:** In the Lattice monorepo, use `gw` for all git operations. It wraps git with safety checks, conventional commit validation, and monorepo-aware workflows.
 
-**Core Principles:**
-- **Safety First**: Always verify before operations, create backups for major changes
-- **Clean History**: Use atomic commits with descriptive messages
-- **Conventional Format**: Standard commit types for automated tooling
-- **Workflow Clarity**: Clear branching strategies and daily patterns
+### Essential `gw` Commands
 
-**When to Use This Guide:**
-- Every session with code changes
-- Before making any git commit
-- When initializing new repositories
-- Setting up branching strategies
-- Understanding git operations
+```bash
+# Daily workflow
+gw git status              # Status with monorepo context
+gw git ship                # Stage, commit, push in one safe flow
+gw git pr-prep             # Prepare branch for pull request
+
+# CI and checks
+gw ci                      # Run full CI pipeline locally
+gw ci --quick              # Quick lint + type check
+
+# GitHub integration
+gw git pr-prep             # Summarize changes for PR description
+```
+
+Run `gw --help` and `gw git --help` for the full command list.
+
+---
+
+## Generic Git Reference
+
+The rest of this guide covers standard git workflows and Conventional Commits format. In the Lattice monorepo, prefer `gw` commands above — they handle safety checks and formatting automatically.
 
 ---
 
