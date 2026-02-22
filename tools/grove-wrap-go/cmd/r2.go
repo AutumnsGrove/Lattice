@@ -119,6 +119,9 @@ var r2CreateCmd = &cobra.Command{
 
 		cfg := config.Get()
 		bucket := args[0]
+		if err := validateCFName(bucket, "bucket"); err != nil {
+			return err
+		}
 
 		result, err := exec.Wrangler("r2", "bucket", "create", bucket)
 		if err != nil {
@@ -149,6 +152,9 @@ var r2LsCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg := config.Get()
 		bucket := args[0]
+		if err := validateCFName(bucket, "bucket"); err != nil {
+			return err
+		}
 		prefix, _ := cmd.Flags().GetString("prefix")
 		limit, _ := cmd.Flags().GetInt("limit")
 		limit = clampR2Limit(limit)
@@ -226,11 +232,21 @@ var r2GetCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg := config.Get()
 		bucket := args[0]
+		if err := validateCFName(bucket, "bucket"); err != nil {
+			return err
+		}
 		key := args[1]
+		if err := validateCFKey(key); err != nil {
+			return err
+		}
 		outputPath, _ := cmd.Flags().GetString("output")
 
 		if outputPath == "" {
 			outputPath = filepath.Base(key)
+		}
+		// Prevent path traversal in output
+		if strings.Contains(outputPath, "..") {
+			return fmt.Errorf("output path must not contain '..': %s", outputPath)
 		}
 
 		result, err := exec.Wrangler("r2", "object", "get", bucket, key, "--file", outputPath)
@@ -266,9 +282,16 @@ var r2PutCmd = &cobra.Command{
 
 		cfg := config.Get()
 		bucket := args[0]
+		if err := validateCFName(bucket, "bucket"); err != nil {
+			return err
+		}
 		filePath := args[1]
 		key, _ := cmd.Flags().GetString("key")
 		contentType, _ := cmd.Flags().GetString("content-type")
+		// Validate content-type if provided
+		if contentType != "" && (len(contentType) > 256 || strings.ContainsAny(contentType, ";\n\r\"")) {
+			return fmt.Errorf("invalid content-type: %q", contentType)
+		}
 
 		if key == "" {
 			key = filepath.Base(filePath)
@@ -312,7 +335,13 @@ var r2RmCmd = &cobra.Command{
 
 		cfg := config.Get()
 		bucket := args[0]
+		if err := validateCFName(bucket, "bucket"); err != nil {
+			return err
+		}
 		key := args[1]
+		if err := validateCFKey(key); err != nil {
+			return err
+		}
 
 		result, err := exec.Wrangler("r2", "object", "delete", bucket, key)
 		if err != nil {

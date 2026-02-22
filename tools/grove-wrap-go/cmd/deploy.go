@@ -22,8 +22,16 @@ var deployCmd = &cobra.Command{
 		worker := "grove-lattice"
 		if len(args) > 0 {
 			worker = args[0]
+			if err := validateCFName(worker, "worker"); err != nil {
+				return err
+			}
 		}
 		env, _ := cmd.Flags().GetString("env")
+		if env != "" {
+			if err := validateCFName(env, "environment"); err != nil {
+				return err
+			}
+		}
 		dryRun, _ := cmd.Flags().GetBool("dry-run")
 		minify, _ := cmd.Flags().GetBool("minify")
 		keepVars, _ := cmd.Flags().GetBool("keep-vars")

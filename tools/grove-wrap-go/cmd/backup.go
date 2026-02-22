@@ -28,7 +28,10 @@ var backupListCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg := config.Get()
 		dbAlias, _ := cmd.Flags().GetString("db")
-		dbName := resolveDatabase(dbAlias)
+		dbName, err := resolveDatabase(dbAlias)
+		if err != nil {
+			return err
+		}
 
 		output, err := exec.WranglerOutput("d1", "backup", "list", dbName, "--json")
 		if err != nil {
@@ -98,7 +101,10 @@ var backupCreateCmd = &cobra.Command{
 
 		cfg := config.Get()
 		dbAlias, _ := cmd.Flags().GetString("db")
-		dbName := resolveDatabase(dbAlias)
+		dbName, err := resolveDatabase(dbAlias)
+		if err != nil {
+			return err
+		}
 
 		if !cfg.JSONMode {
 			ui.Info(fmt.Sprintf("Creating backup of %s...", dbName))
@@ -134,9 +140,15 @@ var backupDownloadCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg := config.Get()
 		backupID := args[0]
+		if err := validateCFName(backupID, "backup ID"); err != nil {
+			return err
+		}
 		dbAlias, _ := cmd.Flags().GetString("db")
 		outputFile, _ := cmd.Flags().GetString("output")
-		dbName := resolveDatabase(dbAlias)
+		dbName, err := resolveDatabase(dbAlias)
+		if err != nil {
+			return err
+		}
 
 		if outputFile == "" {
 			short := backupID
@@ -185,8 +197,14 @@ var backupRestoreCmd = &cobra.Command{
 
 		cfg := config.Get()
 		backupID := args[0]
+		if err := validateCFName(backupID, "backup ID"); err != nil {
+			return err
+		}
 		dbAlias, _ := cmd.Flags().GetString("db")
-		dbName := resolveDatabase(dbAlias)
+		dbName, err := resolveDatabase(dbAlias)
+		if err != nil {
+			return err
+		}
 
 		if !cfg.JSONMode {
 			ui.Warning(fmt.Sprintf("Restoring %s from backup %s", dbName, backupID))

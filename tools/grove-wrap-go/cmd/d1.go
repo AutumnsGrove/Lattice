@@ -23,6 +23,15 @@ func requireCFSafety(operation string) error {
 	)
 }
 
+// maxCFNameLen is the maximum length for Cloudflare resource names/aliases.
+const maxCFNameLen = 128
+
+// maxCFKeyLen is the maximum length for KV/R2 keys.
+const maxCFKeyLen = 1024
+
+// maxCFMetadataLen is the maximum length for metadata strings.
+const maxCFMetadataLen = 10000
+
 // maxD1Limit is the maximum row limit for D1 queries.
 const maxD1Limit = 10000
 
@@ -37,22 +46,49 @@ func clampD1Limit(limit int) int {
 	return limit
 }
 
-// resolveDatabase resolves a database alias to its name using config.
-func resolveDatabase(alias string) string {
-	cfg := config.Get()
-	if db, ok := cfg.Databases[alias]; ok {
-		return db.Name
+// validateCFName validates a Cloudflare resource name (database alias, worker, bucket, etc.).
+func validateCFName(name, label string) error {
+	if len(name) == 0 {
+		return fmt.Errorf("%s must not be empty", label)
 	}
-	return alias
+	if len(name) > maxCFNameLen {
+		return fmt.Errorf("%s too long (max %d chars)", label, maxCFNameLen)
+	}
+	for _, ch := range name {
+		if ch < 0x20 || ch == 0x7f || ch == '|' || ch == ';' || ch == '&' || ch == '$' ||
+			ch == '(' || ch == ')' || ch == '{' || ch == '}' || ch == '<' || ch == '>' ||
+			ch == '`' || ch == '\'' || ch == '"' || ch == '\\' || ch == '\n' || ch == '\r' {
+			return fmt.Errorf("%s contains invalid character: %q", label, ch)
+		}
+	}
+	return nil
 }
 
-// resolveDatabaseID resolves a database alias to its ID using config.
-func resolveDatabaseID(alias string) string {
+// validateCFKey validates a KV or R2 object key.
+func validateCFKey(key string) error {
+	if len(key) == 0 {
+		return fmt.Errorf("key must not be empty")
+	}
+	if len(key) > maxCFKeyLen {
+		return fmt.Errorf("key too long (max %d chars)", maxCFKeyLen)
+	}
+	if strings.ContainsAny(key, "\x00\n\r") {
+		return fmt.Errorf("key contains invalid control characters")
+	}
+	return nil
+}
+
+// resolveDatabase resolves a database alias to its name using config.
+// Returns an error if the alias is invalid.
+func resolveDatabase(alias string) (string, error) {
+	if err := validateCFName(alias, "database alias"); err != nil {
+		return "", err
+	}
 	cfg := config.Get()
 	if db, ok := cfg.Databases[alias]; ok {
-		return db.ID
+		return db.Name, nil
 	}
-	return ""
+	return alias, nil
 }
 
 // d1Cmd is the parent command for D1 database operations.
@@ -129,7 +165,10 @@ var d1TablesCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg := config.Get()
 		dbAlias, _ := cmd.Flags().GetString("db")
-		dbName := resolveDatabase(dbAlias)
+		dbName, err := resolveDatabase(dbAlias)
+		if err != nil {
+			return err
+		}
 
 		sql := "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE '_cf_%' ORDER BY name"
 		output, err := exec.WranglerOutput("d1", "execute", dbName, "--remote", "--json", "--command", sql)
@@ -174,7 +213,10 @@ var d1SchemaCmd = &cobra.Command{
 		cfg := config.Get()
 		tableName := args[0]
 		dbAlias, _ := cmd.Flags().GetString("db")
-		dbName := resolveDatabase(dbAlias)
+		dbName, err := resolveDatabase(dbAlias)
+		if err != nil {
+			return err
+		}
 
 		// Validate table name (alphanumeric + underscore only)
 		if !isValidIdentifier(tableName) {
@@ -241,7 +283,10 @@ var d1QueryCmd = &cobra.Command{
 		sqlStr := args[0]
 		dbAlias, _ := cmd.Flags().GetString("db")
 		limit, _ := cmd.Flags().GetInt("limit")
-		dbName := resolveDatabase(dbAlias)
+		dbName, err := resolveDatabase(dbAlias)
+		if err != nil {
+			return err
+		}
 
 		limit = clampD1Limit(limit)
 
@@ -329,7 +374,10 @@ var d1MigrateCmd = &cobra.Command{
 		filePath := args[0]
 		dbAlias, _ := cmd.Flags().GetString("db")
 		dryRun, _ := cmd.Flags().GetBool("dry-run")
-		dbName := resolveDatabase(dbAlias)
+		dbName, err := resolveDatabase(dbAlias)
+		if err != nil {
+			return err
+		}
 
 		// Validate file
 		if !strings.HasSuffix(filePath, ".sql") {
@@ -345,6 +393,14 @@ var d1MigrateCmd = &cobra.Command{
 		}
 		if info.Size() == 0 {
 			return fmt.Errorf("migration file is empty: %s", filePath)
+		}
+		const maxMigrationSize = 1024 * 1024 // 1MB
+		if info.Size() > maxMigrationSize {
+			return fmt.Errorf("migration file too large: %d bytes (max %d)", info.Size(), maxMigrationSize)
+		}
+		// Reject symlinks to prevent reading unintended files
+		if info.Mode()&os.ModeSymlink != 0 {
+			return fmt.Errorf("migration file must not be a symlink: %s", filePath)
 		}
 
 		if dryRun {

@@ -81,6 +81,9 @@ var doInfoCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg := config.Get()
 		namespace := args[0]
+		if err := validateCFName(namespace, "namespace"); err != nil {
+			return err
+		}
 		worker, _ := cmd.Flags().GetString("worker")
 
 		dashURL := "https://dash.cloudflare.com/?to=/:account/workers/durable-objects"
@@ -115,7 +118,13 @@ var doAlarmCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg := config.Get()
 		namespace := args[0]
+		if err := validateCFName(namespace, "namespace"); err != nil {
+			return err
+		}
 		instanceID := args[1]
+		if err := validateCFName(instanceID, "instance ID"); err != nil {
+			return err
+		}
 
 		dashURL := "https://dash.cloudflare.com/?to=/:account/workers/durable-objects"
 

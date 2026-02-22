@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -107,6 +108,12 @@ var emailTestCmd = &cobra.Command{
 
 		if to == "" {
 			return fmt.Errorf("--to flag is required")
+		}
+		if len(to) > 254 || !strings.Contains(to, "@") || strings.ContainsAny(to, " \n\r\t") {
+			return fmt.Errorf("invalid email address: %q", to)
+		}
+		if len(subject) > 512 {
+			return fmt.Errorf("subject too long (max 512 chars)")
 		}
 
 		if cfg.JSONMode {

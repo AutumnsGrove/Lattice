@@ -70,6 +70,9 @@ var flagListCmd = &cobra.Command{
 			return err
 		}
 		prefix, _ := cmd.Flags().GetString("prefix")
+		if prefix != "" && (len(prefix) > 256 || strings.ContainsAny(prefix, "\x00\n\r")) {
+			return fmt.Errorf("prefix too long or contains invalid characters")
+		}
 
 		wranglerArgs := []string{"kv:key", "list", "--namespace-id", nsID}
 		if prefix != "" {
@@ -146,6 +149,9 @@ var flagGetCmd = &cobra.Command{
 			return err
 		}
 		name := args[0]
+		if err := validateCFKey(name); err != nil {
+			return fmt.Errorf("invalid flag name: %w", err)
+		}
 
 		raw, err := exec.WranglerOutput("kv:key", "get", "--namespace-id", nsID, name)
 		if err != nil {
@@ -206,6 +212,9 @@ var flagEnableCmd = &cobra.Command{
 			return err
 		}
 		name := args[0]
+		if err := validateCFKey(name); err != nil {
+			return fmt.Errorf("invalid flag name: %w", err)
+		}
 		metadata, _ := cmd.Flags().GetString("metadata")
 
 		// Build flag value
@@ -216,6 +225,9 @@ var flagEnableCmd = &cobra.Command{
 
 		// Merge extra metadata if provided
 		if metadata != "" {
+			if len(metadata) > maxCFMetadataLen {
+				return fmt.Errorf("metadata too large (max %d bytes)", maxCFMetadataLen)
+			}
 			var extra map[string]interface{}
 			if err := json.Unmarshal([]byte(metadata), &extra); err != nil {
 				return fmt.Errorf("invalid JSON metadata: %s", metadata)
@@ -264,6 +276,9 @@ var flagDisableCmd = &cobra.Command{
 			return err
 		}
 		name := args[0]
+		if err := validateCFKey(name); err != nil {
+			return fmt.Errorf("invalid flag name: %w", err)
+		}
 
 		flagValue := map[string]interface{}{
 			"enabled":    false,
@@ -308,6 +323,9 @@ var flagDeleteCmd = &cobra.Command{
 			return err
 		}
 		name := args[0]
+		if err := validateCFKey(name); err != nil {
+			return fmt.Errorf("invalid flag name: %w", err)
+		}
 
 		result, err := exec.Wrangler("kv:key", "delete", "--namespace-id", nsID, name)
 		if err != nil {

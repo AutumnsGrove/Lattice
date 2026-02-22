@@ -28,6 +28,9 @@ func clampKVLimit(limit int) int {
 
 // resolveNamespace resolves a KV namespace alias to its ID using config.
 func resolveNamespace(alias string) (string, error) {
+	if err := validateCFName(alias, "namespace"); err != nil {
+		return "", err
+	}
 	cfg := config.Get()
 	if ns, ok := cfg.KVNamespaces[alias]; ok {
 		return ns.ID, nil
@@ -186,6 +189,9 @@ var kvGetCmd = &cobra.Command{
 			return err
 		}
 		key := args[1]
+		if err := validateCFKey(key); err != nil {
+			return err
+		}
 
 		output, err := exec.WranglerOutput("kv:key", "get", "--namespace-id", nsID, key)
 		if err != nil {
@@ -256,11 +262,26 @@ var kvPutCmd = &cobra.Command{
 			return err
 		}
 		key := args[1]
+		if err := validateCFKey(key); err != nil {
+			return err
+		}
 		value := args[2]
 
 		ttl, _ := cmd.Flags().GetInt("ttl")
 		expiration, _ := cmd.Flags().GetInt("expiration")
 		metadata, _ := cmd.Flags().GetString("metadata")
+
+		// Clamp TTL and expiration
+		const maxTTL = 86400 * 365 // 1 year
+		if ttl < 0 {
+			return fmt.Errorf("TTL must be non-negative, got %d", ttl)
+		}
+		if ttl > maxTTL {
+			return fmt.Errorf("TTL too large (max %d seconds = 1 year)", maxTTL)
+		}
+		if expiration < 0 {
+			return fmt.Errorf("expiration must be non-negative, got %d", expiration)
+		}
 
 		wranglerArgs := []string{"kv:key", "put", "--namespace-id", nsID, key, value}
 		if ttl > 0 {
@@ -270,7 +291,9 @@ var kvPutCmd = &cobra.Command{
 			wranglerArgs = append(wranglerArgs, "--expiration", fmt.Sprintf("%d", expiration))
 		}
 		if metadata != "" {
-			// Validate JSON
+			if len(metadata) > maxCFMetadataLen {
+				return fmt.Errorf("metadata too large (max %d bytes)", maxCFMetadataLen)
+			}
 			if !json.Valid([]byte(metadata)) {
 				return fmt.Errorf("invalid JSON metadata: %s", metadata)
 			}
@@ -314,6 +337,9 @@ var kvDeleteCmd = &cobra.Command{
 			return err
 		}
 		key := args[1]
+		if err := validateCFKey(key); err != nil {
+			return err
+		}
 
 		result, err := exec.Wrangler("kv:key", "delete", "--namespace-id", nsID, key)
 		if err != nil {
