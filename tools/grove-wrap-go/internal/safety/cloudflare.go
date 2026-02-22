@@ -75,6 +75,15 @@ var cloudflareOperationTiers = map[string]Tier{
 	"export_download": TierRead,
 	"export_cleanup":  TierWrite,
 
+	// Social operations
+	"social_post":    TierWrite,
+	"social_status":  TierRead,
+	"social_history": TierRead,
+	"social_setup":   TierRead,
+
+	// Publish operations
+	"publish_npm": TierWrite,
+
 	// Warden operations
 	"warden_status":        TierRead,
 	"warden_test":          TierRead,
