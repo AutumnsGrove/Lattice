@@ -112,6 +112,9 @@ var gitCommitCmd = &cobra.Command{
 		if gitCommitMessage == "" {
 			return fmt.Errorf("commit message required: use -m \"message\"")
 		}
+		if len(gitCommitMessage) > maxCommitMessageLen {
+			return fmt.Errorf("commit message too long (%d chars, max %d)", len(gitCommitMessage), maxCommitMessageLen)
+		}
 
 		// Auto-detect issue from branch name
 		issue := gitCommitIssue
@@ -543,6 +546,11 @@ var gitStashCmd = &cobra.Command{
 			action = strings.ToLower(args[0])
 		}
 
+		// Validate stash index bounds
+		if gitStashIndex < 0 || gitStashIndex > maxStashIndex {
+			return fmt.Errorf("stash index must be between 0 and %d", maxStashIndex)
+		}
+
 		switch action {
 		case "list":
 			// READ tier — no --write needed
@@ -793,7 +801,14 @@ var gitCherryPickCmd = &cobra.Command{
 
 // ── Helpers ─────────────────────────────────────────────────────────
 
+// maxCommitMessageLen is the maximum allowed commit message length.
+const maxCommitMessageLen = 10000
+
+// maxStashIndex is the upper bound for stash index operations.
+const maxStashIndex = 100
+
 // extractCommitHash extracts the short hash from git commit output.
+// Falls back to git rev-parse if parsing fails.
 func extractCommitHash(output string) string {
 	// git commit output: "[branch hash] message"
 	for _, line := range strings.Split(output, "\n") {
@@ -809,6 +824,11 @@ func extractCommitHash(output string) string {
 				return hash
 			}
 		}
+	}
+	// Fallback: ask git for HEAD
+	out, err := gwexec.GitOutput("rev-parse", "--short", "HEAD")
+	if err == nil {
+		return strings.TrimSpace(out)
 	}
 	return ""
 }

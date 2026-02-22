@@ -36,6 +36,9 @@ var gitShipCmd = &cobra.Command{
 		if gitShipMessage == "" {
 			return fmt.Errorf("message required: use -m \"message\"")
 		}
+		if len(gitShipMessage) > maxCommitMessageLen {
+			return fmt.Errorf("commit message too long (%d chars, max %d)", len(gitShipMessage), maxCommitMessageLen)
+		}
 
 		branch, _ := gwexec.CurrentBranch()
 		var steps []shipStep

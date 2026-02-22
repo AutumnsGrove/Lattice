@@ -243,6 +243,9 @@ var gitFastCmd = &cobra.Command{
 		if gitFastMessage == "" {
 			return fmt.Errorf("message required: use -m \"message\"")
 		}
+		if len(gitFastMessage) > maxCommitMessageLen {
+			return fmt.Errorf("commit message too long (%d chars, max %d)", len(gitFastMessage), maxCommitMessageLen)
+		}
 
 		// Validate conventional commit format
 		if cfg.Git.CommitFormat != "none" {
