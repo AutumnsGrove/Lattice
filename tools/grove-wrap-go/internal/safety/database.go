@@ -40,8 +40,20 @@ var (
 	reWhereClause    = regexp.MustCompile(`(?i)WHERE\s+(.*?)(?:\s+ORDER\s+BY|\s+GROUP\s+BY|\s+LIMIT|\s*$)`)
 )
 
+// MaxQueryLength is the maximum allowed SQL query length (64KB).
+// Queries longer than this are rejected to prevent resource exhaustion.
+const MaxQueryLength = 65536
+
 // ValidateSQL checks a SQL query against database safety rules.
 func ValidateSQL(sql string, protectedTables []string, maxDeleteRows, maxUpdateRows int, skipRowLimits bool) error {
+	if len(sql) > MaxQueryLength {
+		return &SQLSafetyError{
+			Code:    ErrDangerousPattern,
+			Message: fmt.Sprintf("query exceeds maximum length of %d bytes", MaxQueryLength),
+			SQL:     sql[:100] + "...",
+		}
+	}
+
 	upper := strings.TrimSpace(strings.ToUpper(sql))
 	operation := getSQLOperation(upper)
 
@@ -142,12 +154,21 @@ func getSQLOperation(upper string) string {
 	return "UNKNOWN"
 }
 
-// hasDangerousPatterns checks for stacked queries and SQL comments.
+// reUnionSelect detects UNION-based injection attempts.
+var reUnionSelect = regexp.MustCompile(`(?i)\bUNION\b\s+\bSELECT\b`)
+
+// hasDangerousPatterns checks for stacked queries, SQL comments, and injection patterns.
 func hasDangerousPatterns(sql string) bool {
+	// Stacked queries (semicolon followed by another statement)
 	if reStackedQueries.MatchString(sql) {
 		return true
 	}
+	// SQL comments that might hide malicious code
 	if strings.Contains(sql, "--") || strings.Contains(sql, "/*") {
+		return true
+	}
+	// UNION SELECT injection
+	if reUnionSelect.MatchString(sql) {
 		return true
 	}
 	return false

@@ -3,6 +3,10 @@
 // All external tool invocations (git, gh, wrangler) go through this package.
 // Commands are executed with argument lists (no shell expansion) to prevent
 // injection. Output capture and streaming are both supported.
+//
+// Security: Only allowlisted binaries can be executed. The binary name is
+// validated against a known set to prevent path traversal and arbitrary
+// command execution.
 package exec
 
 import (
@@ -13,6 +17,19 @@ import (
 	"strings"
 	"time"
 )
+
+// allowedBinaries is the set of external programs gw is permitted to invoke.
+// Any attempt to run a binary not in this list is rejected.
+var allowedBinaries = map[string]bool{
+	"git":      true,
+	"gh":       true,
+	"wrangler": true,
+	"npx":      true,
+	"node":     true,
+	"pnpm":     true,
+	"bun":      true,
+	"npm":      true,
+}
 
 // Result holds the output of a completed command.
 type Result struct {
@@ -41,13 +58,14 @@ func (r *Result) Lines() []string {
 // DefaultTimeout is the maximum time a subprocess can run.
 const DefaultTimeout = 30 * time.Second
 
-// Run executes a command and captures its output.
+// Run executes an allowlisted command and captures its output.
 // The command is NOT run through a shell — args are passed directly.
+// Returns an error if the binary is not in the allowlist.
 func Run(name string, args ...string) (*Result, error) {
 	return RunWithTimeout(DefaultTimeout, name, args...)
 }
 
-// RunWithTimeout executes a command with a specific timeout.
+// RunWithTimeout executes an allowlisted command with a specific timeout.
 func RunWithTimeout(timeout time.Duration, name string, args ...string) (*Result, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
@@ -55,8 +73,18 @@ func RunWithTimeout(timeout time.Duration, name string, args ...string) (*Result
 	return RunContext(ctx, name, args...)
 }
 
-// RunContext executes a command with the given context.
+// RunContext executes an allowlisted command with the given context.
 func RunContext(ctx context.Context, name string, args ...string) (*Result, error) {
+	// Validate binary name against allowlist
+	if !allowedBinaries[name] {
+		return nil, fmt.Errorf("binary %q is not in the gw allowlist", name)
+	}
+
+	// Reject names with path separators to prevent traversal
+	if strings.ContainsAny(name, "/\\") {
+		return nil, fmt.Errorf("binary name must not contain path separators: %q", name)
+	}
+
 	cmd := exec.CommandContext(ctx, name, args...)
 
 	var stdout, stderr bytes.Buffer
