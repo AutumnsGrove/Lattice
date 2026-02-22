@@ -286,6 +286,122 @@ This is a critical workflow command if agents are expected to use it.
 
 ---
 
+## 6. Second Leg: Deeper Terrain
+
+_The jeep refueled. Back on the road. More commands, more discoveries._
+
+### The `gw ci` mystery — solved
+
+AGENT.md references `gw ci --affected --fail-fast --diagnose` as a top-level command.
+It doesn't appear in `gw --help`. The Go port put it under `gw dev ci`.
+
+```
+gw dev ci    # where it lives
+gw ci        # where AGENT.md points
+```
+
+This is a naming inconsistency, not a missing port. All the logic is there — the entry point
+is just nested one level deeper than documented. Needs either an alias or a doc update.
+
+### The binary build mystery — also solved
+
+`rebuild-gw-binaries.yml` and `rebuild-gf-binaries.yml` both exist in `.github/workflows/`.
+The CI pipeline is: test → build 4 platforms → commit binaries back to branch.
+
+The binaries don't exist in `tools/grove-wrap-go/dist/` because:
+1. The Go port landed today (Feb 22, 2026)
+2. CI only runs on push/PR to `main`
+3. This hasn't merged yet
+
+Once merged, CI auto-builds and commits the binaries. The pipeline is solid.
+
+**One subtle bug found**: gf's rebuild CI uses `git diff --quiet` to detect changes —
+this only catches MODIFIED files, not untracked ones. On first bootstrap (when dist/ doesn't
+exist), the untracked binaries would be silently skipped. The gw CI already has the fix:
+it also checks `git ls-files --others --exclude-standard`. The gf CI needs the same patch.
+
+### `gw packages` — one of the best commands
+
+```
+╭──────────────────────────┬───────────┬─────────────────────────────────╮
+│ Package                  │ Type      │ Scripts                         │
+├──────────────────────────┼───────────┼─────────────────────────────────┤
+│ apps/amber               │ sveltekit │ [dev, build, test, check, lint] │
+│ libs/engine              │ sveltekit │ [dev, build, test, check]       │
+│ services/heartwood       │ worker    │ [dev, test]                     │
+│ tools/grove-wrap-go      │ go        │                                 │
+│ ...34 total              │           │                                 │
+╰──────────────────────────┴───────────┴─────────────────────────────────╯
+```
+
+At a glance: package type, available scripts, the whole monorepo inventory. Clean. Useful.
+
+### `gf impact` — unexpectedly powerful
+
+```
+gf impact libs/engine/src/lib/errors/helpers.ts
+```
+
+Returns: test coverage (55 test files), route exposure (19 routes). This is genuinely
+valuable for pre-change risk assessment. If you're touching a file and want to know the
+blast radius, `gf impact` maps it. Worth promoting more prominently.
+
+### `gf large` — the conscience check
+
+Returns 191 files over 500 lines, sorted by size with types separated (Svelte, TS, tests).
+The top offender: `services/heartwood/worker-configuration.d.ts` at 12,290 lines (a generated
+type file, not a coding problem). The largest real component: `MarkdownEditor.svelte` at 2,316
+lines. This kind of awareness check is useful for architecture reviews.
+
+### `gf store` — Svelte 4 vs Svelte 5 split
+
+Shows writable/readable/derived stores (Svelte 4) separately from $state/$derived/$effect
+(Svelte 5 runes). Smart categorization — the split matters because Svelte 4 stores and
+Svelte 5 runes have different lifecycles.
+
+### `gw dev --help` — the dev toolchain is clean
+
+```
+📖 Quality (Always Safe)
+  test, check, lint, fmt, ci
+
+🔨 Build (Always Safe)
+  build
+
+✏️ Server (Require --write)
+  start, stop, restart, logs
+```
+
+Well-structured. Safety tiers applied even to dev server operations — `start` requires
+`--write` because starting a server affects the system. Good discipline.
+
+### `gw git --help` — the most complete help panel
+
+The full git command group has the best-organized help in the entire CLI:
+- 8 READ commands, 11 WRITE commands, 5 DANGEROUS commands
+- ⚡ Shortcuts section (save, wip, fast, sync, undo, amend)
+- 🚀 Workflows section (ship, prep, pr-prep)
+- 🔧 Management section (worktree, remote, tag, config)
+
+This is the template for how every group help should look.
+
+### Interactive mode opportunity
+
+`gw` currently has no interactive TUI elements. No prompts, no selections, no paginators.
+Every command outputs and exits. For agents, this is exactly right. For humans at a
+terminal, there are cases where interactive beats flag-slinging:
+
+- `gw d1 query` — interactive SQL REPL with table display
+- `gw packages` — interactive selector to drill into a specific package's commands
+- `gw git log` — scroll through commits with arrow keys
+- `gw history list` — searchable/filterable command history
+
+The model: `--interactive` / `-i` flag enables Bubble Tea TUI. Without the flag, pure
+output mode (safe for agents, CI, pipes). With the flag, full interactive goodness.
+This is exactly how the user described it — opt-in, not default.
+
+---
+
 ## Expedition Summary
 
 ### By the numbers
@@ -302,16 +418,29 @@ This is a critical workflow command if agents are expected to use it.
 
 ### Priority fix order
 
-1. **gw pre-built binaries** — critical for install experience (you said it: this needs to happen)
-2. **Wrangler auth caching** — 4s → 1ms. The biggest daily pain point by far
-3. **`gw git ship --help` routing** — help should show ship's own flags
-4. **`gf briefing` TODO truncation** — visible bug, easy fix
-5. **`gf deps` full graph** — shows count but no edges
-6. **`gf changed` graceful fallback** — fails hard instead of degrading
-7. **`gw ci` command** — either implement or document why it's missing from Go port
-8. **`gw context` panel upgrade** — use Lipgloss panels like the rest of gw does
-9. **`gw version` ldflags** — show real version even for local builds
-10. **gf/gw visual coherence** — give gf section headers the Lipgloss treatment
+**gw — immediate polish:**
+1. Wrangler auth caching — 4s → 1ms. The single biggest daily pain point
+2. `gw ci` alias for `gw dev ci` — AGENT.md documents it at root level
+3. `gw git ship --help` routing — show ship's own flags, not parent group
+4. `gw context` panel upgrade — wrap in RenderInfoPanel, match the rest
+5. `gw version` ldflags via git describe — no more "dev"
+6. `--no-cloud` flag — skip wrangler for git-only workflows
+
+**gw — new features:**
+7. `--interactive` / `-i` mode — Bubble Tea TUI for humans, pure output for agents
+8. Animated spinner for long-running operations (wrangler calls, CI runs)
+
+**gf — quality fixes:**
+9. `gf briefing` TODO truncation bug fix
+10. `gf changed` graceful fallback when main branch unavailable
+11. `gf deps` full graph with edges (not just a count)
+12. `gf` rebuild CI bootstrap bug (add untracked detection, match gw CI)
+
+**gf — charm glow-up:**
+13. Lipgloss section headers (replace raw ANSI cyan `---`)
+14. Bubble Tea paginator for high-volume output
+15. `--max-results N` flag for agent context control
+16. `_archived/` exclusion flag (or default-exclude)
 
 ### What's genuinely great
 
@@ -324,6 +453,9 @@ These tools deserve to be fast. When they are — they feel like the grove.
 
 ---
 
-_The fire dies to embers. Journal full. The drive covered both tools from cold install through
-daily workflow. The bones are excellent. Fix the wrangler slowness, ship the binaries, and
-this becomes infrastructure you reach for by reflex._
+---
+
+_Two legs of driving. The journal is full. Two spec files now live in
+`docs/plans/tooling/planned/` — one for gw, one for gf — with the full implementation
+picture. The bones are excellent. Fix the wrangler slowness, give gf some warmth, and this
+becomes infrastructure you reach for by reflex. The grove tends itself._
