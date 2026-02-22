@@ -109,6 +109,44 @@ func RunContext(ctx context.Context, name string, args ...string) (*Result, erro
 	return result, nil
 }
 
+// RunWithStdin executes an allowlisted command, piping stdinData to its stdin.
+// Used for commands like `wrangler secret put` that read secrets from stdin.
+func RunWithStdin(stdinData string, name string, args ...string) (*Result, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
+	defer cancel()
+
+	if !allowedBinaries[name] {
+		return nil, fmt.Errorf("binary %q is not in the gw allowlist", name)
+	}
+	if strings.ContainsAny(name, "/\\") {
+		return nil, fmt.Errorf("binary name must not contain path separators: %q", name)
+	}
+
+	cmd := exec.CommandContext(ctx, name, args...)
+	cmd.Stdin = strings.NewReader(stdinData)
+
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	err := cmd.Run()
+
+	result := &Result{
+		Stdout: stdout.String(),
+		Stderr: stderr.String(),
+	}
+
+	if err != nil {
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			result.ExitCode = exitErr.ExitCode()
+			return result, nil
+		}
+		return result, fmt.Errorf("failed to execute %s: %w", name, err)
+	}
+
+	return result, nil
+}
+
 // Which checks if a binary exists in PATH.
 func Which(name string) (string, bool) {
 	path, err := exec.LookPath(name)

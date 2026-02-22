@@ -48,6 +48,11 @@ var rootHelpCategories = []ui.HelpCategory{
 			{Name: "backup", Desc: "D1 database backups"},
 			{Name: "do", Desc: "Durable Object operations"},
 			{Name: "email", Desc: "Email routing operations"},
+			{Name: "secret", Desc: "Encrypted secrets vault"},
+			{Name: "cache", Desc: "Cache management and CDN purge"},
+			{Name: "bindings", Desc: "Scan wrangler.toml bindings"},
+			{Name: "export", Desc: "Storage export management"},
+			{Name: "warden", Desc: "Grove Warden service"},
 		},
 	},
 	{
@@ -62,6 +67,20 @@ var rootHelpCategories = []ui.HelpCategory{
 			{Name: "context", Desc: "Session context"},
 			{Name: "packages", Desc: "Monorepo package detection"},
 			{Name: "version", Desc: "Print version"},
+			{Name: "history", Desc: "Command history tracking"},
+			{Name: "metrics", Desc: "Performance diagnostics"},
+			{Name: "config-validate", Desc: "Validate gw.toml config"},
+			{Name: "env-audit", Desc: "Check environment variables"},
+			{Name: "monorepo-size", Desc: "Monorepo filesystem stats"},
+		},
+	},
+	{
+		Title: "Platform Admin",
+		Icon:  "👑",
+		Style: ui.DangerStyle,
+		Commands: []ui.HelpCommand{
+			{Name: "auth", Desc: "Authentication & OAuth clients"},
+			{Name: "tenant", Desc: "Tenant management"},
 		},
 	},
 }

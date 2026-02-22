@@ -64,6 +64,15 @@ func WranglerInteractive(args ...string) (*Result, error) {
 	return &Result{ExitCode: 0}, nil
 }
 
+// WranglerWithStdin runs a wrangler command, piping stdinData to its stdin.
+// Used for `wrangler secret put` which reads the secret value from stdin.
+func WranglerWithStdin(stdinData string, args ...string) (*Result, error) {
+	if _, ok := Which("wrangler"); ok {
+		return RunWithStdin(stdinData, "wrangler", args...)
+	}
+	return RunWithStdin(stdinData, "npx", append([]string{"wrangler"}, args...)...)
+}
+
 // IsWranglerAvailable returns true if wrangler is accessible.
 func IsWranglerAvailable() bool {
 	if _, ok := Which("wrangler"); ok {
