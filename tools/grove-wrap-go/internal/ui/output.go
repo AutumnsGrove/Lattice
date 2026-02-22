@@ -41,6 +41,21 @@ func Step(ok bool, msg string) {
 	}
 }
 
+// Muted prints a dim, low-emphasis message.
+func Muted(msg string) {
+	fmt.Println(HintStyle.Render(msg))
+}
+
+// PrintHeader prints a bold section header.
+func PrintHeader(title string) {
+	fmt.Println(TitleStyle.Render(title))
+}
+
+// PrintKeyValue prints a key-value pair with styled formatting.
+func PrintKeyValue(key, value string) {
+	fmt.Printf("  %s  %s\n", CommandStyle.Render(key), value)
+}
+
 // SafetyError prints a safety check failure with an optional suggestion.
 func SafetyError(msg string, suggestion string) {
 	Error("Safety check failed: " + msg)
