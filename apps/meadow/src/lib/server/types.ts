@@ -81,6 +81,7 @@ export interface PostRow {
   post_type: string;
   user_id: string | null;
   body: string | null;
+  blaze: string | null;
   // Joined from user context
   user_voted?: number | null;
   user_bookmarked?: number | null;
@@ -131,5 +132,6 @@ export function rowToPost(row: PostRow): MeadowPost {
     userReactions,
     score: row.score,
     reactionCounts,
+    blaze: row.blaze ?? null,
   };
 }

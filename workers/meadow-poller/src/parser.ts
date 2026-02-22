@@ -95,6 +95,10 @@ function normalizeItem(raw: Record<string, unknown>): ParsedFeedItem {
     enclosureUrl = extractText(enc["@_url"]) || null;
   }
 
+  // grove:blaze — custom blaze slug from Grove RSS namespace
+  const blazeRaw = extractText(raw["grove:blaze"]) || null;
+  const blaze = blazeRaw && /^[a-z0-9][a-z0-9-]*[a-z0-9]$/.test(blazeRaw) ? blazeRaw : null;
+
   return {
     title,
     link,
@@ -104,6 +108,7 @@ function normalizeItem(raw: Record<string, unknown>): ParsedFeedItem {
     contentEncoded,
     categories,
     enclosureUrl,
+    blaze,
   };
 }
 

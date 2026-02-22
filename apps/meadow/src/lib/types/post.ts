@@ -27,10 +27,13 @@ export interface MeadowPost {
   /** Aggregated engagement */
   score: number;
   reactionCounts: Record<string, number>;
+  /** Custom blaze slug (Slot 2) — null if no custom blaze set */
+  blaze: string | null;
 }
 
 /** Payload for creating a new Note */
 export interface NoteCreatePayload {
   body: string;
   tags?: string[];
+  blaze?: string;
 }

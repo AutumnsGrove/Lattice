@@ -240,8 +240,8 @@ async function upsertPosts(
     statements.push(
       db
         .prepare(
-          `INSERT INTO meadow_posts (id, tenant_id, guid, title, description, content_html, link, author_name, author_subdomain, tags, featured_image, published_at, fetched_at, content_hash)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `INSERT INTO meadow_posts (id, tenant_id, guid, title, description, content_html, link, author_name, author_subdomain, tags, featured_image, published_at, fetched_at, content_hash, blaze)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
            ON CONFLICT(tenant_id, guid) DO UPDATE SET
              title = excluded.title,
              description = excluded.description,
@@ -249,7 +249,8 @@ async function upsertPosts(
              tags = excluded.tags,
              featured_image = excluded.featured_image,
              fetched_at = excluded.fetched_at,
-             content_hash = excluded.content_hash`,
+             content_hash = excluded.content_hash,
+             blaze = excluded.blaze`,
         )
         .bind(
           id,
@@ -266,6 +267,7 @@ async function upsertPosts(
           publishedAt,
           nowS,
           contentHash,
+          item.blaze,
         ),
     );
   }

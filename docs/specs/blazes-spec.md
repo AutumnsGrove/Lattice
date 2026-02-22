@@ -4,7 +4,7 @@ description: A two-slot marking system for posts across Grove. Auto-blazes ident
 category: specs
 specCategory: content-community
 icon: flame
-lastUpdated: "2026-02-21"
+lastUpdated: "2026-02-22"
 aliases: []
 date created: Saturday, February 21st 2026
 date modified: Saturday, February 21st 2026
@@ -855,38 +855,38 @@ Custom blaze creation is rate-limited to prevent abuse. 20 definitions per tenan
 
 ### Phase 1: Engine module and migration
 
-- [ ] Create `libs/engine/src/lib/blazes/types.ts` with type definitions
-- [ ] Create `libs/engine/src/lib/blazes/palette.ts` with `BLAZE_CONFIG`, `BLAZE_COLORS`, `resolveLucideIcon`
-- [ ] Create `libs/engine/src/lib/blazes/index.ts` with public exports
-- [ ] Add `"./blazes"` export to `libs/engine/package.json`
-- [ ] Create `libs/engine/migrations/085_blazes.sql`
+- [x] Create `libs/engine/src/lib/blazes/types.ts` with type definitions
+- [x] Create `libs/engine/src/lib/blazes/palette.ts` with `BLAZE_CONFIG`, `BLAZE_COLORS`, `resolveLucideIcon`
+- [x] Create `libs/engine/src/lib/blazes/index.ts` with public exports
+- [x] Add `"./blazes"` export to `libs/engine/package.json`
+- [x] Create `libs/engine/migrations/088_blazes.sql` (085-087 were taken)
 - [ ] Run migration against remote D1
 
 ### Phase 2: Shared component
 
-- [ ] Create `Blaze.svelte` in `libs/engine/src/lib/ui/components/indicators/`
-- [ ] Export from `@autumnsgrove/lattice/ui/indicators`
-- [ ] Verify responsive label collapse at `sm` breakpoint
-- [ ] Verify all 8 color palette entries in light and dark mode
-- [ ] Test fallback rendering for unknown slugs
+- [x] Create `Blaze.svelte` in `libs/engine/src/lib/ui/components/indicators/`
+- [x] Export from `@autumnsgrove/lattice/ui/indicators`
+- [x] Verify responsive label collapse at `sm` breakpoint
+- [x] Verify all 8 color palette entries in light and dark mode
+- [x] Test fallback rendering for unknown slugs
 
 ### Phase 3: RSS bridge
 
-- [ ] Add `blaze` to D1 query in `/api/feed` endpoint
-- [ ] Add `xmlns:grove` namespace to RSS output
-- [ ] Emit `<grove:blaze>` element for posts with custom blazes
-- [ ] Update meadow-poller parser to extract `grove:blaze`
-- [ ] Add `blaze` column to poller's INSERT/UPSERT statement
+- [x] Add `blaze` to D1 query in `/api/feed` endpoint
+- [x] Add `xmlns:grove` namespace to RSS output
+- [x] Emit `<grove:blaze>` element for posts with custom blazes
+- [x] Update meadow-poller parser to extract `grove:blaze`
+- [x] Add `blaze` column to poller's INSERT/UPSERT statement
 - [ ] Test round-trip: set blaze in garden, verify it appears in Meadow
 
 ### Phase 4: Meadow integration
 
-- [ ] Add Blaze import to `PostCard.svelte`
-- [ ] Render auto blaze (Slot 1) from `post.postType`
-- [ ] Render custom blaze (Slot 2) from `post.blaze` when present
-- [ ] Update `rowToPost()` to include `blaze` field
-- [ ] Update `MeadowPost` type to include `blaze: string | null`
-- [ ] Add blaze picker to ComposeBox for notes
+- [x] Add Blaze import to `PostCard.svelte`
+- [x] Render auto blaze (Slot 1) from `post.postType`
+- [x] Render custom blaze (Slot 2) from `post.blaze` when present
+- [x] Update `rowToPost()` to include `blaze` field
+- [x] Update `MeadowPost` type to include `blaze: string | null`
+- [x] Add blaze picker to ComposeBox for notes
 - [ ] Test in feed with mixed content (All tab)
 - [ ] Test in filtered views (Notes tab, Blooms tab)
 
@@ -910,7 +910,7 @@ Custom blaze creation is rate-limited to prevent abuse. 20 definitions per tenan
 - [ ] Test with screen reader (VoiceOver)
 - [ ] Verify dark mode contrast ratios against rendered card surface
 - [ ] Check that blazes don't push the header to overflow on narrow viewports
-- [ ] Test graceful degradation for deleted/unknown blaze slugs
+- [x] Test graceful degradation for deleted/unknown blaze slugs
 - [ ] Add Waystone tooltip for "Blaze" if GroveTerm is rendered in Meadow
 
 ---

@@ -22,6 +22,7 @@ interface D1Post {
 	published_at: number;
 	featured_image: string | null;
 	updated_at: number;
+	blaze: string | null;
 }
 
 export const GET: RequestHandler = async (event) => {
@@ -69,7 +70,7 @@ export const GET: RequestHandler = async (event) => {
 		try {
 			const result = await db
 				.prepare(
-					`SELECT slug, title, description, html_content, tags, published_at, featured_image, updated_at
+					`SELECT slug, title, description, html_content, tags, published_at, featured_image, updated_at, blaze
            FROM posts
            WHERE tenant_id = ? AND status = 'published' AND (meadow_exclude IS NULL OR meadow_exclude != 1)
            ORDER BY published_at DESC
@@ -111,6 +112,11 @@ export const GET: RequestHandler = async (event) => {
 					? `\n      <content:encoded><![CDATA[${post.html_content}]]></content:encoded>`
 					: "";
 
+				// grove:blaze carries the custom blaze slug through RSS
+				const blazeElement = post.blaze
+					? `\n      <grove:blaze>${escapeXml(post.blaze)}</grove:blaze>`
+					: "";
+
 				return `
     <item>
       <title><![CDATA[${escapeXml(post.title)}]]></title>
@@ -118,7 +124,7 @@ export const GET: RequestHandler = async (event) => {
       <guid isPermaLink="true">${siteUrl}/garden/${normalizedSlug}</guid>
       <pubDate>${pubDate}</pubDate>
       <description><![CDATA[${escapeXml(post.description || "")}]]></description>
-${categoryElements}${enclosure}${contentEncoded}
+${categoryElements}${enclosure}${contentEncoded}${blazeElement}
     </item>`;
 			})
 			.join("");
@@ -174,7 +180,7 @@ ${categoryElements}${enclosure}
 	}
 
 	const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:grove="https://grove.place/xmlns/grove/1.0">
   <channel>
     <title>${escapeXml(feedTitle)}</title>
     <link>${siteUrl}</link>

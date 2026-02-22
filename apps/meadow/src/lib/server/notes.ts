@@ -23,6 +23,7 @@ export async function createNote(
   contentHtml?: string | null,
   tenantId?: string,
   authorSubdomain?: string,
+  blaze?: string | null,
 ): Promise<MeadowPost> {
   const id = crypto.randomUUID();
   const guid = `note:${id}`;
@@ -36,11 +37,11 @@ export async function createNote(
         (id, tenant_id, guid, title, description, content_html, link,
          author_name, author_subdomain, tags, featured_image,
          published_at, fetched_at, score, reaction_counts, visible,
-         post_type, user_id, body)
+         post_type, user_id, body, blaze)
       VALUES (?, ?, ?, '', '', ?, '',
               ?, ?, ?, NULL,
               ?, ?, 0, '{}', 1,
-              'note', ?, ?)`,
+              'note', ?, ?, ?)`,
     )
     .bind(
       id,
@@ -54,6 +55,7 @@ export async function createNote(
       now,
       userId,
       trimmedBody,
+      blaze ?? null,
     )
     .run();
 
@@ -77,6 +79,7 @@ export async function createNote(
     userReactions: [],
     score: 0,
     reactionCounts: {},
+    blaze: blaze ?? null,
   };
 }
 

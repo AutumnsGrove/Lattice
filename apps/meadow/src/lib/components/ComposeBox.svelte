@@ -8,6 +8,8 @@
 <script lang="ts">
   import type { MeadowPost } from "$lib/types/post";
   import { NoteEditor } from "@autumnsgrove/lattice/ui/editor";
+  import { Blaze } from "@autumnsgrove/lattice/ui/indicators";
+  import { GLOBAL_BLAZE_DEFAULTS } from "@autumnsgrove/lattice/blazes";
   import { uploadNoteImage } from "$lib/utils/note-upload";
 
   interface Props {
@@ -32,6 +34,7 @@
   let submitting = $state(false);
   let errorMsg = $state<string | null>(null);
   let noteEditor: ReturnType<typeof NoteEditor> | undefined = $state();
+  let selectedBlaze = $state<string | null>(null);
 
   const isOverLimit = $derived(charCount > MAX_BODY);
   const isNearLimit = $derived(charCount >= WARN_AT && !isOverLimit);
@@ -52,6 +55,7 @@
     charCount = 0;
     tags = [];
     tagInput = "";
+    selectedBlaze = null;
     errorMsg = null;
     noteEditor?.clearContent();
   }
@@ -103,6 +107,7 @@
           body: text.trim(),
           content_html: hasRichContent ? html : undefined,
           tags: tags.length > 0 ? tags : undefined,
+          blaze: selectedBlaze || undefined,
         }),
       });
 
@@ -197,6 +202,21 @@
               {/each}
             </div>
           {/if}
+
+          <!-- Blaze picker -->
+          <div class="mt-2 flex flex-wrap gap-1.5">
+            {#each GLOBAL_BLAZE_DEFAULTS as blazeDef}
+              <button
+                type="button"
+                class="min-h-[44px] min-w-[44px] rounded-lg transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-grove-400 focus-visible:ring-offset-1 {selectedBlaze === blazeDef.slug ? 'opacity-100' : 'opacity-50 hover:opacity-75'}"
+                aria-label="{blazeDef.label} blaze{selectedBlaze === blazeDef.slug ? ' (selected)' : ''}"
+                aria-pressed={selectedBlaze === blazeDef.slug}
+                onclick={() => { selectedBlaze = selectedBlaze === blazeDef.slug ? null : blazeDef.slug; }}
+              >
+                <Blaze definition={blazeDef} />
+              </button>
+            {/each}
+          </div>
 
           <!-- Tag input -->
           {#if tags.length < MAX_TAGS}

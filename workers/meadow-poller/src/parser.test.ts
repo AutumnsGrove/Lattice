@@ -218,4 +218,68 @@ describe("parseFeed", () => {
     const feed = parseFeed(xml);
     expect(feed.items[0].categories).toEqual(["bold-tag", "clean-tag"]);
   });
+
+  it("extracts grove:blaze from Grove RSS namespace", () => {
+    const xml = `<?xml version="1.0"?>
+<rss version="2.0" xmlns:grove="https://grove.place/xmlns/grove/1.0">
+  <channel>
+    <title>Blog</title>
+    <link>https://test.grove.place</link>
+    <description>Desc</description>
+    <item>
+      <title>Post with Blaze</title>
+      <link>https://test.grove.place/garden/blazed</link>
+      <grove:blaze>food-review</grove:blaze>
+    </item>
+  </channel>
+</rss>`;
+
+    const feed = parseFeed(xml);
+    expect(feed.items[0].blaze).toBe("food-review");
+  });
+
+  it("returns null blaze when grove:blaze is absent", () => {
+    const feed = parseFeed(VALID_FEED);
+    expect(feed.items[0].blaze).toBeNull();
+    expect(feed.items[1].blaze).toBeNull();
+  });
+
+  it("rejects invalid blaze slugs (XSS attempt)", () => {
+    const xml = `<?xml version="1.0"?>
+<rss version="2.0" xmlns:grove="https://grove.place/xmlns/grove/1.0">
+  <channel>
+    <title>Blog</title>
+    <link>https://test.grove.place</link>
+    <description>Desc</description>
+    <item>
+      <title>Evil Post</title>
+      <link>https://test.grove.place/garden/evil</link>
+      <grove:blaze>&lt;script&gt;alert(1)&lt;/script&gt;</grove:blaze>
+    </item>
+  </channel>
+</rss>`;
+
+    const feed = parseFeed(xml);
+    // Invalid slug format — should be silently dropped
+    expect(feed.items[0].blaze).toBeNull();
+  });
+
+  it("rejects blaze slugs with uppercase or spaces", () => {
+    const xml = `<?xml version="1.0"?>
+<rss version="2.0" xmlns:grove="https://grove.place/xmlns/grove/1.0">
+  <channel>
+    <title>Blog</title>
+    <link>https://test.grove.place</link>
+    <description>Desc</description>
+    <item>
+      <title>Post</title>
+      <link>https://test.grove.place/garden/post</link>
+      <grove:blaze>Food Review</grove:blaze>
+    </item>
+  </channel>
+</rss>`;
+
+    const feed = parseFeed(xml);
+    expect(feed.items[0].blaze).toBeNull();
+  });
 });

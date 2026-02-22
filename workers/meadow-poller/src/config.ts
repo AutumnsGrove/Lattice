@@ -41,6 +41,8 @@ export interface ParsedFeedItem {
   contentEncoded: string | null;
   categories: string[];
   enclosureUrl: string | null;
+  /** Custom blaze slug from grove:blaze RSS extension */
+  blaze: string | null;
 }
 
 // ---------------------------------------------------------------------------
