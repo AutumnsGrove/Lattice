@@ -51,7 +51,7 @@ export const load: PageServerLoad = async ({ parent, platform }) => {
   const [tenantsResult, statsResult] = await Promise.all([
     DB.prepare(
       `SELECT t.id, t.subdomain, t.display_name, t.email, t.plan,
-              COALESCE((SELECT SUM(m.size) FROM media m WHERE m.tenant_id = t.id), 0) as storage_used,
+              COALESCE((SELECT SUM(COALESCE(g.file_size, 0)) FROM gallery_images g WHERE g.tenant_id = t.id), 0) as storage_used,
               COALESCE((SELECT COUNT(*) FROM posts p WHERE p.tenant_id = t.id), 0) as post_count,
               t.custom_domain, t.theme, t.active, t.created_at, t.updated_at
        FROM tenants t
@@ -71,7 +71,7 @@ export const load: PageServerLoad = async ({ parent, platform }) => {
          COUNT(CASE WHEN plan = 'sapling' THEN 1 END) as sapling,
          COUNT(CASE WHEN plan = 'oak' THEN 1 END) as oak,
          COUNT(CASE WHEN plan = 'evergreen' THEN 1 END) as evergreen,
-         COALESCE((SELECT SUM(size) FROM media), 0) as total_storage,
+         COALESCE((SELECT SUM(COALESCE(file_size, 0)) FROM gallery_images), 0) as total_storage,
          COALESCE((SELECT COUNT(*) FROM posts), 0) as total_posts
        FROM tenants`,
     )
