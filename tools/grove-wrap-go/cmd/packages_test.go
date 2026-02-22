@@ -140,18 +140,23 @@ func TestAvailableScripts(t *testing.T) {
 }
 
 func TestFileExists(t *testing.T) {
-	// File that should exist
-	if !fileExists("/home/user/Lattice/tools/grove-wrap-go/go.mod") {
-		t.Skip("go.mod not found")
+	tmp := t.TempDir()
+
+	// Create a real file
+	testFile := filepath.Join(tmp, "exists.txt")
+	os.WriteFile(testFile, []byte("hello"), 0644)
+
+	if !fileExists(testFile) {
+		t.Error("existing file should return true")
 	}
 
 	// File that shouldn't exist
-	if fileExists("/home/user/Lattice/nonexistent-file-12345") {
+	if fileExists(filepath.Join(tmp, "nonexistent-file-12345")) {
 		t.Error("nonexistent file should return false")
 	}
 
 	// Directory should return false
-	if fileExists("/home/user/Lattice/tools") {
+	if fileExists(tmp) {
 		t.Error("directory should return false for fileExists")
 	}
 }

@@ -38,16 +38,7 @@ var backupListCmd = &cobra.Command{
 			return fmt.Errorf("wrangler error: %w", err)
 		}
 
-		var backups []map[string]interface{}
-		if err := json.Unmarshal([]byte(output), &backups); err != nil {
-			// Try array wrapper
-			var wrapper []map[string]interface{}
-			if json.Unmarshal([]byte(output), &wrapper) == nil && len(wrapper) > 0 {
-				if results, ok := wrapper[0]["results"].([]interface{}); ok {
-					backups = interfaceToMaps(results)
-				}
-			}
-		}
+		backups := parseD1Results(output)
 
 		if cfg.JSONMode {
 			result := map[string]interface{}{
