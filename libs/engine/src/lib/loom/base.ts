@@ -8,6 +8,8 @@
  * - Promise dedup locks (this.locks)
  * - SQL helpers (this.sql)
  * - JSON key-value store (this.store)
+ * - Queue event emission (this.emit)
+ * - Workflow creation (this.workflow)
  * - Declarative route matching
  * - Consistent error responses
  *
@@ -30,7 +32,14 @@
 
 /// <reference types="@cloudflare/workers-types" />
 
-import type { LoomRoute, LoomConfig, LoomRequestContext } from "./types.js";
+import type {
+  LoomRoute,
+  LoomConfig,
+  LoomRequestContext,
+  LoomQueueMessage,
+  LoomEmitOptions,
+  LoomWorkflowOptions,
+} from "./types.js";
 import { LoomLogger } from "./logger.js";
 import { AlarmScheduler } from "./alarm.js";
 import { WebSocketManager } from "./websocket.js";
@@ -266,6 +275,144 @@ export abstract class LoomDO<
    */
   protected async persistState(): Promise<void> {
     // Default: no-op. Subclasses that use markDirty() should override this.
+  }
+
+  // ════════════════════════════════════════════════════════════════════
+  // Event emission — Queue + Workflow integration
+  // ════════════════════════════════════════════════════════════════════
+
+  /**
+   * Send a message to a Cloudflare Queue.
+   *
+   * The queue binding is looked up by name from `this.env`. DOs that
+   * need to emit must have the queue binding in their wrangler.toml.
+   *
+   * Messages are wrapped in a `LoomQueueMessage` envelope with the
+   * DO name, ID, event type, and timestamp for consumer routing.
+   *
+   * @param queueBinding - The env binding name (e.g. "MODERATION_QUEUE")
+   * @param type - Event type string for consumer routing (e.g. "moderation.scan")
+   * @param payload - The event payload
+   * @param options - Optional delay, etc.
+   *
+   * @example
+   * ```typescript
+   * // In a DO route handler or alarm:
+   * await this.emit("MODERATION_QUEUE", "moderation.scan", {
+   *   contentId: post.id,
+   *   contentType: "blog_post",
+   *   text: post.markdown_content,
+   * });
+   * ```
+   */
+  protected async emit<T>(
+    queueBinding: string,
+    type: string,
+    payload: T,
+    options?: LoomEmitOptions,
+  ): Promise<void> {
+    const queue = this.env[queueBinding] as
+      | { send(message: unknown, options?: { delaySeconds?: number }): Promise<void> }
+      | undefined;
+
+    if (!queue || typeof queue.send !== "function") {
+      logLoomError(LOOM_ERRORS.EMIT_NO_QUEUE, {
+        doName: this._config.name,
+        doId: this.state.id.toString(),
+        queueBinding,
+      });
+      throw new Error(
+        `Queue binding "${queueBinding}" not found. Add it to wrangler.toml.`,
+      );
+    }
+
+    const message: LoomQueueMessage<T> = {
+      type,
+      payload,
+      source: {
+        do: this._config.name,
+        id: this.state.id.toString(),
+      },
+      timestamp: new Date().toISOString(),
+    };
+
+    try {
+      await queue.send(message, {
+        delaySeconds: options?.delaySeconds,
+      });
+      this.log.info("Event emitted", { type, queueBinding });
+    } catch (err) {
+      logLoomError(LOOM_ERRORS.EMIT_FAILED, {
+        doName: this._config.name,
+        doId: this.state.id.toString(),
+        type,
+        queueBinding,
+        cause: err,
+      });
+      throw err;
+    }
+  }
+
+  /**
+   * Create a Cloudflare Workflow instance.
+   *
+   * The workflow binding is looked up by name from `this.env`. DOs that
+   * need to trigger workflows must have the binding in their wrangler.toml.
+   *
+   * @param workflowBinding - The env binding name (e.g. "EXPORT_WORKFLOW")
+   * @param params - Parameters passed to the workflow's `run()` method
+   * @param options - Optional instance ID for deduplication
+   * @returns The workflow instance ID
+   *
+   * @example
+   * ```typescript
+   * // Trigger an export workflow from a DO:
+   * const instanceId = await this.workflow("EXPORT_WORKFLOW", {
+   *   exportId: "exp_123",
+   *   tenantId: "tenant_abc",
+   *   mode: "blog",
+   * }, { id: `export:${tenantId}:${exportId}` });
+   * ```
+   */
+  protected async workflow<T>(
+    workflowBinding: string,
+    params: T,
+    options?: LoomWorkflowOptions,
+  ): Promise<string> {
+    const binding = this.env[workflowBinding] as
+      | { create(options?: { id?: string; params?: unknown }): Promise<{ id: string }> }
+      | undefined;
+
+    if (!binding || typeof binding.create !== "function") {
+      logLoomError(LOOM_ERRORS.WORKFLOW_NO_BINDING, {
+        doName: this._config.name,
+        doId: this.state.id.toString(),
+        workflowBinding,
+      });
+      throw new Error(
+        `Workflow binding "${workflowBinding}" not found. Add it to wrangler.toml.`,
+      );
+    }
+
+    try {
+      const instance = await binding.create({
+        id: options?.id,
+        params,
+      });
+      this.log.info("Workflow created", {
+        workflowBinding,
+        instanceId: instance.id,
+      });
+      return instance.id;
+    } catch (err) {
+      logLoomError(LOOM_ERRORS.WORKFLOW_FAILED, {
+        doName: this._config.name,
+        doId: this.state.id.toString(),
+        workflowBinding,
+        cause: err,
+      });
+      throw err;
+    }
   }
 
   // ════════════════════════════════════════════════════════════════════

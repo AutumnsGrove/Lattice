@@ -135,6 +135,40 @@ export const LOOM_ERRORS = {
   },
 
   // ─────────────────────────────────────────────────────────────────────────
+  // Event Emission — Queue + Workflow (070-079)
+  // ─────────────────────────────────────────────────────────────────────────
+
+  EMIT_FAILED: {
+    code: "GROVE-LOOM-070",
+    category: "bug" as const,
+    userMessage: "A background task could not be started. Please try again.",
+    adminMessage: "Failed to send message to CF Queue from DO.",
+  },
+
+  EMIT_NO_QUEUE: {
+    code: "GROVE-LOOM-071",
+    category: "bug" as const,
+    userMessage: "Service temporarily unavailable.",
+    adminMessage:
+      "emit() called but no queue binding found in env. Check wrangler.toml.",
+  },
+
+  WORKFLOW_FAILED: {
+    code: "GROVE-LOOM-072",
+    category: "bug" as const,
+    userMessage: "A background process could not be started. Please try again.",
+    adminMessage: "Failed to create CF Workflow instance from DO.",
+  },
+
+  WORKFLOW_NO_BINDING: {
+    code: "GROVE-LOOM-073",
+    category: "bug" as const,
+    userMessage: "Service temporarily unavailable.",
+    adminMessage:
+      "workflow() called but no workflow binding found in env. Check wrangler.toml.",
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
   // Internal / Catch-All (080-099)
   // ─────────────────────────────────────────────────────────────────────────
 

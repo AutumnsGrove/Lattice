@@ -18,6 +18,9 @@ export type {
   LoomLogEntry,
   LoomWebSocketMessage,
   LoomConfig,
+  LoomQueueMessage,
+  LoomEmitOptions,
+  LoomWorkflowOptions,
 } from "./types.js";
 
 // Base class
