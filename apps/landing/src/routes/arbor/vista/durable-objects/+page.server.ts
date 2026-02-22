@@ -20,7 +20,7 @@ interface DOStatsRow {
 export const load: PageServerLoad = async ({ parent, platform }) => {
 	await parent();
 
-	const db = platform?.env?.DB;
+	const db = platform?.env?.OBS_DB;
 
 	if (!db) {
 		return {

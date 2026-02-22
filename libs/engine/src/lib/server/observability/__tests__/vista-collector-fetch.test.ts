@@ -27,6 +27,7 @@ interface MockEnv {
 	CF_OBSERVABILITY_TOKEN?: string;
 	CF_ACCOUNT_ID: string;
 	DB: D1Database;
+	OBS_DB: D1Database;
 }
 
 type CollectionResult = Record<string, unknown>;
@@ -84,6 +85,7 @@ function makeEnv(overrides: Partial<MockEnv> = {}): MockEnv {
 		CF_ACCOUNT_ID: "test-account-id",
 		CF_OBSERVABILITY_TOKEN: "secret-token-abc",
 		DB: {} as D1Database,
+		OBS_DB: {} as D1Database,
 		...overrides,
 	};
 }

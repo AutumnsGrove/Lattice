@@ -17,7 +17,7 @@ import type { CollectionStatus } from "@autumnsgrove/lattice/server/observabilit
 export const load: PageServerLoad = async ({ parent, platform }) => {
 	await parent(); // ensures Wayfinder gate has run
 
-	const db = platform?.env?.DB;
+	const db = platform?.env?.OBS_DB;
 
 	if (!db) {
 		return {

@@ -11,7 +11,7 @@ import type { CollectionStatus } from "@autumnsgrove/lattice/server/observabilit
 export const load: PageServerLoad = async ({ parent, platform }) => {
 	await parent();
 
-	const db = platform?.env?.DB;
+	const db = platform?.env?.OBS_DB;
 
 	if (!db) {
 		return { metrics: [], collectionStatus: null as CollectionStatus | null, dbAvailable: false };

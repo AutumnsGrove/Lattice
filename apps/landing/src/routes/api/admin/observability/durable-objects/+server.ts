@@ -23,7 +23,7 @@ interface DOStatsRow {
 }
 
 export const GET: RequestHandler = async ({ platform, locals }) => {
-	const db = platform?.env?.DB;
+	const db = platform?.env?.OBS_DB;
 	if (!db)
 		return json(
 			{ error: "GROVE-OBS-503", error_description: "Database unavailable" },

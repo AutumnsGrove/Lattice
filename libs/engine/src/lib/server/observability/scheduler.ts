@@ -29,6 +29,7 @@ import { aggregateFirefly } from "./aggregators/firefly-aggregator.js";
 
 export interface ObservabilityEnv {
 	DB: D1Database;
+	OBS_DB: D1Database;
 	CF_ACCOUNT_ID: string;
 	CF_OBSERVABILITY_TOKEN?: string;
 }
@@ -52,7 +53,7 @@ export function createObservabilityCollector(env: ObservabilityEnv): Observabili
 			let alertsResolved = 0;
 
 			// Write collection log entry at start
-			const logResult = await env.DB.prepare(
+			const logResult = await env.OBS_DB.prepare(
 				`INSERT INTO observability_collection_log (started_at, trigger) VALUES (?, ?)`,
 			)
 				.bind(startedAtEpoch, trigger)
@@ -67,10 +68,10 @@ export function createObservabilityCollector(env: ObservabilityEnv): Observabili
 			// STEP 1: Cloudflare API collectors — run in parallel, fail safely
 			// =========================================================================
 			const cfResults = await Promise.allSettled([
-				collectWorkerMetrics(env.CF_ACCOUNT_ID, env.CF_OBSERVABILITY_TOKEN, env.DB),
-				collectD1Metrics(env.CF_ACCOUNT_ID, env.CF_OBSERVABILITY_TOKEN, env.DB),
-				collectR2Metrics(env.CF_ACCOUNT_ID, env.CF_OBSERVABILITY_TOKEN, env.DB),
-				collectKVMetrics(env.CF_ACCOUNT_ID, env.CF_OBSERVABILITY_TOKEN, env.DB),
+				collectWorkerMetrics(env.CF_ACCOUNT_ID, env.CF_OBSERVABILITY_TOKEN, env.OBS_DB),
+				collectD1Metrics(env.CF_ACCOUNT_ID, env.CF_OBSERVABILITY_TOKEN, env.OBS_DB),
+				collectR2Metrics(env.CF_ACCOUNT_ID, env.CF_OBSERVABILITY_TOKEN, env.OBS_DB),
+				collectKVMetrics(env.CF_ACCOUNT_ID, env.CF_OBSERVABILITY_TOKEN, env.OBS_DB),
 			]);
 
 			for (const result of cfResults) {
@@ -100,7 +101,7 @@ export function createObservabilityCollector(env: ObservabilityEnv): Observabili
 			// =========================================================================
 			// STEP 2: Health checks — all workers in parallel
 			// =========================================================================
-			const healthResult = await Promise.allSettled([runHealthChecks(env.DB)]);
+			const healthResult = await Promise.allSettled([runHealthChecks(env.OBS_DB)]);
 			for (const result of healthResult) {
 				if (result.status === "fulfilled") {
 					const r = result.value;
@@ -117,7 +118,7 @@ export function createObservabilityCollector(env: ObservabilityEnv): Observabili
 			// =========================================================================
 			// STEP 3: DO metrics
 			// =========================================================================
-			const doResult = await Promise.allSettled([collectDOMetrics(env.DB)]);
+			const doResult = await Promise.allSettled([collectDOMetrics(env.OBS_DB)]);
 			for (const result of doResult) {
 				if (result.status === "fulfilled") {
 					const r = result.value;
@@ -165,7 +166,7 @@ export function createObservabilityCollector(env: ObservabilityEnv): Observabili
 			// STEP 5: Alert threshold evaluation
 			// =========================================================================
 			try {
-				const alertResult = await evaluateAlerts(env.DB, collectors);
+				const alertResult = await evaluateAlerts(env.OBS_DB, collectors);
 				alertsTriggered = alertResult.triggered;
 				alertsResolved = alertResult.resolved;
 			} catch (err) {
@@ -185,7 +186,7 @@ export function createObservabilityCollector(env: ObservabilityEnv): Observabili
 			// =========================================================================
 			const hourOfDay = new Date().getUTCHours();
 			if (trigger === "cron" && hourOfDay === 0) {
-				await runRetentionCleanup(env.DB).catch((err) => {
+				await runRetentionCleanup(env.OBS_DB).catch((err) => {
 					console.error("[Vista Collector] Retention cleanup failed:", err);
 					errors.push(`retention-cleanup: ${err instanceof Error ? err.message : String(err)}`);
 				});
@@ -209,7 +210,7 @@ export function createObservabilityCollector(env: ObservabilityEnv): Observabili
 
 			// Update the collection log
 			if (logId) {
-				await env.DB.prepare(
+				await env.OBS_DB.prepare(
 					`UPDATE observability_collection_log
            SET completed_at = ?, duration_ms = ?, collectors_run = ?,
                collectors_failed = ?, error_summary = ?

@@ -8,7 +8,7 @@ import { getCostMetrics, PRICING_LAST_VERIFIED } from "@autumnsgrove/lattice/ser
 export const load: PageServerLoad = async ({ parent, platform }) => {
 	await parent();
 
-	const db = platform?.env?.DB;
+	const db = platform?.env?.OBS_DB;
 
 	if (!db) {
 		return { costs: [], pricingLastVerified: PRICING_LAST_VERIFIED, dbAvailable: false };
