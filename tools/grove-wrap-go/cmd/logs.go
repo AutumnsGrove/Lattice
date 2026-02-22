@@ -2,9 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-	"os/signal"
-	"syscall"
 
 	"github.com/spf13/cobra"
 
@@ -92,11 +89,4 @@ func init() {
 	logsCmd.Flags().String("search", "", "Filter by message content")
 	logsCmd.Flags().Float64("sampling-rate", 0, "Sampling rate (0.0 to 1.0)")
 	logsCmd.Flags().String("ip", "", "Filter by client IP")
-
-	// Handle Ctrl+C gracefully
-	go func() {
-		sigCh := make(chan os.Signal, 1)
-		signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
-		<-sigCh
-	}()
 }

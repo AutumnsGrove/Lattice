@@ -157,6 +157,13 @@ var backupDownloadCmd = &cobra.Command{
 			}
 			outputFile = fmt.Sprintf("%s-%s.sql", dbName, short)
 		}
+		// Prevent path traversal in output
+		if strings.Contains(outputFile, "..") {
+			return fmt.Errorf("output path must not contain '..': %s", outputFile)
+		}
+		if filepath.IsAbs(outputFile) {
+			return fmt.Errorf("output path must be relative: %s", outputFile)
+		}
 
 		wranglerArgs := []string{"d1", "backup", "download", dbName, backupID, "--output", outputFile}
 

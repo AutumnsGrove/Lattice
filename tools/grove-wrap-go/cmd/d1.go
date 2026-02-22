@@ -387,7 +387,7 @@ var d1MigrateCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("invalid path: %w", err)
 		}
-		info, err := os.Stat(absPath)
+		info, err := os.Lstat(absPath)
 		if err != nil {
 			return fmt.Errorf("file not found: %s", filePath)
 		}

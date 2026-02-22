@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/safety"
@@ -55,10 +56,7 @@ func TestValidateCFName(t *testing.T) {
 }
 
 func TestValidateCFNameTooLong(t *testing.T) {
-	long := ""
-	for i := 0; i < maxCFNameLen+1; i++ {
-		long += "a"
-	}
+	long := strings.Repeat("a", maxCFNameLen+1)
 	err := validateCFName(long, "test")
 	if err == nil {
 		t.Errorf("validateCFName should reject strings longer than %d", maxCFNameLen)
@@ -101,10 +99,7 @@ func TestValidateCFKey(t *testing.T) {
 }
 
 func TestValidateCFKeyTooLong(t *testing.T) {
-	long := ""
-	for i := 0; i < maxCFKeyLen+1; i++ {
-		long += "k"
-	}
+	long := strings.Repeat("k", maxCFKeyLen+1)
 	err := validateCFKey(long)
 	if err == nil {
 		t.Errorf("validateCFKey should reject keys longer than %d", maxCFKeyLen)
@@ -204,10 +199,7 @@ func TestIsValidIdentifier(t *testing.T) {
 }
 
 func TestIsValidIdentifierTooLong(t *testing.T) {
-	long := ""
-	for i := 0; i < 129; i++ {
-		long += "a"
-	}
+	long := strings.Repeat("a", 129)
 	if isValidIdentifier(long) {
 		t.Error("isValidIdentifier should reject strings > 128 chars")
 	}
@@ -267,10 +259,7 @@ func TestFormatD1Value(t *testing.T) {
 	}
 
 	// Long string truncation
-	long := ""
-	for i := 0; i < 60; i++ {
-		long += "x"
-	}
+	long := strings.Repeat("x", 60)
 	got := formatD1Value(long)
 	if len(got) != 50 {
 		t.Errorf("formatD1Value should truncate to 50, got len=%d", len(got))

@@ -223,7 +223,7 @@ var flagEnableCmd = &cobra.Command{
 			"updated_at": time.Now().UTC().Format(time.RFC3339),
 		}
 
-		// Merge extra metadata if provided
+		// Merge extra metadata if provided (set reserved fields last to prevent override)
 		if metadata != "" {
 			if len(metadata) > maxCFMetadataLen {
 				return fmt.Errorf("metadata too large (max %d bytes)", maxCFMetadataLen)
@@ -235,6 +235,9 @@ var flagEnableCmd = &cobra.Command{
 			for k, v := range extra {
 				flagValue[k] = v
 			}
+			// Re-assert reserved fields so metadata cannot override them
+			flagValue["enabled"] = true
+			flagValue["updated_at"] = time.Now().UTC().Format(time.RFC3339)
 		}
 
 		valueJSON, _ := json.Marshal(flagValue)

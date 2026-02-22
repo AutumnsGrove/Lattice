@@ -248,6 +248,9 @@ var r2GetCmd = &cobra.Command{
 		if strings.Contains(outputPath, "..") {
 			return fmt.Errorf("output path must not contain '..': %s", outputPath)
 		}
+		if filepath.IsAbs(outputPath) {
+			return fmt.Errorf("output path must be relative: %s", outputPath)
+		}
 
 		result, err := exec.Wrangler("r2", "object", "get", bucket, key, "--file", outputPath)
 		if err != nil {
