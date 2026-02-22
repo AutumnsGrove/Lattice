@@ -1,14 +1,14 @@
 ---
 aliases: []
 date created: Wednesday, February 5th 2026
-date modified: Tuesday, February 17th 2026
+date modified: Sunday, February 22nd 2026
 tags:
   - infrastructure
   - ci-cd
   - durable-objects
   - cloudflare-workers
 type: tech-spec
-lastUpdated: "2026-02-18"
+lastUpdated: "2026-02-22"
 ---
 
 # Queen Firefly: Pool Coordinator
@@ -724,6 +724,154 @@ These remain from the original planning. Each needs its own investigation before
 
 ---
 
+## Cloudflare Workflows Integration
+
+*Added February 2026. The Queen gains durable multi-step orchestration.*
+
+The original design uses a 60-second alarm cycle for pool management. This works for simple check-and-act loops, but provisioning a server is a multi-step process that can take 30-90 seconds and may fail at any point. CF Workflows give us durable checkpointing for these longer operations.
+
+### What Moves to Workflows
+
+| Operation | Before (Alarm) | After (Workflow) |
+|-----------|----------------|------------------|
+| **Ignite a runner** | Alarm fires, calls Hetzner API, hopes it works | `IgniteWorkflow` with steps: create server, wait for ready, run bootstrap, register with Queen |
+| **Fade a runner** | Alarm fires, calls Hetzner delete | `FadeWorkflow` with steps: drain jobs, snapshot state (if configured), delete server, confirm deletion |
+| **CI job lifecycle** | WebSocket claim + heartbeat | `CIJobWorkflow` with steps: claim runner, inject secrets, execute pipeline steps, collect artifacts, upload to R2, report result |
+
+### What Stays in the Queen DO
+
+The Queen stays the coordinator. She holds state, makes decisions, and triggers workflows.
+
+- Job queue (SQLite)
+- Runner registry (SQLite)
+- Consumer profiles
+- Pool sizing decisions (min warm, max total)
+- WebSocket connections from runners
+- The 60-second alarm cycle (still useful for pool health checks)
+
+### IgniteWorkflow
+
+The most important workflow. Replaces the fire-and-hope ignition pattern.
+
+```typescript
+export class IgniteWorkflow extends WorkflowEntrypoint<Env, IgniteParams> {
+  async run(event: WorkflowEvent<IgniteParams>, step: WorkflowStep) {
+    const { consumer, provider, config } = event.payload;
+
+    // Step 1: Create server via Firefly SDK
+    const server = await step.do('create-server', async () => {
+      return await firefly.ignite(provider, config);
+    });
+
+    // Step 2: Wait for server to be ready (poll with sleep)
+    await step.do('wait-ready', async () => {
+      return await firefly.waitForReady(server.id, { timeout: 120_000 });
+    });
+
+    // Step 3: Bootstrap (install runner agent, register with Queen)
+    await step.do('bootstrap', async () => {
+      return await firefly.bootstrap(server.id, consumer.bootstrapScript);
+    });
+
+    // Step 4: Register runner in Queen DO
+    await step.do('register', async () => {
+      await queenDO.registerRunner({
+        serverId: server.id,
+        ip: server.ip,
+        consumer: consumer.name,
+        status: 'warm',
+      });
+    });
+  }
+}
+```
+
+If the server creation succeeds but bootstrap fails, the Workflow resumes from the bootstrap step. No orphaned servers that the Queen doesn't know about.
+
+### CIJobWorkflow
+
+Replaces the WebSocket claim-heartbeat-complete flow for CI jobs with a durable pipeline.
+
+```typescript
+export class CIJobWorkflow extends WorkflowEntrypoint<Env, CIJobParams> {
+  async run(event: WorkflowEvent<CIJobParams>, step: WorkflowStep) {
+    const { jobId, runnerId, pipeline } = event.payload;
+
+    // Step 1: Inject secrets from Worker env
+    const secrets = await step.do('inject-secrets', async () => {
+      return await this.resolveSecrets(pipeline.secrets);
+    });
+
+    // Step 2: Execute each pipeline step
+    for (const [i, pipelineStep] of pipeline.steps.entries()) {
+      await step.do(`step-${i}-${pipelineStep.name}`, async () => {
+        return await this.executeStep(runnerId, pipelineStep, secrets);
+      });
+    }
+
+    // Step 3: Collect and upload artifacts
+    if (pipeline.artifacts?.length) {
+      await step.do('artifacts', async () => {
+        return await this.uploadArtifacts(runnerId, pipeline.artifacts);
+      });
+    }
+
+    // Step 4: Report result to Queen
+    await step.do('report', async () => {
+      await queenDO.completeJob(jobId, { status: 'success' });
+    });
+  }
+}
+```
+
+### How Queen Triggers Workflows
+
+The Queen DO uses the new Loom `this.workflow()` method:
+
+```typescript
+// In Queen DO alarm handler, when a job needs a runner:
+if (pendingJobs.length > 0 && warmRunners.length === 0) {
+  const instanceId = await this.workflow("IGNITE_WORKFLOW", {
+    consumer: consumerProfile,
+    provider: "hetzner",
+    config: { size: "cx22", region: "fsn1", image: "ubuntu-24.04" },
+  }, {
+    id: `ignite:${consumer}:${Date.now()}`,
+  });
+  this.log.info("Ignite workflow started", { instanceId });
+}
+```
+
+### Wrangler Bindings
+
+```toml
+[[workflows]]
+name = "ignite-workflow"
+binding = "IGNITE_WORKFLOW"
+class_name = "IgniteWorkflow"
+
+[[workflows]]
+name = "fade-workflow"
+binding = "FADE_WORKFLOW"
+class_name = "FadeWorkflow"
+
+[[workflows]]
+name = "ci-job-workflow"
+binding = "CI_JOB_WORKFLOW"
+class_name = "CIJobWorkflow"
+```
+
+### Phase Mapping
+
+Workflows slot into the existing implementation phases:
+
+- **Phase 0:** No workflows yet. Manual ignition via `gw queen ignite`.
+- **Phase 1:** Add `IgniteWorkflow` and `FadeWorkflow`. Queen triggers these instead of raw Hetzner API calls from the alarm.
+- **Phase 2:** Add `CIJobWorkflow`. Pipeline execution becomes durable. Partial pipeline failures resume from the last completed step.
+- **Phase 3:** Workflow metrics feed into cost tracking and the web dashboard.
+
+---
+
 ## Implementation Phases
 
 ### Phase 0: The Queen Wakes
@@ -951,6 +1099,9 @@ tools/gw/src/gw/commands/
 - [ ] Runner WebSocket protocol (register, heartbeat, claim, complete)
 - [ ] Log streaming via WebSocket relay
 - [ ] `gw queen swarm` commands
+- [ ] `IgniteWorkflow`: create server, wait ready, bootstrap, register
+- [ ] `FadeWorkflow`: drain, snapshot, delete, confirm
+- [ ] Wire Queen DO `this.workflow()` for ignite/fade triggers
 
 ### Phase 2: The Hive Mind
 
@@ -959,6 +1110,7 @@ tools/gw/src/gw/commands/
 - [ ] Artifact upload to R2
 - [ ] `gw ci` command suite
 - [ ] Pipeline validation dry-run
+- [ ] `CIJobWorkflow`: claim, inject secrets, execute steps, upload artifacts, report
 
 ### Phase 3: The Sovereign's Court
 

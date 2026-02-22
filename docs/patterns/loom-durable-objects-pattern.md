@@ -3,7 +3,7 @@ title: Loom — Real-Time Coordination
 description: 'Cloudflare Durable Objects for auth, scaling, and real-time features'
 category: patterns
 icon: spool
-lastUpdated: '2026-01-01'
+lastUpdated: '2026-02-22'
 ---
 # Loom: Real-Time Coordination
 
@@ -939,6 +939,94 @@ await this.ctx.storage.sql.exec(
   fileId, r2Key, size
 );
 ```
+
+---
+
+## Queue + Workflow Integration (emit & workflow)
+
+As of February 2026, the LoomDO base class provides two new methods that make every DO a queue producer and workflow trigger. No subclass changes needed. Just add the bindings to wrangler.toml and call the methods.
+
+### this.emit() — Send to a CF Queue
+
+```typescript
+// In any DO handler or alarm:
+await this.emit("MODERATION_QUEUE", "moderation.text_scan", {
+  contentId: post.id,
+  tenantId: this.state_data.tenantId,
+  text: post.markdown_content,
+  contentType: "blog_post",
+});
+```
+
+Every message is wrapped in a `LoomQueueMessage` envelope:
+
+```typescript
+interface LoomQueueMessage<T> {
+  type: string;       // Event type for consumer routing
+  payload: T;         // Your data
+  source: {
+    do: string;       // "PostMetaDO"
+    id: string;       // DO instance ID
+  };
+  timestamp: string;  // ISO 8601
+}
+```
+
+**Delayed delivery:**
+```typescript
+// Send with 60-second delay (e.g. for debounced moderation after edits)
+await this.emit("MODERATION_QUEUE", "moderation.text_scan", payload, {
+  delaySeconds: 60,
+});
+```
+
+**Wrangler binding:**
+```toml
+[[queues.producers]]
+binding = "MODERATION_QUEUE"
+queue = "grove-moderation"
+```
+
+### this.workflow() — Create a CF Workflow Instance
+
+```typescript
+// Trigger a durable workflow from a DO:
+const instanceId = await this.workflow("EXPORT_WORKFLOW", {
+  exportId: "exp_123",
+  tenantId: "tenant_abc",
+  mode: "blog",
+  includeImages: true,
+}, {
+  id: `export:tenant_abc:exp_123`,  // Deterministic ID prevents duplicates
+});
+```
+
+**Wrangler binding:**
+```toml
+[[workflows]]
+name = "export-workflow"
+binding = "EXPORT_WORKFLOW"
+class_name = "ExportWorkflow"
+```
+
+### When to Use Which
+
+| Pattern | Use When | Example |
+|---------|----------|---------|
+| **emit()** | Fire-and-forget. Consumer handles retries. | Moderation scan, email send, analytics event |
+| **workflow()** | Multi-step process with checkpoints. | Export, onboarding drip, provisioning |
+| **alarm** | Self-scheduling periodic work within the DO. | Flush buffer, refresh cache, heartbeat |
+| **loomFetch** | Direct DO-to-DO call, need response now. | Get config, validate session |
+
+### Error Handling
+
+Both methods throw on failure with structured Signpost errors:
+- `GROVE-LOOM-070` — Queue send failed
+- `GROVE-LOOM-071` — Queue binding not found
+- `GROVE-LOOM-072` — Workflow creation failed
+- `GROVE-LOOM-073` — Workflow binding not found
+
+DOs should catch these in handlers and return appropriate responses. In alarms, the base class already catches and logs via `ALARM_HANDLER_ERROR`.
 
 ---
 

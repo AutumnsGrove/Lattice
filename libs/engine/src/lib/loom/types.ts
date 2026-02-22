@@ -101,3 +101,48 @@ export interface LoomConfig {
    */
   hibernation?: boolean;
 }
+
+// ============================================================================
+// Event Types — Queue + Workflow Integration
+// ============================================================================
+
+/**
+ * A message to be sent to a Cloudflare Queue.
+ * The `type` field acts as a discriminator for consumers.
+ */
+export interface LoomQueueMessage<T = unknown> {
+  /** Event type identifier (e.g. "email.send", "moderation.scan"). */
+  type: string;
+  /** The event payload. */
+  payload: T;
+  /** DO that produced this event. */
+  source: {
+    do: string;
+    id: string;
+  };
+  /** ISO timestamp of when the event was created. */
+  timestamp: string;
+}
+
+/**
+ * Options for emitting a queue message.
+ */
+export interface LoomEmitOptions {
+  /**
+   * Delay delivery by this many seconds (max 43200 = 12 hours).
+   * Maps to the CF Queue `delaySeconds` option.
+   */
+  delaySeconds?: number;
+}
+
+/**
+ * Options for creating a Workflow instance.
+ */
+export interface LoomWorkflowOptions {
+  /**
+   * Optional workflow instance ID. If not provided, a random ID is generated.
+   * Use a deterministic ID when you want to prevent duplicate workflow runs
+   * (e.g. `export:${tenantId}:${exportId}`).
+   */
+  id?: string;
+}
