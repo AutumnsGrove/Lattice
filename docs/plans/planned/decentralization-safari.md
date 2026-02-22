@@ -113,9 +113,22 @@ Grove's situation is arguably more honest but also more exposed: the entire stac
 | AI Gateway | Per-tenant AI routing | Low — CF-proprietary |
 
 **The honest assessment:**
-- **Data is portable.** D1 is SQLite (downloadable). R2 is S3-compatible (standard tooling). Content exports are Markdown/JSON. This is genuinely good.
+- **Data is portable.** D1 is SQLite (downloadable). R2 is S3-compatible (standard tooling). Content exports are Markdown/JSON. The `.grove` file format spec (`docs/specs/file-formats-spec.md`) already defines a comprehensive portable archive format. This is genuinely good.
 - **Logic is entangled.** Workers runtime, Durable Objects, service bindings, KV — the _code_ is deeply coupled to CF's execution model.
-- **No abstraction layer.** `libs/shutter/cloudflare/` exists for Shade, but most services call CF APIs directly.
+- **No abstraction layer — yet.** `libs/shutter/cloudflare/` exists for Shade, but most services call CF APIs directly. This is the biggest opportunity for improvement.
+
+**The Server SDK vision:**
+
+What if all Cloudflare interactions were abstracted behind a **Server SDK** — generic enough to eventually support bindings for other infrastructure providers (Azure, GCP, AWS, Vercel, whoever)?
+
+- Every call to D1, KV, R2, Workers, service bindings goes through the SDK instead of hitting CF APIs directly
+- The SDK maintains the Signpost error code system (`docs/developer/signpost-error-codes.md`) with its own prefix (e.g., `SRV-001` through `SRV-099`) following the existing category ranges
+- The SDK could be consumed by `gw` itself, simplifying the CLI's infrastructure operations
+- Adding a new provider becomes adding a set of bindings/adapters, not rewriting application code
+- Even while running 100% on Cloudflare underneath, the abstraction means migration becomes _mechanical_ rather than _architectural_ — swap the adapter, keep the interface
+- This follows the same pattern as Loom (abstracts Durable Objects), Threshold (abstracts rate limiting), and Firefly (abstracts ephemeral servers) — it's the Grove SDK philosophy applied to the infrastructure layer itself
+
+**This deserves its own spec.** See: Server SDK spec (to be written via /swan-design).
 
 ### The honest tension
 
@@ -138,9 +151,11 @@ The goal isn't to eliminate CF dependency (that's unrealistic and wasteful). It'
    - Content is Markdown/JSON → universal formats
    - **Action:** Add automated monthly data integrity checks that verify export completeness
 
-2. **Document the migration playbook.**
-   - Write a "Break Glass: Moving Off Cloudflare" document that maps every CF service to its portable equivalent (Workers → AWS Lambda/Deno Deploy, D1 → Turso/PlanetScale, R2 → S3/Backblaze, KV → Redis/Upstash, DOs → Redis pub/sub or Fly machines)
+2. **Document the migration playbook — and make the SDK the execution path.**
+   - Write a "Break Glass: Moving Off Cloudflare" document that maps every CF service to its portable equivalent (Workers → AWS Lambda/Deno Deploy, D1 → Turso/PlanetScale, R2 → S3/Backblaze, KV → Redis/Upstash, DOs → Fly machines or Railway)
    - Not because you plan to migrate. Because you _could_. And documenting it keeps you honest about the coupling.
+   - With the Server SDK in place, the playbook becomes more than documentation — it becomes a **concrete implementation plan**: "write these adapter modules, swap this config, deploy." The SDK makes the playbook _executable_, not just aspirational.
+   - **This deserves its own document.** See: Break Glass migration playbook (to be written via /owl-archive).
 
 3. **Accept the Durable Object reality.**
    - DOs are the hardest to migrate — and honestly, they may be irreplaceable for what Grove needs. The Loom SDK depends on DOs for coordination. Even the Firefly SDK (ephemeral servers) uses Loom underneath to track instance state. There's no serverless alternative that provides the same guarantees: persistent WebSocket connections, transactional state, and guaranteed single-instance execution.
@@ -202,7 +217,9 @@ But the deeper question is: **Is "you can download a ZIP" enough?**
 **Commitment: The Escape Hatch Principle — Your Data Leaves Before You Do**
 
 1. **Automated periodic exports via Amber.**
-   - Amber (Grove's media/export service) already handles export generation. Extend it to run automated backups on a configurable schedule — weekly, monthly, or custom.
+   - Amber is Grove's **unified storage management system** — not just media/export, but the visibility and control layer over all uploaded content across every service (blog images, Ivy email attachments, profile assets, themes, fonts, exports). It already has a `StorageRepository` abstraction, quota tracking, R2 integration, and Durable Object-based export processing.
+   - An **Amber SDK** would formalize this into a clean, importable library that any Grove service can use for storage operations — the same way Loom abstracts DOs and Threshold abstracts rate limiting. This SDK feeds directly into the Server SDK vision: Amber becomes the storage adapter that today speaks R2, but tomorrow could speak S3/GCS/Azure Blob.
+   - Extend Amber to run automated backups on a configurable schedule — weekly, monthly, or custom.
    - **Internal backup:** Every export is stored in the user's Amber storage automatically. Your latest backup is always sitting there, ready to download, without you having to remember to request one.
    - **External sync:** Users can optionally connect external storage providers — iCloud, Google Drive, Dropbox, Mega, S3-compatible buckets — and Amber pushes encrypted backups to them on the same schedule. Abstract the provider interface so adding a new one is a config addition, not a code rewrite.
    - **Email-based retrieval:** Allow data exports to be requested by emailing a dedicated address (e.g., `export@grove.place`) from the email associated with your account. If `dave@grove.place` emails asking for Dave's data, he gets a bundled ZIP. If he asks for Sarah's data, the response says "you can only access your own data" — without confirming or denying Sarah's existence (protecting identity disclosure).
@@ -285,6 +302,7 @@ Signature: [ed25519 signature using author's key]
 - **Key generation:** On account creation, generate an Ed25519 keypair. Store the private key encrypted (user's auth token as derivation input). The public key is published at `username.grove.place/.well-known/grove-author.json`.
 - **Signing flow:** On publish/update, hash the post content (title + body + published timestamp) with SHA-256, then sign the hash with the author's private key. Store the signature alongside the post metadata.
 - **Verification:** Anyone with the public key (published at `.well-known/`) can verify the signature against the content hash. A standalone `verify.grove.place` page lets you paste exported content and check signatures without any Grove account.
+- **Human authorship and AI transparency:** This goes beyond just "who wrote it" into "how was it written." Grove already tracks whether a post was composed with Fireside (AI writing assistant) or Wisp (AI features). The signature metadata can include an `authorship` field: `human`, `ai-assisted` (Fireside/Wisp), or `ai-generated`. This transforms verify.grove.place from a simple signature checker into a **provenance oracle** — visitors can see not just that Autumn wrote this post on this date, but that it was written by a human (or that AI assisted, transparently). In a world drowning in AI-generated content, this is a genuine differentiator: Grove content carries proof of its origin story.
 - **Key rotation:** If a user changes auth or requests a new key, the old key is archived (not deleted) so historical signatures remain verifiable. A key history endpoint lists all public keys with validity periods.
 - **Export integration:** Every exported post includes its signature block. The export ZIP includes the full public key and a `verify.html` that runs signature checks locally in the browser — zero server dependency.
 - **What this proves:** "This specific text was published by this specific author at this specific time, and has not been modified since." That's provenance. That's ownership. That travels with your words forever, regardless of what happens to Grove.
@@ -298,18 +316,25 @@ Options worth exploring:
 - **did:web:** The simplest DID method — your identity is `did:web:yourdomain.com`. Resolves via HTTPS. No special infrastructure. If you own your domain, you own your identity. Period.
 - **Avoid did:plc and similar.** The article's warning is clear: any DID method that depends on a centralized directory defeats the purpose.
 
-#### 4c. Export as First-Class Artifact (Practical Now)
+#### 4c. Export as First-Class Artifact — The Portable Grove (Practical Now)
 
-The export ZIP should feel like a _complete_ artifact, not a data dump:
+The `.grove` file format spec (`docs/specs/file-formats-spec.md`) already defines a comprehensive portable archive — ZIP with Markdown posts, media, themes, settings, curios. It includes standard format conversion to Markdown+Media ZIP and an HTML archive. The `grove.place/open` viewer lets anyone browse a `.grove` file client-side.
 
-- Include the content signature for every post
-- Include an `index.html` that renders the blog as a static site (readable offline, hostable on any web server)
-- Include a `verify.html` that checks all signatures locally
+**The Portable Grove vision extends this further:** the export should be a **deployable website**, not just readable files.
+
+- Include content signatures for every post (extending the manifest with a `signatures` section)
+- Include a thin **HTML shim** — a lightweight static site generator that dynamically pulls in Markdown content from the `content/` folder at runtime. Open `index.html` in a browser, and you see your blog. Point a deployment at it, and you have a live website.
+- Include a `verify.html` that checks all signatures locally in the browser
 - Include author identity files (`.well-known/` contents)
+- Include a `DEPLOY.md` guide: "Here's how to publish this as a real website on Cloudflare Pages / Vercel / Netlify / GitHub Pages in under 5 minutes"
 
-When someone downloads their Grove export, they should have a **working, verifiable, self-contained website** — not just files. That's ownership.
+**The origin story matters here.** This is how autumnsgrove.com started: Markdown files in a directory, committed to a repo, deployed to Cloudflare Pages. The site code dynamically pulled in the posts. Add a new Markdown file, commit, deploy — and your new post is live. It was _shockingly_ simple. The Portable Grove gives every Wanderer that same experience: a folder that IS your website, that you can deploy anywhere, that works without any server or subscription.
 
-**The bottom line:** "You can export" is table stakes. "Your export is a signed, verifiable, self-hosting artifact" is ownership. Grove can get there with proven cryptography, no complex protocols, and no dependencies on any external service.
+The existing `.grove` HTML archive is a static snapshot. The Portable Grove is a **living artifact** — add a new `.md` file to the `content/posts/` folder and it appears in the site. That's the difference between a backup and a home.
+
+**This deserves its own spec** extending the file-formats spec. See: Portable Grove spec (to be written via /swan-design).
+
+**The bottom line:** "You can export" is table stakes. "Your export is a signed, verifiable, deployable website that grows with you" is ownership. Grove can get there with proven cryptography, a thin HTML shim, and no dependencies on any external service.
 
 ---
 
@@ -373,6 +398,21 @@ Meadow (the community feed) is the one place where social-graph-style lock-in co
 - Meadow follows are RSS-based. If you leave Grove, followers can still follow you via any RSS reader.
 - Meadow reactions/interactions are NOT exportable (they're ephemeral encouragement, not data).
 - No "Meadow-only" features that create dependency. Everything in Meadow should work with a plain blog and an RSS feed.
+
+#### 5d. Dynamic Post Types — Portable Content, Not Platform Features
+
+Right now, notes live only in Meadow. But they should be available on someone's Garden too — short bursts, Twitter-like posts, alongside long-form blooms. The distinction is simple: a note is short (slimmed-down editor, which already exists in the engine), a bloom is long-form with photos and the full Flow editor. Easy addition — a button and a new interface.
+
+But the bigger vision: **what if all content types share a dynamic pipeline?** Blooms and notes already overlap significantly. If we abstract the content type system properly:
+- Adding a new type (e.g., standalone image posts, link bookmarks, audio posts) becomes wiring in a new type definition, not rewriting the publishing flow
+- The Garden interface dynamically extends to include new types
+- RSS feeds include all types (or filter by type)
+- The `.grove` export format includes all types (extending the manifest's `contents` section)
+- **Every new content type is automatically portable** — it follows the same export/import/signing/RSS pipeline as everything else
+
+This is the same SDK philosophy applied to content: abstract the pipeline, and extending it becomes configuration rather than architecture.
+
+**This deserves its own spec.** See: Dynamic Post Types spec (to be written via /swan-design).
 
 #### 5d. The No-Acquisition Pledge (or: What Happens If)
 
@@ -453,7 +493,7 @@ Grove's position should be explicit and principled:
 
 #### 6b. Address the RSS Exposure
 
-- **Rate-limit RSS feed requests.** A human with a feed reader checks once an hour. A scraper checks every second. Rate limiting at the feed level distinguishes the two.
+- **Rate-limit RSS feed requests.** A human with a feed reader checks once an hour. A scraper checks every second. Rate limiting at the feed level distinguishes the two. Edge case to handle: someone adding multiple Grove feeds to their RSS app one at a time — that looks like several requests in quick succession but from one IP for different feeds, which is distinct from one IP requesting hundreds of feeds simultaneously. The rate limiter needs to distinguish "human browsing the ecosystem" from "bot vacuuming the ecosystem." **This deserves its own spec** — see: RSS Rate Limiting spec (to be written via /swan-design).
 - **Optional RSS modes per user:**
   - Full content (default — open web principle)
   - Excerpt only (for users who want tighter control)
@@ -513,24 +553,39 @@ Grove does the opposite: no protocol pretense, but genuine structural alignment.
 ### Recommended Implementation Order
 
 **Now (Pre-Launch / Phase 1):**
-1. Enhance exports to include static-site-ready output with migration guides
-2. Document the "Break Glass: Moving Off Cloudflare" playbook
-3. Write the Irrevocable Export Guarantee into TOS
-4. Add RSS rate-limiting to Shade
+1. Write the Irrevocable Export Guarantee into TOS
+2. Add RSS rate-limiting to Shade (spec needed)
+3. AI protection language in all legal docs (portability policy, help center, TOS)
 
 **Soon (Phase 2, Post-Launch):**
-5. Content signing with Ed25519 keys per user (confirmed priority — this is the provenance breakthrough)
-6. `.well-known/grove-author.json` for portable identity + signature verification
-7. Automated Amber backups with external provider sync (iCloud, GDrive, Dropbox, Mega, S3)
-8. Email-based export retrieval (`export@grove.place` with identity verification)
-9. Dead man's switch fund and mechanism
+4. **Server SDK** — abstract all CF bindings behind a generic infrastructure layer (spec needed)
+5. **Amber SDK** — formalize storage operations as a clean, importable library (spec needed)
+6. **Content signing** with Ed25519 keys per user + authorship transparency metadata (spec needed)
+7. `.well-known/grove-author.json` for portable identity + signature verification
+8. **verify.grove.place** — provenance oracle for signatures + human authorship (spec needed)
+9. Automated Amber backups with external provider sync (iCloud, GDrive, Dropbox, Mega, S3)
+10. Email-based export retrieval (`export@grove.place` with identity verification)
+11. Dead man's switch fund and mechanism
+12. Document the "Break Glass: Moving Off Cloudflare" playbook (documentation needed)
 
 **Later (Phase 3, When Scale Justifies):**
-10. Annual sovereignty audit (public report)
-11. `did:web` support for custom domain users
-12. Export verification tool (`verify.grove.place` — web-based signature checker)
-13. RSS analytics in Vista with auto-blocking of scraper patterns
-14. AI protection language in all legal docs (portability policy, help center, TOS)
+13. **Portable Grove** — extend `.grove` format with deployable HTML shim (spec needed, extends `file-formats-spec.md`)
+14. **Dynamic Post Types** — notes on Garden, abstracted content pipeline (spec needed)
+15. `did:web` support for custom domain users
+16. Annual sovereignty audit (public report)
+17. RSS analytics in Vista with auto-blocking of scraper patterns
+
+### Specs to Write (Generated by This Safari)
+
+| # | Spec | Skill | Status |
+|---|------|-------|--------|
+| 1 | Server SDK — CF infrastructure abstraction layer | /swan-design | Planned |
+| 2 | Break Glass — Moving Off Cloudflare playbook | /owl-archive | Planned |
+| 3 | Amber SDK — unified storage operations library | /swan-design | Planned |
+| 4 | Content Signing + verify.grove.place — provenance & authorship | /swan-design | Planned |
+| 5 | Portable Grove — deployable `.grove` export with HTML shim | /swan-design | Planned |
+| 6 | Dynamic Post Types — notes/blooms/images unified pipeline | /swan-design | Planned |
+| 7 | RSS Rate Limiting — intelligent feed protection in Shade | /swan-design | Planned |
 
 ### Cross-Cutting Themes
 
