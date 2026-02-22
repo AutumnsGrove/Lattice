@@ -38,7 +38,14 @@ var backupListCmd = &cobra.Command{
 			return fmt.Errorf("wrangler error: %w", err)
 		}
 
-		backups := parseD1Results(output)
+		// wrangler d1 backup list --json returns a plain array of backup
+		// objects ([{"id":...,"state":...,"created_at":...}]), NOT the
+		// D1 execute wrapper format ([{"results":[...],"success":true}]).
+		// Parse directly instead of routing through parseD1Results.
+		var backups []map[string]interface{}
+		if err := json.Unmarshal([]byte(strings.TrimSpace(output)), &backups); err != nil {
+			backups = nil
+		}
 
 		if cfg.JSONMode {
 			result := map[string]interface{}{

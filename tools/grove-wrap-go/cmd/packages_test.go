@@ -94,11 +94,37 @@ func TestDetectPackageTypePrecedence(t *testing.T) {
 }
 
 func TestDiscoverPackages(t *testing.T) {
-	// Use the real monorepo root if available
-	root := "/home/user/Lattice"
-	if _, err := os.Stat(root); os.IsNotExist(err) {
-		t.Skip("Lattice monorepo not available")
-	}
+	// Build a synthetic monorepo structure using t.TempDir() so the
+	// test works in CI and on any machine (not just the developer's).
+	root := t.TempDir()
+
+	// tools/grove-wrap-go — Go package (go.mod)
+	mkPkg(t, root, "tools/grove-wrap-go", "go.mod", "module test")
+	// tools/grove-find-go — Go package (go.mod)
+	mkPkg(t, root, "tools/grove-find-go", "go.mod", "module test")
+	// libs/engine — SvelteKit (svelte.config.js + package.json)
+	mkPkg(t, root, "libs/engine", "package.json", `{}`)
+	os.WriteFile(filepath.Join(root, "libs/engine/svelte.config.js"), []byte(`export default {}`), 0644)
+	// apps/amber — SvelteKit
+	mkPkg(t, root, "apps/amber", "package.json", `{}`)
+	os.WriteFile(filepath.Join(root, "apps/amber/svelte.config.js"), []byte(`export default {}`), 0644)
+	// apps/cedar — SvelteKit
+	mkPkg(t, root, "apps/cedar", "package.json", `{}`)
+	os.WriteFile(filepath.Join(root, "apps/cedar/svelte.config.js"), []byte(`export default {}`), 0644)
+	// workers/api — Worker (wrangler.toml + package.json)
+	mkPkg(t, root, "workers/api", "package.json", `{}`)
+	os.WriteFile(filepath.Join(root, "workers/api/wrangler.toml"), []byte(`name = "api"`), 0644)
+	// services/auth — Worker
+	mkPkg(t, root, "services/auth", "package.json", `{}`)
+	os.WriteFile(filepath.Join(root, "services/auth/wrangler.toml"), []byte(`name = "auth"`), 0644)
+	// tools/gw — Python (pyproject.toml)
+	mkPkg(t, root, "tools/gw", "pyproject.toml", `[project]`)
+	// packages/config — library (package.json only)
+	mkPkg(t, root, "packages/config", "package.json", `{}`)
+	// packages/types — library
+	mkPkg(t, root, "packages/types", "package.json", `{}`)
+	// libs/shared — library
+	mkPkg(t, root, "libs/shared", "package.json", `{}`)
 
 	pkgs := discoverPackages(root)
 	if len(pkgs) < 10 {
@@ -116,6 +142,18 @@ func TestDiscoverPackages(t *testing.T) {
 		if !found[name] {
 			t.Errorf("expected to find package %q", name)
 		}
+	}
+}
+
+// mkPkg creates a directory under root/relPath with a single marker file.
+func mkPkg(t *testing.T, root, relPath, filename, content string) {
+	t.Helper()
+	dir := filepath.Join(root, relPath)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		t.Fatalf("mkPkg: mkdir %s: %v", dir, err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, filename), []byte(content), 0644); err != nil {
+		t.Fatalf("mkPkg: write %s/%s: %v", dir, filename, err)
 	}
 }
 
