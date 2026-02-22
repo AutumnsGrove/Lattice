@@ -18,7 +18,9 @@
 	let relatedArticles = $derived(data.relatedArticles || []);
 	let category = $derived(page.params.category as DocCategory);
 	let slug = $derived(page.params.slug);
-	let headers = $derived(doc?.headers || []);
+	// Cap TOC to h1-h3 only — specs like gw-cli-spec have 600+ headers,
+	// and creating IntersectionObserver entries for each one freezes the browser
+	let headers = $derived((doc?.headers || []).filter((h) => h.level <= 3));
 
 	// Get colors for current category (with fallback)
 	let colors = $derived(kbCategoryColors[category] || kbCategoryColors.help);
@@ -44,15 +46,18 @@
 							: "Legal & Policies"),
 	);
 
-	// Setup copy button functionality for code blocks
+	// Copy button functionality via event delegation — one listener on the article
+	// instead of N listeners on N code blocks (code-heavy specs have hundreds)
+	let articleRef = $state<HTMLElement>();
+
 	$effect(() => {
-		if (!browser) return;
+		if (!browser || !articleRef) return;
 
 		const handleCopyClick = async (event: Event) => {
-			const button = event.currentTarget as HTMLElement;
-			// Read code from the sibling <pre><code> element's textContent
-			// This is simpler and more reliable than storing content in data-code attributes,
-			// which duplicated every code block's content in the HTML and inflated page size
+			const target = event.target as HTMLElement;
+			const button = target.closest(".code-block-copy") as HTMLElement | null;
+			if (!button) return;
+
 			const wrapper = button.closest(".code-block-wrapper");
 			const codeElement = wrapper?.querySelector("pre code");
 			const codeText = codeElement?.textContent;
@@ -62,13 +67,11 @@
 			try {
 				await navigator.clipboard.writeText(codeText);
 
-				// Update button text and style to show success
 				const copyText = button.querySelector(".copy-text");
 				const originalText = copyText?.textContent || "Copy";
 				if (copyText) copyText.textContent = "Copied!";
 				button.classList.add("copied");
 
-				// Reset after 2 seconds
 				setTimeout(() => {
 					if (copyText) copyText.textContent = originalText;
 					button.classList.remove("copied");
@@ -83,18 +86,8 @@
 			}
 		};
 
-		// Attach event listeners to all copy buttons
-		const copyButtons = document.querySelectorAll(".code-block-copy");
-		copyButtons.forEach((button) => {
-			button.addEventListener("click", handleCopyClick);
-		});
-
-		// Cleanup
-		return () => {
-			copyButtons.forEach((button) => {
-				button.removeEventListener("click", handleCopyClick);
-			});
-		};
+		articleRef.addEventListener("click", handleCopyClick);
+		return () => articleRef.removeEventListener("click", handleCopyClick);
 	});
 </script>
 
@@ -175,7 +168,7 @@
 					{/if}
 
 					<!-- Article Content -->
-					<article class="content-body prose prose-bark dark:prose-invert max-w-none">
+					<article bind:this={articleRef} class="content-body prose prose-bark dark:prose-invert max-w-none">
 						<!-- eslint-disable-next-line svelte/no-at-html-tags -- sanitized markdown output -->
 						{@html doc.html ||
 							`<p class="text-foreground-muted leading-relaxed">${doc.excerpt}</p>`}

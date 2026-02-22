@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { type TOCHeader, DEFAULT_SCROLL_OFFSET, isValidIcon } from './types.js';
+	import { type TOCHeader, DEFAULT_SCROLL_OFFSET, isValidIcon } from "./types.js";
+	import { scheduleIdle, cancelIdle } from "../../utils/schedule.js";
 
 	// Re-export for consumers who import from this component
 	export type { TOCHeader };
@@ -13,13 +14,17 @@
 		scrollOffset?: number;
 	}
 
-	let { headers = [], title = 'Table of Contents', scrollOffset = DEFAULT_SCROLL_OFFSET }: Props = $props();
+	let {
+		headers = [],
+		title = "Table of Contents",
+		scrollOffset = DEFAULT_SCROLL_OFFSET,
+	}: Props = $props();
 
-	let activeId = $state('');
+	let activeId = $state("");
 
 	// Set up intersection observer to track active section
 	function setupScrollTracking() {
-		if (typeof window === 'undefined') return;
+		if (typeof window === "undefined") return;
 
 		const observer = new IntersectionObserver(
 			(entries) => {
@@ -30,9 +35,9 @@
 				});
 			},
 			{
-				rootMargin: '-20% 0% -35% 0%',
-				threshold: 0
-			}
+				rootMargin: "-20% 0% -35% 0%",
+				threshold: 0,
+			},
 		);
 
 		// Observe all headers in the document
@@ -46,10 +51,23 @@
 		return () => observer.disconnect();
 	}
 
-	// Set up scroll tracking (runs on mount and when headers change)
+	// Defer scroll tracking so it doesn't block initial render.
+	// For specs with many headers, synchronous observer setup freezes the main thread.
 	$effect(() => {
-		const cleanup = setupScrollTracking();
-		return cleanup;
+		// Read `headers` synchronously so Svelte 5 tracks it as a dependency.
+		// The actual work happens in the idle callback, but this ensures the
+		// effect re-runs when headers change (e.g. after invalidate()).
+		const snapshot = headers;
+		let cleanup: (() => void) | undefined;
+
+		const id = scheduleIdle(() => {
+			cleanup = setupScrollTracking();
+		});
+
+		return () => {
+			cancelIdle(id);
+			cleanup?.();
+		};
 	});
 
 	function scrollToHeader(id: string) {
@@ -60,16 +78,15 @@
 
 			window.scrollTo({
 				top: offsetPosition,
-				behavior: 'smooth'
+				behavior: "smooth",
 			});
 
 			// Update URL hash without jumping
-			history.pushState(null, '', `#${id}`);
+			history.pushState(null, "", `#${id}`);
 		} else {
 			console.warn(`TableOfContents: Header element not found for ID: ${id}`);
 		}
 	}
-
 </script>
 
 {#if headers.length > 0}
@@ -83,11 +100,7 @@
 					class:active={activeId === header.id}
 					class:has-icon={!!IconComponent}
 				>
-					<button
-						type="button"
-						onclick={() => scrollToHeader(header.id)}
-						class="toc-link"
-					>
+					<button type="button" onclick={() => scrollToHeader(header.id)} class="toc-link">
 						{#if IconComponent}
 							<IconComponent class="toc-icon" />
 						{/if}
@@ -139,7 +152,9 @@
 		margin: 0 0 1rem 0;
 		padding-bottom: 0.5rem;
 		border-bottom: 1px solid var(--color-divider, rgba(0, 0, 0, 0.1));
-		transition: color 0.3s ease, border-color 0.3s ease;
+		transition:
+			color 0.3s ease,
+			border-color 0.3s ease;
 	}
 	.toc-list {
 		list-style: none;

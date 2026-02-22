@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { type TOCHeader, DEFAULT_SCROLL_OFFSET, isValidIcon } from './types.js';
+	import { type TOCHeader, DEFAULT_SCROLL_OFFSET, isValidIcon } from "./types.js";
+	import { scheduleIdle, cancelIdle } from "../../utils/schedule.js";
 
 	// Re-export for consumers who import from this component
 	export type { TOCHeader };
@@ -13,12 +14,16 @@
 		scrollOffset?: number;
 	}
 
-	let { headers = [], title = 'Table of Contents', scrollOffset = DEFAULT_SCROLL_OFFSET }: Props = $props();
+	let {
+		headers = [],
+		title = "Table of Contents",
+		scrollOffset = DEFAULT_SCROLL_OFFSET,
+	}: Props = $props();
 
 	let isOpen = $state(false);
 	let menuRef = $state<HTMLDivElement>();
 	let buttonRef = $state<HTMLButtonElement>();
-	let activeId = $state('');
+	let activeId = $state("");
 	let previouslyFocusedElement: HTMLElement | null = null;
 
 	function toggleMenu() {
@@ -31,9 +36,9 @@
 
 	// Focus trap: Tab key cycles within menu
 	function handleFocusTrap(event: KeyboardEvent) {
-		if (event.key === 'Tab' && isOpen && menuRef) {
+		if (event.key === "Tab" && isOpen && menuRef) {
 			const focusableElements = menuRef.querySelectorAll<HTMLElement>(
-				'button, a, [tabindex]:not([tabindex="-1"])'
+				'button, a, [tabindex]:not([tabindex="-1"])',
 			);
 			if (focusableElements.length === 0) return;
 
@@ -60,11 +65,11 @@
 
 			window.scrollTo({
 				top: offsetPosition,
-				behavior: 'smooth'
+				behavior: "smooth",
 			});
 
 			// Update URL hash without jumping
-			history.pushState(null, '', `#${id}`);
+			history.pushState(null, "", `#${id}`);
 		}
 		closeMenu();
 	}
@@ -81,7 +86,7 @@
 
 	// Handle escape key and focus trap
 	function handleKeydown(event: KeyboardEvent) {
-		if (event.key === 'Escape' && isOpen) {
+		if (event.key === "Escape" && isOpen) {
 			closeMenu();
 			// Restore focus to button when closing
 			buttonRef?.focus();
@@ -91,7 +96,7 @@
 
 	// Set up intersection observer to track active section
 	function setupScrollTracking() {
-		if (typeof window === 'undefined') return;
+		if (typeof window === "undefined") return;
 
 		const observer = new IntersectionObserver(
 			(entries) => {
@@ -102,9 +107,9 @@
 				});
 			},
 			{
-				rootMargin: '-20% 0% -35% 0%',
-				threshold: 0
-			}
+				rootMargin: "-20% 0% -35% 0%",
+				threshold: 0,
+			},
 		);
 
 		headers.forEach((header) => {
@@ -124,7 +129,7 @@
 			previouslyFocusedElement = document.activeElement as HTMLElement;
 			// Focus the first TOC item when menu opens
 			requestAnimationFrame(() => {
-				const firstLink = menuRef?.querySelector<HTMLButtonElement>('.toc-link');
+				const firstLink = menuRef?.querySelector<HTMLButtonElement>(".toc-link");
 				firstLink?.focus();
 			});
 		} else {
@@ -136,17 +141,28 @@
 		}
 	});
 
+	// Defer IntersectionObserver setup so it doesn't block initial render.
+	// Event listeners for click-outside/keyboard are cheap — keep those synchronous.
 	$effect(() => {
-		const cleanup = setupScrollTracking();
+		// Read `headers` synchronously so Svelte 5 tracks it as a dependency.
+		// The actual work happens in the idle callback, but this ensures the
+		// effect re-runs when headers change (e.g. after invalidate()).
+		const snapshot = headers;
+		let observerCleanup: (() => void) | undefined;
 
-		// Add event listeners
-		document.addEventListener('click', handleClickOutside);
-		document.addEventListener('keydown', handleKeydown);
+		const id = scheduleIdle(() => {
+			observerCleanup = setupScrollTracking();
+		});
+
+		// Event listeners are lightweight — no need to defer
+		document.addEventListener("click", handleClickOutside);
+		document.addEventListener("keydown", handleKeydown);
 
 		return () => {
-			if (cleanup) cleanup();
-			document.removeEventListener('click', handleClickOutside);
-			document.removeEventListener('keydown', handleKeydown);
+			cancelIdle(id);
+			observerCleanup?.();
+			document.removeEventListener("click", handleClickOutside);
+			document.removeEventListener("keydown", handleKeydown);
 		};
 	});
 </script>
@@ -161,7 +177,17 @@
 			aria-label="Toggle table of contents"
 			aria-expanded={isOpen}
 		>
-			<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				width="20"
+				height="20"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			>
 				<line x1="3" y1="6" x2="21" y2="6"></line>
 				<line x1="3" y1="12" x2="15" y2="12"></line>
 				<line x1="3" y1="18" x2="18" y2="18"></line>
@@ -186,11 +212,7 @@
 							class:active={activeId === header.id}
 							class:has-icon={!!IconComponent}
 						>
-							<button
-								type="button"
-								onclick={() => scrollToHeader(header.id)}
-								class="toc-link"
-							>
+							<button type="button" onclick={() => scrollToHeader(header.id)} class="toc-link">
 								{#if IconComponent}
 									<IconComponent class="toc-icon" />
 								{/if}
@@ -239,7 +261,9 @@
 		align-items: center;
 		justify-content: center;
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-		transition: background-color 0.2s ease, transform 0.2s ease;
+		transition:
+			background-color 0.2s ease,
+			transform 0.2s ease;
 	}
 	.toc-button:hover {
 		background: var(--accent-success-dark, #234a24);

@@ -5,37 +5,38 @@ export * from "./api";
 export * from "./cn";
 export * from "./csrf";
 export * from "./debounce";
+export * from "./schedule";
 export * from "./shuffle";
 
 // Gallery - explicit exports to avoid ambiguity
 export {
-  parseImageFilename,
-  getImageTitle,
-  getImageDate,
-  searchImages,
-  filterImagesByDateRange,
-  filterImagesByTags,
-  filterImagesByCategory,
-  getAvailableYears,
-  getAvailableCategories,
-  type GalleryImage,
-  type ImageTag,
-  type ParsedImageMetadata,
+	parseImageFilename,
+	getImageTitle,
+	getImageDate,
+	searchImages,
+	filterImagesByDateRange,
+	filterImagesByTags,
+	filterImagesByCategory,
+	getAvailableYears,
+	getAvailableCategories,
+	type GalleryImage,
+	type ImageTag,
+	type ParsedImageMetadata,
 } from "./gallery";
 
 // Gutter - explicit exports to avoid ambiguity
 export {
-  parseAnchor,
-  getAnchorKey,
-  getUniqueAnchors,
-  getAnchorLabel,
-  getItemsForAnchor,
-  getOrphanItems,
-  findAnchorElement,
-  type AnchorType,
-  type ParsedAnchor,
-  type Header,
-  type GutterItem,
+	parseAnchor,
+	getAnchorKey,
+	getUniqueAnchors,
+	getAnchorLabel,
+	getItemsForAnchor,
+	getOrphanItems,
+	findAnchorElement,
+	type AnchorType,
+	type ParsedAnchor,
+	type Header,
+	type GutterItem,
 } from "./gutter";
 
 export * from "./imageProcessor";
@@ -55,7 +56,7 @@ export { mentionsPlugin, processMentions } from "./markdown-mentions";
 
 // Rehype GroveTerm plugin - explicit exports
 export {
-  rehypeGroveTerm,
-  processGroveTerms,
-  type RehypeGroveTermOptions,
+	rehypeGroveTerm,
+	processGroveTerms,
+	type RehypeGroveTermOptions,
 } from "./rehype-groveterm";
