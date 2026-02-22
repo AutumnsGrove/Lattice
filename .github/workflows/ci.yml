@@ -42,7 +42,7 @@ jobs:
           RESULT=$(node .github/scripts/affected-packages.mjs "$BASE")
           echo "Full result: $RESULT"
 
-          PACKAGES=$(echo "$RESULT" | jq -r '.affectedPackages')
+          PACKAGES=$(echo "$RESULT" | jq -c '.affectedPackages')
           TEST_MATRIX=$(echo "$RESULT" | jq -c '.testMatrix')
           TC_MATRIX=$(echo "$RESULT" | jq -c '.typecheckMatrix')
           NEEDS_ENGINE=$(echo "$RESULT" | jq -r '.needsEngine')
