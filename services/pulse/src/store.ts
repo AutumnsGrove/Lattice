@@ -120,7 +120,14 @@ async function updateActiveStatus(
 async function updateTodayStats(env: Env, tenantId: string, event: NormalizedEvent): Promise<void> {
 	const key = `pulse:${tenantId}:today`;
 	const raw = await env.KV.get(key, "text");
-	const parsed = raw ? TodayStatsSchema.safeParse(JSON.parse(raw)) : null;
+	let parsed: ReturnType<typeof TodayStatsSchema.safeParse> | null = null;
+	if (raw) {
+		try {
+			parsed = TodayStatsSchema.safeParse(JSON.parse(raw));
+		} catch {
+			// Malformed JSON in KV — fall through to defaults
+		}
+	}
 
 	const today = parsed?.success
 		? parsed.data

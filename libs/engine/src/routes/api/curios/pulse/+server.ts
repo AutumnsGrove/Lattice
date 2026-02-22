@@ -18,7 +18,12 @@ import { z } from "zod";
 import { safeJsonParse } from "$lib/server/utils/typed-cache";
 
 // ─── Zod schemas for KV cache reads (Rootwork Phase 5) ──────────────
-const PulseActiveSchema = z.object({ isActive: z.boolean() });
+const PulseActiveSchema = z.object({
+	isActive: z.boolean(),
+	lastCommit: z.number().optional(),
+	author: z.string().optional(),
+	message: z.string().optional(),
+});
 const PulseTodaySchema = z.object({
 	commits: z.number(),
 	prsMerged: z.number(),
