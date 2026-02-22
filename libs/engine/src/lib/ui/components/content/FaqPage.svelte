@@ -93,11 +93,11 @@
 					{#if item.value === 'what-is-grove'}
 						<GroveTerm term="your-grove">Grove</GroveTerm> is a cozy corner of the internet where you can have your own <GroveSwap term="your-garden">blog</GroveSwap>, your own space, away from algorithms and big tech. Think of it as a digital <GroveSwap term="your-garden">garden</GroveSwap> you actually own -- a place to write, share, and belong.
 					{:else if item.value === 'how-do-i-sign-up'}
-						Head to <a href="https://grove.place" class="text-grove-700 dark:text-grove-400 underline underline-offset-2">grove.place</a> and sign in with your Google account -- no lengthy forms, no passwords to remember. We're also adding passkey support and magic link sign-in soon, so you'll have even more ways to get in without fussing with passwords. Once you're in, you can pick a username and start setting up your <GroveSwap term="your-garden">garden</GroveSwap>.
+						Head to <a href="https://grove.place" class="text-grove-700 dark:text-grove-400 underline underline-offset-2">grove.place</a> and sign in with your Google account, a magic link sent to your email, or a passkey like Face ID or Touch ID -- no lengthy forms, no passwords to remember. Once you're in, you can pick a username and start setting up your <GroveSwap term="your-garden">garden</GroveSwap>.
 					{:else if item.value === 'what-is-a-wanderer'}
 						Everyone who enters <GroveSwap term="your-grove">the Grove</GroveSwap> is a <GroveTerm term="wanderer" />. It's our way of saying "welcome" without the cold, corporate feel of "user." You're exploring, finding your path -- and that's a beautiful thing.
 					{:else if item.value === 'is-grove-free'}
-						<GroveSwap term="your-grove">Grove</GroveSwap> offers a free tier so you can start writing right away. If you want more features -- like custom domains, extra storage, or advanced customization -- our <a href="https://grove.place/pricing" class="text-grove-700 dark:text-grove-400 underline underline-offset-2">paid plans</a> (<GroveTerm term="seedling" />, <GroveTerm term="sapling" />, <GroveTerm term="oak" />, and <GroveTerm term="evergreen" />) grow with you.
+						Yes! The free <GroveTerm term="wanderer">Wanderer</GroveTerm> plan lets you start writing right away -- no credit card needed. If you want more features -- like extra storage, advanced customization, or your own domain -- our <a href="https://grove.place/pricing" class="text-grove-700 dark:text-grove-400 underline underline-offset-2">paid plans</a> (<GroveTerm term="seedling" />, <GroveTerm term="sapling" />, <GroveTerm term="oak" />, and <GroveTerm term="evergreen" />) grow with you.
 					{:else if item.value === 'what-is-lattice'}
 						<GroveTerm term="lattice" /> is the framework that powers <GroveSwap term="your-grove">Grove</GroveSwap>. Like a garden lattice supports climbing vines, our <GroveSwap term="lattice">Lattice</GroveSwap> supports your <GroveSwap term="your-garden">blog</GroveSwap>, your pages, and everything you build here. You don't need to think about it -- it just works beneath the surface.
 					{/if}
@@ -122,15 +122,15 @@
 			<Accordion items={blogItems} type="single" collapsible class="w-full">
 				{#snippet contentSnippet(item)}
 					{#if item.value === 'how-to-write'}
-						Head to your <GroveTerm term="arbor">admin panel</GroveTerm> and click "New Post." You'll get a clean editor where you can write in Markdown or rich text, add images, set tags, and preview before publishing.
+						Head to your <GroveTerm term="arbor">admin panel</GroveTerm> and click "New Post." You'll open Flow, our Markdown editor with a live preview, where you can add images, set tags, embed interactive widgets with <code>::curio::</code> syntax, and even drop in a music link to get a beautiful preview card via HUM. It's a lovely place to write.
 					{:else if item.value === 'custom-domain'}
-						Yes! Paid plans support custom domains. You can point your own domain to your <GroveSwap term="your-grove">Grove</GroveSwap> <GroveSwap term="your-garden">blog</GroveSwap> so readers visit yourname.com instead of yourname.grove.place. Setup instructions are in the <GroveSwap term="arbor">Arbor</GroveSwap> under Settings.
+						Yes! Our <GroveTerm term="oak" /> and <GroveTerm term="evergreen" /> plans support custom domains. You can point your own domain to your <GroveSwap term="your-grove">Grove</GroveSwap> <GroveSwap term="your-garden">blog</GroveSwap> so readers visit yourname.com instead of yourname.grove.place. Setup instructions are in the <GroveSwap term="arbor">Arbor</GroveSwap> under Settings.
 					{:else if item.value === 'themes-customization'}
 						Absolutely. You can choose fonts, accent colors, toggle the <GroveSwap term="your-grove">Grove</GroveSwap> logo, and adjust your layout. <GroveSwap term="your-grove">Grove</GroveSwap> <GroveSwap term="your-garden">blogs</GroveSwap> have a warm, nature-inspired aesthetic by default, but the details are yours to shape.
 					{:else if item.value === 'rss-feed'}
 						Every <GroveSwap term="your-grove">Grove</GroveSwap> <GroveSwap term="your-garden">blog</GroveSwap> automatically has an RSS feed at /rss.xml. Readers can subscribe in their favorite feed reader to follow your writing without needing an account.
 					{:else if item.value === 'import-export'}
-						We're working on import tools for common platforms. In the meantime, you can copy your content over manually -- Markdown <GroveSwap term="blooms">posts</GroveSwap> transfer especially well. Your writing is always yours, and we'll never lock you in.
+						You can export your content anytime from the <GroveSwap term="arbor">Arbor</GroveSwap> -- your writing is always yours, and we'll never lock you in. We're also working on import tools for common platforms. In the meantime, you can copy your content over manually -- Markdown <GroveSwap term="blooms">posts</GroveSwap> transfer especially well.
 					{/if}
 				{/snippet}
 			</Accordion>
@@ -184,11 +184,11 @@
 					{#if item.value === 'data-ownership'}
 						You do. Your writing, your images, your <GroveSwap term="your-garden">blog</GroveSwap> -- they belong to you. We don't sell your data, we don't mine it for ads, and we don't train AI models on your content. <GroveSwap term="your-grove">Grove</GroveSwap> exists to serve you, not to extract from you.
 					{:else if item.value === 'tracking'}
-						<GroveSwap term="your-grove">Grove</GroveSwap> uses privacy-first <GroveTerm term="rings">analytics</GroveTerm> that count page views without tracking individuals. No cookies for tracking, no fingerprinting, no third-party scripts watching your readers. We believe you can understand your audience without surveilling them.
+						<GroveSwap term="your-grove">Grove</GroveSwap> is built around privacy-first principles. No cookies for tracking, no fingerprinting, no third-party scripts watching your readers. We're building <GroveTerm term="rings">analytics</GroveTerm> to help you understand your audience without surveilling them -- simple, wellness-focused insights rather than anxious dashboards.
 					{:else if item.value === 'authentication'}
-						We built our own sign-in system called <GroveTerm term="heartwood">Heartwood</GroveTerm>. You sign in through your existing accounts (like Google), so <GroveSwap term="your-grove">Grove</GroveSwap> never sees or stores a password. Your sessions are encrypted, and we're adding passkey support so you can sign in with just your fingerprint or face -- no passwords anywhere in the chain.
+						We built our own sign-in system called <GroveTerm term="heartwood">Heartwood</GroveTerm>. You can sign in with Google, a magic link sent to your email, or a passkey like Face ID or Touch ID -- <GroveSwap term="your-grove">Grove</GroveSwap> never sees or stores a password. Your sessions are encrypted, and there are no passwords anywhere in the chain.
 					{:else if item.value === 'delete-account'}
-						Yes, completely. If you choose to leave, we'll delete your account, your <GroveSwap term="blooms">posts</GroveSwap>, your images -- everything. No "we keep your data for 90 days" games. When you say delete, we mean delete.
+						Yes, completely. Request deletion from your account settings and we'll remove your account, your <GroveSwap term="blooms">posts</GroveSwap>, your images -- everything. Your <GroveSwap term="your-garden">blog</GroveSwap> goes dark right away, and all data is permanently purged. Your writing is yours, and we'll never hold it hostage.
 					{/if}
 				{/snippet}
 			</Accordion>
@@ -211,7 +211,7 @@
 			<Accordion items={billingItems} type="single" collapsible class="w-full">
 				{#snippet contentSnippet(item)}
 					{#if item.value === 'plans'}
-						We offer four tiers: <GroveTerm term="seedling" /> (free, great for getting started), <GroveTerm term="sapling" /> (for growing <GroveSwap term="your-garden">blogs</GroveSwap>), <GroveTerm term="oak" /> (for established writers), and <GroveTerm term="evergreen" /> (for those who want everything). Each tier adds more storage, features, and customization options. <a href="https://grove.place/pricing" class="text-grove-700 dark:text-grove-400 underline underline-offset-2">Compare plans</a>
+						The free <GroveTerm term="wanderer">Wanderer</GroveTerm> plan lets you start writing with no credit card. When you're ready to grow, paid tiers include <GroveTerm term="seedling" /> and <GroveTerm term="sapling" />, with <GroveTerm term="oak" /> and <GroveTerm term="evergreen" /> on the way. Each tier adds more storage, features, and customization options. <a href="https://grove.place/pricing" class="text-grove-700 dark:text-grove-400 underline underline-offset-2">Compare plans</a>
 					{:else if item.value === 'payment-methods'}
 						We process payments through Stripe, which supports all major credit and debit cards. Your payment information is handled entirely by Stripe -- we never see or store your card details.
 					{:else if item.value === 'cancel-anytime'}
@@ -244,7 +244,7 @@
 					{:else if item.value === 'post-not-showing'}
 						Make sure the <GroveSwap term="blooms">post</GroveSwap> is set to "Published" (not "Draft") in your <GroveTerm term="arbor">Arbor</GroveTerm> editor. If you're sharing to the <GroveSwap term="meadow">Meadow</GroveSwap>, it can take a moment for community <GroveSwap term="blooms">posts</GroveSwap> to appear. Check your <GroveSwap term="blooms">post</GroveSwap> status in the <GroveSwap term="arbor">Arbor</GroveSwap> dashboard.
 					{:else if item.value === 'images-not-uploading'}
-						Check that your image is under the size limit for your plan and in a supported format (JPG, PNG, WebP, GIF). If uploads keep failing, it may be a temporary storage issue -- try again in a few minutes or <a href="https://grove.place/contact" class="text-grove-700 dark:text-grove-400 underline underline-offset-2">contact support</a>.
+						Check that your image is under the size limit for your plan and in a supported format (JPG, PNG, WebP, GIF, AVIF, or HEIC). If uploads keep failing, it may be a temporary storage issue -- try again in a few minutes or <a href="https://grove.place/contact" class="text-grove-700 dark:text-grove-400 underline underline-offset-2">contact support</a>.
 					{:else if item.value === 'contact-support'}
 						You can reach us through the <a href="https://grove.place/contact" class="text-grove-700 dark:text-grove-400 underline underline-offset-2">contact page</a>, or email us directly. We're a small team, so responses might take a day, but we read everything and genuinely care about helping you.
 					{/if}
