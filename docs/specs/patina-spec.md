@@ -4,7 +4,7 @@ description: Nightly database backups with weekly archives and 12-week retention
 category: specs
 specCategory: operations
 icon: database
-lastUpdated: "2025-12-31"
+lastUpdated: "2026-02-22"
 aliases: []
 tags:
   - backups
@@ -75,6 +75,7 @@ Grove's automated backup system running nightly SQL dumps of all D1 databases to
 **Internal Name:** GrovePatina
 **Domain:** `patina.grove.place`
 **Repository:** [AutumnsGrove/Patina](https://github.com/AutumnsGrove/Patina)
+**Monorepo Location:** workers/patina/
 **Last Updated:** December 2025
 
 A patina forms on copper over time. Not decay, but protection. The oxidation becomes armor, beauty emerging from age. Patina is Grove's automated backup system, quietly preserving everything while you sleep.
@@ -85,7 +86,7 @@ Every night, Patina runs automated backups of all Grove D1 databases to R2 cold 
 
 ## Goals
 
-1. **Automated nightly backups** of all 6 D1 databases
+1. **Automated nightly backups** of all 14 D1 databases
 2. **Weekly meta-backups** — compress 7 daily backups into one archive
 3. **SQL dump format** — portable, restorable, human-readable
 4. **12-week retention** with automatic cleanup
@@ -118,7 +119,7 @@ Every night, Patina runs automated backups of all Grove D1 databases to R2 cold 
            ▼                   ▼                   ▼
 ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐
 │   D1 Databases  │  │  grove-patina   │  │  grove-patina   │
-│   (6 total)     │  │     (R2)        │  │     -db (D1)    │
+│   (14 total)    │  │     (R2)        │  │     -db (D1)    │
 │                 │  │                 │  │                 │
 │ • groveauth     │  │ Backup Storage  │  │ Backup metadata │
 │ • scout-db      │  │                 │  │ Job history     │
@@ -128,11 +129,12 @@ Every night, Patina runs automated backups of all Grove D1 databases to R2 cold 
 │ • autumnsgrove- │  │                 │  │                 │
 │     git-stats   │  │ /weekly/        │  │                 │
 │ • grove-domain  │  │   YYYY-Www.tar  │  │                 │
+│ • and 8 more    │  │                 │  │                 │
 └─────────────────┘  └─────────────────┘  └─────────────────┘
 
 Backup Flow (Nightly):
 1. Cron triggers at 3 AM UTC every night
-2. Worker iterates through all 6 databases
+2. Worker iterates through all 14 databases
 3. For each DB: export schema + data to SQL
 4. Upload to R2: /daily/YYYY-MM-DD/db-name.sql
 5. Log results to grove-patina-db
@@ -146,7 +148,7 @@ Meta-Backup Flow (Weekly, Sunday):
 5. Delete weekly archives older than 12 weeks
 
 Timing Dependencies:
-• Nightly backup (3 AM): ~15-30 min for 6 DBs (concurrency=3, timeout=30s each)
+• Nightly backup (3 AM): ~15-30 min for 14 DBs (concurrency=3, timeout=30s each)
 • Meta-backup starts 1 hour later (4 AM) - sufficient buffer
 • If nightly runs long, meta-backup checks for running jobs before starting:
   - Query backup_jobs for status='running' AND started_at > (now - 2 hours)
@@ -159,7 +161,7 @@ Timing Dependencies:
 ## 📦 Project Structure
 
 ```
-Patina/                          # Standalone repository
+workers/patina/                  # Lattice monorepo
 ├── src/
 │   ├── index.ts                 # Main worker entry
 │   ├── scheduled.ts             # Nightly backup cron handler
@@ -328,6 +330,23 @@ export const DATABASES: DatabaseConfig[] = [
     description: "Domain search jobs (Forage/Acorn)",
     priority: "normal",
     estimatedSize: "45 KB",
+  },
+  {
+    name: "grove-curios-db",
+    id: "b03756ad-30d7-427a-9a1b-ec2f6478fcbd",
+    binding: "GROVE_CURIOS_DB",
+    description: "Curio widgets: timeline, gallery, guestbook, polls, mood ring, shrines, etc.",
+    priority: "high",
+    estimatedSize: "~50 KB",
+    dailyBackup: true,
+  },
+  {
+    name: "grove-observability-db",
+    id: "59e70f9e-8f9c-4021-96e5-1e130e753766",
+    binding: "GROVE_OBSERVABILITY_DB",
+    description: "Sentinel + Vista monitoring data",
+    priority: "normal",
+    estimatedSize: "~200 KB",
   },
 ];
 
@@ -609,7 +628,7 @@ Worker info and documentation.
   "description": "Automated D1 database backup system for Grove",
   "schedule": "Every Sunday at 3:00 AM UTC",
   "retention": "12 weeks",
-  "databases": 6,
+  "databases": 14,
   "endpoints": {
     "GET /": "This documentation",
     "GET /status": "Current backup status and recent history",
@@ -879,45 +898,41 @@ Get restore instructions for a specific database.
 }
 ```
 
-### Discord Format
+### Zephyr Email Format
+
+Alerts are sent via Zephyr email gateway instead of Discord webhooks, allowing for richer formatted emails and better archival.
 
 ```typescript
 // src/lib/alerting.ts
 
-export function formatDiscordMessage(result: BackupJobResult): object {
+export async function sendZephyrAlert(
+  result: BackupJobResult,
+  zephyrUrl: string,
+  alertEmail: string,
+): Promise<void> {
   const isSuccess = result.failedCount === 0;
+  const subject = isSuccess
+    ? "✅ Patina Backup Completed"
+    : "⚠️ Patina Backup Partially Failed";
 
-  return {
-    embeds: [
-      {
-        title: isSuccess
-          ? "✅ Patina Backup Completed"
-          : "⚠️ Patina Backup Partially Failed",
-        color: isSuccess ? 0x22c55e : 0xef4444,
-        fields: [
-          {
-            name: "Databases",
-            value: `${result.successfulCount}/${result.totalDatabases} successful`,
-            inline: true,
-          },
-          {
-            name: "Total Size",
-            value: formatBytes(result.totalSizeBytes),
-            inline: true,
-          },
-          {
-            name: "Duration",
-            value: `${(result.durationMs / 1000).toFixed(1)}s`,
-            inline: true,
-          },
-        ],
-        footer: {
-          text: `Job ID: ${result.jobId}`,
-        },
-        timestamp: new Date().toISOString(),
-      },
-    ],
-  };
+  const htmlBody = `
+    <h2>${subject}</h2>
+    <p><strong>Status:</strong> ${result.status}</p>
+    <p><strong>Databases:</strong> ${result.successfulCount}/${result.totalDatabases} successful</p>
+    <p><strong>Total Size:</strong> ${formatBytes(result.totalSizeBytes)}</p>
+    <p><strong>Duration:</strong> ${(result.durationMs / 1000).toFixed(1)}s</p>
+    <p><strong>Job ID:</strong> ${result.jobId}</p>
+  `;
+
+  await fetch(zephyrUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      to: alertEmail,
+      subject,
+      html: htmlBody,
+    }),
+  });
 }
 ```
 
@@ -1083,7 +1098,7 @@ crons = [
 ]
 
 # ============================================
-# Source D1 Databases (6 Grove databases)
+# Source D1 Databases (14 Grove databases)
 # ============================================
 
 [[d1_databases]]
@@ -1116,6 +1131,16 @@ binding = "GROVE_DOMAIN_JOBS_DB"
 database_name = "grove-domain-jobs"
 database_id = "cd493112-a901-4f6d-aadf-a5ca78929557"
 
+[[d1_databases]]
+binding = "GROVE_CURIOS_DB"
+database_name = "grove-curios-db"
+database_id = "b03756ad-30d7-427a-9a1b-ec2f6478fcbd"
+
+[[d1_databases]]
+binding = "GROVE_OBSERVABILITY_DB"
+database_name = "grove-observability-db"
+database_id = "59e70f9e-8f9c-4021-96e5-1e130e753766"
+
 # ============================================
 # Metadata Database (for backup tracking)
 # ============================================
@@ -1139,7 +1164,8 @@ bucket_name = "grove-patina"
 
 [vars]
 RETENTION_WEEKS = "12"
-DISCORD_WEBHOOK_URL = ""  # Set via wrangler secret
+ZEPHYR_URL = "https://grove-zephyr.m7jv4v7npb.workers.dev"
+ALERT_EMAIL = "autumn@autumnsgrove.com"
 ALERT_ON_SUCCESS = "false"
 ALERT_ON_FAILURE = "true"
 ```
@@ -1161,8 +1187,8 @@ wrangler d1 create grove-patina-db
 # 3. Run migrations
 wrangler d1 execute grove-patina-db --file=migrations/001_backup_metadata.sql
 
-# 4. Set Discord webhook (optional)
-wrangler secret put DISCORD_WEBHOOK_URL
+# 4. Set Zephyr API key (optional)
+wrangler secret put ZEPHYR_API_KEY
 ```
 
 ### Deploy
@@ -1310,7 +1336,7 @@ Before beginning recovery, ensure you have:
 
 ```bash
 # Check which databases are affected
-for db in groveauth scout-db grove-engine-db autumnsgrove-posts autumnsgrove-git-stats grove-domain-jobs; do
+for db in groveauth scout-db grove-engine-db grovemusic-db library-enhancer-db autumnsgrove-posts autumnsgrove-git-stats grove-domain-jobs your-site-posts amber mycelium-oauth ivy-db grove-curios-db grove-observability-db; do
   echo "Checking $db..."
   wrangler d1 execute $db --command="SELECT COUNT(*) FROM sqlite_master" 2>&1
 done
@@ -1336,8 +1362,16 @@ wrangler r2 object list grove-patina --prefix="daily/"
 | 2     | `grove-engine-db`        | Critical | Core platform, references auth  |
 | 3     | `scout-db`               | Critical | References users from groveauth |
 | 4     | `autumnsgrove-posts`     | High     | Blog content                    |
-| 5     | `autumnsgrove-git-stats` | Normal   | Can be regenerated              |
-| 6     | `grove-domain-jobs`      | Normal   | Transient job data              |
+| 5     | `grove-curios-db`        | High     | Curio widgets                   |
+| 6     | `grovemusic-db`          | High     | Music library data              |
+| 7     | `library-enhancer-db`    | High     | Library enhancement features    |
+| 8     | `autumnsgrove-git-stats` | Normal   | Can be regenerated              |
+| 9     | `grove-domain-jobs`      | Normal   | Transient job data              |
+| 10    | `your-site-posts`        | Normal   | Blog posts                      |
+| 11    | `amber`                  | Normal   | Supporting data                 |
+| 12    | `mycelium-oauth`         | Normal   | OAuth integration data          |
+| 13    | `ivy-db`                 | Normal   | IVY framework data              |
+| 14    | `grove-observability-db` | Normal   | Monitoring/telemetry data       |
 
 ```bash
 # Restore groveauth FIRST
@@ -1380,8 +1414,8 @@ wrangler d1 execute grove-engine-db --command="PRAGMA foreign_key_check"
 | Scenario                   | Time Estimate | Notes                   |
 | -------------------------- | ------------- | ----------------------- |
 | Single DB restore          | 5-10 minutes  | Download + execute      |
-| All 6 DBs (sequential)     | 30-45 minutes | Including verification  |
-| Full system + verification | 1-2 hours     | Including health checks |
+| All 14 DBs (sequential)    | 60-90 minutes | Including verification  |
+| Full system + verification | 2-3 hours     | Including health checks |
 
 ### If Backups Are Also Corrupted
 
@@ -1414,7 +1448,7 @@ const backupMetrics = {
   backup_last_success_timestamp: lastSuccessfulBackup,
   backup_last_duration_ms: lastBackupDuration,
   backup_total_size_bytes: totalBackupSize,
-  backup_databases_count: 6,
+  backup_databases_count: 14,
   backup_failures_24h: failuresInLast24Hours,
 };
 ```

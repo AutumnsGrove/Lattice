@@ -120,7 +120,7 @@
 			<div class="text-xs text-foreground-muted mt-1">Storage Used</div>
 		</div>
 		<div class="text-center p-4 rounded-xl bg-black/5 dark:bg-white/5">
-			<div class="text-2xl font-bold text-foreground tabular-nums">12</div>
+			<div class="text-2xl font-bold text-foreground tabular-nums">14</div>
 			<div class="text-xs text-foreground-muted mt-1">Databases</div>
 		</div>
 	</div>
