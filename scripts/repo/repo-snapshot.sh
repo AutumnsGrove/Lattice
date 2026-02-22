@@ -102,7 +102,7 @@ count_lines() {
         _grove_count_lines_pattern "$pattern" "."
     else
         # Fallback if grove-find not sourced
-        find . -name "$pattern" ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" ! -path "*/.svelte-kit/*" -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' '
+        find . -name "$pattern" ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" ! -path "*/.svelte-kit/*" ! -path "*/_archived/*" -type f -exec cat {} + 2>/dev/null | wc -l | tr -d ' '
     fi
 }
 
@@ -114,7 +114,7 @@ count_files() {
         _grove_count_files_pattern "$pattern" "."
     else
         # Fallback if grove-find not sourced
-        find . -name "$pattern" ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" ! -path "*/.svelte-kit/*" -type f 2>/dev/null | wc -l | tr -d ' '
+        find . -name "$pattern" ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" ! -path "*/.svelte-kit/*" ! -path "*/_archived/*" -type f 2>/dev/null | wc -l | tr -d ' '
     fi
 }
 
@@ -182,7 +182,7 @@ while IFS= read -r file; do
         MD_CHARS=$((MD_CHARS + chars))
         MD_FILES=$((MD_FILES + 1))
     fi
-done < <(find . -name "*.md" ! -path "*/node_modules/*" ! -path "*/.git/*" -type f 2>/dev/null)
+done < <(find . -name "*.md" ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/_archived/*" -type f 2>/dev/null)
 echo -e " ${GREEN}✓${NC}"
 
 echo -n "  Counting JSON files..."
@@ -199,7 +199,7 @@ while IFS= read -r file; do
         TEST_LINES=$((TEST_LINES + lines))
         TEST_FILES=$((TEST_FILES + 1))
     fi
-done < <(find . \( -name "*.test.ts" -o -name "*.test.js" -o -name "*.spec.ts" -o -name "*.spec.js" \) ! -path "*/node_modules/*" ! -path "*/.git/*" -type f 2>/dev/null)
+done < <(find . \( -name "*.test.ts" -o -name "*.test.js" -o -name "*.spec.ts" -o -name "*.spec.js" \) ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/_archived/*" -type f 2>/dev/null)
 echo -e " ${GREEN}✓${NC}"
 
 echo -n "  Measuring bundle size..."
@@ -212,11 +212,11 @@ fi
 echo -e " ${GREEN}✓${NC}"
 
 echo -n "  Analyzing code characters..."
-CODE_CHARS=$(find . \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.svelte" -o -name "*.css" -o -name "*.py" -o -name "*.go" -o -name "*.sql" -o -name "*.sh" -o -name "*.html" \) ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" ! -path "*/.svelte-kit/*" -type f -exec cat {} + 2>/dev/null | wc -c | tr -d ' ')
+CODE_CHARS=$(find . \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.svelte" -o -name "*.css" -o -name "*.py" -o -name "*.go" -o -name "*.sql" -o -name "*.sh" -o -name "*.html" \) ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" ! -path "*/.svelte-kit/*" ! -path "*/_archived/*" -type f -exec cat {} + 2>/dev/null | wc -c | tr -d ' ')
 echo -e " ${GREEN}✓${NC}"
 
 echo -n "  Counting directories..."
-TOTAL_DIRS=$(find . -type d ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" ! -path "*/.svelte-kit/*" | wc -l | tr -d ' ')
+TOTAL_DIRS=$(find . -type d ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" ! -path "*/.svelte-kit/*" ! -path "*/_archived/*" | wc -l | tr -d ' ')
 echo -e " ${GREEN}✓${NC}"
 
 echo -n "  Reading git history..."

@@ -16,7 +16,7 @@ gf --help && gw --help
 
 ```bash
 bash tools/grove-find-go/install.sh   # gf — codebase search (Go binary, ~40ms)
-uv tool install --editable tools/gw   # gw — infrastructure CLI (git/GitHub/CF)
+bash tools/grove-wrap-go/install.sh   # gw — infrastructure CLI (Go binary, ~17ms)
 ```
 
 Run `gf --help` and `gw --help` for full command lists.

@@ -442,7 +442,7 @@ gw git undo --write             # Keeps changes staged
 
 ## Related Resources
 
-- **gw README**: `tools/gw/README.md` — Full command reference
+- **gw source**: `tools/grove-wrap-go/` — Go source code and Makefile
 - **gw spec**: `docs/specs/gw-cli-spec.md` — Technical specification
 - **Git guide**: `AgentUsage/git_guide.md` — Extended documentation
 - **MCP integration**: `gw mcp serve` exposes all commands as MCP tools for Claude Code

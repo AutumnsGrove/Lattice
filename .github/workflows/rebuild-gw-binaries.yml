@@ -1,26 +1,22 @@
-name: Rebuild GF Binaries
+name: Rebuild GW Binaries
 
-# Auto-rebuild gf (grove-find) cross-platform binaries when Go code or dependencies change
-# Detects changes in Go source, module files, or version bumps
-# Commits rebuilt binaries back to the branch
+# Auto-rebuild gw (grove-wrap) cross-platform binaries when Go code or dependencies change
+# Pipeline: test → build (4-platform matrix) → commit binaries back to branch
+# Mirrors rebuild-gf-binaries.yml with test gate and version embedding
 
 on:
   pull_request:
     branches: [main]
     paths:
-      # Go source code
-      - "tools/grove-find-go/**/*.go"
-      # Go module files
-      - "tools/grove-find-go/go.mod"
-      - "tools/grove-find-go/go.sum"
+      - "tools/grove-wrap-go/**/*.go"
+      - "tools/grove-wrap-go/go.mod"
+      - "tools/grove-wrap-go/go.sum"
   push:
     branches: [main]
     paths:
-      # Go source code
-      - "tools/grove-find-go/**/*.go"
-      # Go module files
-      - "tools/grove-find-go/go.mod"
-      - "tools/grove-find-go/go.sum"
+      - "tools/grove-wrap-go/**/*.go"
+      - "tools/grove-wrap-go/go.mod"
+      - "tools/grove-wrap-go/go.sum"
 
 permissions:
   contents: write
@@ -31,11 +27,36 @@ concurrency:
 
 jobs:
   # ============================================
+  # TEST - Validate before building
+  # ============================================
+  test:
+    name: Test GW
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+
+      - name: Run tests
+        working-directory: tools/grove-wrap-go
+        run: go test ./...
+
+      - name: Run vet
+        working-directory: tools/grove-wrap-go
+        run: go vet ./...
+
+  # ============================================
   # BUILD - Compile for all platforms
   # ============================================
   build:
-    name: Build GF Binaries
+    name: Build GW Binaries
     runs-on: ubuntu-latest
+    needs: test
 
     strategy:
       fail-fast: false
@@ -43,16 +64,16 @@ jobs:
         include:
           - goos: linux
             goarch: amd64
-            binary: gf-linux-x86_64
+            binary: gw-linux-x86_64
           - goos: linux
             goarch: arm64
-            binary: gf-linux-arm64
+            binary: gw-linux-arm64
           - goos: darwin
             goarch: arm64
-            binary: gf-darwin-arm64
+            binary: gw-darwin-arm64
           - goos: windows
             goarch: amd64
-            binary: gf-windows-x86_64.exe
+            binary: gw-windows-x86_64.exe
 
     steps:
       - name: Checkout
@@ -70,15 +91,15 @@ jobs:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
         run: |
-          cd tools/grove-find-go
-          go build -ldflags="-s -w" -o dist/${{ matrix.binary }} .
+          cd tools/grove-wrap-go
+          go build -ldflags="-s -w -X github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/cmd.Version=0.1.0" -o dist/${{ matrix.binary }} .
           ls -lh dist/${{ matrix.binary }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.binary }}
-          path: tools/grove-find-go/dist/${{ matrix.binary }}
+          path: tools/grove-wrap-go/dist/${{ matrix.binary }}
           retention-days: 1
 
   # ============================================
@@ -88,7 +109,7 @@ jobs:
     name: Commit Rebuilt Binaries
     runs-on: ubuntu-latest
     needs: build
-    if: always()
+    if: always() && needs.build.result == 'success'
 
     steps:
       - name: Checkout
@@ -103,22 +124,27 @@ jobs:
 
       - name: Organize binaries
         run: |
-          mkdir -p tools/grove-find-go/dist
+          mkdir -p tools/grove-wrap-go/dist
           for dir in artifacts/*/; do
             binary=$(ls "$dir")
-            cp "$dir$binary" tools/grove-find-go/dist/
-            chmod +x tools/grove-find-go/dist/$binary
+            cp "$dir$binary" tools/grove-wrap-go/dist/
+            chmod +x "tools/grove-wrap-go/dist/$binary"
           done
-          ls -lh tools/grove-find-go/dist/
+          ls -lh tools/grove-wrap-go/dist/
 
       - name: Check for changes
         id: changes
         run: |
-          if git diff --quiet tools/grove-find-go/dist/; then
+          # Bootstrap-safe: detect both modified AND untracked files in dist/
+          UNTRACKED=$(git ls-files --others --exclude-standard tools/grove-wrap-go/dist/)
+          if git diff --quiet tools/grove-wrap-go/dist/ && [ -z "$UNTRACKED" ]; then
             echo "has_changes=false" >> $GITHUB_OUTPUT
           else
             echo "has_changes=true" >> $GITHUB_OUTPUT
-            git diff --stat tools/grove-find-go/dist/
+            echo "--- Modified files ---"
+            git diff --stat tools/grove-wrap-go/dist/ || true
+            echo "--- Untracked files ---"
+            echo "$UNTRACKED"
           fi
 
       - name: Setup git
@@ -130,8 +156,8 @@ jobs:
       - name: Commit binaries
         if: steps.changes.outputs.has_changes == 'true'
         run: |
-          git add tools/grove-find-go/dist/
-          git commit -m "chore: rebuild gf binaries for latest Go changes"
+          git add tools/grove-wrap-go/dist/
+          git commit -m "chore: rebuild gw binaries for latest Go changes"
 
       - name: Push
         if: steps.changes.outputs.has_changes == 'true'
@@ -141,7 +167,7 @@ jobs:
       - name: Summary
         if: always()
         run: |
-          echo "## GF Binary Build Summary"
+          echo "## GW Binary Build Summary"
           echo ""
           if [ "${{ steps.changes.outputs.has_changes }}" = "true" ]; then
             echo "Status: Updated"
@@ -150,7 +176,7 @@ jobs:
           fi
           echo ""
           echo "### Binaries"
-          ls -lh tools/grove-find-go/dist/ | tail -n +2
+          ls -lh tools/grove-wrap-go/dist/ | tail -n +2
           echo ""
           echo "### Total Size"
-          du -sh tools/grove-find-go/dist/
+          du -sh tools/grove-wrap-go/dist/

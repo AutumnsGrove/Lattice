@@ -18,6 +18,7 @@ Historical materials, deprecated code, and reference documents. Everything here 
 | `grove-find-bash`        | 2026-02-17 | Bash codebase search tool, replaced by `grove-find-go`          |
 | `grove-find-py`          | 2026-02-17 | Python codebase search tool, replaced by `grove-find-go`        |
 | `GroveDomainTool-python` | 2026-02-19 | Python LLM domain discovery tool, replaced by `services/forage` |
+| `gw-python`              | 2026-02-22 | Python infrastructure CLI (30K lines), replaced by `grove-wrap-go` |
 | `logo-concepts`          | 2026-01-13 | Old logo iterations                                             |
 | `vineyard-standalone`    | 2026-01-04 | Standalone vineyard app, merged into `libs/vineyard`            |
 

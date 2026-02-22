@@ -2,8 +2,9 @@
 gw
 gw.exe
 
-# Distribution binaries
-dist/
+# But DO commit pre-built binaries in dist/
+!/dist/
+!/dist/**
 
 # Go build cache
 *.test
