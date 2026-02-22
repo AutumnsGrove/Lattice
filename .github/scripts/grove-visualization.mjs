@@ -10,7 +10,7 @@
  * The grove grows with your codebase. Every package is a tree in the forest.
  */
 
-import { readdirSync, statSync, existsSync } from "node:fs";
+import { readdirSync, readFileSync, statSync, existsSync } from "node:fs";
 import { join, basename } from "node:path";
 
 const ROOT = process.argv[2] || process.cwd();
@@ -124,11 +124,7 @@ function discoverPackages() {
 			let name = entry.name;
 			try {
 				if (existsSync(pkgJsonPath)) {
-					const pkg = JSON.parse(
-						readdirSync(pkgDir).includes("package.json")
-							? require("node:fs").readFileSync(pkgJsonPath, "utf-8")
-							: "{}",
-					);
+					const pkg = JSON.parse(readFileSync(pkgJsonPath, "utf-8"));
 					name = pkg.name
 						? pkg.name.replace(/^@autumnsgrove\//, "").replace(/^grove-/, "")
 						: entry.name;

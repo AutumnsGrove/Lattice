@@ -15,7 +15,8 @@ jobs:
 
     steps:
       - name: Assign size label
-        uses: pascalgn/size-label-action@v0.5.5
+        # Pinned to v0.5.5 commit SHA — tags are mutable, SHAs are not
+        uses: pascalgn/size-label-action@f8edde36b3be04b4f65dcfead05dc8691b374348 # v0.5.5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # Grove-themed size labels:
