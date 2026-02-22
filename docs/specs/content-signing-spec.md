@@ -8,6 +8,7 @@ tags:
   - content-integrity
   - provenance
 type: tech-spec
+lastUpdated: "2026-02-22"
 ---
 
 ```

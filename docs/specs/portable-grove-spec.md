@@ -8,6 +8,7 @@ tags:
   - static-site
   - decentralization
 type: tech-spec
+lastUpdated: "2026-02-22"
 ---
 
 ```

@@ -8,6 +8,7 @@ tags:
   - rss
   - shade
 type: tech-spec
+lastUpdated: "2026-02-22"
 ---
 
 ```

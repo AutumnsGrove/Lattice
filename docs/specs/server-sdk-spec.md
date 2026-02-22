@@ -8,6 +8,7 @@ tags:
   - cloudflare-workers
   - portability
 type: tech-spec
+lastUpdated: "2026-02-22"
 ---
 
 ```
@@ -219,8 +220,9 @@ class CloudflareDatabase implements GroveDatabase {
   constructor(private d1: D1Database) {}
 
   async execute(sql: string, params?: unknown[]): Promise<QueryResult> {
-    const stmt = this.d1.prepare(sql);
-    if (params?.length) stmt.bind(...params);
+    const stmt = params?.length
+      ? this.d1.prepare(sql).bind(...params)
+      : this.d1.prepare(sql);
     return stmt.all();
   }
 

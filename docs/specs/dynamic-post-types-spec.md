@@ -8,6 +8,7 @@ tags:
   - post-types
   - garden
 type: tech-spec
+lastUpdated: "2026-02-22"
 ---
 
 ```

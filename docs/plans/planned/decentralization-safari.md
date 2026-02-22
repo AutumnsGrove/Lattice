@@ -299,7 +299,7 @@ Signature: [ed25519 signature using author's key]
 
 **Implementation sketch:**
 
-- **Key generation:** On account creation, generate an Ed25519 keypair. Store the private key encrypted (user's auth token as derivation input). The public key is published at `username.grove.place/.well-known/grove-author.json`.
+- **Key generation:** On account creation, generate an Ed25519 keypair. Store the private key encrypted via SecretsManager envelope encryption (KEK wraps a per-key DEK). The public key is published at `username.grove.place/.well-known/grove-author.json`.
 - **Signing flow:** On publish/update, hash the post content (title + body + published timestamp) with SHA-256, then sign the hash with the author's private key. Store the signature alongside the post metadata.
 - **Verification:** Anyone with the public key (published at `.well-known/`) can verify the signature against the content hash. A standalone `verify.grove.place` page lets you paste exported content and check signatures without any Grove account.
 - **Human authorship and AI transparency:** This goes beyond just "who wrote it" into "how was it written." Grove already tracks whether a post was composed with Fireside (AI writing assistant) or Wisp (AI features). The signature metadata can include an `authorship` field: `human`, `ai-assisted` (Fireside/Wisp), or `ai-generated`. This transforms verify.grove.place from a simple signature checker into a **provenance oracle** — visitors can see not just that Autumn wrote this post on this date, but that it was written by a human (or that AI assisted, transparently). In a world drowning in AI-generated content, this is a genuine differentiator: Grove content carries proof of its origin story.
@@ -414,7 +414,7 @@ This is the same SDK philosophy applied to content: abstract the pipeline, and e
 
 **This deserves its own spec.** See: Dynamic Post Types spec (to be written via /swan-design).
 
-#### 5d. The No-Acquisition Pledge (or: What Happens If)
+#### 5e. The No-Acquisition Pledge (or: What Happens If)
 
 Be transparent about what happens in every scenario:
 
@@ -426,7 +426,7 @@ Be transparent about what happens in every scenario:
 | Someone offers to buy Grove | Users notified 90 days before any transfer. Full export window. |
 | Cloudflare becomes hostile | Migration playbook executes. Data is portable. Code takes work. |
 
-#### 5e. Annual Sovereignty Audit
+#### 5f. Annual Sovereignty Audit
 
 Once a year, answer publicly:
 - Can every user export all their data today? (Test it.)
@@ -527,7 +527,7 @@ _The fire crackles. Stars emerge above the acacia trees. The journal is full —
 | Growing (good bones, meaningful additions needed) | 2 — Export system, Anti-capture commitments |
 | Wilting (needs real work) | 2 — Cloudflare contingency, True ownership tooling |
 | Barren | 0 |
-| Actionable items | 22 |
+| Actionable items | 17 |
 
 ### The Core Insight
 
