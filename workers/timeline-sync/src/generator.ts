@@ -16,7 +16,7 @@ import type {
 import { DEFAULT_OPENROUTER_MODEL } from "./config";
 import { createSecretsManager } from "./secrets-manager";
 import { fetchGitHubCommits, fetchCommitStats } from "./github";
-import { callOpenRouter, parseAIResponse } from "./openrouter";
+import { parseAIResponse } from "./response-parser";
 import { buildVoicedPrompt } from "./voices";
 import {
 	getHistoricalContext,
@@ -26,6 +26,7 @@ import {
 	formatContinuationForPrompt,
 	buildSummaryContextData,
 } from "./context";
+import { RemoteLumenClient } from "@autumnsgrove/lattice/lumen";
 
 // =============================================================================
 // Public API
@@ -178,13 +179,28 @@ export async function processTenantTimeline(
 			promptContext,
 		);
 
-		// 6. Call OpenRouter
-		console.log(`${logPrefix} Calling OpenRouter (${config.openrouterModel})...`);
-		const aiResult = await callOpenRouter(
-			systemPrompt,
-			userPrompt,
-			config.openrouterModel || DEFAULT_OPENROUTER_MODEL,
-			openrouterKey,
+		// 6. Call Lumen (via service binding — full pipeline: PII scrub, quota, fallback)
+		console.log(`${logPrefix} Calling Lumen (${config.openrouterModel})...`);
+		const lumen = new RemoteLumenClient({
+			baseUrl: "https://lumen.grove.place",
+			fetcher: env.LUMEN,
+		});
+
+		const aiResult = await lumen.run(
+			{
+				task: "summary",
+				input: [
+					{ role: "system", content: systemPrompt },
+					{ role: "user", content: userPrompt },
+				],
+				tenant: config.tenantId,
+				options: {
+					model: config.openrouterModel || DEFAULT_OPENROUTER_MODEL,
+					tenantApiKey: openrouterKey,
+					maxTokens: 2048,
+					temperature: 0.7,
+				},
+			},
 		);
 
 		// 7. Parse AI response
@@ -255,7 +271,7 @@ export async function processTenantTimeline(
 					JSON.stringify(repos),
 					totalAdditions,
 					totalDeletions,
-					aiResult.usage.model,
+					aiResult.model,
 					config.voicePreset,
 					JSON.stringify(contextData.contextBrief),
 					contextData.detectedFocus ? JSON.stringify(contextData.detectedFocus) : null,
@@ -303,9 +319,9 @@ export async function processTenantTimeline(
 			)
 				.bind(
 					config.tenantId,
-					aiResult.usage.model,
-					aiResult.usage.inputTokens,
-					aiResult.usage.outputTokens,
+					aiResult.model,
+					aiResult.usage.input,
+					aiResult.usage.output,
 					aiResult.usage.cost,
 				)
 				.run(),

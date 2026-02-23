@@ -32,6 +32,7 @@ import { WardenCloudflare } from "./services/cloudflare";
 import { WardenExa } from "./services/exa";
 import { WardenResend } from "./services/resend";
 import { WardenStripe } from "./services/stripe";
+import { WardenOpenRouter } from "./services/openrouter";
 
 export class WardenClient {
 	private baseUrl: string;
@@ -45,6 +46,7 @@ export class WardenClient {
 	readonly exa: WardenExa;
 	readonly resend: WardenResend;
 	readonly stripe: WardenStripe;
+	readonly openrouter: WardenOpenRouter;
 
 	constructor(config: WardenConfig) {
 		this.baseUrl = config.baseUrl.replace(/\/$/, "");
@@ -58,6 +60,7 @@ export class WardenClient {
 		this.exa = new WardenExa(this);
 		this.resend = new WardenResend(this);
 		this.stripe = new WardenStripe(this);
+		this.openrouter = new WardenOpenRouter(this);
 	}
 
 	/**

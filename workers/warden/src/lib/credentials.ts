@@ -18,6 +18,7 @@ const GLOBAL_CREDENTIAL_MAP: Record<WardenService, keyof Env> = {
 	exa: "EXA_API_KEY",
 	resend: "RESEND_API_KEY",
 	stripe: "STRIPE_SECRET_KEY",
+	openrouter: "OPENROUTER_API_KEY",
 };
 
 /** Mapping of services to their SecretsManager key names */
@@ -28,6 +29,7 @@ const TENANT_CREDENTIAL_MAP: Record<WardenService, string> = {
 	exa: "exa_api_key",
 	resend: "resend_api_key",
 	stripe: "stripe_secret_key",
+	openrouter: "openrouter_api_key",
 };
 
 export interface ResolvedCredential {

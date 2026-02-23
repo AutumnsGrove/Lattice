@@ -15,6 +15,8 @@ export interface Env {
 	CURIO_DB: D1Database;
 	/** Key Encryption Key from Cloudflare Secrets Store (hex string) */
 	GROVE_KEK: string;
+	/** Service binding to the Lumen AI Gateway worker */
+	LUMEN: { fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response> };
 	/** Optional fallback OpenRouter key if tenant key fails */
 	OPENROUTER_API_KEY?: string;
 }

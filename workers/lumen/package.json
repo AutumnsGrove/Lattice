@@ -1,0 +1,22 @@
+{
+	"name": "grove-lumen",
+	"version": "0.1.0",
+	"private": true,
+	"description": "AI inference gateway — unified pipeline with PII scrubbing, quota, and fallback chains",
+	"type": "module",
+	"scripts": {
+		"dev": "wrangler dev",
+		"deploy": "wrangler deploy",
+		"tail": "wrangler tail"
+	},
+	"dependencies": {
+		"@autumnsgrove/lattice": "workspace:*",
+		"hono": "^4.7.0",
+		"zod": "^3.24.0"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20251128.0",
+		"typescript": "^5.7.0",
+		"wrangler": "^4.63.0"
+	}
+}

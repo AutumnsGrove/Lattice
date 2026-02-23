@@ -64,6 +64,10 @@ export {
   createLumenClientWithDecryption,
 } from "./client.js";
 
+export { RemoteLumenClient, type RemoteLumenConfig } from "./remote.js";
+
+export { createLumenClientAuto, type LumenClientUnion } from "./factory.js";
+
 // =============================================================================
 // TYPES
 // =============================================================================
