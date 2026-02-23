@@ -136,6 +136,33 @@ export default {
 - **Everything else** (auth, tenants, pages, billing) → use `platform?.env?.DB`
 - **Cross-DB routes** (e.g., timeline generate/backfill/save-token) need **both** `DB` and `CURIO_DB` — `DB` for SecretsManager, `CURIO_DB` for curio tables
 
+### Warden (Credential Gateway)
+
+**Warden** (`workers/warden/`) is Grove's centralized API credential gateway. No other worker should hold raw API keys — they resolve credentials through Warden via service binding.
+
+**Credential flow:** Worker receives request → calls Warden `/resolve` with its agent API key → Warden authenticates, checks scopes, decrypts credential from `tenant_secrets` → returns key → worker uses it for the external API call. Raw keys never leave Warden except over internal service bindings (same colo, in-process).
+
+**Agent enrollment:** Each worker that needs credentials must be registered as a Warden agent with scoped permissions:
+
+```bash
+gw warden agent enroll --write --name <worker-name> --owner system \
+  --scopes "openrouter:*" --rpm 600 --daily 50000 --apply-to <worker-name>
+```
+
+This registers the agent, generates a unique API key, saves it to the vault, and deploys it to the worker.
+
+**Key `gw warden` commands:**
+
+| Command                                  | Tier   | Description                        |
+| ---------------------------------------- | ------ | ---------------------------------- |
+| `gw warden status`                       | Read   | Check Warden health                |
+| `gw warden agent list`                   | Read   | List registered agents             |
+| `gw warden logs [--service] [--agent]`   | Read   | Fetch audit logs                   |
+| `gw warden agent enroll --write [flags]` | Write  | Register agent + save key to vault |
+| `gw warden agent revoke --write --force` | Danger | Disable an agent (irreversible)    |
+
+**Alias fallback:** Warden checks multiple key names per service (e.g., `openrouter_api_key` then `timeline_openrouter_key`) so credentials saved under legacy names are still discoverable.
+
 ### Key Architecture Documents
 
 | Document                                                            | Purpose                                                                      |
@@ -303,6 +330,21 @@ cat libs/engine/package.json | grep -A2 '"\./'
 Skills are invoked via the Skill tool. Each skill's description explains when to use it. For help choosing a skill, invoke skill: `robin-guide`.
 
 Skills live in `.claude/skills/` — lean instruction files with deep references loaded on demand.
+
+### Security Skills
+
+Grove has layered security animals — use the right one for the scope of work:
+
+| Skill                | Focus                      | Use When                                             |
+| -------------------- | -------------------------- | ---------------------------------------------------- |
+| `spider-weave`       | Auth integration           | Implementing OAuth, sessions, RBAC, route protection |
+| `raccoon-audit`      | Secrets & vulnerability    | Finding exposed secrets, dead code, dependency vulns |
+| `turtle-harden`      | Defense-in-depth           | Layered hardening: validation, sanitization, CSP     |
+| `raven-investigate`  | Quick posture assessment   | Rapid audit of any codebase (parallel sub-agents)    |
+| `hawk-survey`        | Formal audit + remediation | Full STRIDE threat model across 14 domains           |
+| `gathering-security` | End-to-end pipeline        | Spider → Raccoon → Turtle in coordinated sequence    |
+
+**Credential security:** All API keys route through Warden (see [Warden section](#warden-credential-gateway)). Use `gw warden agent enroll` to register workers, `gw secret` to manage the vault.
 
 ### Gathering Chains (Multi-Animal Workflows)
 
@@ -487,5 +529,5 @@ Full reference: `AgentUsage/house_agents.md`
 
 ---
 
-_Last updated: 2026-02-22_
+_Last updated: 2026-02-23_
 _Model: Claude Opus 4.6_

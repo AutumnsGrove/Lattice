@@ -1,0 +1,21 @@
+name: Deploy Lumen
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "workers/lumen/**"
+      - "libs/engine/src/lib/lumen/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/_deploy-worker.yml
+    with:
+      worker-dir: workers/lumen
+      needs-engine: true
+    secrets: inherit

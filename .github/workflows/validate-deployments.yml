@@ -63,6 +63,12 @@ jobs:
           - name: og-worker
             path: services/og-worker
             needs-engine: false
+          - name: lumen
+            path: workers/lumen
+            needs-engine: true
+          - name: warden
+            path: workers/warden
+            needs-engine: true
 
     steps:
       - name: Checkout
