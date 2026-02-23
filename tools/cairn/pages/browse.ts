@@ -32,23 +32,23 @@ export function browsePage(idx: CairnIndex, biome: string, query: URLSearchParam
 	const sortedTags = [...allTags.entries()].sort((a, b) => b[1] - a[1]).slice(0, 20);
 
 	const biomeIcons: Record<string, string> = {
-		specs: "📐",
-		plans: "📋",
-		museum: "🏛️",
-		safaris: "🗺️",
-		"help-center": "📖",
-		security: "🔒",
-		philosophy: "🌿",
-		guides: "📚",
-		patterns: "🧩",
-		"design-system": "🎨",
-		developer: "⚙️",
-		scratch: "✏️",
-		snapshots: "📸",
-		"agent-usage": "🗝️",
-		root: "🌱",
+		specs: "ruler",
+		plans: "clipboard-list",
+		museum: "landmark",
+		safaris: "map",
+		"help-center": "book-open",
+		security: "shield",
+		philosophy: "leaf",
+		guides: "book-marked",
+		patterns: "component",
+		"design-system": "palette",
+		developer: "terminal",
+		scratch: "pen-line",
+		snapshots: "camera",
+		"agent-usage": "key-round",
+		root: "sprout",
 	};
-	const icon = biomeIcons[biome] ?? "📄";
+	const icon = biomeIcons[biome] ?? "file-text";
 
 	// For plans: kanban view grouped by status
 	const isPlans = biome === "plans";
@@ -98,7 +98,7 @@ export function browsePage(idx: CairnIndex, biome: string, query: URLSearchParam
 	return `
 <div class="page-header">
 	<div style="display:flex;align-items:center;gap:0.75rem;">
-		<span style="font-size:1.8rem;">${icon}</span>
+		<i data-lucide="${icon}" style="width:28px;height:28px;flex-shrink:0;" aria-hidden="true"></i>
 		<div>
 			<h1 class="page-title">${escHtml(biome.charAt(0).toUpperCase() + biome.slice(1))}</h1>
 			<p class="page-subtitle">${docs.length} document${docs.length !== 1 ? "s" : ""} ${tagFilter ? `tagged "${escHtml(tagFilter)}"` : ""}</p>
@@ -123,9 +123,15 @@ function docCard(doc: Document, biome: string): string {
 		.map((t, i) => tagBadge(t, i))
 		.join(" ");
 
+	const iconHtml = doc.icon
+		? /^[a-z][a-z0-9-]+$/.test(doc.icon)
+			? `<div class="doc-card-icon"><i data-lucide="${escHtml(doc.icon)}" style="width:18px;height:18px;color:var(--accent-warm);" aria-hidden="true"></i></div>`
+			: `<div class="doc-card-icon">${doc.icon}</div>`
+		: "";
+
 	return `
 <a href="/docs/${escHtml(doc.slug)}" class="doc-card">
-	${doc.icon ? `<div class="doc-card-icon">${doc.icon}</div>` : ""}
+	${iconHtml}
 	<div class="doc-card-title">${escHtml(doc.title ?? doc.path)}</div>
 	${doc.description ? `<div class="doc-card-desc">${escHtml(doc.description)}</div>` : ""}
 	<div class="doc-card-footer">

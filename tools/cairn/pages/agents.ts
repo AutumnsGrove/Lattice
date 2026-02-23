@@ -353,9 +353,14 @@ export function claudeSessionDetailPage(idx: CairnIndex, sessionId: string): str
 	const displayMessages = messages.slice(0, 100);
 	const truncated = messages.length > 100;
 
+	const toolOnlyCount = displayMessages.filter(
+		(m) => !m.text.trim() && (m.tools?.length ?? 0) > 0,
+	).length;
+
 	const msgsHtml = displayMessages
 		.map((m) => {
 			const isUser = m.role === "user";
+			const isToolOnly = !m.text.trim() && (m.tools?.length ?? 0) > 0;
 			const bg = isUser ? "rgba(122, 158, 196, 0.08)" : "rgba(255, 255, 255, 0.03)";
 			const border = isUser ? "rgba(122, 158, 196, 0.2)" : "var(--glass-border)";
 			const roleColor = isUser ? "var(--accent-blue)" : "var(--accent-warm)";
@@ -366,7 +371,7 @@ export function claudeSessionDetailPage(idx: CairnIndex, sessionId: string): str
 				.join("");
 
 			return `
-		<div style="background:${bg};border:1px solid ${border};border-radius:8px;padding:0.85rem 1rem;">
+		<div ${isToolOnly ? 'data-tool-only="true"' : ""} style="background:${bg};border:1px solid ${border};border-radius:8px;padding:0.85rem 1rem;">
 			<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:${preview || toolsHtml ? "0.4rem" : "0"};">
 				<span style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:${roleColor};">${m.role}</span>
 				${toolsHtml}
@@ -397,9 +402,22 @@ export function claudeSessionDetailPage(idx: CairnIndex, sessionId: string): str
 			</div>
 		</div>
 
-		<div style="display:flex;flex-direction:column;gap:0.6rem;">
+		<div id="message-thread">
+			${
+				toolOnlyCount > 0
+					? `<div class="filter-toolbar">
+				<button class="filter-btn" id="filter-toggle" onclick="toggleToolOnly(this)">
+					<i data-lucide="filter" style="width:12px;height:12px;"></i>
+					<span id="filter-label">Hide tool-only</span>
+				</button>
+				<span>${toolOnlyCount} tool-only message${toolOnlyCount !== 1 ? "s" : ""}</span>
+			</div>`
+					: ""
+			}
+			<div id="messages" style="display:flex;flex-direction:column;gap:0.6rem;">
 			${msgsHtml}
 			${truncated ? `<div style="text-align:center;color:var(--text-muted);font-size:0.8rem;padding:1rem;font-style:italic;">Showing first 100 messages of ${messages.length}</div>` : ""}
+			</div>
 		</div>
 	</div>
 
@@ -428,5 +446,15 @@ export function claudeSessionDetailPage(idx: CairnIndex, sessionId: string): str
 			</div>
 		</div>
 	</div>
-</div>`;
+</div>
+
+<script>
+function toggleToolOnly(btn) {
+	const msgs = document.getElementById('messages');
+	const isHiding = msgs.classList.toggle('hide-tool-only');
+	btn.classList.toggle('active', isHiding);
+	document.getElementById('filter-label').textContent = isHiding ? 'Show tool-only' : 'Hide tool-only';
+}
+</script>
+`;
 }

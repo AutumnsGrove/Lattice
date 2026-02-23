@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap");
+
 /* ─── Grove Forest Palette ─────────────────────────────────────────────────── */
 :root {
 	--bg-deep: #0d1117;
@@ -22,7 +24,7 @@
 	--glass-blur: 12px;
 
 	/* Typography */
-	--font-body: "Inter", "Lexend", system-ui, sans-serif;
+	--font-body: "Lexend", system-ui, sans-serif;
 	--font-mono: "JetBrains Mono", "SF Mono", "Fira Code", monospace;
 	--font-display: "Fraunces", Georgia, serif;
 
@@ -67,6 +69,29 @@ pre {
 	font-size: 0.875em;
 }
 
+/* ─── Lucide Icons ──────────────────────────────────────────────────────────── */
+[data-lucide] {
+	width: 14px;
+	height: 14px;
+	flex-shrink: 0;
+	stroke-width: 1.75;
+	display: inline-block;
+	vertical-align: middle;
+}
+
+.sidebar [data-lucide] {
+	opacity: 0.65;
+}
+.sidebar a.active [data-lucide],
+.sidebar a:hover [data-lucide] {
+	opacity: 1;
+}
+.topbar-icon {
+	width: 18px;
+	height: 18px;
+	color: var(--accent-warm);
+}
+
 /* ─── Layout ────────────────────────────────────────────────────────────────── */
 .layout {
 	display: grid;
@@ -81,7 +106,7 @@ pre {
 	align-items: center;
 	gap: 1rem;
 	padding: 0 1.5rem;
-	height: 52px;
+	height: 54px;
 	background: rgba(13, 17, 23, 0.8);
 	backdrop-filter: blur(var(--glass-blur));
 	border-bottom: 1px solid var(--border-subtle);
@@ -146,8 +171,8 @@ pre {
 	padding: 1rem 0;
 	border-right: 1px solid var(--border-subtle);
 	position: sticky;
-	top: 52px;
-	height: calc(100vh - 52px);
+	top: 54px;
+	height: calc(100vh - 54px);
 	overflow-y: auto;
 	background: rgba(13, 17, 23, 0.6);
 }
@@ -170,7 +195,7 @@ pre {
 	display: flex;
 	align-items: center;
 	gap: 0.5rem;
-	padding: 0.35rem 1rem;
+	padding: 0.4rem 1rem;
 	font-size: 0.8rem;
 	color: var(--text-secondary);
 	transition:
@@ -197,7 +222,7 @@ pre {
 	color: var(--text-muted);
 	background: var(--bg-glass);
 	padding: 0.1rem 0.4rem;
-	border-radius: 9999px;
+	border-radius: 4px;
 }
 
 /* ─── Main Content ──────────────────────────────────────────────────────────── */
@@ -488,7 +513,7 @@ pre {
 	padding: 1rem;
 	font-size: 0.78rem;
 	position: sticky;
-	top: calc(52px + 2rem);
+	top: calc(54px + 2rem);
 }
 
 .toc-title {
@@ -954,6 +979,50 @@ mark {
 .status-completed {
 	background: var(--bg-glass);
 	color: var(--text-muted);
+}
+
+/* ─── Filter Toolbar ────────────────────────────────────────────────────────── */
+.filter-toolbar {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	margin-bottom: 1rem;
+	padding: 0.5rem 0.75rem;
+	background: var(--glass-bg);
+	border: 1px solid var(--glass-border);
+	border-radius: var(--radius-sm);
+	font-size: 0.78rem;
+	color: var(--text-muted);
+}
+
+.filter-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	padding: 0.2rem 0.6rem;
+	border: 1px solid var(--border-subtle);
+	border-radius: var(--radius-sm);
+	background: transparent;
+	color: var(--text-secondary);
+	font-size: 0.73rem;
+	font-family: var(--font-body);
+	cursor: pointer;
+	transition:
+		border-color 0.15s,
+		color 0.15s,
+		background 0.15s;
+}
+.filter-btn:hover {
+	border-color: var(--border-hover);
+	color: var(--text-primary);
+}
+.filter-btn.active {
+	background: rgba(212, 165, 116, 0.1);
+	border-color: rgba(212, 165, 116, 0.3);
+	color: var(--accent-warm);
+}
+.hide-tool-only [data-tool-only="true"] {
+	display: none;
 }
 
 /* ─── Empty State ───────────────────────────────────────────────────────────── */

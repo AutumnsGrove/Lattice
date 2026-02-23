@@ -40,23 +40,23 @@ export function dashboardPage(idx: CairnIndex): string {
 
 	// Biome quick-links grid
 	const biomeLinks = [
-		{ href: "/browse/specs", icon: "📐", label: "Specs", biome: "specs" },
-		{ href: "/browse/plans", icon: "📋", label: "Plans", biome: "plans" },
-		{ href: "/browse/museum", icon: "🏛️", label: "Museum", biome: "museum" },
-		{ href: "/browse/safaris", icon: "🗺️", label: "Safaris", biome: "safaris" },
-		{ href: "/browse/help-center", icon: "📖", label: "Help Center", biome: "help-center" },
-		{ href: "/browse/security", icon: "🔒", label: "Security", biome: "security" },
-		{ href: "/browse/philosophy", icon: "🌿", label: "Philosophy", biome: "philosophy" },
-		{ href: "/browse/guides", icon: "📚", label: "Guides", biome: "guides" },
-		{ href: "/skills", icon: "🦎", label: "Skills", biome: "skills" },
-		{ href: "/agents", icon: "🤖", label: "Agent Activity", biome: "agents" },
-		{ href: "/timeline", icon: "⏱️", label: "Timeline", biome: "snapshots" },
-		{ href: "/browse/scratch", icon: "✏️", label: "Scratch", biome: "scratch" },
+		{ href: "/browse/specs", icon: "ruler", label: "Specs", biome: "specs" },
+		{ href: "/browse/plans", icon: "clipboard-list", label: "Plans", biome: "plans" },
+		{ href: "/browse/museum", icon: "landmark", label: "Museum", biome: "museum" },
+		{ href: "/browse/safaris", icon: "map", label: "Safaris", biome: "safaris" },
+		{ href: "/browse/help-center", icon: "book-open", label: "Help Center", biome: "help-center" },
+		{ href: "/browse/security", icon: "shield", label: "Security", biome: "security" },
+		{ href: "/browse/philosophy", icon: "leaf", label: "Philosophy", biome: "philosophy" },
+		{ href: "/browse/guides", icon: "book-marked", label: "Guides", biome: "guides" },
+		{ href: "/skills", icon: "sparkles", label: "Skills", biome: "skills" },
+		{ href: "/agents", icon: "bot", label: "Agent Activity", biome: "agents" },
+		{ href: "/timeline", icon: "clock", label: "Timeline", biome: "snapshots" },
+		{ href: "/browse/scratch", icon: "pen-line", label: "Scratch", biome: "scratch" },
 	]
 		.map(
 			({ href, icon, label, biome }) => `
 		<a href="${href}" class="doc-card">
-			<div class="doc-card-icon">${icon}</div>
+			<i data-lucide="${icon}" style="width:22px;height:22px;color:var(--accent-warm);margin-bottom:0.4rem;display:block;" aria-hidden="true"></i>
 			<div class="doc-card-title">${label}</div>
 			<div class="doc-card-footer">
 				${biomeBadge(biome)}

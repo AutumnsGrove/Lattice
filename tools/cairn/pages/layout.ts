@@ -26,48 +26,68 @@ function buildNav(stats: IndexStats, currentPath: string): NavItem[][] {
 
 	return [
 		[
-			{ href: "/", label: "Dashboard", icon: "🏔️" },
-			{ href: "/search", label: "Search", icon: "🔍" },
+			{ href: "/", label: "Dashboard", icon: "layout-dashboard" },
+			{ href: "/search", label: "Search", icon: "search" },
 		],
 		[
-			{ href: "/browse/specs", label: "Specs", icon: "📐", count: biomes["specs"] },
-			{ href: "/browse/plans", label: "Plans", icon: "📋", count: biomes["plans"] },
-			{ href: "/browse/museum", label: "Museum", icon: "🏛️", count: biomes["museum"] },
-			{ href: "/browse/safaris", label: "Safaris", icon: "🗺️", count: biomes["safaris"] },
+			{ href: "/browse/specs", label: "Specs", icon: "ruler", count: biomes["specs"] },
+			{ href: "/browse/plans", label: "Plans", icon: "clipboard-list", count: biomes["plans"] },
+			{ href: "/browse/museum", label: "Museum", icon: "landmark", count: biomes["museum"] },
+			{ href: "/browse/safaris", label: "Safaris", icon: "map", count: biomes["safaris"] },
 			{
 				href: "/browse/help-center",
 				label: "Help Center",
-				icon: "📖",
+				icon: "book-open",
 				count: biomes["help-center"],
 			},
-			{ href: "/browse/security", label: "Security", icon: "🔒", count: biomes["security"] },
-			{ href: "/browse/philosophy", label: "Philosophy", icon: "🌿", count: biomes["philosophy"] },
-			{ href: "/browse/guides", label: "Guides", icon: "📚", count: biomes["guides"] },
-			{ href: "/browse/patterns", label: "Patterns", icon: "🧩", count: biomes["patterns"] },
+			{ href: "/browse/security", label: "Security", icon: "shield", count: biomes["security"] },
+			{
+				href: "/browse/philosophy",
+				label: "Philosophy",
+				icon: "leaf",
+				count: biomes["philosophy"],
+			},
+			{ href: "/browse/guides", label: "Guides", icon: "book-marked", count: biomes["guides"] },
+			{ href: "/browse/patterns", label: "Patterns", icon: "component", count: biomes["patterns"] },
 			{
 				href: "/browse/design-system",
 				label: "Design",
-				icon: "🎨",
+				icon: "palette",
 				count: biomes["design-system"],
 			},
-			{ href: "/browse/developer", label: "Developer", icon: "⚙️", count: biomes["developer"] },
-			{ href: "/browse/scratch", label: "Scratch", icon: "✏️", count: biomes["scratch"] },
+			{
+				href: "/browse/developer",
+				label: "Developer",
+				icon: "terminal",
+				count: biomes["developer"],
+			},
+			{ href: "/browse/scratch", label: "Scratch", icon: "pen-line", count: biomes["scratch"] },
 		],
 		[
-			{ href: "/skills", label: "Skills", icon: "🦎", count: stats.skills },
-			{ href: "/agents", label: "Agents", icon: "🤖" },
-			{ href: "/agents/crush", label: "Crush Sessions", icon: "💬", count: stats.crushSessions },
-			{ href: "/agents/claude", label: "Claude Sessions", icon: "📜", count: stats.claudeSessions },
-			{ href: "/timeline", label: "Timeline", icon: "⏱️" },
+			{ href: "/skills", label: "Skills", icon: "sparkles", count: stats.skills },
+			{ href: "/agents", label: "Agents", icon: "bot" },
+			{
+				href: "/agents/crush",
+				label: "Crush Sessions",
+				icon: "message-circle",
+				count: stats.crushSessions,
+			},
+			{
+				href: "/agents/claude",
+				label: "Claude Sessions",
+				icon: "scroll",
+				count: stats.claudeSessions,
+			},
+			{ href: "/timeline", label: "Timeline", icon: "clock" },
 		],
 		[
 			{
 				href: "/browse/agent-usage",
 				label: "Agent Guides",
-				icon: "🗝️",
+				icon: "key-round",
 				count: biomes["agent-usage"],
 			},
-			{ href: "/browse/snapshots", label: "Snapshots", icon: "📸", count: biomes["snapshots"] },
+			{ href: "/browse/snapshots", label: "Snapshots", icon: "camera", count: biomes["snapshots"] },
 		],
 	];
 }
@@ -93,7 +113,7 @@ export function layout(opts: {
 				.map(({ href, label: itemLabel, icon, count }) => {
 					const isActive = href === currentPath || (href !== "/" && currentPath.startsWith(href));
 					return `<a href="${href}" class="${isActive ? "active" : ""}">
-					<span>${icon}</span>
+					<i data-lucide="${icon}" aria-hidden="true"></i>
 					<span>${itemLabel}</span>
 					${count !== undefined && count > 0 ? `<span class="sidebar-count" aria-label="${count} documents">${count}</span>` : ""}
 				</a>`;
@@ -113,6 +133,7 @@ export function layout(opts: {
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>${escHtml(title)} · Cairn</title>
 	<style>${css}</style>
+	<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" crossorigin="anonymous"></script>
 </head>
 <body>
 <div class="layout">
@@ -123,7 +144,7 @@ export function layout(opts: {
 	<!-- Topbar -->
 	<header class="topbar" role="banner">
 		<a href="/" class="topbar-brand" style="text-decoration:none;" aria-label="Cairn home">
-			<span class="stone" aria-hidden="true">🏔️</span>
+			<i data-lucide="mountain" class="topbar-icon" aria-hidden="true"></i>
 			<span>Cairn</span>
 		</a>
 		<span class="topbar-tagline" aria-hidden="true">Follow the cairns. Find your way.</span>
@@ -172,6 +193,8 @@ searchInput?.addEventListener('keydown', e => {
 		if (q) window.location.href = '/search?q=' + encodeURIComponent(q);
 	}
 });
+
+if (typeof lucide !== 'undefined') lucide.createIcons();
 </script>
 </body>
 </html>`;
