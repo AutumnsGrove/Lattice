@@ -113,21 +113,26 @@ export class MockStorage implements GroveStorage {
 		const prefix = options?.prefix ?? "";
 		const limit = options?.limit ?? 1000;
 
-		const matching = Array.from(this.store.entries())
+		const allMatching = Array.from(this.store.entries())
 			.filter(([key]) => key.startsWith(prefix))
-			.slice(0, limit)
-			.map(([key, stored]) => ({
-				key,
-				size: stored.size,
-				etag: `"mock-etag"`,
-				contentType: stored.contentType,
-				lastModified: stored.uploadedAt,
-				metadata: stored.metadata,
-			}));
+			.sort(([a], [b]) => a.localeCompare(b));
+
+		const truncated = allMatching.length > limit;
+		const page = allMatching.slice(0, limit);
+
+		const objects = page.map(([key, stored]) => ({
+			key,
+			size: stored.size,
+			etag: `"mock-etag"`,
+			contentType: stored.contentType,
+			lastModified: stored.uploadedAt,
+			metadata: stored.metadata,
+		}));
 
 		return {
-			objects: matching,
-			truncated: false,
+			objects,
+			cursor: truncated ? page[page.length - 1]?.[0] : undefined,
+			truncated,
 		};
 	}
 

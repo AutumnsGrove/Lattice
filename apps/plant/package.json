@@ -33,6 +33,7 @@
 		"@autumnsgrove/lattice": "workspace:*",
 		"lucide-svelte": "^0.554.0",
 		"resend": "^4.8.0",
-		"stripe": "^17.7.0"
+		"stripe": "^17.7.0",
+		"zod": "^4.3.6"
 	}
 }

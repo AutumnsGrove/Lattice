@@ -19,7 +19,10 @@ import type {
 } from "../types.js";
 
 export class CloudflareStorage implements GroveStorage {
-	constructor(private readonly r2: R2Bucket) {}
+	constructor(
+		private readonly r2: R2Bucket,
+		private readonly bucketName: string = "default",
+	) {}
 
 	private validateKey(key: string, context: string): void {
 		// Validate key is a non-empty string and doesn't contain path traversal patterns
@@ -59,7 +62,10 @@ export class CloudflareStorage implements GroveStorage {
 				throw new Error("R2 put returned null");
 			}
 
-			return this.toStorageObject(obj, key);
+			// R2 put() returns R2Object (no body). Reconstruct a readable
+			// stream from the original data so the returned StorageObject
+			// has a usable body — callers can read what they just wrote.
+			return this.toStorageObjectFromPut(obj, key, data);
 		} catch (error) {
 			logGroveError("ServerSDK", SRV_ERRORS.STORAGE_UPLOAD_FAILED, {
 				detail: key,
@@ -202,14 +208,38 @@ export class CloudflareStorage implements GroveStorage {
 	info(): StorageInfo {
 		return {
 			provider: "cloudflare-r2",
-			bucket: "grove",
+			bucket: this.bucketName,
 		};
 	}
 
-	private toStorageObject(obj: R2Object, key: string): StorageObject {
+	private toStorageObjectFromPut(
+		obj: R2Object,
+		key: string,
+		originalData: ReadableStream | ArrayBuffer | string,
+	): StorageObject {
+		// Reconstruct a body stream from the original input data since
+		// R2 put() returns R2Object (no body), not R2ObjectBody.
+		let body: ReadableStream;
+		if (originalData instanceof ReadableStream) {
+			// Stream was already consumed by R2 — return an empty stream.
+			// Callers should re-fetch with get() if they need to re-read.
+			body = new ReadableStream();
+		} else {
+			const bytes =
+				typeof originalData === "string"
+					? new TextEncoder().encode(originalData)
+					: new Uint8Array(originalData);
+			body = new ReadableStream({
+				start(controller) {
+					controller.enqueue(bytes);
+					controller.close();
+				},
+			});
+		}
+
 		return {
 			key,
-			body: new ReadableStream(),
+			body,
 			size: obj.size,
 			etag: obj.etag,
 			contentType: obj.httpMetadata?.contentType ?? "application/octet-stream",

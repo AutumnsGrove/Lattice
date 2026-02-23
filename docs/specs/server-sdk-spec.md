@@ -47,7 +47,7 @@ The Server SDK is the bedrock beneath every Grove service. It wraps each infrast
 **Internal Name:** GroveServerSDK
 **Package:** `@autumnsgrove/server-sdk`
 **Location:** `libs/server-sdk/`
-**Exports:** `@autumnsgrove/server-sdk` (primary), re-exported via `@autumnsgrove/lattice/server`
+**Exports:** `@autumnsgrove/server-sdk` (primary), re-exported via `@autumnsgrove/lattice/infra`
 **Last Updated:** February 2026
 
 Trees grow where their roots can find water. Move the roots to different soil, and the tree still grows. The Server SDK is that root system: a layer of abstraction between application code and the ground it runs on. Cloudflare is fertile soil today. If the soil changes, we transplant the roots, not the tree.

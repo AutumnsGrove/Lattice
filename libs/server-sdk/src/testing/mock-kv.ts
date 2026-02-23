@@ -90,18 +90,23 @@ export class MockKV implements GroveKV {
 		const prefix = options?.prefix ?? "";
 		const limit = options?.limit ?? 1000;
 
-		const keys = Array.from(this.store.entries())
+		const allMatching = Array.from(this.store.entries())
 			.filter(([key]) => key.startsWith(prefix))
-			.slice(0, limit)
-			.map(([name, entry]) => ({
-				name,
-				expiration: entry.expiration,
-				metadata: entry.metadata,
-			}));
+			.sort(([a], [b]) => a.localeCompare(b));
+
+		const listComplete = allMatching.length <= limit;
+		const page = allMatching.slice(0, limit);
+
+		const keys = page.map(([name, entry]) => ({
+			name,
+			expiration: entry.expiration,
+			metadata: entry.metadata,
+		}));
 
 		return {
 			keys,
-			list_complete: true,
+			cursor: listComplete ? undefined : page[page.length - 1]?.[0],
+			list_complete: listComplete,
 		};
 	}
 

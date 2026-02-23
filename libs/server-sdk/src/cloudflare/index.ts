@@ -48,6 +48,10 @@ export interface CloudflareContextOptions {
 	services?: Record<string, Fetcher>;
 	/** The full env object for config/secrets access */
 	env: Record<string, unknown>;
+	/** Optional name for the D1 database (for diagnostics) */
+	dbName?: string;
+	/** Optional name for the R2 bucket (for diagnostics) */
+	bucketName?: string;
 	/** Optional name for the KV namespace (for diagnostics) */
 	kvNamespace?: string;
 }
@@ -82,8 +86,8 @@ export function createCloudflareContext(options: CloudflareContextOptions): Grov
 
 	try {
 		return {
-			db: new CloudflareDatabase(options.db),
-			storage: new CloudflareStorage(options.storage),
+			db: new CloudflareDatabase(options.db, options.dbName),
+			storage: new CloudflareStorage(options.storage, options.bucketName),
 			kv: new CloudflareKV(options.kv, options.kvNamespace),
 			services: new CloudflareServiceBus(options.services ?? {}),
 			scheduler: new CloudflareScheduler(),

@@ -98,6 +98,18 @@
 		"./groveauth": {
 			"types": "./libs/engine/dist/heartwood/index.d.ts",
 			"default": "./libs/engine/dist/heartwood/index.js"
+		},
+		"./infra": {
+			"types": "./libs/server-sdk/src/index.ts",
+			"default": "./libs/server-sdk/src/index.ts"
+		},
+		"./infra/cloudflare": {
+			"types": "./libs/server-sdk/src/cloudflare/index.ts",
+			"default": "./libs/server-sdk/src/cloudflare/index.ts"
+		},
+		"./infra/testing": {
+			"types": "./libs/server-sdk/src/testing/index.ts",
+			"default": "./libs/server-sdk/src/testing/index.ts"
 		}
 	},
 	"overrides": {

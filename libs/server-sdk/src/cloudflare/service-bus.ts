@@ -103,7 +103,18 @@ export class CloudflareServiceBus implements GroveServiceBus {
 	}
 
 	async ping(service: string): Promise<boolean> {
-		return service in this.bindings;
+		const binding = this.bindings[service];
+		if (!binding) return false;
+
+		try {
+			// Attempt a real HEAD request to verify the service is reachable.
+			// Cloudflare service bindings are zero-latency so this is cheap.
+			const response = await binding.fetch(`https://${service}/`, { method: "HEAD" });
+			// Any response (even 404) means the binding is alive.
+			return response.status < 500;
+		} catch {
+			return false;
+		}
 	}
 
 	services(): string[] {

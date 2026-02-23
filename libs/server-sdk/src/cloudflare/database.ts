@@ -18,7 +18,10 @@ import type {
 } from "../types.js";
 
 export class CloudflareDatabase implements GroveDatabase {
-	constructor(private readonly d1: D1Database) {}
+	constructor(
+		private readonly d1: D1Database,
+		private readonly databaseName: string = "default",
+	) {}
 
 	async execute(sql: string, params?: unknown[]): Promise<QueryResult> {
 		// Input validation: sql must be a non-empty string
@@ -56,7 +59,19 @@ export class CloudflareDatabase implements GroveDatabase {
 
 		try {
 			// D1's batch expects D1PreparedStatement instances.
-			// BoundStatements wrapping D1 prepared statements are passed through.
+			// BoundStatements created via CloudflareDatabase.prepare().bind()
+			// are D1PreparedStatements under the hood. Validate that each
+			// statement has the expected .all() method before casting.
+			for (const stmt of statements) {
+				if (typeof stmt.all !== "function") {
+					logGroveError("ServerSDK", SRV_ERRORS.QUERY_FAILED, {
+						detail: "batch() received a statement not created by this adapter",
+					});
+					throw new Error(
+						"Batch statements must be created via CloudflareDatabase.prepare().bind()",
+					);
+				}
+			}
 			const results = await this.d1.batch(statements as unknown as D1PreparedStatement[]);
 			return results.map((result) => ({
 				results: result.results as Record<string, unknown>[],
@@ -100,7 +115,7 @@ export class CloudflareDatabase implements GroveDatabase {
 	info(): DatabaseInfo {
 		return {
 			provider: "cloudflare-d1",
-			database: "grove",
+			database: this.databaseName,
 			readonly: false,
 		};
 	}
