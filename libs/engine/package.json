@@ -350,6 +350,10 @@
 			"types": "./dist/warden/index.d.ts",
 			"default": "./dist/warden/index.js"
 		},
+		"./amber": {
+			"types": "./dist/amber/index.d.ts",
+			"default": "./dist/amber/index.js"
+		},
 		"./blazes": {
 			"types": "./dist/blazes/index.d.ts",
 			"svelte": "./dist/blazes/index.js",
@@ -486,6 +490,7 @@
 		"@11ty/gray-matter": "^2.0.1",
 		"@autumnsgrove/foliage": "workspace:*",
 		"@autumnsgrove/gossamer": "workspace:*",
+		"@autumnsgrove/server-sdk": "workspace:*",
 		"@jsquash/jxl": "^1.3.0",
 		"@react-email/components": "^1.0.7",
 		"@react-email/render": "^2.0.4",
