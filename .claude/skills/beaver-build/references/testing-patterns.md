@@ -20,22 +20,26 @@
 ## What Each Layer Does
 
 **Static Analysis (TypeScript, ESLint):**
+
 - Catches typos, type errors, obvious mistakes
 - Zero runtime cost, always running
 - First line of defense
 
 **Unit Tests:**
+
 - Pure functions, algorithms, utilities
 - Fast, isolated, easy to debug
 - Don't mock everything — test real behavior where practical
 
 **Integration Tests (THE SWEET SPOT):**
+
 - Multiple units working together
 - Tests behavior users actually experience
 - Less brittle than unit tests, faster than E2E
 - Most of your tests should live here
 
 **E2E Tests (Playwright):**
+
 - Critical user journeys only: login, checkout, core flows
 - Expensive to write and maintain
 - Reserve for flows where failure = business impact
@@ -71,18 +75,18 @@
 
 ```typescript
 it("should reject invalid email during registration", async () => {
-  // Arrange: Set up the scenario
-  const invalidEmail = "not-an-email";
+	// Arrange: Set up the scenario
+	const invalidEmail = "not-an-email";
 
-  // Act: Do the thing (ONE line)
-  const result = await registerUser({
-    email: invalidEmail,
-    password: "valid123",
-  });
+	// Act: Do the thing (ONE line)
+	const result = await registerUser({
+		email: invalidEmail,
+		password: "valid123",
+	});
 
-  // Assert: Check the outcome
-  expect(result.success).toBe(false);
-  expect(result.error).toContain("email");
+	// Assert: Check the outcome
+	expect(result.success).toBe(false);
+	expect(result.error).toContain("email");
 });
 ```
 
@@ -93,16 +97,16 @@ The Act section should be one line. If it's not, the test is probably doing too 
 ```typescript
 // Bad: Testing implementation detail
 it("should set isLoading state to true", async () => {
-  const { component } = render(LoginForm);
-  await fireEvent.click(getByRole("button"));
-  expect(component.isLoading).toBe(true); // Tests internal state!
+	const { component } = render(LoginForm);
+	await fireEvent.click(getByRole("button"));
+	expect(component.isLoading).toBe(true); // Tests internal state!
 });
 
 // Good: Testing user experience
 it("should show loading indicator while logging in", async () => {
-  render(LoginForm);
-  await fireEvent.click(getByRole("button", { name: /sign in/i }));
-  expect(getByRole("progressbar")).toBeInTheDocument();
+	render(LoginForm);
+	await fireEvent.click(getByRole("button", { name: /sign in/i }));
+	expect(getByRole("progressbar")).toBeInTheDocument();
 });
 ```
 
@@ -110,19 +114,21 @@ it("should show loading indicator while logging in", async () => {
 
 ```typescript
 getByRole("button", { name: /submit/i }); // How screen readers see it — BEST
-getByLabelText("Email");                   // Form fields
-getByText("Welcome back");                // Visible text
-getByTestId("login-form");               // Last resort only
+getByLabelText("Email"); // Form fields
+getByText("Welcome back"); // Visible text
+getByTestId("login-form"); // Last resort only
 ```
 
 ## Good Test Names
 
 **Good:**
+
 - `should reject registration with invalid email`
 - `should show error message when API fails`
 - `should preserve draft when navigating away`
 
 **Bad:**
+
 - `test email validation` (what about it?)
 - `handleSubmit works` (what does "works" mean?)
 - `test case 1` (no)
@@ -172,14 +178,14 @@ Every production bug should become a test:
 
 ## What Makes a Test Valuable (Kent Beck)
 
-| Property | What It Means |
-|----------|---------------|
-| **Behavior-sensitive** | Fails when actual functionality breaks |
-| **Structure-immune** | Doesn't break when you refactor safely |
-| **Deterministic** | Same result every time, no flakiness |
-| **Fast** | Gives feedback in seconds, not minutes |
-| **Clear diagnosis** | When it fails, you know exactly what broke |
-| **Cheap to write** | Effort proportional to code complexity |
+| Property               | What It Means                              |
+| ---------------------- | ------------------------------------------ |
+| **Behavior-sensitive** | Fails when actual functionality breaks     |
+| **Structure-immune**   | Doesn't break when you refactor safely     |
+| **Deterministic**      | Same result every time, no flakiness       |
+| **Fast**               | Gives feedback in seconds, not minutes     |
+| **Clear diagnosis**    | When it fails, you know exactly what broke |
+| **Cheap to write**     | Effort proportional to code complexity     |
 
 ## Signpost Error Code Coverage
 
@@ -194,10 +200,32 @@ expect(data.error_description).toBeDefined();
 ```
 
 Error handling checklist for tests:
+
 - [ ] API routes return `buildErrorJson()` format (has `error_code`, `error`, `error_description`)
 - [ ] Error messages match catalog `userMessage` (no ad-hoc strings)
 - [ ] Client shows `toast.success()` / `toast.error()` for user actions
 - [ ] Auth errors don't reveal user existence (same response for valid/invalid)
+
+## Rootwork Validation Testing
+
+- Test that invalid form data returns structured errors (not crashes)
+- Test that malformed KV data falls back gracefully (`safeJsonParse` returns null)
+- Test that catch blocks properly re-throw redirects (use `isRedirect()` type guard)
+- Verify Signpost error codes on validation failures match expected category (user/admin/bug)
+
+```typescript
+// Example: form validation failure
+it("should return user-facing error for invalid email", async () => {
+	const response = await POST({
+		request: createMockRequest("POST", { email: "not-an-email" }),
+		locals: {},
+	});
+	const data = await response.json();
+
+	// Verify it's a user-category error (400-level), not a bug (500-level)
+	expect(data.error_code).toMatch(/^GROVE-API-[4]\d{2}$/);
+});
+```
 
 ## The Ice Cream Cone Anti-Pattern (AVOID)
 
@@ -219,11 +247,13 @@ This is backwards. Integration tests give the best ROI.
 ## When Tests Break
 
 **Good breaks (expected):**
+
 - Feature changed — test caught that behavior shifted. Update the test.
 - Bug fixed — old test was wrong. Fix it.
 - Requirement changed — test reflects old requirement. Update it.
 
 **Bad breaks (symptoms of poor tests):**
+
 - Refactored internal code — test was coupled to implementation. Rewrite it.
 - Changed CSS class — test was querying implementation details. Use accessible queries.
 - Reordered code — test depended on execution order. Make it order-independent.

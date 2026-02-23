@@ -43,7 +43,7 @@ For new integrations, use Better Auth's client library:
 import { createAuthClient } from "better-auth/client";
 
 export const auth = createAuthClient({
-  baseURL: "https://auth-api.grove.place",
+	baseURL: "https://auth-api.grove.place",
 });
 
 // Sign in with Google
@@ -65,31 +65,28 @@ For apps on `.grove.place` subdomains, sessions work automatically via cookies:
 import type { Handle } from "@sveltejs/kit";
 
 export const handle: Handle = async ({ event, resolve }) => {
-  // Check session via Heartwood API
-  const sessionCookie = event.cookies.get("better-auth.session_token");
+	// Check session via Heartwood API
+	const sessionCookie = event.cookies.get("better-auth.session_token");
 
-  if (sessionCookie) {
-    try {
-      const response = await fetch(
-        "https://auth-api.grove.place/api/auth/session",
-        {
-          headers: {
-            Cookie: `better-auth.session_token=${sessionCookie}`,
-          },
-        },
-      );
+	if (sessionCookie) {
+		try {
+			const response = await fetch("https://auth-api.grove.place/api/auth/session", {
+				headers: {
+					Cookie: `better-auth.session_token=${sessionCookie}`,
+				},
+			});
 
-      if (response.ok) {
-        const data = await response.json();
-        event.locals.user = data.user;
-        event.locals.session = data.session;
-      }
-    } catch {
-      // Session invalid or expired
-    }
-  }
+			if (response.ok) {
+				const data = await response.json();
+				event.locals.user = data.user;
+				event.locals.session = data.session;
+			}
+		} catch {
+			// Session invalid, expired, or network error — silently continue
+		}
+	}
 
-  return resolve(event);
+	return resolve(event);
 };
 ```
 
@@ -100,31 +97,31 @@ For existing integrations using the legacy OAuth flow:
 ```typescript
 // 1. Redirect to Heartwood login
 const params = new URLSearchParams({
-  client_id: "your-client-id",
-  redirect_uri: "https://yourapp.grove.place/auth/callback",
-  state: crypto.randomUUID(),
-  code_challenge: await generateCodeChallenge(verifier),
-  code_challenge_method: "S256",
+	client_id: "your-client-id",
+	redirect_uri: "https://yourapp.grove.place/auth/callback",
+	state: crypto.randomUUID(),
+	code_challenge: await generateCodeChallenge(verifier),
+	code_challenge_method: "S256",
 });
 redirect(302, `https://auth-api.grove.place/login?${params}`);
 
 // 2. Exchange code for tokens (in callback route)
 const tokens = await fetch("https://auth-api.grove.place/token", {
-  method: "POST",
-  headers: { "Content-Type": "application/x-www-form-urlencoded" },
-  body: new URLSearchParams({
-    grant_type: "authorization_code",
-    code: code,
-    redirect_uri: "https://yourapp.grove.place/auth/callback",
-    client_id: "your-client-id",
-    client_secret: env.HEARTWOOD_CLIENT_SECRET,
-    code_verifier: verifier,
-  }),
+	method: "POST",
+	headers: { "Content-Type": "application/x-www-form-urlencoded" },
+	body: new URLSearchParams({
+		grant_type: "authorization_code",
+		code: code,
+		redirect_uri: "https://yourapp.grove.place/auth/callback",
+		client_id: "your-client-id",
+		client_secret: env.HEARTWOOD_CLIENT_SECRET,
+		code_verifier: verifier,
+	}),
 }).then((r) => r.json());
 
 // 3. Verify token on protected routes
 const user = await fetch("https://auth-api.grove.place/verify", {
-  headers: { Authorization: `Bearer ${tokens.access_token}` },
+	headers: { Authorization: `Bearer ${tokens.access_token}` },
 }).then((r) => r.json());
 ```
 
@@ -138,13 +135,13 @@ import { redirect } from "@sveltejs/kit";
 import type { LayoutServerLoad } from "./$types";
 
 export const load: LayoutServerLoad = async ({ locals }) => {
-  if (!locals.user) {
-    throw redirect(302, "/auth/login");
-  }
+	if (!locals.user) {
+		throw redirect(302, "/auth/login");
+	}
 
-  return {
-    user: locals.user,
-  };
+	return {
+		user: locals.user,
+	};
 };
 ```
 
@@ -156,11 +153,11 @@ import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 
 export const GET: RequestHandler = async ({ locals }) => {
-  if (!locals.user) {
-    throw error(401, "Unauthorized");
-  }
+	if (!locals.user) {
+		throw error(401, "Unauthorized");
+	}
 
-  return json({ message: "Protected data", user: locals.user });
+	return json({ message: "Protected data", user: locals.user });
 };
 ```
 
@@ -170,19 +167,16 @@ export const GET: RequestHandler = async ({ locals }) => {
 
 ```typescript
 async function validateSession(sessionToken: string) {
-  const response = await fetch(
-    "https://auth-api.grove.place/api/auth/session",
-    {
-      headers: {
-        Cookie: `better-auth.session_token=${sessionToken}`,
-      },
-    },
-  );
+	const response = await fetch("https://auth-api.grove.place/api/auth/session", {
+		headers: {
+			Cookie: `better-auth.session_token=${sessionToken}`,
+		},
+	});
 
-  if (!response.ok) return null;
+	if (!response.ok) return null;
 
-  const data = await response.json();
-  return data.session ? data : null;
+	const data = await response.json();
+	return data.session ? data : null;
 }
 ```
 
@@ -190,14 +184,14 @@ async function validateSession(sessionToken: string) {
 
 ```typescript
 async function validateToken(accessToken: string) {
-  const response = await fetch("https://auth-api.grove.place/verify", {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
+	const response = await fetch("https://auth-api.grove.place/verify", {
+		headers: {
+			Authorization: `Bearer ${accessToken}`,
+		},
+	});
 
-  const data = await response.json();
-  return data.active ? data : null;
+	const data = await response.json();
+	return data.active ? data : null;
 }
 ```
 
@@ -283,6 +277,44 @@ wrangler secret put HEARTWOOD_CLIENT_SECRET
 - Hardcode client secrets
 - Ignore token expiration
 
+## Type-Safe Error Handling
+
+**Use Rootwork type guards** in catch blocks instead of manual error type narrowing. Import from `@autumnsgrove/lattice/server`:
+
+```typescript
+import { isRedirect, isHttpError } from "@autumnsgrove/lattice/server";
+
+try {
+	// ... auth flow
+} catch (err) {
+	if (isRedirect(err)) throw err; // Re-throw SvelteKit redirects
+	if (isHttpError(err)) {
+		// Handle HTTP errors with proper status code
+		console.error(`Auth failed: ${err.status} ${err.body}`);
+	}
+	// Fallback error handling
+}
+```
+
+**Reading session data from KV/cache:** Use `safeJsonParse()` for type-safe deserialization:
+
+```typescript
+import { safeJsonParse } from "@autumnsgrove/lattice/server";
+import { z } from "zod";
+
+const sessionSchema = z.object({
+	userId: z.string(),
+	email: z.string().email(),
+});
+
+const rawSession = await kv.get("session:123");
+const session = safeJsonParse(rawSession, sessionSchema);
+
+if (session) {
+	event.locals.user = { id: session.userId, email: session.email };
+}
+```
+
 ## Cross-Subdomain SSO
 
 All `.grove.place` apps share the same session cookie automatically:
@@ -318,10 +350,10 @@ Heartwood has its own Signpost error catalog with 16 codes:
 
 ```typescript
 import {
-  AUTH_ERRORS,
-  getAuthError,
-  logAuthError,
-  buildErrorParams,
+	AUTH_ERRORS,
+	getAuthError,
+	logAuthError,
+	buildErrorParams,
 } from "@autumnsgrove/lattice/heartwood";
 ```
 

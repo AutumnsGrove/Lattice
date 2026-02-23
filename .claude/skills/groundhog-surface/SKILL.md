@@ -71,12 +71,12 @@ _The groundhog turns slowly, scanning the horizon..._
 
 **Surface ALL assumptions.** Each gets a **type** (immutable audit trail):
 
-| Type | Meaning | Example |
-|------|---------|---------|
-| **STATED** | User explicitly said this | "We're using Cloudflare Workers" |
-| **INFERRED** | Derived from code/config evidence | `wrangler.toml` exists → Cloudflare |
-| **ASSUMED** | Default without evidence | "Tests probably use Vitest" |
-| **UNCERTAIN** | Conflicting signals found | package.json says Jest, vitest.config.ts exists |
+| Type          | Meaning                           | Example                                         |
+| ------------- | --------------------------------- | ----------------------------------------------- |
+| **STATED**    | User explicitly said this         | "We're using Cloudflare Workers"                |
+| **INFERRED**  | Derived from code/config evidence | `wrangler.toml` exists → Cloudflare             |
+| **ASSUMED**   | Default without evidence          | "Tests probably use Vitest"                     |
+| **UNCERTAIN** | Conflicting signals found         | package.json says Jest, vitest.config.ts exists |
 
 **Categories:** Tech Stack, Infrastructure, Data, Auth, Development, Patterns, Project, Intent
 
@@ -93,6 +93,12 @@ _The groundhog turns slowly, scanning the horizon..._
 [ ] Styling: Tailwind with preset vs plain Tailwind vs CSS
 ```
 
+**Type Safety Assumptions:**
+
+- [ ] Rootwork utilities in use? (`parseFormData`/`safeJsonParse`/type guards)
+- [ ] Using Server SDK abstractions or raw Cloudflare bindings?
+- [ ] Storage via Amber SDK (FileManager/QuotaManager) or raw R2?
+
 **Contradiction detection:** Actively look for signals that disagree — these are the highest-value findings.
 
 **Output:** Complete list of assumptions with types assigned
@@ -105,13 +111,14 @@ _The groundhog arranges what it found into tidy piles..._
 
 **Classify each assumption into confidence tiers** (mutable — updated by user input):
 
-| Tier | Meaning | Action |
-|------|---------|--------|
-| **ESTABLISHED** | Confirmed by multiple sources | Proceed with confidence |
-| **WORKING** | Reasonable inference | Proceed, flag for review |
-| **OPEN** | Needs user input | Ask before building on this |
+| Tier            | Meaning                       | Action                      |
+| --------------- | ----------------------------- | --------------------------- |
+| **ESTABLISHED** | Confirmed by multiple sources | Proceed with confidence     |
+| **WORKING**     | Reasonable inference          | Proceed, flag for review    |
+| **OPEN**        | Needs user input              | Ask before building on this |
 
 **Tier rules:**
+
 - STATED → ESTABLISHED
 - INFERRED with strong evidence → ESTABLISHED
 - INFERRED with weak/single evidence → WORKING
@@ -137,18 +144,18 @@ _The groundhog sits up straight and speaks clearly..._
 
 ### Assumption Map
 
-| # | Assumption | Type | Tier | Evidence |
-|---|-----------|------|------|----------|
+| #   | Assumption | Type | Tier | Evidence |
+| --- | ---------- | ---- | ---- | -------- |
 
 ### Contradictions Found
 
 | Signal A | Signal B | Impact |
-|----------|----------|--------|
+| -------- | -------- | ------ |
 
 ### Shadow Check Results
 
 | Check | Result | Confidence |
-|-------|--------|------------|
+| ----- | ------ | ---------- |
 
 ### Questions for You
 
@@ -170,6 +177,7 @@ _The groundhog descends, carefully storing what it learned for next time..._
 For the full ground file format, see `references/ground-file-format.md`.
 
 **Burrow rules:**
+
 - Only write AFTER the user has responded to OPEN questions
 - Never overwrite established ground without new contradicting evidence
 - Date-stamp everything
@@ -181,16 +189,16 @@ For the full ground file format, see `references/ground-file-format.md`.
 
 ## Quick Decision Guide
 
-| Situation | Approach |
-|-----------|----------|
-| Starting a complex feature | Full EMERGE through BURROW |
-| Something feels off mid-task | Quick EMERGE + SURVEY on specific assumptions |
-| New codebase, first session | Full surfacing — everything is unknown |
-| Returning to familiar codebase | Check ground file age, resurface only stale items |
-| After a failed attempt | Focus SURVEY on what went wrong |
-| Before architectural decision | Full surfacing |
-| Quick sanity check | Shadow Check only |
-| Ground file exists and is recent | Read it, skip to checking OPEN items |
+| Situation                        | Approach                                          |
+| -------------------------------- | ------------------------------------------------- |
+| Starting a complex feature       | Full EMERGE through BURROW                        |
+| Something feels off mid-task     | Quick EMERGE + SURVEY on specific assumptions     |
+| New codebase, first session      | Full surfacing — everything is unknown            |
+| Returning to familiar codebase   | Check ground file age, resurface only stale items |
+| After a failed attempt           | Focus SURVEY on what went wrong                   |
+| Before architectural decision    | Full surfacing                                    |
+| Quick sanity check               | Shadow Check only                                 |
+| Ground file exists and is recent | Read it, skip to checking OPEN items              |
 
 ## MUST DO
 

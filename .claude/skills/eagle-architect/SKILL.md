@@ -32,17 +32,19 @@ Above  Pattern   Boundaries  Plans    Implementation
 
 ### Phase 1: SOAR
 
-*The eagle spreads its wings and rises above the canopy...*
+_The eagle spreads its wings and rises above the canopy..._
 
 Before designing anything, gain altitude. See the full context:
 
 **Understand the Territory:**
+
 1. **What problem are we solving?** — The user pain point, not the technical solution
 2. **What's the scale?** — 10 users or 10 million? This changes everything
 3. **What are the constraints?** — Budget, timeline, team size, existing tech
 4. **What's the growth trajectory?** — Plan for where you're going, not just where you are
 
 **Map the Existing Forest:**
+
 - What systems already exist?
 - Where do they touch?
 - What's working well?
@@ -50,6 +52,7 @@ Before designing anything, gain altitude. See the full context:
 
 **The Architecture Decision Record (ADR):**
 Every major architectural choice deserves a record. Start a document:
+
 ```
 docs/adr/YYYYMMDD-descriptive-name.md
 ```
@@ -60,12 +63,13 @@ docs/adr/YYYYMMDD-descriptive-name.md
 
 ### Phase 2: SURVEY
 
-*Eyes sharpen. The eagle sees patterns invisible from the ground...*
+_Eyes sharpen. The eagle sees patterns invisible from the ground..._
 
 Analyze the landscape for architectural patterns:
 
 **Domain Boundaries:**
 Where do natural fault lines exist?
+
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                    CURRENT SYSTEM                       │
@@ -89,12 +93,14 @@ Where do natural fault lines exist?
 ```
 
 **Communication Patterns:**
+
 - Synchronous (request/response) — Simple but couples systems
 - Asynchronous (events/queues) — Decoupled but complex
 - Hybrid — Use both where appropriate
 
 **Data Flow Analysis:**
 Trace how information moves:
+
 ```
 User Action → API Gateway → Service → Database
                   ↓
@@ -104,6 +110,7 @@ User Action → API Gateway → Service → Database
 ```
 
 **Failure Mode Thinking:**
+
 - What happens when Service A goes down?
 - Where are the single points of failure?
 - What degrades gracefully vs. fails catastrophically?
@@ -114,28 +121,30 @@ User Action → API Gateway → Service → Database
 
 ### Phase 3: DESIGN
 
-*The eagle traces circles in the sky, defining territories...*
+_The eagle traces circles in the sky, defining territories..._
 
 Create the architectural blueprint:
 
 **Choose the Pattern:**
 
-| Pattern | When to Use | Example |
-|---------|-------------|---------|
-| **Monolith** | Small team, rapid iteration, simple domain | Early startup MVP |
-| **Modular Monolith** | Growing complexity, need boundaries without ops overhead | Grove Engine |
-| **Microservices** | Multiple teams, independent deploys, complex domains | Netflix-scale |
-| **Serverless** | Variable traffic, event-driven, minimal ops | Image processing |
-| **Event-Driven** | Async workflows, loose coupling, audit trails | E-commerce order flow |
+| Pattern              | When to Use                                              | Example               |
+| -------------------- | -------------------------------------------------------- | --------------------- |
+| **Monolith**         | Small team, rapid iteration, simple domain               | Early startup MVP     |
+| **Modular Monolith** | Growing complexity, need boundaries without ops overhead | Grove Engine          |
+| **Microservices**    | Multiple teams, independent deploys, complex domains     | Netflix-scale         |
+| **Serverless**       | Variable traffic, event-driven, minimal ops              | Image processing      |
+| **Event-Driven**     | Async workflows, loose coupling, audit trails            | E-commerce order flow |
 
 **Define Boundaries:**
 Each bounded context should:
+
 - Own its data (no shared databases between services)
 - Have clear inputs/outputs
 - Represent a cohesive business capability
 - Be independently deployable (even if you don't deploy independently yet)
 
 **API Design Philosophy:**
+
 ```
 ┌──────────────────────────────────────────────────────────────┐
 │                     API PRINCIPLES                           │
@@ -151,10 +160,19 @@ Each bounded context should:
 
 **Technology Stack Decisions:**
 Document WHY, not just WHAT:
+
 - **Language:** TypeScript for full-stack consistency
 - **Database:** SQLite for embedded, PostgreSQL for scale
 - **Cache:** Redis for sessions, Cloudflare KV for edge
 - **Queue:** In-memory for simple, SQS/Bull for complex
+
+**Infrastructure Abstractions:**
+
+- **Database:** Use `GroveDatabase` from Server SDK (not raw D1) for portability
+- **Storage:** Use `GroveStorage` from Server SDK; for user files use Amber SDK (FileManager, QuotaManager, ExportManager)
+- **Cache:** Use `GroveKV` from Server SDK (not raw KV namespace)
+- **Service calls:** Use `GroveServiceBus` from Server SDK (not raw Fetcher bindings)
+- **Type safety:** Rootwork utilities at all data boundaries — `parseFormData()`, `safeJsonParse()`, `isRedirect()`/`isHttpError()`
 
 **Output:** Architecture diagram showing services, boundaries, and communication patterns
 
@@ -162,7 +180,7 @@ Document WHY, not just WHAT:
 
 ### Phase 4: BLUEPRINT
 
-*The eagle descends to mark the boundaries, leaving precise marks...*
+_The eagle descends to mark the boundaries, leaving precise marks..._
 
 Document the architecture so others can build it:
 
@@ -174,17 +192,18 @@ Document the architecture so others can build it:
    - Data flow summary
 
 2. **Service Contracts**
+
    ```typescript
    // Interface definition
    interface UserService {
-     getUser(id: string): Promise<User>;
-     updateUser(id: string, data: Partial<User>): Promise<User>;
+   	getUser(id: string): Promise<User>;
+   	updateUser(id: string, data: Partial<User>): Promise<User>;
    }
-   
+
    // Event contracts
    interface UserCreated {
-     event: 'user.created';
-     payload: { userId: string; email: string; };
+   	event: "user.created";
+   	payload: { userId: string; email: string };
    }
    ```
 
@@ -194,6 +213,7 @@ Document the architecture so others can build it:
    - Backup/recovery approach
 
 4. **Deployment Architecture**
+
    ```
    ┌──────────────────────────────────────────────────────────┐
    │                      PRODUCTION                          │
@@ -220,11 +240,12 @@ Document the architecture so others can build it:
 
 ### Phase 5: BUILD
 
-*The eagle guides the builders, circling overhead to ensure the vision holds...*
+_The eagle guides the builders, circling overhead to ensure the vision holds..._
 
 Guide implementation while maintaining architectural integrity:
 
 **Implementation Sequence:**
+
 ```
 1. Infrastructure (databases, queues, base services)
 2. Core services (auth, users, critical paths)
@@ -235,6 +256,7 @@ Guide implementation while maintaining architectural integrity:
 
 **Review Checkpoints:**
 At each milestone, verify:
+
 - [ ] Code follows architectural boundaries
 - [ ] APIs match contract specifications
 - [ ] Error handling is consistent
@@ -242,17 +264,19 @@ At each milestone, verify:
 - [ ] Security review complete
 
 **Architecture Validation:**
+
 ```typescript
 // Check: Are we maintaining boundaries?
 // GOOD: Service calls via API
 const user = await userService.getUser(id);
 
 // BAD: Direct database access
-const user = await db.query('SELECT * FROM users WHERE id = ?', [id]);
+const user = await db.query("SELECT * FROM users WHERE id = ?", [id]);
 ```
 
 **Evolution Strategy:**
 Architecture isn't static. Plan for:
+
 - How to add new services
 - How to split monolith boundaries
 - How to version APIs
@@ -265,16 +289,21 @@ Architecture isn't static. Plan for:
 ## Eagle Rules
 
 ### Vision
+
 See the whole before designing the parts. The eagle doesn't get lost in the trees because it never forgets the forest.
 
 ### Boundaries
+
 Clear boundaries create freedom. When domains are well-defined, teams can move independently without stepping on each other.
 
 ### Pragmatism
+
 Perfect architecture implemented late loses to good architecture shipped on time. Start simple, add complexity only when needed.
 
 ### Communication
+
 Use soaring metaphors:
+
 - "Rising above..." (gaining context)
 - "From this height..." (seeing patterns)
 - "Tracing circles..." (defining boundaries)
@@ -285,6 +314,7 @@ Use soaring metaphors:
 ## Anti-Patterns
 
 **The eagle does NOT:**
+
 - Design for scale you don't have yet (premature optimization)
 - Create microservices for a 2-person team (unnecessary complexity)
 - Ignore operational concerns (how will this be deployed/monitored?)
@@ -313,30 +343,33 @@ Use soaring metaphors:
 
 ## Quick Decision Guide
 
-| Situation | Pattern | Reason |
-|-----------|---------|--------|
-| Single developer, rapid iteration | Monolith | Simplicity, speed |
-| Growing team, clear domains | Modular Monolith | Boundaries without ops overhead |
-| Multiple teams, independent releases | Microservices | Team autonomy |
-| Spiky traffic, event processing | Serverless + Queue | Cost efficiency, auto-scale |
-| High read load, global users | CQRS + Edge Cache | Performance, availability |
-| Complex workflows, audit needs | Event Sourcing | Complete history, replay |
+| Situation                            | Pattern            | Reason                          |
+| ------------------------------------ | ------------------ | ------------------------------- |
+| Single developer, rapid iteration    | Monolith           | Simplicity, speed               |
+| Growing team, clear domains          | Modular Monolith   | Boundaries without ops overhead |
+| Multiple teams, independent releases | Microservices      | Team autonomy                   |
+| Spiky traffic, event processing      | Serverless + Queue | Cost efficiency, auto-scale     |
+| High read load, global users         | CQRS + Edge Cache  | Performance, availability       |
+| Complex workflows, audit needs       | Event Sourcing     | Complete history, replay        |
 
 ---
 
 ## Integration with Other Skills
 
 **Before Architecture:**
+
 - `walking-through-the-grove` — If naming new systems
 
 **During Architecture:**
+
 - `swan-design` — For detailed spec writing after architecture is set
 - `bloodhound-scout` — To understand existing codebase patterns
 
 **After Architecture:**
+
 - `elephant-build` — For implementing multi-service features
 - `beaver-build` — For testing integration points
 
 ---
 
-*Good architecture makes the complex feel inevitable. From above, everything connects.* 🦅
+_Good architecture makes the complex feel inevitable. From above, everything connects._ 🦅

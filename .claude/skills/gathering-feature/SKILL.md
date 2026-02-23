@@ -121,6 +121,14 @@ All animals MUST use Signpost error codes (from `@autumnsgrove/lattice/errors`).
 
 See `AgentUsage/error_handling.md` for the full reference.
 
+**Type Safety at Boundaries (Rootwork):**
+
+- **Elephant** validates form inputs with `parseFormData()` and KV reads with `safeJsonParse()`
+- **Turtle** verifies all trust boundaries use Rootwork utilities (no `as` casts at boundaries)
+- **Beaver** tests that validation rejects bad input and catch blocks use `isRedirect()`/`isHttpError()`
+- **Raccoon** audits for unsafe casts and unvalidated JSON parsing
+- Reference: `AgentUsage/rootwork_type_safety.md`
+
 **Dependencies:**
 
 - Bloodhound must complete before Elephant (needs context)
@@ -246,6 +254,10 @@ gw ci --affected --fail-fast --diagnose
 - [ ] Deer: WCAG AA compliance verified
 - [ ] Fox: Performance targets met
 - [ ] Owl: Documentation complete
+- [ ] All form data parsed with parseFormData() + Zod schemas
+- [ ] All KV/JSON reads use safeJsonParse() with schemas
+- [ ] Catch blocks use isRedirect()/isHttpError() type guards
+- [ ] No `as` casts at trust boundaries
 
 **Quality Gates:**
 

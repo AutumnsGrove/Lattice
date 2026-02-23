@@ -39,21 +39,38 @@ Auth errors MUST use the `AUTH_ERRORS` Signpost catalog — never bare redirect 
 
 ```typescript
 import {
-  AUTH_ERRORS,
-  getAuthError,
-  logAuthError,
-  buildErrorParams,
+	AUTH_ERRORS,
+	getAuthError,
+	logAuthError,
+	buildErrorParams,
 } from "@autumnsgrove/lattice/heartwood";
 
 // In callback — map OAuth error to structured code
 if (errorParam) {
-  const authError = getAuthError(errorParam);
-  logAuthError(authError, { path: "/auth/callback" });
-  redirect(302, `/login?${buildErrorParams(authError)}`);
+	const authError = getAuthError(errorParam);
+	logAuthError(authError, { path: "/auth/callback" });
+	redirect(302, `/login?${buildErrorParams(authError)}`);
 }
 ```
 
 See `AgentUsage/error_handling.md` for the full Signpost reference.
+
+**Type-Safe Error Handling in Catch Blocks:**
+Always use Rootwork type guards in catch blocks instead of manual property checks. Import `isRedirect()` and `isHttpError()` from `@autumnsgrove/lattice/server`:
+
+```typescript
+import { isRedirect, isHttpError } from "@autumnsgrove/lattice/server";
+
+try {
+	// ... auth flow code
+} catch (err) {
+	if (isRedirect(err)) throw err; // Re-throw SvelteKit redirects
+	if (isHttpError(err)) {
+		// Handle HTTP errors with proper status and message
+	}
+	redirect(302, "/?error=auth_failed");
+}
+```
 
 ---
 
@@ -156,60 +173,58 @@ import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 
 function generateRandomString(length: number): string {
-  const charset =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
-  const randomValues = crypto.getRandomValues(new Uint8Array(length));
-  return Array.from(randomValues, (v) => charset[v % charset.length]).join("");
+	const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
+	const randomValues = crypto.getRandomValues(new Uint8Array(length));
+	return Array.from(randomValues, (v) => charset[v % charset.length]).join("");
 }
 
 async function generatePKCE(): Promise<{
-  verifier: string;
-  challenge: string;
+	verifier: string;
+	challenge: string;
 }> {
-  const verifier = generateRandomString(64);
-  const encoder = new TextEncoder();
-  const data = encoder.encode(verifier);
-  const hash = await crypto.subtle.digest("SHA-256", data);
-  const challenge = btoa(String.fromCharCode(...new Uint8Array(hash)))
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=/g, "");
-  return { verifier, challenge };
+	const verifier = generateRandomString(64);
+	const encoder = new TextEncoder();
+	const data = encoder.encode(verifier);
+	const hash = await crypto.subtle.digest("SHA-256", data);
+	const challenge = btoa(String.fromCharCode(...new Uint8Array(hash)))
+		.replace(/\+/g, "-")
+		.replace(/\//g, "_")
+		.replace(/=/g, "");
+	return { verifier, challenge };
 }
 
 export const GET: RequestHandler = async ({ url, cookies, platform }) => {
-  const env = platform?.env as Record<string, string> | undefined;
-  const authBaseUrl = env?.GROVEAUTH_URL || "https://auth-api.grove.place";
-  const clientId = env?.GROVEAUTH_CLIENT_ID || "YOUR_CLIENT_ID";
-  const appBaseUrl = env?.PUBLIC_APP_URL || "https://YOUR_SITE_URL";
-  const redirectUri = `${appBaseUrl}/auth/callback`;
+	const env = platform?.env as Record<string, string> | undefined;
+	const authBaseUrl = env?.GROVEAUTH_URL || "https://auth-api.grove.place";
+	const clientId = env?.GROVEAUTH_CLIENT_ID || "YOUR_CLIENT_ID";
+	const appBaseUrl = env?.PUBLIC_APP_URL || "https://YOUR_SITE_URL";
+	const redirectUri = `${appBaseUrl}/auth/callback`;
 
-  const { verifier, challenge } = await generatePKCE();
-  const state = generateRandomString(32);
+	const { verifier, challenge } = await generatePKCE();
+	const state = generateRandomString(32);
 
-  const isProduction =
-    url.hostname !== "localhost" && url.hostname !== "127.0.0.1";
-  const cookieOptions = {
-    path: "/",
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: "lax" as const,
-    maxAge: 60 * 10, // 10 minutes
-  };
+	const isProduction = url.hostname !== "localhost" && url.hostname !== "127.0.0.1";
+	const cookieOptions = {
+		path: "/",
+		httpOnly: true,
+		secure: isProduction,
+		sameSite: "lax" as const,
+		maxAge: 60 * 10, // 10 minutes
+	};
 
-  cookies.set("auth_state", state, cookieOptions);
-  cookies.set("auth_code_verifier", verifier, cookieOptions);
+	cookies.set("auth_state", state, cookieOptions);
+	cookies.set("auth_code_verifier", verifier, cookieOptions);
 
-  const authUrl = new URL(`${authBaseUrl}/login`);
-  authUrl.searchParams.set("client_id", clientId);
-  authUrl.searchParams.set("redirect_uri", redirectUri);
-  authUrl.searchParams.set("response_type", "code");
-  authUrl.searchParams.set("scope", "openid profile email");
-  authUrl.searchParams.set("state", state);
-  authUrl.searchParams.set("code_challenge", challenge);
-  authUrl.searchParams.set("code_challenge_method", "S256");
+	const authUrl = new URL(`${authBaseUrl}/login`);
+	authUrl.searchParams.set("client_id", clientId);
+	authUrl.searchParams.set("redirect_uri", redirectUri);
+	authUrl.searchParams.set("response_type", "code");
+	authUrl.searchParams.set("scope", "openid profile email");
+	authUrl.searchParams.set("state", state);
+	authUrl.searchParams.set("code_challenge", challenge);
+	authUrl.searchParams.set("code_challenge_method", "S256");
 
-  redirect(302, authUrl.toString());
+	redirect(302, authUrl.toString());
 };
 ```
 
@@ -221,127 +236,121 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
  * Exchanges authorization code for tokens and creates session.
  */
 import { redirect } from "@sveltejs/kit";
+import { isRedirect } from "@autumnsgrove/lattice/server";
 import type { RequestHandler } from "./$types";
 
 export const GET: RequestHandler = async ({ url, cookies, platform }) => {
-  const code = url.searchParams.get("code");
-  const state = url.searchParams.get("state");
-  const errorParam = url.searchParams.get("error");
+	const code = url.searchParams.get("code");
+	const state = url.searchParams.get("state");
+	const errorParam = url.searchParams.get("error");
 
-  if (errorParam) {
-    redirect(302, `/?error=${encodeURIComponent(errorParam)}`);
-  }
+	if (errorParam) {
+		redirect(302, `/?error=${encodeURIComponent(errorParam)}`);
+	}
 
-  // Validate state (CSRF protection)
-  const savedState = cookies.get("auth_state");
-  if (!state || state !== savedState) {
-    redirect(302, "/?error=invalid_state");
-  }
+	// Validate state (CSRF protection)
+	const savedState = cookies.get("auth_state");
+	if (!state || state !== savedState) {
+		redirect(302, "/?error=invalid_state");
+	}
 
-  // Get PKCE verifier
-  const codeVerifier = cookies.get("auth_code_verifier");
-  if (!codeVerifier || !code) {
-    redirect(302, "/?error=missing_credentials");
-  }
+	// Get PKCE verifier
+	const codeVerifier = cookies.get("auth_code_verifier");
+	if (!codeVerifier || !code) {
+		redirect(302, "/?error=missing_credentials");
+	}
 
-  // Clear auth cookies immediately
-  cookies.delete("auth_state", { path: "/" });
-  cookies.delete("auth_code_verifier", { path: "/" });
+	// Clear auth cookies immediately
+	cookies.delete("auth_state", { path: "/" });
+	cookies.delete("auth_code_verifier", { path: "/" });
 
-  const env = platform?.env as Record<string, string> | undefined;
-  const authBaseUrl = env?.GROVEAUTH_URL || "https://auth-api.grove.place";
-  const clientId = env?.GROVEAUTH_CLIENT_ID || "YOUR_CLIENT_ID";
-  const clientSecret = env?.GROVEAUTH_CLIENT_SECRET || "";
-  const appBaseUrl = env?.PUBLIC_APP_URL || "https://YOUR_SITE_URL";
-  const redirectUri = `${appBaseUrl}/auth/callback`;
+	const env = platform?.env as Record<string, string> | undefined;
+	const authBaseUrl = env?.GROVEAUTH_URL || "https://auth-api.grove.place";
+	const clientId = env?.GROVEAUTH_CLIENT_ID || "YOUR_CLIENT_ID";
+	const clientSecret = env?.GROVEAUTH_CLIENT_SECRET || "";
+	const appBaseUrl = env?.PUBLIC_APP_URL || "https://YOUR_SITE_URL";
+	const redirectUri = `${appBaseUrl}/auth/callback`;
 
-  try {
-    // Exchange code for tokens
-    const tokenResponse = await fetch(`${authBaseUrl}/token`, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        grant_type: "authorization_code",
-        code,
-        redirect_uri: redirectUri,
-        client_id: clientId,
-        client_secret: clientSecret,
-        code_verifier: codeVerifier,
-      }),
-    });
+	try {
+		// Exchange code for tokens
+		const tokenResponse = await fetch(`${authBaseUrl}/token`, {
+			method: "POST",
+			headers: { "Content-Type": "application/x-www-form-urlencoded" },
+			body: new URLSearchParams({
+				grant_type: "authorization_code",
+				code,
+				redirect_uri: redirectUri,
+				client_id: clientId,
+				client_secret: clientSecret,
+				code_verifier: codeVerifier,
+			}),
+		});
 
-    if (!tokenResponse.ok) {
-      redirect(302, "/?error=token_exchange_failed");
-    }
+		if (!tokenResponse.ok) {
+			redirect(302, "/?error=token_exchange_failed");
+		}
 
-    const tokens = (await tokenResponse.json()) as {
-      access_token: string;
-      refresh_token?: string;
-      expires_in?: number;
-    };
+		const tokens = (await tokenResponse.json()) as {
+			access_token: string;
+			refresh_token?: string;
+			expires_in?: number;
+		};
 
-    // Fetch user info
-    const userinfoResponse = await fetch(`${authBaseUrl}/userinfo`, {
-      headers: { Authorization: `Bearer ${tokens.access_token}` },
-    });
+		// Fetch user info
+		const userinfoResponse = await fetch(`${authBaseUrl}/userinfo`, {
+			headers: { Authorization: `Bearer ${tokens.access_token}` },
+		});
 
-    if (!userinfoResponse.ok) {
-      redirect(302, "/?error=userinfo_failed");
-    }
+		if (!userinfoResponse.ok) {
+			redirect(302, "/?error=userinfo_failed");
+		}
 
-    const userinfo = (await userinfoResponse.json()) as {
-      sub?: string;
-      id?: string;
-      email: string;
-      name?: string;
-      email_verified?: boolean;
-    };
+		const userinfo = (await userinfoResponse.json()) as {
+			sub?: string;
+			id?: string;
+			email: string;
+			name?: string;
+			email_verified?: boolean;
+		};
 
-    const userId = userinfo.sub || userinfo.id;
-    const email = userinfo.email;
+		const userId = userinfo.sub || userinfo.id;
+		const email = userinfo.email;
 
-    if (!userId || !email) {
-      redirect(302, "/?error=incomplete_profile");
-    }
+		if (!userId || !email) {
+			redirect(302, "/?error=incomplete_profile");
+		}
 
-    // Set session cookies
-    const isProduction =
-      url.hostname !== "localhost" && url.hostname !== "127.0.0.1";
-    const cookieOptions = {
-      path: "/",
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: "lax" as const,
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-    };
+		// Set session cookies
+		const isProduction = url.hostname !== "localhost" && url.hostname !== "127.0.0.1";
+		const cookieOptions = {
+			path: "/",
+			httpOnly: true,
+			secure: isProduction,
+			sameSite: "lax" as const,
+			maxAge: 60 * 60 * 24 * 7, // 7 days
+		};
 
-    cookies.set("access_token", tokens.access_token, {
-      ...cookieOptions,
-      maxAge: tokens.expires_in || 3600,
-    });
+		cookies.set("access_token", tokens.access_token, {
+			...cookieOptions,
+			maxAge: tokens.expires_in || 3600,
+		});
 
-    if (tokens.refresh_token) {
-      cookies.set("refresh_token", tokens.refresh_token, {
-        ...cookieOptions,
-        maxAge: 60 * 60 * 24 * 30, // 30 days
-      });
-    }
+		if (tokens.refresh_token) {
+			cookies.set("refresh_token", tokens.refresh_token, {
+				...cookieOptions,
+				maxAge: 60 * 60 * 24 * 30, // 30 days
+			});
+		}
 
-    // TODO: Create local session or onboarding record as needed
-    // This varies by property — adapt to your app's needs
+		// TODO: Create local session or onboarding record as needed
+		// This varies by property — adapt to your app's needs
 
-    redirect(302, "/dashboard"); // Or wherever authenticated users go
-  } catch (err) {
-    if (
-      err &&
-      typeof err === "object" &&
-      "status" in err &&
-      err.status === 302
-    ) {
-      throw err; // Re-throw redirects
-    }
-    redirect(302, "/?error=auth_failed");
-  }
+		redirect(302, "/dashboard"); // Or wherever authenticated users go
+	} catch (err) {
+		// Type-safe error handling with Rootwork type guards
+		if (isRedirect(err)) throw err; // Re-throw SvelteKit redirects
+		redirect(302, "/?error=auth_failed");
+	}
 };
 ```
 
@@ -355,33 +364,33 @@ Choose ONE approach:
 import type { Handle } from "@sveltejs/kit";
 
 export const handle: Handle = async ({ event, resolve }) => {
-  const accessToken = event.cookies.get("access_token");
+	const accessToken = event.cookies.get("access_token");
 
-  if (accessToken) {
-    try {
-      const env = event.platform?.env as Record<string, string> | undefined;
-      const authBaseUrl = env?.GROVEAUTH_URL || "https://auth-api.grove.place";
+	if (accessToken) {
+		try {
+			const env = event.platform?.env as Record<string, string> | undefined;
+			const authBaseUrl = env?.GROVEAUTH_URL || "https://auth-api.grove.place";
 
-      const response = await fetch(`${authBaseUrl}/verify`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
+			const response = await fetch(`${authBaseUrl}/verify`, {
+				headers: { Authorization: `Bearer ${accessToken}` },
+			});
 
-      if (response.ok) {
-        const result = await response.json();
-        if (result.active) {
-          event.locals.user = {
-            id: result.sub,
-            email: result.email,
-            name: result.name,
-          };
-        }
-      }
-    } catch {
-      // Token invalid or expired — user remains unauthenticated
-    }
-  }
+			if (response.ok) {
+				const result = await response.json();
+				if (result.active) {
+					event.locals.user = {
+						id: result.sub,
+						email: result.email,
+						name: result.name,
+					};
+				}
+			}
+		} catch {
+			// Token invalid or expired — user remains unauthenticated
+		}
+	}
 
-  return resolve(event);
+	return resolve(event);
 };
 ```
 
@@ -393,41 +402,35 @@ Requires a service binding in wrangler.toml (see Step 5).
 import type { Handle } from "@sveltejs/kit";
 
 export const handle: Handle = async ({ event, resolve }) => {
-  const cookieHeader = event.request.headers.get("Cookie") || "";
+	const cookieHeader = event.request.headers.get("Cookie") || "";
 
-  // Only validate if grove_session or access_token cookie exists
-  if (
-    cookieHeader.includes("grove_session") ||
-    cookieHeader.includes("access_token")
-  ) {
-    try {
-      const env = event.platform?.env as any;
+	// Only validate if grove_session or access_token cookie exists
+	if (cookieHeader.includes("grove_session") || cookieHeader.includes("access_token")) {
+		try {
+			const env = event.platform?.env as any;
 
-      // Use service binding for sub-100ms validation
-      const response = await env.AUTH.fetch(
-        "https://auth-api.grove.place/session/validate",
-        {
-          method: "POST",
-          headers: { Cookie: cookieHeader },
-        },
-      );
+			// Use service binding for sub-100ms validation
+			const response = await env.AUTH.fetch("https://auth-api.grove.place/session/validate", {
+				method: "POST",
+				headers: { Cookie: cookieHeader },
+			});
 
-      if (response.ok) {
-        const { valid, user } = await response.json();
-        if (valid && user) {
-          event.locals.user = {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-          };
-        }
-      }
-    } catch {
-      // Session invalid — user remains unauthenticated
-    }
-  }
+			if (response.ok) {
+				const { valid, user } = await response.json();
+				if (valid && user) {
+					event.locals.user = {
+						id: user.id,
+						email: user.email,
+						name: user.name,
+					};
+				}
+			}
+		} catch {
+			// Session invalid — user remains unauthenticated
+		}
+	}
 
-  return resolve(event);
+	return resolve(event);
 };
 ```
 
@@ -435,26 +438,26 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 ```typescript
 declare global {
-  namespace App {
-    interface Locals {
-      user?: {
-        id: string;
-        email: string;
-        name?: string | null;
-      };
-    }
-    interface Platform {
-      env?: {
-        GROVEAUTH_URL?: string;
-        GROVEAUTH_CLIENT_ID?: string;
-        GROVEAUTH_CLIENT_SECRET?: string;
-        PUBLIC_APP_URL?: string;
-        AUTH?: Fetcher; // Service binding (Option B only)
-        DB?: D1Database;
-        [key: string]: unknown;
-      };
-    }
-  }
+	namespace App {
+		interface Locals {
+			user?: {
+				id: string;
+				email: string;
+				name?: string | null;
+			};
+		}
+		interface Platform {
+			env?: {
+				GROVEAUTH_URL?: string;
+				GROVEAUTH_CLIENT_ID?: string;
+				GROVEAUTH_CLIENT_SECRET?: string;
+				PUBLIC_APP_URL?: string;
+				AUTH?: Fetcher; // Service binding (Option B only)
+				DB?: D1Database;
+				[key: string]: unknown;
+			};
+		}
+	}
 }
 
 export {};
@@ -467,10 +470,10 @@ import { redirect } from "@sveltejs/kit";
 import type { LayoutServerLoad } from "./$types";
 
 export const load: LayoutServerLoad = async ({ locals }) => {
-  if (!locals.user) {
-    redirect(302, "/auth");
-  }
-  return { user: locals.user };
+	if (!locals.user) {
+		redirect(302, "/auth");
+	}
+	return { user: locals.user };
 };
 ```
 
@@ -481,24 +484,24 @@ import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 
 export const POST: RequestHandler = async ({ cookies, platform }) => {
-  const accessToken = cookies.get("access_token");
+	const accessToken = cookies.get("access_token");
 
-  if (accessToken) {
-    const env = platform?.env as Record<string, string> | undefined;
-    const authBaseUrl = env?.GROVEAUTH_URL || "https://auth-api.grove.place";
+	if (accessToken) {
+		const env = platform?.env as Record<string, string> | undefined;
+		const authBaseUrl = env?.GROVEAUTH_URL || "https://auth-api.grove.place";
 
-    // Revoke token at Heartwood
-    await fetch(`${authBaseUrl}/logout`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${accessToken}` },
-    }).catch(() => {}); // Best-effort
-  }
+		// Revoke token at Heartwood
+		await fetch(`${authBaseUrl}/logout`, {
+			method: "POST",
+			headers: { Authorization: `Bearer ${accessToken}` },
+		}).catch(() => {}); // Best-effort
+	}
 
-  // Clear all auth cookies
-  cookies.delete("access_token", { path: "/" });
-  cookies.delete("refresh_token", { path: "/" });
+	// Clear all auth cookies
+	cookies.delete("access_token", { path: "/" });
+	cookies.delete("refresh_token", { path: "/" });
 
-  redirect(302, "/");
+	redirect(302, "/");
 };
 ```
 

@@ -8,6 +8,7 @@ description: Write effective, maintainable tests that catch real bugs and enable
 ## When to Activate
 
 Activate this skill when:
+
 - Deciding **what** to test (not just how)
 - Writing tests for new Grove features
 - Reviewing existing tests for effectiveness
@@ -21,7 +22,7 @@ Activate this skill when:
 
 ## The Testing Philosophy
 
-> *"Write tests. Not too many. Mostly integration."*
+> _"Write tests. Not too many. Mostly integration."_
 > — Guillermo Rauch
 
 This captures everything Grove believes about testing:
@@ -34,7 +35,7 @@ This captures everything Grove believes about testing:
 
 ### The Guiding Principle
 
-> *"The more your tests resemble the way your software is used, the more confidence they can give you."*
+> _"The more your tests resemble the way your software is used, the more confidence they can give you."_
 > — Kent C. Dodds (Testing Library)
 
 Ask yourself: **Does this test fail when the feature breaks?** If yes, it's valuable. If it only fails during refactors, it's testing implementation details.
@@ -45,14 +46,14 @@ Ask yourself: **Does this test fail when the feature breaks?** If yes, it's valu
 
 A good test has these properties (Kent Beck's Test Desiderata):
 
-| Property | What It Means |
-|----------|---------------|
-| **Behavior-sensitive** | Fails when actual functionality breaks |
-| **Structure-immune** | Doesn't break when you refactor safely |
-| **Deterministic** | Same result every time, no flakiness |
-| **Fast** | Gives feedback in seconds, not minutes |
-| **Clear diagnosis** | When it fails, you know exactly what broke |
-| **Cheap to write** | Effort proportional to code complexity |
+| Property               | What It Means                              |
+| ---------------------- | ------------------------------------------ |
+| **Behavior-sensitive** | Fails when actual functionality breaks     |
+| **Structure-immune**   | Doesn't break when you refactor safely     |
+| **Deterministic**      | Same result every time, no flakiness       |
+| **Fast**               | Gives feedback in seconds, not minutes     |
+| **Clear diagnosis**    | When it fails, you know exactly what broke |
+| **Cheap to write**     | Effort proportional to code complexity     |
 
 ### The Confidence Test
 
@@ -70,30 +71,30 @@ Not everything needs tests. Some things actively harm your codebase when tested.
 
 ### Skip Testing
 
-| What | Why |
-|------|-----|
-| **Trivial code** | Getters, setters, data models with no logic |
-| **Framework behavior** | Trust that SvelteKit routing works |
+| What                       | Why                                          |
+| -------------------------- | -------------------------------------------- |
+| **Trivial code**           | Getters, setters, data models with no logic  |
+| **Framework behavior**     | Trust that SvelteKit routing works           |
 | **Implementation details** | Internal state, private methods, CSS classes |
-| **One-off scripts** | Maintenance cost exceeds value |
-| **Volatile prototypes** | Requirements unclear, code will change |
+| **One-off scripts**        | Maintenance cost exceeds value               |
+| **Volatile prototypes**    | Requirements unclear, code will change       |
 
 ### Test Lightly
 
-| What | Approach |
-|------|----------|
-| **Configuration** | Smoke test that it loads, not every option |
-| **Third-party integrations** | Mock at boundaries, test your code's response |
-| **Visual design** | Snapshot tests or visual regression, not unit tests |
+| What                         | Approach                                            |
+| ---------------------------- | --------------------------------------------------- |
+| **Configuration**            | Smoke test that it loads, not every option          |
+| **Third-party integrations** | Mock at boundaries, test your code's response       |
+| **Visual design**            | Snapshot tests or visual regression, not unit tests |
 
 ### Test Thoroughly
 
-| What | Why |
-|------|-----|
-| **Business logic** | Core value of the application |
-| **User-facing flows** | What users actually experience |
-| **Edge cases** | Error states, empty states, boundaries |
-| **Bug fixes** | Every bug becomes a test to prevent regression |
+| What                  | Why                                            |
+| --------------------- | ---------------------------------------------- |
+| **Business logic**    | Core value of the application                  |
+| **User-facing flows** | What users actually experience                 |
+| **Edge cases**        | Error states, empty states, boundaries         |
+| **Bug fixes**         | Every bug becomes a test to prevent regression |
 
 ---
 
@@ -119,22 +120,26 @@ Modern JavaScript testing follows the Testing Trophy, not the old Testing Pyrami
 ### What Each Layer Does
 
 **Static Analysis (TypeScript, ESLint)**
+
 - Catches typos, type errors, obvious mistakes
 - Zero runtime cost, always running
 - This is your first line of defense
 
 **Unit Tests**
+
 - Pure functions, algorithms, utilities
 - Fast, isolated, easy to debug
 - Don't mock everything—test real behavior where practical
 
 **Integration Tests (THE SWEET SPOT)**
+
 - Multiple units working together
 - Tests behavior users actually experience
 - Less brittle than unit tests, faster than E2E
 - **This is where most of your tests should live**
 
 **E2E Tests (Playwright)**
+
 - Critical user journeys only: login, checkout, core flows
 - Expensive to write and maintain
 - Reserve for flows where failure = business impact
@@ -148,16 +153,16 @@ Modern JavaScript testing follows the Testing Trophy, not the old Testing Pyrami
 Every test should follow this pattern:
 
 ```typescript
-it('should reject invalid email during registration', async () => {
-    // Arrange: Set up the scenario
-    const invalidEmail = 'not-an-email';
+it("should reject invalid email during registration", async () => {
+	// Arrange: Set up the scenario
+	const invalidEmail = "not-an-email";
 
-    // Act: Do the thing
-    const result = await registerUser({ email: invalidEmail, password: 'valid123' });
+	// Act: Do the thing
+	const result = await registerUser({ email: invalidEmail, password: "valid123" });
 
-    // Assert: Check the outcome
-    expect(result.success).toBe(false);
-    expect(result.error).toContain('email');
+	// Assert: Check the outcome
+	expect(result.success).toBe(false);
+	expect(result.error).toContain("email");
 });
 ```
 
@@ -168,11 +173,13 @@ The **Act** section should be one line. If it's not, the test is probably doing 
 Test names should describe the behavior, not the implementation:
 
 **Good names:**
+
 - `should reject registration with invalid email`
 - `should show error message when API fails`
 - `should preserve draft when navigating away`
 
 **Bad names:**
+
 - `test email validation` (what about it?)
 - `handleSubmit works` (what does "works" mean?)
 - `test case 1` (no)
@@ -196,6 +203,22 @@ it('should send welcome email after registration', ...);
 
 ---
 
+## Testing Trust Boundaries (Rootwork)
+
+Every trust boundary should have tests for both valid and invalid data:
+
+**Form actions:** Submit with missing fields, wrong types, edge-case values → verify `parseFormData()` returns structured errors (not crashes)
+
+**KV reads:** Mock KV returning corrupted/stale JSON → verify `safeJsonParse()` falls back to default
+
+**Cache reads:** Mock cache service returning unexpected shapes → verify `createTypedCacheReader()` uses fallback
+
+**Catch blocks:** Trigger redirects and HTTP errors → verify `isRedirect()`/`isHttpError()` route them correctly
+
+Reference: Rootwork (`@autumnsgrove/lattice/server`) provides `parseFormData`, `safeJsonParse`, `createTypedCacheReader`, `isRedirect`, and `isHttpError`.
+
+---
+
 ## Integration Tests in Practice
 
 Integration tests are the heart of Grove's testing strategy. Here's how to write them well.
@@ -204,17 +227,17 @@ Integration tests are the heart of Grove's testing strategy. Here's how to write
 
 ```typescript
 // Bad: Testing implementation
-it('should set isLoading state to true', async () => {
-    const { component } = render(LoginForm);
-    await fireEvent.click(getByRole('button'));
-    expect(component.isLoading).toBe(true);  // Testing internal state!
+it("should set isLoading state to true", async () => {
+	const { component } = render(LoginForm);
+	await fireEvent.click(getByRole("button"));
+	expect(component.isLoading).toBe(true); // Testing internal state!
 });
 
 // Good: Testing user experience
-it('should show loading indicator while logging in', async () => {
-    render(LoginForm);
-    await fireEvent.click(getByRole('button', { name: /sign in/i }));
-    expect(getByRole('progressbar')).toBeInTheDocument();
+it("should show loading indicator while logging in", async () => {
+	render(LoginForm);
+	await fireEvent.click(getByRole("button", { name: /sign in/i }));
+	expect(getByRole("progressbar")).toBeInTheDocument();
 });
 ```
 
@@ -224,10 +247,10 @@ Query elements the way users find them:
 
 ```typescript
 // Priority order (best to worst):
-getByRole('button', { name: /submit/i })  // How screen readers see it
-getByLabelText('Email')                    // Form fields
-getByText('Welcome back')                  // Visible text
-getByTestId('login-form')                  // Last resort
+getByRole("button", { name: /submit/i }); // How screen readers see it
+getByLabelText("Email"); // Form fields
+getByText("Welcome back"); // Visible text
+getByTestId("login-form"); // Last resort
 ```
 
 ### Don't Over-Mock
@@ -236,13 +259,13 @@ Mocks remove confidence in the integration. Use them sparingly:
 
 ```typescript
 // Over-mocked: False confidence
-vi.mock('./api');
-vi.mock('./validation');
-vi.mock('./utils');
+vi.mock("./api");
+vi.mock("./validation");
+vi.mock("./utils");
 // You're testing... nothing real
 
 // Better: Mock at boundaries
-vi.mock('./external-api');  // Mock the network, not your code
+vi.mock("./external-api"); // Mock the network, not your code
 // Let validation, utils, etc. run for real
 ```
 
@@ -311,8 +334,8 @@ expect(component.state.items).toHaveLength(3);
 expect(handleClick).toHaveBeenCalledWith({ id: 1 });
 
 // Testing behavior (good)
-expect(getByRole('list').children).toHaveLength(3);
-expect(getByText('Item added!')).toBeInTheDocument();
+expect(getByRole("list").children).toHaveLength(3);
+expect(getByText("Item added!")).toBeInTheDocument();
 ```
 
 ### Coverage Theater
@@ -321,10 +344,10 @@ Chasing 100% coverage leads to bad tests:
 
 ```typescript
 // Written only to hit coverage, provides zero value
-it('should have properties', () => {
-    const user = new User();
-    expect(user.email).toBeDefined();
-    expect(user.name).toBeDefined();
+it("should have properties", () => {
+	const user = new User();
+	expect(user.email).toBeDefined();
+	expect(user.name).toBeDefined();
 });
 ```
 
@@ -333,11 +356,13 @@ Coverage is a **signal**, not a **goal**. High coverage with bad tests is worse 
 ### Snapshot Abuse
 
 Snapshots are useful for:
+
 - Complex serialized output
 - Error message formatting
 - API response shapes
 
 Snapshots are harmful for:
+
 - UI components (break on every style change)
 - Anything with timestamps or random IDs
 - Large objects (nobody reviews 500-line snapshot diffs)
@@ -383,16 +408,16 @@ npx vitest run          # CI verification
 
 ## Quick Decision Guide
 
-| Situation | Action |
-|-----------|--------|
-| New feature | Write integration tests for user-facing behavior |
-| Bug fix | Write test that reproduces bug first, then fix |
-| Refactoring | Run existing tests; if they break on safe changes, they're bad tests |
-| "Need more coverage" | Add tests for uncovered **behavior**, not uncovered lines |
-| Pure function/algorithm | Unit test it |
-| API endpoint | Integration test with mocked external services |
-| UI component | Component test with Testing Library |
-| Critical user flow | E2E test with Playwright |
+| Situation               | Action                                                               |
+| ----------------------- | -------------------------------------------------------------------- |
+| New feature             | Write integration tests for user-facing behavior                     |
+| Bug fix                 | Write test that reproduces bug first, then fix                       |
+| Refactoring             | Run existing tests; if they break on safe changes, they're bad tests |
+| "Need more coverage"    | Add tests for uncovered **behavior**, not uncovered lines            |
+| Pure function/algorithm | Unit test it                                                         |
+| API endpoint            | Integration test with mocked external services                       |
+| UI component            | Component test with Testing Library                                  |
+| Critical user flow      | E2E test with Playwright                                             |
 
 ---
 
@@ -401,6 +426,7 @@ npx vitest run          # CI verification
 ### javascript-testing
 
 Use `javascript-testing` for:
+
 - Vitest configuration syntax
 - Mocking patterns and APIs
 - Assertion reference
@@ -409,6 +435,7 @@ Use `javascript-testing` for:
 ### grove-documentation
 
 When writing test descriptions, follow Grove voice:
+
 - Clear, direct names
 - No jargon
 - Say what the user experiences
@@ -434,4 +461,4 @@ Before considering tests "done":
 
 ---
 
-*Good tests let you ship with confidence. That's the whole point.*
+_Good tests let you ship with confidence. That's the whole point._
