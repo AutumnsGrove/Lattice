@@ -5,23 +5,23 @@
 import { Hono } from "hono";
 import type { Env, SubscriptionTier } from "../types.js";
 import {
-  getUserSubscription,
-  getOrCreateUserSubscription,
-  canUserCreatePost,
-  incrementPostCount,
-  decrementPostCount,
-  setPostCount,
-  updateSubscriptionTier,
-  getSubscriptionStatus,
+	getUserSubscription,
+	getOrCreateUserSubscription,
+	canUserCreatePost,
+	incrementPostCount,
+	decrementPostCount,
+	setPostCount,
+	updateSubscriptionTier,
+	getSubscriptionStatus,
 } from "../db/queries.js";
 import { createDbSession } from "../db/session.js";
 import { verifyBearerAuth } from "../middleware/bearerAuth.js";
 import { checkRouteRateLimit } from "../middleware/rateLimit.js";
 import { getClientIP } from "../middleware/security.js";
 import {
-  RATE_LIMIT_WINDOW,
-  RATE_LIMIT_SUBSCRIPTION_READ,
-  RATE_LIMIT_SUBSCRIPTION_WRITE,
+	RATE_LIMIT_WINDOW,
+	RATE_LIMIT_SUBSCRIPTION_READ,
+	RATE_LIMIT_SUBSCRIPTION_WRITE,
 } from "../utils/constants.js";
 
 const subscription = new Hono<{ Bindings: Env }>();
@@ -30,151 +30,139 @@ const subscription = new Hono<{ Bindings: Env }>();
  * GET /subscription - Get current user's subscription (requires Bearer token)
  */
 subscription.get("/", async (c) => {
-  // Rate limit by IP
-  const rateLimit = await checkRouteRateLimit(
-    c.env.DB,
-    "subscription_read",
-    getClientIP(c.req.raw),
-    RATE_LIMIT_SUBSCRIPTION_READ,
-    RATE_LIMIT_WINDOW,
-  );
-  if (!rateLimit.allowed) {
-    return c.json(
-      {
-        error: "rate_limit",
-        error_description: "Too many requests. Please try again later.",
-        retry_after: rateLimit.retryAfter,
-      },
-      429,
-    );
-  }
+	// Rate limit by IP
+	const rateLimit = await checkRouteRateLimit(
+		c.env.DB,
+		"subscription_read",
+		getClientIP(c.req.raw),
+		RATE_LIMIT_SUBSCRIPTION_READ,
+		RATE_LIMIT_WINDOW,
+	);
+	if (!rateLimit.allowed) {
+		return c.json(
+			{
+				error: "rate_limit",
+				error_description: "Too many requests. Please try again later.",
+				retry_after: rateLimit.retryAfter,
+			},
+			429,
+		);
+	}
 
-  const payload = await verifyBearerAuth(c.req, c.env);
-  if (!payload) {
-    return c.json(
-      { error: "unauthorized", error_description: "Missing or invalid token" },
-      401,
-    );
-  }
+	const payload = await verifyBearerAuth(c.req, c.env);
+	if (!payload) {
+		return c.json({ error: "unauthorized", error_description: "Missing or invalid token" }, 401);
+	}
 
-  const db = createDbSession(c.env);
-  const sub = await getOrCreateUserSubscription(db, payload.sub);
-  const status = getSubscriptionStatus(sub);
+	const db = createDbSession(c.env);
+	const sub = await getOrCreateUserSubscription(db, payload.sub);
+	const status = getSubscriptionStatus(sub);
 
-  return c.json({
-    subscription: sub,
-    status,
-  });
+	return c.json({
+		subscription: sub,
+		status,
+	});
 });
 
 /**
  * GET /subscription/:userId - Get specific user's subscription
  */
 subscription.get("/:userId", async (c) => {
-  // Rate limit by IP
-  const rateLimit = await checkRouteRateLimit(
-    c.env.DB,
-    "subscription_read",
-    getClientIP(c.req.raw),
-    RATE_LIMIT_SUBSCRIPTION_READ,
-    RATE_LIMIT_WINDOW,
-  );
-  if (!rateLimit.allowed) {
-    return c.json(
-      {
-        error: "rate_limit",
-        error_description: "Too many requests. Please try again later.",
-        retry_after: rateLimit.retryAfter,
-      },
-      429,
-    );
-  }
+	// Rate limit by IP
+	const rateLimit = await checkRouteRateLimit(
+		c.env.DB,
+		"subscription_read",
+		getClientIP(c.req.raw),
+		RATE_LIMIT_SUBSCRIPTION_READ,
+		RATE_LIMIT_WINDOW,
+	);
+	if (!rateLimit.allowed) {
+		return c.json(
+			{
+				error: "rate_limit",
+				error_description: "Too many requests. Please try again later.",
+				retry_after: rateLimit.retryAfter,
+			},
+			429,
+		);
+	}
 
-  const payload = await verifyBearerAuth(c.req, c.env);
-  if (!payload) {
-    return c.json(
-      { error: "unauthorized", error_description: "Missing or invalid token" },
-      401,
-    );
-  }
+	const payload = await verifyBearerAuth(c.req, c.env);
+	if (!payload) {
+		return c.json({ error: "unauthorized", error_description: "Missing or invalid token" }, 401);
+	}
 
-  const requestedUserId = c.req.param("userId");
-  if (payload.sub !== requestedUserId) {
-    return c.json(
-      {
-        error: "forbidden",
-        error_description: "Cannot access other user data",
-      },
-      403,
-    );
-  }
+	const requestedUserId = c.req.param("userId");
+	if (payload.sub !== requestedUserId) {
+		return c.json(
+			{
+				error: "forbidden",
+				error_description: "Cannot access other user data",
+			},
+			403,
+		);
+	}
 
-  const db = createDbSession(c.env);
-  const userId = c.req.param("userId");
-  const sub = await getUserSubscription(db, userId);
+	const db = createDbSession(c.env);
+	const userId = c.req.param("userId");
+	const sub = await getUserSubscription(db, userId);
 
-  if (!sub) {
-    return c.json(
-      { error: "not_found", error_description: "Subscription not found" },
-      404,
-    );
-  }
+	if (!sub) {
+		return c.json({ error: "not_found", error_description: "Subscription not found" }, 404);
+	}
 
-  const status = getSubscriptionStatus(sub);
+	const status = getSubscriptionStatus(sub);
 
-  return c.json({
-    subscription: sub,
-    status,
-  });
+	return c.json({
+		subscription: sub,
+		status,
+	});
 });
 
 /**
  * GET /subscription/:userId/can-post - Check if user can create a post
  */
 subscription.get("/:userId/can-post", async (c) => {
-  // Rate limit by IP
-  const rateLimit = await checkRouteRateLimit(
-    c.env.DB,
-    "subscription_read",
-    getClientIP(c.req.raw),
-    RATE_LIMIT_SUBSCRIPTION_READ,
-    RATE_LIMIT_WINDOW,
-  );
-  if (!rateLimit.allowed) {
-    return c.json(
-      {
-        error: "rate_limit",
-        error_description: "Too many requests. Please try again later.",
-        retry_after: rateLimit.retryAfter,
-      },
-      429,
-    );
-  }
+	// Rate limit by IP
+	const rateLimit = await checkRouteRateLimit(
+		c.env.DB,
+		"subscription_read",
+		getClientIP(c.req.raw),
+		RATE_LIMIT_SUBSCRIPTION_READ,
+		RATE_LIMIT_WINDOW,
+	);
+	if (!rateLimit.allowed) {
+		return c.json(
+			{
+				error: "rate_limit",
+				error_description: "Too many requests. Please try again later.",
+				retry_after: rateLimit.retryAfter,
+			},
+			429,
+		);
+	}
 
-  const payload = await verifyBearerAuth(c.req, c.env);
-  if (!payload) {
-    return c.json(
-      { error: "unauthorized", error_description: "Missing or invalid token" },
-      401,
-    );
-  }
+	const payload = await verifyBearerAuth(c.req, c.env);
+	if (!payload) {
+		return c.json({ error: "unauthorized", error_description: "Missing or invalid token" }, 401);
+	}
 
-  const requestedUserId = c.req.param("userId");
-  if (payload.sub !== requestedUserId) {
-    return c.json(
-      {
-        error: "forbidden",
-        error_description: "Cannot access other user data",
-      },
-      403,
-    );
-  }
+	const requestedUserId = c.req.param("userId");
+	if (payload.sub !== requestedUserId) {
+		return c.json(
+			{
+				error: "forbidden",
+				error_description: "Cannot access other user data",
+			},
+			403,
+		);
+	}
 
-  const db = createDbSession(c.env);
-  const userId = c.req.param("userId");
-  const result = await canUserCreatePost(db, userId);
+	const db = createDbSession(c.env);
+	const userId = c.req.param("userId");
+	const result = await canUserCreatePost(db, userId);
 
-  return c.json(result);
+	return c.json(result);
 });
 
 /**
@@ -182,187 +170,166 @@ subscription.get("/:userId/can-post", async (c) => {
  * Body: { action: 'increment' | 'decrement' } or { count: number }
  */
 subscription.post("/:userId/post-count", async (c) => {
-  // Rate limit by IP (write endpoint — stricter limit)
-  const rateLimit = await checkRouteRateLimit(
-    c.env.DB,
-    "subscription_write",
-    getClientIP(c.req.raw),
-    RATE_LIMIT_SUBSCRIPTION_WRITE,
-    RATE_LIMIT_WINDOW,
-  );
-  if (!rateLimit.allowed) {
-    return c.json(
-      {
-        error: "rate_limit",
-        error_description: "Too many requests. Please try again later.",
-        retry_after: rateLimit.retryAfter,
-      },
-      429,
-    );
-  }
+	// Rate limit by IP (write endpoint — stricter limit)
+	const rateLimit = await checkRouteRateLimit(
+		c.env.DB,
+		"subscription_write",
+		getClientIP(c.req.raw),
+		RATE_LIMIT_SUBSCRIPTION_WRITE,
+		RATE_LIMIT_WINDOW,
+	);
+	if (!rateLimit.allowed) {
+		return c.json(
+			{
+				error: "rate_limit",
+				error_description: "Too many requests. Please try again later.",
+				retry_after: rateLimit.retryAfter,
+			},
+			429,
+		);
+	}
 
-  const payload = await verifyBearerAuth(c.req, c.env);
-  if (!payload) {
-    return c.json(
-      { error: "unauthorized", error_description: "Missing or invalid token" },
-      401,
-    );
-  }
+	const payload = await verifyBearerAuth(c.req, c.env);
+	if (!payload) {
+		return c.json({ error: "unauthorized", error_description: "Missing or invalid token" }, 401);
+	}
 
-  const requestedUserId = c.req.param("userId");
-  if (payload.sub !== requestedUserId) {
-    return c.json(
-      {
-        error: "forbidden",
-        error_description: "Cannot access other user data",
-      },
-      403,
-    );
-  }
+	const requestedUserId = c.req.param("userId");
+	if (payload.sub !== requestedUserId) {
+		return c.json(
+			{
+				error: "forbidden",
+				error_description: "Cannot access other user data",
+			},
+			403,
+		);
+	}
 
-  const db = createDbSession(c.env);
-  const userId = c.req.param("userId");
+	const db = createDbSession(c.env);
+	const userId = c.req.param("userId");
 
-  let body: { action?: "increment" | "decrement"; count?: number };
-  try {
-    body = await c.req.json();
-  } catch {
-    return c.json(
-      { error: "invalid_request", error_description: "Invalid JSON body" },
-      400,
-    );
-  }
+	let body: { action?: "increment" | "decrement"; count?: number };
+	try {
+		body = await c.req.json();
+	} catch {
+		return c.json({ error: "invalid_request", error_description: "Invalid JSON body" }, 400);
+	}
 
-  let updatedSub;
+	let updatedSub;
 
-  if (body.action === "increment") {
-    updatedSub = await incrementPostCount(db, userId);
-  } else if (body.action === "decrement") {
-    updatedSub = await decrementPostCount(db, userId);
-  } else if (typeof body.count === "number") {
-    updatedSub = await setPostCount(db, userId, body.count);
-  } else {
-    return c.json(
-      {
-        error: "invalid_request",
-        error_description:
-          'Body must contain either { action: "increment" | "decrement" } or { count: number }',
-      },
-      400,
-    );
-  }
+	if (body.action === "increment") {
+		updatedSub = await incrementPostCount(db, userId);
+	} else if (body.action === "decrement") {
+		updatedSub = await decrementPostCount(db, userId);
+	} else if (typeof body.count === "number") {
+		updatedSub = await setPostCount(db, userId, body.count);
+	} else {
+		return c.json(
+			{
+				error: "invalid_request",
+				error_description:
+					'Body must contain either { action: "increment" | "decrement" } or { count: number }',
+			},
+			400,
+		);
+	}
 
-  if (!updatedSub) {
-    return c.json(
-      { error: "not_found", error_description: "Subscription not found" },
-      404,
-    );
-  }
+	if (!updatedSub) {
+		return c.json({ error: "not_found", error_description: "Subscription not found" }, 404);
+	}
 
-  const status = getSubscriptionStatus(updatedSub);
+	const status = getSubscriptionStatus(updatedSub);
 
-  return c.json({
-    subscription: updatedSub,
-    status,
-  });
+	return c.json({
+		subscription: updatedSub,
+		status,
+	});
 });
 
 /**
  * PUT /subscription/:userId/tier - Update subscription tier
- * Body: { tier: 'seedling' | 'sapling' | 'evergreen' | 'canopy' | 'platform' }
+ * Body: { tier: 'seedling' | 'sapling' | 'oak' | 'evergreen' | 'canopy' | 'platform' }
  */
 subscription.put("/:userId/tier", async (c) => {
-  // Rate limit by IP (write endpoint — stricter limit)
-  const rateLimit = await checkRouteRateLimit(
-    c.env.DB,
-    "subscription_write",
-    getClientIP(c.req.raw),
-    RATE_LIMIT_SUBSCRIPTION_WRITE,
-    RATE_LIMIT_WINDOW,
-  );
-  if (!rateLimit.allowed) {
-    return c.json(
-      {
-        error: "rate_limit",
-        error_description: "Too many requests. Please try again later.",
-        retry_after: rateLimit.retryAfter,
-      },
-      429,
-    );
-  }
+	// Rate limit by IP (write endpoint — stricter limit)
+	const rateLimit = await checkRouteRateLimit(
+		c.env.DB,
+		"subscription_write",
+		getClientIP(c.req.raw),
+		RATE_LIMIT_SUBSCRIPTION_WRITE,
+		RATE_LIMIT_WINDOW,
+	);
+	if (!rateLimit.allowed) {
+		return c.json(
+			{
+				error: "rate_limit",
+				error_description: "Too many requests. Please try again later.",
+				retry_after: rateLimit.retryAfter,
+			},
+			429,
+		);
+	}
 
-  const payload = await verifyBearerAuth(c.req, c.env);
-  if (!payload) {
-    return c.json(
-      { error: "unauthorized", error_description: "Missing or invalid token" },
-      401,
-    );
-  }
+	const payload = await verifyBearerAuth(c.req, c.env);
+	if (!payload) {
+		return c.json({ error: "unauthorized", error_description: "Missing or invalid token" }, 401);
+	}
 
-  const requestedUserId = c.req.param("userId");
-  if (payload.sub !== requestedUserId) {
-    return c.json(
-      {
-        error: "forbidden",
-        error_description: "Cannot access other user data",
-      },
-      403,
-    );
-  }
+	const requestedUserId = c.req.param("userId");
+	if (payload.sub !== requestedUserId) {
+		return c.json(
+			{
+				error: "forbidden",
+				error_description: "Cannot access other user data",
+			},
+			403,
+		);
+	}
 
-  const db = createDbSession(c.env);
-  const userId = c.req.param("userId");
+	const db = createDbSession(c.env);
+	const userId = c.req.param("userId");
 
-  let body: { tier?: string };
-  try {
-    body = await c.req.json();
-  } catch {
-    return c.json(
-      { error: "invalid_request", error_description: "Invalid JSON body" },
-      400,
-    );
-  }
+	let body: { tier?: string };
+	try {
+		body = await c.req.json();
+	} catch {
+		return c.json({ error: "invalid_request", error_description: "Invalid JSON body" }, 400);
+	}
 
-  const validTiers: SubscriptionTier[] = [
-    "seedling",
-    "sapling",
-    "evergreen",
-    "canopy",
-    "platform",
-  ];
-  if (!body.tier || !validTiers.includes(body.tier as SubscriptionTier)) {
-    return c.json(
-      {
-        error: "invalid_request",
-        error_description:
-          'Body must contain { tier: "seedling" | "sapling" | "evergreen" | "canopy" | "platform" }',
-      },
-      400,
-    );
-  }
+	const validTiers: SubscriptionTier[] = [
+		"seedling",
+		"sapling",
+		"oak",
+		"evergreen",
+		"canopy",
+		"platform",
+	];
+	if (!body.tier || !validTiers.includes(body.tier as SubscriptionTier)) {
+		return c.json(
+			{
+				error: "invalid_request",
+				error_description:
+					'Body must contain { tier: "seedling" | "sapling" | "oak" | "evergreen" | "canopy" | "platform" }',
+			},
+			400,
+		);
+	}
 
-  // Ensure subscription exists first
-  await getOrCreateUserSubscription(db, userId);
+	// Ensure subscription exists first
+	await getOrCreateUserSubscription(db, userId);
 
-  const updatedSub = await updateSubscriptionTier(
-    db,
-    userId,
-    body.tier as SubscriptionTier,
-  );
+	const updatedSub = await updateSubscriptionTier(db, userId, body.tier as SubscriptionTier);
 
-  if (!updatedSub) {
-    return c.json(
-      { error: "not_found", error_description: "Subscription not found" },
-      404,
-    );
-  }
+	if (!updatedSub) {
+		return c.json({ error: "not_found", error_description: "Subscription not found" }, 404);
+	}
 
-  const status = getSubscriptionStatus(updatedSub);
+	const status = getSubscriptionStatus(updatedSub);
 
-  return c.json({
-    subscription: updatedSub,
-    status,
-  });
+	return c.json({
+		subscription: updatedSub,
+		status,
+	});
 });
 
 export default subscription;

@@ -876,9 +876,10 @@ export async function updateSubscriptionTier(
 	const tierOrder: Record<SubscriptionTier, number> = {
 		seedling: 0,
 		sapling: 1,
-		evergreen: 2,
-		canopy: 3,
-		platform: 4,
+		oak: 2,
+		evergreen: 3,
+		canopy: 4,
+		platform: 5,
 	};
 	const eventType: SubscriptionAuditEventType =
 		tierOrder[newTier] > tierOrder[oldTier] ? "tier_upgraded" : "tier_downgraded";

@@ -156,7 +156,7 @@ All git, GitHub, and Cloudflare operations go through `gw`. Write operations req
 ```bash
 gw context                              # Start every session here
 gw git ship --write -a -m "feat: msg"   # Auto-stage + format + check + commit + push
-gw ci --affected --fail-fast --diagnose # Verify before committing
+gw dev ci --affected --fail-fast --diagnose # Verify before committing
 gw git pr-prep                          # PR readiness report
 ```
 
@@ -180,7 +180,7 @@ Run `gw --help` for full commands. See `AgentUsage/git_guide.md` for details.
 pnpm install
 
 # Step 2: Run affected-only CI
-gw ci --affected --fail-fast --diagnose
+gw dev ci --affected --fail-fast --diagnose
 ```
 
 **When verification fails:** Read diagnostics, fix errors, re-run, repeat until clean, THEN commit.
@@ -274,6 +274,7 @@ Use conventional commits format for PR titles. Write a brief description of what
 | **Typography**        | `@autumnsgrove/lattice/ui/typography` | Text components              |
 | **Auth**              | `@autumnsgrove/lattice/auth`          | Authentication utilities     |
 | **Errors**            | `@autumnsgrove/lattice/errors`        | Signpost error codes         |
+| **Type Safety**       | `@autumnsgrove/lattice/server`        | Rootwork boundary utilities  |
 
 ### Common Violations (Don't Do These)
 
@@ -377,6 +378,27 @@ toast.promise(apiRequest("/api/export", { method: "POST" }), {
 **When NOT to use toast:** form validation errors (use `fail()` + inline), page load failures (`+error.svelte`), persistent notices (use GroveMessages)
 
 See `AgentUsage/error_handling.md` for the full reference.
+
+### Type Safety at Boundaries (Rootwork)
+
+**MANDATORY: No `as` casts at trust boundaries.** Use Rootwork utilities for form data, KV reads, caught exceptions, and webhook payloads.
+
+```typescript
+import {
+	parseFormData,
+	safeJsonParse,
+	isRedirect,
+	isHttpError,
+} from "@autumnsgrove/lattice/server";
+```
+
+| Boundary               | Utility                                |
+| ---------------------- | -------------------------------------- |
+| `request.formData()`   | `parseFormData(formData, ZodSchema)`   |
+| KV / JSON strings      | `safeJsonParse(raw, ZodSchema)`        |
+| SvelteKit catch blocks | `isRedirect(err)` / `isHttpError(err)` |
+
+See `AgentUsage/rootwork_type_safety.md` for patterns, decision guide, and checklist.
 
 ### File Organization
 

@@ -14,6 +14,27 @@ import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { API_ERRORS, throwGroveError } from "$lib/errors";
 import { PULSE_EVENT_TYPES } from "$lib/curios/pulse";
+import { z } from "zod";
+import { safeJsonParse } from "$lib/server/utils";
+
+// ─── Zod schemas for KV cache reads (Rootwork Phase 5) ──────────────
+const PulseActiveSchema = z.object({
+	isActive: z.boolean(),
+	lastCommit: z.number().optional(),
+	author: z.string().optional(),
+	message: z.string().optional(),
+});
+const PulseTodaySchema = z.object({
+	commits: z.number().default(0),
+	prsMerged: z.number().default(0),
+	issuesClosed: z.number().default(0),
+	linesAdded: z.number().default(0),
+	linesRemoved: z.number().default(0),
+});
+const PulseStreakSchema = z.object({
+	days: z.number(),
+	since: z.string(),
+});
 
 interface EventRow {
 	id: string;
@@ -137,14 +158,14 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
 	let streak = { days: 0, since: "" };
 
 	if (kv) {
-		const [activeData, todayData, streakData] = await Promise.all([
-			kv.get(`pulse:${tenantId}:active`, "json").catch(() => null),
-			kv.get(`pulse:${tenantId}:today`, "json").catch(() => null),
-			kv.get(`pulse:${tenantId}:streak`, "json").catch(() => null),
+		const [activeRaw, todayRaw, streakRaw] = await Promise.all([
+			kv.get(`pulse:${tenantId}:active`).catch(() => null),
+			kv.get(`pulse:${tenantId}:today`).catch(() => null),
+			kv.get(`pulse:${tenantId}:streak`).catch(() => null),
 		]);
-		if (activeData) active = activeData as typeof active;
-		if (todayData) today = todayData as typeof today;
-		if (streakData) streak = streakData as typeof streak;
+		active = safeJsonParse(activeRaw, PulseActiveSchema) ?? active;
+		today = safeJsonParse(todayRaw, PulseTodaySchema) ?? today;
+		streak = safeJsonParse(streakRaw, PulseStreakSchema) ?? streak;
 	}
 
 	return json(

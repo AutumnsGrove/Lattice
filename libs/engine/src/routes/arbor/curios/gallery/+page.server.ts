@@ -8,6 +8,28 @@ import {
 	THUMBNAIL_SIZE_OPTIONS,
 	sanitizeCustomCss,
 } from "$lib/curios/gallery";
+import { z } from "zod";
+import { parseFormData } from "$lib/server/utils/form-data";
+
+// ─── Zod schema for gallery config form (Rootwork Phase 3) ──────────
+const GalleryConfigSchema = z.object({
+	enabled: z.string().optional().default("false"),
+	r2Bucket: z.string().optional().default("grove-media"),
+	cdnBaseUrl: z.string().optional().default("https://cdn.grove.place"),
+	galleryTitle: z.string().optional().default(""),
+	galleryDescription: z.string().optional().default(""),
+	itemsPerPage: z.coerce.number().int().min(10).max(100).default(30),
+	sortOrder: z.string().optional().default(DEFAULT_GALLERY_CONFIG.sortOrder),
+	showDescriptions: z.string().optional().default("false"),
+	showDates: z.string().optional().default("false"),
+	showTags: z.string().optional().default("false"),
+	enableLightbox: z.string().optional().default("false"),
+	enableSearch: z.string().optional().default("false"),
+	enableFilters: z.string().optional().default("false"),
+	gridStyle: z.string().optional().default(DEFAULT_GALLERY_CONFIG.gridStyle),
+	thumbnailSize: z.string().optional().default(DEFAULT_GALLERY_CONFIG.thumbnailSize),
+	customCss: z.string().optional().default(""),
+});
 
 interface ConfigRow {
 	enabled: number;
@@ -172,29 +194,35 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
+		const parsed = parseFormData(formData, GalleryConfigSchema);
+		if (!parsed.success) {
+			return fail(400, {
+				error: "Invalid gallery configuration",
+				error_code: ARBOR_ERRORS.SAVE_FAILED.code,
+			});
+		}
 
-		const enabled = formData.get("enabled") === "true";
-		const r2Bucket = formData.get("r2Bucket") as string | null;
-		const cdnBaseUrl = formData.get("cdnBaseUrl") as string | null;
-		const galleryTitle = formData.get("galleryTitle") as string | null;
-		const galleryDescription = formData.get("galleryDescription") as string | null;
-		const itemsPerPage = parseInt(formData.get("itemsPerPage") as string) || 30;
-		const sortOrder = formData.get("sortOrder") as string;
-		const showDescriptions = formData.get("showDescriptions") === "true";
-		const showDates = formData.get("showDates") === "true";
-		const showTags = formData.get("showTags") === "true";
-		const enableLightbox = formData.get("enableLightbox") === "true";
-		const enableSearch = formData.get("enableSearch") === "true";
-		const enableFilters = formData.get("enableFilters") === "true";
-		const gridStyle = formData.get("gridStyle") as string;
-		const thumbnailSize = formData.get("thumbnailSize") as string;
-		const customCss = formData.get("customCss") as string | null;
+		const d = parsed.data;
+		const enabled = d.enabled === "true";
+		const r2Bucket = d.r2Bucket;
+		const galleryTitle = d.galleryTitle || null;
+		const galleryDescription = d.galleryDescription || null;
+		const sortOrder = d.sortOrder;
+		const showDescriptions = d.showDescriptions === "true";
+		const showDates = d.showDates === "true";
+		const showTags = d.showTags === "true";
+		const enableLightbox = d.enableLightbox === "true";
+		const enableSearch = d.enableSearch === "true";
+		const enableFilters = d.enableFilters === "true";
+		const gridStyle = d.gridStyle;
+		const thumbnailSize = d.thumbnailSize;
+		const customCss = d.customCss || null;
 
 		// Default CDN URL to Grove's CDN if not provided
-		const finalCdnBaseUrl = cdnBaseUrl?.trim() || "https://cdn.grove.place";
+		const finalCdnBaseUrl = d.cdnBaseUrl?.trim() || "https://cdn.grove.place";
 
-		// Validate items per page
-		const validItemsPerPage = Math.max(10, Math.min(100, itemsPerPage));
+		// itemsPerPage is already validated by Zod (10-100 range)
+		const validItemsPerPage = d.itemsPerPage;
 
 		try {
 			await db

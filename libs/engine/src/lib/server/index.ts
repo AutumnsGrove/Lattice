@@ -42,3 +42,9 @@ export { canUploadImages, type UploadGateResult } from "./upload-gate.js";
 // ============================================================================
 
 export * from "./observability/index.js";
+
+// ============================================================================
+// Type Safety Utilities (Rootwork)
+// ============================================================================
+
+export * from "./utils/index.js";
