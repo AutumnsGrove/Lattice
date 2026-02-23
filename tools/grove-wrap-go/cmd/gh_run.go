@@ -73,7 +73,7 @@ var runListCmd = &cobra.Command{
 			// Flat view: one run per line with IDs for easy piping
 			ui.PrintHeader("Workflow Runs")
 			for _, r := range runs {
-				id := fmt.Sprintf("%v", r["databaseId"])
+				id := formatRunID(r["databaseId"])
 				workflow, _ := r["workflowName"].(string)
 				conclusion, _ := r["conclusion"].(string)
 				runStatus, _ := r["status"].(string)
@@ -134,7 +134,7 @@ var runListCmd = &cobra.Command{
 			fmt.Printf("\n  ● %s  %s  %s\n", shortSha, title, createdAt)
 
 			for _, r := range g.runs {
-				id := fmt.Sprintf("%v", r["databaseId"])
+				id := formatRunID(r["databaseId"])
 				workflow, _ := r["workflowName"].(string)
 				conclusion, _ := r["conclusion"].(string)
 				runStatus, _ := r["status"].(string)
@@ -156,6 +156,16 @@ var runListCmd = &cobra.Command{
 		fmt.Println()
 		return nil
 	},
+}
+
+// formatRunID extracts databaseId as a clean integer string.
+// Go's encoding/json decodes numbers into float64 for map[string]interface{},
+// so a databaseId like 23318684455 becomes 2.3318684455e+10 with %v.
+func formatRunID(v interface{}) string {
+	if f, ok := v.(float64); ok {
+		return fmt.Sprintf("%.0f", f)
+	}
+	return fmt.Sprintf("%v", v)
 }
 
 // conclusionIcon returns a status icon for a workflow conclusion/status.
