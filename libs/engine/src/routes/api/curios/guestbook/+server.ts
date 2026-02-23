@@ -13,9 +13,14 @@ import {
 	sanitizeName,
 	sanitizeMessage,
 	isValidEmoji,
+	isValidHexColor,
 	isSpam,
+	getRandomSigningStyle,
+	getRandomColor,
 	RATE_LIMIT_MINUTES,
+	VALID_SIGNING_STYLES,
 	type GuestbookDisplayEntry,
+	type GuestbookSigningStyle,
 } from "$lib/curios/guestbook";
 
 interface ConfigRow {
@@ -24,6 +29,8 @@ interface ConfigRow {
 	allow_emoji: number;
 	max_message_length: number;
 	entries_per_page: number;
+	allowed_styles: string | null;
+	color_palette: string | null;
 }
 
 interface EntryRow {
@@ -31,6 +38,8 @@ interface EntryRow {
 	name: string;
 	message: string;
 	emoji: string | null;
+	entry_style: string | null;
+	entry_color: string | null;
 	created_at: string;
 }
 
@@ -71,7 +80,7 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
 	const [entriesResult, total] = await Promise.all([
 		db
 			.prepare(
-				`SELECT id, name, message, emoji, created_at
+				`SELECT id, name, message, emoji, entry_style, entry_color, created_at
          FROM guestbook_entries
          WHERE tenant_id = ? AND approved = 1
          ORDER BY created_at DESC
@@ -97,6 +106,8 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
 		name: row.name,
 		message: row.message,
 		emoji: row.emoji,
+		entryStyle: (row.entry_style as GuestbookSigningStyle) ?? null,
+		entryColor: row.entry_color ?? null,
 		createdAt: row.created_at,
 	}));
 
@@ -137,7 +148,8 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 	// Load config
 	const config = await db
 		.prepare(
-			`SELECT enabled, require_approval, allow_emoji, max_message_length
+			`SELECT enabled, require_approval, allow_emoji, max_message_length,
+              allowed_styles, color_palette
        FROM guestbook_config WHERE tenant_id = ?`,
 		)
 		.bind(tenantId)
@@ -148,7 +160,13 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 	}
 
 	// Parse request body
-	let body: { name?: string; message?: string; emoji?: string };
+	let body: {
+		name?: string;
+		message?: string;
+		emoji?: string;
+		entryStyle?: string;
+		entryColor?: string;
+	};
 	try {
 		body = await request.json();
 	} catch {
@@ -176,6 +194,60 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 			emoji = body.emoji;
 		}
 		// Silently ignore invalid emoji — not an error
+	}
+
+	// Parse tenant's allowed styles and color palette
+	let allowedStyles: GuestbookSigningStyle[] | null = null;
+	try {
+		if (config.allowed_styles) {
+			const parsed = JSON.parse(config.allowed_styles);
+			if (Array.isArray(parsed) && parsed.length > 0) {
+				allowedStyles = parsed.filter((s: string) =>
+					VALID_SIGNING_STYLES.includes(s as GuestbookSigningStyle),
+				) as GuestbookSigningStyle[];
+			}
+		}
+	} catch {
+		// Invalid JSON — treat as null (all styles allowed)
+	}
+
+	let colorPalette: string[] | null = null;
+	try {
+		if (config.color_palette) {
+			const parsed = JSON.parse(config.color_palette);
+			if (Array.isArray(parsed) && parsed.length > 0) {
+				colorPalette = parsed.filter((c: string) => isValidHexColor(c));
+			}
+		}
+	} catch {
+		// Invalid JSON — treat as null (default palette)
+	}
+
+	// Validate entry style (optional — assign random if not provided)
+	let entryStyle: GuestbookSigningStyle;
+	if (body.entryStyle && VALID_SIGNING_STYLES.includes(body.entryStyle as GuestbookSigningStyle)) {
+		const requested = body.entryStyle as GuestbookSigningStyle;
+		// Check against tenant's allowed styles
+		if (!allowedStyles || allowedStyles.includes(requested)) {
+			entryStyle = requested;
+		} else {
+			entryStyle = getRandomSigningStyle(allowedStyles);
+		}
+	} else {
+		entryStyle = getRandomSigningStyle(allowedStyles);
+	}
+
+	// Validate entry color (optional — assign random if not provided)
+	let entryColor: string;
+	if (body.entryColor && isValidHexColor(body.entryColor)) {
+		// Check against tenant's color palette
+		if (!colorPalette || colorPalette.includes(body.entryColor)) {
+			entryColor = body.entryColor;
+		} else {
+			entryColor = getRandomColor(colorPalette);
+		}
+	} else {
+		entryColor = getRandomColor(colorPalette);
 	}
 
 	// Rate limiting via IP hash
@@ -239,10 +311,10 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 	try {
 		await db
 			.prepare(
-				`INSERT INTO guestbook_entries (id, tenant_id, name, message, emoji, approved, ip_hash)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+				`INSERT INTO guestbook_entries (id, tenant_id, name, message, emoji, approved, ip_hash, entry_style, entry_color)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 			)
-			.bind(id, tenantId, name, message, emoji, approved, ipHash)
+			.bind(id, tenantId, name, message, emoji, approved, ipHash, entryStyle, entryColor)
 			.run();
 	} catch (err) {
 		logGroveError("API", API_ERRORS.OPERATION_FAILED, {
@@ -260,6 +332,8 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 				name,
 				message,
 				emoji,
+				entryStyle,
+				entryColor,
 				approved: Boolean(approved),
 			},
 			requiresApproval: Boolean(config.require_approval),

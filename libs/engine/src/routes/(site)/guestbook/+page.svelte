@@ -1,7 +1,14 @@
 <script lang="ts">
 	import { GlassCard, GlassButton } from "$lib/ui/components/ui";
-	import { Send, BookOpen, ChevronDown, Loader2 } from "lucide-svelte";
-	import { formatRelativeTime } from "$lib/curios/guestbook";
+	import { Send, BookOpen, ChevronDown, Loader2, Palette } from "lucide-svelte";
+	import {
+		formatRelativeTime,
+		getEntryRotation,
+		getDeterministicStyle,
+		DEFAULT_COLOR_PALETTE,
+		GUESTBOOK_SIGNING_STYLES,
+		type GuestbookSigningStyle,
+	} from "$lib/curios/guestbook";
 
 	let { data } = $props();
 
@@ -12,6 +19,39 @@
 	let isSubmitting = $state(false);
 	let formMessage = $state<{ type: "success" | "error"; text: string } | null>(null);
 	let showEmojiPicker = $state(false);
+
+	// Personalization state
+	let selectedStyle = $state<GuestbookSigningStyle | null>(null);
+	let selectedColor = $state<string | null>(null);
+	let showPersonalize = $state(false);
+
+	// Resolve available styles and colors from config
+	const availableStyles = $derived(
+		data.config.allowedStyles && data.config.allowedStyles.length > 0
+			? GUESTBOOK_SIGNING_STYLES.filter((s) => data.config.allowedStyles!.includes(s.value))
+			: GUESTBOOK_SIGNING_STYLES,
+	);
+	const availableColors = $derived(
+		data.config.colorPalette && data.config.colorPalette.length > 0
+			? data.config.colorPalette
+			: DEFAULT_COLOR_PALETTE,
+	);
+
+	// Resolve the effective style/color for each entry (handles legacy null entries)
+	function resolveEntryStyle(entry: (typeof entries)[0]): GuestbookSigningStyle {
+		if (entry.entryStyle) return entry.entryStyle;
+		return getDeterministicStyle(entry.id, data.config.allowedStyles ?? null);
+	}
+	function resolveEntryColor(entry: (typeof entries)[0]): string {
+		if (entry.entryColor) return entry.entryColor;
+		const palette = data.config.colorPalette ?? DEFAULT_COLOR_PALETTE;
+		let hash = 0;
+		for (let i = 0; i < entry.id.length; i++) {
+			hash = (hash << 5) - hash + entry.id.charCodeAt(i);
+			hash |= 0;
+		}
+		return palette[Math.abs(hash) % palette.length];
+	}
 
 	// Pagination state
 	// svelte-ignore state_referenced_locally
@@ -39,13 +79,22 @@
 					name: name.trim() || undefined,
 					message: message.trim(),
 					emoji: selectedEmoji,
+					entryStyle: selectedStyle || undefined,
+					entryColor: selectedColor || undefined,
 				}),
 			});
 
 			if (res.ok) {
 				const result = (await res.json()) as {
 					requiresApproval: boolean;
-					entry: { id: string; name: string; message: string; emoji: string | null };
+					entry: {
+						id: string;
+						name: string;
+						message: string;
+						emoji: string | null;
+						entryStyle: GuestbookSigningStyle;
+						entryColor: string;
+					};
 				};
 				if (result.requiresApproval) {
 					formMessage = {
@@ -64,6 +113,8 @@
 							name: result.entry.name,
 							message: result.entry.message,
 							emoji: result.entry.emoji,
+							entryStyle: result.entry.entryStyle,
+							entryColor: result.entry.entryColor,
 							createdAt: new Date().toISOString(),
 						},
 						...entries,
@@ -73,7 +124,10 @@
 				name = "";
 				message = "";
 				selectedEmoji = null;
+				selectedStyle = null;
+				selectedColor = null;
 				showEmojiPicker = false;
+				showPersonalize = false;
 			} else if (res.status === 429) {
 				formMessage = {
 					type: "error",
@@ -141,7 +195,7 @@
 	<meta name="description" content="Sign the guestbook — leave a message, say hello." />
 </svelte:head>
 
-<div class="guestbook-page guestbook-{data.config.style}">
+<div class="guestbook-page guestbook-{data.config.style} wall-{data.config.wallBacking ?? 'none'}">
 	<header class="guestbook-header">
 		<BookOpen class="header-icon" />
 		<h1>Guestbook</h1>
@@ -225,6 +279,62 @@
 				</div>
 			</div>
 
+			<!-- Personalize your entry -->
+			<details class="personalize-section" bind:open={showPersonalize}>
+				<summary class="personalize-toggle">
+					<Palette class="w-4 h-4" />
+					Personalize your entry
+				</summary>
+
+				<div class="personalize-content">
+					<!-- Style picker -->
+					<div class="picker-group">
+						<span class="picker-label">Signing style</span>
+						<div class="style-picker" role="radiogroup" aria-label="Choose a signing style">
+							{#each availableStyles as styleOpt}
+								<button
+									type="button"
+									class="style-chip"
+									class:active={selectedStyle === styleOpt.value}
+									onclick={() =>
+										(selectedStyle = selectedStyle === styleOpt.value ? null : styleOpt.value)}
+									role="radio"
+									aria-checked={selectedStyle === styleOpt.value}
+									aria-label={styleOpt.label}
+									title={styleOpt.description}
+								>
+									<span class="style-preview style-preview-{styleOpt.value}"></span>
+									<span class="style-chip-label">{styleOpt.label}</span>
+								</button>
+							{/each}
+						</div>
+					</div>
+
+					<!-- Color picker -->
+					<div class="picker-group">
+						<span class="picker-label">Accent color</span>
+						<div class="color-picker" role="radiogroup" aria-label="Choose an accent color">
+							{#each availableColors as color}
+								<button
+									type="button"
+									class="color-swatch"
+									class:active={selectedColor === color}
+									style="--swatch-color: {color}"
+									onclick={() => (selectedColor = selectedColor === color ? null : color)}
+									role="radio"
+									aria-checked={selectedColor === color}
+									aria-label="Color {color}"
+								></button>
+							{/each}
+						</div>
+					</div>
+
+					<p class="personalize-note">
+						Leave blank for a random style — zero friction, still personal.
+					</p>
+				</div>
+			</details>
+
 			<div class="form-footer">
 				{#if formMessage}
 					<p class="form-message {formMessage.type}" role="status" aria-live="polite">
@@ -249,19 +359,58 @@
 		</form>
 	</GlassCard>
 
-	<!-- Entries -->
-	<div class="entries-list">
+	<!-- Entries Collage -->
+	<div class="entries-collage">
 		{#each entries as entry (entry.id)}
-			<div class="guestbook-entry">
-				<div class="entry-meta">
-					{#if entry.emoji}
-						<span class="entry-emoji">{entry.emoji}</span>
-					{/if}
-					<span class="entry-name">{entry.name}</span>
-					<span class="entry-date">{formatRelativeTime(entry.createdAt)}</span>
+			{@const style = resolveEntryStyle(entry)}
+			{@const color = resolveEntryColor(entry)}
+			{@const rotation = getEntryRotation(entry.id)}
+
+			{#if style === "line"}
+				<!-- Quick Line: inline, no card -->
+				<div class="entry-line" style="--entry-color: {color}">
+					<span class="line-accent"></span>
+					<span class="line-body">
+						{#if entry.emoji}<span class="entry-emoji">{entry.emoji}</span>{/if}
+						<span class="entry-name">{entry.name}</span>
+						<span class="line-msg">{entry.message}</span>
+						<span class="entry-date">{formatRelativeTime(entry.createdAt)}</span>
+					</span>
 				</div>
-				<p class="entry-message">{entry.message}</p>
-			</div>
+			{:else if style === "letter"}
+				<!-- Letter: folded envelope, unfolds via <details> -->
+				<details class="entry-letter" style="--entry-color: {color}">
+					<summary class="letter-envelope">
+						<span class="letter-seal"></span>
+						<span class="letter-from">
+							{#if entry.emoji}<span class="entry-emoji">{entry.emoji}</span>{/if}
+							{entry.name}
+						</span>
+						<span class="entry-date">{formatRelativeTime(entry.createdAt)}</span>
+					</summary>
+					<div class="letter-content">
+						<p class="entry-message">{entry.message}</p>
+					</div>
+				</details>
+			{:else}
+				<!-- Card styles: sticky, note, postcard, doodle -->
+				<div
+					class="entry-card entry-{style}"
+					style="--entry-color: {color}; --entry-rotation: {rotation}deg"
+				>
+					{#if style === "postcard"}
+						<div class="postcard-header"></div>
+					{/if}
+					<div class="entry-meta">
+						{#if entry.emoji}
+							<span class="entry-emoji" class:doodle-emoji={style === "doodle"}>{entry.emoji}</span>
+						{/if}
+						<span class="entry-name">{entry.name}</span>
+						<span class="entry-date">{formatRelativeTime(entry.createdAt)}</span>
+					</div>
+					<p class="entry-message">{entry.message}</p>
+				</div>
+			{/if}
 		{/each}
 	</div>
 
@@ -505,22 +654,14 @@
 		}
 	}
 
-	/* ─── Entries List ─── */
-	.entries-list {
-		display: flex;
-		flex-direction: column;
-		gap: 0;
+	/* ─── Entries Collage Grid ─── */
+	.entries-collage {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+		gap: 1rem;
 	}
 
-	.guestbook-entry {
-		padding: 1.25rem 0;
-		border-bottom: 1px solid var(--color-border, #e5e7eb);
-	}
-
-	.guestbook-entry:first-child {
-		border-top: 1px solid var(--color-border, #e5e7eb);
-	}
-
+	/* Shared entry base styles */
 	.entry-meta {
 		display: flex;
 		align-items: center;
@@ -553,6 +694,187 @@
 		word-break: break-word;
 	}
 
+	/* ─── Sticky Note ─── */
+	.entry-sticky {
+		background: var(--entry-color, #e8d5a3);
+		padding: 1.25rem;
+		border-radius: 0.25rem;
+		transform: rotate(var(--entry-rotation, 0deg));
+		box-shadow: 2px 3px 8px rgba(0, 0, 0, 0.1);
+		font-family: "Caveat", cursive;
+	}
+
+	.entry-sticky .entry-message {
+		font-size: 1.05rem;
+		font-family: "Caveat", cursive;
+	}
+
+	.entry-sticky .entry-name {
+		font-family: "Caveat", cursive;
+		font-size: 1rem;
+	}
+
+	.entry-sticky .entry-date {
+		font-family: inherit;
+		font-size: 0.7rem;
+	}
+
+	/* ─── Written Note ─── */
+	.entry-note {
+		background: var(--color-background, #fff);
+		padding: 1.25rem 1.25rem 1.25rem 2.5rem;
+		border: 1px solid var(--color-border, #e5e7eb);
+		border-radius: 0.25rem;
+		border-left: 3px solid #e88f7a;
+		background-image: repeating-linear-gradient(
+			transparent,
+			transparent 1.5rem,
+			var(--color-border, #e5e7eb) 1.5rem,
+			var(--color-border, #e5e7eb) calc(1.5rem + 1px)
+		);
+		font-family: "Caveat", cursive;
+	}
+
+	.entry-note .entry-message {
+		color: var(--entry-color, currentColor);
+		font-family: "Caveat", cursive;
+		font-size: 1.05rem;
+	}
+
+	.entry-note .entry-name {
+		font-family: "Caveat", cursive;
+	}
+
+	/* ─── Quick Line ─── */
+	.entry-line {
+		grid-column: 1 / -1;
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0.5rem 0;
+	}
+
+	.line-accent {
+		width: 3px;
+		min-height: 1.25rem;
+		align-self: stretch;
+		background: var(--entry-color, var(--color-primary));
+		border-radius: 2px;
+		flex-shrink: 0;
+	}
+
+	.line-body {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+		font-size: 0.9rem;
+	}
+
+	.line-msg {
+		color: var(--color-foreground);
+	}
+
+	.line-body .entry-date {
+		margin-left: 0;
+	}
+
+	/* ─── Letter ─── */
+	.entry-letter {
+		border: 1px solid var(--color-border, #e5e7eb);
+		border-radius: 0.5rem;
+		overflow: hidden;
+		background: var(--color-background, #fff);
+	}
+
+	.letter-envelope {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 1rem 1.25rem;
+		cursor: pointer;
+		list-style: none;
+		user-select: none;
+	}
+
+	.letter-envelope::-webkit-details-marker {
+		display: none;
+	}
+
+	.letter-seal {
+		width: 1rem;
+		height: 1rem;
+		border-radius: 50%;
+		background: var(--entry-color, #c4a7d7);
+		flex-shrink: 0;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+	}
+
+	.letter-from {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+		font-weight: 600;
+		font-size: 0.95rem;
+		color: var(--color-foreground);
+	}
+
+	.letter-envelope .entry-date {
+		margin-left: auto;
+	}
+
+	.letter-content {
+		padding: 0 1.25rem 1.25rem;
+		display: grid;
+		grid-template-rows: 1fr;
+	}
+
+	.entry-letter:not([open]) .letter-content {
+		grid-template-rows: 0fr;
+		padding: 0;
+		overflow: hidden;
+	}
+
+	/* ─── Postcard ─── */
+	.entry-postcard {
+		border-radius: 0.75rem;
+		overflow: hidden;
+		background: var(--color-background, #fff);
+		border: 1px solid var(--color-border, #e5e7eb);
+		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+	}
+
+	.postcard-header {
+		height: 3rem;
+		background: var(--entry-color, #8cb8d4);
+		opacity: 0.7;
+	}
+
+	.entry-postcard .entry-meta,
+	.entry-postcard .entry-message {
+		padding: 0 1.25rem;
+	}
+
+	.entry-postcard .entry-meta {
+		padding-top: 1rem;
+	}
+
+	.entry-postcard .entry-message {
+		padding-bottom: 1.25rem;
+	}
+
+	/* ─── Doodle Card ─── */
+	.entry-doodle {
+		background: var(--color-background, #fff);
+		padding: 1.25rem;
+		border: 2px dashed var(--entry-color, #a3c4a3);
+		border-radius: 0.75rem;
+	}
+
+	.doodle-emoji {
+		font-size: 2em;
+	}
+
 	:global(.empty-state) {
 		text-align: center;
 		padding: 3rem 2rem !important;
@@ -565,116 +887,288 @@
 		padding: 2rem 0;
 	}
 
-	/* ═════════════════════════════════════════════════════════════
-     STYLE: COZY (default)
-     Warm, rounded, handwriting feel
-     ═════════════════════════════════════════════════════════════ */
-	.guestbook-cozy .guestbook-entry {
-		padding: 1.25rem;
-		margin-bottom: 0.75rem;
-		border: none;
-		border-bottom: none;
-		background: var(--grove-overlay-4, rgba(0, 0, 0, 0.02));
-		border-radius: 1rem;
+	/* ─── Personalization Picker ─── */
+	.personalize-section {
+		margin-bottom: 1rem;
+		border: 1px solid var(--color-border, #e5e7eb);
+		border-radius: 0.75rem;
+		overflow: hidden;
 	}
 
-	.guestbook-cozy .guestbook-entry:first-child {
-		border-top: none;
+	.personalize-toggle {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.75rem 1rem;
+		cursor: pointer;
+		font-size: 0.85rem;
+		font-weight: 500;
+		color: var(--color-muted-foreground);
+		list-style: none;
+		user-select: none;
+		transition: color 0.15s ease;
 	}
 
-	.guestbook-cozy .entries-list {
-		gap: 0.75rem;
+	.personalize-toggle::-webkit-details-marker {
+		display: none;
 	}
 
-	.guestbook-cozy .entry-message {
+	.personalize-toggle:hover {
+		color: var(--color-foreground);
+	}
+
+	.personalize-content {
+		padding: 0 1rem 1rem;
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.picker-group {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.picker-label {
+		font-size: 0.8rem;
+		font-weight: 500;
+		color: var(--color-muted-foreground);
+	}
+
+	.style-picker {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+	}
+
+	.style-chip {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+		padding: 0.375rem 0.75rem;
+		border: 1px solid var(--color-border, #e5e7eb);
+		border-radius: 2rem;
+		background: transparent;
+		cursor: pointer;
+		font-size: 0.8rem;
+		color: var(--color-foreground);
+		transition: all 0.15s ease;
+	}
+
+	.style-chip:hover {
+		border-color: var(--color-primary);
+	}
+
+	.style-chip.active {
+		border-color: var(--color-primary);
+		background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+	}
+
+	.style-preview {
+		width: 1rem;
+		height: 1rem;
+		border-radius: 0.125rem;
+		flex-shrink: 0;
+	}
+
+	.style-preview-sticky {
+		background: #e8d5a3;
+		transform: rotate(-3deg);
+	}
+
+	.style-preview-note {
+		background: #fff;
+		border-left: 2px solid #e88f7a;
+		border-top: 1px solid var(--color-border, #ddd);
+	}
+
+	.style-preview-line {
+		width: 1.25rem;
+		height: 3px;
+		background: var(--color-primary);
+		border-radius: 2px;
+	}
+
+	.style-preview-letter {
+		background: #fff;
+		border: 1px solid var(--color-border, #ddd);
+		border-radius: 0.125rem;
+		position: relative;
+	}
+
+	.style-preview-letter::after {
+		content: "";
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		width: 4px;
+		height: 4px;
+		border-radius: 50%;
+		background: #c4a7d7;
+	}
+
+	.style-preview-postcard {
+		background: linear-gradient(to bottom, #8cb8d4 40%, #fff 40%);
+		border: 1px solid var(--color-border, #ddd);
+	}
+
+	.style-preview-doodle {
+		background: #fff;
+		border: 1.5px dashed #a3c4a3;
+	}
+
+	.color-picker {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.375rem;
+	}
+
+	.color-swatch {
+		width: 1.75rem;
+		height: 1.75rem;
+		border-radius: 50%;
+		border: 2px solid transparent;
+		background: var(--swatch-color);
+		cursor: pointer;
+		transition: all 0.15s ease;
+	}
+
+	.color-swatch:hover {
+		transform: scale(1.15);
+	}
+
+	.color-swatch.active {
+		border-color: var(--color-foreground);
+		box-shadow:
+			0 0 0 2px var(--color-background, #fff),
+			0 0 0 4px var(--swatch-color);
+	}
+
+	.personalize-note {
+		font-size: 0.75rem;
+		color: var(--color-muted-foreground);
+		margin: 0;
 		font-style: italic;
 	}
 
 	/* ═════════════════════════════════════════════════════════════
-     STYLE: CLASSIC
-     Old-web bordered entries
+     PAGE CHROME STYLES (header, form, load-more theming)
+     Entry rendering is now per-entry via signing styles above.
      ═════════════════════════════════════════════════════════════ */
-	.guestbook-classic .guestbook-entry {
-		padding: 1rem;
-		margin-bottom: 0.5rem;
-		border: 2px solid var(--color-border, #e5e7eb);
-		border-radius: 0;
-		background: var(--grove-overlay-2, rgba(0, 0, 0, 0.01));
+
+	/* COZY: warm rounded chrome */
+	.guestbook-cozy .guestbook-header h1 {
+		font-family: "Caveat", cursive;
+		font-size: 3rem;
 	}
 
-	.guestbook-classic .guestbook-entry:first-child {
-		border-top: 2px solid var(--color-border, #e5e7eb);
+	/* CLASSIC: old-web chrome */
+	.guestbook-classic .guestbook-header h1 {
+		border-bottom: 2px solid var(--color-border, #e5e7eb);
+		padding-bottom: 0.5rem;
 	}
 
-	.guestbook-classic .entries-list {
-		gap: 0.5rem;
-	}
-
-	.guestbook-classic .entry-name {
-		text-decoration: underline;
-	}
-
-	/* ═════════════════════════════════════════════════════════════
-     STYLE: MODERN
-     Clean cards with subtle shadows
-     ═════════════════════════════════════════════════════════════ */
-	.guestbook-modern .guestbook-entry {
-		padding: 1.25rem;
-		margin-bottom: 0.75rem;
-		border: 1px solid var(--color-border, #e5e7eb);
-		border-radius: 0.75rem;
-		background: var(--color-background, #fff);
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-		border-bottom: 1px solid var(--color-border, #e5e7eb);
-	}
-
-	.guestbook-modern .guestbook-entry:first-child {
-		border-top: 1px solid var(--color-border, #e5e7eb);
-	}
-
-	.guestbook-modern .entries-list {
-		gap: 0.75rem;
-	}
-
-	/* ═════════════════════════════════════════════════════════════
-     STYLE: PIXEL
-     Retro pixelated borders, monospace text
-     ═════════════════════════════════════════════════════════════ */
-	.guestbook-pixel .guestbook-entry {
-		padding: 1rem;
-		margin-bottom: 0.5rem;
-		border: 3px solid var(--color-foreground);
-		border-radius: 0;
-		background: var(--color-background, #fff);
-		box-shadow:
-			4px 4px 0 var(--color-foreground),
-			-1px -1px 0 var(--color-foreground);
-		font-family: "Courier New", Courier, monospace;
-	}
-
-	.guestbook-pixel .guestbook-entry:first-child {
-		border-top: 3px solid var(--color-foreground);
-	}
-
-	.guestbook-pixel .entries-list {
-		gap: 0.75rem;
-	}
-
-	.guestbook-pixel .entry-name {
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-		font-size: 0.85rem;
-	}
-
-	.guestbook-pixel .entry-message {
-		font-family: "Courier New", Courier, monospace;
-		font-size: 0.85rem;
-	}
-
+	/* PIXEL: retro chrome */
 	.guestbook-pixel .guestbook-header h1 {
 		text-transform: uppercase;
 		letter-spacing: 0.1em;
 		font-family: "Courier New", Courier, monospace;
+	}
+
+	/* ═════════════════════════════════════════════════════════════
+     WALL BACKINGS — Room layer CSS
+     ═════════════════════════════════════════════════════════════ */
+
+	/* Frosted Glass */
+	.wall-glass .entries-collage {
+		background: rgba(255, 255, 255, 0.35);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border: 1px solid rgba(255, 255, 255, 0.25);
+		border-radius: 1rem;
+		padding: 1.5rem;
+	}
+
+	:global(.dark) .wall-glass .entries-collage {
+		background: rgba(0, 0, 0, 0.25);
+		border-color: rgba(255, 255, 255, 0.1);
+	}
+
+	/* Cork Board */
+	.wall-cork .entries-collage {
+		background:
+			radial-gradient(circle at 20% 30%, rgba(180, 140, 90, 0.15) 0%, transparent 50%),
+			radial-gradient(circle at 70% 60%, rgba(160, 120, 70, 0.12) 0%, transparent 50%),
+			radial-gradient(circle at 50% 80%, rgba(190, 150, 100, 0.1) 0%, transparent 50%), #c4a882;
+		border-radius: 0.75rem;
+		padding: 1.5rem;
+		box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.15);
+	}
+
+	.wall-cork .entry-card::before {
+		content: "\1F4CC";
+		position: absolute;
+		top: -0.5rem;
+		left: 50%;
+		transform: translateX(-50%);
+		font-size: 0.9rem;
+	}
+
+	.wall-cork .entry-card {
+		position: relative;
+	}
+
+	:global(.dark) .wall-cork .entries-collage {
+		background:
+			radial-gradient(circle at 20% 30%, rgba(100, 80, 50, 0.2) 0%, transparent 50%),
+			radial-gradient(circle at 70% 60%, rgba(90, 70, 45, 0.15) 0%, transparent 50%), #5a4a35;
+	}
+
+	/* Cream Paper */
+	.wall-paper .entries-collage {
+		background: #fdf6e3;
+		background-image: repeating-linear-gradient(
+			transparent,
+			transparent 1.75rem,
+			rgba(0, 0, 0, 0.04) 1.75rem,
+			rgba(0, 0, 0, 0.04) calc(1.75rem + 1px)
+		);
+		border-radius: 0.5rem;
+		padding: 1.5rem;
+		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+	}
+
+	:global(.dark) .wall-paper .entries-collage {
+		background: #2a2520;
+		background-image: repeating-linear-gradient(
+			transparent,
+			transparent 1.75rem,
+			rgba(255, 255, 255, 0.04) 1.75rem,
+			rgba(255, 255, 255, 0.04) calc(1.75rem + 1px)
+		);
+	}
+
+	/* ─── Reduced Motion ─── */
+	@media (prefers-reduced-motion: reduce) {
+		.entry-sticky {
+			transform: none !important;
+		}
+
+		.entry-letter .letter-content {
+			transition: none;
+		}
+
+		.color-swatch:hover {
+			transform: none;
+		}
+
+		.style-chip,
+		.color-swatch,
+		.personalize-toggle {
+			transition: none;
+		}
 	}
 
 	/* ─── Responsive ─── */
@@ -683,6 +1177,32 @@
 			font-size: 2rem;
 		}
 
+		/* Collage → single column, no rotation */
+		.entries-collage {
+			grid-template-columns: 1fr;
+			gap: 0.75rem;
+		}
+
+		.entry-sticky {
+			transform: none;
+		}
+
+		.entry-line {
+			grid-column: auto;
+		}
+
+		/* Tighter card padding on mobile */
+		.entry-sticky,
+		.entry-note,
+		.entry-doodle {
+			padding: 1rem;
+		}
+
+		.postcard-header {
+			height: 2.25rem;
+		}
+
+		/* Signing form */
 		.form-row {
 			flex-direction: column;
 			gap: 0.75rem;
@@ -700,6 +1220,23 @@
 
 		.form-message {
 			text-align: center;
+		}
+
+		/* Personalization picker stacks nicely */
+		.style-picker {
+			gap: 0.375rem;
+		}
+
+		.style-chip {
+			padding: 0.3rem 0.6rem;
+			font-size: 0.75rem;
+		}
+
+		/* Wall backing tighter padding */
+		.wall-glass .entries-collage,
+		.wall-cork .entries-collage,
+		.wall-paper .entries-collage {
+			padding: 1rem;
 		}
 	}
 </style>

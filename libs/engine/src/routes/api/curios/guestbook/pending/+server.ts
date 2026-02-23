@@ -14,6 +14,8 @@ interface EntryRow {
 	message: string;
 	emoji: string | null;
 	ip_hash: string | null;
+	entry_style: string | null;
+	entry_color: string | null;
 	created_at: string;
 }
 
@@ -39,7 +41,7 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
 	const [entriesResult, total] = await Promise.all([
 		db
 			.prepare(
-				`SELECT id, name, message, emoji, ip_hash, created_at
+				`SELECT id, name, message, emoji, ip_hash, entry_style, entry_color, created_at
          FROM guestbook_entries
          WHERE tenant_id = ? AND approved = 0
          ORDER BY created_at DESC
@@ -65,6 +67,8 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
 		message: row.message,
 		emoji: row.emoji,
 		ipHash: row.ip_hash,
+		entryStyle: row.entry_style,
+		entryColor: row.entry_color,
 		createdAt: row.created_at,
 	}));
 
