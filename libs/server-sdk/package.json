@@ -1,0 +1,53 @@
+{
+	"name": "@autumnsgrove/server-sdk",
+	"version": "0.1.0",
+	"description": "Infrastructure abstraction layer for Grove — the roots run deep, the tree stands anywhere",
+	"author": "AutumnsGrove",
+	"license": "AGPL-3.0-only",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/AutumnsGrove/Lattice.git",
+		"directory": "libs/server-sdk"
+	},
+	"type": "module",
+	"main": "./src/index.ts",
+	"types": "./src/index.ts",
+	"exports": {
+		".": {
+			"types": "./src/index.ts",
+			"default": "./src/index.ts"
+		},
+		"./cloudflare": {
+			"types": "./src/cloudflare/index.ts",
+			"default": "./src/cloudflare/index.ts"
+		},
+		"./testing": {
+			"types": "./src/testing/index.ts",
+			"default": "./src/testing/index.ts"
+		}
+	},
+	"files": [
+		"src"
+	],
+	"scripts": {
+		"check": "tsc --noEmit",
+		"test": "vitest",
+		"test:run": "vitest run"
+	},
+	"dependencies": {
+		"@autumnsgrove/lattice": "workspace:*"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20260210.0",
+		"typescript": "^5.9.3",
+		"vitest": "^4.0.18"
+	},
+	"keywords": [
+		"grove",
+		"server-sdk",
+		"infrastructure",
+		"cloudflare",
+		"abstraction",
+		"adapters"
+	]
+}
