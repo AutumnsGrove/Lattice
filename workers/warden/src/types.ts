@@ -41,13 +41,20 @@ export interface Env {
 }
 
 /** Warden service identifiers */
-export type WardenService = "github" | "tavily" | "cloudflare" | "exa" | "resend" | "stripe" | "openrouter";
+export type WardenService =
+	| "github"
+	| "tavily"
+	| "cloudflare"
+	| "exa"
+	| "resend"
+	| "stripe"
+	| "openrouter";
 
 /** Authentication method used for a request */
 export type AuthMethod = "service_binding" | "challenge_response";
 
 /** Audit log event types — aligned with Vista warden-aggregator queries */
-export type EventType = "request" | "nonce_reuse" | "rate_limit_hit" | "scope_denial";
+export type EventType = "request" | "resolve" | "nonce_reuse" | "rate_limit_hit" | "scope_denial";
 
 /** Agent record from D1 */
 export interface WardenAgent {
@@ -107,4 +114,10 @@ export interface WardenRequestBody {
 		nonce: string;
 		signature: string;
 	};
+}
+
+/** Incoming request body for POST /resolve */
+export interface WardenResolveBody {
+	service: WardenService;
+	tenant_id?: string;
 }

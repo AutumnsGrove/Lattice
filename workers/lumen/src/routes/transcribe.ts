@@ -44,7 +44,7 @@ transcribe.post("/", async (c) => {
 	const req = parsed.data;
 
 	try {
-		const lumen = createLumenClientForWorker(c.env);
+		const lumen = await createLumenClientForWorker(c.env, undefined, req.tenant_id);
 
 		// Convert base64 audio string to Uint8Array for LumenClient
 		const binaryString = atob(req.audio);

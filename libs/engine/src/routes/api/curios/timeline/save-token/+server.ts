@@ -11,8 +11,15 @@ import {
 	setTimelineToken,
 	getTimelineToken,
 	TIMELINE_SECRET_KEYS,
+	maybeCreateSecretsManager,
 } from "$lib/curios/timeline/secrets.server";
 import { API_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
+
+/** Warden's canonical key names — dual-write ensures Warden can find these directly */
+const WARDEN_CANONICAL_KEYS: Record<string, string> = {
+	github: "github_token",
+	openrouter: "openrouter_api_key",
+};
 
 export const POST: RequestHandler = async ({ request, platform, locals }) => {
 	const db = platform?.env?.DB; // Core DB for SecretsManager (tenant_secrets, tenants)
@@ -77,6 +84,22 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 			`[Timeline Config] Token ${tokenType} saved via ${saveResult.system}` +
 				(saveResult.fallbackReason ? ` (fallback reason: ${saveResult.fallbackReason})` : ""),
 		);
+
+		// Dual-write under Warden's canonical key name so Warden can resolve
+		// credentials without relying on the alias fallback chain
+		const canonicalKey = WARDEN_CANONICAL_KEYS[tokenType as string];
+		if (canonicalKey && canonicalKey !== keyName) {
+			const sm = await maybeCreateSecretsManager(env);
+			if (sm) {
+				try {
+					await sm.setSecret(tenantId, canonicalKey, tokenValue);
+					console.log(`[Timeline Config] Dual-write: also saved as ${canonicalKey}`);
+				} catch (dualErr) {
+					// Non-fatal — the alias chain will still find it under the timeline key
+					console.warn(`[Timeline Config] Dual-write to ${canonicalKey} failed:`, dualErr);
+				}
+			}
+		}
 
 		// Read it back to verify it's retrievable
 		const row = await curioDb

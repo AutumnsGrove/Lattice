@@ -8,6 +8,7 @@
  * - GET  /health          — Health check
  * - POST /nonce           — Request auth nonce
  * - POST /request         — Proxied API request
+ * - POST /resolve         — Credential resolution (service-binding only)
  * - POST /admin/agents    — Register agent
  * - GET  /admin/agents    — List agents
  * - DELETE /admin/agents/:id — Revoke agent
@@ -19,6 +20,7 @@ import { cors } from "hono/cors";
 import type { Env } from "./types";
 import { nonceRoute } from "./routes/nonce";
 import { requestRoute } from "./routes/request";
+import { resolveRoute } from "./routes/resolve";
 import { adminRoutes } from "./routes/admin";
 
 // Register services with the registry (side-effect imports)
@@ -51,6 +53,9 @@ app.route("/nonce", nonceRoute);
 
 // Main request proxy
 app.route("/request", requestRoute);
+
+// Credential resolution (service-binding callers only)
+app.route("/resolve", resolveRoute);
 
 // Admin endpoints
 app.route("/admin", adminRoutes);

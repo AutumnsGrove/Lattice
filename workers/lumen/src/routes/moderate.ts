@@ -43,7 +43,7 @@ moderate.post("/", async (c) => {
 	const req = parsed.data;
 
 	try {
-		const lumen = createLumenClientForWorker(c.env);
+		const lumen = await createLumenClientForWorker(c.env, undefined, req.tenant_id);
 
 		const result = await lumen.moderate(
 			{

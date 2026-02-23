@@ -16,19 +16,15 @@ export interface Env {
 	DB: D1Database;
 	/** Cloudflare Workers AI — embeddings, transcription, local moderation */
 	AI: Ai;
-	/** Service binding to Warden for credential-injected OpenRouter access
-	 *  TODO: Wire into client-factory.ts — binding exists but is not yet exercised */
+	/** Service binding to Warden for credential resolution */
 	WARDEN: { fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response> };
 	/** Rate limit counters (used by Threshold SDK) */
 	RATE_LIMITS: KVNamespace;
 
 	/** API key for authenticating callers to this worker */
 	LUMEN_API_KEY: string;
-	/** Key encryption key for SecretsManager (BYOK tenant key decryption)
-	 *  TODO: Wire into client-factory.ts for per-tenant key decryption */
-	GROVE_KEK?: string;
-	/** Direct OpenRouter key fallback (prefer Warden resolution) */
-	OPENROUTER_API_KEY?: string;
+	/** Lumen's registered agent API key for Warden auth */
+	WARDEN_API_KEY: string;
 }
 
 // =============================================================================

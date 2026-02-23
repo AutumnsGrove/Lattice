@@ -42,6 +42,5 @@ id = "427ae01e877f40bf8bb107bdb5f77442"
 # =============================================================================
 # Secrets (configured via: gw secret apply <name> --worker grove-lumen)
 # =============================================================================
-# LUMEN_API_KEY         - API key for authenticating callers
-# GROVE_KEK             - Key encryption key for SecretsManager (BYOK)
-# OPENROUTER_API_KEY    - Direct fallback (prefer Warden resolution)
+# LUMEN_API_KEY         - API key for authenticating callers to this worker
+# WARDEN_API_KEY        - Lumen's registered agent key for Warden /resolve auth

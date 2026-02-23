@@ -47,7 +47,11 @@ inference.post("/", async (c) => {
 	const req = parsed.data;
 
 	try {
-		const lumen = createLumenClientForWorker(c.env, req.options?.tenant_api_key);
+		const lumen = await createLumenClientForWorker(
+			c.env,
+			req.options?.tenant_api_key,
+			req.tenant_id,
+		);
 
 		// tier is Zod-validated above (Rootwork boundary) — safe to pass directly
 		const result = await lumen.run(
