@@ -34,12 +34,14 @@ export interface Env {
 	RESEND_API_KEY: string;
 	/** Stripe secret key — read-only billing (global fallback) */
 	STRIPE_SECRET_KEY: string;
+	/** OpenRouter API key — LLM gateway (global fallback) */
+	OPENROUTER_API_KEY: string;
 	/** Admin API key for agent management endpoints */
 	WARDEN_ADMIN_KEY?: string;
 }
 
 /** Warden service identifiers */
-export type WardenService = "github" | "tavily" | "cloudflare" | "exa" | "resend" | "stripe";
+export type WardenService = "github" | "tavily" | "cloudflare" | "exa" | "resend" | "stripe" | "openrouter";
 
 /** Authentication method used for a request */
 export type AuthMethod = "service_binding" | "challenge_response";

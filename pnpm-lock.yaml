@@ -1188,6 +1188,34 @@ importers:
         specifier: ^4.64.0
         version: 4.64.0(@cloudflare/workers-types@4.20260210.0)
 
+  workers/lumen:
+    dependencies:
+      '@autumnsgrove/lattice':
+        specifier: workspace:*
+        version: link:../../libs/engine
+      hono:
+        specifier: ^4.7.0
+        version: 4.11.9
+      zod:
+        specifier: ^3.24.0
+        version: 3.25.76
+    devDependencies:
+      '@cloudflare/vitest-pool-workers':
+        specifier: ^0.12.11
+        version: 0.12.11(@cloudflare/workers-types@4.20260210.0)(@vitest/runner@4.0.18)(@vitest/snapshot@4.0.18)(vitest@3.2.4(@types/debug@4.1.12)(@types/node@25.2.3)(happy-dom@20.6.1)(jsdom@27.4.0(@noble/hashes@2.0.1)(canvas@3.2.1)))
+      '@cloudflare/workers-types':
+        specifier: ^4.20251128.0
+        version: 4.20260210.0
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.2.3)(happy-dom@20.6.1)(jsdom@27.4.0(@noble/hashes@2.0.1)(canvas@3.2.1))
+      wrangler:
+        specifier: ^4.63.0
+        version: 4.64.0(@cloudflare/workers-types@4.20260210.0)
+
   workers/meadow-poller:
     dependencies:
       fast-xml-parser:
@@ -1248,6 +1276,10 @@ importers:
         version: 4.64.0(@cloudflare/workers-types@4.20260210.0)
 
   workers/timeline-sync:
+    dependencies:
+      '@autumnsgrove/lattice':
+        specifier: workspace:*
+        version: link:../../libs/engine
     devDependencies:
       '@cloudflare/workers-types':
         specifier: ^4.20251128.0

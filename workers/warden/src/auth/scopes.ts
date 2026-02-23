@@ -52,6 +52,11 @@ const SERVICE_SCOPES: Record<string, Record<string, string>> = {
 		list_invoices: "read",
 		get_invoice: "read",
 	},
+	openrouter: {
+		chat_completion: "inference",
+		list_models: "read",
+		get_generation: "read",
+	},
 };
 
 /** Check if an agent's scopes permit a given service + action */

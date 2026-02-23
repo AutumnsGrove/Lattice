@@ -1,0 +1,47 @@
+# Grove Lumen — AI Inference Gateway
+# Wraps the Lumen pipeline (PII scrub, quota, fallback, Songbird)
+# as a standalone Cloudflare Worker reachable by any other worker.
+#
+# Callers authenticate via X-API-Key header.
+# Credentials for upstream providers are resolved via Warden service binding.
+
+name = "grove-lumen"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# =============================================================================
+# D1 Database — Shared engine DB for quota tracking (lumen_usage table)
+# =============================================================================
+[[d1_databases]]
+binding = "DB"
+database_name = "grove-engine-db"
+database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
+
+# =============================================================================
+# Workers AI — Native Cloudflare AI binding for embeddings + transcription
+# =============================================================================
+[ai]
+binding = "AI"
+
+# =============================================================================
+# Service Bindings — Internal worker-to-worker communication
+# =============================================================================
+[[services]]
+binding = "WARDEN"
+service = "grove-warden"
+
+# =============================================================================
+# KV — Rate limit counters (Threshold SDK)
+# =============================================================================
+[[kv_namespaces]]
+binding = "RATE_LIMITS"
+title = "grove-lumen-ratelimits"
+id = "427ae01e877f40bf8bb107bdb5f77442"
+
+# =============================================================================
+# Secrets (configured via: gw secret apply <name> --worker grove-lumen)
+# =============================================================================
+# LUMEN_API_KEY         - API key for authenticating callers
+# GROVE_KEK             - Key encryption key for SecretsManager (BYOK)
+# OPENROUTER_API_KEY    - Direct fallback (prefer Warden resolution)

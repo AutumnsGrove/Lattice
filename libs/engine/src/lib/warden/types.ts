@@ -8,7 +8,7 @@
 // Service Types
 // =============================================================================
 
-export type WardenService = "github" | "tavily" | "cloudflare" | "exa" | "resend" | "stripe";
+export type WardenService = "github" | "tavily" | "cloudflare" | "exa" | "resend" | "stripe" | "openrouter";
 
 export type WardenErrorCode =
 	| "INVALID_REQUEST"
@@ -311,6 +311,59 @@ export interface StripeListResponse<T> {
 	data: T[];
 	has_more: boolean;
 	url: string;
+}
+
+// =============================================================================
+// OpenRouter Types
+// =============================================================================
+
+export interface OpenRouterMessage {
+	role: "system" | "user" | "assistant";
+	content:
+		| string
+		| Array<{
+				type: "text" | "image_url";
+				text?: string;
+				image_url?: { url: string; detail?: "auto" | "low" | "high" };
+		  }>;
+}
+
+export interface OpenRouterChatCompletion {
+	id: string;
+	model: string;
+	choices: Array<{
+		index: number;
+		message: { role: string; content: string };
+		finish_reason: string;
+	}>;
+	usage: {
+		prompt_tokens: number;
+		completion_tokens: number;
+		total_tokens: number;
+	};
+}
+
+export interface OpenRouterModel {
+	id: string;
+	name: string;
+	description: string;
+	pricing: { prompt: string; completion: string };
+	context_length: number;
+	architecture: { modality: string; tokenizer: string };
+	top_provider: { max_completion_tokens: number | null };
+}
+
+export interface OpenRouterModelsResponse {
+	data: OpenRouterModel[];
+}
+
+export interface OpenRouterGeneration {
+	id: string;
+	model: string;
+	total_cost: number;
+	tokens_prompt: number;
+	tokens_completion: number;
+	generation_time: number;
 }
 
 // =============================================================================

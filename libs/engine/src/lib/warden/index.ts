@@ -12,6 +12,7 @@ export { WardenCloudflare } from "./services/cloudflare";
 export { WardenExa } from "./services/exa";
 export { WardenResend } from "./services/resend";
 export { WardenStripe } from "./services/stripe";
+export { WardenOpenRouter } from "./services/openrouter";
 export { signNonce } from "./crypto";
 export type {
 	WardenConfig,
@@ -51,4 +52,10 @@ export type {
 	StripeSubscription,
 	StripeInvoice,
 	StripeListResponse,
+	// OpenRouter
+	OpenRouterMessage,
+	OpenRouterChatCompletion,
+	OpenRouterModel,
+	OpenRouterModelsResponse,
+	OpenRouterGeneration,
 } from "./types";

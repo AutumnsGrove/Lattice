@@ -28,6 +28,15 @@ database_name = "grove-curios-db"
 database_id = "b03756ad-30d7-427a-9a1b-ec2f6478fcbd"
 
 # =============================================================================
+# Service Bindings — Lumen AI Gateway
+# =============================================================================
+# Routes AI calls through the full Lumen pipeline (PII scrub, quota, fallback)
+# instead of raw OpenRouter API calls.
+[[services]]
+binding = "LUMEN"
+service = "grove-lumen"
+
+# =============================================================================
 # Envelope Encryption - Key Encryption Key (KEK)
 # =============================================================================
 # The KEK decrypts per-tenant DEKs which decrypt the actual API tokens.
