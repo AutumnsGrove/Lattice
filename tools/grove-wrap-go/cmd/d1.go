@@ -79,7 +79,7 @@ func validateCFKey(key string) error {
 }
 
 // resolveDatabase resolves a database alias to its name using config.
-// Returns an error if the alias is invalid.
+// Returns an error if the alias is invalid. Warns when no alias matches.
 func resolveDatabase(alias string) (string, error) {
 	if err := validateCFName(alias, "database alias"); err != nil {
 		return "", err
@@ -88,6 +88,8 @@ func resolveDatabase(alias string) (string, error) {
 	if db, ok := cfg.Databases[alias]; ok {
 		return db.Name, nil
 	}
+	// No alias found — pass through but warn
+	ui.Warning(fmt.Sprintf("no alias '%s' in config — using as literal database name", alias))
 	return alias, nil
 }
 
@@ -105,32 +107,36 @@ var d1ListCmd = &cobra.Command{
 	Short: "List D1 databases",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg := config.Get()
-
-		output, err := exec.WranglerOutput("d1", "list", "--json")
-		if err != nil {
-			return fmt.Errorf("wrangler error: %w", err)
-		}
+		remote, _ := cmd.Flags().GetBool("remote")
 
 		if cfg.JSONMode {
-			var remote json.RawMessage
-			if err := json.Unmarshal([]byte(output), &remote); err != nil {
-				remote = json.RawMessage("[]")
-			}
-
 			configured := make(map[string]config.Database)
 			for alias, db := range cfg.Databases {
 				configured[alias] = db
 			}
 			result := map[string]interface{}{
 				"configured": configured,
-				"remote":     remote,
 			}
+
+			// Only hit Cloudflare API when --remote is set
+			if remote {
+				output, err := exec.WranglerOutput("d1", "list", "--json")
+				if err != nil {
+					return fmt.Errorf("wrangler error: %w", err)
+				}
+				var remoteDBs json.RawMessage
+				if err := json.Unmarshal([]byte(output), &remoteDBs); err != nil {
+					remoteDBs = json.RawMessage("[]")
+				}
+				result["remote"] = remoteDBs
+			}
+
 			data, _ := json.Marshal(result)
 			fmt.Println(string(data))
 			return nil
 		}
 
-		// Show configured databases
+		// Always show configured databases
 		if len(cfg.Databases) > 0 {
 			headers := []string{"Alias", "Name", "ID"}
 			var rows [][]string
@@ -140,15 +146,25 @@ var d1ListCmd = &cobra.Command{
 			fmt.Print(ui.RenderTable("Configured Databases", headers, rows))
 		}
 
-		// Show remote databases
-		var dbs []map[string]interface{}
-		if err := json.Unmarshal([]byte(output), &dbs); err == nil && len(dbs) > 0 {
-			headers := []string{"Name", "ID"}
-			var rows [][]string
-			for _, db := range dbs {
-				rows = append(rows, []string{fmt.Sprintf("%v", db["name"]), fmt.Sprintf("%v", db["uuid"])})
+		// Only hit Cloudflare API when --remote is set
+		if remote {
+			output, err := exec.WranglerOutput("d1", "list", "--json")
+			if err != nil {
+				return fmt.Errorf("wrangler error: %w", err)
 			}
-			fmt.Print(ui.RenderTable("Remote D1 Databases", headers, rows))
+			var dbs []map[string]interface{}
+			if err := json.Unmarshal([]byte(output), &dbs); err == nil && len(dbs) > 0 {
+				headers := []string{"Name", "ID"}
+				var rows [][]string
+				for _, db := range dbs {
+					rows = append(rows, []string{fmt.Sprintf("%v", db["name"]), fmt.Sprintf("%v", db["uuid"])})
+				}
+				fmt.Print(ui.RenderTable("Remote D1 Databases", headers, rows))
+			}
+		}
+
+		if len(cfg.Databases) == 0 && !remote {
+			ui.Muted("No configured databases. Use --remote to list from Cloudflare, or add aliases to ~/.grove/gw.toml")
 		}
 
 		return nil
@@ -163,13 +179,18 @@ var d1TablesCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg := config.Get()
 		dbAlias, _ := cmd.Flags().GetString("db")
+		remote, _ := cmd.Flags().GetBool("remote")
 		dbName, err := resolveDatabase(dbAlias)
 		if err != nil {
 			return err
 		}
 
 		sql := "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE '_cf_%' ORDER BY name"
-		output, err := exec.WranglerOutput("d1", "execute", dbName, "--remote", "--json", "--command", sql)
+		wranglerArgs := []string{"d1", "execute", dbName, "--json", "--command", sql}
+		if remote {
+			wranglerArgs = append(wranglerArgs, "--remote")
+		}
+		output, err := exec.WranglerOutput(wranglerArgs...)
 		if err != nil {
 			return fmt.Errorf("wrangler error: %w", err)
 		}
@@ -209,6 +230,7 @@ var d1SchemaCmd = &cobra.Command{
 		cfg := config.Get()
 		tableName := args[0]
 		dbAlias, _ := cmd.Flags().GetString("db")
+		remote, _ := cmd.Flags().GetBool("remote")
 		dbName, err := resolveDatabase(dbAlias)
 		if err != nil {
 			return err
@@ -220,7 +242,11 @@ var d1SchemaCmd = &cobra.Command{
 		}
 
 		sql := fmt.Sprintf("PRAGMA table_info(%s)", tableName)
-		output, err := exec.WranglerOutput("d1", "execute", dbName, "--remote", "--json", "--command", sql)
+		wranglerArgs := []string{"d1", "execute", dbName, "--json", "--command", sql}
+		if remote {
+			wranglerArgs = append(wranglerArgs, "--remote")
+		}
+		output, err := exec.WranglerOutput(wranglerArgs...)
 		if err != nil {
 			return fmt.Errorf("wrangler error: %w", err)
 		}
@@ -276,6 +302,7 @@ var d1QueryCmd = &cobra.Command{
 		sqlStr := args[0]
 		dbAlias, _ := cmd.Flags().GetString("db")
 		limit, _ := cmd.Flags().GetInt("limit")
+		remote, _ := cmd.Flags().GetBool("remote")
 		dbName, err := resolveDatabase(dbAlias)
 		if err != nil {
 			return err
@@ -311,7 +338,11 @@ var d1QueryCmd = &cobra.Command{
 			sqlStr = fmt.Sprintf("%s LIMIT %d", sqlStr, limit)
 		}
 
-		output, err := exec.WranglerOutput("d1", "execute", dbName, "--remote", "--json", "--command", sqlStr)
+		wranglerArgs := []string{"d1", "execute", dbName, "--json", "--command", sqlStr}
+		if remote {
+			wranglerArgs = append(wranglerArgs, "--remote")
+		}
+		output, err := exec.WranglerOutput(wranglerArgs...)
 		if err != nil {
 			return fmt.Errorf("wrangler error: %w", err)
 		}
@@ -367,6 +398,7 @@ var d1MigrateCmd = &cobra.Command{
 		filePath := args[0]
 		dbAlias, _ := cmd.Flags().GetString("db")
 		dryRun, _ := cmd.Flags().GetBool("dry-run")
+		remote, _ := cmd.Flags().GetBool("remote")
 		dbName, err := resolveDatabase(dbAlias)
 		if err != nil {
 			return err
@@ -435,7 +467,11 @@ var d1MigrateCmd = &cobra.Command{
 			return err
 		}
 
-		result, err := exec.Wrangler("d1", "execute", dbName, "--remote", "--file", absPath)
+		migrateArgs := []string{"d1", "execute", dbName, "--file", absPath}
+		if remote {
+			migrateArgs = append(migrateArgs, "--remote")
+		}
+		result, err := exec.Wrangler(migrateArgs...)
 		if err != nil {
 			return fmt.Errorf("wrangler error: %w", err)
 		}
@@ -528,13 +564,13 @@ func isValidIdentifier(s string) bool {
 
 var d1HelpCategories = []ui.HelpCategory{
 	{Title: "Read (Always Safe)", Icon: "📖", Style: ui.SafeReadStyle, Commands: []ui.HelpCommand{
-		{Name: "list", Desc: "List D1 databases"},
-		{Name: "tables", Desc: "List tables in a database"},
-		{Name: "schema", Desc: "Show table schema"},
+		{Name: "list", Desc: "List configured databases (--remote for Cloudflare API)"},
+		{Name: "tables --remote", Desc: "List tables in a database"},
+		{Name: "schema --remote", Desc: "Show table schema"},
 	}},
 	{Title: "Write (--write)", Icon: "✏️", Style: ui.SafeWriteStyle, Commands: []ui.HelpCommand{
-		{Name: "query", Desc: "Execute a SQL query"},
-		{Name: "migrate", Desc: "Execute a SQL migration file"},
+		{Name: "query --remote", Desc: "Execute a SQL query"},
+		{Name: "migrate --remote", Desc: "Execute a SQL migration file"},
 	}},
 }
 
@@ -547,23 +583,28 @@ func init() {
 	})
 
 	// d1 list
+	d1ListCmd.Flags().Bool("remote", false, "Also fetch databases from Cloudflare API")
 	d1Cmd.AddCommand(d1ListCmd)
 
 	// d1 tables
 	d1TablesCmd.Flags().StringP("db", "d", "lattice", "Database alias or name")
+	d1TablesCmd.Flags().Bool("remote", false, "Execute against remote (production) database")
 	d1Cmd.AddCommand(d1TablesCmd)
 
 	// d1 schema
 	d1SchemaCmd.Flags().StringP("db", "d", "lattice", "Database alias or name")
+	d1SchemaCmd.Flags().Bool("remote", false, "Execute against remote (production) database")
 	d1Cmd.AddCommand(d1SchemaCmd)
 
 	// d1 query
 	d1QueryCmd.Flags().StringP("db", "d", "lattice", "Database alias or name")
 	d1QueryCmd.Flags().IntP("limit", "n", 100, "Maximum rows to return")
+	d1QueryCmd.Flags().Bool("remote", false, "Execute against remote (production) database")
 	d1Cmd.AddCommand(d1QueryCmd)
 
 	// d1 migrate
 	d1MigrateCmd.Flags().StringP("db", "d", "lattice", "Database alias or name")
 	d1MigrateCmd.Flags().Bool("dry-run", false, "Show SQL without executing")
+	d1MigrateCmd.Flags().Bool("remote", false, "Execute against remote (production) database")
 	d1Cmd.AddCommand(d1MigrateCmd)
 }
