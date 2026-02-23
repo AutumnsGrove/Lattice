@@ -2,6 +2,8 @@
 	import { enhance } from "$app/forms";
 	import { invalidateAll } from "$app/navigation";
 	import { GlassCard, GlassButton, Badge, toast } from "$lib/ui/components/ui";
+	import GuestbookPreview from "$lib/curios/guestbook/GuestbookPreview.svelte";
+	import "$lib/styles/fonts-optional.css";
 	import {
 		BookOpen,
 		Check,
@@ -14,6 +16,7 @@
 		Palette,
 		Plus,
 		RotateCcw,
+		Eye,
 	} from "lucide-svelte";
 	import {
 		formatRelativeTime,
@@ -208,6 +211,24 @@
 			<div class="stat-label">Total</div>
 		</GlassCard>
 	</div>
+
+	<!-- Live Preview -->
+	<details class="preview-section" open>
+		<summary class="preview-toggle">
+			<Eye class="w-4 h-4" />
+			Live Preview
+		</summary>
+		<GlassCard class="preview-card">
+			<GuestbookPreview
+				{style}
+				{wallBacking}
+				{allowedStyles}
+				{colorPalette}
+				{allowEmoji}
+				{customPrompt}
+			/>
+		</GlassCard>
+	</details>
 
 	<!-- Tabs -->
 	<div class="tab-bar">
@@ -1097,6 +1118,41 @@
 
 	:global(.dark) .action-btn.delete:hover {
 		background: rgb(127 29 29 / 0.3);
+	}
+
+	/* ─── Preview Section ─── */
+	.preview-section {
+		margin-bottom: 1.5rem;
+		border: 1px solid var(--color-border, #e5e7eb);
+		border-radius: 0.75rem;
+		overflow: hidden;
+	}
+
+	.preview-toggle {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.75rem 1rem;
+		cursor: pointer;
+		font-size: 0.9rem;
+		font-weight: 500;
+		color: var(--color-text-muted);
+		list-style: none;
+		user-select: none;
+		transition: color 0.15s ease;
+	}
+
+	.preview-toggle::-webkit-details-marker {
+		display: none;
+	}
+
+	.preview-toggle:hover {
+		color: var(--color-text);
+	}
+
+	:global(.preview-card) {
+		margin: 0 0.75rem 0.75rem !important;
+		padding: 1rem !important;
 	}
 
 	@media (max-width: 640px) {
