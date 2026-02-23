@@ -59,7 +59,7 @@ embed.post("/", async (c) => {
 			data: {
 				embeddings: result.embeddings,
 				model: result.model,
-				usage: result.usage,
+				tokens: result.tokens,
 			},
 			meta: {
 				task: "embedding",
@@ -71,7 +71,7 @@ embed.post("/", async (c) => {
 		return c.json(response);
 	} catch (err) {
 		const { body, status } = buildErrorResponse(err, "embedding", startTime);
-		return c.json(body, status);
+		return c.json(body, status as 500);
 	}
 });
 

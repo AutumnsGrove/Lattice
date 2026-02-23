@@ -12,6 +12,21 @@
 import { createMiddleware } from "hono/factory";
 import type { Env, LumenWorkerResponse } from "../types";
 
+/** Constant-time string comparison to prevent timing attacks */
+function timingSafeEqual(a: string, b: string): boolean {
+	if (a.length !== b.length) return false;
+
+	const encoder = new TextEncoder();
+	const bufA = encoder.encode(a);
+	const bufB = encoder.encode(b);
+
+	let result = 0;
+	for (let i = 0; i < bufA.length; i++) {
+		result |= bufA[i] ^ bufB[i];
+	}
+	return result === 0;
+}
+
 export type AuthVariables = {
 	/** Whether the caller authenticated successfully */
 	authenticated: boolean;
@@ -52,25 +67,7 @@ export const apiKeyAuth = createMiddleware<{
 		return c.json(response, 500);
 	}
 
-	const encoder = new TextEncoder();
-	const a = encoder.encode(apiKey);
-	const b = encoder.encode(expected);
-
-	if (a.byteLength !== b.byteLength) {
-		const response: LumenWorkerResponse = {
-			success: false,
-			error: {
-				code: "AUTH_REQUIRED",
-				message: "Invalid API key",
-			},
-		};
-		return c.json(response, 401);
-	}
-
-	// Use crypto.subtle.timingSafeEqual for constant-time comparison
-	const isValid = crypto.subtle.timingSafeEqual(a.buffer, b.buffer);
-
-	if (!isValid) {
+	if (!timingSafeEqual(apiKey, expected)) {
 		const response: LumenWorkerResponse = {
 			success: false,
 			error: {

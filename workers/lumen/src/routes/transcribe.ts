@@ -46,11 +46,18 @@ transcribe.post("/", async (c) => {
 	try {
 		const lumen = createLumenClientForWorker(c.env);
 
+		// Convert base64 audio string to Uint8Array for LumenClient
+		const binaryString = atob(req.audio);
+		const audioBytes = new Uint8Array(binaryString.length);
+		for (let i = 0; i < binaryString.length; i++) {
+			audioBytes[i] = binaryString.charCodeAt(i);
+		}
+
 		const result = await lumen.transcribe(
 			{
-				audio: req.audio,
+				audio: audioBytes,
 				tenant: req.tenant_id,
-				mode: req.mode,
+				options: { mode: req.mode },
 			},
 			req.tier,
 		);
@@ -74,7 +81,7 @@ transcribe.post("/", async (c) => {
 		return c.json(response);
 	} catch (err) {
 		const { body, status } = buildErrorResponse(err, "transcription", startTime);
-		return c.json(body, status);
+		return c.json(body, status as 500);
 	}
 });
 

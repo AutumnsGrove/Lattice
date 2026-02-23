@@ -49,7 +49,6 @@ moderate.post("/", async (c) => {
 			{
 				content: req.content,
 				tenant: req.tenant_id,
-				model: req.model,
 			},
 			req.tier,
 		);
@@ -72,7 +71,7 @@ moderate.post("/", async (c) => {
 		return c.json(response);
 	} catch (err) {
 		const { body, status } = buildErrorResponse(err, "moderation", startTime);
-		return c.json(body, status);
+		return c.json(body, status as 500);
 	}
 });
 

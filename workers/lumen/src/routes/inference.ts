@@ -88,7 +88,7 @@ inference.post("/", async (c) => {
 		return c.json(response);
 	} catch (err) {
 		const { body, status } = buildErrorResponse(err, req.task, startTime);
-		return c.json(body, status);
+		return c.json(body, status as 500);
 	}
 });
 

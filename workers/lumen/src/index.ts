@@ -33,7 +33,7 @@ const app = new Hono<{ Bindings: Env }>();
 app.use(
 	"*",
 	cors({
-		origin: ["https://grove.place", /\.grove\.place$/],
+		origin: ["https://grove.place", "https://*.grove.place"],
 		allowMethods: ["GET", "POST", "OPTIONS"],
 		allowHeaders: ["Content-Type", "X-API-Key"],
 	}),
