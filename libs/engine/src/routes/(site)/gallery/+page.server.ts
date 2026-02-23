@@ -169,7 +169,9 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 		id: row.id,
 		r2_key: row.r2_key,
 		url: row.cdn_url || `${cdnBaseUrl}/${row.r2_key}`,
-		thumbnail_url: row.thumbnail_r2_key ? `${cdnBaseUrl}/${row.thumbnail_r2_key}` : null,
+		thumbnail_url: row.thumbnail_r2_key
+			? `${cdnBaseUrl}/${row.thumbnail_r2_key}`
+			: `${cdnBaseUrl}/cdn-cgi/image/width=400,quality=60,format=webp/${row.r2_key}`,
 		dominant_color: row.dominant_color,
 		aspect_ratio: row.aspect_ratio,
 		parsed_date: row.parsed_date,

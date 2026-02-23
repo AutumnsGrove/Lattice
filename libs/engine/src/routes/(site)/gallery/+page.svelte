@@ -163,6 +163,7 @@
 							loading={index < 6 ? "eager" : "lazy"}
 							fetchpriority={index < 6 ? "high" : undefined}
 							decoding="async"
+							onload={(e) => e.currentTarget.classList.add("loaded")}
 						/>
 					</div>
 
@@ -361,7 +362,14 @@
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
-		transition: transform 0.3s ease;
+		opacity: 0;
+		transition:
+			opacity 0.3s ease,
+			transform 0.3s ease;
+	}
+
+	.mood-item :global(img.loaded) {
+		opacity: 1;
 	}
 
 	.mood-item:hover img {

@@ -102,6 +102,12 @@
 	let bulkDeleteModalOpen = $state(false);
 	let bulkDeleting = $state(false);
 
+	// Backfill state
+	let backfilling = $state(false);
+	let backfillProgress = $state(0);
+	let backfillTotal = $state(0);
+	let backfillErrors = $state(0);
+
 	// Initialize gallery and check JXL support on mount
 	$effect(() => {
 		loadGallery();
@@ -153,6 +159,84 @@
 	function changeSortOrder() {
 		galleryCursor = null;
 		loadGallery();
+	}
+
+	/**
+	 * Backfill thumbnails + dominant colors for existing images.
+	 * Fetches images missing data, processes each client-side, then PATCHes back.
+	 */
+	async function runBackfill() {
+		if (backfilling) return;
+		backfilling = true;
+		backfillProgress = 0;
+		backfillErrors = 0;
+
+		try {
+			// 1. Get images needing backfill
+			const listing = await api.get("/api/curios/gallery/backfill?limit=200");
+			const images = listing.images ?? [];
+			backfillTotal = images.length;
+
+			if (images.length === 0) {
+				toast.info("All images already have thumbnails");
+				backfilling = false;
+				return;
+			}
+
+			toast.info(`Processing ${images.length} images...`);
+
+			// 2. Process each image sequentially (avoids memory pressure from parallel canvas ops)
+			for (const img of images) {
+				try {
+					// Fetch the image as a blob via its CDN URL
+					const response = await fetch(img.url);
+					if (!response.ok) {
+						backfillErrors++;
+						backfillProgress++;
+						continue;
+					}
+					const blob = await response.blob();
+					const file = new File([blob], "image.jpg", { type: blob.type || "image/jpeg" });
+
+					// Generate thumbnail + extract dominant color
+					const [thumbResult, color] = await Promise.all([
+						generateThumbnail(file, { maxWidth: 400, quality: 60 }),
+						extractDominantColor(file),
+					]);
+
+					// POST the results back
+					const formData = new FormData();
+					formData.append("imageId", img.id);
+					formData.append(
+						"thumbnail",
+						new File([thumbResult.blob], "thumb.webp", { type: "image/webp" }),
+					);
+					formData.append("dominantColor", color);
+					formData.append("width", String(thumbResult.width));
+					formData.append("height", String(thumbResult.height));
+
+					await apiRequest("/api/curios/gallery/backfill", {
+						method: "POST",
+						body: formData,
+					});
+				} catch (err) {
+					console.warn("Backfill failed for image:", img.id, err);
+					backfillErrors++;
+				}
+				backfillProgress++;
+			}
+
+			const succeeded = backfillProgress - backfillErrors;
+			if (backfillErrors > 0) {
+				toast.warning(`Backfill complete: ${succeeded} processed, ${backfillErrors} failed`);
+			} else {
+				toast.success(`Backfill complete: ${succeeded} images processed`);
+			}
+		} catch (err) {
+			toast.error("Backfill failed: " + (err instanceof Error ? err.message : "Unknown error"));
+		} finally {
+			backfilling = false;
+		}
 	}
 
 	/** @param {string} key */
@@ -964,8 +1048,32 @@
 				>
 					{selectionMode ? "Cancel" : "Select"}
 				</Button>
+				<Button variant="secondary" size="sm" onclick={runBackfill} disabled={backfilling}>
+					{#if backfilling}
+						{backfillProgress}/{backfillTotal}
+					{:else}
+						Thumbnails
+					{/if}
+				</Button>
 			</div>
 		</div>
+
+		{#if backfilling}
+			<div class="backfill-progress">
+				<div class="backfill-bar">
+					<div
+						class="backfill-fill"
+						style="width: {backfillTotal > 0 ? (backfillProgress / backfillTotal) * 100 : 0}%"
+					></div>
+				</div>
+				<span class="backfill-label">
+					Generating thumbnails... {backfillProgress}/{backfillTotal}
+					{#if backfillErrors > 0}
+						({backfillErrors} failed)
+					{/if}
+				</span>
+			</div>
+		{/if}
 
 		{#if galleryError}
 			<div class="gallery-error">{galleryError}</div>
@@ -1807,6 +1915,34 @@
 	:global(.dark) .filter-group input {
 		background: rgba(255, 255, 255, 0.05);
 		border-color: rgba(255, 255, 255, 0.1);
+	}
+
+	.backfill-progress {
+		margin: 1rem 0;
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+	}
+
+	.backfill-bar {
+		flex: 1;
+		height: 6px;
+		background: var(--color-border);
+		border-radius: 3px;
+		overflow: hidden;
+	}
+
+	.backfill-fill {
+		height: 100%;
+		background: var(--color-primary);
+		transition: width 0.3s ease;
+		border-radius: 3px;
+	}
+
+	.backfill-label {
+		font-size: 0.8rem;
+		color: var(--color-text-muted);
+		white-space: nowrap;
 	}
 
 	.gallery-error {
