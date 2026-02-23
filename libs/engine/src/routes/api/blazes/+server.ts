@@ -34,11 +34,52 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
 	}
 
 	try {
-		// Always include global defaults
-		const globalResult = await platform.env.DB.prepare(
+		// Fire global query immediately — it's needed regardless of auth
+		const globalQuery = platform.env.DB.prepare(
 			"SELECT id, tenant_id, slug, label, icon, color, sort_order FROM blaze_definitions WHERE tenant_id IS NULL ORDER BY sort_order",
 		).all<BlazeRow>();
 
+		// If authenticated, resolve tenant in parallel with the global query
+		if (locals.user && locals.tenantId) {
+			try {
+				const [globalResult, tenantId] = await Promise.all([
+					globalQuery,
+					getVerifiedTenantId(platform.env.DB, locals.tenantId, locals.user),
+				]);
+
+				const globals = (globalResult.results ?? []).map((row) => ({
+					slug: row.slug,
+					label: row.label,
+					icon: row.icon,
+					color: row.color,
+					scope: "global" as const,
+				}));
+
+				const tenantResult = await platform.env.DB.prepare(
+					"SELECT id, tenant_id, slug, label, icon, color, sort_order FROM blaze_definitions WHERE tenant_id = ? ORDER BY sort_order",
+				)
+					.bind(tenantId)
+					.all<BlazeRow>();
+
+				const tenantBlazes = (tenantResult.results ?? []).map((row) => ({
+					slug: row.slug,
+					label: row.label,
+					icon: row.icon,
+					color: row.color,
+					scope: "tenant" as const,
+				}));
+
+				return json(
+					{ blazes: [...globals, ...tenantBlazes] },
+					{ headers: { "Cache-Control": "private, max-age=60" } },
+				);
+			} catch {
+				// Tenant verification failed — fall through to globals-only
+			}
+		}
+
+		// Unauthenticated or tenant verification failed — globals only
+		const globalResult = await globalQuery;
 		const globals = (globalResult.results ?? []).map((row) => ({
 			slug: row.slug,
 			label: row.label,
@@ -47,37 +88,7 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
 			scope: "global" as const,
 		}));
 
-		// If authenticated and tenant context available, include tenant blazes
-		let tenantBlazes: typeof globals = [];
-		if (locals.user && locals.tenantId) {
-			try {
-				const tenantId = await getVerifiedTenantId(platform.env.DB, locals.tenantId, locals.user);
-				const tenantResult = await platform.env.DB.prepare(
-					"SELECT id, tenant_id, slug, label, icon, color, sort_order FROM blaze_definitions WHERE tenant_id = ? ORDER BY sort_order",
-				)
-					.bind(tenantId)
-					.all<BlazeRow>();
-
-				tenantBlazes = (tenantResult.results ?? []).map((row) => ({
-					slug: row.slug,
-					label: row.label,
-					icon: row.icon,
-					color: row.color,
-					scope: "tenant" as const,
-				}));
-			} catch {
-				// User doesn't own this tenant — only show globals
-			}
-		}
-
-		return json(
-			{ blazes: [...globals, ...tenantBlazes] },
-			{
-				headers: {
-					"Cache-Control": "private, max-age=60",
-				},
-			},
-		);
+		return json({ blazes: globals }, { headers: { "Cache-Control": "public, max-age=300" } });
 	} catch (err) {
 		if ((err as { status?: number }).status) throw err;
 		throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
@@ -144,7 +155,9 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 			throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
 		}
 
-		// Enforce per-tenant limit
+		// Enforce per-tenant soft cap. The COUNT/INSERT is not atomic, but D1
+		// serializes writes so the race window is negligible. The UNIQUE constraint
+		// on (tenant_id, slug) prevents true duplicates regardless.
 		const countResult = await platform.env.DB.prepare(
 			"SELECT COUNT(*) as count FROM blaze_definitions WHERE tenant_id = ?",
 		)

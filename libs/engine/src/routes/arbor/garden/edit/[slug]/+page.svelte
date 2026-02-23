@@ -1,6 +1,7 @@
 <script>
 	import { goto, beforeNavigate } from "$app/navigation";
 	import { browser } from "$app/environment";
+	import { onMount } from "svelte";
 	import MarkdownEditor from "$lib/components/admin/MarkdownEditor.svelte";
 	import GutterManager from "$lib/components/admin/GutterManager.svelte";
 	import { Button, GroveSwap } from "$lib/ui";
@@ -39,6 +40,24 @@
 	let slugError = $state("");
 	/** @type {string | null} */
 	let selectedBlaze = $state(null);
+
+	// Blaze picker — fetched from API to include tenant custom blazes
+	/** @type {Array<{slug: string, label: string, icon: string, color: string}>} */
+	let availableBlazes = $state([...GLOBAL_BLAZE_DEFAULTS]);
+
+	onMount(async () => {
+		try {
+			const res = await fetch("/api/blazes");
+			if (res.ok) {
+				const { blazes } = await res.json();
+				if (Array.isArray(blazes) && blazes.length > 0) {
+					availableBlazes = blazes;
+				}
+			}
+		} catch {
+			// Keep GLOBAL_BLAZE_DEFAULTS fallback
+		}
+	});
 
 	// Sync form state when data changes (e.g., navigating to different post)
 	$effect(() => {
@@ -620,7 +639,7 @@
 							>A small marker that tells readers what this post is about.</span
 						>
 						<div class="blaze-picker">
-							{#each GLOBAL_BLAZE_DEFAULTS as blazeDef}
+							{#each availableBlazes as blazeDef}
 								<button
 									type="button"
 									class="blaze-option"
