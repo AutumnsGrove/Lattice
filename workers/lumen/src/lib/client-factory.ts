@@ -8,7 +8,9 @@
  * Credential resolution priority:
  * 1. tenantApiKey (BYOK — caller provides their own key)
  * 2. env.OPENROUTER_API_KEY (direct fallback on the worker)
- * 3. Warden credential injection (via service binding) — future enhancement
+ *
+ * TODO: Add Warden credential injection as step 2 (env.WARDEN service
+ * binding is wired but not yet exercised). See workers/warden/src/services/openrouter.ts
  *
  * The worker has its own AI binding for Cloudflare Workers AI (embeddings,
  * transcription, local moderation) — no Warden needed for CF-native services.

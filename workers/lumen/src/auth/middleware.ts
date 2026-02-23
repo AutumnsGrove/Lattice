@@ -12,19 +12,26 @@
 import { createMiddleware } from "hono/factory";
 import type { Env, LumenWorkerResponse } from "../types";
 
-/** Constant-time string comparison to prevent timing attacks */
-function timingSafeEqual(a: string, b: string): boolean {
-	if (a.length !== b.length) return false;
-
+/**
+ * Constant-time string comparison to prevent timing attacks.
+ * Pads both buffers to the same length so the comparison never
+ * short-circuits on length mismatch (which would leak key length).
+ */
+async function timingSafeEqual(a: string, b: string): Promise<boolean> {
 	const encoder = new TextEncoder();
 	const bufA = encoder.encode(a);
 	const bufB = encoder.encode(b);
 
-	let result = 0;
-	for (let i = 0; i < bufA.length; i++) {
-		result |= bufA[i] ^ bufB[i];
-	}
-	return result === 0;
+	// Pad to equal length so we never short-circuit on length difference
+	const maxLen = Math.max(bufA.length, bufB.length);
+	const paddedA = new Uint8Array(maxLen);
+	const paddedB = new Uint8Array(maxLen);
+	paddedA.set(bufA);
+	paddedB.set(bufB);
+
+	const equal = crypto.subtle.timingSafeEqual(paddedA, paddedB);
+	// Both buffers must match AND have the same original length
+	return equal && bufA.length === bufB.length;
 }
 
 export type AuthVariables = {
@@ -67,7 +74,7 @@ export const apiKeyAuth = createMiddleware<{
 		return c.json(response, 500);
 	}
 
-	if (!timingSafeEqual(apiKey, expected)) {
+	if (!(await timingSafeEqual(apiKey, expected))) {
 		const response: LumenWorkerResponse = {
 			success: false,
 			error: {

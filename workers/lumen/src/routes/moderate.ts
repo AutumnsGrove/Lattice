@@ -53,6 +53,9 @@ moderate.post("/", async (c) => {
 			req.tier,
 		);
 
+		// Derive provider from model name — CF AI models use @cf/ or @hf/ prefix
+		const provider = result.model.startsWith("@") ? "cloudflare-ai" : "openrouter";
+
 		const response: LumenWorkerResponse = {
 			success: true,
 			data: {
@@ -64,7 +67,7 @@ moderate.post("/", async (c) => {
 			meta: {
 				task: "moderation",
 				model: result.model,
-				provider: "openrouter",
+				provider,
 				latencyMs: Date.now() - startTime,
 			},
 		};

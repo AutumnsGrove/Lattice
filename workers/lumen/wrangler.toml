@@ -32,11 +32,13 @@ binding = "WARDEN"
 service = "grove-warden"
 
 # =============================================================================
-# KV — Rate limit counters
+# KV — Rate limit counters (Threshold SDK)
 # =============================================================================
 [[kv_namespaces]]
 binding = "RATE_LIMITS"
 title = "grove-lumen-ratelimits"
+# TODO: Create via `wrangler kv namespace create grove-lumen-ratelimits`
+#       then replace this placeholder with the real namespace ID.
 id = "placeholder-create-via-wrangler"
 
 # =============================================================================

@@ -19,6 +19,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import type { Env, LumenWorkerResponse } from "./types";
 import { apiKeyAuth } from "./auth/middleware";
+import { lumenRateLimit } from "./lib/rate-limit";
 import { inference } from "./routes/inference";
 import { embed } from "./routes/embed";
 import { moderate } from "./routes/moderate";
@@ -59,6 +60,7 @@ app.get("/health", (c) => {
 	const hasAI = !!c.env.AI;
 	const hasDB = !!c.env.DB;
 	const hasWarden = !!c.env.WARDEN;
+	const hasRateLimits = !!c.env.RATE_LIMITS;
 	const hasApiKey = !!c.env.LUMEN_API_KEY;
 
 	return c.json({
@@ -69,11 +71,13 @@ app.get("/health", (c) => {
 			embedding: hasAI,
 			moderation: true,
 			transcription: hasAI,
+			rateLimiting: hasRateLimits,
 		},
 		bindings: {
 			ai: hasAI,
 			db: hasDB,
 			warden: hasWarden,
+			rateLimits: hasRateLimits,
 		},
 	});
 });
@@ -86,6 +90,12 @@ app.use("/inference/*", apiKeyAuth);
 app.use("/embed/*", apiKeyAuth);
 app.use("/moderate/*", apiKeyAuth);
 app.use("/transcribe/*", apiKeyAuth);
+
+// Rate limiting via Threshold SDK (after auth, so only authed callers counted)
+app.use("/inference/*", lumenRateLimit("lumen/inference"));
+app.use("/embed/*", lumenRateLimit("lumen/embed"));
+app.use("/moderate/*", lumenRateLimit("lumen/moderate"));
+app.use("/transcribe/*", lumenRateLimit("lumen/transcribe"));
 
 app.route("/inference", inference);
 app.route("/embed", embed);
