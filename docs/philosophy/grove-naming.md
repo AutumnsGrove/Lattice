@@ -743,6 +743,19 @@ Press is Grove's image processing CLI. It takes your raw photos and presses them
 
 _Raw in. Ready out. Going to press._
 
+### Cairn
+
+**Documentation Browser & Agent Activity Viewer** · _Developer tool_
+**Package:** `tools/cairn/`
+**CLI:** `bun run cairn`
+**Standard:** Documentation Browser
+
+A cairn is a stack of stones built by travelers to mark a trail. Each person who passes through a place adds a stone — slowly, over time, the pile grows. When you're uncertain where to go next, you look for cairns. You follow the markers left by everyone who came before. The path becomes readable.
+
+Cairn is a local dev server that makes the entire project's knowledge browseable and searchable. Every spec written, every plan made, every agent conversation had: another stone on the pile. Cairn indexes all of it — markdown docs, skill definitions, Crush sessions, Claude Code conversation logs — and makes the whole trail visible at once. Search for anything. Follow a decision back through time. Browse the skill ecosystem. See which files the agents touched most.
+
+_Follow the cairns. Find your way._
+
 ### Vista
 
 **Infrastructure Observability** · `vista.grove.place`
