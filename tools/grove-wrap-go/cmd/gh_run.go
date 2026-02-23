@@ -67,6 +67,35 @@ var runListCmd = &cobra.Command{
 			return nil
 		}
 
+		flat, _ := cmd.Flags().GetBool("flat")
+
+		if flat {
+			// Flat view: one run per line with IDs for easy piping
+			ui.PrintHeader("Workflow Runs")
+			for _, r := range runs {
+				id := fmt.Sprintf("%v", r["databaseId"])
+				workflow, _ := r["workflowName"].(string)
+				conclusion, _ := r["conclusion"].(string)
+				runStatus, _ := r["status"].(string)
+				branch, _ := r["headBranch"].(string)
+				createdAt, _ := r["createdAt"].(string)
+				if len(createdAt) > 10 {
+					createdAt = createdAt[:10]
+				}
+
+				icon := conclusionIcon(conclusion, runStatus)
+				display := conclusion
+				if display == "" {
+					display = runStatus
+				}
+
+				fmt.Printf("  %s %-12s %-24s %-10s %-20s %s\n",
+					icon, id, workflow, display, branch, createdAt)
+			}
+			fmt.Println()
+			return nil
+		}
+
 		// Group by headSha for the default grouped view
 		type runGroup struct {
 			sha  string
@@ -105,6 +134,7 @@ var runListCmd = &cobra.Command{
 			fmt.Printf("\n  ● %s  %s  %s\n", shortSha, title, createdAt)
 
 			for _, r := range g.runs {
+				id := fmt.Sprintf("%v", r["databaseId"])
 				workflow, _ := r["workflowName"].(string)
 				conclusion, _ := r["conclusion"].(string)
 				runStatus, _ := r["status"].(string)
@@ -120,7 +150,7 @@ var runListCmd = &cobra.Command{
 					padding = 1
 				}
 				dots := strings.Repeat("·", padding)
-				fmt.Printf("    %s %s %s %s\n", icon, workflow, dots, display)
+				fmt.Printf("    %s %-12s %s %s %s\n", icon, id, workflow, dots, display)
 			}
 		}
 		fmt.Println()
@@ -405,7 +435,7 @@ var runCancelCmd = &cobra.Command{
 
 var runHelpCategories = []ui.HelpCategory{
 	{Title: "Read (Always Safe)", Icon: "📖", Style: ui.SafeReadStyle, Commands: []ui.HelpCommand{
-		{Name: "list", Desc: "List workflow runs"},
+		{Name: "list", Desc: "List workflow runs (--flat for IDs)"},
 		{Name: "view", Desc: "View run details with job breakdown"},
 		{Name: "watch", Desc: "Watch a run in progress"},
 	}},
@@ -428,6 +458,7 @@ func init() {
 	runListCmd.Flags().StringP("branch", "b", "", "Filter by branch")
 	runListCmd.Flags().StringP("status", "s", "", "Filter by status")
 	runListCmd.Flags().Int("limit", 20, "Maximum number to return")
+	runListCmd.Flags().Bool("flat", false, "Flat view: one run per line with IDs")
 	runCmd.AddCommand(runListCmd)
 
 	// run view
