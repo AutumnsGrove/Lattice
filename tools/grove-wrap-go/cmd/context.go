@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/spf13/cobra"
 
+	cfcloud "github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/cloudflare"
 	"github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/config"
 	gwexec "github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/exec"
 	"github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/ui"
@@ -74,31 +76,33 @@ var contextCmd = &cobra.Command{
 			})
 		}
 
-		// Rich output
-		fmt.Println(ui.TitleStyle.Render("gw context"))
-		fmt.Println()
-
-		fmt.Printf("  Branch:     %s\n", ui.CommandStyle.Render(branch))
-		fmt.Printf("  Staged:     %d   Unstaged: %d   Untracked: %d\n", staged, unstaged, untracked)
+		// Rich panel output
+		pairs := [][2]string{
+			{"branch", ui.CommandStyle.Render(branch)},
+			{"staged", fmt.Sprintf("%d", staged)},
+			{"unstaged", fmt.Sprintf("%d", unstaged)},
+			{"untracked", fmt.Sprintf("%d", untracked)},
+		}
 		if stashCount > 0 {
-			fmt.Printf("  Stashes:    %d\n", stashCount)
+			pairs = append(pairs, [2]string{"stashes", fmt.Sprintf("%d", stashCount)})
 		}
 		if len(packages) > 0 {
-			fmt.Printf("  Packages:   %s\n", strings.Join(packages, ", "))
+			sort.Strings(packages)
+			pairs = append(pairs, [2]string{"packages", strings.Join(packages, ", ")})
 		}
+		fmt.Print(ui.RenderInfoPanel("gw context", pairs))
 
 		// Recent commits
 		if logOut != "" {
-			fmt.Println()
 			fmt.Println(ui.SubtitleStyle.Render("  Recent Commits"))
 			for _, line := range strings.Split(strings.TrimSpace(logOut), "\n") {
 				if line != "" {
 					fmt.Println("    " + line)
 				}
 			}
+			fmt.Println()
 		}
 
-		fmt.Println()
 		return nil
 	},
 }
@@ -141,8 +145,15 @@ var whoamiCmd = &cobra.Command{
 		cwd, _ := os.Getwd()
 		branch, _ := gwexec.CurrentBranch()
 
-		// Cloudflare
-		cfOut, _ := gwexec.WranglerOutput("whoami")
+		// Cloudflare — cached, skippable with --no-cloud
+		var cfOut string
+		if !cfg.NoCloud {
+			_ = ui.RunWithSpinner("Checking Cloudflare auth", func() error {
+				var err error
+				cfOut, err = cfcloud.WranglerAuth()
+				return err
+			})
+		}
 		cfEmail := extractField(cfOut, "email")
 
 		// GitHub (via gh)
@@ -159,10 +170,11 @@ var whoamiCmd = &cobra.Command{
 				"cloudflare": map[string]any{
 					"email":         cfEmail,
 					"authenticated": cfEmail != "",
+					"skipped":       cfg.NoCloud,
 				},
 				"project": map[string]any{
-					"directory": cwd,
-					"branch":    branch,
+					"directory":  cwd,
+					"branch":     branch,
 					"grove_root": cfg.GroveRoot,
 				},
 				"vault": map[string]any{
@@ -175,7 +187,9 @@ var whoamiCmd = &cobra.Command{
 		fmt.Println()
 
 		// Cloudflare
-		if cfEmail != "" {
+		if cfg.NoCloud {
+			ui.Step(false, "Cloudflare: skipped (--no-cloud)")
+		} else if cfEmail != "" {
 			ui.Step(true, fmt.Sprintf("Cloudflare: %s", cfEmail))
 		} else {
 			ui.Step(false, "Cloudflare: not authenticated")
@@ -190,14 +204,13 @@ var whoamiCmd = &cobra.Command{
 
 		// Project
 		fmt.Println()
-		fmt.Printf("  Directory:  %s\n", cwd)
-		fmt.Printf("  Grove root: %s\n", cfg.GroveRoot)
-		if branch != "" {
-			fmt.Printf("  Branch:     %s\n", branch)
-		}
+		fmt.Print(ui.RenderInfoPanel("project", [][2]string{
+			{"directory", cwd},
+			{"grove root", cfg.GroveRoot},
+			{"branch", branch},
+		}))
 
 		// Vault
-		fmt.Println()
 		if vaultExists {
 			ui.Step(true, "Vault: initialized")
 		} else {

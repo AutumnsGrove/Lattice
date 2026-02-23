@@ -149,7 +149,12 @@ var gitLogCmd = &cobra.Command{
 			}
 			rows = append(rows, []string{parts[1], parts[5], parts[2], formatDateShort(parts[4])})
 		}
-		fmt.Print(ui.RenderTable("gw git log", headers, rows))
+
+		table := ui.RenderTable("gw git log", headers, rows)
+		if cfg.InteractiveMode {
+			return ui.RunViewport("gw git log", table)
+		}
+		fmt.Print(table)
 		return nil
 	},
 }
