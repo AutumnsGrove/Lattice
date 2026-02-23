@@ -19,6 +19,12 @@ func GHOutput(args ...string) (string, error) {
 	return result.Stdout, nil
 }
 
+// GHStreaming runs a gh command with real-time output to the terminal.
+// Use for long-running or interactive commands like `gh run watch`.
+func GHStreaming(args ...string) (int, error) {
+	return RunStreaming("gh", args...)
+}
+
 // IsGHAvailable returns true if the GitHub CLI is installed.
 func IsGHAvailable() bool {
 	_, ok := Which("gh")

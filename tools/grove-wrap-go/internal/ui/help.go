@@ -39,9 +39,20 @@ func RenderCozyHelp(cmdPath, subtitle string, categories []HelpCategory, showSaf
 		title := cat.Style.Bold(true).Render(cat.Icon + " " + cat.Title)
 		b.WriteString(title + "\n")
 
-		// Commands
+		// Commands — compute padding from the longest name in this category
+		maxLen := 0
 		for _, cmd := range cat.Commands {
-			name := CommandStyle.Render(fmt.Sprintf("  %-16s", cmd.Name))
+			if len(cmd.Name) > maxLen {
+				maxLen = len(cmd.Name)
+			}
+		}
+		if maxLen < 14 {
+			maxLen = 14 // minimum column width
+		}
+		pad := maxLen + 2 // 2 chars gutter
+		fmtStr := fmt.Sprintf("  %%-%ds", pad)
+		for _, cmd := range cat.Commands {
+			name := CommandStyle.Render(fmt.Sprintf(fmtStr, cmd.Name))
 			desc := DescStyle.Render(cmd.Desc)
 			b.WriteString(name + desc + "\n")
 		}

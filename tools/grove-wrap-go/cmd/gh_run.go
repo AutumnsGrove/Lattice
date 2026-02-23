@@ -345,13 +345,14 @@ var runWatchCmd = &cobra.Command{
 		ghArgs := []string{"run", "watch", runID}
 		ghArgs = append(ghArgs, ghRepoArgs()...)
 
-		result, err := exec.GH(ghArgs...)
+		// Stream directly to terminal — gh run watch is long-running
+		// and needs real-time output (progress updates, step logs)
+		exitCode, err := exec.GHStreaming(ghArgs...)
 		if err != nil {
 			return fmt.Errorf("github error: %w", err)
 		}
-		fmt.Print(result.Stdout)
-		if result.Stderr != "" {
-			fmt.Print(result.Stderr)
+		if exitCode != 0 {
+			return fmt.Errorf("gh run watch exited with code %d", exitCode)
 		}
 		return nil
 	},

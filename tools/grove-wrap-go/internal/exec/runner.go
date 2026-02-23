@@ -13,6 +13,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"os"
 	"os/exec"
 	"strings"
 	"time"
@@ -107,6 +108,33 @@ func RunContext(ctx context.Context, name string, args ...string) (*Result, erro
 	}
 
 	return result, nil
+}
+
+// RunStreaming executes an allowlisted command with stdout/stderr connected
+// directly to the terminal. Use this for long-running or interactive commands
+// (like `gh run watch`) that need real-time output instead of buffering.
+// No timeout is applied — the command runs until completion or interrupt.
+func RunStreaming(name string, args ...string) (int, error) {
+	if !allowedBinaries[name] {
+		return 1, fmt.Errorf("binary %q is not in the gw allowlist", name)
+	}
+	if strings.ContainsAny(name, "/\\") {
+		return 1, fmt.Errorf("binary name must not contain path separators: %q", name)
+	}
+
+	cmd := exec.Command(name, args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Stdin = os.Stdin
+
+	err := cmd.Run()
+	if err != nil {
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			return exitErr.ExitCode(), nil
+		}
+		return 1, fmt.Errorf("failed to execute %s: %w", name, err)
+	}
+	return 0, nil
 }
 
 // RunWithStdin executes an allowlisted command, piping stdinData to its stdin.

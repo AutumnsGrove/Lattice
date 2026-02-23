@@ -565,12 +565,12 @@ func isValidIdentifier(s string) bool {
 var d1HelpCategories = []ui.HelpCategory{
 	{Title: "Read (Always Safe)", Icon: "📖", Style: ui.SafeReadStyle, Commands: []ui.HelpCommand{
 		{Name: "list", Desc: "List configured databases (--remote for Cloudflare API)"},
-		{Name: "tables --remote", Desc: "List tables in a database"},
-		{Name: "schema --remote", Desc: "Show table schema"},
+		{Name: "tables", Desc: "List tables in a database (--db <name> --remote)"},
+		{Name: "schema <table>", Desc: "Show table schema (--db <name> --remote)"},
 	}},
 	{Title: "Write (--write)", Icon: "✏️", Style: ui.SafeWriteStyle, Commands: []ui.HelpCommand{
-		{Name: "query --remote", Desc: "Execute a SQL query"},
-		{Name: "migrate --remote", Desc: "Execute a SQL migration file"},
+		{Name: "query <sql>", Desc: "Execute a SQL query (--db <name> --remote)"},
+		{Name: "migrate <file.sql>", Desc: "Execute a SQL migration file (--db <name> --remote)"},
 	}},
 }
 
