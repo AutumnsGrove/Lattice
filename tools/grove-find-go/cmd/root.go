@@ -10,10 +10,12 @@ import (
 )
 
 var (
-	flagRoot    string
-	flagAgent   bool
-	flagJSON    bool
-	flagVerbose bool
+	flagRoot          string
+	flagAgent         bool
+	flagJSON          bool
+	flagVerbose       bool
+	flagNoPager       bool
+	flagPageThreshold int
 )
 
 const version = "0.1.0"
@@ -25,7 +27,7 @@ var rootCmd = &cobra.Command{
 It wraps ripgrep, fd, git, and gh with context-enriched commands
 that reduce agent round-trips by ~50%.`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		config.Init(flagRoot, flagAgent, flagJSON, flagVerbose)
+		config.Init(flagRoot, flagAgent, flagJSON, flagVerbose, flagNoPager, flagPageThreshold)
 	},
 	SilenceUsage:  true,
 	SilenceErrors: true,
@@ -36,6 +38,8 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&flagAgent, "agent", "a", false, "Agent mode: no colors/emoji/box-drawing (env: GF_AGENT)")
 	rootCmd.PersistentFlags().BoolVarP(&flagJSON, "json", "j", false, "JSON output for scripting")
 	rootCmd.PersistentFlags().BoolVarP(&flagVerbose, "verbose", "v", false, "Verbose output")
+	rootCmd.PersistentFlags().BoolVar(&flagNoPager, "no-pager", false, "Disable Bubble Tea paginator (dump full output)")
+	rootCmd.PersistentFlags().IntVar(&flagPageThreshold, "page-threshold", 50, "Lines before paginator activates")
 
 	rootCmd.AddCommand(versionCmd)
 

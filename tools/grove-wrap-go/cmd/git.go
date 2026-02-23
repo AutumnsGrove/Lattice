@@ -108,8 +108,17 @@ func init() {
 	// Register git subcommand on root
 	rootCmd.AddCommand(gitCmd)
 
-	// Set cozy help for the git group
+	// Capture the default Cobra help func before overriding.
+	// This lets git subcommands (ship, log, etc.) still show their own flags
+	// when --help is passed — cobra.SetHelpFunc cascades to children otherwise.
+	defaultHelp := gitCmd.HelpFunc()
+
 	gitCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+		if cmd != gitCmd {
+			// Subcommand: render its own Cobra-default help (flags, usage, etc.)
+			defaultHelp(cmd, args)
+			return
+		}
 		output := ui.RenderCozyHelp(
 			"gw git",
 			"Git operations with safety tiers",

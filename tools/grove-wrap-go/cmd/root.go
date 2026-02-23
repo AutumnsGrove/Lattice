@@ -20,11 +20,13 @@ var Version = "dev"
 var cmdStartTime time.Time
 
 var (
-	flagWrite   bool
-	flagForce   bool
-	flagJSON    bool
-	flagAgent   bool
-	flagVerbose bool
+	flagWrite       bool
+	flagForce       bool
+	flagJSON        bool
+	flagAgent       bool
+	flagVerbose     bool
+	flagNoCloud     bool
+	flagInteractive bool
 )
 
 var rootCmd = &cobra.Command{
@@ -36,7 +38,7 @@ and the dev toolchain behind a safety-tiered interface.
 Every tool in the grove was shaped by fire and patience.`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		cmdStartTime = time.Now()
-		config.Init(flagWrite, flagForce, flagJSON, flagAgent, flagVerbose)
+		config.Init(flagWrite, flagForce, flagJSON, flagAgent, flagVerbose, flagNoCloud, flagInteractive)
 		ui.SetVerbose(flagVerbose)
 		cfg := config.Get()
 		ui.SetPlain(!cfg.IsHumanMode())
@@ -64,6 +66,8 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&flagJSON, "json", "j", false, "JSON output for scripting")
 	rootCmd.PersistentFlags().BoolVar(&flagAgent, "agent", false, "Agent mode: stricter safety, no colors")
 	rootCmd.PersistentFlags().BoolVarP(&flagVerbose, "verbose", "v", false, "Verbose output")
+	rootCmd.PersistentFlags().BoolVar(&flagNoCloud, "no-cloud", false, "Skip cloud/wrangler calls (faster, offline-safe)")
+	rootCmd.PersistentFlags().BoolVarP(&flagInteractive, "interactive", "i", false, "Enable interactive Bubble Tea TUI (humans only)")
 
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(doctorCmd)

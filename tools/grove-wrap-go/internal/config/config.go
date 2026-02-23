@@ -23,12 +23,14 @@ type Config struct {
 	GitHub       GitHubConfig        `toml:"github"`
 
 	// Runtime state (not from TOML)
-	AgentMode bool   `toml:"-"`
-	JSONMode  bool   `toml:"-"`
-	Verbose   bool   `toml:"-"`
-	WriteFlag bool   `toml:"-"`
-	ForceFlag bool   `toml:"-"`
-	GroveRoot string `toml:"-"`
+	AgentMode       bool   `toml:"-"`
+	JSONMode        bool   `toml:"-"`
+	Verbose         bool   `toml:"-"`
+	WriteFlag       bool   `toml:"-"`
+	ForceFlag       bool   `toml:"-"`
+	GroveRoot       string `toml:"-"`
+	NoCloud         bool   `toml:"-"` // skip wrangler/cloud calls (offline mode)
+	InteractiveMode bool   `toml:"-"` // enable Bubble Tea TUI (opt-in, humans only)
 }
 
 // Database represents a D1 database alias.
@@ -92,7 +94,7 @@ func Get() *Config {
 }
 
 // Init initializes the config from flags, environment, and the TOML file.
-func Init(writeFlag, forceFlag, jsonMode, agentMode, verbose bool) *Config {
+func Init(writeFlag, forceFlag, jsonMode, agentMode, verbose, noCloud, interactiveMode bool) *Config {
 	cfg := Get()
 
 	// Load TOML file (merges over defaults)
@@ -106,6 +108,10 @@ func Init(writeFlag, forceFlag, jsonMode, agentMode, verbose bool) *Config {
 
 	// Agent mode from flag or environment
 	cfg.AgentMode = agentMode || isAgentEnv()
+
+	// Cloud and interactive flags (interactive disabled in agent/json mode)
+	cfg.NoCloud = noCloud
+	cfg.InteractiveMode = interactiveMode && !cfg.AgentMode && !jsonMode
 
 	// Detect grove root
 	cfg.GroveRoot = detectGroveRoot()

@@ -30,6 +30,8 @@ var healthCmd = &cobra.Command{
 		}
 
 		// Check 2: wrangler authenticated
+		// TODO(follow-up): wire cfcloud.WranglerAuth() cache here so health skips the
+		// 4-10s wrangler subprocess cost; for now it calls wrangler directly.
 		wranglerAuth := false
 		if wranglerOK {
 			out, _ := gwexec.WranglerOutput("whoami")
