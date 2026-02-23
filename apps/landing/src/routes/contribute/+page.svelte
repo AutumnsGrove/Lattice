@@ -310,13 +310,13 @@
 					<!-- The pitch -->
 					<div class="glass-support rounded-2xl p-8 mb-8">
 						<div class="prose prose-grove max-w-none text-center">
-							<p class="text-foreground-muted font-sans leading-relaxed mb-4">
+							<p class="text-foreground font-sans leading-relaxed mb-4">
 								Grove doesn't have investors. No venture capital. No pressure to grow at all costs or sell your data to make the numbers work.
 							</p>
-							<p class="text-foreground-muted font-sans leading-relaxed mb-4">
+							<p class="text-foreground font-sans leading-relaxed mb-4">
 								It's just me, building something I believe in.
 							</p>
-							<p class="text-foreground-muted font-sans leading-relaxed">
+							<p class="text-foreground font-sans leading-relaxed">
 								If Grove resonates with you, if you believe in quiet corners of the internet, queer-friendly spaces, and words that belong to the people who write them, you can support the vision directly.
 							</p>
 						</div>
@@ -333,11 +333,11 @@
 								title="Support Autumn on Ko-fi"
 							></iframe>
 						</div>
-						<p class="text-sm text-foreground-subtle mt-4 text-center">
+						<p class="text-sm text-foreground-muted mt-4 text-center">
 							One-time support, no account needed.
 						</p>
 						<!-- Always-visible fallback: covers JS-off, CSP blocks, and extension-blocked iframes -->
-						<p class="text-sm text-foreground-subtle mt-1 text-center">
+						<p class="text-sm text-foreground-muted mt-1 text-center">
 							Widget not showing?
 							<a
 								href="https://ko-fi.com/autumnsgrove"
@@ -359,7 +359,7 @@
 								</div>
 								<div>
 									<p class="font-sans font-medium text-foreground">Keeping the servers running</p>
-									<p class="text-sm text-foreground-subtle">Hosting, databases, CDN, and all the infrastructure that keeps Grove online.</p>
+									<p class="text-sm text-foreground-muted">Hosting, databases, CDN, and all the infrastructure that keeps Grove online.</p>
 								</div>
 							</div>
 
@@ -369,7 +369,7 @@
 								</div>
 								<div>
 									<p class="font-sans font-medium text-foreground">Building new features</p>
-									<p class="text-sm text-foreground-subtle">More time to code means more features, faster. Federation, galleries, and everything on the roadmap.</p>
+									<p class="text-sm text-foreground-muted">More time to code means more features, faster. Federation, galleries, and everything on the roadmap.</p>
 								</div>
 							</div>
 
@@ -379,7 +379,7 @@
 								</div>
 								<div>
 									<p class="font-sans font-medium text-foreground">Sustaining the dream</p>
-									<p class="text-sm text-foreground-subtle">Every coffee helps me spend more time on Grove and less time worrying about whether I can keep doing this.</p>
+									<p class="text-sm text-foreground-muted">Every coffee helps me spend more time on Grove and less time worrying about whether I can keep doing this.</p>
 								</div>
 							</div>
 						</div>
@@ -398,10 +398,10 @@
 					<p class="text-accent-muted font-serif text-lg mb-2">
 						Thank you for being here.
 					</p>
-					<p class="text-foreground-subtle font-sans">
+					<p class="text-foreground-muted font-sans">
 						Every contribution—a bug report, a line of code, or a coffee—helps build a better corner of the internet.
 					</p>
-					<p class="text-sm text-foreground-subtle font-sans mt-2 italic">
+					<p class="text-sm text-foreground-muted font-sans mt-2 italic">
 						Every bit helps. Every kind word, too.
 					</p>
 				</section>
@@ -450,7 +450,7 @@
 	}
 
 	:global(.dark) .glass-support {
-		background: rgba(30, 41, 59, 0.5);
+		background: rgba(30, 41, 59, 0.75);
 	}
 
 	.kofi-widget-container {
