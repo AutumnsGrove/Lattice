@@ -578,7 +578,7 @@ var prChecksCmd = &cobra.Command{
 
 		ghArgs := []string{"pr", "checks", number}
 		ghArgs = append(ghArgs, ghRepoArgs()...)
-		ghArgs = append(ghArgs, "--json", "name,state,conclusion,link")
+		ghArgs = append(ghArgs, "--json", "name,state,bucket,link")
 
 		output, err := exec.GHOutput(ghArgs...)
 		if err != nil {
@@ -603,14 +603,14 @@ var prChecksCmd = &cobra.Command{
 		// Summary counts
 		var passed, failed, pending int
 		for _, c := range checks {
-			conclusion, _ := c["conclusion"].(string)
+			bucket, _ := c["bucket"].(string)
 			state, _ := c["state"].(string)
 			switch {
-			case conclusion == "SUCCESS":
+			case bucket == "pass":
 				passed++
-			case conclusion == "FAILURE" || conclusion == "TIMED_OUT":
+			case bucket == "fail":
 				failed++
-			case state == "QUEUED" || state == "IN_PROGRESS" || state == "PENDING":
+			case bucket == "pending" || state == "QUEUED" || state == "IN_PROGRESS" || state == "PENDING":
 				pending++
 			default:
 				passed++ // neutral, skipped count as not-failed
@@ -621,24 +621,24 @@ var prChecksCmd = &cobra.Command{
 		var rows [][]string
 		for _, c := range checks {
 			name, _ := c["name"].(string)
-			conclusion, _ := c["conclusion"].(string)
+			bucket, _ := c["bucket"].(string)
 			state, _ := c["state"].(string)
 
 			var icon string
 			switch {
-			case conclusion == "SUCCESS":
+			case bucket == "pass":
 				icon = "✓"
-			case conclusion == "FAILURE" || conclusion == "TIMED_OUT":
+			case bucket == "fail":
 				icon = "✗"
-			case state == "QUEUED" || state == "IN_PROGRESS" || state == "PENDING":
+			case bucket == "pending" || state == "QUEUED" || state == "IN_PROGRESS" || state == "PENDING":
 				icon = "●"
-			case conclusion == "SKIPPED":
+			case bucket == "skipping":
 				icon = "○"
 			default:
 				icon = "?"
 			}
 
-			status := conclusion
+			status := bucket
 			if status == "" {
 				status = state
 			}

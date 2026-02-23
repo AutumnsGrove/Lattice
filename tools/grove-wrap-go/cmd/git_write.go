@@ -185,6 +185,13 @@ var gitPushCmd = &cobra.Command{
 		}
 		cfg := config.Get()
 
+		// Bridge local --force flag into global config so safety checks see it.
+		// Cobra resolves --force to the local flag (gitPushForce), but
+		// requireSafetyBranch reads cfg.ForceFlag (the global persistent flag).
+		if gitPushForce {
+			cfg.ForceFlag = true
+		}
+
 		// Determine operation tier
 		operation := "push"
 		if gitPushForce {
@@ -244,6 +251,18 @@ var gitPushCmd = &cobra.Command{
 
 		ui.Action("Pushed", fmt.Sprintf("%s → %s/%s", pushBranch, remote, pushBranch))
 		return nil
+	},
+}
+
+// ── git force-push ──────────────────────────────────────────────────
+
+var gitForcePushCmd = &cobra.Command{
+	Use:   "force-push [remote] [branch]",
+	Short: "Force push to remote (uses --force-with-lease)",
+	Args:  cobra.MaximumNArgs(2),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		gitPushForce = true
+		return gitPushCmd.RunE(cmd, args)
 	},
 }
 
@@ -879,6 +898,9 @@ func init() {
 	gitPushCmd.Flags().BoolVarP(&gitPushSetUpstream, "set-upstream", "u", false, "Set upstream tracking")
 	gitPushCmd.Flags().BoolVarP(&gitPushForce, "force", "f", false, "Force push (uses --force-with-lease)")
 	gitCmd.AddCommand(gitPushCmd)
+
+	// git force-push (convenience alias)
+	gitCmd.AddCommand(gitForcePushCmd)
 
 	// git pull
 	gitPullCmd.Flags().BoolVar(&gitPullRebase, "rebase", false, "Use rebase instead of merge")

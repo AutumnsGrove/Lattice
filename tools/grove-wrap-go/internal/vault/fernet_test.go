@@ -3,6 +3,8 @@ package vault
 import (
 	"bytes"
 	"encoding/base64"
+	"encoding/json"
+	"os"
 	"testing"
 )
 
@@ -179,6 +181,105 @@ func TestVaultCreateAndUnlock(t *testing.T) {
 
 	if string(plaintext) != data {
 		t.Fatalf("vault roundtrip failed")
+	}
+}
+
+func TestPythonVaultFormatCompat(t *testing.T) {
+	// Python gw stores secrets as a flat dict (no "secrets" wrapper key):
+	//   {"MY_KEY": {"value": "sk-test", "created_at": "...", "updated_at": "..."}}
+	// Go gw expects: {"secrets": {"MY_KEY": {...}}}
+	// The Unlock path must handle both formats.
+
+	password := "test-password-123"
+	salt, err := generateSalt()
+	if err != nil {
+		t.Fatal(err)
+	}
+	key := deriveKey(password, salt)
+
+	// Simulate Python-format vault plaintext — includes deployed_to as an
+	// ARRAY (Python format) rather than a map (Go format), plus last_deployed_at
+	pythonJSON := `{"API_KEY":{"value":"sk-test-123","created_at":"2025-01-01T00:00:00","updated_at":"2025-01-01T00:00:00","deployed_to":["grove-lattice","grove-warden"],"last_deployed_at":"2025-01-02T00:00:00"},"DB_URL":{"value":"postgres://localhost","created_at":"2025-01-02T00:00:00","updated_at":"2025-01-02T00:00:00"}}`
+
+	token, err := fernetEncrypt(key, []byte(pythonJSON))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Build vault file: version + salt + token
+	file := make([]byte, 0, 1+saltLen+len(token))
+	file = append(file, vaultFileVersion)
+	file = append(file, salt...)
+	file = append(file, token...)
+
+	// Write to temp file
+	tmpDir := t.TempDir()
+	vaultPath := tmpDir + "/secrets.enc"
+	if err := os.WriteFile(vaultPath, file, 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	// Now simulate the Unlock parsing logic (can't call Unlock directly
+	// since it reads from DefaultVaultPath, so test the parsing inline)
+	raw, _ := os.ReadFile(vaultPath)
+	readSalt := raw[1 : 1+saltLen]
+	readToken := raw[1+saltLen:]
+	readKey := deriveKey(password, readSalt)
+	plaintext, err := fernetDecrypt(readKey, readToken, 0)
+	if err != nil {
+		t.Fatalf("decrypt failed: %v", err)
+	}
+
+	// Step 1: Try Go format
+	var data vaultData
+	if err := json.Unmarshal(plaintext, &data); err != nil {
+		t.Fatalf("unmarshal failed: %v", err)
+	}
+	if data.Secrets == nil {
+		data.Secrets = make(map[string]*SecretEntry)
+	}
+
+	// Go format should find nothing (Python doesn't use "secrets" wrapper)
+	if len(data.Secrets) != 0 {
+		t.Fatalf("expected 0 secrets from Go-format parse of Python vault, got %d", len(data.Secrets))
+	}
+
+	// Step 2: Fallback to flat Python format via parsePythonSecrets
+	if len(data.Secrets) == 0 {
+		var flat map[string]json.RawMessage
+		if err := json.Unmarshal(plaintext, &flat); err != nil {
+			t.Fatalf("flat unmarshal failed: %v", err)
+		}
+		if len(flat) == 0 {
+			t.Fatal("flat parse found 0 entries — Python compat broken")
+		}
+		data.Secrets = parsePythonSecrets(flat)
+	}
+
+	// Verify secrets were recovered
+	if len(data.Secrets) != 2 {
+		t.Fatalf("expected 2 secrets, got %d", len(data.Secrets))
+	}
+
+	apiKey, ok := data.Secrets["API_KEY"]
+	if !ok || apiKey.Value != "sk-test-123" {
+		t.Fatalf("API_KEY not recovered correctly: %+v", apiKey)
+	}
+	// Verify deployed_to was converted from array to map
+	if len(apiKey.DeployedTo) != 2 {
+		t.Fatalf("API_KEY deployed_to should have 2 targets, got %d: %v", len(apiKey.DeployedTo), apiKey.DeployedTo)
+	}
+	if _, ok := apiKey.DeployedTo["grove-lattice"]; !ok {
+		t.Fatalf("API_KEY deployed_to missing 'grove-lattice': %v", apiKey.DeployedTo)
+	}
+
+	dbURL, ok := data.Secrets["DB_URL"]
+	if !ok || dbURL.Value != "postgres://localhost" {
+		t.Fatalf("DB_URL not recovered correctly: %+v", dbURL)
+	}
+	// DB_URL has no deployed_to — should be nil or empty
+	if len(dbURL.DeployedTo) != 0 {
+		t.Fatalf("DB_URL should have no deploy targets, got %v", dbURL.DeployedTo)
 	}
 }
 

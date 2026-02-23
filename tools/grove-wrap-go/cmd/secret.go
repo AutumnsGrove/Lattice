@@ -20,8 +20,9 @@ import (
 )
 
 var secretCmd = &cobra.Command{
-	Use:   "secret",
-	Short: "Encrypted secrets vault for Cloudflare Workers",
+	Use:     "secret",
+	Aliases: []string{"secrets"},
+	Short:   "Encrypted secrets vault for Cloudflare Workers",
 	Long: `Manage secrets safely with an encrypted local vault.
 Values are never displayed in normal output — safe for agent use.`,
 }
@@ -622,8 +623,68 @@ var secretSyncCmd = &cobra.Command{
 	},
 }
 
+// ── Cozy Help ───────────────────────────────────────────────────────
+
+var secretHelpCategories = []ui.HelpCategory{
+	{
+		Title: "Read (Always Safe)",
+		Icon:  "📖",
+		Style: ui.SafeReadStyle,
+		Commands: []ui.HelpCommand{
+			{Name: "list", Desc: "List secrets (values are never shown)"},
+			{Name: "exists", Desc: "Check if a secret exists (exit code 0/1)"},
+		},
+	},
+	{
+		Title: "Write (--write)",
+		Icon:  "✏️",
+		Style: ui.SafeWriteStyle,
+		Commands: []ui.HelpCommand{
+			{Name: "init", Desc: "Create a new secrets vault"},
+			{Name: "set", Desc: "Set a secret value (prompted or piped)"},
+			{Name: "generate", Desc: "Generate and store a random secret"},
+			{Name: "delete", Desc: "Delete a secret from the vault"},
+		},
+	},
+	{
+		Title: "Deploy (--write)",
+		Icon:  "🚀",
+		Style: lipglossStyle(ui.BlossomPink),
+		Commands: []ui.HelpCommand{
+			{Name: "apply", Desc: "Deploy secrets to a Cloudflare Worker"},
+			{Name: "sync", Desc: "Deploy all secrets to a Worker"},
+		},
+	},
+	{
+		Title: "Dangerous (--write --force)",
+		Icon:  "🔥",
+		Style: ui.DangerStyle,
+		Commands: []ui.HelpCommand{
+			{Name: "reveal", Desc: "Show a secret's plaintext value"},
+		},
+	},
+}
+
+// ── Registration ────────────────────────────────────────────────────
+
 func init() {
 	rootCmd.AddCommand(secretCmd)
+
+	secretCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+		if cmd != secretCmd {
+			// Subcommands use Cobra's built-in usage output directly,
+			// avoiding recursion through the root cozy help function.
+			fmt.Println(cmd.UsageString())
+			return
+		}
+		output := ui.RenderCozyHelp(
+			"gw secret",
+			"encrypted secrets vault — values never leak",
+			secretHelpCategories,
+			true,
+		)
+		fmt.Print(output)
+	})
 
 	secretCmd.AddCommand(secretInitCmd)
 	secretCmd.AddCommand(secretListCmd)

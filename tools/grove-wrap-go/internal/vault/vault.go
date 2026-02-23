@@ -103,13 +103,26 @@ func Unlock(password string) (*SecretsVault, error) {
 		return nil, fmt.Errorf("wrong password or corrupted vault")
 	}
 
-	// Parse JSON
+	// Parse JSON — handle both Go format {"secrets": {...}} and
+	// Python format {"SECRET_NAME": {"value": "...", ...}, ...}
 	var data vaultData
 	if err := json.Unmarshal(plaintext, &data); err != nil {
 		return nil, fmt.Errorf("failed to parse vault data: %w", err)
 	}
 	if data.Secrets == nil {
 		data.Secrets = make(map[string]*SecretEntry)
+	}
+
+	// If no secrets found under "secrets" key, try flat Python format.
+	// Python stores: {"NAME": {"value": "...", "deployed_to": ["target", ...], ...}}
+	// Go expects:    {"secrets": {"NAME": {"value": "...", "deployed_to": {"target": "ts"}, ...}}}
+	// We can't unmarshal directly because deployed_to is an array in Python
+	// but a map in Go — so we parse as raw JSON and convert manually.
+	if len(data.Secrets) == 0 {
+		var flat map[string]json.RawMessage
+		if err := json.Unmarshal(plaintext, &flat); err == nil && len(flat) > 0 {
+			data.Secrets = parsePythonSecrets(flat)
+		}
 	}
 
 	return &SecretsVault{
@@ -244,4 +257,67 @@ func (v *SecretsVault) Names() []string {
 		names = append(names, name)
 	}
 	return names
+}
+
+// parsePythonSecrets converts Python-format vault entries to Go SecretEntry structs.
+// Python stores deployed_to as an array of strings; Go expects a map[string]string.
+// Python also stores last_deployed_at as a top-level field which Go doesn't have.
+func parsePythonSecrets(flat map[string]json.RawMessage) map[string]*SecretEntry {
+	secrets := make(map[string]*SecretEntry, len(flat))
+
+	for name, raw := range flat {
+		// Skip the "secrets" key if present (Go-format inside flat parse)
+		if name == "secrets" {
+			continue
+		}
+
+		// Parse each entry as a generic map first
+		var entry map[string]interface{}
+		if err := json.Unmarshal(raw, &entry); err != nil {
+			continue
+		}
+
+		// Must have a "value" field to be a secret entry
+		value, ok := entry["value"].(string)
+		if !ok {
+			continue
+		}
+
+		se := &SecretEntry{
+			Value: value,
+		}
+
+		if v, ok := entry["created_at"].(string); ok {
+			se.CreatedAt = v
+		}
+		if v, ok := entry["updated_at"].(string); ok {
+			se.UpdatedAt = v
+		}
+
+		// Convert deployed_to: Python stores []string, Go wants map[string]string
+		if dt, ok := entry["deployed_to"]; ok {
+			se.DeployedTo = make(map[string]string)
+			switch v := dt.(type) {
+			case []interface{}:
+				// Python format: array of target names
+				ts, _ := entry["last_deployed_at"].(string)
+				for _, item := range v {
+					if target, ok := item.(string); ok {
+						se.DeployedTo[target] = ts
+					}
+				}
+			case map[string]interface{}:
+				// Already Go format: map of target → timestamp
+				for target, ts := range v {
+					if tsStr, ok := ts.(string); ok {
+						se.DeployedTo[target] = tsStr
+					}
+				}
+			}
+		}
+
+		secrets[name] = se
+	}
+
+	return secrets
 }
