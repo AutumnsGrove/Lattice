@@ -198,7 +198,8 @@ export const POST: RequestHandler = async ({ platform, locals }) => {
 				)
 				.bind(tenantId)
 				.run();
-			backfilledAspectRatio = backfillResult.meta?.changes ?? 0;
+			backfilledAspectRatio =
+				((backfillResult.meta as Record<string, unknown>)?.changes as number) ?? 0;
 		} catch (backfillErr) {
 			// Non-critical — aspect_ratio column may not exist yet
 			console.warn("[GallerySync] Aspect ratio backfill skipped:", (backfillErr as Error).message);

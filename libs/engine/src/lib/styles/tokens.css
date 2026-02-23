@@ -19,381 +19,381 @@
    ============================================================================= */
 
 :root {
-  color-scheme: light;
+	color-scheme: light;
 
-  /* ==========================================================================
+	/* ==========================================================================
 	   PRIMITIVE COLOR TOKENS
 	   Base palette values - single source of truth
 	   ========================================================================== */
 
-  /* Primary: Grove Green */
-  --grove-50: 240 253 244;
-  --grove-100: 220 252 231;
-  --grove-200: 187 247 208;
-  --grove-300: 134 239 172;
-  --grove-400: 74 222 128;
-  --grove-500: 34 197 94;
-  --grove-600: 22 163 74;
-  --grove-700: 21 128 61;
-  --grove-800: 22 101 52;
-  --grove-900: 20 83 45;
-  --grove-950: 5 46 22;
+	/* Primary: Grove Green */
+	--grove-50: 240 253 244;
+	--grove-100: 220 252 231;
+	--grove-200: 187 247 208;
+	--grove-300: 134 239 172;
+	--grove-400: 74 222 128;
+	--grove-500: 34 197 94;
+	--grove-600: 22 163 74;
+	--grove-700: 21 128 61;
+	--grove-800: 22 101 52;
+	--grove-900: 20 83 45;
+	--grove-950: 5 46 22;
 
-  /* Neutral: Cream */
-  --cream-50: 254 253 251;
-  --cream-100: 253 252 248;
-  --cream-200: 250 248 243;
-  --cream-300: 245 242 234;
-  --cream-400: 237 233 222;
-  --cream-500: 226 221 208;
+	/* Neutral: Cream */
+	--cream-50: 254 253 251;
+	--cream-100: 253 252 248;
+	--cream-200: 250 248 243;
+	--cream-300: 245 242 234;
+	--cream-400: 237 233 222;
+	--cream-500: 226 221 208;
 
-  /* Neutral: Bark */
-  --bark-50: 249 246 243;
-  --bark-100: 240 233 225;
-  --bark-200: 224 210 194;
-  --bark-300: 204 181 156;
-  --bark-400: 182 149 117;
-  --bark-500: 165 124 90;
-  --bark-600: 138 99 71;
-  --bark-700: 111 77 57;
-  --bark-800: 90 63 48;
-  --bark-900: 61 41 20;
-  --bark-950: 42 27 13;
+	/* Neutral: Bark */
+	--bark-50: 249 246 243;
+	--bark-100: 240 233 225;
+	--bark-200: 224 210 194;
+	--bark-300: 204 181 156;
+	--bark-400: 182 149 117;
+	--bark-500: 165 124 90;
+	--bark-600: 138 99 71;
+	--bark-700: 111 77 57;
+	--bark-800: 90 63 48;
+	--bark-900: 61 41 20;
+	--bark-950: 42 27 13;
 
-  /* Semantic color references */
-  --cream: var(--cream-50);
-  --bark: var(--bark-900);
+	/* Semantic color references */
+	--cream: var(--cream-50);
+	--bark: var(--bark-900);
 
-  /* ==========================================================================
+	/* ==========================================================================
 	   SEMANTIC COLOR TOKENS
 	   Contextual colors that reference primitives
 	   ========================================================================== */
 
-  /* Primary colors - flattened HSL values */
-  --color-primary: hsl(121 37% 27%);
-  --color-primary-hover: hsl(121 37% 40%);
-  --color-primary-light: hsl(121 37% 45%);
-  --color-primary-light-hover: hsl(121 37% 52%);
+	/* Primary colors - flattened HSL values */
+	--color-primary: hsl(121 37% 27%);
+	--color-primary-hover: hsl(121 37% 40%);
+	--color-primary-light: hsl(121 37% 45%);
+	--color-primary-light-hover: hsl(121 37% 52%);
 
-  /* Text colors - flattened HSL values */
-  --color-text: hsl(0 0% 20%);
-  --color-text-muted: hsl(25 32% 33%);
-  --color-text-subtle: hsl(0 0% 53%);
+	/* Text colors - flattened HSL values */
+	--color-text: hsl(0 0% 20%);
+	--color-text-muted: hsl(25 32% 33%);
+	--color-text-subtle: hsl(0 0% 53%);
 
-  /* Background colors - flattened HSL values */
-  --color-bg-secondary: hsl(0 0% 96%);
-  --color-border: hsl(0 0% 88%);
+	/* Background & foreground - agent-friendly aliases
+     These names are what AI agents instinctively reach for in scoped CSS.
+     Maps to the shadcn HSL system defined in app.css. */
+	--color-background: hsl(var(--background));
+	--color-foreground: hsl(var(--foreground));
+	--color-muted: hsl(var(--muted));
+	--color-muted-foreground: hsl(var(--muted-foreground));
 
-  /* Grove overlay tokens - centralized green overlays for glassmorphism */
-  /* Base RGB values for color mixing */
-  --grove-green-rgb: 34, 197, 94;
-  --grove-green-light-rgb: 74, 222, 128;
-  --grove-green-dark-rgb: 74, 124, 89;
-  --grove-sage-rgb: 167, 199, 183;
+	/* Background colors - flattened HSL values */
+	--color-bg-secondary: hsl(0 0% 96%);
+	--color-border: hsl(0 0% 88%);
 
-  /* Grove overlays - light mode (use grove green) */
-  --grove-overlay-5: rgba(34, 197, 94, 0.05);
-  --grove-overlay-8: rgba(34, 197, 94, 0.08);
-  --grove-overlay-10: rgba(34, 197, 94, 0.1);
-  --grove-overlay-12: rgba(34, 197, 94, 0.12);
-  --grove-overlay-15: rgba(34, 197, 94, 0.15);
-  --grove-overlay-18: rgba(34, 197, 94, 0.18);
-  --grove-overlay-20: rgba(34, 197, 94, 0.2);
-  --grove-overlay-25: rgba(34, 197, 94, 0.25);
-  --grove-overlay-30: rgba(34, 197, 94, 0.3);
-  --grove-overlay-35: rgba(34, 197, 94, 0.35);
-  --grove-overlay-70: rgba(34, 197, 94, 0.7);
+	/* Grove overlay tokens - centralized green overlays for glassmorphism */
+	/* Base RGB values for color mixing */
+	--grove-green-rgb: 34, 197, 94;
+	--grove-green-light-rgb: 74, 222, 128;
+	--grove-green-dark-rgb: 74, 124, 89;
+	--grove-sage-rgb: 167, 199, 183;
 
-  /* Grove borders - light mode */
-  --grove-border-subtle: rgba(34, 197, 94, 0.1);
-  --grove-border: rgba(34, 197, 94, 0.2);
-  --grove-border-strong: rgba(34, 197, 94, 0.35);
+	/* Grove overlays - light mode (use grove green) */
+	--grove-overlay-5: rgba(34, 197, 94, 0.05);
+	--grove-overlay-8: rgba(34, 197, 94, 0.08);
+	--grove-overlay-10: rgba(34, 197, 94, 0.1);
+	--grove-overlay-12: rgba(34, 197, 94, 0.12);
+	--grove-overlay-15: rgba(34, 197, 94, 0.15);
+	--grove-overlay-18: rgba(34, 197, 94, 0.18);
+	--grove-overlay-20: rgba(34, 197, 94, 0.2);
+	--grove-overlay-25: rgba(34, 197, 94, 0.25);
+	--grove-overlay-30: rgba(34, 197, 94, 0.3);
+	--grove-overlay-35: rgba(34, 197, 94, 0.35);
+	--grove-overlay-70: rgba(34, 197, 94, 0.7);
 
-  /* Glass backgrounds - light mode */
-  --glass-bg: rgba(255, 255, 255, 0.85);
-  --glass-bg-medium: rgba(255, 255, 255, 0.6);
-  --glass-bg-subtle: rgba(255, 255, 255, 0.5);
-  --glass-border: rgba(255, 255, 255, 0.3);
-  --glass-border-strong: rgba(255, 255, 255, 0.4);
+	/* Grove borders - light mode */
+	--grove-border-subtle: rgba(34, 197, 94, 0.1);
+	--grove-border: rgba(34, 197, 94, 0.2);
+	--grove-border-strong: rgba(34, 197, 94, 0.35);
 
-  /* Neutral overlays */
-  --overlay-dark-5: rgba(0, 0, 0, 0.05);
-  --overlay-dark-10: rgba(0, 0, 0, 0.1);
-  --overlay-dark-40: rgba(0, 0, 0, 0.4);
-  --overlay-light-5: rgba(255, 255, 255, 0.05);
-  --overlay-light-10: rgba(255, 255, 255, 0.1);
-  --overlay-light-20: rgba(255, 255, 255, 0.2);
+	/* Glass backgrounds - light mode */
+	--glass-bg: rgba(255, 255, 255, 0.85);
+	--glass-bg-medium: rgba(255, 255, 255, 0.6);
+	--glass-bg-subtle: rgba(255, 255, 255, 0.5);
+	--glass-border: rgba(255, 255, 255, 0.3);
+	--glass-border-strong: rgba(255, 255, 255, 0.4);
 
-  /* Shadow tokens */
-  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --shadow-md: 0 4px 24px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.1);
-  --shadow-grove: 0 8px 32px rgba(34, 197, 94, 0.15);
+	/* Neutral overlays */
+	--overlay-dark-5: rgba(0, 0, 0, 0.05);
+	--overlay-dark-10: rgba(0, 0, 0, 0.1);
+	--overlay-dark-40: rgba(0, 0, 0, 0.4);
+	--overlay-light-5: rgba(255, 255, 255, 0.05);
+	--overlay-light-10: rgba(255, 255, 255, 0.1);
+	--overlay-light-20: rgba(255, 255, 255, 0.2);
 
-  /* Grove-specific shadow tokens for Tailwind preset */
-  --shadow-grove-sm: 0 1px 2px 0 rgb(61 41 20 / 0.05);
-  --shadow-grove:
-    0 2px 8px -2px rgb(61 41 20 / 0.08), 0 1px 2px -1px rgb(61 41 20 / 0.04);
-  --shadow-grove-md:
-    0 4px 12px -4px rgb(61 41 20 / 0.1), 0 2px 4px -2px rgb(61 41 20 / 0.05);
-  --shadow-grove-lg:
-    0 8px 24px -8px rgb(61 41 20 / 0.12), 0 4px 8px -4px rgb(61 41 20 / 0.06);
-  --shadow-grove-xl:
-    0 16px 48px -16px rgb(61 41 20 / 0.15), 0 8px 16px -8px rgb(61 41 20 / 0.08);
-  --shadow-grove-inner: inset 0 1px 2px 0 rgb(61 41 20 / 0.05);
-  --shadow-grove-glow: 0 0 0 3px rgb(22 163 74 / 0.15);
+	/* Shadow tokens */
+	--shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.08);
+	--shadow-md: 0 4px 24px rgba(0, 0, 0, 0.08);
+	--shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.1);
+	--shadow-grove: 0 8px 32px rgba(34, 197, 94, 0.15);
 
-  /* Dark mode values - flattened HSL values */
-  --color-text-dark: hsl(0 0% 94%);
-  --color-text-muted-dark: hsl(30 6% 75%);
-  --color-text-subtle-dark: hsl(0 0% 72%);
-  --color-bg-secondary-dark: hsl(0 0% 10%);
-  --color-bg-tertiary-dark: hsl(0 0% 16%);
-  --color-border-dark: hsl(0 0% 20%);
+	/* Grove-specific shadow tokens for Tailwind preset */
+	--shadow-grove-sm: 0 1px 2px 0 rgb(61 41 20 / 0.05);
+	--shadow-grove: 0 2px 8px -2px rgb(61 41 20 / 0.08), 0 1px 2px -1px rgb(61 41 20 / 0.04);
+	--shadow-grove-md: 0 4px 12px -4px rgb(61 41 20 / 0.1), 0 2px 4px -2px rgb(61 41 20 / 0.05);
+	--shadow-grove-lg: 0 8px 24px -8px rgb(61 41 20 / 0.12), 0 4px 8px -4px rgb(61 41 20 / 0.06);
+	--shadow-grove-xl: 0 16px 48px -16px rgb(61 41 20 / 0.15), 0 8px 16px -8px rgb(61 41 20 / 0.08);
+	--shadow-grove-inner: inset 0 1px 2px 0 rgb(61 41 20 / 0.05);
+	--shadow-grove-glow: 0 0 0 3px rgb(22 163 74 / 0.15);
 
-  /* Danger/Error colors - flattened HSL values */
-  --color-danger: hsl(354 66% 54%);
-  --color-danger-hover: hsl(354 75% 45%);
+	/* Dark mode values - flattened HSL values */
+	--color-text-dark: hsl(0 0% 94%);
+	--color-text-muted-dark: hsl(30 6% 75%);
+	--color-text-subtle-dark: hsl(0 0% 72%);
+	--color-bg-secondary-dark: hsl(0 0% 10%);
+	--color-bg-tertiary-dark: hsl(0 0% 16%);
+	--color-border-dark: hsl(0 0% 20%);
 
-  /* Component-specific - flattened HSL values */
-  --mobile-menu-bg: hsl(0 0% 100%);
-  --mobile-menu-border: hsl(0 0% 88%);
-  --tag-bg: hsl(270 38% 49%);
-  --tag-bg-hover: hsl(270 45% 45%);
+	/* Danger/Error colors - flattened HSL values */
+	--color-danger: hsl(354 66% 54%);
+	--color-danger-hover: hsl(354 75% 45%);
 
-  /* Border radius - flattened values */
-  --border-radius-standard: 0.5rem;
-  --border-radius-small: calc(0.5rem - 4px);
-  --border-radius-button: calc(0.5rem - 2px);
+	/* Component-specific - flattened HSL values */
+	--mobile-menu-bg: hsl(0 0% 100%);
+	--mobile-menu-border: hsl(0 0% 88%);
+	--tag-bg: hsl(270 38% 49%);
+	--tag-bg-hover: hsl(270 45% 45%);
 
-  /* Component-specific colors for standardized dark mode */
-  /* Blog header */
-  --blog-header-title: #2c5f2d;
-  --blog-header-text: #666;
+	/* Border radius - flattened values */
+	--border-radius-standard: 0.5rem;
+	--border-radius-small: calc(0.5rem - 4px);
+	--border-radius-button: calc(0.5rem - 2px);
 
-  /* Admin actions */
-  --admin-indicator: #28a745;
-  --admin-link-text: #666;
-  --admin-link-hover-bg: rgba(0, 0, 0, 0.05);
+	/* Component-specific colors for standardized dark mode */
+	/* Blog header */
+	--blog-header-title: #2c5f2d;
+	--blog-header-text: #666;
 
-  /* Post viewer */
-  --viewer-border: #e0e0e0;
-  --viewer-bg: #fafafa;
-  --viewer-hover-shadow: rgba(44, 95, 45, 0.15);
-  --viewer-date-text: #888;
-  --viewer-content-text: #555;
-  --viewer-footer-border: #e8e8e8;
-  --viewer-tag-bg: #e8f5e9;
-  --viewer-caption-text: #777;
-  --viewer-caption-border: #ddd;
+	/* Admin actions */
+	--admin-indicator: #28a745;
+	--admin-link-text: #666;
+	--admin-link-hover-bg: rgba(0, 0, 0, 0.05);
 
-  /* Light mode backgrounds and text */
-  --light-bg-primary: #ffffff;
-  --light-bg-secondary: #f9f9f9;
-  --light-bg-tertiary: #f5f5f5;
-  --light-bg-hover: rgba(0, 0, 0, 0.05);
-  --light-text-primary: #333;
-  --light-text-secondary: #555;
-  --light-text-tertiary: #777;
-  --light-text-muted: #888;
-  --light-text-light: #999;
-  --light-text-very-light: #aaa;
-  --light-border-primary: #e0e0e0;
-  --light-border-secondary: #e8e8e8;
-  --light-border-light: #ddd;
+	/* Post viewer */
+	--viewer-border: #e0e0e0;
+	--viewer-bg: #fafafa;
+	--viewer-hover-shadow: rgba(44, 95, 45, 0.15);
+	--viewer-date-text: #888;
+	--viewer-content-text: #555;
+	--viewer-footer-border: #e8e8e8;
+	--viewer-tag-bg: #e8f5e9;
+	--viewer-caption-text: #777;
+	--viewer-caption-border: #ddd;
 
-  /* Accent colors */
-  --accent-success: #28a745;
-  --accent-success-dark: #4cae4c;
-  --accent-success-light: #5cb85f;
-  --accent-warning: #ffc107;
-  --accent-warning-dark: #f0ad4e;
-  --accent-danger: #dc3545;
-  --accent-danger-dark: #d73a49;
-  --accent-info: #17a2b8;
+	/* Light mode backgrounds and text */
+	--light-bg-primary: #ffffff;
+	--light-bg-secondary: #f9f9f9;
+	--light-bg-tertiary: #f5f5f5;
+	--light-bg-hover: rgba(0, 0, 0, 0.05);
+	--light-text-primary: #333;
+	--light-text-secondary: #555;
+	--light-text-tertiary: #777;
+	--light-text-muted: #888;
+	--light-text-light: #999;
+	--light-text-very-light: #aaa;
+	--light-border-primary: #e0e0e0;
+	--light-border-secondary: #e8e8e8;
+	--light-border-light: #ddd;
 
-  /* Status colors - light mode */
-  --status-success-bg: #e8f5e9;
-  --status-warning-bg: #fff3cd;
-  --status-danger-bg: #fdecea;
-  --status-info-bg: #f0f7f0;
+	/* Accent colors */
+	--accent-success: #28a745;
+	--accent-success-dark: #4cae4c;
+	--accent-success-light: #5cb85f;
+	--accent-warning: #ffc107;
+	--accent-warning-dark: #f0ad4e;
+	--accent-danger: #dc3545;
+	--accent-danger-dark: #d73a49;
+	--accent-info: #17a2b8;
 
-  /* Card and container backgrounds */
-  --card-border: #e0e0e0;
+	/* Status colors - light mode */
+	--status-success-bg: #e8f5e9;
+	--status-warning-bg: #fff3cd;
+	--status-danger-bg: #fdecea;
+	--status-info-bg: #f0f7f0;
 
-  /* Specialty/Chart colors */
-  --chart-gray: #777;
-  --chart-gray-dark: #b8b8b8;
-  --chart-gray-light: #666;
-  --chart-purple: #a87ddb;
-  --chart-error-red: #e57373;
-  --chart-success-green: #39d353;
-  --chart-info-blue: #5865f2;
+	/* Card and container backgrounds */
+	--card-border: #e0e0e0;
+
+	/* Specialty/Chart colors */
+	--chart-gray: #777;
+	--chart-gray-dark: #b8b8b8;
+	--chart-gray-light: #666;
+	--chart-purple: #a87ddb;
+	--chart-error-red: #e57373;
+	--chart-success-green: #39d353;
+	--chart-info-blue: #5865f2;
 }
 
 .dark {
-  color-scheme: dark;
+	color-scheme: dark;
 
-  /* ==========================================================================
+	/* ==========================================================================
 	   PRIMITIVE COLOR TOKENS - DARK MODE
 	   Base palette values inverted for dark theme
 	   ========================================================================== */
 
-  /* Primary: Grove Green (same values, used differently) */
-  --grove-50: 5 46 22;
-  --grove-100: 20 83 45;
-  --grove-200: 22 101 52;
-  --grove-300: 21 128 61;
-  --grove-400: 22 163 74;
-  --grove-500: 34 197 94;
-  --grove-600: 74 222 128;
-  --grove-700: 134 239 172;
-  --grove-800: 187 247 208;
-  --grove-900: 220 252 231;
-  --grove-950: 240 253 244;
+	/* Primary: Grove Green (same values, used differently) */
+	--grove-50: 5 46 22;
+	--grove-100: 20 83 45;
+	--grove-200: 22 101 52;
+	--grove-300: 21 128 61;
+	--grove-400: 22 163 74;
+	--grove-500: 34 197 94;
+	--grove-600: 74 222 128;
+	--grove-700: 134 239 172;
+	--grove-800: 187 247 208;
+	--grove-900: 220 252 231;
+	--grove-950: 240 253 244;
 
-  /* Neutral: Cream (dark mode - warm grays) */
-  --cream-50: 26 25 21;
-  --cream-100: 37 35 32;
-  --cream-200: 50 48 43;
-  --cream-300: 67 64 58;
-  --cream-400: 92 88 79;
-  --cream-500: 119 114 103;
+	/* Neutral: Cream (dark mode - warm grays) */
+	--cream-50: 26 25 21;
+	--cream-100: 37 35 32;
+	--cream-200: 50 48 43;
+	--cream-300: 67 64 58;
+	--cream-400: 92 88 79;
+	--cream-500: 119 114 103;
 
-  /* Neutral: Bark (dark mode - light text) */
-  --bark-50: 42 27 13;
-  --bark-100: 61 41 20;
-  --bark-200: 90 63 48;
-  --bark-300: 111 77 57;
-  --bark-400: 138 99 71;
-  --bark-500: 165 124 90;
-  --bark-600: 182 149 117;
-  --bark-700: 204 181 156;
-  --bark-800: 224 210 194;
-  --bark-900: 240 233 225;
-  --bark-950: 249 246 243;
+	/* Neutral: Bark (dark mode - light text) */
+	--bark-50: 42 27 13;
+	--bark-100: 61 41 20;
+	--bark-200: 90 63 48;
+	--bark-300: 111 77 57;
+	--bark-400: 138 99 71;
+	--bark-500: 165 124 90;
+	--bark-600: 182 149 117;
+	--bark-700: 204 181 156;
+	--bark-800: 224 210 194;
+	--bark-900: 240 233 225;
+	--bark-950: 249 246 243;
 
-  /* Semantic color references - dark mode */
-  --cream: var(--cream-50);
-  --bark: var(--bark-900);
+	/* Semantic color references - dark mode */
+	--cream: var(--cream-50);
+	--bark: var(--bark-900);
 
-  /* ==========================================================================
+	/* ==========================================================================
 	   BASE VARIABLE REDEFINITIONS FOR DARK MODE
 	   These redefine the same variable names used in :root so that components
 	   using var(--color-text-muted) automatically get dark mode values.
 	   The -dark suffixed variants below are kept for backward compatibility.
 	   ========================================================================== */
-  --color-text: hsl(0 0% 94%);
-  --color-text-muted: hsl(30 6% 75%);
-  --color-text-subtle: hsl(0 0% 72%);
-  --color-bg-secondary: hsl(0 0% 10%);
-  --color-border: hsl(0 0% 20%);
+	--color-text: hsl(0 0% 94%);
+	--color-text-muted: hsl(30 6% 75%);
+	--color-text-subtle: hsl(0 0% 72%);
+	--color-bg-secondary: hsl(0 0% 10%);
+	--color-border: hsl(0 0% 20%);
 
-  /* Dark mode tag colors - flattened HSL values */
-  --tag-bg: hsl(270 38% 60%);
-  --tag-bg-hover: hsl(270 38% 55%);
+	/* Dark mode tag colors - flattened HSL values */
+	--tag-bg: hsl(270 38% 60%);
+	--tag-bg-hover: hsl(270 38% 55%);
 
-  /* Grove overlays - dark mode (use lighter grove green) */
-  --grove-overlay-5: rgba(74, 222, 128, 0.05);
-  --grove-overlay-8: rgba(74, 222, 128, 0.08);
-  --grove-overlay-10: rgba(74, 222, 128, 0.1);
-  --grove-overlay-12: rgba(74, 222, 128, 0.12);
-  --grove-overlay-15: rgba(74, 222, 128, 0.15);
-  --grove-overlay-18: rgba(74, 222, 128, 0.18);
-  --grove-overlay-20: rgba(74, 222, 128, 0.2);
-  --grove-overlay-25: rgba(74, 222, 128, 0.25);
-  --grove-overlay-30: rgba(74, 222, 128, 0.3);
-  --grove-overlay-35: rgba(74, 222, 128, 0.35);
-  --grove-overlay-70: rgba(74, 222, 128, 0.7);
+	/* Grove overlays - dark mode (use lighter grove green) */
+	--grove-overlay-5: rgba(74, 222, 128, 0.05);
+	--grove-overlay-8: rgba(74, 222, 128, 0.08);
+	--grove-overlay-10: rgba(74, 222, 128, 0.1);
+	--grove-overlay-12: rgba(74, 222, 128, 0.12);
+	--grove-overlay-15: rgba(74, 222, 128, 0.15);
+	--grove-overlay-18: rgba(74, 222, 128, 0.18);
+	--grove-overlay-20: rgba(74, 222, 128, 0.2);
+	--grove-overlay-25: rgba(74, 222, 128, 0.25);
+	--grove-overlay-30: rgba(74, 222, 128, 0.3);
+	--grove-overlay-35: rgba(74, 222, 128, 0.35);
+	--grove-overlay-70: rgba(74, 222, 128, 0.7);
 
-  /* Grove borders - dark mode */
-  --grove-border-subtle: rgba(74, 124, 89, 0.2);
-  --grove-border: rgba(74, 222, 128, 0.2);
-  --grove-border-strong: rgba(74, 222, 128, 0.35);
+	/* Grove borders - dark mode */
+	--grove-border-subtle: rgba(74, 124, 89, 0.2);
+	--grove-border: rgba(74, 222, 128, 0.2);
+	--grove-border-strong: rgba(74, 222, 128, 0.35);
 
-  /* Glass backgrounds - dark mode (dark grove tint) */
-  --glass-bg: rgba(20, 30, 25, 0.92);
-  --glass-bg-medium: rgba(30, 45, 35, 0.6);
-  --glass-bg-subtle: rgba(30, 41, 59, 0.4);
-  --glass-border: rgba(74, 124, 89, 0.25);
-  --glass-border-strong: rgba(74, 124, 89, 0.3);
+	/* Glass backgrounds - dark mode (dark grove tint) */
+	--glass-bg: rgba(20, 30, 25, 0.92);
+	--glass-bg-medium: rgba(30, 45, 35, 0.6);
+	--glass-bg-subtle: rgba(30, 41, 59, 0.4);
+	--glass-border: rgba(74, 124, 89, 0.25);
+	--glass-border-strong: rgba(74, 124, 89, 0.3);
 
-  /* Grove sage text - dark mode muted text (WCAG AA compliant) */
-  --grove-text-muted: rgba(167, 199, 183, 0.75);
-  --grove-text-subtle: rgba(167, 199, 183, 0.6);
-  --grove-text-strong: rgba(167, 199, 183, 0.9);
+	/* Grove sage text - dark mode muted text (WCAG AA compliant) */
+	--grove-text-muted: rgba(167, 199, 183, 0.75);
+	--grove-text-subtle: rgba(167, 199, 183, 0.6);
+	--grove-text-strong: rgba(167, 199, 183, 0.9);
 
-  /* Shadow tokens - dark mode */
-  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 4px 24px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.3);
-  --shadow-grove: 0 8px 32px rgba(74, 222, 128, 0.15);
+	/* Shadow tokens - dark mode */
+	--shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.2);
+	--shadow-md: 0 4px 24px rgba(0, 0, 0, 0.3);
+	--shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.3);
+	--shadow-grove: 0 8px 32px rgba(74, 222, 128, 0.15);
 
-  /* Grove-specific shadow tokens - dark mode */
-  --shadow-grove-sm: 0 1px 2px 0 rgb(0 0 0 / 0.2);
-  --shadow-grove:
-    0 2px 8px -2px rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.2);
-  --shadow-grove-md:
-    0 4px 12px -4px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.25);
-  --shadow-grove-lg:
-    0 8px 24px -8px rgb(0 0 0 / 0.5), 0 4px 8px -4px rgb(0 0 0 / 0.3);
-  --shadow-grove-xl:
-    0 16px 48px -16px rgb(0 0 0 / 0.6), 0 8px 16px -8px rgb(0 0 0 / 0.4);
-  --shadow-grove-inner: inset 0 1px 2px 0 rgb(0 0 0 / 0.2);
-  --shadow-grove-glow: 0 0 0 3px rgb(74 222 128 / 0.2);
+	/* Grove-specific shadow tokens - dark mode */
+	--shadow-grove-sm: 0 1px 2px 0 rgb(0 0 0 / 0.2);
+	--shadow-grove: 0 2px 8px -2px rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.2);
+	--shadow-grove-md: 0 4px 12px -4px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.25);
+	--shadow-grove-lg: 0 8px 24px -8px rgb(0 0 0 / 0.5), 0 4px 8px -4px rgb(0 0 0 / 0.3);
+	--shadow-grove-xl: 0 16px 48px -16px rgb(0 0 0 / 0.6), 0 8px 16px -8px rgb(0 0 0 / 0.4);
+	--shadow-grove-inner: inset 0 1px 2px 0 rgb(0 0 0 / 0.2);
+	--shadow-grove-glow: 0 0 0 3px rgb(74 222 128 / 0.2);
 
-  /* Dark mode component-specific overrides */
-  /* Blog header */
-  --blog-header-title: #5cb85f;
-  --blog-header-text: var(--color-text-muted-dark);
+	/* Dark mode component-specific overrides */
+	/* Blog header */
+	--blog-header-title: #5cb85f;
+	--blog-header-text: var(--color-text-muted-dark);
 
-  /* Admin actions */
-  --admin-indicator: #5cb85f;
-  --admin-link-text: #a8a8a8;
-  --admin-link-hover-bg: rgba(255, 255, 255, 0.05);
+	/* Admin actions */
+	--admin-indicator: #5cb85f;
+	--admin-link-text: #a8a8a8;
+	--admin-link-hover-bg: rgba(255, 255, 255, 0.05);
 
-  /* Post viewer */
-  --viewer-border: #3a3a3a;
-  --viewer-bg: #1a1a1a;
-  --viewer-hover-shadow: rgba(92, 184, 95, 0.2);
-  --viewer-date-text: #a8a8a8;
-  --viewer-content-text: #c8c8c8;
-  --viewer-footer-border: #333;
-  --viewer-tag-bg: #1f3a1f;
-  --viewer-caption-text: #a0a0a0;
-  --viewer-caption-border: #444;
+	/* Post viewer */
+	--viewer-border: #3a3a3a;
+	--viewer-bg: #1a1a1a;
+	--viewer-hover-shadow: rgba(92, 184, 95, 0.2);
+	--viewer-date-text: #a8a8a8;
+	--viewer-content-text: #c8c8c8;
+	--viewer-footer-border: #333;
+	--viewer-tag-bg: #1f3a1f;
+	--viewer-caption-text: #a0a0a0;
+	--viewer-caption-border: #444;
 
-  /* Dark mode backgrounds and text */
-  --light-bg-primary: #1a1a1a;
-  --light-bg-secondary: #252525;
-  --light-bg-tertiary: #2a2a2a;
-  --light-bg-hover: rgba(255, 255, 255, 0.05);
-  --light-text-primary: #f5f5f5;
-  --light-text-secondary: #d4d4d4;
-  --light-text-tertiary: #c0c0c0;
-  --light-text-muted: #a8a8a8;
-  --light-text-light: #909090;
-  --light-text-very-light: #eeeeee;
-  --light-border-primary: #3a3a3a;
-  --light-border-secondary: #333;
-  --light-border-light: #444;
+	/* Dark mode backgrounds and text */
+	--light-bg-primary: #1a1a1a;
+	--light-bg-secondary: #252525;
+	--light-bg-tertiary: #2a2a2a;
+	--light-bg-hover: rgba(255, 255, 255, 0.05);
+	--light-text-primary: #f5f5f5;
+	--light-text-secondary: #d4d4d4;
+	--light-text-tertiary: #c0c0c0;
+	--light-text-muted: #a8a8a8;
+	--light-text-light: #909090;
+	--light-text-very-light: #eeeeee;
+	--light-border-primary: #3a3a3a;
+	--light-border-secondary: #333;
+	--light-border-light: #444;
 
-  /* Accent colors in dark mode */
-  --accent-success: #5cb85f;
-  --accent-success-dark: #4cae4c;
-  --accent-success-light: #7cd97f;
-  --accent-warning: #ffc107;
-  --accent-warning-dark: #f0ad4e;
-  --accent-danger: #ff8080;
-  --accent-danger-dark: #dc3545;
-  --accent-info: #17a2b8;
+	/* Accent colors in dark mode */
+	--accent-success: #5cb85f;
+	--accent-success-dark: #4cae4c;
+	--accent-success-light: #7cd97f;
+	--accent-warning: #ffc107;
+	--accent-warning-dark: #f0ad4e;
+	--accent-danger: #ff8080;
+	--accent-danger-dark: #dc3545;
+	--accent-info: #17a2b8;
 
-  /* Status colors - dark mode */
-  --status-success-bg: #1f3a1f;
-  --status-warning-bg: #3d3520;
-  --status-danger-bg: #3d2020;
-  --status-info-bg: #1a3a1b;
+	/* Status colors - dark mode */
+	--status-success-bg: #1f3a1f;
+	--status-warning-bg: #3d3520;
+	--status-danger-bg: #3d2020;
+	--status-info-bg: #1a3a1b;
 
-  /* Card and container backgrounds */
-  --card-border: #333;
+	/* Card and container backgrounds */
+	--card-border: #333;
 }

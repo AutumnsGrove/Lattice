@@ -13,6 +13,8 @@ import {
 	VALID_SIGNING_STYLES,
 	isValidHexColor,
 	type GuestbookSigningStyle,
+	type GuestbookStyle,
+	type GuestbookWallBacking,
 } from "$lib/curios/guestbook";
 
 interface ConfigRow {
@@ -136,13 +138,14 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 		entries,
 		total,
 		config: {
-			style: config.style || DEFAULT_GUESTBOOK_CONFIG.style,
+			style: (config.style || DEFAULT_GUESTBOOK_CONFIG.style) as GuestbookStyle,
 			entriesPerPage,
 			allowEmoji: Boolean(config.allow_emoji),
 			maxMessageLength: config.max_message_length || 500,
 			customPrompt: config.custom_prompt,
 			requireApproval: Boolean(config.require_approval),
-			wallBacking: config.wall_backing || DEFAULT_GUESTBOOK_CONFIG.wallBacking,
+			wallBacking: (config.wall_backing ||
+				DEFAULT_GUESTBOOK_CONFIG.wallBacking) as GuestbookWallBacking,
 			ctaStyle: config.cta_style || DEFAULT_GUESTBOOK_CONFIG.ctaStyle,
 			allowedStyles,
 			colorPalette,
