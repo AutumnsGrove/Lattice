@@ -65,6 +65,8 @@ export interface AmberUploadRequest {
 	filename: string;
 	data: ReadableStream | ArrayBuffer | Uint8Array;
 	contentType: string;
+	/** Known byte size for ReadableStream uploads. Required for accurate quota enforcement when data is a stream. */
+	sizeBytes?: number;
 	metadata?: Record<string, unknown>;
 }
 

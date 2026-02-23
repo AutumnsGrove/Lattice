@@ -9,8 +9,7 @@
 
 import type { GroveDatabase, GroveStorage, GroveServiceBus } from "@autumnsgrove/server-sdk";
 import type { AmberExport, AmberExportCreateOptions, D1StorageExportRow } from "./types.js";
-import { AMB_ERRORS } from "./errors.js";
-import { AmberError } from "./files.js";
+import { AMB_ERRORS, AmberError } from "./errors.js";
 import { generateFileId, rowToAmberExport } from "./utils.js";
 
 export class ExportManager {
@@ -72,12 +71,13 @@ export class ExportManager {
 	}
 
 	/**
-	 * Check the status of an export job.
+	 * Check the status of an export job, scoped to a specific user.
+	 * Returns EXPORT_NOT_FOUND for both missing exports and wrong-user access (IDOR mitigation).
 	 */
-	async status(exportId: string): Promise<AmberExport> {
+	async status(exportId: string, userId: string): Promise<AmberExport> {
 		const row = await this.db
-			.prepare("SELECT * FROM storage_exports WHERE id = ?")
-			.bind(exportId)
+			.prepare("SELECT * FROM storage_exports WHERE id = ? AND user_id = ?")
+			.bind(exportId, userId)
 			.first<D1StorageExportRow>();
 
 		if (!row) {
@@ -91,8 +91,8 @@ export class ExportManager {
 	 * Poll an export job until it completes or fails.
 	 * Returns the current status — callers should implement their own polling loop.
 	 */
-	async poll(exportId: string): Promise<AmberExport> {
-		return this.status(exportId);
+	async poll(exportId: string, userId: string): Promise<AmberExport> {
+		return this.status(exportId, userId);
 	}
 
 	/**
@@ -102,8 +102,8 @@ export class ExportManager {
 	 * Uses GroveStorage.presignedUrl() when the provider supports it.
 	 * Falls back to returning the R2 key for proxy-based download.
 	 */
-	async downloadUrl(exportId: string): Promise<string> {
-		const exp = await this.status(exportId);
+	async downloadUrl(exportId: string, userId: string): Promise<string> {
+		const exp = await this.status(exportId, userId);
 
 		if (exp.status !== "completed") {
 			throw new AmberError(AMB_ERRORS.EXPORT_NOT_READY);

@@ -129,3 +129,26 @@ export const AMB_ERRORS = {
 } satisfies Record<string, GroveErrorDef>;
 
 export type AmberErrorKey = keyof typeof AMB_ERRORS;
+
+/**
+ * Amber SDK error class.
+ * Wraps a GroveErrorDef with the error code and messages.
+ */
+export class AmberError extends Error {
+	code: string;
+	category: string;
+	userMessage: string;
+
+	constructor(errorDef: {
+		code: string;
+		category: string;
+		userMessage: string;
+		adminMessage: string;
+	}) {
+		super(errorDef.adminMessage);
+		this.name = "AmberError";
+		this.code = errorDef.code;
+		this.category = errorDef.category;
+		this.userMessage = errorDef.userMessage;
+	}
+}

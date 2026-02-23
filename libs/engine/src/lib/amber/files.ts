@@ -16,7 +16,7 @@ import type {
 	AmberDownloadResult,
 	D1StorageFileRow,
 } from "./types.js";
-import { AMB_ERRORS } from "./errors.js";
+import { AMB_ERRORS, AmberError } from "./errors.js";
 import { generateR2Key, getExtension, generateFileId, rowToAmberFile } from "./utils.js";
 import type { QuotaManager } from "./quota.js";
 
@@ -48,8 +48,8 @@ export class FileManager {
 			throw new AmberError(AMB_ERRORS.INVALID_UPLOAD);
 		}
 
-		// Determine file size
-		const sizeBytes = this.getDataSize(data);
+		// Determine file size (prefer explicit sizeBytes for streams)
+		const sizeBytes = request.sizeBytes ?? this.getDataSize(data);
 
 		// Check quota before upload
 		const canFit = await this.quotaManager.canUpload(userId, sizeBytes);
@@ -138,12 +138,13 @@ export class FileManager {
 	}
 
 	/**
-	 * Get a file by ID.
+	 * Get a file by ID, scoped to a specific user.
+	 * Returns FILE_NOT_FOUND for both missing files and wrong-user access (IDOR mitigation).
 	 */
-	async get(fileId: string): Promise<AmberFile> {
+	async get(fileId: string, userId: string): Promise<AmberFile> {
 		const row = await this.db
-			.prepare("SELECT * FROM storage_files WHERE id = ?")
-			.bind(fileId)
+			.prepare("SELECT * FROM storage_files WHERE id = ? AND user_id = ?")
+			.bind(fileId, userId)
 			.first<D1StorageFileRow>();
 
 		if (!row) {
@@ -213,8 +214,8 @@ export class FileManager {
 	/**
 	 * Move a file to trash (soft delete).
 	 */
-	async trash(fileId: string): Promise<AmberFile> {
-		const file = await this.get(fileId);
+	async trash(fileId: string, userId: string): Promise<AmberFile> {
+		const file = await this.get(fileId, userId);
 
 		if (file.deletedAt) {
 			throw new AmberError(AMB_ERRORS.FILE_ALREADY_TRASHED);
@@ -235,8 +236,8 @@ export class FileManager {
 	/**
 	 * Restore a file from trash.
 	 */
-	async restore(fileId: string): Promise<AmberFile> {
-		const file = await this.get(fileId);
+	async restore(fileId: string, userId: string): Promise<AmberFile> {
+		const file = await this.get(fileId, userId);
 
 		if (!file.deletedAt) {
 			throw new AmberError(AMB_ERRORS.FILE_NOT_TRASHED);
@@ -258,8 +259,8 @@ export class FileManager {
 	 * Permanently delete a file (hard delete + R2 cleanup).
 	 * Also updates the user's quota usage.
 	 */
-	async delete(fileId: string): Promise<AmberFile> {
-		const file = await this.get(fileId);
+	async delete(fileId: string, userId: string): Promise<AmberFile> {
+		const file = await this.get(fileId, userId);
 
 		// Delete from R2
 		try {
@@ -292,8 +293,8 @@ export class FileManager {
 	/**
 	 * Download a file's content from R2.
 	 */
-	async download(fileId: string): Promise<AmberDownloadResult> {
-		const file = await this.get(fileId);
+	async download(fileId: string, userId: string): Promise<AmberDownloadResult> {
+		const file = await this.get(fileId, userId);
 
 		const object = await this.storage.get(file.r2Key);
 		if (!object) {
@@ -323,25 +324,5 @@ export class FileManager {
 	}
 }
 
-/**
- * Amber SDK error class.
- * Wraps a GroveErrorDef with the error code and messages.
- */
-export class AmberError extends Error {
-	code: string;
-	category: string;
-	userMessage: string;
-
-	constructor(errorDef: {
-		code: string;
-		category: string;
-		userMessage: string;
-		adminMessage: string;
-	}) {
-		super(errorDef.adminMessage);
-		this.name = "AmberError";
-		this.code = errorDef.code;
-		this.category = errorDef.category;
-		this.userMessage = errorDef.userMessage;
-	}
-}
+// AmberError is re-exported from errors.ts for backwards compatibility
+export { AmberError } from "./errors.js";
