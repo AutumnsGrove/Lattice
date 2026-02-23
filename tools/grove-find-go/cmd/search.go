@@ -10,14 +10,17 @@ import (
 
 	"github.com/AutumnsGrove/Lattice/tools/grove-find-go/internal/config"
 	"github.com/AutumnsGrove/Lattice/tools/grove-find-go/internal/output"
+	"github.com/AutumnsGrove/Lattice/tools/grove-find-go/internal/pager"
 	"github.com/AutumnsGrove/Lattice/tools/grove-find-go/internal/search"
 )
 
 // ---------- search ----------
 
 var (
-	searchFlagPath string
-	searchFlagType string
+	searchFlagPath       string
+	searchFlagType       string
+	searchFlagMaxResults int
+	searchFlagArchived   bool
 )
 
 // typeMap maps user-friendly type names to ripgrep --type or --glob arguments.
@@ -43,6 +46,11 @@ var searchCmd = &cobra.Command{
 		pattern := args[0]
 		cfg := config.Get()
 
+		// Apply --archived flag to config so shouldExclude respects it.
+		if searchFlagArchived {
+			cfg.IncludeArchived = true
+		}
+
 		output.PrintSection(fmt.Sprintf("Searching for: %s", pattern))
 
 		// Build search options from flags.
@@ -51,10 +59,8 @@ var searchCmd = &cobra.Command{
 		if searchFlagType != "" {
 			lower := strings.ToLower(searchFlagType)
 			if mapped, ok := typeMap[lower]; ok {
-				// mapped comes as pairs like ["--type", "ts"] or ["--glob", "*.svelte"]
 				opts = append(opts, search.WithExtraArgs(mapped...))
 			} else {
-				// Pass through as a ripgrep type directly.
 				opts = append(opts, search.WithType(lower))
 			}
 		}
@@ -63,29 +69,50 @@ var searchCmd = &cobra.Command{
 			opts = append(opts, search.WithExtraArgs(searchFlagPath))
 		}
 
+		// Exclude _archived/ by default unless --archived is set.
+		if !cfg.IncludeArchived {
+			opts = append(opts, search.WithExtraArgs("--glob", "!*/_archived/*"))
+		}
+
 		result, err := search.RunRg(pattern, opts...)
 		if err != nil {
 			return fmt.Errorf("search failed: %w", err)
 		}
 
+		lines := search.SplitLines(result)
+
+		// Apply --max-results cap.
+		truncated := false
+		if searchFlagMaxResults > 0 && len(lines) > searchFlagMaxResults {
+			lines = lines[:searchFlagMaxResults]
+			truncated = true
+		}
+
 		if cfg.JSONMode {
-			lines := search.SplitLines(result)
 			output.PrintJSON(map[string]any{
-				"command": "search",
-				"pattern": pattern,
-				"type":    searchFlagType,
-				"path":    searchFlagPath,
-				"count":   len(lines),
-				"results": lines,
+				"command":   "search",
+				"pattern":   pattern,
+				"type":      searchFlagType,
+				"path":      searchFlagPath,
+				"count":     len(lines),
+				"truncated": truncated,
+				"results":   lines,
 			})
 			return nil
 		}
 
-		if result != "" {
-			output.PrintRaw(strings.TrimRight(result, "\n") + "\n")
-		} else {
-			output.PrintWarning("No results found")
+		if cfg.AgentMode && truncated {
+			fmt.Printf("--- truncated at %d results (use --max-results 0 for all) ---\n", searchFlagMaxResults)
 		}
+
+		if len(lines) > 0 {
+			body := strings.Join(lines, "\n") + "\n"
+			if truncated {
+				output.PrintDim(fmt.Sprintf("  (truncated at %d results — use --max-results 0 for all)", searchFlagMaxResults))
+			}
+			return pager.MaybePage(body)
+		}
+		output.PrintWarning("No results found")
 
 		return nil
 	},
@@ -94,6 +121,8 @@ var searchCmd = &cobra.Command{
 func init() {
 	searchCmd.Flags().StringVarP(&searchFlagPath, "path", "p", "", "Limit search to path")
 	searchCmd.Flags().StringVarP(&searchFlagType, "type", "t", "", "Filter by file type (svelte, ts, js, py, etc.)")
+	searchCmd.Flags().IntVar(&searchFlagMaxResults, "max-results", 0, "Cap result count (0 = unlimited; best practice: --max-results 50 in agent mode)")
+	searchCmd.Flags().BoolVar(&searchFlagArchived, "archived", false, "Include _archived/ directories in results")
 }
 
 // ---------- class ----------

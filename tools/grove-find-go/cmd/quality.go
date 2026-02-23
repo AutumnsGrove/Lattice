@@ -894,8 +894,8 @@ var briefingCmd = &cobra.Command{
 			todoLines := search.SplitLines(todoOut)
 			truncated := truncateSlice(todoLines, 10)
 			for _, line := range truncated {
-				if len(line) > 100 {
-					line = line[:100]
+				if len(line) > 120 {
+					line = line[:120]
 				}
 				output.Print(fmt.Sprintf("  %s", line))
 			}

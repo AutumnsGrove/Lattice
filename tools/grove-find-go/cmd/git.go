@@ -18,13 +18,29 @@ import (
 var excludePatterns = []string{"node_modules", "pnpm-lock", "dist", ".svelte-kit"}
 
 // shouldExclude returns true if the path matches any exclude pattern.
+// When config.IncludeArchived is false (default), _archived/ paths are also excluded.
 func shouldExclude(path string) bool {
 	for _, exc := range excludePatterns {
 		if strings.Contains(path, exc) {
 			return true
 		}
 	}
+	if !config.Get().IncludeArchived && strings.Contains(path, "_archived") {
+		return true
+	}
 	return false
+}
+
+// resolveBase tries base, then origin/<base>, then origin/HEAD in order.
+// Returns the first available ref, or an error with a helpful message.
+func resolveBase(base string) (string, error) {
+	candidates := []string{base, "origin/" + base, "origin/HEAD"}
+	for _, ref := range candidates {
+		if _, err := search.RunGit("rev-parse", "--verify", ref); err == nil {
+			return ref, nil
+		}
+	}
+	return "", fmt.Errorf("base branch %q not available locally\n  Try: git fetch origin %s && gf changed", base, base)
 }
 
 // dirFromPath extracts the directory portion of a file path.
@@ -167,6 +183,8 @@ func recentJSON(days int) error {
 	return nil
 }
 
+var changedFlagBase string
+
 // changedCmd — gf changed [base]
 var changedCmd = &cobra.Command{
 	Use:   "changed [base]",
@@ -174,7 +192,7 @@ var changedCmd = &cobra.Command{
 	Long:  "Show files changed on the current branch compared to base (default main), with type breakdown and commits.",
 	Args:  cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		base := "main"
+		base := changedFlagBase
 		if len(args) > 0 {
 			base = args[0]
 		}
@@ -188,14 +206,21 @@ var changedCmd = &cobra.Command{
 		}
 		current = strings.TrimSpace(current)
 
-		if cfg.JSONMode {
-			return changedJSON(base, current)
+		// Resolve base ref — try local, then origin/<base>, then origin/HEAD.
+		resolvedBase, err := resolveBase(base)
+		if err != nil {
+			output.PrintError(err.Error())
+			return nil
 		}
 
-		output.PrintSection(fmt.Sprintf("Files changed on %s vs %s", current, base))
+		if cfg.JSONMode {
+			return changedJSON(resolvedBase, current)
+		}
+
+		output.PrintSection(fmt.Sprintf("Files changed on %s vs %s", current, resolvedBase))
 
 		// Changed files
-		raw, err := search.RunGit("diff", "--name-only", fmt.Sprintf("%s...HEAD", base))
+		raw, err := search.RunGit("diff", "--name-only", fmt.Sprintf("%s...HEAD", resolvedBase))
 		if err != nil {
 			return fmt.Errorf("git diff failed: %w", err)
 		}
@@ -220,7 +245,7 @@ var changedCmd = &cobra.Command{
 
 		// Change summary
 		output.PrintSection("Change Summary")
-		stat, err := search.RunGit("diff", "--stat", fmt.Sprintf("%s...HEAD", base))
+		stat, err := search.RunGit("diff", "--stat", fmt.Sprintf("%s...HEAD", resolvedBase))
 		if err == nil && strings.TrimSpace(stat) != "" {
 			lines := search.SplitLines(stat)
 			if len(lines) > 0 {
@@ -244,7 +269,7 @@ var changedCmd = &cobra.Command{
 
 		// Commits on branch
 		output.PrintSection("Commits on this branch")
-		commits, err := search.RunGit("log", "--oneline", fmt.Sprintf("%s..HEAD", base))
+		commits, err := search.RunGit("log", "--oneline", fmt.Sprintf("%s..HEAD", resolvedBase))
 		if err == nil && strings.TrimSpace(commits) != "" {
 			lines := search.SplitLines(commits)
 			shown, _ := output.TruncateResults(lines, 15)
@@ -253,6 +278,10 @@ var changedCmd = &cobra.Command{
 
 		return nil
 	},
+}
+
+func init() {
+	changedCmd.Flags().StringVar(&changedFlagBase, "base", "main", "Base branch to compare against")
 }
 
 func changedJSON(base, current string) error {

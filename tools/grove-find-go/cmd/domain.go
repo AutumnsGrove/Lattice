@@ -12,12 +12,16 @@ import (
 
 	"github.com/AutumnsGrove/Lattice/tools/grove-find-go/internal/config"
 	"github.com/AutumnsGrove/Lattice/tools/grove-find-go/internal/output"
+	"github.com/AutumnsGrove/Lattice/tools/grove-find-go/internal/pager"
 	"github.com/AutumnsGrove/Lattice/tools/grove-find-go/internal/search"
 )
 
 // ---------- routes ----------
 
 var routesFlagGuards bool
+
+// glassFlagArchived controls whether _archived/ is included in glass results.
+var glassFlagArchived bool
 
 var routesCmd = &cobra.Command{
 	Use:   "routes [pattern]",
@@ -401,14 +405,23 @@ var glassCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg := config.Get()
 
+		if glassFlagArchived {
+			cfg.IncludeArchived = true
+		}
+
+		// Shared option: exclude _archived/ by default.
+		archiveExclusion := []search.Option{}
+		if !cfg.IncludeArchived {
+			archiveExclusion = append(archiveExclusion, search.WithExtraArgs("--glob", "!*/_archived/*"))
+		}
+
 		if len(args) > 0 {
 			variant := args[0]
 			output.PrintSection(fmt.Sprintf("Glass components with variant: %s", variant))
 
 			pattern := fmt.Sprintf(`Glass.*variant.*['"%s]`, variant)
-			result, err := search.RunRg(pattern,
-				search.WithGlob("*.{svelte,ts}"),
-			)
+			opts := append([]search.Option{search.WithGlob("*.{svelte,ts}")}, archiveExclusion...)
+			result, err := search.RunRg(pattern, opts...)
 			if err != nil {
 				return fmt.Errorf("search failed: %w", err)
 			}
@@ -432,9 +445,8 @@ var glassCmd = &cobra.Command{
 		} else {
 			output.PrintSection("Glass Component Usage")
 
-			result, err := search.RunRg(`<Glass`,
-				search.WithGlob("*.svelte"),
-			)
+			opts := append([]search.Option{search.WithGlob("*.svelte")}, archiveExclusion...)
+			result, err := search.RunRg(`<Glass`, opts...)
 			if err != nil {
 				return fmt.Errorf("search failed: %w", err)
 			}
@@ -450,19 +462,17 @@ var glassCmd = &cobra.Command{
 			}
 
 			if result != "" {
-				lines := search.SplitLines(result)
-				show, overflow := output.TruncateResults(lines, 50)
-				output.PrintRaw(strings.Join(show, "\n") + "\n")
-				if overflow > 0 {
-					output.Printf("  ... and %d more", overflow)
-				}
-			} else {
-				output.PrintNoResults("Glass components")
+				return pager.MaybePage(strings.TrimRight(result, "\n") + "\n")
 			}
+			output.PrintNoResults("Glass components")
 		}
 
 		return nil
 	},
+}
+
+func init() {
+	glassCmd.Flags().BoolVar(&glassFlagArchived, "archived", false, "Include _archived/ directories in results")
 }
 
 // ---------- store ----------

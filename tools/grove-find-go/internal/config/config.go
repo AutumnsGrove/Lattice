@@ -8,10 +8,13 @@ import (
 
 // Config holds the global configuration for grove-find.
 type Config struct {
-	GroveRoot string
-	AgentMode bool
-	JSONMode  bool
-	Verbose   bool
+	GroveRoot       string
+	AgentMode       bool
+	JSONMode        bool
+	Verbose         bool
+	IncludeArchived bool // when true, _archived/ dirs are included in results
+	NoPager         bool // when true, skip Bubble Tea paginator
+	PageThreshold   int  // min lines before paginator activates (default 50)
 }
 
 var (
@@ -28,11 +31,17 @@ func Get() *Config {
 }
 
 // Init initializes the config with CLI flags and environment variables.
-func Init(root string, agent, jsonMode, verbose bool) *Config {
+func Init(root string, agent, jsonMode, verbose, noPager bool, pageThreshold int) *Config {
 	cfg := Get()
 	cfg.AgentMode = agent || os.Getenv("GF_AGENT") == "1"
 	cfg.JSONMode = jsonMode
 	cfg.Verbose = verbose
+	cfg.NoPager = noPager
+	if pageThreshold > 0 {
+		cfg.PageThreshold = pageThreshold
+	} else {
+		cfg.PageThreshold = 50
+	}
 
 	if root != "" {
 		cfg.GroveRoot = root

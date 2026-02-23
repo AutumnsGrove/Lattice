@@ -15,6 +15,7 @@ import (
 
 	"github.com/AutumnsGrove/Lattice/tools/grove-find-go/internal/config"
 	"github.com/AutumnsGrove/Lattice/tools/grove-find-go/internal/output"
+	"github.com/AutumnsGrove/Lattice/tools/grove-find-go/internal/pager"
 	"github.com/AutumnsGrove/Lattice/tools/grove-find-go/internal/search"
 )
 
@@ -189,12 +190,21 @@ func runLargeCommand(threshold int) error {
 // gf orphaned -- Find Svelte components not imported anywhere
 // =============================================================================
 
+var orphanedFlagAll bool
+
 var orphanedCmd = &cobra.Command{
 	Use:   "orphaned",
 	Short: "Find Svelte components not imported anywhere",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		if orphanedFlagAll {
+			config.Get().IncludeArchived = true
+		}
 		return runOrphanedCommand()
 	},
+}
+
+func init() {
+	orphanedCmd.Flags().BoolVar(&orphanedFlagAll, "all", false, "Include _archived/ directories in results")
 }
 
 func runOrphanedCommand() error {
@@ -222,7 +232,7 @@ func runOrphanedCommand() error {
 		return nil
 	}
 
-	// Filter out route files (+page, +layout, +error, etc.) and _deprecated.
+	// Filter out route files (+page, +layout, +error, etc.), _deprecated, and _archived (unless --all).
 	var componentFiles []string
 	for _, fp := range allSvelte {
 		name := filepath.Base(fp)
@@ -230,6 +240,9 @@ func runOrphanedCommand() error {
 			continue // Route files are implicitly used by SvelteKit.
 		}
 		if strings.Contains(fp, "_deprecated") {
+			continue
+		}
+		if !cfg.IncludeArchived && strings.Contains(fp, "_archived") {
 			continue
 		}
 		componentFiles = append(componentFiles, fp)
@@ -294,16 +307,17 @@ func runOrphanedCommand() error {
 	}
 
 	if len(orphaned) > 0 {
-		output.PrintSection(fmt.Sprintf("Orphaned Components (%d)", len(orphaned)))
+		var sb strings.Builder
 		for _, fp := range orphaned {
-			output.Printf("  %s", fp)
+			sb.WriteString(fmt.Sprintf("  %s\n", fp))
 		}
-		output.Printf("\n  %d components with no external imports", len(orphaned))
-		output.Print("  These may be safe to remove or may be dynamically loaded")
-	} else {
-		output.Print("  All components are imported somewhere!")
+		sb.WriteString(fmt.Sprintf("\n  %d components with no external imports\n", len(orphaned)))
+		sb.WriteString("  These may be safe to remove or may be dynamically loaded\n")
+		output.PrintSection(fmt.Sprintf("Orphaned Components (%d)", len(orphaned)))
+		return pager.MaybePage(sb.String())
 	}
 
+	output.Print("  All components are imported somewhere!")
 	return nil
 }
 

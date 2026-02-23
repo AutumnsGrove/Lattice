@@ -6,27 +6,35 @@ import (
 	"os"
 	"strings"
 
+	"github.com/charmbracelet/lipgloss"
+
 	"github.com/AutumnsGrove/Lattice/tools/grove-find-go/internal/config"
 )
 
-// ANSI color codes.
-const (
-	Reset     = "\033[0m"
-	Bold      = "\033[1m"
-	Dim       = "\033[2m"
-	Red       = "\033[31m"
-	Green     = "\033[32m"
-	Yellow    = "\033[33m"
-	Blue      = "\033[34m"
-	Magenta   = "\033[35m"
-	Cyan      = "\033[36m"
-	BoldRed   = "\033[1;31m"
-	BoldGreen = "\033[1;32m"
-	BoldBlue  = "\033[1;34m"
-	BoldCyan  = "\033[1;36m"
+// Grove color palette — matches gw for visual consistency.
+var (
+	colorForestGreen = lipgloss.Color("#2d5a27")
+	colorMossGreen   = lipgloss.Color("#4a7c59")
+	colorSunsetAmber = lipgloss.Color("#e8a838")
+	colorLeafYellow  = lipgloss.Color("#b8a924")
+	colorDangerRed   = lipgloss.Color("#ff4444")
+	colorDimGray     = lipgloss.Color("#666666")
 )
 
-// PrintMajorHeader prints a major section header.
+// Lipgloss styles for human-readable output.
+var (
+	majorHeaderStyle = lipgloss.NewStyle().Bold(true).Foreground(colorForestGreen)
+	sectionStyle     = lipgloss.NewStyle().Bold(true).Foreground(colorMossGreen)
+	sectionDetailStyle = lipgloss.NewStyle().Foreground(colorDimGray)
+	warningStyle     = lipgloss.NewStyle().Foreground(colorLeafYellow)
+	errorStyle       = lipgloss.NewStyle().Foreground(colorDangerRed)
+	successStyle     = lipgloss.NewStyle().Foreground(colorForestGreen)
+	dimStyle         = lipgloss.NewStyle().Foreground(colorDimGray)
+	countStyle       = lipgloss.NewStyle().Bold(true).Foreground(colorSunsetAmber)
+)
+
+// PrintMajorHeader prints a major section header (e.g. "Daily Briefing").
+// Agent mode: === Title ===   Human mode: Lipgloss ForestGreen bold
 func PrintMajorHeader(title string) {
 	cfg := config.Get()
 	if cfg.JSONMode {
@@ -35,11 +43,13 @@ func PrintMajorHeader(title string) {
 	if cfg.AgentMode {
 		fmt.Printf("\n=== %s ===\n", title)
 	} else {
-		fmt.Printf("\n%s%s=== %s ===%s\n", Bold, Magenta, title, Reset)
+		fmt.Println()
+		fmt.Println(majorHeaderStyle.Render("  " + title))
 	}
 }
 
-// PrintSection prints a section header.
+// PrintSection prints a section divider header.
+// Agent mode: --- Title ---   Human mode: Lipgloss MossGreen bold, no brackets
 func PrintSection(title string) {
 	cfg := config.Get()
 	if cfg.JSONMode {
@@ -48,11 +58,13 @@ func PrintSection(title string) {
 	if cfg.AgentMode {
 		fmt.Printf("\n--- %s ---\n", title)
 	} else {
-		fmt.Printf("\n%s%s--- %s ---%s\n", Bold, Cyan, title, Reset)
+		fmt.Println()
+		fmt.Println(sectionStyle.Render("  " + title))
 	}
 }
 
-// PrintSectionWithDetail prints a section header with additional detail text.
+// PrintSectionWithDetail prints a section header with supplementary detail text.
+// Agent mode: --- Title (detail) ---   Human mode: title bold + detail dim
 func PrintSectionWithDetail(title, detail string) {
 	cfg := config.Get()
 	if cfg.JSONMode {
@@ -65,10 +77,11 @@ func PrintSectionWithDetail(title, detail string) {
 			fmt.Printf("\n--- %s ---\n", title)
 		}
 	} else {
+		fmt.Println()
 		if detail != "" {
-			fmt.Printf("\n%s%s--- %s%s (%s) ---%s\n", Bold, Cyan, title, Reset, detail, Reset)
+			fmt.Println(sectionStyle.Render("  "+title) + "  " + sectionDetailStyle.Render("("+detail+")"))
 		} else {
-			fmt.Printf("\n%s%s--- %s ---%s\n", Bold, Cyan, title, Reset)
+			fmt.Println(sectionStyle.Render("  " + title))
 		}
 	}
 }
@@ -88,13 +101,15 @@ func PrintRaw(text string) {
 	fmt.Print(text)
 }
 
-// PrintColor prints colored text (only in human mode).
+// PrintColor prints colored text. In agent/JSON mode prints plain text.
+// The color arg is kept for call-site compatibility but ignored in favor of Lipgloss.
 func PrintColor(color, text string) {
 	cfg := config.Get()
 	if cfg.AgentMode || cfg.JSONMode {
 		fmt.Println(text)
 	} else {
-		fmt.Printf("%s%s%s\n", color, text, Reset)
+		style := lipgloss.NewStyle().Foreground(lipgloss.Color(color))
+		fmt.Println(style.Render(text))
 	}
 }
 
@@ -104,17 +119,17 @@ func PrintWarning(msg string) {
 	if cfg.AgentMode {
 		fmt.Printf("WARNING: %s\n", msg)
 	} else if !cfg.JSONMode {
-		fmt.Printf("%sWarning: %s%s\n", Yellow, msg, Reset)
+		fmt.Println(warningStyle.Render("  Warning: " + msg))
 	}
 }
 
-// PrintError prints an error message.
+// PrintError prints an error message to stderr.
 func PrintError(msg string) {
 	cfg := config.Get()
 	if cfg.AgentMode {
 		fmt.Fprintf(os.Stderr, "ERROR: %s\n", msg)
 	} else {
-		fmt.Fprintf(os.Stderr, "%sError: %s%s\n", BoldRed, msg, Reset)
+		fmt.Fprintln(os.Stderr, errorStyle.Render("  Error: "+msg))
 	}
 }
 
@@ -124,7 +139,7 @@ func PrintSuccess(msg string) {
 	if cfg.AgentMode {
 		fmt.Printf("OK: %s\n", msg)
 	} else if !cfg.JSONMode {
-		fmt.Printf("%s%s%s\n", Green, msg, Reset)
+		fmt.Println(successStyle.Render("  " + msg))
 	}
 }
 
@@ -134,17 +149,17 @@ func PrintDim(msg string) {
 	if cfg.AgentMode || cfg.JSONMode {
 		fmt.Println(msg)
 	} else {
-		fmt.Printf("%s%s%s\n", Dim, msg, Reset)
+		fmt.Println(dimStyle.Render(msg))
 	}
 }
 
-// PrintNoResults prints a "no results" message.
+// PrintNoResults prints a "no results" placeholder.
 func PrintNoResults(context string) {
 	cfg := config.Get()
 	if cfg.AgentMode {
 		fmt.Printf("(no %s found)\n", context)
 	} else if !cfg.JSONMode {
-		fmt.Printf("%s(no %s found)%s\n", Dim, context, Reset)
+		fmt.Println(dimStyle.Render(fmt.Sprintf("  (no %s found)", context)))
 	}
 }
 
@@ -158,13 +173,13 @@ func PrintJSON(data any) {
 	fmt.Println(string(b))
 }
 
-// PrintTip prints a helpful tip.
+// PrintTip prints a helpful tip in dim style.
 func PrintTip(msg string) {
 	cfg := config.Get()
 	if cfg.AgentMode {
 		fmt.Printf("Tip: %s\n", msg)
 	} else if !cfg.JSONMode {
-		fmt.Printf("%sTip: %s%s\n", Dim, msg, Reset)
+		fmt.Println(dimStyle.Render("  Tip: " + msg))
 	}
 }
 
@@ -174,7 +189,7 @@ func PrintCount(label string, count int) {
 	if cfg.AgentMode {
 		fmt.Printf("Total %s: %d\n", label, count)
 	} else if !cfg.JSONMode {
-		fmt.Printf("%sTotal %s: %s%d%s\n", Dim, label, Bold, count, Reset)
+		fmt.Println(dimStyle.Render("  Total "+label+": ") + countStyle.Render(fmt.Sprintf("%d", count)))
 	}
 }
 
@@ -186,13 +201,8 @@ func TruncateResults(items []string, max int) ([]string, int) {
 	return items[:max], len(items) - max
 }
 
-// ColorizeRgOutput strips or keeps rg color codes based on mode.
+// ColorizeRgOutput is a passthrough — rg is already called with --color=never.
 func ColorizeRgOutput(output string) string {
-	cfg := config.Get()
-	if cfg.AgentMode || cfg.JSONMode {
-		// rg was already called with --color=never, so nothing to strip
-		return output
-	}
 	return output
 }
 
