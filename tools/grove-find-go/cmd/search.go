@@ -51,7 +51,9 @@ var searchCmd = &cobra.Command{
 			cfg.IncludeArchived = true
 		}
 
-		output.PrintSection(fmt.Sprintf("Searching for: %s", pattern))
+		// Capture the section header as a string so it lands inside the pager
+		// if MaybePage activates alt-screen (not leaked to the normal scroll buffer).
+		sectionHeader := output.RenderSection(fmt.Sprintf("Searching for: %s", pattern))
 
 		// Build search options from flags.
 		var opts []search.Option
@@ -101,17 +103,19 @@ var searchCmd = &cobra.Command{
 			return nil
 		}
 
-		if cfg.AgentMode && truncated {
-			fmt.Printf("--- truncated at %d results (use --max-results 0 for all) ---\n", searchFlagMaxResults)
-		}
-
 		if len(lines) > 0 {
+			// Build full content with section header so pager owns all output.
 			body := strings.Join(lines, "\n") + "\n"
 			if truncated {
-				output.PrintDim(fmt.Sprintf("  (truncated at %d results — use --max-results 0 for all)", searchFlagMaxResults))
+				if cfg.AgentMode {
+					body += fmt.Sprintf("--- truncated at %d results (use --max-results 0 for all) ---\n", searchFlagMaxResults)
+				} else {
+					body += output.RenderDim(fmt.Sprintf("  (truncated at %d results — use --max-results 0 for all)", searchFlagMaxResults))
+				}
 			}
-			return pager.MaybePage(body)
+			return pager.MaybePage(sectionHeader + body)
 		}
+		fmt.Print(sectionHeader)
 		output.PrintWarning("No results found")
 
 		return nil

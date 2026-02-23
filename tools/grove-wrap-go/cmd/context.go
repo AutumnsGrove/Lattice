@@ -77,12 +77,15 @@ var contextCmd = &cobra.Command{
 		}
 
 		// Rich panel output
-		pairs := [][2]string{
-			{"branch", ui.CommandStyle.Render(branch)},
-			{"staged", fmt.Sprintf("%d", staged)},
-			{"unstaged", fmt.Sprintf("%d", unstaged)},
-			{"untracked", fmt.Sprintf("%d", untracked)},
+		pairs := [][2]string{}
+		if branch != "" {
+			pairs = append(pairs, [2]string{"branch", ui.CommandStyle.Render(branch)})
 		}
+		pairs = append(pairs,
+			[2]string{"staged", fmt.Sprintf("%d", staged)},
+			[2]string{"unstaged", fmt.Sprintf("%d", unstaged)},
+			[2]string{"untracked", fmt.Sprintf("%d", untracked)},
+		)
 		if stashCount > 0 {
 			pairs = append(pairs, [2]string{"stashes", fmt.Sprintf("%d", stashCount)})
 		}
@@ -204,11 +207,14 @@ var whoamiCmd = &cobra.Command{
 
 		// Project
 		fmt.Println()
-		fmt.Print(ui.RenderInfoPanel("project", [][2]string{
+		projectPairs := [][2]string{
 			{"directory", cwd},
 			{"grove root", cfg.GroveRoot},
-			{"branch", branch},
-		}))
+		}
+		if branch != "" {
+			projectPairs = append(projectPairs, [2]string{"branch", branch})
+		}
+		fmt.Print(ui.RenderInfoPanel("project", projectPairs))
 
 		// Vault
 		if vaultExists {

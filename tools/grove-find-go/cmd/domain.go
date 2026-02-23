@@ -443,7 +443,8 @@ var glassCmd = &cobra.Command{
 				output.PrintNoResults("glass variants")
 			}
 		} else {
-			output.PrintSection("Glass Component Usage")
+			// Capture header as string so pager owns all output when it activates.
+			sectionHeader := output.RenderSection("Glass Component Usage")
 
 			opts := append([]search.Option{search.WithGlob("*.svelte")}, archiveExclusion...)
 			result, err := search.RunRg(`<Glass`, opts...)
@@ -462,8 +463,9 @@ var glassCmd = &cobra.Command{
 			}
 
 			if result != "" {
-				return pager.MaybePage(strings.TrimRight(result, "\n") + "\n")
+				return pager.MaybePage(sectionHeader + strings.TrimRight(result, "\n") + "\n")
 			}
+			fmt.Print(sectionHeader)
 			output.PrintNoResults("Glass components")
 		}
 

@@ -63,6 +63,20 @@ func PrintSection(title string) {
 	}
 }
 
+// RenderSection returns the section header as a string instead of printing it.
+// Use this when the header must be included in content passed to the paginator.
+// Agent mode: \n--- Title ---\n   Human mode: \n  Title (Lipgloss styled)\n
+func RenderSection(title string) string {
+	cfg := config.Get()
+	if cfg.JSONMode {
+		return ""
+	}
+	if cfg.AgentMode {
+		return fmt.Sprintf("\n--- %s ---\n", title)
+	}
+	return "\n" + sectionStyle.Render("  "+title) + "\n"
+}
+
 // PrintSectionWithDetail prints a section header with supplementary detail text.
 // Agent mode: --- Title (detail) ---   Human mode: title bold + detail dim
 func PrintSectionWithDetail(title, detail string) {
@@ -101,8 +115,8 @@ func PrintRaw(text string) {
 	fmt.Print(text)
 }
 
-// PrintColor prints colored text. In agent/JSON mode prints plain text.
-// The color arg is kept for call-site compatibility but ignored in favor of Lipgloss.
+// PrintColor prints text using the provided hex color string.
+// In agent/JSON mode the color is omitted and plain text is printed.
 func PrintColor(color, text string) {
 	cfg := config.Get()
 	if cfg.AgentMode || cfg.JSONMode {
@@ -151,6 +165,15 @@ func PrintDim(msg string) {
 	} else {
 		fmt.Println(dimStyle.Render(msg))
 	}
+}
+
+// RenderDim returns dim text as a string (with trailing newline) for embedding in pager content.
+func RenderDim(msg string) string {
+	cfg := config.Get()
+	if cfg.AgentMode || cfg.JSONMode {
+		return msg + "\n"
+	}
+	return dimStyle.Render(msg) + "\n"
 }
 
 // PrintNoResults prints a "no results" placeholder.

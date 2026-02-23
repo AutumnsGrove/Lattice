@@ -307,13 +307,14 @@ func runOrphanedCommand() error {
 	}
 
 	if len(orphaned) > 0 {
+		// Build full content with section header so pager owns all output when it activates.
 		var sb strings.Builder
+		sb.WriteString(output.RenderSection(fmt.Sprintf("Orphaned Components (%d)", len(orphaned))))
 		for _, fp := range orphaned {
 			sb.WriteString(fmt.Sprintf("  %s\n", fp))
 		}
 		sb.WriteString(fmt.Sprintf("\n  %d components with no external imports\n", len(orphaned)))
 		sb.WriteString("  These may be safe to remove or may be dynamically loaded\n")
-		output.PrintSection(fmt.Sprintf("Orphaned Components (%d)", len(orphaned)))
 		return pager.MaybePage(sb.String())
 	}
 
