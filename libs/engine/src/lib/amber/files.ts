@@ -18,6 +18,7 @@ import type {
 } from "./types.js";
 import { AMB_ERRORS, AmberError } from "./errors.js";
 import { generateR2Key, getExtension, generateFileId, rowToAmberFile } from "./utils.js";
+import { logGroveError } from "../errors/helpers.js";
 import type { QuotaManager } from "./quota.js";
 
 export class FileManager {
@@ -45,6 +46,11 @@ export class FileManager {
 
 		// Validate inputs
 		if (!filename || !contentType || !product) {
+			throw new AmberError(AMB_ERRORS.INVALID_UPLOAD);
+		}
+
+		// Streams require an explicit size for quota enforcement
+		if (data instanceof ReadableStream && request.sizeBytes == null) {
 			throw new AmberError(AMB_ERRORS.INVALID_UPLOAD);
 		}
 
@@ -119,8 +125,12 @@ export class FileManager {
 				)
 				.bind(sizeBytes, userId)
 				.run();
-		} catch {
-			// Non-fatal: quota will be slightly off but file is saved
+		} catch (err) {
+			logGroveError("amber", AMB_ERRORS.QUOTA_SYNC_ERROR, {
+				userId,
+				detail: `Upload quota increment failed for file ${fileId}`,
+				cause: err,
+			});
 		}
 
 		return {
@@ -283,8 +293,12 @@ export class FileManager {
 				)
 				.bind(file.sizeBytes, file.userId)
 				.run();
-		} catch {
-			// Non-fatal: quota tracking will be slightly off
+		} catch (err) {
+			logGroveError("amber", AMB_ERRORS.QUOTA_SYNC_ERROR, {
+				userId: file.userId,
+				detail: `Delete quota decrement failed for file ${fileId}`,
+				cause: err,
+			});
 		}
 
 		return file;

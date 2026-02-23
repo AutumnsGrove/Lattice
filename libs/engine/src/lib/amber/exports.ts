@@ -10,6 +10,7 @@
 import type { GroveDatabase, GroveStorage, GroveServiceBus } from "@autumnsgrove/server-sdk";
 import type { AmberExport, AmberExportCreateOptions, D1StorageExportRow } from "./types.js";
 import { AMB_ERRORS, AmberError } from "./errors.js";
+import { logGroveError } from "../errors/helpers.js";
 import { generateFileId, rowToAmberExport } from "./utils.js";
 
 export class ExportManager {
@@ -55,19 +56,17 @@ export class ExportManager {
 						filter: options.filter,
 					},
 				});
-			} catch {
-				// DO trigger failed — export stays "pending" and can be retried
+			} catch (err) {
+				logGroveError("amber", AMB_ERRORS.EXPORT_SERVICE_UNAVAILABLE, {
+					userId: options.userId,
+					detail: `DO trigger failed for export ${exportId}`,
+					cause: err,
+				});
 			}
 		}
 
-		return {
-			id: exportId,
-			userId: options.userId,
-			status: "pending",
-			exportType: options.type,
-			filterParams: options.filter,
-			createdAt: new Date().toISOString(),
-		};
+		// Read back the D1-stored row for accurate timestamps
+		return this.status(exportId, options.userId);
 	}
 
 	/**
