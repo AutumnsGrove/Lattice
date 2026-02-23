@@ -86,7 +86,7 @@ export interface GroveStorage {
 	/** Upload an object. */
 	put(
 		key: string,
-		data: ReadableStream | ArrayBuffer | string,
+		data: ReadableStream | ArrayBuffer | Uint8Array | string,
 		options?: PutOptions,
 	): Promise<StorageObject>;
 

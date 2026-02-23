@@ -44,7 +44,7 @@ export class CloudflareStorage implements GroveStorage {
 
 	async put(
 		key: string,
-		data: ReadableStream | ArrayBuffer | string,
+		data: ReadableStream | ArrayBuffer | Uint8Array | string,
 		options?: PutOptions,
 	): Promise<StorageObject> {
 		// Input validation

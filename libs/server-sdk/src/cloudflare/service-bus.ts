@@ -75,10 +75,12 @@ export class CloudflareServiceBus implements GroveServiceBus {
 
 			const response = await binding.fetch(url, init);
 
-			let data: T;
+			// Parse response body — callers should validate the shape of T
+			// with Rootwork (safeJsonParse / Zod) at their trust boundary.
+			let data: unknown;
 			const contentType = response.headers.get("content-type") ?? "";
 			if (contentType.includes("application/json")) {
-				data = (await response.json()) as T;
+				data = await response.json();
 			} else {
 				const text = await response.text();
 				if (!response.ok) {
@@ -89,7 +91,7 @@ export class CloudflareServiceBus implements GroveServiceBus {
 				}
 				// Try parsing as JSON even without Content-Type header
 				try {
-					data = JSON.parse(text) as T;
+					data = JSON.parse(text);
 				} catch {
 					logGroveError("ServerSDK", SRV_ERRORS.SERVICE_CALL_FAILED, {
 						detail: `${request.method} ${service}${request.path} returned non-JSON body (${response.status})`,
@@ -110,7 +112,7 @@ export class CloudflareServiceBus implements GroveServiceBus {
 			return {
 				status: response.status,
 				headers: Object.fromEntries(response.headers),
-				data,
+				data: data as T,
 			};
 		} catch (error) {
 			const durationMs = performance.now() - start;

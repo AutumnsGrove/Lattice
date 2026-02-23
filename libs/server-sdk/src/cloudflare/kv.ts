@@ -18,6 +18,15 @@ import type {
 	GroveObserver,
 } from "../types.js";
 
+/** Runtime check that a value is a Record<string, string> (e.g. KV metadata). */
+function isStringRecord(v: unknown): v is Record<string, string> {
+	if (typeof v !== "object" || v === null || Array.isArray(v)) return false;
+	for (const val of Object.values(v)) {
+		if (typeof val !== "string") return false;
+	}
+	return true;
+}
+
 export class CloudflareKV implements GroveKV {
 	constructor(
 		private readonly kv: KVNamespace,
@@ -38,7 +47,9 @@ export class CloudflareKV implements GroveKV {
 		try {
 			const type = options?.type ?? "text";
 			let result: T | null;
-			// Use separate overloads to satisfy CF's KVNamespace type
+			// Use separate overloads to satisfy CF's KVNamespace type.
+			// Callers needing validated shapes should use Rootwork's
+			// safeJsonParse() or createTypedCacheReader() on the result.
 			if (type === "json") {
 				result = (await this.kv.get(key, "json")) as T | null;
 			} else if (type === "arrayBuffer") {
@@ -191,7 +202,7 @@ export class CloudflareKV implements GroveKV {
 				keys: result.keys.map((k) => ({
 					name: k.name,
 					expiration: k.expiration ?? undefined,
-					metadata: k.metadata as Record<string, string> | undefined,
+					metadata: isStringRecord(k.metadata) ? k.metadata : undefined,
 				})),
 				cursor: result.list_complete ? undefined : result.cursor,
 				list_complete: result.list_complete,
@@ -237,10 +248,11 @@ export class CloudflareKV implements GroveKV {
 				detail: key,
 			});
 			if (result.value === null) return null;
-			return {
-				value: result.value as unknown as T,
-				metadata: result.metadata,
-			};
+			// KV returns string; callers needing parsed data should use
+			// safeJsonParse() from Rootwork on the returned string value.
+			const value: unknown = result.value;
+			const metadata = isStringRecord(result.metadata) ? (result.metadata as M) : null;
+			return { value: value as T, metadata };
 		} catch (error) {
 			const durationMs = performance.now() - start;
 			this.observer?.({
