@@ -150,12 +150,21 @@
 					onclick={() => openLightbox(image, index)}
 					aria-label="View {getImageTitle(image)}"
 				>
-					<img
-						src={image.url}
-						alt={image.alt_text || getImageTitle(image)}
-						loading="lazy"
-						decoding="async"
-					/>
+					<div
+						class="image-wrapper"
+						style:background-color={image.dominant_color || "var(--color-muted)"}
+						style:aspect-ratio={image.aspect_ratio || undefined}
+					>
+						<img
+							src={image.thumbnail_url || image.url}
+							alt={image.alt_text || getImageTitle(image)}
+							width={image.width || undefined}
+							height={image.height || undefined}
+							loading={index < 6 ? "eager" : "lazy"}
+							fetchpriority={index < 6 ? "high" : undefined}
+							decoding="async"
+						/>
+					</div>
 
 					<!-- Overlay with metadata -->
 					<div class="image-overlay">
@@ -325,9 +334,17 @@
 		border: none;
 		padding: 0;
 		border-radius: 0.5rem;
+		content-visibility: auto;
+		contain-intrinsic-size: auto 200px;
 		transition:
 			transform 0.2s ease,
 			box-shadow 0.2s ease;
+	}
+
+	.image-wrapper {
+		width: 100%;
+		height: 100%;
+		overflow: hidden;
 	}
 
 	.mood-item:hover {
@@ -581,6 +598,25 @@
 		.lightbox-counter {
 			bottom: 1rem;
 			font-size: 0.85rem;
+		}
+	}
+
+	/* Respect reduced motion preference */
+	@media (prefers-reduced-motion: reduce) {
+		.mood-item {
+			transition: none;
+		}
+
+		.mood-item:hover {
+			transform: none;
+		}
+
+		.mood-item img {
+			transition: none;
+		}
+
+		.mood-item:hover img {
+			transform: none;
 		}
 	}
 </style>

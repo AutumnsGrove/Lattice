@@ -28,6 +28,9 @@ interface ImageRow {
 	cdn_url: string | null;
 	width: number | null;
 	height: number | null;
+	aspect_ratio: number | null;
+	thumbnail_r2_key: string | null;
+	dominant_color: string | null;
 	sort_index: number;
 	is_featured: number;
 }
@@ -43,7 +46,7 @@ interface ImageTagRow {
 /** Sensible defaults — no curio config table needed */
 const GALLERY_DEFAULTS = {
 	sortOrder: "date-desc",
-	itemsPerPage: 30,
+	itemsPerPage: 15,
 	showDescriptions: true,
 	showDates: true,
 	showTags: true,
@@ -111,6 +114,7 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
           id, r2_key, parsed_date, parsed_category, parsed_slug,
           custom_title, custom_description, custom_date, alt_text,
           file_size, uploaded_at, cdn_url, width, height,
+          aspect_ratio, thumbnail_r2_key, dominant_color,
           sort_index, is_featured
         FROM gallery_images
         WHERE tenant_id = ?
@@ -165,6 +169,9 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 		id: row.id,
 		r2_key: row.r2_key,
 		url: row.cdn_url || `${cdnBaseUrl}/${row.r2_key}`,
+		thumbnail_url: row.thumbnail_r2_key ? `${cdnBaseUrl}/${row.thumbnail_r2_key}` : null,
+		dominant_color: row.dominant_color,
+		aspect_ratio: row.aspect_ratio,
 		parsed_date: row.parsed_date,
 		parsed_category: row.parsed_category,
 		parsed_slug: row.parsed_slug,

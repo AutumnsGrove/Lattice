@@ -142,6 +142,14 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 		const originalSizeBytes = originalSizeStr ? parseInt(originalSizeStr, 10) : null;
 		const storedSizeBytes = storedSizeStr ? parseInt(storedSizeStr, 10) : null;
 
+		// Thumbnail + dominant color metadata (gallery performance)
+		const thumbnail = formData.get("thumbnail") as File | null;
+		const dominantColor = formData.get("dominantColor") as string | null;
+		const imageWidthStr = formData.get("imageWidth") as string | null;
+		const imageHeightStr = formData.get("imageHeight") as string | null;
+		const parsedWidth = imageWidthStr ? parseInt(imageWidthStr, 10) : null;
+		const parsedHeight = imageHeightStr ? parseInt(imageHeightStr, 10) : null;
+
 		if (!file || !(file instanceof File)) {
 			throwGroveError(400, API_ERRORS.INVALID_REQUEST_BODY, "API", {
 				detail: "file required",
@@ -365,6 +373,25 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 			customMetadata: metadata,
 		});
 
+		// Upload thumbnail to R2 if provided (gallery performance)
+		let thumbnailR2Key: string | null = null;
+		if (thumbnail && thumbnail instanceof File && thumbnail.size > 0) {
+			thumbnailR2Key = `${tenantId}/thumbs/${datePath}/${filename.replace(/\.[^.]+$/, "")}-thumb.webp`;
+			try {
+				const thumbBuffer = await thumbnail.arrayBuffer();
+				await images.put(thumbnailR2Key, thumbBuffer, {
+					httpMetadata: {
+						contentType: "image/webp",
+						cacheControl: "public, max-age=31536000, immutable",
+					},
+				});
+			} catch (thumbErr) {
+				// Non-critical — gallery falls back to full-res URL
+				console.warn("[ImageUpload] Thumbnail upload skipped:", (thumbErr as Error).message);
+				thumbnailR2Key = null;
+			}
+		}
+
 		// Track activity for inactivity reclamation
 		updateLastActivity(db, tenantId);
 
@@ -409,6 +436,8 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
 		// Insert into gallery_images so uploads appear on the public gallery immediately
 		// Non-blocking: gallery insert failure must NOT prevent the upload response
+		const aspectRatio =
+			parsedWidth && parsedHeight && parsedHeight > 0 ? parsedWidth / parsedHeight : null;
 		try {
 			const keyWithoutPrefix = key.startsWith(`${tenantId}/`)
 				? key.slice(tenantId.length + 1)
@@ -420,8 +449,10 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 					`INSERT OR IGNORE INTO gallery_images (
 						id, tenant_id, r2_key,
 						parsed_date, parsed_category, parsed_slug,
-						file_size, uploaded_at, cdn_url
-					) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+						file_size, uploaded_at, cdn_url,
+						width, height, aspect_ratio,
+						thumbnail_r2_key, dominant_color
+					) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 				)
 				.bind(
 					generateGalleryId(),
@@ -433,6 +464,11 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 					file.size,
 					new Date().toISOString(),
 					cdnUrl,
+					parsedWidth,
+					parsedHeight,
+					aspectRatio,
+					thumbnailR2Key,
+					dominantColor,
 				)
 				.run();
 		} catch (galleryErr) {
@@ -456,6 +492,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 				type: file.type,
 				altText: altText || null,
 				description: description || null,
+				thumbnailUrl: thumbnailR2Key ? `${cdnBaseUrl}/${thumbnailR2Key}` : null,
 				markdown,
 				html,
 				svelte,

@@ -185,11 +185,31 @@ export const POST: RequestHandler = async ({ platform, locals }) => {
 		}
 		added = inserts.length;
 
+		// Backfill aspect_ratio from existing width/height data
+		let backfilledAspectRatio = 0;
+		try {
+			const backfillResult = await db
+				.prepare(
+					`UPDATE gallery_images
+					SET aspect_ratio = CAST(width AS REAL) / height
+					WHERE tenant_id = ?
+						AND width IS NOT NULL AND height IS NOT NULL AND height > 0
+						AND aspect_ratio IS NULL`,
+				)
+				.bind(tenantId)
+				.run();
+			backfilledAspectRatio = backfillResult.meta?.changes ?? 0;
+		} catch (backfillErr) {
+			// Non-critical — aspect_ratio column may not exist yet
+			console.warn("[GallerySync] Aspect ratio backfill skipped:", (backfillErr as Error).message);
+		}
+
 		return json({
 			success: true,
 			added,
 			updated,
 			skipped,
+			backfilledAspectRatio,
 			total: added + updated,
 		});
 	} catch (err) {

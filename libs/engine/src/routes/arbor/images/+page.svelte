@@ -6,6 +6,8 @@
 		api,
 		apiRequest,
 		processImage,
+		generateThumbnail,
+		extractDominantColor,
 		supportsJxlEncoding,
 		calculateFileHash,
 		generateDatePath,
@@ -326,12 +328,34 @@
 
 			updateUpload({
 				progress: 30,
-				stage: useAiAnalysis ? "Analyzing with AI..." : "Uploading...",
+				stage: "Generating thumbnail...",
 				processedSize: processResult.processedSize,
 				format: processResult.format,
 			});
 
-			// Step 3: AI Analysis (if enabled)
+			// Step 3b: Generate thumbnail + extract dominant color in parallel
+			/** @type {{ blob: Blob; width: number; height: number } | null} */
+			let thumbResult = null;
+			/** @type {string | null} */
+			let dominantColor = null;
+			try {
+				const [thumb, color] = await Promise.all([
+					generateThumbnail(file, { maxWidth: 400, quality: 60 }),
+					extractDominantColor(file),
+				]);
+				thumbResult = thumb;
+				dominantColor = color;
+			} catch (thumbErr) {
+				// Non-critical — upload proceeds without thumbnail
+				console.warn("Thumbnail generation failed:", thumbErr);
+			}
+
+			updateUpload({
+				progress: 40,
+				stage: useAiAnalysis ? "Analyzing with AI..." : "Uploading...",
+			});
+
+			// Step 3c: AI Analysis (if enabled)
 			let aiData = null;
 			if (useAiAnalysis) {
 				try {
@@ -385,6 +409,19 @@
 			}
 			formData.append("originalSize", String(processResult.originalSize));
 			formData.append("storedSize", String(processResult.processedSize));
+
+			// Append thumbnail + metadata for gallery performance
+			if (thumbResult) {
+				formData.append(
+					"thumbnail",
+					new File([thumbResult.blob], "thumb.webp", { type: "image/webp" }),
+				);
+				formData.append("imageWidth", String(processResult.width || thumbResult.width));
+				formData.append("imageHeight", String(processResult.height || thumbResult.height));
+			}
+			if (dominantColor) {
+				formData.append("dominantColor", dominantColor);
+			}
 
 			if (aiData) {
 				formData.append("filename", aiData.filename);
