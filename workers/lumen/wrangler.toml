@@ -37,9 +37,7 @@ service = "grove-warden"
 [[kv_namespaces]]
 binding = "RATE_LIMITS"
 title = "grove-lumen-ratelimits"
-# TODO: Create via `wrangler kv namespace create grove-lumen-ratelimits`
-#       then replace this placeholder with the real namespace ID.
-id = "placeholder-create-via-wrangler"
+id = "427ae01e877f40bf8bb107bdb5f77442"
 
 # =============================================================================
 # Secrets (configured via: gw secret apply <name> --worker grove-lumen)

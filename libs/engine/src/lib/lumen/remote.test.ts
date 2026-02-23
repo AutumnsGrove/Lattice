@@ -6,7 +6,7 @@
  * boundaries (Rootwork pattern).
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { RemoteLumenClient } from "./remote.js";
 
 // =============================================================================
@@ -372,9 +372,7 @@ describe("RemoteLumenClient", () => {
 					wordCount: 2,
 					duration: 1.5,
 					model: "whisper-v3",
-					gutterContent: [
-						{ type: "vine", content: "Note: clear audio", anchor: "0:00" },
-					],
+					gutterContent: [{ type: "vine", content: "Note: clear audio", anchor: "0:00" }],
 				}),
 			);
 
