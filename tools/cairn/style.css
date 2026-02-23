@@ -26,7 +26,7 @@
 	/* Typography */
 	--font-body: "Lexend", system-ui, sans-serif;
 	--font-mono: "JetBrains Mono", "SF Mono", "Fira Code", monospace;
-	--font-display: "Fraunces", Georgia, serif;
+	--font-display: "Lexend", system-ui, sans-serif;
 
 	--radius: 10px;
 	--radius-sm: 6px;
