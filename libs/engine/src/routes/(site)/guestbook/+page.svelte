@@ -452,11 +452,11 @@
 	input[type="text"],
 	textarea {
 		padding: 0.625rem 0.875rem;
-		border: 1px solid var(--color-border, #e5e7eb);
+		border: 1px solid var(--color-border);
 		border-radius: 0.5rem;
 		font-size: 0.9rem;
 		color: var(--color-foreground);
-		background: var(--color-background, #fff);
+		background: rgb(var(--cream));
 		transition: border-color 0.2s ease;
 		font-family: inherit;
 		width: 100%;
@@ -492,9 +492,9 @@
 		align-items: center;
 		gap: 0.375rem;
 		padding: 0.625rem 0.75rem;
-		border: 1px solid var(--color-border, #e5e7eb);
+		border: 1px solid var(--color-border);
 		border-radius: 0.5rem;
-		background: var(--color-background, #fff);
+		background: rgb(var(--cream));
 		cursor: pointer;
 		font-size: 1.1rem;
 		min-height: 2.5rem;
@@ -514,12 +514,12 @@
 		grid-template-columns: repeat(6, 1fr);
 		gap: 0.25rem;
 		padding: 0.75rem;
-		background: var(--color-background, #fff);
-		border: 1px solid var(--color-border, #e5e7eb);
+		background: rgb(var(--cream));
+		border: 1px solid var(--color-border);
 		border-radius: 0.75rem;
 		box-shadow:
-			0 10px 25px rgba(0, 0, 0, 0.1),
-			0 4px 10px rgba(0, 0, 0, 0.05);
+			0 10px 25px rgba(0, 0, 0, 0.15),
+			0 4px 10px rgba(0, 0, 0, 0.08);
 		margin-top: 0.25rem;
 		min-width: 220px;
 	}
@@ -539,7 +539,7 @@
 	}
 
 	.emoji-option:hover {
-		background: var(--color-muted, #f3f4f6);
+		background: rgb(var(--cream-200));
 		transform: scale(1.2);
 	}
 
@@ -758,7 +758,7 @@
 	.color-swatch.active {
 		border-color: var(--color-foreground);
 		box-shadow:
-			0 0 0 2px var(--color-background, #fff),
+			0 0 0 2px rgb(var(--cream)),
 			0 0 0 4px var(--swatch-color);
 	}
 
