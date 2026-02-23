@@ -175,8 +175,15 @@ export class FileManager {
 		}
 
 		const whereClause = conditions.join(" AND ");
-		const sortBy = options.sortBy || "created_at";
-		const sortOrder = options.sortOrder || "desc";
+
+		// Allowlist validation — prevent SQL injection via sortBy/sortOrder
+		const ALLOWED_SORT_COLUMNS = new Set(["created_at", "size_bytes", "filename"]);
+		const ALLOWED_SORT_ORDERS = new Set(["asc", "desc"]);
+		const sortBy = ALLOWED_SORT_COLUMNS.has(options.sortBy || "") ? options.sortBy! : "created_at";
+		const sortOrder = ALLOWED_SORT_ORDERS.has(options.sortOrder || "")
+			? options.sortOrder!
+			: "desc";
+
 		const limit = options.limit || 50;
 		const offset = options.offset || 0;
 

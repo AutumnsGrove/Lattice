@@ -32,10 +32,11 @@ export class AddonManager {
 	 * Get available add-on packages with pricing.
 	 */
 	available(): AmberAddonCatalogEntry[] {
-		return Object.entries(STORAGE_ADDONS).map(([type, config]) => ({
-			type: type as AmberAddonType,
-			gb: config.gb,
-			priceCents: config.priceCents,
+		const types = Object.keys(STORAGE_ADDONS) as AmberAddonType[];
+		return types.map((type) => ({
+			type,
+			gb: STORAGE_ADDONS[type].gb,
+			priceCents: STORAGE_ADDONS[type].priceCents,
 		}));
 	}
 

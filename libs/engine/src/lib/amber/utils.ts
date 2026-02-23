@@ -14,6 +14,8 @@ import type {
 	AmberExport,
 	D1StorageExportRow,
 } from "./types.js";
+import { safeJsonParse } from "../server/utils/typed-cache.js";
+import { z } from "zod";
 
 // ─── Constants ────────────────────────────────────────────────────
 
@@ -154,6 +156,14 @@ export function generateFileId(): string {
 	return crypto.randomUUID();
 }
 
+// ─── Boundary Schemas ─────────────────────────────────────────────
+
+/** Schema for file metadata stored as JSON in D1 */
+const MetadataSchema = z.record(z.string(), z.unknown());
+
+/** Schema for export filter params stored as JSON in D1 */
+const FilterParamsSchema = z.record(z.string(), z.unknown());
+
 // ─── Row Transformation ──────────────────────────────────────────
 
 /**
@@ -170,7 +180,7 @@ export function rowToAmberFile(row: D1StorageFileRow): AmberFile {
 		product: row.product,
 		category: row.category,
 		parentId: row.parent_id || undefined,
-		metadata: row.metadata ? JSON.parse(row.metadata) : undefined,
+		metadata: row.metadata ? (safeJsonParse(row.metadata, MetadataSchema) ?? undefined) : undefined,
 		createdAt: row.created_at,
 		deletedAt: row.deleted_at || undefined,
 	};
@@ -185,7 +195,9 @@ export function rowToAmberExport(row: D1StorageExportRow): AmberExport {
 		userId: row.user_id,
 		status: row.status,
 		exportType: row.export_type,
-		filterParams: row.filter_params ? JSON.parse(row.filter_params) : undefined,
+		filterParams: row.filter_params
+			? (safeJsonParse(row.filter_params, FilterParamsSchema) ?? undefined)
+			: undefined,
 		r2Key: row.r2_key || undefined,
 		sizeBytes: row.size_bytes || undefined,
 		fileCount: row.file_count || undefined,
