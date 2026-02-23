@@ -15,7 +15,7 @@ import type { RequestHandler } from "./$types";
 import { API_ERRORS, throwGroveError } from "$lib/errors";
 import { PULSE_EVENT_TYPES } from "$lib/curios/pulse";
 import { z } from "zod";
-import { safeJsonParse } from "$lib/server/utils/typed-cache";
+import { safeJsonParse } from "$lib/server/utils";
 
 // ─── Zod schemas for KV cache reads (Rootwork Phase 5) ──────────────
 const PulseActiveSchema = z.object({
@@ -25,11 +25,11 @@ const PulseActiveSchema = z.object({
 	message: z.string().optional(),
 });
 const PulseTodaySchema = z.object({
-	commits: z.number(),
-	prsMerged: z.number(),
-	issuesClosed: z.number(),
-	linesAdded: z.number(),
-	linesRemoved: z.number(),
+	commits: z.number().default(0),
+	prsMerged: z.number().default(0),
+	issuesClosed: z.number().default(0),
+	linesAdded: z.number().default(0),
+	linesRemoved: z.number().default(0),
 });
 const PulseStreakSchema = z.object({
 	days: z.number(),

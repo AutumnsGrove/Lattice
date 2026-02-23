@@ -24,6 +24,11 @@ export type FormDataResult<T> =
  * Returns typed data on success, or field-level errors for use with
  * SvelteKit's `fail()` helper.
  *
+ * Note: Multi-value fields (repeated inputs with the same name) are not
+ * supported — `Object.fromEntries` keeps only the last value. For multi-value
+ * data (e.g. multi-select checkboxes, repeated tags), encode as a JSON string
+ * in a single field and parse with a Zod transform.
+ *
  * @example
  * ```typescript
  * const UpdateSchema = z.object({
