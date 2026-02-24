@@ -10,6 +10,11 @@ main = ".svelte-kit/cloudflare/_worker.js"
 directory = ".svelte-kit/cloudflare"
 binding = "ASSETS"
 
+# Custom domain — grove.place root (wildcard *.grove.place is on grove-router)
+routes = [
+  { pattern = "grove.place/*", zone_name = "grove.place" }
+]
+
 # Observability — structured logs in Cloudflare dashboard
 [observability]
 enabled = true
