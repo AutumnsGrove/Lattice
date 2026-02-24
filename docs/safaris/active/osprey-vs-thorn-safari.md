@@ -121,17 +121,23 @@ Rich built-in UDFs:
 | Time-series data | Apache Druid                      | Real-time OLAP for UI queries     |
 | Entity history   | Google Bigtable (emulated in dev) | Historical entity data            |
 | Unique IDs       | Snowflake ID worker               | Discord-style snowflake IDs       |
+| Coordinator      | Rust (tokio + tonic)              | Stateless event orchestration     |
 | Communication    | gRPC + Protobuf                   | Coordinator ↔ Worker protocol     |
 | Metrics          | Datadog (ddtrace)                 | APM and custom metrics            |
 | UI               | React                             | Investigation dashboard           |
 | Backend API      | Flask                             | UI API serving layer              |
 
-**6. Coordinator** (`osprey_coordinator/`)
+**6. Coordinator** (`osprey_coordinator/` — **Rust**)
 
-- [x] gRPC service for synchronous action processing
-- [x] Alternative to Kafka for request/response patterns
+- [x] Written in Rust (tokio async runtime + tonic gRPC)
+- [x] Dual-priority queue system (sync channel prioritized over async)
+- [x] Bidirectional gRPC streaming to workers (persistent connections)
 - [x] `ProcessAction` RPC — send event, get verdict back synchronously
-- [x] Load balancing and routing to worker pool
+- [x] Pluggable consumers: Kafka (rdkafka) or Google Cloud PubSub
+- [x] GCP KMS envelope encryption for PubSub messages (Tink AEAD)
+- [x] Snowflake ID generation for action IDs
+- [x] Stateless design — horizontally scalable, replays from event source on restart
+- [x] Graceful shutdown: nacks outstanding actions, 15s grace period
 - [x] Optional component (Kafka-only mode works without it)
 
 **7. UI** (`osprey_ui/`)
@@ -244,7 +250,7 @@ Rich built-in UDFs:
 | **Decision logic**     | Human-written rules in SML                 | AI model + confidence thresholds             |
 | **Speed**              | Sub-millisecond per rule                   | 200-500ms per inference call                 |
 | **Statefulness**       | Yes — labels persist across events         | Stateless (each review independent)          |
-| **Language**           | Python (gevent)                            | TypeScript (Cloudflare Workers)              |
+| **Language**           | Python (worker) + Rust (coordinator)       | TypeScript (Cloudflare Workers)              |
 | **What it watches**    | Event streams (any action/behavior)        | Content text (blog posts, comments)          |
 | **Detection method**   | Pattern matching + entity state            | Context-aware AI classification              |
 | **False positives**    | Low (deterministic)                        | Possible (AI confidence ≠ certainty)         |
@@ -518,7 +524,7 @@ Osprey was built for Discord's scale. Some lessons that translate even at Grove'
 
 | Metric                           | Osprey                      | Thorn                        |
 | -------------------------------- | --------------------------- | ---------------------------- |
-| Language                         | Python 3.11                 | TypeScript                   |
+| Language                         | Python 3.11 + Rust          | TypeScript                   |
 | Lines of code (estimated)        | ~30,000+                    | ~500                         |
 | Docker containers (dev)          | 15+                         | 0 (Cloudflare)               |
 | Infrastructure services          | 7 (Kafka, PG, Druid, etc.) | 2 (D1, Workers)              |
