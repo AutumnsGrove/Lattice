@@ -476,7 +476,14 @@ async function loadCCUsageMonthly(): Promise<CCUsageMonth[]> {
 		const output = await new Response(proc.stdout).text();
 		const code = await proc.exited;
 		if (code !== 0 || !output.trim()) return [];
-		return JSON.parse(output) as CCUsageMonth[];
+		const parsed = JSON.parse(output) as unknown;
+		// ccusage returns { "monthly": [...] }
+		if (parsed && typeof parsed === "object" && "monthly" in parsed) {
+			const inner = (parsed as Record<string, unknown>).monthly;
+			if (Array.isArray(inner)) return inner as CCUsageMonth[];
+		}
+		if (Array.isArray(parsed)) return parsed as CCUsageMonth[];
+		return [];
 	} catch {
 		return [];
 	}

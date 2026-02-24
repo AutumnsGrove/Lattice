@@ -89,10 +89,13 @@ export interface ClaudeSession {
 // ─── ccusage ──────────────────────────────────────────────────────────────────
 
 export interface CCUsageModelBreakdown {
-	model: string;
-	cost: number;
-	tokens: number;
-	requests?: number;
+	modelName: string;
+	totalCost: number;
+	totalTokens: number;
+	inputTokens?: number;
+	outputTokens?: number;
+	cacheCreationTokens?: number;
+	cacheReadTokens?: number;
 }
 
 export interface CCUsageMonth {
