@@ -449,7 +449,7 @@
 		"@vitest/ui": "^4.0.18",
 		"autoprefixer": "^10.4.24",
 		"bits-ui": "^1.8.0",
-		"drizzle-kit": "^0.31.9",
+		"drizzle-kit": "0.31.9",
 		"esbuild": "^0.27.3",
 		"happy-dom": "^20.6.1",
 		"jsdom": "^27.4.0",
