@@ -128,7 +128,7 @@ export const baPasskey = sqliteTable("ba_passkey", {
 		.references(() => baUser.id, { onDelete: "cascade" }),
 	name: text("name"), // User-provided name for the passkey
 	publicKey: text("public_key").notNull(),
-	credentialId: text("credential_id").notNull().unique(),
+	credentialID: text("credential_id").notNull().unique(),
 	counter: integer("counter").notNull().default(0),
 	deviceType: text("device_type"), // 'singleDevice' or 'multiDevice'
 	backedUp: integer("backed_up", { mode: "boolean" }).default(false),
