@@ -10,6 +10,14 @@ main = ".svelte-kit/cloudflare/_worker.js"
 directory = ".svelte-kit/cloudflare"
 binding = "ASSETS"
 
+# Observability — structured logs in Cloudflare dashboard
+[observability]
+enabled = true
+
+[observability.logs]
+enabled = true
+invocation_logs = true
+
 # Environment variables
 [vars]
 CDN_URL = "https://cdn.grove.place"
@@ -65,11 +73,8 @@ id = "514e91e81cc44d128a82ec6f668303e4"
 binding = "CACHE_KV"
 id = "514e91e81cc44d128a82ec6f668303e4"
 
-# Secrets (set via `wrangler secret put` or `gw secret apply`):
+# Secrets (set via `gw secret apply` or `wrangler secret put`):
 # - ZEPHYR_API_KEY - Shared secret for authenticating with Zephyr email worker
 # - TURNSTILE_SECRET_KEY - Cloudflare Turnstile secret (Shade)
 # - UNSUBSCRIBE_SECRET - HMAC secret for email unsubscribe tokens
-#
-# Production env vars (set via `wrangler secret put` for sensitive values):
-# - ADMIN_EMAILS
-# - CDN_URL = https://cdn.grove.place
+# - GROVEAUTH_CLIENT_SECRET - OAuth client secret for Heartwood auth flow
