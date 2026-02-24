@@ -84,6 +84,7 @@ async function sendEmailAlert(env: IncidentEnv, subject: string, body: string): 
 		const result = await zephyr.sendRaw({
 			to: env.ALERT_EMAIL || "alerts@grove.place",
 			subject,
+			html: `<pre style="font-family: monospace; white-space: pre-wrap;">${body}</pre>`,
 			text: body,
 			from: EMAIL_FROM_ADDRESS,
 			fromName: EMAIL_FROM_NAME,

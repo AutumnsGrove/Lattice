@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
 import { processHealthCheckResult, type IncidentEnv } from "../incident-manager";
 import type { HealthCheckResult } from "../health-checks";
 
@@ -165,7 +165,7 @@ describe("processHealthCheckResult - State Machine", () => {
 		});
 
 		// Mock the incident existence check (resolveIncident does a SELECT first)
-		const mockStmt = (env.DB.prepare as ReturnType<typeof vi.fn>)();
+		const mockStmt = (env.DB.prepare as Mock)();
 		mockStmt.first.mockResolvedValueOnce({ id: "incident-123" });
 
 		await processHealthCheckResult(env, createHealthyResult());
@@ -191,7 +191,7 @@ describe("processHealthCheckResult - State Machine", () => {
 		});
 
 		// Mock: incident doesn't exist (first() returns null)
-		const mockStmt = (env.DB.prepare as ReturnType<typeof vi.fn>)();
+		const mockStmt = (env.DB.prepare as Mock)();
 		mockStmt.first.mockResolvedValueOnce(null);
 
 		await processHealthCheckResult(env, createHealthyResult());
