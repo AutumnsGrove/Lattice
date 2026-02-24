@@ -2,7 +2,7 @@ import type { CairnIndex } from "../index.ts";
 import { escHtml, formatDate, biomeBadge } from "./layout.ts";
 
 export function dashboardPage(idx: CairnIndex): string {
-	const { stats, documents, crushSessions, claudeSessions } = idx;
+	const { stats, documents, crushSessions, claudeSessions, ccUsageMonthly } = idx;
 
 	// Recently updated documents (sorted by mtime)
 	const recentDocs = [...documents.values()]
@@ -78,6 +78,62 @@ export function dashboardPage(idx: CairnIndex): string {
 		)
 		.join("");
 
+	// ccusage monthly table (most recent 6 months)
+	const ccMonths = [...ccUsageMonthly].sort((a, b) => b.month.localeCompare(a.month)).slice(0, 6);
+	const ccTotalCost = ccMonths.reduce((s, m) => s + m.totalCost, 0);
+	const ccTotalTokens = ccMonths.reduce((s, m) => s + m.totalTokens, 0);
+
+	const ccMonthRows = ccMonths
+		.map((m) => {
+			const [year, mo] = m.month.split("-");
+			const monthLabel = new Date(Number(year), Number(mo) - 1).toLocaleDateString("en-US", {
+				month: "short",
+				year: "numeric",
+			});
+			const tokensK =
+				m.totalTokens >= 1_000_000
+					? `${(m.totalTokens / 1_000_000).toFixed(1)}M`
+					: `${(m.totalTokens / 1_000).toFixed(0)}k`;
+			return `
+		<div style="display:grid;grid-template-columns:100px 1fr auto auto;gap:0.75rem;align-items:center;padding:0.35rem 0;border-bottom:1px solid var(--border-subtle);">
+			<span style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text-secondary);">${escHtml(monthLabel)}</span>
+			<div style="display:flex;gap:0.35rem;flex-wrap:wrap;">
+				${(m.modelsUsed ?? [])
+					.slice(0, 3)
+					.map(
+						(model) =>
+							`<span class="tag" style="font-size:0.65rem;">${escHtml(model.replace("claude-", "").replace(/-\d{8}$/, ""))}</span>`,
+					)
+					.join("")}
+			</div>
+			<span style="font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);">${tokensK}</span>
+			<span style="font-family:var(--font-mono);font-size:0.82rem;color:var(--accent-green);font-weight:500;">$${m.totalCost.toFixed(2)}</span>
+		</div>`;
+		})
+		.join("");
+
+	const ccSection =
+		ccMonths.length === 0
+			? ""
+			: `
+<div class="section-header mb-2">
+	<span class="section-title">Claude API Usage</span>
+	<span style="margin-left:auto;font-size:0.72rem;color:var(--text-muted);">via ccusage · last ${ccMonths.length} months</span>
+</div>
+<div class="glass-card mb-3" style="padding:0.75rem 1.25rem;">
+	<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem;margin-bottom:0.75rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border-subtle);">
+		<div>
+			<div style="font-size:0.68rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.2rem;">Total (shown)</div>
+			<div style="font-size:1.3rem;font-family:var(--font-display);color:var(--accent-green);">$${ccTotalCost.toFixed(2)}</div>
+		</div>
+		<div>
+			<div style="font-size:0.68rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.2rem;">Total Tokens</div>
+			<div style="font-size:1.3rem;font-family:var(--font-display);color:var(--accent-blue);">${ccTotalTokens >= 1_000_000 ? (ccTotalTokens / 1_000_000).toFixed(1) + "M" : (ccTotalTokens / 1_000).toFixed(0) + "k"}</div>
+		</div>
+	</div>
+	${ccMonthRows}
+</div>`;
+
 	// Crush session snippets
 	const crushRecent = crushSessions
 		.slice(0, 6)
@@ -135,6 +191,9 @@ export function dashboardPage(idx: CairnIndex): string {
 	<span class="section-title">Browse</span>
 </div>
 <div class="doc-grid mb-3">${biomeLinks}</div>
+
+<!-- ccusage monthly breakdown -->
+${ccSection}
 
 <!-- Two column: recent docs + crush sessions -->
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:start;">

@@ -4,14 +4,20 @@ import { join, relative, basename, dirname } from "path";
 import matter from "gray-matter";
 import MiniSearch from "minisearch";
 import { Database } from "bun:sqlite";
-import type { Document, Skill, CrushSession, ClaudeSession, IndexStats } from "./types.ts";
+import type {
+	Document,
+	Skill,
+	CrushSession,
+	ClaudeSession,
+	IndexStats,
+	CCUsageMonth,
+} from "./types.ts";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const PROJECT_ROOT = join(import.meta.dir, "..", "..");
 const CRUSH_DB_PATH = join(PROJECT_ROOT, ".crush", "crush.db");
 const CLAUDE_PROJECTS_DIR = join(process.env.HOME!, ".claude", "projects");
-const LATTICE_SESSION_DIR = join(CLAUDE_PROJECTS_DIR, "-Users-autumn-Documents-Projects-Lattice");
 
 // Files and directories to skip during indexing
 const DENY_PATTERNS = [
@@ -336,88 +342,144 @@ export function loadCrushMessages(sessionId: string): CrushMessage[] {
 
 // ─── Claude Session Scanner ───────────────────────────────────────────────────
 
+/** Derive a human-readable project name from a ~/.claude/projects/ dir name.
+ *  e.g. "-Users-autumn-Documents-Projects-Lattice" → "Lattice"
+ *       "-Users-autumn-Documents-Projects"          → "Projects"
+ */
+function deriveProjectName(dirName: string): string {
+	const parts = dirName.split("-").filter(Boolean);
+	const projectsIdx = parts.lastIndexOf("Projects");
+	if (projectsIdx === -1) return dirName;
+	const after = parts.slice(projectsIdx + 1);
+	return after.length > 0 ? after.join("-") : "Projects";
+}
+
+async function parseSessionFile(
+	fullPath: string,
+	sessionId: string,
+	project: string,
+): Promise<ClaudeSession | null> {
+	try {
+		const raw = readFileSync(fullPath, "utf8");
+		const allLines = raw.split("\n").filter(Boolean);
+		const headerLines = allLines.slice(0, 50);
+
+		let slug: string | undefined;
+		let gitBranch: string | undefined;
+		let version: string | undefined;
+		let createdAt: Date | undefined;
+
+		for (const line of headerLines) {
+			try {
+				const obj = JSON.parse(line) as Record<string, unknown>;
+				if (obj.type === "progress" && obj.sessionId === sessionId) {
+					slug = slug ?? (obj.slug as string | undefined);
+					gitBranch = gitBranch ?? (obj.gitBranch as string | undefined);
+					version = version ?? (obj.version as string | undefined);
+					if (!createdAt && obj.data && typeof obj.data === "object") {
+						const data = obj.data as Record<string, unknown>;
+						if (data.timestamp) createdAt = new Date(data.timestamp as string);
+					}
+				}
+			} catch {
+				// skip malformed lines
+			}
+		}
+
+		const messageCount = allLines.filter((l) => {
+			try {
+				const o = JSON.parse(l) as Record<string, unknown>;
+				return o.type === "assistant" || o.type === "user";
+			} catch {
+				return false;
+			}
+		}).length;
+
+		const toolCallCount = allLines.filter((l) => {
+			try {
+				const o = JSON.parse(l) as Record<string, unknown>;
+				return o.type === "assistant" && l.includes("tool_use");
+			} catch {
+				return false;
+			}
+		}).length;
+
+		return {
+			sessionId,
+			project,
+			filePath: fullPath,
+			slug,
+			messageCount,
+			toolCallCount,
+			createdAt,
+			gitBranch,
+			version,
+		};
+	} catch {
+		return null;
+	}
+}
+
 async function scanClaudeSessions(): Promise<ClaudeSession[]> {
 	const sessions: ClaudeSession[] = [];
 
-	let files: string[];
+	let projectDirs: string[];
 	try {
-		files = await readdir(LATTICE_SESSION_DIR);
+		projectDirs = await readdir(CLAUDE_PROJECTS_DIR);
 	} catch {
 		return sessions;
 	}
 
-	const jsonlFiles = files.filter((f) => f.endsWith(".jsonl")).sort();
+	for (const dirName of projectDirs) {
+		const projectDir = join(CLAUDE_PROJECTS_DIR, dirName);
 
-	for (const file of jsonlFiles) {
-		const sessionId = file.replace(".jsonl", "");
-		const fullPath = join(LATTICE_SESSION_DIR, file);
-
+		let files: string[];
 		try {
-			const raw = readFileSync(fullPath, "utf8");
-			const lines = raw.split("\n").filter(Boolean).slice(0, 50); // Read first 50 lines for metadata
-
-			let slug: string | undefined;
-			let gitBranch: string | undefined;
-			let version: string | undefined;
-			let createdAt: Date | undefined;
-			let messageCount = 0;
-			let toolCallCount = 0;
-
-			for (const line of lines) {
-				try {
-					const obj = JSON.parse(line) as Record<string, unknown>;
-					if (obj.type === "progress" && obj.sessionId === sessionId) {
-						slug = slug ?? (obj.slug as string | undefined);
-						gitBranch = gitBranch ?? (obj.gitBranch as string | undefined);
-						version = version ?? (obj.version as string | undefined);
-						if (!createdAt && obj.data && typeof obj.data === "object") {
-							const data = obj.data as Record<string, unknown>;
-							if (data.timestamp) {
-								createdAt = new Date(data.timestamp as string);
-							}
-						}
-					}
-				} catch {
-					// skip malformed lines
-				}
-			}
-
-			// Count all lines for message estimate
-			const allLines = raw.split("\n").filter(Boolean);
-			messageCount = allLines.filter((l) => {
-				try {
-					const o = JSON.parse(l) as Record<string, unknown>;
-					return o.type === "assistant" || o.type === "user";
-				} catch {
-					return false;
-				}
-			}).length;
-
-			toolCallCount = allLines.filter((l) => {
-				try {
-					const o = JSON.parse(l) as Record<string, unknown>;
-					return o.type === "assistant" && l.includes("tool_use");
-				} catch {
-					return false;
-				}
-			}).length;
-
-			sessions.push({
-				sessionId,
-				project: "Lattice",
-				slug,
-				messageCount,
-				toolCallCount,
-				createdAt,
-				gitBranch,
-				version,
-			});
+			const st = await stat(projectDir);
+			if (!st.isDirectory()) continue;
+			files = await readdir(projectDir);
 		} catch {
-			// Skip unreadable files
+			continue;
+		}
+
+		const projectName = deriveProjectName(dirName);
+		const jsonlFiles = files.filter((f) => f.endsWith(".jsonl")).sort();
+
+		for (const file of jsonlFiles) {
+			const sessionId = file.replace(".jsonl", "");
+			const fullPath = join(projectDir, file);
+			const session = await parseSessionFile(fullPath, sessionId, projectName);
+			if (session) sessions.push(session);
 		}
 	}
 
+	// Sort newest first (sessions without createdAt go last)
+	sessions.sort((a, b) => {
+		if (!a.createdAt && !b.createdAt) return 0;
+		if (!a.createdAt) return 1;
+		if (!b.createdAt) return -1;
+		return b.createdAt.getTime() - a.createdAt.getTime();
+	});
+
 	return sessions;
+}
+
+// ─── ccusage Monthly Stats ────────────────────────────────────────────────────
+
+async function loadCCUsageMonthly(): Promise<CCUsageMonth[]> {
+	try {
+		const binary = Bun.which("ccusage") ?? "/opt/homebrew/bin/ccusage";
+		const proc = Bun.spawn([binary, "monthly", "--json"], {
+			stdout: "pipe",
+			stderr: "pipe",
+		});
+		const output = await new Response(proc.stdout).text();
+		const code = await proc.exited;
+		if (code !== 0 || !output.trim()) return [];
+		return JSON.parse(output) as CCUsageMonth[];
+	} catch {
+		return [];
+	}
 }
 
 // ─── In-Memory Store ──────────────────────────────────────────────────────────
@@ -427,6 +489,7 @@ export interface CairnIndex {
 	skills: Skill[];
 	crushSessions: CrushSession[];
 	claudeSessions: ClaudeSession[];
+	ccUsageMonthly: CCUsageMonth[];
 	searchIndex: MiniSearch;
 	stats: IndexStats;
 }
@@ -481,7 +544,10 @@ export async function buildIndex(): Promise<CairnIndex> {
 
 	// ── Agent Sessions ────────────────────────────────────────────────────────
 	const crushSessions = loadCrushSessions();
-	const claudeSessions = await scanClaudeSessions();
+	const [claudeSessions, ccUsageMonthly] = await Promise.all([
+		scanClaudeSessions(),
+		loadCCUsageMonthly(),
+	]);
 
 	// ── Search Index ──────────────────────────────────────────────────────────
 	const searchIndex = new MiniSearch({
@@ -535,8 +601,9 @@ export async function buildIndex(): Promise<CairnIndex> {
 	}
 
 	const elapsed = Date.now() - startTime;
+	const ccCost = ccUsageMonthly.reduce((s, m) => s + m.totalCost, 0);
 	console.log(
-		`✓  Indexed ${docs.length} docs, ${skills.length} skills, ${crushSessions.length} Crush sessions, ${claudeSessions.length} Claude sessions in ${elapsed}ms`,
+		`✓  Indexed ${docs.length} docs, ${skills.length} skills, ${crushSessions.length} Crush sessions, ${claudeSessions.length} Claude sessions (${ccUsageMonthly.length} months, $${ccCost.toFixed(2)} API cost) in ${elapsed}ms`,
 	);
 
 	return {
@@ -544,6 +611,7 @@ export async function buildIndex(): Promise<CairnIndex> {
 		skills,
 		crushSessions,
 		claudeSessions,
+		ccUsageMonthly,
 		searchIndex,
 		stats: {
 			documents: docs.length,

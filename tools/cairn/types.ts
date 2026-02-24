@@ -77,12 +77,30 @@ export interface CrushMessage {
 export interface ClaudeSession {
 	sessionId: string;
 	project: string;
+	filePath: string;
 	slug?: string;
 	messageCount: number;
 	toolCallCount: number;
 	createdAt?: Date;
 	gitBranch?: string;
 	version?: string;
+}
+
+// ─── ccusage ──────────────────────────────────────────────────────────────────
+
+export interface CCUsageModelBreakdown {
+	model: string;
+	cost: number;
+	tokens: number;
+	requests?: number;
+}
+
+export interface CCUsageMonth {
+	month: string; // "2025-11"
+	totalCost: number;
+	totalTokens: number;
+	modelsUsed: string[];
+	modelBreakdowns: CCUsageModelBreakdown[];
 }
 
 // ─── Index ────────────────────────────────────────────────────────────────────

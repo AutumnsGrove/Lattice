@@ -1,17 +1,8 @@
 import { readFileSync } from "fs";
-import { join } from "path";
 import type { CairnIndex } from "../index.ts";
 import { loadCrushMessages } from "../index.ts";
 import { escHtml, formatDate, emptyState } from "./layout.ts";
 import type { CrushMessage } from "../types.ts";
-
-const HOME = process.env.HOME!;
-const LATTICE_SESSION_DIR = join(
-	HOME,
-	".claude",
-	"projects",
-	"-Users-autumn-Documents-Projects-Lattice",
-);
 
 // ─── Agent Dashboard ──────────────────────────────────────────────────────────
 
@@ -267,15 +258,26 @@ export function claudeSessionsPage(idx: CairnIndex): string {
 		return emptyState("📜", "No Claude Code sessions found.");
 	}
 
+	// Count sessions per project for the subtitle
+	const projectCounts = new Map<string, number>();
+	for (const s of claudeSessions) {
+		projectCounts.set(s.project, (projectCounts.get(s.project) ?? 0) + 1);
+	}
+	const projectSummary = [...projectCounts.entries()]
+		.sort((a, b) => b[1] - a[1])
+		.map(([p, n]) => `${escHtml(p)} (${n})`)
+		.join(" · ");
+
 	const rows = claudeSessions
 		.map(
 			(s) => `
-		<a href="/agents/claude/${escHtml(s.sessionId)}" style="display:grid;grid-template-columns:1fr auto auto auto;gap:1rem;align-items:center;padding:0.65rem 1rem;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:6px;text-decoration:none;margin-bottom:0.4rem;transition:border-color 0.15s;">
+		<a href="/agents/claude/${escHtml(s.sessionId)}" style="display:grid;grid-template-columns:1fr auto auto auto auto;gap:1rem;align-items:center;padding:0.65rem 1rem;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:6px;text-decoration:none;margin-bottom:0.4rem;transition:border-color 0.15s;">
 			<div>
 				<div class="session-title">${escHtml(s.slug ?? s.sessionId.slice(0, 8) + "…")}</div>
 				<div class="session-meta" style="font-family:var(--font-mono);font-size:0.68rem;">${escHtml(s.sessionId.slice(0, 12))}… ${s.gitBranch ? "· " + escHtml(s.gitBranch) : ""}</div>
 			</div>
-			${s.createdAt ? `<span class="session-meta">${formatDate(s.createdAt)}</span>` : ""}
+			<span class="tag" style="white-space:nowrap;">${escHtml(s.project)}</span>
+			${s.createdAt ? `<span class="session-meta">${formatDate(s.createdAt)}</span>` : "<span></span>"}
 			<span class="session-msgs">${s.messageCount} msgs</span>
 			<span class="session-msgs" style="color:var(--accent-blue);">${s.toolCallCount} tools</span>
 		</a>`,
@@ -286,8 +288,8 @@ export function claudeSessionsPage(idx: CairnIndex): string {
 <div class="page-header">
 	<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
 		<div>
-			<h1 class="page-title">📜 Claude Sessions</h1>
-			<p class="page-subtitle">${claudeSessions.length} session files for this project</p>
+			<h1 class="page-title">Claude Sessions</h1>
+			<p class="page-subtitle">${claudeSessions.length} sessions across all projects · ${projectSummary}</p>
 		</div>
 		<a href="/agents" style="font-size:0.78rem;color:var(--text-secondary);">← Agents</a>
 	</div>
@@ -303,8 +305,8 @@ export function claudeSessionDetailPage(idx: CairnIndex, sessionId: string): str
 	const session = idx.claudeSessions.find((s) => s.sessionId === sessionId);
 	if (!session) return null;
 
-	// Read the JSONL file
-	const filePath = join(LATTICE_SESSION_DIR, `${sessionId}.jsonl`);
+	// Read the JSONL file using the stored path
+	const filePath = session.filePath;
 	const messages: { role: string; text: string; ts?: string; tools?: string[] }[] = [];
 
 	try {
@@ -424,6 +426,10 @@ export function claudeSessionDetailPage(idx: CairnIndex, sessionId: string): str
 	<div class="doc-toc">
 		<div class="toc-title">Session Info</div>
 		<div style="display:flex;flex-direction:column;gap:0.5rem;margin-top:0.5rem;">
+			<div style="font-size:0.75rem;">
+				<div style="color:var(--text-muted);font-size:0.68rem;margin-bottom:0.1rem;">Project</div>
+				<div><span class="tag">${escHtml(session.project)}</span></div>
+			</div>
 			<div style="font-size:0.75rem;">
 				<div style="color:var(--text-muted);font-size:0.68rem;margin-bottom:0.1rem;">Session ID</div>
 				<div style="font-family:var(--font-mono);font-size:0.68rem;word-break:break-all;">${escHtml(sessionId)}</div>
