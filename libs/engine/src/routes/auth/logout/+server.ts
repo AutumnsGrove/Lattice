@@ -1,8 +1,9 @@
 /**
  * Logout - Revoke SessionDO session and clear all auth cookies
  *
- * POST-only to prevent CSRF logout attacks (no GET handler).
- * All logout UI uses <form method="POST"> to submit here.
+ * POST-only logout to prevent CSRF attacks. All logout UI uses
+ * <form method="POST"> to submit here. GET redirects to home
+ * as a graceful fallback for bookmarks or stale links.
  *
  * This endpoint:
  * 1. Calls GroveAuth /session/revoke to invalidate the SessionDO session
@@ -12,6 +13,12 @@
 import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { AUTH_HUB_URL } from "$lib/config/auth.js";
+
+// GET → 302 to home: graceful fallback for bookmarks, stale links, etc.
+// Does NOT perform logout — that requires POST to prevent CSRF.
+export const GET: RequestHandler = async () => {
+	redirect(302, "/");
+};
 
 /** POST logout handler (CSRF-safe, used by form submissions). */
 export const POST: RequestHandler = async ({ url, cookies, platform }) => {
