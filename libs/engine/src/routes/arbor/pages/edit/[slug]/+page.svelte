@@ -7,13 +7,7 @@
 	import { toast } from "$lib/ui/components/ui/toast";
 	import { api } from "$lib/utils";
 	import { clickOutside } from "$lib/actions/clickOutside";
-	import {
-		ExternalLink,
-		Ellipsis,
-		Trash2,
-		ChevronRight,
-		ArrowLeft,
-	} from "lucide-svelte";
+	import { ExternalLink, Ellipsis, Trash2, ChevronRight, ArrowLeft } from "lucide-svelte";
 	import Waystone from "$lib/ui/components/ui/Waystone.svelte";
 
 	/**
@@ -105,8 +99,8 @@
 			title !== (data.page.title || "") ||
 			description !== (data.page.description || "") ||
 			content !== (data.page.markdown_content || "") ||
-			font !== (/** @type {any} */ (data.page).font || "default") ||
-			showInNav !== (/** @type {any} */ (data.page).show_in_nav === 1) ||
+			font !== /** @type {any} */ (data.page.font || "default") ||
+			showInNav !== /** @type {any} */ (data.page.show_in_nav === 1) ||
 			heroTitle !== (data.page.hero?.title || "") ||
 			heroSubtitle !== (data.page.hero?.subtitle || "") ||
 			heroCtaText !== (data.page.hero?.cta?.text || "") ||
@@ -234,7 +228,12 @@
 			</span>
 
 			<!-- View Live -->
-			<Button variant="ghost" size="icon" href="/{slug}" title="View live page">
+			<Button
+				variant="ghost"
+				size="icon"
+				href={slug === "home" ? "/" : `/${slug}`}
+				title="View live page"
+			>
 				<ExternalLink size={16} />
 			</Button>
 
@@ -274,7 +273,7 @@
 			{/if}
 
 			<!-- Save (primary action, always rightmost) -->
-			<Button onclick={handleSave} disabled={saving}>
+			<Button onclick={handleSave} disabled={saving || !hasUnsavedChanges}>
 				{saving ? "Saving..." : "Save"}
 			</Button>
 		</div>
@@ -822,7 +821,9 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.75rem;
-		transition: background-color 0.3s ease, border-color 0.3s ease;
+		transition:
+			background-color 0.3s ease,
+			border-color 0.3s ease;
 	}
 	:global(.dark) .hero-fields {
 		background: rgba(30, 41, 59, 0.4);

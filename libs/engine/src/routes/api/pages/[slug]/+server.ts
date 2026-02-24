@@ -100,12 +100,12 @@ export const PUT: RequestHandler = async ({ params, request, platform, locals })
 			throwGroveError(413, API_ERRORS.CONTENT_TOO_LARGE, "API");
 		}
 
-		// Check if page exists and belongs to tenant
+		// Check if page exists and belongs to tenant (fetch show_in_nav to preserve when omitted)
 		const existing = await platform.env.DB.prepare(
-			"SELECT slug FROM pages WHERE slug = ? AND tenant_id = ?",
+			"SELECT slug, show_in_nav FROM pages WHERE slug = ? AND tenant_id = ?",
 		)
 			.bind(slug, tenantId)
-			.first();
+			.first<{ slug: string; show_in_nav: number | null }>();
 
 		if (!existing) {
 			throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
@@ -128,7 +128,11 @@ export const PUT: RequestHandler = async ({ params, request, platform, locals })
 			html_content,
 			data.hero || null,
 			data.font && ALLOWED_FONTS.has(data.font) ? data.font : "default",
-			typeof data.show_in_nav === "boolean" ? (data.show_in_nav ? 1 : 0) : 0,
+			typeof data.show_in_nav === "boolean"
+				? data.show_in_nav
+					? 1
+					: 0
+				: (existing.show_in_nav ?? 0),
 			now,
 			slug,
 			tenantId,
