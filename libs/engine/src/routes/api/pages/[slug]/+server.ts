@@ -116,7 +116,10 @@ export const PUT: RequestHandler = async ({ params, request, platform, locals })
 
 		const now = new Date().toISOString();
 
-		// Build the update query
+		// Build the update query.
+		// Note: show_in_nav is writable via both PUT and PATCH.
+		// PUT preserves the existing value when the field is omitted (not reset to 0).
+		// PATCH is the lightweight toggle; PUT is the full-page save from the editor.
 		const updateQuery = `UPDATE pages
        SET title = ?, description = ?, markdown_content = ?, html_content = ?, hero = ?, font = ?, show_in_nav = ?, updated_at = ?
        WHERE slug = ? AND tenant_id = ?`;
@@ -132,7 +135,7 @@ export const PUT: RequestHandler = async ({ params, request, platform, locals })
 				? data.show_in_nav
 					? 1
 					: 0
-				: (existing.show_in_nav ?? 0),
+				: (existing?.show_in_nav ?? 0),
 			now,
 			slug,
 			tenantId,
