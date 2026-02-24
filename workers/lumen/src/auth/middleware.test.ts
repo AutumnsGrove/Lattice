@@ -32,6 +32,7 @@ function createEnv(apiKey?: string): Env {
 		WARDEN: { fetch: vi.fn() },
 		RATE_LIMITS: {} as KVNamespace,
 		LUMEN_API_KEY: apiKey ?? TEST_API_KEY,
+		WARDEN_API_KEY: "test-warden-key",
 	} as Env;
 }
 

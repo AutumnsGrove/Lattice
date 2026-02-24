@@ -33,6 +33,7 @@ const mockEnv: Env = {
 	WARDEN: { fetch: vi.fn() },
 	RATE_LIMITS: {} as KVNamespace,
 	LUMEN_API_KEY: "test-key",
+	WARDEN_API_KEY: "test-warden-key",
 };
 
 // Create a small valid base64 string (represents "hello" in base64)

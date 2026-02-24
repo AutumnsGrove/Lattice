@@ -3,7 +3,7 @@
  *
  * Tests LumenClient creation and credential resolution priority:
  * 1. tenantApiKey (BYOK)
- * 2. env.OPENROUTER_API_KEY (worker fallback)
+ * 2. Warden /resolve (per-tenant → global, via service binding)
  * 3. Empty string (no key available)
  */
 
@@ -21,8 +21,14 @@ const mockCreateLumenClient = vi.hoisted(() =>
 	}),
 );
 
+const mockResolveWardenCredential = vi.hoisted(() => vi.fn());
+
 vi.mock("@autumnsgrove/lattice/lumen", () => ({
 	createLumenClient: mockCreateLumenClient,
+}));
+
+vi.mock("./warden-client", () => ({
+	resolveWardenCredential: mockResolveWardenCredential,
 }));
 
 import { createLumenClientForWorker } from "./client-factory";
@@ -35,6 +41,7 @@ function createMockEnv(overrides: Partial<Env> = {}): Env {
 		WARDEN: { fetch: vi.fn() },
 		RATE_LIMITS: {} as KVNamespace,
 		LUMEN_API_KEY: "test-key",
+		WARDEN_API_KEY: "test-warden-key",
 		...overrides,
 	};
 }
@@ -42,12 +49,14 @@ function createMockEnv(overrides: Partial<Env> = {}): Env {
 describe("createLumenClientForWorker", () => {
 	beforeEach(() => {
 		mockCreateLumenClient.mockClear();
+		mockResolveWardenCredential.mockReset();
 	});
 
-	it("should use tenant API key when provided (BYOK)", () => {
-		const env = createMockEnv({ OPENROUTER_API_KEY: "env-key" });
-		createLumenClientForWorker(env, "tenant-byok-key");
+	it("should use tenant API key when provided (BYOK)", async () => {
+		const env = createMockEnv();
+		await createLumenClientForWorker(env, "tenant-byok-key");
 
+		expect(mockResolveWardenCredential).not.toHaveBeenCalled();
 		expect(mockCreateLumenClient).toHaveBeenCalledWith(
 			expect.objectContaining({
 				openrouterApiKey: "tenant-byok-key",
@@ -55,20 +64,31 @@ describe("createLumenClientForWorker", () => {
 		);
 	});
 
-	it("should fall back to env.OPENROUTER_API_KEY when no tenant key", () => {
-		const env = createMockEnv({ OPENROUTER_API_KEY: "env-key" });
-		createLumenClientForWorker(env);
+	it("should fall back to Warden resolution when no tenant key", async () => {
+		mockResolveWardenCredential.mockResolvedValue({
+			credential: "warden-resolved-key",
+			source: "global",
+		});
+		const env = createMockEnv();
+		await createLumenClientForWorker(env);
 
+		expect(mockResolveWardenCredential).toHaveBeenCalledWith(
+			env.WARDEN,
+			"test-warden-key",
+			"openrouter",
+			undefined,
+		);
 		expect(mockCreateLumenClient).toHaveBeenCalledWith(
 			expect.objectContaining({
-				openrouterApiKey: "env-key",
+				openrouterApiKey: "warden-resolved-key",
 			}),
 		);
 	});
 
-	it("should use empty string when no keys available", () => {
+	it("should use empty string when Warden resolution returns null", async () => {
+		mockResolveWardenCredential.mockResolvedValue(null);
 		const env = createMockEnv();
-		createLumenClientForWorker(env);
+		await createLumenClientForWorker(env);
 
 		expect(mockCreateLumenClient).toHaveBeenCalledWith(
 			expect.objectContaining({
@@ -77,10 +97,11 @@ describe("createLumenClientForWorker", () => {
 		);
 	});
 
-	it("should pass AI binding to client config", () => {
+	it("should pass AI binding to client config", async () => {
+		mockResolveWardenCredential.mockResolvedValue(null);
 		const mockAI = { run: vi.fn() } as unknown as Ai;
 		const env = createMockEnv({ AI: mockAI });
-		createLumenClientForWorker(env);
+		await createLumenClientForWorker(env);
 
 		expect(mockCreateLumenClient).toHaveBeenCalledWith(
 			expect.objectContaining({
@@ -89,10 +110,11 @@ describe("createLumenClientForWorker", () => {
 		);
 	});
 
-	it("should pass DB binding to client config", () => {
+	it("should pass DB binding to client config", async () => {
+		mockResolveWardenCredential.mockResolvedValue(null);
 		const mockDB = { prepare: vi.fn() } as unknown as D1Database;
 		const env = createMockEnv({ DB: mockDB });
-		createLumenClientForWorker(env);
+		await createLumenClientForWorker(env);
 
 		expect(mockCreateLumenClient).toHaveBeenCalledWith(
 			expect.objectContaining({
@@ -101,9 +123,10 @@ describe("createLumenClientForWorker", () => {
 		);
 	});
 
-	it("should set enabled to true", () => {
+	it("should set enabled to true", async () => {
+		mockResolveWardenCredential.mockResolvedValue(null);
 		const env = createMockEnv();
-		createLumenClientForWorker(env);
+		await createLumenClientForWorker(env);
 
 		expect(mockCreateLumenClient).toHaveBeenCalledWith(
 			expect.objectContaining({
@@ -112,13 +135,39 @@ describe("createLumenClientForWorker", () => {
 		);
 	});
 
-	it("should prefer tenant key over env key", () => {
-		const env = createMockEnv({ OPENROUTER_API_KEY: "env-fallback" });
-		createLumenClientForWorker(env, "tenant-preferred");
+	it("should prefer tenant key over Warden resolution", async () => {
+		mockResolveWardenCredential.mockResolvedValue({
+			credential: "warden-key",
+			source: "global",
+		});
+		const env = createMockEnv();
+		await createLumenClientForWorker(env, "tenant-preferred");
 
+		expect(mockResolveWardenCredential).not.toHaveBeenCalled();
 		expect(mockCreateLumenClient).toHaveBeenCalledWith(
 			expect.objectContaining({
 				openrouterApiKey: "tenant-preferred",
+			}),
+		);
+	});
+
+	it("should pass tenantId to Warden for per-tenant resolution", async () => {
+		mockResolveWardenCredential.mockResolvedValue({
+			credential: "tenant-specific-key",
+			source: "tenant",
+		});
+		const env = createMockEnv();
+		await createLumenClientForWorker(env, undefined, "tenant-123");
+
+		expect(mockResolveWardenCredential).toHaveBeenCalledWith(
+			env.WARDEN,
+			"test-warden-key",
+			"openrouter",
+			"tenant-123",
+		);
+		expect(mockCreateLumenClient).toHaveBeenCalledWith(
+			expect.objectContaining({
+				openrouterApiKey: "tenant-specific-key",
 			}),
 		);
 	});

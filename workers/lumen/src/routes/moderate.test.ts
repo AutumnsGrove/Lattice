@@ -33,6 +33,7 @@ const mockEnv: Env = {
 	WARDEN: { fetch: vi.fn() },
 	RATE_LIMITS: {} as KVNamespace,
 	LUMEN_API_KEY: "test-key",
+	WARDEN_API_KEY: "test-warden-key",
 };
 
 function post(body: unknown) {

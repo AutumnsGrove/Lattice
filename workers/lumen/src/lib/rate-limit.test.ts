@@ -80,6 +80,7 @@ function createMockContext(overrides: Partial<{ env: Partial<Env>; ip: string }>
 	return {
 		env: {
 			RATE_LIMITS: {} as KVNamespace,
+			WARDEN_API_KEY: "test-warden-key",
 			...overrides.env,
 		} as Env,
 		req: {
