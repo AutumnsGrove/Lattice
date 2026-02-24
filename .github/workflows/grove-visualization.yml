@@ -4,71 +4,46 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - "apps/*/package.json"
-      - "services/*/package.json"
-      - "workers/*/package.json"
-      - "libs/*/package.json"
+      - "apps/**"
+      - "services/**"
+      - "workers/**"
+      - "libs/**"
       - "pnpm-workspace.yaml"
-
-  # Weekly forest census
-  schedule:
-    - cron: "0 6 * * 1" # Monday 6am UTC
-
-  workflow_dispatch:
 
 permissions:
   contents: read
   pull-requests: write
 
 jobs:
-  visualize:
-    name: Generate Grove Map
+  pr-impact:
+    name: PR Impact
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Full history for base branch comparison
+          fetch-depth: 0
 
-      - name: Snapshot base branch (PR only)
-        if: github.event_name == 'pull_request'
+      - name: Snapshot base branch
         run: |
-          # Copy script before switching branches (base may have old version)
           cp .github/scripts/grove-visualization.mjs /tmp/grove-viz.mjs
           git checkout ${{ github.event.pull_request.base.sha }} --quiet
           node /tmp/grove-viz.mjs . --json > /tmp/base.json
           git checkout ${{ github.sha }} --quiet
 
-      - name: Generate visualization
+      - name: Generate diff
         id: grove
         run: |
-          BASE_ARG=""
-          [ -f /tmp/base.json ] && BASE_ARG="--base /tmp/base.json"
+          node .github/scripts/grove-visualization.mjs . --markdown --base /tmp/base.json > /tmp/grove.md
 
-          node .github/scripts/grove-visualization.mjs . --markdown $BASE_ARG > /tmp/grove.md
-          node .github/scripts/grove-visualization.mjs . --json > /tmp/grove.json
-          node .github/scripts/grove-visualization.mjs . $BASE_ARG > /tmp/grove.txt
-
-          # Store markdown for PR comment
           {
             echo 'markdown<<GROVE_EOF'
             cat /tmp/grove.md
             echo 'GROVE_EOF'
           } >> $GITHUB_OUTPUT
 
-      - name: Upload grove artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: grove-visualization
-          path: |
-            /tmp/grove.md
-            /tmp/grove.json
-            /tmp/grove.txt
-          retention-days: 90
-
       - name: Comment on PR
-        if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
         env:
           COMMENT_BODY: ${{ steps.grove.outputs.markdown }}
@@ -101,9 +76,3 @@ jobs:
                 body,
               });
             }
-
-      - name: Print grove to log
-        run: |
-          echo "🌲 The Grove — Census"
-          echo "═══════════════════════════════════"
-          cat /tmp/grove.txt

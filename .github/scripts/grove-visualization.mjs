@@ -1,12 +1,11 @@
 /**
- * Grove Codebase Visualization
+ * Grove PR Impact
  *
- * Generates a compact, useful overview of the monorepo.
- * - Census mode (default): bar chart of package sizes, category breakdown
- * - PR diff mode (--base file.json): shows only changed packages with deltas
+ * Compares package file counts between a base snapshot and the current tree.
+ * Shows only what changed — added, removed, or resized packages.
  *
  * Usage:
- *   node grove-visualization.mjs [root] [--markdown] [--json] [--base file.json]
+ *   node grove-visualization.mjs [root] --base base.json [--markdown] [--json]
  */
 
 import { readdirSync, readFileSync, existsSync } from "node:fs";
@@ -16,8 +15,9 @@ import { join } from "node:path";
 
 const args = process.argv.slice(2);
 const ROOT =
-	args.find((a) => !a.startsWith("--") && args[args.indexOf(a) - 1] !== "--base") ||
-	process.cwd();
+	args.find(
+		(a) => !a.startsWith("--") && args[args.indexOf(a) - 1] !== "--base",
+	) || process.cwd();
 const FORMAT = args.includes("--json")
 	? "json"
 	: args.includes("--markdown")
@@ -43,7 +43,8 @@ function countFiles(dir) {
 	let count = 0;
 	try {
 		for (const entry of readdirSync(dir, { withFileTypes: true })) {
-			if (entry.name.startsWith(".") || entry.name === "node_modules") continue;
+			if (entry.name.startsWith(".") || entry.name === "node_modules")
+				continue;
 			const fullPath = join(dir, entry.name);
 			if (entry.isDirectory()) {
 				count += countFiles(fullPath);
@@ -76,8 +77,9 @@ function discoverPackages() {
 				if (existsSync(pkgJsonPath)) {
 					const pkg = JSON.parse(readFileSync(pkgJsonPath, "utf-8"));
 					name =
-						pkg.name?.replace(/^@autumnsgrove\//, "").replace(/^grove-/, "") ||
-						entry.name;
+						pkg.name
+							?.replace(/^@autumnsgrove\//, "")
+							.replace(/^grove-/, "") || entry.name;
 				}
 			} catch {
 				// Use directory name
@@ -97,85 +99,31 @@ function discoverPackages() {
 	return packages.sort((a, b) => b.fileCount - a.fileCount);
 }
 
-// ─── Bar rendering ───────────────────────────────────────────────────
+// ─── JSON snapshot ───────────────────────────────────────────────────
 
-function bar(value, max, width = 35) {
-	if (max === 0) return "▏";
-	const len = Math.max(1, Math.round((value / max) * width));
-	return "█".repeat(len);
+function toJSON(packages) {
+	return JSON.stringify(
+		{
+			generated: new Date().toISOString(),
+			packages: packages.map((p) => ({
+				name: p.name,
+				path: p.path,
+				category: p.category,
+				fileCount: p.fileCount,
+			})),
+		},
+		null,
+		2,
+	);
 }
 
-// ─── Census mode ─────────────────────────────────────────────────────
+// ─── Diff rendering ─────────────────────────────────────────────────
 
-function renderCensus(packages) {
-	const lines = [];
-	const totalFiles = packages.reduce((s, p) => s + p.fileCount, 0);
-	const maxFiles = packages[0]?.fileCount || 1;
-
-	// Header
-	lines.push("🌲 The Grove — Census");
-	lines.push("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-	lines.push(
-		`${packages.length} packages · ${totalFiles.toLocaleString()} source files`,
-	);
-	lines.push("");
-
-	// Category summary table
-	lines.push("  Category          Packages     Files");
-	lines.push("  ────────────────────────────────────────");
-	for (const cat of CATEGORIES) {
-		const pkgs = packages.filter((p) => p.category === cat.type);
-		if (pkgs.length === 0) continue;
-		const files = pkgs.reduce((s, p) => s + p.fileCount, 0);
-		const label = `${cat.emoji} ${cat.label}`;
-		lines.push(
-			`  ${label.padEnd(20)} ${String(pkgs.length).padStart(4)}     ${String(files.toLocaleString()).padStart(5)}`,
-		);
-	}
-	lines.push("  ────────────────────────────────────────");
-	lines.push(
-		`  ${"Total".padEnd(20)} ${String(packages.length).padStart(4)}     ${String(totalFiles.toLocaleString()).padStart(5)}`,
-	);
-	lines.push("");
-
-	// Bar chart — top 10 packages
-	lines.push("  Largest packages:");
-	lines.push("");
-	const top = packages.slice(0, 10);
-	for (const pkg of top) {
-		const nameStr =
-			pkg.name.length > 14 ? pkg.name.slice(0, 13) + "…" : pkg.name;
-		const countStr = String(pkg.fileCount).padStart(5);
-		const b = bar(pkg.fileCount, maxFiles);
-		lines.push(
-			`  ${nameStr.padEnd(15)} ${countStr}  ${b} ${EMOJI_MAP[pkg.category]}`,
-		);
-	}
-
-	// Remaining packages as compact note
-	if (packages.length > 10) {
-		const restFiles = packages
-			.slice(10)
-			.reduce((s, p) => s + p.fileCount, 0);
-		lines.push("");
-		lines.push(
-			`  + ${packages.length - 10} more packages (${restFiles.toLocaleString()} files)`,
-		);
-	}
-
-	lines.push("");
-	return lines.join("\n");
-}
-
-// ─── PR diff mode ────────────────────────────────────────────────────
-
-function renderDiff(headPackages, baseData) {
-	const lines = [];
+function computeDiff(headPackages, baseData) {
 	const basePkgs = baseData.packages;
 	const baseMap = new Map(basePkgs.map((p) => [p.path, p]));
 	const headMap = new Map(headPackages.map((p) => [p.path, p]));
 
-	// Compute changes
 	const changes = [];
 	const added = [];
 	const removed = [];
@@ -202,24 +150,23 @@ function renderDiff(headPackages, baseData) {
 		}
 	}
 
+	changes.sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta));
+
 	const totalBefore = basePkgs.reduce((s, p) => s + p.fileCount, 0);
 	const totalAfter = headPackages.reduce((s, p) => s + p.fileCount, 0);
+
+	return { changes, added, removed, totalBefore, totalAfter };
+}
+
+function renderDiff(diff) {
+	const { changes, added, removed, totalBefore, totalAfter } = diff;
 	const totalDelta = totalAfter - totalBefore;
 	const changedCount = changes.length + added.length + removed.length;
 	const deltaStr = totalDelta >= 0 ? `+${totalDelta}` : String(totalDelta);
-
-	// Header
-	lines.push("🌲 The Grove — PR Impact");
-	lines.push("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+	const lines = [];
 
 	if (changedCount === 0) {
-		lines.push("");
-		lines.push("  No package size changes. The grove is unchanged. 🌿");
-		lines.push("");
-		lines.push(
-			`  Total: ${totalAfter.toLocaleString()} files across ${headPackages.length} packages`,
-		);
-		lines.push("");
+		lines.push("No package size changes. The grove is unchanged. 🌿");
 		return lines.join("\n");
 	}
 
@@ -228,9 +175,7 @@ function renderDiff(headPackages, baseData) {
 	);
 	lines.push("");
 
-	// Changed packages table
 	if (changes.length > 0) {
-		changes.sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta));
 		lines.push("  Package                Before    After    Delta");
 		lines.push(
 			"  ──────────────────────────────────────────────────",
@@ -248,7 +193,6 @@ function renderDiff(headPackages, baseData) {
 		lines.push("");
 	}
 
-	// New packages
 	if (added.length > 0) {
 		for (const pkg of added) {
 			lines.push(
@@ -258,7 +202,6 @@ function renderDiff(headPackages, baseData) {
 		lines.push("");
 	}
 
-	// Removed packages
 	if (removed.length > 0) {
 		for (const pkg of removed) {
 			lines.push(
@@ -268,78 +211,27 @@ function renderDiff(headPackages, baseData) {
 		lines.push("");
 	}
 
-	// Total
 	lines.push(
 		`  Total: ${totalBefore.toLocaleString()} → ${totalAfter.toLocaleString()} files (${deltaStr})`,
 	);
-	lines.push("");
+
 	return lines.join("\n");
 }
 
-// ─── JSON output ─────────────────────────────────────────────────────
-
-function toJSON(packages) {
-	const totalFiles = packages.reduce((s, p) => s + p.fileCount, 0);
-	return JSON.stringify(
-		{
-			generated: new Date().toISOString(),
-			summary: {
-				totalPackages: packages.length,
-				totalFiles,
-				byCategory: Object.fromEntries(
-					CATEGORIES.map((cat) => {
-						const pkgs = packages.filter((p) => p.category === cat.type);
-						return [
-							cat.type,
-							{
-								count: pkgs.length,
-								files: pkgs.reduce((s, p) => s + p.fileCount, 0),
-							},
-						];
-					}),
-				),
-			},
-			packages: packages.map((p) => ({
-				name: p.name,
-				path: p.path,
-				category: p.category,
-				fileCount: p.fileCount,
-			})),
-		},
-		null,
-		2,
-	);
-}
-
-// ─── Markdown wrappers ───────────────────────────────────────────────
-
-function toMarkdownCensus(packages, plainText) {
-	const totalFiles = packages.reduce((s, p) => s + p.fileCount, 0);
-
-	let md = `## 🌲 The Grove — Codebase Visualization\n\n`;
-	md += `*${packages.length} packages · ${totalFiles.toLocaleString()} source files*\n\n`;
-	md += "```\n" + plainText + "\n```\n\n";
-
-	// Full package table in collapsible section
-	md += "<details><summary>All packages</summary>\n\n";
-	md += "| Package | Type | Files | Path |\n";
-	md += "| --- | --- | ---: | --- |\n";
-
-	for (const pkg of packages) {
-		md += `| ${EMOJI_MAP[pkg.category]} ${pkg.name} | ${pkg.categoryLabel} | ${pkg.fileCount} | \`${pkg.path}\` |\n`;
-	}
-
-	md += "\n</details>\n";
-	return md;
-}
-
-function toMarkdownDiff(headPackages, baseData, plainText) {
-	const totalAfter = headPackages.reduce((s, p) => s + p.fileCount, 0);
-	const totalBefore = baseData.packages.reduce((s, p) => s + p.fileCount, 0);
+function toMarkdown(headPackages, diff, plainText) {
+	const { totalBefore, totalAfter } = diff;
 	const delta = totalAfter - totalBefore;
 	const deltaStr = delta >= 0 ? `+${delta}` : String(delta);
+	const changedCount =
+		diff.changes.length + diff.added.length + diff.removed.length;
 
 	let md = `## 🌲 The Grove — PR Impact\n\n`;
+
+	if (changedCount === 0) {
+		md += `*${headPackages.length} packages · ${totalAfter.toLocaleString()} files · no size changes*\n`;
+		return md;
+	}
+
 	md += `*${headPackages.length} packages · ${totalAfter.toLocaleString()} files (${deltaStr} from base)*\n\n`;
 	md += "```\n" + plainText + "\n```\n";
 	return md;
@@ -350,22 +242,22 @@ function toMarkdownDiff(headPackages, baseData, plainText) {
 const packages = discoverPackages();
 
 if (FORMAT === "json") {
+	// Snapshot mode — used by workflow to capture base branch state
 	console.log(toJSON(packages));
 } else if (BASE_FILE) {
-	// PR diff mode
+	// Diff mode — compare HEAD against base snapshot
 	const baseData = JSON.parse(readFileSync(BASE_FILE, "utf-8"));
-	const plainText = renderDiff(packages, baseData);
+	const diff = computeDiff(packages, baseData);
+	const plainText = renderDiff(diff);
 	if (FORMAT === "markdown") {
-		console.log(toMarkdownDiff(packages, baseData, plainText));
+		console.log(toMarkdown(packages, diff, plainText));
 	} else {
 		console.log(plainText);
 	}
 } else {
-	// Census mode
-	const plainText = renderCensus(packages);
-	if (FORMAT === "markdown") {
-		console.log(toMarkdownCensus(packages, plainText));
-	} else {
-		console.log(plainText);
-	}
+	console.error("Usage: grove-visualization.mjs [root] --base base.json [--markdown | --json]");
+	console.error("  --json     Generate a snapshot (no --base needed)");
+	console.error("  --base     Compare against a base snapshot");
+	console.error("  --markdown Wrap output in GitHub-flavored markdown");
+	process.exit(1);
 }
