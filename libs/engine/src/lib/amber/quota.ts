@@ -7,13 +7,10 @@
  * @module @autumnsgrove/lattice/amber
  */
 
-import type { GroveDatabase } from "@autumnsgrove/server-sdk";
-import type {
-	AmberQuota,
-	AmberUsageEntry,
-	D1UserStorageRow,
-	D1UsageBreakdownRow,
-} from "./types.js";
+import type { EngineDb } from "../server/db/client.js";
+import { storageFiles, userStorage } from "../server/db/schema/engine.js";
+import { eq, and, sql, isNull } from "drizzle-orm";
+import type { AmberQuota, AmberUsageEntry } from "./types.js";
 import { GB_IN_BYTES } from "./utils.js";
 
 /** Quota warning thresholds */
@@ -24,7 +21,7 @@ const QUOTA_THRESHOLDS = {
 } as const;
 
 export class QuotaManager {
-	constructor(private db: GroveDatabase) {}
+	constructor(private db: EngineDb) {}
 
 	/**
 	 * Get current quota status for a user.
@@ -35,9 +32,10 @@ export class QuotaManager {
 	 */
 	async status(userId: string): Promise<AmberQuota> {
 		const row = await this.db
-			.prepare("SELECT * FROM user_storage WHERE user_id = ?")
-			.bind(userId)
-			.first<D1UserStorageRow>();
+			.select()
+			.from(userStorage)
+			.where(eq(userStorage.userId, userId))
+			.get();
 
 		if (!row) {
 			return {
@@ -72,22 +70,21 @@ export class QuotaManager {
 	 */
 	async breakdown(userId: string): Promise<AmberUsageEntry[]> {
 		const result = await this.db
-			.prepare(
-				`SELECT product, category,
-				        SUM(size_bytes) as bytes,
-				        COUNT(*) as file_count
-				 FROM storage_files
-				 WHERE user_id = ? AND deleted_at IS NULL
-				 GROUP BY product, category`,
-			)
-			.bind(userId)
-			.all<D1UsageBreakdownRow>();
+			.select({
+				product: storageFiles.product,
+				category: storageFiles.category,
+				bytes: sql<number>`SUM(${storageFiles.sizeBytes})`,
+				fileCount: sql<number>`COUNT(*)`,
+			})
+			.from(storageFiles)
+			.where(and(eq(storageFiles.userId, userId), isNull(storageFiles.deletedAt)))
+			.groupBy(storageFiles.product, storageFiles.category);
 
-		return result.results.map((row) => ({
+		return result.map((row) => ({
 			product: row.product,
 			category: row.category,
 			bytes: row.bytes,
-			fileCount: row.file_count,
+			fileCount: row.fileCount,
 		}));
 	}
 
@@ -97,21 +94,21 @@ export class QuotaManager {
 	 */
 	async getOrCreateStorage(userId: string, tierGb: number): Promise<AmberQuota> {
 		const existing = await this.db
-			.prepare("SELECT * FROM user_storage WHERE user_id = ?")
-			.bind(userId)
-			.first<D1UserStorageRow>();
+			.select()
+			.from(userStorage)
+			.where(eq(userStorage.userId, userId))
+			.get();
 
 		if (existing) {
 			return this.calculateQuota(existing);
 		}
 
-		await this.db
-			.prepare(
-				`INSERT INTO user_storage (user_id, tier_gb, additional_gb, used_bytes)
-				 VALUES (?, ?, 0, 0)`,
-			)
-			.bind(userId, tierGb)
-			.run();
+		await this.db.insert(userStorage).values({
+			userId,
+			tierGb,
+			additionalGb: 0,
+			usedBytes: 0,
+		});
 
 		return {
 			tierGb,
@@ -125,11 +122,11 @@ export class QuotaManager {
 		};
 	}
 
-	/** Calculate quota status from a D1 row */
-	private calculateQuota(row: D1UserStorageRow): AmberQuota {
-		const totalGb = row.tier_gb + row.additional_gb;
+	/** Calculate quota status from a user storage row */
+	private calculateQuota(row: typeof userStorage.$inferSelect): AmberQuota {
+		const totalGb = row.tierGb + row.additionalGb;
 		const totalBytes = totalGb * GB_IN_BYTES;
-		const ratio = totalBytes > 0 ? row.used_bytes / totalBytes : 0;
+		const ratio = totalBytes > 0 ? row.usedBytes / totalBytes : 0;
 
 		let warningLevel: AmberQuota["warningLevel"] = "none";
 		if (ratio >= QUOTA_THRESHOLDS.full) {
@@ -141,12 +138,12 @@ export class QuotaManager {
 		}
 
 		return {
-			tierGb: row.tier_gb,
-			additionalGb: row.additional_gb,
+			tierGb: row.tierGb,
+			additionalGb: row.additionalGb,
 			totalGb,
 			totalBytes,
-			usedBytes: row.used_bytes,
-			availableBytes: Math.max(0, totalBytes - row.used_bytes),
+			usedBytes: row.usedBytes,
+			availableBytes: Math.max(0, totalBytes - row.usedBytes),
 			percentage: Math.min(ratio * 100, 100),
 			warningLevel,
 		};

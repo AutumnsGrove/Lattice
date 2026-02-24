@@ -7,8 +7,10 @@
  * @module @autumnsgrove/lattice/amber
  */
 
-import type { GroveDatabase } from "@autumnsgrove/server-sdk";
-import type { AmberAddon, AmberAddonType, D1StorageAddonRow } from "./types.js";
+import type { EngineDb } from "../server/db/client.js";
+import { storageAddons, userStorage } from "../server/db/schema/engine.js";
+import { eq, and } from "drizzle-orm";
+import type { AmberAddon, AmberAddonType } from "./types.js";
 import { GB_IN_BYTES } from "./utils.js";
 
 /** Available add-on configurations */
@@ -26,7 +28,7 @@ export interface AmberAddonCatalogEntry {
 }
 
 export class AddonManager {
-	constructor(private db: GroveDatabase) {}
+	constructor(private db: EngineDb) {}
 
 	/**
 	 * Get available add-on packages with pricing.
@@ -45,11 +47,19 @@ export class AddonManager {
 	 */
 	async list(userId: string): Promise<AmberAddon[]> {
 		const result = await this.db
-			.prepare("SELECT * FROM storage_addons WHERE user_id = ? AND active = 1")
-			.bind(userId)
-			.all<D1StorageAddonRow>();
+			.select()
+			.from(storageAddons)
+			.where(and(eq(storageAddons.userId, userId), eq(storageAddons.active, 1)));
 
-		return result.results.map(this.rowToAddon);
+		return result.map((row) => ({
+			id: row.id,
+			userId: row.userId,
+			addonType: row.addonType as AmberAddonType,
+			gbAmount: row.gbAmount,
+			active: row.active === 1,
+			createdAt: row.createdAt ?? new Date().toISOString(),
+			cancelledAt: row.cancelledAt ?? undefined,
+		}));
 	}
 
 	/**
@@ -58,15 +68,14 @@ export class AddonManager {
 	 * @returns Total storage in GB
 	 */
 	async totalStorage(userId: string): Promise<number> {
-		// Get base tier
 		const storage = await this.db
-			.prepare("SELECT tier_gb, additional_gb FROM user_storage WHERE user_id = ?")
-			.bind(userId)
-			.first<{ tier_gb: number; additional_gb: number }>();
+			.select({ tierGb: userStorage.tierGb, additionalGb: userStorage.additionalGb })
+			.from(userStorage)
+			.where(eq(userStorage.userId, userId))
+			.get();
 
 		if (!storage) return 0;
-
-		return storage.tier_gb + storage.additional_gb;
+		return storage.tierGb + storage.additionalGb;
 	}
 
 	/**
@@ -75,18 +84,5 @@ export class AddonManager {
 	async totalStorageBytes(userId: string): Promise<number> {
 		const gb = await this.totalStorage(userId);
 		return gb * GB_IN_BYTES;
-	}
-
-	/** Transform a D1 row into an AmberAddon */
-	private rowToAddon(row: D1StorageAddonRow): AmberAddon {
-		return {
-			id: row.id,
-			userId: row.user_id,
-			addonType: row.addon_type,
-			gbAmount: row.gb_amount,
-			active: row.active === 1,
-			createdAt: row.created_at,
-			cancelledAt: row.cancelled_at || undefined,
-		};
 	}
 }

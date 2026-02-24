@@ -7,15 +7,7 @@
  * @module @autumnsgrove/lattice/amber
  */
 
-import type {
-	AmberProduct,
-	AmberFile,
-	D1StorageFileRow,
-	AmberExport,
-	D1StorageExportRow,
-} from "./types.js";
-import { safeJsonParse } from "../server/utils/typed-cache.js";
-import { z } from "zod";
+import type { AmberProduct } from "./types.js";
 
 // ─── Constants ────────────────────────────────────────────────────
 
@@ -154,56 +146,4 @@ export function formatBytes(bytes: number): string {
  */
 export function generateFileId(): string {
 	return crypto.randomUUID();
-}
-
-// ─── Boundary Schemas ─────────────────────────────────────────────
-
-/** Schema for file metadata stored as JSON in D1 */
-const MetadataSchema = z.record(z.string(), z.unknown());
-
-/** Schema for export filter params stored as JSON in D1 */
-const FilterParamsSchema = z.record(z.string(), z.unknown());
-
-// ─── Row Transformation ──────────────────────────────────────────
-
-/**
- * Transform a D1 storage_files row (snake_case) into an AmberFile (camelCase).
- */
-export function rowToAmberFile(row: D1StorageFileRow): AmberFile {
-	return {
-		id: row.id,
-		userId: row.user_id,
-		r2Key: row.r2_key,
-		filename: row.filename,
-		mimeType: row.mime_type,
-		sizeBytes: row.size_bytes,
-		product: row.product,
-		category: row.category,
-		parentId: row.parent_id || undefined,
-		metadata: row.metadata ? (safeJsonParse(row.metadata, MetadataSchema) ?? undefined) : undefined,
-		createdAt: row.created_at,
-		deletedAt: row.deleted_at || undefined,
-	};
-}
-
-/**
- * Transform a D1 storage_exports row (snake_case) into an AmberExport (camelCase).
- */
-export function rowToAmberExport(row: D1StorageExportRow): AmberExport {
-	return {
-		id: row.id,
-		userId: row.user_id,
-		status: row.status,
-		exportType: row.export_type,
-		filterParams: row.filter_params
-			? (safeJsonParse(row.filter_params, FilterParamsSchema) ?? undefined)
-			: undefined,
-		r2Key: row.r2_key || undefined,
-		sizeBytes: row.size_bytes || undefined,
-		fileCount: row.file_count || undefined,
-		createdAt: row.created_at,
-		completedAt: row.completed_at || undefined,
-		expiresAt: row.expires_at || undefined,
-		errorMessage: row.error_message || undefined,
-	};
 }

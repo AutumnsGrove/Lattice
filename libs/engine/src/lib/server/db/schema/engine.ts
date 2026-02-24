@@ -1107,6 +1107,60 @@ export const storageExports = sqliteTable("storage_exports", {
 	expiresAt: integer("expires_at"),
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+// AMBER: User-Scoped Storage (files, quota, add-ons, exports)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const amberExports = sqliteTable("amber_exports", {
+	id: text("id").primaryKey(),
+	userId: text("user_id").notNull(),
+	status: text("status").notNull().default("pending"),
+	exportType: text("export_type").notNull(),
+	filterParams: text("filter_params"),
+	r2Key: text("r2_key"),
+	sizeBytes: integer("size_bytes"),
+	fileCount: integer("file_count"),
+	errorMessage: text("error_message"),
+	createdAt: text("created_at").default(sql`(datetime('now'))`),
+	completedAt: text("completed_at"),
+	expiresAt: text("expires_at"),
+});
+
+export const storageFiles = sqliteTable("storage_files", {
+	id: text("id").primaryKey(),
+	userId: text("user_id").notNull(),
+	r2Key: text("r2_key").notNull(),
+	filename: text("filename").notNull(),
+	mimeType: text("mime_type").notNull(),
+	sizeBytes: integer("size_bytes").notNull().default(0),
+	product: text("product").notNull(),
+	category: text("category").notNull(),
+	parentId: text("parent_id"),
+	metadata: text("metadata"),
+	createdAt: text("created_at").default(sql`(datetime('now'))`),
+	updatedAt: text("updated_at").default(sql`(datetime('now'))`),
+	deletedAt: text("deleted_at"),
+});
+
+export const userStorage = sqliteTable("user_storage", {
+	userId: text("user_id").primaryKey(),
+	tierGb: integer("tier_gb").notNull().default(0),
+	additionalGb: integer("additional_gb").notNull().default(0),
+	usedBytes: integer("used_bytes").notNull().default(0),
+	updatedAt: text("updated_at").default(sql`(datetime('now'))`),
+});
+
+export const storageAddons = sqliteTable("storage_addons", {
+	id: text("id").primaryKey(),
+	userId: text("user_id").notNull(),
+	addonType: text("addon_type").notNull(),
+	gbAmount: integer("gb_amount").notNull(),
+	stripeSubscriptionItemId: text("stripe_subscription_item_id"),
+	active: integer("active").notNull().default(1),
+	createdAt: text("created_at").default(sql`(datetime('now'))`),
+	cancelledAt: text("cancelled_at"),
+});
+
 export const gitDashboardConfig = sqliteTable("git_dashboard_config", {
 	tenantId: text("tenant_id")
 		.primaryKey()

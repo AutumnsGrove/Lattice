@@ -5,13 +5,14 @@
  * These map to the Amber D1 tables (storage_files, user_storage,
  * storage_exports, storage_addons) and define the SDK's public API surface.
  *
- * Built on Server SDK interfaces (GroveDatabase, GroveStorage, GroveServiceBus)
- * for infrastructure portability.
+ * Built on Drizzle ORM (Aquifer) for typed queries and Server SDK
+ * interfaces (GroveStorage, GroveServiceBus) for R2 and service bus access.
  *
  * @module @autumnsgrove/lattice/amber
  */
 
-import type { GroveDatabase, GroveStorage, GroveServiceBus } from "@autumnsgrove/server-sdk";
+import type { EngineDb } from "../server/db/client.js";
+import type { GroveStorage, GroveServiceBus } from "@autumnsgrove/server-sdk";
 
 // ─── Product Types ────────────────────────────────────────────────
 
@@ -147,74 +148,7 @@ export interface AmberDownloadResult {
 
 /** Configuration for creating an Amber client */
 export interface AmberClientConfig {
-	db: GroveDatabase;
+	db: EngineDb;
 	storage: GroveStorage;
 	services?: GroveServiceBus;
-}
-
-// ─── D1 Row Types (snake_case from database) ─────────────────────
-//
-// These represent raw D1 rows before camelCase transformation.
-// Internal use only — not exported from the public API.
-
-/** @internal Raw user_storage row from D1 */
-export interface D1UserStorageRow {
-	user_id: string;
-	tier_gb: number;
-	additional_gb: number;
-	used_bytes: number;
-	updated_at: string;
-}
-
-/** @internal Raw storage_files row from D1 */
-export interface D1StorageFileRow {
-	id: string;
-	user_id: string;
-	r2_key: string;
-	filename: string;
-	mime_type: string;
-	size_bytes: number;
-	product: AmberProduct;
-	category: string;
-	parent_id?: string;
-	metadata?: string;
-	created_at: string;
-	updated_at?: string;
-	deleted_at?: string;
-}
-
-/** @internal Raw storage_exports row from D1 */
-export interface D1StorageExportRow {
-	id: string;
-	user_id: string;
-	status: "pending" | "processing" | "completed" | "failed";
-	export_type: AmberExportType;
-	filter_params?: string;
-	r2_key?: string;
-	size_bytes?: number;
-	file_count?: number;
-	created_at: string;
-	completed_at?: string;
-	expires_at?: string;
-	error_message?: string;
-}
-
-/** @internal Raw storage_addons row from D1 */
-export interface D1StorageAddonRow {
-	id: string;
-	user_id: string;
-	addon_type: AmberAddonType;
-	gb_amount: number;
-	stripe_subscription_item_id?: string;
-	active: number; // D1 stores booleans as 0/1
-	created_at: string;
-	cancelled_at?: string;
-}
-
-/** @internal Raw usage breakdown from D1 GROUP BY */
-export interface D1UsageBreakdownRow {
-	product: string;
-	category: string;
-	bytes: number;
-	file_count: number;
 }

@@ -7,18 +7,48 @@
  * @module @autumnsgrove/lattice/amber
  */
 
-import type { GroveDatabase, GroveStorage, GroveServiceBus } from "@autumnsgrove/server-sdk";
-import type { AmberExport, AmberExportCreateOptions, D1StorageExportRow } from "./types.js";
+import type { GroveStorage, GroveServiceBus } from "@autumnsgrove/server-sdk";
+import type { EngineDb } from "../server/db/client.js";
+import { amberExports } from "../server/db/schema/engine.js";
+import { eq, and, desc } from "drizzle-orm";
+import type { AmberExport, AmberExportCreateOptions, AmberExportType } from "./types.js";
 import { AMB_ERRORS, AmberError } from "./errors.js";
 import { logGroveError } from "../errors/helpers.js";
-import { generateFileId, rowToAmberExport } from "./utils.js";
+import { generateFileId } from "./utils.js";
+import { safeJsonParse } from "../server/utils/typed-cache.js";
+import { z } from "zod";
+
+const FilterParamsSchema = z.record(z.string(), z.unknown());
 
 export class ExportManager {
 	constructor(
-		private db: GroveDatabase,
+		private db: EngineDb,
 		private storage: GroveStorage,
 		private services?: GroveServiceBus,
 	) {}
+
+	/**
+	 * Transform a Drizzle row to an AmberExport object.
+	 * Handles JSON parsing of filterParams and type casting.
+	 */
+	private toAmberExport(row: typeof amberExports.$inferSelect): AmberExport {
+		return {
+			id: row.id,
+			userId: row.userId,
+			status: row.status as AmberExport["status"],
+			exportType: row.exportType as AmberExportType,
+			filterParams: row.filterParams
+				? (safeJsonParse(row.filterParams, FilterParamsSchema) ?? undefined)
+				: undefined,
+			r2Key: row.r2Key ?? undefined,
+			sizeBytes: row.sizeBytes ?? undefined,
+			fileCount: row.fileCount ?? undefined,
+			createdAt: row.createdAt ?? new Date().toISOString(),
+			completedAt: row.completedAt ?? undefined,
+			expiresAt: row.expiresAt ?? undefined,
+			errorMessage: row.errorMessage ?? undefined,
+		};
+	}
 
 	/**
 	 * Create an export job.
@@ -29,19 +59,12 @@ export class ExportManager {
 	async create(options: AmberExportCreateOptions): Promise<AmberExport> {
 		const exportId = generateFileId();
 
-		await this.db
-			.prepare(
-				`INSERT INTO storage_exports
-				 (id, user_id, status, export_type, filter_params)
-				 VALUES (?, ?, 'pending', ?, ?)`,
-			)
-			.bind(
-				exportId,
-				options.userId,
-				options.type,
-				options.filter ? JSON.stringify(options.filter) : null,
-			)
-			.run();
+		await this.db.insert(amberExports).values({
+			id: exportId,
+			userId: options.userId,
+			exportType: options.type,
+			filterParams: options.filter ? JSON.stringify(options.filter) : null,
+		});
 
 		// Trigger ExportJobV2 DO via service bus if available
 		if (this.services) {
@@ -75,15 +98,16 @@ export class ExportManager {
 	 */
 	async status(exportId: string, userId: string): Promise<AmberExport> {
 		const row = await this.db
-			.prepare("SELECT * FROM storage_exports WHERE id = ? AND user_id = ?")
-			.bind(exportId, userId)
-			.first<D1StorageExportRow>();
+			.select()
+			.from(amberExports)
+			.where(and(eq(amberExports.id, exportId), eq(amberExports.userId, userId)))
+			.get();
 
 		if (!row) {
 			throw new AmberError(AMB_ERRORS.EXPORT_NOT_FOUND);
 		}
 
-		return rowToAmberExport(row);
+		return this.toAmberExport(row);
 	}
 
 	/**
@@ -134,14 +158,11 @@ export class ExportManager {
 	 */
 	async list(userId: string): Promise<AmberExport[]> {
 		const result = await this.db
-			.prepare(
-				`SELECT * FROM storage_exports
-				 WHERE user_id = ?
-				 ORDER BY created_at DESC`,
-			)
-			.bind(userId)
-			.all<D1StorageExportRow>();
+			.select()
+			.from(amberExports)
+			.where(eq(amberExports.userId, userId))
+			.orderBy(desc(amberExports.createdAt));
 
-		return result.results.map(rowToAmberExport);
+		return result.map((row) => this.toAmberExport(row));
 	}
 }

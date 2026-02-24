@@ -9,10 +9,11 @@
  * @example
  * ```typescript
  * import { createAmberClient } from "@autumnsgrove/lattice/amber";
+ * import { createDb } from "@autumnsgrove/lattice/db";
  *
  * const amber = createAmberClient({
- *   db: platform.env.DB,
- *   storage: platform.env.R2_BUCKET,
+ *   db: createDb(platform.env.DB),
+ *   storage: groveStorage,
  * });
  *
  * // Check quota
@@ -60,7 +61,8 @@ export { AmberClient } from "./client.js";
 
 // Manager classes
 export { QuotaManager } from "./quota.js";
-export { FileManager, AmberError } from "./files.js";
+export { FileManager } from "./files.js";
+export { AmberError } from "./errors.js";
 export { ExportManager } from "./exports.js";
 export { AddonManager } from "./addons.js";
 export type { AmberAddonCatalogEntry } from "./addons.js";

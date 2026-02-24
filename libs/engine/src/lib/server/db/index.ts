@@ -50,6 +50,9 @@ export type {
 	GroveMessage,
 	AuditLogEntry,
 	StorageExport,
+	StorageFile,
+	UserStorageRow,
+	StorageAddon,
 	NewTenant,
 	NewUser,
 	NewPost,
@@ -59,6 +62,9 @@ export type {
 	NewMeadowPost,
 	NewFeatureFlag,
 	NewBlazeDefinition,
+	NewStorageFile,
+	NewStorageExport,
+	NewStorageAddon,
 } from "./types.js";
 
 // ── Schema (for advanced queries and Drizzle Kit) ───────────────────

@@ -4,29 +4,60 @@
  * Handles file upload, download, listing, trash, restore, and deletion.
  * Implements quota-check-before-upload and orphan cleanup on D1 failure.
  *
+ * Uses Drizzle ORM for all database operations.
+ *
  * @module @autumnsgrove/lattice/amber
  */
 
-import type { GroveDatabase, GroveStorage } from "@autumnsgrove/server-sdk";
+import type { GroveStorage } from "@autumnsgrove/server-sdk";
 import type {
 	AmberFile,
 	AmberUploadRequest,
 	AmberFileListOptions,
 	AmberFileListResult,
 	AmberDownloadResult,
-	D1StorageFileRow,
+	AmberProduct,
 } from "./types.js";
+import type { EngineDb } from "../server/db/client.js";
+import { storageFiles, userStorage } from "../server/db/schema/engine.js";
+import { eq, and, sql, isNull, isNotNull, asc, desc } from "drizzle-orm";
 import { AMB_ERRORS, AmberError } from "./errors.js";
-import { generateR2Key, getExtension, generateFileId, rowToAmberFile } from "./utils.js";
+import { generateR2Key, getExtension, generateFileId } from "./utils.js";
 import { logGroveError } from "../errors/helpers.js";
+import { safeJsonParse } from "../server/utils/typed-cache.js";
+import { z } from "zod";
 import type { QuotaManager } from "./quota.js";
+
+const MetadataSchema = z.record(z.string(), z.unknown());
 
 export class FileManager {
 	constructor(
-		private db: GroveDatabase,
+		private db: EngineDb,
 		private storage: GroveStorage,
 		private quotaManager: QuotaManager,
 	) {}
+
+	/**
+	 * Transform a Drizzle row to AmberFile shape.
+	 */
+	private toAmberFile(row: typeof storageFiles.$inferSelect): AmberFile {
+		return {
+			id: row.id,
+			userId: row.userId,
+			r2Key: row.r2Key,
+			filename: row.filename,
+			mimeType: row.mimeType,
+			sizeBytes: row.sizeBytes,
+			product: row.product as AmberProduct,
+			category: row.category,
+			parentId: row.parentId ?? undefined,
+			metadata: row.metadata
+				? (safeJsonParse(row.metadata, MetadataSchema) ?? undefined)
+				: undefined,
+			createdAt: row.createdAt ?? new Date().toISOString(),
+			deletedAt: row.deletedAt ?? undefined,
+		};
+	}
 
 	/**
 	 * Upload a file with automatic R2 key generation and quota tracking.
@@ -85,25 +116,18 @@ export class FileManager {
 
 		// Insert D1 record — with orphan cleanup on failure
 		try {
-			await this.db
-				.prepare(
-					`INSERT INTO storage_files
-					 (id, user_id, r2_key, filename, mime_type, size_bytes, product, category, parent_id, metadata)
-					 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-				)
-				.bind(
-					fileId,
-					userId,
-					r2Key,
-					filename,
-					contentType,
-					sizeBytes,
-					product,
-					category,
-					null,
-					metadata ? JSON.stringify(metadata) : null,
-				)
-				.run();
+			await this.db.insert(storageFiles).values({
+				id: fileId,
+				userId,
+				r2Key,
+				filename,
+				mimeType: contentType,
+				sizeBytes,
+				product,
+				category,
+				parentId: null,
+				metadata: metadata ? JSON.stringify(metadata) : null,
+			});
 		} catch {
 			// D1 failed after R2 succeeded — clean up orphan
 			try {
@@ -117,14 +141,12 @@ export class FileManager {
 		// Track quota usage
 		try {
 			await this.db
-				.prepare(
-					`UPDATE user_storage
-					 SET used_bytes = used_bytes + ?,
-					     updated_at = datetime('now')
-					 WHERE user_id = ?`,
-				)
-				.bind(sizeBytes, userId)
-				.run();
+				.update(userStorage)
+				.set({
+					usedBytes: sql`${userStorage.usedBytes} + ${sizeBytes}`,
+					updatedAt: sql`datetime('now')`,
+				})
+				.where(eq(userStorage.userId, userId));
 		} catch (err) {
 			logGroveError("amber", AMB_ERRORS.QUOTA_SYNC_ERROR, {
 				userId,
@@ -153,70 +175,53 @@ export class FileManager {
 	 */
 	async get(fileId: string, userId: string): Promise<AmberFile> {
 		const row = await this.db
-			.prepare("SELECT * FROM storage_files WHERE id = ? AND user_id = ?")
-			.bind(fileId, userId)
-			.first<D1StorageFileRow>();
+			.select()
+			.from(storageFiles)
+			.where(and(eq(storageFiles.id, fileId), eq(storageFiles.userId, userId)))
+			.get();
 
 		if (!row) {
 			throw new AmberError(AMB_ERRORS.FILE_NOT_FOUND);
 		}
 
-		return rowToAmberFile(row);
+		return this.toAmberFile(row);
 	}
 
 	/**
 	 * List files with filtering and pagination.
 	 */
 	async list(options: AmberFileListOptions): Promise<AmberFileListResult> {
-		const conditions = ["user_id = ?"];
-		const params: unknown[] = [options.userId];
+		const conditions = [eq(storageFiles.userId, options.userId)];
+		if (!options.includeDeleted) conditions.push(isNull(storageFiles.deletedAt));
+		if (options.product) conditions.push(eq(storageFiles.product, options.product));
+		if (options.category) conditions.push(eq(storageFiles.category, options.category));
 
-		if (!options.includeDeleted) {
-			conditions.push("deleted_at IS NULL");
-		}
-
-		if (options.product) {
-			conditions.push("product = ?");
-			params.push(options.product);
-		}
-
-		if (options.category) {
-			conditions.push("category = ?");
-			params.push(options.category);
-		}
-
-		const whereClause = conditions.join(" AND ");
-
-		// Allowlist validation — prevent SQL injection via sortBy/sortOrder
-		const ALLOWED_SORT_COLUMNS = new Set(["created_at", "size_bytes", "filename"]);
-		const ALLOWED_SORT_ORDERS = new Set(["asc", "desc"]);
-		const sortBy = ALLOWED_SORT_COLUMNS.has(options.sortBy || "") ? options.sortBy! : "created_at";
-		const sortOrder = ALLOWED_SORT_ORDERS.has(options.sortOrder || "")
-			? options.sortOrder!
-			: "desc";
-
+		const sortColumnMap = {
+			created_at: storageFiles.createdAt,
+			size_bytes: storageFiles.sizeBytes,
+			filename: storageFiles.filename,
+		} as const;
+		const sortCol = sortColumnMap[options.sortBy || "created_at"] ?? storageFiles.createdAt;
+		const orderFn = options.sortOrder === "asc" ? asc : desc;
 		const limit = options.limit || 50;
 		const offset = options.offset || 0;
 
-		// Get total count
 		const countResult = await this.db
-			.prepare(`SELECT COUNT(*) as count FROM storage_files WHERE ${whereClause}`)
-			.bind(...params)
-			.first<{ count: number }>();
+			.select({ count: sql<number>`COUNT(*)` })
+			.from(storageFiles)
+			.where(and(...conditions))
+			.get();
 
-		// Get files
 		const result = await this.db
-			.prepare(
-				`SELECT * FROM storage_files
-				 WHERE ${whereClause}
-				 ORDER BY ${sortBy} ${sortOrder}
-				 LIMIT ? OFFSET ?`,
-			)
-			.bind(...params, limit, offset)
-			.all<D1StorageFileRow>();
+			.select()
+			.from(storageFiles)
+			.where(and(...conditions))
+			.orderBy(orderFn(sortCol))
+			.limit(limit)
+			.offset(offset);
 
 		return {
-			files: result.results.map(rowToAmberFile),
+			files: result.map((row) => this.toAmberFile(row)),
 			total: countResult?.count || 0,
 		};
 	}
@@ -232,13 +237,9 @@ export class FileManager {
 		}
 
 		await this.db
-			.prepare(
-				`UPDATE storage_files
-				 SET deleted_at = datetime('now')
-				 WHERE id = ? AND deleted_at IS NULL`,
-			)
-			.bind(fileId)
-			.run();
+			.update(storageFiles)
+			.set({ deletedAt: sql`datetime('now')` })
+			.where(and(eq(storageFiles.id, fileId), isNull(storageFiles.deletedAt)));
 
 		return { ...file, deletedAt: new Date().toISOString() };
 	}
@@ -254,13 +255,9 @@ export class FileManager {
 		}
 
 		await this.db
-			.prepare(
-				`UPDATE storage_files
-				 SET deleted_at = NULL
-				 WHERE id = ? AND deleted_at IS NOT NULL`,
-			)
-			.bind(fileId)
-			.run();
+			.update(storageFiles)
+			.set({ deletedAt: null })
+			.where(and(eq(storageFiles.id, fileId), isNotNull(storageFiles.deletedAt)));
 
 		return { ...file, deletedAt: undefined };
 	}
@@ -280,19 +277,17 @@ export class FileManager {
 		}
 
 		// Delete from D1
-		await this.db.prepare("DELETE FROM storage_files WHERE id = ?").bind(fileId).run();
+		await this.db.delete(storageFiles).where(eq(storageFiles.id, fileId));
 
 		// Update quota (reduce used bytes)
 		try {
 			await this.db
-				.prepare(
-					`UPDATE user_storage
-					 SET used_bytes = MAX(0, used_bytes - ?),
-					     updated_at = datetime('now')
-					 WHERE user_id = ?`,
-				)
-				.bind(file.sizeBytes, file.userId)
-				.run();
+				.update(userStorage)
+				.set({
+					usedBytes: sql`MAX(0, ${userStorage.usedBytes} - ${file.sizeBytes})`,
+					updatedAt: sql`datetime('now')`,
+				})
+				.where(eq(userStorage.userId, file.userId));
 		} catch (err) {
 			logGroveError("amber", AMB_ERRORS.QUOTA_SYNC_ERROR, {
 				userId: file.userId,
