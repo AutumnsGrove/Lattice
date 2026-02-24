@@ -360,7 +360,7 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 			// origin supports comma-separated values for multi-origin (e.g. "https://login.grove.place,http://localhost:5173")
 			passkey({
 				rpID: env.PASSKEY_RP_ID || "grove.place",
-				rpName: "Heartwood",
+				rpName: "Grove",
 				origin: (env.PASSKEY_ORIGIN || "https://login.grove.place")
 					.split(",")
 					.map((o: string) => o.trim()),
