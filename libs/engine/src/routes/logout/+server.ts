@@ -1,19 +1,15 @@
 /**
- * Logout redirect - forwards to /auth/logout
+ * Logout redirect - forwards POST to /auth/logout
  *
- * The Header component links to /logout by default, so this route
- * exists to redirect to the actual logout handler at /auth/logout.
+ * The Header/MobileMenu components default to action="/logout",
+ * so this route redirects to the actual logout handler at /auth/logout.
+ * POST-only — GET logout was removed to prevent CSRF logout attacks.
  */
 
 import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 
-// GET → 302: browser follows as GET, hitting the GET fallback at /auth/logout
-export const GET: RequestHandler = async () => {
-  redirect(302, "/auth/logout");
-};
-
-// POST → 307: preserves POST method, hitting the primary POST handler at /auth/logout
+// POST → 307: preserves POST method, hitting the POST handler at /auth/logout
 export const POST: RequestHandler = async () => {
-  redirect(307, "/auth/logout");
+	redirect(307, "/auth/logout");
 };

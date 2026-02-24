@@ -1,18 +1,18 @@
 <script lang="ts">
-	import { page } from '$app/state';
-	import { X, ExternalLink, Search, LogIn, LogOut, User } from 'lucide-svelte';
-	import type { NavItem, FooterLink, HeaderUser } from './types';
-	import { isActivePath } from './types';
+	import { page } from "$app/state";
+	import { X, ExternalLink, Search, LogIn, LogOut, User } from "lucide-svelte";
+	import type { NavItem, FooterLink, HeaderUser } from "./types";
+	import { isActivePath } from "./types";
 	import {
 		DEFAULT_MOBILE_NAV_ITEMS,
 		DEFAULT_MOBILE_RESOURCE_LINKS,
 		DEFAULT_MOBILE_CONNECT_LINKS,
-		DIVIDER_HORIZONTAL
-	} from './defaults';
-	import { GroveDivider } from '../nature';
-	import { groveModeStore } from '../../stores/grove-mode.svelte';
-	import { resolveNavLabel } from './types';
-	import defaultManifestData from '$lib/data/grove-term-manifest.json';
+		DIVIDER_HORIZONTAL,
+	} from "./defaults";
+	import { GroveDivider } from "../nature";
+	import { groveModeStore } from "../../stores/grove-mode.svelte";
+	import { resolveNavLabel } from "./types";
+	import defaultManifestData from "$lib/data/grove-term-manifest.json";
 
 	interface Props {
 		open: boolean;
@@ -42,20 +42,20 @@
 		connectLinks,
 		// Search props
 		searchEnabled = false,
-		searchPlaceholder = 'Search...',
+		searchPlaceholder = "Search...",
 		onSearch,
 		// Auth props
 		showSignIn = true,
 		user = null,
-		signInHref = 'https://heartwood.grove.place',
-		signInLabel = 'Sign in',
-		userHref = '/arbor',
-		signOutHref = '/logout',
-		signOutLabel = 'Sign out'
+		signInHref = "https://heartwood.grove.place",
+		signInLabel = "Sign in",
+		userHref = "/arbor",
+		signOutHref = "/logout",
+		signOutLabel = "Sign out",
 	}: Props = $props();
 
 	// Search state
-	let searchQuery = $state('');
+	let searchQuery = $state("");
 
 	let currentPath = $derived(page.url.pathname);
 
@@ -71,7 +71,7 @@
 	// Handle close action
 	function handleClose() {
 		open = false;
-		searchQuery = '';
+		searchQuery = "";
 		onClose();
 	}
 
@@ -80,21 +80,21 @@
 		event.preventDefault();
 		if (searchQuery.trim() && onSearch) {
 			onSearch(searchQuery.trim());
-			searchQuery = '';
+			searchQuery = "";
 			handleClose();
 		}
 	}
 
 	// Close on escape key
 	function handleKeydown(event: KeyboardEvent) {
-		if (event.key === 'Escape' && open) {
+		if (event.key === "Escape" && open) {
 			handleClose();
 		}
 
 		// Focus trap: Tab key cycles within menu
-		if (event.key === 'Tab' && open && menuPanelRef) {
+		if (event.key === "Tab" && open && menuPanelRef) {
 			const focusableElements = menuPanelRef.querySelectorAll<HTMLElement>(
-				'button, a, input, select, textarea, [tabindex]:not([tabindex="-1"])'
+				'button, a, input, select, textarea, [tabindex]:not([tabindex="-1"])',
 			);
 			const firstElement = focusableElements[0];
 			const lastElement = focusableElements[focusableElements.length - 1];
@@ -121,7 +121,7 @@
 				closeButtonRef?.focus();
 			});
 			// Prevent body scroll
-			document.body.style.overflow = 'hidden';
+			document.body.style.overflow = "hidden";
 		} else {
 			if (previouslyFocusedElement) {
 				// Restore focus when menu closes
@@ -129,12 +129,12 @@
 				previouslyFocusedElement = null;
 			}
 			// Restore body scroll
-			document.body.style.overflow = '';
+			document.body.style.overflow = "";
 		}
 
 		// Cleanup on unmount: ensure body scroll is always restored
 		return () => {
-			document.body.style.overflow = '';
+			document.body.style.overflow = "";
 		};
 	});
 
@@ -208,19 +208,21 @@
 						</div>
 					{/if}
 					<div class="flex-1 min-w-0">
-						<p class="text-sm font-medium truncate">{user.name || 'Wanderer'}</p>
+						<p class="text-sm font-medium truncate">{user.name || "Wanderer"}</p>
 						<p class="text-xs text-foreground-subtle">Go to your Grove →</p>
 					</div>
 				</a>
-				<!-- Sign out link -->
-				<a
-					href={signOutHref}
-					onclick={handleClose}
-					class="flex items-center gap-3 px-3 py-3 rounded-lg text-foreground hover:bg-surface-hover transition-colors mt-2"
-				>
-					<LogOut class="w-5 h-5 text-accent-muted" />
-					<span class="text-sm font-medium">{signOutLabel}</span>
-				</a>
+				<!-- Sign out button (POST form to prevent CSRF logout) -->
+				<form method="POST" action={signOutHref} class="mt-2">
+					<button
+						type="submit"
+						onclick={handleClose}
+						class="flex w-full items-center gap-3 px-3 py-3 rounded-lg text-foreground hover:bg-surface-hover transition-colors"
+					>
+						<LogOut class="w-5 h-5 text-accent-muted" />
+						<span class="text-sm font-medium">{signOutLabel}</span>
+					</button>
+				</form>
 			{:else}
 				<!-- Not logged in: sign-in link -->
 				<a
@@ -266,8 +268,8 @@
 			{@const active = isActivePath(item.href, currentPath)}
 			<a
 				href={item.href}
-				target={item.external ? '_blank' : undefined}
-				rel={item.external ? 'noopener noreferrer' : undefined}
+				target={item.external ? "_blank" : undefined}
+				rel={item.external ? "noopener noreferrer" : undefined}
 				onclick={handleClose}
 				class="flex items-center gap-3 px-3 py-3 rounded-lg transition-colors
 					{active
@@ -291,7 +293,10 @@
 			</div>
 
 			<section aria-labelledby="mobile-menu-resources">
-				<h3 id="mobile-menu-resources" class="text-xs font-medium text-foreground-subtle uppercase tracking-wide px-3 py-2">
+				<h3
+					id="mobile-menu-resources"
+					class="text-xs font-medium text-foreground-subtle uppercase tracking-wide px-3 py-2"
+				>
 					Resources
 				</h3>
 				{#each resources as link}
@@ -299,8 +304,8 @@
 					{@const active = isActivePath(link.href, currentPath)}
 					<a
 						href={link.href}
-						target={link.external ? '_blank' : undefined}
-						rel={link.external ? 'noopener noreferrer' : undefined}
+						target={link.external ? "_blank" : undefined}
+						rel={link.external ? "noopener noreferrer" : undefined}
 						onclick={handleClose}
 						class="flex items-center gap-3 px-3 py-3 rounded-lg transition-colors
 							{active
@@ -326,7 +331,10 @@
 			</div>
 
 			<section aria-labelledby="mobile-menu-connect">
-				<h3 id="mobile-menu-connect" class="text-xs font-medium text-foreground-subtle uppercase tracking-wide px-3 py-2">
+				<h3
+					id="mobile-menu-connect"
+					class="text-xs font-medium text-foreground-subtle uppercase tracking-wide px-3 py-2"
+				>
 					Connect
 				</h3>
 				{#each connect as link}
@@ -334,8 +342,8 @@
 					{@const active = isActivePath(link.href, currentPath)}
 					<a
 						href={link.href}
-						target={link.external ? '_blank' : undefined}
-						rel={link.external ? 'noopener noreferrer' : undefined}
+						target={link.external ? "_blank" : undefined}
+						rel={link.external ? "noopener noreferrer" : undefined}
 						onclick={handleClose}
 						class="flex items-center gap-3 px-3 py-3 rounded-lg transition-colors
 							{active
@@ -355,4 +363,3 @@
 		{/if}
 	</nav>
 </div>
-

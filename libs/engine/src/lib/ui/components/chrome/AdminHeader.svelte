@@ -111,14 +111,16 @@
 				<ThemeToggle />
 
 				{#if logoutHref}
-					<a
-						href={logoutHref}
-						class="p-2 rounded-lg text-foreground-subtle hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-						title="Logout"
-						aria-label="Logout"
-					>
-						<LogOut class="w-5 h-5" />
-					</a>
+					<form method="POST" action={logoutHref}>
+						<button
+							type="submit"
+							class="p-2 rounded-lg text-foreground-subtle hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+							title="Logout"
+							aria-label="Logout"
+						>
+							<LogOut class="w-5 h-5" />
+						</button>
+					</form>
 				{:else if onLogout}
 					<button
 						onclick={handleLogout}
