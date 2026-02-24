@@ -28,14 +28,27 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history for base branch comparison
 
-      - name: Generate grove visualization
+      - name: Snapshot base branch (PR only)
+        if: github.event_name == 'pull_request'
+        run: |
+          # Copy script before switching branches (base may have old version)
+          cp .github/scripts/grove-visualization.mjs /tmp/grove-viz.mjs
+          git checkout ${{ github.event.pull_request.base.sha }} --quiet
+          node /tmp/grove-viz.mjs . --json > /tmp/base.json
+          git checkout ${{ github.sha }} --quiet
+
+      - name: Generate visualization
         id: grove
         run: |
-          # Generate all formats
-          node .github/scripts/grove-visualization.mjs . --markdown > /tmp/grove.md
+          BASE_ARG=""
+          [ -f /tmp/base.json ] && BASE_ARG="--base /tmp/base.json"
+
+          node .github/scripts/grove-visualization.mjs . --markdown $BASE_ARG > /tmp/grove.md
           node .github/scripts/grove-visualization.mjs . --json > /tmp/grove.json
-          node .github/scripts/grove-visualization.mjs . > /tmp/grove.txt
+          node .github/scripts/grove-visualization.mjs . $BASE_ARG > /tmp/grove.txt
 
           # Store markdown for PR comment
           {
@@ -70,7 +83,7 @@ jobs:
             });
 
             const existing = comments.find(c =>
-              c.user.type === 'Bot' && c.body.includes('The Grove — Codebase Visualization')
+              c.user.type === 'Bot' && c.body.includes('The Grove —')
             );
 
             if (existing) {
@@ -91,6 +104,6 @@ jobs:
 
       - name: Print grove to log
         run: |
-          echo "🌲 The Grove — Weekly Forest Census"
+          echo "🌲 The Grove — Census"
           echo "═══════════════════════════════════"
           cat /tmp/grove.txt

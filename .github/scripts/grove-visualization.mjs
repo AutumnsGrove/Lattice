@@ -1,91 +1,49 @@
 /**
  * Grove Codebase Visualization
  *
- * Generates an ASCII art grove/forest representing the monorepo structure.
- * Each package becomes a tree — size proportional to file count,
- * shape based on package type (app, service, worker, lib).
+ * Generates a compact, useful overview of the monorepo.
+ * - Census mode (default): bar chart of package sizes, category breakdown
+ * - PR diff mode (--base file.json): shows only changed packages with deltas
  *
- * Usage: node grove-visualization.mjs [--markdown] [--json]
- *
- * The grove grows with your codebase. Every package is a tree in the forest.
+ * Usage:
+ *   node grove-visualization.mjs [root] [--markdown] [--json] [--base file.json]
  */
 
-import { readdirSync, readFileSync, statSync, existsSync } from "node:fs";
-import { join, basename } from "node:path";
+import { readdirSync, readFileSync, existsSync } from "node:fs";
+import { join } from "node:path";
 
-const ROOT = process.argv[2] || process.cwd();
-const FORMAT = process.argv.includes("--json")
+// ─── Args ────────────────────────────────────────────────────────────
+
+const args = process.argv.slice(2);
+const ROOT =
+	args.find((a) => !a.startsWith("--") && args[args.indexOf(a) - 1] !== "--base") ||
+	process.cwd();
+const FORMAT = args.includes("--json")
 	? "json"
-	: process.argv.includes("--markdown")
+	: args.includes("--markdown")
 		? "markdown"
 		: "plain";
+const baseIdx = args.indexOf("--base");
+const BASE_FILE = baseIdx !== -1 ? args[baseIdx + 1] : null;
 
-// ─── Tree shapes ────────────────────────────────────────────────────
-// Each tree type has layers that scale with size.
-// Art is bottom-up: trunk first, then canopy layers smallest to largest.
+// ─── Category config ─────────────────────────────────────────────────
 
-const TREE_STYLES = {
-	// Apps — full deciduous trees with broad canopies
-	app: {
-		emoji: "🌳",
-		trunk: "  |  ",
-		layers: [
-			"  *  ",
-			" /|\\ ",
-			"/ | \\",
-			" /|\\ ",
-			"/||\\\\",
-		],
-		crown: "  🍂 ",
-	},
-	// Services — tall evergreen conifers
-	service: {
-		emoji: "🌲",
-		trunk: "  |  ",
-		layers: [
-			"  *  ",
-			" /|\\ ",
-			" /|\\ ",
-			"//|\\\\",
-			"//|\\\\",
-		],
-		crown: "  ⭐ ",
-	},
-	// Workers — small flowering bushes
-	worker: {
-		emoji: "🌿",
-		trunk: "  |  ",
-		layers: [
-			"  .  ",
-			" .|. ",
-			".|.|.",
-		],
-		crown: "  🌸 ",
-	},
-	// Libs — ancient deep-rooted trees
-	lib: {
-		emoji: "🌴",
-		trunk: "  |  ",
-		layers: [
-			"  *  ",
-			" *** ",
-			" /|\\ ",
-			"/ | \\",
-			"//|\\\\",
-			"/|||\\",
-		],
-		crown: "  🍃 ",
-	},
-};
+const CATEGORIES = [
+	{ dir: "apps", type: "app", label: "Apps", emoji: "🌳" },
+	{ dir: "services", type: "service", label: "Services", emoji: "🌲" },
+	{ dir: "workers", type: "worker", label: "Workers", emoji: "🌿" },
+	{ dir: "libs", type: "lib", label: "Libraries", emoji: "🌴" },
+];
 
-// ─── Count files in a directory ─────────────────────────────────────
+const EMOJI_MAP = Object.fromEntries(CATEGORIES.map((c) => [c.type, c.emoji]));
+
+// ─── Count source files ──────────────────────────────────────────────
 
 function countFiles(dir) {
 	let count = 0;
 	try {
 		for (const entry of readdirSync(dir, { withFileTypes: true })) {
-			if (entry.name.startsWith(".") || entry.name === "node_modules")
-				continue;
+			if (entry.name.startsWith(".") || entry.name === "node_modules") continue;
 			const fullPath = join(dir, entry.name);
 			if (entry.isDirectory()) {
 				count += countFiles(fullPath);
@@ -99,19 +57,12 @@ function countFiles(dir) {
 	return count;
 }
 
-// ─── Discover packages ──────────────────────────────────────────────
+// ─── Discover packages ───────────────────────────────────────────────
 
 function discoverPackages() {
-	const categories = [
-		{ dir: "apps", type: "app", label: "Apps" },
-		{ dir: "services", type: "service", label: "Services" },
-		{ dir: "workers", type: "worker", label: "Workers" },
-		{ dir: "libs", type: "lib", label: "Libs" },
-	];
-
 	const packages = [];
 
-	for (const cat of categories) {
+	for (const cat of CATEGORIES) {
 		const catDir = join(ROOT, cat.dir);
 		if (!existsSync(catDir)) continue;
 
@@ -119,28 +70,25 @@ function discoverPackages() {
 			if (!entry.isDirectory() || entry.name.startsWith(".")) continue;
 
 			const pkgDir = join(catDir, entry.name);
-			const pkgJsonPath = join(pkgDir, "package.json");
-
 			let name = entry.name;
 			try {
+				const pkgJsonPath = join(pkgDir, "package.json");
 				if (existsSync(pkgJsonPath)) {
 					const pkg = JSON.parse(readFileSync(pkgJsonPath, "utf-8"));
-					name = pkg.name
-						? pkg.name.replace(/^@autumnsgrove\//, "").replace(/^grove-/, "")
-						: entry.name;
+					name =
+						pkg.name?.replace(/^@autumnsgrove\//, "").replace(/^grove-/, "") ||
+						entry.name;
 				}
 			} catch {
 				// Use directory name
 			}
-
-			const fileCount = countFiles(pkgDir);
 
 			packages.push({
 				name,
 				dirName: entry.name,
 				category: cat.type,
 				categoryLabel: cat.label,
-				fileCount,
+				fileCount: countFiles(pkgDir),
 				path: `${cat.dir}/${entry.name}`,
 			});
 		}
@@ -149,136 +97,189 @@ function discoverPackages() {
 	return packages.sort((a, b) => b.fileCount - a.fileCount);
 }
 
-// ─── Generate a single ASCII tree ───────────────────────────────────
+// ─── Bar rendering ───────────────────────────────────────────────────
 
-function generateTree(pkg) {
-	const style = TREE_STYLES[pkg.category];
-	// Tree height scales with file count (min 2 layers, max all layers)
-	const maxLayers = style.layers.length;
-	const heightRatio = Math.min(pkg.fileCount / 80, 1); // 80+ files = full height
-	const layerCount = Math.max(2, Math.round(heightRatio * maxLayers));
-
-	const lines = [];
-
-	// Crown
-	lines.push(style.crown);
-
-	// Canopy layers (top to bottom = smallest to largest)
-	const selectedLayers = style.layers.slice(0, layerCount);
-	for (const layer of selectedLayers) {
-		lines.push(layer);
-	}
-
-	// Trunk
-	lines.push(style.trunk);
-	if (pkg.fileCount > 40) lines.push(style.trunk); // Taller trunk for big packages
-
-	// Label
-	const label = pkg.name.length > 9 ? pkg.name.slice(0, 8) + "…" : pkg.name;
-	lines.push(label.padStart(Math.floor((5 + label.length) / 2)).padEnd(5));
-
-	return lines;
+function bar(value, max, width = 35) {
+	if (max === 0) return "▏";
+	const len = Math.max(1, Math.round((value / max) * width));
+	return "█".repeat(len);
 }
 
-// ─── Compose the full grove ─────────────────────────────────────────
+// ─── Census mode ─────────────────────────────────────────────────────
 
-function composeGrove(packages) {
-	const output = [];
+function renderCensus(packages) {
+	const lines = [];
+	const totalFiles = packages.reduce((s, p) => s + p.fileCount, 0);
+	const maxFiles = packages[0]?.fileCount || 1;
 
-	// Title
-	output.push("");
-	output.push("  ╔══════════════════════════════════════════════════════╗");
-	output.push("  ║            🌲  THE GROVE  🌲                        ║");
-	output.push("  ║         a living codebase map                       ║");
-	output.push("  ╚══════════════════════════════════════════════════════╝");
-	output.push("");
+	// Header
+	lines.push("🌲 The Grove — Census");
+	lines.push("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+	lines.push(
+		`${packages.length} packages · ${totalFiles.toLocaleString()} source files`,
+	);
+	lines.push("");
 
-	// Group by category
-	const groups = {};
-	for (const pkg of packages) {
-		if (!groups[pkg.categoryLabel]) groups[pkg.categoryLabel] = [];
-		groups[pkg.categoryLabel].push(pkg);
+	// Category summary table
+	lines.push("  Category          Packages     Files");
+	lines.push("  ────────────────────────────────────────");
+	for (const cat of CATEGORIES) {
+		const pkgs = packages.filter((p) => p.category === cat.type);
+		if (pkgs.length === 0) continue;
+		const files = pkgs.reduce((s, p) => s + p.fileCount, 0);
+		const label = `${cat.emoji} ${cat.label}`;
+		lines.push(
+			`  ${label.padEnd(20)} ${String(pkgs.length).padStart(4)}     ${String(files.toLocaleString()).padStart(5)}`,
+		);
+	}
+	lines.push("  ────────────────────────────────────────");
+	lines.push(
+		`  ${"Total".padEnd(20)} ${String(packages.length).padStart(4)}     ${String(totalFiles.toLocaleString()).padStart(5)}`,
+	);
+	lines.push("");
+
+	// Bar chart — top 10 packages
+	lines.push("  Largest packages:");
+	lines.push("");
+	const top = packages.slice(0, 10);
+	for (const pkg of top) {
+		const nameStr =
+			pkg.name.length > 14 ? pkg.name.slice(0, 13) + "…" : pkg.name;
+		const countStr = String(pkg.fileCount).padStart(5);
+		const b = bar(pkg.fileCount, maxFiles);
+		lines.push(
+			`  ${nameStr.padEnd(15)} ${countStr}  ${b} ${EMOJI_MAP[pkg.category]}`,
+		);
 	}
 
-	for (const [label, pkgs] of Object.entries(groups)) {
-		const style = TREE_STYLES[pkgs[0].category];
+	// Remaining packages as compact note
+	if (packages.length > 10) {
+		const restFiles = packages
+			.slice(10)
+			.reduce((s, p) => s + p.fileCount, 0);
+		lines.push("");
+		lines.push(
+			`  + ${packages.length - 10} more packages (${restFiles.toLocaleString()} files)`,
+		);
+	}
 
-		output.push(`  ── ${style.emoji} ${label} ${"─".repeat(45 - label.length)}`);
-		output.push("");
+	lines.push("");
+	return lines.join("\n");
+}
 
-		// Render trees side by side (up to 6 per row)
-		const TREES_PER_ROW = 6;
-		const COL_WIDTH = 11;
+// ─── PR diff mode ────────────────────────────────────────────────────
 
-		for (let i = 0; i < pkgs.length; i += TREES_PER_ROW) {
-			const row = pkgs.slice(i, i + TREES_PER_ROW);
-			const trees = row.map((pkg) => generateTree(pkg));
+function renderDiff(headPackages, baseData) {
+	const lines = [];
+	const basePkgs = baseData.packages;
+	const baseMap = new Map(basePkgs.map((p) => [p.path, p]));
+	const headMap = new Map(headPackages.map((p) => [p.path, p]));
 
-			// Find max height in this row
-			const maxHeight = Math.max(...trees.map((t) => t.length));
+	// Compute changes
+	const changes = [];
+	const added = [];
+	const removed = [];
 
-			// Pad all trees to same height (top-pad with spaces)
-			const padded = trees.map((tree) => {
-				const pad = maxHeight - tree.length;
-				return [...Array(pad).fill("     "), ...tree];
+	for (const hp of headPackages) {
+		const bp = baseMap.get(hp.path);
+		if (!bp) {
+			added.push(hp);
+		} else if (hp.fileCount !== bp.fileCount) {
+			changes.push({
+				name: hp.name,
+				category: hp.category,
+				path: hp.path,
+				before: bp.fileCount,
+				after: hp.fileCount,
+				delta: hp.fileCount - bp.fileCount,
 			});
-
-			// Render row line by line
-			for (let line = 0; line < maxHeight; line++) {
-				const rowLine = padded
-					.map((tree) => {
-						const cell = tree[line] || "     ";
-						return cell.padEnd(COL_WIDTH);
-					})
-					.join(" ");
-				output.push("    " + rowLine);
-			}
-
-			// File counts under the trees
-			const counts = row
-				.map((pkg) => {
-					const count = `${pkg.fileCount}f`;
-					return count.padStart(Math.floor((COL_WIDTH + count.length) / 2)).padEnd(COL_WIDTH);
-				})
-				.join(" ");
-			output.push("    " + counts);
-
-			// Ground line
-			const ground = row.map(() => "───────────").join("─");
-			output.push("    " + ground);
-			output.push("");
 		}
 	}
 
-	// Summary stats
-	const totalFiles = packages.reduce((sum, p) => sum + p.fileCount, 0);
-	const totalPkgs = packages.length;
+	for (const bp of basePkgs) {
+		if (!headMap.has(bp.path)) {
+			removed.push(bp);
+		}
+	}
 
-	output.push("  ── 📊 Forest Census ─────────────────────────────────");
-	output.push("");
-	output.push(`    🌳 ${groups["Apps"]?.length || 0} apps`);
-	output.push(`    🌲 ${groups["Services"]?.length || 0} services`);
-	output.push(`    🌿 ${groups["Workers"]?.length || 0} workers`);
-	output.push(`    🌴 ${groups["Libs"]?.length || 0} libraries`);
-	output.push(`    ─────────────────────`);
-	output.push(`    📦 ${totalPkgs} packages · ${totalFiles.toLocaleString()} files`);
-	output.push("");
+	const totalBefore = basePkgs.reduce((s, p) => s + p.fileCount, 0);
+	const totalAfter = headPackages.reduce((s, p) => s + p.fileCount, 0);
+	const totalDelta = totalAfter - totalBefore;
+	const changedCount = changes.length + added.length + removed.length;
+	const deltaStr = totalDelta >= 0 ? `+${totalDelta}` : String(totalDelta);
 
-	// Legend
-	output.push("  ── 📖 Legend ────────────────────────────────────────");
-	output.push("");
-	output.push("    Tree height = file count (taller = more files)");
-	output.push("    🌳 App (user-facing)   🌲 Service (backend)");
-	output.push("    🌿 Worker (background) 🌴 Library (shared)");
-	output.push("");
+	// Header
+	lines.push("🌲 The Grove — PR Impact");
+	lines.push("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
-	return output.join("\n");
+	if (changedCount === 0) {
+		lines.push("");
+		lines.push("  No package size changes. The grove is unchanged. 🌿");
+		lines.push("");
+		lines.push(
+			`  Total: ${totalAfter.toLocaleString()} files across ${headPackages.length} packages`,
+		);
+		lines.push("");
+		return lines.join("\n");
+	}
+
+	lines.push(
+		`${changedCount} package${changedCount !== 1 ? "s" : ""} affected · ${deltaStr} files net`,
+	);
+	lines.push("");
+
+	// Changed packages table
+	if (changes.length > 0) {
+		changes.sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta));
+		lines.push("  Package                Before    After    Delta");
+		lines.push(
+			"  ──────────────────────────────────────────────────",
+		);
+		for (const c of changes) {
+			const emoji = EMOJI_MAP[c.category];
+			const nameStr =
+				c.name.length > 16 ? c.name.slice(0, 15) + "…" : c.name;
+			const arrow = c.delta > 0 ? "▲" : "▼";
+			const sign = c.delta > 0 ? "+" : "";
+			lines.push(
+				`  ${emoji} ${nameStr.padEnd(18)} ${String(c.before).padStart(5)}    ${String(c.after).padStart(5)}    ${sign}${c.delta} ${arrow}`,
+			);
+		}
+		lines.push("");
+	}
+
+	// New packages
+	if (added.length > 0) {
+		for (const pkg of added) {
+			lines.push(
+				`  🌱 NEW: ${pkg.name} (${pkg.fileCount} files) — ${pkg.path}`,
+			);
+		}
+		lines.push("");
+	}
+
+	// Removed packages
+	if (removed.length > 0) {
+		for (const pkg of removed) {
+			lines.push(
+				`  🍂 REMOVED: ${pkg.name} (was ${pkg.fileCount} files) — ${pkg.path}`,
+			);
+		}
+		lines.push("");
+	}
+
+	// Total
+	lines.push(
+		`  Total: ${totalBefore.toLocaleString()} → ${totalAfter.toLocaleString()} files (${deltaStr})`,
+	);
+	lines.push("");
+	return lines.join("\n");
 }
 
-// ─── JSON output for programmatic use ───────────────────────────────
+// ─── JSON output ─────────────────────────────────────────────────────
 
 function toJSON(packages) {
-	const totalFiles = packages.reduce((sum, p) => sum + p.fileCount, 0);
+	const totalFiles = packages.reduce((s, p) => s + p.fileCount, 0);
 	return JSON.stringify(
 		{
 			generated: new Date().toISOString(),
@@ -286,10 +287,10 @@ function toJSON(packages) {
 				totalPackages: packages.length,
 				totalFiles,
 				byCategory: Object.fromEntries(
-					["app", "service", "worker", "lib"].map((cat) => {
-						const pkgs = packages.filter((p) => p.category === cat);
+					CATEGORIES.map((cat) => {
+						const pkgs = packages.filter((p) => p.category === cat.type);
 						return [
-							cat,
+							cat.type,
 							{
 								count: pkgs.length,
 								files: pkgs.reduce((s, p) => s + p.fileCount, 0),
@@ -310,47 +311,61 @@ function toJSON(packages) {
 	);
 }
 
-// ─── Markdown wrapper ───────────────────────────────────────────────
+// ─── Markdown wrappers ───────────────────────────────────────────────
 
-function toMarkdown(packages, asciiGrove) {
-	const totalFiles = packages.reduce((sum, p) => sum + p.fileCount, 0);
+function toMarkdownCensus(packages, plainText) {
+	const totalFiles = packages.reduce((s, p) => s + p.fileCount, 0);
 
-	let md = "## 🌲 The Grove — Codebase Visualization\n\n";
+	let md = `## 🌲 The Grove — Codebase Visualization\n\n`;
 	md += `*${packages.length} packages · ${totalFiles.toLocaleString()} source files*\n\n`;
-	md += "```\n";
-	md += asciiGrove;
-	md += "\n```\n\n";
+	md += "```\n" + plainText + "\n```\n\n";
 
-	// Package table
-	md += "<details><summary>Package details</summary>\n\n";
+	// Full package table in collapsible section
+	md += "<details><summary>All packages</summary>\n\n";
 	md += "| Package | Type | Files | Path |\n";
 	md += "| --- | --- | ---: | --- |\n";
 
 	for (const pkg of packages) {
-		const emoji =
-			pkg.category === "app"
-				? "🌳"
-				: pkg.category === "service"
-					? "🌲"
-					: pkg.category === "worker"
-						? "🌿"
-						: "🌴";
-		md += `| ${emoji} ${pkg.name} | ${pkg.categoryLabel} | ${pkg.fileCount} | \`${pkg.path}\` |\n`;
+		md += `| ${EMOJI_MAP[pkg.category]} ${pkg.name} | ${pkg.categoryLabel} | ${pkg.fileCount} | \`${pkg.path}\` |\n`;
 	}
 
 	md += "\n</details>\n";
 	return md;
 }
 
-// ─── Main ───────────────────────────────────────────────────────────
+function toMarkdownDiff(headPackages, baseData, plainText) {
+	const totalAfter = headPackages.reduce((s, p) => s + p.fileCount, 0);
+	const totalBefore = baseData.packages.reduce((s, p) => s + p.fileCount, 0);
+	const delta = totalAfter - totalBefore;
+	const deltaStr = delta >= 0 ? `+${delta}` : String(delta);
+
+	let md = `## 🌲 The Grove — PR Impact\n\n`;
+	md += `*${headPackages.length} packages · ${totalAfter.toLocaleString()} files (${deltaStr} from base)*\n\n`;
+	md += "```\n" + plainText + "\n```\n";
+	return md;
+}
+
+// ─── Main ────────────────────────────────────────────────────────────
 
 const packages = discoverPackages();
-const asciiGrove = composeGrove(packages);
 
 if (FORMAT === "json") {
 	console.log(toJSON(packages));
-} else if (FORMAT === "markdown") {
-	console.log(toMarkdown(packages, asciiGrove));
+} else if (BASE_FILE) {
+	// PR diff mode
+	const baseData = JSON.parse(readFileSync(BASE_FILE, "utf-8"));
+	const plainText = renderDiff(packages, baseData);
+	if (FORMAT === "markdown") {
+		console.log(toMarkdownDiff(packages, baseData, plainText));
+	} else {
+		console.log(plainText);
+	}
 } else {
-	console.log(asciiGrove);
+	// Census mode
+	const plainText = renderCensus(packages);
+	if (FORMAT === "markdown") {
+		console.log(toMarkdownCensus(packages, plainText));
+	} else {
+		console.log(plainText);
+	}
 }
