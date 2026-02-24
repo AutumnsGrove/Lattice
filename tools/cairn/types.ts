@@ -102,6 +102,10 @@ export interface CCUsageMonth {
 	month: string; // "2025-11"
 	totalCost: number;
 	totalTokens: number;
+	inputTokens: number;
+	outputTokens: number;
+	cacheCreationTokens: number;
+	cacheReadTokens: number;
 	modelsUsed: string[];
 	modelBreakdowns: CCUsageModelBreakdown[];
 }

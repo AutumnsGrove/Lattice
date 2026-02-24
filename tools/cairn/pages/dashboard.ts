@@ -81,7 +81,17 @@ export function dashboardPage(idx: CairnIndex): string {
 	// ccusage monthly table (most recent 6 months)
 	const ccMonths = [...ccUsageMonthly].sort((a, b) => b.month.localeCompare(a.month)).slice(0, 6);
 	const ccTotalCost = ccMonths.reduce((s, m) => s + m.totalCost, 0);
-	const ccTotalTokens = ccMonths.reduce((s, m) => s + m.totalTokens, 0);
+	const ccTotalInput = ccMonths.reduce((s, m) => s + (m.inputTokens ?? 0), 0);
+	const ccTotalOutput = ccMonths.reduce((s, m) => s + (m.outputTokens ?? 0), 0);
+	const ccTotalCacheWrite = ccMonths.reduce((s, m) => s + (m.cacheCreationTokens ?? 0), 0);
+	const ccTotalCacheRead = ccMonths.reduce((s, m) => s + (m.cacheReadTokens ?? 0), 0);
+
+	function fmtTok(n: number): string {
+		if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(1)}B`;
+		if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+		if (n >= 1_000) return `${(n / 1_000).toFixed(0)}k`;
+		return String(n);
+	}
 
 	const ccMonthRows = ccMonths
 		.map((m) => {
@@ -90,24 +100,22 @@ export function dashboardPage(idx: CairnIndex): string {
 				month: "short",
 				year: "numeric",
 			});
-			const tokensK =
-				m.totalTokens >= 1_000_000
-					? `${(m.totalTokens / 1_000_000).toFixed(1)}M`
-					: `${(m.totalTokens / 1_000).toFixed(0)}k`;
+			const models = (m.modelsUsed ?? [])
+				.slice(0, 2)
+				.map(
+					(model) =>
+						`<span class="tag" style="font-size:0.65rem;">${escHtml(model.replace("claude-", "").replace(/-\d{8}$/, ""))}</span>`,
+				)
+				.join("");
 			return `
-		<div style="display:grid;grid-template-columns:100px 1fr auto auto;gap:0.75rem;align-items:center;padding:0.35rem 0;border-bottom:1px solid var(--border-subtle);">
-			<span style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text-secondary);">${escHtml(monthLabel)}</span>
-			<div style="display:flex;gap:0.35rem;flex-wrap:wrap;">
-				${(m.modelsUsed ?? [])
-					.slice(0, 3)
-					.map(
-						(model) =>
-							`<span class="tag" style="font-size:0.65rem;">${escHtml(model.replace("claude-", "").replace(/-\d{8}$/, ""))}</span>`,
-					)
-					.join("")}
-			</div>
-			<span style="font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);">${tokensK}</span>
-			<span style="font-family:var(--font-mono);font-size:0.82rem;color:var(--accent-green);font-weight:500;">$${m.totalCost.toFixed(2)}</span>
+		<div style="display:grid;grid-template-columns:80px 1fr 60px 60px 72px 72px 68px;gap:0.6rem;align-items:center;padding:0.35rem 0;border-bottom:1px solid var(--border-subtle);">
+			<span style="font-family:var(--font-mono);font-size:0.75rem;color:var(--text-secondary);">${escHtml(monthLabel)}</span>
+			<div style="display:flex;gap:0.25rem;flex-wrap:wrap;">${models}</div>
+			<span style="font-family:var(--font-mono);font-size:0.72rem;color:var(--text-muted);text-align:right;" title="Input tokens">${fmtTok(m.inputTokens ?? 0)}</span>
+			<span style="font-family:var(--font-mono);font-size:0.72rem;color:var(--text-muted);text-align:right;" title="Output tokens">${fmtTok(m.outputTokens ?? 0)}</span>
+			<span style="font-family:var(--font-mono);font-size:0.72rem;color:var(--accent-purple);text-align:right;" title="Cache write tokens">${fmtTok(m.cacheCreationTokens ?? 0)}</span>
+			<span style="font-family:var(--font-mono);font-size:0.72rem;color:var(--accent-blue);text-align:right;" title="Cache read tokens">${fmtTok(m.cacheReadTokens ?? 0)}</span>
+			<span style="font-family:var(--font-mono);font-size:0.78rem;color:var(--accent-green);font-weight:500;text-align:right;">$${m.totalCost.toFixed(2)}</span>
 		</div>`;
 		})
 		.join("");
@@ -121,15 +129,38 @@ export function dashboardPage(idx: CairnIndex): string {
 	<span style="margin-left:auto;font-size:0.72rem;color:var(--text-muted);">via ccusage · last ${ccMonths.length} months</span>
 </div>
 <div class="glass-card mb-3" style="padding:0.75rem 1.25rem;">
-	<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem;margin-bottom:0.75rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border-subtle);">
+	<!-- Aggregate totals -->
+	<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:1rem;margin-bottom:0.75rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border-subtle);">
 		<div>
-			<div style="font-size:0.68rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.2rem;">Total (shown)</div>
-			<div style="font-size:1.3rem;font-family:var(--font-display);color:var(--accent-green);">$${ccTotalCost.toFixed(2)}</div>
+			<div style="font-size:0.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.2rem;">Total Cost</div>
+			<div style="font-size:1.25rem;font-family:var(--font-display);color:var(--accent-green);">$${ccTotalCost.toFixed(2)}</div>
 		</div>
 		<div>
-			<div style="font-size:0.68rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.2rem;">Total Tokens</div>
-			<div style="font-size:1.3rem;font-family:var(--font-display);color:var(--accent-blue);">${ccTotalTokens >= 1_000_000 ? (ccTotalTokens / 1_000_000).toFixed(1) + "M" : (ccTotalTokens / 1_000).toFixed(0) + "k"}</div>
+			<div style="font-size:0.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.2rem;">Input</div>
+			<div style="font-size:1.25rem;font-family:var(--font-display);color:var(--text-primary);">${fmtTok(ccTotalInput)}</div>
 		</div>
+		<div>
+			<div style="font-size:0.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.2rem;">Output</div>
+			<div style="font-size:1.25rem;font-family:var(--font-display);color:var(--text-primary);">${fmtTok(ccTotalOutput)}</div>
+		</div>
+		<div>
+			<div style="font-size:0.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.2rem;">Cache Write ↑</div>
+			<div style="font-size:1.25rem;font-family:var(--font-display);color:var(--accent-purple);">${fmtTok(ccTotalCacheWrite)}</div>
+		</div>
+		<div>
+			<div style="font-size:0.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.2rem;">Cache Read ↓</div>
+			<div style="font-size:1.25rem;font-family:var(--font-display);color:var(--accent-blue);">${fmtTok(ccTotalCacheRead)}</div>
+		</div>
+	</div>
+	<!-- Column headers -->
+	<div style="display:grid;grid-template-columns:80px 1fr 60px 60px 72px 72px 68px;gap:0.6rem;padding-bottom:0.3rem;margin-bottom:0.1rem;border-bottom:1px solid var(--border-subtle);">
+		<span style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);">Month</span>
+		<span style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);">Models</span>
+		<span style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);text-align:right;">Input</span>
+		<span style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);text-align:right;">Output</span>
+		<span style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--accent-purple);text-align:right;">Cache↑</span>
+		<span style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--accent-blue);text-align:right;">Cache↓</span>
+		<span style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);text-align:right;">Cost</span>
 	</div>
 	${ccMonthRows}
 </div>`;
