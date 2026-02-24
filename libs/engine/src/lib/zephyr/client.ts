@@ -49,6 +49,24 @@ export class ZephyrClient {
 	}
 
 	/**
+	 * Build auth headers for a request.
+	 *
+	 * When using a service binding, we skip X-API-Key (which may contain
+	 * corrupted bytes from Cloudflare Pages secrets) and instead send a
+	 * SHA-256 hash of the key as X-Zephyr-Binding. The hash is always
+	 * clean hex, avoiding "Invalid header value" errors entirely.
+	 * Zephyr validates the hash against its own copy of the key.
+	 */
+	private async authHeaders(): Promise<Record<string, string>> {
+		if (this.fetcher) {
+			const hash = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(this.apiKey));
+			const hex = [...new Uint8Array(hash)].map((b) => b.toString(16).padStart(2, "0")).join("");
+			return { "X-Zephyr-Binding": hex };
+		}
+		return { "X-API-Key": this.apiKey };
+	}
+
+	/**
 	 * Send an email
 	 *
 	 * @param request - Email send request
@@ -66,11 +84,12 @@ export class ZephyrClient {
 		}
 
 		try {
+			const auth = await this.authHeaders();
 			const response = await this.fetch(`${this.baseUrl}/send`, {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
-					"X-API-Key": this.apiKey,
+					...auth,
 				},
 				body: JSON.stringify(request),
 			});
@@ -140,11 +159,12 @@ export class ZephyrClient {
 	 */
 	async broadcast(request: BroadcastRequest): Promise<BroadcastResponse> {
 		try {
+			const auth = await this.authHeaders();
 			const response = await this.fetch(`${this.baseUrl}/broadcast`, {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
-					"X-API-Key": this.apiKey,
+					...auth,
 				},
 				body: JSON.stringify(request),
 			});
