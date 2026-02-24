@@ -10,16 +10,16 @@ import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { AUTH_HUB_URL } from "$lib/config/auth.js";
 
-/**
- * POST logout handler (CSRF-safe).
- * All logout forms must use POST — GET logout was removed to prevent CSRF logout attacks.
- */
-export const POST: RequestHandler = async ({
+/** Shared logout logic for both GET and POST handlers. */
+async function performLogout({
   url,
   cookies,
   platform,
-  request,
-}) => {
+}: {
+  url: URL;
+  cookies: Parameters<RequestHandler>[0]["cookies"];
+  platform: Parameters<RequestHandler>[0]["platform"];
+}): Promise<never> {
   // Determine if we're in production
   const isProduction =
     url.hostname !== "localhost" && url.hostname !== "127.0.0.1";
@@ -59,4 +59,18 @@ export const POST: RequestHandler = async ({
   cookies.delete("session_token", { path: "/" });
 
   redirect(302, "/");
+}
+
+/**
+ * GET logout handler.
+ * Needed because the Header/MobileMenu logout links use <a> tags (GET requests).
+ * The /logout route redirects here via 302 which the browser follows as GET.
+ */
+export const GET: RequestHandler = async ({ url, cookies, platform }) => {
+  return performLogout({ url, cookies, platform });
+};
+
+/** POST logout handler (CSRF-safe, used by form submissions). */
+export const POST: RequestHandler = async ({ url, cookies, platform }) => {
+  return performLogout({ url, cookies, platform });
 };
