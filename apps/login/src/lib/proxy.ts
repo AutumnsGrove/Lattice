@@ -123,6 +123,19 @@ export async function proxyToHeartwood(event: RequestEvent, targetPath: string):
 		}
 	}
 
+	// [Passkey Debug] Log request details for passkey routes
+	const isPasskeyRoute = targetPath.includes("/passkey/");
+	if (isPasskeyRoute) {
+		const cookieNames = authCookies.map((c) => c.name);
+		console.log("[Passkey Debug] Proxy request:", {
+			method: request.method,
+			path: targetPath,
+			cookieNames,
+			contentType: proxyHeaders.get("content-type"),
+			hasCookieHeader: !!cookieHeader,
+		});
+	}
+
 	// Perform the service binding fetch
 	const response = await platform.env.AUTH.fetch(targetUrl, {
 		method: request.method,
@@ -130,6 +143,37 @@ export async function proxyToHeartwood(event: RequestEvent, targetPath: string):
 		body: ["GET", "HEAD"].includes(request.method) ? undefined : await request.arrayBuffer(),
 		redirect: "manual",
 	});
+
+	// [Passkey Debug] Log response details for passkey routes
+	if (isPasskeyRoute) {
+		const setCookieHeaders: string[] = [];
+		response.headers.forEach((value, key) => {
+			if (key.toLowerCase() === "set-cookie") {
+				// Mask cookie values, keep name + attributes
+				const masked = value.replace(/=([^;]+)/, "=***");
+				setCookieHeaders.push(masked);
+			}
+		});
+
+		console.log("[Passkey Debug] Proxy response:", {
+			status: response.status,
+			statusText: response.statusText,
+			setCookieCount: setCookieHeaders.length,
+			setCookieHeaders,
+			contentType: response.headers.get("content-type"),
+		});
+
+		// If error response, clone and log the body
+		if (response.status >= 400) {
+			try {
+				const cloned = response.clone();
+				const errorBody = await cloned.text();
+				console.error("[Passkey Debug] Proxy error body:", errorBody);
+			} catch {
+				console.error("[Passkey Debug] Could not read error response body");
+			}
+		}
+	}
 
 	// Forward only allowed response headers (HAWK-005)
 	const responseHeaders = new Headers();
