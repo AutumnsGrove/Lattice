@@ -165,13 +165,14 @@ This registers the agent, generates a unique API key, saves it to the vault, and
 
 ### Key Architecture Documents
 
-| Document                                                            | Purpose                                                                      |
-| ------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| `docs/plans/infra/completed/database-consolidation-architecture.md` | 3-phase database extraction plan (completed Feb 2026)                        |
-| `docs/patterns/loom-durable-objects-pattern.md`                     | Loom DO coordination layer for auth, tenant coordination, D1 batching        |
-| `docs/specs/rings-spec.md`                                          | Rings analytics system with privacy-first design and DO integration          |
-| `docs/grove-ai-gateway-integration.md`                              | Cloudflare AI Gateway integration for per-tenant AI quotas and observability |
-| `docs/specs/server-sdk-spec.md`                                     | Server SDK infrastructure abstraction layer (Ports & Adapters)               |
+| Document                                                            | Purpose                                                                           |
+| ------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `docs/plans/infra/completed/database-consolidation-architecture.md` | 3-phase database extraction plan (completed Feb 2026)                             |
+| `docs/patterns/loom-durable-objects-pattern.md`                     | Loom DO coordination layer for auth, tenant coordination, D1 batching             |
+| `docs/specs/rings-spec.md`                                          | Rings analytics system with privacy-first design and DO integration               |
+| `docs/grove-ai-gateway-integration.md`                              | Cloudflare AI Gateway integration for per-tenant AI quotas and observability      |
+| `docs/specs/server-sdk-spec.md`                                     | Server SDK infrastructure abstraction layer (Ports & Adapters)                    |
+| `docs/specs/drizzle-integration-spec.md`                            | Drizzle ORM integration (The Aquifer): typed D1 queries, scopedDb, migration plan |
 
 ---
 
@@ -489,6 +490,34 @@ const [settings, pages] = await Promise.all([
 ```
 
 **Use typed query builders** from `libs/engine/src/lib/server/services/database.ts` instead of raw SQL.
+
+**Drizzle ORM (preferred for new code)** — typed queries with compile-time safety:
+
+```typescript
+import { createDb, scopedDb } from "@autumnsgrove/lattice/db";
+import type { Post } from "@autumnsgrove/lattice/db";
+
+// Create client from D1 binding
+const db = createDb(platform.env.DB);
+
+// Tenant-scoped queries (automatic WHERE tenant_id = ?)
+const tenant = scopedDb(db, locals.tenantId);
+const post = await tenant.posts.findBySlug("hello-world");
+const published = await tenant.posts.listPublished();
+
+// Direct Drizzle queries (for platform-wide operations)
+import { posts } from "@autumnsgrove/lattice/db/schema";
+import { eq, desc } from "@autumnsgrove/lattice/db";
+const allPosts = await db
+	.select()
+	.from(posts)
+	.where(eq(posts.status, "published"))
+	.orderBy(desc(posts.publishedAt));
+```
+
+Drizzle and raw D1 coexist. Both patterns work in the same file. New code should prefer Drizzle; existing raw D1 queries migrate incrementally. See `docs/specs/drizzle-integration-spec.md` for the full migration plan.
+
+**Schema files** live at `libs/engine/src/lib/server/db/schema/` (engine.ts, curios.ts, observability.ts). When a column changes in the schema, types update everywhere automatically.
 
 ### Multi-Tenant CSRF
 

@@ -536,6 +536,14 @@
     ],
     "standardTerm": "Build System"
   },
+  "cairn": {
+    "slug": "cairn",
+    "term": "Cairn",
+    "category": "operations",
+    "tagline": "Documentation Browser & Agent Activity Viewer",
+    "definition": "A cairn is a stack of stones built by travelers to mark a trail. Each person who passes through a place adds a stone — slowly, over time, the pile grows. When you're uncertain where to go next, you look for cairns. You follow the markers left by everyone who came before. The path becomes readable.",
+    "standardTerm": "Documentation Browser"
+  },
   "vista": {
     "slug": "vista",
     "term": "Vista",

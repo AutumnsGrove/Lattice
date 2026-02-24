@@ -382,6 +382,18 @@
 		"./foliage/server": {
 			"types": "./dist/foliage/server.d.ts",
 			"default": "./dist/foliage/server.js"
+		},
+		"./db": {
+			"types": "./dist/server/db/index.d.ts",
+			"default": "./dist/server/db/index.js"
+		},
+		"./db/schema": {
+			"types": "./dist/server/db/schema/index.d.ts",
+			"default": "./dist/server/db/schema/index.js"
+		},
+		"./db/schema/*": {
+			"types": "./dist/server/db/schema/*.d.ts",
+			"default": "./dist/server/db/schema/*.js"
 		}
 	},
 	"files": [
@@ -437,6 +449,7 @@
 		"@vitest/ui": "^4.0.18",
 		"autoprefixer": "^10.4.24",
 		"bits-ui": "^1.8.0",
+		"drizzle-kit": "0.31.9",
 		"esbuild": "^0.27.3",
 		"happy-dom": "^20.6.1",
 		"jsdom": "^27.4.0",
@@ -477,6 +490,7 @@
 		"clsx": "^2.1.1",
 		"dom-to-image-more": "^3.7.2",
 		"dompurify": "^3.3.1",
+		"drizzle-orm": "0.44.5",
 		"esm-env": "^1.2.2",
 		"heic2any": "^0.0.4",
 		"lucide-svelte": "^0.554.0",
