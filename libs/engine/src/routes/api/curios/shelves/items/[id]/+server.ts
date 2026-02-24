@@ -1,8 +1,8 @@
 /**
- * Bookmark Shelf Curio API — Single Bookmark
+ * Shelves Curio API — Single Item
  *
- * PATCH  — Update a bookmark (admin)
- * DELETE — Remove a bookmark (admin)
+ * PATCH  — Update an item (admin)
+ * DELETE — Remove an item (admin)
  */
 
 import { json } from "@sveltejs/kit";
@@ -11,40 +11,32 @@ import { API_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
 import {
 	isValidUrl,
 	sanitizeTitle,
-	sanitizeAuthor,
+	sanitizeCreator,
 	sanitizeDescription,
 	sanitizeCategory,
+	sanitizeNote,
+	sanitizeRating,
 	MAX_URL_LENGTH,
-} from "$lib/curios/bookmarkshelf";
+} from "$lib/curios/shelves";
 
 export const PATCH: RequestHandler = async ({ params, request, platform, locals }) => {
 	const db = platform?.env?.CURIO_DB;
 	const tenantId = locals.tenantId;
 
-	if (!db) {
-		throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
-	}
-
-	if (!tenantId) {
-		throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
-	}
-
-	if (!locals.user) {
-		throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
-	}
+	if (!db) throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
+	if (!tenantId) throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
+	if (!locals.user) throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
 
 	const existing = await db
 		.prepare(
 			`SELECT b.id FROM bookmarks b
-       JOIN bookmark_shelves s ON b.shelf_id = s.id
-       WHERE b.id = ? AND s.tenant_id = ?`,
+			 JOIN bookmark_shelves s ON b.shelf_id = s.id
+			 WHERE b.id = ? AND s.tenant_id = ?`,
 		)
 		.bind(params.id, tenantId)
 		.first<{ id: string }>();
 
-	if (!existing) {
-		throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
-	}
+	if (!existing) throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
 
 	let body: Record<string, unknown>;
 	try {
@@ -58,9 +50,7 @@ export const PATCH: RequestHandler = async ({ params, request, platform, locals 
 
 	if (body.title !== undefined) {
 		const title = sanitizeTitle(body.title as string);
-		if (!title) {
-			throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
-		}
+		if (!title) throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
 		updates.push("title = ?");
 		values.push(title);
 	}
@@ -74,9 +64,9 @@ export const PATCH: RequestHandler = async ({ params, request, platform, locals 
 		values.push(url);
 	}
 
-	if (body.author !== undefined) {
+	if (body.creator !== undefined) {
 		updates.push("author = ?");
-		values.push(sanitizeAuthor(body.author as string));
+		values.push(sanitizeCreator(body.creator as string));
 	}
 
 	if (body.description !== undefined) {
@@ -89,14 +79,42 @@ export const PATCH: RequestHandler = async ({ params, request, platform, locals 
 		values.push(sanitizeCategory(body.category as string));
 	}
 
-	if (body.isCurrentlyReading !== undefined) {
-		updates.push("is_currently_reading = ?");
-		values.push(body.isCurrentlyReading ? 1 : 0);
+	if (body.coverUrl !== undefined) {
+		const coverUrl = (body.coverUrl as string)?.trim() || null;
+		if (coverUrl && (!isValidUrl(coverUrl) || coverUrl.length > MAX_URL_LENGTH)) {
+			throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
+		}
+		updates.push("cover_url = ?");
+		values.push(coverUrl);
 	}
 
-	if (body.isFavorite !== undefined) {
+	if (body.thumbnailUrl !== undefined) {
+		const thumbUrl = (body.thumbnailUrl as string)?.trim() || null;
+		if (thumbUrl && (!isValidUrl(thumbUrl) || thumbUrl.length > MAX_URL_LENGTH)) {
+			throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
+		}
+		updates.push("thumbnail_url = ?");
+		values.push(thumbUrl);
+	}
+
+	if (body.isStatus1 !== undefined) {
+		updates.push("is_currently_reading = ?");
+		values.push(body.isStatus1 ? 1 : 0);
+	}
+
+	if (body.isStatus2 !== undefined) {
 		updates.push("is_favorite = ?");
-		values.push(body.isFavorite ? 1 : 0);
+		values.push(body.isStatus2 ? 1 : 0);
+	}
+
+	if (body.rating !== undefined) {
+		updates.push("rating = ?");
+		values.push(sanitizeRating(body.rating));
+	}
+
+	if (body.note !== undefined) {
+		updates.push("note = ?");
+		values.push(sanitizeNote(body.note as string));
 	}
 
 	if (updates.length === 0) {
@@ -108,7 +126,8 @@ export const PATCH: RequestHandler = async ({ params, request, platform, locals 
 	try {
 		await db
 			.prepare(
-				`UPDATE bookmarks SET ${updates.join(", ")} WHERE id = ? AND shelf_id IN (SELECT id FROM bookmark_shelves WHERE tenant_id = ?)`,
+				`UPDATE bookmarks SET ${updates.join(", ")}
+				 WHERE id = ? AND shelf_id IN (SELECT id FROM bookmark_shelves WHERE tenant_id = ?)`,
 			)
 			.bind(...values)
 			.run();
@@ -116,7 +135,7 @@ export const PATCH: RequestHandler = async ({ params, request, platform, locals 
 		return json({ success: true });
 	} catch (error) {
 		logGroveError("API", API_ERRORS.OPERATION_FAILED, {
-			detail: "Bookmark update failed",
+			detail: "Item update failed",
 			cause: error,
 		});
 		throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API");
@@ -127,30 +146,20 @@ export const DELETE: RequestHandler = async ({ params, platform, locals }) => {
 	const db = platform?.env?.CURIO_DB;
 	const tenantId = locals.tenantId;
 
-	if (!db) {
-		throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
-	}
-
-	if (!tenantId) {
-		throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
-	}
-
-	if (!locals.user) {
-		throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
-	}
+	if (!db) throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
+	if (!tenantId) throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
+	if (!locals.user) throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
 
 	const existing = await db
 		.prepare(
 			`SELECT b.id FROM bookmarks b
-       JOIN bookmark_shelves s ON b.shelf_id = s.id
-       WHERE b.id = ? AND s.tenant_id = ?`,
+			 JOIN bookmark_shelves s ON b.shelf_id = s.id
+			 WHERE b.id = ? AND s.tenant_id = ?`,
 		)
 		.bind(params.id, tenantId)
 		.first<{ id: string }>();
 
-	if (!existing) {
-		throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
-	}
+	if (!existing) throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
 
 	try {
 		await db
@@ -163,7 +172,7 @@ export const DELETE: RequestHandler = async ({ params, platform, locals }) => {
 		return json({ success: true });
 	} catch (error) {
 		logGroveError("API", API_ERRORS.OPERATION_FAILED, {
-			detail: "Bookmark delete failed",
+			detail: "Item delete failed",
 			cause: error,
 		});
 		throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API");

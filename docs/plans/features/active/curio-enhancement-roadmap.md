@@ -520,8 +520,8 @@ Extract the duplicated `.sr-only` CSS class from 11 curio components into a shar
 | 2     | Status Badge        | Not started                                                       |
 | 3     | Activity Status     | Not started                                                       |
 | 4     | Now Playing (quick) | Not started                                                       |
-| 5     | Hit Counter         | Not started                                                       |
-| 6     | Guestbook           | Not started                                                       |
+| 5     | Hit Counter         | Shipped                                                           |
+| 6     | Guestbook           | Shipped                                                           |
 | 7     | Blogroll            | Not started                                                       |
 | 8     | Mood Ring           | Not started                                                       |
 | 9     | Polls               | Not started                                                       |

@@ -2,7 +2,7 @@
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
 	"version": "1.0.0",
 	"description": "Tracks curio (interactive feature/widget) inventory for development planning, status tracking, and drift detection",
-	"lastUpdated": "2026-02-06",
+	"lastUpdated": "2026-02-23",
 	"lastAuditedBy": "claude/curios-planning-audit-YiZpr",
 	"curios": {
 		"total": 21,

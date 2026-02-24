@@ -80,11 +80,10 @@
 		"badges",
 		"blogroll",
 		"webring",
-		"linkgarden",
+		"shelves",
 		"activitystatus",
 		"statusbadges",
 		"artifacts",
-		"bookmarkshelf",
 	]);
 
 	/**

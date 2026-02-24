@@ -16,9 +16,8 @@ export { default as CurioBlogroll } from "./CurioBlogroll.svelte";
 export { default as CurioStatusbadges } from "./CurioStatusbadges.svelte";
 export { default as CurioArtifacts } from "./CurioArtifacts.svelte";
 export { default as CurioWebring } from "./CurioWebring.svelte";
-export { default as CurioLinkgarden } from "./CurioLinkgarden.svelte";
+export { default as CurioShelves } from "./CurioShelves.svelte";
 export { default as CurioActivitystatus } from "./CurioActivitystatus.svelte";
-export { default as CurioBookmarkshelf } from "./CurioBookmarkshelf.svelte";
 
 // Global curio layers (imported directly in root layout)
 export { default as CurioCursorsLayer } from "./CurioCursorsLayer.svelte";

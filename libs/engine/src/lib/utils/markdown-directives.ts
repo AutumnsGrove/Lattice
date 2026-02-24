@@ -19,12 +19,12 @@ import type StateBlock from "markdown-it/lib/rules_block/state_block.mjs";
  * Escape HTML special characters for safe embedding in attributes and content.
  */
 function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+	return str
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;")
+		.replace(/'/g, "&#39;");
 }
 
 // ============================================================================
@@ -40,21 +40,21 @@ type DirectiveHandler = (content: string) => string | null;
  * Output: .grove-gallery container with .grove-gallery-item figures
  */
 function handleGallery(content: string): string | null {
-  const urls = content
-    .split(",")
-    .map((u) => u.trim())
-    .filter((u) => u.length > 0);
+	const urls = content
+		.split(",")
+		.map((u) => u.trim())
+		.filter((u) => u.length > 0);
 
-  if (urls.length === 0) return null;
+	if (urls.length === 0) return null;
 
-  const items = urls
-    .map((url) => {
-      const safeUrl = escapeHtml(url);
-      return `<figure class="grove-gallery-item"><img src="${safeUrl}" alt="" loading="lazy" /></figure>`;
-    })
-    .join("\n  ");
+	const items = urls
+		.map((url) => {
+			const safeUrl = escapeHtml(url);
+			return `<figure class="grove-gallery-item"><img src="${safeUrl}" alt="" loading="lazy" /></figure>`;
+		})
+		.join("\n  ");
 
-  return `<div class="grove-gallery" data-images="${urls.length}">\n  ${items}\n</div>\n`;
+	return `<div class="grove-gallery" data-images="${urls.length}">\n  ${items}\n</div>\n`;
 }
 
 // ============================================================================
@@ -66,19 +66,18 @@ function handleGallery(content: string): string | null {
  * Each produces a placeholder <div> that the CurioHydrator mounts at runtime.
  */
 const CURIO_DIRECTIVES = [
-  "guestbook",
-  "hitcounter",
-  "poll",
-  "nowplaying",
-  "moodring",
-  "badges",
-  "blogroll",
-  "webring",
-  "linkgarden",
-  "activitystatus",
-  "statusbadges",
-  "artifacts",
-  "bookmarkshelf",
+	"guestbook",
+	"hitcounter",
+	"poll",
+	"nowplaying",
+	"moodring",
+	"badges",
+	"blogroll",
+	"webring",
+	"shelves",
+	"activitystatus",
+	"statusbadges",
+	"artifacts",
 ] as const;
 
 /**
@@ -92,22 +91,26 @@ const CURIO_DIRECTIVES = [
  * used for curios that need an ID (e.g., ::poll[my-poll-id]::).
  */
 function handleCurio(curioName: string, content: string): string {
-  const safeName = escapeHtml(curioName);
-  // Truncate arg to 200 chars to prevent resource exhaustion via huge attributes
-  const safeContent = escapeHtml(content.trim().slice(0, 200));
-  const argAttr = safeContent ? ` data-curio-arg="${safeContent}"` : "";
-  return `<div class="grove-curio" data-grove-curio="${safeName}"${argAttr}>\n  <span class="grove-curio-loading">Loading ${safeName}\u2026</span>\n</div>\n`;
+	const safeName = escapeHtml(curioName);
+	// Truncate arg to 200 chars to prevent resource exhaustion via huge attributes
+	const safeContent = escapeHtml(content.trim().slice(0, 200));
+	const argAttr = safeContent ? ` data-curio-arg="${safeContent}"` : "";
+	return `<div class="grove-curio" data-grove-curio="${safeName}"${argAttr}>\n  <span class="grove-curio-loading">Loading ${safeName}\u2026</span>\n</div>\n`;
 }
 
 /** Map of directive names to their handlers */
 const directiveHandlers: Record<string, DirectiveHandler> = {
-  gallery: handleGallery,
+	gallery: handleGallery,
 };
 
 // Register all curio directives
 for (const name of CURIO_DIRECTIVES) {
-  directiveHandlers[name] = (content) => handleCurio(name, content);
+	directiveHandlers[name] = (content) => handleCurio(name, content);
 }
+
+// Backward-compatibility aliases (old directive names → shelves)
+directiveHandlers["bookmarkshelf"] = (content) => handleCurio("shelves", content);
+directiveHandlers["linkgarden"] = (content) => handleCurio("shelves", content);
 
 /**
  * Metadata for all embeddable curios — used by the editor autocomplete.
@@ -118,22 +121,21 @@ for (const name of CURIO_DIRECTIVES) {
  * - `system: true` → not a curio, but uses the same directive syntax (e.g., gallery)
  */
 export const CURIO_METADATA = [
-  { id: "guestbook", name: "Guestbook", requiresArg: false },
-  { id: "hitcounter", name: "Hit Counter", requiresArg: false },
-  { id: "poll", name: "Poll", requiresArg: true },
-  { id: "nowplaying", name: "Now Playing", requiresArg: false },
-  { id: "moodring", name: "Mood Ring", requiresArg: false },
-  { id: "badges", name: "Badges", requiresArg: false },
-  { id: "blogroll", name: "Blogroll", requiresArg: false },
-  { id: "webring", name: "Web Ring", requiresArg: false },
-  { id: "linkgarden", name: "Link Garden", requiresArg: false },
-  { id: "activitystatus", name: "Activity Status", requiresArg: false },
-  { id: "statusbadges", name: "Status Badge", requiresArg: false },
-  { id: "artifacts", name: "Artifacts", requiresArg: false },
-  { id: "bookmarkshelf", name: "Bookmark Shelf", requiresArg: false },
-  { id: "shrines", name: "Shrines", requiresArg: false },
-  // System directive (not a curio, but uses same syntax)
-  { id: "gallery", name: "Gallery", requiresArg: true, system: true },
+	{ id: "guestbook", name: "Guestbook", requiresArg: false },
+	{ id: "hitcounter", name: "Hit Counter", requiresArg: false },
+	{ id: "poll", name: "Poll", requiresArg: true },
+	{ id: "nowplaying", name: "Now Playing", requiresArg: false },
+	{ id: "moodring", name: "Mood Ring", requiresArg: false },
+	{ id: "badges", name: "Badges", requiresArg: false },
+	{ id: "blogroll", name: "Blogroll", requiresArg: false },
+	{ id: "webring", name: "Web Ring", requiresArg: false },
+	{ id: "shelves", name: "Shelves", requiresArg: false },
+	{ id: "activitystatus", name: "Activity Status", requiresArg: false },
+	{ id: "statusbadges", name: "Status Badge", requiresArg: false },
+	{ id: "artifacts", name: "Artifacts", requiresArg: false },
+	{ id: "shrines", name: "Shrines", requiresArg: false },
+	// System directive (not a curio, but uses same syntax)
+	{ id: "gallery", name: "Gallery", requiresArg: true, system: true },
 ] as const;
 
 /** Exported for testing — the list of recognized curio directive names */
@@ -153,37 +155,37 @@ const DIRECTIVE_RE = /^::(\w+)(?:\[([^\]]*)\])?::$/;
  * dispatches to the appropriate handler and emits an html_block token.
  */
 function directiveBlockRule(
-  state: StateBlock,
-  startLine: number,
-  _endLine: number,
-  silent: boolean,
+	state: StateBlock,
+	startLine: number,
+	_endLine: number,
+	silent: boolean,
 ): boolean {
-  const pos = state.bMarks[startLine] + state.tShift[startLine];
-  const max = state.eMarks[startLine];
-  const lineText = state.src.slice(pos, max).trim();
+	const pos = state.bMarks[startLine] + state.tShift[startLine];
+	const max = state.eMarks[startLine];
+	const lineText = state.src.slice(pos, max).trim();
 
-  const match = DIRECTIVE_RE.exec(lineText);
-  if (!match) return false;
+	const match = DIRECTIVE_RE.exec(lineText);
+	if (!match) return false;
 
-  // In validation mode, just confirm we'd match
-  if (silent) return true;
+	// In validation mode, just confirm we'd match
+	if (silent) return true;
 
-  const directiveName = match[1].toLowerCase();
-  const directiveContent = match[2] ?? "";
+	const directiveName = match[1].toLowerCase();
+	const directiveContent = match[2] ?? "";
 
-  const handler = directiveHandlers[directiveName];
-  if (!handler) return false;
+	const handler = directiveHandlers[directiveName];
+	if (!handler) return false;
 
-  const html = handler(directiveContent);
-  if (!html) return false;
+	const html = handler(directiveContent);
+	if (!html) return false;
 
-  // Emit an html_block token with the rendered content
-  const token = state.push("html_block", "", 0);
-  token.content = html;
-  token.map = [startLine, startLine + 1];
+	// Emit an html_block token with the rendered content
+	const token = state.push("html_block", "", 0);
+	token.content = html;
+	token.map = [startLine, startLine + 1];
 
-  state.line = startLine + 1;
-  return true;
+	state.line = startLine + 1;
+	return true;
 }
 
 // ============================================================================
@@ -198,7 +200,7 @@ function directiveBlockRule(
  *   md.use(groveDirectivePlugin);
  */
 export function groveDirectivePlugin(md: MarkdownIt): void {
-  md.block.ruler.before("paragraph", "grove_directive", directiveBlockRule, {
-    alt: ["paragraph", "reference", "blockquote"],
-  });
+	md.block.ruler.before("paragraph", "grove_directive", directiveBlockRule, {
+		alt: ["paragraph", "reference", "blockquote"],
+	});
 }
