@@ -22,12 +22,13 @@ jobs:
   deploy:
     # Skip if triggered by failed workflow_run
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
-    uses: ./.github/workflows/_deploy-pages.yml
+    uses: ./.github/workflows/_deploy-worker.yml
     with:
-      app-dir: apps/landing
-      project-name: grove-landing
+      worker-dir: apps/landing
       needs-engine: true
+      run-build: true
       run-tests: true
+      typecheck-command: pnpm check
       run-migrations: true
       migration-db: grove-engine-db
       checkout-ref: main

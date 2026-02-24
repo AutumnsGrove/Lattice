@@ -69,6 +69,11 @@ jobs:
           - name: warden
             path: workers/warden
             needs-engine: true
+          - name: landing
+            path: apps/landing
+            needs-engine: true
+            build-first: true
+            typecheck-command: pnpm check
 
     steps:
       - name: Checkout
@@ -92,8 +97,13 @@ jobs:
         run: pnpm run package
         working-directory: libs/engine
 
+      - name: Build (SvelteKit)
+        if: matrix.build-first
+        run: pnpm run build
+        working-directory: ${{ matrix.path }}
+
       - name: Type check
-        run: pnpm exec tsc --noEmit
+        run: ${{ matrix.typecheck-command || 'pnpm exec tsc --noEmit' }}
         working-directory: ${{ matrix.path }}
 
       - name: Validate deployment (dry-run)
@@ -122,10 +132,6 @@ jobs:
             path: libs/engine
             project: grove-lattice
             needs-engine: false
-          - name: landing
-            path: apps/landing
-            project: grove-landing
-            needs-engine: true
           - name: clearing
             path: apps/clearing
             project: grove-clearing

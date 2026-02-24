@@ -81,18 +81,18 @@ const SUBDOMAIN_ROUTES: Record<string, string | RouteTarget> = {
 
 	// Reserved subdomains - route to landing until services are built
 	// These are claimed to prevent user registration conflicts
-	pantry: "grove-landing.pages.dev", // Pantry shop (coming soon)
-	nook: "grove-landing.pages.dev", // Nook video sharing (coming soon)
-	trove: "grove-landing.pages.dev", // Trove library finder (coming soon)
-	bloom: "grove-landing.pages.dev", // Bloom remote coding (coming soon)
-	vista: "grove-landing.pages.dev", // Vista monitoring (coming soon)
-	foliage: "grove-landing.pages.dev", // Foliage theming (coming soon)
+	pantry: "grove-landing.m7jv4v7npb.workers.dev", // Pantry shop (coming soon)
+	nook: "grove-landing.m7jv4v7npb.workers.dev", // Nook video sharing (coming soon)
+	trove: "grove-landing.m7jv4v7npb.workers.dev", // Trove library finder (coming soon)
+	bloom: "grove-landing.m7jv4v7npb.workers.dev", // Bloom remote coding (coming soon)
+	vista: "grove-landing.m7jv4v7npb.workers.dev", // Vista monitoring (coming soon)
+	foliage: "grove-landing.m7jv4v7npb.workers.dev", // Foliage theming (coming soon)
 	status: "grove-clearing.pages.dev", // Clearing status page
 	clearing: "grove-clearing.pages.dev", // Clearing alias
-	mc: "grove-landing.pages.dev", // Outpost Minecraft (coming soon)
-	search: "grove-landing.pages.dev", // Search (coming soon)
-	porch: "grove-landing.pages.dev", // Porch conversations (coming soon)
-	canopy: "grove-landing.pages.dev", // Canopy directory (route-based at grove.place/canopy)
+	mc: "grove-landing.m7jv4v7npb.workers.dev", // Outpost Minecraft (coming soon)
+	search: "grove-landing.m7jv4v7npb.workers.dev", // Search (coming soon)
+	porch: "grove-landing.m7jv4v7npb.workers.dev", // Porch conversations (coming soon)
+	canopy: "grove-landing.m7jv4v7npb.workers.dev", // Canopy directory (route-based at grove.place/canopy)
 
 	// Special handling
 	www: "REDIRECT", // Redirect to root

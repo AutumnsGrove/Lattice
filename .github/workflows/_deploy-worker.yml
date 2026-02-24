@@ -55,6 +55,21 @@ on:
         required: false
         type: boolean
         default: false
+      run-migrations:
+        description: "Run D1 database migrations before deploying"
+        required: false
+        type: boolean
+        default: false
+      migration-db:
+        description: "D1 database name for migrations"
+        required: false
+        type: string
+        default: ""
+      checkout-ref:
+        description: "Git ref to checkout (default: triggering ref)"
+        required: false
+        type: string
+        default: ""
 
 jobs:
   deploy:
@@ -66,7 +81,14 @@ jobs:
     steps:
       # ── Inline grove-setup (can't use composite action in reusable workflow) ──
       - name: Checkout
+        if: inputs.checkout-ref == ''
         uses: actions/checkout@v4
+
+      - name: Checkout (specific ref)
+        if: inputs.checkout-ref != ''
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.checkout-ref }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -101,6 +123,16 @@ jobs:
         if: inputs.run-build
         run: pnpm run build
         working-directory: ${{ inputs.worker-dir }}
+
+      - name: Run database migrations
+        if: inputs.run-migrations
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: d1 migrations apply ${{ inputs.migration-db }} --remote
+          workingDirectory: ${{ inputs.worker-dir }}
+          packageManager: pnpm
 
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3

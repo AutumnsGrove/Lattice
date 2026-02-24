@@ -1,7 +1,14 @@
 name = "grove-landing"
 compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
-pages_build_output_dir = ".svelte-kit/cloudflare"
+
+# Worker entry point (SvelteKit adapter-cloudflare output)
+main = ".svelte-kit/cloudflare/_worker.js"
+
+# Static assets served alongside the Worker
+[assets]
+directory = ".svelte-kit/cloudflare"
+binding = "ASSETS"
 
 # Environment variables for local development
 [vars]
@@ -57,13 +64,11 @@ id = "514e91e81cc44d128a82ec6f668303e4"
 binding = "CACHE_KV"
 id = "514e91e81cc44d128a82ec6f668303e4"
 
-# Secrets (configured in Cloudflare Dashboard - Pages > Settings > Bindings):
+# Secrets (set via `wrangler secret put` or `gw secret apply`):
 # - ZEPHYR_API_KEY - Shared secret for authenticating with Zephyr email worker
-# - RESEND_API_KEY (environment variable, not secret for Pages)
-# - ADMIN_EMAILS (environment variable)
-# - CDN_URL = https://cdn.grove.place (production only)
-# - TURNSTILE_SECRET_KEY = Cloudflare Turnstile secret (Shade)
+# - TURNSTILE_SECRET_KEY - Cloudflare Turnstile secret (Shade)
+# - UNSUBSCRIBE_SECRET - HMAC secret for email unsubscribe tokens
 #
-# NOTE: D1 and R2 bindings are read from this file by wrangler pages deploy.
-# For secrets/env vars, configure them in Cloudflare Dashboard since
-# wrangler pages deploy doesn't support --var flags.
+# Production env vars (set via `wrangler secret put` for sensitive values):
+# - ADMIN_EMAILS
+# - CDN_URL = https://cdn.grove.place
