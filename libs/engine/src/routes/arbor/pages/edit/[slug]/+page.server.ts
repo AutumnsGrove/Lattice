@@ -13,6 +13,8 @@ interface PageRecord {
 	hero: string | null;
 	gutter_content: string | null;
 	font: string | null;
+	show_in_nav: number | null;
+	nav_order: number | null;
 	updated_at: string | null;
 	created_at: string | null;
 }
@@ -40,7 +42,7 @@ export const load: PageServerLoad = async ({ params, platform, locals }) => {
 			const [page, curios] = await Promise.all([
 				db
 					.prepare(
-						`SELECT slug, title, description, type, markdown_content, html_content, hero, gutter_content, font, updated_at, created_at
+						`SELECT slug, title, description, type, markdown_content, html_content, hero, gutter_content, font, COALESCE(show_in_nav, 0) as show_in_nav, COALESCE(nav_order, 0) as nav_order, updated_at, created_at
              FROM pages
              WHERE slug = ? AND tenant_id = ?`,
 					)
