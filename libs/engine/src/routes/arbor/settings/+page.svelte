@@ -506,6 +506,10 @@
 	let savingBlaze = $state(false);
 	/** @type {string | null} */
 	let deletingBlazeSlug = $state(null);
+	let showDeleteBlazeDialog = $state(false);
+	/** @type {string | null} */
+	let pendingDeleteBlazeSlug = $state(null);
+	let pendingDeleteBlazeLabel = $state("");
 
 	async function fetchBlazes() {
 		loadingBlazes = true;
@@ -566,17 +570,32 @@
 		savingBlaze = false;
 	}
 
-	/** @param {string} blazeSlug */
-	async function deleteBlaze(blazeSlug) {
-		deletingBlazeSlug = blazeSlug;
+	/**
+	 * Open confirmation dialog before deleting a blaze
+	 * @param {string} blazeSlug
+	 */
+	function confirmDeleteBlaze(blazeSlug) {
+		const blaze = customBlazes.find((b) => b.slug === blazeSlug);
+		pendingDeleteBlazeSlug = blazeSlug;
+		pendingDeleteBlazeLabel = blaze?.label || blazeSlug;
+		showDeleteBlazeDialog = true;
+	}
+
+	/** Execute the confirmed blaze deletion */
+	async function deleteBlaze() {
+		if (!pendingDeleteBlazeSlug) return;
+		deletingBlazeSlug = pendingDeleteBlazeSlug;
+		showDeleteBlazeDialog = false;
 		try {
-			await api.delete(`/api/blazes/${blazeSlug}`);
+			await api.delete(`/api/blazes/${pendingDeleteBlazeSlug}`);
 			toast.success("Blaze deleted");
 			await fetchBlazes();
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : "Failed to delete blaze");
 		}
 		deletingBlazeSlug = null;
+		pendingDeleteBlazeSlug = null;
+		pendingDeleteBlazeLabel = "";
 	}
 </script>
 
@@ -1154,7 +1173,7 @@
 							<Button
 								variant="danger"
 								size="sm"
-								onclick={() => deleteBlaze(blaze.slug)}
+								onclick={() => confirmDeleteBlaze(blaze.slug)}
 								disabled={deletingBlazeSlug === blaze.slug}
 							>
 								{deletingBlazeSlug === blaze.slug ? "Deleting..." : "Delete"}
@@ -1315,6 +1334,16 @@
 	variant="danger"
 	loading={revokingAllSessions}
 	onconfirm={revokeAllSessions}
+/>
+
+<GlassConfirmDialog
+	bind:open={showDeleteBlazeDialog}
+	title="Delete Blaze"
+	message="Delete the &quot;{pendingDeleteBlazeLabel}&quot; blaze? Posts using it will fall back to a generic badge."
+	confirmLabel="Delete"
+	variant="danger"
+	loading={deletingBlazeSlug !== null}
+	onconfirm={deleteBlaze}
 />
 
 <style>

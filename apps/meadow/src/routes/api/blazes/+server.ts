@@ -5,6 +5,7 @@
  */
 
 import { json } from "@sveltejs/kit";
+import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 import type { RequestHandler } from "./$types";
 
 interface BlazeRow {
@@ -18,7 +19,7 @@ interface BlazeRow {
 export const GET: RequestHandler = async ({ platform, locals }) => {
 	const db = platform?.env?.DB;
 	if (!db) {
-		return json({ blazes: [] }, { status: 503 });
+		throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
 	}
 
 	try {
@@ -59,7 +60,7 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
 
 		return json({ blazes }, { headers: { "Cache-Control": "public, max-age=300" } });
 	} catch (err) {
-		console.error("[Blazes API] Failed to fetch blazes:", err);
-		return json({ blazes: [] }, { status: 500 });
+		if ((err as { status?: number }).status) throw err;
+		throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
 	}
 };

@@ -9,11 +9,18 @@
 
   Uses Svelte 5 runes and engine components (GlassCard, Badge).
 -->
+<script lang="ts" module>
+	import { GLOBAL_BLAZE_DEFAULTS } from "@autumnsgrove/lattice/blazes";
+
+	/** Slug→definition map for O(1) lookup — built once per module, shared across all PostCard instances */
+	const BLAZE_SLUG_MAP: Record<string, { label: string; icon: string; color: string }> =
+		Object.fromEntries(GLOBAL_BLAZE_DEFAULTS.map((b) => [b.slug, b]));
+</script>
+
 <script lang="ts">
 	import type { MeadowPost } from "$lib/types/post.js";
 	import { formatRelativeTime } from "$lib/utils/time.js";
 	import { Blaze } from "@autumnsgrove/lattice/ui/indicators";
-	import { GLOBAL_BLAZE_DEFAULTS } from "@autumnsgrove/lattice/blazes";
 
 	interface Props {
 		post: MeadowPost;
@@ -31,10 +38,6 @@
 	);
 	const displayTags = $derived(post.tags.slice(0, 4));
 	const hasImage = $derived(!isNote && !!post.featuredImage);
-
-	/** Pre-built slug→definition map for O(1) lookup (8 items, built once) */
-	const BLAZE_SLUG_MAP: Record<string, { label: string; icon: string; color: string }> =
-		Object.fromEntries(GLOBAL_BLAZE_DEFAULTS.map((b) => [b.slug, b]));
 
 	/** Resolve custom blaze slug to a definition for the Blaze component */
 	const customBlazeDefinition = $derived.by(() => {
