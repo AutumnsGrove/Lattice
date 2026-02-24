@@ -28,7 +28,6 @@ jobs:
           IGNORED: |
             pnpm-lock.yaml
             **/*.snap
-            .github/visual-regression/snapshots/**
           SIZES: >
             {
               "0":   "size/seed",
