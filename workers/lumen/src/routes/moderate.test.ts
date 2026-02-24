@@ -58,7 +58,7 @@ describe("POST /moderate", () => {
 		});
 
 		const app = createApp();
-		const res = await app.request(post({ content: "Hello world" }), mockEnv);
+		const res = await app.request(post({ content: "Hello world" }), undefined, mockEnv);
 
 		expect(res.status).toBe(200);
 		const body: LumenWorkerResponse = await res.json();
@@ -81,7 +81,7 @@ describe("POST /moderate", () => {
 		});
 
 		const app = createApp();
-		const res = await app.request(post({ content: "bad content" }), mockEnv);
+		const res = await app.request(post({ content: "bad content" }), undefined, mockEnv);
 
 		expect(res.status).toBe(200);
 		const body: LumenWorkerResponse = await res.json();
@@ -100,7 +100,7 @@ describe("POST /moderate", () => {
 		});
 
 		const app = createApp();
-		const res = await app.request(post({ content: "test" }), mockEnv);
+		const res = await app.request(post({ content: "test" }), undefined, mockEnv);
 		const body: LumenWorkerResponse = await res.json();
 		expect(body.meta?.provider).toBe("cloudflare-ai");
 	});
@@ -114,7 +114,7 @@ describe("POST /moderate", () => {
 		});
 
 		const app = createApp();
-		const res = await app.request(post({ content: "test" }), mockEnv);
+		const res = await app.request(post({ content: "test" }), undefined, mockEnv);
 		const body: LumenWorkerResponse = await res.json();
 		expect(body.meta?.provider).toBe("openrouter");
 	});
@@ -127,6 +127,7 @@ describe("POST /moderate", () => {
 				headers: { "Content-Type": "application/json" },
 				body: "broken json",
 			}),
+			undefined,
 			mockEnv,
 		);
 
@@ -137,7 +138,7 @@ describe("POST /moderate", () => {
 
 	it("should return 400 for missing content field", async () => {
 		const app = createApp();
-		const res = await app.request(post({}), mockEnv);
+		const res = await app.request(post({}), undefined, mockEnv);
 
 		expect(res.status).toBe(400);
 		const body: LumenWorkerResponse = await res.json();
@@ -152,7 +153,7 @@ describe("POST /moderate", () => {
 		});
 
 		const app = createApp();
-		const res = await app.request(post({ content: "test" }), mockEnv);
+		const res = await app.request(post({ content: "test" }), undefined, mockEnv);
 
 		expect(res.status).toBe(500);
 		const body: LumenWorkerResponse = await res.json();
@@ -170,7 +171,11 @@ describe("POST /moderate", () => {
 		});
 
 		const app = createApp();
-		await app.request(post({ content: "test", tenant_id: "t_abc", tier: "evergreen" }), mockEnv);
+		await app.request(
+			post({ content: "test", tenant_id: "t_abc", tier: "evergreen" }),
+			undefined,
+			mockEnv,
+		);
 
 		expect(mockModerate).toHaveBeenCalledWith(
 			expect.objectContaining({

@@ -25,7 +25,7 @@ export function lumenRateLimit(
 	return async (
 		c: {
 			env: Env;
-			req: { header: (name: string) => string | undefined };
+			req: { url: string; header: (name: string) => string | undefined };
 			header: (name: string, value: string) => void;
 			json: (data: unknown, status?: number) => Response;
 		},

@@ -61,7 +61,7 @@ describe("POST /transcribe", () => {
 		});
 
 		const app = createApp();
-		const res = await app.request(post({ audio: SAMPLE_AUDIO_BASE64 }), mockEnv);
+		const res = await app.request(post({ audio: SAMPLE_AUDIO_BASE64 }), undefined, mockEnv);
 
 		expect(res.status).toBe(200);
 		const body: LumenWorkerResponse = await res.json();
@@ -87,7 +87,7 @@ describe("POST /transcribe", () => {
 		});
 
 		const app = createApp();
-		const res = await app.request(post({ audio: SAMPLE_AUDIO_BASE64 }), mockEnv);
+		const res = await app.request(post({ audio: SAMPLE_AUDIO_BASE64 }), undefined, mockEnv);
 
 		expect(res.status).toBe(200);
 		const body: LumenWorkerResponse = await res.json();
@@ -103,7 +103,7 @@ describe("POST /transcribe", () => {
 		});
 
 		const app = createApp();
-		await app.request(post({ audio: SAMPLE_AUDIO_BASE64 }), mockEnv);
+		await app.request(post({ audio: SAMPLE_AUDIO_BASE64 }), undefined, mockEnv);
 
 		// Verify the audio was decoded to Uint8Array
 		const callArgs = mockTranscribe.mock.calls[0][0];
@@ -120,7 +120,7 @@ describe("POST /transcribe", () => {
 		});
 
 		const app = createApp();
-		await app.request(post({ audio: SAMPLE_AUDIO_BASE64 }), mockEnv);
+		await app.request(post({ audio: SAMPLE_AUDIO_BASE64 }), undefined, mockEnv);
 
 		const callArgs = mockTranscribe.mock.calls[0][0];
 		expect(callArgs.options.mode).toBe("raw");
@@ -135,7 +135,7 @@ describe("POST /transcribe", () => {
 		});
 
 		const app = createApp();
-		await app.request(post({ audio: SAMPLE_AUDIO_BASE64, mode: "draft" }), mockEnv);
+		await app.request(post({ audio: SAMPLE_AUDIO_BASE64, mode: "draft" }), undefined, mockEnv);
 
 		const callArgs = mockTranscribe.mock.calls[0][0];
 		expect(callArgs.options.mode).toBe("draft");
@@ -149,6 +149,7 @@ describe("POST /transcribe", () => {
 				headers: { "Content-Type": "application/json" },
 				body: "{{bad json",
 			}),
+			undefined,
 			mockEnv,
 		);
 
@@ -159,7 +160,7 @@ describe("POST /transcribe", () => {
 
 	it("should return 400 for missing audio field", async () => {
 		const app = createApp();
-		const res = await app.request(post({}), mockEnv);
+		const res = await app.request(post({}), undefined, mockEnv);
 
 		expect(res.status).toBe(400);
 		const body: LumenWorkerResponse = await res.json();
@@ -169,7 +170,11 @@ describe("POST /transcribe", () => {
 
 	it("should return 400 for invalid mode value", async () => {
 		const app = createApp();
-		const res = await app.request(post({ audio: SAMPLE_AUDIO_BASE64, mode: "invalid" }), mockEnv);
+		const res = await app.request(
+			post({ audio: SAMPLE_AUDIO_BASE64, mode: "invalid" }),
+			undefined,
+			mockEnv,
+		);
 
 		expect(res.status).toBe(400);
 		const body: LumenWorkerResponse = await res.json();
@@ -180,7 +185,7 @@ describe("POST /transcribe", () => {
 		mockTranscribe.mockRejectedValue(new Error("Audio too short"));
 
 		const app = createApp();
-		const res = await app.request(post({ audio: SAMPLE_AUDIO_BASE64 }), mockEnv);
+		const res = await app.request(post({ audio: SAMPLE_AUDIO_BASE64 }), undefined, mockEnv);
 
 		expect(res.status).toBe(500);
 		const body: LumenWorkerResponse = await res.json();
@@ -199,6 +204,7 @@ describe("POST /transcribe", () => {
 		const app = createApp();
 		await app.request(
 			post({ audio: SAMPLE_AUDIO_BASE64, tenant_id: "t_abc", tier: "sapling" }),
+			undefined,
 			mockEnv,
 		);
 

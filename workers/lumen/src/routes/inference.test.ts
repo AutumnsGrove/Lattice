@@ -75,7 +75,11 @@ describe("POST /inference", () => {
 		});
 
 		const app = createApp();
-		const res = await app.request(post({ task: "generation", input: "Write a haiku" }), mockEnv);
+		const res = await app.request(
+			post({ task: "generation", input: "Write a haiku" }),
+			undefined,
+			mockEnv,
+		);
 
 		expect(res.status).toBe(200);
 		const body: LumenWorkerResponse = await res.json();
@@ -95,7 +99,7 @@ describe("POST /inference", () => {
 
 	it("should return 400 for invalid JSON body", async () => {
 		const app = createApp();
-		const res = await app.request(postRaw("not json {{{"), mockEnv);
+		const res = await app.request(postRaw("not json {{{"), undefined, mockEnv);
 
 		expect(res.status).toBe(400);
 		const body: LumenWorkerResponse = await res.json();
@@ -106,7 +110,7 @@ describe("POST /inference", () => {
 
 	it("should return 400 for missing required fields", async () => {
 		const app = createApp();
-		const res = await app.request(post({}), mockEnv);
+		const res = await app.request(post({}), undefined, mockEnv);
 
 		expect(res.status).toBe(400);
 		const body: LumenWorkerResponse = await res.json();
@@ -117,7 +121,11 @@ describe("POST /inference", () => {
 
 	it("should return 400 for invalid task type", async () => {
 		const app = createApp();
-		const res = await app.request(post({ task: "not-a-real-task", input: "test" }), mockEnv);
+		const res = await app.request(
+			post({ task: "not-a-real-task", input: "test" }),
+			undefined,
+			mockEnv,
+		);
 
 		expect(res.status).toBe(400);
 		const body: LumenWorkerResponse = await res.json();
@@ -142,6 +150,7 @@ describe("POST /inference", () => {
 					{ role: "user", content: "Hi" },
 				],
 			}),
+			undefined,
 			mockEnv,
 		);
 
@@ -172,6 +181,7 @@ describe("POST /inference", () => {
 					skip_pii_scrub: true,
 				},
 			}),
+			undefined,
 			mockEnv,
 		);
 
@@ -196,7 +206,7 @@ describe("POST /inference", () => {
 		mockRun.mockRejectedValue({ code: "QUOTA_EXCEEDED", message: "Daily limit reached" });
 
 		const app = createApp();
-		const res = await app.request(post({ task: "generation", input: "test" }), mockEnv);
+		const res = await app.request(post({ task: "generation", input: "test" }), undefined, mockEnv);
 
 		expect(res.status).toBe(429);
 		const body: LumenWorkerResponse = await res.json();
@@ -209,6 +219,7 @@ describe("POST /inference", () => {
 		const app = createApp();
 		const res = await app.request(
 			post({ task: "generation", input: "test", tier: "platinum" }),
+			undefined,
 			mockEnv,
 		);
 
@@ -239,7 +250,7 @@ describe("POST /inference", () => {
 		];
 
 		for (const task of validTasks) {
-			const res = await app.request(post({ task, input: "test" }), mockEnv);
+			const res = await app.request(post({ task, input: "test" }), undefined, mockEnv);
 			expect(res.status).toBe(200);
 		}
 	});

@@ -57,7 +57,7 @@ describe("POST /embed", () => {
 		});
 
 		const app = createApp();
-		const res = await app.request(post({ input: "Hello world" }), mockEnv);
+		const res = await app.request(post({ input: "Hello world" }), undefined, mockEnv);
 
 		expect(res.status).toBe(200);
 		const body: LumenWorkerResponse = await res.json();
@@ -79,7 +79,7 @@ describe("POST /embed", () => {
 		});
 
 		const app = createApp();
-		const res = await app.request(post({ input: ["Hello", "World"] }), mockEnv);
+		const res = await app.request(post({ input: ["Hello", "World"] }), undefined, mockEnv);
 
 		expect(res.status).toBe(200);
 	});
@@ -92,6 +92,7 @@ describe("POST /embed", () => {
 				headers: { "Content-Type": "application/json" },
 				body: "not json",
 			}),
+			undefined,
 			mockEnv,
 		);
 
@@ -103,7 +104,7 @@ describe("POST /embed", () => {
 
 	it("should return 400 for missing input field", async () => {
 		const app = createApp();
-		const res = await app.request(post({}), mockEnv);
+		const res = await app.request(post({}), undefined, mockEnv);
 
 		expect(res.status).toBe(400);
 		const body: LumenWorkerResponse = await res.json();
@@ -119,7 +120,11 @@ describe("POST /embed", () => {
 		});
 
 		const app = createApp();
-		await app.request(post({ input: "test", tenant_id: "t_123", tier: "seedling" }), mockEnv);
+		await app.request(
+			post({ input: "test", tenant_id: "t_123", tier: "seedling" }),
+			undefined,
+			mockEnv,
+		);
 
 		expect(mockEmbed).toHaveBeenCalledWith(
 			expect.objectContaining({
@@ -134,7 +139,7 @@ describe("POST /embed", () => {
 		mockEmbed.mockRejectedValue({ code: "PROVIDER_ERROR", message: "AI binding failed" });
 
 		const app = createApp();
-		const res = await app.request(post({ input: "test" }), mockEnv);
+		const res = await app.request(post({ input: "test" }), undefined, mockEnv);
 
 		expect(res.status).toBe(500);
 		const body: LumenWorkerResponse = await res.json();
@@ -151,7 +156,7 @@ describe("POST /embed", () => {
 		});
 
 		const app = createApp();
-		await app.request(post({ input: "test", model: "custom-embed" }), mockEnv);
+		await app.request(post({ input: "test", model: "custom-embed" }), undefined, mockEnv);
 
 		expect(mockEmbed).toHaveBeenCalledWith(
 			expect.objectContaining({ model: "custom-embed" }),

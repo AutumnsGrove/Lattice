@@ -55,7 +55,7 @@ describe("apiKeyAuth middleware", () => {
 		const res = await app.request(req, undefined, env);
 
 		expect(res.status).toBe(200);
-		const body = await res.json();
+		const body: LumenWorkerResponse = await res.json();
 		expect(body.data).toBe("secret");
 	});
 
