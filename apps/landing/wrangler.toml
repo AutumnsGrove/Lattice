@@ -15,6 +15,10 @@ routes = [
   { pattern = "grove.place/*", zone_name = "grove.place" }
 ]
 
+# Smart Placement — run closer to back-end services (D1, KV, R2, Zephyr)
+[placement]
+mode = "smart"
+
 # Observability — structured logs in Cloudflare dashboard
 [observability]
 enabled = true
