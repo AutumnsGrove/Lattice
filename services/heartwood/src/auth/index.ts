@@ -224,6 +224,12 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 			expiresIn: 7 * 24 * 60 * 60,
 			// Refresh session if within 7 days of expiry
 			updateAge: 7 * 24 * 60 * 60,
+			// Disable "fresh session" check for passkey registration.
+			// BA's freshSessionMiddleware rejects sessions where updatedAt is older
+			// than freshAge. With updateAge=7d, updatedAt is never refreshed, so the
+			// check always fails. Passkey registration is already protected by the
+			// browser's biometric prompt — the fresh check adds friction, not security.
+			freshAge: 0,
 			// Cross-subdomain cookie for .grove.place
 			cookieCache: {
 				enabled: true,

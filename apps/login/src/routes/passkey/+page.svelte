@@ -82,7 +82,7 @@
 				);
 			}
 
-			const optionsData = await optionsRes.json();
+			const optionsData: any = await optionsRes.json();
 			console.log("[Passkey Debug] Step 1 success — registration options:", {
 				hasChallenge: !!optionsData?.challenge,
 				rpId: optionsData?.rp?.id,
