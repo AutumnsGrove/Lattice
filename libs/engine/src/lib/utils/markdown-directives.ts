@@ -129,7 +129,7 @@ export const CURIO_METADATA = [
 	{ id: "badges", name: "Badges", requiresArg: false },
 	{ id: "blogroll", name: "Blogroll", requiresArg: false },
 	{ id: "webring", name: "Web Ring", requiresArg: false },
-	{ id: "shelves", name: "Shelves", requiresArg: false },
+	{ id: "shelves", name: "Shelves", requiresArg: true },
 	{ id: "activitystatus", name: "Activity Status", requiresArg: false },
 	{ id: "statusbadges", name: "Status Badge", requiresArg: false },
 	{ id: "artifacts", name: "Artifacts", requiresArg: false },

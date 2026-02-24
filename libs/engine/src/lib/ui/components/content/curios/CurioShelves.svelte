@@ -61,10 +61,15 @@
 			});
 	});
 
-	function getFilteredShelves(): Shelf[] {
-		if (!data) return [];
-		if (arg) return data.shelves.filter((s) => s.id === arg);
-		return data.shelves;
+	function resolveShelf(): Shelf | null {
+		if (!data || !arg) return null;
+		const num = Number(arg);
+		if (Number.isInteger(num) && num >= 1 && num <= data.shelves.length) {
+			return data.shelves[num - 1];
+		}
+		const byName = data.shelves.find((s) => s.name.toLowerCase() === arg.toLowerCase());
+		if (byName) return byName;
+		return data.shelves.find((s) => s.id === arg) ?? null;
 	}
 
 	function toggleSpine(itemId: string) {
@@ -158,261 +163,271 @@
 	</div>
 {:else if error}
 	<span class="grove-curio-error">Shelves unavailable</span>
-{:else if data}
+{:else if data && !arg}
+	<span class="grove-curio-error"
+		>This shelf needs to be configured. Specify which shelf to display: <code
+			>::shelves[My Shelf Name]::</code
+		>
+		or <code>::shelves[1]::</code></span
+	>
+{:else if data && arg && !resolveShelf()}
+	<span class="grove-curio-error"
+		>Shelf "{arg}" not found. Check the name or number and try again.</span
+	>
+{:else if data && resolveShelf()}
+	{@const shelf = resolveShelf()!}
 	<div class="shelves" role="region" aria-label="Shelves">
-		{#each getFilteredShelves() as shelf (shelf.id)}
-			<section class="shelf-section">
-				<div class="shelf-header">
-					<h2 class="shelf-title">{shelf.name}</h2>
-					{#if shelf.description}
-						<p class="shelf-description">{shelf.description}</p>
-					{/if}
-				</div>
+		<section class="shelf-section">
+			<div class="shelf-header">
+				<h2 class="shelf-title">{shelf.name}</h2>
+				{#if shelf.description}
+					<p class="shelf-description">{shelf.description}</p>
+				{/if}
+			</div>
 
-				{#if shelf.items.length === 0}
-					<p class="shelf-empty">Nothing on this shelf yet</p>
+			{#if shelf.items.length === 0}
+				<p class="shelf-empty">Nothing on this shelf yet</p>
 
-					<!-- COVER GRID -->
-				{:else if shelf.displayMode === "cover-grid"}
-					<div class="display-cover-grid">
-						{#each shelf.items as item (item.id)}
-							<a
-								href={item.url}
-								target="_blank"
-								rel="noopener noreferrer"
-								class="cover-card"
-								title={item.title}
-							>
-								{#if item.coverUrl}
-									<img src={item.coverUrl} alt="" class="cover-image" loading="lazy" />
-								{:else if item.thumbnailUrl}
-									<img
-										src={item.thumbnailUrl}
-										alt=""
-										class="cover-image cover-image--thumb"
-										loading="lazy"
-									/>
-								{:else}
-									<div class="cover-placeholder">
-										<span class="cover-placeholder-text">{item.title.slice(0, 2)}</span>
-									</div>
-								{/if}
-								<div class="cover-overlay">
-									<span class="cover-overlay-title">{item.title}</span>
-									{#if item.creator}
-										<span class="cover-overlay-creator">{item.creator}</span>
-									{/if}
-								</div>
-								{#if item.isStatus1 || item.isStatus2}
-									<div class="cover-badges">
-										{#if item.isStatus1}
-											<span class="badge badge--status1">{shelf.status1Label}</span>
-										{/if}
-										{#if item.isStatus2}
-											<span class="badge badge--status2">{shelf.status2Label}</span>
-										{/if}
-									</div>
-								{/if}
-							</a>
-						{/each}
-					</div>
-
-					<!-- CARD LIST -->
-				{:else if shelf.displayMode === "card-list"}
-					<div class="display-card-list">
-						{#each shelf.items as item (item.id)}
-							<a href={item.url} target="_blank" rel="noopener noreferrer" class="list-card">
-								{#if item.coverUrl || item.thumbnailUrl}
-									<img
-										src={item.coverUrl || item.thumbnailUrl}
-										alt=""
-										class="list-card-image"
-										loading="lazy"
-									/>
-								{/if}
-								<div class="list-card-content">
-									<h3 class="list-card-title">{item.title}</h3>
-									{#if item.creator}
-										<p class="list-card-creator">{shelf.creatorLabel}: {item.creator}</p>
-									{/if}
-									{#if item.description}
-										<p class="list-card-desc">{item.description}</p>
-									{/if}
-									<div class="list-card-meta">
-										{#if item.rating}
-											<span class="list-card-rating" aria-label="{item.rating} out of 5 stars"
-												>{renderStars(item.rating)}</span
-											>
-										{/if}
-										{#if item.isStatus1}
-											<span class="badge badge--status1">{shelf.status1Label}</span>
-										{/if}
-										{#if item.isStatus2}
-											<span class="badge badge--status2">{shelf.status2Label}</span>
-										{/if}
-									</div>
-									{#if item.note}
-										<p class="list-card-note">{item.note}</p>
-									{/if}
-								</div>
-							</a>
-						{/each}
-					</div>
-
-					<!-- BUTTONS (88x31) -->
-				{:else if shelf.displayMode === "buttons"}
-					<div class="display-buttons">
-						{#each shelf.items as item (item.id)}
-							<a
-								href={item.url}
-								target="_blank"
-								rel="noopener noreferrer"
-								class="button-tile"
-								title={item.title}
-							>
-								{#if item.thumbnailUrl}
-									<img
-										src={item.thumbnailUrl}
-										alt={item.title}
-										class="button-image"
-										loading="lazy"
-										width="88"
-										height="31"
-									/>
-								{:else}
-									<span class="button-text">{item.title}</span>
-								{/if}
-							</a>
-						{/each}
-					</div>
-
-					<!-- SPINES -->
-				{:else if shelf.displayMode === "spines"}
-					<div class="display-spines">
-						<ul class="spines-row" role="list">
-							{#each shelf.items as item, idx (item.id)}
-								<li class="spine-slot">
-									<button
-										class="spine"
-										style:--spine-color={spineColor(item.category, idx)}
-										aria-expanded={expandedSpine === item.id}
-										onclick={() => toggleSpine(item.id)}
-										onkeydown={(e) => handleSpineKey(e, item.id)}
-									>
-										<span class="spine-title">{item.title}</span>
-										{#if item.creator}
-											<span class="spine-creator">{item.creator}</span>
-										{/if}
-									</button>
-								</li>
-							{/each}
-						</ul>
-						<div class="shelf-plank shelf-plank--{shelf.material}"></div>
-						{#if expandedSpine}
-							{@const expanded = shelf.items.find((i) => i.id === expandedSpine)}
-							{#if expanded}
-								<div class="spine-detail">
-									{#if expanded.coverUrl}
-										<img src={expanded.coverUrl} alt="" class="spine-detail-cover" />
-									{/if}
-									<div class="spine-detail-info">
-										<h3 class="spine-detail-title">
-											<a href={expanded.url} target="_blank" rel="noopener noreferrer"
-												>{expanded.title}</a
-											>
-										</h3>
-										{#if expanded.creator}
-											<p class="spine-detail-creator">{shelf.creatorLabel}: {expanded.creator}</p>
-										{/if}
-										{#if expanded.description}
-											<p class="spine-detail-desc">{expanded.description}</p>
-										{/if}
-										{#if expanded.rating}
-											<span class="spine-detail-rating">{renderStars(expanded.rating)}</span>
-										{/if}
-										{#if expanded.note}
-											<p class="spine-detail-note">{expanded.note}</p>
-										{/if}
-										<div class="spine-detail-badges">
-											{#if expanded.isStatus1}
-												<span class="badge badge--status1">{shelf.status1Label}</span>
-											{/if}
-											{#if expanded.isStatus2}
-												<span class="badge badge--status2">{shelf.status2Label}</span>
-											{/if}
-										</div>
-									</div>
-								</div>
-							{/if}
-						{/if}
-					</div>
-
-					<!-- MASONRY -->
-				{:else if shelf.displayMode === "masonry"}
-					<div class="display-masonry">
-						{#each shelf.items as item, idx (item.id)}
-							<a href={item.url} target="_blank" rel="noopener noreferrer" class="masonry-card">
-								{#if item.coverUrl}
-									<img src={item.coverUrl} alt="" class="masonry-card-image" loading="lazy" />
-								{:else if item.thumbnailUrl}
-									<img src={item.thumbnailUrl} alt="" class="masonry-card-image" loading="lazy" />
-								{:else}
-									<div
-										class="masonry-card-gradient"
-										style:background={masonryGradient(item.category, idx)}
-									>
-										<span class="masonry-card-initial">{item.title.slice(0, 2)}</span>
-									</div>
-								{/if}
-								<div class="masonry-card-body">
-									<h3 class="masonry-card-title">{item.title}</h3>
-									{#if item.creator}
-										<p class="masonry-card-creator">{shelf.creatorLabel}: {item.creator}</p>
-									{/if}
-									{#if item.description}
-										<p class="masonry-card-desc">{item.description}</p>
-									{/if}
-									<div class="masonry-card-meta">
-										{#if item.rating}
-											<span class="masonry-card-rating" aria-label="{item.rating} out of 5 stars"
-												>{renderStars(item.rating)}</span
-											>
-										{/if}
-										{#if item.isStatus1}
-											<span class="badge badge--status1">{shelf.status1Label}</span>
-										{/if}
-										{#if item.isStatus2}
-											<span class="badge badge--status2">{shelf.status2Label}</span>
-										{/if}
-									</div>
-								</div>
-							</a>
-						{/each}
-					</div>
-
-					<!-- FALLBACK to cover-grid -->
-				{:else}
-					<div class="display-cover-grid">
-						{#each shelf.items as item (item.id)}
-							<a
-								href={item.url}
-								target="_blank"
-								rel="noopener noreferrer"
-								class="cover-card"
-								title={item.title}
-							>
+				<!-- COVER GRID -->
+			{:else if shelf.displayMode === "cover-grid"}
+				<div class="display-cover-grid">
+					{#each shelf.items as item (item.id)}
+						<a
+							href={item.url}
+							target="_blank"
+							rel="noopener noreferrer"
+							class="cover-card"
+							title={item.title}
+						>
+							{#if item.coverUrl}
+								<img src={item.coverUrl} alt="" class="cover-image" loading="lazy" />
+							{:else if item.thumbnailUrl}
+								<img
+									src={item.thumbnailUrl}
+									alt=""
+									class="cover-image cover-image--thumb"
+									loading="lazy"
+								/>
+							{:else}
 								<div class="cover-placeholder">
 									<span class="cover-placeholder-text">{item.title.slice(0, 2)}</span>
 								</div>
-								<div class="cover-overlay">
-									<span class="cover-overlay-title">{item.title}</span>
+							{/if}
+							<div class="cover-overlay">
+								<span class="cover-overlay-title">{item.title}</span>
+								{#if item.creator}
+									<span class="cover-overlay-creator">{item.creator}</span>
+								{/if}
+							</div>
+							{#if item.isStatus1 || item.isStatus2}
+								<div class="cover-badges">
+									{#if item.isStatus1}
+										<span class="badge badge--status1">{shelf.status1Label}</span>
+									{/if}
+									{#if item.isStatus2}
+										<span class="badge badge--status2">{shelf.status2Label}</span>
+									{/if}
 								</div>
-							</a>
+							{/if}
+						</a>
+					{/each}
+				</div>
+
+				<!-- CARD LIST -->
+			{:else if shelf.displayMode === "card-list"}
+				<div class="display-card-list">
+					{#each shelf.items as item (item.id)}
+						<a href={item.url} target="_blank" rel="noopener noreferrer" class="list-card">
+							{#if item.coverUrl || item.thumbnailUrl}
+								<img
+									src={item.coverUrl || item.thumbnailUrl}
+									alt=""
+									class="list-card-image"
+									loading="lazy"
+								/>
+							{/if}
+							<div class="list-card-content">
+								<h3 class="list-card-title">{item.title}</h3>
+								{#if item.creator}
+									<p class="list-card-creator">{shelf.creatorLabel}: {item.creator}</p>
+								{/if}
+								{#if item.description}
+									<p class="list-card-desc">{item.description}</p>
+								{/if}
+								<div class="list-card-meta">
+									{#if item.rating}
+										<span class="list-card-rating" aria-label="{item.rating} out of 5 stars"
+											>{renderStars(item.rating)}</span
+										>
+									{/if}
+									{#if item.isStatus1}
+										<span class="badge badge--status1">{shelf.status1Label}</span>
+									{/if}
+									{#if item.isStatus2}
+										<span class="badge badge--status2">{shelf.status2Label}</span>
+									{/if}
+								</div>
+								{#if item.note}
+									<p class="list-card-note">{item.note}</p>
+								{/if}
+							</div>
+						</a>
+					{/each}
+				</div>
+
+				<!-- BUTTONS (88x31) -->
+			{:else if shelf.displayMode === "buttons"}
+				<div class="display-buttons">
+					{#each shelf.items as item (item.id)}
+						<a
+							href={item.url}
+							target="_blank"
+							rel="noopener noreferrer"
+							class="button-tile"
+							title={item.title}
+						>
+							{#if item.thumbnailUrl}
+								<img
+									src={item.thumbnailUrl}
+									alt={item.title}
+									class="button-image"
+									loading="lazy"
+									width="88"
+									height="31"
+								/>
+							{:else}
+								<span class="button-text">{item.title}</span>
+							{/if}
+						</a>
+					{/each}
+				</div>
+
+				<!-- SPINES -->
+			{:else if shelf.displayMode === "spines"}
+				<div class="display-spines">
+					<ul class="spines-row" role="list">
+						{#each shelf.items as item, idx (item.id)}
+							<li class="spine-slot">
+								<button
+									class="spine"
+									style:--spine-color={spineColor(item.category, idx)}
+									aria-expanded={expandedSpine === item.id}
+									onclick={() => toggleSpine(item.id)}
+									onkeydown={(e) => handleSpineKey(e, item.id)}
+								>
+									<span class="spine-title">{item.title}</span>
+									{#if item.creator}
+										<span class="spine-creator">{item.creator}</span>
+									{/if}
+								</button>
+							</li>
 						{/each}
-					</div>
-				{/if}
-			</section>
-		{/each}
+					</ul>
+					<div class="shelf-plank shelf-plank--{shelf.material}"></div>
+					{#if expandedSpine}
+						{@const expanded = shelf.items.find((i) => i.id === expandedSpine)}
+						{#if expanded}
+							<div class="spine-detail">
+								{#if expanded.coverUrl}
+									<img src={expanded.coverUrl} alt="" class="spine-detail-cover" />
+								{/if}
+								<div class="spine-detail-info">
+									<h3 class="spine-detail-title">
+										<a href={expanded.url} target="_blank" rel="noopener noreferrer"
+											>{expanded.title}</a
+										>
+									</h3>
+									{#if expanded.creator}
+										<p class="spine-detail-creator">{shelf.creatorLabel}: {expanded.creator}</p>
+									{/if}
+									{#if expanded.description}
+										<p class="spine-detail-desc">{expanded.description}</p>
+									{/if}
+									{#if expanded.rating}
+										<span class="spine-detail-rating">{renderStars(expanded.rating)}</span>
+									{/if}
+									{#if expanded.note}
+										<p class="spine-detail-note">{expanded.note}</p>
+									{/if}
+									<div class="spine-detail-badges">
+										{#if expanded.isStatus1}
+											<span class="badge badge--status1">{shelf.status1Label}</span>
+										{/if}
+										{#if expanded.isStatus2}
+											<span class="badge badge--status2">{shelf.status2Label}</span>
+										{/if}
+									</div>
+								</div>
+							</div>
+						{/if}
+					{/if}
+				</div>
+
+				<!-- MASONRY -->
+			{:else if shelf.displayMode === "masonry"}
+				<div class="display-masonry">
+					{#each shelf.items as item, idx (item.id)}
+						<a href={item.url} target="_blank" rel="noopener noreferrer" class="masonry-card">
+							{#if item.coverUrl}
+								<img src={item.coverUrl} alt="" class="masonry-card-image" loading="lazy" />
+							{:else if item.thumbnailUrl}
+								<img src={item.thumbnailUrl} alt="" class="masonry-card-image" loading="lazy" />
+							{:else}
+								<div
+									class="masonry-card-gradient"
+									style:background={masonryGradient(item.category, idx)}
+								>
+									<span class="masonry-card-initial">{item.title.slice(0, 2)}</span>
+								</div>
+							{/if}
+							<div class="masonry-card-body">
+								<h3 class="masonry-card-title">{item.title}</h3>
+								{#if item.creator}
+									<p class="masonry-card-creator">{shelf.creatorLabel}: {item.creator}</p>
+								{/if}
+								{#if item.description}
+									<p class="masonry-card-desc">{item.description}</p>
+								{/if}
+								<div class="masonry-card-meta">
+									{#if item.rating}
+										<span class="masonry-card-rating" aria-label="{item.rating} out of 5 stars"
+											>{renderStars(item.rating)}</span
+										>
+									{/if}
+									{#if item.isStatus1}
+										<span class="badge badge--status1">{shelf.status1Label}</span>
+									{/if}
+									{#if item.isStatus2}
+										<span class="badge badge--status2">{shelf.status2Label}</span>
+									{/if}
+								</div>
+							</div>
+						</a>
+					{/each}
+				</div>
+
+				<!-- FALLBACK to cover-grid -->
+			{:else}
+				<div class="display-cover-grid">
+					{#each shelf.items as item (item.id)}
+						<a
+							href={item.url}
+							target="_blank"
+							rel="noopener noreferrer"
+							class="cover-card"
+							title={item.title}
+						>
+							<div class="cover-placeholder">
+								<span class="cover-placeholder-text">{item.title.slice(0, 2)}</span>
+							</div>
+							<div class="cover-overlay">
+								<span class="cover-overlay-title">{item.title}</span>
+							</div>
+						</a>
+					{/each}
+				</div>
+			{/if}
+		</section>
 	</div>
 {/if}
 
