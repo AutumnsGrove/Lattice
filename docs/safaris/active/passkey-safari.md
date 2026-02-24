@@ -2,6 +2,7 @@
 title: "Passkey Safari — Tracking the Ghost Keys"
 status: active
 category: safari
+updated: 2026-02-24
 ---
 
 # Passkey Safari — Tracking the Ghost Keys
@@ -22,400 +23,215 @@ category: safari
 
 **Backend (source of truth)**: heartwood — Better Auth + passkey plugin, D1 `ba_passkey` table
 **Auth Hub (same-origin ceremonies)**: login — proxy to Heartwood, same-origin UI
-**Tenant App (admin panel)**: engine — Arbor Account passkey management, Login Graft
+**Tenant App (admin panel)**: engine — Arbor Account passkey management redirect
 **Onboarding**: plant — redirects to login.grove.place (correctly!)
 **Tests**: heartwood/e2e — Playwright tests with CDP virtual authenticator
 
 ---
 
-## The Root Cause (Read This First)
+## Architecture (Post-Cleanup)
 
-The system has **two parallel passkey implementations** fighting each other:
+All WebAuthn ceremonies happen on `login.grove.place`. Period.
 
-### Implementation A: Better Auth Client (Login Hub)
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Plant (/auth/setup-passkey)                                    │
+│  → redirect to login.grove.place/passkey?redirect=plant...      │
+├─────────────────────────────────────────────────────────────────┤
+│  Engine Arbor Account ("Manage Passkeys" button)                │
+│  → redirect to login.grove.place/passkey?redirect=arbor...      │
+├─────────────────────────────────────────────────────────────────┤
+│  login.grove.place/passkey                                      │
+│  → authClient.passkey.addPasskey()                              │
+│  → POST /api/auth/passkey/generate-register-options (proxy)     │
+│  → navigator.credentials.create() (browser prompt)              │
+│  → POST /api/auth/passkey/verify-registration (proxy)           │
+├─────────────────────────────────────────────────────────────────┤
+│  Proxy (login hub /api/auth/[...path])                          │
+│  → platform.env.AUTH.fetch() (service binding)                  │
+│  → forwards auth cookies, returns filtered response headers     │
+├─────────────────────────────────────────────────────────────────┤
+│  Heartwood (groveauth Worker)                                   │
+│  → Better Auth passkey plugin                                   │
+│  → rpID: "grove.place", origin: ["https://login.grove.place"]   │
+│  → ba_passkey table in D1                                       │
+└─────────────────────────────────────────────────────────────────┘
+```
 
-- Uses `authClient.passkey.addPasskey()` / `authClient.signIn.passkey()`
-- Better Auth handles the full WebAuthn ceremony internally
-- Runs on `login.grove.place` — **correct origin** for `PASSKEY_ORIGIN`
-- Session cookies are first-party (same-origin)
-- Proxied to Heartwood via service binding
+### Cookie Configuration (Heartwood auth/index.ts)
 
-### Implementation B: Custom Engine Routes (Arbor Account + Login Graft)
+```
+crossSubDomainCookies: { enabled: true, domain: ".grove.place" }
+defaultCookieAttributes: { httpOnly: true, secure: true, sameSite: "lax", path: "/" }
+```
 
-- Manually reimplements the WebAuthn ceremony with raw `navigator.credentials.create/get()`
-- Custom proxy routes (`/api/passkey/*`) that forward to Heartwood endpoints
-- Runs on `*.grove.place` subdomains — **WRONG origin** for `PASSKEY_ORIGIN`
-- Sends `grove_session` cookie which Better Auth doesn't recognize
-- Mix of service binding and bare `fetch()` calls
-
-**Implementation A is architecturally correct. Implementation B is fundamentally broken.**
-
-Plant already does the right thing: it redirects `/auth/setup-passkey` to `https://login.grove.place/passkey`.
+All Better Auth cookies (`better-auth.session_token`, `better-auth-passkey`, etc.)
+are set with `Domain=.grove.place` — shared across all *.grove.place subdomains.
 
 ---
 
-## Bug Inventory
+## Current Bug Status (2026-02-24 Re-assessment)
 
-### BUG 1: WebAuthn Origin Mismatch (CRITICAL — Blocks ALL Engine Passkey Operations)
+### What's been FIXED since the original safari
+
+| Original Bug | Status | What Changed |
+|---|---|---|
+| BUG 1: WebAuthn Origin Mismatch | FIXED | Engine now redirects to login hub instead of running ceremonies locally |
+| BUG 2: Session Cookie Mismatch in Registration | FIXED | Custom registration routes deleted from engine |
+| BUG 3: Bare fetch() in Auth Routes | FIXED | Custom auth routes deleted from engine |
+| BUG 4: Wrong GROVEAUTH_URL | FIXED for listing | `fetchUserPasskeys()` uses service binding now |
+| BUG 5: Non-Standard Response Format | FIXED | Custom verify route deleted from engine |
+| BUG 6: Legacy JWT Only | FIXED | `api/passkey/+server.ts` now sends both session cookies |
+| BUG 7: HTTP Method Mismatch | FIXED | Custom routes deleted; only Better Auth client flow remains |
+
+### What's STILL broken
+
+#### ACTIVE BUG 1: Login Hub Passkey Registration Fails (CRITICAL)
+
+**Symptom**: "Failed to create passkey" error on `login.grove.place/passkey`
+
+**Where**: `apps/login/src/routes/passkey/+page.svelte:54-60`
+
+**What happens**:
+1. User arrives at login.grove.place/passkey (redirected from Plant or Engine)
+2. Server guard passes (session cookie exists) — page loads correctly
+3. User clicks "Create Passkey"
+4. `authClient.passkey.addPasskey({ name: getDeviceName() })` is called
+5. Better Auth client internally calls `POST /api/auth/passkey/generate-register-options`
+6. Proxy forwards to Heartwood via service binding
+7. **Something fails** → error returned → "Failed to create passkey" displayed
+
+**Diagnosis needed**: The error message is swallowed. The catch block at line 68-84 shows
+specific messages for WebAuthn-specific errors (NotAllowedError, SecurityError, InvalidStateError)
+but the generic case just shows `err.message` which may be empty/vague.
+
+**Possible causes** (in order of likelihood):
+1. **Session invalid on Heartwood side**: The `better-auth.session_token` cookie reaches
+   Heartwood but the session has expired or doesn't exist in D1. (7-day expiry, but
+   if user just signed up, this shouldn't apply)
+2. **Challenge cookie not round-tripping**: The `better-auth-passkey` challenge cookie
+   set by generate-register-options doesn't make it back to verify-registration through
+   the proxy
+3. **generate-register-options returns error**: Heartwood returns 401/500 before the
+   browser ceremony even starts
+4. **`ba_user` table mismatch**: The user's record exists in SessionDO/grove_session
+   but NOT in Better Auth's `ba_user` table (if they signed up via legacy flow)
+
+**Debug approach**: Add detailed error logging to the passkey page to capture the
+actual error from Better Auth, and add console.log to the proxy for passkey requests.
+
+#### ACTIVE BUG 2: Engine "Could not load passkeys" (LOW — Design Issue)
+
+**Symptom**: "Could not load passkeys. Please try refreshing the page." on Arbor Account
+
+**Where**: `libs/engine/src/routes/arbor/account/+page.server.ts:54-107`
+
+**Root cause**: The engine calls `fetchUserPasskeys()` which makes a service binding
+request to Heartwood's `list-user-passkeys` endpoint. This fails (probably 401) because
+the `better-auth.session_token` cookie may not be present or valid when forwarded
+from the engine.
+
+**But this is a design issue, not a code bug**: Per the user, the engine account page
+shouldn't be LOADING passkeys at all. It should just show a "Manage Passkeys" button
+that redirects to login.grove.place. No API call, no loading state, no error state.
+
+#### DEAD CODE: Plant Custom Passkey Routes
 
 **Files**:
+- `apps/plant/src/routes/api/account/passkey/register-options/+server.ts`
+- `apps/plant/src/routes/api/account/passkey/verify-registration/+server.ts`
+- Custom WebAuthn ceremony code in `apps/plant/src/routes/account/+page.svelte:124-191`
 
-- `libs/engine/src/routes/arbor/account/passkey-utils.ts:110` (registration)
-- `libs/engine/src/lib/grafts/login/passkey-authenticate.ts:220` (authentication)
-
-**What happens**:
-When the WebAuthn ceremony runs on `autumn.grove.place`, the browser embeds `origin: "https://autumn.grove.place"` into `clientDataJSON`. Heartwood validates this against:
-
-```
-PASSKEY_ORIGIN = "https://login.grove.place"   (wrangler.toml line 19)
-```
-
-Origin mismatch → **Heartwood rejects the credential**. Every time. On every subdomain.
-
-**Why this exists**: WebAuthn's origin check is a security feature — it prevents phishing by ensuring the credential was created on the expected domain. You can't bypass it; you have to run the ceremony on the allowed origin.
-
-**Impact**: Passkey registration from Arbor Account always fails. Passkey sign-in from Login Graft always fails. Only `login.grove.place` has the correct origin.
-
-**Fix**: Don't run WebAuthn ceremonies on engine subdomains. Redirect to `login.grove.place` (like Plant does).
+Plant correctly redirects to login.grove.place for passkey creation (/auth/setup-passkey).
+These custom routes are dead code from before the architecture was fixed.
+Plant's account page also has inline passkey UI that calls these dead routes.
 
 ---
 
-### BUG 2: Session Cookie Mismatch in Engine Registration Routes (CRITICAL)
-
-**Files**:
-
-- `libs/engine/src/routes/api/passkey/register-options/+server.ts:38-41`
-- `libs/engine/src/routes/api/passkey/verify-registration/+server.ts:62-70`
-
-**What happens**:
-The engine sends `Cookie: grove_session=${groveSession}` to Heartwood. But Better Auth identifies users via `better-auth.session_token`, not `grove_session`. `grove_session` is a custom SessionDO token that Better Auth has no knowledge of.
-
-```typescript
-// Engine sends this:
-Cookie: grove_session=abc123
-
-// Better Auth looks for this:
-Cookie: better-auth.session_token=xyz789
-```
-
-Result: Better Auth returns 401 "Unauthorized" or "User not found" because it can't identify who's registering.
-
-**Contrast**: The `fetchUserPasskeys()` function in `+page.server.ts:71-78` correctly sends BOTH cookies. But the registration routes don't.
-
-**Fix**: Forward `better-auth.session_token` in the Cookie header alongside `grove_session`. But this is moot if we fix BUG 1 by redirecting to login.grove.place.
-
----
-
-### BUG 3: Authentication Routes Use Bare `fetch()` (HIGH)
-
-**Files**:
-
-- `libs/engine/src/routes/api/passkey/authenticate/options/+server.ts:79`
-- `libs/engine/src/routes/api/passkey/authenticate/verify/+server.ts:124`
-
-**What happens**:
-These routes use `fetch()` instead of `platform.env.AUTH.fetch()` (service binding). The register routes correctly use the service binding for the `grove_session` path, but the authenticate routes don't — they go over the public internet.
-
-```typescript
-// Registration route (correct):
-response = await platform.env.AUTH.fetch(...);  // service binding
-
-// Authentication route (wrong):
-const response = await fetch(...);  // public internet
-```
-
-The bare `fetch()` targets `${authBaseUrl}/api/auth/passkey/generate-authentication-options` where `authBaseUrl` comes from `platform?.env?.GROVEAUTH_URL || AUTH_HUB_URL`.
-
-**Compounded by**: BUG 4 (wrong URL).
-
----
-
-### BUG 4: Engine `GROVEAUTH_URL` May Point to Wrong Domain (HIGH)
-
-**Files**:
-
-- `libs/engine/wrangler.toml:140` → `GROVEAUTH_URL = "https://auth.grove.place"`
-- `services/heartwood/wrangler.toml:43` → Heartwood's domain is `auth-api.grove.place`
-- `libs/engine/src/lib/config/auth.ts:15` → `AUTH_HUB_URL = "https://login.grove.place"`
-
-**What happens**:
-When bare `fetch()` is used (BUG 3), the URL is `https://auth.grove.place/api/auth/passkey/...`.
-Heartwood's actual custom domain is `auth-api.grove.place`. If `auth.grove.place` doesn't resolve to Heartwood (different domain!), all bare fetch calls fail with DNS/connection errors.
-
-Note: This doesn't affect service binding calls (hostname is cosmetic for `platform.env.AUTH.fetch()`). But any code path using bare `fetch()` with `GROVEAUTH_URL` is affected.
-
-The `fetchUserPasskeys()` in `+page.server.ts:80` also uses bare `fetch()` with this URL — so the passkey LIST on the account page may also be failing.
-
----
-
-### BUG 5: Engine Verify Route Expects Non-Standard Response Format (HIGH)
-
-**File**: `libs/engine/src/routes/api/passkey/authenticate/verify/+server.ts:156-163`
-
-**What happens**:
-The route expects this from Heartwood:
-
-```json
-{
-	"verified": true,
-	"accessToken": "jwt...",
-	"refreshToken": "...",
-	"user": { "id": "...", "email": "..." }
-}
-```
-
-But Better Auth's passkey authentication returns a **session response** with Set-Cookie headers, not a JSON body with JWT tokens. Better Auth creates a session, sets `better-auth.session_token` via cookie, and returns session metadata — NOT access/refresh tokens.
-
-```typescript
-// Engine expects:
-if (!result.verified || !result.accessToken) { ... fail ... }
-
-// Better Auth actually returns:
-// Headers: Set-Cookie: better-auth.session_token=...
-// Body: { session: {...}, user: {...} }  (maybe)
-```
-
-The engine then tries to set its own `access_token` and `refresh_token` cookies from a response that doesn't contain them → undefined cookies → broken session.
-
----
-
-### BUG 6: `GET /api/passkey` Only Accepts Legacy JWT (MEDIUM)
-
-**File**: `libs/engine/src/routes/api/passkey/+server.ts:20-22`
-
-**What happens**:
-
-```typescript
-const accessToken = cookies.get("access_token");
-if (!accessToken) {
-	throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
-}
-```
-
-Only checks `access_token` (legacy JWT). Users who signed in via Better Auth (OAuth, magic link, passkey) get `better-auth.session_token`, not `access_token`. This route rejects all modern sessions.
-
-**Current impact**: Low — the account page loads passkeys via server-side deferred data (`fetchUserPasskeys()`), not this client API. But if any client code calls `GET /api/passkey`, it fails.
-
----
-
-### BUG 7: Possible HTTP Method Mismatch (MEDIUM)
-
-**File**: `libs/engine/src/routes/api/passkey/register-options/+server.ts:34`
-
-**What happens**:
-
-```typescript
-// Comment says: "Note: generate-register-options is a GET endpoint in Better Auth"
-response = await platform.env.AUTH.fetch(
-  `${AUTH_HUB_URL}/api/auth/passkey/generate-register-options`,
-  { method: "GET", ... }
-);
-```
-
-But Heartwood's endpoint listing says: `"POST /api/auth/passkey/generate-register-options"`.
-
-If Better Auth expects POST, the GET request returns 404 or 405. Need to verify which method Better Auth actually uses.
-
----
-
-## Structural Issues
-
-### Duplicated base64url encoding
-
-Two independent implementations:
-
-- `libs/engine/src/lib/utils/webauthn.ts` → `base64urlToBuffer()`, `bufferToBase64url()`
-- `libs/engine/src/lib/grafts/login/passkey-authenticate.ts` → `arrayBufferToBase64Url()`, `base64UrlToArrayBuffer()`
-
-Same logic, different names, different files. Should consolidate.
-
-### Dead code paths
-
-If we fix the architecture by redirecting all ceremonies to `login.grove.place`, these engine routes become dead code:
-
-- `libs/engine/src/routes/api/passkey/register-options/+server.ts`
-- `libs/engine/src/routes/api/passkey/verify-registration/+server.ts`
-- `libs/engine/src/routes/api/passkey/authenticate/options/+server.ts`
-- `libs/engine/src/routes/api/passkey/authenticate/verify/+server.ts`
-- `libs/engine/src/routes/api/passkey/[id]/+server.ts`
-- `libs/engine/src/routes/arbor/account/passkey-utils.ts`
-- Parts of `libs/engine/src/lib/grafts/login/passkey-authenticate.ts`
-
-That's ~800 lines of custom WebAuthn proxy code that should be replaced by redirects.
-
----
-
-## The Fix Architecture
-
-### Principle: One Origin, One Client, One Flow
-
-All WebAuthn ceremonies MUST happen on `login.grove.place` because:
-
-1. It's the `PASSKEY_ORIGIN` — WebAuthn validates the origin
-2. Better Auth's session cookies are first-party there
-3. The proxy correctly round-trips all cookies
-4. The Better Auth client handles the ceremony correctly
-
-### Registration Flow (adding a passkey)
-
-**Current (broken)**:
-
-```
-Arbor Account → /api/passkey/register-options → Heartwood
-                                                ↑ wrong origin
-                                                ↑ wrong cookie
-```
-
-**Fixed**:
-
-```
-Arbor Account "Add Passkey" button
-    → redirect to https://login.grove.place/passkey?redirect=<arbor-url>
-    → login.grove.place runs ceremony (correct origin!)
-    → Better Auth client handles it (correct cookies!)
-    → redirect back to arbor account page
-```
-
-Plant already does this! See `apps/plant/src/routes/auth/setup-passkey/+page.server.ts`.
-
-### Authentication Flow (signing in with passkey)
-
-**Current (broken)**:
-
-```
-Login Graft on autumn.grove.place
-    → /api/passkey/authenticate/options → Heartwood
-    → navigator.credentials.get() (wrong origin!)
-    → /api/passkey/authenticate/verify → Heartwood (bare fetch, wrong URL)
-```
-
-**Fixed** — Two options:
-
-**Option A (recommended): Add subdomain origins to Heartwood**
-
-```toml
-# heartwood/wrangler.toml
-PASSKEY_ORIGIN = "https://login.grove.place,https://grove.place"
-```
-
-With `rpID: "grove.place"`, passkeys registered on `login.grove.place` are usable on ANY `*.grove.place` subdomain per WebAuthn spec. We just need Heartwood to accept the origin from those subdomains. BUT — Better Auth's passkey plugin may not support wildcard origins. Need to check.
-
-**Option B: Redirect all sign-in to Login Hub**
-The Login Graft's passkey button redirects to `login.grove.place/?redirect=<current-url>` instead of running the ceremony locally. Login hub runs the ceremony, sets cookies, redirects back.
-
-**Option A is better UX** (no redirect) but requires Better Auth to accept multiple origins or wildcard `*.grove.place`. Option B always works but adds a redirect.
-
-### Passkey List Flow (viewing passkeys in admin)
-
-**Current (partially broken)**:
-
-```
-+page.server.ts → bare fetch() to GROVEAUTH_URL (might be wrong domain)
-                → sends both grove_session + better-auth.session_token (correct!)
-```
-
-**Fixed**:
-
-```
-+page.server.ts → platform.env.AUTH.fetch() (service binding, always works)
-                → sends better-auth.session_token (correct cookie)
-```
-
-### Passkey Delete Flow
-
-Currently in `libs/engine/src/routes/api/passkey/[id]/+server.ts` — needs same session cookie fixes as the other routes. Or, if we redirect management to login.grove.place, this becomes dead code too.
-
----
-
-## Implementation Plan
-
-### Phase 1: Make Login Hub Passkeys Work (Quick Win)
-
-The Login Hub (`login.grove.place`) should already work — it uses Better Auth client on the correct origin. If it doesn't, debug the cookie flow:
-
-- [ ] Test `authClient.signIn.passkey()` on login.grove.place — check browser console
-- [ ] Verify the challenge cookie (`better-auth-passkey` or similar) round-trips through proxy
-- [ ] Check if `better-auth.session_token` cookie exists before trying passkey sign-in
-- [ ] Test `authClient.passkey.addPasskey()` on login.grove.place/passkey after sign-in
-
-### Phase 2: Redirect Engine to Login Hub (Core Fix)
-
-- [ ] **Arbor Account**: Change "Add Passkey" button to redirect to `https://login.grove.place/passkey?redirect={currentUrl}` instead of calling `registerPasskey()`
-- [ ] **Login Graft**: Change PasskeyButton to redirect to `https://login.grove.place?redirect={currentUrl}` with passkey intent, OR implement Option A (multi-origin)
-- [ ] **Delete passkey routes**: Keep the delete route but fix session cookie forwarding, or move management to login.grove.place too
-
-### Phase 3: Fix Passkey Listing (Service Binding)
-
-- [ ] Change `fetchUserPasskeys()` in `+page.server.ts` to use `platform.env.AUTH.fetch()` instead of bare `fetch()`
-- [ ] Send `better-auth.session_token` cookie (already doing this correctly)
-- [ ] Remove dependency on `GROVEAUTH_URL` for this call
-
-### Phase 4: Clean Up Dead Code
-
-After Phases 1-3 are working:
-
-- [ ] Remove engine passkey API routes (`/api/passkey/*`) — 6 files, ~750 lines
-- [ ] Remove `passkey-utils.ts` — 248 lines
-- [ ] Simplify `passkey-authenticate.ts` if Login Graft uses redirect
-- [ ] Consolidate duplicate base64url utilities
-- [ ] Remove `GET /api/passkey` endpoint (legacy JWT only)
-- [ ] Update PasskeyCard to work with redirect flow (no local registration state)
-
-### Phase 5: Multi-Origin Support (Optional Enhancement)
-
-If we want passkey sign-in to work on subdomains without redirect:
-
-- [ ] Update `PASSKEY_ORIGIN` to include `https://*.grove.place` (if Better Auth supports wildcards)
-- [ ] OR enumerate known subdomains: `"https://login.grove.place,https://plant.grove.place,https://grove.place"`
-- [ ] Test that passkeys registered on `login.grove.place` work on other subdomains (rpID: `grove.place` should allow this per WebAuthn spec)
-- [ ] Rewrite engine authenticate routes to use service binding + correct cookies
+## Fix Plan
+
+### Phase 1: Quick Wins (Clean Up Dead Code + Simplify)
+
+- [ ] **Engine Account**: Replace PasskeyCard deferred loading with a simple redirect button
+  - Remove `fetchUserPasskeys()` call from `+page.server.ts`
+  - Remove `passkeyData` from the returned data
+  - Replace `{#await data.passkeyData}` block with a static PasskeyCard that only shows
+    "Manage Passkeys → login.grove.place/passkey" button
+  - Keep delete functionality? No — manage everything on login hub
+- [ ] **Plant**: Delete dead passkey routes
+  - Delete `apps/plant/src/routes/api/account/passkey/` directory (2 files)
+  - Remove inline passkey UI from `apps/plant/src/routes/account/+page.svelte`
+
+### Phase 2: Debug Login Hub Passkey (The Real Fix)
+
+- [ ] **Better error logging**: Update login hub passkey page to show the actual error
+  from Better Auth (not the generic fallback). Log `result.error` details to console.
+- [ ] **Proxy passkey logging**: Add temporary console.log to the proxy for passkey
+  requests showing request/response status and cookie presence.
+- [ ] **Test the ceremony steps individually**:
+  1. Does `generate-register-options` return 200? Check response body.
+  2. Does the `better-auth-passkey` challenge cookie get set?
+  3. Does the browser prompt appear? (If not, step 1 failed.)
+  4. Does `verify-registration` receive the challenge cookie?
+  5. Does Heartwood return 200 for verify?
+- [ ] **Fix the root cause** once identified (likely session or cookie issue)
+
+### Phase 3: Login Hub Passkey Management UI
+
+Once registration works on login.grove.place/passkey:
+- [ ] Add a passkey LIST page on login.grove.place (show registered passkeys)
+- [ ] Add passkey DELETE functionality on login.grove.place
+- [ ] Consider adding passkey rename
+- [ ] Engine and Plant link to this management page
+
+### Phase 4: Final Cleanup
+
+- [ ] Remove engine's remaining passkey API routes (`/api/passkey/+server.ts`,
+  `/api/passkey/[id]/+server.ts`) — no longer needed if management moves to login hub
+- [ ] Remove `passkey-authenticate.ts` from Login Graft if unused
+- [ ] Remove duplicate base64url utilities
+- [ ] Update PasskeyCard to be a pure redirect component (no loading/error states)
 
 ---
 
 ## Expedition Summary
 
-### By the numbers
+### By the numbers (2026-02-24)
 
-| Metric            | Count |
-| ----------------- | ----- |
-| Total stops       | 10    |
-| Critical bugs     | 2     |
-| High bugs         | 3     |
-| Medium bugs       | 2     |
-| Structural issues | 2     |
-| Dead code (lines) | ~800  |
+| Metric | Count |
+|---|---|
+| Original bugs (first safari) | 7 |
+| Bugs FIXED since then | 7 |
+| NEW bugs found | 1 active + 1 design |
+| Dead code to remove | ~400 lines (Plant routes + inline UI) |
 
-### Condition Assessment
+### Condition Assessment (Updated)
 
-| Component                         | Condition                                                                  |
-| --------------------------------- | -------------------------------------------------------------------------- |
-| Heartwood passkey plugin config   | Thriving :green_circle: — correctly configured                             |
-| Login Hub proxy                   | Growing :yellow_circle: — works but untested for passkey cookie flow       |
-| Login Hub sign-in page            | Growing :yellow_circle: — correct code, may have cookie issue              |
-| Login Hub passkey registration    | Growing :yellow_circle: — correct code, needs testing                      |
-| Engine Arbor Account registration | Barren :red_circle: — fundamentally broken (wrong origin + cookies)        |
-| Engine Login Graft authentication | Barren :red_circle: — fundamentally broken (wrong origin)                  |
-| Engine passkey API routes         | Wilting :orange_circle: — wrong cookies, bare fetch, wrong response format |
-| Engine passkey list (server)      | Wilting :orange_circle: — bare fetch with possibly wrong URL               |
-| Plant passkey setup               | Thriving :green_circle: — correctly redirects to login.grove.place         |
-| Heartwood E2E tests               | Growing :yellow_circle: — exist but may not run in CI                      |
+| Component | Condition |
+|---|---|
+| Heartwood passkey plugin config | Thriving 🟢 — correctly configured |
+| Login Hub proxy | Thriving 🟢 — cookie allowlist, header filtering all correct |
+| Login Hub passkey page (registration) | Wilting 🟠 — architecture correct but ceremony fails |
+| Engine Arbor Account passkey section | Wilting 🟠 — loading when it should just redirect |
+| Engine passkey API routes (list/delete) | Growing 🟡 — work but should migrate to login hub |
+| Plant passkey setup redirect | Thriving 🟢 — correct redirect to login hub |
+| Plant custom passkey routes | Barren 🔴 — dead code, should delete |
 
 ### Cross-cutting themes
 
-1. **Origin is king**: WebAuthn origin validation is the #1 blocker. Can't work around it — must run on `login.grove.place`.
-2. **Cookie identity crisis**: Three different session tokens (`grove_session`, `better-auth.session_token`, `access_token`) and different routes expect different ones.
-3. **Service binding vs bare fetch**: Some routes use the service binding, others use bare `fetch()` with a potentially wrong URL. Should be consistent.
-4. **Better Auth client vs custom implementation**: The Better Auth client handles everything correctly. The custom implementation reimplements poorly. Use the client.
-
-### Recommended trek order
-
-1. **Login Hub** (Phase 1) — Verify the one correct path works. Quick win, builds confidence.
-2. **Arbor redirect** (Phase 2a) — Redirect "Add Passkey" to login hub. Instant fix for admin panel.
-3. **Login Graft** (Phase 2b) — Either redirect or multi-origin. Fixes sign-in.
-4. **Passkey list** (Phase 3) — Fix service binding. Fixes the account page display.
-5. **Dead code cleanup** (Phase 4) — Remove ~800 lines of broken proxy code.
-6. **Multi-origin** (Phase 5) — Optional polish for seamless subdomain sign-in.
+1. **The architecture is now correct**: One origin, one client, one flow. All roads lead
+   to login.grove.place. The original safari's recommendation was implemented.
+2. **Dead code persists**: Plant and Engine both have remnant passkey code that should
+   be removed now that the centralized approach is in place.
+3. **The login hub ceremony itself needs debugging**: The one place where passkeys
+   SHOULD work... doesn't. Need to add instrumentation to find the exact failure point.
+4. **Error messages are too vague**: "Failed to create passkey" tells the user nothing.
+   Need to surface the actual error from Better Auth for debugging (and eventually
+   provide friendly messages once we know the failure modes).
 
 ---
 
-_The fire dies to embers. The journal is full — 10 stops, 7 bugs, 2 structural issues, and one clear path forward. The architecture isn't broken in a hundred small ways — it's broken in ONE fundamental way (wrong origin) that cascades into everything else. Fix the origin, fix the flow, remove the dead code. Tomorrow, the animals go to work. But tonight? Tonight was the drive. And it was glorious._ :bus:
+_The fire dies to embers. Seven ghosts from the first expedition have been laid to rest.
+One new ghost appeared — but this one's different. The architecture is sound; the ghost
+is hiding in the plumbing. Tomorrow we add instruments to the pipes and find it.
+Tonight? The journal is updated. The map is clear._ 🚙

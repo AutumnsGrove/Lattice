@@ -9,318 +9,245 @@
 
 import { redirect, fail } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
-import {
-  isValidTotpCode,
-  getRequiredEnv,
-  TOTP_CODE_LENGTH,
-} from "@autumnsgrove/lattice/heartwood";
+import { isValidTotpCode, getRequiredEnv, TOTP_CODE_LENGTH } from "@autumnsgrove/lattice/heartwood";
 
 /** Default auth URL for development. In production, set AUTH_BASE_URL env var. */
 const DEFAULT_AUTH_URL = "https://heartwood.grove.place";
 
 // Response types
 interface ErrorResponse {
-  message?: string;
+	message?: string;
 }
 
 interface TwoFactorEnableResponse {
-  secret: string;
-  qrCodeUrl: string;
+	secret: string;
+	qrCodeUrl: string;
 }
 
 interface TwoFactorVerifyResponse {
-  backupCodes?: string[];
+	backupCodes?: string[];
 }
 
 interface BackupCodesResponse {
-  backupCodes: string[];
+	backupCodes: string[];
 }
 
 export const load: PageServerLoad = async ({ parent, cookies, platform }) => {
-  const { user } = await parent();
+	const { user } = await parent();
 
-  // Redirect if not authenticated
-  if (!user) {
-    redirect(302, "/");
-  }
+	// Redirect if not authenticated
+	if (!user) {
+		redirect(302, "/");
+	}
 
-  const accessToken = cookies.get("access_token");
-  if (!accessToken) {
-    redirect(302, "/");
-  }
+	const accessToken = cookies.get("access_token");
+	if (!accessToken) {
+		redirect(302, "/");
+	}
 
-  const env = platform?.env as Record<string, string> | undefined;
-  const authBaseUrl = getRequiredEnv(env, "AUTH_BASE_URL", DEFAULT_AUTH_URL);
+	const env = platform?.env as Record<string, string> | undefined;
+	const authBaseUrl = getRequiredEnv(env, "AUTH_BASE_URL", DEFAULT_AUTH_URL);
 
-  // Fetch account data in parallel
-  const [passkeysRes, twoFactorRes, linkedAccountsRes] =
-    await Promise.allSettled([
-      fetch(`${authBaseUrl}/api/auth/passkey/list-user-passkeys`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      }),
-      fetch(`${authBaseUrl}/api/auth/two-factor/get-status`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      }),
-      fetch(`${authBaseUrl}/api/auth/linked-accounts`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      }),
-    ]);
+	// Fetch account data in parallel
+	const [twoFactorRes, linkedAccountsRes] = await Promise.allSettled([
+		fetch(`${authBaseUrl}/api/auth/two-factor/get-status`, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+		}),
+		fetch(`${authBaseUrl}/api/auth/linked-accounts`, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+		}),
+	]);
 
-  // Parse responses
-  const passkeys =
-    passkeysRes.status === "fulfilled" && passkeysRes.value.ok
-      ? await passkeysRes.value.json()
-      : [];
+	// Parse responses
+	const twoFactorStatus =
+		twoFactorRes.status === "fulfilled" && twoFactorRes.value.ok
+			? await twoFactorRes.value.json()
+			: { enabled: false, enabledAt: null, backupCodesRemaining: 0 };
 
-  const twoFactorStatus =
-    twoFactorRes.status === "fulfilled" && twoFactorRes.value.ok
-      ? await twoFactorRes.value.json()
-      : { enabled: false, enabledAt: null, backupCodesRemaining: 0 };
+	const linkedAccounts =
+		linkedAccountsRes.status === "fulfilled" && linkedAccountsRes.value.ok
+			? await linkedAccountsRes.value.json()
+			: [];
 
-  const linkedAccounts =
-    linkedAccountsRes.status === "fulfilled" && linkedAccountsRes.value.ok
-      ? await linkedAccountsRes.value.json()
-      : [];
-
-  return {
-    user,
-    passkeys,
-    twoFactorStatus,
-    linkedAccounts,
-  };
+	return {
+		user,
+		twoFactorStatus,
+		linkedAccounts,
+	};
 };
 
 export const actions: Actions = {
-  // Delete a passkey
-  deletePasskey: async ({ request, cookies, platform }) => {
-    const accessToken = cookies.get("access_token");
-    if (!accessToken) {
-      return fail(401, {
-        error: "You'll need to sign in to manage your account settings",
-      });
-    }
+	// Enable 2FA - Step 1: Generate secret and QR code
+	enableTwoFactor: async ({ cookies, platform }) => {
+		const accessToken = cookies.get("access_token");
+		if (!accessToken) {
+			return fail(401, {
+				error: "You'll need to sign in to manage your account settings",
+			});
+		}
 
-    const formData = await request.formData();
-    const passkeyId = formData.get("passkeyId")?.toString();
+		const env = platform?.env as Record<string, string> | undefined;
+		const authBaseUrl = getRequiredEnv(env, "AUTH_BASE_URL", DEFAULT_AUTH_URL);
 
-    if (!passkeyId) {
-      return fail(400, { error: "Passkey ID is required" });
-    }
+		try {
+			const response = await fetch(`${authBaseUrl}/api/auth/two-factor/enable`, {
+				method: "POST",
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+					"Content-Type": "application/json",
+				},
+			});
 
-    const env = platform?.env as Record<string, string> | undefined;
-    const authBaseUrl = getRequiredEnv(env, "AUTH_BASE_URL", DEFAULT_AUTH_URL);
+			if (!response.ok) {
+				const errorData = (await response.json()) as ErrorResponse;
+				return fail(response.status, {
+					error: errorData.message || "Failed to enable 2FA",
+				});
+			}
 
-    try {
-      const response = await fetch(
-        `${authBaseUrl}/api/auth/passkey/delete-passkey`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ passkeyId }),
-        },
-      );
+			const data = (await response.json()) as TwoFactorEnableResponse;
+			return {
+				success: true,
+				action: "enableTwoFactor",
+				secret: data.secret,
+				qrCodeUrl: data.qrCodeUrl,
+			};
+		} catch {
+			return fail(500, { error: "Unable to enable 2FA. Please try again." });
+		}
+	},
 
-      if (!response.ok) {
-        const data = (await response.json()) as ErrorResponse;
-        return fail(response.status, {
-          error: data.message || "Failed to delete passkey",
-        });
-      }
+	// Verify 2FA code to complete setup
+	verifyTwoFactor: async ({ request, cookies, platform }) => {
+		const accessToken = cookies.get("access_token");
+		if (!accessToken) {
+			return fail(401, {
+				error: "You'll need to sign in to manage your account settings",
+			});
+		}
 
-      return { success: true, action: "deletePasskey" };
-    } catch {
-      return fail(500, {
-        error: "Unable to delete passkey. Please try again.",
-      });
-    }
-  },
+		const formData = await request.formData();
+		const code = formData.get("code")?.toString();
 
-  // Enable 2FA - Step 1: Generate secret and QR code
-  enableTwoFactor: async ({ cookies, platform }) => {
-    const accessToken = cookies.get("access_token");
-    if (!accessToken) {
-      return fail(401, {
-        error: "You'll need to sign in to manage your account settings",
-      });
-    }
+		if (!isValidTotpCode(code)) {
+			return fail(400, {
+				error: `Please enter a valid ${TOTP_CODE_LENGTH}-digit code`,
+			});
+		}
 
-    const env = platform?.env as Record<string, string> | undefined;
-    const authBaseUrl = getRequiredEnv(env, "AUTH_BASE_URL", DEFAULT_AUTH_URL);
+		const env = platform?.env as Record<string, string> | undefined;
+		const authBaseUrl = getRequiredEnv(env, "AUTH_BASE_URL", DEFAULT_AUTH_URL);
 
-    try {
-      const response = await fetch(
-        `${authBaseUrl}/api/auth/two-factor/enable`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-        },
-      );
+		try {
+			const response = await fetch(`${authBaseUrl}/api/auth/two-factor/verify-totp`, {
+				method: "POST",
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ code }),
+			});
 
-      if (!response.ok) {
-        const errorData = (await response.json()) as ErrorResponse;
-        return fail(response.status, {
-          error: errorData.message || "Failed to enable 2FA",
-        });
-      }
+			if (!response.ok) {
+				const errorData = (await response.json()) as ErrorResponse;
+				return fail(response.status, {
+					error: errorData.message || "Invalid code. Please try again.",
+				});
+			}
 
-      const data = (await response.json()) as TwoFactorEnableResponse;
-      return {
-        success: true,
-        action: "enableTwoFactor",
-        secret: data.secret,
-        qrCodeUrl: data.qrCodeUrl,
-      };
-    } catch {
-      return fail(500, { error: "Unable to enable 2FA. Please try again." });
-    }
-  },
+			const data = (await response.json()) as TwoFactorVerifyResponse;
+			return {
+				success: true,
+				action: "verifyTwoFactor",
+				backupCodes: data.backupCodes,
+			};
+		} catch {
+			return fail(500, { error: "Unable to verify code. Please try again." });
+		}
+	},
 
-  // Verify 2FA code to complete setup
-  verifyTwoFactor: async ({ request, cookies, platform }) => {
-    const accessToken = cookies.get("access_token");
-    if (!accessToken) {
-      return fail(401, {
-        error: "You'll need to sign in to manage your account settings",
-      });
-    }
+	// Disable 2FA
+	disableTwoFactor: async ({ request, cookies, platform }) => {
+		const accessToken = cookies.get("access_token");
+		if (!accessToken) {
+			return fail(401, {
+				error: "You'll need to sign in to manage your account settings",
+			});
+		}
 
-    const formData = await request.formData();
-    const code = formData.get("code")?.toString();
+		const formData = await request.formData();
+		const code = formData.get("code")?.toString();
 
-    if (!isValidTotpCode(code)) {
-      return fail(400, {
-        error: `Please enter a valid ${TOTP_CODE_LENGTH}-digit code`,
-      });
-    }
+		if (!isValidTotpCode(code)) {
+			return fail(400, {
+				error: `Please enter a valid ${TOTP_CODE_LENGTH}-digit code`,
+			});
+		}
 
-    const env = platform?.env as Record<string, string> | undefined;
-    const authBaseUrl = getRequiredEnv(env, "AUTH_BASE_URL", DEFAULT_AUTH_URL);
+		const env = platform?.env as Record<string, string> | undefined;
+		const authBaseUrl = getRequiredEnv(env, "AUTH_BASE_URL", DEFAULT_AUTH_URL);
 
-    try {
-      const response = await fetch(
-        `${authBaseUrl}/api/auth/two-factor/verify-totp`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ code }),
-        },
-      );
+		try {
+			const response = await fetch(`${authBaseUrl}/api/auth/two-factor/disable`, {
+				method: "POST",
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ code }),
+			});
 
-      if (!response.ok) {
-        const errorData = (await response.json()) as ErrorResponse;
-        return fail(response.status, {
-          error: errorData.message || "Invalid code. Please try again.",
-        });
-      }
+			if (!response.ok) {
+				const errorData = (await response.json()) as ErrorResponse;
+				return fail(response.status, {
+					error: errorData.message || "Failed to disable 2FA",
+				});
+			}
 
-      const data = (await response.json()) as TwoFactorVerifyResponse;
-      return {
-        success: true,
-        action: "verifyTwoFactor",
-        backupCodes: data.backupCodes,
-      };
-    } catch {
-      return fail(500, { error: "Unable to verify code. Please try again." });
-    }
-  },
+			return { success: true, action: "disableTwoFactor" };
+		} catch {
+			return fail(500, { error: "Unable to disable 2FA. Please try again." });
+		}
+	},
 
-  // Disable 2FA
-  disableTwoFactor: async ({ request, cookies, platform }) => {
-    const accessToken = cookies.get("access_token");
-    if (!accessToken) {
-      return fail(401, {
-        error: "You'll need to sign in to manage your account settings",
-      });
-    }
+	// Generate new backup codes
+	generateBackupCodes: async ({ cookies, platform }) => {
+		const accessToken = cookies.get("access_token");
+		if (!accessToken) {
+			return fail(401, {
+				error: "You'll need to sign in to manage your account settings",
+			});
+		}
 
-    const formData = await request.formData();
-    const code = formData.get("code")?.toString();
+		const env = platform?.env as Record<string, string> | undefined;
+		const authBaseUrl = getRequiredEnv(env, "AUTH_BASE_URL", DEFAULT_AUTH_URL);
 
-    if (!isValidTotpCode(code)) {
-      return fail(400, {
-        error: `Please enter a valid ${TOTP_CODE_LENGTH}-digit code`,
-      });
-    }
+		try {
+			const response = await fetch(`${authBaseUrl}/api/auth/two-factor/generate-backup-codes`, {
+				method: "POST",
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+					"Content-Type": "application/json",
+				},
+			});
 
-    const env = platform?.env as Record<string, string> | undefined;
-    const authBaseUrl = getRequiredEnv(env, "AUTH_BASE_URL", DEFAULT_AUTH_URL);
+			if (!response.ok) {
+				const errorData = (await response.json()) as ErrorResponse;
+				return fail(response.status, {
+					error: errorData.message || "Failed to generate backup codes",
+				});
+			}
 
-    try {
-      const response = await fetch(
-        `${authBaseUrl}/api/auth/two-factor/disable`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ code }),
-        },
-      );
-
-      if (!response.ok) {
-        const errorData = (await response.json()) as ErrorResponse;
-        return fail(response.status, {
-          error: errorData.message || "Failed to disable 2FA",
-        });
-      }
-
-      return { success: true, action: "disableTwoFactor" };
-    } catch {
-      return fail(500, { error: "Unable to disable 2FA. Please try again." });
-    }
-  },
-
-  // Generate new backup codes
-  generateBackupCodes: async ({ cookies, platform }) => {
-    const accessToken = cookies.get("access_token");
-    if (!accessToken) {
-      return fail(401, {
-        error: "You'll need to sign in to manage your account settings",
-      });
-    }
-
-    const env = platform?.env as Record<string, string> | undefined;
-    const authBaseUrl = getRequiredEnv(env, "AUTH_BASE_URL", DEFAULT_AUTH_URL);
-
-    try {
-      const response = await fetch(
-        `${authBaseUrl}/api/auth/two-factor/generate-backup-codes`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-        },
-      );
-
-      if (!response.ok) {
-        const errorData = (await response.json()) as ErrorResponse;
-        return fail(response.status, {
-          error: errorData.message || "Failed to generate backup codes",
-        });
-      }
-
-      const data = (await response.json()) as BackupCodesResponse;
-      return {
-        success: true,
-        action: "generateBackupCodes",
-        backupCodes: data.backupCodes,
-      };
-    } catch {
-      return fail(500, {
-        error: "Unable to generate backup codes. Please try again.",
-      });
-    }
-  },
+			const data = (await response.json()) as BackupCodesResponse;
+			return {
+				success: true,
+				action: "generateBackupCodes",
+				backupCodes: data.backupCodes,
+			};
+		} catch {
+			return fail(500, {
+				error: "Unable to generate backup codes. Please try again.",
+			});
+		}
+	},
 };

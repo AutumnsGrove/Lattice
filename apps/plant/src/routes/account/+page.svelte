@@ -1,31 +1,19 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
-	import { browser } from '$app/environment';
-	import { invalidateAll } from '$app/navigation';
-	import { GlassCard } from '@autumnsgrove/lattice/ui';
+	import { enhance } from "$app/forms";
+	import { browser } from "$app/environment";
+	import { invalidateAll } from "$app/navigation";
+	import { GlassCard } from "@autumnsgrove/lattice/ui";
 	import {
 		Fingerprint,
 		Shield,
 		Link2,
-		Plus,
 		Trash2,
 		Copy,
 		Check,
-		Loader2,
-		AlertTriangle,
-		Key,
-		RefreshCw
-	} from '@autumnsgrove/lattice/ui/icons';
-	import { base64urlToBuffer, bufferToBase64url } from '@autumnsgrove/lattice/utils';
+		RefreshCw,
+	} from "@autumnsgrove/lattice/ui/icons";
 
 	// Type definitions
-	interface Passkey {
-		id: string;
-		name: string | null;
-		createdAt: string;
-		lastUsedAt: string | null;
-	}
-
 	interface TwoFactorStatus {
 		enabled: boolean;
 		enabledAt: string | null;
@@ -38,15 +26,8 @@
 		linkedAt: string;
 	}
 
-	interface PasskeyRegisterOptions {
-		challenge: string;
-		user: { id: string };
-		[key: string]: unknown;
-	}
-
 	interface PageData {
 		user: { id: string; email: string } | null;
-		passkeys: Passkey[];
 		twoFactorStatus: TwoFactorStatus;
 		linkedAccounts: LinkedAccount[];
 	}
@@ -62,53 +43,39 @@
 
 	let { data, form }: { data: PageData; form: FormResult | null } = $props();
 
-	// State for passkey registration
-	let isAddingPasskey = $state(false);
-	let passkeyName = $state('');
-	let passkeyError = $state<string | null>(null);
-
 	// State for 2FA setup flow
-	let twoFactorSetupStep = $state<'idle' | 'qr' | 'verify' | 'backup'>('idle');
+	let twoFactorSetupStep = $state<"idle" | "qr" | "verify" | "backup">("idle");
 	let twoFactorSecret = $state<string | null>(null);
 	let twoFactorQrCode = $state<string | null>(null);
 	let backupCodes = $state<string[]>([]);
-	let verifyCode = $state('');
-	let disableCode = $state('');
+	let verifyCode = $state("");
+	let disableCode = $state("");
 	let showDisableConfirm = $state(false);
 	let copiedBackupCodes = $state(false);
 
-	// Check if WebAuthn is supported
-	let webAuthnSupported = $derived(
-		browser &&
-			window.PublicKeyCredential !== undefined &&
-			typeof window.PublicKeyCredential === 'function'
-	);
-
 	// Provider display info
 	const providerInfo: Record<string, { name: string; color: string; icon: string }> = {
-		google: { name: 'Google', color: '#4285F4', icon: 'G' },
-		discord: { name: 'Discord', color: '#5865F2', icon: 'D' }
+		google: { name: "Google", color: "#4285F4", icon: "G" },
+		discord: { name: "Discord", color: "#5865F2", icon: "D" },
 	};
 
 	// Handle form results
 	$effect(() => {
 		if (form?.success) {
-			if (form.action === 'enableTwoFactor' && form.qrCodeUrl) {
-				twoFactorSetupStep = 'qr';
+			if (form.action === "enableTwoFactor" && form.qrCodeUrl) {
+				twoFactorSetupStep = "qr";
 				twoFactorSecret = form.secret ?? null;
 				twoFactorQrCode = form.qrCodeUrl ?? null;
-			} else if (form.action === 'verifyTwoFactor' && form.backupCodes) {
-				twoFactorSetupStep = 'backup';
+			} else if (form.action === "verifyTwoFactor" && form.backupCodes) {
+				twoFactorSetupStep = "backup";
 				backupCodes = form.backupCodes;
-			} else if (form.action === 'disableTwoFactor') {
+			} else if (form.action === "disableTwoFactor") {
 				showDisableConfirm = false;
-				disableCode = '';
+				disableCode = "";
 				invalidateAll();
-			} else if (form.action === 'generateBackupCodes' && form.backupCodes) {
+			} else if (form.action === "generateBackupCodes" && form.backupCodes) {
 				backupCodes = form.backupCodes;
-				twoFactorSetupStep = 'backup';
-			} else if (form.action === 'deletePasskey') {
-				invalidateAll();
+				twoFactorSetupStep = "backup";
 			}
 		}
 	});
@@ -116,89 +83,18 @@
 	// Copy backup codes to clipboard
 	async function copyBackupCodes() {
 		if (!backupCodes.length) return;
-		await navigator.clipboard.writeText(backupCodes.join('\n'));
+		await navigator.clipboard.writeText(backupCodes.join("\n"));
 		copiedBackupCodes = true;
 		setTimeout(() => (copiedBackupCodes = false), 2000);
 	}
 
-	// Add a new passkey
-	async function addPasskey() {
-		if (!browser || !webAuthnSupported) return;
-
-		isAddingPasskey = true;
-		passkeyError = null;
-
-		try {
-			// Get registration options from the server
-			const optionsRes = await fetch('/api/account/passkey/register-options', { // csrf-ok
-				method: 'POST'
-			});
-
-			if (!optionsRes.ok) {
-				throw new Error('Failed to get registration options');
-			}
-
-			const options = (await optionsRes.json()) as PasskeyRegisterOptions;
-
-			// Convert base64url strings to ArrayBuffer for WebAuthn API
-			const publicKeyOptions = {
-				...options,
-				challenge: base64urlToBuffer(options.challenge),
-				user: {
-					...options.user,
-					id: base64urlToBuffer(options.user.id)
-				}
-			} as PublicKeyCredentialCreationOptions;
-
-			// Create the credential
-			const credential = (await navigator.credentials.create({
-				publicKey: publicKeyOptions
-			})) as PublicKeyCredential;
-
-			if (!credential) {
-				throw new Error('Failed to create credential');
-			}
-
-			const response = credential.response as AuthenticatorAttestationResponse;
-
-			// Send to server for verification
-			const verifyRes = await fetch('/api/account/passkey/verify-registration', { // csrf-ok
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					id: credential.id,
-					rawId: bufferToBase64url(credential.rawId),
-					response: {
-						attestationObject: bufferToBase64url(response.attestationObject),
-						clientDataJSON: bufferToBase64url(response.clientDataJSON)
-					},
-					type: credential.type,
-					name: passkeyName || undefined
-				})
-			});
-
-			if (!verifyRes.ok) {
-				const errorData = (await verifyRes.json()) as { message?: string };
-				throw new Error(errorData.message || 'Failed to register passkey');
-			}
-
-			// Reset state and refresh data
-			passkeyName = '';
-			invalidateAll();
-		} catch (err) {
-			passkeyError = err instanceof Error ? err.message : 'Failed to add passkey';
-		} finally {
-			isAddingPasskey = false;
-		}
-	}
-
 	// Format date
 	function formatDate(dateString: string | null): string {
-		if (!dateString) return 'Never';
-		return new Date(dateString).toLocaleDateString('en-US', {
-			year: 'numeric',
-			month: 'short',
-			day: 'numeric'
+		if (!dateString) return "Never";
+		return new Date(dateString).toLocaleDateString("en-US", {
+			year: "numeric",
+			month: "short",
+			day: "numeric",
 		});
 	}
 </script>
@@ -211,7 +107,7 @@
 	</div>
 
 	<div class="space-y-6">
-		<!-- Passkeys Section -->
+		<!-- Passkeys Section — managed on login hub -->
 		<GlassCard variant="frosted">
 			<div class="flex items-center gap-3 mb-4">
 				<div class="p-2 rounded-lg bg-emerald-100/50 dark:bg-emerald-900/30">
@@ -225,84 +121,18 @@
 				</div>
 			</div>
 
-			{#if !webAuthnSupported}
-				<div
-					class="p-3 rounded-lg bg-amber-100/50 dark:bg-amber-900/30 border border-amber-200/50 dark:border-amber-700/30 flex items-start gap-2"
-				>
-					<AlertTriangle class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
-					<p class="text-sm text-amber-800 dark:text-amber-200">
-						Your browser doesn't support passkeys. Try using a modern browser like Chrome, Safari,
-						or Edge.
-					</p>
-				</div>
-			{:else}
-				<!-- Existing passkeys -->
-				{#if data.passkeys && data.passkeys.length > 0}
-					<div class="space-y-2 mb-4">
-						{#each data.passkeys as passkey}
-							<div
-								class="flex items-center justify-between p-3 rounded-lg bg-white/50 dark:bg-bark-800/30 border border-white/20 dark:border-bark-700/20"
-							>
-								<div class="flex items-center gap-3">
-									<Key class="w-4 h-4 text-foreground-muted" />
-									<div>
-										<p class="text-sm font-medium text-foreground">
-											{passkey.name || 'Passkey'}
-										</p>
-										<p class="text-xs text-foreground-subtle">
-											Added {formatDate(passkey.createdAt)}
-											{#if passkey.lastUsedAt}
-												 &middot; Last used {formatDate(passkey.lastUsedAt)}
-											{/if}
-										</p>
-									</div>
-								</div>
-								<form method="POST" action="?/deletePasskey" use:enhance>
-									<input type="hidden" name="passkeyId" value={passkey.id} />
-									<button
-										type="submit"
-										class="p-2 rounded-lg text-foreground-muted hover:text-error hover:bg-error/10 transition-colors"
-										aria-label="Delete passkey {passkey.name || 'unnamed'}"
-									>
-										<Trash2 class="w-4 h-4" aria-hidden="true" />
-									</button>
-								</form>
-							</div>
-						{/each}
-					</div>
-				{:else}
-					<p class="text-sm text-foreground-muted mb-4">
-						You haven't added any passkeys yet. Add one for faster, more secure sign-ins.
-					</p>
-				{/if}
-
-				<!-- Add passkey -->
-				<div class="space-y-3">
-					<div class="flex gap-2">
-						<input
-							type="text"
-							bind:value={passkeyName}
-							placeholder="Passkey name (optional)"
-							class="flex-1 px-3 py-2 rounded-lg bg-white/70 dark:bg-bark-800/50 backdrop-blur-sm border border-white/30 dark:border-bark-700/30 text-foreground placeholder:text-foreground-faint text-sm transition-all focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-						/>
-						<button
-							onclick={addPasskey}
-							disabled={isAddingPasskey}
-							class="btn-primary flex items-center gap-2 text-sm"
-						>
-							{#if isAddingPasskey}
-								<Loader2 class="w-4 h-4 animate-spin" />
-							{:else}
-								<Plus class="w-4 h-4" />
-							{/if}
-							Add Passkey
-						</button>
-					</div>
-					{#if passkeyError}
-						<p class="text-sm text-error">{passkeyError}</p>
-					{/if}
-				</div>
-			{/if}
+			<p class="text-sm text-foreground-muted mb-4">
+				Manage your passkeys on the Grove login hub for secure, passwordless sign-in.
+			</p>
+			<a
+				href="https://login.grove.place/passkey?redirect={encodeURIComponent(
+					'https://plant.grove.place/account',
+				)}"
+				class="btn-primary inline-flex items-center gap-2 text-sm"
+			>
+				<Fingerprint class="w-4 h-4" />
+				Manage Passkeys
+			</a>
 		</GlassCard>
 
 		<!-- Two-Factor Authentication Section -->
@@ -380,19 +210,19 @@
 								type="button"
 								onclick={() => {
 									showDisableConfirm = false;
-									disableCode = '';
+									disableCode = "";
 								}}
 								class="btn-secondary text-sm"
 							>
 								Cancel
 							</button>
 						</form>
-						{#if form?.error && form?.action === 'disableTwoFactor'}
+						{#if form?.error && form?.action === "disableTwoFactor"}
 							<p class="text-sm text-error mt-2">{form.error}</p>
 						{/if}
 					</div>
 				{/if}
-			{:else if twoFactorSetupStep === 'idle'}
+			{:else if twoFactorSetupStep === "idle"}
 				<!-- 2FA is not enabled -->
 				<p class="text-sm text-foreground-muted mb-4">
 					Protect your account with an authenticator app like Google Authenticator or 1Password.
@@ -403,10 +233,10 @@
 						Enable Two-Factor Auth
 					</button>
 				</form>
-				{#if form?.error && form?.action === 'enableTwoFactor'}
+				{#if form?.error && form?.action === "enableTwoFactor"}
 					<p class="text-sm text-error mt-2">{form.error}</p>
 				{/if}
-			{:else if twoFactorSetupStep === 'qr'}
+			{:else if twoFactorSetupStep === "qr"}
 				<!-- QR code step -->
 				<div class="space-y-4">
 					<p class="text-sm text-foreground-muted">
@@ -448,10 +278,10 @@
 							<button
 								type="button"
 								onclick={() => {
-									twoFactorSetupStep = 'idle';
+									twoFactorSetupStep = "idle";
 									twoFactorSecret = null;
 									twoFactorQrCode = null;
-									verifyCode = '';
+									verifyCode = "";
 								}}
 								class="btn-secondary"
 							>
@@ -459,11 +289,11 @@
 							</button>
 						</div>
 					</form>
-					{#if form?.error && form?.action === 'verifyTwoFactor'}
+					{#if form?.error && form?.action === "verifyTwoFactor"}
 						<p class="text-sm text-error">{form.error}</p>
 					{/if}
 				</div>
-			{:else if twoFactorSetupStep === 'backup'}
+			{:else if twoFactorSetupStep === "backup"}
 				<!-- Backup codes step -->
 				<div class="space-y-4">
 					<div
@@ -479,8 +309,8 @@
 
 					<div>
 						<p class="text-sm text-foreground mb-3">
-							<strong>Save these backup codes</strong> in a safe place. You can use them to sign in
-							if you lose access to your authenticator app.
+							<strong>Save these backup codes</strong> in a safe place. You can use them to sign in if
+							you lose access to your authenticator app.
 						</p>
 						<div class="p-4 rounded-lg bg-slate-900 text-slate-100 font-mono text-sm">
 							<div class="grid grid-cols-2 gap-2">
@@ -495,7 +325,9 @@
 						<button
 							onclick={copyBackupCodes}
 							class="btn-secondary flex items-center gap-2 text-sm"
-							aria-label={copiedBackupCodes ? 'Backup codes copied to clipboard' : 'Copy backup codes to clipboard'}
+							aria-label={copiedBackupCodes
+								? "Backup codes copied to clipboard"
+								: "Copy backup codes to clipboard"}
 						>
 							{#if copiedBackupCodes}
 								<Check class="w-4 h-4" aria-hidden="true" />
@@ -507,7 +339,7 @@
 						</button>
 						<button
 							onclick={() => {
-								twoFactorSetupStep = 'idle';
+								twoFactorSetupStep = "idle";
 								backupCodes = [];
 								invalidateAll();
 							}}
@@ -538,8 +370,8 @@
 					{#each data.linkedAccounts as account}
 						{@const info = providerInfo[account.provider] || {
 							name: account.provider,
-							color: '#666',
-							icon: '?'
+							color: "#666",
+							icon: "?",
 						}}
 						<div
 							class="flex items-center justify-between p-3 rounded-lg bg-white/50 dark:bg-bark-800/30 border border-white/20 dark:border-bark-700/20"
@@ -574,7 +406,7 @@
 				<div class="flex gap-2 flex-wrap">
 					{#each Object.entries(providerInfo) as [provider, info]}
 						{@const isLinked = data.linkedAccounts?.some(
-							(a: { provider: string }) => a.provider === provider
+							(a: { provider: string }) => a.provider === provider,
 						)}
 						{#if !isLinked}
 							<button

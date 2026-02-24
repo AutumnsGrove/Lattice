@@ -2,8 +2,6 @@ import { error } from "@sveltejs/kit";
 import { ARBOR_ERRORS, throwGroveError } from "$lib/errors";
 import type { PageServerLoad, Actions } from "./$types";
 import { TIERS, type TierKey, getTier } from "$lib/config/tiers";
-import type { Passkey } from "$lib/heartwood";
-import { AUTH_HUB_URL } from "$lib/config/auth.js";
 
 /**
  * Account & Subscription Management Page
@@ -41,71 +39,6 @@ interface TenantRecord {
 	created_at: number;
 }
 
-/**
- * Fetch user passkeys from GroveAuth.
- * Returns empty array on error to allow graceful degradation.
- *
- * Session authentication:
- * - grove_session: SessionDO cookie (preferred, set by session bridge after OAuth)
- * - better-auth.session_token: Better Auth session (set directly by BA after OAuth)
- *
- * Note: access_token (legacy JWT) is no longer used for OAuth accounts.
- */
-async function fetchUserPasskeys(
-	sessionCookies: {
-		groveSession?: string;
-		betterAuthSession?: string;
-	},
-	platform: App.Platform | undefined,
-): Promise<{ passkeys: Passkey[]; error: boolean }> {
-	const { groveSession, betterAuthSession } = sessionCookies;
-
-	// Need at least one session cookie
-	if (!groveSession && !betterAuthSession) {
-		return { passkeys: [], error: false };
-	}
-
-	// Need service binding to reach Heartwood
-	if (!platform?.env?.AUTH) {
-		console.error("[Account] AUTH service binding not available");
-		return { passkeys: [], error: true };
-	}
-
-	try {
-		// Build Cookie header with available session cookies
-		// GroveAuth validates sessions via Cookie header (not Authorization)
-		const cookieParts: string[] = [];
-		if (groveSession) {
-			cookieParts.push(`grove_session=${groveSession}`);
-		}
-		if (betterAuthSession) {
-			// Better Auth uses this cookie name for session validation
-			cookieParts.push(`better-auth.session_token=${betterAuthSession}`);
-		}
-
-		// Use service binding — Worker-to-Worker, never public internet
-		const response = await platform.env.AUTH.fetch(
-			`${AUTH_HUB_URL}/api/auth/passkey/list-user-passkeys`,
-			{
-				headers: {
-					Cookie: cookieParts.join("; "),
-				},
-			},
-		);
-
-		if (!response.ok) {
-			console.error("[Account] Failed to fetch passkeys:", response.status);
-			return { passkeys: [], error: true };
-		}
-
-		const passkeys = (await response.json()) as Passkey[];
-		return { passkeys, error: false };
-	} catch (e) {
-		console.error("[Account] Passkey fetch error:", e);
-		return { passkeys: [], error: true };
-	}
-}
-
 export const load: PageServerLoad = async ({ locals, platform, parent, cookies }) => {
 	const parentData = await parent();
 
@@ -119,13 +52,6 @@ export const load: PageServerLoad = async ({ locals, platform, parent, cookies }
 		throwGroveError(500, ARBOR_ERRORS.DB_NOT_AVAILABLE, "Arbor");
 	}
 
-	// Get session cookies for passkey API calls
-	// grove_session: SessionDO cookie (set by session bridge after OAuth)
-	// better-auth.session_token: Better Auth session cookie (set directly after OAuth)
-	// Note: access_token (legacy JWT) is no longer used for OAuth accounts
-	const groveSession = cookies.get("grove_session");
-	const betterAuthSession =
-		cookies.get("__Secure-better-auth.session_token") || cookies.get("better-auth.session_token");
 	// ISOLATED QUERIES: D1 queries and external API calls are separated
 	// D1 queries (billing, tenant) are fast (~50ms) and critical for page render
 	// Passkey fetch is an external API call that can be slower and is non-critical
@@ -134,10 +60,6 @@ export const load: PageServerLoad = async ({ locals, platform, parent, cookies }
 	let billingError = false;
 	let tenant: TenantRecord | null = null;
 	let usageError = false;
-
-	// Start passkey fetch early (runs concurrently with D1 queries)
-	// Returned as deferred data - page renders immediately, passkeys stream in
-	const passkeyPromise = fetchUserPasskeys({ groveSession, betterAuthSession }, platform);
 
 	// Await critical D1 queries
 	const [billingResult, tenantResult] = await Promise.all([
@@ -332,8 +254,5 @@ export const load: PageServerLoad = async ({ locals, platform, parent, cookies }
 		},
 		availableTiers,
 		curiosCount,
-		// Deferred: passkey data streams in after initial render
-		// Use {#await data.passkeyData} in the page to handle loading state
-		passkeyData: passkeyPromise,
 	};
 };
