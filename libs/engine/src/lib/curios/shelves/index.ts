@@ -7,7 +7,7 @@
  *
  * Features:
  * - 7 presets with smart defaults (books, links, music, movies, games, recipes, custom)
- * - 4 display modes (cover-grid, card-list, buttons, spines)
+ * - 5 display modes (cover-grid, card-list, buttons, spines, masonry)
  * - 3 shelf materials (wood, glass, none)
  * - Customizable labels for creator/status fields
  * - Per-item rating, notes, and thumbnail support
@@ -21,7 +21,7 @@
 
 export type ShelfPreset = "books" | "links" | "music" | "movies" | "games" | "recipes" | "custom";
 
-export type ShelfDisplayMode = "cover-grid" | "card-list" | "buttons" | "spines";
+export type ShelfDisplayMode = "cover-grid" | "card-list" | "buttons" | "spines" | "masonry";
 
 export type ShelfMaterial = "wood" | "glass" | "none";
 
@@ -193,6 +193,11 @@ export const SHELF_DISPLAY_MODE_OPTIONS: {
 		description: "Classic web button wall — the indie web staple",
 	},
 	{ value: "spines", label: "Spines", description: "Colored book spines sitting on a shelf plank" },
+	{
+		value: "masonry",
+		label: "Masonry",
+		description: "Rich cards flowing in a cascading gallery wall",
+	},
 ];
 
 export const SHELF_MATERIAL_OPTIONS: {

@@ -48,8 +48,8 @@ describe("constants", () => {
 		expect(SHELF_PRESET_OPTIONS).toHaveLength(7);
 	});
 
-	it("has 4 display mode options", () => {
-		expect(SHELF_DISPLAY_MODE_OPTIONS).toHaveLength(4);
+	it("has 5 display mode options", () => {
+		expect(SHELF_DISPLAY_MODE_OPTIONS).toHaveLength(5);
 	});
 
 	it("has 3 material options", () => {
@@ -58,7 +58,7 @@ describe("constants", () => {
 
 	it("has matching valid sets", () => {
 		expect(VALID_PRESETS.size).toBe(7);
-		expect(VALID_DISPLAY_MODES.size).toBe(4);
+		expect(VALID_DISPLAY_MODES.size).toBe(5);
 		expect(VALID_MATERIALS.size).toBe(3);
 	});
 
@@ -154,6 +154,7 @@ describe("isValidDisplayMode", () => {
 		expect(isValidDisplayMode("card-list")).toBe(true);
 		expect(isValidDisplayMode("buttons")).toBe(true);
 		expect(isValidDisplayMode("spines")).toBe(true);
+		expect(isValidDisplayMode("masonry")).toBe(true);
 	});
 
 	it("rejects invalid display modes", () => {
