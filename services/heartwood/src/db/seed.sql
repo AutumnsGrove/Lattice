@@ -7,7 +7,7 @@ VALUES (
     'c1000000-0000-0000-0000-000000000001',
     'GroveEngine',
     'groveengine',
-    '452YpWplVAcb3UxXzBtGfSAY6KjN1JBl8PQvPYBpu1E',
+    'QEkj5WPEa5Bl-k1wlAXq-3KXImeMl_fJC17ZxReZ2EA',
     '["https://grove.place/auth/callback", "https://admin.grove.place/auth/callback", "https://admin.grove.place/callback", "https://forage.grove.place/auth/callback", "https://domains.grove.place/auth/callback"]',
     '["https://grove.place", "https://admin.grove.place", "https://forage.grove.place", "https://domains.grove.place"]'
 );
