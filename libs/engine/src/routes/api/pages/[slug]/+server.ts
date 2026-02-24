@@ -13,6 +13,8 @@ interface PageInput {
   markdown_content?: string;
   description?: string;
   hero?: string;
+  font?: string;
+  show_in_nav?: boolean;
 }
 
 interface PagePatchInput {
@@ -100,7 +102,7 @@ export const PUT: RequestHandler = async ({
 
     // Build the update query
     const updateQuery = `UPDATE pages
-       SET title = ?, description = ?, markdown_content = ?, html_content = ?, hero = ?, updated_at = ?
+       SET title = ?, description = ?, markdown_content = ?, html_content = ?, hero = ?, font = ?, show_in_nav = ?, updated_at = ?
        WHERE slug = ? AND tenant_id = ?`;
 
     const queryParams = [
@@ -109,6 +111,8 @@ export const PUT: RequestHandler = async ({
       data.markdown_content,
       html_content,
       data.hero || null,
+      data.font || "default",
+      typeof data.show_in_nav === "boolean" ? (data.show_in_nav ? 1 : 0) : null,
       now,
       slug,
       tenantId,
