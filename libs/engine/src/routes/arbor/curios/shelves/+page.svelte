@@ -1,12 +1,34 @@
 <script lang="ts">
 	import { enhance } from "$app/forms";
-	import { GlassCard, GlassButton, toast } from "$lib/ui/components/ui";
+	import { GlassCard, GlassButton, GlassConfirmDialog, toast } from "$lib/ui/components/ui";
 	import { BookMarked, Plus, Trash2, Settings, ChevronDown, ChevronUp } from "lucide-svelte";
 
 	let { data, form } = $props();
 	let editingShelf = $state<string | null>(null);
 	let editingItem = $state<string | null>(null);
 	let addingItemTo = $state<string | null>(null);
+	let pendingDeleteShelf = $state<{ id: string; name: string; itemCount: number } | null>(null);
+	let deleteConfirmOpen = $state(false);
+	let deleteFormEl: HTMLFormElement;
+
+	let deleteMessage = $derived(
+		pendingDeleteShelf
+			? pendingDeleteShelf.itemCount > 0
+				? `"${pendingDeleteShelf.name}" has ${pendingDeleteShelf.itemCount} item${pendingDeleteShelf.itemCount === 1 ? "" : "s"}. Deleting this shelf removes everything on it — we can't recover deleted shelves.`
+				: `Are you sure you want to delete "${pendingDeleteShelf.name}"? We can't recover deleted shelves.`
+			: "",
+	);
+
+	function confirmDeleteShelf() {
+		if (pendingDeleteShelf && deleteFormEl) {
+			deleteFormEl.requestSubmit();
+		}
+		pendingDeleteShelf = null;
+	}
+
+	function cancelDeleteShelf() {
+		pendingDeleteShelf = null;
+	}
 
 	// Toast feedback on form results
 	$effect(() => {
@@ -73,8 +95,12 @@
 						onchange={(e) => {
 							const target = e.target as HTMLSelectElement;
 							const defaults = getPresetDefaults(target.value);
-							const dmSelect = target.form?.querySelector('[name="displayMode"]') as HTMLSelectElement | null;
-							const matSelect = target.form?.querySelector('[name="material"]') as HTMLSelectElement | null;
+							const dmSelect = target.form?.querySelector(
+								'[name="displayMode"]',
+							) as HTMLSelectElement | null;
+							const matSelect = target.form?.querySelector(
+								'[name="material"]',
+							) as HTMLSelectElement | null;
 							if (dmSelect) dmSelect.value = defaults.displayMode;
 							if (matSelect) matSelect.value = defaults.material;
 						}}
@@ -162,12 +188,20 @@
 								<Settings />
 							{/if}
 						</button>
-						<form method="POST" action="?/removeShelf" use:enhance>
-							<input type="hidden" name="shelfId" value={shelf.id} />
-							<button type="submit" class="icon-btn icon-btn--danger" title="Delete shelf">
-								<Trash2 />
-							</button>
-						</form>
+						<button
+							class="icon-btn icon-btn--danger"
+							title="Delete shelf"
+							onclick={() => {
+								pendingDeleteShelf = {
+									id: shelf.id,
+									name: shelf.name,
+									itemCount: shelf.items.length,
+								};
+								deleteConfirmOpen = true;
+							}}
+						>
+							<Trash2 />
+						</button>
 					</div>
 				</div>
 
@@ -454,6 +488,21 @@
 			</GlassCard>
 		{/each}
 	{/if}
+
+	<!-- Hidden form for programmatic shelf deletion -->
+	<form bind:this={deleteFormEl} method="POST" action="?/removeShelf" use:enhance hidden>
+		<input type="hidden" name="shelfId" value={pendingDeleteShelf?.id ?? ""} />
+	</form>
+
+	<GlassConfirmDialog
+		bind:open={deleteConfirmOpen}
+		title="Delete Shelf?"
+		message={deleteMessage}
+		confirmLabel="Delete Shelf"
+		variant="danger"
+		onconfirm={confirmDeleteShelf}
+		oncancel={cancelDeleteShelf}
+	/>
 </div>
 
 <style>
