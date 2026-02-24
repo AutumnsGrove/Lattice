@@ -53,8 +53,8 @@
 		slug = data.page.slug || "";
 		description = data.page.description || "";
 		content = data.page.markdown_content || "";
-		font = /** @type {any} */ (data.page).font || "default";
-		showInNav = /** @type {any} */ (data.page).show_in_nav === 1;
+		font = data.page.font || "default";
+		showInNav = data.page.show_in_nav === 1;
 		heroTitle = data.page.hero?.title || "";
 		heroSubtitle = data.page.hero?.subtitle || "";
 		heroCtaText = data.page.hero?.cta?.text || "";
@@ -99,8 +99,8 @@
 			title !== (data.page.title || "") ||
 			description !== (data.page.description || "") ||
 			content !== (data.page.markdown_content || "") ||
-			font !== /** @type {any} */ (data.page.font || "default") ||
-			showInNav !== /** @type {any} */ (data.page.show_in_nav === 1) ||
+			font !== (data.page.font || "default") ||
+			showInNav !== (data.page.show_in_nav === 1) ||
 			heroTitle !== (data.page.hero?.title || "") ||
 			heroSubtitle !== (data.page.hero?.subtitle || "") ||
 			heroCtaText !== (data.page.hero?.cta?.text || "") ||
@@ -108,12 +108,14 @@
 		hasUnsavedChanges = hasChanges;
 	});
 
-	/** Format a Unix timestamp (seconds or ms) to a human-readable locale string */
+	/** Format a timestamp (unix seconds, unix ms, or ISO string) to locale string */
 	/** @param {number | string | null | undefined} val */
 	function formatTimestamp(val) {
 		if (!val) return "";
-		const ms = typeof val === "number" && val < 1e12 ? val * 1000 : Number(val);
-		return new Date(ms).toLocaleString();
+		if (typeof val === "number") {
+			return new Date(val < 1e12 ? val * 1000 : val).toLocaleString();
+		}
+		return new Date(val).toLocaleString();
 	}
 
 	/** Whether this is a protected system page */
