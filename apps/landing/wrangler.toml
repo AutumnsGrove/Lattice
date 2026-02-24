@@ -10,10 +10,11 @@ main = ".svelte-kit/cloudflare/_worker.js"
 directory = ".svelte-kit/cloudflare"
 binding = "ASSETS"
 
-# Environment variables for local development
+# Environment variables
 [vars]
-CDN_URL = "http://localhost:5173/cdn"
+CDN_URL = "https://cdn.grove.place"
 ZEPHYR_URL = "https://grove-zephyr.m7jv4v7npb.workers.dev"
+ADMIN_EMAILS = "autumnbrown23@pm.me"
 # Turnstile (Shade) - human verification
 TURNSTILE_SITE_KEY = "0x4AAAAAACI9p49O_VFDy3WA"
 
