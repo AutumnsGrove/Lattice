@@ -12,7 +12,8 @@ tags:
   - thorn
   - content-moderation
   - behavioral
-  - rate-limiting
+  - threshold-sdk
+  - server-sdk
   - cloudflare-workers
 ---
 
@@ -89,8 +90,9 @@ User publishes content
 ┌─────────────────────────────────────────────────────────────────┐
 │  THORN BEHAVIORAL LAYER (new)                         <1ms     │
 │                                                                 │
-│  1. Check entity labels     "Is this user already flagged?"    │
-│  2. Check rate limits       "Too many actions too fast?"       │
+│  1. Threshold rate check    "Too many actions too fast?"       │
+│     (via @autumnsgrove/lattice/threshold)                      │
+│  2. Check entity labels     "Is this user already flagged?"    │
 │  3. Evaluate behavioral     "Does this match a known          │
 │     rules                    spam pattern?"                    │
 │                                                                 │
@@ -255,115 +257,106 @@ Event outcome
 
 ---
 
-## Rate Limiting
+## Rate Limiting (via Threshold SDK)
 
-### Schema
+The behavioral layer uses the existing **Threshold SDK** (`@autumnsgrove/lattice/threshold`) for all rate limiting. No custom rate limit tables or counters needed. Threshold already provides:
 
-```sql
-CREATE TABLE IF NOT EXISTS thorn_rate_counters (
-  -- What entity, what action, what time window
-  entity_type TEXT NOT NULL,
-  entity_id TEXT NOT NULL,
-  action_type TEXT NOT NULL,       -- 'publish' | 'comment' | 'edit' | 'signup'
-  window_key TEXT NOT NULL,        -- Time bucket: '2026-02-24T15' (hourly)
+- Atomic counters via `ThresholdD1Store` (uses existing `rate_limits` table)
+- Graduated abuse tracking via `checkWithAbuse()` (warnings → 24h ban)
+- Centralized config in `ENDPOINT_RATE_LIMITS`
+- Framework adapters for SvelteKit, Hono, and Workers
 
-  -- Counter
-  count INTEGER NOT NULL DEFAULT 1,
-  first_at TEXT NOT NULL DEFAULT (datetime('now')),
-  last_at TEXT NOT NULL DEFAULT (datetime('now')),
+### Existing Endpoint Limits (Already Configured)
 
-  PRIMARY KEY (entity_type, entity_id, action_type, window_key)
-);
-
--- Cleanup old windows
-CREATE INDEX IF NOT EXISTS idx_thorn_rate_first
-  ON thorn_rate_counters(first_at);
-```
-
-### Rate Limit Configuration
+The Threshold SDK already defines limits for content creation:
 
 ```typescript
-// libs/engine/src/lib/thorn/behavioral/config.ts
-
-export const BEHAVIORAL_RATE_LIMITS: RateLimitConfig[] = [
-  {
-    name: "publish_per_hour",
-    entityType: "user",
-    actionType: "publish",
-    window: "hour",
-    max: 20,
-    action: "block",
-    labelOnTrigger: "thorn:rapid_poster",
-    labelExpiry: 24,  // hours
-  },
-  {
-    name: "publish_per_minute",
-    entityType: "user",
-    actionType: "publish",
-    window: "minute",
-    max: 5,
-    action: "block",
-    labelOnTrigger: "thorn:rapid_poster",
-    labelExpiry: 1,
-  },
-  {
-    name: "comment_per_minute",
-    entityType: "user",
-    actionType: "comment",
-    window: "minute",
-    max: 10,
-    action: "block",
-    labelOnTrigger: "thorn:rapid_poster",
-    labelExpiry: 1,
-  },
-  {
-    name: "songbird_fails_per_day",
-    entityType: "user",
-    actionType: "songbird_fail",
-    window: "day",
-    max: 3,
-    action: "block",
-    labelOnTrigger: "thorn:repeat_offender",
-    labelExpiry: 168,  // 7 days
-  },
-];
+// From @autumnsgrove/lattice/threshold config.ts (already exists)
+"posts/create": { limit: 10, windowSeconds: 3600 },   // 10 posts/hour
+"posts/update": { limit: 30, windowSeconds: 3600 },   // 30 edits/hour
+"comments/create": { limit: 20, windowSeconds: 300 },  // 20 comments/5min
 ```
 
-### Rate Limit Check
+### Behavioral Integration with Threshold
+
+The behavioral layer wraps Threshold checks and bridges them to entity labels:
 
 ```typescript
-/** Increment counter and check if rate limit is exceeded */
-export async function checkRateLimit(
+// libs/engine/src/lib/thorn/behavioral/rate-check.ts
+
+import { Threshold, ThresholdD1Store } from "@autumnsgrove/lattice/threshold";
+import { addLabel } from "./labels.js";
+
+/**
+ * Check Threshold rate limits and apply labels on violation.
+ *
+ * Bridges the Threshold SDK into Thorn's behavioral layer:
+ * 1. Calls threshold.check() for the endpoint
+ * 2. If exceeded, applies a thorn:rapid_poster label
+ * 3. If abuse escalation triggers, applies thorn:repeat_offender
+ */
+export async function checkBehavioralRateLimit(
+  threshold: Threshold,
   db: D1Database,
-  entityType: EntityType,
-  entityId: string,
-  actionType: string,
-): Promise<RateLimitResult>;
+  userId: string,
+  endpointKey: string,
+): Promise<{ exceeded: boolean; action?: ThornAction }> {
+  const result = await threshold.check({
+    key: `thorn:${endpointKey}:${userId}`,
+    limit: getEndpointLimitByKey(endpointKey).limit,
+    windowSeconds: getEndpointLimitByKey(endpointKey).windowSeconds,
+  });
 
-// Returns:
-interface RateLimitResult {
-  exceeded: boolean;
-  rule?: string;          // Which rule triggered
-  count: number;          // Current count in window
-  max: number;            // Configured maximum
-  action?: ThornAction;   // 'block' | 'warn'
+  if (!result.allowed) {
+    // Apply rapid_poster label (expires when window resets)
+    await addLabel(db, "user", userId, "thorn:rapid_poster", {
+      addedBy: `threshold:${endpointKey}`,
+      expiresInHours: 1,
+      reason: `Rate limit exceeded: ${endpointKey}`,
+    });
+
+    return { exceeded: true, action: "block" };
+  }
+
+  return { exceeded: false };
 }
 ```
 
-### Window Key Generation
+### Abuse Escalation Bridge
+
+Threshold's existing abuse tracking (`recordViolation()`) handles graduated escalation. The behavioral layer bridges this into entity labels:
 
 ```typescript
-function getWindowKey(window: "minute" | "hour" | "day"): string {
-  const now = new Date();
-  switch (window) {
-    case "minute":
-      return now.toISOString().slice(0, 16); // "2026-02-24T15:30"
-    case "hour":
-      return now.toISOString().slice(0, 13);  // "2026-02-24T15"
-    case "day":
-      return now.toISOString().slice(0, 10);  // "2026-02-24"
+/**
+ * When Threshold records a violation, mirror it as a Thorn label.
+ * Called after any rate limit violation in the behavioral pipeline.
+ */
+async function bridgeAbuseToLabels(
+  abuseKV: KVNamespace,
+  db: D1Database,
+  userId: string,
+): Promise<void> {
+  const violation = await recordViolation(abuseKV, userId);
+
+  if (violation.banned) {
+    // Threshold escalated to ban (5+ violations in 24h)
+    await addLabel(db, "user", userId, "thorn:repeat_offender", {
+      addedBy: "threshold:abuse_escalation",
+      expiresInHours: 24,
+      reason: "Threshold abuse escalation: repeated rate limit violations",
+    });
   }
 }
+```
+
+### Thorn-Specific Rate Limits (New Endpoints)
+
+For Thorn-specific signals not covered by existing Threshold config, add entries to `ENDPOINT_RATE_LIMITS`:
+
+```typescript
+// Added to @autumnsgrove/lattice/threshold config.ts
+"thorn/songbird-fail": { limit: 3, windowSeconds: 86400 },   // 3 failures/day
+"thorn/behavioral-block": { limit: 10, windowSeconds: 3600 }, // 10 blocks/hour
 ```
 
 ---
@@ -403,10 +396,13 @@ export type BehavioralCondition =
   | { type: "has_label"; label: string }
   | { type: "not_has_label"; label: string }
   | { type: "account_age_below"; hours: number }
-  | { type: "rate_exceeded"; actionType: string; window: Window; max: number }
   | { type: "content_has_links"; min: number }
   | { type: "content_length_below"; chars: number }
   | { type: "content_length_above"; chars: number };
+
+// Note: rate limiting is NOT a condition type.
+// Rate checks are handled by Threshold SDK (checkBehavioralRateLimit)
+// and run as a separate step before rule evaluation.
 ```
 
 ### Default Rules
@@ -502,7 +498,8 @@ export interface BehavioralResult {
  * Evaluate all behavioral rules against the current context.
  * Rules are checked in order. First match wins.
  *
- * This function performs D1 queries for label and rate limit checks.
+ * Rate limiting runs BEFORE rule evaluation via Threshold SDK.
+ * This function handles label checks and content signal matching.
  * Typical execution: 1-3ms (1-2 D1 queries).
  */
 export async function evaluateBehavioralRules(
@@ -531,14 +528,37 @@ export interface BehavioralContext {
 
 ### Updated Hook Flow
 
-The existing `moderatePublishedContent()` in `hooks.ts` gains a behavioral pre-check:
+The existing `moderatePublishedContent()` in `hooks.ts` gains a behavioral pre-check. The hook receives a `Threshold` instance from the caller (already available in the request context):
 
 ```typescript
 export async function moderatePublishedContent(
-  options: ModeratePublishedContentOptions,
+  options: ModeratePublishedContentOptions & { threshold: Threshold },
 ): Promise<void> {
   try {
-    // ── NEW: Behavioral pre-check ──────────────────────────
+    // ── NEW: Threshold rate check ───────────────────────────
+    const rateResult = await checkBehavioralRateLimit(
+      options.threshold,
+      options.db,
+      options.userId!,
+      mapHookToEndpoint(options.hookPoint), // e.g. "on_publish" → "posts/create"
+    );
+
+    if (rateResult.exceeded) {
+      await logModerationEvent(options.db, {
+        userId: options.userId,
+        tenantId: options.tenantId,
+        contentType: options.contentType,
+        hookPoint: options.hookPoint,
+        action: rateResult.action!,
+        categories: ["behavioral:rate_limit"],
+        confidence: 1.0,
+        model: "threshold-sdk",
+        contentRef: options.contentRef,
+      });
+      return; // Rate limited, skip everything
+    }
+
+    // ── NEW: Behavioral rule pre-check ──────────────────────
     const behavioral = await evaluateBehavioralRules(options.db, {
       userId: options.userId,
       tenantId: options.tenantId,
@@ -652,7 +672,7 @@ libs/engine/src/lib/thorn/
 └── behavioral/                 # ── NEW ──
     ├── index.ts                # Behavioral public API
     ├── labels.ts               # Entity label CRUD operations
-    ├── rate-limit.ts           # Rate counter operations
+    ├── rate-check.ts           # Threshold SDK bridge (not custom counters)
     ├── rules.ts                # Rule definitions and config
     ├── evaluate.ts             # Rule evaluation engine
     ├── types.ts                # Behavioral-specific types
@@ -665,11 +685,24 @@ libs/engine/src/lib/thorn/
 
 | Component | Technology | Why |
 |-----------|-----------|-----|
-| Labels storage | D1 (SQLite) | Already used by Thorn, sub-ms queries, zero additional infra |
-| Rate counters | D1 (SQLite) | UPSERT with increment, same DB as labels |
+| Labels storage | D1 via Server SDK (`GroveDatabase`) | Abstracts D1 behind portable interface, sub-ms queries |
+| Rate limiting | Threshold SDK (`@autumnsgrove/lattice/threshold`) | Existing unified rate limiting with D1/KV/DO stores and abuse tracking |
+| Abuse escalation | Threshold abuse module + KV (`GroveKV`) | Graduated violation tracking already built |
 | Rule definitions | TypeScript config | Type-safe, no parser needed, lives in codebase |
 | Rule evaluation | Pure TypeScript | Deterministic, testable, no external dependencies |
 | Integration | Cloudflare Workers | Same runtime as existing Thorn |
+
+### SDK Integration Map
+
+The behavioral layer connects to three existing SDK packages:
+
+```
+@autumnsgrove/lattice/threshold     ← Rate limiting, abuse escalation
+@autumnsgrove/lattice/thorn         ← Parent module (types, logging, config)
+@autumnsgrove/server-sdk            ← GroveDatabase, GroveKV interfaces
+```
+
+**Why Server SDK?** The existing Thorn code uses raw `D1Database` types from `@cloudflare/workers-types`. The behavioral layer follows this pattern for consistency. When Thorn migrates to `GroveDatabase` (the Server SDK abstraction), the behavioral layer migrates with it. The `GroveDatabase` interface is a superset of the D1 API, so the migration is a type change, not a logic change.
 
 ---
 
@@ -677,7 +710,7 @@ libs/engine/src/lib/thorn/
 
 - **No content storage.** Behavioral rules check metadata (length, link count, account age), never content text. The content text is only passed to the AI layer.
 - **Label privacy.** Labels are internal state. They are never exposed to users or included in API responses. Users see only the moderation decision (allow/warn/flag/block).
-- **Rate limit accuracy.** D1's UPSERT ensures atomic counter increments. Window keys use truncated ISO timestamps for natural expiry grouping.
+- **Rate limit accuracy.** Delegated to Threshold SDK, which uses atomic `INSERT ON CONFLICT` in D1 and graduated abuse tracking in KV. No custom rate limit implementation to maintain.
 - **Label TTL enforcement.** Expired labels are cleaned up periodically. The `hasLabel` check filters expired labels at query time, so stale data never affects decisions.
 - **Trusted label governance.** The `thorn:trusted` label (which skips AI) can only be added by Wayfinders through the admin panel. It cannot be self-applied or auto-applied by rules.
 - **Existing Thorn feature flag.** The behavioral layer respects the existing `thorn_moderation` feature flag. If Thorn is disabled, behavioral checks are also disabled.
@@ -696,7 +729,8 @@ The existing `thorn-aggregator.ts` gains behavioral metrics:
 | Behavioral skip rate | (behavioral blocks / total events) | Thorn dashboard |
 | AI inference savings | behavioral blocks x $0.001 | Thorn dashboard |
 | Active entity labels | `thorn_entity_labels` count | Thorn dashboard |
-| Rate limit triggers (24h) | `thorn_moderation_log WHERE categories LIKE 'behavioral:rate%'` | Thorn dashboard |
+| Rate limit triggers (24h) | `thorn_moderation_log WHERE model = 'threshold-sdk'` | Thorn dashboard |
+| Threshold abuse escalations | Labels with `added_by LIKE 'threshold:%'` | Thorn dashboard |
 | Top triggered rules | Group by `categories` where `model = 'thorn-behavioral'` | Thorn dashboard |
 
 ### Admin Label Management
@@ -736,19 +770,20 @@ Wayfinders can view, add, and remove entity labels through the existing Arbor ad
 
 ### Phase 1: Entity Labels (Foundation)
 
-- [ ] Create migration `090_thorn_behavioral_labels.sql` with `thorn_entity_labels` and `thorn_rate_counters` tables
+- [ ] Create migration `090_thorn_behavioral_labels.sql` with `thorn_entity_labels` table (no rate limit tables needed)
 - [ ] Create `libs/engine/src/lib/thorn/behavioral/` directory
 - [ ] Implement `labels.ts` with getEntityLabels, hasLabel, addLabel, removeLabel, cleanupExpiredLabels
 - [ ] Implement `types.ts` with EntityType, BehavioralRule, BehavioralCondition, etc.
 - [ ] Add feature flag `thorn_behavioral` for gradual rollout
 - [ ] Write unit tests for label CRUD operations
 
-### Phase 2: Rate Limiting
+### Phase 2: Threshold SDK Integration
 
-- [ ] Implement `rate-limit.ts` with checkRateLimit, incrementCounter, cleanupOldWindows
-- [ ] Define default rate limit configuration in `rules.ts`
-- [ ] Wire rate limit checks into publish flow
-- [ ] Write unit tests for rate limit logic (window boundaries, counter overflow)
+- [ ] Add Thorn-specific endpoint keys to `ENDPOINT_RATE_LIMITS` in `@autumnsgrove/lattice/threshold`
+- [ ] Implement `rate-check.ts` bridging Threshold checks to entity labels
+- [ ] Implement `bridgeAbuseToLabels()` for Threshold → label escalation
+- [ ] Wire Threshold instance through `moderatePublishedContent()` options
+- [ ] Write unit tests for Threshold-to-label bridge logic
 
 ### Phase 3: Behavioral Rules Engine
 
@@ -786,8 +821,10 @@ Wayfinders can view, add, and remove entity labels through the existing Arbor ad
 | Document | Relationship |
 |----------|-------------|
 | `thorn-spec.md` | Parent spec. Behavioral layer extends Thorn. |
+| `threshold-spec.md` | Rate limiting SDK. Behavioral layer uses Threshold for all rate checks. |
 | `songbird-pattern.md` | Songbird failures feed into behavioral labels. |
 | `shade-spec.md` | Privacy policy governs what behavioral data we store. |
+| Server SDK (`@autumnsgrove/server-sdk`) | `GroveDatabase` and `GroveKV` interfaces for infrastructure portability. |
 
 ---
 
