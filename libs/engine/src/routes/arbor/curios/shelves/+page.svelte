@@ -2,6 +2,7 @@
 	import { enhance } from "$app/forms";
 	import { GlassCard, GlassButton, GlassConfirmDialog, toast } from "$lib/ui/components/ui";
 	import { BookMarked, Plus, Trash2, Settings, ChevronDown, ChevronUp } from "lucide-svelte";
+	import { api } from "$lib/utils/api";
 
 	let { data, form } = $props();
 	let editingShelf = $state<string | null>(null);
@@ -10,6 +11,10 @@
 	let pendingDeleteShelf = $state<{ id: string; name: string; itemCount: number } | null>(null);
 	let deleteConfirmOpen = $state(false);
 	let deleteFormEl: HTMLFormElement;
+
+	// URL unfurling state
+	let unfurling = $state(false);
+	let unfurlError = $state<string | null>(null);
 
 	let deleteMessage = $derived(
 		pendingDeleteShelf
@@ -52,6 +57,59 @@
 			custom: { displayMode: "cover-grid", material: "none" },
 		};
 		return map[preset] ?? map.custom;
+	}
+
+	async function handleUrlBlur(e: FocusEvent) {
+		const input = e.target as HTMLInputElement;
+		const url = input.value.trim();
+		if (!url) return;
+
+		// Validate URL client-side first
+		try {
+			new URL(url);
+		} catch {
+			return;
+		}
+
+		const formEl = input.closest("form");
+		if (!formEl) return;
+
+		unfurling = true;
+		unfurlError = null;
+
+		try {
+			const result = await api.post<{
+				success: boolean;
+				data?: { title?: string; description?: string; image?: string };
+			}>("/api/curios/shelves/unfurl", { url });
+
+			if (!result?.success || !result.data) {
+				unfurlError = "Couldn't fetch page info \u2014 fill in details manually";
+				return;
+			}
+
+			const { title, description, image } = result.data;
+
+			// Pre-fill EMPTY fields only — never overwrite user input
+			const titleInput = formEl.querySelector<HTMLInputElement>('[name="title"]');
+			if (titleInput && !titleInput.value.trim() && title) {
+				titleInput.value = title;
+			}
+
+			const descInput = formEl.querySelector<HTMLInputElement>('[name="description"]');
+			if (descInput && !descInput.value.trim() && description) {
+				descInput.value = description;
+			}
+
+			const coverInput = formEl.querySelector<HTMLInputElement>('[name="coverUrl"]');
+			if (coverInput && !coverInput.value.trim() && image) {
+				coverInput.value = image;
+			}
+		} catch {
+			unfurlError = "Couldn't fetch page info \u2014 fill in details manually";
+		} finally {
+			unfurling = false;
+		}
 	}
 
 	function getDisplayModeLabel(mode: string): string {
@@ -385,13 +443,32 @@
 								<div class="form-row">
 									<label class="form-label">
 										URL
-										<input
-											type="url"
-											name="url"
-											required
-											placeholder="https://example.com"
-											class="form-input"
-										/>
+										<div class="url-input-wrapper">
+											<input
+												type="url"
+												name="url"
+												required
+												placeholder="https://example.com"
+												class="form-input"
+												onblur={handleUrlBlur}
+											/>
+											{#if unfurling}
+												<svg
+													class="unfurl-spinner"
+													viewBox="0 0 24 24"
+													fill="none"
+													stroke="currentColor"
+													stroke-width="2"
+												>
+													<path
+														d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"
+													/>
+												</svg>
+											{/if}
+										</div>
+										{#if unfurlError}
+											<span class="unfurl-hint">{unfurlError}</span>
+										{/if}
 									</label>
 									<label class="form-label">
 										Title
@@ -428,7 +505,31 @@
 								</div>
 								<label class="form-label">
 									URL (optional)
-									<input type="url" name="url" placeholder="https://..." class="form-input" />
+									<div class="url-input-wrapper">
+										<input
+											type="url"
+											name="url"
+											placeholder="https://..."
+											class="form-input"
+											onblur={handleUrlBlur}
+										/>
+										{#if unfurling}
+											<svg
+												class="unfurl-spinner"
+												viewBox="0 0 24 24"
+												fill="none"
+												stroke="currentColor"
+												stroke-width="2"
+											>
+												<path
+													d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"
+												/>
+											</svg>
+										{/if}
+									</div>
+									{#if unfurlError}
+										<span class="unfurl-hint">{unfurlError}</span>
+									{/if}
 								</label>
 							{/if}
 							<div class="form-row">
@@ -791,6 +892,39 @@
 	:global(.btn-icon) {
 		width: 1rem;
 		height: 1rem;
+	}
+
+	/* URL unfurl */
+	.url-input-wrapper {
+		position: relative;
+	}
+
+	.url-input-wrapper .form-input {
+		width: 100%;
+	}
+
+	.unfurl-spinner {
+		position: absolute;
+		right: 0.5rem;
+		top: 50%;
+		transform: translateY(-50%);
+		width: 1rem;
+		height: 1rem;
+		color: var(--color-primary);
+		animation: unfurl-spin 1s linear infinite;
+	}
+
+	@keyframes unfurl-spin {
+		to {
+			transform: translateY(-50%) rotate(360deg);
+		}
+	}
+
+	.unfurl-hint {
+		font-size: 0.75rem;
+		color: var(--color-text-muted);
+		opacity: 0.8;
+		margin-top: 0.125rem;
 	}
 
 	@media (max-width: 640px) {
