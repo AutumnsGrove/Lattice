@@ -63,7 +63,10 @@ export class ZephyrClient {
 			const hex = [...new Uint8Array(hash)].map((b) => b.toString(16).padStart(2, "0")).join("");
 			return { "X-Zephyr-Binding": hex };
 		}
-		return { "X-API-Key": this.apiKey };
+		// Sanitize the API key to prevent "Invalid header value" errors from
+		// corrupted secrets (e.g. Cloudflare Pages secrets with stray newlines)
+		const sanitized = this.apiKey.replace(/[\r\n\t]/g, "").trim();
+		return { "X-API-Key": sanitized };
 	}
 
 	/**
