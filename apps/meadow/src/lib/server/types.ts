@@ -11,23 +11,23 @@ import type { MeadowPost } from "$lib/types/post";
 // ─────────────────────────────────────────────────────────────────────────────
 
 export type FeedFilter =
-  | "all"
-  | "popular"
-  | "hot"
-  | "top"
-  | "following"
-  | "bookmarks"
-  | "notes"
-  | "blooms";
+	| "all"
+	| "popular"
+	| "hot"
+	| "top"
+	| "following"
+	| "bookmarks"
+	| "notes"
+	| "blooms";
 
 export type TopPeriod = "day" | "week" | "month";
 
 export interface FeedOptions {
-  filter: FeedFilter;
-  topPeriod?: TopPeriod;
-  userId?: string | null;
-  limit: number;
-  offset: number;
+	filter: FeedFilter;
+	topPeriod?: TopPeriod;
+	userId?: string | null;
+	limit: number;
+	offset: number;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -35,15 +35,15 @@ export interface FeedOptions {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface Pagination {
-  total: number;
-  limit: number;
-  offset: number;
-  hasMore: boolean;
+	total: number;
+	limit: number;
+	offset: number;
+	hasMore: boolean;
 }
 
 export interface FeedPage {
-  posts: MeadowPost[];
-  pagination: Pagination;
+	posts: MeadowPost[];
+	pagination: Pagination;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -53,10 +53,10 @@ export interface FeedPage {
 export type ReportReason = "spam" | "harassment" | "misinformation" | "other";
 
 export const VALID_REPORT_REASONS: Set<string> = new Set([
-  "spam",
-  "harassment",
-  "misinformation",
-  "other",
+	"spam",
+	"harassment",
+	"misinformation",
+	"other",
 ]);
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -64,74 +64,86 @@ export const VALID_REPORT_REASONS: Set<string> = new Set([
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface PostRow {
-  id: string;
-  tenant_id: string;
-  guid: string;
-  title: string;
-  description: string;
-  content_html: string | null;
-  link: string;
-  author_name: string | null;
-  author_subdomain: string;
-  tags: string | null;
-  featured_image: string | null;
-  published_at: number;
-  score: number;
-  reaction_counts: string | null;
-  post_type: string;
-  user_id: string | null;
-  body: string | null;
-  blaze: string | null;
-  // Joined from user context
-  user_voted?: number | null;
-  user_bookmarked?: number | null;
-  user_reactions?: string | null;
+	id: string;
+	tenant_id: string;
+	guid: string;
+	title: string;
+	description: string;
+	content_html: string | null;
+	link: string;
+	author_name: string | null;
+	author_subdomain: string;
+	tags: string | null;
+	featured_image: string | null;
+	published_at: number;
+	score: number;
+	reaction_counts: string | null;
+	post_type: string;
+	user_id: string | null;
+	body: string | null;
+	blaze: string | null;
+	// Joined from blaze_definitions
+	blaze_label?: string | null;
+	blaze_icon?: string | null;
+	blaze_color?: string | null;
+	// Joined from user context
+	user_voted?: number | null;
+	user_bookmarked?: number | null;
+	user_reactions?: string | null;
 }
 
 /**
  * Transform a database row into the client-facing MeadowPost shape.
  */
 export function rowToPost(row: PostRow): MeadowPost {
-  let tags: string[] = [];
-  try {
-    tags = row.tags ? JSON.parse(row.tags) : [];
-  } catch {
-    tags = [];
-  }
+	let tags: string[] = [];
+	try {
+		tags = row.tags ? JSON.parse(row.tags) : [];
+	} catch {
+		tags = [];
+	}
 
-  let reactionCounts: Record<string, number> = {};
-  try {
-    reactionCounts = row.reaction_counts ? JSON.parse(row.reaction_counts) : {};
-  } catch {
-    reactionCounts = {};
-  }
+	let reactionCounts: Record<string, number> = {};
+	try {
+		reactionCounts = row.reaction_counts ? JSON.parse(row.reaction_counts) : {};
+	} catch {
+		reactionCounts = {};
+	}
 
-  let userReactions: string[] = [];
-  try {
-    userReactions = row.user_reactions ? JSON.parse(row.user_reactions) : [];
-  } catch {
-    userReactions = [];
-  }
+	let userReactions: string[] = [];
+	try {
+		userReactions = row.user_reactions ? JSON.parse(row.user_reactions) : [];
+	} catch {
+		userReactions = [];
+	}
 
-  return {
-    id: row.id,
-    postType: (row.post_type as "bloom" | "note") || "bloom",
-    title: row.title,
-    description: row.description,
-    link: row.link,
-    authorName: row.author_name,
-    authorSubdomain: row.author_subdomain,
-    tags,
-    featuredImage: row.featured_image,
-    publishedAt: row.published_at,
-    contentHtml: row.content_html,
-    body: row.body ?? null,
-    userId: row.user_id ?? null,
-    userVoted: Boolean(row.user_voted),
-    userBookmarked: Boolean(row.user_bookmarked),
-    userReactions,
-    score: row.score,
-    reactionCounts,
-    blaze: row.blaze ?? null,
-  };
+	return {
+		id: row.id,
+		postType: (row.post_type as "bloom" | "note") || "bloom",
+		title: row.title,
+		description: row.description,
+		link: row.link,
+		authorName: row.author_name,
+		authorSubdomain: row.author_subdomain,
+		tags,
+		featuredImage: row.featured_image,
+		publishedAt: row.published_at,
+		contentHtml: row.content_html,
+		body: row.body ?? null,
+		userId: row.user_id ?? null,
+		userVoted: Boolean(row.user_voted),
+		userBookmarked: Boolean(row.user_bookmarked),
+		userReactions,
+		score: row.score,
+		reactionCounts,
+		blaze: row.blaze ?? null,
+		blazeDefinition:
+			row.blaze && row.blaze_label
+				? {
+						label: row.blaze_label,
+						icon: row.blaze_icon ?? "HelpCircle",
+						color: row.blaze_color ?? "slate",
+					}
+				: null,
+	};
 }

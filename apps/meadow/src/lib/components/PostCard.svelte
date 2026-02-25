@@ -39,9 +39,12 @@
 	const displayTags = $derived(post.tags.slice(0, 4));
 	const hasImage = $derived(!isNote && !!post.featuredImage);
 
-	/** Resolve custom blaze slug to a definition for the Blaze component */
+	/** Resolve custom blaze: prefer hydrated definition from feed, then global map, then slug fallback */
 	const customBlazeDefinition = $derived.by(() => {
 		if (!post.blaze) return null;
+		// Feed query hydrates the definition via LEFT JOIN — use it when available
+		if (post.blazeDefinition) return post.blazeDefinition;
+		// Static global defaults (no JOIN needed for these)
 		const global = BLAZE_SLUG_MAP[post.blaze];
 		if (global) return global;
 		// Graceful fallback for unknown slugs: titlecase the slug, neutral style
