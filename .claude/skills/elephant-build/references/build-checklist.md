@@ -13,6 +13,8 @@ Use this during Phase 3 (BUILD) to track progress across all files.
 [ ] Indexes added for frequent query patterns
 [ ] Migration script created (if needed)
 [ ] Schema tested locally with wrangler d1
+[ ] Correct D1 binding selected (DB for core, CURIO_DB for curios, OBS_DB for observability)
+[ ] Queries scoped to tenant_id for multi-tenant safety
 ```
 
 ### Backend Service Checklist
@@ -39,6 +41,30 @@ Use this during Phase 3 (BUILD) to track progress across all files.
 [ ] Error responses use buildErrorJson() — never ad-hoc JSON
 [ ] Rate limiting considered for sensitive operations
 [ ] Multi-tenant: queries scoped to tenant_id
+```
+
+### Type Safety at Boundaries (Rootwork)
+
+> Validate at the boundary, trust inside. See `AgentUsage/rootwork_type_safety.md`.
+
+```
+[ ] Form data parsed with `parseFormData(formData, ZodSchema)` — no raw `.get()` casts
+[ ] KV/JSON reads use `safeJsonParse(raw, ZodSchema)` — no bare `JSON.parse()`
+[ ] Cache reads use `createTypedCacheReader()` with schema + fallback
+[ ] SvelteKit catch blocks use `isRedirect(err)` / `isHttpError(err)` — no `as any` casts
+[ ] Zod schemas defined at module scope, not inside handlers
+[ ] No `as` casts at trust boundaries (form data, KV, webhooks, caught exceptions)
+[ ] All imports from `@autumnsgrove/lattice/server`
+```
+
+### Storage & File Operations Checklist
+
+```
+[ ] File operations use Amber SDK (FileManager, QuotaManager) — not raw R2
+[ ] Quota checked before upload via QuotaManager.canUpload()
+[ ] File exports use ExportManager for multi-format support
+[ ] Addon file management uses AddonManager for sandboxed storage
+[ ] All storage imports from `@autumnsgrove/lattice/amber`
 ```
 
 ### Frontend Component Checklist
@@ -81,23 +107,22 @@ Use this during Phase 3 (BUILD) to track progress across all files.
 ```typescript
 // In src/lib/db/schema.ts (or equivalent)
 export const myTable = sqliteTable("my_table", {
-  id: text("id").primaryKey(),                    // nanoid or UUID
-  tenantId: text("tenant_id").notNull(),          // multi-tenant scoping
-  userId: text("user_id").notNull(),              // owner
-  title: text("title").notNull(),
-  content: text("content"),
-  status: text("status").notNull().default("draft"),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .notNull()
-    .$defaultFn(() => new Date()),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
-    .notNull()
-    .$defaultFn(() => new Date()),
+	id: text("id").primaryKey(), // nanoid or UUID
+	tenantId: text("tenant_id").notNull(), // multi-tenant scoping
+	userId: text("user_id").notNull(), // owner
+	title: text("title").notNull(),
+	content: text("content"),
+	status: text("status").notNull().default("draft"),
+	createdAt: integer("created_at", { mode: "timestamp" })
+		.notNull()
+		.$defaultFn(() => new Date()),
+	updatedAt: integer("updated_at", { mode: "timestamp" })
+		.notNull()
+		.$defaultFn(() => new Date()),
 });
 
 // Indexes for common query patterns
-export const myTableIdx = index("my_table_tenant_status_idx")
-  .on(myTable.tenantId, myTable.status);
+export const myTableIdx = index("my_table_tenant_status_idx").on(myTable.tenantId, myTable.status);
 ```
 
 ### Multi-Tenant Query Pattern
@@ -105,16 +130,15 @@ export const myTableIdx = index("my_table_tenant_status_idx")
 ```typescript
 // Always scope to tenant
 const items = await db
-  .prepare("SELECT * FROM my_table WHERE tenant_id = ? AND status = ?")
-  .bind(tenantId, "published")
-  .all();
+	.prepare("SELECT * FROM my_table WHERE tenant_id = ? AND status = ?")
+	.bind(tenantId, "published")
+	.all();
 
 // Or with typed helper
-const item = await queryOne<MyItem>(
-  db,
-  "SELECT * FROM my_table WHERE id = ? AND tenant_id = ?",
-  [id, tenantId]
-);
+const item = await queryOne<MyItem>(db, "SELECT * FROM my_table WHERE id = ? AND tenant_id = ?", [
+	id,
+	tenantId,
+]);
 ```
 
 ### Parallel Query Pattern
@@ -122,12 +146,21 @@ const item = await queryOne<MyItem>(
 ```typescript
 // Independent queries in parallel (not sequential)
 const [posts, settings, config] = await Promise.all([
-  db.prepare("SELECT * FROM posts WHERE tenant_id = ?").bind(tenantId).all()
-    .catch(() => ({ results: [] })),
-  db.prepare("SELECT * FROM settings WHERE tenant_id = ?").bind(tenantId).first()
-    .catch(() => null),
-  db.prepare("SELECT * FROM config WHERE tenant_id = ?").bind(tenantId).first()
-    .catch(() => null),
+	db
+		.prepare("SELECT * FROM posts WHERE tenant_id = ?")
+		.bind(tenantId)
+		.all()
+		.catch(() => ({ results: [] })),
+	db
+		.prepare("SELECT * FROM settings WHERE tenant_id = ?")
+		.bind(tenantId)
+		.first()
+		.catch(() => null),
+	db
+		.prepare("SELECT * FROM config WHERE tenant_id = ?")
+		.bind(tenantId)
+		.first()
+		.catch(() => null),
 ]);
 ```
 
@@ -138,8 +171,9 @@ const [posts, settings, config] = await Promise.all([
 ```svelte
 <!-- In layout or nav component -->
 <nav>
-  <a href="/existing-feature">Existing Feature</a>
-  <a href="/new-feature">New Feature</a>  <!-- Add this -->
+	<a href="/existing-feature">Existing Feature</a>
+	<a href="/new-feature">New Feature</a>
+	<!-- Add this -->
 </nav>
 ```
 
@@ -148,10 +182,8 @@ const [posts, settings, config] = await Promise.all([
 ```svelte
 <!-- In existing page, add reference to new feature -->
 <section>
-  <h2>Related Feature</h2>
-  <a href="/new-feature" class="see-also-link">
-    Check out the new feature →
-  </a>
+	<h2>Related Feature</h2>
+	<a href="/new-feature" class="see-also-link"> Check out the new feature → </a>
 </section>
 ```
 
@@ -162,8 +194,8 @@ const [posts, settings, config] = await Promise.all([
 const featureEnabled = platform?.env?.FEATURE_FLAG_NEW_THING === "true";
 
 return {
-  featureEnabled,
-  // rest of data
+	featureEnabled,
+	// rest of data
 };
 ```
 
@@ -177,19 +209,23 @@ After BUILD phase, document what was created:
 ### Feature: [Name]
 
 #### Files Created
+
 - `src/lib/services/feature.ts` — Business logic
 - `src/routes/feature/+page.svelte` — UI
 - `src/routes/api/feature/+server.ts` — API endpoint
 
 #### Files Modified
+
 - `src/lib/db/schema.ts` — Added feature table
 - `src/routes/+layout.svelte` — Added nav link
 
 #### Config
+
 - Added FEATURE_SECRET to .env.example
 - Added feature binding to wrangler.toml
 
 #### Tests
+
 - Unit: service functions
 - Integration: API endpoint flow
 - Component: form submission

@@ -31,42 +31,42 @@ src/routes/
 
 ```svelte
 <script lang="ts">
-  // 1. Imports (external, then internal)
-  import { toast } from "@autumnsgrove/lattice/ui";
-  import { cn } from "@autumnsgrove/lattice/ui/utils";
+	// 1. Imports (external, then internal)
+	import { toast } from "@autumnsgrove/lattice/ui";
+	import { cn } from "@autumnsgrove/lattice/ui/utils";
 
-  // 2. Props (Svelte 5 runes)
-  let { data, onSubmit } = $props<{ data: SomeType; onSubmit: () => void }>();
+	// 2. Props (Svelte 5 runes)
+	let { data, onSubmit } = $props<{ data: SomeType; onSubmit: () => void }>();
 
-  // 3. State
-  let loading = $state(false);
-  let value = $state("");
+	// 3. State
+	let loading = $state(false);
+	let value = $state("");
 
-  // 4. Derived
-  let isValid = $derived(value.length > 0);
+	// 4. Derived
+	let isValid = $derived(value.length > 0);
 
-  // 5. Effects
-  $effect(() => {
-    // side effects
-  });
+	// 5. Effects
+	$effect(() => {
+		// side effects
+	});
 
-  // 6. Functions
-  async function handleSubmit() {
-    loading = true;
-    try {
-      await onSubmit();
-      toast.success("Done!");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
-      loading = false;
-    }
-  }
+	// 6. Functions
+	async function handleSubmit() {
+		loading = true;
+		try {
+			await onSubmit();
+			toast.success("Done!");
+		} catch (err) {
+			toast.error(err instanceof Error ? err.message : "Something went wrong");
+		} finally {
+			loading = false;
+		}
+	}
 </script>
 
 <!-- Template -->
-<div class={cn("base-classes", { "conditional": someCondition })}>
-  <!-- content -->
+<div class={cn("base-classes", { conditional: someCondition })}>
+	<!-- content -->
 </div>
 ```
 
@@ -75,59 +75,86 @@ src/routes/
 ```typescript
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import {
-  API_ERRORS,
-  buildErrorJson,
-  logGroveError,
-} from "@autumnsgrove/lattice/errors";
+import { z } from "zod";
+import { API_ERRORS, buildErrorJson, logGroveError } from "@autumnsgrove/lattice/errors";
+import { safeJsonParse } from "@autumnsgrove/lattice/server";
+
+// Define schema at module scope
+const RequestSchema = z.object({
+	name: z.string().trim().min(1),
+	email: z.string().email(),
+});
 
 export const POST: RequestHandler = async ({ request, locals, platform }) => {
-  // 1. Auth check
-  if (!locals.user) {
-    return json(buildErrorJson(API_ERRORS.UNAUTHORIZED), { status: 401 });
-  }
+	// 1. Auth check
+	if (!locals.user) {
+		return json(buildErrorJson(API_ERRORS.UNAUTHORIZED), { status: 401 });
+	}
 
-  // 2. Parse & validate input
-  const body = await request.json();
-  // validate with Zod...
+	// 2. Parse & validate input using Rootwork
+	const body = await request.json();
+	const result = safeJsonParse(body, RequestSchema);
+	if (!result.success) {
+		return json(buildErrorJson(API_ERRORS.BAD_REQUEST), { status: 400 });
+	}
+	const { name, email } = result.data;
 
-  // 3. Business logic
-  try {
-    const result = await doSomething(body);
-    return json({ success: true, data: result });
-  } catch (err) {
-    logGroveError("Engine", API_ERRORS.INTERNAL_ERROR, { cause: err });
-    return json(buildErrorJson(API_ERRORS.INTERNAL_ERROR), { status: 500 });
-  }
+	// 3. Business logic
+	try {
+		const data = await doSomething(name, email);
+		return json({ success: true, data });
+	} catch (err) {
+		logGroveError("Engine", API_ERRORS.INTERNAL_ERROR, { cause: err });
+		return json(buildErrorJson(API_ERRORS.INTERNAL_ERROR), { status: 500 });
+	}
 };
 ```
 
 ### Page Server Pattern (`+page.server.ts`)
 
 ```typescript
-import { error, redirect } from "@sveltejs/kit";
+import { fail, redirect } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
-import { throwGroveError } from "@autumnsgrove/lattice/errors";
+import { z } from "zod";
+import { throwGroveError, SITE_ERRORS } from "@autumnsgrove/lattice/errors";
+import { parseFormData } from "@autumnsgrove/lattice/server";
+
+// Define schema at module scope
+const MyFormSchema = z.object({
+	name: z.string().trim().min(1),
+	email: z.string().email(),
+});
 
 export const load: PageServerLoad = async ({ locals, params }) => {
-  if (!locals.user) {
-    redirect(302, "/login");
-  }
+	if (!locals.user) {
+		redirect(302, "/login");
+	}
 
-  const item = await getItem(params.id);
-  if (!item) {
-    throwGroveError(404, SITE_ERRORS.NOT_FOUND, "Engine");
-  }
+	const item = await getItem(params.id);
+	if (!item) {
+		throwGroveError(404, SITE_ERRORS.NOT_FOUND, "Engine");
+	}
 
-  return { item };
+	return { item };
 };
 
 export const actions: Actions = {
-  default: async ({ request, locals }) => {
-    const data = await request.formData();
-    // handle form action
-    return { success: true };
-  },
+	default: async ({ request, locals }) => {
+		const formData = await request.formData();
+		// Parse & validate using Rootwork
+		const result = parseFormData(formData, MyFormSchema);
+		if (!result.success) {
+			return fail(400, { error: Object.values(result.errors).flat()[0] });
+		}
+		const { name, email } = result.data;
+
+		// handle form action
+		const success = await saveItem(name, email);
+		if (!success) {
+			return fail(500, { error: "Failed to save" });
+		}
+		return { success: true };
+	},
 };
 ```
 
@@ -174,6 +201,85 @@ MODIFIED FILES (edit existing):
 CONFIG CHANGES:
 - wrangler.toml  (add binding)
 - .env.example  (add new var)
+```
+
+## Rootwork Type Safety Patterns
+
+### Form Data Validation
+
+Always use `parseFormData()` instead of raw `.get()` calls:
+
+```typescript
+import { parseFormData } from "@autumnsgrove/lattice/server";
+import { z } from "zod";
+
+const UserFormSchema = z.object({
+	username: z.string().trim().min(3),
+	email: z.string().email(),
+	acceptTerms: z.literal("on"),
+});
+
+export const actions: Actions = {
+	default: async ({ request }) => {
+		const formData = await request.formData();
+		const result = parseFormData(formData, UserFormSchema);
+
+		if (!result.success) {
+			// result.errors contains field-specific errors
+			return fail(400, { errors: result.errors });
+		}
+
+		// Type-safe here — no casts needed
+		const { username, email } = result.data;
+		// ... proceed with validation
+	},
+};
+```
+
+### KV and JSON Parsing
+
+Use `safeJsonParse()` for untrusted JSON data:
+
+```typescript
+import { safeJsonParse } from "@autumnsgrove/lattice/server";
+
+// Reading from KV, cache, or user input
+const raw = await kv.get("user:config");
+const ConfigSchema = z.object({
+	theme: z.enum(["light", "dark"]),
+	language: z.string(),
+});
+
+const result = safeJsonParse(raw, ConfigSchema);
+if (!result.success) {
+	// Use default config
+	return getDefaultConfig();
+}
+
+// Type-safe access
+const { theme, language } = result.data;
+```
+
+### Exception Handling
+
+Use `isRedirect()` and `isHttpError()` for safe error type checking:
+
+```typescript
+import { isRedirect, isHttpError } from "@autumnsgrove/lattice/server";
+
+try {
+	// ... do something
+} catch (err) {
+	// Type-safe discrimination without `as` casts
+	if (isRedirect(err)) {
+		throw err; // Re-throw redirects
+	}
+	if (isHttpError(err)) {
+		return json(buildErrorJson(err.body.error), { status: err.status });
+	}
+	// Unknown error — log safely
+	logGroveError("Engine", API_ERRORS.INTERNAL_ERROR, { cause: err });
+}
 ```
 
 ## Build Sequence

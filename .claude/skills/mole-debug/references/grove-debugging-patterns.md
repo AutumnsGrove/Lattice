@@ -31,6 +31,7 @@ gf --agent search "export function POST"  # Specific method handler
 ```
 
 Common causes:
+
 - Hook runs on wrong path pattern (check `hooks.server.ts` matchers)
 - `locals.tenant` not populated for API routes outside `/app/*`
 - Form action vs API endpoint confusion
@@ -45,6 +46,7 @@ gf --agent search "wrangler.toml"
 ```
 
 Common causes:
+
 - Schema migration applied in production but not locally (or vice versa)
 - Column renamed/added but queries not updated
 - Missing tenant_id scope in multi-tenant queries
@@ -59,6 +61,7 @@ gf --agent search "cache.delete"
 ```
 
 Common causes:
+
 - Cache not invalidated after write (stale reads)
 - Cache key mismatch between write and read
 - TTL too long for frequently changing data
@@ -73,6 +76,7 @@ gf --agent func "requireAuth"
 ```
 
 Common causes:
+
 - Session cookie not sent (SameSite, Secure flags, cross-origin)
 - Token expired but refresh not triggered
 - CSRF mismatch behind proxy (`Origin` vs `Host` header — see AGENT.md)
@@ -88,6 +92,7 @@ gf diff-summary
 ```
 
 Common causes:
+
 - Import from server module in client code (`$lib/server/` in `.svelte`)
 - Missing dependency in `package.json` (works with hoisted `node_modules`, fails in production)
 - Environment variable missing in production (set in `.dev.vars` but not in Cloudflare Dashboard)
@@ -109,3 +114,23 @@ Common causes:
 4. **SURFACE** — "Failing test written: 'should handle apostrophes in post titles.' Fix: parameterized query. Test passes. CI passes."
 
 5. **SEAL** — "Searched for other raw interpolation: found 2 more in comments and pages services. Fixed both. Regression tests added. MOLE instrumentation removed."
+
+---
+
+## Rootwork / Type Safety Issues
+
+**Symptoms:** Silent data corruption, undefined fields where data expected, validation errors not surfacing
+
+**Investigation:**
+
+- Check if `parseFormData()` result is being checked (`result.success`)
+- Check if `safeJsonParse()` returns `null` (schema mismatch) — verify schema matches actual data shape
+- Check if catch blocks swallow redirects (missing `isRedirect(err)` check)
+- Verify Zod schemas include all fields that consumers read
+
+**Common causes:**
+
+- Schema defined inside handler (recreated per-request, may have stale shape)
+- Schema missing optional fields that were recently added
+- KV read using `"json"` type with `safeJsonParse()` (use text mode instead)
+- Catch block missing `isRedirect()` check, swallowing SvelteKit redirects

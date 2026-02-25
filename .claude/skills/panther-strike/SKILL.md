@@ -60,6 +60,13 @@ gf --agent impact "file"     # What trembles when this tree falls?
 
 Use Glob, Grep, and Read tools as backup. Move through the undergrowth without snapping a single twig.
 
+**Type Safety Checks:**
+
+- Search for `parseFormData` / `safeJsonParse` — is Rootwork used at boundaries?
+- Search for `as any` / `as ` casts — unsafe type assertions at trust boundaries?
+- Search for bare `JSON.parse` — should use `safeJsonParse()` with Zod schema
+- Search for raw `formData.get()` — should use `parseFormData()` with schema
+
 **Output:** List of files in the strike zone — the hunting ground mapped in darkness.
 
 ### Phase 3: STALK
@@ -105,6 +112,8 @@ Make the changes with surgical precision:
 - Follow existing patterns
 - Add comments only if the code isn't self-explanatory
 - No drive-by refactoring
+- Use Signpost error codes for all error paths (no bare `throw new Error`)
+- Use Rootwork type guards (`isRedirect`/`isHttpError`) in catch blocks
 
 Use Edit tool for precision. Write tool only for new files.
 

@@ -107,6 +107,9 @@ These always get attention:
 - Functional bugs (broken logic, missing error handling, race conditions)
 - Test failures (CI broken, tests missing for new code)
 - API contract violations (breaking changes without versioning)
+- Type safety violations at trust boundaries (missing `parseFormData`/`safeJsonParse`/`isRedirect`/`isHttpError`)
+- Unsafe `as` casts on external data (form submissions, KV reads, webhook payloads)
+- Bare `JSON.parse()` without schema validation
 
 **Decision tree:**
 
@@ -368,6 +371,7 @@ Reviewers are helping. Even when wrong, they spent time understanding the code:
 - Missing documentation where it's obviously needed
 - Test coverage gaps
 - Typo or obvious mistake
+- Missing Rootwork validation at a trust boundary (add parseFormData/safeJsonParse/type guards)
 
 ### Plan When:
 

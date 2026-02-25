@@ -114,6 +114,12 @@ System   Design    Spec       Foundation
 - Crow must complete before Swan (design strengthened before specifying)
 - Swan must complete before Elephant (needs detailed spec)
 
+**Infrastructure Abstractions:**
+
+- Use `GroveDatabase`/`GroveStorage`/`GroveKV`/`GroveServiceBus` from Server SDK for portability
+- Use Amber SDK (FileManager, QuotaManager) for user file management — not raw R2
+- Use Rootwork utilities at all data boundaries (forms, KV, webhooks, catch blocks)
+
 ---
 
 ### Phase 3: EXECUTE

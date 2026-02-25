@@ -43,7 +43,10 @@ import type {
 	communityThemes,
 	groveMessages,
 	auditLog,
-	storageExports,
+	amberExports,
+	storageFiles,
+	userStorage,
+	storageAddons,
 } from "./schema/engine.js";
 
 // ── Select Types (what you get back from queries) ────────────────────
@@ -75,7 +78,10 @@ export type CustomFont = InferSelectModel<typeof customFonts>;
 export type CommunityTheme = InferSelectModel<typeof communityThemes>;
 export type GroveMessage = InferSelectModel<typeof groveMessages>;
 export type AuditLogEntry = InferSelectModel<typeof auditLog>;
-export type StorageExport = InferSelectModel<typeof storageExports>;
+export type StorageExport = InferSelectModel<typeof amberExports>;
+export type StorageFile = InferSelectModel<typeof storageFiles>;
+export type UserStorageRow = InferSelectModel<typeof userStorage>;
+export type StorageAddon = InferSelectModel<typeof storageAddons>;
 
 // ── Insert Types (what you provide when creating) ────────────────────
 
@@ -88,6 +94,9 @@ export type NewComment = InferInsertModel<typeof comments>;
 export type NewMeadowPost = InferInsertModel<typeof meadowPosts>;
 export type NewFeatureFlag = InferInsertModel<typeof featureFlags>;
 export type NewBlazeDefinition = InferInsertModel<typeof blazeDefinitions>;
+export type NewStorageFile = InferInsertModel<typeof storageFiles>;
+export type NewStorageExport = InferInsertModel<typeof amberExports>;
+export type NewStorageAddon = InferInsertModel<typeof storageAddons>;
 
 // Curio types can be generated on demand from curios.ts
 // Observability types are internal to vista collectors

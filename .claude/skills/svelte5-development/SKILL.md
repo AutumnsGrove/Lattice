@@ -148,17 +148,37 @@ export async function load({ fetch }) {
 
 ## Form Actions
 
-```javascript
-// src/routes/login/+page.server.js
+### Type-Safe Form Validation (Rootwork Pattern)
+
+Use `parseFormData()` for type-safe form handling at trust boundaries:
+
+```typescript
+// src/routes/login/+page.server.ts
 import { fail, redirect } from "@sveltejs/kit";
+import { parseFormData } from "@autumnsgrove/lattice/server";
+import { z } from "zod";
+
+const LoginSchema = z.object({
+	email: z.string().email("Valid email required"),
+	password: z.string().min(8, "Password must be at least 8 characters"),
+});
 
 export const actions = {
 	default: async ({ request, cookies }) => {
-		const data = await request.formData();
-		const email = data.get("email");
+		const formData = await request.formData();
+		const result = parseFormData(formData, LoginSchema);
 
-		if (!email) {
-			return fail(400, { missing: true });
+		if (!result.success) {
+			const firstError = Object.values(result.errors).flat()[0];
+			return fail(400, { error: firstError || "Invalid input" });
+		}
+
+		const { email, password } = result.data;
+
+		// Authenticate with validated, typed data
+		const token = await authenticate(email, password);
+		if (!token) {
+			return fail(401, { error: "Invalid credentials" });
 		}
 
 		cookies.set("session", token, { path: "/" });
@@ -166,6 +186,12 @@ export const actions = {
 	},
 };
 ```
+
+**Benefits:**
+
+- Type-safe: `result.data` is fully typed as `LoginSchema`
+- Structured errors: `result.errors` is a map of field → messages
+- No `as` casts at trust boundaries
 
 ```svelte
 <!-- +page.svelte -->
@@ -280,7 +306,41 @@ return json(buildErrorJson(API_ERRORS.RESOURCE_NOT_FOUND), { status: 404 });
 throwGroveError(404, SITE_ERRORS.PAGE_NOT_FOUND, "Engine");
 ```
 
-See `AgentUsage/error_handling.md` for the full reference.
+### Type-Safe Error Handling (Rootwork Guards)
+
+Use `isRedirect()` and `isHttpError()` to safely handle caught exceptions in form actions:
+
+```typescript
+import { isRedirect, isHttpError } from "@autumnsgrove/lattice/server";
+import { fail } from "@sveltejs/kit";
+
+export const actions = {
+	default: async ({ request }) => {
+		try {
+			const formData = await request.formData();
+			const result = parseFormData(formData, MySchema);
+
+			if (!result.success) {
+				return fail(400, { error: "Validation failed" });
+			}
+
+			// Process data
+			const response = await processData(result.data);
+			throw redirect(303, "/success");
+		} catch (err) {
+			// Redirects and HTTP errors must be re-thrown
+			if (isRedirect(err)) throw err;
+			if (isHttpError(err)) return fail(err.status, { error: err.body.message });
+
+			// Unexpected errors
+			console.error("Unexpected error:", err);
+			return fail(500, { error: "Something went wrong" });
+		}
+	},
+};
+```
+
+See `AgentUsage/error_handling.md` and `AgentUsage/rootwork_type_safety.md` for the full reference.
 
 ## Project Structure
 

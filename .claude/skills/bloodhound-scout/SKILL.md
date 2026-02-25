@@ -184,6 +184,14 @@ Look for:
 - Type coercion (`any` types, `as` assertions)
 - Magic numbers and strings
 
+**Type Safety Patterns to Track:**
+
+- Unsafe type casts (`as any`, `as SomeType`) at trust boundaries
+- Bare `JSON.parse()` without `safeJsonParse()` validation
+- Raw `formData.get()` without `parseFormData()` schema
+- Catch blocks without `isRedirect()`/`isHttpError()` type guards
+- Server SDK bypass: raw `env.DB`/`env.STORAGE` instead of GroveDatabase/GroveStorage
+
 **Dependency Mapping:**
 
 ```

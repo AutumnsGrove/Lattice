@@ -233,6 +233,14 @@ _The web holds. The audit confirms. The shell endures..._
 - [ ] Turtle: Exotic attack vectors tested and clear
 - [ ] Turtle: Multi-tenant isolation verified (if applicable)
 
+**Rootwork Boundary Validation:**
+
+- [ ] Form data parsed with `parseFormData()`, not raw `formData.get()`
+- [ ] JSON reads validated with `safeJsonParse()`, not unsafe `as` casts
+- [ ] Caught exceptions use `isRedirect()`/`isHttpError()` type guards
+- [ ] No `as any` or `as SomeType` casts at trust boundaries
+- [ ] Schemas defined at module scope, not inside handlers
+
 **Security Test Cases:**
 
 ```

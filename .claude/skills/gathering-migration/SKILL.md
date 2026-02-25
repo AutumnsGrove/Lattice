@@ -173,6 +173,12 @@ LIMIT 10;
 -- Spot check transformation logic
 ```
 
+**Type Safety During Migration:**
+
+- Validate migrated JSON columns with `safeJsonParse(raw, ZodSchema)` to catch corruption
+- If migrating storage data, respect Amber SDK's QuotaManager constraints
+- Use text-mode KV reads (`kv.get(key)`) with `safeJsonParse()`, not `kv.get(key, "json")`
+
 ---
 
 ### Phase 5: COMPLETE

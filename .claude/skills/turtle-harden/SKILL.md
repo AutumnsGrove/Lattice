@@ -64,7 +64,7 @@ Apply the foundational defenses. These are non-negotiable — every piece of cod
 - **2A. Input Validation** — Validate all entry points server-side, using allowlists with Zod/Valibot, strict types, length and range limits; reject invalid input, never silently coerce
 - **2B. Output Encoding** — Encode for context at every exit point (HTML, JS, URL, CSS, JSON); never use `{@html}` with unsanitized input; use DOMPurify for rich text
 - **2C. Parameterized Queries** — Zero string concatenation in SQL; all queries use `.bind()`; typed helpers from `database.ts`; parallel queries with `Promise.all()`
-- **2D. Type Safety** — TypeScript strict mode, no `any`, no `eval()`, no user-controlled `import()`, `Object.create(null)` for dictionaries
+- **2D. Type Safety** — MANDATORY Rootwork utilities at all trust boundaries. `parseFormData()` for form data, `safeJsonParse()` for KV/JSON reads, `isRedirect()`/`isHttpError()` for catch blocks. No `as` casts at boundaries. TypeScript strict mode is table stakes; Rootwork is the lock. Reference: `AgentUsage/rootwork_type_safety.md`
 - **2E. Error Handling** — Every error uses a Signpost code; `logGroveError()` for server errors; generic user messages only; no enumeration leaks; no swallowed exceptions
 
 **Output:** Foundational defenses applied to all entry and exit points
@@ -133,13 +133,13 @@ Final verification and reporting.
 
 ## Reference Routing Table
 
-| Phase | Reference | Load When |
-|-------|-----------|-----------|
-| WITHDRAW | `references/attack-surface.md` | Always (start of hardening) |
-| LAYER | `references/foundational-defenses.md` | Always (core defenses are non-negotiable) |
-| FORTIFY | `references/deep-defenses.md` | When hardening HTTP/auth/sessions/multi-tenant |
-| SIEGE | `references/exotic-vectors.md` | When testing for advanced/exotic attack vectors |
-| SEAL | `references/verification-report.md` | When writing final report |
+| Phase    | Reference                             | Load When                                       |
+| -------- | ------------------------------------- | ----------------------------------------------- |
+| WITHDRAW | `references/attack-surface.md`        | Always (start of hardening)                     |
+| LAYER    | `references/foundational-defenses.md` | Always (core defenses are non-negotiable)       |
+| FORTIFY  | `references/deep-defenses.md`         | When hardening HTTP/auth/sessions/multi-tenant  |
+| SIEGE    | `references/exotic-vectors.md`        | When testing for advanced/exotic attack vectors |
+| SEAL     | `references/verification-report.md`   | When writing final report                       |
 
 ---
 
@@ -221,6 +221,16 @@ Use shell metaphors:
 | File upload feature        | Focus: FORTIFY 3J + SIEGE 4L (SVG XSS) + 4E (SSRF)                     |
 | API endpoint               | Focus: LAYER + FORTIFY 3A-3F + SIEGE 4O (verb tampering)               |
 | Pre-production deploy      | Full flow, verify defense-in-depth compliance                          |
+
+---
+
+## Phase 2 (LAYER) Checklist
+
+- [ ] All form data uses `parseFormData()` with Zod schema
+- [ ] All KV/JSON reads use `safeJsonParse()` with Zod schema
+- [ ] All SvelteKit catch blocks use `isRedirect()`/`isHttpError()`
+- [ ] No `as` casts at trust boundaries
+- [ ] Schemas defined at module scope, not inside handlers
 
 ---
 
