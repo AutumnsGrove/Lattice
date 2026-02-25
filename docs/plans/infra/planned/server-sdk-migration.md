@@ -63,23 +63,23 @@ migration from direct Cloudflare access to `GroveContext`.
 
 | Service | D1 | R2 | KV | DOs | Service Bindings | Cron | Call Sites | Complexity |
 |---------|----|----|-----|-----|-----------------|------|------------|------------|
-| **Heartwood** | `env.DB`, `env.ENGINE_DB` | `env.CDN_BUCKET` | `env.SESSION_KV` | `env.SESSIONS` | — | Yes (keepalive + cleanup) | ~40+ | High |
-| **Amber** | `env.DB` | `env.BUCKET` | — | (ExportDO in separate pkg) | — | — | ~15 | Medium |
-| **Forage** | `env.DB` | — | — | `env.SEARCH_JOB` | — | — | ~10 | Medium |
+| **Heartwood** | `env.DB`, `env.ENGINE_DB` | `env.CDN_BUCKET` | `env.SESSION_KV` | `env.SESSIONS` (SessionDO) | `env.ZEPHYR` (email gateway) | Yes (keepalive + daily cleanup) | ~80+ across ~27 files | High |
+| **Amber** | `env.DB` | `env.R2_BUCKET` | — | `env.EXPORT_JOBS` (ExportJobV2) | `env.AUTH` (Heartwood) | Yes (every 5min + 3AM cleanup) | ~50+ across ~4 files | Medium |
+| **Forage** | `env.DB` | — | — | `env.SEARCH_JOB` (SearchJobDO) | — | — | ~40+ (index.ts, job-index.ts) | Medium |
 | **Durable Objects** | `env.DB` | — | — | (is DO host) | — | — | ~20 | High (DOs) |
 
 ### Workers
 
 | Worker | D1 | R2 | KV | Service Bindings | Cron | Call Sites | Complexity |
 |--------|----|----|-----|-----------------|------|------------|------------|
-| **lumen** | `env.DB` | — | — | `env.AI`, `env.WARDEN` | — | ~15 | Medium |
-| **warden** | — | — | — | (is target) | — | ~5 | Low |
-| **timeline-sync** | `env.DB` | — | — | — | Yes | ~10 | Medium |
-| **meadow-poller** | `env.DB` | — | — | — | Yes | ~10 | Medium |
+| **lumen** | `env.DB` | — | `env.RATE_LIMITS` | `env.AI`, `env.WARDEN` | — | ~20+ | Medium |
+| **warden** | `env.DB` (delegated to routes) | — | — | (is target) | — | ~10 | Low |
+| **timeline-sync** | `env.CURIO_DB` | — | — | — | Yes (daily 1AM) | ~10 | Low |
+| **meadow-poller** | `env.DB` | — | — | — | Yes (every 15min) | ~15 | Low |
 | **webhook-cleanup** | `env.DB` | `env.BUCKET` | — | — | Yes | ~10 | Low |
-| **email-catchup** | `env.DB` | — | — | service bindings | Yes | ~10 | Low |
+| **email-catchup** | `env.DB` | — | — | `env.EMAIL_RENDER` | Yes (weekly) | ~20+ | Low |
 | **vista-collector** | `env.DB` | — | `env.KV` | — | — | ~5 | Low |
-| **patina** | — | — | — | — | — | ~3 | Low |
+| **patina** | likely D1/KV | — | — | — | Yes | ~30 | Moderate |
 
 ### Engine (libs/engine) — The Final Boss
 
@@ -99,14 +99,14 @@ migration from direct Cloudflare access to `GroveContext`.
 | App | Files Using `platform.env.*` | Primitives | Complexity |
 |-----|------------------------------|------------|------------|
 | **landing** | ~25 | D1, AUTH, service bindings | High |
-| **domains** | ~12 | D1, AUTH, DOs (SEARCH_JOB) | Medium |
-| **clearing** | ~5 | D1, AUTH | Low |
+| **domains** | ~12 | D1, AUTH, DOs (`SEARCH_JOB` via Forage) | Medium |
+| **clearing** | ~5 | D1, KV (`MONITOR_KV`), `ZEPHYR` (email alerts) | Low–Moderate |
 | **login** | ~3 | AUTH (proxy) | Low |
-| **plant** | ~5 | AUTH | Low |
-| **meadow** | ~2 | AUTH | Low |
-| **ivy** | ~2 | AUTH | Low |
+| **plant** | ~5 | D1 (Drizzle ORM), AUTH | Low |
+| **meadow** | ~2 | Multi-DB (`DB`, `CURIO_DB`, `OBS_DB`), AUTH | Low–Moderate |
+| **ivy** | ~2 | D1 (email metadata), AUTH | Low |
 
-**58 files** across apps use direct `platform.env.*` access.
+**~58 files** across apps use direct `platform.env.*` access.
 
 ---
 
@@ -213,9 +213,9 @@ Migrate the remaining low-complexity workers one at a time.
 | Order | Worker | Primitives | Call Sites | Notes |
 |-------|--------|------------|------------|-------|
 | 2a | **vista-collector** | D1, KV | ~5 | Analytics, low risk |
-| 2b | **patina** | minimal | ~3 | Smallest possible |
-| 2c | **email-catchup** | D1, service bindings | ~10 | Cron + email render binding |
-| 2d | **meadow-poller** | D1 | ~10 | Feed polling, cron |
+| 2b | **email-catchup** | D1, `env.EMAIL_RENDER` (service binding) | ~20+ | Weekly cron + email render binding |
+| 2c | **meadow-poller** | D1 | ~15 | Feed polling, cron every 15min |
+| 2d | **warden** | D1 (delegated to routes) | ~10 | Credential gateway, Hono-based |
 
 **Per-worker migration:** Same flow as Phase 1. One PR per worker. Each PR is a pure
 refactor — no behavior changes.
@@ -229,8 +229,12 @@ and has zero regressions.
 
 | Order | Worker | Primitives | Call Sites | Notes |
 |-------|--------|------------|------------|-------|
-| 3a | **timeline-sync** | D1, secrets | ~10 | SecretsManager uses env.DB |
-| 3b | **lumen** | D1, AI, service bindings | ~15 | Inference gateway, quota mgmt |
+| 3a | **timeline-sync** | D1 (`env.CURIO_DB`) | ~10 | Daily cron at 1AM, RSS generation |
+| 3b | **patina** | D1/KV (backup state) | ~30 | Status, list, trigger, download routes |
+| 3c | **lumen** | D1, KV (`env.RATE_LIMITS`), AI, service bindings (`env.WARDEN`) | ~20+ | Inference gateway, quota mgmt |
+
+**patina note:** Heavier than initially estimated (~30 call sites). Storage-heavy backup
+operations with status, list, trigger, and download routes. Needs its own PR.
 
 **lumen note:** The `env.AI` binding (Cloudflare Workers AI) doesn't map cleanly to any
 SDK interface. Options:
@@ -245,24 +249,39 @@ the spec explicitly says "Don't abstract things that are naturally Cloudflare-sp
 
 ### Phase 4: Services
 
-| Order | Service | Primitives | Complexity | Notes |
-|-------|---------|------------|------------|-------|
-| 4a | **Amber** | D1, R2 | Medium | Export jobs, file ops |
-| 4b | **Forage** | D1, DOs | Medium | Search jobs, AI agents |
-| 4c | **Heartwood** | D1 (x2), R2, KV, DOs, Cron | High | Auth — requires careful testing |
+| Order | Service | Primitives | Call Sites | Complexity | Notes |
+|-------|---------|------------|------------|------------|-------|
+| 4a | **Forage** | D1, DOs (SearchJobDO via Loom) | ~40+ | Medium | Search jobs, AI agents. Already uses Loom SDK. |
+| 4b | **Amber** | D1, R2, DOs (ExportJobV2), service binding (AUTH) | ~50+ | Medium | Export jobs, file ops, auth validation via Heartwood. |
+| 4c | **Heartwood** | D1 (x2), R2, KV, DOs (SessionDO), service binding (ZEPHYR), Cron | ~80+ | High | Auth — requires careful testing |
 
-**Heartwood is the riskiest migration.** It touches two D1 databases, KV, R2, Durable
-Objects, and cron triggers. It's the auth service — any regression affects every
-property. This gets its own dedicated testing phase.
+**Forage first:** Already uses Loom SDK for DO communication, making it the cleanest
+service to migrate. The ~40 call sites are primarily DO stub fetch() calls (transparent)
+and straightforward D1 queries for job indexing.
+
+**Amber second:** ~50+ call sites across ~4 files. R2 operations (get/delete/list) are
+straightforward. ExportJobV2 is DO-backed via Loom. The `env.AUTH` service binding for
+session validation is a simple fetch() pattern. Cron runs every 5 minutes (export
+processing) and at 3 AM UTC (trash/export cleanup).
+
+**Heartwood is the riskiest migration.** ~80+ call sites across ~27 files. It touches
+two D1 databases (`env.DB` + `env.ENGINE_DB` with read replication via D1 sessions),
+KV (`SESSION_KV`), R2 (`CDN_BUCKET`), Durable Objects (`SessionDO` with SQLite storage,
+alarms, and rate limiting), a service binding (`ZEPHYR` for email), and cron triggers
+(keepalive every minute + daily audit log cleanup). It's the auth service — any
+regression affects every property. This gets its own dedicated testing phase.
 
 **Heartwood migration sub-steps:**
 1. Create context in the Hono app entry point
 2. Thread `ctx` through Hono middleware (via `c.set('ctx', ctx)`)
-3. Migrate DB queries first (biggest surface, most testable)
-4. Migrate KV access (session cache)
-5. Migrate R2 access (CDN uploads)
-6. Migrate cron handlers
-7. Leave Durable Object access as-is (Loom handles DOs, per spec)
+3. Migrate `env.DB` queries first (~60+ direct D1 queries — biggest surface, most testable)
+4. Migrate `env.ENGINE_DB` access (read replication via `withSession()`)
+5. Migrate `env.SESSION_KV` access (session cache get/put)
+6. Migrate `env.CDN_BUCKET` R2 access (CDN uploads)
+7. Migrate `env.ZEPHYR` service binding (email gateway fetch)
+8. Migrate cron handlers (keepalive + audit cleanup)
+9. Leave `env.SESSIONS` Durable Object access as-is (SessionDO has deep SQLite
+   storage, alarms, and rate limiting — Loom handles DOs, per spec)
 
 ---
 
@@ -304,7 +323,7 @@ call engine helpers, not raw CF). The remaining work is app-specific server rout
 | 6b | **plant** | ~5 | AUTH + passkeys |
 | 6c | **ivy** | ~2 | AUTH only |
 | 6d | **meadow** | ~2 | AUTH only |
-| 6e | **clearing** | ~5 | D1 + AUTH |
+| 6e | **clearing** | ~5 | D1, KV (`MONITOR_KV`), `ZEPHYR` (email alerts) |
 | 6f | **domains** | ~12 | D1, AUTH, DOs |
 | 6g | **landing** | ~25 | Largest app, last |
 
@@ -373,12 +392,26 @@ The spec is clear about scope boundaries. These stay as-is:
 
 ---
 
+## Total Scope
+
+**~300+ direct Cloudflare access points** across the entire monorepo (services, workers,
+engine, apps). Breakdown:
+
+- Services: ~170+ (Heartwood ~80, Amber ~50, Forage ~40)
+- Workers: ~130+ (lumen ~20, patina ~30, email-catchup ~20, others ~60)
+- Engine: ~57 files with `platform.env.*` access
+- Apps: ~58 files with `platform.env.*` access
+
+---
+
 ## Success Metrics
 
 - **Phase 1 done:** 1 worker fully on SDK, zero regressions
-- **Phase 2 done:** All simple workers on SDK, pattern documented
-- **Phase 4 done:** All services on SDK, Heartwood regression-free
+- **Phase 2 done:** All simple workers on SDK (~50 call sites migrated), pattern documented
+- **Phase 3 done:** Medium workers on SDK (~60 call sites migrated)
+- **Phase 4 done:** All services on SDK (~170 call sites migrated), Heartwood regression-free
 - **Phase 5 done:** Engine on SDK, 57 files migrated
+- **Phase 6 done:** All apps on SDK, 58 files migrated
 - **Phase 7 done:** Lint rule prevents new direct CF access
 
 The migration is complete when `grep -r "env\.DB\|env\.BUCKET\|env\.KV" --include="*.ts"`
