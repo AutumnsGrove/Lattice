@@ -19,7 +19,7 @@
 </script>
 
 <div
-	class="pointer-events-none absolute left-1/2 -translate-x-1/2 transition-all duration-500"
+	class="pointer-events-none absolute left-1/2 -translate-x-1/2 transition-all duration-500 motion-reduce:transition-none"
 	class:opacity-0={!visible}
 	class:opacity-100={visible}
 	class:-translate-y-2={!visible}

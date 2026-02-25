@@ -33,9 +33,16 @@
 
 	const season = $derived(seasonStore.current);
 
+	// Reduced motion preference
+	const prefersReducedMotion =
+		typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
 	// Current frame data
 	const currentFrame = $derived(frames[frameIndex] ?? null);
-	const prevFrame = $derived(frameIndex > 0 ? frames[frameIndex - 1] : null);
+
+	// Cache previous frame's tree IDs to avoid full re-layout each frame
+	let cachedPrevTreeIds = new Set<string>();
+	let lastFrameIndex = -1;
 
 	// Build island layouts from current frame
 	const islands = $derived.by((): IslandLayout[] => {
@@ -55,26 +62,7 @@
 		return map;
 	});
 
-	// Track which islands existed in previous frame (for rise animation)
-	const prevIslandPaths = $derived.by((): Set<string> => {
-		if (!prevFrame) return new Set();
-		return new Set(buildIslandLayouts(prevFrame.directories).map((i) => i.path));
-	});
-
-	// Track which trees are new vs dying between frames
-	const prevTreeIds = $derived.by((): Set<string> => {
-		if (!prevFrame) return new Set();
-		const ids = new Set<string>();
-		const prevIslands = buildIslandLayouts(prevFrame.directories);
-		for (const island of prevIslands) {
-			const trees = buildTreesForIsland(island.path, prevFrame.directories);
-			for (const tree of trees) {
-				ids.add(tree.id);
-			}
-		}
-		return ids;
-	});
-
+	// Collect current tree IDs
 	const currentTreeIds = $derived.by((): Set<string> => {
 		const ids = new Set<string>();
 		for (const trees of islandTrees.values()) {
@@ -85,20 +73,37 @@
 		return ids;
 	});
 
+	// Diff against cached previous frame (avoids recomputing prevFrame layouts)
 	const newTreeIds = $derived.by((): Set<string> => {
+		if (prefersReducedMotion) return new Set<string>();
 		const newIds = new Set<string>();
 		for (const id of currentTreeIds) {
-			if (!prevTreeIds.has(id)) newIds.add(id);
+			if (!cachedPrevTreeIds.has(id)) newIds.add(id);
 		}
 		return newIds;
 	});
 
 	const dyingTreeIds = $derived.by((): Set<string> => {
+		if (prefersReducedMotion) return new Set<string>();
 		const dying = new Set<string>();
-		for (const id of prevTreeIds) {
+		for (const id of cachedPrevTreeIds) {
 			if (!currentTreeIds.has(id)) dying.add(id);
 		}
 		return dying;
+	});
+
+	// Update cache after diffing (runs as effect after deriveds resolve)
+	$effect(() => {
+		if (frameIndex !== lastFrameIndex) {
+			cachedPrevTreeIds = new Set(currentTreeIds);
+			lastFrameIndex = frameIndex;
+		}
+	});
+
+	// Screen reader summary — updates periodically, not every frame
+	const srSummary = $derived.by(() => {
+		if (!currentFrame) return "No census data loaded.";
+		return `${currentFrame.date}: ${currentFrame.totalLines.toLocaleString()} lines of code across ${currentFrame.totalFiles.toLocaleString()} files in ${islands.length} packages.`;
 	});
 
 	// Sky gradient based on season
@@ -132,17 +137,25 @@
 	});
 </script>
 
+<!-- Screen reader description (hidden visually) -->
+<div class="sr-only" role="status" aria-live="polite" aria-atomic="true">
+	{srSummary}
+</div>
+
 <div
-	class="relative h-full w-full overflow-hidden transition-all duration-1000"
+	class="relative h-full w-full overflow-hidden transition-all duration-1000 motion-reduce:transition-none"
 	style:background={skyGradient}
-	aria-hidden="true"
+	role="img"
+	aria-label="Living Grove visualization — an animated archipelago representing the codebase"
 >
 	<!-- Clouds -->
-	<div class="pointer-events-none absolute inset-0">
-		<div class="absolute left-[10%] top-[8%]"><Cloud variant="fluffy" size={80} {season} /></div>
-		<div class="absolute left-[40%] top-[5%]"><Cloud variant="wispy" size={60} {season} /></div>
-		<div class="absolute left-[70%] top-[12%]"><Cloud variant="puffy" size={70} {season} /></div>
-	</div>
+	{#if !prefersReducedMotion}
+		<div class="pointer-events-none absolute inset-0">
+			<div class="absolute left-[10%] top-[8%]"><Cloud variant="fluffy" size={80} {season} /></div>
+			<div class="absolute left-[40%] top-[5%]"><Cloud variant="wispy" size={60} {season} /></div>
+			<div class="absolute left-[70%] top-[12%]"><Cloud variant="puffy" size={70} {season} /></div>
+		</div>
+	{/if}
 
 	<!-- Islands container -->
 	<div class="absolute inset-0">
@@ -162,16 +175,18 @@
 
 	<!-- Water layer at the bottom -->
 	<div
-		class="absolute bottom-0 left-0 right-0 h-[15%] transition-colors duration-1000"
+		class="absolute bottom-0 left-0 right-0 h-[15%] transition-colors duration-1000 motion-reduce:transition-none"
 		style:background={waterGradient}
 	></div>
 
-	<!-- Seasonal atmospheric effects -->
-	{#if season === "spring"}
-		<FallingPetalsLayer count={40} />
-	{:else if season === "autumn"}
-		<FallingLeavesLayer count={30} />
-	{:else if season === "winter"}
-		<SnowfallLayer count={60} />
+	<!-- Seasonal atmospheric effects (skip for reduced motion) -->
+	{#if !prefersReducedMotion}
+		{#if season === "spring"}
+			<FallingPetalsLayer count={40} />
+		{:else if season === "autumn"}
+			<FallingLeavesLayer count={30} />
+		{:else if season === "winter"}
+			<SnowfallLayer count={60} />
+		{/if}
 	{/if}
 </div>

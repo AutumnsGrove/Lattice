@@ -33,7 +33,7 @@
 </script>
 
 <div
-	class="absolute bottom-0 origin-bottom transition-all duration-500 ease-out"
+	class="absolute bottom-0 origin-bottom transition-all duration-500 ease-out motion-reduce:transition-none"
 	style:left="{tree.x * 100}%"
 	style:transform="scale({scale})"
 	style:opacity

@@ -57,6 +57,61 @@ interface CensusData {
 	generated: string;
 }
 
+/** Coerce a value to a non-negative integer, defaulting to 0 */
+function safeInt(val: unknown): number {
+	const n = typeof val === "number" ? val : Number(val);
+	return Number.isFinite(n) && n >= 0 ? Math.round(n) : 0;
+}
+
+/** Validate and sanitize a directory entry from raw JSON */
+function sanitizeDirectory(raw: Record<string, unknown>): DirectoryEntry | null {
+	const path = typeof raw.path === "string" ? raw.path : "";
+	// Reject paths with suspicious characters (only allow alphanumeric, /, -, _, .)
+	if (!path || !/^[\w/.\\-]+$/.test(path)) return null;
+
+	const depth = safeInt(raw.depth);
+	if (depth < 0 || depth > 10) return null;
+
+	return {
+		path,
+		depth,
+		totalLines: safeInt(raw.totalLines),
+		tsLines: safeInt(raw.tsLines),
+		svelteLines: safeInt(raw.svelteLines),
+		jsLines: safeInt(raw.jsLines),
+		cssLines: safeInt(raw.cssLines),
+		pyLines: safeInt(raw.pyLines),
+		goLines: safeInt(raw.goLines),
+		sqlLines: safeInt(raw.sqlLines),
+		shLines: safeInt(raw.shLines),
+		tsxLines: safeInt(raw.tsxLines),
+		mdLines: safeInt(raw.mdLines),
+		otherLines: safeInt(raw.otherLines),
+	};
+}
+
+/** Validate and sanitize a frame from raw JSON */
+function sanitizeFrame(raw: Record<string, unknown>): GroveFrame | null {
+	const date = typeof raw.date === "string" ? raw.date : "";
+	// Validate date format (YYYY-MM-DD)
+	if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
+
+	const commit = typeof raw.commit === "string" ? raw.commit.slice(0, 40) : "";
+
+	const rawDirs = Array.isArray(raw.directories) ? raw.directories : [];
+	const directories = rawDirs
+		.map((d: unknown) => sanitizeDirectory((d ?? {}) as Record<string, unknown>))
+		.filter((d): d is DirectoryEntry => d !== null);
+
+	return {
+		date,
+		commit,
+		totalLines: safeInt(raw.totalLines),
+		totalFiles: safeInt(raw.totalFiles),
+		directories,
+	};
+}
+
 /** Determine the primary language of a directory entry */
 function getPrimaryLanguage(dir: DirectoryEntry): string {
 	const langs = [
@@ -76,8 +131,7 @@ function getPrimaryLanguage(dir: DirectoryEntry): string {
 }
 
 export function load() {
-	if (!censusData || !censusData.frames || censusData.frames.length === 0) {
-		// No census data yet — return empty state
+	if (!censusData || !Array.isArray(censusData.frames) || censusData.frames.length === 0) {
 		return {
 			frames: [] as GroveFrame[],
 			totalFrames: 0,
@@ -87,7 +141,20 @@ export function load() {
 		};
 	}
 
-	const { frames } = censusData;
+	// Validate and sanitize each frame
+	const frames = censusData.frames
+		.map((raw: unknown) => sanitizeFrame((raw ?? {}) as Record<string, unknown>))
+		.filter((f): f is GroveFrame => f !== null);
+
+	if (frames.length === 0) {
+		return {
+			frames: [] as GroveFrame[],
+			totalFrames: 0,
+			firstDate: null,
+			lastDate: null,
+			packages: [] as string[],
+		};
+	}
 
 	// Extract unique package names (depth 1 directories) across all frames
 	const packageSet = new Set<string>();

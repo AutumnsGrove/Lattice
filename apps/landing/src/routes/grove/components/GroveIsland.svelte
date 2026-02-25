@@ -73,7 +73,7 @@
 </script>
 
 <div
-	class="absolute transition-all duration-700 ease-out"
+	class="absolute transition-all duration-700 ease-out motion-reduce:transition-none"
 	style:left="{island.x}%"
 	style:top="{island.y}%"
 	style:z-index={island.zIndex}

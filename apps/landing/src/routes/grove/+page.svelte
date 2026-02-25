@@ -16,9 +16,15 @@
 
 	const season = $derived(seasonStore.current);
 
+	/** Safely clamp a frame index within bounds */
+	function clampFrame(idx: number): number {
+		if (data.frames.length === 0) return 0;
+		return Math.max(0, Math.min(Math.round(idx), data.frames.length - 1));
+	}
+
 	/** Format frame index as a readable date */
 	function formatFrameAsDate(frameIndex: number): string {
-		const frame = data.frames[Math.round(frameIndex)];
+		const frame = data.frames[clampFrame(frameIndex)];
 		if (!frame) return "";
 		const d = new Date(frame.date);
 		return d.toLocaleDateString("en-US", { month: "short", year: "numeric" });
@@ -46,6 +52,8 @@
 				return "🌲";
 		}
 	});
+
+	const safeFrameData = $derived(data.frames[clampFrame(currentFrame)]);
 </script>
 
 <svelte:head>
@@ -81,13 +89,13 @@
 								<div
 									class="mt-1 flex items-center justify-center gap-4 text-xs text-bark-700 dark:text-cream-300"
 								>
-									{#if data.frames[Math.round(currentFrame)]}
+									{#if safeFrameData}
 										<span class="tabular-nums">
-											{data.frames[Math.round(currentFrame)].totalLines.toLocaleString()} lines
+											{safeFrameData.totalLines.toLocaleString()} lines
 										</span>
 										<span class="opacity-50">·</span>
 										<span class="tabular-nums">
-											{data.frames[Math.round(currentFrame)].totalFiles.toLocaleString()} files
+											{safeFrameData.totalFiles.toLocaleString()} files
 										</span>
 									{/if}
 									<span class="opacity-50">·</span>
@@ -103,7 +111,7 @@
 					</div>
 
 					<!-- The archipelago visualization -->
-					<GroveArchipelago frames={data.frames} frameIndex={Math.round(currentFrame)} />
+					<GroveArchipelago frames={data.frames} frameIndex={clampFrame(currentFrame)} />
 				</div>
 			{/snippet}
 		</MediaPlayer>

@@ -116,12 +116,11 @@ SQL
 # COUNTING
 # ===========================================================================
 
-# Count non-blank lines for files matching a pattern in a given directory.
+# Count lines for files matching a pattern in a given directory.
 # Usage: count_ext <root_dir> <extension>
 count_ext() {
     local root="$1"
     local ext="$2"
-    local count=0
 
     # Build find command with exclusions
     local cmd="find \"$root\" -name \"*.$ext\" -type f"
@@ -129,8 +128,14 @@ count_ext() {
         cmd="$cmd ! -path \"*/$dir/*\""
     done
 
-    count=$(eval "$cmd" 2>/dev/null | xargs cat 2>/dev/null | grep -c '' || echo 0)
-    echo "$count"
+    local result
+    result=$(eval "$cmd" 2>/dev/null | xargs wc -l 2>/dev/null | tail -1 | awk '{print $1}')
+    # If no files found or result is empty/non-numeric, return 0
+    if [[ -z "$result" ]] || ! [[ "$result" =~ ^[0-9]+$ ]]; then
+        echo 0
+    else
+        echo "$result"
+    fi
 }
 
 # Count total tracked files in a directory
@@ -359,6 +364,56 @@ backfill() {
 }
 
 # ===========================================================================
+# JSON EXPORT
+# ===========================================================================
+
+export_json() {
+    local json_file="$DB_DIR/grove_census.json"
+    log "Exporting census data to JSON..."
+
+    local snapshot_count
+    snapshot_count=$(sqlite3 "$DB_FILE" "SELECT COUNT(*) FROM snapshots;")
+    if [ "$snapshot_count" -eq 0 ]; then
+        warn "No snapshots in database, skipping JSON export"
+        return 0
+    fi
+
+    # Build JSON using sqlite3 output
+    {
+        echo '{"frames":['
+
+        local first=true
+        sqlite3 -separator '|' "$DB_FILE" "SELECT id, date, commit_hash, total_lines, total_files FROM snapshots ORDER BY date;" | while IFS='|' read -r sid sdate shash slines sfiles; do
+            if [ "$first" = true ]; then
+                first=false
+            else
+                echo ','
+            fi
+
+            echo -n "{\"date\":\"$sdate\",\"commit\":\"$shash\",\"totalLines\":$slines,\"totalFiles\":$sfiles,\"directories\":["
+
+            local dfirst=true
+            sqlite3 -separator '|' "$DB_FILE" "SELECT path, depth, total_lines, ts_lines, svelte_lines, js_lines, css_lines, py_lines, go_lines, sql_lines, sh_lines, tsx_lines, md_lines, other_lines FROM directories WHERE snapshot_id=$sid ORDER BY depth, path;" | while IFS='|' read -r dpath ddepth dtotal dts dsvelte djs dcss dpy dgo dsql dsh dtsx dmd dother; do
+                if [ "$dfirst" = true ]; then
+                    dfirst=false
+                else
+                    echo -n ','
+                fi
+                echo -n "{\"path\":\"$dpath\",\"depth\":$ddepth,\"totalLines\":$dtotal,\"tsLines\":$dts,\"svelteLines\":$dsvelte,\"jsLines\":$djs,\"cssLines\":$dcss,\"pyLines\":$dpy,\"goLines\":$dgo,\"sqlLines\":$dsql,\"shLines\":$dsh,\"tsxLines\":$dtsx,\"mdLines\":$dmd,\"otherLines\":$dother}"
+            done
+
+            echo -n "]}"
+        done
+
+        echo '],"generated":"'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'"}'
+    } > "$json_file"
+
+    local json_size
+    json_size=$(du -h "$json_file" 2>/dev/null | cut -f1)
+    success "JSON exported: $json_file ($json_size)"
+}
+
+# ===========================================================================
 # MAIN
 # ===========================================================================
 
@@ -370,11 +425,13 @@ case "${1:---help}" in
     --backfill)
         init_db
         backfill
+        export_json
         ;;
     --today)
         cd "$PROJECT_ROOT"
         init_db
         snapshot_today
+        export_json
         ;;
     --help|-h)
         usage
