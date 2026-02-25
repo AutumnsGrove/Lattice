@@ -18,8 +18,8 @@
  * ```
  */
 
-import { eq, and, desc, asc } from "drizzle-orm";
-import { posts, pages, media } from "./schema/engine.js";
+import { eq, and, or, desc, asc, isNull } from "drizzle-orm";
+import { posts, pages, media, blazeDefinitions } from "./schema/engine.js";
 import type { EngineDb } from "./client.js";
 
 /**
@@ -98,6 +98,45 @@ export function scopedDb(db: EngineDb, tenantId: string) {
 
 			deleteBySlug: (slug: string) =>
 				db.delete(pages).where(and(eq(pages.tenantId, tenantId), eq(pages.slug, slug))),
+		},
+
+		// ── Blaze Definitions ─────────────────────────────────────────
+		blazeDefinitions: {
+			/** All blazes visible to this tenant: globals (tenant_id IS NULL) + custom */
+			listAll: () =>
+				db
+					.select()
+					.from(blazeDefinitions)
+					.where(or(eq(blazeDefinitions.tenantId, tenantId), isNull(blazeDefinitions.tenantId)))
+					.orderBy(asc(blazeDefinitions.sortOrder)),
+
+			/** Only this tenant's custom definitions */
+			listCustom: () =>
+				db
+					.select()
+					.from(blazeDefinitions)
+					.where(eq(blazeDefinitions.tenantId, tenantId))
+					.orderBy(asc(blazeDefinitions.sortOrder)),
+
+			findBySlug: (slug: string) =>
+				db
+					.select()
+					.from(blazeDefinitions)
+					.where(
+						and(
+							or(eq(blazeDefinitions.tenantId, tenantId), isNull(blazeDefinitions.tenantId)),
+							eq(blazeDefinitions.slug, slug),
+						),
+					)
+					.get(),
+
+			create: (data: typeof blazeDefinitions.$inferInsert) =>
+				db.insert(blazeDefinitions).values({ ...data, tenantId }),
+
+			deleteBySlug: (slug: string) =>
+				db
+					.delete(blazeDefinitions)
+					.where(and(eq(blazeDefinitions.tenantId, tenantId), eq(blazeDefinitions.slug, slug))),
 		},
 
 		// ── Media ─────────────────────────────────────────────────────

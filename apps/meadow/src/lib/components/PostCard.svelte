@@ -9,9 +9,18 @@
 
   Uses Svelte 5 runes and engine components (GlassCard, Badge).
 -->
+<script lang="ts" module>
+	import { GLOBAL_BLAZE_DEFAULTS } from "@autumnsgrove/lattice/blazes";
+
+	/** Slug→definition map for O(1) lookup — built once per module, shared across all PostCard instances */
+	const BLAZE_SLUG_MAP: Record<string, { label: string; icon: string; color: string }> =
+		Object.fromEntries(GLOBAL_BLAZE_DEFAULTS.map((b) => [b.slug, b]));
+</script>
+
 <script lang="ts">
 	import type { MeadowPost } from "$lib/types/post.js";
 	import { formatRelativeTime } from "$lib/utils/time.js";
+	import { Blaze } from "@autumnsgrove/lattice/ui/indicators";
 
 	interface Props {
 		post: MeadowPost;
@@ -29,6 +38,22 @@
 	);
 	const displayTags = $derived(post.tags.slice(0, 4));
 	const hasImage = $derived(!isNote && !!post.featuredImage);
+
+	/** Resolve custom blaze: prefer hydrated definition from feed, then global map, then slug fallback */
+	const customBlazeDefinition = $derived.by(() => {
+		if (!post.blaze) return null;
+		// Feed query hydrates the definition via LEFT JOIN — use it when available
+		if (post.blazeDefinition) return post.blazeDefinition;
+		// Static global defaults (no JOIN needed for these)
+		const global = BLAZE_SLUG_MAP[post.blaze];
+		if (global) return global;
+		// Graceful fallback for unknown slugs: titlecase the slug, neutral style
+		const label = post.blaze
+			.split("-")
+			.map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+			.join(" ");
+		return { label, icon: "HelpCircle", color: "slate" };
+	});
 </script>
 
 <article
@@ -72,6 +97,13 @@
 				<time datetime={new Date(post.publishedAt * 1000).toISOString()}>
 					{relativeTime}
 				</time>
+			</div>
+			<!-- Blazes -->
+			<div class="mt-0.5 flex items-center gap-1.5">
+				<Blaze postType={post.postType} />
+				{#if customBlazeDefinition}
+					<Blaze definition={customBlazeDefinition} />
+				{/if}
 			</div>
 		</div>
 	</div>

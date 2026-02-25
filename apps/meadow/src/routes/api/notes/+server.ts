@@ -47,7 +47,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 	}
 
 	// Parse and validate body
-	let payload: { body?: string; content_html?: string; tags?: string[] };
+	let payload: { body?: string; content_html?: string; tags?: string[]; blaze?: string };
 	try {
 		payload = await request.json();
 	} catch {
@@ -82,6 +82,24 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 	const contentHtml =
 		typeof payload.content_html === "string" ? sanitizeNoteHtml(payload.content_html) : null;
 
+	// Validate blaze slug if provided (whitelist: lowercase alphanumeric + hyphens, 2-40 chars)
+	let blaze: string | null = null;
+	if (typeof payload.blaze === "string" && payload.blaze.length > 0) {
+		const blazeSlug = payload.blaze.trim().toLowerCase();
+		if (!/^[a-z0-9][a-z0-9-]*[a-z0-9]$/.test(blazeSlug) || blazeSlug.length > 40) {
+			return json(
+				{
+					error: "GROVE-API-040",
+					error_code: "VALIDATION_FAILED",
+					error_description:
+						"Invalid blaze slug. Use 2-40 lowercase alphanumeric characters and hyphens.",
+				},
+				{ status: 400 },
+			);
+		}
+		blaze = blazeSlug;
+	}
+
 	// Tenant info flows from Heartwood session validation — no local DB lookup needed
 	const tenantId = locals.user.tenantId || "";
 	const authorSubdomain = locals.user.subdomain || "";
@@ -108,6 +126,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 			contentHtml,
 			tenantId,
 			authorSubdomain,
+			blaze,
 		);
 
 		return json({ success: true, post }, { status: 201 });

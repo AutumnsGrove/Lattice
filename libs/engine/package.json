@@ -350,6 +350,11 @@
 			"types": "./dist/warden/index.d.ts",
 			"default": "./dist/warden/index.js"
 		},
+		"./blazes": {
+			"types": "./dist/blazes/index.d.ts",
+			"svelte": "./dist/blazes/index.js",
+			"default": "./dist/blazes/index.js"
+		},
 		"./errors": {
 			"types": "./dist/errors/index.d.ts",
 			"default": "./dist/errors/index.js"

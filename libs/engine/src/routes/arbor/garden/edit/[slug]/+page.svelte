@@ -1,6 +1,7 @@
 <script>
 	import { goto, beforeNavigate } from "$app/navigation";
 	import { browser } from "$app/environment";
+	import { onMount } from "svelte";
 	import MarkdownEditor from "$lib/components/admin/MarkdownEditor.svelte";
 	import GutterManager from "$lib/components/admin/GutterManager.svelte";
 	import { Button, GroveSwap } from "$lib/ui";
@@ -19,6 +20,8 @@
 		RefreshCw,
 	} from "lucide-svelte";
 	import Waystone from "$lib/ui/components/ui/Waystone.svelte";
+	import { Blaze } from "$lib/ui/components/indicators";
+	import { GLOBAL_BLAZE_DEFAULTS } from "$lib/blazes";
 
 	let { data } = $props();
 
@@ -35,6 +38,26 @@
 	let shareToMeadow = $state(true);
 	let originalSlug = $state("");
 	let slugError = $state("");
+	/** @type {string | null} */
+	let selectedBlaze = $state(null);
+
+	// Blaze picker — fetched from API to include tenant custom blazes
+	/** @type {Array<{slug: string, label: string, icon: string, color: string}>} */
+	let availableBlazes = $state([...GLOBAL_BLAZE_DEFAULTS]);
+
+	onMount(async () => {
+		try {
+			const res = await fetch("/api/blazes");
+			if (res.ok) {
+				const { blazes } = await res.json();
+				if (Array.isArray(blazes) && blazes.length > 0) {
+					availableBlazes = blazes;
+				}
+			}
+		} catch {
+			// Keep GLOBAL_BLAZE_DEFAULTS fallback
+		}
+	});
 
 	// Sync form state when data changes (e.g., navigating to different post)
 	$effect(() => {
@@ -51,6 +74,7 @@
 		status = /** @type {any} */ (data.post).status || "draft";
 		featuredImage = /** @type {any} */ (data.post).featured_image || "";
 		shareToMeadow = /** @type {any} */ (data.post).meadow_exclude !== 1;
+		selectedBlaze = /** @type {any} */ (data.post).blaze || null;
 	});
 
 	// Editor reference for anchor insertion
@@ -79,6 +103,7 @@
 		const tagCount = parseTags(tagsInput).length;
 		if (tagCount > 0) parts.push(`${tagCount} tag${tagCount > 1 ? "s" : ""}`);
 		if (font && font !== "default") parts.push(font);
+		if (selectedBlaze) parts.push("blaze");
 		return parts.join(" \u00b7 ");
 	});
 
@@ -160,6 +185,7 @@
 				featured_image: featuredImage.trim() || null,
 				meadow_exclude: shareToMeadow ? 0 : 1,
 				slug: slug !== originalSlug ? slug : undefined,
+				blaze: selectedBlaze,
 			});
 
 			editorRef?.clearDraft();
@@ -218,6 +244,7 @@
 				featured_image: featuredImage.trim() || null,
 				meadow_exclude: shareToMeadow ? 0 : 1,
 				slug: slug !== originalSlug ? slug : undefined,
+				blaze: selectedBlaze,
 			});
 
 			editorRef?.clearDraft();
@@ -299,6 +326,7 @@
 				featured_image: featuredImage.trim() || null,
 				meadow_exclude: shareToMeadow ? 0 : 1,
 				slug: slug !== originalSlug ? slug : undefined,
+				blaze: selectedBlaze,
 				republish: true,
 			});
 
@@ -603,6 +631,31 @@
 								>
 							</span>
 						</label>
+					</div>
+
+					<div class="form-group field-full">
+						<label>Blaze</label>
+						<span class="form-hint" style="margin-top: 0; margin-bottom: 0.5rem;"
+							>A small marker that tells readers what this post is about.</span
+						>
+						<div class="blaze-picker">
+							{#each availableBlazes as blazeDef}
+								<button
+									type="button"
+									class="blaze-option"
+									class:selected={selectedBlaze === blazeDef.slug}
+									aria-label="{blazeDef.label} blaze{selectedBlaze === blazeDef.slug
+										? ' (selected)'
+										: ''}"
+									aria-pressed={selectedBlaze === blazeDef.slug}
+									onclick={() => {
+										selectedBlaze = selectedBlaze === blazeDef.slug ? null : blazeDef.slug;
+									}}
+								>
+									<Blaze definition={blazeDef} />
+								</button>
+							{/each}
+						</div>
 					</div>
 
 					<!-- Lifecycle metadata -->
@@ -1226,6 +1279,37 @@
 			width: 100%;
 			justify-content: flex-end;
 		}
+	}
+
+	/* Blaze picker */
+	.blaze-picker {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.35rem;
+	}
+	.blaze-option {
+		border: 2px solid transparent;
+		border-radius: 999px;
+		background: transparent;
+		cursor: pointer;
+		padding: 2px;
+		opacity: 0.5;
+		transition:
+			opacity 0.15s ease,
+			border-color 0.15s ease;
+		min-height: 32px;
+	}
+	.blaze-option:hover {
+		opacity: 0.8;
+	}
+	.blaze-option.selected {
+		opacity: 1;
+		border-color: var(--color-primary);
+	}
+	.blaze-option:focus-visible {
+		outline: none;
+		box-shadow: 0 0 0 2px var(--color-primary);
+		border-radius: 999px;
 	}
 
 	/* Mobile-specific refinements */

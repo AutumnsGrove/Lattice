@@ -1,6 +1,7 @@
 <script>
 	import { goto, beforeNavigate } from "$app/navigation";
 	import { browser } from "$app/environment";
+	import { onMount } from "svelte";
 	import MarkdownEditor from "$lib/components/admin/MarkdownEditor.svelte";
 	import GutterManager from "$lib/components/admin/GutterManager.svelte";
 	import { Glass, GroveSwap, GroveIntro } from "$lib/ui";
@@ -9,6 +10,8 @@
 	import { api } from "$lib/utils";
 	import { ArrowLeft, ArrowRight, ChevronRight, X, AlertCircle } from "lucide-svelte";
 	import Waystone from "$lib/ui/components/ui/Waystone.svelte";
+	import { Blaze } from "$lib/ui/components/indicators";
+	import { GLOBAL_BLAZE_DEFAULTS } from "$lib/blazes";
 
 	// Page data from admin layout (includes grafts cascade)
 	let { data } = $props();
@@ -26,6 +29,26 @@
 	let firesideAssisted = $state(false);
 	let featuredImage = $state("");
 	let shareToMeadow = $state(true);
+	/** @type {string | null} */
+	let selectedBlaze = $state(null);
+
+	// Blaze picker — fetched from API to include tenant custom blazes
+	/** @type {Array<{slug: string, label: string, icon: string, color: string}>} */
+	let availableBlazes = $state([...GLOBAL_BLAZE_DEFAULTS]);
+
+	onMount(async () => {
+		try {
+			const res = await fetch("/api/blazes");
+			if (res.ok) {
+				const { blazes } = await res.json();
+				if (Array.isArray(blazes) && blazes.length > 0) {
+					availableBlazes = blazes;
+				}
+			}
+		} catch {
+			// Keep GLOBAL_BLAZE_DEFAULTS fallback
+		}
+	});
 
 	// Editor reference for anchor insertion
 	/** @type {any} */
@@ -53,6 +76,7 @@
 		if (tagCount > 0) parts.push(`${tagCount} tag${tagCount > 1 ? "s" : ""}`);
 		if (slug && slugManuallyEdited) parts.push("custom slug");
 		if (font && font !== "default") parts.push(font);
+		if (selectedBlaze) parts.push("blaze");
 		return parts.join(" \u00b7 ");
 	});
 
@@ -116,6 +140,7 @@
 				status: "draft",
 				featured_image: featuredImage.trim() || null,
 				meadow_exclude: shareToMeadow ? 0 : 1,
+				blaze: selectedBlaze,
 			});
 
 			editorRef?.clearDraft();
@@ -188,6 +213,7 @@
 				status: "published",
 				featured_image: featuredImage.trim() || null,
 				meadow_exclude: shareToMeadow ? 0 : 1,
+				blaze: selectedBlaze,
 			});
 
 			editorRef?.clearDraft();
@@ -404,6 +430,31 @@
 								>
 							</span>
 						</label>
+					</div>
+
+					<div class="form-group field-full">
+						<label>Blaze</label>
+						<span class="form-hint" style="margin-top: 0; margin-bottom: 0.5rem;"
+							>A small marker that tells readers what this post is about.</span
+						>
+						<div class="blaze-picker">
+							{#each availableBlazes as blazeDef}
+								<button
+									type="button"
+									class="blaze-option"
+									class:selected={selectedBlaze === blazeDef.slug}
+									aria-label="{blazeDef.label} blaze{selectedBlaze === blazeDef.slug
+										? ' (selected)'
+										: ''}"
+									aria-pressed={selectedBlaze === blazeDef.slug}
+									onclick={() => {
+										selectedBlaze = selectedBlaze === blazeDef.slug ? null : blazeDef.slug;
+									}}
+								>
+									<Blaze definition={blazeDef} />
+								</button>
+							{/each}
+						</div>
 					</div>
 				</div>
 			{/if}
@@ -835,6 +886,37 @@
 	.meadow-toggle-hint {
 		font-size: 0.75rem;
 		color: var(--color-text-subtle);
+	}
+
+	/* Blaze picker */
+	.blaze-picker {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.35rem;
+	}
+	.blaze-option {
+		border: 2px solid transparent;
+		border-radius: 999px;
+		background: transparent;
+		cursor: pointer;
+		padding: 2px;
+		opacity: 0.5;
+		transition:
+			opacity 0.15s ease,
+			border-color 0.15s ease;
+		min-height: 32px;
+	}
+	.blaze-option:hover {
+		opacity: 0.8;
+	}
+	.blaze-option.selected {
+		opacity: 1;
+		border-color: var(--color-primary);
+	}
+	.blaze-option:focus-visible {
+		outline: none;
+		box-shadow: 0 0 0 2px var(--color-primary);
+		border-radius: 999px;
 	}
 
 	/* Responsive */
