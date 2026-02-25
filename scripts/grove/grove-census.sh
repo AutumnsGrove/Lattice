@@ -61,13 +61,10 @@ error() {
     echo -e "${RED}[census]${NC} $1" >&2
 }
 
-# Build the find exclusion args from EXCLUDES list
-build_exclude_args() {
-    local args=""
-    for dir in $EXCLUDES; do
-        args="$args ! -path \"*/$dir/*\""
-    done
-    echo "$args"
+# Escape single quotes for safe SQL string interpolation
+# Usage: sql_escape "it's a path" → "it''s a path"
+sql_escape() {
+    echo "${1//\'/\'\'}"
 }
 
 # ===========================================================================
@@ -122,14 +119,14 @@ count_ext() {
     local root="$1"
     local ext="$2"
 
-    # Build find command with exclusions
-    local cmd="find \"$root\" -name \"*.$ext\" -type f"
+    # Build find args as an array (no eval needed)
+    local -a find_args=("$root" -name "*.$ext" -type f)
     for dir in $EXCLUDES; do
-        cmd="$cmd ! -path \"*/$dir/*\""
+        find_args+=(! -path "*/$dir/*")
     done
 
     local result
-    result=$(eval "$cmd" 2>/dev/null | xargs wc -l 2>/dev/null | tail -1 | awk '{print $1}')
+    result=$(find "${find_args[@]}" 2>/dev/null | xargs wc -l 2>/dev/null | tail -1 | awk '{print $1}')
     # If no files found or result is empty/non-numeric, return 0
     if [[ -z "$result" ]] || ! [[ "$result" =~ ^[0-9]+$ ]]; then
         echo 0
@@ -141,14 +138,16 @@ count_ext() {
 # Count total tracked files in a directory
 count_files_in() {
     local root="$1"
-    local cmd="find \"$root\" -type f"
+
+    # Build find args as an array (no eval needed)
+    local -a find_args=("$root" -type f)
     for dir in $EXCLUDES; do
-        cmd="$cmd ! -path \"*/$dir/*\""
+        find_args+=(! -path "*/$dir/*")
     done
     # Exclude common non-source files
-    cmd="$cmd ! -name '*.lock' ! -name '*.png' ! -name '*.jpg' ! -name '*.svg' ! -name '*.ico' ! -name '*.woff*' ! -name '*.ttf' ! -name '*.eot'"
+    find_args+=(! -name '*.lock' ! -name '*.png' ! -name '*.jpg' ! -name '*.svg' ! -name '*.ico' ! -name '*.woff*' ! -name '*.ttf' ! -name '*.eot')
 
-    eval "$cmd" 2>/dev/null | wc -l | tr -d ' '
+    find "${find_args[@]}" 2>/dev/null | wc -l | tr -d ' '
 }
 
 # Snapshot a single directory, capturing line counts per language.
@@ -180,7 +179,9 @@ snapshot_directory() {
 
     # Only insert if directory has any content
     if [ "$total_lines" -gt 0 ]; then
-        sqlite3 "$DB_FILE" "INSERT INTO directories (snapshot_id, path, depth, total_lines, ts_lines, svelte_lines, js_lines, css_lines, py_lines, go_lines, sql_lines, sh_lines, tsx_lines, md_lines, other_lines) VALUES ($snapshot_id, '$rel_path', $depth, $total_lines, $ts_lines, $svelte_lines, $js_lines, $css_lines, $py_lines, $go_lines, $sql_lines, $sh_lines, $tsx_lines, $md_lines, $other_lines);"
+        local safe_path
+        safe_path=$(sql_escape "$rel_path")
+        sqlite3 "$DB_FILE" "INSERT INTO directories (snapshot_id, path, depth, total_lines, ts_lines, svelte_lines, js_lines, css_lines, py_lines, go_lines, sql_lines, sh_lines, tsx_lines, md_lines, other_lines) VALUES ($snapshot_id, '$safe_path', $depth, $total_lines, $ts_lines, $svelte_lines, $js_lines, $css_lines, $py_lines, $go_lines, $sql_lines, $sh_lines, $tsx_lines, $md_lines, $other_lines);"
     fi
 }
 
@@ -378,35 +379,47 @@ export_json() {
         return 0
     fi
 
-    # Build JSON using sqlite3 output
-    {
-        echo '{"frames":['
+    # Use Python for proper JSON escaping of path values
+    python3 -c "
+import sqlite3, json, datetime
 
-        local first=true
-        sqlite3 -separator '|' "$DB_FILE" "SELECT id, date, commit_hash, total_lines, total_files FROM snapshots ORDER BY date;" | while IFS='|' read -r sid sdate shash slines sfiles; do
-            if [ "$first" = true ]; then
-                first=false
-            else
-                echo ','
-            fi
+db = sqlite3.connect('$DB_FILE')
+db.row_factory = sqlite3.Row
 
-            echo -n "{\"date\":\"$sdate\",\"commit\":\"$shash\",\"totalLines\":$slines,\"totalFiles\":$sfiles,\"directories\":["
+frames = []
+for snap in db.execute('SELECT id, date, commit_hash, total_lines, total_files FROM snapshots ORDER BY date'):
+    dirs = []
+    for d in db.execute('''
+        SELECT path, depth, total_lines, ts_lines, svelte_lines, js_lines,
+               css_lines, py_lines, go_lines, sql_lines, sh_lines, tsx_lines,
+               md_lines, other_lines
+        FROM directories WHERE snapshot_id=? ORDER BY depth, path
+    ''', (snap['id'],)):
+        dirs.append({
+            'path': d['path'], 'depth': d['depth'],
+            'totalLines': d['total_lines'], 'tsLines': d['ts_lines'],
+            'svelteLines': d['svelte_lines'], 'jsLines': d['js_lines'],
+            'cssLines': d['css_lines'], 'pyLines': d['py_lines'],
+            'goLines': d['go_lines'], 'sqlLines': d['sql_lines'],
+            'shLines': d['sh_lines'], 'tsxLines': d['tsx_lines'],
+            'mdLines': d['md_lines'], 'otherLines': d['other_lines'],
+        })
+    frames.append({
+        'date': snap['date'], 'commit': snap['commit_hash'],
+        'totalLines': snap['total_lines'], 'totalFiles': snap['total_files'],
+        'directories': dirs,
+    })
 
-            local dfirst=true
-            sqlite3 -separator '|' "$DB_FILE" "SELECT path, depth, total_lines, ts_lines, svelte_lines, js_lines, css_lines, py_lines, go_lines, sql_lines, sh_lines, tsx_lines, md_lines, other_lines FROM directories WHERE snapshot_id=$sid ORDER BY depth, path;" | while IFS='|' read -r dpath ddepth dtotal dts dsvelte djs dcss dpy dgo dsql dsh dtsx dmd dother; do
-                if [ "$dfirst" = true ]; then
-                    dfirst=false
-                else
-                    echo -n ','
-                fi
-                echo -n "{\"path\":\"$dpath\",\"depth\":$ddepth,\"totalLines\":$dtotal,\"tsLines\":$dts,\"svelteLines\":$dsvelte,\"jsLines\":$djs,\"cssLines\":$dcss,\"pyLines\":$dpy,\"goLines\":$dgo,\"sqlLines\":$dsql,\"shLines\":$dsh,\"tsxLines\":$dtsx,\"mdLines\":$dmd,\"otherLines\":$dother}"
-            done
+db.close()
 
-            echo -n "]}"
-        done
+output = {
+    'frames': frames,
+    'generated': datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+}
 
-        echo '],"generated":"'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'"}'
-    } > "$json_file"
+with open('$json_file', 'w') as f:
+    json.dump(output, f, separators=(',', ':'))
+"
 
     local json_size
     json_size=$(du -h "$json_file" 2>/dev/null | cut -f1)

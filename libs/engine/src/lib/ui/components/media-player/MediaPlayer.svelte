@@ -56,7 +56,7 @@
 	}: Props = $props();
 
 	let containerEl: HTMLDivElement | undefined = $state();
-	let intervalId: ReturnType<typeof setInterval> | null = $state(null);
+	let intervalId: ReturnType<typeof setInterval> | null = null;
 
 	const progress = $derived(duration > 0 ? currentTime / (duration - 1) : 0);
 
