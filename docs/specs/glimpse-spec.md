@@ -271,7 +271,7 @@ Two approaches, chosen based on timing:
 - **Pre-navigation seeding** (preferred): Set localStorage via `context.add_init_script()` before `page.goto()`. Page loads with correct state already set.
 - **Post-navigation injection**: For when the page is already loaded. Inject JS, dispatch StorageEvent, wait for CSS transitions.
 
-### Layer 3: Console Collector (New)
+### Layer 3: Console Collector
 
 The key insight from the verification loop: screenshots show what looks wrong, console logs show *why* it is wrong. When `--logs` is passed, Glimpse hooks into Playwright's console event listener before navigation.
 
@@ -979,36 +979,7 @@ Grove's visual state is controlled by three Svelte 5 stores that persist to loca
 | `themeStore` | `theme` | light, dark, system | `.dark` class on `<html>`, CSS variable swap |
 | `groveModeStore` | `grove-mode` | true, false | Terminology (Grove terms vs standard terms) |
 
-### Injection Strategy
-
-Two approaches, chosen based on timing:
-
-**Pre-navigation seeding** (faster, for fresh page loads):
-1. Create browser context
-2. Set localStorage values via `context.add_init_script()`
-3. Navigate to URL
-4. Page loads with correct state already set
-5. Wait for render settle
-6. Capture
-
-```python
-# Pre-seed localStorage before any page loads
-await context.add_init_script("""
-    localStorage.setItem('grove-season', 'winter');
-    localStorage.setItem('theme', 'dark');
-""")
-await page.goto(url)
-await page.wait_for_timeout(wait_ms)
-```
-
-**Post-navigation injection** (for when page is already loaded):
-1. Navigate to URL
-2. Wait for load
-3. Inject JS to update stores
-4. Wait for CSS transitions (500ms default)
-5. Capture
-
-The pre-navigation approach is preferred because it avoids any flash of the default theme before the target theme applies.
+See **Layer 2: Theme Injector** in the Architecture section for injection strategy and code examples.
 
 ### Wait Strategies
 
@@ -1030,6 +1001,8 @@ Default: `fixed` at 500ms. Configurable per-capture in batch configs.
 ---
 
 ## Smart Detection API
+
+See **Layer 7: Smart Detector** in the Architecture section for the fallback chain (a11y → heuristics → Lumen). This section documents the Lumen Gateway wire format.
 
 ### Request to Lumen Gateway
 
