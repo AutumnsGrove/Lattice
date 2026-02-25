@@ -1189,6 +1189,9 @@ importers:
 
   workers/email-catchup:
     dependencies:
+      '@autumnsgrove/infra':
+        specifier: workspace:*
+        version: link:../../libs/infra
       resend:
         specifier: ^4.8.0
         version: 4.8.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -1196,6 +1199,12 @@ importers:
       '@cloudflare/workers-types':
         specifier: ^4.20260210.0
         version: 4.20260210.0
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.18
+        version: 4.0.18(@types/node@25.2.3)(@vitest/ui@4.0.18)(happy-dom@20.6.1)(jiti@2.4.2)(jsdom@27.4.0(@noble/hashes@2.0.1)(canvas@3.2.1))(tsx@4.21.0)
       wrangler:
         specifier: ^4.64.0
         version: 4.64.0(@cloudflare/workers-types@4.20260210.0)

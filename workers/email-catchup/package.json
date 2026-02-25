@@ -1,18 +1,25 @@
 {
-  "name": "grove-email-catchup",
-  "version": "1.0.0",
-  "private": true,
-  "description": "Weekly catch-up cron for Grove email infrastructure",
-  "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
-    "tail": "wrangler tail"
-  },
-  "dependencies": {
-    "resend": "^4.8.0"
-  },
-  "devDependencies": {
-    "@cloudflare/workers-types": "^4.20260210.0",
-    "wrangler": "^4.64.0"
-  }
+	"name": "grove-email-catchup",
+	"version": "1.0.0",
+	"private": true,
+	"description": "Weekly catch-up cron for Grove email infrastructure",
+	"scripts": {
+		"dev": "wrangler dev",
+		"deploy": "wrangler deploy",
+		"tail": "wrangler tail",
+		"test": "vitest run",
+		"test:run": "vitest run",
+		"test:watch": "vitest",
+		"check": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@autumnsgrove/infra": "workspace:*",
+		"resend": "^4.8.0"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20260210.0",
+		"typescript": "^5.7.0",
+		"vitest": "^4.0.18",
+		"wrangler": "^4.64.0"
+	}
 }
