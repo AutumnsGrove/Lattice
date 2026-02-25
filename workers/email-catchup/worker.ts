@@ -13,6 +13,8 @@
  * Logs: wrangler tail
  */
 
+import { createCloudflareContext } from "@autumnsgrove/infra/cloudflare";
+import type { GroveContext } from "@autumnsgrove/infra";
 import { Resend } from "resend";
 
 // =============================================================================
@@ -26,6 +28,20 @@ interface Env {
 	EMAIL_RENDER_URL: string;
 	/** Service binding to email-render worker (preferred over URL) */
 	EMAIL_RENDER?: Fetcher;
+}
+
+function createContext(env: Env): GroveContext {
+	return createCloudflareContext({
+		db: env.DB,
+		env: env as unknown as Record<string, unknown>,
+		observer: (event) => {
+			console.log(
+				`[Infra] ${event.service}.${event.operation} ` +
+					`${event.ok ? "ok" : "ERR"} ${event.durationMs.toFixed(1)}ms` +
+					`${event.detail ? ` — ${event.detail}` : ""}`,
+			);
+		},
+	});
 }
 
 type AudienceType = "wanderer" | "promo" | "rooted";
@@ -78,7 +94,7 @@ const TEMPLATE_MAP: Record<number, string> = {
 // =============================================================================
 
 export default {
-	async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
+	async scheduled(event: ScheduledEvent, env: Env, execCtx: ExecutionContext) {
 		console.log("📧 Email catch-up cron starting...");
 
 		// Validate required environment variables
@@ -94,6 +110,8 @@ export default {
 			return { error: "RESEND_API_KEY not configured" };
 		}
 
+		const ctx = createContext(env);
+
 		const results = {
 			overdueFound: 0,
 			emailsSent: 0,
@@ -104,7 +122,7 @@ export default {
 
 		try {
 			// 1. Find and send overdue emails
-			const overdueResult = await processOverdueEmails(env);
+			const overdueResult = await processOverdueEmails(ctx, env);
 			results.overdueFound = overdueResult.found;
 			results.emailsSent = overdueResult.sent;
 			results.errors.push(...overdueResult.errors);
@@ -115,7 +133,7 @@ export default {
 			results.errors.push(...unsubResult.errors);
 
 			// 3. Mark completed sequences
-			const completeResult = await markCompletedSequences(env);
+			const completeResult = await markCompletedSequences(ctx);
 			results.sequencesCompleted = completeResult.completed;
 
 			console.log("📧 Email catch-up complete:", results);
@@ -133,7 +151,7 @@ export default {
 // Process Overdue Emails
 // =============================================================================
 
-async function processOverdueEmails(env: Env) {
+async function processOverdueEmails(ctx: GroveContext, env: Env) {
 	const result = { found: 0, sent: 0, errors: [] as string[] };
 
 	// Find users who are overdue for their next email
@@ -145,7 +163,7 @@ async function processOverdueEmails(env: Env) {
 	// with the SEQUENCES constant defined at the top of this file.
 	// Offsets include a 1-day buffer to account for scheduling delays.
 	// Example: stage 0→1 is 1 day, so we check +2 days to allow buffer.
-	const overdueUsers = await env.DB.prepare(
+	const overdueUsers = await ctx.db.execute(
 		`
 		SELECT * FROM email_signups
 		WHERE sequence_stage >= 0
@@ -167,9 +185,10 @@ async function processOverdueEmails(env: Env) {
 		)
 		LIMIT 100
 	`,
-	).all<EmailSignup>();
+	);
 
-	result.found = overdueUsers.results?.length || 0;
+	const users = overdueUsers.results as unknown as EmailSignup[];
+	result.found = users.length;
 
 	if (result.found === 0) {
 		console.log("📧 No overdue emails found");
@@ -181,16 +200,16 @@ async function processOverdueEmails(env: Env) {
 	const resend = new Resend(env.RESEND_API_KEY);
 	const renderUrl = env.EMAIL_RENDER_URL;
 
-	for (const user of overdueUsers.results || []) {
+	for (const user of users) {
 		try {
 			// Determine next stage
 			const nextStage = getNextStage(user.sequence_stage, user.audience_type);
 
 			if (nextStage === -1) {
 				// Sequence complete, just update the stage
-				await env.DB.prepare(`UPDATE email_signups SET sequence_stage = -1 WHERE id = ?`)
-					.bind(user.id)
-					.run();
+				await ctx.db.execute(`UPDATE email_signups SET sequence_stage = -1 WHERE id = ?`, [
+					user.id,
+				]);
 				continue;
 			}
 
@@ -231,16 +250,15 @@ async function processOverdueEmails(env: Env) {
 			console.log(`📧 Sent Day ${nextStage} catch-up to ${user.email} (${user.audience_type})`);
 
 			// Update the user's sequence stage and last_email_at
-			await env.DB.prepare(
+			await ctx.db.execute(
 				`
 				UPDATE email_signups
 				SET sequence_stage = ?,
 				    last_email_at = datetime('now')
 				WHERE id = ?
 			`,
-			)
-				.bind(nextStage, user.id)
-				.run();
+				[nextStage, user.id],
+			);
 
 			result.sent++;
 
@@ -331,14 +349,14 @@ async function syncUnsubscribes(env: Env) {
 // Mark Completed Sequences
 // =============================================================================
 
-async function markCompletedSequences(env: Env) {
+async function markCompletedSequences(ctx: GroveContext) {
 	const result = { completed: 0 };
 
 	// Find users who have received their last sequence email
 	// and mark them as complete (stage = -1)
 
 	// Wanderer: last email is day 30
-	const wandererResult = await env.DB.prepare(
+	const wandererResult = await ctx.db.execute(
 		`
 		UPDATE email_signups
 		SET sequence_stage = -1
@@ -347,10 +365,10 @@ async function markCompletedSequences(env: Env) {
 		AND last_email_at IS NOT NULL
 		AND datetime(last_email_at, '+1 day') < datetime('now')
 	`,
-	).run();
+	);
 
 	// Promo: last email is day 7 (short sequence)
-	const promoResult = await env.DB.prepare(
+	const promoResult = await ctx.db.execute(
 		`
 		UPDATE email_signups
 		SET sequence_stage = -1
@@ -359,10 +377,10 @@ async function markCompletedSequences(env: Env) {
 		AND last_email_at IS NOT NULL
 		AND datetime(last_email_at, '+1 day') < datetime('now')
 	`,
-	).run();
+	);
 
 	// Rooted: last email is day 7
-	const rootedResult = await env.DB.prepare(
+	const rootedResult = await ctx.db.execute(
 		`
 		UPDATE email_signups
 		SET sequence_stage = -1
@@ -371,12 +389,10 @@ async function markCompletedSequences(env: Env) {
 		AND last_email_at IS NOT NULL
 		AND datetime(last_email_at, '+1 day') < datetime('now')
 	`,
-	).run();
+	);
 
 	result.completed =
-		(wandererResult.meta?.changes || 0) +
-		(promoResult.meta?.changes || 0) +
-		(rootedResult.meta?.changes || 0);
+		wandererResult.meta.changes + promoResult.meta.changes + rootedResult.meta.changes;
 
 	if (result.completed > 0) {
 		console.log(`📧 Marked ${result.completed} sequences as complete`);
