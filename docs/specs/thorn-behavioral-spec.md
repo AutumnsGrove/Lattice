@@ -6,7 +6,7 @@ description: >-
 category: specs
 specCategory: content-community
 icon: shield
-lastUpdated: "2026-02-24"
+lastUpdated: "2026-02-25"
 aliases: []
 tags:
   - thorn
@@ -140,7 +140,10 @@ Inspired by Osprey's `HasLabel` / `LabelAdd` / `LabelRemove` pattern. Labels are
 
 ```sql
 CREATE TABLE IF NOT EXISTS thorn_entity_labels (
-  -- Composite key: what entity, which label
+  -- Tenant isolation (required for all Grove tables)
+  tenant_id TEXT NOT NULL,
+
+  -- Composite key: which tenant, what entity, which label
   entity_type TEXT NOT NULL,       -- 'user' | 'ip' | 'email_domain' | 'tenant'
   entity_id TEXT NOT NULL,
   label TEXT NOT NULL,
@@ -151,21 +154,21 @@ CREATE TABLE IF NOT EXISTS thorn_entity_labels (
   added_by TEXT NOT NULL,           -- rule name ('rapid_posting') or 'wayfinder'
   reason TEXT,                      -- Human-readable reason
 
-  PRIMARY KEY (entity_type, entity_id, label)
+  PRIMARY KEY (tenant_id, entity_type, entity_id, label)
 );
 
--- Find all labels for an entity (the most common query)
+-- Find all labels for an entity within a tenant (the most common query)
 CREATE INDEX IF NOT EXISTS idx_thorn_labels_entity
-  ON thorn_entity_labels(entity_type, entity_id);
+  ON thorn_entity_labels(tenant_id, entity_type, entity_id);
 
 -- Find expired labels for cleanup
 CREATE INDEX IF NOT EXISTS idx_thorn_labels_expires
   ON thorn_entity_labels(expires_at)
   WHERE expires_at IS NOT NULL;
 
--- Find labels added by a specific rule (for rule tuning)
+-- Find labels added by a specific rule within a tenant (for rule tuning)
 CREATE INDEX IF NOT EXISTS idx_thorn_labels_added_by
-  ON thorn_entity_labels(added_by);
+  ON thorn_entity_labels(tenant_id, added_by);
 ```
 
 ### Label Operations
@@ -173,24 +176,27 @@ CREATE INDEX IF NOT EXISTS idx_thorn_labels_added_by
 ```typescript
 // libs/engine/src/lib/thorn/behavioral/labels.ts
 
-/** Read all active labels for an entity */
+/** Read all active labels for an entity within a tenant */
 export async function getEntityLabels(
   db: D1Database,
+  tenantId: string,
   entityType: EntityType,
   entityId: string,
 ): Promise<string[]>;
 
-/** Check if an entity has a specific label */
+/** Check if an entity has a specific label within a tenant */
 export async function hasLabel(
   db: D1Database,
+  tenantId: string,
   entityType: EntityType,
   entityId: string,
   label: string,
 ): Promise<boolean>;
 
-/** Add a label to an entity (with optional TTL) */
+/** Add a label to an entity within a tenant (with optional TTL) */
 export async function addLabel(
   db: D1Database,
+  tenantId: string,
   entityType: EntityType,
   entityId: string,
   label: string,
@@ -201,15 +207,16 @@ export async function addLabel(
   },
 ): Promise<void>;
 
-/** Remove a label from an entity */
+/** Remove a label from an entity within a tenant */
 export async function removeLabel(
   db: D1Database,
+  tenantId: string,
   entityType: EntityType,
   entityId: string,
   label: string,
 ): Promise<void>;
 
-/** Clean up expired labels (called periodically) */
+/** Clean up expired labels across all tenants (called periodically) */
 export async function cleanupExpiredLabels(
   db: D1Database,
 ): Promise<number>;
@@ -298,6 +305,7 @@ import { addLabel } from "./labels.js";
 export async function checkBehavioralRateLimit(
   threshold: Threshold,
   db: D1Database,
+  tenantId: string,
   userId: string,
   endpointKey: string,
 ): Promise<{ exceeded: boolean; action?: ThornAction }> {
@@ -309,7 +317,7 @@ export async function checkBehavioralRateLimit(
 
   if (!result.allowed) {
     // Apply rapid_poster label (expires when window resets)
-    await addLabel(db, "user", userId, "thorn:rapid_poster", {
+    await addLabel(db, tenantId, "user", userId, "thorn:rapid_poster", {
       addedBy: `threshold:${endpointKey}`,
       expiresInHours: 1,
       reason: `Rate limit exceeded: ${endpointKey}`,
@@ -334,13 +342,14 @@ Threshold's existing abuse tracking (`recordViolation()`) handles graduated esca
 async function bridgeAbuseToLabels(
   abuseKV: KVNamespace,
   db: D1Database,
+  tenantId: string,
   userId: string,
 ): Promise<void> {
   const violation = await recordViolation(abuseKV, userId);
 
   if (violation.banned) {
     // Threshold escalated to ban (5+ violations in 24h)
-    await addLabel(db, "user", userId, "thorn:repeat_offender", {
+    await addLabel(db, tenantId, "user", userId, "thorn:repeat_offender", {
       addedBy: "threshold:abuse_escalation",
       expiresInHours: 24,
       reason: "Threshold abuse escalation: repeated rate limit violations",
@@ -388,6 +397,14 @@ export interface BehavioralRule {
   };
   /** Skip AI inference if this rule matches? */
   skipAI: boolean;
+  /**
+   * Sampling passthrough rate (0.0–1.0). When skipAI is true, this
+   * fraction of matched events still run AI as a permanent accuracy signal.
+   * Example: 0.05 = 5% of matched events still go through AI.
+   * The behavioral decision (allow/block) stands regardless; sampling
+   * only determines whether AI also runs for monitoring.
+   */
+  samplingRate?: number;
   /** Is this rule enabled? */
   enabled: boolean;
 }
@@ -426,16 +443,22 @@ export const BEHAVIORAL_RULES: BehavioralRule[] = [
 
   // ─────────────────────────────────────────────────────────────
   // Trusted users: skip AI for clean track record
+  // 5% of trusted-user posts still run AI as a permanent accuracy
+  // signal (sampling passthrough). All trusted-user actions are
+  // logged to thorn_moderation_log with model: 'thorn-behavioral'
+  // so activity remains visible even when AI is skipped.
   // ─────────────────────────────────────────────────────────────
   {
     name: "trusted_user_pass",
-    description: "Users with trusted label skip AI moderation",
+    description: "Users with trusted label skip AI moderation (5% sampling passthrough)",
     contentTypes: ["blog_post", "comment", "profile_bio"],
     conditions: [
       { type: "has_label", label: "thorn:trusted" },
     ],
     action: "allow",
     skipAI: true,
+    /** Percentage of trusted-user actions that still run AI for accuracy monitoring */
+    samplingRate: 0.05,
     enabled: true,
   },
 
@@ -461,13 +484,16 @@ export const BEHAVIORAL_RULES: BehavioralRule[] = [
 
   // ─────────────────────────────────────────────────────────────
   // Empty content: skip AI (nothing to classify)
+  // Threshold set to 3 chars — covers truly empty/emoji-only
+  // content while ensuring single-word slurs and short epithets
+  // (which fit in 4-9 chars) still reach AI classification.
   // ─────────────────────────────────────────────────────────────
   {
     name: "empty_content_pass",
-    description: "Content under 10 characters skips AI (nothing meaningful to check)",
+    description: "Content under 3 characters skips AI (empty or single emoji)",
     contentTypes: ["blog_post", "comment"],
     conditions: [
-      { type: "content_length_below", chars: 10 },
+      { type: "content_length_below", chars: 3 },
     ],
     action: "allow",
     skipAI: true,
@@ -490,6 +516,8 @@ export interface BehavioralResult {
   action: ThornAction;
   /** Should AI inference be skipped? */
   skipAI: boolean;
+  /** Was this event selected for AI sampling passthrough? */
+  sampledForAI: boolean;
   /** Labels applied as a result */
   labelsApplied: string[];
 }
@@ -539,6 +567,7 @@ export async function moderatePublishedContent(
     const rateResult = await checkBehavioralRateLimit(
       options.threshold,
       options.db,
+      options.tenantId!,
       options.userId!,
       mapHookToEndpoint(options.hookPoint), // e.g. "on_publish" → "posts/create"
     );
@@ -585,6 +614,7 @@ export async function moderatePublishedContent(
     });
 
     // If behavioral says block/warn and skipAI, we're done
+    // (unless sampling passthrough selects this event for AI monitoring)
     if (behavioral.matched && behavioral.skipAI) {
       if (behavioral.action === "block" || behavioral.action === "flag_review") {
         await flagContent(options.db, {
@@ -597,7 +627,13 @@ export async function moderatePublishedContent(
           confidence: 1.0,
         });
       }
-      return; // Skip AI inference
+      // Sampling passthrough: a percentage of skipped events still run AI
+      // for accuracy monitoring. The behavioral decision stands regardless.
+      if (!behavioral.sampledForAI) {
+        return; // Skip AI inference
+      }
+      // Fall through to AI — behavioral decision already applied,
+      // AI result is logged but does NOT override the allow/block.
     }
 
     // ── Existing: AI moderation ────────────────────────────
@@ -613,13 +649,13 @@ export async function moderatePublishedContent(
 
     // ── NEW: Post-AI label updates ─────────────────────────
     if (result.action === "block") {
-      await addLabel(options.db, "user", options.userId!, "thorn:blocked_content", {
+      await addLabel(options.db, options.tenantId!, "user", options.userId!, "thorn:blocked_content", {
         addedBy: "ai_moderation",
         expiresInHours: 90 * 24,
         reason: `Blocked: ${result.categories.join(", ")}`,
       });
       // Check for repeat offender escalation
-      await checkRepeatOffenderEscalation(options.db, options.userId!);
+      await checkRepeatOffenderEscalation(options.db, options.tenantId!, options.userId!);
     }
   } catch (err) {
     console.error("[Thorn] Moderation failed:", err);
@@ -632,20 +668,21 @@ export async function moderatePublishedContent(
 ```typescript
 async function checkRepeatOffenderEscalation(
   db: D1Database,
+  tenantId: string,
   userId: string,
 ): Promise<void> {
-  // Count blocks in the last 30 days
+  // Count blocks in the last 30 days, scoped to this tenant
   const result = await db
     .prepare(
       `SELECT COUNT(*) as block_count FROM thorn_moderation_log
-       WHERE user_id = ? AND action = 'block'
+       WHERE tenant_id = ? AND user_id = ? AND action = 'block'
        AND timestamp > datetime('now', '-30 days')`,
     )
-    .bind(userId)
+    .bind(tenantId, userId)
     .first<{ block_count: number }>();
 
   if (result && result.block_count >= 3) {
-    await addLabel(db, "user", userId, "thorn:repeat_offender", {
+    await addLabel(db, tenantId, "user", userId, "thorn:repeat_offender", {
       addedBy: "escalation_rule",
       reason: `${result.block_count} blocks in 30 days`,
     });
@@ -713,6 +750,7 @@ The behavioral layer connects to three existing SDK packages:
 - **Rate limit accuracy.** Delegated to Threshold SDK, which uses atomic `INSERT ON CONFLICT` in D1 and graduated abuse tracking in KV. No custom rate limit implementation to maintain.
 - **Label TTL enforcement.** Expired labels are cleaned up periodically. The `hasLabel` check filters expired labels at query time, so stale data never affects decisions.
 - **Trusted label governance.** The `thorn:trusted` label (which skips AI) can only be added by Wayfinders through the admin panel. It cannot be self-applied or auto-applied by rules.
+- **Trusted user sampling.** 5% of trusted-user posts still run AI as a permanent accuracy signal. This catches compromised trusted accounts and provides ongoing false-negative monitoring. All trusted-user actions are logged to `thorn_moderation_log` with `model: 'thorn-behavioral'` regardless of whether AI runs.
 - **Existing Thorn feature flag.** The behavioral layer respects the existing `thorn_moderation` feature flag. If Thorn is disabled, behavioral checks are also disabled.
 
 ---
