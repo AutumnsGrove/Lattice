@@ -1,18 +1,21 @@
 ---
 aliases: []
 date created: Friday, February 7th 2026
-date modified: Friday, February 7th 2026
-lastUpdated: '2026-02-07'
+date modified: Tuesday, February 25th 2026
+lastUpdated: '2026-02-25'
 tags:
   - tooling
   - screenshots
   - playwright
   - developer-tools
   - ai-vision
+  - verification
+  - console-logs
+  - dev-server
 type: tech-spec
 ---
 
-# Glimpse — Automated Screenshot Capture
+# Glimpse — Verification Loops for the Grove
 
 ```
                       🌲         🌲
@@ -22,27 +25,28 @@ type: tech-spec
                     ╭─────╲─┼─╱─────╮
                     │      ╲│╱      │
                     │   ┌───────┐   │
-                    │   │ 📸    │   │
+                    │   │ 📸 📋 │   │
                     │   │  ···  │   │
                     │   │  ···  │   │
                     │   └───────┘   │
                     │               │
+                    ╰───────┬───────╯
+                            │
+                    ╭───────┴───────╮
+                    │  peek · check │
+                    │  walk · tend  │
+                    │  see  · know  │
                     ╰───────────────╯
-                          │
-                    ╭─────┴─────╮
-                    │  spring   │
-                    │  summer   │
-                    │  autumn   │
-                    │  winter   │
-                    │  midnight │
-                    ╰───────────╯
 
-             A quick peek through the trees.
+          A quick peek through the trees.
+          Then step inside and look around.
 ```
 
-> *A quick peek through the trees.*
+> *A quick peek through the trees. Then step inside and look around.*
 
-Glimpse is a developer tool for capturing screenshots of Grove sites. Point it at a page, tell it what season and theme you want, and it hands you back a picture. Need all ten combinations? One command. Need just the hero section in midnight mode? One command. Need an agent to grab twenty screenshots while you make tea? One command.
+Glimpse is the development verification companion for the Grove ecosystem. Point it at a page and it hands you a screenshot. Add `--logs` and it captures every console error alongside that screenshot. Add `--auto` and it starts the dev server for you. Tell it to `browse` and it walks through the page, clicking links and filling forms, reporting what it finds.
+
+One tool. Five capabilities. One loop: change, look, fix, repeat.
 
 **Public Name:** Glimpse
 **Internal Name:** GroveGlimpse
@@ -50,25 +54,126 @@ Glimpse is a developer tool for capturing screenshots of Grove sites. Point it a
 **CLI Name:** `glimpse`
 **Last Updated:** February 2026
 
-In a forest, a glimpse is what you catch between the branches. A flash of color. A shape half-hidden. Glimpse captures those moments on demand, in any season, in any light. It's the field naturalist's camera for the Grove ecosystem.
+In a forest, a glimpse is what you catch between the branches. A flash of color. A shape half-hidden. Glimpse started as a field naturalist's camera, capturing those moments on demand in any season and light. Now it goes further. It steps inside the grove, checks the soil, listens for broken branches, and walks the paths. It sees what you see, and tells you what you missed.
 
 ---
 
-## Goals
+## Overview
 
-1. **One-command screenshots** — `glimpse capture https://grove.place --season autumn --theme dark`
-2. **Full theme matrix** — Generate all season + theme combinations automatically
-3. **Element targeting** — Capture specific components by CSS selector or natural language
-4. **Batch operations** — YAML config files for repeatable screenshot runs
-5. **Agent-friendly** — Clean output mode for automated pipelines
-6. **Smart detection** — Optional AI-powered element finding via Lumen Gateway
+### What This Is
 
-## Non-Goals
+Glimpse is the tool that closes the feedback loop in AI-assisted development. It gives Claude Code (and human developers) the ability to see pages, read browser errors, interact with UI, and verify that changes actually work. The bottleneck in AI-assisted development is not idea quality. It is feedback loop quality.
 
-- Visual regression testing (use dedicated tools for that)
+### Why This Exists
+
+Without Glimpse, development looks like this:
+
+```
+Code change → typecheck → lint → unit test → commit → deploy → look at it → "oh no"
+```
+
+With Glimpse:
+
+```
+Code change → glimpse capture --logs → see it + read errors → fix → repeat → commit
+```
+
+The difference is catching a broken sidebar before it reaches production, not after.
+
+### Goals
+
+1. **See the page** — Screenshot any Grove page, local or production, in any season and theme
+2. **Read the errors** — Capture browser console output (errors, warnings, logs) alongside screenshots
+3. **Walk the grove** — Browse interactively with natural language ("click the Posts tab, screenshot")
+4. **Tend the data** — Bootstrap local D1 databases with migrations and seed data so pages render content
+5. **Manage the server** — Detect running dev servers, optionally start them, wait for readiness
+6. **Full theme matrix** — Generate all season + theme combinations automatically
+7. **Element targeting** — Capture specific components by CSS selector or natural language
+8. **Batch operations** — YAML config files for repeatable screenshot runs
+9. **Agent-friendly** — Clean output mode for automated pipelines
+10. **Smart detection** — Optional AI-powered element finding via Lumen Gateway
+
+### Non-Goals
+
 - Video capture or screen recording
 - Live site monitoring or uptime checks
-- Replacing browser DevTools for debugging
+- Full browser DevTools replacement (Glimpse captures console output, not network traces or memory profiles)
+- Running unit tests or typechecks (that is `gw dev ci`, not Glimpse)
+- Deploying code (that is `gw git ship`, not Glimpse)
+
+---
+
+## The Verification Loop
+
+This is the core concept. Everything in Glimpse exists to serve this loop.
+
+```
+    ╭──────────────────────────────────────────────────────╮
+    │                  THE VERIFICATION LOOP                │
+    │                                                      │
+    │   ┌─────────┐    ┌─────────┐    ┌─────────┐         │
+    │   │  CHANGE │───→│  PEEK   │───→│  CHECK  │         │
+    │   │         │    │         │    │         │         │
+    │   │ Edit    │    │ Screenshot  │ Console │         │
+    │   │ code    │    │ the page │    │ errors? │         │
+    │   └─────────┘    └─────────┘    └────┬────┘         │
+    │       ▲                              │              │
+    │       │          ╭───────╮           │              │
+    │       │     NO   │       │   YES     │              │
+    │       ╰──────────│ GOOD? │◀──────────╯              │
+    │                  │       │                          │
+    │                  ╰───┬───╯                          │
+    │                      │ YES                          │
+    │                      ▼                              │
+    │                 ┌─────────┐                         │
+    │                 │ COMMIT  │                         │
+    │                 └─────────┘                         │
+    ╰──────────────────────────────────────────────────────╯
+```
+
+### The Four Tiers
+
+Each tier builds on the last. Tier 1 alone catches the majority of visual bugs.
+
+| Tier | Name | What It Does | Command |
+|------|------|-------------|---------|
+| **1. Peek** | See the page | Screenshot + console logs from a local or live page | `glimpse capture --logs` |
+| **2. Walk** | Browse the grove | Navigate, click, fill forms, screenshot at each step | `glimpse browse --do "..."` |
+| **3. Tend** | Prepare the soil | Seed local D1 with migrations and test data | `glimpse seed` |
+| **4. Know** | Check readiness | Report whether dev server, DB, and browser are ready | `glimpse status` |
+
+### In Practice (Agent Workflow)
+
+Here is what a verification cycle looks like when Claude Code is working on the arbor page:
+
+```bash
+# 1. Claude edits libs/engine/src/routes/arbor/+page.svelte
+# 2. Claude runs verification
+glimpse capture http://localhost:5173/arbor?subdomain=autumn \
+  --logs --auto --season autumn --theme dark \
+  -o /tmp/arbor-check.png
+
+# 3. Claude reads the screenshot (vision) and console output
+#    "The sidebar is overlapping content. Console: TypeError at +page.svelte:28"
+
+# 4. Claude fixes the issues and runs again
+glimpse capture http://localhost:5173/arbor?subdomain=autumn \
+  --logs -o /tmp/arbor-check-2.png
+
+# 5. Screenshot looks correct, no console errors. Commit.
+```
+
+### In Practice (Interactive Browsing)
+
+```bash
+# Claude needs to verify a multi-step flow
+glimpse browse http://localhost:5173/arbor?subdomain=autumn \
+  --do "click the Posts navigation link, then click the first post title" \
+  --logs --auto
+
+# Glimpse returns: screenshots at each step + console output
+# Claude sees the navigation worked, the post rendered correctly
+```
 
 ---
 
