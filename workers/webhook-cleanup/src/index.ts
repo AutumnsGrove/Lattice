@@ -70,7 +70,8 @@ export async function cleanupExpiredExports(ctx: GroveContext): Promise<number> 
 			[now, EXPORT_CLEANUP_LIMIT],
 		);
 
-		for (const exp of expired.results as { id: string; r2_key: string | null }[]) {
+		for (const row of expired.results) {
+			const exp = { id: String(row.id), r2_key: row.r2_key ? String(row.r2_key) : null };
 			try {
 				// Delete R2 object if it exists
 				if (exp.r2_key) {
@@ -130,6 +131,7 @@ async function cleanupExpiredWebhooks(ctx: GroveContext): Promise<{
 			[now, BATCH_SIZE],
 		);
 
+		// Safe: CloudflareDatabase.extractMeta() guarantees changes is always a number (falls back to 0)
 		const deletedInBatch = result.meta.changes;
 		totalDeleted += deletedInBatch;
 		batchCount++;

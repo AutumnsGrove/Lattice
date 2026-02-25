@@ -44,7 +44,9 @@ describe("createGroveHandle", () => {
 		expect(resolve).toHaveBeenCalledWith(event);
 	});
 
-	it("should skip context creation when platform.env is undefined", async () => {
+	it("should skip context creation and warn when platform.env is undefined", async () => {
+		const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
 		const handle = createGroveHandle((env) => ({
 			env: env as Record<string, unknown>,
 		}));
@@ -57,6 +59,26 @@ describe("createGroveHandle", () => {
 
 		expect(event.locals.ctx).toBeUndefined();
 		expect(result).toBe(mockResponse);
+		expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("platform.env not available"));
+
+		warnSpy.mockRestore();
+	});
+
+	it("should only warn once across multiple requests", async () => {
+		const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+		const handle = createGroveHandle((env) => ({
+			env: env as Record<string, unknown>,
+		}));
+
+		const resolve = vi.fn().mockResolvedValue(new Response("ok"));
+		await handle({ event: createMockEvent(), resolve });
+		await handle({ event: createMockEvent(), resolve });
+		await handle({ event: createMockEvent(), resolve });
+
+		expect(warnSpy).toHaveBeenCalledTimes(1);
+
+		warnSpy.mockRestore();
 	});
 
 	it("should support partial context (db only)", async () => {

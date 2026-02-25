@@ -34,17 +34,29 @@ type Handle = (input: {
 /**
  * Create a SvelteKit handle hook that wires up GroveContext.
  *
+ * When `event.platform?.env` is absent (e.g. local dev without the
+ * Cloudflare adapter), `event.locals.ctx` will NOT be set and a
+ * warning is logged once. Routes that access `ctx` should guard
+ * against this or use `wrangler pages dev` for local testing.
+ *
  * @param configure - Function that maps platform env to CloudflareContextOptions
  */
 export function createGroveHandle(
 	configure: (env: Record<string, unknown>) => CloudflareContextOptions,
 ): Handle {
+	let warned = false;
 	return async ({ event, resolve }) => {
 		const env = event.platform?.env;
 		if (env) {
 			const ctx = createCloudflareContext(configure(env));
 			event.locals.ctx = ctx;
 			event.locals.rawEnv = env;
+		} else if (!warned) {
+			console.warn(
+				"[InfraSDK] platform.env not available — GroveContext not created. " +
+					"Use `wrangler pages dev` for local Cloudflare bindings.",
+			);
+			warned = true;
 		}
 		return resolve(event);
 	};
