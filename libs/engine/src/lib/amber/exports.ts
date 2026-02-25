@@ -122,8 +122,7 @@ export class ExportManager {
 	 * Get a presigned download URL for a completed export.
 	 * The URL expires after 1 hour.
 	 *
-	 * Uses GroveStorage.presignedUrl() when the provider supports it.
-	 * Falls back to returning the R2 key for proxy-based download.
+	 * @throws {AmberError} AMB-050 if presigned URL generation fails
 	 */
 	async downloadUrl(exportId: string, userId: string): Promise<string> {
 		const exp = await this.status(exportId, userId);
@@ -141,15 +140,18 @@ export class ExportManager {
 			throw new AmberError(AMB_ERRORS.EXPORT_EXPIRED);
 		}
 
-		// Try presigned URL, fall back to raw key for proxy download
 		try {
 			return await this.storage.presignedUrl(exp.r2Key, {
 				action: "get",
 				expiresIn: 3600, // 1 hour
 			});
-		} catch {
-			// Presigned URLs not supported (e.g., Cloudflare R2 without S3 credentials)
-			return exp.r2Key;
+		} catch (err) {
+			logGroveError("amber", AMB_ERRORS.DOWNLOAD_FAILED, {
+				userId,
+				detail: `Presigned URL generation failed for export ${exportId}`,
+				cause: err,
+			});
+			throw new AmberError(AMB_ERRORS.DOWNLOAD_FAILED);
 		}
 	}
 

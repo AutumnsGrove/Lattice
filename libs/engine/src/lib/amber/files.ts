@@ -239,7 +239,13 @@ export class FileManager {
 		await this.db
 			.update(storageFiles)
 			.set({ deletedAt: sql`datetime('now')` })
-			.where(and(eq(storageFiles.id, fileId), isNull(storageFiles.deletedAt)));
+			.where(
+				and(
+					eq(storageFiles.id, fileId),
+					eq(storageFiles.userId, userId),
+					isNull(storageFiles.deletedAt),
+				),
+			);
 
 		return { ...file, deletedAt: new Date().toISOString() };
 	}
@@ -257,7 +263,13 @@ export class FileManager {
 		await this.db
 			.update(storageFiles)
 			.set({ deletedAt: null })
-			.where(and(eq(storageFiles.id, fileId), isNotNull(storageFiles.deletedAt)));
+			.where(
+				and(
+					eq(storageFiles.id, fileId),
+					eq(storageFiles.userId, userId),
+					isNotNull(storageFiles.deletedAt),
+				),
+			);
 
 		return { ...file, deletedAt: undefined };
 	}
@@ -277,7 +289,9 @@ export class FileManager {
 		}
 
 		// Delete from D1
-		await this.db.delete(storageFiles).where(eq(storageFiles.id, fileId));
+		await this.db
+			.delete(storageFiles)
+			.where(and(eq(storageFiles.id, fileId), eq(storageFiles.userId, userId)));
 
 		// Update quota (reduce used bytes)
 		try {

@@ -12,6 +12,7 @@ import { storageFiles, userStorage } from "../server/db/schema/engine.js";
 import { eq, and, sql, isNull } from "drizzle-orm";
 import type { AmberQuota, AmberUsageEntry } from "./types.js";
 import { GB_IN_BYTES } from "./utils.js";
+import { AMB_ERRORS, AmberError } from "./errors.js";
 
 /** Quota warning thresholds */
 const QUOTA_THRESHOLDS = {
@@ -57,9 +58,20 @@ export class QuotaManager {
 	 * Check if a user can upload a file of the given size.
 	 *
 	 * @returns true if the upload would fit within the user's quota
+	 * @throws {AmberError} AMB-051 if user has no storage record (not provisioned)
 	 */
 	async canUpload(userId: string, fileSizeBytes: number): Promise<boolean> {
-		const quota = await this.status(userId);
+		const row = await this.db
+			.select()
+			.from(userStorage)
+			.where(eq(userStorage.userId, userId))
+			.get();
+
+		if (!row) {
+			throw new AmberError(AMB_ERRORS.USER_STORAGE_NOT_FOUND);
+		}
+
+		const quota = this.calculateQuota(row);
 		return quota.availableBytes >= fileSizeBytes;
 	}
 
@@ -103,23 +115,24 @@ export class QuotaManager {
 			return this.calculateQuota(existing);
 		}
 
-		await this.db.insert(userStorage).values({
-			userId,
-			tierGb,
-			additionalGb: 0,
-			usedBytes: 0,
-		});
+		await this.db
+			.insert(userStorage)
+			.values({
+				userId,
+				tierGb,
+				additionalGb: 0,
+				usedBytes: 0,
+			})
+			.onConflictDoNothing();
 
-		return {
-			tierGb,
-			additionalGb: 0,
-			totalGb: tierGb,
-			totalBytes: tierGb * GB_IN_BYTES,
-			usedBytes: 0,
-			availableBytes: tierGb * GB_IN_BYTES,
-			percentage: 0,
-			warningLevel: "none",
-		};
+		// Re-read to return accurate data (handles concurrent insert race)
+		const created = await this.db
+			.select()
+			.from(userStorage)
+			.where(eq(userStorage.userId, userId))
+			.get();
+
+		return this.calculateQuota(created!);
 	}
 
 	/** Calculate quota status from a user storage row */
