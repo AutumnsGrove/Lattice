@@ -19,7 +19,7 @@
  */
 
 import type { GroveScheduler, ScheduleHandler, ScheduleInfo, SchedulerInfo } from "../types.js";
-import type { GroveConfig, ConfigInfo } from "../types.js";
+import type { GroveConfig, ConfigInfo, GroveObserver } from "../types.js";
 import { MockDatabase } from "./mock-database.js";
 import { MockStorage } from "./mock-storage.js";
 import { MockKV } from "./mock-kv.js";
@@ -139,6 +139,7 @@ export interface MockGroveContext {
 	services: MockServiceBus;
 	scheduler: MockScheduler;
 	config: MockConfig;
+	observer?: GroveObserver;
 }
 
 /**
@@ -146,8 +147,9 @@ export interface MockGroveContext {
  *
  * All services are backed by in-memory implementations.
  * Each service has a `.reset()` method to clear state between tests.
+ * Pass an observer to capture SDK events during tests.
  */
-export function createMockContext(): MockGroveContext {
+export function createMockContext(observer?: GroveObserver): MockGroveContext {
 	return {
 		db: new MockDatabase(),
 		storage: new MockStorage(),
@@ -155,5 +157,6 @@ export function createMockContext(): MockGroveContext {
 		services: new MockServiceBus(),
 		scheduler: new MockScheduler(),
 		config: new MockConfig(),
+		observer,
 	};
 }

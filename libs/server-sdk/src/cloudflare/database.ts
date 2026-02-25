@@ -15,12 +15,14 @@ import type {
 	QueryMeta,
 	GroveTransaction,
 	DatabaseInfo,
+	GroveObserver,
 } from "../types.js";
 
 export class CloudflareDatabase implements GroveDatabase {
 	constructor(
 		private readonly d1: D1Database,
 		private readonly databaseName: string = "default",
+		private readonly observer?: GroveObserver,
 	) {}
 
 	async execute(sql: string, params?: unknown[]): Promise<QueryResult> {
@@ -32,14 +34,32 @@ export class CloudflareDatabase implements GroveDatabase {
 			throw new Error("SQL query cannot be empty");
 		}
 
+		const start = performance.now();
 		try {
 			const stmt = params?.length ? this.d1.prepare(sql).bind(...params) : this.d1.prepare(sql);
 			const result = await stmt.all();
+			const durationMs = performance.now() - start;
+			this.observer?.({
+				service: "db",
+				operation: "execute",
+				durationMs,
+				ok: true,
+				detail: sql.slice(0, 100),
+			});
 			return {
 				results: result.results as Record<string, unknown>[],
 				meta: this.extractMeta(result.meta),
 			};
 		} catch (error) {
+			const durationMs = performance.now() - start;
+			this.observer?.({
+				service: "db",
+				operation: "execute",
+				durationMs,
+				ok: false,
+				detail: sql.slice(0, 100),
+				error: error instanceof Error ? error.message : String(error),
+			});
 			logGroveError("ServerSDK", SRV_ERRORS.QUERY_FAILED, {
 				detail: sql.slice(0, 100),
 				cause: error,
@@ -57,6 +77,7 @@ export class CloudflareDatabase implements GroveDatabase {
 			throw new Error("Batch statements array cannot be empty");
 		}
 
+		const start = performance.now();
 		try {
 			// D1's batch expects D1PreparedStatement instances.
 			// BoundStatements created via CloudflareDatabase.prepare().bind()
@@ -73,11 +94,28 @@ export class CloudflareDatabase implements GroveDatabase {
 				}
 			}
 			const results = await this.d1.batch(statements as unknown as D1PreparedStatement[]);
+			const durationMs = performance.now() - start;
+			this.observer?.({
+				service: "db",
+				operation: "batch",
+				durationMs,
+				ok: true,
+				detail: `${statements.length} statements`,
+			});
 			return results.map((result) => ({
 				results: result.results as Record<string, unknown>[],
 				meta: this.extractMeta(result.meta),
 			}));
 		} catch (error) {
+			const durationMs = performance.now() - start;
+			this.observer?.({
+				service: "db",
+				operation: "batch",
+				durationMs,
+				ok: false,
+				detail: `${statements.length} statements`,
+				error: error instanceof Error ? error.message : String(error),
+			});
 			logGroveError("ServerSDK", SRV_ERRORS.QUERY_FAILED, {
 				detail: `batch of ${statements.length} statements`,
 				cause: error,
