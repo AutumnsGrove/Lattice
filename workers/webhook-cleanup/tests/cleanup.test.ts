@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { cleanupExpiredExports } from "../src/index.js";
+import { cleanupExpiredExports, cleanupExpiredWebhooks } from "../src/index.js";
 import type { GroveContext } from "@autumnsgrove/infra";
 
 vi.mock("@autumnsgrove/lattice/errors", () => ({
@@ -184,5 +184,68 @@ describe("cleanupExpiredExports", () => {
 
 		expect(cleaned).toBe(1);
 		expect(storageDel).not.toHaveBeenCalled();
+	});
+});
+
+describe("cleanupExpiredWebhooks", () => {
+	const meta = (changes: number) => ({
+		changes,
+		duration: 1,
+		last_row_id: 0,
+		rows_read: changes,
+		rows_written: changes,
+	});
+
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it("should delete expired webhooks in a single batch", async () => {
+		const ctx = createTestContext({
+			executeResults: [{ results: [], meta: meta(50) }],
+		});
+
+		const result = await cleanupExpiredWebhooks(ctx);
+
+		expect(result.totalDeleted).toBe(50);
+		expect(result.batchCount).toBe(1);
+		expect(ctx.db.execute).toHaveBeenCalledTimes(1);
+	});
+
+	it("should continue batching when BATCH_SIZE rows deleted", async () => {
+		// First batch returns exactly 1000 (BATCH_SIZE), second returns less → stop
+		const ctx = createTestContext({
+			executeResults: [
+				{ results: [], meta: meta(1000) },
+				{ results: [], meta: meta(200) },
+			],
+		});
+
+		const result = await cleanupExpiredWebhooks(ctx);
+
+		expect(result.totalDeleted).toBe(1200);
+		expect(result.batchCount).toBe(2);
+	});
+
+	it("should stop when fewer than BATCH_SIZE deleted", async () => {
+		const ctx = createTestContext({
+			executeResults: [{ results: [], meta: meta(500) }],
+		});
+
+		const result = await cleanupExpiredWebhooks(ctx);
+
+		expect(result.totalDeleted).toBe(500);
+		expect(result.batchCount).toBe(1);
+	});
+
+	it("should handle zero expired webhooks", async () => {
+		const ctx = createTestContext({
+			executeResults: [{ results: [], meta: meta(0) }],
+		});
+
+		const result = await cleanupExpiredWebhooks(ctx);
+
+		expect(result.totalDeleted).toBe(0);
+		expect(result.batchCount).toBe(1);
 	});
 });

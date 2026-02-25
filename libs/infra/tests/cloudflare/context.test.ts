@@ -118,7 +118,7 @@ describe("createCloudflareContext", () => {
 	// =========================================================================
 
 	describe("partial context with unavailable proxies", () => {
-		it("should create context with missing db — throws on access, not creation", () => {
+		it("should create context with missing db — rejects on access, not creation", async () => {
 			const ctx = createCloudflareContext({
 				...validOptions,
 				db: undefined,
@@ -126,10 +126,10 @@ describe("createCloudflareContext", () => {
 
 			expect(ctx.db).toBeDefined();
 			expect(ctx.db.info().provider).toBe("unavailable");
-			expect(() => ctx.db.execute("SELECT 1")).toThrow("SRV-001");
+			await expect(ctx.db.execute("SELECT 1")).rejects.toThrow("SRV-001");
 		});
 
-		it("should create context with missing storage — throws on access, not creation", () => {
+		it("should create context with missing storage — rejects on access, not creation", async () => {
 			const ctx = createCloudflareContext({
 				...validOptions,
 				storage: undefined,
@@ -137,10 +137,10 @@ describe("createCloudflareContext", () => {
 
 			expect(ctx.storage).toBeDefined();
 			expect(ctx.storage.info().provider).toBe("unavailable");
-			expect(() => ctx.storage.get("key")).toThrow("SRV-002");
+			await expect(ctx.storage.get("key")).rejects.toThrow("SRV-002");
 		});
 
-		it("should create context with missing kv — throws on access, not creation", () => {
+		it("should create context with missing kv — rejects on access, not creation", async () => {
 			const ctx = createCloudflareContext({
 				...validOptions,
 				kv: undefined,
@@ -148,7 +148,7 @@ describe("createCloudflareContext", () => {
 
 			expect(ctx.kv).toBeDefined();
 			expect(ctx.kv.info().provider).toBe("unavailable");
-			expect(() => ctx.kv.get("key")).toThrow("SRV-003");
+			await expect(ctx.kv.get("key")).rejects.toThrow("SRV-003");
 		});
 
 		it("should create context with no bindings at all", () => {
