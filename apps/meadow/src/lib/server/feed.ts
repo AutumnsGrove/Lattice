@@ -36,9 +36,13 @@ function buildBaseSelect(userId: string | null): string {
       ${userId ? "CASE WHEN mb.id IS NOT NULL THEN 1 ELSE 0 END" : "0"} AS user_bookmarked,
       ${userId ? "mr.emojis" : "NULL"} AS user_reactions
     FROM meadow_posts p
-    LEFT JOIN blaze_definitions bd
-      ON bd.slug = p.blaze
-      AND (bd.tenant_id = p.tenant_id OR bd.tenant_id IS NULL)
+    LEFT JOIN blaze_definitions bd ON bd.id = (
+      SELECT bd2.id FROM blaze_definitions bd2
+      WHERE bd2.slug = p.blaze
+        AND (bd2.tenant_id = p.tenant_id OR bd2.tenant_id IS NULL)
+      ORDER BY bd2.tenant_id IS NOT NULL DESC
+      LIMIT 1
+    )
     ${userJoins}`;
 }
 

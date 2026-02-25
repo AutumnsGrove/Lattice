@@ -52,7 +52,7 @@
 		try {
 			const res = await fetch("/api/blazes");
 			if (res.ok) {
-				const { blazes } = await res.json();
+				const { blazes } = (await res.json()) as { blazes: Array<{ slug: string; label: string; icon: string; color: string }> };
 				if (Array.isArray(blazes) && blazes.length > 0) {
 					availableBlazes = blazes;
 				}
