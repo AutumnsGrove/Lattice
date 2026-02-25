@@ -107,7 +107,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 	try {
 		const tenantId = await getVerifiedTenantId(platform.env.DB, locals.tenantId, locals.user);
 
-		const data = await request.json();
+		const data = (await request.json()) as Record<string, unknown>;
 		const slug = typeof data.slug === "string" ? data.slug.trim() : "";
 		const label = typeof data.label === "string" ? data.label.trim() : "";
 		const icon = typeof data.icon === "string" ? data.icon.trim() : "";

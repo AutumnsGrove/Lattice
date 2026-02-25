@@ -17,8 +17,7 @@ import {
 	Megaphone,
 	HelpCircle,
 } from "lucide-svelte";
-import type { Component } from "svelte";
-import type { AutoBlazeConfig, BlazeColorClasses, PostType } from "./types.js";
+import type { AutoBlazeConfig, BlazeColorClasses, LucideIcon, PostType } from "./types.js";
 
 /**
  * Static config for auto-blazes (Slot 1). Keyed by post_type.
@@ -70,7 +69,7 @@ export const BLAZE_COLORS: Record<string, BlazeColorClasses> = {
 };
 
 /** Map of icon names to Lucide components for custom blazes */
-const LUCIDE_ICON_MAP: Record<string, Component> = {
+const LUCIDE_ICON_MAP: Record<string, LucideIcon> = {
 	Bell,
 	UtensilsCrossed,
 	Heart,
@@ -82,7 +81,7 @@ const LUCIDE_ICON_MAP: Record<string, Component> = {
 };
 
 /** Resolve a Lucide icon name to a component. Falls back to HelpCircle. */
-export function resolveLucideIcon(name: string): Component {
+export function resolveLucideIcon(name: string): LucideIcon {
 	return LUCIDE_ICON_MAP[name] ?? HelpCircle;
 }
 

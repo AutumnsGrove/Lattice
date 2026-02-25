@@ -5,15 +5,19 @@
  * The second tells you why you're walking it.
  */
 
-import type { Component } from "svelte";
-
 /** Post content types that receive auto-blazes */
 export type PostType = "bloom" | "note";
+
+/**
+ * Lucide icon component type — uses typeof import to match the actual
+ * SvelteComponentTyped class that lucide-svelte v0.x exports.
+ */
+export type LucideIcon = typeof import("lucide-svelte").Cherry;
 
 /** Auto-blaze config for Slot 1 (derived from post_type, never stored) */
 export interface AutoBlazeConfig {
 	label: string;
-	icon: Component;
+	icon: LucideIcon;
 	/** Full Tailwind class string (static for JIT scanner) */
 	classes: string;
 }

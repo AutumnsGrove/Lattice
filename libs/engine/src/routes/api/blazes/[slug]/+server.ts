@@ -39,7 +39,7 @@ export const DELETE: RequestHandler = async ({ params, platform, locals }) => {
 			.bind(tenantId, slug)
 			.run();
 
-		if (!result.meta.changes || result.meta.changes === 0) {
+		if (!(result.meta as D1Meta).changes || (result.meta as D1Meta).changes === 0) {
 			throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
 		}
 
