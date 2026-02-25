@@ -538,7 +538,8 @@ export async function evaluateBehavioralRules(
 export interface BehavioralContext {
   /** Entity performing the action */
   userId?: string;
-  tenantId?: string;
+  /** Tenant scope — required for all label and moderation log operations */
+  tenantId: string;
   /** Content metadata (not the content itself) */
   contentType: ThornContentType;
   hookPoint: ThornHookPoint;
@@ -567,7 +568,7 @@ export async function moderatePublishedContent(
     const rateResult = await checkBehavioralRateLimit(
       options.threshold,
       options.db,
-      options.tenantId!,
+      options.tenantId,
       options.userId!,
       mapHookToEndpoint(options.hookPoint), // e.g. "on_publish" → "posts/create"
     );
@@ -649,13 +650,13 @@ export async function moderatePublishedContent(
 
     // ── NEW: Post-AI label updates ─────────────────────────
     if (result.action === "block") {
-      await addLabel(options.db, options.tenantId!, "user", options.userId!, "thorn:blocked_content", {
+      await addLabel(options.db, options.tenantId, "user", options.userId!, "thorn:blocked_content", {
         addedBy: "ai_moderation",
         expiresInHours: 90 * 24,
         reason: `Blocked: ${result.categories.join(", ")}`,
       });
       // Check for repeat offender escalation
-      await checkRepeatOffenderEscalation(options.db, options.tenantId!, options.userId!);
+      await checkRepeatOffenderEscalation(options.db, options.tenantId, options.userId!);
     }
   } catch (err) {
     console.error("[Thorn] Moderation failed:", err);
