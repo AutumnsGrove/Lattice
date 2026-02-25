@@ -43,14 +43,14 @@
 	style:translate="-50% 0"
 >
 	{#if tree.species === "pine"}
-		<TreePine {season} size={tree.height} />
+		<TreePine {season} class="h-full w-full" />
 	{:else if tree.species === "cherry"}
-		<TreeCherry {season} size={tree.height} />
+		<TreeCherry {season} class="h-full w-full" />
 	{:else if tree.species === "aspen"}
-		<TreeAspen {season} size={tree.height} />
+		<TreeAspen {season} class="h-full w-full" />
 	{:else if tree.species === "birch"}
-		<TreeBirch {season} size={tree.height} />
+		<TreeBirch {season} class="h-full w-full" />
 	{:else if tree.species === "logo"}
-		<Logo {season} size={tree.height} />
+		<Logo {season} class="h-full w-full" />
 	{/if}
 </div>
