@@ -1,84 +1,43 @@
 /**
- * Grove Codebase Visualization
+ * Grove PR Impact
  *
- * Generates an ASCII art grove/forest representing the monorepo structure.
- * Each package becomes a tree — size proportional to file count,
- * shape based on package type (app, service, worker, lib).
+ * Compares package file counts between a base snapshot and the current tree.
+ * Shows only what changed — added, removed, or resized packages.
  *
- * Usage: node grove-visualization.mjs [--markdown] [--json]
- *
- * The grove grows with your codebase. Every package is a tree in the forest.
+ * Usage:
+ *   node grove-visualization.mjs [root] --base base.json [--markdown] [--json]
  */
 
-import { readdirSync, readFileSync, statSync, existsSync } from "node:fs";
-import { join, basename } from "node:path";
+import { readdirSync, readFileSync, existsSync } from "node:fs";
+import { join } from "node:path";
 
-const ROOT = process.argv[2] || process.cwd();
-const FORMAT = process.argv.includes("--json")
+// ─── Args ────────────────────────────────────────────────────────────
+
+const args = process.argv.slice(2);
+const ROOT =
+	args.find(
+		(a) => !a.startsWith("--") && args[args.indexOf(a) - 1] !== "--base",
+	) || process.cwd();
+const FORMAT = args.includes("--json")
 	? "json"
-	: process.argv.includes("--markdown")
+	: args.includes("--markdown")
 		? "markdown"
 		: "plain";
+const baseIdx = args.indexOf("--base");
+const BASE_FILE = baseIdx !== -1 ? args[baseIdx + 1] : null;
 
-// ─── Tree shapes ────────────────────────────────────────────────────
-// Each tree type has layers that scale with size.
-// Art is bottom-up: trunk first, then canopy layers smallest to largest.
+// ─── Category config ─────────────────────────────────────────────────
 
-const TREE_STYLES = {
-	// Apps — full deciduous trees with broad canopies
-	app: {
-		emoji: "🌳",
-		trunk: "  |  ",
-		layers: [
-			"  *  ",
-			" /|\\ ",
-			"/ | \\",
-			" /|\\ ",
-			"/||\\\\",
-		],
-		crown: "  🍂 ",
-	},
-	// Services — tall evergreen conifers
-	service: {
-		emoji: "🌲",
-		trunk: "  |  ",
-		layers: [
-			"  *  ",
-			" /|\\ ",
-			" /|\\ ",
-			"//|\\\\",
-			"//|\\\\",
-		],
-		crown: "  ⭐ ",
-	},
-	// Workers — small flowering bushes
-	worker: {
-		emoji: "🌿",
-		trunk: "  |  ",
-		layers: [
-			"  .  ",
-			" .|. ",
-			".|.|.",
-		],
-		crown: "  🌸 ",
-	},
-	// Libs — ancient deep-rooted trees
-	lib: {
-		emoji: "🌴",
-		trunk: "  |  ",
-		layers: [
-			"  *  ",
-			" *** ",
-			" /|\\ ",
-			"/ | \\",
-			"//|\\\\",
-			"/|||\\",
-		],
-		crown: "  🍃 ",
-	},
-};
+const CATEGORIES = [
+	{ dir: "apps", type: "app", label: "Apps", emoji: "🌳" },
+	{ dir: "services", type: "service", label: "Services", emoji: "🌲" },
+	{ dir: "workers", type: "worker", label: "Workers", emoji: "🌿" },
+	{ dir: "libs", type: "lib", label: "Libraries", emoji: "🌴" },
+];
 
-// ─── Count files in a directory ─────────────────────────────────────
+const EMOJI_MAP = Object.fromEntries(CATEGORIES.map((c) => [c.type, c.emoji]));
+
+// ─── Count source files ──────────────────────────────────────────────
 
 function countFiles(dir) {
 	let count = 0;
@@ -99,19 +58,12 @@ function countFiles(dir) {
 	return count;
 }
 
-// ─── Discover packages ──────────────────────────────────────────────
+// ─── Discover packages ───────────────────────────────────────────────
 
 function discoverPackages() {
-	const categories = [
-		{ dir: "apps", type: "app", label: "Apps" },
-		{ dir: "services", type: "service", label: "Services" },
-		{ dir: "workers", type: "worker", label: "Workers" },
-		{ dir: "libs", type: "lib", label: "Libs" },
-	];
-
 	const packages = [];
 
-	for (const cat of categories) {
+	for (const cat of CATEGORIES) {
 		const catDir = join(ROOT, cat.dir);
 		if (!existsSync(catDir)) continue;
 
@@ -119,28 +71,26 @@ function discoverPackages() {
 			if (!entry.isDirectory() || entry.name.startsWith(".")) continue;
 
 			const pkgDir = join(catDir, entry.name);
-			const pkgJsonPath = join(pkgDir, "package.json");
-
 			let name = entry.name;
 			try {
+				const pkgJsonPath = join(pkgDir, "package.json");
 				if (existsSync(pkgJsonPath)) {
 					const pkg = JSON.parse(readFileSync(pkgJsonPath, "utf-8"));
-					name = pkg.name
-						? pkg.name.replace(/^@autumnsgrove\//, "").replace(/^grove-/, "")
-						: entry.name;
+					name =
+						pkg.name
+							?.replace(/^@autumnsgrove\//, "")
+							.replace(/^grove-/, "") || entry.name;
 				}
 			} catch {
 				// Use directory name
 			}
-
-			const fileCount = countFiles(pkgDir);
 
 			packages.push({
 				name,
 				dirName: entry.name,
 				category: cat.type,
 				categoryLabel: cat.label,
-				fileCount,
+				fileCount: countFiles(pkgDir),
 				path: `${cat.dir}/${entry.name}`,
 			});
 		}
@@ -149,155 +99,12 @@ function discoverPackages() {
 	return packages.sort((a, b) => b.fileCount - a.fileCount);
 }
 
-// ─── Generate a single ASCII tree ───────────────────────────────────
-
-function generateTree(pkg) {
-	const style = TREE_STYLES[pkg.category];
-	// Tree height scales with file count (min 2 layers, max all layers)
-	const maxLayers = style.layers.length;
-	const heightRatio = Math.min(pkg.fileCount / 80, 1); // 80+ files = full height
-	const layerCount = Math.max(2, Math.round(heightRatio * maxLayers));
-
-	const lines = [];
-
-	// Crown
-	lines.push(style.crown);
-
-	// Canopy layers (top to bottom = smallest to largest)
-	const selectedLayers = style.layers.slice(0, layerCount);
-	for (const layer of selectedLayers) {
-		lines.push(layer);
-	}
-
-	// Trunk
-	lines.push(style.trunk);
-	if (pkg.fileCount > 40) lines.push(style.trunk); // Taller trunk for big packages
-
-	// Label
-	const label = pkg.name.length > 9 ? pkg.name.slice(0, 8) + "…" : pkg.name;
-	lines.push(label.padStart(Math.floor((5 + label.length) / 2)).padEnd(5));
-
-	return lines;
-}
-
-// ─── Compose the full grove ─────────────────────────────────────────
-
-function composeGrove(packages) {
-	const output = [];
-
-	// Title
-	output.push("");
-	output.push("  ╔══════════════════════════════════════════════════════╗");
-	output.push("  ║            🌲  THE GROVE  🌲                        ║");
-	output.push("  ║         a living codebase map                       ║");
-	output.push("  ╚══════════════════════════════════════════════════════╝");
-	output.push("");
-
-	// Group by category
-	const groups = {};
-	for (const pkg of packages) {
-		if (!groups[pkg.categoryLabel]) groups[pkg.categoryLabel] = [];
-		groups[pkg.categoryLabel].push(pkg);
-	}
-
-	for (const [label, pkgs] of Object.entries(groups)) {
-		const style = TREE_STYLES[pkgs[0].category];
-
-		output.push(`  ── ${style.emoji} ${label} ${"─".repeat(45 - label.length)}`);
-		output.push("");
-
-		// Render trees side by side (up to 6 per row)
-		const TREES_PER_ROW = 6;
-		const COL_WIDTH = 11;
-
-		for (let i = 0; i < pkgs.length; i += TREES_PER_ROW) {
-			const row = pkgs.slice(i, i + TREES_PER_ROW);
-			const trees = row.map((pkg) => generateTree(pkg));
-
-			// Find max height in this row
-			const maxHeight = Math.max(...trees.map((t) => t.length));
-
-			// Pad all trees to same height (top-pad with spaces)
-			const padded = trees.map((tree) => {
-				const pad = maxHeight - tree.length;
-				return [...Array(pad).fill("     "), ...tree];
-			});
-
-			// Render row line by line
-			for (let line = 0; line < maxHeight; line++) {
-				const rowLine = padded
-					.map((tree) => {
-						const cell = tree[line] || "     ";
-						return cell.padEnd(COL_WIDTH);
-					})
-					.join(" ");
-				output.push("    " + rowLine);
-			}
-
-			// File counts under the trees
-			const counts = row
-				.map((pkg) => {
-					const count = `${pkg.fileCount}f`;
-					return count.padStart(Math.floor((COL_WIDTH + count.length) / 2)).padEnd(COL_WIDTH);
-				})
-				.join(" ");
-			output.push("    " + counts);
-
-			// Ground line
-			const ground = row.map(() => "───────────").join("─");
-			output.push("    " + ground);
-			output.push("");
-		}
-	}
-
-	// Summary stats
-	const totalFiles = packages.reduce((sum, p) => sum + p.fileCount, 0);
-	const totalPkgs = packages.length;
-
-	output.push("  ── 📊 Forest Census ─────────────────────────────────");
-	output.push("");
-	output.push(`    🌳 ${groups["Apps"]?.length || 0} apps`);
-	output.push(`    🌲 ${groups["Services"]?.length || 0} services`);
-	output.push(`    🌿 ${groups["Workers"]?.length || 0} workers`);
-	output.push(`    🌴 ${groups["Libs"]?.length || 0} libraries`);
-	output.push(`    ─────────────────────`);
-	output.push(`    📦 ${totalPkgs} packages · ${totalFiles.toLocaleString()} files`);
-	output.push("");
-
-	// Legend
-	output.push("  ── 📖 Legend ────────────────────────────────────────");
-	output.push("");
-	output.push("    Tree height = file count (taller = more files)");
-	output.push("    🌳 App (user-facing)   🌲 Service (backend)");
-	output.push("    🌿 Worker (background) 🌴 Library (shared)");
-	output.push("");
-
-	return output.join("\n");
-}
-
-// ─── JSON output for programmatic use ───────────────────────────────
+// ─── JSON snapshot ───────────────────────────────────────────────────
 
 function toJSON(packages) {
-	const totalFiles = packages.reduce((sum, p) => sum + p.fileCount, 0);
 	return JSON.stringify(
 		{
 			generated: new Date().toISOString(),
-			summary: {
-				totalPackages: packages.length,
-				totalFiles,
-				byCategory: Object.fromEntries(
-					["app", "service", "worker", "lib"].map((cat) => {
-						const pkgs = packages.filter((p) => p.category === cat);
-						return [
-							cat,
-							{
-								count: pkgs.length,
-								files: pkgs.reduce((s, p) => s + p.fileCount, 0),
-							},
-						];
-					}),
-				),
-			},
 			packages: packages.map((p) => ({
 				name: p.name,
 				path: p.path,
@@ -310,47 +117,147 @@ function toJSON(packages) {
 	);
 }
 
-// ─── Markdown wrapper ───────────────────────────────────────────────
+// ─── Diff rendering ─────────────────────────────────────────────────
 
-function toMarkdown(packages, asciiGrove) {
-	const totalFiles = packages.reduce((sum, p) => sum + p.fileCount, 0);
+function computeDiff(headPackages, baseData) {
+	const basePkgs = baseData.packages;
+	const baseMap = new Map(basePkgs.map((p) => [p.path, p]));
+	const headMap = new Map(headPackages.map((p) => [p.path, p]));
 
-	let md = "## 🌲 The Grove — Codebase Visualization\n\n";
-	md += `*${packages.length} packages · ${totalFiles.toLocaleString()} source files*\n\n`;
-	md += "```\n";
-	md += asciiGrove;
-	md += "\n```\n\n";
+	const changes = [];
+	const added = [];
+	const removed = [];
 
-	// Package table
-	md += "<details><summary>Package details</summary>\n\n";
-	md += "| Package | Type | Files | Path |\n";
-	md += "| --- | --- | ---: | --- |\n";
-
-	for (const pkg of packages) {
-		const emoji =
-			pkg.category === "app"
-				? "🌳"
-				: pkg.category === "service"
-					? "🌲"
-					: pkg.category === "worker"
-						? "🌿"
-						: "🌴";
-		md += `| ${emoji} ${pkg.name} | ${pkg.categoryLabel} | ${pkg.fileCount} | \`${pkg.path}\` |\n`;
+	for (const hp of headPackages) {
+		const bp = baseMap.get(hp.path);
+		if (!bp) {
+			added.push(hp);
+		} else if (hp.fileCount !== bp.fileCount) {
+			changes.push({
+				name: hp.name,
+				category: hp.category,
+				path: hp.path,
+				before: bp.fileCount,
+				after: hp.fileCount,
+				delta: hp.fileCount - bp.fileCount,
+			});
+		}
 	}
 
-	md += "\n</details>\n";
+	for (const bp of basePkgs) {
+		if (!headMap.has(bp.path)) {
+			removed.push(bp);
+		}
+	}
+
+	changes.sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta));
+
+	const totalBefore = basePkgs.reduce((s, p) => s + p.fileCount, 0);
+	const totalAfter = headPackages.reduce((s, p) => s + p.fileCount, 0);
+
+	return { changes, added, removed, totalBefore, totalAfter };
+}
+
+function renderDiff(diff) {
+	const { changes, added, removed, totalBefore, totalAfter } = diff;
+	const totalDelta = totalAfter - totalBefore;
+	const changedCount = changes.length + added.length + removed.length;
+	const deltaStr = totalDelta >= 0 ? `+${totalDelta}` : String(totalDelta);
+	const lines = [];
+
+	if (changedCount === 0) {
+		lines.push("No package size changes. The grove is unchanged. 🌿");
+		return lines.join("\n");
+	}
+
+	lines.push(
+		`${changedCount} package${changedCount !== 1 ? "s" : ""} affected · ${deltaStr} files net`,
+	);
+	lines.push("");
+
+	if (changes.length > 0) {
+		lines.push("  Package                Before    After    Delta");
+		lines.push(
+			"  ──────────────────────────────────────────────────",
+		);
+		for (const c of changes) {
+			const emoji = EMOJI_MAP[c.category];
+			const nameStr =
+				c.name.length > 16 ? c.name.slice(0, 15) + "…" : c.name;
+			const arrow = c.delta > 0 ? "▲" : "▼";
+			const sign = c.delta > 0 ? "+" : "";
+			lines.push(
+				`  ${emoji} ${nameStr.padEnd(18)} ${String(c.before).padStart(5)}    ${String(c.after).padStart(5)}    ${sign}${c.delta} ${arrow}`,
+			);
+		}
+		lines.push("");
+	}
+
+	if (added.length > 0) {
+		for (const pkg of added) {
+			lines.push(
+				`  🌱 NEW: ${pkg.name} (${pkg.fileCount} files) — ${pkg.path}`,
+			);
+		}
+		lines.push("");
+	}
+
+	if (removed.length > 0) {
+		for (const pkg of removed) {
+			lines.push(
+				`  🍂 REMOVED: ${pkg.name} (was ${pkg.fileCount} files) — ${pkg.path}`,
+			);
+		}
+		lines.push("");
+	}
+
+	lines.push(
+		`  Total: ${totalBefore.toLocaleString()} → ${totalAfter.toLocaleString()} files (${deltaStr})`,
+	);
+
+	return lines.join("\n");
+}
+
+function toMarkdown(headPackages, diff, plainText) {
+	const { totalBefore, totalAfter } = diff;
+	const delta = totalAfter - totalBefore;
+	const deltaStr = delta >= 0 ? `+${delta}` : String(delta);
+	const changedCount =
+		diff.changes.length + diff.added.length + diff.removed.length;
+
+	let md = `## 🌲 The Grove — PR Impact\n\n`;
+
+	if (changedCount === 0) {
+		md += `*${headPackages.length} packages · ${totalAfter.toLocaleString()} files · no size changes*\n`;
+		return md;
+	}
+
+	md += `*${headPackages.length} packages · ${totalAfter.toLocaleString()} files (${deltaStr} from base)*\n\n`;
+	md += "```\n" + plainText + "\n```\n";
 	return md;
 }
 
-// ─── Main ───────────────────────────────────────────────────────────
+// ─── Main ────────────────────────────────────────────────────────────
 
 const packages = discoverPackages();
-const asciiGrove = composeGrove(packages);
 
 if (FORMAT === "json") {
+	// Snapshot mode — used by workflow to capture base branch state
 	console.log(toJSON(packages));
-} else if (FORMAT === "markdown") {
-	console.log(toMarkdown(packages, asciiGrove));
+} else if (BASE_FILE) {
+	// Diff mode — compare HEAD against base snapshot
+	const baseData = JSON.parse(readFileSync(BASE_FILE, "utf-8"));
+	const diff = computeDiff(packages, baseData);
+	const plainText = renderDiff(diff);
+	if (FORMAT === "markdown") {
+		console.log(toMarkdown(packages, diff, plainText));
+	} else {
+		console.log(plainText);
+	}
 } else {
-	console.log(asciiGrove);
+	console.error("Usage: grove-visualization.mjs [root] --base base.json [--markdown | --json]");
+	console.error("  --json     Generate a snapshot (no --base needed)");
+	console.error("  --base     Compare against a base snapshot");
+	console.error("  --markdown Wrap output in GitHub-flavored markdown");
+	process.exit(1);
 }

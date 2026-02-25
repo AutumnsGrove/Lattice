@@ -78,6 +78,11 @@
 			"svelte": "./dist/ui/components/gallery/index.js",
 			"default": "./dist/ui/components/gallery/index.js"
 		},
+		"./ui/media-player": {
+			"types": "./dist/ui/components/media-player/index.d.ts",
+			"svelte": "./dist/ui/components/media-player/index.js",
+			"default": "./dist/ui/components/media-player/index.js"
+		},
 		"./ui/charts": {
 			"types": "./dist/ui/components/charts/index.d.ts",
 			"svelte": "./dist/ui/components/charts/index.js",

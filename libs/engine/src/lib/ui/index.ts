@@ -19,6 +19,9 @@ export * from "./components/forms/index.js";
 export * from "./components/icons/index.js";
 export * from "./components/states/index.js";
 
+// Media player
+export * from "./components/media-player/index.js";
+
 // Charts (from AutumnsGrove)
 export * from "./components/charts/index.js";
 
