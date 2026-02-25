@@ -28,8 +28,9 @@
 	const season = $derived(seasonStore.current);
 
 	// Determine scale for morph animation
-	const scale = $derived(isDying ? 0 : isNew ? 1 : 1);
-	const opacity = $derived(isDying ? 0 : 1);
+	// New trees start at scale 0 and opacity 0, then animate to 1 via CSS transition
+	const scale = $derived(isDying ? 0 : isNew ? 0 : 1);
+	const opacity = $derived(isDying ? 0 : isNew ? 0 : 1);
 </script>
 
 <div
