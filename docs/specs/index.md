@@ -1,8 +1,8 @@
 ---
-lastUpdated: '2026-02-21'
+lastUpdated: '2026-02-25'
 aliases: []
 date created: Thursday, January 2nd 2026
-date modified: Saturday, February 21st 2026
+date modified: Tuesday, February 25th 2026
 tags:
   - specifications
   - architecture
@@ -75,7 +75,6 @@ Core  Tools  Docs
 | **[Curios](curios-spec.md)** | Cabinet of wonders and personal touches | Active |
 | **[Reverie](reverie-spec.md)** | AI-powered composition layer | Planned |
 | **[Gossamer](gossamer-spec.md)** | ASCII visual effects for Glass UI | Active |
-| **[Seasons](seasons-spec.md)** | Semantic versioning system | Active |
 
 ---
 
@@ -148,7 +147,8 @@ Core  Tools  Docs
 | Specification | Purpose | Status |
 |---------------|---------|--------|
 | **[gw CLI](gw-cli-spec.md)** | GroveWrap infrastructure CLI for D1, KV, R2 | Active |
-| **[Versioning](versioning-spec.md)** | npm publishing workflow | Active |
+| **[Seasons](seasons-spec.md)** | Semantic versioning and release workflow | Active |
+| ~~[Versioning](versioning-spec.md)~~ | ~~npm publishing workflow~~ | Deprecated (merged into Seasons) |
 | **[Testing](testing-spec.md)** | Testing strategy and infrastructure | Active |
 | **[Clearing](clearing-spec.md)** | Data export and migration tools | Active |
 

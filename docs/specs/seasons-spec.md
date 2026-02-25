@@ -1,16 +1,19 @@
 ---
-title: Seasons — Versioning System
-description: Semantic versioning strategy and release workflow
+title: "Seasons — Versioning System"
+description: "Semantic versioning strategy, release workflow, and deployment propagation for the Grove package ecosystem."
 category: specs
 specCategory: reference
 icon: tag
-lastUpdated: "2025-11-26"
+lastUpdated: "2026-02-25"
 aliases: []
+date created: Tuesday, November 26th 2025
+date modified: Tuesday, February 25th 2026
 tags:
   - versioning
   - npm
-  - releases
   - semver
+  - releases
+type: tech-spec
 ---
 
 # Seasons — Versioning System
@@ -27,7 +30,7 @@ tags:
                  │├─┤ │ │ 0.x.x │ │ │─┤│
                  ││││ │ │       │ │ │ │││
                  ││││ │ │  🌱   │ │ │ │││
-                 └┴┴┴─┴─┴───────┴─┴─┴─┴┴┘
+                 └┴┴┴─┴─┴───────┴─┴─┴─┴┘
                 ╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱
              ────────────────────────────
 
@@ -37,22 +40,24 @@ tags:
 
 > _Each ring records a season—growth in plenty, resilience through hardship._
 
-Grove's semantic versioning system defining how Lattice evolves and updates propagate to customer repositories. Covers major/minor/patch conventions, publishing workflows, breaking change protocols, and the Renovate-powered auto-update pipeline.
+Seasons is Grove's versioning system: how Lattice evolves, how releases propagate, how the ecosystem grows through breaking changes and gentle improvements alike.
+
+> **Note:** Not to be confused with the seasonal UI theming system (`seasonStore` in `libs/engine/src/lib/ui/`) — that system handles spring/summer/autumn/winter visual themes for wanderers. This spec covers package versioning.
 
 **Public Name:** Seasons
 **Internal Name:** GroveSeasons
 **Package:** `@autumnsgrove/lattice`
-**Registry:** npmjs.com (public)
-
-Seasons mark the passage of time in a forest. Spring brings new growth, summer matures it, autumn harvests, winter rests. Each season builds on the last, each version a new ring in the trunk.
-
-Seasons is Grove's versioning system: how Lattice evolves, how updates propagate, how the ecosystem grows together through breaking changes and gentle improvements alike.
+**Version:** 1.0.0 (stable)
+**Registry:** GitHub Packages (`npm.pkg.github.com`)
+**License:** AGPL-3.0-only
 
 ---
 
 ## Overview
 
-Lattice follows [Semantic Versioning 2.0.0](https://semver.org/) for all releases. This document defines how versions are managed, how releases are published, and how updates propagate to customer repositories.
+Lattice follows [Semantic Versioning 2.0.0](https://semver.org/) for all releases. Grove operates as a single **multi-tenant deployment** — all tenants share one `grove-lattice` Cloudflare Pages deployment, routed via `grove-router` (Passage) at `*.grove.place`. When a new version ships, every grove gets the update simultaneously.
+
+This document defines how versions are managed, how releases are published, and how the package ecosystem grows.
 
 ---
 
@@ -101,7 +106,7 @@ Version format: `MAJOR.MINOR.PATCH` (e.g., `1.2.3`)
 
 ### MAJOR Version Changes
 
-Increment MAJOR when making **incompatible API changes** that require customer action:
+Increment MAJOR when making **incompatible API changes** that require action:
 
 - Breaking changes to component props or APIs
 - Removal of exported functions, types, or components
@@ -111,10 +116,10 @@ Increment MAJOR when making **incompatible API changes** that require customer a
 
 **Examples:**
 
-- `PostCard` component removes required `post` prop
-- `createSession()` function signature changes
-- `users` table schema changes column names
-- KV binding renamed from `KV` to `CACHE`
+- Loom SDK removes `LoomDO.onAlarm()` callback signature
+- Heartwood auth flow changes required session cookie format
+- Drizzle schema migration renames a column in `tenants` table
+- KV binding renamed from `KV` to `GROVE_CACHE`
 
 ### MINOR Version Changes
 
@@ -128,10 +133,10 @@ Increment MINOR when adding **backwards-compatible functionality**:
 
 **Examples:**
 
-- New `Newsletter` component added
-- `PostCard` gets optional `showTags` prop
+- New Blazes content markers system added
+- Amber SDK adds optional `quotaManager` to storage context
 - New `formatRelativeDate()` utility function
-- New `subscriptions` table added
+- New `storageAddons` table added via migration
 
 ### PATCH Version Changes
 
@@ -147,28 +152,39 @@ Increment PATCH for **backwards-compatible bug fixes**:
 **Examples:**
 
 - Fix XSS vulnerability in markdown renderer
-- Fix mobile layout issue in `Header` component
-- Improve database query performance
+- Fix Svelte 5 rune reactivity in `seasonStore`
+- Improve Loom DO query performance
 - Update Tailwind CSS peer dependency
+
+---
+
+## Package Landscape
+
+Grove's monorepo contains five publishable packages at different maturity stages:
+
+| Package | Version | Location | Status | Description |
+|---------|---------|----------|--------|-------------|
+| `@autumnsgrove/lattice` | **1.0.0** | `libs/engine` | Published (GitHub Packages) | Core framework — UI, auth, Loom, Lumen, email |
+| `@autumnsgrove/server-sdk` | 0.1.0 | `libs/server-sdk` | Workspace only | Infra SDK — GroveDatabase, GroveStorage, GroveKV |
+| `@autumnsgrove/foliage` | 0.1.0 | `libs/foliage` | Workspace only | Theme system and visual customization |
+| `@autumnsgrove/gossamer` | 0.2.0 | `libs/gossamer` | Workspace only | ASCII visual effects for Glass UI |
+| `@autumnsgrove/vineyard` | 0.0.1 | `libs/vineyard` | Workspace only | Component showcase library |
+
+Only `@autumnsgrove/lattice` currently publishes to GitHub Packages. The remaining packages use `workspace:*` references and are consumed within the monorepo. They may be published independently as they mature.
+
+Private apps (`apps/*`), services (`services/*`), and workers (`workers/*`) are deployed directly — they don't follow this versioning spec.
 
 ---
 
 ## Pre-release Versions
 
-### Development Phase (Current)
+### Lattice (v1.0.0 Stable)
 
-During initial development, versions are `0.x.x`:
+Lattice has graduated past the `0.x.x` development phase. Version 1.0.0 signals a stable API contract: MAJOR bumps for breaking changes, MINOR for features, PATCH for fixes.
 
-```
-0.1.0  - Initial alpha release
-0.2.0  - Add admin components
-0.3.0  - Add authentication system
-...
-0.9.0  - Feature complete for v1
-1.0.0  - First stable release
-```
+### Secondary Packages (0.x.x Development)
 
-In `0.x.x` versions, MINOR version bumps may include breaking changes. This is expected during initial development.
+Packages still in `0.x.x` (server-sdk, foliage, gossamer, vineyard) follow relaxed semver: MINOR bumps may include breaking changes during initial development.
 
 ```
 Development Phase:
@@ -198,16 +214,6 @@ Use `-beta.x` suffix for testing before stable releases:
 - Significant UI/UX changes
 - Performance improvements needing validation
 
-```
-Beta Releases:
-
-    1.2.0-beta.1 ──▶ 1.2.0-beta.2 ──▶ 1.2.0-beta.3 ──▶ 1.2.0
-         │                │                │             │
-        🔬               🔬               🔬             ✓
-      testing           fixes            final         stable
-                                         polish
-```
-
 ### Alpha Releases
 
 Use `-alpha.x` suffix for early experimental features:
@@ -218,240 +224,119 @@ Use `-alpha.x` suffix for early experimental features:
 
 ---
 
-## Publishing Workflow
+## Release Workflow
 
-### Standard Release Process
+### How Releases Actually Work
+
+Releases follow a two-stage process: automated tagging and snapshotting via CI, then manual publishing to the registry.
+
+```
+    ┌─────────────────┐
+    │ 1. Bump version │   libs/engine/package.json
+    │    in code      │   Update CHANGELOG.md
+    └────────┬────────┘
+             │
+             ▼
+    ┌─────────────────┐
+    │ 2. Merge to     │   PR review + merge
+    │    main         │
+    └────────┬────────┘
+             │
+             ▼
+    ┌─────────────────┐
+    │ 3. auto-tag.yml │   Detects version change
+    │    fires        │   Creates annotated git tag (vX.Y.Z)
+    │                 │   Generates repository snapshot
+    │                 │   AI release summary via OpenRouter
+    │                 │   Calculates package size
+    │                 │   Syncs to landing page
+    └────────┬────────┘
+             │
+             ▼
+    ┌─────────────────┐
+    │ 4. Manual       │   pnpm publish (from libs/engine)
+    │    publish      │   → GitHub Packages
+    └────────┬────────┘
+             │
+             ▼
+    ┌─────────────────┐
+    │ 5. All tenants  │   Single deployment
+    │    updated      │   grove-lattice on Cloudflare Pages
+    └─────────────────┘
+```
+
+### Step-by-Step
 
 ```bash
-# 1. Ensure you're on main branch with clean working directory
-git checkout main
-git pull origin main
-git status  # Should show clean
+# 1. Update version in libs/engine/package.json
+# 2. Update CHANGELOG.md with release notes
+# 3. Commit and push to main (or merge PR)
 
-# 2. Run tests and build
-pnpm test
-pnpm build
+# auto-tag.yml runs automatically on push to main
+# when libs/engine/package.json version changes
 
-# 3. Bump version (choose one)
-pnpm version patch  # Bug fixes: 1.0.0 -> 1.0.1
-pnpm version minor  # New features: 1.0.0 -> 1.1.0
-pnpm version major  # Breaking changes: 1.0.0 -> 2.0.0
+# 4. Publish to GitHub Packages (manual)
+cd libs/engine
+pnpm publish
 
-# 4. Publish to npm
-pnpm publish --access public
-
-# 5. Push version tag to GitHub
-git push --follow-tags
+# 5. Deploy (if not already deployed via CI)
+# The Cloudflare Pages deployment picks up the new build
 ```
+
+### Auto-Tag Workflow (`.github/workflows/auto-tag.yml`)
+
+When a version bump lands on `main`, the `auto-tag.yml` workflow:
+
+1. **Detects** the version change by comparing `libs/engine/package.json` with the previous commit
+2. **Creates** an annotated git tag (`vX.Y.Z`) with release metadata
+3. **Generates** a repository snapshot appended to `snapshots/history.csv` (46+ versions tracked)
+4. **Produces** an AI release summary via OpenRouter (stored alongside the snapshot)
+5. **Calculates** package size (tarball + unpacked bytes)
+6. **Runs** documentation keyword analysis
+7. **Syncs** release data to the landing page
+
+The workflow also supports manual triggers for force-snapshotting and backfilling historical summaries.
 
 ### Pre-release Publishing
 
 ```bash
-# Beta release
+# Beta release from libs/engine
 pnpm version prerelease --preid=beta  # 1.2.0 -> 1.2.1-beta.0
-pnpm publish --tag beta --access public
-
-# Customers can install beta:
-# pnpm add @lattice/core@beta
-```
-
-### Automated Publishing (CI/CD)
-
-GitHub Actions workflow for automated publishing:
-
-```yaml
-# .github/workflows/publish.yml
-name: Publish to npm
-
-on:
-  push:
-    tags:
-      - "v*"
-
-jobs:
-  publish:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 9
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          registry-url: "https://registry.npmjs.org"
-          cache: "pnpm"
-
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm test
-      - run: pnpm build
-
-      - name: Publish to npm
-        run: pnpm publish --access public --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          generate_release_notes: true
+pnpm publish --tag beta
 ```
 
 ---
 
-## Version Constraints
+## Deployment & Propagation
 
-### Customer package.json
+### Multi-Tenant Model
 
-Recommended version constraints for customer repositories:
-
-```json
-{
-  "dependencies": {
-    "@lattice/core": "^1.0.0"
-  }
-}
-```
-
-**Caret (`^`) recommended:** Allows automatic updates for MINOR and PATCH versions while protecting against MAJOR changes.
+Grove operates as a **single multi-tenant deployment**. There are no per-customer repositories, no Renovate bot, no customer PRs.
 
 ```
-    Recommended in package.json:
-
-    ┌─────────────────────────────────────────────────────────────┐
-    │                                                             │
-    │  "dependencies": {                                          │
-    │    "@lattice/core": "^1.0.0"                            │
-    │  }                     ▲                                    │
-    │                        │                                    │
-    │                        └── The caret (^) is your friend     │
-    │                                                             │
-    └─────────────────────────────────────────────────────────────┘
-
-    What each symbol means:
-
-    ^1.2.3    ───▶    ≥1.2.3  and  <2.0.0     ✓ Recommended
-                      │
-                      └── Gets minor + patch updates safely
-
-    ~1.2.3    ───▶    ≥1.2.3  and  <1.3.0     ⚠️ Conservative
-                      │
-                      └── Patch updates only
-
-    1.2.3     ───▶    Exactly 1.2.3            ⛔ Avoid
-                      │
-                      └── Misses security patches!
-
-    *         ───▶    Any version               🚫 Never use
-                      │
-                      └── Chaos. Breaking changes everywhere.
+    ┌─────────────────┐
+    │  grove-lattice   │   Single Cloudflare Pages deployment
+    │  (all tenants)   │
+    └────────┬─────────┘
+             │
+    ┌────────┼─────────────────────────┐
+    │        │                         │
+    ▼        ▼                         ▼
+  alice.     bob.                   carol.
+  grove.     grove.                grove.
+  place      place                 place
 ```
 
-**Version constraint meanings:**
+**How updates reach tenants:**
 
-- `^1.2.3` - Allows `>=1.2.3 <2.0.0` (recommended)
-- `~1.2.3` - Allows `>=1.2.3 <1.3.0` (conservative)
-- `1.2.3` - Exact version only (not recommended)
-- `*` - Any version (dangerous, never use)
+1. New version merges to `main`
+2. CI builds and deploys `grove-lattice` to Cloudflare Pages
+3. `grove-router` (Passage) routes all `*.grove.place` subdomains to the single deployment
+4. Every tenant is running the new version immediately — no opt-in, no lag
 
----
+This means breaking changes must be handled with extra care (see Breaking Change Protocol below), since there's no gradual rollout window.
 
-## Update Propagation
-
-### Flow Diagram
-
-```mermaid
-sequenceDiagram
-    participant E as Lattice Repo
-    participant N as npm Registry
-    participant R as Renovate Bot
-    participant C as Customer Repo
-    participant G as GitHub Actions
-    participant CF as Cloudflare
-
-    E->>N: pnpm publish (new version)
-    Note over N: Package available<br/>on npm registry
-
-    loop Every ~1 hour
-        R->>N: Check for updates
-        N->>R: New version available
-        R->>C: Open PR with update
-    end
-
-    C->>G: PR triggers CI
-    G->>G: Run build & tests
-
-    alt CI Passes
-        G->>C: Auto-merge PR
-        C->>G: Merge triggers deploy
-        G->>CF: Deploy to Cloudflare
-        Note over CF: Customer site<br/>running new version
-    else CI Fails
-        G->>C: PR blocked
-        Note over C: Manual intervention<br/>required
-    end
-```
-
-### Timeline
-
-Typical update propagation timeline:
-
-| Event                             | Time                  |
-| --------------------------------- | --------------------- |
-| Engine publishes new version      | T+0                   |
-| npm registry indexes package      | T+1 minute            |
-| Renovate detects update           | T+1 hour (worst case) |
-| PR opened on customer repo        | T+1 hour              |
-| CI runs build & tests             | T+1.5 hours           |
-| Auto-merge (if passing)           | T+1.5 hours           |
-| Deploy to Cloudflare              | T+2 hours             |
-| Customer site running new version | T+2 hours             |
-
-**Note:** Emergency security patches can be expedited by manually triggering Renovate or updating dependencies directly.
-
-### Update Propagation Visual
-
-```
-    ┌─────────────┐
-    │ ENGINE      │   T+0 min      pnpm publish
-    │ publishes   │ ─────────────────────────────▶
-    └─────┬───────┘
-          │
-          ▼
-    ┌─────────────┐
-    │ npm         │   T+1 min      Package indexed
-    │ registry    │ ─────────────────────────────▶
-    └─────┬───────┘
-          │
-          ▼
-    ┌─────────────┐
-    │ Renovate    │   T+1 hour     Detects update
-    │ bot         │ ─────────────────────────────▶
-    └─────┬───────┘
-          │
-          ▼
-    ┌─────────────┐
-    │ Customer    │   T+1.5 hours  PR opened, CI runs
-    │ repo        │ ─────────────────────────────▶
-    └─────┬───────┘
-          │
-          ▼
-    ┌─────────────┐
-    │ Auto-merge  │   T+1.5 hours  (if CI passes)
-    │             │ ─────────────────────────────▶
-    └─────┬───────┘
-          │
-          ▼
-    ┌─────────────┐
-    │ Cloudflare  │   T+2 hours    🚀 Live!
-    │ deploy      │ ─────────────────────────────▶
-    └─────────────┘
-
-         ╰───────────────────────────────────────╯
-                    Automated growth
-```
+> **Historical note:** An earlier architecture envisioned per-customer GitHub repos with Renovate-powered auto-updates. That model was never built. See `customer-repo-spec.md` for the original design if curious.
 
 ---
 
@@ -462,15 +347,15 @@ When a breaking change is necessary:
 ### 1. Document in CHANGELOG
 
 ```markdown
-## [2.0.0] - 2025-12-01
+## [2.0.0] - 2026-XX-XX
 
 ### BREAKING CHANGES
 
-- **PostCard**: Removed `post` prop, now uses `data` prop
-  - Migration: Replace `<PostCard post={p}>` with `<PostCard data={p}>`
+- **Loom SDK**: `LoomDO.onAlarm()` signature changed to accept `AlarmContext`
+  - Migration: Update DO subclasses to use new callback shape
 
-- **Database**: `users` table renamed `email` to `email_address`
-  - Migration: Run `ALTER TABLE users RENAME COLUMN email TO email_address;`
+- **Database**: `tenants` table renamed `slug` to `handle`
+  - Migration: Run schema migration 095
 ```
 
 ### 2. Provide Migration Guide
@@ -480,43 +365,46 @@ Create a migration guide in the release notes:
 ````markdown
 ## Migrating to v2.0.0
 
-### Step 1: Update component usage
+### Step 1: Update Loom DO subclasses
 
-Find and replace in your codebase:
+Find and replace in your Durable Objects:
 
-- `<PostCard post=` → `<PostCard data=`
-- `import { post }` → `import { data }`
+```typescript
+// Before
+onAlarm(): Promise<void>
+
+// After
+onAlarm(ctx: AlarmContext): Promise<void>
+```
 
 ### Step 2: Run database migration
 
 ```bash
-wrangler d1 execute grove-blog --command "ALTER TABLE users RENAME COLUMN email TO email_address;"
+wrangler d1 execute grove-engine-db --command "ALTER TABLE tenants RENAME COLUMN slug TO handle;"
 ```
 ````
 
-### Step 3: Update and test
+### Step 3: Build and test
 
 ```bash
-pnpm update @lattice/core
 pnpm build
 pnpm test
 ```
-
-````
 
 ### 3. Consider Deprecation Period
 
 For non-critical changes, provide a deprecation period:
 
 ```typescript
-// v1.9.0 - Deprecate old prop
-/** @deprecated Use `data` prop instead. Will be removed in v2.0.0 */
-export let post: Post;
-export let data: Post = post; // Backwards compatible
+// v1.9.0 - Deprecate old API
+/** @deprecated Use `handle` prop instead. Will be removed in v2.0.0 */
+let slug = $derived(handle);
 
-// v2.0.0 - Remove deprecated prop
-export let data: Post;
-````
+// v2.0.0 - Remove deprecated API
+// slug removed entirely
+```
+
+Since all tenants update simultaneously in multi-tenant mode, deprecation periods are primarily for **internal consumers** (apps, services, workers) that import from the engine. Give subsystem maintainers time to migrate before removing deprecated APIs.
 
 ---
 
@@ -540,31 +428,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - New feature being developed
 
-## [1.1.0] - 2025-11-26
+## [1.0.0] - 2026-01-XX
 
 ### Added
 
-- `Newsletter` component for email signups
-- `formatRelativeDate()` utility function
+- Loom Durable Objects SDK
+- Amber storage management
+- Blazes content markers
+- Infra SDK integration
 
 ### Changed
 
-- Improved mobile responsiveness in `Header`
-
-### Fixed
-
-- XSS vulnerability in markdown renderer
-- Session cookie not persisting on Safari
-
-## [1.0.0] - 2025-11-01
-
-### Added
-
-- Initial release with core blog functionality
-- Post management (CRUD)
-- Magic code authentication
-- Media upload to R2
-- Theme system
+- Graduated to stable 1.0.0
 ```
 
 ### Categories
@@ -578,36 +453,47 @@ Use these categories in the changelog:
 - **Fixed** - Bug fixes
 - **Security** - Vulnerability fixes
 
+### AI Release Summaries
+
+In addition to the manual CHANGELOG, the `auto-tag.yml` workflow generates AI-powered release summaries for each tagged version. These are stored in `snapshots/` and synced to the landing page. See `release-summaries-spec.md` for details on the summary generation pipeline.
+
 ---
 
-## npm Organization Setup
+## Registry Configuration
 
-### Initial Setup
+### GitHub Packages Setup
 
-1. Create npm organization at https://www.npmjs.com/org/create
-   - Organization name: `lattice`
-   - This reserves the `@lattice` scope
+Lattice publishes to GitHub Packages under the `@autumnsgrove` scope.
 
-2. Configure package.json:
+**Engine `package.json` configuration:**
 
-   ```json
-   {
-     "name": "@lattice/core",
-     "publishConfig": {
-       "access": "public"
-     }
-   }
-   ```
+```json
+{
+  "name": "@autumnsgrove/lattice",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.pkg.github.com"
+  }
+}
+```
 
-3. Add team members to the organization with appropriate roles
+**Authentication for publishing:**
 
-### Access Tokens
+Publishing requires a GitHub token with `write:packages` permission. The token is configured via:
 
-For CI/CD publishing, create an automation token:
+1. Generate a Personal Access Token (classic) with `write:packages` scope
+2. Authenticate: `npm login --registry=https://npm.pkg.github.com`
+3. Or set `NODE_AUTH_TOKEN` in CI environment
 
-1. Go to npmjs.com → Access Tokens → Generate New Token
-2. Select "Automation" token type
-3. Add to GitHub Secrets as `NPM_TOKEN`
+**Authentication for consuming (if published externally):**
+
+```bash
+# .npmrc
+@autumnsgrove:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
+```
+
+> Currently, all consumers are within the monorepo using `workspace:*` references, so registry auth is only needed for the publish step.
 
 ---
 
@@ -617,25 +503,35 @@ For CI/CD publishing, create an automation token:
 
 ```bash
 # Local package version
-cat package.json | grep version
+cat libs/engine/package.json | grep '"version"'
 
-# Published version on npm
-npm view @lattice/core version
+# Check git tags
+git tag --list 'v*' --sort=-version:refname | head -5
 
-# All published versions
-npm view @lattice/core versions --json
+# View snapshot history
+cat snapshots/history.csv | tail -5
 ```
 
-### Check Customer Dependencies
+### Check Published Version
 
 ```bash
-# In customer repo
-pnpm list @lattice/core
+# Published version on GitHub Packages
+npm view @autumnsgrove/lattice version --registry=https://npm.pkg.github.com
 
-# Check for outdated
-pnpm outdated @lattice/core
+# All published versions
+npm view @autumnsgrove/lattice versions --json --registry=https://npm.pkg.github.com
+```
+
+### Check Workspace Dependencies
+
+```bash
+# List all workspace package versions
+pnpm ls -r --depth 0 --json | jq '.[].name, .[].version'
+
+# Check a specific package
+pnpm ls @autumnsgrove/server-sdk -r
 ```
 
 ---
 
-_Last Updated: November 2025_
+_Last Updated: February 2026_
