@@ -28,6 +28,7 @@ requestRoute.use("*", dualAuth);
 requestRoute.post("/", async (c) => {
 	const agent = c.get("agent");
 	const authMethod = c.get("authMethod");
+	const ctx = c.get("ctx");
 	const startTime = Date.now();
 
 	// Parse request body — for challenge-response auth, body was already parsed by dualAuth
@@ -73,7 +74,7 @@ requestRoute.post("/", async (c) => {
 	const agentScopes: string[] = JSON.parse(agent.scopes || "[]");
 	if (!validateScope(agentScopes, service as WardenService, action)) {
 		const required = getRequiredScope(service as WardenService, action);
-		await logAuditEvent(c.env.DB, {
+		await logAuditEvent(ctx.db, {
 			agent_id: agent.id,
 			agent_name: agent.name,
 			target_service: service,
@@ -100,7 +101,7 @@ requestRoute.post("/", async (c) => {
 	// Check per-agent rate limits
 	const rateResult = await checkRateLimit(c.env.RATE_LIMITS, agent, service as WardenService);
 	if (!rateResult.allowed) {
-		await logAuditEvent(c.env.DB, {
+		await logAuditEvent(ctx.db, {
 			agent_id: agent.id,
 			agent_name: agent.name,
 			target_service: service,
@@ -130,7 +131,7 @@ requestRoute.post("/", async (c) => {
 		service as WardenService,
 	);
 	if (!serviceRateResult.allowed) {
-		await logAuditEvent(c.env.DB, {
+		await logAuditEvent(ctx.db, {
 			agent_id: agent.id,
 			agent_name: agent.name,
 			target_service: service,
@@ -198,7 +199,7 @@ requestRoute.post("/", async (c) => {
 	const totalLatency = Date.now() - startTime;
 
 	// Log audit event (fire and forget)
-	const logPromise = logAuditEvent(c.env.DB, {
+	const logPromise = logAuditEvent(ctx.db, {
 		agent_id: agent.id,
 		agent_name: agent.name,
 		target_service: service,
@@ -212,7 +213,7 @@ requestRoute.post("/", async (c) => {
 	});
 
 	// Update agent usage stats
-	const usagePromise = updateAgentUsage(c.env.DB, agent.id);
+	const usagePromise = updateAgentUsage(ctx.db, agent.id);
 
 	// Don't await — let these complete in the background
 	c.executionCtx.waitUntil(Promise.all([logPromise, usagePromise]));

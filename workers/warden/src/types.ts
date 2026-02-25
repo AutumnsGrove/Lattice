@@ -4,6 +4,13 @@
  * All Cloudflare bindings and secrets used by the Warden gateway.
  */
 
+import type { GroveContext } from "@autumnsgrove/infra";
+
+/** Hono Variables set by groveInfraMiddleware — available on all routes */
+export type AppVariables = {
+	ctx: GroveContext;
+};
+
 export interface Env {
 	// --- D1 Databases ---
 	/** Warden's own database: agent registry + audit log */

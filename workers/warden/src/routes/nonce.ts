@@ -6,10 +6,10 @@
  */
 
 import { Hono } from "hono";
-import type { Env } from "../types";
+import type { Env, AppVariables } from "../types";
 import { generateNonce } from "../auth/nonce";
 
-export const nonceRoute = new Hono<{ Bindings: Env }>();
+export const nonceRoute = new Hono<{ Bindings: Env; Variables: AppVariables }>();
 
 nonceRoute.post("/", async (c) => {
 	let body: { agentId?: string };
@@ -30,7 +30,9 @@ nonceRoute.post("/", async (c) => {
 	}
 
 	// Verify agent exists and is enabled
-	const agent = await c.env.DB.prepare("SELECT id FROM warden_agents WHERE id = ? AND enabled = 1")
+	const ctx = c.get("ctx");
+	const agent = await ctx.db
+		.prepare("SELECT id FROM warden_agents WHERE id = ? AND enabled = 1")
 		.bind(body.agentId)
 		.first();
 

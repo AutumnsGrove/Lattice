@@ -9,14 +9,14 @@
  */
 
 import { createMiddleware } from "hono/factory";
-import type { Env, WardenAgent } from "../types";
+import type { Env, AppVariables, WardenAgent } from "../types";
 import { authenticateByApiKey } from "./api-key";
 import { validateNonce } from "./nonce";
 import { verifySignature } from "./signature";
 import { logAuditEvent } from "../lib/logging";
 
 /** Extended Hono variables set by auth middleware */
-export type AuthVariables = {
+export type AuthVariables = AppVariables & {
 	agent: WardenAgent;
 	authMethod: "service_binding" | "challenge_response";
 };
@@ -26,7 +26,8 @@ export const dualAuth = createMiddleware<{
 	Bindings: Env;
 	Variables: AuthVariables;
 }>(async (c, next) => {
-	const db = c.env.DB;
+	const ctx = c.get("ctx");
+	const db = ctx.db;
 
 	// Path 1: API key header (service binding or direct callers)
 	const apiKey = c.req.header("X-API-Key");

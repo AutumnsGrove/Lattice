@@ -1324,6 +1324,9 @@ importers:
 
   workers/warden:
     dependencies:
+      '@autumnsgrove/infra':
+        specifier: workspace:*
+        version: link:../../libs/infra
       '@autumnsgrove/lattice':
         specifier: workspace:*
         version: link:../../libs/engine

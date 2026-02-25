@@ -35,6 +35,7 @@ resolveRoute.use("*", dualAuth);
 resolveRoute.post("/", async (c) => {
 	const agent = c.get("agent");
 	const authMethod = c.get("authMethod");
+	const ctx = c.get("ctx");
 	const startTime = Date.now();
 
 	// Reject challenge-response auth — only service-binding callers can resolve
@@ -85,7 +86,7 @@ resolveRoute.post("/", async (c) => {
 
 	if (!hasServiceScope) {
 		c.executionCtx.waitUntil(
-			logAuditEvent(c.env.DB, {
+			logAuditEvent(ctx.db, {
 				agent_id: agent.id,
 				agent_name: agent.name,
 				target_service: service,
@@ -130,7 +131,7 @@ resolveRoute.post("/", async (c) => {
 	// Audit log + usage update (fire and forget)
 	c.executionCtx.waitUntil(
 		Promise.all([
-			logAuditEvent(c.env.DB, {
+			logAuditEvent(ctx.db, {
 				agent_id: agent.id,
 				agent_name: agent.name,
 				target_service: service,
@@ -142,7 +143,7 @@ resolveRoute.post("/", async (c) => {
 				latency_ms: totalLatency,
 				error_code: null,
 			}),
-			updateAgentUsage(c.env.DB, agent.id),
+			updateAgentUsage(ctx.db, agent.id),
 		]),
 	);
 
