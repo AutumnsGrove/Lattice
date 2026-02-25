@@ -42,13 +42,25 @@ export interface DirectoryEntry {
 	otherLines: number;
 }
 
-/** A single snapshot frame (one day) */
-export interface GroveFrame {
+/** A directory entry annotated with its computed primary language */
+export type AnnotatedDirectoryEntry = DirectoryEntry & { primaryLanguage: string };
+
+/** A single snapshot frame (one day), raw from census data */
+interface RawGroveFrame {
 	date: string;
 	commit: string;
 	totalLines: number;
 	totalFiles: number;
 	directories: DirectoryEntry[];
+}
+
+/** A snapshot frame with annotated directories (as returned by the loader) */
+export interface GroveFrame {
+	date: string;
+	commit: string;
+	totalLines: number;
+	totalFiles: number;
+	directories: AnnotatedDirectoryEntry[];
 }
 
 /** The full census dataset */
@@ -91,7 +103,7 @@ function sanitizeDirectory(raw: Record<string, unknown>): DirectoryEntry | null 
 }
 
 /** Validate and sanitize a frame from raw JSON */
-function sanitizeFrame(raw: Record<string, unknown>): GroveFrame | null {
+function sanitizeFrame(raw: Record<string, unknown>): RawGroveFrame | null {
 	const date = typeof raw.date === "string" ? raw.date : "";
 	// Validate date format (YYYY-MM-DD)
 	if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
@@ -144,7 +156,7 @@ export function load() {
 	// Validate and sanitize each frame
 	const frames = censusData.frames
 		.map((raw: unknown) => sanitizeFrame((raw ?? {}) as Record<string, unknown>))
-		.filter((f): f is GroveFrame => f !== null);
+		.filter((f): f is RawGroveFrame => f !== null);
 
 	if (frames.length === 0) {
 		return {

@@ -6,7 +6,7 @@
  * and which tree species represents each directory.
  */
 
-import type { DirectoryEntry } from "../+page.server";
+import type { AnnotatedDirectoryEntry } from "../+page.server";
 
 /** A positioned island in the archipelago */
 export interface IslandLayout {
@@ -37,7 +37,7 @@ export interface TreeLayout {
 	/** Tree species component name */
 	species: "pine" | "cherry" | "aspen" | "birch" | "logo";
 	/** The directory entry this tree represents */
-	directory: DirectoryEntry & { primaryLanguage: string };
+	directory: AnnotatedDirectoryEntry;
 }
 
 /** Pre-defined island positions. Larger packages toward the center-back. */
@@ -124,7 +124,7 @@ function getTreeHeight(lines: number): number {
  * Returns one IslandLayout per depth-1 package that has lines.
  */
 export function buildIslandLayouts(
-	directories: (DirectoryEntry & { primaryLanguage: string })[],
+	directories: (AnnotatedDirectoryEntry)[],
 ): IslandLayout[] {
 	const depth1 = directories.filter((d) => d.depth === 1 && d.totalLines > 0);
 	// Also include depth-0 dirs that don't have depth-1 children (like standalone 'docs', 'scripts')
@@ -158,7 +158,7 @@ export function buildIslandLayouts(
  */
 export function buildTreesForIsland(
 	islandPath: string,
-	directories: (DirectoryEntry & { primaryLanguage: string })[],
+	directories: (AnnotatedDirectoryEntry)[],
 	maxTrees: number = 8,
 ): TreeLayout[] {
 	// Find depth-2 children of this island

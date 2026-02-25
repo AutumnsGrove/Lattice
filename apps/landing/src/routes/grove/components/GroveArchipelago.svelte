@@ -106,6 +106,17 @@
 		return `${currentFrame.date}: ${currentFrame.totalLines.toLocaleString()} lines of code across ${currentFrame.totalFiles.toLocaleString()} files in ${islands.length} packages.`;
 	});
 
+	// Synthetic tree positions for FallingLeavesLayer (leaf spawn points derived from islands)
+	const leafTrees = $derived.by(() =>
+		islands.map((island, i) => ({
+			id: i,
+			x: island.x,
+			y: island.y,
+			size: island.width / 3,
+			treeType: "pine" as const,
+		})),
+	);
+
 	// Sky gradient based on season
 	const skyGradient = $derived.by(() => {
 		switch (season) {
@@ -151,9 +162,9 @@
 	<!-- Clouds -->
 	{#if !prefersReducedMotion}
 		<div class="pointer-events-none absolute inset-0">
-			<div class="absolute left-[10%] top-[8%]"><Cloud variant="fluffy" size={80} {season} /></div>
-			<div class="absolute left-[40%] top-[5%]"><Cloud variant="wispy" size={60} {season} /></div>
-			<div class="absolute left-[70%] top-[12%]"><Cloud variant="puffy" size={70} {season} /></div>
+			<div class="absolute left-[10%] top-[8%]"><Cloud variant="fluffy" class="h-10 w-20" /></div>
+			<div class="absolute left-[40%] top-[5%]"><Cloud variant="wispy" class="h-8 w-16" /></div>
+			<div class="absolute left-[70%] top-[12%]"><Cloud variant="puffy" class="h-9 w-[4.5rem]" /></div>
 		</div>
 	{/if}
 
@@ -184,7 +195,7 @@
 		{#if season === "spring"}
 			<FallingPetalsLayer count={40} />
 		{:else if season === "autumn"}
-			<FallingLeavesLayer count={30} />
+			<FallingLeavesLayer trees={leafTrees} {season} />
 		{:else if season === "winter"}
 			<SnowfallLayer count={60} />
 		{/if}
