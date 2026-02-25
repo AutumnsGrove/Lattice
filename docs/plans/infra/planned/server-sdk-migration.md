@@ -28,19 +28,19 @@ category: infra
         The roots run deep. The tree stands anywhere.
 ```
 
-# Server SDK Migration Plan
+# Infra SDK Migration Plan
 
 **Created:** February 25, 2026
 **Status:** Planned
 **Spec:** `docs/specs/server-sdk-spec.md`
-**SDK Location:** `libs/server-sdk/`
-**Package:** `@autumnsgrove/server-sdk`
+**SDK Location:** `libs/infra/`
+**Package:** `@autumnsgrove/infra`
 
 ---
 
 ## Where We Are
 
-The Server SDK exists. It's complete, tested, and well-documented. It wraps every
+The Infra SDK exists. It's complete, tested, and well-documented. It wraps every
 Cloudflare primitive behind clean TypeScript interfaces (GroveDatabase, GroveStorage,
 GroveKV, GroveServiceBus, GroveScheduler, GroveConfig). The Cloudflare adapters work.
 The test mocks work. The error catalog is wired into Signpost.
@@ -175,11 +175,11 @@ Before migrating anyone, verify the SDK itself is ready.
 - [ ] Verify all Cloudflare adapter tests pass
 - [ ] Verify `createMockContext()` provides working mocks for all 6 primitives
 - [ ] Ensure the SDK builds cleanly with current TypeScript config
-- [ ] Confirm `@autumnsgrove/lattice/infra` re-exports resolve correctly
-- [ ] Check for any interface mismatches between SDK types and actual D1/R2/KV APIs
+- [ ] Confirm `@autumnsgrove/infra` and re-exports via `@autumnsgrove/lattice/infra` resolve correctly
+- [ ] Check for any interface mismatches between Infra SDK types and actual D1/R2/KV APIs
   (the SDK was written 3 days ago — subtle mismatches are possible)
 
-**Exit criteria:** SDK is confirmed working, no changes needed to interfaces.
+**Exit criteria:** Infra SDK is confirmed working, no changes needed to interfaces.
 
 ---
 
@@ -195,7 +195,7 @@ a bit longer.
 - Cron-triggered scheduled handler
 
 **Migration steps:**
-1. Add `@autumnsgrove/server-sdk` dependency
+1. Add `@autumnsgrove/infra` dependency
 2. Create `GroveContext` in the scheduled handler entry point
 3. Replace `env.DB.prepare(...)` calls with `ctx.db.execute(...)`
 4. Replace `env.BUCKET.delete(...)` calls with `ctx.storage.delete(...)`
@@ -243,7 +243,7 @@ SDK interface. Options:
 - Keep `env.AI` as a direct access alongside `ctx` (pragmatic, avoids over-abstraction)
 
 **Recommendation:** Keep `env.AI` direct. Workers AI is deeply Cloudflare-specific and
-the spec explicitly says "Don't abstract things that are naturally Cloudflare-specific."
+the Infra SDK spec explicitly says "Don't abstract things that are naturally Cloudflare-specific."
 
 ---
 
@@ -299,7 +299,7 @@ gets the SDK for free.
 
 **Sub-phases:**
 1. **5a:** Migrate `db/client.ts` to use `GroveContext.db` internally
-2. **5b:** Migrate `db/helpers.ts` to use SDK types
+2. **5b:** Migrate `db/helpers.ts` to use Infra SDK types
 3. **5c:** Migrate `services/database.ts` (central service layer)
 4. **5d:** Migrate API routes (batch by domain: posts, images, auth, export, etc.)
 5. **5e:** Migrate Arbor routes
@@ -334,25 +334,25 @@ call engine helpers, not raw CF). The remaining work is app-specific server rout
 - [ ] Remove all direct `D1Database` type imports from non-adapter code
 - [ ] Remove all direct `R2Bucket` type imports from non-adapter code
 - [ ] Remove all direct `KVNamespace` type imports from non-adapter code
-- [ ] Update `AgentUsage/server_sdk_guide.md` with real migration examples
+- [ ] Update `AgentUsage/infra_sdk_guide.md` with real migration examples
 - [ ] Add a lint rule / eslint plugin that warns on direct CF primitive access
-  outside of `libs/server-sdk/src/cloudflare/`
+  outside of `libs/infra/src/cloudflare/`
 
 ---
 
 ## What NOT to Migrate
 
-The spec is clear about scope boundaries. These stay as-is:
+The Infra SDK spec is clear about scope boundaries. These stay as-is:
 
-- **Durable Objects** — Loom handles DO abstraction. The Server SDK integrates with
+- **Durable Objects** — Loom handles DO abstraction. The Infra SDK integrates with
   Loom but doesn't wrap DOs.
 - **Workers AI** (`env.AI`) — Deeply Cloudflare-specific. No portable interface exists.
 - **Service bindings for auth** (`platform.env.AUTH.fetch()`) — The GroveServiceBus
   interface could wrap this, but the auth integration pattern is already consistent
   and tested. Low value to abstract.
-- **Wrangler / dev tooling** — The spec explicitly excludes development workflow.
+- **Wrangler / dev tooling** — The Infra SDK spec explicitly excludes development workflow.
 - **Miniflare in tests** — Integration tests that need real D1/R2 behavior should
-  continue using miniflare. The SDK mocks are for unit tests.
+  continue using miniflare. The Infra SDK mocks are for unit tests.
 
 ---
 
@@ -415,7 +415,7 @@ engine, apps). Breakdown:
 - **Phase 7 done:** Lint rule prevents new direct CF access
 
 The migration is complete when `grep -r "env\.DB\|env\.BUCKET\|env\.KV" --include="*.ts"`
-returns zero results outside of `libs/server-sdk/src/cloudflare/` and test files.
+returns zero results outside of `libs/infra/src/cloudflare/` and test files.
 
 ---
 

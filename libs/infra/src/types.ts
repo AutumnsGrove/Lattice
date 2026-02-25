@@ -1,5 +1,5 @@
 /**
- * Grove Server SDK — Interface Definitions
+ * Grove Infra SDK — Interface Definitions
  *
  * The roots run deep. The tree stands anywhere.
  *
@@ -8,7 +8,7 @@
  * application code could run on any cloud. The interface stays the same.
  * Only the roots change.
  *
- * @module @autumnsgrove/server-sdk
+ * @module @autumnsgrove/infra
  */
 
 // =============================================================================

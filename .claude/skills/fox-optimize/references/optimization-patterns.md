@@ -144,7 +144,7 @@ ON posts(tenant_id, status, created_at DESC);
 Use `GroveKV` from Server SDK instead of raw `platform.env.CACHE` for portable caching:
 
 ```typescript
-import { GroveKV } from "@autumnsgrove/server-sdk";
+import { GroveKV } from "@autumnsgrove/infra";
 import { safeJsonParse } from "@autumnsgrove/lattice/server";
 
 // Validated cache read with Rootwork

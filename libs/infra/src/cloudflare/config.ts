@@ -14,14 +14,14 @@ export class CloudflareConfig implements GroveConfig {
 
 	require(key: string): string {
 		if (!key || typeof key !== "string" || key.trim().length === 0) {
-			logGroveError("ServerSDK", SRV_ERRORS.CONFIG_MISSING, {
+			logGroveError("InfraSDK", SRV_ERRORS.CONFIG_MISSING, {
 				detail: "require: key is empty or invalid",
 			});
 			throw new Error("Config key cannot be empty");
 		}
 		const value = this.env[key];
 		if (value === undefined || value === null) {
-			logGroveError("ServerSDK", SRV_ERRORS.CONFIG_MISSING, {
+			logGroveError("InfraSDK", SRV_ERRORS.CONFIG_MISSING, {
 				detail: `Key: ${key}`,
 			});
 			throw new Error(SRV_ERRORS.CONFIG_MISSING.adminMessage);

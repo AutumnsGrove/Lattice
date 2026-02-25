@@ -110,7 +110,7 @@ export class CloudflareScheduler implements GroveScheduler {
 			return;
 		}
 
-		logGroveError("ServerSDK", SRV_ERRORS.SCHEDULE_UNMATCHED, {
+		logGroveError("InfraSDK", SRV_ERRORS.SCHEDULE_UNMATCHED, {
 			detail: `cron: ${cron}`,
 		});
 	}

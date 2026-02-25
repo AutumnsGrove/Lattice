@@ -1,5 +1,5 @@
 {
-	"name": "@autumnsgrove/server-sdk",
+	"name": "@autumnsgrove/infra",
 	"version": "0.1.0",
 	"description": "Infrastructure abstraction layer for Grove — the roots run deep, the tree stands anywhere",
 	"author": "AutumnsGrove",
@@ -7,7 +7,7 @@
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/AutumnsGrove/Lattice.git",
-		"directory": "libs/server-sdk"
+		"directory": "libs/infra"
 	},
 	"type": "module",
 	"main": "./src/index.ts",
@@ -44,7 +44,7 @@
 	},
 	"keywords": [
 		"grove",
-		"server-sdk",
+		"infra",
 		"infrastructure",
 		"cloudflare",
 		"abstraction",

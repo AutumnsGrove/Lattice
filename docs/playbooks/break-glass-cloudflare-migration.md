@@ -32,7 +32,7 @@ type: implementation-plan
 
 This document exists for one reason: to prove Grove can leave Cloudflare if it ever needs to. Not because a migration is planned. Not because Cloudflare is a bad partner. But because documenting the escape route keeps the dependency honest.
 
-The Server SDK (see `server-sdk-spec.md`) makes this playbook executable. When the SDK is in place, migration becomes "write these adapters, swap the config, deploy." Without the SDK, it's "rewrite the application layer."
+The Infra SDK (see `server-sdk-spec.md`) makes this playbook executable. When the SDK is in place, migration becomes "write these adapters, swap the config, deploy." Without the SDK, it's "rewrite the application layer."
 
 ---
 
@@ -95,7 +95,7 @@ These services have direct, well-established equivalents.
 **Migration steps:**
 1. Export all D1 databases: `wrangler d1 export <db> --output <file>.sql`
 2. Import into Turso: `turso db shell <db> < file.sql`
-3. Swap Server SDK adapter: `CloudflareDatabase` → `TursoDatabase`
+3. Swap Infra SDK adapter: `CloudflareDatabase` → `TursoDatabase`
 4. Test all queries (some D1-specific SQL may need adjustment)
 
 #### R2 → S3-Compatible Storage
@@ -111,7 +111,7 @@ These services have direct, well-established equivalents.
 
 **Migration steps:**
 1. Use `rclone` to copy all R2 buckets: `rclone sync r2:bucket b2:bucket`
-2. Swap Server SDK adapter: `CloudflareStorage` → `S3Storage`
+2. Swap Infra SDK adapter: `CloudflareStorage` → `S3Storage`
 3. Update presigned URL generation for new provider
 4. Verify media serving works (may need CDN in front)
 
@@ -127,7 +127,7 @@ These services have direct, well-established equivalents.
 
 **Migration steps:**
 1. KV data is ephemeral (caches, rate limits). No migration needed.
-2. Swap Server SDK adapter: `CloudflareKV` → `UpstashKV`
+2. Swap Infra SDK adapter: `CloudflareKV` → `UpstashKV`
 3. Rate limit counters reset (acceptable, they're short-lived)
 4. Cache rebuilds on first access (expected behavior)
 
@@ -293,16 +293,16 @@ This is the honest tradeoff. Cloudflare is genuinely cheap for what Grove uses. 
 
 ---
 
-## The Server SDK Makes This Real
+## The Infra SDK Makes This Real
 
-Without the Server SDK, this playbook is aspirational. With it, each phase becomes:
+Without the Infra SDK, this playbook is aspirational. With it, each phase becomes:
 
 1. Write the adapter (e.g., `TursoDatabase implements GroveDatabase`)
-2. Pass conformance tests (the SDK includes interface test suites)
+2. Pass conformance tests (the Infra SDK includes interface test suites)
 3. Swap the adapter in `createContext()`
 4. Deploy
 
-The playbook doesn't require the SDK to start. But the SDK makes it finish.
+The playbook doesn't require the Infra SDK to start. But the Infra SDK makes it finish.
 
 ```
 Without SDK:  "Rewrite everything that touches env.DB, env.IMAGES, env.CACHE_KV..."

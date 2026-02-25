@@ -28,7 +28,7 @@ export class CloudflareDatabase implements GroveDatabase {
 	async execute(sql: string, params?: unknown[]): Promise<QueryResult> {
 		// Input validation: sql must be a non-empty string
 		if (!sql || typeof sql !== "string" || sql.trim().length === 0) {
-			logGroveError("ServerSDK", SRV_ERRORS.QUERY_FAILED, {
+			logGroveError("InfraSDK", SRV_ERRORS.QUERY_FAILED, {
 				detail: "execute() called with empty or invalid SQL",
 			});
 			throw new Error("SQL query cannot be empty");
@@ -60,7 +60,7 @@ export class CloudflareDatabase implements GroveDatabase {
 				detail: sql.slice(0, 100),
 				error: error instanceof Error ? error.message : String(error),
 			});
-			logGroveError("ServerSDK", SRV_ERRORS.QUERY_FAILED, {
+			logGroveError("InfraSDK", SRV_ERRORS.QUERY_FAILED, {
 				detail: sql.slice(0, 100),
 				cause: error,
 			});
@@ -71,7 +71,7 @@ export class CloudflareDatabase implements GroveDatabase {
 	async batch(statements: BoundStatement[]): Promise<QueryResult[]> {
 		// Input validation: statements array must not be empty
 		if (!Array.isArray(statements) || statements.length === 0) {
-			logGroveError("ServerSDK", SRV_ERRORS.QUERY_FAILED, {
+			logGroveError("InfraSDK", SRV_ERRORS.QUERY_FAILED, {
 				detail: "batch() called with empty statements array",
 			});
 			throw new Error("Batch statements array cannot be empty");
@@ -85,7 +85,7 @@ export class CloudflareDatabase implements GroveDatabase {
 			// statement has the expected .all() method before casting.
 			for (const stmt of statements) {
 				if (typeof stmt.all !== "function") {
-					logGroveError("ServerSDK", SRV_ERRORS.QUERY_FAILED, {
+					logGroveError("InfraSDK", SRV_ERRORS.QUERY_FAILED, {
 						detail: "batch() received a statement not created by this adapter",
 					});
 					throw new Error(
@@ -116,7 +116,7 @@ export class CloudflareDatabase implements GroveDatabase {
 				detail: `${statements.length} statements`,
 				error: error instanceof Error ? error.message : String(error),
 			});
-			logGroveError("ServerSDK", SRV_ERRORS.QUERY_FAILED, {
+			logGroveError("InfraSDK", SRV_ERRORS.QUERY_FAILED, {
 				detail: `batch of ${statements.length} statements`,
 				cause: error,
 			});
@@ -127,7 +127,7 @@ export class CloudflareDatabase implements GroveDatabase {
 	prepare(sql: string): PreparedStatement {
 		// Input validation: sql must be a non-empty string
 		if (!sql || typeof sql !== "string" || sql.trim().length === 0) {
-			logGroveError("ServerSDK", SRV_ERRORS.QUERY_FAILED, {
+			logGroveError("InfraSDK", SRV_ERRORS.QUERY_FAILED, {
 				detail: "prepare() called with empty or invalid SQL",
 			});
 			throw new Error("SQL query cannot be empty");
@@ -144,7 +144,7 @@ export class CloudflareDatabase implements GroveDatabase {
 	async transaction<T>(_fn: (tx: GroveTransaction) => Promise<T>): Promise<T> {
 		// D1 doesn't support interactive transactions.
 		// For true transaction support, consumers should use Loom DOs or batch().
-		logGroveError("ServerSDK", SRV_ERRORS.TRANSACTIONS_NOT_SUPPORTED, {
+		logGroveError("InfraSDK", SRV_ERRORS.TRANSACTIONS_NOT_SUPPORTED, {
 			detail: "Use batch() for atomic operations or Loom DOs for interactive transactions.",
 		});
 		throw new Error(SRV_ERRORS.TRANSACTIONS_NOT_SUPPORTED.adminMessage);

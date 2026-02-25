@@ -1,5 +1,5 @@
 /**
- * Grove Server SDK — Context Object
+ * Grove Infra SDK — Context Object
  *
  * Every Grove request handler receives a GroveContext that bundles
  * all infrastructure services together. This is the single entry point

@@ -29,13 +29,13 @@ export class CloudflareStorage implements GroveStorage {
 	private validateKey(key: string, context: string): void {
 		// Validate key is a non-empty string and doesn't contain path traversal patterns
 		if (!key || typeof key !== "string" || key.trim().length === 0) {
-			logGroveError("ServerSDK", SRV_ERRORS.ADAPTER_ERROR, {
+			logGroveError("InfraSDK", SRV_ERRORS.ADAPTER_ERROR, {
 				detail: `${context}: key is empty or invalid`,
 			});
 			throw new Error("Storage key cannot be empty");
 		}
 		if (key.includes("..") || key.startsWith("/")) {
-			logGroveError("ServerSDK", SRV_ERRORS.ADAPTER_ERROR, {
+			logGroveError("InfraSDK", SRV_ERRORS.ADAPTER_ERROR, {
 				detail: `${context}: key contains path traversal pattern`,
 			});
 			throw new Error("Storage key contains invalid path pattern");
@@ -88,7 +88,7 @@ export class CloudflareStorage implements GroveStorage {
 				detail: key,
 				error: error instanceof Error ? error.message : String(error),
 			});
-			logGroveError("ServerSDK", SRV_ERRORS.STORAGE_UPLOAD_FAILED, {
+			logGroveError("InfraSDK", SRV_ERRORS.STORAGE_UPLOAD_FAILED, {
 				detail: key,
 				cause: error,
 			});
@@ -123,7 +123,7 @@ export class CloudflareStorage implements GroveStorage {
 				detail: key,
 				error: error instanceof Error ? error.message : String(error),
 			});
-			logGroveError("ServerSDK", SRV_ERRORS.STORAGE_DOWNLOAD_FAILED, {
+			logGroveError("InfraSDK", SRV_ERRORS.STORAGE_DOWNLOAD_FAILED, {
 				detail: key,
 				cause: error,
 			});
@@ -158,7 +158,7 @@ export class CloudflareStorage implements GroveStorage {
 				detail: key,
 				error: error instanceof Error ? error.message : String(error),
 			});
-			logGroveError("ServerSDK", SRV_ERRORS.STORAGE_DOWNLOAD_FAILED, {
+			logGroveError("InfraSDK", SRV_ERRORS.STORAGE_DOWNLOAD_FAILED, {
 				detail: `head: ${key}`,
 				cause: error,
 			});
@@ -191,7 +191,7 @@ export class CloudflareStorage implements GroveStorage {
 				detail: key,
 				error: error instanceof Error ? error.message : String(error),
 			});
-			logGroveError("ServerSDK", SRV_ERRORS.ADAPTER_ERROR, {
+			logGroveError("InfraSDK", SRV_ERRORS.ADAPTER_ERROR, {
 				detail: `delete: ${key}`,
 				cause: error,
 			});
@@ -202,20 +202,20 @@ export class CloudflareStorage implements GroveStorage {
 	async deleteMany(keys: string[]): Promise<void> {
 		// Input validation: keys array must not be empty and each key must be valid
 		if (!Array.isArray(keys) || keys.length === 0) {
-			logGroveError("ServerSDK", SRV_ERRORS.ADAPTER_ERROR, {
+			logGroveError("InfraSDK", SRV_ERRORS.ADAPTER_ERROR, {
 				detail: "deleteMany: keys array is empty or invalid",
 			});
 			throw new Error("Keys array cannot be empty");
 		}
 		for (const key of keys) {
 			if (!key || typeof key !== "string" || key.trim().length === 0) {
-				logGroveError("ServerSDK", SRV_ERRORS.ADAPTER_ERROR, {
+				logGroveError("InfraSDK", SRV_ERRORS.ADAPTER_ERROR, {
 					detail: "deleteMany: key is empty or invalid",
 				});
 				throw new Error("Storage key cannot be empty");
 			}
 			if (key.includes("..") || key.startsWith("/")) {
-				logGroveError("ServerSDK", SRV_ERRORS.ADAPTER_ERROR, {
+				logGroveError("InfraSDK", SRV_ERRORS.ADAPTER_ERROR, {
 					detail: "deleteMany: key contains path traversal pattern",
 				});
 				throw new Error("Storage key contains invalid path pattern");
@@ -243,7 +243,7 @@ export class CloudflareStorage implements GroveStorage {
 				detail: `${keys.length} keys`,
 				error: error instanceof Error ? error.message : String(error),
 			});
-			logGroveError("ServerSDK", SRV_ERRORS.ADAPTER_ERROR, {
+			logGroveError("InfraSDK", SRV_ERRORS.ADAPTER_ERROR, {
 				detail: `deleteMany: ${keys.length} keys`,
 				cause: error,
 			});
@@ -254,13 +254,13 @@ export class CloudflareStorage implements GroveStorage {
 	async list(options?: ListOptions): Promise<StorageListResult> {
 		// Input validation: limit must be positive if provided
 		if (options?.limit !== undefined && typeof options.limit !== "number") {
-			logGroveError("ServerSDK", SRV_ERRORS.ADAPTER_ERROR, {
+			logGroveError("InfraSDK", SRV_ERRORS.ADAPTER_ERROR, {
 				detail: "list: limit must be a number",
 			});
 			throw new Error("Limit must be a positive number");
 		}
 		if (options?.limit !== undefined && options.limit <= 0) {
-			logGroveError("ServerSDK", SRV_ERRORS.ADAPTER_ERROR, {
+			logGroveError("InfraSDK", SRV_ERRORS.ADAPTER_ERROR, {
 				detail: "list: limit must be positive",
 			});
 			throw new Error("Limit must be a positive number");
@@ -299,7 +299,7 @@ export class CloudflareStorage implements GroveStorage {
 				detail: `prefix=${options?.prefix ?? ""}`,
 				error: error instanceof Error ? error.message : String(error),
 			});
-			logGroveError("ServerSDK", SRV_ERRORS.ADAPTER_ERROR, {
+			logGroveError("InfraSDK", SRV_ERRORS.ADAPTER_ERROR, {
 				detail: `list: prefix=${options?.prefix ?? ""}`,
 				cause: error,
 			});
@@ -310,7 +310,7 @@ export class CloudflareStorage implements GroveStorage {
 	async presignedUrl(_key: string, _options: PresignOptions): Promise<string> {
 		// R2 presigned URLs require the S3-compatible API with credentials.
 		// This is not available through the Worker binding directly.
-		logGroveError("ServerSDK", SRV_ERRORS.PRESIGNED_URL_FAILED, {
+		logGroveError("InfraSDK", SRV_ERRORS.PRESIGNED_URL_FAILED, {
 			detail:
 				"R2 presigned URLs require S3-compatible API credentials, not available through Worker bindings.",
 		});
@@ -327,7 +327,7 @@ export class CloudflareStorage implements GroveStorage {
 	private toStorageObjectFromPut(
 		obj: R2Object,
 		key: string,
-		originalData: ReadableStream | ArrayBuffer | string,
+		originalData: ReadableStream | ArrayBuffer | Uint8Array | string,
 	): StorageObject {
 		// Reconstruct a body stream from the original input data since
 		// R2 put() returns R2Object (no body), not R2ObjectBody.

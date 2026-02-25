@@ -37,7 +37,7 @@ export class CloudflareKV implements GroveKV {
 	async get<T = string>(key: string, options?: KVGetOptions): Promise<T | null> {
 		// Input validation: key must be a non-empty string
 		if (!key || typeof key !== "string" || key.trim().length === 0) {
-			logGroveError("ServerSDK", SRV_ERRORS.KV_OPERATION_FAILED, {
+			logGroveError("InfraSDK", SRV_ERRORS.KV_OPERATION_FAILED, {
 				detail: "get: key is empty or invalid",
 			});
 			throw new Error("KV key cannot be empty");
@@ -78,7 +78,7 @@ export class CloudflareKV implements GroveKV {
 				detail: key,
 				error: error instanceof Error ? error.message : String(error),
 			});
-			logGroveError("ServerSDK", SRV_ERRORS.KV_OPERATION_FAILED, {
+			logGroveError("InfraSDK", SRV_ERRORS.KV_OPERATION_FAILED, {
 				detail: `get: ${key}`,
 				cause: error,
 			});
@@ -93,7 +93,7 @@ export class CloudflareKV implements GroveKV {
 	): Promise<void> {
 		// Input validation: key must be a non-empty string
 		if (!key || typeof key !== "string" || key.trim().length === 0) {
-			logGroveError("ServerSDK", SRV_ERRORS.KV_OPERATION_FAILED, {
+			logGroveError("InfraSDK", SRV_ERRORS.KV_OPERATION_FAILED, {
 				detail: "put: key is empty or invalid",
 			});
 			throw new Error("KV key cannot be empty");
@@ -103,7 +103,7 @@ export class CloudflareKV implements GroveKV {
 			options?.expirationTtl !== undefined &&
 			(typeof options.expirationTtl !== "number" || options.expirationTtl <= 0)
 		) {
-			logGroveError("ServerSDK", SRV_ERRORS.KV_OPERATION_FAILED, {
+			logGroveError("InfraSDK", SRV_ERRORS.KV_OPERATION_FAILED, {
 				detail: "put: expirationTtl must be a positive number",
 			});
 			throw new Error("Expiration TTL must be a positive number");
@@ -134,7 +134,7 @@ export class CloudflareKV implements GroveKV {
 				detail: key,
 				error: error instanceof Error ? error.message : String(error),
 			});
-			logGroveError("ServerSDK", SRV_ERRORS.KV_OPERATION_FAILED, {
+			logGroveError("InfraSDK", SRV_ERRORS.KV_OPERATION_FAILED, {
 				detail: `put: ${key}`,
 				cause: error,
 			});
@@ -145,7 +145,7 @@ export class CloudflareKV implements GroveKV {
 	async delete(key: string): Promise<void> {
 		// Input validation: key must be a non-empty string
 		if (!key || typeof key !== "string" || key.trim().length === 0) {
-			logGroveError("ServerSDK", SRV_ERRORS.KV_OPERATION_FAILED, {
+			logGroveError("InfraSDK", SRV_ERRORS.KV_OPERATION_FAILED, {
 				detail: "delete: key is empty or invalid",
 			});
 			throw new Error("KV key cannot be empty");
@@ -172,7 +172,7 @@ export class CloudflareKV implements GroveKV {
 				detail: key,
 				error: error instanceof Error ? error.message : String(error),
 			});
-			logGroveError("ServerSDK", SRV_ERRORS.KV_OPERATION_FAILED, {
+			logGroveError("InfraSDK", SRV_ERRORS.KV_OPERATION_FAILED, {
 				detail: `delete: ${key}`,
 				cause: error,
 			});
@@ -217,7 +217,7 @@ export class CloudflareKV implements GroveKV {
 				detail: `prefix=${options?.prefix ?? ""}`,
 				error: error instanceof Error ? error.message : String(error),
 			});
-			logGroveError("ServerSDK", SRV_ERRORS.KV_OPERATION_FAILED, {
+			logGroveError("InfraSDK", SRV_ERRORS.KV_OPERATION_FAILED, {
 				detail: `list: prefix=${options?.prefix ?? ""}`,
 				cause: error,
 			});
@@ -230,7 +230,7 @@ export class CloudflareKV implements GroveKV {
 	): Promise<KVValueMeta<T, M> | null> {
 		// Input validation: key must be a non-empty string
 		if (!key || typeof key !== "string" || key.trim().length === 0) {
-			logGroveError("ServerSDK", SRV_ERRORS.KV_OPERATION_FAILED, {
+			logGroveError("InfraSDK", SRV_ERRORS.KV_OPERATION_FAILED, {
 				detail: "getWithMetadata: key is empty or invalid",
 			});
 			throw new Error("KV key cannot be empty");
@@ -263,7 +263,7 @@ export class CloudflareKV implements GroveKV {
 				detail: key,
 				error: error instanceof Error ? error.message : String(error),
 			});
-			logGroveError("ServerSDK", SRV_ERRORS.KV_OPERATION_FAILED, {
+			logGroveError("InfraSDK", SRV_ERRORS.KV_OPERATION_FAILED, {
 				detail: `getWithMetadata: ${key}`,
 				cause: error,
 			});

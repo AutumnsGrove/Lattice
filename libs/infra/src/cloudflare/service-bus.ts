@@ -26,13 +26,13 @@ export class CloudflareServiceBus implements GroveServiceBus {
 	async call<T = unknown>(service: string, request: ServiceRequest): Promise<ServiceResponse<T>> {
 		// Input validation: service name and request.path must be non-empty strings
 		if (!service || typeof service !== "string" || service.trim().length === 0) {
-			logGroveError("ServerSDK", SRV_ERRORS.SERVICE_NOT_FOUND, {
+			logGroveError("InfraSDK", SRV_ERRORS.SERVICE_NOT_FOUND, {
 				detail: "call: service name is empty or invalid",
 			});
 			throw new Error("Service name cannot be empty");
 		}
 		if (!request.path || typeof request.path !== "string" || request.path.trim().length === 0) {
-			logGroveError("ServerSDK", SRV_ERRORS.SERVICE_CALL_FAILED, {
+			logGroveError("InfraSDK", SRV_ERRORS.SERVICE_CALL_FAILED, {
 				detail: "call: request path is empty or invalid",
 			});
 			throw new Error("Request path cannot be empty");
@@ -43,7 +43,7 @@ export class CloudflareServiceBus implements GroveServiceBus {
 			typeof request.method !== "string" ||
 			!VALID_HTTP_METHODS.has(request.method.toUpperCase())
 		) {
-			logGroveError("ServerSDK", SRV_ERRORS.SERVICE_CALL_FAILED, {
+			logGroveError("InfraSDK", SRV_ERRORS.SERVICE_CALL_FAILED, {
 				detail: `call: invalid HTTP method: ${request.method}`,
 			});
 			throw new Error("Invalid HTTP method");
@@ -51,7 +51,7 @@ export class CloudflareServiceBus implements GroveServiceBus {
 
 		const binding = this.bindings[service];
 		if (!binding) {
-			logGroveError("ServerSDK", SRV_ERRORS.SERVICE_NOT_FOUND, {
+			logGroveError("InfraSDK", SRV_ERRORS.SERVICE_NOT_FOUND, {
 				detail: `Service: ${service}`,
 			});
 			throw new Error(SRV_ERRORS.SERVICE_NOT_FOUND.adminMessage);
@@ -84,7 +84,7 @@ export class CloudflareServiceBus implements GroveServiceBus {
 			} else {
 				const text = await response.text();
 				if (!response.ok) {
-					logGroveError("ServerSDK", SRV_ERRORS.SERVICE_CALL_FAILED, {
+					logGroveError("InfraSDK", SRV_ERRORS.SERVICE_CALL_FAILED, {
 						detail: `${request.method} ${service}${request.path} returned ${response.status}: ${text.slice(0, 200)}`,
 					});
 					throw new Error(SRV_ERRORS.SERVICE_CALL_FAILED.adminMessage);
@@ -93,7 +93,7 @@ export class CloudflareServiceBus implements GroveServiceBus {
 				try {
 					data = JSON.parse(text);
 				} catch {
-					logGroveError("ServerSDK", SRV_ERRORS.SERVICE_CALL_FAILED, {
+					logGroveError("InfraSDK", SRV_ERRORS.SERVICE_CALL_FAILED, {
 						detail: `${request.method} ${service}${request.path} returned non-JSON body (${response.status})`,
 					});
 					throw new Error(SRV_ERRORS.SERVICE_CALL_FAILED.adminMessage);
@@ -124,7 +124,7 @@ export class CloudflareServiceBus implements GroveServiceBus {
 				detail: `${request.method} ${service}${request.path}`,
 				error: error instanceof Error ? error.message : String(error),
 			});
-			logGroveError("ServerSDK", SRV_ERRORS.SERVICE_CALL_FAILED, {
+			logGroveError("InfraSDK", SRV_ERRORS.SERVICE_CALL_FAILED, {
 				detail: `${request.method} ${service}${request.path}`,
 				cause: error,
 			});

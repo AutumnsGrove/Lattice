@@ -1,5 +1,5 @@
 /**
- * Grove Server SDK — Error Catalog
+ * Grove Infra SDK — Error Catalog
  *
  * Structured error codes for all infrastructure operations.
  * Uses the shared GroveErrorDef pattern from @autumnsgrove/lattice/errors.

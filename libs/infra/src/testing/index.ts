@@ -1,12 +1,12 @@
 /**
- * Grove Server SDK — Test Utilities
+ * Grove Infra SDK — Test Utilities
  *
  * In-memory mock implementations for all SDK interfaces.
  * Use these in unit tests to avoid real infrastructure dependencies.
  *
  * @example
  * ```typescript
- * import { createMockContext } from "@autumnsgrove/server-sdk/testing";
+ * import { createMockContext } from "@autumnsgrove/infra/testing";
  *
  * const ctx = createMockContext();
  * ctx.db.whenQuery("SELECT", [{ id: 1, title: "Test Post" }]);
@@ -15,7 +15,7 @@
  * expect(result.results).toHaveLength(1);
  * ```
  *
- * @module @autumnsgrove/server-sdk/testing
+ * @module @autumnsgrove/infra/testing
  */
 
 import type { GroveScheduler, ScheduleHandler, ScheduleInfo, SchedulerInfo } from "../types.js";

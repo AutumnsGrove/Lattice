@@ -101,16 +101,16 @@
 			"default": "./libs/engine/dist/heartwood/index.js"
 		},
 		"./infra": {
-			"types": "./libs/server-sdk/src/index.ts",
-			"default": "./libs/server-sdk/src/index.ts"
+			"types": "./libs/infra/src/index.ts",
+			"default": "./libs/infra/src/index.ts"
 		},
 		"./infra/cloudflare": {
-			"types": "./libs/server-sdk/src/cloudflare/index.ts",
-			"default": "./libs/server-sdk/src/cloudflare/index.ts"
+			"types": "./libs/infra/src/cloudflare/index.ts",
+			"default": "./libs/infra/src/cloudflare/index.ts"
 		},
 		"./infra/testing": {
-			"types": "./libs/server-sdk/src/testing/index.ts",
-			"default": "./libs/server-sdk/src/testing/index.ts"
+			"types": "./libs/infra/src/testing/index.ts",
+			"default": "./libs/infra/src/testing/index.ts"
 		}
 	},
 	"overrides": {

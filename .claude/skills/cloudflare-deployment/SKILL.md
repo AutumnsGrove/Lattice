@@ -128,23 +128,23 @@ const { results } = await env.DB.prepare("SELECT * FROM users WHERE id = ?").bin
 return Response.json(results);
 ```
 
-## Server SDK Abstraction Layer
+## Infra SDK Abstraction Layer
 
-Grove uses portable infrastructure interfaces from `@autumnsgrove/server-sdk` instead of raw Cloudflare APIs. This enables backend portability and consistent patterns across all services.
+Grove uses portable infrastructure interfaces from `@autumnsgrove/infra` instead of raw Cloudflare APIs. This enables backend portability and consistent patterns across all services.
 
-| Raw Cloudflare               | Server SDK Interface | Import                     |
-| ---------------------------- | -------------------- | -------------------------- |
-| `env.DB` (D1Database)        | `GroveDatabase`      | `@autumnsgrove/server-sdk` |
-| `env.STORAGE` (R2Bucket)     | `GroveStorage`       | `@autumnsgrove/server-sdk` |
-| `env.CACHE_KV` (KVNamespace) | `GroveKV`            | `@autumnsgrove/server-sdk` |
-| Service bindings (Fetcher)   | `GroveServiceBus`    | `@autumnsgrove/server-sdk` |
+| Raw Cloudflare               | Infra SDK Interface | Import                |
+| ---------------------------- | ------------------- | --------------------- |
+| `env.DB` (D1Database)        | `GroveDatabase`     | `@autumnsgrove/infra` |
+| `env.STORAGE` (R2Bucket)     | `GroveStorage`      | `@autumnsgrove/infra` |
+| `env.CACHE_KV` (KVNamespace) | `GroveKV`           | `@autumnsgrove/infra` |
+| Service bindings (Fetcher)   | `GroveServiceBus`   | `@autumnsgrove/infra` |
 
 ### Creating a Grove Context
 
 Create a `GroveContext` via `createCloudflareContext()` in your Worker entry point:
 
 ```typescript
-import { createCloudflareContext } from "@autumnsgrove/server-sdk/cloudflare";
+import { createCloudflareContext } from "@autumnsgrove/infra/cloudflare";
 
 const ctx = createCloudflareContext({
 	db: env.DB,
