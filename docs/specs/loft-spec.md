@@ -246,11 +246,11 @@ source /etc/environment
 # ── Start services ───────────────────────────────────────────
 tmux new-session -d -s loft
 
-ttyd -W -c "autumn:${SESSION_PASSWORD}" -p 7681 \
+ttyd -W -c "autumn:${SESSION_PASSWORD}" -i 127.0.0.1 -p 7681 \
   tmux new -A -s loft &
 
 PASSWORD="${SESSION_PASSWORD}" code-server \
-  --bind-addr 0.0.0.0:8080 \
+  --bind-addr 127.0.0.1:8080 \
   --auth password \
   --disable-telemetry &
 
@@ -264,10 +264,16 @@ if [ -n "${GIT_HOOKS_ARCHIVE_URL:-}" ]; then
   curl -sL "$GIT_HOOKS_ARCHIVE_URL" | tar xz -C /tmp/hooks
 fi
 
+# ── Store password for out-of-band retrieval ──────────────
+# Do NOT print password to stdout — cloud providers capture
+# serial/console logs. gw loft status retrieves it via API.
+echo "${SESSION_PASSWORD}" > /run/loft-session-password
+chmod 600 /run/loft-session-password
+
 echo "✨ Loft is ready."
 echo "   Terminal: https://loft.grove.place"
 echo "   Editor:   https://editor.loft.grove.place"
-echo "   Password: ${SESSION_PASSWORD}"
+echo "   Password: (use 'gw loft password' to retrieve)"
 ```
 
 ---
@@ -333,7 +339,10 @@ async function loftFadeSequence(instance: ServerInstance, opts: FadeOptions): Pr
       console.error('   Fix the issue and run gw loft kill again.');
       console.error('   Or run gw loft kill --skip-push to abandon uncommitted work.');
       console.error(pushResult.stderr);
-      throw new Error('FADE_BLOCKED: push failed');
+      throwGroveError(500, SRV_ERRORS.LOFT_FADE_BLOCKED, 'Loft', {
+        reason: 'push failed',
+        stderr: pushResult.stderr,
+      });
     }
 
     console.log(`✅ Pushed to ${branchName}`);
@@ -343,7 +352,17 @@ async function loftFadeSequence(instance: ServerInstance, opts: FadeOptions): Pr
 
   // ── Step 2: Sync workspace to R2 ─────────────────────────
   console.log('☁️  Syncing workspace to R2...');
-  await instance.exec('tar -czf /tmp/workspace.tar.gz /workspace');
+  await instance.exec(
+    'tar -czf /tmp/workspace.tar.gz' +
+    ' --exclude="*.env"' +
+    ' --exclude="*.env.*"' +
+    ' --exclude=".env"' +
+    ' --exclude=".env.local"' +
+    ' --exclude=".env.production"' +
+    ' --exclude="credentials.json"' +
+    ' --exclude="secrets.json"' +
+    ' /workspace'
+  );
   await r2Sync.persist(instance, `loft/${instance.id}/workspace.tar.gz`);
   console.log('✅ Workspace synced.');
 
@@ -359,8 +378,15 @@ async function loftFadeSequence(instance: ServerInstance, opts: FadeOptions): Pr
   }
 
   // ── Step 4: Cleanup credentials ───────────────────────────
+  // NOTE: shred is unreliable on network-attached / COW block storage
+  // (most cloud providers). The real credential protection is server
+  // termination — the disk is destroyed. shred is defense-in-depth
+  // for the window between cleanup and termination, not a guarantee.
   console.log('🔒 Cleaning credentials...');
-  await instance.exec('shred -u /etc/environment || true');
+  const shredResult = await instance.exec('shred -u /etc/environment');
+  if (shredResult.exitCode !== 0) {
+    console.warn('⚠️  shred failed (expected on cloud block storage). Server will be terminated.');
+  }
 
   // ── Step 5: Terminate ─────────────────────────────────────
   console.log('💨 Terminating server...');
@@ -444,8 +470,8 @@ The 24hr safety cap means the worst case is ~$0.50.
 
 ## Security Considerations
 
-- **Credentials shredded on fade.** API keys written to `/etc/environment` are `shred -u`'d before termination.
-- **CF Tunnel, not open ports.** No public IP exposure. All traffic through Cloudflare's network.
+- **Credentials cleaned on fade, destroyed on termination.** API keys in `/etc/environment` are `shred -u`'d before termination. `shred` is unreliable on cloud block storage (network-attached, COW), so the real protection is server termination — the disk is destroyed with it. `shred` is defense-in-depth for the window between cleanup and termination.
+- **CF Tunnel, not open ports.** ttyd and code-server bind to `127.0.0.1` only. They are unreachable from the public internet — only `cloudflared` (running locally on the same server) can reach them. All external traffic routes through Cloudflare's network.
 - **Password-protected services.** Both ttyd and code-server require the session password.
 - **Pre-push hooks preserved.** Your existing git safety hooks travel with you to the loft.
 - **No credential persistence in R2.** Workspace snapshots exclude `/etc/environment` and any `.env` files.
@@ -464,7 +490,7 @@ The 24hr safety cap means the worst case is ~$0.50.
 - [ ] Implement basic `FlyProvider` (port from Fly API docs)
 - [ ] Implement `gw loft ignite`, `gw loft status`, `gw loft kill`
 - [ ] Implement `--repo` flag with deploy key / token injection
-- [ ] Password show + store (print at ignite, persist in `gw` local keychain)
+- [ ] Password store + retrieve (write to `/run/` on server, `gw loft status` pulls via API, persists in `gw` local keychain)
 - [ ] `gw loft open` auto-opens URL with stored auth
 - [ ] `gw loft password` retrieves stored session password
 - [ ] Basic fade sequence (push check → terminate, skip R2/snapshot for now)
@@ -510,7 +536,7 @@ Answers to the original open questions, decided during spec design.
 1. **Crush install path.** Confirm the exact install command before Phase 0. Likely `npm install -g @charmland/crush` since Node is already in the bootstrap.
 2. **CF Tunnel: wildcard.** Single pre-created tunnel with `*.loft.grove.place` wildcard routing. No per-session tunnel provisioning needed. Simpler bootstrap, no CF API calls.
 3. **code-server + ttyd on iPad: test and document.** Try both single-PWA (terminal only) and split-screen during Phase 0 iPad testing. Document what works. Don't prescribe the UX before real usage.
-4. **Password: show + store.** Print the session password at ignite time AND store it in `gw`'s local keychain. `gw loft open` auto-opens with auth. `gw loft password` retrieves it if needed elsewhere.
+4. **Password: store + retrieve out-of-band.** Session password is NOT printed to bootstrap stdout (cloud providers capture serial/console logs). Instead, it's written to `/run/loft-session-password` on the server. `gw loft status` retrieves it via API and stores it in `gw`'s local keychain. `gw loft open` auto-opens with auth. `gw loft password` retrieves it if needed elsewhere.
 5. **Git repo auto-clone: Phase 0.** `gw loft ignite --repo autumnsgrove/lattice` is a Phase 0 feature. Without it you ignite and then manually git clone anyway. Needs a deploy key or token injected at bootstrap.
 6. **Fly snapshots: R2 only.** Fly sessions restore from R2 workspace tarballs only. Reserve machine snapshots for DO where they're mature and first-class.
 7. **Crush + OpenCode: install both.** They've diverged enough to complement each other. Crush for Go speed + Charm polish + LSP. OpenCode for TypeScript + Zen gateway. Both in bootstrap.
