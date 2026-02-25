@@ -8,7 +8,3 @@ build
 .DS_Store
 *.local
 !.env.local.example
-
-# Generated census data (re-create with: bash scripts/grove/grove-census.sh --today)
-static/data/grove_census.db
-static/data/grove_census.json
