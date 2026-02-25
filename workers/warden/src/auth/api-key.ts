@@ -5,11 +5,12 @@
  * Checks X-API-Key header against registered agent secrets.
  */
 
+import type { GroveDatabase } from "@autumnsgrove/infra";
 import type { WardenAgent } from "../types";
 
 /** Look up an agent by API key (the raw key, compared against stored hash) */
 export async function authenticateByApiKey(
-	db: D1Database,
+	db: GroveDatabase,
 	apiKey: string,
 ): Promise<WardenAgent | null> {
 	// Hash the provided key to compare against stored hash

@@ -5,21 +5,20 @@
  * the Vista warden-aggregator so the dashboard auto-populates.
  */
 
+import type { GroveDatabase } from "@autumnsgrove/infra";
 import type { AuditLogEntry } from "../types";
 
 /** Write an audit log entry to D1 */
 export async function logAuditEvent(
-	db: D1Database,
+	db: GroveDatabase,
 	entry: Omit<AuditLogEntry, "id" | "created_at">,
 ): Promise<void> {
 	try {
-		await db
-			.prepare(
-				`INSERT INTO warden_audit_log
-				(agent_id, agent_name, target_service, action, auth_method, auth_result, event_type, tenant_id, latency_ms, error_code)
-				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-			)
-			.bind(
+		await db.execute(
+			`INSERT INTO warden_audit_log
+			(agent_id, agent_name, target_service, action, auth_method, auth_result, event_type, tenant_id, latency_ms, error_code)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+			[
 				entry.agent_id,
 				entry.agent_name,
 				entry.target_service,
@@ -30,8 +29,8 @@ export async function logAuditEvent(
 				entry.tenant_id,
 				entry.latency_ms,
 				entry.error_code,
-			)
-			.run();
+			],
+		);
 	} catch (err) {
 		// Audit logging should never break the request flow
 		console.error("[Warden] Audit log write failed:", err);
@@ -39,16 +38,14 @@ export async function logAuditEvent(
 }
 
 /** Update agent usage stats (last_used_at, request_count) */
-export async function updateAgentUsage(db: D1Database, agentId: string): Promise<void> {
+export async function updateAgentUsage(db: GroveDatabase, agentId: string): Promise<void> {
 	try {
-		await db
-			.prepare(
-				`UPDATE warden_agents
-				SET last_used_at = datetime('now'), request_count = request_count + 1
-				WHERE id = ?`,
-			)
-			.bind(agentId)
-			.run();
+		await db.execute(
+			`UPDATE warden_agents
+			SET last_used_at = datetime('now'), request_count = request_count + 1
+			WHERE id = ?`,
+			[agentId],
+		);
 	} catch (err) {
 		console.error("[Warden] Agent usage update failed:", err);
 	}

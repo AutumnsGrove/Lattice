@@ -17,7 +17,9 @@
 
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import type { Env } from "./types";
+import { groveInfraMiddleware } from "@autumnsgrove/infra/cloudflare";
+import type { MiddlewareHandler } from "hono";
+import type { Env, AppVariables } from "./types";
 import { nonceRoute } from "./routes/nonce";
 import { requestRoute } from "./routes/request";
 import { resolveRoute } from "./routes/resolve";
@@ -27,7 +29,24 @@ import { adminRoutes } from "./routes/admin";
 import "./services";
 import { listServices } from "./services";
 
-const app = new Hono<{ Bindings: Env }>();
+const app = new Hono<{ Bindings: Env; Variables: AppVariables }>();
+
+// Wire GroveContext from primary DB binding (KV namespaces stay raw — dual-namespace)
+app.use(
+	"*",
+	groveInfraMiddleware((env) => ({
+		db: (env as unknown as Env).DB,
+		env: env as Record<string, unknown>,
+		dbName: "grove-warden",
+		observer: (event) => {
+			console.log(
+				`[Infra] ${event.service}.${event.operation} ` +
+					`${event.ok ? "ok" : "ERR"} ${event.durationMs.toFixed(1)}ms` +
+					`${event.detail ? ` — ${event.detail}` : ""}`,
+			);
+		},
+	})) as MiddlewareHandler,
+);
 
 // CORS for cross-origin agent requests
 app.use(

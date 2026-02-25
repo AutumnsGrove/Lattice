@@ -6,10 +6,10 @@
  */
 
 import { Hono } from "hono";
-import type { Env, WardenAgent, AuditLogEntry } from "../types";
+import type { Env, AppVariables, WardenAgent, AuditLogEntry } from "../types";
 import { hashApiKey } from "../auth/api-key";
 
-export const adminRoutes = new Hono<{ Bindings: Env }>();
+export const adminRoutes = new Hono<{ Bindings: Env; Variables: AppVariables }>();
 
 /** Admin auth middleware — checks WARDEN_ADMIN_KEY or CF-Worker header */
 adminRoutes.use("*", async (c, next) => {
@@ -71,13 +71,14 @@ adminRoutes.post("/agents", async (c) => {
 	const rateRpm = body.rate_limit_rpm ?? 60;
 	const rateDaily = body.rate_limit_daily ?? 1000;
 
+	const ctx = c.get("ctx");
+
 	try {
-		await c.env.DB.prepare(
+		await ctx.db.execute(
 			`INSERT INTO warden_agents (id, name, owner, secret_hash, scopes, rate_limit_rpm, rate_limit_daily)
 			VALUES (?, ?, ?, ?, ?, ?, ?)`,
-		)
-			.bind(agentId, body.name, body.owner, secretHash, scopes, rateRpm, rateDaily)
-			.run();
+			[agentId, body.name, body.owner, secretHash, scopes, rateRpm, rateDaily],
+		);
 
 		return c.json({
 			success: true,
@@ -103,15 +104,17 @@ adminRoutes.post("/agents", async (c) => {
 
 /** GET /admin/agents — List all agents (secrets redacted) */
 adminRoutes.get("/agents", async (c) => {
+	const ctx = c.get("ctx");
+
 	try {
-		const result = await c.env.DB.prepare(
+		const result = await ctx.db.execute(
 			`SELECT id, name, owner, scopes, rate_limit_rpm, rate_limit_daily,
 				enabled, created_at, last_used_at, request_count
 			FROM warden_agents
 			ORDER BY created_at DESC`,
-		).all<Omit<WardenAgent, "secret_hash">>();
+		);
 
-		const agents = (result.results || []).map((a) => ({
+		const agents = (result.results as unknown as Omit<WardenAgent, "secret_hash">[]).map((a) => ({
 			...a,
 			scopes: JSON.parse(a.scopes as string),
 			enabled: !!a.enabled,
@@ -130,13 +133,14 @@ adminRoutes.get("/agents", async (c) => {
 /** DELETE /admin/agents/:id — Revoke (disable) an agent */
 adminRoutes.delete("/agents/:id", async (c) => {
 	const agentId = c.req.param("id");
+	const ctx = c.get("ctx");
 
 	try {
-		const result = await c.env.DB.prepare("UPDATE warden_agents SET enabled = 0 WHERE id = ?")
-			.bind(agentId)
-			.run();
+		const result = await ctx.db.execute("UPDATE warden_agents SET enabled = 0 WHERE id = ?", [
+			agentId,
+		]);
 
-		if (!result.meta.changes || result.meta.changes === 0) {
+		if (result.meta.changes === 0) {
 			return c.json(
 				{ success: false, error: { code: "NOT_FOUND", message: "Agent not found" } },
 				404,
@@ -159,6 +163,7 @@ adminRoutes.get("/logs", async (c) => {
 	const service = c.req.query("service");
 	const limit = Math.min(Number(c.req.query("limit") || 50), 500);
 	const offset = Number(c.req.query("offset") || 0);
+	const ctx = c.get("ctx");
 
 	try {
 		let query = "SELECT * FROM warden_audit_log WHERE 1=1";
@@ -176,15 +181,15 @@ adminRoutes.get("/logs", async (c) => {
 		query += " ORDER BY created_at DESC LIMIT ? OFFSET ?";
 		bindings.push(String(limit), String(offset));
 
-		const result = await c.env.DB.prepare(query)
-			.bind(...bindings)
-			.all<AuditLogEntry>();
+		const result = await ctx.db.execute(query, bindings);
+
+		const entries = result.results as unknown as AuditLogEntry[];
 
 		return c.json({
 			success: true,
 			data: {
-				entries: result.results || [],
-				total: result.results?.length || 0,
+				entries,
+				total: entries.length,
 				limit,
 				offset,
 			},
