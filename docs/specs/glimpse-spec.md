@@ -1177,14 +1177,67 @@ glimpse = "glimpse.cli:main"
 
 - **URL validation:** Only allow http/https schemes. No `file://` or `javascript:` URLs.
 - **JS injection scope:** Only inject Grove-specific store values. Never execute arbitrary user JS.
-- **Lumen API key:** Loaded from environment variable, never stored in config files.
+- **Lumen API key:** Loaded from environment variable, never stored in config files or committed to git.
 - **Output paths:** Sanitize output filenames to prevent directory traversal.
 - **Browser sandbox:** Playwright runs Chromium in sandboxed mode by default. Do not disable.
 - **Timeout limits:** All navigation and capture operations have timeouts (default 30s) to prevent hangs.
+- **Server management:** Glimpse only stops processes it started (PID file tracking). It never kills developer-started servers.
+- **Seed data scope:** `glimpse seed` only operates on `--local` D1 databases. It never touches remote or production data.
+- **Browse action scope:** The `browse` command only executes UI interactions (click, fill, scroll). It does not inject arbitrary JavaScript or modify page state beyond what a user could do manually.
+- **Console capture privacy:** Console output may contain sensitive data (API keys logged accidentally, user data in error messages). Glimpse writes this to local files only; it is never sent to external services unless the caller explicitly pipes it somewhere.
 
 ---
 
 ## Usage Examples
+
+### Verification Loop (The Main Use Case)
+
+```bash
+# You just edited the arbor page. Check your work:
+glimpse capture http://localhost:5173/arbor?subdomain=autumn \
+  --logs --auto --season autumn --theme dark -o /tmp/check.png
+
+# Output:
+# /tmp/check.png
+# [ERROR] Cannot read property 'title' of undefined (+page.svelte:31:8)
+
+# Fix the bug, check again:
+glimpse capture http://localhost:5173/arbor?subdomain=autumn \
+  --logs -o /tmp/check-2.png
+
+# Output:
+# /tmp/check-2.png
+# (no errors)
+
+# Looks good. Ship it.
+```
+
+### First-Time Setup
+
+```bash
+# Install browser
+glimpse install
+
+# Seed local databases
+glimpse seed
+
+# Check everything is ready
+glimpse status
+
+# Take your first screenshot
+glimpse capture http://localhost:5173/?subdomain=autumn --auto --logs
+```
+
+### Multi-Step Flow Verification
+
+```bash
+# Verify that the auth flow works end-to-end
+glimpse browse http://localhost:5173/?subdomain=autumn \
+  --do "click Sign In, fill email with test@grove.place, fill password with test123, click Submit" \
+  --screenshot-each --logs --auto
+
+# Returns: browse-step-1.png through browse-step-4.png + console output
+```
 
 ### Documentation Screenshots
 
@@ -1192,21 +1245,22 @@ glimpse = "glimpse.cli:main"
 # Capture the landing page in all seasons, light mode
 glimpse matrix https://grove.place --themes light -o docs/screenshots/
 
-# Capture a specific component for the storybook
+# Capture a specific component
 glimpse capture https://grove.place --selector ".glass-card-demo" \
   --season autumn --theme dark -o docs/components/glass-card.png
 ```
 
-### Agent-Driven Captures
+### Agent-Driven Workflow
 
 ```bash
-# An agent can grab exactly what it needs
-glimpse capture https://plant.grove.place/settings \
-  --season autumn --theme dark --agent \
+# Claude Code uses agent mode for clean parsing
+glimpse capture http://localhost:5173/arbor?subdomain=autumn \
+  --season autumn --theme dark --agent --logs \
   -o /tmp/settings-page.png
 
-# Then analyze the screenshot with Claude
-# (the agent reads the output path from stdout)
+# stdout (line 1 = image path, rest = diagnostics):
+# /tmp/settings-page.png
+# [ERROR] Failed to load resource: /api/curios/timeline (404)
 ```
 
 ### Marketing Asset Pipeline
@@ -1219,6 +1273,7 @@ defaults:
   season: autumn
   theme: dark
   output_dir: marketing/assets/
+  logs: true
 
 captures:
   - url: https://grove.place
@@ -1231,10 +1286,6 @@ captures:
   - url: https://grove.place
     name: hero-tablet
     viewport: { width: 768, height: 1024 }
-
-  - url: https://plant.grove.place
-    name: plant-dashboard
-    selector: ".dashboard-main"
 
   - url: https://grove.place/about
     name: about-midnight
@@ -1250,31 +1301,33 @@ glimpse batch marketing-shots.yaml
 
 ```bash
 # Quick check: does the page look right in all themes?
-glimpse matrix https://grove.place/pricing \
-  --selector "main" \
-  -o qa/pricing/
+glimpse matrix http://localhost:5173/?subdomain=autumn \
+  --selector "main" --logs \
+  -o qa/homepage/
 ```
 
 Produces:
 ```
-qa/pricing/
-├── pricing-spring-light.png
-├── pricing-spring-dark.png
-├── pricing-summer-light.png
-├── pricing-summer-dark.png
-├── pricing-autumn-light.png
-├── pricing-autumn-dark.png
-├── pricing-winter-light.png
-├── pricing-winter-dark.png
-├── pricing-midnight-light.png
-└── pricing-midnight-dark.png
+qa/homepage/
+├── homepage-spring-light.png
+├── homepage-spring-dark.png
+├── homepage-summer-light.png
+├── homepage-summer-dark.png
+├── homepage-autumn-light.png
+├── homepage-autumn-dark.png
+├── homepage-winter-light.png
+├── homepage-winter-dark.png
+├── homepage-midnight-light.png
+└── homepage-midnight-dark.png
 ```
 
 ---
 
-## Implementation Checklist
+## Implementation Phases
 
-### Phase 1: Core Capture (MVP)
+### Phase 1: Peek (Core Capture + Console)
+
+The minimum viable verification loop. Screenshot a page, capture console errors, report both.
 
 - [ ] Project scaffolding (`tools/glimpse/`, pyproject.toml, Click CLI)
 - [ ] `glimpse install` command (wraps `playwright install chromium`)
@@ -1285,10 +1338,17 @@ qa/pricing/
 - [ ] PNG and JPEG output with quality control
 - [ ] Human, agent, and JSON output modes
 - [ ] Auto-generated filenames from URL slug
+- [ ] Console collector (`--logs` flag)
+- [ ] Uncaught exception capture (`pageerror` event)
+- [ ] Console output formatting (human / agent / JSON)
 
-### Phase 2: Theme System
+**After Phase 1:** Claude Code can change code, screenshot a page, read console errors, and fix issues in a loop.
 
-- [ ] Theme injector (localStorage pre-seeding)
+### Phase 2: Theme System + Matrix
+
+Theme injection so verification works across all visual states.
+
+- [ ] Theme injector (localStorage pre-seeding via `add_init_script`)
 - [ ] Season control (`--season` flag)
 - [ ] Dark/light control (`--theme` flag)
 - [ ] Grove mode control (`--grove-mode` flag)
@@ -1296,32 +1356,68 @@ qa/pricing/
 - [ ] `glimpse matrix` command (all combinations)
 - [ ] Parallel capture with asyncio (configurable concurrency)
 
-### Phase 3: Batch Operations
+### Phase 3: Server + Seed
 
-- [ ] YAML config file parsing
+Remove the "start the dev server manually" friction.
+
+- [ ] Server manager: detect running server on target port
+- [ ] Server manager: auto-start dev server (`--auto` flag)
+- [ ] Health polling with configurable timeout
+- [ ] PID file tracking (`.glimpse/server.pid`)
+- [ ] `glimpse stop` command
+- [ ] Data bootstrapper: apply D1 migrations
+- [ ] Data bootstrapper: apply seed SQL scripts
+- [ ] `glimpse seed` command with `--reset` and `--dry-run`
+- [ ] `glimpse status` command (browser + server + database readiness)
+
+**After Phase 3:** Full self-service. Claude Code can set up a complete local dev environment from scratch and verify pages with real data.
+
+### Phase 4: Batch + Config
+
+Repeatable screenshot sets for documentation and QA.
+
+- [ ] YAML batch config file parsing
 - [ ] `glimpse batch` command
 - [ ] Per-capture overrides in config
 - [ ] Dry-run mode
 - [ ] `.glimpse.toml` project config loading
 - [ ] Default inheritance in batch configs
+- [ ] Console capture in batch mode
 
-### Phase 4: Smart Detection
+### Phase 5: Walk (Interactive Browsing)
 
-- [ ] Playwright accessibility tree detection (`a11y.py`)
-- [ ] CSS heuristic mapping (`heuristics.py`)
+Multi-step flow verification.
+
+- [ ] Natural language instruction parser
+- [ ] Action vocabulary (click, fill, hover, scroll, wait, press, go to)
+- [ ] Target resolution via a11y tree
+- [ ] Target resolution via CSS heuristics
+- [ ] `glimpse browse` command
+- [ ] `--screenshot-each` mode
+- [ ] Console collection across navigation events
+
+**After Phase 5:** Claude Code can verify multi-step user flows (sign in, navigate, submit forms) without writing Playwright scripts.
+
+### Phase 6: Smart Detection + Lumen
+
+AI-powered element finding for when the DOM is not enough.
+
 - [ ] Lumen Gateway integration (`vision.py`)
-- [ ] Fallback chain orchestration
+- [ ] Fallback chain orchestration (a11y → heuristics → Lumen)
 - [ ] `glimpse detect` command
 - [ ] Bounding box overlay mode (`--overlay`)
 - [ ] Coordinates-only output (`--coords-only`)
+- [ ] Lumen fallback in `browse` for unresolvable targets
 
-### Phase 5: Polish
+### Phase 7: Polish
+
+Developer experience refinements.
 
 - [ ] Shell completions (bash/zsh/fish)
 - [ ] Rich progress bars for batch/matrix operations
 - [ ] Error recovery (retry failed captures)
 - [ ] Browser context reuse for same-domain captures
-- [ ] Caching (skip captures if output file exists and is recent)
+- [ ] `.glimpse/` directory for cached state and logs
 - [ ] `--diff` flag to highlight visual differences between captures
 
 ---
