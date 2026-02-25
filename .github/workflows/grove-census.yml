@@ -1,0 +1,80 @@
+name: Grove Census
+
+# Daily snapshot of the codebase structure for the Living Grove visualization.
+# Runs the grove-census.sh script in --today mode and commits the updated database.
+
+on:
+  schedule:
+    - cron: "0 6 * * *" # Daily at 6am UTC
+  workflow_dispatch: # Manual trigger
+
+permissions:
+  contents: write
+
+jobs:
+  census:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history needed for accurate commit hash
+
+      - name: Install SQLite
+        run: sudo apt-get install -y sqlite3
+
+      - name: Run census
+        run: bash scripts/grove/grove-census.sh --today
+
+      - name: Export census to JSON
+        run: |
+          DB_FILE="apps/landing/static/data/grove_census.db"
+          JSON_FILE="apps/landing/static/data/grove_census.json"
+
+          python3 -c "
+          import sqlite3, json
+
+          conn = sqlite3.connect('$DB_FILE')
+          conn.row_factory = sqlite3.Row
+
+          snapshots = conn.execute('SELECT * FROM snapshots ORDER BY date ASC').fetchall()
+          frames = []
+          for snap in snapshots:
+              dirs = conn.execute('SELECT * FROM directories WHERE snapshot_id = ?', (snap['id'],)).fetchall()
+              frames.append({
+                  'date': snap['date'],
+                  'commit': snap['commit_hash'],
+                  'totalLines': snap['total_lines'],
+                  'totalFiles': snap['total_files'],
+                  'directories': [{
+                      'path': d['path'],
+                      'depth': d['depth'],
+                      'totalLines': d['total_lines'],
+                      'tsLines': d['ts_lines'],
+                      'svelteLines': d['svelte_lines'],
+                      'jsLines': d['js_lines'],
+                      'cssLines': d['css_lines'],
+                      'pyLines': d['py_lines'],
+                      'goLines': d['go_lines'],
+                      'sqlLines': d['sql_lines'],
+                      'shLines': d['sh_lines'],
+                      'tsxLines': d['tsx_lines'],
+                      'mdLines': d['md_lines'],
+                      'otherLines': d['other_lines'],
+                  } for d in dirs]
+              })
+
+          conn.close()
+
+          with open('$JSON_FILE', 'w') as f:
+              json.dump({'frames': frames, 'generated': '$(date -Iseconds)'}, f)
+
+          print(f'Exported {len(frames)} frames to JSON')
+          "
+
+      - name: Commit snapshot
+        run: |
+          git config user.name "Grove Census Bot"
+          git config user.email "census@grove.place"
+          git add apps/landing/static/data/grove_census.db apps/landing/static/data/grove_census.json
+          git diff --staged --quiet || git commit -m "census: daily snapshot $(date +%Y-%m-%d)"
+          git push
