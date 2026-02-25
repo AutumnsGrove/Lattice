@@ -81,7 +81,7 @@ The core technical specification for Lattice, Grove's Cloudflare-native blog eng
 
 ## Overview
 
-Lattice is a Cloudflare-native blog engine published as an npm package. Customers install `@lattice/core` in their individual repositories to power their blogs. Each customer has a separate repository with their own Cloudflare resources (D1, KV, R2), deployed either on a `grove.place` subdomain or a custom domain.
+Lattice is a Cloudflare-native blog engine published as an npm package. Customers install `@autumnsgrove/lattice` in their individual repositories to power their blogs. Each customer has a separate repository with their own Cloudflare resources (D1, KV, R2), deployed either on a `grove.place` subdomain or a custom domain.
 
 ---
 
@@ -104,11 +104,11 @@ Lattice is a Cloudflare-native blog engine published as an npm package. Customer
 ```mermaid
 graph TB
     subgraph "Lattice Repo"
-        ENGINE[("@lattice/core<br/>npm package")]
+        ENGINE[("@autumnsgrove/lattice<br/>npm package")]
     end
 
     subgraph "npm Registry"
-        NPM[("npmjs.com<br/>@lattice/core")]
+        NPM[("npmjs.com<br/>@autumnsgrove/lattice")]
     end
 
     subgraph "Customer Repos"
@@ -137,7 +137,7 @@ graph TB
 ## Package Structure
 
 ```
-@lattice/core/
+@autumnsgrove/lattice/
 ├── src/lib/
 │   ├── components/        # Svelte components
 │   │   ├── blog/          # Post, PostCard, PostList, etc.
@@ -168,7 +168,7 @@ graph TB
 
 ```json
 {
-  "name": "@lattice/core",
+  "name": "@autumnsgrove/lattice",
   "version": "0.1.0",
   "exports": {
     ".": {
@@ -203,17 +203,17 @@ graph TB
 
 ```typescript
 // Main exports (components, types, utilities)
-import { PostList, PostCard, Header, Footer } from "@lattice/core";
-import type { Post, User, SiteConfig } from "@lattice/core";
+import { PostList, PostCard, Header, Footer } from "@autumnsgrove/lattice";
+import type { Post, User, SiteConfig } from "@autumnsgrove/lattice";
 
 // Server-side utilities (use in +page.server.ts, +server.ts)
-import { verifyMagicCode, createSession, getPosts } from "@lattice/core/server";
+import { verifyMagicCode, createSession, getPosts } from "@autumnsgrove/lattice/server";
 
 // Svelte stores
-import { theme, user, siteConfig } from "@lattice/core/stores";
+import { theme, user, siteConfig } from "@autumnsgrove/lattice/stores";
 
 // Direct component imports
-import PostEditor from "@lattice/core/components/admin/PostEditor.svelte";
+import PostEditor from "@autumnsgrove/lattice/components/admin/PostEditor.svelte";
 ```
 
 ---
@@ -503,8 +503,8 @@ declare global {
     }
 
     interface Locals {
-      user: import("@lattice/core").User | null;
-      session: import("@lattice/core").Session | null;
+      user: import("@autumnsgrove/lattice").User | null;
+      session: import("@autumnsgrove/lattice").Session | null;
     }
   }
 }

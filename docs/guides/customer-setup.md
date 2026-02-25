@@ -123,12 +123,12 @@ Update the configuration file with the resource IDs:
 ### Copy Migrations from Engine
 
 ```bash
-# Ensure @lattice/core is installed
+# Ensure @autumnsgrove/lattice is installed
 pnpm install
 
 # Copy migrations to local directory
 mkdir -p migrations
-cp node_modules/@lattice/core/migrations/*.sql migrations/
+cp node_modules/@autumnsgrove/lattice/migrations/*.sql migrations/
 ```
 
 ### Apply Migrations
@@ -285,7 +285,7 @@ Ensure the file exists with proper configuration:
   "labels": ["dependencies"],
   "packageRules": [
     {
-      "matchPackageNames": ["@lattice/core"],
+      "matchPackageNames": ["@autumnsgrove/lattice"],
       "automerge": true,
       "automergeType": "pr",
       "schedule": ["at any time"],
@@ -449,7 +449,7 @@ Include the following information:
 
 1. Check GitHub Actions logs
 2. Verify pnpm-lock.yaml is committed
-3. Ensure @lattice/core version is published
+3. Ensure @autumnsgrove/lattice version is published
 
 ### Can't Log In
 

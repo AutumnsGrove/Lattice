@@ -43,7 +43,7 @@ Template structure for individual customer blog repositories, each with dedicate
 
 ## Overview
 
-Each customer has their own repository that imports `@lattice/core` as a dependency. This single-tenant model provides:
+Each customer has their own repository that imports `@autumnsgrove/lattice` as a dependency. This single-tenant model provides:
 
 - **Isolation:** Each customer has dedicated Cloudflare resources
 - **Customization:** Full control over routes, styling, and configuration
@@ -179,7 +179,7 @@ customer-blog/
 
 ```typescript
 // src/routes/+layout.server.ts
-import { getSiteConfig } from "@lattice/core/server";
+import { getSiteConfig } from "@autumnsgrove/lattice/server";
 import siteJson from "../../config/site.json";
 import type { LayoutServerLoad } from "./$types";
 
@@ -223,7 +223,7 @@ export const load: LayoutServerLoad = async ({ platform, locals }) => {
     "deploy": "wrangler pages deploy"
   },
   "dependencies": {
-    "@lattice/core": "^0.1.0"
+    "@autumnsgrove/lattice": "^0.1.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20241127.0",
@@ -321,7 +321,7 @@ export default config;
 ```typescript
 /// <reference types="@cloudflare/workers-types" />
 
-import type { User, Session } from "@lattice/core";
+import type { User, Session } from "@autumnsgrove/lattice";
 
 declare global {
   namespace App {
@@ -356,7 +356,7 @@ export {};
 ### src/hooks.server.ts
 
 ```typescript
-import { validateSession } from "@lattice/core/server";
+import { validateSession } from "@autumnsgrove/lattice/server";
 import type { Handle } from "@sveltejs/kit";
 
 export const handle: Handle = async ({ event, resolve }) => {
@@ -390,8 +390,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 ```svelte
 <script lang="ts">
-  import { Header, Footer } from '@lattice/core';
-  import { siteConfig } from '@lattice/core/stores';
+  import { Header, Footer } from '@autumnsgrove/lattice';
+  import { siteConfig } from '@autumnsgrove/lattice/stores';
   import '../app.css';
 
   let { data, children } = $props();
@@ -417,7 +417,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 ```svelte
 <script lang="ts">
-  import { PostList } from '@lattice/core';
+  import { PostList } from '@autumnsgrove/lattice';
 
   let { data } = $props();
 </script>
@@ -456,7 +456,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 ### src/routes/blog/+page.server.ts
 
 ```typescript
-import { getPosts } from "@lattice/core/server";
+import { getPosts } from "@autumnsgrove/lattice/server";
 import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ platform, url }) => {
@@ -482,7 +482,7 @@ export const load: PageServerLoad = async ({ platform, url }) => {
 
 ```svelte
 <script lang="ts">
-  import { PostView, TableOfContents, GutterLinks } from '@lattice/core';
+  import { PostView, TableOfContents, GutterLinks } from '@autumnsgrove/lattice';
 
   let { data } = $props();
 </script>
@@ -521,7 +521,7 @@ export const load: PageServerLoad = async ({ platform, url }) => {
 
 ```svelte
 <script lang="ts">
-  import { AdminPanel } from '@lattice/core';
+  import { AdminPanel } from '@autumnsgrove/lattice';
 
   let { data } = $props();
 </script>
@@ -569,7 +569,7 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 @import "tailwindcss/utilities";
 
 /* Import engine base styles */
-@import "@lattice/core/styles.css";
+@import "@autumnsgrove/lattice/styles.css";
 
 /* Custom site overrides */
 :root {
@@ -598,7 +598,7 @@ import typography from "@tailwindcss/typography";
 export default {
   content: [
     "./src/**/*.{html,js,svelte,ts}",
-    "./node_modules/@lattice/core/**/*.{html,js,svelte,ts}",
+    "./node_modules/@autumnsgrove/lattice/**/*.{html,js,svelte,ts}",
   ],
   theme: {
     extend: {
@@ -723,7 +723,7 @@ Customer repos include migrations from the engine:
 
 ```bash
 # Copy migrations from engine (done during setup)
-cp node_modules/@lattice/core/migrations/*.sql migrations/
+cp node_modules/@autumnsgrove/lattice/migrations/*.sql migrations/
 
 # Apply migrations locally
 pnpm db:migrate:local
