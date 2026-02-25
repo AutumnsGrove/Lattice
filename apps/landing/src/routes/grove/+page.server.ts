@@ -11,7 +11,7 @@
 let censusData: CensusData | null = null;
 
 try {
-	const modules = import.meta.glob("../../../../static/data/grove_census.json", {
+	const modules = import.meta.glob("../../../static/data/grove_census.json", {
 		eager: true,
 		import: "default",
 	}) as Record<string, CensusData>;
