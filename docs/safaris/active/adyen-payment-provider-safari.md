@@ -14,14 +14,20 @@ Grove currently runs on **Stripe** for payment processing. There was a previous 
 
 | Layer | File | Role |
 |-------|------|------|
-| **Stripe Checkout** | `apps/plant/src/lib/server/stripe.ts` | Creates checkout sessions, webhook verification, billing portal |
+| **PaymentProvider Interface** | `libs/engine/src/lib/payments/types.ts` | Full abstract interface: products, checkout, payments, subscriptions, customers, webhooks, Connect |
+| **Provider Factory** | `libs/engine/src/lib/payments/index.ts` | `createPaymentProvider('stripe' | 'paddle', config)` — pluggable |
+| **Stripe Implementation** | `libs/engine/src/lib/payments/stripe/provider.ts` (20KB) | Full `PaymentProvider` implementation for Stripe |
+| **Stripe Client** | `libs/engine/src/lib/payments/stripe/client.ts` (11KB) | Low-level Stripe API wrapper |
+| **Stripe Checkout** | `apps/plant/src/lib/server/stripe.ts` | Platform-level checkout sessions, webhook verification, billing portal |
 | **Billing Abstraction** | `libs/engine/src/lib/server/billing.ts` | Provider-agnostic billing checks via `platform_billing` table |
 | **Warden Stripe** | `libs/engine/src/lib/warden/services/stripe.ts` | Read-only Stripe access (customers, subscriptions, invoices) |
 | **Tier Config** | `libs/engine/src/lib/config/tiers.ts` | Unified tier definitions (free → seedling → sapling → oak → evergreen) |
 | **Heartwood Subscriptions** | `services/heartwood/src/routes/subscription.ts` | User subscription management, post limits |
 | **Checkout URLs** | `libs/engine/src/lib/grafts/pricing/checkout.ts` | LemonSqueezy checkout URL generation (legacy, may be unused) |
 
-**Key abstraction**: `billing.ts` uses a `provider_customer_id` column in `platform_billing`, meaning the billing layer is partially provider-agnostic. The Stripe-specific code is isolated in `apps/plant` and `workers/warden`.
+**Key abstraction**: Grove has a complete `PaymentProvider` interface with a factory pattern. Adding a new provider means implementing `syncProduct()`, `createCheckoutSession()`, `getSubscription()`, `cancelSubscription()`, `syncCustomer()`, `createBillingPortalSession()`, `handleWebhook()`, and more. The database uses generic `provider_*` columns throughout (`provider_customer_id`, `provider_subscription_id`, `provider_product_id`, etc.), making it truly provider-agnostic.
+
+**The factory already has a slot for Paddle** and could trivially add `"adyen"` as a type — the question is whether Adyen can fulfill the interface contract (spoiler: it can't fully, since it lacks billing portal and subscription management).
 
 ### Grove's Transaction Profile
 
@@ -292,19 +298,48 @@ Solid security features, but the content policy vagueness is a concern for Grove
 
 **Character**: *The bridge exists, but it leads to a different country.*
 
+### The PaymentProvider Interface Challenge
+
+Grove has a beautiful `PaymentProvider` interface (`libs/engine/src/lib/payments/types.ts`) that any new provider must implement. Here's what Adyen can and can't fulfill:
+
+| Interface Method | Can Adyen Implement? | Notes |
+|-----------------|---------------------|-------|
+| `syncProduct()` | Partially | Adyen doesn't have a product catalog concept |
+| `syncPrice()` | No | No price objects — you manage pricing yourself |
+| `createCheckoutSession()` | Yes | Adyen Drop-in/Components, but different flow |
+| `getCheckoutSession()` | Partially | Different session model |
+| `getPaymentStatus()` | Yes | Via Payment API |
+| `refund()` | Yes | Via Modifications API |
+| `getSubscription()` | **No** | Adyen has no subscription management |
+| `cancelSubscription()` | **No** | You'd build this yourself |
+| `resumeSubscription()` | **No** | You'd build this yourself |
+| `syncCustomer()` | Partially | Shopper references, not full customer objects |
+| `getCustomer()` | Partially | Limited compared to Stripe |
+| `createBillingPortalSession()` | **No** | No equivalent exists |
+| `handleWebhook()` | Yes | Different format, different signing |
+| `createConnectAccount()` | **No** | Adyen for Platforms exists but very different model |
+
+**6 of 14 interface methods cannot be directly implemented** — they'd require building entirely new systems around Adyen's primitives.
+
 ### What Would Change
 
-**Billing abstraction (`billing.ts`)**: Mostly fine — uses `provider_customer_id` generically. Would need minimal changes.
+**Provider factory (`payments/index.ts`)**: Easy — add `"adyen"` to the `ProviderType` union. Trivial change.
 
-**Stripe checkout (`apps/plant/src/lib/server/stripe.ts`)**: **Complete rewrite.** Adyen's checkout API is fundamentally different. No equivalent to `createCheckoutSession` that handles everything.
+**PaymentProvider implementation**: **Massive effort.** Must build subscription lifecycle, billing portal, and product sync from scratch since Adyen doesn't have these concepts.
+
+**Billing abstraction (`billing.ts`)**: Mostly fine — uses `provider_customer_id` generically. Minimal changes.
+
+**Stripe checkout (`apps/plant/src/lib/server/stripe.ts`)**: **Complete rewrite.** Adyen's checkout API is fundamentally different.
 
 **Warden Stripe service**: **Complete rewrite.** Different API, different response shapes.
 
-**Webhook handling**: **Complete rewrite.** Different event names, different payload structures, different signature verification.
+**Webhook handling**: **Complete rewrite.** Different event names, different payload structures, different signature verification (HMAC but different format).
 
 **Tier config (`tiers.ts`)**: No changes needed — tier definitions are provider-agnostic.
 
-**Subscription management**: **New code needed.** Adyen doesn't manage subscriptions — you'd need a new scheduling system.
+**Database**: No schema changes needed — `provider_*` columns already support any provider's IDs.
+
+**Subscription management**: **New system needed.** Adyen stores payment tokens but doesn't schedule or manage recurring charges — you'd need a cron/scheduler to initiate charges.
 
 **Heartwood subscriptions**: Would need updates to work with whatever custom subscription system replaces Stripe Billing.
 
