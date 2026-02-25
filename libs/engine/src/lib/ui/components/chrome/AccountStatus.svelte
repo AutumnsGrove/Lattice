@@ -1,18 +1,18 @@
 <script lang="ts">
-	import { LogIn, LogOut, User, ChevronDown } from '../icons/lucide';
-	import type { AccountStatusProps, HeaderUser } from './types';
+	import { LogIn, LogOut, User, ChevronDown } from "../icons/lucide";
+	import type { AccountStatusProps, HeaderUser } from "./types";
 
 	let {
 		user = null,
 		loading = false,
-		signInHref = 'https://heartwood.grove.place',
-		signInLabel = 'Sign in',
-		userHref = '/arbor',
-		signOutHref = '/logout',
-		signOutLabel = 'Sign out',
+		signInHref = "https://heartwood.grove.place",
+		signInLabel = "Sign in",
+		userHref = "/arbor",
+		signOutHref = "/logout",
+		signOutLabel = "Sign out",
 		compact = false,
 		dropdown = true,
-		menuItems
+		menuItems,
 	}: AccountStatusProps = $props();
 
 	let dropdownOpen = $state(false);
@@ -27,25 +27,25 @@
 
 	function handleClickOutside(event: MouseEvent) {
 		const target = event.target as HTMLElement;
-		if (!target.closest('[data-account-status]')) {
+		if (!target.closest("[data-account-status]")) {
 			closeDropdown();
 		}
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
-		if (event.key === 'Escape') {
+		if (event.key === "Escape") {
 			closeDropdown();
 		}
 	}
 
 	$effect(() => {
 		if (dropdownOpen) {
-			document.addEventListener('click', handleClickOutside);
-			document.addEventListener('keydown', handleKeydown);
+			document.addEventListener("click", handleClickOutside);
+			document.addEventListener("keydown", handleKeydown);
 		}
 		return () => {
-			document.removeEventListener('click', handleClickOutside);
-			document.removeEventListener('keydown', handleKeydown);
+			document.removeEventListener("click", handleClickOutside);
+			document.removeEventListener("keydown", handleKeydown);
 		};
 	});
 </script>
@@ -58,7 +58,7 @@
 		role="status"
 	></div>
 
-<!-- Unauthenticated: sign-in link -->
+	<!-- Unauthenticated: sign-in link -->
 {:else if !user}
 	<a
 		href={signInHref}
@@ -68,7 +68,7 @@
 		<span>{signInLabel}</span>
 	</a>
 
-<!-- Authenticated: avatar with optional dropdown -->
+	<!-- Authenticated: avatar with optional dropdown -->
 {:else}
 	<div class="relative" data-account-status>
 		{#if dropdown}
@@ -93,7 +93,9 @@
 					</div>
 				{/if}
 				{#if !compact}
-					<span class="text-sm hidden lg:inline max-w-[120px] truncate">{user.name || 'Your Grove'}</span>
+					<span class="text-sm hidden lg:inline max-w-[120px] truncate"
+						>{user.name || "Your Grove"}</span
+					>
 				{/if}
 				<ChevronDown class="w-3.5 h-3.5 transition-transform {dropdownOpen ? 'rotate-180' : ''}" />
 			</button>
@@ -125,7 +127,7 @@
 							{/if}
 							<div class="min-w-0 flex-1">
 								<p class="text-sm font-medium text-foreground truncate">
-									{user.name || 'Your Grove'}
+									{user.name || "Your Grove"}
 								</p>
 								{#if user.email}
 									<p class="text-xs text-foreground-subtle truncate">{user.email}</p>
@@ -150,21 +152,22 @@
 						{@render menuItems()}
 					{/if}
 
-					<!-- Divider + sign out -->
+					<!-- Divider + sign out (POST form to prevent CSRF logout) -->
 					<div class="border-t border-black/5 dark:border-white/10">
-						<a
-							href={signOutHref}
-							class="flex items-center gap-2 px-4 py-2.5 text-sm text-foreground-subtle hover:text-foreground hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
-							role="menuitem"
-							onclick={closeDropdown}
-						>
-							<LogOut class="w-4 h-4" />
-							<span>{signOutLabel}</span>
-						</a>
+						<form method="POST" action={signOutHref}>
+							<button
+								type="submit"
+								class="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-foreground-subtle hover:text-foreground hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+								role="menuitem"
+								onclick={closeDropdown}
+							>
+								<LogOut class="w-4 h-4" />
+								<span>{signOutLabel}</span>
+							</button>
+						</form>
 					</div>
 				</div>
 			{/if}
-
 		{:else}
 			<!-- No dropdown: avatar links directly -->
 			<a
@@ -186,7 +189,7 @@
 					</div>
 				{/if}
 				{#if !compact}
-					<span class="text-sm hidden lg:inline">{user.name || 'Your Grove'}</span>
+					<span class="text-sm hidden lg:inline">{user.name || "Your Grove"}</span>
 				{/if}
 			</a>
 		{/if}
