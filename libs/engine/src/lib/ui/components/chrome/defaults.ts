@@ -101,7 +101,7 @@ export const LANDING_RESOURCE_LINKS: FooterLink[] = [
 	{ href: "/vineyard", label: "Vineyard", icon: Grape, termSlug: "vineyard" },
 	{ href: "/forest", label: "Forest", icon: Trees, termSlug: "forests" },
 	{ href: "/journey", label: "Journey", icon: Footprints },
-	{ href: "/pulse", label: "Pulse", icon: HeartPulse },
+	{ href: "/grove", label: "Kit", icon: HeartPulse },
 	{
 		href: "https://status.grove.place",
 		label: "Status",
@@ -141,7 +141,7 @@ export const LANDING_MOBILE_RESOURCE_LINKS: FooterLink[] = [
 	{ href: "/vineyard", label: "Vineyard", icon: Grape, termSlug: "vineyard" },
 	{ href: "/forest", label: "Forest", icon: Trees, termSlug: "forests" },
 	{ href: "/journey", label: "Journey", icon: Footprints },
-	{ href: "/pulse", label: "Pulse", icon: HeartPulse },
+	{ href: "/grove", label: "Kit", icon: HeartPulse },
 	{
 		href: "https://status.grove.place",
 		label: "Status",
