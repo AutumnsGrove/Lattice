@@ -3,6 +3,7 @@ import {
 	buildIslandLayouts,
 	buildTreesForIsland,
 	getTreeSpecies,
+	UMBRELLA_DIRS,
 	type IslandLayout,
 	type TreeLayout,
 } from "./groveLayout";
@@ -86,22 +87,46 @@ describe("groveLayout", () => {
 			expect(islands[0].path).toBe("libs/engine");
 		});
 
-		it("includes standalone depth-0 dirs as islands", () => {
-			const dirs = [makeDir({ path: "docs", depth: 0, totalLines: 2000 })];
+		it("creates umbrella island from depth-0 dir in UMBRELLA_DIRS", () => {
+			const dirs = [
+				makeDir({ path: "docs", depth: 0, totalLines: 10000 }),
+				makeDir({ path: "docs/specs", depth: 1, totalLines: 5000 }),
+				makeDir({ path: "docs/plans", depth: 1, totalLines: 3000 }),
+			];
 			const islands = buildIslandLayouts(dirs);
+			// Should have 1 umbrella island, NOT 2 child islands
 			expect(islands).toHaveLength(1);
+			expect(islands[0].path).toBe("docs");
 			expect(islands[0].name).toBe("docs");
 		});
 
-		it("does NOT include depth-0 dirs that have depth-1 children", () => {
+		it("absorbs depth-1 children of umbrella dirs", () => {
+			const dirs = [
+				makeDir({ path: "workers", depth: 0, totalLines: 5000 }),
+				makeDir({ path: "workers/warden", depth: 1, totalLines: 2000 }),
+				makeDir({ path: "workers/lumen", depth: 1, totalLines: 1500 }),
+				makeDir({ path: "libs/engine", depth: 1, totalLines: 8000 }),
+			];
+			const islands = buildIslandLayouts(dirs);
+			const paths = islands.map((i) => i.path);
+			expect(paths).toContain("workers");
+			expect(paths).toContain("libs/engine");
+			expect(paths).not.toContain("workers/warden");
+			expect(paths).not.toContain("workers/lumen");
+		});
+
+		it("does NOT absorb depth-1 children of non-umbrella dirs like libs", () => {
 			const dirs = [
 				makeDir({ path: "libs", depth: 0, totalLines: 10000 }),
 				makeDir({ path: "libs/engine", depth: 1, totalLines: 5000 }),
+				makeDir({ path: "libs/foliage", depth: 1, totalLines: 3000 }),
 			];
 			const islands = buildIslandLayouts(dirs);
-			// Should only have libs/engine, not libs
-			expect(islands).toHaveLength(1);
-			expect(islands[0].path).toBe("libs/engine");
+			const paths = islands.map((i) => i.path);
+			// libs is not an umbrella dir, so its children become individual islands
+			expect(paths).toContain("libs/engine");
+			expect(paths).toContain("libs/foliage");
+			expect(paths).not.toContain("libs");
 		});
 
 		it("assigns known positions for predefined packages", () => {
@@ -111,11 +136,23 @@ describe("groveLayout", () => {
 			expect(islands[0].y).toBe(28);
 		});
 
-		it("assigns default position for unknown packages", () => {
+		it("auto-positions unknown packages instead of piling at center", () => {
 			const dirs = [makeDir({ path: "libs/unknown-new-pkg", depth: 1, totalLines: 100 })];
 			const islands = buildIslandLayouts(dirs);
-			expect(islands[0].x).toBe(50);
-			expect(islands[0].y).toBe(50);
+			// Should not be exactly at center default (50, 50)
+			// Auto-position is hash-based and deterministic
+			expect(islands[0].x).toBeGreaterThanOrEqual(10);
+			expect(islands[0].x).toBeLessThanOrEqual(90);
+			expect(islands[0].y).toBeGreaterThanOrEqual(20);
+			expect(islands[0].y).toBeLessThanOrEqual(75);
+		});
+
+		it("auto-position is deterministic for the same path", () => {
+			const dirs = [makeDir({ path: "libs/brand-new", depth: 1, totalLines: 100 })];
+			const a = buildIslandLayouts(dirs);
+			const b = buildIslandLayouts(dirs);
+			expect(a[0].x).toBe(b[0].x);
+			expect(a[0].y).toBe(b[0].y);
 		});
 
 		it("scales island width with line count", () => {
@@ -177,6 +214,20 @@ describe("groveLayout", () => {
 			expect(trees).toHaveLength(2);
 			expect(trees.map((t) => t.id)).toContain("libs/engine/src/ui");
 			expect(trees.map((t) => t.id)).toContain("libs/engine/src/server");
+		});
+
+		it("umbrella island uses depth-1 children as trees", () => {
+			const dirs = [
+				makeDir({ path: "docs", depth: 0, totalLines: 50000 }),
+				makeDir({ path: "docs/specs", depth: 1, totalLines: 10000, primaryLanguage: "md" }),
+				makeDir({ path: "docs/plans", depth: 1, totalLines: 8000, primaryLanguage: "md" }),
+				makeDir({ path: "docs/tiny", depth: 1, totalLines: 20, primaryLanguage: "md" }),
+			];
+			const trees = buildTreesForIsland("docs", dirs);
+			expect(trees).toHaveLength(2);
+			expect(trees.map((t) => t.id)).toContain("docs/specs");
+			expect(trees.map((t) => t.id)).toContain("docs/plans");
+			expect(trees.map((t) => t.id)).not.toContain("docs/tiny");
 		});
 
 		it("limits trees to maxTrees parameter", () => {

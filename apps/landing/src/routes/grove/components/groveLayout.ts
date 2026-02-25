@@ -67,6 +67,9 @@ const ISLAND_POSITIONS: Record<string, { x: number; y: number; zIndex: number }>
 // Default position for unknown packages
 const DEFAULT_POSITION = { x: 50, y: 50, zIndex: 3 };
 
+/** Depth-0 directories that aggregate children as trees within a single island */
+export const UMBRELLA_DIRS = new Set(["docs", "workers", "services", "scripts", "tools"]);
+
 /** Map primary language to tree species */
 export function getTreeSpecies(primaryLanguage: string): TreeLayout["species"] {
 	switch (primaryLanguage) {
@@ -120,50 +123,89 @@ function getTreeHeight(lines: number): number {
 }
 
 /**
- * Build the full island layout from a frame's directory entries.
- * Returns one IslandLayout per depth-1 package that has lines.
+ * Generate a stable position for an unknown package based on its path.
+ * Uses a simple hash to distribute packages across the viewport.
  */
-export function buildIslandLayouts(
-	directories: (AnnotatedDirectoryEntry)[],
-): IslandLayout[] {
-	const depth1 = directories.filter((d) => d.depth === 1 && d.totalLines > 0);
-	// Also include depth-0 dirs that don't have depth-1 children (like standalone 'docs', 'scripts')
-	const depth0 = directories.filter((d) => d.depth === 0 && d.totalLines > 0);
-	const depth1Paths = new Set(depth1.map((d) => d.path));
-
-	// For depth-0 dirs, only include them as islands if they don't have depth-1 children
-	const standaloneDepth0 = depth0.filter((d) => {
-		return !depth1.some((d1) => d1.path.startsWith(d.path + "/"));
-	});
-
-	const allIslandDirs = [...depth1, ...standaloneDepth0];
-
-	return allIslandDirs.map((dir) => {
-		const pos = ISLAND_POSITIONS[dir.path] ?? DEFAULT_POSITION;
-		return {
-			path: dir.path,
-			name: dir.path.split("/").pop() ?? dir.path,
-			x: pos.x,
-			y: pos.y,
-			zIndex: pos.zIndex,
-			width: getIslandWidth(dir.totalLines),
-			opacity: getDepthOpacity(pos.zIndex),
-		};
-	});
+function autoPosition(path: string): { x: number; y: number; zIndex: number } {
+	let hash = 0;
+	for (let i = 0; i < path.length; i++) {
+		hash = ((hash << 5) - hash + path.charCodeAt(i)) | 0;
+	}
+	const h = Math.abs(hash);
+	return {
+		x: 10 + (h % 80),
+		y: 20 + ((h >> 8) % 55),
+		zIndex: 3,
+	};
 }
 
 /**
- * Build trees for a specific island from depth-2 directory entries.
- * If no depth-2 entries, creates a single tree from the depth-1 entry.
+ * Build the full island layout from a frame's directory entries.
+ *
+ * Umbrella dirs (docs, workers, services, scripts, tools) become a single
+ * island each — their depth-1 children become trees, not separate islands.
+ * True packages (apps/*, libs/*) keep their own islands as before.
+ */
+export function buildIslandLayouts(directories: AnnotatedDirectoryEntry[]): IslandLayout[] {
+	const islands: IslandLayout[] = [];
+	const absorbedPaths = new Set<string>();
+
+	// Umbrella islands: depth-0 dirs that aggregate their children
+	for (const dir of directories) {
+		if (dir.depth === 0 && UMBRELLA_DIRS.has(dir.path) && dir.totalLines > 0) {
+			const pos = ISLAND_POSITIONS[dir.path] ?? DEFAULT_POSITION;
+			islands.push({
+				path: dir.path,
+				name: dir.path,
+				x: pos.x,
+				y: pos.y,
+				zIndex: pos.zIndex,
+				width: getIslandWidth(dir.totalLines),
+				opacity: getDepthOpacity(pos.zIndex),
+			});
+			// Mark depth-1 children as absorbed — they become trees, not islands
+			for (const child of directories) {
+				if (child.depth === 1 && child.path.startsWith(dir.path + "/")) {
+					absorbedPaths.add(child.path);
+				}
+			}
+		}
+	}
+
+	// Individual package islands: depth-1 dirs that weren't absorbed
+	for (const dir of directories) {
+		if (dir.depth === 1 && dir.totalLines > 0 && !absorbedPaths.has(dir.path)) {
+			const pos = ISLAND_POSITIONS[dir.path] ?? autoPosition(dir.path);
+			islands.push({
+				path: dir.path,
+				name: dir.path.split("/").pop() ?? dir.path,
+				x: pos.x,
+				y: pos.y,
+				zIndex: pos.zIndex,
+				width: getIslandWidth(dir.totalLines),
+				opacity: getDepthOpacity(pos.zIndex),
+			});
+		}
+	}
+
+	return islands;
+}
+
+/**
+ * Build trees for a specific island from its child directories.
+ * Umbrella dirs use depth-1 children; packages use depth-2 children.
+ * If no children exist, creates a single tree from the island itself.
  */
 export function buildTreesForIsland(
 	islandPath: string,
-	directories: (AnnotatedDirectoryEntry)[],
+	directories: AnnotatedDirectoryEntry[],
 	maxTrees: number = 8,
 ): TreeLayout[] {
-	// Find depth-2 children of this island
+	// Umbrella dirs show depth-1 children as trees; packages show depth-2
+	const childDepth = UMBRELLA_DIRS.has(islandPath) ? 1 : 2;
+
 	const children = directories.filter(
-		(d) => d.depth === 2 && d.path.startsWith(islandPath + "/") && d.totalLines > 50,
+		(d) => d.depth === childDepth && d.path.startsWith(islandPath + "/") && d.totalLines > 50,
 	);
 
 	if (children.length === 0) {
