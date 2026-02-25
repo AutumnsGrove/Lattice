@@ -41,7 +41,9 @@
 	const currentFrame = $derived(frames[frameIndex] ?? null);
 
 	// Cache previous frame's tree IDs to avoid full re-layout each frame
-	let cachedPrevTreeIds = new Set<string>();
+	// MUST be $state so that $derived(newTreeIds/dyingTreeIds) re-evaluate
+	// when the $effect below updates the cache after each frame change.
+	let cachedPrevTreeIds = $state(new Set<string>());
 	let lastFrameIndex = -1;
 
 	// Build island layouts from current frame
