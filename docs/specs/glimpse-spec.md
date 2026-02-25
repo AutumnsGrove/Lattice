@@ -330,7 +330,7 @@ screenshots/arbor-autumn-dark.png
 }
 ```
 
-### Layer 4: Server Manager (New)
+### Layer 4: Server Manager
 
 Glimpse needs a page to look at. The Server Manager handles the lifecycle of local dev servers so the agent does not have to manage background processes manually.
 
@@ -367,7 +367,7 @@ Health poll: GET http://localhost:{port}/ every 500ms
 
 **Process tracking:** Glimpse writes a PID file to `.glimpse/server.pid` so it can detect and stop servers it started. It never kills servers it did not start.
 
-### Layer 5: Data Bootstrapper (New)
+### Layer 5: Data Bootstrapper
 
 Pages with no data render empty shells. The Data Bootstrapper ensures local D1 databases have migrations applied and test content seeded.
 
@@ -405,7 +405,7 @@ Report: "Seeded 1 tenant, 5 pages, 3 posts"
 
 **The test tenant:** Subdomain `autumn`, display name "The Midnight Bloom", a tea-shop themed blog with home page, about page, and sample posts. Access locally at `http://localhost:5173/?subdomain=autumn`.
 
-### Layer 6: Interactive Browser (New)
+### Layer 6: Interactive Browser
 
 Beyond screenshots, Glimpse can walk through pages. The `browse` command accepts natural language instructions and translates them into Playwright actions.
 
