@@ -254,14 +254,10 @@ PASSWORD="${SESSION_PASSWORD}" code-server \
   --auth password \
   --disable-telemetry &
 
-# ── Cloudflare tunnels ───────────────────────────────────────
-cloudflared tunnel --url http://localhost:7681 \
-  --hostname loft.grove.place \
-  --token "${CF_TUNNEL_TOKEN}" &
-
-cloudflared tunnel --url http://localhost:8080 \
-  --hostname editor.loft.grove.place \
-  --token "${CF_TUNNEL_TOKEN_EDITOR}" &
+# ── Cloudflare tunnel (wildcard: *.loft.grove.place) ─────────
+# Single pre-created tunnel with wildcard routing.
+# Terminal on loft.grove.place, editor on editor.loft.grove.place.
+cloudflared tunnel run --token "${CF_TUNNEL_TOKEN}" &
 
 # ── Pre-push hooks ──────────────────────────────────────────
 if [ -n "${GIT_HOOKS_ARCHIVE_URL:-}" ]; then
@@ -460,15 +456,19 @@ The 24hr safety cap means the worst case is ~$0.50.
 
 ### Phase 0: It Works
 
-**Goal:** `gw loft ignite` → URL in browser → terminal → `gw loft kill`
+**Goal:** `gw loft ignite --repo autumnsgrove/lattice` → URL in browser → terminal → `gw loft kill`
 
 - [ ] Add `loft` consumer profile to Firefly SDK
-- [ ] Write `loft-bootstrap.sh` (ttyd + code-server + cloudflared + tools)
-- [ ] Wire CF Tunnel at bootstrap time (pre-provisioned tunnel token)
+- [ ] Write `loft-bootstrap.sh` (ttyd + code-server + cloudflared + Crush + OpenCode + Claude Code)
+- [ ] Set up wildcard CF Tunnel (`*.loft.grove.place`)
 - [ ] Implement basic `FlyProvider` (port from Fly API docs)
 - [ ] Implement `gw loft ignite`, `gw loft status`, `gw loft kill`
+- [ ] Implement `--repo` flag with deploy key / token injection
+- [ ] Password show + store (print at ignite, persist in `gw` local keychain)
+- [ ] `gw loft open` auto-opens URL with stored auth
+- [ ] `gw loft password` retrieves stored session password
 - [ ] Basic fade sequence (push check → terminate, skip R2/snapshot for now)
-- [ ] Test on iPad Safari: ttyd PWA, keyboard, tmux navigation
+- [ ] Test on iPad Safari: ttyd + code-server PWA behavior, document findings
 
 ### Phase 1: Proper Fade
 
@@ -503,16 +503,23 @@ The 24hr safety cap means the worst case is ~$0.50.
 
 ---
 
-## Open Questions
+## Decisions (Resolved)
 
-1. **Crush install path.** Confirm the exact install command before Phase 0. Is it `npm install -g @charmland/crush`? A standalone binary?
-2. **CF Tunnel auth.** Two options: (a) provision a named tunnel per-session with its own token, or (b) use a single pre-created tunnel with a wildcard route. Option (b) is simpler to bootstrap. Probably right for now.
-3. **code-server on iPad.** Official iPad PWA path works (Safari → Add to Home Screen). Worth testing whether split-screen with ttyd as a second PWA is useful or just cluttered.
-4. **Password management.** Session password is generated at ignite time and shown once. Consider storing it in `gw`'s local keychain for `gw loft open` to auto-login.
-5. **Git repo auto-clone.** Could auto-clone at ignite time: `gw loft ignite --repo autumnsgrove/lattice`. Needs a deploy key or token injected at bootstrap.
-6. **Fly snapshots.** Less mature than DO. May be R2-workspace-restore only for Fly sessions. Investigate before Phase 2.
-7. **Crush vs OpenCode.** Two distinct tools now. Crush (Charmbracelet, Go, LSP, Charm polish) and OpenCode (TypeScript, Zen gateway). Both worth installing. Both complement each other.
-8. **iPad keyboard.** Smart Folio or external keyboard changes everything. ttyd + tmux with a real keyboard is genuinely good. On-screen keyboard is usable for short commands, rough for extended coding. Worth noting in docs.
+Answers to the original open questions, decided during spec design.
+
+1. **Crush install path.** Confirm the exact install command before Phase 0. Likely `npm install -g @charmland/crush` since Node is already in the bootstrap.
+2. **CF Tunnel: wildcard.** Single pre-created tunnel with `*.loft.grove.place` wildcard routing. No per-session tunnel provisioning needed. Simpler bootstrap, no CF API calls.
+3. **code-server + ttyd on iPad: test and document.** Try both single-PWA (terminal only) and split-screen during Phase 0 iPad testing. Document what works. Don't prescribe the UX before real usage.
+4. **Password: show + store.** Print the session password at ignite time AND store it in `gw`'s local keychain. `gw loft open` auto-opens with auth. `gw loft password` retrieves it if needed elsewhere.
+5. **Git repo auto-clone: Phase 0.** `gw loft ignite --repo autumnsgrove/lattice` is a Phase 0 feature. Without it you ignite and then manually git clone anyway. Needs a deploy key or token injected at bootstrap.
+6. **Fly snapshots: R2 only.** Fly sessions restore from R2 workspace tarballs only. Reserve machine snapshots for DO where they're mature and first-class.
+7. **Crush + OpenCode: install both.** They've diverged enough to complement each other. Crush for Go speed + Charm polish + LSP. OpenCode for TypeScript + Zen gateway. Both in bootstrap.
+8. **iPad keyboard: no special accommodations.** The iPad already has a full keyboard setup. Loft finishes the bridge to real dev work on iPad. No custom tmux config or on-screen keyboard considerations needed.
+
+## Remaining Open Questions
+
+1. **Crush exact install command.** Verify `npm install -g @charmland/crush` works before Phase 0. Could be a different package name or a standalone binary.
+2. **Deploy key strategy for --repo.** `gw loft ignite --repo` needs auth to clone private repos. Options: inject a GitHub deploy key at bootstrap, use a fine-grained PAT, or create a GitHub App installation token per-session.
 
 ---
 
