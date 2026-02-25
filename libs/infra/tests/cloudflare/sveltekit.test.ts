@@ -18,7 +18,7 @@ function createMockEvent(env?: Record<string, unknown>) {
 }
 
 describe("createGroveHandle", () => {
-	it("should set ctx and rawEnv on event.locals when platform env exists", async () => {
+	it("should set ctx on event.locals when platform env exists", async () => {
 		const env = {
 			DB: createMockD1(),
 			BUCKET: createMockR2(),
@@ -39,7 +39,7 @@ describe("createGroveHandle", () => {
 		const result = await handle({ event, resolve });
 
 		expect(event.locals.ctx).toBeDefined();
-		expect(event.locals.rawEnv).toBe(env);
+		expect(event.locals.rawEnv).toBeUndefined(); // rawEnv intentionally NOT set — use event.platform.env
 		expect(result).toBe(mockResponse);
 		expect(resolve).toHaveBeenCalledWith(event);
 	});
@@ -64,7 +64,7 @@ describe("createGroveHandle", () => {
 		warnSpy.mockRestore();
 	});
 
-	it("should only warn once across multiple requests", async () => {
+	it("should throttle warnings to once per 60s window", async () => {
 		const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
 		const handle = createGroveHandle((env) => ({
@@ -72,13 +72,22 @@ describe("createGroveHandle", () => {
 		}));
 
 		const resolve = vi.fn().mockResolvedValue(new Response("ok"));
-		await handle({ event: createMockEvent(), resolve });
-		await handle({ event: createMockEvent(), resolve });
-		await handle({ event: createMockEvent(), resolve });
 
+		// First request warns
+		await handle({ event: createMockEvent(), resolve });
 		expect(warnSpy).toHaveBeenCalledTimes(1);
 
-		warnSpy.mockRestore();
+		// Rapid follow-up requests within 60s are suppressed
+		await handle({ event: createMockEvent(), resolve });
+		await handle({ event: createMockEvent(), resolve });
+		expect(warnSpy).toHaveBeenCalledTimes(1);
+
+		// After 60s, the warning fires again
+		vi.spyOn(Date, "now").mockReturnValue(Date.now() + 61_000);
+		await handle({ event: createMockEvent(), resolve });
+		expect(warnSpy).toHaveBeenCalledTimes(2);
+
+		vi.restoreAllMocks();
 	});
 
 	it("should support partial context (db only)", async () => {

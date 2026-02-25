@@ -20,7 +20,7 @@ function createMockHonoContext(env: Record<string, unknown>) {
 }
 
 describe("groveInfraMiddleware", () => {
-	it("should set ctx and rawEnv on the Hono context", async () => {
+	it("should set ctx on the Hono context (rawEnv not exposed)", async () => {
 		const env = {
 			DB: createMockD1(),
 			BUCKET: createMockR2(),
@@ -41,7 +41,7 @@ describe("groveInfraMiddleware", () => {
 		await middleware(c, next);
 
 		expect(c.set).toHaveBeenCalledWith("ctx", expect.objectContaining({ db: expect.anything() }));
-		expect(c.set).toHaveBeenCalledWith("rawEnv", env);
+		expect(c.set).not.toHaveBeenCalledWith("rawEnv", expect.anything()); // secrets stay on c.env
 		expect(next).toHaveBeenCalledOnce();
 	});
 

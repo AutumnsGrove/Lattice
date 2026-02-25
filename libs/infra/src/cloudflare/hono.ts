@@ -2,7 +2,10 @@
  * Hono middleware for Grove Infra SDK.
  *
  * Automatically creates a GroveContext from Cloudflare env bindings
- * and attaches it to the Hono context for downstream handlers.
+ * and attaches it to the Hono context as `ctx` for downstream handlers.
+ *
+ * Raw env bindings are NOT attached — access them via `c.env` directly.
+ * This avoids accidentally exposing secrets through response helpers.
  *
  * @example
  * ```typescript
@@ -29,6 +32,9 @@ type MiddlewareHandler = (
 /**
  * Hono middleware that creates a GroveContext from env bindings.
  *
+ * Only `ctx` is set on the Hono context. For raw env bindings,
+ * use `c.env` directly in your handlers.
+ *
  * @param configure - Function that maps Hono's env to CloudflareContextOptions
  */
 export function groveInfraMiddleware(
@@ -37,7 +43,6 @@ export function groveInfraMiddleware(
 	return async (c, next) => {
 		const ctx = createCloudflareContext(configure(c.env));
 		c.set("ctx", ctx);
-		c.set("rawEnv", c.env);
 		await next();
 	};
 }

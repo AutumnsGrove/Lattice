@@ -2,7 +2,11 @@
  * SvelteKit handle hook for Grove Infra SDK.
  *
  * Automatically creates a GroveContext from platform env bindings
- * and attaches it to event.locals for downstream load/action functions.
+ * and attaches it to `event.locals.ctx` for downstream load/action functions.
+ *
+ * Raw env bindings are NOT attached to locals — access them via
+ * `event.platform.env` directly to avoid accidental serialization
+ * of secrets to the browser.
  *
  * @example
  * ```typescript
@@ -36,27 +40,32 @@ type Handle = (input: {
  *
  * When `event.platform?.env` is absent (e.g. local dev without the
  * Cloudflare adapter), `event.locals.ctx` will NOT be set and a
- * warning is logged once. Routes that access `ctx` should guard
- * against this or use `wrangler pages dev` for local testing.
+ * warning is logged (throttled to once per 60 s to avoid flooding).
+ * Routes that access `ctx` should guard against this or use
+ * `wrangler pages dev` for local testing.
  *
  * @param configure - Function that maps platform env to CloudflareContextOptions
  */
 export function createGroveHandle(
 	configure: (env: Record<string, unknown>) => CloudflareContextOptions,
 ): Handle {
-	let warned = false;
+	/** Timestamp (ms) of the last missing-env warning. 0 = never warned. */
+	let lastWarnedAt = 0;
+
 	return async ({ event, resolve }) => {
 		const env = event.platform?.env;
 		if (env) {
 			const ctx = createCloudflareContext(configure(env));
 			event.locals.ctx = ctx;
-			event.locals.rawEnv = env;
-		} else if (!warned) {
-			console.warn(
-				"[InfraSDK] platform.env not available — GroveContext not created. " +
-					"Use `wrangler pages dev` for local Cloudflare bindings.",
-			);
-			warned = true;
+		} else {
+			const now = Date.now();
+			if (now - lastWarnedAt > 60_000) {
+				console.warn(
+					"[InfraSDK] platform.env not available — GroveContext not created. " +
+						"Use `wrangler pages dev` for local Cloudflare bindings.",
+				);
+				lastWarnedAt = now;
+			}
 		}
 		return resolve(event);
 	};
