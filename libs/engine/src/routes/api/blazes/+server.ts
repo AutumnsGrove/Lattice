@@ -13,13 +13,10 @@ const MAX_BLAZES_PER_TENANT = 20;
 const SLUG_PATTERN = /^[a-z0-9][a-z0-9-]*[a-z0-9]$/;
 
 interface BlazeRow {
-	id: string;
-	tenant_id: string | null;
 	slug: string;
 	label: string;
 	icon: string;
 	color: string;
-	sort_order: number;
 }
 
 /**
@@ -36,49 +33,30 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
 	try {
 		// Fire global query immediately — it's needed regardless of auth
 		const globalQuery = platform.env.DB.prepare(
-			"SELECT id, tenant_id, slug, label, icon, color, sort_order FROM blaze_definitions WHERE tenant_id IS NULL ORDER BY sort_order",
+			"SELECT slug, label, icon, color FROM blaze_definitions WHERE tenant_id IS NULL ORDER BY sort_order",
 		).all<BlazeRow>();
 
-		// If authenticated, resolve tenant in parallel with the global query
+		// If authenticated with a tenant, fire both queries in parallel
+		// (locals.tenantId is already verified by session middleware)
 		if (locals.user && locals.tenantId) {
-			try {
-				const [globalResult, tenantId] = await Promise.all([
-					globalQuery,
-					getVerifiedTenantId(platform.env.DB, locals.tenantId, locals.user),
-				]);
-
-				const globals = (globalResult.results ?? []).map((row) => ({
-					slug: row.slug,
-					label: row.label,
-					icon: row.icon,
-					color: row.color,
-					scope: "global" as const,
-				}));
-
-				const tenantResult = await platform.env.DB.prepare(
-					"SELECT id, tenant_id, slug, label, icon, color, sort_order FROM blaze_definitions WHERE tenant_id = ? ORDER BY sort_order",
+			const [globalResult, tenantResult] = await Promise.all([
+				globalQuery,
+				platform.env.DB.prepare(
+					"SELECT slug, label, icon, color FROM blaze_definitions WHERE tenant_id = ? ORDER BY sort_order",
 				)
-					.bind(tenantId)
-					.all<BlazeRow>();
+					.bind(locals.tenantId)
+					.all<BlazeRow>(),
+			]);
 
-				const tenantBlazes = (tenantResult.results ?? []).map((row) => ({
-					slug: row.slug,
-					label: row.label,
-					icon: row.icon,
-					color: row.color,
-					scope: "tenant" as const,
-				}));
+			const blazes = [
+				...(globalResult.results ?? []).map((r) => ({ ...r, scope: "global" as const })),
+				...(tenantResult.results ?? []).map((r) => ({ ...r, scope: "tenant" as const })),
+			];
 
-				return json(
-					{ blazes: [...globals, ...tenantBlazes] },
-					{ headers: { "Cache-Control": "private, max-age=60" } },
-				);
-			} catch {
-				// Tenant verification failed — fall through to globals-only
-			}
+			return json({ blazes }, { headers: { "Cache-Control": "private, max-age=60" } });
 		}
 
-		// Unauthenticated or tenant verification failed — globals only
+		// Unauthenticated — globals only
 		const globalResult = await globalQuery;
 		const globals = (globalResult.results ?? []).map((row) => ({
 			slug: row.slug,

@@ -35,6 +35,7 @@ export type {
 	WebhookEvent,
 	FeatureFlag,
 	FlagRule,
+	BlazeDefinition,
 	Comment,
 	CommentSettings,
 	MeadowPost,
@@ -57,6 +58,7 @@ export type {
 	NewComment,
 	NewMeadowPost,
 	NewFeatureFlag,
+	NewBlazeDefinition,
 } from "./types.js";
 
 // ── Schema (for advanced queries and Drizzle Kit) ───────────────────

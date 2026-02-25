@@ -1,4 +1,5 @@
 <script>
+	import { onMount } from "svelte";
 	import { Button, Spinner, GlassCard, GlassConfirmDialog, Waystone, GroveTerm } from "$lib/ui";
 	import { GreenhouseStatusCard, GraftControlPanel } from "$lib/grafts/greenhouse";
 	import { Smartphone, Laptop, Monitor, Leaf } from "lucide-svelte";
@@ -334,9 +335,11 @@
 		showRevokeAllDialog = false;
 	}
 
-	$effect(() => {
+	onMount(() => {
 		fetchCurrentSettings();
 		fetchSessions();
+		fetchCanopySettings();
+		fetchBlazes();
 	});
 	// CANOPY SETTINGS
 	// =========================================================================
@@ -437,10 +440,7 @@
 		savingCanopy = false;
 	}
 
-	// Load Canopy settings on mount
-	$effect(() => {
-		fetchCanopySettings();
-	});
+	// Canopy settings loaded in onMount above
 
 	// =========================================================================
 	// MEADOW SETTINGS
@@ -524,10 +524,6 @@
 		}
 		loadingBlazes = false;
 	}
-
-	$effect(() => {
-		fetchBlazes();
-	});
 
 	/** Auto-generate slug from label (unless user manually edited the slug) */
 	$effect(() => {

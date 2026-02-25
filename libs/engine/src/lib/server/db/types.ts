@@ -29,6 +29,7 @@ import type {
 	webhookEvents,
 	featureFlags,
 	flagRules,
+	blazeDefinitions,
 	comments,
 	commentSettings,
 	meadowPosts,
@@ -60,6 +61,7 @@ export type PlatformBilling = InferSelectModel<typeof platformBilling>;
 export type WebhookEvent = InferSelectModel<typeof webhookEvents>;
 export type FeatureFlag = InferSelectModel<typeof featureFlags>;
 export type FlagRule = InferSelectModel<typeof flagRules>;
+export type BlazeDefinition = InferSelectModel<typeof blazeDefinitions>;
 export type Comment = InferSelectModel<typeof comments>;
 export type CommentSettings = InferSelectModel<typeof commentSettings>;
 export type MeadowPost = InferSelectModel<typeof meadowPosts>;
@@ -85,6 +87,7 @@ export type NewMedia = InferInsertModel<typeof media>;
 export type NewComment = InferInsertModel<typeof comments>;
 export type NewMeadowPost = InferInsertModel<typeof meadowPosts>;
 export type NewFeatureFlag = InferInsertModel<typeof featureFlags>;
+export type NewBlazeDefinition = InferInsertModel<typeof blazeDefinitions>;
 
 // Curio types can be generated on demand from curios.ts
 // Observability types are internal to vista collectors
