@@ -1,16 +1,24 @@
 {
-  "name": "grove-webhook-cleanup",
-  "version": "1.0.0",
-  "private": true,
-  "description": "Cloudflare Worker for scheduled webhook cleanup (120-day retention)",
-  "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
-    "tail": "wrangler tail"
-  },
-  "devDependencies": {
-    "@cloudflare/workers-types": "^4.20251128.0",
-    "typescript": "^5.7.0",
-    "wrangler": "^4.63.0"
-  }
+	"name": "grove-webhook-cleanup",
+	"version": "1.0.0",
+	"private": true,
+	"description": "Cloudflare Worker for scheduled webhook cleanup (120-day retention)",
+	"scripts": {
+		"dev": "wrangler dev",
+		"deploy": "wrangler deploy",
+		"tail": "wrangler tail",
+		"test": "vitest",
+		"test:run": "vitest run",
+		"check": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@autumnsgrove/infra": "workspace:*",
+		"@autumnsgrove/lattice": "workspace:*"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20251128.0",
+		"typescript": "^5.7.0",
+		"vitest": "^4.0.18",
+		"wrangler": "^4.63.0"
+	}
 }

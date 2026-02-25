@@ -20,7 +20,7 @@ lastUpdated: "2026-02-22"
                 │           │           │           │
           ┌─────┴───────────┴───────────┴───────────┴─────┐
           │            ░░░░░░░░░░░░░░░░░░░░░              │
-          │          ░ GROVE SERVER SDK ░░░                │
+          │          ░  GROVE INFRA SDK ░░░                │
           │            ░░░░░░░░░░░░░░░░░░░░░              │
           ├───────────────────────────────────────────────┤
           │  ┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐ │
@@ -37,20 +37,20 @@ lastUpdated: "2026-02-22"
 
 > _The roots run deep. The tree stands anywhere._
 
-# Server SDK: Infrastructure Abstraction Layer
+# Infra SDK: Infrastructure Abstraction Layer
 
 > _The roots run deep. The tree stands anywhere._
 
-The Server SDK is the bedrock beneath every Grove service. It wraps each infrastructure primitive (database, storage, key-value, scheduling, service calls) in a clean TypeScript interface. Today, Cloudflare adapters power everything. Tomorrow, the same application code could run on any cloud. The interface stays the same. Only the roots change.
+The Infra SDK is the bedrock beneath every Grove service. It wraps each infrastructure primitive (database, storage, key-value, scheduling, service calls) in a clean TypeScript interface. Today, Cloudflare adapters power everything. Tomorrow, the same application code could run on any cloud. The interface stays the same. Only the roots change.
 
-**Public Name:** Server SDK
-**Internal Name:** GroveServerSDK
-**Package:** `@autumnsgrove/server-sdk`
-**Location:** `libs/server-sdk/`
-**Exports:** `@autumnsgrove/server-sdk` (primary), re-exported via `@autumnsgrove/lattice/infra`
+**Public Name:** Infra SDK
+**Internal Name:** GroveInfra
+**Package:** `@autumnsgrove/infra`
+**Location:** `libs/infra/`
+**Exports:** `@autumnsgrove/infra` (primary), re-exported via `@autumnsgrove/lattice/infra`
 **Last Updated:** February 2026
 
-Trees grow where their roots can find water. Move the roots to different soil, and the tree still grows. The Server SDK is that root system: a layer of abstraction between application code and the ground it runs on. Cloudflare is fertile soil today. If the soil changes, we transplant the roots, not the tree.
+Trees grow where their roots can find water. Move the roots to different soil, and the tree still grows. The Infra SDK is that root system: a layer of abstraction between application code and the ground it runs on. Cloudflare is fertile soil today. If the soil changes, we transplant the roots, not the tree.
 
 ---
 
@@ -90,7 +90,7 @@ A TypeScript package that provides generic interfaces for every infrastructure s
           │  imports interfaces only          │
           ▼                 ▼                 ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│                      Server SDK Interfaces                           │
+│                      Infra SDK Interfaces                            │
 │                                                                      │
 │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐  │
 │  │ Database │ │ Storage  │ │ KeyValue │ │ Scheduler│ │ Service  │  │
@@ -132,24 +132,24 @@ A TypeScript package that provides generic interfaces for every infrastructure s
 ┌─────────────────────────────────────────────────────────┐
 │                    SDK Ecosystem                          │
 │                                                          │
-│  Server SDK ──── foundation layer                        │
+│  Infra SDK ──── foundation layer                        │
 │       │                                                  │
 │       ├── Loom ──── Durable Object coordination          │
 │       │    └── SessionDO, TenantDO, PostDO               │
 │       │                                                  │
 │       ├── Threshold ──── rate limiting                    │
-│       │    └── uses Server SDK's KV + Loom's DOs         │
+│       │    └── uses Infra SDK's KV + Loom's DOs         │
 │       │                                                  │
 │       ├── Firefly ──── ephemeral compute                 │
-│       │    └── uses Server SDK's Storage for state sync  │
+│       │    └── uses Infra SDK's Storage for state sync  │
 │       │                                                  │
 │       └── Amber SDK ──── unified storage management      │
-│            └── built on Server SDK's Storage + Database  │
+│            └── built on Infra SDK's Storage + Database  │
 │                                                          │
 └─────────────────────────────────────────────────────────┘
 ```
 
-Loom, Threshold, and Firefly currently talk to Cloudflare services directly. Over time, they migrate to use Server SDK interfaces. This is incremental. No big bang.
+Loom, Threshold, and Firefly currently talk to Cloudflare services directly. Over time, they migrate to use Infra SDK interfaces. This is incremental. No big bang.
 
 ---
 
@@ -608,7 +608,7 @@ interface GroveContext {
 ### Creating Context (Cloudflare)
 
 ```typescript
-import { createCloudflareContext } from "@autumnsgrove/server-sdk/cloudflare";
+import { createCloudflareContext } from "@autumnsgrove/infra/cloudflare";
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -640,7 +640,7 @@ async function handleRequest(request: Request, ctx: GroveContext): Promise<Respo
 ### Creating Context (Future: Node.js)
 
 ```typescript
-import { createNodeContext } from "@autumnsgrove/server-sdk/node";
+import { createNodeContext } from "@autumnsgrove/infra/node";
 
 const ctx = createNodeContext({
   db: { type: "libsql", url: process.env.DATABASE_URL },
@@ -656,7 +656,7 @@ Same `GroveContext` type. Same application code. Different roots.
 
 ## Signpost Error Catalog
 
-The Server SDK uses the `SRV` prefix for all error codes. Error types import from `@autumnsgrove/lattice/errors`.
+The Infra SDK uses the `SRV` prefix for all error codes. Error types import from `@autumnsgrove/lattice/errors`.
 
 ```typescript
 import type { GroveErrorDef } from "@autumnsgrove/lattice/errors";
@@ -800,7 +800,7 @@ export const SRV_ERRORS = {
 
 Loom stays independent. Durable Objects are irreplaceable. No other serverless platform offers single-threaded, globally-unique, stateful compute instances with WebSocket support. Abstracting them would mean losing what makes them valuable.
 
-Server SDK integrates with Loom through the service bus:
+Infra SDK integrates with Loom through the service bus:
 
 ```typescript
 // Calling a Loom DO through the service bus
@@ -813,7 +813,7 @@ const session = await ctx.services.call("auth", {
 And by providing Loom's underlying storage needs:
 
 ```typescript
-// Loom DOs can use Server SDK for their D1 writes
+// Loom DOs can use Infra SDK for their D1 writes
 class TenantDO {
   constructor(private ctx: GroveContext) {}
 
@@ -828,13 +828,13 @@ class TenantDO {
 
 ### Threshold (Rate Limiting)
 
-Threshold currently reads/writes rate limit counters directly through KV. With Server SDK, it uses the `GroveKV` interface:
+Threshold currently reads/writes rate limit counters directly through KV. With Infra SDK, it uses the `GroveKV` interface:
 
 ```typescript
 // Before (direct CF)
 const count = await env.CACHE_KV.get(`rate:${userId}:${endpoint}`);
 
-// After (Server SDK)
+// After (Infra SDK)
 const count = await ctx.kv.get(`rate:${userId}:${endpoint}`);
 ```
 
@@ -842,7 +842,7 @@ Same behavior. Same performance. The KV adapter adds zero overhead on Cloudflare
 
 ### Firefly (Ephemeral Compute)
 
-Firefly uses R2 for state synchronization. With Server SDK, the `R2StateSynchronizer` becomes a `StorageSynchronizer` that uses `GroveStorage`:
+Firefly uses R2 for state synchronization. With Infra SDK, the `R2StateSynchronizer` becomes a `StorageSynchronizer` that uses `GroveStorage`:
 
 ```typescript
 class StorageSynchronizer implements StateSynchronizer {
@@ -864,10 +864,10 @@ class StorageSynchronizer implements StateSynchronizer {
 
 ### Amber SDK
 
-Amber (unified storage management) builds on top of Server SDK's `GroveStorage` and `GroveDatabase` interfaces. The Amber SDK is a higher-level abstraction that adds quota tracking, export processing, and add-on management. Server SDK provides the primitives. Amber orchestrates them.
+Amber (unified storage management) builds on top of Infra SDK's `GroveStorage` and `GroveDatabase` interfaces. The Amber SDK is a higher-level abstraction that adds quota tracking, export processing, and add-on management. Infra SDK provides the primitives. Amber orchestrates them.
 
 ```
-GroveStorage (Server SDK)
+GroveStorage (Infra SDK)
     │
     └── Amber SDK
          ├── Quota tracking (via GroveDatabase)
@@ -880,7 +880,7 @@ GroveStorage (Server SDK)
 
 ## GW CLI Integration
 
-The `gw` CLI currently uses wrangler commands directly for infrastructure operations. Server SDK can simplify this by providing a CLI adapter:
+The `gw` CLI currently uses wrangler commands directly for infrastructure operations. Infra SDK can simplify this by providing a CLI adapter:
 
 ```
 ┌──────────────────────────────────────────────────┐
@@ -902,7 +902,7 @@ This lets `gw` infrastructure commands work against local SQLite, local filesyst
 
 ## Migration Strategy
 
-Migration from direct Cloudflare calls to Server SDK is incremental. No service needs to migrate all at once.
+Migration from direct Cloudflare calls to Infra SDK is incremental. No service needs to migrate all at once.
 
 ### Migration Flow
 
@@ -922,7 +922,7 @@ Phase 1: Publish SDK          Phase 2: Wrap existing       Phase 3: Replace dire
 
 ### Step-by-Step Migration for a Service
 
-1. **Add dependency.** `pnpm add @autumnsgrove/server-sdk` in the app.
+1. **Add dependency.** `pnpm add @autumnsgrove/infra` in the app.
 2. **Create context.** Add `createCloudflareContext()` in the Worker entry point.
 3. **Pass context.** Thread `GroveContext` through to handlers.
 4. **Replace one binding at a time.** Start with the simplest (KV get/set, then R2, then D1).
@@ -1006,7 +1006,7 @@ Miniflare provides local D1/R2/KV for development. The Server SDK wraps miniflar
 ## File Structure
 
 ```
-libs/server-sdk/
+libs/infra/
 ├── package.json
 ├── tsconfig.json
 ├── src/
@@ -1050,7 +1050,7 @@ libs/server-sdk/
 
 ```json
 {
-  "name": "@autumnsgrove/server-sdk",
+  "name": "@autumnsgrove/infra",
   "exports": {
     ".": "./src/index.ts",
     "./cloudflare": "./src/cloudflare/index.ts",
@@ -1063,13 +1063,13 @@ Consumers import interfaces from the root. Adapter wiring comes from the platfor
 
 ```typescript
 // Interfaces (platform-agnostic)
-import type { GroveDatabase, GroveStorage, GroveKV, GroveContext } from "@autumnsgrove/server-sdk";
+import type { GroveDatabase, GroveStorage, GroveKV, GroveContext } from "@autumnsgrove/infra";
 
 // Cloudflare adapter (platform-specific, only in entry point)
-import { createCloudflareContext } from "@autumnsgrove/server-sdk/cloudflare";
+import { createCloudflareContext } from "@autumnsgrove/infra/cloudflare";
 
 // Test mocks
-import { createMockContext } from "@autumnsgrove/server-sdk/testing";
+import { createMockContext } from "@autumnsgrove/infra/testing";
 ```
 
 ---

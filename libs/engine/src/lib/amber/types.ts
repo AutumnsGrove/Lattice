@@ -12,7 +12,7 @@
  */
 
 import type { EngineDb } from "../server/db/client.js";
-import type { GroveStorage, GroveServiceBus } from "@autumnsgrove/server-sdk";
+import type { GroveStorage, GroveServiceBus } from "@autumnsgrove/infra";
 
 // ─── Product Types ────────────────────────────────────────────────
 

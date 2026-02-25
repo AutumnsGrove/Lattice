@@ -73,7 +73,12 @@ describe("GroveObserver", () => {
 		it("should emit event on successful batch", async () => {
 			const stmt = createMockD1Statement();
 			const mockD1 = createMockD1(stmt);
-			mockD1.batch.mockResolvedValue([{ results: [], meta: { changes: 0, duration: 1, last_row_id: 0, rows_read: 0, rows_written: 0 } }]);
+			mockD1.batch.mockResolvedValue([
+				{
+					results: [],
+					meta: { changes: 0, duration: 1, last_row_id: 0, rows_read: 0, rows_written: 0 },
+				},
+			]);
 			const db = new CloudflareDatabase(mockD1 as unknown as D1Database, "test-db", observer);
 
 			await db.batch([stmt as unknown as Parameters<typeof db.batch>[0][0]]);
@@ -268,10 +273,7 @@ describe("GroveObserver", () => {
 	describe("CloudflareServiceBus", () => {
 		it("should emit event on successful call", async () => {
 			const mockFetcher = createMockFetcher({ body: { ok: true } });
-			const bus = new CloudflareServiceBus(
-				{ auth: mockFetcher as unknown as Fetcher },
-				observer,
-			);
+			const bus = new CloudflareServiceBus({ auth: mockFetcher as unknown as Fetcher }, observer);
 
 			await bus.call("auth", { method: "GET", path: "/session" });
 
@@ -284,10 +286,7 @@ describe("GroveObserver", () => {
 
 		it("should emit event on ping", async () => {
 			const mockFetcher = createMockFetcher({ status: 200 });
-			const bus = new CloudflareServiceBus(
-				{ auth: mockFetcher as unknown as Fetcher },
-				observer,
-			);
+			const bus = new CloudflareServiceBus({ auth: mockFetcher as unknown as Fetcher }, observer);
 
 			await bus.ping("auth");
 
@@ -299,14 +298,9 @@ describe("GroveObserver", () => {
 
 		it("should emit error event on failed call", async () => {
 			const mockFetcher = { fetch: vi.fn().mockRejectedValue(new Error("network error")) };
-			const bus = new CloudflareServiceBus(
-				{ auth: mockFetcher as unknown as Fetcher },
-				observer,
-			);
+			const bus = new CloudflareServiceBus({ auth: mockFetcher as unknown as Fetcher }, observer);
 
-			await expect(
-				bus.call("auth", { method: "GET", path: "/session" }),
-			).rejects.toThrow();
+			await expect(bus.call("auth", { method: "GET", path: "/session" })).rejects.toThrow();
 
 			expect(events).toHaveLength(1);
 			expect(events[0].ok).toBe(false);
@@ -314,10 +308,7 @@ describe("GroveObserver", () => {
 
 		it("should emit ok=false on failed ping", async () => {
 			const mockFetcher = { fetch: vi.fn().mockRejectedValue(new Error("down")) };
-			const bus = new CloudflareServiceBus(
-				{ auth: mockFetcher as unknown as Fetcher },
-				observer,
-			);
+			const bus = new CloudflareServiceBus({ auth: mockFetcher as unknown as Fetcher }, observer);
 
 			const result = await bus.ping("auth");
 
@@ -353,9 +344,7 @@ describe("GroveObserver", () => {
 				throw new Error("handler crashed");
 			});
 
-			await expect(scheduler.dispatch("0 * * * *", new Date())).rejects.toThrow(
-				"handler crashed",
-			);
+			await expect(scheduler.dispatch("0 * * * *", new Date())).rejects.toThrow("handler crashed");
 
 			expect(events).toHaveLength(1);
 			expect(events[0].ok).toBe(false);

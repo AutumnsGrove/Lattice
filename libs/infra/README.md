@@ -1,4 +1,4 @@
-# Server SDK
+# Infra SDK
 
 > _The roots run deep. The tree stands anywhere._
 
@@ -8,7 +8,7 @@ Infrastructure abstraction layer that wraps each primitive (database, storage, k
 
 ```bash
 # Direct dependency
-pnpm add @autumnsgrove/server-sdk
+pnpm add @autumnsgrove/infra
 
 # Or via Lattice monorepo (recommended for Grove apps)
 import type { GroveContext } from "@autumnsgrove/lattice/infra";
@@ -19,7 +19,7 @@ import { createMockContext } from "@autumnsgrove/lattice/infra/testing";
 ## Quick Start
 
 ```typescript
-import { createCloudflareContext } from "@autumnsgrove/server-sdk/cloudflare";
+import { createCloudflareContext } from "@autumnsgrove/infra/cloudflare";
 
 export default {
 	async fetch(request: Request, env: Env): Promise<Response> {
@@ -59,11 +59,11 @@ async function handleRequest(request: Request, ctx: GroveContext): Promise<Respo
 
 ## Export Paths
 
-| Path                                  | Contents                                | Use In                            |
-| ------------------------------------- | --------------------------------------- | --------------------------------- |
-| `@autumnsgrove/server-sdk`            | Interfaces + types + error catalog      | Application code, type signatures |
-| `@autumnsgrove/server-sdk/cloudflare` | CF adapters + `createCloudflareContext` | Worker entry points only          |
-| `@autumnsgrove/server-sdk/testing`    | In-memory mocks + `createMockContext`   | Test files                        |
+| Path                             | Contents                                | Use In                            |
+| -------------------------------- | --------------------------------------- | --------------------------------- |
+| `@autumnsgrove/infra`            | Interfaces + types + error catalog      | Application code, type signatures |
+| `@autumnsgrove/infra/cloudflare` | CF adapters + `createCloudflareContext` | Worker entry points only          |
+| `@autumnsgrove/infra/testing`    | In-memory mocks + `createMockContext`   | Test files                        |
 
 Via Lattice re-exports: `@autumnsgrove/lattice/infra`, `@autumnsgrove/lattice/infra/cloudflare`, `@autumnsgrove/lattice/infra/testing`.
 
@@ -71,7 +71,7 @@ Via Lattice re-exports: `@autumnsgrove/lattice/infra`, `@autumnsgrove/lattice/in
 
 ```typescript
 import { describe, it, expect, beforeEach } from "vitest";
-import { createMockContext, type MockGroveContext } from "@autumnsgrove/server-sdk/testing";
+import { createMockContext, type MockGroveContext } from "@autumnsgrove/infra/testing";
 
 describe("PostService", () => {
 	let ctx: MockGroveContext;
@@ -136,4 +136,4 @@ Application code depends only on ports. Adapters are injected at startup. To sup
 - **Spec:** `docs/specs/server-sdk-spec.md`
 - **Agent guide:** `AgentUsage/server_sdk_guide.md`
 - **Error handling:** `AgentUsage/error_handling.md`
-- **Loom SDK:** `packages/engine/src/lib/loom/` (Durable Object coordination, integrates with Server SDK)
+- **Loom SDK:** `packages/engine/src/lib/loom/` (Durable Object coordination, integrates with Infra SDK)

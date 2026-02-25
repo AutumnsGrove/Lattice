@@ -7,7 +7,7 @@
  * @module @autumnsgrove/lattice/amber
  */
 
-import type { GroveStorage, GroveServiceBus } from "@autumnsgrove/server-sdk";
+import type { GroveStorage, GroveServiceBus } from "@autumnsgrove/infra";
 import type { EngineDb } from "../server/db/client.js";
 import { amberExports } from "../server/db/schema/engine.js";
 import { eq, and, desc } from "drizzle-orm";

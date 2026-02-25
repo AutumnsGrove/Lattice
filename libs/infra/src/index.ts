@@ -1,5 +1,5 @@
 /**
- * Grove Server SDK
+ * Grove Infra SDK
  *
  * The roots run deep. The tree stands anywhere.
  *
@@ -10,16 +10,16 @@
  * @example
  * ```typescript
  * // Import interfaces (platform-agnostic)
- * import type { GroveDatabase, GroveStorage, GroveKV, GroveContext } from "@autumnsgrove/server-sdk";
+ * import type { GroveDatabase, GroveStorage, GroveKV, GroveContext } from "@autumnsgrove/infra";
  *
  * // Cloudflare adapter (platform-specific, only in entry point)
- * import { createCloudflareContext } from "@autumnsgrove/server-sdk/cloudflare";
+ * import { createCloudflareContext } from "@autumnsgrove/infra/cloudflare";
  *
  * // Test mocks
- * import { createMockContext } from "@autumnsgrove/server-sdk/testing";
+ * import { createMockContext } from "@autumnsgrove/infra/testing";
  * ```
  *
- * @module @autumnsgrove/server-sdk
+ * @module @autumnsgrove/infra
  */
 
 // Context

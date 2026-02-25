@@ -44,7 +44,7 @@ The Amber SDK is a TypeScript client library that gives any Grove service clean 
 **Internal Name:** GroveAmber
 **Package:** `@autumnsgrove/lattice/amber`
 **Location:** `libs/engine/src/lib/amber/`
-**Depends On:** Server SDK (`@autumnsgrove/server-sdk`), Loom (Durable Objects)
+**Depends On:** Infra SDK (`@autumnsgrove/infra`), Loom (Durable Objects)
 **Last Updated:** February 2026
 
 Amber is tree resin. It preserves things. It wraps around what matters and holds it through time. The Amber system does the same for Wanderer data: uploads, exports, backups, quotas. The SDK is how every other part of Grove reaches into that resin without knowing the chemistry underneath.
@@ -63,7 +63,7 @@ A library that abstracts Amber's storage management into a clean API. Today, the
 - Quota validation before any upload, not after
 - Export creation and polling without Durable Object boilerplate
 - Consistent R2 key generation and file organization
-- Built on Server SDK's `GroveStorage` and `GroveDatabase` interfaces
+- Built on Infra SDK's `GroveStorage` and `GroveDatabase` interfaces
 - Signpost error codes (`AMB-*` prefix) for clear diagnostics
 
 ### Non-Goals (Out of Scope)
@@ -543,7 +543,7 @@ export const AMB_ERRORS = {
 The Amber SDK is built on top of Server SDK interfaces. It doesn't import Cloudflare types directly.
 
 ```typescript
-import type { GroveDatabase, GroveStorage, GroveServiceBus } from "@autumnsgrove/server-sdk";
+import type { GroveDatabase, GroveStorage, GroveServiceBus } from "@autumnsgrove/infra";
 
 class AmberClient {
   constructor(
@@ -557,7 +557,7 @@ class AmberClient {
 }
 ```
 
-This means the Amber SDK inherits Server SDK's portability. If the Server SDK gets a PostgreSQL adapter, Amber automatically works with PostgreSQL. If the Server SDK gets an S3 adapter, Amber automatically works with S3.
+This means the Amber SDK inherits Infra SDK's portability. If the Infra SDK gets a PostgreSQL adapter, Amber automatically works with PostgreSQL. If the Infra SDK gets an S3 adapter, Amber automatically works with S3.
 
 ---
 

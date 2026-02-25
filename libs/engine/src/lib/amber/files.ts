@@ -9,7 +9,7 @@
  * @module @autumnsgrove/lattice/amber
  */
 
-import type { GroveStorage } from "@autumnsgrove/server-sdk";
+import type { GroveStorage } from "@autumnsgrove/infra";
 import type {
 	AmberFile,
 	AmberUploadRequest,

@@ -49,7 +49,7 @@ skill: "grove-ui-design"
 | ---------------------------------------------- | ----------------------------------------- | ----------------------------------- |
 | [svelte5_guide.md](svelte5_guide.md)           | Svelte 5 runes, SvelteKit patterns        | Building Svelte web applications    |
 | [cloudflare_guide.md](cloudflare_guide.md)     | Workers, KV, R2, D1, MCP server           | Deploying to Cloudflare             |
-| [server_sdk_guide.md](server_sdk_guide.md)     | Infrastructure abstraction via Server SDK | Building services with GroveContext |
+| [server_sdk_guide.md](server_sdk_guide.md)     | Infrastructure abstraction via Infra SDK  | Building services with GroveContext |
 | [ci_cd_patterns.md](ci_cd_patterns.md)         | GitHub Actions, `gw ci`, pnpm workspaces  | CI/CD pipelines for Lattice         |
 | [testing_javascript.md](testing_javascript.md) | Vitest/Jest for JS/TS                     | Writing JavaScript/TypeScript tests |
 | [testing_python.md](testing_python.md)         | pytest for Python                         | Writing Python tests (tools)        |

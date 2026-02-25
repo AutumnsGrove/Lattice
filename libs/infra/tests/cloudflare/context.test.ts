@@ -114,77 +114,52 @@ describe("createCloudflareContext", () => {
 	});
 
 	// =========================================================================
-	// Binding Validation
+	// Partial Context (Unavailable Proxies)
 	// =========================================================================
 
-	describe("binding validation", () => {
-		it("should throw when db binding is missing", () => {
-			expect(() =>
-				createCloudflareContext({
-					...validOptions,
-					db: undefined as unknown as D1Database,
-				}),
-			).toThrow();
+	describe("partial context with unavailable proxies", () => {
+		it("should create context with missing db — rejects on access, not creation", async () => {
+			const ctx = createCloudflareContext({
+				...validOptions,
+				db: undefined,
+			});
+
+			expect(ctx.db).toBeDefined();
+			expect(ctx.db.info().provider).toBe("unavailable");
+			await expect(ctx.db.execute("SELECT 1")).rejects.toThrow("SRV-001");
 		});
 
-		it("should throw when storage binding is missing", () => {
-			expect(() =>
-				createCloudflareContext({
-					...validOptions,
-					storage: undefined as unknown as R2Bucket,
-				}),
-			).toThrow();
+		it("should create context with missing storage — rejects on access, not creation", async () => {
+			const ctx = createCloudflareContext({
+				...validOptions,
+				storage: undefined,
+			});
+
+			expect(ctx.storage).toBeDefined();
+			expect(ctx.storage.info().provider).toBe("unavailable");
+			await expect(ctx.storage.get("key")).rejects.toThrow("SRV-002");
 		});
 
-		it("should throw when kv binding is missing", () => {
-			expect(() =>
-				createCloudflareContext({
-					...validOptions,
-					kv: undefined as unknown as KVNamespace,
-				}),
-			).toThrow();
+		it("should create context with missing kv — rejects on access, not creation", async () => {
+			const ctx = createCloudflareContext({
+				...validOptions,
+				kv: undefined,
+			});
+
+			expect(ctx.kv).toBeDefined();
+			expect(ctx.kv.info().provider).toBe("unavailable");
+			await expect(ctx.kv.get("key")).rejects.toThrow("SRV-003");
 		});
 
-		it("should log error before throwing on missing db", async () => {
-			try {
-				createCloudflareContext({
-					...validOptions,
-					db: null as unknown as D1Database,
-				});
-			} catch {
-				// expected
-			}
+		it("should create context with no bindings at all", () => {
+			const ctx = createCloudflareContext({
+				env: validOptions.env,
+			});
 
-			const { logGroveError } = await import("@autumnsgrove/lattice/errors");
-			expect(logGroveError).toHaveBeenCalled();
-		});
-
-		it("should log error before throwing on missing storage", async () => {
-			try {
-				createCloudflareContext({
-					...validOptions,
-					storage: null as unknown as R2Bucket,
-				});
-			} catch {
-				// expected
-			}
-
-			const { logGroveError } = await import("@autumnsgrove/lattice/errors");
-			expect(logGroveError).toHaveBeenCalled();
-		});
-
-		it("should log error before throwing on missing kv", async () => {
-			try {
-				createCloudflareContext({
-					...validOptions,
-					kv: null as unknown as KVNamespace,
-				});
-			} catch {
-				// expected
-			}
-
-			const { logGroveError } = await import("@autumnsgrove/lattice/errors");
-			expect(logGroveError).toHaveBeenCalled();
+			expect(ctx.db.info().provider).toBe("unavailable");
+			expect(ctx.storage.info().provider).toBe("unavailable");
+			expect(ctx.kv.info().provider).toBe("unavailable");
+			expect(ctx.config.info().provider).toBe("cloudflare-env");
 		});
 	});
 });

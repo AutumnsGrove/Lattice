@@ -490,7 +490,7 @@
 		"@11ty/gray-matter": "^2.0.1",
 		"@autumnsgrove/foliage": "workspace:*",
 		"@autumnsgrove/gossamer": "workspace:*",
-		"@autumnsgrove/server-sdk": "workspace:*",
+		"@autumnsgrove/infra": "workspace:*",
 		"@jsquash/jxl": "^1.3.0",
 		"@react-email/components": "^1.0.7",
 		"@react-email/render": "^2.0.4",

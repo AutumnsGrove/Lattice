@@ -1,20 +1,20 @@
-# Server SDK Guide
+# Infra SDK Guide
 
 > _The roots run deep. The tree stands anywhere._
 
-The Server SDK abstracts every Cloudflare infrastructure primitive behind clean TypeScript interfaces. Application code imports the interface, adapters get wired at startup. When you need to migrate, you swap the adapter — not the tree.
+The Infra SDK abstracts every Cloudflare infrastructure primitive behind clean TypeScript interfaces. Application code imports the interface, adapters get wired at startup. When you need to migrate, you swap the adapter — not the tree.
 
 ---
 
-## When to Use Server SDK vs Direct Bindings
+## When to Use Infra SDK vs Direct Bindings
 
-| Situation                                | Use                                                     |
-| ---------------------------------------- | ------------------------------------------------------- |
-| New service or feature                   | **Server SDK** — start with `GroveContext` from day one |
-| Existing code with `env.DB.prepare(...)` | **Keep direct** until you have a migration window       |
-| Test code that needs a database          | **Server SDK mocks** — `createMockContext()`            |
-| Loom DO internals                        | **Direct** — DOs have their own storage model           |
-| One-off wrangler CLI scripts             | **Direct** — no abstraction needed                      |
+| Situation                                | Use                                                    |
+| ---------------------------------------- | ------------------------------------------------------ |
+| New service or feature                   | **Infra SDK** — start with `GroveContext` from day one |
+| Existing code with `env.DB.prepare(...)` | **Keep direct** until you have a migration window      |
+| Test code that needs a database          | **Infra SDK mocks** — `createMockContext()`            |
+| Loom DO internals                        | **Direct** — DOs have their own storage model          |
+| One-off wrangler CLI scripts             | **Direct** — no abstraction needed                     |
 
 ---
 
@@ -25,7 +25,7 @@ The Server SDK abstracts every Cloudflare infrastructure primitive behind clean 
 Every Worker entry point creates a `GroveContext` once, then passes it to all handlers:
 
 ```typescript
-import { createCloudflareContext } from "@autumnsgrove/server-sdk/cloudflare";
+import { createCloudflareContext } from "@autumnsgrove/infra/cloudflare";
 // Or via Lattice: "@autumnsgrove/lattice/infra/cloudflare"
 
 export default {
@@ -65,7 +65,7 @@ let globalCtx: GroveContext;
 Application code imports only the interface types:
 
 ```typescript
-import type { GroveContext, GroveDatabase, GroveStorage } from "@autumnsgrove/server-sdk";
+import type { GroveContext, GroveDatabase, GroveStorage } from "@autumnsgrove/infra";
 // Or: "@autumnsgrove/lattice/infra"
 ```
 
@@ -194,7 +194,7 @@ if (ctx.config.has("FEATURE_FLAG_NEW_UI")) { ... }
 ### Mock Context
 
 ```typescript
-import { createMockContext } from "@autumnsgrove/server-sdk/testing";
+import { createMockContext } from "@autumnsgrove/infra/testing";
 
 const ctx = createMockContext();
 
@@ -224,7 +224,7 @@ const mockD1 = createMockD1();
 const db = new CloudflareDatabase(mockD1 as unknown as D1Database);
 ```
 
-See `libs/server-sdk/tests/cloudflare/` for the full test suite.
+See `libs/infra/tests/cloudflare/` for the full test suite.
 
 ---
 
@@ -233,7 +233,7 @@ See `libs/server-sdk/tests/cloudflare/` for the full test suite.
 All SDK operations use `logGroveError` with `SRV_ERRORS`:
 
 ```typescript
-import { SRV_ERRORS } from "@autumnsgrove/server-sdk";
+import { SRV_ERRORS } from "@autumnsgrove/infra";
 import { logGroveError } from "@autumnsgrove/lattice/errors";
 ```
 
@@ -286,26 +286,26 @@ async function syncTenant(d1: D1Database, tenantId: string) {
 
 ```typescript
 // worker.ts (entry point)
-import { createCloudflareContext } from "@autumnsgrove/server-sdk/cloudflare";
+import { createCloudflareContext } from "@autumnsgrove/infra/cloudflare";
 
 // handlers.ts (application code)
-import type { GroveContext } from "@autumnsgrove/server-sdk";
+import type { GroveContext } from "@autumnsgrove/infra";
 ```
 
 ### ❌ Bad: Adapter imports in application code
 
 ```typescript
 // handlers.ts — now locked to Cloudflare
-import { CloudflareDatabase } from "@autumnsgrove/server-sdk/cloudflare";
+import { CloudflareDatabase } from "@autumnsgrove/infra/cloudflare";
 ```
 
 ---
 
 ## Migration Guidance
 
-### Migrating a Service to Server SDK
+### Migrating a Service to Infra SDK
 
-1. **Add dependency**: `pnpm add @autumnsgrove/server-sdk` (or use `@autumnsgrove/lattice/infra`)
+1. **Add dependency**: `pnpm add @autumnsgrove/infra` (or use `@autumnsgrove/lattice/infra`)
 2. **Create context**: Add `createCloudflareContext()` in the Worker entry point
 3. **Thread context**: Pass `GroveContext` through to handlers
 4. **Replace one binding at a time**: Start with KV (simplest), then R2, then D1

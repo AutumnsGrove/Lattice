@@ -171,7 +171,7 @@ This registers the agent, generates a unique API key, saves it to the vault, and
 | `docs/patterns/loom-durable-objects-pattern.md`                     | Loom DO coordination layer for auth, tenant coordination, D1 batching             |
 | `docs/specs/rings-spec.md`                                          | Rings analytics system with privacy-first design and DO integration               |
 | `docs/grove-ai-gateway-integration.md`                              | Cloudflare AI Gateway integration for per-tenant AI quotas and observability      |
-| `docs/specs/server-sdk-spec.md`                                     | Server SDK infrastructure abstraction layer (Ports & Adapters)                    |
+| `docs/specs/server-sdk-spec.md`                                     | Infra SDK infrastructure abstraction layer (Ports & Adapters)                     |
 | `docs/specs/drizzle-integration-spec.md`                            | Drizzle ORM integration (The Aquifer): typed D1 queries, scopedDb, migration plan |
 
 ---
@@ -304,7 +304,7 @@ Use conventional commits format for PR titles. Write a brief description of what
 | **Auth**              | `@autumnsgrove/lattice/auth`          | Authentication utilities     |
 | **Errors**            | `@autumnsgrove/lattice/errors`        | Signpost error codes         |
 | **Type Safety**       | `@autumnsgrove/lattice/server`        | Rootwork boundary utilities  |
-| **Infrastructure**    | `@autumnsgrove/lattice/infra`         | Server SDK (DB, Storage, KV) |
+| **Infrastructure**    | `@autumnsgrove/lattice/infra`         | Infra SDK (DB, Storage, KV)  |
 
 ### Common Violations (Don't Do These)
 
@@ -404,7 +404,7 @@ import {
 | `ARBOR_ERRORS` | `GROVE-ARBOR-XXX` | `@autumnsgrove/lattice/errors`    |
 | `SITE_ERRORS`  | `GROVE-SITE-XXX`  | `@autumnsgrove/lattice/errors`    |
 | `AUTH_ERRORS`  | `HW-AUTH-XXX`     | `@autumnsgrove/lattice/heartwood` |
-| `SRV_ERRORS`   | `SRV-XXX`         | `@autumnsgrove/server-sdk`        |
+| `SRV_ERRORS`   | `SRV-XXX`         | `@autumnsgrove/infra`             |
 | `PLANT_ERRORS` | `PLANT-XXX`       | `apps/plant/src/lib/errors.ts`    |
 
 **Client-Side Feedback (Toast):**
