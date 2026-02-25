@@ -353,3 +353,41 @@ export interface ConfigInfo {
 	/** Provider identifier (e.g. "cloudflare-env", "process-env", "dotenv") */
 	provider: string;
 }
+
+// =============================================================================
+// OBSERVABILITY
+// =============================================================================
+
+/**
+ * Lightweight observer callback for SDK operations.
+ *
+ * Every adapter emits events when operations complete (success or error).
+ * The SDK does not aggregate, buffer, or transmit — it just calls the
+ * observer. What happens next is up to the consumer: log to console,
+ * write to a D1 table Vista aggregators read, or ignore entirely.
+ *
+ * @example
+ * ```typescript
+ * const observer: GroveObserver = (event) => {
+ *   console.log(`[${event.service}] ${event.operation} took ${event.durationMs}ms`);
+ * };
+ * const ctx = createCloudflareContext({ ..., observer });
+ * ```
+ */
+export type GroveObserver = (event: GroveEvent) => void;
+
+/** An operation event emitted by an SDK adapter. */
+export interface GroveEvent {
+	/** Which infrastructure service: "db", "storage", "kv", "services", "scheduler" */
+	service: "db" | "storage" | "kv" | "services" | "scheduler";
+	/** The operation name: "execute", "get", "put", "call", "dispatch", etc. */
+	operation: string;
+	/** Wall-clock duration in milliseconds */
+	durationMs: number;
+	/** Whether the operation succeeded */
+	ok: boolean;
+	/** Optional detail (SQL snippet, storage key, service name, etc.) */
+	detail?: string;
+	/** Error message if ok is false */
+	error?: string;
+}

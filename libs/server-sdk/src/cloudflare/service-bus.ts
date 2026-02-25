@@ -7,12 +7,21 @@
 
 import { logGroveError } from "@autumnsgrove/lattice/errors";
 import { SRV_ERRORS } from "../errors.js";
-import type { GroveServiceBus, ServiceRequest, ServiceResponse, ServiceBusInfo } from "../types.js";
+import type {
+	GroveServiceBus,
+	ServiceRequest,
+	ServiceResponse,
+	ServiceBusInfo,
+	GroveObserver,
+} from "../types.js";
 
 const VALID_HTTP_METHODS = new Set(["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"]);
 
 export class CloudflareServiceBus implements GroveServiceBus {
-	constructor(private readonly bindings: Record<string, Fetcher>) {}
+	constructor(
+		private readonly bindings: Record<string, Fetcher>,
+		private readonly observer?: GroveObserver,
+	) {}
 
 	async call<T = unknown>(service: string, request: ServiceRequest): Promise<ServiceResponse<T>> {
 		// Input validation: service name and request.path must be non-empty strings
@@ -48,6 +57,7 @@ export class CloudflareServiceBus implements GroveServiceBus {
 			throw new Error(SRV_ERRORS.SERVICE_NOT_FOUND.adminMessage);
 		}
 
+		const start = performance.now();
 		try {
 			const url = `https://${service}${request.path}`;
 			const init: RequestInit = {
@@ -88,12 +98,30 @@ export class CloudflareServiceBus implements GroveServiceBus {
 				}
 			}
 
+			const durationMs = performance.now() - start;
+			this.observer?.({
+				service: "services",
+				operation: "call",
+				durationMs,
+				ok: true,
+				detail: `${request.method} ${service}${request.path}`,
+			});
+
 			return {
 				status: response.status,
 				headers: Object.fromEntries(response.headers),
 				data,
 			};
 		} catch (error) {
+			const durationMs = performance.now() - start;
+			this.observer?.({
+				service: "services",
+				operation: "call",
+				durationMs,
+				ok: false,
+				detail: `${request.method} ${service}${request.path}`,
+				error: error instanceof Error ? error.message : String(error),
+			});
 			logGroveError("ServerSDK", SRV_ERRORS.SERVICE_CALL_FAILED, {
 				detail: `${request.method} ${service}${request.path}`,
 				cause: error,
@@ -106,13 +134,31 @@ export class CloudflareServiceBus implements GroveServiceBus {
 		const binding = this.bindings[service];
 		if (!binding) return false;
 
+		const start = performance.now();
 		try {
 			// Attempt a real HEAD request to verify the service is reachable.
 			// Cloudflare service bindings are zero-latency so this is cheap.
 			const response = await binding.fetch(`https://${service}/`, { method: "HEAD" });
+			const durationMs = performance.now() - start;
+			const ok = response.status < 500;
+			this.observer?.({
+				service: "services",
+				operation: "ping",
+				durationMs,
+				ok,
+				detail: service,
+			});
 			// Any response (even 404) means the binding is alive.
-			return response.status < 500;
+			return ok;
 		} catch {
+			const durationMs = performance.now() - start;
+			this.observer?.({
+				service: "services",
+				operation: "ping",
+				durationMs,
+				ok: false,
+				detail: service,
+			});
 			return false;
 		}
 	}

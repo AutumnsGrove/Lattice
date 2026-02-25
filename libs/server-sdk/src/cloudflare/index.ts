@@ -29,6 +29,7 @@
 import { logGroveError } from "@autumnsgrove/lattice/errors";
 import { SRV_ERRORS } from "../errors.js";
 import type { GroveContext } from "../context.js";
+import type { GroveObserver } from "../types.js";
 import { CloudflareDatabase } from "./database.js";
 import { CloudflareStorage } from "./storage.js";
 import { CloudflareKV } from "./kv.js";
@@ -54,6 +55,8 @@ export interface CloudflareContextOptions {
 	bucketName?: string;
 	/** Optional name for the KV namespace (for diagnostics) */
 	kvNamespace?: string;
+	/** Optional observer for operation events (timing, errors, diagnostics) */
+	observer?: GroveObserver;
 }
 
 /**
@@ -85,13 +88,15 @@ export function createCloudflareContext(options: CloudflareContextOptions): Grov
 	}
 
 	try {
+		const obs = options.observer;
 		return {
-			db: new CloudflareDatabase(options.db, options.dbName),
-			storage: new CloudflareStorage(options.storage, options.bucketName),
-			kv: new CloudflareKV(options.kv, options.kvNamespace),
-			services: new CloudflareServiceBus(options.services ?? {}),
-			scheduler: new CloudflareScheduler(),
+			db: new CloudflareDatabase(options.db, options.dbName, obs),
+			storage: new CloudflareStorage(options.storage, options.bucketName, obs),
+			kv: new CloudflareKV(options.kv, options.kvNamespace, obs),
+			services: new CloudflareServiceBus(options.services ?? {}, obs),
+			scheduler: new CloudflareScheduler(obs),
 			config: new CloudflareConfig(options.env),
+			observer: obs,
 		};
 	} catch (error) {
 		logGroveError("ServerSDK", SRV_ERRORS.CONTEXT_INIT_FAILED, {

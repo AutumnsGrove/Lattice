@@ -16,12 +16,14 @@ import type {
 	StorageListResult,
 	PresignOptions,
 	StorageInfo,
+	GroveObserver,
 } from "../types.js";
 
 export class CloudflareStorage implements GroveStorage {
 	constructor(
 		private readonly r2: R2Bucket,
 		private readonly bucketName: string = "default",
+		private readonly observer?: GroveObserver,
 	) {}
 
 	private validateKey(key: string, context: string): void {
@@ -48,6 +50,7 @@ export class CloudflareStorage implements GroveStorage {
 		// Input validation
 		this.validateKey(key, "put");
 
+		const start = performance.now();
 		try {
 			const obj = await this.r2.put(key, data, {
 				httpMetadata: {
@@ -62,11 +65,29 @@ export class CloudflareStorage implements GroveStorage {
 				throw new Error("R2 put returned null");
 			}
 
+			const durationMs = performance.now() - start;
+			this.observer?.({
+				service: "storage",
+				operation: "put",
+				durationMs,
+				ok: true,
+				detail: key,
+			});
+
 			// R2 put() returns R2Object (no body). Reconstruct a readable
 			// stream from the original data so the returned StorageObject
 			// has a usable body — callers can read what they just wrote.
 			return this.toStorageObjectFromPut(obj, key, data);
 		} catch (error) {
+			const durationMs = performance.now() - start;
+			this.observer?.({
+				service: "storage",
+				operation: "put",
+				durationMs,
+				ok: false,
+				detail: key,
+				error: error instanceof Error ? error.message : String(error),
+			});
 			logGroveError("ServerSDK", SRV_ERRORS.STORAGE_UPLOAD_FAILED, {
 				detail: key,
 				cause: error,
@@ -79,11 +100,29 @@ export class CloudflareStorage implements GroveStorage {
 		// Input validation
 		this.validateKey(key, "get");
 
+		const start = performance.now();
 		try {
 			const obj = await this.r2.get(key);
+			const durationMs = performance.now() - start;
+			this.observer?.({
+				service: "storage",
+				operation: "get",
+				durationMs,
+				ok: true,
+				detail: key,
+			});
 			if (!obj) return null;
 			return this.toStorageObjectWithBody(obj, key);
 		} catch (error) {
+			const durationMs = performance.now() - start;
+			this.observer?.({
+				service: "storage",
+				operation: "get",
+				durationMs,
+				ok: false,
+				detail: key,
+				error: error instanceof Error ? error.message : String(error),
+			});
 			logGroveError("ServerSDK", SRV_ERRORS.STORAGE_DOWNLOAD_FAILED, {
 				detail: key,
 				cause: error,
@@ -96,11 +135,29 @@ export class CloudflareStorage implements GroveStorage {
 		// Input validation
 		this.validateKey(key, "head");
 
+		const start = performance.now();
 		try {
 			const obj = await this.r2.head(key);
+			const durationMs = performance.now() - start;
+			this.observer?.({
+				service: "storage",
+				operation: "head",
+				durationMs,
+				ok: true,
+				detail: key,
+			});
 			if (!obj) return null;
 			return this.toMeta(obj, key);
 		} catch (error) {
+			const durationMs = performance.now() - start;
+			this.observer?.({
+				service: "storage",
+				operation: "head",
+				durationMs,
+				ok: false,
+				detail: key,
+				error: error instanceof Error ? error.message : String(error),
+			});
 			logGroveError("ServerSDK", SRV_ERRORS.STORAGE_DOWNLOAD_FAILED, {
 				detail: `head: ${key}`,
 				cause: error,
@@ -113,9 +170,27 @@ export class CloudflareStorage implements GroveStorage {
 		// Input validation
 		this.validateKey(key, "delete");
 
+		const start = performance.now();
 		try {
 			await this.r2.delete(key);
+			const durationMs = performance.now() - start;
+			this.observer?.({
+				service: "storage",
+				operation: "delete",
+				durationMs,
+				ok: true,
+				detail: key,
+			});
 		} catch (error) {
+			const durationMs = performance.now() - start;
+			this.observer?.({
+				service: "storage",
+				operation: "delete",
+				durationMs,
+				ok: false,
+				detail: key,
+				error: error instanceof Error ? error.message : String(error),
+			});
 			logGroveError("ServerSDK", SRV_ERRORS.ADAPTER_ERROR, {
 				detail: `delete: ${key}`,
 				cause: error,
@@ -147,9 +222,27 @@ export class CloudflareStorage implements GroveStorage {
 			}
 		}
 
+		const start = performance.now();
 		try {
 			await this.r2.delete(keys);
+			const durationMs = performance.now() - start;
+			this.observer?.({
+				service: "storage",
+				operation: "deleteMany",
+				durationMs,
+				ok: true,
+				detail: `${keys.length} keys`,
+			});
 		} catch (error) {
+			const durationMs = performance.now() - start;
+			this.observer?.({
+				service: "storage",
+				operation: "deleteMany",
+				durationMs,
+				ok: false,
+				detail: `${keys.length} keys`,
+				error: error instanceof Error ? error.message : String(error),
+			});
 			logGroveError("ServerSDK", SRV_ERRORS.ADAPTER_ERROR, {
 				detail: `deleteMany: ${keys.length} keys`,
 				cause: error,
@@ -173,6 +266,7 @@ export class CloudflareStorage implements GroveStorage {
 			throw new Error("Limit must be a positive number");
 		}
 
+		const start = performance.now();
 		try {
 			const result = await this.r2.list({
 				prefix: options?.prefix,
@@ -181,12 +275,30 @@ export class CloudflareStorage implements GroveStorage {
 				delimiter: options?.delimiter,
 			});
 
+			const durationMs = performance.now() - start;
+			this.observer?.({
+				service: "storage",
+				operation: "list",
+				durationMs,
+				ok: true,
+				detail: `prefix=${options?.prefix ?? ""}`,
+			});
+
 			return {
 				objects: result.objects.map((obj) => this.toMeta(obj, obj.key)),
 				cursor: result.truncated ? result.cursor : undefined,
 				truncated: result.truncated,
 			};
 		} catch (error) {
+			const durationMs = performance.now() - start;
+			this.observer?.({
+				service: "storage",
+				operation: "list",
+				durationMs,
+				ok: false,
+				detail: `prefix=${options?.prefix ?? ""}`,
+				error: error instanceof Error ? error.message : String(error),
+			});
 			logGroveError("ServerSDK", SRV_ERRORS.ADAPTER_ERROR, {
 				detail: `list: prefix=${options?.prefix ?? ""}`,
 				cause: error,

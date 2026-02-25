@@ -15,12 +15,14 @@ import type {
 	KVListResult,
 	KVValueMeta,
 	KVInfo,
+	GroveObserver,
 } from "../types.js";
 
 export class CloudflareKV implements GroveKV {
 	constructor(
 		private readonly kv: KVNamespace,
 		private readonly namespaceName: string = "default",
+		private readonly observer?: GroveObserver,
 	) {}
 
 	async get<T = string>(key: string, options?: KVGetOptions): Promise<T | null> {
@@ -32,20 +34,39 @@ export class CloudflareKV implements GroveKV {
 			throw new Error("KV key cannot be empty");
 		}
 
+		const start = performance.now();
 		try {
 			const type = options?.type ?? "text";
+			let result: T | null;
 			// Use separate overloads to satisfy CF's KVNamespace type
 			if (type === "json") {
-				return (await this.kv.get(key, "json")) as T | null;
+				result = (await this.kv.get(key, "json")) as T | null;
+			} else if (type === "arrayBuffer") {
+				result = (await this.kv.get(key, "arrayBuffer")) as T | null;
+			} else if (type === "stream") {
+				result = (await this.kv.get(key, "stream")) as T | null;
+			} else {
+				result = (await this.kv.get(key, "text")) as T | null;
 			}
-			if (type === "arrayBuffer") {
-				return (await this.kv.get(key, "arrayBuffer")) as T | null;
-			}
-			if (type === "stream") {
-				return (await this.kv.get(key, "stream")) as T | null;
-			}
-			return (await this.kv.get(key, "text")) as T | null;
+			const durationMs = performance.now() - start;
+			this.observer?.({
+				service: "kv",
+				operation: "get",
+				durationMs,
+				ok: true,
+				detail: key,
+			});
+			return result;
 		} catch (error) {
+			const durationMs = performance.now() - start;
+			this.observer?.({
+				service: "kv",
+				operation: "get",
+				durationMs,
+				ok: false,
+				detail: key,
+				error: error instanceof Error ? error.message : String(error),
+			});
 			logGroveError("ServerSDK", SRV_ERRORS.KV_OPERATION_FAILED, {
 				detail: `get: ${key}`,
 				cause: error,
@@ -77,13 +98,31 @@ export class CloudflareKV implements GroveKV {
 			throw new Error("Expiration TTL must be a positive number");
 		}
 
+		const start = performance.now();
 		try {
 			await this.kv.put(key, value, {
 				expirationTtl: options?.expirationTtl,
 				expiration: options?.expiration,
 				metadata: options?.metadata,
 			});
+			const durationMs = performance.now() - start;
+			this.observer?.({
+				service: "kv",
+				operation: "put",
+				durationMs,
+				ok: true,
+				detail: key,
+			});
 		} catch (error) {
+			const durationMs = performance.now() - start;
+			this.observer?.({
+				service: "kv",
+				operation: "put",
+				durationMs,
+				ok: false,
+				detail: key,
+				error: error instanceof Error ? error.message : String(error),
+			});
 			logGroveError("ServerSDK", SRV_ERRORS.KV_OPERATION_FAILED, {
 				detail: `put: ${key}`,
 				cause: error,
@@ -101,9 +140,27 @@ export class CloudflareKV implements GroveKV {
 			throw new Error("KV key cannot be empty");
 		}
 
+		const start = performance.now();
 		try {
 			await this.kv.delete(key);
+			const durationMs = performance.now() - start;
+			this.observer?.({
+				service: "kv",
+				operation: "delete",
+				durationMs,
+				ok: true,
+				detail: key,
+			});
 		} catch (error) {
+			const durationMs = performance.now() - start;
+			this.observer?.({
+				service: "kv",
+				operation: "delete",
+				durationMs,
+				ok: false,
+				detail: key,
+				error: error instanceof Error ? error.message : String(error),
+			});
 			logGroveError("ServerSDK", SRV_ERRORS.KV_OPERATION_FAILED, {
 				detail: `delete: ${key}`,
 				cause: error,
@@ -113,11 +170,21 @@ export class CloudflareKV implements GroveKV {
 	}
 
 	async list(options?: KVListOptions): Promise<KVListResult> {
+		const start = performance.now();
 		try {
 			const result = await this.kv.list({
 				prefix: options?.prefix ?? undefined,
 				cursor: options?.cursor ?? undefined,
 				limit: options?.limit,
+			});
+
+			const durationMs = performance.now() - start;
+			this.observer?.({
+				service: "kv",
+				operation: "list",
+				durationMs,
+				ok: true,
+				detail: `prefix=${options?.prefix ?? ""}`,
 			});
 
 			return {
@@ -130,6 +197,15 @@ export class CloudflareKV implements GroveKV {
 				list_complete: result.list_complete,
 			};
 		} catch (error) {
+			const durationMs = performance.now() - start;
+			this.observer?.({
+				service: "kv",
+				operation: "list",
+				durationMs,
+				ok: false,
+				detail: `prefix=${options?.prefix ?? ""}`,
+				error: error instanceof Error ? error.message : String(error),
+			});
 			logGroveError("ServerSDK", SRV_ERRORS.KV_OPERATION_FAILED, {
 				detail: `list: prefix=${options?.prefix ?? ""}`,
 				cause: error,
@@ -149,14 +225,32 @@ export class CloudflareKV implements GroveKV {
 			throw new Error("KV key cannot be empty");
 		}
 
+		const start = performance.now();
 		try {
 			const result = await this.kv.getWithMetadata<M>(key);
+			const durationMs = performance.now() - start;
+			this.observer?.({
+				service: "kv",
+				operation: "getWithMetadata",
+				durationMs,
+				ok: true,
+				detail: key,
+			});
 			if (result.value === null) return null;
 			return {
 				value: result.value as unknown as T,
 				metadata: result.metadata,
 			};
 		} catch (error) {
+			const durationMs = performance.now() - start;
+			this.observer?.({
+				service: "kv",
+				operation: "getWithMetadata",
+				durationMs,
+				ok: false,
+				detail: key,
+				error: error instanceof Error ? error.message : String(error),
+			});
 			logGroveError("ServerSDK", SRV_ERRORS.KV_OPERATION_FAILED, {
 				detail: `getWithMetadata: ${key}`,
 				cause: error,

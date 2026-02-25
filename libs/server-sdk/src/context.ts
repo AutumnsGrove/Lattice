@@ -22,6 +22,7 @@ import type {
 	GroveServiceBus,
 	GroveScheduler,
 	GroveConfig,
+	GroveObserver,
 } from "./types.js";
 
 /**
@@ -41,4 +42,6 @@ export interface GroveContext {
 	scheduler: GroveScheduler;
 	/** Configuration and secrets access */
 	config: GroveConfig;
+	/** Optional observer for operation events. Set during context creation. */
+	observer?: GroveObserver;
 }

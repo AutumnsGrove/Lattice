@@ -67,6 +67,9 @@ export type {
 	// Config
 	GroveConfig,
 	ConfigInfo,
+	// Observability
+	GroveObserver,
+	GroveEvent,
 } from "./types.js";
 
 // Errors
