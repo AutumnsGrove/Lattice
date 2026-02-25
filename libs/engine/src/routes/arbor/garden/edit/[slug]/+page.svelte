@@ -634,11 +634,11 @@
 					</div>
 
 					<div class="form-group field-full">
-						<label>Blaze</label>
+						<span id="blaze-label" class="label">Blaze</span>
 						<span class="form-hint" style="margin-top: 0; margin-bottom: 0.5rem;"
 							>A small marker that tells readers what this post is about.</span
 						>
-						<div class="blaze-picker">
+						<div class="blaze-picker" role="group" aria-labelledby="blaze-label">
 							{#each availableBlazes as blazeDef}
 								<button
 									type="button"
@@ -1011,7 +1011,8 @@
 	.form-group {
 		margin-bottom: 0;
 	}
-	.form-group label {
+	.form-group label,
+	.form-group .label {
 		display: block;
 		margin-bottom: 0.4rem;
 		font-size: 0.85rem;

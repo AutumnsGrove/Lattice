@@ -225,6 +225,7 @@
 		line-height: 1.3;
 		display: -webkit-box;
 		-webkit-line-clamp: 2;
+		line-clamp: 2;
 		-webkit-box-orient: vertical;
 		overflow: hidden;
 	}
@@ -263,6 +264,7 @@
 	.mini-line .mini-message {
 		display: inline;
 		-webkit-line-clamp: unset;
+		line-clamp: unset;
 	}
 
 	.mini-letter {
