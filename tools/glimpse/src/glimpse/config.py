@@ -23,13 +23,27 @@ class GlimpseConfig:
     format: str = "png"
     quality: int = 90
     output_dir: str = "screenshots"
+    logs: bool = False
 
     # [theme]
     season: str | None = None
     theme: str | None = None
     grove_mode: bool | None = None
 
-    # [lumen] (forward-looking: Phase 4 Smart Detection)
+    # [server]
+    server_port: int = 5173
+    server_start_command: str = "pnpm dev:wrangler"
+    server_start_cwd: str = "libs/engine"
+    server_health_url: str = "http://localhost:5173"
+    server_health_timeout: int = 30000
+    server_pid_file: str = ".glimpse/server.pid"
+
+    # [seed]
+    seed_scripts_dir: str = "scripts/db"
+    seed_default_tenant: str = "midnight-bloom"
+    seed_migrations_dir: str = "libs/engine/migrations"
+
+    # [lumen]
     lumen_gateway_url: str | None = None
     lumen_model: str = "gemini-flash"
 
@@ -120,6 +134,32 @@ class GlimpseConfig:
             config.quality = defaults["quality"]
         if "output_dir" in defaults:
             config.output_dir = defaults["output_dir"]
+        if "logs" in defaults:
+            config.logs = defaults["logs"]
+
+        # [server]
+        server = data.get("server", {})
+        if "port" in server:
+            config.server_port = server["port"]
+        if "start_command" in server:
+            config.server_start_command = server["start_command"]
+        if "start_cwd" in server:
+            config.server_start_cwd = server["start_cwd"]
+        if "health_url" in server:
+            config.server_health_url = server["health_url"]
+        if "health_timeout" in server:
+            config.server_health_timeout = server["health_timeout"]
+        if "pid_file" in server:
+            config.server_pid_file = server["pid_file"]
+
+        # [seed]
+        seed = data.get("seed", {})
+        if "scripts_dir" in seed:
+            config.seed_scripts_dir = seed["scripts_dir"]
+        if "default_tenant" in seed:
+            config.seed_default_tenant = seed["default_tenant"]
+        if "migrations_dir" in seed:
+            config.seed_migrations_dir = seed["migrations_dir"]
 
         # [theme]
         theme_section = data.get("theme", {})
