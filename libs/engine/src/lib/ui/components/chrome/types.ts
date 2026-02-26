@@ -11,47 +11,47 @@ export type { Season } from "../nature/palette";
  *
  * This allows cross-package compatibility when Lucide versions differ.
  */
- 
+
 export type IconComponent =
-  | Component
-  | ComponentType<SvelteComponent<any>>
-  | (new (...args: any[]) => any);
+	| Component
+	| ComponentType<SvelteComponent<any>>
+	| (new (...args: any[]) => any);
 
 export interface NavItem {
-  href: string;
-  label: string;
-  icon?: IconComponent;
-  external?: boolean;
-  /** Term slug for Grove Mode label resolution (e.g., "porch", "forests") */
-  termSlug?: string;
+	href: string;
+	label: string;
+	icon?: IconComponent;
+	external?: boolean;
+	/** Term slug for Grove Mode label resolution (e.g., "porch", "forests") */
+	termSlug?: string;
 }
 
 /**
  * Tab item for AdminHeader navigation
  */
 export interface AdminTab {
-  href: string;
-  label: string;
-  icon?: IconComponent;
+	href: string;
+	label: string;
+	icon?: IconComponent;
 }
 
 export interface FooterLink {
-  href: string;
-  label: string;
-  icon?: IconComponent;
-  external?: boolean;
-  /** Term slug for Grove Mode label resolution */
-  termSlug?: string;
+	href: string;
+	label: string;
+	icon?: IconComponent;
+	external?: boolean;
+	/** Term slug for Grove Mode label resolution */
+	termSlug?: string;
 }
 
 /**
  * User object for header auth display
  */
 export interface HeaderUser {
-  id: string;
-  name?: string | null;
-  email?: string;
-  avatarUrl?: string | null;
+	id: string;
+	name?: string | null;
+	email?: string;
+	avatarUrl?: string | null;
 }
 
 export type MaxWidth = "narrow" | "default" | "wide";
@@ -65,34 +65,52 @@ export type MaxWidth = "narrow" | "default" | "wide";
  * - Authenticated: avatar + name, optional dropdown with sign-out
  */
 export interface AccountStatusProps {
-  /** Server-driven user object. null = not logged in, undefined = unknown/loading */
-  user?: HeaderUser | null;
-  /** Explicit loading state (shows skeleton). Defaults to false. */
-  loading?: boolean;
-  /** Sign-in URL (default: "https://heartwood.grove.place") */
-  signInHref?: string;
-  /** Label for sign-in link (default: "Sign in") */
-  signInLabel?: string;
-  /** Where clicking the avatar navigates (default: "/arbor") */
-  userHref?: string;
-  /** Sign-out URL (default: "/logout") */
-  signOutHref?: string;
-  /** Label for sign-out action (default: "Sign out") */
-  signOutLabel?: string;
-  /** Avatar-only mode — hides name text (default: false) */
-  compact?: boolean;
-  /** When false, avatar links directly to userHref with no dropdown (default: true) */
-  dropdown?: boolean;
-  /** Injectable custom dropdown items rendered between user info and sign-out */
-  menuItems?: import("svelte").Snippet;
+	/** Server-driven user object. null = not logged in, undefined = unknown/loading */
+	user?: HeaderUser | null;
+	/** Explicit loading state (shows skeleton). Defaults to false. */
+	loading?: boolean;
+	/** Sign-in URL (default: "https://heartwood.grove.place") */
+	signInHref?: string;
+	/** Label for sign-in link (default: "Sign in") */
+	signInLabel?: string;
+	/** Where clicking the avatar navigates (default: "/arbor") */
+	userHref?: string;
+	/** Sign-out URL (default: "/logout") */
+	signOutHref?: string;
+	/** Label for sign-out action (default: "Sign out") */
+	signOutLabel?: string;
+	/** Avatar-only mode — hides name text (default: false) */
+	compact?: boolean;
+	/** When false, avatar links directly to userHref with no dropdown (default: true) */
+	dropdown?: boolean;
+	/** Injectable custom dropdown items rendered between user info and sign-out */
+	menuItems?: import("svelte").Snippet;
+}
+
+/**
+ * Resolve a display name with graceful fallbacks: name → email prefix → "Your Grove"
+ */
+export function resolveDisplayName(user: HeaderUser): string {
+	if (user.name) return user.name;
+	if (user.email) return user.email.split("@")[0];
+	return "Your Grove";
+}
+
+/**
+ * Get an initial for the avatar placeholder: first character of name or email prefix.
+ */
+export function resolveInitial(user: HeaderUser): string {
+	const source = user.name || user.email?.split("@")[0];
+	if (!source) return "?";
+	return source.charAt(0).toUpperCase();
 }
 
 /**
  * Check if a navigation item is active based on the current path
  */
 export function isActivePath(href: string, currentPath: string): boolean {
-  if (href === "/") return currentPath === "/";
-  return currentPath.startsWith(href);
+	if (href === "/") return currentPath === "/";
+	return currentPath.startsWith(href);
 }
 
 /**
@@ -103,16 +121,13 @@ export function isActivePath(href: string, currentPath: string): boolean {
  * Falls back to the item's label prop if no termSlug or no manifest match.
  */
 export function resolveNavLabel(
-  item: NavItem | FooterLink,
-  groveMode: boolean,
-  manifest?: Record<
-    string,
-    { term: string; standardTerm?: string; alwaysGrove?: boolean }
-  >,
+	item: NavItem | FooterLink,
+	groveMode: boolean,
+	manifest?: Record<string, { term: string; standardTerm?: string; alwaysGrove?: boolean }>,
 ): string {
-  if (!item.termSlug || !manifest) return item.label;
-  const entry = manifest[item.termSlug];
-  if (!entry) return item.label;
-  if (entry.alwaysGrove) return entry.term;
-  return groveMode ? entry.term : entry.standardTerm || entry.term;
+	if (!item.termSlug || !manifest) return item.label;
+	const entry = manifest[item.termSlug];
+	if (!entry) return item.label;
+	if (entry.alwaysGrove) return entry.term;
+	return groveMode ? entry.term : entry.standardTerm || entry.term;
 }
