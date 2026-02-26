@@ -6,16 +6,16 @@
  */
 
 interface VerificationEmailParams {
-  name: string;
-  code: string;
-  expiryMinutes: number;
+	name: string;
+	code: string;
+	expiryMinutes: number;
 }
 
 /**
  * Base email wrapper with Grove styling (matches existing templates)
  */
 function wrapEmail(content: string): string {
-  return `
+	return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -27,11 +27,7 @@ function wrapEmail(content: string): string {
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
     <tr>
       <td align="center" style="padding-bottom: 30px;">
-        <!-- Grove Logo -->
-        <svg width="48" height="59" viewBox="0 0 417 512.238" xmlns="http://www.w3.org/2000/svg">
-          <path fill="#5d4037" d="M171.274 344.942h74.09v167.296h-74.09V344.942z"/>
-          <path fill="#22c55e" d="M0 173.468h126.068l-89.622-85.44 49.591-50.985 85.439 87.829V0h74.086v124.872L331 37.243l49.552 50.785-89.58 85.24H417v70.502H290.252l90.183 87.629L331 381.192 208.519 258.11 86.037 381.192l-49.591-49.591 90.218-87.631H0v-70.502z"/>
-        </svg>
+        <img src="https://cdn.grove.place/email/logo.png" width="48" height="48" alt="Grove" style="display: inline-block; border-radius: 50%;" />
       </td>
     </tr>
     ${content}
@@ -52,22 +48,22 @@ function wrapEmail(content: string): string {
  * Generate the verification email content
  */
 export function getVerificationEmail(params: VerificationEmailParams): {
-  subject: string;
-  html: string;
-  text: string;
+	subject: string;
+	html: string;
+	text: string;
 } {
-  const subject = `${params.code} is your Grove verification code`;
+	const subject = `${params.code} is your Grove verification code`;
 
-  // Split code into individual digits for visual display
-  const codeDigits = params.code.split("");
-  const codeBoxes = codeDigits
-    .map(
-      (digit) =>
-        `<td style="width: 40px; height: 48px; background-color: rgba(22, 163, 74, 0.1); border-radius: 8px; text-align: center; font-size: 24px; font-weight: 600; color: #15803d; font-family: 'SF Mono', 'Menlo', monospace;">${digit}</td>`,
-    )
-    .join('<td style="width: 8px;"></td>');
+	// Split code into individual digits for visual display
+	const codeDigits = params.code.split("");
+	const codeBoxes = codeDigits
+		.map(
+			(digit) =>
+				`<td style="width: 40px; height: 48px; background-color: rgba(22, 163, 74, 0.1); border-radius: 8px; text-align: center; font-size: 24px; font-weight: 600; color: #15803d; font-family: 'SF Mono', 'Menlo', monospace;">${digit}</td>`,
+		)
+		.join('<td style="width: 8px;"></td>');
 
-  const html = wrapEmail(`
+	const html = wrapEmail(`
     <tr>
       <td style="padding: 30px; background-color: #1e2227; border-radius: 12px;">
         <h1 style="margin: 0 0 16px 0; font-size: 24px; color: #f5f2ea; font-weight: normal;">
@@ -98,7 +94,7 @@ export function getVerificationEmail(params: VerificationEmailParams): {
     </tr>
   `);
 
-  const text = `
+	const text = `
 Verify your email, ${params.name}
 
 Enter this code to verify your email address and continue setting up your Grove blog:
@@ -112,5 +108,5 @@ If you didn't request this, you can safely ignore this email.
 — Grove
 `.trim();
 
-  return { subject, html, text };
+	return { subject, html, text };
 }

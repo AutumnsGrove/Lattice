@@ -5,18 +5,18 @@
  */
 
 interface EmailParams {
-  name: string;
-  username: string;
-  email: string;
-  postCount?: number;
-  checklistComplete?: boolean;
+	name: string;
+	username: string;
+	email: string;
+	postCount?: number;
+	checklistComplete?: boolean;
 }
 
 /**
  * Base email wrapper with Grove styling
  */
 function wrapEmail(content: string): string {
-  return `
+	return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,11 +28,7 @@ function wrapEmail(content: string): string {
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
     <tr>
       <td align="center" style="padding-bottom: 30px;">
-        <!-- Grove Logo -->
-        <svg width="48" height="59" viewBox="0 0 417 512.238" xmlns="http://www.w3.org/2000/svg">
-          <path fill="#5d4037" d="M171.274 344.942h74.09v167.296h-74.09V344.942z"/>
-          <path fill="#22c55e" d="M0 173.468h126.068l-89.622-85.44 49.591-50.985 85.439 87.829V0h74.086v124.872L331 37.243l49.552 50.785-89.58 85.24H417v70.502H290.252l90.183 87.629L331 381.192 208.519 258.11 86.037 381.192l-49.591-49.591 90.218-87.631H0v-70.502z"/>
-        </svg>
+        <img src="https://cdn.grove.place/email/logo.png" width="48" height="48" alt="Grove" style="display: inline-block; border-radius: 50%;" />
       </td>
     </tr>
     ${content}
@@ -53,13 +49,13 @@ function wrapEmail(content: string): string {
  * Welcome email - sent immediately after signup
  */
 export function getWelcomeEmail(params: EmailParams): {
-  subject: string;
-  html: string;
-  text: string;
+	subject: string;
+	html: string;
+	text: string;
 } {
-  const subject = `Welcome to Grove, ${params.name}!`;
+	const subject = `Welcome to Grove, ${params.name}!`;
 
-  const html = wrapEmail(`
+	const html = wrapEmail(`
     <tr>
       <td style="padding: 30px; background-color: #1e2227; border-radius: 12px;">
         <h1 style="margin: 0 0 16px 0; font-size: 24px; color: #f5f2ea; font-weight: normal;">
@@ -103,7 +99,7 @@ export function getWelcomeEmail(params: EmailParams): {
     </tr>
   `);
 
-  const text = `
+	const text = `
 Welcome to Grove, ${params.name}!
 
 Your blog is live and ready at: ${params.username}.grove.place
@@ -119,20 +115,20 @@ Happy writing!
 — Autumn
 `.trim();
 
-  return { subject, html, text };
+	return { subject, html, text };
 }
 
 /**
  * Day 1 checklist reminder - sent if checklist incomplete
  */
 export function getDay1Email(params: EmailParams): {
-  subject: string;
-  html: string;
-  text: string;
+	subject: string;
+	html: string;
+	text: string;
 } {
-  const subject = `Finish setting up your Grove blog`;
+	const subject = `Finish setting up your Grove blog`;
 
-  const html = wrapEmail(`
+	const html = wrapEmail(`
     <tr>
       <td style="padding: 30px; background-color: #1e2227; border-radius: 12px;">
         <h1 style="margin: 0 0 16px 0; font-size: 24px; color: #f5f2ea; font-weight: normal;">
@@ -155,7 +151,7 @@ export function getDay1Email(params: EmailParams): {
     </tr>
   `);
 
-  const text = `
+	const text = `
 Hey ${params.name}!
 
 I noticed you haven't finished setting up your blog yet. No rush—but if you need help with anything, just reply to this email.
@@ -165,22 +161,22 @@ Your checklist is waiting at ${params.username}.grove.place
 — Autumn
 `.trim();
 
-  return { subject, html, text };
+	return { subject, html, text };
 }
 
 /**
  * Day 3 check-in
  */
 export function getDay3Email(params: EmailParams): {
-  subject: string;
-  html: string;
-  text: string;
+	subject: string;
+	html: string;
+	text: string;
 } {
-  const subject = `How's it going, ${params.name}?`;
+	const subject = `How's it going, ${params.name}?`;
 
-  const hasPublished = (params.postCount || 0) > 0;
+	const hasPublished = (params.postCount || 0) > 0;
 
-  const html = wrapEmail(`
+	const html = wrapEmail(`
     <tr>
       <td style="padding: 30px; background-color: #1e2227; border-radius: 12px;">
         <h1 style="margin: 0 0 16px 0; font-size: 24px; color: #f5f2ea; font-weight: normal;">
@@ -190,14 +186,14 @@ export function getDay3Email(params: EmailParams): {
           You've been on Grove for a few days now. How's it feeling?
         </p>
         ${
-          hasPublished
-            ? `<p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: rgba(245, 242, 234, 0.7);">
+					hasPublished
+						? `<p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: rgba(245, 242, 234, 0.7);">
                   I saw you published ${params.postCount} post${params.postCount === 1 ? "" : "s"}! That's awesome.
                 </p>`
-            : `<p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: rgba(245, 242, 234, 0.7);">
+						: `<p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: rgba(245, 242, 234, 0.7);">
                   If you haven't written your first post yet, no pressure—sometimes it takes a while to find the right words.
                 </p>`
-        }
+				}
         <p style="margin: 0; font-size: 16px; line-height: 1.6; color: rgba(245, 242, 234, 0.7);">
           I'm here if you need anything. Just hit reply.
         </p>
@@ -212,7 +208,7 @@ export function getDay3Email(params: EmailParams): {
     </tr>
   `);
 
-  const text = `
+	const text = `
 How's it going, ${params.name}?
 
 You've been on Grove for a few days now. How's it feeling?
@@ -224,20 +220,20 @@ I'm here if you need anything. Just hit reply.
 — Autumn
 `.trim();
 
-  return { subject, html, text };
+	return { subject, html, text };
 }
 
 /**
  * Day 7 check-in
  */
 export function getDay7Email(params: EmailParams): {
-  subject: string;
-  html: string;
-  text: string;
+	subject: string;
+	html: string;
+	text: string;
 } {
-  const subject = `One week with Grove`;
+	const subject = `One week with Grove`;
 
-  const html = wrapEmail(`
+	const html = wrapEmail(`
     <tr>
       <td style="padding: 30px; background-color: #1e2227; border-radius: 12px;">
         <h1 style="margin: 0 0 16px 0; font-size: 24px; color: #f5f2ea; font-weight: normal;">
@@ -268,7 +264,7 @@ export function getDay7Email(params: EmailParams): {
     </tr>
   `);
 
-  const text = `
+	const text = `
 	One week with Grove
 
 Hey ${params.name}! It's been a week since you joined Grove. I hope you're finding your rhythm.
@@ -283,22 +279,22 @@ Questions? I'm here.
 — Autumn
 `.trim();
 
-  return { subject, html, text };
+	return { subject, html, text };
 }
 
 /**
  * Day 30 milestone check-in
  */
 export function getDay30Email(params: EmailParams): {
-  subject: string;
-  html: string;
-  text: string;
+	subject: string;
+	html: string;
+	text: string;
 } {
-  const subject = `One month!`;
+	const subject = `One month!`;
 
-  const hasPublished = (params.postCount || 0) > 0;
+	const hasPublished = (params.postCount || 0) > 0;
 
-  const html = wrapEmail(`
+	const html = wrapEmail(`
     <tr>
       <td style="padding: 30px; background-color: #1e2227; border-radius: 12px;">
         <h1 style="margin: 0 0 16px 0; font-size: 24px; color: #f5f2ea; font-weight: normal;">
@@ -308,12 +304,12 @@ export function getDay30Email(params: EmailParams): {
           Hey ${params.name}! You've been growing with Grove for a whole month now.
         </p>
         ${
-          hasPublished
-            ? `<p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: rgba(245, 242, 234, 0.7);">
+					hasPublished
+						? `<p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: rgba(245, 242, 234, 0.7);">
             You've published <strong style="color: #16a34a;">${params.postCount} post${params.postCount === 1 ? "" : "s"}</strong>! That's your voice out in the world.
           </p>`
-            : ""
-        }
+						: ""
+				}
         <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: rgba(245, 242, 234, 0.7);">
           Thanks for being part of this. I'd love to hear how it's going—what's working, what could be better. Just hit reply.
         </p>
@@ -328,7 +324,7 @@ export function getDay30Email(params: EmailParams): {
     </tr>
   `);
 
-  const text = `
+	const text = `
 	One month!
 
 Hey ${params.name}! You've been growing with Grove for a whole month now.
@@ -340,25 +336,25 @@ Thanks for being part of this. I'd love to hear how it's going—what's working,
 — Autumn
 `.trim();
 
-  return { subject, html, text };
+	return { subject, html, text };
 }
 
 /**
  * Payment Failed Email
  */
 interface PaymentFailedParams {
-  name: string;
-  subdomain: string;
+	name: string;
+	subdomain: string;
 }
 
 export function getPaymentFailedEmail(params: PaymentFailedParams): {
-  subject: string;
-  html: string;
-  text: string;
+	subject: string;
+	html: string;
+	text: string;
 } {
-  const subject = `Issue with your Grove payment`;
+	const subject = `Issue with your Grove payment`;
 
-  const html = wrapEmail(`
+	const html = wrapEmail(`
     <tr>
       <td style="padding: 30px; background-color: #1e2227; border-radius: 12px;">
         <h1 style="margin: 0 0 16px 0; font-size: 24px; color: #f5f2ea; font-weight: normal;">
@@ -416,7 +412,7 @@ export function getPaymentFailedEmail(params: PaymentFailedParams): {
     </tr>
   `);
 
-  const text = `
+	const text = `
 Hi ${params.name},
 
 We tried to charge your card for your Grove membership, but it didn't go through. These things happen—expired cards, bank holds, cosmic rays.
@@ -451,31 +447,31 @@ No hard feelings. Your content is always exportable.
 —Autumn
 `.trim();
 
-  return { subject, html, text };
+	return { subject, html, text };
 }
 
 /**
  * Payment Received Email
  */
 interface PaymentReceivedParams {
-  name: string;
-  subdomain: string;
-  amount: string;
-  paymentDate: string;
-  planName: string;
-  interval: string;
-  nextPaymentDate: string;
-  invoiceId: string;
+	name: string;
+	subdomain: string;
+	amount: string;
+	paymentDate: string;
+	planName: string;
+	interval: string;
+	nextPaymentDate: string;
+	invoiceId: string;
 }
 
 export function getPaymentReceivedEmail(params: PaymentReceivedParams): {
-  subject: string;
-  html: string;
-  text: string;
+	subject: string;
+	html: string;
+	text: string;
 } {
-  const subject = `Receipt for your Grove membership`;
+	const subject = `Receipt for your Grove membership`;
 
-  const html = wrapEmail(`
+	const html = wrapEmail(`
     <tr>
       <td style="padding: 30px; background-color: #1e2227; border-radius: 12px;">
         <h1 style="margin: 0 0 16px 0; font-size: 24px; color: #f5f2ea; font-weight: normal;">
@@ -540,7 +536,7 @@ export function getPaymentReceivedEmail(params: PaymentReceivedParams): {
     </tr>
   `);
 
-  const text = `
+	const text = `
 Hi ${params.name},
 
 Just confirming we received your payment. Thanks for sticking with us.
@@ -571,5 +567,5 @@ Questions? Just reply.
 —Autumn
 `.trim();
 
-  return { subject, html, text };
+	return { subject, html, text };
 }

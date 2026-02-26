@@ -6,17 +6,17 @@
  */
 
 export function getExportReadyEmail(params: {
-  name: string;
-  downloadUrl: string;
-  itemCounts: { posts: number; pages: number; images: number };
-  fileSize: string;
-  expiresAt: string;
+	name: string;
+	downloadUrl: string;
+	itemCounts: { posts: number; pages: number; images: number };
+	fileSize: string;
+	expiresAt: string;
 }): { subject: string; html: string; text: string } {
-  const { name, downloadUrl, itemCounts, fileSize, expiresAt } = params;
+	const { name, downloadUrl, itemCounts, fileSize, expiresAt } = params;
 
-  const subject = "Your Grove export is ready";
+	const subject = "Your Grove export is ready";
 
-  const html = `<!DOCTYPE html>
+	const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -27,11 +27,7 @@ export function getExportReadyEmail(params: {
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
     <tr>
       <td align="center" style="padding-bottom: 30px;">
-        <!-- Grove Logo SVG -->
-        <svg width="48" height="59" viewBox="0 0 417 512.238" xmlns="http://www.w3.org/2000/svg">
-          <path fill="#5d4037" d="M171.274 344.942h74.09v167.296h-74.09V344.942z"/>
-          <path fill="#22c55e" d="M0 173.468h126.068l-89.622-85.44 49.591-50.985 85.439 87.829V0h74.086v124.872L331 37.243l49.552 50.785-89.58 85.24H417v70.502H290.252l90.183 87.629L331 381.192 208.519 258.11 86.037 381.192l-49.591-49.591 90.218-87.631H0v-70.502z"/>
-        </svg>
+        <img src="https://cdn.grove.place/email/logo.png" width="48" height="48" alt="Grove" style="display: inline-block; border-radius: 50%;" />
       </td>
     </tr>
     <tr>
@@ -96,7 +92,7 @@ export function getExportReadyEmail(params: {
 </body>
 </html>`;
 
-  const text = `Your Grove export is ready!
+	const text = `Your Grove export is ready!
 
 Hey ${name}! Your export is packed and waiting:
 - ${itemCounts.posts} posts
@@ -113,5 +109,5 @@ This is your data — you own it.
 — Grove
 grove.place`;
 
-  return { subject, html, text };
+	return { subject, html, text };
 }

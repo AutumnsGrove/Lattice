@@ -51,22 +51,21 @@ export const LOCKOUT_DURATION = 15 * 60; // 15 minutes in seconds
 // OAuth URLs
 export const GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
 export const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
-export const GOOGLE_USERINFO_URL =
-  "https://www.googleapis.com/oauth2/v2/userinfo";
+export const GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v2/userinfo";
 
 // Resend
 export const RESEND_API_URL = "https://api.resend.com/emails";
-export const EMAIL_FROM = "GroveAuth <auth@grove.place>";
+export const EMAIL_FROM = "Grove <auth@grove.place>";
 
 // Security headers
 export const SECURITY_HEADERS = {
-  "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
-  "X-Content-Type-Options": "nosniff",
-  "X-Frame-Options": "DENY",
-  "Referrer-Policy": "strict-origin-when-cross-origin",
-  "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
-  "Content-Security-Policy":
-    "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data: blob:; font-src 'self'",
+	"Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+	"X-Content-Type-Options": "nosniff",
+	"X-Frame-Options": "DENY",
+	"Referrer-Policy": "strict-origin-when-cross-origin",
+	"Permissions-Policy": "geolocation=(), microphone=(), camera=()",
+	"Content-Security-Policy":
+		"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data: blob:; font-src 'self'",
 };
 
 // Stricter CSP for security-sensitive pages (passkey management, settings)
@@ -74,7 +73,7 @@ export const SECURITY_HEADERS = {
 // - Explicitly denies frame-ancestors to prevent clickjacking on security pages
 // - Adds upgrade-insecure-requests for mixed content protection
 export const SECURITY_PAGE_CSP =
-  "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data: blob:; font-src 'self'; frame-ancestors 'none'; upgrade-insecure-requests";
+	"default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data: blob:; font-src 'self'; frame-ancestors 'none'; upgrade-insecure-requests";
 
 // Allowed OAuth scopes
 export const GOOGLE_SCOPES = ["openid", "email", "profile"];
