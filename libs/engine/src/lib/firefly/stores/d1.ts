@@ -111,7 +111,7 @@ export class D1FireflyStore implements FireflyStateStore {
 				metadata: string;
 			}>();
 
-		return result.results.map((row) => this.rowToInstance(row));
+		return (result.results ?? []).map((row) => this.rowToInstance(row));
 	}
 
 	async logSession(session: FireflySession): Promise<void> {
@@ -155,7 +155,7 @@ export class D1FireflyStore implements FireflyStateStore {
 				status: string;
 			}>();
 
-		return result.results.map((row) => ({
+		return (result.results ?? []).map((row) => ({
 			id: row.id,
 			instanceId: row.instance_id,
 			consumer: row.consumer,

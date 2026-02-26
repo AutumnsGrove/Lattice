@@ -91,6 +91,15 @@ var cloudflareOperationTiers = map[string]Tier{
 	"warden_agent_list":    TierRead,
 	"warden_agent_register": TierWrite,
 
+	// Loft operations
+	"loft_status":       TierRead,
+	"loft_sessions":     TierRead,
+	"loft_ssh_key_show": TierRead,
+	"loft_ignite":       TierWrite,
+	"loft_fade":         TierWrite,
+	"loft_extend":       TierWrite,
+	"loft_ssh_key_set":  TierWrite,
+
 	// Tier 2: Destructive operations (require --write + --force)
 	"r2_rm":                TierDangerous,
 	"flag_delete":          TierDangerous,

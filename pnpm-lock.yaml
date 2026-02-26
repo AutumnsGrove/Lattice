@@ -1209,6 +1209,28 @@ importers:
         specifier: ^4.64.0
         version: 4.64.0(@cloudflare/workers-types@4.20260210.0)
 
+  workers/loft:
+    dependencies:
+      '@autumnsgrove/infra':
+        specifier: workspace:*
+        version: link:../../libs/infra
+      '@autumnsgrove/lattice':
+        specifier: workspace:*
+        version: link:../../libs/engine
+      hono:
+        specifier: ^4.7.0
+        version: 4.11.9
+    devDependencies:
+      '@cloudflare/workers-types':
+        specifier: ^4.20251128.0
+        version: 4.20260210.0
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+      wrangler:
+        specifier: ^4.63.0
+        version: 4.64.0(@cloudflare/workers-types@4.20260210.0)
+
   workers/lumen:
     dependencies:
       '@autumnsgrove/lattice':

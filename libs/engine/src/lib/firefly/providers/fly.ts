@@ -48,13 +48,19 @@ export class FlyProvider extends FireflyProviderBase {
 		const region = config.region || this.defaultRegion || "iad";
 		const size = config.size || this.defaultSize || "shared-cpu-1x";
 
+		// Destructure env from providerOptions; spread the rest (services, auto_destroy, restart, etc.)
+		const { env: envVars, ...extraConfig } = (config.providerOptions ?? {}) as Record<
+			string,
+			unknown
+		>;
+
 		const body: Record<string, unknown> = {
 			name: `firefly-${id.slice(0, 8)}`,
 			region,
 			config: {
 				image: config.image,
 				guest: this.sizeToGuest(size),
-				env: config.providerOptions?.env ?? {},
+				env: envVars ?? {},
 				metadata: {
 					"firefly-id": id,
 					managed: "true",
@@ -66,6 +72,7 @@ export class FlyProvider extends FireflyProviderBase {
 						{} as Record<string, string>,
 					) ?? {}),
 				},
+				...extraConfig,
 			},
 		};
 

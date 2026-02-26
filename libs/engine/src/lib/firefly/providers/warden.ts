@@ -105,9 +105,10 @@ export function createWardenProvider(
 export function createWardenProvider(
 	providerName: FireflyProviderName,
 	warden: WardenClient,
-	config?: Record<string, unknown> & WardenResolverOptions,
+	config?: Partial<Omit<HetznerProviderConfig & FlyProviderConfig, "token" | "tokenResolver">> &
+		WardenResolverOptions,
 ): FireflyProvider {
-	const { tenantId, ...providerConfig } = config ?? {};
+	const { tenantId, ...providerConfig } = config ?? ({} as WardenResolverOptions);
 	const tokenResolver = createWardenTokenResolver(warden, providerName, { tenantId });
 
 	switch (providerName) {

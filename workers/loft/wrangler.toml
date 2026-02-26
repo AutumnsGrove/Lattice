@@ -1,0 +1,27 @@
+# Grove Loft — Ephemeral Dev Environments
+# code-server + SSH on Fly.io, orchestrated by Firefly SDK
+#
+# Secrets (via: gw secret apply <name> --worker grove-loft):
+# LOFT_API_KEY       — Auth for gw CLI / HTTP API
+# WARDEN_API_KEY     — Loft's Warden agent key for Fly token resolution
+
+name = "grove-loft"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[triggers]
+crons = ["*/2 * * * *", "0 */6 * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "grove-loft-db"
+database_id = "c767ae1c-fe3d-49ab-b77f-1cb1d3869de1"
+
+[[r2_buckets]]
+binding = "LOFT_STATE"
+bucket_name = "grove-loft-state"
+
+[[services]]
+binding = "WARDEN"
+service = "grove-warden"
