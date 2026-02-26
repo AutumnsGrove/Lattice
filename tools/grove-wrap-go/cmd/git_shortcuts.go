@@ -15,6 +15,7 @@ import (
 // ── git save ────────────────────────────────────────────────────────
 
 var gitSaveMessage string
+var gitSaveNoFormat bool
 
 var gitSaveCmd = &cobra.Command{
 	Use:   "save",
@@ -37,13 +38,18 @@ var gitSaveCmd = &cobra.Command{
 			return fmt.Errorf("git add: %s", strings.TrimSpace(result.Stderr))
 		}
 
-		// Step 2: Determine message
+		// Step 2: Format staged files
+		if !gitSaveNoFormat {
+			formatStagedFiles()
+		}
+
+		// Step 3: Determine message
 		msg := gitSaveMessage
 		if msg == "" {
 			msg = fmt.Sprintf("wip: work in progress (%s)", wipTimestamp())
 		}
 
-		// Step 3: Commit
+		// Step 4: Commit
 		result, err = gwexec.Git("commit", "-m", msg)
 		if err != nil {
 			return err
@@ -57,7 +63,7 @@ var gitSaveCmd = &cobra.Command{
 		}
 		hash := extractCommitHash(result.Stdout)
 
-		// Step 3: Push
+		// Step 5: Push
 		branch, _ := gwexec.CurrentBranch()
 		result, err = gwexec.Git("push", "-u", "origin", branch)
 		if err != nil {
@@ -420,6 +426,7 @@ var gitSyncCmd = &cobra.Command{
 func init() {
 	// git save
 	gitSaveCmd.Flags().StringVarP(&gitSaveMessage, "message", "m", "", "Commit message (default: WIP timestamp)")
+	gitSaveCmd.Flags().BoolVar(&gitSaveNoFormat, "no-format", false, "Skip prettier formatting")
 	gitCmd.AddCommand(gitSaveCmd)
 
 	// git wip

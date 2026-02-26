@@ -162,17 +162,6 @@
     "deny": ["Bash(gw secret reveal:*)", "Bash(gw secret reveal)"]
   },
   "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": ".claude/hooks/auto-format.py"
-          }
-        ]
-      }
-    ],
     "PreToolUse": [
       {
         "hooks": [

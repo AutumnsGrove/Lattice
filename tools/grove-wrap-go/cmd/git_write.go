@@ -96,6 +96,7 @@ var gitAddCmd = &cobra.Command{
 var gitCommitMessage string
 var gitCommitIssue int
 var gitCommitNoVerify bool
+var gitCommitNoFormat bool
 
 var gitCommitCmd = &cobra.Command{
 	Use:   "commit",
@@ -134,6 +135,11 @@ var gitCommitCmd = &cobra.Command{
 			if !ok {
 				return fmt.Errorf("invalid commit message: %s", errMsg)
 			}
+		}
+
+		// Format staged files before committing
+		if !gitCommitNoFormat {
+			formatStagedFiles()
 		}
 
 		gitArgs := []string{"commit", "-m", gitCommitMessage}
@@ -892,6 +898,7 @@ func init() {
 	gitCommitCmd.Flags().StringVarP(&gitCommitMessage, "message", "m", "", "Commit message (required)")
 	gitCommitCmd.Flags().IntVar(&gitCommitIssue, "issue", 0, "Link to GitHub issue number")
 	gitCommitCmd.Flags().BoolVar(&gitCommitNoVerify, "no-verify", false, "Skip pre-commit hooks")
+	gitCommitCmd.Flags().BoolVar(&gitCommitNoFormat, "no-format", false, "Skip prettier formatting")
 	gitCmd.AddCommand(gitCommitCmd)
 
 	// git push
