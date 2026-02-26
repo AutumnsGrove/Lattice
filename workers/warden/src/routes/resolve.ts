@@ -20,7 +20,17 @@ import { resolveCredential } from "../lib/credentials";
 import { logAuditEvent, updateAgentUsage } from "../lib/logging";
 
 const resolveBodySchema = z.object({
-	service: z.enum(["github", "tavily", "cloudflare", "exa", "resend", "stripe", "openrouter"]),
+	service: z.enum([
+		"github",
+		"tavily",
+		"cloudflare",
+		"exa",
+		"resend",
+		"stripe",
+		"openrouter",
+		"hetzner",
+		"fly",
+	]),
 	tenant_id: z.string().optional(),
 });
 

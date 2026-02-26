@@ -379,6 +379,10 @@
 			"types": "./dist/loom/test-utils.d.ts",
 			"default": "./dist/loom/test-utils.js"
 		},
+		"./firefly": {
+			"types": "./dist/firefly/index.d.ts",
+			"default": "./dist/firefly/index.js"
+		},
 		"./foliage": {
 			"types": "./dist/foliage/index.d.ts",
 			"svelte": "./dist/foliage/index.js",

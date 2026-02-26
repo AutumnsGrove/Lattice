@@ -109,6 +109,46 @@ export class WardenClient {
 		}
 	}
 
+	/**
+	 * Resolve a credential for a service via Warden's /resolve endpoint.
+	 *
+	 * Returns the decrypted credential string and its source, or null on failure.
+	 * Never throws — matches the client's existing error contract.
+	 */
+	async resolve(
+		service: WardenService,
+		tenantId?: string,
+	): Promise<{ credential: string; source: "tenant" | "global" } | null> {
+		try {
+			if (!this.apiKey) return null;
+
+			const doFetch = this.fetcher?.fetch ?? fetch;
+			const response = await doFetch(`${this.baseUrl}/resolve`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					"X-API-Key": this.apiKey,
+				},
+				body: JSON.stringify({
+					service,
+					...(tenantId ? { tenant_id: tenantId } : {}),
+				}),
+			});
+
+			if (!response.ok) return null;
+
+			const result = (await response.json()) as WardenResponse<{
+				credential: string;
+				source: "tenant" | "global";
+			}>;
+
+			if (!result.success || !result.data) return null;
+			return result.data;
+		} catch {
+			return null;
+		}
+	}
+
 	// ─── Private Methods ────────────────────────────────────────────
 
 	private async requestWithApiKey<T>(req: WardenRequest): Promise<WardenResponse<T>> {

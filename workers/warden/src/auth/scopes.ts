@@ -57,6 +57,12 @@ const SERVICE_SCOPES: Record<string, Record<string, string>> = {
 		list_models: "read",
 		get_generation: "read",
 	},
+	hetzner: {
+		api: "api",
+	},
+	fly: {
+		api: "api",
+	},
 };
 
 /** Check if an agent's scopes permit a given service + action */

@@ -19,6 +19,8 @@ const GLOBAL_CREDENTIAL_MAP: Record<WardenService, keyof Env> = {
 	resend: "RESEND_API_KEY",
 	stripe: "STRIPE_SECRET_KEY",
 	openrouter: "OPENROUTER_API_KEY",
+	hetzner: "HETZNER_API_TOKEN",
+	fly: "FLY_API_TOKEN",
 };
 
 /**
@@ -37,6 +39,8 @@ const TENANT_CREDENTIAL_ALIASES: Record<WardenService, string[]> = {
 	resend: ["resend_api_key"],
 	stripe: ["stripe_secret_key"],
 	openrouter: ["openrouter_api_key", "timeline_openrouter_key"],
+	hetzner: ["hetzner_api_token"],
+	fly: ["fly_api_token"],
 };
 
 export interface ResolvedCredential {
