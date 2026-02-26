@@ -536,7 +536,13 @@ export async function evaluateBehavioralRules(
 ): Promise<BehavioralResult>;
 
 export interface BehavioralContext {
-  /** Entity performing the action */
+  /**
+   * Entity performing the action. Optional because some content types
+   * (e.g. anonymous guestbook entries) have no authenticated user.
+   * When absent, label-based conditions (has_label, not_has_label) and
+   * rate-limit checks short-circuit to "no match" — the content falls
+   * through to AI moderation with no behavioral override.
+   */
   userId?: string;
   /** Tenant scope — required for all label and moderation log operations */
   tenantId: string;
@@ -565,27 +571,32 @@ export async function moderatePublishedContent(
 ): Promise<void> {
   try {
     // ── NEW: Threshold rate check ───────────────────────────
-    const rateResult = await checkBehavioralRateLimit(
-      options.threshold,
-      options.db,
-      options.tenantId,
-      options.userId!,
-      mapHookToEndpoint(options.hookPoint), // e.g. "on_publish" → "posts/create"
-    );
+    // Rate checks and label operations require a userId.
+    // Anonymous content (no userId) skips behavioral rules entirely
+    // and falls through to AI moderation.
+    if (options.userId) {
+      const rateResult = await checkBehavioralRateLimit(
+        options.threshold,
+        options.db,
+        options.tenantId,
+        options.userId,
+        mapHookToEndpoint(options.hookPoint), // e.g. "on_publish" → "posts/create"
+      );
 
-    if (rateResult.exceeded) {
-      await logModerationEvent(options.db, {
-        userId: options.userId,
-        tenantId: options.tenantId,
-        contentType: options.contentType,
-        hookPoint: options.hookPoint,
-        action: rateResult.action!,
-        categories: ["behavioral:rate_limit"],
-        confidence: 1.0,
-        model: "threshold-sdk",
-        contentRef: options.contentRef,
-      });
-      return; // Rate limited, skip everything
+      if (rateResult.exceeded) {
+        await logModerationEvent(options.db, {
+          userId: options.userId,
+          tenantId: options.tenantId,
+          contentType: options.contentType,
+          hookPoint: options.hookPoint,
+          action: rateResult.action!,
+          categories: ["behavioral:rate_limit"],
+          confidence: 1.0,
+          model: "threshold-sdk",
+          contentRef: options.contentRef,
+        });
+        return; // Rate limited, skip everything
+      }
     }
 
     // ── NEW: Behavioral rule pre-check ──────────────────────
@@ -649,14 +660,16 @@ export async function moderatePublishedContent(
     await logModerationEvent(options.db, { /* existing logging */ });
 
     // ── NEW: Post-AI label updates ─────────────────────────
-    if (result.action === "block") {
-      await addLabel(options.db, options.tenantId, "user", options.userId!, "thorn:blocked_content", {
+    // Labels require a userId — anonymous blocked content is still flagged
+    // by flagContent() above but cannot accumulate user-level labels.
+    if (result.action === "block" && options.userId) {
+      await addLabel(options.db, options.tenantId, "user", options.userId, "thorn:blocked_content", {
         addedBy: "ai_moderation",
         expiresInHours: 90 * 24,
         reason: `Blocked: ${result.categories.join(", ")}`,
       });
       // Check for repeat offender escalation
-      await checkRepeatOffenderEscalation(options.db, options.tenantId, options.userId!);
+      await checkRepeatOffenderEscalation(options.db, options.tenantId, options.userId);
     }
   } catch (err) {
     console.error("[Thorn] Moderation failed:", err);
@@ -814,6 +827,7 @@ Wayfinders can view, add, and remove entity labels through the existing Arbor ad
 - [ ] Implement `labels.ts` with getEntityLabels, hasLabel, addLabel, removeLabel, cleanupExpiredLabels
 - [ ] Implement `types.ts` with EntityType, BehavioralRule, BehavioralCondition, etc.
 - [ ] Add feature flag `thorn_behavioral` for gradual rollout
+- [ ] Wire `cleanupExpiredLabels()` into a daily Cron Trigger (expand vista-collector or add a dedicated `thorn-cleanup` trigger in `wrangler.toml`)
 - [ ] Write unit tests for label CRUD operations
 
 ### Phase 2: Threshold SDK Integration
