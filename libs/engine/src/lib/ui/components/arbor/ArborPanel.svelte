@@ -332,6 +332,10 @@
 			margin-left: 0;
 			padding: 1rem;
 			padding-top: calc(76px + 1rem);
+			width: 100%;
+			max-width: 100vw;
+			overflow-x: hidden;
+			box-sizing: border-box;
 		}
 
 		.arbor-content.expanded {
