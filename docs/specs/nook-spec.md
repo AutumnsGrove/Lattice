@@ -755,7 +755,20 @@ POST /nook/api/register
 
 The cloud schema supports flat tags, user-created collections, and AI-suggested auto-groups. Access is all-or-nothing (allowlist), so there's no per-video access table. The consent tables support the Phase 3 face privacy feature (designed now, built later).
 
+**D1 binding**: All Nook tables live in the core `platform.env.DB` binding (not CURIO_DB). Nook is a first-class Lattice module, not optional widget data.
+
 ```sql
+-- Core video catalog (platform.env.DB)
+
+-- Allowlist: who can view this owner's Nook
+CREATE TABLE nook_allowlist (
+    id TEXT PRIMARY KEY,
+    owner_id TEXT NOT NULL,        -- Heartwood user ID of the Nook owner
+    friend_id TEXT NOT NULL,       -- Heartwood user ID of the friend
+    added_at INTEGER NOT NULL,
+    UNIQUE(owner_id, friend_id)
+);
+
 -- Core video catalog
 CREATE TABLE nook_videos (
     id TEXT PRIMARY KEY,
@@ -849,7 +862,7 @@ CREATE TABLE nook_face_consent (
     display_name TEXT,              -- how they want to appear in metadata
     consent_status TEXT NOT NULL DEFAULT 'pending',
         -- 'pending', 'opted_in', 'opted_out'
-    reference_image_r2_key TEXT,   -- selfie for face matching (encrypted)
+    reference_image_r2_key TEXT,   -- selfie for face matching (encrypted via Warden)
     consented_at INTEGER,
     revoked_at INTEGER,
     created_at INTEGER NOT NULL,
@@ -857,6 +870,7 @@ CREATE TABLE nook_face_consent (
 );
 
 -- Indexes
+CREATE INDEX idx_nook_allowlist_owner ON nook_allowlist(owner_id);
 CREATE INDEX idx_nook_videos_owner ON nook_videos(owner_id);
 CREATE INDEX idx_nook_videos_category ON nook_videos(category);
 CREATE INDEX idx_nook_videos_created ON nook_videos(created_at);
@@ -1069,7 +1083,7 @@ The consent layer. Schema already in D1, UX designed, ready to build.
 - [ ] MediaPipe face detection in pipeline analysis pass
 - [ ] Face clustering (same person across videos)
 - [ ] Friend self-service consent page at nook.grove.place/consent
-- [ ] Reference image upload + encrypted storage
+- [ ] Reference image upload + Warden-encrypted storage (see AGENT.md §Warden)
 - [ ] Automatic blur for unknown/opted-out faces before upload
 - [ ] Owner override controls in review UI
 - [ ] Consent status display in video metadata
