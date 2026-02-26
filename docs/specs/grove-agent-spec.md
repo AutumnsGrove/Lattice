@@ -98,7 +98,8 @@ A separate npm package (`@autumnsgrove/grove-agent`) providing two base classes 
               │                         │
     ┌─────────┴──────────┐   ┌─────────┴──────────┐
     │   Agent (CF SDK)    │   │ AIChatAgent (CF SDK)│
-    │   from "agents"     │   │ from "@cf/ai-chat"  │
+    │   from "agents"     │   │ from "@cloudflare/  │
+    │                     │   │      ai-chat"       │
     └─────────┬──────────┘   └─────────┬──────────┘
               └────────────┬────────────┘
                   ┌────────┴────────┐
@@ -179,7 +180,7 @@ libs/grove-agent/
 │   ├── init.ts               # groveInit() shared convention layer
 │   ├── logger.ts             # AgentLogger
 │   ├── errors.ts             # GROVE_AGENT_ERRORS catalog
-│   ├── observability.ts      # GroveObservability bridge
+│   ├── observability.ts      # observe() helper (logs now, SDK events later)
 │   └── types.ts              # Shared type definitions
 ├── package.json
 ├── tsconfig.json
@@ -200,7 +201,7 @@ libs/grove-agent/
 }
 ```
 
-Single entry point. Both classes, the error catalog, types, and the `callable` re-export all come from `"."`.
+Single entry point. Both classes, the error catalog, types, and the `callable` decorator (re-exported from `"agents"`) all come from `"."`. Consumers import everything from `@autumnsgrove/grove-agent` — no need to import from `"agents"` directly.
 
 ---
 
@@ -233,15 +234,16 @@ export abstract class GroveAgent<
     groveInit(this, config);
   }
 
-  /** Emit a structured observability event. */
+  /**
+   * Emit a structured observability event.
+   * Currently logs via AgentLogger. When the Cloudflare Agents SDK adds
+   * an observability API (tracked in their roadmap), this method will
+   * also emit to the SDK's event system without changing consumer code.
+   */
   protected observe(event: GroveObservabilityEvent): void {
-    this.log.info(event.type, event.data);
-    this.observability?.emit({
-      id: crypto.randomUUID(),
-      type: event.type,
-      displayMessage: event.message,
-      timestamp: Date.now(),
-      payload: event.data ?? {},
+    this.log.info(`[observe] ${event.type}`, {
+      message: event.message,
+      ...event.data,
     });
   }
 
@@ -318,13 +320,9 @@ export abstract class GroveChatAgent<
   }
 
   protected observe(event: GroveObservabilityEvent): void {
-    this.log.info(event.type, event.data);
-    this.observability?.emit({
-      id: crypto.randomUUID(),
-      type: event.type,
-      displayMessage: event.message,
-      timestamp: Date.now(),
-      payload: event.data ?? {},
+    this.log.info(`[observe] ${event.type}`, {
+      message: event.message,
+      ...event.data,
     });
   }
 
@@ -492,8 +490,7 @@ export interface GroveObservabilityEvent {
 ### OnboardingAgent (GroveAgent) — First Consumer
 
 ```typescript
-import { callable } from "agents";
-import { GroveAgent } from "@autumnsgrove/grove-agent";
+import { GroveAgent, callable } from "@autumnsgrove/grove-agent";
 import type { GroveAgentConfig } from "@autumnsgrove/grove-agent";
 
 interface OnboardingState {
