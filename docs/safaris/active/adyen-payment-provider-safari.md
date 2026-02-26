@@ -494,17 +494,18 @@ These platforms **become the legal seller** on behalf of your business. They han
 
 #### Paddle — 🟢 Thriving
 
-Already researched in a previous safari. Top MoR contender for SaaS.
+**Deep dive**: See [`mor-deep-dive-paddle-polar-safari.md`](./mor-deep-dive-paddle-polar-safari.md) for full analysis.
 
 | Aspect | Details |
 |--------|---------|
 | **Pricing** | 5% + $0.50 per transaction. Higher than Stripe but includes all tax compliance |
-| **Subscriptions** | Full subscription management — plans, upgrades, downgrades, dunning |
+| **Subscriptions** | Full subscription management — plans, upgrades, downgrades, dunning. Full Stripe Billing parity |
 | **Tax compliance** | Global VAT/GST/sales tax — they handle everything |
-| **DX** | Good APIs, developer-friendly. Not as polished as Stripe |
-| **Fit for Grove** | Strong. The #1 alternative if Stripe becomes painful |
-| **When to consider** | When US sales tax nexus becomes a compliance headache, or when expanding internationally |
-| **Caveat** | Higher per-transaction cost. At $8/mo Seedling: 5% + $0.50 = $0.90 (vs Stripe's $0.53) |
+| **DX** | Good APIs, TypeScript SDK, 12+ webhook events. Not as polished as Stripe but close |
+| **Content policy** | Explicitly protects against targeting sexual orientation. No vague "offensive content" clause |
+| **Fit for Grove** | Strong. Maps to 13/14 PaymentProvider interface methods. The safe MoR choice |
+| **When to consider** | When tax compliance becomes painful, or when wanting full MoR protection |
+| **Caveat** | Higher per-transaction cost. At $8/mo Seedling: $0.90 (vs Stripe's $0.53). But with Stripe Tax: $1.03 — Paddle is cheaper |
 
 #### LemonSqueezy (Stripe-owned) — 🟠 Wilting
 
@@ -532,17 +533,19 @@ Already researched. Acquired by Stripe in late 2023.
 
 #### Polar.sh — 🟡 Growing (Exciting for Indie)
 
+**Deep dive**: See [`mor-deep-dive-paddle-polar-safari.md`](./mor-deep-dive-paddle-polar-safari.md) for full analysis.
+
 | Aspect | Details |
 |--------|---------|
-| **Pricing** | **4% + $0.40 per transaction** — cheapest MoR option. Claims 20% cheaper than alternatives |
-| **Subscriptions** | Memberships, SaaS billing, digital products |
+| **Pricing** | **4% + $0.40 per transaction** — cheapest MoR base rate. But +1.5% intl cards, +0.5% subs, $15/chargeback |
+| **Subscriptions** | Memberships, SaaS billing, digital products. Adequate but less flexible than Paddle |
 | **Tax compliance** | Full MoR — VAT, GST, sales tax. EU B2B reverse charge supported |
-| **DX** | Developer-first. Open source. 6 lines of code to integrate. GitHub funding option |
+| **DX** | Developer-first. Open source. **Native SvelteKit adapter** — huge win for Grove's stack |
+| **Content policy** | Most permissive of any MoR. No content policing — "proudly boast about in public" framing |
 | **Special features** | Auto license keys, digital asset delivery (up to 10GB), auto Discord role assignment, GitHub repo access |
-| **Fit for Grove** | Intriguing. Built for exactly this audience — indie developers selling digital products/subscriptions |
-| **Limitations** | Still maturing (was in beta late 2025). Card-only (no PayPal/BNPL). Built on Stripe Connect under the hood |
-| **When to consider** | Worth watching closely. If it matures and proves reliable, could be a great Stripe complement for tax compliance |
-| **Risk** | Young platform, small team. Sustainability uncertain |
+| **Fit for Grove** | Philosophically aligned. Maps to 12/14 PaymentProvider methods. The romantic MoR choice |
+| **Limitations** | Card-only (no PayPal/Apple Pay). Built on Stripe Connect under the hood. Can't change billing cycle after product creation |
+| **Risk** | Young startup (est. 2023), small team. But open source = fork hedge, and Stripe Connect underneath = clean fallback |
 
 #### Creem — 🟠 Wilting (Concerning)
 
@@ -691,11 +694,13 @@ These platforms embed payments into a broader creator ecosystem. They're not pay
 
 ### Final Rankings for Grove
 
+> **Full MoR comparison**: [`mor-deep-dive-paddle-polar-safari.md`](./mor-deep-dive-paddle-polar-safari.md)
+
 | Rank | Provider | Category | Why |
 |------|----------|----------|-----|
 | **1** | **Stripe** | Processor | Already integrated, best DX, zero minimums, full billing. No reason to leave |
-| **2** | **Paddle** | MoR | Best alternative if tax compliance becomes painful. Higher fees but eliminates tax burden |
-| **3** | **Polar.sh** | MoR | Exciting indie-focused MoR. Cheapest MoR fees. Worth watching as it matures |
+| **2** | **Paddle** | MoR | Safe MoR choice — 13/14 interface methods, full sub management, $1.4B stable company. Fees match Stripe+Tax |
+| **3** | **Polar.sh** | MoR | Aligned MoR choice — cheapest fees, native SvelteKit, open source, built for indie. Startup risk is real |
 | **4** | **Chargebee** | Bolt-on | If Stripe Billing's dunning ever falls short (free tier is generous). Unlikely to need |
 | **5** | **Mollie** | Processor | Only if Grove has a European entity and needs EU payment optimization |
 | **6–∞** | Everyone else | Various | Not relevant at Grove's current or near-future scale |
