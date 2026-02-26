@@ -18,7 +18,7 @@ import type { RemoteExecutor, ServerInstance, ExecutionResult } from "../types.j
 import { FireflyError, FLY_ERRORS } from "../errors.js";
 
 export interface WebhookExecutorConfig {
-	/** Protocol to use. Default: "http". Use "https" when agent has TLS configured. */
+	/** Protocol to use. Default: "https". Use "http" only for private-network agents. */
 	protocol?: "http" | "https";
 	/** Port the agent listens on. Default: 8080 */
 	port?: number;
@@ -38,7 +38,7 @@ export class WebhookExecutor implements RemoteExecutor {
 	private readonly timeoutMs: number;
 
 	constructor(config: WebhookExecutorConfig = {}) {
-		this.protocol = config.protocol ?? "http";
+		this.protocol = config.protocol ?? "https";
 		this.port = config.port ?? 8080;
 		this.pathPrefix = config.pathPrefix ?? "/firefly";
 		this.secret = config.secret;

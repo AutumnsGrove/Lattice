@@ -33,6 +33,16 @@ export class FireflyIdleDetector implements IdleDetector {
 			warned: false,
 		};
 
+		// Guard: setInterval is only available in Durable Objects, not standard Workers.
+		// In standard Workers, idle detection must be driven externally (e.g., via alarm()).
+		if (typeof setInterval === "undefined") {
+			console.warn(
+				"[Firefly] setInterval not available — idle detection requires a Durable Object runtime.",
+			);
+			this.entries.set(instanceId, entry);
+			return;
+		}
+
 		entry.intervalId = setInterval(() => {
 			this.check(instanceId);
 		}, config.checkInterval);

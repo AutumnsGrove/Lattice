@@ -85,12 +85,23 @@ export class R2StateSynchronizer implements StateSynchronizer {
 		delete instance.metadata._pendingState;
 	}
 
-	async checkConflicts(stateKey: string): Promise<ConflictResult> {
+	async checkConflicts(stateKey: string, localVersion?: string): Promise<ConflictResult> {
 		const key = this.buildKey(stateKey);
 		const meta = await this.storage.head(key);
 
 		if (!meta) {
 			return { hasConflict: false };
+		}
+
+		// If the caller provides a local version (etag from last hydrate),
+		// detect conflicts by comparing it against the current remote version.
+		if (localVersion && meta.etag && localVersion !== meta.etag) {
+			return {
+				hasConflict: true,
+				localVersion,
+				remoteVersion: meta.etag,
+				resolution: "use_remote",
+			};
 		}
 
 		return {

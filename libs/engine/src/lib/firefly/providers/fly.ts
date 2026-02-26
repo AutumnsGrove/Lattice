@@ -27,6 +27,7 @@ interface FlyMachineResponse {
 		image: string;
 		size?: string;
 		guest?: { cpus: number; memory_mb: number };
+		metadata?: Record<string, string>;
 	};
 	created_at: string;
 	updated_at: string;
@@ -79,7 +80,8 @@ export class FlyProvider extends FireflyProviderBase {
 			id,
 			providerServerId: response.id,
 			provider: "fly",
-			publicIp: response.private_ip, // Fly uses private IPs by default; public via proxy
+			publicIp: `${this.app}.fly.dev`,
+			privateIp: response.private_ip,
 			status: this.mapStatus(response.state),
 			createdAt: Date.now(),
 			metadata: {
@@ -126,7 +128,7 @@ export class FlyProvider extends FireflyProviderBase {
 
 				// Filter by tags via machine metadata (mirrors Hetzner's label_selector)
 				if (tags?.length) {
-					const metadata = (m.config as Record<string, Record<string, string>>)?.metadata;
+					const metadata = m.config.metadata;
 					if (!metadata) return false;
 					return tags.every((tag) => metadata[`tag-${tag}`] === "true");
 				}
@@ -134,13 +136,11 @@ export class FlyProvider extends FireflyProviderBase {
 				return true;
 			})
 			.map((m) => ({
-				id: (m.config as Record<string, unknown>)?.metadata
-					? ((m.config as Record<string, Record<string, string>>).metadata["firefly-id"] ??
-						crypto.randomUUID())
-					: crypto.randomUUID(),
+				id: m.config.metadata?.["firefly-id"] ?? crypto.randomUUID(),
 				providerServerId: m.id,
 				provider: "fly" as const,
-				publicIp: m.private_ip,
+				publicIp: `${this.app}.fly.dev`,
+				privateIp: m.private_ip,
 				status: this.mapStatus(m.state),
 				createdAt: new Date(m.created_at).getTime(),
 				metadata: {
