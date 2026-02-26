@@ -119,12 +119,12 @@ the tab.
 
 ### Design spec (safari-approved)
 
-**Core transformation:** Fireside becomes an `AIChatAgent` — every conversation
+**Core transformation:** Fireside becomes a `GroveChatAgent` — every conversation
 is a Durable Object with persistent messages, resumable streams, and real-time
 state sync.
 
 ```typescript
-class FiresideAgent extends AIChatAgent<Env, FiresideState> {
+class FiresideAgent extends GroveChatAgent<Env, FiresideState> {
   initialState = {
     phase: 'warming-up',        // warming-up | conversing | drafting | complete
     messageCount: 0,
@@ -199,7 +199,7 @@ Currently stateless — analyzes, forgets, repeats.
 Analysis history persists in agent SQL. Streaming feedback via WebSocket.
 
 ```typescript
-class WispAgent extends Agent<Env, WispState> {
+class WispAgent extends GroveAgent<Env, WispState> {
   @callable({ description: 'Analyze grammar, tone, and readability' })
   async analyze(text: string, options: AnalysisOptions) {
     // Streams results as they complete
@@ -246,7 +246,7 @@ Instead of cron workers sweeping for missed emails, each new signup gets their
 own agent instance that manages their entire onboarding journey:
 
 ```typescript
-class OnboardingAgent extends Agent<Env, OnboardingState> {
+class OnboardingAgent extends GroveAgent<Env, OnboardingState> {
   initialState = {
     audience: null,        // 'wanderer' | 'promo' | 'rooted'
     emailsSent: [],
@@ -340,7 +340,7 @@ noise and the traps. Currently squinting through foggy glass.
 **The browser binding changes everything.** Shutter gets Puppeteer on Cloudflare.
 
 ```typescript
-class ShutterAgent extends Agent<Env, ShutterState> {
+class ShutterAgent extends GroveAgent<Env, ShutterState> {
   async browse(url: string, query: string) {
     const browser = await puppeteer.launch(this.env.BROWSER);
     const page = await browser.newPage();
@@ -407,7 +407,7 @@ synchronous — blocks the request while moderating.
 ### Design spec (safari-approved)
 
 ```typescript
-class ThornAgent extends Agent<Env, ModerationState> {
+class ThornAgent extends GroveAgent<Env, ModerationState> {
   // Async moderation — queue content, return immediately
   @callable()
   async moderate(content: string, contentId: string) {
@@ -522,7 +522,7 @@ updates every 5 minutes via cron.
 ### Design spec (safari-approved)
 
 ```typescript
-class VistaAgent extends Agent<Env, VistaState> {
+class VistaAgent extends GroveAgent<Env, VistaState> {
   initialState = {
     lastCollection: null,
     healthStatus: {},
@@ -586,7 +586,7 @@ Object via Loom.
 **Sentinel migrates from Loom to Agents SDK.** The Agent class IS the next-gen Loom.
 
 ```typescript
-class SentinelAgent extends Agent<Env, SentinelState> {
+class SentinelAgent extends GroveAgent<Env, SentinelState> {
   // Health check scheduling
   async onStart() {
     await this.scheduleEvery(60, 'healthCheck', {});   // Every minute
@@ -636,7 +636,7 @@ single Hono worker routing requests.
 capabilities by consuming Lumen's MCP tools.
 
 ```typescript
-class LumenAgent extends Agent<Env, LumenState> {
+class LumenAgent extends GroveAgent<Env, LumenState> {
   // MCP Server: expose AI inference as tools
   // Any agent can call: await this.addMcpServer('lumen', env.LUMEN)
   @callable({ description: 'Run AI inference with task routing' })
@@ -841,7 +841,7 @@ a separate cron worker.
 ### Design spec (safari-approved)
 
 ```typescript
-class MeadowPollerAgent extends Agent<Env, PollerState> {
+class MeadowPollerAgent extends GroveAgent<Env, PollerState> {
   async onStart() {
     await this.scheduleEvery(900, 'pollAllFeeds', {});  // Every 15 min
   }
@@ -882,7 +882,7 @@ class MeadowPollerAgent extends Agent<Env, PollerState> {
 ### Design spec (safari-approved)
 
 ```typescript
-class TimelineAgent extends Agent<Env, TimelineState> {
+class TimelineAgent extends GroveAgent<Env, TimelineState> {
   async onStart() {
     await this.schedule('0 1 * * *', 'nightlySync', {});
   }
@@ -973,7 +973,7 @@ Each writer gets their own Rings agent (`rings:{tenantId}`). Their analytics
 never leave their DO. No central aggregation. True privacy.
 
 ```typescript
-class RingsAgent extends Agent<Env, RingsState> {
+class RingsAgent extends GroveAgent<Env, RingsState> {
   initialState = {
     focusPeriodActive: false,
     digestMode: false,

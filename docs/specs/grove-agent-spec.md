@@ -224,7 +224,11 @@ export abstract class GroveAgent<
 > extends Agent<Env, State> {
   readonly log: AgentLogger;
 
-  /** Override to configure the agent. */
+  /**
+   * Override to configure the agent.
+   * IMPORTANT: Called during super() — return a plain object literal.
+   * Do NOT reference `this` (subclass fields aren't initialized yet).
+   */
   abstract groveConfig(): GroveAgentConfig;
 
   constructor(ctx: AgentContext, env: Env) {
@@ -650,7 +654,7 @@ export default {
 
 - **Agent isolation.** Each instance is a separate Durable Object. Data does not leak between instances. OnboardingAgent for user A cannot see user B's state.
 - **No raw API keys in agents.** AI credentials route through Lumen or Warden. Agents never hold raw provider keys.
-- **State validation.** Use the SDK's `validateStateChange()` to reject invalid state updates from clients. Never trust client-initiated state changes without validation.
+- **State validation.** Override `onStateChanged(state, source)` to reject invalid state updates from clients. When `source` is `"client"`, validate the shape before accepting. Never trust client-initiated state changes without validation.
 - **WebSocket auth.** Override `onConnect()` to validate tokens. Reject unauthorized connections with `connection.close(4001, "Unauthorized")`.
 - **Email safety.** Agents with `onEmail()` must validate sender and content. Do not auto-reply to untrusted senders.
 - **MCP server trust.** Only connect to MCP servers you control. External MCP tools execute in the agent's context.
@@ -671,6 +675,7 @@ export default {
 - [ ] Implement `GroveAgent` base class
 - [ ] Implement `GroveChatAgent` base class
 - [ ] Implement `types.ts` with config and event types
+- [ ] Document that `groveConfig()` must return a plain object literal (no `this` access) — it runs during `super()` before subclass field initializers complete
 - [ ] Write barrel exports in `index.ts`
 - [ ] Run `pnpm install` and verify workspace resolution
 - [ ] Type-check passes (`tsc --noEmit`)
