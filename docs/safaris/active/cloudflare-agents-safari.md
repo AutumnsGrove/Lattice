@@ -3,6 +3,8 @@
 > Every tree in the Grove could have its own heartbeat. The Agents SDK gives them one.
 > **Aesthetic principle**: Stateful, autonomous, self-scheduling — agents that wake, work, and sleep.
 > **Scope**: Map every Grove system against Cloudflare Agents SDK capabilities.
+> **Companion spec**: `docs/specs/grove-agent-spec.md` — the GroveAgent base class
+> **Action plan**: `docs/plans/infra/planned/grove-agent-consumers.md` — the hit list
 
 ---
 
@@ -13,7 +15,7 @@ stateful AI agents on Cloudflare Durable Objects. Built on PartyServer, with
 built-in SQL, WebSocket state sync, task scheduling, queues, MCP integration,
 workflows, email handling, and web browsing.
 
-**Grove/Lattice** — 9 apps, 9 services, 11 workers, 3 D1 databases, 6+ Durable
+**Grove/Lattice** — 10 apps, 9 services, 10 workers, 3 D1 databases, 7+ Durable
 Objects, all running on Cloudflare. Currently uses plain Workers, Hono, and the
 Loom DO framework.
 
@@ -46,39 +48,53 @@ Loom DO framework.
 
 | # | Stop | Category | Current State | Agent Fit |
 |---|---|---|---|---|
-| 1 | Fireside | AIChatAgent | API endpoint + sessionStorage | Perfect |
-| 2 | Wisp | AIChatAgent | API endpoints | Perfect |
-| 3 | Email Onboarding | Scheduling + Workflows | Broken cron, deprecated worker | Solves a real problem |
-| 4 | Shutter | Agent + Browser | Python + CF Worker hybrid | Browser binding is a game-changer |
+| 1 | Fireside | GroveChatAgent | API endpoint + sessionStorage | Perfect — persistent conversations |
+| 2 | Wisp | GroveAgent | API endpoints | Perfect — session-aware analysis |
+| 3 | Email Onboarding | GroveAgent + Scheduling | Broken cron, deprecated worker | Solves a real problem |
+| 4 | Shutter | GroveAgent + Browser | Python + CF Worker hybrid | Browser binding is a game-changer |
 
 **Tier 2 — Strong Upgrade (Significant architectural improvement)**
 
 | # | Stop | Category | Current State | Agent Fit |
 |---|---|---|---|---|
-| 5 | Thorn | Agent + Queue | Engine library (sync) | Async moderation pipeline |
-| 6 | Petal | Agent + Workflows | Spec only | 4-layer pipeline as workflow |
-| 7 | Vista | Agent + Scheduling | Cron worker + dashboard | Self-scheduling with state sync |
-| 8 | Sentinel | Agent + Scheduling | Durable Object | Natural evolution from Loom |
-| 9 | Lumen | Agent + MCP | Hono worker | MCP server for AI tools mesh |
+| 5 | Thorn | GroveAgent + Queue | Engine library (sync) | Async moderation pipeline |
+| 6 | Petal | AgentWorkflow | Spec only | 4-layer pipeline as durable workflow |
+| 7 | Vista | GroveAgent + Scheduling | Cron worker + dashboard | Self-scheduling with state sync |
+| 8 | Sentinel | GroveAgent + Scheduling | Durable Object (Loom) | Natural evolution from Loom |
+| 9 | Lumen | GroveAgent + MCP | Hono worker | MCP server for AI tools mesh |
+| 10 | Ivy | GroveChatAgent + Queue | App + cron + AI triage | Smart inbox with learning rules |
+| 11 | Forage | GroveAgent + Workflows | Service + DO (SearchJobDO) | Multi-provider search coordination |
 
 **Tier 3 — Good Fit (Clean migration, moderate gains)**
 
 | # | Stop | Category | Current State | Agent Fit |
 |---|---|---|---|---|
-| 10 | Meadow Poller | Agent + Scheduling | Cron worker | `scheduleEvery(900)` replaces worker |
-| 11 | Timeline Sync | Agent + Scheduling | Cron worker | Nightly schedule + per-tenant queues |
-| 12 | Patina | Agent + Workflows | Cron worker | Durable backup pipeline |
-| 13 | Rings | Agent + State | Planned | Per-user private analytics DO |
-| 14 | Scribe | Sub-agent | Lumen task type | Could be autonomous transcription agent |
+| 12 | Meadow Poller | GroveAgent + Scheduling | Cron worker | `scheduleEvery(900)` replaces worker |
+| 13 | Timeline Sync | GroveAgent + Scheduling | Cron worker | Nightly schedule + per-tenant queues |
+| 14 | Patina | AgentWorkflow | Cron worker | Durable backup pipeline |
+| 15 | Rings | GroveAgent + State | Planned (spec) | Per-user private analytics DO |
+| 16 | Scribe | Sub-agent | Lumen task type | Could be autonomous transcription agent |
+| 17 | Amber/Export | GroveAgent + Workflows | Service + DO (ExportJobV2) | Durable export pipeline with resume |
+| 18 | Clearing | GroveAgent + Scheduling | App with cron monitoring | Autonomous incident detection |
+| 19 | Pulse | GroveAgent + Scheduling | Service with cron rollups | Activity tracking + streak agent |
 
-**Tier 4 — Meta / Infrastructure**
+**Tier 4 — Infrastructure & Support Systems**
 
 | # | Stop | Category | Current State | Agent Fit |
 |---|---|---|---|---|
-| 15 | Infra SDK | Agent Adapter | Ports & Adapters | Wrap agent primitives as infra |
-| 16 | Loom | Migration Path | DO framework | Agents SDK is the next-gen Loom |
-| 17 | Zephyr | Agent + Queue | Service worker | Native queue + retry |
-| 18 | Warden | Agent + State | Hono worker | Audit logs, key rotation scheduling |
+| 20 | Zephyr | GroveAgent + Queue | Service worker | Native queue + retry + bounce handling |
+| 21 | Heartwood | GroveAgent + Scheduling | Auth service + SessionDO | Session anomaly detection, cleanup |
+| 22 | Warden | GroveAgent + State | Hono worker | Audit logs, key rotation scheduling |
+| 23 | Loft | GroveAgent + Scheduling | Cron worker (2min/6hr) | Idle detection, resource cleanup |
+| 24 | Infra SDK | Agent Adapter | Ports & Adapters | Wrap agent primitives as infra |
+| 25 | Loom | Migration Path | DO framework | Agents SDK is the next-gen Loom |
+
+**Tier 5 — Lightweight / Future Consideration**
+
+| # | Stop | Category | Current State | Agent Fit |
+|---|---|---|---|---|
+| 26 | Post Migrator | GroveAgent + Scheduling | Worker (DISABLED) | Intelligent storage tier placement |
+| 27 | Curios | GroveAgent + MCP | Widget system | Expose interactive widgets as MCP tools |
 
 ---
 
@@ -678,7 +694,136 @@ moderation. The mesh is self-organizing.
 
 ---
 
-## 10. Meadow Poller — The Gatherer Wakes on Schedule
+## 10. Ivy — The Inbox Gets a Brain
+
+**Character**: Email triage that learns your patterns. Currently a cron-driven
+queue processor with AI classification.
+
+### What exists today
+
+**Ivy app** (`apps/ivy/`):
+- [x] Email triage with Forward.Email webhook intake
+- [x] Lumen AI classifier for email priority/category
+- [x] Cron-based queue processing (every minute)
+- [x] TriageDO cross-binding for persistent state
+- [x] Zephyr delivery for responses
+- [ ] **Cron-driven classification** — no real-time processing
+- [ ] **No learning from corrections** — same rules every time
+- [ ] **No per-inbox customization** — global rules only
+- [ ] **No email threading** — each message processed in isolation
+
+### Design spec (safari-approved)
+
+**Ivy as GroveChatAgent:** The inbox becomes a conversational agent. Each user
+gets their own Ivy instance that learns their triage preferences over time.
+
+```typescript
+class IvyAgent extends GroveChatAgent<Env, IvyState> {
+  initialState = {
+    rulesLearned: 0,
+    emailsTriaged: 0,
+    autoArchivePatterns: [],
+  };
+
+  // Webhook: new email arrives
+  async onEmail(email: AgentEmail) {
+    // AI classification via Lumen MCP
+    const classification = await this.classify(email);
+
+    // Apply learned rules
+    const action = this.matchRules(classification);
+    if (action.auto) {
+      await this.applyAction(email, action);
+    } else {
+      // Human review — state syncs to inbox UI
+      this.setState({ ...this.state, pendingReview: email.id });
+    }
+  }
+
+  // User corrects a classification → agent learns
+  @callable()
+  async correctClassification(emailId: string, correct: Classification) {
+    this.sql`INSERT INTO corrections (email_id, correct_classification)
+             VALUES (${emailId}, ${JSON.stringify(correct)})`;
+    this.setState({
+      ...this.state,
+      rulesLearned: this.state.rulesLearned + 1,
+    });
+  }
+
+  // Schedule daily digest
+  async onStart() {
+    await this.schedule('0 8 * * *', 'sendDigest', {});
+  }
+}
+```
+
+**What this gives us:**
+- Real-time email triage (no cron delay)
+- Per-user learning from corrections
+- Native email handling via `onEmail()`
+- Daily digest scheduling built-in
+- State sync to inbox UI for pending reviews
+
+---
+
+## 11. Forage — The Search Party Gets Coordination
+
+**Character**: Domain search that fans out across AI providers. Currently a
+service with SearchJobDO, prone to provider failures mid-search.
+
+### What exists today
+
+**Forage service** (`services/forage/`):
+- [x] Multi-provider AI search (DeepSeek, OpenRouter, Cerebras)
+- [x] SearchJobDO (Durable Object with SQLite) for job coordination
+- [x] Email notification on search completion
+- [x] RDAP domain availability checking
+- [ ] **No retry per provider** — one failure stalls the search
+- [ ] **No progressive results** — wait for completion or nothing
+- [ ] **SearchJobDO is custom DO** — not using Loom, not using Agents SDK
+
+### Design spec (safari-approved)
+
+**Forage as AgentWorkflow:** A durable search pipeline where each provider
+is a step with independent retries.
+
+```typescript
+class ForageWorkflow extends AgentWorkflow {
+  async run(step: Step, payload: SearchPayload) {
+    // Step 1: RDAP availability check
+    const availability = await step.do('rdap-check', { retries: { limit: 3 } },
+      async () => this.checkRDAP(payload.domain)
+    );
+
+    // Step 2: Fan out to AI providers (parallel steps)
+    const results = await Promise.all([
+      step.do('deepseek-search', { retries: { limit: 2 } },
+        () => this.searchProvider('deepseek', payload)),
+      step.do('openrouter-search', { retries: { limit: 2 } },
+        () => this.searchProvider('openrouter', payload)),
+    ]);
+
+    // Step 3: Compile and score results
+    const compiled = await step.do('compile', async () =>
+      this.compileResults(results, availability));
+
+    // Step 4: Notify user
+    await step.do('notify', async () =>
+      this.sendCompletionEmail(payload.userId, compiled));
+
+    return compiled;
+  }
+}
+```
+
+**Key upgrade:** SearchJobDO becomes a workflow. Each provider step retries
+independently. Results compile even if one provider fails. The whole pipeline
+is crash-resistant.
+
+---
+
+## 12. Meadow Poller — The Gatherer Wakes on Schedule
 
 **Character**: Patient RSS gatherer that feeds the community timeline. Currently
 a separate cron worker.
@@ -720,7 +865,7 @@ class MeadowPollerAgent extends Agent<Env, PollerState> {
 
 ---
 
-## 11. Timeline Sync — The Storyteller Gets Smarter
+## 13. Timeline Sync — The Storyteller Gets Smarter
 
 **Character**: Nightly summaries of activity, told in the user's chosen voice.
 
@@ -763,7 +908,7 @@ class TimelineAgent extends Agent<Env, TimelineState> {
 
 ---
 
-## 12. Patina — Backups Get Durable Workflows
+## 14. Patina — Backups Get Durable Workflows
 
 **Character**: Careful preservation of everything that matters.
 
@@ -807,7 +952,7 @@ class PatinaWorkflow extends AgentWorkflow {
 
 ---
 
-## 13. Rings — Private Analytics Born as an Agent
+## 15. Rings — Private Analytics Born as an Agent
 
 **Character**: Count the rings of a tree and you learn its story. Rings are
 internal. Private.
@@ -864,7 +1009,7 @@ class RingsAgent extends Agent<Env, RingsState> {
 
 ---
 
-## 14. Scribe — Transcription Becomes Autonomous
+## 16. Scribe — Transcription Becomes Autonomous
 
 **Character**: Your voice, captured faithfully.
 
@@ -881,7 +1026,324 @@ more complex (multi-language, speaker diarization, etc.)
 
 ---
 
-## 15-16. Infra SDK + Loom — The Meta Layer
+## 17. Amber/Export — The Archive Gets Durable
+
+**Character**: Patient assembly of everything you've created, bundled for safe
+keeping. Currently a service + DO that can lose state mid-export.
+
+### What exists today
+
+**Amber service** (`services/amber/`) + **Amber app** (`apps/amber/`):
+- [x] ExportJobV2 Durable Object with SQLite for job tracking
+- [x] 5-minute cron for progress polling + daily 3 AM cleanup
+- [x] Multi-format export (posts, media, metadata)
+- [x] R2 storage for assembled exports
+- [ ] **No crash recovery** — if the worker dies mid-export, job is stuck
+- [ ] **No progress streaming** — UI polls for status
+- [ ] **Export failures require manual restart**
+- [ ] **No incremental exports** — full export every time
+
+### Design spec (safari-approved)
+
+**Amber as AgentWorkflow:** Each export becomes a durable workflow. Steps
+for each content type, each with independent retries. Progress streams via
+WebSocket state sync.
+
+```typescript
+class AmberWorkflow extends AgentWorkflow {
+  async run(step: Step, payload: ExportPayload) {
+    // Step 1: Gather post metadata
+    const posts = await step.do('gather-posts', { timeout: '2m' },
+      () => this.gatherPosts(payload.tenantId));
+
+    // Step 2: Gather media (largest step, most crash-prone)
+    const media = await step.do('gather-media', {
+      retries: { limit: 3 }, timeout: '10m',
+    }, () => this.gatherMedia(posts));
+
+    // Step 3: Assemble archive
+    const archive = await step.do('assemble', { timeout: '5m' },
+      () => this.assembleZip(posts, media));
+
+    // Step 4: Upload to R2
+    await step.do('upload', { retries: { limit: 2 } },
+      () => this.uploadToR2(archive, payload.tenantId));
+
+    // Step 5: Notify user
+    await step.do('notify', () =>
+      this.sendDownloadEmail(payload.tenantId, archive.url));
+
+    return { url: archive.url, size: archive.size };
+  }
+}
+```
+
+**Workers retired:** Amber's 5-minute cron and daily cleanup become agent-scheduled.
+ExportJobV2 DO migrates to AgentWorkflow.
+
+---
+
+## 18. Clearing — The Watchtower Sees Everything
+
+**Character**: The high ground where you can see smoke before it reaches the
+forest. Currently a status page with cron-based health checks.
+
+### What exists today
+
+**Clearing app** (`apps/clearing/`):
+- [x] 5-minute cron health checks across all services
+- [x] Daily midnight aggregation
+- [x] Email alerts on incidents
+- [x] Status page UI with historical uptime
+- [ ] **Cron-based detection** — 5 minute blind spots
+- [ ] **No root-cause correlation** — sees symptoms, not causes
+- [ ] **Manual incident declaration** — no auto-detection
+- [ ] **No recovery monitoring** — alerts on down, doesn't confirm back up
+
+### Design spec (safari-approved)
+
+```typescript
+class ClearingAgent extends GroveAgent<Env, ClearingState> {
+  initialState = {
+    incidents: [],
+    serviceHealth: {},
+    lastCheckAt: null,
+  };
+
+  async onStart() {
+    await this.scheduleEvery(60, 'healthCheck', {});        // Every minute
+    await this.schedule('0 0 * * *', 'dailyReport', {});    // Daily summary
+  }
+
+  async healthCheck() {
+    const health = await this.checkAllServices();
+    this.setState({ ...this.state, serviceHealth: health, lastCheckAt: Date.now() });
+
+    // Auto-detect incidents from pattern (3+ failures = incident)
+    const newIncidents = this.detectIncidents(health);
+    for (const incident of newIncidents) {
+      await this.queue('handleIncident', incident);
+    }
+  }
+
+  async handleIncident(incident: Incident) {
+    // Correlate with Vista metrics for root cause hints
+    // Alert via Zephyr
+    // Track recovery — schedule follow-up checks
+    await this.scheduleEvery(30, `recovery-${incident.id}`, { incidentId: incident.id });
+  }
+
+  // Real-time status page via WebSocket state sync
+  // Status page connects → sees live health without polling
+}
+```
+
+**Upgrade:** From 5-minute cron to 1-minute self-scheduling with auto-incident
+detection, recovery tracking, and real-time status page via state sync.
+
+---
+
+## 19. Pulse — The Heartbeat Tracker
+
+**Character**: Listens to the rhythm of development activity. Currently a
+webhook processor with hourly and daily cron rollups.
+
+### What exists today
+
+**Pulse service** (`services/pulse/`):
+- [x] GitHub webhook processing (push, PR, issue events)
+- [x] Hourly activity rollup
+- [x] Daily digest at 00:05
+- [ ] **Cron-based rollups** — separate worker scheduling
+- [ ] **No streak detection** — raw events, no patterns
+- [ ] **No cross-tenant correlation** — each webhook processed alone
+
+### Design spec (safari-approved)
+
+```typescript
+class PulseAgent extends GroveAgent<Env, PulseState> {
+  initialState = {
+    streakDays: 0,
+    lastActivityAt: null,
+    todayEvents: 0,
+  };
+
+  // Webhook intake — called by GitHub
+  @callable()
+  async ingestEvent(event: GitHubEvent) {
+    this.sql`INSERT INTO events (type, timestamp, data)
+             VALUES (${event.type}, ${Date.now()}, ${JSON.stringify(event)})`;
+    this.setState({
+      ...this.state,
+      lastActivityAt: Date.now(),
+      todayEvents: this.state.todayEvents + 1,
+    });
+  }
+
+  async onStart() {
+    await this.schedule('0 0 * * *', 'dailyRollup', {});    // Midnight
+    await this.schedule('0 * * * *', 'hourlyRollup', {});    // Hourly
+  }
+
+  async dailyRollup() {
+    const today = await this.aggregateToday();
+    // Feed to Timeline agent for summary generation
+    // Update streak count
+    const streak = today.events > 0
+      ? this.state.streakDays + 1 : 0;
+    this.setState({ ...this.state, streakDays: streak, todayEvents: 0 });
+  }
+}
+```
+
+**Workers retired:** Pulse hourly + daily crons become agent schedules.
+
+---
+
+## 20. Zephyr — The Wind Gets a Queue
+
+**Character**: The wind that carries messages.
+
+### Design spec (safari-approved)
+
+```typescript
+class ZephyrAgent extends GroveAgent<Env, ZephyrState> {
+  @callable()
+  async send(email: EmailRequest) {
+    // Queue with automatic retry
+    await this.queue('deliverEmail', email);
+    return { status: 'queued' };
+  }
+
+  async deliverEmail(email: EmailRequest) {
+    // Circuit breaker as agent state
+    if (this.state.circuitOpen && Date.now() - this.state.circuitOpenedAt < 30000) {
+      throw new Error('Circuit breaker open'); // Will retry via queue
+    }
+
+    const result = await this.resendClient.send(email);
+    this.sql`INSERT INTO send_log (email_id, status, timestamp) VALUES (...)`;
+  }
+
+  // Handle bounces natively
+  async onEmail(email: AgentEmail) {
+    await this.processBounce(email);
+  }
+}
+```
+
+---
+
+## 21. Heartwood — Sessions Get Smarter
+
+**Character**: The auth service that guards every door. Currently cleans up
+sessions via cron, sends magic links, and manages OAuth flows.
+
+### What exists today
+
+**Heartwood service** (`services/heartwood/`):
+- [x] Better Auth (OAuth, passkeys, magic links)
+- [x] SessionDO (Durable Object with SQLite) for session state
+- [x] Daily midnight session cleanup cron
+- [x] Per-minute keepalive cron
+- [x] Magic link / email verification via Zephyr
+- [ ] **Session cleanup is batch** — no per-session intelligence
+- [ ] **No anomaly detection** — unusual login patterns aren't flagged
+- [ ] **No device trust scoring** — every device treated equally
+
+### Design spec (safari-approved)
+
+Heartwood is security-critical, so migration is cautious. The SessionDO is the
+clearest candidate — session cleanup and anomaly detection as agent scheduling.
+
+```typescript
+class SessionAgent extends GroveAgent<Env, SessionState> {
+  async onStart() {
+    await this.schedule('0 0 * * *', 'cleanupExpired', {});    // Daily
+    await this.scheduleEvery(3600, 'anomalyScan', {});          // Hourly
+  }
+
+  async anomalyScan() {
+    const suspicious = this.sql`SELECT * FROM sessions
+      WHERE last_ip != created_ip AND created_at > ${Date.now() - 86400000}`;
+    for (const session of suspicious) {
+      await this.queue('reviewSession', { sessionId: session.id });
+    }
+  }
+}
+```
+
+**Verdict:** Low priority for full migration. SessionDO cleanup and anomaly
+detection are the first pieces. Auth logic stays in Better Auth.
+
+---
+
+## 22. Warden — The Guardian Gets Audit Trails
+
+**Character**: The silent guardian who holds all keys.
+
+### Design spec (safari-approved)
+
+Warden could benefit from agent SQL for audit logs and `schedule()` for key
+rotation reminders, but is security-sensitive and low priority for migration.
+
+**Verdict:** Last to migrate. Security infrastructure should be stable.
+
+---
+
+## 23. Loft — The Workshop Cleans Itself
+
+**Character**: Dev environment provisioning. Spins up code-server machines on
+Fly.io, currently relies on 2-minute and 6-hour crons for idle detection.
+
+### What exists today
+
+**Loft worker** (`workers/loft/`):
+- [x] Fly.io machine provisioning (code-server)
+- [x] 2-minute cron for idle detection
+- [x] 6-hour cron for deep cleanup
+- [ ] **Fixed polling interval** — checks every 2 minutes even when no machines running
+- [ ] **No usage tracking** — machines cleaned by time, not activity
+- [ ] **No cost optimization** — no awareness of Fly.io billing
+
+### Design spec (safari-approved)
+
+```typescript
+class LoftAgent extends GroveAgent<Env, LoftState> {
+  initialState = {
+    activeMachines: [],
+    totalCostToday: 0,
+  };
+
+  @callable()
+  async provision(config: MachineConfig) {
+    const machine = await this.flyClient.createMachine(config);
+    this.setState({
+      ...this.state,
+      activeMachines: [...this.state.activeMachines, machine],
+    });
+    // Schedule idle check for THIS machine specifically
+    await this.scheduleEvery(120, `idle-${machine.id}`, { machineId: machine.id });
+    return machine;
+  }
+
+  async checkIdle(payload: { machineId: string }) {
+    const machine = this.state.activeMachines.find(m => m.id === payload.machineId);
+    if (!machine) { await this.cancelSchedule(`idle-${payload.machineId}`); return; }
+    const idle = await this.flyClient.getIdleTime(machine.id);
+    if (idle > 1800000) { // 30 min idle
+      await this.flyClient.stopMachine(machine.id);
+      await this.cancelSchedule(`idle-${payload.machineId}`);
+    }
+  }
+}
+```
+
+**Workers retired:** Loft's 2-minute and 6-hour crons become per-machine schedules.
+
+---
+
+## 24-25. Infra SDK + Loom — The Meta Layer
 
 **Character**: The foundations that everything else stands on.
 
@@ -918,50 +1380,103 @@ conceptually similar to Loom. The migration path:
 
 ---
 
-## 17. Zephyr — Email Queue Gets Native
+## 26. Post Migrator — The Archivist Learns Patterns
 
-**Character**: The wind that carries messages.
+**Character**: Moves content between hot/warm/cold storage tiers. Currently
+disabled, waiting for intelligence.
+
+### What exists today
+
+**Post Migrator worker** (`workers/post-migrator/`):
+- [x] Hot/Warm/Cold tier migration logic designed
+- [x] Time-based tier placement rules
+- [ ] **DISABLED** — cron triggers commented out
+- [ ] **Fixed rules** — no awareness of actual access patterns
+- [ ] **No recovery** — crash mid-migration = inconsistent state
 
 ### Design spec (safari-approved)
 
 ```typescript
-class ZephyrAgent extends Agent<Env, ZephyrState> {
-  @callable()
-  async send(email: EmailRequest) {
-    // Queue with automatic retry
-    await this.queue('deliverEmail', email);
-    return { status: 'queued' };
+class PostMigratorAgent extends GroveAgent<Env, MigratorState> {
+  async onStart() {
+    await this.schedule('0 3 * * *', 'evaluateTiers', {});    // Daily 3 AM
   }
 
-  async deliverEmail(email: EmailRequest) {
-    // Circuit breaker as agent state
-    if (this.state.circuitOpen && Date.now() - this.state.circuitOpenedAt < 30000) {
-      throw new Error('Circuit breaker open'); // Will retry via queue
+  async evaluateTiers() {
+    // Query access patterns from Rings data
+    const coldCandidates = this.sql`SELECT post_id FROM access_log
+      WHERE last_accessed < ${Date.now() - 90 * 86400000}`;
+
+    for (const post of coldCandidates) {
+      await this.queue('migratePost', {
+        postId: post.post_id,
+        targetTier: 'cold',
+      });
     }
-
-    const result = await this.resendClient.send(email);
-    this.sql`INSERT INTO send_log (email_id, status, timestamp) VALUES (...)`;
   }
 
-  // Handle bounces natively
-  async onEmail(email: AgentEmail) {
-    await this.processBounce(email);
+  async migratePost(payload: { postId: string; targetTier: string }) {
+    // Each migration is queued — auto-retry on failure
+    // No more inconsistent state from mid-migration crashes
   }
 }
 ```
 
+**Verdict:** Low priority but the pattern is clean. Unlock this when storage
+costs become meaningful. Agent queue gives crash recovery for free.
+
 ---
 
-## 18. Warden — The Guardian Gets Audit Trails
+## 27. Curios — The Cabinet Opens Its Doors
 
-**Character**: The silent guardian who holds all keys.
+**Character**: Personal touches that make a blog feel like home — guestbooks,
+hit counters, mood rings, now-playing widgets.
+
+### What exists today
+
+**Curios system** (`libs/engine/src/lib/curios/`):
+- [x] Multiple curio types (guestbook, hit counter, status, mood ring, etc.)
+- [x] Curios D1 database
+- [x] Per-tenant curio configuration
+- [ ] **No external data sync** — Spotify now-playing requires manual refresh
+- [ ] **No scheduled updates** — mood rings don't auto-expire
+- [ ] **No inter-curio coordination** — each curio is independent
 
 ### Design spec (safari-approved)
 
-Warden could benefit from agent SQL for audit logs and `schedule()` for key
-rotation reminders, but is security-sensitive and low priority for migration.
+**Curios as MCP tools:** Each curio type becomes an `@callable()` method.
+Other agents can interact with curios — Timeline writes to the activity
+curio, Rings feeds the hit counter, Wisp updates the "currently writing" status.
 
-**Verdict:** Last to migrate. Security infrastructure should be stable.
+```typescript
+class CuriosAgent extends GroveAgent<Env, CuriosState> {
+  // MCP tools: other agents can trigger curio updates
+  @callable({ description: 'Update a curio value' })
+  async updateCurio(type: CurioType, value: unknown) {
+    this.sql`UPDATE curios SET value = ${JSON.stringify(value)},
+             updated_at = ${Date.now()} WHERE type = ${type}`;
+    // State sync → curio updates live on the blog
+    this.setState({ ...this.state, lastUpdate: { type, at: Date.now() } });
+  }
+
+  // Schedule: sync external data sources
+  async onStart() {
+    await this.scheduleEvery(300, 'syncExternalData', {});    // Every 5 min
+  }
+
+  async syncExternalData() {
+    // Spotify now-playing, GitHub activity, weather, etc.
+    if (this.state.spotifyEnabled) {
+      const track = await this.fetchNowPlaying();
+      await this.updateCurio('now-playing', track);
+    }
+  }
+}
+```
+
+**Key insight:** Curios become the bridge between agents and the public-facing
+blog. When Timeline generates a summary, it writes to the activity curio.
+When Vista detects an incident, it writes to the status curio. The blog is alive.
 
 ---
 
@@ -971,17 +1486,18 @@ rotation reminders, but is security-sensitive and low priority for migration.
 
 | Metric | Count |
 |---|---|
-| Total stops | 18 |
+| Total stops | 27 |
 | Perfect fit (Tier 1) | 4 |
-| Strong upgrade (Tier 2) | 5 |
-| Good fit (Tier 3) | 5 |
-| Meta/Infrastructure (Tier 4) | 4 |
-| Workers that could be retired | 6 |
-| New capabilities unlocked | 12+ |
+| Strong upgrade (Tier 2) | 7 |
+| Good fit (Tier 3) | 8 |
+| Infrastructure (Tier 4) | 6 |
+| Future consideration (Tier 5) | 2 |
+| Cron workers that get retired | 8+ |
+| New capabilities unlocked | 15+ |
 
-### Workers That Get Retired
+### Workers / Systems That Get Retired or Consolidated
 
-| Worker | Replaced By |
+| Current Worker/System | Replaced By |
 |---|---|
 | `onboarding-emails` (deprecated) | OnboardingAgent scheduling |
 | `email-catchup` (weekly cron) | OnboardingAgent scheduling |
@@ -989,92 +1505,74 @@ rotation reminders, but is security-sensitive and low priority for migration.
 | `timeline-sync` (daily cron) | TimelineAgent `schedule()` |
 | `vista-collector` (5-min cron) | VistaAgent `scheduleEvery()` |
 | `patina` (backup cron) | PatinaWorkflow |
+| `loft` (2-min/6-hr cron) | LoftAgent per-machine scheduling |
+| `pulse` (hourly/daily cron) | PulseAgent self-scheduling |
+| `clearing` (5-min/daily cron) | ClearingAgent self-scheduling |
+| `SearchJobDO` (custom DO) | ForageWorkflow |
+| `ExportJobV2` (custom DO) | AmberWorkflow |
 
 ### New Capabilities Unlocked
 
 1. **Persistent conversations** — Fireside survives tab close and device switch
 2. **Resumable streams** — Connection drops don't lose AI responses
-3. **Real-time dashboards** — Vista, Sentinel, Rings via WebSocket state sync
+3. **Real-time dashboards** — Vista, Sentinel, Rings, Clearing via WebSocket state sync
 4. **Native browser automation** — Shutter gets Puppeteer on Cloudflare
 5. **MCP agent mesh** — Every agent exposes and consumes tools
-6. **Durable workflows** — Petal's 4-layer pipeline, Patina's backup pipeline
+6. **Durable workflows** — Petal, Patina, Amber, Forage pipelines
 7. **Human-in-the-loop** — Thorn escalation, Petal approval, workflow gates
 8. **Per-user scheduling** — Email onboarding, Rings analytics, Focus Periods
 9. **Async moderation** — Thorn moves from blocking to background
 10. **Self-healing email** — Bounce handling, unsubscribe, per-user journeys
 11. **Agent-to-agent communication** — Replace service bindings with MCP
 12. **Per-agent observability** — Structured events from every agent
-
-### Recommended Trek Order
-
-**Phase 1: Quick Wins (Solve real problems)**
-1. **OnboardingAgent** — Fix the broken email system. Retire 2 workers.
-2. **FiresideAgent** — Persistent conversations. The wow factor.
-
-**Phase 2: Infrastructure Foundation**
-3. **LumenAgent as MCP Server** — Unlock the mesh for everything else.
-4. **ShutterAgent with Browser** — Web capabilities for the whole forest.
-
-**Phase 3: Migrate Cron Workers**
-5. **VistaAgent** — Real-time monitoring dashboard.
-6. **MeadowPollerAgent** — RSS polling as agent schedule.
-7. **TimelineAgent** — Nightly sync as agent schedule.
-
-**Phase 4: New Capabilities**
-8. **ThornAgent** — Async moderation pipeline.
-9. **PetalWorkflow** — Durable 4-layer image moderation.
-10. **RingsAgent** — Per-user private analytics.
-
-**Phase 5: Deep Migration**
-11. **SentinelAgent** — Evolve from Loom.
-12. **PatinaWorkflow** — Durable backup pipeline.
-13. **WispAgent** — Session-aware writing assistance.
-14. **ZephyrAgent** — Native email queue.
-
-**Phase 6: Meta**
-15. **Infra SDK Agent Adapter** — Wrap agent primitives.
-16. **Loom → Agents SDK migration guide** — For existing DOs.
+13. **Smart inbox** — Ivy learns triage patterns, auto-classifies, digests
+14. **External data sync** — Curios pull from Spotify, GitHub, weather
+15. **Crash-resistant pipelines** — Forage searches, Amber exports resume on failure
 
 ### Cross-Cutting Themes
 
 **1. The Cron Worker Pattern Is Dead**
-Six separate cron workers with separate deployments, separate monitoring, and
+Eight+ separate cron workers with separate deployments, separate monitoring, and
 separate failure modes. The Agents SDK replaces all of them with `schedule()`
 and `scheduleEvery()` — self-contained, per-instance, hibernatable.
 
 **2. The MCP Mesh Is the Architecture**
 Instead of service bindings (which are point-to-point), MCP creates a
 self-describing tool mesh. Any agent can discover and call any other agent's
-capabilities. This is the evolution of Warden's credential gateway concept —
-but for ALL capabilities, not just API keys.
+capabilities. Lumen serves AI. Shutter serves web content. Thorn serves
+moderation. Curios serve the blog surface. The mesh is self-organizing.
 
 **3. State Sync Replaces Polling**
 Every admin dashboard currently polls for data. With agent state sync, dashboards
 subscribe via WebSocket and get real-time updates. Vista, Rings, Sentinel,
-Thorn moderation queue — all become live.
+Clearing, Thorn moderation queue — all become live.
 
 **4. Per-User Agents Are the Privacy Model**
-Rings analytics as a per-user DO means analytics data never leaves the user's
-agent. No central aggregation. No data warehouse. True privacy by architecture,
-not just by policy.
+Rings analytics, OnboardingAgent, Ivy inbox — all per-user DOs. Analytics data
+never leaves the user's agent. No central aggregation. True privacy by
+architecture, not just by policy.
 
 **5. Workflows Solve the "What If It Crashes" Problem**
-Patina backups, Petal moderation, email onboarding — all have multi-step
-processes where a crash mid-way leaves broken state. Durable workflows guarantee
-every step completes or retries.
+Patina backups, Petal moderation, Amber exports, Forage searches — all have
+multi-step processes where a crash mid-way leaves broken state. Durable workflows
+guarantee every step completes or retries.
 
-**6. Loom Is the Bridge**
-Loom (the existing DO framework) and the Agents SDK share DNA — both build on
-Durable Objects with SQL, WebSocket, and scheduling. Migration is incremental.
-New agents use the SDK directly; existing Loom DOs migrate when they need
-agent-specific features.
+**6. Loom Is the Bridge, Not the Destination**
+Loom and the Agents SDK share DNA — both build on Durable Objects with SQL,
+WebSocket, and scheduling. Migration is incremental. New agents use the SDK
+directly; existing Loom DOs migrate when they need agent features.
+
+**7. Custom DOs Become Workflows**
+SearchJobDO, ExportJobV2, and any other custom DO that coordinates multi-step
+processes should migrate to AgentWorkflow. Same durable guarantees, better
+retry semantics, built-in human-in-the-loop.
 
 ---
 
-_The fire dies to embers. The journal is full — 18 stops, every system mapped,
-the whole landscape transformed. The Cloudflare Agents SDK isn't just a library.
-It's the next architecture for Grove. Every tree in the forest gets its own
-heartbeat. Every Worker becomes an Agent. The forest awakens._
+_The fire dies to embers. The journal is full — 27 stops, every creature
+catalogued, the whole landscape transformed. The Cloudflare Agents SDK isn't
+just a library. It's the next architecture for Grove. Every tree in the forest
+gets its own heartbeat. Every Worker becomes an Agent._
 
-_Tomorrow, the animals go to work. But tonight? Tonight was the drive._
-_And it was glorious._ 🚙
+_The field guide is complete. Now comes the plan._
+_See: `docs/plans/infra/planned/grove-agent-consumers.md`_ 🚙

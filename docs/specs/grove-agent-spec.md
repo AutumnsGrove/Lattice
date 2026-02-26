@@ -705,3 +705,18 @@ export default {
 ---
 
 *Loom taught the trees to stand. GroveAgent teaches them to breathe.*
+
+---
+
+## What's Next: The Consumer Hit List
+
+Once this package ships, 27 Grove systems are ready to become agents.
+
+**Start here:** [`docs/plans/infra/planned/grove-agent-consumers.md`](../plans/infra/planned/grove-agent-consumers.md)
+
+That plan is a clean, phased hit list — every consumer catalogued with its
+class type, SDK features, worker location, and what it retires. An agent can
+pick up any item and work it independently.
+
+**The full safari journal** with detailed analysis of each system:
+[`docs/safaris/active/cloudflare-agents-safari.md`](../safaris/active/cloudflare-agents-safari.md)
