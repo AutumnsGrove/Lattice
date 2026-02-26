@@ -49,6 +49,12 @@ export const FLY_ERRORS = {
 		userMessage: "Remote execution is not available for this server.",
 		adminMessage: "RemoteExecutor not available. Workers runtime lacks net/tls modules for SSH.",
 	},
+	EXECUTOR_COMMAND_FAILED: {
+		code: "FLY-006",
+		category: "bug" as const,
+		userMessage: "A command failed on the server.",
+		adminMessage: "Remote agent returned a non-OK HTTP status for command execution.",
+	},
 
 	// ─── Lifecycle (020-039) ─────────────────────────────────────
 
@@ -143,9 +149,9 @@ export class FireflyError extends Error {
 	category: string;
 	userMessage: string;
 
-	constructor(errorDef: GroveErrorDef, details?: string) {
+	constructor(errorDef: GroveErrorDef, details?: string, cause?: unknown) {
 		const message = details ? `${errorDef.adminMessage} ${details}` : errorDef.adminMessage;
-		super(message);
+		super(message, cause ? { cause } : undefined);
 		this.name = "FireflyError";
 		this.code = errorDef.code;
 		this.category = errorDef.category;

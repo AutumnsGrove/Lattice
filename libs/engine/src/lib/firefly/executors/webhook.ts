@@ -18,6 +18,8 @@ import type { RemoteExecutor, ServerInstance, ExecutionResult } from "../types.j
 import { FireflyError, FLY_ERRORS } from "../errors.js";
 
 export interface WebhookExecutorConfig {
+	/** Protocol to use. Default: "http". Use "https" when agent has TLS configured. */
+	protocol?: "http" | "https";
 	/** Port the agent listens on. Default: 8080 */
 	port?: number;
 	/** Path prefix for the agent endpoint. Default: /firefly */
@@ -29,12 +31,14 @@ export interface WebhookExecutorConfig {
 }
 
 export class WebhookExecutor implements RemoteExecutor {
+	private readonly protocol: "http" | "https";
 	private readonly port: number;
 	private readonly pathPrefix: string;
 	private readonly secret?: string;
 	private readonly timeoutMs: number;
 
 	constructor(config: WebhookExecutorConfig = {}) {
+		this.protocol = config.protocol ?? "http";
 		this.port = config.port ?? 8080;
 		this.pathPrefix = config.pathPrefix ?? "/firefly";
 		this.secret = config.secret;
@@ -42,7 +46,7 @@ export class WebhookExecutor implements RemoteExecutor {
 	}
 
 	async execute(instance: ServerInstance, command: string): Promise<ExecutionResult> {
-		const url = `http://${instance.publicIp}:${this.port}${this.pathPrefix}/exec`;
+		const url = `${this.protocol}://${instance.publicIp}:${this.port}${this.pathPrefix}/exec`;
 
 		const headers: Record<string, string> = {
 			"Content-Type": "application/json",
@@ -64,7 +68,7 @@ export class WebhookExecutor implements RemoteExecutor {
 
 			if (!response.ok) {
 				throw new FireflyError(
-					FLY_ERRORS.EXECUTOR_NOT_AVAILABLE,
+					FLY_ERRORS.EXECUTOR_COMMAND_FAILED,
 					`Agent returned ${response.status}`,
 				);
 			}
@@ -85,6 +89,7 @@ export class WebhookExecutor implements RemoteExecutor {
 			throw new FireflyError(
 				FLY_ERRORS.EXECUTOR_NOT_AVAILABLE,
 				err instanceof Error ? err.message : String(err),
+				err,
 			);
 		} finally {
 			clearTimeout(timeout);
@@ -92,7 +97,7 @@ export class WebhookExecutor implements RemoteExecutor {
 	}
 
 	async isReachable(instance: ServerInstance): Promise<boolean> {
-		const url = `http://${instance.publicIp}:${this.port}${this.pathPrefix}/health`;
+		const url = `${this.protocol}://${instance.publicIp}:${this.port}${this.pathPrefix}/health`;
 		const controller = new AbortController();
 		const timeout = setTimeout(() => controller.abort(), 5_000);
 

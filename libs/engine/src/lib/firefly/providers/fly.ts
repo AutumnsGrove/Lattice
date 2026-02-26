@@ -113,7 +113,7 @@ export class FlyProvider extends FireflyProviderBase {
 		await this.request(FLY_API, "DELETE", `/apps/${this.app}/machines/${providerServerId}`);
 	}
 
-	protected async doListActive(): Promise<ServerInstance[]> {
+	protected async doListActive(tags?: string[]): Promise<ServerInstance[]> {
 		const response = await this.request<FlyMachineResponse[]>(
 			FLY_API,
 			"GET",
@@ -121,7 +121,18 @@ export class FlyProvider extends FireflyProviderBase {
 		);
 
 		return response
-			.filter((m) => m.state !== "destroyed" && m.state !== "stopped")
+			.filter((m) => {
+				if (m.state === "destroyed" || m.state === "stopped") return false;
+
+				// Filter by tags via machine metadata (mirrors Hetzner's label_selector)
+				if (tags?.length) {
+					const metadata = (m.config as Record<string, Record<string, string>>)?.metadata;
+					if (!metadata) return false;
+					return tags.every((tag) => metadata[`tag-${tag}`] === "true");
+				}
+
+				return true;
+			})
 			.map((m) => ({
 				id: (m.config as Record<string, unknown>)?.metadata
 					? ((m.config as Record<string, Record<string, string>>).metadata["firefly-id"] ??

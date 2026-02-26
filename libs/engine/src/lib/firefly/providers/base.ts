@@ -39,6 +39,7 @@ export abstract class FireflyProviderBase implements FireflyProvider {
 			throw new FireflyError(
 				FLY_ERRORS.IGNITE_FAILED,
 				err instanceof Error ? err.message : String(err),
+				err,
 			);
 		}
 	}
@@ -70,6 +71,7 @@ export abstract class FireflyProviderBase implements FireflyProvider {
 			throw new FireflyError(
 				FLY_ERRORS.FADE_FAILED,
 				err instanceof Error ? err.message : String(err),
+				err,
 			);
 		}
 	}
@@ -82,6 +84,7 @@ export abstract class FireflyProviderBase implements FireflyProvider {
 			throw new FireflyError(
 				FLY_ERRORS.PROVIDER_API_ERROR,
 				err instanceof Error ? err.message : String(err),
+				err,
 			);
 		}
 	}
