@@ -112,3 +112,99 @@ quality = 85
         config = GlimpseConfig.load()
         # Should fall back to defaults
         assert config.viewport_width == 1920
+
+    def test_load_server_section(self, tmp_path, monkeypatch):
+        """[server] section should populate server config."""
+        config_content = b"""
+[server]
+port = 3000
+start_command = "npm run dev"
+start_cwd = "apps/web"
+health_timeout = 60000
+pid_file = ".glimpse/custom.pid"
+"""
+        (tmp_path / ".glimpse.toml").write_bytes(config_content)
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.delenv("GROVE_ROOT", raising=False)
+
+        config = GlimpseConfig.load()
+        assert config.server_port == 3000
+        assert config.server_start_command == "npm run dev"
+        assert config.server_start_cwd == "apps/web"
+        assert config.server_health_timeout == 60000
+        assert config.server_pid_file == ".glimpse/custom.pid"
+
+    def test_load_seed_section(self, tmp_path, monkeypatch):
+        """[seed] section should populate seed config."""
+        config_content = b"""
+[seed]
+scripts_dir = "db/seeds"
+default_tenant = "test-grove"
+migrations_dir = "apps/web/migrations"
+"""
+        (tmp_path / ".glimpse.toml").write_bytes(config_content)
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.delenv("GROVE_ROOT", raising=False)
+
+        config = GlimpseConfig.load()
+        assert config.seed_scripts_dir == "db/seeds"
+        assert config.seed_default_tenant == "test-grove"
+        assert config.seed_migrations_dir == "apps/web/migrations"
+
+    def test_load_logs_default(self, tmp_path, monkeypatch):
+        """[defaults] logs should be loaded from config."""
+        config_content = b"""
+[defaults]
+logs = true
+"""
+        (tmp_path / ".glimpse.toml").write_bytes(config_content)
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.delenv("GROVE_ROOT", raising=False)
+
+        config = GlimpseConfig.load()
+        assert config.logs is True
+
+    def test_load_lumen_section(self, tmp_path, monkeypatch):
+        """[lumen] section should populate gateway config."""
+        config_content = b"""
+[lumen]
+gateway_url = "https://custom-lumen.example.com/api"
+model = "gpt-4o"
+"""
+        (tmp_path / ".glimpse.toml").write_bytes(config_content)
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.delenv("GROVE_ROOT", raising=False)
+
+        config = GlimpseConfig.load()
+        assert config.lumen_gateway_url == "https://custom-lumen.example.com/api"
+        assert config.lumen_model == "gpt-4o"
+
+
+class TestGlimpseConfigServerDefaults:
+    def test_server_defaults(self):
+        config = GlimpseConfig()
+        assert config.server_port == 5173
+        assert config.server_start_command == "pnpm dev:wrangler"
+        assert config.server_start_cwd == "libs/engine"
+        assert config.server_health_timeout == 30000
+        assert config.server_pid_file == ".glimpse/server.pid"
+
+    def test_seed_defaults(self):
+        config = GlimpseConfig()
+        assert config.seed_scripts_dir == "scripts/db"
+        assert config.seed_default_tenant == "midnight-bloom"
+        assert config.seed_migrations_dir == "libs/engine/migrations"
+
+    def test_logs_default(self):
+        config = GlimpseConfig()
+        assert config.logs is False
+
+    def test_lumen_defaults(self):
+        config = GlimpseConfig()
+        assert config.lumen_gateway_url is None
+        assert config.lumen_model == "gemini-flash"
+
+    def test_browser_defaults(self):
+        config = GlimpseConfig()
+        assert config.headless is True
+        assert config.browser == "chromium"

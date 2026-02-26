@@ -1069,10 +1069,34 @@ When writing text for Grove UI (tooltips, buttons, onboarding, error messages), 
 
 ---
 
+## Visual Verification with Glimpse
+
+**Before shipping any Grove page, look at it.** CI passing is not the same as looking correct. Use Glimpse to capture the rendered page and review it yourself:
+
+```bash
+# Capture the page with Grove theme injection
+uv run --project tools/glimpse glimpse capture http://localhost:5173/[page] \
+  --season autumn --theme dark --logs
+
+# Verify all season × theme combos
+uv run --project tools/glimpse glimpse matrix http://localhost:5173/[page]
+
+# Interactive browse — click around, verify navigation and flows
+uv run --project tools/glimpse glimpse browse http://localhost:5173/[page] \
+  --do "click links, scroll down, interact with elements" --screenshot-each --logs
+```
+
+**The iterate loop:** Capture → review → fix → capture again. Repeat until the page matches the Grove aesthetic. Don't ship what you haven't seen.
+
+---
+
 ## Quick Checklist
 
 Before shipping a Grove page:
 
+- [ ] Glimpse: Page captured and visually reviewed
+- [ ] Glimpse: All target seasons render correctly (use `matrix`)
+- [ ] Glimpse: No console errors in `--logs` output
 - [ ] Glass effects used for text readability over busy backgrounds?
 - [ ] Lucide icons, no emojis?
 - [ ] Mobile overflow menu for navigation items?

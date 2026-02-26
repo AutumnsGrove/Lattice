@@ -101,13 +101,30 @@ gw ci --affected --fail-fast --diagnose
 If verification fails: read the diagnostics, fix the errors, re-run verification. Repeat until the structure holds.
 
 Once CI passes, verify manually:
+
 - Happy path works end-to-end
 - Error states handled gracefully
 - Loading states work
 - Mobile layout correct
 - Keyboard navigation and accessibility pass
 
-**Output:** All tests passing, manual verification complete, edge cases handled
+**Visual verification (for UI features):**
+
+If the elephant built UI, it looks at the result before declaring the structure sound:
+
+```bash
+# Capture the page to see what was actually built
+uv run --project tools/glimpse glimpse capture http://localhost:5173/[page] \
+  --season autumn --theme dark --logs
+
+# Walk through the feature visually
+uv run --project tools/glimpse glimpse browse http://localhost:5173/[page] \
+  --do "interact with the new feature" --screenshot-each --logs
+```
+
+Review the screenshots. If something doesn't look right, fix it and capture again. The elephant doesn't ship structures it hasn't inspected.
+
+**Output:** All tests passing, visual and manual verification complete, edge cases handled
 
 ---
 
@@ -129,11 +146,11 @@ Write the completion summary: files created, files modified, config changes, tes
 
 ## Reference Routing Table
 
-| Phase | Reference | Load When |
-|-------|-----------|-----------|
-| TRUMPET | `references/file-patterns.md` | Planning new SvelteKit files |
-| BUILD | `references/build-checklist.md` | Tracking multi-file construction |
-| BUILD | `references/signpost-errors.md` | Implementing error handling |
+| Phase   | Reference                       | Load When                        |
+| ------- | ------------------------------- | -------------------------------- |
+| TRUMPET | `references/file-patterns.md`   | Planning new SvelteKit files     |
+| BUILD   | `references/build-checklist.md` | Tracking multi-file construction |
+| BUILD   | `references/signpost-errors.md` | Implementing error handling      |
 
 ---
 

@@ -33,7 +33,7 @@ LISTEN --> SCAN --> TEST --> GUIDE --> PROTECT
 
 ### Phase 1: LISTEN
 
-*The deer's ears twitch, hearing what others miss before the danger arrives...*
+_The deer's ears twitch, hearing what others miss before the danger arrives..._
 
 Understand who we're building for and what barriers they face. Map disability types to assistive technologies. Establish WCAG level targets for this project.
 
@@ -48,7 +48,7 @@ Understand who we're building for and what barriers they face. Map disability ty
 
 ### Phase 2: SCAN
 
-*The deer's eyes scan the forest floor, spotting what blocks the path before setting a hoof forward...*
+_The deer's eyes scan the forest floor, spotting what blocks the path before setting a hoof forward..._
 
 Run automated scanning to surface mechanical violations quickly. Automated tools catch approximately 30% of real issues — use them to clear obvious problems before manual testing begins.
 
@@ -57,13 +57,34 @@ Run automated scanning to surface mechanical violations quickly. Automated tools
 - Check the common issues checklist: images, forms, navigation, color contrast, page structure, language attribute
 - Note violations and group by severity: blockers (missing labels, keyboard traps) vs. warnings (suboptimal alt text)
 
+**Visual scan with Glimpse:**
+
+Capture the page to see what the rendered result actually looks like. Console logs often reveal hidden a11y issues:
+
+```bash
+# Capture with console logs — errors often reveal missing ARIA, broken refs
+uv run --project tools/glimpse glimpse capture http://localhost:5173/[page] \
+  --season autumn --theme dark --logs
+
+# Check dark mode contrast — capture both themes side by side
+uv run --project tools/glimpse glimpse matrix http://localhost:5173/[page] \
+  --themes light,dark --logs
+
+# Browse interactively — does tab order make visual sense?
+uv run --project tools/glimpse glimpse browse http://localhost:5173/[page] \
+  --do "click first interactive element, press Tab, press Tab, press Tab" \
+  --screenshot-each
+```
+
+Review the screenshots: Are focus indicators visible? Do glass surfaces maintain contrast? Are touch targets visually large enough?
+
 **Reference:** Load `references/automated-scanning.md` for axe-core commands, Lighthouse CI setup, ESLint plugin config, CI integration YAML, and the full issues checklist
 
 ---
 
 ### Phase 3: TEST
 
-*The deer tests each path personally, because knowing the map is not the same as walking the trail...*
+_The deer tests each path personally, because knowing the map is not the same as walking the trail..._
 
 Manual testing catches what automation misses. Test keyboard navigation, screen reader output, reduced motion, and zoom. Work through the test scenarios relevant to this interface.
 
@@ -78,7 +99,7 @@ Manual testing catches what automation misses. Test keyboard navigation, screen 
 
 ### Phase 4: GUIDE
 
-*The deer guides the herd around the fallen tree, showing the clear path with a gentle turn of its head...*
+_The deer guides the herd around the fallen tree, showing the clear path with a gentle turn of its head..._
 
 Fix accessibility issues with proper implementations. Prefer semantic HTML over ARIA when possible. Every fix should leave the interface clearer for everyone.
 
@@ -95,7 +116,7 @@ Fix accessibility issues with proper implementations. Prefer semantic HTML over 
 
 ### Phase 5: PROTECT
 
-*The deer stands watch, ensuring the path stays clear long after this audit is done...*
+_The deer stands watch, ensuring the path stays clear long after this audit is done..._
 
 Prevent future accessibility regressions. Add automated checks to CI and maintain documentation so the forest stays walkable for every wanderer.
 
@@ -111,31 +132,36 @@ Prevent future accessibility regressions. Add automated checks to CI and maintai
 
 ## Reference Routing Table
 
-| Phase | Reference | Load When |
-|-------|-----------|-----------|
-| LISTEN | `references/automated-scanning.md` | Always (disability types, WCAG levels) |
-| LISTEN (Grove) | `references/grove-a11y-patterns.md` | Any Grove component audit |
-| SCAN | `references/automated-scanning.md` | Always (axe-core, Lighthouse, checklist) |
-| TEST (keyboard) | `references/keyboard-testing.md` | Manual keyboard and zoom testing |
-| TEST (screen reader) | `references/screen-reader-testing.md` | Screen reader testing scenarios |
-| GUIDE | `references/screen-reader-testing.md` + `references/grove-a11y-patterns.md` | Fixing issues |
-| PROTECT | `references/automated-scanning.md` + `references/screen-reader-testing.md` | CI setup, final report |
+| Phase                | Reference                                                                   | Load When                                |
+| -------------------- | --------------------------------------------------------------------------- | ---------------------------------------- |
+| LISTEN               | `references/automated-scanning.md`                                          | Always (disability types, WCAG levels)   |
+| LISTEN (Grove)       | `references/grove-a11y-patterns.md`                                         | Any Grove component audit                |
+| SCAN                 | `references/automated-scanning.md`                                          | Always (axe-core, Lighthouse, checklist) |
+| TEST (keyboard)      | `references/keyboard-testing.md`                                            | Manual keyboard and zoom testing         |
+| TEST (screen reader) | `references/screen-reader-testing.md`                                       | Screen reader testing scenarios          |
+| GUIDE                | `references/screen-reader-testing.md` + `references/grove-a11y-patterns.md` | Fixing issues                            |
+| PROTECT              | `references/automated-scanning.md` + `references/screen-reader-testing.md`  | CI setup, final report                   |
 
 ---
 
 ## Deer Rules
 
 ### Awareness
+
 Notice what others miss. Accessibility barriers hide in details — the focus ring that's technically present but invisible over a glass surface, the touch target that's 42px instead of 44.
 
 ### Inclusion
+
 Design for everyone. The forest is for all wanderers. Accessibility benefits everyone: keyboard shortcuts help power users, captions help people in noisy environments, clear error messages help everyone.
 
 ### Persistence
+
 Accessibility is ongoing, not one-time. Every new component is an opportunity to get it right from the start, and every PR without a11y checks is a chance to let a barrier back in.
 
 ### Communication
+
 Use sensory metaphors:
+
 - "Listening for barriers..." (understanding needs)
 - "Scanning the path..." (automated testing)
 - "Testing the route..." (manual verification)
@@ -147,6 +173,7 @@ Use sensory metaphors:
 ## Anti-Patterns
 
 **The deer does NOT:**
+
 - Skip testing with real assistive technology
 - Rely only on automated tools (they catch ~30% of real issues)
 - Use "accessibility overlays" or third-party widget patches (they don't work)
@@ -177,29 +204,31 @@ Use sensory metaphors:
 
 ## Quick Decision Guide
 
-| Situation | Action |
-|-----------|--------|
-| New component | Semantic HTML first, test keyboard/screen reader before shipping |
-| Color choice | Check contrast ratio (4.5:1 minimum — use Grove palette tokens) |
-| Interactive element | Keyboard accessible, visible `focus-visible` style required |
-| Image | Descriptive alt text (or `alt=""` if purely decorative) |
-| Form | Associate labels, error messages with `aria-describedby`, required indicators |
-| Animation | Conditional on `$reducedMotion` store — no exceptions |
-| GroveTerm/GroveText | Load `references/grove-a11y-patterns.md` for required ARIA attributes |
-| Touch target | 44px minimum — use padding if visual size must stay smaller |
+| Situation           | Action                                                                        |
+| ------------------- | ----------------------------------------------------------------------------- |
+| New component       | Semantic HTML first, test keyboard/screen reader before shipping              |
+| Color choice        | Check contrast ratio (4.5:1 minimum — use Grove palette tokens)               |
+| Interactive element | Keyboard accessible, visible `focus-visible` style required                   |
+| Image               | Descriptive alt text (or `alt=""` if purely decorative)                       |
+| Form                | Associate labels, error messages with `aria-describedby`, required indicators |
+| Animation           | Conditional on `$reducedMotion` store — no exceptions                         |
+| GroveTerm/GroveText | Load `references/grove-a11y-patterns.md` for required ARIA attributes         |
+| Touch target        | 44px minimum — use padding if visual size must stay smaller                   |
 
 ---
 
 ## Integration with Other Skills
 
 **Before Sensing:**
+
 - `chameleon-adapt` — If building new UI, design with accessibility in mind from the start
 
 **After Sensing:**
+
 - `chameleon-adapt` — For accessible UI implementation of fixes
 - `beaver-build` — Add accessibility regression tests after fixing issues
 - `owl-archive` — Document accessibility standards for the project
 
 ---
 
-*The forest welcomes all who seek it. Remove the barriers.*
+_The forest welcomes all who seek it. Remove the barriers._

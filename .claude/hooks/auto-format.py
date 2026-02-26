@@ -16,13 +16,14 @@ import subprocess
 import sys
 
 # Formattable file extensions (Prettier-supported types used in Grove)
+# NOTE: .md/.mdx excluded — Prettier collapses code blocks inside fences,
+# garbling multiline examples in skill files and reference docs.
 FORMATTABLE_EXTENSIONS = {
     ".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs",
     ".svelte",
     ".css", ".scss", ".postcss",
     ".json",
     ".html",
-    ".md", ".mdx",
     ".yaml", ".yml",
 }
 

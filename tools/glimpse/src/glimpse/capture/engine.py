@@ -1,7 +1,8 @@
 """Playwright-based capture engine for Glimpse.
 
 Manages browser lifecycle and executes screenshot captures with
-Grove theme injection via localStorage pre-seeding.
+Grove theme injection via localStorage pre-seeding and optional
+console log collection.
 """
 
 import asyncio
@@ -10,7 +11,14 @@ from pathlib import Path
 
 from playwright.async_api import async_playwright, Browser, BrowserContext
 
+from glimpse.capture.console import ConsoleCollector
+from glimpse.capture.injector import build_init_script
 from glimpse.capture.screenshot import CaptureRequest, CaptureResult
+from glimpse.utils.browser import find_chromium_executable
+
+
+# Backward-compat alias (was private, now public in utils.browser)
+_find_chromium_executable = find_chromium_executable
 
 
 class CaptureEngine:
@@ -35,9 +43,15 @@ class CaptureEngine:
     async def start(self) -> None:
         """Launch the Chromium browser."""
         self._playwright = await async_playwright().start()
-        self._browser = await self._playwright.chromium.launch(
-            headless=self._headless,
-        )
+
+        launch_opts: dict = {"headless": self._headless}
+
+        # If Playwright can't find its expected browser, try an installed one
+        executable = _find_chromium_executable()
+        if executable:
+            launch_opts["executable_path"] = executable
+
+        self._browser = await self._playwright.chromium.launch(**launch_opts)
 
     async def stop(self) -> None:
         """Close browser and cleanup Playwright."""
@@ -61,10 +75,11 @@ class CaptureEngine:
         Steps:
         1. Create isolated browser context with viewport + scale
         2. Pre-seed localStorage if season/theme is set (avoids theme flash)
-        3. Navigate to URL, wait for domcontentloaded
-        4. Wait for render settle (configurable delay)
-        5. Capture screenshot (full page, selector, or viewport)
-        6. Save to output path, record metadata
+        3. Attach console collector if --logs requested
+        4. Navigate to URL, wait for domcontentloaded
+        5. Wait for render settle (configurable delay or networkidle)
+        6. Capture screenshot (full page, selector, or viewport)
+        7. Save to output path, record metadata + console messages
         """
         if not self._browser:
             return CaptureResult(
@@ -84,7 +99,7 @@ class CaptureEngine:
 
             # 2. Pre-seed localStorage for theme injection (before navigation)
             if not request.no_inject:
-                init_js = _build_init_script(
+                init_js = build_init_script(
                     season=request.season,
                     theme=request.theme,
                     grove_mode=request.grove_mode,
@@ -94,7 +109,13 @@ class CaptureEngine:
 
             page = await context.new_page()
 
-            # 3. Navigate to URL
+            # 3. Attach console collector before navigation
+            collector = None
+            if request.logs:
+                collector = ConsoleCollector()
+                collector.attach(page)
+
+            # 4. Navigate to URL
             try:
                 await page.goto(
                     request.url,
@@ -105,14 +126,20 @@ class CaptureEngine:
                 return CaptureResult(
                     url=request.url,
                     error=f"Navigation failed: {e}",
+                    console_messages=collector.messages if collector else [],
                 )
 
-            # 4. Wait for render settle
-            if request.wait_ms > 0:
+            # 5. Wait for render settle
+            if request.wait_strategy == "networkidle":
+                try:
+                    await page.wait_for_load_state("networkidle", timeout=request.timeout_ms)
+                except Exception:
+                    pass  # Best-effort; proceed with capture
+            elif request.wait_ms > 0:
                 await page.wait_for_timeout(request.wait_ms)
 
-            # 5. Capture screenshot
-            screenshot_opts = {
+            # 6. Capture screenshot
+            screenshot_opts: dict = {
                 "type": request.format,
             }
 
@@ -135,6 +162,7 @@ class CaptureEngine:
                         viewport=(request.width, request.height),
                         scale=request.scale,
                         error=f"Selector '{request.selector}' not found: {e}",
+                        console_messages=collector.messages if collector else [],
                     )
             elif request.full_page:
                 screenshot_bytes = await page.screenshot(
@@ -144,7 +172,7 @@ class CaptureEngine:
             else:
                 screenshot_bytes = await page.screenshot(**screenshot_opts)
 
-            # 6. Save to file
+            # 7. Save to file
             output_path.parent.mkdir(parents=True, exist_ok=True)
             output_path.write_bytes(screenshot_bytes)
 
@@ -159,6 +187,7 @@ class CaptureEngine:
                 scale=request.scale,
                 size_bytes=len(screenshot_bytes),
                 duration_ms=duration_ms,
+                console_messages=collector.messages if collector else [],
             )
 
         except Exception as e:
@@ -175,50 +204,25 @@ class CaptureEngine:
             if context:
                 await context.close()
 
+    async def capture_many(
+        self,
+        requests: list[CaptureRequest],
+        concurrency: int = 4,
+    ) -> list[CaptureResult]:
+        """Execute multiple captures in parallel with bounded concurrency.
 
-_SAFE_SEASONS = {"spring", "summer", "autumn", "winter", "midnight"}
-_SAFE_THEMES = {"light", "dark", "system"}
+        Uses asyncio.Semaphore to limit parallel browser contexts.
+        Returns results in the same order as the input requests.
+        """
+        semaphore = asyncio.Semaphore(concurrency)
 
+        async def _bounded_capture(req: CaptureRequest) -> CaptureResult:
+            async with semaphore:
+                return await self.capture(req)
 
-def _build_init_script(
-    season: str | None = None,
-    theme: str | None = None,
-    grove_mode: bool | None = None,
-) -> str | None:
-    """Build a JavaScript init script for localStorage pre-seeding.
-
-    This runs before any page JavaScript, so the Svelte stores pick up
-    the correct values on first read — no flash of default theme.
-
-    Defense-in-depth: values are checked against allowlists here even though
-    the CLI layer validates them too. This prevents JS injection if a caller
-    bypasses validation.
-    """
-    statements = []
-
-    if season:
-        if season not in _SAFE_SEASONS:
-            raise ValueError(f"Unsafe season value rejected: {season!r}")
-        statements.append(f"localStorage.setItem('grove-season', '{season}');")
-
-    if theme:
-        if theme not in _SAFE_THEMES:
-            raise ValueError(f"Unsafe theme value rejected: {theme!r}")
-        statements.append(f"localStorage.setItem('theme', '{theme}');")
-        # Apply dark class immediately to prevent flash
-        if theme == "dark":
-            statements.append("document.documentElement.classList.add('dark');")
-        elif theme == "light":
-            statements.append("document.documentElement.classList.remove('dark');")
-
-    if grove_mode is not None:
-        val = "true" if grove_mode else "false"
-        statements.append(f"localStorage.setItem('grove-mode', '{val}');")
-
-    if not statements:
-        return None
-
-    return "\n".join(statements)
+        return await asyncio.gather(
+            *[_bounded_capture(req) for req in requests]
+        )
 
 
 def run_capture(request: CaptureRequest, headless: bool = True) -> CaptureResult:
@@ -231,5 +235,23 @@ def run_capture(request: CaptureRequest, headless: bool = True) -> CaptureResult
     async def _run() -> CaptureResult:
         async with CaptureEngine(headless=headless) as engine:
             return await engine.capture(request)
+
+    return asyncio.run(_run())
+
+
+def run_capture_many(
+    requests: list[CaptureRequest],
+    headless: bool = True,
+    concurrency: int = 4,
+) -> list[CaptureResult]:
+    """Synchronous bridge for parallel captures.
+
+    Spins up one browser, captures all screenshots in parallel, and
+    tears everything down. Designed for matrix and batch commands.
+    """
+
+    async def _run() -> list[CaptureResult]:
+        async with CaptureEngine(headless=headless) as engine:
+            return await engine.capture_many(requests, concurrency=concurrency)
 
     return asyncio.run(_run())

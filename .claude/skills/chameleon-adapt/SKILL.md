@@ -33,14 +33,14 @@ Light    Structure Palette  Effects  Form
 
 ## Reference Routing Table
 
-| Phase   | Reference                          | Load When                                   |
-| ------- | ---------------------------------- | ------------------------------------------- |
-| READ    | —                                  | No reference needed (context assessment)    |
-| SKETCH  | `references/layout-patterns.md`    | When designing page structure               |
-| COLOR   | `references/color-palette.md`      | When applying seasonal colors               |
-| COLOR   | `references/groveterm-system.md`   | When writing user-facing text               |
-| TEXTURE | `references/glass-components.md`   | When adding glassmorphism                   |
-| TEXTURE | `references/nature-components.md`  | When adding nature decorations              |
+| Phase   | Reference                         | Load When                                |
+| ------- | --------------------------------- | ---------------------------------------- |
+| READ    | —                                 | No reference needed (context assessment) |
+| SKETCH  | `references/layout-patterns.md`   | When designing page structure            |
+| COLOR   | `references/color-palette.md`     | When applying seasonal colors            |
+| COLOR   | `references/groveterm-system.md`  | When writing user-facing text            |
+| TEXTURE | `references/glass-components.md`  | When adding glassmorphism                |
+| TEXTURE | `references/nature-components.md` | When adding nature decorations           |
 
 ---
 
@@ -107,7 +107,7 @@ Key decisions: Which glass variant fits each container? Where does content live 
 import { Glass, GlassCard, GlassButton } from '@lattice/ui/ui';
 
 <Glass variant="tint" class="p-6 rounded-xl">
-  <p>Readable text over busy backgrounds</p>
+	<p>Readable text over busy backgrounds</p>
 </Glass>
 ```
 
@@ -160,9 +160,32 @@ gw ci --affected --fail-fast --diagnose
 
 If CI fails: read diagnostics, fix, re-run. The chameleon does not leave broken code behind its color shift.
 
-**Final Checklist (after CI passes):**
+**Visual Verification (mandatory for UI work):**
+
+The chameleon doesn't just build — it _looks_ at what it built. Use Glimpse to capture the result and iterate until the design matches the vision:
+
+```bash
+# Capture the page you just built (start the dev server first)
+uv run --project tools/glimpse glimpse capture http://localhost:5173/[your-page] \
+  --season autumn --theme dark --logs
+
+# Verify all season × theme combos render correctly
+uv run --project tools/glimpse glimpse matrix http://localhost:5173/[your-page] \
+  --seasons spring,summer,autumn,winter --themes light,dark
+
+# Interactive check: click around, verify flows work visually
+uv run --project tools/glimpse glimpse browse http://localhost:5173/[your-page] \
+  --do "click navigation links, scroll down" --screenshot-each --logs
+```
+
+**The iterate loop:** Capture → review screenshot → spot issues → fix → capture again. Repeat until the adaptation is complete. Don't ship UI you haven't seen.
+
+**Final Checklist (after CI passes AND visual verification):**
 
 - [ ] CI: `gw ci --affected` passes clean
+- [ ] Glimpse: Captured page looks correct in all target seasons
+- [ ] Glimpse: Dark mode and light mode both verified visually
+- [ ] Glimpse: No console errors in `--logs` output
 - [ ] Glass effects used for text readability over busy backgrounds?
 - [ ] Lucide icons, no emojis?
 - [ ] Mobile overflow menu for navigation items?
@@ -175,7 +198,7 @@ If CI fails: read diagnostics, fix, re-run. The chameleon does not leave broken 
 - [ ] Grove terminology uses GroveTerm components (not hardcoded)?
 - [ ] `[[term]]` syntax used in data-driven content strings?
 
-**Output:** Fully adapted, accessible, responsive UI ready for production
+**Output:** Fully adapted, accessible, responsive UI ready for production — visually verified
 
 ---
 

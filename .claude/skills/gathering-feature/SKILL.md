@@ -240,9 +240,26 @@ gw ci --affected --fail-fast --diagnose
 
 **If verification fails:** Identify which animal's work caused the failure. Return to that phase, fix the issue, and re-run verification. The gathering does not conclude on broken code.
 
+**Visual Verification (for features with UI):**
+
+If the feature has a user-facing interface, capture it before declaring the gathering complete:
+
+```bash
+# Verify the feature renders correctly across seasons
+uv run --project tools/glimpse glimpse matrix http://localhost:5173/[feature-page] \
+  --seasons autumn,winter --themes light,dark --logs
+
+# Walk through the feature flow visually
+uv run --project tools/glimpse glimpse browse http://localhost:5173/[feature-page] \
+  --do "interact with the new feature elements" --screenshot-each --logs
+```
+
+Review screenshots for visual correctness, console errors, and theme consistency. Fix and re-capture until the feature looks right.
+
 **Validation Checklist (after CI passes):**
 
 - [ ] CI: `gw ci --affected` passes clean (lint, check, test, build)
+- [ ] Glimpse: Feature visually verified (if UI work) — no console errors
 - [ ] Bloodhound: All integration points mapped
 - [ ] Elephant: Feature functional end-to-end
 - [ ] Turtle: Input validation on all entry points

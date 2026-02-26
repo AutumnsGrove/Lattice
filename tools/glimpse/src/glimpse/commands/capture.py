@@ -1,7 +1,8 @@
 """glimpse capture — single screenshot command.
 
 This is the core command. Takes a URL and produces a screenshot with
-optional theme injection, element targeting, and viewport control.
+optional theme injection, element targeting, console log capture,
+and viewport control.
 """
 
 import click
@@ -102,6 +103,18 @@ from glimpse.utils.validation import (
     default=False,
     help="Skip theme injection (capture as-is)",
 )
+@click.option(
+    "--logs", "-l",
+    is_flag=True,
+    default=False,
+    help="Capture browser console output alongside screenshot",
+)
+@click.option(
+    "--auto",
+    is_flag=True,
+    default=False,
+    help="Auto-start dev server if target URL is unreachable",
+)
 @click.pass_context
 def capture(
     ctx: click.Context,
@@ -119,6 +132,8 @@ def capture(
     quality: int | None,
     fmt: str | None,
     no_inject: bool,
+    logs: bool,
+    auto: bool,
 ) -> None:
     """Capture a screenshot of a URL.
 
@@ -126,12 +141,16 @@ def capture(
 
         glimpse capture https://grove.place
 
-        glimpse capture https://grove.place --season autumn --theme dark
+        glimpse capture https://grove.place --season autumn --theme dark --logs
 
         glimpse capture https://grove.place --selector ".hero-section" -o hero.png
     """
     config = ctx.obj["config"]
     output_handler = ctx.obj["output"]
+
+    # Merge global flags from parent group
+    effective_logs = logs or ctx.obj.get("global_logs", False) or config.logs
+    effective_auto = auto or ctx.obj.get("global_auto", False)
 
     # Validate URL
     try:
@@ -140,6 +159,17 @@ def capture(
         output_handler.print_error(str(e))
         ctx.exit(1)
         return
+
+    # Auto-start server if requested
+    if effective_auto:
+        from glimpse.server.manager import ServerManager
+
+        mgr = ServerManager(config)
+        ok, err = mgr.ensure_server(url)
+        if not ok:
+            output_handler.print_error(f"Server not reachable: {err}")
+            ctx.exit(1)
+            return
 
     # Merge CLI flags with config defaults
     effective_season = season
@@ -201,6 +231,7 @@ def capture(
         quality=effective_quality,
         no_inject=no_inject,
         timeout_ms=config.timeout_ms,
+        logs=effective_logs,
     )
 
     # Execute capture

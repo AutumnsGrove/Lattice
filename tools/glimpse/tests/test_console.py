@@ -1,12 +1,12 @@
-"""Tests for glimpse.output.console — output mode behavior."""
+"""Tests for glimpse.output.formatter — output mode behavior."""
 
 import json
 from io import StringIO
 from pathlib import Path
 from unittest.mock import patch
 
-from glimpse.capture.screenshot import CaptureResult
-from glimpse.output.console import GlimpseOutput, _format_bytes, _display_url
+from glimpse.capture.screenshot import CaptureResult, ConsoleMessage
+from glimpse.output.formatter import GlimpseOutput, _format_bytes, _display_url
 
 
 class TestFormatBytes:
@@ -44,15 +44,45 @@ class TestAgentMode:
         )
         with patch("sys.stdout", new_callable=StringIO) as mock_stdout:
             output.print_capture(result)
-            assert mock_stdout.getvalue().strip() == "/tmp/test.png"
+            assert "/tmp/test.png" in mock_stdout.getvalue()
 
-    def test_error_goes_to_stderr(self):
+    def test_failure_uses_fail_prefix(self):
+        """Agent mode failures use [FAIL] prefix per spec contract."""
         output = GlimpseOutput(mode="agent")
         result = CaptureResult(error="Navigation failed")
-        with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
+        with patch("sys.stdout", new_callable=StringIO) as mock_stdout:
             output.print_capture(result)
-            assert "ERROR" in mock_stderr.getvalue()
-            assert "Navigation failed" in mock_stderr.getvalue()
+            assert "[FAIL]" in mock_stdout.getvalue()
+            assert "Navigation failed" in mock_stdout.getvalue()
+
+    def test_console_errors_printed_after_path(self):
+        """Agent mode prints [ERROR] lines after the screenshot path."""
+        output = GlimpseOutput(mode="agent")
+        result = CaptureResult(
+            output_path=Path("/tmp/test.png"),
+            url="https://grove.place",
+            size_bytes=1000,
+            console_messages=[
+                ConsoleMessage(level="error", text="TypeError: x is undefined", url="page.svelte", line=42, col=15),
+                ConsoleMessage(level="warning", text="Deprecated API usage"),
+            ],
+        )
+        with patch("sys.stdout", new_callable=StringIO) as mock_stdout:
+            output.print_capture(result)
+            lines = mock_stdout.getvalue().strip().split("\n")
+            assert "/tmp/test.png" in lines[0]
+            assert "[ERROR]" in lines[1]
+            assert "TypeError" in lines[1]
+            assert "(page.svelte:42:15)" in lines[1]
+            assert "[WARN]" in lines[2]
+            assert "Deprecated" in lines[2]
+
+    def test_print_error_uses_fail_prefix(self):
+        """print_error in agent mode uses [FAIL] prefix."""
+        output = GlimpseOutput(mode="agent")
+        with patch("sys.stdout", new_callable=StringIO) as mock_stdout:
+            output.print_error("Server not reachable: localhost:5173")
+            assert "[FAIL]" in mock_stdout.getvalue()
 
 
 class TestJsonMode:
@@ -91,3 +121,24 @@ class TestJsonMode:
             output.print_error("Bad URL")
             data = json.loads(mock_stdout.getvalue())
             assert data["error"] == "Bad URL"
+
+    def test_console_messages_in_json(self):
+        """JSON output includes console array and counts when logs captured."""
+        output = GlimpseOutput(mode="json")
+        result = CaptureResult(
+            output_path=Path("/tmp/test.png"),
+            url="https://grove.place",
+            console_messages=[
+                ConsoleMessage(level="error", text="TypeError", url="page.svelte", line=42),
+                ConsoleMessage(level="warning", text="Deprecated"),
+                ConsoleMessage(level="log", text="Debug info"),
+            ],
+        )
+        with patch("sys.stdout", new_callable=StringIO) as mock_stdout:
+            output.print_capture(result)
+            data = json.loads(mock_stdout.getvalue())
+            assert "console" in data
+            assert len(data["console"]) == 3
+            assert data["error_count"] == 1
+            assert data["warning_count"] == 1
+            assert data["log_count"] == 1
