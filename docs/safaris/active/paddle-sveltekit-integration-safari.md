@@ -25,7 +25,7 @@
 │  ┌──────────────────────┐     ┌──────────────────────────────┐  │
 │  │  Client (Browser)    │     │  Server (+server.ts routes)  │  │
 │  │                      │     │                              │  │
-│  │  Paddle.js (CDN)     │     │  @paddle/paddle-node-sdk     │  │
+│  │  @paddle/paddle-js   │     │  @paddle/paddle-node-sdk     │  │
 │  │  ┌────────────────┐  │     │  ┌────────────────────────┐  │  │
 │  │  │ Paddle.Init()  │  │     │  │ new Paddle(API_KEY)    │  │  │
 │  │  │ Paddle.Checkout│  │     │  │ paddle.webhooks        │  │  │
@@ -53,7 +53,7 @@
 
 | Library | Side | Purpose | Package |
 |---------|------|---------|---------|
-| **Paddle.js** | Client (browser) | Checkout UI, payment collection | CDN script: `https://cdn.paddle.com/paddle.js` |
+| **Paddle.js** | Client (browser) | Checkout UI, payment collection | `@paddle/paddle-js` (npm) or CDN: `https://cdn.paddle.com/paddle.js` |
 | **Paddle Node SDK** | Server (SvelteKit) | API calls, webhook verification | `@paddle/paddle-node-sdk` |
 
 ---
@@ -62,51 +62,69 @@
 
 *The jeep rolls to the first stop. Binoculars up. How does Paddle.js actually load and work inside a Svelte component?*
 
-### How Paddle.js Loads
+### How Paddle.js Loads — Two Options
 
-Paddle.js is a **CDN script** that injects `window.Paddle` into the browser. It's not an npm package for the client — it's a `<script>` tag.
+**Option A: npm package (recommended for SvelteKit)**
 
-**The script URL:** `https://cdn.paddle.com/paddle.js`
+```bash
+npm install @paddle/paddle-js
+```
+
+Paddle provides an official npm wrapper `@paddle/paddle-js` with TypeScript types and a clean `initializePaddle()` function. This is the right choice for SvelteKit — no script tag injection, proper types, tree-shakeable.
+
+**Option B: CDN script tag**
+
+```html
+<script src="https://cdn.paddle.com/paddle.js"></script>
+```
+
+Injects `window.Paddle` global. Works but requires `@ts-expect-error` casts everywhere.
 
 ### Initialization
 
-After the script loads, you call `Paddle.Initialize()` with your **client-side token** (not the API key — that's server-only):
+After loading, you initialize with your **client-side token** (not the API key — that's server-only):
 
 ```typescript
-window.Paddle.Initialize({
+import { initializePaddle } from '@paddle/paddle-js';
+
+const paddle = await initializePaddle({
   token: "ptk_live_or_sandbox_xxxx",  // Client-side token from Paddle dashboard
   environment: "sandbox",              // or "production"
+  eventCallback: (event) => {
+    // Global event listener for ALL checkout events
+    // 18 event types: checkout.loaded, checkout.completed, checkout.failed, etc.
+  },
 });
 ```
 
 ### SvelteKit Integration Pattern
 
-Since Paddle.js needs the browser DOM, it loads in `onMount`:
+Since Paddle.js needs the browser, it initializes in `onMount`. Using the npm package:
 
 ```svelte
 <!-- src/lib/components/PaddleProvider.svelte -->
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { initializePaddle, type Paddle } from '@paddle/paddle-js';
   import { PUBLIC_PADDLE_CLIENT_TOKEN, PUBLIC_PADDLE_ENV } from '$env/static/public';
 
-  let loaded = false;
+  // Expose the paddle instance to child components via context or store
+  import { setPaddleInstance } from '$lib/stores/paddle';
 
-  onMount(() => {
-    if (loaded) return;
+  onMount(async () => {
+    const paddle = await initializePaddle({
+      token: PUBLIC_PADDLE_CLIENT_TOKEN,
+      environment: PUBLIC_PADDLE_ENV || 'sandbox',
+      eventCallback: (event) => {
+        if (event.name === 'checkout.completed') {
+          // Optimistic UI update — real confirmation comes via webhook
+        }
+      },
+    });
 
-    const script = document.createElement('script');
-    script.src = 'https://cdn.paddle.com/paddle.js';
-    script.async = true;
-
-    script.onload = () => {
-      window.Paddle?.Initialize({
-        token: PUBLIC_PADDLE_CLIENT_TOKEN,
-        environment: PUBLIC_PADDLE_ENV || 'sandbox',
-      });
-    };
-
-    document.body.appendChild(script);
-    loaded = true;
+    if (paddle) {
+      setPaddleInstance(paddle);
+    }
   });
 </script>
 
@@ -114,6 +132,23 @@ Since Paddle.js needs the browser DOM, it loads in `onMount`:
 ```
 
 **Where it goes in Grove:** In the root `+layout.svelte` of `apps/plant`, alongside other providers. It loads once and stays resident.
+
+### Client-Side Checkout Events
+
+The `eventCallback` fires for 18+ events during the checkout lifecycle:
+
+| Event | When |
+|-------|------|
+| `checkout.loaded` | Checkout UI rendered |
+| `checkout.customer.created` | New customer during checkout |
+| `checkout.payment.selected` | Customer chose a payment method |
+| `checkout.payment.initiated` | Payment processing started |
+| `checkout.completed` | Payment succeeded |
+| `checkout.failed` | Payment failed |
+| `checkout.closed` | Customer closed the overlay |
+| `checkout.error` | Something went wrong |
+
+These are **client-side only** — for optimistic UI updates, analytics, and UX feedback. The webhook is still the source of truth for provisioning.
 
 ### Opening a Checkout
 
@@ -124,15 +159,24 @@ Two modes: **overlay** (modal on your page) and **inline** (embedded frame in a 
 ```svelte
 <!-- src/lib/components/PaddleCheckoutButton.svelte -->
 <script lang="ts">
+  import { getPaddleInstance } from '$lib/stores/paddle';
+
   export let priceId: string;
   export let customerEmail: string | undefined = undefined;
   export let customData: Record<string, unknown> = {};
 
   function openCheckout() {
-    window.Paddle?.Checkout.open({
+    const paddle = getPaddleInstance();
+
+    // Two mutually exclusive modes (TypeScript-enforced via `never`):
+    // Mode A: pass items[] (Paddle auto-creates transaction)
+    // Mode B: pass transactionId (you created it server-side)
+    // For new signups, Mode A is simpler:
+
+    paddle?.Checkout.open({
       items: [{ priceId, quantity: 1 }],
       customer: customerEmail ? { email: customerEmail } : undefined,
-      customData,  // Stored on transaction AND subscription
+      customData,  // Stored on transaction AND copied to subscription
       settings: {
         displayMode: 'overlay',
         variant: 'one-page',  // Single-page checkout (vs multi-page)
@@ -231,7 +275,7 @@ When the webhook fires, `customData` is in the payload — we use `grove_onboard
 
 ### Safari Finding
 
-**No SvelteKit-specific Paddle tutorial exists anywhere online.** Zero. This is greenfield territory. But the integration pattern is straightforward because Paddle.js is framework-agnostic — it's a window global. The Svelte adapter is just `onMount` + script injection + `window.Paddle.Checkout.open()`. No special framework adapter needed (unlike Polar.sh which has a dedicated SvelteKit package).
+**No SvelteKit-specific Paddle tutorial exists anywhere online.** Zero. This is greenfield territory. But the integration is clean because `@paddle/paddle-js` is a proper npm package with TypeScript types and `initializePaddle()` — not just a CDN script. The Svelte pattern is `onMount` → `initializePaddle()` → store the instance → `paddle.Checkout.open()`. Typed throughout, no `window` globals or `@ts-expect-error` casts needed.
 
 ---
 
@@ -239,13 +283,17 @@ When the webhook fires, `customData` is in the payload — we use `grove_onboard
 
 *The jeep bounces across a dry riverbed. On the other side, the server-side landscape opens up.*
 
-### Installation & Initialization
+### Installation
 
 ```bash
-npm install @paddle/paddle-node-sdk
-# or
+# Server-side SDK (API calls, webhook verification)
 pnpm add @paddle/paddle-node-sdk
+
+# Client-side SDK (checkout UI, TypeScript types)
+pnpm add @paddle/paddle-js
 ```
+
+### Initialization
 
 ```typescript
 // src/lib/server/paddle.ts
@@ -449,17 +497,29 @@ function verifyPaddleSignature(
 }
 ```
 
-**Or using the Paddle SDK:**
+**Or using the Paddle SDK (recommended — handles everything including typing):**
 
 ```typescript
 import { Paddle, Environment } from '@paddle/paddle-node-sdk';
 
 const paddle = new Paddle(PADDLE_API_KEY, { environment: Environment.production });
 
-// The SDK handles all signature verification internally
-const event = paddle.webhooks.unmarshal(rawBody, PADDLE_WEBHOOK_SECRET, signature);
-// Returns typed event object or throws on invalid signature
+// The SDK handles signature verification + event parsing + type mapping
+// Returns a typed event (SubscriptionCreatedEvent, TransactionCompletedEvent, etc.)
+const event = await paddle.webhooks.unmarshal(rawBody, PADDLE_WEBHOOK_SECRET, signature);
+// Note: unmarshal is ASYNC — uses RuntimeProvider for cross-platform crypto
+// Works in both Node.js and edge runtimes (Cloudflare Workers compatible)
 ```
+
+### Production Warning: 5-Second Replay Window
+
+The Paddle SDK's `WebhooksValidator` rejects signatures where the timestamp is more than **5 seconds** old (`MAX_VALID_TIME_DIFFERENCE = 5`). This is extremely tight — Stripe uses 300 seconds (5 minutes). In production:
+
+- Server clock skew can cause false rejections
+- If your webhook handler takes >5 seconds to receive the request (network latency, cold starts), it'll fail
+- **Mitigation**: Use NTP for accurate server time, or implement your own signature verification with a more generous window (Grove's Stripe handler uses 256 seconds)
+
+If using the custom `verifyPaddleSignature()` function above, you can add your own timestamp tolerance check. If using `paddle.webhooks.unmarshal()`, you're locked to 5 seconds.
 
 ### Webhook Events Grove Needs to Handle
 
