@@ -157,6 +157,11 @@ const PACKAGES = {
 		hasTests: true,
 		isSvelteKit: false,
 	},
+	"workers/lumen": {
+		typecheck: "pnpm exec tsc --noEmit",
+		hasTests: true,
+		isSvelteKit: false,
+	},
 	"workers/timeline-sync": {
 		typecheck: "pnpm exec tsc --noEmit",
 		hasTests: false,

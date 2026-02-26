@@ -17,7 +17,9 @@
 
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import type { Env, LumenWorkerResponse } from "./types";
+import { groveInfraMiddleware } from "@autumnsgrove/infra/cloudflare";
+import type { MiddlewareHandler } from "hono";
+import type { Env, LumenWorkerResponse, AppVariables } from "./types";
 import { apiKeyAuth } from "./auth/middleware";
 import { lumenRateLimit } from "./lib/rate-limit";
 import { inference } from "./routes/inference";
@@ -25,7 +27,7 @@ import { embed } from "./routes/embed";
 import { moderate } from "./routes/moderate";
 import { transcribe } from "./routes/transcribe";
 
-const app = new Hono<{ Bindings: Env }>();
+const app = new Hono<{ Bindings: Env; Variables: AppVariables }>();
 
 // =============================================================================
 // CORS — Allow Grove properties
@@ -38,6 +40,26 @@ app.use(
 		allowMethods: ["GET", "POST", "OPTIONS"],
 		allowHeaders: ["Content-Type", "X-API-Key"],
 	}),
+);
+
+// =============================================================================
+// Infrastructure Context
+// =============================================================================
+
+app.use(
+	"*",
+	groveInfraMiddleware((env) => ({
+		db: (env as unknown as Env).DB,
+		env: env as Record<string, unknown>,
+		dbName: "grove-lumen",
+		observer: (event) => {
+			console.log(
+				`[Infra] ${event.service}.${event.operation} ` +
+					`${event.ok ? "ok" : "ERR"} ${event.durationMs.toFixed(1)}ms` +
+					`${event.detail ? ` — ${event.detail}` : ""}`,
+			);
+		},
+	})) as MiddlewareHandler,
 );
 
 // =============================================================================

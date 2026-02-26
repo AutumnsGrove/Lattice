@@ -1233,6 +1233,9 @@ importers:
 
   workers/lumen:
     dependencies:
+      '@autumnsgrove/infra':
+        specifier: workspace:*
+        version: link:../../libs/infra
       '@autumnsgrove/lattice':
         specifier: workspace:*
         version: link:../../libs/engine
@@ -1323,6 +1326,9 @@ importers:
 
   workers/timeline-sync:
     dependencies:
+      '@autumnsgrove/infra':
+        specifier: workspace:*
+        version: link:../../libs/infra
       '@autumnsgrove/lattice':
         specifier: workspace:*
         version: link:../../libs/engine

@@ -5,6 +5,7 @@
  * Orchestrates the full flow: decrypt tokens → fetch commits → AI → store.
  */
 
+import type { GroveContext, GroveDatabase } from "@autumnsgrove/infra";
 import type {
 	Env,
 	TenantConfig,
@@ -35,7 +36,7 @@ import { RemoteLumenClient } from "@autumnsgrove/lattice/lumen";
 /**
  * Get all enabled tenants with valid configuration.
  */
-export async function getEnabledTenants(curioDb: D1Database): Promise<TenantConfig[]> {
+export async function getEnabledTenants(curioDb: GroveDatabase): Promise<TenantConfig[]> {
 	// Query enabled tenants - secrets are stored separately in tenant_secrets table
 	const result = await curioDb
 		.prepare(
@@ -56,6 +57,7 @@ export async function getEnabledTenants(curioDb: D1Database): Promise<TenantConf
       WHERE enabled = 1
     `,
 		)
+		.bind()
 		.all<TenantConfigRow>();
 
 	return (result.results || []).map(parseConfigRow);
@@ -69,15 +71,17 @@ export async function processTenantTimeline(
 	config: TenantConfig,
 	targetDate: string,
 	env: Env,
+	ctx: GroveContext,
 ): Promise<GenerationResult> {
 	const logPrefix = `[${config.tenantId}]`;
 
 	try {
 		// 0. Check if summary already exists (skip regeneration)
-		const existing = await env.CURIO_DB.prepare(
-			`SELECT 1 FROM timeline_summaries
+		const existing = await ctx.db
+			.prepare(
+				`SELECT 1 FROM timeline_summaries
        WHERE tenant_id = ? AND summary_date = ? AND commit_count > 0`,
-		)
+			)
 			.bind(config.tenantId, targetDate)
 			.first();
 
@@ -116,7 +120,7 @@ export async function processTenantTimeline(
 
 		// 2. Fetch GitHub commits
 		console.log(`${logPrefix} Fetching commits for ${targetDate}...`);
-		const commits = await fetchGitHubCommits(config, githubToken, targetDate, env.CURIO_DB);
+		const commits = await fetchGitHubCommits(config, githubToken, targetDate, ctx.db);
 
 		if (commits.length === 0) {
 			console.log(`${logPrefix} No commits for ${targetDate}, skipping`);
@@ -135,7 +139,7 @@ export async function processTenantTimeline(
 
 		// 4. Get historical context
 		const repos = [...new Set(commits.map((c) => c.repo))];
-		const historicalContext = await getHistoricalContext(env.CURIO_DB, config.tenantId, targetDate);
+		const historicalContext = await getHistoricalContext(ctx.db, config.tenantId, targetDate);
 
 		// Pre-detect task type for continuation detection
 		const commitText = commits.map((c) => c.message).join(" ");
@@ -186,22 +190,20 @@ export async function processTenantTimeline(
 			fetcher: env.LUMEN,
 		});
 
-		const aiResult = await lumen.run(
-			{
-				task: "summary",
-				input: [
-					{ role: "system", content: systemPrompt },
-					{ role: "user", content: userPrompt },
-				],
-				tenant: config.tenantId,
-				options: {
-					model: config.openrouterModel || DEFAULT_OPENROUTER_MODEL,
-					tenantApiKey: openrouterKey,
-					maxTokens: 2048,
-					temperature: 0.7,
-				},
+		const aiResult = await lumen.run({
+			task: "summary",
+			input: [
+				{ role: "system", content: systemPrompt },
+				{ role: "user", content: userPrompt },
+			],
+			tenant: config.tenantId,
+			options: {
+				model: config.openrouterModel || DEFAULT_OPENROUTER_MODEL,
+				tenantApiKey: openrouterKey,
+				maxTokens: 2048,
+				temperature: 0.7,
 			},
-		);
+		});
 
 		// 7. Parse AI response
 		const parsed = parseAIResponse(aiResult.content);
@@ -224,8 +226,9 @@ export async function processTenantTimeline(
 
 		await Promise.all([
 			// Store summary (curio table)
-			env.CURIO_DB.prepare(
-				`INSERT INTO timeline_summaries (
+			ctx.db
+				.prepare(
+					`INSERT INTO timeline_summaries (
           id,
           tenant_id,
           summary_date,
@@ -259,7 +262,7 @@ export async function processTenantTimeline(
           continuation_of = excluded.continuation_of,
           focus_streak = excluded.focus_streak,
           created_at = strftime('%s', 'now')`,
-			)
+				)
 				.bind(
 					summaryId,
 					config.tenantId,
@@ -281,8 +284,9 @@ export async function processTenantTimeline(
 				.run(),
 
 			// Update activity table (curio table)
-			env.CURIO_DB.prepare(
-				`INSERT INTO timeline_activity (
+			ctx.db
+				.prepare(
+					`INSERT INTO timeline_activity (
           tenant_id,
           activity_date,
           commit_count,
@@ -295,7 +299,7 @@ export async function processTenantTimeline(
           repos_active = excluded.repos_active,
           lines_added = excluded.lines_added,
           lines_deleted = excluded.lines_deleted`,
-			)
+				)
 				.bind(
 					config.tenantId,
 					targetDate,
@@ -307,8 +311,9 @@ export async function processTenantTimeline(
 				.run(),
 
 			// Log AI usage (curio table)
-			env.CURIO_DB.prepare(
-				`INSERT INTO timeline_ai_usage (
+			ctx.db
+				.prepare(
+					`INSERT INTO timeline_ai_usage (
           tenant_id,
           used_at,
           model,
@@ -316,7 +321,7 @@ export async function processTenantTimeline(
           output_tokens,
           cost_usd
         ) VALUES (?, strftime('%s', 'now'), ?, ?, ?, ?)`,
-			)
+				)
 				.bind(
 					config.tenantId,
 					aiResult.model,

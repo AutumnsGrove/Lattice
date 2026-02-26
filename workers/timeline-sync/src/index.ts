@@ -12,21 +12,43 @@
  * Error isolation: If one tenant fails, others continue processing.
  */
 
+import { createCloudflareContext } from "@autumnsgrove/infra/cloudflare";
+import type { GroveContext } from "@autumnsgrove/infra";
 import type { Env, GenerationResult } from "./config";
 import { getEnabledTenants, processTenantTimeline } from "./generator";
 import { createSecretsManager } from "./secrets-manager";
+
+function createContext(env: Env): GroveContext {
+	return createCloudflareContext({
+		db: env.CURIO_DB,
+		env: env as unknown as Record<string, unknown>,
+		dbName: "grove-curios-db",
+		observer: (event) => {
+			console.log(
+				`[Infra] ${event.service}.${event.operation} ` +
+					`${event.ok ? "ok" : "ERR"} ${event.durationMs.toFixed(1)}ms` +
+					`${event.detail ? ` — ${event.detail}` : ""}`,
+			);
+		},
+	});
+}
 
 export default {
 	/**
 	 * Cron trigger handler - called by Cloudflare Cron at 1 AM UTC daily.
 	 */
-	async scheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
+	async scheduled(
+		controller: ScheduledController,
+		env: Env,
+		execCtx: ExecutionContext,
+	): Promise<void> {
 		const targetDate = getYesterdayUTC();
 		console.log(`[Timeline Sync] Starting nightly sync for ${targetDate}...`);
+		const ctx = createContext(env);
 
 		try {
 			// 1. Get enabled tenants
-			const tenants = await getEnabledTenants(env.CURIO_DB);
+			const tenants = await getEnabledTenants(ctx.db);
 
 			if (tenants.length === 0) {
 				console.log("[Timeline Sync] No enabled tenants found, skipping");
@@ -37,7 +59,7 @@ export default {
 
 			// 2. Process all tenants with error isolation
 			const results = await Promise.allSettled(
-				tenants.map((tenant) => processTenantTimeline(tenant, targetDate, env)),
+				tenants.map((tenant) => processTenantTimeline(tenant, targetDate, env, ctx)),
 			);
 
 			// 3. Log summary
@@ -60,13 +82,14 @@ export default {
 	 */
 	async fetch(request: Request, env: Env): Promise<Response> {
 		const url = new URL(request.url);
+		const ctx = createContext(env);
 
 		// GET / - Run sync for yesterday (for manual testing)
 		if (request.method === "GET" && url.pathname === "/") {
 			const targetDate = url.searchParams.get("date") || getYesterdayUTC();
 
 			try {
-				const tenants = await getEnabledTenants(env.CURIO_DB);
+				const tenants = await getEnabledTenants(ctx.db);
 
 				if (tenants.length === 0) {
 					return Response.json({
@@ -80,7 +103,7 @@ export default {
 				// Process all tenants
 				const results: GenerationResult[] = [];
 				for (const tenant of tenants) {
-					const result = await processTenantTimeline(tenant, targetDate, env);
+					const result = await processTenantTimeline(tenant, targetDate, env, ctx);
 					results.push(result);
 				}
 
@@ -114,7 +137,7 @@ export default {
 		// GET /tenants - List enabled tenants (for debugging)
 		if (request.method === "GET" && url.pathname === "/tenants") {
 			try {
-				const tenants = await getEnabledTenants(env.CURIO_DB);
+				const tenants = await getEnabledTenants(ctx.db);
 				return Response.json({
 					count: tenants.length,
 					tenants: tenants.map((t) => ({
@@ -153,7 +176,7 @@ export default {
 				}> = [];
 
 				try {
-					const tenants = await getEnabledTenants(env.CURIO_DB);
+					const tenants = await getEnabledTenants(ctx.db);
 					dbConnected = true;
 					tenantCount = tenants.length;
 					enabledTenants = tenants.map((t) => ({
@@ -185,10 +208,11 @@ export default {
 				if (dbConnected) {
 					for (const t of enabledTenants) {
 						try {
-							const legacy = await env.CURIO_DB.prepare(
-								`SELECT github_token_encrypted, openrouter_key_encrypted
+							const legacy = await ctx.db
+								.prepare(
+									`SELECT github_token_encrypted, openrouter_key_encrypted
                  FROM timeline_curio_config WHERE tenant_id = ?`,
-							)
+								)
 								.bind(t.tenantId)
 								.first<{
 									github_token_encrypted: string | null;

@@ -10,7 +10,7 @@
  */
 
 import { createMiddleware } from "hono/factory";
-import type { Env, LumenWorkerResponse } from "../types";
+import type { Env, LumenWorkerResponse, AppVariables } from "../types";
 
 /**
  * Constant-time string comparison to prevent timing attacks.
@@ -34,7 +34,7 @@ async function timingSafeEqual(a: string, b: string): Promise<boolean> {
 	return equal && bufA.length === bufB.length;
 }
 
-export type AuthVariables = {
+export type AuthVariables = AppVariables & {
 	/** Whether the caller authenticated successfully */
 	authenticated: boolean;
 };

@@ -11,15 +11,16 @@
  * - Focus Streak: Number of consecutive days on same task
  */
 
+import type { GroveDatabase } from "@autumnsgrove/infra";
 import type {
-  Commit,
-  TaskType,
-  ContextBrief,
-  DetectedFocus,
-  TaskContinuation,
-  HistoricalContextEntry,
-  HistoricalContextRow,
-  SummaryContextData,
+	Commit,
+	TaskType,
+	ContextBrief,
+	DetectedFocus,
+	TaskContinuation,
+	HistoricalContextEntry,
+	HistoricalContextRow,
+	SummaryContextData,
 } from "./config";
 
 // =============================================================================
@@ -27,8 +28,8 @@ import type {
 // =============================================================================
 
 interface TaskPattern {
-  pattern: RegExp;
-  task: TaskType;
+	pattern: RegExp;
+	task: TaskType;
 }
 
 /**
@@ -36,27 +37,27 @@ interface TaskPattern {
  * Ordered roughly by specificity (more specific patterns first).
  */
 const TASK_PATTERNS: TaskPattern[] = [
-  {
-    pattern: /security|audit|vulnerab|xss|csrf|auth.*fix/i,
-    task: "security work",
-  },
-  { pattern: /migration?|migrate|upgrade/i, task: "migration" },
-  { pattern: /refactor|cleanup|reorganize|restructur/i, task: "refactoring" },
-  { pattern: /test|coverage|spec|jest|vitest/i, task: "testing improvements" },
-  { pattern: /docs?|documentation|readme|comment/i, task: "documentation" },
-  { pattern: /ui|design|style|css|tailwind|layout/i, task: "UI/UX work" },
-  { pattern: /api|endpoint|route|graphql|rest/i, task: "API development" },
-  { pattern: /auth|login|session|oauth|jwt/i, task: "authentication" },
-  {
-    pattern: /perf|performance|optimiz|speed|cache/i,
-    task: "performance optimization",
-  },
-  {
-    pattern: /deploy|ci|cd|pipeline|docker|build/i,
-    task: "deployment/CI work",
-  },
-  { pattern: /database|schema|sql|d1/i, task: "database work" },
-  { pattern: /bug|fix|patch|issue|error/i, task: "bug fixes" },
+	{
+		pattern: /security|audit|vulnerab|xss|csrf|auth.*fix/i,
+		task: "security work",
+	},
+	{ pattern: /migration?|migrate|upgrade/i, task: "migration" },
+	{ pattern: /refactor|cleanup|reorganize|restructur/i, task: "refactoring" },
+	{ pattern: /test|coverage|spec|jest|vitest/i, task: "testing improvements" },
+	{ pattern: /docs?|documentation|readme|comment/i, task: "documentation" },
+	{ pattern: /ui|design|style|css|tailwind|layout/i, task: "UI/UX work" },
+	{ pattern: /api|endpoint|route|graphql|rest/i, task: "API development" },
+	{ pattern: /auth|login|session|oauth|jwt/i, task: "authentication" },
+	{
+		pattern: /perf|performance|optimiz|speed|cache/i,
+		task: "performance optimization",
+	},
+	{
+		pattern: /deploy|ci|cd|pipeline|docker|build/i,
+		task: "deployment/CI work",
+	},
+	{ pattern: /database|schema|sql|d1/i, task: "database work" },
+	{ pattern: /bug|fix|patch|issue|error/i, task: "bug fixes" },
 ];
 
 // =============================================================================
@@ -68,16 +69,16 @@ const TASK_PATTERNS: TaskPattern[] = [
  * Used before AI generates the summary to detect multi-day continuation early.
  */
 export function detectTaskFromText(text: string): TaskType | null {
-  if (!text) return null;
+	if (!text) return null;
 
-  const scores = TASK_PATTERNS.map(({ pattern, task }) => {
-    const matches = text.match(new RegExp(pattern, "gi")) || [];
-    return { task, score: matches.length };
-  }).filter((s) => s.score > 0);
+	const scores = TASK_PATTERNS.map(({ pattern, task }) => {
+		const matches = text.match(new RegExp(pattern, "gi")) || [];
+		return { task, score: matches.length };
+	}).filter((s) => s.score > 0);
 
-  if (scores.length === 0) return null;
-  scores.sort((a, b) => b.score - a.score);
-  return scores[0].task;
+	if (scores.length === 0) return null;
+	scores.sort((a, b) => b.score - a.score);
+	return scores[0].task;
 }
 
 /**
@@ -85,21 +86,21 @@ export function detectTaskFromText(text: string): TaskType | null {
  * More accurate after AI has analyzed the work.
  */
 export function detectTask(
-  summary: { brief: string; detailed: string },
-  commits: Commit[],
+	summary: { brief: string; detailed: string },
+	commits: Commit[],
 ): TaskType | null {
-  const allMessages = commits.map((c) => c.message).join(" ");
-  const summaryText = [summary.brief || "", summary.detailed || ""].join(" ");
-  const combinedText = allMessages + " " + summaryText;
+	const allMessages = commits.map((c) => c.message).join(" ");
+	const summaryText = [summary.brief || "", summary.detailed || ""].join(" ");
+	const combinedText = allMessages + " " + summaryText;
 
-  const scores = TASK_PATTERNS.map(({ pattern, task }) => {
-    const matches = combinedText.match(new RegExp(pattern, "gi")) || [];
-    return { task, score: matches.length };
-  }).filter((s) => s.score > 0);
+	const scores = TASK_PATTERNS.map(({ pattern, task }) => {
+		const matches = combinedText.match(new RegExp(pattern, "gi")) || [];
+		return { task, score: matches.length };
+	}).filter((s) => s.score > 0);
 
-  if (scores.length === 0) return null;
-  scores.sort((a, b) => b.score - a.score);
-  return scores[0].task;
+	if (scores.length === 0) return null;
+	scores.sort((a, b) => b.score - a.score);
+	return scores[0].task;
 }
 
 // =============================================================================
@@ -110,37 +111,34 @@ export function detectTask(
  * Extract main focus from summary markdown.
  * Looks for the brief summary or first substantive sentence.
  */
-function extractMainFocus(summary: {
-  brief: string;
-  detailed: string;
-}): string {
-  // Use the brief summary if available
-  if (summary.brief && summary.brief.length > 20) {
-    const brief = summary.brief.substring(0, 200);
-    const sentenceEnd = brief.search(/[.!?]\s/);
-    if (sentenceEnd > 50) {
-      return brief.substring(0, sentenceEnd + 1).trim();
-    }
-    return brief.trim();
-  }
+function extractMainFocus(summary: { brief: string; detailed: string }): string {
+	// Use the brief summary if available
+	if (summary.brief && summary.brief.length > 20) {
+		const brief = summary.brief.substring(0, 200);
+		const sentenceEnd = brief.search(/[.!?]\s/);
+		if (sentenceEnd > 50) {
+			return brief.substring(0, sentenceEnd + 1).trim();
+		}
+		return brief.trim();
+	}
 
-  // Fallback: try to extract from detailed content
-  if (summary.detailed) {
-    const lines = summary.detailed.split("\n").filter((l) => l.trim());
+	// Fallback: try to extract from detailed content
+	if (summary.detailed) {
+		const lines = summary.detailed.split("\n").filter((l) => l.trim());
 
-    for (const line of lines) {
-      if (line.startsWith("#")) continue;
-      if (line.match(/^[-*+]\s*$/)) continue;
-      if (line.length > 20 && line.length < 200) {
-        return line
-          .replace(/^[-*+]\s*/, "")
-          .replace(/\*\*/g, "")
-          .trim();
-      }
-    }
-  }
+		for (const line of lines) {
+			if (line.startsWith("#")) continue;
+			if (line.match(/^[-*+]\s*$/)) continue;
+			if (line.length > 20 && line.length < 200) {
+				return line
+					.replace(/^[-*+]\s*/, "")
+					.replace(/\*\*/g, "")
+					.trim();
+			}
+		}
+	}
 
-  return "Various development tasks";
+	return "Various development tasks";
 }
 
 /**
@@ -148,43 +146,40 @@ function extractMainFocus(summary: {
  * Used for passing historical context to future summaries.
  */
 export function generateContextBrief(
-  summary: { brief: string; detailed: string },
-  commits: Commit[],
-  date: string,
+	summary: { brief: string; detailed: string },
+	commits: Commit[],
+	date: string,
 ): ContextBrief {
-  const repos = [...new Set(commits.map((c) => c.repo))];
-  const linesChanged = commits.reduce(
-    (sum, c) => sum + (c.additions || 0) + (c.deletions || 0),
-    0,
-  );
-  const mainFocus = extractMainFocus(summary);
-  const detectedTask = detectTask(summary, commits);
+	const repos = [...new Set(commits.map((c) => c.repo))];
+	const linesChanged = commits.reduce((sum, c) => sum + (c.additions || 0) + (c.deletions || 0), 0);
+	const mainFocus = extractMainFocus(summary);
+	const detectedTask = detectTask(summary, commits);
 
-  return {
-    date,
-    mainFocus,
-    repos: repos.slice(0, 3), // Top 3 repos
-    linesChanged,
-    commitCount: commits.length,
-    detectedTask,
-  };
+	return {
+		date,
+		mainFocus,
+		repos: repos.slice(0, 3), // Top 3 repos
+		linesChanged,
+		commitCount: commits.length,
+		detectedTask,
+	};
 }
 
 /**
  * Build detected focus object for storage.
  */
 export function buildDetectedFocus(
-  task: TaskType | null,
-  date: string,
-  repos: string[],
+	task: TaskType | null,
+	date: string,
+	repos: string[],
 ): DetectedFocus | null {
-  if (!task) return null;
+	if (!task) return null;
 
-  return {
-    task,
-    startDate: date,
-    repos: repos.slice(0, 3),
-  };
+	return {
+		task,
+		startDate: date,
+		repos: repos.slice(0, 3),
+	};
 }
 
 // =============================================================================
@@ -195,40 +190,40 @@ export function buildDetectedFocus(
  * Safely parse JSON, returning a default value on failure.
  */
 function safeParseJson<T>(json: string | null, defaultValue: T): T {
-  if (!json) return defaultValue;
-  try {
-    return JSON.parse(json) as T;
-  } catch {
-    return defaultValue;
-  }
+	if (!json) return defaultValue;
+	try {
+		return JSON.parse(json) as T;
+	} catch {
+		return defaultValue;
+	}
 }
 
 /**
  * Retrieve historical context for summary generation.
  * Returns last 3 days of context briefs (skipping rest days).
  *
- * @param db - D1 database binding
+ * @param db - GroveDatabase (Curio DB)
  * @param tenantId - Tenant ID for multi-tenant isolation
  * @param targetDate - Target date (YYYY-MM-DD) to get context for
  */
 export async function getHistoricalContext(
-  db: D1Database,
-  tenantId: string,
-  targetDate: string,
+	db: GroveDatabase,
+	tenantId: string,
+	targetDate: string,
 ): Promise<HistoricalContextEntry[]> {
-  const dateObj = new Date(targetDate);
+	const dateObj = new Date(targetDate);
 
-  // Get past 7 days to account for gaps (weekends, etc)
-  // but only return up to 3 with actual context
-  const dates: string[] = [];
-  for (let i = 1; i <= 7; i++) {
-    const d = new Date(dateObj);
-    d.setDate(d.getDate() - i);
-    dates.push(d.toISOString().split("T")[0]);
-  }
+	// Get past 7 days to account for gaps (weekends, etc)
+	// but only return up to 3 with actual context
+	const dates: string[] = [];
+	for (let i = 1; i <= 7; i++) {
+		const d = new Date(dateObj);
+		d.setDate(d.getDate() - i);
+		dates.push(d.toISOString().split("T")[0]);
+	}
 
-  const placeholders = dates.map(() => "?").join(",");
-  const query = `
+	const placeholders = dates.map(() => "?").join(",");
+	const query = `
     SELECT summary_date, context_brief, detected_focus, brief_summary, commit_count
     FROM timeline_summaries
     WHERE tenant_id = ?
@@ -238,28 +233,28 @@ export async function getHistoricalContext(
     LIMIT 3
   `;
 
-  try {
-    const results = await db
-      .prepare(query)
-      .bind(tenantId, ...dates)
-      .all<HistoricalContextRow>();
+	try {
+		const results = await db
+			.prepare(query)
+			.bind(tenantId, ...dates)
+			.all<HistoricalContextRow>();
 
-    return results.results
-      .map((row) => ({
-        date: row.summary_date,
-        brief: row.context_brief
-          ? safeParseJson<ContextBrief | null>(row.context_brief, null)
-          : null,
-        focus: row.detected_focus
-          ? safeParseJson<DetectedFocus | null>(row.detected_focus, null)
-          : null,
-        briefSummary: row.brief_summary,
-      }))
-      .filter((r) => r.brief || r.briefSummary);
-  } catch (error) {
-    console.error("Failed to get historical context:", error);
-    return [];
-  }
+		return results.results
+			.map((row) => ({
+				date: row.summary_date,
+				brief: row.context_brief
+					? safeParseJson<ContextBrief | null>(row.context_brief, null)
+					: null,
+				focus: row.detected_focus
+					? safeParseJson<DetectedFocus | null>(row.detected_focus, null)
+					: null,
+				briefSummary: row.brief_summary,
+			}))
+			.filter((r) => r.brief || r.briefSummary);
+	} catch (error) {
+		console.error("Failed to get historical context:", error);
+		return [];
+	}
 }
 
 // =============================================================================
@@ -271,35 +266,35 @@ export async function getHistoricalContext(
  * Checks if the same task type appears across consecutive days.
  */
 export function detectContinuation(
-  historicalContext: HistoricalContextEntry[],
-  currentFocus: TaskType | null,
+	historicalContext: HistoricalContextEntry[],
+	currentFocus: TaskType | null,
 ): TaskContinuation | null {
-  if (!currentFocus || historicalContext.length === 0) {
-    return null;
-  }
+	if (!currentFocus || historicalContext.length === 0) {
+		return null;
+	}
 
-  let streak = 0;
-  let startDate: string | null = null;
+	let streak = 0;
+	let startDate: string | null = null;
 
-  for (const ctx of historicalContext) {
-    const ctxFocus = ctx.focus?.task || ctx.brief?.detectedTask;
-    if (ctxFocus === currentFocus) {
-      streak++;
-      startDate = ctx.date;
-    } else {
-      break; // Streak broken
-    }
-  }
+	for (const ctx of historicalContext) {
+		const ctxFocus = ctx.focus?.task || ctx.brief?.detectedTask;
+		if (ctxFocus === currentFocus) {
+			streak++;
+			startDate = ctx.date;
+		} else {
+			break; // Streak broken
+		}
+	}
 
-  if (streak >= 1 && startDate) {
-    return {
-      task: currentFocus,
-      startDate,
-      dayCount: streak + 1, // +1 for current day
-    };
-  }
+	if (streak >= 1 && startDate) {
+		return {
+			task: currentFocus,
+			startDate,
+			dayCount: streak + 1, // +1 for current day
+		};
+	}
 
-  return null;
+	return null;
 }
 
 // =============================================================================
@@ -311,40 +306,37 @@ export function detectContinuation(
  * Condensed single-line format to minimize token usage.
  */
 export function formatHistoricalContextForPrompt(
-  historicalContext: HistoricalContextEntry[],
+	historicalContext: HistoricalContextEntry[],
 ): string {
-  if (!historicalContext || historicalContext.length === 0) {
-    return "";
-  }
+	if (!historicalContext || historicalContext.length === 0) {
+		return "";
+	}
 
-  // Condensed format: one line per day to save tokens
-  const lines = historicalContext.map((ctx) => {
-    const brief = ctx.brief;
-    const focus = brief?.mainFocus || ctx.briefSummary || "Various work";
-    const repos = brief?.repos?.join(", ") || "multiple repos";
-    const task = ctx.focus?.task || brief?.detectedTask;
-    const loc = brief?.linesChanged || 0;
-    // Truncate focus to ~80 chars to keep context lean
-    const shortFocus =
-      focus.length > 80 ? focus.substring(0, 77) + "..." : focus;
-    const locStr = loc > 0 ? `, ~${loc} lines` : "";
+	// Condensed format: one line per day to save tokens
+	const lines = historicalContext.map((ctx) => {
+		const brief = ctx.brief;
+		const focus = brief?.mainFocus || ctx.briefSummary || "Various work";
+		const repos = brief?.repos?.join(", ") || "multiple repos";
+		const task = ctx.focus?.task || brief?.detectedTask;
+		const loc = brief?.linesChanged || 0;
+		// Truncate focus to ~80 chars to keep context lean
+		const shortFocus = focus.length > 80 ? focus.substring(0, 77) + "..." : focus;
+		const locStr = loc > 0 ? `, ~${loc} lines` : "";
 
-    return `- ${ctx.date}: ${shortFocus} (${repos}${locStr}${task ? `, ${task}` : ""})`;
-  });
+		return `- ${ctx.date}: ${shortFocus} (${repos}${locStr}${task ? `, ${task}` : ""})`;
+	});
 
-  return lines.join("\n");
+	return lines.join("\n");
 }
 
 /**
  * Format continuation info for prompt inclusion.
  * Gives the AI guidance on acknowledging multi-day work naturally.
  */
-export function formatContinuationForPrompt(
-  continuation: TaskContinuation | null,
-): string {
-  if (!continuation) return "";
+export function formatContinuationForPrompt(continuation: TaskContinuation | null): string {
+	if (!continuation) return "";
 
-  return `## Ongoing Task Detected
+	return `## Ongoing Task Detected
 
 This appears to be day ${continuation.dayCount} of work on "${continuation.task}"
 (started ${continuation.startDate}).
@@ -362,37 +354,33 @@ Avoid: "Amazing progress!" or "You're crushing it!" or any excitement about stre
  * Build complete context data for storage after summary generation.
  */
 export function buildSummaryContextData(
-  summary: { brief: string; detailed: string },
-  commits: Commit[],
-  date: string,
-  historicalContext: HistoricalContextEntry[],
-  preDetectedTask: TaskType | null,
+	summary: { brief: string; detailed: string },
+	commits: Commit[],
+	date: string,
+	historicalContext: HistoricalContextEntry[],
+	preDetectedTask: TaskType | null,
 ): SummaryContextData {
-  const repos = [...new Set(commits.map((c) => c.repo))];
+	const repos = [...new Set(commits.map((c) => c.repo))];
 
-  // Generate context brief
-  const contextBrief = generateContextBrief(summary, commits, date);
+	// Generate context brief
+	const contextBrief = generateContextBrief(summary, commits, date);
 
-  // Refine task detection with full summary content
-  const detectedTaskType = detectTask(summary, commits);
-  const detectedFocus = buildDetectedFocus(detectedTaskType, date, repos);
+	// Refine task detection with full summary content
+	const detectedTaskType = detectTask(summary, commits);
+	const detectedFocus = buildDetectedFocus(detectedTaskType, date, repos);
 
-  // Update continuation detection with refined task type
-  let continuation = detectContinuation(historicalContext, preDetectedTask);
-  if (detectedTaskType && detectedTaskType !== preDetectedTask) {
-    continuation = detectContinuation(historicalContext, detectedTaskType);
-  }
+	// Update continuation detection with refined task type
+	let continuation = detectContinuation(historicalContext, preDetectedTask);
+	if (detectedTaskType && detectedTaskType !== preDetectedTask) {
+		continuation = detectContinuation(historicalContext, detectedTaskType);
+	}
 
-  const focusStreak = continuation
-    ? continuation.dayCount
-    : detectedTaskType
-      ? 1
-      : 0;
+	const focusStreak = continuation ? continuation.dayCount : detectedTaskType ? 1 : 0;
 
-  return {
-    contextBrief,
-    detectedFocus,
-    continuationOf: continuation?.startDate || null,
-    focusStreak,
-  };
+	return {
+		contextBrief,
+		detectedFocus,
+		continuationOf: continuation?.startDate || null,
+		focusStreak,
+	};
 }
