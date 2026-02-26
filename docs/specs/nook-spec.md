@@ -126,10 +126,12 @@ The key insight: the cloud side is not a separate Nook Worker. It's a **new modu
 | AI inference | LM Studio (localhost) | Already setup, OpenAI-compatible API, Qwen3-VL 7B |
 | Video analysis | ffprobe + Qwen3-VL | Probe for smart-skip, VLM for content understanding |
 | Compression | video-compressor (Python lib) | Existing project, imported as library via UV |
+| HLS packaging | ffmpeg HLS muxer | Segment long videos into adaptive quality tiers |
 | Cloud backend | Lattice engine module | Composes with Amber, Threshold, Heartwood |
 | Video storage | Cloudflare R2 | S3-compatible, $0.015/GB/month, multipart upload |
 | Video catalog | Cloudflare D1 | SQLite at the edge, tenant-scoped metadata |
-| Streaming | Cloudflare Workers | Range-request serving, authenticated access |
+| Streaming | Cloudflare Workers | Progressive MP4 (<5 min) + HLS adaptive (≥5 min) |
+| Video player | Lattice MediaPlayer + hls.js | Extend existing glassmorphic player with HLS support |
 | Auth | Heartwood | OAuth + passkey, PKCE flow, allowlist gate |
 
 ---
@@ -161,16 +163,52 @@ Processing happens in batches of 20-50 videos. This lets you course-correct the 
 │     │                          │
 │     ▼                          ▼
 │
+├─ 3b. HLS PACKAGING ──── for videos ≥5 minutes
+│     │
+│     ├─ 3 quality tiers: 1080p, 720p, 480p
+│     ├─ 6-10 second segments + .m3u8 manifest
+│     └─ Videos <5 min stay as progressive MP4
+│
 ├─ 4. REVIEW UI ──────── batch lands in local web app
 │     │
 │     ├─ Grid view: quick triage (approve / skip / flag)
 │     ├─ Detail view: full curation (thumbnails, tags, description)
 │     └─ "Upload approved" button
 │
-├─ 5. UPLOAD ────────── R2 multipart, S3 API
+├─ 5. UPLOAD ────────── throttled background, R2 multipart
+│     │
+│     ├─ Bandwidth cap: user-configured (set on first run)
+│     ├─ Auto-resume on failure
+│     └─ Runs in background without saturating connection
 │
 └─ 6. REGISTER ──────── JSON manifest to Lattice Nook API
 ```
+
+### Calibration Loop (First-Time Import)
+
+When you first point Nook at your library of hundreds of videos, you don't fire-and-forget. You calibrate.
+
+```
+Round 1: CALIBRATION (20 videos)
+────────────────────────────────
+  Process 20 videos → review in UI → approve/skip/edit
+
+  Your review decisions become few-shot examples:
+    "You categorized this cooking video as 'shareable' with tag 'friends'"
+    "You changed this description from X to Y"
+    "You skipped this blurry phone clip"
+
+Round 2+: INFORMED BATCHES (50 videos each)
+───────────────────────────────────────────
+  AI receives your Round 1 decisions as context
+  Prompts include: "Here are examples of how the owner categorized
+  similar videos. Match their style and preferences."
+
+  After each batch, new decisions refine the few-shot pool.
+  The AI learns your taste. Accuracy improves with each round.
+```
+
+The calibration loop turns a weekend project into a smooth first experience. Instead of fixing 200 miscategorized videos, you fix 3-4 in the first batch and the AI gets it right for the rest.
 
 ### Smart Skip (Probe)
 
@@ -225,14 +263,24 @@ Video: cooking_trip_2024.mp4 (12 minutes)
                   ▼      ▼     ▼     ▼         ▼      ▼
                [ 24 frames sent to Qwen3-VL ]
 
-  Prompt: "What's happening in this video? Describe each frame
-           briefly. Flag any segments that might contain:
-           private conversations, identifiable people who
-           haven't consented, intimate moments, or content
-           you'd hesitate to share publicly."
+  Prompt: "Analyze these frames and fill out the following template.
+           Be factual and consistent. Flag any segments that might
+           contain private conversations, identifiable people, or
+           content you'd hesitate to share."
 
-  Returns:
-    overall_vibe: "cooking session with friends"
+  Returns (structured template):
+    setting: "Kitchen, afternoon light"
+    people: "3 people visible, 1 unidentified"
+    activity: "Cooking, conversation"
+    mood: "Relaxed, casual"
+    moments: [
+        { time: 45, label: "Kneading dough" },
+        { time: 210, label: "Taste test" }
+    ]
+    context: "Indoor, daytime, 12 minutes"
+    privacy: "Unidentified person at 3:00-5:00, conversation at 9:00-10:00"
+    vibe: "A lazy afternoon making pasta from scratch — flour everywhere,
+           friendly arguments about sauce."
     category_hint: "shareable"
     interesting_segments: [
         { start: 180, end: 300, reason: "conversation visible" },
@@ -277,19 +325,28 @@ The AI's role is **curator, not bouncer**. This is a private, friends-only platf
 
 The confidence threshold is tunable. After your first batch of 20 videos, you'll see if the AI is being too conservative or too loose and can adjust the prompts and thresholds before processing more.
 
-### Metadata Extraction
+### Structured Template (AI Output Format)
 
-For every video, the AI extracts:
+Every video gets a fixed-format template. Consistent, scannable, easy to build UI around. The AI fills these fields:
+
+| Field | Example | Purpose |
+|-------|---------|---------|
+| **Setting** | "Cabin kitchen, afternoon light" | Where it happens |
+| **People** | "Sam, Alex, one unidentified" | Who's visible |
+| **Activity** | "Making pasta from scratch" | What's happening |
+| **Mood** | "Relaxed, laughing, casual" | Emotional tone |
+| **Moments** | "0:45 kneading dough, 2:10 taste test" | Navigable timestamps |
+| **Context** | "Indoor, daytime, 4min 32s" | Duration + environment |
+| **Privacy** | "Unidentified person at 1:15-2:30" | Flags for review |
+| **Vibe** | "A lazy afternoon making pasta from scratch — flour everywhere, friendly arguments about sauce." | One human-readable sentence for browsing |
+
+Plus the standard extraction:
 
 - **Category** and **confidence score** (0.0-1.0)
-- **Description**: 1-2 sentence summary of the video content
 - **Tags**: cooking, travel, hangout, birthday, outdoors, etc.
-- **Key moments**: timestamps with labels ("group photo", "sunset view", "cake cutting")
 - **Thumbnail candidates**: the 5 best frames, ranked by visual quality and representativeness
-- **Scene descriptions**: per-segment narrative for browsing context
-- **Privacy flags**: moments with identifiable strangers, sensitive text, or locations
 
-This rich extraction makes the Nook browsing experience great from day one. Your friends see organized, described, navigable video content.
+The structured fields are for machines (filtering, searching, review UI). The vibe line is for humans (browsing the library, seeing what a video is about at a glance). Seven fields to scan, one sentence to feel.
 
 ---
 
@@ -479,7 +536,15 @@ CREATE TABLE batches (
 );
 ```
 
-> 🔲 **OPEN**: Exact index strategy. Likely: `videos(status)`, `videos(batch_id)`, `analysis(video_id)`.
+```sql
+-- Local indexes (decided at implementation time, starting set)
+CREATE INDEX idx_videos_status ON videos(status);
+CREATE INDEX idx_videos_batch ON videos(batch_id);
+CREATE INDEX idx_analysis_video ON analysis(video_id);
+CREATE INDEX idx_reviews_video ON reviews(video_id);
+CREATE INDEX idx_uploads_video ON uploads(video_id);
+CREATE INDEX idx_uploads_status ON uploads(status);
+```
 
 ### JSON Manifest (Cloud Contract)
 
@@ -487,7 +552,7 @@ The JSON manifest is what gets sent to the Lattice Nook registration API alongsi
 
 ```json
 {
-    "version": "1.0",
+    "version": "2.0",
     "video": {
         "id": "550e8400-e29b-41d4-a716-446655440000",
         "r2_key": "nook/v/550e8400.mp4",
@@ -496,11 +561,20 @@ The JSON manifest is what gets sent to the Lattice Nook registration API alongsi
         "resolution": { "width": 1920, "height": 1080 },
         "codec": "h265",
         "file_size": 156000000,
-        "compressed_from": 890000000
+        "compressed_from": 890000000,
+        "streaming_format": "progressive"
+    },
+    "template": {
+        "setting": "Cabin kitchen, afternoon light",
+        "people": "Sam, Alex, one unidentified",
+        "activity": "Making pasta from scratch",
+        "mood": "Relaxed, laughing, casual",
+        "context": "Indoor, daytime, 4min 32s",
+        "privacy_notes": "Unidentified person at 1:15-2:30",
+        "vibe": "A lazy afternoon making pasta from scratch — flour everywhere, friendly arguments about sauce."
     },
     "metadata": {
         "category": "shareable",
-        "description": "Making pasta from scratch at the cabin with Sam and Alex.",
         "tags": ["cooking", "friends", "cabin", "travel"],
         "thumbnail_r2_key": "nook/t/550e8400.webp"
     },
@@ -519,12 +593,12 @@ The JSON manifest is what gets sent to the Lattice Nook registration API alongsi
         "ai_model": "qwen3-vl-7b",
         "ai_confidence": 0.91,
         "compression_ratio": 0.175,
-        "pipeline_version": "0.1.0"
+        "pipeline_version": "0.2.0"
     }
 }
 ```
 
-> 🔲 **OPEN**: Finalize the manifest schema once the D1 catalog schema is designed. These should mirror each other.
+For HLS videos (≥5 min), `streaming_format` is `"hls"` and `r2_key` points to the HLS directory (`nook/v/{id}/`) instead of a single file. The manifest schema mirrors the D1 `nook_videos` table — every field in the manifest maps to a column.
 
 ---
 
@@ -540,8 +614,9 @@ When you bump the Lattice version and publish to npm, every property using `@aut
 libs/engine/
 ├── nook/                    ← NEW MODULE
 │   ├── upload.ts            ← R2 multipart upload handler
-│   ├── stream.ts            ← Range-request video serving
+│   ├── stream.ts            ← Progressive + HLS video serving
 │   ├── catalog.ts           ← D1 video metadata (from manifest)
+│   ├── collections.ts       ← User collections + AI auto-groups
 │   └── api.ts               ← Registration endpoint
 │
 ├── amber/                   ← R2 storage + quota tracking
@@ -565,7 +640,12 @@ libs/engine/
 
 ### Streaming Endpoint
 
-Videos are served with HTTP range requests for seeking support. Every request is authenticated through Heartwood and rate-limited through Threshold.
+Videos use a hybrid streaming strategy based on duration:
+
+- **Under 5 minutes**: Progressive MP4 with range-request serving. Simple, fast seeking, one file per video.
+- **5 minutes and over**: HLS adaptive streaming with 3 quality tiers (1080p, 720p, 480p). The player auto-selects quality based on connection speed.
+
+Every request is authenticated through Heartwood and rate-limited through Threshold. Access is all-or-nothing: if you're on the allowlist, you see everything approved. No per-video access controls.
 
 ```
 GET /nook/v/:videoId
@@ -576,14 +656,79 @@ GET /nook/v/:videoId
     │
     ├─ Threshold rate check ─── FAIL ──→ 429
     │
-    ├─ Parse Range header
-    │     ├─ No Range → 200, full file (small videos)
-    │     └─ Range: bytes=X-Y → 206 Partial Content
+    ├─ Check streaming format
+    │     ├─ Progressive MP4 (short videos):
+    │     │     ├─ Parse Range header
+    │     │     ├─ No Range → 200, full file
+    │     │     └─ Range: bytes=X-Y → 206 Partial Content
+    │     │
+    │     └─ HLS (long videos):
+    │           ├─ GET /nook/v/:videoId/master.m3u8 → quality manifest
+    │           ├─ GET /nook/v/:videoId/:quality/playlist.m3u8 → segment list
+    │           └─ GET /nook/v/:videoId/:quality/:segment.ts → video chunk
     │
     └─ Amber.getObject(r2_key) → stream response
 ```
 
-> 🔲 **OPEN**: Progressive MP4 vs HLS for long videos. Progressive is simpler and works for friend-group scale. HLS adds complexity but enables adaptive bitrate. Start with progressive, revisit if needed.
+### HLS Pipeline (Local)
+
+For videos ≥5 minutes, the local pipeline generates HLS assets after compression:
+
+```
+Input: compressed_video.mp4 (1080p source)
+    │
+    ├─ ffmpeg -i input.mp4 [1080p encode] → segments + playlist
+    ├─ ffmpeg -i input.mp4 [720p encode]  → segments + playlist
+    ├─ ffmpeg -i input.mp4 [480p encode]  → segments + playlist
+    │
+    └─ Generate master.m3u8 (points to all 3 quality playlists)
+
+Output in R2:
+  nook/v/{id}/master.m3u8
+  nook/v/{id}/1080p/playlist.m3u8
+  nook/v/{id}/1080p/segment_000.ts ... segment_NNN.ts
+  nook/v/{id}/720p/playlist.m3u8
+  nook/v/{id}/720p/segment_000.ts ... segment_NNN.ts
+  nook/v/{id}/480p/playlist.m3u8
+  nook/v/{id}/480p/segment_000.ts ... segment_NNN.ts
+```
+
+Segment duration: 6-10 seconds. Each segment is individually addressable in R2, enabling fast seeking and adaptive quality switching mid-stream.
+
+### Video Player (Lattice MediaPlayer + hls.js)
+
+Nook extends the existing `MediaPlayer` component from `@autumnsgrove/lattice/ui/media-player`. The component is currently frame-based (used for the Living Grove visualization), with glassmorphic controls, seasonal scrubber colors, keyboard shortcuts, speed toggle, and fullscreen support.
+
+For Nook, a `<video>` element lives in the MediaPlayer's content slot. hls.js handles adaptive streaming for HLS videos, falling back to native `<video>` playback for progressive MP4s.
+
+```
+Existing MediaPlayer (keep as-is)
+├── MediaControls (glassmorphic bar)
+│   ├── play/pause, step back/forward
+│   ├── MediaScrubber (seasonal accent colors)
+│   ├── MediaSpeedToggle (0.5x, 1x, 2x)
+│   ├── loop toggle, fullscreen
+│   └── keyboard: Space, ←→, F, L
+│
+└── Content slot ← Nook wraps <video> here
+
+Nook extensions needed:
+├── NookVideoPlayer.svelte
+│   ├── Wraps <video> + hls.js in MediaPlayer content slot
+│   ├── Syncs video.currentTime ↔ MediaPlayer.currentTime
+│   ├── Passes video.duration to MediaPlayer
+│   └── Handles HLS manifest loading + quality switching
+│
+├── Key moment markers on MediaScrubber
+│   ├── Small dots on the timeline at moment timestamps
+│   ├── Hover tooltip shows moment label
+│   └── Click jumps to that timestamp
+│
+└── Quality indicator (optional)
+    └── Shows current HLS quality tier (1080p/720p/480p)
+```
+
+The existing seasonal theming carries through automatically — the scrubber fill color, the glassmorphic controls, dark/light mode awareness. Nook's player looks like it belongs in the grove because it's built from the same components.
 
 ### Registration API
 
@@ -608,13 +753,14 @@ POST /nook/api/register
 
 ### D1 Catalog Schema (Cloud)
 
-> 🔲 **OPEN**: Full schema design. Preliminary structure:
+The cloud schema supports flat tags, user-created collections, and AI-suggested auto-groups. Access is all-or-nothing (allowlist), so there's no per-video access table. The consent tables support the Phase 3 face privacy feature (designed now, built later).
 
 ```sql
+-- Core video catalog
 CREATE TABLE nook_videos (
     id TEXT PRIMARY KEY,
     owner_id TEXT NOT NULL,        -- Heartwood user ID
-    r2_key TEXT NOT NULL,
+    r2_key TEXT NOT NULL,          -- progressive MP4 or HLS directory
     thumbnail_r2_key TEXT,
     file_name TEXT NOT NULL,
     duration_seconds REAL,
@@ -622,9 +768,21 @@ CREATE TABLE nook_videos (
     resolution_height INTEGER,
     codec TEXT,
     file_size INTEGER,
-    category TEXT NOT NULL,
-    description TEXT,
-    tags TEXT,                     -- JSON array
+    category TEXT NOT NULL,        -- shareable, friends_only
+    streaming_format TEXT NOT NULL DEFAULT 'progressive',
+        -- 'progressive' (<5 min) or 'hls' (≥5 min)
+
+    -- Structured template fields
+    setting TEXT,                  -- "Cabin kitchen, afternoon light"
+    people TEXT,                   -- "Sam, Alex, one unidentified"
+    activity TEXT,                 -- "Making pasta from scratch"
+    mood TEXT,                     -- "Relaxed, laughing, casual"
+    context TEXT,                  -- "Indoor, daytime, 4min 32s"
+    privacy_notes TEXT,            -- "Unidentified person at 1:15-2:30"
+    vibe TEXT,                     -- freeform human-readable sentence
+    description TEXT,              -- legacy/fallback description
+
+    tags TEXT,                     -- JSON array: ["cooking", "friends"]
     ai_confidence REAL,
     pipeline_version TEXT,
     processed_at INTEGER,
@@ -632,22 +790,101 @@ CREATE TABLE nook_videos (
     updated_at INTEGER NOT NULL
 );
 
+-- Navigable timestamps within videos
 CREATE TABLE nook_moments (
     id TEXT PRIMARY KEY,
-    video_id TEXT NOT NULL REFERENCES nook_videos(id),
+    video_id TEXT NOT NULL REFERENCES nook_videos(id) ON DELETE CASCADE,
     time_seconds REAL NOT NULL,
     label TEXT NOT NULL,
-    moment_type TEXT DEFAULT 'key',
+    moment_type TEXT DEFAULT 'key', -- 'key' or 'flagged'
     created_at INTEGER NOT NULL
 );
 
-CREATE TABLE nook_access (
+-- User-created collections (ordered, named, with optional cover)
+CREATE TABLE nook_collections (
     id TEXT PRIMARY KEY,
-    video_id TEXT NOT NULL REFERENCES nook_videos(id),
-    user_id TEXT NOT NULL,         -- Heartwood user ID of viewer
-    granted_at INTEGER NOT NULL
+    owner_id TEXT NOT NULL,
+    name TEXT NOT NULL,             -- "Japan Trip 2024"
+    description TEXT,
+    cover_video_id TEXT REFERENCES nook_videos(id) ON DELETE SET NULL,
+    sort_order INTEGER NOT NULL DEFAULT 0,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
 );
+
+-- Videos in collections (many-to-many, ordered)
+CREATE TABLE nook_collection_videos (
+    id TEXT PRIMARY KEY,
+    collection_id TEXT NOT NULL REFERENCES nook_collections(id) ON DELETE CASCADE,
+    video_id TEXT NOT NULL REFERENCES nook_videos(id) ON DELETE CASCADE,
+    sort_order INTEGER NOT NULL DEFAULT 0,
+    added_at INTEGER NOT NULL,
+    UNIQUE(collection_id, video_id)
+);
+
+-- AI-suggested groupings (date proximity + tag overlap)
+CREATE TABLE nook_auto_groups (
+    id TEXT PRIMARY KEY,
+    owner_id TEXT NOT NULL,
+    suggested_name TEXT NOT NULL,   -- "Weekend of Feb 15, 2024"
+    grouping_reason TEXT,           -- "8 videos within 48 hours, 5 share 'cooking' tag"
+    status TEXT NOT NULL DEFAULT 'suggested',
+        -- 'suggested', 'accepted' (promoted to collection), 'dismissed'
+    created_at INTEGER NOT NULL
+);
+
+-- Videos in auto-groups
+CREATE TABLE nook_auto_group_videos (
+    id TEXT PRIMARY KEY,
+    group_id TEXT NOT NULL REFERENCES nook_auto_groups(id) ON DELETE CASCADE,
+    video_id TEXT NOT NULL REFERENCES nook_videos(id) ON DELETE CASCADE,
+    UNIQUE(group_id, video_id)
+);
+
+-- Face consent (designed now, built in Phase 3)
+-- Friends self-manage consent at nook.grove.place/consent
+CREATE TABLE nook_face_consent (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,          -- Heartwood user ID of the friend
+    display_name TEXT,              -- how they want to appear in metadata
+    consent_status TEXT NOT NULL DEFAULT 'pending',
+        -- 'pending', 'opted_in', 'opted_out'
+    reference_image_r2_key TEXT,   -- selfie for face matching (encrypted)
+    consented_at INTEGER,
+    revoked_at INTEGER,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+);
+
+-- Indexes
+CREATE INDEX idx_nook_videos_owner ON nook_videos(owner_id);
+CREATE INDEX idx_nook_videos_category ON nook_videos(category);
+CREATE INDEX idx_nook_videos_created ON nook_videos(created_at);
+CREATE INDEX idx_nook_moments_video ON nook_moments(video_id);
+CREATE INDEX idx_nook_collections_owner ON nook_collections(owner_id);
+CREATE INDEX idx_nook_auto_groups_owner ON nook_auto_groups(owner_id);
+CREATE INDEX idx_nook_auto_groups_status ON nook_auto_groups(status);
+CREATE INDEX idx_nook_face_consent_user ON nook_face_consent(user_id);
 ```
+
+### Auto-Group Algorithm
+
+Auto-groups are generated when new videos are registered. The algorithm clusters by date proximity and tag overlap:
+
+```
+For each new video:
+  1. Find all videos within 48 hours of this video's processed_at
+  2. Among those, check tag overlap (≥2 shared tags)
+  3. If ≥3 videos match both criteria → suggest a group
+  4. Name suggestion: "Weekend of {earliest_date}" or
+     "{shared_tag} — {date_range}"
+
+Groups surface in the UI as suggestions:
+  "These 8 videos seem to be from the same weekend"
+  [Accept as collection] [Dismiss]
+```
+
+When accepted, an auto-group gets promoted to a full collection with a name you can edit.
 
 ---
 
@@ -669,15 +906,41 @@ Multiple layers, all enforced:
 
 7. **Rate limiting**: Threshold enforces per-user rate limits on the streaming endpoint, even within the allowlist.
 
-### Face Privacy (Phase 3)
+### Face Privacy (Phase 3 — designed now, built later)
 
-> 🔲 **OPEN**: Full implementation design. Preliminary approach:
+Friends manage their own consent at `nook.grove.place/consent`. You don't decide for them. They do.
 
-- **MediaPipe face detection** runs locally during AI analysis
-- **Unknown faces** (not in your consent database) get automatic blurring
-- **Consent management**: friends opt in to appearing unblurred
-- **Granular control**: per-video, per-person consent decisions
-- **Processing**: blur is applied before upload, not at streaming time
+**Self-Service Consent Flow:**
+
+```
+Friend visits nook.grove.place/consent (authenticated via Heartwood)
+    │
+    ├─ "Nook uses face detection to protect privacy.
+    │   If you'd like to appear unblurred in videos,
+    │   opt in below."
+    │
+    ├─ [Opt In]
+    │     ├─ Upload a reference selfie (stored encrypted in R2)
+    │     ├─ Set display name (how they appear in metadata)
+    │     └─ Status: opted_in
+    │
+    ├─ [Opt Out] or [Revoke]
+    │     ├─ Reference image deleted from R2
+    │     ├─ All future videos blur their face
+    │     └─ Status: opted_out (face still detected, always blurred)
+    │
+    └─ Default for friends who haven't visited: opted_out (blurred)
+```
+
+**Pipeline Integration:**
+
+- **MediaPipe face detection** runs locally during AI analysis pass
+- **Face matching** compares detected faces against opted-in reference images
+- **Unknown faces** (no match or opted-out) get automatic blurring
+- **Blur is applied before upload**, not at streaming time — the cloud never sees unblurred faces of non-consenting people
+- **You retain final override**: the review UI shows which faces were detected and their consent status, and you can override per-video
+
+**D1 Schema:** The `nook_face_consent` table (defined in the catalog schema above) stores consent status, reference image keys, and timestamps. Designed into the schema now so no migration is needed when Phase 3 ships.
 
 ---
 
@@ -685,20 +948,31 @@ Multiple layers, all enforced:
 
 Two ways to feed the pipeline:
 
-### Watch Folder (Passive Intake)
+### Watch Folder (Staging Pattern)
 
-Point it at a directory. New videos dropped in get auto-queued as pending. The watch folder accumulates, you process when ready.
+The watch folder uses a two-directory staging pattern: `inbox/` and `ready/`. Files land in inbox (drag-and-drop, Finder copy, whatever). When they're done copying, you move them to `ready/`. The pipeline only processes files in `ready/`. No ambiguity about partial copies, no file lock detection, no settle delays.
+
+```
+~/Videos/nook/
+├── inbox/          ← drop files here (copying, incomplete, whatever)
+│   ├── trip_video.mp4      (still copying...)
+│   └── cooking_2024.mp4    (still copying...)
+│
+└── ready/          ← move here when done, pipeline picks them up
+    ├── birthday.mp4         (queued as pending)
+    └── park_day.mp4         (queued as pending)
+```
 
 ```bash
-# Start watching (runs in background)
-nook watch ~/Videos/to-share/
+# Start watching the ready folder
+nook watch ~/Videos/nook/
 
-# Videos accumulate as "pending" in SQLite
+# Files in ready/ get auto-queued as "pending" in SQLite
 # Process them when ready:
 nook batch --size 30
 ```
 
-> 🔲 **OPEN**: Implementation: fswatch, watchdog (Python), or simple polling interval. Watchdog is the likely choice (pure Python, cross-platform, well-maintained).
+The staging pattern is manual but unambiguous. You control when files are ready. The pipeline never touches a half-written file.
 
 ### Manual CLI
 
@@ -725,19 +999,19 @@ nook export --batch 3 --format json
 
 ## Cost Structure
 
-Projected monthly costs at friend-group scale:
+Projected monthly costs at friend-group scale. HLS increases storage (3 quality tiers per long video) but R2 pricing stays cheap:
 
 | Resource | Usage | Cost |
 |----------|-------|------|
-| R2 Storage | 60-150 GB compressed video | $0.90-$2.25/month |
-| R2 Operations | ~1,000 reads/month (friend viewing) | ~$0.01/month |
-| Workers | ~5,000 requests/month | Free tier |
-| D1 | ~10,000 reads/month | Free tier |
-| Local compute | Mac Mini power draw | Negligible |
+| R2 Storage | 100-250 GB (progressive + HLS tiers) | $1.50-$3.75/month |
+| R2 Operations | ~3,000 reads/month (HLS segments + thumbnails) | ~$0.01/month |
+| Workers | ~10,000 requests/month (HLS segments are individual requests) | Free tier |
+| D1 | ~15,000 reads/month (catalog + collections + auto-groups) | Free tier |
+| Local compute | Mac Mini power draw during encoding | Negligible |
 
-**Total: ~$1-3/month**
+**Total: ~$2-4/month**
 
-The economics only work because this is friend-group scale. 5-15 viewers, not 5,000. That's the whole point.
+Storage is higher than progressive-only because each long video exists at 3 quality tiers. But the economics still work because this is friend-group scale. 5-15 viewers, not 5,000. That's the whole point.
 
 ---
 
@@ -749,65 +1023,87 @@ Get the basic loop working end-to-end.
 
 - [ ] Heartwood auth integration for nook.grove.place
 - [ ] Manual video upload to R2 (no pipeline, just direct)
-- [ ] Basic streaming endpoint with range request support
+- [ ] Progressive MP4 streaming endpoint with range request support
+- [ ] HLS streaming endpoint (manifest + segment serving)
 - [ ] Simple video list page with authentication
-- [ ] Allowlist gate (hardcoded list, Heartwood users only)
+- [ ] Allowlist gate (all-or-nothing, Heartwood users only)
+- [ ] Extend Lattice MediaPlayer with `<video>` + hls.js support
 
 ### Phase 1: Local Pipeline
 
 The core Nook experience. Where most of the work lives.
 
 - [ ] Complete video compressor refactor (library API, probe_video)
-- [ ] Pipeline orchestrator: probe → compress → analyze → review → upload
-- [ ] LM Studio integration for two-pass adaptive analysis
+- [ ] Pipeline orchestrator: probe → compress → analyze → HLS package → review → upload
+- [ ] HLS packaging step (ffmpeg, 3 quality tiers for videos ≥5 min)
+- [ ] LM Studio integration: structured template output (7 fields + vibe)
+- [ ] Two-pass adaptive analysis with calibration loop
 - [ ] SQLite state management
 - [ ] FastAPI backend for review UI
 - [ ] SvelteKit review UI with Lattice components (grid + detail views)
 - [ ] Thumbnail extraction and picker
-- [ ] JSON manifest generation
-- [ ] R2 multipart upload from pipeline
+- [ ] JSON manifest generation (v2.0 schema)
+- [ ] Throttled background upload to R2 (user-configured bandwidth cap, auto-resume)
 - [ ] Nook registration API in Lattice engine
-- [ ] Watch folder + CLI interface
-- [ ] Batch processing flow (20-50 at a time)
+- [ ] Watch folder with staging pattern (inbox → ready)
+- [ ] CLI interface (add, batch, status, export)
+- [ ] Calibration loop: first 20 videos → review → few-shot context for subsequent batches
 
 ### Phase 2: Rich Catalog
 
 Make the viewing experience great.
 
 - [ ] Video browsing by tag, date, collection
-- [ ] Key moment navigation (jump to timestamps)
-- [ ] Search across descriptions and tags
-- [ ] Collections / playlists
+- [ ] Key moment markers on MediaScrubber timeline
+- [ ] Search across structured template fields and tags
+- [ ] User-created collections (ordered, named, cover thumbnails)
+- [ ] AI auto-groups (date proximity + tag overlap → suggested collections)
 - [ ] "New since last visit" indicator for friends
 - [ ] Thumbnail grid view on nook.grove.place
+- [ ] Notification hook interface (designed, not implemented)
 
 ### Phase 3: Face Privacy
 
-The consent layer.
+The consent layer. Schema already in D1, UX designed, ready to build.
 
 - [ ] MediaPipe face detection in pipeline analysis pass
 - [ ] Face clustering (same person across videos)
-- [ ] Consent database (who has opted in)
-- [ ] Automatic blur for unknown faces before upload
-- [ ] Friend consent management UI
-- [ ] Per-video override controls
+- [ ] Friend self-service consent page at nook.grove.place/consent
+- [ ] Reference image upload + encrypted storage
+- [ ] Automatic blur for unknown/opted-out faces before upload
+- [ ] Owner override controls in review UI
+- [ ] Consent status display in video metadata
 
 ---
 
-## Open Questions
+## Resolved Decisions
 
-These decisions are flagged for future resolution:
+These questions were resolved during spec design:
+
+| Decision | Resolution | Details |
+|----------|-----------|---------|
+| AI description format | **Structured template: 7 fields + vibe line** | Setting, People, Activity, Mood, Moments, Context, Privacy, plus freeform vibe sentence |
+| Streaming strategy | **Hybrid: progressive <5 min, HLS ≥5 min** | 3 quality tiers (1080p/720p/480p), 6-10s segments |
+| Watch folder | **Staging pattern (inbox → ready)** | Two directories, manual move signals file completeness |
+| Video organization | **Tags + collections + AI auto-groups** | Flat tags, user collections, date+tag-overlap auto-clustering |
+| Bulk migration | **Calibration loop** | 20 videos → review → few-shot context → scale to batches of 50 |
+| Upload strategy | **Throttled background, user-configured cap** | Set on first run, auto-resume on failure |
+| Friend access model | **All-or-nothing allowlist** | On the list = see everything approved |
+| Face consent UX | **Friend self-service at /consent** | Friends opt in/out, upload reference selfie, owner retains override |
+| Video player | **Extend existing Lattice MediaPlayer** | hls.js for HLS, key moment markers on scrubber |
+| Notifications | **Hook for later** | Design the notification hook now, no notifications at launch |
+| Auto-group signals | **Date proximity + tag overlap** | Videos within 48h sharing ≥2 tags → suggested group |
+| Bandwidth default | **No default — user-configured** | Pipeline asks on first run |
+
+## Remaining Implementation Questions
 
 | Question | Context | When to Decide |
 |----------|---------|----------------|
-| LM Studio prompt strategy | Exact system prompts for Pass 1 and Pass 2 analysis | Phase 1 implementation |
-| Progressive vs HLS streaming | Start with progressive MP4, but may need HLS for long videos | Phase 0, revisit Phase 2 |
-| Watch folder implementation | watchdog (Python) vs fswatch vs polling | Phase 1 implementation |
-| D1 catalog schema (final) | Must mirror JSON manifest format | Phase 0-1 boundary |
-| Review UI component architecture | Which Lattice components to compose, custom components needed | Phase 1 implementation |
-| Face consent UX | How friends opt in/out, granularity of control | Phase 3 design |
-| Bulk migration strategy | First run through hundreds of existing videos, tuning thresholds | Phase 1 testing |
-| Upload bandwidth management | Throttling, scheduling, resume-on-failure for large libraries | Phase 1 implementation |
+| Exact LM Studio prompts | System prompts incorporating structured template + few-shot examples from calibration | Phase 1 implementation |
+| HLS segment duration | 6s vs 10s segments, tradeoff between seek granularity and request overhead | Phase 0 implementation |
+| Review UI components | Which Lattice components to compose for grid/detail views, custom components needed | Phase 1 implementation |
+| Face matching threshold | MediaPipe confidence threshold for face recognition against reference images | Phase 3 implementation |
+| Notification hook design | Interface shape for the notification hook (email, webhook, future Grove notifications) | Phase 2 design |
 
 ---
 
@@ -824,5 +1120,5 @@ These decisions are flagged for future resolution:
 
 *The nook stays quiet until you invite someone in. Then the screen glows warm, and the moment belongs to everyone in the room.*
 
-*Spec Version: 2.0*
+*Spec Version: 3.0 — All open questions resolved*
 *Last Updated: February 2026*
