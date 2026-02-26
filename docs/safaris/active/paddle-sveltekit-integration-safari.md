@@ -133,6 +133,10 @@ Since Paddle.js needs the browser, it initializes in `onMount`. Using the npm pa
 
 **Where it goes in Grove:** In the root `+layout.svelte` of `apps/plant`, alongside other providers. It loads once and stays resident.
 
+**Why `onMount` + dynamic import, not `<svelte:head>`:** SvelteKit has a [known issue](https://github.com/sveltejs/kit/issues/9096) where scripts in `<svelte:head>` don't re-execute on client-side navigation. The `onMount` + `import()` pattern is the safe approach — it never runs during SSR, lazy-loads only when the component mounts, and works correctly with SvelteKit's client-side navigation.
+
+**Note:** Even though `@paddle/paddle-js` is an npm package, under the hood it dynamically injects a `<script>` tag to `https://cdn.paddle.com/paddle/v2/paddle.js`. So the script still loads from Paddle's CDN — the npm package just wraps that with TypeScript types and a clean async API.
+
 ### Client-Side Checkout Events
 
 The `eventCallback` fires for 18+ events during the checkout lifecycle:
@@ -246,6 +250,17 @@ Two modes: **overlay** (modal on your page) and **inline** (embedded frame in a 
 | **Best for** | Quick integration, standard checkout | Custom-branded, embedded experience |
 
 **Recommendation for Grove: Overlay.** It's simpler, shows the full checkout context (items, tax, totals), and the one-page variant is clean. The pricing page already shows tier details — the overlay just needs to collect payment.
+
+### Bonus: Localized Price Preview
+
+Paddle provides a client-side method to preview localized prices before opening checkout — useful for showing the right currency on the pricing page:
+
+```typescript
+const preview = await paddle.PricePreview({
+  items: [{ priceId: 'pri_xxx', quantity: 1 }],
+});
+// Returns localized price with currency, tax, and formatted strings
+```
 
 ### `customData` — How Grove Passes Context Through Paddle
 
@@ -380,9 +395,23 @@ export class PaddleClient {
 
 **Why this matters for Grove:** The existing `StripeClient` is fetch-based (478 lines) specifically because it needs to run on Cloudflare Workers. A `PaddleClient` would follow the exact same pattern — no Node.js-specific APIs, pure fetch.
 
+### Community Alternative: `paddle-billing`
+
+The [`paddle-billing`](https://github.com/kossnocorp/paddle-billing) package by kossnocorp wraps both API and Paddle.js with richer TypeScript types. Notable features:
+- `parseWebhookBody()` for server-side webhook verification
+- `loadScript()` for client-side Paddle.js loading
+- Strongly typed custom data generics
+- Works with both client and server
+
+Worth evaluating as an alternative to the official SDK, especially if TypeScript ergonomics matter.
+
 ### Safari Finding
 
 The Paddle Node SDK (`@paddle/paddle-node-sdk`) is clean and well-typed. **However**, if Grove needs Cloudflare Workers compatibility (like the current Stripe integration), we'd build a custom `PaddleClient` class following the same fetch-based pattern as `StripeClient`. The SDK is great for local dev and testing, but the custom client is the production pattern.
+
+### Business Note: Payout Timing
+
+Paddle payouts arrive in **7–14 days** (Paddle collects, deducts fees/tax, then pays you). Stripe payouts arrive in **2 business days**. This doesn't affect the customer experience but does affect cash flow. At Grove's current scale this is negligible, but worth knowing.
 
 ---
 
@@ -533,6 +562,49 @@ If using the custom `verifyPaddleSignature()` function above, you can add your o
 | `subscription.past_due` | Payment failed, dunning started | Set status to `past_due`, send email |
 | `subscription.paused` | Subscription paused | Set status to `paused` |
 | `subscription.resumed` | Subscription resumed | Set status to `active` |
+
+### Webhook Event Sequence — What Fires When
+
+**New customer checkout (no trial):**
+```
+customer.created           ← new Paddle customer
+address.created            ← customer address collected
+transaction.created        ← payment intent created
+transaction.ready          ← all required fields present
+transaction.paid           ← payment collected
+transaction.completed      ← all processing done
+subscription.created       ← subscription entity (includes transaction_id!)
+subscription.activated     ← status → active
+```
+
+**Subscription renewal (automatic):**
+```
+transaction.created        ← auto-created by Paddle
+transaction.ready → transaction.paid → transaction.completed
+subscription.updated       ← billing period advanced
+```
+
+**Cancellation at end of period:**
+```
+subscription.updated       ← scheduledChange set to cancel
+... time passes until billing period ends ...
+subscription.canceled      ← status → canceled
+```
+
+**Failed payment / dunning:**
+```
+transaction.past_due       ← payment failed
+subscription.past_due      ← subscription marked past_due
+... Paddle retries automatically (up to 60 times over 3 days) ...
+transaction.paid           ← if retry succeeds
+  OR subscription.canceled ← if all retries fail
+```
+
+**Critical implementation notes:**
+- **Event ordering is NOT guaranteed.** Always check `occurred_at` before applying state changes
+- **`subscription.created` is the ONLY event that includes `transaction_id`** — use it to link the subscription to its originating checkout
+- **Respond within 5 seconds** with HTTP 200, then process asynchronously
+- **Paddle may send duplicates.** Use `event_id` to deduplicate (same pattern as Grove's Stripe handler)
 
 ### How This Compares to Grove's Current Stripe Webhook Handler
 
