@@ -52,8 +52,6 @@ class TargetResolver:
 
     async def _try_accessible(self, description: str) -> Locator | None:
         """Try Playwright's built-in accessible element selectors."""
-        desc_lower = description.lower().strip()
-
         # Try getByRole with name
         for role in ["link", "button", "heading", "tab", "menuitem", "textbox", "checkbox"]:
             try:

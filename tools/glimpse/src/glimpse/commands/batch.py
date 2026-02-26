@@ -125,7 +125,7 @@ def batch(ctx: click.Context, config_file: str, dry_run: bool) -> None:
 
     output_handler.print_info(f"Running {len(requests)} captures...")
 
-    concurrency = defaults.get("concurrency", 4)
+    concurrency = max(1, min(int(defaults.get("concurrency", 4)), 20))
     results = run_capture_many(requests, headless=app_config.headless, concurrency=concurrency)
 
     failures = 0

@@ -6,6 +6,7 @@ and PID file tracking. Only manages servers Glimpse itself started.
 
 import asyncio
 import os
+import shlex
 import signal
 import subprocess
 import sys
@@ -112,7 +113,7 @@ class ServerManager:
             return False, f"Cannot auto-start: directory not found: {start_cwd}"
 
         # Split command into args
-        cmd_parts = self._config.server_start_command.split()
+        cmd_parts = shlex.split(self._config.server_start_command)
 
         try:
             # Start as background process, redirect output to log file

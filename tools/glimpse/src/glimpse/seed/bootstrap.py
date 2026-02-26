@@ -190,7 +190,7 @@ class DataBootstrapper:
                     tables = [row[0] for row in cursor.fetchall()]
                     for table in tables:
                         if table != "sqlite_sequence":
-                            cursor.execute(f"DROP TABLE IF EXISTS {table}")  # noqa: S608
+                            cursor.execute(f'DROP TABLE IF EXISTS "{table}"')  # noqa: S608
                     conn.commit()
                     conn.close()
                     results.append({

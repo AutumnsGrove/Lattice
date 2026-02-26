@@ -5,8 +5,8 @@ import asyncio
 import click
 from playwright.async_api import async_playwright
 
-from glimpse.capture.engine import _find_chromium_executable
 from glimpse.capture.injector import build_init_script
+from glimpse.utils.browser import find_chromium_executable
 from glimpse.detection.a11y import find_in_a11y_tree
 from glimpse.detection.heuristics import find_by_heuristic
 from glimpse.detection.vision import LumenClient
@@ -97,7 +97,7 @@ async def _run_detect(url, description, config, lumen, season, theme, overlay, c
     """Async detection execution."""
     async with async_playwright() as p:
         launch_opts = {"headless": config.headless}
-        executable = _find_chromium_executable()
+        executable = find_chromium_executable()
         if executable:
             launch_opts["executable_path"] = executable
         browser = await p.chromium.launch(**launch_opts)
@@ -106,85 +106,82 @@ async def _run_detect(url, description, config, lumen, season, theme, overlay, c
             device_scale_factor=config.scale,
         )
 
-        # Theme injection
-        init_js = build_init_script(
-            season=season or config.season,
-            theme=theme or config.theme,
-        )
-        if init_js:
-            await context.add_init_script(init_js)
+        try:
+            # Theme injection
+            init_js = build_init_script(
+                season=season or config.season,
+                theme=theme or config.theme,
+            )
+            if init_js:
+                await context.add_init_script(init_js)
 
-        page = await context.new_page()
-        await page.goto(url, wait_until="domcontentloaded", timeout=config.timeout_ms)
-        await page.wait_for_timeout(config.wait_ms)
+            page = await context.new_page()
+            await page.goto(url, wait_until="domcontentloaded", timeout=config.timeout_ms)
+            await page.wait_for_timeout(config.wait_ms)
 
-        # Take screenshot for detection
-        screenshot_bytes = await page.screenshot(type="png")
+            # Take screenshot for detection
+            screenshot_bytes = await page.screenshot(type="png")
 
-        # Try a11y tree first
-        a11y_result = await find_in_a11y_tree(page, description)
-        if a11y_result:
-            await context.close()
-            await browser.close()
-            return {
-                "boxes": [{"label": description, "source": "a11y", "name": a11y_result.get("name")}],
-            }
-
-        # Try heuristics
-        heuristic_locator = await find_by_heuristic(page, description)
-        if heuristic_locator:
-            box = await heuristic_locator.bounding_box()
-            await context.close()
-            await browser.close()
-            if box:
+            # Try a11y tree first
+            a11y_result = await find_in_a11y_tree(page, description)
+            if a11y_result:
                 return {
-                    "boxes": [{
-                        "label": description,
-                        "source": "heuristics",
-                        "x": box["x"] / config.viewport_width,
-                        "y": box["y"] / config.viewport_height,
-                        "width": box["width"] / config.viewport_width,
-                        "height": box["height"] / config.viewport_height,
-                    }],
+                    "boxes": [{"label": description, "source": "a11y", "name": a11y_result.get("name")}],
                 }
 
-        # Fall back to Lumen
-        a11y_snapshot = None
-        try:
-            a11y_snapshot = await page.accessibility.snapshot()
-        except Exception:
-            pass
+            # Try heuristics
+            heuristic_locator = await find_by_heuristic(page, description)
+            if heuristic_locator:
+                box = await heuristic_locator.bounding_box()
+                if box:
+                    return {
+                        "boxes": [{
+                            "label": description,
+                            "source": "heuristics",
+                            "x": box["x"] / config.viewport_width,
+                            "y": box["y"] / config.viewport_height,
+                            "width": box["width"] / config.viewport_width,
+                            "height": box["height"] / config.viewport_height,
+                        }],
+                    }
 
-        boxes = await lumen.detect(screenshot_bytes, description, a11y_snapshot)
-
-        await context.close()
-        await browser.close()
-
-        if not boxes:
-            return {"error": f"Could not detect '{description}' on page"}
-
-        result = {"boxes": [{"label": b.label, "confidence": b.confidence,
-                    "x": b.x, "y": b.y, "width": b.width, "height": b.height}
-                   for b in boxes]}
-
-        if overlay and output:
-            # Draw bounding boxes on the image (requires PIL, degrade gracefully)
+            # Fall back to Lumen
+            a11y_snapshot = None
             try:
-                from PIL import Image, ImageDraw
-                import io
+                a11y_snapshot = await page.accessibility.snapshot()
+            except Exception:
+                pass
 
-                img = Image.open(io.BytesIO(screenshot_bytes))
-                draw = ImageDraw.Draw(img)
-                for b in boxes:
-                    px = b.to_pixels(img.width, img.height)
-                    draw.rectangle(
-                        [px["x"], px["y"], px["x"] + px["width"], px["y"] + px["height"]],
-                        outline="red",
-                        width=3,
-                    )
-                img.save(output)
-                result["output"] = output
-            except ImportError:
-                pass  # PIL not available, skip overlay
+            boxes = await lumen.detect(screenshot_bytes, description, a11y_snapshot)
 
-        return result
+            if not boxes:
+                return {"error": f"Could not detect '{description}' on page"}
+
+            result = {"boxes": [{"label": b.label, "confidence": b.confidence,
+                        "x": b.x, "y": b.y, "width": b.width, "height": b.height}
+                       for b in boxes]}
+
+            if overlay and output:
+                # Draw bounding boxes on the image (requires PIL, degrade gracefully)
+                try:
+                    from PIL import Image, ImageDraw
+                    import io
+
+                    img = Image.open(io.BytesIO(screenshot_bytes))
+                    draw = ImageDraw.Draw(img)
+                    for b in boxes:
+                        px = b.to_pixels(img.width, img.height)
+                        draw.rectangle(
+                            [px["x"], px["y"], px["x"] + px["width"], px["y"] + px["height"]],
+                            outline="red",
+                            width=3,
+                        )
+                    img.save(output)
+                    result["output"] = output
+                except ImportError:
+                    pass  # PIL not available, skip overlay
+
+            return result
+        finally:
+            await context.close()
+            await browser.close()

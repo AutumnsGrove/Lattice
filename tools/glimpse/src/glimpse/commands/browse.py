@@ -10,8 +10,8 @@ from glimpse.browse.executor import BrowseExecutor
 from glimpse.browse.interpreter import parse_instructions
 from glimpse.browse.resolver import TargetResolver
 from glimpse.capture.console import ConsoleCollector
-from glimpse.capture.engine import _find_chromium_executable
 from glimpse.capture.injector import build_init_script
+from glimpse.utils.browser import find_chromium_executable
 from glimpse.capture.screenshot import CaptureRequest, CaptureResult
 from glimpse.utils.validation import validate_url
 
@@ -118,7 +118,7 @@ async def _run_browse(
     """Async browse execution."""
     async with async_playwright() as p:
         launch_opts = {"headless": config.headless}
-        executable = _find_chromium_executable()
+        executable = find_chromium_executable()
         if executable:
             launch_opts["executable_path"] = executable
         browser = await p.chromium.launch(**launch_opts)
@@ -127,59 +127,60 @@ async def _run_browse(
             device_scale_factor=config.scale,
         )
 
-        # Theme injection
-        effective_season = season or config.season
-        effective_theme = theme or config.theme
-        init_js = build_init_script(
-            season=effective_season,
-            theme=effective_theme,
-            grove_mode=config.grove_mode,
-        )
-        if init_js:
-            await context.add_init_script(init_js)
+        try:
+            # Theme injection
+            effective_season = season or config.season
+            effective_theme = theme or config.theme
+            init_js = build_init_script(
+                season=effective_season,
+                theme=effective_theme,
+                grove_mode=config.grove_mode,
+            )
+            if init_js:
+                await context.add_init_script(init_js)
 
-        page = await context.new_page()
+            page = await context.new_page()
 
-        # Console collector
-        collector = None
-        if logs:
-            collector = ConsoleCollector()
-            collector.attach(page)
+            # Console collector
+            collector = None
+            if logs:
+                collector = ConsoleCollector()
+                collector.attach(page)
 
-        # Navigate to starting URL
-        await page.goto(url, wait_until="domcontentloaded", timeout=config.timeout_ms)
-        await page.wait_for_timeout(config.wait_ms)
+            # Navigate to starting URL
+            await page.goto(url, wait_until="domcontentloaded", timeout=config.timeout_ms)
+            await page.wait_for_timeout(config.wait_ms)
 
-        # Execute steps
-        resolver = TargetResolver(page)
-        executor = BrowseExecutor(
-            page=page,
-            resolver=resolver,
-            collector=collector,
-            screenshot_each=screenshot_each,
-            output_dir=output_dir,
-            timeout_ms=timeout_ms,
-        )
-        step_results = await executor.execute(steps)
+            # Execute steps
+            resolver = TargetResolver(page)
+            executor = BrowseExecutor(
+                page=page,
+                resolver=resolver,
+                collector=collector,
+                screenshot_each=screenshot_each,
+                output_dir=output_dir,
+                timeout_ms=timeout_ms,
+            )
+            step_results = await executor.execute(steps)
 
-        # Take final screenshot
-        output_dir.mkdir(parents=True, exist_ok=True)
-        final_path = output_dir / "browse-final.png"
-        screenshot_bytes = await page.screenshot(type="png")
-        final_path.write_bytes(screenshot_bytes)
+            # Take final screenshot
+            output_dir.mkdir(parents=True, exist_ok=True)
+            final_path = output_dir / "browse-final.png"
+            screenshot_bytes = await page.screenshot(type="png")
+            final_path.write_bytes(screenshot_bytes)
 
-        final_result = CaptureResult(
-            output_path=final_path,
-            url=url,
-            season=effective_season,
-            theme=effective_theme,
-            viewport=(config.viewport_width, config.viewport_height),
-            scale=config.scale,
-            size_bytes=len(screenshot_bytes),
-            console_messages=collector.messages if collector else [],
-        )
+            final_result = CaptureResult(
+                output_path=final_path,
+                url=url,
+                season=effective_season,
+                theme=effective_theme,
+                viewport=(config.viewport_width, config.viewport_height),
+                scale=config.scale,
+                size_bytes=len(screenshot_bytes),
+                console_messages=collector.messages if collector else [],
+            )
 
-        await context.close()
-        await browser.close()
-
-        return step_results, final_result
+            return step_results, final_result
+        finally:
+            await context.close()
+            await browser.close()

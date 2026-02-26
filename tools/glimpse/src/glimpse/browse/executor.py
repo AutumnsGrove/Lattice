@@ -156,7 +156,10 @@ class BrowseExecutor:
         """Scroll the page."""
         parts = step.value.split(":")
         direction = parts[0] if parts else "down"
-        amount = int(parts[1]) if len(parts) > 1 else 3
+        try:
+            amount = int(parts[1]) if len(parts) > 1 else 3
+        except ValueError:
+            amount = 3
 
         delta = amount * 300  # pixels per scroll unit
         if direction == "up":
@@ -174,7 +177,10 @@ class BrowseExecutor:
 
     async def _do_wait(self, step: ActionStep, step_num: int) -> BrowseStepResult:
         """Wait for a specified duration."""
-        seconds = int(step.value) if step.value else 1
+        try:
+            seconds = int(step.value) if step.value else 1
+        except ValueError:
+            seconds = 1
         await self._page.wait_for_timeout(seconds * 1000)
 
         return BrowseStepResult(action=f"wait {seconds}s", status="success")

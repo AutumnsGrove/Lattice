@@ -93,7 +93,7 @@ def query_database_counts(db_path: Path) -> dict[str, int]:
         # Try counting common tables (ignore if they don't exist)
         for table in ["tenants", "pages", "posts", "site_settings"]:
             try:
-                cursor.execute(f"SELECT count(*) FROM {table}")  # noqa: S608
+                cursor.execute(f'SELECT count(*) FROM "{table}"')  # noqa: S608
                 counts[table] = cursor.fetchone()[0]
             except sqlite3.OperationalError:
                 pass
