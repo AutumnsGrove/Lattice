@@ -1211,7 +1211,7 @@ describe("Community Themes Server Functions", () => {
 			const results = await Promise.all(ops);
 
 			expect(results).toHaveLength(3);
-			expect(results.every((r) => r === true || r === true || r === true)).toBe(true);
+			expect(results.every((r) => r === true)).toBe(true);
 		});
 	});
 

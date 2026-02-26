@@ -156,7 +156,7 @@
 			const themeData: Partial<CommunityTheme> = {
 				name: name.trim(),
 				description: description.trim() || undefined,
-				tags: tags().length > 0 ? tags() : undefined,
+				tags: tags.length > 0 ? tags : undefined,
 				baseTheme: selectedBaseTheme,
 				customColors:
 					customColorsEnabled && Object.keys(customColors).length > 0 ? customColors : undefined,

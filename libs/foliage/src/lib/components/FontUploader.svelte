@@ -104,7 +104,7 @@
 				valid: false,
 				error: `Maximum of ${maxFonts} fonts allowed per account`,
 			};
-			onError?.(validationResult.error);
+			if (validationResult.error) onError?.(validationResult.error);
 			return;
 		}
 
@@ -114,7 +114,7 @@
 				valid: false,
 				error: "Only .woff2 files are supported",
 			};
-			onError?.(validationResult.error);
+			if (validationResult.error) onError?.(validationResult.error);
 			return;
 		}
 

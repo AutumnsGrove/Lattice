@@ -63,7 +63,8 @@
 
 		// Tag filter
 		if (selectedTag) {
-			result = result.filter((theme) => theme.tags?.includes(selectedTag));
+			const tag = selectedTag;
+			result = result.filter((theme) => theme.tags?.includes(tag));
 		}
 
 		// Sort

@@ -26,6 +26,7 @@ export default [
 			globals: {
 				...globals.node,
 				D1Database: "readonly",
+				R2Bucket: "readonly",
 			},
 		},
 		plugins: {

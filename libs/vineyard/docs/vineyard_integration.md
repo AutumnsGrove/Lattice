@@ -36,9 +36,9 @@ In your project's `package.json`:
 
 ```json
 {
-  "dependencies": {
-    "@autumnsgrove/vineyard": "link:../path/to/Vineyard"
-  }
+	"dependencies": {
+		"@autumnsgrove/vineyard": "link:../path/to/Vineyard"
+	}
 }
 ```
 
@@ -54,21 +54,17 @@ pnpm install
 
 ```typescript
 import {
-  VineyardLayout,
-  FeatureCard,
-  StatusBadge,
-  DemoContainer,
-  CodeExample,
-  TierGate,
-  RoadmapSection,
+	VineyardLayout,
+	FeatureCard,
+	StatusBadge,
+	DemoContainer,
+	CodeExample,
+	TierGate,
+	RoadmapSection,
 } from "@autumnsgrove/vineyard/vineyard";
 
 // Types are also available
-import type {
-  VineyardStatus,
-  GroveTool,
-  GroveTier,
-} from "@autumnsgrove/vineyard/vineyard";
+import type { VineyardStatus, GroveTool, GroveTier } from "@autumnsgrove/vineyard/vineyard";
 ```
 
 ---
@@ -78,11 +74,7 @@ import type {
 If your project already depends on Lattice, you can import from there instead:
 
 ```typescript
-import {
-  VineyardLayout,
-  FeatureCard,
-  StatusBadge,
-} from "@autumnsgrove/lattice/vineyard";
+import { VineyardLayout, FeatureCard, StatusBadge } from "@autumnsgrove/lattice/vineyard";
 ```
 
 This is the recommended approach for Grove tools that already use Lattice.
@@ -106,85 +98,81 @@ src/routes/vineyard/
 
 ```svelte
 <script lang="ts">
-  import {
-    VineyardLayout,
-    FeatureCard,
-    DemoContainer,
-    CodeExample,
-    RoadmapSection
-  } from '@autumnsgrove/lattice/vineyard';
+	import {
+		VineyardLayout,
+		FeatureCard,
+		DemoContainer,
+		CodeExample,
+		RoadmapSection,
+	} from "@autumnsgrove/lattice/vineyard";
 </script>
 
-<VineyardLayout
-  tool="amber"
-  tagline="Your files, preserved"
-  status="preview"
->
-  <!-- Feature Tour Section -->
-  <section>
-    <h2>Features</h2>
-    <div class="grid">
-      <FeatureCard
-        title="Storage Overview"
-        description="See usage across posts and media"
-        status="ready"
-        icon="HardDrive"
-      />
-      <FeatureCard
-        title="File Browser"
-        description="Browse and manage uploaded files"
-        status="ready"
-        icon="FolderOpen"
-      />
-      <FeatureCard
-        title="Export Data"
-        description="Download all your stored content"
-        status="coming-soon"
-        icon="Download"
-      />
-    </div>
-  </section>
+<VineyardLayout tool="amber" tagline="Your files, preserved" status="preview">
+	<!-- Feature Tour Section -->
+	<section>
+		<h2>Features</h2>
+		<div class="grid">
+			<FeatureCard
+				title="Storage Overview"
+				description="See usage across posts and media"
+				status="ready"
+				icon="HardDrive"
+			/>
+			<FeatureCard
+				title="File Browser"
+				description="Browse and manage uploaded files"
+				status="ready"
+				icon="FolderOpen"
+			/>
+			<FeatureCard
+				title="Export Data"
+				description="Download all your stored content"
+				status="coming-soon"
+				icon="Download"
+			/>
+		</div>
+	</section>
 
-  <!-- Demo Section -->
-  <section>
-    <DemoContainer
-      title="Storage Dashboard"
-      description="Preview of the storage management interface"
-      mockData={true}
-    >
-      <!-- Your demo component here -->
-      <StorageDashboardDemo />
-    </DemoContainer>
-  </section>
+	<!-- Demo Section -->
+	<section>
+		<DemoContainer
+			title="Storage Dashboard"
+			description="Preview of the storage management interface"
+			mockData={true}
+		>
+			<!-- Your demo component here -->
+			<StorageDashboardDemo />
+		</DemoContainer>
+	</section>
 
-  <!-- Code Example -->
-  <section>
-    <h2>Quick Start</h2>
-    <CodeExample language="typescript" filename="src/routes/+page.svelte">
-{`import { getStorageStats } from '@autumnsgrove/lattice/amber';
+	<!-- Code Example -->
+	<section>
+		<h2>Quick Start</h2>
+		<CodeExample language="typescript" filename="src/routes/+page.svelte">
+			{`import { getStorageStats } from '@autumnsgrove/lattice/amber';
 
 const stats = await getStorageStats();
 console.log(stats.usedBytes, stats.totalBytes);`}
-    </CodeExample>
-  </section>
+		</CodeExample>
+	</section>
 
-  <!-- Roadmap -->
-  <RoadmapSection
-    built={['Core storage view', 'Usage breakdown', 'File browser']}
-    inProgress={['Export functionality']}
-    planned={['Bulk delete', 'Storage alerts', 'External backup']}
-  />
+	<!-- Roadmap -->
+	<RoadmapSection
+		built={["Core storage view", "Usage breakdown", "File browser"]}
+		inProgress={["Export functionality"]}
+		planned={["Bulk delete", "Storage alerts", "External backup"]}
+	/>
 </VineyardLayout>
 
 <style>
-  section {
-    margin-bottom: 3rem;
-  }
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
-  }
+	section {
+		margin-bottom: 3rem;
+	}
+	.grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+		gap: 1.5rem;
+	}
 </style>
 ```
 

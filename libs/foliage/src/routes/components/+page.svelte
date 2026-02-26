@@ -61,7 +61,7 @@
 		<h3>AccentColorPicker</h3>
 		<p class="description">Color picker for theme accent customization.</p>
 		<div class="demo">
-			<AccentColorPicker color={accentColor} onChange={(c) => (accentColor = c)} />
+			<AccentColorPicker value={accentColor} onChange={(c) => (accentColor = c)} />
 		</div>
 		<div class="selected-info">
 			Selected: <code>{accentColor}</code>

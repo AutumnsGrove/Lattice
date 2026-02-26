@@ -176,7 +176,7 @@
 			name: theme.name,
 			description: theme.description || "",
 			thumbnail: "",
-			tier: "oak",
+			tier: "seedling" as const,
 			colors: {
 				background: theme.customColors?.background || "#ffffff",
 				surface: theme.customColors?.surface || "#f5f5f5",
@@ -971,7 +971,7 @@
 		name: previewTheme.name,
 		description: previewTheme.description || "",
 		thumbnail: "",
-		tier: "oak",
+		tier: "seedling" as const,
 		colors: {
 			background: previewTheme.customColors?.background || "#ffffff",
 			surface: previewTheme.customColors?.surface || "#f5f5f5",

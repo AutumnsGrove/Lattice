@@ -29,28 +29,23 @@ export { default as UserMenu } from "./UserMenu.svelte";
 
 // Re-export types
 export type {
-  VineyardStatus,
-  GroveTool,
-  GroveTier,
-  VineyardLayoutProps,
-  FeatureCardProps,
-  StatusBadgeProps,
-  DemoContainerProps,
-  CodeExampleProps,
-  TierGateProps,
-  RoadmapSectionProps,
-  BetterAuthUser,
-  BetterAuthSession,
-  BetterAuthSessionResponse,
-  BetterAuthProvider,
-  AuthButtonProps,
-  UserMenuProps,
+	VineyardStatus,
+	GroveTool,
+	GroveTier,
+	VineyardLayoutProps,
+	FeatureCardProps,
+	StatusBadgeProps,
+	DemoContainerProps,
+	CodeExampleProps,
+	TierGateProps,
+	RoadmapSectionProps,
+	BetterAuthUser,
+	BetterAuthSession,
+	BetterAuthSessionResponse,
+	BetterAuthProvider,
+	AuthButtonProps,
+	UserMenuProps,
 } from "../../types/index.js";
 
 // Re-export auth utilities
-export {
-  signIn,
-  signOut,
-  getSession,
-  isAuthenticated,
-} from "../../auth/index.js";
+export { signIn, signOut, getSession, isAuthenticated } from "../../auth/index.js";

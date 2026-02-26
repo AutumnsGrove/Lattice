@@ -22,7 +22,7 @@ A simple authentication button that shows "Sign In" when not authenticated and "
 
 ```svelte
 <script>
-  import { AuthButton } from '@autumnsgrove/vineyard';
+	import { AuthButton } from "@autumnsgrove/vineyard";
 </script>
 
 <!-- Sign in with Google (default) -->
@@ -32,11 +32,7 @@ A simple authentication button that shows "Sign In" when not authenticated and "
 <AuthButton provider="github" />
 
 <!-- Custom button text -->
-<AuthButton
-  provider="google"
-  signInText="Login with Google"
-  signOutText="Logout"
-/>
+<AuthButton provider="google" signInText="Login with Google" signOutText="Logout" />
 ```
 
 **Props:**
@@ -53,7 +49,7 @@ Displays user information with a dropdown menu for account actions.
 
 ```svelte
 <script>
-  import { UserMenu } from '@autumnsgrove/vineyard';
+	import { UserMenu } from "@autumnsgrove/vineyard";
 </script>
 
 <!-- Full user menu with avatar and email -->
@@ -102,10 +98,10 @@ import { getSession } from "@autumnsgrove/vineyard";
 
 const sessionData = await getSession();
 if (sessionData.user) {
-  console.log("Logged in as:", sessionData.user.name);
-  console.log("Email:", sessionData.user.email);
+	console.log("Logged in as:", sessionData.user.name);
+	console.log("Email:", sessionData.user.email);
 } else {
-  console.log("Not authenticated");
+	console.log("Not authenticated");
 }
 ```
 
@@ -113,8 +109,8 @@ if (sessionData.user) {
 
 ```typescript
 {
-  user: BetterAuthUser | null;
-  session: BetterAuthSession | null;
+	user: BetterAuthUser | null;
+	session: BetterAuthSession | null;
 }
 ```
 
@@ -144,9 +140,9 @@ Check if user is currently authenticated.
 import { isAuthenticated } from "@autumnsgrove/vineyard";
 
 if (await isAuthenticated()) {
-  // Show authenticated content
+	// Show authenticated content
 } else {
-  // Show login prompt
+	// Show login prompt
 }
 ```
 
@@ -160,15 +156,15 @@ Protect routes on the client side:
 
 ```svelte
 <script>
-  import { onMount } from 'svelte';
-  import { goto } from '$app/navigation';
-  import { isAuthenticated } from '@autumnsgrove/vineyard';
+	import { onMount } from "svelte";
+	import { goto } from "$app/navigation";
+	import { isAuthenticated } from "@autumnsgrove/vineyard";
 
-  onMount(async () => {
-    if (!(await isAuthenticated())) {
-      goto('/login');
-    }
-  });
+	onMount(async () => {
+		if (!(await isAuthenticated())) {
+			goto("/login");
+		}
+	});
 </script>
 ```
 
@@ -181,31 +177,28 @@ Protect routes on the server side using hooks:
 import type { Handle } from "@sveltejs/kit";
 
 export const handle: Handle = async ({ event, resolve }) => {
-  // Forward cookies to Better Auth
-  const sessionRes = await fetch(
-    "https://auth-api.grove.place/api/auth/session",
-    {
-      headers: {
-        cookie: event.request.headers.get("cookie") || "",
-      },
-    },
-  );
+	// Forward cookies to Better Auth
+	const sessionRes = await fetch("https://auth-api.grove.place/api/auth/session", {
+		headers: {
+			cookie: event.request.headers.get("cookie") || "",
+		},
+	});
 
-  if (sessionRes.ok) {
-    const { user, session } = await sessionRes.json();
-    event.locals.user = user;
-    event.locals.session = session;
-  }
+	if (sessionRes.ok) {
+		const { user, session } = await sessionRes.json();
+		event.locals.user = user;
+		event.locals.session = session;
+	}
 
-  // Protect /dashboard routes
-  if (event.url.pathname.startsWith("/dashboard") && !event.locals.user) {
-    return new Response("Redirect", {
-      status: 303,
-      headers: { Location: "/login" },
-    });
-  }
+	// Protect /dashboard routes
+	if (event.url.pathname.startsWith("/dashboard") && !event.locals.user) {
+		return new Response("Redirect", {
+			status: 303,
+			headers: { Location: "/login" },
+		});
+	}
 
-  return resolve(event);
+	return resolve(event);
 };
 ```
 
@@ -217,12 +210,12 @@ Add to `src/app.d.ts`:
 import type { BetterAuthUser, BetterAuthSession } from "@autumnsgrove/vineyard";
 
 declare global {
-  namespace App {
-    interface Locals {
-      user: BetterAuthUser | null;
-      session: BetterAuthSession | null;
-    }
-  }
+	namespace App {
+		interface Locals {
+			user: BetterAuthUser | null;
+			session: BetterAuthSession | null;
+		}
+	}
 }
 
 export {};
@@ -235,40 +228,40 @@ Here's a complete example of a protected Vineyard page:
 ```svelte
 <!-- src/routes/vineyard/+page.svelte -->
 <script lang="ts">
-  import {
-    VineyardLayout,
-    FeatureCard,
-    AuthButton,
-    UserMenu,
-    getSession
-  } from '@autumnsgrove/vineyard';
-  import { onMount } from 'svelte';
+	import {
+		VineyardLayout,
+		FeatureCard,
+		AuthButton,
+		UserMenu,
+		getSession,
+	} from "@autumnsgrove/vineyard";
+	import { onMount } from "svelte";
 
-  let user = $state(null);
+	let user = $state(null);
 
-  onMount(async () => {
-    const session = await getSession();
-    user = session.user;
-  });
+	onMount(async () => {
+		const session = await getSession();
+		user = session.user;
+	});
 </script>
 
 <VineyardLayout tool="amber" tagline="Your files, preserved" status="preview">
-  <div class="auth-section">
-    {#if user}
-      <UserMenu />
-    {:else}
-      <AuthButton provider="google" />
-    {/if}
-  </div>
+	<div class="auth-section">
+		{#if user}
+			<UserMenu />
+		{:else}
+			<AuthButton provider="google" />
+		{/if}
+	</div>
 
-  <FeatureCard
-    title="Storage Overview"
-    description="See usage across posts and media"
-    status="ready"
-    icon="HardDrive"
-  />
+	<FeatureCard
+		title="Storage Overview"
+		description="See usage across posts and media"
+		status="ready"
+		icon="HardDrive"
+	/>
 
-  <!-- More features... -->
+	<!-- More features... -->
 </VineyardLayout>
 ```
 
@@ -280,7 +273,7 @@ Always use `credentials: 'include'` when making requests to Better Auth:
 
 ```typescript
 fetch("https://auth-api.grove.place/api/auth/session", {
-  credentials: "include", // Required for cross-origin cookies
+	credentials: "include", // Required for cross-origin cookies
 });
 ```
 
@@ -308,7 +301,7 @@ If you're migrating from legacy Heartwood token auth:
 // ❌ Don't use this anymore
 const token = localStorage.getItem("access_token");
 const response = await fetch("https://auth-api.grove.place/verify", {
-  headers: { Authorization: `Bearer ${token}` },
+	headers: { Authorization: `Bearer ${token}` },
 });
 ```
 
@@ -318,7 +311,7 @@ const response = await fetch("https://auth-api.grove.place/verify", {
 // ✅ Use this instead
 const session = await getSession();
 if (session.user) {
-  // User is authenticated
+	// User is authenticated
 }
 ```
 

@@ -3,10 +3,7 @@
  * Client-side functions for Better Auth session management
  */
 
-import type {
-  BetterAuthSessionResponse,
-  BetterAuthProvider,
-} from "../types/index.js";
+import type { BetterAuthSessionResponse, BetterAuthProvider } from "../types/index.js";
 
 /** Better Auth API base URL — canonical source: @autumnsgrove/lattice/config AUTH_HUB_URL */
 const BETTER_AUTH_BASE_URL = "https://login.grove.place";
@@ -31,27 +28,22 @@ const BETTER_AUTH_BASE_URL = "https://login.grove.place";
  * signIn('github', 'https://myapp.grove.place/dashboard');
  * ```
  */
-export function signIn(
-  provider: BetterAuthProvider = "google",
-  callbackURL?: string,
-): void {
-  if (typeof window === "undefined") {
-    throw new Error("signIn can only be called in the browser");
-  }
+export function signIn(provider: BetterAuthProvider = "google", callbackURL?: string): void {
+	if (typeof window === "undefined") {
+		throw new Error("signIn can only be called in the browser");
+	}
 
-  // Validate provider at runtime (defense in depth)
-  const validProviders: BetterAuthProvider[] = ["google", "github"];
-  if (!validProviders.includes(provider)) {
-    throw new Error(
-      `Invalid provider: ${provider}. Must be one of: ${validProviders.join(", ")}`,
-    );
-  }
+	// Validate provider at runtime (defense in depth)
+	const validProviders: BetterAuthProvider[] = ["google", "github"];
+	if (!validProviders.includes(provider)) {
+		throw new Error(`Invalid provider: ${provider}. Must be one of: ${validProviders.join(", ")}`);
+	}
 
-  const redirectUrl = callbackURL || window.location.href;
-  const encodedRedirect = encodeURIComponent(redirectUrl);
-  const authUrl = `${BETTER_AUTH_BASE_URL}/api/auth/sign-in/${provider}?callbackURL=${encodedRedirect}`;
+	const redirectUrl = callbackURL || window.location.href;
+	const encodedRedirect = encodeURIComponent(redirectUrl);
+	const authUrl = `${BETTER_AUTH_BASE_URL}/api/auth/sign-in/${provider}?callbackURL=${encodedRedirect}`;
 
-  window.location.href = authUrl;
+	window.location.href = authUrl;
 }
 
 /**
@@ -73,27 +65,24 @@ export function signIn(
  * ```
  */
 export async function getSession(): Promise<BetterAuthSessionResponse> {
-  try {
-    const response = await fetch(`${BETTER_AUTH_BASE_URL}/api/auth/session`, {
-      credentials: "include", // Required for cross-origin cookies
-      headers: {
-        Accept: "application/json",
-      },
-    });
+	try {
+		const response = await fetch(`${BETTER_AUTH_BASE_URL}/api/auth/session`, {
+			credentials: "include", // Required for cross-origin cookies
+			headers: {
+				Accept: "application/json",
+			},
+		});
 
-    if (!response.ok) {
-      return { user: null, session: null };
-    }
+		if (!response.ok) {
+			return { user: null, session: null };
+		}
 
-    const data = await response.json();
-    return data as BetterAuthSessionResponse;
-  } catch (error) {
-    console.warn(
-      "[Vineyard Auth] Session fetch failed:",
-      (error as Error)?.message,
-    );
-    return { user: null, session: null };
-  }
+		const data = await response.json();
+		return data as BetterAuthSessionResponse;
+	} catch (error) {
+		console.warn("[Vineyard Auth] Session fetch failed:", (error as Error)?.message);
+		return { user: null, session: null };
+	}
 }
 
 /**
@@ -114,27 +103,27 @@ export async function getSession(): Promise<BetterAuthSessionResponse> {
  * ```
  */
 export async function signOut(redirectTo: string = "/"): Promise<void> {
-  if (typeof window === "undefined") {
-    throw new Error("signOut can only be called in the browser");
-  }
+	if (typeof window === "undefined") {
+		throw new Error("signOut can only be called in the browser");
+	}
 
-  try {
-    await fetch(`${BETTER_AUTH_BASE_URL}/api/auth/sign-out`, {
-      method: "POST",
-      credentials: "include", // Required for cross-origin cookies
-      headers: {
-        Accept: "application/json",
-      },
-    });
-  } catch (error) {
-    console.warn(
-      "[Vineyard Auth] Sign-out failed (redirecting anyway):",
-      (error as Error)?.message,
-    );
-  }
+	try {
+		await fetch(`${BETTER_AUTH_BASE_URL}/api/auth/sign-out`, {
+			method: "POST",
+			credentials: "include", // Required for cross-origin cookies
+			headers: {
+				Accept: "application/json",
+			},
+		});
+	} catch (error) {
+		console.warn(
+			"[Vineyard Auth] Sign-out failed (redirecting anyway):",
+			(error as Error)?.message,
+		);
+	}
 
-  // Redirect regardless of fetch result
-  window.location.href = redirectTo;
+	// Redirect regardless of fetch result
+	window.location.href = redirectTo;
 }
 
 /**
@@ -155,6 +144,6 @@ export async function signOut(redirectTo: string = "/"): Promise<void> {
  * ```
  */
 export async function isAuthenticated(): Promise<boolean> {
-  const { user } = await getSession();
-  return user !== null;
+	const { user } = await getSession();
+	return user !== null;
 }

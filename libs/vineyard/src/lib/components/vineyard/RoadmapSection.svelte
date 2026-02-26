@@ -10,232 +10,239 @@
   />
 -->
 <script lang="ts">
-  import type { RoadmapSectionProps } from '../../types/index.js';
-  import { Check, ArrowRight, Circle } from 'lucide-svelte';
+	import type { RoadmapSectionProps } from "../../types/index.js";
+	import { Check, ArrowRight, Circle } from "lucide-svelte";
 
-  let { built, inProgress, planned }: RoadmapSectionProps = $props();
+	let { built, inProgress, planned }: RoadmapSectionProps = $props();
 </script>
 
 <section class="roadmap-section">
-  <div class="roadmap-header">
-    <h3 class="roadmap-title">Roadmap</h3>
-    <p class="roadmap-subtitle">What's built, what's next, and what's planned</p>
-  </div>
+	<div class="roadmap-header">
+		<h3 class="roadmap-title">Roadmap</h3>
+		<p class="roadmap-subtitle">What's built, what's next, and what's planned</p>
+	</div>
 
-  <div class="roadmap-timeline">
-    {#if built.length > 0}
-      <div class="roadmap-group roadmap-built">
-        <div class="group-header">
-          <div class="group-icon">
-            <Check size={16} />
-          </div>
-          <h4 class="group-title">Built</h4>
-          <span class="group-count">{built.length}</span>
-        </div>
-        <ul class="group-list">
-          {#each built as item}
-            <li class="roadmap-item">
-              <span class="item-indicator"></span>
-              <span class="item-text">{item}</span>
-            </li>
-          {/each}
-        </ul>
-      </div>
-    {/if}
+	<div class="roadmap-timeline">
+		{#if built.length > 0}
+			<div class="roadmap-group roadmap-built">
+				<div class="group-header">
+					<div class="group-icon">
+						<Check size={16} />
+					</div>
+					<h4 class="group-title">Built</h4>
+					<span class="group-count">{built.length}</span>
+				</div>
+				<ul class="group-list">
+					{#each built as item}
+						<li class="roadmap-item">
+							<span class="item-indicator"></span>
+							<span class="item-text">{item}</span>
+						</li>
+					{/each}
+				</ul>
+			</div>
+		{/if}
 
-    {#if inProgress.length > 0}
-      <div class="roadmap-group roadmap-in-progress">
-        <div class="group-header">
-          <div class="group-icon">
-            <ArrowRight size={16} />
-          </div>
-          <h4 class="group-title">In Progress</h4>
-          <span class="group-count">{inProgress.length}</span>
-        </div>
-        <ul class="group-list">
-          {#each inProgress as item}
-            <li class="roadmap-item">
-              <span class="item-indicator"></span>
-              <span class="item-text">{item}</span>
-            </li>
-          {/each}
-        </ul>
-      </div>
-    {/if}
+		{#if inProgress.length > 0}
+			<div class="roadmap-group roadmap-in-progress">
+				<div class="group-header">
+					<div class="group-icon">
+						<ArrowRight size={16} />
+					</div>
+					<h4 class="group-title">In Progress</h4>
+					<span class="group-count">{inProgress.length}</span>
+				</div>
+				<ul class="group-list">
+					{#each inProgress as item}
+						<li class="roadmap-item">
+							<span class="item-indicator"></span>
+							<span class="item-text">{item}</span>
+						</li>
+					{/each}
+				</ul>
+			</div>
+		{/if}
 
-    {#if planned.length > 0}
-      <div class="roadmap-group roadmap-planned">
-        <div class="group-header">
-          <div class="group-icon">
-            <Circle size={16} />
-          </div>
-          <h4 class="group-title">Planned</h4>
-          <span class="group-count">{planned.length}</span>
-        </div>
-        <ul class="group-list">
-          {#each planned as item}
-            <li class="roadmap-item">
-              <span class="item-indicator"></span>
-              <span class="item-text">{item}</span>
-            </li>
-          {/each}
-        </ul>
-      </div>
-    {/if}
-  </div>
+		{#if planned.length > 0}
+			<div class="roadmap-group roadmap-planned">
+				<div class="group-header">
+					<div class="group-icon">
+						<Circle size={16} />
+					</div>
+					<h4 class="group-title">Planned</h4>
+					<span class="group-count">{planned.length}</span>
+				</div>
+				<ul class="group-list">
+					{#each planned as item}
+						<li class="roadmap-item">
+							<span class="item-indicator"></span>
+							<span class="item-text">{item}</span>
+						</li>
+					{/each}
+				</ul>
+			</div>
+		{/if}
+	</div>
 </section>
 
 <style>
-  .roadmap-section {
-    --status-ready: #22c55e;
-    --status-in-progress: #f97316;
-    --status-planned: var(--color-foreground-subtle, #9ca3af);
-  }
+	.roadmap-section {
+		--status-ready: #22c55e;
+		--status-in-progress: #f97316;
+		--status-planned: var(--color-foreground-subtle, #9ca3af);
+	}
 
-  .roadmap-header {
-    margin-bottom: 1.5rem;
-  }
+	.roadmap-header {
+		margin-bottom: 1.5rem;
+	}
 
-  .roadmap-title {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--color-foreground, #292524);
-    margin: 0 0 0.25rem;
-  }
+	.roadmap-title {
+		font-size: 1.5rem;
+		font-weight: 600;
+		color: var(--color-foreground, #292524);
+		margin: 0 0 0.25rem;
+	}
 
-  .roadmap-subtitle {
-    font-size: 0.9375rem;
-    color: var(--color-foreground-muted, rgba(61, 41, 20, 0.7));
-    margin: 0;
-  }
+	.roadmap-subtitle {
+		font-size: 0.9375rem;
+		color: var(--color-foreground-muted, rgba(61, 41, 20, 0.7));
+		margin: 0;
+	}
 
-  .roadmap-timeline {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
+	.roadmap-timeline {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
 
-  .roadmap-group {
-    background: var(--color-surface-elevated, #ffffff);
-    border: 1px solid var(--color-border-subtle, rgba(0, 0, 0, 0.08));
-    border-radius: 0.75rem;
-    overflow: hidden;
-  }
+	.roadmap-group {
+		background: var(--color-surface-elevated, #ffffff);
+		border: 1px solid var(--color-border-subtle, rgba(0, 0, 0, 0.08));
+		border-radius: 0.75rem;
+		overflow: hidden;
+	}
 
-  .group-header {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 1rem 1.25rem;
-    border-bottom: 1px solid var(--color-border-subtle, rgba(0, 0, 0, 0.08));
-  }
+	.group-header {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 1rem 1.25rem;
+		border-bottom: 1px solid var(--color-border-subtle, rgba(0, 0, 0, 0.08));
+	}
 
-  .group-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2rem;
-    height: 2rem;
-    border-radius: 50%;
-  }
+	.group-icon {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 2rem;
+		height: 2rem;
+		border-radius: 50%;
+	}
 
-  .roadmap-built .group-icon {
-    background: rgba(34, 197, 94, 0.1);
-    color: var(--status-ready);
-  }
+	.roadmap-built .group-icon {
+		background: rgba(34, 197, 94, 0.1);
+		color: var(--status-ready);
+	}
 
-  .roadmap-in-progress .group-icon {
-    background: rgba(249, 115, 22, 0.1);
-    color: var(--status-in-progress);
-  }
+	.roadmap-in-progress .group-icon {
+		background: rgba(249, 115, 22, 0.1);
+		color: var(--status-in-progress);
+	}
 
-  .roadmap-planned .group-icon {
-    background: var(--color-surface-hover, rgba(156, 163, 175, 0.1));
-    color: var(--status-planned);
-  }
+	.roadmap-planned .group-icon {
+		background: var(--color-surface-hover, rgba(156, 163, 175, 0.1));
+		color: var(--status-planned);
+	}
 
-  .group-title {
-    flex: 1;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--color-foreground, #292524);
-    margin: 0;
-  }
+	.group-title {
+		flex: 1;
+		font-size: 1rem;
+		font-weight: 600;
+		color: var(--color-foreground, #292524);
+		margin: 0;
+	}
 
-  .group-count {
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 0.125rem 0.5rem;
-    border-radius: 9999px;
-    background: var(--color-surface-hover, #f5f5f4);
-    color: var(--color-foreground-muted, rgba(61, 41, 20, 0.7));
-  }
+	.group-count {
+		font-size: 0.75rem;
+		font-weight: 600;
+		padding: 0.125rem 0.5rem;
+		border-radius: 9999px;
+		background: var(--color-surface-hover, #f5f5f4);
+		color: var(--color-foreground-muted, rgba(61, 41, 20, 0.7));
+	}
 
-  .group-list {
-    list-style: none;
-    margin: 0;
-    padding: 0.5rem 0;
-  }
+	.group-list {
+		list-style: none;
+		margin: 0;
+		padding: 0.5rem 0;
+	}
 
-  .roadmap-item {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.625rem 1.25rem;
-    transition: background 0.15s ease;
-  }
+	.roadmap-item {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0.625rem 1.25rem;
+		transition: background 0.15s ease;
+	}
 
-  .roadmap-item:hover {
-    background: var(--color-surface-hover, rgba(0, 0, 0, 0.03));
-  }
+	.roadmap-item:hover {
+		background: var(--color-surface-hover, rgba(0, 0, 0, 0.03));
+	}
 
-  .item-indicator {
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
+	.item-indicator {
+		width: 0.5rem;
+		height: 0.5rem;
+		border-radius: 50%;
+		flex-shrink: 0;
+	}
 
-  .roadmap-built .item-indicator {
-    background: var(--status-ready);
-  }
+	.roadmap-built .item-indicator {
+		background: var(--status-ready);
+	}
 
-  .roadmap-in-progress .item-indicator {
-    background: var(--status-in-progress);
-    animation: pulse-dot 2s ease-in-out infinite;
-  }
+	.roadmap-in-progress .item-indicator {
+		background: var(--status-in-progress);
+		animation: pulse-dot 2s ease-in-out infinite;
+	}
 
-  .roadmap-planned .item-indicator {
-    background: transparent;
-    border: 2px solid var(--status-planned);
-  }
+	.roadmap-planned .item-indicator {
+		background: transparent;
+		border: 2px solid var(--status-planned);
+	}
 
-  @keyframes pulse-dot {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.6; transform: scale(1.2); }
-  }
+	@keyframes pulse-dot {
+		0%,
+		100% {
+			opacity: 1;
+			transform: scale(1);
+		}
+		50% {
+			opacity: 0.6;
+			transform: scale(1.2);
+		}
+	}
 
-  .item-text {
-    font-size: 0.9375rem;
-    color: var(--color-foreground, #292524);
-  }
+	.item-text {
+		font-size: 0.9375rem;
+		color: var(--color-foreground, #292524);
+	}
 
-  @media (prefers-reduced-motion: reduce) {
-    .roadmap-item {
-      transition: none;
-    }
-    .roadmap-in-progress .item-indicator {
-      animation: none;
-    }
-  }
+	@media (prefers-reduced-motion: reduce) {
+		.roadmap-item {
+			transition: none;
+		}
+		.roadmap-in-progress .item-indicator {
+			animation: none;
+		}
+	}
 
-  @media (min-width: 768px) {
-    .roadmap-timeline {
-      flex-direction: row;
-    }
+	@media (min-width: 768px) {
+		.roadmap-timeline {
+			flex-direction: row;
+		}
 
-    .roadmap-group {
-      flex: 1;
-    }
-  }
+		.roadmap-group {
+			flex: 1;
+		}
+	}
 </style>

@@ -4,7 +4,7 @@
  */
 
 export {
-	grove,
+	grove as groveColors,
 	cream,
 	bark,
 	semantic,
