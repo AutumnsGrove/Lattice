@@ -6,10 +6,13 @@ the detection fallback chain.
 """
 
 import base64
+import logging
 import os
 from dataclasses import dataclass
 
 import httpx
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -101,4 +104,5 @@ class LumenClient:
                 return boxes
 
         except Exception:
+            logger.debug("Lumen detection failed", exc_info=True)
             return []

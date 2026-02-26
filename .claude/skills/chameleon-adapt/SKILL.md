@@ -53,9 +53,12 @@ Before choosing a single color, understand the environment. Assess three things:
 **What season is it?**
 
 ```svelte
-import {season} from '$lib/stores/season'; const isSpring = $derived($season === 'spring'); const isAutumn
-= $derived($season === 'autumn'); const isWinter = $derived($season === 'winter'); // Summer is the default
-(no flag needed)
+import { season } from '$lib/stores/season';
+
+const isSpring = $derived($season === 'spring');
+const isAutumn = $derived($season === 'autumn');
+const isWinter = $derived($season === 'winter');
+// Summer is the default (no flag needed)
 ```
 
 **What's the emotional tone?**
@@ -101,7 +104,7 @@ Key decisions: Which glass variant fits each container? Where does content live 
 **Quick glass starter:**
 
 ```svelte
-import {(Glass, GlassCard, GlassButton)} from '@lattice/ui/ui';
+import { Glass, GlassCard, GlassButton } from '@lattice/ui/ui';
 
 <Glass variant="tint" class="p-6 rounded-xl">
 	<p>Readable text over busy backgrounds</p>

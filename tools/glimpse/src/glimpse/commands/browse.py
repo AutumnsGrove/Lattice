@@ -6,13 +6,14 @@ from pathlib import Path
 import click
 from playwright.async_api import async_playwright
 
-from glimpse.browse.executor import BrowseExecutor
-from glimpse.browse.interpreter import parse_instructions
+from glimpse.browse.executor import BrowseExecutor, BrowseStepResult
+from glimpse.browse.interpreter import ActionStep, parse_instructions
 from glimpse.browse.resolver import TargetResolver
 from glimpse.capture.console import ConsoleCollector
 from glimpse.capture.injector import build_init_script
+from glimpse.capture.screenshot import CaptureResult
+from glimpse.config import GlimpseConfig
 from glimpse.utils.browser import find_chromium_executable
-from glimpse.capture.screenshot import CaptureRequest, CaptureResult
 from glimpse.utils.validation import validate_url
 
 
@@ -106,15 +107,15 @@ def browse(
 
 async def _run_browse(
     url: str,
-    steps,
-    config,
+    steps: list[ActionStep],
+    config: GlimpseConfig,
     season: str | None,
     theme: str | None,
     logs: bool,
     screenshot_each: bool,
     output_dir: Path,
     timeout_ms: int,
-):
+) -> tuple[list[BrowseStepResult], CaptureResult]:
     """Async browse execution."""
     async with async_playwright() as p:
         launch_opts = {"headless": config.headless}
