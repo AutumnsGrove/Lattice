@@ -8,9 +8,6 @@
 		FallingPetalsLayer,
 		FallingLeavesLayer,
 		SnowfallLayer,
-		Robin,
-		Cardinal,
-		Chickadee,
 	} from "@autumnsgrove/lattice/ui/nature";
 	import { seasonStore } from "@autumnsgrove/lattice/ui/chrome";
 	import {
@@ -246,17 +243,6 @@
 			<!-- Right tree -->
 			<div class="absolute -right-16 bottom-0 opacity-40 hidden sm:block" aria-hidden="true">
 				<TreeCherry class="w-10 h-14" {season} />
-			</div>
-
-			<!-- Seasonal bird perched on the right tree -->
-			<div class="absolute -right-12 -top-1 opacity-50 hidden sm:block" aria-hidden="true">
-				{#if isSpring || isSummer}
-					<Robin class="w-5 h-5" facing="left" />
-				{:else if isAutumn}
-					<Cardinal class="w-5 h-5" facing="left" />
-				{:else}
-					<Chickadee class="w-5 h-5" facing="left" />
-				{/if}
 			</div>
 		</div>
 
