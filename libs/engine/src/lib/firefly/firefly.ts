@@ -34,6 +34,7 @@ export class Firefly {
 	private readonly idle?: IdleDetector;
 	private readonly idleConfig?: IdleConfig;
 	private readonly maxLifetime?: number;
+	private readonly readyTimeout: number;
 	private readonly defaultTags: string[];
 	private readonly consumer: string;
 	private readonly onIgnite?: (instance: ServerInstance) => Promise<void>;
@@ -46,6 +47,7 @@ export class Firefly {
 		this.store = config.store ?? new MemoryFireflyStore();
 		this.sync = config.sync;
 		this.maxLifetime = config.maxLifetime;
+		this.readyTimeout = config.readyTimeout ?? 300_000; // 5 min default
 		this.defaultTags = config.tags ?? [];
 		this.consumer = config.consumer ?? "unknown";
 		this.onIgnite = config.onIgnite;
@@ -131,9 +133,10 @@ export class Firefly {
 			);
 		}
 
-		// 3. Wait for ready
-		const timeoutMs = options.maxLifetime ?? this.maxLifetime ?? 300_000;
-		const ready = await this.provider.waitForReady(instance, timeoutMs);
+		// 3. Wait for ready (separate from maxLifetime — a 5min boot timeout
+		// is very different from a 12hr session cap)
+		const readyTimeoutMs = options.readyTimeout ?? this.readyTimeout;
+		const ready = await this.provider.waitForReady(instance, readyTimeoutMs);
 		if (!ready) {
 			await this.store.updateStatus(instance.id, "terminated");
 			try {
@@ -334,9 +337,7 @@ export class Firefly {
 	async sweepOrphans(tags?: string[]): Promise<ServerInstance[]> {
 		const cloudInstances = await this.provider.listActive(tags);
 		const tracked = await this.store.getActiveInstances();
-		const trackedIds = new Set(
-			(Array.isArray(tracked) ? tracked : await tracked).map((t) => t.providerServerId),
-		);
+		const trackedIds = new Set(tracked.map((t) => t.providerServerId));
 
 		const orphans: ServerInstance[] = [];
 		for (const cloud of cloudInstances) {

@@ -5,6 +5,12 @@
  * The server runs an agent that accepts HTTP commands (the Outpost pattern).
  * Worker-native alternative to SSH — no net/tls modules required.
  *
+ * **Security note:** By default, commands are sent over plain HTTP with
+ * `X-Firefly-Secret` in the header. This is acceptable on private networks
+ * (e.g., Hetzner private networking, Fly internal IPs) but should use HTTPS
+ * when the agent is reachable over the public internet. Configure the agent
+ * with TLS or use a VPN/tunnel for production workloads.
+ *
  * @module @autumnsgrove/lattice/firefly
  */
 
@@ -87,17 +93,16 @@ export class WebhookExecutor implements RemoteExecutor {
 
 	async isReachable(instance: ServerInstance): Promise<boolean> {
 		const url = `http://${instance.publicIp}:${this.port}${this.pathPrefix}/health`;
+		const controller = new AbortController();
+		const timeout = setTimeout(() => controller.abort(), 5_000);
 
 		try {
-			const controller = new AbortController();
-			const timeout = setTimeout(() => controller.abort(), 5_000);
-
 			const response = await fetch(url, { signal: controller.signal });
-			clearTimeout(timeout);
-
 			return response.ok;
 		} catch {
 			return false;
+		} finally {
+			clearTimeout(timeout);
 		}
 	}
 }

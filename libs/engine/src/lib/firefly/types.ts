@@ -319,6 +319,8 @@ export interface FireflyConfig {
 	idle?: IdleConfig;
 	/** Default max session duration (ms), overridable per-ignite */
 	maxLifetime?: number;
+	/** Max time to wait for a server to become ready (ms). Default: 300_000 (5 min). */
+	readyTimeout?: number;
 	/** Default tags applied to all instances */
 	tags?: string[];
 	/** Consumer name for session logging */
@@ -349,6 +351,8 @@ export interface IgniteOptions {
 	tags?: string[];
 	/** Max lifetime override (ms) */
 	maxLifetime?: number;
+	/** Ready timeout override (ms) */
+	readyTimeout?: number;
 	/** Instance metadata */
 	metadata?: Record<string, unknown>;
 	/** State key for R2 sync */
