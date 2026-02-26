@@ -10,6 +10,7 @@ from glimpse.browse.executor import BrowseExecutor
 from glimpse.browse.interpreter import parse_instructions
 from glimpse.browse.resolver import TargetResolver
 from glimpse.capture.console import ConsoleCollector
+from glimpse.capture.engine import _find_chromium_executable
 from glimpse.capture.injector import build_init_script
 from glimpse.capture.screenshot import CaptureRequest, CaptureResult
 from glimpse.utils.validation import validate_url
@@ -116,7 +117,11 @@ async def _run_browse(
 ):
     """Async browse execution."""
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=config.headless)
+        launch_opts = {"headless": config.headless}
+        executable = _find_chromium_executable()
+        if executable:
+            launch_opts["executable_path"] = executable
+        browser = await p.chromium.launch(**launch_opts)
         context = await browser.new_context(
             viewport={"width": config.viewport_width, "height": config.viewport_height},
             device_scale_factor=config.scale,

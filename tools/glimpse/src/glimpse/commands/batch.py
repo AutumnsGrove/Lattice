@@ -47,7 +47,7 @@ def batch(ctx: click.Context, config_file: str, dry_run: bool) -> None:
     # Build capture requests
     requests = []
     for entry in captures:
-        url = entry.get("url")
+        url = entry.get("url", defaults.get("url"))
         if not url:
             output_handler.print_error("Capture entry missing 'url'")
             continue
