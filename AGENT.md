@@ -220,6 +220,39 @@ gw dev ci --affected --fail-fast --diagnose
 
 **This is non-negotiable.** Every workflow must end with verification before commit.
 
+### Glimpse — Visual Verification (UI Work)
+
+**When you build, modify, or review UI, you MUST look at the result.** CI passing is not the same as looking correct. Glimpse is Grove's Playwright-based screenshot tool — it lets you see what you built.
+
+```bash
+# Capture a page with Grove theme injection
+uv run --project tools/glimpse glimpse capture http://localhost:5173/ --season autumn --theme dark --logs
+
+# Capture all season × theme combinations at once
+uv run --project tools/glimpse glimpse matrix http://localhost:5173/
+
+# Interactive browsing — click around, fill forms, verify flows
+uv run --project tools/glimpse glimpse browse http://localhost:5173/ \
+  --do "click Posts, then scroll down" --screenshot-each --logs
+
+# Check readiness (browser, server, database)
+uv run --project tools/glimpse glimpse status
+```
+
+**When to use Glimpse:**
+
+- After building or modifying any UI component, page, or layout
+- During design skill workflows (chameleon-adapt, gathering-ui, grove-ui-design)
+- When verifying accessibility (deer-sense) — capture at different viewports
+- Before declaring UI work complete — capture → review → iterate
+- When reviewing someone else's UI changes
+
+**The iterate loop:** Capture → look at screenshot → fix issues → capture again. Don't ship UI you haven't seen.
+
+**Output modes:** `--agent` for CI-style output, `--json` for structured data, default for rich terminal display. Use `--logs` to surface console errors alongside screenshots.
+
+**Full spec:** `docs/specs/glimpse-spec.md`
+
 ### Naming Conventions
 
 - **Directories**: Use CamelCase (e.g., `VideoProcessor`, `AudioTools`, `DataAnalysis`)

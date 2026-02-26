@@ -136,13 +136,33 @@ Handoff: accessibility-verified components → VALIDATE phase
 
 ### Phase 4: VALIDATE
 
-_The design stands. Both animals verify..._
+_The design stands. Both animals verify — with their own eyes..._
 
-**Validation Checklist:**
+**Visual Verification (mandatory):**
 
-- [ ] Chameleon: UI matches Grove aesthetic
-- [ ] Chameleon: Seasonal theme appropriate
-- [ ] Chameleon: Glassmorphism readable
+Before checking boxes, actually _look_ at what was built. Use Glimpse to capture and review the rendered result:
+
+```bash
+# Capture the page across all seasons and themes
+uv run --project tools/glimpse glimpse matrix http://localhost:5173/[page] \
+  --seasons spring,summer,autumn,winter --themes light,dark --logs
+
+# Browse interactively — verify flows, click targets, scrolling
+uv run --project tools/glimpse glimpse browse http://localhost:5173/[page] \
+  --do "click navigation, scroll to content, click interactive elements" \
+  --screenshot-each --logs
+```
+
+Review every screenshot. If something looks wrong — fix it and capture again. The gathering does not declare UI complete without visual proof.
+
+**Validation Checklist (after visual verification):**
+
+- [ ] Glimpse: Page captured across all target seasons — looks correct
+- [ ] Glimpse: Light and dark mode both visually verified
+- [ ] Glimpse: No console errors in `--logs` output
+- [ ] Chameleon: UI matches Grove aesthetic (verified by screenshot)
+- [ ] Chameleon: Seasonal theme appropriate (verified by matrix)
+- [ ] Chameleon: Glassmorphism readable (verified by screenshot)
 - [ ] Chameleon: Mobile responsive
 - [ ] Deer: Keyboard navigation works
 - [ ] Deer: Screen reader compatible
@@ -155,17 +175,24 @@ _The design stands. Both animals verify..._
 **Quality Gates:**
 
 ```
-Chameleon completes → Deer audits
-                         ↓
-               Issues found?
-                  /        \
-               Yes          No
-                |            |
-         Chameleon fixes     ↓
-                |         Proceed
-         Deer re-audit
-                |
-            Complete
+Chameleon completes → Glimpse capture → Review screenshots
+                                              ↓
+                                    Looks correct?
+                                       /        \
+                                    No            Yes
+                                     |             |
+                              Chameleon fixes      ↓
+                                     |          Deer audits
+                              Glimpse re-capture    ↓
+                                     |         Issues found?
+                                  Repeat        /        \
+                                             Yes          No
+                                              |            |
+                                       Chameleon fixes     ↓
+                                              |         Proceed
+                                       Deer re-audit
+                                              |
+                                          Complete
 ```
 
 ---
