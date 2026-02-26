@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { LogIn, LogOut, User, ChevronDown } from "../icons/lucide";
 	import type { AccountStatusProps, HeaderUser } from "./types";
+	import { resolveDisplayName, resolveInitial } from "./types";
 
 	let {
 		user = null,
@@ -89,12 +90,12 @@
 					/>
 				{:else}
 					<div class="w-7 h-7 rounded-full bg-accent/20 flex items-center justify-center">
-						<User class="w-4 h-4 text-accent-muted" />
+						<span class="text-xs font-medium text-accent-muted">{resolveInitial(user)}</span>
 					</div>
 				{/if}
 				{#if !compact}
 					<span class="text-sm hidden lg:inline max-w-[120px] truncate"
-						>{user.name || "Your Grove"}</span
+						>{resolveDisplayName(user)}</span
 					>
 				{/if}
 				<ChevronDown class="w-3.5 h-3.5 transition-transform {dropdownOpen ? 'rotate-180' : ''}" />
@@ -122,12 +123,12 @@
 								/>
 							{:else}
 								<div class="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
-									<User class="w-5 h-5 text-accent-muted" />
+									<span class="text-sm font-medium text-accent-muted">{resolveInitial(user)}</span>
 								</div>
 							{/if}
 							<div class="min-w-0 flex-1">
 								<p class="text-sm font-medium text-foreground truncate">
-									{user.name || "Your Grove"}
+									{resolveDisplayName(user)}
 								</p>
 								{#if user.email}
 									<p class="text-xs text-foreground-subtle truncate">{user.email}</p>
@@ -185,11 +186,11 @@
 					/>
 				{:else}
 					<div class="w-7 h-7 rounded-full bg-accent/20 flex items-center justify-center">
-						<User class="w-4 h-4 text-accent-muted" />
+						<span class="text-xs font-medium text-accent-muted">{resolveInitial(user)}</span>
 					</div>
 				{/if}
 				{#if !compact}
-					<span class="text-sm hidden lg:inline">{user.name || "Your Grove"}</span>
+					<span class="text-sm hidden lg:inline">{resolveDisplayName(user)}</span>
 				{/if}
 			</a>
 		{/if}

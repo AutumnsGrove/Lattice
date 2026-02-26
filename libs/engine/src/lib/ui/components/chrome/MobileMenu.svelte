@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { page } from "$app/state";
-	import { X, ExternalLink, Search, LogIn, LogOut, User } from "lucide-svelte";
+	import { X, ExternalLink, Search, LogIn, LogOut } from "lucide-svelte";
 	import type { NavItem, FooterLink, HeaderUser } from "./types";
-	import { isActivePath } from "./types";
+	import { isActivePath, resolveDisplayName, resolveInitial } from "./types";
 	import {
 		DEFAULT_MOBILE_NAV_ITEMS,
 		DEFAULT_MOBILE_RESOURCE_LINKS,
@@ -204,11 +204,11 @@
 						/>
 					{:else}
 						<div class="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center">
-							<User class="w-4 h-4 text-accent-muted" />
+							<span class="text-sm font-medium text-accent-muted">{resolveInitial(user)}</span>
 						</div>
 					{/if}
 					<div class="flex-1 min-w-0">
-						<p class="text-sm font-medium truncate">{user.name || "Wanderer"}</p>
+						<p class="text-sm font-medium truncate">{resolveDisplayName(user)}</p>
 						<p class="text-xs text-foreground-subtle">Go to your Grove →</p>
 					</div>
 				</a>
