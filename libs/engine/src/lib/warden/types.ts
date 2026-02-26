@@ -8,7 +8,16 @@
 // Service Types
 // =============================================================================
 
-export type WardenService = "github" | "tavily" | "cloudflare" | "exa" | "resend" | "stripe" | "openrouter";
+export type WardenService =
+	| "github"
+	| "tavily"
+	| "cloudflare"
+	| "exa"
+	| "resend"
+	| "stripe"
+	| "openrouter"
+	| "hetzner"
+	| "fly";
 
 export type WardenErrorCode =
 	| "INVALID_REQUEST"

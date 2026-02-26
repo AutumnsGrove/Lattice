@@ -32,6 +32,7 @@ export type {
 	ProviderConfig,
 	HetznerProviderConfig,
 	FlyProviderConfig,
+	TokenResolver,
 	FireflyStateStore,
 	FireflySession,
 	StateSynchronizer,
@@ -63,6 +64,8 @@ export { HetznerProvider } from "./providers/hetzner.js";
 export { FlyProvider } from "./providers/fly.js";
 export { RailwayProvider } from "./providers/railway.js";
 export { DigitalOceanProvider } from "./providers/digitalocean.js";
+export { createWardenProvider, createWardenTokenResolver } from "./providers/warden.js";
+export type { WardenResolverOptions } from "./providers/warden.js";
 
 // ─── State Stores ────────────────────────────────────────────
 export { MemoryFireflyStore } from "./stores/memory.js";

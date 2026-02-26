@@ -15,19 +15,76 @@ import type {
 	ServerInstance,
 	ServerStatus,
 	ProviderConfig,
+	TokenResolver,
 } from "../types.js";
 import { FireflyError, FLY_ERRORS } from "../errors.js";
 
+/** Token cache TTL: 5 minutes */
+const TOKEN_CACHE_TTL_MS = 5 * 60 * 1000;
+
 export abstract class FireflyProviderBase implements FireflyProvider {
 	abstract readonly name: FireflyProviderName;
-	protected readonly token: string;
 	protected readonly defaultRegion?: string;
 	protected readonly defaultSize?: string;
 
+	private readonly _staticToken?: string;
+	private readonly _tokenResolver?: TokenResolver;
+	private _cachedToken?: string;
+	private _cachedTokenAt?: number;
+
 	constructor(config: ProviderConfig) {
-		this.token = config.token;
+		if (!config.token && !config.tokenResolver) {
+			throw new FireflyError(
+				FLY_ERRORS.CREDENTIAL_RESOLVE_FAILED,
+				"ProviderConfig requires at least one of `token` or `tokenResolver`.",
+			);
+		}
+		this._staticToken = config.token;
+		this._tokenResolver = config.tokenResolver;
 		this.defaultRegion = config.defaultRegion;
 		this.defaultSize = config.defaultSize;
+	}
+
+	/**
+	 * Resolve the current API token.
+	 *
+	 * Static tokens are returned immediately (zero overhead).
+	 * Resolver-backed tokens are cached for 5 minutes to avoid
+	 * per-request round-trips to Warden while still supporting rotation.
+	 */
+	protected async getToken(): Promise<string> {
+		// Static token — fast path
+		if (this._staticToken) return this._staticToken;
+
+		// Cached and still fresh
+		if (
+			this._cachedToken &&
+			this._cachedTokenAt &&
+			Date.now() - this._cachedTokenAt < TOKEN_CACHE_TTL_MS
+		) {
+			return this._cachedToken;
+		}
+
+		// Resolve via callback
+		if (!this._tokenResolver) {
+			throw new FireflyError(
+				FLY_ERRORS.CREDENTIAL_RESOLVE_FAILED,
+				"No token or resolver available.",
+			);
+		}
+
+		try {
+			const token = await this._tokenResolver();
+			this._cachedToken = token;
+			this._cachedTokenAt = Date.now();
+			return token;
+		} catch (err) {
+			throw new FireflyError(
+				FLY_ERRORS.CREDENTIAL_RESOLVE_FAILED,
+				err instanceof Error ? err.message : String(err),
+				err,
+			);
+		}
 	}
 
 	async provision(config: ServerConfig): Promise<ServerInstance> {
@@ -113,11 +170,12 @@ export abstract class FireflyProviderBase implements FireflyProvider {
 		body?: unknown,
 	): Promise<T> {
 		const url = `${baseUrl}${endpoint}`;
+		const token = await this.getToken();
 
 		const response = await fetch(url, {
 			method,
 			headers: {
-				Authorization: `Bearer ${this.token}`,
+				Authorization: `Bearer ${token}`,
 				"Content-Type": "application/json",
 			},
 			body: body ? JSON.stringify(body) : undefined,

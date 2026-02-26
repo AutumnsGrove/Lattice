@@ -43,6 +43,10 @@ export interface Env {
 	STRIPE_SECRET_KEY: string;
 	/** OpenRouter API key — LLM gateway (global fallback) */
 	OPENROUTER_API_KEY: string;
+	/** Hetzner Cloud API token (global fallback) */
+	HETZNER_API_TOKEN: string;
+	/** Fly.io API token (global fallback) */
+	FLY_API_TOKEN: string;
 	/** Admin API key for agent management endpoints */
 	WARDEN_ADMIN_KEY?: string;
 }
@@ -55,7 +59,9 @@ export type WardenService =
 	| "exa"
 	| "resend"
 	| "stripe"
-	| "openrouter";
+	| "openrouter"
+	| "hetzner"
+	| "fly";
 
 /** Authentication method used for a request */
 export type AuthMethod = "service_binding" | "challenge_response";

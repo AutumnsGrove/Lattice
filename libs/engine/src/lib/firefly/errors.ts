@@ -55,6 +55,12 @@ export const FLY_ERRORS = {
 		userMessage: "A command failed on the server.",
 		adminMessage: "Remote agent returned a non-OK HTTP status for command execution.",
 	},
+	CREDENTIAL_RESOLVE_FAILED: {
+		code: "FLY-007",
+		category: "admin" as const,
+		userMessage: "Server provisioning service is temporarily unavailable.",
+		adminMessage: "Failed to resolve provider API credential via Warden.",
+	},
 
 	// ─── Lifecycle (020-039) ─────────────────────────────────────
 

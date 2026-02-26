@@ -86,10 +86,15 @@ export interface FireflyProvider {
 	listActive(tags?: string[]): Promise<ServerInstance[]>;
 }
 
+/** A function that resolves an API token at runtime (e.g. from Warden). */
+export type TokenResolver = () => Promise<string>;
+
 /** Configuration for constructing a provider. */
 export interface ProviderConfig {
-	/** API token for the provider */
-	token: string;
+	/** Static API token for the provider. At least one of `token` or `tokenResolver` is required. */
+	token?: string;
+	/** Lazy token resolver (e.g. Warden credential resolution). Called on first use, cached with TTL. */
+	tokenResolver?: TokenResolver;
 	/** Default region when not specified per-ignite */
 	defaultRegion?: string;
 	/** Default server size when not specified per-ignite */
