@@ -644,10 +644,21 @@ glimpse seed --db curios
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `--reset` | false | Drop all local D1 data and recreate from scratch |
+| `--reset` | false | Drop all local D1 data and recreate from scratch (requires `--yes` or interactive confirmation) |
+| `--yes` | false | Skip confirmation prompt for destructive operations (`--reset`) |
 | `--tenant` | all | Seed only a specific test tenant |
 | `--dry-run` | false | Show SQL that would be executed |
 | `--db` | all | Target specific database: engine, curios, observability |
+
+**Destructive-action safety:** `--reset` is destructive — it drops all local D1 tables and re-seeds from scratch. When invoked without `--yes`, Glimpse prints a summary of what will be destroyed and prompts:
+
+```
+⚠ This will drop all local D1 data and recreate from scratch.
+  Databases: engine, curios, observability
+  Are you sure? [y/N]
+```
+
+In agent mode (`--agent`) or non-interactive shells where stdin is not a TTY, `--reset` without `--yes` exits with code 1 and the message: `[FAIL] --reset requires --yes in non-interactive mode`.
 
 **Seed scripts directory:** `scripts/db/` in the monorepo root. Glimpse discovers scripts by convention:
 
@@ -666,6 +677,8 @@ Reports whether the development environment is ready for verification.
 ```bash
 glimpse status
 ```
+
+**D1 database check mechanism:** Glimpse reads the local D1 SQLite files directly from `.wrangler/state/v3/d1/` rather than shelling out to `wrangler d1 execute --local`. Direct SQLite reads are faster (~5ms vs ~2s), have no dependency on wrangler being installed, and avoid wrangler's stdout formatting. Glimpse runs `SELECT count(*) FROM sqlite_master WHERE type='table'` to verify migrations and `SELECT count(*) FROM tenants` (etc.) for seed counts. If the SQLite file does not exist, the database is reported as "not seeded."
 
 **Output (human mode):**
 
@@ -922,6 +935,24 @@ screenshots/arbor-autumn-dark.png
 
 This format is designed for Claude Code: the first line is the screenshot path (read it with vision), subsequent lines are parseable diagnostics.
 
+**Failure contract (agent mode):**
+
+When a capture or browse fails, Glimpse writes a `[FAIL]` line to stdout and exits with a non-zero code. The consumer (Claude Code) can rely on this stable format:
+
+```
+[FAIL] Server not reachable: localhost:5173 (connection refused)
+```
+
+```
+[FAIL] Screenshot not written: navigation timeout after 30000ms
+```
+
+```
+[FAIL] Browse action failed at step 2: element not found (selector: .sidebar-posts)
+```
+
+The pattern is always `[FAIL] <category>: <detail>`. Exit codes: `1` for operational failures (server down, timeout, element not found), `2` for configuration errors (invalid URL, missing browser).
+
 ### JSON Mode (`--json`)
 
 ```json
@@ -1157,6 +1188,7 @@ glimpse = "glimpse.cli:main"
 - **Server management:** Glimpse only stops processes it started (PID file tracking). It never kills developer-started servers.
 - **Seed data scope:** `glimpse seed` only operates on `--local` D1 databases. It never touches remote or production data.
 - **Browse action scope:** The `browse` command only executes UI interactions (click, fill, scroll). It does not inject arbitrary JavaScript or modify page state beyond what a user could do manually.
+- **Credentials in `--do` strings:** Arguments passed via `--do` appear in shell history, `ps aux` output, and CI logs. Never pass real credentials in `--do` strings — use fixture accounts with throwaway passwords only. For automated flows needing auth, prefer environment variables or seed data with known test accounts.
 - **Console capture privacy:** Console output may contain sensitive data (API keys logged accidentally, user data in error messages). Glimpse writes this to local files only; it is never sent to external services unless the caller explicitly pipes it somewhere.
 
 ---
