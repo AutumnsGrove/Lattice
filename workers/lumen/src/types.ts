@@ -5,7 +5,17 @@
  * No `as` casts at boundaries — always validate through schemas.
  */
 
+import type { GroveContext } from "@autumnsgrove/infra";
 import { z } from "zod";
+
+// =============================================================================
+// Hono Variables
+// =============================================================================
+
+/** Variables set by groveInfraMiddleware — available on all routes */
+export type AppVariables = {
+	ctx: GroveContext;
+};
 
 // =============================================================================
 // Environment
