@@ -54,9 +54,9 @@ const PACKAGES = {
 		hasTests: true,
 		isSvelteKit: true,
 	},
-	"libs/foliage": { typecheck: null, hasTests: false, isSvelteKit: false },
+	"libs/foliage": { typecheck: "pnpm check", hasTests: true, isSvelteKit: false },
 	"libs/gossamer": { typecheck: null, hasTests: false, isSvelteKit: false },
-	"libs/vineyard": { typecheck: null, hasTests: false, isSvelteKit: false },
+	"libs/vineyard": { typecheck: "pnpm check", hasTests: true, isSvelteKit: false },
 	"apps/landing": {
 		typecheck: "pnpm check",
 		hasTests: true,
@@ -173,8 +173,8 @@ const PACKAGES = {
 		isSvelteKit: false,
 	},
 	"workers/email-catchup": {
-		typecheck: null,
-		hasTests: false,
+		typecheck: "pnpm exec tsc --noEmit",
+		hasTests: true,
 		isSvelteKit: false,
 	},
 	"workers/webhook-cleanup": {
