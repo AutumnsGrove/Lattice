@@ -1,14 +1,29 @@
 #!/usr/bin/env python3
 # CLAUDE_HOOK_EVENT: PostToolUse
+#
+# ╔══════════════════════════════════════════════════════════════════╗
+# ║  RETIRED — This hook is no longer registered in settings.json  ║
+# ║                                                                ║
+# ║  Formatting on every Edit/Write was too aggressive for agents: ║
+# ║  • Threw off diff reviews with unexpected changes              ║
+# ║  • Constantly flipped indentation and quote styles             ║
+# ║  • Made agents confused about what they actually changed       ║
+# ║                                                                ║
+# ║  Formatting now runs at COMMIT TIME via gw:                    ║
+# ║  • gw git commit  — formats staged files before committing    ║
+# ║  • gw git ship    — formats as step 2 (already did this)      ║
+# ║  • gw git save    — formats after staging, before committing  ║
+# ║                                                                ║
+# ║  All three support --no-format to skip when needed.            ║
+# ╚══════════════════════════════════════════════════════════════════╝
+#
 """Auto-format files after Claude edits them.
 
-Runs Prettier on formattable file types after Edit or Write tool use.
-This shifts formatting LEFT — catching issues immediately instead of
-at pre-commit hook time, eliminating entire agent turns spent on
-"fix formatting and recommit" loops.
+RETIRED: This hook ran Prettier on every Edit/Write tool use. It was too
+disruptive for agent workflows — formatting now happens at commit time
+through gw git commit/ship/save instead. See the banner above.
 
-Uses `bun x prettier` for speed (10-50x faster than npx).
-Never blocks — formatting failures are silent (pre-commit hook is the safety net).
+Kept for reference. To re-enable, add this to .claude/settings.json hooks.
 """
 import json
 import os
