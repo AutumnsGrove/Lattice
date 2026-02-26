@@ -1,0 +1,103 @@
+/**
+ * Firefly SDK — Webhook Executor
+ *
+ * HTTP callback pattern for executing commands on provisioned servers.
+ * The server runs an agent that accepts HTTP commands (the Outpost pattern).
+ * Worker-native alternative to SSH — no net/tls modules required.
+ *
+ * @module @autumnsgrove/lattice/firefly
+ */
+
+import type { RemoteExecutor, ServerInstance, ExecutionResult } from "../types.js";
+import { FireflyError, FLY_ERRORS } from "../errors.js";
+
+export interface WebhookExecutorConfig {
+	/** Port the agent listens on. Default: 8080 */
+	port?: number;
+	/** Path prefix for the agent endpoint. Default: /firefly */
+	pathPrefix?: string;
+	/** Shared secret for authenticating requests. */
+	secret?: string;
+	/** Request timeout in ms. Default: 30_000 */
+	timeoutMs?: number;
+}
+
+export class WebhookExecutor implements RemoteExecutor {
+	private readonly port: number;
+	private readonly pathPrefix: string;
+	private readonly secret?: string;
+	private readonly timeoutMs: number;
+
+	constructor(config: WebhookExecutorConfig = {}) {
+		this.port = config.port ?? 8080;
+		this.pathPrefix = config.pathPrefix ?? "/firefly";
+		this.secret = config.secret;
+		this.timeoutMs = config.timeoutMs ?? 30_000;
+	}
+
+	async execute(instance: ServerInstance, command: string): Promise<ExecutionResult> {
+		const url = `http://${instance.publicIp}:${this.port}${this.pathPrefix}/exec`;
+
+		const headers: Record<string, string> = {
+			"Content-Type": "application/json",
+		};
+		if (this.secret) {
+			headers["X-Firefly-Secret"] = this.secret;
+		}
+
+		const controller = new AbortController();
+		const timeout = setTimeout(() => controller.abort(), this.timeoutMs);
+
+		try {
+			const response = await fetch(url, {
+				method: "POST",
+				headers,
+				body: JSON.stringify({ command }),
+				signal: controller.signal,
+			});
+
+			if (!response.ok) {
+				throw new FireflyError(
+					FLY_ERRORS.EXECUTOR_NOT_AVAILABLE,
+					`Agent returned ${response.status}`,
+				);
+			}
+
+			const result = (await response.json()) as {
+				exitCode?: number;
+				stdout?: string;
+				stderr?: string;
+			};
+
+			return {
+				exitCode: result.exitCode ?? -1,
+				stdout: result.stdout ?? "",
+				stderr: result.stderr ?? "",
+			};
+		} catch (err) {
+			if (err instanceof FireflyError) throw err;
+			throw new FireflyError(
+				FLY_ERRORS.EXECUTOR_NOT_AVAILABLE,
+				err instanceof Error ? err.message : String(err),
+			);
+		} finally {
+			clearTimeout(timeout);
+		}
+	}
+
+	async isReachable(instance: ServerInstance): Promise<boolean> {
+		const url = `http://${instance.publicIp}:${this.port}${this.pathPrefix}/health`;
+
+		try {
+			const controller = new AbortController();
+			const timeout = setTimeout(() => controller.abort(), 5_000);
+
+			const response = await fetch(url, { signal: controller.signal });
+			clearTimeout(timeout);
+
+			return response.ok;
+		} catch {
+			return false;
+		}
+	}
+}
