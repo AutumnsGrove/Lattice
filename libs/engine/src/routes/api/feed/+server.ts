@@ -9,6 +9,17 @@
  */
 import { getAllPosts, getSiteConfig } from "$lib/utils/markdown.js";
 import type { RequestHandler } from "./$types.js";
+import { createThreshold } from "$lib/threshold/factory.js";
+import { getClientIP } from "$lib/threshold/adapters/worker.js";
+import {
+	classifyFeedClient,
+	checkRSSRateLimit,
+	buildBlockedResponse,
+	buildRateLimitedResponse,
+	rssRateLimitHeaders,
+} from "$lib/threshold/rss.js";
+import { logGroveError } from "$lib/errors/helpers.js";
+import { API_ERRORS } from "$lib/errors/api-errors.js";
 
 export const prerender = false;
 
@@ -26,6 +37,20 @@ interface D1Post {
 }
 
 export const GET: RequestHandler = async (event) => {
+	// ─────────────────────────────────────────────────────────────────────────
+	// RSS Rate Limiting: classify client and block known scrapers early
+	// ─────────────────────────────────────────────────────────────────────────
+	const userAgent = event.request.headers.get("user-agent") ?? "";
+	const classification = classifyFeedClient(userAgent);
+
+	if (classification === "blocked") {
+		logGroveError("Engine", API_ERRORS.RSS_SCRAPER_BLOCKED, {
+			path: "/api/feed",
+			detail: `Blocked scraper UA: ${userAgent.slice(0, 120)}`,
+		});
+		return buildBlockedResponse();
+	}
+
 	const context = event.locals.context;
 	const db = event.platform?.env?.DB;
 
@@ -174,9 +199,40 @@ ${categoryElements}${enclosure}
 	const etag = await generateETag(etagSource);
 
 	// Handle conditional requests (If-None-Match)
+	// 304 responses are exempt from rate limiting — reward polite clients
 	const ifNoneMatch = event.request.headers.get("If-None-Match");
 	if (ifNoneMatch === etag) {
 		return new Response(null, { status: 304 });
+	}
+
+	// ─────────────────────────────────────────────────────────────────────────
+	// RSS Rate Limiting: check per-classification limits for full serves only
+	// ─────────────────────────────────────────────────────────────────────────
+	const clientIP = getClientIP(event.request);
+	const threshold = createThreshold(event.platform?.env, {
+		identifier: clientIP,
+	});
+
+	let rateLimitHeaders: Record<string, string> = {};
+
+	if (threshold) {
+		const rateCheck = await checkRSSRateLimit(threshold, clientIP, userAgent);
+
+		if (!rateCheck.allowed && rateCheck.result) {
+			logGroveError("Engine", API_ERRORS.RSS_RATE_LIMITED, {
+				path: "/api/feed",
+				detail: `Classification: ${rateCheck.classification}, IP: ${clientIP}`,
+			});
+			const limits =
+				classification === "known-reader" ? 600 : classification === "suspicious" ? 10 : 60;
+			return buildRateLimitedResponse(rateCheck.result, rateCheck.classification, limits);
+		}
+
+		if (rateCheck.result) {
+			const limits =
+				classification === "known-reader" ? 600 : classification === "suspicious" ? 10 : 60;
+			rateLimitHeaders = rssRateLimitHeaders(rateCheck.result, rateCheck.classification, limits);
+		}
 	}
 
 	const xml = `<?xml version="1.0" encoding="UTF-8"?>
@@ -199,6 +255,7 @@ ${categoryElements}${enclosure}
 			"Content-Type": "application/rss+xml; charset=utf-8",
 			"Cache-Control": "max-age=3600, s-maxage=3600",
 			ETag: etag,
+			...rateLimitHeaders,
 		},
 	});
 };

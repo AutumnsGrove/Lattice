@@ -342,6 +342,20 @@ export const API_ERRORS = {
 		adminMessage: "Upload abuse throttle triggered for this tenant.",
 	},
 
+	RSS_RATE_LIMITED: {
+		code: "GROVE-API-064",
+		category: "user" as const,
+		userMessage: "You're requesting feeds faster than we allow. Please wait a bit and try again.",
+		adminMessage: "RSS rate limit exceeded for this IP. Classification: {classification}.",
+	},
+
+	RSS_SCRAPER_BLOCKED: {
+		code: "GROVE-API-065",
+		category: "user" as const,
+		userMessage: "This feed is not available for automated scraping.",
+		adminMessage: "Known AI scraper blocked from RSS endpoint. UA: {userAgent}.",
+	},
+
 	// ─────────────────────────────────────────────────────────────────────────
 	// Internal / Catch-All (080-099)
 	// ─────────────────────────────────────────────────────────────────────────
