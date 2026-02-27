@@ -52,6 +52,7 @@ class CaptureRequest:
     full_page: bool = False
     wait_ms: int = 500
     wait_strategy: str = "fixed"  # "fixed" or "networkidle"
+    wait_for: str | None = None  # CSS selector to wait for before capture
     output_path: Path | None = None
     format: str = "png"
     quality: int = 90
