@@ -93,6 +93,10 @@ export const ENDPOINT_RATE_LIMITS = {
 	// OG image generation
 	"og/generate": { limit: 100, windowSeconds: 3600 },
 
+	// Thorn behavioral layer signals
+	"thorn/songbird-fail": { limit: 3, windowSeconds: 86400 }, // 3 failures/day
+	"thorn/behavioral-block": { limit: 10, windowSeconds: 3600 }, // 10 blocks/hour
+
 	// Default for unspecified endpoints
 	default: { limit: 100, windowSeconds: 60 },
 } as const satisfies Record<string, RateLimitConfig>;
