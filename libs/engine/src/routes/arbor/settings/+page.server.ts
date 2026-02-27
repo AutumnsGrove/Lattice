@@ -154,17 +154,18 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
         tenantPlan = tenantRow.plan || "seedling";
       }
 
-      // Check if username change is allowed for this tier
+      // Check rate limit and load history in parallel
       const tier: TierKey = isValidTier(tenantPlan)
         ? (tenantPlan as TierKey)
         : "seedling";
-      const rateResult = await canChangeUsername(env.DB, locals.tenantId, tier);
+      const [rateResult, history] = await Promise.all([
+        canChangeUsername(env.DB, locals.tenantId, tier),
+        getUsernameHistory(env.DB, locals.tenantId),
+      ]);
       usernameChangeAllowed = rateResult.allowed;
       usernameChangeNextAllowedAt = rateResult.nextAllowedAt;
       usernameChangeReason = rateResult.reason;
-
-      // Load change history
-      usernameHistory = await getUsernameHistory(env.DB, locals.tenantId);
+      usernameHistory = history;
     } catch (error) {
       console.error("Failed to load username change data:", error);
     }
@@ -321,23 +322,25 @@ export const actions: Actions = {
             const newDoId = tenantsDO.idFromName(`tenant:${newUsername}`);
             const newStub = tenantsDO.get(newDoId);
 
-            // Copy each draft to new DO
-            for (const draft of drafts) {
-              const fullDraftRes = await oldStub.fetch(
-                `https://tenant.internal/drafts/${encodeURIComponent(draft.slug)}`,
-              );
-              if (fullDraftRes.ok) {
-                const fullDraft = await fullDraftRes.json();
-                await newStub.fetch(
+            // Copy all drafts to new DO in parallel
+            await Promise.all(
+              drafts.map(async (draft) => {
+                const fullDraftRes = await oldStub.fetch(
                   `https://tenant.internal/drafts/${encodeURIComponent(draft.slug)}`,
-                  {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(fullDraft),
-                  },
                 );
-              }
-            }
+                if (fullDraftRes.ok) {
+                  const fullDraft = await fullDraftRes.json();
+                  await newStub.fetch(
+                    `https://tenant.internal/drafts/${encodeURIComponent(draft.slug)}`,
+                    {
+                      method: "PUT",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify(fullDraft),
+                    },
+                  );
+                }
+              }),
+            );
           }
         }
       } catch (draftErr) {
