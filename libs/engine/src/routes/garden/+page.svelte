@@ -2,26 +2,9 @@
 	import { goto } from '$app/navigation';
 	import { Card, Badge, GlassButton, GroveSwap, GroveIntro } from '$lib/ui';
 	import { Blaze } from '$lib/ui/components/indicators';
-	import { GLOBAL_BLAZE_DEFAULTS } from '$lib/blazes';
+	import { resolveBlaze } from '$lib/blazes';
 
 	let { data } = $props();
-
-	// Build slug→definition map for blaze resolution
-	const BLAZE_SLUG_MAP = Object.fromEntries(
-		GLOBAL_BLAZE_DEFAULTS.map((b) => [b.slug, b]),
-	);
-
-	/**
-	 * Resolve blaze slug to definition
-	 * @param {string | null} blazeSlug
-	 */
-	function resolveBlaze(blazeSlug) {
-		if (!blazeSlug) return null;
-		const global = BLAZE_SLUG_MAP[blazeSlug];
-		if (global) return global;
-		const label = blazeSlug.split("-").map((/** @type {string} */ w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
-		return { label, icon: "HelpCircle", color: "slate" };
-	}
 
 	// Get accent color from site settings (falls back to default if not set)
 	const accentColor = $derived(data.siteSettings?.accent_color || null);
@@ -111,7 +94,7 @@
 					</time>
 					<div class="flex items-center gap-1.5">
 						<Blaze postType="bloom" />
-						{@const blazeDef = resolveBlaze(post.blaze)}
+						{@const blazeDef = resolveBlaze(post.blaze, post.blazeDefinition)}
 						{#if blazeDef}
 							<Blaze definition={blazeDef} />
 						{/if}

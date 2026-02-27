@@ -14,6 +14,15 @@ interface PostRow {
 	tags: string | null;
 	description: string | null;
 	blaze: string | null;
+	blaze_label: string | null;
+	blaze_icon: string | null;
+	blaze_color: string | null;
+}
+
+interface BlazeDefinition {
+	label: string;
+	icon: string;
+	color: string;
 }
 
 interface PostMeta {
@@ -23,10 +32,43 @@ interface PostMeta {
 	tags: string[];
 	description: string;
 	blaze: string | null;
+	blazeDefinition: BlazeDefinition | null;
 }
 
 /** Cache configuration */
 const CACHE_TTL_SECONDS = 900; // 15 minutes for post list
+
+/** SQL query with LEFT JOIN for blaze definitions */
+const POSTS_WITH_BLAZES_SQL = `SELECT p.slug, p.title, p.published_at, p.tags, p.description, p.blaze,
+	bd.label AS blaze_label, bd.icon AS blaze_icon, bd.color AS blaze_color
+FROM posts p
+LEFT JOIN blaze_definitions bd ON bd.id = (
+	SELECT bd2.id FROM blaze_definitions bd2
+	WHERE bd2.slug = p.blaze
+		AND (bd2.tenant_id = p.tenant_id OR bd2.tenant_id IS NULL)
+	ORDER BY bd2.tenant_id IS NOT NULL DESC
+	LIMIT 1
+)
+WHERE p.tenant_id = ? AND p.status = 'published'
+ORDER BY p.published_at DESC
+LIMIT 100`;
+
+function mapPostRow(post: PostRow): PostMeta {
+	return {
+		slug: post.slug as string,
+		title: post.title as string,
+		date: post.published_at
+			? new Date((post.published_at as number) * 1000).toISOString()
+			: new Date().toISOString(),
+		tags: post.tags ? JSON.parse(post.tags as string) : [],
+		description: (post.description as string) || "",
+		blaze: (post.blaze as string) || null,
+		blazeDefinition:
+			post.blaze_label && post.blaze_icon && post.blaze_color
+				? { label: post.blaze_label, icon: post.blaze_icon, color: post.blaze_color }
+				: null,
+	};
+}
 
 export const load: PageServerLoad = async ({ locals, platform, setHeaders }) => {
 	let posts: PostMeta[] = [];
@@ -42,25 +84,11 @@ export const load: PageServerLoad = async ({ locals, platform, setHeaders }) => 
 			ttl: CACHE_TTL_SECONDS,
 			compute: async () => {
 				const result = await db
-					.prepare(
-						`SELECT slug, title, published_at, tags, description, blaze
-             FROM posts
-             WHERE tenant_id = ? AND status = 'published'
-             ORDER BY published_at DESC
-             LIMIT 100`,
-					)
+					.prepare(POSTS_WITH_BLAZES_SQL)
 					.bind(tenantId)
 					.all<PostRow>();
 
-				return (result.results ?? []).map((post) => ({
-					slug: post.slug as string,
-					title: post.title as string,
-					date: post.published_at
-						? new Date((post.published_at as number) * 1000).toISOString()
-						: new Date().toISOString(),
-					tags: post.tags ? JSON.parse(post.tags as string) : [],
-					description: (post.description as string) || "",
-				}));
+				return (result.results ?? []).map(mapPostRow);
 			},
 		});
 
@@ -73,26 +101,11 @@ export const load: PageServerLoad = async ({ locals, platform, setHeaders }) => 
 		// No KV available, fall back to direct D1 (no caching)
 		try {
 			const result = await db
-				.prepare(
-					`SELECT slug, title, published_at, tags, description
-           FROM posts
-           WHERE tenant_id = ? AND status = 'published'
-           ORDER BY published_at DESC
-           LIMIT 100`,
-				)
+				.prepare(POSTS_WITH_BLAZES_SQL)
 				.bind(tenantId)
 				.all<PostRow>();
 
-			posts = (result.results ?? []).map((post) => ({
-				slug: post.slug as string,
-				title: post.title as string,
-				date: post.published_at
-					? new Date((post.published_at as number) * 1000).toISOString()
-					: new Date().toISOString(),
-				tags: post.tags ? JSON.parse(post.tags as string) : [],
-				description: (post.description as string) || "",
-				blaze: (post.blaze as string) || null,
-			}));
+			posts = (result.results ?? []).map(mapPostRow);
 		} catch (err) {
 			console.error("D1 fetch error for posts list:", err);
 		}

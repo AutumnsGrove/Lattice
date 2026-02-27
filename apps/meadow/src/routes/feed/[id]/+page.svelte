@@ -4,13 +4,6 @@
   Shows the full content:encoded from the RSS feed, all reactions,
   author info, and action buttons.
 -->
-<script lang="ts" module>
-	import { GLOBAL_BLAZE_DEFAULTS } from "@autumnsgrove/lattice/blazes";
-
-	const BLAZE_SLUG_MAP: Record<string, { label: string; icon: string; color: string }> =
-		Object.fromEntries(GLOBAL_BLAZE_DEFAULTS.map((b) => [b.slug, b]));
-</script>
-
 <script lang="ts">
 	import { goto } from "$app/navigation";
 	import { page } from "$app/state";
@@ -19,6 +12,7 @@
 	import ReactionPicker from "$lib/components/ReactionPicker.svelte";
 	import SEO from "$lib/components/SEO.svelte";
 	import { Blaze } from "@autumnsgrove/lattice/ui/indicators";
+	import { resolveBlaze } from "@autumnsgrove/lattice/blazes";
 
 	let { data } = $props();
 
@@ -32,18 +26,10 @@
 
 	const isNote = $derived(post.postType === "note");
 
-	/** Resolve custom blaze: prefer hydrated definition from feed, then global map, then slug fallback */
-	const customBlazeDefinition = $derived.by(() => {
-		if (!post.blaze) return null;
-		if (post.blazeDefinition) return post.blazeDefinition;
-		const global = BLAZE_SLUG_MAP[post.blaze];
-		if (global) return global;
-		const label = post.blaze
-			.split("-")
-			.map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
-			.join(" ");
-		return { label, icon: "HelpCircle", color: "slate" };
-	});
+	/** Resolve custom blaze: server definition → global default → slug fallback */
+	const customBlazeDefinition = $derived(
+		resolveBlaze(post.blaze, post.blazeDefinition),
+	);
 	const isOwnNote = $derived(isNote && !!user && post.userId === user.id);
 
 	let showReactionPicker = $state(false);

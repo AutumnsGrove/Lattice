@@ -23,3 +23,7 @@ export {
 	isValidBlazeHexColor,
 	isValidBlazeColor,
 } from "./palette.js";
+
+// Resolution utility
+export { resolveBlaze } from "./resolve.js";
+export type { BlazeDisplayDef } from "./resolve.js";

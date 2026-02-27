@@ -12,6 +12,21 @@ interface PostRecord {
   published_at?: number | string;
   updated_at?: number | string;
   created_at?: number | string;
+  blaze?: string;
+}
+
+interface BlazeDefRow {
+  slug: string;
+  label: string;
+  icon: string;
+  color: string;
+  tenant_id: string | null;
+}
+
+interface BlazeDefinition {
+  label: string;
+  icon: string;
+  color: string;
 }
 
 interface BlogPost {
@@ -22,6 +37,7 @@ interface BlogPost {
   tags: string[];
   description: string;
   blaze: string | null;
+  blazeDefinition: BlazeDefinition | null;
 }
 
 /**
@@ -50,14 +66,30 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
       tenantId: locals.tenantId,
     });
 
-    // Fetch posts for this tenant, ordered by publish date descending
-    // Limit to 500 to prevent extremely large result sets
-    const postsArray = await tenantDb.queryMany<PostRecord>(
-      "posts",
-      undefined, // No additional WHERE clause (tenant_id is automatic)
-      [],
-      { orderBy: "published_at DESC, created_at DESC", limit: 500 },
-    );
+    // Fetch posts and blaze definitions in parallel
+    const [postsArray, blazeResult] = await Promise.all([
+      tenantDb.queryMany<PostRecord>(
+        "posts",
+        undefined, // No additional WHERE clause (tenant_id is automatic)
+        [],
+        { orderBy: "published_at DESC, created_at DESC", limit: 500 },
+      ),
+      platform.env.DB.prepare(
+        "SELECT slug, label, icon, color, tenant_id FROM blaze_definitions WHERE tenant_id = ? OR tenant_id IS NULL",
+      )
+        .bind(locals.tenantId)
+        .all<BlazeDefRow>()
+        .catch(() => ({ results: [] as BlazeDefRow[] })),
+    ]);
+
+    // Build slug→definition map (tenant-scoped take precedence over globals)
+    const blazeMap = new Map<string, BlazeDefinition>();
+    for (const bd of blazeResult.results ?? []) {
+      // Only overwrite if tenant-scoped (globals go in first, then tenant overrides)
+      if (!blazeMap.has(bd.slug) || bd.tenant_id !== null) {
+        blazeMap.set(bd.slug, { label: bd.label, icon: bd.icon, color: bd.color });
+      }
+    }
 
     // Transform posts - parse tags from JSON string
     const posts: BlogPost[] = postsArray.map((post) => {
@@ -100,7 +132,8 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
         date,
         tags: post.tags ? JSON.parse(post.tags) : [],
         description: post.description || "",
-        blaze: /** @type {any} */ (post).blaze || null,
+        blaze: post.blaze || null,
+        blazeDefinition: post.blaze ? (blazeMap.get(post.blaze) ?? null) : null,
       };
     });
 

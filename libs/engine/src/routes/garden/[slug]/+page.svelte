@@ -4,27 +4,14 @@
 	import { Button, Badge, GroveSwap, MessageSquare, MessageSquareText } from "$lib/ui";
 	import { fontMap } from "$lib/ui/tokens/fonts";
 	import { Blaze } from "$lib/ui/components/indicators";
-	import { GLOBAL_BLAZE_DEFAULTS } from "$lib/blazes";
+	import { resolveBlaze } from "$lib/blazes";
 
 	let { data } = $props();
 
-	// Build slug→definition map for blaze resolution
-	const BLAZE_SLUG_MAP = Object.fromEntries(
-		GLOBAL_BLAZE_DEFAULTS.map((b) => [b.slug, b]),
+	/** Resolve custom blaze: server definition → global default → slug fallback */
+	const customBlazeDefinition = $derived(
+		resolveBlaze(data.post.blaze, data.post.blazeDefinition),
 	);
-
-	/** Resolve custom blaze definition from slug */
-	const customBlazeDefinition = $derived.by(() => {
-		if (!data.post.blaze) return null;
-		const global = BLAZE_SLUG_MAP[data.post.blaze];
-		if (global) return global;
-		// Graceful fallback for unknown slugs
-		const label = data.post.blaze
-			.split("-")
-			.map((/** @type {string} */ w) => w.charAt(0).toUpperCase() + w.slice(1))
-			.join(" ");
-		return { label, icon: "HelpCircle", color: "slate" };
-	});
 
 	// Get accent color from site settings (falls back to default if not set)
 	const accentColor = $derived(data.siteSettings?.accent_color || null);
