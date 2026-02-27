@@ -13,12 +13,21 @@
  */
 
 import { Hono } from "hono";
-import { routeAgentRequest } from "@autumnsgrove/grove-agent";
+import { routeAgentRequest, getAgentByName } from "@autumnsgrove/grove-agent";
 import { ONBOARDING_ERRORS } from "./errors.js";
+import type { OnboardingAgent } from "./agent.js";
 import type { Env } from "./types.js";
 
 // Re-export the DO class so wrangler can find it
 export { OnboardingAgent } from "./agent.js";
+
+// Helper: get a typed stub for RPC calls to @callable() methods.
+// The `as any` cast bridges the DurableObjectNamespace<T> generic constraint —
+// our Env's ONBOARDING_AGENT is untyped, but the returned stub is properly typed.
+async function getAgent(ns: DurableObjectNamespace, email: string) {
+	const name = email.toLowerCase().trim();
+	return getAgentByName(ns as unknown as DurableObjectNamespace<OnboardingAgent>, name);
+}
 
 // =============================================================================
 // HTTP Router
@@ -46,18 +55,9 @@ app.post("/start", async (c) => {
 		return c.json({ success: false, error: ONBOARDING_ERRORS.INVALID_AUDIENCE }, 400);
 	}
 
-	const id = c.env.ONBOARDING_AGENT.idFromName(email.toLowerCase().trim());
-	const stub = c.env.ONBOARDING_AGENT.get(id);
-
-	// Forward to the agent's startSequence callable via RPC
-	const response = await stub.fetch("https://agents/startSequence", {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify([email, audience]),
-	});
-
-	const result = await response.json();
-	return c.json({ success: true, ...(result as Record<string, unknown>) });
+	const stub = await getAgent(c.env.ONBOARDING_AGENT, email);
+	const result = await stub.startSequence(email, audience);
+	return c.json({ success: true, ...result });
 });
 
 /**
@@ -72,17 +72,9 @@ app.post("/unsubscribe", async (c) => {
 		return c.json({ success: false, error: ONBOARDING_ERRORS.INVALID_EMAIL }, 400);
 	}
 
-	const id = c.env.ONBOARDING_AGENT.idFromName(email.toLowerCase().trim());
-	const stub = c.env.ONBOARDING_AGENT.get(id);
-
-	const response = await stub.fetch("https://agents/unsubscribe", {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify([]),
-	});
-
-	const result = await response.json();
-	return c.json({ success: true, ...(result as Record<string, unknown>) });
+	const stub = await getAgent(c.env.ONBOARDING_AGENT, email);
+	const result = await stub.unsubscribe();
+	return c.json({ success: true, ...result });
 });
 
 /**
@@ -91,16 +83,8 @@ app.post("/unsubscribe", async (c) => {
 app.get("/status/:email", async (c) => {
 	const email = c.req.param("email");
 
-	const id = c.env.ONBOARDING_AGENT.idFromName(email.toLowerCase().trim());
-	const stub = c.env.ONBOARDING_AGENT.get(id);
-
-	const response = await stub.fetch("https://agents/getStatus", {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify([]),
-	});
-
-	const result = await response.json();
+	const stub = await getAgent(c.env.ONBOARDING_AGENT, email);
+	const result = await stub.getStatus();
 	return c.json({ success: true, state: result });
 });
 
