@@ -51,6 +51,6 @@
 	{:else if tree.species === "birch"}
 		<TreeBirch {season} class="h-full w-full" />
 	{:else if tree.species === "logo"}
-		<Logo {season} class="h-full w-full" />
+		<Logo {season} background={false} rotation={0} class="h-full w-full" />
 	{/if}
 </div>
