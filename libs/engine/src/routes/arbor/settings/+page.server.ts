@@ -18,6 +18,14 @@ import type { TenantGraftInfo } from "$lib/feature-flags/tenant-grafts";
 import type { GreenhouseTenant } from "$lib/feature-flags/types";
 import type { FeatureFlagSummary } from "$lib/feature-flags/admin";
 import { isWayfinder } from "$lib/config/wayfinder";
+import { isValidTier, type TierKey } from "$lib/config/tiers";
+import {
+  validateUsernameAvailability,
+  canChangeUsername,
+  changeUsername,
+  getUsernameHistory,
+  type UsernameChangeHistoryEntry,
+} from "$lib/server/services/username.js";
 
 export const load: PageServerLoad = async ({ locals, platform }) => {
   const env = platform?.env;
@@ -124,12 +132,57 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
     }
   }
 
+  // Username change data
+  let currentSubdomain = "";
+  let tenantPlan = "seedling";
+  let usernameChangeAllowed = false;
+  let usernameChangeNextAllowedAt: number | undefined;
+  let usernameChangeReason: string | undefined;
+  let usernameHistory: UsernameChangeHistoryEntry[] = [];
+
+  if (env?.DB && locals.tenantId) {
+    try {
+      // Get current tenant subdomain and plan
+      const tenantRow = await env.DB.prepare(
+        "SELECT subdomain, plan FROM tenants WHERE id = ?",
+      )
+        .bind(locals.tenantId)
+        .first<{ subdomain: string; plan: string | null }>();
+
+      if (tenantRow) {
+        currentSubdomain = tenantRow.subdomain;
+        tenantPlan = tenantRow.plan || "seedling";
+      }
+
+      // Check if username change is allowed for this tier
+      const tier: TierKey = isValidTier(tenantPlan)
+        ? (tenantPlan as TierKey)
+        : "seedling";
+      const rateResult = await canChangeUsername(env.DB, locals.tenantId, tier);
+      usernameChangeAllowed = rateResult.allowed;
+      usernameChangeNextAllowedAt = rateResult.nextAllowedAt;
+      usernameChangeReason = rateResult.reason;
+
+      // Load change history
+      usernameHistory = await getUsernameHistory(env.DB, locals.tenantId);
+    } catch (error) {
+      console.error("Failed to load username change data:", error);
+    }
+  }
+
   return {
     isWayfinder: userIsWayfinder,
     greenhouseStatus,
     tenantGrafts,
     oauthAvatarUrl: locals.user?.picture ?? null,
     meadowOptIn,
+    // Username change data
+    currentSubdomain,
+    tenantPlan,
+    usernameChangeAllowed,
+    usernameChangeNextAllowedAt,
+    usernameChangeReason,
+    usernameHistory,
     // Wayfinder-only data
     greenhouseTenants,
     tenantNames,
@@ -139,6 +192,190 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
 };
 
 export const actions: Actions = {
+  // =========================================================================
+  // USERNAME CHANGE
+  // =========================================================================
+
+  /**
+   * Change the tenant's username (subdomain).
+   * Validates availability, checks tier rate limits, and executes atomically.
+   */
+  changeUsername: async ({ request, locals, platform }) => {
+    const env = platform?.env;
+    if (!env?.DB) {
+      return fail(500, {
+        error: ARBOR_ERRORS.DB_NOT_AVAILABLE.userMessage,
+        error_code: ARBOR_ERRORS.DB_NOT_AVAILABLE.code,
+      });
+    }
+
+    if (!locals.user || !locals.tenantId) {
+      return fail(403, {
+        error: ARBOR_ERRORS.UNAUTHORIZED.userMessage,
+        error_code: ARBOR_ERRORS.UNAUTHORIZED.code,
+      });
+    }
+
+    const formData = await request.formData();
+    const newUsername = formData.get("newUsername")?.toString()?.toLowerCase().trim();
+
+    if (!newUsername) {
+      return fail(400, {
+        error: ARBOR_ERRORS.FIELD_REQUIRED.userMessage,
+        error_code: ARBOR_ERRORS.FIELD_REQUIRED.code,
+      });
+    }
+
+    // Get current tenant info
+    const tenantRow = await env.DB.prepare(
+      "SELECT subdomain, plan FROM tenants WHERE id = ?",
+    )
+      .bind(locals.tenantId)
+      .first<{ subdomain: string; plan: string | null }>();
+
+    if (!tenantRow) {
+      return fail(404, {
+        error: ARBOR_ERRORS.RESOURCE_NOT_FOUND.userMessage,
+        error_code: ARBOR_ERRORS.RESOURCE_NOT_FOUND.code,
+      });
+    }
+
+    const currentSubdomain = tenantRow.subdomain;
+
+    // Check for same username
+    if (newUsername === currentSubdomain) {
+      return fail(400, {
+        error: ARBOR_ERRORS.USERNAME_SAME_AS_CURRENT.userMessage,
+        error_code: ARBOR_ERRORS.USERNAME_SAME_AS_CURRENT.code,
+      });
+    }
+
+    // Validate the new username
+    const validation = await validateUsernameAvailability(
+      env.DB,
+      newUsername,
+      locals.tenantId,
+    );
+
+    if (!validation.available) {
+      return fail(400, {
+        error: validation.error || ARBOR_ERRORS.USERNAME_UNAVAILABLE.userMessage,
+        error_code: ARBOR_ERRORS.USERNAME_UNAVAILABLE.code,
+      });
+    }
+
+    // Check tier-based rate limit
+    const tier: TierKey = isValidTier(tenantRow.plan || "seedling")
+      ? ((tenantRow.plan || "seedling") as TierKey)
+      : "seedling";
+    const rateLimit = await canChangeUsername(env.DB, locals.tenantId, tier);
+
+    if (!rateLimit.allowed) {
+      return fail(429, {
+        error: rateLimit.reason || ARBOR_ERRORS.USERNAME_CHANGE_RATE_LIMITED.userMessage,
+        error_code: ARBOR_ERRORS.USERNAME_CHANGE_RATE_LIMITED.code,
+      });
+    }
+
+    // Execute the username change
+    const result = await changeUsername(env.DB, {
+      tenantId: locals.tenantId,
+      currentSubdomain,
+      newSubdomain: newUsername,
+      actorEmail: locals.user.email || "unknown",
+      tier,
+    });
+
+    if (!result.success) {
+      logGroveError("Arbor", ARBOR_ERRORS.USERNAME_CHANGE_FAILED, {
+        tenantId: locals.tenantId,
+        from: currentSubdomain,
+        to: newUsername,
+        error: result.error,
+      });
+      return fail(500, {
+        error: result.error || ARBOR_ERRORS.USERNAME_CHANGE_FAILED.userMessage,
+        error_code: result.errorCode || ARBOR_ERRORS.USERNAME_CHANGE_FAILED.code,
+      });
+    }
+
+    // Migrate drafts from old TenantDO to new TenantDO (best-effort)
+    const tenantsDO = env.TENANTS as DurableObjectNamespace | undefined;
+    if (tenantsDO) {
+      try {
+        // Read drafts from old DO
+        const oldDoId = tenantsDO.idFromName(`tenant:${currentSubdomain}`);
+        const oldStub = tenantsDO.get(oldDoId);
+        const draftsResponse = await oldStub.fetch("https://tenant.internal/drafts");
+
+        if (draftsResponse.ok) {
+          const drafts = (await draftsResponse.json()) as Array<{
+            slug: string;
+            metadata: Record<string, unknown>;
+            lastSaved: number;
+            deviceId: string;
+          }>;
+
+          if (drafts.length > 0) {
+            // Get new DO stub
+            const newDoId = tenantsDO.idFromName(`tenant:${newUsername}`);
+            const newStub = tenantsDO.get(newDoId);
+
+            // Copy each draft to new DO
+            for (const draft of drafts) {
+              const fullDraftRes = await oldStub.fetch(
+                `https://tenant.internal/drafts/${encodeURIComponent(draft.slug)}`,
+              );
+              if (fullDraftRes.ok) {
+                const fullDraft = await fullDraftRes.json();
+                await newStub.fetch(
+                  `https://tenant.internal/drafts/${encodeURIComponent(draft.slug)}`,
+                  {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(fullDraft),
+                  },
+                );
+              }
+            }
+          }
+        }
+      } catch (draftErr) {
+        // Non-critical: drafts still accessible via old DO if user changes back
+        console.warn("[Username] Draft migration failed (non-blocking):", draftErr);
+      }
+
+      // Push config to new TenantDO so first request is warm
+      try {
+        const newDoId = tenantsDO.idFromName(`tenant:${newUsername}`);
+        const newStub = tenantsDO.get(newDoId);
+        await newStub.fetch("https://tenant.internal/config", {
+          method: "PUT",
+          headers: {
+            "X-Tenant-Subdomain": newUsername,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            subdomain: newUsername,
+          }),
+        });
+      } catch (cacheErr) {
+        // Non-critical: TenantDO will refresh from D1 on next request
+        console.warn("[Username] TenantDO cache push failed (non-blocking):", cacheErr);
+      }
+    }
+
+    return {
+      success: true,
+      message: `Username changed to ${newUsername}`,
+      newSubdomain: newUsername,
+    };
+  },
+
+  // =========================================================================
+  // GRAFT CONTROLS
+  // =========================================================================
+
   /**
    * Toggle a graft on/off for the current tenant
    */

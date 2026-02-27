@@ -2,7 +2,7 @@
 	import { onMount } from "svelte";
 	import { Button, Spinner, GlassCard, GlassConfirmDialog, Waystone, GroveTerm } from "$lib/ui";
 	import { GreenhouseStatusCard, GraftControlPanel } from "$lib/grafts/greenhouse";
-	import { Smartphone, Laptop, Monitor, Leaf, Plus, RotateCcw } from "lucide-svelte";
+	import { Smartphone, Laptop, Monitor, Leaf, Plus, RotateCcw, Check, X, Loader2, AlertTriangle, Clock } from "lucide-svelte";
 	import { groveModeStore } from "$lib/ui/stores/grove-mode.svelte";
 	import { toast } from "$lib/ui/components/ui/toast";
 	import { api, apiRequest } from "$lib/utils";
@@ -82,6 +82,56 @@
 	let resetGraftsForm = $state();
 	let toggleGraftId = $state("");
 	let toggleGraftEnabled = $state("");
+
+	// Username change state
+	let showUsernameChange = $state(false);
+	let newUsername = $state("");
+	let checkingUsername = $state(false);
+	/** @type {boolean | null} */
+	let usernameAvailable = $state(null);
+	let usernameError = $state("");
+	let changingUsername = $state(false);
+	let showUsernameConfirmDialog = $state(false);
+	/** @type {ReturnType<typeof setTimeout> | undefined} */
+	let usernameDebounceTimer = $state(undefined);
+
+	// Debounced username availability check
+	function checkUsernameAvailability(value) {
+		const trimmed = value.toLowerCase().trim();
+		clearTimeout(usernameDebounceTimer);
+		usernameAvailable = null;
+		usernameError = "";
+
+		if (!trimmed || trimmed.length < 3) {
+			if (trimmed.length > 0) usernameError = "At least 3 characters";
+			return;
+		}
+
+		if (trimmed === data.currentSubdomain) {
+			usernameError = "That's already your current username";
+			usernameAvailable = false;
+			return;
+		}
+
+		checkingUsername = true;
+		usernameDebounceTimer = setTimeout(async () => {
+			try {
+				const res = await fetch(`/api/username/check?username=${encodeURIComponent(trimmed)}`);
+				const result = await res.json();
+				if (result.available) {
+					usernameAvailable = true;
+					usernameError = "";
+				} else {
+					usernameAvailable = false;
+					usernameError = result.error || "Username not available";
+				}
+			} catch {
+				usernameError = "Unable to check availability";
+				usernameAvailable = false;
+			}
+			checkingUsername = false;
+		}, 400);
+	}
 
 	// Fetch current settings (font, accent color, header branding)
 	async function fetchCurrentSettings() {
@@ -644,6 +694,159 @@
 				{/if}
 			</div>
 		</div>
+	</GlassCard>
+
+	<!-- Change Username -->
+	<GlassCard variant="frosted" class="mb-6">
+		<div class="section-header">
+			<h2>Grove Address</h2>
+		</div>
+		<p class="section-description">
+			Your grove lives at <strong>{data.currentSubdomain}.grove.place</strong>
+		</p>
+
+		{#if !showUsernameChange}
+			<div class="username-display">
+				{#if data.usernameChangeAllowed}
+					<Button onclick={() => (showUsernameChange = true)} variant="secondary">
+						Change Username
+					</Button>
+				{:else}
+					<p class="rate-limit-notice">
+						<Clock size={14} class="inline-icon" />
+						{data.usernameChangeReason || "Username change limit reached."}
+						{#if data.usernameChangeNextAllowedAt}
+							Available {new Date(data.usernameChangeNextAllowedAt * 1000).toLocaleDateString()}.
+						{/if}
+					</p>
+				{/if}
+			</div>
+		{:else}
+			<div class="username-change-form">
+				<div class="username-input-row">
+					<div class="username-input-wrapper">
+						<input
+							type="text"
+							class="glass-input"
+							placeholder="new-username"
+							bind:value={newUsername}
+							oninput={(e) => checkUsernameAvailability(e.target.value)}
+							disabled={changingUsername}
+						/>
+						<span class="username-suffix">.grove.place</span>
+					</div>
+
+					<div class="username-status">
+						{#if checkingUsername}
+							<Loader2 size={18} class="animate-spin text-white/50" />
+						{:else if usernameAvailable === true}
+							<Check size={18} class="text-green-400" />
+						{:else if usernameAvailable === false}
+							<X size={18} class="text-red-400" />
+						{/if}
+					</div>
+				</div>
+
+				{#if usernameError}
+					<p class="username-error">{usernameError}</p>
+				{/if}
+
+				<p class="username-hint">
+					Lowercase letters, numbers, and hyphens. Must start with a letter, 3–30 characters.
+				</p>
+
+				<div class="username-actions">
+					<Button
+						onclick={() => (showUsernameConfirmDialog = true)}
+						variant="primary"
+						disabled={!usernameAvailable || changingUsername || !newUsername.trim()}
+					>
+						{changingUsername ? "Changing..." : "Change Username"}
+					</Button>
+					<Button
+						onclick={() => {
+							showUsernameChange = false;
+							newUsername = "";
+							usernameAvailable = null;
+							usernameError = "";
+						}}
+						variant="ghost"
+						disabled={changingUsername}
+					>
+						Cancel
+					</Button>
+				</div>
+			</div>
+
+			<GlassConfirmDialog
+				open={showUsernameConfirmDialog}
+				title="Change your grove address?"
+				confirmLabel={changingUsername ? "Changing..." : "Change Username"}
+				confirmVariant="warning"
+				onconfirm={() => {
+					// Submit the form programmatically
+					const form = document.getElementById("username-change-form");
+					if (form) form.requestSubmit();
+				}}
+				oncancel={() => (showUsernameConfirmDialog = false)}
+			>
+				<div class="username-warning">
+					<p class="warning-highlight">
+						<AlertTriangle size={16} class="inline-icon" />
+						Your grove will move from <strong>{data.currentSubdomain}.grove.place</strong> to <strong>{newUsername}.grove.place</strong>
+					</p>
+					<ul class="warning-list">
+						<li>External links to your old address will redirect for 30 days</li>
+						<li>RSS subscribers may need to update their feed URL</li>
+						<li>Your old username will be held for 30 days — you can change back if needed</li>
+					</ul>
+				</div>
+			</GlassConfirmDialog>
+
+			<form
+				id="username-change-form"
+				method="POST"
+				action="?/changeUsername"
+				class="hidden"
+				use:enhance={() => {
+					changingUsername = true;
+					showUsernameConfirmDialog = false;
+					return async ({ result, update }) => {
+						changingUsername = false;
+						if (result.type === "success") {
+							const newSub = result.data?.newSubdomain || newUsername.toLowerCase().trim();
+							toast.success(`Username changed to ${newSub}! Redirecting...`);
+							setTimeout(() => {
+								window.location.href = `https://${newSub}.grove.place/arbor/settings`;
+							}, 1500);
+						} else if (result.type === "failure") {
+							toast.error(result.data?.error || "Failed to change username");
+						}
+						await update();
+					};
+				}}
+			>
+				<input type="hidden" name="newUsername" value={newUsername} />
+			</form>
+		{/if}
+
+		{#if data.usernameHistory && data.usernameHistory.length > 0}
+			<details class="username-history">
+				<summary>Previous changes</summary>
+				<ul class="history-list">
+					{#each data.usernameHistory as entry}
+						<li>
+							<span class="history-from">{entry.oldSubdomain}</span>
+							→
+							<span class="history-to">{entry.newSubdomain}</span>
+							<span class="history-date">
+								{new Date(entry.changedAt * 1000).toLocaleDateString()}
+							</span>
+						</li>
+					{/each}
+				</ul>
+			</details>
+		{/if}
 	</GlassCard>
 
 	<GlassCard variant="frosted" class="mb-6">
@@ -1406,6 +1609,125 @@
 	.settings {
 		max-width: 800px;
 	}
+
+	/* Username change section */
+	.username-display {
+		margin-top: 0.75rem;
+	}
+	.rate-limit-notice {
+		color: rgba(255, 255, 255, 0.6);
+		font-size: 0.85rem;
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+	}
+	.username-change-form {
+		margin-top: 1rem;
+	}
+	.username-input-row {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+	}
+	.username-input-wrapper {
+		display: flex;
+		align-items: center;
+		flex: 1;
+		background: rgba(255, 255, 255, 0.05);
+		border: 1px solid rgba(255, 255, 255, 0.15);
+		border-radius: 0.5rem;
+		overflow: hidden;
+	}
+	.username-input-wrapper .glass-input {
+		flex: 1;
+		border: none;
+		background: transparent;
+		padding: 0.5rem 0.75rem;
+		color: white;
+		font-size: 0.95rem;
+	}
+	.username-input-wrapper .glass-input:focus {
+		outline: none;
+	}
+	.username-suffix {
+		padding: 0.5rem 0.75rem;
+		color: rgba(255, 255, 255, 0.4);
+		font-size: 0.85rem;
+		white-space: nowrap;
+		border-left: 1px solid rgba(255, 255, 255, 0.1);
+	}
+	.username-status {
+		width: 24px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	.username-error {
+		color: #f87171;
+		font-size: 0.8rem;
+		margin-top: 0.4rem;
+	}
+	.username-hint {
+		color: rgba(255, 255, 255, 0.4);
+		font-size: 0.75rem;
+		margin-top: 0.3rem;
+	}
+	.username-actions {
+		display: flex;
+		gap: 0.5rem;
+		margin-top: 1rem;
+	}
+	.username-warning {
+		font-size: 0.9rem;
+	}
+	.warning-highlight {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+		color: #fbbf24;
+		margin-bottom: 0.75rem;
+	}
+	.warning-list {
+		padding-left: 1.25rem;
+		list-style: disc;
+		color: rgba(255, 255, 255, 0.7);
+		line-height: 1.6;
+	}
+	.username-history {
+		margin-top: 1rem;
+		border-top: 1px solid rgba(255, 255, 255, 0.1);
+		padding-top: 0.75rem;
+	}
+	.username-history summary {
+		cursor: pointer;
+		color: rgba(255, 255, 255, 0.5);
+		font-size: 0.8rem;
+	}
+	.history-list {
+		list-style: none;
+		padding: 0;
+		margin-top: 0.5rem;
+	}
+	.history-list li {
+		font-size: 0.8rem;
+		color: rgba(255, 255, 255, 0.5);
+		padding: 0.25rem 0;
+	}
+	.history-from {
+		text-decoration: line-through;
+		opacity: 0.6;
+	}
+	.history-to {
+		color: rgba(255, 255, 255, 0.8);
+	}
+	.history-date {
+		margin-left: 0.5rem;
+		opacity: 0.4;
+	}
+	.hidden {
+		display: none;
+	}
+
 	.page-header {
 		margin-bottom: 2rem;
 	}

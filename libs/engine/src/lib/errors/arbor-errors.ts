@@ -103,6 +103,45 @@ export const ARBOR_ERRORS = {
       "Admin attempted to modify a resource in a non-modifiable state.",
   },
 
+  USERNAME_UNAVAILABLE: {
+    code: "GROVE-ARBOR-045",
+    category: "user" as const,
+    userMessage: "That username isn't available. Please try a different one.",
+    adminMessage:
+      "Username change blocked: subdomain taken, reserved, or in active hold.",
+  },
+
+  USERNAME_CHANGE_RATE_LIMITED: {
+    code: "GROVE-ARBOR-046",
+    category: "user" as const,
+    userMessage:
+      "You've reached the limit for username changes on your current plan.",
+    adminMessage: "Username change denied: tier-based rate limit exceeded.",
+  },
+
+  USERNAME_VALIDATION_FAILED: {
+    code: "GROVE-ARBOR-047",
+    category: "user" as const,
+    userMessage:
+      "That username doesn't meet the requirements. Please check the format.",
+    adminMessage:
+      "Username change failed: format validation (length, pattern, blocklist).",
+  },
+
+  USERNAME_CHANGE_FAILED: {
+    code: "GROVE-ARBOR-048",
+    category: "bug" as const,
+    userMessage: "Something went wrong changing your username. Please try again.",
+    adminMessage: "Username change DB transaction failed.",
+  },
+
+  USERNAME_SAME_AS_CURRENT: {
+    code: "GROVE-ARBOR-049",
+    category: "user" as const,
+    userMessage: "That's already your current username.",
+    adminMessage: "Username change attempted with identical subdomain.",
+  },
+
   // ─────────────────────────────────────────────────────────────────────────
   // Internal / Catch-All (080-099)
   // ─────────────────────────────────────────────────────────────────────────

@@ -135,6 +135,36 @@ function isValidSubdomain(subdomain: string): boolean {
 }
 
 /**
+ * Check if a subdomain has an active username redirect (30-day hold).
+ * Only called on the 404 path (subdomain not found), not on every request.
+ *
+ * Returns the new subdomain to redirect to, or null if no redirect exists.
+ */
+async function checkUsernameRedirect(
+  subdomain: string,
+  platform: App.Platform | undefined,
+): Promise<string | null> {
+  const db = platform?.env?.DB;
+  if (!db) return null;
+
+  try {
+    const row = await db
+      .prepare(
+        `SELECT new_subdomain FROM username_history
+         WHERE old_subdomain = ? AND released = 0 AND hold_expires_at > unixepoch()
+         ORDER BY changed_at DESC LIMIT 1`,
+      )
+      .bind(subdomain)
+      .first<{ new_subdomain: string }>();
+
+    return row?.new_subdomain ?? null;
+  } catch (err) {
+    console.error("[Hooks] Username redirect lookup failed:", err);
+    return null;
+  }
+}
+
+/**
  * Try to get tenant config from TenantDO first, fall back to D1
  *
  * TenantDO caches config in memory (including tenant ID), eliminating
@@ -425,6 +455,17 @@ export const handle: Handle = async ({ event, resolve }) => {
     const tenant = await getTenantConfig(subdomain, event.platform);
 
     if (!tenant) {
+      // Before showing 404, check if this is an old subdomain with an active redirect
+      const redirectTarget = await checkUsernameRedirect(
+        subdomain,
+        event.platform,
+      );
+      if (redirectTarget) {
+        throw redirect(
+          301,
+          `https://${redirectTarget}.grove.place${event.url.pathname}${event.url.search}`,
+        );
+      }
       // Subdomain not registered or inactive
       event.locals.context = { type: "not_found", subdomain };
     } else {
