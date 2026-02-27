@@ -177,7 +177,16 @@ class DataBootstrapper:
             patched_sql = _patch_migration_sql(sql)
 
             try:
-                cursor.executescript(patched_sql)
+                # Split into individual statements and run inside an explicit
+                # transaction so rollback actually works. executescript() issues
+                # an implicit COMMIT first, making rollback a no-op on failure
+                # and leaving partial migrations committed but untracked.
+                statements = [
+                    s.strip() for s in patched_sql.split(";") if s.strip()
+                ]
+                cursor.execute("BEGIN")
+                for stmt in statements:
+                    cursor.execute(stmt)
                 cursor.execute(
                     "INSERT INTO d1_migrations (name) VALUES (?)",
                     (mig_file.name,),
@@ -185,8 +194,8 @@ class DataBootstrapper:
                 conn.commit()
                 applied_count += 1
             except sqlite3.Error as e:
-                errors.append(f"{mig_file.name}: {e}")
                 conn.rollback()
+                errors.append(f"{mig_file.name}: {e}")
 
         conn.close()
 

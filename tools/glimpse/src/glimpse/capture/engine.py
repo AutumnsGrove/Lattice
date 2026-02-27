@@ -13,7 +13,7 @@ from playwright.async_api import async_playwright, Browser, BrowserContext
 
 from glimpse.capture.console import ConsoleCollector
 from glimpse.capture.injector import build_init_script
-from glimpse.capture.screenshot import CaptureRequest, CaptureResult
+from glimpse.capture.screenshot import CaptureRequest, CaptureResult, ConsoleMessage
 from glimpse.utils.browser import find_chromium_executable
 
 
@@ -138,7 +138,18 @@ class CaptureEngine:
                         timeout=request.timeout_ms,
                     )
                 except Exception:
-                    pass  # Best-effort; proceed with capture
+                    # Surface the timeout as a warning so callers know the
+                    # selector never appeared. Inject into console messages
+                    # so it flows through human/agent/JSON output naturally.
+                    if collector is None:
+                        collector = ConsoleCollector()
+                    collector._messages.append(ConsoleMessage(
+                        level="warning",
+                        text=(
+                            f"--wait-for selector '{request.wait_for}' timed out; "
+                            f"captured page in current state"
+                        ),
+                    ))
             elif request.wait_strategy == "networkidle":
                 try:
                     await page.wait_for_load_state("networkidle", timeout=request.timeout_ms)
