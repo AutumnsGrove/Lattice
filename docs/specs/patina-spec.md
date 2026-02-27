@@ -1194,7 +1194,7 @@ wrangler secret put ZEPHYR_API_KEY
 ### Deploy
 
 ```bash
-cd packages/backups
+cd workers/patina
 pnpm install
 pnpm deploy
 ```
@@ -1221,7 +1221,7 @@ wrangler tail grove-patina
 - [ ] Create R2 bucket `grove-patina`
 - [ ] Create D1 database `grove-patina-db`
 - [ ] Run migrations
-- [ ] Set up project structure in `packages/backups/`
+- [ ] Set up project structure in `workers/patina/`
 
 ### Phase 2: Export Logic
 

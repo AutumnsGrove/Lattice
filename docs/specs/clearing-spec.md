@@ -785,7 +785,7 @@ Key tasks:
 4. Implement scheduled maintenance scheduling
 5. Connect to D1 database tables (status_components, status_incidents, status_updates)
 
-The admin panel already exists at packages/admin/. Follow existing patterns for:
+The admin panel already exists at apps/login/. Follow existing patterns for:
 - Sidebar navigation (see +layout.svelte)
 - Form components and validation
 - API integration patterns

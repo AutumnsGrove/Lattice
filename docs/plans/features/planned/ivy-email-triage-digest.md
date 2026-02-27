@@ -370,5 +370,5 @@ event.waitUntil(
 - **MIME parsing**: Add `postal-mime` for proper multipart handling (works in Workers runtime)
 - **Forwarding headers**: Gmail/ProtonMail may embed original sender in `X-Original-From` or envelope — handle per-provider
 - **DO alarm chaining**: Process ~10 emails per alarm invocation (each takes ~2s with Lumen call), schedule next alarm for remaining. This keeps each alarm well under the 30s limit.
-- **Engine rebuild**: After adding TriageDO, run `pnpm run package` in engine AND `cd packages/durable-objects && pnpm deploy`
+- **Engine rebuild**: After adding TriageDO, run `pnpm run package` in engine AND `cd services/durable-objects && pnpm deploy`
 - **Greenhouse dogfooding**: Once working for personal use, enroll Ivy in Greenhouse. Use graft flags to gate triage features for other users.

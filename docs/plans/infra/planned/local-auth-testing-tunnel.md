@@ -23,7 +23,7 @@ cp apps/landing/.env.local.example apps/landing/.env.local
 
 # Day-to-day: two terminals
 ./scripts/dev-tunnel.sh              # Terminal 1: tunnel
-cd packages/landing && bun run dev   # Terminal 2: dev server
+cd apps/landing && bun run dev       # Terminal 2: dev server
 
 # Visit https://dev.grove.place
 ```
@@ -146,7 +146,7 @@ The server-side `GroveAuthClient` accepts `authBaseUrl` via constructor config, 
 
 In another terminal:
 ```bash
-cd packages/landing && bun run dev
+cd apps/landing && bun run dev
 ```
 
 ### Test the Flow
@@ -167,7 +167,7 @@ DEV_PORT=3000 ./scripts/dev-tunnel.sh
 For auth code changes, run Heartwood locally too:
 
 ```bash
-cd packages/heartwood && wrangler dev --local
+cd services/heartwood && wrangler dev --local
 ```
 
 Update the tunnel config (`~/.cloudflared/config-grove-dev.yml`) to split routing:

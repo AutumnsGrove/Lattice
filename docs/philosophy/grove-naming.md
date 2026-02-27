@@ -696,7 +696,7 @@ _The cupboard is always stocked._
 ### Passage
 
 **Subdomain Routing** · _Internal infrastructure_
-**Repository:** [AutumnsGrove/Lattice](https://github.com/AutumnsGrove/Lattice/tree/main/packages/grove-router)
+**Repository:** [AutumnsGrove/Lattice](https://github.com/AutumnsGrove/Lattice/tree/main/services/grove-router)
 **Standard:** Router
 **Waystone:** The subdomain router that sends visitors to the right Grove site when they type {you}.grove.place.
 

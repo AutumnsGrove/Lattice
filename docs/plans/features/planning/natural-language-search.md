@@ -392,7 +392,7 @@ CREATE TABLE IF NOT EXISTS discovery_settings (
 
 #### 1.2 RSS Polling & Orama Indexing
 
-**Background Worker** (`packages/discovery/src/workers/indexer.ts`):
+**Background Worker** (`apps/discovery/src/workers/indexer.ts`):
 
 ```typescript
 // Cron: Every 15 minutes
@@ -453,7 +453,7 @@ async function generateEmbedding(text: string, env: Env): Promise<number[]> {
 }
 ```
 
-**Index Schema** (`packages/discovery/migrations/001_search_index.sql`):
+**Index Schema** (`apps/discovery/migrations/001_search_index.sql`):
 
 ```sql
 CREATE TABLE IF NOT EXISTS discovery_index (
@@ -477,11 +477,11 @@ CREATE INDEX idx_discovery_date ON discovery_index(date DESC);
 
 #### 1.3 Discovery Frontend with Orama
 
-**New Property:** `packages/discovery/` (SvelteKit)
+**New Property:** `apps/discovery/` (SvelteKit)
 
 **Route:** `discover.grove.place/`
 
-**Search Handler** (`packages/discovery/src/routes/api/search/+server.ts`):
+**Search Handler** (`apps/discovery/src/routes/api/search/+server.ts`):
 
 ```typescript
 import { create, insert, search } from "@orama/orama";

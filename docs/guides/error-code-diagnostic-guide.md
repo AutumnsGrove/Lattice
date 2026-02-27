@@ -339,7 +339,7 @@ When you need a new error:
 
 3. Add the entry with all four fields: `code`, `category`, `userMessage`, `adminMessage`.
 
-4. Rebuild the engine: `cd packages/engine && pnpm run package`
+4. Rebuild the engine: `cd libs/engine && pnpm run package`
 
 5. The integrity test suite (`integrity.test.ts`) auto-validates: no duplicate codes, all fields present, correct format.
 

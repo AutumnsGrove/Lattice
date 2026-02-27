@@ -127,7 +127,7 @@ created: 2026-02-21
 
 ## The Engine Identity Crisis
 
-`packages/engine` is simultaneously:
+`libs/engine` is simultaneously:
 - **A library** (`@autumnsgrove/lattice`) — 539 files, 253 export paths, consumed by 10 packages
 - **A deployment** (`grove-lattice`) — 262 route files, 127 API handlers, serves `*.grove.place`
 

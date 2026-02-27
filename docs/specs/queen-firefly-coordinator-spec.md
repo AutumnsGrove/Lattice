@@ -690,12 +690,12 @@ steps:
   typecheck:
     image: node:20
     commands:
-      - pnpm run typecheck --filter='./packages/*'
+      - pnpm run typecheck --filter='./apps/*' --filter='./libs/*' --filter='./services/*' --filter='./workers/*'
 
   test:
     image: node:20
     commands:
-      - pnpm test --filter='./packages/*'
+      - pnpm test --filter='./apps/*' --filter='./libs/*' --filter='./services/*' --filter='./workers/*'
 
   deploy:
     image: node:20

@@ -182,7 +182,7 @@ The basic setup routes all traffic to your local SvelteKit dev server, but auth 
 ### 1. Run Heartwood Locally
 
 ```bash
-cd packages/heartwood && wrangler dev --local
+cd services/heartwood && wrangler dev --local
 ```
 
 This starts Heartwood on port 8787.

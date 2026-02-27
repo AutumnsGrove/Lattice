@@ -738,7 +738,7 @@ Stripe price IDs are hardcoded in source code instead of environment variables.
 ### Search for Hardcoded IDs
 
 ```bash
-grep -rn "price_" --include="*.ts" packages/ plant/ landing/
+grep -rn "price_" --include="*.ts" apps/ libs/ plant/ landing/
 ```
 
 ### Required Fix

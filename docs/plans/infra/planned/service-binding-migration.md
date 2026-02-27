@@ -27,7 +27,7 @@ An audit on 2026-02-06 found multiple Worker-to-Worker calls using bare `fetch()
 
 ## Phase 1: Grove Router (5 Worker targets)
 
-The router (`packages/grove-router`) proxies requests to Workers via public URLs. Add Service Bindings for Workers (Pages targets must remain URL-based).
+The router (`services/grove-router`) proxies requests to Workers via public URLs. Add Service Bindings for Workers (Pages targets must remain URL-based).
 
 ### Workers to bind
 

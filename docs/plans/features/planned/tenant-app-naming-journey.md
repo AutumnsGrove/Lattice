@@ -56,7 +56,7 @@ Then the sharper insight landed:
 > lattice. We are getting things off of one lattice and using the other.
 > One is static, one is live."
 
-The cost of a full rename (creating `packages/thicket`, updating every
+The cost of a full rename (creating `apps/thicket`, updating every
 import, new deploy config, new CI workflows, new docs) would be massive
 for what is essentially a structural separation, not a new identity.
 

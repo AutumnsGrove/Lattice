@@ -285,7 +285,7 @@ After removal, grep for `discord` (case-insensitive) across both packages to cat
 ## Target Structure
 
 ```
-packages/
+services/
 ├── heartwood/                    # NEW — Worker API (Hono.js)
 │   ├── src/
 │   │   ├── index.ts              # Hono app entry
@@ -320,6 +320,10 @@ packages/
 │   ├── vitest.config.ts
 │   └── worker-configuration.d.ts
 │
+├── durable-objects/              # (unchanged location)
+└── ...
+
+libs/
 ├── engine/                       # MODIFIED
 │   ├── src/lib/
 │   │   ├── heartwood/            # RENAMED from groveauth/
@@ -341,9 +345,12 @@ packages/
 │   │   └── cdn/                  # NEW — file management
 │   └── package.json              # Export renamed: ./groveauth → ./heartwood
 │
+└── ...
+
+apps/
 ├── landing/                      # MODIFIED (credits page updated)
 ├── plant/                        # MODIFIED (imports renamed)
-├── ...
+└── ...
 ```
 
 ---
@@ -374,8 +381,8 @@ packages/
   - Remove Discord references from OAuth service
 - [ ] Add `services/heartwood/` to `pnpm-workspace.yaml`
 - [ ] Run `pnpm install` from root
-- [ ] Verify `services/heartwood/` builds: `cd packages/heartwood && pnpm run typecheck`
-- [ ] Verify tests pass: `cd packages/heartwood && pnpm run test:run`
+- [ ] Verify `services/heartwood/` builds: `cd services/heartwood && pnpm run typecheck`
+- [ ] Verify tests pass: `cd services/heartwood && pnpm run test:run`
 
 ### Phase 2: Internal Rename (groveauth → heartwood)
 
@@ -435,9 +442,9 @@ packages/
 ### Phase 6: CI/CD Setup
 
 - [ ] Add `services/heartwood/` to GitHub Actions workflows
-  - Worker deployment: `cd packages/heartwood && wrangler deploy`
-  - Type checking: `cd packages/heartwood && pnpm run typecheck`
-  - Tests: `cd packages/heartwood && pnpm run test:run`
+  - Worker deployment: `cd services/heartwood && wrangler deploy`
+  - Type checking: `cd services/heartwood && pnpm run typecheck`
+  - Tests: `cd services/heartwood && pnpm run test:run`
 - [ ] Verify deployment target matches existing Cloudflare project
   - Worker name in wrangler.toml: `groveauth` (kept for infrastructure compatibility)
 - [ ] Verify engine build succeeds with renamed exports

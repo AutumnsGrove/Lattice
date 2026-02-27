@@ -33,34 +33,34 @@ category: safari
 
 | #   | Package              | Script Name       | Domain                       | Bindings                                       | Complexity    |
 | --- | -------------------- | ----------------- | ---------------------------- | ---------------------------------------------- | ------------- |
-| 1   | `packages/engine`    | `grove-lattice`   | `*.grove.place` (via router) | D1, R2×3, KV×2, AI, Auth svc, Zephyr svc, DO×6 | **Very High** |
-| 2   | `packages/landing`   | `grove-landing`   | `grove.place`                | D1, R2, KV×2, Auth svc, Zephyr svc             | **High**      |
-| 3   | `packages/plant`     | `grove-plant`     | `plant.grove.place`          | D1, KV, Auth svc, Zephyr svc                   | **Medium**    |
-| 4   | `packages/meadow`    | `grove-meadow`    | `meadow.grove.place`         | D1, KV, Auth svc, DO×1                         | **Medium**    |
-| 5   | `packages/clearing`  | `grove-clearing`  | `status.grove.place`         | D1×2                                           | **Low**       |
-| 6   | `packages/domains`   | `grove-domains`   | Forage tool                  | D1, Auth svc                                   | **Low**       |
-| 7   | `packages/login`     | `grove-login`     | `login.grove.place`          | Auth svc only                                  | **Minimal**   |
-| 8   | `packages/terrarium` | `grove-terrarium` | TBD                          | None (localStorage)                            | **Minimal**   |
+| 1   | `libs/engine`        | `grove-lattice`   | `*.grove.place` (via router) | D1, R2×3, KV×2, AI, Auth svc, Zephyr svc, DO×6 | **Very High** |
+| 2   | `apps/landing`       | `grove-landing`   | `grove.place`                | D1, R2, KV×2, Auth svc, Zephyr svc             | **High**      |
+| 3   | `apps/plant`         | `grove-plant`     | `plant.grove.place`          | D1, KV, Auth svc, Zephyr svc                   | **Medium**    |
+| 4   | `apps/meadow`        | `grove-meadow`    | `meadow.grove.place`         | D1, KV, Auth svc, DO×1                         | **Medium**    |
+| 5   | `apps/clearing`      | `grove-clearing`  | `status.grove.place`         | D1×2                                           | **Low**       |
+| 6   | `apps/domains`       | `grove-domains`   | Forage tool                  | D1, Auth svc                                   | **Low**       |
+| 7   | `apps/login`         | `grove-login`     | `login.grove.place`          | Auth svc only                                  | **Minimal**   |
+| 8   | `apps/terrarium`     | `grove-terrarium` | TBD                          | None (localStorage)                            | **Minimal**   |
 
 ### Cloudflare Workers
 
 | #   | Package                             | Script Name               | Type            | Cron                       | Bindings                                      |
 | --- | ----------------------------------- | ------------------------- | --------------- | -------------------------- | --------------------------------------------- |
-| 1   | `packages/heartwood`                | `groveauth`               | Service         | `* * * * *`, `0 0 * * *`   | D1×2, R2, KV, DO, Zephyr svc, Smart Placement |
-| 2   | `packages/grove-router`             | `grove-router`            | Service         | `* * * * *`                | R2×2, Scout/Auth/MC/Mycelium/OG svcs          |
-| 3   | `packages/durable-objects`          | `grove-durable-objects`   | DO Host         | —                          | D1×2, R2×2, KV, AI, Zephyr svc                |
-| 4   | `packages/og-worker`                | `grove-og`                | Service         | —                          | KV                                            |
+| 1   | `services/heartwood`                | `groveauth`               | Service         | `* * * * *`, `0 0 * * *`   | D1×2, R2, KV, DO, Zephyr svc, Smart Placement |
+| 2   | `services/grove-router`             | `grove-router`            | Service         | `* * * * *`                | R2×2, Scout/Auth/MC/Mycelium/OG svcs          |
+| 3   | `services/durable-objects`          | `grove-durable-objects`   | DO Host         | —                          | D1×2, R2×2, KV, AI, Zephyr svc                |
+| 4   | `workers/og-worker`                 | `grove-og`                | Service         | —                          | KV                                            |
 | 5   | `workers/zephyr`                    | `grove-zephyr`            | Service         | —                          | D1, Email Render svc                          |
 | 6   | `workers/pulse`                     | `grove-pulse`             | Service+Cron    | `0 * * * *`, `5 0 * * *`   | D1, KV                                        |
 | 7   | `workers/email-render`              | `grove-email-render`      | Service         | —                          | None (stateless)                              |
 | 8   | `workers/email-catchup`             | `grove-email-catchup`     | Cron            | `0 10 * * 0`               | D1, Email Render svc                          |
 | 9   | `landing/workers/onboarding-emails` | `grove-onboarding-emails` | Cron            | `0 10 * * *`               | D1                                            |
-| 10  | `packages/post-migrator`            | `grove-post-migrator`     | Cron (disabled) | —                          | D1, R2                                        |
-| 11  | `packages/workers/clearing-monitor` | `grove-clearing-monitor`  | Cron            | `*/5 * * * *`, `0 0 * * *` | D1, KV                                        |
-| 12  | `packages/workers/meadow-poller`    | `grove-meadow-poller`     | Cron            | `*/15 * * * *`             | D1, KV                                        |
-| 13  | `packages/workers/timeline-sync`    | `grove-timeline-sync`     | Cron            | `0 1 * * *`                | D1                                            |
-| 14  | `packages/workers/vista-collector`  | `grove-vista-collector`   | Cron            | `*/5 * * * *`, `0 0 * * *` | D1                                            |
-| 15  | `packages/workers/webhook-cleanup`  | `grove-webhook-cleanup`   | Cron            | `0 3 * * *`                | D1, R2                                        |
+| 10  | `workers/post-migrator`             | `grove-post-migrator`     | Cron (disabled) | —                          | D1, R2                                        |
+| 11  | `workers/clearing-monitor`          | `grove-clearing-monitor`  | Cron            | `*/5 * * * *`, `0 0 * * *` | D1, KV                                        |
+| 12  | `workers/meadow-poller`             | `grove-meadow-poller`     | Cron            | `*/15 * * * *`             | D1, KV                                        |
+| 13  | `workers/timeline-sync`             | `grove-timeline-sync`     | Cron            | `0 1 * * *`                | D1                                            |
+| 14  | `workers/vista-collector`           | `grove-vista-collector`   | Cron            | `*/5 * * * *`, `0 0 * * *` | D1                                            |
+| 15  | `workers/webhook-cleanup`           | `grove-webhook-cleanup`   | Cron            | `0 3 * * *`                | D1, R2                                        |
 
 ---
 
@@ -91,7 +91,7 @@ If Pages apps became Workers, **up to 6 of these cron workers could be absorbed*
 
 ### 2. Smart Placement
 
-Workers support `[placement] mode = "smart"` which runs the worker closer to its D1 database. Heartwood already uses this (`packages/heartwood/wrangler.toml:71`). Every Pages app with D1 bindings is leaving latency on the table — especially Engine, which is the most DB-heavy app in the system.
+Workers support `[placement] mode = "smart"` which runs the worker closer to its D1 database. Heartwood already uses this (`services/heartwood/wrangler.toml:71`). Every Pages app with D1 bindings is leaving latency on the table — especially Engine, which is the most DB-heavy app in the system.
 
 ### 3. Secrets Store Bindings
 
@@ -121,7 +121,7 @@ Workers support `tail_consumers` for real-time log streaming to another worker. 
 
 ## Vista Observability Gap
 
-This is the key finding of the safari. Vista currently monitors the Grove ecosystem from `packages/landing/src/routes/arbor/vista/` with data collected by `grove-vista-collector`.
+This is the key finding of the safari. Vista currently monitors the Grove ecosystem from `apps/landing/src/routes/arbor/vista/` with data collected by `grove-vista-collector`.
 
 ### How Vista Collects Worker Data
 
@@ -171,7 +171,7 @@ If all Pages became Workers:
 
 **Why convert**:
 
-- **Smart Placement** — This is the most D1-heavy app in the ecosystem (shared `grove-engine-db`, 2 KV namespaces, 3 R2 buckets, 6 DO bindings). Smart placement could reduce p50 latency meaningfully for all tenant page loads.
+- **Smart Placement** — This is the most D1-heavy app in the ecosystem (shared `grove-engine-db`, 2 KV namespaces, 3 R2 buckets, 6 DO bindings). Smart placement could reduce p50 latency meaningfully for all tenant page loads. See `libs/engine/wrangler.toml` for binding details.
 - **Absorb cron workers** — Could absorb `webhook-cleanup`, `post-migrator`, and `timeline-sync`. That's 3 fewer deployments to maintain.
 - **Secrets Store** — The GROVE_KEK workaround (regular secret instead of secrets store) goes away.
 - **Vista observability** — Consistent Worker analytics instead of ambiguous Pages analytics.
@@ -193,7 +193,7 @@ If all Pages became Workers:
 **Why convert**:
 
 - **Self-observability** — Landing hosts Vista but isn't monitored as cleanly as Workers are. Converting makes the observer a first-class citizen in its own system.
-- **Absorb cron workers** — Could absorb `onboarding-emails` (daily email sequences). That worker lives _inside_ the landing package already (`packages/landing/workers/onboarding-emails/`).
+- **Absorb cron workers** — Could absorb `onboarding-emails` (daily email sequences). That worker lives _inside_ the landing app already (`apps/landing/workers/onboarding-emails/`).
 - **Smart Placement** — Landing reads from D1 for admin operations and signup data.
 - **`--var` flags** — Currently notes that Pages deploy "doesn't support --var flags" and secrets must be set via dashboard. Workers fix this.
 
@@ -349,7 +349,7 @@ _The jeep rounds a kopje and there it is — the largest creature on the savanna
 
 ### What we're looking at
 
-`packages/engine` is simultaneously:
+`libs/engine` is simultaneously:
 
 1. **A shared library** published as `@autumnsgrove/lattice` with **253 export paths**, consumed by **10 packages** across 162 files
 2. **A live deployment** (`grove-lattice`) serving every tenant site, with **262 route files**, **127 API handlers**, and **121 endpoints**
@@ -477,7 +477,7 @@ apps/
 
 No new name needed. Both are lattice. One you build with, one you visit.
 
-This split is the prerequisite step before converting to a Worker. The library doesn't deploy — no conversion needed. The engine converts and gains smart placement, cron triggers, secrets store, and full Vista observability.
+This split is the prerequisite step before converting to a Worker. The library doesn't deploy — no conversion needed. The app (engine) converts and gains smart placement, cron triggers, secrets store, and full Vista observability.
 
 ---
 

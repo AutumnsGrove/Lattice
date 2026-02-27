@@ -267,7 +267,7 @@ Here's a breakdown by component:
 
 ### The One Thing That Makes This Simpler Than It Seems
 
-**All Grove properties run on the same engine.** This is the key simplifying factor compared to federated protocols. Since every property is a deployment of `packages/engine`, the burrow middleware only needs to be implemented once. Every property automatically gets burrow support when you update the engine. You don't need to convince independent operators to implement a protocol.
+**All Grove properties run on the same engine.** This is the key simplifying factor compared to federated protocols. Since every property is a deployment of `libs/engine`, the burrow middleware only needs to be implemented once. Every property automatically gets burrow support when you update the engine. You don't need to convince independent operators to implement a protocol.
 
 ### The One Thing That Makes This Harder Than It Seems
 

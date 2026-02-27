@@ -456,7 +456,7 @@ throwGroveError(404, SITE_ERRORS.PAGE_NOT_FOUND, "Site", { path: slug });
 6. **Run the integrity tests** to verify the entry is valid:
 
 ```bash
-cd packages/engine && npx vitest run src/lib/errors/integrity.test.ts
+cd libs/engine && npx vitest run src/lib/errors/integrity.test.ts
 ```
 
 The tests auto-validate format, uniqueness, category values, and message content for every entry.

@@ -162,7 +162,7 @@ npm_unpacked_size
 ### Where the untracked languages live
 
 **Python (48,616 lines)**:
-- `tools/gw` — 30,741 lines (the infrastructure CLI — your most-used tool!)
+- `tools/grove-wrap` — 30,741 lines (the infrastructure CLI — your most-used tool!)
 - `libs/shutter` — 3,201 lines (screenshot service)
 - `tools/glimpse` — 1,968 lines (insight tool)
 - `_archived/` — 12,278 lines (old Python tools)

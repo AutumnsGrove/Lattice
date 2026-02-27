@@ -203,7 +203,7 @@ For v1, all active tenants with a blog-capable plan are polled. A future `meadow
 **Dependency:** `fast-xml-parser` — lightweight, zero-dependency XML parser. Well-maintained, widely used, works in Workers.
 
 ```bash
-cd packages/meadow && pnpm add fast-xml-parser
+cd apps/meadow && pnpm add fast-xml-parser
 ```
 
 **Parser module:** `apps/meadow/src/lib/server/rss-parser.ts`

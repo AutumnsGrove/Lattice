@@ -33,7 +33,7 @@ tags: []
 **Public Name:** Terrarium
 **Internal Name:** GroveTerrarium
 **Route:** `/terrarium`
-**Repository:** `AutumnsGrove/Lattice` (packages/engine)
+**Repository:** `AutumnsGrove/Lattice` (libs/engine)
 
 A terrarium is a contained miniature ecosystem you design, arrange, and nurture. Moss, stones, tiny plants—all placed with intention.
 

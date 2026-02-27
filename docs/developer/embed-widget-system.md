@@ -200,7 +200,7 @@ The `embedProvider` field is optional. If present, the client skips the API call
 Run them:
 
 ```bash
-cd packages/engine
+cd libs/engine
 npx vitest run src/lib/server/services/oembed-providers.test.ts
 npx vitest run src/routes/api/oembed/oembed.test.ts
 ```

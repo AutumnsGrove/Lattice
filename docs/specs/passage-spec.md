@@ -48,7 +48,7 @@ A passage is a way through—a corridor connecting spaces that seem separate. In
 
 **Public Name:** Passage
 **Internal Name:** GroveRouter (legacy), GrovePassage (future)
-**Package:** `packages/grove-router` (pending rename to `packages/passage`)
+**Package:** `services/grove-router` (pending rename to `services/passage`)
 **Worker:** `grove-router` on Cloudflare Workers
 
 Passage is how the grove makes the impossible feel inevitable. Without it, every tenant would need a manually configured page. Every URL would require hand-wired routing. The architecture would collapse under its own complexity. But Passage arches over all of it.

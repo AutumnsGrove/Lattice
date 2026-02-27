@@ -117,7 +117,7 @@ CF_GATEWAY_ID = "grove-production"
 Create a reusable AI client that all Grove services use:
 
 ```typescript
-// packages/grove-ai/src/client.ts
+// services/grove-ai/src/client.ts
 
 import { TenantContext } from '@grove/heartwood';
 
@@ -308,7 +308,7 @@ For pro tier (4x limits):
 ### Updated Client for Dynamic Routes
 
 ```typescript
-// packages/grove-ai/src/client.ts
+// services/grove-ai/src/client.ts
 
 const TIER_ROUTES: Record<string, string> = {
   free: 'dynamic/grove-free',
@@ -364,7 +364,7 @@ export function createAIClient(config: AIClientConfig) {
 ### Checking Quota in Application Code
 
 ```typescript
-// packages/grove-ai/src/quota.ts
+// services/grove-ai/src/quota.ts
 
 import { TenantContext } from '@grove/heartwood';
 
@@ -447,7 +447,7 @@ function getNextMidnightUTC(): Date {
 ### Middleware Pattern
 
 ```typescript
-// packages/grove-ai/src/middleware.ts
+// services/grove-ai/src/middleware.ts
 
 import { enforceQuota } from './quota';
 
@@ -541,7 +541,7 @@ CREATE TABLE ai_usage_by_feature (
 ### Quota Tracking Service
 
 ```typescript
-// packages/grove-ai/src/quota/tracker.ts
+// services/grove-ai/src/quota/tracker.ts
 
 import { D1Database } from '@cloudflare/workers-types';
 
@@ -785,7 +785,7 @@ function getNextMidnightUTC(): Date {
 ### Integrating with the AI Client
 
 ```typescript
-// packages/grove-ai/src/client.ts (updated)
+// services/grove-ai/src/client.ts (updated)
 
 import { createQuotaTracker } from './quota/tracker';
 
@@ -1037,7 +1037,7 @@ export default app;
 Include quota info in response headers so frontends can show usage passively:
 
 ```typescript
-// packages/grove-ai/src/middleware.ts
+// services/grove-ai/src/middleware.ts
 
 export function withQuotaHeaders(response: Response, quota: QuotaStatus): Response {
   const headers = new Headers(response.headers);
@@ -1211,7 +1211,7 @@ Set up provider fallbacks in Dynamic Routes:
 ### Application-Level Error Handling
 
 ```typescript
-// packages/grove-ai/src/client.ts
+// services/grove-ai/src/client.ts
 
 export async function chatWithFallback(
   messages: ChatMessage[],

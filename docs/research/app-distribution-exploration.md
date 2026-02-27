@@ -266,7 +266,7 @@ What we need is a shared API client that:
 - Handles token refresh when sessions expire
 - Works from both the web (as a progressive enhancement) and Capacitor
 
-**Where it lives:** Something like `packages/engine/src/lib/api-client/` or a new `packages/grove-api/` package.
+**Where it lives:** Something like `libs/engine/src/lib/api-client/` or a new `libs/grove-api/` package.
 
 **The pattern change:**
 

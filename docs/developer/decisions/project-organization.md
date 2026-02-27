@@ -23,7 +23,7 @@ Everything that powers the core Grove experience lives here.
 
 ```
 Lattice/
-├── packages/
+├── libs/
 │   └── engine/              # Lattice - the npm package
 │       └── src/lib/
 │           ├── ui/          # UI components (GlassCard, Logo, etc.)
@@ -36,8 +36,9 @@ Lattice/
 │           ├── trails/      # Personal roadmaps
 │           ├── wisp/        # Writing assistant
 │           └── arbor/       # Admin panel components
-├── landing/                 # grove.place marketing site
-├── plant/                   # plant.grove.place (onboarding)
+├── apps/
+│   ├── landing/             # grove.place marketing site
+│   └── plant/               # plant.grove.place (onboarding)
 └── docs/                    # Documentation & specs
 ```
 
@@ -404,7 +405,7 @@ pnpm check
 
 ```bash
 # Publish new package under new org
-cd packages/engine
+cd libs/engine
 npm publish --access public
 ```
 

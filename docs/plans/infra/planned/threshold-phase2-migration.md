@@ -285,7 +285,7 @@ auth/callback, magic-link/callback, passkey/options, passkey/verify
 ### Step 7: Verify
 
 ```bash
-cd packages/engine
+cd libs/engine
 pnpm run test                              # All tests pass
 pnpm run package                           # Engine builds
 npx svelte-check --tsconfig ./tsconfig.json # Type check

@@ -174,7 +174,7 @@ Grove uses automated content moderation to enforce our [Acceptable Use Policy](/
 
 **Songbird Integration:** The three-bird pattern (Canary → Kestrel → Robin) protects against prompt injection attacks. See Section 10.5 for implementation details.
 
-[Note: Package references will be updated in implementation from packages/engine to libs/engine]
+[Note: Package references are in libs/engine]
 
 ### 2.2 Data Flow Details
 

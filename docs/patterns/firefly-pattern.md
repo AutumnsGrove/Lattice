@@ -620,7 +620,7 @@ await vista.record({
 
 ### Shared Infrastructure
 
-- [ ] Create `packages/firefly/` shared library
+- [ ] Create `libs/firefly/` shared library
 - [ ] Implement generic `ServerProvisioner` interface
 - [ ] Implement `StateSynchronizer` with R2 backend
 - [ ] Implement `IdleDetector` with configurable signals

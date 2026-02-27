@@ -439,7 +439,7 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
 
 Your existing GroveBloom worker can expose an MCP interface alongside its REST API:
 
-### `packages/worker/src/mcp.ts`
+### `workers/bloom/src/mcp.ts`
 
 ```typescript
 import { McpAgent } from "agents/mcp";
