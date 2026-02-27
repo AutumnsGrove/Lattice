@@ -1,0 +1,25 @@
+{
+	"name": "grove-onboarding",
+	"version": "0.1.0",
+	"private": true,
+	"description": "Email onboarding agent — one Durable Object per user, scheduled sequences without cron",
+	"type": "module",
+	"scripts": {
+		"dev": "wrangler dev",
+		"deploy": "wrangler deploy",
+		"tail": "wrangler tail",
+		"test": "vitest",
+		"test:run": "vitest run"
+	},
+	"dependencies": {
+		"@autumnsgrove/grove-agent": "workspace:*",
+		"@autumnsgrove/lattice": "workspace:*",
+		"hono": "^4.7.0"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20260210.0",
+		"typescript": "^5.9.3",
+		"vitest": "^4.0.18",
+		"wrangler": "^4.63.0"
+	}
+}

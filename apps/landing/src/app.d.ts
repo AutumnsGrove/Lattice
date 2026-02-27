@@ -47,6 +47,8 @@ declare global {
 				CF_OBSERVABILITY_TOKEN?: string;
 				/** Vista collector service binding (manual collection trigger) */
 				VISTA_COLLECTOR?: Fetcher;
+				/** Onboarding agent service binding (email sequence scheduling) */
+				ONBOARDING?: Fetcher;
 			};
 			context: {
 				waitUntil(promise: Promise<unknown>): void;

@@ -1,6 +1,21 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { sendWelcomeEmail } from "$lib/email/send";
+
+/**
+ * Start the onboarding sequence via the OnboardingAgent service binding.
+ * The agent handles Day 0/1/7/14/30 scheduling, idempotency, and unsubscribe.
+ */
+function startOnboardingAgent(
+	onboarding: Fetcher,
+	email: string,
+	audience: string,
+): Promise<Response> {
+	return onboarding.fetch("https://onboarding/start", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ email, audience }),
+	});
+}
 
 export const POST: RequestHandler = async ({ request, platform }) => {
 	if (!platform?.env?.DB) {
@@ -45,16 +60,10 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 					.bind(existing.id)
 					.run();
 
-				// Send welcome email in background
-				if (platform.env.ZEPHYR_API_KEY) {
+				// Start onboarding sequence via agent (idempotent — safe to call again)
+				if (platform.env.ONBOARDING) {
 					platform.context.waitUntil(
-						sendWelcomeEmail(
-							normalizedEmail,
-							platform.env.ZEPHYR_API_KEY,
-							platform.env.ZEPHYR_URL,
-							platform.env.UNSUBSCRIBE_SECRET,
-							platform.env.ZEPHYR,
-						),
+						startOnboardingAgent(platform.env.ONBOARDING, normalizedEmail, "wanderer"),
 					);
 				}
 
@@ -70,16 +79,10 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 			.bind(normalizedEmail)
 			.run();
 
-		// Send welcome email in background
-		if (platform.env.ZEPHYR_API_KEY) {
+		// Start onboarding sequence via agent
+		if (platform.env.ONBOARDING) {
 			platform.context.waitUntil(
-				sendWelcomeEmail(
-					normalizedEmail,
-					platform.env.ZEPHYR_API_KEY,
-					platform.env.ZEPHYR_URL,
-					platform.env.UNSUBSCRIBE_SECRET,
-					platform.env.ZEPHYR,
-				),
+				startOnboardingAgent(platform.env.ONBOARDING, normalizedEmail, "wanderer"),
 			);
 		}
 

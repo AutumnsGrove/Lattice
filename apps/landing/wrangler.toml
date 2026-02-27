@@ -66,6 +66,11 @@ service = "grove-zephyr"
 binding = "VISTA_COLLECTOR"
 service = "grove-vista-collector"
 
+# Onboarding Agent Service Binding (email sequence scheduling)
+[[services]]
+binding = "ONBOARDING"
+service = "grove-onboarding"
+
 # R2 Storage binding
 [[r2_buckets]]
 binding = "CDN_BUCKET"

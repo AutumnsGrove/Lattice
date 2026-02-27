@@ -1,0 +1,36 @@
+# Grove Onboarding — Email Sequence Agent
+# One Durable Object per user. Schedules Day 0/1/7/14/30 emails at signup,
+# handles unsubscribe, tracks delivery state. No cron polling needed.
+#
+# Phase 2 of grove-agent-consumers.md — first GroveAgent consumer.
+# Replaces: inline sendWelcomeEmail(), email-catchup cron, onboarding-emails cron.
+
+name = "grove-onboarding"
+main = "src/index.ts"
+compatibility_date = "2025-12-01"
+compatibility_flags = ["nodejs_compat"]
+
+# =============================================================================
+# Durable Objects — One agent instance per email address
+# =============================================================================
+[durable_objects]
+bindings = [
+  { name = "ONBOARDING_AGENT", class_name = "OnboardingAgent" }
+]
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["OnboardingAgent"]
+
+# =============================================================================
+# Service Bindings — Internal worker-to-worker communication
+# =============================================================================
+[[services]]
+binding = "ZEPHYR"
+service = "grove-zephyr"
+
+# =============================================================================
+# Secrets (configured via: gw secret apply <name> --worker grove-onboarding)
+# =============================================================================
+# ZEPHYR_API_KEY        - Shared secret for authenticating with Zephyr email worker
+# UNSUBSCRIBE_SECRET    - HMAC secret for email unsubscribe tokens
