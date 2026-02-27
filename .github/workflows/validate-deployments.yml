@@ -53,13 +53,14 @@ jobs:
             needs-engine: false
           - name: heartwood
             path: services/heartwood
-            needs-engine: false
+            needs-engine: true
           - name: webhook-cleanup
             path: workers/webhook-cleanup
-            needs-engine: false
+            needs-engine: true
           - name: email-render
             path: services/email-render
             needs-engine: false
+            typecheck-command: "node scripts/sync-templates.mjs && pnpm exec tsc --noEmit"
           - name: og-worker
             path: services/og-worker
             needs-engine: false
