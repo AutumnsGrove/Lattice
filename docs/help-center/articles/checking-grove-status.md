@@ -26,6 +26,8 @@ Grove's status page lives at **status.grove.place**.
 
 This is where we post updates whenever there's a known issue: outages, slowdowns, scheduled maintenance. If something's wrong on our end, it'll be listed here.
 
+![The Clearing status page showing current system health](https://cdn.grove.place/docs/help/clearing-status.png)
+
 ## What you'll see
 
 ### All systems operational

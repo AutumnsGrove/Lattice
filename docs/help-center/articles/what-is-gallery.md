@@ -21,6 +21,8 @@ Gallery is a curio for showcasing visual work—art, photography, collections, o
 
 Your blog posts are great for stories and essays, but sometimes you just want to show things. A portfolio of illustrations. Photos from a trip. Fan art you've collected. Screenshots of projects you're proud of. Gallery gives visual content the space it deserves.
 
+![A Gallery showcase displaying images in a beautiful grid layout](https://cdn.grove.place/docs/help/blog-gallery.png)
+
 ## How it works
 
 Gallery creates a dedicated space for images:

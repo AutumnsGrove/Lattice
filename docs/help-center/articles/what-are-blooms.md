@@ -22,6 +22,8 @@ In Grove, we don't call them posts. We call them blooms.
 
 A bloom is a piece of writing you publish on your Grove blog. An essay, a thought, a story, a rant, a love letter to a topic you can't stop thinking about. Whatever it is, when you hit publish, it blooms in your garden for others to see.
 
+![A published bloom on a Grove blog — writing that's found its place in the garden](https://cdn.grove.place/docs/help/blog-post-reading.png)
+
 ## Why "bloom"?
 
 A [[blooms|bloom]] is a flower opening. A moment of expression, color, and beauty. It's what your [[your-grove|grove]] produces. It's why visitors come.

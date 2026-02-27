@@ -21,6 +21,8 @@ Then the walls went up. Platforms became isolated biospheres. Friends scattered 
 
 [[grove|Grove]] is everything that isn't.
 
+![Grove's Manifesto page — the core beliefs and values that guide everything we build](https://cdn.grove.place/docs/help/grove-manifesto.png)
+
 ## What I reject
 
 ### The machines

@@ -24,6 +24,8 @@ When you need help with something the documentation doesn't cover, here's how to
 
 That's it. No ticket system, no chatbot maze, no "press 1 for billing". Just send an email and a human will read it.
 
+![The Grove help center — where answers live alongside real human support](https://cdn.grove.place/docs/help/help-center-overview.png)
+
 ## Who responds
 
 Right now, Grove is a one-person operation. Autumn reads every support email personally. This means:

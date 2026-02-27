@@ -26,6 +26,8 @@ Grove uses a lot of its own language. Arbor, Meadow, Porch, Clearing, Shade — 
 
 Waystones are how Grove speaks to you without making you go read a manual. Instead of dumping a glossary on you and hoping you memorize it, the explanations live right where the terms are. You see a word you don't recognize, you tap the Waystone, and now you know.
 
+![A help article with Waystones — contextual help that meets you where you are](https://cdn.grove.place/docs/help/help-article-example.png)
+
 ## What they look like
 
 Waystones show up in two ways:

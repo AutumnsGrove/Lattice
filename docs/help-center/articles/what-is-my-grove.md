@@ -22,6 +22,8 @@ Your [[your-grove|grove]] is your space. Your corner of the forest. The place at
 
 The platform is called [[grove|Grove]]. Your personal space within it is *your* [[your-grove|grove]]. When someone visits `autumn.grove.place`, they're visiting Autumn's [[your-grove|grove]]. The possessive makes it personal. The word makes it home.
 
+![A personal Grove blog — your own corner of the forest](https://cdn.grove.place/docs/help/sample-blog.png)
+
 ## Why "grove" instead of "blog"?
 
 A [[grove|grove]] is a small group of trees growing together. Intimate, sheltered, yours. It's not a feed. It's not content. It's a place where something is growing.

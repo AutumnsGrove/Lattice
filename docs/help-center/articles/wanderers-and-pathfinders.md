@@ -28,6 +28,8 @@ Everyone who enters Grove is a [[wanderer|Wanderer]]. Reading a blog, browsing t
 
 Wandering is a disposition, not a status. Even after you plant your blog and become part of the community, you're still a wanderer at heart. You still explore. You still discover new voices. The paths wind on.
 
+![The Grove Canopy — where Wanderers discover each other's spaces](https://cdn.grove.place/docs/help/grove-canopy.png)
+
 ## Taking Root
 
 When you subscribe and create your blog, you take root. You've planted your tree in the grove. You have a home here now.

@@ -24,6 +24,8 @@ order: 5
 
 Think of it as a cozy town square for [[your-grove|Grove]] writers.
 
+![The Meadow community feed showing posts from across Grove](https://cdn.grove.place/docs/help/meadow-feed.png)
+
 ## How it works
 
 When you publish a post on [[your-grove|Grove]], you can choose to share it to [[meadow|Meadow]]. Your post appears in the community feed alongside posts from other [[your-grove|Grove]] bloggers who've done the same.

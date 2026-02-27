@@ -19,6 +19,8 @@ Every grove starts with a seed. Plant is where that seed goes into the ground.
 
 Plant is Grove's onboarding system—the guided experience that takes you from "I want a blog" to "my blog is live." It handles signup, plan selection, payment, and a walkthrough of your new space. The whole journey takes minutes.
 
+![The Plant onboarding wizard guiding a new Wanderer through setting up their Grove](https://cdn.grove.place/docs/help/plant-onboarding.png)
+
 ## Why Plant exists
 
 Creating an account on most platforms means filling out forms, confirming emails, navigating confusing dashboards, and eventually figuring out how to do what you came to do.

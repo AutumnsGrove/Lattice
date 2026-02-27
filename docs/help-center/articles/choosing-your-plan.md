@@ -25,6 +25,8 @@ order: 2
 
 Grove has a few plans, each designed for different needs. Here's what you get at each level.
 
+![Grove's pricing page showing the available plans and what each includes](https://cdn.grove.place/docs/help/grove-pricing.png)
+
 ## The plans
 
 ### Wanderer

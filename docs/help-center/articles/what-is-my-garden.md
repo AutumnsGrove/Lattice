@@ -22,6 +22,8 @@ Your garden is where all your [[blooms]] live together. It's the page at `yourna
 
 Think of it like this: your [[your-grove|grove]] is your whole space. Your garden is the part where you've planted and tended your writing. Each piece you publish is a bloom. The garden is the collection of all of them.
 
+![A Grove garden page showing a collection of published blooms](https://cdn.grove.place/docs/help/blog-garden.png)
+
 ## Why "garden" instead of "blog index"?
 
 A garden is where you tend what grows. It's cultivated, arranged, cared for. You don't just dump seeds and walk away—you plant things with intention, water them, maybe rearrange them as they grow.

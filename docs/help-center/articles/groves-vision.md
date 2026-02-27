@@ -22,6 +22,8 @@ The internet used to be a place of personal expression. Geocities. Angelfire. Bl
 
 Grove is a return to something simpler.
 
+![Grove's Vision page outlining the philosophy behind the platform](https://cdn.grove.place/docs/help/grove-vision.png)
+
 ## What we believe
 
 ### Your words are yours

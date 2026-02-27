@@ -29,6 +29,8 @@ Grove offers three ways to sign in — pick whichever feels most comfortable:
 2. **Magic link** — Enter your email, click the link we send you. No password, no third-party account required.
 3. **Passkey** — Use your device's biometrics (fingerprint, face) or hardware key. The most secure option, no passwords or emails involved.
 
+![The Plant onboarding flow — creating your Grove account in minutes](https://cdn.grove.place/docs/help/plant-onboarding.png)
+
 ### Signing up with Google
 
 1. Go to [grove.place](https://grove.place) and click **Get Started**

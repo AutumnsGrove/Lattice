@@ -28,6 +28,8 @@ By default, your blog is private. Your posts live at your URL and that's it. Peo
 
 When you enable [[meadow|Meadow]] sharing, your published posts can appear in the community feed. Other [[wanderer|Wanderers]] can discover your writing, vote on it, and react with emojis. It's a way to find readers who might never have stumbled across your blog otherwise.
 
+![The Meadow feed showing shared posts from across the Grove community](https://cdn.grove.place/docs/help/meadow-feed.png)
+
 ## Enabling [[meadow|Meadow]] sharing
 
 1. Go to **Settings → [[meadow|Meadow]]** in your admin panel

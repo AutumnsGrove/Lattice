@@ -22,6 +22,8 @@ Grove is a blogging platform for people who want their own space on the internet
 
 You get a blog. It's yours. You write, we host it, your readers can find you via your own URL. No ads, no algorithms deciding who sees your posts, no tracking your visitors.
 
+![The Grove landing page — a warm, nature-themed welcome inviting you to plant your own space on the web](https://cdn.grove.place/docs/help/grove-landing.png)
+
 **Reading is free. Always.** Every Grove blog is publicly accessible. Just visit and read, no account needed. You only pay if you want to write your own blog.
 
 ## What makes Grove different

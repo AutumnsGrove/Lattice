@@ -28,6 +28,8 @@ Most platforms make you create separate accounts for each service. Different pas
 
 Grove takes a different approach. Your identity lives in one place—Heartwood—and every Grove property trusts it. Think of it like a library card that works at every branch. You prove who you are once, and the whole system knows you.
 
+![The Grove landing page with Heartwood authentication — one login for the entire ecosystem](https://cdn.grove.place/docs/help/grove-landing.png)
+
 This also means better security. Instead of each service implementing its own login (with its own potential vulnerabilities), authentication happens in one carefully protected place.
 
 ## How it works

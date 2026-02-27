@@ -19,6 +19,8 @@ Sometimes things break. Servers hiccup. Maintenance happens. When it does, you s
 
 Clearing is Grove's status page. Visit [status.grove.place](https://status.grove.place) to see whether everything's working, what's currently affected, and when things are expected to return to normal.
 
+![The Clearing status page showing Grove's system health at a glance](https://cdn.grove.place/docs/help/clearing-status.png)
+
 ## Why Clearing exists
 
 Nothing's more frustrating than not knowing if the problem is on your end or ours. Is your site down? Is Grove having issues? Is it your internet connection?

@@ -29,6 +29,8 @@ You might have seen the word "[[solarpunk|solarpunk]]" around [[grove|Grove]]. O
 
 [[solarpunk|Solarpunk]] emerged as a counterpoint to dystopian futures. Cyberpunk gave us neon-lit corporate hellscapes. [[solarpunk|Solarpunk]] asks: what if we built something better instead?
 
+![Grove's vision — technology in service of people, rooted in solarpunk values](https://cdn.grove.place/docs/help/grove-vision.png)
+
 The aesthetic often involves greenery growing through architecture, solar panels on every roof, communities that actually function. But the philosophy runs deeper than the visuals. It's about believing we can create technology that serves human flourishing.
 
 ## What it means for Grove

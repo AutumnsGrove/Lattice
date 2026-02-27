@@ -20,6 +20,8 @@ Your corner of the grove should look like yours. Maybe you want warm earth tones
 
 Foliage is Grove's theming system—the way you customize how your blog looks to visitors. From a simple accent color to full typography control, Foliage helps you make your space feel like home.
 
+![A Grove blog with custom theming applied — Foliage makes your space feel like yours](https://cdn.grove.place/docs/help/sample-blog.png)
+
 ## Why Foliage exists
 
 Most blogging platforms give you a handful of themes designed by someone else. They're fine, but they're not *you*. You end up with a site that looks like every other site using that same template.

@@ -24,6 +24,8 @@ Everyone starts somewhere. Grove's tiers are named for where you are on your jou
 
 Five levels—Wanderer, Seedling, Sapling, Oak, and Evergreen—each offering more as your grove grows. No hidden upsells. No surprise feature gates. Just clear options for where you are right now.
 
+![Grove's pricing tiers — clear options that grow with you](https://cdn.grove.place/docs/help/grove-pricing.png)
+
 ## The tiers
 
 ### Wanderer — Free

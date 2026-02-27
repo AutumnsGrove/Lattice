@@ -26,6 +26,8 @@ Starting a blog can feel like standing in front of a blank page. Here's how to g
 
 That's it. You're looking at the editor.
 
+![A published bloom on Grove — your words, beautifully presented](https://cdn.grove.place/docs/help/blog-post-reading.png)
+
 ## The basics
 
 Every post has a few parts:
