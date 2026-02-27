@@ -26,9 +26,13 @@ import {
   getPaymentReceivedEmail,
 } from "$lib/server/email-templates";
 import {
-  sanitizeWebhookPayload,
+  sanitizeStripeWebhookPayload,
   calculateWebhookExpiry,
 } from "@autumnsgrove/lattice/utils";
+import {
+  logPlantError,
+  PLANT_ERRORS,
+} from "$lib/errors";
 
 export const POST: RequestHandler = async ({ request, platform }) => {
   const db = platform?.env?.DB;
@@ -36,8 +40,11 @@ export const POST: RequestHandler = async ({ request, platform }) => {
   const zephyrApiKey = platform?.env?.ZEPHYR_API_KEY;
   const zephyrUrl = platform?.env?.ZEPHYR_URL;
 
-  if (!db || !webhookSecret || !zephyrApiKey) {
-    console.error("[Webhook] Missing configuration");
+  if (!db || !webhookSecret) {
+    logPlantError(PLANT_ERRORS.STRIPE_NOT_CONFIGURED, {
+      path: "/api/webhooks/stripe",
+      detail: `Missing: ${[!db && "DB", !webhookSecret && "STRIPE_WEBHOOK_SECRET"].filter(Boolean).join(", ")}`,
+    });
     return json({ error: "Configuration error" }, { status: 500 });
   }
 
@@ -57,7 +64,10 @@ export const POST: RequestHandler = async ({ request, platform }) => {
   );
 
   if (!verification.valid || !verification.event) {
-    console.error("[Webhook] Invalid signature:", verification.error);
+    logPlantError(PLANT_ERRORS.WEBHOOK_SIGNATURE_INVALID, {
+      path: "/api/webhooks/stripe",
+      detail: verification.error,
+    });
     return json(
       { error: verification.error || "Invalid signature" },
       { status: 401 },
@@ -82,7 +92,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 
   // Store the event or reuse existing failed event
   // Sanitize payload to remove PII before storing (GDPR/PCI DSS compliance)
-  const sanitizedPayload = sanitizeWebhookPayload(event);
+  const sanitizedPayload = sanitizeStripeWebhookPayload(event);
 
   const payloadToStore = sanitizedPayload
     ? JSON.stringify(sanitizedPayload)
@@ -141,12 +151,17 @@ export const POST: RequestHandler = async ({ request, platform }) => {
       }
 
       case "invoice.paid": {
-        await handleInvoicePaid(db, event, zephyrApiKey, zephyrUrl);
+        await handleInvoicePaid(db, event, zephyrApiKey || null, zephyrUrl);
         break;
       }
 
       case "invoice.payment_failed": {
-        await handleInvoicePaymentFailed(db, event, zephyrApiKey, zephyrUrl);
+        await handleInvoicePaymentFailed(
+          db,
+          event,
+          zephyrApiKey || null,
+          zephyrUrl,
+        );
         break;
       }
 
@@ -164,11 +179,10 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 
     return json({ received: true });
   } catch (error) {
-    console.error("[Webhook] Error processing event", {
-      eventId,
-      eventType,
-      errorType: error instanceof Error ? error.name : "Unknown",
-      errorMessage: error instanceof Error ? error.message : String(error),
+    logPlantError(PLANT_ERRORS.WEBHOOK_PROCESSING_FAILED, {
+      path: "/api/webhooks/stripe",
+      detail: `Event ${eventType} (${eventId})`,
+      cause: error,
     });
 
     // Store error
@@ -335,7 +349,7 @@ async function handleSubscriptionDeleted(
 async function handleInvoicePaid(
   db: D1Database,
   event: StripeWebhookEvent,
-  zephyrApiKey: string,
+  zephyrApiKey: string | null,
   zephyrUrl?: string,
 ) {
   const invoice = event.data.object as StripeInvoice;
@@ -363,6 +377,14 @@ async function handleInvoicePaid(
     console.log(`[Webhook] Skipping email for renewal payment`, {
       subscriptionId,
       billingReason: invoice.billing_reason,
+    });
+    return;
+  }
+
+  if (!zephyrApiKey) {
+    logPlantError(PLANT_ERRORS.WEBHOOK_EMAIL_DEGRADED, {
+      path: "/api/webhooks/stripe",
+      detail: "Skipping payment receipt email (invoice.paid)",
     });
     return;
   }
@@ -449,7 +471,7 @@ async function handleInvoicePaid(
 async function handleInvoicePaymentFailed(
   db: D1Database,
   event: StripeWebhookEvent,
-  zephyrApiKey: string,
+  zephyrApiKey: string | null,
   zephyrUrl?: string,
 ) {
   const invoice = event.data.object as StripeInvoice;
@@ -468,6 +490,14 @@ async function handleInvoicePaymentFailed(
     )
     .bind(subscriptionId)
     .run();
+
+  if (!zephyrApiKey) {
+    logPlantError(PLANT_ERRORS.WEBHOOK_EMAIL_DEGRADED, {
+      path: "/api/webhooks/stripe",
+      detail: "Skipping payment failed email (invoice.payment_failed)",
+    });
+    return;
+  }
 
   // Get tenant info for the email
   const billing = await db
