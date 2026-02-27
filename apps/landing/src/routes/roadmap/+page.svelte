@@ -459,9 +459,9 @@
 							Complete
 						</span>
 					{/if}
-					<h2 class="text-3xl md:text-4xl font-serif text-bark-900 dark:text-cream-100 mb-2">{phases['first-frost'].title}</h2>
-					<p class="text-bark-700 dark:text-cream-300 italic">{phases['first-frost'].subtitle}</p>
-					<p class="mt-4 text-bark-700/80 dark:text-cream-400 max-w-lg mx-auto">{phases['first-frost'].description}</p>
+					<h2 class="text-3xl md:text-4xl font-serif text-bark-900 mb-2">{phases['first-frost'].title}</h2>
+					<p class="text-bark-700 italic">{phases['first-frost'].subtitle}</p>
+					<p class="mt-4 text-bark-700/80 max-w-lg mx-auto">{phases['first-frost'].description}</p>
 				</div>
 
 				<ul class="space-y-4 max-w-md mx-auto">
@@ -470,7 +470,7 @@
 							<Check class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
 							<div class="flex-1">
 								<div class="flex items-center gap-2">
-									<span class="font-medium text-bark-900 dark:text-cream-100">
+									<span class="font-medium text-bark-900">
 										{#if feature.articleSlug}
 											<a
 												href="/knowledge/help/{feature.articleSlug}"
@@ -486,7 +486,7 @@
 										<FeatureStar />
 									{/if}
 								</div>
-								<p class="text-sm text-bark-700 dark:text-cream-400">{feature.description}</p>
+								<p class="text-sm text-bark-700">{feature.description}</p>
 							</div>
 						</li>
 					{/each}
@@ -546,9 +546,9 @@
 							You are here
 						</span>
 					{/if}
-					<h2 class="text-3xl md:text-4xl font-serif text-bark-900 dark:text-cream-100 mb-2">{phases.thaw.title}</h2>
-					<p class="text-bark-700 dark:text-cream-300 italic">{phases.thaw.subtitle}</p>
-					<p class="mt-4 text-bark-700/80 dark:text-cream-400 max-w-lg mx-auto">{phases.thaw.description}</p>
+					<h2 class="text-3xl md:text-4xl font-serif text-bark-900 mb-2">{phases.thaw.title}</h2>
+					<p class="text-bark-700 italic">{phases.thaw.subtitle}</p>
+					<p class="mt-4 text-bark-700/80 max-w-lg mx-auto">{phases.thaw.description}</p>
 				</div>
 
 				<ul class="space-y-4 max-w-md mx-auto">
@@ -562,7 +562,7 @@
 							/>
 							<div class="flex-1">
 								<div class="flex items-center gap-2">
-									<span class="font-medium text-bark-900 dark:text-cream-100">
+									<span class="font-medium text-bark-900">
 										{#if feature.articleSlug}
 											<a
 												href="/knowledge/help/{feature.articleSlug}"
@@ -578,10 +578,10 @@
 										<FeatureStar />
 									{/if}
 									{#if feature.internal}
-										<span class="px-2 py-0.5 text-xs font-medium rounded bg-bark-200 dark:bg-cream-200 text-bark-700 dark:text-cream-400">Internal</span>
+										<span class="px-2 py-0.5 text-xs font-medium rounded bg-bark-200 text-bark-700">Internal</span>
 									{/if}
 								</div>
-								<p class="text-sm text-bark-700 dark:text-cream-400">{feature.description}</p>
+								<p class="text-sm text-bark-700">{feature.description}</p>
 							</div>
 						</li>
 					{/each}
@@ -656,9 +656,9 @@
 							Coming Soon
 						</span>
 					{/if}
-					<h2 class="text-3xl md:text-4xl font-serif text-bark-900 dark:text-cream-100 mb-2">{phases['first-buds'].title}</h2>
-					<p class="text-bark-700 dark:text-cream-300 italic">{phases['first-buds'].subtitle}</p>
-					<p class="mt-4 text-bark-700/80 dark:text-cream-400 max-w-lg mx-auto">{phases['first-buds'].description}</p>
+					<h2 class="text-3xl md:text-4xl font-serif text-bark-900 mb-2">{phases['first-buds'].title}</h2>
+					<p class="text-bark-700 italic">{phases['first-buds'].subtitle}</p>
+					<p class="mt-4 text-bark-700/80 max-w-lg mx-auto">{phases['first-buds'].description}</p>
 				</div>
 
 				<ul class="space-y-4 max-w-md mx-auto">
@@ -697,7 +697,7 @@
 							/>
 							<div class="flex-1">
 								<div class="flex items-center gap-2">
-									<span class="font-medium text-bark-900 dark:text-cream-100">
+									<span class="font-medium text-bark-900">
 										{#if feature.articleSlug}
 											<a
 												href="/knowledge/help/{feature.articleSlug}"
@@ -713,7 +713,7 @@
 										<FeatureStar />
 									{/if}
 								</div>
-								<p class="text-sm text-bark-700 dark:text-cream-400">{feature.description}</p>
+								<p class="text-sm text-bark-700">{feature.description}</p>
 							</div>
 						</li>
 					{/each}
@@ -789,9 +789,9 @@
 							On the Horizon
 						</span>
 					{/if}
-					<h2 class="text-3xl md:text-4xl font-serif text-bark-900 dark:text-cream-100 mb-2">{phases['full-bloom'].title}</h2>
-					<p class="text-bark-700 dark:text-cream-300 italic">{phases['full-bloom'].subtitle}</p>
-					<p class="mt-4 text-bark-700/80 dark:text-cream-400 max-w-lg mx-auto">{phases['full-bloom'].description}</p>
+					<h2 class="text-3xl md:text-4xl font-serif text-bark-900 mb-2">{phases['full-bloom'].title}</h2>
+					<p class="text-bark-700 italic">{phases['full-bloom'].subtitle}</p>
+					<p class="mt-4 text-bark-700/80 max-w-lg mx-auto">{phases['full-bloom'].description}</p>
 				</div>
 
 				<ul class="space-y-4 max-w-md mx-auto">
@@ -819,7 +819,7 @@
 							/>
 							<div class="flex-1">
 								<div class="flex items-center gap-2">
-									<span class="font-medium text-bark-900 dark:text-cream-100">
+									<span class="font-medium text-bark-900">
 										{#if feature.articleSlug}
 											<a
 												href="/knowledge/help/{feature.articleSlug}"
@@ -835,7 +835,7 @@
 										<FeatureStar />
 									{/if}
 								</div>
-								<p class="text-sm text-bark-700 dark:text-cream-400">{feature.description}</p>
+								<p class="text-sm text-bark-700">{feature.description}</p>
 							</div>
 						</li>
 					{/each}
@@ -930,7 +930,7 @@
 							gem: 'text-amber-600 dark:text-amber-400',
 							zap: 'text-yellow-500',
 							accessibility: 'text-blue-500',
-							smartphone: 'text-bark-600 dark:text-cream-400',
+							smartphone: 'text-bark-600',
 							puzzle: 'text-purple-500',
 							wander: 'text-teal-500'
 						}}
