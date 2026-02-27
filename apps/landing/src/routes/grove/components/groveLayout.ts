@@ -35,7 +35,7 @@ export interface TreeLayout {
 	/** Height in px based on line count */
 	height: number;
 	/** Tree species component name */
-	species: "pine" | "cherry" | "aspen" | "birch" | "logo";
+	species: "pine" | "cherry" | "aspen" | "birch";
 	/** The directory entry this tree represents */
 	directory: AnnotatedDirectoryEntry;
 }
@@ -82,7 +82,7 @@ export function getTreeSpecies(primaryLanguage: string): TreeLayout["species"] {
 		case "go":
 			return "birch";
 		case "md":
-			return "logo";
+			return "birch";
 		default:
 			return "pine";
 	}
@@ -173,8 +173,15 @@ export function buildIslandLayouts(directories: AnnotatedDirectoryEntry[]): Isla
 	}
 
 	// Individual package islands: depth-1 dirs that weren't absorbed
+	// Also skip depth-1 entries whose path is an umbrella name (e.g. "workers")
+	// — those are already represented by the depth-0 umbrella island above.
 	for (const dir of directories) {
-		if (dir.depth === 1 && dir.totalLines > 0 && !absorbedPaths.has(dir.path)) {
+		if (
+			dir.depth === 1 &&
+			dir.totalLines > 0 &&
+			!absorbedPaths.has(dir.path) &&
+			!UMBRELLA_DIRS.has(dir.path)
+		) {
 			const pos = ISLAND_POSITIONS[dir.path] ?? autoPosition(dir.path);
 			islands.push({
 				path: dir.path,

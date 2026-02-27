@@ -10,7 +10,6 @@
 		TreeCherry,
 		TreeAspen,
 		TreeBirch,
-		Logo,
 	} from "@autumnsgrove/lattice/ui/nature";
 	import { seasonStore } from "@autumnsgrove/lattice/ui/stores";
 	import type { TreeLayout } from "./groveLayout";
@@ -50,7 +49,5 @@
 		<TreeAspen {season} class="h-full w-full" />
 	{:else if tree.species === "birch"}
 		<TreeBirch {season} class="h-full w-full" />
-	{:else if tree.species === "logo"}
-		<Logo {season} background={false} rotation={0} class="h-full w-full" />
 	{/if}
 </div>

@@ -51,8 +51,8 @@ describe("groveLayout", () => {
 			expect(getTreeSpecies("go")).toBe("birch");
 		});
 
-		it("maps md to logo", () => {
-			expect(getTreeSpecies("md")).toBe("logo");
+		it("maps md to birch", () => {
+			expect(getTreeSpecies("md")).toBe("birch");
 		});
 
 		it("maps unknown languages to pine", () => {
@@ -98,6 +98,21 @@ describe("groveLayout", () => {
 			expect(islands).toHaveLength(1);
 			expect(islands[0].path).toBe("docs");
 			expect(islands[0].name).toBe("docs");
+		});
+
+		it("excludes depth-1 entries whose path is an umbrella dir name", () => {
+			// Census data can produce a depth-1 "workers" entry alongside the depth-0 "workers".
+			// Both must not create islands — the depth-0 umbrella covers it.
+			const dirs = [
+				makeDir({ path: "workers", depth: 0, totalLines: 5000 }),
+				makeDir({ path: "workers", depth: 1, totalLines: 134 }),
+				makeDir({ path: "workers/post-migrator", depth: 1, totalLines: 968 }),
+			];
+			const islands = buildIslandLayouts(dirs);
+			const paths = islands.map((i) => i.path);
+			expect(paths).toEqual(["workers"]);
+			// No duplicate keys
+			expect(new Set(paths).size).toBe(paths.length);
 		});
 
 		it("absorbs depth-1 children of umbrella dirs", () => {
