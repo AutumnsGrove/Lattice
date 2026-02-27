@@ -213,22 +213,22 @@ export async function verifyWebhookSignature(
   }
 
   try {
-    // Parse the signature header: t=timestamp,v1=signature
-    const parts = signature.split(",").reduce(
-      (acc, part) => {
-        const [key, value] = part.split("=");
-        if (key && value) {
-          acc[key] = value;
-        }
-        return acc;
-      },
-      {} as Record<string, string>,
-    );
+    // Parse the signature header: t=timestamp,v1=signature[,v1=signature2]
+    // During secret rotation, Stripe sends multiple v1 signatures — one for
+    // each active signing secret. We must check ALL of them.
+    let timestamp: string | undefined;
+    const v1Signatures: string[] = [];
 
-    const timestamp = parts["t"];
-    const v1Signature = parts["v1"];
+    for (const part of signature.split(",")) {
+      const eqIdx = part.indexOf("=");
+      if (eqIdx === -1) continue;
+      const key = part.slice(0, eqIdx).trim();
+      const value = part.slice(eqIdx + 1);
+      if (key === "t") timestamp = value;
+      if (key === "v1") v1Signatures.push(value);
+    }
 
-    if (!timestamp || !v1Signature) {
+    if (!timestamp || v1Signatures.length === 0) {
       return { valid: false, error: "Invalid signature format" };
     }
 
@@ -262,8 +262,12 @@ export async function verifyWebhookSignature(
       .map((b) => b.toString(16).padStart(2, "0"))
       .join("");
 
-    // Constant-time comparison to prevent timing attacks
-    if (!secureCompare(expectedSignature, v1Signature)) {
+    // Check ALL v1 signatures — any match is valid (handles secret rotation)
+    const matched = v1Signatures.some((v1Sig) =>
+      secureCompare(expectedSignature, v1Sig),
+    );
+
+    if (!matched) {
       return { valid: false, error: "Signature mismatch" };
     }
 

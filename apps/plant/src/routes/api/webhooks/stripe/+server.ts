@@ -26,7 +26,7 @@ import {
   getPaymentReceivedEmail,
 } from "$lib/server/email-templates";
 import {
-  sanitizeWebhookPayload,
+  sanitizeStripeWebhookPayload,
   calculateWebhookExpiry,
 } from "@autumnsgrove/lattice/utils";
 
@@ -36,8 +36,11 @@ export const POST: RequestHandler = async ({ request, platform }) => {
   const zephyrApiKey = platform?.env?.ZEPHYR_API_KEY;
   const zephyrUrl = platform?.env?.ZEPHYR_URL;
 
-  if (!db || !webhookSecret || !zephyrApiKey) {
-    console.error("[Webhook] Missing configuration");
+  if (!db || !webhookSecret) {
+    console.error("[Webhook] Missing required configuration:", {
+      hasDb: !!db,
+      hasWebhookSecret: !!webhookSecret,
+    });
     return json({ error: "Configuration error" }, { status: 500 });
   }
 
@@ -82,7 +85,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 
   // Store the event or reuse existing failed event
   // Sanitize payload to remove PII before storing (GDPR/PCI DSS compliance)
-  const sanitizedPayload = sanitizeWebhookPayload(event);
+  const sanitizedPayload = sanitizeStripeWebhookPayload(event);
 
   const payloadToStore = sanitizedPayload
     ? JSON.stringify(sanitizedPayload)
@@ -141,12 +144,17 @@ export const POST: RequestHandler = async ({ request, platform }) => {
       }
 
       case "invoice.paid": {
-        await handleInvoicePaid(db, event, zephyrApiKey, zephyrUrl);
+        await handleInvoicePaid(db, event, zephyrApiKey || null, zephyrUrl);
         break;
       }
 
       case "invoice.payment_failed": {
-        await handleInvoicePaymentFailed(db, event, zephyrApiKey, zephyrUrl);
+        await handleInvoicePaymentFailed(
+          db,
+          event,
+          zephyrApiKey || null,
+          zephyrUrl,
+        );
         break;
       }
 
@@ -335,7 +343,7 @@ async function handleSubscriptionDeleted(
 async function handleInvoicePaid(
   db: D1Database,
   event: StripeWebhookEvent,
-  zephyrApiKey: string,
+  zephyrApiKey: string | null,
   zephyrUrl?: string,
 ) {
   const invoice = event.data.object as StripeInvoice;
@@ -364,6 +372,13 @@ async function handleInvoicePaid(
       subscriptionId,
       billingReason: invoice.billing_reason,
     });
+    return;
+  }
+
+  if (!zephyrApiKey) {
+    console.warn(
+      "[Webhook] Zephyr not configured, skipping payment receipt email",
+    );
     return;
   }
 
@@ -449,7 +464,7 @@ async function handleInvoicePaid(
 async function handleInvoicePaymentFailed(
   db: D1Database,
   event: StripeWebhookEvent,
-  zephyrApiKey: string,
+  zephyrApiKey: string | null,
   zephyrUrl?: string,
 ) {
   const invoice = event.data.object as StripeInvoice;
@@ -468,6 +483,13 @@ async function handleInvoicePaymentFailed(
     )
     .bind(subscriptionId)
     .run();
+
+  if (!zephyrApiKey) {
+    console.warn(
+      "[Webhook] Zephyr not configured, skipping payment failed email",
+    );
+    return;
+  }
 
   // Get tenant info for the email
   const billing = await db
