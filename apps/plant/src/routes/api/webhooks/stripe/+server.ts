@@ -29,6 +29,10 @@ import {
   sanitizeStripeWebhookPayload,
   calculateWebhookExpiry,
 } from "@autumnsgrove/lattice/utils";
+import {
+  logPlantError,
+  PLANT_ERRORS,
+} from "$lib/errors";
 
 export const POST: RequestHandler = async ({ request, platform }) => {
   const db = platform?.env?.DB;
@@ -37,9 +41,9 @@ export const POST: RequestHandler = async ({ request, platform }) => {
   const zephyrUrl = platform?.env?.ZEPHYR_URL;
 
   if (!db || !webhookSecret) {
-    console.error("[Webhook] Missing required configuration:", {
-      hasDb: !!db,
-      hasWebhookSecret: !!webhookSecret,
+    logPlantError(PLANT_ERRORS.STRIPE_NOT_CONFIGURED, {
+      path: "/api/webhooks/stripe",
+      detail: `Missing: ${[!db && "DB", !webhookSecret && "STRIPE_WEBHOOK_SECRET"].filter(Boolean).join(", ")}`,
     });
     return json({ error: "Configuration error" }, { status: 500 });
   }
@@ -60,7 +64,10 @@ export const POST: RequestHandler = async ({ request, platform }) => {
   );
 
   if (!verification.valid || !verification.event) {
-    console.error("[Webhook] Invalid signature:", verification.error);
+    logPlantError(PLANT_ERRORS.WEBHOOK_SIGNATURE_INVALID, {
+      path: "/api/webhooks/stripe",
+      detail: verification.error,
+    });
     return json(
       { error: verification.error || "Invalid signature" },
       { status: 401 },
@@ -172,11 +179,10 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 
     return json({ received: true });
   } catch (error) {
-    console.error("[Webhook] Error processing event", {
-      eventId,
-      eventType,
-      errorType: error instanceof Error ? error.name : "Unknown",
-      errorMessage: error instanceof Error ? error.message : String(error),
+    logPlantError(PLANT_ERRORS.WEBHOOK_PROCESSING_FAILED, {
+      path: "/api/webhooks/stripe",
+      detail: `Event ${eventType} (${eventId})`,
+      cause: error,
     });
 
     // Store error
@@ -376,9 +382,10 @@ async function handleInvoicePaid(
   }
 
   if (!zephyrApiKey) {
-    console.warn(
-      "[Webhook] Zephyr not configured, skipping payment receipt email",
-    );
+    logPlantError(PLANT_ERRORS.WEBHOOK_EMAIL_DEGRADED, {
+      path: "/api/webhooks/stripe",
+      detail: "Skipping payment receipt email (invoice.paid)",
+    });
     return;
   }
 
@@ -485,9 +492,10 @@ async function handleInvoicePaymentFailed(
     .run();
 
   if (!zephyrApiKey) {
-    console.warn(
-      "[Webhook] Zephyr not configured, skipping payment failed email",
-    );
+    logPlantError(PLANT_ERRORS.WEBHOOK_EMAIL_DEGRADED, {
+      path: "/api/webhooks/stripe",
+      detail: "Skipping payment failed email (invoice.payment_failed)",
+    });
     return;
   }
 

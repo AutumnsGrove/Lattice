@@ -223,7 +223,7 @@ export async function verifyWebhookSignature(
       const eqIdx = part.indexOf("=");
       if (eqIdx === -1) continue;
       const key = part.slice(0, eqIdx).trim();
-      const value = part.slice(eqIdx + 1);
+      const value = part.slice(eqIdx + 1).trim();
       if (key === "t") timestamp = value;
       if (key === "v1") v1Signatures.push(value);
     }

@@ -310,6 +310,9 @@ const STRIPE_OBJECT_WHITELIST = new Set([
 	"interval",
 	"interval_count",
 
+	// Subscription line items (deep-sanitized below)
+	"items",
+
 	// Timestamps
 	"created",
 	"livemode",

@@ -165,6 +165,35 @@ export const PLANT_ERRORS = {
   },
 
   // ─────────────────────────────────────────────────────────────────────────
+  // Webhook Errors (060-079)
+  // ─────────────────────────────────────────────────────────────────────────
+
+  WEBHOOK_SIGNATURE_INVALID: {
+    code: "PLANT-060",
+    category: "bug" as const,
+    userMessage: "Payment notification could not be verified.",
+    adminMessage:
+      "Stripe webhook signature verification failed. Check STRIPE_WEBHOOK_SECRET matches Stripe Dashboard > Developers > Webhooks > Signing secret.",
+  },
+
+  WEBHOOK_PROCESSING_FAILED: {
+    code: "PLANT-061",
+    category: "bug" as const,
+    userMessage: "Payment notification processing failed.",
+    adminMessage:
+      "Webhook event handler threw an error. Check webhook_events table for error details.",
+  },
+
+  WEBHOOK_EMAIL_DEGRADED: {
+    code: "PLANT-062",
+    category: "bug" as const,
+    userMessage:
+      "Payment processed but confirmation email could not be sent.",
+    adminMessage:
+      "ZEPHYR_API_KEY is not configured. Webhook billing updates succeed but notification emails are skipped. Set ZEPHYR_API_KEY in Cloudflare Dashboard > Pages > grove-plant > Settings > Environment variables.",
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
   // Internal Errors (080-099)
   // ─────────────────────────────────────────────────────────────────────────
 
