@@ -49,6 +49,18 @@ var publishNpmCmd = &cobra.Command{
 		dryRun, _ := cmd.Flags().GetBool("dry-run")
 		skipBuild, _ := cmd.Flags().GetBool("skip-build")
 		skipCommit, _ := cmd.Flags().GetBool("skip-commit")
+		tokenFlag, _ := cmd.Flags().GetString("token")
+		tagFlag, _ := cmd.Flags().GetString("tag")
+
+		// Resolve npm auth token: --token flag → NPM_TOKEN env → none
+		npmToken := tokenFlag
+		tokenSource := ""
+		if npmToken != "" {
+			tokenSource = "flag"
+		} else if envToken := os.Getenv("NPM_TOKEN"); envToken != "" {
+			npmToken = envToken
+			tokenSource = "env"
+		}
 
 		// Dry-run doesn't require --write, but actual publish does
 		if !dryRun {
@@ -100,6 +112,15 @@ var publishNpmCmd = &cobra.Command{
 			}
 		}
 
+		// Resolve auth label for plan output
+		authLabel := "existing npm config"
+		switch tokenSource {
+		case "flag":
+			authLabel = "token (--token flag)"
+		case "env":
+			authLabel = "NPM_TOKEN env"
+		}
+
 		// Show the plan
 		if cfg.JSONMode && dryRun {
 			steps := []string{
@@ -117,13 +138,18 @@ var publishNpmCmd = &cobra.Command{
 			} else {
 				steps = append(steps, "Commit version bump", "Push to remote")
 			}
-			return printJSON(map[string]interface{}{
+			result := map[string]interface{}{
 				"dry_run":         true,
 				"package":         resolvedName,
 				"current_version": currentVersion,
 				"new_version":     newVersion,
+				"auth":            authLabel,
 				"steps":           steps,
-			})
+			}
+			if tagFlag != "" {
+				result["tag"] = tagFlag
+			}
+			return printJSON(result)
 		}
 
 		if !cfg.JSONMode {
@@ -132,6 +158,10 @@ var publishNpmCmd = &cobra.Command{
 			ui.PrintKeyValue("Package", resolvedName)
 			ui.PrintKeyValue("Version", fmt.Sprintf("%s → %s", currentVersion, newVersion))
 			ui.PrintKeyValue("Registry", npmRegistry)
+			ui.PrintKeyValue("Auth", authLabel)
+			if tagFlag != "" {
+				ui.PrintKeyValue("Tag", tagFlag)
+			}
 			if skipBuild {
 				ui.PrintKeyValue("Build", "Skip")
 			} else {
@@ -202,17 +232,32 @@ var publishNpmCmd = &cobra.Command{
 			ui.Info("Step 3/6: Skipping build")
 		}
 
+		// Create temporary .npmrc if a token was resolved
+		if npmToken != "" {
+			npmrcPath, npmrcErr := writeNpmrc(root, npmToken)
+			if npmrcErr != nil {
+				return npmrcErr
+			}
+			defer removeNpmrc(npmrcPath)
+			ui.Success("Temporary .npmrc created")
+		}
+
 		// Step 4: Publish to npm
 		ui.Info("Step 4/6: Publishing to npm...")
-		result, err := exec.RunInDirWithTimeout(2*time.Minute, pkgPath, "npm", "publish", "--access", "public")
+		publishArgs := []string{"publish", "--access", "public"}
+		if tagFlag != "" {
+			publishArgs = append(publishArgs, "--tag", tagFlag)
+		}
+		result, err := exec.RunInDirWithTimeout(2*time.Minute, pkgPath, "npm", publishArgs...)
 		if err != nil {
 			return fmt.Errorf("publish command failed: %w", err)
 		}
 		if !result.OK() {
 			// Detect common errors
 			if strings.Contains(result.Stderr, "EOTP") {
-				ui.Warning("OTP/2FA error — ensure your npm token has 'Bypass 2FA' enabled")
-				ui.Info("Or run: npm login --auth-type=web")
+				ui.Warning("2FA/OTP required — your token doesn't bypass 2FA")
+				ui.Info("Fix: Create a Granular Access Token at https://www.npmjs.com/settings/tokens")
+				ui.Info("     with \"Read and write\" Packages permission, then re-run with --token <token>")
 			} else if strings.Contains(result.Stderr, "403") {
 				ui.Warning("403 error — you may have already published this version")
 			}
@@ -357,6 +402,23 @@ func bumpVersion(current, bumpType string) (string, error) {
 	return fmt.Sprintf("%d.%d.%d", major, minor, patch), nil
 }
 
+// writeNpmrc creates a temporary .npmrc at the grove root with the given auth token.
+func writeNpmrc(root, token string) (string, error) {
+	npmrcPath := filepath.Join(root, ".npmrc")
+	content := fmt.Sprintf("//registry.npmjs.org/:_authToken=%s\n", token)
+	if err := os.WriteFile(npmrcPath, []byte(content), 0o600); err != nil {
+		return "", fmt.Errorf("failed to write .npmrc: %w", err)
+	}
+	return npmrcPath, nil
+}
+
+// removeNpmrc removes a .npmrc file (best-effort, logs warning on failure).
+func removeNpmrc(path string) {
+	if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
+		ui.Warning(fmt.Sprintf("Failed to clean up .npmrc: %s", err))
+	}
+}
+
 // findPackagePath locates a monorepo package by name using discoverPackages.
 func findPackagePath(root, name string) (string, error) {
 	pkgs := discoverPackages(root)
@@ -404,5 +466,7 @@ func init() {
 	publishNpmCmd.Flags().Bool("dry-run", false, "Show plan without executing")
 	publishNpmCmd.Flags().Bool("skip-build", false, "Skip the build step")
 	publishNpmCmd.Flags().Bool("skip-commit", false, "Skip git commit and push")
+	publishNpmCmd.Flags().String("token", "", "npm auth token (or set NPM_TOKEN env var)")
+	publishNpmCmd.Flags().String("tag", "", "npm dist-tag (e.g., beta, next)")
 	publishCmd.AddCommand(publishNpmCmd)
 }
