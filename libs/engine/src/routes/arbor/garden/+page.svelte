@@ -2,8 +2,27 @@
   import { Button, Badge, GlassConfirmDialog, GlassCard, toast, GroveTerm, GroveSwap, GroveIntro } from '$lib/ui';
   import { api } from '$lib/utils';
   import { Trash2, Sparkles } from 'lucide-svelte';
+  import { Blaze } from '$lib/ui/components/indicators';
+  import { GLOBAL_BLAZE_DEFAULTS } from '$lib/blazes';
 
   let { data } = $props();
+
+  // Build slug→definition map for blaze resolution
+  const BLAZE_SLUG_MAP = Object.fromEntries(
+    GLOBAL_BLAZE_DEFAULTS.map((b) => [b.slug, b]),
+  );
+
+  /**
+   * Resolve blaze slug to definition
+   * @param {string | null} blazeSlug
+   */
+  function resolveBlaze(blazeSlug) {
+    if (!blazeSlug) return null;
+    const global = BLAZE_SLUG_MAP[blazeSlug];
+    if (global) return global;
+    const label = blazeSlug.split("-").map((/** @type {string} */ w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+    return { label, icon: "HelpCircle", color: "slate" };
+  }
 
   /** @type {{ slug: string, title: string } | null} */
   let bloomToDelete = $state(null);
@@ -102,15 +121,20 @@
               {/if}
             </td>
             <td class="p-4 text-left border-b border-gray-200 dark:border-gray-700 transition-[border-color] max-md:hidden">
-              {#if post.tags.length > 0}
-                <div class="flex flex-wrap gap-1">
-                  {#each post.tags as tag (tag)}
-                    <Badge variant="tag">{tag}</Badge>
-                  {/each}
-                </div>
-              {:else}
-                <span class="text-foreground-muted">-</span>
-              {/if}
+              <div class="flex flex-wrap gap-1 items-center">
+                {#if post.blaze}
+                  {@const blazeDef = resolveBlaze(post.blaze)}
+                  {#if blazeDef}
+                    <Blaze definition={blazeDef} />
+                  {/if}
+                {/if}
+                {#each post.tags as tag (tag)}
+                  <Badge variant="tag">{tag}</Badge>
+                {/each}
+                {#if !post.blaze && post.tags.length === 0}
+                  <span class="text-foreground-muted">-</span>
+                {/if}
+              </div>
             </td>
             <td class="p-4 text-left border-b border-gray-200 dark:border-gray-700 whitespace-nowrap transition-[border-color] max-md:px-2 max-md:py-3">
               <a href="/garden/{post.slug}" target="_blank" rel="noopener noreferrer" aria-label="View {post.title} (opens in new tab)" class="text-green-700 dark:text-green-400 no-underline text-sm mr-4 hover:underline transition-colors max-md:mr-2">View</a>

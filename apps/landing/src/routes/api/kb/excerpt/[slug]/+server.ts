@@ -113,6 +113,7 @@ const WAYSTONE_ARTICLE_SLUGS = [
 	"what-is-hum", // Hum music link previews
 	"what-is-pulse", // Pulse GitHub activity curio
 	"using-curios-in-content", // Curio directives cheatsheet for editors
+	"what-are-blazes", // Blazes content markers — used in arbor/settings
 ];
 
 // Generate entries for all waystone-linked articles

@@ -13,6 +13,7 @@ interface PostRow {
 	published_at: number | null;
 	tags: string | null;
 	description: string | null;
+	blaze: string | null;
 }
 
 interface PostMeta {
@@ -21,6 +22,7 @@ interface PostMeta {
 	date: string;
 	tags: string[];
 	description: string;
+	blaze: string | null;
 }
 
 /** Cache configuration */
@@ -41,7 +43,7 @@ export const load: PageServerLoad = async ({ locals, platform, setHeaders }) => 
 			compute: async () => {
 				const result = await db
 					.prepare(
-						`SELECT slug, title, published_at, tags, description
+						`SELECT slug, title, published_at, tags, description, blaze
              FROM posts
              WHERE tenant_id = ? AND status = 'published'
              ORDER BY published_at DESC
@@ -89,6 +91,7 @@ export const load: PageServerLoad = async ({ locals, platform, setHeaders }) => 
 					: new Date().toISOString(),
 				tags: post.tags ? JSON.parse(post.tags as string) : [],
 				description: (post.description as string) || "",
+				blaze: (post.blaze as string) || null,
 			}));
 		} catch (err) {
 			console.error("D1 fetch error for posts list:", err);

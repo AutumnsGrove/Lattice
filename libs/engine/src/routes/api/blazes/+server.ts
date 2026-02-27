@@ -2,7 +2,7 @@ import { json } from "@sveltejs/kit";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
 import { createThreshold } from "$lib/threshold/factory.js";
 import { thresholdCheck } from "$lib/threshold/adapters/sveltekit.js";
-import { VALID_BLAZE_COLORS, VALID_BLAZE_ICONS } from "$lib/blazes/index.js";
+import { VALID_BLAZE_COLORS, VALID_BLAZE_ICONS, isValidBlazeHexColor } from "$lib/blazes/index.js";
 import type { RequestHandler } from "./$types.js";
 import { API_ERRORS, throwGroveError } from "$lib/errors";
 
@@ -128,8 +128,8 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 			throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
 		}
 
-		// Validate color (must be in allowed palette)
-		if (!VALID_BLAZE_COLORS.includes(color)) {
+		// Validate color (palette key or hex color)
+		if (!VALID_BLAZE_COLORS.includes(color) && !isValidBlazeHexColor(color)) {
 			throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
 		}
 

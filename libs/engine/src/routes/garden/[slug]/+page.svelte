@@ -3,8 +3,28 @@
 	import ReedsThread from "$lib/components/reeds/ReedsThread.svelte";
 	import { Button, Badge, GroveSwap, MessageSquare, MessageSquareText } from "$lib/ui";
 	import { fontMap } from "$lib/ui/tokens/fonts";
+	import { Blaze } from "$lib/ui/components/indicators";
+	import { GLOBAL_BLAZE_DEFAULTS } from "$lib/blazes";
 
 	let { data } = $props();
+
+	// Build slug→definition map for blaze resolution
+	const BLAZE_SLUG_MAP = Object.fromEntries(
+		GLOBAL_BLAZE_DEFAULTS.map((b) => [b.slug, b]),
+	);
+
+	/** Resolve custom blaze definition from slug */
+	const customBlazeDefinition = $derived.by(() => {
+		if (!data.post.blaze) return null;
+		const global = BLAZE_SLUG_MAP[data.post.blaze];
+		if (global) return global;
+		// Graceful fallback for unknown slugs
+		const label = data.post.blaze
+			.split("-")
+			.map((/** @type {string} */ w) => w.charAt(0).toUpperCase() + w.slice(1))
+			.join(" ");
+		return { label, icon: "HelpCircle", color: "slate" };
+	});
 
 	// Get accent color from site settings (falls back to default if not set)
 	const accentColor = $derived(data.siteSettings?.accent_color || null);
@@ -143,6 +163,13 @@
 								</span>
 							{/if}
 						{/if}
+						<span class="meta-separator" aria-hidden="true"></span>
+						<div class="blaze-badges">
+							<Blaze postType="bloom" />
+							{#if customBlazeDefinition}
+								<Blaze definition={customBlazeDefinition} />
+							{/if}
+						</div>
 						{#if data.post.tags.length > 0}
 							<span class="meta-separator" aria-hidden="true"></span>
 							<div class="tags">
@@ -325,6 +352,13 @@
 
 	:global(.dark) .post-meta .entry-date {
 		color: var(--color-text-muted-dark);
+	}
+
+	/* Blaze badges */
+	.blaze-badges {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
 	}
 
 	/* "Started writing" secondary date — muted to stay subordinate to publish date */

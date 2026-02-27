@@ -15,8 +15,11 @@ export type { AutoBlazeConfig, BlazeColorClasses, BlazeDefinition, BlazeResponse
 export {
 	BLAZE_CONFIG,
 	BLAZE_COLORS,
+	BLAZE_COLOR_HEX,
 	GLOBAL_BLAZE_DEFAULTS,
 	VALID_BLAZE_COLORS,
 	VALID_BLAZE_ICONS,
 	resolveLucideIcon,
+	isValidBlazeHexColor,
+	isValidBlazeColor,
 } from "./palette.js";

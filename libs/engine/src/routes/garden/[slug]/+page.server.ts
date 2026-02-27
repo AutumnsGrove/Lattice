@@ -43,6 +43,7 @@ interface PostRecord {
 	featured_image?: string;
 	storage_location?: string;
 	r2_key?: string;
+	blaze?: string;
 }
 
 /** Cached post data - the fully processed result */
@@ -60,6 +61,7 @@ interface CachedPost {
 	featured_image?: string;
 	created_at?: string;
 	updated_at?: string;
+	blaze?: string | null;
 }
 
 /** Cache configuration */
@@ -352,5 +354,6 @@ async function fetchAndProcessPost(
 		featured_image: (post.featured_image as string) || undefined,
 		created_at: safeDate(post.created_at),
 		updated_at: safeDate(post.updated_at),
+		blaze: (post.blaze as string) || null,
 	};
 }

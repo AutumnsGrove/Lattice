@@ -21,6 +21,7 @@ interface BlogPost {
   date: string | null;
   tags: string[];
   description: string;
+  blaze: string | null;
 }
 
 /**
@@ -99,6 +100,7 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
         date,
         tags: post.tags ? JSON.parse(post.tags) : [],
         description: post.description || "",
+        blaze: /** @type {any} */ (post).blaze || null,
       };
     });
 
