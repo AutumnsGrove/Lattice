@@ -69,14 +69,7 @@ func readPid(pkg string) (int, error) {
 	return pid, nil
 }
 
-// isProcessRunning checks if a process with the given PID exists.
-func isProcessRunning(pid int) bool {
-	process, err := os.FindProcess(pid)
-	if err != nil {
-		return false
-	}
-	return process.Signal(syscall.Signal(0)) == nil
-}
+// isProcessRunning and killProcessGroup are in process_unix.go / process_windows.go
 
 // --- dev start ---
 
@@ -201,7 +194,7 @@ var devStopCmd = &cobra.Command{
 				}
 				if pid, err := readPid(name); err == nil {
 					if isProcessRunning(pid) {
-						syscall.Kill(-pid, syscall.SIGTERM)
+						killProcessGroup(pid)
 						stopped++
 					}
 				}
@@ -229,7 +222,7 @@ var devStopCmd = &cobra.Command{
 		}
 
 		if isProcessRunning(pid) {
-			syscall.Kill(-pid, syscall.SIGTERM)
+			killProcessGroup(pid)
 		}
 		os.Remove(pidFile(pkgName))
 
@@ -266,7 +259,7 @@ var devRestartCmd = &cobra.Command{
 
 		// Stop if running
 		if pid, err := readPid(pkgName); err == nil && isProcessRunning(pid) {
-			syscall.Kill(-pid, syscall.SIGTERM)
+			killProcessGroup(pid)
 			os.Remove(pidFile(pkgName))
 			time.Sleep(500 * time.Millisecond)
 		}
