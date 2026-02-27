@@ -70,14 +70,17 @@
 	}
 
 	// Map server user data to HeaderUser shape (picture → avatarUrl)
-	// Prefer custom avatar from site_settings over OAuth provider picture
+	// Only use custom avatar from site_settings when the logged-in user is the site owner.
+	// Visitors get their own OAuth picture (or default) — not the owner's avatar.
 	const headerUser = $derived(
 		data.user
 			? {
 					id: data.user.id,
 					name: data.user.name,
 					email: data.user.email,
-					avatarUrl: data.siteSettings?.avatar_url || data.user.picture,
+					avatarUrl: data.isOwner
+						? (data.siteSettings?.avatar_url || data.user.picture)
+						: data.user.picture,
 				}
 			: null,
 	);
