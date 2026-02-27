@@ -2,20 +2,32 @@
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
 	"version": "1.0.0",
 	"description": "Tracks Waystone (contextual help marker) usage across all Grove packages for documentation and drift detection",
-	"lastUpdated": "2026-02-20",
-	"lastAuditedBy": "claude/daily-standup-audit",
+	"lastUpdated": "2026-02-26",
+	"lastAuditedBy": "claude/inventory-reconciliation",
 	"waystones": {
-		"total": 20,
+		"total": 23,
 		"breakdown": {
-			"engine": 18,
+			"engine": 21,
 			"login": 2,
 			"landing": 0,
 			"plant": 0,
 			"meadow": 0
 		},
-		"bySlugs": 14
+		"bySlugs": 15
 	},
 	"slugs": [
+		{
+			"slug": "blazes",
+			"usageCount": 1,
+			"instances": [
+				{
+					"file": "libs/engine/src/routes/arbor/settings/+page.svelte",
+					"label": "What are blazes?",
+					"placement": "section-header",
+					"size": "sm"
+				}
+			]
+		},
 		{
 			"slug": "what-is-rings",
 			"usageCount": 2,

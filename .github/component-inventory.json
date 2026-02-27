@@ -2,10 +2,10 @@
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
 	"version": "1.0.0",
 	"description": "Tracks engine component counts for documentation freshness checks",
-	"lastUpdated": "2026-02-25",
-	"lastAuditedBy": "review-fix (claude/improve-workflow-visualization-RQzGi)",
+	"lastUpdated": "2026-02-26",
+	"lastAuditedBy": "claude/inventory-reconciliation",
 	"components": {
-		"total": 239,
+		"total": 240,
 		"breakdown": {
 			"primitives": 45,
 			"nature": 65,

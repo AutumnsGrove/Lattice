@@ -14,6 +14,7 @@ tags:
   - backups
   - engine
 type: tech-spec
+lastUpdated: "2026-02-22"
 ---
 
 # Amber: Grove Storage & Data Sovereignty Specification
