@@ -9,7 +9,7 @@
   hex colors (e.g. "#e88f7a") for maximum creative flexibility.
 -->
 <script lang="ts">
-	import { BLAZE_CONFIG, BLAZE_COLORS, resolveLucideIcon } from "$lib/blazes/index.js";
+	import { BLAZE_CONFIG, BLAZE_COLORS, resolveLucideIcon, isValidBlazeHexColor } from "$lib/blazes/index.js";
 
 	interface AutoProps {
 		/** Auto blaze: pass the post type */
@@ -27,18 +27,13 @@
 
 	const { postType, definition }: Props = $props();
 
-	/** Check if a string is a hex color */
-	function isHexColor(color: string): boolean {
-		return /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(color);
-	}
-
 	const resolved = $derived.by(() => {
 		if (postType) {
 			const config = BLAZE_CONFIG[postType];
 			return { icon: config.icon, label: config.label, classes: config.classes, hexColor: null };
 		}
 		// Check if color is a hex value (custom color)
-		if (isHexColor(definition.color)) {
+		if (isValidBlazeHexColor(definition.color)) {
 			return {
 				icon: resolveLucideIcon(definition.icon),
 				label: definition.label,
