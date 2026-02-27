@@ -23,7 +23,14 @@ func WranglerOutput(args ...string) (string, error) {
 		return "", err
 	}
 	if !result.OK() {
-		return "", fmt.Errorf("wrangler: %s", result.Stderr)
+		msg := strings.TrimSpace(result.Stderr)
+		if msg == "" {
+			msg = strings.TrimSpace(result.Stdout)
+		}
+		if msg == "" {
+			msg = fmt.Sprintf("exited with code %d", result.ExitCode)
+		}
+		return "", fmt.Errorf("wrangler: %s", msg)
 	}
 	return result.Stdout, nil
 }

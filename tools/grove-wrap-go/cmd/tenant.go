@@ -384,6 +384,18 @@ var tenantDeleteCmd = &cobra.Command{
 		dbAlias, _ := cmd.Flags().GetString("db")
 		dryRun, _ := cmd.Flags().GetBool("dry-run")
 
+		// Safety check up front — dry-run still requires --write (reads remote DB),
+		// full delete requires --write --force (TierDangerous).
+		if !dryRun {
+			if err := requireCFSafety("tenant_delete"); err != nil {
+				return err
+			}
+		} else {
+			if err := requireCFSafety("d1_query_read"); err != nil {
+				return err
+			}
+		}
+
 		dbName, err := resolveDatabase(dbAlias)
 		if err != nil {
 			return err
@@ -448,10 +460,6 @@ var tenantDeleteCmd = &cobra.Command{
 				ui.Hint("Re-run without --dry-run and with --write --force to execute")
 			}
 			return nil
-		}
-
-		if err := requireCFSafety("tenant_delete"); err != nil {
-			return err
 		}
 
 		deleteSQL := fmt.Sprintf("DELETE FROM tenants WHERE id = '%s'", escapedID)
