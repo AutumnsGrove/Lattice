@@ -254,7 +254,7 @@ var r2GetCmd = &cobra.Command{
 			return fmt.Errorf("output path must be relative: %s", outputPath)
 		}
 
-		result, err := exec.Wrangler("r2", "object", "get", bucket, key, "--file", outputPath)
+		result, err := exec.Wrangler("r2", "object", "get", bucket+"/"+key, "--file", outputPath, "--remote")
 		if err != nil {
 			return fmt.Errorf("wrangler error: %w", err)
 		}
@@ -302,7 +302,7 @@ var r2PutCmd = &cobra.Command{
 			key = filepath.Base(filePath)
 		}
 
-		wranglerArgs := []string{"r2", "object", "put", bucket, key, "--file", filePath}
+		wranglerArgs := []string{"r2", "object", "put", bucket + "/" + key, "--file", filePath, "--remote"}
 		if contentType != "" {
 			wranglerArgs = append(wranglerArgs, "--content-type", contentType)
 		}
@@ -348,7 +348,7 @@ var r2RmCmd = &cobra.Command{
 			return err
 		}
 
-		result, err := exec.Wrangler("r2", "object", "delete", bucket, key)
+		result, err := exec.Wrangler("r2", "object", "delete", bucket+"/"+key, "--remote")
 		if err != nil {
 			return fmt.Errorf("wrangler error: %w", err)
 		}
