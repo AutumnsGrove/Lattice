@@ -122,9 +122,19 @@ func Init(writeFlag, forceFlag, jsonMode, agentMode, verbose, noCloud, interacti
 // DefaultConfig returns the configuration with sensible defaults.
 func DefaultConfig() *Config {
 	return &Config{
-		Databases: map[string]Database{},
-		KVNamespaces: map[string]Namespace{},
-		R2Buckets: []Bucket{},
+		Databases: map[string]Database{
+			"lattice":   {Name: "grove-engine-db", ID: "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"},
+			"groveauth": {Name: "groveauth", ID: "45eae4c7-8ae7-4078-9218-8e1677a4360f"},
+			"clearing":  {Name: "daily-clearing-db", ID: "1fb94ac6-53c6-49d6-9388-a6f585f86196"},
+			"amber":     {Name: "amber", ID: "f688021b-a986-495a-94bb-352354768a22"},
+		},
+		KVNamespaces: map[string]Namespace{
+			"cache": {Name: "cache", ID: "514e91e81cc44d128a82ec6f668303e4"},
+			"flags": {Name: "flags", ID: "65a600876aa14e9cbec8f8acd7d53b5f"},
+		},
+		R2Buckets: []Bucket{
+			{Name: "grove-media"},
+		},
 		Safety: SafetyConfig{
 			MaxDeleteRows: 100,
 			MaxUpdateRows: 500,
