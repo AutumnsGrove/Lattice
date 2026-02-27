@@ -12,6 +12,7 @@ import (
 	cfcloud "github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/cloudflare"
 	"github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/config"
 	gwexec "github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/exec"
+	"github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/heartwood"
 	"github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/ui"
 )
 
@@ -140,13 +141,24 @@ func init() {
 var whoamiCmd = &cobra.Command{
 	Use:   "whoami",
 	Short: "Current context display",
-	Long:  "Show who you are: Cloudflare, GitHub, project, and vault status.",
+	Long:  "Show who you are: Grove, Cloudflare, GitHub, project, and vault status.",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg := config.Get()
 
 		// Gather identity data
 		cwd, _ := os.Getwd()
 		branch, _ := gwexec.CurrentBranch()
+
+		// Grove identity (from vault token)
+		var groveEmail, groveName, groveRole string
+		if token, err := getGroveToken(); err == nil && token != "" {
+			hc := heartwood.NewClient(cfg.Grove.AuthBaseURL, token)
+			if user, err := hc.GetUserInfo(); err == nil {
+				groveEmail = user.Email
+				groveName = user.Name
+				groveRole = user.Role
+			}
+		}
 
 		// Cloudflare — cached, skippable with --no-cloud
 		var cfOut string
@@ -170,6 +182,13 @@ var whoamiCmd = &cobra.Command{
 
 		if cfg.JSONMode {
 			return printJSON(map[string]any{
+				"grove": map[string]any{
+					"email":         groveEmail,
+					"name":          groveName,
+					"role":          groveRole,
+					"tenant":        cfg.Grove.Tenant,
+					"authenticated": groveEmail != "",
+				},
 				"cloudflare": map[string]any{
 					"email":         cfEmail,
 					"authenticated": cfEmail != "",
@@ -188,6 +207,16 @@ var whoamiCmd = &cobra.Command{
 
 		fmt.Println(ui.TitleStyle.Render("gw whoami"))
 		fmt.Println()
+
+		// Grove
+		if groveEmail != "" {
+			ui.Step(true, fmt.Sprintf("Grove: %s (%s) [%s]", groveName, groveEmail, groveRole))
+			if cfg.Grove.Tenant != "" {
+				ui.Step(true, fmt.Sprintf("Tenant: %s", cfg.Grove.Tenant))
+			}
+		} else {
+			ui.Step(false, "Grove: not authenticated (run `gw login`)")
+		}
 
 		// Cloudflare
 		if cfg.NoCloud {

@@ -2,11 +2,15 @@ package vault
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"time"
 )
+
+// ErrNoAutoPassword is returned by AutoUnlock when GROVE_VAULT_PASSWORD is not set.
+var ErrNoAutoPassword = errors.New("GROVE_VAULT_PASSWORD not set")
 
 // SecretEntry holds a secret's metadata and value inside the vault.
 type SecretEntry struct {
@@ -140,6 +144,22 @@ func UnlockOrCreate(password string) (*SecretsVault, error) {
 		return Unlock(password)
 	}
 	return Create(password)
+}
+
+// AutoUnlock attempts password-free unlock via GROVE_VAULT_PASSWORD or
+// GW_VAULT_PASSWORD env vars. Returns (nil, ErrNoAutoPassword) if neither is set.
+func AutoUnlock() (*SecretsVault, error) {
+	pw := os.Getenv("GROVE_VAULT_PASSWORD")
+	if pw == "" {
+		pw = os.Getenv("GW_VAULT_PASSWORD")
+	}
+	if pw == "" {
+		return nil, ErrNoAutoPassword
+	}
+	if !VaultExists() {
+		return nil, fmt.Errorf("vault does not exist at %s", DefaultVaultPath())
+	}
+	return Unlock(pw)
 }
 
 // Save encrypts and writes the vault to disk.

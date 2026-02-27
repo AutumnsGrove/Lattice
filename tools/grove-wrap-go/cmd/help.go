@@ -72,6 +72,17 @@ var rootHelpCategories = []ui.HelpCategory{
 		},
 	},
 	{
+		Title: "Grove",
+		Icon:  "🌿",
+		Style: ui.SafeWriteStyle,
+		Commands: []ui.HelpCommand{
+			{Name: "login", Desc: "Authenticate with Grove via Heartwood"},
+			{Name: "logout", Desc: "Log out and revoke session"},
+			{Name: "lattice", Desc: "Blog post management (CRUD)"},
+			{Name: "config", Desc: "Grove configuration (tenant, URLs)"},
+		},
+	},
+	{
 		Title: "Status & Info",
 		Icon:  "ℹ️",
 		Style: ui.SafeReadStyle,

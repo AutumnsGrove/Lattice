@@ -6,6 +6,7 @@
 package config
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"sync"
@@ -21,6 +22,7 @@ type Config struct {
 	Safety       SafetyConfig        `toml:"safety"`
 	Git          GitConfig           `toml:"git"`
 	GitHub       GitHubConfig        `toml:"github"`
+	Grove        GroveConfig         `toml:"grove"`
 
 	// Runtime state (not from TOML)
 	AgentMode       bool   `toml:"-"`
@@ -80,6 +82,14 @@ type GitHubConfig struct {
 	ProjectValues          map[string]string `toml:"project_values"`
 }
 
+// GroveConfig holds Grove platform settings (auth, Lattice, tenant).
+type GroveConfig struct {
+	Tenant         string `toml:"tenant"`
+	DefaultRegion  string `toml:"default_region"`
+	AuthBaseURL    string `toml:"auth_base_url"`
+	LatticeBaseURL string `toml:"lattice_base_url"`
+}
+
 var (
 	global *Config
 	once   sync.Once
@@ -115,6 +125,16 @@ func Init(writeFlag, forceFlag, jsonMode, agentMode, verbose, noCloud, interacti
 
 	// Detect grove root
 	cfg.GroveRoot = detectGroveRoot()
+
+	// GROVE_TENANT env var overrides config file
+	if tenant := os.Getenv("GROVE_TENANT"); tenant != "" {
+		cfg.Grove.Tenant = tenant
+	}
+
+	// Best-effort migration from ~/.grove/config.json (Mycelium's format)
+	if cfg.Grove.Tenant == "" {
+		cfg.Grove.Tenant = migrateMyceliumTenant()
+	}
 
 	return cfg
 }
@@ -160,6 +180,10 @@ func DefaultConfig() *Config {
 			RateLimitBlockThreshold: 10,
 			ProjectFields:           map[string]string{},
 			ProjectValues:           map[string]string{},
+		},
+		Grove: GroveConfig{
+			AuthBaseURL:    "https://auth-api.grove.place",
+			LatticeBaseURL: "https://grove.place",
 		},
 	}
 }
@@ -236,6 +260,26 @@ func isAgentEnv() bool {
 		}
 	}
 	return false
+}
+
+// migrateMyceliumTenant reads tenant from ~/.grove/config.json (Mycelium's format).
+// Returns empty string if the file doesn't exist or doesn't contain a tenant.
+func migrateMyceliumTenant() string {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return ""
+	}
+	data, err := os.ReadFile(filepath.Join(home, ".grove", "config.json"))
+	if err != nil {
+		return ""
+	}
+	var legacy struct {
+		Tenant string `json:"tenant"`
+	}
+	if json.Unmarshal(data, &legacy) != nil {
+		return ""
+	}
+	return legacy.Tenant
 }
 
 // detectGroveRoot walks up from cwd looking for monorepo markers.

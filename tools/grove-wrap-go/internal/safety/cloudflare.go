@@ -100,7 +100,24 @@ var cloudflareOperationTiers = map[string]Tier{
 	"loft_extend":       TierWrite,
 	"loft_ssh_key_set":  TierWrite,
 
+	// Grove login/logout
+	"grove_login":  TierWrite,
+	"grove_logout": TierWrite,
+	"grove_whoami": TierRead,
+
+	// Lattice blog operations
+	"lattice_posts_list":   TierRead,
+	"lattice_posts_get":    TierRead,
+	"lattice_drafts":       TierRead,
+	"lattice_posts_create": TierWrite,
+	"lattice_posts_update": TierWrite,
+
+	// Grove config operations
+	"config_tenant_set": TierWrite,
+	"config_show":       TierRead,
+
 	// Tier 2: Destructive operations (require --write + --force)
+	"lattice_posts_delete": TierDangerous,
 	"r2_rm":                TierDangerous,
 	"flag_delete":          TierDangerous,
 	"backup_restore":       TierDangerous,

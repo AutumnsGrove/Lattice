@@ -64,8 +64,13 @@ main() {
     echo ""
     echo "Falling back to local build..."
     cd "$script_dir"
+    mkdir -p ~/.local/bin
     go build -o ~/.local/bin/$binary_name .
+    for alias in grove mycel mycelium; do
+      ln -sf ~/.local/bin/$binary_name ~/.local/bin/$alias
+    done
     echo "gw built and installed to ~/.local/bin/$binary_name"
+    echo "Aliases: grove, mycel, mycelium"
     return 0
   fi
 
@@ -76,7 +81,13 @@ main() {
   cp "$src_binary" ~/.local/bin/$binary_name
   chmod +x ~/.local/bin/$binary_name
 
+  # Create CLI aliases (grove, mycel, mycelium → gw)
+  for alias in grove mycel mycelium; do
+    ln -sf ~/.local/bin/$binary_name ~/.local/bin/$alias
+  done
+
   echo "gw installed to ~/.local/bin/$binary_name"
+  echo "Aliases: grove, mycel, mycelium"
   echo ""
   echo "Detected platform: $platform"
   echo "Binary size: $(du -h ~/.local/bin/$binary_name | cut -f1)"

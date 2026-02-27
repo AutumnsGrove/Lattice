@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -42,6 +43,15 @@ Every tool in the grove was shaped by fire and patience.`,
 		ui.SetVerbose(flagVerbose)
 		cfg := config.Get()
 		ui.SetPlain(!cfg.IsHumanMode())
+
+		// Detect alias invocation (grove, mycel, mycelium → gw)
+		if len(os.Args) > 0 {
+			invoked := filepath.Base(os.Args[0])
+			switch invoked {
+			case "grove", "mycel", "mycelium":
+				cmd.Root().Use = invoked
+			}
+		}
 	},
 	PersistentPostRun: func(cmd *cobra.Command, args []string) {
 		// Record command in history (best-effort, never fail the command)
