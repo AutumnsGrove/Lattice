@@ -113,6 +113,14 @@ const RSS_LIMITS: Record<
 	suspicious: { limit: 10, windowSeconds: 3600 },
 };
 
+/**
+ * Get the rate limit for a given classification.
+ * Returns the limit number used for X-RateLimit-Limit headers.
+ */
+export function getRSSLimit(classification: Exclude<FeedClientClass, "blocked">): number {
+	return RSS_LIMITS[classification].limit;
+}
+
 // ============================================================================
 // Rate Limit Check
 // ============================================================================
@@ -120,22 +128,15 @@ const RSS_LIMITS: Record<
 /**
  * Check RSS rate limit for a feed request.
  *
- * Returns classification and whether the request is allowed.
- * Blocked scrapers are rejected without consuming rate limit budget.
- * Should be called AFTER conditional 304 handling (304s are exempt).
+ * Accepts a pre-computed classification (from classifyFeedClient) to avoid
+ * redundant UA parsing. Should be called BEFORE heavy DB/XML work so
+ * rate-limited clients don't waste compute.
  */
 export async function checkRSSRateLimit(
 	threshold: Threshold,
 	clientIP: string,
-	userAgent: string,
+	classification: Exclude<FeedClientClass, "blocked">,
 ): Promise<RSSRateLimitResult> {
-	const classification = classifyFeedClient(userAgent);
-
-	// Blocked scrapers get rejected without rate limit check
-	if (classification === "blocked") {
-		return { allowed: false, classification };
-	}
-
 	const limits = RSS_LIMITS[classification];
 	const result = await threshold.check({
 		key: `rss:${classification}:${clientIP}`,

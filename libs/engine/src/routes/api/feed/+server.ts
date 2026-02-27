@@ -14,6 +14,7 @@ import { getClientIP } from "$lib/threshold/adapters/worker.js";
 import {
 	classifyFeedClient,
 	checkRSSRateLimit,
+	getRSSLimit,
 	buildBlockedResponse,
 	buildRateLimitedResponse,
 	rssRateLimitHeaders,
@@ -49,6 +50,42 @@ export const GET: RequestHandler = async (event) => {
 			detail: `Blocked scraper UA: ${userAgent.slice(0, 120)}`,
 		});
 		return buildBlockedResponse();
+	}
+
+	// ─────────────────────────────────────────────────────────────────────────
+	// RSS Rate Limiting: check BEFORE DB queries to avoid wasting D1 reads
+	// on rate-limited clients. Conditional 304 requests still count but the
+	// limits are generous enough to accommodate polite polling patterns.
+	// ─────────────────────────────────────────────────────────────────────────
+	const clientIP = getClientIP(event.request);
+	const threshold = createThreshold(event.platform?.env, {
+		identifier: clientIP,
+	});
+
+	let rateLimitHeaders: Record<string, string> = {};
+
+	if (threshold) {
+		const rateCheck = await checkRSSRateLimit(threshold, clientIP, classification);
+
+		if (!rateCheck.allowed && rateCheck.result) {
+			logGroveError("Engine", API_ERRORS.RSS_RATE_LIMITED, {
+				path: "/api/feed",
+				detail: `Classification: ${rateCheck.classification}, IP: ${clientIP}`,
+			});
+			return buildRateLimitedResponse(
+				rateCheck.result,
+				rateCheck.classification,
+				getRSSLimit(classification),
+			);
+		}
+
+		if (rateCheck.result) {
+			rateLimitHeaders = rssRateLimitHeaders(
+				rateCheck.result,
+				rateCheck.classification,
+				getRSSLimit(classification),
+			);
+		}
 	}
 
 	const context = event.locals.context;
@@ -199,40 +236,9 @@ ${categoryElements}${enclosure}
 	const etag = await generateETag(etagSource);
 
 	// Handle conditional requests (If-None-Match)
-	// 304 responses are exempt from rate limiting — reward polite clients
 	const ifNoneMatch = event.request.headers.get("If-None-Match");
 	if (ifNoneMatch === etag) {
 		return new Response(null, { status: 304 });
-	}
-
-	// ─────────────────────────────────────────────────────────────────────────
-	// RSS Rate Limiting: check per-classification limits for full serves only
-	// ─────────────────────────────────────────────────────────────────────────
-	const clientIP = getClientIP(event.request);
-	const threshold = createThreshold(event.platform?.env, {
-		identifier: clientIP,
-	});
-
-	let rateLimitHeaders: Record<string, string> = {};
-
-	if (threshold) {
-		const rateCheck = await checkRSSRateLimit(threshold, clientIP, userAgent);
-
-		if (!rateCheck.allowed && rateCheck.result) {
-			logGroveError("Engine", API_ERRORS.RSS_RATE_LIMITED, {
-				path: "/api/feed",
-				detail: `Classification: ${rateCheck.classification}, IP: ${clientIP}`,
-			});
-			const limits =
-				classification === "known-reader" ? 600 : classification === "suspicious" ? 10 : 60;
-			return buildRateLimitedResponse(rateCheck.result, rateCheck.classification, limits);
-		}
-
-		if (rateCheck.result) {
-			const limits =
-				classification === "known-reader" ? 600 : classification === "suspicious" ? 10 : 60;
-			rateLimitHeaders = rssRateLimitHeaders(rateCheck.result, rateCheck.classification, limits);
-		}
 	}
 
 	const xml = `<?xml version="1.0" encoding="UTF-8"?>
