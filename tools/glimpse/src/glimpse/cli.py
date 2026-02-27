@@ -28,6 +28,7 @@ class LazyGroup(click.Group):
         "browse": "glimpse.commands.browse:browse",
         "capture": "glimpse.commands.capture:capture",
         "detect": "glimpse.commands.detect:detect",
+        "diff": "glimpse.commands.diff:diff",
         "install": "glimpse.commands.install:install",
         "matrix": "glimpse.commands.matrix:matrix",
         "seed": "glimpse.commands.seed:seed",

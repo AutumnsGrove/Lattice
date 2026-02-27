@@ -1,0 +1,55 @@
+# Glimpse Batch Config — Example
+#
+# Run all captures:  glimpse batch .glimpse-batch.example.yml
+# Preview first:     glimpse batch .glimpse-batch.example.yml --dry-run
+#
+# Copy this file, rename it, and customize for your verification runs.
+
+defaults:
+  viewport:
+    width: 1920
+    height: 1080
+  scale: 2
+  wait: 500
+  format: png
+  logs: true
+  output_dir: screenshots/batch
+  concurrency: 4
+
+captures:
+  # ── Homepage: full matrix (5 seasons × 2 themes = 10 screenshots) ──
+  - url: http://localhost:5173/?subdomain=autumn
+    name: homepage
+    matrix: true
+
+  # ── Specific season/theme combos ──
+  - url: http://localhost:5173/?subdomain=autumn
+    name: homepage-autumn-dark
+    season: autumn
+    theme: dark
+
+  - url: http://localhost:5173/?subdomain=autumn
+    name: homepage-spring-light
+    season: spring
+    theme: light
+
+  # ── Blog post page ──
+  - url: http://localhost:5173/posts/first-light?subdomain=autumn
+    name: blog-post
+    season: autumn
+    theme: dark
+
+  # ── About page ──
+  - url: http://localhost:5173/about?subdomain=autumn
+    name: about
+    season: midnight
+    theme: dark
+
+  # ── Mobile viewport ──
+  - url: http://localhost:5173/?subdomain=autumn
+    name: mobile-homepage
+    season: autumn
+    theme: dark
+    viewport:
+      width: 375
+      height: 812

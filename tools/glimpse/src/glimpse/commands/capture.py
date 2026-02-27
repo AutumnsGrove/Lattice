@@ -10,6 +10,7 @@ import click
 from glimpse.capture.engine import run_capture
 from glimpse.capture.screenshot import CaptureRequest
 from glimpse.utils.naming import resolve_output_path
+from glimpse.utils.devices import get_device, DEVICE_NAMES
 from glimpse.utils.validation import (
     validate_url,
     validate_viewport,
@@ -98,10 +99,22 @@ from glimpse.utils.validation import (
     help="Output format: png, jpeg (default: png)",
 )
 @click.option(
+    "--device", "-d",
+    type=str,
+    default=None,
+    help=f"Device preset for viewport ({', '.join(['iphone', 'ipad', 'tablet', 'laptop', '...'])})",
+)
+@click.option(
     "--no-inject",
     is_flag=True,
     default=False,
     help="Skip theme injection (capture as-is)",
+)
+@click.option(
+    "--wait-for",
+    type=str,
+    default=None,
+    help="CSS selector to wait for before capturing (instead of fixed delay)",
 )
 @click.option(
     "--logs", "-l",
@@ -131,7 +144,9 @@ def capture(
     wait: int | None,
     quality: int | None,
     fmt: str | None,
+    device: str | None,
     no_inject: bool,
+    wait_for: str | None,
     logs: bool,
     auto: bool,
 ) -> None:
@@ -144,6 +159,10 @@ def capture(
         glimpse capture https://grove.place --season autumn --theme dark --logs
 
         glimpse capture https://grove.place --selector ".hero-section" -o hero.png
+
+        glimpse capture https://grove.place --device iphone --season autumn
+
+        glimpse capture https://grove.place --wait-for ".hero-loaded"
     """
     config = ctx.obj["config"]
     output_handler = ctx.obj["output"]
@@ -170,6 +189,23 @@ def capture(
             output_handler.print_error(f"Server not reachable: {err}")
             ctx.exit(1)
             return
+
+    # Apply device preset if specified (overrides width/height/scale)
+    if device:
+        preset = get_device(device)
+        if not preset:
+            output_handler.print_error(
+                f"Unknown device '{device}'. Available: {', '.join(DEVICE_NAMES)}"
+            )
+            ctx.exit(1)
+            return
+        # Device preset provides defaults, explicit --width/--height/--scale override
+        if width is None:
+            width = preset["width"]
+        if height is None:
+            height = preset["height"]
+        if scale is None:
+            scale = preset["scale"]
 
     # Merge CLI flags with config defaults
     effective_season = season
@@ -226,6 +262,7 @@ def capture(
         scale=effective_scale,
         full_page=full_page,
         wait_ms=effective_wait,
+        wait_for=wait_for,
         output_path=output_path,
         format=effective_fmt,
         quality=effective_quality,

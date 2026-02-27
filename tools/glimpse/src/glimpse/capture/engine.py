@@ -130,7 +130,16 @@ class CaptureEngine:
                 )
 
             # 5. Wait for render settle
-            if request.wait_strategy == "networkidle":
+            if request.wait_for:
+                # Wait for specific CSS selector to appear
+                try:
+                    await page.wait_for_selector(
+                        request.wait_for,
+                        timeout=request.timeout_ms,
+                    )
+                except Exception:
+                    pass  # Best-effort; proceed with capture
+            elif request.wait_strategy == "networkidle":
                 try:
                     await page.wait_for_load_state("networkidle", timeout=request.timeout_ms)
                 except Exception:

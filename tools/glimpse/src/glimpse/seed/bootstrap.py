@@ -2,8 +2,13 @@
 
 Applies migrations via wrangler CLI and executes seed SQL scripts via
 direct SQLite access for speed. Handles all three Grove databases.
+
+When wrangler migrations fail (e.g. DEFAULT (unixepoch()) not supported
+in local SQLite ALTER TABLE), falls back to direct SQLite execution with
+compatibility patching.
 """
 
+import re
 import sqlite3
 import subprocess
 import sys
@@ -18,6 +23,24 @@ DATABASES = {
     "curios": "grove-curios-db",
     "observability": "grove-observability-db",
 }
+
+# Patterns that break local D1 SQLite in ALTER TABLE statements.
+# unixepoch() is valid in CREATE TABLE but not in ALTER TABLE ADD COLUMN
+# on the local miniflare SQLite version.
+_UNIXEPOCH_DEFAULT_RE = re.compile(
+    r"(ALTER\s+TABLE\s+\w+\s+ADD\s+COLUMN\s+\w+\s+\w+)\s+DEFAULT\s+\(unixepoch\(\)\)",
+    re.IGNORECASE,
+)
+
+
+def _patch_migration_sql(sql: str) -> str:
+    """Patch migration SQL for local D1 SQLite compatibility.
+
+    Replaces DEFAULT (unixepoch()) in ALTER TABLE statements with
+    DEFAULT 0, since local SQLite doesn't support non-constant defaults
+    in ALTER TABLE ADD COLUMN.
+    """
+    return _UNIXEPOCH_DEFAULT_RE.sub(r"\1 DEFAULT 0", sql)
 
 
 class DataBootstrapper:
@@ -42,6 +65,9 @@ class DataBootstrapper:
 
         target_db: "engine", "curios", or "observability". None = all.
         Returns list of result dicts with 'db', 'success', 'output'.
+
+        If wrangler fails (common with non-constant DEFAULT expressions),
+        falls back to direct SQLite execution with compatibility patching.
         """
         if not self._grove_root:
             return [{"db": "all", "success": False, "output": "GROVE_ROOT not found"}]
@@ -69,11 +95,16 @@ class DataBootstrapper:
                     text=True,
                     timeout=60,
                 )
-                results.append({
-                    "db": name,
-                    "success": proc.returncode == 0,
-                    "output": proc.stdout.strip() or proc.stderr.strip(),
-                })
+                if proc.returncode == 0:
+                    results.append({
+                        "db": name,
+                        "success": True,
+                        "output": proc.stdout.strip() or "Migrations applied",
+                    })
+                else:
+                    # Wrangler failed — try direct SQLite fallback
+                    fallback = self._apply_migrations_direct(name)
+                    results.append(fallback)
             except FileNotFoundError:
                 results.append({
                     "db": name,
@@ -88,6 +119,95 @@ class DataBootstrapper:
                 })
 
         return results
+
+    def _apply_migrations_direct(self, db_name: str) -> dict:
+        """Fallback: apply migrations directly via SQLite with compatibility patches.
+
+        This handles cases where wrangler d1 migrations fail due to
+        local SQLite limitations (e.g. DEFAULT (unixepoch()) in ALTER TABLE).
+        """
+        migrations_path = self._grove_root / self._migrations_dir
+        if not migrations_path.exists():
+            return {"db": db_name, "success": False, "output": f"Migrations dir not found: {migrations_path}"}
+
+        # Find or create the local D1 database
+        databases = find_local_d1_databases(self._grove_root)
+        db_path = databases.get(db_name)
+
+        if not db_path:
+            # Try to create the state directory and DB file
+            state_dir = self._grove_root / ".wrangler" / "state" / "v3" / "d1"
+            state_dir.mkdir(parents=True, exist_ok=True)
+            # Use a deterministic directory name
+            db_dir = state_dir / f"glimpse-{db_name}"
+            db_dir.mkdir(exist_ok=True)
+            db_path = db_dir / "db.sqlite"
+
+        migration_files = sorted(migrations_path.glob("*.sql"))
+        if not migration_files:
+            return {"db": db_name, "success": True, "output": "No migration files found"}
+
+        conn = sqlite3.connect(str(db_path))
+        cursor = conn.cursor()
+
+        # Create migrations tracking table if needed
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS d1_migrations (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL UNIQUE,
+                applied_at TEXT DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        conn.commit()
+
+        # Get already-applied migrations
+        cursor.execute("SELECT name FROM d1_migrations")
+        applied = {row[0] for row in cursor.fetchall()}
+
+        applied_count = 0
+        skipped_count = 0
+        errors = []
+
+        for mig_file in migration_files:
+            if mig_file.name in applied:
+                skipped_count += 1
+                continue
+
+            sql = mig_file.read_text()
+            patched_sql = _patch_migration_sql(sql)
+
+            try:
+                cursor.executescript(patched_sql)
+                cursor.execute(
+                    "INSERT INTO d1_migrations (name) VALUES (?)",
+                    (mig_file.name,),
+                )
+                conn.commit()
+                applied_count += 1
+            except sqlite3.Error as e:
+                errors.append(f"{mig_file.name}: {e}")
+                conn.rollback()
+
+        conn.close()
+
+        if errors:
+            return {
+                "db": db_name,
+                "success": False,
+                "output": (
+                    f"Direct SQLite fallback: {applied_count} applied, "
+                    f"{len(errors)} failed: {'; '.join(errors[:3])}"
+                ),
+            }
+
+        return {
+            "db": db_name,
+            "success": True,
+            "output": (
+                f"Applied {applied_count} migrations via direct SQLite "
+                f"({skipped_count} already applied)"
+            ),
+        }
 
     def apply_seeds(
         self,
