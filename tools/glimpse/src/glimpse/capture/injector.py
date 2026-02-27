@@ -36,11 +36,13 @@ def build_init_script(
         if theme not in _SAFE_THEMES:
             raise ValueError(f"Unsafe theme value rejected: {theme!r}")
         statements.append(f"localStorage.setItem('theme', '{theme}');")
-        # Apply dark class immediately to prevent flash
+        # Apply dark class immediately to prevent flash.
+        # Guard against null documentElement — init scripts run on about:blank
+        # before navigation, where documentElement may not exist yet.
         if theme == "dark":
-            statements.append("document.documentElement.classList.add('dark');")
+            statements.append("if (document.documentElement) document.documentElement.classList.add('dark');")
         elif theme == "light":
-            statements.append("document.documentElement.classList.remove('dark');")
+            statements.append("if (document.documentElement) document.documentElement.classList.remove('dark');")
 
     if grove_mode is not None:
         val = "true" if grove_mode else "false"

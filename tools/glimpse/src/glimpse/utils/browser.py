@@ -19,13 +19,22 @@ def find_chromium_executable() -> str | None:
     search_dirs.append(Path.home() / ".cache" / "ms-playwright")
     search_dirs.append(Path("/root/.cache/ms-playwright"))
 
+    # Search patterns ordered by preference: full browser, then headless shell
+    patterns = [
+        "chromium-*/chrome-linux/chrome",
+        "chromium-*/chrome-linux64/chrome",
+        "chromium_headless_shell-*/chrome-linux/headless_shell",
+        "chromium_headless_shell-*/chrome-headless-shell-linux64/chrome-headless-shell",
+    ]
+
     for cache_dir in search_dirs:
         if not cache_dir.is_dir():
             continue
-        # Look for chromium-* directories (not headless_shell), newest first
-        candidates = sorted(cache_dir.glob("chromium-*/chrome-linux/chrome"), reverse=True)
-        for candidate in candidates:
-            if candidate.is_file():
-                return str(candidate)
+        # Look for chromium binaries, newest first per pattern
+        for pattern in patterns:
+            candidates = sorted(cache_dir.glob(pattern), reverse=True)
+            for candidate in candidates:
+                if candidate.is_file():
+                    return str(candidate)
 
     return None
