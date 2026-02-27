@@ -1,0 +1,21 @@
+name: Deploy Onboarding
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "workers/onboarding/**"
+      - "libs/grove-agent/src/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/_deploy-worker.yml
+    with:
+      worker-dir: workers/onboarding
+      needs-engine: true
+    secrets: inherit
