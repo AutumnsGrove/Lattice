@@ -217,7 +217,7 @@ jobs:
             ---
             *This check helps keep our waystone documentation accurate.*`;
 
-            github.rest.issues.createComment({
+            await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
@@ -310,7 +310,7 @@ jobs:
             ---
             *This issue was automatically created by the waystone-inventory workflow.*`;
 
-            github.rest.issues.create({
+            await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
               title: `${emoji} Waystone Inventory Update Needed - ${today}`,
