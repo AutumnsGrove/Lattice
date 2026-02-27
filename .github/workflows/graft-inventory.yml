@@ -176,7 +176,7 @@ jobs:
             ---
             *This check helps keep our graft documentation accurate.*`;
 
-            github.rest.issues.createComment({
+            await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
@@ -251,7 +251,7 @@ jobs:
             ---
             *This issue was automatically created by the graft-inventory workflow.*`;
 
-            github.rest.issues.create({
+            await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
               title: `${emoji} Graft Inventory Update Needed - ${today}`,

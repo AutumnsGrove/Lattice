@@ -188,7 +188,7 @@ jobs:
             ---
             *This check helps keep our component documentation accurate. See \`docs/plans/tooling/planned/documentation-plan.md\` for the full component cataloging plan.*`;
 
-            github.rest.issues.createComment({
+            await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
@@ -284,7 +284,7 @@ jobs:
             ---
             *This issue was automatically created by the component-inventory workflow.*`;
 
-            github.rest.issues.create({
+            await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
               title: `${emoji} Component Inventory Update Needed - ${today}`,

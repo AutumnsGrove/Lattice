@@ -2,12 +2,12 @@
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
 	"version": "1.0.0",
 	"description": "Tracks Waystone (contextual help marker) usage across all Grove packages for documentation and drift detection",
-	"lastUpdated": "2026-02-26",
-	"lastAuditedBy": "claude/inventory-reconciliation",
+	"lastUpdated": "2026-02-27",
+	"lastAuditedBy": "claude/fix-workflows",
 	"waystones": {
-		"total": 23,
+		"total": 21,
 		"breakdown": {
-			"engine": 21,
+			"engine": 19,
 			"login": 2,
 			"landing": 0,
 			"plant": 0,
