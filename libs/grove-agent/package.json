@@ -1,0 +1,46 @@
+{
+	"name": "@autumnsgrove/grove-agent",
+	"version": "0.1.0",
+	"description": "Autonomous agent framework for Grove — Loom gave them structure, agents give them life",
+	"author": "AutumnsGrove",
+	"license": "AGPL-3.0-only",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/AutumnsGrove/Lattice.git",
+		"directory": "libs/grove-agent"
+	},
+	"type": "module",
+	"main": "./src/index.ts",
+	"types": "./src/index.ts",
+	"exports": {
+		".": {
+			"types": "./src/index.ts",
+			"default": "./src/index.ts"
+		}
+	},
+	"files": [
+		"src"
+	],
+	"scripts": {
+		"check": "tsc --noEmit",
+		"test": "vitest",
+		"test:run": "vitest run"
+	},
+	"dependencies": {
+		"@autumnsgrove/lattice": "workspace:*",
+		"agents": "^0.6.0",
+		"@cloudflare/ai-chat": "^0.1.5"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20260210.0",
+		"typescript": "^5.9.3",
+		"vitest": "^4.0.18"
+	},
+	"keywords": [
+		"grove",
+		"agent",
+		"cloudflare",
+		"durable-objects",
+		"autonomous"
+	]
+}
