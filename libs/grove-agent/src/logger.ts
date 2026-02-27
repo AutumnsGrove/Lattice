@@ -13,11 +13,22 @@ import type { AgentLogLevel, AgentLogEntry } from "./types.js";
 
 export class AgentLogger {
 	private readonly agentName: string;
-	private readonly instanceName: string;
+	private readonly instanceNameOrFn: string | (() => string);
 
-	constructor(agentName: string, instanceName: string) {
+	/**
+	 * @param agentName — static name from groveConfig().name
+	 * @param instanceName — the DO instance name. Can be a lazy getter
+	 *   because the Agents SDK sets `.name` after construction, not during.
+	 */
+	constructor(agentName: string, instanceName: string | (() => string)) {
 		this.agentName = agentName;
-		this.instanceName = instanceName;
+		this.instanceNameOrFn = instanceName;
+	}
+
+	private get instanceName(): string {
+		return typeof this.instanceNameOrFn === "function"
+			? this.instanceNameOrFn()
+			: this.instanceNameOrFn;
 	}
 
 	debug(message: string, data?: Record<string, unknown>): void {

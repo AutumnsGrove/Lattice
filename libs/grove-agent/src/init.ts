@@ -11,9 +11,9 @@
 import type { AgentLogger } from "./logger.js";
 import type { GroveAgentConfig } from "./types.js";
 
-export function groveInit(agent: { log: AgentLogger }, config: GroveAgentConfig): void {
-	agent.log.debug("Grove agent initializing", {
-		name: config.name,
-		description: config.description,
-	});
+export function groveInit(_agent: { log: AgentLogger }, _config: GroveAgentConfig): void {
+	// NOTE: Do NOT log here. The Agents SDK sets .name lazily after
+	// construction, so accessing this.name during the constructor throws.
+	// See: https://github.com/cloudflare/workerd/issues/2240
+	// The onStart() lifecycle hook logs "Agent started" once the name is set.
 }

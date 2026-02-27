@@ -54,7 +54,7 @@ export abstract class GroveAgent<
 	constructor(ctx: DurableObjectState, env: Env) {
 		super(ctx, env);
 		const config = this.groveConfig();
-		this.log = new AgentLogger(config.name, this.name);
+		this.log = new AgentLogger(config.name, () => this.name);
 		groveInit(this, config);
 	}
 

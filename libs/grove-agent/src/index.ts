@@ -32,5 +32,5 @@ export type {
 
 // ── Re-exports from Agents SDK ────────────────────────────────────────────────
 // So consumers don't need to install "agents" directly for common imports.
-export { callable, routeAgentRequest } from "agents";
+export { callable, getAgentByName, routeAgentRequest } from "agents";
 export type { Connection, ConnectionContext, Schedule } from "agents";
