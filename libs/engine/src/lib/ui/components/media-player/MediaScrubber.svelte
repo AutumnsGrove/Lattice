@@ -64,7 +64,6 @@
 	}
 </script>
 
-<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	class="relative flex h-8 cursor-pointer items-center px-1"
 	bind:this={trackEl}
