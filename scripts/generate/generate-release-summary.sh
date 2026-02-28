@@ -208,11 +208,33 @@ fi
 
 echo -e "Extracting key changes..."
 
-# Get list of features (limit to 10 most significant)
-FEATURES=$(echo "$COMMITS" | grep "^feat" | head -10 | sed 's/^feat[^:]*: //' || echo "")
+# Extract commits by type, REVERSED (oldest first = foundational work first).
+# Preserves scope from conventional commits: "feat(engine): add X" → "add X"
+# but also extracts scope separately for structured data.
 
-# Get list of fixes (limit to 10)
-FIXES=$(echo "$COMMITS" | grep "^fix" | head -10 | sed 's/^fix[^:]*: //' || echo "")
+# Helper: extract commit messages for a type, oldest-first, with limit
+extract_type() {
+    local type="$1"
+    local limit="${2:-15}"
+    echo "$COMMITS" | grep "^${type}" | tac | head -"$limit" | sed 's/^[^:]*: //' || echo ""
+}
+
+# Helper: extract unique scopes for a type
+extract_scopes() {
+    local type="$1"
+    echo "$COMMITS" | grep "^${type}(" | sed 's/^[^(]*(\([^)]*\)).*/\1/' | sort -u || echo ""
+}
+
+FEATURES=$(extract_type "feat" 15)
+FIXES=$(extract_type "fix" 15)
+REFACTORS=$(extract_type "refactor" 10)
+DOCS=$(extract_type "docs" 10)
+PERF=$(extract_type "perf" 10)
+TESTS=$(extract_type "test" 10)
+CHORES=$(extract_type "chore" 10)
+
+# Extract scopes to show where work happened
+ALL_SCOPES=$(echo "$COMMITS" | grep '(' | sed 's/^[^(]*(\([^)]*\)).*/\1/' | sort | uniq -c | sort -rn | head -10 | awk '{print $2}' || echo "")
 
 # ============================================================================
 # GET METADATA
@@ -240,17 +262,24 @@ echo -e "Creating JSON summary..."
 
 OUTPUT_FILE="$SUMMARIES_DIR/${VERSION_TAG}.json"
 
-# Build features array (if any)
-FEATURES_JSON="[]"
-if [ -n "$FEATURES" ]; then
-    FEATURES_JSON=$(echo "$FEATURES" | jq -R . | jq -s .)
-fi
+# Build JSON arrays for each type
+to_json_array() {
+    local input="$1"
+    if [ -n "$input" ]; then
+        echo "$input" | jq -R . | jq -s .
+    else
+        echo "[]"
+    fi
+}
 
-# Build fixes array (if any)
-FIXES_JSON="[]"
-if [ -n "$FIXES" ]; then
-    FIXES_JSON=$(echo "$FIXES" | jq -R . | jq -s .)
-fi
+FEATURES_JSON=$(to_json_array "$FEATURES")
+FIXES_JSON=$(to_json_array "$FIXES")
+REFACTORS_JSON=$(to_json_array "$REFACTORS")
+DOCS_JSON=$(to_json_array "$DOCS")
+PERF_JSON=$(to_json_array "$PERF")
+TESTS_JSON=$(to_json_array "$TESTS")
+CHORES_JSON=$(to_json_array "$CHORES")
+SCOPES_JSON=$(to_json_array "$ALL_SCOPES")
 
 # Create JSON structure
 cat > "$OUTPUT_FILE" <<EOF
@@ -268,9 +297,15 @@ cat > "$OUTPUT_FILE" <<EOF
     "tests": ${TEST_COUNT},
     "performance": ${PERF_COUNT}
   },
+  "scopes": ${SCOPES_JSON},
   "highlights": {
     "features": ${FEATURES_JSON},
-    "fixes": ${FIXES_JSON}
+    "fixes": ${FIXES_JSON},
+    "refactoring": ${REFACTORS_JSON},
+    "docs": ${DOCS_JSON},
+    "performance": ${PERF_JSON},
+    "tests": ${TESTS_JSON},
+    "chores": ${CHORES_JSON}
   }
 }
 EOF
@@ -288,7 +323,10 @@ echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━�
 echo ""
 echo -e "$SUMMARY"
 echo ""
-echo -e "${CYAN}Stats:${NC} $COMMIT_COUNT commits ($FEAT_COUNT features, $FIX_COUNT fixes)"
+echo -e "${CYAN}Stats:${NC} $COMMIT_COUNT commits ($FEAT_COUNT feat, $FIX_COUNT fix, $REFACTOR_COUNT refactor, $DOCS_COUNT docs, $PERF_COUNT perf, $TEST_COUNT test)"
+if [ -n "$ALL_SCOPES" ]; then
+    echo -e "${CYAN}Scopes:${NC} $(echo "$ALL_SCOPES" | paste -sd ', ' -)"
+fi
 echo ""
 
 exit 0

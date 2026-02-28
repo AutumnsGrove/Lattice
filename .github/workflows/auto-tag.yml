@@ -276,22 +276,73 @@ jobs:
           # Build release body from AI-generated summary
           if [ -f "$SUMMARY_FILE" ]; then
             SUMMARY=$(jq -r '.summary' "$SUMMARY_FILE")
-            FEATURES=$(jq -r '.highlights.features[]? // empty' "$SUMMARY_FILE" | head -10 | sed 's/^/- /')
-            FIXES=$(jq -r '.highlights.fixes[]? // empty' "$SUMMARY_FILE" | head -10 | sed 's/^/- /')
             COMMITS=$(jq -r '.stats.totalCommits // "N/A"' "$SUMMARY_FILE")
 
-            BODY="$SUMMARY
+            # Extract scopes (areas of work)
+            SCOPES=$(jq -r '.scopes[]? // empty' "$SUMMARY_FILE" | head -8 | sed 's/^/`/;s/$/`/' | paste -sd ', ' -)
+
+            # Build highlights sections — only include categories that have entries
+            HIGHLIGHTS=""
+
+            FEATURES=$(jq -r '.highlights.features[]? // empty' "$SUMMARY_FILE" | sed 's/^/- /')
+            if [ -n "$FEATURES" ]; then
+              HIGHLIGHTS="${HIGHLIGHTS}
+          **Features**
+          ${FEATURES}
+          "
+            fi
+
+            FIXES=$(jq -r '.highlights.fixes[]? // empty' "$SUMMARY_FILE" | sed 's/^/- /')
+            if [ -n "$FIXES" ]; then
+              HIGHLIGHTS="${HIGHLIGHTS}
+          **Fixes**
+          ${FIXES}
+          "
+            fi
+
+            REFACTORING=$(jq -r '.highlights.refactoring[]? // empty' "$SUMMARY_FILE" | sed 's/^/- /')
+            if [ -n "$REFACTORING" ]; then
+              HIGHLIGHTS="${HIGHLIGHTS}
+          **Refactoring**
+          ${REFACTORING}
+          "
+            fi
+
+            PERF=$(jq -r '.highlights.performance[]? // empty' "$SUMMARY_FILE" | sed 's/^/- /')
+            if [ -n "$PERF" ]; then
+              HIGHLIGHTS="${HIGHLIGHTS}
+          **Performance**
+          ${PERF}
+          "
+            fi
+
+            DOCS=$(jq -r '.highlights.docs[]? // empty' "$SUMMARY_FILE" | sed 's/^/- /')
+            if [ -n "$DOCS" ]; then
+              HIGHLIGHTS="${HIGHLIGHTS}
+          **Docs**
+          ${DOCS}
+          "
+            fi
+
+            TESTS=$(jq -r '.highlights.tests[]? // empty' "$SUMMARY_FILE" | sed 's/^/- /')
+            if [ -n "$TESTS" ]; then
+              HIGHLIGHTS="${HIGHLIGHTS}
+          **Tests**
+          ${TESTS}
+          "
+            fi
+
+            SCOPE_LINE=""
+            if [ -n "$SCOPES" ]; then
+              SCOPE_LINE="Areas: ${SCOPES} | "
+            fi
+
+            BODY="${SUMMARY}
 
           ### Highlights
-
-          **Features**
-          $FEATURES
-
-          **Fixes**
-          $FIXES
-
+          ${HIGHLIGHTS}
           ---
-          *${COMMITS} total commits* | [npm](https://npm.pkg.github.com/package/@autumnsgrove/lattice) | [changelog](https://grove.autumn.pub/roadmap)"
+          ${SCOPE_LINE}*${COMMITS} total commits* | [npm](https://npm.pkg.github.com/package/@autumnsgrove/lattice) | [changelog](https://grove.autumn.pub/roadmap)"
           else
             BODY="## @autumnsgrove/lattice v${VERSION}
 
