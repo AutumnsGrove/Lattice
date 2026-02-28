@@ -27,8 +27,9 @@ var cloudflareOperationTiers = map[string]Tier{
 	"email_rules":   TierRead,
 
 	// Tier 1: Write operations (require --write)
-	"d1_query_write": TierWrite,
-	"d1_migrate":     TierWrite,
+	"d1_query_write":  TierWrite,
+	"d1_migrate":      TierWrite,
+	"d1_migrate_all":  TierWrite,
 	"kv_put":         TierWrite,
 	"kv_delete":      TierWrite,
 	"r2_create":      TierWrite,

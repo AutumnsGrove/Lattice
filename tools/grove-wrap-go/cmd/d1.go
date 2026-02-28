@@ -93,6 +93,19 @@ func resolveDatabase(alias string) (string, error) {
 	return alias, nil
 }
 
+// resolveDatabaseConfig resolves a database alias to its full config entry.
+// Returns an error if the alias is not found in configuration.
+func resolveDatabaseConfig(alias string) (config.Database, error) {
+	if err := validateCFName(alias, "database alias"); err != nil {
+		return config.Database{}, err
+	}
+	cfg := config.Get()
+	if db, ok := cfg.Databases[alias]; ok {
+		return db, nil
+	}
+	return config.Database{}, fmt.Errorf("no database alias '%s' in config — migrate-all requires a configured alias with migrations_dir", alias)
+}
+
 // d1Cmd is the parent command for D1 database operations.
 var d1Cmd = &cobra.Command{
 	Use:   "d1",
@@ -493,6 +506,115 @@ var d1MigrateCmd = &cobra.Command{
 	},
 }
 
+// --- d1 migrate-all ---
+
+var d1MigrateAllCmd = &cobra.Command{
+	Use:   "migrate-all",
+	Short: "Apply all pending D1 migrations via wrangler",
+	Long:  "Runs wrangler's native migration tracking to apply pending .sql files from the migrations directory.",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		cfg := config.Get()
+		dbAlias, _ := cmd.Flags().GetString("db")
+		dryRun, _ := cmd.Flags().GetBool("dry-run")
+		remote, _ := cmd.Flags().GetBool("remote")
+
+		dbCfg, err := resolveDatabaseConfig(dbAlias)
+		if err != nil {
+			return err
+		}
+
+		if dbCfg.MigrationsDir == "" {
+			return fmt.Errorf("database alias '%s' has no migrations_dir configured", dbAlias)
+		}
+
+		// Resolve the working directory (migrations_dir is relative to grove root)
+		workDir := filepath.Join(cfg.GroveRoot, dbCfg.MigrationsDir)
+		if _, err := os.Stat(workDir); err != nil {
+			return fmt.Errorf("migrations directory not found: %s", workDir)
+		}
+
+		if dryRun {
+			// List pending migrations without applying
+			listArgs := []string{"d1", "migrations", "list", dbCfg.Name}
+			if remote {
+				listArgs = append(listArgs, "--remote")
+			}
+
+			output, err := exec.WranglerInDirOutput(workDir, listArgs...)
+			if err != nil {
+				return fmt.Errorf("wrangler error: %w", err)
+			}
+
+			if cfg.JSONMode {
+				result := map[string]interface{}{
+					"dry_run":  true,
+					"database": dbCfg.Name,
+					"output":   strings.TrimSpace(output),
+				}
+				data, _ := json.Marshal(result)
+				fmt.Println(string(data))
+			} else {
+				ui.PrintHeader("Migration Status (dry-run)")
+				ui.PrintKeyValue("Database", dbCfg.Name)
+				ui.PrintKeyValue("Directory", workDir)
+				fmt.Println()
+				fmt.Println(strings.TrimSpace(output))
+			}
+			return nil
+		}
+
+		if err := requireCFSafety("d1_migrate_all"); err != nil {
+			return err
+		}
+
+		// Apply pending migrations
+		applyArgs := []string{"d1", "migrations", "apply", dbCfg.Name}
+		if remote {
+			applyArgs = append(applyArgs, "--remote")
+		}
+
+		if !cfg.JSONMode {
+			ui.PrintHeader("Applying D1 Migrations")
+			ui.PrintKeyValue("Database", dbCfg.Name)
+			ui.PrintKeyValue("Directory", workDir)
+			if remote {
+				ui.PrintKeyValue("Target", "remote (production)")
+			} else {
+				ui.PrintKeyValue("Target", "local")
+			}
+			fmt.Println()
+		}
+
+		result, err := exec.WranglerInDir(workDir, applyArgs...)
+		if err != nil {
+			return fmt.Errorf("wrangler error: %w", err)
+		}
+
+		output := strings.TrimSpace(result.Stdout)
+		if result.Stderr != "" {
+			output += "\n" + strings.TrimSpace(result.Stderr)
+		}
+
+		if !result.OK() {
+			return fmt.Errorf("migration failed (exit %d):\n%s", result.ExitCode, output)
+		}
+
+		if cfg.JSONMode {
+			data, _ := json.Marshal(map[string]interface{}{
+				"success":  true,
+				"database": dbCfg.Name,
+				"output":   output,
+			})
+			fmt.Println(string(data))
+		} else {
+			fmt.Println(output)
+			fmt.Println()
+			ui.Success(fmt.Sprintf("Migrations applied to %s", dbCfg.Name))
+		}
+		return nil
+	},
+}
+
 // parseD1Results extracts row data from wrangler d1 JSON output.
 // Wrangler returns: [{"results": [...], "success": true, ...}]
 func parseD1Results(output string) []map[string]interface{} {
@@ -571,6 +693,7 @@ var d1HelpCategories = []ui.HelpCategory{
 	{Title: "Write (--write)", Icon: "✏️", Style: ui.SafeWriteStyle, Commands: []ui.HelpCommand{
 		{Name: "query <sql>", Desc: "Execute a SQL query (--db <name> --remote)"},
 		{Name: "migrate <file.sql>", Desc: "Execute a SQL migration file (--db <name> --remote)"},
+		{Name: "migrate-all", Desc: "Apply pending migrations via wrangler (--db <name> --remote --dry-run)"},
 	}},
 }
 
@@ -607,4 +730,10 @@ func init() {
 	d1MigrateCmd.Flags().Bool("dry-run", false, "Show SQL without executing")
 	d1MigrateCmd.Flags().Bool("remote", false, "Execute against remote (production) database")
 	d1Cmd.AddCommand(d1MigrateCmd)
+
+	// d1 migrate-all
+	d1MigrateAllCmd.Flags().StringP("db", "d", "lattice", "Database alias or name")
+	d1MigrateAllCmd.Flags().Bool("dry-run", false, "List pending migrations without applying")
+	d1MigrateAllCmd.Flags().Bool("remote", false, "Execute against remote (production) database")
+	d1Cmd.AddCommand(d1MigrateAllCmd)
 }

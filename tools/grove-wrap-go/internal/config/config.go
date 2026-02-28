@@ -37,8 +37,9 @@ type Config struct {
 
 // Database represents a D1 database alias.
 type Database struct {
-	Name string `toml:"name"`
-	ID   string `toml:"id"`
+	Name          string `toml:"name"`
+	ID            string `toml:"id"`
+	MigrationsDir string `toml:"migrations_dir"` // path to dir containing wrangler.toml (relative to grove root)
 }
 
 // Namespace represents a KV namespace.
@@ -143,7 +144,7 @@ func Init(writeFlag, forceFlag, jsonMode, agentMode, verbose, noCloud, interacti
 func DefaultConfig() *Config {
 	return &Config{
 		Databases: map[string]Database{
-			"lattice":   {Name: "grove-engine-db", ID: "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"},
+			"lattice":   {Name: "grove-engine-db", ID: "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68", MigrationsDir: "libs/engine"},
 			"groveauth": {Name: "groveauth", ID: "45eae4c7-8ae7-4078-9218-8e1677a4360f"},
 			"clearing":  {Name: "daily-clearing-db", ID: "1fb94ac6-53c6-49d6-9388-a6f585f86196"},
 			"amber":     {Name: "amber", ID: "f688021b-a986-495a-94bb-352354768a22"},

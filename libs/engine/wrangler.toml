@@ -62,6 +62,7 @@ bucket_name = "grove-exports"
 binding = "DB"
 database_name = "grove-engine-db"
 database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
+migrations_dir = "migrations"
 
 # =============================================================================
 # D1 Database - Curio widgets (gallery, timeline, guestbook, etc.)

@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 )
 
 // Wrangler runs a wrangler command and returns the result.
@@ -78,6 +79,37 @@ func WranglerWithStdin(stdinData string, args ...string) (*Result, error) {
 		return RunWithStdin(stdinData, "wrangler", args...)
 	}
 	return RunWithStdin(stdinData, "npx", append([]string{"wrangler"}, args...)...)
+}
+
+// WranglerInDir runs a wrangler command from a specific directory.
+// Used for commands like `d1 migrations apply` that need to run
+// relative to a wrangler.toml with migrations_dir configured.
+func WranglerInDir(dir string, args ...string) (*Result, error) {
+	timeout := 60 * time.Second
+	if _, ok := Which("wrangler"); ok {
+		return RunInDirWithTimeout(timeout, dir, "wrangler", args...)
+	}
+	return RunInDirWithTimeout(timeout, dir, "npx", append([]string{"wrangler"}, args...)...)
+}
+
+// WranglerInDirOutput runs a wrangler command from a specific directory
+// and returns stdout, or an error.
+func WranglerInDirOutput(dir string, args ...string) (string, error) {
+	result, err := WranglerInDir(dir, args...)
+	if err != nil {
+		return "", err
+	}
+	if !result.OK() {
+		msg := strings.TrimSpace(result.Stderr)
+		if msg == "" {
+			msg = strings.TrimSpace(result.Stdout)
+		}
+		if msg == "" {
+			msg = fmt.Sprintf("exited with code %d", result.ExitCode)
+		}
+		return "", fmt.Errorf("wrangler: %s", msg)
+	}
+	return result.Stdout, nil
 }
 
 // IsWranglerAvailable returns true if wrangler is accessible.
