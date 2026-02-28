@@ -9,6 +9,18 @@
  */
 import { getAllPosts, getSiteConfig } from "$lib/utils/markdown.js";
 import type { RequestHandler } from "./$types.js";
+import { createThreshold } from "$lib/threshold/factory.js";
+import { getClientIP } from "$lib/threshold/adapters/worker.js";
+import {
+	classifyFeedClient,
+	checkRSSRateLimit,
+	getRSSLimit,
+	buildBlockedResponse,
+	buildRateLimitedResponse,
+	rssRateLimitHeaders,
+} from "$lib/threshold/rss.js";
+import { logGroveError } from "$lib/errors/helpers.js";
+import { API_ERRORS } from "$lib/errors/api-errors.js";
 
 export const prerender = false;
 
@@ -26,6 +38,56 @@ interface D1Post {
 }
 
 export const GET: RequestHandler = async (event) => {
+	// ─────────────────────────────────────────────────────────────────────────
+	// RSS Rate Limiting: classify client and block known scrapers early
+	// ─────────────────────────────────────────────────────────────────────────
+	const userAgent = event.request.headers.get("user-agent") ?? "";
+	const classification = classifyFeedClient(userAgent);
+
+	if (classification === "blocked") {
+		logGroveError("Engine", API_ERRORS.RSS_SCRAPER_BLOCKED, {
+			path: "/api/feed",
+			detail: `Blocked scraper UA: ${userAgent.slice(0, 120)}`,
+		});
+		return buildBlockedResponse();
+	}
+
+	// ─────────────────────────────────────────────────────────────────────────
+	// RSS Rate Limiting: check BEFORE DB queries to avoid wasting D1 reads
+	// on rate-limited clients. Conditional 304 requests still count but the
+	// limits are generous enough to accommodate polite polling patterns.
+	// ─────────────────────────────────────────────────────────────────────────
+	const clientIP = getClientIP(event.request);
+	const threshold = createThreshold(event.platform?.env, {
+		identifier: clientIP,
+	});
+
+	let rateLimitHeaders: Record<string, string> = {};
+
+	if (threshold) {
+		const rateCheck = await checkRSSRateLimit(threshold, clientIP, classification);
+
+		if (!rateCheck.allowed && rateCheck.result) {
+			logGroveError("Engine", API_ERRORS.RSS_RATE_LIMITED, {
+				path: "/api/feed",
+				detail: `Classification: ${rateCheck.classification}, IP: ${clientIP}`,
+			});
+			return buildRateLimitedResponse(
+				rateCheck.result,
+				rateCheck.classification,
+				getRSSLimit(classification),
+			);
+		}
+
+		if (rateCheck.result) {
+			rateLimitHeaders = rssRateLimitHeaders(
+				rateCheck.result,
+				rateCheck.classification,
+				getRSSLimit(classification),
+			);
+		}
+	}
+
 	const context = event.locals.context;
 	const db = event.platform?.env?.DB;
 
@@ -199,6 +261,7 @@ ${categoryElements}${enclosure}
 			"Content-Type": "application/rss+xml; charset=utf-8",
 			"Cache-Control": "max-age=3600, s-maxage=3600",
 			ETag: etag,
+			...rateLimitHeaders,
 		},
 	});
 };
