@@ -3,25 +3,13 @@ name: Claude Code Review
 on:
   pull_request:
     types: [opened, synchronize]
-    # Optional: Only run on specific file changes
-    # paths:
-    #   - "src/**/*.ts"
-    #   - "src/**/*.tsx"
-    #   - "src/**/*.js"
-    #   - "src/**/*.jsx"
 
 jobs:
   claude-review:
-    # Optional: Filter by PR author
-    # if: |
-    #   github.event.pull_request.user.login == 'external-contributor' ||
-    #   github.event.pull_request.user.login == 'new-developer' ||
-    #   github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR'
-
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: read
+      pull-requests: write
       issues: read
       id-token: write
 
@@ -36,30 +24,49 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          use_sticky_comment: true
+
           prompt: |
-            You are reviewing PR #${{ github.event.pull_request.number }} in ${{ github.repository }}.
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
 
-            ## Instructions
+            You are reviewing a pull request. Your job is to find **real bugs** — not speculate about possible issues.
 
-            1. Read AGENT.md, CLAUDE.md, and CONTRIBUTING.md for project conventions
+            ## Workflow
+
+            1. Read AGENT.md for project conventions (if it exists)
             2. Run `gh pr diff ${{ github.event.pull_request.number }}` to see the changes
-            3. Review ONLY the diff—no drive-by comments on untouched code
+            3. For EVERY issue you plan to report, **read the full file first** to verify your concern is real
+               - Use the Read tool to open the file and check surrounding context
+               - Use Grep to search for definitions, imports, or config keys you're unsure about
+               - If you cannot verify a concern, do NOT report it
             4. Post your review using `gh pr comment`
 
-            ## What to Check
+            ## The Golden Rule
 
-            Focus on issues that **impact correctness, security, or maintainability**:
+            **Never report an issue you haven't verified against the actual codebase.**
+
+            Diffs show what changed but not the full picture. Before flagging something:
+            - "This function is duplicated" → Grep for it. Is it actually duplicated?
+            - "This config key doesn't exist" → Read the config file. Does it?
+            - "This import is wrong" → Read the source file. Is it?
+            - "The docs contradict the code" → Read both. Do they?
+
+            If you're unsure after checking, say "I couldn't fully verify this" — don't state it as fact.
+
+            ## What to Report
+
+            Only flag issues that **impact correctness, security, or will cause runtime failures**:
             - Bugs or logic errors introduced by this PR
             - Security vulnerabilities (injection, auth bypass, secrets exposure)
             - Breaking changes or API contract violations
-            - Performance regressions in hot paths
-            - Missing error handling that could cause crashes
+            - Missing error handling that will cause unhandled exceptions
+            - Multi-tenant data leaks (queries missing `tenant_id` scope)
 
-            **Skip:** Style nitpicks, minor refactoring suggestions, and "could also do X" ideas unless they directly impact functionality.
+            **Do NOT report:** Style preferences, "could also do X" suggestions, minor refactoring ideas,
+            performance concerns without evidence, or issues in code that wasn't changed by this PR.
 
             ## Review Format
-
-            Use this structure:
 
             ```markdown
             ## Code Review
@@ -69,8 +76,8 @@ jobs:
             🔴 **[Critical]** Brief title
             `path/to/file.ts:42` — One-sentence explanation. Suggested fix if obvious.
 
-            🟡 **[Suggestion]** Brief title
-            `path/to/file.ts:87` — One-sentence explanation.
+            🟡 **[Verified Suggestion]** Brief title
+            `path/to/file.ts:87` — One-sentence explanation. I checked [file/config] and confirmed [X].
 
             ### Summary
             One paragraph overall assessment. Is this ready to merge? Any blocking concerns?
@@ -92,7 +99,7 @@ jobs:
             - Show the actual data/control flow changed by this PR
             - Skip the diagram entirely for trivial changes (typos, config tweaks)
 
-            If the PR looks good with no significant issues, say so briefly—don't manufacture feedback.
+            **If the PR looks good with no verified issues, say so briefly — a clean review is a good review. Do not manufacture feedback.**
 
             ## Grove-Specific Patterns
 
@@ -100,10 +107,8 @@ jobs:
             - **Engine-first**: New utilities should go in `libs/engine`, not duplicated in apps
             - **Multi-tenant safety**: Queries must scope by `tenant_id`, never leak cross-tenant data
             - **Cloudflare bindings**: D1/KV/R2 accessed correctly via `platform.env`
-            - **Isolated queries**: Independent DB queries should use `Promise.all()`, not sequential awaits
+            - **Signpost errors**: User-facing errors should use `throwGroveError()` with GROVE-prefixed codes
 
-            Keep the review concise. Aim for quality over quantity.
-
-          # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
-          # or https://code.claude.com/docs/en/cli-reference for available options
-          claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*)"'
+          claude_args: >-
+            --max-turns 10
+            --allowedTools "Read,Glob,Grep,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
