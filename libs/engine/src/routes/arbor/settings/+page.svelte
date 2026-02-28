@@ -98,7 +98,7 @@
 	let usernameAbortController = $state(null);
 
 	// Debounced username availability check with AbortController to prevent stale responses
-	function checkUsernameAvailability(value) {
+	function checkUsernameAvailability(/** @type {string} */ value) {
 		const trimmed = value.toLowerCase().trim();
 		clearTimeout(usernameDebounceTimer);
 		usernameAvailable = null;
@@ -750,7 +750,7 @@
 							class="glass-input"
 							placeholder="new-username"
 							bind:value={newUsername}
-							oninput={(e) => checkUsernameAvailability(e.target.value)}
+							oninput={(e) => checkUsernameAvailability(/** @type {HTMLInputElement} */ (e.target).value)}
 							disabled={changingUsername}
 						/>
 						<span class="username-suffix">.grove.place</span>
@@ -802,10 +802,10 @@
 				open={showUsernameConfirmDialog}
 				title="Change your grove address?"
 				confirmLabel={changingUsername ? "Changing..." : "Change Username"}
-				confirmVariant="warning"
+				variant="warning"
 				onconfirm={() => {
 					// Submit the form programmatically
-					const form = document.getElementById("username-change-form");
+					const form = /** @type {HTMLFormElement | null} */ (document.getElementById("username-change-form"));
 					if (form) form.requestSubmit();
 				}}
 				oncancel={() => (showUsernameConfirmDialog = false)}
@@ -834,13 +834,13 @@
 					return async ({ result, update }) => {
 						changingUsername = false;
 						if (result.type === "success") {
-							const newSub = result.data?.newSubdomain || newUsername.toLowerCase().trim();
+							const newSub = String(result.data?.newSubdomain || newUsername.toLowerCase().trim());
 							toast.success(`Username changed to ${newSub}! Redirecting...`);
 							setTimeout(() => {
 								window.location.href = `https://${newSub}.grove.place/arbor/settings`;
 							}, 1500);
 						} else if (result.type === "failure") {
-							toast.error(result.data?.error || "Failed to change username");
+							toast.error(String(result.data?.error || "Failed to change username"));
 						}
 						await update();
 					};

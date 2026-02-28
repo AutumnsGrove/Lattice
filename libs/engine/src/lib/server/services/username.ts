@@ -38,16 +38,14 @@ const IN_PROGRESS_WINDOW_SECONDS = 3600;
  * maxPerYear: How many times a username can be changed per rolling year.
  * cooldownDays: Minimum days between consecutive changes (for unlimited tiers).
  */
-export const USERNAME_CHANGE_LIMITS: Record<
-	TierKey,
-	{ maxPerYear: number; cooldownDays: number }
-> = {
-	free: { maxPerYear: 1, cooldownDays: 0 },
-	seedling: { maxPerYear: 1, cooldownDays: 0 },
-	sapling: { maxPerYear: 2, cooldownDays: 0 },
-	oak: { maxPerYear: Infinity, cooldownDays: 7 },
-	evergreen: { maxPerYear: Infinity, cooldownDays: 7 },
-};
+export const USERNAME_CHANGE_LIMITS: Record<TierKey, { maxPerYear: number; cooldownDays: number }> =
+	{
+		free: { maxPerYear: 1, cooldownDays: 0 },
+		seedling: { maxPerYear: 1, cooldownDays: 0 },
+		sapling: { maxPerYear: 2, cooldownDays: 0 },
+		oak: { maxPerYear: Infinity, cooldownDays: 7 },
+		evergreen: { maxPerYear: Infinity, cooldownDays: 7 },
+	};
 
 // ============================================================================
 // Types
@@ -95,10 +93,7 @@ export interface UsernameChangeHistoryEntry {
  * Generate username suggestions when the original is taken.
  * Mirrors the logic in Plant's check-username endpoint.
  */
-function generateSuggestions(
-	base: string,
-	reason: BlocklistReason | null,
-): string[] {
+function generateSuggestions(base: string, reason: BlocklistReason | null): string[] {
 	if (reason === "offensive") return [];
 
 	const year = new Date().getFullYear();
@@ -178,9 +173,7 @@ export async function validateUsernameAvailability(
 	try {
 		// Check reserved_usernames table
 		const reserved = await db
-			.prepare(
-				"SELECT username, reason FROM reserved_usernames WHERE username = ?",
-			)
+			.prepare("SELECT username, reason FROM reserved_usernames WHERE username = ?")
 			.bind(normalized)
 			.first<{ username: string; reason: string }>();
 
@@ -216,8 +209,7 @@ export async function validateUsernameAvailability(
 		}
 
 		// Check in-progress onboarding
-		const cutoffTimestamp =
-			Math.floor(Date.now() / 1000) - IN_PROGRESS_WINDOW_SECONDS;
+		const cutoffTimestamp = Math.floor(Date.now() / 1000) - IN_PROGRESS_WINDOW_SECONDS;
 		const inProgress = await db
 			.prepare(
 				`SELECT username FROM user_onboarding
@@ -304,8 +296,7 @@ export async function canChangeUsername(
 			.bind(tenantId, oneYearAgo)
 			.first<{ earliest: number }>();
 
-		const nextAllowedAt =
-			(earliestResult?.earliest ?? 0) + ONE_YEAR_SECONDS;
+		const nextAllowedAt = (earliestResult?.earliest ?? 0) + ONE_YEAR_SECONDS;
 		return {
 			allowed: false,
 			nextAllowedAt,
@@ -370,15 +361,7 @@ export async function changeUsername(
 					`INSERT INTO username_history (id, tenant_id, old_subdomain, new_subdomain, changed_at, hold_expires_at, released, actor_email)
 					 VALUES (?, ?, ?, ?, ?, ?, 0, ?)`,
 				)
-				.bind(
-					historyId,
-					tenantId,
-					currentSubdomain,
-					normalized,
-					now,
-					holdExpiresAt,
-					actorEmail,
-				),
+				.bind(historyId, tenantId, currentSubdomain, normalized, now, holdExpiresAt, actorEmail),
 
 			// 3. Update user_onboarding username (if record exists)
 			db
@@ -389,9 +372,7 @@ export async function changeUsername(
 
 			// 4. Update meadow_posts author_subdomain (if any exist)
 			db
-				.prepare(
-					"UPDATE meadow_posts SET author_subdomain = ? WHERE tenant_id = ?",
-				)
+				.prepare("UPDATE meadow_posts SET author_subdomain = ? WHERE tenant_id = ?")
 				.bind(normalized, tenantId),
 		];
 
@@ -399,7 +380,8 @@ export async function changeUsername(
 
 		// Check that the tenants update actually changed a row
 		const tenantsResult = results[0];
-		if (!tenantsResult?.meta?.changes || tenantsResult.meta.changes === 0) {
+		const meta = tenantsResult?.meta as { changes?: number } | undefined;
+		if (!meta?.changes || meta.changes === 0) {
 			return {
 				success: false,
 				error: "Failed to update username — tenant not found or subdomain mismatch",
