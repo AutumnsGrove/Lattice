@@ -87,7 +87,7 @@ while IFS=',' read -r timestamp label git_hash rest; do
     fi
 
     # Generate summary using the commit hash range
-    ./scripts/generate-release-summary.sh "$label" "$PREV_HASH" 2>&1 | sed 's/^/  /'
+    ./scripts/generate/generate-release-summary.sh "$label" "$PREV_HASH" 2>&1 | sed 's/^/  /'
 
     PREV_HASH="$git_hash"
     echo ""
