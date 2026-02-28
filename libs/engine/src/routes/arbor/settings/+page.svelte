@@ -2,7 +2,7 @@
 	import { onMount } from "svelte";
 	import { Button, Spinner, GlassCard, GlassConfirmDialog, Waystone, GroveTerm } from "$lib/ui";
 	import { GreenhouseStatusCard, GraftControlPanel } from "$lib/grafts/greenhouse";
-	import { Smartphone, Laptop, Monitor, Leaf } from "lucide-svelte";
+	import { Smartphone, Laptop, Monitor, Leaf, Plus, RotateCcw } from "lucide-svelte";
 	import { groveModeStore } from "$lib/ui/stores/grove-mode.svelte";
 	import { toast } from "$lib/ui/components/ui/toast";
 	import { api, apiRequest } from "$lib/utils";
@@ -482,9 +482,10 @@
 		VALID_BLAZE_ICONS,
 		VALID_BLAZE_COLORS,
 		BLAZE_COLORS,
+		BLAZE_COLOR_HEX,
 		resolveLucideIcon,
+		isValidBlazeHexColor,
 	} from "$lib/blazes";
-
 	/**
 	 * @typedef {Object} BlazeItem
 	 * @property {string} slug
@@ -503,6 +504,7 @@
 	let slugManuallyEdited = $state(false);
 	let newBlazeIcon = $state("Bell");
 	let newBlazeColor = $state("sky");
+	let newCustomHexColor = $state("#8b5e3c");
 	let savingBlaze = $state(false);
 	/** @type {string | null} */
 	let deletingBlazeSlug = $state(null);
@@ -1139,7 +1141,7 @@
 	<GlassCard variant="frosted" class="mb-6">
 		<div class="section-header">
 			<h2>Blazes</h2>
-			<Waystone slug="blazes" label="What are blazes?" size="sm" />
+			<Waystone slug="what-are-blazes" label="What are blazes?" size="sm" />
 		</div>
 		<p class="section-description">
 			Small markers that tell readers what your posts are about. The 8 default blazes are always
@@ -1206,23 +1208,81 @@
 								maxlength="40"
 							/>
 						</div>
-						<div class="form-group">
-							<label for="blaze-icon">Icon</label>
-							<select id="blaze-icon" bind:value={newBlazeIcon} class="form-input">
-								{#each VALID_BLAZE_ICONS as iconName}
-									<option value={iconName}>{iconName}</option>
-								{/each}
-							</select>
-						</div>
-						<div class="form-group">
-							<label for="blaze-color">Color</label>
-							<select id="blaze-color" bind:value={newBlazeColor} class="form-input">
-								{#each VALID_BLAZE_COLORS as colorName}
-									<option value={colorName}>{colorName}</option>
-								{/each}
-							</select>
+					</div>
+
+					<!-- Icon picker — visual grid -->
+					<div class="form-group" style="margin-top: 0.75rem;">
+						<span class="form-label">Icon</span>
+						<div class="blaze-icon-grid" role="radiogroup" aria-label="Choose a blaze icon">
+							{#each VALID_BLAZE_ICONS as iconName}
+								{@const IconComp = resolveLucideIcon(iconName)}
+								<button
+									type="button"
+									class="blaze-icon-btn"
+									class:active={newBlazeIcon === iconName}
+									onclick={() => (newBlazeIcon = iconName)}
+									title={iconName}
+									aria-label={iconName}
+								>
+									<IconComp size={18} />
+								</button>
+							{/each}
 						</div>
 					</div>
+
+					<!-- Color picker — swatches + custom hex -->
+					<div class="form-group" style="margin-top: 0.75rem;">
+						<span class="form-label">Color</span>
+						<div class="blaze-color-picker">
+							<div class="blaze-color-swatches" role="radiogroup" aria-label="Choose a blaze color">
+								{#each VALID_BLAZE_COLORS as colorName}
+									<button
+										type="button"
+										class="blaze-color-swatch"
+										class:active={newBlazeColor === colorName}
+										style:--swatch-color={BLAZE_COLOR_HEX[colorName] || '#888'}
+										onclick={() => (newBlazeColor = colorName)}
+										title={colorName}
+										aria-label={colorName}
+									></button>
+								{/each}
+								<!-- Custom hex color input -->
+								<div class="blaze-color-custom">
+									<input
+										type="color"
+										bind:value={newCustomHexColor}
+										class="blaze-color-input"
+										aria-label="Pick a custom color"
+									/>
+									<button
+										type="button"
+										class="blaze-color-add-btn"
+										onclick={() => {
+											if (isValidBlazeHexColor(newCustomHexColor)) {
+												newBlazeColor = newCustomHexColor;
+											}
+										}}
+										title="Use this custom color"
+									>
+										<Plus size={14} />
+									</button>
+								</div>
+							</div>
+							{#if isValidBlazeHexColor(newBlazeColor)}
+								<div class="blaze-custom-color-info">
+									Using custom color: <code>{newBlazeColor}</code>
+									<button
+										type="button"
+										class="blaze-reset-color"
+										onclick={() => (newBlazeColor = "sky")}
+									>
+										<RotateCcw size={12} /> Reset
+									</button>
+								</div>
+							{/if}
+						</div>
+					</div>
+
 					{#if newBlazeLabel && newBlazeSlug}
 						<div class="blaze-preview">
 							<span class="blaze-preview-label">Preview:</span>
@@ -1966,6 +2026,141 @@
 		font-size: 0.8rem;
 		color: var(--color-text-subtle);
 	}
+
+	/* Icon grid picker */
+	.blaze-icon-grid {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.25rem;
+		max-height: 180px;
+		overflow-y: auto;
+		padding: 0.25rem;
+		border: 1px solid var(--color-border, #e5e7eb);
+		border-radius: var(--border-radius-small);
+		background: var(--color-bg-primary);
+		transition: background-color 0.3s, border-color 0.3s;
+	}
+	.blaze-icon-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 2.25rem;
+		height: 2.25rem;
+		border: 2px solid transparent;
+		border-radius: 0.5rem;
+		background: none;
+		color: var(--color-text-muted);
+		cursor: pointer;
+		transition: all 0.15s ease;
+	}
+	.blaze-icon-btn:hover {
+		background: var(--color-bg-secondary);
+		color: var(--color-text);
+	}
+	.blaze-icon-btn.active {
+		border-color: var(--color-primary, #2c5f2d);
+		color: var(--color-primary, #2c5f2d);
+		background: var(--color-bg-secondary);
+	}
+
+	/* Color swatch picker */
+	.blaze-color-picker {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+	.blaze-color-swatches {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.375rem;
+		align-items: center;
+	}
+	.blaze-color-swatch {
+		width: 2rem;
+		height: 2rem;
+		border-radius: 50%;
+		border: 2px solid transparent;
+		background: var(--swatch-color);
+		cursor: pointer;
+		transition: all 0.15s ease;
+		position: relative;
+	}
+	.blaze-color-swatch:hover {
+		transform: scale(1.15);
+	}
+	.blaze-color-swatch.active {
+		border-color: var(--color-text, #333);
+		box-shadow: 0 0 0 2px var(--color-bg-primary), 0 0 0 4px var(--swatch-color);
+	}
+	.blaze-color-custom {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+		margin-left: 0.25rem;
+	}
+	.blaze-color-input {
+		width: 2rem;
+		height: 2rem;
+		border: 1px solid var(--color-border, #e5e7eb);
+		border-radius: 50%;
+		padding: 0;
+		cursor: pointer;
+		background: none;
+	}
+	.blaze-color-input::-webkit-color-swatch-wrapper {
+		padding: 2px;
+	}
+	.blaze-color-input::-webkit-color-swatch {
+		border: none;
+		border-radius: 50%;
+	}
+	.blaze-color-add-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.5rem;
+		height: 1.5rem;
+		border: 1px solid var(--color-border, #e5e7eb);
+		border-radius: 50%;
+		background: var(--color-bg-secondary);
+		color: var(--color-text-muted);
+		cursor: pointer;
+		transition: all 0.15s ease;
+	}
+	.blaze-color-add-btn:hover {
+		background: var(--color-bg-primary);
+		color: var(--color-text);
+	}
+	.blaze-custom-color-info {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 0.8rem;
+		color: var(--color-text-muted);
+	}
+	.blaze-custom-color-info code {
+		font-size: 0.75rem;
+		background: var(--color-bg-secondary);
+		padding: 0.125rem 0.375rem;
+		border-radius: 0.25rem;
+	}
+	.blaze-reset-color {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+		font-size: 0.75rem;
+		color: var(--color-text-subtle);
+		background: none;
+		border: none;
+		cursor: pointer;
+		padding: 0.125rem 0.25rem;
+		border-radius: 0.25rem;
+	}
+	.blaze-reset-color:hover {
+		color: var(--color-text);
+		background: var(--color-bg-secondary);
+	}
+
 	@media (max-width: 600px) {
 		.blaze-form-fields {
 			grid-template-columns: 1fr;

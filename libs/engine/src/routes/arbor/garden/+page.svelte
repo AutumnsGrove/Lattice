@@ -2,6 +2,8 @@
   import { Button, Badge, GlassConfirmDialog, GlassCard, toast, GroveTerm, GroveSwap, GroveIntro } from '$lib/ui';
   import { api } from '$lib/utils';
   import { Trash2, Sparkles } from 'lucide-svelte';
+  import { Blaze } from '$lib/ui/components/indicators';
+  import { resolveBlaze } from '$lib/blazes';
 
   let { data } = $props();
 
@@ -102,15 +104,20 @@
               {/if}
             </td>
             <td class="p-4 text-left border-b border-gray-200 dark:border-gray-700 transition-[border-color] max-md:hidden">
-              {#if post.tags.length > 0}
-                <div class="flex flex-wrap gap-1">
-                  {#each post.tags as tag (tag)}
-                    <Badge variant="tag">{tag}</Badge>
-                  {/each}
-                </div>
-              {:else}
-                <span class="text-foreground-muted">-</span>
-              {/if}
+              <div class="flex flex-wrap gap-1 items-center">
+                {#if post.blaze}
+                  {@const blazeDef = resolveBlaze(post.blaze, post.blazeDefinition)}
+                  {#if blazeDef}
+                    <Blaze definition={blazeDef} />
+                  {/if}
+                {/if}
+                {#each post.tags as tag (tag)}
+                  <Badge variant="tag">{tag}</Badge>
+                {/each}
+                {#if !post.blaze && post.tags.length === 0}
+                  <span class="text-foreground-muted">-</span>
+                {/if}
+              </div>
             </td>
             <td class="p-4 text-left border-b border-gray-200 dark:border-gray-700 whitespace-nowrap transition-[border-color] max-md:px-2 max-md:py-3">
               <a href="/garden/{post.slug}" target="_blank" rel="noopener noreferrer" aria-label="View {post.title} (opens in new tab)" class="text-green-700 dark:text-green-400 no-underline text-sm mr-4 hover:underline transition-colors max-md:mr-2">View</a>

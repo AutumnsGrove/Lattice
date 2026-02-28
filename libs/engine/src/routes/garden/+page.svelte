@@ -1,6 +1,8 @@
 <script>
 	import { goto } from '$app/navigation';
 	import { Card, Badge, GlassButton, GroveSwap, GroveIntro } from '$lib/ui';
+	import { Blaze } from '$lib/ui/components/indicators';
+	import { resolveBlaze } from '$lib/blazes';
 
 	let { data } = $props();
 
@@ -81,6 +83,7 @@
 				role="button"
 				tabindex="0"
 			>
+				{@const blazeDef = resolveBlaze(post.blaze, post.blazeDefinition)}
 				<h2 class="text-xl font-semibold mb-4 text-green-800 dark:text-green-500 transition-colors">{post.title}</h2>
 				<div class="flex items-center gap-4 mb-3 flex-wrap">
 					<time datetime={post.date} class="text-sm text-foreground-subtle transition-colors">
@@ -90,6 +93,12 @@
 							day: 'numeric'
 						})}
 					</time>
+					<div class="flex items-center gap-1.5">
+						<Blaze postType="bloom" />
+						{#if blazeDef}
+							<Blaze definition={blazeDef} />
+						{/if}
+					</div>
 					{#if post.tags.length > 0}
 						<div class="tags" style:--accent-color={accentColor}>
 							{#each post.tags as tag (tag)}

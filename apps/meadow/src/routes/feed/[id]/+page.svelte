@@ -11,6 +11,8 @@
 	import { formatRelativeTime } from "$lib/utils/time";
 	import ReactionPicker from "$lib/components/ReactionPicker.svelte";
 	import SEO from "$lib/components/SEO.svelte";
+	import { Blaze } from "@autumnsgrove/lattice/ui/indicators";
+	import { resolveBlaze } from "@autumnsgrove/lattice/blazes";
 
 	let { data } = $props();
 
@@ -23,6 +25,11 @@
 	);
 
 	const isNote = $derived(post.postType === "note");
+
+	/** Resolve custom blaze: server definition → global default → slug fallback */
+	const customBlazeDefinition = $derived(
+		resolveBlaze(post.blaze, post.blazeDefinition),
+	);
 	const isOwnNote = $derived(isNote && !!user && post.userId === user.id);
 
 	let showReactionPicker = $state(false);
@@ -168,6 +175,12 @@
 					<time datetime={new Date(post.publishedAt * 1000).toISOString()}>
 						{relativeTime}
 					</time>
+				</div>
+				<div class="mt-0.5 flex items-center gap-1.5">
+					<Blaze postType={post.postType} />
+					{#if customBlazeDefinition}
+						<Blaze definition={customBlazeDefinition} />
+					{/if}
 				</div>
 			</div>
 		</div>

@@ -43,6 +43,14 @@ interface PostRecord {
 	featured_image?: string;
 	storage_location?: string;
 	r2_key?: string;
+	blaze?: string;
+}
+
+/** Resolved blaze definition (label, icon, color) */
+interface BlazeDefinition {
+	label: string;
+	icon: string;
+	color: string;
 }
 
 /** Cached post data - the fully processed result */
@@ -60,6 +68,8 @@ interface CachedPost {
 	featured_image?: string;
 	created_at?: string;
 	updated_at?: string;
+	blaze?: string | null;
+	blazeDefinition?: BlazeDefinition | null;
 }
 
 /** Cache configuration */
@@ -146,6 +156,8 @@ export const load: PageServerLoad = async ({ params, locals, platform, setHeader
 						author: authorName,
 						created_at: undefined,
 						updated_at: undefined,
+						blaze: null as string | null,
+						blazeDefinition: null as BlazeDefinition | null,
 					},
 					isOwner: isOwner || false,
 					comments: [],
@@ -338,6 +350,27 @@ async function fetchAndProcessPost(
 		return Number.isNaN(d.getTime()) ? undefined : d.toISOString();
 	};
 
+	// Resolve blaze definition if post has a custom blaze
+	let blazeDefinition: BlazeDefinition | null = null;
+	if (post.blaze) {
+		try {
+			const bdRow = await db
+				.prepare(
+					`SELECT label, icon, color FROM blaze_definitions
+					 WHERE slug = ? AND (tenant_id = ? OR tenant_id IS NULL)
+					 ORDER BY tenant_id IS NOT NULL DESC
+					 LIMIT 1`,
+				)
+				.bind(post.blaze, tenantId)
+				.first<{ label: string; icon: string; color: string }>();
+			if (bdRow) {
+				blazeDefinition = { label: bdRow.label, icon: bdRow.icon, color: bdRow.color };
+			}
+		} catch {
+			// Non-critical — blaze will use client-side fallback
+		}
+	}
+
 	return {
 		slug: post.slug as string,
 		title: post.title as string,
@@ -352,5 +385,7 @@ async function fetchAndProcessPost(
 		featured_image: (post.featured_image as string) || undefined,
 		created_at: safeDate(post.created_at),
 		updated_at: safeDate(post.updated_at),
+		blaze: (post.blaze as string) || null,
+		blazeDefinition,
 	};
 }

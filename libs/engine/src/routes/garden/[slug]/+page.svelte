@@ -3,8 +3,15 @@
 	import ReedsThread from "$lib/components/reeds/ReedsThread.svelte";
 	import { Button, Badge, GroveSwap, MessageSquare, MessageSquareText } from "$lib/ui";
 	import { fontMap } from "$lib/ui/tokens/fonts";
+	import { Blaze } from "$lib/ui/components/indicators";
+	import { resolveBlaze } from "$lib/blazes";
 
 	let { data } = $props();
+
+	/** Resolve custom blaze: server definition → global default → slug fallback */
+	const customBlazeDefinition = $derived(
+		resolveBlaze(data.post.blaze, data.post.blazeDefinition),
+	);
 
 	// Get accent color from site settings (falls back to default if not set)
 	const accentColor = $derived(data.siteSettings?.accent_color || null);
@@ -143,6 +150,13 @@
 								</span>
 							{/if}
 						{/if}
+						<span class="meta-separator" aria-hidden="true"></span>
+						<div class="blaze-badges">
+							<Blaze postType="bloom" />
+							{#if customBlazeDefinition}
+								<Blaze definition={customBlazeDefinition} />
+							{/if}
+						</div>
 						{#if data.post.tags.length > 0}
 							<span class="meta-separator" aria-hidden="true"></span>
 							<div class="tags">
@@ -325,6 +339,13 @@
 
 	:global(.dark) .post-meta .entry-date {
 		color: var(--color-text-muted-dark);
+	}
+
+	/* Blaze badges */
+	.blaze-badges {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
 	}
 
 	/* "Started writing" secondary date — muted to stay subordinate to publish date */
