@@ -1,7 +1,6 @@
-# Root build artifacts - ignore these
+# Root build artifacts
 /gf
 /*.exe
 
-# But DO commit pre-built binaries in dist/
-!/dist/
-!/dist/**
+# Pre-built binaries (now distributed via GitHub Releases)
+dist/
