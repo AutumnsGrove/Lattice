@@ -2,7 +2,8 @@
 	import { onMount } from "svelte";
 	import { Button, Spinner, GlassCard, GlassConfirmDialog, Waystone, GroveTerm } from "$lib/ui";
 	import { GreenhouseStatusCard, GraftControlPanel } from "$lib/grafts/greenhouse";
-	import { Smartphone, Laptop, Monitor, Leaf, Plus, RotateCcw, Check, X, Loader2, AlertTriangle, Clock } from "lucide-svelte";
+	import { Smartphone, Laptop, Monitor, Leaf, Plus, RotateCcw, Check, X, Loader2, AlertTriangle, Clock, Globe } from "lucide-svelte";
+	import { DomainCheckerModal } from "$lib/ui/components/domain";
 	import { groveModeStore } from "$lib/ui/stores/grove-mode.svelte";
 	import { toast } from "$lib/ui/components/ui/toast";
 	import { api, apiRequest } from "$lib/utils";
@@ -71,6 +72,17 @@
 	let revokingSessionId = $state(null);
 	let revokingAllSessions = $state(false);
 	let showRevokeAllDialog = $state(false);
+
+	// Domain checker modal state
+	let showDomainChecker = $state(false);
+
+	// Derive tenant info for domain checker
+	const tenantUsername = $derived(
+		data.context?.type === "tenant" ? data.context.tenant.subdomain : "",
+	);
+	const tenantTier = $derived(
+		data.context?.type === "tenant" ? data.context.tenant.plan || "seedling" : "seedling",
+	);
 
 	// Greenhouse graft toggle state
 	/** @type {string | undefined} */
@@ -1215,6 +1227,26 @@
 		</div>
 	</GlassCard>
 
+	<!-- Custom Domain CTA -->
+	<div class="domain-cta mb-6">
+		<div class="domain-cta__inner">
+			<div class="domain-cta__content">
+				<div class="domain-cta__icon">
+					<Globe size={18} />
+				</div>
+				<div>
+					<p class="domain-cta__title">Want your own domain?</p>
+					<p class="domain-cta__description">
+						Check if your dream .com is available — or <a href="/arbor/domain">explore on a full page</a>.
+					</p>
+				</div>
+			</div>
+			<Button variant="outline" size="sm" onclick={() => (showDomainChecker = true)}>
+				Check Availability
+			</Button>
+		</div>
+	</div>
+
 	<!-- Canopy Settings -->
 	<GlassCard variant="frosted" class="mb-6">
 		<div class="section-header">
@@ -1623,6 +1655,12 @@
 	variant="danger"
 	loading={deletingBlazeSlug !== null}
 	onconfirm={deleteBlaze}
+/>
+
+<DomainCheckerModal
+	bind:open={showDomainChecker}
+	username={tenantUsername}
+	userTier={tenantTier}
 />
 
 <style>
@@ -2506,6 +2544,62 @@
 	@media (max-width: 600px) {
 		.blaze-form-fields {
 			grid-template-columns: 1fr;
+		}
+	}
+	/* Domain CTA styles */
+	.domain-cta {
+		border: 2px dashed var(--color-border);
+		border-radius: var(--border-radius-standard);
+		padding: 1rem 1.25rem;
+		transition:
+			border-color 0.2s,
+			background-color 0.2s;
+	}
+	.domain-cta:hover {
+		border-color: var(--color-primary);
+		background: rgba(44, 95, 45, 0.03);
+	}
+	:global(.dark) .domain-cta:hover {
+		background: rgba(92, 184, 95, 0.05);
+	}
+	.domain-cta__inner {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+	}
+	.domain-cta__content {
+		display: flex;
+		align-items: flex-start;
+		gap: 0.75rem;
+	}
+	.domain-cta__icon {
+		flex-shrink: 0;
+		margin-top: 2px;
+		color: var(--color-primary);
+	}
+	.domain-cta__title {
+		margin: 0;
+		font-size: 0.95rem;
+		font-weight: 600;
+		color: var(--color-text);
+	}
+	.domain-cta__description {
+		margin: 0.125rem 0 0 0;
+		font-size: 0.825rem;
+		color: var(--color-text-muted);
+	}
+	.domain-cta__description a {
+		color: var(--color-primary);
+		text-decoration: none;
+	}
+	.domain-cta__description a:hover {
+		text-decoration: underline;
+	}
+	@media (max-width: 600px) {
+		.domain-cta__inner {
+			flex-direction: column;
+			align-items: flex-start;
 		}
 	}
 </style>
