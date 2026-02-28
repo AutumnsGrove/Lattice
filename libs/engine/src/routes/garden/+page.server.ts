@@ -53,6 +53,13 @@ WHERE p.tenant_id = ? AND p.status = 'published'
 ORDER BY p.published_at DESC
 LIMIT 100`;
 
+/** Fallback SQL without blaze JOIN — used when blaze_definitions table is missing */
+const POSTS_SIMPLE_SQL = `SELECT slug, title, published_at, tags, description
+FROM posts
+WHERE tenant_id = ? AND status = 'published'
+ORDER BY published_at DESC
+LIMIT 100`;
+
 function mapPostRow(post: PostRow): PostMeta {
 	return {
 		slug: post.slug as string,
@@ -80,28 +87,46 @@ export const load: PageServerLoad = async ({ locals, platform, setHeaders }) => 
 	if (kv && db && tenantId) {
 		const cacheKey = `garden:list:${tenantId}`;
 
-		posts = await cache.getOrSet<PostMeta[]>(kv, cacheKey, {
-			ttl: CACHE_TTL_SECONDS,
-			compute: async () => {
-				const result = await db.prepare(POSTS_WITH_BLAZES_SQL).bind(tenantId).all<PostRow>();
+		try {
+			posts = await cache.getOrSet<PostMeta[]>(kv, cacheKey, {
+				ttl: CACHE_TTL_SECONDS,
+				compute: async () => {
+					const result = await db.prepare(POSTS_WITH_BLAZES_SQL).bind(tenantId).all<PostRow>();
 
-				return (result.results ?? []).map(mapPostRow);
-			},
-		});
+					return (result.results ?? []).map(mapPostRow);
+				},
+			});
+		} catch {
+			// Blaze-enriched query or cache layer failed — try simpler query
+			try {
+				const result = await db.prepare(POSTS_SIMPLE_SQL).bind(tenantId).all<PostRow>();
+				posts = (result.results ?? []).map(mapPostRow);
+			} catch (err) {
+				console.error("D1 fetch error for posts list:", err);
+			}
+		}
 
 		// Set Cache-Control headers for edge caching
-		setHeaders({
-			"Cache-Control": "public, max-age=300, s-maxage=600",
-			"CDN-Cache-Control": "max-age=600, stale-while-revalidate=3600",
-		});
+		if (posts.length > 0) {
+			setHeaders({
+				"Cache-Control": "public, max-age=300, s-maxage=600",
+				"CDN-Cache-Control": "max-age=600, stale-while-revalidate=3600",
+			});
+		}
 	} else if (db && tenantId) {
 		// No KV available, fall back to direct D1 (no caching)
 		try {
 			const result = await db.prepare(POSTS_WITH_BLAZES_SQL).bind(tenantId).all<PostRow>();
 
 			posts = (result.results ?? []).map(mapPostRow);
-		} catch (err) {
-			console.error("D1 fetch error for posts list:", err);
+		} catch {
+			// Blaze query failed — try simpler query
+			try {
+				const result = await db.prepare(POSTS_SIMPLE_SQL).bind(tenantId).all<PostRow>();
+				posts = (result.results ?? []).map(mapPostRow);
+			} catch (err) {
+				console.error("D1 fetch error for posts list:", err);
+			}
 		}
 	}
 

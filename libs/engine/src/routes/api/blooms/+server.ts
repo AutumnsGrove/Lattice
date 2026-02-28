@@ -342,7 +342,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
 		// Insert using TenantDb (automatically adds tenant_id and generates id)
 		// Note: created_at and updated_at are auto-added by TenantDb.insert()
-		await tenantDb.insert("posts", {
+		const insertData: Record<string, unknown> = {
 			slug,
 			title,
 			tags,
@@ -361,7 +361,21 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 			// Set published_at on direct publish (skipping draft stage) so RSS and
 			// meadow poller see the correct timestamp instead of NULL.
 			...(data.status === "published" ? { published_at: Math.floor(Date.now() / 1000) } : {}),
-		});
+		};
+
+		// Retry without blaze column if migration 088 hasn't been applied yet
+		try {
+			await tenantDb.insert("posts", insertData);
+		} catch (insertErr) {
+			const msg = insertErr instanceof Error ? insertErr.message : String(insertErr);
+			if ("blaze" in insertData && /no such column|has no column/i.test(msg)) {
+				console.warn("[Blooms] Retrying insert without blaze (migration 088 may be pending)");
+				delete insertData.blaze;
+				await tenantDb.insert("posts", insertData);
+			} else {
+				throw insertErr;
+			}
+		}
 
 		// Track activity for inactivity reclamation
 		updateLastActivity(platform.env.DB, tenantId);

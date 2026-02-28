@@ -407,7 +407,19 @@ export const PUT: RequestHandler = async ({ params, request, platform, locals })
 		}
 
 		// Update using TenantDb (automatically adds tenant_id to WHERE clause)
-		await tenantDb.update("posts", updateData, "slug = ?", [slug]);
+		// Retry without blaze column if migration 088 hasn't been applied yet
+		try {
+			await tenantDb.update("posts", updateData, "slug = ?", [slug]);
+		} catch (updateErr) {
+			const msg = updateErr instanceof Error ? updateErr.message : String(updateErr);
+			if ("blaze" in updateData && /no such column|has no column/i.test(msg)) {
+				console.warn("[Blooms] Retrying update without blaze (migration 088 may be pending)");
+				delete updateData.blaze;
+				await tenantDb.update("posts", updateData, "slug = ?", [slug]);
+			} else {
+				throw updateErr;
+			}
+		}
 
 		// Track activity for inactivity reclamation
 		updateLastActivity(platform.env.DB, tenantId);
