@@ -136,21 +136,34 @@ else
 
     # Create prompt for LLM
     read -r -d '' PROMPT <<EOF || true
-You are analyzing git commits for a release of Grove, a multi-tenant blog platform built with SvelteKit and Cloudflare Workers.
+You are writing a release summary for Grove — a blogging platform built by a queer indie developer for friends, writers, and people who want their own corner of the internet.
 
-Here are the commits for version $VERSION_TAG:
+These are the git commits for version $VERSION_TAG:
 
 $COMMIT_LIST
 
-Please create a concise 2-4 sentence summary of this release for display on a public roadmap page. Focus on:
-1. Major new features or capabilities
-2. Significant improvements or changes
-3. Important bug fixes
-4. Overall theme or direction of this release
+Write a 2-4 sentence summary for the public roadmap page. This is the developer talking directly to the people who use Grove.
 
-The summary should be in a warm, friendly tone that matches Grove's voice. Avoid technical jargon where possible. Make it engaging for users to read.
+VOICE RULES:
+- Sound like a person, not a product. You're telling a friend what you built this week over tea.
+- Be specific about what actually changed. Name the features. Don't generalize into "powerful new tools" or "significant improvements."
+- Understated confidence. You built something good — you don't need to sell it.
+- Skip the exclamation marks. Skip "exciting." Skip "we're thrilled." Skip "it's all about making X better." None of that.
+- Technical specifics are fine when they matter (people who use Grove understand what a Durable Object is).
+- If a release is mostly infrastructure or bug fixes, just say that honestly. Not every release needs to sound momentous.
 
-Respond with ONLY the summary text, no additional formatting or labels.
+ANTI-EXAMPLES (never write like this):
+- "This release brings powerful new tools for creators and developers!"
+- "We've made significant strides in security and stability."
+- "It's all about giving you more control and a smoother experience."
+- "Overall, this update focuses on building a more robust platform."
+
+GOOD EXAMPLES:
+- "Loom finally has proper rate limiting, and the auto-save actually syncs to the server now instead of just pretending to. Also rewired how Meadow handles feeds — it pulls from the community timeline instead of polling each site individually."
+- "Mostly an infrastructure release. Migrated four workers to the new Infra SDK, which means they all get proper error handling and observability for free. Fixed a layout bug on mobile that's been bothering me for weeks."
+- "Added Shelves — a way to collect and organize links on your site. Think bookmarks, but prettier and public. Also rebuilt Glimpse from scratch so content suggestions actually make sense now."
+
+Respond with ONLY the summary text. No labels, no markdown formatting.
 EOF
 
     # Call OpenRouter API
@@ -168,7 +181,7 @@ EOF
                     \"content\": $(echo "$PROMPT" | jq -Rs .)
                 }
             ],
-            \"temperature\": 0.7,
+            \"temperature\": 0.5,
             \"max_tokens\": 300
         }")
 
