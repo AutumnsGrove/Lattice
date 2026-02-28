@@ -18,7 +18,8 @@ var (
 	flagPageThreshold int
 )
 
-const version = "0.1.0"
+// Version is set via ldflags at build time.
+var Version = "dev"
 
 var rootCmd = &cobra.Command{
 	Use:   "gf",
@@ -116,7 +117,7 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Print version",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("gf version %s (go)\n", version)
+		fmt.Printf("gf version %s (go)\n", Version)
 	},
 }
 

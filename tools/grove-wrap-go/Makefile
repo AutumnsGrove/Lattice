@@ -2,7 +2,7 @@
 
 BINARY := gw
 MODULE := github.com/AutumnsGrove/Lattice/tools/grove-wrap-go
-VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
+VERSION := $(shell git describe --tags --match 'gw/v*' --always --dirty 2>/dev/null || echo "dev")
 LDFLAGS := -s -w -X $(MODULE)/cmd.Version=$(VERSION)
 
 build:
