@@ -37,17 +37,18 @@ import type { EvaluationContext, FeatureFlagsEnv } from "./types.js";
  * Unknown IDs still work — this is just for DX.
  */
 export type KnownGraftId =
-  | "fireside_mode"
-  | "scribe_mode"
-  | "meadow_access"
-  | "jxl_encoding"
-  | "jxl_kill_switch"
-  | "image_uploads_enabled"
-  | "image_uploads"
-  | "uploads_suspended"
-  | "photo_gallery"
-  | "reeds_comments"
-  | "thorn_moderation";
+	| "fireside_mode"
+	| "scribe_mode"
+	| "wisp_enabled"
+	| "meadow_access"
+	| "jxl_encoding"
+	| "jxl_kill_switch"
+	| "image_uploads_enabled"
+	| "image_uploads"
+	| "uploads_suspended"
+	| "photo_gallery"
+	| "reeds_comments"
+	| "thorn_moderation";
 
 /**
  * Record of graft ID to enabled status.
@@ -64,16 +65,16 @@ export type GraftsRecord = Record<string, boolean>;
  * Returns only the IDs — evaluation happens separately.
  */
 async function getAllFlagIds(db: D1Database): Promise<string[]> {
-  try {
-    const result = await db
-      .prepare("SELECT id FROM feature_flags WHERE enabled = 1")
-      .all<{ id: string }>();
+	try {
+		const result = await db
+			.prepare("SELECT id FROM feature_flags WHERE enabled = 1")
+			.all<{ id: string }>();
 
-    return (result.results ?? []).map((row) => row.id);
-  } catch (error) {
-    console.error("[Grafts] Failed to load flag IDs:", error);
-    return [];
-  }
+		return (result.results ?? []).map((row) => row.id);
+	} catch (error) {
+		console.error("[Grafts] Failed to load flag IDs:", error);
+		return [];
+	}
 }
 
 /**
@@ -105,27 +106,27 @@ async function getAllFlagIds(db: D1Database): Promise<string[]> {
  * ```
  */
 export async function getEnabledGrafts(
-  context: EvaluationContext,
-  env: FeatureFlagsEnv,
+	context: EvaluationContext,
+	env: FeatureFlagsEnv,
 ): Promise<GraftsRecord> {
-  // 1. Load all enabled flag IDs
-  const flagIds = await getAllFlagIds(env.DB);
+	// 1. Load all enabled flag IDs
+	const flagIds = await getAllFlagIds(env.DB);
 
-  if (flagIds.length === 0) {
-    return {};
-  }
+	if (flagIds.length === 0) {
+		return {};
+	}
 
-  // 2. Batch evaluate all flags
-  const results = await evaluateFlags(flagIds, context, env);
+	// 2. Batch evaluate all flags
+	const results = await evaluateFlags(flagIds, context, env);
 
-  // 3. Convert to simple boolean record
-  const grafts: GraftsRecord = {};
-  for (const [id, result] of results) {
-    // Treat any truthy value as enabled, anything else as disabled
-    grafts[id] = result.value === true;
-  }
+	// 3. Convert to simple boolean record
+	const grafts: GraftsRecord = {};
+	for (const [id, result] of results) {
+		// Treat any truthy value as enabled, anything else as disabled
+		grafts[id] = result.value === true;
+	}
 
-  return grafts;
+	return grafts;
 }
 
 /**
@@ -143,9 +144,9 @@ export async function getEnabledGrafts(
  * ```
  */
 export function isGraftEnabled(
-  grafts: GraftsRecord | undefined,
-  graftId: string,
-  fallback = false,
+	grafts: GraftsRecord | undefined,
+	graftId: string,
+	fallback = false,
 ): boolean {
-  return grafts?.[graftId] ?? fallback;
+	return grafts?.[graftId] ?? fallback;
 }

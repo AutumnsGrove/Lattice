@@ -95,6 +95,7 @@
 	} = $props();
 
 	// Derived graft flags - add new ones here as they're created
+	const wispEnabled = $derived(grafts?.wisp_enabled ?? false);
 	const firesideEnabled = $derived(grafts?.fireside_mode ?? false);
 	const scribeEnabled = $derived(grafts?.scribe_mode ?? false);
 	const uploadsEnabled = $derived(grafts?.image_uploads ?? true);
@@ -479,7 +480,7 @@
 		}
 
 		// Cmd/Ctrl + Shift + F for Fireside mode (only if graft enabled)
-		if (e.key === "f" && (e.metaKey || e.ctrlKey) && e.shiftKey && firesideEnabled) {
+		if (e.key === "f" && (e.metaKey || e.ctrlKey) && e.shiftKey && wispEnabled && firesideEnabled) {
 			e.preventDefault();
 			toggleFiresideMode();
 		}
@@ -1156,7 +1157,7 @@
 					<div class="toolbar-divider-line"></div>
 				{/if}
 
-				{#if firesideEnabled && !content.trim()}
+				{#if wispEnabled && firesideEnabled && !content.trim()}
 					<button
 						type="button"
 						class="fireside-btn"
@@ -1170,7 +1171,7 @@
 					<span class="toolbar-divider">|</span>
 				{/if}
 				<!-- Voice Input (Scribe) - gated by scribe_mode graft -->
-				{#if scribeEnabled && editorMode !== "preview"}
+				{#if wispEnabled && scribeEnabled && editorMode !== "preview"}
 					<div
 						class="voice-wrapper"
 						title="Voice Input (⌘⇧U) - Hold to record, release to transcribe"

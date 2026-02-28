@@ -19,7 +19,7 @@ import { createLumenClient, type LumenClient } from "$lib/lumen/index.js";
 import { createThreshold } from "$lib/threshold/factory.js";
 import { thresholdCheck } from "$lib/threshold/adapters/sveltekit.js";
 import { checkFeatureAccess } from "$lib/server/billing.js";
-import { queryOne, execute, DatabaseError } from "$lib/server/services/database.js";
+import { execute } from "$lib/server/services/database.js";
 
 // Import pure functions from separate module (enables testing)
 import {
@@ -72,70 +72,21 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 	// ==========================================================================
 	// Each check has an explicit failure strategy:
 	//
-	// 1. Wisp enabled check (tenant_settings):
-	//    - FAIL-OPEN only if table doesn't exist (initial setup before first migration)
-	//    - FAIL-CLOSED for all other database errors (security)
-	//
-	// 2. Feature access check (billing/subscription):
+	// 1. Feature access check (billing/subscription):
 	//    - FAIL-OPEN if billing check fails (don't block users due to billing bugs)
 	//    - FAIL-CLOSED if billing says "not allowed" (subscription limits)
 	//
-	// 3. Rate limiting (KV store):
+	// 2. Rate limiting (KV store):
 	//    - FAIL-CLOSED if KV not available (prevent abuse)
 	//    - FAIL-CLOSED if over limit
 	//
-	// 4. Usage logging (database insert):
+	// 3. Usage logging (database insert):
 	//    - FAIL-OPEN (don't lose user's draft due to logging failure)
 	//    - Log warning for monitoring
+	//
+	// Note: wisp_enabled is now a graft (migration 092) — UI layer gates
+	// feature visibility; API relies on auth + subscription + rate limiting.
 	// ==========================================================================
-
-	// Check if Wisp is enabled (isolated query with explicit error handling)
-	// Uses tenant_settings (not site_settings) — wisp_enabled is per-tenant (migration 016)
-	if (db && locals.tenantId) {
-		try {
-			const settings = await queryOne<{ setting_value: string }>(
-				db,
-				"SELECT setting_value FROM tenant_settings WHERE tenant_id = ? AND setting_key = ?",
-				[locals.tenantId, "wisp_enabled"],
-			);
-
-			if (!settings || settings.setting_value !== "true") {
-				return json(
-					{
-						error: "Wisp is resting right now. You can wake them in Settings when you're ready.",
-					},
-					{ status: 403 },
-				);
-			}
-		} catch (err) {
-			// DatabaseError from queryOne wraps the original error
-			const errorMessage = err instanceof Error ? err.message : "Unknown error";
-			const causeMessage =
-				err instanceof DatabaseError && err.cause instanceof Error ? err.cause.message : "";
-
-			// Only fail-open if table doesn't exist (initial setup scenario)
-			// For all other errors, fail-closed to prevent unauthorized access
-			if (
-				errorMessage.includes("no such table") ||
-				causeMessage.includes("no such table") ||
-				errorMessage.includes("SQLITE_ERROR")
-			) {
-				console.debug(
-					"[Fireside] Settings table not created yet (expected during setup):",
-					errorMessage,
-				);
-			} else {
-				logGroveError("API", API_ERRORS.SERVICE_UNAVAILABLE, { cause: err });
-				return json(
-					{
-						error: API_ERRORS.SERVICE_UNAVAILABLE.userMessage,
-						error_code: API_ERRORS.SERVICE_UNAVAILABLE.code,
-					},
-					{ status: 503 },
-				);
-			}
-		}
-	}
 
 	// Check subscription access to AI features (isolated query)
 	if (db && locals.tenantId) {

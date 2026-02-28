@@ -23,10 +23,6 @@ import { createThreshold } from "$lib/threshold/factory.js";
 import { thresholdCheck } from "$lib/threshold/adapters/sveltekit.js";
 import { checkFeatureAccess } from "$lib/server/billing.js";
 
-interface SettingsRow {
-	setting_value: string;
-}
-
 export const prerender = false;
 
 // ============================================================================
@@ -47,26 +43,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
 	const db = platform?.env?.DB;
 
-	// Guard checks are intentionally sequential: if Wisp is disabled (common during
-	// onboarding), skip the subscription check entirely to avoid a wasted D1 query.
-	if (db && locals.tenantId) {
-		try {
-			const settings = await db
-				.prepare(
-					"SELECT setting_value FROM tenant_settings WHERE tenant_id = ? AND setting_key = ?",
-				)
-				.bind(locals.tenantId, "wisp_enabled")
-				.first<SettingsRow>();
-
-			if (!settings || settings.setting_value !== "true") {
-				return json({ error: "Wisp is disabled. Enable it in Settings." }, { status: 403 });
-			}
-		} catch {
-			// If settings table doesn't exist, allow (for initial setup)
-		}
-	}
-
-	// Check subscription access to AI features (after wisp_enabled, before request parsing)
+	// Check subscription access to AI features (before request parsing)
 	if (db && locals.tenantId) {
 		const featureCheck = await checkFeatureAccess(db, locals.tenantId, "ai");
 		if (!featureCheck.allowed) {
