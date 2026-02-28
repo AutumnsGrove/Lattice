@@ -1,0 +1,90 @@
+{
+  "version": "v1.1.1",
+  "timestamp": "2026-02-28T17:18:47.595Z",
+  "topWords": [
+    {
+      "word": "grove",
+      "count": 5863,
+      "pct": 1.33
+    },
+    {
+      "word": "content",
+      "count": 1883,
+      "pct": 0.43
+    },
+    {
+      "word": "api",
+      "count": 1412,
+      "pct": 0.32
+    },
+    {
+      "word": "blog",
+      "count": 1288,
+      "pct": 0.29
+    },
+    {
+      "word": "post",
+      "count": 1273,
+      "pct": 0.29
+    },
+    {
+      "word": "email",
+      "count": 1268,
+      "pct": 0.29
+    },
+    {
+      "word": "per",
+      "count": 1266,
+      "pct": 0.29
+    },
+    {
+      "word": "tenant",
+      "count": 1257,
+      "pct": 0.29
+    },
+    {
+      "word": "status",
+      "count": 1181,
+      "pct": 0.27
+    },
+    {
+      "word": "system",
+      "count": 1169,
+      "pct": 0.27
+    },
+    {
+      "word": "place",
+      "count": 1136,
+      "pct": 0.26
+    },
+    {
+      "word": "engine",
+      "count": 1117,
+      "pct": 0.25
+    },
+    {
+      "word": "full",
+      "count": 1094,
+      "pct": 0.25
+    },
+    {
+      "word": "cloudflare",
+      "count": 1061,
+      "pct": 0.24
+    },
+    {
+      "word": "admin",
+      "count": 1060,
+      "pct": 0.24
+    }
+  ],
+  "totalWords": 439510,
+  "uniqueWords": 15538,
+  "totalFiles": 655,
+  "funFacts": {
+    "mostUsedWord": "grove",
+    "groveCount": 5863,
+    "wandererCount": 508,
+    "mostDocumentedTopic": "Content & Blogging"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "version": "v1.1.1",
+  "date": "2026-02-28 12:16:12 -0500",
+  "commitHash": "a6b95274",
+  "summary": "Version 1.1.1 adds a self-service domain checker, lets you change your username, and introduces OnboardingAgent for automated email sequences. It also brings user-level rate limiting to RSS feeds, makes Blazes a permanent feature, and includes the usual round of fixes for Stripe, database migrations, and the build process.\n",
+  "stats": {
+    "totalCommits": 60,
+    "features": 20,
+    "fixes": 23,
+    "refactoring": 0,
+    "docs": 2,
+    "tests": 1,
+    "performance": 0
+  },
+  "highlights": {
+    "features": [
+  "auto-release gw/gf on code changes, add Lattice GitHub Releases",
+  "add make release target for automated tagging",
+  "rewrite install.sh with GitHub Releases fallback",
+  "add tag-triggered release workflow, simplify CI to test-only",
+  "add version injection to gf, scope gw tag pattern",
+  "promote wisp_enabled to a proper graft",
+  "add D1 migration tracking and gw d1 migrate-all",
+  "add self-service domain availability checker (#1293)",
+  "add UA-based rate limiting to RSS feed endpoint (#1291)",
+  "add username change feature (#482) (#1290)"
+],
+    "fixes": [
+  "rewrite summary prompt to sound like a person, not a pitch deck",
+  "reorder 086 DDL, isolate wisp to tenant_settings",
+  "handle missing blaze schema gracefully (#1294)",
+  "give review bot file access and verify-before-report prompt",
+  "address review — dead code, signpost errors, header trim",
+  "fix Stripe webhook failures — signature rotation, config gating, sanitizer",
+  "early safety gate on tenant delete, better wrangler errors",
+  "remove broken dark:text-cream-* overrides on roadmap phase text",
+  "remove stale svelte-ignore comments breaking CI",
+  "use build tags for Windows-compatible process management"
+]
+  }
+}
