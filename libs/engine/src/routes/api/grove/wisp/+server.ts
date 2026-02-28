@@ -49,11 +49,13 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
 	// Guard checks are intentionally sequential: if Wisp is disabled (common during
 	// onboarding), skip the subscription check entirely to avoid a wasted D1 query.
-	if (db) {
+	if (db && locals.tenantId) {
 		try {
 			const settings = await db
-				.prepare("SELECT setting_value FROM site_settings WHERE setting_key = ?")
-				.bind("wisp_enabled")
+				.prepare(
+					"SELECT setting_value FROM tenant_settings WHERE tenant_id = ? AND setting_key = ?",
+				)
+				.bind(locals.tenantId, "wisp_enabled")
 				.first<SettingsRow>();
 
 			if (!settings || settings.setting_value !== "true") {
