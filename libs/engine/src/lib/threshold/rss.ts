@@ -8,7 +8,10 @@
  *   - Known AI scrapers: blocked outright (403)
  *
  * Integrates with Threshold's existing rate limiting infrastructure.
- * Conditional 304 responses are exempt from rate limit counting.
+ * Rate limits are checked before DB/XML work to avoid wasting compute
+ * on rejected clients. Conditional 304 requests do count against limits,
+ * but the generous thresholds (600/hr for known readers) easily absorb
+ * polite polling patterns.
  *
  * @see docs/specs/rss-rate-limiting-spec.md
  */
@@ -71,7 +74,12 @@ const KNOWN_FEED_READERS: FeedReaderPattern[] = [
  * robots.txt since they're fetched via HTTP, not crawled.
  */
 const AI_SCRAPER_PATTERN =
-	/GPTBot|ChatGPT-User|ChatGPT Agent|OAI-SearchBot|OpenAI|ClaudeBot|Claude-Web|Claude-User|Claude-SearchBot|anthropic-ai|Google-Extended|GoogleOther|Google-CloudVertexBot|CloudVertexBot|Meta-ExternalAgent|Meta-ExternalFetcher|meta-externalagent|meta-externalfetcher|FacebookBot|facebookexternalhit|Applebot-Extended|Amazonbot|AmazonBuyForMe|bedrockbot|Bytespider|TikTokSpider|PerplexityBot|Perplexity-User|CCBot|cohere-ai|cohere-training-data-crawler|YouBot|Diffbot|DeepSeekBot|MistralAI-User|Scrapy|Crawl4AI|FirecrawlAgent|img2dataset|PetalBot|archive\.org_bot|ia_archiver/i;
+	/GPTBot|ChatGPT-User|ChatGPT Agent|OAI-SearchBot|OpenAI|ClaudeBot|Claude-Web|Claude-User|Claude-SearchBot|anthropic-ai|Google-Extended|GoogleOther|Google-CloudVertexBot|CloudVertexBot|Meta-ExternalAgent|Meta-ExternalFetcher|meta-externalagent|meta-externalfetcher|FacebookBot|facebookexternalhit|Applebot-Extended|Amazonbot|AmazonBuyForMe|bedrockbot|Bytespider|TikTokSpider|PerplexityBot|Perplexity-User|CCBot|cohere-ai|cohere-training-data-crawler|YouBot|Diffbot|DeepSeekBot|MistralAI-User|Scrapy|Crawl4AI|FirecrawlAgent|img2dataset|PetalBot/i;
+
+// Note: Internet Archive bots (archive.org_bot, ia_archiver) are intentionally
+// NOT blocked from RSS. While robots.txt disallows them for page crawling,
+// RSS feed archival supports digital preservation — valuable for queer creators
+// whose work deserves to persist. They'll fall through to "suspicious" limits.
 
 // ============================================================================
 // Classification
