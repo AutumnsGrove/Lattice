@@ -1,14 +1,21 @@
 name: Release Grove Tools
 
-# Build and release gw/gf binaries when tool-scoped tags are pushed.
-# Tags: gw/v1.0.0, gf/v1.2.3, etc.
-# Creates a GitHub Release with cross-compiled binaries for 4 platforms.
+# Build and release gw/gf binaries.
+# Triggered by:
+#   1. Tag push (gw/v*, gf/v*) — manual releases via `make release TAG=v2.0.0`
+#   2. workflow_call — automatic releases from auto-release-tools.yml
 
 on:
   push:
     tags:
       - "gw/v*"
       - "gf/v*"
+  workflow_call:
+    inputs:
+      tag:
+        description: "Full tag name, e.g. gw/v1.0.1"
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -23,6 +30,7 @@ jobs:
     outputs:
       tool: ${{ steps.parse.outputs.tool }}
       version: ${{ steps.parse.outputs.version }}
+      tag: ${{ steps.parse.outputs.tag }}
       directory: ${{ steps.parse.outputs.directory }}
       module: ${{ steps.parse.outputs.module }}
 
@@ -30,7 +38,13 @@ jobs:
       - name: Parse tag
         id: parse
         run: |
-          TAG="${GITHUB_REF#refs/tags/}"
+          # Accept tag from workflow_call input or from GITHUB_REF (tag push)
+          if [ -n "${{ inputs.tag }}" ]; then
+            TAG="${{ inputs.tag }}"
+          else
+            TAG="${GITHUB_REF#refs/tags/}"
+          fi
+
           TOOL="${TAG%%/*}"
           VERSION="${TAG#*/}"
 
@@ -51,6 +65,7 @@ jobs:
 
           echo "tool=$TOOL" >> $GITHUB_OUTPUT
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
           echo "directory=$DIR" >> $GITHUB_OUTPUT
           echo "module=$MOD" >> $GITHUB_OUTPUT
 
@@ -136,7 +151,6 @@ jobs:
             -o "$BINARY" .
 
           ls -lh "$BINARY"
-          echo "binary=$BINARY" >> $GITHUB_ENV
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -177,7 +191,7 @@ jobs:
         run: |
           TOOL="${{ needs.prepare.outputs.tool }}"
           VERSION="${{ needs.prepare.outputs.version }}"
-          TAG="${GITHUB_REF#refs/tags/}"
+          TAG="${{ needs.prepare.outputs.tag }}"
 
           TOOL_NAME="gw (Grove Wrap)"
           DIR="grove-wrap-go"

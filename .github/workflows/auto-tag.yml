@@ -21,6 +21,7 @@ on:
 
 permissions:
   contents: write
+  packages: write
 
 jobs:
   tag-and-snapshot:
@@ -262,6 +263,65 @@ jobs:
 
           git commit -m "docs: add repository snapshot and release summary for ${{ steps.snapshot.outputs.tag_name }}"
           git push origin main
+
+      - name: Create GitHub Release
+        if: steps.create_tag.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ steps.create_tag.outputs.tag_name }}"
+          VERSION="${{ steps.version.outputs.current }}"
+          SUMMARY_FILE="snapshots/summaries/${TAG}.json"
+
+          # Build release body from AI-generated summary
+          if [ -f "$SUMMARY_FILE" ]; then
+            SUMMARY=$(jq -r '.summary' "$SUMMARY_FILE")
+            FEATURES=$(jq -r '.highlights.features[]? // empty' "$SUMMARY_FILE" | head -10 | sed 's/^/- /')
+            FIXES=$(jq -r '.highlights.fixes[]? // empty' "$SUMMARY_FILE" | head -10 | sed 's/^/- /')
+            COMMITS=$(jq -r '.stats.totalCommits // "N/A"' "$SUMMARY_FILE")
+
+            BODY="$SUMMARY
+
+          ### Highlights
+
+          **Features**
+          $FEATURES
+
+          **Fixes**
+          $FIXES
+
+          ---
+          *${COMMITS} total commits* | [npm](https://npm.pkg.github.com/package/@autumnsgrove/lattice) | [changelog](https://grove.autumn.pub/roadmap)"
+          else
+            BODY="## @autumnsgrove/lattice v${VERSION}
+
+          See the [roadmap](https://grove.autumn.pub/roadmap) for details."
+          fi
+
+          gh release create "$TAG" \
+            --title "@autumnsgrove/lattice ${TAG}" \
+            --notes "$BODY"
+
+          echo "Created GitHub Release: $TAG"
+
+      - name: Publish to GitHub Package Registry
+        if: steps.create_tag.outcome == 'success'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Configure npm for GitHub Package Registry
+          echo "@autumnsgrove:registry=https://npm.pkg.github.com" >> .npmrc
+          echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> .npmrc
+
+          cd libs/engine
+
+          # Build the package (prepublishOnly runs svelte-package)
+          pnpm run package
+
+          # Publish
+          pnpm publish --no-git-checks || echo "Warning: Publish failed (version may already exist)"
+
+          echo "Published @autumnsgrove/lattice v${{ steps.version.outputs.current }}"
 
   # Separate job for backfilling historical summaries
   backfill:
