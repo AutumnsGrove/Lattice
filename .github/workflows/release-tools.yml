@@ -1,0 +1,205 @@
+name: Release Grove Tools
+
+# Build and release gw/gf binaries when tool-scoped tags are pushed.
+# Tags: gw/v1.0.0, gf/v1.2.3, etc.
+# Creates a GitHub Release with cross-compiled binaries for 4 platforms.
+
+on:
+  push:
+    tags:
+      - "gw/v*"
+      - "gf/v*"
+
+permissions:
+  contents: write
+
+jobs:
+  # ============================================
+  # PREPARE - Parse tag into tool metadata
+  # ============================================
+  prepare:
+    name: Parse Tag
+    runs-on: ubuntu-latest
+    outputs:
+      tool: ${{ steps.parse.outputs.tool }}
+      version: ${{ steps.parse.outputs.version }}
+      directory: ${{ steps.parse.outputs.directory }}
+      module: ${{ steps.parse.outputs.module }}
+
+    steps:
+      - name: Parse tag
+        id: parse
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          TOOL="${TAG%%/*}"
+          VERSION="${TAG#*/}"
+
+          case "$TOOL" in
+            gw)
+              DIR="tools/grove-wrap-go"
+              MOD="github.com/AutumnsGrove/Lattice/tools/grove-wrap-go"
+              ;;
+            gf)
+              DIR="tools/grove-find-go"
+              MOD="github.com/AutumnsGrove/Lattice/tools/grove-find-go"
+              ;;
+            *)
+              echo "Unknown tool: $TOOL"
+              exit 1
+              ;;
+          esac
+
+          echo "tool=$TOOL" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "directory=$DIR" >> $GITHUB_OUTPUT
+          echo "module=$MOD" >> $GITHUB_OUTPUT
+
+          echo "## Parsed Tag" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tool:** $TOOL" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version:** $VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "- **Directory:** $DIR" >> $GITHUB_STEP_SUMMARY
+
+  # ============================================
+  # TEST - Validate before building
+  # ============================================
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    needs: prepare
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+
+      - name: Run tests
+        working-directory: ${{ needs.prepare.outputs.directory }}
+        run: go test ./...
+
+      - name: Run vet
+        working-directory: ${{ needs.prepare.outputs.directory }}
+        run: go vet ./...
+
+  # ============================================
+  # BUILD - Cross-compile for all platforms
+  # ============================================
+  build:
+    name: Build ${{ needs.prepare.outputs.tool }}-${{ matrix.platform }}
+    runs-on: ubuntu-latest
+    needs: [prepare, test]
+
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+            platform: linux-x86_64
+          - goos: linux
+            goarch: arm64
+            platform: linux-arm64
+          - goos: darwin
+            goarch: arm64
+            platform: darwin-arm64
+          - goos: windows
+            goarch: amd64
+            platform: windows-x86_64
+            ext: .exe
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+
+      - name: Build
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        run: |
+          TOOL="${{ needs.prepare.outputs.tool }}"
+          VERSION="${{ needs.prepare.outputs.version }}"
+          MODULE="${{ needs.prepare.outputs.module }}"
+          DIR="${{ needs.prepare.outputs.directory }}"
+          BINARY="${TOOL}-${{ matrix.platform }}${{ matrix.ext }}"
+
+          cd "$DIR"
+          go build \
+            -ldflags="-s -w -X ${MODULE}/cmd.Version=${VERSION}" \
+            -o "$BINARY" .
+
+          ls -lh "$BINARY"
+          echo "binary=$BINARY" >> $GITHUB_ENV
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ needs.prepare.outputs.tool }}-${{ matrix.platform }}
+          path: ${{ needs.prepare.outputs.directory }}/${{ needs.prepare.outputs.tool }}-${{ matrix.platform }}${{ matrix.ext }}
+          retention-days: 1
+
+  # ============================================
+  # RELEASE - Create GitHub Release with binaries
+  # ============================================
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: [prepare, build]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+
+      - name: Collect binaries
+        run: |
+          mkdir -p release/
+          for dir in artifacts/*/; do
+            cp "$dir"* release/
+          done
+          chmod +x release/*
+          ls -lh release/
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TOOL="${{ needs.prepare.outputs.tool }}"
+          VERSION="${{ needs.prepare.outputs.version }}"
+          TAG="${GITHUB_REF#refs/tags/}"
+
+          TOOL_NAME="gw (Grove Wrap)"
+          DIR="grove-wrap-go"
+          if [ "$TOOL" = "gf" ]; then
+            TOOL_NAME="gf (Grove Find)"
+            DIR="grove-find-go"
+          fi
+
+          gh release create "$TAG" release/* \
+            --title "${TOOL_NAME} ${VERSION}" \
+            --notes "## ${TOOL_NAME} ${VERSION}
+
+          ### Install
+
+          \`\`\`bash
+          bash tools/${DIR}/install.sh
+          \`\`\`
+
+          Or download the binary for your platform below.
+
+          ### Platforms
+          - \`${TOOL}-linux-x86_64\` — Linux x86_64
+          - \`${TOOL}-linux-arm64\` — Linux ARM64
+          - \`${TOOL}-darwin-arm64\` — macOS Apple Silicon
+          - \`${TOOL}-windows-x86_64.exe\` — Windows x86_64"
