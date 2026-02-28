@@ -317,30 +317,36 @@ export const actions: Actions = {
             deviceId: string;
           }>;
 
-          if (drafts.length > 0) {
+          // Cap at 20 drafts to avoid DO concurrency limits / timeouts
+          const draftsToMigrate = drafts.slice(0, 20);
+
+          if (draftsToMigrate.length > 0) {
             // Get new DO stub
             const newDoId = tenantsDO.idFromName(`tenant:${newUsername}`);
             const newStub = tenantsDO.get(newDoId);
 
-            // Copy all drafts to new DO in parallel
-            await Promise.all(
-              drafts.map(async (draft) => {
-                const fullDraftRes = await oldStub.fetch(
-                  `https://tenant.internal/drafts/${encodeURIComponent(draft.slug)}`,
-                );
-                if (fullDraftRes.ok) {
-                  const fullDraft = await fullDraftRes.json();
-                  await newStub.fetch(
+            // Migrate drafts in batches of 5 to avoid overwhelming DOs
+            for (let i = 0; i < draftsToMigrate.length; i += 5) {
+              const batch = draftsToMigrate.slice(i, i + 5);
+              await Promise.all(
+                batch.map(async (draft) => {
+                  const fullDraftRes = await oldStub.fetch(
                     `https://tenant.internal/drafts/${encodeURIComponent(draft.slug)}`,
-                    {
-                      method: "PUT",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify(fullDraft),
-                    },
                   );
-                }
-              }),
-            );
+                  if (fullDraftRes.ok) {
+                    const fullDraft = await fullDraftRes.json();
+                    await newStub.fetch(
+                      `https://tenant.internal/drafts/${encodeURIComponent(draft.slug)}`,
+                      {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(fullDraft),
+                      },
+                    );
+                  }
+                }),
+              );
+            }
           }
         }
       } catch (draftErr) {

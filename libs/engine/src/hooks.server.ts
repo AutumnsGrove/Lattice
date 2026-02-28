@@ -461,8 +461,10 @@ export const handle: Handle = async ({ event, resolve }) => {
         event.platform,
       );
       if (redirectTarget) {
+        // 302 (not 301): the hold expires after 30 days and the old subdomain
+        // can be re-registered. A cached 301 would permanently bypass the new owner.
         throw redirect(
-          301,
+          302,
           `https://${redirectTarget}.grove.place${event.url.pathname}${event.url.search}`,
         );
       }

@@ -94,15 +94,24 @@
 	let showUsernameConfirmDialog = $state(false);
 	/** @type {ReturnType<typeof setTimeout> | undefined} */
 	let usernameDebounceTimer = $state(undefined);
+	/** @type {AbortController | null} */
+	let usernameAbortController = $state(null);
 
-	// Debounced username availability check
+	// Debounced username availability check with AbortController to prevent stale responses
 	function checkUsernameAvailability(value) {
 		const trimmed = value.toLowerCase().trim();
 		clearTimeout(usernameDebounceTimer);
 		usernameAvailable = null;
 		usernameError = "";
 
+		// Cancel any in-flight request
+		if (usernameAbortController) {
+			usernameAbortController.abort();
+			usernameAbortController = null;
+		}
+
 		if (!trimmed || trimmed.length < 3) {
+			checkingUsername = false;
 			if (trimmed.length > 0) usernameError = "At least 3 characters";
 			return;
 		}
@@ -115,21 +124,32 @@
 
 		checkingUsername = true;
 		usernameDebounceTimer = setTimeout(async () => {
+			const controller = new AbortController();
+			usernameAbortController = controller;
 			try {
-				const res = await fetch(`/api/username/check?username=${encodeURIComponent(trimmed)}`);
+				const res = await fetch(
+					`/api/username/check?username=${encodeURIComponent(trimmed)}`,
+					{ signal: controller.signal },
+				);
 				const result = await res.json();
-				if (result.available) {
-					usernameAvailable = true;
-					usernameError = "";
-				} else {
-					usernameAvailable = false;
-					usernameError = result.error || "Username not available";
+				// Only apply if this controller wasn't aborted (i.e. still the latest request)
+				if (!controller.signal.aborted) {
+					if (result.available) {
+						usernameAvailable = true;
+						usernameError = "";
+					} else {
+						usernameAvailable = false;
+						usernameError = result.error || "Username not available";
+					}
+					checkingUsername = false;
 				}
-			} catch {
-				usernameError = "Unable to check availability";
-				usernameAvailable = false;
+			} catch (err) {
+				if (!controller.signal.aborted) {
+					usernameError = "Unable to check availability";
+					usernameAvailable = false;
+					checkingUsername = false;
+				}
 			}
-			checkingUsername = false;
 		}, 400);
 	}
 
