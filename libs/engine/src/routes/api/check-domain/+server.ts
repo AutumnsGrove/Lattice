@@ -12,7 +12,7 @@
  * Requires authentication (any signed-in user).
  */
 
-import { json, error } from "@sveltejs/kit";
+import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { normalizeDomain, checkDomain } from "$lib/server/rdap";
 
@@ -74,15 +74,13 @@ async function checkRateLimit(
 	}
 }
 
-export const GET: RequestHandler = async ({
-	url,
-	locals,
-	platform,
-	getClientAddress,
-}) => {
+export const GET: RequestHandler = async ({ url, locals, platform, getClientAddress }) => {
 	// Auth check — must be signed in
 	if (!locals.user) {
-		throw error(401, "Sign in to check domain availability");
+		return json(
+			{ domain: "", status: "unknown" as const, error: "Sign in to check domain availability" },
+			{ status: 401 },
+		);
 	}
 
 	// Rate limit
