@@ -36,8 +36,8 @@ describe("BLAZE_CONFIG (auto blazes)", () => {
 });
 
 describe("BLAZE_COLORS", () => {
-	it("has 8 color entries", () => {
-		expect(Object.keys(BLAZE_COLORS)).toHaveLength(8);
+	it("has 16 color entries", () => {
+		expect(Object.keys(BLAZE_COLORS)).toHaveLength(16);
 	});
 
 	it("each color has light and dark classes", () => {
@@ -48,7 +48,24 @@ describe("BLAZE_COLORS", () => {
 	});
 
 	it("includes all expected palette keys", () => {
-		const expected = ["grove", "amber", "rose", "pink", "sky", "violet", "yellow", "slate"];
+		const expected = [
+			"grove",
+			"amber",
+			"rose",
+			"pink",
+			"sky",
+			"violet",
+			"yellow",
+			"slate",
+			"red",
+			"orange",
+			"teal",
+			"emerald",
+			"cyan",
+			"indigo",
+			"fuchsia",
+			"lime",
+		];
 		for (const key of expected) {
 			expect(BLAZE_COLORS[key], `missing color: ${key}`).toBeDefined();
 		}
