@@ -1212,7 +1212,7 @@
 
 					<!-- Icon picker — visual grid -->
 					<div class="form-group" style="margin-top: 0.75rem;">
-						<label>Icon</label>
+						<span class="form-label">Icon</span>
 						<div class="blaze-icon-grid" role="radiogroup" aria-label="Choose a blaze icon">
 							{#each VALID_BLAZE_ICONS as iconName}
 								{@const IconComp = resolveLucideIcon(iconName)}
@@ -1232,7 +1232,7 @@
 
 					<!-- Color picker — swatches + custom hex -->
 					<div class="form-group" style="margin-top: 0.75rem;">
-						<label>Color</label>
+						<span class="form-label">Color</span>
 						<div class="blaze-color-picker">
 							<div class="blaze-color-swatches" role="radiogroup" aria-label="Choose a blaze color">
 								{#each VALID_BLAZE_COLORS as colorName}

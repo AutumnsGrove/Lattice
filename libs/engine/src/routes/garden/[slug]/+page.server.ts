@@ -156,6 +156,8 @@ export const load: PageServerLoad = async ({ params, locals, platform, setHeader
 						author: authorName,
 						created_at: undefined,
 						updated_at: undefined,
+						blaze: null as string | null,
+						blazeDefinition: null as BlazeDefinition | null,
 					},
 					isOwner: isOwner || false,
 					comments: [],

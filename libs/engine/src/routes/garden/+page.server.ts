@@ -83,10 +83,7 @@ export const load: PageServerLoad = async ({ locals, platform, setHeaders }) => 
 		posts = await cache.getOrSet<PostMeta[]>(kv, cacheKey, {
 			ttl: CACHE_TTL_SECONDS,
 			compute: async () => {
-				const result = await db
-					.prepare(POSTS_WITH_BLAZES_SQL)
-					.bind(tenantId)
-					.all<PostRow>();
+				const result = await db.prepare(POSTS_WITH_BLAZES_SQL).bind(tenantId).all<PostRow>();
 
 				return (result.results ?? []).map(mapPostRow);
 			},
@@ -100,10 +97,7 @@ export const load: PageServerLoad = async ({ locals, platform, setHeaders }) => 
 	} else if (db && tenantId) {
 		// No KV available, fall back to direct D1 (no caching)
 		try {
-			const result = await db
-				.prepare(POSTS_WITH_BLAZES_SQL)
-				.bind(tenantId)
-				.all<PostRow>();
+			const result = await db.prepare(POSTS_WITH_BLAZES_SQL).bind(tenantId).all<PostRow>();
 
 			posts = (result.results ?? []).map(mapPostRow);
 		} catch (err) {
@@ -113,7 +107,7 @@ export const load: PageServerLoad = async ({ locals, platform, setHeaders }) => 
 
 	// If no D1 posts, fall back to filesystem (for local dev or if D1 is empty)
 	if (posts.length === 0) {
-		posts = getAllPosts();
+		posts = getAllPosts().map((p) => ({ ...p, blaze: null, blazeDefinition: null }));
 	}
 
 	// Determine if logged-in user is the tenant owner (can access admin)

@@ -83,6 +83,7 @@
 				role="button"
 				tabindex="0"
 			>
+				{@const blazeDef = resolveBlaze(post.blaze, post.blazeDefinition)}
 				<h2 class="text-xl font-semibold mb-4 text-green-800 dark:text-green-500 transition-colors">{post.title}</h2>
 				<div class="flex items-center gap-4 mb-3 flex-wrap">
 					<time datetime={post.date} class="text-sm text-foreground-subtle transition-colors">
@@ -94,7 +95,6 @@
 					</time>
 					<div class="flex items-center gap-1.5">
 						<Blaze postType="bloom" />
-						{@const blazeDef = resolveBlaze(post.blaze, post.blazeDefinition)}
 						{#if blazeDef}
 							<Blaze definition={blazeDef} />
 						{/if}
