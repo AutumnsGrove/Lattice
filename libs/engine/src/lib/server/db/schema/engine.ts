@@ -337,6 +337,21 @@ export const usernameAuditLog = sqliteTable("username_audit_log", {
 	createdAt: integer("created_at").default(sql`(unixepoch())`),
 });
 
+export const usernameHistory = sqliteTable("username_history", {
+	id: text("id").primaryKey(),
+	tenantId: text("tenant_id")
+		.notNull()
+		.references(() => tenants.id, { onDelete: "cascade" }),
+	oldSubdomain: text("old_subdomain").notNull(),
+	newSubdomain: text("new_subdomain").notNull(),
+	changedAt: integer("changed_at")
+		.notNull()
+		.default(sql`(unixepoch())`),
+	holdExpiresAt: integer("hold_expires_at").notNull(),
+	released: integer("released").default(0),
+	actorEmail: text("actor_email").notNull(),
+});
+
 // ─────────────────────────────────────────────────────────────────────────────
 // BILLING: Platform Billing, Webhooks, Comped Invites
 // ─────────────────────────────────────────────────────────────────────────────

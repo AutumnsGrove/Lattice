@@ -90,6 +90,9 @@ export const ENDPOINT_RATE_LIMITS = {
 	// Username checking (anti-enumeration)
 	"check/username": { limit: 30, windowSeconds: 60 },
 
+	// Username change availability check (engine-side)
+	"username/check": { limit: 30, windowSeconds: 60 },
+
 	// OG image generation
 	"og/generate": { limit: 100, windowSeconds: 3600 },
 
@@ -134,6 +137,7 @@ export const ENDPOINT_MAP: Record<string, EndpointKey> = {
 	"PUT:/api/billing": "billing/operations",
 	"POST:/api/trace": "trace/submit",
 	"GET:/api/check-username": "check/username",
+	"GET:/api/username/check": "username/check",
 
 	// Lumen gateway routes
 	"POST:/inference": "lumen/inference",
