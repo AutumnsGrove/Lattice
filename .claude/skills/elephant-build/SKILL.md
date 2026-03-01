@@ -113,13 +113,19 @@ Once CI passes, verify manually:
 If the elephant built UI, it looks at the result before declaring the structure sound:
 
 ```bash
+# Prerequisite: seed the database if not already done
+uv run --project tools/glimpse glimpse seed --yes
+
 # Capture the page to see what was actually built
-uv run --project tools/glimpse glimpse capture http://localhost:5173/[page] \
-  --season autumn --theme dark --logs
+# Local routing uses ?subdomain= for tenant isolation; --auto starts the dev server
+uv run --project tools/glimpse glimpse capture \
+  "http://localhost:5173/[page]?subdomain=midnight-bloom" \
+  --season autumn --theme dark --logs --auto
 
 # Walk through the feature visually
-uv run --project tools/glimpse glimpse browse http://localhost:5173/[page] \
-  --do "interact with the new feature" --screenshot-each --logs
+uv run --project tools/glimpse glimpse browse \
+  "http://localhost:5173/[page]?subdomain=midnight-bloom" \
+  --do "interact with the new feature" --screenshot-each --logs --auto
 ```
 
 Review the screenshots. If something doesn't look right, fix it and capture again. The elephant doesn't ship structures it hasn't inspected.

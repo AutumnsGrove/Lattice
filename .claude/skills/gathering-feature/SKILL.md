@@ -245,13 +245,19 @@ gw ci --affected --fail-fast --diagnose
 If the feature has a user-facing interface, capture it before declaring the gathering complete:
 
 ```bash
+# Prerequisite: seed the database if not already done
+uv run --project tools/glimpse glimpse seed --yes
+
 # Verify the feature renders correctly across seasons
-uv run --project tools/glimpse glimpse matrix http://localhost:5173/[feature-page] \
-  --seasons autumn,winter --themes light,dark --logs
+# Local routing uses ?subdomain= for tenant isolation; --auto starts the dev server
+uv run --project tools/glimpse glimpse matrix \
+  "http://localhost:5173/[feature-page]?subdomain=midnight-bloom" \
+  --seasons autumn,winter --themes light,dark --logs --auto
 
 # Walk through the feature flow visually
-uv run --project tools/glimpse glimpse browse http://localhost:5173/[feature-page] \
-  --do "interact with the new feature elements" --screenshot-each --logs
+uv run --project tools/glimpse glimpse browse \
+  "http://localhost:5173/[feature-page]?subdomain=midnight-bloom" \
+  --do "interact with the new feature elements" --screenshot-each --logs --auto
 ```
 
 Review screenshots for visual correctness, console errors, and theme consistency. Fix and re-capture until the feature looks right.

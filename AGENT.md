@@ -224,22 +224,90 @@ gw dev ci --affected --fail-fast --diagnose
 
 **When you build, modify, or review UI, you MUST look at the result.** CI passing is not the same as looking correct. Glimpse is Grove's Playwright-based screenshot tool — it lets you see what you built.
 
-```bash
-# Capture a page with Grove theme injection
-uv run --project tools/glimpse glimpse capture http://localhost:5173/ --season autumn --theme dark --logs
+#### Quick Start (3 steps from cold start)
 
-# Capture all season × theme combinations at once
-uv run --project tools/glimpse glimpse matrix http://localhost:5173/
+```bash
+# 1. Seed the local database with test data
+uv run --project tools/glimpse glimpse seed --yes
+
+# 2. Capture a page (--auto starts the dev server if not running)
+uv run --project tools/glimpse glimpse capture http://localhost:5173/?subdomain=midnight-bloom \
+  --season autumn --theme dark --logs --auto
+
+# 3. Read the screenshot to verify (Claude can view PNGs)
+# The output path is printed in the capture output
+```
+
+That's it. `glimpse seed` sets up the database, `--auto` starts the dev server, and `?subdomain=` routes to the test tenant locally.
+
+#### Local Routing
+
+Locally, subdomains are simulated via query parameter:
+- `http://localhost:5173/?subdomain=midnight-bloom` — Home page
+- `http://localhost:5173/garden?subdomain=midnight-bloom` — Blog listing
+- `http://localhost:5173/garden/some-post?subdomain=midnight-bloom` — Blog post
+- `http://localhost:5173/about?subdomain=midnight-bloom` — About page
+
+#### Data Profiles
+
+Glimpse seeds local D1 databases with test content. Choose the right profile for what you're testing:
+
+```bash
+# Full curated blog (3 posts, 5 pages) — default, good for consistent verification
+uv run --project tools/glimpse glimpse seed --profile blog --yes
+
+# Empty tenant — test what new users see (no posts, no custom pages)
+uv run --project tools/glimpse glimpse seed --profile empty --yes
+
+# Random content via @faker-js/faker — proves UI works with any data, not just golden-path
+uv run --project tools/glimpse glimpse seed --profile fake --fake-posts 5 --yes
+
+# Migrations only, no seed data — clean slate
+uv run --project tools/glimpse glimpse seed --profile fresh --yes
+```
+
+| Profile | Subdomain | Use Case |
+|---------|-----------|----------|
+| `blog` | `midnight-bloom` | Default. Curated tea shop blog with known content |
+| `empty` | `empty-grove` | Empty state testing — what does a blank site look like? |
+| `fake` | _(random each run)_ | Random content — proves rendering works with arbitrary data |
+| `fresh` | _(none)_ | Migrations only — no tenant data at all |
+
+**Use `fake` when you want to prove your UI handles real-world variation, not just the one test dataset you designed around.**
+
+#### Capture Commands
+
+```bash
+# Single page capture with theme injection
+uv run --project tools/glimpse glimpse capture http://localhost:5173/?subdomain=midnight-bloom \
+  --season autumn --theme dark --logs --auto
+
+# All season × theme combinations at once
+uv run --project tools/glimpse glimpse matrix http://localhost:5173/?subdomain=midnight-bloom --auto
 
 # Interactive browsing — click around, fill forms, verify flows
-uv run --project tools/glimpse glimpse browse http://localhost:5173/ \
-  --do "click Posts, then scroll down" --screenshot-each --logs
+uv run --project tools/glimpse glimpse browse http://localhost:5173/?subdomain=midnight-bloom \
+  --do "click Posts, then scroll down" --screenshot-each --logs --auto
 
 # Check readiness (browser, server, database)
 uv run --project tools/glimpse glimpse status
 ```
 
-**When to use Glimpse:**
+#### Dev Server Details
+
+The `--auto` flag handles server startup automatically. If you need to manage it manually:
+
+```bash
+# Start dev server (from repo root — runs in libs/engine via wrangler)
+cd libs/engine && pnpm dev:wrangler
+
+# Stop auto-started server
+uv run --project tools/glimpse glimpse stop
+```
+
+Default port is 5173. The server runs via wrangler for local D1/KV/R2 bindings.
+
+#### When to use Glimpse
 
 - After building or modifying any UI component, page, or layout
 - During design skill workflows (chameleon-adapt, gathering-ui, grove-ui-design)
