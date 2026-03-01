@@ -87,9 +87,13 @@
         {#each data.posts as post (post.slug)}
           <tr>
             <td class="p-4 text-left border-b border-gray-200 dark:border-gray-700 transition-[border-color] max-md:px-2 max-md:py-3">
-              <a href="/garden/{post.slug}" target="_blank" rel="noopener noreferrer" aria-label="{post.title} (opens in new tab)" class="font-medium text-green-700 dark:text-green-400 no-underline hover:underline transition-colors">
-                {post.title}
-              </a>
+              {#if post.status === 'published'}
+                <a href="/garden/{post.slug}" target="_blank" rel="noopener noreferrer" aria-label="{post.title} (opens in new tab)" class="font-medium text-green-700 dark:text-green-400 no-underline hover:underline transition-colors">
+                  {post.title}
+                </a>
+              {:else}
+                <span class="font-medium text-foreground">{post.title}</span>
+              {/if}
               {#if post.description}
                 <p class="mt-1 mb-0 text-xs text-foreground-muted">{post.description}</p>
               {/if}
@@ -120,7 +124,11 @@
               </div>
             </td>
             <td class="p-4 text-left border-b border-gray-200 dark:border-gray-700 whitespace-nowrap transition-[border-color] max-md:px-2 max-md:py-3">
-              <a href="/garden/{post.slug}" target="_blank" rel="noopener noreferrer" aria-label="View {post.title} (opens in new tab)" class="text-green-700 dark:text-green-400 no-underline text-sm mr-4 hover:underline transition-colors max-md:mr-2">View</a>
+              {#if post.status === 'published'}
+                <a href="/garden/{post.slug}" target="_blank" rel="noopener noreferrer" aria-label="View {post.title} (opens in new tab)" class="text-green-700 dark:text-green-400 no-underline text-sm mr-4 hover:underline transition-colors max-md:mr-2">View</a>
+              {:else}
+                <span class="text-foreground-subtle text-sm mr-4 cursor-default" title="Publish this bloom to view it">View</span>
+              {/if}
               <a href="/arbor/garden/edit/{post.slug}" class="text-green-700 dark:text-green-400 no-underline text-sm mr-4 hover:underline transition-colors max-md:mr-2">Edit</a>
               <button
                 onclick={() => confirmDelete({ slug: post.slug, title: post.title })}
