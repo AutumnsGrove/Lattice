@@ -3,18 +3,24 @@
 Manages browser lifecycle and executes screenshot captures with
 Grove theme injection via localStorage pre-seeding and optional
 console log collection.
+
+Includes CDN font interception: when running locally, external font
+requests to cdn.grove.place are served from libs/engine/static/fonts/
+so screenshots render correctly without internet access.
 """
 
 import asyncio
+import mimetypes
 import time
 from pathlib import Path
 
-from playwright.async_api import async_playwright, Browser, BrowserContext
+from playwright.async_api import async_playwright, Browser, BrowserContext, Route
 
 from glimpse.capture.console import ConsoleCollector
 from glimpse.capture.injector import build_init_script
 from glimpse.capture.screenshot import CaptureRequest, CaptureResult, ConsoleMessage
 from glimpse.utils.browser import find_chromium_executable
+from glimpse.seed.discovery import find_grove_root
 
 
 # Backward-compat alias (was private, now public in utils.browser)
@@ -109,6 +115,28 @@ class CaptureEngine:
 
             page = await context.new_page()
 
+            # 2b. Intercept CDN font requests → serve from local static/fonts/
+            grove_root = find_grove_root()
+            if grove_root:
+                fonts_dir = grove_root / "libs" / "engine" / "static" / "fonts"
+                if fonts_dir.exists():
+                    async def _handle_font_route(route: Route) -> None:
+                        url = route.request.url
+                        # Extract filename from CDN URL
+                        filename = url.rsplit("/", 1)[-1]
+                        local_path = fonts_dir / filename
+                        if local_path.exists():
+                            content_type = mimetypes.guess_type(filename)[0] or "font/ttf"
+                            await route.fulfill(
+                                status=200,
+                                content_type=content_type,
+                                body=local_path.read_bytes(),
+                            )
+                        else:
+                            await route.abort("blockedbyclient")
+
+                    await page.route("**/cdn.grove.place/fonts/**", _handle_font_route)
+
             # 3. Attach console collector before navigation
             collector = None
             if request.logs:
@@ -167,6 +195,10 @@ class CaptureEngine:
                 screenshot_opts["quality"] = request.quality
 
             output_path = request.output_path or Path("screenshot.png")
+
+            # Screenshot timeout: use the request timeout so it doesn't
+            # hang on unreachable font CDNs or slow resource loads.
+            screenshot_opts["timeout"] = request.timeout_ms
 
             if request.selector:
                 # Element capture

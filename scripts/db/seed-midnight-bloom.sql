@@ -2,11 +2,16 @@
 -- Run with: npx wrangler d1 execute grove-engine-db --file scripts/seed-midnight-bloom.sql --remote
 
 -- ============================================
--- UPDATE HOME PAGE
+-- UPSERT HOME PAGE (INSERT OR REPLACE to be resilient to missing migration data)
 -- ============================================
-UPDATE pages SET
-  title = 'The Midnight Bloom',
-  markdown_content = '# Welcome to The Midnight Bloom
+INSERT INTO pages (id, tenant_id, slug, title, type, markdown_content, hero, updated_at, created_at)
+VALUES (
+  'example-page-home',
+  'example-tenant-001',
+  'home',
+  'The Midnight Bloom',
+  'home',
+  '# Welcome to The Midnight Bloom
 
 When the rest of the world winds down, we''re just getting started. The Midnight Bloom is a sanctuary for night owls, late-shift workers, insomniacs, and anyone who finds peace in the quiet hours after dark.
 
@@ -28,9 +33,15 @@ Our selection spans the globe: delicate white teas from Fujian, robust pu-erhs f
 We''re tucked away on Twilight Lane, easy to miss if you''re not looking. A small wooden sign, a door with a brass moon handle, and the warm glow of candlelight in the window. You''ll know it when you find it.
 
 *The Midnight Bloom: where every night holds the possibility of something beautiful.*',
-  hero = '{"title": "The Midnight Bloom", "subtitle": "Open when the stars come out", "cta": {"text": "View Our Menu", "link": "/shop"}}',
-  updated_at = unixepoch()
-WHERE tenant_id = 'example-tenant-001' AND slug = 'home';
+  '{"title": "The Midnight Bloom", "subtitle": "Open when the stars come out", "cta": {"text": "View Our Menu", "link": "/menu"}}',
+  unixepoch(),
+  unixepoch()
+)
+ON CONFLICT(tenant_id, slug) DO UPDATE SET
+  title = excluded.title,
+  markdown_content = excluded.markdown_content,
+  hero = excluded.hero,
+  updated_at = unixepoch();
 
 -- ============================================
 -- ADD ABOUT PAGE

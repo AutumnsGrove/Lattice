@@ -39,7 +39,7 @@ WHERE slug = 'home' AND tenant_id = 'example-tenant-001';
 -- ============================================
 -- CREATE MENU PAGE
 -- ============================================
-INSERT INTO pages (id, tenant_id, slug, title, description, type, markdown_content, html_content, hero, gutter_content, font, created_at, updated_at)
+INSERT OR REPLACE INTO pages (id, tenant_id, slug, title, description, type, markdown_content, html_content, hero, gutter_content, font, created_at, updated_at)
 VALUES (
   'example-page-menu',
   'example-tenant-001',
@@ -175,7 +175,7 @@ We don''t list prices on our menu. Tea is served by the pot or by the gaiwan ses
 -- ============================================
 -- CREATE GALLERY PAGE
 -- ============================================
-INSERT INTO pages (id, tenant_id, slug, title, description, type, markdown_content, html_content, hero, gutter_content, font, created_at, updated_at)
+INSERT OR REPLACE INTO pages (id, tenant_id, slug, title, description, type, markdown_content, html_content, hero, gutter_content, font, created_at, updated_at)
 VALUES (
   'example-page-gallery',
   'example-tenant-001',

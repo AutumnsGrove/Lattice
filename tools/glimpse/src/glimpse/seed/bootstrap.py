@@ -6,6 +6,11 @@ direct SQLite access for speed. Handles all three Grove databases.
 When wrangler migrations fail (e.g. DEFAULT (unixepoch()) not supported
 in local SQLite ALTER TABLE), falls back to direct SQLite execution with
 compatibility patching.
+
+Supports data profiles for switching between different test states:
+  - blog: Full Midnight Bloom tea shop (3 posts, 5 pages)
+  - empty: Tenant exists with defaults, no posts or custom pages
+  - fresh: Clean databases with migrations only, no tenant data
 """
 
 import re
@@ -32,6 +37,23 @@ _UNIXEPOCH_DEFAULT_RE = re.compile(
     re.IGNORECASE,
 )
 
+# Data profiles: map profile name to the seed scripts it uses.
+# Scripts are loaded from the seed scripts directory (scripts/db/).
+# "fresh" uses no seeds (migrations only).
+PROFILES: dict[str, list[str]] = {
+    "blog": [
+        "seed-midnight-bloom.sql",
+        "add-midnight-bloom-pages.sql",
+        "fix-midnight-bloom-content.sql",
+    ],
+    "empty": [
+        "seed-empty-grove.sql",
+    ],
+    "fresh": [],
+}
+
+DEFAULT_PROFILE = "blog"
+
 
 def _patch_migration_sql(sql: str) -> str:
     """Patch migration SQL for local D1 SQLite compatibility.
@@ -41,6 +63,57 @@ def _patch_migration_sql(sql: str) -> str:
     in ALTER TABLE ADD COLUMN.
     """
     return _UNIXEPOCH_DEFAULT_RE.sub(r"\1 DEFAULT 0", sql)
+
+
+def _split_sql_statements(sql: str) -> list[str]:
+    """Split SQL text into individual statements, respecting string literals.
+
+    Unlike naive str.split(';'), this handles:
+      - Multiline string values containing semicolons
+      - SQL comments (-- line comments)
+      - Escaped quotes ('') within strings
+    """
+    statements: list[str] = []
+    current: list[str] = []
+    in_string = False
+
+    for line in sql.split("\n"):
+        stripped = line.strip()
+
+        # Skip pure comment lines (but keep inline comments)
+        if stripped.startswith("--") and not in_string:
+            continue
+
+        current.append(line)
+
+        # Track string state character by character
+        i = 0
+        while i < len(line):
+            ch = line[i]
+            if ch == "'" and not in_string:
+                in_string = True
+            elif ch == "'" and in_string:
+                # Check for escaped quote ('')
+                if i + 1 < len(line) and line[i + 1] == "'":
+                    i += 1  # Skip the escaped quote
+                else:
+                    in_string = False
+            elif ch == "-" and not in_string and i + 1 < len(line) and line[i + 1] == "-":
+                break  # Rest of line is a comment
+            elif ch == ";" and not in_string:
+                # End of statement
+                stmt = "\n".join(current).strip()
+                if stmt:
+                    statements.append(stmt)
+                current = []
+            i += 1
+
+    # Handle any remaining content (statement without trailing semicolon)
+    remainder = "\n".join(current).strip()
+    if remainder:
+        statements.append(remainder)
+
+    return statements
 
 
 class DataBootstrapper:
@@ -66,8 +139,11 @@ class DataBootstrapper:
         target_db: "engine", "curios", or "observability". None = all.
         Returns list of result dicts with 'db', 'success', 'output'.
 
-        If wrangler fails (common with non-constant DEFAULT expressions),
-        falls back to direct SQLite execution with compatibility patching.
+        Strategy:
+          1. Try wrangler d1 migrations apply (handles most migrations)
+          2. If wrangler fails (e.g. migration 053+ with unixepoch()),
+             apply remaining migrations directly to the SAME databases
+             with compatibility patching.
         """
         if not self._grove_root:
             return [{"db": "all", "success": False, "output": "GROVE_ROOT not found"}]
@@ -84,61 +160,51 @@ class DataBootstrapper:
                 })
                 continue
 
-            try:
-                proc = subprocess.run(
-                    [
-                        "npx", "wrangler", "d1", "migrations", "apply",
-                        wrangler_name, "--local",
-                    ],
-                    cwd=str(self._grove_root / "libs" / "engine"),
-                    capture_output=True,
-                    text=True,
-                    timeout=60,
-                )
-                if proc.returncode == 0:
-                    results.append({
-                        "db": name,
-                        "success": True,
-                        "output": proc.stdout.strip() or "Migrations applied",
-                    })
-                else:
-                    # Wrangler failed — try direct SQLite fallback
-                    fallback = self._apply_migrations_direct(name)
-                    results.append(fallback)
-            except FileNotFoundError:
-                results.append({
-                    "db": name,
-                    "success": False,
-                    "output": "wrangler not found (install with: pnpm add -g wrangler)",
-                })
-            except subprocess.TimeoutExpired:
-                results.append({
-                    "db": name,
-                    "success": False,
-                    "output": "Migration timed out after 60s",
-                })
+            # Step 1: Try wrangler (creates databases and applies what it can)
+            wrangler_ok = self._try_wrangler_migrations(name, wrangler_name)
+
+            # Step 2: Apply any remaining migrations directly with patching
+            fallback = self._apply_remaining_migrations_direct(name)
+            results.append(fallback)
 
         return results
 
-    def _apply_migrations_direct(self, db_name: str) -> dict:
-        """Fallback: apply migrations directly via SQLite with compatibility patches.
+    def _try_wrangler_migrations(self, db_name: str, wrangler_name: str) -> bool:
+        """Run wrangler d1 migrations apply. Returns True if successful."""
+        try:
+            proc = subprocess.run(
+                [
+                    "npx", "wrangler", "d1", "migrations", "apply",
+                    wrangler_name, "--local",
+                ],
+                cwd=str(self._grove_root / "libs" / "engine"),
+                capture_output=True,
+                text=True,
+                timeout=60,
+            )
+            return proc.returncode == 0
+        except (FileNotFoundError, subprocess.TimeoutExpired):
+            return False
 
-        This handles cases where wrangler d1 migrations fail due to
-        local SQLite limitations (e.g. DEFAULT (unixepoch()) in ALTER TABLE).
+    def _apply_remaining_migrations_direct(self, db_name: str) -> dict:
+        """Apply unapplied migrations directly via SQLite with compatibility patches.
+
+        Finds the databases created by wrangler (in libs/engine/.wrangler/) and
+        applies any migrations that wrangler couldn't handle (e.g. those with
+        DEFAULT (unixepoch()) in ALTER TABLE).
         """
         migrations_path = self._grove_root / self._migrations_dir
         if not migrations_path.exists():
             return {"db": db_name, "success": False, "output": f"Migrations dir not found: {migrations_path}"}
 
-        # Find or create the local D1 database
+        # Find the database (wrangler-created preferred, glimpse-created fallback)
         databases = find_local_d1_databases(self._grove_root)
         db_path = databases.get(db_name)
 
         if not db_path:
-            # Try to create the state directory and DB file
+            # Create a glimpse-managed database as last resort
             state_dir = self._grove_root / ".wrangler" / "state" / "v3" / "d1"
             state_dir.mkdir(parents=True, exist_ok=True)
-            # Use a deterministic directory name
             db_dir = state_dir / f"glimpse-{db_name}"
             db_dir.mkdir(exist_ok=True)
             db_path = db_dir / "db.sqlite"
@@ -175,15 +241,9 @@ class DataBootstrapper:
 
             sql = mig_file.read_text()
             patched_sql = _patch_migration_sql(sql)
+            statements = _split_sql_statements(patched_sql)
 
             try:
-                # Split into individual statements and run inside an explicit
-                # transaction so rollback actually works. executescript() issues
-                # an implicit COMMIT first, making rollback a no-op on failure
-                # and leaving partial migrations committed but untracked.
-                statements = [
-                    s.strip() for s in patched_sql.split(";") if s.strip()
-                ]
                 cursor.execute("BEGIN")
                 for stmt in statements:
                     cursor.execute(stmt)
@@ -223,22 +283,38 @@ class DataBootstrapper:
         tenant: str | None = None,
         target_db: str | None = None,
         dry_run: bool = False,
+        profile: str | None = None,
     ) -> list[dict]:
         """Execute seed SQL scripts against local D1 databases.
 
         Uses direct SQLite access for speed (bypasses wrangler CLI).
+
+        When profile is specified, only scripts listed in that profile are run.
+        When profile is None and tenant is None, all scripts in the seed
+        directory are run (backward-compatible behavior).
         """
         if not self._grove_root:
             return [{"script": "all", "success": False, "output": "GROVE_ROOT not found"}]
 
-        # Find seed scripts
-        scripts = find_seed_scripts(self._grove_root, self._scripts_dir)
-        if not scripts:
-            return [{"script": "all", "success": True, "output": "No seed scripts found"}]
-
-        # Filter by tenant if specified
-        if tenant:
-            scripts = [s for s in scripts if tenant in s.name]
+        # Determine which scripts to run
+        if profile is not None:
+            if profile not in PROFILES:
+                return [{"script": "all", "success": False, "output": f"Unknown profile: {profile}. Available: {', '.join(PROFILES)}"}]
+            script_names = PROFILES[profile]
+            if not script_names:
+                return [{"script": "all", "success": True, "output": f"Profile '{profile}' uses no seed scripts (migrations only)"}]
+            scripts_base = self._grove_root / self._scripts_dir
+            scripts = [scripts_base / name for name in script_names if (scripts_base / name).exists()]
+            missing = [name for name in script_names if not (scripts_base / name).exists()]
+            if missing:
+                return [{"script": "all", "success": False, "output": f"Missing seed scripts for profile '{profile}': {', '.join(missing)}"}]
+        else:
+            # Legacy behavior: find all scripts, optionally filter by tenant
+            scripts = find_seed_scripts(self._grove_root, self._scripts_dir)
+            if not scripts:
+                return [{"script": "all", "success": True, "output": "No seed scripts found"}]
+            if tenant:
+                scripts = [s for s in scripts if tenant in s.name]
 
         # Find local databases
         databases = find_local_d1_databases(self._grove_root)
@@ -297,10 +373,11 @@ class DataBootstrapper:
 
         return results
 
-    def reset(self, target_db: str | None = None) -> list[dict]:
+    def reset(self, target_db: str | None = None, profile: str | None = None) -> list[dict]:
         """Drop all local D1 data and recreate from scratch.
 
         This is destructive. Caller must confirm before calling.
+        Uses the specified profile for re-seeding (defaults to 'blog').
         """
         if not self._grove_root:
             return [{"db": "all", "success": False, "output": "GROVE_ROOT not found"}]
@@ -340,8 +417,8 @@ class DataBootstrapper:
                     "output": f"No local database for {name} (nothing to reset)",
                 })
 
-        # Re-apply migrations and seeds
+        # Re-apply migrations and seeds with the specified profile
         migration_results = self.apply_migrations(target_db)
-        seed_results = self.apply_seeds(target_db=target_db)
+        seed_results = self.apply_seeds(target_db=target_db, profile=profile or DEFAULT_PROFILE)
 
         return results + migration_results + seed_results
