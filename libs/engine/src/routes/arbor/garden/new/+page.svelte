@@ -59,6 +59,7 @@
 	/** @type {string | null} */
 	let error = $state(null);
 	let slugManuallyEdited = $state(false);
+	let navigatingAfterSave = $state(false);
 	let showGutter = $state(
 		browser ? localStorage.getItem("new-post-gutter-visible") === "true" : false,
 	);
@@ -144,6 +145,7 @@
 			});
 
 			editorRef?.clearDraft();
+			navigatingAfterSave = true;
 
 			toast.success(`Draft saved!`, {
 				description: `"${result.title}" has been saved.`,
@@ -162,6 +164,8 @@
 	// Flush draft and warn about unsaved changes on page unload
 	/** @param {BeforeUnloadEvent} e */
 	function handleBeforeUnload(e) {
+		if (navigatingAfterSave) return;
+
 		// Always flush the draft to localStorage so content survives session expiry
 		editorRef?.flushDraft();
 
@@ -174,6 +178,8 @@
 	// Guard SvelteKit client-side navigations (beforeunload only covers tab close / hard nav)
 	beforeNavigate((navigation) => {
 		editorRef?.flushDraft();
+
+		if (navigatingAfterSave) return;
 
 		if (content.trim() || title.trim()) {
 			if (!confirm("You have unsaved changes. Leave this page?")) {
@@ -217,6 +223,7 @@
 			});
 
 			editorRef?.clearDraft();
+			navigatingAfterSave = true;
 
 			toast.success(`${resolveTermString("Bloom", "Post")} published!`, {
 				description: `"${result.title}" is now live.`,
