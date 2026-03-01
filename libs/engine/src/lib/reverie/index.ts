@@ -56,6 +56,42 @@ import { cursorSchema } from "./schemas/curios/cursor";
 import { ambientSchema } from "./schemas/curios/ambient";
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Schema Imports — Phase 3 (Content & Social)
+// ─────────────────────────────────────────────────────────────────────────────
+
+import { postsSchema } from "./schemas/content/posts";
+import { pagesSchema } from "./schemas/content/pages";
+import { blazesSchema, DEFAULT_BLAZES } from "./schemas/content/blazes";
+import { guestbookSchema } from "./schemas/curios/guestbook";
+import { blogrollSchema } from "./schemas/social/blogroll";
+import { canopySchema, CANOPY_CATEGORIES } from "./schemas/social/canopy";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Schema Imports — Phase 4 (Full Curio Coverage)
+// ─────────────────────────────────────────────────────────────────────────────
+
+import { moodringSchema } from "./schemas/curios/moodring";
+import { nowplayingSchema } from "./schemas/curios/nowplaying";
+import { gallerySchema } from "./schemas/curios/gallery";
+import { timelineSchema } from "./schemas/curios/timeline";
+import { journeySchema } from "./schemas/curios/journey";
+import { pulseSchema } from "./schemas/curios/pulse";
+import { hitcounterSchema } from "./schemas/curios/hitcounter";
+import { linkgardenSchema } from "./schemas/curios/linkgarden";
+import { pollsSchema } from "./schemas/curios/polls";
+import { bookmarksSchema } from "./schemas/curios/bookmarks";
+import { badgesSchema } from "./schemas/identity/badges";
+import { activityStatusSchema } from "./schemas/identity/activitystatus";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Schema Imports — Phase 5 (Infrastructure)
+// ─────────────────────────────────────────────────────────────────────────────
+
+import { webringSchema } from "./schemas/social/webring";
+import { billingSchema } from "./schemas/infra/billing";
+import { flagsSchema } from "./schemas/infra/flags";
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Atmosphere Manifold
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -89,6 +125,30 @@ export const SCHEMA_REGISTRY: Partial<Record<DomainId, DomainSchema>> = {
 	"foliage.layout": layoutSchema,
 	"curios.cursor": cursorSchema,
 	"curios.ambient": ambientSchema,
+	// Phase 3
+	"content.posts": postsSchema,
+	"content.pages": pagesSchema,
+	"content.blazes": blazesSchema,
+	"curios.guestbook": guestbookSchema,
+	"curios.blogroll": blogrollSchema,
+	"social.canopy": canopySchema,
+	// Phase 4
+	"curios.moodring": moodringSchema,
+	"curios.nowplaying": nowplayingSchema,
+	"curios.gallery": gallerySchema,
+	"curios.timeline": timelineSchema,
+	"curios.journey": journeySchema,
+	"curios.pulse": pulseSchema,
+	"curios.hitcounter": hitcounterSchema,
+	"curios.linkgarden": linkgardenSchema,
+	"curios.polls": pollsSchema,
+	"curios.bookmarks": bookmarksSchema,
+	"identity.badges": badgesSchema,
+	"identity.activitystatus": activityStatusSchema,
+	// Phase 5
+	"curios.webring": webringSchema,
+	"infra.billing": billingSchema,
+	"infra.flags": flagsSchema,
 };
 
 /**
@@ -138,32 +198,32 @@ export const DOMAIN_CATALOG: readonly CatalogEntry[] = [
 	{ id: "curios.cursor",          status: "implemented", fieldCount: 6,  phase: 2, file: "curios/cursor.ts" },
 	{ id: "curios.ambient",         status: "implemented", fieldCount: 4,  phase: 2, file: "curios/ambient.ts" },
 
-	// Phase 3 — Content & Social (planned)
-	{ id: "content.posts",          status: "planned",     fieldCount: 12, phase: 3, file: "content/posts.ts" },
-	{ id: "content.pages",          status: "planned",     fieldCount: 7,  phase: 3, file: "content/pages.ts" },
-	{ id: "content.blazes",         status: "planned",     fieldCount: 5,  phase: 3, file: "content/blazes.ts" },
-	{ id: "curios.guestbook",       status: "planned",     fieldCount: 7,  phase: 3, file: "curios/guestbook.ts" },
-	{ id: "curios.blogroll",        status: "planned",     fieldCount: 5,  phase: 3, file: "social/blogroll.ts" },
-	{ id: "social.canopy",          status: "planned",     fieldCount: 4,  phase: 3, file: "social/canopy.ts" },
+	// Phase 3 — Content & Social
+	{ id: "content.posts",          status: "implemented", fieldCount: 12, phase: 3, file: "content/posts.ts" },
+	{ id: "content.pages",          status: "implemented", fieldCount: 7,  phase: 3, file: "content/pages.ts" },
+	{ id: "content.blazes",         status: "implemented", fieldCount: 5,  phase: 3, file: "content/blazes.ts" },
+	{ id: "curios.guestbook",       status: "implemented", fieldCount: 7,  phase: 3, file: "curios/guestbook.ts" },
+	{ id: "curios.blogroll",        status: "implemented", fieldCount: 5,  phase: 3, file: "social/blogroll.ts" },
+	{ id: "social.canopy",          status: "implemented", fieldCount: 4,  phase: 3, file: "social/canopy.ts" },
 
-	// Phase 4 — Full Curio Coverage (planned)
-	{ id: "curios.moodring",        status: "planned",     fieldCount: 6,  phase: 4, file: "curios/moodring.ts" },
-	{ id: "curios.nowplaying",      status: "planned",     fieldCount: 6,  phase: 4, file: "curios/nowplaying.ts" },
-	{ id: "curios.gallery",         status: "planned",     fieldCount: 14, phase: 4, file: "curios/gallery.ts" },
-	{ id: "curios.timeline",        status: "planned",     fieldCount: 10, phase: 4, file: "curios/timeline.ts" },
-	{ id: "curios.journey",         status: "planned",     fieldCount: 7,  phase: 4, file: "curios/journey.ts" },
-	{ id: "curios.pulse",           status: "planned",     fieldCount: 9,  phase: 4, file: "curios/pulse.ts" },
-	{ id: "curios.hitcounter",      status: "planned",     fieldCount: 6,  phase: 4, file: "curios/hitcounter.ts" },
-	{ id: "curios.linkgarden",      status: "planned",     fieldCount: 3,  phase: 4, file: "curios/linkgarden.ts" },
-	{ id: "curios.polls",           status: "planned",     fieldCount: 6,  phase: 4, file: "curios/polls.ts" },
-	{ id: "curios.bookmarks",       status: "planned",     fieldCount: 6,  phase: 4, file: "curios/bookmarks.ts" },
-	{ id: "identity.badges",        status: "planned",     fieldCount: 3,  phase: 4, file: "identity/badges.ts" },
-	{ id: "identity.activitystatus", status: "planned",    fieldCount: 6,  phase: 4, file: "identity/activitystatus.ts" },
+	// Phase 4 — Full Curio Coverage
+	{ id: "curios.moodring",        status: "implemented", fieldCount: 6,  phase: 4, file: "curios/moodring.ts" },
+	{ id: "curios.nowplaying",      status: "implemented", fieldCount: 6,  phase: 4, file: "curios/nowplaying.ts" },
+	{ id: "curios.gallery",         status: "implemented", fieldCount: 14, phase: 4, file: "curios/gallery.ts" },
+	{ id: "curios.timeline",        status: "implemented", fieldCount: 10, phase: 4, file: "curios/timeline.ts" },
+	{ id: "curios.journey",         status: "implemented", fieldCount: 7,  phase: 4, file: "curios/journey.ts" },
+	{ id: "curios.pulse",           status: "implemented", fieldCount: 9,  phase: 4, file: "curios/pulse.ts" },
+	{ id: "curios.hitcounter",      status: "implemented", fieldCount: 6,  phase: 4, file: "curios/hitcounter.ts" },
+	{ id: "curios.linkgarden",      status: "implemented", fieldCount: 3,  phase: 4, file: "curios/linkgarden.ts" },
+	{ id: "curios.polls",           status: "implemented", fieldCount: 6,  phase: 4, file: "curios/polls.ts" },
+	{ id: "curios.bookmarks",       status: "implemented", fieldCount: 6,  phase: 4, file: "curios/bookmarks.ts" },
+	{ id: "identity.badges",        status: "implemented", fieldCount: 3,  phase: 4, file: "identity/badges.ts" },
+	{ id: "identity.activitystatus", status: "implemented", fieldCount: 6,  phase: 4, file: "identity/activitystatus.ts" },
 
-	// Phase 5 — Infrastructure (read-only, planned)
-	{ id: "curios.webring",         status: "planned",     fieldCount: 7,  phase: 5, file: "curios/webring.ts" },
-	{ id: "infra.billing",          status: "planned",     fieldCount: 5,  phase: 5, file: "infra/billing.ts" },
-	{ id: "infra.flags",            status: "planned",     fieldCount: 2,  phase: 5, file: "infra/flags.ts" },
+	// Phase 5 — Infrastructure (read-only)
+	{ id: "curios.webring",         status: "implemented", fieldCount: 7,  phase: 5, file: "social/webring.ts" },
+	{ id: "infra.billing",          status: "implemented", fieldCount: 5,  phase: 5, file: "infra/billing.ts" },
+	{ id: "infra.flags",            status: "implemented", fieldCount: 2,  phase: 5, file: "infra/flags.ts" },
 ] as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -200,3 +260,5 @@ export { FONT_MOODS } from "./schemas/appearance/typography";
 export { THEME_MOODS } from "./schemas/appearance/theme";
 export { CSS_BLOCKED_PATTERNS } from "./schemas/appearance/css";
 export { INTEREST_OPTIONS } from "./schemas/identity/profile";
+export { DEFAULT_BLAZES } from "./schemas/content/blazes";
+export { CANOPY_CATEGORIES } from "./schemas/social/canopy";

@@ -1,0 +1,86 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"version": "1.0.0",
+	"description": "Tracks Reverie domain schema inventory for documentation and drift detection",
+	"lastUpdated": "2026-03-01",
+	"lastAuditedBy": "claude/blog-design-options-json-IOmbd",
+	"schemas": {
+		"total": 32,
+		"implemented": 32,
+		"planned": 0,
+		"breakdown": {
+			"identity": 3,
+			"appearance": 6,
+			"content": 3,
+			"social": 4,
+			"curios": 14,
+			"infra": 2
+		},
+		"byPhase": {
+			"1": 5,
+			"2": 6,
+			"3": 6,
+			"4": 12,
+			"5": 3
+		}
+	},
+	"fields": {
+		"total": 176,
+		"byGroup": {
+			"identity": 13,
+			"appearance": 14,
+			"content": 24,
+			"social": 17,
+			"curios": 101,
+			"infra": 7
+		}
+	},
+	"atmospheres": {
+		"total": 14,
+		"keywords": ["cozy", "cottagecore", "midnight", "gothic", "garden", "forest", "elegant", "professional", "retro", "hacker", "dreamy", "solarpunk", "sunset", "ocean"]
+	},
+	"domains": [
+		{ "id": "identity.profile", "group": "identity", "phase": 1, "fieldCount": 4, "file": "identity/profile.ts" },
+		{ "id": "identity.badges", "group": "identity", "phase": 4, "fieldCount": 3, "file": "identity/badges.ts" },
+		{ "id": "identity.activitystatus", "group": "identity", "phase": 4, "fieldCount": 6, "file": "identity/activitystatus.ts" },
+		{ "id": "foliage.accent", "group": "appearance", "phase": 1, "fieldCount": 1, "file": "appearance/accent.ts" },
+		{ "id": "foliage.typography", "group": "appearance", "phase": 1, "fieldCount": 2, "file": "appearance/typography.ts" },
+		{ "id": "foliage.theme", "group": "appearance", "phase": 2, "fieldCount": 3, "file": "appearance/theme.ts" },
+		{ "id": "foliage.colors", "group": "appearance", "phase": 2, "fieldCount": 1, "file": "appearance/colors.ts" },
+		{ "id": "foliage.css", "group": "appearance", "phase": 2, "fieldCount": 1, "file": "appearance/css.ts" },
+		{ "id": "foliage.layout", "group": "appearance", "phase": 2, "fieldCount": 1, "file": "appearance/layout.ts" },
+		{ "id": "content.posts", "group": "content", "phase": 3, "fieldCount": 12, "file": "content/posts.ts" },
+		{ "id": "content.pages", "group": "content", "phase": 3, "fieldCount": 7, "file": "content/pages.ts" },
+		{ "id": "content.blazes", "group": "content", "phase": 3, "fieldCount": 5, "file": "content/blazes.ts" },
+		{ "id": "social.comments", "group": "social", "phase": 1, "fieldCount": 7, "file": "social/comments.ts" },
+		{ "id": "social.meadow", "group": "social", "phase": 1, "fieldCount": 1, "file": "social/meadow.ts" },
+		{ "id": "social.canopy", "group": "social", "phase": 3, "fieldCount": 4, "file": "social/canopy.ts" },
+		{ "id": "curios.blogroll", "group": "social", "phase": 3, "fieldCount": 5, "file": "social/blogroll.ts" },
+		{ "id": "curios.cursor", "group": "curios", "phase": 2, "fieldCount": 6, "file": "curios/cursor.ts" },
+		{ "id": "curios.ambient", "group": "curios", "phase": 2, "fieldCount": 4, "file": "curios/ambient.ts" },
+		{ "id": "curios.guestbook", "group": "curios", "phase": 3, "fieldCount": 7, "file": "curios/guestbook.ts" },
+		{ "id": "curios.moodring", "group": "curios", "phase": 4, "fieldCount": 6, "file": "curios/moodring.ts" },
+		{ "id": "curios.nowplaying", "group": "curios", "phase": 4, "fieldCount": 6, "file": "curios/nowplaying.ts" },
+		{ "id": "curios.gallery", "group": "curios", "phase": 4, "fieldCount": 14, "file": "curios/gallery.ts" },
+		{ "id": "curios.timeline", "group": "curios", "phase": 4, "fieldCount": 10, "file": "curios/timeline.ts" },
+		{ "id": "curios.journey", "group": "curios", "phase": 4, "fieldCount": 7, "file": "curios/journey.ts" },
+		{ "id": "curios.pulse", "group": "curios", "phase": 4, "fieldCount": 9, "file": "curios/pulse.ts" },
+		{ "id": "curios.hitcounter", "group": "curios", "phase": 4, "fieldCount": 6, "file": "curios/hitcounter.ts" },
+		{ "id": "curios.linkgarden", "group": "curios", "phase": 4, "fieldCount": 3, "file": "curios/linkgarden.ts" },
+		{ "id": "curios.polls", "group": "curios", "phase": 4, "fieldCount": 6, "file": "curios/polls.ts" },
+		{ "id": "curios.bookmarks", "group": "curios", "phase": 4, "fieldCount": 6, "file": "curios/bookmarks.ts" },
+		{ "id": "curios.webring", "group": "social", "phase": 5, "fieldCount": 7, "file": "social/webring.ts" },
+		{ "id": "infra.billing", "group": "infra", "phase": 5, "fieldCount": 5, "file": "infra/billing.ts" },
+		{ "id": "infra.flags", "group": "infra", "phase": 5, "fieldCount": 2, "file": "infra/flags.ts" }
+	],
+	"sourceFiles": {
+		"registry": "libs/engine/src/lib/reverie/index.ts",
+		"types": "libs/engine/src/lib/reverie/types.ts",
+		"atmosphere": "libs/engine/src/lib/reverie/atmosphere.ts",
+		"schemasDir": "libs/engine/src/lib/reverie/schemas"
+	},
+	"documentation": {
+		"spec": "docs/specs/reverie-spec.md",
+		"safari": "docs/safaris/active/reverie-expansion-safari.md"
+	}
+}

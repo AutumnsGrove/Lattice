@@ -1,0 +1,296 @@
+name: Reverie Inventory Check
+
+on:
+  # Run on PRs that touch reverie schema files
+  pull_request:
+    paths:
+      - "libs/engine/src/lib/reverie/**"
+
+  # Run weekly on Friday mornings
+  schedule:
+    - cron: "0 9 * * 5"
+
+  # Allow manual trigger
+  workflow_dispatch:
+
+jobs:
+  check-reverie-inventory:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Count schemas and compare to inventory
+        id: count-schemas
+        shell: bash
+        run: |
+          #!/bin/bash
+          set -e
+
+          echo "🌿 Counting Reverie domain schemas..."
+          echo ""
+
+          SCHEMA_DIR="libs/engine/src/lib/reverie/schemas"
+          ATMOSPHERE_FILE="libs/engine/src/lib/reverie/atmosphere.ts"
+          INVENTORY_FILE=".github/reverie-inventory.json"
+
+          # Read expected counts from inventory
+          EXPECTED_SCHEMAS=$(jq -r '.schemas.total' "$INVENTORY_FILE")
+          EXPECTED_IMPLEMENTED=$(jq -r '.schemas.implemented' "$INVENTORY_FILE")
+          EXPECTED_FIELDS=$(jq -r '.fields.total' "$INVENTORY_FILE")
+          EXPECTED_ATMOSPHERES=$(jq -r '.atmospheres.total' "$INVENTORY_FILE")
+          LAST_UPDATED=$(jq -r '.lastUpdated' "$INVENTORY_FILE")
+
+          # Count actual schema files
+          ACTUAL_SCHEMAS=$(find "$SCHEMA_DIR" -name "*.ts" -type f 2>/dev/null | wc -l | tr -d ' ') || ACTUAL_SCHEMAS=0
+
+          # Count atmosphere entries (lines with "keyword:")
+          ACTUAL_ATMOSPHERES=$(grep -c 'keyword:' "$ATMOSPHERE_FILE" 2>/dev/null | tr -d ' ') || ACTUAL_ATMOSPHERES=0
+
+          # Count fields across all schema files
+          # Each field is a key in the fields object with a type property
+          ACTUAL_FIELDS=$(grep -rh '^\t\t\ttype: ' "$SCHEMA_DIR" 2>/dev/null | wc -l | tr -d ' ') || ACTUAL_FIELDS=0
+
+          # Count by group
+          ACTUAL_IDENTITY=$(find "$SCHEMA_DIR/identity" -name "*.ts" -type f 2>/dev/null | wc -l | tr -d ' ') || ACTUAL_IDENTITY=0
+          ACTUAL_APPEARANCE=$(find "$SCHEMA_DIR/appearance" -name "*.ts" -type f 2>/dev/null | wc -l | tr -d ' ') || ACTUAL_APPEARANCE=0
+          ACTUAL_CONTENT=$(find "$SCHEMA_DIR/content" -name "*.ts" -type f 2>/dev/null | wc -l | tr -d ' ') || ACTUAL_CONTENT=0
+          ACTUAL_SOCIAL=$(find "$SCHEMA_DIR/social" -name "*.ts" -type f 2>/dev/null | wc -l | tr -d ' ') || ACTUAL_SOCIAL=0
+          ACTUAL_CURIOS=$(find "$SCHEMA_DIR/curios" -name "*.ts" -type f 2>/dev/null | wc -l | tr -d ' ') || ACTUAL_CURIOS=0
+          ACTUAL_INFRA=$(find "$SCHEMA_DIR/infra" -name "*.ts" -type f 2>/dev/null | wc -l | tr -d ' ') || ACTUAL_INFRA=0
+
+          echo "📊 Reverie Schema Count Results"
+          echo "================================"
+          echo "Expected (from inventory): $EXPECTED_SCHEMAS schemas, $EXPECTED_FIELDS fields, $EXPECTED_ATMOSPHERES atmospheres"
+          echo "Actual (from files):       $ACTUAL_SCHEMAS schemas, $ACTUAL_FIELDS fields, $ACTUAL_ATMOSPHERES atmospheres"
+          echo ""
+          echo "By group: identity=$ACTUAL_IDENTITY appearance=$ACTUAL_APPEARANCE content=$ACTUAL_CONTENT social=$ACTUAL_SOCIAL curios=$ACTUAL_CURIOS infra=$ACTUAL_INFRA"
+          echo "Inventory last updated: $LAST_UPDATED"
+          echo ""
+
+          # Calculate differences
+          SCHEMA_DIFF=$((ACTUAL_SCHEMAS - EXPECTED_SCHEMAS))
+          FIELD_DIFF=$((ACTUAL_FIELDS - EXPECTED_FIELDS))
+          ATMOS_DIFF=$((ACTUAL_ATMOSPHERES - EXPECTED_ATMOSPHERES))
+
+          # Determine if there are any changes
+          HAS_CHANGES="false"
+          if [ "$SCHEMA_DIFF" -ne 0 ] || [ "$FIELD_DIFF" -ne 0 ] || [ "$ATMOS_DIFF" -ne 0 ]; then
+            HAS_CHANGES="true"
+          fi
+
+          if [ "$HAS_CHANGES" = "false" ]; then
+            echo "✅ All counts match inventory"
+          else
+            [ "$SCHEMA_DIFF" -ne 0 ] && echo "🌿 Schema count drift: ${SCHEMA_DIFF:+$SCHEMA_DIFF}"
+            [ "$FIELD_DIFF" -ne 0 ] && echo "🌿 Field count drift: ${FIELD_DIFF:+$FIELD_DIFF}"
+            [ "$ATMOS_DIFF" -ne 0 ] && echo "🌿 Atmosphere count drift: ${ATMOS_DIFF:+$ATMOS_DIFF}"
+          fi
+
+          # Export values for later steps
+          echo "has_changes=$HAS_CHANGES" >> $GITHUB_OUTPUT
+          echo "expected_schemas=$EXPECTED_SCHEMAS" >> $GITHUB_OUTPUT
+          echo "actual_schemas=$ACTUAL_SCHEMAS" >> $GITHUB_OUTPUT
+          echo "expected_fields=$EXPECTED_FIELDS" >> $GITHUB_OUTPUT
+          echo "actual_fields=$ACTUAL_FIELDS" >> $GITHUB_OUTPUT
+          echo "expected_atmospheres=$EXPECTED_ATMOSPHERES" >> $GITHUB_OUTPUT
+          echo "actual_atmospheres=$ACTUAL_ATMOSPHERES" >> $GITHUB_OUTPUT
+          echo "schema_diff=$SCHEMA_DIFF" >> $GITHUB_OUTPUT
+          echo "field_diff=$FIELD_DIFF" >> $GITHUB_OUTPUT
+          echo "atmos_diff=$ATMOS_DIFF" >> $GITHUB_OUTPUT
+          echo "last_updated=$LAST_UPDATED" >> $GITHUB_OUTPUT
+
+      - name: Find new schema files in PR
+        if: github.event_name == 'pull_request' && steps.count-schemas.outputs.has_changes == 'true'
+        id: find-new-schemas
+        shell: bash
+        run: |
+          # Get new schema files added in this PR
+          NEW_FILES=$(git diff --name-only --diff-filter=A origin/${{ github.base_ref }}...HEAD -- 'libs/engine/src/lib/reverie/schemas/**/*.ts' || echo "")
+
+          if [ -n "$NEW_FILES" ]; then
+            echo "new_files<<EOF" >> $GITHUB_OUTPUT
+            echo "$NEW_FILES" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+            echo "has_new_files=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_new_files=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Comment on PR (if schemas changed)
+        if: github.event_name == 'pull_request' && steps.count-schemas.outputs.has_changes == 'true'
+        uses: actions/github-script@v7
+        env:
+          EXPECTED_SCHEMAS: ${{ steps.count-schemas.outputs.expected_schemas }}
+          ACTUAL_SCHEMAS: ${{ steps.count-schemas.outputs.actual_schemas }}
+          EXPECTED_FIELDS: ${{ steps.count-schemas.outputs.expected_fields }}
+          ACTUAL_FIELDS: ${{ steps.count-schemas.outputs.actual_fields }}
+          EXPECTED_ATMOSPHERES: ${{ steps.count-schemas.outputs.expected_atmospheres }}
+          ACTUAL_ATMOSPHERES: ${{ steps.count-schemas.outputs.actual_atmospheres }}
+          SCHEMA_DIFF: ${{ steps.count-schemas.outputs.schema_diff }}
+          FIELD_DIFF: ${{ steps.count-schemas.outputs.field_diff }}
+          ATMOS_DIFF: ${{ steps.count-schemas.outputs.atmos_diff }}
+          NEW_FILES: ${{ steps.find-new-schemas.outputs.new_files }}
+        with:
+          script: |
+            const schemaDiff = parseInt(process.env.SCHEMA_DIFF);
+            const fieldDiff = parseInt(process.env.FIELD_DIFF);
+            const atmosDiff = parseInt(process.env.ATMOS_DIFF);
+            const newFiles = process.env.NEW_FILES || '';
+
+            let newFilesList = '';
+            if (newFiles) {
+              const files = newFiles.trim().split('\n').map(f => `- \`${f}\``).join('\n');
+              newFilesList = `
+
+            ### New Schema Files
+            ${files}`;
+            }
+
+            const formatDiff = (n) => n > 0 ? `+${n}` : `${n}`;
+
+            const body = `## 🌿 Reverie Inventory Change Detected
+
+            This PR modifies Reverie domain schemas.
+
+            | Metric | Expected | Actual | Diff |
+            |--------|----------|--------|------|
+            | Schemas | ${process.env.EXPECTED_SCHEMAS} | ${process.env.ACTUAL_SCHEMAS} | ${formatDiff(schemaDiff)} |
+            | Fields | ${process.env.EXPECTED_FIELDS} | ${process.env.ACTUAL_FIELDS} | ${formatDiff(fieldDiff)} |
+            | Atmospheres | ${process.env.EXPECTED_ATMOSPHERES} | ${process.env.ACTUAL_ATMOSPHERES} | ${formatDiff(atmosDiff)} |
+            ${newFilesList}
+
+            ### Action Required
+
+            If this PR adds or modifies domain schemas, please:
+            1. Update \`.github/reverie-inventory.json\` with accurate counts
+            2. Add new domain IDs to \`DomainId\` type in \`types.ts\`
+            3. Register schemas in \`SCHEMA_REGISTRY\` and \`DOMAIN_CATALOG\` in \`index.ts\`
+            4. Re-export any domain-specific constants from \`index.ts\`
+
+            See \`docs/specs/reverie-spec.md\` for the full domain schema standard.
+
+            ---
+            *This check helps keep our Reverie schema documentation accurate.*`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: body
+            });
+
+      - name: Create issue for inventory drift (scheduled run only)
+        if: github.event_name == 'schedule' && steps.count-schemas.outputs.has_changes == 'true'
+        uses: actions/github-script@v7
+        env:
+          EXPECTED_SCHEMAS: ${{ steps.count-schemas.outputs.expected_schemas }}
+          ACTUAL_SCHEMAS: ${{ steps.count-schemas.outputs.actual_schemas }}
+          EXPECTED_FIELDS: ${{ steps.count-schemas.outputs.expected_fields }}
+          ACTUAL_FIELDS: ${{ steps.count-schemas.outputs.actual_fields }}
+          SCHEMA_DIFF: ${{ steps.count-schemas.outputs.schema_diff }}
+          FIELD_DIFF: ${{ steps.count-schemas.outputs.field_diff }}
+          LAST_UPDATED: ${{ steps.count-schemas.outputs.last_updated }}
+        with:
+          script: |
+            const today = new Date().toISOString().split('T')[0];
+
+            // Check if there's already an open issue for this
+            const existingIssues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'documentation,reverie'
+            });
+
+            const hasExisting = existingIssues.data.some(issue =>
+              issue.title.includes('Reverie Inventory')
+            );
+
+            if (hasExisting) {
+              console.log('Existing reverie inventory issue found, skipping creation');
+              return;
+            }
+
+            const schemaDiff = parseInt(process.env.SCHEMA_DIFF);
+            const fieldDiff = parseInt(process.env.FIELD_DIFF);
+            const formatDiff = (n) => n > 0 ? `+${n}` : `${n}`;
+
+            const body = `## 🌿 Reverie Inventory Drift Detected
+
+            The automated schema count found discrepancies since the last inventory update.
+
+            | Metric | Expected | Actual | Diff |
+            |--------|----------|--------|------|
+            | Schemas | ${process.env.EXPECTED_SCHEMAS} | ${process.env.ACTUAL_SCHEMAS} | ${formatDiff(schemaDiff)} |
+            | Fields | ${process.env.EXPECTED_FIELDS} | ${process.env.ACTUAL_FIELDS} | ${formatDiff(fieldDiff)} |
+            | Last Updated | ${process.env.LAST_UPDATED} | | |
+
+            ### Action Required
+
+            1. Review which schemas were added or removed
+            2. Update \`.github/reverie-inventory.json\` with accurate counts
+            3. Ensure \`DomainId\` type includes all domain IDs
+            4. Verify all schemas are registered in \`index.ts\`
+
+            ### How to Get Current Counts
+
+            \`\`\`bash
+            # Count schema files
+            find libs/engine/src/lib/reverie/schemas -name "*.ts" -type f | wc -l
+
+            # List all domain IDs
+            grep -rh "id:" libs/engine/src/lib/reverie/schemas/ | grep -oP '"[a-z]+\\.[a-z]+"' | sort -u
+
+            # Count atmosphere entries
+            grep -c "keyword:" libs/engine/src/lib/reverie/atmosphere.ts
+
+            # Show inventory summary
+            jq '{schemas: .schemas.total, fields: .fields.total, atmospheres: .atmospheres.total}' .github/reverie-inventory.json
+            \`\`\`
+
+            ---
+            *This issue was automatically created by the reverie-inventory workflow.*`;
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `🌿 Reverie Inventory Update Needed - ${today}`,
+              body: body,
+              labels: ['documentation', 'reverie']
+            });
+
+      - name: Summary
+        shell: bash
+        env:
+          HAS_CHANGES: ${{ steps.count-schemas.outputs.has_changes }}
+          EXPECTED_SCHEMAS: ${{ steps.count-schemas.outputs.expected_schemas }}
+          ACTUAL_SCHEMAS: ${{ steps.count-schemas.outputs.actual_schemas }}
+          EXPECTED_FIELDS: ${{ steps.count-schemas.outputs.expected_fields }}
+          ACTUAL_FIELDS: ${{ steps.count-schemas.outputs.actual_fields }}
+          EXPECTED_ATMOSPHERES: ${{ steps.count-schemas.outputs.expected_atmospheres }}
+          ACTUAL_ATMOSPHERES: ${{ steps.count-schemas.outputs.actual_atmospheres }}
+        run: |
+          echo "## Reverie Inventory Check" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Expected | Actual |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Schemas | $EXPECTED_SCHEMAS | $ACTUAL_SCHEMAS |" >> $GITHUB_STEP_SUMMARY
+          echo "| Fields | $EXPECTED_FIELDS | $ACTUAL_FIELDS |" >> $GITHUB_STEP_SUMMARY
+          echo "| Atmospheres | $EXPECTED_ATMOSPHERES | $ACTUAL_ATMOSPHERES |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$HAS_CHANGES" = "true" ]; then
+            echo "⚠️ **Schema counts have drifted from inventory**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Update \`.github/reverie-inventory.json\` to match current state." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ All schema counts match inventory" >> $GITHUB_STEP_SUMMARY
+          fi
