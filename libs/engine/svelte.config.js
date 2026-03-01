@@ -12,7 +12,14 @@ const config = {
   preprocess: vitePreprocess(),
 
   kit: {
-    adapter: adapter(),
+    adapter: adapter({
+      platformProxy: {
+        // Use local miniflare bindings (D1, KV, R2) during vite dev.
+        // Without this, getPlatformProxy() tries remote Cloudflare auth
+        // which fails in local/CI environments.
+        remoteBindings: false,
+      },
+    }),
 
     // Disable SvelteKit's built-in CSRF origin check for two reasons:
     //

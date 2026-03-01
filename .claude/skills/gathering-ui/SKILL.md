@@ -143,14 +143,20 @@ _The design stands. Both animals verify — with their own eyes..._
 Before checking boxes, actually _look_ at what was built. Use Glimpse to capture and review the rendered result:
 
 ```bash
+# Prerequisite: seed the database if not already done
+uv run --project tools/glimpse glimpse seed --yes
+
 # Capture the page across all seasons and themes
-uv run --project tools/glimpse glimpse matrix http://localhost:5173/[page] \
-  --seasons spring,summer,autumn,winter --themes light,dark --logs
+# Local routing uses ?subdomain= for tenant isolation; --auto starts the dev server
+uv run --project tools/glimpse glimpse matrix \
+  "http://localhost:5173/[page]?subdomain=midnight-bloom" \
+  --seasons spring,summer,autumn,winter --themes light,dark --logs --auto
 
 # Browse interactively — verify flows, click targets, scrolling
-uv run --project tools/glimpse glimpse browse http://localhost:5173/[page] \
+uv run --project tools/glimpse glimpse browse \
+  "http://localhost:5173/[page]?subdomain=midnight-bloom" \
   --do "click navigation, scroll to content, click interactive elements" \
-  --screenshot-each --logs
+  --screenshot-each --logs --auto
 ```
 
 Review every screenshot. If something looks wrong — fix it and capture again. The gathering does not declare UI complete without visual proof.

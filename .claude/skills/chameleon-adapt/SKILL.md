@@ -165,17 +165,28 @@ If CI fails: read diagnostics, fix, re-run. The chameleon does not leave broken 
 The chameleon doesn't just build — it _looks_ at what it built. Use Glimpse to capture the result and iterate until the design matches the vision:
 
 ```bash
-# Capture the page you just built (start the dev server first)
-uv run --project tools/glimpse glimpse capture http://localhost:5173/[your-page] \
-  --season autumn --theme dark --logs
+# Prerequisite: seed the database if not already done
+uv run --project tools/glimpse glimpse seed --yes
+
+# Capture the page you just built (--auto starts the dev server)
+# Local routing uses ?subdomain= for tenant isolation
+uv run --project tools/glimpse glimpse capture \
+  "http://localhost:5173/[your-page]?subdomain=midnight-bloom" \
+  --season autumn --theme dark --logs --auto
 
 # Verify all season × theme combos render correctly
-uv run --project tools/glimpse glimpse matrix http://localhost:5173/[your-page] \
-  --seasons spring,summer,autumn,winter --themes light,dark
+uv run --project tools/glimpse glimpse matrix \
+  "http://localhost:5173/[your-page]?subdomain=midnight-bloom" \
+  --seasons spring,summer,autumn,winter --themes light,dark --auto
 
 # Interactive check: click around, verify flows work visually
-uv run --project tools/glimpse glimpse browse http://localhost:5173/[your-page] \
-  --do "click navigation links, scroll down" --screenshot-each --logs
+uv run --project tools/glimpse glimpse browse \
+  "http://localhost:5173/[your-page]?subdomain=midnight-bloom" \
+  --do "click navigation links, scroll down" --screenshot-each --logs --auto
+
+# Optional: verify with random data too (proves UI handles any content)
+uv run --project tools/glimpse glimpse seed --profile fake --fake-posts 5 --yes
+# Then capture with the randomly generated subdomain from seed output
 ```
 
 **The iterate loop:** Capture → review screenshot → spot issues → fix → capture again. Repeat until the adaptation is complete. Don't ship UI you haven't seen.

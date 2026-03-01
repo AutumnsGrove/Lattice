@@ -62,18 +62,25 @@ Run automated scanning to surface mechanical violations quickly. Automated tools
 Capture the page to see what the rendered result actually looks like. Console logs often reveal hidden a11y issues:
 
 ```bash
+# Prerequisite: seed the database if not already done
+uv run --project tools/glimpse glimpse seed --yes
+
 # Capture with console logs — errors often reveal missing ARIA, broken refs
-uv run --project tools/glimpse glimpse capture http://localhost:5173/[page] \
-  --season autumn --theme dark --logs
+# Local routing uses ?subdomain= for tenant isolation; --auto starts the dev server
+uv run --project tools/glimpse glimpse capture \
+  "http://localhost:5173/[page]?subdomain=midnight-bloom" \
+  --season autumn --theme dark --logs --auto
 
 # Check dark mode contrast — capture both themes side by side
-uv run --project tools/glimpse glimpse matrix http://localhost:5173/[page] \
-  --themes light,dark --logs
+uv run --project tools/glimpse glimpse matrix \
+  "http://localhost:5173/[page]?subdomain=midnight-bloom" \
+  --themes light,dark --logs --auto
 
 # Browse interactively — does tab order make visual sense?
-uv run --project tools/glimpse glimpse browse http://localhost:5173/[page] \
+uv run --project tools/glimpse glimpse browse \
+  "http://localhost:5173/[page]?subdomain=midnight-bloom" \
   --do "click first interactive element, press Tab, press Tab, press Tab" \
-  --screenshot-each
+  --screenshot-each --auto
 ```
 
 Review the screenshots: Are focus indicators visible? Do glass surfaces maintain contrast? Are touch targets visually large enough?
