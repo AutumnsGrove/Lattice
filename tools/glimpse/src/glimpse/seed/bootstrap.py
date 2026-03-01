@@ -11,6 +11,7 @@ Supports data profiles for switching between different test states:
   - blog: Full Midnight Bloom tea shop (3 posts, 5 pages)
   - empty: Tenant exists with defaults, no posts or custom pages
   - fresh: Clean databases with migrations only, no tenant data
+  - fake: Randomized realistic blog via @faker-js/faker (different every run)
 """
 
 import re
@@ -40,6 +41,7 @@ _UNIXEPOCH_DEFAULT_RE = re.compile(
 # Data profiles: map profile name to the seed scripts it uses.
 # Scripts are loaded from the seed scripts directory (scripts/db/).
 # "fresh" uses no seeds (migrations only).
+# "fake" is special — it runs a JS generator instead of static SQL.
 PROFILES: dict[str, list[str]] = {
     "blog": [
         "seed-midnight-bloom.sql",
@@ -50,7 +52,11 @@ PROFILES: dict[str, list[str]] = {
         "seed-empty-grove.sql",
     ],
     "fresh": [],
+    "fake": [],  # Handled specially via generate-fake-seed.mjs
 }
+
+# The JS generator script path (relative to grove root)
+FAKE_SEED_GENERATOR = "scripts/db/generate-fake-seed.mjs"
 
 DEFAULT_PROFILE = "blog"
 
@@ -278,12 +284,77 @@ class DataBootstrapper:
             ),
         }
 
+    def _generate_fake_seed(
+        self,
+        dry_run: bool = False,
+        fake_seed: int | None = None,
+        fake_posts: int | None = None,
+    ) -> list[dict]:
+        """Generate and execute a fake seed via the Node.js generator.
+
+        Runs generate-fake-seed.mjs, captures the SQL output, and executes
+        it against the engine database.
+        """
+        generator = self._grove_root / FAKE_SEED_GENERATOR
+        if not generator.exists():
+            return [{"script": "fake", "success": False, "output": f"Generator not found: {generator}"}]
+
+        cmd = ["node", str(generator)]
+        if fake_seed is not None:
+            cmd += ["--seed", str(fake_seed)]
+        if fake_posts is not None:
+            cmd += ["--posts", str(fake_posts)]
+
+        if dry_run:
+            return [{"script": "fake", "success": True, "output": f"[dry-run] Would run: {' '.join(cmd)}"}]
+
+        try:
+            proc = subprocess.run(
+                cmd,
+                cwd=str(self._grove_root),
+                capture_output=True,
+                text=True,
+                timeout=30,
+            )
+        except FileNotFoundError:
+            return [{"script": "fake", "success": False, "output": "Node.js not found (required for fake profile)"}]
+        except subprocess.TimeoutExpired:
+            return [{"script": "fake", "success": False, "output": "Generator timed out after 30s"}]
+
+        if proc.returncode != 0:
+            return [{"script": "fake", "success": False, "output": f"Generator failed: {proc.stderr.strip()[:200]}"}]
+
+        sql = proc.stdout
+
+        # Extract tenant info from the SQL header comment for the result message
+        header_line = ""
+        for line in sql.split("\n"):
+            if line.startswith("-- Fake seed:"):
+                header_line = line.replace("-- Fake seed: ", "").strip()
+                break
+
+        # Execute the generated SQL against the engine database
+        databases = find_local_d1_databases(self._grove_root)
+        db_path = databases.get("engine")
+        if not db_path:
+            return [{"script": "fake", "success": False, "output": "Engine database not found (run migrations first)"}]
+
+        try:
+            conn = sqlite3.connect(str(db_path))
+            conn.executescript(sql)
+            conn.close()
+            return [{"script": "fake", "success": True, "output": f"Generated fake tenant: {header_line}"}]
+        except sqlite3.Error as e:
+            return [{"script": "fake", "success": False, "output": f"SQL error in generated seed: {e}"}]
+
     def apply_seeds(
         self,
         tenant: str | None = None,
         target_db: str | None = None,
         dry_run: bool = False,
         profile: str | None = None,
+        fake_seed: int | None = None,
+        fake_posts: int | None = None,
     ) -> list[dict]:
         """Execute seed SQL scripts against local D1 databases.
 
@@ -292,9 +363,20 @@ class DataBootstrapper:
         When profile is specified, only scripts listed in that profile are run.
         When profile is None and tenant is None, all scripts in the seed
         directory are run (backward-compatible behavior).
+
+        The "fake" profile is special: it runs a Node.js generator that uses
+        @faker-js/faker to create randomized realistic blog data.
         """
         if not self._grove_root:
             return [{"script": "all", "success": False, "output": "GROVE_ROOT not found"}]
+
+        # Handle the "fake" profile specially — runs a JS generator
+        if profile == "fake":
+            return self._generate_fake_seed(
+                dry_run=dry_run,
+                fake_seed=fake_seed,
+                fake_posts=fake_posts,
+            )
 
         # Determine which scripts to run
         if profile is not None:
@@ -373,7 +455,13 @@ class DataBootstrapper:
 
         return results
 
-    def reset(self, target_db: str | None = None, profile: str | None = None) -> list[dict]:
+    def reset(
+        self,
+        target_db: str | None = None,
+        profile: str | None = None,
+        fake_seed: int | None = None,
+        fake_posts: int | None = None,
+    ) -> list[dict]:
         """Drop all local D1 data and recreate from scratch.
 
         This is destructive. Caller must confirm before calling.
@@ -419,6 +507,11 @@ class DataBootstrapper:
 
         # Re-apply migrations and seeds with the specified profile
         migration_results = self.apply_migrations(target_db)
-        seed_results = self.apply_seeds(target_db=target_db, profile=profile or DEFAULT_PROFILE)
+        seed_results = self.apply_seeds(
+            target_db=target_db,
+            profile=profile or DEFAULT_PROFILE,
+            fake_seed=fake_seed,
+            fake_posts=fake_posts,
+        )
 
         return results + migration_results + seed_results

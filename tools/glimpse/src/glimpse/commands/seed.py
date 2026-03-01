@@ -24,7 +24,19 @@ from glimpse.seed.discovery import find_grove_root
     "-p",
     type=click.Choice(list(PROFILES.keys())),
     default=None,
-    help="Data profile to seed (blog=full content, empty=tenant only, fresh=no data)",
+    help="Data profile to seed (blog=full content, empty=tenant only, fresh=no data, fake=random)",
+)
+@click.option(
+    "--fake-seed",
+    type=int,
+    default=None,
+    help="Seed for reproducible fake data (only with --profile fake)",
+)
+@click.option(
+    "--fake-posts",
+    type=int,
+    default=None,
+    help="Number of posts to generate (only with --profile fake, default 3-8)",
 )
 @click.pass_context
 def seed(
@@ -35,6 +47,8 @@ def seed(
     dry_run: bool,
     db: str | None,
     profile: str | None,
+    fake_seed: int | None,
+    fake_posts: int | None,
 ) -> None:
     """Bootstrap local D1 databases with migrations and seed data.
 
@@ -44,6 +58,7 @@ def seed(
       blog   Full Midnight Bloom tea shop (3 posts, 5 pages) [default]
       empty  Tenant exists with defaults, no posts or custom pages
       fresh  Clean databases with migrations only, no tenant data
+      fake   Random realistic blog via faker.js (different every run)
 
     Examples:
 
@@ -52,6 +67,9 @@ def seed(
         glimpse seed --profile blog          # Full blog content
         glimpse seed --profile empty         # Empty state (test blank pages)
         glimpse seed --profile fresh         # Migrations only, no content
+        glimpse seed --profile fake          # Random blog, new content each run
+        glimpse seed -p fake --fake-seed 42  # Reproducible random content
+        glimpse seed -p fake --fake-posts 8  # Control post count
         glimpse seed --reset --yes           # Nuke and rebuild with blog profile
         glimpse seed --reset -p empty --yes  # Nuke and rebuild with empty state
     """
@@ -87,7 +105,12 @@ def seed(
 
         profile_name = profile or DEFAULT_PROFILE
         output_handler.print_info(f"Resetting local databases with profile '{profile_name}'...")
-        results = bootstrapper.reset(target_db=db, profile=profile_name)
+        results = bootstrapper.reset(
+            target_db=db,
+            profile=profile_name,
+            fake_seed=fake_seed,
+            fake_posts=fake_posts,
+        )
         for r in results:
             if r["success"]:
                 output_handler.print_success(r["output"])
@@ -110,6 +133,8 @@ def seed(
         target_db=db,
         dry_run=dry_run,
         profile=profile,
+        fake_seed=fake_seed,
+        fake_posts=fake_posts,
     )
     for r in seed_results:
         if r["success"]:
