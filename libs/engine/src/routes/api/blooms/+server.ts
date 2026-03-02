@@ -181,7 +181,9 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
 	try {
 		// Verify the authenticated user owns this tenant
-		const tenantId = await getVerifiedTenantId(platform.env.DB, locals.tenantId, locals.user);
+		const tenantId = await getVerifiedTenantId(platform.env.DB, locals.tenantId, locals.user, {
+			isInternalService: locals.isInternalService,
+		});
 
 		const data = sanitizeObject(await request.json()) as PostInput;
 

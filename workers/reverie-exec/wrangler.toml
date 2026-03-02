@@ -1,0 +1,32 @@
+# Grove Reverie Exec — Execution Worker
+# Applies Reverie's validated changes by calling SvelteKit API endpoints.
+# Holds write access (service binding to grove-lattice), NOT LLM access.
+#
+# Auth chain: Reverie → (EXEC_API_KEY) → Exec → (INTERNAL_SERVICE_KEY) → SvelteKit
+# The execution worker never touches databases directly.
+
+name = "grove-reverie-exec"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# =============================================================================
+# Service Bindings — Internal worker-to-worker communication
+# =============================================================================
+[[services]]
+binding = "GROVE_APP"
+service = "grove-lattice"
+
+# =============================================================================
+# KV — Rate limit counters (Threshold SDK)
+# =============================================================================
+[[kv_namespaces]]
+binding = "RATE_LIMITS"
+title = "grove-reverie-exec-ratelimits"
+id = "placeholder-will-be-created"
+
+# =============================================================================
+# Secrets (configured via: gw secret apply <name> --worker grove-reverie-exec)
+# =============================================================================
+# EXEC_API_KEY           - API key for authenticating callers (Reverie worker)
+# INTERNAL_SERVICE_KEY   - API key for authenticating to SvelteKit (grove-lattice)

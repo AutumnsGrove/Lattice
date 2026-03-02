@@ -77,7 +77,8 @@ execute.post("/", async (c) => {
 			description: `Set ${change.domain}.${change.field}`,
 		}));
 
-		const result = await executeChanges(changesPreviewed);
+		const tier = c.get("tier");
+		const result = await executeChanges(changesPreviewed, c.env, tenantId, tier, request_id);
 
 		const response: ReverieResponse = {
 			success: result.success,

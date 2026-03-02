@@ -105,7 +105,9 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 	}
 
 	try {
-		const tenantId = await getVerifiedTenantId(platform.env.DB, locals.tenantId, locals.user);
+		const tenantId = await getVerifiedTenantId(platform.env.DB, locals.tenantId, locals.user, {
+			isInternalService: locals.isInternalService,
+		});
 
 		const data = (await request.json()) as Record<string, unknown>;
 		const slug = typeof data.slug === "string" ? data.slug.trim() : "";

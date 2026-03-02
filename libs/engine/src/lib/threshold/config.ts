@@ -84,6 +84,9 @@ export const ENDPOINT_RATE_LIMITS = {
 	"reverie/execute": { limit: 20, windowSeconds: 60 },
 	"reverie/query": { limit: 30, windowSeconds: 60 },
 
+	// Reverie Exec endpoints (write operations, per-tenant)
+	"reverie-exec/execute": { limit: 20, windowSeconds: 60 },
+
 	// Data operations
 	"export/data": { limit: 10, windowSeconds: 3600 },
 	"export/zip-start": { limit: 3, windowSeconds: 86400 },

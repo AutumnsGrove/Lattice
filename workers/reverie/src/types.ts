@@ -40,11 +40,15 @@ export interface Env {
 	LUMEN: { fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response> };
 	/** Service binding to Auth for Heartwood token verification */
 	AUTH: { fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response> };
+	/** Service binding to Execution Worker for applying validated changes */
+	REVERIE_EXEC: { fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response> };
 
 	/** API key for authenticating callers to this worker */
 	REVERIE_API_KEY: string;
 	/** API key for calling the Lumen worker */
 	LUMEN_API_KEY: string;
+	/** API key for authenticating to the execution worker */
+	EXEC_API_KEY: string;
 }
 
 // =============================================================================

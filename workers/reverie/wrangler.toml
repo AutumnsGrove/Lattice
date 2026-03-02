@@ -45,8 +45,13 @@ service = "grove-lumen"
 binding = "AUTH"
 service = "grove-auth"
 
+[[services]]
+binding = "REVERIE_EXEC"
+service = "grove-reverie-exec"
+
 # =============================================================================
 # Secrets (configured via: gw secret apply <name> --worker grove-reverie)
 # =============================================================================
 # REVERIE_API_KEY       - API key for authenticating callers to this worker
 # LUMEN_API_KEY         - API key for calling the Lumen worker
+# EXEC_API_KEY          - API key for authenticating to the execution worker
