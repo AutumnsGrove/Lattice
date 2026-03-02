@@ -25,8 +25,8 @@ const (
 // publishCmd is the parent command for package publishing.
 var publishCmd = &cobra.Command{
 	Use:   "publish",
-	Short: "Package publishing to npm",
-	Long:  "Automate npm package publishing with GitHub→npm registry swap.",
+	Short: "Publish packages and tools",
+	Long:  "Publish npm packages or release gw/gf tool binaries via git tags.",
 }
 
 // --- publish npm ---
@@ -325,6 +325,167 @@ var publishNpmCmd = &cobra.Command{
 	},
 }
 
+// --- publish gw / gf ---
+
+var publishGwCmd = &cobra.Command{
+	Use:   "gw",
+	Short: "Release a new gw version via git tag",
+	Long: `Create and push a git tag to release a new gw version.
+  1. Find latest gw/v* tag
+  2. Calculate new version (--bump or --version)
+  3. Show release plan
+  4. Create annotated git tag
+  5. Push tag (triggers release-tools.yml CI)`,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return publishTool("gw", "gw/v", cmd)
+	},
+}
+
+var publishGfCmd = &cobra.Command{
+	Use:   "gf",
+	Short: "Release a new gf version via git tag",
+	Long: `Create and push a git tag to release a new gf version.
+  1. Find latest gf/v* tag
+  2. Calculate new version (--bump or --version)
+  3. Show release plan
+  4. Create annotated git tag
+  5. Push tag (triggers release-tools.yml CI)`,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return publishTool("gf", "gf/v", cmd)
+	},
+}
+
+// publishTool is the shared implementation for gw and gf release commands.
+func publishTool(toolName, tagPrefix string, cmd *cobra.Command) error {
+	dryRun, _ := cmd.Flags().GetBool("dry-run")
+
+	// Safety — require --write for actual publish
+	if !dryRun {
+		if err := requireCFSafety("publish_" + toolName); err != nil {
+			return err
+		}
+	}
+
+	cfg := config.Get()
+	bump, _ := cmd.Flags().GetString("bump")
+	explicitVersion, _ := cmd.Flags().GetString("version")
+
+	// Require version specification
+	if bump == "" && explicitVersion == "" {
+		return fmt.Errorf("specify version: --bump patch|minor|major or --version X.Y.Z")
+	}
+	if bump != "" && bump != "patch" && bump != "minor" && bump != "major" {
+		return fmt.Errorf("--bump must be patch, minor, or major")
+	}
+
+	// Find latest tag for this tool
+	currentVersion, err := getLatestToolVersion(tagPrefix)
+	if err != nil {
+		return err
+	}
+
+	// Calculate new version
+	var newVersion string
+	if explicitVersion != "" {
+		newVersion = strings.TrimPrefix(explicitVersion, "v")
+	} else {
+		newVersion, err = bumpVersion(currentVersion, bump)
+		if err != nil {
+			return err
+		}
+	}
+
+	tagName := tagPrefix + newVersion // e.g. "gw/v1.2.0"
+
+	// JSON dry-run
+	if cfg.JSONMode && dryRun {
+		return printJSON(map[string]interface{}{
+			"dry_run":         true,
+			"tool":            toolName,
+			"current_version": currentVersion,
+			"new_version":     newVersion,
+			"tag":             tagName,
+			"trigger":         "release-tools.yml",
+		})
+	}
+
+	// Show plan
+	if !cfg.JSONMode {
+		fmt.Print(ui.RenderInfoPanel(toolName+" Release Plan", [][2]string{
+			{"Tool", toolName},
+			{"Version", fmt.Sprintf("%s → %s", currentVersion, newVersion)},
+			{"Tag", tagName},
+			{"Trigger", "release-tools.yml → build binaries"},
+		}))
+	}
+
+	if dryRun {
+		ui.Info("DRY RUN — No changes made")
+		return nil
+	}
+
+	// Dirty check
+	statusResult, err := exec.Git("status", "--porcelain")
+	if err != nil {
+		return fmt.Errorf("failed to check git status: %w", err)
+	}
+	if strings.TrimSpace(statusResult.Stdout) != "" {
+		return fmt.Errorf("working tree is dirty — commit or stash first")
+	}
+
+	// Create annotated tag
+	ui.Info(fmt.Sprintf("Creating tag %s...", tagName))
+	_, err = exec.Git("tag", "-a", tagName, "-m", fmt.Sprintf("%s %s", toolName, newVersion))
+	if err != nil {
+		return fmt.Errorf("failed to create tag: %w", err)
+	}
+	ui.Success(fmt.Sprintf("Created tag %s", tagName))
+
+	// Push tag
+	ui.Info(fmt.Sprintf("Pushing %s to origin...", tagName))
+	pushResult, err := exec.Git("push", "origin", tagName)
+	if err != nil {
+		return fmt.Errorf("failed to push tag: %w", err)
+	}
+	if !pushResult.OK() {
+		return fmt.Errorf("push failed:\n%s", pushResult.Stderr)
+	}
+
+	// Success output
+	if cfg.JSONMode {
+		return printJSON(map[string]interface{}{
+			"published": true,
+			"tool":      toolName,
+			"version":   newVersion,
+			"tag":       tagName,
+		})
+	}
+
+	fmt.Println()
+	ui.Success(fmt.Sprintf("Tagged and pushed %s", tagName))
+	ui.Muted("Release workflow will build binaries automatically")
+	fmt.Println()
+
+	return nil
+}
+
+// getLatestToolVersion finds the latest version for a tool tag prefix (e.g. "gw/v").
+// Returns "0.0.0" if no tags exist yet.
+func getLatestToolVersion(tagPrefix string) (string, error) {
+	result, err := exec.Git("tag", "-l", tagPrefix+"*", "--sort=-v:refname")
+	if err != nil {
+		return "", fmt.Errorf("failed to list tags: %w", err)
+	}
+
+	lines := strings.Split(strings.TrimSpace(result.Stdout), "\n")
+	if len(lines) == 0 || lines[0] == "" {
+		return "0.0.0", nil
+	}
+
+	// Strip prefix to get bare version: "gw/v1.2.3" → "1.2.3"
+	return strings.TrimPrefix(lines[0], tagPrefix), nil
+}
+
 // --- helpers ---
 
 // readPackageJSON reads and parses a package.json file.
@@ -469,4 +630,16 @@ func init() {
 	publishNpmCmd.Flags().String("token", "", "npm auth token (or set NPM_TOKEN env var)")
 	publishNpmCmd.Flags().String("tag", "", "npm dist-tag (e.g., beta, next)")
 	publishCmd.AddCommand(publishNpmCmd)
+
+	// publish gw
+	publishGwCmd.Flags().String("bump", "", "Version bump type (patch, minor, major)")
+	publishGwCmd.Flags().String("version", "", "Explicit version (e.g., 1.2.0)")
+	publishGwCmd.Flags().Bool("dry-run", false, "Show plan without executing")
+	publishCmd.AddCommand(publishGwCmd)
+
+	// publish gf
+	publishGfCmd.Flags().String("bump", "", "Version bump type (patch, minor, major)")
+	publishGfCmd.Flags().String("version", "", "Explicit version (e.g., 1.2.0)")
+	publishGfCmd.Flags().Bool("dry-run", false, "Show plan without executing")
+	publishCmd.AddCommand(publishGfCmd)
 }
