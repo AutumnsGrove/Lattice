@@ -55,6 +55,14 @@ export const EXEC_ERRORS = {
 		message: "SvelteKit app service binding unavailable",
 		status: 503,
 	},
+
+	// Client errors
+	NOT_FOUND: { code: "EXC-011", message: "Route not found", status: 404 },
+	INVALID_CONTENT_TYPE: {
+		code: "EXC-012",
+		message: "Content-Type must be application/json",
+		status: 415,
+	},
 } as const;
 
 /**

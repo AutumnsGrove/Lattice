@@ -14,6 +14,8 @@
 import { Hono } from "hono";
 import type { Env, ExecResponse } from "./types";
 import { execAuth } from "./auth/middleware";
+import { execRateLimit } from "./lib/rate-limit";
+import { EXEC_ERRORS, buildExecError } from "./errors";
 import { executeRoute } from "./routes/execute";
 
 const app = new Hono<{ Bindings: Env }>();
@@ -55,18 +57,14 @@ app.get("/health", (c) => {
 // Content-Type enforcement on POST (reject non-JSON early)
 app.use("/execute", async (c, next) => {
 	if (c.req.method === "POST" && !c.req.header("content-type")?.includes("application/json")) {
-		return c.json(
-			{
-				success: false,
-				error: { code: "EXC-003", message: "Content-Type must be application/json" },
-			},
-			415,
-		);
+		const { body, status } = buildExecError(EXEC_ERRORS.INVALID_CONTENT_TYPE);
+		return c.json(body, status as 415);
 	}
 	return next();
 });
 
 app.use("/execute", execAuth);
+app.use("/execute", execRateLimit());
 
 app.route("/execute", executeRoute);
 
@@ -95,8 +93,8 @@ app.notFound((c) => {
 	const response: ExecResponse = {
 		success: false,
 		error: {
-			code: "EXC-003",
-			message: `Route not found: ${c.req.method} ${c.req.path}`,
+			code: "EXC-011",
+			message: "Route not found",
 		},
 	};
 	return c.json(response, 404);

@@ -19,11 +19,8 @@ import type { ExecRequest, ExecutionResultData } from "../types";
 // Types
 // =============================================================================
 
-interface Change {
-	domain: string;
-	field: string;
-	value: unknown;
-}
+/** Change type derived from ExecRequest to avoid Zod inference mismatches */
+type Change = ExecRequest["changes"][number];
 
 interface StepResult {
 	domain: string;
@@ -98,16 +95,29 @@ export async function dispatch(
 		// Execute each call and collect results
 		for (const { call, fields } of calls) {
 			callPromises.push(
-				client.send(call).then((result) => {
-					for (const field of fields) {
-						allStepResults.push({
-							domain,
-							field,
-							success: result.success,
-							error: result.error,
-						});
-					}
-				}),
+				client
+					.send(call)
+					.then((result) => {
+						for (const field of fields) {
+							allStepResults.push({
+								domain,
+								field,
+								success: result.success,
+								error: result.error,
+							});
+						}
+					})
+					.catch((err) => {
+						const message = err instanceof Error ? err.message : "Service binding call failed";
+						for (const field of fields) {
+							allStepResults.push({
+								domain,
+								field,
+								success: false,
+								error: message,
+							});
+						}
+					}),
 			);
 		}
 	}

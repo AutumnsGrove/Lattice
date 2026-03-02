@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { isAllowed, validateBatch, WRITE_ALLOWLIST } from "./allowlist";
+import { ENDPOINT_MAP } from "./endpoint-map";
 
 describe("WRITE_ALLOWLIST", () => {
 	it("contains all 30 writable domains", () => {
@@ -9,6 +10,15 @@ describe("WRITE_ALLOWLIST", () => {
 	it("does not include read-only domains", () => {
 		expect(WRITE_ALLOWLIST["infra.billing"]).toBeUndefined();
 		expect(WRITE_ALLOWLIST["infra.flags"]).toBeUndefined();
+	});
+
+	it("has a matching endpoint-map entry for every allowlisted domain", () => {
+		const allowlistDomains = Object.keys(WRITE_ALLOWLIST);
+		const endpointDomains = Object.keys(ENDPOINT_MAP);
+		// Every domain in the allowlist must have a corresponding endpoint mapping
+		for (const domain of allowlistDomains) {
+			expect(endpointDomains, `Missing endpoint-map entry for "${domain}"`).toContain(domain);
+		}
 	});
 
 	it("does not include username in identity.profile", () => {

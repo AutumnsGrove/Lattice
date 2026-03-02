@@ -149,7 +149,7 @@ describe("dispatcher", () => {
 		});
 	});
 
-	it("marks unknown domains as failed without calling API", async () => {
+	it("rejects unknown domains at the allowlist gate", async () => {
 		const { client, calls } = mockClient();
 		const request: ExecRequest = {
 			request_id: "test-7",
@@ -157,12 +157,13 @@ describe("dispatcher", () => {
 			changes: [{ domain: "nonexistent.domain", field: "anything", value: "test" }],
 		};
 
-		// Add domain to allowlist to bypass that check (normally this wouldn't pass)
-		// This tests the endpoint-map fallback specifically
-		// Since "nonexistent.domain" isn't in allowlist, it'll fail at allowlist first
+		// "nonexistent.domain" isn't in the allowlist, so the batch is rejected
+		// at step 1 (allowlist) before reaching the endpoint-map (step 2).
 		const result = await dispatch(request, client);
 
-		expect(result.failedCount).toBeGreaterThan(0);
+		expect(result.failedCount).toBe(1);
+		expect(result.appliedCount).toBe(0);
+		expect(result.steps[0].error).toContain("not in the write allowlist");
 		expect(calls).toHaveLength(0);
 	});
 });

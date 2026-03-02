@@ -200,8 +200,10 @@ export const WRITE_ALLOWLIST: Record<string, ReadonlySet<string>> = {
 /**
  * Check if a domain+field combination is allowed for writing.
  * Returns false for any domain or field not explicitly listed.
+ * Uses Object.hasOwn() to prevent prototype pollution (e.g., "__proto__").
  */
 export function isAllowed(domain: string, field: string): boolean {
+	if (!Object.hasOwn(WRITE_ALLOWLIST, domain)) return false;
 	const fields = WRITE_ALLOWLIST[domain];
 	if (!fields) return false;
 	return fields.has(field);

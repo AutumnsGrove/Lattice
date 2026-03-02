@@ -582,14 +582,25 @@ export const handle: Handle = async ({ event, resolve }) => {
 		const internalTenant = event.request.headers.get("X-Tenant-Id");
 		if (internalKey && internalTenant) {
 			const expected = event.platform?.env?.INTERNAL_SERVICE_KEY;
-			if (expected && internalKey.length === expected.length) {
-				// Timing-safe comparison via XOR to prevent timing attacks
+			if (expected) {
+				// Timing-safe comparison via HMAC to prevent timing attacks.
+				// HMAC outputs are always 32 bytes (SHA-256) regardless of input
+				// length, so no information about key length is leaked.
 				const encoder = new TextEncoder();
-				const a = encoder.encode(internalKey);
-				const b = encoder.encode(expected);
+				const aBytes = encoder.encode(internalKey);
+				const bBytes = encoder.encode(expected);
+				const hmacKey = await crypto.subtle.importKey(
+					"raw",
+					aBytes,
+					{ name: "HMAC", hash: "SHA-256" },
+					false,
+					["sign"],
+				);
+				const sig = new Uint8Array(await crypto.subtle.sign("HMAC", hmacKey, bBytes));
+				const exp = new Uint8Array(await crypto.subtle.sign("HMAC", hmacKey, aBytes));
 				let diff = 0;
-				for (let i = 0; i < a.length; i++) {
-					diff |= a[i] ^ b[i];
+				for (let i = 0; i < sig.length; i++) {
+					diff |= sig[i] ^ exp[i];
 				}
 				if (diff === 0) {
 					event.locals.user = {
@@ -679,7 +690,12 @@ export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.csrfToken = csrfToken;
 
 	// Auto-validate CSRF on state-changing methods
-	if (["POST", "PUT", "DELETE", "PATCH"].includes(event.request.method)) {
+	// Internal service requests (worker-to-worker via service binding) are not
+	// subject to CSRF — they never traverse a browser. Skip validation entirely.
+	if (
+		!event.locals.isInternalService &&
+		["POST", "PUT", "DELETE", "PATCH"].includes(event.request.method)
+	) {
 		const isAuthEndpoint = event.url.pathname.includes("/auth/");
 		// Turnstile verification is like auth - new visitors don't have CSRF tokens
 		const isTurnstileEndpoint = event.url.pathname === "/api/verify/turnstile";

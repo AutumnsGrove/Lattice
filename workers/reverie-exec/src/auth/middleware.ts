@@ -14,15 +14,19 @@ import { EXEC_ERRORS, buildExecError } from "../errors";
 
 /**
  * Constant-time string comparison to prevent timing attacks.
- * Falls back to byte-by-byte XOR if crypto.subtle is unavailable.
+ *
+ * Uses HMAC(key=a, data=b) === HMAC(key=a, data=a) comparison.
+ * The HMAC output length is always 32 bytes (SHA-256) regardless of
+ * input length, so no timing information is leaked about key length.
  */
 async function timingSafeEqual(a: string, b: string): Promise<boolean> {
-	if (a.length !== b.length) return false;
 	const encoder = new TextEncoder();
 	const aBytes = encoder.encode(a);
 	const bBytes = encoder.encode(b);
 
-	// Use crypto.subtle for timing-safe comparison
+	// Use crypto.subtle for timing-safe comparison via HMAC.
+	// HMAC outputs are always 32 bytes regardless of input length,
+	// so the comparison below never leaks the key length.
 	const aKey = await crypto.subtle.importKey(
 		"raw",
 		aBytes,
@@ -33,10 +37,9 @@ async function timingSafeEqual(a: string, b: string): Promise<boolean> {
 	const sig = await crypto.subtle.sign("HMAC", aKey, bBytes);
 	const expected = await crypto.subtle.sign("HMAC", aKey, aBytes);
 
-	// Compare the HMAC outputs (constant-time at the crypto level)
+	// Compare the HMAC outputs (constant-time, fixed 32-byte length)
 	const sigArr = new Uint8Array(sig);
 	const expectedArr = new Uint8Array(expected);
-	if (sigArr.length !== expectedArr.length) return false;
 	let diff = 0;
 	for (let i = 0; i < sigArr.length; i++) {
 		diff |= sigArr[i] ^ expectedArr[i];
