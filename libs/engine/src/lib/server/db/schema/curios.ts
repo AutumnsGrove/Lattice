@@ -496,6 +496,8 @@ export const polls = sqliteTable('polls', {
 	pollType: text('poll_type').notNull().default('single'),
 	options: text('options').notNull().default('[]'),
 	resultsVisibility: text('results_visibility').notNull().default('after-vote'),
+	containerStyle: text('container_style').notNull().default('glass'),
+	status: text('status').notNull().default('active'),
 	isPinned: integer('is_pinned').notNull().default(0),
 	closeDate: text('close_date'),
 	createdAt: text('created_at').notNull().default(sql`(datetime('now'))`),

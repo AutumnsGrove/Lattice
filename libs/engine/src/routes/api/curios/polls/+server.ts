@@ -14,6 +14,7 @@ import {
 	generateOptionId,
 	isValidPollType,
 	isValidResultsVisibility,
+	isValidContainerStyle,
 	sanitizeQuestion,
 	sanitizeOptionText,
 	parseOptions,
@@ -33,6 +34,8 @@ interface PollRow {
 	poll_type: string;
 	options: string;
 	results_visibility: string;
+	container_style: string;
+	status: string;
 	is_pinned: number;
 	close_date: string | null;
 	created_at: string;
@@ -61,9 +64,9 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
 	try {
 		const result = await db
 			.prepare(
-				`SELECT id, tenant_id, question, description, poll_type, options, results_visibility, is_pinned, close_date, created_at, updated_at
+				`SELECT id, tenant_id, question, description, poll_type, options, results_visibility, container_style, status, is_pinned, close_date, created_at, updated_at
          FROM polls
-         WHERE tenant_id = ?
+         WHERE tenant_id = ? AND status = 'active'
          ORDER BY is_pinned DESC, created_at DESC
          LIMIT ? OFFSET ?`,
 			)
@@ -77,6 +80,7 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
 			pollType: row.poll_type,
 			options: parseOptions(row.options),
 			resultsVisibility: row.results_visibility,
+			containerStyle: row.container_style || "glass",
 			isPinned: Boolean(row.is_pinned),
 			isClosed: isPollClosed(row.close_date),
 			closeDate: row.close_date,
@@ -145,14 +149,21 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 		? String(body.resultsVisibility)
 		: "after-vote";
 
-	// Process options
+	const containerStyle = isValidContainerStyle(String(body.containerStyle ?? "glass"))
+		? String(body.containerStyle)
+		: "glass";
+
+	// Process options (now with optional emoji + color)
 	const rawOptions = Array.isArray(body.options) ? body.options : [];
 	const options: PollOption[] = rawOptions
 		.map((opt: unknown) => {
-			const text = sanitizeOptionText(
-				typeof opt === "string" ? opt : (opt as Record<string, string>)?.text,
-			);
-			return text ? { id: generateOptionId(), text } : null;
+			const raw = typeof opt === "string" ? { text: opt } : (opt as Record<string, string>);
+			const text = sanitizeOptionText(raw?.text);
+			if (!text) return null;
+			const option: PollOption = { id: generateOptionId(), text };
+			if (typeof raw?.emoji === "string" && raw.emoji.trim()) option.emoji = raw.emoji.trim();
+			if (typeof raw?.color === "string" && /^#[0-9a-fA-F]{3,8}$/.test(raw.color)) option.color = raw.color;
+			return option;
 		})
 		.filter((opt): opt is PollOption => opt !== null)
 		.slice(0, MAX_OPTIONS);
@@ -178,8 +189,8 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 	try {
 		await db
 			.prepare(
-				`INSERT INTO polls (id, tenant_id, question, description, poll_type, options, results_visibility, is_pinned, close_date)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+				`INSERT INTO polls (id, tenant_id, question, description, poll_type, options, results_visibility, container_style, is_pinned, close_date)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 			)
 			.bind(
 				id,
@@ -189,6 +200,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 				pollType,
 				JSON.stringify(options),
 				resultsVisibility,
+				containerStyle,
 				isPinned ? 1 : 0,
 				closeDate,
 			)
