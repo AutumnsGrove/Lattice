@@ -70,6 +70,12 @@ jobs:
           - name: warden
             path: workers/warden
             needs-engine: true
+          - name: reverie
+            path: workers/reverie
+            needs-engine: true
+          - name: reverie-exec
+            path: workers/reverie-exec
+            needs-engine: true
           - name: landing
             path: apps/landing
             needs-engine: true
