@@ -1,13 +1,13 @@
 /**
  * Rate Limiting for Reverie Exec Worker
  *
- * Uses the Threshold SDK with KV storage to rate limit per tenant.
- * Rate limits are keyed by tenant ID (not IP) since all requests are authenticated.
- * Fails open — a KV outage should not block execution.
+ * Uses the Threshold SDK with Durable Object storage for per-tenant rate limiting.
+ * DO-backed: zero contention, single-writer consistency, no KV namespace needed.
+ * Fails open — a DO outage should not block execution.
  */
 
-import { Threshold, ThresholdKVStore } from "@autumnsgrove/lattice/threshold";
-import type { Env, ExecVariables } from "../types";
+import { Threshold, ThresholdDOStore } from "@autumnsgrove/lattice/threshold";
+import type { Env } from "../types";
 
 /** Rate limit: 20 requests per 60 seconds per tenant */
 const RATE_LIMIT = 20;
@@ -16,13 +16,9 @@ const WINDOW_SECONDS = 60;
 /**
  * Create Threshold rate-limit middleware for the /execute endpoint.
  *
- * Keyed by tenant ID (set by auth middleware) rather than IP,
- * since reverie-exec is tenant-scoped. Fails open — KV outage
- * should not block change execution.
- *
- * Uses Threshold.check() directly instead of thresholdMiddleware
- * because the Hono structural types don't include .get() for
- * reading variables set by prior middleware.
+ * Keyed by tenant ID (set by auth middleware). Each tenant gets its
+ * own DO instance for zero-contention rate limiting. Fails open —
+ * DO outage should not block change execution.
  */
 export function execRateLimit() {
 	return async (
@@ -35,13 +31,13 @@ export function execRateLimit() {
 		},
 		next: () => Promise<void>,
 	) => {
-		// Skip if KV not bound (pre-deployment)
-		if (!c.env.RATE_LIMITS) return next();
+		// Skip if THRESHOLD DO not bound (pre-deployment)
+		if (!c.env.THRESHOLD) return next();
 
 		const tenantId = c.get("tenantId") ?? "unknown";
 
 		const threshold = new Threshold({
-			store: new ThresholdKVStore(c.env.RATE_LIMITS, "reverie-exec"),
+			store: new ThresholdDOStore(c.env.THRESHOLD, tenantId),
 		});
 
 		try {
@@ -71,7 +67,7 @@ export function execRateLimit() {
 				);
 			}
 		} catch {
-			// Fail open — KV outage should not block execution
+			// Fail open — DO outage should not block execution
 		}
 
 		return next();

@@ -102,7 +102,7 @@ app.get("/health", (c) => {
 	const hasCurioDB = !!c.env.CURIO_DB;
 	const hasLumen = !!c.env.LUMEN;
 	const hasAuth = !!c.env.AUTH;
-	const hasRateLimits = !!c.env.RATE_LIMITS;
+	const hasThreshold = !!c.env.THRESHOLD;
 
 	return c.json({
 		status: hasLumen ? "healthy" : "degraded",
@@ -118,7 +118,7 @@ app.get("/health", (c) => {
 			curioDB: hasCurioDB,
 			lumen: hasLumen,
 			auth: hasAuth,
-			rateLimits: hasRateLimits,
+			threshold: hasThreshold,
 		},
 	});
 });

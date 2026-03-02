@@ -1,12 +1,12 @@
 /**
  * Rate Limiting Middleware for Reverie Worker
  *
- * Uses the Threshold SDK with KV storage to rate limit per tenant.
- * Rate limits are keyed by tenant ID (not IP) since all requests are authenticated.
- * Fails open — a KV outage should not block configuration.
+ * Uses the Threshold SDK with Durable Object storage for per-tenant rate limiting.
+ * DO-backed: zero contention, single-writer consistency, no KV namespace needed.
+ * Fails open — a DO outage should not block configuration.
  */
 
-import { Threshold, ThresholdKVStore } from "@autumnsgrove/lattice/threshold";
+import { Threshold, ThresholdDOStore } from "@autumnsgrove/lattice/threshold";
 import { thresholdMiddleware } from "@autumnsgrove/lattice/threshold/hono";
 import { ENDPOINT_RATE_LIMITS } from "@autumnsgrove/lattice/threshold";
 import type { Env, ReverieVariables } from "../types";
@@ -17,8 +17,8 @@ type ReverieEndpointKey = "reverie/configure" | "reverie/execute" | "reverie/que
  * Create Threshold rate-limit middleware for a Reverie endpoint.
  *
  * Keyed by tenant ID (set by auth middleware) rather than IP,
- * since Reverie is tenant-scoped. Fails open — KV outage
- * should not block configuration requests.
+ * since Reverie is tenant-scoped. Each tenant gets its own DO
+ * instance for zero-contention rate limiting.
  */
 export function reverieRateLimit(endpointKey: ReverieEndpointKey) {
 	const config = ENDPOINT_RATE_LIMITS[endpointKey];
@@ -33,11 +33,13 @@ export function reverieRateLimit(endpointKey: ReverieEndpointKey) {
 		},
 		next: () => Promise<void>,
 	) => {
-		// Skip if KV not bound (pre-deployment)
-		if (!c.env.RATE_LIMITS) return next();
+		// Skip if THRESHOLD DO not bound (pre-deployment)
+		if (!c.env.THRESHOLD) return next();
+
+		const tenantId = c.get("tenantId") ?? "unknown";
 
 		const threshold = new Threshold({
-			store: new ThresholdKVStore(c.env.RATE_LIMITS, "reverie"),
+			store: new ThresholdDOStore(c.env.THRESHOLD, tenantId),
 		});
 
 		const middleware = thresholdMiddleware({
@@ -45,8 +47,7 @@ export function reverieRateLimit(endpointKey: ReverieEndpointKey) {
 			limit: config.limit,
 			windowSeconds: config.windowSeconds,
 			keyPrefix: endpointKey,
-			// Key by tenant ID since all requests are authenticated
-			getKey: (ctx) => ctx.get("tenantId") ?? "unknown",
+			getKey: () => tenantId,
 			failMode: "open",
 		});
 

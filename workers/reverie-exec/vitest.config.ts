@@ -21,7 +21,6 @@ export default defineWorkersConfig({
 				miniflare: {
 					compatibilityDate: "2025-01-01",
 					compatibilityFlags: ["nodejs_compat"],
-					kvNamespaces: ["RATE_LIMITS"],
 				},
 			},
 		},

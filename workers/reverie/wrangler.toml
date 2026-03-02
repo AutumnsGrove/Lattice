@@ -27,12 +27,12 @@ database_name = "grove-curios-db"
 database_id = "e8e0f3c5-62a4-4c14-9a21-3c9e3b6f0d12"
 
 # =============================================================================
-# KV — Rate limit counters (Threshold SDK)
+# Durable Objects — Threshold rate limiting (per-tenant isolation)
 # =============================================================================
-[[kv_namespaces]]
-binding = "RATE_LIMITS"
-title = "grove-reverie-ratelimits"
-id = "placeholder-will-be-created"
+[[durable_objects.bindings]]
+name = "THRESHOLD"
+class_name = "ThresholdDO"
+script_name = "grove-durable-objects"
 
 # =============================================================================
 # Service Bindings — Internal worker-to-worker communication

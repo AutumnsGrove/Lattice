@@ -34,8 +34,8 @@ export interface Env {
 	DB: D1Database;
 	/** Curios D1 — curio widget config reads */
 	CURIO_DB: D1Database;
-	/** Rate limit counters (Threshold SDK) */
-	RATE_LIMITS: KVNamespace;
+	/** Threshold DO for per-tenant rate limiting */
+	THRESHOLD: DurableObjectNamespace;
 	/** Service binding to Lumen for LLM inference */
 	LUMEN: { fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response> };
 	/** Service binding to Auth for Heartwood token verification */

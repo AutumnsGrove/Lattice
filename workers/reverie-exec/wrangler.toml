@@ -18,12 +18,12 @@ binding = "GROVE_APP"
 service = "grove-lattice"
 
 # =============================================================================
-# KV — Rate limit counters (Threshold SDK)
+# Durable Objects — Threshold rate limiting (per-tenant isolation)
 # =============================================================================
-[[kv_namespaces]]
-binding = "RATE_LIMITS"
-title = "grove-reverie-exec-ratelimits"
-id = "placeholder-will-be-created"
+[[durable_objects.bindings]]
+name = "THRESHOLD"
+class_name = "ThresholdDO"
+script_name = "grove-durable-objects"
 
 # =============================================================================
 # Secrets (configured via: gw secret apply <name> --worker grove-reverie-exec)

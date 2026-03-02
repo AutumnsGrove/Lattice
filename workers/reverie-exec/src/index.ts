@@ -38,14 +38,14 @@ app.use("*", async (c, next) => {
 
 app.get("/health", (c) => {
 	const hasApp = !!c.env.GROVE_APP;
-	const hasRateLimits = !!c.env.RATE_LIMITS;
+	const hasThreshold = !!c.env.THRESHOLD;
 
 	return c.json({
 		status: hasApp ? "healthy" : "degraded",
 		version: "0.1.0",
 		bindings: {
 			groveApp: hasApp,
-			rateLimits: hasRateLimits,
+			threshold: hasThreshold,
 		},
 	});
 });

@@ -18,8 +18,8 @@ export interface Env {
 	EXEC_API_KEY: string;
 	/** API key for authenticating to SvelteKit (internal service auth) */
 	INTERNAL_SERVICE_KEY: string;
-	/** Rate limit counters (Threshold SDK) */
-	RATE_LIMITS: KVNamespace;
+	/** Threshold DO for per-tenant rate limiting */
+	THRESHOLD: DurableObjectNamespace;
 }
 
 // =============================================================================

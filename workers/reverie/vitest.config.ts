@@ -28,7 +28,6 @@ export default defineWorkersConfig({
 					compatibilityDate: "2025-01-01",
 					compatibilityFlags: ["nodejs_compat"],
 					d1Databases: ["DB", "CURIO_DB"],
-					kvNamespaces: ["RATE_LIMITS"],
 				},
 			},
 		},
