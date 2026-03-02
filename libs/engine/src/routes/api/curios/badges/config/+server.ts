@@ -52,9 +52,7 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
 				showcaseStyle: isValidShowcaseStyle(row.showcase_style)
 					? row.showcase_style
 					: DEFAULT_CONFIG.showcaseStyle,
-				badgeSize: isValidBadgeSize(row.badge_size)
-					? row.badge_size
-					: DEFAULT_CONFIG.badgeSize,
+				badgeSize: isValidBadgeSize(row.badge_size) ? row.badge_size : DEFAULT_CONFIG.badgeSize,
 			}
 		: DEFAULT_CONFIG;
 
@@ -84,25 +82,22 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
 		return json(buildErrorJson(API_ERRORS.UNAUTHORIZED), { status: 401 });
 	}
 
-	const body = await request.json().catch(() => null);
+	const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
 	if (!body) {
 		return json(buildErrorJson(API_ERRORS.INVALID_REQUEST_BODY), {
 			status: 400,
 		});
 	}
 
-	const wallLayout =
-		body.wallLayout && isValidWallLayout(body.wallLayout)
-			? body.wallLayout
-			: DEFAULT_CONFIG.wallLayout;
-	const showcaseStyle =
-		body.showcaseStyle && isValidShowcaseStyle(body.showcaseStyle)
-			? body.showcaseStyle
-			: DEFAULT_CONFIG.showcaseStyle;
-	const badgeSize =
-		body.badgeSize && isValidBadgeSize(body.badgeSize)
-			? body.badgeSize
-			: DEFAULT_CONFIG.badgeSize;
+	const rawWallLayout = typeof body.wallLayout === "string" ? body.wallLayout : "";
+	const rawShowcaseStyle = typeof body.showcaseStyle === "string" ? body.showcaseStyle : "";
+	const rawBadgeSize = typeof body.badgeSize === "string" ? body.badgeSize : "";
+
+	const wallLayout = isValidWallLayout(rawWallLayout) ? rawWallLayout : DEFAULT_CONFIG.wallLayout;
+	const showcaseStyle = isValidShowcaseStyle(rawShowcaseStyle)
+		? rawShowcaseStyle
+		: DEFAULT_CONFIG.showcaseStyle;
+	const badgeSize = isValidBadgeSize(rawBadgeSize) ? rawBadgeSize : DEFAULT_CONFIG.badgeSize;
 
 	await db
 		.prepare(

@@ -63,7 +63,7 @@
 					<div class="config-grid">
 						<!-- Wall Layout -->
 						<div class="config-group">
-							<label class="config-label">Wall Layout</label>
+							<span class="config-label">Wall Layout</span>
 							<p class="config-hint">How your badge collection is arranged</p>
 							<div class="radio-grid">
 								{#each data.wallLayoutOptions as layout}
@@ -83,7 +83,7 @@
 
 						<!-- Showcase Style -->
 						<div class="config-group">
-							<label class="config-label">Showcase Style</label>
+							<span class="config-label">Showcase Style</span>
 							<p class="config-hint">How your featured badges are emphasized</p>
 							<div class="radio-grid">
 								{#each data.showcaseStyleOptions as style}
@@ -106,7 +106,7 @@
 
 						<!-- Badge Size -->
 						<div class="config-group">
-							<label class="config-label">Badge Size</label>
+							<span class="config-label">Badge Size</span>
 							<p class="config-hint">How large badges appear to visitors</p>
 							<div class="radio-row">
 								{#each data.badgeSizeOptions as size}

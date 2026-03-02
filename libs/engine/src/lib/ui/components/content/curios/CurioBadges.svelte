@@ -137,6 +137,8 @@
 					{@const prideColors = getPrideFlagColors(badge.id)}
 					{@const rotation =
 						config.wallLayout === "pinboard" ? pinboardRotation(badge.id) : 0}
+					<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+					<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 					<div
 						class="badge-glass"
 						class:shape-rectangle={badge.shape === "rectangle"}
@@ -222,6 +224,8 @@
 					{@const prideColors = getPrideFlagColors(badge.id)}
 					{@const rotation =
 						config.wallLayout === "pinboard" ? pinboardRotation(badge.id) : 0}
+					<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+					<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 					<div
 						class="badge-glass"
 						class:shape-rectangle={badge.shape === "rectangle"}
