@@ -1,15 +1,20 @@
 <script lang="ts">
 	import { enhance } from "$app/forms";
 	import { GlassCard, GlassButton, toast } from "$lib/ui/components/ui";
-	import { Award, Plus, Trash2, Star } from "lucide-svelte";
+	import { Award, Plus, Trash2, Star, Settings } from "lucide-svelte";
 
 	let { data, form } = $props();
 
 	let showCustomForm = $state(false);
+	let showConfigForm = $state(false);
+	let showLibrary = $state(false);
 
 	$effect(() => {
 		if (form?.showcaseToggled) {
 			toast.success("Showcase updated");
+		} else if (form?.configSaved) {
+			toast.success("Display settings saved");
+			showConfigForm = false;
 		} else if (form?.customCreated) {
 			toast.success("Custom badge created");
 			showCustomForm = false;
@@ -22,7 +27,7 @@
 
 	function getRarityColor(rarity: string): string {
 		const opt = data.rarityOptions.find((r) => r.value === rarity);
-		return opt?.color ?? "#cd7f32";
+		return opt?.color ?? "#8B7355";
 	}
 </script>
 
@@ -37,10 +42,99 @@
 			<h1>Badges</h1>
 		</div>
 		<p class="subtitle">
-			Collectible achievements celebrating your milestones. Badges celebrate what you've done, not
-			pressure you into doing more.
+			Glass ornaments — collectible achievements celebrating your milestones. Each badge is a
+			frosted glass pane, precious and personal.
 		</p>
 	</header>
+
+	<!-- Display Settings -->
+	<section class="badges-section">
+		<div class="section-header">
+			<h2>Display Settings</h2>
+			<GlassButton variant="ghost" onclick={() => (showConfigForm = !showConfigForm)}>
+				<Settings class="btn-icon" />
+				{showConfigForm ? "Hide" : "Customize"}
+			</GlassButton>
+		</div>
+
+		{#if showConfigForm}
+			<GlassCard class="config-card">
+				<form method="POST" action="?/saveConfig" use:enhance>
+					<div class="config-grid">
+						<!-- Wall Layout -->
+						<div class="config-group">
+							<label class="config-label">Wall Layout</label>
+							<p class="config-hint">How your badge collection is arranged</p>
+							<div class="radio-grid">
+								{#each data.wallLayoutOptions as layout}
+									<label class="radio-card" class:selected={data.config.wallLayout === layout.value}>
+										<input
+											type="radio"
+											name="wallLayout"
+											value={layout.value}
+											checked={data.config.wallLayout === layout.value}
+										/>
+										<span class="radio-card-label">{layout.label}</span>
+										<span class="radio-card-desc">{layout.description}</span>
+									</label>
+								{/each}
+							</div>
+						</div>
+
+						<!-- Showcase Style -->
+						<div class="config-group">
+							<label class="config-label">Showcase Style</label>
+							<p class="config-hint">How your featured badges are emphasized</p>
+							<div class="radio-grid">
+								{#each data.showcaseStyleOptions as style}
+									<label
+										class="radio-card"
+										class:selected={data.config.showcaseStyle === style.value}
+									>
+										<input
+											type="radio"
+											name="showcaseStyle"
+											value={style.value}
+											checked={data.config.showcaseStyle === style.value}
+										/>
+										<span class="radio-card-label">{style.label}</span>
+										<span class="radio-card-desc">{style.description}</span>
+									</label>
+								{/each}
+							</div>
+						</div>
+
+						<!-- Badge Size -->
+						<div class="config-group">
+							<label class="config-label">Badge Size</label>
+							<p class="config-hint">How large badges appear to visitors</p>
+							<div class="radio-row">
+								{#each data.badgeSizeOptions as size}
+									<label class="radio-pill" class:selected={data.config.badgeSize === size.value}>
+										<input
+											type="radio"
+											name="badgeSize"
+											value={size.value}
+											checked={data.config.badgeSize === size.value}
+										/>
+										<span>{size.label}</span>
+										<span class="size-px">{size.px}px</span>
+									</label>
+								{/each}
+							</div>
+						</div>
+					</div>
+
+					<div class="form-actions">
+						<GlassButton type="submit" variant="accent">Save Settings</GlassButton>
+						<GlassButton variant="ghost" onclick={() => (showConfigForm = false)}
+							>Cancel</GlassButton
+						>
+					</div>
+				</form>
+			</GlassCard>
+		{/if}
+	</section>
 
 	<!-- Earned Badges -->
 	<section class="badges-section">
@@ -108,6 +202,44 @@
 				</div>
 			{/each}
 		</div>
+	</section>
+
+	<!-- Badge Library -->
+	<section class="badges-section">
+		<div class="section-header">
+			<h2>Badge Library</h2>
+			<GlassButton variant="ghost" onclick={() => (showLibrary = !showLibrary)}>
+				{showLibrary ? "Hide Library" : "Browse Library"}
+			</GlassButton>
+		</div>
+		<p class="section-desc">
+			Pre-built badges you can add to your collection. Retro web badges, pride flags, seasonal
+			nature, and more.
+		</p>
+
+		{#if showLibrary}
+			{#each Object.entries(data.prebuiltBadgesByCategory) as [category, badges]}
+				<div class="library-category">
+					<h3 class="library-category-label">
+						{category === "retro-web"
+							? "Retro Web"
+							: category === "pride"
+								? "Pride & Identity"
+								: category === "seasonal"
+									? "Seasonal & Nature"
+									: category}
+					</h3>
+					<div class="library-grid">
+						{#each badges as badge}
+							<div class="library-badge">
+								<span class="library-badge-name">{badge.name}</span>
+								<span class="library-badge-desc">{badge.description}</span>
+							</div>
+						{/each}
+					</div>
+				</div>
+			{/each}
+		{/if}
 	</section>
 
 	<!-- Custom Badges -->
@@ -232,17 +364,189 @@
 	.badges-section {
 		margin-bottom: 2rem;
 	}
+	.section-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		margin-bottom: 0.5rem;
+	}
 	h2 {
 		font-size: 1.25rem;
 		font-weight: 600;
 		margin: 0 0 0.75rem 0;
 		color: var(--color-text);
 	}
+	.section-header h2 {
+		margin-bottom: 0;
+	}
 	.section-desc {
 		font-size: 0.85rem;
 		color: var(--color-text-muted);
 		margin-bottom: 0.75rem;
 	}
+
+	/* ── Display Config ─────────────────────────────────────────────── */
+
+	:global(.config-card) {
+		padding: 1.5rem;
+		margin-top: 0.75rem;
+	}
+
+	.config-grid {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+
+	.config-group {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.config-label {
+		font-size: 0.9rem;
+		font-weight: 600;
+		color: var(--color-text);
+	}
+
+	.config-hint {
+		font-size: 0.8rem;
+		color: var(--color-text-muted);
+		margin: 0;
+	}
+
+	.radio-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+		gap: 0.5rem;
+	}
+
+	.radio-card {
+		display: flex;
+		flex-direction: column;
+		gap: 0.125rem;
+		padding: 0.75rem;
+		border: 1px solid var(--grove-overlay-12);
+		border-radius: var(--border-radius-standard);
+		background: var(--grove-overlay-4);
+		cursor: pointer;
+		transition:
+			border-color 0.15s ease,
+			background 0.15s ease;
+	}
+
+	.radio-card:hover {
+		background: var(--grove-overlay-8);
+	}
+
+	.radio-card.selected {
+		border-color: var(--color-primary);
+		background: rgba(var(--grove-rgb, 74 222 128), 0.06);
+	}
+
+	.radio-card input[type="radio"] {
+		position: absolute;
+		opacity: 0;
+		width: 0;
+		height: 0;
+	}
+
+	.radio-card-label {
+		font-size: 0.85rem;
+		font-weight: 600;
+		color: var(--color-text);
+	}
+
+	.radio-card-desc {
+		font-size: 0.75rem;
+		color: var(--color-text-muted);
+		line-height: 1.3;
+	}
+
+	.radio-row {
+		display: flex;
+		gap: 0.5rem;
+	}
+
+	.radio-pill {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+		padding: 0.5rem 0.875rem;
+		border: 1px solid var(--grove-overlay-12);
+		border-radius: 9999px;
+		background: var(--grove-overlay-4);
+		cursor: pointer;
+		font-size: 0.85rem;
+		transition:
+			border-color 0.15s ease,
+			background 0.15s ease;
+	}
+
+	.radio-pill:hover {
+		background: var(--grove-overlay-8);
+	}
+
+	.radio-pill.selected {
+		border-color: var(--color-primary);
+		background: rgba(var(--grove-rgb, 74 222 128), 0.06);
+	}
+
+	.radio-pill input[type="radio"] {
+		position: absolute;
+		opacity: 0;
+		width: 0;
+		height: 0;
+	}
+
+	.size-px {
+		font-size: 0.7rem;
+		color: var(--color-text-muted);
+	}
+
+	/* ── Badge Library ───────────────────────────────────────────────── */
+
+	.library-category {
+		margin-top: 1rem;
+	}
+
+	.library-category-label {
+		font-size: 0.9rem;
+		font-weight: 600;
+		color: var(--color-text);
+		margin: 0 0 0.5rem 0;
+		text-transform: capitalize;
+	}
+
+	.library-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+		gap: 0.375rem;
+	}
+
+	.library-badge {
+		display: flex;
+		flex-direction: column;
+		padding: 0.5rem 0.75rem;
+		background: var(--grove-overlay-4);
+		border-radius: var(--border-radius-standard);
+		font-size: 0.8rem;
+	}
+
+	.library-badge-name {
+		font-weight: 600;
+		color: var(--color-text);
+	}
+
+	.library-badge-desc {
+		font-size: 0.75rem;
+		color: var(--color-text-muted);
+	}
+
+	/* ── Shared Styles (carried from v1) ──────────────────────────────── */
+
 	:global(.empty-card) {
 		padding: 3rem 1.5rem;
 		text-align: center;
@@ -437,6 +741,15 @@
 		}
 		.badge-icon-wrap {
 			flex-shrink: 1;
+		}
+		.radio-grid {
+			grid-template-columns: 1fr;
+		}
+		.radio-row {
+			flex-wrap: wrap;
+		}
+		.section-header {
+			flex-wrap: wrap;
 		}
 	}
 </style>

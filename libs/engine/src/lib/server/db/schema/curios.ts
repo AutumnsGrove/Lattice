@@ -641,6 +641,15 @@ export const customBadges = sqliteTable('custom_badges', {
 	createdAt: text('created_at').notNull().default(sql`(datetime('now'))`),
 });
 
+export const badgesConfig = sqliteTable('badges_config', {
+	tenantId: text('tenant_id').primaryKey(),
+	wallLayout: text('wall_layout').notNull().default('shadow-box'),
+	showcaseStyle: text('showcase_style').notNull().default('glowing-shelf'),
+	badgeSize: text('badge_size').notNull().default('medium'),
+	createdAt: text('created_at').notNull().default(sql`(datetime('now'))`),
+	updatedAt: text('updated_at').notNull().default(sql`(datetime('now'))`),
+});
+
 // ─────────────────────────────────────────────────────────────────────────────
 // AMBIENT
 // ─────────────────────────────────────────────────────────────────────────────
