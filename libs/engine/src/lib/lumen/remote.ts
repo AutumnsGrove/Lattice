@@ -32,12 +32,22 @@ const UsageSchema = z.object({
 	cost: z.number(),
 });
 
+const ToolCallSchema = z.object({
+	id: z.string(),
+	type: z.literal("function"),
+	function: z.object({
+		name: z.string(),
+		arguments: z.string(),
+	}),
+});
+
 const InferenceDataSchema = z.object({
 	content: z.string(),
 	model: z.string(),
 	provider: z.string(),
 	usage: UsageSchema,
 	cached: z.boolean().optional().default(false),
+	tool_calls: z.array(ToolCallSchema).optional(),
 });
 
 const EmbedDataSchema = z.object({
@@ -59,7 +69,9 @@ const TranscribeDataSchema = z.object({
 	duration: z.number(),
 	model: z.string(),
 	gutterContent: z
-		.array(z.object({ type: z.literal("vine"), content: z.string(), anchor: z.string().optional() }))
+		.array(
+			z.object({ type: z.literal("vine"), content: z.string(), anchor: z.string().optional() }),
+		)
 		.optional(),
 });
 
@@ -140,6 +152,8 @@ export class RemoteLumenClient {
 						songbird: request.options.songbird ? true : undefined,
 						tenant_api_key: request.options.tenantApiKey,
 						metadata: request.options.metadata,
+						tools: request.options.tools,
+						tool_choice: request.options.toolChoice,
 					}
 				: undefined,
 		};
@@ -154,9 +168,10 @@ export class RemoteLumenClient {
 
 		if (!envelope.data.success) {
 			const err = envelope.data.error;
-			throw Object.assign(new Error(err?.message ?? "Inference failed"), {
-				code: err?.code ?? "UPSTREAM_ERROR",
-			});
+			const inferErr = new Error(err?.message ?? "Inference failed");
+			(inferErr as Error & { code: string }).code =
+				typeof err?.code === "string" ? err.code : "UPSTREAM_ERROR";
+			throw inferErr;
 		}
 
 		const data = InferenceDataSchema.safeParse(envelope.data.data);
@@ -171,6 +186,7 @@ export class RemoteLumenClient {
 			usage: data.data.usage,
 			cached: data.data.cached,
 			latency: envelope.data.meta?.latencyMs ?? 0,
+			...(data.data.tool_calls && { toolCalls: data.data.tool_calls }),
 		};
 	}
 
@@ -192,9 +208,10 @@ export class RemoteLumenClient {
 
 		if (!envelope.data.success) {
 			const err = envelope.data.error;
-			throw Object.assign(new Error(err?.message ?? "Embedding failed"), {
-				code: err?.code ?? "UPSTREAM_ERROR",
-			});
+			const embedErr = new Error(err?.message ?? "Embedding failed");
+			(embedErr as Error & { code: string }).code =
+				typeof err?.code === "string" ? err.code : "UPSTREAM_ERROR";
+			throw embedErr;
 		}
 
 		const data = EmbedDataSchema.safeParse(envelope.data.data);
@@ -227,9 +244,10 @@ export class RemoteLumenClient {
 
 		if (!envelope.data.success) {
 			const err = envelope.data.error;
-			throw Object.assign(new Error(err?.message ?? "Moderation failed"), {
-				code: err?.code ?? "UPSTREAM_ERROR",
-			});
+			const modErr = new Error(err?.message ?? "Moderation failed");
+			(modErr as Error & { code: string }).code =
+				typeof err?.code === "string" ? err.code : "UPSTREAM_ERROR";
+			throw modErr;
 		}
 
 		const data = ModerateDataSchema.safeParse(envelope.data.data);
@@ -272,9 +290,10 @@ export class RemoteLumenClient {
 
 		if (!envelope.data.success) {
 			const err = envelope.data.error;
-			throw Object.assign(new Error(err?.message ?? "Transcription failed"), {
-				code: err?.code ?? "UPSTREAM_ERROR",
-			});
+			const txErr = new Error(err?.message ?? "Transcription failed");
+			(txErr as Error & { code: string }).code =
+				typeof err?.code === "string" ? err.code : "UPSTREAM_ERROR";
+			throw txErr;
 		}
 
 		const data = TranscribeDataSchema.safeParse(envelope.data.data);

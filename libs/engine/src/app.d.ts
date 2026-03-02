@@ -41,6 +41,9 @@ declare global {
 
 			/** Origin for CSRF validation */
 			origin?: string;
+
+			/** True when request is from an internal service binding (e.g., reverie-exec) */
+			isInternalService?: boolean;
 		}
 
 		// interface PageData {}
@@ -146,6 +149,9 @@ declare global {
 
 				/** Tenant ID for the landing site's own Pulse page (dogfooding) */
 				PULSE_LANDING_TENANT_ID?: string;
+
+				/** Internal service key for worker-to-worker auth (reverie-exec → grove-lattice) */
+				INTERNAL_SERVICE_KEY?: string;
 			};
 			context: {
 				waitUntil(promise: Promise<unknown>): void;

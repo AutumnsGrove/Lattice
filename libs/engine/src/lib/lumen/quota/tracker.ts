@@ -167,6 +167,8 @@ export class QuotaTracker {
 			image: 0,
 			code: 0,
 			transcription: 0,
+			reverie: 0,
+			"reverie-compose": 0,
 		};
 
 		// Fill in actual counts

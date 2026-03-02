@@ -1,0 +1,22 @@
+name: Deploy Reverie
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "workers/reverie/**"
+      - "libs/engine/src/lib/reverie/**"
+      - "libs/engine/src/lib/threshold/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/_deploy-worker.yml
+    with:
+      worker-dir: workers/reverie
+      needs-engine: true
+    secrets: inherit

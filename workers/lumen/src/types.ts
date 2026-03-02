@@ -51,6 +51,8 @@ export const LumenTaskSchema = z.enum([
 	"moderation",
 	"embedding",
 	"transcription",
+	"reverie",
+	"reverie-compose",
 ]);
 
 /** Message format — supports text and multimodal */
@@ -73,6 +75,36 @@ const MessageSchema = z.object({
 	]),
 });
 
+/** Tool definition schema (OpenAI/OpenRouter function calling format) */
+const ToolDefinitionSchema = z.object({
+	type: z.literal("function"),
+	function: z.object({
+		name: z.string().max(64),
+		description: z.string().max(1024),
+		parameters: z.record(z.unknown()),
+		strict: z.boolean().optional(),
+	}),
+});
+
+/** Tool choice schema */
+const ToolChoiceSchema = z.union([
+	z.enum(["auto", "required", "none"]),
+	z.object({
+		type: z.literal("function"),
+		function: z.object({ name: z.string().max(64) }),
+	}),
+]);
+
+/** Tool call schema (returned by models) */
+export const ToolCallSchema = z.object({
+	id: z.string(),
+	type: z.literal("function"),
+	function: z.object({
+		name: z.string(),
+		arguments: z.string(),
+	}),
+});
+
 /** POST /inference request body */
 export const InferenceRequestSchema = z.object({
 	task: LumenTaskSchema,
@@ -89,6 +121,8 @@ export const InferenceRequestSchema = z.object({
 			songbird: z.boolean().optional(),
 			tenant_api_key: z.string().max(500).optional(),
 			metadata: z.record(z.unknown()).optional(),
+			tools: z.array(ToolDefinitionSchema).max(64).optional(),
+			tool_choice: ToolChoiceSchema.optional(),
 		})
 		.optional(),
 });

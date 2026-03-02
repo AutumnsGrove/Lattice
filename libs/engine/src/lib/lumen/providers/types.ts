@@ -6,10 +6,11 @@
  */
 
 import type {
-  LumenMessage,
-  LumenProviderName,
-  LumenStreamChunk,
-  LumenUsage,
+	LumenMessage,
+	LumenProviderName,
+	LumenStreamChunk,
+	LumenToolCall,
+	LumenUsage,
 } from "../types.js";
 
 // =============================================================================
@@ -17,23 +18,23 @@ import type {
 // =============================================================================
 
 export interface LumenInferenceOptions {
-  /** Maximum tokens to generate */
-  maxTokens: number;
+	/** Maximum tokens to generate */
+	maxTokens: number;
 
-  /** Temperature (0-2) */
-  temperature: number;
+	/** Temperature (0-2) */
+	temperature: number;
 
-  /** Enable streaming */
-  stream?: boolean;
+	/** Enable streaming */
+	stream?: boolean;
 
-  /** Request timeout in milliseconds */
-  timeoutMs?: number;
+	/** Request timeout in milliseconds */
+	timeoutMs?: number;
 
-  /** API key override for BYOK (uses this instead of the provider's default key) */
-  apiKeyOverride?: string;
+	/** API key override for BYOK (uses this instead of the provider's default key) */
+	apiKeyOverride?: string;
 
-  /** Additional provider-specific options */
-  providerOptions?: Record<string, unknown>;
+	/** Additional provider-specific options */
+	providerOptions?: Record<string, unknown>;
 }
 
 // =============================================================================
@@ -41,17 +42,20 @@ export interface LumenInferenceOptions {
 // =============================================================================
 
 export interface LumenProviderResponse {
-  /** Generated content */
-  content: string;
+	/** Generated content */
+	content: string;
 
-  /** Token usage */
-  usage: LumenUsage;
+	/** Token usage */
+	usage: LumenUsage;
 
-  /** Actual model used (may differ from requested if aliased) */
-  model: string;
+	/** Actual model used (may differ from requested if aliased) */
+	model: string;
 
-  /** Raw provider response for debugging (optional) */
-  raw?: unknown;
+	/** Raw provider response for debugging (optional) */
+	raw?: unknown;
+
+	/** Tool calls returned by the model (when tools were provided in the request) */
+	toolCalls?: LumenToolCall[];
 }
 
 // =============================================================================
@@ -65,108 +69,108 @@ export interface LumenProviderResponse {
  * Follows the same pattern as PaymentProvider in payments/types.ts.
  */
 export interface LumenProvider {
-  /** Provider identifier */
-  readonly name: LumenProviderName;
+	/** Provider identifier */
+	readonly name: LumenProviderName;
 
-  // ===========================================================================
-  // INFERENCE
-  // ===========================================================================
+	// ===========================================================================
+	// INFERENCE
+	// ===========================================================================
 
-  /**
-   * Run inference (chat completion)
-   *
-   * @param model - Model identifier (e.g., "deepseek/deepseek-chat")
-   * @param messages - Chat messages
-   * @param options - Inference options
-   * @returns Generated content and usage stats
-   */
-  inference(
-    model: string,
-    messages: LumenMessage[],
-    options: LumenInferenceOptions,
-  ): Promise<LumenProviderResponse>;
+	/**
+	 * Run inference (chat completion)
+	 *
+	 * @param model - Model identifier (e.g., "deepseek/deepseek-chat")
+	 * @param messages - Chat messages
+	 * @param options - Inference options
+	 * @returns Generated content and usage stats
+	 */
+	inference(
+		model: string,
+		messages: LumenMessage[],
+		options: LumenInferenceOptions,
+	): Promise<LumenProviderResponse>;
 
-  /**
-   * Run streaming inference (optional)
-   *
-   * @param model - Model identifier
-   * @param messages - Chat messages
-   * @param options - Inference options
-   * @returns Async generator yielding chunks
-   */
-  stream?(
-    model: string,
-    messages: LumenMessage[],
-    options: LumenInferenceOptions,
-  ): AsyncGenerator<LumenStreamChunk>;
+	/**
+	 * Run streaming inference (optional)
+	 *
+	 * @param model - Model identifier
+	 * @param messages - Chat messages
+	 * @param options - Inference options
+	 * @returns Async generator yielding chunks
+	 */
+	stream?(
+		model: string,
+		messages: LumenMessage[],
+		options: LumenInferenceOptions,
+	): AsyncGenerator<LumenStreamChunk>;
 
-  // ===========================================================================
-  // EMBEDDINGS (Optional - only Cloudflare AI supports this)
-  // ===========================================================================
+	// ===========================================================================
+	// EMBEDDINGS (Optional - only Cloudflare AI supports this)
+	// ===========================================================================
 
-  /**
-   * Generate embeddings for text
-   *
-   * @param model - Embedding model identifier
-   * @param input - Text or array of texts to embed
-   * @returns Array of embedding vectors
-   */
-  embed?(
-    model: string,
-    input: string | string[],
-  ): Promise<{
-    embeddings: number[][];
-    tokens: number;
-  }>;
+	/**
+	 * Generate embeddings for text
+	 *
+	 * @param model - Embedding model identifier
+	 * @param input - Text or array of texts to embed
+	 * @returns Array of embedding vectors
+	 */
+	embed?(
+		model: string,
+		input: string | string[],
+	): Promise<{
+		embeddings: number[][];
+		tokens: number;
+	}>;
 
-  // ===========================================================================
-  // MODERATION (Optional - only Cloudflare AI supports this natively)
-  // ===========================================================================
+	// ===========================================================================
+	// MODERATION (Optional - only Cloudflare AI supports this natively)
+	// ===========================================================================
 
-  /**
-   * Run content moderation
-   *
-   * @param model - Moderation model identifier
-   * @param content - Content to moderate
-   * @returns Moderation result
-   */
-  moderate?(
-    model: string,
-    content: string,
-  ): Promise<{
-    safe: boolean;
-    categories: string[];
-    confidence: number;
-  }>;
+	/**
+	 * Run content moderation
+	 *
+	 * @param model - Moderation model identifier
+	 * @param content - Content to moderate
+	 * @returns Moderation result
+	 */
+	moderate?(
+		model: string,
+		content: string,
+	): Promise<{
+		safe: boolean;
+		categories: string[];
+		confidence: number;
+	}>;
 
-  // ===========================================================================
-  // TRANSCRIPTION (Optional - only Cloudflare AI supports this)
-  // ===========================================================================
+	// ===========================================================================
+	// TRANSCRIPTION (Optional - only Cloudflare AI supports this)
+	// ===========================================================================
 
-  /**
-   * Transcribe audio to text using Whisper
-   *
-   * @param model - Whisper model identifier (e.g., "@cf/openai/whisper-large-v3-turbo")
-   * @param audio - Audio data as Uint8Array
-   * @returns Transcription result with text, word count, and duration
-   */
-  transcribe?(
-    model: string,
-    audio: Uint8Array,
-  ): Promise<{
-    text: string;
-    wordCount: number;
-    duration: number;
-  }>;
+	/**
+	 * Transcribe audio to text using Whisper
+	 *
+	 * @param model - Whisper model identifier (e.g., "@cf/openai/whisper-large-v3-turbo")
+	 * @param audio - Audio data as Uint8Array
+	 * @returns Transcription result with text, word count, and duration
+	 */
+	transcribe?(
+		model: string,
+		audio: Uint8Array,
+	): Promise<{
+		text: string;
+		wordCount: number;
+		duration: number;
+	}>;
 
-  // ===========================================================================
-  // HEALTH CHECK
-  // ===========================================================================
+	// ===========================================================================
+	// HEALTH CHECK
+	// ===========================================================================
 
-  /**
-   * Check if provider is available
-   */
-  healthCheck?(): Promise<boolean>;
+	/**
+	 * Check if provider is available
+	 */
+	healthCheck?(): Promise<boolean>;
 }
 
 // =============================================================================
@@ -174,9 +178,9 @@ export interface LumenProvider {
 // =============================================================================
 
 export interface LumenProviderSecrets {
-  /** OpenRouter API key */
-  OPENROUTER_API_KEY?: string;
+	/** OpenRouter API key */
+	OPENROUTER_API_KEY?: string;
 
-  /** Cloudflare AI binding (passed separately) */
-  // AI binding is passed via LumenClientConfig, not secrets
+	/** Cloudflare AI binding (passed separately) */
+	// AI binding is passed via LumenClientConfig, not secrets
 }

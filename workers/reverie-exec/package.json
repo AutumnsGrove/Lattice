@@ -1,0 +1,28 @@
+{
+	"name": "grove-reverie-exec",
+	"version": "0.1.0",
+	"private": true,
+	"description": "Execution worker — applies Reverie's validated changes via SvelteKit API endpoints",
+	"type": "module",
+	"scripts": {
+		"dev": "wrangler dev",
+		"deploy": "wrangler deploy",
+		"tail": "wrangler tail",
+		"test": "vitest",
+		"test:run": "vitest run",
+		"lint": "tsc --noEmit",
+		"check": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@autumnsgrove/lattice": "workspace:*",
+		"hono": "^4.7.0",
+		"zod": "^3.24.0"
+	},
+	"devDependencies": {
+		"@cloudflare/vitest-pool-workers": "^0.12.11",
+		"@cloudflare/workers-types": "^4.20251128.0",
+		"typescript": "^5.7.0",
+		"vitest": "^3.2.4",
+		"wrangler": "^4.63.0"
+	}
+}
