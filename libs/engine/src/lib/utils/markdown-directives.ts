@@ -58,6 +58,137 @@ function handleGallery(content: string): string | null {
 }
 
 // ============================================================================
+// Image Directive
+// ============================================================================
+
+/**
+ * Size presets for the ::image[...]:: directive.
+ * Maps friendly names to CSS max-width values (percentage-based).
+ */
+const IMAGE_SIZE_PRESETS: Record<string, string> = {
+	small: "25%",
+	medium: "50%",
+	large: "75%",
+	full: "100%",
+};
+
+const IMAGE_ALIGN_VALUES = new Set(["left", "center", "right"]);
+
+/**
+ * Parse the content of an ::image[...]:: directive into source URL and options.
+ *
+ * Format: ::image[url, size=medium, align=center, blur, rounded, caption=text, border, shadow]::
+ *
+ * The first value (before any comma) is always the image source URL.
+ * Remaining comma-separated values are either key=value pairs or boolean flags.
+ */
+function parseImageOptions(content: string): {
+	src: string;
+	size: string;
+	align: string;
+	blur: boolean;
+	rounded: boolean;
+	caption: string;
+	border: boolean;
+	shadow: boolean;
+} {
+	const parts = content.split(",").map((p) => p.trim());
+	const src = parts[0] || "";
+
+	const opts = {
+		src,
+		size: "full",
+		align: "center",
+		blur: false,
+		rounded: false,
+		caption: "",
+		border: false,
+		shadow: false,
+	};
+
+	for (let i = 1; i < parts.length; i++) {
+		const part = parts[i];
+		if (!part) continue;
+
+		const eqIdx = part.indexOf("=");
+		if (eqIdx !== -1) {
+			const key = part.slice(0, eqIdx).trim().toLowerCase();
+			const value = part.slice(eqIdx + 1).trim();
+			switch (key) {
+				case "size":
+					opts.size = value.toLowerCase();
+					break;
+				case "align":
+					if (IMAGE_ALIGN_VALUES.has(value.toLowerCase())) {
+						opts.align = value.toLowerCase();
+					}
+					break;
+				case "caption":
+					// Caption consumes the rest of the string — commas are
+					// valid in natural-language captions like "Paris, 2024".
+					opts.caption = [value, ...parts.slice(i + 1)]
+						.join(", ")
+						.trim();
+					i = parts.length; // stop the loop
+					break;
+			}
+		} else {
+			const flag = part.toLowerCase();
+			if (flag === "blur") opts.blur = true;
+			else if (flag === "rounded") opts.rounded = true;
+			else if (flag === "border") opts.border = true;
+			else if (flag === "shadow") opts.shadow = true;
+		}
+	}
+
+	return opts;
+}
+
+/**
+ * Image directive: renders a responsive image with optional sizing and display options.
+ *
+ * Input:  ::image[url, size=medium, align=center, blur, rounded, caption=text, border, shadow]::
+ * Output: <figure> with appropriate CSS classes for layout and display
+ *
+ * Size presets: small (25%), medium (50%), large (75%), full (100%)
+ * Custom sizes also accepted: size=300px, size=60%
+ */
+function handleImage(content: string): string | null {
+	const opts = parseImageOptions(content);
+	if (!opts.src) return null;
+
+	const safeSrc = escapeHtml(opts.src);
+	const safeCaption = opts.caption ? escapeHtml(opts.caption) : "";
+
+	// Resolve size to a CSS value
+	const sizeValue = IMAGE_SIZE_PRESETS[opts.size] ?? opts.size;
+	// Validate custom sizes: only allow digits+px, digits+%, or preset names
+	const safeSizeValue = /^(\d+(%|px)|100%)$/.test(sizeValue)
+		? sizeValue
+		: IMAGE_SIZE_PRESETS[opts.size] || "100%";
+
+	// Build CSS classes
+	const classes = ["grove-image"];
+	classes.push(`grove-image-align-${opts.align}`);
+	if (opts.blur) classes.push("grove-image-blur");
+	if (opts.rounded) classes.push("grove-image-rounded");
+	if (opts.border) classes.push("grove-image-border");
+	if (opts.shadow) classes.push("grove-image-shadow");
+
+	const style = `max-width: ${safeSizeValue}`;
+	const classStr = classes.join(" ");
+
+	let html = `<figure class="${classStr}" style="${style}">\n`;
+	html += `  <img src="${safeSrc}" alt="${safeCaption || ""}" loading="lazy" />\n`;
+	if (safeCaption) {
+		html += `  <figcaption>${safeCaption}</figcaption>\n`;
+	}
+	html += `</figure>\n`;
+
+	return html;
+}
+
+// ============================================================================
 // Curio Directive Handlers
 // ============================================================================
 
@@ -101,6 +232,7 @@ function handleCurio(curioName: string, content: string): string {
 /** Map of directive names to their handlers */
 const directiveHandlers: Record<string, DirectiveHandler> = {
 	gallery: handleGallery,
+	image: handleImage,
 };
 
 // Register all curio directives
@@ -134,8 +266,9 @@ export const CURIO_METADATA = [
 	{ id: "statusbadges", name: "Status Badge", requiresArg: false },
 	{ id: "artifacts", name: "Artifacts", requiresArg: false },
 	{ id: "shrines", name: "Shrines", requiresArg: false },
-	// System directive (not a curio, but uses same syntax)
+	// System directives (not curios, but use same syntax)
 	{ id: "gallery", name: "Gallery", requiresArg: true, system: true },
+	{ id: "image", name: "Image", requiresArg: true, system: true },
 ] as const;
 
 /** Exported for testing — the list of recognized curio directive names */

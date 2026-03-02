@@ -60,7 +60,7 @@ export const BLAZE_CONFIG: Record<PostType, AutoBlazeConfig> = {
 	bloom: {
 		label: "Bloom",
 		icon: Cherry,
-		classes: "bg-grove-50 text-grove-700 dark:bg-grove-900/30 dark:text-grove-300",
+		classes: "bg-grove-50 text-grove-700 dark:bg-grove-100/30 dark:text-grove-700",
 	},
 	note: {
 		label: "Note",
@@ -76,7 +76,7 @@ export const BLAZE_CONFIG: Record<PostType, AutoBlazeConfig> = {
  */
 export const BLAZE_COLORS: Record<string, BlazeColorClasses> = {
 	grove: {
-		classes: "bg-grove-50 text-grove-700 dark:bg-grove-900/30 dark:text-grove-300",
+		classes: "bg-grove-50 text-grove-700 dark:bg-grove-100/30 dark:text-grove-700",
 	},
 	amber: {
 		classes: "bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",

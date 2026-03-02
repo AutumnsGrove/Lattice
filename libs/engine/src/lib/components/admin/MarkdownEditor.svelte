@@ -631,9 +631,10 @@
 		if (browser) {
 			localStorage.setItem("editor-mode", mode);
 		}
-		// Focus textarea when switching to write or split mode
+		// Focus textarea when switching to write or split mode.
+		// Use preventScroll to avoid resetting the viewport position.
 		if (mode !== "preview" && textareaRef) {
-			setTimeout(() => textareaRef?.focus(), 50);
+			setTimeout(() => textareaRef?.focus({ preventScroll: true }), 50);
 		}
 	}
 
@@ -1269,39 +1270,37 @@
 			class:split={editorMode === "split"}
 			class:preview-only={editorMode === "preview"}
 		>
-			<!-- Editor Panel (hidden in preview mode) -->
-			{#if editorMode !== "preview"}
-				<div class="editor-panel">
-					<div class="editor-wrapper">
-						<div class="line-numbers" aria-hidden="true" bind:this={lineNumbersRef}>
-							{#each lineNumbers as num}
-								<span class:current={num === cursorLine}>{num}</span>
-							{/each}
-						</div>
-						<textarea
-							aria-label="Markdown editor content"
-							bind:this={textareaRef}
-							bind:value={content}
-							oninput={() => {
-								updateCursorPosition();
-								checkCurioTrigger();
-							}}
-							onclick={() => {
-								updateCursorPosition();
-								if (showCurioAutocomplete) checkCurioTrigger();
-							}}
-							onkeyup={updateCursorPosition}
-							onkeydown={handleKeydown}
-							onscroll={handleScroll}
-							onpaste={handlePaste}
-							placeholder="Start writing your bloom... (Drag & drop or paste images)"
-							spellcheck="true"
-							disabled={readonly}
-							class="editor-textarea"
-						></textarea>
+			<!-- Editor Panel (hidden via CSS in preview mode to preserve scroll position & cursor) -->
+			<div class="editor-panel" class:editor-panel-hidden={editorMode === "preview"}>
+				<div class="editor-wrapper">
+					<div class="line-numbers" aria-hidden="true" bind:this={lineNumbersRef}>
+						{#each lineNumbers as num}
+							<span class:current={num === cursorLine}>{num}</span>
+						{/each}
 					</div>
+					<textarea
+						aria-label="Markdown editor content"
+						bind:this={textareaRef}
+						bind:value={content}
+						oninput={() => {
+							updateCursorPosition();
+							checkCurioTrigger();
+						}}
+						onclick={() => {
+							updateCursorPosition();
+							if (showCurioAutocomplete) checkCurioTrigger();
+						}}
+						onkeyup={updateCursorPosition}
+						onkeydown={handleKeydown}
+						onscroll={handleScroll}
+						onpaste={handlePaste}
+						placeholder="Start writing your bloom... (Drag & drop or paste images)"
+						spellcheck="true"
+						disabled={readonly}
+						class="editor-textarea"
+					></textarea>
 				</div>
-			{/if}
+			</div>
 
 			<!-- Preview Panel (shown in split and preview modes) -->
 			{#if editorMode === "split" || editorMode === "preview"}
@@ -1873,6 +1872,9 @@
 		display: flex;
 		flex-direction: column;
 		min-height: 0;
+	}
+	.editor-panel-hidden {
+		display: none;
 	}
 	.editor-wrapper {
 		display: flex;

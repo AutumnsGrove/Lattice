@@ -67,3 +67,6 @@ scripts/journey/output/
 
 # gw-managed worktrees
 .gw-worktrees/
+
+# Glimpse runtime artifacts
+.glimpse/
