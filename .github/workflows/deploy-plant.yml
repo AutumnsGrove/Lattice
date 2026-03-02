@@ -14,12 +14,12 @@ permissions:
 
 jobs:
   deploy:
-    uses: ./.github/workflows/_deploy-pages.yml
+    uses: ./.github/workflows/_deploy-worker.yml
     with:
-      app-dir: apps/plant
-      project-name: grove-plant
+      worker-dir: apps/plant
       needs-engine: true
       run-tests: true
+      run-build: true
       checkout-ref: main
     secrets: inherit
 
@@ -31,13 +31,13 @@ jobs:
       - name: Check Stripe payments endpoint
         run: |
           for i in {1..6}; do
-            STATUS=$(curl -s https://grove-plant.pages.dev/api/health/payments | jq -r '.status // "error"')
+            STATUS=$(curl -s https://plant.grove.place/api/health/payments | jq -r '.status // "error"')
             if [ "$STATUS" != "error" ]; then break; fi
             echo "Waiting for deployment ($i/6)..."
             sleep 5
           done
 
-          RESPONSE=$(curl -s https://grove-plant.pages.dev/api/health/payments)
+          RESPONSE=$(curl -s https://plant.grove.place/api/health/payments)
           STATUS=$(echo "$RESPONSE" | jq -r '.status')
           echo "Health Check: $STATUS"
           echo "$RESPONSE" | jq '.checks'
