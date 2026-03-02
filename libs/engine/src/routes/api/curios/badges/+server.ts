@@ -1,12 +1,14 @@
 /**
- * Badges Curio API — Earned Badges
+ * Badges Curio API — Earned Badges (v2)
  *
- * GET — Get tenant's earned badges (public)
+ * GET — Get tenant's earned badges with icon registry + shape (public)
  */
 
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { API_ERRORS, throwGroveError } from "$lib/errors";
+import { getBadgeIcon, getBadgeShape } from "$lib/curios/badges";
+import type { BadgeCategory } from "$lib/curios/badges";
 
 interface EarnedBadgeRow {
 	badge_id: string;
@@ -49,8 +51,10 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
 		name: row.name,
 		description: row.description,
 		iconUrl: row.icon_url,
+		icon: getBadgeIcon(row.badge_id),
 		category: row.category,
 		rarity: row.rarity,
+		shape: getBadgeShape(row.category as BadgeCategory),
 		earnedAt: row.earned_at,
 		isShowcased: row.is_showcased === 1,
 	}));

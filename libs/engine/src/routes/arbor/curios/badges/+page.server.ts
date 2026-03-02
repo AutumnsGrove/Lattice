@@ -6,10 +6,19 @@ import {
 	sanitizeBadgeName,
 	sanitizeBadgeDescription,
 	isValidIconUrl,
+	isValidWallLayout,
+	isValidShowcaseStyle,
+	isValidBadgeSize,
 	SYSTEM_BADGES,
 	COMMUNITY_BADGES,
 	BADGE_RARITY_OPTIONS,
+	WALL_LAYOUT_OPTIONS,
+	SHOWCASE_STYLE_OPTIONS,
+	BADGE_SIZE_OPTIONS,
+	DEFAULT_CONFIG,
 	MAX_CUSTOM_BADGES,
+	ALL_PREBUILT_BADGES,
+	getPrebuiltBadgesByCategory,
 } from "$lib/curios/badges";
 
 interface EarnedBadgeRow {
@@ -32,6 +41,12 @@ interface CustomBadgeRow {
 	created_at: string;
 }
 
+interface ConfigRow {
+	wall_layout: string;
+	showcase_style: string;
+	badge_size: string;
+}
+
 export const load: PageServerLoad = async ({ platform, locals }) => {
 	const db = platform?.env?.CURIO_DB;
 	const tenantId = locals.tenantId;
@@ -43,11 +58,16 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 			systemBadges: SYSTEM_BADGES,
 			communityBadges: COMMUNITY_BADGES,
 			rarityOptions: BADGE_RARITY_OPTIONS,
+			wallLayoutOptions: WALL_LAYOUT_OPTIONS,
+			showcaseStyleOptions: SHOWCASE_STYLE_OPTIONS,
+			badgeSizeOptions: BADGE_SIZE_OPTIONS,
+			config: DEFAULT_CONFIG,
+			prebuiltBadgesByCategory: getPrebuiltBadgesByCategory(),
 			error: "Database not available",
 		};
 	}
 
-	const [earnedResult, customResult] = await Promise.all([
+	const [earnedResult, customResult, configRow] = await Promise.all([
 		db
 			.prepare(
 				`SELECT bd.id as badge_id, bd.name, bd.description, bd.icon_url, bd.category, bd.rarity,
@@ -69,6 +89,14 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 			.bind(tenantId)
 			.all<CustomBadgeRow>()
 			.catch(() => ({ results: [] as CustomBadgeRow[] })),
+		db
+			.prepare(
+				`SELECT wall_layout, showcase_style, badge_size
+         FROM badges_config WHERE tenant_id = ?`,
+			)
+			.bind(tenantId)
+			.first<ConfigRow>()
+			.catch(() => null),
 	]);
 
 	const earnedBadges = (earnedResult.results ?? []).map((row) => ({
@@ -90,12 +118,31 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 		createdAt: row.created_at,
 	}));
 
+	const config = configRow
+		? {
+				wallLayout: isValidWallLayout(configRow.wall_layout)
+					? configRow.wall_layout
+					: DEFAULT_CONFIG.wallLayout,
+				showcaseStyle: isValidShowcaseStyle(configRow.showcase_style)
+					? configRow.showcase_style
+					: DEFAULT_CONFIG.showcaseStyle,
+				badgeSize: isValidBadgeSize(configRow.badge_size)
+					? configRow.badge_size
+					: DEFAULT_CONFIG.badgeSize,
+			}
+		: DEFAULT_CONFIG;
+
 	return {
 		earnedBadges,
 		customBadges,
 		systemBadges: SYSTEM_BADGES,
 		communityBadges: COMMUNITY_BADGES,
 		rarityOptions: BADGE_RARITY_OPTIONS,
+		wallLayoutOptions: WALL_LAYOUT_OPTIONS,
+		showcaseStyleOptions: SHOWCASE_STYLE_OPTIONS,
+		badgeSizeOptions: BADGE_SIZE_OPTIONS,
+		config,
+		prebuiltBadgesByCategory: getPrebuiltBadgesByCategory(),
 	};
 };
 
@@ -122,6 +169,57 @@ export const actions: Actions = {
 				.run();
 
 			return { success: true, showcaseToggled: true };
+		} catch (error) {
+			logGroveError("Arbor", ARBOR_ERRORS.SAVE_FAILED, { cause: error });
+			return fail(500, {
+				error: ARBOR_ERRORS.SAVE_FAILED.userMessage,
+				error_code: ARBOR_ERRORS.SAVE_FAILED.code,
+			});
+		}
+	},
+
+	saveConfig: async ({ request, platform, locals }) => {
+		const db = platform?.env?.CURIO_DB;
+		const tenantId = locals.tenantId;
+
+		if (!db || !tenantId) {
+			return fail(500, {
+				error: ARBOR_ERRORS.DB_NOT_AVAILABLE.userMessage,
+				error_code: ARBOR_ERRORS.DB_NOT_AVAILABLE.code,
+			});
+		}
+
+		const formData = await request.formData();
+		const wallLayout = (formData.get("wallLayout") as string) || DEFAULT_CONFIG.wallLayout;
+		const showcaseStyle =
+			(formData.get("showcaseStyle") as string) || DEFAULT_CONFIG.showcaseStyle;
+		const badgeSize = (formData.get("badgeSize") as string) || DEFAULT_CONFIG.badgeSize;
+
+		if (!isValidWallLayout(wallLayout)) {
+			return fail(400, { error: "Invalid wall layout", error_code: "INVALID_LAYOUT" });
+		}
+		if (!isValidShowcaseStyle(showcaseStyle)) {
+			return fail(400, { error: "Invalid showcase style", error_code: "INVALID_STYLE" });
+		}
+		if (!isValidBadgeSize(badgeSize)) {
+			return fail(400, { error: "Invalid badge size", error_code: "INVALID_SIZE" });
+		}
+
+		try {
+			await db
+				.prepare(
+					`INSERT INTO badges_config (tenant_id, wall_layout, showcase_style, badge_size, updated_at)
+           VALUES (?, ?, ?, ?, datetime('now'))
+           ON CONFLICT(tenant_id) DO UPDATE SET
+             wall_layout = excluded.wall_layout,
+             showcase_style = excluded.showcase_style,
+             badge_size = excluded.badge_size,
+             updated_at = datetime('now')`,
+				)
+				.bind(tenantId, wallLayout, showcaseStyle, badgeSize)
+				.run();
+
+			return { success: true, configSaved: true };
 		} catch (error) {
 			logGroveError("Arbor", ARBOR_ERRORS.SAVE_FAILED, { cause: error });
 			return fail(500, {
