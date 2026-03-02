@@ -222,6 +222,20 @@ describe("groveDirectivePlugin - image", () => {
 		expect(result).toContain('alt="A beautiful sunset"');
 	});
 
+	it("preserves commas in caption text", () => {
+		const result = md.render("::image[pic.jpg, caption=Paris, France, 2024]::");
+		expect(result).toContain("<figcaption>Paris, France, 2024</figcaption>");
+	});
+
+	it("caption consumes remaining content after caption= even with flags before it", () => {
+		const result = md.render(
+			"::image[pic.jpg, size=medium, blur, caption=A warm evening, with tea]::",
+		);
+		expect(result).toContain("<figcaption>A warm evening, with tea</figcaption>");
+		expect(result).toContain("grove-image-blur");
+		expect(result).toContain("max-width: 50%");
+	});
+
 	it("renders no figcaption when caption is omitted", () => {
 		const result = md.render("::image[pic.jpg]::");
 		expect(result).not.toContain("<figcaption>");

@@ -124,7 +124,12 @@ function parseImageOptions(content: string): {
 					}
 					break;
 				case "caption":
-					opts.caption = value;
+					// Caption consumes the rest of the string — commas are
+					// valid in natural-language captions like "Paris, 2024".
+					opts.caption = [value, ...parts.slice(i + 1)]
+						.join(", ")
+						.trim();
+					i = parts.length; // stop the loop
 					break;
 			}
 		} else {
