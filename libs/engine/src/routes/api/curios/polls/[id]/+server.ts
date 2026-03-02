@@ -25,6 +25,8 @@ interface PollRow {
 	poll_type: string;
 	options: string;
 	results_visibility: string;
+	container_style: string;
+	status: string;
 	is_pinned: number;
 	close_date: string | null;
 	created_at: string;
@@ -52,7 +54,7 @@ export const GET: RequestHandler = async ({ params, request, platform, locals })
 
 	const poll = await db
 		.prepare(
-			`SELECT id, tenant_id, question, description, poll_type, options, results_visibility, is_pinned, close_date, created_at
+			`SELECT id, tenant_id, question, description, poll_type, options, results_visibility, container_style, status, is_pinned, close_date, created_at
        FROM polls WHERE id = ? AND tenant_id = ?`,
 		)
 		.bind(params.id, tenantId)
@@ -116,11 +118,13 @@ export const GET: RequestHandler = async ({ params, request, platform, locals })
 			pollType: poll.poll_type,
 			options,
 			resultsVisibility: poll.results_visibility,
+			containerStyle: poll.container_style || "glass",
 			isPinned: Boolean(poll.is_pinned),
 			isClosed,
 			closeDate: poll.close_date,
 			results: showResults ? results : null,
 			hasVoted,
+			totalVotes: results.totalVotes,
 		},
 	});
 };

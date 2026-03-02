@@ -1,10 +1,11 @@
 <script lang="ts">
   import { enhance } from "$app/forms";
   import { GlassCard, GlassButton, toast } from "$lib/ui/components/ui";
-  import { BarChart3, ArrowLeft, Plus, Trash2 } from "lucide-svelte";
+  import { BarChart3, ArrowLeft, Plus, Trash2, Copy, Archive } from "lucide-svelte";
   import {
     POLL_TYPE_OPTIONS,
     RESULTS_VISIBILITY_OPTIONS,
+    CONTAINER_STYLE_OPTIONS,
     isPollClosed,
   } from "$lib/curios/polls";
 
@@ -15,29 +16,53 @@
   let description = $state("");
   let pollType = $state("single");
   let resultsVisibility = $state("after-vote");
-  let optionInputs = $state(["", "", ""]);
+  let containerStyle = $state("glass");
   let isPinned = $state(false);
   let closeDate = $state("");
   let isSubmitting = $state(false);
+
+  // Option state: text + optional emoji + optional color
+  let optionInputs = $state<Array<{ text: string; emoji: string; color: string }>>([
+    { text: "", emoji: "", color: "" },
+    { text: "", emoji: "", color: "" },
+    { text: "", emoji: "", color: "" },
+  ]);
 
   // Show toast
   $effect(() => {
     if (form?.success && form?.pollCreated) {
       toast.success("Poll created!");
       showCreateForm = false;
-      question = "";
-      description = "";
-      optionInputs = ["", "", ""];
+      resetForm();
     } else if (form?.success && form?.pollRemoved) {
       toast.success("Poll deleted.");
+    } else if (form?.success && form?.pollArchived) {
+      toast.success("Poll archived.");
+    } else if (form?.success && form?.pollDuplicated) {
+      toast.success("Poll duplicated!");
     } else if (form?.error) {
       toast.error("Failed", { description: form.error });
     }
   });
 
+  function resetForm() {
+    question = "";
+    description = "";
+    pollType = "single";
+    resultsVisibility = "after-vote";
+    containerStyle = "glass";
+    isPinned = false;
+    closeDate = "";
+    optionInputs = [
+      { text: "", emoji: "", color: "" },
+      { text: "", emoji: "", color: "" },
+      { text: "", emoji: "", color: "" },
+    ];
+  }
+
   function addOption() {
     if (optionInputs.length < 20) {
-      optionInputs = [...optionInputs, ""];
+      optionInputs = [...optionInputs, { text: "", emoji: "", color: "" }];
     }
   }
 
@@ -45,6 +70,10 @@
     if (optionInputs.length > 2) {
       optionInputs = optionInputs.filter((_, i) => i !== index);
     }
+  }
+
+  function validOptionCount(): number {
+    return optionInputs.filter((o) => o.text.trim()).length;
   }
 </script>
 
@@ -94,6 +123,7 @@
           };
         }}
       >
+        <!-- Question + Description -->
         <div class="form-section">
           <div class="input-group">
             <label class="input-label" for="question">Question</label>
@@ -123,6 +153,7 @@
           </div>
         </div>
 
+        <!-- Options with emoji + color -->
         <div class="form-section">
           <h4>Options</h4>
           {#each optionInputs as _, i}
@@ -130,10 +161,26 @@
               <input
                 type="text"
                 name="option_{i}"
-                bind:value={optionInputs[i]}
+                bind:value={optionInputs[i].text}
                 placeholder="Option {i + 1}"
                 maxlength="200"
-                class="text-input"
+                class="text-input option-text-input"
+              />
+              <input
+                type="text"
+                name="option_emoji_{i}"
+                bind:value={optionInputs[i].emoji}
+                placeholder="🌸"
+                maxlength="4"
+                class="text-input emoji-input"
+                title="Emoji (optional)"
+              />
+              <input
+                type="color"
+                name="option_color_{i}"
+                bind:value={optionInputs[i].color}
+                class="color-input"
+                title="Bar color (optional)"
               />
               {#if optionInputs.length > 2}
                 <button
@@ -154,7 +201,8 @@
           {/if}
         </div>
 
-        <div class="form-section settings-row">
+        <!-- Settings -->
+        <div class="form-section settings-grid">
           <div class="input-group">
             <label class="input-label" for="pollType">Type</label>
             <select id="pollType" name="pollType" bind:value={pollType} class="select-input">
@@ -171,6 +219,32 @@
               {/each}
             </select>
           </div>
+          <div class="input-group">
+            <label class="input-label" for="containerStyle">Style</label>
+            <select id="containerStyle" name="containerStyle" bind:value={containerStyle} class="select-input">
+              {#each CONTAINER_STYLE_OPTIONS as option}
+                <option value={option.value}>{option.label}</option>
+              {/each}
+            </select>
+          </div>
+          <div class="input-group">
+            <label class="input-label" for="closeDate">Close Date <span class="optional">(optional)</span></label>
+            <input
+              id="closeDate"
+              type="datetime-local"
+              name="closeDate"
+              bind:value={closeDate}
+              class="text-input"
+            />
+          </div>
+        </div>
+
+        <!-- Pin toggle -->
+        <div class="form-section">
+          <label class="toggle-label">
+            <input type="checkbox" name="isPinned" value="true" bind:checked={isPinned} class="toggle-checkbox" />
+            <span class="toggle-text">Pin to top of poll list</span>
+          </label>
         </div>
 
         <div class="form-actions">
@@ -180,7 +254,7 @@
           <GlassButton
             type="submit"
             variant="accent"
-            disabled={isSubmitting || !question.trim() || optionInputs.filter((o) => o.trim()).length < 2}
+            disabled={isSubmitting || !question.trim() || validOptionCount() < 2}
           >
             {isSubmitting ? "Creating..." : "Create Poll"}
           </GlassButton>
@@ -198,36 +272,77 @@
               <h4>{poll.question}</h4>
               <span class="poll-meta">
                 {poll.options.length} options &middot; {poll.voteCount} vote{poll.voteCount !== 1 ? "s" : ""}
+                {#if poll.containerStyle && poll.containerStyle !== "glass"}
+                  &middot; {poll.containerStyle}
+                {/if}
                 {#if poll.isPinned}
                   &middot; Pinned
                 {/if}
-                {#if poll.closeDate && isPollClosed(poll.closeDate)}
+                {#if poll.isClosed}
                   &middot; Closed
+                {/if}
+                {#if poll.status === "archived"}
+                  &middot; Archived
                 {/if}
               </span>
             </div>
-            <form
-              method="POST"
-              action="?/remove"
-              use:enhance={({ cancel }) => {
-                if (!confirm("Delete this poll and all votes?")) {
-                  cancel();
-                  return;
-                }
-                return async ({ update }) => {
-                  await update();
-                };
-              }}
-            >
-              <input type="hidden" name="pollId" value={poll.id} />
-              <button type="submit" class="remove-btn" aria-label="Delete poll">
-                <Trash2 class="w-4 h-4" />
-              </button>
-            </form>
+            <div class="poll-actions-row">
+              <!-- Duplicate -->
+              <form
+                method="POST"
+                action="?/duplicate"
+                use:enhance={() => {
+                  return async ({ update }) => { await update(); };
+                }}
+              >
+                <input type="hidden" name="pollId" value={poll.id} />
+                <button type="submit" class="action-btn" title="Duplicate poll" aria-label="Duplicate poll">
+                  <Copy class="w-4 h-4" />
+                </button>
+              </form>
+              <!-- Archive -->
+              {#if poll.status !== "archived"}
+                <form
+                  method="POST"
+                  action="?/archive"
+                  use:enhance={({ cancel }) => {
+                    if (!confirm("Archive this poll? It will be hidden from visitors.")) {
+                      cancel();
+                      return;
+                    }
+                    return async ({ update }) => { await update(); };
+                  }}
+                >
+                  <input type="hidden" name="pollId" value={poll.id} />
+                  <button type="submit" class="action-btn" title="Archive poll" aria-label="Archive poll">
+                    <Archive class="w-4 h-4" />
+                  </button>
+                </form>
+              {/if}
+              <!-- Delete -->
+              <form
+                method="POST"
+                action="?/remove"
+                use:enhance={({ cancel }) => {
+                  if (!confirm("Delete this poll and all votes? This cannot be undone.")) {
+                    cancel();
+                    return;
+                  }
+                  return async ({ update }) => { await update(); };
+                }}
+              >
+                <input type="hidden" name="pollId" value={poll.id} />
+                <button type="submit" class="remove-btn" aria-label="Delete poll">
+                  <Trash2 class="w-4 h-4" />
+                </button>
+              </form>
+            </div>
           </div>
           <div class="poll-options-preview">
             {#each poll.options as option}
-              <span class="option-chip">{option.text}</span>
+              <span class="option-chip">
+                {#if option.emoji}{option.emoji} {/if}{option.text}
+              </span>
             {/each}
           </div>
         </GlassCard>
@@ -266,14 +381,21 @@
   .text-input, .select-input { width: 100%; padding: 0.625rem 0.875rem; border: 1px solid var(--color-border, #e5e7eb); border-radius: 0.5rem; font-size: 0.9rem; color: var(--color-text); background: hsl(var(--background)); }
   .text-input:focus, .select-input:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 20%, transparent); }
 
-  .settings-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+  .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
 
-  .option-row { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
-  .option-row .text-input { flex: 1; }
+  .option-row { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center; }
+  .option-text-input { flex: 1; }
+  .emoji-input { width: 3.5rem; min-width: 3.5rem; text-align: center; padding: 0.625rem 0.25rem; }
+  .color-input { width: 2.75rem; min-width: 2.75rem; height: 2.75rem; padding: 0.25rem; border: 1px solid var(--color-border, #e5e7eb); border-radius: 0.375rem; cursor: pointer; background: none; }
   .remove-option { display: flex; align-items: center; justify-content: center; min-width: 2.75rem; min-height: 2.75rem; background: none; border: none; color: var(--color-text-muted); cursor: pointer; font-size: 1.25rem; border-radius: 0.25rem; }
   .remove-option:hover { color: hsl(var(--destructive)); background: hsl(var(--destructive) / 0.1); }
   .add-option-btn { background: none; border: 1px dashed var(--color-border, #e5e7eb); border-radius: 0.5rem; padding: 0.5rem; width: 100%; color: var(--color-text-muted); cursor: pointer; font-size: 0.85rem; transition: all 0.2s ease; }
   .add-option-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+
+  /* Toggle / Pin */
+  .toggle-label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.9rem; color: var(--color-text); }
+  .toggle-checkbox { accent-color: var(--color-primary); width: 1rem; height: 1rem; }
+  .toggle-text { font-weight: 500; }
 
   .form-actions { display: flex; justify-content: flex-end; gap: 0.75rem; }
 
@@ -281,7 +403,11 @@
   .poll-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 0.75rem; }
   .poll-info h4 { font-size: 1rem; font-weight: 600; color: var(--color-text); margin: 0 0 0.25rem; }
   .poll-meta { font-size: 0.8rem; color: var(--color-text-muted); }
-  .remove-btn { display: flex; align-items: center; justify-content: center; min-width: 2.75rem; min-height: 2.75rem; background: none; border: 1px solid transparent; border-radius: 0.5rem; color: var(--color-text-muted); cursor: pointer; transition: all 0.2s ease; }
+
+  .poll-actions-row { display: flex; gap: 0.25rem; flex-shrink: 0; }
+  .action-btn { display: flex; align-items: center; justify-content: center; min-width: 2.25rem; min-height: 2.25rem; background: none; border: 1px solid transparent; border-radius: 0.375rem; color: var(--color-text-muted); cursor: pointer; transition: all 0.2s ease; }
+  .action-btn:hover { color: var(--color-primary); background: color-mix(in srgb, var(--color-primary) 8%, transparent); border-color: color-mix(in srgb, var(--color-primary) 15%, transparent); }
+  .remove-btn { display: flex; align-items: center; justify-content: center; min-width: 2.25rem; min-height: 2.25rem; background: none; border: 1px solid transparent; border-radius: 0.375rem; color: var(--color-text-muted); cursor: pointer; transition: all 0.2s ease; }
   .remove-btn:hover { color: hsl(var(--destructive)); background: hsl(var(--destructive) / 0.1); border-color: hsl(var(--destructive) / 0.2); }
 
   .poll-options-preview { display: flex; flex-wrap: wrap; gap: 0.375rem; }
@@ -291,7 +417,7 @@
   @media (max-width: 640px) {
     .title-row { flex-wrap: wrap; }
     .section-header { flex-wrap: wrap; align-items: stretch; }
-    .settings-row { grid-template-columns: 1fr; }
+    .settings-grid { grid-template-columns: 1fr; }
     .poll-header { flex-wrap: wrap; }
     .option-row { flex-wrap: wrap; }
     .form-actions { flex-wrap: wrap; }

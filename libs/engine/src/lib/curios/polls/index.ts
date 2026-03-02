@@ -31,11 +31,23 @@ export type ResultsVisibility =
   | "admin-only";
 
 /**
+ * Container style for poll display
+ */
+export type ContainerStyle = "glass" | "bulletin" | "minimal";
+
+/**
+ * Poll status
+ */
+export type PollStatus = "active" | "archived";
+
+/**
  * Poll option
  */
 export interface PollOption {
   id: string;
   text: string;
+  emoji?: string;
+  color?: string;
 }
 
 /**
@@ -49,6 +61,8 @@ export interface PollRecord {
   pollType: PollType;
   options: PollOption[];
   resultsVisibility: ResultsVisibility;
+  containerStyle: ContainerStyle;
+  status: PollStatus;
   isPinned: boolean;
   closeDate: string | null;
   createdAt: string;
@@ -85,11 +99,13 @@ export interface PollDisplay {
   pollType: PollType;
   options: PollOption[];
   resultsVisibility: ResultsVisibility;
+  containerStyle: ContainerStyle;
   isPinned: boolean;
   isClosed: boolean;
   closeDate: string | null;
   results: PollResults | null;
   hasVoted: boolean;
+  totalVotes: number;
 }
 
 // =============================================================================
@@ -135,6 +151,31 @@ export const RESULTS_VISIBILITY_OPTIONS: {
 ];
 
 /**
+ * Container style options
+ */
+export const CONTAINER_STYLE_OPTIONS: {
+  value: ContainerStyle;
+  label: string;
+  description: string;
+}[] = [
+  {
+    value: "glass",
+    label: "Glass Card",
+    description: "Frosted glass with grove-green accent",
+  },
+  {
+    value: "bulletin",
+    label: "Bulletin Board",
+    description: "Pinned to a cork board, indie web energy",
+  },
+  {
+    value: "minimal",
+    label: "Clean Minimal",
+    description: "Light border, content-first",
+  },
+];
+
+/**
  * Valid poll types
  */
 export const VALID_POLL_TYPES = new Set<string>(["single", "multiple"]);
@@ -145,6 +186,18 @@ export const VALID_POLL_TYPES = new Set<string>(["single", "multiple"]);
 export const VALID_RESULTS_VISIBILITY = new Set<string>(
   RESULTS_VISIBILITY_OPTIONS.map((v) => v.value),
 );
+
+/**
+ * Valid container styles
+ */
+export const VALID_CONTAINER_STYLES = new Set<string>(
+  CONTAINER_STYLE_OPTIONS.map((v) => v.value),
+);
+
+/**
+ * Valid poll statuses
+ */
+export const VALID_POLL_STATUSES = new Set<string>(["active", "archived"]);
 
 /**
  * Maximum question length
@@ -228,6 +281,24 @@ export function isValidResultsVisibility(
 }
 
 /**
+ * Validate container style
+ */
+export function isValidContainerStyle(
+  style: string,
+): style is ContainerStyle {
+  return VALID_CONTAINER_STYLES.has(style);
+}
+
+/**
+ * Validate poll status
+ */
+export function isValidPollStatus(
+  status: string,
+): status is PollStatus {
+  return VALID_POLL_STATUSES.has(status);
+}
+
+/**
  * Sanitize question text
  */
 export function sanitizeQuestion(
@@ -272,6 +343,12 @@ export function parseOptions(optionsJson: string): PollOption[] {
           typeof (opt as PollOption).id === "string" &&
           typeof (opt as PollOption).text === "string",
       )
+      .map((opt: Record<string, unknown>) => ({
+        id: opt.id as string,
+        text: opt.text as string,
+        ...(typeof opt.emoji === "string" && opt.emoji ? { emoji: opt.emoji } : {}),
+        ...(typeof opt.color === "string" && opt.color ? { color: opt.color } : {}),
+      }))
       .slice(0, MAX_OPTIONS);
   } catch {
     return [];

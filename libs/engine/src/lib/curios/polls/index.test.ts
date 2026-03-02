@@ -6,6 +6,8 @@ import {
   isPollClosed,
   isValidPollType,
   isValidResultsVisibility,
+  isValidContainerStyle,
+  isValidPollStatus,
   sanitizeQuestion,
   sanitizeOptionText,
   parseOptions,
@@ -13,8 +15,11 @@ import {
   calculateResults,
   POLL_TYPE_OPTIONS,
   RESULTS_VISIBILITY_OPTIONS,
+  CONTAINER_STYLE_OPTIONS,
   VALID_POLL_TYPES,
   VALID_RESULTS_VISIBILITY,
+  VALID_CONTAINER_STYLES,
+  VALID_POLL_STATUSES,
   MAX_QUESTION_LENGTH,
   MAX_OPTION_TEXT_LENGTH,
   MAX_OPTIONS,
@@ -56,6 +61,28 @@ describe("Polls constants", () => {
     expect(VALID_RESULTS_VISIBILITY.has("after-close")).toBe(true);
     expect(VALID_RESULTS_VISIBILITY.has("admin-only")).toBe(true);
     expect(VALID_RESULTS_VISIBILITY.has("never")).toBe(false);
+  });
+
+  it("has container style options", () => {
+    expect(CONTAINER_STYLE_OPTIONS).toHaveLength(3);
+    expect(CONTAINER_STYLE_OPTIONS.map((o) => o.value)).toEqual([
+      "glass",
+      "bulletin",
+      "minimal",
+    ]);
+  });
+
+  it("has valid container styles set", () => {
+    expect(VALID_CONTAINER_STYLES.has("glass")).toBe(true);
+    expect(VALID_CONTAINER_STYLES.has("bulletin")).toBe(true);
+    expect(VALID_CONTAINER_STYLES.has("minimal")).toBe(true);
+    expect(VALID_CONTAINER_STYLES.has("custom")).toBe(false);
+  });
+
+  it("has valid poll statuses set", () => {
+    expect(VALID_POLL_STATUSES.has("active")).toBe(true);
+    expect(VALID_POLL_STATUSES.has("archived")).toBe(true);
+    expect(VALID_POLL_STATUSES.has("deleted")).toBe(false);
   });
 
   it("has correct limits", () => {
@@ -161,6 +188,31 @@ describe("isValidResultsVisibility", () => {
   });
 });
 
+describe("isValidContainerStyle", () => {
+  it("accepts valid container styles", () => {
+    expect(isValidContainerStyle("glass")).toBe(true);
+    expect(isValidContainerStyle("bulletin")).toBe(true);
+    expect(isValidContainerStyle("minimal")).toBe(true);
+  });
+
+  it("rejects invalid styles", () => {
+    expect(isValidContainerStyle("custom")).toBe(false);
+    expect(isValidContainerStyle("")).toBe(false);
+  });
+});
+
+describe("isValidPollStatus", () => {
+  it("accepts valid statuses", () => {
+    expect(isValidPollStatus("active")).toBe(true);
+    expect(isValidPollStatus("archived")).toBe(true);
+  });
+
+  it("rejects invalid statuses", () => {
+    expect(isValidPollStatus("deleted")).toBe(false);
+    expect(isValidPollStatus("")).toBe(false);
+  });
+});
+
 // =============================================================================
 // Sanitizers
 // =============================================================================
@@ -252,6 +304,29 @@ describe("parseOptions", () => {
     }));
     const result = parseOptions(JSON.stringify(options));
     expect(result).toHaveLength(MAX_OPTIONS);
+  });
+
+  it("preserves emoji and color fields when present", () => {
+    const options = [
+      { id: "opt_1", text: "Spring", emoji: "🌸", color: "#ff69b4" },
+      { id: "opt_2", text: "Winter", emoji: "❄️" },
+      { id: "opt_3", text: "Summer" },
+    ];
+    const result = parseOptions(JSON.stringify(options));
+    expect(result).toHaveLength(3);
+    expect(result[0]).toEqual({ id: "opt_1", text: "Spring", emoji: "🌸", color: "#ff69b4" });
+    expect(result[1]).toEqual({ id: "opt_2", text: "Winter", emoji: "❄️" });
+    expect(result[2]).toEqual({ id: "opt_3", text: "Summer" });
+  });
+
+  it("strips empty emoji and color fields", () => {
+    const options = [
+      { id: "opt_1", text: "Test", emoji: "", color: "" },
+    ];
+    const result = parseOptions(JSON.stringify(options));
+    expect(result[0]).toEqual({ id: "opt_1", text: "Test" });
+    expect(result[0]).not.toHaveProperty("emoji");
+    expect(result[0]).not.toHaveProperty("color");
   });
 });
 

@@ -215,7 +215,7 @@ export const DOMAIN_CATALOG: readonly CatalogEntry[] = [
 	{ id: "curios.pulse",           status: "implemented", fieldCount: 9,  phase: 4, file: "curios/pulse.ts" },
 	{ id: "curios.hitcounter",      status: "implemented", fieldCount: 6,  phase: 4, file: "curios/hitcounter.ts" },
 	{ id: "curios.linkgarden",      status: "implemented", fieldCount: 3,  phase: 4, file: "curios/linkgarden.ts" },
-	{ id: "curios.polls",           status: "implemented", fieldCount: 6,  phase: 4, file: "curios/polls.ts" },
+	{ id: "curios.polls",           status: "implemented", fieldCount: 8,  phase: 4, file: "curios/polls.ts" },
 	{ id: "curios.bookmarks",       status: "implemented", fieldCount: 6,  phase: 4, file: "curios/bookmarks.ts" },
 	{ id: "identity.badges",        status: "implemented", fieldCount: 3,  phase: 4, file: "identity/badges.ts" },
 	{ id: "identity.activitystatus", status: "implemented", fieldCount: 6,  phase: 4, file: "identity/activitystatus.ts" },
