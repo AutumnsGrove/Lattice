@@ -103,15 +103,16 @@
 
 		isVoting = true;
 		try {
-			const res = await fetch(`/api/curios/polls/${encodeURIComponent(poll.id)}`, {
+			const res = await fetch(`/api/curios/polls/${encodeURIComponent(poll.id)}`, { // csrf-ok: public anonymous vote, IP-hash auth
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ selectedOptions: [...selectedOptions] }),
 			});
 
 			if (!res.ok) {
-				const errData = await res.json().catch(() => null);
-				throw new Error(errData?.error?.message ?? `Vote failed (${res.status})`);
+				const errData = (await res.json().catch(() => null)) as Record<string, unknown> | null;
+				const msg = typeof errData?.message === 'string' ? errData.message : `Vote failed (${res.status})`;
+				throw new Error(msg);
 			}
 
 			// Re-fetch poll to get updated results

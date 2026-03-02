@@ -24,11 +24,7 @@ export type PollType = "single" | "multiple";
 /**
  * When results are visible
  */
-export type ResultsVisibility =
-  | "always"
-  | "after-vote"
-  | "after-close"
-  | "admin-only";
+export type ResultsVisibility = "always" | "after-vote" | "after-close" | "admin-only";
 
 /**
  * Container style for poll display
@@ -44,68 +40,68 @@ export type PollStatus = "active" | "archived";
  * Poll option
  */
 export interface PollOption {
-  id: string;
-  text: string;
-  emoji?: string;
-  color?: string;
+	id: string;
+	text: string;
+	emoji?: string;
+	color?: string;
 }
 
 /**
  * Poll record stored in database
  */
 export interface PollRecord {
-  id: string;
-  tenantId: string;
-  question: string;
-  description: string | null;
-  pollType: PollType;
-  options: PollOption[];
-  resultsVisibility: ResultsVisibility;
-  containerStyle: ContainerStyle;
-  status: PollStatus;
-  isPinned: boolean;
-  closeDate: string | null;
-  createdAt: string;
-  updatedAt: string;
+	id: string;
+	tenantId: string;
+	question: string;
+	description: string | null;
+	pollType: PollType;
+	options: PollOption[];
+	resultsVisibility: ResultsVisibility;
+	containerStyle: ContainerStyle;
+	status: PollStatus;
+	isPinned: boolean;
+	closeDate: string | null;
+	createdAt: string;
+	updatedAt: string;
 }
 
 /**
  * Vote record
  */
 export interface VoteRecord {
-  id: string;
-  pollId: string;
-  tenantId: string;
-  voterHash: string;
-  selectedOptions: string[];
-  votedAt: string;
+	id: string;
+	pollId: string;
+	tenantId: string;
+	voterHash: string;
+	selectedOptions: string[];
+	votedAt: string;
 }
 
 /**
  * Poll results for display
  */
 export interface PollResults {
-  totalVotes: number;
-  optionCounts: Record<string, number>;
+	totalVotes: number;
+	optionCounts: Record<string, number>;
 }
 
 /**
  * Poll for public display
  */
 export interface PollDisplay {
-  id: string;
-  question: string;
-  description: string | null;
-  pollType: PollType;
-  options: PollOption[];
-  resultsVisibility: ResultsVisibility;
-  containerStyle: ContainerStyle;
-  isPinned: boolean;
-  isClosed: boolean;
-  closeDate: string | null;
-  results: PollResults | null;
-  hasVoted: boolean;
-  totalVotes: number;
+	id: string;
+	question: string;
+	description: string | null;
+	pollType: PollType;
+	options: PollOption[];
+	resultsVisibility: ResultsVisibility;
+	containerStyle: ContainerStyle;
+	isPinned: boolean;
+	isClosed: boolean;
+	closeDate: string | null;
+	results: PollResults | null;
+	hasVoted: boolean;
+	totalVotes: number;
 }
 
 // =============================================================================
@@ -116,63 +112,63 @@ export interface PollDisplay {
  * Poll type options
  */
 export const POLL_TYPE_OPTIONS: { value: PollType; label: string }[] = [
-  { value: "single", label: "Single Choice" },
-  { value: "multiple", label: "Multiple Choice" },
+	{ value: "single", label: "Single Choice" },
+	{ value: "multiple", label: "Multiple Choice" },
 ];
 
 /**
  * Results visibility options
  */
 export const RESULTS_VISIBILITY_OPTIONS: {
-  value: ResultsVisibility;
-  label: string;
-  description: string;
+	value: ResultsVisibility;
+	label: string;
+	description: string;
 }[] = [
-  {
-    value: "always",
-    label: "Always",
-    description: "Results visible before voting",
-  },
-  {
-    value: "after-vote",
-    label: "After Voting",
-    description: "Visible only after casting a vote",
-  },
-  {
-    value: "after-close",
-    label: "After Close",
-    description: "Visible only after the poll closes",
-  },
-  {
-    value: "admin-only",
-    label: "Admin Only",
-    description: "Only you can see results",
-  },
+	{
+		value: "always",
+		label: "Always",
+		description: "Results visible before voting",
+	},
+	{
+		value: "after-vote",
+		label: "After Voting",
+		description: "Visible only after casting a vote",
+	},
+	{
+		value: "after-close",
+		label: "After Close",
+		description: "Visible only after the poll closes",
+	},
+	{
+		value: "admin-only",
+		label: "Admin Only",
+		description: "Only you can see results",
+	},
 ];
 
 /**
  * Container style options
  */
 export const CONTAINER_STYLE_OPTIONS: {
-  value: ContainerStyle;
-  label: string;
-  description: string;
+	value: ContainerStyle;
+	label: string;
+	description: string;
 }[] = [
-  {
-    value: "glass",
-    label: "Glass Card",
-    description: "Frosted glass with grove-green accent",
-  },
-  {
-    value: "bulletin",
-    label: "Bulletin Board",
-    description: "Pinned to a cork board, indie web energy",
-  },
-  {
-    value: "minimal",
-    label: "Clean Minimal",
-    description: "Light border, content-first",
-  },
+	{
+		value: "glass",
+		label: "Glass Card",
+		description: "Frosted glass with grove-green accent",
+	},
+	{
+		value: "bulletin",
+		label: "Bulletin Board",
+		description: "Pinned to a cork board, indie web energy",
+	},
+	{
+		value: "minimal",
+		label: "Clean Minimal",
+		description: "Light border, content-first",
+	},
 ];
 
 /**
@@ -184,15 +180,13 @@ export const VALID_POLL_TYPES = new Set<string>(["single", "multiple"]);
  * Valid results visibility options
  */
 export const VALID_RESULTS_VISIBILITY = new Set<string>(
-  RESULTS_VISIBILITY_OPTIONS.map((v) => v.value),
+	RESULTS_VISIBILITY_OPTIONS.map((v) => v.value),
 );
 
 /**
  * Valid container styles
  */
-export const VALID_CONTAINER_STYLES = new Set<string>(
-  CONTAINER_STYLE_OPTIONS.map((v) => v.value),
-);
+export const VALID_CONTAINER_STYLES = new Set<string>(CONTAINER_STYLE_OPTIONS.map((v) => v.value));
 
 /**
  * Valid poll statuses
@@ -239,157 +233,159 @@ import { stripHtml } from "../sanitize";
  * Generate a unique poll ID
  */
 export function generatePollId(): string {
-  return `poll_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+	return `poll_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
 /**
  * Generate a unique vote ID
  */
 export function generateVoteId(): string {
-  return `pv_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+	return `pv_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
 /**
  * Generate a unique option ID
  */
 export function generateOptionId(): string {
-  return `opt_${Math.random().toString(36).slice(2, 8)}`;
+	return `opt_${Math.random().toString(36).slice(2, 8)}`;
 }
 
 /**
  * Check if a poll is closed
  */
 export function isPollClosed(closeDate: string | null): boolean {
-  if (!closeDate) return false;
-  return new Date(closeDate).getTime() < Date.now();
+	if (!closeDate) return false;
+	return new Date(closeDate).getTime() < Date.now();
 }
 
 /**
  * Validate poll type
  */
 export function isValidPollType(type: string): type is PollType {
-  return VALID_POLL_TYPES.has(type);
+	return VALID_POLL_TYPES.has(type);
 }
 
 /**
  * Validate results visibility
  */
-export function isValidResultsVisibility(
-  visibility: string,
-): visibility is ResultsVisibility {
-  return VALID_RESULTS_VISIBILITY.has(visibility);
+export function isValidResultsVisibility(visibility: string): visibility is ResultsVisibility {
+	return VALID_RESULTS_VISIBILITY.has(visibility);
 }
 
 /**
  * Validate container style
  */
-export function isValidContainerStyle(
-  style: string,
-): style is ContainerStyle {
-  return VALID_CONTAINER_STYLES.has(style);
+export function isValidContainerStyle(style: string): style is ContainerStyle {
+	return VALID_CONTAINER_STYLES.has(style);
 }
 
 /**
  * Validate poll status
  */
-export function isValidPollStatus(
-  status: string,
-): status is PollStatus {
-  return VALID_POLL_STATUSES.has(status);
+export function isValidPollStatus(status: string): status is PollStatus {
+	return VALID_POLL_STATUSES.has(status);
+}
+
+/**
+ * Check if a string contains at least one emoji and no regular letters/digits.
+ * Uses Extended_Pictographic to match actual emoji (not digits or basic punctuation).
+ */
+export function isValidEmoji(value: string): boolean {
+	const trimmed = value.trim();
+	if (!trimmed) return false;
+	// Must contain at least one pictographic emoji
+	if (!/\p{Extended_Pictographic}/u.test(trimmed)) return false;
+	// Must not contain letters or digits (those aren't emoji)
+	if (/[a-zA-Z0-9]/u.test(trimmed)) return false;
+	return true;
 }
 
 /**
  * Sanitize question text
  */
-export function sanitizeQuestion(
-  text: string | null | undefined,
-): string | null {
-  if (!text) return null;
-  const cleaned = stripHtml(text).trim();
-  if (cleaned.length === 0) return null;
-  if (cleaned.length > MAX_QUESTION_LENGTH)
-    return cleaned.slice(0, MAX_QUESTION_LENGTH);
-  return cleaned;
+export function sanitizeQuestion(text: string | null | undefined): string | null {
+	if (!text) return null;
+	const cleaned = stripHtml(text).trim();
+	if (cleaned.length === 0) return null;
+	if (cleaned.length > MAX_QUESTION_LENGTH) return cleaned.slice(0, MAX_QUESTION_LENGTH);
+	return cleaned;
 }
 
 /**
  * Sanitize option text
  */
-export function sanitizeOptionText(
-  text: string | null | undefined,
-): string | null {
-  if (!text) return null;
-  const cleaned = stripHtml(text).trim();
-  if (cleaned.length === 0) return null;
-  if (cleaned.length > MAX_OPTION_TEXT_LENGTH)
-    return cleaned.slice(0, MAX_OPTION_TEXT_LENGTH);
-  return cleaned;
+export function sanitizeOptionText(text: string | null | undefined): string | null {
+	if (!text) return null;
+	const cleaned = stripHtml(text).trim();
+	if (cleaned.length === 0) return null;
+	if (cleaned.length > MAX_OPTION_TEXT_LENGTH) return cleaned.slice(0, MAX_OPTION_TEXT_LENGTH);
+	return cleaned;
 }
 
 /**
  * Parse and validate poll options from JSON string
  */
 export function parseOptions(optionsJson: string): PollOption[] {
-  try {
-    const parsed = JSON.parse(optionsJson);
-    if (!Array.isArray(parsed)) return [];
-    return parsed
-      .filter(
-        (opt: unknown) =>
-          opt &&
-          typeof opt === "object" &&
-          "id" in opt &&
-          "text" in opt &&
-          typeof (opt as PollOption).id === "string" &&
-          typeof (opt as PollOption).text === "string",
-      )
-      .map((opt: Record<string, unknown>) => ({
-        id: opt.id as string,
-        text: opt.text as string,
-        ...(typeof opt.emoji === "string" && opt.emoji ? { emoji: opt.emoji } : {}),
-        ...(typeof opt.color === "string" && opt.color ? { color: opt.color } : {}),
-      }))
-      .slice(0, MAX_OPTIONS);
-  } catch {
-    return [];
-  }
+	try {
+		const parsed = JSON.parse(optionsJson);
+		if (!Array.isArray(parsed)) return [];
+		return parsed
+			.filter(
+				(opt: unknown) =>
+					opt &&
+					typeof opt === "object" &&
+					"id" in opt &&
+					"text" in opt &&
+					typeof (opt as PollOption).id === "string" &&
+					typeof (opt as PollOption).text === "string",
+			)
+			.map((opt: Record<string, unknown>) => ({
+				id: opt.id as string,
+				text: opt.text as string,
+				...(typeof opt.emoji === "string" && opt.emoji ? { emoji: opt.emoji } : {}),
+				...(typeof opt.color === "string" && opt.color ? { color: opt.color } : {}),
+			}))
+			.slice(0, MAX_OPTIONS);
+	} catch {
+		return [];
+	}
 }
 
 /**
  * Calculate results from votes
  */
 export function calculateResults(
-  options: PollOption[],
-  votes: { selectedOptions: string[] }[],
+	options: PollOption[],
+	votes: { selectedOptions: string[] }[],
 ): PollResults {
-  const optionCounts: Record<string, number> = {};
-  for (const opt of options) {
-    optionCounts[opt.id] = 0;
-  }
+	const optionCounts: Record<string, number> = {};
+	for (const opt of options) {
+		optionCounts[opt.id] = 0;
+	}
 
-  for (const vote of votes) {
-    for (const optId of vote.selectedOptions) {
-      if (optId in optionCounts) {
-        optionCounts[optId]++;
-      }
-    }
-  }
+	for (const vote of votes) {
+		for (const optId of vote.selectedOptions) {
+			if (optId in optionCounts) {
+				optionCounts[optId]++;
+			}
+		}
+	}
 
-  return {
-    totalVotes: votes.length,
-    optionCounts,
-  };
+	return {
+		totalVotes: votes.length,
+		optionCounts,
+	};
 }
 
 /**
  * Parse selected options from JSON string
  */
 export function parseSelectedOptions(json: string): string[] {
-  try {
-    const parsed = JSON.parse(json);
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter((s: unknown) => typeof s === "string");
-  } catch {
-    return [];
-  }
+	try {
+		const parsed = JSON.parse(json);
+		if (!Array.isArray(parsed)) return [];
+		return parsed.filter((s: unknown) => typeof s === "string");
+	} catch {
+		return [];
+	}
 }

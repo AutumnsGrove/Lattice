@@ -8,6 +8,7 @@ import {
 	isValidPollType,
 	isValidResultsVisibility,
 	isValidContainerStyle,
+	isValidEmoji,
 	sanitizeQuestion,
 	sanitizeOptionText,
 	parseOptions,
@@ -153,7 +154,7 @@ export const actions: Actions = {
 			const option: PollOption = { id: generateOptionId(), text };
 			const emoji = (formData.get(`option_emoji_${i}`) as string | null)?.trim();
 			const color = formData.get(`option_color_${i}`) as string | null;
-			if (emoji) option.emoji = emoji;
+			if (emoji && isValidEmoji(emoji)) option.emoji = emoji;
 			if (color && /^#[0-9a-fA-F]{3,8}$/.test(color)) option.color = color;
 			options.push(option);
 		}
@@ -216,7 +217,9 @@ export const actions: Actions = {
 
 		try {
 			await db
-				.prepare(`UPDATE polls SET status = 'archived', updated_at = datetime('now') WHERE id = ? AND tenant_id = ?`)
+				.prepare(
+					`UPDATE polls SET status = 'archived', updated_at = datetime('now') WHERE id = ? AND tenant_id = ?`,
+				)
 				.bind(pollId, tenantId)
 				.run();
 
@@ -245,9 +248,18 @@ export const actions: Actions = {
 		const sourcePollId = formData.get("pollId") as string;
 
 		const source = await db
-			.prepare(`SELECT question, description, poll_type, options, results_visibility, container_style FROM polls WHERE id = ? AND tenant_id = ?`)
+			.prepare(
+				`SELECT question, description, poll_type, options, results_visibility, container_style FROM polls WHERE id = ? AND tenant_id = ?`,
+			)
 			.bind(sourcePollId, tenantId)
-			.first<{ question: string; description: string | null; poll_type: string; options: string; results_visibility: string; container_style: string }>();
+			.first<{
+				question: string;
+				description: string | null;
+				poll_type: string;
+				options: string;
+				results_visibility: string;
+				container_style: string;
+			}>();
 
 		if (!source) {
 			return fail(404, { error: "Poll not found", error_code: "NOT_FOUND" });

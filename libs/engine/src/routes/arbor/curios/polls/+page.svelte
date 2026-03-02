@@ -72,9 +72,7 @@
     }
   }
 
-  function validOptionCount(): number {
-    return optionInputs.filter((o) => o.text.trim()).length;
-  }
+  let validOptionCount = $derived(optionInputs.filter((o) => o.text.trim()).length);
 </script>
 
 <svelte:head>
@@ -254,7 +252,7 @@
           <GlassButton
             type="submit"
             variant="accent"
-            disabled={isSubmitting || !question.trim() || validOptionCount() < 2}
+            disabled={isSubmitting || !question.trim() || validOptionCount < 2}
           >
             {isSubmitting ? "Creating..." : "Create Poll"}
           </GlassButton>
@@ -319,23 +317,25 @@
                   </button>
                 </form>
               {/if}
-              <!-- Delete -->
-              <form
-                method="POST"
-                action="?/remove"
-                use:enhance={({ cancel }) => {
-                  if (!confirm("Delete this poll and all votes? This cannot be undone.")) {
-                    cancel();
-                    return;
-                  }
-                  return async ({ update }) => { await update(); };
-                }}
-              >
-                <input type="hidden" name="pollId" value={poll.id} />
-                <button type="submit" class="remove-btn" aria-label="Delete poll">
-                  <Trash2 class="w-4 h-4" />
-                </button>
-              </form>
+              <!-- Delete (only for archived polls — two-step destruction) -->
+              {#if poll.status === "archived"}
+                <form
+                  method="POST"
+                  action="?/remove"
+                  use:enhance={({ cancel }) => {
+                    if (!confirm("Permanently delete this poll and all votes? This cannot be undone.")) {
+                      cancel();
+                      return;
+                    }
+                    return async ({ update }) => { await update(); };
+                  }}
+                >
+                  <input type="hidden" name="pollId" value={poll.id} />
+                  <button type="submit" class="remove-btn" aria-label="Permanently delete poll">
+                    <Trash2 class="w-4 h-4" />
+                  </button>
+                </form>
+              {/if}
             </div>
           </div>
           <div class="poll-options-preview">
