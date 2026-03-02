@@ -16,14 +16,16 @@
  * Each task has a primary provider and fallback chain configured in config.ts.
  */
 export type LumenTask =
-  | "moderation" // Content safety → GPT-oss Safeguard (OpenRouter)
-  | "generation" // Text generation → DeepSeek (OpenRouter)
-  | "summary" // Summarization → DeepSeek (OpenRouter)
-  | "embedding" // Vector embeddings → bge-base (CF Workers AI)
-  | "chat" // Conversational → DeepSeek (OpenRouter)
-  | "image" // Image analysis → Claude via OpenRouter
-  | "code" // Code tasks → Claude via OpenRouter
-  | "transcription"; // Voice-to-text → Whisper (CF Workers AI)
+	| "moderation" // Content safety → GPT-oss Safeguard (OpenRouter)
+	| "generation" // Text generation → DeepSeek (OpenRouter)
+	| "summary" // Summarization → DeepSeek (OpenRouter)
+	| "embedding" // Vector embeddings → bge-base (CF Workers AI)
+	| "chat" // Conversational → DeepSeek (OpenRouter)
+	| "image" // Image analysis → Claude via OpenRouter
+	| "code" // Code tasks → Claude via OpenRouter
+	| "transcription" // Voice-to-text → Whisper (CF Workers AI)
+	| "reverie" // Reverie natural language config → Liquid LFM2
+	| "reverie-compose"; // Reverie multi-domain composition → MiniMax M2.5
 
 // =============================================================================
 // MESSAGE TYPES
@@ -32,17 +34,17 @@ export type LumenTask =
 export type LumenMessageRole = "system" | "user" | "assistant";
 
 export interface LumenMessage {
-  role: LumenMessageRole;
-  content: string | LumenContentPart[];
+	role: LumenMessageRole;
+	content: string | LumenContentPart[];
 }
 
 export interface LumenContentPart {
-  type: "text" | "image_url";
-  text?: string;
-  image_url?: {
-    url: string; // Base64 data URL or HTTP URL
-    detail?: "auto" | "low" | "high";
-  };
+	type: "text" | "image_url";
+	text?: string;
+	image_url?: {
+		url: string; // Base64 data URL or HTTP URL
+		detail?: "auto" | "low" | "high";
+	};
 }
 
 // =============================================================================
@@ -50,93 +52,113 @@ export interface LumenContentPart {
 // =============================================================================
 
 export interface LumenRequest {
-  /** The task type - determines provider routing */
-  task: LumenTask;
+	/** The task type - determines provider routing */
+	task: LumenTask;
 
-  /** Input prompt or messages */
-  input: string | LumenMessage[];
+	/** Input prompt or messages */
+	input: string | LumenMessage[];
 
-  /** Tenant ID for quota tracking (optional for anonymous requests) */
-  tenant?: string;
+	/** Tenant ID for quota tracking (optional for anonymous requests) */
+	tenant?: string;
 
-  /** Optional configuration overrides */
-  options?: LumenRequestOptions;
+	/** Optional configuration overrides */
+	options?: LumenRequestOptions;
 }
 
 export interface LumenRequestOptions {
-  /** Override the default model for this task */
-  model?: string;
+	/** Override the default model for this task */
+	model?: string;
 
-  /** Maximum tokens to generate */
-  maxTokens?: number;
+	/** Maximum tokens to generate */
+	maxTokens?: number;
 
-  /** Temperature (0-2, lower = more deterministic) */
-  temperature?: number;
+	/** Temperature (0-2, lower = more deterministic) */
+	temperature?: number;
 
-  /** Enable streaming response */
-  stream?: boolean;
+	/** Enable streaming response */
+	stream?: boolean;
 
-  /**
-   * Skip quota enforcement for this request.
-   * Use for system/admin operations or BYOK users who pay via their own key.
-   * When true, the request still routes through Lumen's pipeline but won't
-   * count toward the tenant's daily limits or reject on quota exhaustion.
-   */
-  skipQuota?: boolean;
+	/**
+	 * Skip quota enforcement for this request.
+	 * Use for system/admin operations or BYOK users who pay via their own key.
+	 * When true, the request still routes through Lumen's pipeline but won't
+	 * count toward the tenant's daily limits or reject on quota exhaustion.
+	 */
+	skipQuota?: boolean;
 
-  /** Skip PII scrubbing (for already-sanitized content) */
-  skipPiiScrub?: boolean;
+	/** Skip PII scrubbing (for already-sanitized content) */
+	skipPiiScrub?: boolean;
 
-  /**
-   * Per-tenant API key override (for BYOK features like Timeline).
-   * When provided, this key is used for the actual API call instead of
-   * the global key. The request still goes through Lumen's pipeline
-   * (routing, logging, normalization) but bills to the tenant's account.
-   */
-  tenantApiKey?: string;
+	/**
+	 * Per-tenant API key override (for BYOK features like Timeline).
+	 * When provided, this key is used for the actual API call instead of
+	 * the global key. The request still goes through Lumen's pipeline
+	 * (routing, logging, normalization) but bills to the tenant's account.
+	 */
+	tenantApiKey?: string;
 
-  /** Enable Songbird prompt injection protection (3-layer pipeline) */
-  songbird?: boolean | SongbirdOptions;
+	/** Enable Songbird prompt injection protection (3-layer pipeline) */
+	songbird?: boolean | SongbirdOptions;
 
-  /** Enrich request with distilled web content via Shutter (not yet implemented) */
-  shutter?: ShutterOptions;
+	/** Enrich request with distilled web content via Shutter (not yet implemented) */
+	shutter?: ShutterOptions;
 
-  /** Augment request with MCP tool results (not yet implemented) */
-  mcp?: LumenMcpOptions;
+	/** Augment request with MCP tool results (not yet implemented) */
+	mcp?: LumenMcpOptions;
 
-  /** Additional metadata for logging (no content!) */
-  metadata?: Record<string, unknown>;
+	/**
+	 * Tool definitions for function calling.
+	 * When provided, the model may return tool_calls instead of (or with) content.
+	 * Only supported by OpenRouter provider with compatible models.
+	 */
+	tools?: LumenToolDefinition[];
+
+	/**
+	 * How the model should use the provided tools.
+	 * Default: "auto" (model decides)
+	 */
+	toolChoice?: LumenToolChoice;
+
+	/** Additional metadata for logging (no content!) */
+	metadata?: Record<string, unknown>;
 }
 
 export interface LumenResponse {
-  /** Generated content */
-  content: string;
+	/** Generated content (may be empty string when model only returns tool calls) */
+	content: string;
 
-  /** Model that was used */
-  model: string;
+	/**
+	 * Tool calls returned by the model (only present when tools were provided).
+	 * Each call includes the function name and JSON-encoded arguments.
+	 * The caller is responsible for parsing arguments and executing the calls.
+	 */
+	toolCalls?: LumenToolCall[];
 
-  /** Provider that was used */
-  provider: LumenProviderName;
+	/** Model that was used */
+	model: string;
 
-  /** Token usage and cost */
-  usage: LumenUsage;
+	/** Provider that was used */
+	provider: LumenProviderName;
 
-  /** Whether response was served from cache */
-  cached: boolean;
+	/** Token usage and cost */
+	usage: LumenUsage;
 
-  /** Total latency in milliseconds */
-  latency: number;
+	/** Whether response was served from cache */
+	cached: boolean;
+
+	/** Total latency in milliseconds */
+	latency: number;
 }
 
 export interface LumenUsage {
-  /** Input tokens consumed */
-  input: number;
+	/** Input tokens consumed */
+	input: number;
 
-  /** Output tokens generated */
-  output: number;
+	/** Output tokens generated */
+	output: number;
 
-  /** Estimated cost in USD */
-  cost: number;
+	/** Estimated cost in USD */
+	cost: number;
 }
 
 // =============================================================================
@@ -144,14 +166,14 @@ export interface LumenUsage {
 // =============================================================================
 
 export interface LumenStreamChunk {
-  /** Partial content */
-  content: string;
+	/** Partial content */
+	content: string;
 
-  /** Whether this is the final chunk */
-  done: boolean;
+	/** Whether this is the final chunk */
+	done: boolean;
 
-  /** Final usage stats (only on done=true) */
-  usage?: LumenUsage;
+	/** Final usage stats (only on done=true) */
+	usage?: LumenUsage;
 }
 
 // =============================================================================
@@ -165,17 +187,17 @@ export interface LumenStreamChunk {
 export type LumenProviderName = "openrouter" | "cloudflare-ai";
 
 export interface LumenProviderConfig {
-  /** Human-readable name */
-  name: string;
+	/** Human-readable name */
+	name: string;
 
-  /** Base URL for API calls */
-  baseUrl: string;
+	/** Base URL for API calls */
+	baseUrl: string;
 
-  /** Whether this provider supports Zero Data Retention */
-  zdr: boolean;
+	/** Whether this provider supports Zero Data Retention */
+	zdr: boolean;
 
-  /** Default timeout in milliseconds */
-  timeoutMs: number;
+	/** Default timeout in milliseconds */
+	timeoutMs: number;
 }
 
 // =============================================================================
@@ -183,28 +205,28 @@ export interface LumenProviderConfig {
 // =============================================================================
 
 export interface LumenEmbeddingRequest {
-  /** Text(s) to embed */
-  input: string | string[];
+	/** Text(s) to embed */
+	input: string | string[];
 
-  /** Tenant ID for quota tracking */
-  tenant?: string;
+	/** Tenant ID for quota tracking */
+	tenant?: string;
 
-  /** Override default embedding model */
-  model?: string;
+	/** Override default embedding model */
+	model?: string;
 }
 
 export interface LumenEmbeddingResponse {
-  /** Embedding vectors */
-  embeddings: number[][];
+	/** Embedding vectors */
+	embeddings: number[][];
 
-  /** Model used */
-  model: string;
+	/** Model used */
+	model: string;
 
-  /** Provider used */
-  provider: LumenProviderName;
+	/** Provider used */
+	provider: LumenProviderName;
 
-  /** Total tokens processed */
-  tokens: number;
+	/** Total tokens processed */
+	tokens: number;
 }
 
 // =============================================================================
@@ -212,35 +234,35 @@ export interface LumenEmbeddingResponse {
 // =============================================================================
 
 export interface LumenModerationRequest {
-  /** Content to moderate */
-  content: string;
+	/** Content to moderate */
+	content: string;
 
-  /** Tenant ID for quota tracking */
-  tenant?: string;
+	/** Tenant ID for quota tracking */
+	tenant?: string;
 }
 
 export interface LumenModerationResponse {
-  /** Whether content is safe */
-  safe: boolean;
+	/** Whether content is safe */
+	safe: boolean;
 
-  /** Flagged categories (if unsafe) */
-  categories: LumenModerationCategory[];
+	/** Flagged categories (if unsafe) */
+	categories: LumenModerationCategory[];
 
-  /** Model used */
-  model: string;
+	/** Model used */
+	model: string;
 
-  /** Confidence score (0-1) */
-  confidence: number;
+	/** Confidence score (0-1) */
+	confidence: number;
 }
 
 export type LumenModerationCategory =
-  | "hate"
-  | "harassment"
-  | "violence"
-  | "self_harm"
-  | "sexual"
-  | "dangerous"
-  | "illegal";
+	| "hate"
+	| "harassment"
+	| "violence"
+	| "self_harm"
+	| "sexual"
+	| "dangerous"
+	| "illegal";
 
 // =============================================================================
 // TRANSCRIPTION (SCRIBE)
@@ -255,63 +277,63 @@ export type LumenModerationCategory =
 export type ScribeMode = "raw" | "draft";
 
 export interface LumenTranscriptionRequest {
-  /** Audio data as Uint8Array (from MediaRecorder or file upload) */
-  audio: Uint8Array;
+	/** Audio data as Uint8Array (from MediaRecorder or file upload) */
+	audio: Uint8Array;
 
-  /** Tenant ID for quota tracking */
-  tenant?: string;
+	/** Tenant ID for quota tracking */
+	tenant?: string;
 
-  /** Transcription options */
-  options?: LumenTranscriptionOptions;
+	/** Transcription options */
+	options?: LumenTranscriptionOptions;
 }
 
 export interface LumenTranscriptionOptions {
-  /** Transcription mode: "raw" for 1:1, "draft" for AI-structured */
-  mode?: ScribeMode;
+	/** Transcription mode: "raw" for 1:1, "draft" for AI-structured */
+	mode?: ScribeMode;
 
-  /** Language hint (BCP-47 format, e.g., "en", "en-US") */
-  language?: string;
+	/** Language hint (BCP-47 format, e.g., "en", "en-US") */
+	language?: string;
 
-  /** Include word-level timestamps in response */
-  timestamps?: boolean;
+	/** Include word-level timestamps in response */
+	timestamps?: boolean;
 
-  /** Skip PII scrubbing (for already-sanitized content) */
-  skipPiiScrub?: boolean;
+	/** Skip PII scrubbing (for already-sanitized content) */
+	skipPiiScrub?: boolean;
 
-  /** Skip quota enforcement */
-  skipQuota?: boolean;
+	/** Skip quota enforcement */
+	skipQuota?: boolean;
 }
 
 export interface LumenTranscriptionResponse {
-  /** Transcribed text (cleaned/structured if mode="draft") */
-  text: string;
+	/** Transcribed text (cleaned/structured if mode="draft") */
+	text: string;
 
-  /** Word count of the transcription */
-  wordCount: number;
+	/** Word count of the transcription */
+	wordCount: number;
 
-  /** Duration of the audio in seconds */
-  duration: number;
+	/** Duration of the audio in seconds */
+	duration: number;
 
-  /** Processing latency in milliseconds */
-  latency: number;
+	/** Processing latency in milliseconds */
+	latency: number;
 
-  /** Model that was used */
-  model: string;
+	/** Model that was used */
+	model: string;
 
-  /** Provider that was used */
-  provider: LumenProviderName;
+	/** Provider that was used */
+	provider: LumenProviderName;
 
-  /**
-   * Gutter content for Vine creation (only present in "draft" mode).
-   * Each item represents a tangent or aside that should become a Vine.
-   */
-  gutterContent?: GutterItem[];
+	/**
+	 * Gutter content for Vine creation (only present in "draft" mode).
+	 * Each item represents a tangent or aside that should become a Vine.
+	 */
+	gutterContent?: GutterItem[];
 
-  /**
-   * Raw transcript before structuring (only present in "draft" mode).
-   * Useful for comparison or fallback.
-   */
-  rawTranscript?: string;
+	/**
+	 * Raw transcript before structuring (only present in "draft" mode).
+	 * Useful for comparison or fallback.
+	 */
+	rawTranscript?: string;
 }
 
 /**
@@ -319,14 +341,14 @@ export interface LumenTranscriptionResponse {
  * In Scribe's draft mode, these are auto-generated Vines for tangents.
  */
 export interface GutterItem {
-  /** The type of gutter content */
-  type: "vine";
+	/** The type of gutter content */
+	type: "vine";
 
-  /** The text content for the Vine */
-  content: string;
+	/** The text content for the Vine */
+	content: string;
 
-  /** Optional anchor text this Vine relates to */
-  anchor?: string;
+	/** Optional anchor text this Vine relates to */
+	anchor?: string;
 }
 
 // =============================================================================
@@ -334,20 +356,20 @@ export interface GutterItem {
 // =============================================================================
 
 export interface LumenClientConfig {
-  /** OpenRouter API key (encrypted or plain) */
-  openrouterApiKey: string;
+	/** OpenRouter API key (encrypted or plain) */
+	openrouterApiKey: string;
 
-  /** Token encryption key for decrypting stored API keys */
-  encryptionKey?: string;
+	/** Token encryption key for decrypting stored API keys */
+	encryptionKey?: string;
 
-  /** D1 database instance for quota tracking */
-  db?: D1Database;
+	/** D1 database instance for quota tracking */
+	db?: D1Database;
 
-  /** Cloudflare AI binding (for moderation/embeddings) */
-  ai?: Ai;
+	/** Cloudflare AI binding (for moderation/embeddings) */
+	ai?: Ai;
 
-  /** Feature flag to enable/disable Lumen */
-  enabled?: boolean;
+	/** Feature flag to enable/disable Lumen */
+	enabled?: boolean;
 }
 
 // =============================================================================
@@ -355,48 +377,48 @@ export interface LumenClientConfig {
 // =============================================================================
 
 export interface SongbirdOptions {
-  /** Custom Kestrel context (overrides task-based defaults) */
-  context?: KestrelContext;
+	/** Custom Kestrel context (overrides task-based defaults) */
+	context?: KestrelContext;
 
-  /** Skip canary check (only run Kestrel + Robin) */
-  skipCanary?: boolean;
+	/** Skip canary check (only run Kestrel + Robin) */
+	skipCanary?: boolean;
 
-  /** Custom confidence threshold (default: 0.85) */
-  confidenceThreshold?: number;
+	/** Custom confidence threshold (default: 0.85) */
+	confidenceThreshold?: number;
 }
 
 export interface KestrelContext {
-  /** What kind of system this is */
-  contextType: string;
+	/** What kind of system this is */
+	contextType: string;
 
-  /** What the user is expected to be doing */
-  expectedUseCase: string;
+	/** What the user is expected to be doing */
+	expectedUseCase: string;
 
-  /** Bullet points of expected input characteristics */
-  expectedPatterns: string;
+	/** Bullet points of expected input characteristics */
+	expectedPatterns: string;
 
-  /** Policy rules for validation */
-  relevantPolicies: string;
+	/** Policy rules for validation */
+	relevantPolicies: string;
 }
 
 export interface SongbirdResult {
-  /** Whether the input passed all checks */
-  passed: boolean;
+	/** Whether the input passed all checks */
+	passed: boolean;
 
-  /** Which layer failed (if any) */
-  failedLayer?: "canary" | "kestrel";
+	/** Which layer failed (if any) */
+	failedLayer?: "canary" | "kestrel";
 
-  /** Kestrel confidence score (if Kestrel ran) */
-  confidence?: number;
+	/** Kestrel confidence score (if Kestrel ran) */
+	confidence?: number;
 
-  /** Kestrel reason (if Kestrel ran) */
-  reason?: string;
+	/** Kestrel reason (if Kestrel ran) */
+	reason?: string;
 
-  /** Timing metrics */
-  metrics: {
-    canaryMs?: number;
-    kestrelMs?: number;
-  };
+	/** Timing metrics */
+	metrics: {
+		canaryMs?: number;
+		kestrelMs?: number;
+	};
 }
 
 // =============================================================================
@@ -414,23 +436,23 @@ export interface SongbirdResult {
  * @see https://github.com/AutumnsGrove/Shutter
  */
 export interface ShutterOptions {
-  /** URL(s) to fetch and distill */
-  urls: string | string[];
+	/** URL(s) to fetch and distill */
+	urls: string | string[];
 
-  /** What to extract from the page(s) */
-  query: string;
+	/** What to extract from the page(s) */
+	query: string;
 
-  /** Model tier for extraction (default: "fast") */
-  model?: ShutterModelTier;
+	/** Model tier for extraction (default: "fast") */
+	model?: ShutterModelTier;
 
-  /** Maximum tokens for extracted content per URL (default: 500) */
-  maxTokens?: number;
+	/** Maximum tokens for extracted content per URL (default: 500) */
+	maxTokens?: number;
 
-  /** Timeout in milliseconds (default: 30000) */
-  timeoutMs?: number;
+	/** Timeout in milliseconds (default: 30000) */
+	timeoutMs?: number;
 
-  /** How to inject distilled content into the request */
-  inject?: ShutterInjectMode;
+	/** How to inject distilled content into the request */
+	inject?: ShutterInjectMode;
 }
 
 /** Shutter model tiers — speed vs accuracy tradeoff */
@@ -438,51 +460,51 @@ export type ShutterModelTier = "fast" | "accurate" | "research" | "code";
 
 /** How distilled content gets injected into the Lumen request */
 export type ShutterInjectMode =
-  | "prepend" // Add as context before user message (default)
-  | "append" // Add after user message
-  | "system"; // Add as a system message
+	| "prepend" // Add as context before user message (default)
+	| "append" // Add after user message
+	| "system"; // Add as a system message
 
 export interface ShutterResult {
-  /** Distilled content from each URL */
-  extractions: ShutterExtraction[];
+	/** Distilled content from each URL */
+	extractions: ShutterExtraction[];
 
-  /** Total tokens consumed by the distillation step */
-  totalTokensUsed: number;
+	/** Total tokens consumed by the distillation step */
+	totalTokensUsed: number;
 
-  /** Total time for all fetches + distillation */
-  totalMs: number;
+	/** Total time for all fetches + distillation */
+	totalMs: number;
 }
 
 export interface ShutterExtraction {
-  /** Source URL */
-  url: string;
+	/** Source URL */
+	url: string;
 
-  /** Extracted content (null if blocked by injection detection) */
-  extracted: string | null;
+	/** Extracted content (null if blocked by injection detection) */
+	extracted: string | null;
 
-  /** Token counts for this extraction */
-  tokensInput: number;
-  tokensOutput: number;
+	/** Token counts for this extraction */
+	tokensInput: number;
+	tokensOutput: number;
 
-  /** Prompt injection detection result (null if clean) */
-  promptInjection: ShutterInjectionResult | null;
+	/** Prompt injection detection result (null if clean) */
+	promptInjection: ShutterInjectionResult | null;
 }
 
 export interface ShutterInjectionResult {
-  /** Whether injection was detected */
-  detected: boolean;
+	/** Whether injection was detected */
+	detected: boolean;
 
-  /** Type of injection pattern */
-  type: string;
+	/** Type of injection pattern */
+	type: string;
 
-  /** Snippet of the offending content */
-  snippet: string;
+	/** Snippet of the offending content */
+	snippet: string;
 
-  /** Confidence score (0.0-1.0) */
-  confidence: number;
+	/** Confidence score (0.0-1.0) */
+	confidence: number;
 
-  /** Contributing detection signals */
-  signals: string[];
+	/** Contributing detection signals */
+	signals: string[];
 }
 
 // =============================================================================
@@ -499,59 +521,59 @@ export interface ShutterInjectionResult {
  * @see https://modelcontextprotocol.io
  */
 export interface LumenMcpOptions {
-  /** Which tools to invoke (or "auto" to let Lumen decide based on task) */
-  tools?: LumenMcpToolRef[] | "auto";
+	/** Which tools to invoke (or "auto" to let Lumen decide based on task) */
+	tools?: LumenMcpToolRef[] | "auto";
 
-  /** Maximum total tokens to inject from tool results (default: 2000) */
-  maxContextTokens?: number;
+	/** Maximum total tokens to inject from tool results (default: 2000) */
+	maxContextTokens?: number;
 
-  /** Timeout for all tool calls combined (default: 15000ms) */
-  timeoutMs?: number;
+	/** Timeout for all tool calls combined (default: 15000ms) */
+	timeoutMs?: number;
 
-  /** How to inject tool results into the request */
-  inject?: McpInjectMode;
+	/** How to inject tool results into the request */
+	inject?: McpInjectMode;
 
-  /** Per-tool API key overrides (BYOK for tool providers) */
-  toolKeys?: Record<string, string>;
+	/** Per-tool API key overrides (BYOK for tool providers) */
+	toolKeys?: Record<string, string>;
 }
 
 /** Reference to an MCP tool to invoke */
 export interface LumenMcpToolRef {
-  /** Tool server identifier (e.g., "tavily", "context7", "custom") */
-  server: string;
+	/** Tool server identifier (e.g., "tavily", "context7", "custom") */
+	server: string;
 
-  /** Tool name within the server (e.g., "search", "query-docs") */
-  tool: string;
+	/** Tool name within the server (e.g., "search", "query-docs") */
+	tool: string;
 
-  /** Arguments to pass to the tool */
-  args?: Record<string, unknown>;
+	/** Arguments to pass to the tool */
+	args?: Record<string, unknown>;
 }
 
 /** How tool results get injected into the Lumen request */
 export type McpInjectMode =
-  | "system" // Add as system message context (default)
-  | "prepend" // Prepend to user message
-  | "append"; // Append after user message
+	| "system" // Add as system message context (default)
+	| "prepend" // Prepend to user message
+	| "append"; // Append after user message
 
 /** Configuration for a registered MCP server */
 export interface LumenMcpServerConfig {
-  /** Unique server identifier */
-  id: string;
+	/** Unique server identifier */
+	id: string;
 
-  /** Human-readable name */
-  name: string;
+	/** Human-readable name */
+	name: string;
 
-  /** Server transport type */
-  transport: McpTransportType;
+	/** Server transport type */
+	transport: McpTransportType;
 
-  /** Connection URL (for HTTP/SSE transports) */
-  url?: string;
+	/** Connection URL (for HTTP/SSE transports) */
+	url?: string;
 
-  /** Available tools on this server */
-  tools: LumenMcpToolDefinition[];
+	/** Available tools on this server */
+	tools: LumenMcpToolDefinition[];
 
-  /** Whether this server requires authentication */
-  requiresAuth: boolean;
+	/** Whether this server requires authentication */
+	requiresAuth: boolean;
 }
 
 /** MCP transport types supported */
@@ -559,51 +581,118 @@ export type McpTransportType = "stdio" | "sse" | "http";
 
 /** Definition of a tool available on an MCP server */
 export interface LumenMcpToolDefinition {
-  /** Tool name */
-  name: string;
+	/** Tool name */
+	name: string;
 
-  /** Human-readable description */
-  description: string;
+	/** Human-readable description */
+	description: string;
 
-  /** JSON Schema for tool arguments */
-  inputSchema: Record<string, unknown>;
+	/** JSON Schema for tool arguments */
+	inputSchema: Record<string, unknown>;
 
-  /** Which Lumen tasks this tool is relevant for (for "auto" mode) */
-  relevantTasks?: LumenTask[];
+	/** Which Lumen tasks this tool is relevant for (for "auto" mode) */
+	relevantTasks?: LumenTask[];
 }
 
 /** Result from running MCP tools */
 export interface LumenMcpResult {
-  /** Results from each tool invocation */
-  toolResults: LumenMcpToolResult[];
+	/** Results from each tool invocation */
+	toolResults: LumenMcpToolResult[];
 
-  /** Total tokens used by injected context */
-  totalTokens: number;
+	/** Total tokens used by injected context */
+	totalTokens: number;
 
-  /** Total time for all tool calls */
-  totalMs: number;
+	/** Total time for all tool calls */
+	totalMs: number;
 }
 
 /** Result from a single MCP tool call */
 export interface LumenMcpToolResult {
-  /** Server that provided this result */
-  server: string;
+	/** Server that provided this result */
+	server: string;
 
-  /** Tool that was called */
-  tool: string;
+	/** Tool that was called */
+	tool: string;
 
-  /** Extracted/formatted content to inject */
-  content: string;
+	/** Extracted/formatted content to inject */
+	content: string;
 
-  /** Token count for this result */
-  tokens: number;
+	/** Token count for this result */
+	tokens: number;
 
-  /** Latency for this tool call */
-  latencyMs: number;
+	/** Latency for this tool call */
+	latencyMs: number;
 
-  /** Whether the call succeeded */
-  success: boolean;
+	/** Whether the call succeeded */
+	success: boolean;
 
-  /** Error message (if failed) */
-  error?: string;
+	/** Error message (if failed) */
+	error?: string;
+}
+
+// =============================================================================
+// TOOL CALLING TYPES
+// =============================================================================
+
+/**
+ * Tool definition following the OpenAI/OpenRouter function calling spec.
+ * These are passed directly to the model to describe available actions.
+ */
+export interface LumenToolDefinition {
+	/** Always "function" for now */
+	type: "function";
+
+	/** Function specification */
+	function: {
+		/** Tool name (alphanumeric + underscores, max 64 chars) */
+		name: string;
+
+		/** Human description for the model */
+		description: string;
+
+		/** JSON Schema for the function parameters */
+		parameters: Record<string, unknown>;
+
+		/**
+		 * Whether the model must always provide every parameter.
+		 * When true, all parameters in the schema are treated as required.
+		 * Default: false
+		 */
+		strict?: boolean;
+	};
+}
+
+/**
+ * Controls how the model uses the provided tools.
+ *
+ * - "auto": Model decides whether to call tools or respond with text
+ * - "required": Model must call at least one tool
+ * - "none": Model must respond with text only (tools visible but not callable)
+ * - { type: "function", function: { name: "..." } }: Force a specific tool
+ */
+export type LumenToolChoice =
+	| "auto"
+	| "required"
+	| "none"
+	| { type: "function"; function: { name: string } };
+
+/**
+ * A tool call returned by the model.
+ * Each call represents one function the model wants to invoke.
+ */
+export interface LumenToolCall {
+	/** Unique ID for this tool call (from the provider) */
+	id: string;
+
+	/** Always "function" for now */
+	type: "function";
+
+	/** The function to call and its arguments */
+	function: {
+		/** Tool name (matches a name from the provided tools) */
+		name: string;
+
+		/** JSON-encoded arguments string (caller must parse) */
+		arguments: string;
+	};
 }

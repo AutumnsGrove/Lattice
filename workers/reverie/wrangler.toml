@@ -1,0 +1,52 @@
+# Grove Reverie — Natural Language Configuration
+# Translates feelings into coordinated API calls across 32 domains.
+# "Make my site feel like a midnight library" → theme, fonts, colors, ambient sounds.
+#
+# Callers authenticate via Heartwood tokens (AUTH service binding).
+# LLM inference delegated to Lumen via service binding.
+
+name = "grove-reverie"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# =============================================================================
+# D1 Database — Engine DB for interaction history + settings reads
+# =============================================================================
+[[d1_databases]]
+binding = "DB"
+database_name = "grove-engine-db"
+database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
+
+# =============================================================================
+# D1 Database — Curios DB for curio widget config reads
+# =============================================================================
+[[d1_databases]]
+binding = "CURIO_DB"
+database_name = "grove-curios-db"
+database_id = "e8e0f3c5-62a4-4c14-9a21-3c9e3b6f0d12"
+
+# =============================================================================
+# KV — Rate limit counters (Threshold SDK)
+# =============================================================================
+[[kv_namespaces]]
+binding = "RATE_LIMITS"
+title = "grove-reverie-ratelimits"
+id = "placeholder-will-be-created"
+
+# =============================================================================
+# Service Bindings — Internal worker-to-worker communication
+# =============================================================================
+[[services]]
+binding = "LUMEN"
+service = "grove-lumen"
+
+[[services]]
+binding = "AUTH"
+service = "grove-auth"
+
+# =============================================================================
+# Secrets (configured via: gw secret apply <name> --worker grove-reverie)
+# =============================================================================
+# REVERIE_API_KEY       - API key for authenticating callers to this worker
+# LUMEN_API_KEY         - API key for calling the Lumen worker

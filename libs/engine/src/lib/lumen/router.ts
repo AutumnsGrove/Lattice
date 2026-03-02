@@ -8,16 +8,19 @@
 import { getTaskConfig, type TaskConfig } from "./config.js";
 import { AllProvidersFailedError, LumenError } from "./errors.js";
 import type {
-  LumenMessage,
-  LumenProviderName,
-  LumenRequest,
-  LumenTask,
+	LumenMessage,
+	LumenProviderName,
+	LumenRequest,
+	LumenTask,
+	LumenToolCall,
+	LumenToolChoice,
+	LumenToolDefinition,
 } from "./types.js";
 import type {
-  ProviderRegistry,
-  LumenProvider,
-  LumenProviderResponse,
-  LumenInferenceOptions,
+	ProviderRegistry,
+	LumenProvider,
+	LumenProviderResponse,
+	LumenInferenceOptions,
 } from "./providers/index.js";
 
 // =============================================================================
@@ -25,25 +28,28 @@ import type {
 // =============================================================================
 
 export interface RouteResult {
-  /** Provider to use */
-  provider: LumenProviderName;
+	/** Provider to use */
+	provider: LumenProviderName;
 
-  /** Model to use */
-  model: string;
+	/** Model to use */
+	model: string;
 
-  /** Task configuration */
-  config: TaskConfig;
+	/** Task configuration */
+	config: TaskConfig;
 }
 
 export interface ExecuteResult {
-  /** Provider response */
-  response: LumenProviderResponse;
+	/** Provider response */
+	response: LumenProviderResponse;
 
-  /** Provider that succeeded */
-  provider: LumenProviderName;
+	/** Provider that succeeded */
+	provider: LumenProviderName;
 
-  /** Model that was used */
-  model: string;
+	/** Model that was used */
+	model: string;
+
+	/** Tool calls from the model (propagated from provider response) */
+	toolCalls?: LumenToolCall[];
 }
 
 // =============================================================================
@@ -54,44 +60,42 @@ export interface ExecuteResult {
  * Determine the route for a task (which provider/model to use)
  */
 export function routeTask(
-  task: LumenTask,
-  providers: ProviderRegistry,
-  modelOverride?: string,
+	task: LumenTask,
+	providers: ProviderRegistry,
+	modelOverride?: string,
 ): RouteResult {
-  const config = getTaskConfig(task);
+	const config = getTaskConfig(task);
 
-  // Check if primary provider is available
-  const primaryAvailable = providers[config.primaryProvider] !== undefined;
+	// Check if primary provider is available
+	const primaryAvailable = providers[config.primaryProvider] !== undefined;
 
-  // Use model override if specified, otherwise use primary model
-  const model = modelOverride ?? config.primaryModel;
+	// Use model override if specified, otherwise use primary model
+	const model = modelOverride ?? config.primaryModel;
 
-  // If primary is available, use it
-  if (primaryAvailable) {
-    return {
-      provider: config.primaryProvider,
-      model,
-      config,
-    };
-  }
+	// If primary is available, use it
+	if (primaryAvailable) {
+		return {
+			provider: config.primaryProvider,
+			model,
+			config,
+		};
+	}
 
-  // Try fallback chain
-  for (const fallback of config.fallbackChain) {
-    if (providers[fallback.provider] !== undefined) {
-      return {
-        provider: fallback.provider,
-        model: modelOverride ?? fallback.model,
-        config,
-      };
-    }
-  }
+	// Try fallback chain
+	for (const fallback of config.fallbackChain) {
+		if (providers[fallback.provider] !== undefined) {
+			return {
+				provider: fallback.provider,
+				model: modelOverride ?? fallback.model,
+				config,
+			};
+		}
+	}
 
-  // No providers available
-  throw new LumenError(
-    `No providers available for task "${task}"`,
-    "ALL_PROVIDERS_FAILED",
-    { task },
-  );
+	// No providers available
+	throw new LumenError(`No providers available for task "${task}"`, "ALL_PROVIDERS_FAILED", {
+		task,
+	});
 }
 
 // =============================================================================
@@ -107,97 +111,108 @@ export function routeTask(
  * models on failure would be unexpected.
  */
 export async function executeWithFallback(
-  task: LumenTask,
-  messages: LumenMessage[],
-  providers: ProviderRegistry,
-  options: {
-    model?: string;
-    maxTokens?: number;
-    temperature?: number;
-    timeoutMs?: number;
-    apiKeyOverride?: string;
-  } = {},
+	task: LumenTask,
+	messages: LumenMessage[],
+	providers: ProviderRegistry,
+	options: {
+		model?: string;
+		maxTokens?: number;
+		temperature?: number;
+		timeoutMs?: number;
+		apiKeyOverride?: string;
+		tools?: LumenToolDefinition[];
+		toolChoice?: LumenToolChoice;
+	} = {},
 ): Promise<ExecuteResult> {
-  const config = getTaskConfig(task);
-  const attempts: Array<{
-    provider: LumenProviderName;
-    model: string;
-    error: string;
-  }> = [];
+	const config = getTaskConfig(task);
+	const attempts: Array<{
+		provider: LumenProviderName;
+		model: string;
+		error: string;
+	}> = [];
 
-  // Build execution chain: primary + fallbacks
-  const chain: Array<{ provider: LumenProviderName; model: string }> = [];
+	// Build execution chain: primary + fallbacks
+	const chain: Array<{ provider: LumenProviderName; model: string }> = [];
 
-  // When model is explicitly specified, skip fallback chain entirely.
-  // The user chose this model — don't silently switch to another.
-  const skipFallbacks = !!options.model;
+	// When model is explicitly specified OR tools are provided, skip fallback chain.
+	// Model override: user chose this model — don't silently switch.
+	// Tools: schemas are model-specific, falling back with the same tools is unpredictable.
+	const skipFallbacks = !!options.model || !!options.tools;
 
-  // Add primary if available
-  if (providers[config.primaryProvider]) {
-    chain.push({
-      provider: config.primaryProvider,
-      model: options.model ?? config.primaryModel,
-    });
-  }
+	// Add primary if available
+	if (providers[config.primaryProvider]) {
+		chain.push({
+			provider: config.primaryProvider,
+			model: options.model ?? config.primaryModel,
+		});
+	}
 
-  // Add fallbacks (unless model override was specified)
-  if (!skipFallbacks) {
-    for (const fallback of config.fallbackChain) {
-      if (providers[fallback.provider]) {
-        chain.push({
-          provider: fallback.provider,
-          model: fallback.model,
-        });
-      }
-    }
-  }
+	// Add fallbacks (unless model override was specified)
+	if (!skipFallbacks) {
+		for (const fallback of config.fallbackChain) {
+			if (providers[fallback.provider]) {
+				chain.push({
+					provider: fallback.provider,
+					model: fallback.model,
+				});
+			}
+		}
+	}
 
-  if (chain.length === 0) {
-    throw new AllProvidersFailedError(task, [
-      {
-        provider: config.primaryProvider,
-        model: config.primaryModel,
-        error: "Provider not configured",
-      },
-    ]);
-  }
+	if (chain.length === 0) {
+		throw new AllProvidersFailedError(task, [
+			{
+				provider: config.primaryProvider,
+				model: config.primaryModel,
+				error: "Provider not configured",
+			},
+		]);
+	}
 
-  // Try each provider in the chain
-  for (const { provider: providerName, model } of chain) {
-    const provider = providers[providerName];
-    if (!provider) continue;
+	// Try each provider in the chain
+	for (const { provider: providerName, model } of chain) {
+		const provider = providers[providerName];
+		if (!provider) continue;
 
-    try {
-      const inferenceOptions: LumenInferenceOptions = {
-        maxTokens: options.maxTokens ?? config.defaultMaxTokens,
-        temperature: options.temperature ?? config.defaultTemperature,
-        timeoutMs: options.timeoutMs,
-        apiKeyOverride: options.apiKeyOverride,
-      };
+		try {
+			// Build providerOptions to carry tool definitions through to the provider
+			const providerOptions: Record<string, unknown> | undefined = options.tools
+				? {
+						tools: options.tools,
+						...(options.toolChoice !== undefined && {
+							toolChoice: options.toolChoice,
+						}),
+					}
+				: undefined;
 
-      const response = await provider.inference(
-        model,
-        messages,
-        inferenceOptions,
-      );
+			const inferenceOptions: LumenInferenceOptions = {
+				maxTokens: options.maxTokens ?? config.defaultMaxTokens,
+				temperature: options.temperature ?? config.defaultTemperature,
+				timeoutMs: options.timeoutMs,
+				apiKeyOverride: options.apiKeyOverride,
+				providerOptions,
+			};
 
-      return {
-        response,
-        provider: providerName,
-        model,
-      };
-    } catch (err) {
-      attempts.push({
-        provider: providerName,
-        model,
-        error: err instanceof Error ? err.message : "Unknown error",
-      });
-      // Continue to next provider in chain
-    }
-  }
+			const response = await provider.inference(model, messages, inferenceOptions);
 
-  // All providers failed
-  throw new AllProvidersFailedError(task, attempts);
+			return {
+				response,
+				provider: providerName,
+				model,
+				toolCalls: response.toolCalls,
+			};
+		} catch (err) {
+			attempts.push({
+				provider: providerName,
+				model,
+				error: err instanceof Error ? err.message : "Unknown error",
+			});
+			// Continue to next provider in chain
+		}
+	}
+
+	// All providers failed
+	throw new AllProvidersFailedError(task, attempts);
 }
 
 // =============================================================================
@@ -209,76 +224,76 @@ export async function executeWithFallback(
  * Tries OpenRouter first (BGE-M3), falls back to Cloudflare AI
  */
 export async function executeEmbedding(
-  input: string | string[],
-  providers: ProviderRegistry,
-  model?: string,
+	input: string | string[],
+	providers: ProviderRegistry,
+	model?: string,
 ): Promise<{
-  embeddings: number[][];
-  tokens: number;
-  model: string;
-  provider: LumenProviderName;
+	embeddings: number[][];
+	tokens: number;
+	model: string;
+	provider: LumenProviderName;
 }> {
-  const config = getTaskConfig("embedding");
-  const attempts: Array<{
-    provider: LumenProviderName;
-    model: string;
-    error: string;
-  }> = [];
+	const config = getTaskConfig("embedding");
+	const attempts: Array<{
+		provider: LumenProviderName;
+		model: string;
+		error: string;
+	}> = [];
 
-  // Build the execution chain from config
-  const chain: Array<{ provider: LumenProviderName; model: string }> = [];
+	// Build the execution chain from config
+	const chain: Array<{ provider: LumenProviderName; model: string }> = [];
 
-  // Add primary if available
-  if (providers[config.primaryProvider]) {
-    chain.push({
-      provider: config.primaryProvider,
-      model: model ?? config.primaryModel,
-    });
-  }
+	// Add primary if available
+	if (providers[config.primaryProvider]) {
+		chain.push({
+			provider: config.primaryProvider,
+			model: model ?? config.primaryModel,
+		});
+	}
 
-  // Add fallbacks
-  for (const fallback of config.fallbackChain) {
-    if (providers[fallback.provider]) {
-      chain.push({
-        provider: fallback.provider,
-        model: model ?? fallback.model,
-      });
-    }
-  }
+	// Add fallbacks
+	for (const fallback of config.fallbackChain) {
+		if (providers[fallback.provider]) {
+			chain.push({
+				provider: fallback.provider,
+				model: model ?? fallback.model,
+			});
+		}
+	}
 
-  if (chain.length === 0) {
-    throw new AllProvidersFailedError("embedding", [
-      {
-        provider: config.primaryProvider,
-        model: config.primaryModel,
-        error: "No embedding providers configured",
-      },
-    ]);
-  }
+	if (chain.length === 0) {
+		throw new AllProvidersFailedError("embedding", [
+			{
+				provider: config.primaryProvider,
+				model: config.primaryModel,
+				error: "No embedding providers configured",
+			},
+		]);
+	}
 
-  // Try each provider in the chain
-  for (const { provider: providerName, model: embedModel } of chain) {
-    const provider = providers[providerName];
-    if (!provider?.embed) continue;
+	// Try each provider in the chain
+	for (const { provider: providerName, model: embedModel } of chain) {
+		const provider = providers[providerName];
+		if (!provider?.embed) continue;
 
-    try {
-      const result = await provider.embed(embedModel, input);
-      return {
-        embeddings: result.embeddings,
-        tokens: result.tokens,
-        model: embedModel,
-        provider: providerName,
-      };
-    } catch (err) {
-      attempts.push({
-        provider: providerName,
-        model: embedModel,
-        error: err instanceof Error ? err.message : "Unknown error",
-      });
-    }
-  }
+		try {
+			const result = await provider.embed(embedModel, input);
+			return {
+				embeddings: result.embeddings,
+				tokens: result.tokens,
+				model: embedModel,
+				provider: providerName,
+			};
+		} catch (err) {
+			attempts.push({
+				provider: providerName,
+				model: embedModel,
+				error: err instanceof Error ? err.message : "Unknown error",
+			});
+		}
+	}
 
-  throw new AllProvidersFailedError("embedding", attempts);
+	throw new AllProvidersFailedError("embedding", attempts);
 }
 
 /**
@@ -286,76 +301,76 @@ export async function executeEmbedding(
  * GPT-oss Safeguard 20B → LlamaGuard 4 12B → DeepSeek V3.2 (all OpenRouter).
  */
 export async function executeModeration(
-  content: string,
-  providers: ProviderRegistry,
-  model?: string,
+	content: string,
+	providers: ProviderRegistry,
+	model?: string,
 ): Promise<{
-  safe: boolean;
-  categories: string[];
-  confidence: number;
-  model: string;
-  provider: LumenProviderName;
+	safe: boolean;
+	categories: string[];
+	confidence: number;
+	model: string;
+	provider: LumenProviderName;
 }> {
-  const config = getTaskConfig("moderation");
-  const attempts: Array<{
-    provider: LumenProviderName;
-    model: string;
-    error: string;
-  }> = [];
+	const config = getTaskConfig("moderation");
+	const attempts: Array<{
+		provider: LumenProviderName;
+		model: string;
+		error: string;
+	}> = [];
 
-  // Build the execution chain from config
-  const chain: Array<{ provider: LumenProviderName; model: string }> = [];
+	// Build the execution chain from config
+	const chain: Array<{ provider: LumenProviderName; model: string }> = [];
 
-  // Add primary if available
-  if (providers[config.primaryProvider]) {
-    chain.push({
-      provider: config.primaryProvider,
-      model: model ?? config.primaryModel,
-    });
-  }
+	// Add primary if available
+	if (providers[config.primaryProvider]) {
+		chain.push({
+			provider: config.primaryProvider,
+			model: model ?? config.primaryModel,
+		});
+	}
 
-  // Add fallbacks
-  for (const fallback of config.fallbackChain) {
-    if (providers[fallback.provider]) {
-      chain.push({
-        provider: fallback.provider,
-        model: model ?? fallback.model,
-      });
-    }
-  }
+	// Add fallbacks
+	for (const fallback of config.fallbackChain) {
+		if (providers[fallback.provider]) {
+			chain.push({
+				provider: fallback.provider,
+				model: model ?? fallback.model,
+			});
+		}
+	}
 
-  if (chain.length === 0) {
-    throw new AllProvidersFailedError("moderation", [
-      {
-        provider: config.primaryProvider,
-        model: config.primaryModel,
-        error: "No moderation providers configured",
-      },
-    ]);
-  }
+	if (chain.length === 0) {
+		throw new AllProvidersFailedError("moderation", [
+			{
+				provider: config.primaryProvider,
+				model: config.primaryModel,
+				error: "No moderation providers configured",
+			},
+		]);
+	}
 
-  // Try each provider in the chain
-  for (const { provider: providerName, model: modModel } of chain) {
-    const provider = providers[providerName];
-    if (!provider?.moderate) continue;
+	// Try each provider in the chain
+	for (const { provider: providerName, model: modModel } of chain) {
+		const provider = providers[providerName];
+		if (!provider?.moderate) continue;
 
-    try {
-      const result = await provider.moderate(modModel, content);
-      return {
-        safe: result.safe,
-        categories: result.categories,
-        confidence: result.confidence,
-        model: modModel,
-        provider: providerName,
-      };
-    } catch (err) {
-      attempts.push({
-        provider: providerName,
-        model: modModel,
-        error: err instanceof Error ? err.message : "Unknown error",
-      });
-    }
-  }
+		try {
+			const result = await provider.moderate(modModel, content);
+			return {
+				safe: result.safe,
+				categories: result.categories,
+				confidence: result.confidence,
+				model: modModel,
+				provider: providerName,
+			};
+		} catch (err) {
+			attempts.push({
+				provider: providerName,
+				model: modModel,
+				error: err instanceof Error ? err.message : "Unknown error",
+			});
+		}
+	}
 
-  throw new AllProvidersFailedError("moderation", attempts);
+	throw new AllProvidersFailedError("moderation", attempts);
 }

@@ -68,6 +68,8 @@ inference.post("/", async (c) => {
 					songbird: req.options?.songbird,
 					tenantApiKey: req.options?.tenant_api_key,
 					metadata: req.options?.metadata,
+					tools: req.options?.tools,
+					toolChoice: req.options?.tool_choice,
 				},
 			},
 			req.tier,
@@ -81,6 +83,7 @@ inference.post("/", async (c) => {
 				provider: result.provider,
 				usage: result.usage,
 				cached: result.cached,
+				...(result.toolCalls && { tool_calls: result.toolCalls }),
 			},
 			meta: {
 				task: req.task,
