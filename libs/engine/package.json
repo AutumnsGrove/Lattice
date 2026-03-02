@@ -185,6 +185,10 @@
 			"default": "./dist/errors/index.js",
 			"types": "./dist/errors/index.d.ts"
 		},
+		"./reverie": {
+			"default": "./dist/reverie/index.js",
+			"types": "./dist/reverie/index.d.ts"
+		},
 		"./feature-flags": {
 			"default": "./dist/feature-flags/index.js",
 			"types": "./dist/feature-flags/index.d.ts"
