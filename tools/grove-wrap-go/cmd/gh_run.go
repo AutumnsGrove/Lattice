@@ -70,8 +70,8 @@ var runListCmd = &cobra.Command{
 		flat, _ := cmd.Flags().GetBool("flat")
 
 		if flat {
-			// Flat view: one run per line with IDs for easy piping
-			ui.PrintHeader("Workflow Runs")
+			headers := []string{"", "ID", "Workflow", "Status", "Branch", "Date"}
+			var rows [][]string
 			for _, r := range runs {
 				id := formatRunID(r["databaseId"])
 				workflow, _ := r["workflowName"].(string)
@@ -89,10 +89,9 @@ var runListCmd = &cobra.Command{
 					display = runStatus
 				}
 
-				fmt.Printf("  %s %-12s %-24s %-10s %-20s %s\n",
-					icon, id, workflow, display, branch, createdAt)
+				rows = append(rows, []string{icon, id, TruncateStr(workflow, 24), display, TruncateStr(branch, 20), createdAt})
 			}
-			fmt.Println()
+			fmt.Print(ui.RenderTable("Workflow Runs", headers, rows))
 			return nil
 		}
 
@@ -117,7 +116,6 @@ var runListCmd = &cobra.Command{
 			}
 		}
 
-		ui.PrintHeader("Workflow Runs")
 		for _, g := range groups {
 			shortSha := g.sha
 			if len(shortSha) > 7 {
@@ -131,8 +129,9 @@ var runListCmd = &cobra.Command{
 				createdAt = createdAt[:10]
 			}
 
-			fmt.Printf("\n  ● %s  %s  %s\n", shortSha, title, createdAt)
-
+			groupTitle := fmt.Sprintf("%s  %s  %s", shortSha, TruncateStr(title, 40), createdAt)
+			headers := []string{"", "ID", "Workflow", "Status"}
+			var rows [][]string
 			for _, r := range g.runs {
 				id := formatRunID(r["databaseId"])
 				workflow, _ := r["workflowName"].(string)
@@ -145,15 +144,10 @@ var runListCmd = &cobra.Command{
 					display = runStatus
 				}
 
-				padding := 40 - len(workflow) - len(display)
-				if padding < 1 {
-					padding = 1
-				}
-				dots := strings.Repeat("·", padding)
-				fmt.Printf("    %s %-12s %s %s %s\n", icon, id, workflow, dots, display)
+				rows = append(rows, []string{icon, id, workflow, display})
 			}
+			fmt.Print(ui.RenderTable(groupTitle, headers, rows))
 		}
-		fmt.Println()
 		return nil
 	},
 }
@@ -240,17 +234,21 @@ var runViewCmd = &cobra.Command{
 			display = runStatus
 		}
 
-		ui.PrintHeader(fmt.Sprintf("Run #%s", runID))
-		fmt.Printf("  %s — %s\n", workflow, title)
-		fmt.Printf("  Status: %s\n", display)
-		fmt.Printf("  Branch: %s  Event: %s\n", branch, event)
-		fmt.Printf("  Created: %s\n", createdAt)
-		fmt.Printf("  URL: %s\n", url)
+		pairs := [][2]string{
+			{"workflow", workflow},
+			{"title", title},
+			{"status", display},
+			{"branch", branch},
+			{"event", event},
+			{"created", createdAt},
+			{"url", url},
+		}
+		fmt.Print(ui.RenderInfoPanel(fmt.Sprintf("Run #%s", runID), pairs))
 
 		// Job breakdown
 		hasFailures := false
 		if jobs, ok := run["jobs"].([]interface{}); ok && len(jobs) > 0 {
-			fmt.Printf("\n  Jobs:\n")
+			var steps []ui.StepItem
 			for _, j := range jobs {
 				job, ok := j.(map[string]interface{})
 				if !ok {
@@ -265,34 +263,36 @@ var runViewCmd = &cobra.Command{
 					jobDisplay = jobStatus
 				}
 
-				icon := conclusionIcon(jobConclusion, jobStatus)
-
 				if strings.EqualFold(jobConclusion, "failure") {
 					hasFailures = true
 				}
 
 				// Find failed steps
-				var failedSteps []string
-				if steps, ok := job["steps"].([]interface{}); ok {
-					for _, s := range steps {
+				var failedStepNames []string
+				if jobSteps, ok := job["steps"].([]interface{}); ok {
+					for _, s := range jobSteps {
 						step, ok := s.(map[string]interface{})
 						if !ok {
 							continue
 						}
 						if c, _ := step["conclusion"].(string); strings.EqualFold(c, "failure") {
 							name, _ := step["name"].(string)
-							failedSteps = append(failedSteps, name)
+							failedStepNames = append(failedStepNames, name)
 						}
 					}
 				}
 
-				stepInfo := ""
-				if len(failedSteps) > 0 {
-					stepInfo = "  ← " + strings.Join(failedSteps, ", ")
+				label := fmt.Sprintf("%-35s %s", jobName, jobDisplay)
+				if len(failedStepNames) > 0 {
+					label += "  ← " + strings.Join(failedStepNames, ", ")
 				}
 
-				fmt.Printf("    %s %-35s %s%s\n", icon, jobName, jobDisplay, stepInfo)
+				steps = append(steps, ui.StepItem{
+					OK:    !strings.EqualFold(jobConclusion, "failure"),
+					Label: label,
+				})
 			}
+			fmt.Print(ui.RenderStepList("Jobs", steps))
 		}
 
 		// Auto-fetch failure logs

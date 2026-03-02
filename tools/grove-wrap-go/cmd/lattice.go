@@ -80,19 +80,17 @@ var latticePostsListCmd = &cobra.Command{
 			return nil
 		}
 
-		ui.PrintHeader(fmt.Sprintf("Posts (%d)", len(posts)))
-		fmt.Println()
+		headers := []string{"Status", "Title", "Slug", "Updated"}
+		var rows [][]string
 		for _, p := range posts {
-			statusBadge := formatPostStatus(p.Status)
-			date := truncDate(p.UpdatedAt)
-			fmt.Printf("  %s  %-40s  %s  %s\n",
-				statusBadge,
-				ui.CommandStyle.Render(truncateStr(p.Title, 40)),
-				ui.HintStyle.Render(p.Slug),
-				ui.HintStyle.Render(date),
-			)
+			rows = append(rows, []string{
+				p.Status,
+				TruncateStr(p.Title, 40),
+				p.Slug,
+				truncDate(p.UpdatedAt),
+			})
 		}
-		fmt.Println()
+		fmt.Print(ui.RenderTable(fmt.Sprintf("Posts (%d)", len(posts)), headers, rows))
 		return nil
 	},
 }
@@ -313,17 +311,16 @@ var latticeDraftsCmd = &cobra.Command{
 			return nil
 		}
 
-		ui.PrintHeader(fmt.Sprintf("Drafts (%d)", len(posts)))
-		fmt.Println()
+		headers := []string{"Title", "Slug", "Updated"}
+		var rows [][]string
 		for _, p := range posts {
-			date := truncDate(p.UpdatedAt)
-			fmt.Printf("  %s  %s  %s\n",
-				ui.CommandStyle.Render(truncateStr(p.Title, 40)),
-				ui.HintStyle.Render(p.Slug),
-				ui.HintStyle.Render(date),
-			)
+			rows = append(rows, []string{
+				TruncateStr(p.Title, 40),
+				p.Slug,
+				truncDate(p.UpdatedAt),
+			})
 		}
-		fmt.Println()
+		fmt.Print(ui.RenderTable(fmt.Sprintf("Drafts (%d)", len(posts)), headers, rows))
 		return nil
 	},
 }
@@ -341,13 +338,6 @@ func formatPostStatus(status string) string {
 	default:
 		return ui.HintStyle.Render(status)
 	}
-}
-
-func truncateStr(s string, max int) string {
-	if len(s) <= max {
-		return s
-	}
-	return s[:max-1] + "…"
 }
 
 // ── Cozy Help ───────────────────────────────────────────────────────

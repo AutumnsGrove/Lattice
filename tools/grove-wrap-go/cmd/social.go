@@ -245,10 +245,10 @@ var socialStatusCmd = &cobra.Command{
 			return printJSON(result)
 		}
 
-		ui.PrintHeader("Social Platforms")
-		fmt.Println()
-
 		platforms, _ := result["platforms"].([]interface{})
+
+		headers := []string{"Platform", "Configured", "Health", "Note"}
+		var rows [][]string
 		for _, p := range platforms {
 			platform, ok := p.(map[string]interface{})
 			if !ok {
@@ -266,6 +266,7 @@ var socialStatusCmd = &cobra.Command{
 
 			configStr := "✗ No"
 			healthStr := "✗ Down"
+			note := ""
 
 			if configured {
 				configStr = "✓ Yes"
@@ -277,17 +278,16 @@ var socialStatusCmd = &cobra.Command{
 			if comingSoon {
 				configStr = "—"
 				healthStr = "—"
-				ui.PrintKeyValue(name, fmt.Sprintf("configured: %s  health: %s  (coming soon)", configStr, healthStr))
-			} else {
-				// Check circuit breaker
-				if cb, ok := platform["circuitBreaker"].(map[string]interface{}); ok {
-					if open, _ := cb["open"].(bool); open {
-						healthStr = "✗ Circuit open"
-					}
+				note = "coming soon"
+			} else if cb, ok := platform["circuitBreaker"].(map[string]interface{}); ok {
+				if open, _ := cb["open"].(bool); open {
+					healthStr = "✗ Circuit open"
 				}
-				ui.PrintKeyValue(name, fmt.Sprintf("configured: %s  health: %s", configStr, healthStr))
 			}
+
+			rows = append(rows, []string{name, configStr, healthStr, note})
 		}
+		fmt.Print(ui.RenderTable("Social Platforms", headers, rows))
 
 		return nil
 	},
@@ -347,30 +347,19 @@ var socialSetupCmd = &cobra.Command{
 			})
 		}
 
-		fmt.Println()
-		ui.PrintHeader("Social Platform Setup")
-		fmt.Println()
+		fmt.Print(ui.RenderPanel("API Key Configuration",
+			"Option 1: Set ZEPHYR_API_KEY environment variable\n"+
+				"Option 2: Store in vault — gw secret set ZEPHYR_API_KEY"))
 
-		fmt.Println("  API Key Configuration:")
-		fmt.Println("    Option 1: Set ZEPHYR_API_KEY environment variable")
-		fmt.Println("    Option 2: Store in vault: gw secret set ZEPHYR_API_KEY")
-		fmt.Println()
-
-		fmt.Println("  Bluesky Setup:")
-		fmt.Println("    1. Go to bsky.app → Settings → App Passwords")
-		fmt.Println("    2. Create a new app password (name it \"grove-zephyr\")")
-		fmt.Println("    3. Copy the generated password")
-		fmt.Println("    4. Set the secrets:")
-		ui.Muted("       wrangler secret put BLUESKY_HANDLE")
-		fmt.Println("         → e.g. autumn.bsky.social")
-		ui.Muted("       wrangler secret put BLUESKY_APP_PASSWORD")
-		fmt.Println("         → paste the generated password")
-		fmt.Println()
-
-		fmt.Println("  5. Test it:")
-		fmt.Println("     gw social post --write \"Hello from Grove!\"")
-		fmt.Println()
-		ui.Muted("  Mastodon and DEV.to support coming soon.")
+		steps := []ui.StepItem{
+			{Label: "Go to bsky.app → Settings → App Passwords", OK: true},
+			{Label: "Create a new app password (name it \"grove-zephyr\")", OK: true},
+			{Label: "Copy the generated password", OK: true},
+			{Label: "Set secrets: wrangler secret put BLUESKY_HANDLE / BLUESKY_APP_PASSWORD", OK: true},
+			{Label: "Test: gw social post --write \"Hello from Grove!\"", OK: true},
+		}
+		fmt.Print(ui.RenderStepList("Bluesky Setup", steps))
+		ui.Muted("Mastodon and DEV.to support coming soon.")
 		fmt.Println()
 
 		return nil

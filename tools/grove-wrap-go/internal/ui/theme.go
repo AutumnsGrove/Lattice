@@ -160,6 +160,18 @@ var (
 			Foreground(lipgloss.Color("#ffffff")).
 			Background(DangerRed).
 			Padding(0, 1)
+
+	BadgeInfo = lipgloss.NewStyle().
+			Bold(true).
+			Foreground(lipgloss.Color("#ffffff")).
+			Background(RiverCyan).
+			Padding(0, 1)
+
+	BadgeDraft = lipgloss.NewStyle().
+			Bold(true).
+			Foreground(lipgloss.Color("#ffffff")).
+			Background(DimGray).
+			Padding(0, 1)
 )
 
 // Spinner style for animated indicators.

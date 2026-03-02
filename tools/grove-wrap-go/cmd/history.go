@@ -46,33 +46,31 @@ var historyListCmd = &cobra.Command{
 			return nil
 		}
 
-		ui.PrintHeader(fmt.Sprintf("Command History (%d entries)", len(entries)))
-		fmt.Println()
+		headers := []string{"", "#", "Command", "Args", "Time", "Duration"}
+		var rows [][]string
 		for _, e := range entries {
-			writeMarker := " "
-			if e.IsWrite {
-				writeMarker = "W"
-			}
-			exitMark := ui.SuccessStyle.Render("✓")
+			icon := "✓"
 			if e.ExitCode != 0 {
-				exitMark = ui.ErrorStyle.Render("✗")
+				icon = "✗"
+			}
+			writeTag := ""
+			if e.IsWrite {
+				writeTag = " W"
 			}
 			ts := e.Timestamp
 			if len(ts) > 16 {
-				ts = ts[:16] // trim to "2006-01-02T15:04"
+				ts = ts[:16]
 			}
-			line := fmt.Sprintf(
-				"  %s %s  [%s]  #%-5d  %s %s  (%dms)",
-				exitMark,
-				ui.HintStyle.Render(writeMarker),
-				ui.HintStyle.Render(ts),
-				e.ID,
-				ui.CommandStyle.Render(e.Command),
-				e.Args,
-				e.DurationMS,
-			)
-			fmt.Println(line)
+			rows = append(rows, []string{
+				icon + writeTag,
+				fmt.Sprintf("%d", e.ID),
+				e.Command,
+				TruncateStr(e.Args, 30),
+				ts,
+				fmt.Sprintf("%dms", e.DurationMS),
+			})
 		}
+		fmt.Print(ui.RenderTable(fmt.Sprintf("Command History (%d entries)", len(entries)), headers, rows))
 		return nil
 	},
 }
@@ -107,25 +105,26 @@ var historySearchCmd = &cobra.Command{
 			return nil
 		}
 
-		ui.PrintHeader(fmt.Sprintf("History Search: %q (%d results)", query, len(entries)))
-		fmt.Println()
+		headers := []string{"", "#", "Command", "Args", "Time"}
+		var rows [][]string
 		for _, e := range entries {
-			exitMark := ui.SuccessStyle.Render("✓")
+			icon := "✓"
 			if e.ExitCode != 0 {
-				exitMark = ui.ErrorStyle.Render("✗")
+				icon = "✗"
 			}
 			ts := e.Timestamp
 			if len(ts) > 16 {
 				ts = ts[:16]
 			}
-			fmt.Printf("  %s [%s]  #%-5d  %s %s\n",
-				exitMark,
-				ui.HintStyle.Render(ts),
-				e.ID,
-				ui.CommandStyle.Render(e.Command),
-				e.Args,
-			)
+			rows = append(rows, []string{
+				icon,
+				fmt.Sprintf("%d", e.ID),
+				e.Command,
+				TruncateStr(e.Args, 30),
+				ts,
+			})
 		}
+		fmt.Print(ui.RenderTable(fmt.Sprintf("History Search: %q (%d results)", query, len(entries)), headers, rows))
 		return nil
 	},
 }
@@ -171,27 +170,28 @@ var historyShowCmd = &cobra.Command{
 			})
 		}
 
-		ui.PrintHeader(fmt.Sprintf("History Entry #%d", entry.ID))
-		fmt.Println()
-		ui.PrintKeyValue("Command", entry.Command)
-		if entry.Args != "" {
-			ui.PrintKeyValue("Args", entry.Args)
-		}
-		ui.PrintKeyValue("Timestamp", entry.Timestamp)
-		ui.PrintKeyValue("Duration", fmt.Sprintf("%dms", entry.DurationMS))
-
 		exitStatus := "0 (success)"
 		if entry.ExitCode != 0 {
 			exitStatus = fmt.Sprintf("%d (failed)", entry.ExitCode)
 		}
-		ui.PrintKeyValue("Exit Code", exitStatus)
-
 		writeStr := "no"
 		if entry.IsWrite {
 			writeStr = "yes"
 		}
-		ui.PrintKeyValue("Write Op", writeStr)
 
+		pairs := [][2]string{
+			{"Command", entry.Command},
+		}
+		if entry.Args != "" {
+			pairs = append(pairs, [2]string{"Args", entry.Args})
+		}
+		pairs = append(pairs,
+			[2]string{"Timestamp", entry.Timestamp},
+			[2]string{"Duration", fmt.Sprintf("%dms", entry.DurationMS)},
+			[2]string{"Exit Code", exitStatus},
+			[2]string{"Write Op", writeStr},
+		)
+		fmt.Print(ui.RenderInfoPanel(fmt.Sprintf("History Entry #%d", entry.ID), pairs))
 		return nil
 	},
 }

@@ -78,6 +78,28 @@ func jsonFields(fields []string, jq string) []string {
 	return args
 }
 
+// ghCommentsToItems converts GitHub API comment JSON into ui.CommentItem slices.
+func ghCommentsToItems(comments []map[string]interface{}) []ui.CommentItem {
+	items := make([]ui.CommentItem, 0, len(comments))
+	for _, c := range comments {
+		author := ""
+		if a, ok := c["author"].(map[string]interface{}); ok {
+			author = fmt.Sprintf("%v", a["login"])
+		}
+		body, _ := c["body"].(string)
+		createdAt, _ := c["createdAt"].(string)
+		if len(createdAt) > 10 {
+			createdAt = createdAt[:10]
+		}
+		items = append(items, ui.CommentItem{
+			Author: author,
+			Date:   createdAt,
+			Body:   body,
+		})
+	}
+	return items
+}
+
 var prCmd = &cobra.Command{
 	Use:   "pr",
 	Short: "Pull request operations",
@@ -131,23 +153,22 @@ var prListCmd = &cobra.Command{
 			return nil
 		}
 
-		ui.PrintHeader(fmt.Sprintf("Pull Requests (%s)", state))
+		headers := []string{"#", "Title", "Author", "Status"}
+		var rows [][]string
 		for _, pr := range prs {
-			number := pr["number"]
-			title := pr["title"]
+			number := fmt.Sprintf("%v", pr["number"])
+			title := TruncateStr(fmt.Sprintf("%v", pr["title"]), 50)
 			author := ""
 			if a, ok := pr["author"].(map[string]interface{}); ok {
 				author = fmt.Sprintf("%v", a["login"])
 			}
-			draft := ""
+			status := fmt.Sprintf("%v", pr["state"])
 			if d, ok := pr["isDraft"].(bool); ok && d {
-				draft = " (Draft)"
+				status = "draft"
 			}
-			ui.PrintKeyValue(
-				fmt.Sprintf("#%-5v", number),
-				fmt.Sprintf("%v%s  — %s", title, draft, author),
-			)
+			rows = append(rows, []string{number, title, author, status})
 		}
+		fmt.Print(ui.RenderTable(fmt.Sprintf("Pull Requests (%s)", state), headers, rows))
 		return nil
 	},
 }
@@ -204,7 +225,6 @@ var prViewCmd = &cobra.Command{
 			return fmt.Errorf("failed to parse PR: %w", err)
 		}
 
-		// Header
 		title := fmt.Sprintf("%v", pr["title"])
 		state := fmt.Sprintf("%v", pr["state"])
 		head := fmt.Sprintf("%v", pr["headRefName"])
@@ -215,15 +235,17 @@ var prViewCmd = &cobra.Command{
 			author = fmt.Sprintf("%v", a["login"])
 		}
 
-		draft := ""
-		if d, ok := pr["isDraft"].(bool); ok && d {
-			draft = " (Draft)"
+		pairs := [][2]string{
+			{"title", title},
+			{"state", state},
+			{"branch", fmt.Sprintf("%s → %s", head, base)},
+			{"author", author},
+			{"url", url},
 		}
 
-		ui.PrintHeader(fmt.Sprintf("PR #%v", pr["number"]))
-		fmt.Printf("  %s%s\n", title, draft)
-		fmt.Printf("  %s  %s → %s\n", state, head, base)
-		fmt.Printf("  Author: %s  %s\n", author, url)
+		if d, ok := pr["isDraft"].(bool); ok && d {
+			pairs = append(pairs, [2]string{"draft", "yes"})
+		}
 
 		// Labels
 		if labels, ok := pr["labels"].([]interface{}); ok && len(labels) > 0 {
@@ -233,13 +255,14 @@ var prViewCmd = &cobra.Command{
 					names = append(names, fmt.Sprintf("%v", m["name"]))
 				}
 			}
-			fmt.Printf("\n  Labels: %s\n", strings.Join(names, ", "))
+			pairs = append(pairs, [2]string{"labels", strings.Join(names, ", ")})
 		}
 
-		// Body
-		if body, ok := pr["body"].(string); ok && body != "" {
-			fmt.Printf("\n  Description:\n  %s\n", body)
+		body := ""
+		if b, ok := pr["body"].(string); ok {
+			body = b
 		}
+		fmt.Print(ui.RenderDetailView(fmt.Sprintf("PR #%v", pr["number"]), pairs, body))
 
 		// Comments
 		if showComments {
@@ -250,14 +273,9 @@ var prViewCmd = &cobra.Command{
 			if err == nil {
 				var comments []map[string]interface{}
 				if json.Unmarshal([]byte(commentOutput), &comments) == nil && len(comments) > 0 {
-					fmt.Printf("\n  Comments (%d):\n", len(comments))
-					for _, c := range comments {
-						author := ""
-						if a, ok := c["author"].(map[string]interface{}); ok {
-							author = fmt.Sprintf("%v", a["login"])
-						}
-						fmt.Printf("    %s: %v\n", author, c["body"])
-					}
+					items := ghCommentsToItems(comments)
+					fmt.Print(ui.RenderCommentThread(
+						fmt.Sprintf("Comments (%d)", len(comments)), items))
 				}
 			}
 		}
@@ -737,19 +755,9 @@ var prCommentsCmd = &cobra.Command{
 			return nil
 		}
 
-		ui.PrintHeader(fmt.Sprintf("PR #%s Comments (%d)", number, len(comments)))
-		for _, c := range comments {
-			author := ""
-			if a, ok := c["author"].(map[string]interface{}); ok {
-				author = fmt.Sprintf("%v", a["login"])
-			}
-			body, _ := c["body"].(string)
-			createdAt, _ := c["createdAt"].(string)
-			if len(createdAt) > 10 {
-				createdAt = createdAt[:10]
-			}
-			fmt.Printf("  %s (%s):\n    %s\n\n", author, createdAt, body)
-		}
+		items := ghCommentsToItems(comments)
+		fmt.Print(ui.RenderCommentThread(
+			fmt.Sprintf("PR #%s Comments (%d)", number, len(comments)), items))
 		return nil
 	},
 }

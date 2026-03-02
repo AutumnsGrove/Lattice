@@ -95,19 +95,21 @@ var cacheListCmd = &cobra.Command{
 			return nil
 		}
 
-		header := fmt.Sprintf("Cache Keys (%d)", len(keys))
+		title := fmt.Sprintf("Cache Keys (%d)", len(keys))
 		if effectivePrefix != "" {
-			header = fmt.Sprintf("Cache Keys — prefix: %s (%d)", effectivePrefix, len(keys))
+			title = fmt.Sprintf("Cache Keys — prefix: %s (%d)", effectivePrefix, len(keys))
 		}
-		ui.PrintHeader(header)
+		tableHeaders := []string{"Key", "Expiration"}
+		var tableRows [][]string
 		for _, k := range keys {
 			name := fmt.Sprintf("%v", k["name"])
-			expiry := ""
+			expiry := "—"
 			if exp, ok := k["expiration"].(float64); ok && exp > 0 {
-				expiry = fmt.Sprintf("  (exp: %.0f)", exp)
+				expiry = fmt.Sprintf("%.0f", exp)
 			}
-			ui.PrintKeyValue("  ", name+expiry)
+			tableRows = append(tableRows, []string{name, expiry})
 		}
+		fmt.Print(ui.RenderTable(title, tableHeaders, tableRows))
 
 		return nil
 	},
@@ -172,13 +174,12 @@ var cacheStatsCmd = &cobra.Command{
 			return nil
 		}
 
-		ui.PrintHeader(fmt.Sprintf("KV Namespace Stats (%d namespaces)", len(stats)))
+		tableHeaders := []string{"Namespace", "Keys"}
+		var tableRows [][]string
 		for _, s := range stats {
-			ui.PrintKeyValue(
-				fmt.Sprintf("%-32s", s.Title),
-				fmt.Sprintf("%d keys", s.Count),
-			)
+			tableRows = append(tableRows, []string{s.Title, fmt.Sprintf("%d", s.Count)})
 		}
+		fmt.Print(ui.RenderTable(fmt.Sprintf("KV Namespace Stats (%d namespaces)", len(stats)), tableHeaders, tableRows))
 
 		return nil
 	},

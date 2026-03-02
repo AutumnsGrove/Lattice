@@ -137,24 +137,24 @@ var monorepoSizeCmd = &cobra.Command{
 			})
 		}
 
-		fmt.Println(ui.TitleStyle.Render("gw monorepo-size"))
-		fmt.Println()
-
-		ui.PrintKeyValue("Root:   ", root)
-		ui.PrintKeyValue("Files:  ", fmt.Sprintf("%d", totalFiles))
-		ui.PrintKeyValue("Dirs:   ", fmt.Sprintf("%d", totalDirs))
-		ui.PrintKeyValue("Total:  ", formatBytes(totalBytes))
-		fmt.Println()
-
-		fmt.Println(ui.SubtitleStyle.Render("  Breakdown by top-level directory"))
-		fmt.Println()
-
-		for _, s := range topList {
-			line := fmt.Sprintf("%-20s  %6d files  %s", s.Name, s.Files, s.Size)
-			fmt.Printf("    %s\n", line)
+		summaryPairs := [][2]string{
+			{"Root", root},
+			{"Files", fmt.Sprintf("%d", totalFiles)},
+			{"Dirs", fmt.Sprintf("%d", totalDirs)},
+			{"Total", formatBytes(totalBytes)},
 		}
+		fmt.Print(ui.RenderInfoPanel("Monorepo Size", summaryPairs))
 
-		fmt.Println()
+		headers := []string{"Directory", "Files", "Size"}
+		var rows [][]string
+		for _, s := range topList {
+			rows = append(rows, []string{
+				s.Name,
+				fmt.Sprintf("%d", s.Files),
+				s.Size,
+			})
+		}
+		fmt.Print(ui.RenderTable("Breakdown by Top-Level Directory", headers, rows))
 		ui.Muted("(node_modules, .git, dist, .next, .svelte-kit skipped)")
 		fmt.Println()
 

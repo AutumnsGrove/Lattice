@@ -377,24 +377,21 @@ var d1QueryCmd = &cobra.Command{
 			return nil
 		}
 
-		ui.PrintHeader(fmt.Sprintf("Query Results (%d rows)", len(rows)))
-
-		// Print column headers from first row
-		if len(rows) > 0 {
-			var cols []string
-			for k := range rows[0] {
-				cols = append(cols, k)
-			}
-
-			for _, row := range rows {
-				var parts []string
-				for _, c := range cols {
-					val := formatD1Value(row[c])
-					parts = append(parts, fmt.Sprintf("%s=%s", c, val))
-				}
-				fmt.Printf("  %s\n", strings.Join(parts, "  "))
-			}
+		// Build dynamic columns from the first row
+		var cols []string
+		for k := range rows[0] {
+			cols = append(cols, k)
 		}
+
+		var tableRows [][]string
+		for _, row := range rows {
+			var cells []string
+			for _, c := range cols {
+				cells = append(cells, formatD1Value(row[c]))
+			}
+			tableRows = append(tableRows, cells)
+		}
+		fmt.Print(ui.RenderTable(fmt.Sprintf("Query Results (%d rows)", len(rows)), cols, tableRows))
 
 		return nil
 	},

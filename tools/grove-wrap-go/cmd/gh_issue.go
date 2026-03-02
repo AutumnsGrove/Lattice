@@ -71,10 +71,11 @@ var issueListCmd = &cobra.Command{
 			return nil
 		}
 
-		ui.PrintHeader(fmt.Sprintf("Issues (%s)", state))
+		headers := []string{"#", "Title", "Author", "Labels"}
+		var rows [][]string
 		for _, issue := range issues {
-			number := issue["number"]
-			title := issue["title"]
+			number := fmt.Sprintf("%v", issue["number"])
+			title := TruncateStr(fmt.Sprintf("%v", issue["title"]), 50)
 			author := ""
 			if a, ok := issue["author"].(map[string]interface{}); ok {
 				author = fmt.Sprintf("%v", a["login"])
@@ -88,16 +89,9 @@ var issueListCmd = &cobra.Command{
 					}
 				}
 			}
-			labelStr := ""
-			if len(labelNames) > 0 {
-				labelStr = "  [" + strings.Join(labelNames, ", ") + "]"
-			}
-
-			ui.PrintKeyValue(
-				fmt.Sprintf("#%-5v", number),
-				fmt.Sprintf("%v  — %s%s", title, author, labelStr),
-			)
+			rows = append(rows, []string{number, title, author, strings.Join(labelNames, ", ")})
 		}
+		fmt.Print(ui.RenderTable(fmt.Sprintf("Issues (%s)", state), headers, rows))
 		return nil
 	},
 }
@@ -158,9 +152,12 @@ var issueViewCmd = &cobra.Command{
 			author = fmt.Sprintf("%v", a["login"])
 		}
 
-		ui.PrintHeader(fmt.Sprintf("Issue #%v", issue["number"]))
-		fmt.Printf("  %s\n", title)
-		fmt.Printf("  %s  Author: %s  %s\n", state, author, url)
+		pairs := [][2]string{
+			{"title", title},
+			{"state", state},
+			{"author", author},
+			{"url", url},
+		}
 
 		// Labels
 		if labels, ok := issue["labels"].([]interface{}); ok && len(labels) > 0 {
@@ -170,7 +167,7 @@ var issueViewCmd = &cobra.Command{
 					names = append(names, fmt.Sprintf("%v", m["name"]))
 				}
 			}
-			fmt.Printf("\n  Labels: %s\n", strings.Join(names, ", "))
+			pairs = append(pairs, [2]string{"labels", strings.Join(names, ", ")})
 		}
 
 		// Assignees
@@ -181,18 +178,20 @@ var issueViewCmd = &cobra.Command{
 					names = append(names, fmt.Sprintf("%v", m["login"]))
 				}
 			}
-			fmt.Printf("  Assignees: %s\n", strings.Join(names, ", "))
+			pairs = append(pairs, [2]string{"assignees", strings.Join(names, ", ")})
 		}
 
 		// Milestone
 		if ms, ok := issue["milestone"].(map[string]interface{}); ok {
-			fmt.Printf("  Milestone: %v\n", ms["title"])
+			pairs = append(pairs, [2]string{"milestone", fmt.Sprintf("%v", ms["title"])})
 		}
 
 		// Body
-		if body, ok := issue["body"].(string); ok && body != "" {
-			fmt.Printf("\n  Description:\n  %s\n", body)
+		body := ""
+		if b, ok := issue["body"].(string); ok {
+			body = b
 		}
+		fmt.Print(ui.RenderDetailView(fmt.Sprintf("Issue #%v", issue["number"]), pairs, body))
 
 		// Comments
 		if showComments {
@@ -203,19 +202,9 @@ var issueViewCmd = &cobra.Command{
 			if err == nil {
 				var comments []map[string]interface{}
 				if json.Unmarshal([]byte(commentOutput), &comments) == nil && len(comments) > 0 {
-					fmt.Printf("\n  Comments (%d):\n", len(comments))
-					for _, c := range comments {
-						cAuthor := ""
-						if a, ok := c["author"].(map[string]interface{}); ok {
-							cAuthor = fmt.Sprintf("%v", a["login"])
-						}
-						body, _ := c["body"].(string)
-						createdAt, _ := c["createdAt"].(string)
-						if len(createdAt) > 10 {
-							createdAt = createdAt[:10]
-						}
-						fmt.Printf("    %s (%s):\n      %s\n\n", cAuthor, createdAt, body)
-					}
+					items := ghCommentsToItems(comments)
+					fmt.Print(ui.RenderCommentThread(
+						fmt.Sprintf("Comments (%d)", len(comments)), items))
 				}
 			}
 		}
@@ -451,19 +440,9 @@ var issueCommentsCmd = &cobra.Command{
 			return nil
 		}
 
-		ui.PrintHeader(fmt.Sprintf("Issue #%s Comments (%d)", number, len(comments)))
-		for _, c := range comments {
-			author := ""
-			if a, ok := c["author"].(map[string]interface{}); ok {
-				author = fmt.Sprintf("%v", a["login"])
-			}
-			body, _ := c["body"].(string)
-			createdAt, _ := c["createdAt"].(string)
-			if len(createdAt) > 10 {
-				createdAt = createdAt[:10]
-			}
-			fmt.Printf("  %s (%s):\n    %s\n\n", author, createdAt, body)
-		}
+		items := ghCommentsToItems(comments)
+		fmt.Print(ui.RenderCommentThread(
+			fmt.Sprintf("Issue #%s Comments (%d)", number, len(comments)), items))
 		return nil
 	},
 }

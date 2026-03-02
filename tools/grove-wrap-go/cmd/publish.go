@@ -153,26 +153,26 @@ var publishNpmCmd = &cobra.Command{
 		}
 
 		if !cfg.JSONMode {
-			fmt.Println()
-			ui.PrintHeader("npm Publish Plan")
-			ui.PrintKeyValue("Package", resolvedName)
-			ui.PrintKeyValue("Version", fmt.Sprintf("%s → %s", currentVersion, newVersion))
-			ui.PrintKeyValue("Registry", npmRegistry)
-			ui.PrintKeyValue("Auth", authLabel)
+			pairs := [][2]string{
+				{"Package", resolvedName},
+				{"Version", fmt.Sprintf("%s → %s", currentVersion, newVersion)},
+				{"Registry", npmRegistry},
+				{"Auth", authLabel},
+			}
 			if tagFlag != "" {
-				ui.PrintKeyValue("Tag", tagFlag)
+				pairs = append(pairs, [2]string{"Tag", tagFlag})
 			}
+			buildLabel := "pnpm run package"
 			if skipBuild {
-				ui.PrintKeyValue("Build", "Skip")
-			} else {
-				ui.PrintKeyValue("Build", "pnpm run package")
+				buildLabel = "Skip"
 			}
+			pairs = append(pairs, [2]string{"Build", buildLabel})
+			commitLabel := fmt.Sprintf("chore: bump version to %s", newVersion)
 			if skipCommit {
-				ui.PrintKeyValue("Commit", "Skip")
-			} else {
-				ui.PrintKeyValue("Commit", fmt.Sprintf("chore: bump version to %s", newVersion))
+				commitLabel = "Skip"
 			}
-			fmt.Println()
+			pairs = append(pairs, [2]string{"Commit", commitLabel})
+			fmt.Print(ui.RenderInfoPanel("npm Publish Plan", pairs))
 		}
 
 		if dryRun {

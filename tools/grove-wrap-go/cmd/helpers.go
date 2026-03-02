@@ -37,3 +37,11 @@ func truncDate(ts string) string {
 	}
 	return ts
 }
+
+// TruncateStr truncates a string to max characters, appending an ellipsis if needed.
+func TruncateStr(s string, max int) string {
+	if len(s) <= max {
+		return s
+	}
+	return s[:max-1] + "…"
+}

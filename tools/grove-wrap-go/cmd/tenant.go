@@ -100,17 +100,18 @@ var tenantListCmd = &cobra.Command{
 			return nil
 		}
 
-		ui.PrintHeader(fmt.Sprintf("Tenants (%d)", len(rows)))
+		headers := []string{"Subdomain", "Name", "Plan", "Email", "Created"}
+		var tableRows [][]string
 		for _, row := range rows {
-			subdomain := fmt.Sprintf("%v", row["subdomain"])
-			name := fmt.Sprintf("%v", row["display_name"])
-			rowPlan := fmt.Sprintf("%v", row["plan"])
-			email := fmt.Sprintf("%v", row["email"])
-			ui.PrintKeyValue(
-				fmt.Sprintf("%-20s", subdomain),
-				fmt.Sprintf("%-24s  plan: %-10s  email: %s", name, rowPlan, email),
-			)
+			tableRows = append(tableRows, []string{
+				fmt.Sprintf("%v", row["subdomain"]),
+				TruncateStr(fmt.Sprintf("%v", row["display_name"]), 24),
+				fmt.Sprintf("%v", row["plan"]),
+				fmt.Sprintf("%v", row["email"]),
+				truncDate(fmt.Sprintf("%v", row["created_at"])),
+			})
 		}
+		fmt.Print(ui.RenderTable(fmt.Sprintf("Tenants (%d)", len(rows)), headers, tableRows))
 		return nil
 	},
 }
@@ -168,17 +169,17 @@ var tenantLookupCmd = &cobra.Command{
 		}
 
 		row := rows[0]
-		ui.PrintHeader("Tenant Details")
 		displayOrder := []string{
 			"id", "subdomain", "display_name", "email",
 			"plan", "is_active", "created_at", "updated_at",
 		}
+		var pairs [][2]string
 		for _, key := range displayOrder {
 			if v, ok := row[key]; ok {
-				ui.PrintKeyValue(fmt.Sprintf("%-16s", key), formatD1Value(v))
+				pairs = append(pairs, [2]string{key, formatD1Value(v)})
 			}
 		}
-		// Print any remaining fields not in the display order.
+		// Append any remaining fields not in the display order.
 		for k, v := range row {
 			inOrder := false
 			for _, key := range displayOrder {
@@ -188,9 +189,10 @@ var tenantLookupCmd = &cobra.Command{
 				}
 			}
 			if !inOrder {
-				ui.PrintKeyValue(fmt.Sprintf("%-16s", k), formatD1Value(v))
+				pairs = append(pairs, [2]string{k, formatD1Value(v)})
 			}
 		}
+		fmt.Print(ui.RenderInfoPanel("Tenant Details", pairs))
 		return nil
 	},
 }
@@ -260,11 +262,13 @@ var tenantStatsCmd = &cobra.Command{
 		}
 
 		row := stats[0]
-		ui.PrintHeader(fmt.Sprintf("Stats: %s", subdomain))
-		ui.PrintKeyValue("Posts         ", formatD1Value(row["posts"]))
-		ui.PrintKeyValue("Pages         ", formatD1Value(row["pages"]))
-		ui.PrintKeyValue("Gallery Images", formatD1Value(row["gallery_images"]))
-		ui.PrintKeyValue("Sessions      ", formatD1Value(row["sessions"]))
+		pairs := [][2]string{
+			{"posts", formatD1Value(row["posts"])},
+			{"pages", formatD1Value(row["pages"])},
+			{"gallery images", formatD1Value(row["gallery_images"])},
+			{"sessions", formatD1Value(row["sessions"])},
+		}
+		fmt.Print(ui.RenderInfoPanel(fmt.Sprintf("Stats: %s", subdomain), pairs))
 		return nil
 	},
 }
@@ -333,13 +337,14 @@ var tenantCreateCmd = &cobra.Command{
 				})
 				fmt.Println(string(data))
 			} else {
-				ui.PrintHeader("Tenant Create (dry-run)")
-				ui.PrintKeyValue("ID       ", tenantID)
-				ui.PrintKeyValue("Subdomain", subdomain)
-				ui.PrintKeyValue("Name     ", displayName)
-				ui.PrintKeyValue("Email    ", email)
-				ui.PrintKeyValue("Plan     ", plan)
-				fmt.Println()
+				pairs := [][2]string{
+					{"id", tenantID},
+					{"subdomain", subdomain},
+					{"name", displayName},
+					{"email", email},
+					{"plan", plan},
+				}
+				fmt.Print(ui.RenderInfoPanel("Tenant Create (dry-run)", pairs))
 				ui.Muted(sql)
 			}
 			return nil
@@ -448,16 +453,17 @@ var tenantDeleteCmd = &cobra.Command{
 				})
 				fmt.Println(string(data))
 			} else {
-				ui.PrintHeader(fmt.Sprintf("Tenant Delete (dry-run): %s", subdomain))
-				ui.PrintKeyValue("Tenant ID     ", tenantID)
-				ui.Info("Impact (rows that would be deleted):")
+				msg := fmt.Sprintf("Tenant %s (%s) will be permanently deleted.", subdomain, tenantID)
 				if impact != nil {
-					ui.PrintKeyValue("  Posts         ", formatD1Value(impact["posts"]))
-					ui.PrintKeyValue("  Pages         ", formatD1Value(impact["pages"]))
-					ui.PrintKeyValue("  Gallery Images", formatD1Value(impact["gallery_images"]))
-					ui.PrintKeyValue("  Sessions      ", formatD1Value(impact["sessions"]))
+					msg += fmt.Sprintf("\n\nImpact: %s posts, %s pages, %s gallery images, %s sessions",
+						formatD1Value(impact["posts"]),
+						formatD1Value(impact["pages"]),
+						formatD1Value(impact["gallery_images"]),
+						formatD1Value(impact["sessions"]),
+					)
 				}
-				ui.Hint("Re-run without --dry-run and with --write --force to execute")
+				msg += "\n\nRe-run without --dry-run and with --write --force to execute."
+				fmt.Print(ui.RenderWarningPanel("Tenant Delete (dry-run)", msg))
 			}
 			return nil
 		}

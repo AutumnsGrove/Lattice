@@ -62,26 +62,23 @@ var metricsCmd = &cobra.Command{
 			})
 		}
 
-		fmt.Println(ui.TitleStyle.Render("gw metrics"))
-		fmt.Println()
-
-		fmt.Println(ui.SubtitleStyle.Render("  Timing"))
-		fmt.Println()
+		var steps []ui.StepItem
 		for _, t := range timings {
-			label := fmt.Sprintf("%-30s", t.Name)
-			ms := fmt.Sprintf("%.2f ms", t.Ms)
-			ui.Step(t.OK, fmt.Sprintf("%s  %s", label, ms))
+			steps = append(steps, ui.StepItem{
+				Label:  fmt.Sprintf("%-30s  %.2f ms", t.Name, t.Ms),
+				OK: t.OK,
+			})
 		}
+		fmt.Print(ui.RenderStepList("Timing", steps))
 
-		fmt.Println()
-		fmt.Println(ui.SubtitleStyle.Render("  Go Runtime"))
-		fmt.Println()
-		ui.PrintKeyValue("GOOS:        ", runtime.GOOS)
-		ui.PrintKeyValue("GOARCH:      ", runtime.GOARCH)
-		ui.PrintKeyValue("NumCPU:      ", fmt.Sprintf("%d", runtime.NumCPU()))
-		ui.PrintKeyValue("NumGoroutine:", fmt.Sprintf("%d", runtime.NumGoroutine()))
-		ui.PrintKeyValue("Go version:  ", runtime.Version())
-		fmt.Println()
+		runtimePairs := [][2]string{
+			{"GOOS", runtime.GOOS},
+			{"GOARCH", runtime.GOARCH},
+			{"NumCPU", fmt.Sprintf("%d", runtime.NumCPU())},
+			{"NumGoroutine", fmt.Sprintf("%d", runtime.NumGoroutine())},
+			{"Go version", runtime.Version()},
+		}
+		fmt.Print(ui.RenderInfoPanel("Go Runtime", runtimePairs))
 
 		return nil
 	},

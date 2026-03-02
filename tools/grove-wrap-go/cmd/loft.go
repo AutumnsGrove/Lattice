@@ -174,17 +174,17 @@ var loftStatusCmd = &cobra.Command{
 			return nil
 		}
 
-		ui.PrintHeader("Loft Status")
-		fmt.Println()
 		for _, inst := range envelope.Data.Instances {
-			ui.PrintKeyValue("Instance", inst.InstanceID)
-			ui.PrintKeyValue("  Status", inst.Status)
-			ui.PrintKeyValue("  Region", inst.Region)
-			ui.PrintKeyValue("  Created", inst.CreatedAt)
-			ui.PrintKeyValue("  Idle", fmt.Sprintf("%d min", inst.IdleMinutes))
-			ui.PrintKeyValue("  Remaining", fmt.Sprintf("%d min", inst.RemainingMinutes))
-			ui.PrintKeyValue("  Code Server", inst.CodeServerURL)
-			fmt.Println()
+			pairs := [][2]string{
+				{"instance", inst.InstanceID},
+				{"status", inst.Status},
+				{"region", inst.Region},
+				{"created", inst.CreatedAt},
+				{"idle", fmt.Sprintf("%d min", inst.IdleMinutes)},
+				{"remaining", fmt.Sprintf("%d min", inst.RemainingMinutes)},
+				{"code server", inst.CodeServerURL},
+			}
+			fmt.Print(ui.RenderInfoPanel("Loft Instance", pairs))
 		}
 
 		return nil
@@ -259,25 +259,26 @@ var loftSessionsCmd = &cobra.Command{
 			return nil
 		}
 
-		ui.PrintHeader(fmt.Sprintf("Loft Sessions (%d)", len(sessions)))
-		fmt.Println()
+		headers := []string{"ID", "Status", "Region", "Started", "Duration"}
+		var tableRows [][]string
 		for _, s := range sessions {
 			started := "—"
 			if s.StartedAt != nil {
-				started = *s.StartedAt
+				started = truncDate(*s.StartedAt)
 			}
 			duration := "—"
 			if s.DurationMin != nil {
 				duration = fmt.Sprintf("%d min", *s.DurationMin)
 			}
-
-			ui.PrintKeyValue("Session", s.ID[:8])
-			ui.PrintKeyValue("  Status", s.Status)
-			ui.PrintKeyValue("  Region", s.Region)
-			ui.PrintKeyValue("  Started", started)
-			ui.PrintKeyValue("  Duration", duration)
-			fmt.Println()
+			tableRows = append(tableRows, []string{
+				s.ID[:8],
+				s.Status,
+				s.Region,
+				started,
+				duration,
+			})
 		}
+		fmt.Print(ui.RenderTable(fmt.Sprintf("Loft Sessions (%d)", len(sessions)), headers, tableRows))
 
 		return nil
 	},

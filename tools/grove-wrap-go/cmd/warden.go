@@ -290,29 +290,24 @@ var wardenAgentListCmd = &cobra.Command{
 			return nil
 		}
 
-		ui.PrintHeader(fmt.Sprintf("Warden Agents (%d)", len(agents)))
-		fmt.Println()
+		headers := []string{"Name", "ID", "Owner", "Status", "Requests", "Rate Limits"}
+		var rows [][]string
 		for _, agent := range agents {
 			status := "active"
 			if !agent.Enabled {
 				status = "revoked"
 			}
 
-			var scopes []string
-			_ = json.Unmarshal(agent.Scopes, &scopes)
-
-			ui.PrintKeyValue("Name", agent.Name)
-			ui.PrintKeyValue("  ID", agent.ID)
-			ui.PrintKeyValue("  Owner", agent.Owner)
-			ui.PrintKeyValue("  Scopes", strings.Join(scopes, ", "))
-			ui.PrintKeyValue("  Rate Limits", fmt.Sprintf("%d RPM / %d daily", agent.RateLimitRPM, agent.RateLimitDay))
-			ui.PrintKeyValue("  Status", status)
-			ui.PrintKeyValue("  Requests", fmt.Sprintf("%d", agent.RequestCount))
-			if agent.LastUsedAt != nil {
-				ui.PrintKeyValue("  Last Used", *agent.LastUsedAt)
-			}
-			fmt.Println()
+			rows = append(rows, []string{
+				agent.Name,
+				TruncateStr(agent.ID, 12),
+				agent.Owner,
+				status,
+				fmt.Sprintf("%d", agent.RequestCount),
+				fmt.Sprintf("%d RPM / %d daily", agent.RateLimitRPM, agent.RateLimitDay),
+			})
 		}
+		fmt.Print(ui.RenderTable(fmt.Sprintf("Warden Agents (%d)", len(agents)), headers, rows))
 
 		return nil
 	},
@@ -642,8 +637,8 @@ var wardenLogsCmd = &cobra.Command{
 			return nil
 		}
 
-		ui.PrintHeader(fmt.Sprintf("Warden Audit Logs (%d)", len(entries)))
-		fmt.Println()
+		headers := []string{"Time", "Type", "Agent", "Service/Action", "Result", "Latency"}
+		var rows [][]string
 		for _, entry := range entries {
 			ts := entry.CreatedAt
 			if len(ts) > 19 {
@@ -655,26 +650,16 @@ var wardenLogsCmd = &cobra.Command{
 				agent = *entry.AgentName
 			}
 
-			tenant := ""
-			if entry.TenantID != nil {
-				tenant = fmt.Sprintf("  tenant=%s", *entry.TenantID)
-			}
-
-			result := entry.AuthResult
-			icon := "  "
-			if result == "success" {
-				icon = "  "
-			} else {
-				icon = "  "
-			}
-
-			ui.PrintKeyValue(
-				fmt.Sprintf("%s%s", icon, ts),
-				fmt.Sprintf("%-12s %-20s %-16s %dms%s",
-					entry.EventType, agent, entry.TargetService+"/"+entry.Action,
-					entry.LatencyMs, tenant),
-			)
+			rows = append(rows, []string{
+				ts,
+				entry.EventType,
+				agent,
+				entry.TargetService + "/" + entry.Action,
+				entry.AuthResult,
+				fmt.Sprintf("%dms", entry.LatencyMs),
+			})
 		}
+		fmt.Print(ui.RenderTable(fmt.Sprintf("Warden Audit Logs (%d)", len(entries)), headers, rows))
 
 		return nil
 	},

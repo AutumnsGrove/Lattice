@@ -92,39 +92,43 @@ var onboardingStatusCmd = &cobra.Command{
 			return nil
 		}
 
-		ui.PrintHeader(fmt.Sprintf("Onboarding: %s", email))
-
 		audience, _ := state["audience"].(string)
 		unsubscribed, _ := state["unsubscribed"].(bool)
 
-		if audience != "" {
-			ui.PrintKeyValue("Audience", audience)
-		} else {
-			ui.Muted("  No sequence started")
+		if audience == "" {
+			ui.Muted(fmt.Sprintf("No sequence started for %s", email))
 			return nil
 		}
 
+		statusStr := "Active"
 		if unsubscribed {
-			ui.PrintKeyValue("Status", "Unsubscribed")
-		} else {
-			ui.PrintKeyValue("Status", "Active")
+			statusStr = "Unsubscribed"
 		}
 
 		emailsSent, _ := state["emailsSent"].([]interface{})
-		ui.PrintKeyValue("Emails sent", fmt.Sprintf("%d", len(emailsSent)))
+		pairs := [][2]string{
+			{"Audience", audience},
+			{"Status", statusStr},
+			{"Emails sent", fmt.Sprintf("%d", len(emailsSent))},
+		}
+		fmt.Print(ui.RenderInfoPanel(fmt.Sprintf("Onboarding: %s", email), pairs))
 
-		for _, e := range emailsSent {
-			entry, ok := e.(map[string]interface{})
-			if !ok {
-				continue
+		if len(emailsSent) > 0 {
+			var steps []ui.StepItem
+			for _, e := range emailsSent {
+				entry, ok := e.(map[string]interface{})
+				if !ok {
+					continue
+				}
+				day := entry["day"]
+				msgID, _ := entry["messageId"].(string)
+				label := fmt.Sprintf("Day %v", day)
+				if msgID != "" && len(msgID) >= 8 {
+					label = fmt.Sprintf("Day %v  (id: %s)", day, msgID[:8])
+				}
+				steps = append(steps, ui.StepItem{Label: label, OK: true})
 			}
-			day := entry["day"]
-			msgID, _ := entry["messageId"].(string)
-			if msgID != "" {
-				ui.Step(true, fmt.Sprintf("Day %v  (id: %s)", day, msgID[:8]))
-			} else {
-				ui.Step(true, fmt.Sprintf("Day %v", day))
-			}
+			fmt.Print(ui.RenderStepList("Emails Delivered", steps))
 		}
 
 		return nil

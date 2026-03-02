@@ -128,35 +128,37 @@ var bindingsCmd = &cobra.Command{
 		if filterType != "" {
 			title = fmt.Sprintf("Wrangler Bindings — type: %s (%d)", filterType, len(entries))
 		}
-		ui.PrintHeader(title)
 
-		// Group by worker name for readability
-		lastWorker := ""
-		for _, e := range entries {
-			if e.Worker != lastWorker {
-				fmt.Printf("\n  [%s]\n", e.Worker)
-				if e.File != "" {
-					// Print relative path from root
-					rel, err := filepath.Rel(root, e.File)
-					if err != nil {
-						rel = e.File
-					}
-					ui.Muted(fmt.Sprintf("    %s", rel))
-				}
-				lastWorker = e.Worker
-			}
-
-			idStr := e.ID
-			if idStr == "" && e.Details != "" {
-				idStr = e.Details
-			}
-
-			ui.PrintKeyValue(
-				fmt.Sprintf("    %-24s", e.Name),
-				fmt.Sprintf("%-16s  %s", e.Type, idStr),
-			)
+		// Group by worker name for per-worker tables
+		type workerGroup struct {
+			name    string
+			entries []bindingEntry
 		}
-		fmt.Println()
+		var groups []workerGroup
+		groupMap := map[string]int{}
+		for _, e := range entries {
+			idx, exists := groupMap[e.Worker]
+			if !exists {
+				idx = len(groups)
+				groupMap[e.Worker] = idx
+				groups = append(groups, workerGroup{name: e.Worker})
+			}
+			groups[idx].entries = append(groups[idx].entries, e)
+		}
+
+		fmt.Println(ui.TitleStyle.Render(title))
+		for _, g := range groups {
+			headers := []string{"Binding", "Type", "ID / Details"}
+			var rows [][]string
+			for _, e := range g.entries {
+				idStr := e.ID
+				if idStr == "" {
+					idStr = e.Details
+				}
+				rows = append(rows, []string{e.Name, e.Type, idStr})
+			}
+			fmt.Print(ui.RenderTable(g.name, headers, rows))
+		}
 
 		return nil
 	},

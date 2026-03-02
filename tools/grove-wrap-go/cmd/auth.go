@@ -119,20 +119,20 @@ var authClientListCmd = &cobra.Command{
 			return nil
 		}
 
-		ui.PrintHeader(fmt.Sprintf("OAuth Clients (%d)", len(rows)))
+		headers := []string{"Name", "Client ID", "Redirect URI"}
+		var tableRows [][]string
 		for _, row := range rows {
 			clientID := fmt.Sprintf("%v", row["client_id"])
-			name := fmt.Sprintf("%v", row["name"])
-			uri := fmt.Sprintf("%v", row["redirect_uri"])
-			truncID := clientID
-			if len(truncID) > 16 {
-				truncID = truncID[:16] + "..."
+			if len(clientID) > 16 {
+				clientID = clientID[:16] + "..."
 			}
-			ui.PrintKeyValue(
-				fmt.Sprintf("%-20s", name),
-				fmt.Sprintf("%s  → %s", truncID, uri),
-			)
+			tableRows = append(tableRows, []string{
+				fmt.Sprintf("%v", row["name"]),
+				clientID,
+				fmt.Sprintf("%v", row["redirect_uri"]),
+			})
 		}
+		fmt.Print(ui.RenderTable(fmt.Sprintf("OAuth Clients (%d)", len(rows)), headers, tableRows))
 		return nil
 	},
 }
@@ -170,10 +170,11 @@ var authClientInfoCmd = &cobra.Command{
 			return nil
 		}
 
-		ui.PrintHeader("OAuth Client Details")
+		var pairs [][2]string
 		for k, v := range rows[0] {
-			ui.PrintKeyValue(fmt.Sprintf("%-16s", k), fmt.Sprintf("%v", v))
+			pairs = append(pairs, [2]string{k, fmt.Sprintf("%v", v)})
 		}
+		fmt.Print(ui.RenderInfoPanel("OAuth Client Details", pairs))
 		return nil
 	},
 }

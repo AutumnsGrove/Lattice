@@ -37,6 +37,17 @@ func RenderInfoPanel(title string, pairs [][2]string) string {
 	return titleLine + "\n" + panel + "\n"
 }
 
+// RenderDetailView renders an info panel with an optional body section below it.
+// This is the standard layout for "view" commands: key-value metadata on top,
+// and a description/content panel below when body is non-empty.
+func RenderDetailView(title string, pairs [][2]string, body string) string {
+	result := RenderInfoPanel(title, pairs)
+	if body != "" {
+		result += RenderPanel("Description", body)
+	}
+	return result
+}
+
 // RenderWarningPanel renders a yellow-bordered panel with a warning prefix.
 func RenderWarningPanel(title, msg string) string {
 	prefix := WarningStyle.Render("⚠")

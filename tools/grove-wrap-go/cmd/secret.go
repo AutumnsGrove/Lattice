@@ -119,7 +119,6 @@ var secretListCmd = &cobra.Command{
 			return nil
 		}
 
-		ui.PrintHeader(fmt.Sprintf("Secrets Vault (%d entries)", len(secrets)))
 		// Sort by name
 		names := make([]string, 0, len(secrets))
 		for name := range secrets {
@@ -127,21 +126,22 @@ var secretListCmd = &cobra.Command{
 		}
 		sort.Strings(names)
 
+		headers := []string{"Name", "Updated", "Deployed To"}
+		var rows [][]string
 		for _, name := range names {
 			entry := secrets[name]
-			targets := ""
+			targets := "—"
 			if len(entry.DeployedTo) > 0 {
 				targetNames := make([]string, 0, len(entry.DeployedTo))
 				for t := range entry.DeployedTo {
 					targetNames = append(targetNames, t)
 				}
-				targets = fmt.Sprintf("  → %s", strings.Join(targetNames, ", "))
+				sort.Strings(targetNames)
+				targets = strings.Join(targetNames, ", ")
 			}
-			ui.PrintKeyValue(
-				fmt.Sprintf("%-24s", name),
-				fmt.Sprintf("updated: %s%s", entry.UpdatedAt, targets),
-			)
+			rows = append(rows, []string{name, entry.UpdatedAt, targets})
 		}
+		fmt.Print(ui.RenderTable(fmt.Sprintf("Secrets Vault (%d entries)", len(secrets)), headers, rows))
 		return nil
 	},
 }

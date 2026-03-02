@@ -97,21 +97,22 @@ var exportListCmd = &cobra.Command{
 			return nil
 		}
 
-		ui.PrintHeader(fmt.Sprintf("Storage Exports (%d)", len(rows)))
+		headers := []string{"ID", "Status", "Subdomain", "Method", "Created"}
+		var tableRows [][]string
 		for _, row := range rows {
 			id := formatD1Value(row["id"])
 			if len(id) > 8 {
 				id = id[:8] + "..."
 			}
-			status := formatD1Value(row["status"])
-			subdomain := formatD1Value(row["subdomain"])
-			created := formatD1Value(row["created_at"])
-
-			ui.PrintKeyValue(
-				fmt.Sprintf("%-14s", id),
-				fmt.Sprintf("%-12s  subdomain: %-20s  created: %s", status, subdomain, truncDate(created)),
-			)
+			tableRows = append(tableRows, []string{
+				id,
+				formatD1Value(row["status"]),
+				formatD1Value(row["subdomain"]),
+				formatD1Value(row["delivery_method"]),
+				truncDate(formatD1Value(row["created_at"])),
+			})
 		}
+		fmt.Print(ui.RenderTable(fmt.Sprintf("Storage Exports (%d)", len(rows)), headers, tableRows))
 
 		return nil
 	},
@@ -163,17 +164,18 @@ var exportStatusCmd = &cobra.Command{
 		}
 
 		row := rows[0]
-		ui.PrintHeader(fmt.Sprintf("Export: %s", args[0]))
 		displayOrder := []string{
 			"id", "status", "progress", "file_size_bytes",
 			"delivery_method", "subdomain",
 			"created_at", "completed_at", "expires_at",
 		}
+		var pairs [][2]string
 		for _, key := range displayOrder {
 			if v, ok := row[key]; ok {
-				ui.PrintKeyValue(fmt.Sprintf("%-20s", key), formatD1Value(v))
+				pairs = append(pairs, [2]string{key, formatD1Value(v)})
 			}
 		}
+		fmt.Print(ui.RenderInfoPanel(fmt.Sprintf("Export: %s", args[0]), pairs))
 
 		return nil
 	},
