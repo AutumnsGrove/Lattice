@@ -506,6 +506,86 @@
 }
 
 /* ==========================================================================
+   Grove Image (::image[url, options]:: directive)
+   ========================================================================== */
+
+.grove-image {
+  margin: 1.5rem 0;
+  display: block;
+}
+
+.grove-image img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Alignment */
+.grove-image-align-center {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.grove-image-align-left {
+  margin-right: auto;
+}
+
+.grove-image-align-right {
+  margin-left: auto;
+}
+
+/* Visual options */
+.grove-image-rounded img {
+  border-radius: 12px;
+}
+
+.grove-image-border img {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.dark .grove-image-border img {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.grove-image-shadow img {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.dark .grove-image-shadow img {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.grove-image-blur img {
+  filter: blur(8px);
+  transition: filter 0.3s ease;
+}
+
+.grove-image-blur:hover img,
+.grove-image-blur:focus-within img {
+  filter: blur(0);
+}
+
+/* Caption */
+.grove-image figcaption {
+  text-align: center;
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-top: 0.5rem;
+  font-style: italic;
+}
+
+.dark .grove-image figcaption {
+  color: #9ca3af;
+}
+
+/* Responsive: images go full width on narrow screens regardless of size setting */
+@media (max-width: 480px) {
+  .grove-image {
+    max-width: 100% !important;
+  }
+}
+
+/* ==========================================================================
    Grove Curios (::curio-name[]:: directive placeholders)
    ========================================================================== */
 

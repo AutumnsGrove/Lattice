@@ -179,3 +179,96 @@ describe("groveDirectivePlugin - edge cases", () => {
 		expect(withBrackets).toBe(withoutBrackets);
 	});
 });
+
+// ============================================================================
+// Image Directive
+// ============================================================================
+
+describe("groveDirectivePlugin - image", () => {
+	const md = createMd();
+
+	it("renders a basic image with default options", () => {
+		const result = md.render("::image[https://example.com/photo.jpg]::");
+		expect(result).toContain('class="grove-image grove-image-align-center"');
+		expect(result).toContain('src="https://example.com/photo.jpg"');
+		expect(result).toContain("max-width: 100%");
+		expect(result).toContain("<figure");
+	});
+
+	it("applies size presets", () => {
+		expect(md.render("::image[pic.jpg, size=small]::")).toContain("max-width: 25%");
+		expect(md.render("::image[pic.jpg, size=medium]::")).toContain("max-width: 50%");
+		expect(md.render("::image[pic.jpg, size=large]::")).toContain("max-width: 75%");
+		expect(md.render("::image[pic.jpg, size=full]::")).toContain("max-width: 100%");
+	});
+
+	it("supports alignment options", () => {
+		expect(md.render("::image[pic.jpg, align=left]::")).toContain("grove-image-align-left");
+		expect(md.render("::image[pic.jpg, align=center]::")).toContain("grove-image-align-center");
+		expect(md.render("::image[pic.jpg, align=right]::")).toContain("grove-image-align-right");
+	});
+
+	it("supports boolean flags: blur, rounded, border, shadow", () => {
+		const result = md.render("::image[pic.jpg, blur, rounded, border, shadow]::");
+		expect(result).toContain("grove-image-blur");
+		expect(result).toContain("grove-image-rounded");
+		expect(result).toContain("grove-image-border");
+		expect(result).toContain("grove-image-shadow");
+	});
+
+	it("renders caption as figcaption", () => {
+		const result = md.render("::image[pic.jpg, caption=A beautiful sunset]::");
+		expect(result).toContain("<figcaption>A beautiful sunset</figcaption>");
+		expect(result).toContain('alt="A beautiful sunset"');
+	});
+
+	it("renders no figcaption when caption is omitted", () => {
+		const result = md.render("::image[pic.jpg]::");
+		expect(result).not.toContain("<figcaption>");
+	});
+
+	it("supports multiple options together", () => {
+		const result = md.render(
+			"::image[/gallery/sunset.png, size=medium, align=right, blur, rounded, caption=Sunset]::",
+		);
+		expect(result).toContain("max-width: 50%");
+		expect(result).toContain("grove-image-align-right");
+		expect(result).toContain("grove-image-blur");
+		expect(result).toContain("grove-image-rounded");
+		expect(result).toContain("<figcaption>Sunset</figcaption>");
+	});
+
+	it("returns nothing for empty source", () => {
+		const result = md.render("::image[]::");
+		expect(result).not.toContain("grove-image");
+	});
+
+	it("escapes HTML in src and caption", () => {
+		const result = md.render('::image["><script>alert(1)</script>, caption=<b>xss</b>]::');
+		expect(result).not.toContain("<script>");
+		expect(result).not.toContain("<b>");
+		expect(result).toContain("&lt;script&gt;");
+		expect(result).toContain("&lt;b&gt;");
+	});
+
+	it("falls back to 100% for invalid custom size", () => {
+		const result = md.render("::image[pic.jpg, size=evil]::");
+		expect(result).toContain("max-width: 100%");
+	});
+
+	it("accepts valid custom pixel size", () => {
+		const result = md.render("::image[pic.jpg, size=300px]::");
+		expect(result).toContain("max-width: 300px");
+	});
+
+	it("accepts valid custom percentage size", () => {
+		const result = md.render("::image[pic.jpg, size=60%]::");
+		expect(result).toContain("max-width: 60%");
+	});
+
+	it("ignores unknown alignment values", () => {
+		const result = md.render("::image[pic.jpg, align=invalid]::");
+		// Should fall back to default center
+		expect(result).toContain("grove-image-align-center");
+	});
+});
