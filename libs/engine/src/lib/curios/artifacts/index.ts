@@ -99,6 +99,7 @@ export interface DiscoveryCondition {
 export interface ArtifactRecord {
 	id: string;
 	tenantId: string;
+	name: string;
 	artifactType: ArtifactType;
 	placement: ArtifactPlacement;
 	config: Record<string, unknown>;
@@ -119,6 +120,7 @@ export interface ArtifactRecord {
  */
 export interface ArtifactDisplay {
 	id: string;
+	name: string;
 	artifactType: ArtifactType;
 	placement: ArtifactPlacement;
 	config: Record<string, unknown>;
@@ -653,6 +655,11 @@ export const VALID_REVEAL_ANIMATIONS = new Set<string>(
 export const VALID_CONTAINERS = new Set<string>(CONTAINER_OPTIONS.map((c) => c.value));
 
 /**
+ * Max artifact name length
+ */
+export const MAX_ARTIFACT_NAME_LENGTH = 80;
+
+/**
  * Max config JSON size
  */
 export const MAX_CONFIG_SIZE = 4096;
@@ -714,6 +721,298 @@ export function isValidRevealAnimation(animation: string): animation is RevealAn
 export function isValidContainer(container: string): container is ArtifactContainer {
 	return VALID_CONTAINERS.has(container);
 }
+
+/**
+ * Validate artifact name (1-80 chars, trimmed, non-empty)
+ */
+export function isValidArtifactName(name: string): boolean {
+	const trimmed = name.trim();
+	return trimmed.length >= 1 && trimmed.length <= MAX_ARTIFACT_NAME_LENGTH;
+}
+
+// =============================================================================
+// Config Field Registry
+// =============================================================================
+
+/**
+ * Definition for a config form field rendered in the admin UI.
+ * The registry maps each artifact type to its configurable fields.
+ */
+export interface ArtifactConfigFieldDef {
+	key: string;
+	label: string;
+	type: "text" | "textarea" | "select" | "color" | "date" | "number" | "toggle";
+	options?: { value: string; label: string }[];
+	placeholder?: string;
+	required?: boolean;
+	helpText?: string;
+}
+
+/**
+ * Per-type config field definitions.
+ * Empty arrays mean "no user-configurable fields".
+ */
+export const ARTIFACT_CONFIG_FIELDS: Record<ArtifactType, ArtifactConfigFieldDef[]> = {
+	magic8ball: [
+		{
+			key: "customAnswers",
+			label: "Custom Answers",
+			type: "textarea",
+			placeholder: "One answer per line (leave empty for defaults)",
+			helpText: "20 default answers used if empty",
+		},
+	],
+	fortunecookie: [
+		{
+			key: "customFortunes",
+			label: "Custom Fortunes",
+			type: "textarea",
+			placeholder: "One fortune per line",
+			helpText: "15 defaults used if empty",
+		},
+	],
+	tarotcard: [
+		{
+			key: "showMeaning",
+			label: "Show Meaning",
+			type: "toggle",
+			helpText: "Display the card's meaning alongside the name",
+		},
+	],
+	crystalball: [
+		{
+			key: "mistColor",
+			label: "Mist Color",
+			type: "select",
+			options: [
+				{ value: "purple", label: "Purple" },
+				{ value: "green", label: "Green" },
+				{ value: "blue", label: "Blue" },
+				{ value: "rose", label: "Rose" },
+				{ value: "amber", label: "Amber" },
+			],
+		},
+	],
+	glasscathedral: [
+		{
+			key: "panelCount",
+			label: "Panel Count",
+			type: "number",
+			placeholder: "3",
+			helpText: "Number of stained glass panels",
+		},
+		{
+			key: "baseColor",
+			label: "Base Color",
+			type: "color",
+		},
+		{
+			key: "transition",
+			label: "Transition",
+			type: "select",
+			options: [
+				{ value: "fade", label: "Fade" },
+				{ value: "slide", label: "Slide" },
+				{ value: "dissolve", label: "Dissolve" },
+			],
+		},
+	],
+	diceroller: [
+		{
+			key: "diceType",
+			label: "Dice Type",
+			type: "select",
+			options: [
+				{ value: "d4", label: "d4" },
+				{ value: "d6", label: "d6" },
+				{ value: "d8", label: "d8" },
+				{ value: "d12", label: "d12" },
+				{ value: "d20", label: "d20" },
+			],
+		},
+	],
+	coinflip: [
+		{
+			key: "headsLabel",
+			label: "Heads Label",
+			type: "text",
+			placeholder: "Heads",
+		},
+		{
+			key: "tailsLabel",
+			label: "Tails Label",
+			type: "text",
+			placeholder: "Tails",
+		},
+	],
+	wishingwell: [
+		{
+			key: "placeholder",
+			label: "Placeholder Text",
+			type: "text",
+			placeholder: "Make a wish…",
+		},
+	],
+	snowglobe: [
+		{
+			key: "particles",
+			label: "Particles",
+			type: "select",
+			options: [
+				{ value: "snow", label: "Snow" },
+				{ value: "petals", label: "Petals" },
+				{ value: "leaves", label: "Leaves" },
+				{ value: "fireflies", label: "Fireflies" },
+			],
+		},
+	],
+	marqueetext: [
+		{
+			key: "text",
+			label: "Scrolling Text",
+			type: "text",
+			placeholder: "Your scrolling message",
+			required: true,
+		},
+		{
+			key: "speed",
+			label: "Speed",
+			type: "select",
+			options: [
+				{ value: "slow", label: "Slow" },
+				{ value: "normal", label: "Normal" },
+				{ value: "fast", label: "Fast" },
+			],
+		},
+		{
+			key: "direction",
+			label: "Direction",
+			type: "select",
+			options: [
+				{ value: "left", label: "Left" },
+				{ value: "right", label: "Right" },
+			],
+		},
+	],
+	blinkingnew: [
+		{
+			key: "text",
+			label: "Text",
+			type: "text",
+			placeholder: "NEW!",
+		},
+	],
+	rainbowdivider: [
+		{
+			key: "style",
+			label: "Style",
+			type: "select",
+			options: [
+				{ value: "gradient", label: "Gradient" },
+				{ value: "stripes", label: "Stripes" },
+				{ value: "sparkle", label: "Sparkle" },
+			],
+		},
+	],
+	emailbutton: [
+		{
+			key: "contactUrl",
+			label: "Contact URL",
+			type: "text",
+			placeholder: "https://example.com/contact",
+		},
+		{
+			key: "label",
+			label: "Button Label",
+			type: "text",
+			placeholder: "Email Me!",
+		},
+	],
+	moodcandle: [
+		{
+			key: "flameColor",
+			label: "Flame Color",
+			type: "select",
+			options: [
+				{ value: "amber", label: "Amber" },
+				{ value: "green", label: "Green" },
+				{ value: "lavender", label: "Lavender" },
+				{ value: "blue", label: "Blue" },
+				{ value: "rose", label: "Rose" },
+			],
+		},
+	],
+	windchime: [
+		{
+			key: "material",
+			label: "Material",
+			type: "select",
+			options: [
+				{ value: "glass", label: "Glass" },
+				{ value: "bamboo", label: "Bamboo" },
+				{ value: "metal", label: "Metal" },
+			],
+		},
+	],
+	hourglass: [
+		{
+			key: "eventName",
+			label: "Event Name",
+			type: "text",
+			placeholder: "e.g. New Year's Eve",
+			required: true,
+		},
+		{
+			key: "targetDate",
+			label: "Target Date",
+			type: "date",
+			required: true,
+		},
+	],
+	potionbottle: [
+		{
+			key: "liquidColor",
+			label: "Liquid Color",
+			type: "color",
+		},
+		{
+			key: "label",
+			label: "Potion Label",
+			type: "text",
+			placeholder: "Liquid Courage",
+		},
+	],
+	musicbox: [
+		{
+			key: "melody",
+			label: "Melody",
+			type: "select",
+			options: [
+				{ value: "lullaby", label: "Lullaby" },
+				{ value: "forest", label: "Forest" },
+				{ value: "classic", label: "Classic" },
+				{ value: "waltz", label: "Waltz" },
+				{ value: "celeste", label: "Celeste" },
+			],
+		},
+	],
+	compassrose: [
+		{
+			key: "pointsTo",
+			label: "Points To",
+			type: "text",
+			placeholder: "e.g. Home",
+			helpText: "Label for the compass direction",
+		},
+		{
+			key: "pointsToUrl",
+			label: "Destination URL",
+			type: "text",
+			placeholder: "https://…",
+		},
+	],
+	terrariumglobe: [],
+};
 
 /**
  * Sanitize artifact config JSON
@@ -829,6 +1128,7 @@ export function flipCoin(): "heads" | "tails" {
 export function rowToRecord(row: {
 	id: string;
 	tenant_id: string;
+	name?: string;
 	artifact_type: string;
 	placement: string;
 	config: string;
@@ -846,6 +1146,7 @@ export function rowToRecord(row: {
 	return {
 		id: row.id,
 		tenantId: row.tenant_id,
+		name: row.name ?? "",
 		artifactType: row.artifact_type as ArtifactType,
 		placement: (row.placement || "sidebar") as ArtifactPlacement,
 		config: sanitizeConfig(row.config),
@@ -868,6 +1169,7 @@ export function rowToRecord(row: {
 export function toDisplayArtifact(record: ArtifactRecord): ArtifactDisplay {
 	return {
 		id: record.id,
+		name: record.name,
 		artifactType: record.artifactType,
 		placement: record.placement,
 		config: record.config,

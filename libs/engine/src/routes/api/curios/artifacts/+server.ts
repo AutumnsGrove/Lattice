@@ -11,6 +11,7 @@ import { API_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
 import {
 	generateArtifactId,
 	isValidArtifactType,
+	isValidArtifactName,
 	isValidPlacement,
 	isValidVisibility,
 	isValidRevealAnimation,
@@ -25,6 +26,7 @@ import {
 interface ArtifactRow {
 	id: string;
 	tenant_id: string;
+	name: string;
 	artifact_type: string;
 	placement: string;
 	config: string;
@@ -55,7 +57,7 @@ export const GET: RequestHandler = async ({ platform, locals, url }) => {
 	// Optional type filter
 	const typeFilter = url.searchParams.get("type");
 
-	let query = `SELECT id, artifact_type, placement, config, sort_order,
+	let query = `SELECT id, name, artifact_type, placement, config, sort_order,
 		visibility, discovery_rules, reveal_animation, container,
 		position_x, position_y, z_index, fallback_zone
 		FROM artifacts WHERE tenant_id = ?`;
@@ -75,28 +77,25 @@ export const GET: RequestHandler = async ({ platform, locals, url }) => {
 
 	const artifacts: ArtifactDisplay[] = (result.results ?? []).map((row) => ({
 		id: row.id,
+		name: row.name ?? "",
 		artifactType: row.artifact_type as ArtifactDisplay["artifactType"],
 		placement: (row.placement || "sidebar") as ArtifactDisplay["placement"],
 		config: sanitizeConfig(row.config),
-		visibility: (row.visibility ||
-			"always") as ArtifactDisplay["visibility"],
+		visibility: (row.visibility || "always") as ArtifactDisplay["visibility"],
 		discoveryRules: parseDiscoveryRules(row.discovery_rules),
-		revealAnimation: (row.reveal_animation ||
-			"fade") as ArtifactDisplay["revealAnimation"],
+		revealAnimation: (row.reveal_animation || "fade") as ArtifactDisplay["revealAnimation"],
 		container: (row.container || "none") as ArtifactDisplay["container"],
 		positionX: row.position_x ?? null,
 		positionY: row.position_y ?? null,
 		zIndex: row.z_index ?? 10,
-		fallbackZone: (row.fallback_zone ||
-			"floating") as ArtifactDisplay["fallbackZone"],
+		fallbackZone: (row.fallback_zone || "floating") as ArtifactDisplay["fallbackZone"],
 	}));
 
 	return json(
 		{ artifacts, tenantId },
 		{
 			headers: {
-				"Cache-Control":
-					"public, max-age=60, stale-while-revalidate=120",
+				"Cache-Control": "public, max-age=60, stale-while-revalidate=120",
 			},
 		},
 	);
@@ -130,6 +129,11 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 		throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
 	}
 
+	const name = typeof body.name === "string" ? body.name.trim() : "";
+	if (name && !isValidArtifactName(name)) {
+		throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
+	}
+
 	const placement = isValidPlacement(body.placement as string)
 		? (body.placement as string)
 		: "sidebar";
@@ -138,9 +142,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 		? (body.visibility as string)
 		: "always";
 
-	const revealAnimation = isValidRevealAnimation(
-		body.revealAnimation as string,
-	)
+	const revealAnimation = isValidRevealAnimation(body.revealAnimation as string)
 		? (body.revealAnimation as string)
 		: "fade";
 
@@ -148,19 +150,15 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 		? (body.container as string)
 		: "none";
 
-	const discoveryRules = body.discoveryRules
-		? JSON.stringify(body.discoveryRules)
-		: "[]";
+	const discoveryRules = body.discoveryRules ? JSON.stringify(body.discoveryRules) : "[]";
 
 	const configStr = body.config ? JSON.stringify(body.config) : "{}";
 	if (configStr.length > MAX_CONFIG_SIZE) {
 		throwGroveError(400, API_ERRORS.CONTENT_TOO_LARGE, "API");
 	}
 
-	const positionX =
-		typeof body.positionX === "number" ? body.positionX : null;
-	const positionY =
-		typeof body.positionY === "number" ? body.positionY : null;
+	const positionX = typeof body.positionX === "number" ? body.positionX : null;
+	const positionY = typeof body.positionY === "number" ? body.positionY : null;
 	const zIndex = typeof body.zIndex === "number" ? body.zIndex : 10;
 	const fallbackZone = isValidPlacement(body.fallbackZone as string)
 		? (body.fallbackZone as string)
@@ -189,14 +187,15 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
 		await db
 			.prepare(
-				`INSERT INTO artifacts (id, tenant_id, artifact_type, placement, config, sort_order,
+				`INSERT INTO artifacts (id, tenant_id, name, artifact_type, placement, config, sort_order,
 				 visibility, discovery_rules, reveal_animation, container,
 				 position_x, position_y, z_index, fallback_zone)
-				 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+				 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 			)
 			.bind(
 				id,
 				tenantId,
+				name,
 				artifactType,
 				placement,
 				configStr,

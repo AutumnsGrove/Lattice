@@ -9,6 +9,7 @@ import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { API_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
 import {
+	isValidArtifactName,
 	isValidPlacement,
 	isValidVisibility,
 	isValidRevealAnimation,
@@ -16,12 +17,7 @@ import {
 	MAX_CONFIG_SIZE,
 } from "$lib/curios/artifacts";
 
-export const PATCH: RequestHandler = async ({
-	params,
-	request,
-	platform,
-	locals,
-}) => {
+export const PATCH: RequestHandler = async ({ params, request, platform, locals }) => {
 	const db = platform?.env?.CURIO_DB;
 	const tenantId = locals.tenantId;
 
@@ -55,6 +51,15 @@ export const PATCH: RequestHandler = async ({
 
 	const updates: string[] = [];
 	const values: unknown[] = [];
+
+	if (body.name !== undefined) {
+		const trimmedName = typeof body.name === "string" ? body.name.trim() : "";
+		if (trimmedName && !isValidArtifactName(trimmedName)) {
+			throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
+		}
+		updates.push("name = ?");
+		values.push(trimmedName);
+	}
 
 	if (body.placement !== undefined) {
 		if (!isValidPlacement(body.placement as string)) {
@@ -133,9 +138,7 @@ export const PATCH: RequestHandler = async ({
 
 	try {
 		await db
-			.prepare(
-				`UPDATE artifacts SET ${updates.join(", ")} WHERE id = ? AND tenant_id = ?`,
-			)
+			.prepare(`UPDATE artifacts SET ${updates.join(", ")} WHERE id = ? AND tenant_id = ?`)
 			.bind(...values)
 			.run();
 

@@ -4,6 +4,7 @@ import { ARBOR_ERRORS, logGroveError } from "$lib/errors";
 import {
 	generateArtifactId,
 	isValidArtifactType,
+	isValidArtifactName,
 	isValidPlacement,
 	isValidVisibility,
 	isValidRevealAnimation,
@@ -15,12 +16,14 @@ import {
 	VISIBILITY_OPTIONS,
 	REVEAL_ANIMATION_OPTIONS,
 	CONTAINER_OPTIONS,
+	ARTIFACT_CONFIG_FIELDS,
 	MAX_CONFIG_SIZE,
 } from "$lib/curios/artifacts";
 
 interface ArtifactRow {
 	id: string;
 	tenant_id: string;
+	name: string;
 	artifact_type: string;
 	placement: string;
 	config: string;
@@ -44,13 +47,14 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 			visibilityOptions: VISIBILITY_OPTIONS,
 			revealAnimationOptions: REVEAL_ANIMATION_OPTIONS,
 			containerOptions: CONTAINER_OPTIONS,
+			configFields: ARTIFACT_CONFIG_FIELDS,
 			error: "Database not available",
 		};
 	}
 
 	const result = await db
 		.prepare(
-			`SELECT id, artifact_type, placement, config, sort_order, created_at,
+			`SELECT id, name, artifact_type, placement, config, sort_order, created_at,
 			 visibility, discovery_rules, reveal_animation, container
 			 FROM artifacts WHERE tenant_id = ?
 			 ORDER BY sort_order ASC, created_at ASC`,
@@ -61,6 +65,7 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 
 	const artifacts = (result.results ?? []).map((row) => ({
 		id: row.id,
+		name: row.name ?? "",
 		artifactType: row.artifact_type,
 		placement: row.placement,
 		config: sanitizeConfig(row.config),
@@ -78,6 +83,7 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 		visibilityOptions: VISIBILITY_OPTIONS,
 		revealAnimationOptions: REVEAL_ANIMATION_OPTIONS,
 		containerOptions: CONTAINER_OPTIONS,
+		configFields: ARTIFACT_CONFIG_FIELDS,
 	};
 };
 
@@ -94,7 +100,15 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
+		const name = ((formData.get("name") as string) ?? "").trim();
 		const artifactType = formData.get("artifactType") as string;
+
+		if (name && !isValidArtifactName(name)) {
+			return fail(400, {
+				error: "Name must be 1-80 characters",
+				error_code: "INVALID_NAME",
+			});
+		}
 
 		if (!artifactType || !isValidArtifactType(artifactType)) {
 			return fail(400, {
@@ -107,21 +121,15 @@ export const actions: Actions = {
 			? (formData.get("placement") as string)
 			: "sidebar";
 
-		const visibility = isValidVisibility(
-			formData.get("visibility") as string,
-		)
+		const visibility = isValidVisibility(formData.get("visibility") as string)
 			? (formData.get("visibility") as string)
 			: "always";
 
-		const revealAnimation = isValidRevealAnimation(
-			formData.get("revealAnimation") as string,
-		)
+		const revealAnimation = isValidRevealAnimation(formData.get("revealAnimation") as string)
 			? (formData.get("revealAnimation") as string)
 			: "fade";
 
-		const container = isValidContainer(
-			formData.get("container") as string,
-		)
+		const container = isValidContainer(formData.get("container") as string)
 			? (formData.get("container") as string)
 			: "none";
 
@@ -147,13 +155,14 @@ export const actions: Actions = {
 
 			await db
 				.prepare(
-					`INSERT INTO artifacts (id, tenant_id, artifact_type, placement, config, sort_order,
+					`INSERT INTO artifacts (id, tenant_id, name, artifact_type, placement, config, sort_order,
 					 visibility, reveal_animation, container)
-					 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+					 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 				)
 				.bind(
 					id,
 					tenantId,
+					name,
 					artifactType,
 					placement,
 					configStr,
