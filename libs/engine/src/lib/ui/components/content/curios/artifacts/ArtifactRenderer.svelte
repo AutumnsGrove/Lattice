@@ -3,8 +3,12 @@
 	 * ArtifactRenderer — Renders the correct artifact component based on type.
 	 * Handles container wrapping (bare vs glass-card) and reveal animations.
 	 */
-	import type { Component } from "svelte";
-	import type { ArtifactDisplay, ArtifactType } from "$lib/curios/artifacts";
+	import type {
+		ArtifactDisplay,
+		ArtifactType,
+		ArtifactComponentProps,
+		ArtifactComponentType,
+	} from "$lib/curios/artifacts";
 	import { GlassCard } from "$lib/ui/components/ui";
 
 	import Magic8Ball from "./Magic8Ball.svelte";
@@ -39,7 +43,11 @@
 	const useGlassCard = $derived(artifact.container === "glass-card");
 	const revealClass = $derived(`reveal-${artifact.revealAnimation || "fade"}`);
 
-	const componentMap: Record<ArtifactType, Component<any>> = {
+	// Trust boundary: each artifact component accepts ArtifactComponentProps
+	// at runtime (config + optional tenantId/artifactId). The assertion bridges
+	// TypeScript's contravariance between each component's specific config type
+	// and the common interface.
+	const componentMap = {
 		magic8ball: Magic8Ball,
 		fortunecookie: FortuneCookie,
 		tarotcard: TarotCard,
@@ -60,25 +68,25 @@
 		musicbox: MusicBox,
 		compassrose: CompassRose,
 		terrariumglobe: TerrariumGlobe,
-	};
+	} as Record<ArtifactType, ArtifactComponentType>;
 
 	const ArtifactComponent = $derived(componentMap[artifact.artifactType]);
 
 	/** Build props depending on artifact type */
-	const componentProps = $derived.by(() => {
-		const base: Record<string, unknown> = { config: artifact.config };
+	const componentProps = $derived.by((): ArtifactComponentProps => {
+		const props: ArtifactComponentProps = { config: artifact.config };
 
 		// Some artifacts need tenantId for daily seeding
 		if (["fortunecookie", "tarotcard"].includes(artifact.artifactType)) {
-			base.tenantId = tenantId;
+			props.tenantId = tenantId;
 		}
 
 		// Glass Cathedral needs its artifact ID for panel loading
 		if (artifact.artifactType === "glasscathedral") {
-			base.artifactId = artifact.id;
+			props.artifactId = artifact.id;
 		}
 
-		return base;
+		return props;
 	});
 </script>
 
