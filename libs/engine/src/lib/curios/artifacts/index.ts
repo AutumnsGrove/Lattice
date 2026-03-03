@@ -1,15 +1,18 @@
 /**
- * Weird Artifacts Curio
+ * Artifacts Curio — A Personal Cabinet of Curiosities
  *
- * Interactive chaos objects — Magic 8-Ball, fortune cookies,
- * dice rollers, marquee text. Playful elements that make
- * personal sites delightful.
+ * 20 interactive artifacts organized into five categories:
+ * Mystical, Interactive, Classic Web, Nature, and Whimsical.
+ * Each artifact is a self-contained object with its own visual
+ * style, interaction pattern, and optional glass card container.
  *
  * Features:
- * - Self-contained interactive artifacts
+ * - Self-contained interactive artifacts with unique visuals
  * - Daily draws seeded by date (consistent per day per tenant)
- * - Custom configuration per artifact (JSON)
+ * - Zone-based placement (sidebar, header, footer, inline, floating, hidden)
+ * - Discovery mechanics (visibility rules, reveal animations)
  * - Keyboard-accessible with reduced motion fallbacks
+ * - Dark mode aware
  */
 
 // =============================================================================
@@ -22,17 +25,87 @@
 export type ArtifactType =
   | "magic8ball"
   | "fortunecookie"
-  | "diceroller"
-  | "marqueetext"
   | "tarotcard"
+  | "crystalball"
+  | "glasscathedral"
+  | "diceroller"
   | "coinflip"
+  | "wishingwell"
+  | "snowglobe"
+  | "marqueetext"
   | "blinkingnew"
-  | "rainbowdivider";
+  | "rainbowdivider"
+  | "emailbutton"
+  | "moodcandle"
+  | "windchime"
+  | "hourglass"
+  | "potionbottle"
+  | "musicbox"
+  | "compassrose"
+  | "terrariumglobe";
 
 /**
- * Placement options for artifacts
+ * Artifact category for grouping in the picker
  */
-export type ArtifactPlacement = "right-vine" | "left-vine" | "floating";
+export type ArtifactCategory =
+  | "mystical"
+  | "interactive"
+  | "classic"
+  | "nature"
+  | "whimsical";
+
+/**
+ * Zone-based placement system
+ */
+export type ArtifactPlacement =
+  | "sidebar"
+  | "header"
+  | "footer"
+  | "inline"
+  | "floating"
+  | "hidden";
+
+/**
+ * Visibility mode for discovery mechanics
+ */
+export type ArtifactVisibility = "always" | "hidden" | "easter-egg";
+
+/**
+ * Reveal animation when a hidden artifact becomes visible
+ */
+export type RevealAnimation =
+  | "fade"
+  | "sparkle"
+  | "slide"
+  | "grow"
+  | "flicker";
+
+/**
+ * Container style — bare (default) or wrapped in glass card
+ */
+export type ArtifactContainer = "none" | "glass-card";
+
+/**
+ * Discovery rule condition types
+ */
+export type DiscoveryConditionType =
+  | "time-of-day"
+  | "day-of-week"
+  | "season"
+  | "specific-date"
+  | "dark-mode"
+  | "scroll-depth"
+  | "pages-visited"
+  | "time-on-site"
+  | "random-chance";
+
+/**
+ * A single discovery rule condition
+ */
+export interface DiscoveryCondition {
+  type: DiscoveryConditionType;
+  value: string | number;
+}
 
 /**
  * Artifact record stored in database
@@ -44,6 +117,14 @@ export interface ArtifactRecord {
   placement: ArtifactPlacement;
   config: Record<string, unknown>;
   sortOrder: number;
+  visibility: ArtifactVisibility;
+  discoveryRules: DiscoveryCondition[];
+  revealAnimation: RevealAnimation;
+  container: ArtifactContainer;
+  positionX: number | null;
+  positionY: number | null;
+  zIndex: number;
+  fallbackZone: ArtifactPlacement;
   createdAt: string;
 }
 
@@ -55,29 +136,107 @@ export interface ArtifactDisplay {
   artifactType: ArtifactType;
   placement: ArtifactPlacement;
   config: Record<string, unknown>;
+  visibility: ArtifactVisibility;
+  discoveryRules: DiscoveryCondition[];
+  revealAnimation: RevealAnimation;
+  container: ArtifactContainer;
+  positionX: number | null;
+  positionY: number | null;
+  zIndex: number;
+  fallbackZone: ArtifactPlacement;
 }
 
-/**
- * Magic 8-Ball config
- */
+// =============================================================================
+// Config Interfaces (per artifact type)
+// =============================================================================
+
 export interface Magic8BallConfig {
   customAnswers?: string[];
 }
 
-/**
- * Dice Roller config
- */
+export interface FortuneCookieConfig {
+  customFortunes?: string[];
+}
+
+export interface TarotCardConfig {
+  showMeaning?: boolean;
+}
+
+export interface CrystalBallConfig {
+  mistColor?: "purple" | "green" | "blue" | "rose" | "amber";
+}
+
+export interface GlassCathedralConfig {
+  panelCount?: number;
+  baseColor?: string;
+  transition?: "fade" | "slide" | "dissolve";
+}
+
 export interface DiceRollerConfig {
   diceType?: "d4" | "d6" | "d8" | "d12" | "d20";
 }
 
-/**
- * Marquee Text config
- */
+export interface CoinFlipConfig {
+  headsLabel?: string;
+  tailsLabel?: string;
+}
+
+export interface WishingWellConfig {
+  placeholder?: string;
+}
+
+export interface SnowGlobeConfig {
+  particles?: "snow" | "petals" | "leaves" | "fireflies";
+}
+
 export interface MarqueeTextConfig {
   text?: string;
   speed?: "slow" | "normal" | "fast";
   direction?: "left" | "right";
+}
+
+export interface BlinkingNewConfig {
+  text?: string;
+}
+
+export interface RainbowDividerConfig {
+  style?: "gradient" | "stripes" | "sparkle";
+}
+
+export interface EmailButtonConfig {
+  contactUrl?: string;
+  label?: string;
+}
+
+export interface MoodCandleConfig {
+  flameColor?: "amber" | "green" | "lavender" | "blue" | "rose";
+}
+
+export interface WindChimeConfig {
+  material?: "glass" | "bamboo" | "metal";
+}
+
+export interface HourglassConfig {
+  eventName?: string;
+  targetDate?: string;
+}
+
+export interface PotionBottleConfig {
+  liquidColor?: string;
+  label?: string;
+}
+
+export interface MusicBoxConfig {
+  melody?: "lullaby" | "forest" | "classic" | "waltz" | "celeste";
+}
+
+export interface CompassRoseConfig {
+  pointsTo?: string;
+  pointsToUrl?: string;
+}
+
+export interface TerrariumGlobeConfig {
+  seasonAware?: boolean;
 }
 
 // =============================================================================
@@ -85,14 +244,20 @@ export interface MarqueeTextConfig {
 // =============================================================================
 
 /**
- * All artifact type definitions
+ * Artifact type definition
  */
-export const ARTIFACT_TYPES: {
+export interface ArtifactTypeDefinition {
   value: ArtifactType;
   label: string;
   description: string;
-  category: "mystical" | "interactive" | "classic";
-}[] = [
+  category: ArtifactCategory;
+}
+
+/**
+ * All artifact type definitions — 20 types across 5 categories
+ */
+export const ARTIFACT_TYPES: ArtifactTypeDefinition[] = [
+  // --- Mystical ---
   {
     value: "magic8ball",
     label: "Magic 8-Ball",
@@ -108,9 +273,22 @@ export const ARTIFACT_TYPES: {
   {
     value: "tarotcard",
     label: "Tarot Card",
-    description: "Daily card draw with meaning",
+    description: "Daily card draw from the Major Arcana",
     category: "mystical",
   },
+  {
+    value: "crystalball",
+    label: "Crystal Ball",
+    description: "Swirling mist in a glass sphere",
+    category: "mystical",
+  },
+  {
+    value: "glasscathedral",
+    label: "Glass Cathedral",
+    description: "A prismatic doorway to an immersive experience",
+    category: "mystical",
+  },
+  // --- Interactive ---
   {
     value: "diceroller",
     label: "Dice Roller",
@@ -120,9 +298,22 @@ export const ARTIFACT_TYPES: {
   {
     value: "coinflip",
     label: "Coin Flip",
-    description: "Heads or tails with flip animation",
+    description: "Heads or tails with a spinning animation",
     category: "interactive",
   },
+  {
+    value: "wishingwell",
+    label: "Wishing Well",
+    description: "Toss a coin and make a wish",
+    category: "interactive",
+  },
+  {
+    value: "snowglobe",
+    label: "Snow Globe",
+    description: "Shake to send particles swirling",
+    category: "interactive",
+  },
+  // --- Classic Web ---
   {
     value: "marqueetext",
     label: "Marquee Text",
@@ -138,25 +329,149 @@ export const ARTIFACT_TYPES: {
   {
     value: "rainbowdivider",
     label: "Rainbow Divider",
-    description: "Colorful separator line",
+    description: "Colorful animated separator line",
     category: "classic",
+  },
+  {
+    value: "emailbutton",
+    label: "Email Button",
+    description: "Retro contact button with mailbox icon",
+    category: "classic",
+  },
+  // --- Nature ---
+  {
+    value: "moodcandle",
+    label: "Mood Candle",
+    description: "Flickering flame, brighter in dark mode",
+    category: "nature",
+  },
+  {
+    value: "windchime",
+    label: "Wind Chime",
+    description: "Gently swaying chimes",
+    category: "nature",
+  },
+  {
+    value: "hourglass",
+    label: "Hourglass",
+    description: "Countdown timer to your next event",
+    category: "nature",
+  },
+  // --- Whimsical ---
+  {
+    value: "potionbottle",
+    label: "Potion Bottle",
+    description: "Bubbling liquid in a glass bottle",
+    category: "whimsical",
+  },
+  {
+    value: "musicbox",
+    label: "Music Box",
+    description: "Click to play a short melody",
+    category: "whimsical",
+  },
+  {
+    value: "compassrose",
+    label: "Compass Rose",
+    description: "A needle that always points somewhere",
+    category: "whimsical",
+  },
+  {
+    value: "terrariumglobe",
+    label: "Terrarium Globe",
+    description: "A tiny sealed ecosystem in glass",
+    category: "whimsical",
   },
 ];
 
 /**
- * Placement options
+ * Placement zone options
  */
 export const PLACEMENT_OPTIONS: {
   value: ArtifactPlacement;
   label: string;
+  description: string;
 }[] = [
-  { value: "right-vine", label: "Right Vine" },
-  { value: "left-vine", label: "Left Vine" },
-  { value: "floating", label: "Floating" },
+  {
+    value: "sidebar",
+    label: "Sidebar",
+    description: "Right or left margin alongside content",
+  },
+  {
+    value: "header",
+    label: "Header",
+    description: "Top of page, above or within the header",
+  },
+  {
+    value: "footer",
+    label: "Footer",
+    description: "Bottom of page, within the footer area",
+  },
+  {
+    value: "inline",
+    label: "Inline",
+    description: "Within the content flow",
+  },
+  {
+    value: "floating",
+    label: "Floating",
+    description: "Fixed position, overlaying content",
+  },
+  {
+    value: "hidden",
+    label: "Hidden",
+    description: "Invisible until discovery rules are met",
+  },
 ];
 
 /**
- * Default Magic 8-Ball answers
+ * Visibility mode options
+ */
+export const VISIBILITY_OPTIONS: {
+  value: ArtifactVisibility;
+  label: string;
+}[] = [
+  { value: "always", label: "Always visible" },
+  { value: "hidden", label: "Hidden (rule-based)" },
+  { value: "easter-egg", label: "Easter egg (no hints)" },
+];
+
+/**
+ * Reveal animation options
+ */
+export const REVEAL_ANIMATION_OPTIONS: {
+  value: RevealAnimation;
+  label: string;
+  description: string;
+}[] = [
+  { value: "fade", label: "Fade", description: "Gentle fade-in" },
+  {
+    value: "sparkle",
+    label: "Sparkle",
+    description: "Materializes with a tiny celebration",
+  },
+  { value: "slide", label: "Slide", description: "Slides in from the edge" },
+  { value: "grow", label: "Grow", description: "Grows from a tiny seed" },
+  {
+    value: "flicker",
+    label: "Flicker",
+    description: "Phases into existence",
+  },
+];
+
+/**
+ * Container style options
+ */
+export const CONTAINER_OPTIONS: {
+  value: ArtifactContainer;
+  label: string;
+}[] = [
+  { value: "none", label: "Bare (artifact's own style)" },
+  { value: "glass-card", label: "Glass card (display case)" },
+];
+
+/**
+ * Default Magic 8-Ball answers (20)
  */
 export const DEFAULT_8BALL_ANSWERS: string[] = [
   "It is certain",
@@ -182,7 +497,7 @@ export const DEFAULT_8BALL_ANSWERS: string[] = [
 ];
 
 /**
- * Daily fortunes
+ * Daily fortunes (15)
  */
 export const DEFAULT_FORTUNES: string[] = [
   "A pleasant surprise is waiting for you",
@@ -201,6 +516,113 @@ export const DEFAULT_FORTUNES: string[] = [
   "Your instincts are right — trust them",
   "A gentle wind carries good news",
 ];
+
+/**
+ * Tarot Major Arcana — 22 cards
+ */
+export const TAROT_MAJOR_ARCANA: {
+  number: number;
+  name: string;
+  meaning: string;
+}[] = [
+  { number: 0, name: "The Fool", meaning: "New beginnings, spontaneity" },
+  { number: 1, name: "The Magician", meaning: "Willpower, creation" },
+  {
+    number: 2,
+    name: "The High Priestess",
+    meaning: "Intuition, inner voice",
+  },
+  { number: 3, name: "The Empress", meaning: "Abundance, nurturing" },
+  { number: 4, name: "The Emperor", meaning: "Structure, authority" },
+  {
+    number: 5,
+    name: "The Hierophant",
+    meaning: "Tradition, spiritual guidance",
+  },
+  { number: 6, name: "The Lovers", meaning: "Connection, harmony" },
+  { number: 7, name: "The Chariot", meaning: "Determination, momentum" },
+  { number: 8, name: "Strength", meaning: "Courage, inner strength" },
+  { number: 9, name: "The Hermit", meaning: "Reflection, solitude" },
+  {
+    number: 10,
+    name: "Wheel of Fortune",
+    meaning: "Cycles, turning points",
+  },
+  { number: 11, name: "Justice", meaning: "Truth, fairness" },
+  {
+    number: 12,
+    name: "The Hanged Man",
+    meaning: "Surrender, new perspective",
+  },
+  { number: 13, name: "Death", meaning: "Transformation, endings" },
+  { number: 14, name: "Temperance", meaning: "Balance, patience" },
+  { number: 15, name: "The Devil", meaning: "Shadow, attachment" },
+  { number: 16, name: "The Tower", meaning: "Upheaval, revelation" },
+  { number: 17, name: "The Star", meaning: "Hope, inspiration" },
+  { number: 18, name: "The Moon", meaning: "Illusion, the unconscious" },
+  { number: 19, name: "The Sun", meaning: "Joy, vitality" },
+  { number: 20, name: "Judgement", meaning: "Rebirth, reckoning" },
+  { number: 21, name: "The World", meaning: "Completion, wholeness" },
+];
+
+/**
+ * Music box melody presets
+ */
+export const MUSIC_BOX_MELODIES = [
+  "lullaby",
+  "forest",
+  "classic",
+  "waltz",
+  "celeste",
+] as const;
+export type MusicBoxMelody = (typeof MUSIC_BOX_MELODIES)[number];
+
+/**
+ * Mood candle flame colors
+ */
+export const FLAME_COLORS = [
+  "amber",
+  "green",
+  "lavender",
+  "blue",
+  "rose",
+] as const;
+export type FlameColor = (typeof FLAME_COLORS)[number];
+
+/**
+ * Crystal ball mist colors
+ */
+export const MIST_COLORS = [
+  "purple",
+  "green",
+  "blue",
+  "rose",
+  "amber",
+] as const;
+export type MistColor = (typeof MIST_COLORS)[number];
+
+/**
+ * Wind chime materials
+ */
+export const CHIME_MATERIALS = ["glass", "bamboo", "metal"] as const;
+export type ChimeMaterial = (typeof CHIME_MATERIALS)[number];
+
+/**
+ * Snow globe particle types
+ */
+export const GLOBE_PARTICLES = [
+  "snow",
+  "petals",
+  "leaves",
+  "fireflies",
+] as const;
+export type GlobeParticles = (typeof GLOBE_PARTICLES)[number];
+
+/**
+ * Rainbow divider styles
+ */
+export const DIVIDER_STYLES = ["gradient", "stripes", "sparkle"] as const;
+export type DividerStyle = (typeof DIVIDER_STYLES)[number];
 
 /**
  * Dice types
@@ -231,6 +653,27 @@ export const VALID_ARTIFACT_TYPES = new Set<string>(
  */
 export const VALID_PLACEMENTS = new Set<string>(
   PLACEMENT_OPTIONS.map((p) => p.value),
+);
+
+/**
+ * Valid visibility modes
+ */
+export const VALID_VISIBILITIES = new Set<string>(
+  VISIBILITY_OPTIONS.map((v) => v.value),
+);
+
+/**
+ * Valid reveal animations
+ */
+export const VALID_REVEAL_ANIMATIONS = new Set<string>(
+  REVEAL_ANIMATION_OPTIONS.map((r) => r.value),
+);
+
+/**
+ * Valid container styles
+ */
+export const VALID_CONTAINERS = new Set<string>(
+  CONTAINER_OPTIONS.map((c) => c.value),
 );
 
 /**
@@ -278,6 +721,33 @@ export function isValidPlacement(
 }
 
 /**
+ * Validate visibility mode
+ */
+export function isValidVisibility(
+  visibility: string,
+): visibility is ArtifactVisibility {
+  return VALID_VISIBILITIES.has(visibility);
+}
+
+/**
+ * Validate reveal animation
+ */
+export function isValidRevealAnimation(
+  animation: string,
+): animation is RevealAnimation {
+  return VALID_REVEAL_ANIMATIONS.has(animation);
+}
+
+/**
+ * Validate container style
+ */
+export function isValidContainer(
+  container: string,
+): container is ArtifactContainer {
+  return VALID_CONTAINERS.has(container);
+}
+
+/**
  * Sanitize artifact config JSON
  */
 export function sanitizeConfig(
@@ -306,6 +776,29 @@ export function sanitizeMarqueeText(
   if (cleaned.length > MAX_MARQUEE_TEXT_LENGTH)
     return cleaned.slice(0, MAX_MARQUEE_TEXT_LENGTH);
   return cleaned;
+}
+
+/**
+ * Parse discovery rules from JSON string
+ */
+export function parseDiscoveryRules(
+  rulesStr: string | null | undefined,
+): DiscoveryCondition[] {
+  if (!rulesStr) return [];
+  try {
+    const parsed = JSON.parse(rulesStr);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(
+      (r: unknown) =>
+        typeof r === "object" &&
+        r !== null &&
+        "type" in r &&
+        "value" in r &&
+        typeof (r as DiscoveryCondition).type === "string",
+    ) as DiscoveryCondition[];
+  } catch {
+    return [];
+  }
 }
 
 /**
@@ -341,9 +834,32 @@ export function get8BallAnswer(customAnswers?: string[]): string {
 /**
  * Get daily fortune for a tenant
  */
-export function getDailyFortune(tenantId: string, dateStr?: string): string {
-  const index = getDailyIndex(tenantId, DEFAULT_FORTUNES.length, dateStr);
-  return DEFAULT_FORTUNES[index];
+export function getDailyFortune(
+  tenantId: string,
+  customFortunes?: string[],
+  dateStr?: string,
+): string {
+  const fortunes =
+    customFortunes && customFortunes.length > 0
+      ? customFortunes
+      : DEFAULT_FORTUNES;
+  const index = getDailyIndex(tenantId, fortunes.length, dateStr);
+  return fortunes[index];
+}
+
+/**
+ * Get daily tarot card for a tenant
+ */
+export function getDailyTarot(
+  tenantId: string,
+  dateStr?: string,
+): (typeof TAROT_MAJOR_ARCANA)[number] {
+  const index = getDailyIndex(
+    tenantId,
+    TAROT_MAJOR_ARCANA.length,
+    dateStr,
+  );
+  return TAROT_MAJOR_ARCANA[index];
 }
 
 /**
@@ -362,6 +878,45 @@ export function flipCoin(): "heads" | "tails" {
 }
 
 /**
+ * Transform database row to ArtifactRecord
+ */
+export function rowToRecord(row: {
+  id: string;
+  tenant_id: string;
+  artifact_type: string;
+  placement: string;
+  config: string;
+  sort_order: number;
+  visibility?: string;
+  discovery_rules?: string;
+  reveal_animation?: string;
+  container?: string;
+  position_x?: number | null;
+  position_y?: number | null;
+  z_index?: number;
+  fallback_zone?: string;
+  created_at: string;
+}): ArtifactRecord {
+  return {
+    id: row.id,
+    tenantId: row.tenant_id,
+    artifactType: row.artifact_type as ArtifactType,
+    placement: (row.placement || "sidebar") as ArtifactPlacement,
+    config: sanitizeConfig(row.config),
+    sortOrder: row.sort_order,
+    visibility: (row.visibility || "always") as ArtifactVisibility,
+    discoveryRules: parseDiscoveryRules(row.discovery_rules),
+    revealAnimation: (row.reveal_animation || "fade") as RevealAnimation,
+    container: (row.container || "none") as ArtifactContainer,
+    positionX: row.position_x ?? null,
+    positionY: row.position_y ?? null,
+    zIndex: row.z_index ?? 10,
+    fallbackZone: (row.fallback_zone || "floating") as ArtifactPlacement,
+    createdAt: row.created_at,
+  };
+}
+
+/**
  * Transform record to public display
  */
 export function toDisplayArtifact(record: ArtifactRecord): ArtifactDisplay {
@@ -370,5 +925,72 @@ export function toDisplayArtifact(record: ArtifactRecord): ArtifactDisplay {
     artifactType: record.artifactType,
     placement: record.placement,
     config: record.config,
+    visibility: record.visibility,
+    discoveryRules: record.discoveryRules,
+    revealAnimation: record.revealAnimation,
+    container: record.container,
+    positionX: record.positionX,
+    positionY: record.positionY,
+    zIndex: record.zIndex,
+    fallbackZone: record.fallbackZone,
   };
+}
+
+/**
+ * Evaluate discovery rules to determine if an artifact should be visible
+ */
+export function evaluateDiscoveryRules(
+  rules: DiscoveryCondition[],
+  context: {
+    hour?: number;
+    dayOfWeek?: number;
+    season?: string;
+    date?: string;
+    isDarkMode?: boolean;
+    scrollDepth?: number;
+    pagesVisited?: number;
+    timeOnSite?: number;
+  },
+): boolean {
+  if (rules.length === 0) return true;
+
+  // AND logic: all rules must pass
+  return rules.every((rule) => {
+    switch (rule.type) {
+      case "time-of-day": {
+        const [startStr, endStr] = String(rule.value).split("-");
+        const start = parseInt(startStr, 10);
+        const end = parseInt(endStr, 10);
+        const hour = context.hour ?? new Date().getHours();
+        if (start <= end) return hour >= start && hour < end;
+        return hour >= start || hour < end; // overnight range
+      }
+      case "day-of-week": {
+        const days = String(rule.value)
+          .split(",")
+          .map((d) => parseInt(d, 10));
+        const dow = context.dayOfWeek ?? new Date().getDay();
+        return days.includes(dow);
+      }
+      case "season":
+        return context.season === String(rule.value);
+      case "specific-date":
+        return (
+          (context.date ?? new Date().toISOString().slice(5, 10)) ===
+          String(rule.value)
+        );
+      case "dark-mode":
+        return (context.isDarkMode ?? false) === (rule.value === "true");
+      case "scroll-depth":
+        return (context.scrollDepth ?? 0) >= Number(rule.value);
+      case "pages-visited":
+        return (context.pagesVisited ?? 1) >= Number(rule.value);
+      case "time-on-site":
+        return (context.timeOnSite ?? 0) >= Number(rule.value);
+      case "random-chance":
+        return Math.random() * 100 < Number(rule.value);
+      default:
+        return true;
+    }
+  });
 }

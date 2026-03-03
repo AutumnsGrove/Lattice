@@ -1,16 +1,27 @@
 /**
- * Weird Artifacts Curio API — Single Artifact
+ * Artifacts Curio API — Single Artifact
  *
- * PATCH  — Update artifact config/placement (admin)
+ * PATCH  — Update artifact fields (admin)
  * DELETE — Remove an artifact (admin)
  */
 
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { API_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
-import { isValidPlacement, MAX_CONFIG_SIZE } from "$lib/curios/artifacts";
+import {
+	isValidPlacement,
+	isValidVisibility,
+	isValidRevealAnimation,
+	isValidContainer,
+	MAX_CONFIG_SIZE,
+} from "$lib/curios/artifacts";
 
-export const PATCH: RequestHandler = async ({ params, request, platform, locals }) => {
+export const PATCH: RequestHandler = async ({
+	params,
+	request,
+	platform,
+	locals,
+}) => {
 	const db = platform?.env?.CURIO_DB;
 	const tenantId = locals.tenantId;
 
@@ -62,6 +73,58 @@ export const PATCH: RequestHandler = async ({ params, request, platform, locals 
 		values.push(configStr);
 	}
 
+	if (body.visibility !== undefined) {
+		if (!isValidVisibility(body.visibility as string)) {
+			throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
+		}
+		updates.push("visibility = ?");
+		values.push(body.visibility);
+	}
+
+	if (body.discoveryRules !== undefined) {
+		updates.push("discovery_rules = ?");
+		values.push(JSON.stringify(body.discoveryRules));
+	}
+
+	if (body.revealAnimation !== undefined) {
+		if (!isValidRevealAnimation(body.revealAnimation as string)) {
+			throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
+		}
+		updates.push("reveal_animation = ?");
+		values.push(body.revealAnimation);
+	}
+
+	if (body.container !== undefined) {
+		if (!isValidContainer(body.container as string)) {
+			throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
+		}
+		updates.push("container = ?");
+		values.push(body.container);
+	}
+
+	if (typeof body.positionX === "number" || body.positionX === null) {
+		updates.push("position_x = ?");
+		values.push(body.positionX);
+	}
+
+	if (typeof body.positionY === "number" || body.positionY === null) {
+		updates.push("position_y = ?");
+		values.push(body.positionY);
+	}
+
+	if (typeof body.zIndex === "number") {
+		updates.push("z_index = ?");
+		values.push(body.zIndex);
+	}
+
+	if (body.fallbackZone !== undefined) {
+		if (!isValidPlacement(body.fallbackZone as string)) {
+			throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
+		}
+		updates.push("fallback_zone = ?");
+		values.push(body.fallbackZone);
+	}
+
 	if (updates.length === 0) {
 		return json({ success: true, noChanges: true });
 	}
@@ -70,7 +133,9 @@ export const PATCH: RequestHandler = async ({ params, request, platform, locals 
 
 	try {
 		await db
-			.prepare(`UPDATE artifacts SET ${updates.join(", ")} WHERE id = ? AND tenant_id = ?`)
+			.prepare(
+				`UPDATE artifacts SET ${updates.join(", ")} WHERE id = ? AND tenant_id = ?`,
+			)
 			.bind(...values)
 			.run();
 
