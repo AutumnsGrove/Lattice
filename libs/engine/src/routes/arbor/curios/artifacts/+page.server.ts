@@ -5,9 +5,16 @@ import {
 	generateArtifactId,
 	isValidArtifactType,
 	isValidPlacement,
+	isValidVisibility,
+	isValidRevealAnimation,
+	isValidContainer,
 	sanitizeConfig,
+	parseDiscoveryRules,
 	ARTIFACT_TYPES,
 	PLACEMENT_OPTIONS,
+	VISIBILITY_OPTIONS,
+	REVEAL_ANIMATION_OPTIONS,
+	CONTAINER_OPTIONS,
 	MAX_CONFIG_SIZE,
 } from "$lib/curios/artifacts";
 
@@ -18,6 +25,10 @@ interface ArtifactRow {
 	placement: string;
 	config: string;
 	sort_order: number;
+	visibility: string;
+	discovery_rules: string;
+	reveal_animation: string;
+	container: string;
 	created_at: string;
 }
 
@@ -30,15 +41,19 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 			artifacts: [],
 			artifactTypes: ARTIFACT_TYPES,
 			placementOptions: PLACEMENT_OPTIONS,
+			visibilityOptions: VISIBILITY_OPTIONS,
+			revealAnimationOptions: REVEAL_ANIMATION_OPTIONS,
+			containerOptions: CONTAINER_OPTIONS,
 			error: "Database not available",
 		};
 	}
 
 	const result = await db
 		.prepare(
-			`SELECT id, artifact_type, placement, config, sort_order, created_at
-       FROM artifacts WHERE tenant_id = ?
-       ORDER BY sort_order ASC, created_at ASC`,
+			`SELECT id, artifact_type, placement, config, sort_order, created_at,
+			 visibility, discovery_rules, reveal_animation, container
+			 FROM artifacts WHERE tenant_id = ?
+			 ORDER BY sort_order ASC, created_at ASC`,
 		)
 		.bind(tenantId)
 		.all<ArtifactRow>()
@@ -50,12 +65,19 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 		placement: row.placement,
 		config: sanitizeConfig(row.config),
 		sortOrder: row.sort_order,
+		visibility: row.visibility || "always",
+		discoveryRules: parseDiscoveryRules(row.discovery_rules),
+		revealAnimation: row.reveal_animation || "fade",
+		container: row.container || "none",
 	}));
 
 	return {
 		artifacts,
 		artifactTypes: ARTIFACT_TYPES,
 		placementOptions: PLACEMENT_OPTIONS,
+		visibilityOptions: VISIBILITY_OPTIONS,
+		revealAnimationOptions: REVEAL_ANIMATION_OPTIONS,
+		containerOptions: CONTAINER_OPTIONS,
 	};
 };
 
@@ -83,7 +105,25 @@ export const actions: Actions = {
 
 		const placement = isValidPlacement(formData.get("placement") as string)
 			? (formData.get("placement") as string)
-			: "right-vine";
+			: "sidebar";
+
+		const visibility = isValidVisibility(
+			formData.get("visibility") as string,
+		)
+			? (formData.get("visibility") as string)
+			: "always";
+
+		const revealAnimation = isValidRevealAnimation(
+			formData.get("revealAnimation") as string,
+		)
+			? (formData.get("revealAnimation") as string)
+			: "fade";
+
+		const container = isValidContainer(
+			formData.get("container") as string,
+		)
+			? (formData.get("container") as string)
+			: "none";
 
 		const configStr = (formData.get("config") as string) || "{}";
 		if (configStr.length > MAX_CONFIG_SIZE) {
@@ -107,10 +147,21 @@ export const actions: Actions = {
 
 			await db
 				.prepare(
-					`INSERT INTO artifacts (id, tenant_id, artifact_type, placement, config, sort_order)
-           VALUES (?, ?, ?, ?, ?, ?)`,
+					`INSERT INTO artifacts (id, tenant_id, artifact_type, placement, config, sort_order,
+					 visibility, reveal_animation, container)
+					 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 				)
-				.bind(id, tenantId, artifactType, placement, configStr, sortOrder)
+				.bind(
+					id,
+					tenantId,
+					artifactType,
+					placement,
+					configStr,
+					sortOrder,
+					visibility,
+					revealAnimation,
+					container,
+				)
 				.run();
 
 			return { success: true, artifactAdded: true };
@@ -145,7 +196,9 @@ export const actions: Actions = {
 
 			return { success: true, artifactRemoved: true };
 		} catch (error) {
-			logGroveError("Arbor", ARBOR_ERRORS.OPERATION_FAILED, { cause: error });
+			logGroveError("Arbor", ARBOR_ERRORS.OPERATION_FAILED, {
+				cause: error,
+			});
 			return fail(500, {
 				error: ARBOR_ERRORS.OPERATION_FAILED.userMessage,
 				error_code: ARBOR_ERRORS.OPERATION_FAILED.code,
