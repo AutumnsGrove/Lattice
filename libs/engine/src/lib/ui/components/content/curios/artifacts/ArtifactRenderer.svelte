@@ -3,42 +3,43 @@
 	 * ArtifactRenderer — Renders the correct artifact component based on type.
 	 * Handles container wrapping (bare vs glass-card) and reveal animations.
 	 */
-	import type { ArtifactDisplay, ArtifactType, RevealAnimation } from '$lib/curios/artifacts';
-	import { GlassCard } from '$lib/ui/components/ui';
+	import type { Component } from "svelte";
+	import type { ArtifactDisplay, ArtifactType } from "$lib/curios/artifacts";
+	import { GlassCard } from "$lib/ui/components/ui";
 
-	import Magic8Ball from './Magic8Ball.svelte';
-	import FortuneCookie from './FortuneCookie.svelte';
-	import TarotCard from './TarotCard.svelte';
-	import CrystalBall from './CrystalBall.svelte';
-	import GlassCathedral from './GlassCathedral.svelte';
-	import DiceRoller from './DiceRoller.svelte';
-	import CoinFlip from './CoinFlip.svelte';
-	import WishingWell from './WishingWell.svelte';
-	import SnowGlobe from './SnowGlobe.svelte';
-	import MarqueeText from './MarqueeText.svelte';
-	import BlinkingNew from './BlinkingNew.svelte';
-	import RainbowDivider from './RainbowDivider.svelte';
-	import EmailButton from './EmailButton.svelte';
-	import MoodCandle from './MoodCandle.svelte';
-	import WindChime from './WindChime.svelte';
-	import Hourglass from './Hourglass.svelte';
-	import PotionBottle from './PotionBottle.svelte';
-	import MusicBox from './MusicBox.svelte';
-	import CompassRose from './CompassRose.svelte';
-	import TerrariumGlobe from './TerrariumGlobe.svelte';
+	import Magic8Ball from "./Magic8Ball.svelte";
+	import FortuneCookie from "./FortuneCookie.svelte";
+	import TarotCard from "./TarotCard.svelte";
+	import CrystalBall from "./CrystalBall.svelte";
+	import GlassCathedral from "./GlassCathedral.svelte";
+	import DiceRoller from "./DiceRoller.svelte";
+	import CoinFlip from "./CoinFlip.svelte";
+	import WishingWell from "./WishingWell.svelte";
+	import SnowGlobe from "./SnowGlobe.svelte";
+	import MarqueeText from "./MarqueeText.svelte";
+	import BlinkingNew from "./BlinkingNew.svelte";
+	import RainbowDivider from "./RainbowDivider.svelte";
+	import EmailButton from "./EmailButton.svelte";
+	import MoodCandle from "./MoodCandle.svelte";
+	import WindChime from "./WindChime.svelte";
+	import Hourglass from "./Hourglass.svelte";
+	import PotionBottle from "./PotionBottle.svelte";
+	import MusicBox from "./MusicBox.svelte";
+	import CompassRose from "./CompassRose.svelte";
+	import TerrariumGlobe from "./TerrariumGlobe.svelte";
 
 	let {
 		artifact,
-		tenantId = '',
+		tenantId = "",
 	}: {
 		artifact: ArtifactDisplay;
 		tenantId?: string;
 	} = $props();
 
-	const useGlassCard = $derived(artifact.container === 'glass-card');
-	const revealClass = $derived(`reveal-${artifact.revealAnimation || 'fade'}`);
+	const useGlassCard = $derived(artifact.container === "glass-card");
+	const revealClass = $derived(`reveal-${artifact.revealAnimation || "fade"}`);
 
-	const componentMap: Record<ArtifactType, typeof Magic8Ball> = {
+	const componentMap: Record<ArtifactType, Component<any>> = {
 		magic8ball: Magic8Ball,
 		fortunecookie: FortuneCookie,
 		tarotcard: TarotCard,
@@ -68,12 +69,12 @@
 		const base: Record<string, unknown> = { config: artifact.config };
 
 		// Some artifacts need tenantId for daily seeding
-		if (['fortunecookie', 'tarotcard'].includes(artifact.artifactType)) {
+		if (["fortunecookie", "tarotcard"].includes(artifact.artifactType)) {
 			base.tenantId = tenantId;
 		}
 
 		// Glass Cathedral needs its artifact ID for panel loading
-		if (artifact.artifactType === 'glasscathedral') {
+		if (artifact.artifactType === "glasscathedral") {
 			base.artifactId = artifact.id;
 		}
 
@@ -125,34 +126,75 @@
 	}
 
 	@keyframes reveal-fade {
-		0% { opacity: 0; }
-		100% { opacity: 1; }
+		0% {
+			opacity: 0;
+		}
+		100% {
+			opacity: 1;
+		}
 	}
 
 	@keyframes reveal-sparkle {
-		0% { opacity: 0; filter: brightness(2); transform: scale(0.9); }
-		50% { opacity: 1; filter: brightness(1.5); }
-		100% { opacity: 1; filter: brightness(1); transform: scale(1); }
+		0% {
+			opacity: 0;
+			filter: brightness(2);
+			transform: scale(0.9);
+		}
+		50% {
+			opacity: 1;
+			filter: brightness(1.5);
+		}
+		100% {
+			opacity: 1;
+			filter: brightness(1);
+			transform: scale(1);
+		}
 	}
 
 	@keyframes reveal-slide {
-		0% { opacity: 0; transform: translateX(-1rem); }
-		100% { opacity: 1; transform: translateX(0); }
+		0% {
+			opacity: 0;
+			transform: translateX(-1rem);
+		}
+		100% {
+			opacity: 1;
+			transform: translateX(0);
+		}
 	}
 
 	@keyframes reveal-grow {
-		0% { opacity: 0; transform: scale(0.3); }
-		70% { transform: scale(1.05); }
-		100% { opacity: 1; transform: scale(1); }
+		0% {
+			opacity: 0;
+			transform: scale(0.3);
+		}
+		70% {
+			transform: scale(1.05);
+		}
+		100% {
+			opacity: 1;
+			transform: scale(1);
+		}
 	}
 
 	@keyframes reveal-flicker {
-		0% { opacity: 0; }
-		20% { opacity: 0.8; }
-		40% { opacity: 0.2; }
-		60% { opacity: 0.9; }
-		80% { opacity: 0.4; }
-		100% { opacity: 1; }
+		0% {
+			opacity: 0;
+		}
+		20% {
+			opacity: 0.8;
+		}
+		40% {
+			opacity: 0.2;
+		}
+		60% {
+			opacity: 0.9;
+		}
+		80% {
+			opacity: 0.4;
+		}
+		100% {
+			opacity: 1;
+		}
 	}
 
 	@media (prefers-reduced-motion: reduce) {
