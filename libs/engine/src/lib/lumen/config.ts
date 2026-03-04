@@ -95,11 +95,11 @@ export const MODELS = {
 	// OpenRouter Models - Reverie (Tool Calling)
 	// ─────────────────────────────────────────────────────────────────────────────
 
-	/** Reverie routing — Liquid LFM2 8B (fast tool calling, structured output) */
-	LIQUID_LFM2: "liquid/lfm2-8b",
+	/** Reverie routing — Liquid LFM-2 24B A2B (fast tool calling, structured output) */
+	LIQUID_LFM2: "liquid/lfm-2-24b-a2b",
 
-	/** Reverie composition — MiniMax M2.5 (strong multi-tool reasoning) */
-	MINIMAX_M2_5: "minimax/minimax-m1-80k",
+	/** Reverie fallback — MiniMax M2.5 (strong multi-tool reasoning) */
+	MINIMAX_M2_5: "minimax/minimax-m2.5",
 
 	// ─────────────────────────────────────────────────────────────────────────────
 	// Cloudflare Workers AI Models (last-resort fallbacks)
@@ -340,7 +340,7 @@ export const TASK_REGISTRY: Record<LumenTask, TaskConfig> = {
 	},
 
 	// ─────────────────────────────────────────────────────────────────────────────
-	// Reverie — Natural Language Config (Liquid LFM2 → Kimi K2)
+	// Reverie — Natural Language Config (Liquid LFM-2 → MiniMax M2.5)
 	//
 	// Fast tool-calling model for single-domain routing and simple changes.
 	// Low temperature for deterministic tool selection.
@@ -348,22 +348,22 @@ export const TASK_REGISTRY: Record<LumenTask, TaskConfig> = {
 	reverie: {
 		primaryModel: MODELS.LIQUID_LFM2,
 		primaryProvider: "openrouter",
-		fallbackChain: [{ provider: "openrouter", model: MODELS.KIMI_K2 }],
+		fallbackChain: [{ provider: "openrouter", model: MODELS.MINIMAX_M2_5 }],
 		defaultMaxTokens: 1024,
 		defaultTemperature: 0.1,
 		description: "Reverie natural language configuration",
 	},
 
 	// ─────────────────────────────────────────────────────────────────────────────
-	// Reverie Compose — Multi-Domain Composition (MiniMax M2.5 → DeepSeek V3)
+	// Reverie Compose — Multi-Domain Composition (Liquid LFM-2 → MiniMax M2.5)
 	//
-	// Stronger reasoning model for atmosphere-level changes across 5-7 domains.
-	// Slightly higher temperature for creative cross-domain coordination.
+	// Same model chain as reverie but with higher token limit and temperature
+	// for atmosphere-level changes across 5-7 domains.
 	// ─────────────────────────────────────────────────────────────────────────────
 	"reverie-compose": {
-		primaryModel: MODELS.MINIMAX_M2_5,
+		primaryModel: MODELS.LIQUID_LFM2,
 		primaryProvider: "openrouter",
-		fallbackChain: [{ provider: "openrouter", model: MODELS.KIMI_K2 }],
+		fallbackChain: [{ provider: "openrouter", model: MODELS.MINIMAX_M2_5 }],
 		defaultMaxTokens: 2048,
 		defaultTemperature: 0.3,
 		description: "Reverie multi-domain composition",
