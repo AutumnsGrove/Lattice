@@ -12,7 +12,6 @@ import {
 	Leaf,
 	Trees,
 	BookOpen,
-	TreePine,
 	Mail,
 	Archive,
 	Sparkles,
@@ -50,13 +49,6 @@ export function getDestinations(homeGrove: string): LanternDestination[] {
 			icon: Leaf,
 			external: true,
 			termSlug: "meadow",
-		},
-		{
-			href: groveUrl,
-			label: "Home Page",
-			groveLabel: "Grove Home",
-			icon: TreePine,
-			external: true,
 		},
 		{
 			href: "https://grove.place/knowledge",

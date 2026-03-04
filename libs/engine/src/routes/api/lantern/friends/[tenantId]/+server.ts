@@ -7,6 +7,7 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { API_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
+import { getVerifiedTenantId } from "$lib/auth/session.js";
 
 export const DELETE: RequestHandler = async ({ params, platform, locals }) => {
 	const db = platform?.env?.DB;
@@ -24,6 +25,9 @@ export const DELETE: RequestHandler = async ({ params, platform, locals }) => {
 		throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
 	}
 
+	// Verify the authenticated user owns this tenant
+	const verifiedTenantId = await getVerifiedTenantId(db, tenantId, locals.user);
+
 	const friendTenantId = params.tenantId;
 	if (!friendTenantId) {
 		throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
@@ -32,7 +36,7 @@ export const DELETE: RequestHandler = async ({ params, platform, locals }) => {
 	try {
 		const existing = await db
 			.prepare(`SELECT id FROM lantern_friends WHERE tenant_id = ? AND friend_tenant_id = ?`)
-			.bind(tenantId, friendTenantId)
+			.bind(verifiedTenantId, friendTenantId)
 			.first<{ id: string }>();
 
 		if (!existing) {
@@ -41,7 +45,7 @@ export const DELETE: RequestHandler = async ({ params, platform, locals }) => {
 
 		await db
 			.prepare(`DELETE FROM lantern_friends WHERE tenant_id = ? AND friend_tenant_id = ?`)
-			.bind(tenantId, friendTenantId)
+			.bind(verifiedTenantId, friendTenantId)
 			.run();
 
 		return json({ success: true });

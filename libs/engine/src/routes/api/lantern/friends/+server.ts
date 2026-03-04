@@ -8,6 +8,7 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { API_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
+import { getVerifiedTenantId } from "$lib/auth/session.js";
 import { createThreshold } from "$lib/threshold/factory.js";
 import { thresholdCheck } from "$lib/threshold/adapters/sveltekit.js";
 
@@ -79,6 +80,9 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 		throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
 	}
 
+	// Verify the authenticated user owns this tenant
+	const verifiedTenantId = await getVerifiedTenantId(db, tenantId, locals.user);
+
 	// Rate limit: 30 friend additions per hour
 	const threshold = createThreshold(platform?.env, { identifier: locals.user.id });
 	if (threshold) {
@@ -115,14 +119,14 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 		}
 
 		// Prevent self-add
-		if (friendTenant.id === tenantId) {
+		if (friendTenant.id === verifiedTenantId) {
 			throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
 		}
 
 		// Check friend limit
 		const countResult = await db
 			.prepare(`SELECT COUNT(*) as count FROM lantern_friends WHERE tenant_id = ?`)
-			.bind(tenantId)
+			.bind(verifiedTenantId)
 			.first<{ count: number }>();
 
 		if ((countResult?.count ?? 0) >= MAX_FRIENDS_PER_TENANT) {
@@ -135,7 +139,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 				`INSERT OR IGNORE INTO lantern_friends (tenant_id, friend_tenant_id, friend_name, friend_subdomain, source)
 				 VALUES (?, ?, ?, ?, 'manual')`,
 			)
-			.bind(tenantId, friendTenant.id, friendTenant.name, friendTenant.subdomain)
+			.bind(verifiedTenantId, friendTenant.id, friendTenant.name, friendTenant.subdomain)
 			.run();
 
 		return json(
