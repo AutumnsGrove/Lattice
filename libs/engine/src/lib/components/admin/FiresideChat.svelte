@@ -5,12 +5,17 @@
 	 * A chat interface that replaces the editor when in Fireside mode.
 	 * Helps writers who freeze at the blank page by turning conversation into drafts.
 	 *
+	 * Built on GlassChat — this component owns only Fireside-specific domain logic:
+	 * API calls, draft mode, and the fire-themed personality.
+	 *
 	 * @fires draft - When user accepts a generated draft { title: string, content: string, marker: string }
 	 * @fires close - When user exits Fireside mode without a draft
 	 */
 
 	import { tick } from "svelte";
-	import { Send, Sparkles, ArrowLeft, Check, RotateCcw, Flame, X } from "lucide-svelte";
+	import { Sparkles, ArrowLeft, Check, RotateCcw, X } from "lucide-svelte";
+	import { GlassChat, type ChatMessageData, type ChatRoleMap } from "$lib/ui/components/ui";
+	import { api } from "$lib/utils/api";
 
 	// ============================================================================
 	// Props & Events
@@ -26,21 +31,28 @@
 	let { onDraft, onClose }: Props = $props();
 
 	// ============================================================================
+	// Role Configuration
+	// ============================================================================
+
+	const FIRESIDE_ROLES: ChatRoleMap = {
+		wisp: {
+			label: "Wisp",
+			align: "start",
+			bubbleClass:
+				"bg-[var(--grove-bg-secondary,#2a2a2a)] border border-[var(--grove-border,#333)]",
+		},
+		user: {
+			label: "You",
+			align: "end",
+			bubbleClass: "bg-[var(--grove-accent-primary,#4a7c59)] text-white",
+		},
+	};
+
+	// ============================================================================
 	// State
 	// ============================================================================
 
-	interface Message {
-		id: string; // Unique ID for message identification (prevents race conditions)
-		role: "wisp" | "user";
-		content: string;
-		timestamp: string;
-	}
-
 	// API response types
-	interface ApiErrorResponse {
-		error?: string;
-	}
-
 	interface StartResponse {
 		conversationId: string;
 		reply: string;
@@ -58,7 +70,7 @@
 		warning?: string;
 	}
 
-	let messages = $state<Message[]>([]);
+	let messages = $state<ChatMessageData[]>([]);
 	let inputValue = $state("");
 	let isLoading = $state(false);
 	let canDraft = $state(false);
@@ -72,23 +84,16 @@
 	);
 	let isDrafting = $state(false);
 
-	// Refs
-	let messagesContainer = $state<HTMLDivElement | undefined>(undefined);
-	let inputElement = $state<HTMLTextAreaElement | undefined>(undefined);
-
 	// ============================================================================
 	// Constants
 	// ============================================================================
 
-	/** Average reading speed in words per minute for reading time estimates */
 	const WORDS_PER_MINUTE = 200;
 
-	/** Calculate word count for content */
 	function getWordCount(content: string): number {
 		return content.trim().split(/\s+/).filter(Boolean).length;
 	}
 
-	/** Calculate reading time in minutes */
 	function getReadingTime(content: string): number {
 		return Math.max(1, Math.ceil(getWordCount(content) / WORDS_PER_MINUTE));
 	}
@@ -102,18 +107,9 @@
 		error = null;
 
 		try {
-			const response = await fetch("/api/grove/wisp/fireside", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ action: "start" }),
-			});
+			const data = await api.post<StartResponse>("/api/grove/wisp/fireside", { action: "start" });
+			if (!data) throw new Error("Failed to start conversation");
 
-			if (!response.ok) {
-				const data = (await response.json()) as ApiErrorResponse;
-				throw new Error(data.error || "Failed to start conversation");
-			}
-
-			const data = (await response.json()) as StartResponse;
 			conversationId = data.conversationId;
 
 			messages = [
@@ -136,49 +132,30 @@
 
 		const userMessage = inputValue.trim();
 		inputValue = "";
-		if (inputElement) {
-			inputElement.style.height = "";
-			inputElement.style.overflowY = "hidden";
-		}
 		error = null;
 
-		// Create the message with a unique ID for identification (avoids timestamp collision)
-		const newMessage: Message = {
+		const newMessage: ChatMessageData = {
 			id: crypto.randomUUID(),
 			role: "user",
 			content: userMessage,
 			timestamp: new Date().toISOString(),
 		};
 
-		// Add user message to UI immediately
 		messages = [...messages, newMessage];
-
-		// Scroll to bottom
 		await tick();
-		scrollToBottom();
 
 		isLoading = true;
 
 		try {
-			const response = await fetch("/api/grove/wisp/fireside", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					action: "respond",
-					message: userMessage,
-					conversation: messages,
-				}),
+			const data = await api.post<RespondResponse>("/api/grove/wisp/fireside", {
+				action: "respond",
+				message: userMessage,
+				conversation: messages,
 			});
+			if (!data) throw new Error("Failed to send message");
 
-			if (!response.ok) {
-				const data = (await response.json()) as ApiErrorResponse;
-				throw new Error(data.error || "Failed to send message");
-			}
-
-			const data = (await response.json()) as RespondResponse;
 			canDraft = data.canDraft;
 
-			// Add Wisp's response
 			messages = [
 				...messages,
 				{
@@ -188,16 +165,11 @@
 					timestamp: new Date().toISOString(),
 				},
 			];
-
-			await tick();
-			scrollToBottom();
 		} catch (err) {
 			error = err instanceof Error ? err.message : "Something went wrong";
-			// Remove the specific user message that failed (safer than slice)
 			messages = messages.filter((m) => m.id !== newMessage.id);
 		} finally {
 			isLoading = false;
-			inputElement?.focus();
 		}
 	}
 
@@ -208,22 +180,12 @@
 		error = null;
 
 		try {
-			const response = await fetch("/api/grove/wisp/fireside", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					action: "draft",
-					conversation: messages,
-					conversationId,
-				}),
+			const data = await api.post<DraftResponse>("/api/grove/wisp/fireside", {
+				action: "draft",
+				conversation: messages,
+				conversationId,
 			});
-
-			if (!response.ok) {
-				const data = (await response.json()) as ApiErrorResponse;
-				throw new Error(data.error || "Failed to generate draft");
-			}
-
-			const data = (await response.json()) as DraftResponse;
+			if (!data) throw new Error("Failed to generate draft");
 			draft = {
 				title: data.title,
 				content: data.content,
@@ -250,50 +212,13 @@
 	}
 
 	function handleClose() {
-		if (onClose) {
-			onClose();
-		}
-	}
-
-	// ============================================================================
-	// Helpers
-	// ============================================================================
-
-	function scrollToBottom() {
-		if (messagesContainer) {
-			messagesContainer.scrollTop = messagesContainer.scrollHeight;
-		}
-	}
-
-	function handleKeydown(event: KeyboardEvent) {
-		if (event.key === "Enter" && !event.shiftKey) {
-			event.preventDefault();
-			sendMessage();
-		}
-		if (event.key === "Escape") {
-			handleClose();
-		}
-	}
-
-	function autoResize(event: Event) {
-		const target = event.target as HTMLTextAreaElement;
-		const scrollY = window.scrollY;
-
-		target.style.height = "auto";
-		const newHeight = Math.min(target.scrollHeight, 150);
-		target.style.height = newHeight + "px";
-		target.style.overflowY = newHeight >= 150 ? "auto" : "hidden";
-
-		if (window.scrollY !== scrollY) {
-			window.scrollTo({ top: scrollY });
-		}
+		onClose?.();
 	}
 
 	// ============================================================================
 	// Lifecycle
 	// ============================================================================
 
-	// Start conversation on mount
 	$effect(() => {
 		startConversation();
 	});
@@ -337,88 +262,63 @@
 			</footer>
 		</div>
 	{:else}
-		<!-- Chat Mode -->
-		<header class="fireside-header">
-			<div class="fire-art" aria-hidden="true">
-				<pre>{`     ~  ~
+		<!-- Chat Mode via GlassChat -->
+		<GlassChat
+			{messages}
+			roles={FIRESIDE_ROLES}
+			{isLoading}
+			loadingRole="wisp"
+			{error}
+			bind:inputValue
+			onSend={sendMessage}
+			inputDisabled={isLoading}
+			inputPlaceholder="Type your thoughts..."
+			onClose={handleClose}
+			variant="dark"
+			class="h-full"
+		>
+			{#snippet header()}
+				<header class="fireside-header">
+					<div class="fire-art" aria-hidden="true">
+						<pre>{`     ~  ~
     (    )
    (      )
   ~~~~~~~~~~`}</pre>
-			</div>
-			<h2>Fireside with Wisp</h2>
-			<p class="fireside-subtitle">sit by the fire and tell me what's on your mind</p>
-			<button class="close-button" onclick={handleClose} type="button" aria-label="Exit Fireside">
-				<X size={16} />
-			</button>
-		</header>
+					</div>
+					<h2>Fireside with Wisp</h2>
+					<p class="fireside-subtitle">sit by the fire and tell me what's on your mind</p>
+					<button
+						class="close-button"
+						onclick={handleClose}
+						type="button"
+						aria-label="Exit Fireside"
+					>
+						<X size={16} />
+					</button>
+				</header>
+			{/snippet}
 
-		<div class="messages-container" bind:this={messagesContainer} role="log" aria-live="polite">
-			{#each messages as message}
-				<div class="message message-{message.role}">
-					<span class="message-role">{message.role === "wisp" ? "Wisp" : "You"}</span>
-					<p class="message-content">{message.content}</p>
-				</div>
-			{/each}
-
-			{#if isLoading}
-				<div class="message message-wisp loading" aria-label="Wisp is thinking">
-					<span class="message-role">Wisp</span>
-					<p class="message-content typing" aria-hidden="true">
-						<span class="dot"></span>
-						<span class="dot"></span>
-						<span class="dot"></span>
+			{#snippet inputToolbar()}
+				{#if canDraft}
+					<button class="draft-button" onclick={generateDraft} disabled={isDrafting} type="button">
+						<Sparkles size={16} />
+						{isDrafting ? "Drafting..." : "Ready to draft"}
+					</button>
+				{:else if messages.length > 0}
+					<p
+						class="draft-hint"
+						title="Share a few more thoughts and I'll be able to help shape them into a draft"
+					>
+						<Sparkles size={16} />
+						<span>Keep chatting - drafting unlocks after a few exchanges</span>
 					</p>
-					<span class="sr-only">Wisp is thinking...</span>
-				</div>
-			{/if}
+				{/if}
+			{/snippet}
 
-			{#if error}
-				<div class="error-message" role="alert">
-					{error}
-				</div>
-			{/if}
-		</div>
-
-		<footer class="input-area">
-			{#if canDraft}
-				<button class="draft-button" onclick={generateDraft} disabled={isDrafting} type="button">
-					<Sparkles size={16} />
-					{isDrafting ? "Drafting..." : "Ready to draft"}
-				</button>
-			{:else if messages.length > 0}
-				<p
-					class="draft-hint"
-					title="Share a few more thoughts and I'll be able to help shape them into a draft"
-				>
-					<Sparkles size={16} />
-					<span>Keep chatting - drafting unlocks after a few exchanges</span>
-				</p>
-			{/if}
-
-			<div class="input-row">
-				<textarea
-					bind:this={inputElement}
-					bind:value={inputValue}
-					onkeydown={handleKeydown}
-					oninput={autoResize}
-					placeholder="Type your thoughts..."
-					rows="1"
-					disabled={isLoading}
-					aria-label="Your message"
-				></textarea>
-				<button
-					class="send-button"
-					onclick={sendMessage}
-					disabled={!inputValue.trim() || isLoading}
-					type="button"
-					aria-label="Send message"
-				>
-					<Send size={18} />
-				</button>
-			</div>
-
-			<p class="philosophy">~ a good listener, not a ghostwriter ~</p>
-		</footer>
+			{#snippet inputFooter()}
+				<p class="philosophy">~ a good listener, not a ghostwriter ~</p>
+			{/snippet}
+		</GlassChat>
 	{/if}
 </div>
 
@@ -428,15 +328,13 @@
 		flex-direction: column;
 		height: 100%;
 		min-height: 500px;
-		background: var(--grove-bg-primary, #1a1a1a);
 		color: var(--grove-text-primary, #e8e8e8);
 		font-family: var(--grove-font-sans, system-ui, sans-serif);
 		border-radius: var(--grove-radius-lg, 12px);
 		overflow: hidden;
-		overflow-anchor: none;
 	}
 
-	/* Header */
+	/* ===== Fireside Header ===== */
 	.fireside-header {
 		position: relative;
 		padding: 1.5rem;
@@ -491,104 +389,7 @@
 		background: var(--grove-bg-secondary, #2a2a2a);
 	}
 
-	/* Messages */
-	.messages-container {
-		flex: 1;
-		overflow-y: auto;
-		padding: 1rem;
-		display: flex;
-		flex-direction: column;
-		gap: 1rem;
-	}
-
-	.message {
-		max-width: 85%;
-		padding: 0.75rem 1rem;
-		border-radius: var(--grove-radius-md, 8px);
-	}
-
-	.message-wisp {
-		align-self: flex-start;
-		background: var(--grove-bg-secondary, #2a2a2a);
-		border: 1px solid var(--grove-border, #333);
-	}
-
-	.message-user {
-		align-self: flex-end;
-		background: var(--grove-accent-primary, #4a7c59);
-		color: white;
-	}
-
-	.message-role {
-		display: block;
-		font-size: 0.75rem;
-		font-weight: 600;
-		margin-bottom: 0.25rem;
-		opacity: 0.7;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-	}
-
-	.message-user .message-role {
-		text-align: right;
-	}
-
-	.message-content {
-		margin: 0;
-		line-height: 1.5;
-		white-space: pre-wrap;
-	}
-
-	/* Typing indicator */
-	.typing {
-		display: flex;
-		gap: 0.25rem;
-		padding: 0.25rem 0;
-	}
-
-	.dot {
-		width: 6px;
-		height: 6px;
-		background: var(--grove-text-secondary, #a0a0a0);
-		border-radius: 50%;
-		animation: bounce 1.4s infinite ease-in-out both;
-	}
-
-	.dot:nth-child(1) {
-		animation-delay: -0.32s;
-	}
-	.dot:nth-child(2) {
-		animation-delay: -0.16s;
-	}
-
-	@keyframes bounce {
-		0%,
-		80%,
-		100% {
-			transform: scale(0);
-		}
-		40% {
-			transform: scale(1);
-		}
-	}
-
-	/* Error */
-	.error-message {
-		padding: 0.75rem 1rem;
-		background: rgba(220, 53, 69, 0.15);
-		border: 1px solid rgba(220, 53, 69, 0.3);
-		border-radius: var(--grove-radius-md, 8px);
-		color: #ff6b6b;
-		font-size: 0.875rem;
-	}
-
-	/* Input Area */
-	.input-area {
-		padding: 1rem;
-		border-top: 1px solid var(--grove-border, #333);
-		background: var(--grove-bg-secondary, #2a2a2a);
-	}
-
+	/* ===== Toolbar: Draft Button & Hint ===== */
 	.draft-button {
 		display: flex;
 		align-items: center;
@@ -596,7 +397,6 @@
 		gap: 0.5rem;
 		width: 100%;
 		padding: 0.75rem 1rem;
-		margin-bottom: 0.75rem;
 		background: linear-gradient(135deg, var(--grove-accent-warm, #ff8c32) 0%, #e67320 100%);
 		color: white;
 		border: none;
@@ -625,84 +425,31 @@
 		justify-content: center;
 		gap: 0.5rem;
 		padding: 0.5rem 1rem;
-		margin-bottom: 0.75rem;
 		font-size: 0.8125rem;
 		color: var(--grove-text-secondary, #a0a0a0);
 		font-style: italic;
 		cursor: help;
+		margin: 0;
 	}
 
 	.draft-hint:hover {
 		color: var(--grove-text-primary, #e8e8e8);
 	}
 
-	.input-row {
-		display: flex;
-		gap: 0.5rem;
-		align-items: flex-end;
-	}
-
-	.input-row textarea {
-		flex: 1;
-		padding: 0.75rem 1rem;
-		background: var(--grove-bg-primary, #1a1a1a);
-		border: 1px solid var(--grove-border, #333);
-		border-radius: var(--grove-radius-md, 8px);
-		color: var(--grove-text-primary, #e8e8e8);
-		font-family: inherit;
-		font-size: 0.9375rem;
-		line-height: 1.5;
-		resize: none;
-		min-height: 44px;
-		max-height: 150px;
-		overflow-y: hidden;
-	}
-
-	.input-row textarea:focus {
-		outline: none;
-		border-color: var(--grove-accent-primary, #4a7c59);
-	}
-
-	.input-row textarea::placeholder {
-		color: var(--grove-text-secondary, #a0a0a0);
-	}
-
-	.send-button {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 44px;
-		height: 44px;
-		background: var(--grove-accent-primary, #4a7c59);
-		border: none;
-		border-radius: var(--grove-radius-md, 8px);
-		color: white;
-		cursor: pointer;
-		transition: background 0.15s;
-	}
-
-	.send-button:hover:not(:disabled) {
-		background: var(--grove-accent-primary-hover, #3d6b4a);
-	}
-
-	.send-button:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
-
 	.philosophy {
-		margin: 0.75rem 0 0;
+		margin: 0;
 		font-size: 0.75rem;
 		color: var(--grove-text-secondary, #a0a0a0);
 		text-align: center;
 		font-style: italic;
 	}
 
-	/* Draft View */
+	/* ===== Draft View ===== */
 	.draft-view {
 		display: flex;
 		flex-direction: column;
 		height: 100%;
+		background: var(--grove-bg-primary, #1a1a1a);
 	}
 
 	.draft-header {
@@ -834,37 +581,15 @@
 		background: var(--grove-accent-primary-hover, #3d6b4a);
 	}
 
-	/* Screen reader only */
-	.sr-only {
-		position: absolute;
-		width: 1px;
-		height: 1px;
-		padding: 0;
-		margin: -1px;
-		overflow: hidden;
-		clip: rect(0, 0, 0, 0);
-		white-space: nowrap;
-		border: 0;
-	}
-
-	/* Reduced motion */
+	/* ===== Reduced Motion ===== */
 	@media (prefers-reduced-motion: reduce) {
-		.dot {
-			animation: none;
-			opacity: 0.5;
-		}
-
 		.draft-button:hover:not(:disabled) {
 			transform: none;
 		}
 	}
 
-	/* Mobile adjustments */
+	/* ===== Mobile ===== */
 	@media (max-width: 640px) {
-		.message {
-			max-width: 95%;
-		}
-
 		.draft-content {
 			padding: 1.5rem;
 		}

@@ -48,6 +48,14 @@ export { default as GlassCarousel } from "./GlassCarousel.svelte";
 export { default as GlassLegend } from "./GlassLegend.svelte";
 export { default as GlassStatusWidget } from "./GlassStatusWidget.svelte";
 export { default as GlassComparisonTable } from "./GlassComparisonTable.svelte";
+
+// GlassChat - reusable chat interface
+export { default as GlassChat } from "./glasschat/GlassChat.svelte";
+export { default as ChatMessage } from "./glasschat/ChatMessage.svelte";
+export { default as ChatInput } from "./glasschat/ChatInput.svelte";
+export { default as ChatTypingIndicator } from "./glasschat/ChatTypingIndicator.svelte";
+export * from "./glasschat/types";
+
 export { default as Waystone } from "./Waystone.svelte";
 export { default as WaystonePopup } from "./waystone/WaystonePopup.svelte";
 export * from "./waystone/types";
@@ -68,13 +76,13 @@ export * from "./groveterm/types";
 
 // Table sub-components (from primitives)
 export {
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableCell,
-  TableHead,
-  TableFooter,
-  TableCaption,
+	TableHeader,
+	TableBody,
+	TableRow,
+	TableCell,
+	TableHead,
+	TableFooter,
+	TableCaption,
 } from "$lib/ui/components/primitives/table";
 
 // Toast utility
