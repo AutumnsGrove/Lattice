@@ -80,11 +80,28 @@
 	}
 
 	// ── Error Sanitization ────────────────────────────────────────────────────
-	// Never display raw API error messages to users — they may leak internal details.
+	// Map every known error code to a friendly, actionable message.
+	// Never display raw API error messages — they may leak internal details.
 	const SAFE_ERROR_MESSAGES: Record<string, string> = {
-		"REV-001": "Reverie is having trouble understanding that. Try rephrasing?",
-		"REV-002": "Reverie couldn't find the right settings to change. Try being more specific?",
+		// Reverie worker errors (REV-XXX)
+		"REV-001": "You need to be signed in to use Reverie.",
+		"REV-002": "Your session has expired. Please sign in again.",
+		"REV-003": "Reverie requires a paid plan. Take Root to unlock it!",
+		"REV-004": "Reverie didn't understand that request. Try rephrasing?",
+		"REV-005": "That message is too long. Try keeping it shorter.",
+		"REV-006": "Reverie couldn't find any settings to change. Try being more specific — for example, \"make my accent color warmer\" or \"change my font to something cozy\".",
+		"REV-007": "That change preview has expired. Send your request again to get a fresh preview.",
+		"REV-008": "Those settings are read-only and can't be changed through Reverie.",
+		"REV-009": "Some of the values Reverie chose didn't pass validation. Try rephrasing your request.",
+		"REV-010": "Reverie couldn't apply those changes. Please try again.",
+		"REV-011": "You're sending requests too quickly. Take a breath and try again in a moment.",
+		"REV-012": "Reverie's AI is temporarily unavailable. Please try again in a moment.",
+		"REV-013": "Reverie's AI ran into an issue. Please try again.",
 		"REV-014": "Something went wrong on our end. Please try again in a moment.",
+		"REV-015": "Reverie couldn't save that change. Please try again.",
+		// Engine proxy errors (GROVE-API-XXX)
+		"GROVE-API-010": "Reverie is temporarily unavailable. Please try again in a moment.",
+		"GROVE-API-020": "You need to be signed in to use Reverie.",
 	};
 	const DEFAULT_CONFIGURE_ERROR = "Reverie couldn't process that request. Please try again.";
 	const DEFAULT_EXECUTE_ERROR = "Some changes couldn't be applied. Please try again.";
