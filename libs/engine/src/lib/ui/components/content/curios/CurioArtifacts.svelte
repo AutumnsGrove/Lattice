@@ -11,8 +11,9 @@
 	 *   ::artifacts[art_abc]::  → artifact by ID
 	 */
 	import type { ArtifactDisplay } from "$lib/curios/artifacts";
-	import { evaluateDiscoveryRules } from "$lib/curios/artifacts";
+	import { evaluateDiscoveryRules, getTypeLabel } from "$lib/curios/artifacts";
 	import ArtifactRenderer from "./artifacts/ArtifactRenderer.svelte";
+	import ArtifactShowcase from "./artifacts/ArtifactShowcase.svelte";
 
 	let { arg = "" }: { arg?: string } = $props();
 
@@ -85,6 +86,15 @@
 	const resolved = $derived(arg ? resolveArtifact() : null);
 	const showAll = $derived(!arg);
 	const notFound = $derived(arg && !loading && !error && !resolved);
+
+	// Showcase state
+	let showcaseOpen = $state(false);
+	let showcaseIndex = $state(0);
+
+	function openShowcase(i: number) {
+		showcaseIndex = i;
+		showcaseOpen = true;
+	}
 </script>
 
 <!-- Loading skeleton -->
@@ -105,8 +115,15 @@
 	<!-- Single resolved artifact -->
 {:else if arg && resolved}
 	<div class="artifacts" role="region" aria-label="Artifact">
-		<ArtifactRenderer artifact={resolved} {tenantId} />
+		<button
+			class="artifact-trigger"
+			onclick={() => openShowcase(0)}
+			aria-label="View {resolved.name || getTypeLabel(resolved.artifactType)}"
+		>
+			<ArtifactRenderer artifact={resolved} {tenantId} />
+		</button>
 	</div>
+	<ArtifactShowcase artifacts={[resolved]} bind:open={showcaseOpen} currentIndex={0} {tenantId} />
 
 	<!-- Not found -->
 {:else if notFound}
@@ -117,15 +134,46 @@
 	<!-- Show all visible artifacts -->
 {:else if showAll && visibleArtifacts.length > 0}
 	<div class="artifacts" role="region" aria-label="Artifacts collection">
-		{#each visibleArtifacts as artifact (artifact.id)}
-			<ArtifactRenderer {artifact} {tenantId} />
+		{#each visibleArtifacts as artifact, i (artifact.id)}
+			<button
+				class="artifact-trigger"
+				onclick={() => openShowcase(i)}
+				aria-label="View {artifact.name || getTypeLabel(artifact.artifactType)}"
+			>
+				<ArtifactRenderer {artifact} {tenantId} />
+			</button>
 		{/each}
 	</div>
+	<ArtifactShowcase
+		artifacts={visibleArtifacts}
+		bind:open={showcaseOpen}
+		currentIndex={showcaseIndex}
+		{tenantId}
+	/>
 {:else if artifacts.length === 0}
 	<p class="artifacts-empty">No artifacts to display</p>
 {/if}
 
 <style>
+	.artifact-trigger {
+		all: unset;
+		cursor: pointer;
+		border-radius: 0.5rem;
+		transition:
+			transform 0.15s ease,
+			box-shadow 0.15s ease;
+	}
+
+	.artifact-trigger:hover {
+		transform: scale(1.03);
+	}
+
+	.artifact-trigger:focus-visible {
+		outline: 2px solid var(--color-primary, #7c3aed);
+		outline-offset: 4px;
+		border-radius: 0.5rem;
+	}
+
 	.artifacts {
 		display: flex;
 		flex-wrap: wrap;
@@ -185,6 +233,14 @@
 	@media (prefers-reduced-motion: reduce) {
 		.artifact-placeholder {
 			animation: none;
+		}
+
+		.artifact-trigger {
+			transition: none;
+		}
+
+		.artifact-trigger:hover {
+			transform: none;
 		}
 	}
 </style>

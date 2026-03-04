@@ -674,6 +674,29 @@ export const MAX_MARQUEE_TEXT_LENGTH = 200;
  */
 export const MAX_ARTIFACTS_PER_TENANT = 100;
 
+/**
+ * Look up the human-readable label for an artifact type.
+ * Returns the raw type string if no match is found.
+ */
+export function getTypeLabel(type: string): string {
+	return ARTIFACT_TYPES.find((t) => t.value === type)?.label ?? type;
+}
+
+/**
+ * Summarize non-empty config values as human-readable display tags.
+ * Used in showcase admin mode and artifact card meta tags.
+ */
+export function summarizeConfig(config: Record<string, unknown>): string[] {
+	return Object.entries(config)
+		.filter(([, v]) => v !== undefined && v !== "" && v !== null)
+		.map(([k, v]) => {
+			if (Array.isArray(v)) return `${k}: ${v.length} items`;
+			if (typeof v === "boolean") return v ? k : "";
+			return `${k}: ${v}`;
+		})
+		.filter(Boolean);
+}
+
 // =============================================================================
 // Utility Functions
 // =============================================================================

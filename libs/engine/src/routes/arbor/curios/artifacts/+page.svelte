@@ -5,7 +5,9 @@
 	import { Wand2, Plus, Trash2, Eye, Sparkles, Box, Pencil } from "lucide-svelte";
 	import { api } from "$lib/utils/api";
 	import ArtifactConfigForm from "$lib/ui/components/content/curios/artifacts/ArtifactConfigForm.svelte";
-	import type { ArtifactType } from "$lib/curios/artifacts";
+	import ArtifactShowcase from "$lib/ui/components/content/curios/artifacts/ArtifactShowcase.svelte";
+	import { summarizeConfig } from "$lib/curios/artifacts";
+	import type { ArtifactType, ArtifactDisplay } from "$lib/curios/artifacts";
 
 	let { data, form } = $props();
 
@@ -22,6 +24,34 @@
 	let editContainer = $state("");
 	let editConfig = $state<Record<string, unknown>>({});
 	let saving = $state(false);
+
+	// Preview showcase
+	let previewOpen = $state(false);
+	let previewIndex = $state(0);
+
+	/** Map admin artifact data to ArtifactDisplay for the showcase */
+	const showcaseArtifacts = $derived<ArtifactDisplay[]>(
+		data.artifacts.map((a) => ({
+			id: a.id,
+			name: a.name ?? "",
+			artifactType: a.artifactType as ArtifactDisplay["artifactType"],
+			placement: a.placement as ArtifactDisplay["placement"],
+			config: a.config,
+			visibility: a.visibility as ArtifactDisplay["visibility"],
+			discoveryRules: [],
+			revealAnimation: a.revealAnimation as ArtifactDisplay["revealAnimation"],
+			container: a.container as ArtifactDisplay["container"],
+			positionX: null,
+			positionY: null,
+			zIndex: 10,
+			fallbackZone: "floating" as const,
+		})),
+	);
+
+	function openPreview(index: number) {
+		previewIndex = index;
+		previewOpen = true;
+	}
 
 	// Delete confirmation
 	let pendingDelete = $state<{ id: string; name: string } | null>(null);
@@ -129,18 +159,6 @@
 	function cancelDelete() {
 		pendingDelete = null;
 	}
-
-	/** Summarize non-empty config values as display strings */
-	function getConfigSummary(config: Record<string, unknown>): string[] {
-		return Object.entries(config)
-			.filter(([, v]) => v !== undefined && v !== "" && v !== null)
-			.map(([k, v]) => {
-				if (Array.isArray(v)) return `${k}: ${v.length} items`;
-				if (typeof v === "boolean") return v ? k : "";
-				return `${k}: ${v}`;
-			})
-			.filter(Boolean);
-	}
 </script>
 
 <svelte:head>
@@ -161,10 +179,18 @@
 
 	<section class="add-section">
 		{#if !showAddForm}
-			<GlassButton variant="accent" onclick={() => (showAddForm = true)}>
-				<Plus class="btn-icon" />
-				Add Artifact
-			</GlassButton>
+			<div class="action-buttons">
+				<GlassButton variant="accent" onclick={() => (showAddForm = true)}>
+					<Plus class="btn-icon" />
+					Add Artifact
+				</GlassButton>
+				{#if data.artifacts.length > 0}
+					<GlassButton variant="ghost" onclick={() => openPreview(0)}>
+						<Eye class="btn-icon" />
+						Preview Gallery
+					</GlassButton>
+				{/if}
+			</div>
 		{:else}
 			<GlassCard class="add-form-card">
 				<h2>Add an Artifact</h2>
@@ -295,7 +321,7 @@
 			</GlassCard>
 		{:else}
 			<div class="artifact-cards">
-				{#each data.artifacts as artifact (artifact.id)}
+				{#each data.artifacts as artifact, artIdx (artifact.id)}
 					<GlassCard class={`artifact-card${editingArtifact === artifact.id ? " editing" : ""}`}>
 						{#if editingArtifact === artifact.id}
 							<!-- Edit mode -->
@@ -402,12 +428,20 @@
 										{#if artifact.container === "glass-card"}
 											<span class="meta-tag meta-tag--container">Glass card</span>
 										{/if}
-										{#each getConfigSummary(artifact.config) as tag}
+										{#each summarizeConfig(artifact.config) as tag}
 											<span class="meta-tag meta-tag--config">{tag}</span>
 										{/each}
 									</div>
 								</div>
 								<div class="card-actions">
+									<GlassButton
+										variant="ghost"
+										class="preview-btn"
+										title="Preview artifact"
+										onclick={() => openPreview(artIdx)}
+									>
+										<Eye class="btn-icon-solo" />
+									</GlassButton>
 									<GlassButton
 										variant="ghost"
 										class="edit-btn"
@@ -447,6 +481,13 @@
 		onconfirm={confirmDelete}
 		oncancel={cancelDelete}
 	/>
+
+	<ArtifactShowcase
+		artifacts={showcaseArtifacts}
+		bind:open={previewOpen}
+		currentIndex={previewIndex}
+		adminMode={true}
+	/>
 </div>
 
 <style>
@@ -479,6 +520,11 @@
 		font-size: 0.95rem;
 		line-height: 1.6;
 		max-width: 600px;
+	}
+	.action-buttons {
+		display: flex;
+		gap: 0.75rem;
+		flex-wrap: wrap;
 	}
 	.add-section {
 		margin-bottom: 2rem;
@@ -679,6 +725,7 @@
 		display: flex;
 		gap: 0.25rem;
 	}
+	:global(.preview-btn),
 	:global(.edit-btn),
 	:global(.remove-btn) {
 		min-width: 2.5rem;
