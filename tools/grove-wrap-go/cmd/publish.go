@@ -397,16 +397,23 @@ func publishTool(toolName, tagPrefix string, cmd *cobra.Command) error {
 
 	tagName := tagPrefix + newVersion // e.g. "gw/v1.2.0"
 
+	// Generate changelog from git log between previous tag and HEAD
+	changes := generateChangelog(toolName, tagPrefix, currentVersion)
+
 	// JSON dry-run
 	if cfg.JSONMode && dryRun {
-		return printJSON(map[string]interface{}{
+		result := map[string]interface{}{
 			"dry_run":         true,
 			"tool":            toolName,
 			"current_version": currentVersion,
 			"new_version":     newVersion,
 			"tag":             tagName,
 			"trigger":         "release-tools.yml",
-		})
+		}
+		if len(changes) > 0 {
+			result["changes"] = changes
+		}
+		return printJSON(result)
 	}
 
 	// Show plan
@@ -417,6 +424,13 @@ func publishTool(toolName, tagPrefix string, cmd *cobra.Command) error {
 			{"Tag", tagName},
 			{"Trigger", "release-tools.yml → build binaries"},
 		}))
+
+		if len(changes) > 0 {
+			fmt.Print(ui.RenderPanel(
+				fmt.Sprintf("Changes (%d)", len(changes)),
+				strings.Join(changes, "\n"),
+			))
+		}
 	}
 
 	if dryRun {
@@ -433,9 +447,22 @@ func publishTool(toolName, tagPrefix string, cmd *cobra.Command) error {
 		return fmt.Errorf("working tree is dirty — commit or stash first")
 	}
 
+	// Build tag message with changelog
+	tagMsg := fmt.Sprintf("%s %s", toolName, newVersion)
+	if len(changes) > 0 {
+		tagMsg += "\n"
+		for _, line := range changes {
+			// Each line is "hash message" — extract just the message
+			if parts := strings.SplitN(line, " ", 2); len(parts) == 2 {
+				tagMsg += "\n- " + parts[1]
+			}
+		}
+		tagMsg += "\n"
+	}
+
 	// Create annotated tag
 	ui.Info(fmt.Sprintf("Creating tag %s...", tagName))
-	_, err = exec.Git("tag", "-a", tagName, "-m", fmt.Sprintf("%s %s", toolName, newVersion))
+	_, err = exec.Git("tag", "-a", tagName, "-m", tagMsg)
 	if err != nil {
 		return fmt.Errorf("failed to create tag: %w", err)
 	}
@@ -453,12 +480,16 @@ func publishTool(toolName, tagPrefix string, cmd *cobra.Command) error {
 
 	// Success output
 	if cfg.JSONMode {
-		return printJSON(map[string]interface{}{
+		result := map[string]interface{}{
 			"published": true,
 			"tool":      toolName,
 			"version":   newVersion,
 			"tag":       tagName,
-		})
+		}
+		if len(changes) > 0 {
+			result["changes"] = len(changes)
+		}
+		return printJSON(result)
 	}
 
 	fmt.Println()
@@ -467,6 +498,49 @@ func publishTool(toolName, tagPrefix string, cmd *cobra.Command) error {
 	fmt.Println()
 
 	return nil
+}
+
+// toolDirectory maps a tool name to its monorepo-relative directory.
+func toolDirectory(toolName string) string {
+	switch toolName {
+	case "gw":
+		return "tools/grove-wrap-go"
+	case "gf":
+		return "tools/grove-find-go"
+	default:
+		return ""
+	}
+}
+
+// generateChangelog extracts one-line commit summaries between the previous
+// tag and HEAD, scoped to the tool's directory. Returns nil if no changes
+// are found or on any error (non-fatal).
+func generateChangelog(toolName, tagPrefix, currentVersion string) []string {
+	toolDir := toolDirectory(toolName)
+	if toolDir == "" {
+		return nil
+	}
+
+	var args []string
+	if currentVersion == "0.0.0" {
+		// No previous release — show recent commits
+		args = []string{"log", "--oneline", "--no-decorate", "--no-merges", "-20", "--", toolDir}
+	} else {
+		prevTag := tagPrefix + currentVersion
+		args = []string{"log", "--oneline", "--no-decorate", "--no-merges", prevTag + "..HEAD", "--", toolDir}
+	}
+
+	result, err := exec.Git(args...)
+	if err != nil {
+		return nil
+	}
+
+	output := strings.TrimSpace(result.Stdout)
+	if output == "" {
+		return nil
+	}
+
+	return strings.Split(output, "\n")
 }
 
 // getLatestToolVersion finds the latest version for a tool tag prefix (e.g. "gw/v").

@@ -170,6 +170,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -200,9 +202,21 @@ jobs:
             DIR="grove-find-go"
           fi
 
-          gh release create "$TAG" release/* \
-            --title "${TOOL_NAME} ${VERSION}" \
-            --notes "## ${TOOL_NAME} ${VERSION}
+          # Extract changelog from annotated tag body (populated by gw publish)
+          CHANGELOG=$(git tag -l --format='%(contents:body)' "$TAG" | sed '/^$/d')
+
+          # Build release notes with optional changelog section
+          NOTES="## ${TOOL_NAME} ${VERSION}"
+
+          if [ -n "$CHANGELOG" ]; then
+            NOTES="${NOTES}
+
+          ### Changes
+
+          ${CHANGELOG}"
+          fi
+
+          NOTES="${NOTES}
 
           ### Install
 
@@ -217,3 +231,7 @@ jobs:
           - \`${TOOL}-linux-arm64\` — Linux ARM64
           - \`${TOOL}-darwin-arm64\` — macOS Apple Silicon
           - \`${TOOL}-windows-x86_64.exe\` — Windows x86_64"
+
+          gh release create "$TAG" release/* \
+            --title "${TOOL_NAME} ${VERSION}" \
+            --notes "$NOTES"
