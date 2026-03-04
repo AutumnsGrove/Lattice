@@ -25,6 +25,31 @@
 	// Read redirect param from URL
 	const redirectTo = $derived(validateRedirectUrl(page.url.searchParams.get("redirect")));
 
+	// Friendly messages for known callback error codes (sent by /callback on failure)
+	const CALLBACK_ERRORS: Record<string, string> = {
+		no_session: "Your session wasn't created. Please try signing in again.",
+	};
+
+	// Read error from URL params — set by /callback when auth succeeds but
+	// the session cookie is missing (e.g., proxy cookie handling issue). (#1315)
+	const callbackError = $derived.by(() => {
+		const error = page.url.searchParams.get("error");
+		if (!error) return null;
+		return CALLBACK_ERRORS[error] ?? error;
+	});
+
+	// Clean stale error params from the URL bar after reading them.
+	// Uses raw history.replaceState (not SvelteKit goto) so the page store
+	// keeps the original value and the error stays visible until the user acts.
+	$effect(() => {
+		if (browser && page.url.searchParams.has("error")) {
+			const clean = new URL(window.location.href);
+			clean.searchParams.delete("error");
+			clean.searchParams.delete("error_code");
+			window.history.replaceState({}, "", clean.pathname + clean.search);
+		}
+	});
+
 	// Passkey is the only flow that still needs client-side state.
 	// Google and email loading is tracked via use:enhance submission callbacks.
 	let passkeyLoading = $state(false);
@@ -35,8 +60,9 @@
 	// Any in-flight submission disables all buttons to prevent double-submit
 	const anyLoading = $derived(googleSubmitting || emailSubmitting || passkeyLoading);
 
-	// Server action errors and passkey client errors share the same display slot
-	const displayError = $derived(form?.error ?? passkeyError);
+	// All error sources funnel into one display slot.
+	// Priority: form action errors > callback URL errors > passkey client errors
+	const displayError = $derived(form?.error ?? callbackError ?? passkeyError);
 
 	// Email confirmation state comes from the server action return value
 	const emailSent = $derived(form?.emailSent === true);

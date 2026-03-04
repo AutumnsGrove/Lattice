@@ -146,14 +146,9 @@ export async function proxyToHeartwood(event: RequestEvent, targetPath: string):
 
 	// [Passkey Debug] Log response details for passkey routes
 	if (isPasskeyRoute) {
-		const setCookieHeaders: string[] = [];
-		response.headers.forEach((value, key) => {
-			if (key.toLowerCase() === "set-cookie") {
-				// Mask cookie values, keep name + attributes
-				const masked = value.replace(/=([^;]+)/, "=***");
-				setCookieHeaders.push(masked);
-			}
-		});
+		const setCookieHeaders = response.headers
+			.getSetCookie()
+			.map((c) => c.replace(/=([^;]+)/, "=***"));
 
 		console.log("[Passkey Debug] Proxy response:", {
 			status: response.status,
@@ -176,9 +171,16 @@ export async function proxyToHeartwood(event: RequestEvent, targetPath: string):
 	}
 
 	// Forward only allowed response headers (HAWK-005)
+	// Set-Cookie headers are forwarded individually — Headers.forEach combines
+	// same-name headers with ", " per Fetch spec, producing malformed cookie
+	// strings that browsers silently drop (see #1314).
 	const responseHeaders = new Headers();
+	for (const cookie of response.headers.getSetCookie()) {
+		responseHeaders.append("Set-Cookie", cookie);
+	}
 	response.headers.forEach((value, key) => {
-		if (ALLOWED_RESPONSE_HEADERS.has(key.toLowerCase())) {
+		const lower = key.toLowerCase();
+		if (lower !== "set-cookie" && ALLOWED_RESPONSE_HEADERS.has(lower)) {
 			responseHeaders.append(key, value);
 		}
 	});
