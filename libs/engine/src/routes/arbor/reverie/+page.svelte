@@ -89,7 +89,10 @@
 	const DEFAULT_CONFIGURE_ERROR = "Reverie couldn't process that request. Please try again.";
 	const DEFAULT_EXECUTE_ERROR = "Some changes couldn't be applied. Please try again.";
 
-	function sanitizeError(raw: { code?: string; message?: string } | undefined, fallback: string): string {
+	function sanitizeError(
+		raw: { code?: string; message?: string } | undefined,
+		fallback: string,
+	): string {
 		if (raw?.code && raw.code in SAFE_ERROR_MESSAGES) {
 			return SAFE_ERROR_MESSAGES[raw.code];
 		}
@@ -174,10 +177,10 @@
 				value: c.to,
 			}));
 
-			const result = await api.post<ReverieResponse<ExecuteResponseData>>(
-				"/api/reverie/execute",
-				{ request_id: requestId, changes: executeChanges },
-			);
+			const result = await api.post<ReverieResponse<ExecuteResponseData>>("/api/reverie/execute", {
+				request_id: requestId,
+				changes: executeChanges,
+			});
 
 			// Mark the change card as applied
 			updateMessageMetadata(messageId, { applied: true });
@@ -302,11 +305,11 @@
 					<div class="fallback-icon">
 						<Sparkles size={32} aria-hidden="true" />
 					</div>
-					<h2 class="text-xl font-semibold text-white mb-2">Reverie</h2>
-					<p class="text-white/60 text-sm mb-1">
+					<h2 class="text-xl font-semibold text-bark-800 dark:text-white mb-2">Reverie</h2>
+					<p class="text-bark-600 dark:text-white/60 text-sm mb-1">
 						Describe your grove, and it becomes real.
 					</p>
-					<p class="text-white/40 text-xs mb-6">
+					<p class="text-bark-500 dark:text-white/40 text-xs mb-6">
 						"Make my site feel like a midnight library" — and watch it happen.
 					</p>
 					<a
@@ -365,17 +368,28 @@
 		min-height: 400px;
 		border-radius: 0.75rem;
 		overflow: hidden;
+		background: rgba(139, 92, 246, 0.04);
+		border: 1px solid rgba(139, 92, 246, 0.12);
+	}
+
+	:global(.dark) .tier-fallback {
 		background: rgba(0, 0, 0, 0.3);
-		border: 1px solid rgba(139, 92, 246, 0.15);
+		border-color: rgba(139, 92, 246, 0.15);
 	}
 
 	.fallback-glow {
 		position: absolute;
 		inset: 0;
 		background:
+			radial-gradient(ellipse at center, rgba(139, 92, 246, 0.06) 0%, transparent 60%),
+			radial-gradient(ellipse at 60% 40%, rgba(124, 58, 237, 0.04) 0%, transparent 50%);
+		pointer-events: none;
+	}
+
+	:global(.dark) .fallback-glow {
+		background:
 			radial-gradient(ellipse at center, rgba(88, 28, 135, 0.12) 0%, transparent 60%),
 			radial-gradient(ellipse at 60% 40%, rgba(124, 58, 237, 0.06) 0%, transparent 50%);
-		pointer-events: none;
 	}
 
 	.fallback-content {
@@ -391,9 +405,15 @@
 		width: 4rem;
 		height: 4rem;
 		border-radius: 50%;
+		background: rgba(139, 92, 246, 0.1);
+		color: rgb(124, 58, 237);
+		margin-bottom: 1rem;
+		box-shadow: 0 0 24px rgba(124, 58, 237, 0.08);
+	}
+
+	:global(.dark) .fallback-icon {
 		background: rgba(88, 28, 135, 0.2);
 		color: rgb(167, 139, 250);
-		margin-bottom: 1rem;
 		box-shadow: 0 0 24px rgba(124, 58, 237, 0.15);
 	}
 </style>
