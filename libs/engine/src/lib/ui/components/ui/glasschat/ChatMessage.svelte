@@ -40,6 +40,8 @@
 		roleConfig.bubbleClass || defaultBubble,
 		className,
 	)}
+	role="group"
+	aria-label="{roleConfig.label} message"
 >
 	<span
 		class={cn(
@@ -55,6 +57,12 @@
 		{@render contentOverride(message)}
 	{:else}
 		<p class="m-0 leading-relaxed whitespace-pre-wrap">{message.content}</p>
+	{/if}
+
+	{#if message.timestamp}
+		<time datetime={message.timestamp} class="sr-only">
+			{new Date(message.timestamp).toLocaleTimeString()}
+		</time>
 	{/if}
 </div>
 

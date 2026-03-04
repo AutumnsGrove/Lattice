@@ -59,6 +59,8 @@
 		onClose?: () => void;
 		/** GlassCard variant (default: "dark") */
 		variant?: "default" | "accent" | "dark" | "muted" | "frosted";
+		/** Accessible label for the message log region */
+		logLabel?: string;
 		/** Extra classes for the outer GlassCard */
 		class?: string;
 	}
@@ -79,6 +81,7 @@
 		inputPlaceholder,
 		onClose,
 		variant = "dark",
+		logLabel,
 		class: className,
 	}: Props = $props();
 
@@ -128,6 +131,7 @@
 		class="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3"
 		role="log"
 		aria-live="polite"
+		aria-label={logLabel}
 	>
 		{#each messages as message (message.id)}
 			<ChatMessage
@@ -149,16 +153,16 @@
 				)}
 			/>
 		{/if}
-
-		{#if error}
-			<div
-				class="rounded-lg px-4 py-3 bg-red-500/15 border border-red-500/30 text-red-300 text-sm"
-				role="alert"
-			>
-				{error}
-			</div>
-		{/if}
 	</div>
+
+	{#if error}
+		<div
+			class="mx-4 mb-2 rounded-lg px-4 py-3 bg-red-500/15 border border-red-500/30 text-red-300 text-sm"
+			role="alert"
+		>
+			{error}
+		</div>
+	{/if}
 
 	<ChatInput
 		bind:value={inputValue}

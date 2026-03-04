@@ -152,6 +152,9 @@ declare global {
 
 				/** Internal service key for worker-to-worker auth (reverie-exec → grove-lattice) */
 				INTERNAL_SERVICE_KEY?: string;
+
+				/** Reverie Worker service binding (AI configuration pipeline) */
+				REVERIE?: Fetcher;
 			};
 			context: {
 				waitUntil(promise: Promise<unknown>): void;

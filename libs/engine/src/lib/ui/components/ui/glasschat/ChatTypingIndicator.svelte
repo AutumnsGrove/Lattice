@@ -21,7 +21,7 @@
 	let { label, labelClass, srText = "Thinking...", class: className }: Props = $props();
 </script>
 
-<div class={cn("max-w-[85%] self-start", className)} aria-label={srText}>
+<div class={cn("max-w-[85%] self-start", className)} role="status">
 	{#if label}
 		<span
 			class={cn("block text-xs font-semibold mb-1 opacity-70 uppercase tracking-wide", labelClass)}

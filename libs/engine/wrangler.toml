@@ -142,6 +142,13 @@ script_name = "grove-durable-objects"
 # Pages projects reference external DOs via script_name.
 
 # =============================================================================
+# Reverie Service Binding (AI configuration pipeline)
+# =============================================================================
+[[services]]
+binding = "REVERIE"
+service = "grove-reverie"
+
+# =============================================================================
 # Environment Variables (non-sensitive)
 # =============================================================================
 [vars]

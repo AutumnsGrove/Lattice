@@ -83,7 +83,8 @@
 			{placeholder}
 			rows="1"
 			{disabled}
-			aria-label="Your message"
+			aria-label={placeholder || "Your message"}
+			aria-describedby="glasschat-input-hint"
 			class={cn(
 				"flex-1 resize-none rounded-lg border border-white/20 bg-black/30 px-4 py-3",
 				"text-sm leading-relaxed text-inherit font-[inherit]",
@@ -101,13 +102,16 @@
 			class={cn(
 				"flex items-center justify-center w-11 h-11 rounded-lg",
 				"bg-emerald-700/80 text-white",
-				"hover:bg-emerald-600/80 transition-colors",
+				"hover:bg-emerald-600/80",
+				"focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400",
 				"disabled:opacity-50 disabled:cursor-not-allowed",
 			)}
 		>
 			<Send size={18} />
 		</button>
 	</div>
+
+	<p id="glasschat-input-hint" class="sr-only">Press Enter to send, Shift+Enter for a new line.</p>
 
 	{#if footer}
 		<div class="mt-3">
