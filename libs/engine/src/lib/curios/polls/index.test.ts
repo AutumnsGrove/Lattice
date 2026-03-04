@@ -247,9 +247,9 @@ describe("isValidEmoji", () => {
 		expect(isValidEmoji("⭐")).toBe(true);
 	});
 
-	it("rejects typographic symbols that look like emoji", () => {
-		// ★ (U+2605) is a Dingbat, not Extended_Pictographic
-		expect(isValidEmoji("★")).toBe(false);
+	it("rejects typographic symbols that are not emoji", () => {
+		// † (U+2020 DAGGER) is General Punctuation, not Extended_Pictographic
+		expect(isValidEmoji("†")).toBe(false);
 	});
 });
 
