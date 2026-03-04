@@ -521,13 +521,17 @@ func generateChangelog(toolName, tagPrefix, currentVersion string) []string {
 		return nil
 	}
 
+	// Use :(top) pathspec magic so the path is always relative to the repo
+	// root, regardless of which directory gw was invoked from.
+	pathspec := ":(top)" + toolDir
+
 	var args []string
 	if currentVersion == "0.0.0" {
 		// No previous release — show recent commits
-		args = []string{"log", "--oneline", "--no-decorate", "--no-merges", "-20", "--", toolDir}
+		args = []string{"log", "--oneline", "--no-decorate", "--no-merges", "-20", "--", pathspec}
 	} else {
 		prevTag := tagPrefix + currentVersion
-		args = []string{"log", "--oneline", "--no-decorate", "--no-merges", prevTag + "..HEAD", "--", toolDir}
+		args = []string{"log", "--oneline", "--no-decorate", "--no-merges", prevTag + "..HEAD", "--", pathspec}
 	}
 
 	result, err := exec.Git(args...)
