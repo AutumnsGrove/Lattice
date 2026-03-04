@@ -12,7 +12,10 @@ import {
 	SHRINE_TYPE_OPTIONS,
 	SIZE_OPTIONS,
 	FRAME_STYLE_OPTIONS,
+	CONTENT_TYPE_OPTIONS,
+	SHRINE_TEMPLATES,
 	MAX_CONTENTS_SIZE,
+	type ShrineType,
 } from "$lib/curios/shrines";
 
 interface ShrineRow {
@@ -37,6 +40,8 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 			shrineTypeOptions: SHRINE_TYPE_OPTIONS,
 			sizeOptions: SIZE_OPTIONS,
 			frameStyleOptions: FRAME_STYLE_OPTIONS,
+			contentTypeOptions: CONTENT_TYPE_OPTIONS,
+			shrineTemplates: SHRINE_TEMPLATES,
 			error: "Database not available",
 		};
 	}
@@ -67,6 +72,8 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 		shrineTypeOptions: SHRINE_TYPE_OPTIONS,
 		sizeOptions: SIZE_OPTIONS,
 		frameStyleOptions: FRAME_STYLE_OPTIONS,
+		contentTypeOptions: CONTENT_TYPE_OPTIONS,
+		shrineTemplates: SHRINE_TEMPLATES,
 	};
 };
 
@@ -116,6 +123,10 @@ export const actions: Actions = {
 		const description = sanitizeDescription(formData.get("description") as string);
 		const id = generateShrineId();
 
+		// Auto-populate with template contents based on shrine type
+		const templateContents = SHRINE_TEMPLATES[shrineType as ShrineType] ?? [];
+		const contentsJson = JSON.stringify(templateContents);
+
 		try {
 			const maxSort = await db
 				.prepare(
@@ -129,9 +140,19 @@ export const actions: Actions = {
 			await db
 				.prepare(
 					`INSERT INTO shrines (id, tenant_id, title, shrine_type, description, size, frame_style, contents, is_published, sort_order)
-           VALUES (?, ?, ?, ?, ?, ?, ?, '[]', 0, ?)`,
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, ?)`,
 				)
-				.bind(id, tenantId, title, shrineType, description, size, frameStyle, sortOrder)
+				.bind(
+					id,
+					tenantId,
+					title,
+					shrineType,
+					description,
+					size,
+					frameStyle,
+					contentsJson,
+					sortOrder,
+				)
 				.run();
 
 			return { success: true, shrineAdded: true };
@@ -204,6 +225,93 @@ export const actions: Actions = {
 			return fail(500, {
 				error: ARBOR_ERRORS.OPERATION_FAILED.userMessage,
 				error_code: ARBOR_ERRORS.OPERATION_FAILED.code,
+			});
+		}
+	},
+
+	updateContents: async ({ request, platform, locals }) => {
+		const db = platform?.env?.CURIO_DB;
+		const tenantId = locals.tenantId;
+
+		if (!db || !tenantId) {
+			return fail(500, {
+				error: ARBOR_ERRORS.DB_NOT_AVAILABLE.userMessage,
+				error_code: ARBOR_ERRORS.DB_NOT_AVAILABLE.code,
+			});
+		}
+
+		const formData = await request.formData();
+		const shrineId = formData.get("shrineId") as string;
+		const contentsRaw = formData.get("contents") as string;
+
+		if (!shrineId || !contentsRaw) {
+			return fail(400, { error: "Missing required fields", error_code: "MISSING_FIELDS" });
+		}
+
+		if (contentsRaw.length > MAX_CONTENTS_SIZE) {
+			return fail(400, { error: "Contents too large", error_code: "CONTENTS_TOO_LARGE" });
+		}
+
+		// Validate JSON structure
+		const contents = parseContents(contentsRaw);
+		const validatedJson = JSON.stringify(contents);
+
+		try {
+			await db
+				.prepare(
+					`UPDATE shrines SET contents = ?, updated_at = datetime('now')
+           WHERE id = ? AND tenant_id = ?`,
+				)
+				.bind(validatedJson, shrineId, tenantId)
+				.run();
+
+			return { success: true, contentsUpdated: true };
+		} catch (error) {
+			logGroveError("Arbor", ARBOR_ERRORS.SAVE_FAILED, { cause: error });
+			return fail(500, {
+				error: ARBOR_ERRORS.SAVE_FAILED.userMessage,
+				error_code: ARBOR_ERRORS.SAVE_FAILED.code,
+			});
+		}
+	},
+
+	loadTemplate: async ({ request, platform, locals }) => {
+		const db = platform?.env?.CURIO_DB;
+		const tenantId = locals.tenantId;
+
+		if (!db || !tenantId) {
+			return fail(500, {
+				error: ARBOR_ERRORS.DB_NOT_AVAILABLE.userMessage,
+				error_code: ARBOR_ERRORS.DB_NOT_AVAILABLE.code,
+			});
+		}
+
+		const formData = await request.formData();
+		const shrineId = formData.get("shrineId") as string;
+		const shrineType = formData.get("shrineType") as string;
+
+		if (!shrineId || !isValidShrineType(shrineType)) {
+			return fail(400, { error: "Invalid request", error_code: "INVALID_REQUEST" });
+		}
+
+		const templateContents = SHRINE_TEMPLATES[shrineType as ShrineType] ?? [];
+		const contentsJson = JSON.stringify(templateContents);
+
+		try {
+			await db
+				.prepare(
+					`UPDATE shrines SET contents = ?, updated_at = datetime('now')
+           WHERE id = ? AND tenant_id = ?`,
+				)
+				.bind(contentsJson, shrineId, tenantId)
+				.run();
+
+			return { success: true, templateLoaded: true };
+		} catch (error) {
+			logGroveError("Arbor", ARBOR_ERRORS.SAVE_FAILED, { cause: error });
+			return fail(500, {
+				error: ARBOR_ERRORS.SAVE_FAILED.userMessage,
+				error_code: ARBOR_ERRORS.SAVE_FAILED.code,
 			});
 		}
 	},
