@@ -55,6 +55,10 @@
 		inputDisabled?: boolean;
 		/** Forwarded to ChatInput */
 		inputPlaceholder?: string;
+		/** Hide the ChatInput entirely (read-only mode) */
+		hideInput?: boolean;
+		/** Extra classes forwarded to ChatInput's outer container */
+		inputClass?: string;
 		/** Called when Escape is pressed */
 		onClose?: () => void;
 		/** GlassCard variant (default: "dark") */
@@ -79,6 +83,8 @@
 		onSend,
 		inputDisabled = false,
 		inputPlaceholder,
+		hideInput = false,
+		inputClass,
 		onClose,
 		variant = "dark",
 		logLabel,
@@ -119,7 +125,11 @@
 	{variant}
 	flush
 	border
-	class={cn("flex flex-col h-full min-h-[400px] text-white", className)}
+	class={cn(
+		"flex flex-col h-full min-h-[400px]",
+		variant === "dark" ? "text-white" : "text-foreground",
+		className,
+	)}
 	onkeydown={handleKeydown}
 >
 	{#if header}
@@ -164,12 +174,15 @@
 		</div>
 	{/if}
 
-	<ChatInput
-		bind:value={inputValue}
-		{onSend}
-		disabled={inputDisabled}
-		placeholder={inputPlaceholder}
-		toolbar={inputToolbar}
-		footer={inputFooter}
-	/>
+	{#if !hideInput}
+		<ChatInput
+			bind:value={inputValue}
+			{onSend}
+			disabled={inputDisabled}
+			placeholder={inputPlaceholder}
+			toolbar={inputToolbar}
+			footer={inputFooter}
+			class={inputClass}
+		/>
+	{/if}
 </GlassCard>

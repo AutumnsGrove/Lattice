@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from "$app/forms";
-	import { GlassCard, GroveSwap } from "@autumnsgrove/lattice/ui";
+	import { GlassCard, GlassChat, GroveSwap } from "@autumnsgrove/lattice/ui";
+	import type { ChatMessageData } from "@autumnsgrove/lattice/ui";
 	import {
 		MessageCircle,
 		Clock,
@@ -11,6 +12,7 @@
 		Mail,
 		StickyNote,
 	} from "lucide-svelte";
+	import { toChatMessages, PORCH_ADMIN_ROLES } from "$lib/utils/porch";
 	import type { ActionData, PageData } from "./$types";
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
@@ -44,6 +46,8 @@
 			minute: "2-digit",
 		});
 	}
+
+	const chatMessages: ChatMessageData[] = $derived(toChatMessages(data.messages));
 
 	// Get reply email
 	const replyToEmail = $derived(data.visit?.guest_email || data.userEmail || null);
@@ -89,32 +93,40 @@
 				</div>
 			</GlassCard>
 
-			<!-- Messages -->
-			<div class="space-y-4">
-				{#each data.messages as message}
-					<GlassCard
-						class={message.sender_type === "autumn"
-							? "bg-grove-50/80 border-grove-200 ml-8"
-							: "mr-8"}
-					>
-						<div class="flex items-center gap-2 mb-2">
-							<span class="text-sm font-medium text-foreground">
-								{#if message.sender_type === "autumn"}
-									Autumn (you)
-								{:else if message.sender_name}
-									{message.sender_name}
-								{:else}
-									<GroveSwap term="wanderer">Wanderer</GroveSwap>
-								{/if}
-							</span>
-							<span class="text-xs text-foreground/50">
-								{formatDate(message.created_at)}
-							</span>
-						</div>
-						<p class="text-foreground font-sans whitespace-pre-wrap">{message.content}</p>
-					</GlassCard>
-				{/each}
-			</div>
+			<!-- Messages (read-only GlassChat) -->
+			<GlassChat
+				messages={chatMessages}
+				roles={PORCH_ADMIN_ROLES}
+				variant="default"
+				hideInput
+				logLabel="Porch admin conversation"
+				class="min-h-[300px] max-h-[500px]"
+			>
+				{#snippet messageContent(message: ChatMessageData)}
+					<div class="flex items-center gap-2 mb-1">
+						<span class="text-sm font-medium text-foreground">
+							{#if message.role === "autumn"}
+								Autumn (you)
+							{:else if message.metadata?.senderName}
+								{message.metadata.senderName}
+							{:else}
+								<GroveSwap term="wanderer">Wanderer</GroveSwap>
+							{/if}
+						</span>
+						<time datetime={message.timestamp} class="text-xs text-foreground/50">
+							{new Date(message.timestamp).toLocaleDateString("en-US", {
+								month: "short",
+								day: "numeric",
+								hour: "numeric",
+								minute: "2-digit",
+							})}
+						</time>
+					</div>
+					<p class="m-0 leading-relaxed whitespace-pre-wrap text-foreground font-sans">
+						{message.content}
+					</p>
+				{/snippet}
+			</GlassChat>
 
 			<!-- Reply Form -->
 			{#if form?.replySuccess}
