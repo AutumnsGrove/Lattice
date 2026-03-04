@@ -344,6 +344,19 @@
     ],
     "standardTerm": "Discovery"
   },
+  "lantern": {
+    "slug": "lantern",
+    "term": "Lantern",
+    "category": "navigation",
+    "tagline": "Cross-Grove Navigation",
+    "definition": "A floating navigation panel that lets logged-in users hop between groves, access platform services, and find their way home.",
+    "seeAlso": [
+      "forests",
+      "meadow",
+      "arbor"
+    ],
+    "standardTerm": "Compass"
+  },
   "grafts": {
     "slug": "grafts",
     "term": "Grafts",

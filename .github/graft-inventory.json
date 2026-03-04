@@ -5,13 +5,13 @@
 	"lastUpdated": "2026-02-11",
 	"lastAuditedBy": "claude/upload-gate-redesign",
 	"grafts": {
-		"total": 15,
+		"total": 16,
 		"breakdown": {
 			"platform": 11,
-			"greenhouse": 4
+			"greenhouse": 5
 		},
 		"byType": {
-			"boolean": 14,
+			"boolean": 15,
 			"number": 1
 		}
 	},
@@ -63,6 +63,14 @@
 			"greenhouseOnly": false,
 			"migration": "023_jxl_format_tracking.sql",
 			"description": "Percentage of tenants receiving JXL encoding"
+		},
+		{
+			"id": "lantern_enabled",
+			"name": "Lantern Navigation",
+			"type": "boolean",
+			"greenhouseOnly": true,
+			"migration": "094_lantern.sql",
+			"description": "Cross-grove navigation panel for hopping between groves and accessing platform services"
 		},
 		{
 			"id": "meadow_access",

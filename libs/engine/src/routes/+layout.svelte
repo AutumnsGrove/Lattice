@@ -8,7 +8,7 @@
 	import { goto } from "$app/navigation";
 	import { Button, GroveSwap, PassageTransition } from "$lib/ui";
 	import { fontMap, DEFAULT_FONT } from "$lib/ui/tokens/fonts";
-	import { Header, buildTenantNavItems, themeStore } from "$lib/ui/components/chrome";
+	import { Header, buildTenantNavItems, themeStore, Lantern } from "$lib/ui/components/chrome";
 	import { groveModeStore } from "$lib/ui/stores/grove-mode.svelte";
 
 	/** @type {{ children: import('svelte').Snippet, data: any }} */
@@ -160,6 +160,10 @@
 				{/key}
 			{/if}
 		</main>
+
+		{#if data.lanternData?.enabled}
+			<Lantern data={data.lanternData} />
+		{/if}
 
 		{#if !isAdminPage}
 			<footer>
