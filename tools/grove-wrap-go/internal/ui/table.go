@@ -26,6 +26,7 @@ func RenderTable(title string, headers []string, rows [][]string) string {
 	t := table.New().
 		Border(lipgloss.RoundedBorder()).
 		BorderStyle(TableBorderStyle).
+		Width(TermWidth()).
 		Headers(headers...).
 		Rows(rows...).
 		StyleFunc(func(row, col int) lipgloss.Style {

@@ -34,8 +34,9 @@ func RenderCommentThread(title string, comments []CommentItem) string {
 		}
 	}
 
+	w := TermWidth()
 	content := strings.Join(parts, "\n")
-	panel := PanelStyle.Render(content)
+	panel := PanelStyle.MaxWidth(w).Render(content)
 	titleLine := PanelTitleStyle.Render(title)
 	return titleLine + "\n" + panel + "\n"
 }

@@ -9,8 +9,9 @@ import (
 
 // RenderPanel renders a bordered panel with a title.
 func RenderPanel(title, content string) string {
+	w := TermWidth()
 	titleLine := PanelTitleStyle.Render(title)
-	panel := PanelStyle.Render(content)
+	panel := PanelStyle.MaxWidth(w).Render(content)
 	return titleLine + "\n" + panel + "\n"
 }
 
@@ -30,8 +31,9 @@ func RenderInfoPanel(title string, pairs [][2]string) string {
 		lines = append(lines, fmt.Sprintf("%s  %s", key, p[1]))
 	}
 
+	w := TermWidth()
 	content := strings.Join(lines, "\n")
-	panel := PanelStyle.Render(content)
+	panel := PanelStyle.MaxWidth(w).Render(content)
 
 	titleLine := PanelTitleStyle.Render(title)
 	return titleLine + "\n" + panel + "\n"
@@ -50,15 +52,17 @@ func RenderDetailView(title string, pairs [][2]string, body string) string {
 
 // RenderWarningPanel renders a yellow-bordered panel with a warning prefix.
 func RenderWarningPanel(title, msg string) string {
+	w := TermWidth()
 	prefix := WarningStyle.Render("⚠")
 	titleLine := WarningStyle.Bold(true).Render(title)
 	content := prefix + " " + msg
-	panel := WarningPanelStyle.Render(content)
+	panel := WarningPanelStyle.MaxWidth(w).Render(content)
 	return titleLine + "\n" + panel + "\n"
 }
 
 // RenderErrorPanel renders a red-bordered panel with error + suggestion.
 func RenderErrorPanel(title, msg, suggestion string) string {
+	w := TermWidth()
 	prefix := ErrorStyle.Render("✗")
 	titleLine := ErrorStyle.Bold(true).Render(title)
 
@@ -70,16 +74,17 @@ func RenderErrorPanel(title, msg, suggestion string) string {
 	}
 
 	content := strings.Join(lines, "\n")
-	panel := ErrorPanelStyle.Render(content)
+	panel := ErrorPanelStyle.MaxWidth(w).Render(content)
 	return titleLine + "\n" + panel + "\n"
 }
 
 // RenderSuccessPanel renders a green-bordered panel with a success prefix.
 func RenderSuccessPanel(title, content string) string {
+	w := TermWidth()
 	prefix := SuccessStyle.Render("✓")
 	titleLine := SuccessStyle.Bold(true).Render(title)
 	body := prefix + " " + content
-	panel := SuccessPanelStyle.Render(body)
+	panel := SuccessPanelStyle.MaxWidth(w).Render(body)
 	return titleLine + "\n" + panel + "\n"
 }
 
@@ -111,6 +116,7 @@ func RenderStepList(title string, steps []StepItem) string {
 		}
 	}
 
+	w := TermWidth()
 	var style lipgloss.Style
 	if allOK {
 		style = SuccessPanelStyle
@@ -118,7 +124,7 @@ func RenderStepList(title string, steps []StepItem) string {
 		style = WarningPanelStyle
 	}
 
-	panel := style.Render(content)
+	panel := style.MaxWidth(w).Render(content)
 	titleLine := PanelTitleStyle.Render(title)
 	return titleLine + "\n" + panel + "\n"
 }
