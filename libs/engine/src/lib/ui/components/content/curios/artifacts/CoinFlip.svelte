@@ -2,29 +2,32 @@
 	/**
 	 * Coin Flip — Click to flip. Spinning animation + heads or tails.
 	 */
-	import { flipCoin, type CoinFlipConfig } from '$lib/curios/artifacts';
+	import { flipCoin, type CoinFlipConfig } from "$lib/curios/artifacts";
 
 	let { config = {} }: { config: CoinFlipConfig } = $props();
 
-	const headsLabel = $derived(config.headsLabel || 'Heads');
-	const tailsLabel = $derived(config.tailsLabel || 'Tails');
+	const headsLabel = $derived(config.headsLabel || "Heads");
+	const tailsLabel = $derived(config.tailsLabel || "Tails");
 
-	let result = $state<'heads' | 'tails' | null>(null);
+	let result = $state<"heads" | "tails" | null>(null);
 	let flipping = $state(false);
+	let flipTimer: ReturnType<typeof setTimeout> | undefined;
+
+	$effect(() => () => clearTimeout(flipTimer));
 
 	function flip() {
 		if (flipping) return;
 		flipping = true;
 		result = null;
 
-		setTimeout(() => {
+		flipTimer = setTimeout(() => {
 			result = flipCoin();
 			flipping = false;
 		}, 700);
 	}
 
 	function onKeydown(e: KeyboardEvent) {
-		if (e.key === 'Enter' || e.key === ' ') {
+		if (e.key === "Enter" || e.key === " ") {
 			e.preventDefault();
 			flip();
 		}
@@ -41,7 +44,7 @@
 	role="button"
 	aria-label="Flip a coin"
 >
-	<div class="coin" class:heads={result === 'heads'} class:tails={result === 'tails'}>
+	<div class="coin" class:heads={result === "heads"} class:tails={result === "tails"}>
 		<div class="coin-face coin-heads">
 			<span class="coin-label">{headsLabel}</span>
 		</div>
@@ -51,7 +54,7 @@
 	</div>
 	<span class="coin-result">
 		{#if result}
-			{result === 'heads' ? headsLabel : tailsLabel}!
+			{result === "heads" ? headsLabel : tailsLabel}!
 		{:else}
 			flip me
 		{/if}
@@ -134,13 +137,21 @@
 	}
 
 	@keyframes coin-spin {
-		0% { transform: rotateY(0deg); }
-		100% { transform: rotateY(1080deg); }
+		0% {
+			transform: rotateY(0deg);
+		}
+		100% {
+			transform: rotateY(1080deg);
+		}
 	}
 
 	/* After spin, snap to correct face */
-	.coin.heads { transform: rotateY(1080deg); }
-	.coin.tails { transform: rotateY(1260deg); }
+	.coin.heads {
+		transform: rotateY(1080deg);
+	}
+	.coin.tails {
+		transform: rotateY(1260deg);
+	}
 
 	:global(.dark) .coin-heads {
 		background: linear-gradient(135deg, #c8a830, #a08020);
@@ -155,7 +166,11 @@
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.flipping .coin { animation: none; }
-		.coin { transition: none; }
+		.flipping .coin {
+			animation: none;
+		}
+		.coin {
+			transition: none;
+		}
 	}
 </style>

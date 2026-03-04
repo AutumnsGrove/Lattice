@@ -26,6 +26,26 @@
 	let loaded = $state(false);
 	let modalOpen = $state(false);
 	let currentPanel = $state(0);
+	let modalEl: HTMLDivElement | undefined = $state();
+	let previousFocus: HTMLElement | null = null;
+
+	// Focus management: capture previous focus on open, focus modal container
+	$effect(() => {
+		if (modalOpen && modalEl) {
+			previousFocus = document.activeElement as HTMLElement | null;
+			modalEl.focus();
+		}
+	});
+
+	// Scroll lock: prevent background scrolling while modal is open
+	$effect(() => {
+		if (modalOpen) {
+			document.body.style.overflow = "hidden";
+			return () => {
+				document.body.style.overflow = "";
+			};
+		}
+	});
 
 	$effect(() => {
 		if (!artifactId) {
@@ -51,6 +71,8 @@
 
 	function closeCathedral() {
 		modalOpen = false;
+		previousFocus?.focus();
+		previousFocus = null;
 	}
 
 	function nextPanel() {
@@ -66,13 +88,41 @@
 	}
 
 	function onModalKeydown(e: KeyboardEvent) {
-		if (e.key === "Escape") closeCathedral();
-		else if (e.key === "ArrowRight" || e.key === " ") {
+		if (e.key === "Escape") {
+			e.preventDefault();
+			closeCathedral();
+		} else if (e.key === "ArrowRight" || e.key === " ") {
 			e.preventDefault();
 			nextPanel();
 		} else if (e.key === "ArrowLeft") {
 			e.preventDefault();
 			prevPanel();
+		} else if (e.key === "Tab") {
+			trapFocus(e);
+		}
+	}
+
+	/** Trap focus within the cathedral modal */
+	function trapFocus(e: KeyboardEvent) {
+		if (!modalEl) return;
+		const focusable = modalEl.querySelectorAll<HTMLElement>(
+			'button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])',
+		);
+		if (focusable.length === 0) return;
+
+		const first = focusable[0];
+		const last = focusable[focusable.length - 1];
+
+		if (e.shiftKey) {
+			if (document.activeElement === first || document.activeElement === modalEl) {
+				e.preventDefault();
+				last.focus();
+			}
+		} else {
+			if (document.activeElement === last) {
+				e.preventDefault();
+				first.focus();
+			}
 		}
 	}
 
@@ -137,18 +187,23 @@
 
 <!-- Modal (when open) -->
 {#if modalOpen}
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div class="cathedral-modal" onkeydown={onModalKeydown}>
+	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+	<div
+		class="cathedral-modal"
+		role="dialog"
+		aria-modal="true"
+		aria-label="Glass Cathedral — panel {currentPanel + 1} of {panels.length}"
+		bind:this={modalEl}
+		tabindex="-1"
+		onkeydown={onModalKeydown}
+		onclick={(e) => {
+			if (e.target === e.currentTarget) closeCathedral();
+		}}
+	>
 		<!-- Backdrop -->
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
-		<!-- svelte-ignore a11y_click_events_have_key_events -->
-		<div class="modal-backdrop" onclick={closeCathedral}></div>
+		<div class="modal-backdrop"></div>
 		<!-- Panel content -->
-		<div
-			class="modal-content transition-{transition}"
-			role="dialog"
-			aria-label="Glass Cathedral — panel {currentPanel + 1} of {panels.length}"
-		>
+		<div class="modal-content transition-{transition}">
 			{#if panel}
 				<div
 					class="panel"
@@ -274,17 +329,18 @@
 	.cathedral-modal {
 		position: fixed;
 		inset: 0;
-		z-index: 9999;
+		z-index: 60; /* z-grove-modal */
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		outline: none;
 	}
 
 	.modal-backdrop {
 		position: absolute;
 		inset: 0;
 		background: rgba(0, 0, 0, 0.85);
-		backdrop-filter: blur(4px);
+		pointer-events: none;
 	}
 
 	.modal-content {

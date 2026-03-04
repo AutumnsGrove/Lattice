@@ -3,21 +3,24 @@
 	 * Magic 8-Ball — Shake for an answer.
 	 * Click/keyboard to trigger shake animation + random answer reveal.
 	 */
-	import { get8BallAnswer, type Magic8BallConfig } from '$lib/curios/artifacts';
+	import { get8BallAnswer, type Magic8BallConfig } from "$lib/curios/artifacts";
 
 	let { config = {} }: { config: Magic8BallConfig } = $props();
 
-	let answer = $state('');
+	let answer = $state("");
 	let shaking = $state(false);
 	let revealed = $state(false);
+	let shakeTimer: ReturnType<typeof setTimeout> | undefined;
+
+	$effect(() => () => clearTimeout(shakeTimer));
 
 	function shake() {
 		if (shaking) return;
 		shaking = true;
 		revealed = false;
-		answer = '';
+		answer = "";
 
-		setTimeout(() => {
+		shakeTimer = setTimeout(() => {
 			answer = get8BallAnswer(config.customAnswers);
 			shaking = false;
 			revealed = true;
@@ -25,7 +28,7 @@
 	}
 
 	function onKeydown(e: KeyboardEvent) {
-		if (e.key === 'Enter' || e.key === ' ') {
+		if (e.key === "Enter" || e.key === " ") {
 			e.preventDefault();
 			shake();
 		}
@@ -80,7 +83,9 @@
 		height: 7rem;
 		border-radius: 50%;
 		background: radial-gradient(circle at 35% 30%, #3a3a3a, #111 60%, #000);
-		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), inset 0 -4px 12px rgba(0, 0, 0, 0.6);
+		box-shadow:
+			0 4px 16px rgba(0, 0, 0, 0.5),
+			inset 0 -4px 12px rgba(0, 0, 0, 0.6);
 		transition: transform 0.15s ease;
 	}
 
@@ -90,11 +95,7 @@
 		left: 22%;
 		width: 35%;
 		height: 20%;
-		background: radial-gradient(
-			ellipse,
-			rgba(255, 255, 255, 0.3),
-			transparent
-		);
+		background: radial-gradient(ellipse, rgba(255, 255, 255, 0.3), transparent);
 		border-radius: 50%;
 		pointer-events: none;
 	}
@@ -131,7 +132,9 @@
 		padding: 0.2rem;
 		opacity: 0;
 		transform: scale(0.8);
-		transition: opacity 0.4s ease, transform 0.4s ease;
+		transition:
+			opacity 0.4s ease,
+			transform 0.4s ease;
 	}
 
 	.ball-answer.visible {
@@ -151,19 +154,44 @@
 	}
 
 	@keyframes ball-shake {
-		0%, 100% { transform: translate(0, 0) rotate(0deg); }
-		10% { transform: translate(-4px, -2px) rotate(-5deg); }
-		20% { transform: translate(4px, 1px) rotate(4deg); }
-		30% { transform: translate(-3px, 2px) rotate(-3deg); }
-		40% { transform: translate(3px, -1px) rotate(3deg); }
-		50% { transform: translate(-2px, 1px) rotate(-2deg); }
-		60% { transform: translate(2px, 0) rotate(1deg); }
-		70% { transform: translate(-1px, 0) rotate(-1deg); }
-		80% { transform: translate(1px, 0) rotate(0deg); }
+		0%,
+		100% {
+			transform: translate(0, 0) rotate(0deg);
+		}
+		10% {
+			transform: translate(-4px, -2px) rotate(-5deg);
+		}
+		20% {
+			transform: translate(4px, 1px) rotate(4deg);
+		}
+		30% {
+			transform: translate(-3px, 2px) rotate(-3deg);
+		}
+		40% {
+			transform: translate(3px, -1px) rotate(3deg);
+		}
+		50% {
+			transform: translate(-2px, 1px) rotate(-2deg);
+		}
+		60% {
+			transform: translate(2px, 0) rotate(1deg);
+		}
+		70% {
+			transform: translate(-1px, 0) rotate(-1deg);
+		}
+		80% {
+			transform: translate(1px, 0) rotate(0deg);
+		}
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.shaking .ball-outer { animation: none; }
-		.ball-answer { transition: none; opacity: 1; transform: none; }
+		.shaking .ball-outer {
+			animation: none;
+		}
+		.ball-answer {
+			transition: none;
+			opacity: 1;
+			transform: none;
+		}
 	}
 </style>

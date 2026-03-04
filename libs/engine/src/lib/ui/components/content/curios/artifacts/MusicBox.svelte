@@ -3,28 +3,39 @@
 	 * Music Box — Click to open. Visual gears turn while "playing."
 	 * No actual audio — purely visual with a 5-second animation cycle.
 	 */
-	import type { MusicBoxConfig } from '$lib/curios/artifacts';
+	import type { MusicBoxConfig } from "$lib/curios/artifacts";
 
 	let { config = {} }: { config: MusicBoxConfig } = $props();
 
-	const melody = $derived(config.melody || 'classic');
+	const melody = $derived(config.melody || "classic");
 
 	let playing = $state(false);
 	let open = $state(false);
+	let playTimer: ReturnType<typeof setTimeout> | undefined;
+	let closeTimer: ReturnType<typeof setTimeout> | undefined;
+
+	// Clean up timers on unmount
+	$effect(() => {
+		return () => {
+			clearTimeout(playTimer);
+			clearTimeout(closeTimer);
+		};
+	});
 
 	function toggle() {
 		if (playing) return;
 		open = true;
 		playing = true;
-		setTimeout(() => {
+		playTimer = setTimeout(() => {
 			playing = false;
-			// Close after a beat
-			setTimeout(() => { open = false; }, 800);
+			closeTimer = setTimeout(() => {
+				open = false;
+			}, 800);
 		}, 5000);
 	}
 
 	function onKeydown(e: KeyboardEvent) {
-		if (e.key === 'Enter' || e.key === ' ') {
+		if (e.key === "Enter" || e.key === " ") {
 			e.preventDefault();
 			toggle();
 		}
@@ -32,11 +43,16 @@
 
 	const melodyLabel = $derived.by(() => {
 		switch (melody) {
-			case 'lullaby': return 'Lullaby';
-			case 'forest': return 'Forest Theme';
-			case 'waltz': return 'Waltz';
-			case 'celeste': return 'Celeste';
-			default: return 'Classic';
+			case "lullaby":
+				return "Lullaby";
+			case "forest":
+				return "Forest Theme";
+			case "waltz":
+				return "Waltz";
+			case "celeste":
+				return "Celeste";
+			default:
+				return "Classic";
 		}
 	});
 </script>
@@ -62,7 +78,15 @@
 		{#if open}
 			<div class="gear-container">
 				<svg viewBox="0 0 30 30" class="gear" aria-hidden="true">
-					<circle cx="15" cy="15" r="10" fill="none" stroke="rgb(var(--bark-400, 161 137 104))" stroke-width="1.5" opacity="0.5" />
+					<circle
+						cx="15"
+						cy="15"
+						r="10"
+						fill="none"
+						stroke="rgb(var(--bark-400, 161 137 104))"
+						stroke-width="1.5"
+						opacity="0.5"
+					/>
 					<circle cx="15" cy="15" r="3" fill="rgb(var(--bark-400, 161 137 104))" opacity="0.4" />
 					{#each Array(8) as _, i}
 						<line
@@ -82,7 +106,7 @@
 		<!-- Musical notes floating out when playing -->
 		{#if playing}
 			<div class="notes">
-				{#each ['♪', '♫', '♩', '♬'] as note, i}
+				{#each ["♪", "♫", "♩", "♬"] as note, i}
 					<span class="note" style="animation-delay: {i * 0.6}s; left: {20 + i * 18}%">{note}</span>
 				{/each}
 			</div>
@@ -169,8 +193,12 @@
 	}
 
 	@keyframes gear-spin {
-		0% { transform: rotate(0deg); }
-		100% { transform: rotate(360deg); }
+		0% {
+			transform: rotate(0deg);
+		}
+		100% {
+			transform: rotate(360deg);
+		}
 	}
 
 	.notes {
@@ -195,9 +223,17 @@
 	}
 
 	@keyframes note-float {
-		0% { transform: translateY(0); opacity: 0; }
-		20% { opacity: 0.8; }
-		100% { transform: translateY(-2rem) translateX(0.5rem); opacity: 0; }
+		0% {
+			transform: translateY(0);
+			opacity: 0;
+		}
+		20% {
+			opacity: 0.8;
+		}
+		100% {
+			transform: translateY(-2rem) translateX(0.5rem);
+			opacity: 0;
+		}
 	}
 
 	.box-melody {
@@ -208,8 +244,15 @@
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.box-lid { transition: none; }
-		.playing .gear, .note { animation: none; }
-		.note { opacity: 0.5; }
+		.box-lid {
+			transition: none;
+		}
+		.playing .gear,
+		.note {
+			animation: none;
+		}
+		.note {
+			opacity: 0.5;
+		}
 	}
 </style>

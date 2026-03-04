@@ -3,23 +3,28 @@
 	 * Potion Bottle — Bubbling liquid in a glass bottle.
 	 * Click for a bubble burst animation.
 	 */
-	import type { PotionBottleConfig } from '$lib/curios/artifacts';
+	import type { PotionBottleConfig } from "$lib/curios/artifacts";
 
 	let { config = {} }: { config: PotionBottleConfig } = $props();
 
-	const liquidColor = $derived(config.liquidColor || '#a78bfa');
-	const label = $derived(config.label || 'Mystery Elixir');
+	const liquidColor = $derived(config.liquidColor || "#a78bfa");
+	const label = $derived(config.label || "Mystery Elixir");
 
 	let bubbling = $state(false);
+	let bubbleTimer: ReturnType<typeof setTimeout> | undefined;
+
+	$effect(() => () => clearTimeout(bubbleTimer));
 
 	function bubble() {
 		if (bubbling) return;
 		bubbling = true;
-		setTimeout(() => { bubbling = false; }, 1500);
+		bubbleTimer = setTimeout(() => {
+			bubbling = false;
+		}, 1500);
 	}
 
 	function onKeydown(e: KeyboardEvent) {
-		if (e.key === 'Enter' || e.key === ' ') {
+		if (e.key === "Enter" || e.key === " ") {
 			e.preventDefault();
 			bubble();
 		}
@@ -38,9 +43,27 @@
 >
 	<svg viewBox="0 0 40 70" class="bottle-svg" aria-hidden="true">
 		<!-- Bottle neck -->
-		<rect x="16" y="2" width="8" height="10" rx="1" fill="none" stroke="currentColor" stroke-width="1" opacity="0.3" />
+		<rect
+			x="16"
+			y="2"
+			width="8"
+			height="10"
+			rx="1"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="1"
+			opacity="0.3"
+		/>
 		<!-- Cork -->
-		<rect x="15" y="0" width="10" height="5" rx="2" fill="rgb(var(--bark-400, 161 137 104))" opacity="0.6" />
+		<rect
+			x="15"
+			y="0"
+			width="10"
+			height="5"
+			rx="2"
+			fill="rgb(var(--bark-400, 161 137 104))"
+			opacity="0.6"
+		/>
 		<!-- Bottle body -->
 		<path
 			d="M16 12 L12 22 Q8 28 8 35 L8 58 Q8 64 14 64 L26 64 Q32 64 32 58 L32 35 Q32 28 28 22 L24 12Z"
@@ -112,13 +135,26 @@
 		animation: bubble-float 3s ease-in-out infinite;
 	}
 
-	.b1 { animation-delay: 0s; }
-	.b2 { animation-delay: 1s; }
-	.b3 { animation-delay: 2s; }
+	.b1 {
+		animation-delay: 0s;
+	}
+	.b2 {
+		animation-delay: 1s;
+	}
+	.b3 {
+		animation-delay: 2s;
+	}
 
 	@keyframes bubble-float {
-		0%, 100% { transform: translateY(0); opacity: 0.3; }
-		50% { transform: translateY(-8px); opacity: 0.15; }
+		0%,
+		100% {
+			transform: translateY(0);
+			opacity: 0.3;
+		}
+		50% {
+			transform: translateY(-8px);
+			opacity: 0.15;
+		}
 	}
 
 	.bubbling .bubble {
@@ -145,8 +181,14 @@
 	}
 
 	@keyframes burst-rise {
-		0% { transform: translateY(0) scale(1); opacity: 0.5; }
-		100% { transform: translateY(-20px) scale(0); opacity: 0; }
+		0% {
+			transform: translateY(0) scale(1);
+			opacity: 0.5;
+		}
+		100% {
+			transform: translateY(-20px) scale(0);
+			opacity: 0;
+		}
 	}
 
 	.potion-label {
@@ -159,6 +201,10 @@
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.bubble, .burst-bubble { animation: none; opacity: 0.3; }
+		.bubble,
+		.burst-bubble {
+			animation: none;
+			opacity: 0.3;
+		}
 	}
 </style>

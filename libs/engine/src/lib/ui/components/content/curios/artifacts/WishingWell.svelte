@@ -9,15 +9,20 @@
 	let tossing = $state(false);
 	let splashed = $state(false);
 	let loaded = $state(false);
+	let tossTimer: ReturnType<typeof setTimeout> | undefined;
+
+	$effect(() => () => clearTimeout(tossTimer));
 
 	$effect(() => {
-		fetch('/api/curios/artifacts/wishing-well') // csrf-ok
-			.then((r) => r.ok ? r.json() as Promise<{ count: number }> : { count: 0 })
+		fetch("/api/curios/artifacts/wishing-well") // csrf-ok
+			.then((r) => (r.ok ? (r.json() as Promise<{ count: number }>) : { count: 0 }))
 			.then((d) => {
 				wishCount = d.count;
 				loaded = true;
 			})
-			.catch(() => { loaded = true; });
+			.catch(() => {
+				loaded = true;
+			});
 	});
 
 	function toss() {
@@ -29,18 +34,18 @@
 		wishCount++;
 
 		// POST to increment
-		fetch('/api/curios/artifacts/wishing-well', { method: 'POST' }).catch(() => {
+		fetch("/api/curios/artifacts/wishing-well", { method: "POST" }).catch(() => {
 			wishCount--; // rollback on failure
 		});
 
-		setTimeout(() => {
+		tossTimer = setTimeout(() => {
 			splashed = true;
 			tossing = false;
 		}, 600);
 	}
 
 	function onKeydown(e: KeyboardEvent) {
-		if (e.key === 'Enter' || e.key === ' ') {
+		if (e.key === "Enter" || e.key === " ") {
 			e.preventDefault();
 			toss();
 		}
@@ -60,10 +65,44 @@
 		<!-- Well structure -->
 		<svg viewBox="0 0 60 50" class="well-svg" aria-hidden="true">
 			<!-- Well wall -->
-			<ellipse cx="30" cy="35" rx="25" ry="8" fill="none" stroke="rgb(var(--bark-400, 161 137 104))" stroke-width="2" opacity="0.5" />
-			<ellipse cx="30" cy="20" rx="25" ry="8" fill="rgba(30,80,160,0.15)" stroke="rgb(var(--bark-400, 161 137 104))" stroke-width="2" opacity="0.5" />
-			<line x1="5" y1="20" x2="5" y2="35" stroke="rgb(var(--bark-400, 161 137 104))" stroke-width="2" opacity="0.5" />
-			<line x1="55" y1="20" x2="55" y2="35" stroke="rgb(var(--bark-400, 161 137 104))" stroke-width="2" opacity="0.5" />
+			<ellipse
+				cx="30"
+				cy="35"
+				rx="25"
+				ry="8"
+				fill="none"
+				stroke="rgb(var(--bark-400, 161 137 104))"
+				stroke-width="2"
+				opacity="0.5"
+			/>
+			<ellipse
+				cx="30"
+				cy="20"
+				rx="25"
+				ry="8"
+				fill="rgba(30,80,160,0.15)"
+				stroke="rgb(var(--bark-400, 161 137 104))"
+				stroke-width="2"
+				opacity="0.5"
+			/>
+			<line
+				x1="5"
+				y1="20"
+				x2="5"
+				y2="35"
+				stroke="rgb(var(--bark-400, 161 137 104))"
+				stroke-width="2"
+				opacity="0.5"
+			/>
+			<line
+				x1="55"
+				y1="20"
+				x2="55"
+				y2="35"
+				stroke="rgb(var(--bark-400, 161 137 104))"
+				stroke-width="2"
+				opacity="0.5"
+			/>
 			<!-- Water surface -->
 			<ellipse cx="30" cy="21" rx="22" ry="6" fill="rgba(59,130,246,0.2)" />
 		</svg>
@@ -81,7 +120,7 @@
 		{/if}
 	</div>
 	<div class="well-info">
-		<span class="well-count">{loaded ? wishCount.toLocaleString() : '...'}</span>
+		<span class="well-count">{loaded ? wishCount.toLocaleString() : "..."}</span>
 		<span class="well-label">wishes made</span>
 	</div>
 </div>
@@ -127,9 +166,18 @@
 	}
 
 	@keyframes coin-toss {
-		0% { transform: translate(-50%, -10px) scale(1); opacity: 1; }
-		50% { transform: translate(-50%, 5px) scale(0.7); opacity: 0.8; }
-		100% { transform: translate(-50%, 15px) scale(0.3); opacity: 0; }
+		0% {
+			transform: translate(-50%, -10px) scale(1);
+			opacity: 1;
+		}
+		50% {
+			transform: translate(-50%, 5px) scale(0.7);
+			opacity: 0.8;
+		}
+		100% {
+			transform: translate(-50%, 15px) scale(0.3);
+			opacity: 0;
+		}
 	}
 
 	.splash {
@@ -152,8 +200,14 @@
 	}
 
 	@keyframes droplet-fly {
-		0% { transform: rotate(var(--angle)) translateY(0) scale(1); opacity: 1; }
-		100% { transform: rotate(var(--angle)) translateY(-12px) scale(0); opacity: 0; }
+		0% {
+			transform: rotate(var(--angle)) translateY(0) scale(1);
+			opacity: 1;
+		}
+		100% {
+			transform: rotate(var(--angle)) translateY(-12px) scale(0);
+			opacity: 0;
+		}
 	}
 
 	.well-info {
@@ -180,6 +234,10 @@
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.toss-coin, .droplet { animation: none; opacity: 0; }
+		.toss-coin,
+		.droplet {
+			animation: none;
+			opacity: 0;
+		}
 	}
 </style>
