@@ -31,16 +31,16 @@ jobs:
       - name: Check Stripe payments endpoint
         run: |
           for i in {1..6}; do
-            STATUS=$(curl -s https://plant.grove.place/api/health/payments | jq -r '.status // "error"')
+            STATUS=$(curl -s https://plant.grove.place/api/health/payments | jq -r '.status // "error"' 2>/dev/null || echo "error")
             if [ "$STATUS" != "error" ]; then break; fi
             echo "Waiting for deployment ($i/6)..."
-            sleep 5
+            sleep 10
           done
 
           RESPONSE=$(curl -s https://plant.grove.place/api/health/payments)
-          STATUS=$(echo "$RESPONSE" | jq -r '.status')
+          STATUS=$(echo "$RESPONSE" | jq -r '.status' 2>/dev/null || echo "unknown")
           echo "Health Check: $STATUS"
-          echo "$RESPONSE" | jq '.checks'
+          echo "$RESPONSE" | jq '.checks' 2>/dev/null || echo "$RESPONSE"
 
           if [[ "$STATUS" != "healthy" && "$STATUS" != "degraded" ]]; then
             echo "::error::Deployment health check failed — Status: $STATUS"
