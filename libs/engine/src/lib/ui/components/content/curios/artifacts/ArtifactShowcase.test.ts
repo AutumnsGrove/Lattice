@@ -6,7 +6,7 @@
  * admin mode) — not the artifact rendering itself.
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/svelte";
 import ArtifactShowcase from "./ArtifactShowcase.svelte";
 import type { ArtifactDisplay } from "$lib/curios/artifacts";

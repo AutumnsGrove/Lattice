@@ -22,22 +22,6 @@ export interface HealthCheckResult {
 }
 
 /**
- * Deep health response format (JSON response from /api/health endpoints)
- */
-interface DeepHealthResponse {
-	status: "healthy" | "degraded" | "unhealthy" | "maintenance";
-	service: string;
-	reason?: string;
-	checks?: {
-		name: string;
-		status: "pass" | "fail" | "skip";
-		latency_ms?: number;
-		error?: string;
-	}[];
-	timestamp: string;
-}
-
-/**
  * Perform health check for a single component
  */
 export async function checkComponent(config: ComponentConfig): Promise<HealthCheckResult> {

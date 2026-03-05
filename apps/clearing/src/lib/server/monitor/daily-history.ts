@@ -86,7 +86,7 @@ async function countIncidentsForDate(
 		.bind(componentId)
 		.first<{ current_status: string }>();
 
-	const currentStatus = componentResult?.current_status || "operational";
+	const _currentStatus = componentResult?.current_status || "operational";
 
 	// If no incidents, use operational; otherwise use worst incident status
 	const worstStatus =
