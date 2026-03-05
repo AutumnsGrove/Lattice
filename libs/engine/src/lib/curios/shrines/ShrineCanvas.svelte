@@ -24,11 +24,20 @@
 	let mouseY = $state(0.5);
 	let isHovering = $state(false);
 
-	// Respect prefers-reduced-motion
+	// Respect prefers-reduced-motion (reactive — updates if preference changes)
 	let prefersReducedMotion = $state(false);
-	if (typeof window !== "undefined") {
-		prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-	}
+
+	$effect(() => {
+		if (typeof window === "undefined") return;
+		const mql = window.matchMedia("(prefers-reduced-motion: reduce)");
+		prefersReducedMotion = mql.matches;
+
+		const handler = (e: MediaQueryListEvent) => {
+			prefersReducedMotion = e.matches;
+		};
+		mql.addEventListener("change", handler);
+		return () => mql.removeEventListener("change", handler);
+	});
 
 	function handleMouseMove(e: MouseEvent) {
 		if (prefersReducedMotion) return;
@@ -66,7 +75,6 @@
 	}
 
 	function getDepthForIndex(index: number): number {
-		// Alternate depth layers: items at different "distances"
 		return 0.5 + (index % 3) * 0.5;
 	}
 </script>
@@ -74,7 +82,6 @@
 <div
 	class="shrine-canvas frame-{frameStyle}"
 	style="width: {dimensions.width}px; height: {dimensions.height}px;"
-	role="img"
 	aria-label="Shrine: {title}"
 	onmousemove={handleMouseMove}
 	onmouseenter={handleMouseEnter}
@@ -96,10 +103,19 @@
 				</span>
 			{:else if item.type === "icon"}
 				{@const IconComponent = ICON_MAP[item.data.icon as string]}
+				{@const iconLabel = (item.data.label as string) ?? "icon"}
 				{#if IconComponent}
-					<IconComponent size={size === "small" ? 18 : size === "medium" ? 24 : 32} />
+					<IconComponent
+						size={size === "small" ? 18 : size === "medium" ? 24 : 32}
+						aria-hidden="true"
+					/>
+					<span class="sr-only">{iconLabel}</span>
 				{:else}
-					<Heart size={size === "small" ? 18 : size === "medium" ? 24 : 32} />
+					<Heart
+						size={size === "small" ? 18 : size === "medium" ? 24 : 32}
+						aria-hidden="true"
+					/>
+					<span class="sr-only">Heart</span>
 				{/if}
 			{:else if item.type === "date"}
 				<time class="item-date" datetime={item.data.date as string}>
@@ -117,14 +133,17 @@
 					{/if}
 				</blockquote>
 			{:else if item.type === "decoration"}
-				<span class="item-decoration decoration-{item.data.style ?? 'sparkle'}"></span>
+				<span
+					class="item-decoration decoration-{item.data.style ?? 'sparkle'}"
+					aria-hidden="true"
+				></span>
 			{/if}
 		</div>
 	{/each}
 
 	{#if items.length === 0}
-		<div class="empty-shrine">
-			<Heart size={20} />
+		<div class="empty-shrine" aria-hidden="true">
+			<Heart size={24} />
 		</div>
 	{/if}
 </div>
@@ -137,86 +156,103 @@
 		position: relative;
 		overflow: hidden;
 		border-radius: 12px;
-		background: var(--grove-overlay-4, rgba(0, 0, 0, 0.04));
+		background: rgba(251, 249, 246, 0.5);
+		backdrop-filter: blur(8px);
+		-webkit-backdrop-filter: blur(8px);
 		transition: box-shadow 0.3s ease;
 	}
 	.shrine-canvas:hover {
-		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+		box-shadow: 0 4px 20px rgba(139, 105, 20, 0.08);
 	}
 	:global(.dark) .shrine-canvas {
-		background: var(--grove-overlay-8, rgba(255, 255, 255, 0.04));
+		background: rgba(42, 38, 35, 0.5);
 	}
 	:global(.dark) .shrine-canvas:hover {
 		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+	}
+
+	/* Screen reader only utility */
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border-width: 0;
 	}
 
 	/* ==========================================================================
 	   Frame Styles — Tier 1: Subtle themed borders
 	   ========================================================================== */
 	.frame-wood {
-		border: 3px solid #8b6914;
+		border: 3px solid var(--bark-700, #8b6914);
 		border-radius: 8px;
-		box-shadow: inset 0 0 8px rgba(139, 105, 20, 0.1);
+		box-shadow: inset 0 0 12px rgba(139, 105, 20, 0.12);
 	}
 	:global(.dark) .frame-wood {
-		border-color: #a0822c;
-		box-shadow: inset 0 0 8px rgba(160, 130, 44, 0.15);
+		border-color: var(--bark-600, #a0822c);
+		box-shadow: inset 0 0 12px rgba(160, 130, 44, 0.18);
 	}
 
 	.frame-stone {
 		border: 3px solid #8a8a8a;
 		border-radius: 6px;
-		box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.08);
+		box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.08);
 	}
 	:global(.dark) .frame-stone {
-		border-color: #6b6b6b;
-		box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.05);
+		border-color: #7a7a7a;
+		box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.06);
 	}
 
 	.frame-crystal {
 		border: 2px solid transparent;
 		background-clip: padding-box;
 		box-shadow:
-			0 0 0 2px rgba(147, 130, 220, 0.3),
-			inset 0 0 12px rgba(147, 130, 220, 0.08);
+			0 0 0 2px rgba(147, 130, 220, 0.45),
+			inset 0 0 14px rgba(147, 130, 220, 0.1);
 		border-radius: 12px;
 	}
 	:global(.dark) .frame-crystal {
 		box-shadow:
-			0 0 0 2px rgba(167, 150, 240, 0.25),
-			inset 0 0 12px rgba(167, 150, 240, 0.1);
+			0 0 0 2px rgba(167, 150, 240, 0.3),
+			inset 0 0 14px rgba(167, 150, 240, 0.12);
 	}
 
 	.frame-floral {
 		border: 2px solid #c4a0b0;
 		border-radius: 14px;
-		box-shadow: inset 0 0 10px rgba(196, 160, 176, 0.1);
+		box-shadow: inset 0 0 12px rgba(196, 160, 176, 0.12);
 	}
 	:global(.dark) .frame-floral {
-		border-color: #9b7888;
-		box-shadow: inset 0 0 10px rgba(155, 120, 136, 0.12);
+		border-color: #a88898;
+		box-shadow: inset 0 0 12px rgba(168, 136, 152, 0.15);
 	}
 
 	.frame-cosmic {
-		border: 2px solid #4a3070;
+		border: 2px solid #5a3d80;
 		border-radius: 10px;
 		box-shadow:
-			inset 0 0 15px rgba(74, 48, 112, 0.1),
-			0 0 8px rgba(74, 48, 112, 0.05);
+			inset 0 0 18px rgba(90, 61, 128, 0.12),
+			inset 0 0 30px rgba(245, 158, 11, 0.04),
+			0 0 10px rgba(90, 61, 128, 0.08);
 	}
 	:global(.dark) .frame-cosmic {
-		border-color: #6b4a9a;
+		border-color: #7b5aaa;
 		box-shadow:
-			inset 0 0 15px rgba(107, 74, 154, 0.15),
-			0 0 8px rgba(107, 74, 154, 0.1);
+			inset 0 0 18px rgba(123, 90, 170, 0.18),
+			inset 0 0 30px rgba(245, 158, 11, 0.06),
+			0 0 10px rgba(123, 90, 170, 0.12);
 	}
 
 	.frame-minimal {
-		border: 1px solid var(--grove-overlay-12, rgba(0, 0, 0, 0.08));
+		border: 1px solid rgba(139, 115, 85, 0.15);
 		border-radius: 12px;
 	}
 	:global(.dark) .frame-minimal {
-		border-color: var(--grove-overlay-12, rgba(255, 255, 255, 0.08));
+		border-color: rgba(204, 181, 156, 0.12);
 	}
 
 	/* ==========================================================================
@@ -263,16 +299,16 @@
 	.item-date {
 		font-size: 0.7rem;
 		font-weight: 500;
-		color: var(--color-text-muted, #666);
-		background: var(--grove-overlay-4, rgba(0, 0, 0, 0.04));
+		color: var(--bark-700, #8b7355);
+		background: rgba(251, 249, 246, 0.6);
 		padding: 0.15rem 0.5rem;
 		border-radius: 999px;
 		white-space: nowrap;
 		letter-spacing: 0.02em;
 	}
 	:global(.dark) .item-date {
-		background: var(--grove-overlay-8, rgba(255, 255, 255, 0.06));
-		color: var(--bark-700, #ccb59c);
+		background: rgba(251, 249, 246, 0.08);
+		color: var(--bark-600, #b69575);
 	}
 
 	/* Quote items */
@@ -292,7 +328,7 @@
 	.item-quote cite {
 		display: block;
 		font-size: 0.65rem;
-		color: var(--color-text-muted, #666);
+		color: var(--bark-700, #8b7355);
 		margin-top: 0.2rem;
 		font-style: normal;
 	}
@@ -300,7 +336,7 @@
 		color: var(--bark, #f5f2ea);
 	}
 	:global(.dark) .item-quote cite {
-		color: var(--bark-700, #ccb59c);
+		color: var(--bark-600, #b69575);
 	}
 
 	/* Decoration items */
@@ -337,9 +373,14 @@
 		position: absolute;
 		inset: 0;
 		display: flex;
+		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		color: var(--color-text-muted, #999);
-		opacity: 0.3;
+		gap: 0.5rem;
+		color: var(--bark-700, #8b7355);
+		opacity: 0.4;
+	}
+	:global(.dark) .empty-shrine {
+		color: var(--bark-600, #b69575);
 	}
 </style>

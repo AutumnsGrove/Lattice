@@ -30,11 +30,20 @@
 		showAddItem = false;
 	}
 
+	/** Element ref for returning focus on close */
+	let editTriggerRef = $state<HTMLElement | null>(null);
+
 	function stopEditing() {
+		const trigger = editTriggerRef;
 		editingShrineId = null;
 		editorItems = [];
 		editingItemIndex = null;
 		showAddItem = false;
+		editTriggerRef = null;
+		// Return focus to the edit button that opened the editor
+		if (trigger) {
+			requestAnimationFrame(() => trigger.focus());
+		}
 	}
 
 	function addItem() {
@@ -126,7 +135,7 @@
 <div class="shrines-page">
 	<header class="page-header">
 		<div class="title-row">
-			<Heart class="header-icon" />
+			<Heart class="header-icon" aria-hidden="true" />
 			<h1>Personal Shrines</h1>
 		</div>
 		<p class="subtitle">
@@ -257,13 +266,22 @@
 						</div>
 
 						<!-- Item list -->
-						<div class="item-list">
+						<div class="item-list" role="listbox" aria-label="Shrine content items">
 							{#each editorItems as item, i}
-								<button
-									type="button"
+								<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+								<div
 									class="item-row"
 									class:active={editingItemIndex === i}
+									role="option"
+									aria-selected={editingItemIndex === i}
+									tabindex="0"
 									onclick={() => (editingItemIndex = editingItemIndex === i ? null : i)}
+									onkeydown={(e) => {
+										if (e.key === "Enter" || e.key === " ") {
+											e.preventDefault();
+											editingItemIndex = editingItemIndex === i ? null : i;
+										}
+									}}
 								>
 									<span class="item-type-badge">{item.type}</span>
 									<span class="item-position">({Math.round(item.x)}, {Math.round(item.y)})</span>
@@ -274,11 +292,11 @@
 											e.stopPropagation();
 											removeItem(i);
 										}}
-										aria-label="Remove item"
+										aria-label="Remove {item.type} item at position {Math.round(item.x)}, {Math.round(item.y)}"
 									>
-										<X size={12} />
+										<X size={14} />
 									</button>
-								</button>
+								</div>
 							{/each}
 						</div>
 
@@ -458,7 +476,8 @@
 						<!-- Add item -->
 						{#if showAddItem}
 							<div class="add-item-bar">
-								<select bind:value={newItemType} class="glass-input">
+								<label for="new-item-type" class="sr-only">Item type</label>
+								<select id="new-item-type" bind:value={newItemType} class="glass-input">
 									{#each data.contentTypeOptions as opt}
 										<option value={opt.value}>{opt.label}</option>
 									{/each}
@@ -498,7 +517,7 @@
 	<section class="shrines-section">
 		{#if data.shrines.length === 0}
 			<GlassCard class="empty-card">
-				<Heart class="empty-icon" />
+				<Heart class="empty-icon" aria-hidden="true" />
 				<p>No shrines yet.</p>
 				<p class="empty-hint">Create a shrine to dedicate space for something meaningful.</p>
 			</GlassCard>
@@ -525,12 +544,18 @@
 							<div class="shrine-actions">
 								<GlassButton
 									variant="ghost"
-									onclick={() =>
-										editingShrineId === shrine.id ? stopEditing() : startEditing(shrine)}
+									onclick={(e: MouseEvent) => {
+										if (editingShrineId === shrine.id) {
+											stopEditing();
+										} else {
+											editTriggerRef = e.currentTarget as HTMLElement;
+											startEditing(shrine);
+										}
+									}}
 									title={editingShrineId === shrine.id ? "Close editor" : "Edit contents"}
 									aria-label={editingShrineId === shrine.id
-										? "Close editor"
-										: "Edit shrine contents"}
+										? `Close editor for ${shrine.title}`
+										: `Edit contents of ${shrine.title}`}
 								>
 									{#if editingShrineId === shrine.id}
 										<X class="btn-icon" />
@@ -545,7 +570,7 @@
 										type="submit"
 										variant="ghost"
 										title={shrine.isPublished ? "Unpublish" : "Publish"}
-										aria-label={shrine.isPublished ? "Unpublish shrine" : "Publish shrine"}
+										aria-label={shrine.isPublished ? `Unpublish ${shrine.title}` : `Publish ${shrine.title}`}
 									>
 										{#if shrine.isPublished}
 											<EyeOff class="btn-icon" />
@@ -561,7 +586,7 @@
 										variant="ghost"
 										class="remove-btn"
 										title="Remove shrine"
-										aria-label="Remove shrine"
+										aria-label={`Remove ${shrine.title}`}
 									>
 										<Trash2 class="btn-icon" />
 									</GlassButton>
@@ -653,7 +678,10 @@
 	.form-field label {
 		font-size: 0.85rem;
 		font-weight: 500;
-		color: var(--color-text-muted);
+		color: var(--bark-700, #8b7355);
+	}
+	:global(.dark) .form-field label {
+		color: var(--bark-600, #ccb59c);
 	}
 	.optional {
 		font-weight: 400;
@@ -672,8 +700,9 @@
 		color: var(--color-text);
 		font-size: 0.9rem;
 	}
-	.glass-input:focus {
-		outline: none;
+	.glass-input:focus-visible {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 1px;
 		border-color: var(--color-primary);
 	}
 	.form-actions {
@@ -741,7 +770,7 @@
 		flex-direction: column;
 		gap: 0.25rem;
 		margin-bottom: 0.75rem;
-		max-height: 200px;
+		max-height: 320px;
 		overflow-y: auto;
 	}
 	.item-row {
@@ -761,6 +790,10 @@
 	}
 	.item-row:hover {
 		background: var(--grove-overlay-8);
+	}
+	.item-row:focus-visible {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 1px;
 	}
 	.item-row.active {
 		border-color: var(--color-primary);
@@ -783,14 +816,21 @@
 		border: none;
 		cursor: pointer;
 		color: var(--color-text-muted);
-		padding: 0.2rem;
+		padding: 0.5rem;
 		border-radius: 4px;
 		display: flex;
 		align-items: center;
+		justify-content: center;
+		min-width: 2.75rem;
+		min-height: 2.75rem;
 	}
 	.item-remove:hover {
 		color: var(--color-error, #ef4444);
 		background: rgba(239, 68, 68, 0.1);
+	}
+	.item-remove:focus-visible {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 1px;
 	}
 
 	/* Item editor */
@@ -891,6 +931,19 @@
 	:global(.remove-btn) {
 		min-width: 2.75rem;
 		min-height: 2.75rem;
+	}
+
+	/* Screen reader only utility */
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border-width: 0;
 	}
 
 	@media (max-width: 640px) {

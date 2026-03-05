@@ -18,10 +18,10 @@
 </script>
 
 {#if shrines.length === 0}
-	<div class="shrines-empty">
-		<Heart size={32} />
+	<section class="shrines-empty" aria-label="No shrines available">
+		<Heart size={32} aria-hidden="true" />
 		<p>No shrines to display yet.</p>
-	</div>
+	</section>
 {:else}
 	<div class="shrines-grid" role="list" aria-label="Personal shrines">
 		{#each shrines as shrine (shrine.id)}
