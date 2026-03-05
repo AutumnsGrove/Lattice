@@ -30,85 +30,50 @@ jobs:
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
 
-            You are reviewing a pull request. Your job is to find **real bugs** — not speculate about possible issues.
+            Review this pull request for real bugs — not style nits or speculation.
 
-            ## Workflow
+            ## Steps
 
-            1. Read AGENT.md for project conventions (if it exists)
-            2. Run `gh pr diff ${{ github.event.pull_request.number }}` to see the changes
-            3. For EVERY issue you plan to report, **read the full file first** to verify your concern is real
-               - Use the Read tool to open the file and check surrounding context
-               - Use Grep to search for definitions, imports, or config keys you're unsure about
-               - If you cannot verify a concern, do NOT report it
-            4. Post your review using `gh pr comment`
+            1. Run `gh pr diff ${{ github.event.pull_request.number }}` to see the changes
+            2. Analyze the diff for issues listed below
+            3. Post your review using `gh pr comment`
 
-            ## The Golden Rule
+            ## What to Flag
 
-            **Never report an issue you haven't verified against the actual codebase.**
-
-            Diffs show what changed but not the full picture. Before flagging something:
-            - "This function is duplicated" → Grep for it. Is it actually duplicated?
-            - "This config key doesn't exist" → Read the config file. Does it?
-            - "This import is wrong" → Read the source file. Is it?
-            - "The docs contradict the code" → Read both. Do they?
-
-            If you're unsure after checking, say "I couldn't fully verify this" — don't state it as fact.
-
-            ## What to Report
-
-            Only flag issues that **impact correctness, security, or will cause runtime failures**:
+            Only report issues that **will break things or compromise security**:
             - Bugs or logic errors introduced by this PR
             - Security vulnerabilities (injection, auth bypass, secrets exposure)
             - Breaking changes or API contract violations
             - Missing error handling that will cause unhandled exceptions
             - Multi-tenant data leaks (queries missing `tenant_id` scope)
 
-            **Do NOT report:** Style preferences, "could also do X" suggestions, minor refactoring ideas,
-            performance concerns without evidence, or issues in code that wasn't changed by this PR.
+            Skip: style preferences, "could also do X" suggestions, refactoring ideas,
+            speculative performance concerns, or issues in unchanged code.
 
-            ## Review Format
+            ## Grove Patterns
+
+            - **Engine-first**: Utilities belong in `libs/engine`, not duplicated in apps
+            - **Multi-tenant safety**: Queries must scope by `tenant_id`
+            - **Cloudflare bindings**: D1/KV/R2 via `platform.env`
+            - **Signpost errors**: User-facing errors use `throwGroveError()` with GROVE-prefixed codes
+
+            ## Output Format
 
             ```markdown
             ## Code Review
 
-            ### Issues Found
-
             🔴 **[Critical]** Brief title
             `path/to/file.ts:42` — One-sentence explanation. Suggested fix if obvious.
 
-            🟡 **[Verified Suggestion]** Brief title
-            `path/to/file.ts:87` — One-sentence explanation. I checked [file/config] and confirmed [X].
+            🟡 **[Suggestion]** Brief title
+            `path/to/file.ts:87` — One-sentence explanation.
 
             ### Summary
-            One paragraph overall assessment. Is this ready to merge? Any blocking concerns?
-
-            ### Change Flow
-            <details>
-            <summary>View diagram</summary>
-
-            ```mermaid
-            flowchart LR
-              A[Component] --> B[Change] --> C[Effect]
-            ```
-            </details>
+            One paragraph: Is this ready to merge? Any blocking concerns?
             ```
 
-            For the Change Flow diagram:
-            - Use `flowchart LR` (left-to-right) for simple linear flows
-            - Keep it to 3-6 nodes max — just the key components touched
-            - Show the actual data/control flow changed by this PR
-            - Skip the diagram entirely for trivial changes (typos, config tweaks)
-
-            **If the PR looks good with no verified issues, say so briefly — a clean review is a good review. Do not manufacture feedback.**
-
-            ## Grove-Specific Patterns
-
-            Watch for these project-specific concerns:
-            - **Engine-first**: New utilities should go in `libs/engine`, not duplicated in apps
-            - **Multi-tenant safety**: Queries must scope by `tenant_id`, never leak cross-tenant data
-            - **Cloudflare bindings**: D1/KV/R2 accessed correctly via `platform.env`
-            - **Signpost errors**: User-facing errors should use `throwGroveError()` with GROVE-prefixed codes
+            If the PR looks good, say so briefly. A clean review is a good review — do not manufacture feedback.
 
           claude_args: >-
-            --max-turns 10
-            --allowedTools "Read,Glob,Grep,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
+            --max-turns 6
+            --allowedTools "Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
