@@ -50,6 +50,7 @@ export interface PresetConfig {
 		| "ripple"
 		| "fbm"
 		| "clouds"
+		| "domain-warp"
 		| "plasma"
 		| "vortex"
 		| "matrix"
@@ -64,6 +65,10 @@ export interface PresetConfig {
 	speed: number;
 	/** Default opacity */
 	opacity: number;
+	/** Sparsity bias: 0.0 = no bias, 1.0 = maximum sparsity */
+	sparsity?: number;
+	/** Alpha-by-brightness: 0.0 = uniform opacity, 1.0 = full brightness-based alpha */
+	alphaByBrightness?: number;
 }
 
 // =============================================================================
@@ -131,6 +136,7 @@ export {
 	wavePattern,
 	ripplePattern,
 	cloudsPattern,
+	domainWarpPattern,
 	plasmaPattern,
 	vortexPattern,
 	matrixPattern,

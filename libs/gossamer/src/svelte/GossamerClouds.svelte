@@ -18,12 +18,16 @@
 		frequency?: number;
 		/** Pattern amplitude (intensity) */
 		amplitude?: number;
-		/** Cell size in pixels */
+		/** Cell size in pixels (height; width is computed from font metrics) */
 		cellSize?: number;
 		/** Target FPS for animation */
 		fps?: number;
 		/** Use a preset configuration */
 		preset?: string;
+		/** Sparsity bias: 0.0 = no bias, 1.0 = maximum sparsity */
+		sparsity?: number;
+		/** Alpha-by-brightness: 0.0 = uniform opacity, 1.0 = full brightness-based alpha */
+		alphaByBrightness?: number;
 		/** Additional CSS class */
 		class?: string;
 	}
@@ -55,6 +59,8 @@
 		cellSize = 12,
 		fps = 30,
 		preset,
+		sparsity = 0,
+		alphaByBrightness = 0,
 		class: className = "",
 	}: GossamerCloudsProps = $props();
 
@@ -77,9 +83,20 @@
 				amplitude: p.amplitude,
 				speed: p.speed,
 				opacity: p.opacity,
+				sparsity: p.sparsity ?? sparsity,
+				alphaByBrightness: p.alphaByBrightness ?? alphaByBrightness,
 			};
 		}
-		return { pattern, characters, frequency, amplitude, speed, opacity };
+		return {
+			pattern,
+			characters,
+			frequency,
+			amplitude,
+			speed,
+			opacity,
+			sparsity,
+			alphaByBrightness,
+		};
 	});
 
 	// Should animate based on all factors
@@ -99,6 +116,7 @@
 			frequency: cfg.frequency,
 			amplitude: cfg.amplitude,
 			speed: cfg.speed,
+			sparsity: cfg.sparsity,
 		});
 
 		renderer.renderFromBrightnessGrid(grid);
@@ -128,10 +146,14 @@
 			frequency: cfg.frequency,
 			amplitude: cfg.amplitude,
 			speed: 0,
+			sparsity: cfg.sparsity,
 		});
 
 		renderer.renderFromBrightnessGrid(grid);
 	}
+
+	// Measured cell width (computed from font metrics in setupRenderer)
+	let measuredCellWidth = cellSize;
 
 	function setupRenderer(width: number, height: number): void {
 		if (!canvas) return;
@@ -146,11 +168,21 @@
 		canvas.width = width;
 		canvas.height = height;
 
+		// Phase 1: Compute cellWidth from actual font metrics
+		// Monospace fonts are ~0.6:1 width:height, so using cellSize for both distorts characters
+		const tempCtx = canvas.getContext("2d");
+		if (tempCtx) {
+			tempCtx.font = `${cellSize}px monospace`;
+			const measured = tempCtx.measureText("M").width;
+			measuredCellWidth = Math.ceil(measured);
+		}
+
 		renderer = new GossamerRenderer(canvas, {
 			characters: cfg.characters,
-			cellWidth: cellSize,
+			cellWidth: measuredCellWidth,
 			cellHeight: cellSize,
 			color,
+			alphaByBrightness: cfg.alphaByBrightness,
 		});
 
 		if (shouldAnimate) {
@@ -212,8 +244,9 @@
 			renderer.updateConfig({
 				characters: cfg.characters,
 				color,
-				cellWidth: cellSize,
+				cellWidth: measuredCellWidth,
 				cellHeight: cellSize,
+				alphaByBrightness: cfg.alphaByBrightness,
 			});
 
 			if (shouldAnimate) {

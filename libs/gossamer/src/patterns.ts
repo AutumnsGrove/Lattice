@@ -15,6 +15,9 @@ export interface PatternConfig {
 	amplitude: number;
 	/** Animation speed multiplier */
 	speed: number;
+	/** Sparsity bias: 0.0 = no bias, 1.0 = maximum sparsity (default: 0.0)
+	 *  Higher values push more cells to empty space, creating atmospheric effects */
+	sparsity?: number;
 }
 
 /**
@@ -247,6 +250,43 @@ export function cloudsPattern(
 	// Combine and bias toward lighter values (more sky, less dense cloud)
 	const combined = base + detail;
 	return Math.tanh(combined * 1.5) * amplitude;
+}
+
+/**
+ * Domain warp pattern - feeds noise into noise for organic, atmospheric shapes
+ * Implements Inigo Quilez's technique: fbm(p + 4*fbm(p + 4*fbm(p)))
+ * Creates dramatically more organic results than plain fBm
+ *
+ * @param x - X coordinate
+ * @param y - Y coordinate
+ * @param time - Time value for animation
+ * @param config - Pattern configuration
+ * @returns Value between -1 and 1
+ */
+export function domainWarpPattern(
+	x: number,
+	y: number,
+	time: number,
+	config: PatternConfig = DEFAULT_PATTERN_CONFIG,
+): number {
+	const { frequency, amplitude, speed } = config;
+
+	const drift = time * speed * 0.02;
+	const px = x * frequency * 0.5 + drift;
+	const py = y * frequency * 0.5 + drift * 0.7;
+
+	// First warp layer: q = vec2(fbm(p + offset1), fbm(p + offset2))
+	const qx = fbmNoise(px + 5.2, py + 1.3, 4, 0.5);
+	const qy = fbmNoise(px + 9.1, py + 2.8, 4, 0.5);
+
+	// Second warp layer: r = vec2(fbm(p + 4*q + offset3), fbm(p + 4*q + offset4))
+	const rx = fbmNoise(px + 4.0 * qx + 1.7, py + 4.0 * qy + 8.2, 4, 0.5);
+	const ry = fbmNoise(px + 4.0 * qx + 6.3, py + 4.0 * qy + 3.7, 4, 0.5);
+
+	// Final: fbm(p + 4*r)
+	const result = fbmNoise(px + 4.0 * rx, py + 4.0 * ry, 4, 0.5);
+
+	return Math.tanh(result * 1.5) * amplitude;
 }
 
 /**
@@ -538,6 +578,10 @@ export function generateBrightnessGrid(
 					value = cloudsPattern(col, row, time, config);
 					break;
 
+				case "domain-warp":
+					value = domainWarpPattern(col, row, time, config);
+					break;
+
 				case "plasma":
 					value = plasmaPattern(col, row, time, config);
 					break;
@@ -567,8 +611,18 @@ export function generateBrightnessGrid(
 					break;
 			}
 
-			// Normalize from [-1, 1] to [0, 255] with amplitude
-			const normalized = (value + 1) * 0.5 * amplitude;
+			// Normalize from [-1, 1] to [0, 255] with amplitude and sparsity
+			const sparsity = config.sparsity ?? 0;
+			let normalized: number;
+			if (sparsity > 0) {
+				const threshold = sparsity * 2 - 1;
+				const divisor = 1 - threshold;
+				// Guard against division by zero when sparsity === 1.0
+				const biased = divisor > 0 ? Math.max(0, value - threshold) / divisor : 0;
+				normalized = biased * amplitude;
+			} else {
+				normalized = (value + 1) * 0.5 * amplitude;
+			}
 			const brightness = Math.max(0, Math.min(255, Math.floor(normalized * 255)));
 			grid[row][col] = brightness;
 		}
@@ -623,6 +677,7 @@ export type PatternType =
 	| "ripple"
 	| "fbm"
 	| "clouds"
+	| "domain-warp"
 	| "plasma"
 	| "vortex"
 	| "matrix"
@@ -719,6 +774,10 @@ export function fillBrightnessBuffer(
 					value = cloudsPattern(col, row, time, config);
 					break;
 
+				case "domain-warp":
+					value = domainWarpPattern(col, row, time, config);
+					break;
+
 				case "plasma":
 					value = plasmaPattern(col, row, time, config);
 					break;
@@ -748,9 +807,19 @@ export function fillBrightnessBuffer(
 					break;
 			}
 
-			// Normalize from [-1, 1] to [0, 255] with amplitude
+			// Normalize from [-1, 1] to [0, 255] with amplitude and sparsity
 			// Using bitwise OR for fast floor: (x | 0) is faster than Math.floor(x)
-			const normalized = (value + 1) * 0.5 * amplitude;
+			const sparsity = config.sparsity ?? 0;
+			let normalized: number;
+			if (sparsity > 0) {
+				const threshold = sparsity * 2 - 1;
+				const divisor = 1 - threshold;
+				// Guard against division by zero when sparsity === 1.0
+				const biased = divisor > 0 ? Math.max(0, value - threshold) / divisor : 0;
+				normalized = biased * amplitude;
+			} else {
+				normalized = (value + 1) * 0.5 * amplitude;
+			}
 			data[idx++] = (normalized * 255) | 0;
 		}
 	}

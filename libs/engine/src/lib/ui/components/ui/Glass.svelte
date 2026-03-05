@@ -58,11 +58,8 @@
 		| "grove-rain"
 		| "grove-dew"
 		| "winter-snow"
-		| "autumn-leaves"
-		| "spring-petals"
 		| "summer-heat"
 		| "ambient-static"
-		| "ambient-waves"
 		| "ambient-clouds";
 
 	/** Custom Gossamer configuration */

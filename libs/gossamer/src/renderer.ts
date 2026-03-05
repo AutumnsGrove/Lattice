@@ -32,6 +32,8 @@ export interface RenderConfig {
 	fontFamily: string;
 	/** Custom brightness calculation function */
 	brightnessFunction: (r: number, g: number, b: number) => number;
+	/** Scale character opacity by brightness value (0.0 = off, 1.0 = full range) */
+	alphaByBrightness: number;
 }
 
 /**
@@ -45,6 +47,7 @@ const DEFAULT_RENDER_CONFIG: Omit<RenderConfig, "canvas"> = {
 	backgroundColor: "",
 	fontFamily: "monospace",
 	brightnessFunction: calculateBrightness,
+	alphaByBrightness: 0,
 };
 
 /**
@@ -247,7 +250,7 @@ export class GossamerRenderer {
 	 * Render ASCII from a brightness grid (for pattern-based rendering)
 	 */
 	renderFromBrightnessGrid(grid: number[][]): void {
-		const { characters, cellWidth, cellHeight, color } = this.config;
+		const { characters, cellWidth, cellHeight, color, alphaByBrightness } = this.config;
 
 		this.clear();
 		this.ctx.fillStyle = color;
@@ -259,9 +262,16 @@ export class GossamerRenderer {
 				const char = characters[Math.min(charIndex, characters.length - 1)];
 
 				if (char !== " ") {
+					if (alphaByBrightness > 0) {
+						this.ctx.globalAlpha = 1.0 - alphaByBrightness + (brightness / 255) * alphaByBrightness;
+					}
 					this.ctx.fillText(char, col * cellWidth, row * cellHeight);
 				}
 			}
+		}
+
+		if (alphaByBrightness > 0) {
+			this.ctx.globalAlpha = 1.0;
 		}
 	}
 
@@ -288,7 +298,7 @@ export class GossamerRenderer {
 	 * @param buffer - BrightnessBuffer from fillBrightnessBuffer
 	 */
 	renderFromBuffer(buffer: { data: Uint8Array; cols: number; rows: number }): void {
-		const { characters, cellWidth, cellHeight } = this.config;
+		const { characters, cellWidth, cellHeight, alphaByBrightness } = this.config;
 
 		this.clear();
 
@@ -303,9 +313,16 @@ export class GossamerRenderer {
 					const charIndex = ((brightness / 255) * charLen) | 0;
 					const char = characters[Math.min(charIndex, charLen)];
 					if (char !== " ") {
+						if (alphaByBrightness > 0) {
+							this.ctx.globalAlpha =
+								1.0 - alphaByBrightness + (brightness / 255) * alphaByBrightness;
+						}
 						this.ctx.fillText(char, col * cellWidth, row * cellHeight);
 					}
 				}
+			}
+			if (alphaByBrightness > 0) {
+				this.ctx.globalAlpha = 1.0;
 			}
 			return;
 		}
@@ -325,6 +342,10 @@ export class GossamerRenderer {
 					continue;
 				}
 
+				if (alphaByBrightness > 0) {
+					this.ctx.globalAlpha = 1.0 - alphaByBrightness + (brightness / 255) * alphaByBrightness;
+				}
+
 				// Draw from atlas: source is the character's position in the atlas
 				this.ctx.drawImage(
 					this.charAtlas,
@@ -339,6 +360,10 @@ export class GossamerRenderer {
 				);
 			}
 		}
+
+		if (alphaByBrightness > 0) {
+			this.ctx.globalAlpha = 1.0;
+		}
 	}
 
 	/**
@@ -347,12 +372,12 @@ export class GossamerRenderer {
 	 * @param grid - 2D array of brightness values
 	 */
 	renderGridFast(grid: number[][]): void {
-		const { characters, cellWidth, cellHeight } = this.config;
+		const { characters, cellWidth, cellHeight, alphaByBrightness } = this.config;
 
 		this.clear();
 
 		if (!this.charAtlas) {
-			// Fallback to standard method
+			// Fallback to standard method (handles alpha internally)
 			this.renderFromBrightnessGrid(grid);
 			return;
 		}
@@ -370,6 +395,10 @@ export class GossamerRenderer {
 					continue;
 				}
 
+				if (alphaByBrightness > 0) {
+					this.ctx.globalAlpha = 1.0 - alphaByBrightness + (brightness / 255) * alphaByBrightness;
+				}
+
 				this.ctx.drawImage(
 					this.charAtlas,
 					charIndex * cellWidth,
@@ -382,6 +411,10 @@ export class GossamerRenderer {
 					cellHeight,
 				);
 			}
+		}
+
+		if (alphaByBrightness > 0) {
+			this.ctx.globalAlpha = 1.0;
 		}
 	}
 

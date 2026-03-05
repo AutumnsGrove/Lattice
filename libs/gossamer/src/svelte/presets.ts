@@ -1,5 +1,11 @@
 /**
  * Preset configurations for Gossamer effects
+ *
+ * 8 presets tuned for the visual overhaul:
+ * - Domain warping for organic cloud shapes
+ * - Sparsity bias for atmospheric "dreamy" feel
+ * - Alpha-by-brightness for depth and volume
+ * - Correct aspect ratio (cellWidth measured from font metrics)
  */
 
 import type { PresetConfig } from "../index";
@@ -11,90 +17,82 @@ import type { PresetConfig } from "../index";
 export const grovePresets: Record<string, PresetConfig> = {
 	"grove-mist": {
 		name: "Grove Mist",
-		description: "Soft fog effect drifting through the trees",
-		characters: " ·∙•◦",
-		pattern: "perlin",
+		description: "Soft fog drifting through glass — the signature Gossamer effect",
+		characters: " \u00b7\u2219\u2022\u25e6",
+		pattern: "domain-warp",
 		frequency: 0.03,
 		amplitude: 1.0,
-		speed: 0.3,
+		speed: 0.15,
 		opacity: 0.2,
+		sparsity: 0.6,
+		alphaByBrightness: 0.5,
 	},
 	"grove-fireflies": {
 		name: "Grove Fireflies",
-		description: "Twinkling points of light in the darkness",
-		characters: " ·*+.",
+		description: "Sparse twinkling points, mostly dark",
+		characters: " \u00b7*",
 		pattern: "static",
 		frequency: 0.01,
 		amplitude: 1.0,
-		speed: 0.3,
+		speed: 0.6,
 		opacity: 0.3,
+		sparsity: 0.85,
+		alphaByBrightness: 0.7,
 	},
 	"grove-rain": {
 		name: "Grove Rain",
-		description: "Gentle rain falling through the canopy",
-		characters: " .|:!",
+		description: "Falling columns with fade trails",
+		characters: " .|:",
 		pattern: "matrix",
 		frequency: 0.05,
 		amplitude: 1.0,
-		speed: 0.8,
+		speed: 0.4,
 		opacity: 0.18,
+		sparsity: 0.4,
+		alphaByBrightness: 0.6,
 	},
 	"grove-dew": {
 		name: "Grove Dew",
-		description: "Morning dew glistening on spider silk",
-		characters: " ·.:*",
+		description: "Still morning texture, barely moving",
+		characters: " \u00b7.:*",
 		pattern: "fbm",
 		frequency: 0.04,
 		amplitude: 1.0,
 		speed: 0.1,
 		opacity: 0.15,
+		sparsity: 0.5,
+		alphaByBrightness: 0.4,
 	},
 };
 
 /**
  * Seasonal presets
- * Effects themed around the four seasons
+ * Effects themed around the seasons
  */
 export const seasonalPresets: Record<string, PresetConfig> = {
 	"winter-snow": {
 		name: "Winter Snow",
-		description: "Gentle snowfall on a quiet night",
-		characters: " .*+:",
+		description: "Slow drift, sparse snowflake points",
+		characters: " .*+",
 		pattern: "perlin",
 		frequency: 0.04,
 		amplitude: 1.0,
-		speed: 0.5,
+		speed: 0.2,
 		opacity: 0.25,
-	},
-	"autumn-leaves": {
-		name: "Autumn Leaves",
-		description: "Scattered leaves drifting on the wind",
-		characters: " ~=*%",
-		pattern: "clouds",
-		frequency: 0.04,
-		amplitude: 1.0,
-		speed: 0.4,
-		opacity: 0.2,
-	},
-	"spring-petals": {
-		name: "Spring Petals",
-		description: "Cherry blossom petals floating on the breeze",
-		characters: " .+*:",
-		pattern: "waves",
-		frequency: 0.03,
-		amplitude: 1.0,
-		speed: 0.4,
-		opacity: 0.2,
+		sparsity: 0.7,
+		alphaByBrightness: 0.5,
 	},
 	"summer-heat": {
 		name: "Summer Heat",
-		description: "Heat shimmer rising from sun-warmed ground",
-		characters: " ~-=:",
+		description: "Horizontal shimmer, low sparsity for visible waves",
+		characters: " ~-=",
 		pattern: "waves",
 		frequency: 0.06,
 		amplitude: 1.0,
-		speed: 1.0,
+		speed: 0.5,
 		opacity: 0.15,
+		sparsity: 0.3,
+		alphaByBrightness: 0.3,
 	},
 };
 
@@ -103,35 +101,29 @@ export const seasonalPresets: Record<string, PresetConfig> = {
  * Subtle background textures
  */
 export const ambientPresets: Record<string, PresetConfig> = {
+	"ambient-clouds": {
+		name: "Ambient Clouds",
+		description: "Soft billowing, mid-density",
+		characters: " .:=+",
+		pattern: "domain-warp",
+		frequency: 0.03,
+		amplitude: 1.0,
+		speed: 0.12,
+		opacity: 0.15,
+		sparsity: 0.5,
+		alphaByBrightness: 0.4,
+	},
 	"ambient-static": {
 		name: "Ambient Static",
-		description: "Gentle static noise texture",
-		characters: " .:+*",
+		description: "Gentle texture, sparse",
+		characters: " .:+",
 		pattern: "static",
 		frequency: 0.1,
 		amplitude: 1.0,
 		speed: 0.5,
 		opacity: 0.12,
-	},
-	"ambient-waves": {
-		name: "Ambient Waves",
-		description: "Soft flowing wave pattern",
-		characters: " .~-=",
-		pattern: "waves",
-		frequency: 0.04,
-		amplitude: 1.0,
-		speed: 0.3,
-		opacity: 0.12,
-	},
-	"ambient-clouds": {
-		name: "Ambient Clouds",
-		description: "Drifting cloud-like patterns",
-		characters: " .:=+*",
-		pattern: "clouds",
-		frequency: 0.03,
-		amplitude: 1.0,
-		speed: 0.2,
-		opacity: 0.15,
+		sparsity: 0.7,
+		alphaByBrightness: 0.5,
 	},
 };
 

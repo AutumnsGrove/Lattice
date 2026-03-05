@@ -11,6 +11,9 @@ import {
 	seededNoise2D,
 	generateBrightnessGrid,
 	gridToImageData,
+	domainWarpPattern,
+	fillBrightnessBuffer,
+	createBrightnessBuffer,
 	DEFAULT_PATTERN_CONFIG,
 } from "./patterns";
 
@@ -235,6 +238,145 @@ describe("generateBrightnessGrid", () => {
 			}
 		}
 		expect(hasDifference).toBe(true);
+	});
+});
+
+describe("domainWarpPattern", () => {
+	it("should return value between -1 and 1", () => {
+		for (let i = 0; i < 100; i++) {
+			const x = Math.random() * 100;
+			const y = Math.random() * 100;
+			const value = domainWarpPattern(x, y, Math.random() * 10);
+			expect(value).toBeGreaterThanOrEqual(-1);
+			expect(value).toBeLessThanOrEqual(1);
+		}
+	});
+
+	it("should be deterministic", () => {
+		const val1 = domainWarpPattern(5.5, 3.2, 1.0);
+		const val2 = domainWarpPattern(5.5, 3.2, 1.0);
+		expect(val1).toBe(val2);
+	});
+
+	it("should vary with position", () => {
+		const val1 = domainWarpPattern(0.5, 0.5, 0);
+		const val2 = domainWarpPattern(50.5, 50.5, 0);
+		expect(val1).not.toBe(val2);
+	});
+
+	it("should vary with time", () => {
+		const val1 = domainWarpPattern(10, 10, 0);
+		const val2 = domainWarpPattern(10, 10, 100);
+		expect(val1).not.toBe(val2);
+	});
+
+	it("should respect amplitude config", () => {
+		const config = { frequency: 0.05, amplitude: 0.5, speed: 0.5 };
+		for (let i = 0; i < 50; i++) {
+			const value = domainWarpPattern(
+				Math.random() * 100,
+				Math.random() * 100,
+				Math.random() * 10,
+				config,
+			);
+			expect(Math.abs(value)).toBeLessThanOrEqual(0.5);
+		}
+	});
+});
+
+describe("generateBrightnessGrid with domain-warp", () => {
+	it("should generate valid grid with domain-warp pattern", () => {
+		const grid = generateBrightnessGrid(10, 8, "domain-warp", 0, {
+			frequency: 0.03,
+			amplitude: 1.0,
+			speed: 0.15,
+		});
+		expect(grid.length).toBe(8);
+		expect(grid[0].length).toBe(10);
+		for (const row of grid) {
+			for (const value of row) {
+				expect(value).toBeGreaterThanOrEqual(0);
+				expect(value).toBeLessThanOrEqual(255);
+			}
+		}
+	});
+});
+
+describe("sparsity normalization", () => {
+	it("should produce sparser output with higher sparsity", () => {
+		const gridNoSparsity = generateBrightnessGrid(20, 15, "perlin", 0, {
+			frequency: 0.05,
+			amplitude: 1.0,
+			speed: 0.5,
+			sparsity: 0,
+		});
+		const gridHighSparsity = generateBrightnessGrid(20, 15, "perlin", 0, {
+			frequency: 0.05,
+			amplitude: 1.0,
+			speed: 0.5,
+			sparsity: 0.7,
+		});
+
+		// Count zero-brightness cells
+		let zerosNoSparsity = 0;
+		let zerosHighSparsity = 0;
+		for (const row of gridNoSparsity) {
+			for (const v of row) {
+				if (v === 0) zerosNoSparsity++;
+			}
+		}
+		for (const row of gridHighSparsity) {
+			for (const v of row) {
+				if (v === 0) zerosHighSparsity++;
+			}
+		}
+
+		// High sparsity should have more zero cells
+		expect(zerosHighSparsity).toBeGreaterThan(zerosNoSparsity);
+	});
+
+	it("should not crash at sparsity=1.0 (edge case)", () => {
+		const grid = generateBrightnessGrid(5, 5, "perlin", 0, {
+			frequency: 0.05,
+			amplitude: 1.0,
+			speed: 0.5,
+			sparsity: 1.0,
+		});
+		for (const row of grid) {
+			for (const value of row) {
+				expect(value).toBeGreaterThanOrEqual(0);
+				expect(value).toBeLessThanOrEqual(255);
+				expect(Number.isNaN(value)).toBe(false);
+			}
+		}
+	});
+
+	it("should produce all zeros at sparsity=1.0", () => {
+		const grid = generateBrightnessGrid(10, 10, "perlin", 0, {
+			frequency: 0.05,
+			amplitude: 1.0,
+			speed: 0.5,
+			sparsity: 1.0,
+		});
+		for (const row of grid) {
+			for (const value of row) {
+				expect(value).toBe(0);
+			}
+		}
+	});
+
+	it("should match behavior between grid and buffer APIs", () => {
+		const config = { frequency: 0.05, amplitude: 1.0, speed: 0.5, sparsity: 0.5 };
+		const grid = generateBrightnessGrid(10, 8, "perlin", 1.0, config);
+		const buffer = createBrightnessBuffer(10, 8);
+		fillBrightnessBuffer(buffer, "perlin", 1.0, config);
+
+		for (let row = 0; row < 8; row++) {
+			for (let col = 0; col < 10; col++) {
+				// Allow +-1 difference due to Math.floor vs bitwise OR rounding
+				expect(Math.abs(grid[row][col] - buffer.data[row * 10 + col])).toBeLessThanOrEqual(1);
+			}
+		}
 	});
 });
 
