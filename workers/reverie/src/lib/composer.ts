@@ -5,7 +5,7 @@
  * receives structured tool calls, and returns them for validation.
  */
 
-import { RemoteLumenClient } from "@autumnsgrove/lattice/lumen/remote";
+import { RemoteLumenClient } from "@autumnsgrove/lattice/lumen";
 import type { LumenToolDefinition, LumenToolCall } from "@autumnsgrove/lattice/lumen";
 import type { AtmosphereEntry } from "@autumnsgrove/lattice/reverie";
 import type { Env } from "../types";

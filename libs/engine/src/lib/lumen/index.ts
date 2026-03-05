@@ -58,11 +58,7 @@
 // CLIENT
 // =============================================================================
 
-export {
-  LumenClient,
-  createLumenClient,
-  createLumenClientWithDecryption,
-} from "./client.js";
+export { LumenClient, createLumenClient, createLumenClientWithDecryption } from "./client.js";
 
 export { RemoteLumenClient, type RemoteLumenConfig } from "./remote.js";
 
@@ -73,43 +69,46 @@ export { createLumenClientAuto, type LumenClientUnion } from "./factory.js";
 // =============================================================================
 
 export type {
-  LumenTask,
-  LumenMessage,
-  LumenMessageRole,
-  LumenContentPart,
-  LumenRequest,
-  LumenRequestOptions,
-  LumenResponse,
-  LumenUsage,
-  LumenStreamChunk,
-  LumenProviderName,
-  LumenProviderConfig,
-  LumenEmbeddingRequest,
-  LumenEmbeddingResponse,
-  LumenModerationRequest,
-  LumenModerationResponse,
-  LumenModerationCategory,
-  LumenTranscriptionRequest,
-  LumenTranscriptionResponse,
-  LumenTranscriptionOptions,
-  LumenClientConfig,
-  SongbirdOptions,
-  KestrelContext,
-  SongbirdResult,
-  ShutterOptions,
-  ShutterModelTier,
-  ShutterInjectMode,
-  ShutterResult,
-  ShutterExtraction,
-  ShutterInjectionResult,
-  LumenMcpOptions,
-  LumenMcpToolRef,
-  McpInjectMode,
-  LumenMcpServerConfig,
-  McpTransportType,
-  LumenMcpToolDefinition,
-  LumenMcpResult,
-  LumenMcpToolResult,
+	LumenTask,
+	LumenMessage,
+	LumenMessageRole,
+	LumenContentPart,
+	LumenRequest,
+	LumenRequestOptions,
+	LumenResponse,
+	LumenUsage,
+	LumenStreamChunk,
+	LumenProviderName,
+	LumenProviderConfig,
+	LumenEmbeddingRequest,
+	LumenEmbeddingResponse,
+	LumenModerationRequest,
+	LumenModerationResponse,
+	LumenModerationCategory,
+	LumenTranscriptionRequest,
+	LumenTranscriptionResponse,
+	LumenTranscriptionOptions,
+	LumenClientConfig,
+	SongbirdOptions,
+	KestrelContext,
+	SongbirdResult,
+	ShutterOptions,
+	ShutterModelTier,
+	ShutterInjectMode,
+	ShutterResult,
+	ShutterExtraction,
+	ShutterInjectionResult,
+	LumenMcpOptions,
+	LumenMcpToolRef,
+	McpInjectMode,
+	LumenMcpServerConfig,
+	McpTransportType,
+	LumenMcpToolDefinition,
+	LumenMcpResult,
+	LumenMcpToolResult,
+	LumenToolDefinition,
+	LumenToolCall,
+	LumenToolChoice,
 } from "./types.js";
 
 // =============================================================================
@@ -135,12 +134,12 @@ export { McpServerRegistry, runMcpTools, injectMcpContext } from "./mcp.js";
 // =============================================================================
 
 export {
-  LumenError,
-  QuotaExceededError,
-  ProviderError,
-  ProviderTimeoutError,
-  AllProvidersFailedError,
-  type LumenErrorCode,
+	LumenError,
+	QuotaExceededError,
+	ProviderError,
+	ProviderTimeoutError,
+	AllProvidersFailedError,
+	type LumenErrorCode,
 } from "./errors.js";
 
 // =============================================================================
@@ -148,15 +147,15 @@ export {
 // =============================================================================
 
 export {
-  MODELS,
-  MODEL_COSTS,
-  TASK_REGISTRY,
-  PROVIDERS,
-  getTaskConfig,
-  getModelCost,
-  calculateCost,
-  getModelsForProvider,
-  type TaskConfig,
+	MODELS,
+	MODEL_COSTS,
+	TASK_REGISTRY,
+	PROVIDERS,
+	getTaskConfig,
+	getModelCost,
+	calculateCost,
+	getModelsForProvider,
+	type TaskConfig,
 } from "./config.js";
 
 // =============================================================================
@@ -164,20 +163,20 @@ export {
 // =============================================================================
 
 export {
-  LUMEN_QUOTAS,
-  getTierQuota,
-  getTierQuotas,
-  isTaskAvailable,
-  formatQuota,
-  calculateUsagePercent,
-  wouldExceedQuota,
+	LUMEN_QUOTAS,
+	getTierQuota,
+	getTierQuotas,
+	isTaskAvailable,
+	formatQuota,
+	calculateUsagePercent,
+	wouldExceedQuota,
 } from "./quota/limits.js";
 
 export {
-  QuotaTracker,
-  createQuotaTracker,
-  type QuotaCheckResult,
-  type UsageRecord,
+	QuotaTracker,
+	createQuotaTracker,
+	type QuotaCheckResult,
+	type UsageRecord,
 } from "./quota/tracker.js";
 
 // =============================================================================
@@ -185,16 +184,16 @@ export {
 // =============================================================================
 
 export {
-  createProviders,
-  getAvailableProviders,
-  OpenRouterProvider,
-  createOpenRouterProvider,
-  CloudflareAIProvider,
-  createCloudflareAIProvider,
-  type LumenProvider,
-  type LumenInferenceOptions,
-  type LumenProviderResponse,
-  type ProviderRegistry,
+	createProviders,
+	getAvailableProviders,
+	OpenRouterProvider,
+	createOpenRouterProvider,
+	CloudflareAIProvider,
+	createCloudflareAIProvider,
+	type LumenProvider,
+	type LumenInferenceOptions,
+	type LumenProviderResponse,
+	type ProviderRegistry,
 } from "./providers/index.js";
 
 // =============================================================================
@@ -202,22 +201,22 @@ export {
 // =============================================================================
 
 export {
-  scrubPii,
-  scrubMessages,
-  validateRequest,
-  secureUserContent,
-  preprocess,
-  type ScrubResult,
-  type PreprocessResult,
+	scrubPii,
+	scrubMessages,
+	validateRequest,
+	secureUserContent,
+	preprocess,
+	type ScrubResult,
+	type PreprocessResult,
 } from "./pipeline/preprocessor.js";
 
 export {
-  normalizeResponse,
-  createUsageLog,
-  calculateStats,
-  type PostprocessInput,
-  type UsageLogEntry,
-  type TenantUsageStats,
+	normalizeResponse,
+	createUsageLog,
+	calculateStats,
+	type PostprocessInput,
+	type UsageLogEntry,
+	type TenantUsageStats,
 } from "./pipeline/postprocessor.js";
 
 // =============================================================================
@@ -225,10 +224,10 @@ export {
 // =============================================================================
 
 export {
-  routeTask,
-  executeWithFallback,
-  executeEmbedding,
-  executeModeration,
-  type RouteResult,
-  type ExecuteResult,
+	routeTask,
+	executeWithFallback,
+	executeEmbedding,
+	executeModeration,
+	type RouteResult,
+	type ExecuteResult,
 } from "./router.js";
