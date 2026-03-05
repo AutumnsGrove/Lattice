@@ -46,7 +46,7 @@
 	let {
 		pattern = "perlin",
 		characters = CHARACTER_SETS.grove.characters,
-		color = "currentColor",
+		color = "#22c55e",
 		opacity = 0.3,
 		animated = true,
 		speed = 0.5,

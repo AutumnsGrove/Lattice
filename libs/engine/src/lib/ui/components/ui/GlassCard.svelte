@@ -2,9 +2,7 @@
 	import type { Snippet } from "svelte";
 	import type { HTMLAttributes } from "svelte/elements";
 	import { cn } from "$lib/ui/utils";
-	// TODO: Re-enable when gossamer package exports are wired up
-	// import { GossamerClouds } from "@autumnsgrove/gossamer/svelte";
-	// import "@autumnsgrove/gossamer/svelte/style.css";
+	import { GossamerClouds } from "@autumnsgrove/gossamer/svelte";
 	import { Star } from "@lucide/svelte";
 
 	/**
@@ -267,8 +265,20 @@
 		</div>
 	{/if}
 
-	<!-- TODO: Re-enable GossamerClouds when gossamer package exports are wired up -->
-	<!-- {#if gossamer} ... {/if} -->
+	{#if gossamer}
+		<GossamerClouds
+			preset={gossamerPreset}
+			pattern={gossamerConfig?.pattern}
+			characters={gossamerConfig?.characters}
+			frequency={gossamerConfig?.frequency}
+			amplitude={gossamerConfig?.amplitude}
+			speed={gossamerSpeed ?? gossamerConfig?.speed}
+			cellSize={gossamerConfig?.cellSize}
+			color={gossamerColor}
+			opacity={gossamerOpacity}
+			animated={!gossamerStatic && gossamerConfig?.animated !== false}
+		/>
+	{/if}
 
 	<!-- Content layer (above Gossamer) -->
 	<div class={cn(gossamer && "relative z-10", flush && "flex-1 flex flex-col min-h-0")}>
