@@ -55,8 +55,15 @@ jobs:
           ACTUAL_ATMOSPHERES=$(grep -c 'keyword:' "$ATMOSPHERE_FILE" 2>/dev/null | tr -d ' ') || ACTUAL_ATMOSPHERES=0
 
           # Count fields across all schema files
-          # Each field is a key in the fields object with a type property
-          ACTUAL_FIELDS=$(grep -rh '^\t\t\ttype: ' "$SCHEMA_DIR" 2>/dev/null | wc -l | tr -d ' ') || ACTUAL_FIELDS=0
+          # Each field has a `type:` property at 3-tab indentation (inside fields > fieldName > type)
+          # Use $'\t' bash syntax for portable tab matching across GNU/BSD grep
+          ACTUAL_FIELDS=$(grep -rh $'^\t\t\ttype: ' "$SCHEMA_DIR" 2>/dev/null | wc -l | tr -d ' ') || ACTUAL_FIELDS=0
+
+          # Cross-check: sum fieldCounts from inventory domains and compare to inventory total
+          INVENTORY_SUM=$(jq '[.domains[].fieldCount] | add' "$INVENTORY_FILE" 2>/dev/null) || INVENTORY_SUM=0
+          if [ "$INVENTORY_SUM" -ne "$EXPECTED_FIELDS" ]; then
+            echo "::warning::Inventory internal inconsistency: domains sum to $INVENTORY_SUM fields but fields.total says $EXPECTED_FIELDS"
+          fi
 
           # Count by group
           ACTUAL_IDENTITY=$(find "$SCHEMA_DIR/identity" -name "*.ts" -type f 2>/dev/null | wc -l | tr -d ' ') || ACTUAL_IDENTITY=0
@@ -246,13 +253,17 @@ jobs:
             # Count schema files
             find libs/engine/src/lib/reverie/schemas -name "*.ts" -type f | wc -l
 
+            # Count fields (type: at 3-tab depth inside field definitions)
+            grep -rh $'^\t\t\ttype: ' libs/engine/src/lib/reverie/schemas/ | wc -l
+
             # List all domain IDs
-            grep -rh "id:" libs/engine/src/lib/reverie/schemas/ | grep -oP '"[a-z]+\\.[a-z]+"' | sort -u
+            grep -rh "id:" libs/engine/src/lib/reverie/schemas/ | grep -o '"[a-z.]*"' | sort -u
 
             # Count atmosphere entries
             grep -c "keyword:" libs/engine/src/lib/reverie/atmosphere.ts
 
-            # Show inventory summary
+            # Cross-check: sum domain fieldCounts vs inventory total
+            jq '[.domains[].fieldCount] | add' .github/reverie-inventory.json
             jq '{schemas: .schemas.total, fields: .fields.total, atmospheres: .atmospheres.total}' .github/reverie-inventory.json
             \`\`\`
 

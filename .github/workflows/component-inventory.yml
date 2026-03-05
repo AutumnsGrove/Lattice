@@ -55,14 +55,17 @@ jobs:
           # Calculate difference
           DIFF=$((ACTUAL_TOTAL - EXPECTED_TOTAL))
 
-          # Generate per-category breakdown
+          # Generate per-category breakdown (dynamically read categories from inventory)
           BREAKDOWN=""
-          for category in primitives nature ui typography chrome terrarium gallery charts content states forms indicators icons; do
-            EXPECTED=$(jq -r ".components.breakdown.$category // 0" .github/component-inventory.json)
-            PATH_DIR=$(jq -r ".components.paths.$category // \"\"" .github/component-inventory.json)
+          CATEGORY_SUM=0
+          CATEGORIES=$(jq -r '.components.paths | keys[]' .github/component-inventory.json)
+          for category in $CATEGORIES; do
+            EXPECTED=$(jq -r ".components.breakdown[\"$category\"] // 0" .github/component-inventory.json)
+            PATH_DIR=$(jq -r ".components.paths[\"$category\"] // \"\"" .github/component-inventory.json)
 
             if [ -n "$PATH_DIR" ] && [ -d "$PATH_DIR" ]; then
               ACTUAL=$(find "$PATH_DIR" -name "*.svelte" -type f | wc -l | tr -d ' ')
+              CATEGORY_SUM=$((CATEGORY_SUM + ACTUAL))
               CAT_DIFF=$((ACTUAL - EXPECTED))
 
               if [ "$CAT_DIFF" -ne 0 ]; then
@@ -72,6 +75,13 @@ jobs:
               fi
             fi
           done
+
+          # Cross-check: category sum should equal total
+          if [ "$CATEGORY_SUM" -gt 0 ] && [ "$CATEGORY_SUM" -ne "$ACTUAL_TOTAL" ]; then
+            SUM_DIFF=$((ACTUAL_TOTAL - CATEGORY_SUM))
+            BREAKDOWN="${BREAKDOWN}| **uncategorized** | 0 | $SUM_DIFF | +${SUM_DIFF} |\n"
+            echo "::warning::Category sum ($CATEGORY_SUM) does not match total ($ACTUAL_TOTAL) - $SUM_DIFF component(s) are in directories not tracked by the inventory"
+          fi
 
           # Determine status
           if [ "$DIFF" -eq 0 ]; then
@@ -275,9 +285,10 @@ jobs:
             # Total count
             find libs/engine/src/lib/ui/components -name "*.svelte" | wc -l
 
-            # Per-category counts
-            for dir in primitives nature ui typography chrome terrarium gallery charts content states forms indicators icons; do
-              echo "$dir: $(find libs/engine/src/lib/ui/components/$dir -name '*.svelte' 2>/dev/null | wc -l)"
+            # Per-category counts (reads categories from inventory)
+            for dir in $(jq -r '.components.paths | keys[]' .github/component-inventory.json); do
+              path=$(jq -r ".components.paths[\"$dir\"]" .github/component-inventory.json)
+              echo "$dir: $(find "$path" -name '*.svelte' 2>/dev/null | wc -l)"
             done
             \`\`\`
 

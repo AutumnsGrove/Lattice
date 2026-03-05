@@ -47,11 +47,11 @@ jobs:
           # Count actual INSERT statements for feature_flags in migrations
           MIGRATION_DIR="libs/engine/migrations"
 
-          # The SQL format spans multiple lines:
-          #   INSERT OR IGNORE INTO feature_flags (id, ...)
-          #   VALUES (
-          #     'flag_id',
-          # Use awk to find the flag ID (first quoted value after VALUES in a feature_flags INSERT)
+          # The SQL format varies across migrations:
+          #   Single-line:  INSERT OR IGNORE INTO feature_flags (id, ...) VALUES ('flag_id', ...);
+          #   Multi-line:   INSERT OR IGNORE INTO feature_flags (\n  id, ...\n)\nVALUES (\n  'flag_id',
+          # The awk state machine handles both: `found` flag persists across lines between
+          # INSERT and VALUES, then `values` flag persists until the first quoted identifier.
           ACTUAL_TOTAL=$(awk '
             /INSERT OR IGNORE INTO feature_flags/ { found=1; next }
             found && /VALUES/ { values=1; next }
@@ -60,6 +60,8 @@ jobs:
               print
               found=0; values=0
             }
+            # Reset on statement end if VALUES was never found (safety valve)
+            found && /;/ && values==0 { found=0 }
           ' "$MIGRATION_DIR"/*.sql 2>/dev/null | sort -u | wc -l | tr -d ' ') || ACTUAL_TOTAL=0
 
           # Count greenhouse-only flags from inventory (approximation - actual check would require parsing multi-line SQL)
