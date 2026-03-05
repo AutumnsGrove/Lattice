@@ -143,8 +143,8 @@
 				{/if}
 			</div>
 
-			<!-- Add friends CTA when no friends yet -->
-			{#if !lanternStore.hasFriends}
+			<!-- Add friends CTA when no friends yet (hide while loading) -->
+			{#if !lanternStore.hasFriends && lanternStore.friendsLoaded}
 				<button
 					type="button"
 					class="add-friends-cta"
@@ -153,6 +153,10 @@
 					<UserPlus size={16} />
 					<span>Add Friends</span>
 				</button>
+			{/if}
+
+			{#if lanternStore.friendsLoading}
+				<p class="loading-text">Loading friends…</p>
 			{/if}
 		</div>
 	{/if}
@@ -441,6 +445,14 @@
 	:global(.dark) .add-friends-cta:hover {
 		color: var(--accent-success);
 		border-color: var(--accent-success);
+	}
+
+	.loading-text {
+		text-align: center;
+		color: var(--color-text-muted);
+		font-size: 0.8125rem;
+		padding: 0.5rem 0;
+		margin: 0;
 	}
 
 	/* Responsive: collapse to single column on narrow screens */

@@ -7,26 +7,25 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { API_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
-import { getVerifiedTenantId } from "$lib/auth/session.js";
+import { getUserHomeGrove } from "$lib/server/services/users.js";
 
 export const DELETE: RequestHandler = async ({ params, platform, locals }) => {
 	const db = platform?.env?.DB;
-	const tenantId = locals.tenantId;
 
 	if (!db) {
 		throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
-	}
-
-	if (!tenantId) {
-		throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
 	}
 
 	if (!locals.user) {
 		throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
 	}
 
-	// Verify the authenticated user owns this tenant
-	const verifiedTenantId = await getVerifiedTenantId(db, tenantId, locals.user);
+	// Resolve the user's home grove — friends are always scoped to your own tenant
+	const homeGrove = await getUserHomeGrove(db, locals.user.email);
+	if (!homeGrove) {
+		throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
+	}
+	const homeTenantId = homeGrove.tenantId;
 
 	const friendTenantId = params.tenantId;
 	if (!friendTenantId) {
@@ -36,7 +35,7 @@ export const DELETE: RequestHandler = async ({ params, platform, locals }) => {
 	try {
 		const existing = await db
 			.prepare(`SELECT id FROM lantern_friends WHERE tenant_id = ? AND friend_tenant_id = ?`)
-			.bind(verifiedTenantId, friendTenantId)
+			.bind(homeTenantId, friendTenantId)
 			.first<{ id: string }>();
 
 		if (!existing) {
@@ -45,7 +44,7 @@ export const DELETE: RequestHandler = async ({ params, platform, locals }) => {
 
 		await db
 			.prepare(`DELETE FROM lantern_friends WHERE tenant_id = ? AND friend_tenant_id = ?`)
-			.bind(verifiedTenantId, friendTenantId)
+			.bind(homeTenantId, friendTenantId)
 			.run();
 
 		return json({ success: true });

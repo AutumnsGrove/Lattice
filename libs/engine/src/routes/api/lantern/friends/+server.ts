@@ -8,7 +8,7 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { API_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
-import { getVerifiedTenantId } from "$lib/auth/session.js";
+import { getUserHomeGrove } from "$lib/server/services/users.js";
 import { createThreshold } from "$lib/threshold/factory.js";
 import { thresholdCheck } from "$lib/threshold/adapters/sveltekit.js";
 
@@ -17,18 +17,21 @@ const MAX_FRIENDS_PER_TENANT = 50;
 
 export const GET: RequestHandler = async ({ platform, locals }) => {
 	const db = platform?.env?.DB;
-	const tenantId = locals.tenantId;
 
 	if (!db) {
 		throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
 	}
 
-	if (!tenantId) {
-		throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
-	}
-
 	if (!locals.user) {
 		throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
+	}
+
+	// Resolve the user's own grove — friends are always scoped to your home tenant,
+	// not whichever grove you happen to be visiting
+	const homeGrove = await getUserHomeGrove(db, locals.user.email);
+	if (!homeGrove) {
+		// User hasn't created a grove yet — no friends to show
+		return json({ friends: [] });
 	}
 
 	try {
@@ -39,7 +42,7 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
 				 WHERE tenant_id = ?
 				 ORDER BY added_at DESC`,
 			)
-			.bind(tenantId)
+			.bind(homeGrove.tenantId)
 			.all<{
 				friend_tenant_id: string;
 				friend_name: string;
@@ -66,22 +69,22 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
 
 export const POST: RequestHandler = async ({ request, platform, locals }) => {
 	const db = platform?.env?.DB;
-	const tenantId = locals.tenantId;
 
 	if (!db) {
 		throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
-	}
-
-	if (!tenantId) {
-		throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
 	}
 
 	if (!locals.user) {
 		throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
 	}
 
-	// Verify the authenticated user owns this tenant
-	const verifiedTenantId = await getVerifiedTenantId(db, tenantId, locals.user);
+	// Resolve the user's home grove — friends are always added to your own tenant,
+	// even when the request comes from a different grove's subdomain
+	const homeGrove = await getUserHomeGrove(db, locals.user.email);
+	if (!homeGrove) {
+		throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
+	}
+	const homeTenantId = homeGrove.tenantId;
 
 	// Rate limit: 30 friend additions per hour
 	const threshold = createThreshold(platform?.env, { identifier: locals.user.id });
@@ -119,14 +122,14 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 		}
 
 		// Prevent self-add
-		if (friendTenant.id === verifiedTenantId) {
+		if (friendTenant.id === homeTenantId) {
 			throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
 		}
 
 		// Check friend limit
 		const countResult = await db
 			.prepare(`SELECT COUNT(*) as count FROM lantern_friends WHERE tenant_id = ?`)
-			.bind(verifiedTenantId)
+			.bind(homeTenantId)
 			.first<{ count: number }>();
 
 		if ((countResult?.count ?? 0) >= MAX_FRIENDS_PER_TENANT) {
@@ -139,7 +142,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 				`INSERT OR IGNORE INTO lantern_friends (tenant_id, friend_tenant_id, friend_name, friend_subdomain, source)
 				 VALUES (?, ?, ?, ?, 'manual')`,
 			)
-			.bind(verifiedTenantId, friendTenant.id, friendTenant.name, friendTenant.subdomain)
+			.bind(homeTenantId, friendTenant.id, friendTenant.name, friendTenant.subdomain)
 			.run();
 
 		return json(

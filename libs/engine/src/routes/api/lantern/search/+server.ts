@@ -7,24 +7,24 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { API_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
+import { getUserHomeGrove } from "$lib/server/services/users.js";
 import { createThreshold } from "$lib/threshold/factory.js";
 import { thresholdCheck } from "$lib/threshold/adapters/sveltekit.js";
 
 export const GET: RequestHandler = async ({ url, platform, locals }) => {
 	const db = platform?.env?.DB;
-	const tenantId = locals.tenantId;
 
 	if (!db) {
 		throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
 	}
 
-	if (!tenantId) {
-		throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
-	}
-
 	if (!locals.user) {
 		throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
 	}
+
+	// Resolve the user's home grove to exclude self from search results
+	const homeGrove = await getUserHomeGrove(db, locals.user.email);
+	const excludeTenantId = homeGrove?.tenantId ?? "";
 
 	// Rate limit: 30 searches per minute
 	const threshold = createThreshold(platform?.env, { identifier: locals.user.id });
@@ -54,7 +54,7 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
 				   AND id != ?
 				 LIMIT 10`,
 			)
-			.bind(pattern, pattern, tenantId)
+			.bind(pattern, pattern, excludeTenantId)
 			.all<{ id: string; subdomain: string; name: string }>();
 
 		const results = (result.results ?? []).map((row) => ({

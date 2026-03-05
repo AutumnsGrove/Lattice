@@ -13,6 +13,11 @@
 		requestAnimationFrame(() => {
 			searchInput?.focus();
 		});
+
+		// Clean up debounce timer on unmount
+		return () => {
+			clearTimeout(debounceTimer);
+		};
 	});
 
 	function handleInput(event: Event) {

@@ -5,6 +5,8 @@ import { getNavPageLimit } from "$lib/server/tier-features.js";
 import { canUploadImages } from "$lib/server/upload-gate.js";
 import { emailsMatch } from "$lib/utils/user.js";
 import { isFeatureEnabled } from "$lib/feature-flags/index.js";
+import { getUserHomeGrove } from "$lib/server/services/users.js";
+import type { HomeGrove } from "$lib/server/services/users.js";
 
 interface SiteSettings {
 	font_family: string;
@@ -30,6 +32,7 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
 	let timelineEnabled = false;
 	let galleryEnabled = false;
 	let lanternEnabled = false;
+	let homeGrove: HomeGrove | null = null;
 
 	// Get tenant ID from context if available
 	const tenantId = locals.tenantId;
@@ -136,13 +139,14 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
 						navPages.push({ slug: "gallery", title: "Gallery" });
 					}
 
-					// Lantern navigation panel — only check flag for logged-in users
+					// Lantern navigation panel — only check flag and resolve home grove for logged-in users
 					if (locals.user && flagsEnv) {
-						lanternEnabled = await isFeatureEnabled(
-							"lantern_enabled",
-							{ tenantId },
-							flagsEnv,
-						).catch(() => false);
+						const [flagResult, groveResult] = await Promise.all([
+							isFeatureEnabled("lantern_enabled", { tenantId }, flagsEnv).catch(() => false),
+							getUserHomeGrove(db, locals.user.email).catch(() => null),
+						]);
+						lanternEnabled = flagResult;
+						homeGrove = groveResult;
 					}
 
 					// Calculate enabled curios count for the pages admin UI
@@ -193,9 +197,8 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
 		dbAccessError,
 		lanternData: locals.user
 			? {
-					homeGrove: context.type === "tenant" ? context.tenant.subdomain : "",
-					displayName:
-						siteSettings.grove_title || (context.type === "tenant" ? context.tenant.name : ""),
+					homeGrove: homeGrove?.subdomain ?? "",
+					displayName: siteSettings.grove_title || homeGrove?.name || "",
 					enabled: lanternEnabled,
 				}
 			: null,
