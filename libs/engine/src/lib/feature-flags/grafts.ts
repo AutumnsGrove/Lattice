@@ -48,7 +48,8 @@ export type KnownGraftId =
 	| "uploads_suspended"
 	| "photo_gallery"
 	| "reeds_comments"
-	| "thorn_moderation";
+	| "thorn_moderation"
+	| "lantern_enabled";
 
 /**
  * Record of graft ID to enabled status.
