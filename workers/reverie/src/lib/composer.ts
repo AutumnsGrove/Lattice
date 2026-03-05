@@ -43,7 +43,7 @@ export async function compose(
 	},
 ): Promise<ComposerResult> {
 	const lumen = new RemoteLumenClient({
-		baseUrl: "https://grove-lumen.workers.dev",
+		baseUrl: "https://grove-lumen.internal",
 		apiKey: env.LUMEN_API_KEY,
 		fetcher: env.LUMEN,
 	});

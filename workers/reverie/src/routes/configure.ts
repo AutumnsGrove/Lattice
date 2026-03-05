@@ -112,9 +112,27 @@ configure.post("/", async (c) => {
 			err instanceof Error && "code" in err ? (err as { code: string }).code : undefined;
 		console.error("[Reverie] Configure error:", { code: errCode, message: errMsg });
 
-		if (errCode) {
-			const { body: errBody, status } = buildReverieError(REVERIE_ERRORS.LUMEN_ERROR);
-			return c.json(errBody, status as 502);
+		// Distinguish Lumen upstream errors from internal errors
+		const LUMEN_ERROR_CODES = new Set([
+			"AUTH_REQUIRED",
+			"INVALID_REQUEST",
+			"INVALID_PARAMS",
+			"QUOTA_EXCEEDED",
+			"PROVIDER_ERROR",
+			"ALL_PROVIDERS_FAILED",
+			"SONGBIRD_REJECTED",
+			"RATE_LIMITED",
+			"UPSTREAM_ERROR",
+			"INTERNAL_ERROR",
+		]);
+
+		if (errCode && LUMEN_ERROR_CODES.has(errCode)) {
+			const reverieErr =
+				errCode === "QUOTA_EXCEEDED" || errCode === "RATE_LIMITED"
+					? REVERIE_ERRORS.RATE_LIMITED
+					: REVERIE_ERRORS.LUMEN_ERROR;
+			const { body: errBody, status } = buildReverieError(reverieErr);
+			return c.json(errBody, status as 429 | 502);
 		}
 
 		const { body: errBody, status } = buildReverieError(REVERIE_ERRORS.INTERNAL_ERROR);

@@ -22,7 +22,7 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
 	}
 
 	// Extract and validate tier — prevents header injection via forged plan values
-	const VALID_TIERS = new Set(["free", "seedling", "sapling", "oak", "grove"]);
+	const VALID_TIERS = new Set(["free", "seedling", "sapling", "oak", "evergreen"]);
 	const rawTier = locals.context.type === "tenant" ? locals.context.tenant.plan || "free" : "free";
 	const tier = VALID_TIERS.has(rawTier) ? rawTier : "free";
 

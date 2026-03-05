@@ -9,10 +9,11 @@
   </TierGate>
 
   Tiers (lowest to highest):
+  - free
   - seedling
   - sapling
   - oak
-  - grove
+  - evergreen
 -->
 <script lang="ts">
 	import type { TierGateProps, GroveTier } from "./types.js";
