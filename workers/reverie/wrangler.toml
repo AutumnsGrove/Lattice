@@ -43,7 +43,7 @@ service = "grove-lumen"
 
 [[services]]
 binding = "AUTH"
-service = "grove-auth"
+service = "groveauth"
 
 [[services]]
 binding = "REVERIE_EXEC"
