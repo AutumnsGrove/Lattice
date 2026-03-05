@@ -32,6 +32,7 @@ jobs:
         with:
           build-engine: true
           build-foliage: true
+          build-gossamer: true
 
       - name: Run tests
         run: pnpm test:run

@@ -14,6 +14,10 @@ inputs:
     description: "Build the foliage package (libs/foliage)"
     required: false
     default: "false"
+  build-gossamer:
+    description: "Build the gossamer package (libs/gossamer)"
+    required: false
+    default: "false"
   install-filter:
     description: "pnpm install filter (e.g. '--filter=grove-landing'). Empty = full install."
     required: false
@@ -62,6 +66,12 @@ runs:
       shell: bash
       run: pnpm run build
       working-directory: libs/foliage
+
+    - name: Build gossamer
+      if: inputs.build-gossamer == 'true'
+      shell: bash
+      run: pnpm run build
+      working-directory: libs/gossamer
 
     - name: Build engine
       if: inputs.build-engine == 'true'

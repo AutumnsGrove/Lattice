@@ -117,6 +117,7 @@ jobs:
         with:
           build-engine: ${{ needs.detect.outputs.needs-engine }}
           build-foliage: ${{ needs.detect.outputs.needs-engine }}
+          build-gossamer: ${{ needs.detect.outputs.needs-engine }}
 
       - name: Sync SvelteKit
         if: matrix.isSvelteKit
