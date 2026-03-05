@@ -35,6 +35,9 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 	const tenantId = locals.tenantId;
 
 	if (!db || !tenantId) {
+		logGroveError("Arbor", ARBOR_ERRORS.DB_NOT_AVAILABLE, {
+			detail: "Shrines load: missing db or tenantId",
+		});
 		return {
 			shrines: [],
 			shrineTypeOptions: SHRINE_TYPE_OPTIONS,
@@ -42,7 +45,8 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 			frameStyleOptions: FRAME_STYLE_OPTIONS,
 			contentTypeOptions: CONTENT_TYPE_OPTIONS,
 			shrineTemplates: SHRINE_TEMPLATES,
-			error: "Database not available",
+			error: ARBOR_ERRORS.DB_NOT_AVAILABLE.userMessage,
+			error_code: ARBOR_ERRORS.DB_NOT_AVAILABLE.code,
 		};
 	}
 
@@ -54,7 +58,10 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 		)
 		.bind(tenantId)
 		.all<ShrineRow>()
-		.catch(() => ({ results: [] as ShrineRow[] }));
+		.catch((error) => {
+			logGroveError("Arbor", ARBOR_ERRORS.LOAD_FAILED, { cause: error });
+			return { results: [] as ShrineRow[] };
+		});
 
 	const shrines = (result.results ?? []).map((row) => ({
 		id: row.id,
@@ -94,29 +101,32 @@ export const actions: Actions = {
 		const title = sanitizeTitle(formData.get("title") as string);
 		if (!title) {
 			return fail(400, {
-				error: "Title is required",
-				error_code: "MISSING_TITLE",
+				error: ARBOR_ERRORS.FIELD_REQUIRED.userMessage,
+				error_code: ARBOR_ERRORS.FIELD_REQUIRED.code,
 			});
 		}
 
 		const shrineType = formData.get("shrineType") as string;
 		if (!isValidShrineType(shrineType)) {
 			return fail(400, {
-				error: "Invalid shrine type",
-				error_code: "INVALID_TYPE",
+				error: ARBOR_ERRORS.INVALID_INPUT.userMessage,
+				error_code: ARBOR_ERRORS.INVALID_INPUT.code,
 			});
 		}
 
 		const size = formData.get("size") as string;
 		if (!isValidSize(size)) {
-			return fail(400, { error: "Invalid size", error_code: "INVALID_SIZE" });
+			return fail(400, {
+				error: ARBOR_ERRORS.INVALID_INPUT.userMessage,
+				error_code: ARBOR_ERRORS.INVALID_INPUT.code,
+			});
 		}
 
 		const frameStyle = formData.get("frameStyle") as string;
 		if (!isValidFrameStyle(frameStyle)) {
 			return fail(400, {
-				error: "Invalid frame style",
-				error_code: "INVALID_FRAME",
+				error: ARBOR_ERRORS.INVALID_INPUT.userMessage,
+				error_code: ARBOR_ERRORS.INVALID_INPUT.code,
 			});
 		}
 
@@ -245,11 +255,17 @@ export const actions: Actions = {
 		const contentsRaw = formData.get("contents") as string;
 
 		if (!shrineId || !contentsRaw) {
-			return fail(400, { error: "Missing required fields", error_code: "MISSING_FIELDS" });
+			return fail(400, {
+				error: ARBOR_ERRORS.FIELD_REQUIRED.userMessage,
+				error_code: ARBOR_ERRORS.FIELD_REQUIRED.code,
+			});
 		}
 
 		if (contentsRaw.length > MAX_CONTENTS_SIZE) {
-			return fail(400, { error: "Contents too large", error_code: "CONTENTS_TOO_LARGE" });
+			return fail(400, {
+				error: ARBOR_ERRORS.INVALID_INPUT.userMessage,
+				error_code: ARBOR_ERRORS.INVALID_INPUT.code,
+			});
 		}
 
 		// Validate JSON structure
@@ -291,7 +307,10 @@ export const actions: Actions = {
 		const shrineType = formData.get("shrineType") as string;
 
 		if (!shrineId || !isValidShrineType(shrineType)) {
-			return fail(400, { error: "Invalid request", error_code: "INVALID_REQUEST" });
+			return fail(400, {
+				error: ARBOR_ERRORS.INVALID_INPUT.userMessage,
+				error_code: ARBOR_ERRORS.INVALID_INPUT.code,
+			});
 		}
 
 		const templateContents = SHRINE_TEMPLATES[shrineType as ShrineType] ?? [];

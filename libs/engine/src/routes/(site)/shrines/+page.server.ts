@@ -6,7 +6,7 @@
  */
 
 import type { PageServerLoad } from "./$types";
-import { SITE_ERRORS, throwGroveError } from "$lib/errors";
+import { SITE_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
 import { parseContents } from "$lib/curios/shrines";
 
 interface ShrineRow {
@@ -39,7 +39,10 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 		)
 		.bind(tenantId)
 		.all<ShrineRow>()
-		.catch(() => ({ results: [] as ShrineRow[] }));
+		.catch((error) => {
+			logGroveError("Site", SITE_ERRORS.PAGE_LOAD_FAILED, { cause: error });
+			return { results: [] as ShrineRow[] };
+		});
 
 	const shrines = (result.results ?? []).map((row) => ({
 		id: row.id,

@@ -180,13 +180,33 @@ export function parseContents(json: string): ShrineContentItem[] {
 	try {
 		const parsed = JSON.parse(json);
 		if (!Array.isArray(parsed)) return [];
-		return parsed.filter(
-			(item: unknown) =>
-				item && typeof item === "object" && "type" in item && "x" in item && "y" in item,
-		) as ShrineContentItem[];
+		return parsed
+			.filter(
+				(item: unknown) =>
+					item && typeof item === "object" && "type" in item && "x" in item && "y" in item,
+			)
+			.map((item: ShrineContentItem) => ({
+				...item,
+				x: Math.max(0, Math.min(100, Number(item.x) || 0)),
+				y: Math.max(0, Math.min(100, Number(item.y) || 0)),
+				data: sanitizeContentData(item.data),
+			}));
 	} catch {
 		return [];
 	}
+}
+
+/** Sanitize user-provided text fields in content item data to prevent XSS */
+function sanitizeContentData(data: Record<string, unknown>): Record<string, unknown> {
+	const clean: Record<string, unknown> = {};
+	for (const [key, value] of Object.entries(data)) {
+		if (typeof value === "string") {
+			clean[key] = stripHtml(value);
+		} else {
+			clean[key] = value;
+		}
+	}
+	return clean;
 }
 
 export function toDisplayShrine(record: ShrineRecord): ShrineDisplay {
