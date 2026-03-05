@@ -4,7 +4,7 @@
 	import { TierGate } from "$lib/ui/vineyard";
 	import type { GroveTier } from "$lib/ui/vineyard/types";
 	import { toast } from "$lib/ui/components/ui/toast";
-	import { api } from "$lib/utils";
+	import { getCSRFToken } from "$lib/utils/api";
 	import { Sparkles, Lock } from "lucide-svelte";
 	import ReverieHeader from "./ReverieHeader.svelte";
 	import ReverieChangeCard from "./ReverieChangeCard.svelte";
@@ -89,10 +89,12 @@
 		"REV-003": "Reverie requires a paid plan. Take Root to unlock it!",
 		"REV-004": "Reverie didn't understand that request. Try rephrasing?",
 		"REV-005": "That message is too long. Try keeping it shorter.",
-		"REV-006": "Reverie couldn't find any settings to change. Try being more specific — for example, \"make my accent color warmer\" or \"change my font to something cozy\".",
+		"REV-006":
+			'Reverie couldn\'t find any settings to change. Try being more specific — for example, "make my accent color warmer" or "change my font to something cozy".',
 		"REV-007": "That change preview has expired. Send your request again to get a fresh preview.",
 		"REV-008": "Those settings are read-only and can't be changed through Reverie.",
-		"REV-009": "Some of the values Reverie chose didn't pass validation. Try rephrasing your request.",
+		"REV-009":
+			"Some of the values Reverie chose didn't pass validation. Try rephrasing your request.",
 		"REV-010": "Reverie couldn't apply those changes. Please try again.",
 		"REV-011": "You're sending requests too quickly. Take a breath and try again in a moment.",
 		"REV-012": "Reverie's AI is temporarily unavailable. Please try again in a moment.",
@@ -138,6 +140,28 @@
 		);
 	}
 
+	// ── Reverie Fetch Helper ──────────────────────────────────────────────────
+	// Uses fetch directly instead of api.post because api.post throws on non-2xx,
+	// which loses the structured error codes we need for friendly messages.
+	async function reverieFetch<T>(url: string, body: unknown): Promise<ReverieResponse<T>> {
+		const csrfToken = getCSRFToken();
+		const headers: Record<string, string> = {
+			"Content-Type": "application/json",
+			Accept: "application/json",
+		};
+		if (csrfToken) {
+			headers["X-CSRF-Token"] = csrfToken;
+			headers["csrf-token"] = csrfToken;
+		}
+		const res = await fetch(url, {
+			method: "POST",
+			headers,
+			credentials: "include",
+			body: JSON.stringify(body),
+		});
+		return res.json() as Promise<ReverieResponse<T>>;
+	}
+
 	// ── Send Message ──────────────────────────────────────────────────────────
 	async function handleSend() {
 		const input = inputValue.trim();
@@ -149,12 +173,13 @@
 		isLoading = true;
 
 		try {
-			const result = await api.post<ReverieResponse<ConfigureResponseData>>(
-				"/api/reverie/configure",
-				{ input, session_id: sessionId },
-			);
+			const result = await reverieFetch<ConfigureResponseData>("/api/reverie/configure", {
+				input,
+				session_id: sessionId,
+			});
 
 			if (!result || !result.success || !result.data) {
+				console.error("[Reverie] Configure failed:", result?.error);
 				const errMsg = sanitizeError(result?.error, DEFAULT_CONFIGURE_ERROR);
 				error = errMsg;
 				pushMessage("reverie", errMsg);
@@ -194,7 +219,7 @@
 				value: c.to,
 			}));
 
-			const result = await api.post<ReverieResponse<ExecuteResponseData>>("/api/reverie/execute", {
+			const result = await reverieFetch<ExecuteResponseData>("/api/reverie/execute", {
 				request_id: requestId,
 				changes: executeChanges,
 			});
