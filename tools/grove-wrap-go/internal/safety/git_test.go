@@ -33,6 +33,16 @@ func TestGitOperationTier(t *testing.T) {
 		{"ship", TierWrite},
 		{"cherry_pick", TierWrite},
 
+		// Bisect operations
+		{"bisect_status", TierRead},
+		{"bisect_log", TierRead},
+		{"bisect_start", TierWrite},
+		{"bisect_good", TierWrite},
+		{"bisect_bad", TierWrite},
+		{"bisect_skip", TierWrite},
+		{"bisect_reset", TierWrite},
+		{"bisect_run", TierDangerous},
+
 		// Dangerous operations
 		{"push_force", TierDangerous},
 		{"reset_hard", TierDangerous},

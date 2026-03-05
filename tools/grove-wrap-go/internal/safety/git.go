@@ -54,6 +54,16 @@ var gitOperationTiers = map[string]Tier{
 	"worktree_prune":  TierWrite,
 	"worktree_finish": TierWrite,
 
+	// Bisect operations
+	"bisect_status": TierRead,
+	"bisect_log":    TierRead,
+	"bisect_start":  TierWrite,
+	"bisect_good":   TierWrite,
+	"bisect_bad":    TierWrite,
+	"bisect_skip":   TierWrite,
+	"bisect_reset":  TierWrite,
+	"bisect_run":    TierDangerous,
+
 	// Tier 3: Dangerous operations (require --write --force, blocked in agent mode)
 	"push_force":          TierDangerous,
 	"reset_hard":          TierDangerous,

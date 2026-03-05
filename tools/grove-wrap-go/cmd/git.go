@@ -92,6 +92,14 @@ var gitHelpCategories = []ui.HelpCategory{
 		},
 	},
 	{
+		Title: "Debug",
+		Icon:  "🔍",
+		Style: lipglossStyle(ui.BarkBrown),
+		Commands: []ui.HelpCommand{
+			{Name: "bisect", Desc: "Find the commit that introduced a bug"},
+		},
+	},
+	{
 		Title: "Management",
 		Icon:  "🔧",
 		Style: lipglossStyle(ui.BarkBrown),
