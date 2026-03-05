@@ -17,12 +17,8 @@
 
 	const panelTitle = $derived(groveModeStore.current ? "Lantern" : "Compass");
 	const destinations = $derived(getDestinations(data.homeGrove));
-	const activeItems = $derived(
-		lanternStore.activeTab === "destinations" ? destinations : services,
-	);
-	const homeLabel = $derived(
-		groveModeStore.current ? "Return to Your Grove" : "Back to My Site",
-	);
+	const activeItems = $derived(lanternStore.activeTab === "destinations" ? destinations : services);
+	const homeLabel = $derived(groveModeStore.current ? "Return to Your Grove" : "Back to My Site");
 
 	// Focus trap: cycle Tab/Shift+Tab within the panel
 	function handleKeydown(event: KeyboardEvent) {
@@ -47,7 +43,7 @@
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	bind:this={panelRef}
-	class="lantern-panel z-grove-overlay"
+	class="lantern-panel z-grove-overlay bg-surface/90 backdrop-blur-xl border border-default shadow-lg"
 	class:has-friends={lanternStore.hasFriends}
 	role="dialog"
 	aria-modal="true"
@@ -60,17 +56,17 @@
 	{:else}
 		<div class="panel-content">
 			<!-- Header -->
-			<div class="panel-header">
-				<h2 class="panel-title">{panelTitle}</h2>
+			<div class="flex flex-col gap-0.5">
+				<h2 class="text-base font-semibold text-foreground m-0">{panelTitle}</h2>
 				{#if data.displayName}
-					<p class="panel-subtitle">{data.displayName}</p>
+					<p class="text-[0.8125rem] text-foreground-muted m-0">{data.displayName}</p>
 				{/if}
 			</div>
 
 			<!-- Home link — always first and prominent -->
 			<a
 				href="https://{data.homeGrove}.grove.place"
-				class="home-link"
+				class="home-link block py-2.5 px-3 rounded-[10px] bg-accent text-accent-foreground text-sm font-medium no-underline text-center transition-colors hover:opacity-90 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
 				target="_blank"
 				rel="noopener noreferrer"
 			>
@@ -81,13 +77,17 @@
 			<div class="panel-body">
 				<!-- Left column: tabs + navigation links -->
 				<div class="nav-column">
-					<div class="tab-bar" role="tablist">
+					<div class="tab-bar bg-surface-hover/50 rounded-lg p-1 flex gap-1" role="tablist">
 						<button
 							type="button"
 							role="tab"
-							class="tab-btn"
-							class:active={lanternStore.activeTab === "destinations"}
+							id="lantern-tab-destinations"
+							class="tab-btn flex-1 py-1.5 px-2 border-none rounded-md text-foreground-muted text-[0.8125rem] font-medium cursor-pointer transition-colors
+								{lanternStore.activeTab === 'destinations' ? 'bg-surface-elevated text-foreground shadow-sm' : ''}
+								focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-[-2px]"
 							aria-selected={lanternStore.activeTab === "destinations"}
+							aria-controls="lantern-tabpanel"
+							tabindex={lanternStore.activeTab === "destinations" ? 0 : -1}
 							onclick={() => lanternStore.setTab("destinations")}
 						>
 							{groveModeStore.current ? "Destinations" : "Navigation"}
@@ -95,25 +95,37 @@
 						<button
 							type="button"
 							role="tab"
-							class="tab-btn"
-							class:active={lanternStore.activeTab === "services"}
+							id="lantern-tab-services"
+							class="tab-btn flex-1 py-1.5 px-2 border-none rounded-md text-foreground-muted text-[0.8125rem] font-medium cursor-pointer transition-colors
+								{lanternStore.activeTab === 'services' ? 'bg-surface-elevated text-foreground shadow-sm' : ''}
+								focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-[-2px]"
 							aria-selected={lanternStore.activeTab === "services"}
+							aria-controls="lantern-tabpanel"
+							tabindex={lanternStore.activeTab === "services" ? 0 : -1}
 							onclick={() => lanternStore.setTab("services")}
 						>
 							Services
 						</button>
 					</div>
 
-					<nav class="nav-list" aria-label="{lanternStore.activeTab} links">
+					<nav
+						class="nav-list flex flex-col gap-0.5"
+						id="lantern-tabpanel"
+						role="tabpanel"
+						aria-labelledby="lantern-tab-{lanternStore.activeTab}"
+						aria-label="{lanternStore.activeTab} links"
+					>
 						{#each activeItems as item (item.href)}
 							<a
 								href={item.href}
-								class="nav-item"
+								class="nav-item flex items-center gap-2 py-2 px-2.5 rounded-lg text-foreground no-underline text-sm transition-colors hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-[-2px]"
 								target={item.external ? "_blank" : undefined}
 								rel={item.external ? "noopener noreferrer" : undefined}
 							>
 								<svelte:component this={item.icon} size={16} strokeWidth={2} />
-								<span>{groveModeStore.current && item.groveLabel ? item.groveLabel : item.label}</span>
+								<span
+									>{groveModeStore.current && item.groveLabel ? item.groveLabel : item.label}</span
+								>
 							</a>
 						{/each}
 					</nav>
@@ -121,12 +133,12 @@
 
 				<!-- Right column: friends (only when user has friends) -->
 				{#if lanternStore.hasFriends}
-					<div class="friends-column">
-						<div class="friends-header">
-							<h3 class="friends-title">Friends</h3>
+					<div class="friends-column border-l border-default pl-3">
+						<div class="flex items-center justify-between">
+							<h3 class="text-[0.8125rem] font-semibold text-foreground m-0">Friends</h3>
 							<button
 								type="button"
-								class="add-friends-btn"
+								class="add-friends-btn flex items-center justify-center min-w-[44px] min-h-[44px] -m-[9px] rounded-md border-none bg-transparent text-foreground-muted cursor-pointer transition-colors hover:text-accent-muted hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-[-2px]"
 								onclick={() => lanternStore.setView("add-friends")}
 								aria-label="Add friends"
 							>
@@ -134,7 +146,7 @@
 							</button>
 						</div>
 
-						<div class="friends-list">
+						<div class="friends-list flex-1 overflow-y-auto flex flex-col gap-0.5 max-h-60">
 							{#each lanternStore.friends as friend (friend.tenantId)}
 								<LanternFriendCard {friend} />
 							{/each}
@@ -147,7 +159,7 @@
 			{#if !lanternStore.hasFriends && lanternStore.friendsLoaded}
 				<button
 					type="button"
-					class="add-friends-cta"
+					class="add-friends-cta flex items-center justify-center gap-2 py-2 px-2 rounded-lg border border-dashed border-default bg-transparent text-foreground-muted text-[0.8125rem] cursor-pointer transition-colors hover:text-accent-muted hover:border-accent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
 					onclick={() => lanternStore.setView("add-friends")}
 				>
 					<UserPlus size={16} />
@@ -156,7 +168,13 @@
 			{/if}
 
 			{#if lanternStore.friendsLoading}
-				<p class="loading-text">Loading friends…</p>
+				<p
+					class="text-center text-foreground-muted text-[0.8125rem] py-2 m-0"
+					role="status"
+					aria-live="polite"
+				>
+					Loading friends…
+				</p>
 			{/if}
 		</div>
 	{/if}
@@ -170,13 +188,6 @@
 		width: 320px;
 		max-height: calc(100vh - 6rem);
 		border-radius: 16px;
-		background: rgba(255, 255, 255, 0.88);
-		backdrop-filter: blur(16px);
-		-webkit-backdrop-filter: blur(16px);
-		border: 1px solid rgba(255, 255, 255, 0.5);
-		box-shadow:
-			0 8px 32px rgba(0, 0, 0, 0.08),
-			0 2px 8px rgba(0, 0, 0, 0.04);
 		overflow: hidden;
 		animation: lantern-open 200ms ease both;
 	}
@@ -187,14 +198,6 @@
 
 	.lantern-panel[inert] {
 		display: none;
-	}
-
-	:global(.dark) .lantern-panel {
-		background: rgba(16, 50, 37, 0.88);
-		border-color: rgba(255, 255, 255, 0.1);
-		box-shadow:
-			0 8px 32px rgba(0, 0, 0, 0.3),
-			0 2px 8px rgba(0, 0, 0, 0.15);
 	}
 
 	@keyframes lantern-open {
@@ -208,62 +211,11 @@
 		}
 	}
 
-	@media (prefers-reduced-motion: reduce) {
-		.lantern-panel {
-			animation: none;
-		}
-	}
-
 	.panel-content {
 		display: flex;
 		flex-direction: column;
 		gap: 0.75rem;
 		padding: 1rem;
-	}
-
-	.panel-header {
-		display: flex;
-		flex-direction: column;
-		gap: 0.125rem;
-	}
-
-	.panel-title {
-		font-size: 1rem;
-		font-weight: 600;
-		margin: 0;
-		color: var(--color-text);
-	}
-
-	.panel-subtitle {
-		font-size: 0.8125rem;
-		color: var(--color-text-muted);
-		margin: 0;
-	}
-
-	.home-link {
-		display: block;
-		padding: 0.625rem 0.75rem;
-		border-radius: 10px;
-		background: var(--color-primary, #2c5f2d);
-		color: white;
-		font-size: 0.875rem;
-		font-weight: 500;
-		text-decoration: none;
-		text-align: center;
-		transition: background-color 0.15s ease;
-	}
-
-	.home-link:hover {
-		background: var(--color-primary-hover, #245024);
-	}
-
-	:global(.dark) .home-link {
-		background: var(--accent-success, #22c55e);
-		color: var(--bark-950, #0a1f0d);
-	}
-
-	:global(.dark) .home-link:hover {
-		background: var(--grove-400, #4ade80);
 	}
 
 	.panel-body {
@@ -286,8 +238,6 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.5rem;
-		border-left: 1px solid var(--color-border);
-		padding-left: 0.75rem;
 		animation: column-slide-in 300ms ease-in-out both;
 	}
 
@@ -303,156 +253,13 @@
 	}
 
 	@media (prefers-reduced-motion: reduce) {
+		.lantern-panel {
+			animation: none;
+		}
+
 		.friends-column {
 			animation: none;
 		}
-	}
-
-	.friends-header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-	}
-
-	.friends-title {
-		font-size: 0.8125rem;
-		font-weight: 600;
-		margin: 0;
-		color: var(--color-text);
-	}
-
-	.add-friends-btn {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 26px;
-		height: 26px;
-		border-radius: 6px;
-		border: none;
-		background: none;
-		color: var(--color-text-muted);
-		cursor: pointer;
-		transition:
-			color 0.15s ease,
-			background-color 0.15s ease;
-	}
-
-	.add-friends-btn:hover {
-		color: var(--color-primary, #2c5f2d);
-		background: rgba(0, 0, 0, 0.06);
-	}
-
-	:global(.dark) .add-friends-btn:hover {
-		color: var(--accent-success);
-		background: rgba(255, 255, 255, 0.08);
-	}
-
-	.friends-list {
-		flex: 1;
-		overflow-y: auto;
-		display: flex;
-		flex-direction: column;
-		gap: 0.125rem;
-		max-height: 240px;
-	}
-
-	.tab-bar {
-		display: flex;
-		gap: 0.25rem;
-		padding: 0.25rem;
-		border-radius: 8px;
-		background: rgba(0, 0, 0, 0.04);
-	}
-
-	:global(.dark) .tab-bar {
-		background: rgba(255, 255, 255, 0.06);
-	}
-
-	.tab-btn {
-		flex: 1;
-		padding: 0.375rem 0.5rem;
-		border: none;
-		border-radius: 6px;
-		background: none;
-		color: var(--color-text-muted);
-		font-size: 0.8125rem;
-		font-weight: 500;
-		cursor: pointer;
-		transition:
-			background-color 0.15s ease,
-			color 0.15s ease;
-	}
-
-	.tab-btn.active {
-		background: white;
-		color: var(--color-text);
-		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
-	}
-
-	:global(.dark) .tab-btn.active {
-		background: rgba(255, 255, 255, 0.12);
-		color: var(--accent-success);
-	}
-
-	.nav-list {
-		display: flex;
-		flex-direction: column;
-		gap: 0.125rem;
-	}
-
-	.nav-item {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.5rem 0.625rem;
-		border-radius: 8px;
-		color: var(--color-text);
-		text-decoration: none;
-		font-size: 0.875rem;
-		transition: background-color 0.15s ease;
-	}
-
-	.nav-item:hover {
-		background: rgba(0, 0, 0, 0.05);
-	}
-
-	:global(.dark) .nav-item:hover {
-		background: rgba(255, 255, 255, 0.08);
-	}
-
-	.add-friends-cta {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 0.5rem;
-		padding: 0.5rem;
-		border-radius: 8px;
-		border: 1px dashed var(--color-border);
-		background: none;
-		color: var(--color-text-muted);
-		font-size: 0.8125rem;
-		cursor: pointer;
-		transition:
-			color 0.15s ease,
-			border-color 0.15s ease;
-	}
-
-	.add-friends-cta:hover {
-		color: var(--color-primary, #2c5f2d);
-		border-color: var(--color-primary, #2c5f2d);
-	}
-
-	:global(.dark) .add-friends-cta:hover {
-		color: var(--accent-success);
-		border-color: var(--accent-success);
-	}
-
-	.loading-text {
-		text-align: center;
-		color: var(--color-text-muted);
-		font-size: 0.8125rem;
-		padding: 0.5rem 0;
-		margin: 0;
 	}
 
 	/* Responsive: collapse to single column on narrow screens */
@@ -470,7 +277,7 @@
 		.friends-column {
 			width: 100%;
 			border-left: none;
-			border-top: 1px solid var(--color-border);
+			border-top: 1px solid hsl(var(--border));
 			padding-left: 0;
 			padding-top: 0.75rem;
 		}

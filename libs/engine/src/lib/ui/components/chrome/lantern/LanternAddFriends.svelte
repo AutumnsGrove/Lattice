@@ -71,24 +71,24 @@
 	}
 </script>
 
-<div class="add-friends-view">
-	<div class="add-friends-header">
+<div class="flex flex-col gap-3 p-4 h-full">
+	<div class="flex items-center gap-2">
 		<button
 			type="button"
-			class="back-btn"
+			class="flex items-center justify-center min-w-[44px] min-h-[44px] -m-1.5 rounded-md border-none bg-transparent text-foreground-muted cursor-pointer transition-colors hover:text-foreground hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-[-2px]"
 			onclick={goBack}
 			aria-label="Back to main view"
 		>
 			<ArrowLeft size={18} />
 		</button>
-		<h3 class="add-friends-title">Add Friends</h3>
+		<h3 class="text-[0.9375rem] font-semibold text-foreground m-0">Add Friends</h3>
 	</div>
 
-	<div class="search-field">
+	<div class="relative">
 		<input
 			bind:this={searchInput}
 			type="text"
-			class="search-input"
+			class="w-full py-2 px-3 rounded-lg border border-default bg-surface text-foreground text-sm outline-none transition-colors focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/50"
 			placeholder="Search groves..."
 			value={lanternStore.searchQuery}
 			oninput={handleInput}
@@ -96,16 +96,19 @@
 		/>
 	</div>
 
-	<div class="search-results" role="list">
+	<div class="flex-1 overflow-y-auto flex flex-col gap-1" role="list" aria-live="polite">
 		{#each lanternStore.searchResults as result (result.tenantId)}
-			<div class="search-result" role="listitem">
-				<div class="result-info">
-					<span class="result-name">{result.name}</span>
-					<span class="result-subdomain">{result.subdomain}.grove.place</span>
+			<div
+				class="flex items-center gap-2 py-2 px-2.5 rounded-lg transition-colors hover:bg-surface-hover"
+				role="listitem"
+			>
+				<div class="flex-1 min-w-0 flex flex-col gap-0.5">
+					<span class="text-sm font-medium text-foreground truncate">{result.name}</span>
+					<span class="text-xs text-foreground-muted">{result.subdomain}.grove.place</span>
 				</div>
 				<button
 					type="button"
-					class="add-btn"
+					class="flex items-center gap-1 py-1.5 px-2.5 rounded-md border-none bg-accent text-accent-foreground text-xs font-medium cursor-pointer transition-colors hover:opacity-90 focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
 					disabled={adding === result.subdomain}
 					onclick={() => addFriend(result.subdomain)}
 					aria-label="Add {result.name} as friend"
@@ -117,13 +120,14 @@
 		{/each}
 
 		{#if lanternStore.searchQuery.length >= 2 && lanternStore.searchResults.length === 0}
-			<p class="no-results">No groves found</p>
+			<p class="text-center text-foreground-muted text-sm py-6 m-0">No groves found</p>
 		{/if}
 	</div>
 
-	<div class="browse-link">
+	<div class="text-center pt-2 border-t border-default">
 		<a
 			href="https://grove.place/forests"
+			class="text-[0.8125rem] text-accent-muted no-underline hover:underline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
 			target="_blank"
 			rel="noopener noreferrer"
 		>
@@ -131,190 +135,3 @@
 		</a>
 	</div>
 </div>
-
-<style>
-	.add-friends-view {
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
-		padding: 1rem;
-		height: 100%;
-	}
-
-	.add-friends-header {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-	}
-
-	.back-btn {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 32px;
-		height: 32px;
-		border-radius: 6px;
-		border: none;
-		background: none;
-		color: var(--color-text-muted);
-		cursor: pointer;
-		transition:
-			color 0.15s ease,
-			background-color 0.15s ease;
-	}
-
-	.back-btn:hover {
-		color: var(--color-text);
-		background: rgba(0, 0, 0, 0.06);
-	}
-
-	:global(.dark) .back-btn:hover {
-		background: rgba(255, 255, 255, 0.08);
-	}
-
-	.add-friends-title {
-		font-size: 0.9375rem;
-		font-weight: 600;
-		margin: 0;
-		color: var(--color-text);
-	}
-
-	.search-field {
-		position: relative;
-	}
-
-	.search-input {
-		width: 100%;
-		padding: 0.5rem 0.75rem;
-		border-radius: 8px;
-		border: 1px solid var(--color-border);
-		background: var(--color-background, white);
-		color: var(--color-text);
-		font-size: 0.875rem;
-		outline: none;
-		transition: border-color 0.15s ease;
-	}
-
-	.search-input:focus {
-		border-color: var(--color-primary, #2c5f2d);
-	}
-
-	:global(.dark) .search-input {
-		background: rgba(255, 255, 255, 0.08);
-		border-color: rgba(255, 255, 255, 0.15);
-	}
-
-	:global(.dark) .search-input:focus {
-		border-color: var(--accent-success);
-	}
-
-	.search-results {
-		flex: 1;
-		overflow-y: auto;
-		display: flex;
-		flex-direction: column;
-		gap: 0.25rem;
-	}
-
-	.search-result {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.5rem 0.625rem;
-		border-radius: 8px;
-		transition: background-color 0.15s ease;
-	}
-
-	.search-result:hover {
-		background: rgba(0, 0, 0, 0.04);
-	}
-
-	:global(.dark) .search-result:hover {
-		background: rgba(255, 255, 255, 0.06);
-	}
-
-	.result-info {
-		flex: 1;
-		min-width: 0;
-		display: flex;
-		flex-direction: column;
-		gap: 0.125rem;
-	}
-
-	.result-name {
-		font-size: 0.875rem;
-		font-weight: 500;
-		color: var(--color-text);
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-
-	.result-subdomain {
-		font-size: 0.75rem;
-		color: var(--color-text-muted);
-	}
-
-	.add-btn {
-		display: flex;
-		align-items: center;
-		gap: 0.25rem;
-		padding: 0.375rem 0.625rem;
-		border-radius: 6px;
-		border: none;
-		background: var(--color-primary, #2c5f2d);
-		color: white;
-		font-size: 0.75rem;
-		font-weight: 500;
-		cursor: pointer;
-		transition:
-			background-color 0.15s ease,
-			opacity 0.15s ease;
-	}
-
-	.add-btn:hover {
-		background: var(--color-primary-hover, #245024);
-	}
-
-	:global(.dark) .add-btn {
-		background: var(--accent-success, #22c55e);
-		color: var(--bark-950, #0a1f0d);
-	}
-
-	:global(.dark) .add-btn:hover {
-		background: var(--grove-400, #4ade80);
-	}
-
-	.add-btn:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
-
-	.no-results {
-		text-align: center;
-		color: var(--color-text-muted);
-		font-size: 0.875rem;
-		padding: 1.5rem 0;
-		margin: 0;
-	}
-
-	.browse-link {
-		text-align: center;
-		padding-top: 0.5rem;
-		border-top: 1px solid var(--color-border);
-	}
-
-	.browse-link a {
-		font-size: 0.8125rem;
-		color: var(--color-primary, #2c5f2d);
-		text-decoration: none;
-	}
-
-	.browse-link a:hover {
-		text-decoration: underline;
-	}
-
-	:global(.dark) .browse-link a {
-		color: var(--accent-success);
-	}
-</style>

@@ -6,8 +6,12 @@
 	const icon = $derived(groveModeStore.current ? Lamp : Compass);
 	const label = $derived(
 		groveModeStore.current
-			? lanternStore.open ? "Close Lantern" : "Open Lantern"
-			: lanternStore.open ? "Close Compass" : "Open Compass",
+			? lanternStore.open
+				? "Close Lantern"
+				: "Open Lantern"
+			: lanternStore.open
+				? "Close Compass"
+				: "Open Compass",
 	);
 </script>
 
@@ -85,9 +89,23 @@
 		}
 	}
 
+	.lantern-fab:focus-visible {
+		outline: 2px solid white;
+		outline-offset: 3px;
+	}
+
+	:global(.dark) .lantern-fab:focus-visible {
+		outline-color: var(--accent-success);
+	}
+
 	@media (prefers-reduced-motion: reduce) {
 		.lantern-fab {
 			animation: none;
+			transition: none;
+		}
+
+		.lantern-fab:hover {
+			transform: none;
 		}
 	}
 </style>

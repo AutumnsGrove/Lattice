@@ -106,7 +106,12 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 	}
 
 	const friendSubdomain = (body.friendSubdomain as string)?.trim()?.toLowerCase();
-	if (!friendSubdomain || friendSubdomain.length < 2 || friendSubdomain.length > 63) {
+	if (
+		!friendSubdomain ||
+		friendSubdomain.length < 2 ||
+		friendSubdomain.length > 63 ||
+		!/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(friendSubdomain)
+	) {
 		throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
 	}
 

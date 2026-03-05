@@ -26,19 +26,23 @@
 	}
 </script>
 
-<div class="friend-card">
+<div
+	class="flex items-center gap-2 py-2 px-2.5 rounded-lg transition-colors hover:bg-surface-hover group"
+>
 	<a
 		href="https://{friend.subdomain}.grove.place"
-		class="friend-link"
+		class="flex-1 min-w-0 flex flex-col gap-0.5 no-underline text-inherit focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 rounded"
 		target="_blank"
 		rel="noopener noreferrer"
 	>
-		<span class="friend-name">{friend.name}</span>
-		<span class="friend-subdomain">{friend.subdomain}.grove.place</span>
+		<span class="text-sm font-medium text-foreground truncate">{friend.name}</span>
+		<span class="text-xs text-foreground-muted truncate">{friend.subdomain}.grove.place</span>
 	</a>
 	<button
 		type="button"
-		class="remove-btn"
+		class="remove-btn flex-shrink-0 flex items-center justify-center min-w-[44px] min-h-[44px] rounded border-none bg-transparent text-foreground-subtle cursor-pointer opacity-40 transition-opacity
+			group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-[-2px]
+			hover:text-destructive disabled:opacity-25 disabled:cursor-not-allowed"
 		onclick={removeFriend}
 		disabled={removing}
 		aria-label="Remove {friend.name}"
@@ -49,78 +53,9 @@
 </div>
 
 <style>
-	.friend-card {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.5rem 0.625rem;
-		border-radius: 8px;
-		transition: background-color 0.15s ease;
-	}
-
-	.friend-card:hover {
-		background: rgba(0, 0, 0, 0.04);
-	}
-
-	:global(.dark) .friend-card:hover {
-		background: rgba(255, 255, 255, 0.06);
-	}
-
-	.friend-link {
-		flex: 1;
-		min-width: 0;
-		display: flex;
-		flex-direction: column;
-		gap: 0.125rem;
-		text-decoration: none;
-		color: inherit;
-	}
-
-	.friend-name {
-		font-size: 0.875rem;
-		font-weight: 500;
-		color: var(--color-text);
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-
-	.friend-subdomain {
-		font-size: 0.75rem;
-		color: var(--color-text-muted);
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-
-	.remove-btn {
-		flex-shrink: 0;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 24px;
-		height: 24px;
-		border-radius: 4px;
-		border: none;
-		background: none;
-		color: var(--color-text-muted);
-		cursor: pointer;
-		opacity: 0;
-		transition:
-			opacity 0.15s ease,
-			color 0.15s ease;
-	}
-
-	.friend-card:hover .remove-btn {
-		opacity: 1;
-	}
-
-	.remove-btn:hover {
-		color: var(--destructive, #ef4444);
-	}
-
-	.remove-btn:disabled {
-		opacity: 0.4;
-		cursor: not-allowed;
+	@media (prefers-reduced-motion: reduce) {
+		.remove-btn {
+			transition: none;
+		}
 	}
 </style>

@@ -38,18 +38,20 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
 		if (denied) return denied;
 	}
 
-	const query = url.searchParams.get("q")?.trim() ?? "";
+	const query = url.searchParams.get("q")?.trim()?.slice(0, 64) ?? "";
 	if (query.length < 2) {
 		return json({ results: [] });
 	}
 
 	try {
-		const pattern = `%${query}%`;
+		// Escape LIKE wildcards so user input is treated as literal text
+		const escaped = query.replace(/[%_]/g, "\\$&");
+		const pattern = `%${escaped}%`;
 		const result = await db
 			.prepare(
 				`SELECT id, subdomain, name
 				 FROM tenants
-				 WHERE (subdomain LIKE ? OR name LIKE ?)
+				 WHERE (subdomain LIKE ? ESCAPE '\\' OR name LIKE ? ESCAPE '\\')
 				   AND active = 1
 				   AND id != ?
 				 LIMIT 10`,

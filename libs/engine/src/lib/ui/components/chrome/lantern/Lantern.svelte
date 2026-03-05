@@ -11,19 +11,33 @@
 
 	let { data }: Props = $props();
 
-	// Fetch friends on first panel open
+	// Fetch friends on first panel open, and move focus into the dialog
 	$effect(() => {
-		if (lanternStore.open && !lanternStore.friendsLoaded && !lanternStore.friendsLoading) {
-			lanternStore.setFriendsLoading(true);
+		if (lanternStore.open) {
+			// Load friends on first open
+			if (!lanternStore.friendsLoaded && !lanternStore.friendsLoading) {
+				lanternStore.setFriendsLoading(true);
 
-			api
-				.get<{ friends: Array<{ tenantId: string; name: string; subdomain: string; source: string }> }>("/api/lantern/friends")
-				.then((result) => {
-					lanternStore.setFriends(result?.friends ?? []);
-				})
-				.catch(() => {
-					lanternStore.setFriends([]);
-				});
+				api
+					.get<{
+						friends: Array<{ tenantId: string; name: string; subdomain: string; source: string }>;
+					}>("/api/lantern/friends")
+					.then((result) => {
+						lanternStore.setFriends(result?.friends ?? []);
+					})
+					.catch(() => {
+						lanternStore.setFriends([]);
+					});
+			}
+
+			// Move focus into the panel so screen readers announce the dialog
+			requestAnimationFrame(() => {
+				const panel = document.querySelector<HTMLElement>(".lantern-panel");
+				const firstFocusable = panel?.querySelector<HTMLElement>(
+					"a[href], button:not([disabled]), input",
+				);
+				firstFocusable?.focus();
+			});
 		}
 	});
 
@@ -48,11 +62,7 @@
 
 {#if lanternStore.open}
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div
-		class="lantern-backdrop z-grove-fab"
-		onclick={handleBackdropClick}
-		aria-hidden="true"
-	></div>
+	<div class="lantern-backdrop z-grove-fab" onclick={handleBackdropClick} aria-hidden="true"></div>
 {/if}
 
 <LanternFAB />
