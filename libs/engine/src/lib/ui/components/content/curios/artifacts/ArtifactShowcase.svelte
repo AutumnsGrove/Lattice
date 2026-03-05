@@ -123,7 +123,6 @@
 </script>
 
 {#if open && current}
-	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 	<div
 		class="showcase-backdrop"
 		role="dialog"

@@ -3,9 +3,9 @@
 	 * Tarot Card — Daily draw from the Major Arcana.
 	 * Seeded by date + tenant. Same card all day. Flip to reveal.
 	 */
-	import { getDailyTarot, type TarotCardConfig } from '$lib/curios/artifacts';
+	import { getDailyTarot, type TarotCardConfig } from "$lib/curios/artifacts";
 
-	let { config = {}, tenantId = '' }: { config: TarotCardConfig; tenantId?: string } = $props();
+	let { config = {}, tenantId = "" }: { config: TarotCardConfig; tenantId?: string } = $props();
 
 	const showMeaning = $derived(config.showMeaning !== false);
 	const card = $derived(getDailyTarot(tenantId));
@@ -17,14 +17,13 @@
 	}
 
 	function onKeydown(e: KeyboardEvent) {
-		if (e.key === 'Enter' || e.key === ' ') {
+		if (e.key === "Enter" || e.key === " ") {
 			e.preventDefault();
 			flip();
 		}
 	}
 </script>
 
-<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	class="tarot-card"
 	class:flipped
@@ -40,8 +39,20 @@
 			<div class="back-pattern">
 				<div class="back-border">
 					<svg viewBox="0 0 40 60" class="back-star" aria-hidden="true">
-						<polygon points="20,8 23,18 33,18 25,24 28,34 20,28 12,34 15,24 7,18 17,18" fill="currentColor" opacity="0.2" />
-						<circle cx="20" cy="42" r="6" fill="none" stroke="currentColor" stroke-width="0.5" opacity="0.15" />
+						<polygon
+							points="20,8 23,18 33,18 25,24 28,34 20,28 12,34 15,24 7,18 17,18"
+							fill="currentColor"
+							opacity="0.2"
+						/>
+						<circle
+							cx="20"
+							cy="42"
+							r="6"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="0.5"
+							opacity="0.15"
+						/>
 						<circle cx="20" cy="42" r="3" fill="currentColor" opacity="0.1" />
 					</svg>
 				</div>
@@ -182,6 +193,8 @@
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.card-inner { transition: none; }
+		.card-inner {
+			transition: none;
+		}
 	}
 </style>

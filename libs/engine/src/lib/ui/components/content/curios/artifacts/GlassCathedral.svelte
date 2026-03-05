@@ -139,7 +139,6 @@
 </script>
 
 <!-- Entrance (always visible) -->
-<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	class="cathedral-entrance"
 	class:has-panels={hasPanels}
@@ -187,7 +186,6 @@
 
 <!-- Modal (when open) -->
 {#if modalOpen}
-	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 	<div
 		class="cathedral-modal"
 		role="dialog"

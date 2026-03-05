@@ -3,37 +3,42 @@
 	 * Snow Globe — Click/shake to send particles swirling in a glass dome.
 	 * Seasonal particles: snow, petals, leaves, fireflies.
 	 */
-	import type { SnowGlobeConfig } from '$lib/curios/artifacts';
+	import type { SnowGlobeConfig } from "$lib/curios/artifacts";
 
 	let { config = {} }: { config: SnowGlobeConfig } = $props();
 
-	const particles = $derived(config.particles || 'snow');
+	const particles = $derived(config.particles || "snow");
 	let shaken = $state(false);
 
 	const particleColors = $derived.by(() => {
 		switch (particles) {
-			case 'petals': return ['#ffb3c6', '#ff8fab', '#ffc2d1', '#ffccd5'];
-			case 'leaves': return ['#c77d3a', '#d4913f', '#8b6914', '#a67c44'];
-			case 'fireflies': return ['#ffd700', '#ffe066', '#ffec99', '#fff3b0'];
-			default: return ['#fff', '#e8f0ff', '#d0e4ff', '#f0f8ff'];
+			case "petals":
+				return ["#ffb3c6", "#ff8fab", "#ffc2d1", "#ffccd5"];
+			case "leaves":
+				return ["#c77d3a", "#d4913f", "#8b6914", "#a67c44"];
+			case "fireflies":
+				return ["#ffd700", "#ffe066", "#ffec99", "#fff3b0"];
+			default:
+				return ["#fff", "#e8f0ff", "#d0e4ff", "#f0f8ff"];
 		}
 	});
 
 	function shake() {
 		shaken = false;
 		// Force reflow for re-triggering animation
-		requestAnimationFrame(() => { shaken = true; });
+		requestAnimationFrame(() => {
+			shaken = true;
+		});
 	}
 
 	function onKeydown(e: KeyboardEvent) {
-		if (e.key === 'Enter' || e.key === ' ') {
+		if (e.key === "Enter" || e.key === " ") {
 			e.preventDefault();
 			shake();
 		}
 	}
 </script>
 
-<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	class="snow-globe"
 	onclick={shake}
@@ -69,7 +74,7 @@
 		<div class="globe-shine"></div>
 	</div>
 	<div class="globe-base"></div>
-	<span class="globe-hint">{particles === 'snow' ? 'shake me' : particles}</span>
+	<span class="globe-hint">{particles === "snow" ? "shake me" : particles}</span>
 </div>
 
 <style>
@@ -94,7 +99,11 @@
 		width: 6rem;
 		height: 6rem;
 		border-radius: 50%;
-		background: radial-gradient(circle at 40% 35%, rgba(200, 220, 240, 0.15), rgba(100, 140, 180, 0.08));
+		background: radial-gradient(
+			circle at 40% 35%,
+			rgba(200, 220, 240, 0.15),
+			rgba(100, 140, 180, 0.08)
+		);
 		border: 1.5px solid rgba(180, 200, 220, 0.35);
 		overflow: hidden;
 		box-shadow:
@@ -103,7 +112,11 @@
 	}
 
 	:global(.dark) .globe-dome {
-		background: radial-gradient(circle at 40% 35%, rgba(100, 130, 170, 0.12), rgba(40, 60, 90, 0.08));
+		background: radial-gradient(
+			circle at 40% 35%,
+			rgba(100, 130, 170, 0.12),
+			rgba(40, 60, 90, 0.08)
+		);
 		border-color: rgba(140, 170, 200, 0.2);
 	}
 
@@ -135,7 +148,7 @@
 	.globe-base {
 		width: 3.5rem;
 		height: 1rem;
-		background: linear-gradient(180deg, #8B6914, #6B5010);
+		background: linear-gradient(180deg, #8b6914, #6b5010);
 		border-radius: 0 0 0.5rem 0.5rem;
 		margin-top: -2px;
 	}
@@ -161,14 +174,32 @@
 	}
 
 	@keyframes particle-fall {
-		0% { top: -5%; opacity: 0.8; transform: translateX(0); }
-		25% { transform: translateX(8px); }
-		50% { transform: translateX(-6px); }
-		75% { transform: translateX(4px); }
-		100% { top: 85%; opacity: 0.2; transform: translateX(0); }
+		0% {
+			top: -5%;
+			opacity: 0.8;
+			transform: translateX(0);
+		}
+		25% {
+			transform: translateX(8px);
+		}
+		50% {
+			transform: translateX(-6px);
+		}
+		75% {
+			transform: translateX(4px);
+		}
+		100% {
+			top: 85%;
+			opacity: 0.2;
+			transform: translateX(0);
+		}
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.particle { animation: none; top: 50%; opacity: 0.4; }
+		.particle {
+			animation: none;
+			top: 50%;
+			opacity: 0.4;
+		}
 	}
 </style>

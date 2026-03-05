@@ -3,7 +3,7 @@
 	import { groveModeStore } from "$lib/ui/stores/grove-mode.svelte";
 	import { lanternStore } from "$lib/ui/stores/lantern.svelte";
 
-	const icon = $derived(groveModeStore.current ? Lamp : Compass);
+	const Icon = $derived(groveModeStore.current ? Lamp : Compass);
 	const label = $derived(
 		groveModeStore.current
 			? lanternStore.open
@@ -24,7 +24,7 @@
 	aria-label={label}
 	aria-haspopup="dialog"
 >
-	<svelte:component this={icon} size={22} strokeWidth={2} />
+	<Icon size={22} strokeWidth={2} />
 </button>
 
 <style>

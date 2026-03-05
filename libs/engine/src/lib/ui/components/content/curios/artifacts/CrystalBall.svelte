@@ -3,30 +3,34 @@
 	 * Crystal Ball — Decorative swirling animated mist inside a glass sphere.
 	 * Hover to see mist react. Purely atmospheric.
 	 */
-	import type { CrystalBallConfig } from '$lib/curios/artifacts';
+	import type { CrystalBallConfig } from "$lib/curios/artifacts";
 
 	let { config = {} }: { config: CrystalBallConfig } = $props();
 
-	const mistColor = $derived(config.mistColor || 'purple');
+	const mistColor = $derived(config.mistColor || "purple");
 	let hovering = $state(false);
 
 	const colors = $derived.by(() => {
 		switch (mistColor) {
-			case 'green': return { mist: '34 197 94', glow: '74 222 128' };
-			case 'blue': return { mist: '59 130 246', glow: '96 165 250' };
-			case 'rose': return { mist: '244 63 94', glow: '251 113 133' };
-			case 'amber': return { mist: '245 158 11', glow: '252 211 77' };
-			default: return { mist: '147 51 234', glow: '192 132 252' };
+			case "green":
+				return { mist: "34 197 94", glow: "74 222 128" };
+			case "blue":
+				return { mist: "59 130 246", glow: "96 165 250" };
+			case "rose":
+				return { mist: "244 63 94", glow: "251 113 133" };
+			case "amber":
+				return { mist: "245 158 11", glow: "252 211 77" };
+			default:
+				return { mist: "147 51 234", glow: "192 132 252" };
 		}
 	});
 </script>
 
-<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	class="crystal-ball"
 	class:hovering
-	onmouseenter={() => hovering = true}
-	onmouseleave={() => hovering = false}
+	onmouseenter={() => (hovering = true)}
+	onmouseleave={() => (hovering = false)}
 	role="img"
 	aria-label="Crystal ball with {mistColor} mist"
 >
@@ -112,9 +116,15 @@
 		animation: mist-drift-3 7s ease-in-out infinite;
 	}
 
-	.hovering .mist { opacity: 0.25; }
-	:global(.dark) .mist { opacity: 0.2; }
-	:global(.dark) .hovering .mist { opacity: 0.35; }
+	.hovering .mist {
+		opacity: 0.25;
+	}
+	:global(.dark) .mist {
+		opacity: 0.2;
+	}
+	:global(.dark) .hovering .mist {
+		opacity: 0.35;
+	}
 
 	.ball-highlight {
 		position: absolute;
@@ -140,23 +150,46 @@
 	}
 
 	@keyframes mist-drift-1 {
-		0%, 100% { transform: translate(0, 0) scale(1); }
-		33% { transform: translate(10px, -5px) scale(1.1); }
-		66% { transform: translate(-5px, 5px) scale(0.9); }
+		0%,
+		100% {
+			transform: translate(0, 0) scale(1);
+		}
+		33% {
+			transform: translate(10px, -5px) scale(1.1);
+		}
+		66% {
+			transform: translate(-5px, 5px) scale(0.9);
+		}
 	}
 
 	@keyframes mist-drift-2 {
-		0%, 100% { transform: translate(0, 0) scale(1); }
-		50% { transform: translate(-8px, 3px) scale(1.15); }
+		0%,
+		100% {
+			transform: translate(0, 0) scale(1);
+		}
+		50% {
+			transform: translate(-8px, 3px) scale(1.15);
+		}
 	}
 
 	@keyframes mist-drift-3 {
-		0%, 100% { transform: translate(0, 0) scale(1); }
-		25% { transform: translate(5px, 5px) scale(0.85); }
-		75% { transform: translate(-3px, -8px) scale(1.1); }
+		0%,
+		100% {
+			transform: translate(0, 0) scale(1);
+		}
+		25% {
+			transform: translate(5px, 5px) scale(0.85);
+		}
+		75% {
+			transform: translate(-3px, -8px) scale(1.1);
+		}
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.mist-1, .mist-2, .mist-3 { animation: none; }
+		.mist-1,
+		.mist-2,
+		.mist-3 {
+			animation: none;
+		}
 	}
 </style>

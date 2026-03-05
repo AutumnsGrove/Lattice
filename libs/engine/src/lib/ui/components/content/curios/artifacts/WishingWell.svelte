@@ -33,8 +33,9 @@
 		// Optimistic increment
 		wishCount++;
 
-		// POST to increment
+		// POST to increment (fire-and-forget, no CSRF needed for public counter)
 		fetch("/api/curios/artifacts/wishing-well", { method: "POST" }).catch(() => {
+			// csrf-ok
 			wishCount--; // rollback on failure
 		});
 
@@ -52,7 +53,6 @@
 	}
 </script>
 
-<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	class="wishing-well"
 	onclick={toss}

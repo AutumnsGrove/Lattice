@@ -3,12 +3,12 @@
 	 * Fortune Cookie — Click to crack open for a daily fortune.
 	 * Fortune is seeded by date + tenant, so it's consistent all day.
 	 */
-	import { getDailyFortune, type FortuneCookieConfig } from '$lib/curios/artifacts';
+	import { getDailyFortune, type FortuneCookieConfig } from "$lib/curios/artifacts";
 
-	let { config = {}, tenantId = '' }: { config: FortuneCookieConfig; tenantId?: string } = $props();
+	let { config = {}, tenantId = "" }: { config: FortuneCookieConfig; tenantId?: string } = $props();
 
 	let cracked = $state(false);
-	let fortune = $state('');
+	let fortune = $state("");
 
 	function crack() {
 		if (cracked) return;
@@ -17,14 +17,13 @@
 	}
 
 	function onKeydown(e: KeyboardEvent) {
-		if (e.key === 'Enter' || e.key === ' ') {
+		if (e.key === "Enter" || e.key === " ") {
 			e.preventDefault();
 			crack();
 		}
 	}
 </script>
 
-<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	class="fortune-cookie"
 	class:cracked
@@ -157,16 +156,30 @@
 		opacity: 0.5;
 	}
 
-	.left-half { transform: rotate(-15deg); }
-	.right-half { transform: rotate(15deg); }
+	.left-half {
+		transform: rotate(-15deg);
+	}
+	.right-half {
+		transform: rotate(15deg);
+	}
 
 	@keyframes cookie-reveal {
-		0% { opacity: 0; transform: scale(0.9); }
-		100% { opacity: 1; transform: scale(1); }
+		0% {
+			opacity: 0;
+			transform: scale(0.9);
+		}
+		100% {
+			opacity: 1;
+			transform: scale(1);
+		}
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.cookie-opened { animation: none; }
-		.fortune-cookie:hover .cookie-svg { transform: none; }
+		.cookie-opened {
+			animation: none;
+		}
+		.fortune-cookie:hover .cookie-svg {
+			transform: none;
+		}
 	}
 </style>

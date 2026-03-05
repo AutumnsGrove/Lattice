@@ -61,7 +61,6 @@
 <svelte:window onkeydown={handleKeydown} />
 
 {#if lanternStore.open}
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div class="lantern-backdrop z-grove-fab" onclick={handleBackdropClick} aria-hidden="true"></div>
 {/if}
 

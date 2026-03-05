@@ -40,13 +40,13 @@
 	}
 </script>
 
-<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	bind:this={panelRef}
 	class="lantern-panel z-grove-overlay bg-surface/90 backdrop-blur-xl border border-default shadow-lg"
 	class:has-friends={lanternStore.hasFriends}
 	role="dialog"
 	aria-modal="true"
+	tabindex="-1"
 	aria-label="{panelTitle} navigation panel"
 	inert={!lanternStore.open}
 	onkeydown={handleKeydown}
@@ -108,7 +108,7 @@
 						</button>
 					</div>
 
-					<nav
+					<div
 						class="nav-list flex flex-col gap-0.5"
 						id="lantern-tabpanel"
 						role="tabpanel"
@@ -116,19 +116,20 @@
 						aria-label="{lanternStore.activeTab} links"
 					>
 						{#each activeItems as item (item.href)}
+							{@const Icon = item.icon}
 							<a
 								href={item.href}
 								class="nav-item flex items-center gap-2 py-2 px-2.5 rounded-lg text-foreground no-underline text-sm transition-colors hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-[-2px]"
 								target={item.external ? "_blank" : undefined}
 								rel={item.external ? "noopener noreferrer" : undefined}
 							>
-								<svelte:component this={item.icon} size={16} strokeWidth={2} />
+								<Icon size={16} strokeWidth={2} />
 								<span
 									>{groveModeStore.current && item.groveLabel ? item.groveLabel : item.label}</span
 								>
 							</a>
 						{/each}
-					</nav>
+					</div>
 				</div>
 
 				<!-- Right column: friends (only when user has friends) -->
