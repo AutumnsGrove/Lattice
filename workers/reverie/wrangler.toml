@@ -24,7 +24,7 @@ database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
 [[d1_databases]]
 binding = "CURIO_DB"
 database_name = "grove-curios-db"
-database_id = "e8e0f3c5-62a4-4c14-9a21-3c9e3b6f0d12"
+database_id = "b03756ad-30d7-427a-9a1b-ec2f6478fcbd"
 
 # =============================================================================
 # Durable Objects — Threshold rate limiting (per-tenant isolation)
