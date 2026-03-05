@@ -2,16 +2,16 @@
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
 	"version": "1.0.0",
 	"description": "Tracks feature flag (graft) inventory for documentation and drift detection",
-	"lastUpdated": "2026-02-11",
-	"lastAuditedBy": "claude/upload-gate-redesign",
+	"lastUpdated": "2026-03-05",
+	"lastAuditedBy": "claude/inventory-audit",
 	"grafts": {
-		"total": 16,
+		"total": 18,
 		"breakdown": {
 			"platform": 11,
-			"greenhouse": 5
+			"greenhouse": 7
 		},
 		"byType": {
-			"boolean": 15,
+			"boolean": 17,
 			"number": 1
 		}
 	},
@@ -130,6 +130,14 @@
 			"description": "Voice-to-text transcription in the blog editor"
 		},
 		{
+			"id": "thorn_behavioral",
+			"name": "Thorn Behavioral Layer",
+			"type": "boolean",
+			"greenhouseOnly": false,
+			"migration": "090_thorn_entity_labels.sql",
+			"description": "Enable Thorn behavioral defense layer (entity labels, rate limiting, pattern matching before AI inference)"
+		},
+		{
 			"id": "thorn_moderation",
 			"name": "Thorn Text Moderation",
 			"type": "boolean",
@@ -144,6 +152,14 @@
 			"greenhouseOnly": false,
 			"migration": "055_upload_gate_redesign.sql",
 			"description": "Per-tenant upload suspension. Default true (suspended). Add tenant rule with result_value=false to unsuspend."
+		},
+		{
+			"id": "wisp_enabled",
+			"name": "Wisp Writing Assistant",
+			"type": "boolean",
+			"greenhouseOnly": true,
+			"migration": "092_wisp_enabled_graft.sql",
+			"description": "Master toggle for the Wisp AI writing assistant. Controls visibility of Fireside, Scribe, and analysis features in the editor."
 		}
 	],
 	"migrations": {

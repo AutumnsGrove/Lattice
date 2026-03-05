@@ -51,8 +51,8 @@ jobs:
           # Count actual schema files
           ACTUAL_SCHEMAS=$(find "$SCHEMA_DIR" -name "*.ts" -type f 2>/dev/null | wc -l | tr -d ' ') || ACTUAL_SCHEMAS=0
 
-          # Count atmosphere entries (lines with "keyword:")
-          ACTUAL_ATMOSPHERES=$(grep -c 'keyword:' "$ATMOSPHERE_FILE" 2>/dev/null | tr -d ' ') || ACTUAL_ATMOSPHERES=0
+          # Count atmosphere entries (object properties with "keyword:", not function params)
+          ACTUAL_ATMOSPHERES=$(grep -c 'keyword: "' "$ATMOSPHERE_FILE" 2>/dev/null | tr -d ' ') || ACTUAL_ATMOSPHERES=0
 
           # Count fields across all schema files
           # Each field has a `type:` property at 3-tab indentation (inside fields > fieldName > type)

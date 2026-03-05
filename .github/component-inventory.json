@@ -2,14 +2,14 @@
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
 	"version": "1.0.0",
 	"description": "Tracks engine component counts for documentation freshness checks",
-	"lastUpdated": "2026-03-04",
-	"lastAuditedBy": "claude/lantern-navigation",
+	"lastUpdated": "2026-03-05",
+	"lastAuditedBy": "claude/inventory-audit",
 	"components": {
-		"total": 247,
+		"total": 274,
 		"breakdown": {
 			"primitives": 45,
 			"nature": 65,
-			"ui": 44,
+			"ui": 48,
 			"domain": 2,
 			"typography": 11,
 			"chrome": 13,
@@ -17,7 +17,7 @@
 			"terrarium": 7,
 			"gallery": 4,
 			"charts": 4,
-			"content": 26,
+			"content": 49,
 			"media-player": 4,
 			"states": 4,
 			"forms": 3,
@@ -46,17 +46,18 @@
 		}
 	},
 	"adminComponents": {
-		"total": 8,
+		"total": 9,
 		"path": "libs/engine/src/lib/components/admin",
 		"items": [
-			"MarkdownEditor.svelte",
-			"PhotoPicker.svelte",
+			"CurioAutocomplete.svelte",
 			"FiresideChat.svelte",
-			"VoiceInput.svelte",
 			"GutterManager.svelte",
 			"LumenAnalytics.svelte",
-			"ZephyrAnalytics.svelte",
-			"SafetyMonitoring.svelte"
+			"MarkdownEditor.svelte",
+			"PhotoPicker.svelte",
+			"SafetyMonitoring.svelte",
+			"VoiceInput.svelte",
+			"ZephyrAnalytics.svelte"
 		]
 	},
 	"utilities": {
