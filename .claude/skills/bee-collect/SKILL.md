@@ -73,10 +73,9 @@ gf --agent todo                  # Find existing TODO/FIXME/HACK comments
 gf --agent usage "ComponentName" # Where is this used?
 gf --agent func "functionName"   # Find function definitions
 
-# Fallback tools
-grep -r "keyword" src/ --include="*.ts" --include="*.svelte" | head -20
-glob "**/*[keyword]*.{ts,svelte}"
-git log --oneline --all --grep="keyword" -20
+# Fallback tools (use Grep/Glob/Read tools, or gw git)
+gw git log --oneline
+gw git diff
 ```
 
 **Understand the Territory:**
@@ -133,8 +132,8 @@ _The bee checks the hive—does this pollen already exist?..._
 Verify no duplicates:
 
 ```bash
-# Search existing open issues
-gh issue list --state open --limit 100 --json number,title,body | jq -r '.[] | "#\(.number): \(.title)"'
+# Search existing open issues (gw provides formatted table output)
+gw gh issue list
 ```
 
 **Compare each parsed TODO against existing issues:**
@@ -178,19 +177,11 @@ Create properly structured issues:
 - [Dependencies or related issues]
 ```
 
-**Create issues (batch preferred):**
-
-When depositing multiple pollen grains, use `gw gh issue batch` for efficiency:
+**Create issues using `gw` (always preferred over raw `gh`):**
 
 ```bash
-# Batch creation — deposit all pollen at once (preferred for 3+ issues)
-gw gh issue batch --write --from-json issues.json
-```
-
-For single issues or when batch isn't available, fall back to sequential creation:
-
-```bash
-gh issue create \
+# Single issue creation
+gw gh issue create --write \
   --title "Title in imperative mood" \
   --body "$(cat <<'EOF'
 ## Summary
@@ -204,7 +195,34 @@ gh issue create \
 - Related patterns: [references]
 EOF
 )" \
-  --label "component,type"
+  --label "component" --label "type"
+```
+
+**For 3+ issues (preferred):** Write a JSON file and use batch creation:
+
+```bash
+# Write issues to a JSON file
+cat > /tmp/bee-issues.json <<'EOF'
+[
+  {
+    "title": "Add glass overlay to Forest page",
+    "body": "## Summary\n...\n\n## Acceptance Criteria\n- [ ] ...",
+    "labels": ["forests", "enhancement"],
+    "assignees": ["AutumnsGrove"]
+  }
+]
+EOF
+
+# Preview first, then create
+gw gh issue batch --write --file /tmp/bee-issues.json --dry-run
+gw gh issue batch --write --file /tmp/bee-issues.json
+```
+
+**For 1-2 issues:** Use separate `gw gh issue create --write` calls.
+
+**Closing issues:**
+```bash
+gw gh issue close --write 123
 ```
 
 **Title guidelines:**

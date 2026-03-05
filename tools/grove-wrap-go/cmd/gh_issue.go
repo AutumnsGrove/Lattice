@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -447,6 +448,179 @@ var issueCommentsCmd = &cobra.Command{
 	},
 }
 
+// --- issue batch ---
+
+type batchIssue struct {
+	Title     string   `json:"title"`
+	Body      string   `json:"body"`
+	Labels    []string `json:"labels"`
+	Assignees []string `json:"assignees"`
+	Milestone string   `json:"milestone"`
+}
+
+type batchResult struct {
+	Index int    `json:"index"`
+	Title string `json:"title"`
+	URL   string `json:"url,omitempty"`
+	Error string `json:"error,omitempty"`
+}
+
+const maxBatchSize = 50
+const maxBatchFileSize = 10 * 1024 * 1024 // 10MB
+
+var issueBatchCmd = &cobra.Command{
+	Use:   "batch",
+	Short: "Create multiple issues from a JSON file",
+	Long:  "Create multiple issues from a JSON file containing an array of issue definitions.",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if err := requireGHSafety("issue_batch"); err != nil {
+			return err
+		}
+
+		cfg := config.Get()
+		filePath, _ := cmd.Flags().GetString("file")
+		dryRun, _ := cmd.Flags().GetBool("dry-run")
+
+		// Validate file path — no symlinks
+		fileInfo, err := os.Lstat(filePath)
+		if err != nil {
+			return fmt.Errorf("cannot read file: %w", err)
+		}
+		if fileInfo.Mode()&os.ModeSymlink != 0 {
+			return fmt.Errorf("symlinks not allowed for safety")
+		}
+		if fileInfo.Size() > maxBatchFileSize {
+			return fmt.Errorf("file too large (%d bytes, max %d)", fileInfo.Size(), maxBatchFileSize)
+		}
+
+		data, err := os.ReadFile(filePath)
+		if err != nil {
+			return fmt.Errorf("cannot read file: %w", err)
+		}
+
+		var issues []batchIssue
+		if err := json.Unmarshal(data, &issues); err != nil {
+			return fmt.Errorf("invalid JSON: %w", err)
+		}
+
+		if len(issues) == 0 {
+			return fmt.Errorf("no issues found in file")
+		}
+		if len(issues) > maxBatchSize {
+			return fmt.Errorf("too many issues (%d, max %d)", len(issues), maxBatchSize)
+		}
+
+		// Validate all titles present
+		for i, issue := range issues {
+			if issue.Title == "" {
+				return fmt.Errorf("issue %d missing required field: title", i+1)
+			}
+		}
+
+		// Dry-run: preview table and exit
+		if dryRun {
+			if cfg.JSONMode {
+				out, _ := json.MarshalIndent(issues, "", "  ")
+				fmt.Println(string(out))
+				return nil
+			}
+
+			headers := []string{"#", "Title", "Labels"}
+			var rows [][]string
+			for i, issue := range issues {
+				rows = append(rows, []string{
+					fmt.Sprintf("%d", i+1),
+					TruncateStr(issue.Title, 50),
+					strings.Join(issue.Labels, ", "),
+				})
+			}
+			fmt.Printf("Batch Preview (%d issues)\n\n", len(issues))
+			fmt.Print(ui.RenderSimpleTable(headers, rows))
+			fmt.Println()
+			ui.Hint("Use without --dry-run to create these issues.")
+			return nil
+		}
+
+		// Create issues sequentially
+		var results []batchResult
+		created := 0
+		failed := 0
+
+		for i, issue := range issues {
+			ghArgs := []string{"issue", "create"}
+			ghArgs = append(ghArgs, ghRepoArgs()...)
+			ghArgs = append(ghArgs, "--title", issue.Title)
+
+			if issue.Body != "" {
+				ghArgs = append(ghArgs, "--body", issue.Body)
+			} else {
+				ghArgs = append(ghArgs, "--body", "")
+			}
+			for _, l := range issue.Labels {
+				ghArgs = append(ghArgs, "--label", l)
+			}
+			for _, a := range issue.Assignees {
+				ghArgs = append(ghArgs, "--assignee", a)
+			}
+			if issue.Milestone != "" {
+				ghArgs = append(ghArgs, "--milestone", issue.Milestone)
+			}
+
+			result, err := exec.GH(ghArgs...)
+			br := batchResult{Index: i + 1, Title: issue.Title}
+
+			if err != nil {
+				br.Error = err.Error()
+				failed++
+			} else if !result.OK() {
+				br.Error = strings.TrimSpace(result.Stderr)
+				failed++
+			} else {
+				br.URL = strings.TrimSpace(result.Stdout)
+				created++
+			}
+			results = append(results, br)
+		}
+
+		// Output results
+		if cfg.JSONMode {
+			out, _ := json.MarshalIndent(map[string]interface{}{
+				"created": created,
+				"failed":  failed,
+				"issues":  results,
+			}, "", "  ")
+			fmt.Println(string(out))
+			return nil
+		}
+
+		if failed == 0 {
+			ui.Success(fmt.Sprintf("Created %d issues", created))
+		} else {
+			ui.Warning(fmt.Sprintf("Created %d issues, %d failed", created, failed))
+		}
+
+		headers := []string{"#", "Title", "URL"}
+		if failed > 0 {
+			headers = append(headers, "Error")
+		}
+		var rows [][]string
+		for _, r := range results {
+			row := []string{
+				fmt.Sprintf("%d", r.Index),
+				TruncateStr(r.Title, 40),
+				r.URL,
+			}
+			if failed > 0 {
+				row = append(row, r.Error)
+			}
+			rows = append(rows, row)
+		}
+		fmt.Print(ui.RenderSimpleTable(headers, rows))
+
+		return nil
+	},
+}
+
 var issueHelpCategories = []ui.HelpCategory{
 	{Title: "Read (Always Safe)", Icon: "📖", Style: ui.SafeReadStyle, Commands: []ui.HelpCommand{
 		{Name: "list", Desc: "List issues"},
@@ -455,6 +629,7 @@ var issueHelpCategories = []ui.HelpCategory{
 	}},
 	{Title: "Write (--write)", Icon: "✏️", Style: ui.SafeWriteStyle, Commands: []ui.HelpCommand{
 		{Name: "create", Desc: "Create an issue"},
+		{Name: "batch", Desc: "Create issues from JSON file"},
 		{Name: "comment", Desc: "Add a comment"},
 		{Name: "close", Desc: "Close an issue"},
 		{Name: "reopen", Desc: "Reopen an issue"},
@@ -489,6 +664,12 @@ func init() {
 	issueCreateCmd.Flags().StringSlice("assignee", nil, "Assignees")
 	issueCreateCmd.Flags().String("milestone", "", "Milestone")
 	issueCmd.AddCommand(issueCreateCmd)
+
+	// issue batch
+	issueBatchCmd.Flags().StringP("file", "f", "", "JSON file with issue definitions")
+	issueBatchCmd.MarkFlagRequired("file")
+	issueBatchCmd.Flags().Bool("dry-run", false, "Preview without creating")
+	issueCmd.AddCommand(issueBatchCmd)
 
 	// issue comment
 	issueCommentCmd.Flags().StringP("body", "b", "", "Comment body")
