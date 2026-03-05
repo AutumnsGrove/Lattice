@@ -26,10 +26,13 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
 	const rawTier = locals.context.type === "tenant" ? locals.context.tenant.plan || "free" : "free";
 	const tier = VALID_TIERS.has(rawTier) ? rawTier : "free";
 
+	const apiKey = platform?.env?.REVERIE_API_KEY ?? "";
+
 	try {
 		const response = await reverie.fetch("https://reverie/atmospheres", {
 			method: "GET",
 			headers: {
+				"X-API-Key": apiKey,
 				"X-Tenant-Id": locals.tenantId,
 				"X-Tier": tier,
 			},

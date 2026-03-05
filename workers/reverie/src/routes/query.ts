@@ -1,10 +1,9 @@
 /**
  * POST /query — Read-Only Domain Query
  *
- * Queries current values from a domain without using the LLM.
- * This is for "what's my current theme?" type requests.
- *
- * Note: This is a stub — actual reads will query D1 via GroveContext.
+ * Returns schema definitions for a domain. The `currentValue` field
+ * returns defaults only — live value reads require domain-specific
+ * API calls that are not yet wired up.
  */
 
 import { Hono } from "hono";
@@ -47,20 +46,19 @@ query.post("/", async (c) => {
 		return c.json(errBody, status as 400);
 	}
 
-	// TODO: Query actual values from D1 via GroveContext
-	// For now, return field definitions with defaults
 	const fieldDefs = fields
 		? Object.entries(schema.fields).filter(([name]) => fields.includes(name))
 		: Object.entries(schema.fields);
 
-	const values: Record<string, unknown> = {};
+	const fieldInfo: Record<string, unknown> = {};
 	for (const [name, def] of fieldDefs) {
-		values[name] = {
+		fieldInfo[name] = {
 			type: def.type,
 			description: def.description,
 			default: def.default ?? null,
 			readonly: def.readonly ?? false,
-			currentValue: null, // TODO: read from DB
+			options: def.options ?? null,
+			constraints: def.constraints ?? null,
 		};
 	}
 
@@ -69,7 +67,9 @@ query.post("/", async (c) => {
 		data: {
 			domain: schema.id,
 			name: schema.name,
-			fields: values,
+			description: schema.description,
+			readonly: schema.writeEndpoint === null,
+			fields: fieldInfo,
 		},
 		meta: {
 			latencyMs: Date.now() - startTime,

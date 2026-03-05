@@ -104,6 +104,31 @@ configure.post("/", async (c) => {
 			},
 		};
 
+		// Log interaction asynchronously — don't delay the response
+		c.executionCtx.waitUntil(
+			c.env.DB.prepare(
+				`INSERT INTO reverie_interactions
+				(tenant_id, input_text, action, domains_matched, atmosphere_used,
+				 tool_calls_generated, lumen_task, lumen_model, lumen_latency_ms,
+				 success, session_id)
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)`,
+			)
+				.bind(
+					tenantId,
+					input,
+					routeResult.action === "atmosphere" ? "atmosphere" : "configure",
+					JSON.stringify(routeResult.domains),
+					routeResult.atmosphere?.keyword ?? null,
+					JSON.stringify(composerResult.toolCalls.map((tc) => tc.function.name)),
+					schemas.length > 3 || routeResult.atmosphere ? "reverie-compose" : "reverie",
+					composerResult.model,
+					composerResult.latencyMs,
+					session_id ?? null,
+				)
+				.run()
+				.catch((err) => console.error("[Reverie] Failed to log interaction:", err)),
+		);
+
 		return c.json(response);
 	} catch (err) {
 		// Log error class and code only — never log full error which may contain user input

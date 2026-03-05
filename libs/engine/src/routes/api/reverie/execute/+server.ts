@@ -26,6 +26,8 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 	const rawTier = locals.context.type === "tenant" ? locals.context.tenant.plan || "free" : "free";
 	const tier = VALID_TIERS.has(rawTier) ? rawTier : "free";
 
+	const apiKey = platform?.env?.REVERIE_API_KEY ?? "";
+
 	try {
 		const body = await request.text();
 
@@ -33,6 +35,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
+				"X-API-Key": apiKey,
 				"X-Tenant-Id": locals.tenantId,
 				"X-Tier": tier,
 			},

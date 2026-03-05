@@ -1,10 +1,12 @@
 /**
  * Reverie Auth Middleware
  *
- * During development: stub that extracts tenant info from request headers.
- * Production: will verify Heartwood tokens via AUTH service binding.
+ * Verifies caller identity via REVERIE_API_KEY, then extracts tenant
+ * context from X-Tenant-Id / X-Tier headers set by the engine proxy.
  *
- * Sets tenantId and tier on Hono context variables.
+ * Only the SvelteKit engine proxy should call this worker. The proxy
+ * authenticates users via Heartwood, then forwards verified tenant
+ * context through the service binding with the API key.
  */
 
 import { createMiddleware } from "hono/factory";
@@ -12,30 +14,74 @@ import type { Env, ReverieVariables } from "../types";
 import { REVERIE_ERRORS, buildReverieError } from "../errors";
 
 /**
+ * Constant-time string comparison to prevent timing attacks.
+ * Uses HMAC comparison so output length is always 32 bytes.
+ */
+async function timingSafeEqual(a: string, b: string): Promise<boolean> {
+	const encoder = new TextEncoder();
+	const aBytes = encoder.encode(a);
+	const bBytes = encoder.encode(b);
+	const aKey = await crypto.subtle.importKey(
+		"raw",
+		aBytes,
+		{ name: "HMAC", hash: "SHA-256" },
+		false,
+		["sign"],
+	);
+	const sig = await crypto.subtle.sign("HMAC", aKey, bBytes);
+	const expected = await crypto.subtle.sign("HMAC", aKey, aBytes);
+	const sigArr = new Uint8Array(sig);
+	const expectedArr = new Uint8Array(expected);
+	let diff = 0;
+	for (let i = 0; i < sigArr.length; i++) {
+		diff |= sigArr[i] ^ expectedArr[i];
+	}
+	return diff === 0;
+}
+
+/**
  * Auth middleware for protected routes.
  *
- * Current implementation: reads X-Tenant-Id and X-Tier headers.
- * This is a dev stub — production will verify Heartwood JWT tokens
- * via the AUTH service binding and extract tenant/tier from claims.
+ * 1. Verify X-API-Key matches REVERIE_API_KEY (caller auth)
+ * 2. Extract X-Tenant-Id and X-Tier from headers (tenant context)
+ * 3. Reject free tier (Reverie requires paid plan)
  */
 export const reverieAuth = createMiddleware<{
 	Bindings: Env;
 	Variables: ReverieVariables;
 }>(async (c, next) => {
-	// Dev stub: accept tenant info from headers
-	const tenantId = c.req.header("X-Tenant-Id");
-	const tier = c.req.header("X-Tier") as ReverieVariables["tier"] | undefined;
+	// Step 1: Verify caller API key
+	const apiKey = c.req.header("X-API-Key");
+	if (!apiKey) {
+		const { body, status } = buildReverieError(REVERIE_ERRORS.AUTH_REQUIRED);
+		return c.json(body, status as 401);
+	}
 
+	const expected = c.env.REVERIE_API_KEY;
+	if (!expected) {
+		console.error("[ReverieAuth] REVERIE_API_KEY secret not configured");
+		const { body, status } = buildReverieError(REVERIE_ERRORS.INTERNAL_ERROR);
+		return c.json(body, status as 500);
+	}
+
+	const valid = await timingSafeEqual(apiKey, expected);
+	if (!valid) {
+		const { body, status } = buildReverieError(REVERIE_ERRORS.AUTH_INVALID);
+		return c.json(body, status as 401);
+	}
+
+	// Step 2: Extract tenant context from headers
+	const tenantId = c.req.header("X-Tenant-Id");
 	if (!tenantId) {
 		const { body, status } = buildReverieError(REVERIE_ERRORS.AUTH_REQUIRED);
 		return c.json(body, status as 401);
 	}
 
-	// Validate tier is a known value, default to "free"
+	const tier = c.req.header("X-Tier") as ReverieVariables["tier"] | undefined;
 	const validTiers = new Set(["free", "seedling", "sapling", "oak", "evergreen"]);
 	const resolvedTier = tier && validTiers.has(tier) ? tier : "free";
 
-	// Free tier has no Reverie access
+	// Step 3: Free tier has no Reverie access
 	if (resolvedTier === "free") {
 		const { body, status } = buildReverieError(REVERIE_ERRORS.TIER_FORBIDDEN);
 		return c.json(body, status as 403);

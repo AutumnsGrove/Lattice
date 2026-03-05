@@ -155,6 +155,8 @@ declare global {
 
 				/** Reverie Worker service binding (AI configuration pipeline) */
 				REVERIE?: Fetcher;
+				/** API key for authenticating to the Reverie worker */
+				REVERIE_API_KEY?: string;
 			};
 			context: {
 				waitUntil(promise: Promise<unknown>): void;
