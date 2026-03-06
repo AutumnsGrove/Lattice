@@ -48,7 +48,7 @@ var gitHelpCategories = []ui.HelpCategory{
 			{Name: "push", Desc: "Upload local commits to remote"},
 			{Name: "pull", Desc: "Fetch and integrate remote changes"},
 			{Name: "branch", Desc: "Create or delete branches"},
-			{Name: "switch", Desc: "Switch to a different branch"},
+			{Name: "switch", Desc: "Switch to a branch, PR number, or issue number"},
 			{Name: "checkout", Desc: "Switch branches or restore files"},
 			{Name: "stash", Desc: "Stash working directory changes"},
 			{Name: "unstage", Desc: "Remove files from staging area"},

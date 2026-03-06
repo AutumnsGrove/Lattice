@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -454,17 +456,35 @@ var gitBranchCmd = &cobra.Command{
 var gitSwitchCreate bool
 
 var gitSwitchCmd = &cobra.Command{
-	Use:   "switch <branch>",
-	Short: "Switch to a different branch",
+	Use:   "switch <branch | PR# | issue#>",
+	Short: "Switch to a different branch (or resolve from PR/issue number)",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if !gwexec.IsGitRepo() {
 			return notARepo()
 		}
-		if err := sanitizeRef(args[0]); err != nil {
+		cfg := config.Get()
+
+		target := args[0]
+		resolvedFrom := "" // tracks what we resolved from (e.g. "PR #1334")
+
+		// If the argument is a number, resolve it to a branch via GitHub
+		if num, err := strconv.Atoi(target); err == nil && num > 0 {
+			if !gwexec.IsGHAvailable() {
+				return fmt.Errorf("gh CLI required to resolve #%d — install it or pass a branch name", num)
+			}
+
+			branch, source, resolveErr := resolveNumberToBranch(num)
+			if resolveErr != nil {
+				return resolveErr
+			}
+			target = branch
+			resolvedFrom = source
+		}
+
+		if err := sanitizeRef(target); err != nil {
 			return err
 		}
-		cfg := config.Get()
 
 		operation := "switch"
 		if gitSwitchCreate {
@@ -478,7 +498,7 @@ var gitSwitchCmd = &cobra.Command{
 		if gitSwitchCreate {
 			gitArgs = append(gitArgs, "-c")
 		}
-		gitArgs = append(gitArgs, args[0])
+		gitArgs = append(gitArgs, target)
 
 		result, err := gwexec.Git(gitArgs...)
 		if err != nil {
@@ -489,19 +509,70 @@ var gitSwitchCmd = &cobra.Command{
 		}
 
 		if cfg.JSONMode {
-			return printJSON(map[string]any{
-				"switched": args[0],
+			out := map[string]any{
+				"switched": target,
 				"created":  gitSwitchCreate,
-			})
+			}
+			if resolvedFrom != "" {
+				out["resolved_from"] = resolvedFrom
+			}
+			return printJSON(out)
 		}
 
+		if resolvedFrom != "" {
+			ui.Action("Resolved", fmt.Sprintf("%s → %s", resolvedFrom, target))
+		}
 		if gitSwitchCreate {
-			ui.Action("Created and switched to", args[0])
+			ui.Action("Created and switched to", target)
 		} else {
-			ui.Action("Switched to", args[0])
+			ui.Action("Switched to", target)
 		}
 		return nil
 	},
+}
+
+// resolveNumberToBranch tries to resolve a PR or issue number to a branch name.
+// Returns (branch, source, error) where source is a human-readable label like "PR #1334".
+func resolveNumberToBranch(num int) (string, string, error) {
+	numStr := strconv.Itoa(num)
+
+	// Try 1: Look up as a PR
+	out, err := gwexec.GHOutput("pr", "view", numStr, "--json", "headRefName,state,title")
+	if err == nil {
+		var pr struct {
+			HeadRefName string `json:"headRefName"`
+			State       string `json:"state"`
+			Title       string `json:"title"`
+		}
+		if jsonErr := json.Unmarshal([]byte(out), &pr); jsonErr == nil && pr.HeadRefName != "" {
+			return pr.HeadRefName, fmt.Sprintf("PR #%d", num), nil
+		}
+	}
+
+	// Try 2: Look up PRs linked to this issue number
+	out, err = gwexec.GHOutput("pr", "list", "--state", "all", "--search", fmt.Sprintf("issue:%d", num), "--json", "headRefName,number,state", "--limit", "5")
+	if err == nil {
+		var prs []struct {
+			HeadRefName string `json:"headRefName"`
+			Number      int    `json:"number"`
+			State       string `json:"state"`
+		}
+		if jsonErr := json.Unmarshal([]byte(out), &prs); jsonErr == nil {
+			// Prefer open PRs, fall back to most recent
+			for _, pr := range prs {
+				if pr.State == "OPEN" && pr.HeadRefName != "" {
+					return pr.HeadRefName, fmt.Sprintf("issue #%d → PR #%d", num, pr.Number), nil
+				}
+			}
+			for _, pr := range prs {
+				if pr.HeadRefName != "" {
+					return pr.HeadRefName, fmt.Sprintf("issue #%d → PR #%d", num, pr.Number), nil
+				}
+			}
+		}
+	}
+
+	return "", "", fmt.Errorf("no PR or linked branch found for #%d", num)
 }
 
 // ── git checkout ────────────────────────────────────────────────────
