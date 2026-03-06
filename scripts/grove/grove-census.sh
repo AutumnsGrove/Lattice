@@ -37,11 +37,12 @@ EXCLUDES="node_modules .git dist .svelte-kit _archived .turbo .wrangler .vercel 
 # ===========================================================================
 
 usage() {
-    echo "Usage: $(basename "$0") [--backfill|--today|--help]"
+    echo "Usage: $(basename "$0") [--backfill|--backfill-meta|--today|--help]"
     echo ""
-    echo "  --backfill   Walk full git history, one snapshot per calendar day"
-    echo "  --today      Capture only today's snapshot"
-    echo "  --help       Show this help message"
+    echo "  --backfill       Walk full git history, one snapshot per calendar day"
+    echo "  --backfill-meta  Update commits/tests for existing snapshots (fast)"
+    echo "  --today          Capture only today's snapshot"
+    echo "  --help           Show this help message"
     exit 0
 }
 
@@ -76,12 +77,15 @@ init_db() {
 
     sqlite3 "$DB_FILE" <<'SQL'
 CREATE TABLE IF NOT EXISTS snapshots (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    date        TEXT NOT NULL UNIQUE,
-    commit_hash TEXT NOT NULL,
-    total_lines INTEGER NOT NULL DEFAULT 0,
-    total_files INTEGER NOT NULL DEFAULT 0,
-    created_at  TEXT NOT NULL DEFAULT ''
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    date          TEXT NOT NULL UNIQUE,
+    commit_hash   TEXT NOT NULL,
+    total_lines   INTEGER NOT NULL DEFAULT 0,
+    total_files   INTEGER NOT NULL DEFAULT 0,
+    commit_count  INTEGER NOT NULL DEFAULT 0,
+    test_files    INTEGER NOT NULL DEFAULT 0,
+    test_lines    INTEGER NOT NULL DEFAULT 0,
+    created_at    TEXT NOT NULL DEFAULT ''
 );
 
 CREATE TABLE IF NOT EXISTS directories (
@@ -107,6 +111,11 @@ CREATE INDEX IF NOT EXISTS idx_directories_snapshot ON directories(snapshot_id);
 CREATE INDEX IF NOT EXISTS idx_directories_path ON directories(path);
 CREATE INDEX IF NOT EXISTS idx_snapshots_date ON snapshots(date);
 SQL
+
+    # Migrate: add new columns if they don't exist (idempotent)
+    sqlite3 "$DB_FILE" "ALTER TABLE snapshots ADD COLUMN commit_count INTEGER NOT NULL DEFAULT 0;" 2>/dev/null || true
+    sqlite3 "$DB_FILE" "ALTER TABLE snapshots ADD COLUMN test_files INTEGER NOT NULL DEFAULT 0;" 2>/dev/null || true
+    sqlite3 "$DB_FILE" "ALTER TABLE snapshots ADD COLUMN test_lines INTEGER NOT NULL DEFAULT 0;" 2>/dev/null || true
 }
 
 # ===========================================================================
@@ -148,6 +157,41 @@ count_files_in() {
     find_args+=(! -name '*.lock' ! -name '*.png' ! -name '*.jpg' ! -name '*.svg' ! -name '*.ico' ! -name '*.woff*' ! -name '*.ttf' ! -name '*.eot')
 
     find "${find_args[@]}" 2>/dev/null | wc -l | tr -d ' '
+}
+
+# Count total commits up to the current HEAD
+# Usage: count_commits [root_dir]  (must be inside a git repo or worktree)
+count_commits() {
+    local root_dir="${1:-.}"
+    git -C "$root_dir" rev-list --count HEAD 2>/dev/null || echo 0
+}
+
+# Count test files and test lines in a directory.
+# Looks for files matching common test patterns: *.test.*, *.spec.*, test_*.py, *_test.go
+# Usage: count_test_files <root_dir>
+count_test_files() {
+    local root="$1"
+    local -a find_args=("$root" -type f \( -name "*.test.*" -o -name "*.spec.*" -o -name "test_*.py" -o -name "*_test.go" -o -name "*_test.ts" \))
+    for dir in $EXCLUDES; do
+        find_args+=(! -path "*/$dir/*")
+    done
+    find "${find_args[@]}" 2>/dev/null | wc -l | tr -d ' '
+}
+
+# Usage: count_test_lines <root_dir>
+count_test_lines() {
+    local root="$1"
+    local -a find_args=("$root" -type f \( -name "*.test.*" -o -name "*.spec.*" -o -name "test_*.py" -o -name "*_test.go" -o -name "*_test.ts" \))
+    for dir in $EXCLUDES; do
+        find_args+=(! -path "*/$dir/*")
+    done
+    local result
+    result=$(find "${find_args[@]}" 2>/dev/null | xargs wc -l 2>/dev/null | tail -1 | awk '{print $1}')
+    if [[ -z "$result" ]] || ! [[ "$result" =~ ^[0-9]+$ ]]; then
+        echo 0
+    else
+        echo "$result"
+    fi
 }
 
 # Snapshot a single directory, capturing line counts per language.
@@ -479,8 +523,14 @@ snapshot_commit() {
     local total_files
     total_files=$(count_files_in "$worktree_dir")
 
+    # Count commits, test files, test lines
+    local commit_count test_file_count test_line_count
+    commit_count=$(count_commits "$worktree_dir")
+    test_file_count=$(count_test_files "$worktree_dir")
+    test_line_count=$(count_test_lines "$worktree_dir")
+
     # Insert snapshot record
-    sqlite3 "$DB_FILE" "INSERT INTO snapshots (date, commit_hash, total_lines, total_files) VALUES ('$date', '$short_hash', 0, $total_files);"
+    sqlite3 "$DB_FILE" "INSERT INTO snapshots (date, commit_hash, total_lines, total_files, commit_count, test_files, test_lines) VALUES ('$date', '$short_hash', 0, $total_files, $commit_count, $test_file_count, $test_line_count);"
     local snapshot_id
     snapshot_id=$(sqlite3 "$DB_FILE" "SELECT id FROM snapshots WHERE date='$date';")
 
@@ -493,7 +543,7 @@ snapshot_commit() {
     # Clean up worktree
     git worktree remove --force "$worktree_dir" 2>/dev/null || rm -rf "$worktree_dir"
 
-    success "  $date ($short_hash): $(sqlite3 "$DB_FILE" "SELECT total_lines FROM snapshots WHERE id=$snapshot_id;") lines, $total_files files"
+    success "  $date ($short_hash): $(sqlite3 "$DB_FILE" "SELECT total_lines FROM snapshots WHERE id=$snapshot_id;") lines, $total_files files, $commit_count commits, $test_file_count test files"
 }
 
 # Snapshot current working tree (no worktree needed)
@@ -513,10 +563,13 @@ snapshot_today() {
         sqlite3 "$DB_FILE" "DELETE FROM directories WHERE snapshot_id=$old_id; DELETE FROM snapshots WHERE id=$old_id;"
     fi
 
-    local total_files
+    local total_files commit_count test_file_count test_line_count
     total_files=$(count_files_in "$PROJECT_ROOT")
+    commit_count=$(count_commits "$PROJECT_ROOT")
+    test_file_count=$(count_test_files "$PROJECT_ROOT")
+    test_line_count=$(count_test_lines "$PROJECT_ROOT")
 
-    sqlite3 "$DB_FILE" "INSERT INTO snapshots (date, commit_hash, total_lines, total_files) VALUES ('$date', '$commit_hash', 0, $total_files);"
+    sqlite3 "$DB_FILE" "INSERT INTO snapshots (date, commit_hash, total_lines, total_files, commit_count, test_files, test_lines) VALUES ('$date', '$commit_hash', 0, $total_files, $commit_count, $test_file_count, $test_line_count);"
     local snapshot_id
     snapshot_id=$(sqlite3 "$DB_FILE" "SELECT id FROM snapshots WHERE date='$date';")
 
@@ -524,7 +577,7 @@ snapshot_today() {
 
     sqlite3 "$DB_FILE" "UPDATE snapshots SET total_lines = (SELECT COALESCE(SUM(total_lines), 0) FROM directories WHERE snapshot_id = $snapshot_id AND depth = 0) WHERE id = $snapshot_id;"
 
-    success "Today ($date, $commit_hash): $(sqlite3 "$DB_FILE" "SELECT total_lines FROM snapshots WHERE id=$snapshot_id;") lines, $total_files files"
+    success "Today ($date, $commit_hash): $(sqlite3 "$DB_FILE" "SELECT total_lines FROM snapshots WHERE id=$snapshot_id;") lines, $total_files files, $commit_count commits"
 }
 
 # ===========================================================================
@@ -577,6 +630,69 @@ backfill() {
     success "Backfill complete: $total_snapshots snapshots, $total_dirs directory records"
 }
 
+# Backfill only the metadata columns (commit_count, test_files, test_lines)
+# for existing snapshots. Much faster than a full backfill since it skips
+# the directory walk and only counts commits/tests per worktree.
+backfill_meta() {
+    log "Starting metadata backfill (commits, tests)..."
+
+    cd "$PROJECT_ROOT"
+
+    # Ensure full history
+    if [ -f ".git/shallow" ]; then
+        log "Shallow clone detected, fetching full history..."
+        git fetch --unshallow origin 2>/dev/null || true
+    fi
+
+    # Get all snapshots that need meta updates
+    local snapshots_file="/tmp/grove-census-meta-snapshots.txt"
+    sqlite3 "$DB_FILE" "SELECT id, date, commit_hash FROM snapshots ORDER BY date;" > "$snapshots_file"
+
+    local total
+    total=$(wc -l < "$snapshots_file" | tr -d ' ')
+    log "Updating metadata for $total snapshots..."
+
+    local count=0
+    while IFS='|' read -r snap_id snap_date snap_hash; do
+        count=$((count + 1))
+        echo -ne "\r${CYAN}[census]${NC} Processing $count/$total: $snap_date  "
+
+        # Find the full commit hash for this date
+        local full_hash
+        full_hash=$(git log --format='%H' --until="${snap_date}T23:59:59" -1 2>/dev/null || echo "")
+        if [ -z "$full_hash" ]; then
+            warn "No commit found for $snap_date, skipping meta"
+            continue
+        fi
+
+        local worktree_dir="/tmp/grove-census-meta-${snap_hash}"
+
+        # Create worktree
+        if ! git worktree add --detach "$worktree_dir" "$full_hash" 2>/dev/null; then
+            warn "Failed to create worktree for $snap_hash ($snap_date), skipping"
+            continue
+        fi
+
+        # Count metadata
+        local commit_count test_file_count test_line_count
+        commit_count=$(count_commits "$worktree_dir")
+        test_file_count=$(count_test_files "$worktree_dir")
+        test_line_count=$(count_test_lines "$worktree_dir")
+
+        # Update the snapshot
+        sqlite3 "$DB_FILE" "UPDATE snapshots SET commit_count=$commit_count, test_files=$test_file_count, test_lines=$test_line_count WHERE id=$snap_id;"
+
+        # Clean up
+        git worktree remove --force "$worktree_dir" 2>/dev/null || rm -rf "$worktree_dir"
+    done < "$snapshots_file"
+
+    echo ""
+    rm -f "$snapshots_file"
+    git worktree prune 2>/dev/null || true
+
+    success "Metadata backfill complete for $total snapshots"
+}
+
 # ===========================================================================
 # JSON EXPORT
 # ===========================================================================
@@ -600,7 +716,7 @@ db = sqlite3.connect('$DB_FILE')
 db.row_factory = sqlite3.Row
 
 frames = []
-for snap in db.execute('SELECT id, date, commit_hash, total_lines, total_files FROM snapshots ORDER BY date'):
+for snap in db.execute('SELECT id, date, commit_hash, total_lines, total_files, commit_count, test_files, test_lines FROM snapshots ORDER BY date'):
     dirs = []
     for d in db.execute('''
         SELECT path, depth, total_lines, ts_lines, svelte_lines, js_lines,
@@ -620,6 +736,8 @@ for snap in db.execute('SELECT id, date, commit_hash, total_lines, total_files F
     frames.append({
         'date': snap['date'], 'commit': snap['commit_hash'],
         'totalLines': snap['total_lines'], 'totalFiles': snap['total_files'],
+        'commitCount': snap['commit_count'], 'testFiles': snap['test_files'],
+        'testLines': snap['test_lines'],
         'directories': dirs,
     })
 
@@ -651,6 +769,11 @@ case "${1:---help}" in
     --backfill)
         init_db
         backfill
+        export_json
+        ;;
+    --backfill-meta)
+        init_db
+        backfill_meta
         export_json
         ;;
     --today)

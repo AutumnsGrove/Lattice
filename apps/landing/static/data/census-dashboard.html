@@ -1,960 +1,1060 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Grove Census — Data Visualization Dashboard</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
-<style>
-  :root {
-    --bg: #1a1a2e;
-    --surface: #16213e;
-    --card: #0f3460;
-    --accent: #e94560;
-    --text: #eaeaea;
-    --text-muted: #a0a0b0;
-    --green: #4ecca3;
-    --amber: #f5a623;
-    --pink: #ff6b9d;
-    --blue: #4fc3f7;
-    --purple: #b388ff;
-    --cream: #faf0e6;
-    --glass: rgba(255,255,255,0.06);
-    --glass-border: rgba(255,255,255,0.12);
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    line-height: 1.6;
-    min-height: 100vh;
-  }
-
-  .hero {
-    text-align: center;
-    padding: 3rem 1rem 2rem;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-    border-bottom: 1px solid var(--glass-border);
-  }
-
-  .hero h1 {
-    font-size: 2.5rem;
-    font-weight: 300;
-    letter-spacing: 0.05em;
-    margin-bottom: 0.5rem;
-    background: linear-gradient(135deg, var(--green), var(--blue));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
-  .hero p { color: var(--text-muted); font-size: 1.1rem; }
-
-  .stats-bar {
-    display: flex;
-    justify-content: center;
-    gap: 2rem;
-    padding: 1.5rem;
-    flex-wrap: wrap;
-  }
-
-  .stat {
-    text-align: center;
-    padding: 1rem 1.5rem;
-    background: var(--glass);
-    border: 1px solid var(--glass-border);
-    border-radius: 12px;
-    backdrop-filter: blur(10px);
-    min-width: 140px;
-  }
-
-  .stat-value {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: var(--green);
-  }
-
-  .stat-label {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--text-muted);
-  }
-
-  .dashboard {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 2rem 1rem;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-  }
-
-  .card {
-    background: var(--glass);
-    border: 1px solid var(--glass-border);
-    border-radius: 16px;
-    padding: 1.5rem;
-    backdrop-filter: blur(10px);
-  }
-
-  .card-full { grid-column: 1 / -1; }
-
-  .card h2 {
-    font-size: 1.1rem;
-    font-weight: 500;
-    margin-bottom: 0.3rem;
-    color: var(--cream);
-  }
-
-  .card .subtitle {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    margin-bottom: 1rem;
-  }
-
-  .chart-container {
-    position: relative;
-    width: 100%;
-    height: 350px;
-  }
-
-  .chart-container.tall { height: 450px; }
-  .chart-container.short { height: 280px; }
-
-  .heatmap-grid {
-    display: grid;
-    gap: 2px;
-    margin-top: 0.5rem;
-  }
-
-  .heatmap-cell {
-    border-radius: 3px;
-    aspect-ratio: 1;
-    position: relative;
-    cursor: pointer;
-    transition: transform 0.15s;
-  }
-
-  .heatmap-cell:hover {
-    transform: scale(1.3);
-    z-index: 10;
-  }
-
-  .heatmap-cell .tooltip {
-    display: none;
-    position: absolute;
-    bottom: 110%;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--surface);
-    border: 1px solid var(--glass-border);
-    padding: 0.4rem 0.6rem;
-    border-radius: 6px;
-    font-size: 0.7rem;
-    white-space: nowrap;
-    z-index: 20;
-    pointer-events: none;
-  }
-
-  .heatmap-cell:hover .tooltip { display: block; }
-
-  .heatmap-legend {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-top: 0.8rem;
-    font-size: 0.75rem;
-    color: var(--text-muted);
-  }
-
-  .heatmap-legend-bar {
-    width: 120px;
-    height: 12px;
-    border-radius: 6px;
-  }
-
-  .insights {
-    grid-column: 1 / -1;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1rem;
-  }
-
-  .insight-card {
-    background: linear-gradient(135deg, var(--glass), rgba(78, 204, 163, 0.08));
-    border: 1px solid rgba(78, 204, 163, 0.2);
-    border-radius: 12px;
-    padding: 1.2rem;
-  }
-
-  .insight-card h3 {
-    font-size: 0.95rem;
-    color: var(--green);
-    margin-bottom: 0.4rem;
-  }
-
-  .insight-card p {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    line-height: 1.5;
-  }
-
-  .milestone-timeline {
-    position: relative;
-    padding-left: 2rem;
-  }
-
-  .milestone-timeline::before {
-    content: '';
-    position: absolute;
-    left: 8px;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: linear-gradient(to bottom, var(--green), var(--blue), var(--purple));
-  }
-
-  .milestone {
-    position: relative;
-    margin-bottom: 1rem;
-    padding: 0.6rem 0.8rem;
-    background: var(--glass);
-    border-radius: 8px;
-    border: 1px solid var(--glass-border);
-  }
-
-  .milestone::before {
-    content: '';
-    position: absolute;
-    left: -1.65rem;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: var(--green);
-    border: 2px solid var(--bg);
-  }
-
-  .milestone .date {
-    font-size: 0.7rem;
-    color: var(--text-muted);
-  }
-
-  .milestone .label {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--cream);
-  }
-
-  .milestone .detail {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-  }
-
-  footer {
-    text-align: center;
-    padding: 2rem;
-    color: var(--text-muted);
-    font-size: 0.8rem;
-    border-top: 1px solid var(--glass-border);
-  }
-
-  @media (max-width: 768px) {
-    .dashboard { grid-template-columns: 1fr; }
-    .hero h1 { font-size: 1.8rem; }
-    .stats-bar { gap: 0.8rem; }
-    .stat { min-width: 100px; padding: 0.8rem; }
-    .stat-value { font-size: 1.3rem; }
-  }
-</style>
-</head>
-<body>
-
-<div class="hero">
-  <h1>The Grove Census</h1>
-  <p>Watching a codebase grow from a single seed — Dec 2025 to Mar 2026</p>
-</div>
-
-<div class="stats-bar" id="statsBar"></div>
-
-<div class="dashboard">
-
-  <!-- Key Insights -->
-  <div class="insights" id="insights"></div>
-
-  <!-- Total Growth Over Time -->
-  <div class="card card-full">
-    <h2>Codebase Growth Over Time</h2>
-    <div class="subtitle">Total lines of code across all versions</div>
-    <div class="chart-container tall"><canvas id="growthChart"></canvas></div>
-  </div>
-
-  <!-- Language Breakdown Stacked Area -->
-  <div class="card card-full">
-    <h2>Language Composition Over Time</h2>
-    <div class="subtitle">How the language mix evolved — stacked area chart</div>
-    <div class="chart-container tall"><canvas id="languageStackChart"></canvas></div>
-  </div>
-
-  <!-- Language Proportions (Current) -->
-  <div class="card">
-    <h2>Current Language Mix</h2>
-    <div class="subtitle">v1.1.1 — latest snapshot</div>
-    <div class="chart-container"><canvas id="languagePieChart"></canvas></div>
-  </div>
-
-  <!-- Language Proportions (Initial) -->
-  <div class="card">
-    <h2>Initial Language Mix</h2>
-    <div class="subtitle">v0.1.0 — where it all started</div>
-    <div class="chart-container"><canvas id="languagePieInitChart"></canvas></div>
-  </div>
-
-  <!-- Growth Rate -->
-  <div class="card card-full">
-    <h2>Growth Velocity</h2>
-    <div class="subtitle">Lines added between each version — the pace of building</div>
-    <div class="chart-container"><canvas id="velocityChart"></canvas></div>
-  </div>
-
-  <!-- Commits Over Time -->
-  <div class="card">
-    <h2>Commit Accumulation</h2>
-    <div class="subtitle">Total commits over the project lifetime</div>
-    <div class="chart-container"><canvas id="commitChart"></canvas></div>
-  </div>
-
-  <!-- Files & Directories -->
-  <div class="card">
-    <h2>Files & Directories</h2>
-    <div class="subtitle">Structural growth of the monorepo</div>
-    <div class="chart-container"><canvas id="filesChart"></canvas></div>
-  </div>
-
-  <!-- Test Coverage Growth -->
-  <div class="card">
-    <h2>Test Growth</h2>
-    <div class="subtitle">Test files and test lines over time</div>
-    <div class="chart-container"><canvas id="testChart"></canvas></div>
-  </div>
-
-  <!-- Documentation Growth -->
-  <div class="card">
-    <h2>Documentation Growth</h2>
-    <div class="subtitle">Words written in docs</div>
-    <div class="chart-container"><canvas id="docsChart"></canvas></div>
-  </div>
-
-  <!-- Language Growth Radar -->
-  <div class="card">
-    <h2>Language Growth Multipliers</h2>
-    <div class="subtitle">How much each language grew from v0.1.0 to v1.1.1</div>
-    <div class="chart-container"><canvas id="radarChart"></canvas></div>
-  </div>
-
-  <!-- Code to Test Ratio -->
-  <div class="card">
-    <h2>Code-to-Test Ratio</h2>
-    <div class="subtitle">Lines of code per line of test</div>
-    <div class="chart-container"><canvas id="testRatioChart"></canvas></div>
-  </div>
-
-  <!-- Heatmap: Language Activity -->
-  <div class="card card-full">
-    <h2>Language Activity Heatmap</h2>
-    <div class="subtitle">Lines added per language per version — darker = more growth</div>
-    <div id="heatmapContainer"></div>
-  </div>
-
-  <!-- Milestone Timeline -->
-  <div class="card card-full">
-    <h2>Milestone Timeline</h2>
-    <div class="subtitle">Key moments in the Grove's growth</div>
-    <div class="milestone-timeline" id="timeline"></div>
-  </div>
-
-</div>
-
-<footer>
-  Grove Census Dashboard — Data from history.csv — Built with Chart.js
-</footer>
-
-<script>
-// ─── DATA ───────────────────────────────────────────────────────
-const csvData = `timestamp,label,git_hash,total_code_lines,svelte_lines,ts_lines,js_lines,css_lines,doc_words,doc_lines,total_files,directories,estimated_tokens,commits,test_files,test_lines,bundle_size_kb,npm_unpacked_size,py_lines,go_lines,sql_lines,sh_lines,tsx_lines
-2025-12-02_00-00-00,v0.1.0,12dff31,39419,21292,5202,8959,2088,139820,33830,493,206,260891,66,9,3713,0,487588,0,0,1584,294,0
-2025-12-03_00-00-00,v0.1.1,3204825,39229,21292,5202,8769,2088,140034,33823,493,206,260107,75,9,3713,1136,486557,0,0,1584,294,0
-2025-12-03_00-00-00,v0.3.0,46ba107,38553,20607,5098,8882,2088,152089,37785,477,199,255504,80,9,3713,1136,452123,0,0,1584,294,0
-2025-12-03_00-00-00,v0.3.3,877d90d,38445,20544,5098,8837,2088,151580,37668,476,199,254733,101,9,3713,940,448589,0,0,1584,294,0
-2025-12-04_00-00-00,v0.4.0,04623e0,40253,20523,5292,9959,2601,142120,34660,492,209,265016,113,9,3713,492,686891,0,0,1584,294,0
-2025-12-05_00-00-00,v0.4.1,858d0cd,40303,20566,5299,9959,2601,152828,38728,502,209,265498,137,9,3713,492,687342,0,0,1584,294,0
-2025-12-05_00-00-00,v0.4.2,e8bff58,43636,22167,6483,10247,2719,153582,38836,537,229,289181,147,9,3713,496,689815,0,0,1726,294,0
-2025-12-06_00-00-00,v0.4.6,f882653,45423,22910,7347,10414,2731,154332,38954,549,236,302305,176,9,3713,496,2373793,0,0,1727,294,0
-2025-12-07_00-00-00,v0.4.7,993fa66,46634,23877,7589,10414,2731,155883,39316,551,236,313003,192,9,3713,496,2373803,0,0,1729,294,0
-2025-12-07_00-00-00,v0.4.8,ff64cdf,46663,23877,7589,10443,2731,155883,39316,551,236,313194,197,9,3713,496,2374579,0,0,1729,294,0
-2025-12-07_00-00-00,v0.4.9,7e17e87,46696,23895,7589,10458,2731,156851,39449,552,236,313500,205,9,3713,496,2375779,0,0,1729,294,0
-2025-12-07_00-00-00,v0.4.10,aa494aa,46700,23895,7589,10462,2731,156851,39449,552,236,313532,206,9,3713,496,2375850,0,0,1729,294,0
-2025-12-07_00-00-00,v0.4.12,a852eb0,46745,23911,7589,10491,2731,156857,39449,552,236,313835,210,9,3713,500,2377215,0,0,1729,294,0
-2025-12-08_00-00-00,v0.5.0,2233d8e,49631,24477,9901,10491,2739,159526,40140,571,245,335759,220,9,3713,500,2453624,0,0,1729,294,0
-2025-12-16_18-51-09,v0.6.0,08aee3b,58928,28567,13023,10243,3553,192846,45237,546,308,750000,290,9,3713,500,0,0,0,2670,872,0
-2025-12-16_18-51-35,v0.6.1,acec35e,63563,28953,17261,10254,3553,207827,48967,560,312,800000,299,12,5584,500,6186011,0,0,2670,872,0
-2025-12-16_18-51-55,v0.6.2,49ae3fc,67080,28953,20249,10558,3778,208658,49189,580,320,850000,305,18,8572,500,6186021,0,0,2670,872,0
-2025-12-18_15-57-17,v0.6.3,d506135,74407,34269,25913,6890,3793,209214,49348,635,288,1150298,342,21,9173,500,6232804,0,0,2670,872,0
-2025-12-18_17-09-57,v0.6.4,e7c23ea,74707,34518,25935,6890,3793,213302,50714,638,289,1163287,354,12,5460,552,6251509,0,0,2670,901,0
-2025-12-26_02-08-24,v0.6.5,f89ff3e,85471,39926,30794,6700,4338,284816,69928,767,337,1412151,505,16,7107,544,6290083,0,0,2756,957,0
-2025-12-28_21-57-43,v0.7.0,8c0f2ec,90024,42440,34667,4730,4474,282642,72037,785,341,1236149,582,18,7416,0,6335119,0,0,2756,957,0
-2025-12-30_01-06-23,v0.8.0,67874fb,98020,49478,35505,4730,4594,292211,71941,864,351,1528100,613,20,7708,0,6618924,0,0,2756,957,0
-2026-01-04_23-23-38,v0.8.5,8e7ad55,106740,54593,36863,6644,4770,374301,92095,959,375,1779522,872,22,8739,0,6737617,0,0,2832,1038,0
-2026-01-05_13-12-20,v0.8.6,d621d9b,109687,55871,38118,6727,4975,386143,95851,990,390,1844520,920,23,8884,0,6705563,0,0,2958,1038,0
-2026-01-07_02-54-11,v0.9.0,7e4f237,127308,66307,44034,6851,5621,523797,131588,1172,422,2237635,1072,28,10222,0,6904668,0,0,3457,1038,0
-2026-01-09_21-16-15,v0.9.1,9448b34,136714,73086,46645,6349,5621,553492,138213,1309,431,2367937,1187,32,11595,0,6901081,0,0,3593,1420,0
-2026-01-11_17-01-49,v0.9.3,5f53a33,141461,74113,52505,3895,5621,556781,138973,1331,438,2408980,1224,38,12952,0,6950586,0,0,3907,1420,0
-2026-01-13_16-52-36,v0.9.4,09e6f58,150013,76529,58020,3895,5621,605735,152151,1380,449,2584579,1320,42,14639,0,7046279,0,0,4528,1420,0
-2026-01-14_01-45-09,v0.9.5,dc713594,162354,76756,69924,3895,5621,626351,157985,1435,464,2712869,1345,47,16781,0,7197854,0,0,4738,1420,0
-2026-01-14_20-10-26,v0.9.6,4b8167bd,149171,64368,69129,3895,5621,653423,163924,1306,436,2680031,1384,46,16676,0,7212157,0,0,4738,1420,0
-2026-01-16_02-40-07,v0.9.7,6dc765b1,161064,67701,77088,3895,5621,674134,168455,1359,454,2802762,1433,52,18804,0,7341155,0,0,5004,1755,0
-2026-01-16_03-27-01,v0.9.71,0288d58e,161075,67701,77099,3895,5621,674707,168614,1362,454,2806615,1436,52,18804,0,7341590,0,0,5004,1755,0
-2026-01-17_13-14-06,v0.9.80,b874d9f,180483,68141,96526,3633,5396,633870,168154,1389,459,2746068,1490,71,37662,0,7346971,0,0,5004,1783,0
-2026-01-21_18-08-18,v0.9.85,57178e01,207332,73276,113890,5036,5453,740659,184114,1513,494,3053219,1633,86,42616,0,7668317,0,0,5950,3727,0
-2026-01-23_05-08-21,v0.9.90,4103b0b0,231235,75872,135368,4817,5453,779931,193252,1663,549,3313727,1703,112,53443,0,7924506,0,0,5998,3727,0
-2026-01-23_21-39-14,v0.9.91,a3284115,233370,77507,135352,4817,5453,777221,192947,1684,555,3320500,1742,112,53478,0,7959058,0,0,6025,4216,0
-2026-01-27_02-29-01,v0.9.92,19af892c,244065,79561,143489,4912,5568,818394,202136,1745,571,3481124,1830,119,55519,0,8121147,0,0,6319,4216,0
-2026-01-29_02-06-51,v0.9.93,23d521ec,250394,82017,147126,4981,5671,842237,206522,1823,585,3604448,1884,122,56626,0,8204598,0,0,6383,4216,0
-2026-01-29_21-48-50,v0.9.94,b6534c4f,255982,82978,151657,4981,5671,854546,209560,1850,592,3673389,1896,128,58997,0,8271599,0,0,6383,4312,0
-2026-01-30_14-41-06,v0.9.95,8b819b9e,258417,84480,152661,4982,5578,856976,210213,1866,592,3697222,1930,129,59285,0,8320790,0,0,6404,4312,0
-2026-01-30_16-49-49,v0.9.96,902708c0,258924,84550,153098,4982,5578,858172,210451,1872,592,3706161,1940,129,59285,0,8327337,0,0,6404,4312,0
-2026-01-31_02-59-26,v0.9.97,2f12b781,268035,85649,160910,5005,5705,899131,221304,1939,631,3858407,1989,133,60520,0,8410171,0,0,6454,4312,0
-2026-02-05_19-15-30,v0.9.98,fc869c71,321659,91639,178960,5010,4464,999690,245300,2116,727,4226475,2181,149,66604,0,8671559,29066,0,6782,4312,1426
-2026-02-07_20-39-45,v0.9.99,b96ae0a5,380180,99168,225384,5019,4531,1088823,260867,2331,778,4811833,2323,186,80248,0,8876031,31663,0,7723,4478,2214
-2026-02-18_22-21-50,v1.0.0,dce78eec,483120,127089,281662,5262,4977,1347774,307491,2884,999,5937501,2774,244,94585,0,9853475,39138,8940,9085,4753,2214
-2026-02-27_01-58-56,v1.1.0,85ba17b6,534225,142689,325391,4251,6491,1508074,333453,3637,1151,7084523,3148,298,103614,0,11280258,8866,30486,10963,2883,2205
-2026-02-28_17-17-35,v1.1.1,5dcf66b4,544732,143872,330485,4251,6491,1510497,333900,3703,1166,7173376,3214,303,104562,0,11390156,9728,33288,11108,3290,2219`;
-
-// ─── PARSE ──────────────────────────────────────────────────────
-const lines = csvData.trim().split('\n');
-const headers = lines[0].split(',');
-const data = lines.slice(1).map(line => {
-  const vals = line.split(',');
-  const obj = {};
-  headers.forEach((h, i) => obj[h] = vals[i]);
-  return obj;
-});
-
-const num = (d, key) => parseInt(d[key]) || 0;
-const labels = data.map(d => d.label);
-const first = data[0];
-const last = data[data.length - 1];
-
-// ─── STATS BAR ──────────────────────────────────────────────────
-const totalGrowth = num(last, 'total_code_lines') - num(first, 'total_code_lines');
-const growthPct = ((num(last, 'total_code_lines') / num(first, 'total_code_lines') - 1) * 100).toFixed(0);
-
-document.getElementById('statsBar').innerHTML = `
-  <div class="stat"><div class="stat-value">${(num(last,'total_code_lines')/1000).toFixed(0)}K</div><div class="stat-label">Lines of Code</div></div>
-  <div class="stat"><div class="stat-value">${growthPct}%</div><div class="stat-label">Total Growth</div></div>
-  <div class="stat"><div class="stat-value">${num(last,'commits').toLocaleString()}</div><div class="stat-label">Commits</div></div>
-  <div class="stat"><div class="stat-value">${num(last,'total_files').toLocaleString()}</div><div class="stat-label">Files</div></div>
-  <div class="stat"><div class="stat-value">${num(last,'test_files')}</div><div class="stat-label">Test Files</div></div>
-  <div class="stat"><div class="stat-value">${(num(last,'doc_words')/1000).toFixed(0)}K</div><div class="stat-label">Doc Words</div></div>
-  <div class="stat"><div class="stat-value">47</div><div class="stat-label">Versions</div></div>
-  <div class="stat"><div class="stat-value">88</div><div class="stat-label">Days</div></div>
-`;
-
-// ─── KEY INSIGHTS ───────────────────────────────────────────────
-const tsFirst = num(first, 'ts_lines');
-const tsLast = num(last, 'ts_lines');
-const svFirst = num(first, 'svelte_lines');
-const svLast = num(last, 'svelte_lines');
-
-// Find when TS overtook Svelte
-let tsOvertookVersion = 'N/A';
-for (const d of data) {
-  if (num(d, 'ts_lines') > num(d, 'svelte_lines')) {
-    tsOvertookVersion = d.label;
-    break;
-  }
-}
-
-// Find the biggest single-version jump
-let maxJump = 0, maxJumpLabel = '';
-for (let i = 1; i < data.length; i++) {
-  const jump = num(data[i], 'total_code_lines') - num(data[i-1], 'total_code_lines');
-  if (jump > maxJump) { maxJump = jump; maxJumpLabel = data[i].label; }
-}
-
-document.getElementById('insights').innerHTML = `
-  <div class="insight-card">
-    <h3>14x Growth in 88 Days</h3>
-    <p>The codebase exploded from 39K to 545K lines — a 1,282% increase. That's roughly 5,700 new lines of code per day, every day, for nearly three months straight.</p>
-  </div>
-  <div class="insight-card">
-    <h3>TypeScript Takeover at ${tsOvertookVersion}</h3>
-    <p>TypeScript started at just ${(tsFirst/1000).toFixed(1)}K lines (13% of code) and grew to ${(tsLast/1000).toFixed(0)}K lines (61%). It overtook Svelte as the dominant language at ${tsOvertookVersion}.</p>
-  </div>
-  <div class="insight-card">
-    <h3>JavaScript Sunset</h3>
-    <p>JavaScript went from ${(num(first,'js_lines')/1000).toFixed(1)}K lines (23%) down to ${(num(last,'js_lines')/1000).toFixed(1)}K lines (0.8%) — a deliberate migration to TypeScript. The codebase shed JS while growing everywhere else.</p>
-  </div>
-  <div class="insight-card">
-    <h3>Biggest Sprint: ${maxJumpLabel}</h3>
-    <p>${maxJumpLabel} added ${maxJump.toLocaleString()} lines in a single version — the largest single-version jump. That's more code than many entire projects.</p>
-  </div>
-  <div class="insight-card">
-    <h3>New Languages Emerged</h3>
-    <p>Python (${(num(last,'py_lines')/1000).toFixed(1)}K), Go (${(num(last,'go_lines')/1000).toFixed(1)}K), and TSX (${(num(last,'tsx_lines')/1000).toFixed(1)}K) all appeared mid-project. The ecosystem diversified as the platform matured.</p>
-  </div>
-  <div class="insight-card">
-    <h3>Tests Grew 28x</h3>
-    <p>From ${num(first,'test_lines').toLocaleString()} test lines to ${num(last,'test_lines').toLocaleString()} — and test files grew from ${num(first,'test_files')} to ${num(last,'test_files')}. Testing kept pace with (and sometimes outpaced) feature development.</p>
-  </div>
-`;
-
-// ─── CHART DEFAULTS ─────────────────────────────────────────────
-Chart.defaults.color = '#a0a0b0';
-Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
-Chart.defaults.font.family = "'Segoe UI', system-ui, sans-serif";
-
-const langColors = {
-  svelte: '#ff6b9d',
-  ts: '#4ecca3',
-  js: '#f5a623',
-  css: '#4fc3f7',
-  py: '#b388ff',
-  go: '#00bcd4',
-  sql: '#ff8a65',
-  sh: '#90a4ae',
-  tsx: '#ef5350',
-  md: '#faf0e6'
-};
-
-// ─── 1. TOTAL GROWTH CHART ─────────────────────────────────────
-new Chart(document.getElementById('growthChart'), {
-  type: 'line',
-  data: {
-    labels,
-    datasets: [{
-      label: 'Total Lines of Code',
-      data: data.map(d => num(d, 'total_code_lines')),
-      borderColor: '#4ecca3',
-      backgroundColor: 'rgba(78,204,163,0.1)',
-      fill: true,
-      tension: 0.3,
-      pointRadius: 3,
-      pointHoverRadius: 6,
-      borderWidth: 2
-    }]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: { legend: { display: false } },
-    scales: {
-      y: {
-        beginAtZero: true,
-        ticks: { callback: v => (v/1000) + 'K' }
-      },
-      x: { ticks: { maxRotation: 45, autoSkip: true, maxTicksLimit: 20 } }
-    }
-  }
-});
-
-// ─── 2. LANGUAGE STACKED AREA ───────────────────────────────────
-const langKeys = ['svelte_lines','ts_lines','js_lines','css_lines','py_lines','go_lines','sql_lines','sh_lines','tsx_lines'];
-const langNames = ['Svelte','TypeScript','JavaScript','CSS','Python','Go','SQL','Shell','TSX'];
-const langColorArr = [langColors.svelte, langColors.ts, langColors.js, langColors.css, langColors.py, langColors.go, langColors.sql, langColors.sh, langColors.tsx];
-
-new Chart(document.getElementById('languageStackChart'), {
-  type: 'line',
-  data: {
-    labels,
-    datasets: langKeys.map((key, i) => ({
-      label: langNames[i],
-      data: data.map(d => num(d, key)),
-      borderColor: langColorArr[i],
-      backgroundColor: langColorArr[i] + '40',
-      fill: true,
-      tension: 0.3,
-      borderWidth: 1.5,
-      pointRadius: 0
-    }))
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { position: 'top', labels: { usePointStyle: true, pointStyle: 'circle', padding: 15, font: { size: 11 } } }
-    },
-    scales: {
-      y: { stacked: true, ticks: { callback: v => (v/1000)+'K' } },
-      x: { ticks: { maxRotation: 45, autoSkip: true, maxTicksLimit: 15 } }
-    },
-    interaction: { mode: 'index', intersect: false }
-  }
-});
-
-// ─── 3. CURRENT PIE ────────────────────────────────────────────
-function makePie(canvasId, d) {
-  const vals = langKeys.map(k => num(d, k));
-  const total = vals.reduce((a,b) => a+b, 0);
-  // Filter out zero values
-  const filtered = langNames.map((n,i) => ({ name: n, val: vals[i], color: langColorArr[i] })).filter(x => x.val > 0);
-  new Chart(document.getElementById(canvasId), {
-    type: 'doughnut',
-    data: {
-      labels: filtered.map(x => x.name),
-      datasets: [{
-        data: filtered.map(x => x.val),
-        backgroundColor: filtered.map(x => x.color),
-        borderColor: 'rgba(0,0,0,0.3)',
-        borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { position: 'right', labels: { usePointStyle: true, font: { size: 11 }, padding: 8 } },
-        tooltip: {
-          callbacks: {
-            label: ctx => {
-              const pct = ((ctx.parsed / total) * 100).toFixed(1);
-              return `${ctx.label}: ${(ctx.parsed/1000).toFixed(1)}K (${pct}%)`;
-            }
-          }
-        }
-      }
-    }
-  });
-}
-
-makePie('languagePieChart', last);
-makePie('languagePieInitChart', first);
-
-// ─── 4. VELOCITY ────────────────────────────────────────────────
-const deltas = data.map((d, i) => i === 0 ? 0 : num(d, 'total_code_lines') - num(data[i-1], 'total_code_lines'));
-
-new Chart(document.getElementById('velocityChart'), {
-  type: 'bar',
-  data: {
-    labels,
-    datasets: [{
-      label: 'Lines Added/Removed',
-      data: deltas,
-      backgroundColor: deltas.map(v => v >= 0 ? 'rgba(78,204,163,0.7)' : 'rgba(233,69,96,0.7)'),
-      borderColor: deltas.map(v => v >= 0 ? '#4ecca3' : '#e94560'),
-      borderWidth: 1,
-      borderRadius: 3
-    }]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: { legend: { display: false } },
-    scales: {
-      y: { ticks: { callback: v => v >= 0 ? '+' + (v/1000).toFixed(0) + 'K' : (v/1000).toFixed(0) + 'K' } },
-      x: { ticks: { maxRotation: 45, autoSkip: true, maxTicksLimit: 20 } }
-    }
-  }
-});
-
-// ─── 5. COMMITS ─────────────────────────────────────────────────
-new Chart(document.getElementById('commitChart'), {
-  type: 'line',
-  data: {
-    labels,
-    datasets: [{
-      label: 'Total Commits',
-      data: data.map(d => num(d, 'commits')),
-      borderColor: '#f5a623',
-      backgroundColor: 'rgba(245,166,35,0.1)',
-      fill: true,
-      tension: 0.3,
-      pointRadius: 2,
-      borderWidth: 2
-    }]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: { legend: { display: false } },
-    scales: {
-      x: { ticks: { maxRotation: 45, autoSkip: true, maxTicksLimit: 10 } }
-    }
-  }
-});
-
-// ─── 6. FILES & DIRS ────────────────────────────────────────────
-new Chart(document.getElementById('filesChart'), {
-  type: 'line',
-  data: {
-    labels,
-    datasets: [
-      {
-        label: 'Files',
-        data: data.map(d => num(d, 'total_files')),
-        borderColor: '#4fc3f7',
-        backgroundColor: 'rgba(79,195,247,0.1)',
-        fill: true,
-        tension: 0.3,
-        pointRadius: 2,
-        borderWidth: 2
-      },
-      {
-        label: 'Directories',
-        data: data.map(d => num(d, 'directories')),
-        borderColor: '#b388ff',
-        backgroundColor: 'rgba(179,136,255,0.1)',
-        fill: true,
-        tension: 0.3,
-        pointRadius: 2,
-        borderWidth: 2
-      }
-    ]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: { legend: { position: 'top', labels: { usePointStyle: true, font: { size: 11 } } } },
-    scales: {
-      x: { ticks: { maxRotation: 45, autoSkip: true, maxTicksLimit: 10 } }
-    }
-  }
-});
-
-// ─── 7. TEST GROWTH ─────────────────────────────────────────────
-new Chart(document.getElementById('testChart'), {
-  type: 'line',
-  data: {
-    labels,
-    datasets: [
-      {
-        label: 'Test Lines',
-        data: data.map(d => num(d, 'test_lines')),
-        borderColor: '#4ecca3',
-        backgroundColor: 'rgba(78,204,163,0.1)',
-        fill: true,
-        tension: 0.3,
-        yAxisID: 'y',
-        pointRadius: 2,
-        borderWidth: 2
-      },
-      {
-        label: 'Test Files',
-        data: data.map(d => num(d, 'test_files')),
-        borderColor: '#ff6b9d',
-        backgroundColor: 'rgba(255,107,157,0.1)',
-        fill: false,
-        tension: 0.3,
-        yAxisID: 'y2',
-        pointRadius: 2,
-        borderWidth: 2
-      }
-    ]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: { legend: { position: 'top', labels: { usePointStyle: true, font: { size: 11 } } } },
-    scales: {
-      y: { position: 'left', ticks: { callback: v => (v/1000)+'K' } },
-      y2: { position: 'right', grid: { drawOnChartArea: false } },
-      x: { ticks: { maxRotation: 45, autoSkip: true, maxTicksLimit: 10 } }
-    }
-  }
-});
-
-// ─── 8. DOCS GROWTH ─────────────────────────────────────────────
-new Chart(document.getElementById('docsChart'), {
-  type: 'line',
-  data: {
-    labels,
-    datasets: [{
-      label: 'Documentation Words',
-      data: data.map(d => num(d, 'doc_words')),
-      borderColor: '#faf0e6',
-      backgroundColor: 'rgba(250,240,230,0.08)',
-      fill: true,
-      tension: 0.3,
-      pointRadius: 2,
-      borderWidth: 2
-    }]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: { legend: { display: false } },
-    scales: {
-      y: { ticks: { callback: v => (v/1000000).toFixed(1)+'M' } },
-      x: { ticks: { maxRotation: 45, autoSkip: true, maxTicksLimit: 10 } }
-    }
-  }
-});
-
-// ─── 9. RADAR ───────────────────────────────────────────────────
-const radarLangs = ['Svelte','TypeScript','CSS','SQL','Shell'];
-const radarKeys = ['svelte_lines','ts_lines','css_lines','sql_lines','sh_lines'];
-const radarMultipliers = radarKeys.map(k => {
-  const init = num(first, k);
-  const final = num(last, k);
-  return init > 0 ? (final / init) : 0;
-});
-
-new Chart(document.getElementById('radarChart'), {
-  type: 'radar',
-  data: {
-    labels: radarLangs,
-    datasets: [{
-      label: 'Growth Multiplier (x)',
-      data: radarMultipliers,
-      borderColor: '#4ecca3',
-      backgroundColor: 'rgba(78,204,163,0.2)',
-      borderWidth: 2,
-      pointBackgroundColor: '#4ecca3'
-    }]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-      tooltip: { callbacks: { label: ctx => ctx.raw.toFixed(1) + 'x growth' } }
-    },
-    scales: {
-      r: {
-        beginAtZero: true,
-        ticks: { callback: v => v + 'x', backdropColor: 'transparent' },
-        pointLabels: { font: { size: 12 }, color: '#eaeaea' },
-        grid: { color: 'rgba(255,255,255,0.08)' },
-        angleLines: { color: 'rgba(255,255,255,0.08)' }
-      }
-    }
-  }
-});
-
-// ─── 10. CODE TO TEST RATIO ─────────────────────────────────────
-new Chart(document.getElementById('testRatioChart'), {
-  type: 'line',
-  data: {
-    labels,
-    datasets: [{
-      label: 'Code : Test Ratio',
-      data: data.map(d => {
-        const testLines = num(d, 'test_lines');
-        return testLines > 0 ? (num(d, 'total_code_lines') / testLines).toFixed(1) : null;
-      }),
-      borderColor: '#e94560',
-      backgroundColor: 'rgba(233,69,96,0.1)',
-      fill: true,
-      tension: 0.3,
-      pointRadius: 2,
-      borderWidth: 2
-    }]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-      tooltip: { callbacks: { label: ctx => `${ctx.parsed.y}:1 code to test ratio` } }
-    },
-    scales: {
-      y: { title: { display: true, text: 'Lines of code per test line', color: '#a0a0b0' } },
-      x: { ticks: { maxRotation: 45, autoSkip: true, maxTicksLimit: 10 } }
-    }
-  }
-});
-
-// ─── 11. HEATMAP ────────────────────────────────────────────────
-(function buildHeatmap() {
-  const container = document.getElementById('heatmapContainer');
-  const langs = ['Svelte','TypeScript','JavaScript','CSS','Python','Go','SQL','Shell','TSX'];
-  const keys = ['svelte_lines','ts_lines','js_lines','css_lines','py_lines','go_lines','sql_lines','sh_lines','tsx_lines'];
-
-  // Calculate deltas for each lang per version
-  const matrix = [];
-  let globalMax = 0;
-  let globalMin = 0;
-
-  for (let li = 0; li < keys.length; li++) {
-    const row = [];
-    for (let vi = 0; vi < data.length; vi++) {
-      const delta = vi === 0 ? num(data[vi], keys[li]) : num(data[vi], keys[li]) - num(data[vi-1], keys[li]);
-      row.push(delta);
-      if (delta > globalMax) globalMax = delta;
-      if (delta < globalMin) globalMin = delta;
-    }
-    matrix.push(row);
-  }
-
-  // Build header
-  let html = '<div style="overflow-x: auto;">';
-  html += '<table style="border-collapse: collapse; width: 100%; min-width: 800px;">';
-  html += '<thead><tr><th style="text-align:left;padding:4px 8px;font-size:0.75rem;color:var(--text-muted);min-width:80px;"></th>';
-  for (const d of data) {
-    html += `<th style="font-size:0.6rem;color:var(--text-muted);padding:2px;writing-mode:vertical-lr;transform:rotate(180deg);height:60px;">${d.label}</th>`;
-  }
-  html += '</tr></thead><tbody>';
-
-  for (let li = 0; li < langs.length; li++) {
-    html += `<tr><td style="font-size:0.75rem;color:${Object.values(langColors)[li]};padding:4px 8px;white-space:nowrap;font-weight:600;">${langs[li]}</td>`;
-    for (let vi = 0; vi < data.length; vi++) {
-      const val = matrix[li][vi];
-      let bg;
-      if (val > 0) {
-        const intensity = Math.min(val / (globalMax * 0.3), 1);
-        bg = `rgba(78,204,163,${0.05 + intensity * 0.85})`;
-      } else if (val < 0) {
-        const intensity = Math.min(Math.abs(val) / (Math.abs(globalMin) * 0.3), 1);
-        bg = `rgba(233,69,96,${0.05 + intensity * 0.85})`;
-      } else {
-        bg = 'rgba(255,255,255,0.02)';
-      }
-      const sign = val >= 0 ? '+' : '';
-      html += `<td style="padding:1px;"><div class="heatmap-cell" style="background:${bg};width:100%;height:22px;border-radius:2px;"><span class="tooltip">${data[vi].label}: ${sign}${val.toLocaleString()} ${langs[li]}</span></div></td>`;
-    }
-    html += '</tr>';
-  }
-
-  html += '</tbody></table></div>';
-  html += `<div class="heatmap-legend">
-    <span>Removed</span>
-    <div class="heatmap-legend-bar" style="background: linear-gradient(to right, rgba(233,69,96,0.8), rgba(255,255,255,0.05), rgba(78,204,163,0.8));"></div>
-    <span>Added</span>
-  </div>`;
-
-  container.innerHTML = html;
-})();
-
-// ─── 12. MILESTONE TIMELINE ─────────────────────────────────────
-const milestones = [
-  { version: 'v0.1.0', date: 'Dec 2, 2025', detail: 'First commit — 39K lines, mostly Svelte (54%) and JS (23%)' },
-  { version: 'v0.4.0', date: 'Dec 4, 2025', detail: 'Hit 40K lines. CSS doubled. Bundle size measured.' },
-  { version: 'v0.5.0', date: 'Dec 8, 2025', detail: 'Crossed 49K lines. TypeScript nearly doubled to 9.9K.' },
-  { version: 'v0.6.0', date: 'Dec 16, 2025', detail: 'Major restructure — 59K lines. SQL lines jumped 69%. Token count tripled.' },
-  { version: 'v0.7.0', date: 'Dec 28, 2025', detail: 'Crossed 90K. JavaScript shrank from 10K to 4.7K — the TypeScript migration.' },
-  { version: 'v0.8.0', date: 'Dec 30, 2025', detail: 'Hit 98K. Svelte surged past 49K. Heading toward six figures.' },
-  { version: 'v0.9.0', date: 'Jan 7, 2026', detail: 'Crossed 127K — explosive growth begins. Commits doubled since v0.6.' },
-  { version: 'v0.9.5', date: 'Jan 14, 2026', detail: '162K lines. TypeScript at 70K, approaching Svelte. Test lines quadrupled.' },
-  { version: 'v0.9.6', date: 'Jan 14, 2026', detail: 'Rare dip to 149K — major refactor removed 13K lines.' },
-  { version: 'v0.9.80', date: 'Jan 17, 2026', detail: 'TypeScript overtakes Svelte (96K vs 68K). The tipping point.' },
-  { version: 'v0.9.98', date: 'Feb 5, 2026', detail: 'Python and TSX appear! 322K lines. Truly polyglot now.' },
-  { version: 'v1.0.0', date: 'Feb 18, 2026', detail: 'The milestone: 483K lines. Go appears (8.9K). 2,774 commits. 244 test files.' },
-  { version: 'v1.1.0', date: 'Feb 27, 2026', detail: '534K lines. Go explodes to 30K. 3,148 commits. 298 test files.' },
-  { version: 'v1.1.1', date: 'Feb 28, 2026', detail: 'Latest: 545K lines. 3,214 commits. 303 test files. 1.5M doc words.' }
-];
-
-document.getElementById('timeline').innerHTML = milestones.map(m => `
-  <div class="milestone">
-    <div class="label">${m.version}</div>
-    <div class="date">${m.date}</div>
-    <div class="detail">${m.detail}</div>
-  </div>
-`).join('');
-</script>
-</body>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Grove Census — Daily Codebase Visualization</title>
+		<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+		<style>
+			:root {
+				--bg-deep: #1a0a2e;
+				--bg: #1e1033;
+				--surface: #261542;
+				--grove: #16a34a;
+				--meadow: #22c55e;
+				--spring: #4ade80;
+				--mint: #86efac;
+				--scarlet: #e11d48;
+				--ember: #c2410c;
+				--amber: #d97706;
+				--gold: #eab308;
+				--honey: #facc15;
+				--water-surface: #38bdf8;
+				--water-deep: #0284c7;
+				--cherry: #ec4899;
+				--violet: #8b5cf6;
+				--lavender: #c4b5fd;
+				--cream: #fef3c7;
+				--bone: #f5f0e8;
+				--text: #e8e0f0;
+				--text-muted: #a89bbe;
+				--glass: rgba(255, 255, 255, 0.04);
+				--glass-hover: rgba(255, 255, 255, 0.07);
+				--glass-border: rgba(255, 255, 255, 0.08);
+				--glass-border-hover: rgba(255, 255, 255, 0.14);
+			}
+
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+
+			body {
+				font-family:
+					"Segoe UI",
+					system-ui,
+					-apple-system,
+					sans-serif;
+				background: var(--bg-deep);
+				color: var(--text);
+				line-height: 1.6;
+				min-height: 100vh;
+			}
+
+			.hero {
+				text-align: center;
+				padding: 3rem 1rem 2rem;
+				background: linear-gradient(135deg, var(--bg-deep) 0%, var(--bg) 40%, var(--surface) 100%);
+				border-bottom: 1px solid var(--glass-border);
+			}
+
+			.hero h1 {
+				font-size: 2.5rem;
+				font-weight: 300;
+				letter-spacing: 0.05em;
+				margin-bottom: 0.3rem;
+				background: linear-gradient(135deg, var(--grove), var(--spring), var(--meadow));
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: transparent;
+				background-clip: text;
+			}
+
+			.hero p {
+				color: var(--text-muted);
+				font-size: 1.05rem;
+			}
+			.hero .sub {
+				font-size: 0.85rem;
+				color: var(--lavender);
+				margin-top: 0.3rem;
+				opacity: 0.7;
+			}
+
+			.stats-bar {
+				display: flex;
+				justify-content: center;
+				gap: 1.5rem;
+				padding: 1.5rem;
+				flex-wrap: wrap;
+			}
+
+			.stat {
+				text-align: center;
+				padding: 0.8rem 1.2rem;
+				background: var(--glass);
+				border: 1px solid var(--glass-border);
+				border-radius: 12px;
+				min-width: 110px;
+				transition:
+					border-color 0.2s,
+					background 0.2s;
+			}
+
+			.stat:hover {
+				background: var(--glass-hover);
+				border-color: var(--glass-border-hover);
+			}
+			.stat-value {
+				font-size: 1.6rem;
+				font-weight: 700;
+			}
+			.stat-label {
+				font-size: 0.7rem;
+				text-transform: uppercase;
+				letter-spacing: 0.1em;
+				color: var(--text-muted);
+			}
+
+			.dashboard {
+				max-width: 1400px;
+				margin: 0 auto;
+				padding: 1.5rem 1rem;
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 1.5rem;
+			}
+
+			.card {
+				background: var(--glass);
+				border: 1px solid var(--glass-border);
+				border-radius: 16px;
+				padding: 1.5rem;
+				transition: border-color 0.2s;
+			}
+
+			.card:hover {
+				border-color: var(--glass-border-hover);
+			}
+			.card-full {
+				grid-column: 1 / -1;
+			}
+
+			.card h2 {
+				font-size: 1.05rem;
+				font-weight: 500;
+				margin-bottom: 0.2rem;
+				color: var(--cream);
+			}
+			.card .sub {
+				font-size: 0.78rem;
+				color: var(--text-muted);
+				margin-bottom: 1rem;
+			}
+
+			.chart-wrap {
+				position: relative;
+				width: 100%;
+				height: 350px;
+			}
+			.chart-wrap.tall {
+				height: 420px;
+			}
+
+			.insights {
+				grid-column: 1 / -1;
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+				gap: 1rem;
+			}
+
+			.insight {
+				background: linear-gradient(135deg, var(--glass), rgba(22, 163, 74, 0.06));
+				border: 1px solid rgba(22, 163, 74, 0.15);
+				border-radius: 12px;
+				padding: 1rem;
+			}
+
+			.insight h3 {
+				font-size: 0.88rem;
+				color: var(--spring);
+				margin-bottom: 0.25rem;
+			}
+			.insight p {
+				font-size: 0.8rem;
+				color: var(--text-muted);
+				line-height: 1.5;
+			}
+
+			.loading {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				height: 200px;
+				color: var(--text-muted);
+			}
+
+			.loading::after {
+				content: "";
+				width: 20px;
+				height: 20px;
+				border: 2px solid var(--glass-border);
+				border-top-color: var(--grove);
+				border-radius: 50%;
+				animation: spin 0.8s linear infinite;
+				margin-left: 0.8rem;
+			}
+
+			@keyframes spin {
+				to {
+					transform: rotate(360deg);
+				}
+			}
+
+			.error-msg {
+				grid-column: 1 / -1;
+				text-align: center;
+				padding: 3rem;
+				color: var(--scarlet);
+			}
+
+			footer {
+				text-align: center;
+				padding: 2rem;
+				color: var(--text-muted);
+				font-size: 0.75rem;
+				border-top: 1px solid var(--glass-border);
+			}
+
+			@media (max-width: 768px) {
+				.dashboard {
+					grid-template-columns: 1fr;
+				}
+				.hero h1 {
+					font-size: 1.8rem;
+				}
+				.stats-bar {
+					gap: 0.6rem;
+				}
+				.stat {
+					min-width: 90px;
+					padding: 0.6rem;
+				}
+				.stat-value {
+					font-size: 1.2rem;
+				}
+			}
+
+			@media (prefers-reduced-motion: reduce) {
+				.loading::after {
+					animation: none;
+				}
+				.stat,
+				.card {
+					transition: none;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<div class="hero">
+			<h1>The Grove Census</h1>
+			<p>Watching a codebase grow from a single seed</p>
+			<div class="sub" id="dateRange">Loading...</div>
+		</div>
+
+		<div class="stats-bar" id="statsBar"></div>
+
+		<div class="dashboard" id="dashboard">
+			<div class="loading">Loading census data</div>
+		</div>
+
+		<footer>Grove Census — updated daily from <code>grove_census.json</code></footer>
+
+		<script>
+			const DATA_URL = "./grove_census.json";
+
+			// ─── PALETTE ────────────────────────────────────────────────
+			const P = {
+				grove: "#16a34a",
+				meadow: "#22c55e",
+				spring: "#4ade80",
+				mint: "#86efac",
+				scarlet: "#e11d48",
+				ember: "#c2410c",
+				amber: "#d97706",
+				gold: "#eab308",
+				honey: "#facc15",
+				waterSurface: "#38bdf8",
+				waterDeep: "#0284c7",
+				cherry: "#ec4899",
+				violet: "#8b5cf6",
+				lavender: "#c4b5fd",
+				cream: "#fef3c7",
+				bone: "#f5f0e8",
+			};
+
+			const catColors = {
+				libs: P.meadow,
+				apps: P.cherry,
+				services: P.violet,
+				workers: P.waterSurface,
+				scripts: P.amber,
+				tools: P.gold,
+			};
+			const codeCats = ["libs", "apps", "services", "workers", "scripts", "tools"];
+
+			const langColors = {
+				ts: P.meadow,
+				svelte: P.cherry,
+				js: P.amber,
+				css: P.waterSurface,
+				py: P.violet,
+				go: P.waterDeep,
+				sql: P.ember,
+				sh: "#90a4ae",
+				tsx: P.scarlet,
+			};
+			const langNames = {
+				ts: "TypeScript",
+				svelte: "Svelte",
+				js: "JavaScript",
+				css: "CSS",
+				py: "Python",
+				go: "Go",
+				sql: "SQL",
+				sh: "Shell",
+				tsx: "TSX",
+			};
+			const langKeys = ["ts", "svelte", "js", "css", "py", "go", "sql", "sh", "tsx"];
+			const LF = {
+				ts: "tsLines",
+				svelte: "svelteLines",
+				js: "jsLines",
+				css: "cssLines",
+				py: "pyLines",
+				go: "goLines",
+				sql: "sqlLines",
+				sh: "shLines",
+				tsx: "tsxLines",
+			};
+
+			// ─── HELPERS ────────────────────────────────────────────────
+			const fmt = (n) => n.toLocaleString();
+			const fmtK = (n) => (n >= 1000 ? (n / 1000).toFixed(n >= 100000 ? 0 : 1) + "K" : String(n));
+			const fmtD = (d) => {
+				const [, m, day] = d.split("-");
+				return (
+					["", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][
+						+m
+					] +
+					" " +
+					+day
+				);
+			};
+			const fmtDF = (d) => {
+				const [y, m, day] = d.split("-");
+				return (
+					["", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][
+						+m
+					] +
+					" " +
+					+day +
+					", " +
+					y
+				);
+			};
+			const days = (a, b) => Math.round((new Date(b) - new Date(a)) / 86400000);
+
+			function sumCode(f, field) {
+				return f.directories
+					.filter((d) => d.depth === 0 && d.path !== "docs")
+					.reduce((s, d) => s + (d[field] || 0), 0);
+			}
+			function codeLines(f) {
+				return f.directories
+					.filter((d) => d.depth === 0 && d.path !== "docs")
+					.reduce((s, d) => s + d.totalLines, 0);
+			}
+			function docLines(f) {
+				const d = f.directories.find((d) => d.depth === 0 && d.path === "docs");
+				return d ? d.totalLines : 0;
+			}
+
+			function sma(arr, w = 7) {
+				return arr.map((_, i) => {
+					const s = Math.max(0, i - w + 1);
+					const sl = arr.slice(s, i + 1);
+					return sl.reduce((a, b) => a + b, 0) / sl.length;
+				});
+			}
+
+			// ─── CHART DEFAULTS ─────────────────────────────────────────
+			Chart.defaults.color = "#a89bbe";
+			Chart.defaults.borderColor = "rgba(255,255,255,0.04)";
+			Chart.defaults.font.family = "'Segoe UI', system-ui, sans-serif";
+
+			const commonTooltip = (dates) => ({
+				callbacks: {
+					title: (ctx) => fmtDF(dates[ctx[0].dataIndex]),
+				},
+			});
+
+			const commonX = { ticks: { maxRotation: 45, autoSkip: true, maxTicksLimit: 18 } };
+
+			// ─── MAIN ───────────────────────────────────────────────────
+			async function init() {
+				let data;
+				try {
+					const res = await fetch(DATA_URL);
+					if (!res.ok) throw new Error(`HTTP ${res.status}`);
+					data = await res.json();
+				} catch (err) {
+					document.getElementById("dashboard").innerHTML =
+						`<div class="error-msg">Failed to load: ${err.message}<br><small>Ensure grove_census.json is in the same directory.</small></div>`;
+					return;
+				}
+
+				const frames = data.frames;
+				if (!frames?.length) {
+					document.getElementById("dashboard").innerHTML = '<div class="error-msg">No data.</div>';
+					return;
+				}
+
+				const first = frames[0],
+					last = frames[frames.length - 1];
+				const dates = frames.map((f) => f.date);
+				const labels = frames.map((f) => fmtD(f.date));
+				const nDays = days(first.date, last.date);
+
+				const codeTotals = frames.map(codeLines);
+				const docTotals = frames.map(docLines);
+				const firstCode = codeTotals[0],
+					lastCode = codeTotals.at(-1);
+				const avgPerDay = nDays > 0 ? Math.round((lastCode - firstCode) / nDays) : 0;
+				const hasCommits = (last.commitCount || 0) > 0;
+				const hasTests = (last.testLines || 0) > 0;
+
+				// ─── HEADER ─────────────────────────────────────────────
+				document.getElementById("dateRange").textContent =
+					`${fmtDF(first.date)} to ${fmtDF(last.date)} — ${nDays} days, ${frames.length} snapshots`;
+
+				let stats = `
+    <div class="stat"><div class="stat-value" style="color:${P.meadow}">${fmtK(lastCode)}</div><div class="stat-label">Code Lines</div></div>
+    <div class="stat"><div class="stat-value" style="color:${P.gold}">${firstCode > 0 ? ((lastCode / firstCode - 1) * 100).toFixed(0) : "---"}%</div><div class="stat-label">Growth</div></div>
+    <div class="stat"><div class="stat-value" style="color:${P.cherry}">${fmt(avgPerDay)}</div><div class="stat-label">Lines / Day</div></div>
+    <div class="stat"><div class="stat-value" style="color:${P.waterSurface}">${fmt(last.totalFiles)}</div><div class="stat-label">Files</div></div>`;
+				if (hasCommits)
+					stats += `<div class="stat"><div class="stat-value" style="color:${P.amber}">${fmt(last.commitCount)}</div><div class="stat-label">Commits</div></div>`;
+				if (hasTests)
+					stats += `<div class="stat"><div class="stat-value" style="color:${P.violet}">${fmt(last.testFiles)}</div><div class="stat-label">Test Files</div></div>`;
+				stats += `<div class="stat"><div class="stat-value" style="color:${P.cream}">${fmtK(docTotals.at(-1))}</div><div class="stat-label">Doc Lines</div></div>`;
+				document.getElementById("statsBar").innerHTML = stats;
+
+				// ─── BUILD ──────────────────────────────────────────────
+				const $ = document.getElementById("dashboard");
+				$.innerHTML = "";
+
+				function card(title, sub, opts = {}) {
+					const el = document.createElement("div");
+					el.className = "card" + (opts.full ? " card-full" : "");
+					const id = opts.id || "c" + Math.random().toString(36).slice(2, 7);
+					el.innerHTML = `<h2>${title}</h2><div class="sub">${sub}</div><div class="chart-wrap${opts.tall ? " tall" : ""}"><canvas id="${id}"></canvas></div>`;
+					$.appendChild(el);
+					return id;
+				}
+
+				// ─── INSIGHTS ─────────────────────────────────────────
+				let maxJump = 0,
+					maxJumpDate = "",
+					maxShrink = 0,
+					shrinkDate = "";
+				for (let i = 1; i < frames.length; i++) {
+					const d = codeTotals[i] - codeTotals[i - 1];
+					if (d > maxJump) {
+						maxJump = d;
+						maxJumpDate = frames[i].date;
+					}
+					if (d < maxShrink) {
+						maxShrink = d;
+						shrinkDate = frames[i].date;
+					}
+				}
+
+				let tsOver = null;
+				for (const f of frames) {
+					if (sumCode(f, "tsLines") > sumCode(f, "svelteLines") && sumCode(f, "tsLines") > 0) {
+						tsOver = f.date;
+						break;
+					}
+				}
+
+				const lastLangs = {};
+				for (const k of langKeys) lastLangs[k] = sumCode(last, LF[k]);
+				const firstLangs = {};
+				for (const k of langKeys) firstLangs[k] = sumCode(first, LF[k]);
+				const emerged = langKeys.filter((k) => firstLangs[k] === 0 && lastLangs[k] > 0);
+
+				const ins = [];
+				if (firstCode > 0)
+					ins.push({
+						t: `${(lastCode / firstCode).toFixed(0)}x in ${nDays} Days`,
+						p: `${fmtK(firstCode)} to ${fmtK(lastCode)} lines of code. ~${fmt(avgPerDay)} new lines every day.`,
+					});
+				ins.push({
+					t: `Biggest Sprint: ${fmtD(maxJumpDate)}`,
+					p: `+${fmt(maxJump)} lines in one day.`,
+				});
+				if (maxShrink < -1000)
+					ins.push({
+						t: `Biggest Prune: ${fmtD(shrinkDate)}`,
+						p: `${fmt(Math.abs(maxShrink))} lines removed. Healthy forests need pruning.`,
+					});
+				if (tsOver)
+					ins.push({
+						t: `TS Overtook Svelte`,
+						p: `${fmtDF(tsOver)}. Now: ${fmtK(lastLangs.ts)} TS vs ${fmtK(lastLangs.svelte)} Svelte.`,
+					});
+				if (emerged.length)
+					ins.push({
+						t: "New Languages",
+						p:
+							emerged.map((k) => `${langNames[k]} (${fmtK(lastLangs[k])})`).join(", ") +
+							" appeared mid-project.",
+					});
+
+				const insEl = document.createElement("div");
+				insEl.className = "insights";
+				insEl.innerHTML = ins
+					.map((i) => `<div class="insight"><h3>${i.t}</h3><p>${i.p}</p></div>`)
+					.join("");
+				$.appendChild(insEl);
+
+				// ═════════════════════════════════════════════════════════
+				// 1. CODE VS DOCS
+				// ═════════════════════════════════════════════════════════
+				const id1 = card("Code vs Documentation", "Two different stories, tracked separately", {
+					full: true,
+					tall: true,
+					id: "codeVsDocs",
+				});
+				new Chart(document.getElementById(id1), {
+					type: "line",
+					data: {
+						labels,
+						datasets: [
+							{
+								label: "Code",
+								data: codeTotals,
+								borderColor: P.meadow,
+								backgroundColor: "rgba(34,197,94,0.08)",
+								fill: true,
+								tension: 0.35,
+								pointRadius: 1.5,
+								pointHoverRadius: 5,
+								borderWidth: 2,
+							},
+							{
+								label: "Docs",
+								data: docTotals,
+								borderColor: P.cream,
+								backgroundColor: "rgba(254,243,199,0.05)",
+								fill: true,
+								tension: 0.35,
+								pointRadius: 1.5,
+								pointHoverRadius: 5,
+								borderWidth: 2,
+							},
+						],
+					},
+					options: {
+						responsive: true,
+						maintainAspectRatio: false,
+						plugins: {
+							legend: {
+								position: "top",
+								labels: { usePointStyle: true, pointStyle: "circle", padding: 12 },
+							},
+							tooltip: {
+								...commonTooltip(dates),
+								callbacks: {
+									...commonTooltip(dates).callbacks,
+									label: (ctx) => `${ctx.dataset.label}: ${fmt(ctx.parsed.y)}`,
+								},
+							},
+						},
+						scales: { y: { beginAtZero: true, ticks: { callback: (v) => fmtK(v) } }, x: commonX },
+						interaction: { mode: "index", intersect: false },
+					},
+				});
+
+				// ═════════════════════════════════════════════════════════
+				// 2. LANGUAGE COMPOSITION
+				// ═════════════════════════════════════════════════════════
+				const id2 = card("Language Composition", "The language mix over time (code only)", {
+					full: true,
+					tall: true,
+					id: "langStack",
+				});
+				new Chart(document.getElementById(id2), {
+					type: "line",
+					data: {
+						labels,
+						datasets: langKeys.map((k) => ({
+							label: langNames[k],
+							data: frames.map((f) => sumCode(f, LF[k])),
+							borderColor: langColors[k],
+							backgroundColor: langColors[k] + "35",
+							fill: true,
+							tension: 0.35,
+							borderWidth: 1.5,
+							pointRadius: 0,
+						})),
+					},
+					options: {
+						responsive: true,
+						maintainAspectRatio: false,
+						plugins: {
+							legend: {
+								position: "top",
+								labels: {
+									usePointStyle: true,
+									pointStyle: "circle",
+									padding: 12,
+									font: { size: 11 },
+								},
+							},
+							tooltip: {
+								...commonTooltip(dates),
+								callbacks: {
+									...commonTooltip(dates).callbacks,
+									label: (ctx) => `${ctx.dataset.label}: ${fmtK(ctx.parsed.y)}`,
+								},
+							},
+						},
+						scales: { y: { stacked: true, ticks: { callback: (v) => fmtK(v) } }, x: commonX },
+						interaction: { mode: "index", intersect: false },
+					},
+				});
+
+				// ═════════════════════════════════════════════════════════
+				// 3. WHERE CODE LIVES
+				// ═════════════════════════════════════════════════════════
+				const id3 = card("Where Code Lives", "Monorepo areas over time (code only)", {
+					full: true,
+					tall: true,
+					id: "catStack",
+				});
+				new Chart(document.getElementById(id3), {
+					type: "line",
+					data: {
+						labels,
+						datasets: codeCats.map((cat) => ({
+							label: cat.charAt(0).toUpperCase() + cat.slice(1),
+							data: frames.map((f) => {
+								const d = f.directories.find((x) => x.depth === 0 && x.path === cat);
+								return d ? d.totalLines : 0;
+							}),
+							borderColor: catColors[cat],
+							backgroundColor: catColors[cat] + "30",
+							fill: true,
+							tension: 0.35,
+							borderWidth: 1.5,
+							pointRadius: 0,
+						})),
+					},
+					options: {
+						responsive: true,
+						maintainAspectRatio: false,
+						plugins: {
+							legend: {
+								position: "top",
+								labels: {
+									usePointStyle: true,
+									pointStyle: "circle",
+									padding: 12,
+									font: { size: 11 },
+								},
+							},
+							tooltip: {
+								...commonTooltip(dates),
+								callbacks: {
+									...commonTooltip(dates).callbacks,
+									label: (ctx) => `${ctx.dataset.label}: ${fmtK(ctx.parsed.y)}`,
+								},
+							},
+						},
+						scales: { y: { stacked: true, ticks: { callback: (v) => fmtK(v) } }, x: commonX },
+						interaction: { mode: "index", intersect: false },
+					},
+				});
+
+				// ═════════════════════════════════════════════════════════
+				// 4. DAILY VELOCITY
+				// ═════════════════════════════════════════════════════════
+				const deltas = codeTotals.map((v, i) => (i === 0 ? 0 : v - codeTotals[i - 1]));
+				const smoothed = sma(deltas);
+				const id4 = card(
+					"Daily Growth Velocity",
+					"Lines added/removed per day, with 7-day average",
+					{ full: true, id: "velocity" },
+				);
+				new Chart(document.getElementById(id4), {
+					type: "bar",
+					data: {
+						labels,
+						datasets: [
+							{
+								label: "Daily",
+								data: deltas,
+								backgroundColor: deltas.map((v) =>
+									v >= 0 ? "rgba(34,197,94,0.5)" : "rgba(225,29,72,0.5)",
+								),
+								borderColor: deltas.map((v) => (v >= 0 ? P.meadow : P.scarlet)),
+								borderWidth: 1,
+								borderRadius: 2,
+								order: 2,
+							},
+							{
+								label: "7-Day Avg",
+								data: smoothed,
+								type: "line",
+								borderColor: P.honey,
+								backgroundColor: "transparent",
+								borderWidth: 2,
+								pointRadius: 0,
+								tension: 0.4,
+								order: 1,
+							},
+						],
+					},
+					options: {
+						responsive: true,
+						maintainAspectRatio: false,
+						plugins: {
+							legend: { position: "top", labels: { usePointStyle: true, font: { size: 11 } } },
+							tooltip: {
+								...commonTooltip(dates),
+								callbacks: {
+									...commonTooltip(dates).callbacks,
+									label: (ctx) =>
+										`${ctx.dataset.label}: ${ctx.parsed.y >= 0 ? "+" : ""}${fmt(Math.round(ctx.parsed.y))}`,
+								},
+							},
+						},
+						scales: {
+							y: { ticks: { callback: (v) => (v >= 0 ? "+" : "") + fmtK(v) } },
+							x: commonX,
+						},
+					},
+				});
+
+				// ═════════════════════════════════════════════════════════
+				// 5. GROWTH MOMENTUM (simplified — top 3 areas per day)
+				// ═════════════════════════════════════════════════════════
+				// Instead of a 100% stacked area with 6 thin slivers, show a
+				// simplified "where did the work go?" as a clean stacked area
+				// of just the meaningful categories, smoothed for readability.
+				const catDeltas = {};
+				for (const cat of codeCats) {
+					catDeltas[cat] = frames.map((f, i) => {
+						if (i === 0) return 0;
+						const curr = f.directories.find((d) => d.depth === 0 && d.path === cat);
+						const prev = frames[i - 1].directories.find((d) => d.depth === 0 && d.path === cat);
+						return Math.max(0, (curr ? curr.totalLines : 0) - (prev ? prev.totalLines : 0));
+					});
+				}
+				// Smooth each category independently
+				const smoothCatDeltas = {};
+				for (const cat of codeCats) smoothCatDeltas[cat] = sma(catDeltas[cat], 7);
+
+				const id5 = card(
+					"Growth Momentum",
+					"Where new lines are being written each day (7-day average, positive growth only)",
+					{ full: true, id: "momentum" },
+				);
+				new Chart(document.getElementById(id5), {
+					type: "line",
+					data: {
+						labels,
+						datasets: codeCats.map((cat) => ({
+							label: cat.charAt(0).toUpperCase() + cat.slice(1),
+							data: smoothCatDeltas[cat],
+							borderColor: catColors[cat],
+							backgroundColor: catColors[cat] + "40",
+							fill: true,
+							tension: 0.4,
+							borderWidth: 1.5,
+							pointRadius: 0,
+						})),
+					},
+					options: {
+						responsive: true,
+						maintainAspectRatio: false,
+						plugins: {
+							legend: {
+								position: "top",
+								labels: {
+									usePointStyle: true,
+									pointStyle: "circle",
+									padding: 12,
+									font: { size: 11 },
+								},
+							},
+							tooltip: {
+								...commonTooltip(dates),
+								callbacks: {
+									...commonTooltip(dates).callbacks,
+									label: (ctx) =>
+										`${ctx.dataset.label}: +${fmt(Math.round(ctx.parsed.y))} lines/day`,
+								},
+							},
+						},
+						scales: { y: { stacked: true, ticks: { callback: (v) => "+" + fmtK(v) } }, x: commonX },
+						interaction: { mode: "index", intersect: false },
+					},
+				});
+
+				// ═════════════════════════════════════════════════════════
+				// 6. LANGUAGE ATTENTION (same approach — smoothed daily adds)
+				// ═════════════════════════════════════════════════════════
+				const langDeltas = {};
+				for (const k of langKeys) {
+					langDeltas[k] = frames.map((f, i) => {
+						if (i === 0) return 0;
+						return Math.max(0, sumCode(f, LF[k]) - sumCode(frames[i - 1], LF[k]));
+					});
+				}
+				const smoothLangDeltas = {};
+				for (const k of langKeys) smoothLangDeltas[k] = sma(langDeltas[k], 7);
+
+				const id6 = card(
+					"Language Attention",
+					"Which languages are being written each day (7-day average, positive growth only)",
+					{ full: true, id: "langAttention" },
+				);
+				new Chart(document.getElementById(id6), {
+					type: "line",
+					data: {
+						labels,
+						datasets: langKeys.map((k) => ({
+							label: langNames[k],
+							data: smoothLangDeltas[k],
+							borderColor: langColors[k],
+							backgroundColor: langColors[k] + "35",
+							fill: true,
+							tension: 0.4,
+							borderWidth: 1.5,
+							pointRadius: 0,
+						})),
+					},
+					options: {
+						responsive: true,
+						maintainAspectRatio: false,
+						plugins: {
+							legend: {
+								position: "top",
+								labels: {
+									usePointStyle: true,
+									pointStyle: "circle",
+									padding: 12,
+									font: { size: 11 },
+								},
+							},
+							tooltip: {
+								...commonTooltip(dates),
+								callbacks: {
+									...commonTooltip(dates).callbacks,
+									label: (ctx) =>
+										`${ctx.dataset.label}: +${fmt(Math.round(ctx.parsed.y))} lines/day`,
+								},
+							},
+						},
+						scales: { y: { stacked: true, ticks: { callback: (v) => "+" + fmtK(v) } }, x: commonX },
+						interaction: { mode: "index", intersect: false },
+					},
+				});
+
+				// ═════════════════════════════════════════════════════════
+				// 7 & 8. PIES
+				// ═════════════════════════════════════════════════════════
+				const pieId = card("Current Language Mix", fmtDF(last.date), { id: "langPie" });
+				const pf = langKeys
+					.map((k) => ({ n: langNames[k], v: lastLangs[k], c: langColors[k] }))
+					.filter((x) => x.v > 0);
+				const pt = pf.reduce((a, b) => a + b.v, 0);
+				new Chart(document.getElementById(pieId), {
+					type: "doughnut",
+					data: {
+						labels: pf.map((x) => x.n),
+						datasets: [
+							{
+								data: pf.map((x) => x.v),
+								backgroundColor: pf.map((x) => x.c),
+								borderColor: "rgba(0,0,0,0.3)",
+								borderWidth: 1,
+							},
+						],
+					},
+					options: {
+						responsive: true,
+						maintainAspectRatio: false,
+						plugins: {
+							legend: {
+								position: "right",
+								labels: { usePointStyle: true, font: { size: 11 }, padding: 6 },
+							},
+							tooltip: {
+								callbacks: {
+									label: (ctx) =>
+										`${ctx.label}: ${fmtK(ctx.parsed)} (${((ctx.parsed / pt) * 100).toFixed(1)}%)`,
+								},
+							},
+						},
+					},
+				});
+
+				const catPieId = card("Where Code Lives", fmtDF(last.date), { id: "catPie" });
+				const cd = frames
+					.at(-1)
+					.directories.filter((d) => d.depth === 0 && d.path !== "docs" && d.totalLines > 0)
+					.sort((a, b) => b.totalLines - a.totalLines);
+				const ct = cd.reduce((a, b) => a + b.totalLines, 0);
+				new Chart(document.getElementById(catPieId), {
+					type: "doughnut",
+					data: {
+						labels: cd.map((d) => d.path.charAt(0).toUpperCase() + d.path.slice(1)),
+						datasets: [
+							{
+								data: cd.map((d) => d.totalLines),
+								backgroundColor: cd.map((d) => catColors[d.path] || P.bone),
+								borderColor: "rgba(0,0,0,0.3)",
+								borderWidth: 1,
+							},
+						],
+					},
+					options: {
+						responsive: true,
+						maintainAspectRatio: false,
+						plugins: {
+							legend: {
+								position: "right",
+								labels: { usePointStyle: true, font: { size: 11 }, padding: 6 },
+							},
+							tooltip: {
+								callbacks: {
+									label: (ctx) =>
+										`${ctx.label}: ${fmtK(ctx.parsed)} (${((ctx.parsed / ct) * 100).toFixed(1)}%)`,
+								},
+							},
+						},
+					},
+				});
+
+				// ═════════════════════════════════════════════════════════
+				// 9 & 10. COMMITS PER DAY + TEST GROWTH
+				// ═════════════════════════════════════════════════════════
+				if (hasCommits) {
+					const commitData = frames.map((f) => f.commitCount || 0);
+					const commitDeltas = commitData.map((v, i) => (i === 0 ? 0 : v - commitData[i - 1]));
+					const id_c = card("Commits Per Day", "The daily heartbeat", { id: "cpd" });
+					new Chart(document.getElementById(id_c), {
+						type: "bar",
+						data: {
+							labels,
+							datasets: [
+								{
+									label: "Commits",
+									data: commitDeltas,
+									backgroundColor: "rgba(217,119,6,0.5)",
+									borderColor: P.amber,
+									borderWidth: 1,
+									borderRadius: 2,
+									order: 2,
+								},
+								{
+									label: "7-Day Avg",
+									data: sma(commitDeltas),
+									type: "line",
+									borderColor: P.honey,
+									backgroundColor: "transparent",
+									borderWidth: 2,
+									pointRadius: 0,
+									tension: 0.4,
+									order: 1,
+								},
+							],
+						},
+						options: {
+							responsive: true,
+							maintainAspectRatio: false,
+							plugins: {
+								legend: { position: "top", labels: { usePointStyle: true, font: { size: 11 } } },
+								tooltip: {
+									...commonTooltip(dates),
+									callbacks: {
+										...commonTooltip(dates).callbacks,
+										label: (ctx) => `${ctx.dataset.label}: ${fmt(Math.round(ctx.parsed.y))}`,
+									},
+								},
+							},
+							scales: { x: commonX },
+						},
+					});
+				}
+
+				if (hasTests) {
+					const testData = frames.map((f) => f.testLines || 0);
+					const id_t = card("Test Growth vs Code", "Are tests keeping pace?", { id: "testGrowth" });
+					new Chart(document.getElementById(id_t), {
+						type: "line",
+						data: {
+							labels,
+							datasets: [
+								{
+									label: "Code",
+									data: codeTotals,
+									borderColor: P.meadow,
+									backgroundColor: "transparent",
+									tension: 0.35,
+									pointRadius: 0,
+									borderWidth: 2,
+									yAxisID: "y",
+								},
+								{
+									label: "Tests",
+									data: testData,
+									borderColor: P.cherry,
+									backgroundColor: "rgba(236,72,153,0.06)",
+									fill: true,
+									tension: 0.35,
+									pointRadius: 0,
+									borderWidth: 2,
+									yAxisID: "y",
+								},
+							],
+						},
+						options: {
+							responsive: true,
+							maintainAspectRatio: false,
+							plugins: {
+								legend: { position: "top", labels: { usePointStyle: true, font: { size: 11 } } },
+								tooltip: {
+									...commonTooltip(dates),
+									callbacks: {
+										...commonTooltip(dates).callbacks,
+										label: (ctx) => `${ctx.dataset.label}: ${fmtK(ctx.parsed.y)}`,
+									},
+								},
+							},
+							scales: { y: { ticks: { callback: (v) => fmtK(v) } }, x: commonX },
+							interaction: { mode: "index", intersect: false },
+						},
+					});
+				}
+			}
+
+			init();
+		</script>
+	</body>
 </html>

@@ -15,6 +15,7 @@
 	"type": "module",
 	"scripts": {
 		"cairn": "bun run tools/cairn/server.ts",
+		"census": "bun run tools/census/server.ts",
 		"test": "pnpm -r run test:run",
 		"test:watch": "pnpm -r run test",
 		"test:engine": "pnpm --filter @autumnsgrove/lattice test:run",
