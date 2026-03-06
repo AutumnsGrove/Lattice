@@ -103,6 +103,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Build gossamer
+        if: inputs.needs-engine
+        run: pnpm run build
+        working-directory: libs/gossamer
+
       - name: Build engine
         if: inputs.needs-engine
         run: pnpm run package
