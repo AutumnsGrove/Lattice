@@ -152,8 +152,8 @@
 		renderer.renderFromBrightnessGrid(grid);
 	}
 
-	// Measured cell width (computed from font metrics in setupRenderer)
-	let measuredCellWidth = cellSize;
+	// Measured cell width (computed from font metrics in setupRenderer, falls back to cellSize)
+	let measuredCellWidth = $state(0);
 
 	function setupRenderer(width: number, height: number): void {
 		if (!canvas) return;
@@ -175,6 +175,8 @@
 			tempCtx.font = `${cellSize}px monospace`;
 			const measured = tempCtx.measureText("M").width;
 			measuredCellWidth = Math.ceil(measured);
+		} else {
+			measuredCellWidth = cellSize;
 		}
 
 		renderer = new GossamerRenderer(canvas, {

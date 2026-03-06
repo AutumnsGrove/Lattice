@@ -268,7 +268,6 @@
 						<!-- Item list -->
 						<div class="item-list" role="listbox" aria-label="Shrine content items">
 							{#each editorItems as item, i}
-								<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 								<div
 									class="item-row"
 									class:active={editingItemIndex === i}
