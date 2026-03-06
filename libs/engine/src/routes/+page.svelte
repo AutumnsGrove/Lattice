@@ -3,11 +3,14 @@
 	import Button from "$lib/ui/components/ui/Button.svelte";
 	import GroveSwap from "$lib/ui/components/ui/groveterm/GroveSwap.svelte";
 	import FollowButton from "$lib/ui/components/chrome/FollowButton.svelte";
+	import ShareButton from "$lib/ui/components/chrome/ShareButton.svelte";
 
 	let { data } = $props();
 
 	// Show follow button when a logged-in visitor is on someone else's grove
 	const showFollow = $derived(data.user && !data.isOwner && data.context?.type === "tenant");
+	// Show share button for the grove owner
+	const showShare = $derived(data.isOwner);
 </script>
 
 <svelte:head>
@@ -51,7 +54,7 @@
 	<div class="hero">
 		<h1>{data.hero.title}</h1>
 		<p class="subtitle">{data.hero.subtitle}</p>
-		{#if data.hero.cta || showFollow}
+		{#if data.hero.cta || showFollow || showShare}
 			<div class="hero-actions">
 				{#if data.hero.cta}
 					<Button href={data.hero.cta.link} variant="default" size="lg" class="cta-button"
@@ -64,6 +67,9 @@
 						subdomain={data.context.tenant.subdomain}
 						name={data.context.tenant.name}
 					/>
+				{/if}
+				{#if showShare && data.context?.type === "tenant"}
+					<ShareButton title={data.context.tenant.name} />
 				{/if}
 			</div>
 		{/if}
