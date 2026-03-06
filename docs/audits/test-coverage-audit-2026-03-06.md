@@ -7,7 +7,7 @@
 
 ## Executive Summary
 
-The Lattice monorepo has **311 test files** across **18 vitest-configured packages**. The core engine (`libs/engine`) is well-tested with 178 test files covering critical infrastructure. However, **12 packages with significant source code have zero tests**, including the security-critical credential gateway (Warden) and the entire community feed (Meadow). Test quality is generally strong where tests exist, but there are pockets of **test theatre** and **over-mocking** that provide false confidence.
+The Lattice monorepo has **311 test files** across **1,960 source files** (a **13% test ratio**) in **18 vitest-configured packages**. The core engine (`libs/engine`) is well-tested with 178 test files covering critical infrastructure. However, **12 packages with significant source code have zero tests**, including the security-critical credential gateway (Warden), the Durable Objects coordination layer, and the entire community feed (Meadow). Test quality is generally strong where tests exist, but there are pockets of **test theatre** and **over-mocking** that provide false confidence.
 
 ### Testing Trophy Alignment
 
@@ -67,13 +67,30 @@ These packages have source code but **zero test files**:
 | **apps/meadow** | 32 | 🟠 HIGH | Community feed: reactions, votes, follows, bookmarks. Core social feature untested. |
 | **services/forage** | 17 | 🟠 HIGH | AI agent orchestration, swarm logic, LLM providers. Complex async logic. |
 | **apps/domains** | 24 | 🟡 MEDIUM | Domain search, Arbor discovery routes, database queries. |
-| **workers/loft** | 15 | 🟡 MEDIUM | |
-| **workers/patina** | 15 | 🟡 MEDIUM | |
+| **workers/loft** | 15 | 🟠 HIGH | Session management and state machine orchestration. |
+| **workers/patina** | 15 | 🟡 MEDIUM | Cleanup and maintenance tasks. |
 | **workers/timeline-sync** | 9 | 🟡 MEDIUM | Has vitest config but zero test files. |
 | **workers/onboarding** | 4 | 🟢 LOW | Small worker. |
 | **workers/vista-collector** | 1 | 🟢 LOW | Tiny. |
 | **services/email-render** | 1 | 🟢 LOW | Tiny. |
 | **apps/terrarium** | 1 | 🟢 LOW | Types only. |
+
+### Largest Untested Files (by line count)
+
+The background scout identified the biggest untested source files in the repo:
+
+| File | Lines | Package |
+|------|-------|---------|
+| `services/durable-objects/src/ExportDO.ts` | 858 | durable-objects |
+| `services/durable-objects/src/operations.ts` | 735 | durable-objects |
+| `services/durable-objects/src/TriageDO.ts` | 598 | durable-objects |
+| `services/durable-objects/src/PostMetaDO.ts` | 578 | durable-objects |
+| `services/durable-objects/src/tiers.ts` | 553 | durable-objects |
+| `services/durable-objects/src/TenantDO.ts` | 535 | durable-objects |
+| `services/durable-objects/src/SentinelDO.ts` | 511 | durable-objects |
+| `services/durable-objects/src/digest.ts` | 454 | durable-objects |
+
+The `services/durable-objects` package alone has **5,000+ lines** of untested coordination logic — state machines, monitoring, export pipelines, and tenant orchestration.
 
 ### Minimal Coverage (Not Zero, But Thin)
 
@@ -203,7 +220,9 @@ The Ivy queue/webhook stubs count as 4 "test files" in CI metrics but test **not
 
 | Metric | Value |
 |--------|-------|
+| Total source files | 1,960 |
 | Total test files | 311 |
+| Global test ratio | 13% |
 | Packages with tests | 18 of ~38 |
 | Packages with zero tests (with source) | 12 |
 | Confirmed theatre files | 2 (Ivy stubs) |
