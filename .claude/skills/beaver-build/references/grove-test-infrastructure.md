@@ -11,26 +11,26 @@ Grove already has rich test infrastructure. **Use it** — don't reinvent the wh
 ```typescript
 import {
 	// Factories — create test data objects
-	createTestUser,         // → TestUser with email, name, avatar, provider
-	createTestSession,      // → TestSession with token, expiry
+	createTestUser, // → TestUser with email, name, avatar, provider
+	createTestSession, // → TestSession with token, expiry
 	createTestSubscription, // → TestSubscription with tier, status, lsId
-	createTestImage,        // → TestImage metadata (key, contentType, size)
+	createTestImage, // → TestImage metadata (key, contentType, size)
 	createTestWebhookEvent, // → TestWebhookEvent with signature, timestamp
-	resetFactoryCounters,   // Call in beforeEach to reset auto-incrementing IDs
+	resetFactoryCounters, // Call in beforeEach to reset auto-incrementing IDs
 
 	// Request event mocks
-	createMockRequestEvent,          // → Full SvelteKit RequestEvent mock
-	createAuthenticatedTenantEvent,  // → Pre-configured tenant + user context
-	createMockServiceBinding,        // → Mock service binding (e.g., AUTH Worker)
-	createMockDONamespace,           // → Mock Durable Object namespace
+	createMockRequestEvent, // → Full SvelteKit RequestEvent mock
+	createAuthenticatedTenantEvent, // → Pre-configured tenant + user context
+	createMockServiceBinding, // → Mock service binding (e.g., AUTH Worker)
+	createMockDONamespace, // → Mock Durable Object namespace
 
 	// Cloudflare mocks
-	createMockD1,    // → Full D1Database mock with prepare/bind/run/first/all
-	createMockR2,    // → Full R2Bucket mock with get/put/delete/list
-	createMockKV,    // → Full KVNamespace mock with get/put/delete/list
-	seedMockD1,      // → Seed D1 mock with table data
-	clearMockD1,     // → Clear all D1 mock data
-	advanceKVTime,   // → Fast-forward KV expiration clock
+	createMockD1, // → Full D1Database mock with prepare/bind/run/first/all
+	createMockR2, // → Full R2Bucket mock with get/put/delete/list
+	createMockKV, // → Full KVNamespace mock with get/put/delete/list
+	seedMockD1, // → Seed D1 mock with table data
+	clearMockD1, // → Clear all D1 mock data
+	advanceKVTime, // → Fast-forward KV expiration clock
 
 	// Types
 	type TestUser,
@@ -54,30 +54,30 @@ import {
 ```typescript
 import {
 	// Fixture factories
-	createTestTenant,    // → TestTenant with subdomain, plan, active flag
-	createTestPost,      // → TestPost with markdown, html, gutter content
-	resetTestCounters,   // Call in beforeEach
+	createTestTenant, // → TestTenant with subdomain, plan, active flag
+	createTestPost, // → TestPost with markdown, html, gutter content
+	resetTestCounters, // Call in beforeEach
 
 	// Database helpers (insert into mock D1)
-	insertTestTenant,    // Insert tenant into D1
-	insertTestPost,      // Insert post into D1
-	insertTestViews,     // Insert view records with configurable daysAgo
+	insertTestTenant, // Insert tenant into D1
+	insertTestPost, // Insert post into D1
+	insertTestViews, // Insert view records with configurable daysAgo
 
 	// DO stubs
-	getTenantDOStub,      // → DurableObjectStub for tenant:subdomain
-	getPostMetaDOStub,    // → DurableObjectStub for post:tenantId:slug
+	getTenantDOStub, // → DurableObjectStub for tenant:subdomain
+	getPostMetaDOStub, // → DurableObjectStub for post:tenantId:slug
 	getPostContentDOStub, // → DurableObjectStub for content:tenantId:slug
 
 	// Request helpers
-	createJsonRequest,    // → Request with JSON body and Content-Type header
-	parseJsonResponse,    // → Parse and validate JSON response
+	createJsonRequest, // → Request with JSON body and Content-Type header
+	parseJsonResponse, // → Parse and validate JSON response
 
 	// Assertion helpers
-	assertJsonResponse,   // → Assert 200 + JSON + optional field matching
-	assertErrorResponse,  // → Assert error status + optional message matching
+	assertJsonResponse, // → Assert 200 + JSON + optional field matching
+	assertErrorResponse, // → Assert error status + optional message matching
 
 	// Cleanup
-	cleanupTestData,      // → Delete test-prefixed rows from D1
+	cleanupTestData, // → Delete test-prefixed rows from D1
 
 	// Types
 	type TestTenant,
@@ -103,12 +103,12 @@ Auto-loaded by vitest via `setupFiles` config. Provides:
 
 These alias SvelteKit virtual modules so they work in vitest:
 
-| Mock File | Aliases | What It Provides |
-|-----------|---------|------------------|
-| `app-stores.ts` | `$app/stores` | Mock page, navigating, updated stores |
-| `app-state.ts` | `$app/state` | Mock app state |
-| `app-navigation.ts` | `$app/navigation` | Mock goto, invalidate, beforeNavigate |
-| `app-environment.ts` | `$app/environment` | Mock browser, dev, building flags |
+| Mock File            | Aliases            | What It Provides                      |
+| -------------------- | ------------------ | ------------------------------------- |
+| `app-stores.ts`      | `$app/stores`      | Mock page, navigating, updated stores |
+| `app-state.ts`       | `$app/state`       | Mock app state                        |
+| `app-navigation.ts`  | `$app/navigation`  | Mock goto, invalidate, beforeNavigate |
+| `app-environment.ts` | `$app/environment` | Mock browser, dev, building flags     |
 
 **Also available in:** `apps/landing/src/lib/test-mocks/` (landing-specific overrides)
 
@@ -118,22 +118,22 @@ These alias SvelteKit virtual modules so they work in vitest:
 
 Full-featured mocks for Cloudflare bindings:
 
-| Mock | Key Methods | Special Features |
-|------|------------|------------------|
-| `createMockD1()` | prepare, bind, run, first, all, batch, exec | Full SQL simulation with parametric binding |
-| `createMockKV()` | get, put, delete, list | TTL support, `advanceKVTime()` for testing expiry |
-| `createMockR2()` | get, put, delete, list, head | Supports metadata, content-type, checksums |
+| Mock             | Key Methods                                 | Special Features                                  |
+| ---------------- | ------------------------------------------- | ------------------------------------------------- |
+| `createMockD1()` | prepare, bind, run, first, all, batch, exec | Full SQL simulation with parametric binding       |
+| `createMockKV()` | get, put, delete, list                      | TTL support, `advanceKVTime()` for testing expiry |
+| `createMockR2()` | get, put, delete, list, head                | Supports metadata, content-type, checksums        |
 
 ### Feature-Specific Test Utilities
 
-| Feature | Location | What It Provides |
-|---------|----------|------------------|
-| Feature flags | `libs/engine/src/lib/feature-flags/test-utils.ts` | Mock KV, D1, env helpers for graft testing |
-| Loom (DOs) | `libs/engine/src/lib/loom/test-utils.ts` | DO coordination layer mocks |
-| Rate limiting | `libs/engine/src/lib/threshold/test-utils.ts` | Rate limiter mocks |
-| Rate limits (server) | `libs/engine/src/lib/server/rate-limits/test-utils.ts` | Server-side rate limit mocks |
-| Heartwood | `services/heartwood/src/test-helpers.ts` | Auth service test helpers |
-| Infra SDK | `libs/infra/tests/cloudflare/helpers.ts` | Infrastructure mock helpers |
+| Feature              | Location                                               | What It Provides                           |
+| -------------------- | ------------------------------------------------------ | ------------------------------------------ |
+| Feature flags        | `libs/engine/src/lib/feature-flags/test-utils.ts`      | Mock KV, D1, env helpers for graft testing |
+| Loom (DOs)           | `libs/engine/src/lib/loom/test-utils.ts`               | DO coordination layer mocks                |
+| Rate limiting        | `libs/engine/src/lib/threshold/test-utils.ts`          | Rate limiter mocks                         |
+| Rate limits (server) | `libs/engine/src/lib/server/rate-limits/test-utils.ts` | Server-side rate limit mocks               |
+| Heartwood            | `services/heartwood/src/test-helpers.ts`               | Auth service test helpers                  |
+| Infra SDK            | `libs/infra/tests/cloudflare/helpers.ts`               | Infrastructure mock helpers                |
 
 ## Vitest Configuration Patterns
 
@@ -308,5 +308,5 @@ pnpm test:shell
 pnpm --filter grove-heartwood test:e2e
 
 # CI verification (run this before committing)
-gw dev ci --affected --fail-fast --diagnose
+gw ci --affected --fail-fast --diagnose
 ```

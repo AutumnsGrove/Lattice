@@ -119,7 +119,7 @@ describe("MODULE_NAME", () => {
 });
 TEMPLATE
         # Replace MODULE_NAME placeholder
-        sed -i "s/MODULE_NAME/$BASENAME/g" "$TEST_FILE"
+        sed -i '' "s/MODULE_NAME/$BASENAME/g" "$TEST_FILE"
         ;;
 
     api)
@@ -189,16 +189,17 @@ describe("ROUTE_PATH", () => {
 	});
 });
 TEMPLATE
-        # Calculate relative path to integration helpers
-        REL_HELPERS=$(python3 -c "import os.path; print(os.path.relpath('$PKG_ROOT/tests/integration/helpers', '$TEST_DIR'))" 2>/dev/null || echo "../../../../tests/integration/helpers")
+        # Calculate relative path to integration helpers (pure bash, no python3 dependency)
+        HELPERS_ABS="$PKG_ROOT/tests/integration/helpers"
+        REL_HELPERS=$(perl -e 'use File::Spec; print File::Spec->abs2rel($ARGV[0], $ARGV[1])' "$HELPERS_ABS" "$TEST_DIR" 2>/dev/null || echo "../../../../tests/integration/helpers")
 
         # Extract route path from file path
         ROUTE_URL=$(echo "$SOURCE_FILE" | sed 's|.*/routes/||' | sed 's|/+server\.ts||' | sed 's|/+server\.js||')
         ROUTE_PATH=$(echo "$ROUTE_URL" | tr '/' ' ' | sed 's/\b\(.\)/\U\1/g' | sed 's/ / \/ /g')
 
-        sed -i "s|HELPERS_PATH|$REL_HELPERS|g" "$TEST_FILE"
-        sed -i "s|ROUTE_URL|$ROUTE_URL|g" "$TEST_FILE"
-        sed -i "s|ROUTE_PATH|$ROUTE_URL|g" "$TEST_FILE"
+        sed -i '' "s|HELPERS_PATH|$REL_HELPERS|g" "$TEST_FILE"
+        sed -i '' "s|ROUTE_URL|$ROUTE_URL|g" "$TEST_FILE"
+        sed -i '' "s|ROUTE_PATH|$ROUTE_URL|g" "$TEST_FILE"
         ;;
 
     component)
@@ -250,8 +251,8 @@ TEMPLATE
         COMPONENT_FILE=$(basename "$SOURCE_FILE")
         COMPONENT_NAME=$(echo "$COMPONENT_FILE" | sed 's/\.svelte$//')
 
-        sed -i "s/COMPONENT_NAME/$COMPONENT_NAME/g" "$TEST_FILE"
-        sed -i "s/COMPONENT_FILE/$COMPONENT_FILE/g" "$TEST_FILE"
+        sed -i '' "s/COMPONENT_NAME/$COMPONENT_NAME/g" "$TEST_FILE"
+        sed -i '' "s/COMPONENT_FILE/$COMPONENT_FILE/g" "$TEST_FILE"
         ;;
 
     worker)
@@ -310,7 +311,7 @@ describe("WORKER_NAME worker", () => {
 });
 TEMPLATE
         WORKER_NAME=$(basename "$(dirname "$SOURCE_FILE")")
-        sed -i "s/WORKER_NAME/$WORKER_NAME/g" "$TEST_FILE"
+        sed -i '' "s/WORKER_NAME/$WORKER_NAME/g" "$TEST_FILE"
         ;;
 
     *)
@@ -326,4 +327,4 @@ echo -e "${CYAN}Next steps:${NC}"
 echo "  1. Uncomment imports and adjust to match your source"
 echo "  2. Fill in the TODO placeholders"
 echo "  3. Run: pnpm --filter <package> test:run"
-echo "  4. Verify: gw dev ci --affected --fail-fast --diagnose"
+echo "  4. Verify: gw ci --affected --fail-fast --diagnose"
