@@ -5,7 +5,7 @@
 	import LanternFriendCard from "./LanternFriendCard.svelte";
 	import LanternAddFriends from "./LanternAddFriends.svelte";
 	import type { LanternLayoutData } from "./types";
-	import { UserPlus } from "lucide-svelte";
+	import { UserPlus, Settings } from "lucide-svelte";
 
 	interface Props {
 		data: LanternLayoutData;
@@ -56,11 +56,20 @@
 	{:else}
 		<div class="panel-content">
 			<!-- Header -->
-			<div class="flex flex-col gap-0.5">
-				<h2 class="text-base font-semibold text-foreground m-0">{panelTitle}</h2>
-				{#if data.displayName}
-					<p class="text-[0.8125rem] text-foreground-muted m-0">{data.displayName}</p>
-				{/if}
+			<div class="flex items-start justify-between">
+				<div class="flex flex-col gap-0.5">
+					<h2 class="text-base font-semibold text-foreground m-0">{panelTitle}</h2>
+					{#if data.displayName}
+						<p class="text-[0.8125rem] text-foreground-muted m-0">{data.displayName}</p>
+					{/if}
+				</div>
+				<a
+					href="/arbor"
+					class="flex items-center justify-center min-w-[36px] min-h-[36px] -m-1 rounded-md text-foreground-muted transition-colors hover:text-foreground hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-[-2px]"
+					aria-label="Open settings"
+				>
+					<Settings size={16} strokeWidth={2} />
+				</a>
 			</div>
 
 			<!-- Home link — always first and prominent -->
@@ -185,7 +194,7 @@
 	.lantern-panel {
 		position: fixed;
 		bottom: 4.5rem;
-		left: 1rem;
+		right: 1rem;
 		width: 320px;
 		max-height: calc(100vh - 6rem);
 		border-radius: 16px;

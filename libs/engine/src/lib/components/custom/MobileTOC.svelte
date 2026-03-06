@@ -247,6 +247,11 @@
 		.mobile-toc-wrapper {
 			display: block;
 		}
+
+		/* Shift left when Lantern FAB occupies bottom-right corner */
+		:global(body[data-lantern]) .mobile-toc-wrapper {
+			right: 4.5rem;
+		}
 	}
 	.toc-button {
 		width: 44px;

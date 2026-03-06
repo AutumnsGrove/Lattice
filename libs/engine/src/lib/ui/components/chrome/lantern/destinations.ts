@@ -7,7 +7,6 @@
  */
 
 import {
-	Home,
 	LayoutDashboard,
 	Leaf,
 	Trees,
@@ -16,26 +15,19 @@ import {
 	Archive,
 	Sparkles,
 	Settings,
-	MessageCircle,
 } from "lucide-svelte";
 import type { LanternDestination } from "./types";
 
 /**
  * Build the destinations list, personalized with the user's home grove.
+ *
+ * Note: "Return to Your Grove" is NOT in this list — it's the prominent
+ * button rendered separately above the tabs in LanternPanel.
  */
-export function getDestinations(homeGrove: string): LanternDestination[] {
-	const groveUrl = `https://${homeGrove}.grove.place`;
-
+export function getDestinations(_homeGrove: string): LanternDestination[] {
 	return [
 		{
-			href: groveUrl,
-			label: "Back to My Site",
-			groveLabel: "Return to Your Grove",
-			icon: Home,
-			external: true,
-		},
-		{
-			href: `${groveUrl}/arbor`,
+			href: "https://grove.place/canopy",
 			label: "Dashboard",
 			groveLabel: "Canopy",
 			icon: LayoutDashboard,
@@ -43,12 +35,20 @@ export function getDestinations(homeGrove: string): LanternDestination[] {
 			termSlug: "canopy",
 		},
 		{
-			href: "https://grove.place/meadow",
+			href: "https://meadow.grove.place",
 			label: "Feed",
 			groveLabel: "Meadow",
 			icon: Leaf,
 			external: true,
 			termSlug: "meadow",
+		},
+		{
+			href: "https://grove.place/forest",
+			label: "Communities",
+			groveLabel: "Forests",
+			icon: Trees,
+			external: true,
+			termSlug: "forests",
 		},
 		{
 			href: "https://grove.place/knowledge",
@@ -57,33 +57,25 @@ export function getDestinations(homeGrove: string): LanternDestination[] {
 			icon: BookOpen,
 			external: true,
 		},
-		{
-			href: "https://grove.place/forests",
-			label: "Communities",
-			groveLabel: "Forests",
-			icon: Trees,
-			external: true,
-			termSlug: "forests",
-		},
 	];
 }
 
 /** Platform services shown in the Services tab. */
 export const services: LanternDestination[] = [
 	{
-		href: "/arbor/messages",
+		href: "https://ivy.grove.place",
 		label: "Email",
 		groveLabel: "Ivy",
 		icon: Mail,
-		external: false,
+		external: true,
 		termSlug: "ivy",
 	},
 	{
-		href: "/arbor/storage",
+		href: "https://amber.grove.place",
 		label: "Storage",
 		groveLabel: "Amber",
 		icon: Archive,
-		external: false,
+		external: true,
 		termSlug: "amber",
 	},
 	{
@@ -101,13 +93,5 @@ export const services: LanternDestination[] = [
 		icon: Settings,
 		external: false,
 		termSlug: "arbor",
-	},
-	{
-		href: "/arbor/lumen",
-		label: "AI Chat",
-		groveLabel: "Lumen",
-		icon: MessageCircle,
-		external: false,
-		termSlug: "lumen",
 	},
 ];

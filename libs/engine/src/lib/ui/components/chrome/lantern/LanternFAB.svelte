@@ -31,7 +31,7 @@
 	.lantern-fab {
 		position: fixed;
 		bottom: 1rem;
-		left: 1rem;
+		right: 1rem;
 		width: 48px;
 		height: 48px;
 		border-radius: 50%;

@@ -11,6 +11,12 @@
 
 	let { data }: Props = $props();
 
+	// Signal to other fixed-position elements (e.g. MobileTOC) that the Lantern FAB exists
+	$effect(() => {
+		document.body.setAttribute("data-lantern", "");
+		return () => document.body.removeAttribute("data-lantern");
+	});
+
 	// Fetch friends on first panel open, and move focus into the dialog
 	$effect(() => {
 		if (lanternStore.open) {

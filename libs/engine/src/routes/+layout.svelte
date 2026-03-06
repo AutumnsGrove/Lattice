@@ -410,7 +410,7 @@
 		color: var(--color-text-muted);
 		margin-top: 4rem;
 		position: relative;
-		z-index: 1003;
+		z-index: 1;
 		transition:
 			background-color 0.3s ease,
 			border-color 0.3s ease;
