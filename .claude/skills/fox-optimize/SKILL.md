@@ -44,6 +44,10 @@ Establish baseline metrics before touching anything.
 
 **Reference:** Load `references/measurement-tools.md` for Lighthouse commands, bundle analysis setup, database query profiling, DevTools guide, and performance target values
 
+**Script:** Run `scripts/measure-bundle.sh` to capture baseline bundle sizes across all apps. Run again after optimization to get automatic before/after comparison.
+
+**Reference:** Load `references/performance-toolkit.md` for Grove-specific measurement commands — D1 query profiling across all 3 databases, KV caching patterns, Workers-specific parallelization, and the performance report template
+
 **Output:** Baseline metrics and target goals defined
 
 ---
@@ -131,8 +135,12 @@ Report the win and prevent regression.
 | Phase | Reference | Load When |
 |-------|-----------|-----------|
 | STALK | `references/measurement-tools.md` | Always (must measure before optimizing) |
+| STALK | `references/performance-toolkit.md` | Grove-specific: D1 profiling, KV caching, bundle tracking |
+| STALK | `scripts/measure-bundle.sh` | Run for automated bundle size baseline and comparison |
 | PINPOINT | `references/optimization-patterns.md` | Use the decision tree to identify the cause |
 | STREAMLINE | `references/optimization-patterns.md` | Apply the right fix pattern |
+| STREAMLINE | `references/performance-toolkit.md` | Grove-specific: Workers parallelization, cache headers |
+| CELEBRATE | `references/performance-toolkit.md` | Use the performance report template |
 
 ---
 
