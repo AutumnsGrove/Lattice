@@ -45,6 +45,8 @@ Before gathering materials, understand what you're building for.
 
 **Reference:** Load `references/testing-patterns.md` for the full Testing Trophy explanation, what to test vs. skip, the guiding questions, and what makes a test valuable
 
+**Reference:** Load `references/grove-test-infrastructure.md` to see what test utilities, factories, and mocks already exist in the codebase — don't reinvent what's already built
+
 **Output:** Brief summary of what needs testing and at what layer
 
 ---
@@ -79,7 +81,11 @@ Write tests following Arrange-Act-Assert.
 - Name tests so they explain what breaks: "should reject registration with invalid email"
 - One test, one reason to fail
 
+**Script:** Run `scripts/scaffold-test.sh <type> <source-file>` to generate test boilerplate. Types: `service`, `api`, `component`, `worker`. The scaffolded file uses the right imports, factories, and patterns for each test type.
+
 **Reference:** Load `references/test-templates.md` for complete SvelteKit test templates: service unit tests, API route tests, component tests with Testing Library, and integration tests for full flows
+
+**Reference:** Load `references/grove-test-infrastructure.md` for the exact factory functions, mock utilities, and import paths to use — includes `createMockRequestEvent`, `createAuthenticatedTenantEvent`, `createMockD1`, `createMockKV`, `createMockR2`, and more
 
 **Output:** Working tests that follow AAA pattern and test behavior, not implementation
 
@@ -134,8 +140,11 @@ Run the self-review checklist before considering tests "done".
 | Phase | Reference | Load When |
 |-------|-----------|-----------|
 | SURVEY | `references/testing-patterns.md` | Always (understand the Trophy and what to test) |
+| SURVEY | `references/grove-test-infrastructure.md` | Always (know what utilities already exist) |
 | GATHER | `references/testing-patterns.md` | Deciding what to skip vs. test thoroughly |
+| BUILD | `scripts/scaffold-test.sh` | Run to generate test file boilerplate |
 | BUILD | `references/test-templates.md` | Writing actual tests (service, API, component) |
+| BUILD | `references/grove-test-infrastructure.md` | Import paths for factories, mocks, and helpers |
 | REINFORCE | `references/testing-patterns.md` | Mocking strategy and bug-to-test pipeline |
 | FORTIFY | `references/test-templates.md` | Running the self-review checklist |
 
