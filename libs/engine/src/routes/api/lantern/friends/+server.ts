@@ -115,9 +115,9 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 	try {
 		// Look up the friend's tenant by subdomain
 		const friendTenant = await db
-			.prepare(`SELECT id, subdomain, name FROM tenants WHERE subdomain = ? AND active = 1`)
+			.prepare(`SELECT id, subdomain, display_name FROM tenants WHERE subdomain = ?`)
 			.bind(friendSubdomain)
-			.first<{ id: string; subdomain: string; name: string }>();
+			.first<{ id: string; subdomain: string; display_name: string }>();
 
 		if (!friendTenant) {
 			throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
@@ -134,7 +134,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 				`INSERT OR IGNORE INTO lantern_friends (tenant_id, friend_tenant_id, friend_name, friend_subdomain, source)
 				 VALUES (?, ?, ?, ?, 'manual')`,
 			)
-			.bind(homeTenantId, friendTenant.id, friendTenant.name, friendTenant.subdomain)
+			.bind(homeTenantId, friendTenant.id, friendTenant.display_name, friendTenant.subdomain)
 			.run();
 
 		return json(
@@ -142,7 +142,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 				success: true,
 				friend: {
 					tenantId: friendTenant.id,
-					name: friendTenant.name,
+					name: friendTenant.display_name,
 					subdomain: friendTenant.subdomain,
 					source: "manual",
 				},

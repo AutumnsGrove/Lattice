@@ -49,19 +49,18 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
 		const pattern = `%${escaped}%`;
 		const result = await db
 			.prepare(
-				`SELECT id, subdomain, name
+				`SELECT id, subdomain, display_name
 				 FROM tenants
-				 WHERE (subdomain LIKE ? ESCAPE '\\' OR name LIKE ? ESCAPE '\\')
-				   AND active = 1
+				 WHERE (subdomain LIKE ? ESCAPE '\\' OR display_name LIKE ? ESCAPE '\\')
 				   AND id != ?
 				 LIMIT 10`,
 			)
 			.bind(pattern, pattern, excludeTenantId)
-			.all<{ id: string; subdomain: string; name: string }>();
+			.all<{ id: string; subdomain: string; display_name: string }>();
 
 		const results = (result.results ?? []).map((row) => ({
 			tenantId: row.id,
-			name: row.name,
+			name: row.display_name,
 			subdomain: row.subdomain,
 		}));
 

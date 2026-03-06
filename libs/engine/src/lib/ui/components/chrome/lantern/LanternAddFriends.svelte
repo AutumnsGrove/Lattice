@@ -126,7 +126,7 @@
 
 	<div class="text-center pt-2 border-t border-default">
 		<a
-			href="https://grove.place/forests"
+			href="https://grove.place/forest"
 			class="text-[0.8125rem] text-accent-muted no-underline hover:underline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
 			target="_blank"
 			rel="noopener noreferrer"
