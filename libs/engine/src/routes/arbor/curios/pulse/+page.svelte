@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { copyToClipboard as copyText } from "$lib/utils/share";
 	import type { PageData, ActionData } from "./$types";
 	import { enhance } from "$app/forms";
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
@@ -87,8 +88,9 @@
 		{ value: "Australia/Sydney", label: "Sydney (Australia)" },
 	];
 
-	function copyToClipboard(text: string, type: "url" | "secret") {
-		navigator.clipboard.writeText(text);
+	async function copyToClipboard(text: string, type: "url" | "secret") {
+		const result = await copyText(text);
+		if (!result.success) return;
 		if (type === "url") {
 			urlCopied = true;
 			setTimeout(() => (urlCopied = false), 2000);

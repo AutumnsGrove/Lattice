@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { copyToClipboard } from "$lib/utils/share";
 	import Glass from "$lib/ui/components/ui/Glass.svelte";
 	import GlassButton from "$lib/ui/components/ui/GlassButton.svelte";
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
@@ -1253,8 +1254,7 @@ $ npm run dev
 						class="w-12 h-12 rounded-md shadow-sm border border-black/10 cursor-pointer transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-grove-500"
 						style="background-color: {color}"
 						title="{key}: {color}"
-						onclick={() =>
-							navigator.clipboard.writeText(String(color)).then(() => alert(`Copied ${color}!`))}
+						onclick={() => copyToClipboard(String(color)).then(() => alert(`Copied ${color}!`))}
 					></button>
 					<div
 						class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-bark-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10"

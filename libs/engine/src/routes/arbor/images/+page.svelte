@@ -1,4 +1,5 @@
 <script>
+	import { copyToClipboard as copyText } from "$lib/utils/share";
 	import Button from "$lib/ui/components/ui/Button.svelte";
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import Glass from "$lib/ui/components/ui/Glass.svelte";
@@ -583,13 +584,13 @@
 	 * @param {string | number | null} [itemId]
 	 */
 	async function copyToClipboard(text, itemId = null) {
-		try {
-			await navigator.clipboard.writeText(text);
+		const result = await copyText(text);
+		if (result.success) {
 			copiedItem = itemId;
 			setTimeout(() => {
 				if (copiedItem === itemId) copiedItem = null;
 			}, 2000);
-		} catch (err) {
+		} else {
 			toast.error("Failed to copy to clipboard");
 		}
 	}

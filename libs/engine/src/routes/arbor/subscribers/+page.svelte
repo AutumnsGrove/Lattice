@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { copyToClipboard } from "$lib/utils/share";
 	import { Mail, AlertTriangle, Check, Copy, Download, MailOpen } from "lucide-svelte";
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import Glass from "$lib/ui/components/ui/Glass.svelte";
@@ -33,7 +34,7 @@
 
 	async function copyAllEmails() {
 		const allEmails = subscribers.map((s) => s.email).join(", ");
-		await navigator.clipboard.writeText(allEmails);
+		await copyToClipboard(allEmails);
 		copiedAll = true;
 		setTimeout(() => {
 			copiedAll = false;
@@ -41,7 +42,7 @@
 	}
 
 	async function copyEmail(email: string) {
-		await navigator.clipboard.writeText(email);
+		await copyToClipboard(email);
 		copiedEmail = email;
 		setTimeout(() => {
 			copiedEmail = null;
