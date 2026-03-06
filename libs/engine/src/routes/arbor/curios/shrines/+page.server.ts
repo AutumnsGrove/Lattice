@@ -3,6 +3,7 @@ import { fail } from "@sveltejs/kit";
 import { ARBOR_ERRORS, logGroveError } from "$lib/errors";
 import {
 	generateShrineId,
+	isValidShrineId,
 	isValidShrineType,
 	isValidSize,
 	isValidFrameStyle,
@@ -201,6 +202,14 @@ export const actions: Actions = {
 
 		const formData = await request.formData();
 		const shrineId = formData.get("shrineId") as string;
+
+		if (!isValidShrineId(shrineId)) {
+			return fail(400, {
+				error: ARBOR_ERRORS.INVALID_INPUT.userMessage,
+				error_code: ARBOR_ERRORS.INVALID_INPUT.code,
+			});
+		}
+
 		const isPublished = formData.get("isPublished") === "true" ? 0 : 1;
 
 		try {
@@ -236,6 +245,13 @@ export const actions: Actions = {
 		const formData = await request.formData();
 		const shrineId = formData.get("shrineId") as string;
 
+		if (!isValidShrineId(shrineId)) {
+			return fail(400, {
+				error: ARBOR_ERRORS.INVALID_INPUT.userMessage,
+				error_code: ARBOR_ERRORS.INVALID_INPUT.code,
+			});
+		}
+
 		try {
 			await db
 				.prepare(`DELETE FROM shrines WHERE id = ? AND tenant_id = ?`)
@@ -267,7 +283,7 @@ export const actions: Actions = {
 		const shrineId = formData.get("shrineId") as string;
 		const contentsRaw = formData.get("contents") as string;
 
-		if (!shrineId || !contentsRaw) {
+		if (!isValidShrineId(shrineId) || !contentsRaw) {
 			return fail(400, {
 				error: ARBOR_ERRORS.FIELD_REQUIRED.userMessage,
 				error_code: ARBOR_ERRORS.FIELD_REQUIRED.code,
@@ -319,7 +335,7 @@ export const actions: Actions = {
 		const shrineId = formData.get("shrineId") as string;
 		const shrineType = formData.get("shrineType") as string;
 
-		if (!shrineId || !isValidShrineType(shrineType)) {
+		if (!isValidShrineId(shrineId) || !isValidShrineType(shrineType)) {
 			return fail(400, {
 				error: ARBOR_ERRORS.INVALID_INPUT.userMessage,
 				error_code: ARBOR_ERRORS.INVALID_INPUT.code,

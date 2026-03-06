@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
 	generateShrineId,
+	isValidShrineId,
 	isValidShrineType,
 	isValidSize,
 	isValidFrameStyle,
@@ -60,9 +61,35 @@ describe("generateShrineId", () => {
 		expect(id).toMatch(/^shrine_/);
 	});
 
+	it("generates IDs using crypto hex suffix", () => {
+		const id = generateShrineId();
+		expect(id).toMatch(/^shrine_[a-z0-9]+_[a-f0-9]{12}$/);
+	});
+
 	it("generates unique IDs", () => {
 		const ids = new Set(Array.from({ length: 10 }, () => generateShrineId()));
 		expect(ids.size).toBe(10);
+	});
+
+	it("generates IDs that pass validation", () => {
+		const id = generateShrineId();
+		expect(isValidShrineId(id)).toBe(true);
+	});
+});
+
+describe("isValidShrineId", () => {
+	it("accepts valid shrine IDs", () => {
+		expect(isValidShrineId("shrine_abc123_0a1b2c3d4e5f")).toBe(true);
+	});
+
+	it("rejects non-shrine-prefixed strings", () => {
+		expect(isValidShrineId("curio_abc_def")).toBe(false);
+		expect(isValidShrineId("")).toBe(false);
+	});
+
+	it("rejects strings with invalid characters", () => {
+		expect(isValidShrineId("shrine_<script>_abcdef")).toBe(false);
+		expect(isValidShrineId("shrine_abc_ABCDEF")).toBe(false);
 	});
 });
 
@@ -179,6 +206,21 @@ describe("parseContents", () => {
 
 	it("returns empty array for empty string", () => {
 		expect(parseContents("")).toEqual([]);
+	});
+
+	it("strips prototype-polluting keys from content data", () => {
+		const json = JSON.stringify([
+			{
+				type: "text",
+				x: 10,
+				y: 20,
+				data: { text: "safe", __proto__: "malicious", constructor: "evil" },
+			},
+		]);
+		const result = parseContents(json);
+		expect(result[0].data).toEqual({ text: "safe" });
+		expect(result[0].data).not.toHaveProperty("__proto__");
+		expect(result[0].data).not.toHaveProperty("constructor");
 	});
 });
 

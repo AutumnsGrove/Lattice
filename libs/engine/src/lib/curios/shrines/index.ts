@@ -145,7 +145,16 @@ export const MAX_SHRINES_PER_TENANT = 50;
 import { stripHtml } from "../sanitize";
 
 export function generateShrineId(): string {
-	return `shrine_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+	const bytes = new Uint8Array(6);
+	crypto.getRandomValues(bytes);
+	const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+	return `shrine_${Date.now().toString(36)}_${hex}`;
+}
+
+const SHRINE_ID_PATTERN = /^shrine_[a-z0-9]+_[a-f0-9]+$/;
+
+export function isValidShrineId(id: string): boolean {
+	return typeof id === "string" && SHRINE_ID_PATTERN.test(id);
 }
 
 export function isValidShrineType(type: string): type is ShrineType {
@@ -197,9 +206,12 @@ export function parseContents(json: string): ShrineContentItem[] {
 }
 
 /** Sanitize user-provided text fields in content item data to prevent XSS */
+const DANGEROUS_KEYS = new Set(["__proto__", "constructor", "prototype"]);
+
 function sanitizeContentData(data: Record<string, unknown>): Record<string, unknown> {
 	const clean: Record<string, unknown> = {};
 	for (const [key, value] of Object.entries(data)) {
+		if (DANGEROUS_KEYS.has(key)) continue;
 		if (typeof value === "string") {
 			clean[key] = stripHtml(value);
 		} else {
