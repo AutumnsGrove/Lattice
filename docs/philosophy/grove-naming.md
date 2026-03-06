@@ -202,6 +202,20 @@ _"Put The Prism in receiving mode."_
 
 _A protected way through._
 
+### Lantern
+
+**Cross-Grove Navigation** · _Engine chrome component_
+**Standard:** Compass
+**Waystone:** A floating navigation panel that lets you hop between groves, visit friends, access platform services, and always find your way home.
+
+A lantern in the forest does three things: it shows you what's around you, it shows you where you can go, and it always, always shows you the way back home. You carry it with you. It glows softly. It doesn't demand attention—but when you need it, it's there.
+
+Lantern is the navigation hub that appears on every grove site for logged-in users. A small glowing button in the bottom-left corner. Tap it, and a warm panel opens: your grove (always one tap away), destinations like Meadow and Canopy, platform services like Ivy and Reverie, and your friends' groves listed by name. Add friends by searching for their grove, or let Meadow follows populate automatically. The panel is your compass through the forest—no matter whose grove you're visiting, the Lantern knows where home is.
+
+In standard mode, it's the **Compass**. In Grove mode, it's the **Lantern**. Same light, two names.
+
+_Light it. Find a friend. Find your way home._
+
 ### Rings
 
 **Analytics** · _Integrated into admin dashboard_
@@ -861,6 +875,7 @@ _In a forest full of harvesters, this grove stays shaded._
 | **Foliage**    | Platform     | Theming system                 | foliage.grove.place             |
 | **Curios**     | Platform     | Cabinet of wonders             | curios.grove.place              |
 | **Burrow**     | Platform     | Cross-property access          | _(integrated into Arbor)_       |
+| **Lantern**    | Platform     | Cross-grove navigation         | _(engine chrome)_               |
 | **Rings**      | Platform     | Analytics                      | _(integrated)_                  |
 | **Clearing**   | Platform     | Status page                    | status.grove.place              |
 | **Porch**      | Platform     | Support conversations          | porch.grove.place               |
@@ -930,6 +945,7 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Reverie         | GroveReverie    |
 | Grafts          | GroveGrafts     |
 | Burrow          | GroveBurrow     |
+| Lantern         | GroveLantern    |
 | Greenhouse mode | Dave mode[^1]   |
 | Gossamer        | gossamer (npm)  |
 | Rings           | GroveAnalytics  |

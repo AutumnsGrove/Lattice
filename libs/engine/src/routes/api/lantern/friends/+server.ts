@@ -12,9 +12,6 @@ import { getUserHomeGrove } from "$lib/server/services/users.js";
 import { createThreshold } from "$lib/threshold/factory.js";
 import { thresholdCheck } from "$lib/threshold/adapters/sveltekit.js";
 
-/** Max friends per tenant */
-const MAX_FRIENDS_PER_TENANT = 50;
-
 export const GET: RequestHandler = async ({ platform, locals }) => {
 	const db = platform?.env?.DB;
 
@@ -129,16 +126,6 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 		// Prevent self-add
 		if (friendTenant.id === homeTenantId) {
 			throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
-		}
-
-		// Check friend limit
-		const countResult = await db
-			.prepare(`SELECT COUNT(*) as count FROM lantern_friends WHERE tenant_id = ?`)
-			.bind(homeTenantId)
-			.first<{ count: number }>();
-
-		if ((countResult?.count ?? 0) >= MAX_FRIENDS_PER_TENANT) {
-			throwGroveError(400, API_ERRORS.RATE_LIMITED, "API");
 		}
 
 		// Insert with INSERT OR IGNORE to handle duplicate gracefully
