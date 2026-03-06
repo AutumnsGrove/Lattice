@@ -115,6 +115,10 @@ export const lanternStore = {
 		searchResults = results;
 	},
 
+	isFriend(tenantId: string): boolean {
+		return friends.some((f) => f.tenantId === tenantId);
+	},
+
 	clearSearch() {
 		searchQuery = "";
 		searchResults = [];

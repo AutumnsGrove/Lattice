@@ -11,6 +11,7 @@ export { default as AdminHeader } from "./AdminHeader.svelte";
 export { default as AccountStatus } from "./AccountStatus.svelte";
 export { default as Footer } from "./Footer.svelte";
 export { default as FooterMinimal } from "./FooterMinimal.svelte";
+export { default as FollowButton } from "./FollowButton.svelte";
 export { default as Lantern } from "./lantern/Lantern.svelte";
 export type { LanternLayoutData } from "./lantern/types";
 

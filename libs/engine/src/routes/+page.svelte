@@ -2,8 +2,12 @@
 	import InternalsPostViewer from "$lib/components/custom/InternalsPostViewer.svelte";
 	import Button from "$lib/ui/components/ui/Button.svelte";
 	import GroveSwap from "$lib/ui/components/ui/groveterm/GroveSwap.svelte";
+	import FollowButton from "$lib/ui/components/chrome/FollowButton.svelte";
 
 	let { data } = $props();
+
+	// Show follow button when a logged-in visitor is on someone else's grove
+	const showFollow = $derived(data.user && !data.isOwner && data.context?.type === "tenant");
 </script>
 
 <svelte:head>
@@ -47,10 +51,21 @@
 	<div class="hero">
 		<h1>{data.hero.title}</h1>
 		<p class="subtitle">{data.hero.subtitle}</p>
-		{#if data.hero.cta}
-			<Button href={data.hero.cta.link} variant="default" size="lg" class="cta-button"
-				>{data.hero.cta.text}</Button
-			>
+		{#if data.hero.cta || showFollow}
+			<div class="hero-actions">
+				{#if data.hero.cta}
+					<Button href={data.hero.cta.link} variant="default" size="lg" class="cta-button"
+						>{data.hero.cta.text}</Button
+					>
+				{/if}
+				{#if showFollow && data.context?.type === "tenant"}
+					<FollowButton
+						tenantId={data.context.tenant.id}
+						subdomain={data.context.tenant.subdomain}
+						name={data.context.tenant.name}
+					/>
+				{/if}
+			</div>
 		{/if}
 	</div>
 {/if}
@@ -143,6 +158,13 @@
 		color: var(--color-text-muted);
 		margin: 0 0 2rem 0;
 		transition: color 0.3s ease;
+	}
+	.hero-actions {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.75rem;
+		flex-wrap: wrap;
 	}
 	.intro {
 		max-width: 700px;
