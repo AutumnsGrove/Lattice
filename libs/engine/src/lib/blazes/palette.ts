@@ -5,7 +5,7 @@
  * JIT scanner sees it at build time. Never construct class names dynamically.
  */
 
-import { Cherry, Feather } from "lucide-svelte";
+import { NotebookText, Feather } from "lucide-svelte";
 import {
 	Bell,
 	UtensilsCrossed,
@@ -59,7 +59,7 @@ import type { AutoBlazeConfig, BlazeColorClasses, LucideIcon, PostType } from ".
 export const BLAZE_CONFIG: Record<PostType, AutoBlazeConfig> = {
 	bloom: {
 		label: "Bloom",
-		icon: Cherry,
+		icon: NotebookText,
 		classes: "bg-grove-50 text-grove-700 dark:bg-grove-100/30 dark:text-grove-700",
 	},
 	note: {
