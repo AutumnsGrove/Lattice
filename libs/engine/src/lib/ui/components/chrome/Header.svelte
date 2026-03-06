@@ -1,19 +1,19 @@
 <script lang="ts">
-	import { page } from '$app/state';
-	import { Logo } from '../ui';
-	import ThemeToggle from './ThemeToggle.svelte';
-	import MobileMenu from './MobileMenu.svelte';
-	import { seasonStore } from '../../stores/season.svelte';
-	import { Menu, Search, X, PanelLeftOpen } from 'lucide-svelte';
-	import type { NavItem, MaxWidth, FooterLink, HeaderUser } from './types';
-	import type { Season } from '../../types/season';
-	import { isActivePath } from './types';
-	import { DEFAULT_NAV_ITEMS } from './defaults';
-	import AccountStatus from './AccountStatus.svelte';
-	import { sidebarStore } from '../../stores/sidebar.svelte';
-	import { groveModeStore } from '../../stores/grove-mode.svelte';
-	import { resolveNavLabel } from './types';
-	import defaultManifestData from '$lib/data/grove-term-manifest.json';
+	import { page } from "$app/state";
+	import Logo from "../ui/Logo.svelte";
+	import ThemeToggle from "./ThemeToggle.svelte";
+	import MobileMenu from "./MobileMenu.svelte";
+	import { seasonStore } from "../../stores/season.svelte";
+	import { Menu, Search, X, PanelLeftOpen } from "lucide-svelte";
+	import type { NavItem, MaxWidth, FooterLink, HeaderUser } from "./types";
+	import type { Season } from "../../types/season";
+	import { isActivePath } from "./types";
+	import { DEFAULT_NAV_ITEMS } from "./defaults";
+	import AccountStatus from "./AccountStatus.svelte";
+	import { sidebarStore } from "../../stores/sidebar.svelte";
+	import { groveModeStore } from "../../stores/grove-mode.svelte";
+	import { resolveNavLabel } from "./types";
+	import defaultManifestData from "$lib/data/grove-term-manifest.json";
 
 	// Determine current page for highlighting
 	let currentPath = $derived(page.url.pathname);
@@ -38,7 +38,7 @@
 		/** Show Grove logo next to brand title (enables season cycling) */
 		showLogo?: boolean;
 		/** Logo size when shown */
-		logoSize?: 'xs' | 'sm' | 'md' | 'lg';
+		logoSize?: "xs" | "sm" | "md" | "lg";
 
 		// Auth support
 		/** Show sign-in link when not logged in (default: true) */
@@ -65,32 +65,32 @@
 		navItems,
 		resourceLinks,
 		connectLinks,
-		maxWidth = 'default',
+		maxWidth = "default",
 		brandTitle,
 		season,
 		// Search props
 		searchEnabled = false,
-		searchPlaceholder = 'Search...',
+		searchPlaceholder = "Search...",
 		onSearch,
 		// Logo props
 		showLogo = false,
-		logoSize = 'md',
+		logoSize = "md",
 		// Auth props
 		showSignIn = true,
 		user = null,
-		signInHref = 'https://heartwood.grove.place',
-		signInLabel = 'Sign in',
-		userHref = '/arbor',
-		signOutHref = '/logout',
-		signOutLabel = 'Sign out',
+		signInHref = "https://heartwood.grove.place",
+		signInLabel = "Sign in",
+		userHref = "/arbor",
+		signOutHref = "/logout",
+		signOutLabel = "Sign out",
 		// Admin sidebar props
-		showSidebarToggle = false
+		showSidebarToggle = false,
 	}: Props = $props();
 
 	const maxWidthClass = {
-		narrow: 'max-w-4xl',
-		default: 'max-w-6xl',
-		wide: 'max-w-7xl'
+		narrow: "max-w-4xl",
+		default: "max-w-6xl",
+		wide: "max-w-7xl",
 	};
 
 	// Mobile menu state
@@ -98,7 +98,7 @@
 
 	// Search state
 	let searchExpanded = $state(false);
-	let searchQuery = $state('');
+	let searchQuery = $state("");
 	let searchInputRef = $state<HTMLInputElement | null>(null);
 
 	// Cycle through seasons on logo click (spring → summer → autumn → winter)
@@ -112,7 +112,7 @@
 			// Focus input after DOM update
 			setTimeout(() => searchInputRef?.focus(), 50);
 		} else {
-			searchQuery = '';
+			searchQuery = "";
 		}
 	}
 
@@ -121,14 +121,14 @@
 		if (searchQuery.trim() && onSearch) {
 			onSearch(searchQuery.trim());
 			searchExpanded = false;
-			searchQuery = '';
+			searchQuery = "";
 		}
 	}
 
 	function handleSearchKeydown(event: KeyboardEvent) {
-		if (event.key === 'Escape') {
+		if (event.key === "Escape") {
 			searchExpanded = false;
-			searchQuery = '';
+			searchQuery = "";
 		}
 	}
 
@@ -140,7 +140,9 @@
 	}
 </script>
 
-<header class="sticky top-0 z-grove-sticky py-3 px-6 border-b border-default bg-surface/95 backdrop-blur-sm">
+<header
+	class="sticky top-0 z-grove-sticky py-3 px-6 border-b border-default bg-surface/95 backdrop-blur-sm"
+>
 	<div class="{maxWidthClass[maxWidth]} mx-auto flex items-center justify-between">
 		<!-- Logo area -->
 		<div class="flex items-center gap-3">
@@ -149,7 +151,7 @@
 				<button
 					onclick={() => {
 						// Mobile: slide-in overlay; Desktop: collapse sidebar
-						if (window.matchMedia('(max-width: 768px)').matches) {
+						if (window.matchMedia("(max-width: 768px)").matches) {
 							sidebarStore.toggle();
 						} else {
 							sidebarStore.toggleCollapse();
@@ -165,7 +167,7 @@
 			<!-- For landing: always show. For tenants: only if showLogo is true -->
 			{#if !brandTitle || showLogo}
 				<Logo
-					size={showLogo ? logoSize : 'lg'}
+					size={showLogo ? logoSize : "lg"}
 					season={season || seasonStore.current}
 					interactive
 					onclick={handleLogoClick}
@@ -198,8 +200,8 @@
 			{#each items as item}
 				<a
 					href={item.href}
-					target={item.external ? '_blank' : undefined}
-					rel={item.external ? 'noopener noreferrer' : undefined}
+					target={item.external ? "_blank" : undefined}
+					rel={item.external ? "noopener noreferrer" : undefined}
 					class="transition-colors whitespace-nowrap {isActivePath(item.href, currentPath)
 						? 'text-accent-muted'
 						: 'text-foreground-subtle hover:text-accent-muted'}"
@@ -229,7 +231,7 @@
 						type="button"
 						onclick={toggleSearch}
 						class="p-2 text-foreground-subtle hover:text-foreground transition-colors rounded-lg hover:bg-surface-hover"
-						aria-label={searchExpanded ? 'Close search' : 'Open search'}
+						aria-label={searchExpanded ? "Close search" : "Open search"}
 					>
 						{#if searchExpanded}
 							<X class="w-4 h-4" />

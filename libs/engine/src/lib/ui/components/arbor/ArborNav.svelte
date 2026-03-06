@@ -7,7 +7,7 @@
 -->
 <script lang="ts">
 	import { page } from "$app/state";
-	import { GroveDivider } from "../nature";
+	import GroveDivider from "../nature/GroveDivider.svelte";
 	import { resolveTerm } from "../../utils/grove-term-resolve";
 	import { sidebarStore } from "../../stores/sidebar.svelte";
 	import type { ArborNavEntry } from "./types";

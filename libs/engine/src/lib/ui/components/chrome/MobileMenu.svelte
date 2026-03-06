@@ -9,7 +9,7 @@
 		DEFAULT_MOBILE_CONNECT_LINKS,
 		DIVIDER_HORIZONTAL,
 	} from "./defaults";
-	import { GroveDivider } from "../nature";
+	import GroveDivider from "../nature/GroveDivider.svelte";
 	import { groveModeStore } from "../../stores/grove-mode.svelte";
 	import { resolveNavLabel } from "./types";
 	import defaultManifestData from "$lib/data/grove-term-manifest.json";

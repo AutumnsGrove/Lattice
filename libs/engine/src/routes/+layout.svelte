@@ -6,9 +6,14 @@
 	import { navigating } from "$app/stores";
 	import { fade } from "svelte/transition";
 	import { goto } from "$app/navigation";
-	import { Button, GroveSwap, PassageTransition } from "$lib/ui";
+	import Button from "$lib/ui/components/ui/Button.svelte";
+	import GroveSwap from "$lib/ui/components/ui/groveterm/GroveSwap.svelte";
+	import PassageTransition from "$lib/ui/components/ui/PassageTransition.svelte";
 	import { fontMap, DEFAULT_FONT } from "$lib/ui/tokens/fonts";
-	import { Header, buildTenantNavItems, themeStore, Lantern } from "$lib/ui/components/chrome";
+	import Header from "$lib/ui/components/chrome/Header.svelte";
+	import { buildTenantNavItems } from "$lib/ui/components/chrome/tenant-nav";
+	import Lantern from "$lib/ui/components/chrome/lantern/Lantern.svelte";
+	import { themeStore } from "$lib/ui/stores/theme.svelte";
 	import { groveModeStore } from "$lib/ui/stores/grove-mode.svelte";
 
 	/** @type {{ children: import('svelte').Snippet, data: any }} */
@@ -79,7 +84,7 @@
 					name: data.user.name,
 					email: data.user.email,
 					avatarUrl: data.isOwner
-						? (data.siteSettings?.avatar_url || data.user.picture)
+						? data.siteSettings?.avatar_url || data.user.picture
 						: data.user.picture,
 				}
 			: null,

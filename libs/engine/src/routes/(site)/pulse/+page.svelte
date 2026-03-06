@@ -9,7 +9,7 @@
 
 	import { Activity, HeartPulse, Zap } from "lucide-svelte";
 	import { GlassCard } from "$lib/ui/components/ui";
-	import { GroveDivider } from "$lib/ui/components/nature";
+	import GroveDivider from "$lib/ui/components/nature/GroveDivider.svelte";
 	import { Pulse } from "$lib/curios/pulse";
 	import { toast } from "$lib/ui";
 
