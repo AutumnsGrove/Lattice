@@ -72,15 +72,15 @@
 				</a>
 			</div>
 
-			<!-- Home link — always first and prominent -->
-			<a
-				href="https://{data.homeGrove}.grove.place"
-				class="home-link block py-2.5 px-3 rounded-[10px] bg-accent text-accent-foreground text-sm font-medium no-underline text-center transition-colors hover:opacity-90 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
-				target="_blank"
-				rel="noopener noreferrer"
-			>
-				{homeLabel}
-			</a>
+			<!-- Home link — always first and prominent (hidden if no home grove resolved) -->
+			{#if data.homeGrove}
+				<a
+					href="https://{data.homeGrove}.grove.place"
+					class="home-link block py-2.5 px-3 rounded-[10px] bg-accent text-accent-foreground text-sm font-medium no-underline text-center transition-colors hover:opacity-90 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
+				>
+					{homeLabel}
+				</a>
+			{/if}
 
 			<!-- Main layout: tabs + list (left), friends (right if present) -->
 			<div class="panel-body">

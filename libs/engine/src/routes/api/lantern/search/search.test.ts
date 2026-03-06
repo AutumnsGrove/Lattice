@@ -83,15 +83,14 @@ describe("GET /api/lantern/search", () => {
 		});
 	});
 
-	it("should return empty array for queries shorter than 2 characters", async () => {
-		const db = createMockDB();
+	it("should allow single-character queries", async () => {
+		const db = createMockDB([{ id: "friend-1", subdomain: "a2a0", display_name: "Art's Grove" }]);
 		const event = createRequestEvent("a", { db });
 		const response = await GET(event);
 		const data = await response.json();
 
-		expect(data.results).toEqual([]);
-		// Should NOT have queried the database
-		expect(db.prepare).not.toHaveBeenCalled();
+		expect(data.results).toHaveLength(1);
+		expect(db.prepare).toHaveBeenCalled();
 	});
 
 	it("should return empty array for empty query", async () => {

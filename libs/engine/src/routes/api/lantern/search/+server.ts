@@ -39,7 +39,7 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
 	}
 
 	const query = url.searchParams.get("q")?.trim()?.slice(0, 64) ?? "";
-	if (query.length < 2) {
+	if (query.length < 1) {
 		return json({ results: [] });
 	}
 

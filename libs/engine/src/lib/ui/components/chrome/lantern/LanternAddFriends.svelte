@@ -25,7 +25,7 @@
 		lanternStore.setSearchQuery(value);
 
 		clearTimeout(debounceTimer);
-		if (value.trim().length < 2) {
+		if (value.trim().length < 1) {
 			lanternStore.setSearchResults([]);
 			return;
 		}
@@ -119,19 +119,37 @@
 			</div>
 		{/each}
 
-		{#if lanternStore.searchQuery.length >= 2 && lanternStore.searchResults.length === 0}
+		{#if lanternStore.searchQuery.length >= 1 && lanternStore.searchResults.length === 0}
 			<p class="text-center text-foreground-muted text-sm py-6 m-0">No groves found</p>
 		{/if}
 	</div>
 
-	<div class="text-center pt-2 border-t border-default">
+	<div class="flex items-center justify-center gap-2 pt-2 border-t border-default">
+		<a
+			href="https://grove.place/canopy"
+			class="text-[0.8125rem] text-accent-muted no-underline hover:underline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
+			target="_blank"
+			rel="noopener noreferrer"
+		>
+			Canopy
+		</a>
+		<span class="text-foreground-muted text-[0.75rem]" aria-hidden="true">&middot;</span>
+		<a
+			href="https://meadow.grove.place"
+			class="text-[0.8125rem] text-accent-muted no-underline hover:underline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
+			target="_blank"
+			rel="noopener noreferrer"
+		>
+			Meadow
+		</a>
+		<span class="text-foreground-muted text-[0.75rem]" aria-hidden="true">&middot;</span>
 		<a
 			href="https://grove.place/forest"
 			class="text-[0.8125rem] text-accent-muted no-underline hover:underline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
 			target="_blank"
 			rel="noopener noreferrer"
 		>
-			Or browse Forests
+			Forests
 		</a>
 	</div>
 </div>
