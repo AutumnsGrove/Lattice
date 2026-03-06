@@ -82,6 +82,7 @@
 <div
 	class="shrine-canvas frame-{frameStyle}"
 	style="width: {dimensions.width}px; height: {dimensions.height}px;"
+	role="img"
 	aria-label="Shrine: {title}"
 	onmousemove={handleMouseMove}
 	onmouseenter={handleMouseEnter}
@@ -111,10 +112,7 @@
 					/>
 					<span class="sr-only">{iconLabel}</span>
 				{:else}
-					<Heart
-						size={size === "small" ? 18 : size === "medium" ? 24 : 32}
-						aria-hidden="true"
-					/>
+					<Heart size={size === "small" ? 18 : size === "medium" ? 24 : 32} aria-hidden="true" />
 					<span class="sr-only">Heart</span>
 				{/if}
 			{:else if item.type === "date"}
@@ -133,9 +131,7 @@
 					{/if}
 				</blockquote>
 			{:else if item.type === "decoration"}
-				<span
-					class="item-decoration decoration-{item.data.style ?? 'sparkle'}"
-					aria-hidden="true"
+				<span class="item-decoration decoration-{item.data.style ?? 'sparkle'}" aria-hidden="true"
 				></span>
 			{/if}
 		</div>

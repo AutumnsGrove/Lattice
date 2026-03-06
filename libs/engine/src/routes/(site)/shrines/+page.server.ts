@@ -6,6 +6,7 @@
  */
 
 import type { PageServerLoad } from "./$types";
+import type { ShrineType, ShrineSize, FrameStyle } from "$lib/curios/shrines";
 import { SITE_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
 import { parseContents } from "$lib/curios/shrines";
 
@@ -47,10 +48,10 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 	const shrines = (result.results ?? []).map((row) => ({
 		id: row.id,
 		title: row.title,
-		shrineType: row.shrine_type,
+		shrineType: row.shrine_type as ShrineType,
 		description: row.description,
-		size: row.size,
-		frameStyle: row.frame_style,
+		size: row.size as ShrineSize,
+		frameStyle: row.frame_style as FrameStyle,
 		contents: parseContents(row.contents),
 	}));
 

@@ -292,7 +292,9 @@
 											e.stopPropagation();
 											removeItem(i);
 										}}
-										aria-label="Remove {item.type} item at position {Math.round(item.x)}, {Math.round(item.y)}"
+										aria-label="Remove {item.type} item at position {Math.round(
+											item.x,
+										)}, {Math.round(item.y)}"
 									>
 										<X size={14} />
 									</button>
@@ -524,7 +526,7 @@
 		{:else}
 			<div class="shrine-list">
 				{#each data.shrines as shrine}
-					<GlassCard class="shrine-card" class:editing={editingShrineId === shrine.id}>
+					<GlassCard class="shrine-card {editingShrineId === shrine.id ? 'editing' : ''}">
 						<div class="shrine-header">
 							<div>
 								<h3>{shrine.title}</h3>
@@ -570,7 +572,9 @@
 										type="submit"
 										variant="ghost"
 										title={shrine.isPublished ? "Unpublish" : "Publish"}
-										aria-label={shrine.isPublished ? `Unpublish ${shrine.title}` : `Publish ${shrine.title}`}
+										aria-label={shrine.isPublished
+											? `Unpublish ${shrine.title}`
+											: `Publish ${shrine.title}`}
 									>
 										{#if shrine.isPublished}
 											<EyeOff class="btn-icon" />

@@ -15,6 +15,7 @@ import {
 	CONTENT_TYPE_OPTIONS,
 	SHRINE_TEMPLATES,
 	MAX_CONTENTS_SIZE,
+	MAX_SHRINES_PER_TENANT,
 	type ShrineType,
 } from "$lib/curios/shrines";
 
@@ -93,6 +94,18 @@ export const actions: Actions = {
 			return fail(500, {
 				error: ARBOR_ERRORS.DB_NOT_AVAILABLE.userMessage,
 				error_code: ARBOR_ERRORS.DB_NOT_AVAILABLE.code,
+			});
+		}
+
+		const countResult = await db
+			.prepare("SELECT COUNT(*) as count FROM shrines WHERE tenant_id = ?")
+			.bind(tenantId)
+			.first<{ count: number }>();
+
+		if (countResult && countResult.count >= MAX_SHRINES_PER_TENANT) {
+			return fail(400, {
+				error: `You can have at most ${MAX_SHRINES_PER_TENANT} shrines.`,
+				error_code: ARBOR_ERRORS.INVALID_INPUT.code,
 			});
 		}
 
