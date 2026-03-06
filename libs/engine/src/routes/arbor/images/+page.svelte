@@ -1,5 +1,8 @@
 <script>
-	import { Button, GlassCard, Glass, Waystone } from "$lib/ui";
+	import Button from "$lib/ui/components/ui/Button.svelte";
+	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
+	import Glass from "$lib/ui/components/ui/Glass.svelte";
+	import Waystone from "$lib/ui/components/ui/Waystone.svelte";
 	import Dialog from "$lib/ui/components/ui/Dialog.svelte";
 	import { toast } from "$lib/ui/components/ui/toast";
 	import {

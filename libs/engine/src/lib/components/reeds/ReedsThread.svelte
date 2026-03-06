@@ -8,7 +8,9 @@
 
 	import ReedsComment from "./ReedsComment.svelte";
 	import ReedsCommentForm from "./ReedsCommentForm.svelte";
-	import { GlassConfirmDialog, toast, GroveSwap } from "$lib/ui";
+	import GlassConfirmDialog from "$lib/ui/components/ui/GlassConfirmDialog.svelte";
+	import { toast } from "$lib/ui/components/ui/toast";
+	import GroveSwap from "$lib/ui/components/ui/groveterm/GroveSwap.svelte";
 
 	interface Comment {
 		id: string;

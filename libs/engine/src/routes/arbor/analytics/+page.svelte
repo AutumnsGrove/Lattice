@@ -1,6 +1,19 @@
 <script>
-	import { GlassCard, Waystone, GroveTerm, GroveIntro } from '$lib/ui';
-	import { BarChart3, TrendingUp, Heart, Eye, Users, Calendar, Sprout, Leaf, TreePine } from 'lucide-svelte';
+	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
+	import Waystone from "$lib/ui/components/ui/Waystone.svelte";
+	import GroveTerm from "$lib/ui/components/ui/groveterm/GroveTerm.svelte";
+	import GroveIntro from "$lib/ui/components/ui/groveterm/GroveIntro.svelte";
+	import {
+		BarChart3,
+		TrendingUp,
+		Heart,
+		Eye,
+		Users,
+		Calendar,
+		Sprout,
+		Leaf,
+		TreePine,
+	} from "lucide-svelte";
 </script>
 
 <div class="max-w-4xl mx-auto">
@@ -22,8 +35,9 @@
 			</div>
 			<h2 class="text-2xl font-serif text-foreground mb-3">Coming in Full Bloom (Early Summer)</h2>
 			<p class="text-foreground-muted max-w-2xl mx-auto">
-				<GroveTerm term="rings">Rings</GroveTerm> is <GroveTerm term="grove">Grove's</GroveTerm> private analytics system designed for writers, not marketers.
-				Meaningful insights without the anxiety of real-time dashboards.
+				<GroveTerm term="rings">Rings</GroveTerm> is <GroveTerm term="grove">Grove's</GroveTerm> private
+				analytics system designed for writers, not marketers. Meaningful insights without the anxiety
+				of real-time dashboards.
 			</p>
 		</div>
 	</GlassCard>
@@ -39,7 +53,9 @@
 					</div>
 					<div>
 						<h3 class="text-sm font-medium text-foreground mb-1">24-Hour Delayed Stats</h3>
-						<p class="text-xs text-foreground-muted">No real-time dopamine hits. Publish a post, come back tomorrow to see how it did.</p>
+						<p class="text-xs text-foreground-muted">
+							No real-time dopamine hits. Publish a post, come back tomorrow to see how it did.
+						</p>
 					</div>
 				</div>
 			</GlassCard>
@@ -51,7 +67,12 @@
 					</div>
 					<div>
 						<h3 class="text-sm font-medium text-foreground mb-1">Resonance Indicators</h3>
-						<p class="text-xs text-foreground-muted">Positive signals like <Sprout class="inline w-3.5 h-3.5 text-accent-muted" /> Sparked Interest, <Leaf class="inline w-3.5 h-3.5 text-accent-muted" /> Really Resonated, <TreePine class="inline w-3.5 h-3.5 text-accent-muted" /> Community Favorite.</p>
+						<p class="text-xs text-foreground-muted">
+							Positive signals like <Sprout class="inline w-3.5 h-3.5 text-accent-muted" /> Sparked Interest,
+							<Leaf class="inline w-3.5 h-3.5 text-accent-muted" /> Really Resonated, <TreePine
+								class="inline w-3.5 h-3.5 text-accent-muted"
+							/> Community Favorite.
+						</p>
 					</div>
 				</div>
 			</GlassCard>
@@ -63,7 +84,9 @@
 					</div>
 					<div>
 						<h3 class="text-sm font-medium text-foreground mb-1">Writer Wellness</h3>
-						<p class="text-xs text-foreground-muted">Digest Mode and Focus Periods help you step away from metrics when you need to create.</p>
+						<p class="text-xs text-foreground-muted">
+							Digest Mode and Focus Periods help you step away from metrics when you need to create.
+						</p>
 					</div>
 				</div>
 			</GlassCard>
@@ -75,7 +98,9 @@
 					</div>
 					<div>
 						<h3 class="text-sm font-medium text-foreground mb-1">Meaningful Metrics</h3>
-						<p class="text-xs text-foreground-muted">Engaged Readers, Return Readers, Deep Reads—metrics that matter for writers.</p>
+						<p class="text-xs text-foreground-muted">
+							Engaged Readers, Return Readers, Deep Reads—metrics that matter for writers.
+						</p>
 					</div>
 				</div>
 			</GlassCard>
@@ -89,11 +114,13 @@
 				<TreePine class="w-8 h-8 text-accent-muted" />
 			</div>
 			<div>
-				<h3 class="text-lg font-serif text-foreground mb-2">Private by Default. Delayed by Design.</h3>
+				<h3 class="text-lg font-serif text-foreground mb-2">
+					Private by Default. Delayed by Design.
+				</h3>
 				<p class="text-sm text-foreground-muted mb-3">
-					Count the rings of a tree and you learn its story. Each ring records a season:
-					growth in plenty, resilience through hardship, the quiet accumulation of years.
-					Rings are internal. Private. You only see them when you look closely at your own tree.
+					Count the rings of a tree and you learn its story. Each ring records a season: growth in
+					plenty, resilience through hardship, the quiet accumulation of years. Rings are internal.
+					Private. You only see them when you look closely at your own tree.
 				</p>
 				<p class="text-sm text-foreground-subtle italic">
 					Your growth reflected back to you, not performed for others.

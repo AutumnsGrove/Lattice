@@ -8,10 +8,10 @@
 	 */
 
 	import { Activity, HeartPulse, Zap } from "lucide-svelte";
-	import { GlassCard } from "$lib/ui/components/ui";
+	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import GroveDivider from "$lib/ui/components/nature/GroveDivider.svelte";
 	import { Pulse } from "$lib/curios/pulse";
-	import { toast } from "$lib/ui";
+	import { toast } from "$lib/ui/components/ui/toast";
 
 	import type {
 		PulseEvent,

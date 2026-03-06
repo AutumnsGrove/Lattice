@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
-	import { GlassNavbar } from '$lib/ui/components/ui';
+	import type { Snippet } from "svelte";
+	import GlassNavbar from "$lib/ui/components/ui/GlassNavbar.svelte";
 
 	interface Props {
 		children: Snippet;
@@ -9,19 +9,35 @@
 	let { children }: Props = $props();
 </script>
 
-<div class="min-h-screen bg-gradient-to-b from-cream-50 to-cream-100 dark:from-bark-900 dark:to-bark-950">
+<div
+	class="min-h-screen bg-gradient-to-b from-cream-50 to-cream-100 dark:from-bark-900 dark:to-bark-950"
+>
 	<GlassNavbar maxWidth="wide">
 		{#snippet logo()}
-			<a href="/vineyard" class="flex items-center gap-2 font-semibold text-bark-900 dark:text-cream-50">
+			<a
+				href="/vineyard"
+				class="flex items-center gap-2 font-semibold text-bark-900 dark:text-cream-50"
+			>
 				<span class="text-2xl">🍇</span>
 				<span>Grove Vineyard</span>
 			</a>
 		{/snippet}
 		{#snippet actions()}
 			<nav class="flex items-center gap-4 text-sm">
-				<a href="#glass" class="text-bark-700 dark:text-cream-200 hover:text-grove-600 transition-colors">Glass</a>
-				<a href="#components" class="text-bark-700 dark:text-cream-200 hover:text-grove-600 transition-colors">Components</a>
-				<a href="#palettes" class="text-bark-700 dark:text-cream-200 hover:text-grove-600 transition-colors">Palettes</a>
+				<a
+					href="#glass"
+					class="text-bark-700 dark:text-cream-200 hover:text-grove-600 transition-colors">Glass</a
+				>
+				<a
+					href="#components"
+					class="text-bark-700 dark:text-cream-200 hover:text-grove-600 transition-colors"
+					>Components</a
+				>
+				<a
+					href="#palettes"
+					class="text-bark-700 dark:text-cream-200 hover:text-grove-600 transition-colors"
+					>Palettes</a
+				>
 			</nav>
 		{/snippet}
 	</GlassNavbar>

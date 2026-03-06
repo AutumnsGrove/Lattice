@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { GlassCard, GlassConfirmDialog } from "$lib/ui";
+	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
+	import GlassConfirmDialog from "$lib/ui/components/ui/GlassConfirmDialog.svelte";
 	import { toast } from "$lib/ui/components/ui/toast";
 	import { api } from "$lib/utils";
 	import { invalidateAll } from "$app/navigation";

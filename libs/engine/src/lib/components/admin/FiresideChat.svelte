@@ -14,7 +14,8 @@
 
 	import { tick } from "svelte";
 	import { Sparkles, ArrowLeft, Check, RotateCcw, X } from "lucide-svelte";
-	import { GlassChat, type ChatMessageData, type ChatRoleMap } from "$lib/ui/components/ui";
+	import GlassChat from "$lib/ui/components/ui/glasschat/GlassChat.svelte";
+	import type { ChatMessageData, ChatRoleMap } from "$lib/ui/components/ui/glasschat/types";
 	import { api } from "$lib/utils/api";
 
 	// ============================================================================

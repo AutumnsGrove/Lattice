@@ -1,5 +1,5 @@
 <script>
-	import { GlassCard } from "$lib/ui";
+	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import { DomainChecker } from "$lib/ui/components/domain";
 
 	let { data } = $props();

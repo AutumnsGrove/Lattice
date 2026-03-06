@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { enhance } from "$app/forms";
 	import { invalidateAll } from "$app/navigation";
-	import { GlassCard, GlassButton, GlassConfirmDialog, toast } from "$lib/ui/components/ui";
+	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
+	import GlassButton from "$lib/ui/components/ui/GlassButton.svelte";
+	import GlassConfirmDialog from "$lib/ui/components/ui/GlassConfirmDialog.svelte";
+	import { toast } from "$lib/ui/components/ui/toast";
 	import { Wand2, Plus, Trash2, Eye, Sparkles, Box, Pencil } from "lucide-svelte";
 	import { api } from "$lib/utils/api";
 	import ArtifactConfigForm from "$lib/ui/components/content/curios/artifacts/ArtifactConfigForm.svelte";

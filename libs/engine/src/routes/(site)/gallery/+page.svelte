@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { untrack } from "svelte";
-	import { GlassCard, GlassButton, GlassOverlay } from "$lib/ui/components/ui";
-	import { Button } from "$lib/ui/components/ui";
+	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
+	import GlassButton from "$lib/ui/components/ui/GlassButton.svelte";
+	import GlassOverlay from "$lib/ui/components/ui/GlassOverlay.svelte";
+	import Button from "$lib/ui/components/ui/Button.svelte";
 	import { getImageTitle } from "$lib/utils";
 	import { X, ChevronLeft, ChevronRight } from "lucide-svelte";
 

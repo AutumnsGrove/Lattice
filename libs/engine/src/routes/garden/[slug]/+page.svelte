@@ -1,7 +1,10 @@
 <script>
 	import ContentWithGutter from "$lib/components/custom/ContentWithGutter.svelte";
 	import ReedsThread from "$lib/components/reeds/ReedsThread.svelte";
-	import { Button, Badge, GroveSwap, MessageSquare, MessageSquareText } from "$lib/ui";
+	import Button from "$lib/ui/components/ui/Button.svelte";
+	import Badge from "$lib/ui/components/ui/Badge.svelte";
+	import GroveSwap from "$lib/ui/components/ui/groveterm/GroveSwap.svelte";
+	import { MessageSquare, MessageSquareText } from "lucide-svelte";
 	import { fontMap } from "$lib/ui/tokens/fonts";
 	import { Blaze } from "$lib/ui/components/indicators";
 	import { resolveBlaze } from "$lib/blazes";
@@ -9,9 +12,7 @@
 	let { data } = $props();
 
 	/** Resolve custom blaze: server definition → global default → slug fallback */
-	const customBlazeDefinition = $derived(
-		resolveBlaze(data.post.blaze, data.post.blazeDefinition),
-	);
+	const customBlazeDefinition = $derived(resolveBlaze(data.post.blaze, data.post.blazeDefinition));
 
 	// Get accent color from site settings (falls back to default if not set)
 	const accentColor = $derived(data.siteSettings?.accent_color || null);

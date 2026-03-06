@@ -8,7 +8,7 @@
 
 	import { Calendar } from "lucide-svelte";
 	import { Timeline } from "$lib/curios/timeline";
-	import { toast } from "$lib/ui";
+	import { toast } from "$lib/ui/components/ui/toast";
 
 	interface PageData {
 		summaries: any[];

@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { Mail, AlertTriangle, Check, Copy, Download, MailOpen } from 'lucide-svelte';
-	import { GlassCard, Glass } from '$lib/ui';
+	import { Mail, AlertTriangle, Check, Copy, Download, MailOpen } from "lucide-svelte";
+	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
+	import Glass from "$lib/ui/components/ui/Glass.svelte";
 
 	interface Subscriber {
 		email: string;
@@ -21,17 +22,17 @@
 	let copiedEmail = $state<string | null>(null);
 
 	function formatDate(dateStr: string): string {
-		return new Date(dateStr).toLocaleDateString('en-US', {
-			month: 'short',
-			day: 'numeric',
-			year: 'numeric',
-			hour: '2-digit',
-			minute: '2-digit'
+		return new Date(dateStr).toLocaleDateString("en-US", {
+			month: "short",
+			day: "numeric",
+			year: "numeric",
+			hour: "2-digit",
+			minute: "2-digit",
 		});
 	}
 
 	async function copyAllEmails() {
-		const allEmails = subscribers.map((s) => s.email).join(', ');
+		const allEmails = subscribers.map((s) => s.email).join(", ");
 		await navigator.clipboard.writeText(allEmails);
 		copiedAll = true;
 		setTimeout(() => {
@@ -48,26 +49,26 @@
 	}
 
 	async function exportAsList() {
-		const emailList = subscribers.map((s) => s.email).join('\n');
-		const blob = new Blob([emailList], { type: 'text/plain' });
+		const emailList = subscribers.map((s) => s.email).join("\n");
+		const blob = new Blob([emailList], { type: "text/plain" });
 		const url = URL.createObjectURL(blob);
-		const a = document.createElement('a');
+		const a = document.createElement("a");
 		a.href = url;
-		a.download = `grove-subscribers-${new Date().toISOString().split('T')[0]}.txt`;
+		a.download = `grove-subscribers-${new Date().toISOString().split("T")[0]}.txt`;
 		a.click();
 		URL.revokeObjectURL(url);
 	}
 
 	async function exportAsCSV() {
 		const csv = [
-			'Email,Signed Up,Source',
-			...subscribers.map((s) => `${s.email},${s.created_at},${s.source}`)
-		].join('\n');
-		const blob = new Blob([csv], { type: 'text/csv' });
+			"Email,Signed Up,Source",
+			...subscribers.map((s) => `${s.email},${s.created_at},${s.source}`),
+		].join("\n");
+		const blob = new Blob([csv], { type: "text/csv" });
 		const url = URL.createObjectURL(blob);
-		const a = document.createElement('a');
+		const a = document.createElement("a");
 		a.href = url;
-		a.download = `grove-subscribers-${new Date().toISOString().split('T')[0]}.csv`;
+		a.download = `grove-subscribers-${new Date().toISOString().split("T")[0]}.csv`;
 		a.click();
 		URL.revokeObjectURL(url);
 	}
@@ -81,7 +82,7 @@
 	<div>
 		<h1 class="flex items-center gap-3"><Mail class="w-7 h-7" /> Email Subscribers</h1>
 		<p class="subtitle">
-			{data.totalActive} active subscriber{data.totalActive === 1 ? '' : 's'}
+			{data.totalActive} active subscriber{data.totalActive === 1 ? "" : "s"}
 			{#if data.totalUnsubscribed > 0}
 				· {data.totalUnsubscribed} unsubscribed
 			{/if}
@@ -97,8 +98,8 @@
 			<p>
 				Use with extreme care. This copies all {data.totalActive} subscriber email{data.totalActive ===
 				1
-					? ''
-					: 's'} at once for mass communication.
+					? ""
+					: "s"} at once for mass communication.
 			</p>
 		</div>
 	</div>
@@ -110,8 +111,12 @@
 				<Copy class="w-4 h-4" /> Copy All Emails (comma-separated)
 			{/if}
 		</button>
-		<button class="btn-secondary inline-flex items-center gap-2" onclick={exportAsList}><Download class="w-4 h-4" /> Export as List (.txt)</button>
-		<button class="btn-secondary inline-flex items-center gap-2" onclick={exportAsCSV}><Download class="w-4 h-4" /> Export as CSV</button>
+		<button class="btn-secondary inline-flex items-center gap-2" onclick={exportAsList}
+			><Download class="w-4 h-4" /> Export as List (.txt)</button
+		>
+		<button class="btn-secondary inline-flex items-center gap-2" onclick={exportAsCSV}
+			><Download class="w-4 h-4" /> Export as CSV</button
+		>
 	</div>
 </Glass>
 
@@ -148,7 +153,10 @@
 								<span class="badge">{subscriber.source}</span>
 							</td>
 							<td class="text-right">
-								<button class="btn-copy inline-flex items-center gap-1" onclick={() => copyEmail(subscriber.email)}>
+								<button
+									class="btn-copy inline-flex items-center gap-1"
+									onclick={() => copyEmail(subscriber.email)}
+								>
 									{#if copiedEmail === subscriber.email}
 										<Check class="w-4 h-4" /> Copied
 									{:else}

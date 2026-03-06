@@ -27,7 +27,9 @@
 		Loader2,
 		Flame,
 	} from "lucide-svelte";
-	import { GlassCard, GlassButton, Badge } from "$lib/ui";
+	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
+	import GlassButton from "$lib/ui/components/ui/GlassButton.svelte";
+	import Badge from "$lib/ui/components/ui/Badge.svelte";
 	import Heatmap from "./Heatmap.svelte";
 
 	interface GutterItem {

@@ -1,8 +1,26 @@
 <script>
 	import { onMount } from "svelte";
-	import { Button, Spinner, GlassCard, GlassConfirmDialog, Waystone, GroveTerm } from "$lib/ui";
+	import Button from "$lib/ui/components/ui/Button.svelte";
+	import Spinner from "$lib/ui/components/ui/Spinner.svelte";
+	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
+	import GlassConfirmDialog from "$lib/ui/components/ui/GlassConfirmDialog.svelte";
+	import Waystone from "$lib/ui/components/ui/Waystone.svelte";
+	import GroveTerm from "$lib/ui/components/ui/groveterm/GroveTerm.svelte";
 	import { GreenhouseStatusCard, GraftControlPanel } from "$lib/grafts/greenhouse";
-	import { Smartphone, Laptop, Monitor, Leaf, Plus, RotateCcw, Check, X, Loader2, AlertTriangle, Clock, Globe } from "lucide-svelte";
+	import {
+		Smartphone,
+		Laptop,
+		Monitor,
+		Leaf,
+		Plus,
+		RotateCcw,
+		Check,
+		X,
+		Loader2,
+		AlertTriangle,
+		Clock,
+		Globe,
+	} from "lucide-svelte";
 	import { DomainCheckerModal } from "$lib/ui/components/domain";
 	import { groveModeStore } from "$lib/ui/stores/grove-mode.svelte";
 	import { toast } from "$lib/ui/components/ui/toast";
@@ -139,10 +157,9 @@
 			const controller = new AbortController();
 			usernameAbortController = controller;
 			try {
-				const res = await fetch(
-					`/api/username/check?username=${encodeURIComponent(trimmed)}`,
-					{ signal: controller.signal },
-				);
+				const res = await fetch(`/api/username/check?username=${encodeURIComponent(trimmed)}`, {
+					signal: controller.signal,
+				});
 				const result = await res.json();
 				// Only apply if this controller wasn't aborted (i.e. still the latest request)
 				if (!controller.signal.aborted) {
@@ -762,7 +779,8 @@
 							class="glass-input"
 							placeholder="new-username"
 							bind:value={newUsername}
-							oninput={(e) => checkUsernameAvailability(/** @type {HTMLInputElement} */ (e.target).value)}
+							oninput={(e) =>
+								checkUsernameAvailability(/** @type {HTMLInputElement} */ (e.target).value)}
 							disabled={changingUsername}
 						/>
 						<span class="username-suffix">.grove.place</span>
@@ -817,7 +835,9 @@
 				variant="warning"
 				onconfirm={() => {
 					// Submit the form programmatically
-					const form = /** @type {HTMLFormElement | null} */ (document.getElementById("username-change-form"));
+					const form = /** @type {HTMLFormElement | null} */ (
+						document.getElementById("username-change-form")
+					);
 					if (form) form.requestSubmit();
 				}}
 				oncancel={() => (showUsernameConfirmDialog = false)}
@@ -825,7 +845,8 @@
 				<div class="username-warning">
 					<p class="warning-highlight">
 						<AlertTriangle size={16} class="inline-icon" />
-						Your grove will move from <strong>{data.currentSubdomain}.grove.place</strong> to <strong>{newUsername}.grove.place</strong>
+						Your grove will move from <strong>{data.currentSubdomain}.grove.place</strong> to
+						<strong>{newUsername}.grove.place</strong>
 					</p>
 					<ul class="warning-list">
 						<li>External links to your old address will redirect for 30 days</li>
@@ -1237,7 +1258,9 @@
 				<div>
 					<p class="domain-cta__title">Want your own domain?</p>
 					<p class="domain-cta__description">
-						Check if your dream .com is available — or <a href="/arbor/domain">explore on a full page</a>.
+						Check if your dream .com is available — or <a href="/arbor/domain"
+							>explore on a full page</a
+						>.
 					</p>
 				</div>
 			</div>
@@ -1495,7 +1518,7 @@
 										type="button"
 										class="blaze-color-swatch"
 										class:active={newBlazeColor === colorName}
-										style:--swatch-color={BLAZE_COLOR_HEX[colorName] || '#888'}
+										style:--swatch-color={BLAZE_COLOR_HEX[colorName] || "#888"}
 										onclick={() => (newBlazeColor = colorName)}
 										title={colorName}
 										aria-label={colorName}
@@ -1657,11 +1680,7 @@
 	onconfirm={deleteBlaze}
 />
 
-<DomainCheckerModal
-	bind:open={showDomainChecker}
-	username={tenantUsername}
-	userTier={tenantTier}
-/>
+<DomainCheckerModal bind:open={showDomainChecker} username={tenantUsername} userTier={tenantTier} />
 
 <style>
 	.settings {
@@ -2418,7 +2437,9 @@
 		border: 1px solid var(--color-border, #e5e7eb);
 		border-radius: var(--border-radius-small);
 		background: var(--color-bg-primary);
-		transition: background-color 0.3s, border-color 0.3s;
+		transition:
+			background-color 0.3s,
+			border-color 0.3s;
 	}
 	.blaze-icon-btn {
 		display: flex;
@@ -2470,7 +2491,9 @@
 	}
 	.blaze-color-swatch.active {
 		border-color: var(--color-text, #333);
-		box-shadow: 0 0 0 2px var(--color-bg-primary), 0 0 0 4px var(--swatch-color);
+		box-shadow:
+			0 0 0 2px var(--color-bg-primary),
+			0 0 0 4px var(--swatch-color);
 	}
 	.blaze-color-custom {
 		display: flex;

@@ -1,6 +1,7 @@
 <script>
 	import InternalsPostViewer from "$lib/components/custom/InternalsPostViewer.svelte";
-	import { Button, GroveSwap } from "$lib/ui";
+	import Button from "$lib/ui/components/ui/Button.svelte";
+	import GroveSwap from "$lib/ui/components/ui/groveterm/GroveSwap.svelte";
 
 	let { data } = $props();
 </script>

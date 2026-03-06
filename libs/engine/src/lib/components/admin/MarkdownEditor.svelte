@@ -8,7 +8,9 @@
 	import { groveDirectivePlugin } from "$lib/utils/markdown-directives";
 	editorMd.use(groveDirectivePlugin);
 	import "$lib/styles/content.css";
-	import { Button, Input, Logo } from "$lib/ui";
+	import Button from "$lib/ui/components/ui/Button.svelte";
+	import Input from "$lib/ui/components/ui/Input.svelte";
+	import Logo from "$lib/ui/components/ui/Logo.svelte";
 	import Dialog from "$lib/ui/components/ui/Dialog.svelte";
 	import { toast } from "$lib/ui/components/ui/toast";
 	import { apiRequest } from "$lib/utils/api";

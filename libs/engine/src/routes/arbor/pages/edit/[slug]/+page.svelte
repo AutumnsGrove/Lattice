@@ -2,7 +2,7 @@
 	import { goto, beforeNavigate } from "$app/navigation";
 	import { browser } from "$app/environment";
 	import MarkdownEditor from "$lib/components/admin/MarkdownEditor.svelte";
-	import { Button } from "$lib/ui";
+	import Button from "$lib/ui/components/ui/Button.svelte";
 	import Dialog from "$lib/ui/components/ui/Dialog.svelte";
 	import { toast } from "$lib/ui/components/ui/toast";
 	import { api } from "$lib/utils";

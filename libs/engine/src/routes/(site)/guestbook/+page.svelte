@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { GlassCard, GlassButton } from "$lib/ui/components/ui";
+	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
+	import GlassButton from "$lib/ui/components/ui/GlassButton.svelte";
 	import GuestbookEntryCollage from "$lib/curios/guestbook/GuestbookEntryCollage.svelte";
 	import { Send, BookOpen, ChevronDown, Loader2, Palette } from "lucide-svelte";
 	import {

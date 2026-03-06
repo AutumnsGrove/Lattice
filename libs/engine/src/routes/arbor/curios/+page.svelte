@@ -1,13 +1,11 @@
 <script lang="ts">
-	import {
-		GlassCard,
-		GlassButton,
-		Badge,
-		Waystone,
-		GroveTerm,
-		GroveSwap,
-		GroveIntro,
-	} from "$lib/ui/components/ui";
+	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
+	import GlassButton from "$lib/ui/components/ui/GlassButton.svelte";
+	import Badge from "$lib/ui/components/ui/Badge.svelte";
+	import Waystone from "$lib/ui/components/ui/Waystone.svelte";
+	import GroveTerm from "$lib/ui/components/ui/groveterm/GroveTerm.svelte";
+	import GroveSwap from "$lib/ui/components/ui/groveterm/GroveSwap.svelte";
+	import GroveIntro from "$lib/ui/components/ui/groveterm/GroveIntro.svelte";
 	import {
 		Calendar,
 		Sparkles,

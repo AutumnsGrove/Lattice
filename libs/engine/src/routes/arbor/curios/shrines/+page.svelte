@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { enhance } from "$app/forms";
-	import { GlassCard, GlassButton, Badge, toast } from "$lib/ui/components/ui";
+	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
+	import GlassButton from "$lib/ui/components/ui/GlassButton.svelte";
+	import Badge from "$lib/ui/components/ui/Badge.svelte";
+	import { toast } from "$lib/ui/components/ui/toast";
 	import { Heart, Plus, Trash2, Eye, EyeOff, Pencil, X, RotateCcw, Save } from "lucide-svelte";
 	import ShrineCanvas from "$lib/curios/shrines/ShrineCanvas.svelte";
 	import type { ShrineContentItem, ShrineSize, FrameStyle } from "$lib/curios/shrines";

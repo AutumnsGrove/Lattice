@@ -1,7 +1,12 @@
 <script>
 	import { page } from "$app/state";
 	import { goto } from "$app/navigation";
-	import { Card, Badge, Button, ContentSearch, GroveSwap, GroveIntro } from "$lib/ui";
+	import Card from "$lib/ui/components/ui/Card.svelte";
+	import Badge from "$lib/ui/components/ui/Badge.svelte";
+	import Button from "$lib/ui/components/ui/Button.svelte";
+	import ContentSearch from "$lib/ui/components/forms/ContentSearch.svelte";
+	import GroveSwap from "$lib/ui/components/ui/groveterm/GroveSwap.svelte";
+	import GroveIntro from "$lib/ui/components/ui/groveterm/GroveIntro.svelte";
 
 	let { data } = $props();
 

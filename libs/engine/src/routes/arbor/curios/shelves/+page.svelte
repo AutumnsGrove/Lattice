@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { enhance } from "$app/forms";
-	import { GlassCard, GlassButton, GlassConfirmDialog, toast } from "$lib/ui/components/ui";
+	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
+	import GlassButton from "$lib/ui/components/ui/GlassButton.svelte";
+	import GlassConfirmDialog from "$lib/ui/components/ui/GlassConfirmDialog.svelte";
+	import { toast } from "$lib/ui/components/ui/toast";
 	import { BookMarked, Plus, Trash2, Settings, ChevronDown, ChevronUp } from "lucide-svelte";
 	import { api } from "$lib/utils/api";
 

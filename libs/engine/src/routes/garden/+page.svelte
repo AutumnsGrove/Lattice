@@ -1,8 +1,12 @@
 <script>
-	import { goto } from '$app/navigation';
-	import { Card, Badge, GlassButton, GroveSwap, GroveIntro } from '$lib/ui';
-	import { Blaze } from '$lib/ui/components/indicators';
-	import { resolveBlaze } from '$lib/blazes';
+	import { goto } from "$app/navigation";
+	import Card from "$lib/ui/components/ui/Card.svelte";
+	import Badge from "$lib/ui/components/ui/Badge.svelte";
+	import GlassButton from "$lib/ui/components/ui/GlassButton.svelte";
+	import GroveSwap from "$lib/ui/components/ui/groveterm/GroveSwap.svelte";
+	import GroveIntro from "$lib/ui/components/ui/groveterm/GroveIntro.svelte";
+	import { Blaze } from "$lib/ui/components/indicators";
+	import { resolveBlaze } from "$lib/blazes";
 
 	let { data } = $props();
 
@@ -16,7 +20,7 @@
 	function handleCardClick(event, slug) {
 		// Don't navigate if clicking on a tag link or badge
 		const target = /** @type {HTMLElement} */ (event.target);
-		if (target.closest('a')) {
+		if (target.closest("a")) {
 			return;
 		}
 		goto(`/garden/${slug}`);
@@ -27,7 +31,7 @@
 	 * @param {string} slug
 	 */
 	function handleCardKeydown(event, slug) {
-		if (event.key === 'Enter' || event.key === ' ') {
+		if (event.key === "Enter" || event.key === " ") {
 			event.preventDefault();
 			goto(`/garden/${slug}`);
 		}
@@ -35,8 +39,11 @@
 </script>
 
 <svelte:head>
-	<title>Garden{data.context?.type === 'tenant' ? ` - ${data.context.tenant.name}` : ''}</title>
-	<meta name="description" content="Explore my collection of posts - thoughts, ideas, and explorations." />
+	<title>Garden{data.context?.type === "tenant" ? ` - ${data.context.tenant.name}` : ""}</title>
+	<meta
+		name="description"
+		content="Explore my collection of posts - thoughts, ideas, and explorations."
+	/>
 </svelte:head>
 
 <div class="text-center mt-4 mb-16 max-md:mb-12">
@@ -46,21 +53,57 @@
 	{#if data.isOwner}
 		<div class="flex flex-col items-center gap-3 mt-4">
 			<GlassButton variant="accent" href="/arbor/garden/new">
-				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5">
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="16"
+					height="16"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					class="mr-1.5"
+				>
 					<line x1="12" y1="5" x2="12" y2="19"></line>
 					<line x1="5" y1="12" x2="19" y2="12"></line>
 				</svg>
 				New <GroveSwap term="blooms" standard="Post">Bloom</GroveSwap>
 			</GlassButton>
 			<div class="flex gap-2 items-center">
-				<span class="flex items-center justify-center p-1 admin-indicator" title="Logged in as {data.user?.email}">
-					<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<span
+					class="flex items-center justify-center p-1 admin-indicator"
+					title="Logged in as {data.user?.email}"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="14"
+						height="14"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+					>
 						<polyline points="20 6 9 17 4 12"></polyline>
 					</svg>
 				</span>
 				<a href="/arbor" class="admin-link" aria-label="Admin Panel">
-					<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-						<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="18"
+						height="18"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+					>
+						<path
+							d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
+						></path>
 						<circle cx="12" cy="12" r="3"></circle>
 					</svg>
 				</a>
@@ -84,13 +127,15 @@
 				tabindex="0"
 			>
 				{@const blazeDef = resolveBlaze(post.blaze, post.blazeDefinition)}
-				<h2 class="text-xl font-semibold mb-4 text-green-800 dark:text-green-500 transition-colors">{post.title}</h2>
+				<h2 class="text-xl font-semibold mb-4 text-green-800 dark:text-green-500 transition-colors">
+					{post.title}
+				</h2>
 				<div class="flex items-center gap-4 mb-3 flex-wrap">
 					<time datetime={post.date} class="text-sm text-foreground-subtle transition-colors">
-						{new Date(post.date).toLocaleDateString('en-US', {
-							year: 'numeric',
-							month: 'long',
-							day: 'numeric'
+						{new Date(post.date).toLocaleDateString("en-US", {
+							year: "numeric",
+							month: "long",
+							day: "numeric",
 						})}
 					</time>
 					<div class="flex items-center gap-1.5">
@@ -102,7 +147,11 @@
 					{#if post.tags.length > 0}
 						<div class="tags" style:--accent-color={accentColor}>
 							{#each post.tags as tag (tag)}
-								<a href="/garden/search?tag={encodeURIComponent(tag)}" class="tag-link" aria-label="Filter posts by tag: {tag}">
+								<a
+									href="/garden/search?tag={encodeURIComponent(tag)}"
+									class="tag-link"
+									aria-label="Filter posts by tag: {tag}"
+								>
 									<Badge variant="tag" class="accent-tag">{tag}</Badge>
 								</a>
 							{/each}

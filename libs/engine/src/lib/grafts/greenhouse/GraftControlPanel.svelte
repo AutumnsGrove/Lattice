@@ -19,7 +19,9 @@
 
 	import type { GraftControlPanelProps } from "./types.js";
 	import GraftToggleRow from "./GraftToggleRow.svelte";
-	import { GlassCard, Button, Waystone } from "$lib/ui";
+	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
+	import Button from "$lib/ui/components/ui/Button.svelte";
+	import Waystone from "$lib/ui/components/ui/Waystone.svelte";
 	import { Sprout, RotateCcw, Sparkles, FlaskConical, Leaf } from "lucide-svelte";
 
 	let {
@@ -37,9 +39,7 @@
 	const hasOverrides = $derived(grafts.some((g) => g.hasOverride));
 
 	// Group grafts by category
-	const experimentalGrafts = $derived(
-		grafts.filter((g) => g.category === "experimental"),
-	);
+	const experimentalGrafts = $derived(grafts.filter((g) => g.category === "experimental"));
 	const betaGrafts = $derived(grafts.filter((g) => g.category === "beta"));
 	const stableGrafts = $derived(grafts.filter((g) => g.category === "stable"));
 </script>
@@ -51,9 +51,7 @@
 				<Sparkles class="icon" />
 			</div>
 			<h3>No experimental features available</h3>
-			<p>
-				Check back soon! New features are always growing in the greenhouse.
-			</p>
+			<p>Check back soon! New features are always growing in the greenhouse.</p>
 		</div>
 	</GlassCard>
 {:else}
@@ -67,14 +65,10 @@
 				<div class="header-text">
 					<h2>
 						Your Experimental Features
-						<Waystone
-							slug="greenhouse-features"
-							label="Learn about experimental features"
-						/>
+						<Waystone slug="greenhouse-features" label="Learn about experimental features" />
 					</h2>
 					<p class="subtitle">
-						Toggle features on or off for your site. These are greenhouse-only
-						experiments!
+						Toggle features on or off for your site. These are greenhouse-only experiments!
 					</p>
 				</div>
 			</div>
@@ -103,11 +97,7 @@
 						<span>Experimental</span>
 					</div>
 					{#each experimentalGrafts as graft (graft.id)}
-						<GraftToggleRow
-							{graft}
-							{onToggle}
-							loading={loadingGraftId === graft.id}
-						/>
+						<GraftToggleRow {graft} {onToggle} loading={loadingGraftId === graft.id} />
 					{/each}
 				</div>
 			{/if}
@@ -119,11 +109,7 @@
 						<span>Beta</span>
 					</div>
 					{#each betaGrafts as graft (graft.id)}
-						<GraftToggleRow
-							{graft}
-							{onToggle}
-							loading={loadingGraftId === graft.id}
-						/>
+						<GraftToggleRow {graft} {onToggle} loading={loadingGraftId === graft.id} />
 					{/each}
 				</div>
 			{/if}
@@ -135,11 +121,7 @@
 						<span>Stable</span>
 					</div>
 					{#each stableGrafts as graft (graft.id)}
-						<GraftToggleRow
-							{graft}
-							{onToggle}
-							loading={loadingGraftId === graft.id}
-						/>
+						<GraftToggleRow {graft} {onToggle} loading={loadingGraftId === graft.id} />
 					{/each}
 				</div>
 			{/if}
@@ -152,12 +134,7 @@
 					<span class="override-dot"></span>
 					You have custom preferences. Reset to use default settings.
 				</p>
-				<Button
-					variant="secondary"
-					size="sm"
-					onclick={onReset}
-					disabled={resetting}
-				>
+				<Button variant="secondary" size="sm" onclick={onReset} disabled={resetting}>
 					<RotateCcw class="btn-icon" />
 					{resetting ? "Resetting..." : "Reset to Defaults"}
 				</Button>

@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { enhance } from "$app/forms";
 	import { invalidateAll } from "$app/navigation";
-	import { GlassCard, GlassButton, Badge, toast } from "$lib/ui/components/ui";
+	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
+	import GlassButton from "$lib/ui/components/ui/GlassButton.svelte";
+	import Badge from "$lib/ui/components/ui/Badge.svelte";
+	import { toast } from "$lib/ui/components/ui/toast";
 	import GuestbookPreview from "$lib/curios/guestbook/GuestbookPreview.svelte";
 	import "$lib/styles/fonts-optional.css";
 	import {

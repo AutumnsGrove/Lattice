@@ -4,7 +4,9 @@
 	import { onMount } from "svelte";
 	import MarkdownEditor from "$lib/components/admin/MarkdownEditor.svelte";
 	import GutterManager from "$lib/components/admin/GutterManager.svelte";
-	import { Glass, GroveSwap, GroveIntro } from "$lib/ui";
+	import Glass from "$lib/ui/components/ui/Glass.svelte";
+	import GroveSwap from "$lib/ui/components/ui/groveterm/GroveSwap.svelte";
+	import GroveIntro from "$lib/ui/components/ui/groveterm/GroveIntro.svelte";
 	import { toast } from "$lib/ui/components/ui/toast";
 	import { resolveTermString } from "$lib/ui/utils/grove-term-resolve";
 	import { api } from "$lib/utils";

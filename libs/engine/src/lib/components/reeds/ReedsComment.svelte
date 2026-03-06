@@ -6,7 +6,7 @@
 	 * and action buttons (reply, edit, delete).
 	 */
 
-	import { Button } from "$lib/ui";
+	import Button from "$lib/ui/components/ui/Button.svelte";
 	import ReedsComment from "./ReedsComment.svelte";
 
 	interface Comment {

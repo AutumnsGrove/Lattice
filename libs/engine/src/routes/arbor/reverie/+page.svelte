@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { GlassChat } from "$lib/ui/components/ui";
+	import GlassChat from "$lib/ui/components/ui/glasschat/GlassChat.svelte";
 	import type { ChatMessageData, ChatRoleMap } from "$lib/ui/components/ui/glasschat/types";
 	import { TierGate } from "$lib/ui/vineyard";
 	import type { GroveTier } from "$lib/ui/vineyard/types";

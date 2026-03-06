@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { GlassCard } from '$lib/ui';
+	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import {
 		Wind,
 		Send,
@@ -11,8 +11,8 @@
 		AlertCircle,
 		CheckCircle2,
 		XCircle,
-		Activity
-	} from 'lucide-svelte';
+		Activity,
+	} from "lucide-svelte";
 
 	interface Broadcast {
 		id: string;
@@ -37,38 +37,41 @@
 	let { broadcasts, stats }: Props = $props();
 
 	// Status display info
-	const statusInfo: Record<string, { label: string; icon: typeof Check; color: string; bgColor: string }> = {
-		delivered: { 
-			label: 'Delivered', 
-			icon: CheckCircle2, 
-			color: 'text-emerald-600 dark:text-emerald-400',
-			bgColor: 'bg-emerald-100 dark:bg-emerald-900/30'
+	const statusInfo: Record<
+		string,
+		{ label: string; icon: typeof Check; color: string; bgColor: string }
+	> = {
+		delivered: {
+			label: "Delivered",
+			icon: CheckCircle2,
+			color: "text-emerald-600 dark:text-emerald-400",
+			bgColor: "bg-emerald-100 dark:bg-emerald-900/30",
 		},
-		partial: { 
-			label: 'Partial', 
-			icon: AlertCircle, 
-			color: 'text-amber-600 dark:text-amber-400',
-			bgColor: 'bg-amber-100 dark:bg-amber-900/30'
+		partial: {
+			label: "Partial",
+			icon: AlertCircle,
+			color: "text-amber-600 dark:text-amber-400",
+			bgColor: "bg-amber-100 dark:bg-amber-900/30",
 		},
-		failed: { 
-			label: 'Failed', 
-			icon: XCircle, 
-			color: 'text-red-600 dark:text-red-400',
-			bgColor: 'bg-red-100 dark:bg-red-900/30'
+		failed: {
+			label: "Failed",
+			icon: XCircle,
+			color: "text-red-600 dark:text-red-400",
+			bgColor: "bg-red-100 dark:bg-red-900/30",
 		},
 	};
 
 	// Platform icons/colors
 	const platformInfo: Record<string, { color: string; bgColor: string }> = {
-		bluesky: { color: 'text-blue-500', bgColor: 'bg-blue-100 dark:bg-blue-900/30' },
-		mastodon: { color: 'text-purple-500', bgColor: 'bg-purple-100 dark:bg-purple-900/30' },
-		devto: { color: 'text-black dark:text-white', bgColor: 'bg-gray-100 dark:bg-gray-800' },
+		bluesky: { color: "text-blue-500", bgColor: "bg-blue-100 dark:bg-blue-900/30" },
+		mastodon: { color: "text-purple-500", bgColor: "bg-purple-100 dark:bg-purple-900/30" },
+		devto: { color: "text-black dark:text-white", bgColor: "bg-gray-100 dark:bg-gray-800" },
 	};
 
 	// Format relative time
 	function timeAgo(timestamp: number): string {
 		const seconds = Math.floor((Date.now() - timestamp) / 1000);
-		if (seconds < 60) return 'just now';
+		if (seconds < 60) return "just now";
 		if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
 		if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
 		return `${Math.floor(seconds / 86400)}d ago`;
@@ -101,7 +104,12 @@
 			</GlassCard>
 
 			{#each stats.byStatus as stat (stat.status)}
-				{@const info = statusInfo[stat.status] || { label: stat.status, icon: Activity, color: 'text-gray-600', bgColor: 'bg-gray-100' }}
+				{@const info = statusInfo[stat.status] || {
+					label: stat.status,
+					icon: Activity,
+					color: "text-gray-600",
+					bgColor: "bg-gray-100",
+				}}
 				{@const Icon = info.icon}
 				<GlassCard variant="frosted" class="p-4">
 					<div class="flex items-center gap-3">
@@ -127,7 +135,10 @@
 			</h3>
 			<div class="flex flex-wrap gap-3">
 				{#each Object.entries(stats.byPlatform) as [platform, count] (platform)}
-					{@const info = platformInfo[platform] || { color: 'text-gray-600', bgColor: 'bg-gray-100' }}
+					{@const info = platformInfo[platform] || {
+						color: "text-gray-600",
+						bgColor: "bg-gray-100",
+					}}
 					<div class="inline-flex items-center gap-2 px-4 py-2 rounded-full {info.bgColor}">
 						<span class="font-medium {info.color} capitalize">{platform}</span>
 						<span class="text-foreground-subtle">{count}</span>
@@ -152,17 +163,29 @@
 			<div class="space-y-3">
 				{#each broadcasts.slice(0, 20) as broadcast (broadcast.id)}
 					{@const platforms = parsePlatforms(broadcast.platforms)}
-					{@const status = statusInfo[broadcast.status] || { label: broadcast.status, icon: Activity, color: 'text-gray-600', bgColor: 'bg-gray-100' }}
+					{@const status = statusInfo[broadcast.status] || {
+						label: broadcast.status,
+						icon: Activity,
+						color: "text-gray-600",
+						bgColor: "bg-gray-100",
+					}}
 					{@const StatusIcon = status.icon}
-					<div class="p-4 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-grove-100 dark:border-grove-800">
+					<div
+						class="p-4 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-grove-100 dark:border-grove-800"
+					>
 						<p class="text-foreground text-sm whitespace-pre-wrap break-words mb-3">
 							{broadcast.content}
 						</p>
 						<div class="flex items-center justify-between flex-wrap gap-2">
 							<div class="flex items-center gap-2">
 								{#each platforms as platform (platform)}
-									{@const pInfo = platformInfo[platform] || { color: 'text-gray-600', bgColor: 'bg-gray-100' }}
-									<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs {pInfo.bgColor}">
+									{@const pInfo = platformInfo[platform] || {
+										color: "text-gray-600",
+										bgColor: "bg-gray-100",
+									}}
+									<span
+										class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs {pInfo.bgColor}"
+									>
 										<span class="w-1.5 h-1.5 rounded-full {pInfo.color}"></span>
 										<span class="capitalize {pInfo.color}">{platform}</span>
 									</span>

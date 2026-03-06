@@ -1,12 +1,10 @@
 <script lang="ts">
-	import {
-		Glass,
-		GlassCard,
-		GlassButton,
-		Accordion,
-		GroveTerm,
-		GroveSwap,
-	} from "$lib/ui/components/ui";
+	import Glass from "$lib/ui/components/ui/Glass.svelte";
+	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
+	import GlassButton from "$lib/ui/components/ui/GlassButton.svelte";
+	import Accordion from "$lib/ui/components/ui/Accordion.svelte";
+	import GroveTerm from "$lib/ui/components/ui/groveterm/GroveTerm.svelte";
+	import GroveSwap from "$lib/ui/components/ui/groveterm/GroveSwap.svelte";
 	import {
 		Sprout,
 		PenLine,
@@ -114,11 +112,9 @@
 							href="https://grove.place"
 							class="text-grove-700 dark:text-grove-400 underline underline-offset-2">grove.place</a
 						>
-						and sign in with your Google account, a magic link sent to your email, or a passkey like
-						Face ID or Touch ID -- no lengthy forms, no passwords to remember. Once you're in, you
-						can pick a username and start setting up your <GroveSwap term="your-garden"
-							>garden</GroveSwap
-						>.
+						and sign in with your Google account, a magic link sent to your email, or a passkey like Face
+						ID or Touch ID -- no lengthy forms, no passwords to remember. Once you're in, you can pick
+						a username and start setting up your <GroveSwap term="your-garden">garden</GroveSwap>.
 					{:else if item.value === "what-is-a-wanderer"}
 						Everyone who enters <GroveSwap term="your-grove">the Grove</GroveSwap> is a <GroveTerm
 							term="wanderer"

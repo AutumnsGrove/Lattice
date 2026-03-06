@@ -1,6 +1,22 @@
 <script>
-	import { GlassCard, Waystone, GroveTerm, GroveSwap, GroveIntro } from '$lib/ui';
-	import { Calendar, MapPin, Target, TreePine, Workflow, Map, Sprout, Check, Circle, CircleDot, Diamond } from 'lucide-svelte';
+	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
+	import Waystone from "$lib/ui/components/ui/Waystone.svelte";
+	import GroveTerm from "$lib/ui/components/ui/groveterm/GroveTerm.svelte";
+	import GroveSwap from "$lib/ui/components/ui/groveterm/GroveSwap.svelte";
+	import GroveIntro from "$lib/ui/components/ui/groveterm/GroveIntro.svelte";
+	import {
+		Calendar,
+		MapPin,
+		Target,
+		TreePine,
+		Workflow,
+		Map,
+		Sprout,
+		Check,
+		Circle,
+		CircleDot,
+		Diamond,
+	} from "lucide-svelte";
 </script>
 
 <div class="max-w-4xl mx-auto">
@@ -22,8 +38,9 @@
 			</div>
 			<h2 class="text-2xl font-serif text-foreground mb-3">Coming in First Buds (Early Spring)</h2>
 			<p class="text-foreground-muted max-w-2xl mx-auto">
-				<GroveTerm term="trails">Trails</GroveTerm> is <GroveTerm term="grove">Grove's</GroveTerm> personal roadmap system for building in public.
-				Create and share project timelines with waypoints, phases, and beautiful nature-themed presentations.
+				<GroveTerm term="trails">Trails</GroveTerm> is <GroveTerm term="grove">Grove's</GroveTerm> personal
+				roadmap system for building in public. Create and share project timelines with waypoints, phases,
+				and beautiful nature-themed presentations.
 			</p>
 		</div>
 	</GlassCard>
@@ -39,7 +56,10 @@
 					</div>
 					<div>
 						<h3 class="text-sm font-medium text-foreground mb-1">Waypoints & Phases</h3>
-						<p class="text-xs text-foreground-muted">Mark milestones as you complete them. Group them into phases like "Foundation", "Core Features", "Polish".</p>
+						<p class="text-xs text-foreground-muted">
+							Mark milestones as you complete them. Group them into phases like "Foundation", "Core
+							Features", "Polish".
+						</p>
 					</div>
 				</div>
 			</GlassCard>
@@ -51,7 +71,13 @@
 					</div>
 					<div>
 						<h3 class="text-sm font-medium text-foreground mb-1">Status Tracking</h3>
-						<p class="text-xs text-foreground-muted"><Circle class="w-3 h-3 inline-block" /> Planned, <CircleDot class="w-3 h-3 inline-block" /> In Progress, <Check class="w-3 h-3 inline-block" /> Complete, <Diamond class="w-3 h-3 inline-block" /> Deferred—clear visual indicators of where you are.</p>
+						<p class="text-xs text-foreground-muted">
+							<Circle class="w-3 h-3 inline-block" /> Planned, <CircleDot
+								class="w-3 h-3 inline-block"
+							/> In Progress, <Check class="w-3 h-3 inline-block" /> Complete, <Diamond
+								class="w-3 h-3 inline-block"
+							/> Deferred—clear visual indicators of where you are.
+						</p>
 					</div>
 				</div>
 			</GlassCard>
@@ -63,7 +89,10 @@
 					</div>
 					<div>
 						<h3 class="text-sm font-medium text-foreground mb-1">Nature Themes</h3>
-						<p class="text-xs text-foreground-muted">Seasonal backgrounds, weather particles, and beautiful nature-themed presentations for Oak+ tiers.</p>
+						<p class="text-xs text-foreground-muted">
+							Seasonal backgrounds, weather particles, and beautiful nature-themed presentations for
+							Oak+ tiers.
+						</p>
 					</div>
 				</div>
 			</GlassCard>
@@ -75,7 +104,10 @@
 					</div>
 					<div>
 						<h3 class="text-sm font-medium text-foreground mb-1">Templates</h3>
-						<p class="text-xs text-foreground-muted">Pre-configured structures for content plans, project roadmaps, seasonal menus, and more.</p>
+						<p class="text-xs text-foreground-muted">
+							Pre-configured structures for content plans, project roadmaps, seasonal menus, and
+							more.
+						</p>
 					</div>
 				</div>
 			</GlassCard>
@@ -91,7 +123,9 @@
 				<div>
 					<div class="flex items-center gap-2 mb-3">
 						<h3 class="text-sm font-medium text-foreground uppercase tracking-wide">Foundation</h3>
-						<span class="text-xs text-success inline-flex items-center gap-1"><Check class="w-3 h-3" /> Complete</span>
+						<span class="text-xs text-success inline-flex items-center gap-1"
+							><Check class="w-3 h-3" /> Complete</span
+						>
 					</div>
 					<div class="space-y-2 ml-4">
 						<div class="flex items-center gap-2 text-sm text-foreground-muted">
@@ -112,8 +146,12 @@
 				<!-- Core Features Phase -->
 				<div>
 					<div class="flex items-center gap-2 mb-3">
-						<h3 class="text-sm font-medium text-foreground uppercase tracking-wide">Core Features</h3>
-						<span class="text-xs text-accent-muted inline-flex items-center gap-1"><CircleDot class="w-3 h-3" /> In Progress</span>
+						<h3 class="text-sm font-medium text-foreground uppercase tracking-wide">
+							Core Features
+						</h3>
+						<span class="text-xs text-accent-muted inline-flex items-center gap-1"
+							><CircleDot class="w-3 h-3" /> In Progress</span
+						>
 					</div>
 					<div class="space-y-2 ml-4">
 						<div class="flex items-center gap-2 text-sm text-foreground-muted">
@@ -134,8 +172,12 @@
 				<!-- Future Phase -->
 				<div>
 					<div class="flex items-center gap-2 mb-3">
-						<h3 class="text-sm font-medium text-foreground uppercase tracking-wide">Future Dreams</h3>
-						<span class="text-xs text-foreground-subtle inline-flex items-center gap-1"><Circle class="w-3 h-3" /> Planned</span>
+						<h3 class="text-sm font-medium text-foreground uppercase tracking-wide">
+							Future Dreams
+						</h3>
+						<span class="text-xs text-foreground-subtle inline-flex items-center gap-1"
+							><Circle class="w-3 h-3" /> Planned</span
+						>
 					</div>
 					<div class="space-y-2 ml-4">
 						<div class="flex items-center gap-2 text-sm text-foreground-subtle">
@@ -161,13 +203,12 @@
 			<div>
 				<h3 class="text-lg font-serif text-foreground mb-2">Build in Public. Show the Journey.</h3>
 				<p class="text-sm text-foreground-muted mb-3">
-					<GroveSwap term="trails">Trails</GroveSwap> wind through the forest, marking where others have walked. They show the journey, not just the destination.
-					Whether planning a creative project, outlining upcoming blog content, or tracking progress on a long-term goal,
-					Trails provides a beautiful way to show where you've been, where you are, and where you're headed.
+					<GroveSwap term="trails">Trails</GroveSwap> wind through the forest, marking where others have
+					walked. They show the journey, not just the destination. Whether planning a creative project,
+					outlining upcoming blog content, or tracking progress on a long-term goal, Trails provides a
+					beautiful way to show where you've been, where you are, and where you're headed.
 				</p>
-				<p class="text-sm text-foreground-subtle italic">
-					The path becomes clear by walking it.
-				</p>
+				<p class="text-sm text-foreground-subtle italic">The path becomes clear by walking it.</p>
 			</div>
 		</div>
 	</GlassCard>

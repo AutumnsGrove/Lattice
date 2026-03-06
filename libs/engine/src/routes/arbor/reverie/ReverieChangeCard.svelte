@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Spinner } from "$lib/ui/components/ui";
+	import Spinner from "$lib/ui/components/ui/Spinner.svelte";
 	import { ChevronDown, ChevronUp, Check, X } from "lucide-svelte";
 
 	interface ChangePreview {
@@ -83,7 +83,10 @@
 
 	<div class="card-summary">
 		<span class="summary-text">
-			{changes.length} change{changes.length === 1 ? "" : "s"} across {domainCount} domain{domainCount === 1 ? "" : "s"}
+			{changes.length} change{changes.length === 1 ? "" : "s"} across {domainCount} domain{domainCount ===
+			1
+				? ""
+				: "s"}
 			{#if atmosphereUsed}
 				<span class="atmosphere-tag">{atmosphereUsed}</span>
 			{/if}
@@ -173,20 +176,10 @@
 			{/if}
 
 			<div class="action-buttons">
-				<button
-					type="button"
-					class="btn-cancel"
-					onclick={onCancel}
-					disabled={isApplying}
-				>
+				<button type="button" class="btn-cancel" onclick={onCancel} disabled={isApplying}>
 					Cancel
 				</button>
-				<button
-					type="button"
-					class="btn-apply"
-					onclick={onApply}
-					disabled={isApplying}
-				>
+				<button type="button" class="btn-apply" onclick={onApply} disabled={isApplying}>
 					{#if isApplying}
 						<Spinner />
 						Applying...

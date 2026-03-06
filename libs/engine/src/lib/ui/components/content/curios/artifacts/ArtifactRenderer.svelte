@@ -9,7 +9,7 @@
 		ArtifactComponentProps,
 		ArtifactComponentType,
 	} from "$lib/curios/artifacts";
-	import { GlassCard } from "$lib/ui/components/ui";
+	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 
 	import Magic8Ball from "./Magic8Ball.svelte";
 	import FortuneCookie from "./FortuneCookie.svelte";

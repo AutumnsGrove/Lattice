@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { GlassCard } from '$lib/ui';
+	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import {
 		Sparkles,
 		Activity,
@@ -13,8 +13,8 @@
 		Loader2,
 		TrendingUp,
 		BarChart3,
-		Layers
-	} from 'lucide-svelte';
+		Layers,
+	} from "lucide-svelte";
 
 	interface LumenTaskStat {
 		task: string;
@@ -55,19 +55,19 @@
 
 	// Task display names and icons
 	const taskInfo: Record<string, { name: string; icon: typeof Sparkles; color: string }> = {
-		moderation: { name: 'Moderation', icon: CheckCircle, color: 'text-emerald-600' },
-		generation: { name: 'Generation', icon: Sparkles, color: 'text-violet-600' },
-		summary: { name: 'Summary', icon: Layers, color: 'text-blue-600' },
-		embedding: { name: 'Embedding', icon: Database, color: 'text-amber-600' },
-		chat: { name: 'Chat', icon: Activity, color: 'text-rose-600' },
-		image: { name: 'Image', icon: Zap, color: 'text-pink-600' },
-		code: { name: 'Code', icon: Cpu, color: 'text-cyan-600' },
-		transcription: { name: 'Transcription', icon: BarChart3, color: 'text-indigo-600' },
+		moderation: { name: "Moderation", icon: CheckCircle, color: "text-emerald-600" },
+		generation: { name: "Generation", icon: Sparkles, color: "text-violet-600" },
+		summary: { name: "Summary", icon: Layers, color: "text-blue-600" },
+		embedding: { name: "Embedding", icon: Database, color: "text-amber-600" },
+		chat: { name: "Chat", icon: Activity, color: "text-rose-600" },
+		image: { name: "Image", icon: Zap, color: "text-pink-600" },
+		code: { name: "Code", icon: Cpu, color: "text-cyan-600" },
+		transcription: { name: "Transcription", icon: BarChart3, color: "text-indigo-600" },
 	};
 
 	// Format currency
 	function formatCost(cost: number): string {
-		if (cost < 0.01) return '<$0.01';
+		if (cost < 0.01) return "<$0.01";
 		return `$${cost.toFixed(2)}`;
 	}
 
@@ -86,7 +86,7 @@
 	function timeAgo(timestamp: string): string {
 		const date = new Date(timestamp);
 		const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
-		if (seconds < 60) return 'just now';
+		if (seconds < 60) return "just now";
 		if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
 		if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
 		return `${Math.floor(seconds / 86400)}d ago`;
@@ -167,9 +167,15 @@
 			{:else}
 				<div class="space-y-3">
 					{#each today as stat (stat.task)}
-						{@const info = taskInfo[stat.task] || { name: stat.task, icon: Zap, color: 'text-gray-600' }}
+						{@const info = taskInfo[stat.task] || {
+							name: stat.task,
+							icon: Zap,
+							color: "text-gray-600",
+						}}
 						{@const Icon = info.icon}
-						<div class="flex items-center justify-between p-3 rounded-lg bg-white/50 dark:bg-slate-800/50">
+						<div
+							class="flex items-center justify-between p-3 rounded-lg bg-white/50 dark:bg-slate-800/50"
+						>
 							<div class="flex items-center gap-3">
 								<Icon class="w-4 h-4 {info.color}" />
 								<span class="font-medium text-foreground">{info.name}</span>
@@ -199,7 +205,9 @@
 			{:else}
 				<div class="space-y-3">
 					{#each providers as provider (provider.provider)}
-						<div class="flex items-center justify-between p-3 rounded-lg bg-white/50 dark:bg-slate-800/50">
+						<div
+							class="flex items-center justify-between p-3 rounded-lg bg-white/50 dark:bg-slate-800/50"
+						>
 							<div class="flex items-center gap-3">
 								<div class="w-2 h-2 rounded-full bg-grove-500"></div>
 								<span class="font-medium text-foreground capitalize">{provider.provider}</span>
@@ -243,15 +251,24 @@
 					</thead>
 					<tbody>
 						{#each recent.slice(0, 20) as request (request.id)}
-							{@const info = taskInfo[request.task] || { name: request.task, icon: Zap, color: 'text-gray-600' }}
+							{@const info = taskInfo[request.task] || {
+								name: request.task,
+								icon: Zap,
+								color: "text-gray-600",
+							}}
 							{@const Icon = info.icon}
-							<tr class="border-b border-grove-100 dark:border-grove-800 last:border-0 hover:bg-white/30 dark:hover:bg-slate-800/30 transition-colors">
+							<tr
+								class="border-b border-grove-100 dark:border-grove-800 last:border-0 hover:bg-white/30 dark:hover:bg-slate-800/30 transition-colors"
+							>
 								<td class="py-3 px-3">
 									<div class="flex items-center gap-2">
 										<Icon class="w-4 h-4 {info.color}" />
 										<span class="text-foreground">{info.name}</span>
 										{#if request.cached}
-											<span class="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300">cached</span>
+											<span
+												class="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300"
+												>cached</span
+											>
 										{/if}
 									</div>
 								</td>
@@ -260,9 +277,15 @@
 								<td class="py-3 px-3 text-right text-foreground-subtle">
 									{formatNumber(request.input_tokens + request.output_tokens)}
 								</td>
-								<td class="py-3 px-3 text-right text-foreground-subtle">{formatCost(request.cost)}</td>
-								<td class="py-3 px-3 text-right text-foreground-subtle">{formatLatency(request.latency_ms)}</td>
-								<td class="py-3 px-3 text-right text-foreground-muted">{timeAgo(request.created_at)}</td>
+								<td class="py-3 px-3 text-right text-foreground-subtle"
+									>{formatCost(request.cost)}</td
+								>
+								<td class="py-3 px-3 text-right text-foreground-subtle"
+									>{formatLatency(request.latency_ms)}</td
+								>
+								<td class="py-3 px-3 text-right text-foreground-muted"
+									>{timeAgo(request.created_at)}</td
+								>
 							</tr>
 						{/each}
 					</tbody>

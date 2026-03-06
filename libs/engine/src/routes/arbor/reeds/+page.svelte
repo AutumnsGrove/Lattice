@@ -1,18 +1,9 @@
 <script lang="ts">
-	import {
-		GlassCard,
-		Badge,
-		toast,
-		GroveSwap,
-		MessageSquare,
-		Mail,
-		Check,
-		X,
-		Ban,
-		Settings,
-		ShieldAlert,
-		UserX,
-	} from "$lib/ui";
+	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
+	import Badge from "$lib/ui/components/ui/Badge.svelte";
+	import { toast } from "$lib/ui/components/ui/toast";
+	import GroveSwap from "$lib/ui/components/ui/groveterm/GroveSwap.svelte";
+	import { MessageSquare, Mail, Check, X, Ban, Settings, ShieldAlert, UserX } from "lucide-svelte";
 	import { api } from "$lib/utils/api";
 
 	let { data } = $props();

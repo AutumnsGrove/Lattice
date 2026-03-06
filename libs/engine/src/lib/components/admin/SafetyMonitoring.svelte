@@ -6,7 +6,7 @@
 	 * Props-based widget for embedding in admin panels (e.g., landing Lumen).
 	 */
 
-	import { GlassCard } from '$lib/ui';
+	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import {
 		Shield,
 		ShieldAlert,
@@ -16,8 +16,8 @@
 		CheckCircle,
 		XCircle,
 		Activity,
-		Clock
-	} from 'lucide-svelte';
+		Clock,
+	} from "lucide-svelte";
 
 	interface Props {
 		thornStats: {
@@ -53,22 +53,23 @@
 			flag_type: string;
 			created_at: string;
 		}>;
-		onReview?: (flagId: string, action: 'cleared' | 'removed', notes?: string) => Promise<void>;
+		onReview?: (flagId: string, action: "cleared" | "removed", notes?: string) => Promise<void>;
 	}
 
-	let { thornStats, petalBlocks, thornFlagged, thornRecent, petalFlags, onReview }: Props = $props();
+	let { thornStats, petalBlocks, thornFlagged, thornRecent, petalFlags, onReview }: Props =
+		$props();
 
-	let reviewMessage = $state<{ type: 'success' | 'error'; text: string } | null>(null);
+	let reviewMessage = $state<{ type: "success" | "error"; text: string } | null>(null);
 	let reviewingId = $state<string | null>(null);
 
 	function formatTime(ts: string): string {
 		try {
 			const d = new Date(ts);
-			return d.toLocaleDateString('en-US', {
-				month: 'short',
-				day: 'numeric',
-				hour: '2-digit',
-				minute: '2-digit'
+			return d.toLocaleDateString("en-US", {
+				month: "short",
+				day: "numeric",
+				hour: "2-digit",
+				minute: "2-digit",
 			});
 		} catch {
 			return ts;
@@ -77,21 +78,31 @@
 
 	function actionClass(action: string): string {
 		switch (action) {
-			case 'allow': return 'action-allow';
-			case 'warn': return 'action-warn';
-			case 'flag_review': return 'action-flag';
-			case 'block': return 'action-block';
-			default: return 'action-default';
+			case "allow":
+				return "action-allow";
+			case "warn":
+				return "action-warn";
+			case "flag_review":
+				return "action-flag";
+			case "block":
+				return "action-block";
+			default:
+				return "action-default";
 		}
 	}
 
 	function actionLabel(action: string): string {
 		switch (action) {
-			case 'allow': return 'Allowed';
-			case 'warn': return 'Warned';
-			case 'flag_review': return 'Flagged';
-			case 'block': return 'Blocked';
-			default: return action;
+			case "allow":
+				return "Allowed";
+			case "warn":
+				return "Warned";
+			case "flag_review":
+				return "Flagged";
+			case "block":
+				return "Blocked";
+			default:
+				return action;
 		}
 	}
 
@@ -100,26 +111,26 @@
 		try {
 			const parsed = JSON.parse(cats);
 			if (!Array.isArray(parsed)) return [];
-			return parsed.filter((c): c is string => typeof c === 'string').slice(0, 20);
+			return parsed.filter((c): c is string => typeof c === "string").slice(0, 20);
 		} catch {
 			return [];
 		}
 	}
 
-	async function handleReview(flagId: string, action: 'cleared' | 'removed') {
+	async function handleReview(flagId: string, action: "cleared" | "removed") {
 		if (!onReview) return;
 		reviewingId = flagId;
 		reviewMessage = null;
 		try {
 			await onReview(flagId, action);
 			reviewMessage = {
-				type: 'success',
-				text: `Content ${action === 'cleared' ? 'cleared' : 'removed'} successfully`
+				type: "success",
+				text: `Content ${action === "cleared" ? "cleared" : "removed"} successfully`,
 			};
 		} catch (err) {
 			reviewMessage = {
-				type: 'error',
-				text: err instanceof Error ? err.message : 'Review action failed'
+				type: "error",
+				text: err instanceof Error ? err.message : "Review action failed",
 			};
 		} finally {
 			reviewingId = null;
@@ -129,8 +140,8 @@
 
 <div class="safety-dashboard">
 	{#if reviewMessage}
-		<div class={reviewMessage.type === 'success' ? 'success-banner' : 'error-banner'}>
-			{#if reviewMessage.type === 'success'}
+		<div class={reviewMessage.type === "success" ? "success-banner" : "error-banner"}>
+			{#if reviewMessage.type === "success"}
 				<CheckCircle class="banner-icon" />
 			{:else}
 				<AlertTriangle class="banner-icon" />
@@ -290,16 +301,19 @@
 				{#each thornFlagged as flag}
 					<div class="queue-row">
 						<span class="queue-col-type">{flag.content_type}</span>
-						<span class="queue-col-ref">{flag.content_ref || '—'}</span>
+						<span class="queue-col-ref">{flag.content_ref || "—"}</span>
 						<span class="queue-col-action">
-							<span class="action-badge {actionClass(flag.action)}">{actionLabel(flag.action)}</span>
+							<span class="action-badge {actionClass(flag.action)}">{actionLabel(flag.action)}</span
+							>
 						</span>
 						<span class="queue-col-categories">
 							{#each parseCategories(flag.categories) as cat}
 								<span class="cat-tag">{cat}</span>
 							{/each}
 						</span>
-						<span class="queue-col-confidence">{flag.confidence ? `${Math.round(flag.confidence * 100)}%` : '—'}</span>
+						<span class="queue-col-confidence"
+							>{flag.confidence ? `${Math.round(flag.confidence * 100)}%` : "—"}</span
+						>
 						<span class="queue-col-time">{formatTime(flag.created_at)}</span>
 						<span class="queue-col-actions">
 							<div class="review-buttons">
@@ -307,7 +321,7 @@
 									class="btn-clear"
 									title="Clear - content is safe"
 									disabled={reviewingId === flag.id}
-									onclick={() => handleReview(flag.id, 'cleared')}
+									onclick={() => handleReview(flag.id, "cleared")}
 								>
 									<CheckCircle class="btn-icon" />
 								</button>
@@ -315,7 +329,7 @@
 									class="btn-remove"
 									title="Remove - content violates policy"
 									disabled={reviewingId === flag.id}
-									onclick={() => handleReview(flag.id, 'removed')}
+									onclick={() => handleReview(flag.id, "removed")}
 								>
 									<XCircle class="btn-icon" />
 								</button>
@@ -340,9 +354,10 @@
 			<div class="activity-list">
 				{#each thornRecent as event}
 					<div class="activity-row">
-						<span class="action-badge {actionClass(event.action)}">{actionLabel(event.action)}</span>
+						<span class="action-badge {actionClass(event.action)}">{actionLabel(event.action)}</span
+						>
 						<span class="activity-type">{event.content_type}</span>
-						<span class="activity-ref">{event.content_ref || ''}</span>
+						<span class="activity-ref">{event.content_ref || ""}</span>
 						{#each parseCategories(event.categories) as cat}
 							<span class="cat-tag">{cat}</span>
 						{/each}
@@ -663,7 +678,9 @@
 		border: none;
 		border-radius: var(--border-radius-small);
 		cursor: pointer;
-		transition: background 0.15s, color 0.15s;
+		transition:
+			background 0.15s,
+			color 0.15s;
 	}
 
 	.btn-clear:disabled,

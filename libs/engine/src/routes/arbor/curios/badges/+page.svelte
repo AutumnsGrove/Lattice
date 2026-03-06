@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { enhance } from "$app/forms";
-	import { GlassCard, GlassButton, toast } from "$lib/ui/components/ui";
+	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
+	import GlassButton from "$lib/ui/components/ui/GlassButton.svelte";
+	import { toast } from "$lib/ui/components/ui/toast";
 	import { Award, Plus, Trash2, Star, Settings } from "lucide-svelte";
 
 	let { data, form } = $props();
@@ -67,7 +69,10 @@
 							<p class="config-hint">How your badge collection is arranged</p>
 							<div class="radio-grid">
 								{#each data.wallLayoutOptions as layout}
-									<label class="radio-card" class:selected={data.config.wallLayout === layout.value}>
+									<label
+										class="radio-card"
+										class:selected={data.config.wallLayout === layout.value}
+									>
 										<input
 											type="radio"
 											name="wallLayout"

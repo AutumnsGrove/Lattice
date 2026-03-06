@@ -25,7 +25,7 @@
 		X,
 		MapPin,
 	} from "lucide-svelte";
-	import { GlassCard } from "$lib/ui";
+	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 
 	let { data, form } = $props();
 
@@ -99,9 +99,7 @@
 
 	// Calculate satisfaction rate
 	const satisfactionRate = $derived(
-		data.stats.total > 0
-			? Math.round((data.stats.upvotes / data.stats.total) * 100)
-			: 0,
+		data.stats.total > 0 ? Math.round((data.stats.upvotes / data.stats.total) * 100) : 0,
 	);
 </script>
 
@@ -172,7 +170,9 @@
 		</GlassCard>
 
 		<GlassCard variant="muted" class="p-4 text-center">
-			<div class="text-3xl font-bold text-grove-600 dark:text-grove-400 flex items-center justify-center gap-1">
+			<div
+				class="text-3xl font-bold text-grove-600 dark:text-grove-400 flex items-center justify-center gap-1"
+			>
 				<ThumbsUp class="w-6 h-6" />
 				{data.stats.upvotes}
 			</div>
@@ -180,7 +180,9 @@
 		</GlassCard>
 
 		<GlassCard variant="muted" class="p-4 text-center">
-			<div class="text-3xl font-bold text-rose-600 dark:text-rose-400 flex items-center justify-center gap-1">
+			<div
+				class="text-3xl font-bold text-rose-600 dark:text-rose-400 flex items-center justify-center gap-1"
+			>
 				<ThumbsDown class="w-6 h-6" />
 				{data.stats.downvotes}
 			</div>
@@ -264,9 +266,7 @@
 			<GlassCard variant="frosted">
 				<div class="divide-y divide-white/10 dark:divide-bark-700/30">
 					{#each data.traces as trace}
-						<div
-							class="p-4 group {trace.read_at ? 'opacity-70' : ''}"
-						>
+						<div class="p-4 group {trace.read_at ? 'opacity-70' : ''}">
 							<div class="flex items-start gap-4">
 								<!-- Vote indicator -->
 								<div
@@ -310,7 +310,9 @@
 								</div>
 
 								<!-- Actions -->
-								<div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+								<div
+									class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+								>
 									{#if !trace.read_at}
 										<form
 											method="POST"
@@ -372,7 +374,9 @@
 							{#if voteFilter || unreadOnly || sourceFilter}
 								No traces match your filters
 							{:else}
-								No traces yet. Add <code class="px-1 py-0.5 rounded bg-white/40">&lt;Trace /&gt;</code> to your pages to start collecting feedback.
+								No traces yet. Add <code class="px-1 py-0.5 rounded bg-white/40"
+									>&lt;Trace /&gt;</code
+								> to your pages to start collecting feedback.
 							{/if}
 						</div>
 					{/each}
@@ -385,10 +389,8 @@
 					>
 						<span class="text-sm text-foreground-muted">
 							Showing {(data.pagination.page - 1) * data.pagination.pageSize + 1} -
-							{Math.min(
-								data.pagination.page * data.pagination.pageSize,
-								data.pagination.total,
-							)} of {data.pagination.total}
+							{Math.min(data.pagination.page * data.pagination.pageSize, data.pagination.total)} of {data
+								.pagination.total}
 						</span>
 
 						<div class="flex items-center gap-1">
@@ -422,19 +424,14 @@
 		<!-- Sidebar: By Location -->
 		<div class="space-y-4">
 			<GlassCard variant="frosted">
-				<h2
-					class="text-lg font-medium text-foreground mb-4 flex items-center gap-2 px-4 pt-4"
-				>
+				<h2 class="text-lg font-medium text-foreground mb-4 flex items-center gap-2 px-4 pt-4">
 					<MapPin class="w-5 h-5 text-grove-600 dark:text-grove-400" />
 					By Location
 				</h2>
 
 				<div class="divide-y divide-white/10 dark:divide-bark-700/30">
 					{#each data.sourceStats as source}
-						{@const rate =
-							source.total > 0
-								? Math.round((source.upvotes / source.total) * 100)
-								: 0}
+						{@const rate = source.total > 0 ? Math.round((source.upvotes / source.total) * 100) : 0}
 						<button
 							type="button"
 							onclick={() => {
@@ -464,9 +461,7 @@
 							</div>
 						</button>
 					{:else}
-						<div class="p-4 text-sm text-foreground-muted">
-							No location data yet
-						</div>
+						<div class="p-4 text-sm text-foreground-muted">No location data yet</div>
 					{/each}
 				</div>
 			</GlassCard>

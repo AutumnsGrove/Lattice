@@ -1,5 +1,7 @@
 <script lang="ts">
-	import { GlassCard, Button, Spinner } from "$lib/ui";
+	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
+	import Button from "$lib/ui/components/ui/Button.svelte";
+	import Spinner from "$lib/ui/components/ui/Spinner.svelte";
 	import { toast } from "$lib/ui/components/ui/toast";
 	import { api } from "$lib/utils";
 	import {

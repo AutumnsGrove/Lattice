@@ -6,8 +6,8 @@
 -->
 
 <script lang="ts">
-	import TurnstileWidget from '$lib/ui/components/forms/TurnstileWidget.svelte';
-	import { GroveTerm } from '$lib/ui';
+	import TurnstileWidget from "$lib/ui/components/forms/TurnstileWidget.svelte";
+	import GroveTerm from "$lib/ui/components/ui/groveterm/GroveTerm.svelte";
 
 	interface Props {
 		data: {
@@ -18,23 +18,23 @@
 
 	let { data }: Props = $props();
 
-	let status: 'waiting' | 'verifying' | 'success' | 'error' = $state('waiting');
-	let errorMessage = $state('');
+	let status: "waiting" | "verifying" | "success" | "error" = $state("waiting");
+	let errorMessage = $state("");
 
 	async function handleVerification(token: string) {
-		status = 'verifying';
+		status = "verifying";
 
 		try {
-			const response = await fetch('/api/verify/turnstile', {
-				method: 'POST',
+			const response = await fetch("/api/verify/turnstile", {
+				method: "POST",
 				headers: {
-					'Content-Type': 'application/json'
+					"Content-Type": "application/json",
 				},
-				body: JSON.stringify({ token })
+				body: JSON.stringify({ token }),
 			});
 
 			if (response.ok) {
-				status = 'success';
+				status = "success";
 				// Brief pause to show success, then do a HARD redirect
 				// (soft navigation via goto won't pick up the new verification cookie)
 				setTimeout(() => {
@@ -42,19 +42,19 @@
 				}, 500);
 			} else {
 				const result = (await response.json()) as { message?: string };
-				status = 'error';
-				errorMessage = result.message || 'Verification failed. Please try again.';
+				status = "error";
+				errorMessage = result.message || "Verification failed. Please try again.";
 			}
 		} catch (err) {
-			status = 'error';
-			errorMessage = 'Connection error. Please check your internet and try again.';
+			status = "error";
+			errorMessage = "Connection error. Please check your internet and try again.";
 		}
 	}
 
 	function handleError(error: string) {
-		status = 'error';
-		errorMessage = 'Verification widget failed to load. Please refresh the page.';
-		console.error('Turnstile error:', error);
+		status = "error";
+		errorMessage = "Verification widget failed to load. Please refresh the page.";
+		console.error("Turnstile error:", error);
 	}
 </script>
 
@@ -67,16 +67,18 @@
 	<div class="verify-container">
 		<div class="grove-logo">
 			<svg viewBox="0 0 24 24" fill="currentColor" width="48" height="48">
-				<path d="M12 2C8 2 4 6 4 12c0 4 2 7 5 9v-4c-1.5-1-2.5-2.5-2.5-4.5C6.5 9 9 6.5 12 6.5S17.5 9 17.5 12.5c0 2-1 3.5-2.5 4.5v4c3-2 5-5 5-9 0-6-4-10-8-10z"/>
+				<path
+					d="M12 2C8 2 4 6 4 12c0 4 2 7 5 9v-4c-1.5-1-2.5-2.5-2.5-4.5C6.5 9 9 6.5 12 6.5S17.5 9 17.5 12.5c0 2-1 3.5-2.5 4.5v4c3-2 5-5 5-9 0-6-4-10-8-10z"
+				/>
 			</svg>
 		</div>
 
 		<h1>Entering the Grove...</h1>
 
-		{#if status === 'waiting' || status === 'verifying'}
+		{#if status === "waiting" || status === "verifying"}
 			<p class="subtitle">
-				This site uses <strong><GroveTerm term="shade">Shade</GroveTerm></strong> to protect the author's writing from AI scrapers
-				and automated harvesting. We're just making sure you're a real person
+				This site uses <strong><GroveTerm term="shade">Shade</GroveTerm></strong> to protect the author's
+				writing from AI scrapers and automated harvesting. We're just making sure you're a real person
 				here to read, not a bot here to collect.
 			</p>
 
@@ -88,16 +90,14 @@
 				/>
 			</div>
 
-			{#if status === 'verifying'}
+			{#if status === "verifying"}
 				<p class="status verifying">Verifying...</p>
 			{/if}
-		{:else if status === 'success'}
+		{:else if status === "success"}
 			<p class="status success">Verified! Redirecting...</p>
-		{:else if status === 'error'}
+		{:else if status === "error"}
 			<p class="status error">{errorMessage}</p>
-			<button class="retry-button" onclick={() => window.location.reload()}>
-				Try Again
-			</button>
+			<button class="retry-button" onclick={() => window.location.reload()}> Try Again </button>
 		{/if}
 
 		<p class="info">
