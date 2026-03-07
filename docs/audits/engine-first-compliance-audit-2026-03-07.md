@@ -245,7 +245,7 @@ Zero violations found. All class merging uses `cn()` from `@autumnsgrove/lattice
 
 ---
 
-## Finding 8: Workers Utility Isolation
+## Finding 9: Workers Utility Isolation
 
 **Severity: LOW** — Some duplication is acceptable for standalone workers.
 
