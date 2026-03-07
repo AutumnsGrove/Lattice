@@ -24,16 +24,19 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          use_sticky_comment: true
 
           prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
             Review this pull request for real bugs — not style nits or speculation.
 
             ## Steps
 
             1. Run `gh pr diff ${{ github.event.pull_request.number }}` to see the changes
             2. Analyze the diff for issues listed below
-            3. Output your review directly — it will be posted as a PR comment automatically
+            3. Post your review using `gh pr comment`
+            Only post GitHub comments — don't submit review text as messages.
 
             ## What to Flag
 
@@ -56,7 +59,7 @@ jobs:
 
             ## Output Format
 
-            Use this exact format for your response:
+            Use this exact format when posting via `gh pr comment`:
 
             ## Code Review
 
@@ -72,5 +75,5 @@ jobs:
             If the PR looks good, say so briefly. A clean review is a good review — do not manufacture feedback.
 
           claude_args: >-
-            --max-turns 3
-            --allowedTools Bash(gh pr diff:*),Bash(gh pr view:*)
+            --max-turns 10
+            --allowedTools "Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
