@@ -45,9 +45,9 @@
 	// ============================================================================
 
 	let billingPeriod = $state<BillingPeriod>("monthly");
-	// Auto-select first available paid tier (skip free so users see it as an explicit choice)
+	// Auto-select first available paid tier (skip wanderer so users see it as an explicit choice)
 	let selectedPlan = $state<string | null>(
-		plans.find((p: PricingTier) => p.status === "available" && p.key !== "free")?.key ?? null,
+		plans.find((p: PricingTier) => p.status === "available" && p.key !== "wanderer")?.key ?? null,
 	);
 
 	// Submission state
@@ -57,8 +57,8 @@
 	// Map billing period to database format (annual → yearly)
 	let billingCycleForDb = $derived(billingPeriodToDbFormat(billingPeriod));
 
-	// Check if the selected plan is free (Wanderer)
-	let isFreePlan = $derived(selectedPlan === "free");
+	// Check if the selected plan is wanderer
+	let isWandererPlan = $derived(selectedPlan === "wanderer");
 
 	// Submit plan selection via JSON API
 	async function selectPlanForOnboarding(stage: TierKey) {
@@ -66,12 +66,12 @@
 		isSubmitting = true;
 		submitError = null;
 
-		// Free plan skips checkout — goes directly to success
-		const redirect = stage === "free" ? "/success" : "/checkout";
+		// Wanderer plan skips checkout — goes directly to success
+		const redirect = stage === "wanderer" ? "/success" : "/checkout";
 
 		const error = await submitFormAndGo("/api/select-plan", {
 			plan: stage,
-			billingCycle: stage === "free" ? "monthly" : billingCycleForDb,
+			billingCycle: stage === "wanderer" ? "monthly" : billingCycleForDb,
 		});
 
 		if (error) {
@@ -231,8 +231,8 @@
 					isCurrent={false}
 					isNext={isSelected}
 					available={isAvailable}
-					monthlyPrice={tier.key === "free" ? 0 : Number(monthlyPrice)}
-					annualPrice={tier.key === "free" ? 0 : Number(yearlyPrice)}
+					monthlyPrice={tier.key === "wanderer" ? 0 : Number(monthlyPrice)}
+					annualPrice={tier.key === "wanderer" ? 0 : Number(yearlyPrice)}
 					features={displayFeatures}
 					variant={isSelected ? "primary" : "secondary"}
 					onCultivate={() => handleSelectPlan(tier)}
@@ -262,7 +262,7 @@
 		{#if selectedPlan}
 			{@const selectedTier = plans.find((p) => p.key === selectedPlan)}
 			{@const selectedSavings =
-				billingPeriod === "annual" && selectedTier?.key !== "free" && selectedTier
+				billingPeriod === "annual" && selectedTier?.key !== "wanderer" && selectedTier
 					? getYearlySavingsAmount(selectedTier)
 					: 0}
 			<div
@@ -277,7 +277,7 @@
 									: selectedTier?.standardName || selectedTier?.name}</span
 							>
 						</p>
-						{#if billingPeriod === "annual" && selectedTier?.key !== "free"}
+						{#if billingPeriod === "annual" && selectedTier?.key !== "wanderer"}
 							<p class="text-xs text-accent mt-0.5">
 								Save ${selectedSavings}/year with annual billing
 							</p>
@@ -303,7 +303,7 @@
 				Processing...
 			{:else if selectedPlan}
 				{@const selectedTier = plans.find((p) => p.key === selectedPlan)}
-				{#if selectedTier?.key === "free"}
+				{#if selectedTier?.key === "wanderer"}
 					Start writing for free
 				{:else}
 					Continue with {groveModeStore.current
@@ -314,7 +314,7 @@
 				Select a plan to continue
 			{/if}
 		</button>
-		{#if selectedPlan === "free"}
+		{#if selectedPlan === "wanderer"}
 			<p class="text-xs text-foreground-subtle text-center">
 				No credit card required. Upgrade anytime.
 			</p>

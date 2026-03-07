@@ -188,8 +188,8 @@ describe("Themes", () => {
 		});
 
 		it("should return 0 themes for free tier", () => {
-			const freeThemes = getThemesForTier("free");
-			expect(freeThemes).toHaveLength(0);
+			const freeThemes = getThemesForTier("wanderer");
+			expect(wandererThemes).toHaveLength(0);
 		});
 
 		it("should have exactly 3 seedling tier themes", () => {

@@ -22,7 +22,7 @@ describe("Plan Configuration", () => {
       { name: string; price: number; interval: string; features: string[] }
     > = Object.fromEntries(
       Object.entries(TIERS)
-        .filter(([key]) => key !== "free")
+        .filter(([key]) => key !== "wanderer")
         .map(([key, tier]) => [
           key,
           {
@@ -41,14 +41,14 @@ describe("Plan Configuration", () => {
     expect(Object.keys(PLANS)).toContain("evergreen");
   });
 
-  it("should exclude free tier from billing plans", () => {
+  it("should exclude wanderer tier from billing plans", () => {
     const PLANS = Object.fromEntries(
       Object.entries(TIERS)
-        .filter(([key]) => key !== "free")
+        .filter(([key]) => key !== "wanderer")
         .map(([key, tier]) => [key, tier]),
     );
 
-    expect(Object.keys(PLANS)).not.toContain("free");
+    expect(Object.keys(PLANS)).not.toContain("wanderer");
   });
 
   it("should have correct pricing for each tier", () => {

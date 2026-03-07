@@ -14,18 +14,7 @@
 
 import type MarkdownIt from "markdown-it";
 import type StateBlock from "markdown-it/lib/rules_block/state_block.mjs";
-
-/**
- * Escape HTML special characters for safe embedding in attributes and content.
- */
-function escapeHtml(str: string): string {
-	return str
-		.replace(/&/g, "&amp;")
-		.replace(/</g, "&lt;")
-		.replace(/>/g, "&gt;")
-		.replace(/"/g, "&quot;")
-		.replace(/'/g, "&#39;");
-}
+import { escapeHtml } from "./escape-html.js";
 
 // ============================================================================
 // Directive Handlers

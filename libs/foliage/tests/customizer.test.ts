@@ -158,9 +158,9 @@ describe("Theme Customizer", () => {
 	});
 
 	describe("Tier Gating", () => {
-		it("should block customizer for free/seedling/sapling tiers", () => {
-			// Free tier should not have access
-			expect(canUseCustomizer("free")).toBe(false);
+		it("should block customizer for wanderer/seedling/sapling tiers", () => {
+			// Wanderer tier should not have access
+			expect(canUseCustomizer("wanderer")).toBe(false);
 
 			// Seedling tier should not have access
 			expect(canUseCustomizer("seedling")).toBe(false);

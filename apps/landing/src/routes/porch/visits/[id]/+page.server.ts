@@ -2,6 +2,7 @@ import { fail, type Actions } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import { generateId } from "@autumnsgrove/lattice/services";
 import { GROVE_EMAILS } from "@autumnsgrove/lattice/config";
+import { escapeHtml } from "@autumnsgrove/lattice/utils";
 import { Resend } from "resend";
 
 interface Visit {
@@ -24,16 +25,6 @@ interface Message {
   sender_name: string | null;
   content: string;
   created_at: number;
-}
-
-function escapeHtml(unsafe: string | null): string {
-  if (!unsafe) return "";
-  return unsafe
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
 }
 
 export const load: PageServerLoad = async ({ params, locals, platform }) => {

@@ -2,6 +2,7 @@ import { fail, redirect, type Actions } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import { generateId } from "@autumnsgrove/lattice/services";
 import { isWayfinder, GROVE_EMAILS } from "@autumnsgrove/lattice/config";
+import { escapeHtml } from "@autumnsgrove/lattice/utils";
 import { Resend } from "resend";
 
 interface Visit {
@@ -31,16 +32,6 @@ interface User {
   id: string;
   email: string;
   name: string | null;
-}
-
-function escapeHtml(unsafe: string | null): string {
-  if (!unsafe) return "";
-  return unsafe
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
 }
 
 export const load: PageServerLoad = async ({ params, parent, platform }) => {

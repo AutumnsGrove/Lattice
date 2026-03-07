@@ -1,19 +1,19 @@
 /**
  * Pricing Page Server Load
  *
- * Shows available tiers - Wanderer (free) and Seedling ($8/mo).
+ * Shows available tiers - Wanderer and Seedling ($8/mo).
  * See /pricing/full for the complete 5-tier view.
  */
 
 import { transformAllTiers } from "@autumnsgrove/lattice/grafts/pricing";
 
 export function load() {
-  // Available tiers: Wanderer (free) first, then Seedling
+  // Available tiers: Wanderer first, then Seedling
   const tiers = transformAllTiers({
-    includeTiers: ["free", "seedling"],
-    highlightTier: "free",
+    includeTiers: ["wanderer", "seedling"],
+    highlightTier: "wanderer",
     badges: {
-      free: "Free",
+      wanderer: "Free",
       seedling: "$8/mo",
     },
   });

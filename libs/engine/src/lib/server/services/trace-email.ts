@@ -6,6 +6,7 @@
  */
 
 import { ZephyrClient } from "$lib/zephyr/client.js";
+import { escapeHtml } from "../utils/escape-html.js";
 
 const DEFAULT_ZEPHYR_URL = "https://grove-zephyr.m7jv4v7npb.workers.dev";
 
@@ -133,11 +134,3 @@ function buildTextEmail(
   return text;
 }
 
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}

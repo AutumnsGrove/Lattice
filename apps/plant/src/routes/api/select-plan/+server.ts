@@ -26,7 +26,7 @@ import { shouldSkipCheckout } from "$lib/server/onboarding-helper";
 const VALID_BILLING_CYCLES = ["monthly", "yearly"] as const;
 type BillingCycle = (typeof VALID_BILLING_CYCLES)[number];
 
-// Transform all tiers including free (Wanderer)
+// Transform all tiers including wanderer
 const tiers = transformAllTiers();
 
 function isValidPlanId(id: string): id is TierKey {
@@ -174,7 +174,7 @@ export const POST: RequestHandler = async ({
     `[Select Plan API] Saved plan=${plan} cycle=${billingCycle} for ${onboardingId.slice(0, 8)}...`,
   );
 
-  // Free plan (Wanderer) skips checkout — create tenant directly
+  // Wanderer plan skips checkout — create tenant directly
   if (shouldSkipCheckout(plan)) {
     // Resolve client IP once for both rate-check and logging
     let clientIP: string | undefined;
@@ -250,12 +250,12 @@ export const POST: RequestHandler = async ({
           username: onboarding.username,
           displayName: onboarding.display_name,
           email: onboarding.email,
-          plan: "free",
+          plan: "wanderer",
           favoriteColor: onboarding.favorite_color,
         });
 
         console.log(
-          `[Select Plan API] Created free tier tenant for ${onboarding.username}`,
+          `[Select Plan API] Created wanderer tier tenant for ${onboarding.username}`,
         );
       }
     } catch (err) {

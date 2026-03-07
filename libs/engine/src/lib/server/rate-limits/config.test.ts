@@ -16,7 +16,7 @@ import {
 
 describe("TIER_RATE_LIMITS", () => {
   const allTiers: SubscriptionTier[] = [
-    "free",
+    "wanderer",
     "seedling",
     "sapling",
     "oak",
@@ -51,7 +51,7 @@ describe("TIER_RATE_LIMITS", () => {
   it("higher tiers have higher or equal limits", () => {
     for (const category of categories) {
       expect(TIER_RATE_LIMITS.seedling[category].limit).toBeGreaterThanOrEqual(
-        TIER_RATE_LIMITS.free[category].limit,
+        TIER_RATE_LIMITS.wanderer[category].limit,
       );
       expect(TIER_RATE_LIMITS.sapling[category].limit).toBeGreaterThanOrEqual(
         TIER_RATE_LIMITS.seedling[category].limit,
@@ -65,12 +65,12 @@ describe("TIER_RATE_LIMITS", () => {
     }
   });
 
-  it("free tier has expected rate limits", () => {
-    expect(TIER_RATE_LIMITS.free.requests.limit).toBe(60);
-    expect(TIER_RATE_LIMITS.free.requests.windowSeconds).toBe(60);
-    expect(TIER_RATE_LIMITS.free.writes.limit).toBe(20);
-    expect(TIER_RATE_LIMITS.free.uploads.limit).toBe(5);
-    expect(TIER_RATE_LIMITS.free.ai.limit).toBe(0);
+  it("wanderer tier has expected rate limits", () => {
+    expect(TIER_RATE_LIMITS.wanderer.requests.limit).toBe(60);
+    expect(TIER_RATE_LIMITS.wanderer.requests.windowSeconds).toBe(60);
+    expect(TIER_RATE_LIMITS.wanderer.writes.limit).toBe(20);
+    expect(TIER_RATE_LIMITS.wanderer.uploads.limit).toBe(5);
+    expect(TIER_RATE_LIMITS.wanderer.ai.limit).toBe(0);
   });
 
   it("seedling has expected default values", () => {
@@ -142,8 +142,8 @@ describe("getTierLimit", () => {
 });
 
 describe("isValidTier", () => {
-  it("returns true for valid tiers including free", () => {
-    expect(isValidTier("free")).toBe(true);
+  it("returns true for valid tiers including wanderer", () => {
+    expect(isValidTier("wanderer")).toBe(true);
     expect(isValidTier("seedling")).toBe(true);
     expect(isValidTier("sapling")).toBe(true);
     expect(isValidTier("oak")).toBe(true);

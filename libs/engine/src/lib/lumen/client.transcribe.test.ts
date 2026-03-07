@@ -322,7 +322,7 @@ describe("transcribe() - Quota Enforcement", () => {
           audio: SAMPLE_AUDIO,
           tenant: "tenant_123",
         },
-        "free",
+        "wanderer",
       ),
     ).rejects.toThrow(/limit reached/i);
   });
@@ -342,7 +342,7 @@ describe("transcribe() - Quota Enforcement", () => {
         tenant: "tenant_123",
         options: { skipQuota: true },
       },
-      "free",
+      "wanderer",
     );
 
     // Assert

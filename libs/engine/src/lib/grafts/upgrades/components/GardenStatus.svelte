@@ -26,7 +26,7 @@
 	import type { FlourishState } from "../types.js";
 
 	let {
-		currentStage = "free",
+		currentStage = "wanderer",
 		flourishState = "active" as FlourishState,
 		currentPeriodEnd = null,
 		pruningScheduled = false,
@@ -40,7 +40,7 @@
 
 	// Icon mapping — keyed by TierKey
 	const iconComponents: Record<TierKey, typeof Sprout> = {
-		free: Footprints,
+		wanderer: Footprints,
 		seedling: Sprout,
 		sapling: TreeDeciduous,
 		oak: Trees,
@@ -49,7 +49,7 @@
 
 	// Stage display names
 	const stageNames: Record<TierKey, string> = {
-		free: "Wanderer",
+		wanderer: "Wanderer",
 		seedling: "Seedling",
 		sapling: "Sapling",
 		oak: "Oak",
@@ -78,7 +78,7 @@
 
 	// Next stage for nurture CTA
 	const nextStage: Record<TierKey, TierKey | null> = {
-		free: "seedling",
+		wanderer: "seedling",
 		seedling: "sapling",
 		sapling: "oak",
 		oak: "evergreen",
@@ -169,7 +169,7 @@
 			{#if canNurture && flourishState === "active"}
 				<div class="mt-2 p-3 rounded-lg bg-grove-50 dark:bg-grove-900/30 text-sm">
 					<p class="text-foreground-muted">
-						{#if currentStage === "free"}
+						{#if currentStage === "wanderer"}
 							Free tier.
 						{/if}
 						<button
@@ -178,14 +178,14 @@
 							onclick={() => onNurture?.()}
 						>
 							<Sprout class="w-3.5 h-3.5" />
-							{#if currentStage === "free"}<GroveSwap term="cultivate" standard="Grow to Seedling"
+							{#if currentStage === "wanderer"}<GroveSwap term="cultivate" standard="Grow to Seedling"
 									>Cultivate to Seedling</GroveSwap
 								>{:else}<GroveSwap term="nurture" standard="Explore upgrades"
 									>Nurture your garden</GroveSwap
 								>{/if}
 							<ArrowRight class="w-3 h-3" />
 						</button>
-						{#if currentStage === "free"}
+						{#if currentStage === "wanderer"}
 							to unlock more features.
 						{/if}
 					</p>

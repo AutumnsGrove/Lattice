@@ -42,7 +42,7 @@ interface Env {
  * - warmViewThreshold: Views needed to stay in WARM storage (vs moving to COLD)
  * - coldPromotionThreshold: Views that trigger promotion back from COLD
  */
-type TierKey = "free" | "seedling" | "sapling" | "oak" | "evergreen";
+type TierKey = "wanderer" | "seedling" | "sapling" | "oak" | "evergreen";
 
 /**
  * Default tier used when tier is unknown or invalid.
@@ -59,8 +59,8 @@ interface StorageTierThresholds {
 }
 
 const STORAGE_THRESHOLDS: Record<TierKey, StorageTierThresholds> = {
-	// Free tier: Most aggressive migration (no blog, but for future)
-	free: {
+	// Wanderer tier: Most aggressive migration (no blog, but for future)
+	wanderer: {
 		hotViewThreshold: 15,
 		warmViewThreshold: 3,
 		coldPromotionThreshold: 5,

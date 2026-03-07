@@ -11,15 +11,10 @@ import type {
 	UsageBreakdown,
 	QuotaStatus,
 } from "$types";
+import { TIER_STORAGE_GB } from "@autumnsgrove/lattice/config";
 
-// Tier storage allocations in GB
-export const TIER_STORAGE: Record<string, number> = {
-	free: 0,
-	seedling: 1,
-	sapling: 5,
-	oak: 20,
-	evergreen: 100,
-};
+// Re-export for backwards compatibility
+export const TIER_STORAGE = TIER_STORAGE_GB;
 
 // Add-on configurations
 export const STORAGE_ADDONS = {

@@ -377,13 +377,13 @@ describe("Tier Rules", () => {
 
   it("handles all tier types correctly", async () => {
     const allTiersRule = createTierRule([
-      "free",
+      "wanderer",
       "seedling",
       "sapling",
       "oak",
       "evergreen",
     ]);
-    const tiers = ["free", "seedling", "sapling", "oak", "evergreen"] as const;
+    const tiers = ["wanderer", "seedling", "sapling", "oak", "evergreen"] as const;
 
     for (const tier of tiers) {
       const context: EvaluationContext = { tier };
@@ -394,10 +394,10 @@ describe("Tier Rules", () => {
   it("handles specific tier combinations", async () => {
     const paidTiersRule = createTierRule(["seedling", "sapling", "oak"]);
     const paidContext: EvaluationContext = { tier: "sapling" };
-    const freeContext: EvaluationContext = { tier: "free" };
+    const wandererContext: EvaluationContext = { tier: "wanderer" };
 
     expect(await evaluateRule(paidTiersRule, paidContext, "flag-1")).toBe(true);
-    expect(await evaluateRule(paidTiersRule, freeContext, "flag-1")).toBe(
+    expect(await evaluateRule(paidTiersRule, wandererContext, "flag-1")).toBe(
       false,
     );
   });
@@ -663,7 +663,7 @@ describe("isTierAtLeast", () => {
     it("returns true if userTier >= minimumTier", () => {
       expect(isTierAtLeast("evergreen", "oak")).toBe(true);
       expect(isTierAtLeast("oak", "sapling")).toBe(true);
-      expect(isTierAtLeast("seedling", "free")).toBe(true);
+      expect(isTierAtLeast("seedling", "wanderer")).toBe(true);
     });
 
     it("returns true if userTier equals minimumTier", () => {
@@ -673,20 +673,20 @@ describe("isTierAtLeast", () => {
     });
 
     it("returns false if userTier < minimumTier", () => {
-      expect(isTierAtLeast("free", "seedling")).toBe(false);
+      expect(isTierAtLeast("wanderer", "seedling")).toBe(false);
       expect(isTierAtLeast("sapling", "oak")).toBe(false);
       expect(isTierAtLeast("seedling", "evergreen")).toBe(false);
     });
 
     it("handles free tier correctly", () => {
-      expect(isTierAtLeast("free", "free")).toBe(true);
-      expect(isTierAtLeast("free", "seedling")).toBe(false);
-      expect(isTierAtLeast("seedling", "free")).toBe(true);
+      expect(isTierAtLeast("wanderer", "wanderer")).toBe(true);
+      expect(isTierAtLeast("wanderer", "seedling")).toBe(false);
+      expect(isTierAtLeast("seedling", "wanderer")).toBe(true);
     });
 
     it("handles evergreen tier correctly", () => {
       expect(isTierAtLeast("evergreen", "evergreen")).toBe(true);
-      expect(isTierAtLeast("evergreen", "free")).toBe(true);
+      expect(isTierAtLeast("evergreen", "wanderer")).toBe(true);
       expect(isTierAtLeast("oak", "evergreen")).toBe(false);
     });
   });
@@ -712,7 +712,7 @@ describe("isTierAtLeast", () => {
 
   describe("All tier combinations", () => {
     const allTiers = [
-      "free",
+      "wanderer",
       "seedling",
       "sapling",
       "oak",
@@ -737,10 +737,10 @@ describe("isTierAtLeast", () => {
 
 describe("getTiersAtLeast", () => {
   describe("Valid tiers", () => {
-    it("returns correct tiers for free tier", () => {
-      const result = getTiersAtLeast("free");
+    it("returns correct tiers for wanderer tier", () => {
+      const result = getTiersAtLeast("wanderer");
       expect(result).toEqual([
-        "free",
+        "wanderer",
         "seedling",
         "sapling",
         "oak",
@@ -789,7 +789,7 @@ describe("getTiersAtLeast", () => {
       const result = getTiersAtLeast("sapling");
       expect(Array.isArray(result)).toBe(true);
       for (const tier of result) {
-        expect(["free", "seedling", "sapling", "oak", "evergreen"]).toContain(
+        expect(["wanderer", "seedling", "sapling", "oak", "evergreen"]).toContain(
           tier,
         );
       }
@@ -884,7 +884,7 @@ describe("Rule Evaluation Integration", () => {
   it("maintains tier comparison consistency", () => {
     // If A >= B and B >= C, then A >= C
     const tierChain = [
-      "free",
+      "wanderer",
       "seedling",
       "sapling",
       "oak",

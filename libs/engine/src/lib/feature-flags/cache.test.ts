@@ -124,7 +124,7 @@ describe("buildCacheKey", () => {
     });
 
     it("handles all valid tier values", () => {
-      const tiers = ["free", "seedling", "sapling", "oak", "evergreen"];
+      const tiers = ["wanderer", "seedling", "sapling", "oak", "evergreen"];
       tiers.forEach((tier) => {
         const key = buildCacheKey("test_flag", { tier: tier as any });
         expect(key).toContain("tier:");

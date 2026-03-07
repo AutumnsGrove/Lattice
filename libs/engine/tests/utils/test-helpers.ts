@@ -17,7 +17,7 @@ function getEnv() {
 // Type Helpers
 // ============================================================================
 
-export type TierKey = "free" | "seedling" | "sapling" | "oak" | "evergreen";
+export type TierKey = "wanderer" | "seedling" | "sapling" | "oak" | "evergreen";
 
 export interface TestTenant {
   id: string;

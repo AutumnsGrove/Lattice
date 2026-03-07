@@ -108,7 +108,7 @@ export interface CustomFont {
 	fileSize: number;
 }
 
-export type UserTier = "free" | "seedling" | "sapling" | "oak" | "evergreen";
+export type UserTier = "wanderer" | "seedling" | "sapling" | "oak" | "evergreen";
 
 export interface ValidationResult {
 	valid: boolean;

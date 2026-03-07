@@ -5,20 +5,8 @@ import {
   generateId,
 } from "@autumnsgrove/lattice/services";
 import { GROVE_EMAILS } from "@autumnsgrove/lattice/config";
+import { escapeHtml } from "@autumnsgrove/lattice/utils";
 import { Resend } from "resend";
-
-/**
- * Escape HTML special characters to prevent XSS in email templates
- */
-function escapeHtml(unsafe: string | null): string {
-  if (!unsafe) return "";
-  return unsafe
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
 
 /**
  * Generate next visit number in format: PORCH-2026-00001

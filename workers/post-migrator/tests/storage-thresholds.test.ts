@@ -9,7 +9,7 @@
  * - Oak: 5 views/week (hot), 14 days to warm, 60 days to cold
  * - Sapling: 7 views/week (hot), 10 days to warm, 45 days to cold
  * - Seedling: 10 views/week (hot), 7 days to warm, 30 days to cold
- * - Free: 15 views/week (hot), 5 days to warm, 21 days to cold
+ * - Wanderer: 15 views/week (hot), 5 days to warm, 21 days to cold
  */
 
 import { describe, it, expect } from "vitest";
@@ -18,7 +18,7 @@ import { describe, it, expect } from "vitest";
 // Import the threshold config directly for unit testing
 // ============================================================================
 
-type TierKey = "free" | "seedling" | "sapling" | "oak" | "evergreen";
+type TierKey = "wanderer" | "seedling" | "sapling" | "oak" | "evergreen";
 
 interface StorageTierThresholds {
   hotViewThreshold: number;
@@ -29,7 +29,7 @@ interface StorageTierThresholds {
 }
 
 const STORAGE_THRESHOLDS: Record<TierKey, StorageTierThresholds> = {
-  free: {
+  wanderer: {
     hotViewThreshold: 15,
     warmViewThreshold: 3,
     coldPromotionThreshold: 5,
@@ -110,8 +110,8 @@ describe("Storage Threshold Configuration", () => {
     expect(thresholds.warmToColdDays).toBe(30);
   });
 
-  it("should have correct thresholds for free tier", () => {
-    const thresholds = getStorageThresholds("free");
+  it("should have correct thresholds for wanderer tier", () => {
+    const thresholds = getStorageThresholds("wanderer");
 
     expect(thresholds.hotViewThreshold).toBe(15);
     expect(thresholds.hotToWarmDays).toBe(5);
@@ -136,9 +136,9 @@ describe("Storage Threshold Configuration", () => {
 // ============================================================================
 
 describe("Tier Progression Logic", () => {
-  it("should have increasingly lenient thresholds from free to evergreen", () => {
+  it("should have increasingly lenient thresholds from wanderer to evergreen", () => {
     const tiers: TierKey[] = [
-      "free",
+      "wanderer",
       "seedling",
       "sapling",
       "oak",

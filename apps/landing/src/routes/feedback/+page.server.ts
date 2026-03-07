@@ -6,19 +6,7 @@ import {
 } from "@autumnsgrove/lattice/services";
 import { createZephyrClient } from "@autumnsgrove/lattice/zephyr";
 import { GROVE_EMAILS } from "@autumnsgrove/lattice/config";
-
-/**
- * Escape HTML special characters to prevent XSS in email templates
- */
-function escapeHtml(unsafe: string | null): string {
-  if (!unsafe) return "";
-  return unsafe
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
+import { escapeHtml } from "@autumnsgrove/lattice/utils";
 
 export const load: PageServerLoad = async ({ platform }) => {
   return {

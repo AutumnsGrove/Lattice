@@ -22,7 +22,7 @@ export type ReverieVariables = AppVariables & {
 	/** Authenticated tenant ID */
 	tenantId: string;
 	/** Tenant subscription tier */
-	tier: "free" | "seedling" | "sapling" | "oak" | "evergreen";
+	tier: "wanderer" | "seedling" | "sapling" | "oak" | "evergreen";
 };
 
 // =============================================================================
@@ -56,7 +56,7 @@ export interface Env {
 // =============================================================================
 
 /** Tier values */
-const TierSchema = z.enum(["free", "seedling", "sapling", "oak", "evergreen"]);
+const TierSchema = z.enum(["wanderer", "seedling", "sapling", "oak", "evergreen"]);
 
 /** POST /configure — natural language configuration request */
 export const ConfigureRequestSchema = z.object({
