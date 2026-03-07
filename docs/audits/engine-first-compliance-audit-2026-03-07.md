@@ -16,7 +16,7 @@ The engine-first principle states: _"The engine exists to prevent duplication. U
 | Category | Status | Violations | Severity |
 | ---------------------------------------- | ------ | ---------- | -------- |
 | `cn()` / class merging | PASS | 0 | - |
-| Error handling (Signpost) | FAIL | 108+ | HIGH |
+| Error handling (Signpost) | PARTIAL | 108+ (13 app-layer fixed, catalogs aligned, services remain) | HIGH |
 | `escapeHtml()` duplication | FAIL | 17 impls | HIGH |
 | `formatDate()` duplication | PARTIAL | 14 migrated | MEDIUM |
 | `formatBytes()` duplication | FAIL | 6 impls | LOW |
@@ -119,18 +119,30 @@ All accept flexible input (ISO string, Date, unix seconds). Exported via `@autum
 
 **Severity: HIGH** — Violates MANDATORY requirement from AGENT.md.
 
-### 3a. Bare `throw new Error()` — 62+ instances
+### 3a. Bare `throw new Error()` — 62+ instances → PARTIALLY RESOLVED
 
-Files throwing errors without Signpost codes:
+**Apps-layer violations resolved (13 throws migrated):**
 
-- **apps/landing** — 11 violations across CDN, API, arbor routes
-- **apps/clearing** — 2 violations in incident pages
-- **apps/meadow** — 1 violation in feed page
-- **apps/plant** — 5 violations in Stripe integration, email verification
-- **apps/amber** — 3 violations in client-side code
-- **services/forage** — 20+ violations across providers and routes
-- **services/heartwood** — 5+ violations in auth flow
-- **services/og-worker** — 3 violations
+| Location | What changed |
+| --------------------------------------------------------- | ------------------------------------------ |
+| `apps/landing/knowledge/exhibit/sister-museum/+page.server.ts` | 1 throw → `logGroveError()` + coded Error with `SITE_ERRORS.PAGE_LOAD_FAILED` |
+| `apps/plant/routes/verify-email/+page.server.ts` | 1 throw → `throwGroveError()` with `PLANT_ERRORS.DB_UNAVAILABLE` / `KV_BINDING_MISSING` |
+| `apps/plant/lib/server/stripe.ts` | 5 throws → `logGroveError()` + coded Errors with new `PLANT-005` through `PLANT-009` |
+| `apps/plant/lib/server/email-verification.ts` | 1 throw → coded Error with new `PLANT-045` |
+| `apps/meadow/lib/server/reactions.ts` | 1 throw → coded Error with new `MEADOW-020` |
+| `apps/meadow/lib/utils/note-upload.ts` | 2 throws → coded Errors with new `MEADOW-040`, `MEADOW-041` |
+
+**New error catalog created:** `apps/meadow/src/lib/errors.ts` — `MEADOW_ERRORS` with prefix `MEADOW-XXX` (3 initial codes).
+
+**New errors added to `PLANT_ERRORS`:** `PLANT-005` through `PLANT-009` (Stripe price/checkout/portal), `PLANT-045` (email format).
+
+**Remaining (services/workers — deferred to P2):**
+
+- **apps/landing** — 6 client-side .svelte throws (acceptable — caught by Svelte error boundaries)
+- **apps/amber** — 5 client-side .svelte throws (acceptable — caught by Svelte error boundaries)
+- **services/forage** — 11 violations across providers and routes
+- **services/heartwood** — 13+ violations in auth flow and settings templates
+- **services/og-worker** — 3 violations in worker internals
 
 ### 3b. Raw `new Response(JSON.stringify({ error: ... }))` — 42+ instances
 
@@ -444,7 +456,7 @@ All P0 items have been fixed in commit `a9ea4be`:
    - `workers/reverie` — Medium: restructured 15 error defs from `{message, status}` to `{category, userMessage, adminMessage, status}`, updated `buildReverieError()` + tests
    - `workers/reverie-exec` — Medium: restructured 12 error defs, same pattern as reverie, updated `buildExecError()`
 4. ~~**Define canonical `TierKey` type**~~ — DONE (part of P0 tier alignment). All packages now use engine's `TierKey`.
-5. **Replace bare `throw new Error()` in API routes** — 62+ violations
+5. ~~**Replace bare `throw new Error()` in apps**~~ — PARTIALLY DONE. 13 app-layer throws migrated to Signpost codes across landing, plant, meadow. New `PLANT-005`–`PLANT-009`, `PLANT-045`, `MEADOW-020`/`040`/`041` error codes added. Services-layer violations (forage, heartwood, og-worker) deferred to P2.
 
 ### P2 — Lower Impact, Larger Effort
 9. **Migrate DB query results to typed schemas** — 15+ unsafe `as` casts on `.first()` / `.all()`

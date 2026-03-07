@@ -6,6 +6,7 @@
  */
 
 import { isValidReaction } from "$lib/constants/reactions";
+import { MEADOW_ERRORS } from "$lib/errors";
 
 /**
  * Add an emoji reaction to a post.
@@ -19,7 +20,7 @@ export async function addReaction(
   emoji: string,
 ): Promise<boolean> {
   if (!isValidReaction(emoji)) {
-    throw new Error("Invalid reaction emoji");
+    throw new Error(`${MEADOW_ERRORS.INVALID_REACTION.code}: ${MEADOW_ERRORS.INVALID_REACTION.adminMessage}`);
   }
 
   const id = crypto.randomUUID();

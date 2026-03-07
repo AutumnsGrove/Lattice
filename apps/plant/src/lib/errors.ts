@@ -71,6 +71,49 @@ export const PLANT_ERRORS = {
       "KV binding (platform.env.KV) is not available. Configure in Cloudflare Dashboard > Pages > grove-plant > Settings > KV namespace bindings.",
   },
 
+  STRIPE_PRICE_NOT_CONFIGURED: {
+    code: "PLANT-005",
+    category: "admin" as const,
+    userMessage:
+      "Payment system is being set up. Please try again in a moment.",
+    adminMessage:
+      "Stripe price ID not configured or contains placeholder. Update STRIPE_PRICES in apps/plant/src/lib/server/stripe.ts.",
+  },
+
+  STRIPE_CHECKOUT_FAILED: {
+    code: "PLANT-006",
+    category: "bug" as const,
+    userMessage:
+      "Something went wrong starting checkout. Please try again.",
+    adminMessage: "Stripe Checkout Session creation API returned an error.",
+  },
+
+  STRIPE_CHECKOUT_NO_URL: {
+    code: "PLANT-007",
+    category: "bug" as const,
+    userMessage:
+      "Something went wrong starting checkout. Please try again.",
+    adminMessage:
+      "Stripe Checkout Session created but no URL or ID returned in response.",
+  },
+
+  STRIPE_PORTAL_FAILED: {
+    code: "PLANT-008",
+    category: "bug" as const,
+    userMessage:
+      "Something went wrong opening billing. Please try again.",
+    adminMessage: "Stripe Billing Portal session creation API returned an error.",
+  },
+
+  STRIPE_PORTAL_NO_URL: {
+    code: "PLANT-009",
+    category: "bug" as const,
+    userMessage:
+      "Something went wrong opening billing. Please try again.",
+    adminMessage:
+      "Stripe Billing Portal session created but no URL returned in response.",
+  },
+
   // ─────────────────────────────────────────────────────────────────────────
   // Session & Auth Errors (020-039)
   // ─────────────────────────────────────────────────────────────────────────
@@ -162,6 +205,13 @@ export const PLANT_ERRORS = {
     category: "bug" as const,
     userMessage: "We had trouble saving your session. Please try again.",
     adminMessage: "Failed to set cookies (onboarding_id or access_token).",
+  },
+
+  INVALID_EMAIL_FORMAT: {
+    code: "PLANT-045",
+    category: "user" as const,
+    userMessage: "That email address doesn't look right. Please double-check.",
+    adminMessage: "Email format validation failed in normalizeEmail().",
   },
 
   // ─────────────────────────────────────────────────────────────────────────

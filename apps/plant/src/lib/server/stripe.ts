@@ -17,6 +17,8 @@
  */
 
 import { PAID_TIERS, type PaidTierKey } from "@autumnsgrove/lattice/config";
+import { logGroveError } from "@autumnsgrove/lattice/errors";
+import { PLANT_ERRORS } from "$lib/errors";
 
 // =============================================================================
 // STRIPE PRICE IDS
@@ -65,9 +67,11 @@ export type BillingCycle = "monthly" | "yearly";
 export function getPriceId(plan: PlanId, billingCycle: BillingCycle): string {
   const priceId = STRIPE_PRICES[plan]?.[billingCycle];
   if (!priceId || priceId.includes("REPLACE_ME")) {
+    logGroveError("Plant", PLANT_ERRORS.STRIPE_PRICE_NOT_CONFIGURED, {
+      detail: `${plan} ${billingCycle}`,
+    });
     throw new Error(
-      `Stripe price ID not configured for ${plan} ${billingCycle}. ` +
-        `Update STRIPE_PRICES in packages/plant/src/lib/server/stripe.ts`,
+      `${PLANT_ERRORS.STRIPE_PRICE_NOT_CONFIGURED.code}: ${PLANT_ERRORS.STRIPE_PRICE_NOT_CONFIGURED.adminMessage} (${plan} ${billingCycle})`,
     );
   }
   return priceId;
@@ -176,12 +180,18 @@ export async function createCheckoutSession(
 
   if (!response.ok || data.error) {
     const errorMsg = data.error?.message || "Unknown Stripe error";
-    console.error("[Stripe] Checkout creation failed:", data.error);
-    throw new Error(`Stripe checkout failed: ${errorMsg}`);
+    logGroveError("Plant", PLANT_ERRORS.STRIPE_CHECKOUT_FAILED, {
+      detail: errorMsg,
+      cause: data.error,
+    });
+    throw new Error(`${PLANT_ERRORS.STRIPE_CHECKOUT_FAILED.code}: ${errorMsg}`);
   }
 
   if (!data.url || !data.id) {
-    throw new Error("No checkout URL returned from Stripe");
+    logGroveError("Plant", PLANT_ERRORS.STRIPE_CHECKOUT_NO_URL, {
+      detail: `Session response missing url or id`,
+    });
+    throw new Error(`${PLANT_ERRORS.STRIPE_CHECKOUT_NO_URL.code}: ${PLANT_ERRORS.STRIPE_CHECKOUT_NO_URL.adminMessage}`);
   }
 
   console.log("[Stripe] Created checkout session:", data.id);
@@ -360,13 +370,17 @@ export async function createBillingPortalSession(
   };
 
   if (!response.ok || data.error) {
-    throw new Error(
-      `Billing portal failed: ${data.error?.message || "Unknown error"}`,
-    );
+    const errorMsg = data.error?.message || "Unknown error";
+    logGroveError("Plant", PLANT_ERRORS.STRIPE_PORTAL_FAILED, {
+      detail: errorMsg,
+      cause: data.error,
+    });
+    throw new Error(`${PLANT_ERRORS.STRIPE_PORTAL_FAILED.code}: ${errorMsg}`);
   }
 
   if (!data.url) {
-    throw new Error("No portal URL returned from Stripe");
+    logGroveError("Plant", PLANT_ERRORS.STRIPE_PORTAL_NO_URL);
+    throw new Error(`${PLANT_ERRORS.STRIPE_PORTAL_NO_URL.code}: ${PLANT_ERRORS.STRIPE_PORTAL_NO_URL.adminMessage}`);
   }
 
   return { url: data.url };
