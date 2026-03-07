@@ -3,25 +3,16 @@
  * Extracted for reusability and testability.
  */
 
+import { formatDateFull } from "$lib/utils/date";
+
 /**
  * Format an ISO date string for display.
+ * Delegates to the shared engine date utility.
  * @param isoString - ISO 8601 date string or null/undefined
  * @returns Formatted date string like "January 15, 2026" or "—" if invalid
  */
 export function formatDate(isoString: string | null | undefined): string {
-	if (!isoString) return "—";
-	try {
-		const date = new Date(isoString);
-		// Check for Invalid Date
-		if (isNaN(date.getTime())) return "—";
-		return date.toLocaleDateString(undefined, {
-			year: "numeric",
-			month: "long",
-			day: "numeric",
-		});
-	} catch {
-		return "—";
-	}
+	return formatDateFull(isoString, "—");
 }
 
 /**
