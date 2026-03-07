@@ -21,12 +21,15 @@ The engine-first principle states: _"The engine exists to prevent duplication. U
 | `formatDate()` duplication | FAIL | 41 impls | MEDIUM |
 | `formatBytes()` duplication | FAIL | 6 impls | LOW |
 | `slugify()` duplication | FAIL | 5 impls | LOW |
+| `timingSafeEqual()` duplication | FAIL | 6 impls | HIGH |
 | Subscription tier type duplication | FAIL | 7 defs | MEDIUM |
 | Local error catalogs (workers/services) | FAIL | 8 files | MEDIUM |
 | Rootwork type safety (`as` casts) | FAIL | 52+ | HIGH |
+| Sanitization duplication | FAIL | 2+ impls | MEDIUM |
+| Redirect URL validation duplication | FAIL | 2 impls | MEDIUM |
 | Markdown renderer imports | PASS | 0 outside | - |
 
-**Overall compliance: ~25%** — Only `cn()` and markdown rendering follow engine-first consistently. **Total violations: 220+**
+**Overall compliance: ~25%** — Only `cn()` and markdown rendering follow engine-first consistently. **Total violations: 230+**
 
 ---
 
@@ -263,12 +266,52 @@ Zero violations found. All class merging uses `cn()` from `@autumnsgrove/lattice
 
 ---
 
+## Finding 10: `timingSafeEqual()` — 6 Implementations
+
+**Severity: HIGH** — Security-critical function reimplemented in every worker that does auth.
+
+| Location | Context |
+| ---------------------------------------------------------- | -------------------------------- |
+| `apps/ivy/src/lib/utils/index.ts` | Exported for webhook validation |
+| `apps/ivy/src/lib/api/forwardEmail.ts` | **Re-implemented inline** |
+| `workers/reverie/src/auth/middleware.ts` | API key comparison |
+| `workers/reverie-exec/src/auth/middleware.ts` | API key comparison |
+| `workers/lumen/src/auth/middleware.ts` | API key comparison |
+| `workers/warden/src/auth/signature.ts` | Signature verification |
+
+The engine has timing-safe comparison in `libs/engine/src/lib/utils/csrf.ts` but it's not exported as a standalone utility. Each worker reimplements the same `crypto.subtle.timingSafeEqual()` + TextEncoder pattern.
+
+**Also duplicated:** `hashIp()` in `apps/ivy` — implemented in both `src/lib/utils/index.ts` and inline in `src/routes/api/webhook/incoming/+server.ts`.
+
+**Recommendation:** Export `timingSafeEqual()` from `@autumnsgrove/lattice/utils` (or a new `@autumnsgrove/lattice/security` path). Workers can import it since it uses only Web Crypto APIs.
+
+---
+
+## Finding 11: Sanitization & Redirect Validation Duplication
+
+**Severity: MEDIUM**
+
+### 11a. `sanitizeNoteHtml()` in Meadow
+
+`apps/meadow/src/lib/server/sanitize.ts` reimplements HTML sanitization with its own tag allowlist via `sanitize-html`, duplicating engine's `sanitizeHTML()` from `@autumnsgrove/lattice/utils`.
+
+**Recommendation:** Either use engine's `sanitizeHTML()` with a custom config, or document why Meadow needs a different allowlist.
+
+### 11b. Redirect URL Validation
+
+`apps/login/src/lib/redirect.ts` implements `validateRedirectUrl()` which duplicates the engine's `sanitizeReturnTo()` from `@autumnsgrove/lattice/utils`.
+
+**Recommendation:** Replace with engine import. `apps/domains` already imports `sanitizeReturnTo()` correctly.
+
+---
+
 ## Remediation Priority
 
-### P0 — High Impact, Quick Wins
+### P0 — High Impact, Quick Wins (Security-Critical)
 1. **Export `escapeHtml` from `@autumnsgrove/lattice/utils`** — eliminates 12+ external copies
-2. **Migrate `apps/landing` route escapeHtml copies** — 6 identical inline functions in one app
-3. **Consolidate engine-internal `formatBytes` duplication** — 2 copies within engine
+2. **Export `timingSafeEqual` from `@autumnsgrove/lattice/utils`** — eliminates 6 security-critical copies
+3. **Migrate `apps/landing` route escapeHtml copies** — 6 identical inline functions in one app
+4. **Consolidate engine-internal `formatBytes` duplication** — 2 copies within engine
 
 ### P1 — Medium Impact, Moderate Effort
 4. **Create shared `formatDate()` presets** in engine utils — eliminates ~25 copies
