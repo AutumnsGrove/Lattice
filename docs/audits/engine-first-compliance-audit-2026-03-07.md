@@ -356,19 +356,22 @@ All 7 apps (`landing`, `plant`, `meadow`, `clearing`, `domains`, `terrarium`, `l
 
 ## Remediation Priority
 
-### P0 — High Impact, Quick Wins (Security + Data Critical)
-1. **FIX: TIER_STORAGE mismatch** — apps/amber missing `canopy` and `platform` tiers, causing wrong quota calculations
-2. **Export `escapeHtml` from `@autumnsgrove/lattice/utils`** — eliminates 12+ external copies
-3. **Export `timingSafeEqual` from `@autumnsgrove/lattice/utils`** — eliminates 6 security-critical copies
-4. **Migrate `apps/landing` route escapeHtml copies** — 6 identical inline functions in one app
-5. **Consolidate engine-internal `formatBytes` duplication** — 2 copies within engine
+### P0 — High Impact, Quick Wins (Security + Data Critical) — RESOLVED
+
+All P0 items have been fixed in commit `a9ea4be`:
+
+1. ~~**FIX: TIER_STORAGE mismatch**~~ — FIXED. Removed fake `canopy` and `platform` tiers. Renamed "free" → "wanderer" across 78 files. `apps/amber` now imports `TIER_STORAGE_GB` from engine. `services/amber` aligned to 5 correct tiers.
+2. ~~**Export `escapeHtml`**~~ — DONE. New `escape-html.ts` in engine utils, exported via `@autumnsgrove/lattice/utils`. 12 duplicate implementations replaced with imports.
+3. ~~**Export `timingSafeEqual`**~~ — DONE. Exported from `csrf.ts`, improved to handle different-length strings safely.
+4. ~~**Migrate `apps/landing` escapeHtml copies**~~ — DONE. 7 inline functions replaced with engine imports.
+5. ~~**Consolidate `formatBytes`**~~ — DONE. `imageProcessor.ts` upgraded to handle GB/TB, `amber/utils.ts` now re-exports from it.
 
 ### P1 — Medium Impact, Moderate Effort
-4. **Create shared `formatDate()` presets** in engine utils — eliminates ~25 copies
-5. **Migrate form data parsing to `parseFormData()`** — 18+ unsafe cast sites in landing/plant
-6. **Migrate worker error catalogs to import `GroveErrorDef`** — 4 workers need type alignment
-7. **Define canonical `TierKey` type** in engine config — eliminates 7 drift-prone definitions
-8. **Replace bare `throw new Error()` in API routes** — 62+ violations
+1. **Create shared `formatDate()` presets** in engine utils — eliminates ~25 copies
+2. **Migrate form data parsing to `parseFormData()`** — 18+ unsafe cast sites in landing/plant
+3. **Migrate worker error catalogs to import `GroveErrorDef`** — 4 workers need type alignment
+4. ~~**Define canonical `TierKey` type**~~ — DONE (part of P0 tier alignment). All packages now use engine's `TierKey`.
+5. **Replace bare `throw new Error()` in API routes** — 62+ violations
 
 ### P2 — Lower Impact, Larger Effort
 9. **Migrate DB query results to typed schemas** — 15+ unsafe `as` casts on `.first()` / `.all()`
