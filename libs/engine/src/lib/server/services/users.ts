@@ -224,7 +224,7 @@ export async function getUserHomeGrove(
 ): Promise<HomeGrove | null> {
 	return queryOne<HomeGrove>(
 		db,
-		`SELECT t.id AS tenantId, t.subdomain, t.name
+		`SELECT t.id AS tenantId, t.subdomain, t.display_name AS name
      FROM users u
      JOIN tenants t ON t.id = u.tenant_id
      WHERE u.email = ? AND u.is_active = 1 AND t.active = 1`,
