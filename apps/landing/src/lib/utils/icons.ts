@@ -188,6 +188,7 @@ import {
   // Curios - cabinet of wonders
   Amphora,
   NotebookPen,
+  NotebookText,
   Shell,
   // Wander - immersive discovery
   Earth,
@@ -404,6 +405,7 @@ export const toolIcons = {
   // Curios - cabinet of wonders
   amphora: Amphora, // Curios - main icon (cabinet of curiosities)
   "notebook-pen": NotebookPen, // Curios - Guestbook
+  "notebook-text": NotebookText, // Blooms - individual pieces of writing
   shell: Shell, // Curios - Artifacts
   // Forests - community aggregation
   trees: Trees, // Forests - main icon (many trees together)
@@ -525,7 +527,7 @@ export const toolIcons = {
   "refresh-cw": RefreshCw, // Zephyr - retry with backoff
   // Garden & Blooms - core terminology
   flower: Flower, // Garden - collection of blooms
-  cherry: Cherry, // Blooms - individual pieces of writing
+  cherry: Cherry, // Cherry trees (nature theming)
   zap: Zap, // Verge - remote AI coding
 } as const;
 
