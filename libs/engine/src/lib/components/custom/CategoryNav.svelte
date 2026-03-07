@@ -108,6 +108,7 @@
 	});
 
 	// Color scheme classes
+	// brand-color: intentional — category color coding palette (needs dedicated data-viz tokens later)
 	const colorSchemes = {
 		emerald: {
 			iconText: "text-emerald-600 dark:text-emerald-400",

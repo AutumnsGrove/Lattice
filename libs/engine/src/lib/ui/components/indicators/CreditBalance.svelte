@@ -21,13 +21,13 @@
 </script>
 
 {#if variant === 'card'}
-	<div class="scout-card p-4 {isEmpty ? 'border-red-200 dark:border-red-800' : isLow ? 'border-amber-200 dark:border-amber-800' : ''}">
+	<div class="scout-card p-4 {isEmpty ? 'border-error' : isLow ? 'border-warning' : ''}">
 		<div class="flex items-center justify-between mb-2">
 			<span class="text-sm text-bark-500 dark:text-cream-500">Available Credits</span>
 			{#if isLow && !isEmpty}
-				<span class="text-xs text-amber-600 dark:text-amber-400 font-medium">Low balance</span>
+				<span class="text-xs text-warning font-medium">Low balance</span>
 			{:else if isEmpty}
-				<span class="text-xs text-red-600 dark:text-red-400 font-medium">No credits</span>
+				<span class="text-xs text-error font-medium">No credits</span>
 			{/if}
 		</div>
 		<div class="flex items-baseline gap-1">
@@ -42,7 +42,7 @@
 		{/if}
 	</div>
 {:else if variant === 'compact'}
-	<span class="scout-credits {sizeClasses[size]} {isEmpty ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300' : isLow ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300' : ''}">
+	<span class="scout-credits {sizeClasses[size]} {isEmpty ? 'bg-error-bg text-error' : isLow ? 'bg-warning-bg text-warning-foreground' : ''}">
 		{#if showIcon}
 			<Icons name="credits" size="sm" />
 		{/if}
@@ -58,9 +58,9 @@
 		<div>
 			<div class="font-bold text-bark dark:text-cream">{credits} credits</div>
 			{#if isLow && !isEmpty}
-				<div class="text-xs text-amber-600 dark:text-amber-400">Running low</div>
+				<div class="text-xs text-warning">Running low</div>
 			{:else if isEmpty}
-				<div class="text-xs text-red-600 dark:text-red-400">No credits left</div>
+				<div class="text-xs text-error">No credits left</div>
 			{/if}
 		</div>
 	</div>

@@ -190,10 +190,10 @@
 			<!-- Header -->
 			<div class="text-center mb-6">
 				<div
-					class="mx-auto w-12 h-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center mb-4"
+					class="mx-auto w-12 h-12 bg-warning-bg rounded-full flex items-center justify-center mb-4"
 				>
 					<svg
-						class="w-6 h-6 text-yellow-600 dark:text-yellow-400"
+						class="w-6 h-6 text-warning"
 						fill="currentColor"
 						viewBox="0 0 20 20"
 						aria-hidden="true"
@@ -225,7 +225,7 @@
 				{:else if safeStatus.is_in_grace_period}
 					<p class="text-sm text-foreground-subtle text-center">
 						You're over your post limit. You have <strong
-							class="text-yellow-600 dark:text-yellow-400"
+							class="text-warning"
 							>{safeStatus.grace_period_days_remaining} days</strong
 						> remaining in your grace period.
 					</p>
@@ -250,11 +250,11 @@
 
 				<!-- Tier comparison -->
 				{#if nextTierName && nextTierPostLimit}
-					<div class="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4">
+					<div class="bg-info-bg rounded-lg p-4">
 						<div class="flex items-center justify-between">
 							<div>
-								<p class="font-medium text-blue-900 dark:text-blue-100">{nextTierName} Plan</p>
-								<p class="text-sm text-blue-700 dark:text-blue-300">
+								<p class="font-medium text-info-foreground">{nextTierName} Plan</p>
+								<p class="text-sm text-info-foreground">
 									{nextTierPostLimit === "Unlimited"
 										? "Unlimited posts"
 										: `Up to ${nextTierPostLimit} posts`}
@@ -262,7 +262,7 @@
 							</div>
 							<a
 								href={upgradeUrl}
-								class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
+								class="px-4 py-2 bg-info hover:bg-info-muted text-white text-sm font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-info focus:ring-offset-2 dark:focus:ring-offset-gray-800"
 							>
 								Upgrade
 							</a>
@@ -276,7 +276,7 @@
 				{#if canProceed && onProceed}
 					<button
 						onclick={onProceed}
-						class="w-full px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
+						class="w-full px-4 py-2 bg-warning hover:bg-warning-muted text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-warning focus:ring-offset-2 dark:focus:ring-offset-gray-800"
 					>
 						Continue Anyway
 					</button>

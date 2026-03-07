@@ -54,6 +54,7 @@
 	let { today, week, recent, providers }: Props = $props();
 
 	// Task display names and icons
+	// brand-color: intentional — task type color coding
 	const taskInfo: Record<string, { name: string; icon: typeof Sparkles; color: string }> = {
 		moderation: { name: "Moderation", icon: CheckCircle, color: "text-emerald-600" },
 		generation: { name: "Generation", icon: Sparkles, color: "text-violet-600" },
@@ -104,8 +105,8 @@
 	<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 		<GlassCard variant="frosted" class="p-4">
 			<div class="flex items-center gap-3">
-				<div class="p-2 rounded-lg bg-violet-100 dark:bg-violet-900/30">
-					<Sparkles class="w-5 h-5 text-violet-600 dark:text-violet-400" />
+				<div class="p-2 rounded-lg bg-accent-subtle">
+					<Sparkles class="w-5 h-5 text-accent" />
 				</div>
 				<div>
 					<p class="text-sm text-foreground-subtle">Today's Requests</p>
@@ -116,8 +117,8 @@
 
 		<GlassCard variant="frosted" class="p-4">
 			<div class="flex items-center gap-3">
-				<div class="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
-					<Coins class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+				<div class="p-2 rounded-lg bg-success-bg">
+					<Coins class="w-5 h-5 text-success" />
 				</div>
 				<div>
 					<p class="text-sm text-foreground-subtle">Today's Cost</p>
@@ -128,8 +129,8 @@
 
 		<GlassCard variant="frosted" class="p-4">
 			<div class="flex items-center gap-3">
-				<div class="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
-					<TrendingUp class="w-5 h-5 text-blue-600 dark:text-blue-400" />
+				<div class="p-2 rounded-lg bg-info-bg">
+					<TrendingUp class="w-5 h-5 text-info" />
 				</div>
 				<div>
 					<p class="text-sm text-foreground-subtle">7-Day Requests</p>
@@ -140,8 +141,8 @@
 
 		<GlassCard variant="frosted" class="p-4">
 			<div class="flex items-center gap-3">
-				<div class="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/30">
-					<Coins class="w-5 h-5 text-amber-600 dark:text-amber-400" />
+				<div class="p-2 rounded-lg bg-warning-bg">
+					<Coins class="w-5 h-5 text-warning" />
 				</div>
 				<div>
 					<p class="text-sm text-foreground-subtle">7-Day Cost</p>
@@ -170,11 +171,11 @@
 						{@const info = taskInfo[stat.task] || {
 							name: stat.task,
 							icon: Zap,
-							color: "text-gray-600",
+							color: "text-foreground-muted",
 						}}
 						{@const Icon = info.icon}
 						<div
-							class="flex items-center justify-between p-3 rounded-lg bg-white/50 dark:bg-slate-800/50"
+							class="flex items-center justify-between p-3 rounded-lg bg-surface/50"
 						>
 							<div class="flex items-center gap-3">
 								<Icon class="w-4 h-4 {info.color}" />
@@ -206,7 +207,7 @@
 				<div class="space-y-3">
 					{#each providers as provider (provider.provider)}
 						<div
-							class="flex items-center justify-between p-3 rounded-lg bg-white/50 dark:bg-slate-800/50"
+							class="flex items-center justify-between p-3 rounded-lg bg-surface/50"
 						>
 							<div class="flex items-center gap-3">
 								<div class="w-2 h-2 rounded-full bg-grove-500"></div>
@@ -254,11 +255,11 @@
 							{@const info = taskInfo[request.task] || {
 								name: request.task,
 								icon: Zap,
-								color: "text-gray-600",
+								color: "text-foreground-muted",
 							}}
 							{@const Icon = info.icon}
 							<tr
-								class="border-b border-grove-100 dark:border-grove-800 last:border-0 hover:bg-white/30 dark:hover:bg-slate-800/30 transition-colors"
+								class="border-b border-grove-100 dark:border-grove-800 last:border-0 hover:bg-surface/30 transition-colors"
 							>
 								<td class="py-3 px-3">
 									<div class="flex items-center gap-2">
@@ -266,7 +267,7 @@
 										<span class="text-foreground">{info.name}</span>
 										{#if request.cached}
 											<span
-												class="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300"
+												class="text-[10px] px-1.5 py-0.5 rounded-full bg-warning-bg text-warning-foreground"
 												>cached</span
 											>
 										{/if}

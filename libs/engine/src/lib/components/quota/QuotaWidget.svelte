@@ -55,7 +55,7 @@
   </div>
 {:else}
   <!-- Full widget -->
-  <div class="rounded-lg border border-gray-200 dark:border-gray-700 p-4 {colorClasses.bg}">
+  <div class="rounded-lg border border-border p-4 {colorClasses.bg}">
     <div class="flex justify-between items-center mb-2">
       <h4 class="font-semibold text-foreground">Post Usage</h4>
       <span class="px-2 py-1 text-xs font-medium rounded-full {colorClasses.badge}">
@@ -83,13 +83,13 @@
 
     <!-- Upgrade prompt -->
     {#if safeData.showUpgrade}
-      <div class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
-        <p class="text-sm text-blue-800 dark:text-blue-200 mb-2">
+      <div class="mt-4 p-3 bg-info-bg rounded-lg">
+        <p class="text-sm text-info-foreground mb-2">
           Upgrade for more posts
         </p>
         <a
           href={upgradeUrl}
-          class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
+          class="inline-flex items-center text-sm font-medium text-info hover:underline"
         >
           View Plans
           <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -101,8 +101,8 @@
 
     <!-- Cannot post warning -->
     {#if !safeData.canPost}
-      <div class="mt-4 p-3 bg-red-50 dark:bg-red-900/30 rounded-lg border border-red-200 dark:border-red-800">
-        <p class="text-sm text-red-800 dark:text-red-200 font-medium">
+      <div class="mt-4 p-3 bg-error-bg rounded-lg border border-error">
+        <p class="text-sm text-error font-medium">
           You cannot create new posts until you upgrade or delete existing posts.
         </p>
       </div>

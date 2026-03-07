@@ -44,27 +44,30 @@
 		delivered: {
 			label: "Delivered",
 			icon: CheckCircle2,
-			color: "text-emerald-600 dark:text-emerald-400",
-			bgColor: "bg-emerald-100 dark:bg-emerald-900/30",
+			color: "text-success",
+			bgColor: "bg-success-bg",
 		},
 		partial: {
 			label: "Partial",
 			icon: AlertCircle,
-			color: "text-amber-600 dark:text-amber-400",
-			bgColor: "bg-amber-100 dark:bg-amber-900/30",
+			color: "text-warning",
+			bgColor: "bg-warning-bg",
 		},
 		failed: {
 			label: "Failed",
 			icon: XCircle,
-			color: "text-red-600 dark:text-red-400",
-			bgColor: "bg-red-100 dark:bg-red-900/30",
+			color: "text-error",
+			bgColor: "bg-error-bg",
 		},
 	};
 
 	// Platform icons/colors
 	const platformInfo: Record<string, { color: string; bgColor: string }> = {
+		// brand-color: intentional — Bluesky
 		bluesky: { color: "text-blue-500", bgColor: "bg-blue-100 dark:bg-blue-900/30" },
+		// brand-color: intentional — Mastodon
 		mastodon: { color: "text-purple-500", bgColor: "bg-purple-100 dark:bg-purple-900/30" },
+		// brand-color: intentional — dev.to
 		devto: { color: "text-black dark:text-white", bgColor: "bg-gray-100 dark:bg-gray-800" },
 	};
 
@@ -93,8 +96,8 @@
 		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 			<GlassCard variant="frosted" class="p-4">
 				<div class="flex items-center gap-3">
-					<div class="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
-						<Wind class="w-5 h-5 text-blue-600 dark:text-blue-400" />
+					<div class="p-2 rounded-lg bg-info-bg">
+						<Wind class="w-5 h-5 text-info" />
 					</div>
 					<div>
 						<p class="text-sm text-foreground-subtle">7-Day Broadcasts</p>
@@ -107,8 +110,8 @@
 				{@const info = statusInfo[stat.status] || {
 					label: stat.status,
 					icon: Activity,
-					color: "text-gray-600",
-					bgColor: "bg-gray-100",
+					color: "text-foreground-muted",
+					bgColor: "bg-muted",
 				}}
 				{@const Icon = info.icon}
 				<GlassCard variant="frosted" class="p-4">
@@ -136,8 +139,8 @@
 			<div class="flex flex-wrap gap-3">
 				{#each Object.entries(stats.byPlatform) as [platform, count] (platform)}
 					{@const info = platformInfo[platform] || {
-						color: "text-gray-600",
-						bgColor: "bg-gray-100",
+						color: "text-foreground-muted",
+						bgColor: "bg-muted",
 					}}
 					<div class="inline-flex items-center gap-2 px-4 py-2 rounded-full {info.bgColor}">
 						<span class="font-medium {info.color} capitalize">{platform}</span>
@@ -166,12 +169,12 @@
 					{@const status = statusInfo[broadcast.status] || {
 						label: broadcast.status,
 						icon: Activity,
-						color: "text-gray-600",
-						bgColor: "bg-gray-100",
+						color: "text-foreground-muted",
+						bgColor: "bg-muted",
 					}}
 					{@const StatusIcon = status.icon}
 					<div
-						class="p-4 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-grove-100 dark:border-grove-800"
+						class="p-4 rounded-lg bg-surface/50 border border-grove-100 dark:border-grove-800"
 					>
 						<p class="text-foreground text-sm whitespace-pre-wrap break-words mb-3">
 							{broadcast.content}
@@ -180,8 +183,8 @@
 							<div class="flex items-center gap-2">
 								{#each platforms as platform (platform)}
 									{@const pInfo = platformInfo[platform] || {
-										color: "text-gray-600",
-										bgColor: "bg-gray-100",
+										color: "text-foreground-muted",
+										bgColor: "bg-muted",
 									}}
 									<span
 										class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs {pInfo.bgColor}"

@@ -64,7 +64,7 @@
 	{#if tenants.length === 0}
 		<div class="empty-state">
 			<Sprout class="w-12 h-12 text-grove-400 mx-auto mb-3" />
-			<p class="text-slate-600 dark:text-slate-400 text-center">
+			<p class="text-foreground-muted text-center">
 				No tenants enrolled in the greenhouse program yet.
 			</p>
 		</div>
@@ -75,20 +75,20 @@
 					<tr class="border-b border-grove-200 dark:border-grove-700/50">
 						<th
 							scope="col"
-							class="text-left py-3 px-4 text-sm font-medium text-slate-600 dark:text-slate-400"
+							class="text-left py-3 px-4 text-sm font-medium text-foreground-muted"
 						>
 							Tenant
 						</th>
 						<th
 							scope="col"
-							class="text-left py-3 px-4 text-sm font-medium text-slate-600 dark:text-slate-400"
+							class="text-left py-3 px-4 text-sm font-medium text-foreground-muted"
 						>
 							Enrolled
 						</th>
 						{#if showToggle}
 							<th
 								scope="col"
-								class="text-center py-3 px-4 text-sm font-medium text-slate-600 dark:text-slate-400"
+								class="text-center py-3 px-4 text-sm font-medium text-foreground-muted"
 							>
 								Status
 							</th>
@@ -96,7 +96,7 @@
 						{#if showNotes}
 							<th
 								scope="col"
-								class="text-left py-3 px-4 text-sm font-medium text-slate-600 dark:text-slate-400"
+								class="text-left py-3 px-4 text-sm font-medium text-foreground-muted"
 							>
 								Notes
 							</th>
@@ -104,7 +104,7 @@
 						{#if showRemove}
 							<th
 								scope="col"
-								class="text-right py-3 px-4 text-sm font-medium text-slate-600 dark:text-slate-400"
+								class="text-right py-3 px-4 text-sm font-medium text-foreground-muted"
 							>
 								Actions
 							</th>
@@ -117,17 +117,17 @@
 							class="border-b border-grove-100 dark:border-grove-800/30 hover:bg-grove-50 dark:hover:bg-grove-900/20 transition-colors"
 						>
 							<th scope="row" class="py-3 px-4 font-normal text-left">
-								<span class="font-medium text-slate-800 dark:text-slate-100">
+								<span class="font-medium text-foreground">
 									{getDisplayName(tenant.tenantId)}
 								</span>
-								<span class="block text-xs text-slate-500 dark:text-slate-500 font-mono">
+								<span class="block text-xs text-foreground-subtle font-mono">
 									{tenant.tenantId}
 								</span>
 							</th>
-							<td class="py-3 px-4 text-sm text-slate-600 dark:text-slate-400">
+							<td class="py-3 px-4 text-sm text-foreground-muted">
 								{formatDate(tenant.enrolledAt)}
 								{#if tenant.enrolledBy}
-									<span class="block text-xs text-slate-500 dark:text-slate-500">
+									<span class="block text-xs text-foreground-subtle">
 										by {tenant.enrolledBy}
 									</span>
 								{/if}
@@ -144,11 +144,11 @@
 							{#if showNotes}
 								<td class="py-3 px-4">
 									{#if tenant.notes}
-										<p class="text-sm text-slate-600 dark:text-slate-400 line-clamp-2">
+										<p class="text-sm text-foreground-muted line-clamp-2">
 											{tenant.notes}
 										</p>
 									{:else}
-										<span class="text-xs text-slate-400 dark:text-slate-600 italic">
+										<span class="text-xs text-foreground-faint italic">
 											No notes
 										</span>
 									{/if}
@@ -161,7 +161,7 @@
 											<button
 												type="button"
 												onclick={() => handleEditNotes(tenant)}
-												class="p-2 text-slate-400 hover:text-grove-600 dark:text-slate-500 dark:hover:text-grove-400 transition-colors rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-grove-500 focus-visible:ring-offset-2"
+												class="p-2 text-foreground-faint hover:text-grove-600 dark:hover:text-grove-400 transition-colors rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-grove-500 focus-visible:ring-offset-2"
 												aria-label="Edit notes for {getDisplayName(tenant.tenantId)}"
 											>
 												<FileEdit class="w-4 h-4" />
@@ -170,7 +170,7 @@
 										<button
 											type="button"
 											onclick={() => handleRemove(tenant)}
-											class="p-2 text-slate-400 hover:text-red-600 dark:text-slate-500 dark:hover:text-red-400 transition-colors rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
+											class="p-2 text-foreground-faint hover:text-error dark:hover:text-error transition-colors rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2"
 											aria-label="Remove {getDisplayName(tenant.tenantId)} from greenhouse"
 										>
 											<Trash2 class="w-4 h-4" />

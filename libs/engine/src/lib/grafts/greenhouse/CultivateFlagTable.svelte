@@ -47,11 +47,11 @@
 		<!-- Stats bar -->
 		<div class="flex items-center gap-4 mb-4 text-sm text-foreground-muted">
 			<span class="flex items-center gap-1.5">
-				<span class="w-2 h-2 rounded-full bg-emerald-500" aria-hidden="true"></span>
+				<span class="w-2 h-2 rounded-full bg-success" aria-hidden="true"></span>
 				<span>{cultivatedCount} Cultivated</span>
 			</span>
 			<span class="flex items-center gap-1.5">
-				<span class="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-600" aria-hidden="true"></span>
+				<span class="w-2 h-2 rounded-full bg-muted" aria-hidden="true"></span>
 				<span>{prunedCount} Pruned</span>
 			</span>
 		</div>
@@ -92,13 +92,13 @@
 		</GlassCard>
 
 		<!-- Legend -->
-		<div class="mt-4 text-xs text-slate-500 dark:text-slate-400 flex items-center gap-4">
+		<div class="mt-4 text-xs text-foreground-subtle flex items-center gap-4">
 			<span class="flex items-center gap-1.5">
-				<Sprout class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+				<Sprout class="w-3.5 h-3.5 text-success" />
 				<span>Greenhouse Only</span>
 			</span>
 			<span class="flex items-center gap-1.5">
-				<Home class="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+				<Home class="w-3.5 h-3.5 text-warning" />
 				<span>Global Flag</span>
 			</span>
 		</div>

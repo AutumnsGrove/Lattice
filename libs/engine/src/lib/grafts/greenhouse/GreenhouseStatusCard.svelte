@@ -41,7 +41,7 @@
 			<!-- Icon -->
 			<div
 				class="shrink-0 w-12 h-12 rounded-lg flex items-center justify-center {inGreenhouse
-					? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
+					? 'bg-success-bg text-success'
 					: 'bg-grove-100 text-grove-600 dark:bg-grove-900/30 dark:text-grove-400'}"
 			>
 				{#if inGreenhouse}
@@ -79,9 +79,9 @@
 
 				{#if inGreenhouse && notes}
 					<div
-						class="mt-3 p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border border-emerald-200 dark:border-emerald-800/30"
+						class="mt-3 p-3 bg-success-bg rounded-lg border border-success"
 					>
-						<p class="text-sm text-emerald-700 dark:text-emerald-300">
+						<p class="text-sm text-success-foreground">
 							{notes}
 						</p>
 					</div>

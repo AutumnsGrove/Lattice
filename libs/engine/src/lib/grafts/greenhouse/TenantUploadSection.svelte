@@ -28,7 +28,7 @@
 		<div class="flex items-center gap-3">
 			{#if suspended}
 				<span
-					class="text-xs font-sans px-2 py-1 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400"
+					class="text-xs font-sans px-2 py-1 rounded bg-warning-bg text-warning-foreground"
 				>
 					Uploads Suspended
 				</span>
@@ -37,7 +37,7 @@
 				</span>
 			{:else}
 				<span
-					class="text-xs font-sans px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
+					class="text-xs font-sans px-2 py-1 rounded bg-success-bg text-success-foreground"
 				>
 					Uploads Active
 				</span>
@@ -52,8 +52,8 @@
 			onclick={() => onToggle(!suspended)}
 			disabled={loading}
 			class="px-4 py-2 text-sm font-sans font-medium rounded-lg transition-colors disabled:opacity-50 {suspended
-				? 'bg-emerald-600 text-white hover:bg-emerald-700'
-				: 'bg-amber-600 text-white hover:bg-amber-700'}"
+				? 'bg-primary text-primary-foreground hover:bg-grove-700'
+				: 'bg-warning text-white hover:bg-warning-muted'}"
 		>
 			{#if loading}
 				Updating...
