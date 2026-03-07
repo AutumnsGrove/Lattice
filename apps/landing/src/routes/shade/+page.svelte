@@ -58,15 +58,15 @@
 					<h3 class="text-lg font-semibold text-foreground mb-3">What we block</h3>
 					<ul class="space-y-2 text-foreground-muted">
 						<li class="flex items-start gap-2">
-							<BlockIcon class="w-4 h-4 mt-0.5 text-red-500 shrink-0" />
+							<BlockIcon class="w-4 h-4 mt-0.5 text-error shrink-0" />
 							<span>AI training crawlers (GPTBot, ClaudeBot, CCBot, and dozens more)</span>
 						</li>
 						<li class="flex items-start gap-2">
-							<BlockIcon class="w-4 h-4 mt-0.5 text-red-500 shrink-0" />
+							<BlockIcon class="w-4 h-4 mt-0.5 text-error shrink-0" />
 							<span>Automated scrapers and data harvesters</span>
 						</li>
 						<li class="flex items-start gap-2">
-							<BlockIcon class="w-4 h-4 mt-0.5 text-red-500 shrink-0" />
+							<BlockIcon class="w-4 h-4 mt-0.5 text-error shrink-0" />
 							<span>Bulk archiving services</span>
 						</li>
 					</ul>

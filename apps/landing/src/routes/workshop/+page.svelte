@@ -33,9 +33,9 @@
 
 	function getCardClass(categoryName: string) {
 		if (categoryName === "Patterns") {
-			return "p-6 rounded-xl bg-amber-50 dark:bg-amber-950/25 shadow-sm border border-amber-200 dark:border-amber-800/30";
+			return "p-6 rounded-xl bg-warning-bg shadow-sm border border-border";
 		}
-		return "p-6 rounded-xl bg-white dark:bg-cream-100 shadow-sm border border-amber-200 dark:border-cream-200";
+		return "p-6 rounded-xl bg-surface shadow-sm border border-border";
 	}
 
 	interface SubComponent {
@@ -1201,40 +1201,40 @@
 			case "live":
 				return {
 					text: "Live",
-					class: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
+					class: "bg-success-bg text-success-foreground",
 				};
 			case "greenhouse":
 				return {
 					text: "Greenhouse",
-					class: "bg-emerald-100 text-emerald-600 dark:bg-grove-900/20 dark:text-emerald-400",
+					class: "bg-success-bg text-success-foreground",
 				};
 			case "complete":
 				return {
 					text: "Complete",
-					class: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
+					class: "bg-success-bg text-success-foreground",
 				};
 			case "applied":
 				return {
 					text: "Applied",
-					class: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
+					class: "bg-info-bg text-info-foreground",
 				};
 			case "building":
 				return {
 					text: "Building",
-					class: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
+					class: "bg-warning-bg text-warning-foreground",
 				};
 			case "being implemented":
 				return {
 					text: "Building",
-					class: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
+					class: "bg-warning-bg text-warning-foreground",
 				};
 			case "planned":
 				return {
 					text: "Planned",
-					class: "bg-slate-100 text-slate-600 dark:bg-cream-200 dark:text-slate-400",
+					class: "bg-surface-subtle text-foreground-muted",
 				};
 			default:
-				return { text: status, class: "bg-slate-100 text-slate-600" };
+				return { text: status, class: "bg-surface-subtle text-foreground-muted" };
 		}
 	}
 
@@ -1270,12 +1270,12 @@
 	accentColor="f59e0b"
 />
 
-<main class="min-h-screen flex flex-col bg-slate-50 dark:bg-cream-50">
+<main class="min-h-screen flex flex-col bg-surface">
 	<Header user={data.user} />
 
 	<!-- Hero -->
 	<section
-		class="relative py-16 px-6 text-center overflow-hidden bg-gradient-to-b from-slate-100 via-slate-50 to-white dark:from-cream-100 dark:via-cream-50 dark:to-cream-50"
+		class="relative py-16 px-6 text-center overflow-hidden bg-gradient-to-b from-surface-subtle to-surface"
 	>
 		<!-- Lanterns -->
 		<div class="absolute top-8 left-[15%] opacity-60" aria-hidden="true">
@@ -1308,12 +1308,12 @@
 			<div class="relative group">
 				<a
 					href="#{item.id}"
-					class="flex items-center justify-center w-10 h-10 rounded-full bg-white dark:bg-cream-100 shadow-md border border-amber-200 dark:border-cream-200 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-all duration-200"
+					class="flex items-center justify-center w-10 h-10 rounded-full bg-surface shadow-md border border-border hover:bg-warning-bg transition-all duration-200"
 					aria-label="Jump to {item.text}"
 					title={item.text}
 				>
 					<ItemIcon
-						class="w-5 h-5 text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform"
+						class="w-5 h-5 text-warning group-hover:scale-110 transition-transform"
 					/>
 				</a>
 
@@ -1326,7 +1326,7 @@
 							{@const ToolIconComponent = getToolIcon(tool.icon)}
 							<a
 								href="#{getToolId(tool.name)}"
-								class="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white dark:bg-cream-100 shadow-md border border-amber-200 dark:border-cream-200 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors whitespace-nowrap"
+								class="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-surface shadow-md border border-border text-warning hover:bg-warning-bg transition-colors whitespace-nowrap"
 								title={tool.tagline}
 							>
 								<ToolIconComponent class="w-3.5 h-3.5" />
@@ -1344,7 +1344,7 @@
 		<button
 			type="button"
 			onclick={() => (isMobileTocOpen = !isMobileTocOpen)}
-			class="w-12 h-12 rounded-full bg-amber-500 text-white shadow-lg flex items-center justify-center hover:bg-amber-600 transition-colors"
+			class="w-12 h-12 rounded-full bg-warning text-white shadow-lg flex items-center justify-center hover:bg-warning/90 transition-colors"
 			aria-expanded={isMobileTocOpen}
 			aria-label="Table of contents"
 		>
@@ -1360,10 +1360,10 @@
 
 		{#if isMobileTocOpen}
 			<div
-				class="absolute bottom-16 right-0 w-72 bg-white dark:bg-cream-100 rounded-xl shadow-xl border border-amber-200 dark:border-cream-200 overflow-hidden max-h-[70vh] overflow-y-auto"
+				class="absolute bottom-16 right-0 w-72 bg-surface rounded-xl shadow-xl border border-border overflow-hidden max-h-[70vh] overflow-y-auto"
 			>
 				<div
-					class="px-4 py-3 border-b border-amber-200 dark:border-cream-200 flex items-center justify-between sticky top-0 bg-white dark:bg-cream-100"
+					class="px-4 py-3 border-b border-border flex items-center justify-between sticky top-0 bg-surface"
 				>
 					<span class="font-medium text-foreground">Navigate</span>
 					<button
@@ -1390,9 +1390,9 @@
 							<a
 								href="#{item.id}"
 								onclick={() => (isMobileTocOpen = false)}
-								class="flex items-center gap-3 px-4 py-2 text-foreground-muted hover:text-foreground hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors"
+								class="flex items-center gap-3 px-4 py-2 text-foreground-muted hover:text-foreground hover:bg-surface-hover transition-colors"
 							>
-								<ItemIcon class="w-5 h-5 text-amber-500" />
+								<ItemIcon class="w-5 h-5 text-warning" />
 								<span class="font-medium">{item.text}</span>
 							</a>
 
@@ -1404,9 +1404,9 @@
 										<a
 											href="#{getToolId(tool.name)}"
 											onclick={() => (isMobileTocOpen = false)}
-											class="flex items-center gap-2 px-4 py-1.5 text-sm text-foreground-muted hover:text-foreground hover:bg-slate-100 dark:hover:bg-cream-200/50 transition-colors"
+											class="flex items-center gap-2 px-4 py-1.5 text-sm text-foreground-muted hover:text-foreground hover:bg-surface-subtle transition-colors"
 										>
-											<ToolIconComponent class="w-4 h-4 text-amber-400" />
+											<ToolIconComponent class="w-4 h-4 text-warning-foreground" />
 											<span>{tool.name}</span>
 										</a>
 									{/each}
@@ -1440,7 +1440,7 @@
 								<div class="flex items-start justify-between mb-4">
 									<div class="flex items-center gap-3">
 										<div
-											class="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400"
+											class="w-10 h-10 rounded-lg bg-warning-bg flex items-center justify-center text-warning"
 										>
 											<ToolIcon class="w-5 h-5" />
 										</div>
@@ -1464,8 +1464,8 @@
 											<svelte:element
 												this={sub.href ? "a" : "span"}
 												href={sub.href}
-												class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-cream-200/50 text-xs text-foreground-muted transition-colors {sub.href
-													? 'cursor-pointer hover:bg-amber-100 dark:hover:bg-amber-900/30 hover:text-amber-700 dark:hover:text-amber-300'
+												class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface-subtle text-xs text-foreground-muted transition-colors {sub.href
+													? 'cursor-pointer hover:bg-warning-bg hover:text-warning-foreground'
 													: ''}"
 												title={sub.description}
 												role="listitem"
@@ -1482,13 +1482,13 @@
 									<GroveSwapText content={tool.description} />
 								</p>
 
-								<div class="pt-4 border-t border-divider space-y-2">
+								<div class="pt-4 border-t border-border space-y-2">
 									{#if tool.domain}
 										<div class="flex items-start gap-2 text-sm min-w-0">
-											<span class="text-foreground-faint shrink-0">Domain:</span>
+											<span class="text-foreground-subtle shrink-0">Domain:</span>
 											{#if tool.domain.includes("{you}")}
 												<code
-													class="px-2 py-0.5 rounded bg-slate-100 dark:bg-cream-200 text-foreground-muted break-all"
+													class="px-2 py-0.5 rounded bg-surface-subtle text-foreground-muted break-all"
 													>{tool.domain}</code
 												>
 											{:else}
@@ -1496,13 +1496,13 @@
 													href="https://{tool.domain}"
 													target="_blank"
 													rel="noopener noreferrer"
-													class="px-2 py-0.5 rounded bg-slate-100 dark:bg-cream-200 text-foreground-muted hover:text-accent hover:bg-slate-200 dark:hover:bg-cream-300 transition-colors font-mono text-sm break-all"
+													class="px-2 py-0.5 rounded bg-surface-subtle text-foreground-muted hover:text-accent hover:bg-surface-elevated transition-colors font-mono text-sm break-all"
 													>{tool.domain}</a
 												>
 											{/if}
 										</div>
 									{/if}
-									<div class="text-sm text-foreground-faint">
+									<div class="text-sm text-foreground-subtle">
 										{tool.integration}
 									</div>
 									<div class="flex flex-wrap gap-3">
@@ -1510,7 +1510,7 @@
 											<a
 												href={tool.whatIsLink}
 												aria-label="Learn more about {tool.name}"
-												class="inline-flex items-center gap-1.5 text-sm text-foreground-faint hover:text-foreground transition-colors"
+												class="inline-flex items-center gap-1.5 text-sm text-foreground-subtle hover:text-foreground transition-colors"
 											>
 												<BookOpen class="w-4 h-4" />
 												<span>Read more</span>
@@ -1519,7 +1519,7 @@
 										{#if tool.spec}
 											<a
 												href={tool.spec}
-												class="inline-flex items-center gap-1.5 text-sm text-foreground-faint hover:text-foreground transition-colors"
+												class="inline-flex items-center gap-1.5 text-sm text-foreground-subtle hover:text-foreground transition-colors"
 											>
 												<FileText class="w-4 h-4" />
 												<span>Spec</span>
@@ -1528,7 +1528,7 @@
 										{#if tool.howLink}
 											<a
 												href={tool.howLink}
-												class="inline-flex items-center gap-1.5 text-sm text-foreground-faint hover:text-foreground transition-colors"
+												class="inline-flex items-center gap-1.5 text-sm text-foreground-subtle hover:text-foreground transition-colors"
 											>
 												<Lightbulb class="w-4 h-4" />
 												<span>How we'll do it</span>
@@ -1539,7 +1539,7 @@
 												href={tool.github}
 												target="_blank"
 												rel="noopener noreferrer"
-												class="inline-flex items-center gap-1.5 text-sm text-foreground-faint hover:text-foreground transition-colors"
+												class="inline-flex items-center gap-1.5 text-sm text-foreground-subtle hover:text-foreground transition-colors"
 											>
 												<Github class="w-4 h-4" />
 												<span>GitHub</span>
@@ -1555,10 +1555,10 @@
 
 			<!-- More tools coming -->
 			<div
-				class="text-center p-8 rounded-xl bg-amber-100/50 dark:bg-amber-950/25 backdrop-blur-md border border-dashed border-amber-300 dark:border-amber-800/30"
+				class="text-center p-8 rounded-xl bg-warning-bg backdrop-blur-md border border-dashed border-border"
 			>
 				<p class="text-foreground-muted">More tools are always being dreamed up in the workshop.</p>
-				<p class="text-sm text-foreground-faint mt-2">
+				<p class="text-sm text-foreground-subtle mt-2">
 					Have an idea? <a href="mailto:hello@grove.place" class="text-accent hover:underline"
 						>Let's talk</a
 					>
@@ -1568,17 +1568,17 @@
 	</section>
 
 	<!-- Links -->
-	<section class="py-8 px-6 bg-white/70 dark:bg-cream-100/50 border-t border-divider">
+	<section class="py-8 px-6 bg-surface border-t border-border">
 		<div class="max-w-4xl mx-auto flex flex-wrap justify-center gap-4">
 			<a
 				href="/roadmap"
-				class="px-4 py-2 rounded-lg bg-slate-100 dark:bg-cream-200 text-foreground-muted hover:text-foreground transition-colors"
+				class="px-4 py-2 rounded-lg bg-surface-subtle text-foreground-muted hover:text-foreground transition-colors"
 			>
 				← Main Roadmap
 			</a>
 			<a
 				href="/beyond"
-				class="px-4 py-2 rounded-lg bg-slate-100 dark:bg-cream-200 text-foreground-muted hover:text-foreground transition-colors"
+				class="px-4 py-2 rounded-lg bg-surface-subtle text-foreground-muted hover:text-foreground transition-colors"
 			>
 				Beyond the Grove →
 			</a>

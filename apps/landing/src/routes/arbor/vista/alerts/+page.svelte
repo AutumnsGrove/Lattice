@@ -16,9 +16,9 @@
 	let saveMessage = $state("");
 
 	const severityColors: Record<string, string> = {
-		critical: "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400",
-		warning: "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400",
-		info: "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400",
+		critical: "bg-error-bg text-error",
+		warning: "bg-warning-bg text-warning",
+		info: "bg-info-bg text-info",
 	};
 
 	function formatRelativeTime(epochSeconds: number): string {
@@ -88,7 +88,7 @@
 
 	{#if data.active.length === 0}
 		<GlassCard class="p-6 text-center">
-			<CheckCircle2 class="w-10 h-10 mx-auto mb-3 text-grove-600 dark:text-grove-400" />
+			<CheckCircle2 class="w-10 h-10 mx-auto mb-3 text-success" />
 			<p class="text-foreground-muted font-sans text-sm">No active alerts — all clear.</p>
 		</GlassCard>
 	{:else}
@@ -99,10 +99,10 @@
 						<div class="flex items-start gap-3">
 							<AlertCircle
 								class="w-4 h-4 mt-0.5 {alert.severity === 'critical'
-									? 'text-red-600 dark:text-red-400'
+									? 'text-error'
 									: alert.severity === 'warning'
-										? 'text-amber-600 dark:text-amber-400'
-										: 'text-blue-600 dark:text-blue-400'} shrink-0"
+										? 'text-warning'
+										: 'text-info'} shrink-0"
 							/>
 							<div>
 								<p class="text-sm font-sans font-medium text-foreground">{alert.title}</p>
@@ -134,11 +134,11 @@
 {#if data.recent.length > 0}
 	<section class="mb-8">
 		<h2 class="text-lg font-serif text-foreground mb-4">Recent History</h2>
-		<div class="overflow-hidden rounded-xl border border-grove-200 dark:border-cream-300">
+		<div class="overflow-hidden rounded-xl border border-border">
 			<table class="w-full text-sm font-sans" aria-label="Recent alert history">
 				<thead>
 					<tr
-						class="bg-grove-50 dark:bg-cream-200/20 text-xs text-foreground-muted uppercase tracking-wide"
+						class="bg-surface-subtle text-xs text-foreground-muted uppercase tracking-wide"
 					>
 						<th scope="col" class="px-5 py-3 text-left font-medium">Alert</th>
 						<th scope="col" class="px-5 py-3 text-left font-medium">Service</th>
@@ -147,9 +147,9 @@
 						<th scope="col" class="px-5 py-3 text-right font-medium">Status</th>
 					</tr>
 				</thead>
-				<tbody class="divide-y divide-grove-100 dark:divide-cream-300/40">
+				<tbody class="divide-y divide-divider">
 					{#each data.recent as alert}
-						<tr class="bg-white dark:bg-cream-100/30">
+						<tr class="bg-surface">
 							<td class="px-5 py-3 text-foreground text-xs">{alert.title}</td>
 							<td class="px-5 py-3 font-mono text-xs text-foreground-muted">{alert.serviceName}</td>
 							<td class="px-5 py-3 text-right">
@@ -165,9 +165,9 @@
 							>
 							<td class="px-5 py-3 text-right">
 								{#if alert.resolvedAt}
-									<span class="text-xs text-grove-600 dark:text-grove-400">Resolved</span>
+									<span class="text-xs text-success">Resolved</span>
 								{:else}
-									<span class="text-xs text-amber-600 dark:text-amber-400">Active</span>
+									<span class="text-xs text-warning">Active</span>
 								{/if}
 							</td>
 						</tr>
@@ -183,11 +183,11 @@
 	<h2 class="text-lg font-serif text-foreground mb-4">Alert Thresholds</h2>
 
 	{#if data.thresholds.length > 0}
-		<div class="overflow-hidden rounded-xl border border-grove-200 dark:border-cream-300 mb-6">
+		<div class="overflow-hidden rounded-xl border border-border mb-6">
 			<table class="w-full text-sm font-sans" aria-label="Configured alert thresholds">
 				<thead>
 					<tr
-						class="bg-grove-50 dark:bg-cream-200/20 text-xs text-foreground-muted uppercase tracking-wide"
+						class="bg-surface-subtle text-xs text-foreground-muted uppercase tracking-wide"
 					>
 						<th scope="col" class="px-5 py-3 text-left font-medium">Service</th>
 						<th scope="col" class="px-5 py-3 text-left font-medium">Metric</th>
@@ -196,9 +196,9 @@
 						<th scope="col" class="px-5 py-3 text-right font-medium">Status</th>
 					</tr>
 				</thead>
-				<tbody class="divide-y divide-grove-100 dark:divide-cream-300/40">
+				<tbody class="divide-y divide-divider">
 					{#each data.thresholds as threshold}
-						<tr class="bg-white dark:bg-cream-100/30 {threshold.enabled ? '' : 'opacity-50'}">
+						<tr class="bg-surface {threshold.enabled ? '' : 'opacity-50'}">
 							<td class="px-5 py-3 font-mono text-xs text-foreground">{threshold.serviceName}</td>
 							<td class="px-5 py-3 font-mono text-xs text-foreground-muted"
 								>{threshold.metricType}</td
@@ -243,7 +243,7 @@
 						placeholder="e.g. grove-engine"
 						bind:value={newThreshold.serviceName}
 						required
-						class="w-full text-sm font-sans px-3 py-2 rounded-lg border border-grove-200 dark:border-cream-300 bg-white dark:bg-cream-100 text-foreground"
+						class="w-full text-sm font-sans px-3 py-2 rounded-lg border border-border bg-surface text-foreground"
 					/>
 				</div>
 				<div>
@@ -256,7 +256,7 @@
 						placeholder="e.g. error_rate"
 						bind:value={newThreshold.metricType}
 						required
-						class="w-full text-sm font-sans px-3 py-2 rounded-lg border border-grove-200 dark:border-cream-300 bg-white dark:bg-cream-100 text-foreground"
+						class="w-full text-sm font-sans px-3 py-2 rounded-lg border border-border bg-surface text-foreground"
 					/>
 				</div>
 				<div>
@@ -266,7 +266,7 @@
 					<select
 						id="threshold-operator"
 						bind:value={newThreshold.operator}
-						class="w-full text-sm font-sans px-3 py-2 rounded-lg border border-grove-200 dark:border-cream-300 bg-white dark:bg-cream-100 text-foreground"
+						class="w-full text-sm font-sans px-3 py-2 rounded-lg border border-border bg-surface text-foreground"
 					>
 						<option value="gt">gt (greater than)</option>
 						<option value="gte">gte (greater than or equal)</option>
@@ -286,7 +286,7 @@
 						placeholder="e.g. 0.05"
 						bind:value={newThreshold.thresholdValue}
 						required
-						class="w-full text-sm font-sans px-3 py-2 rounded-lg border border-grove-200 dark:border-cream-300 bg-white dark:bg-cream-100 text-foreground"
+						class="w-full text-sm font-sans px-3 py-2 rounded-lg border border-border bg-surface text-foreground"
 					/>
 				</div>
 				<div>
@@ -296,7 +296,7 @@
 					<select
 						id="threshold-severity"
 						bind:value={newThreshold.severity}
-						class="w-full text-sm font-sans px-3 py-2 rounded-lg border border-grove-200 dark:border-cream-300 bg-white dark:bg-cream-100 text-foreground"
+						class="w-full text-sm font-sans px-3 py-2 rounded-lg border border-border bg-surface text-foreground"
 					>
 						<option value="info">info</option>
 						<option value="warning">warning</option>
@@ -309,7 +309,7 @@
 				<button
 					type="submit"
 					disabled={saving}
-					class="px-4 py-2 bg-grove-600 text-white rounded-lg text-sm font-sans hover:bg-grove-700 transition-colors disabled:opacity-60"
+					class="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-sans hover:bg-primary/90 transition-colors disabled:opacity-60"
 				>
 					{saving ? "Saving…" : "Save Threshold"}
 				</button>
@@ -318,8 +318,8 @@
 						role="status"
 						aria-live="polite"
 						class="text-xs font-sans {saveMessage.includes('saved')
-							? 'text-grove-600 dark:text-grove-400'
-							: 'text-red-600 dark:text-red-400'}"
+							? 'text-success'
+							: 'text-error'}"
 					>
 						{saveMessage}
 					</p>
@@ -330,10 +330,10 @@
 </section>
 
 {#if !data.dbAvailable}
-	<GlassCard class="p-5 border-amber-200 dark:border-amber-800">
+	<GlassCard class="p-5 border-warning">
 		<div class="flex items-start gap-3">
-			<Info class="w-4 h-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
-			<p class="text-xs font-sans text-amber-700 dark:text-amber-400">
+			<Info class="w-4 h-4 text-warning mt-0.5 shrink-0" />
+			<p class="text-xs font-sans text-warning">
 				Database not available in this environment.
 			</p>
 		</div>

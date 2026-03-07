@@ -43,38 +43,38 @@
 	> = {
 		RUNNING: {
 			label: 'Running',
-			color: 'text-green-700 dark:text-green-400',
-			bg: 'bg-green-100 dark:bg-green-900/30',
+			color: 'text-success-foreground',
+			bg: 'bg-success-bg',
 			pulse: false
 		},
 		IDLE: {
 			label: 'Idle',
-			color: 'text-foreground-muted dark:text-cream-300',
-			bg: 'bg-cream-100 dark:bg-cream-200',
+			color: 'text-foreground-muted',
+			bg: 'bg-surface-subtle',
 			pulse: false
 		},
 		PROVISIONING: {
 			label: 'Starting...',
-			color: 'text-amber-700 dark:text-amber-400',
-			bg: 'bg-amber-100 dark:bg-amber-900/30',
+			color: 'text-warning-foreground',
+			bg: 'bg-warning-bg',
 			pulse: true
 		},
 		SUSPENDED: {
 			label: 'Suspended',
-			color: 'text-red-700 dark:text-red-400',
-			bg: 'bg-red-100 dark:bg-red-900/30',
+			color: 'text-error-foreground',
+			bg: 'bg-error-bg',
 			pulse: false
 		},
 		TERMINATING: {
 			label: 'Stopping...',
-			color: 'text-orange-700 dark:text-orange-400',
-			bg: 'bg-orange-100 dark:bg-orange-900/30',
+			color: 'text-warning-foreground',
+			bg: 'bg-warning-bg',
 			pulse: true
 		},
 		UNKNOWN: {
 			label: 'Unknown',
-			color: 'text-foreground-subtle dark:text-cream-400',
-			bg: 'bg-cream-100 dark:bg-cream-200',
+			color: 'text-foreground-subtle',
+			bg: 'bg-surface-subtle',
 			pulse: false
 		}
 	};
@@ -136,17 +136,17 @@
 </div>
 
 {#if form?.error}
-	<GlassCard class="mb-6 p-4 border-red-200 dark:border-red-800" role="alert">
+	<GlassCard class="mb-6 p-4 border-error" role="alert">
 		<div class="flex items-center gap-2">
-			<AlertCircle class="w-4 h-4 text-red-600 dark:text-red-400 shrink-0" />
-			<p class="text-sm font-sans text-red-700 dark:text-red-400">{form.error}</p>
+			<AlertCircle class="w-4 h-4 text-error shrink-0" />
+			<p class="text-sm font-sans text-error-foreground">{form.error}</p>
 		</div>
 	</GlassCard>
 {/if}
 
 {#if form?.success && form?.action === 'command'}
-	<GlassCard class="mb-6 p-4 border-green-200 dark:border-green-800" role="status">
-		<p class="text-sm font-sans text-green-700 dark:text-green-400">
+	<GlassCard class="mb-6 p-4 border-success" role="status">
+		<p class="text-sm font-sans text-success-foreground">
 			{form.response || 'Command sent'}
 		</p>
 	</GlassCard>
@@ -157,11 +157,11 @@
 	<div class="flex items-center justify-between mb-4">
 		<div class="flex items-center gap-3">
 			{#if isRunning}
-				<Wifi class="w-6 h-6 text-green-600 dark:text-green-400" />
+				<Wifi class="w-6 h-6 text-success" />
 			{:else if isTransitioning}
-				<Loader2 class="w-6 h-6 text-amber-600 dark:text-amber-400 animate-spin" />
+				<Loader2 class="w-6 h-6 text-warning animate-spin" />
 			{:else}
-				<WifiOff class="w-6 h-6 text-foreground-subtle dark:text-cream-500" />
+				<WifiOff class="w-6 h-6 text-foreground-subtle" />
 			{/if}
 			<div>
 				<div class="text-lg font-serif text-foreground">Server Status</div>
@@ -180,14 +180,14 @@
 						<select
 							bind:value={selectedRegion}
 							aria-label="Select server region"
-							class="text-xs font-sans px-2 py-1.5 rounded border border-grove-200 dark:border-cream-300 bg-white dark:bg-cream-100 text-foreground"
+							class="text-xs font-sans px-2 py-1.5 rounded border border-border bg-surface text-foreground"
 						>
 							<option value="eu">EU</option>
 							<option value="us">US</option>
 						</select>
 						<button
 							type="submit"
-							class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-sans hover:bg-green-700 transition-colors"
+							class="inline-flex items-center gap-2 px-4 py-2 bg-success text-success-foreground rounded-lg text-sm font-sans hover:bg-success/90 transition-colors"
 						>
 							<Play class="w-4 h-4" />
 							Start
@@ -198,7 +198,7 @@
 				<form method="POST" action="?/stop" use:enhance>
 					<button
 						type="submit"
-						class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-sans hover:bg-red-700 transition-colors"
+						class="inline-flex items-center gap-2 px-4 py-2 bg-error text-error-foreground rounded-lg text-sm font-sans hover:bg-error/90 transition-colors"
 					>
 						<Square class="w-4 h-4" />
 						Stop
@@ -210,7 +210,7 @@
 
 	<!-- Status Details (when running) -->
 	{#if isRunning}
-		<div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-grove-200 dark:border-cream-300">
+		<div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-border">
 			{#if data.serverStatus.players}
 				<div class="text-center">
 					<Users class="w-4 h-4 mx-auto mb-1 text-foreground-muted" />
@@ -251,11 +251,11 @@
 
 		<!-- Online Players List -->
 		{#if data.serverStatus.players && data.serverStatus.players.list.length > 0}
-			<div class="mt-4 pt-4 border-t border-grove-200 dark:border-cream-300">
+			<div class="mt-4 pt-4 border-t border-border">
 				<div class="text-xs font-sans text-foreground-muted mb-2">Online Players</div>
 				<div class="flex flex-wrap gap-2">
 					{#each data.serverStatus.players.list as player}
-						<span class="text-xs font-sans px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
+						<span class="text-xs font-sans px-2 py-1 rounded bg-success-bg text-success-foreground">
 							{player}
 						</span>
 					{/each}
@@ -265,7 +265,7 @@
 
 		<!-- Session Cost -->
 		{#if data.serverStatus.sessionCost}
-			<div class="mt-4 pt-4 border-t border-grove-200 dark:border-cream-300 flex items-center justify-between">
+			<div class="mt-4 pt-4 border-t border-border flex items-center justify-between">
 				<span class="text-sm font-sans text-foreground-muted">Session Cost</span>
 				<span class="text-sm font-sans text-foreground font-medium">
 					{formatCost(data.serverStatus.sessionCost)}
@@ -274,7 +274,7 @@
 		{/if}
 
 		<!-- Last Backup + Manual Sync -->
-		<div class="mt-4 pt-4 border-t border-grove-200 dark:border-cream-300 flex items-center justify-between">
+		<div class="mt-4 pt-4 border-t border-border flex items-center justify-between">
 			<div class="text-sm font-sans text-foreground-muted">
 				Last backup:
 				{data.serverStatus.lastBackup ? formatDate(data.serverStatus.lastBackup) : 'Never'}
@@ -282,7 +282,7 @@
 			<form method="POST" action="?/sync" use:enhance>
 				<button
 					type="submit"
-					class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-sans text-grove-600 dark:text-grove-400 border border-grove-200 dark:border-cream-300 rounded-lg hover:bg-grove-50 dark:hover:bg-cream-200 transition-colors"
+					class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-sans text-primary border border-border rounded-lg hover:bg-surface-hover transition-colors"
 				>
 					<RefreshCw class="w-3 h-3" />
 					Sync Now
@@ -293,7 +293,7 @@
 </GlassCard>
 
 <!-- Tab Navigation -->
-<div class="flex gap-1 mb-6 border-b border-grove-200 dark:border-cream-300" role="tablist">
+<div class="flex gap-1 mb-6 border-b border-border" role="tablist">
 	<button
 		type="button"
 		onclick={() => (activeTab = 'controls')}
@@ -301,7 +301,7 @@
 		aria-selected={activeTab === 'controls'}
 		aria-controls="controls-panel"
 		class="px-4 py-2 text-sm font-sans transition-colors {activeTab === 'controls'
-			? 'text-grove-600 dark:text-grove-400 border-b-2 border-grove-600 dark:border-grove-400'
+			? 'text-primary border-b-2 border-primary'
 			: 'text-foreground-muted hover:text-foreground'}"
 	>
 		Controls
@@ -313,7 +313,7 @@
 		aria-selected={activeTab === 'mods'}
 		aria-controls="mods-panel"
 		class="px-4 py-2 text-sm font-sans transition-colors flex items-center gap-1.5 {activeTab === 'mods'
-			? 'text-grove-600 dark:text-grove-400 border-b-2 border-grove-600 dark:border-grove-400'
+			? 'text-primary border-b-2 border-primary'
 			: 'text-foreground-muted hover:text-foreground'}"
 	>
 		<Package class="w-3.5 h-3.5" />
@@ -326,7 +326,7 @@
 		aria-selected={activeTab === 'world'}
 		aria-controls="world-panel"
 		class="px-4 py-2 text-sm font-sans transition-colors flex items-center gap-1.5 {activeTab === 'world'
-			? 'text-grove-600 dark:text-grove-400 border-b-2 border-grove-600 dark:border-grove-400'
+			? 'text-primary border-b-2 border-primary'
 			: 'text-foreground-muted hover:text-foreground'}"
 	>
 		<Map class="w-3.5 h-3.5" />
@@ -362,11 +362,11 @@
 					bind:value={newWhitelistUser}
 					placeholder="Minecraft username"
 					aria-label="Minecraft username"
-					class="flex-1 px-3 py-2 border border-grove-200 dark:border-cream-300 rounded-lg text-sm font-sans bg-white dark:bg-cream-100 text-foreground focus:outline-none focus:ring-2 focus:ring-grove-500"
+					class="flex-1 px-3 py-2 border border-border rounded-lg text-sm font-sans bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
 				/>
 				<button
 					type="submit"
-					class="inline-flex items-center gap-1 px-4 py-2 bg-grove-600 text-white rounded-lg text-sm font-sans hover:bg-grove-700 transition-colors"
+					class="inline-flex items-center gap-1 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-sans hover:bg-primary/90 transition-colors"
 				>
 					<UserPlus class="w-4 h-4" />
 					Add
@@ -379,7 +379,7 @@
 					No players whitelisted
 				</p>
 			{:else}
-				<div class="divide-y divide-grove-100 dark:divide-cream-300/50">
+				<div class="divide-y divide-border">
 					{#each data.whitelist as entry}
 						<div class="flex items-center justify-between py-2">
 							<span class="text-sm font-sans text-foreground">{entry.username}</span>
@@ -387,7 +387,7 @@
 								<input type="hidden" name="username" value={entry.username} />
 								<button
 									type="submit"
-									class="p-1 text-foreground-muted hover:text-red-600 dark:hover:text-red-400 transition-colors"
+									class="p-1 text-foreground-muted hover:text-error transition-colors"
 									aria-label="Remove {entry.username}"
 								>
 									<UserMinus class="w-4 h-4" />
@@ -431,12 +431,12 @@
 							bind:value={commandInput}
 							placeholder="Enter server command..."
 							aria-label="Server command"
-							class="w-full pl-10 pr-4 py-2 border border-grove-200 dark:border-cream-300 rounded-lg text-sm font-mono bg-white dark:bg-cream-100 text-foreground focus:outline-none focus:ring-2 focus:ring-grove-500"
+							class="w-full pl-10 pr-4 py-2 border border-border rounded-lg text-sm font-mono bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
 						/>
 					</div>
 					<button
 						type="submit"
-						class="px-4 py-2 bg-grove-600 text-white rounded-lg text-sm font-sans hover:bg-grove-700 transition-colors"
+						class="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-sans hover:bg-primary/90 transition-colors"
 					>
 						Send
 					</button>
@@ -461,7 +461,7 @@
 				<div class="overflow-x-auto">
 					<table class="w-full" aria-label="Session history">
 						<thead
-							class="bg-grove-50 dark:bg-cream-100/50 border-b border-grove-200 dark:border-cream-300"
+							class="bg-surface-subtle border-b border-border"
 						>
 							<tr>
 								<th
@@ -497,7 +497,7 @@
 							</tr>
 						</thead>
 						<tbody
-							class="divide-y divide-grove-100 dark:divide-cream-300/50 bg-white dark:bg-cream-100/30"
+							class="divide-y divide-border bg-surface"
 						>
 							{#each data.history as session}
 								<tr>

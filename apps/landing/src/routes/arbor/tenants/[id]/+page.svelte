@@ -54,23 +54,23 @@
 	const planConfig: Record<string, { label: string; color: string; bg: string }> = {
 		seedling: {
 			label: 'Seedling',
-			color: 'text-green-700 dark:text-green-400',
-			bg: 'bg-green-100 dark:bg-green-900/30'
+			color: 'text-success text-success-foreground',
+			bg: 'bg-success-bg'
 		},
 		sapling: {
 			label: 'Sapling',
-			color: 'text-teal-700 dark:text-teal-400',
-			bg: 'bg-teal-100 dark:bg-teal-900/30'
+			color: 'text-accent text-accent-foreground',
+			bg: 'bg-accent-subtle'
 		},
 		oak: {
 			label: 'Oak',
-			color: 'text-amber-700 dark:text-amber-400',
-			bg: 'bg-amber-100 dark:bg-amber-900/30'
+			color: 'text-warning text-warning-foreground',
+			bg: 'bg-warning-bg'
 		},
 		evergreen: {
 			label: 'Evergreen',
-			color: 'text-emerald-700 dark:text-emerald-400',
-			bg: 'bg-emerald-100 dark:bg-emerald-900/30'
+			color: 'text-success text-success-foreground',
+			bg: 'bg-success-bg'
 		}
 	};
 
@@ -281,13 +281,13 @@
 				</span>
 				{#if data.tenant.active}
 					<span
-						class="text-xs font-sans bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-1 rounded"
+						class="text-xs font-sans bg-success-bg text-success-foreground px-2 py-1 rounded"
 					>
 						Active
 					</span>
 				{:else}
 					<span
-						class="text-xs font-sans bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 px-2 py-1 rounded"
+						class="text-xs font-sans bg-error-bg text-error-foreground px-2 py-1 rounded"
 					>
 						Suspended
 					</span>
@@ -358,7 +358,7 @@
 		<span class="text-sm font-sans font-medium text-foreground">Storage Usage</span>
 		<span class="text-sm font-sans text-foreground-muted">{storagePct}%</span>
 	</div>
-	<div class="w-full h-2 bg-grove-100 dark:bg-cream-200 rounded-full overflow-hidden">
+	<div class="w-full h-2 bg-surface-subtle rounded-full overflow-hidden">
 		<div
 			role="progressbar"
 			aria-valuenow={storagePct}
@@ -366,9 +366,9 @@
 			aria-valuemax={100}
 			aria-label="Storage usage"
 			class="h-full rounded-full transition-all {storagePct > 90
-				? 'bg-red-500'
+				? 'bg-error'
 				: storagePct > 70
-					? 'bg-amber-500'
+					? 'bg-warning'
 					: 'bg-grove-500'}"
 			style="width: {storagePct}%"
 		></div>
@@ -382,11 +382,11 @@
 	<GlassCard class="mb-4 p-4">
 		<div class="flex items-center gap-2 text-sm font-sans">
 			{#if form?.success}
-				<CheckCircle class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+				<CheckCircle class="w-4 h-4 text-success shrink-0" />
 				<span class="text-foreground">{form.message || 'Action completed'}</span>
 			{:else}
-				<XCircle class="w-4 h-4 text-red-600 dark:text-red-400 shrink-0" />
-				<span class="text-red-700 dark:text-red-400">{form.error}</span>
+				<XCircle class="w-4 h-4 text-error shrink-0" />
+				<span class="text-error">{form.error}</span>
 			{/if}
 		</div>
 	</GlassCard>
@@ -420,10 +420,10 @@
 </div>
 
 <!-- Danger Zone -->
-<GlassCard class="p-6 border-red-200 dark:border-red-800/50">
+<GlassCard class="p-6 border-error">
 	<div class="flex items-center gap-2 mb-4">
-		<AlertTriangle class="w-5 h-5 text-red-600 dark:text-red-400" />
-		<h2 class="text-lg font-serif text-red-700 dark:text-red-400">Danger Zone</h2>
+		<AlertTriangle class="w-5 h-5 text-error" />
+		<h2 class="text-lg font-serif text-error">Danger Zone</h2>
 	</div>
 	<p class="text-sm font-sans text-foreground-muted mb-4">
 		These commands must be run locally via the CLI. They cannot be executed from this panel.
@@ -431,7 +431,7 @@
 
 	<div class="space-y-4">
 		<!-- Suspend Command -->
-		<div class="flex items-center justify-between gap-4 p-3 rounded-lg bg-red-50/50 dark:bg-red-950/20">
+		<div class="flex items-center justify-between gap-4 p-3 rounded-lg bg-error-bg">
 			<div>
 				<div class="text-sm font-sans font-medium text-foreground">Suspend Tenant</div>
 				<code class="text-xs font-mono text-foreground-muted">
@@ -445,20 +445,20 @@
 						`gw db query --write "UPDATE tenants SET active = 0 WHERE subdomain = '${data.tenant.subdomain}'"`,
 						'suspend'
 					)}
-				class="shrink-0 p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+				class="shrink-0 p-2 rounded-lg hover:bg-error hover:bg-opacity-20 transition-colors"
 				aria-label={copiedCommand === 'suspend' ? 'Copied!' : 'Copy suspend command'}
 			>
 				{#if copiedCommand === 'suspend'}
-					<Check class="w-4 h-4 text-green-600" />
+					<Check class="w-4 h-4 text-success" />
 				{:else}
-					<Copy class="w-4 h-4 text-red-600 dark:text-red-400" />
+					<Copy class="w-4 h-4 text-error" />
 				{/if}
 			</button>
 		</div>
 
 		<!-- Reactivate Command -->
 		{#if !data.tenant.active}
-			<div class="flex items-center justify-between gap-4 p-3 rounded-lg bg-green-50/50 dark:bg-green-950/20">
+			<div class="flex items-center justify-between gap-4 p-3 rounded-lg bg-success-bg">
 				<div>
 					<div class="text-sm font-sans font-medium text-foreground">Reactivate Tenant</div>
 					<code class="text-xs font-mono text-foreground-muted">
@@ -472,22 +472,22 @@
 							`gw db query --write "UPDATE tenants SET active = 1 WHERE subdomain = '${data.tenant.subdomain}'"`,
 							'reactivate'
 						)}
-					class="shrink-0 p-2 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
+					class="shrink-0 p-2 rounded-lg hover:bg-success hover:bg-opacity-20 transition-colors"
 					aria-label={copiedCommand === 'reactivate' ? 'Copied!' : 'Copy reactivate command'}
 				>
 					{#if copiedCommand === 'reactivate'}
-						<Check class="w-4 h-4 text-green-600" />
+						<Check class="w-4 h-4 text-success" />
 					{:else}
-						<Copy class="w-4 h-4 text-green-600 dark:text-green-400" />
+						<Copy class="w-4 h-4 text-success" />
 					{/if}
 				</button>
 			</div>
 		{/if}
 
 		<!-- Delete Command -->
-		<div class="flex items-center justify-between gap-4 p-3 rounded-lg bg-red-50/50 dark:bg-red-950/20">
+		<div class="flex items-center justify-between gap-4 p-3 rounded-lg bg-error-bg">
 			<div>
-				<div class="text-sm font-sans font-medium text-red-700 dark:text-red-400">
+				<div class="text-sm font-sans font-medium text-error">
 					Delete Tenant
 				</div>
 				<code class="text-xs font-mono text-foreground-muted">
@@ -498,13 +498,13 @@
 				type="button"
 				onclick={() =>
 					copyCommand(`gw tenant delete ${data.tenant.subdomain} --write`, 'delete')}
-				class="shrink-0 p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+				class="shrink-0 p-2 rounded-lg hover:bg-error hover:bg-opacity-20 transition-colors"
 				aria-label={copiedCommand === 'delete' ? 'Copied!' : 'Copy delete command'}
 			>
 				{#if copiedCommand === 'delete'}
-					<Check class="w-4 h-4 text-green-600" />
+					<Check class="w-4 h-4 text-success" />
 				{:else}
-					<Copy class="w-4 h-4 text-red-600 dark:text-red-400" />
+					<Copy class="w-4 h-4 text-error" />
 				{/if}
 			</button>
 		</div>

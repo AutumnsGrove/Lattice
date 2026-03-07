@@ -21,17 +21,17 @@
 		open: {
 			label: "Open",
 			icon: MessageCircle,
-			color: "text-blue-600 bg-blue-100 dark:text-blue-400 dark:bg-blue-900/30",
+			color: "text-info bg-info-bg",
 		},
 		pending: {
 			label: "Pending",
 			icon: Clock,
-			color: "text-amber-600 bg-amber-100 dark:text-amber-400 dark:bg-amber-900/30",
+			color: "text-warning bg-warning-bg",
 		},
 		resolved: {
 			label: "Resolved",
 			icon: CheckCircle,
-			color: "text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/30",
+			color: "text-success bg-success-bg",
 		},
 	} as const;
 
@@ -137,17 +137,17 @@
 			<!-- Chat -->
 			{#if form?.success}
 				<GlassCard
-					class="bg-green-50/80 dark:bg-green-900/20 border-green-200 dark:border-green-800 mb-4"
+					class="bg-success-bg border-success/30 mb-4"
 				>
-					<p class="text-sm text-green-800 dark:text-green-300 font-sans">
+					<p class="text-sm text-success font-sans">
 						Reply sent! Autumn will see it soon.
 					</p>
 				</GlassCard>
 			{/if}
 
 			{#if form?.error}
-				<GlassCard class="bg-red-50/80 dark:bg-red-900/20 border-red-200 dark:border-red-800 mb-4">
-					<p class="text-sm text-red-800 dark:text-red-300 font-sans">{form.error}</p>
+				<GlassCard class="bg-error-bg border-error/30 mb-4">
+					<p class="text-sm text-error font-sans">{form.error}</p>
 				</GlassCard>
 			{/if}
 
@@ -163,7 +163,7 @@
 					: "Continue the conversation..."}
 				logLabel="Porch conversation"
 				class="h-[500px]"
-				inputClass="border-grove-200 bg-grove-50/30 dark:bg-grove-900/10"
+				inputClass="border-input bg-surface-hover/30"
 			>
 				{#snippet messageContent(message: ChatMessageData)}
 					<p class="m-0 leading-relaxed whitespace-pre-wrap text-foreground font-sans">
@@ -184,7 +184,7 @@
 						<div
 							class="flex items-center justify-center gap-2 text-sm text-foreground-muted font-sans py-1"
 						>
-							<CheckCircle class="w-4 h-4 text-grove-600 dark:text-grove-400" />
+							<CheckCircle class="w-4 h-4 text-success" />
 							<span>
 								This conversation has been resolved. Need more help?
 								<a href="/porch/new" class="text-primary hover:text-primary/80 underline"

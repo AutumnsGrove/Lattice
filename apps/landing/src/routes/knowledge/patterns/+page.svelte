@@ -41,7 +41,7 @@
           <div class="flex items-start justify-between mb-4">
             <div class="flex-1">
               <h2 class="text-xl font-semibold text-foreground mb-2">
-                <a href="/knowledge/patterns/{pattern.slug}" class="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">
+                <a href="/knowledge/patterns/{pattern.slug}" class="hover:text-warning transition-colors">
                   {pattern.title}
                 </a>
               </h2>
@@ -60,14 +60,14 @@
           <div class="flex items-center justify-between">
             <a
               href="/knowledge/patterns/{pattern.slug}"
-              class="inline-flex items-center text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-medium transition-colors"
+              class="inline-flex items-center text-warning hover:text-warning/80 font-medium transition-colors"
             >
               Read pattern
               <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
               </svg>
             </a>
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-warning-bg text-warning">
               Pattern
             </span>
           </div>
@@ -76,7 +76,7 @@
     </div>
 
     <!-- About Patterns -->
-    <div class="mt-12 bg-amber-50 dark:bg-amber-900/20 rounded-lg p-8 border border-amber-200 dark:border-amber-800/30">
+    <div class="mt-12 bg-warning-bg dark:bg-warning-bg rounded-lg p-8 border border-warning/30">
       <h3 class="text-xl font-semibold text-foreground mb-2">Why Patterns?</h3>
       <p class="text-foreground-muted mb-4">
         Patterns capture solutions that work. Rather than reinventing the wheel for each tool in the Grove ecosystem,
@@ -84,15 +84,15 @@
       </p>
       <div class="grid md:grid-cols-3 gap-4 mt-6">
         <div class="text-center">
-          <div class="text-2xl font-bold text-amber-600 dark:text-amber-400">{patterns.length}</div>
+          <div class="text-2xl font-bold text-warning">{patterns.length}</div>
           <div class="text-sm text-foreground-muted">Documented Patterns</div>
         </div>
         <div class="text-center">
-          <div class="text-2xl font-bold text-amber-600 dark:text-amber-400">Ecosystem</div>
+          <div class="text-2xl font-bold text-warning">Ecosystem</div>
           <div class="text-sm text-foreground-muted">Wide Application</div>
         </div>
         <div class="text-center">
-          <div class="text-2xl font-bold text-amber-600 dark:text-amber-400">Open</div>
+          <div class="text-2xl font-bold text-warning">Open</div>
           <div class="text-sm text-foreground-muted">Freely Shared</div>
         </div>
       </div>

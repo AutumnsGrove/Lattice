@@ -166,11 +166,11 @@
 					<!-- Solarpunk Callout -->
 					<a
 						href="/knowledge/help/what-is-solarpunk"
-						class="group flex items-center gap-3 mt-6 px-4 py-3 bg-amber-50/80 dark:bg-amber-950/30 hover:bg-amber-100/90 dark:hover:bg-amber-900/40 rounded-lg border border-amber-200/60 dark:border-amber-800/40 transition-colors no-underline"
+						class="group flex items-center gap-3 mt-6 px-4 py-3 bg-warning-bg/80 dark:bg-warning-bg/30 hover:bg-warning-bg/90 dark:hover:bg-warning-bg/40 rounded-lg border border-warning/60 dark:border-warning/40 transition-colors no-underline"
 					>
-						<SolarpunkIcon class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" />
+						<SolarpunkIcon class="w-5 h-5 text-warning-foreground dark:text-warning-foreground shrink-0" />
 						<span class="text-sm text-foreground-muted group-hover:text-foreground transition-colors">
-							These values reflect <strong class="text-amber-700 dark:text-amber-300">solarpunk</strong> thinking. <span class="text-foreground-subtle group-hover:text-foreground-muted">Learn what that means →</span>
+							These values reflect <strong class="text-warning-foreground dark:text-warning-foreground">solarpunk</strong> thinking. <span class="text-foreground-subtle group-hover:text-foreground-muted">Learn what that means →</span>
 						</span>
 					</a>
 				</section>

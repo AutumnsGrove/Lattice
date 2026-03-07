@@ -48,8 +48,8 @@
 	<a href="/arbor/feedback" class="block">
 		<GlassCard hoverable class="p-6 h-full">
 			<div class="flex items-start gap-4">
-				<div class="w-12 h-12 bg-grove-100 dark:bg-grove-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-					<MessageCircle class="w-6 h-6 text-grove-600 dark:text-grove-400" />
+				<div class="w-12 h-12 bg-accent-subtle rounded-lg flex items-center justify-center flex-shrink-0">
+					<MessageCircle class="w-6 h-6 text-accent" />
 				</div>
 				<div class="flex-1 min-w-0">
 					<h2 class="text-lg font-serif text-foreground mb-1"><GroveSwap term="wanderer" standard="Visitor">Wanderer</GroveSwap> Feedback</h2>
@@ -65,8 +65,8 @@
 	<a href="/arbor/subscribers" class="block">
 		<GlassCard hoverable class="p-6 h-full">
 			<div class="flex items-start gap-4">
-				<div class="w-12 h-12 bg-grove-100 dark:bg-grove-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-					<AtSign class="w-6 h-6 text-grove-600 dark:text-grove-400" />
+				<div class="w-12 h-12 bg-accent-subtle rounded-lg flex items-center justify-center flex-shrink-0">
+					<AtSign class="w-6 h-6 text-accent" />
 				</div>
 				<div class="flex-1 min-w-0">
 					<h2 class="text-lg font-serif text-foreground mb-1">Email Subscribers</h2>
@@ -82,8 +82,8 @@
 	<a href="/arbor/cdn" class="block">
 		<GlassCard hoverable class="p-6 h-full">
 			<div class="flex items-start gap-4">
-				<div class="w-12 h-12 bg-grove-100 dark:bg-grove-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-					<Upload class="w-6 h-6 text-grove-600 dark:text-grove-400" />
+				<div class="w-12 h-12 bg-accent-subtle rounded-lg flex items-center justify-center flex-shrink-0">
+					<Upload class="w-6 h-6 text-accent" />
 				</div>
 				<div class="flex-1 min-w-0">
 					<h2 class="text-lg font-serif text-foreground mb-1">CDN Manager</h2>
@@ -100,8 +100,8 @@
 		<a href="/arbor/porch" class="block">
 			<GlassCard hoverable class="p-6 h-full">
 				<div class="flex items-start gap-4">
-					<div class="w-12 h-12 bg-grove-100 dark:bg-grove-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-						<MessageSquare class="w-6 h-6 text-grove-600 dark:text-grove-400" />
+					<div class="w-12 h-12 bg-accent-subtle rounded-lg flex items-center justify-center flex-shrink-0">
+						<MessageSquare class="w-6 h-6 text-accent" />
 					</div>
 					<div class="flex-1 min-w-0">
 						<h2 class="text-lg font-serif text-foreground mb-1"><GroveSwap term="porch">The Porch</GroveSwap></h2>
@@ -117,8 +117,8 @@
 		<a href="/arbor/greenhouse" class="block">
 			<GlassCard hoverable class="p-6 h-full">
 				<div class="flex items-start gap-4">
-					<div class="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-						<Sprout class="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+					<div class="w-12 h-12 bg-success-bg rounded-lg flex items-center justify-center flex-shrink-0">
+						<Sprout class="w-6 h-6 text-success" />
 					</div>
 					<div class="flex-1 min-w-0">
 						<h2 class="text-lg font-serif text-foreground mb-1">Greenhouse</h2>
@@ -134,8 +134,8 @@
 		<a href="/arbor/comped-invites" class="block">
 			<GlassCard hoverable class="p-6 h-full">
 				<div class="flex items-start gap-4">
-					<div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-						<Gift class="w-6 h-6 text-amber-600 dark:text-amber-400" />
+					<div class="w-12 h-12 bg-warning-bg rounded-lg flex items-center justify-center flex-shrink-0">
+						<Gift class="w-6 h-6 text-warning" />
 					</div>
 					<div class="flex-1 min-w-0">
 						<h2 class="text-lg font-serif text-foreground mb-1">Comped Invites</h2>
@@ -151,8 +151,8 @@
 		<a href="/arbor/status" class="block">
 			<GlassCard hoverable class="p-6 h-full">
 				<div class="flex items-start gap-4">
-					<div class="w-12 h-12 bg-sky-100 dark:bg-sky-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-						<Activity class="w-6 h-6 text-sky-600 dark:text-sky-400" />
+					<div class="w-12 h-12 bg-info-bg rounded-lg flex items-center justify-center flex-shrink-0">
+						<Activity class="w-6 h-6 text-info" />
 					</div>
 					<div class="flex-1 min-w-0">
 						<h2 class="text-lg font-serif text-foreground mb-1">Status</h2>
@@ -168,8 +168,8 @@
 		<a href="/arbor/tenants" class="block">
 			<GlassCard hoverable class="p-6 h-full">
 				<div class="flex items-start gap-4">
-					<div class="w-12 h-12 bg-violet-100 dark:bg-violet-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-						<Users class="w-6 h-6 text-violet-600 dark:text-violet-400" />
+					<div class="w-12 h-12 bg-accent-subtle rounded-lg flex items-center justify-center flex-shrink-0">
+						<Users class="w-6 h-6 text-accent" />
 					</div>
 					<div class="flex-1 min-w-0">
 						<h2 class="text-lg font-serif text-foreground mb-1">Tenants</h2>
@@ -185,8 +185,8 @@
 		<a href="/arbor/minecraft" class="block">
 			<GlassCard hoverable class="p-6 h-full">
 				<div class="flex items-start gap-4">
-					<div class="w-12 h-12 bg-lime-100 dark:bg-lime-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-						<Gamepad2 class="w-6 h-6 text-lime-600 dark:text-lime-400" />
+					<div class="w-12 h-12 bg-success-bg rounded-lg flex items-center justify-center flex-shrink-0">
+						<Gamepad2 class="w-6 h-6 text-success" />
 					</div>
 					<div class="flex-1 min-w-0">
 						<h2 class="text-lg font-serif text-foreground mb-1">Minecraft</h2>
@@ -221,7 +221,7 @@
 			<a href={WAYFINDER_LINKS.github.repo} target="_blank" rel="noopener noreferrer" class="block">
 				<GlassCard hoverable class="p-4 h-full">
 					<div class="flex items-center gap-3">
-						<div class="w-9 h-9 bg-cream-100 dark:bg-cream-100/50 rounded-lg flex items-center justify-center flex-shrink-0">
+						<div class="w-9 h-9 bg-surface-subtle rounded-lg flex items-center justify-center flex-shrink-0">
 							<Github class="w-5 h-5 text-foreground" />
 						</div>
 						<div class="flex-1 min-w-0">
@@ -236,8 +236,8 @@
 			<a href={WAYFINDER_LINKS.cloudflare.domains} target="_blank" rel="noopener noreferrer" class="block">
 				<GlassCard hoverable class="p-4 h-full">
 					<div class="flex items-center gap-3">
-						<div class="w-9 h-9 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-							<Cloud class="w-5 h-5 text-orange-600 dark:text-orange-400" />
+						<div class="w-9 h-9 bg-warning-bg rounded-lg flex items-center justify-center flex-shrink-0">
+							<Cloud class="w-5 h-5 text-warning" />
 						</div>
 						<div class="flex-1 min-w-0">
 							<p class="text-sm font-sans font-medium text-foreground">Cloudflare</p>
@@ -251,8 +251,8 @@
 			<a href={WAYFINDER_LINKS.knownAgents} target="_blank" rel="noopener noreferrer" class="block">
 				<GlassCard hoverable class="p-4 h-full">
 					<div class="flex items-center gap-3">
-						<div class="w-9 h-9 bg-violet-100 dark:bg-violet-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-							<Bot class="w-5 h-5 text-violet-600 dark:text-violet-400" />
+						<div class="w-9 h-9 bg-accent-subtle rounded-lg flex items-center justify-center flex-shrink-0">
+							<Bot class="w-5 h-5 text-accent" />
 						</div>
 						<div class="flex-1 min-w-0">
 							<p class="text-sm font-sans font-medium text-foreground">Known Agents</p>
@@ -266,8 +266,8 @@
 			<a href={WAYFINDER_LINKS.cloudflare.analytics} target="_blank" rel="noopener noreferrer" class="block">
 				<GlassCard hoverable class="p-4 h-full">
 					<div class="flex items-center gap-3">
-						<div class="w-9 h-9 bg-sky-100 dark:bg-sky-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-							<BarChart3 class="w-5 h-5 text-sky-600 dark:text-sky-400" />
+						<div class="w-9 h-9 bg-info-bg rounded-lg flex items-center justify-center flex-shrink-0">
+							<BarChart3 class="w-5 h-5 text-info" />
 						</div>
 						<div class="flex-1 min-w-0">
 							<p class="text-sm font-sans font-medium text-foreground">Grove.place</p>
@@ -281,8 +281,8 @@
 			<a href={WAYFINDER_LINKS.stripe} target="_blank" rel="noopener noreferrer" class="block">
 				<GlassCard hoverable class="p-4 h-full">
 					<div class="flex items-center gap-3">
-						<div class="w-9 h-9 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-							<CreditCard class="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+						<div class="w-9 h-9 bg-accent-subtle rounded-lg flex items-center justify-center flex-shrink-0">
+							<CreditCard class="w-5 h-5 text-accent" />
 						</div>
 						<div class="flex-1 min-w-0">
 							<p class="text-sm font-sans font-medium text-foreground">Stripe</p>
@@ -296,8 +296,8 @@
 			<a href={WAYFINDER_LINKS.github.issues} target="_blank" rel="noopener noreferrer" class="block">
 				<GlassCard hoverable class="p-4 h-full">
 					<div class="flex items-center gap-3">
-						<div class="w-9 h-9 bg-grove-100 dark:bg-grove-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-							<CircleDot class="w-5 h-5 text-grove-600 dark:text-grove-400" />
+						<div class="w-9 h-9 bg-accent-subtle rounded-lg flex items-center justify-center flex-shrink-0">
+							<CircleDot class="w-5 h-5 text-accent" />
 						</div>
 						<div class="flex-1 min-w-0">
 							<p class="text-sm font-sans font-medium text-foreground">Issues</p>
@@ -311,8 +311,8 @@
 			<a href={WAYFINDER_LINKS.github.project} target="_blank" rel="noopener noreferrer" class="block">
 				<GlassCard hoverable class="p-4 h-full">
 					<div class="flex items-center gap-3">
-						<div class="w-9 h-9 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-							<Kanban class="w-5 h-5 text-purple-600 dark:text-purple-400" />
+						<div class="w-9 h-9 bg-accent-subtle rounded-lg flex items-center justify-center flex-shrink-0">
+							<Kanban class="w-5 h-5 text-accent" />
 						</div>
 						<div class="flex-1 min-w-0">
 							<p class="text-sm font-sans font-medium text-foreground">Lattice Board</p>
@@ -326,8 +326,8 @@
 			<a href={WAYFINDER_LINKS.myArbor} target="_blank" rel="noopener noreferrer" class="block">
 				<GlassCard hoverable class="p-4 h-full">
 					<div class="flex items-center gap-3">
-						<div class="w-9 h-9 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-							<Trees class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+						<div class="w-9 h-9 bg-success-bg rounded-lg flex items-center justify-center flex-shrink-0">
+							<Trees class="w-5 h-5 text-success" />
 						</div>
 						<div class="flex-1 min-w-0">
 							<p class="text-sm font-sans font-medium text-foreground">My Arbor</p>
@@ -341,8 +341,8 @@
 			<a href={WAYFINDER_LINKS.langfuse} target="_blank" rel="noopener noreferrer" class="block">
 				<GlassCard hoverable class="p-4 h-full">
 					<div class="flex items-center gap-3">
-						<div class="w-9 h-9 bg-teal-100 dark:bg-teal-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-							<Eye class="w-5 h-5 text-teal-600 dark:text-teal-400" />
+						<div class="w-9 h-9 bg-accent-subtle rounded-lg flex items-center justify-center flex-shrink-0">
+							<Eye class="w-5 h-5 text-accent" />
 						</div>
 						<div class="flex-1 min-w-0">
 							<p class="text-sm font-sans font-medium text-foreground">Langfuse</p>

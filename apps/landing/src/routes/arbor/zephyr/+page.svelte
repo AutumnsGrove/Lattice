@@ -29,8 +29,8 @@
 
 	// Counter color classes
 	let counterClass = $derived.by(() => {
-		if (isOverLimit) return 'text-red-600 font-semibold';
-		if (graphemesRemaining <= 20) return 'text-amber-600';
+		if (isOverLimit) return 'text-error font-semibold';
+		if (graphemesRemaining <= 20) return 'text-warning';
 		return 'text-foreground-subtle';
 	});
 
@@ -48,7 +48,7 @@
 	<div class="flex items-center justify-between">
 		<div>
 			<h1 class="text-2xl font-serif text-foreground flex items-center gap-2">
-				<Wind class="w-6 h-6 text-blue-500" />
+				<Wind class="w-6 h-6 text-info" />
 				Zephyr Social
 			</h1>
 			<p class="text-foreground-muted font-sans mt-1">
@@ -61,7 +61,7 @@
 	{#if form?.success}
 		<GlassCard variant="default">
 			<div class="flex items-start gap-3">
-				<Check class="w-5 h-5 text-green-600 mt-0.5 shrink-0" />
+				<Check class="w-5 h-5 text-success mt-0.5 shrink-0" />
 				<div>
 					<p class="text-foreground font-medium">{form.message}</p>
 					{#if form.postUrl}
@@ -69,7 +69,7 @@
 							href={form.postUrl}
 							target="_blank"
 							rel="noopener noreferrer"
-							class="inline-flex items-center gap-1 text-sm text-grove-600 hover:text-grove-700 mt-1"
+							class="inline-flex items-center gap-1 text-sm text-primary hover:text-primary/90 mt-1"
 						>
 							View on Bluesky <ExternalLink class="w-3 h-3" />
 						</a>
@@ -82,8 +82,8 @@
 	{#if form?.error}
 		<GlassCard variant="default">
 			<div class="flex items-start gap-3">
-				<AlertTriangle class="w-5 h-5 text-red-600 mt-0.5 shrink-0" />
-				<p class="text-red-700 dark:text-red-400">{form.error}</p>
+				<AlertTriangle class="w-5 h-5 text-error mt-0.5 shrink-0" />
+				<p class="text-error">{form.error}</p>
 			</div>
 		</GlassCard>
 	{/if}
@@ -118,7 +118,7 @@
 						bind:value={content}
 						placeholder="What's on your mind? Share it with the wind..."
 						rows="4"
-						class="w-full px-4 py-3 rounded-lg border border-grove-200 dark:border-grove-700 bg-white/50 dark:bg-slate-800/50 text-foreground placeholder:text-foreground-subtle focus:outline-none focus:ring-2 focus:ring-grove-500 focus:border-transparent resize-none font-sans"
+						class="w-full px-4 py-3 rounded-lg border border-border bg-surface/50 text-foreground placeholder:text-foreground-subtle focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none font-sans"
 						disabled={posting}
 					></textarea>
 
@@ -138,8 +138,8 @@
 					<label
 						class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-sm cursor-pointer transition-colors
 							{blueskyEnabled
-								? 'border-grove-500 bg-grove-50 dark:bg-grove-900/20 text-grove-700 dark:text-grove-300'
-								: 'border-gray-300 dark:border-gray-600 text-foreground-muted'}"
+								? 'border-primary bg-primary/5 text-primary'
+								: 'border-border text-foreground-muted'}"
 					>
 						<input
 							type="checkbox"
@@ -148,26 +148,26 @@
 							bind:checked={blueskyEnabled}
 							class="sr-only"
 						/>
-						<span class="w-2 h-2 rounded-full {blueskyEnabled ? 'bg-grove-500' : 'bg-gray-300'}"></span>
+						<span class="w-2 h-2 rounded-full {blueskyEnabled ? 'bg-primary' : 'bg-foreground-muted'}"></span>
 						Bluesky
 						{#if blueskyPlatform?.healthy}
-							<span class="text-green-500 text-xs">●</span>
+							<span class="text-success text-xs">●</span>
 						{/if}
 					</label>
 
 					<!-- Coming soon platforms -->
 					<span
-						class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm text-foreground-subtle cursor-not-allowed opacity-50"
+						class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border text-sm text-foreground-subtle cursor-not-allowed opacity-50"
 					>
-						<span class="w-2 h-2 rounded-full bg-gray-300"></span>
+						<span class="w-2 h-2 rounded-full bg-foreground-muted"></span>
 						Mastodon
 						<span class="text-[10px] uppercase tracking-wide">soon</span>
 					</span>
 
 					<span
-						class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm text-foreground-subtle cursor-not-allowed opacity-50"
+						class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border text-sm text-foreground-subtle cursor-not-allowed opacity-50"
 					>
-						<span class="w-2 h-2 rounded-full bg-gray-300"></span>
+						<span class="w-2 h-2 rounded-full bg-foreground-muted"></span>
 						DEV.to
 						<span class="text-[10px] uppercase tracking-wide">soon</span>
 					</span>
@@ -178,7 +178,7 @@
 					<button
 						type="submit"
 						disabled={posting || !content.trim() || isOverLimit || !blueskyEnabled}
-						class="inline-flex items-center gap-2 px-5 py-2.5 bg-grove-600 text-white rounded-lg text-sm font-sans font-medium hover:bg-grove-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+						class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-sans font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 					>
 						{#if posting}
 							<span class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>

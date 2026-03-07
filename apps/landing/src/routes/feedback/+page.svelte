@@ -64,11 +64,11 @@
 		{#if form?.success}
 			<div role="status" aria-live="polite">
 				<GlassCard
-					class="mb-6 bg-green-50/80 dark:bg-green-950/40 border-green-200 dark:border-green-800/40"
+					class="mb-6 bg-success-bg/80 dark:bg-success-bg/40 border-success dark:border-success/40"
 				>
 					<div class="flex items-start gap-4">
 						<div
-							class="w-10 h-10 bg-green-100 dark:bg-green-900/40 rounded-lg flex items-center justify-center text-green-600 dark:text-green-400 flex-shrink-0"
+							class="w-10 h-10 bg-success-bg dark:bg-success-bg/40 rounded-lg flex items-center justify-center text-success dark:text-success flex-shrink-0"
 						>
 							<svg class="w-6 h-6" viewBox="0 0 20 20" fill="currentColor">
 								<path
@@ -79,10 +79,10 @@
 							</svg>
 						</div>
 						<div class="flex-1">
-							<h2 class="text-lg font-serif text-green-900 dark:text-green-100 mb-1">
+							<h2 class="text-lg font-serif text-success dark:text-success mb-1">
 								Thank you for sharing!
 							</h2>
-							<p class="text-sm text-green-800 dark:text-green-200 font-sans">
+							<p class="text-sm text-success dark:text-success font-sans">
 								Your feedback means a lot. I read everything personally. —Autumn
 							</p>
 						</div>
@@ -95,11 +95,11 @@
 		{#if form?.error}
 			<div role="alert" aria-live="assertive">
 				<GlassCard
-					class="mb-6 bg-red-50/80 dark:bg-red-950/40 border-red-200 dark:border-red-800/40"
+					class="mb-6 bg-error-bg/80 dark:bg-error-bg/40 border-error dark:border-error/40"
 				>
 					<div class="flex items-start gap-4">
 						<div
-							class="w-10 h-10 bg-red-100 dark:bg-red-900/40 rounded-lg flex items-center justify-center text-red-600 dark:text-red-400 flex-shrink-0"
+							class="w-10 h-10 bg-error-bg dark:bg-error-bg/40 rounded-lg flex items-center justify-center text-error dark:text-error flex-shrink-0"
 						>
 							<svg class="w-6 h-6" viewBox="0 0 20 20" fill="currentColor">
 								<path
@@ -110,7 +110,7 @@
 							</svg>
 						</div>
 						<div class="flex-1">
-							<p class="text-sm text-red-800 dark:text-red-200 font-sans">{form.error}</p>
+							<p class="text-sm text-error dark:text-error font-sans">{form.error}</p>
 						</div>
 					</div>
 				</GlassCard>
@@ -146,7 +146,7 @@
 						name="name"
 						bind:value={name}
 						placeholder="How should I address you?"
-						class="w-full px-4 py-3 rounded-lg border border-grove-200 dark:border-cream-300 bg-white/50 dark:bg-cream-200/50 text-foreground placeholder-foreground/40 dark:placeholder-foreground/50 focus:outline-none focus:ring-2 focus:ring-grove-500 focus:border-transparent font-sans transition-all"
+						class="w-full px-4 py-3 rounded-lg border border-border dark:border-cream-300 bg-white/50 dark:bg-cream-200/50 text-foreground placeholder-foreground/40 dark:placeholder-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-sans transition-all"
 						disabled={submitting}
 					/>
 				</div>
@@ -164,7 +164,7 @@
 						name="email"
 						bind:value={email}
 						placeholder="your.email@example.com"
-						class="w-full px-4 py-3 rounded-lg border border-grove-200 dark:border-cream-300 bg-white/50 dark:bg-cream-200/50 text-foreground placeholder-foreground/40 dark:placeholder-foreground/50 focus:outline-none focus:ring-2 focus:ring-grove-500 focus:border-transparent font-sans transition-all"
+						class="w-full px-4 py-3 rounded-lg border border-border dark:border-cream-300 bg-white/50 dark:bg-cream-200/50 text-foreground placeholder-foreground/40 dark:placeholder-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-sans transition-all"
 						disabled={submitting}
 					/>
 				</div>
@@ -182,7 +182,7 @@
 						name="subject"
 						bind:value={subject}
 						placeholder="What's this about?"
-						class="w-full px-4 py-3 rounded-lg border border-grove-200 dark:border-cream-300 bg-white/50 dark:bg-cream-200/50 text-foreground placeholder-foreground/40 dark:placeholder-foreground/50 focus:outline-none focus:ring-2 focus:ring-grove-500 focus:border-transparent font-sans transition-all"
+						class="w-full px-4 py-3 rounded-lg border border-border dark:border-cream-300 bg-white/50 dark:bg-cream-200/50 text-foreground placeholder-foreground/40 dark:placeholder-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-sans transition-all"
 						disabled={submitting}
 					/>
 				</div>
@@ -201,8 +201,8 @@
 							onclick={() => (sentiment = sentiment === "positive" ? null : "positive")}
 							class="flex-1 px-4 py-3 rounded-lg border transition-all font-sans text-sm {sentiment ===
 							'positive'
-								? 'border-green-500 bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-300'
-								: 'border-grove-200 dark:border-cream-300 bg-white/50 dark:bg-cream-200/50 text-foreground/60 dark:text-foreground/70 hover:border-grove-300 dark:hover:border-cream-400'}"
+								? 'border-success bg-success-bg dark:bg-success-bg/40 text-success dark:text-success'
+								: 'border-border dark:border-cream-300 bg-white/50 dark:bg-cream-200/50 text-foreground/60 dark:text-foreground/70 hover:border-border dark:hover:border-cream-400'}"
 							disabled={submitting}
 							aria-label={sentiment === "positive"
 								? "Positive feedback (selected)"
@@ -217,8 +217,8 @@
 							onclick={() => (sentiment = sentiment === "neutral" ? null : "neutral")}
 							class="flex-1 px-4 py-3 rounded-lg border transition-all font-sans text-sm {sentiment ===
 							'neutral'
-								? 'border-blue-500 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300'
-								: 'border-grove-200 dark:border-cream-300 bg-white/50 dark:bg-cream-200/50 text-foreground/60 dark:text-foreground/70 hover:border-grove-300 dark:hover:border-cream-400'}"
+								? 'border-info bg-info-bg dark:bg-info-bg/40 text-info dark:text-info'
+								: 'border-border dark:border-cream-300 bg-white/50 dark:bg-cream-200/50 text-foreground/60 dark:text-foreground/70 hover:border-border dark:hover:border-cream-400'}"
 							disabled={submitting}
 							aria-label={sentiment === "neutral"
 								? "Neutral feedback (selected)"
@@ -233,8 +233,8 @@
 							onclick={() => (sentiment = sentiment === "negative" ? null : "negative")}
 							class="flex-1 px-4 py-3 rounded-lg border transition-all font-sans text-sm {sentiment ===
 							'negative'
-								? 'border-orange-500 bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300'
-								: 'border-grove-200 dark:border-cream-300 bg-white/50 dark:bg-cream-200/50 text-foreground/60 dark:text-foreground/70 hover:border-grove-300 dark:hover:border-cream-400'}"
+								? 'border-warning bg-warning-bg dark:bg-warning-bg/40 text-warning dark:text-warning'
+								: 'border-border dark:border-cream-300 bg-white/50 dark:bg-cream-200/50 text-foreground/60 dark:text-foreground/70 hover:border-border dark:hover:border-cream-400'}"
 							disabled={submitting}
 							aria-label={sentiment === "negative"
 								? "Concern feedback (selected)"
@@ -251,7 +251,7 @@
 				<!-- Message (Required) -->
 				<div class="mb-5">
 					<label for="message" class="block text-sm font-sans font-medium text-foreground mb-2">
-						Your thoughts <span class="text-red-600">*</span>
+						Your thoughts <span class="text-error">*</span>
 					</label>
 					<textarea
 						id="message"
@@ -263,16 +263,16 @@
 						aria-required="true"
 						minlength="10"
 						maxlength="2000"
-						class="w-full px-4 py-3 rounded-lg border border-grove-200 dark:border-cream-300 bg-white/50 dark:bg-cream-200/50 text-foreground placeholder-foreground/40 dark:placeholder-foreground/50 focus:outline-none focus:ring-2 focus:ring-grove-500 focus:border-transparent font-sans transition-all resize-y"
+						class="w-full px-4 py-3 rounded-lg border border-border dark:border-cream-300 bg-white/50 dark:bg-cream-200/50 text-foreground placeholder-foreground/40 dark:placeholder-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-sans transition-all resize-y"
 						disabled={submitting}
 					></textarea>
 					<div class="flex justify-between items-center mt-2 text-xs font-sans">
 						<span class="text-foreground/50 dark:text-foreground/60">At least 10 characters</span>
 						<span
 							class={isValidLength
-								? "text-grove-600 dark:text-grove-400"
+								? "text-primary dark:text-primary"
 								: charCount > 2000
-									? "text-red-600 dark:text-red-400"
+									? "text-error dark:text-error"
 									: "text-foreground/50 dark:text-foreground/60"}
 						>
 							{charCount}/2000
@@ -290,7 +290,7 @@
 				<button
 					type="submit"
 					disabled={submitting || !isValidLength}
-					class="w-full px-6 py-3 bg-grove-600 text-white rounded-lg font-sans font-medium hover:bg-grove-700 disabled:bg-grove-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+					class="w-full px-6 py-3 bg-primary text-primary-foreground rounded-lg font-sans font-medium hover:bg-primary disabled:bg-primary/50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
 				>
 					{#if submitting}
 						<svg class="animate-spin h-5 w-5" viewBox="0 0 24 24">

@@ -9,9 +9,9 @@
 	let statusFilter = $state<'all' | 'open' | 'pending' | 'resolved'>('all');
 
 	const statusConfig = {
-		open: { label: 'Open', icon: MessageCircle, color: 'text-blue-600 bg-blue-100', borderColor: 'border-blue-200' },
-		pending: { label: 'Pending', icon: Clock, color: 'text-amber-600 bg-amber-100', borderColor: 'border-amber-200' },
-		resolved: { label: 'Resolved', icon: CheckCircle, color: 'text-green-600 bg-green-100', borderColor: 'border-green-200' },
+		open: { label: 'Open', icon: MessageCircle, color: 'text-info bg-info-bg', borderColor: 'border-info/30' },
+		pending: { label: 'Pending', icon: Clock, color: 'text-warning bg-warning-bg', borderColor: 'border-warning/30' },
+		resolved: { label: 'Resolved', icon: CheckCircle, color: 'text-success bg-success-bg', borderColor: 'border-success/30' },
 	} as const;
 
 	const categoryLabels: Record<string, string> = {
@@ -65,15 +65,15 @@
 	<!-- Stats -->
 	<div class="grid grid-cols-3 gap-4 mb-6">
 		<GlassCard class="text-center py-4">
-			<div class="text-2xl font-bold text-blue-600">{data.stats.open}</div>
+			<div class="text-2xl font-bold text-info">{data.stats.open}</div>
 			<div class="text-sm text-foreground-muted font-sans">Open</div>
 		</GlassCard>
 		<GlassCard class="text-center py-4">
-			<div class="text-2xl font-bold text-amber-600">{data.stats.pending}</div>
+			<div class="text-2xl font-bold text-warning">{data.stats.pending}</div>
 			<div class="text-sm text-foreground-muted font-sans">Pending</div>
 		</GlassCard>
 		<GlassCard class="text-center py-4">
-			<div class="text-2xl font-bold text-green-600">{data.stats.resolved}</div>
+			<div class="text-2xl font-bold text-success">{data.stats.resolved}</div>
 			<div class="text-sm text-foreground-muted font-sans">Resolved</div>
 		</GlassCard>
 	</div>
@@ -90,7 +90,7 @@
 					id="search-visits"
 					bind:value={searchQuery}
 					placeholder="Search visits..."
-					class="w-full pl-10 pr-4 py-2 rounded-lg border border-grove-200 bg-white/50 text-foreground placeholder-foreground/40 focus:outline-none focus:ring-2 focus:ring-grove-500 focus:border-transparent font-sans text-sm"
+					class="w-full pl-10 pr-4 py-2 rounded-lg border border-input bg-white/50 text-foreground placeholder-foreground/40 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent font-sans text-sm"
 				/>
 			</div>
 
@@ -101,7 +101,7 @@
 				<select
 					id="status-filter"
 					bind:value={statusFilter}
-					class="px-3 py-2 rounded-lg border border-grove-200 bg-white/50 text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-grove-500"
+					class="px-3 py-2 rounded-lg border border-input bg-white/50 text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-ring"
 				>
 					<option value="all">All visits</option>
 					<option value="open">Open</option>

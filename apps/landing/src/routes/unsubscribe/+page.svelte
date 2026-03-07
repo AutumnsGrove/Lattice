@@ -124,7 +124,7 @@
 						</div>
 
 						{#if form?.error}
-							<p role="alert" class="text-sm text-red-600 dark:text-red-400 font-sans">{form.error}</p>
+							<p role="alert" class="text-sm text-error font-sans">{form.error}</p>
 						{/if}
 
 						<button

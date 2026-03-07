@@ -23,41 +23,41 @@
 	> = {
 		operational: {
 			label: 'Operational',
-			color: 'text-green-700 dark:text-green-400',
-			bg: 'bg-green-100 dark:bg-green-900/30',
+			color: 'text-success-foreground',
+			bg: 'bg-success-bg',
 			icon: CheckCircle2
 		},
 		degraded: {
 			label: 'Degraded',
-			color: 'text-amber-700 dark:text-amber-400',
-			bg: 'bg-amber-100 dark:bg-amber-900/30',
+			color: 'text-warning-foreground',
+			bg: 'bg-warning-bg',
 			icon: AlertTriangle
 		},
 		partial_outage: {
 			label: 'Partial Outage',
-			color: 'text-orange-700 dark:text-orange-400',
-			bg: 'bg-orange-100 dark:bg-orange-900/30',
+			color: 'text-warning-foreground',
+			bg: 'bg-warning-bg',
 			icon: AlertCircle
 		},
 		major_outage: {
 			label: 'Major Outage',
-			color: 'text-red-700 dark:text-red-400',
-			bg: 'bg-red-100 dark:bg-red-900/30',
+			color: 'text-error-foreground',
+			bg: 'bg-error-bg',
 			icon: XCircle
 		},
 		maintenance: {
 			label: 'Maintenance',
-			color: 'text-blue-700 dark:text-blue-400',
-			bg: 'bg-blue-100 dark:bg-blue-900/30',
+			color: 'text-info-foreground',
+			bg: 'bg-info-bg',
 			icon: Wrench
 		}
 	};
 
 	const impactColors: Record<string, string> = {
-		critical: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400',
-		major: 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400',
-		minor: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400',
-		none: 'bg-cream-100 dark:bg-cream-200 text-foreground-muted dark:text-cream-300'
+		critical: 'bg-error-bg text-error-foreground',
+		major: 'bg-warning-bg text-warning-foreground',
+		minor: 'bg-warning-bg text-warning-foreground',
+		none: 'bg-surface text-foreground-muted'
 	};
 
 	function formatDate(dateStr: string): string {
@@ -98,7 +98,7 @@
 	</div>
 	<a
 		href="/arbor/status/incidents/new"
-		class="inline-flex items-center gap-2 px-4 py-2 bg-grove-600 text-white rounded-lg text-sm font-sans hover:bg-grove-700 transition-colors"
+		class="inline-flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-lg text-sm font-sans hover:bg-accent-subtle transition-colors"
 	>
 		<Plus class="w-4 h-4" />
 		New Incident
@@ -108,14 +108,14 @@
 <!-- Overall Status Banner -->
 <GlassCard
 	class="mb-8 p-6 {data.allOperational
-		? 'border-green-200 dark:border-green-800'
-		: 'border-amber-200 dark:border-amber-800'}"
+		? 'border-success'
+		: 'border-warning'}"
 >
 	<div class="flex items-center gap-3">
 		{#if data.allOperational}
-			<CheckCircle2 class="w-8 h-8 text-green-600 dark:text-green-400" />
+			<CheckCircle2 class="w-8 h-8 text-success" />
 			<div>
-				<div class="text-lg font-serif text-green-700 dark:text-green-400">
+				<div class="text-lg font-serif text-success-foreground">
 					All Systems Operational
 				</div>
 				<div class="text-sm font-sans text-foreground-muted">
@@ -123,9 +123,9 @@
 				</div>
 			</div>
 		{:else}
-			<AlertTriangle class="w-8 h-8 text-amber-600 dark:text-amber-400" />
+			<AlertTriangle class="w-8 h-8 text-warning" />
 			<div>
-				<div class="text-lg font-serif text-amber-700 dark:text-amber-400">
+				<div class="text-lg font-serif text-warning-foreground">
 					Some Systems Affected
 				</div>
 				<div class="text-sm font-sans text-foreground-muted">
@@ -143,7 +143,7 @@
 		<div class="space-y-3">
 			{#each data.incidents as incident}
 				<a href="/arbor/status/incidents/{incident.id}" class="block group">
-					<GlassCard class="p-4 hover:bg-grove-50/50 dark:hover:bg-cream-200/30 transition-colors">
+					<GlassCard class="p-4 hover:bg-surface-hover transition-colors">
 						<div class="flex items-center justify-between">
 							<div class="flex items-center gap-3">
 								<span
@@ -153,7 +153,7 @@
 									{incident.impact}
 								</span>
 								<div>
-									<div class="text-sm font-sans font-medium text-foreground group-hover:text-grove-600 dark:group-hover:text-grove-400 transition-colors">
+									<div class="text-sm font-sans font-medium text-foreground group-hover:text-accent transition-colors">
 										{incident.title}
 									</div>
 									<div class="text-xs font-sans text-foreground-muted">
@@ -162,7 +162,7 @@
 								</div>
 							</div>
 							<ChevronRight
-								class="w-4 h-4 text-foreground-muted group-hover:text-grove-600 dark:group-hover:text-grove-400 transition-colors"
+								class="w-4 h-4 text-foreground-muted group-hover:text-accent transition-colors"
 							/>
 						</div>
 					</GlassCard>
@@ -181,13 +181,13 @@
 			<p class="text-foreground-muted font-sans">No components configured</p>
 		</GlassCard>
 	{:else}
-		<div class="overflow-hidden rounded-xl border border-grove-200 dark:border-cream-300">
-			<div class="divide-y divide-grove-100 dark:divide-cream-300/50">
+		<div class="overflow-hidden rounded-xl border border-border">
+			<div class="divide-y divide-border">
 				{#each data.components as component}
 					{@const config = statusConfig[component.current_status] || statusConfig.operational}
 					{@const StatusIcon = config.icon}
 					<div
-						class="flex items-center justify-between px-6 py-4 bg-white dark:bg-cream-100/30"
+						class="flex items-center justify-between px-6 py-4 bg-surface"
 					>
 						<div class="flex items-center gap-3">
 							<StatusIcon class="w-5 h-5 {config.color}" />
@@ -207,7 +207,7 @@
 							<select
 								name="status"
 								aria-label="Update status for {component.name}"
-								class="text-xs font-sans px-2 py-1 rounded border border-grove-200 dark:border-cream-300 bg-white dark:bg-cream-100 text-foreground"
+								class="text-xs font-sans px-2 py-1 rounded border border-border bg-surface text-foreground"
 								value={component.current_status}
 								onchange={(e) => e.currentTarget.form?.requestSubmit()}
 							>
@@ -233,7 +233,7 @@
 			{#each data.scheduled as maintenance}
 				<GlassCard class="p-4">
 					<div class="flex items-start gap-3">
-						<Clock class="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
+						<Clock class="w-5 h-5 text-info mt-0.5 shrink-0" />
 						<div>
 							<div class="text-sm font-sans font-medium text-foreground">
 								{maintenance.title}
@@ -248,7 +248,7 @@
 							</div>
 						</div>
 						<span
-							class="ml-auto text-xs font-sans px-2 py-1 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 shrink-0"
+							class="ml-auto text-xs font-sans px-2 py-1 rounded bg-info-bg text-info-foreground shrink-0"
 						>
 							{maintenance.status}
 						</span>

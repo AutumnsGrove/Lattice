@@ -162,7 +162,7 @@
 			<button
 				type="button"
 				onclick={() => (showDeleteAllConfirm = true)}
-				class="text-xs font-sans text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
+				class="text-xs font-sans text-error hover:text-error/90"
 			>
 				Delete All Mods
 			</button>
@@ -170,20 +170,20 @@
 	</div>
 
 	{#if error}
-		<GlassCard class="mb-4 p-4 border-red-200 dark:border-red-800" role="alert">
+		<GlassCard class="mb-4 p-4 border-error" role="alert">
 			<div class="flex items-center gap-2">
-				<AlertTriangle class="w-4 h-4 text-red-600 dark:text-red-400 shrink-0" />
-				<p class="text-sm font-sans text-red-700 dark:text-red-400">{error}</p>
+				<AlertTriangle class="w-4 h-4 text-error shrink-0" />
+				<p class="text-sm font-sans text-error">{error}</p>
 			</div>
 		</GlassCard>
 	{/if}
 
 	<!-- Delete All Confirmation -->
 	{#if showDeleteAllConfirm}
-		<GlassCard class="mb-4 p-4 border-red-200 dark:border-red-800" role="alertdialog" aria-label="Confirm delete all mods">
+		<GlassCard class="mb-4 p-4 border-error" role="alertdialog" aria-label="Confirm delete all mods">
 			<div class="flex items-center gap-2 mb-3">
-				<AlertTriangle class="w-5 h-5 text-red-600 dark:text-red-400" />
-				<span class="text-sm font-sans font-medium text-red-700 dark:text-red-400">
+				<AlertTriangle class="w-5 h-5 text-error" />
+				<span class="text-sm font-sans font-medium text-error">
 					Delete all {mods.length} mods?
 				</span>
 			</div>
@@ -195,14 +195,14 @@
 					type="button"
 					onclick={deleteAllMods}
 					disabled={deletingAll}
-					class="px-3 py-1.5 bg-red-600 text-white rounded-lg text-xs font-sans hover:bg-red-700 transition-colors disabled:opacity-50"
+					class="px-3 py-1.5 bg-destructive text-destructive-foreground rounded-lg text-xs font-sans hover:bg-destructive/90 transition-colors disabled:opacity-50"
 				>
 					{deletingAll ? 'Deleting...' : 'Yes, Delete All'}
 				</button>
 				<button
 					type="button"
 					onclick={() => (showDeleteAllConfirm = false)}
-					class="px-3 py-1.5 bg-white dark:bg-cream-200 border border-grove-200 dark:border-cream-300 text-foreground rounded-lg text-xs font-sans hover:bg-grove-50 dark:hover:bg-cream-300 transition-colors"
+					class="px-3 py-1.5 bg-surface border border-border text-foreground rounded-lg text-xs font-sans hover:bg-surface-hover transition-colors"
 				>
 					Cancel
 				</button>
@@ -227,8 +227,8 @@
 		}}
 		class="mb-4 border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer
 			{dragOver
-			? 'border-grove-400 bg-grove-50/50 dark:bg-grove-900/20'
-			: 'border-grove-200 dark:border-cream-300 hover:border-grove-300 dark:hover:border-cream-300'}"
+			? 'border-primary bg-primary/5'
+			: 'border-border hover:border-primary/50'}"
 	>
 		{#if uploading}
 			<Loader2 class="w-8 h-8 mx-auto mb-2 text-grove-500 animate-spin" />
@@ -260,11 +260,11 @@
 			<p class="text-foreground-muted font-sans">No mods installed</p>
 		</GlassCard>
 	{:else}
-		<div class="overflow-hidden rounded-xl border border-grove-200 dark:border-cream-300">
-			<div class="divide-y divide-grove-100 dark:divide-cream-300/50">
+		<div class="overflow-hidden rounded-xl border border-border">
+			<div class="divide-y divide-divider">
 				{#each mods as mod}
 					<div
-						class="flex items-center justify-between px-4 py-3 bg-white dark:bg-cream-100/30"
+						class="flex items-center justify-between px-4 py-3 bg-surface"
 					>
 						<div class="flex items-center gap-3">
 							<FileBox class="w-4 h-4 text-foreground-muted shrink-0" />
@@ -279,7 +279,7 @@
 							type="button"
 							onclick={() => deleteMod(mod.filename)}
 							disabled={deleting === mod.filename}
-							class="p-1.5 text-foreground-muted hover:text-red-600 dark:hover:text-red-400 transition-colors disabled:opacity-50"
+							class="p-1.5 text-foreground-muted hover:text-error transition-colors disabled:opacity-50"
 							aria-label="Delete {mod.filename}"
 						>
 							{#if deleting === mod.filename}

@@ -35,7 +35,7 @@
 						</p>
 						{#if doClass.awaitingInstrumentation}
 							<span
-								class="text-xs font-sans px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400"
+								class="text-xs font-sans px-2 py-0.5 rounded bg-warning-bg text-warning-foreground"
 							>
 								Awaiting instrumentation
 							</span>
@@ -50,7 +50,7 @@
 				<div class="grid grid-cols-2 gap-3 mt-3">
 					<div>
 						<p class="text-xs font-sans text-foreground-muted">Active</p>
-						<p class="text-sm font-sans font-medium text-grove-700 dark:text-grove-400 mt-0.5">
+						<p class="text-sm font-sans font-medium text-accent mt-0.5">
 							{doClass.activeInstances.toLocaleString()}
 						</p>
 					</div>

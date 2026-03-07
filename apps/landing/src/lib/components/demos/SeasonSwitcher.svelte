@@ -22,45 +22,47 @@
 
 	let season = $state<Season>('autumn');
 
+	// Seasonal theme colors — intentional design choice for seasonal differentiation
+	// Not status colors, purely visual/thematic
 	const seasons: { id: Season; label: string; color: string }[] = [
 		{
 			id: 'spring',
 			label: 'Spring',
 			color:
-				'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200 hover:bg-emerald-200 dark:hover:bg-emerald-800'
+				'bg-success/10 text-success dark:bg-success/20 hover:bg-success/20 dark:hover:bg-success/30'
 		},
 		{
 			id: 'summer',
 			label: 'Summer',
 			color:
-				'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200 hover:bg-amber-200 dark:hover:bg-amber-800'
+				'bg-warning/10 text-warning dark:bg-warning/20 hover:bg-warning/20 dark:hover:bg-warning/30'
 		},
 		{
 			id: 'autumn',
 			label: 'Autumn',
 			color:
-				'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200 hover:bg-orange-200 dark:hover:bg-orange-800'
+				'bg-accent/10 text-accent dark:bg-accent/20 hover:bg-accent/20 dark:hover:bg-accent/30'
 		},
 		{
 			id: 'winter',
 			label: 'Winter',
 			color:
-				'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-800'
+				'bg-info/10 text-info dark:bg-info/20 hover:bg-info/20 dark:hover:bg-info/30'
 		}
 	];
 
 	// Full Tailwind class strings (not concatenated) so the JIT scanner finds them
 	const bgClasses: Record<Season, string> = {
-		spring: 'from-emerald-50 to-pink-50 dark:from-emerald-950 dark:to-pink-950',
-		summer: 'from-green-50 to-yellow-50 dark:from-green-950 dark:to-amber-950',
-		autumn: 'from-amber-50 to-orange-50 dark:from-amber-950 dark:to-orange-950',
-		winter: 'from-blue-50 to-slate-100 dark:from-blue-950 dark:to-slate-900',
-		midnight: 'from-indigo-100 to-violet-100 dark:from-indigo-950 dark:to-violet-950'
+		spring: 'from-success/10 to-accent/5 dark:from-success/20 dark:to-accent/20',
+		summer: 'from-warning/10 to-accent/5 dark:from-warning/20 dark:to-accent/20',
+		autumn: 'from-accent/10 to-warning/5 dark:from-accent/20 dark:to-warning/20',
+		winter: 'from-info/10 to-surface-subtle dark:from-info/20 dark:to-surface-subtle',
+		midnight: 'from-accent/20 to-accent/10 dark:from-accent/30 dark:to-accent/20'
 	};
 </script>
 
 <div
-	class="relative w-full overflow-hidden rounded-2xl border border-subtle/50 shadow-sm
+	class="relative w-full overflow-hidden rounded-2xl border border-border shadow-sm
 		transition-all duration-700 ease-out bg-gradient-to-br {bgClasses[season]}"
 >
 	<!-- Scene container -->

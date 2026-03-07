@@ -24,9 +24,9 @@
 	let savingNotes = $state(false);
 
 	const statusConfig = {
-		open: { label: "Open", icon: MessageCircle, color: "text-blue-600 bg-blue-100" },
-		pending: { label: "Pending", icon: Clock, color: "text-amber-600 bg-amber-100" },
-		resolved: { label: "Resolved", icon: CheckCircle, color: "text-green-600 bg-green-100" },
+		open: { label: "Open", icon: MessageCircle, color: "text-info bg-info-bg" },
+		pending: { label: "Pending", icon: Clock, color: "text-warning bg-warning-bg" },
+		resolved: { label: "Resolved", icon: CheckCircle, color: "text-success bg-success-bg" },
 	} as const;
 
 	const categoryLabels: Record<string, string> = {
@@ -131,16 +131,16 @@
 			<!-- Reply Form -->
 			{#if form?.replySuccess}
 				<div role="status" aria-live="polite">
-					<GlassCard class="bg-green-50/80 border-green-200">
-						<p class="text-sm text-green-800 font-sans">Reply sent to {replyToEmail}!</p>
+					<GlassCard class="bg-success-bg border-success/30">
+						<p class="text-sm text-success font-sans">Reply sent to {replyToEmail}!</p>
 					</GlassCard>
 				</div>
 			{/if}
 
 			{#if form?.error}
 				<div role="alert">
-					<GlassCard class="bg-red-50/80 border-red-200">
-						<p class="text-sm text-red-800 font-sans">{form.error}</p>
+					<GlassCard class="bg-error-bg border-error/30">
+						<p class="text-sm text-error font-sans">{form.error}</p>
 					</GlassCard>
 				</div>
 			{/if}
@@ -171,7 +171,7 @@
 						rows="4"
 						required
 						aria-required="true"
-						class="w-full px-4 py-3 rounded-lg border border-grove-200 bg-white/50 text-foreground placeholder-foreground/40 focus:outline-none focus:ring-2 focus:ring-grove-500 focus:border-transparent font-sans transition-all resize-y"
+						class="w-full px-4 py-3 rounded-lg border border-input bg-white/50 text-foreground placeholder-foreground/40 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent font-sans transition-all resize-y"
 						disabled={submitting}
 					></textarea>
 					{#if replyToEmail}
@@ -183,7 +183,7 @@
 						<button
 							type="submit"
 							disabled={submitting || reply.length < 1}
-							class="inline-flex items-center gap-2 px-4 py-2 bg-grove-600 text-white rounded-lg font-sans text-sm hover:bg-grove-700 disabled:bg-grove-300 disabled:cursor-not-allowed transition-colors"
+							class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-sans text-sm hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 						>
 							{#if submitting}
 								<svg class="animate-spin h-4 w-4" viewBox="0 0 24 24">
@@ -258,7 +258,7 @@
 					<select
 						id="update-status"
 						name="status"
-						class="flex-1 px-3 py-2 rounded-lg border border-grove-200 bg-white/50 text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-grove-500"
+						class="flex-1 px-3 py-2 rounded-lg border border-input bg-white/50 text-foreground font-sans text-sm focus:outline-none focus:ring-2 focus:ring-ring"
 					>
 						<option value="open" selected={data.visit.status === "open"}>Open</option>
 						<option value="pending" selected={data.visit.status === "pending"}>Pending</option>
@@ -266,7 +266,7 @@
 					</select>
 					<button
 						type="submit"
-						class="px-3 py-2 bg-grove-100 text-grove-700 rounded-lg font-sans text-sm hover:bg-grove-200 transition-colors"
+						class="px-3 py-2 bg-surface-hover text-foreground rounded-lg font-sans text-sm hover:bg-surface-hover/80 transition-colors"
 					>
 						Update
 					</button>
@@ -295,21 +295,21 @@
 						bind:value={adminNotes}
 						placeholder="Private notes (not visible to visitor)..."
 						rows="4"
-						class="w-full px-3 py-2 rounded-lg border border-grove-200 bg-white/50 text-foreground placeholder-foreground/40 focus:outline-none focus:ring-2 focus:ring-grove-500 focus:border-transparent font-sans text-sm transition-all resize-y"
+						class="w-full px-3 py-2 rounded-lg border border-input bg-white/50 text-foreground placeholder-foreground/40 focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent font-sans text-sm transition-all resize-y"
 						disabled={savingNotes}
 					></textarea>
 					<div class="flex justify-end mt-2">
 						<button
 							type="submit"
 							disabled={savingNotes}
-							class="px-3 py-1.5 bg-grove-100 text-grove-700 rounded-lg font-sans text-sm hover:bg-grove-200 transition-colors disabled:opacity-50"
+							class="px-3 py-1.5 bg-surface-hover text-foreground rounded-lg font-sans text-sm hover:bg-surface-hover/80 transition-colors disabled:opacity-50"
 						>
 							{savingNotes ? "Saving..." : "Save notes"}
 						</button>
 					</div>
 				</form>
 				{#if form?.notesSuccess}
-					<p role="status" aria-live="polite" class="text-xs text-green-600 mt-2">Notes saved!</p>
+					<p role="status" aria-live="polite" class="text-xs text-success mt-2">Notes saved!</p>
 				{/if}
 			</GlassCard>
 		</div>

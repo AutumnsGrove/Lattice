@@ -36,36 +36,36 @@
 			id: "critical",
 			label: "Critical",
 			description: "Active exploitation or data exposure",
-			color: "text-red-700 dark:text-red-400",
-			bg: "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800",
+			color: "text-error-foreground",
+			bg: "bg-error-bg border-error",
 		},
 		{
 			id: "high",
 			label: "High",
 			description: "Could lead to significant impact",
-			color: "text-orange-700 dark:text-orange-400",
-			bg: "bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800",
+			color: "text-warning-foreground",
+			bg: "bg-warning-bg border-warning",
 		},
 		{
 			id: "medium",
 			label: "Medium",
 			description: "Requires specific conditions to exploit",
-			color: "text-yellow-700 dark:text-yellow-400",
-			bg: "bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800",
+			color: "text-warning-foreground",
+			bg: "bg-warning-bg border-warning",
 		},
 		{
 			id: "low",
 			label: "Low",
 			description: "Minor issue, limited impact",
-			color: "text-blue-700 dark:text-blue-400",
-			bg: "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800",
+			color: "text-info-foreground",
+			bg: "bg-info-bg border-info",
 		},
 		{
 			id: "informational",
 			label: "Informational",
 			description: "Best practice suggestion or hardening tip",
-			color: "text-grove-700 dark:text-grove-400",
-			bg: "bg-grove-50 dark:bg-grove-900/20 border-grove-200 dark:border-grove-800",
+			color: "text-foreground",
+			bg: "bg-surface border-border",
 		},
 	] as const;
 </script>
@@ -96,8 +96,8 @@
 		<GlassCard class="mb-8">
 			<div class="space-y-6">
 				<div class="flex items-start gap-4">
-					<div class="p-2.5 rounded-lg bg-grove-100 dark:bg-grove-900/30 flex-shrink-0">
-						<Shield class="w-5 h-5 text-grove-700 dark:text-grove-400" />
+					<div class="p-2.5 rounded-lg bg-surface-subtle flex-shrink-0">
+						<Shield class="w-5 h-5 text-foreground" />
 					</div>
 					<div>
 						<h2 class="font-serif text-foreground text-lg mb-1">Responsible Disclosure</h2>
@@ -110,8 +110,8 @@
 				</div>
 
 				<div class="flex items-start gap-4">
-					<div class="p-2.5 rounded-lg bg-grove-100 dark:bg-grove-900/30 flex-shrink-0">
-						<Clock class="w-5 h-5 text-grove-700 dark:text-grove-400" />
+					<div class="p-2.5 rounded-lg bg-surface-subtle flex-shrink-0">
+						<Clock class="w-5 h-5 text-foreground" />
 					</div>
 					<div>
 						<h2 class="font-serif text-foreground text-lg mb-1">Response Times</h2>
@@ -123,8 +123,8 @@
 				</div>
 
 				<div class="flex items-start gap-4">
-					<div class="p-2.5 rounded-lg bg-grove-100 dark:bg-grove-900/30 flex-shrink-0">
-						<Lock class="w-5 h-5 text-grove-700 dark:text-grove-400" />
+					<div class="p-2.5 rounded-lg bg-surface-subtle flex-shrink-0">
+						<Lock class="w-5 h-5 text-foreground" />
 					</div>
 					<div>
 						<h2 class="font-serif text-foreground text-lg mb-1">What's in Scope</h2>
@@ -139,8 +139,8 @@
 				</div>
 
 				<div class="flex items-start gap-4">
-					<div class="p-2.5 rounded-lg bg-grove-100 dark:bg-grove-900/30 flex-shrink-0">
-						<AlertTriangle class="w-5 h-5 text-grove-700 dark:text-grove-400" />
+					<div class="p-2.5 rounded-lg bg-surface-subtle flex-shrink-0">
+						<AlertTriangle class="w-5 h-5 text-foreground" />
 					</div>
 					<div>
 						<h2 class="font-serif text-foreground text-lg mb-1">Please Don't</h2>
@@ -158,14 +158,14 @@
 		<div class="mb-8">
 			<a
 				href="mailto:security@grove.place"
-				class="flex items-center gap-4 p-4 rounded-xl border border-default bg-surface hover:bg-surface-hover transition-colors group"
+				class="flex items-center gap-4 p-4 rounded-xl border border-border bg-surface hover:bg-surface-hover transition-colors group"
 			>
-				<div class="p-3 rounded-lg bg-accent-subtle/20">
-					<Mail class="w-5 h-5 text-accent-muted" />
+				<div class="p-3 rounded-lg bg-surface-subtle">
+					<Mail class="w-5 h-5 text-foreground-muted" />
 				</div>
 				<div class="flex-1">
 					<p
-						class="font-sans font-medium text-foreground group-hover:text-accent-muted transition-colors"
+						class="font-sans font-medium text-foreground group-hover:text-primary transition-colors"
 					>
 						Email directly
 					</p>
@@ -181,7 +181,7 @@
 			<div class="text-center mb-6">
 				<button
 					onclick={() => (showForm = !showForm)}
-					class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-grove-300 dark:border-grove-700 bg-grove-50/50 dark:bg-grove-900/20 text-grove-700 dark:text-grove-300 hover:bg-grove-100 dark:hover:bg-grove-900/40 transition-colors font-sans text-sm font-medium"
+					class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-border bg-surface-subtle text-foreground hover:bg-surface-hover transition-colors font-sans text-sm font-medium"
 				>
 					<Shield class="w-4 h-4" />
 					{showForm ? "Hide report form" : "Submit a report"}
@@ -197,11 +197,11 @@
 		{#if form?.success && form?.reportId}
 			<div role="status" aria-live="polite">
 				<GlassCard
-					class="mb-6 bg-green-50/80 dark:bg-green-900/20 border-green-200 dark:border-green-800"
+					class="mb-6 bg-success-bg border-success"
 				>
 					<div class="flex items-start gap-4">
 						<div
-							class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center text-green-600 dark:text-green-400 flex-shrink-0"
+							class="w-10 h-10 bg-success-bg rounded-lg flex items-center justify-center text-success flex-shrink-0"
 						>
 							<svg class="w-6 h-6" viewBox="0 0 20 20" fill="currentColor">
 								<path
@@ -212,13 +212,13 @@
 							</svg>
 						</div>
 						<div class="flex-1">
-							<h2 class="text-lg font-serif text-green-900 dark:text-green-200 mb-1">
+							<h2 class="text-lg font-serif text-success-foreground mb-1">
 								Report received
 							</h2>
-							<p class="text-sm text-green-800 dark:text-green-300 font-sans mb-2">
+							<p class="text-sm text-success-foreground font-sans mb-2">
 								Your report ID is <strong>{form.reportId}</strong>. Keep this for your records.
 							</p>
-							<p class="text-sm text-green-700 dark:text-green-400 font-sans">
+							<p class="text-sm text-success-foreground font-sans">
 								You'll receive a confirmation email shortly. I'll review your report and follow up
 								as soon as I can.
 							</p>
@@ -231,10 +231,10 @@
 		<!-- Error Message -->
 		{#if form?.error}
 			<div role="alert">
-				<GlassCard class="mb-6 bg-red-50/80 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+				<GlassCard class="mb-6 bg-error-bg border-error">
 					<div class="flex items-start gap-4">
 						<div
-							class="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center text-red-600 dark:text-red-400 flex-shrink-0"
+							class="w-10 h-10 bg-error-bg rounded-lg flex items-center justify-center text-error flex-shrink-0"
 						>
 							<svg class="w-6 h-6" viewBox="0 0 20 20" fill="currentColor">
 								<path
@@ -245,7 +245,7 @@
 							</svg>
 						</div>
 						<div class="flex-1">
-							<p class="text-sm text-red-800 dark:text-red-300 font-sans">
+							<p class="text-sm text-error-foreground font-sans">
 								{form.error}
 							</p>
 						</div>
@@ -281,7 +281,7 @@
 									aria-pressed={severity === opt.id}
 									class="p-3 rounded-lg border transition-all text-left {severity === opt.id
 										? opt.bg
-										: 'border-grove-200 bg-white/50 text-foreground/70 hover:border-grove-300 dark:border-cream-300 dark:bg-cream-200/50 dark:hover:border-cream-400'}"
+										: 'border-border bg-surface text-foreground/70 hover:bg-surface-hover'}"
 									disabled={submitting}
 								>
 									<span class="block text-sm font-medium {severity === opt.id ? opt.color : ''}"
@@ -305,7 +305,7 @@
 							name="name"
 							bind:value={name}
 							placeholder="Your name or handle"
-							class="w-full px-4 py-3 rounded-lg border border-grove-200 dark:border-cream-300 bg-white/50 dark:bg-cream-200/50 text-foreground placeholder-foreground/40 focus:outline-none focus:ring-2 focus:ring-grove-500 focus:border-transparent font-sans transition-all"
+							class="w-full px-4 py-3 rounded-lg border border-border bg-surface text-foreground placeholder-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-transparent font-sans transition-all"
 							disabled={submitting}
 						/>
 					</div>
@@ -313,7 +313,7 @@
 					<!-- Email -->
 					<div class="mb-5">
 						<label for="email" class="block text-sm font-sans font-medium text-foreground mb-2">
-							Email <span class="text-red-600 dark:text-red-400">*</span>
+							Email <span class="text-error-foreground">*</span>
 						</label>
 						<input
 							type="email"
@@ -323,7 +323,7 @@
 							placeholder="your.email@example.com"
 							required
 							aria-required="true"
-							class="w-full px-4 py-3 rounded-lg border border-grove-200 dark:border-cream-300 bg-white/50 dark:bg-cream-200/50 text-foreground placeholder-foreground/40 focus:outline-none focus:ring-2 focus:ring-grove-500 focus:border-transparent font-sans transition-all"
+							class="w-full px-4 py-3 rounded-lg border border-border bg-surface text-foreground placeholder-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-transparent font-sans transition-all"
 							disabled={submitting}
 						/>
 						<p class="text-xs text-foreground/50 mt-1 font-sans">
@@ -334,7 +334,7 @@
 					<!-- Subject -->
 					<div class="mb-5">
 						<label for="subject" class="block text-sm font-sans font-medium text-foreground mb-2">
-							Summary <span class="text-red-600 dark:text-red-400">*</span>
+							Summary <span class="text-error-foreground">*</span>
 						</label>
 						<input
 							type="text"
@@ -344,7 +344,7 @@
 							placeholder="Brief description of the vulnerability"
 							required
 							aria-required="true"
-							class="w-full px-4 py-3 rounded-lg border border-grove-200 dark:border-cream-300 bg-white/50 dark:bg-cream-200/50 text-foreground placeholder-foreground/40 focus:outline-none focus:ring-2 focus:ring-grove-500 focus:border-transparent font-sans transition-all"
+							class="w-full px-4 py-3 rounded-lg border border-border bg-surface text-foreground placeholder-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-transparent font-sans transition-all"
 							disabled={submitting}
 						/>
 					</div>
@@ -355,7 +355,7 @@
 							for="description"
 							class="block text-sm font-sans font-medium text-foreground mb-2"
 						>
-							Details <span class="text-red-600 dark:text-red-400">*</span>
+							Details <span class="text-error-foreground">*</span>
 						</label>
 						<textarea
 							id="description"
@@ -367,16 +367,16 @@
 							aria-required="true"
 							minlength="20"
 							maxlength="10000"
-							class="w-full px-4 py-3 rounded-lg border border-grove-200 dark:border-cream-300 bg-white/50 dark:bg-cream-200/50 text-foreground placeholder-foreground/40 focus:outline-none focus:ring-2 focus:ring-grove-500 focus:border-transparent font-sans transition-all resize-y"
+							class="w-full px-4 py-3 rounded-lg border border-border bg-surface text-foreground placeholder-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-transparent font-sans transition-all resize-y"
 							disabled={submitting}
 						></textarea>
 						<div class="flex justify-between items-center mt-2 text-xs font-sans">
 							<span class="text-foreground/50">At least 20 characters</span>
 							<span
 								class={isValidLength
-									? "text-grove-600 dark:text-grove-400"
+									? "text-success"
 									: charCount > 10000
-										? "text-red-600 dark:text-red-400"
+										? "text-error"
 										: "text-foreground/50"}
 							>
 								{charCount.toLocaleString()}/10,000
@@ -396,7 +396,7 @@
 					<button
 						type="submit"
 						disabled={submitting || !isValidLength || !hasEmail}
-						class="w-full px-6 py-3 bg-grove-600 text-white rounded-lg font-sans font-medium hover:bg-grove-700 disabled:bg-grove-300 dark:disabled:bg-grove-800 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+						class="w-full px-6 py-3 bg-primary text-primary-foreground rounded-lg font-sans font-medium hover:bg-primary/90 disabled:bg-foreground/20 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
 					>
 						{#if submitting}
 							<svg class="animate-spin h-5 w-5" viewBox="0 0 24 24">

@@ -69,10 +69,10 @@
   <Header user={data.user} />
 
   <!-- Hero -->
-  <section class="relative py-12 px-6 text-center bg-gradient-to-b from-violet-50 via-cream-50 to-white dark:from-violet-950/30 dark:via-cream-100 dark:to-cream-50">
+  <section class="relative py-12 px-6 text-center bg-gradient-to-b from-surface via-surface-subtle to-surface-elevated dark:from-surface dark:via-surface-subtle dark:to-surface-elevated">
     <div class="max-w-3xl mx-auto">
       <nav aria-label="Breadcrumb" class="flex items-center justify-center space-x-2 text-sm text-foreground-muted mb-6">
-        <a href="/knowledge" class="hover:text-accent focus-visible:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 rounded transition-colors">Knowledge Base</a>
+        <a href="/knowledge" class="hover:text-accent focus-visible:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded transition-colors">Knowledge Base</a>
         <span aria-hidden="true">/</span>
         <span class="text-foreground" aria-current="page">Art Exhibit</span>
       </nav>
@@ -122,14 +122,14 @@
             <div class="grid gap-4 md:grid-cols-2">
               {#each wingExhibits as exhibit}
                 {@const ExhibitIcon = getIcon(exhibit.icon)}
-                <article class="p-5 rounded-xl bg-white dark:bg-cream-100 shadow-sm border border-violet-200/50 dark:border-cream-300 hover:shadow-md hover:border-violet-300 dark:hover:border-violet-700/50 focus-within:shadow-md focus-within:border-violet-300 dark:focus-within:border-violet-700/50 transition-all motion-reduce:transition-none">
+                <article class="p-5 rounded-xl bg-surface dark:bg-surface shadow-sm border border-border hover:shadow-md hover:border-border dark:hover:border-border focus-within:shadow-md focus-within:border-border dark:focus-within:border-border transition-all motion-reduce:transition-none">
                   <div class="flex items-start gap-3 mb-3">
                     <div class="w-9 h-9 rounded-lg {colors.iconBg} {colors.iconBgDark} flex items-center justify-center {colors.text} {colors.textDark} flex-shrink-0">
                       <ExhibitIcon class="w-4 h-4" />
                     </div>
                     <div class="flex-1 min-w-0">
                       <h3 class="text-lg font-semibold text-foreground leading-tight">
-                        <a href="/knowledge/exhibit/{exhibit.slug}" class="{colors.textHover} {colors.textHoverDark} focus-visible:outline-none transition-colors motion-reduce:transition-none">
+                        <a href="/knowledge/exhibit/{exhibit.slug}" class="text-accent hover:text-accent-muted focus-visible:outline-none transition-colors motion-reduce:transition-none">
                           {exhibit.title}
                         </a>
                       </h3>
@@ -159,7 +159,7 @@
           Each exhibit may have commentary in the margins. These are personal notes from the curator,
           adding context to the documentation.
         </p>
-        <a href="/knowledge/exhibit/MUSEUM" class="inline-flex items-center px-4 py-2 {colors.buttonBg} text-white rounded-lg {colors.buttonHover} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 transition-colors motion-reduce:transition-none">
+        <a href="/knowledge/exhibit/MUSEUM" class="inline-flex items-center px-4 py-2 bg-accent text-accent-foreground rounded-lg hover:bg-accent-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 transition-colors motion-reduce:transition-none">
           Start the Tour
           <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -172,10 +172,10 @@
   <!-- Links -->
   <section class="py-8 px-6 bg-white/70 dark:bg-cream-50/50 border-t border-divider">
     <div class="max-w-4xl mx-auto flex flex-wrap justify-center gap-4">
-      <a href="/knowledge" class="px-4 py-2 rounded-lg bg-cream-100 dark:bg-cream-200 text-foreground-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 transition-colors motion-reduce:transition-none">
+      <a href="/knowledge" class="px-4 py-2 rounded-lg bg-surface-subtle dark:bg-surface-subtle text-foreground-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 transition-colors motion-reduce:transition-none">
         ← Knowledge Base
       </a>
-      <a href="/knowledge/specs" class="px-4 py-2 rounded-lg bg-cream-100 dark:bg-cream-200 text-foreground-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 transition-colors motion-reduce:transition-none">
+      <a href="/knowledge/specs" class="px-4 py-2 rounded-lg bg-surface-subtle dark:bg-surface-subtle text-foreground-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 transition-colors motion-reduce:transition-none">
         Technical Specifications →
       </a>
     </div>

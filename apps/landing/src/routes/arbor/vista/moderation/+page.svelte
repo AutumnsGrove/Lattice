@@ -46,7 +46,7 @@
 				<p class="text-xs font-sans text-foreground-muted uppercase tracking-wide">NCMEC Queue</p>
 				<p
 					class="text-xl font-serif {data.petal.ncmecQueueDepth > 0
-						? 'text-amber-600 dark:text-amber-400'
+						? 'text-warning'
 						: 'text-foreground'} mt-1"
 				>
 					{data.petal.ncmecQueueDepth}
@@ -55,8 +55,8 @@
 		</div>
 
 		{#if data.petal.pendingFlagReviews > 0}
-			<GlassCard class="p-4 mb-4 border-amber-200 dark:border-amber-800">
-				<p class="text-sm font-sans text-amber-700 dark:text-amber-400">
+			<GlassCard class="p-4 mb-4 border-warning">
+				<p class="text-sm font-sans text-warning">
 					{data.petal.pendingFlagReviews} pending account flag review{data.petal
 						.pendingFlagReviews !== 1
 						? "s"
@@ -70,7 +70,7 @@
 			<div class="space-y-1">
 				{#each data.petal.recentBlocks as block}
 					<div
-						class="flex items-center justify-between text-sm font-sans px-4 py-2 bg-white dark:bg-cream-100/30 rounded-lg border border-grove-100 dark:border-cream-300/30"
+						class="flex items-center justify-between text-sm font-sans px-4 py-2 bg-white dark:bg-card rounded-lg border border-border"
 					>
 						<span class="text-foreground font-mono text-xs">{block.category}</span>
 						<span class="text-foreground-muted">{block.count}</span>
@@ -94,33 +94,33 @@
 		<div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
 			<GlassCard class="p-4">
 				<p class="text-xs font-sans text-foreground-muted uppercase tracking-wide">Allowed</p>
-				<p class="text-xl font-serif text-grove-700 dark:text-grove-400 mt-1">
+				<p class="text-xl font-serif text-success mt-1">
 					{data.thorn.actionCounts24h.allowed.toLocaleString()}
 				</p>
 			</GlassCard>
 			<GlassCard class="p-4">
 				<p class="text-xs font-sans text-foreground-muted uppercase tracking-wide">Warned</p>
-				<p class="text-xl font-serif text-amber-600 dark:text-amber-400 mt-1">
+				<p class="text-xl font-serif text-warning mt-1">
 					{data.thorn.actionCounts24h.warned.toLocaleString()}
 				</p>
 			</GlassCard>
 			<GlassCard class="p-4">
 				<p class="text-xs font-sans text-foreground-muted uppercase tracking-wide">Flagged</p>
-				<p class="text-xl font-serif text-orange-600 dark:text-orange-400 mt-1">
+				<p class="text-xl font-serif text-warning mt-1">
 					{data.thorn.actionCounts24h.flagged.toLocaleString()}
 				</p>
 			</GlassCard>
 			<GlassCard class="p-4">
 				<p class="text-xs font-sans text-foreground-muted uppercase tracking-wide">Blocked</p>
-				<p class="text-xl font-serif text-red-600 dark:text-red-400 mt-1">
+				<p class="text-xl font-serif text-error mt-1">
 					{data.thorn.actionCounts24h.blocked.toLocaleString()}
 				</p>
 			</GlassCard>
 		</div>
 
 		{#if data.thorn.flaggedQueueDepth > 0}
-			<GlassCard class="p-4 mb-4 border-amber-200 dark:border-amber-800">
-				<p class="text-sm font-sans text-amber-700 dark:text-amber-400">
+			<GlassCard class="p-4 mb-4 border-warning">
+				<p class="text-sm font-sans text-warning">
 					{data.thorn.flaggedQueueDepth} item{data.thorn.flaggedQueueDepth !== 1 ? "s" : ""} in the flagged
 					content queue awaiting review
 				</p>

@@ -48,10 +48,10 @@
 
 	// Type config for display
 	const typeConfig: Record<string, { label: string; icon: typeof Info; color: string }> = {
-		info: { label: 'Info', icon: Info, color: 'text-teal-600 dark:text-teal-400' },
-		warning: { label: 'Warning', icon: AlertTriangle, color: 'text-amber-600 dark:text-amber-400' },
-		celebration: { label: 'Celebration', icon: PartyPopper, color: 'text-emerald-600 dark:text-emerald-400' },
-		update: { label: 'Update', icon: Sparkles, color: 'text-violet-600 dark:text-violet-400' }
+		info: { label: 'Info', icon: Info, color: 'text-info' },
+		warning: { label: 'Warning', icon: AlertTriangle, color: 'text-warning' },
+		celebration: { label: 'Celebration', icon: PartyPopper, color: 'text-success' },
+		update: { label: 'Update', icon: Sparkles, color: 'text-accent' }
 	};
 
 	// Group messages by channel
@@ -108,11 +108,11 @@
 	function statusColor(status: string): string {
 		switch (status) {
 			case 'published':
-				return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400';
+				return 'bg-success-bg text-success';
 			case 'draft':
-				return 'bg-cream-100 dark:bg-cream-200 text-foreground-subtle dark:text-cream-300';
+				return 'bg-surface-subtle text-foreground-subtle';
 			case 'expired':
-				return 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400';
+				return 'bg-error-bg text-error';
 			default:
 				return '';
 		}
@@ -127,7 +127,7 @@
 
 {#snippet channelSelect(id: string, name: string, value?: string)}
 	<select {id} {name} {value}
-		class="px-3 py-2 text-sm font-sans border border-grove-200 dark:border-cream-300 rounded-lg bg-white dark:bg-cream-100 text-foreground">
+		class="px-3 py-2 text-sm font-sans border border-input rounded-lg bg-white dark:bg-cream-100 text-foreground">
 		{#each channels as ch}
 			<option value={ch.key}>{ch.label}</option>
 		{/each}
@@ -150,11 +150,11 @@
 				<input type="hidden" name="id" value={msg.id} />
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
 					<input name="title" value={msg.title} required
-						class="px-3 py-2 text-sm font-sans border border-grove-200 dark:border-cream-300 rounded-lg bg-white dark:bg-cream-100 text-foreground" />
+						class="px-3 py-2 text-sm font-sans border border-input rounded-lg bg-white dark:bg-cream-100 text-foreground" />
 					<div class="grid grid-cols-2 gap-2">
 						{@render channelSelect('', 'channel', msg.channel)}
 						<select name="message_type" value={msg.message_type}
-							class="px-3 py-2 text-sm font-sans border border-grove-200 dark:border-cream-300 rounded-lg bg-white dark:bg-cream-100 text-foreground">
+							class="px-3 py-2 text-sm font-sans border border-input rounded-lg bg-white dark:bg-cream-100 text-foreground">
 							<option value="info">Info</option>
 							<option value="warning">Warning</option>
 							<option value="celebration">Celebration</option>
@@ -163,18 +163,18 @@
 					</div>
 				</div>
 				<textarea name="body" rows="2" required
-					class="w-full px-3 py-2 text-sm font-sans border border-grove-200 dark:border-cream-300 rounded-lg bg-white dark:bg-cream-100 text-foreground resize-y mb-3"
+					class="w-full px-3 py-2 text-sm font-sans border border-input rounded-lg bg-white dark:bg-cream-100 text-foreground resize-y mb-3"
 				>{msg.body}</textarea>
 				<div class="flex items-center gap-3 mb-3">
 					<input name="expires_at" type="datetime-local" value={msg.expires_at?.slice(0, 16) || ''}
-						class="px-3 py-2 text-sm font-sans border border-grove-200 dark:border-cream-300 rounded-lg bg-white dark:bg-cream-100 text-foreground" />
+						class="px-3 py-2 text-sm font-sans border border-input rounded-lg bg-white dark:bg-cream-100 text-foreground" />
 					<label class="flex items-center gap-2 text-sm font-sans text-foreground cursor-pointer">
 						<input type="checkbox" name="pinned" checked={!!msg.pinned} />
 						Pinned
 					</label>
 				</div>
 				<div class="flex gap-2">
-					<button type="submit" class="px-3 py-1.5 bg-grove-600 text-white rounded-lg text-sm font-sans hover:bg-grove-700 transition-colors">Save</button>
+					<button type="submit" class="px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-sm font-sans hover:bg-primary/90 transition-colors">Save</button>
 					<button type="button" onclick={() => (editingId = null)} class="px-3 py-1.5 text-foreground-muted text-sm font-sans hover:text-foreground transition-colors">Cancel</button>
 				</div>
 			</form>
@@ -218,7 +218,7 @@
 					<!-- Archive -->
 					<form method="POST" action="?/archive" use:enhance>
 						<input type="hidden" name="id" value={msg.id} />
-						<button type="submit" class="p-1.5 rounded-md text-foreground-muted hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" title="Delete">
+						<button type="submit" class="p-1.5 rounded-md text-foreground-muted hover:text-error hover:bg-error-bg/10 transition-colors" title="Delete">
 							<Trash2 class="w-4 h-4" />
 						</button>
 					</form>
@@ -262,7 +262,7 @@
 	<button
 		type="button"
 		onclick={() => (showCreateForm = !showCreateForm)}
-		class="inline-flex items-center gap-2 px-4 py-2 bg-grove-600 text-white rounded-lg text-sm font-sans hover:bg-grove-700 transition-colors"
+		class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-sans hover:bg-primary/90 transition-colors"
 	>
 		<Plus class="w-4 h-4" />
 		New Message
@@ -287,7 +287,7 @@
 						name="title"
 						type="text"
 						required
-						class="w-full px-3 py-2 text-sm font-sans border border-grove-200 dark:border-cream-300 rounded-lg bg-white dark:bg-cream-100 text-foreground"
+						class="w-full px-3 py-2 text-sm font-sans border border-input rounded-lg bg-white dark:bg-cream-100 text-foreground"
 						placeholder="What's happening?"
 					/>
 				</div>
@@ -301,7 +301,7 @@
 						<select
 							id="create-type"
 							name="message_type"
-							class="w-full px-3 py-2 text-sm font-sans border border-grove-200 dark:border-cream-300 rounded-lg bg-white dark:bg-cream-100 text-foreground"
+							class="w-full px-3 py-2 text-sm font-sans border border-input rounded-lg bg-white dark:bg-cream-100 text-foreground"
 						>
 							<option value="info">Info</option>
 							<option value="warning">Warning</option>
@@ -319,7 +319,7 @@
 					name="body"
 					required
 					rows="3"
-					class="w-full px-3 py-2 text-sm font-sans border border-grove-200 dark:border-cream-300 rounded-lg bg-white dark:bg-cream-100 text-foreground resize-y"
+					class="w-full px-3 py-2 text-sm font-sans border border-input rounded-lg bg-white dark:bg-cream-100 text-foreground resize-y"
 					placeholder="Write your message..."
 				></textarea>
 			</div>
@@ -331,11 +331,11 @@
 						id="create-expires"
 						name="expires_at"
 						type="datetime-local"
-						class="px-3 py-2 text-sm font-sans border border-grove-200 dark:border-cream-300 rounded-lg bg-white dark:bg-cream-100 text-foreground"
+						class="px-3 py-2 text-sm font-sans border border-input rounded-lg bg-white dark:bg-cream-100 text-foreground"
 					/>
 				</div>
 				<label class="flex items-center gap-2 text-sm font-sans text-foreground cursor-pointer mt-5">
-					<input type="checkbox" name="pinned" class="rounded border-grove-300 dark:border-cream-300" />
+					<input type="checkbox" name="pinned" class="rounded border-input" />
 					<Pin class="w-4 h-4 text-foreground-muted" />
 					Pin to top
 				</label>
@@ -348,7 +348,7 @@
 			<div class="flex gap-3">
 				<button
 					type="submit"
-					class="px-4 py-2 bg-grove-600 text-white rounded-lg text-sm font-sans hover:bg-grove-700 transition-colors"
+					class="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-sans hover:bg-primary/90 transition-colors"
 				>
 					Create Message
 				</button>
@@ -371,8 +371,8 @@
 			type="button"
 			onclick={() => (previewChannel = previewChannel === ch.key ? null : ch.key)}
 			class="text-xs font-sans px-3 py-1.5 rounded-lg transition-colors {previewChannel === ch.key
-				? 'bg-grove-600 text-white'
-				: 'bg-grove-100 dark:bg-cream-200 text-foreground-muted hover:text-foreground'}"
+				? 'bg-primary text-primary-foreground'
+				: 'bg-surface-hover dark:bg-cream-200 text-foreground-muted hover:text-foreground'}"
 		>
 			Preview {ch.label}
 		</button>

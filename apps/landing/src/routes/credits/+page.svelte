@@ -246,7 +246,7 @@
 							</a>
 							<a
 								href="/knowledge/help/what-is-zdr"
-								class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-cream-100 dark:bg-cream-200/50 text-xs text-foreground-muted hover:bg-amber-100 dark:hover:bg-amber-900/30 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
+								class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface-subtle text-xs text-foreground-muted hover:bg-surface-hover hover:text-warning transition-colors"
 								title="Zero Data Retention"
 							>
 								<Shredder class="w-3 h-3" />
@@ -271,7 +271,7 @@
 							</a>
 							<a
 								href="/knowledge/help/what-is-zdr"
-								class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-cream-100 dark:bg-cream-200/50 text-xs text-foreground-muted hover:bg-amber-100 dark:hover:bg-amber-900/30 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
+								class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface-subtle text-xs text-foreground-muted hover:bg-surface-hover hover:text-warning transition-colors"
 								title="Zero Data Retention"
 							>
 								<Shredder class="w-3 h-3" />
@@ -296,7 +296,7 @@
 							</a>
 							<a
 								href="/knowledge/help/what-is-zdr"
-								class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-cream-100 dark:bg-cream-200/50 text-xs text-foreground-muted hover:bg-amber-100 dark:hover:bg-amber-900/30 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
+								class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface-subtle text-xs text-foreground-muted hover:bg-surface-hover hover:text-warning transition-colors"
 								title="Zero Data Retention"
 							>
 								<Shredder class="w-3 h-3" />
@@ -821,11 +821,11 @@
 			{@const Icon = item.icon}
 			<a
 				href="#{item.id}"
-				class="flex items-center justify-center w-10 h-10 rounded-full bg-white dark:bg-cream-100 shadow-md border border-amber-200 dark:border-cream-200 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-all duration-200 group"
+				class="flex items-center justify-center w-10 h-10 rounded-full bg-white dark:bg-card shadow-md border border-border hover:bg-surface-hover transition-all duration-200 group"
 				aria-label="Jump to {item.text}"
 				title={item.text}
 			>
-				<Icon class="w-5 h-5 text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform" />
+				<Icon class="w-5 h-5 text-warning group-hover:scale-110 transition-transform" />
 			</a>
 		{/each}
 	</nav>
@@ -835,7 +835,7 @@
 		<button
 			type="button"
 			onclick={() => isTocOpen = !isTocOpen}
-			class="w-12 h-12 rounded-full bg-amber-500 text-white shadow-lg flex items-center justify-center hover:bg-amber-600 transition-colors"
+			class="w-12 h-12 rounded-full bg-warning text-white shadow-lg flex items-center justify-center hover:opacity-90 transition-colors"
 			aria-expanded={isTocOpen}
 			aria-label="Table of contents"
 		>
@@ -845,8 +845,8 @@
 		</button>
 
 		{#if isTocOpen}
-			<div class="absolute bottom-16 right-0 w-56 bg-white dark:bg-cream-100 rounded-xl shadow-xl border border-amber-200 dark:border-cream-200 overflow-hidden">
-				<div class="px-4 py-3 border-b border-amber-200 dark:border-cream-200 flex items-center justify-between">
+			<div class="absolute bottom-16 right-0 w-56 bg-white dark:bg-card rounded-xl shadow-xl border border-border overflow-hidden">
+				<div class="px-4 py-3 border-b border-border flex items-center justify-between">
 					<span class="font-medium text-foreground">Navigate</span>
 					<button type="button" onclick={() => isTocOpen = false} class="text-foreground-muted hover:text-foreground" aria-label="Close">
 						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -860,9 +860,9 @@
 						<a
 							href="#{item.id}"
 							onclick={() => isTocOpen = false}
-							class="flex items-center gap-3 px-4 py-2 text-foreground-muted hover:text-foreground hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors"
+							class="flex items-center gap-3 px-4 py-2 text-foreground-muted hover:text-foreground hover:bg-surface-hover transition-colors"
 						>
-							<Icon class="w-5 h-5 text-amber-500" />
+							<Icon class="w-5 h-5 text-warning" />
 							<span>{item.text}</span>
 						</a>
 					{/each}

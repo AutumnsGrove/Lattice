@@ -56,9 +56,9 @@
 	}
 
 	const severityColors: Record<string, string> = {
-		critical: "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400",
-		warning: "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400",
-		info: "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400",
+		critical: "bg-error-bg text-error-foreground",
+		warning: "bg-warning-bg text-warning-foreground",
+		info: "bg-info-bg text-info-foreground",
 	};
 </script>
 
@@ -73,11 +73,11 @@
 
 <!-- Collection status banners — priority: token missing → never attempted → attempted but failed -->
 {#if data.collectionStatus?.tokenMissing}
-	<GlassCard class="mb-6 p-5 border-amber-200 dark:border-amber-800">
+	<GlassCard class="mb-6 p-5 border-warning">
 		<div class="flex items-start gap-3">
-			<AlertTriangle class="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+			<AlertTriangle class="w-5 h-5 text-warning mt-0.5 shrink-0" />
 			<div>
-				<p class="text-sm font-sans font-medium text-amber-700 dark:text-amber-400">
+				<p class="text-sm font-sans font-medium text-warning-foreground">
 					The observability API token isn't configured yet.
 				</p>
 				<p class="text-xs font-sans text-foreground-muted mt-1">
@@ -93,11 +93,11 @@
 		</div>
 	</GlassCard>
 {:else if !data.collectionStatus?.hasAttempted}
-	<GlassCard class="mb-6 p-5 border-amber-200 dark:border-amber-800">
+	<GlassCard class="mb-6 p-5 border-warning">
 		<div class="flex items-start gap-3">
-			<Info class="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+			<Info class="w-5 h-5 text-warning mt-0.5 shrink-0" />
 			<div>
-				<p class="text-sm font-sans font-medium text-amber-700 dark:text-amber-400">
+				<p class="text-sm font-sans font-medium text-warning-foreground">
 					Vista is ready — awaiting the first collection run.
 				</p>
 				<p class="text-xs font-sans text-foreground-muted mt-1">
@@ -110,11 +110,11 @@
 		</div>
 	</GlassCard>
 {:else if data.collectionStatus?.hasAttempted && !data.collectionStatus?.hasCompleted}
-	<GlassCard class="mb-6 p-5 border-amber-200 dark:border-amber-800">
+	<GlassCard class="mb-6 p-5 border-warning">
 		<div class="flex items-start gap-3">
-			<AlertTriangle class="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+			<AlertTriangle class="w-5 h-5 text-warning mt-0.5 shrink-0" />
 			<div>
-				<p class="text-sm font-sans font-medium text-amber-700 dark:text-amber-400">
+				<p class="text-sm font-sans font-medium text-warning-foreground">
 					Collection runs have started but haven't completed successfully.
 				</p>
 				<p class="text-xs font-sans text-foreground-muted mt-1">
@@ -155,16 +155,16 @@
 	<GlassCard class="p-5">
 		<div class="flex items-center gap-3">
 			{#if data.activeAlerts.length > 0}
-				<AlertTriangle class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" />
+				<AlertTriangle class="w-5 h-5 text-warning shrink-0" />
 			{:else}
-				<CheckCircle2 class="w-5 h-5 text-grove-600 dark:text-grove-400 shrink-0" />
+				<CheckCircle2 class="w-5 h-5 text-success shrink-0" />
 			{/if}
 			<div>
 				<p class="text-xs font-sans text-foreground-muted uppercase tracking-wide">Active Alerts</p>
 				<p
 					class="text-sm font-sans font-medium {data.activeAlerts.length > 0
-						? 'text-amber-700 dark:text-amber-400'
-						: 'text-grove-700 dark:text-grove-400'} mt-0.5"
+						? 'text-warning-foreground'
+						: 'text-success-foreground'} mt-0.5"
 				>
 					{data.activeAlerts.length === 0
 						? "None"
@@ -216,10 +216,10 @@
 						<div class="flex items-start gap-3">
 							<AlertCircle
 								class="w-4 h-4 mt-0.5 {alert.severity === 'critical'
-									? 'text-red-600 dark:text-red-400'
+									? 'text-error'
 									: alert.severity === 'warning'
-										? 'text-amber-600 dark:text-amber-400'
-										: 'text-blue-600 dark:text-blue-400'} shrink-0"
+										? 'text-warning'
+										: 'text-info'} shrink-0"
 							/>
 							<div>
 								<p class="text-sm font-sans font-medium text-foreground">{alert.title}</p>
@@ -254,19 +254,19 @@
 			</p>
 		</GlassCard>
 	{:else}
-		<div class="overflow-hidden rounded-xl border border-grove-200 dark:border-cream-300">
-			<div class="divide-y divide-grove-100 dark:divide-cream-300/50">
+		<div class="overflow-hidden rounded-xl border border-border">
+			<div class="divide-y divide-border">
 				{#each data.overview.healthSummary as check}
-					<div class="flex items-center justify-between px-6 py-3 bg-white dark:bg-cream-100/30">
+					<div class="flex items-center justify-between px-6 py-3 bg-surface">
 						<div class="flex items-center gap-3">
 							{#if check.isHealthy}
 								<CheckCircle2
-									class="w-4 h-4 text-green-600 dark:text-green-400 shrink-0"
+									class="w-4 h-4 text-success shrink-0"
 									aria-label="Healthy"
 								/>
 							{:else}
 								<AlertTriangle
-									class="w-4 h-4 text-red-600 dark:text-red-400 shrink-0"
+									class="w-4 h-4 text-error shrink-0"
 									aria-label="Unhealthy"
 								/>
 							{/if}
@@ -277,9 +277,9 @@
 								{formatRelativeTime(check.checkedAt)}
 							</span>
 							{#if check.isHealthy}
-								<Wifi class="w-4 h-4 text-grove-600 dark:text-grove-400" aria-hidden="true" />
+								<Wifi class="w-4 h-4 text-success" aria-hidden="true" />
 							{:else}
-								<WifiOff class="w-4 h-4 text-red-600 dark:text-red-400" aria-hidden="true" />
+								<WifiOff class="w-4 h-4 text-error" aria-hidden="true" />
 							{/if}
 						</div>
 					</div>

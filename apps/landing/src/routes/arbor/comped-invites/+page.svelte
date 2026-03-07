@@ -115,10 +115,10 @@
 	};
 
 	const tierColors: Record<string, string> = {
-		seedling: "bg-green-500/20 text-green-300 border-green-500/30",
-		sapling: "bg-teal-500/20 text-teal-300 border-teal-500/30",
-		oak: "bg-amber-500/20 text-amber-300 border-amber-500/30",
-		evergreen: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
+		seedling: "bg-success-bg text-success border-success",
+		sapling: "bg-info-bg text-info border-info",
+		oak: "bg-warning-bg text-warning border-warning",
+		evergreen: "bg-accent-subtle text-accent border-accent",
 	};
 
 	const typeLabels: Record<string, string> = {
@@ -127,8 +127,8 @@
 	};
 
 	const typeColors: Record<string, string> = {
-		beta: "bg-blue-500/20 text-blue-300 border-blue-500/30",
-		comped: "bg-purple-500/20 text-purple-300 border-purple-500/30",
+		beta: "bg-info-bg text-info border-info",
+		comped: "bg-accent-subtle text-accent border-accent",
 	};
 
 	function formatDate(timestamp: number): string {
@@ -181,28 +181,28 @@
 		<!-- Stats -->
 		<div class="flex flex-wrap gap-3 text-sm">
 			<div
-				class="px-3 py-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center gap-2"
+				class="px-3 py-1.5 rounded-lg bg-info-bg border border-info flex items-center gap-2"
 			>
-				<span class="text-blue-400 dark:text-blue-300">Beta:</span>
+				<span class="text-info">Beta:</span>
 				<span class="font-medium text-foreground">{data.stats.beta}</span>
 			</div>
 			<div
-				class="px-3 py-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center gap-2"
+				class="px-3 py-1.5 rounded-lg bg-accent-subtle border border-accent flex items-center gap-2"
 			>
-				<span class="text-purple-400 dark:text-purple-300">Comped:</span>
+				<span class="text-accent">Comped:</span>
 				<span class="font-medium text-foreground">{data.stats.comped}</span>
 			</div>
 			<div
-				class="px-3 py-1.5 rounded-lg bg-yellow-500/10 border border-yellow-500/20 flex items-center gap-2"
+				class="px-3 py-1.5 rounded-lg bg-warning-bg border border-warning flex items-center gap-2"
 			>
-				<Clock class="w-4 h-4 text-yellow-500" />
+				<Clock class="w-4 h-4 text-warning" />
 				<span class="text-foreground-muted">Pending:</span>
 				<span class="font-medium text-foreground">{data.stats.pending}</span>
 			</div>
 			<div
-				class="px-3 py-1.5 rounded-lg bg-green-500/10 border border-green-500/20 flex items-center gap-2"
+				class="px-3 py-1.5 rounded-lg bg-success-bg border border-success flex items-center gap-2"
 			>
-				<CheckCircle class="w-4 h-4 text-green-500" />
+				<CheckCircle class="w-4 h-4 text-success" />
 				<span class="text-foreground-muted">Used:</span>
 				<span class="font-medium text-foreground">{data.stats.used}</span>
 			</div>
@@ -212,7 +212,7 @@
 	<!-- Feedback Messages -->
 	{#if form?.success}
 		<div
-			class="p-4 rounded-lg bg-green-500/10 border border-green-500/30 text-green-700 dark:text-green-300 flex items-center gap-2"
+			class="p-4 rounded-lg bg-success-bg border border-success text-success flex items-center gap-2"
 		>
 			<Check size={18} />
 			{form.message}
@@ -222,7 +222,7 @@
 		</div>
 		{#if form.emailStatus === "failed"}
 			<div
-				class="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 flex items-center gap-2"
+				class="p-4 rounded-lg bg-warning-bg border border-warning text-warning flex items-center gap-2"
 			>
 				<AlertTriangle size={18} />
 				<span
@@ -233,14 +233,14 @@
 			</div>
 		{:else if form.emailStatus === "partial"}
 			<div
-				class="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 flex items-center gap-2"
+				class="p-4 rounded-lg bg-warning-bg border border-warning text-warning flex items-center gap-2"
 			>
 				<AlertTriangle size={18} />
 				<span>Some invite emails failed to send. Check the audit log for details.</span>
 			</div>
 		{:else if form.emailStatus === "not-configured"}
 			<div
-				class="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 flex items-center gap-2"
+				class="p-4 rounded-lg bg-warning-bg border border-warning text-warning flex items-center gap-2"
 			>
 				<AlertTriangle size={18} />
 				<span>Invite created, but no email API key is configured — email was not sent.</span>
@@ -248,7 +248,7 @@
 		{/if}
 		{#if form.promoteErrors?.length}
 			<div
-				class="p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-700 dark:text-red-300"
+				class="p-4 rounded-lg bg-error-bg border border-error text-error"
 			>
 				<div class="flex items-center gap-2 mb-2">
 					<AlertTriangle size={18} />
@@ -265,7 +265,7 @@
 
 	{#if form?.error}
 		<div
-			class="p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-700 dark:text-red-300 flex items-center gap-2"
+			class="p-4 rounded-lg bg-error-bg border border-error text-error flex items-center gap-2"
 		>
 			<AlertTriangle size={18} />
 			{form.error}
@@ -281,10 +281,10 @@
 					onclick={() => (showEligible = !showEligible)}
 					class="flex items-center gap-2 text-lg font-serif text-foreground"
 				>
-					<Users class="w-5 h-5 text-blue-500" />
+					<Users class="w-5 h-5 text-info" />
 					Email Subscribers Ready for Beta
 					<span
-						class="px-2 py-0.5 text-xs rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30 font-sans"
+						class="px-2 py-0.5 text-xs rounded-full bg-info-bg text-info border border-info font-sans"
 					>
 						{data.eligibleSubscribers.length}
 					</span>
@@ -306,7 +306,7 @@
 						<select
 							name="tier"
 							bind:value={promoteTier}
-							class="px-3 py-1.5 text-sm rounded-lg bg-white/50 dark:bg-cream-100/50 border border-slate-200 dark:border-cream-300 text-foreground focus:outline-none focus:border-grove-500"
+							class="px-3 py-1.5 text-sm rounded-lg bg-white/50 dark:bg-cream-100/50 border border-border text-foreground focus:outline-none focus:border-grove-500"
 						>
 							{#each data.validTiers as tier}
 								<option value={tier}>{tierLabels[tier] || tier}</option>
@@ -316,7 +316,7 @@
 						<button
 							type="submit"
 							disabled={isPromotingAll}
-							class="flex items-center gap-2 px-4 py-1.5 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+							class="flex items-center gap-2 px-4 py-1.5 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-grove-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 						>
 							{#if isPromotingAll}
 								<Loader2 class="w-4 h-4 animate-spin" />
@@ -336,7 +336,7 @@
 						type="text"
 						bind:value={promoteMessage}
 						placeholder="Optional welcome message for beta invite emails..."
-						class="w-full px-3 py-2 text-sm rounded-lg bg-white/50 dark:bg-cream-100/50 border border-slate-200 dark:border-cream-300 text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-grove-500"
+						class="w-full px-3 py-2 text-sm rounded-lg bg-white/50 dark:bg-cream-100/50 border border-border text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-grove-500"
 					/>
 				</div>
 
@@ -346,11 +346,11 @@
 				</p>
 
 				<div
-					class="divide-y divide-slate-200 dark:divide-cream-300 max-h-96 overflow-y-auto rounded-lg border border-slate-200 dark:border-cream-300"
+					class="divide-y divide-border max-h-96 overflow-y-auto rounded-lg border border-border"
 				>
 					{#each data.eligibleSubscribers as sub}
 						<div
-							class="px-4 py-3 flex items-center justify-between group hover:bg-slate-50 dark:hover:bg-cream-100/30"
+							class="px-4 py-3 flex items-center justify-between group hover:bg-surface-hover"
 						>
 							<div class="min-w-0">
 								<div class="flex items-center gap-2">
@@ -389,7 +389,7 @@
 								<button
 									type="submit"
 									disabled={isPromoting === sub.email || isPromotingAll}
-									class="flex items-center gap-1.5 px-3 py-1 text-xs rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+									class="flex items-center gap-1.5 px-3 py-1 text-xs rounded-lg bg-info-bg text-info border border-info hover:bg-info/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 								>
 									{#if isPromoting === sub.email}
 										<Loader2 class="w-3 h-3 animate-spin" />
@@ -422,14 +422,14 @@
 							bind:value={searchQuery}
 							onkeydown={(e) => e.key === "Enter" && applyFilters()}
 							placeholder="Search by email..."
-							class="w-full pl-9 pr-4 py-2 rounded-lg bg-white/50 dark:bg-cream-100/50 border border-slate-200 dark:border-cream-300 text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-grove-500"
+							class="w-full pl-9 pr-4 py-2 rounded-lg bg-white/50 dark:bg-cream-100/50 border border-border text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-grove-500"
 						/>
 					</div>
 
 					<select
 						bind:value={typeFilter}
 						onchange={applyFilters}
-						class="px-4 py-2 rounded-lg bg-white/50 dark:bg-cream-100/50 border border-slate-200 dark:border-cream-300 text-foreground focus:outline-none focus:border-grove-500"
+						class="px-4 py-2 rounded-lg bg-white/50 dark:bg-cream-100/50 border border-border text-foreground focus:outline-none focus:border-grove-500"
 					>
 						<option value="">All types</option>
 						<option value="beta">Beta</option>
@@ -439,7 +439,7 @@
 					<select
 						bind:value={statusFilter}
 						onchange={applyFilters}
-						class="px-4 py-2 rounded-lg bg-white/50 dark:bg-cream-100/50 border border-slate-200 dark:border-cream-300 text-foreground focus:outline-none focus:border-grove-500"
+						class="px-4 py-2 rounded-lg bg-white/50 dark:bg-cream-100/50 border border-border text-foreground focus:outline-none focus:border-grove-500"
 					>
 						<option value="">All status</option>
 						<option value="pending">Pending</option>
@@ -468,22 +468,22 @@
 
 			<!-- Invites List -->
 			<GlassCard>
-				<div class="divide-y divide-slate-200 dark:divide-cream-300">
+				<div class="divide-y divide-border">
 					{#each data.invites as invite}
 						<div class="p-4 flex items-center justify-between group">
 							<div class="flex items-center gap-3 min-w-0">
 								<div class="flex-shrink-0">
 									{#if invite.used_at}
 										<div
-											class="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center"
+											class="w-8 h-8 rounded-full bg-success-bg flex items-center justify-center"
 										>
-											<CheckCircle class="w-4 h-4 text-green-500" />
+											<CheckCircle class="w-4 h-4 text-success" />
 										</div>
 									{:else}
 										<div
-											class="w-8 h-8 rounded-full bg-yellow-500/20 flex items-center justify-center"
+											class="w-8 h-8 rounded-full bg-warning-bg flex items-center justify-center"
 										>
-											<Clock class="w-4 h-4 text-yellow-500" />
+											<Clock class="w-4 h-4 text-warning" />
 										</div>
 									{/if}
 								</div>
@@ -509,7 +509,7 @@
 										{:else}
 											Created {formatDate(invite.created_at)} by {invite.invited_by}
 											{#if !invite.email_sent_at}
-												<span class="text-amber-500 ml-1">· email not sent</span>
+												<span class="text-warning ml-1">· email not sent</span>
 											{/if}
 										{/if}
 									</div>
@@ -551,7 +551,7 @@
 											<button
 												type="submit"
 												disabled={isResending === invite.id}
-												class="p-1.5 rounded text-amber-500 hover:text-amber-400 hover:bg-amber-500/10 transition-colors"
+												class="p-1.5 rounded text-warning hover:text-warning hover:bg-warning-bg transition-colors"
 												title="Resend invite email"
 											>
 												{#if isResending === invite.id}
@@ -565,7 +565,7 @@
 									<button
 										type="button"
 										onclick={() => (revokeInvite = { id: invite.id, email: invite.email })}
-										class="p-1.5 rounded text-foreground-muted hover:text-red-500 hover:bg-red-500/10 transition-colors opacity-0 group-hover:opacity-100"
+										class="p-1.5 rounded text-foreground-muted hover:text-error hover:bg-error-bg transition-colors opacity-0 group-hover:opacity-100"
 										title="Revoke invite"
 									>
 										<Trash2 class="w-4 h-4" />
@@ -587,7 +587,7 @@
 				<!-- Pagination -->
 				{#if data.pagination.totalPages > 1}
 					<div
-						class="p-4 border-t border-slate-200 dark:border-cream-300 flex items-center justify-between"
+						class="p-4 border-t border-border flex items-center justify-between"
 					>
 						<span class="text-sm text-foreground-muted">
 							Showing {(data.pagination.page - 1) * data.pagination.pageSize + 1} -
@@ -600,7 +600,7 @@
 								type="button"
 								onclick={() => goToPage(data.pagination.page - 1)}
 								disabled={data.pagination.page === 1}
-								class="p-2 rounded hover:bg-cream-200 dark:hover:bg-cream-300 disabled:opacity-50 disabled:cursor-not-allowed"
+								class="p-2 rounded hover:bg-surface-hover disabled:opacity-50 disabled:cursor-not-allowed"
 							>
 								<ChevronLeft class="w-4 h-4" />
 							</button>
@@ -613,7 +613,7 @@
 								type="button"
 								onclick={() => goToPage(data.pagination.page + 1)}
 								disabled={data.pagination.page === data.pagination.totalPages}
-								class="p-2 rounded hover:bg-cream-200 dark:hover:bg-cream-300 disabled:opacity-50 disabled:cursor-not-allowed"
+								class="p-2 rounded hover:bg-surface-hover disabled:opacity-50 disabled:cursor-not-allowed"
 							>
 								<ChevronRight class="w-4 h-4" />
 							</button>
@@ -664,7 +664,7 @@
 								bind:value={newEmail}
 								placeholder="friend@example.com"
 								required
-								class="w-full pl-9 pr-3 py-2 rounded-lg bg-white/50 dark:bg-cream-100/50 border border-slate-200 dark:border-cream-300 text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-grove-500"
+								class="w-full pl-9 pr-3 py-2 rounded-lg bg-white/50 dark:bg-cream-100/50 border border-border text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-grove-500"
 							/>
 						</div>
 					</div>
@@ -680,7 +680,7 @@
 									name="invite_type"
 									value="beta"
 									bind:group={newInviteType}
-									class="w-4 h-4 text-blue-500 border-slate-300 focus:ring-blue-500"
+									class="w-4 h-4 text-info border-border focus:ring-info"
 								/>
 								<span class="text-sm text-foreground">Beta Tester</span>
 							</label>
@@ -690,7 +690,7 @@
 									name="invite_type"
 									value="comped"
 									bind:group={newInviteType}
-									class="w-4 h-4 text-purple-500 border-slate-300 focus:ring-purple-500"
+									class="w-4 h-4 text-accent border-border focus:ring-accent"
 								/>
 								<span class="text-sm text-foreground">Comped</span>
 							</label>
@@ -712,7 +712,7 @@
 							name="tier"
 							bind:value={newTier}
 							required
-							class="w-full px-3 py-2 rounded-lg bg-white/50 dark:bg-cream-100/50 border border-slate-200 dark:border-cream-300 text-foreground focus:outline-none focus:border-grove-500"
+							class="w-full px-3 py-2 rounded-lg bg-white/50 dark:bg-cream-100/50 border border-border text-foreground focus:outline-none focus:border-grove-500"
 						>
 							{#each data.validTiers as tier}
 								<option value={tier}>{tierLabels[tier] || tier}</option>
@@ -730,7 +730,7 @@
 							bind:value={newMessage}
 							placeholder="A personal message shown when they sign up..."
 							rows="2"
-							class="w-full px-3 py-2 rounded-lg bg-white/50 dark:bg-cream-100/50 border border-slate-200 dark:border-cream-300 text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-grove-500 resize-none"
+							class="w-full px-3 py-2 rounded-lg bg-white/50 dark:bg-cream-100/50 border border-border text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-grove-500 resize-none"
 						></textarea>
 					</div>
 
@@ -744,7 +744,7 @@
 							name="notes"
 							bind:value={newNotes}
 							placeholder="Why are we inviting them?"
-							class="w-full px-3 py-2 rounded-lg bg-white/50 dark:bg-cream-100/50 border border-slate-200 dark:border-cream-300 text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-grove-500"
+							class="w-full px-3 py-2 rounded-lg bg-white/50 dark:bg-cream-100/50 border border-border text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-grove-500"
 						/>
 					</div>
 
@@ -797,7 +797,7 @@
 						</div>
 
 						<!-- Email Body Preview -->
-						<div class="rounded-xl overflow-hidden border border-slate-200 dark:border-cream-300">
+						<div class="rounded-xl overflow-hidden border border-border">
 							<!-- Warm cream header -->
 							<div class="bg-[#fefdfb] px-5 py-4 text-center">
 								<div
@@ -872,17 +872,17 @@
 
 				<div class="space-y-3 max-h-80 overflow-y-auto">
 					{#each data.auditLog as entry}
-						<div class="p-2 rounded-lg bg-cream-100 dark:bg-cream-100/50 text-sm">
+						<div class="p-2 rounded-lg bg-surface-subtle text-sm">
 							<div class="flex items-center gap-2 flex-wrap">
 								{#if entry.action === "create"}
-									<Plus class="w-3 h-3 text-green-500" />
-									<span class="text-green-600 dark:text-green-400">Created</span>
+									<Plus class="w-3 h-3 text-success" />
+									<span class="text-success">Created</span>
 								{:else if entry.action === "use"}
-									<CheckCircle class="w-3 h-3 text-blue-500" />
-									<span class="text-blue-600 dark:text-blue-400">Used</span>
+									<CheckCircle class="w-3 h-3 text-info" />
+									<span class="text-info">Used</span>
 								{:else}
-									<Trash2 class="w-3 h-3 text-red-500" />
-									<span class="text-red-600 dark:text-red-400">Revoked</span>
+									<Trash2 class="w-3 h-3 text-error" />
+									<span class="text-error">Revoked</span>
 								{/if}
 								<span class="text-foreground truncate">{entry.email}</span>
 								{#if entry.invite_type}
@@ -954,7 +954,7 @@
 							name="notes"
 							bind:value={revokeNotes}
 							placeholder="Why are we revoking this?"
-							class="w-full px-3 py-2 rounded-lg bg-white/50 dark:bg-cream-100/50 border border-slate-200 dark:border-cream-300 text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-grove-500"
+							class="w-full px-3 py-2 rounded-lg bg-white/50 dark:bg-cream-100/50 border border-border text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-grove-500"
 						/>
 					</div>
 
@@ -965,14 +965,14 @@
 								revokeInvite = null;
 								revokeNotes = "";
 							}}
-							class="flex-1 px-4 py-2 rounded-lg bg-cream-200 dark:bg-cream-300 text-foreground hover:bg-cream-300 dark:hover:bg-cream-300 transition-colors"
+							class="flex-1 px-4 py-2 rounded-lg bg-surface-subtle text-foreground hover:bg-surface-hover transition-colors"
 						>
 							Cancel
 						</button>
 						<button
 							type="submit"
 							disabled={isRevoking}
-							class="flex-1 px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors flex items-center justify-center gap-2"
+							class="flex-1 px-4 py-2 rounded-lg bg-error text-destructive-foreground hover:bg-error/90 transition-colors flex items-center justify-center gap-2"
 						>
 							{#if isRevoking}
 								<Loader2 class="w-4 h-4 animate-spin" />

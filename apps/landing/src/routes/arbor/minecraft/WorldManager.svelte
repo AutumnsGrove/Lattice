@@ -160,10 +160,10 @@
 	<h2 class="text-lg font-serif text-foreground mb-4">World Manager</h2>
 
 	{#if error}
-		<GlassCard class="mb-4 p-4 border-red-200 dark:border-red-800" role="alert">
+		<GlassCard class="mb-4 p-4 border-error" role="alert">
 			<div class="flex items-center gap-2">
-				<AlertTriangle class="w-4 h-4 text-red-600 dark:text-red-400 shrink-0" />
-				<p class="text-sm font-sans text-red-700 dark:text-red-400">{error}</p>
+				<AlertTriangle class="w-4 h-4 text-error shrink-0" />
+				<p class="text-sm font-sans text-error">{error}</p>
 			</div>
 		</GlassCard>
 	{/if}
@@ -214,11 +214,11 @@
 					<p class="text-sm font-sans text-foreground-muted">No backups available</p>
 				</GlassCard>
 			{:else}
-				<div class="overflow-hidden rounded-xl border border-grove-200 dark:border-cream-300">
-					<div class="divide-y divide-grove-100 dark:divide-cream-300/50">
+				<div class="overflow-hidden rounded-xl border border-border">
+					<div class="divide-y divide-divider">
 						{#each backups as backup}
 							<div
-								class="flex items-center justify-between px-4 py-3 bg-white dark:bg-cream-100/30"
+								class="flex items-center justify-between px-4 py-3 bg-surface"
 							>
 								<div>
 									<div class="text-sm font-sans text-foreground">
@@ -235,7 +235,7 @@
 									<button
 										type="button"
 										onclick={() => downloadBackup(backup.id)}
-										class="p-1.5 text-foreground-muted hover:text-grove-600 dark:hover:text-grove-400 transition-colors"
+										class="p-1.5 text-foreground-muted hover:text-primary transition-colors"
 										aria-label="Download backup from {formatDate(backup.created_at)}"
 									>
 										<Download class="w-4 h-4" />
@@ -244,7 +244,7 @@
 										type="button"
 										onclick={() => restoreBackup(backup.id)}
 										disabled={restoring === backup.id || serverRunning}
-										class="p-1.5 text-foreground-muted hover:text-amber-600 dark:hover:text-amber-400 transition-colors disabled:opacity-50"
+										class="p-1.5 text-foreground-muted hover:text-warning transition-colors disabled:opacity-50"
 										title={serverRunning
 											? 'Stop the server before restoring'
 											: 'Restore this backup'}
@@ -265,10 +265,10 @@
 		</div>
 
 		<!-- Reset World (Danger Zone) -->
-		<GlassCard class="p-4 border-red-200 dark:border-red-800/50">
+		<GlassCard class="p-4 border-error">
 			<div class="flex items-center gap-2 mb-3">
-				<AlertTriangle class="w-4 h-4 text-red-600 dark:text-red-400" />
-				<h3 class="text-sm font-sans font-medium text-red-700 dark:text-red-400">
+				<AlertTriangle class="w-4 h-4 text-error" />
+				<h3 class="text-sm font-sans font-medium text-error">
 					Danger Zone
 				</h3>
 			</div>
@@ -284,7 +284,7 @@
 						type="button"
 						onclick={resetWorld}
 						disabled={resetting || serverRunning}
-						class="px-3 py-1.5 bg-red-600 text-white rounded-lg text-xs font-sans hover:bg-red-700 transition-colors disabled:opacity-50"
+						class="px-3 py-1.5 bg-destructive text-destructive-foreground rounded-lg text-xs font-sans hover:bg-destructive/90 transition-colors disabled:opacity-50"
 					>
 						{#if resetting}
 							<Loader2 class="w-3 h-3 inline animate-spin mr-1" />
@@ -296,7 +296,7 @@
 					<button
 						type="button"
 						onclick={() => (showResetConfirm = false)}
-						class="px-3 py-1.5 bg-white dark:bg-cream-200 border border-grove-200 dark:border-cream-300 text-foreground rounded-lg text-xs font-sans hover:bg-grove-50 dark:hover:bg-cream-300 transition-colors"
+						class="px-3 py-1.5 bg-surface border border-border text-foreground rounded-lg text-xs font-sans hover:bg-surface-hover transition-colors"
 					>
 						Cancel
 					</button>
@@ -314,7 +314,7 @@
 						type="button"
 						onclick={() => (showResetConfirm = true)}
 						disabled={serverRunning}
-						class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-sans text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors disabled:opacity-50"
+						class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-sans text-error border border-error rounded-lg hover:bg-error/10 transition-colors disabled:opacity-50"
 						title={serverRunning ? 'Stop the server first' : 'Reset world'}
 					>
 						<Trash2 class="w-3 h-3" />

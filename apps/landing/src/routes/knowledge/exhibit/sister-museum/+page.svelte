@@ -105,14 +105,15 @@
 					</nav>
 
 					<!-- External Source Banner -->
+					<!-- brand-color: intentional -->
 					<div
-						class="mb-8 p-4 rounded-xl bg-gradient-to-r from-slate-100 to-violet-50 dark:from-slate-800 dark:to-violet-900/30 border border-violet-200 dark:border-violet-800"
+						class="mb-8 p-4 rounded-xl bg-gradient-to-r from-slate-100 to-violet-50 dark:from-slate-800 dark:to-violet-900/30 border border-accent/20 dark:border-accent/30"
 					>
 						<div class="flex items-start gap-4">
 							<div
-								class="w-10 h-10 rounded-lg bg-slate-900 dark:bg-white flex items-center justify-center flex-shrink-0"
+								class="w-10 h-10 rounded-lg bg-foreground dark:bg-surface-elevated flex items-center justify-center flex-shrink-0"
 							>
-								<GithubIcon class="w-5 h-5 text-white dark:text-slate-900" />
+								<GithubIcon class="w-5 h-5 text-surface dark:text-foreground" />
 							</div>
 							<div class="flex-1">
 								<h2 class="font-semibold text-foreground mb-1">Dynamically Loaded from GitHub</h2>
@@ -194,7 +195,7 @@
 							href={sourceUrl}
 							target="_blank"
 							rel="noopener noreferrer"
-							class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:opacity-90 transition-opacity"
+							class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-foreground dark:bg-surface-elevated text-surface dark:text-foreground hover:opacity-90 transition-opacity"
 						>
 							<GithubIcon class="w-4 h-4" />
 							View on GitHub

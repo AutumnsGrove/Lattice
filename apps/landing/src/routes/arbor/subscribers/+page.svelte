@@ -88,20 +88,20 @@
 
 <!-- Danger Zone - Copy All Emails -->
 <section class="mb-8">
-	<GlassCard class="border-red-500/30 dark:border-red-500/20 bg-red-50/30 dark:bg-red-950/20">
+	<GlassCard class="border-error/30 dark:border-error/20 error-bg/30 dark:error-bg/20">
 		<div class="flex items-start gap-4 p-6">
-			<div class="w-10 h-10 bg-red-100 dark:bg-red-950/50 rounded-lg flex items-center justify-center flex-shrink-0">
-				<AlertTriangle class="w-5 h-5 text-red-600 dark:text-red-400" />
+			<div class="w-10 h-10 error-bg dark:error-bg rounded-lg flex items-center justify-center flex-shrink-0">
+				<AlertTriangle class="w-5 h-5 text-error dark:text-error" />
 			</div>
 			<div class="flex-1">
-				<h2 class="text-lg font-serif text-red-900 dark:text-red-200 mb-2">Mass Email Zone</h2>
-				<p class="text-sm text-red-800 dark:text-red-300 font-sans mb-4">
+				<h2 class="text-lg font-serif text-error dark:text-error mb-2">Mass Email Zone</h2>
+				<p class="text-sm text-error dark:text-error font-sans mb-4">
 					Use with extreme care. This copies all {data.totalActive} subscriber email{data.totalActive === 1 ? '' : 's'} at once for mass communication.
 				</p>
 				<div class="flex flex-wrap gap-3">
 					<button
 						onclick={copyAllEmails}
-						class="px-4 py-2 bg-red-600 text-white font-sans text-sm rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
+						class="px-4 py-2 bg-error text-error-foreground font-sans text-sm rounded-lg hover:bg-error transition-colors flex items-center gap-2"
 					>
 						{#if copiedAll}
 							<Check class="w-4 h-4" />
@@ -113,14 +113,14 @@
 					</button>
 					<button
 						onclick={exportAsList}
-						class="px-4 py-2 bg-white dark:bg-cream-100 border border-red-300 dark:border-red-800 text-red-700 dark:text-red-300 font-sans text-sm rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors flex items-center gap-2"
+						class="px-4 py-2 bg-surface dark:bg-surface border border-error dark:border-error text-error dark:text-error font-sans text-sm rounded-lg hover:bg-surface-hover dark:hover:bg-surface-hover transition-colors flex items-center gap-2"
 					>
 						<Download class="w-4 h-4" />
 						Export as List (.txt)
 					</button>
 					<button
 						onclick={exportAsCSV}
-						class="px-4 py-2 bg-white dark:bg-cream-100 border border-red-300 dark:border-red-800 text-red-700 dark:text-red-300 font-sans text-sm rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors flex items-center gap-2"
+						class="px-4 py-2 bg-surface dark:bg-surface border border-error dark:border-error text-error dark:text-error font-sans text-sm rounded-lg hover:bg-surface-hover dark:hover:bg-surface-hover transition-colors flex items-center gap-2"
 					>
 						<Download class="w-4 h-4" />
 						Export as CSV
@@ -141,10 +141,10 @@
 			<p class="text-foreground-muted font-sans">No subscribers yet</p>
 		</GlassCard>
 	{:else}
-		<div class="overflow-hidden rounded-xl border border-grove-200 dark:border-cream-300">
+		<div class="overflow-hidden rounded-xl border border-border dark:border-border">
 			<div class="overflow-x-auto">
 				<table class="w-full" aria-label="Email subscribers">
-					<thead class="bg-grove-50 dark:bg-cream-100/50 border-b border-grove-200 dark:border-cream-300">
+					<thead class="bg-surface-subtle dark:bg-surface-subtle border-b border-border dark:border-border">
 						<tr>
 							<th scope="col" class="text-left px-6 py-3 text-xs font-sans font-semibold text-foreground-muted uppercase tracking-wider">
 								Email
@@ -160,9 +160,9 @@
 							</th>
 						</tr>
 					</thead>
-					<tbody class="divide-y divide-grove-100 dark:divide-cream-300/50 bg-white dark:bg-cream-100/30">
+					<tbody class="divide-y divide-border dark:divide-border bg-surface dark:bg-surface">
 						{#each subscribers as subscriber}
-							<tr class="hover:bg-grove-50/50 dark:hover:bg-cream-200/30 transition-colors">
+							<tr class="hover:bg-surface-hover dark:hover:bg-surface-hover transition-colors">
 								<td class="px-6 py-4">
 									<span class="text-sm font-sans text-foreground font-medium">{subscriber.email}</span>
 								</td>
@@ -170,14 +170,14 @@
 									<span class="text-sm font-sans text-foreground-muted">{formatDate(subscriber.created_at)}</span>
 								</td>
 								<td class="px-6 py-4">
-									<span class="text-xs font-sans text-foreground-muted bg-grove-100 dark:bg-cream-200 px-2 py-1 rounded">
+									<span class="text-xs font-sans text-foreground-muted bg-surface-subtle dark:bg-surface-subtle px-2 py-1 rounded">
 										{subscriber.source}
 									</span>
 								</td>
 								<td class="px-6 py-4 text-right">
 									<button
 										onclick={() => copyEmail(subscriber.email)}
-										class="text-xs font-sans text-grove-600 dark:text-grove-400 hover:text-grove-700 dark:hover:text-grove-300 transition-colors flex items-center gap-1 ml-auto"
+										class="text-xs font-sans text-accent dark:text-accent hover:text-accent-muted dark:hover:text-accent-muted transition-colors flex items-center gap-1 ml-auto"
 									>
 										{#if copiedEmail === subscriber.email}
 											<Check class="w-3.5 h-3.5" />

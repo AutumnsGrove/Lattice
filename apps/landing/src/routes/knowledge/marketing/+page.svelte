@@ -20,7 +20,7 @@
     <div class="max-w-6xl mx-auto">
     <!-- Breadcrumb -->
     <nav class="flex items-center space-x-2 text-sm text-foreground-muted mb-8">
-      <a href="/knowledge" class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Knowledge Base</a>
+      <a href="/knowledge" class="hover:text-accent transition-colors">Knowledge Base</a>
       <span>/</span>
       <span class="text-foreground">Marketing & Launch</span>
     </nav>
@@ -41,7 +41,7 @@
           <div class="flex items-start justify-between mb-4">
             <div class="flex-1">
               <h2 class="text-xl font-semibold text-foreground mb-2">
-                <a href="/knowledge/marketing/{doc.slug}" class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+                <a href="/knowledge/marketing/{doc.slug}" class="hover:text-accent transition-colors">
                   {doc.title}
                 </a>
               </h2>
@@ -60,14 +60,14 @@
           <div class="flex items-center justify-between">
             <a
               href="/knowledge/marketing/{doc.slug}"
-              class="inline-flex items-center text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium transition-colors"
+              class="inline-flex items-center text-accent hover:text-accent-muted font-medium transition-colors"
             >
               Read document
               <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
               </svg>
             </a>
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300">
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium success-bg text-success">
               Marketing
             </span>
           </div>
@@ -76,7 +76,7 @@
     </div>
 
     <!-- Note about usage -->
-    <div class="mt-12 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-8 text-center border border-emerald-200 dark:border-emerald-800">
+    <div class="mt-12 success-bg/10 rounded-lg p-8 text-center border border-success/30">
       <h3 class="text-xl font-semibold text-foreground mb-2">Using these materials</h3>
       <p class="text-foreground-muted mb-4">
         These documents are reference materials for Grove's launch and ongoing marketing.
