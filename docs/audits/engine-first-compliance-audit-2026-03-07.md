@@ -23,8 +23,8 @@ The engine-first principle states: _"The engine exists to prevent duplication. U
 | `slugify()` duplication | FAIL | 5 impls | LOW |
 | `timingSafeEqual()` duplication | FAIL | 6 impls | HIGH |
 | Subscription tier type duplication | FAIL | 7 defs | MEDIUM |
-| Local error catalogs (workers/services) | FAIL | 8 files | MEDIUM |
-| Rootwork type safety (`as` casts) | PARTIAL | 52+ (28 fixed) | HIGH |
+| Local error catalogs (workers/services) | PARTIAL | 3 non-compliant of 8 (2 compliant, 2 exempt, 1 intentional) | MEDIUM |
+| Rootwork type safety (`as` casts) | PARTIAL | 196+ (28 landing fixed, 147 engine remaining, 21+ other) | HIGH |
 | Sanitization duplication | FAIL | 2+ impls | MEDIUM |
 | Redirect URL validation duplication | FAIL | 2 impls | MEDIUM |
 | TIER_STORAGE constant mismatch | FAIL | 2 defs (diverged!) | CRITICAL |
@@ -144,18 +144,28 @@ API routes returning ad-hoc JSON errors instead of using `buildErrorJson()`:
 
 Workers and services define their own error types instead of using/extending Signpost:
 
-| File | Prefix | Imports Signpost types? |
-| ---------------------------------------- | -------------- | ---------------------- |
-| `apps/plant/src/lib/errors.ts` | `PLANT-XXX` | YES (compliant) |
-| `workers/onboarding/src/errors.ts` | `ONBOARDING-XXX` | YES (partially) |
-| `workers/reverie/src/errors.ts` | `REV-XXX` | NO — own interface |
-| `workers/reverie-exec/src/errors.ts` | `EXC-XXX` | NO — own interface |
-| `workers/lumen/src/lib/errors.ts` | (custom) | NO — own system |
-| `services/zephyr/src/errors.ts` | `ZEPHYR-NNN` | NO — mirrors type |
-| `libs/grove-agent/src/errors.ts` | (varies) | Unknown |
-| `libs/infra/src/errors.ts` | `SRV-XXX` | Own catalog |
+| File | Prefix | Imports Signpost types? | Migration Status |
+| ---------------------------------------- | -------------- | ---------------------- | ---------------- |
+| `apps/plant/src/lib/errors.ts` | `PLANT-XXX` | YES (compliant) | GOLD STANDARD |
+| `workers/onboarding/src/errors.ts` | `ONBOARDING-XXX` | YES | COMPLIANT |
+| `workers/reverie/src/errors.ts` | `REV-XXX` | NO — own interface | NEEDS MIGRATION |
+| `workers/reverie-exec/src/errors.ts` | `EXC-XXX` | NO — own interface | NEEDS MIGRATION |
+| `workers/lumen/src/lib/errors.ts` | (custom) | NO — own system | INTENTIONAL (see below) |
+| `services/zephyr/src/errors.ts` | `ZEPHYR-NNN` | NO — mirrors type | NEEDS MIGRATION |
+| `libs/grove-agent/src/errors.ts` | (varies) | Unknown | NEEDS REVIEW |
+| `libs/infra/src/errors.ts` | `SRV-XXX` | Own catalog | EXEMPT (documented in AGENT.md) |
 
-**Assessment:** `apps/plant` is the gold standard — it imports `GroveErrorDef` from Lattice and extends it. The workers mostly define their own interfaces that mirror the shape but don't import it. `libs/infra` has its own `SRV_ERRORS` catalog which is legitimate (documented in AGENT.md).
+**Assessment:** `apps/plant` is the gold standard — it imports `GroveErrorDef` from Lattice and creates a local alias `PlantErrorDef = GroveErrorDef`. `workers/onboarding` already imports `GroveErrorDef` directly (compliant). `libs/infra` has its own `SRV_ERRORS` catalog which is legitimate (documented in AGENT.md).
+
+**Migration details for the 3 non-compliant workers:**
+
+| Worker | Current Interface | Shape Match? | Effort |
+| -------------------- | -------------------- | ------------ | ------ |
+| `services/zephyr` | `ZephyrErrorDef` | YES — already has `code`, `category`, `userMessage`, `adminMessage` | Trivial — swap to import + alias |
+| `workers/reverie` | `ReverieErrorDef` | NO — uses `message` + `status` instead of `userMessage`/`adminMessage` + `category` | Medium — restructure 15 error defs + update `buildReverieError()` call sites |
+| `workers/reverie-exec` | `ExecErrorDef` | NO — uses `message` + `status` instead of `userMessage`/`adminMessage` + `category` | Medium — restructure 12 error defs + update `buildExecError()` call sites |
+
+**`workers/lumen` exception:** Lumen's error file provides `extractError()` and `buildErrorResponse()` for mapping upstream library errors — it doesn't define an error catalog. This is an intentional isolation pattern, not a type alignment issue.
 
 **Recommendation:**
 1. Workers that define `ReverieErrorDef`, `ExecErrorDef`, `ZephyrErrorDef` should import `GroveErrorDef` from `@autumnsgrove/lattice/errors` and alias it
@@ -223,11 +233,11 @@ The same union type `"free" | "seedling" | "sapling" | "oak" | "evergreen"` is i
 
 **Severity: HIGH** — Violates MANDATORY requirement: "No `as` casts at trust boundaries."
 
-### 7a. Form Data Casts — `formData.get() as string` — RESOLVED
+### 7a. Form Data Casts — `formData.get() as string`
 
-**Status: RESOLVED** — All `apps/landing` form data casts migrated to `parseFormData()` with Zod schemas.
+**Status: PARTIALLY RESOLVED** — All `apps/landing` form data casts migrated to `parseFormData()` with Zod schemas (28+ casts). **147+ additional casts remain in `libs/engine/src/routes/`** (curio handlers) — tracked as future scope.
 
-**Migrated (28+ unsafe casts removed):**
+**Migrated — `apps/landing` (28+ unsafe casts removed):**
 
 | Location | What changed |
 | --------------------------------------------------------- | ------------------------------------------ |
@@ -239,6 +249,35 @@ The same union type `"free" | "seedling" | "sapling" | "oak" | "evergreen"` is i
 | `apps/landing/src/routes/porch/visits/[id]/+page.server.ts` | 1 cast → VisitorReplySchema |
 | `apps/landing/src/routes/api/arbor/cdn/upload/+server.ts` | 2 casts → UploadMetadataSchema |
 | `apps/landing/src/routes/arbor/comped-invites/+page.server.ts` | 5 actions → CreateInviteSchema/InviteIdSchema/PromoteSchema/PromoteAllSchema |
+
+**Remaining — `libs/engine/src/routes/` (147+ casts, future scope):**
+
+| Location | Cast Count | Notes |
+| --------------------------------------------------- | ---------- | ---------------------------------- |
+| `arbor/curios/shelves/+page.server.ts` | 29 | Largest — create/edit/reorder/delete actions |
+| `arbor/curios/polls/+page.server.ts` | 12 | Multiple poll management actions |
+| `arbor/curios/artifacts/+page.server.ts` | 12 | Artifact CRUD |
+| `arbor/curios/timeline/+page.server.ts` | 12 | Timeline entry fields |
+| `api/images/upload/+server.ts` | 11 | Image upload metadata |
+| `arbor/curios/shrines/+page.server.ts` | 11 | Shrine management |
+| `arbor/curios/moodring/+page.server.ts` | 11 | Mood ring settings |
+| `arbor/curios/webring/+page.server.ts` | 11 | Webring management |
+| `arbor/curios/guestbook/+page.server.ts` | 9 | Guestbook moderation |
+| `arbor/curios/badges/+page.server.ts` | 8 | Badge management |
+| `arbor/curios/clipart/+page.server.ts` | 8 | Clipart upload/management |
+| `arbor/curios/nowplaying/+page.server.ts` | 8 | Now playing config |
+| `arbor/curios/statusbadge/+page.server.ts` | 7 | Status badge settings |
+| `arbor/curios/blogroll/+page.server.ts` | 5 | Blogroll entries |
+| `arbor/curios/cursors/+page.server.ts` | 5 | Custom cursor settings |
+| `api/curios/gallery/backfill/+server.ts` | 4 | Gallery backfill |
+| `arbor/curios/activitystatus/+page.server.ts` | 4 | Activity status |
+| `arbor/curios/pulse/+page.server.ts` | 4 | Pulse widget |
+| Other curio handlers | 6 | Scattered across remaining handlers |
+
+**Also remaining — `services/heartwood/` (2 casts):**
+- `src/routes/cdn.ts:167-168` — CDN upload metadata
+
+Each engine curio handler will need its own Zod schema(s) designed for its specific form actions. This is a larger effort (~20 schemas across 20+ files) and should be tracked as a separate initiative.
 
 ### 7b. Database Query Result Casts (15+ violations)
 
@@ -399,8 +438,8 @@ All P0 items have been fixed in commit `a9ea4be`:
 
 ### P1 — Medium Impact, Moderate Effort
 1. ~~**Create shared `formatDate()` presets**~~ — PARTIALLY DONE. Shared utility created, 14 of ~25 copies migrated. Remaining copies in apps without lattice dependency.
-2. **Migrate form data parsing to `parseFormData()`** — 18+ unsafe cast sites in landing/plant
-3. **Migrate worker error catalogs to import `GroveErrorDef`** — 4 workers need type alignment
+2. ~~**Migrate form data parsing to `parseFormData()`**~~ — DONE. 28+ unsafe casts in `apps/landing` migrated to Zod-validated `parseFormData()` across 8 route files. See Finding 7a for details.
+3. **Migrate worker error catalogs to import `GroveErrorDef`** — 3 workers need type alignment (see Finding 3c updated notes)
 4. ~~**Define canonical `TierKey` type**~~ — DONE (part of P0 tier alignment). All packages now use engine's `TierKey`.
 5. **Replace bare `throw new Error()` in API routes** — 62+ violations
 
