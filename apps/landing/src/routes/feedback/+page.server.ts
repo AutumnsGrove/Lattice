@@ -4,9 +4,24 @@ import {
   verifyTurnstileToken,
   generateId,
 } from "@autumnsgrove/lattice/services";
+import { parseFormData } from "@autumnsgrove/lattice/server";
 import { createZephyrClient } from "@autumnsgrove/lattice/zephyr";
 import { GROVE_EMAILS } from "@autumnsgrove/lattice/config";
 import { escapeHtml } from "@autumnsgrove/lattice/utils";
+import { z } from "zod";
+
+const FeedbackSchema = z.object({
+  name: z.string().trim().optional().default(""),
+  email: z.string().trim().optional().default(""),
+  subject: z.string().trim().optional().default(""),
+  message: z
+    .string()
+    .trim()
+    .min(10, "Please enter a message between 10 and 2000 characters.")
+    .max(2000, "Please enter a message between 10 and 2000 characters."),
+  sentiment: z.string().trim().optional().default(""),
+  "cf-turnstile-response": z.string().optional().default(""),
+});
 
 export const load: PageServerLoad = async ({ platform }) => {
   return {
@@ -21,19 +36,17 @@ export const actions: Actions = {
     }
 
     const formData = await request.formData();
-    const name = (formData.get("name") as string)?.trim() || null;
-    const email = (formData.get("email") as string)?.trim() || null;
-    const subject = (formData.get("subject") as string)?.trim() || null;
-    const message = (formData.get("message") as string)?.trim();
-    const sentiment = (formData.get("sentiment") as string)?.trim() || null;
-    const turnstileToken = formData.get("cf-turnstile-response") as string;
-
-    // Validate message
-    if (!message || message.length < 10 || message.length > 2000) {
-      return fail(400, {
-        error: "Please enter a message between 10 and 2000 characters.",
-      });
+    const result = parseFormData(formData, FeedbackSchema);
+    if (!result.success) {
+      const firstError = Object.values(result.errors).flat()[0];
+      return fail(400, { error: firstError || "Invalid form data" });
     }
+    const { message } = result.data;
+    const name = result.data.name || null;
+    const email = result.data.email || null;
+    const subject = result.data.subject || null;
+    const sentiment = result.data.sentiment || null;
+    const turnstileToken = result.data["cf-turnstile-response"];
 
     // Verify Turnstile
     if (!turnstileToken) {

@@ -24,7 +24,7 @@ The engine-first principle states: _"The engine exists to prevent duplication. U
 | `timingSafeEqual()` duplication | FAIL | 6 impls | HIGH |
 | Subscription tier type duplication | FAIL | 7 defs | MEDIUM |
 | Local error catalogs (workers/services) | FAIL | 8 files | MEDIUM |
-| Rootwork type safety (`as` casts) | FAIL | 52+ | HIGH |
+| Rootwork type safety (`as` casts) | PARTIAL | 52+ (28 fixed) | HIGH |
 | Sanitization duplication | FAIL | 2+ impls | MEDIUM |
 | Redirect URL validation duplication | FAIL | 2 impls | MEDIUM |
 | TIER_STORAGE constant mismatch | FAIL | 2 defs (diverged!) | CRITICAL |
@@ -223,17 +223,22 @@ The same union type `"free" | "seedling" | "sapling" | "oak" | "evergreen"` is i
 
 **Severity: HIGH** — Violates MANDATORY requirement: "No `as` casts at trust boundaries."
 
-### 7a. Form Data Casts — `formData.get() as string` (18+ violations)
+### 7a. Form Data Casts — `formData.get() as string` — RESOLVED
 
-Instead of using `parseFormData(formData, ZodSchema)` from `@autumnsgrove/lattice/server`:
+**Status: RESOLVED** — All `apps/landing` form data casts migrated to `parseFormData()` with Zod schemas.
 
-| Location | Cast Count |
-| --------------------------------------------------------- | ---------- |
-| `apps/landing/src/routes/security/+page.server.ts` | 6 casts |
-| `apps/landing/src/routes/arbor/porch/[id]/+page.server.ts` | 3 casts |
-| `apps/landing/src/routes/arbor/comped-invites/+page.server.ts` | 2 casts |
-| `apps/landing/src/routes/arbor/feedback/+page.server.ts` | 3+ casts |
-| `apps/landing/src/routes/api/arbor/cdn/upload/+server.ts` | 3 casts |
+**Migrated (28+ unsafe casts removed):**
+
+| Location | What changed |
+| --------------------------------------------------------- | ------------------------------------------ |
+| `apps/landing/src/routes/security/+page.server.ts` | 6 casts → SecurityReportSchema |
+| `apps/landing/src/routes/porch/new/+page.server.ts` | 6 casts → PorchSubmitSchema |
+| `apps/landing/src/routes/feedback/+page.server.ts` | 6 casts → FeedbackSchema |
+| `apps/landing/src/routes/arbor/feedback/+page.server.ts` | 4 casts → FeedbackIdSchema/FeedbackNotesSchema |
+| `apps/landing/src/routes/arbor/porch/[id]/+page.server.ts` | 3 casts → ReplySchema/StatusSchema/NotesSchema |
+| `apps/landing/src/routes/porch/visits/[id]/+page.server.ts` | 1 cast → VisitorReplySchema |
+| `apps/landing/src/routes/api/arbor/cdn/upload/+server.ts` | 2 casts → UploadMetadataSchema |
+| `apps/landing/src/routes/arbor/comped-invites/+page.server.ts` | 5 actions → CreateInviteSchema/InviteIdSchema/PromoteSchema/PromoteAllSchema |
 
 ### 7b. Database Query Result Casts (15+ violations)
 

@@ -1,9 +1,19 @@
 import { fail, type Actions } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import { generateId } from "@autumnsgrove/lattice/services";
+import { parseFormData } from "@autumnsgrove/lattice/server";
 import { GROVE_EMAILS } from "@autumnsgrove/lattice/config";
 import { escapeHtml } from "@autumnsgrove/lattice/utils";
 import { Resend } from "resend";
+import { z } from "zod";
+
+const VisitorReplySchema = z.object({
+  content: z
+    .string()
+    .trim()
+    .min(1, "Please enter a reply.")
+    .max(5000, "Please enter a reply."),
+});
 
 interface Visit {
   id: string;
@@ -84,11 +94,11 @@ export const actions: Actions = {
     }
 
     const formData = await request.formData();
-    const content = (formData.get("content") as string)?.trim();
-
-    if (!content || content.length < 1 || content.length > 5000) {
+    const result = parseFormData(formData, VisitorReplySchema);
+    if (!result.success) {
       return fail(400, { error: "Please enter a reply." });
     }
+    const { content } = result.data;
 
     // Verify user owns this visit
     const visit = await platform.env.DB.prepare(
