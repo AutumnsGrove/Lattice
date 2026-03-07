@@ -5,6 +5,7 @@
 	import { getDestinations, services } from "./destinations";
 	import LanternFriendCard from "./LanternFriendCard.svelte";
 	import LanternAddFriends from "./LanternAddFriends.svelte";
+	import LanternVisitingCard from "./LanternVisitingCard.svelte";
 	import type { LanternLayoutData } from "./types";
 	import { UserPlus, Settings } from "lucide-svelte";
 
@@ -20,6 +21,13 @@
 	const destinations = $derived(getDestinations(data.homeGrove));
 	const activeItems = $derived(lanternStore.activeTab === "destinations" ? destinations : services);
 	const homeLabel = $derived(groveModeStore.current ? "Return to Your Grove" : "Back to My Site");
+
+	/** The grove the user is visiting (not their own), if any */
+	const visiting = $derived(data.visitingGrove);
+	/** Whether the user already follows the visited grove */
+	const alreadyFollowing = $derived(
+		visiting ? friendsStore.isFriend(visiting.tenantId) : false,
+	);
 
 	// Focus trap: cycle Tab/Shift+Tab within the panel
 	function handleKeydown(event: KeyboardEvent) {
@@ -157,14 +165,23 @@
 							</button>
 						</div>
 
+						{#if visiting && !alreadyFollowing}
+							<LanternVisitingCard grove={visiting} />
+						{/if}
+
 						<div class="friends-list flex-1 overflow-y-auto flex flex-col gap-0.5 max-h-60">
 							{#each friendsStore.friends as friend (friend.tenantId)}
-								<LanternFriendCard {friend} />
+								<LanternFriendCard {friend} visiting={visiting?.tenantId === friend.tenantId} />
 							{/each}
 						</div>
 					</div>
 				{/if}
 			</div>
+
+			<!-- Visiting grove prompt when no friends yet -->
+			{#if visiting && !alreadyFollowing && !friendsStore.hasFriends && friendsStore.loaded}
+				<LanternVisitingCard grove={visiting} />
+			{/if}
 
 			<!-- Add friends CTA when no friends yet (hide while loading) -->
 			{#if !friendsStore.hasFriends && friendsStore.loaded}

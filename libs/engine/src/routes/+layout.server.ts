@@ -206,6 +206,14 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
 					homeGrove: homeGrove?.subdomain ?? "",
 					displayName: siteSettings.grove_title || homeGrove?.name || "",
 					enabled: lanternEnabled,
+					visitingGrove:
+						context.type === "tenant" && context.tenant.id !== homeGrove?.tenantId
+							? {
+									tenantId: context.tenant.id,
+									subdomain: context.tenant.subdomain,
+									name: context.tenant.name,
+								}
+							: null,
 				}
 			: null,
 	};

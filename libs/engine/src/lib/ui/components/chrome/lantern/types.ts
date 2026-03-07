@@ -16,6 +16,15 @@ export interface LanternLayoutData {
 	homeGrove: string;
 	displayName: string;
 	enabled: boolean;
+	/** The grove the user is currently visiting (null if on their own or non-tenant page) */
+	visitingGrove: VisitingGrove | null;
+}
+
+/** Info about a grove the user is currently visiting (not their own). */
+export interface VisitingGrove {
+	tenantId: string;
+	subdomain: string;
+	name: string;
 }
 
 /**

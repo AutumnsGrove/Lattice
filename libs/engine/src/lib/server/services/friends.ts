@@ -104,7 +104,7 @@ export async function removeFriend(
 		.bind(tenantId, friendTenantId)
 		.run();
 
-	return (result.meta?.changes ?? 0) > 0;
+	return ((result.meta as Record<string, number>)?.changes ?? 0) > 0;
 }
 
 /**

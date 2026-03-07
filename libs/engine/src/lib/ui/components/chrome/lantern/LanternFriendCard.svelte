@@ -6,9 +6,11 @@
 
 	interface Props {
 		friend: Friend;
+		/** True when the user is currently visiting this friend's grove */
+		visiting?: boolean;
 	}
 
-	let { friend }: Props = $props();
+	let { friend, visiting = false }: Props = $props();
 	let removing = $state(false);
 
 	async function removeFriend() {
@@ -27,16 +29,21 @@
 </script>
 
 <div
-	class="flex items-center gap-2 py-2 px-2.5 rounded-lg transition-colors hover:bg-surface-hover group"
+	class="friend-card flex items-center gap-2 py-2 px-2.5 rounded-lg transition-colors hover:bg-surface-hover group"
+	class:visiting
 >
 	<a
 		href="https://{friend.subdomain}.grove.place"
 		class="flex-1 min-w-0 flex flex-col gap-0.5 no-underline text-inherit focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 rounded"
 		target="_blank"
 		rel="noopener noreferrer"
+		aria-current={visiting ? "true" : undefined}
 	>
 		<span class="text-sm font-medium text-foreground truncate">{friend.name}</span>
 		<span class="text-xs text-foreground-muted truncate">{friend.subdomain}.grove.place</span>
+		{#if visiting}
+			<span class="sr-only">(currently visiting)</span>
+		{/if}
 	</a>
 	<button
 		type="button"
@@ -53,6 +60,35 @@
 </div>
 
 <style>
+	.friend-card.visiting {
+		background: hsl(var(--accent) / 0.08);
+		border: 1px solid hsl(var(--accent) / 0.2);
+		position: relative;
+	}
+
+	.friend-card.visiting::before {
+		content: "";
+		position: absolute;
+		left: 0;
+		top: 25%;
+		bottom: 25%;
+		width: 3px;
+		border-radius: 0 2px 2px 0;
+		background: hsl(var(--accent));
+	}
+
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border-width: 0;
+	}
+
 	@media (prefers-reduced-motion: reduce) {
 		.remove-btn {
 			transition: none;
