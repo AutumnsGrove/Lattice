@@ -28,14 +28,14 @@
         <a
           href="/knowledge/{article.category}/{article.slug}"
           aria-label="Read article: {article.title}"
-          class="group p-4 rounded-xl bg-white/80 dark:bg-cream-100/60 backdrop-blur-sm border border-slate-200/50 dark:border-cream-300/50 hover:border-slate-300 dark:hover:border-cream-400 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-grove-green focus-visible:ring-offset-2 transition-all motion-reduce:transition-none"
+          class="group p-4 rounded-xl bg-white/80 dark:bg-cream-100/60 backdrop-blur-sm border border-border/50 dark:border-cream-300/50 hover:border-border dark:hover:border-cream-400 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-grove-500 focus-visible:ring-offset-2 transition-all motion-reduce:transition-none"
         >
           <div class="flex items-start gap-3">
             <div aria-hidden="true" class="w-8 h-8 rounded-lg {colors.iconBg} {colors.iconBgDark} flex items-center justify-center flex-shrink-0">
               <FileText class="w-4 h-4 {colors.text} {colors.textDark}" />
             </div>
             <div class="flex-1 min-w-0">
-              <h3 class="text-sm font-medium text-foreground group-hover:text-grove-green dark:group-hover:text-emerald-400 transition-colors line-clamp-2">
+              <h3 class="text-sm font-medium text-foreground group-hover:text-grove-500 dark:group-hover:text-grove-400 transition-colors line-clamp-2">
                 {article.title}
               </h3>
               <p class="text-xs text-foreground-muted mt-1 line-clamp-2">

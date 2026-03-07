@@ -114,6 +114,9 @@ Apps auto-deploy via GitHub Actions on push to main. Resource IDs are hardcoded 
 | `popover` | DEFAULT, foreground | `bg-popover` |
 | `destructive` | DEFAULT, foreground | `bg-destructive` |
 | `error` | DEFAULT, foreground, bg | `text-error`, `bg-error-bg` |
+| `warning` | DEFAULT, foreground, bg, muted | `text-warning`, `bg-warning-bg` |
+| `success` | DEFAULT, foreground, bg, muted | `text-success`, `bg-success-bg` |
+| `info` | DEFAULT, foreground, bg, muted | `text-info`, `bg-info-bg` |
 | `divider` | — | `border-divider` |
 | `default` | — | `border-default` |
 | `subtle` | — | `bg-subtle` |

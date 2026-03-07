@@ -61,6 +61,24 @@
     /* Foreground extensions */
     --foreground-faint: 25 15% 62%;
 
+    /* Status: Warning (amber-adjacent) */
+    --warning: 38 92% 50%;
+    --warning-foreground: 38 92% 20%;
+    --warning-bg: 48 96% 95%;
+    --warning-muted: 45 93% 47%;
+
+    /* Status: Success (emerald-adjacent) */
+    --success: 160 84% 39%;
+    --success-foreground: 160 84% 15%;
+    --success-bg: 152 76% 95%;
+    --success-muted: 160 60% 45%;
+
+    /* Status: Info (blue-adjacent) */
+    --info: 217 91% 60%;
+    --info-foreground: 217 91% 20%;
+    --info-bg: 214 95% 96%;
+    --info-muted: 217 70% 55%;
+
     /* Border Radius */
     --radius: 0.5rem;
   }
@@ -122,6 +140,24 @@
 
     /* Foreground extensions */
     --foreground-faint: 30 5% 45%;
+
+    /* Status: Warning (dark mode) */
+    --warning: 45 93% 47%;
+    --warning-foreground: 48 96% 89%;
+    --warning-bg: 38 75% 15%;
+    --warning-muted: 45 80% 55%;
+
+    /* Status: Success (dark mode) */
+    --success: 160 70% 45%;
+    --success-foreground: 152 76% 90%;
+    --success-bg: 160 50% 12%;
+    --success-muted: 160 55% 50%;
+
+    /* Status: Info (dark mode) */
+    --info: 217 80% 60%;
+    --info-foreground: 214 95% 90%;
+    --info-bg: 217 60% 15%;
+    --info-muted: 217 65% 55%;
   }
 }
 
