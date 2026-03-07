@@ -8,9 +8,52 @@
 
 ## Problem
 
-LLMs (and humans) repeatedly use standard Tailwind color classes (`slate-*`, `gray-*`, `red-*`, `amber-*`, etc.) that aren't defined in the Grove design system. These colors render as transparent/invisible because the Grove Tailwind preset strips default colors. The codebase has **~900+ instances** of invalid color classes across 50+ files.
+LLMs (and humans) repeatedly use standard Tailwind color classes (`slate-*`, `gray-*`, `red-*`, `amber-*`, etc.) that aren't defined in the Grove design system. These colors render as transparent/invisible because the Grove Tailwind preset strips default colors.
+
+**Full inventory: 1,500+ violations across 155 files in 9 packages.**
+
+| Package | Files | Violations |
+|---------|-------|-----------|
+| apps/landing | 58 | 744 |
+| libs/engine | 66 | 413 |
+| apps/clearing | 8 | 95 |
+| apps/plant | 8 | 84 |
+| apps/meadow | 4 | 28 |
+| apps/login | 2 | 14 |
+| apps/terrarium | 1 | 2 |
+| apps/amber | 1 | 1 |
+
+**Top offending color families:**
+
+| Color Family | Count | Primary Use |
+|---|---|---|
+| amber-* | 291 | Status indicators, warnings |
+| red-* | 211 | Error/critical states |
+| green-* | 147 | Success/operational status |
+| emerald-* | 144 | Accents, data visualization |
+| purple-* | 128 | Branding, dark theme |
+| blue-* | 99 | Info states, primary actions |
+| neutral-* | 94 | Backgrounds, borders |
+| slate-* | 87 | Borders, forms, neutral tones |
 
 Root cause: **Grove's palette lacks semantic status colors** (warning, success, info). Developers fall back to standard Tailwind to fill the gap.
+
+---
+
+## Already Fixed (This Session)
+
+Added to `tailwind.preset.js` as part of this session's work:
+
+- `card` / `card.foreground` — shadcn-compatible
+- `popover` / `popover.foreground` — shadcn-compatible
+- `divider` — alias for border (cream-200)
+- `error` / `error.foreground` / `error.bg` — alias for destructive
+
+These resolve **29 previously-invalid instances** across the codebase.
+
+**Still invalid (2 instances):**
+- `text-grove-green` → should be `text-grove-500` (in RelatedArticles.svelte)
+- `ring-grove-green` → should be `ring-grove-500` (in RelatedArticles.svelte)
 
 ---
 
@@ -109,29 +152,51 @@ Also update `AGENT.md` color table to include `warning`, `success`, and `info`.
 
 ### Color Translation Reference
 
+**Neutral / Layout Colors:**
+
 | Standard Tailwind | Semantic Meaning | Grove Replacement |
 |---|---|---|
 | `text-slate-600` / `text-slate-700` | Secondary text | `text-foreground-muted` |
 | `text-slate-500` / `text-slate-400` | Tertiary/hint text | `text-foreground-subtle` or `text-foreground-faint` |
+| `text-gray-600` / `text-gray-500` | Muted text | `text-foreground-muted` |
+| `text-neutral-600` | Muted text | `text-foreground-muted` |
 | `bg-slate-50` / `bg-slate-100` | Subtle background | `bg-surface-subtle` or `bg-muted` |
 | `bg-slate-800` / `bg-slate-900` | Dark mode card bg | `bg-card` or `bg-surface` |
-| `border-slate-200` / `border-slate-300` | Light border | `border-border` or `border-default` |
-| `border-slate-700` | Dark mode border | `border-border` (dark mode auto) |
-| `text-gray-600` | Muted text | `text-foreground-muted` |
-| `bg-gray-100` | Hover/disabled bg | `bg-surface-hover` or `bg-muted` |
+| `bg-gray-100` / `bg-neutral-100` | Hover/disabled bg | `bg-surface-hover` or `bg-muted` |
 | `bg-gray-300` | Disabled indicator | `bg-muted` |
-| `text-red-600` | Error text | `text-error` or `text-destructive` |
+| `bg-stone-50` / `bg-stone-100` | Warm neutral bg | `bg-surface-subtle` |
+| `border-slate-200` / `border-slate-300` | Light border | `border-border` or `border-default` |
+| `border-gray-200` / `border-neutral-200` | Light border | `border-border` |
+| `border-slate-700` | Dark mode border | `border-border` (dark mode auto) |
+| `divide-slate-200` | Table dividers | `divide-border` |
+
+**Status Colors:**
+
+| Standard Tailwind | Semantic Meaning | Grove Replacement |
+|---|---|---|
+| `text-red-600` / `text-red-500` | Error text | `text-error` or `text-destructive` |
 | `bg-red-50` / `bg-red-100` | Error background | `bg-error-bg` |
-| `bg-red-600` | Danger button | `bg-destructive` |
-| `border-red-200` | Error border | `border-error` |
-| `text-amber-600` | Warning text | `text-warning` |
+| `bg-red-600` / `bg-red-700` | Danger button | `bg-destructive` |
+| `border-red-200` / `border-red-300` | Error border | `border-error` |
+| `text-amber-600` / `text-amber-500` | Warning text | `text-warning` |
+| `text-yellow-600` / `text-orange-600` | Warning text | `text-warning` |
 | `bg-amber-50` / `bg-amber-100` | Warning background | `bg-warning-bg` |
+| `bg-yellow-50` / `bg-orange-100` | Warning background | `bg-warning-bg` |
 | `border-amber-200` | Warning border | `border-warning` |
 | `text-emerald-600` / `text-green-600` | Success text | `text-success` |
 | `bg-emerald-50` / `bg-emerald-100` / `bg-green-100` | Success background | `bg-success-bg` |
-| `bg-emerald-500` | Success indicator dot | `bg-success` |
-| `text-blue-600` | Info text | `text-info` |
+| `bg-emerald-500` / `bg-green-500` | Success indicator dot | `bg-success` |
+| `text-blue-600` / `text-blue-500` | Info text | `text-info` |
 | `bg-blue-50` / `bg-blue-100` | Info background | `bg-info-bg` |
+| `border-blue-200` | Info border | `border-info` |
+
+**Interactive / Accent Colors:**
+
+| Standard Tailwind | Semantic Meaning | Grove Replacement |
+|---|---|---|
+| `bg-purple-600` / `bg-indigo-600` | Primary action button | `bg-primary` |
+| `text-purple-600` | Accent text | `text-accent` |
+| `bg-purple-50` / `bg-purple-100` | Accent background | `bg-accent-subtle` |
 
 ### Dark Mode Pattern Translation
 
@@ -157,6 +222,7 @@ Some standard Tailwind colors are used intentionally for external brand alignmen
 | `text-blue-500` | Bluesky social icon | Official Bluesky brand color |
 | `bg-gray-100 dark:bg-gray-800` | dev.to social icon | dev.to brand is neutral |
 | Purple gradients in Vineyard | Showcase page | Intentional visual distinctiveness |
+| CategoryNav multi-color palette | Category color coding | Intentional — needs dedicated data-viz palette later |
 
 These should be marked with a `/* brand-color: intentional */` comment to prevent future migration attempts.
 
@@ -179,28 +245,29 @@ Verification: `gw dev ci --affected --fail-fast --diagnose`
 
 **Migrate libs/engine component files.** These are shared across all apps, so fixing them fixes everywhere.
 
-Priority order (by usage count):
+Priority order (by violation density):
 
 | # | File | Color Families | Est. Changes |
 |---|---|---|---|
-| 1 | `libs/engine/src/lib/grafts/greenhouse/GreenhouseEnrollTable.svelte` | slate, emerald, red, amber | ~20 |
-| 2 | `libs/engine/src/lib/grafts/greenhouse/CultivateFlagTable.svelte` | slate, emerald, amber | ~15 |
-| 3 | `libs/engine/src/lib/grafts/greenhouse/CultivateFlagRow.svelte` | emerald, slate | ~10 |
-| 4 | `libs/engine/src/lib/grafts/greenhouse/TenantGreenhouseSection.svelte` | red, amber, emerald | ~12 |
-| 5 | `libs/engine/src/lib/grafts/greenhouse/GreenhouseStatusCard.svelte` | emerald, amber | ~8 |
-| 6 | `libs/engine/src/lib/grafts/greenhouse/TenantUploadSection.svelte` | amber, red | ~8 |
+| 1 | `libs/engine/src/lib/components/admin/LumenAnalytics.svelte` | slate, amber, emerald, violet, blue, red | ~22 |
+| 2 | `libs/engine/src/lib/components/admin/ZephyrAnalytics.svelte` | gray, blue, emerald, amber, red, purple | ~20 |
+| 3 | `libs/engine/src/lib/grafts/greenhouse/GreenhouseEnrollTable.svelte` | slate, emerald, red, amber | ~20 |
+| 4 | `libs/engine/src/lib/grafts/greenhouse/CultivateFlagTable.svelte` | slate, emerald, amber | ~15 |
+| 5 | `libs/engine/src/lib/grafts/greenhouse/TenantGreenhouseSection.svelte` | red, amber, emerald | ~12 |
+| 6 | `libs/engine/src/lib/grafts/greenhouse/CultivateFlagRow.svelte` | emerald, slate | ~10 |
 | 7 | `libs/engine/src/lib/grafts/upgrades/components/GardenStatus.svelte` | green, red, amber | ~10 |
-| 8 | `libs/engine/src/lib/grafts/upgrades/components/CurrentStageBadge.svelte` | amber, emerald | ~6 |
-| 9 | `libs/engine/src/lib/components/admin/LumenAnalytics.svelte` | slate, amber, emerald, red | ~25 |
-| 10 | `libs/engine/src/lib/components/admin/ZephyrAnalytics.svelte` | slate, gray, amber, emerald, purple, blue | ~20 |
+| 8 | `libs/engine/src/lib/ui/components/indicators/CreditBalance.svelte` | red, amber, emerald | ~10 |
+| 9 | `libs/engine/src/lib/grafts/greenhouse/GreenhouseStatusCard.svelte` | emerald, amber | ~8 |
+| 10 | `libs/engine/src/lib/grafts/greenhouse/TenantUploadSection.svelte` | amber, red | ~8 |
 | 11 | `libs/engine/src/lib/components/quota/QuotaWidget.svelte` | red, blue | ~8 |
-| 12 | `libs/engine/src/lib/components/quota/UpgradePrompt.svelte` | blue | ~6 |
-| 13 | `libs/engine/src/lib/ui/components/indicators/CreditBalance.svelte` | red, amber, emerald | ~10 |
-| 14 | `libs/engine/src/lib/ui/components/custom/CategoryNav.svelte` | emerald, purple, amber + more | ~8 |
+| 12 | `libs/engine/src/lib/ui/components/custom/CategoryNav.svelte` | emerald, purple, amber (INTENTIONAL — data viz) | ~0 |
+| 13 | `libs/engine/src/lib/components/quota/UpgradePrompt.svelte` | blue | ~6 |
+| 14 | `libs/engine/src/lib/grafts/upgrades/components/CurrentStageBadge.svelte` | amber, emerald | ~6 |
+| 15 | `libs/engine/src/lib/ui/components/custom/GlassLegend.svelte` | purple | ~2 |
 
 Verification after each batch: `gw dev ci --affected --fail-fast --diagnose`
 
-### Phase 3: Engine Routes (Arbor Admin)
+### Phase 3: Engine Routes (Arbor Admin + Vineyard)
 
 **Migrate admin page routes in the engine.**
 
@@ -210,37 +277,41 @@ Verification after each batch: `gw dev ci --affected --fail-fast --diagnose`
 | 2 | `libs/engine/src/routes/arbor/pages/+page.svelte` | gray, slate | ~20 |
 | 3 | `libs/engine/src/routes/arbor/pages/new/+page.svelte` | slate | ~8 |
 | 4 | `libs/engine/src/routes/arbor/pages/[slug]/+page.svelte` | slate | ~8 |
-| 5 | `libs/engine/src/routes/arbor/account/PasskeyCard.svelte` | uses `--color-surface-subtle` (invalid CSS var) | ~2 |
+| 5 | `libs/engine/src/routes/arbor/account/PasskeyCard.svelte` | `--color-surface-subtle` (invalid CSS var) | ~2 |
 | 6 | `libs/engine/src/routes/vineyard/+page.svelte` | purple, pink (INTENTIONAL — mark with comment) | ~0 |
 
 ### Phase 4: Landing App
 
-**Migrate landing-specific pages and components.**
+**Migrate landing-specific pages and components.** The three biggest files account for ~244 violations.
 
 | # | File | Color Families | Est. Changes |
 |---|---|---|---|
-| 1 | `apps/landing/src/routes/arbor/comped-invites/+page.svelte` | purple, slate, red, blue, indigo | ~30 |
-| 2 | `apps/landing/src/routes/arbor/porch/+page.svelte` | amber, emerald | ~10 |
-| 3 | `apps/landing/src/routes/arbor/porch/[id]/+page.svelte` | amber, emerald | ~8 |
-| 4 | `apps/landing/src/routes/beyond/+page.svelte` | slate, indigo | ~15 |
-| 5 | `apps/landing/src/routes/workshop/+page.svelte` | slate | ~10 |
-| 6 | `apps/landing/src/routes/roadmap/+page.svelte` | indigo, emerald, amber | ~8 |
-| 7 | `apps/landing/src/lib/components/EmailSignup.svelte` | purple, amber, pink, red | ~12 |
-| 8 | `apps/landing/src/lib/components/RelatedArticles.svelte` | slate, grove-green (invalid) | ~8 |
-| 9 | `apps/landing/src/routes/arbor/vista/+page.svelte` | slate, amber | ~8 |
-| 10 | `apps/landing/src/routes/arbor/zephyr/+page.svelte` | gray, amber | ~8 |
-| 11 | `apps/landing/src/routes/arbor/cdn/+page.svelte` | gray | ~5 |
+| 1 | `apps/landing/src/routes/roadmap/+page.svelte` | amber, purple, green, emerald, teal, indigo | ~100 |
+| 2 | `apps/landing/src/routes/manifesto/+page.svelte` | purple, amber, slate | ~87 |
+| 3 | `apps/landing/src/routes/arbor/comped-invites/+page.svelte` | slate, blue, green, amber, red, indigo | ~57 |
+| 4 | `apps/landing/src/routes/arbor/vista/+page.svelte` | amber, red, blue, green | ~20 |
+| 5 | `apps/landing/src/routes/beyond/+page.svelte` | slate, indigo | ~15 |
+| 6 | `apps/landing/src/lib/components/EmailSignup.svelte` | purple, amber, pink, red | ~12 |
+| 7 | `apps/landing/src/routes/workshop/+page.svelte` | slate | ~10 |
+| 8 | `apps/landing/src/routes/arbor/porch/+page.svelte` | amber, emerald | ~10 |
+| 9 | `apps/landing/src/routes/arbor/porch/[id]/+page.svelte` | amber, emerald | ~8 |
+| 10 | `apps/landing/src/lib/components/RelatedArticles.svelte` | slate, grove-green (invalid) | ~8 |
+| 11 | `apps/landing/src/routes/arbor/zephyr/+page.svelte` | gray, amber | ~8 |
+| 12 | `apps/landing/src/routes/arbor/cdn/+page.svelte` | gray | ~5 |
+| — | Remaining ~45 files in apps/landing | Various | ~404 |
 
-### Phase 5: Other Apps + Cleanup
+### Phase 5: Clearing, Plant, and Other Apps
 
-**Migrate remaining apps and mark intentional exceptions.**
+**Migrate status page, billing, and remaining apps.**
 
-| # | App | Est. Changes |
-|---|---|---|
-| 1 | `apps/plant/` (checkout, account routes) | ~15 |
-| 2 | `apps/meadow/` | ~10 |
-| 3 | `apps/terrarium/` (asset selection blue borders) | ~5 |
-| 4 | Mark all intentional brand colors with `/* brand-color: intentional */` | ~8 |
+| # | Package | Key Files | Est. Changes |
+|---|---|---|---|
+| 1 | `apps/clearing/` | GlassStatusBanner (30), GlassStatusCard (15), 6 others | ~95 |
+| 2 | `apps/plant/` | checkout, account, plans pages | ~84 |
+| 3 | `apps/meadow/` | EmailSignup (shared), ReportModal | ~28 |
+| 4 | `apps/login/` | passkey, login page | ~14 |
+| 5 | `apps/terrarium/` | Minecraft version indicators | ~2 |
+| 6 | `apps/amber/` | Single gray text instance | ~1 |
 
 ### Phase 6: Guardrails
 
@@ -248,7 +319,8 @@ Verification after each batch: `gw dev ci --affected --fail-fast --diagnose`
 
 1. Update `AGENT.md` with final token list including `warning`, `success`, `info`
 2. Consider adding a CI lint rule that flags non-Grove color classes in `.svelte` files
-3. Add comments to intentional brand color exceptions
+3. Add `/* brand-color: intentional */` comments to all intentional exceptions
+4. Update engine tailwind.config.js to match preset (remove duplicate color defs)
 
 ---
 
@@ -257,12 +329,14 @@ Verification after each batch: `gw dev ci --affected --fail-fast --diagnose`
 | Phase | Files | Est. Class Changes | Risk |
 |---|---|---|---|
 | 1: Foundation | 3 | 0 (adding tokens) | Low — additive only |
-| 2: Engine Components | 14 | ~166 | Medium — shared components |
+| 2: Engine Components | 15 | ~157 | Medium — shared components |
 | 3: Engine Routes | 6 | ~58 | Low — admin only |
-| 4: Landing App | 11 | ~132 | Low — landing only |
-| 5: Other Apps | 4 | ~30 | Low — isolated apps |
-| 6: Guardrails | 2 | 0 | Low — docs only |
-| **Total** | **~40** | **~386** | |
+| 4: Landing App | ~58 | ~744 | Medium — high volume, visual review needed |
+| 5: Other Apps | ~24 | ~224 | Low — isolated apps |
+| 6: Guardrails | 3 | 0 | Low — docs only |
+| **Total** | **~109** | **~1,183** | |
+
+Note: ~300+ violations are intentional brand/data-viz colors that should be marked with comments rather than migrated.
 
 ---
 
@@ -278,6 +352,14 @@ Each phase can be executed as an independent task. For each phase:
 6. Run `gw dev ci --affected --fail-fast --diagnose` after each file batch
 7. Use Glimpse to verify UI appearance on any user-facing pages
 8. Commit with message format: `fix(<scope>): migrate <color> classes to Grove palette`
+
+### Key Decision Points for Agents
+
+- **CategoryNav.svelte**: Uses a rainbow of colors for category coding — mark as intentional, don't migrate. This needs a dedicated data-viz palette later.
+- **Vineyard showcase**: Purple/pink gradients are intentional design choices — mark with comment.
+- **Mastodon/Bluesky/dev.to icons**: Brand colors, never migrate.
+- **Status banners in clearing**: Clear semantic pattern (green=operational, yellow=degraded, orange=partial, red=critical, blue=maintenance) — perfect candidates for `success`/`warning`/`error`/`info` tokens.
+- **manifesto + roadmap pages**: Heavy color usage for visual storytelling — requires careful visual review with Glimpse after migration.
 
 ---
 
