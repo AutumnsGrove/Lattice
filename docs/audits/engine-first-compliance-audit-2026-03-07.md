@@ -23,10 +23,10 @@ The engine-first principle states: _"The engine exists to prevent duplication. U
 | `slugify()` duplication | FAIL | 5 impls | LOW |
 | Subscription tier type duplication | FAIL | 7 defs | MEDIUM |
 | Local error catalogs (workers/services) | FAIL | 8 files | MEDIUM |
-| `as any` casts at trust boundaries | WARN | ~15 files | MEDIUM |
+| Rootwork type safety (`as` casts) | FAIL | 52+ | HIGH |
 | Markdown renderer imports | PASS | 0 outside | - |
 
-**Overall compliance: ~30%** — Only `cn()` and markdown rendering follow engine-first consistently.
+**Overall compliance: ~25%** — Only `cn()` and markdown rendering follow engine-first consistently. **Total violations: 220+**
 
 ---
 
@@ -187,7 +187,57 @@ The same union type `"free" | "seedling" | "sapling" | "oak" | "evergreen"` is i
 
 ---
 
-## Finding 7: `cn()` / Class Merging — COMPLIANT
+## Finding 7: Rootwork Type Safety — 52+ Violations
+
+**Severity: HIGH** — Violates MANDATORY requirement: "No `as` casts at trust boundaries."
+
+### 7a. Form Data Casts — `formData.get() as string` (18+ violations)
+
+Instead of using `parseFormData(formData, ZodSchema)` from `@autumnsgrove/lattice/server`:
+
+| Location | Cast Count |
+| --------------------------------------------------------- | ---------- |
+| `apps/landing/src/routes/security/+page.server.ts` | 6 casts |
+| `apps/landing/src/routes/arbor/porch/[id]/+page.server.ts` | 3 casts |
+| `apps/landing/src/routes/arbor/comped-invites/+page.server.ts` | 2 casts |
+| `apps/landing/src/routes/arbor/feedback/+page.server.ts` | 3+ casts |
+| `apps/landing/src/routes/api/arbor/cdn/upload/+server.ts` | 3 casts |
+
+### 7b. Database Query Result Casts (15+ violations)
+
+Raw `.first()` and `.all()` results cast with `as` instead of using typed schemas:
+
+| Location | Issue |
+| ---------------------------------------------------- | ------------------------------------------ |
+| `apps/plant/src/routes/+layout.server.ts` | 20+ casts on onboarding/user data |
+| `apps/plant/src/routes/auth/callback/+server.ts` | Auth flow DB results cast to interface |
+| `apps/plant/src/routes/comped/+page.server.ts` | Multiple DB casts without validation |
+| `apps/ivy/src/routes/(app)/inbox/+page.server.ts` | 10+ casts on email envelope data |
+| `workers/warden/src/routes/admin.ts` | Agent list DB results cast |
+| `workers/email-catchup/worker.ts` | User list cast as `EmailSignup[]` |
+
+### 7c. JSON Parsing Without Validation (10+ violations)
+
+Using `JSON.parse(raw) as T` instead of `safeJsonParse(raw, ZodSchema)`:
+
+| Location | Data Source |
+| ---------------------------------------------------- | ------------------------------ |
+| `workers/meadow-poller/src/index.ts:306` | KV poll state |
+| `workers/timeline-sync/src/github.ts:43` | GitHub API response |
+| `workers/timeline-sync/src/context.ts:195` | Generic JSON parse as `T` |
+| `workers/reverie/src/lib/validator.ts:78` | Tool function arguments |
+| `workers/warden/src/routes/admin.ts` | Agent scopes from DB |
+
+### 7d. Missing Error Type Guards (2+ violations)
+
+Using `(err as any)?.status` instead of `isRedirect()` / `isHttpError()`:
+
+- `apps/clearing/src/routes/incidents/[slug]/+page.server.ts:39`
+- `apps/plant/src/routes/auth/callback/+server.ts` (implicit)
+
+---
+
+## Finding 8: `cn()` / Class Merging — COMPLIANT
 
 **Severity: None** — This is the success story.
 
@@ -222,14 +272,17 @@ Zero violations found. All class merging uses `cn()` from `@autumnsgrove/lattice
 
 ### P1 — Medium Impact, Moderate Effort
 4. **Create shared `formatDate()` presets** in engine utils — eliminates ~25 copies
-5. **Migrate worker error catalogs to import `GroveErrorDef`** — 4 workers need type alignment
-6. **Define canonical `TierKey` type** in engine config — eliminates 7 drift-prone definitions
-7. **Replace bare `throw new Error()` in API routes** — 62+ violations
+5. **Migrate form data parsing to `parseFormData()`** — 18+ unsafe cast sites in landing/plant
+6. **Migrate worker error catalogs to import `GroveErrorDef`** — 4 workers need type alignment
+7. **Define canonical `TierKey` type** in engine config — eliminates 7 drift-prone definitions
+8. **Replace bare `throw new Error()` in API routes** — 62+ violations
 
 ### P2 — Lower Impact, Larger Effort
-8. **Migrate `apps/ivy` and `apps/login` error responses** to `buildErrorJson()` — 20+ violations
-9. **Migrate `services/forage` error handling** — 20+ violations but standalone service
-10. **Add `slugify()` to engine utils** — 5 external implementations
+9. **Migrate DB query results to typed schemas** — 15+ unsafe `as` casts on `.first()` / `.all()`
+10. **Migrate `apps/ivy` and `apps/login` error responses** to `buildErrorJson()` — 20+ violations
+11. **Add `safeJsonParse()` to KV/webhook/API parsing** — 10+ unsafe `JSON.parse() as T`
+12. **Migrate `services/forage` error handling** — 20+ violations but standalone service
+13. **Add `slugify()` to engine utils** — 5 external implementations
 
 ### Estimated LOC Savings
 
