@@ -183,7 +183,7 @@
 	<!-- Header -->
 	<div class="text-center mb-8 space-y-4">
 		<div
-			class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100/50 dark:bg-emerald-900/30 backdrop-blur-md border border-emerald-200/40 dark:border-emerald-700/30"
+			class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-success/10 dark:bg-success/10 backdrop-blur-md border border-success/30 dark:border-success/30"
 		>
 			<svg
 				width="32"
@@ -194,7 +194,7 @@
 				stroke-width="2"
 				stroke-linecap="round"
 				stroke-linejoin="round"
-				class="text-emerald-600 dark:text-emerald-400"
+				class="text-success dark:text-success"
 				aria-hidden="true"
 			>
 				<path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4" />
@@ -220,7 +220,7 @@
 			<!-- Success state -->
 			<div class="text-center py-8 space-y-4" role="status" aria-live="polite">
 				<div
-					class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100/50 dark:bg-emerald-900/30"
+					class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-success/10 dark:bg-success/10"
 				>
 					<svg
 						width="32"
@@ -231,7 +231,7 @@
 						stroke-width="2"
 						stroke-linecap="round"
 						stroke-linejoin="round"
-						class="text-emerald-600 dark:text-emerald-400"
+						class="text-success dark:text-success"
 						aria-hidden="true"
 					>
 						<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
@@ -253,7 +253,7 @@
 
 				<div class="grid gap-3">
 					<div class="flex items-start gap-3">
-						<div class="p-1.5 rounded-lg bg-emerald-100/50 dark:bg-emerald-900/30 mt-0.5">
+						<div class="p-1.5 rounded-lg bg-success/10 dark:bg-success/10 mt-0.5">
 							<svg
 								width="16"
 								height="16"
@@ -263,7 +263,7 @@
 								stroke-width="2"
 								stroke-linecap="round"
 								stroke-linejoin="round"
-								class="text-emerald-600 dark:text-emerald-400"
+								class="text-success dark:text-success"
 								aria-hidden="true"
 							>
 								<path
@@ -279,7 +279,7 @@
 						</div>
 					</div>
 					<div class="flex items-start gap-3">
-						<div class="p-1.5 rounded-lg bg-emerald-100/50 dark:bg-emerald-900/30 mt-0.5">
+						<div class="p-1.5 rounded-lg bg-success/10 dark:bg-success/10 mt-0.5">
 							<svg
 								width="16"
 								height="16"
@@ -289,7 +289,7 @@
 								stroke-width="2"
 								stroke-linecap="round"
 								stroke-linejoin="round"
-								class="text-emerald-600 dark:text-emerald-400"
+								class="text-success dark:text-success"
 								aria-hidden="true"
 							>
 								<path
@@ -311,7 +311,7 @@
 			{#if error}
 				<div
 					role="alert"
-					class="flex items-start gap-3 p-3 rounded-lg bg-red-50/50 dark:bg-red-950/20 border border-red-200/50 dark:border-red-800/30"
+					class="flex items-start gap-3 p-3 rounded-lg bg-error/10 dark:bg-error/10 border border-error/30 dark:border-error/30"
 				>
 					<svg
 						width="20"
@@ -322,14 +322,14 @@
 						stroke-width="2"
 						stroke-linecap="round"
 						stroke-linejoin="round"
-						class="text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5"
+						class="text-error dark:text-error flex-shrink-0 mt-0.5"
 						aria-hidden="true"
 					>
 						<circle cx="12" cy="12" r="10" />
 						<line x1="12" x2="12" y1="8" y2="12" />
 						<line x1="12" x2="12.01" y1="16" y2="16" />
 					</svg>
-					<p class="text-sm text-red-700 dark:text-red-300">{error}</p>
+					<p class="text-sm text-error dark:text-error">{error}</p>
 				</div>
 			{/if}
 

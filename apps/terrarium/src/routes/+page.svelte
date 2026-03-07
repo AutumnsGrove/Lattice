@@ -35,12 +35,12 @@
 		<div class="max-w-md text-center space-y-6">
 			<!-- Icon comparison -->
 			<div class="flex items-center justify-center gap-4">
-				<div class="p-4 rounded-2xl bg-red-100 dark:bg-red-900/30">
-					<Smartphone class="w-8 h-8 text-red-500 dark:text-red-400" />
+				<div class="p-4 rounded-2xl bg-error/10 dark:bg-error/10">
+					<Smartphone class="w-8 h-8 text-error dark:text-error" />
 				</div>
 				<div class="text-foreground-subtle text-2xl">&rarr;</div>
-				<div class="p-4 rounded-2xl bg-grove-100 dark:bg-grove-900/30">
-					<Monitor class="w-8 h-8 text-grove-600 dark:text-grove-400" />
+				<div class="p-4 rounded-2xl bg-accent-foreground/10 dark:bg-accent-foreground/10">
+					<Monitor class="w-8 h-8 text-accent-foreground dark:text-accent-foreground" />
 				</div>
 			</div>
 
@@ -59,7 +59,7 @@
 			<a
 				href="https://grove.place"
 				class="inline-flex items-center gap-2 px-4 py-2 rounded-lg
-					bg-grove-600 hover:bg-grove-700 text-white
+					bg-accent-foreground hover:bg-accent-foreground/80 text-white
 					transition-colors font-medium"
 			>
 				Back to Grove

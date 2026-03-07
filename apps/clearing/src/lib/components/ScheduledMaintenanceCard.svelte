@@ -57,23 +57,23 @@
 </script>
 
 <div class={cn(
-	'glass-card p-4 border-l-4 border-blue-500',
+	'glass-card p-4 border-l-4 border-info',
 	className
 )}>
 	<div class="flex items-start gap-3">
-		<div class="p-2 rounded-lg bg-blue-500/10 flex-shrink-0">
-			<Wrench class="w-5 h-5 text-blue-500" aria-hidden="true" />
+		<div class="p-2 rounded-lg bg-info-bg flex-shrink-0">
+			<Wrench class="w-5 h-5 text-info" aria-hidden="true" />
 		</div>
 
 		<div class="flex-1 min-w-0">
 			<div class="flex items-start justify-between gap-2">
 				<h3 class="font-medium text-foreground">{maintenance.title}</h3>
 				{#if maintenance.status === 'in_progress'}
-					<span class="px-2 py-0.5 text-xs font-medium rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 whitespace-nowrap">
+					<span class="px-2 py-0.5 text-xs font-medium rounded-full bg-info-bg text-info whitespace-nowrap">
 						In Progress
 					</span>
 				{:else if isSoon()}
-					<span class="px-2 py-0.5 text-xs font-medium rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 whitespace-nowrap">
+					<span class="px-2 py-0.5 text-xs font-medium rounded-full bg-warning-bg text-warning whitespace-nowrap">
 						Coming Soon
 					</span>
 				{/if}
@@ -97,7 +97,7 @@
 			{#if components.length > 0}
 				<div class="flex flex-wrap gap-1.5 mt-3">
 					{#each components as component}
-						<span class="px-2 py-0.5 text-xs bg-blue-100 dark:bg-blue-900/30 rounded text-blue-700 dark:text-blue-300">
+						<span class="px-2 py-0.5 text-xs bg-info-bg rounded text-info">
 							{component.name}
 						</span>
 					{/each}

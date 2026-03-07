@@ -59,8 +59,8 @@
           {#each reasons as reason}
             <label
               class="flex items-start gap-3 rounded-lg border p-3 cursor-pointer transition-colors {selectedReason === reason.id
-                ? 'border-grove-400 bg-grove-50/50 dark:border-grove-500 dark:bg-cream-100/20'
-                : 'border-divider hover:bg-grove-50/30 dark:hover:bg-cream-100/10'}"
+                ? 'border-grove-400 bg-surface-subtle dark:border-grove-500 dark:bg-surface-subtle'
+                : 'border-border hover:bg-surface-hover dark:hover:bg-surface-hover'}"
             >
               <input
                 type="radio"
@@ -89,7 +89,7 @@
           rows="3"
           maxlength="500"
           placeholder="Anything else you'd like us to know..."
-          class="w-full rounded-lg border border-divider bg-white/60 px-3 py-2 text-sm text-foreground placeholder:text-foreground-subtle focus:border-grove-400 focus:outline-none focus:ring-1 focus:ring-grove-400 dark:bg-cream-100/20 dark:focus:border-grove-500 dark:focus:ring-grove-500"
+          class="w-full rounded-lg border border-border bg-white/60 px-3 py-2 text-sm text-foreground placeholder:text-foreground-subtle focus:border-grove-400 focus:outline-none focus:ring-1 focus:ring-grove-400 dark:bg-cream-100/20 dark:focus:border-grove-500 dark:focus:ring-grove-500"
         ></textarea>
       </div>
     </div>
@@ -105,7 +105,7 @@
       </button>
       <button
         type="button"
-        class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+        class="rounded-lg bg-error px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-error/80 disabled:opacity-50"
         disabled={!selectedReason || submitting}
         onclick={handleSubmit}
       >

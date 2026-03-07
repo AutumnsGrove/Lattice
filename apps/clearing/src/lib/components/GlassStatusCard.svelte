@@ -29,33 +29,33 @@
 	const statusConfig = {
 		operational: {
 			icon: CheckCircle,
-			color: 'text-green-500',
-			bg: 'bg-green-500/10',
-			border: 'border-green-500/20'
+			color: 'text-success',
+			bg: 'bg-success-bg',
+			border: 'border-success'
 		},
 		degraded: {
 			icon: AlertTriangle,
-			color: 'text-yellow-500',
-			bg: 'bg-yellow-500/10',
-			border: 'border-yellow-500/20'
+			color: 'text-warning',
+			bg: 'bg-warning-bg',
+			border: 'border-warning'
 		},
 		partial_outage: {
 			icon: AlertCircle,
-			color: 'text-orange-500',
-			bg: 'bg-orange-500/10',
-			border: 'border-orange-500/20'
+			color: 'text-warning',
+			bg: 'bg-warning-bg',
+			border: 'border-warning'
 		},
 		major_outage: {
 			icon: XCircle,
-			color: 'text-red-500',
-			bg: 'bg-red-500/10',
-			border: 'border-red-500/20'
+			color: 'text-error',
+			bg: 'bg-error-bg',
+			border: 'border-error'
 		},
 		maintenance: {
 			icon: Wrench,
-			color: 'text-blue-500',
-			bg: 'bg-blue-500/10',
-			border: 'border-blue-500/20'
+			color: 'text-info',
+			bg: 'bg-info-bg',
+			border: 'border-info'
 		}
 	};
 

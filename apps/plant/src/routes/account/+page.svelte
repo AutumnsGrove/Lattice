@@ -110,8 +110,8 @@
 		<!-- Passkeys Section — managed on login hub -->
 		<GlassCard variant="frosted">
 			<div class="flex items-center gap-3 mb-4">
-				<div class="p-2 rounded-lg bg-emerald-100/50 dark:bg-emerald-900/30">
-					<Fingerprint class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+				<div class="p-2 rounded-lg bg-success-bg/50 dark:bg-success-bg/30">
+					<Fingerprint class="w-5 h-5 text-success" />
 				</div>
 				<div>
 					<h2 class="font-medium text-foreground">Passkeys</h2>
@@ -138,8 +138,8 @@
 		<!-- Two-Factor Authentication Section -->
 		<GlassCard variant="frosted">
 			<div class="flex items-center gap-3 mb-4">
-				<div class="p-2 rounded-lg bg-emerald-100/50 dark:bg-emerald-900/30">
-					<Shield class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+				<div class="p-2 rounded-lg bg-success-bg/50 dark:bg-success-bg/30">
+					<Shield class="w-5 h-5 text-success" />
 				</div>
 				<div>
 					<h2 class="font-medium text-foreground">Two-Factor Authentication</h2>
@@ -152,20 +152,20 @@
 			{#if data.twoFactorStatus?.enabled}
 				<!-- 2FA is enabled -->
 				<div
-					class="p-3 rounded-lg bg-emerald-100/50 dark:bg-emerald-900/30 border border-emerald-200/50 dark:border-emerald-700/30 mb-4"
+					class="p-3 rounded-lg bg-success-bg/50 dark:bg-success-bg/30 border border-success/50 dark:border-success/30 mb-4"
 				>
 					<div class="flex items-center gap-2 mb-1">
-						<Check class="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-						<span class="text-sm font-medium text-emerald-800 dark:text-emerald-200"
+						<Check class="w-4 h-4 text-success" />
+						<span class="text-sm font-medium text-success"
 							>Two-factor authentication is enabled</span
 						>
 					</div>
-					<p class="text-xs text-emerald-700 dark:text-emerald-300">
+					<p class="text-xs text-success/80 dark:text-success/80">
 						Enabled on {formatDate(data.twoFactorStatus.enabledAt)}
 						{#if data.twoFactorStatus.backupCodesRemaining > 0}
 							&middot; {data.twoFactorStatus.backupCodesRemaining} backup codes remaining
 						{:else}
-							&middot; <span class="text-amber-600 dark:text-amber-400"
+							&middot; <span class="text-warning"
 								>No backup codes remaining</span
 							>
 						{/if}
@@ -244,7 +244,7 @@
 					</p>
 
 					{#if twoFactorQrCode}
-						<div class="flex justify-center p-4 bg-white rounded-lg">
+						<div class="flex justify-center p-4 bg-surface rounded-lg">
 							<img src={twoFactorQrCode} alt="2FA QR Code" class="w-48 h-48" />
 						</div>
 					{/if}
@@ -297,11 +297,11 @@
 				<!-- Backup codes step -->
 				<div class="space-y-4">
 					<div
-						class="p-3 rounded-lg bg-emerald-100/50 dark:bg-emerald-900/30 border border-emerald-200/50 dark:border-emerald-700/30"
+						class="p-3 rounded-lg bg-success-bg/50 dark:bg-success-bg/30 border border-success/50 dark:border-success/30"
 					>
 						<div class="flex items-center gap-2 mb-1">
-							<Check class="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-							<span class="text-sm font-medium text-emerald-800 dark:text-emerald-200"
+							<Check class="w-4 h-4 text-success" />
+							<span class="text-sm font-medium text-success"
 								>Two-factor authentication is now enabled!</span
 							>
 						</div>
@@ -312,7 +312,7 @@
 							<strong>Save these backup codes</strong> in a safe place. You can use them to sign in if
 							you lose access to your authenticator app.
 						</p>
-						<div class="p-4 rounded-lg bg-slate-900 text-slate-100 font-mono text-sm">
+						<div class="p-4 rounded-lg bg-surface-alt text-foreground font-mono text-sm">
 							<div class="grid grid-cols-2 gap-2">
 								{#each backupCodes as code}
 									<div>{code}</div>
@@ -356,8 +356,8 @@
 		<!-- Linked Accounts Section -->
 		<GlassCard variant="frosted">
 			<div class="flex items-center gap-3 mb-4">
-				<div class="p-2 rounded-lg bg-emerald-100/50 dark:bg-emerald-900/30">
-					<Link2 class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+				<div class="p-2 rounded-lg bg-success-bg/50 dark:bg-success-bg/30">
+					<Link2 class="w-5 h-5 text-success" />
 				</div>
 				<div>
 					<h2 class="font-medium text-foreground">Linked Accounts</h2>

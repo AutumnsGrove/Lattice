@@ -49,7 +49,7 @@
 	{#if claimSuccess && claimedSubdomain}
 		<!-- Success state -->
 		<div class="text-center">
-			<GlassCard variant="accent" class="max-w-md mx-auto mb-8">
+			<GlassCard variant="default" class="max-w-md mx-auto mb-8">
 				<div class="flex flex-col items-center">
 					<div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-success-bg mb-6">
 						<Check size={40} class="text-success" />
@@ -80,8 +80,8 @@
 	{:else}
 		<!-- Welcome state -->
 		<div class="text-center mb-8">
-			<div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-amber-400/20 to-orange-500/20 mb-6 animate-pulse-slow">
-				<Gift size={40} class="text-amber-500" />
+			<div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-warning-bg/20 mb-6 animate-pulse-slow">
+				<Gift size={40} class="text-warning" />
 			</div>
 
 			{#if data.compedInvite?.inviteType === 'beta'}
@@ -106,9 +106,9 @@
 		<!-- Invitation card -->
 		<GlassCard variant="frosted" class="max-w-md mx-auto mb-8">
 			<div class="text-center mb-6">
-				<div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 mb-4">
-					<Sparkles size={16} class="text-amber-500" />
-					<span class="text-sm font-medium text-amber-600 dark:text-amber-400">
+				<div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-warning-bg/10 border border-warning/20 mb-4">
+					<Sparkles size={16} class="text-warning" />
+					<span class="text-sm font-medium text-warning">
 						{#if data.compedInvite?.inviteType === 'beta'}
 							Beta Tester Access
 						{:else}
@@ -184,7 +184,7 @@
 		<!-- Thank you note -->
 		<div class="text-center">
 			<p class="text-sm text-foreground-subtle flex items-center justify-center gap-1">
-				<Heart size={14} class="text-pink-400" />
+				<Heart size={14} class="text-accent" />
 				{#if data.compedInvite?.inviteType === 'beta'}
 					Thank you for helping us grow
 				{:else}

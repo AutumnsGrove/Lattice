@@ -60,9 +60,9 @@
 	<!-- Welcome header -->
 	<section class="text-center space-y-4">
 		<div
-			class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-amber-400/20 to-orange-500/20 mb-2"
+			class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-warning-bg/20 mb-2"
 		>
-			<Sparkles size={40} class="text-amber-500" aria-hidden="true" />
+			<Sparkles size={40} class="text-warning" aria-hidden="true" />
 		</div>
 
 		{#if data.inviteType === "beta"}
@@ -83,14 +83,14 @@
 	<!-- Expired/error magic link notice -->
 	{#if showExpiredNotice}
 		<div
-			class="max-w-md mx-auto p-4 rounded-xl bg-amber-50/80 dark:bg-amber-900/20 border border-amber-200/50 dark:border-amber-700/30 backdrop-blur-sm"
+			class="max-w-md mx-auto p-4 rounded-xl bg-warning-bg/80 dark:bg-warning-bg/20 border border-warning/50 dark:border-warning/30 backdrop-blur-sm"
 			role="alert"
 		>
-			<p class="text-sm text-amber-800 dark:text-amber-200 text-center">
+			<p class="text-sm text-warning dark:text-warning text-center">
 				Your sign-in link didn't work — no worries! Click below to get a fresh one.
 			</p>
 			{#if data.errorCode}
-				<p class="text-xs text-amber-700/70 dark:text-amber-300/50 text-center mt-2 font-mono">
+				<p class="text-xs text-warning/70 dark:text-warning/50 text-center mt-2 font-mono">
 					Error: {data.errorCode}
 				</p>
 			{/if}
@@ -102,10 +102,10 @@
 		<!-- Tier badge -->
 		<div class="text-center mb-6">
 			<div
-				class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 mb-4"
+				class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-warning-bg/10 border border-warning/20 mb-4"
 			>
-				<Leaf size={16} class="text-amber-500" aria-hidden="true" />
-				<span class="text-sm font-medium text-amber-600 dark:text-amber-400">
+				<Leaf size={16} class="text-warning" aria-hidden="true" />
+				<span class="text-sm font-medium text-warning">
 					{#if data.inviteType === "beta"}
 						Beta Tester — {displayTier(data.inviteTier)} Plan
 					{:else}
@@ -137,7 +137,7 @@
 					<div>
 						<p class="block text-sm font-medium text-foreground mb-2">Your email</p>
 						<div
-							class="flex items-center gap-2 px-4 py-3 rounded-xl bg-white/60 dark:bg-bark-800/40 border border-slate-200/50 dark:border-bark-700/40"
+							class="flex items-center gap-2 px-4 py-3 rounded-xl bg-white/60 dark:bg-bark-800/40 border border-border/50 dark:border-bark-700/40"
 						>
 							<Mail size={16} class="text-foreground-subtle flex-shrink-0" aria-hidden="true" />
 							<span class="text-foreground">{data.inviteEmail}</span>
@@ -145,7 +145,7 @@
 					</div>
 
 					{#if errorMessage}
-						<p class="text-sm text-red-600 dark:text-red-400" role="alert">
+						<p class="text-sm text-error" role="alert">
 							{errorMessage}
 						</p>
 					{/if}
@@ -172,9 +172,9 @@
 			{:else if mode === "sent"}
 				<div class="text-center py-4 space-y-4" role="status" aria-live="polite">
 					<div
-						class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-emerald-100/50 dark:bg-emerald-900/30"
+						class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-success-bg/50 dark:bg-success-bg/30"
 					>
-						<Check size={28} class="text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+						<Check size={28} class="text-success" aria-hidden="true" />
 					</div>
 
 					<div>
@@ -209,7 +209,7 @@
 	<!-- What's next -->
 	<section class="text-center">
 		<p class="text-sm text-foreground-subtle flex items-center justify-center gap-1.5">
-			<Heart size={14} class="text-pink-400" aria-hidden="true" />
+			<Heart size={14} class="text-accent" aria-hidden="true" />
 			{#if data.inviteType === "beta"}
 				Thank you for helping us grow
 			{:else}

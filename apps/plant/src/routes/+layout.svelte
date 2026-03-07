@@ -179,7 +179,7 @@
 			<GroveMessages messages={data.messages} centered={true} />
 		{/if}
 		{#if data?.loadError}
-			<div class="p-4 mb-6 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200 text-sm text-center">
+			<div class="p-4 mb-6 rounded-lg bg-warning-bg dark:bg-warning-bg/20 border border-warning dark:border-warning text-warning dark:text-warning text-sm text-center">
 				Something went wrong loading your session. Please refresh the page.
 			</div>
 		{/if}

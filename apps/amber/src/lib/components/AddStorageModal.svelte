@@ -43,7 +43,7 @@
 			</div>
 
 			<div class="modal-body">
-				<p class="text-gray-600 mb-4">
+				<p class="text-foreground-muted mb-4">
 					Current storage: <strong>{currentStorageGb} GB</strong>
 				</p>
 

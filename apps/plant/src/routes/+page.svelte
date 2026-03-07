@@ -47,39 +47,39 @@
 	// Seasonal accent color classes — shift the whole page's feel with the season
 	const accentBg = $derived(
 		isSpring
-			? "bg-pink-100/40 dark:bg-pink-900/30"
+			? "bg-accent-muted/40"
 			: isAutumn
-				? "bg-amber-100/40 dark:bg-amber-900/30"
+				? "bg-warning-bg/40"
 				: isWinter
-					? "bg-sky-100/40 dark:bg-sky-900/30"
-					: "bg-emerald-100/40 dark:bg-emerald-900/30",
+					? "bg-info-bg/40"
+					: "bg-success-bg/40",
 	);
 	const accentIconBg = $derived(
 		isSpring
-			? "bg-pink-100/50 dark:bg-pink-900/30"
+			? "bg-accent-muted/50"
 			: isAutumn
-				? "bg-amber-100/50 dark:bg-amber-900/30"
+				? "bg-warning-bg/50"
 				: isWinter
-					? "bg-sky-100/50 dark:bg-sky-900/30"
-					: "bg-emerald-100/50 dark:bg-emerald-900/30",
+					? "bg-info-bg/50"
+					: "bg-success-bg/50",
 	);
 	const accentIconText = $derived(
 		isSpring
-			? "text-pink-600 dark:text-pink-400"
+			? "text-accent"
 			: isAutumn
-				? "text-amber-600 dark:text-amber-400"
+				? "text-warning"
 				: isWinter
-					? "text-sky-600 dark:text-sky-400"
-					: "text-emerald-600 dark:text-emerald-400",
+					? "text-info"
+					: "text-success",
 	);
 	const accentText = $derived(
 		isSpring
-			? "text-pink-600 dark:text-pink-400"
+			? "text-accent"
 			: isAutumn
-				? "text-amber-600 dark:text-amber-400"
+				? "text-warning"
 				: isWinter
-					? "text-sky-600 dark:text-sky-400"
-					: "text-emerald-600 dark:text-emerald-400",
+					? "text-info"
+					: "text-success",
 	);
 
 	// Available tiers: Wanderer (free) and Seedling ($8/mo)
@@ -182,17 +182,17 @@
 	{#if showAuthError}
 		<GlassCard
 			variant="frosted"
-			class="text-center border-red-300/50 dark:border-red-500/30 bg-red-50/60 dark:bg-red-950/20"
+			class="text-center border-error/50 dark:border-error/30 bg-error-bg/60 dark:bg-error-bg/20"
 		>
 			<div class="flex items-center justify-center gap-2 mb-2">
-				<AlertTriangle class="w-5 h-5 text-red-600 dark:text-red-400" />
+				<AlertTriangle class="w-5 h-5 text-error" />
 				<span class="font-medium text-foreground">Sign-in trouble</span>
 			</div>
 			<p class="text-foreground-muted text-sm">
 				{authError}
 			</p>
 			{#if authErrorCode}
-				<p class="text-xs text-red-700/50 dark:text-red-300/40 text-center mt-2 font-mono">
+				<p class="text-xs text-error/50 dark:text-error/40 text-center mt-2 font-mono">
 					{authErrorCode}
 				</p>
 			{/if}
@@ -211,10 +211,10 @@
 	{#if showInviteExpiredNotice}
 		<GlassCard
 			variant="frosted"
-			class="text-center border-amber-300/50 dark:border-amber-500/30 bg-amber-50/60 dark:bg-amber-950/20"
+			class="text-center border-warning/50 dark:border-warning/30 bg-warning-bg/60 dark:bg-warning-bg/20"
 		>
 			<div class="flex items-center justify-center gap-2 mb-2">
-				<AlertTriangle class="w-5 h-5 text-amber-600 dark:text-amber-400" />
+				<AlertTriangle class="w-5 h-5 text-warning" />
 				<span class="font-medium text-foreground">Invite link expired</span>
 			</div>
 			<p class="text-foreground-muted text-sm">
@@ -235,7 +235,7 @@
 
 			<!-- Logo circle with seasonal accent -->
 			<div
-				class="inline-flex items-center justify-center w-20 h-20 rounded-full {accentBg} backdrop-blur-md border border-emerald-200/40 dark:border-emerald-700/30 mb-2"
+				class="inline-flex items-center justify-center w-20 h-20 rounded-full {accentBg} backdrop-blur-md border border-surface-elevated/40 dark:border-surface-elevated/30 mb-2"
 			>
 				<Logo class="w-12 h-12" {season} />
 			</div>
@@ -362,7 +362,7 @@
 					{#if isComingSoon}
 						<div class="absolute -top-2.5 left-1/2 -translate-x-1/2 z-10">
 							<span
-								class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-amber-500 text-white shadow-lg shadow-amber-500/25"
+								class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-warning text-white shadow-lg shadow-warning/25"
 							>
 								<Clock class="w-2.5 h-2.5" />
 								Soon
@@ -395,7 +395,7 @@
 							<!-- Subtle overlay for unavailable tiers -->
 							{#if isComingSoon}
 								<div
-									class="absolute inset-0 bg-amber-500/5 dark:bg-amber-500/5 rounded-xl pointer-events-none"
+									class="absolute inset-0 bg-warning/5 dark:bg-warning/5 rounded-xl pointer-events-none"
 								></div>
 							{:else if isFuturePlan}
 								<div
@@ -410,15 +410,15 @@
 										{isAvailable
 										? accentIconBg
 										: isComingSoon
-											? 'bg-amber-100/60 dark:bg-amber-900/30'
-											: 'bg-bark-100/60 dark:bg-bark-800/40'}"
+											? 'bg-warning-bg/60 dark:bg-warning-bg/30'
+											: 'bg-surface-subtle/60 dark:bg-surface-subtle/40'}"
 								>
 									<PlanIcon
 										class="w-5 h-5 {isAvailable
 											? accentIconText
 											: isComingSoon
-												? 'text-amber-600 dark:text-amber-400'
-												: 'text-bark-700 dark:text-bark-500'}"
+												? 'text-warning'
+												: 'text-foreground-subtle'}"
 									/>
 								</div>
 
@@ -427,7 +427,7 @@
 									class="text-xs {isAvailable
 										? accentText
 										: isComingSoon
-											? 'text-amber-600 dark:text-amber-400'
+											? 'text-warning'
 											: 'text-foreground-subtle'} mb-2"
 								>
 									{plan.tagline}

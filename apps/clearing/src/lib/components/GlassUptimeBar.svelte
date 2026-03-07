@@ -27,11 +27,11 @@
 	// Status to color mapping
 	function getStatusColor(status: ComponentStatus): string {
 		const colors: Record<ComponentStatus, string> = {
-			operational: 'bg-green-500',
-			degraded: 'bg-yellow-500',
-			partial_outage: 'bg-orange-500',
-			major_outage: 'bg-red-500',
-			maintenance: 'bg-blue-500'
+			operational: 'bg-success',
+			degraded: 'bg-warning',
+			partial_outage: 'bg-warning',
+			major_outage: 'bg-error',
+			maintenance: 'bg-info'
 		};
 		return colors[status];
 	}
@@ -52,10 +52,10 @@
 
 	// Uptime color based on percentage
 	const uptimeColor = $derived(
-		uptimePercentage >= 99.9 ? 'text-green-500' :
-		uptimePercentage >= 99 ? 'text-green-400' :
-		uptimePercentage >= 95 ? 'text-yellow-500' :
-		'text-red-500'
+		uptimePercentage >= 99.9 ? 'text-success' :
+		uptimePercentage >= 99 ? 'text-success' :
+		uptimePercentage >= 95 ? 'text-warning' :
+		'text-error'
 	);
 </script>
 

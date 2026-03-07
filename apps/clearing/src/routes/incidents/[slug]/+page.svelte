@@ -110,11 +110,11 @@
 				<div class="flex items-start gap-4">
 					<div class={cn(
 						'p-3 rounded-xl flex-shrink-0',
-						incident.status === 'resolved' ? 'bg-green-500/10' : 'bg-orange-500/10'
+						incident.status === 'resolved' ? 'bg-success-bg' : 'bg-warning-bg'
 					)}>
 						<TypeIcon class={cn(
 							'w-6 h-6',
-							incident.status === 'resolved' ? 'text-green-500' : 'text-orange-500'
+							incident.status === 'resolved' ? 'text-success' : 'text-warning'
 						)} />
 					</div>
 
@@ -123,9 +123,9 @@
 							<h1 class="text-xl font-semibold text-foreground">{incident.title}</h1>
 							<span class={cn(
 								'px-3 py-1 text-sm font-medium rounded-full whitespace-nowrap',
-								incident.status === 'resolved' ? 'bg-green-500/10 text-green-600 dark:text-green-400' :
-								incident.status === 'monitoring' ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400' :
-								'bg-orange-500/10 text-orange-600 dark:text-orange-400'
+								incident.status === 'resolved' ? 'bg-success-bg text-success' :
+								incident.status === 'monitoring' ? 'bg-info-bg text-info' :
+								'bg-warning-bg text-warning'
 							)}>
 								{getIncidentStatusLabel(incident.status)}
 							</span>
@@ -150,7 +150,7 @@
 								<p class="text-foreground">
 									{duration()}
 									{#if !incident.resolved_at}
-										<span class="text-orange-500">(ongoing)</span>
+										<span class="text-warning">(ongoing)</span>
 									{/if}
 								</p>
 							</div>
@@ -191,11 +191,11 @@
 								<div class="flex flex-col items-center">
 									<div class={cn(
 										'p-2 rounded-full',
-										update.status === 'resolved' ? 'bg-green-500/10' : 'bg-cream-100 dark:bg-bark-800'
+										update.status === 'resolved' ? 'bg-success-bg' : 'bg-cream-100 dark:bg-bark-800'
 									)}>
 										<UpdateIcon class={cn(
 											'w-5 h-5',
-											update.status === 'resolved' ? 'text-green-500' : 'text-foreground-muted'
+											update.status === 'resolved' ? 'text-success' : 'text-foreground-muted'
 										)} />
 									</div>
 									{#if i < incident.updates.length - 1}
@@ -208,7 +208,7 @@
 									<div class="flex flex-wrap items-center gap-2 mb-2">
 										<span class={cn(
 											'font-medium',
-											update.status === 'resolved' ? 'text-green-600 dark:text-green-400' : 'text-foreground'
+											update.status === 'resolved' ? 'text-success' : 'text-foreground'
 										)}>
 											{getIncidentStatusLabel(update.status as IncidentStatus)}
 										</span>

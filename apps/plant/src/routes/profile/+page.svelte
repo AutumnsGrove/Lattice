@@ -307,7 +307,7 @@
 			<!-- Error -->
 			{#if submitError}
 				<div
-					class="p-3 rounded-lg bg-red-50/80 dark:bg-red-950/30 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 text-sm"
+					class="p-3 rounded-lg bg-error-bg/80 dark:bg-error-bg/30 border border-error dark:border-error text-error dark:text-error text-sm"
 				>
 					{submitError}
 				</div>

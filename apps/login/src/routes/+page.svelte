@@ -127,7 +127,7 @@
 		{#if displayError}
 			<div
 				role="alert"
-				class="mb-6 p-3 rounded-lg bg-red-50 dark:bg-red-950/20 border border-red-200/50 dark:border-red-800/30 text-sm text-red-700 dark:text-red-300 text-center"
+				class="mb-6 p-3 rounded-lg bg-error/10 dark:bg-error/10 border border-error/30 dark:border-error/30 text-sm text-error dark:text-error text-center"
 			>
 				{displayError}
 			</div>
@@ -137,7 +137,7 @@
 			<!-- Email sent confirmation -->
 			<div class="text-center space-y-4 py-4" role="status" aria-live="polite">
 				<div
-					class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-emerald-100/50 dark:bg-emerald-900/30"
+					class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-success/10 dark:bg-success/10"
 				>
 					<svg
 						width="28"
@@ -148,7 +148,7 @@
 						stroke-width="2"
 						stroke-linecap="round"
 						stroke-linejoin="round"
-						class="text-emerald-600 dark:text-emerald-400"
+						class="text-success dark:text-success"
 						aria-hidden="true"
 					>
 						<rect width="20" height="16" x="2" y="4" rx="2" />
