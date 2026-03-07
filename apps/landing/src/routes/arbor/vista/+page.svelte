@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from "./$types";
 	import { GlassCard, GlassButton } from "@autumnsgrove/lattice/ui";
-	import { api } from "@autumnsgrove/lattice/utils";
+	import { api, formatRelativeTime as _frt } from "@autumnsgrove/lattice/utils";
 	import { invalidateAll } from "$app/navigation";
 	import {
 		CheckCircle2,
@@ -20,18 +20,8 @@
 	let collecting = $state(false);
 	let collectMessage = $state("");
 
-	function formatRelativeTime(epochSeconds: number | null): string {
-		if (!epochSeconds) return "Never";
-		const diffMs = Date.now() - epochSeconds * 1000;
-		const minutes = Math.floor(diffMs / 60000);
-		const hours = Math.floor(diffMs / 3600000);
-		const days = Math.floor(diffMs / 86400000);
-
-		if (minutes < 1) return "Just now";
-		if (minutes < 60) return `${minutes} minute${minutes !== 1 ? "s" : ""} ago`;
-		if (hours < 24) return `${hours} hour${hours !== 1 ? "s" : ""} ago`;
-		return `${days} day${days !== 1 ? "s" : ""} ago`;
-	}
+	/** Wrapper to provide "Never" fallback for null timestamps */
+	const formatRelativeTime = (v: number | null) => _frt(v, "Never");
 
 	async function triggerCollection() {
 		collecting = true;
