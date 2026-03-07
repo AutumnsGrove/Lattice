@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { UserPlus, UserCheck, UserMinus } from "lucide-svelte";
 	import GlassButton from "$lib/ui/components/ui/GlassButton.svelte";
-	import { lanternStore } from "$lib/ui/stores/lantern.svelte";
+	import { friendsStore } from "$lib/ui/stores/friends.svelte";
 	import { api } from "$lib/utils/api";
 
 	interface Props {
@@ -19,7 +19,7 @@
 	let active = $state(false);
 	let error = $state("");
 
-	let isFollowing = $derived(lanternStore.friends.some((f) => f.tenantId === tenantId));
+	let isFollowing = $derived(friendsStore.isFriend(tenantId));
 
 	// Clear error after a delay
 	$effect(() => {
@@ -35,9 +35,9 @@
 		try {
 			const result = await api.post<{
 				friend: { tenantId: string; name: string; subdomain: string; source: string };
-			}>("/api/lantern/friends", { friendSubdomain: subdomain });
+			}>("/api/friends", { friendSubdomain: subdomain });
 			if (result?.friend) {
-				lanternStore.addFriend(result.friend);
+				friendsStore.addFriend(result.friend);
 			}
 		} catch {
 			error = "Could not follow. Try again.";
@@ -51,8 +51,8 @@
 		loading = true;
 		error = "";
 		try {
-			await api.delete(`/api/lantern/friends/${tenantId}`);
-			lanternStore.removeFriend(tenantId);
+			await api.delete(`/api/friends/${tenantId}`);
+			friendsStore.removeFriend(tenantId);
 		} catch {
 			error = "Could not unfollow. Try again.";
 		} finally {

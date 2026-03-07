@@ -13,6 +13,7 @@
 	import Header from "$lib/ui/components/chrome/Header.svelte";
 	import { buildTenantNavItems } from "$lib/ui/components/chrome/tenant-nav";
 	import Lantern from "$lib/ui/components/chrome/lantern/Lantern.svelte";
+	import FriendsLoader from "$lib/ui/components/chrome/FriendsLoader.svelte";
 	import { themeStore } from "$lib/ui/stores/theme.svelte";
 	import { groveModeStore } from "$lib/ui/stores/grove-mode.svelte";
 
@@ -165,6 +166,10 @@
 				{/key}
 			{/if}
 		</main>
+
+		{#if data.user}
+			<FriendsLoader />
+		{/if}
 
 		{#if data.lanternData?.enabled}
 			<Lantern data={data.lanternData} />

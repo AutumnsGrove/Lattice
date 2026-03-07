@@ -19,17 +19,6 @@ export interface LanternLayoutData {
 }
 
 /**
- * A friend connection between two groves.
- */
-export interface LanternFriend {
-	tenantId: string;
-	name: string;
-	subdomain: string;
-	avatar?: string;
-	source: string;
-}
-
-/**
  * A navigation destination in the Lantern panel.
  */
 export interface LanternDestination {

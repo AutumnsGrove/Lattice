@@ -1,5 +1,5 @@
 /**
- * Lantern Friends API — Single Friend
+ * Friends API — Single Friend
  *
  * DELETE — Remove a friend connection
  */
@@ -8,6 +8,7 @@ import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { API_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
 import { getUserHomeGrove } from "$lib/server/services/users.js";
+import { removeFriend } from "$lib/server/services/friends.js";
 
 export const DELETE: RequestHandler = async ({ params, platform, locals }) => {
 	const db = platform?.env?.DB;
@@ -25,7 +26,6 @@ export const DELETE: RequestHandler = async ({ params, platform, locals }) => {
 	if (!homeGrove) {
 		throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
 	}
-	const homeTenantId = homeGrove.tenantId;
 
 	const friendTenantId = params.tenantId;
 	if (!friendTenantId) {
@@ -33,19 +33,10 @@ export const DELETE: RequestHandler = async ({ params, platform, locals }) => {
 	}
 
 	try {
-		const existing = await db
-			.prepare(`SELECT id FROM lantern_friends WHERE tenant_id = ? AND friend_tenant_id = ?`)
-			.bind(homeTenantId, friendTenantId)
-			.first<{ id: string }>();
-
-		if (!existing) {
+		const removed = await removeFriend(db, homeGrove.tenantId, friendTenantId);
+		if (!removed) {
 			throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
 		}
-
-		await db
-			.prepare(`DELETE FROM lantern_friends WHERE tenant_id = ? AND friend_tenant_id = ?`)
-			.bind(homeTenantId, friendTenantId)
-			.run();
 
 		return json({ success: true });
 	} catch (error) {
@@ -53,7 +44,7 @@ export const DELETE: RequestHandler = async ({ params, platform, locals }) => {
 			throw error;
 		}
 		logGroveError("API", API_ERRORS.OPERATION_FAILED, {
-			detail: "Lantern friend delete failed",
+			detail: "Friend delete failed",
 			cause: error,
 		});
 		throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API");

@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { lanternStore } from "$lib/ui/stores/lantern.svelte";
-	import { api } from "$lib/utils/api";
 	import LanternFAB from "./LanternFAB.svelte";
 	import LanternPanel from "./LanternPanel.svelte";
 	import type { LanternLayoutData } from "./types";
@@ -17,26 +16,9 @@
 		return () => document.body.removeAttribute("data-lantern");
 	});
 
-	// Fetch friends on first panel open, and move focus into the dialog
+	// Move focus into the dialog when panel opens
 	$effect(() => {
 		if (lanternStore.open) {
-			// Load friends on first open
-			if (!lanternStore.friendsLoaded && !lanternStore.friendsLoading) {
-				lanternStore.setFriendsLoading(true);
-
-				api
-					.get<{
-						friends: Array<{ tenantId: string; name: string; subdomain: string; source: string }>;
-					}>("/api/lantern/friends")
-					.then((result) => {
-						lanternStore.setFriends(result?.friends ?? []);
-					})
-					.catch(() => {
-						lanternStore.setFriends([]);
-					});
-			}
-
-			// Move focus into the panel so screen readers announce the dialog
 			requestAnimationFrame(() => {
 				const panel = document.querySelector<HTMLElement>(".lantern-panel");
 				const firstFocusable = panel?.querySelector<HTMLElement>(

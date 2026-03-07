@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { X } from "lucide-svelte";
-	import type { LanternFriend } from "./types";
-	import { lanternStore } from "$lib/ui/stores/lantern.svelte";
+	import type { Friend } from "$lib/server/services/friends";
+	import { friendsStore } from "$lib/ui/stores/friends.svelte";
 	import { api } from "$lib/utils/api";
 
 	interface Props {
-		friend: LanternFriend;
+		friend: Friend;
 	}
 
 	let { friend }: Props = $props();
@@ -16,8 +16,8 @@
 		removing = true;
 
 		try {
-			await api.delete(`/api/lantern/friends/${friend.tenantId}`);
-			lanternStore.removeFriend(friend.tenantId);
+			await api.delete(`/api/friends/${friend.tenantId}`);
+			friendsStore.removeFriend(friend.tenantId);
 		} catch {
 			// Silently fail — user can retry
 		} finally {

@@ -4,12 +4,11 @@
  * Follows the sidebar.svelte.ts pattern: module-level $state variables,
  * exported as a plain object with getters and methods.
  *
- * All state is ephemeral (no localStorage) — the panel starts closed
- * and friends are fetched fresh on each page load.
+ * All state is ephemeral (no localStorage) — the panel starts closed.
+ * Friends state has been moved to friendsStore (friends.svelte.ts).
  */
 
 import type {
-	LanternFriend,
 	LanternTab,
 	LanternView,
 	LanternSearchResult,
@@ -18,9 +17,6 @@ import type {
 let open = $state(false);
 let activeTab = $state<LanternTab>("destinations");
 let currentView = $state<LanternView>("main");
-let friends = $state<LanternFriend[]>([]);
-let friendsLoaded = $state(false);
-let friendsLoading = $state(false);
 let searchQuery = $state("");
 let searchResults = $state<LanternSearchResult[]>([]);
 
@@ -37,28 +33,12 @@ export const lanternStore = {
 		return currentView;
 	},
 
-	get friends() {
-		return friends;
-	},
-
-	get friendsLoaded() {
-		return friendsLoaded;
-	},
-
-	get friendsLoading() {
-		return friendsLoading;
-	},
-
 	get searchQuery() {
 		return searchQuery;
 	},
 
 	get searchResults() {
 		return searchResults;
-	},
-
-	get hasFriends() {
-		return friends.length > 0;
 	},
 
 	toggle() {
@@ -89,34 +69,12 @@ export const lanternStore = {
 		}
 	},
 
-	setFriends(newFriends: LanternFriend[]) {
-		friends = newFriends;
-		friendsLoaded = true;
-		friendsLoading = false;
-	},
-
-	setFriendsLoading(loading: boolean) {
-		friendsLoading = loading;
-	},
-
-	addFriend(friend: LanternFriend) {
-		friends = [...friends, friend];
-	},
-
-	removeFriend(tenantId: string) {
-		friends = friends.filter((f) => f.tenantId !== tenantId);
-	},
-
 	setSearchQuery(query: string) {
 		searchQuery = query;
 	},
 
 	setSearchResults(results: LanternSearchResult[]) {
 		searchResults = results;
-	},
-
-	isFriend(tenantId: string): boolean {
-		return friends.some((f) => f.tenantId === tenantId);
 	},
 
 	clearSearch() {

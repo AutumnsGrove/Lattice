@@ -12,7 +12,6 @@ export { default as LanternFriendCard } from "./LanternFriendCard.svelte";
 export { default as LanternAddFriends } from "./LanternAddFriends.svelte";
 export type {
 	LanternLayoutData,
-	LanternFriend,
 	LanternDestination,
 	LanternSearchResult,
 	LanternTab,

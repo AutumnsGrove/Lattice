@@ -1,7 +1,7 @@
 /**
- * Lantern Friends API — List & Add
+ * Friends API — List & Add
  *
- * GET  — List the current tenant's friends
+ * GET  — List the current user's friends
  * POST — Add a friend by subdomain
  */
 
@@ -9,6 +9,7 @@ import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { API_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
 import { getUserHomeGrove } from "$lib/server/services/users.js";
+import { listFriends, addFriend } from "$lib/server/services/friends.js";
 import { createThreshold } from "$lib/threshold/factory.js";
 import { thresholdCheck } from "$lib/threshold/adapters/sveltekit.js";
 
@@ -32,32 +33,11 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
 	}
 
 	try {
-		const result = await db
-			.prepare(
-				`SELECT friend_tenant_id, friend_name, friend_subdomain, source
-				 FROM lantern_friends
-				 WHERE tenant_id = ?
-				 ORDER BY added_at DESC`,
-			)
-			.bind(homeGrove.tenantId)
-			.all<{
-				friend_tenant_id: string;
-				friend_name: string;
-				friend_subdomain: string;
-				source: string;
-			}>();
-
-		const friends = (result.results ?? []).map((row) => ({
-			tenantId: row.friend_tenant_id,
-			name: row.friend_name,
-			subdomain: row.friend_subdomain,
-			source: row.source,
-		}));
-
+		const friends = await listFriends(db, homeGrove.tenantId);
 		return json({ friends });
 	} catch (error) {
 		logGroveError("API", API_ERRORS.OPERATION_FAILED, {
-			detail: "Lantern friends list failed",
+			detail: "Friends list failed",
 			cause: error,
 		});
 		throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API");
@@ -81,13 +61,12 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 	if (!homeGrove) {
 		throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
 	}
-	const homeTenantId = homeGrove.tenantId;
 
 	// Rate limit: 30 friend additions per hour
 	const threshold = createThreshold(platform?.env, { identifier: locals.user.id });
 	if (threshold) {
 		const denied = await thresholdCheck(threshold, {
-			key: `lantern/add-friend:${locals.user.id}`,
+			key: `friends/add:${locals.user.id}`,
 			limit: 30,
 			windowSeconds: 3600,
 			failMode: "open",
@@ -113,49 +92,23 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 	}
 
 	try {
-		// Look up the friend's tenant by subdomain
-		const friendTenant = await db
-			.prepare(`SELECT id, subdomain, display_name FROM tenants WHERE subdomain = ?`)
-			.bind(friendSubdomain)
-			.first<{ id: string; subdomain: string; display_name: string }>();
+		const result = await addFriend(db, homeGrove.tenantId, friendSubdomain);
 
-		if (!friendTenant) {
-			throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
-		}
-
-		// Prevent self-add
-		if (friendTenant.id === homeTenantId) {
+		if ("error" in result) {
+			if (result.error === "not_found") {
+				throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
+			}
 			throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
 		}
 
-		// Insert with INSERT OR IGNORE to handle duplicate gracefully
-		await db
-			.prepare(
-				`INSERT OR IGNORE INTO lantern_friends (tenant_id, friend_tenant_id, friend_name, friend_subdomain, source)
-				 VALUES (?, ?, ?, ?, 'manual')`,
-			)
-			.bind(homeTenantId, friendTenant.id, friendTenant.display_name, friendTenant.subdomain)
-			.run();
-
-		return json(
-			{
-				success: true,
-				friend: {
-					tenantId: friendTenant.id,
-					name: friendTenant.display_name,
-					subdomain: friendTenant.subdomain,
-					source: "manual",
-				},
-			},
-			{ status: 201 },
-		);
+		return json({ success: true, friend: result.friend }, { status: 201 });
 	} catch (error) {
 		// Re-throw GroveErrors (they have a status property)
 		if (error && typeof error === "object" && "status" in error) {
 			throw error;
 		}
 		logGroveError("API", API_ERRORS.OPERATION_FAILED, {
-			detail: "Lantern friend add failed",
+			detail: "Friend add failed",
 			cause: error,
 		});
 		throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API");

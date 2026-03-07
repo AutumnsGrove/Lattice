@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { groveModeStore } from "$lib/ui/stores/grove-mode.svelte";
 	import { lanternStore } from "$lib/ui/stores/lantern.svelte";
+	import { friendsStore } from "$lib/ui/stores/friends.svelte";
 	import { getDestinations, services } from "./destinations";
 	import LanternFriendCard from "./LanternFriendCard.svelte";
 	import LanternAddFriends from "./LanternAddFriends.svelte";
@@ -43,7 +44,7 @@
 <div
 	bind:this={panelRef}
 	class="lantern-panel z-grove-overlay bg-surface/90 backdrop-blur-xl border border-default shadow-lg"
-	class:has-friends={lanternStore.hasFriends}
+	class:has-friends={friendsStore.hasFriends}
 	role="dialog"
 	aria-modal="true"
 	tabindex="-1"
@@ -142,7 +143,7 @@
 				</div>
 
 				<!-- Right column: friends (only when user has friends) -->
-				{#if lanternStore.hasFriends}
+				{#if friendsStore.hasFriends}
 					<div class="friends-column border-l border-default pl-3">
 						<div class="flex items-center justify-between">
 							<h3 class="text-[0.8125rem] font-semibold text-foreground m-0">Friends</h3>
@@ -157,7 +158,7 @@
 						</div>
 
 						<div class="friends-list flex-1 overflow-y-auto flex flex-col gap-0.5 max-h-60">
-							{#each lanternStore.friends as friend (friend.tenantId)}
+							{#each friendsStore.friends as friend (friend.tenantId)}
 								<LanternFriendCard {friend} />
 							{/each}
 						</div>
@@ -166,7 +167,7 @@
 			</div>
 
 			<!-- Add friends CTA when no friends yet (hide while loading) -->
-			{#if !lanternStore.hasFriends && lanternStore.friendsLoaded}
+			{#if !friendsStore.hasFriends && friendsStore.loaded}
 				<button
 					type="button"
 					class="add-friends-cta flex items-center justify-center gap-2 py-2 px-2 rounded-lg border border-dashed border-default bg-transparent text-foreground-muted text-[0.8125rem] cursor-pointer transition-colors hover:text-accent-muted hover:border-accent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
@@ -177,7 +178,7 @@
 				</button>
 			{/if}
 
-			{#if lanternStore.friendsLoading}
+			{#if friendsStore.loading}
 				<p
 					class="text-center text-foreground-muted text-[0.8125rem] py-2 m-0"
 					role="status"

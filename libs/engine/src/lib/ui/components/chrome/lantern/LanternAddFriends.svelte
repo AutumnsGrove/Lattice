@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { ArrowLeft, UserPlus } from "lucide-svelte";
 	import { lanternStore } from "$lib/ui/stores/lantern.svelte";
+	import { friendsStore } from "$lib/ui/stores/friends.svelte";
 	import { api } from "$lib/utils/api";
-	import type { LanternFriend, LanternSearchResult } from "./types";
+	import type { Friend } from "$lib/server/services/friends";
+	import type { LanternSearchResult } from "./types";
 
 	let searchInput: HTMLInputElement | undefined = $state();
 	let debounceTimer: ReturnType<typeof setTimeout> | undefined;
@@ -38,7 +40,7 @@
 	async function searchGroves(query: string) {
 		try {
 			const result = await api.get<{ results: LanternSearchResult[] }>(
-				`/api/lantern/search?q=${encodeURIComponent(query)}`,
+				`/api/friends/search?q=${encodeURIComponent(query)}`,
 			);
 			lanternStore.setSearchResults(result?.results ?? []);
 		} catch {
@@ -51,12 +53,12 @@
 		adding = subdomain;
 
 		try {
-			const result = await api.post<{ success: boolean; friend: LanternFriend }>(
-				"/api/lantern/friends",
+			const result = await api.post<{ success: boolean; friend: Friend }>(
+				"/api/friends",
 				{ friendSubdomain: subdomain },
 			);
 			if (result?.friend) {
-				lanternStore.addFriend(result.friend);
+				friendsStore.addFriend(result.friend);
 			}
 			lanternStore.setView("main");
 		} catch {

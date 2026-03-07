@@ -1,9 +1,9 @@
 /**
- * Lantern Search API Tests
+ * Friends Search API Tests
  *
  * Tests the grove search endpoint used in the "Add Friends" flow.
- * Mocks D1 at the prepare() boundary since the queries use LIKE/OR
- * which the in-memory mock D1 doesn't support.
+ * Mocks the friends service at the boundary — the service unit tests
+ * cover the actual SQL logic separately.
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
@@ -23,19 +23,17 @@ vi.mock("$lib/threshold/adapters/sveltekit.js", () => ({
 	thresholdCheck: vi.fn(),
 }));
 
+vi.mock("$lib/server/services/friends.js", () => ({
+	searchTenants: vi.fn(),
+}));
+
 import { getUserHomeGrove } from "$lib/server/services/users.js";
+import { searchTenants } from "$lib/server/services/friends.js";
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
-function createMockDB(results: unknown[] = []) {
-	return {
-		prepare: vi.fn(() => ({
-			bind: vi.fn().mockReturnThis(),
-			all: vi.fn().mockResolvedValue({ results }),
-			first: vi.fn().mockResolvedValue(results[0] ?? null),
-			run: vi.fn().mockResolvedValue({ success: true }),
-		})),
-	};
+function createMockDB() {
+	return {} as unknown as D1Database;
 }
 
 function createRequestEvent(
@@ -49,7 +47,7 @@ function createRequestEvent(
 	},
 ) {
 	return {
-		url: new URL(`https://example.com/api/lantern/search?q=${encodeURIComponent(query)}`),
+		url: new URL(`https://example.com/api/friends/search?q=${encodeURIComponent(query)}`),
 		platform: { env: { DB: db } },
 		locals: { user },
 	} as unknown as Parameters<typeof GET>[0];
@@ -57,7 +55,7 @@ function createRequestEvent(
 
 // ── Tests ───────────────────────────────────────────────────────────────────
 
-describe("GET /api/lantern/search", () => {
+describe("GET /api/friends/search", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		vi.mocked(getUserHomeGrove).mockResolvedValue({
@@ -68,8 +66,11 @@ describe("GET /api/lantern/search", () => {
 	});
 
 	it("should return matching tenants for a valid query", async () => {
-		const db = createMockDB([{ id: "friend-1", subdomain: "a2a0", display_name: "Art's Grove" }]);
+		vi.mocked(searchTenants).mockResolvedValue([
+			{ tenantId: "friend-1", name: "Art's Grove", subdomain: "a2a0" },
+		]);
 
+		const db = createMockDB();
 		const event = createRequestEvent("a2a0", { db });
 		const response = await GET(event);
 		const data = await response.json();
@@ -83,46 +84,24 @@ describe("GET /api/lantern/search", () => {
 		});
 	});
 
-	it("should allow single-character queries", async () => {
-		const db = createMockDB([{ id: "friend-1", subdomain: "a2a0", display_name: "Art's Grove" }]);
-		const event = createRequestEvent("a", { db });
-		const response = await GET(event);
-		const data = await response.json();
+	it("should call searchTenants with query and exclude tenant", async () => {
+		vi.mocked(searchTenants).mockResolvedValue([]);
 
-		expect(data.results).toHaveLength(1);
-		expect(db.prepare).toHaveBeenCalled();
+		const db = createMockDB();
+		const event = createRequestEvent("a2a0", { db });
+		await GET(event);
+
+		expect(searchTenants).toHaveBeenCalledWith(db, "a2a0", "my-tenant");
 	});
 
-	it("should return empty array for empty query", async () => {
+	it("should return empty array for empty query without calling service", async () => {
 		const db = createMockDB();
 		const event = createRequestEvent("", { db });
 		const response = await GET(event);
 		const data = await response.json();
 
 		expect(data.results).toEqual([]);
-	});
-
-	it("should exclude the user's own tenant from results", async () => {
-		const db = createMockDB([]);
-		const event = createRequestEvent("autumn", { db });
-		await GET(event);
-
-		// The third bind parameter should be the user's own tenant ID
-		const prepareCall = db.prepare.mock.calls[0][0] as string;
-		expect(prepareCall).toContain("id != ?");
-
-		const bindCall = db.prepare.mock.results[0].value.bind;
-		expect(bindCall).toHaveBeenCalledWith("%autumn%", "%autumn%", "my-tenant");
-	});
-
-	it("should escape LIKE wildcards in user input", async () => {
-		const db = createMockDB([]);
-		const event = createRequestEvent("test%name", { db });
-		await GET(event);
-
-		const bindCall = db.prepare.mock.results[0].value.bind;
-		// The % in user input should be escaped to \%
-		expect(bindCall).toHaveBeenCalledWith("%test\\%name%", "%test\\%name%", "my-tenant");
+		expect(searchTenants).not.toHaveBeenCalled();
 	});
 
 	it("should reject unauthenticated requests", async () => {
@@ -134,36 +113,42 @@ describe("GET /api/lantern/search", () => {
 
 	it("should handle user with no grove gracefully", async () => {
 		vi.mocked(getUserHomeGrove).mockResolvedValue(null);
+		vi.mocked(searchTenants).mockResolvedValue([
+			{ tenantId: "friend-1", name: "Art's Grove", subdomain: "a2a0" },
+		]);
 
-		const db = createMockDB([{ id: "friend-1", subdomain: "a2a0", display_name: "Art's Grove" }]);
+		const db = createMockDB();
 		const event = createRequestEvent("a2a0", { db });
 		const response = await GET(event);
 		const data = await response.json();
 
 		// Should still work — excludeTenantId will be empty string
 		expect(response.status).toBe(200);
-		expect(data.results).toHaveLength(1);
+		expect(searchTenants).toHaveBeenCalledWith(db, "a2a0", "");
 	});
 
 	it("should truncate query to 64 characters", async () => {
-		const db = createMockDB([]);
+		vi.mocked(searchTenants).mockResolvedValue([]);
+
+		const db = createMockDB();
 		const longQuery = "a".repeat(100);
 		const event = createRequestEvent(longQuery, { db });
 		await GET(event);
 
-		const bindCall = db.prepare.mock.results[0].value.bind;
-		const pattern = bindCall.mock.calls[0][0] as string;
-		// Pattern is %<query>%, so length should be 64 + 2 = 66
-		expect(pattern.length).toBe(66);
+		// searchTenants should receive only 64 chars
+		const passedQuery = vi.mocked(searchTenants).mock.calls[0][1];
+		expect(passedQuery.length).toBe(64);
 	});
 
-	it("should return multiple results up to limit", async () => {
+	it("should return multiple results from service", async () => {
 		const tenants = Array.from({ length: 10 }, (_, i) => ({
-			id: `tenant-${i}`,
+			tenantId: `tenant-${i}`,
+			name: `Grove ${i}`,
 			subdomain: `grove-${i}`,
-			display_name: `Grove ${i}`,
 		}));
-		const db = createMockDB(tenants);
+		vi.mocked(searchTenants).mockResolvedValue(tenants);
+
+		const db = createMockDB();
 		const event = createRequestEvent("grove", { db });
 		const response = await GET(event);
 		const data = await response.json();

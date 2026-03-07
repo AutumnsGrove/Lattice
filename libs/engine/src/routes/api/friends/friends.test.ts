@@ -1,5 +1,5 @@
 /**
- * Lantern Friends API Tests
+ * Friends API Tests
  *
  * Tests the friends list (GET), add (POST), and delete (DELETE) endpoints.
  * Mocks D1 at the prepare() boundary since the queries use INSERT OR IGNORE
@@ -24,22 +24,30 @@ vi.mock("$lib/threshold/adapters/sveltekit.js", () => ({
 	thresholdCheck: vi.fn(),
 }));
 
+vi.mock("$lib/server/services/friends.js", async (importOriginal) => {
+	const original = (await importOriginal()) as Record<string, unknown>;
+	return {
+		...original,
+		listFriends: vi.fn(),
+		addFriend: vi.fn(),
+		removeFriend: vi.fn(),
+	};
+});
+
 import { getUserHomeGrove } from "$lib/server/services/users.js";
+import { listFriends, addFriend, removeFriend } from "$lib/server/services/friends.js";
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
 const TEST_USER = { id: "user-1", email: "test@example.com" };
 const HOME_GROVE = { tenantId: "home-tenant", subdomain: "autumn", name: "Autumn's Grove" };
 
-function createMockDB(overrides?: { allResults?: unknown[]; firstResult?: unknown }) {
-	const allResults = overrides?.allResults ?? [];
-	const firstResult = overrides?.firstResult ?? null;
-
+function createMockDB() {
 	return {
 		prepare: vi.fn(() => ({
 			bind: vi.fn().mockReturnThis(),
-			all: vi.fn().mockResolvedValue({ results: allResults }),
-			first: vi.fn().mockResolvedValue(firstResult),
+			all: vi.fn().mockResolvedValue({ results: [] }),
+			first: vi.fn().mockResolvedValue(null),
 			run: vi.fn().mockResolvedValue({ success: true, meta: { changes: 1 } }),
 		})),
 	};
@@ -58,7 +66,7 @@ function createPOSTEvent(
 	user = TEST_USER,
 ) {
 	return {
-		request: new Request("https://example.com/api/lantern/friends", {
+		request: new Request("https://example.com/api/friends", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify(body),
@@ -80,32 +88,31 @@ function createDELETEEvent(
 	} as unknown as Parameters<typeof DELETE>[0];
 }
 
-// ── GET /api/lantern/friends ────────────────────────────────────────────────
+// ── GET /api/friends ────────────────────────────────────────────────────────
 
-describe("GET /api/lantern/friends", () => {
+describe("GET /api/friends", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		vi.mocked(getUserHomeGrove).mockResolvedValue(HOME_GROVE);
 	});
 
 	it("should return the user's friends list", async () => {
-		const db = createMockDB({
-			allResults: [
-				{
-					friend_tenant_id: "friend-1",
-					friend_name: "Art's Grove",
-					friend_subdomain: "a2a0",
-					source: "manual",
-				},
-				{
-					friend_tenant_id: "friend-2",
-					friend_name: "River's Place",
-					friend_subdomain: "river",
-					source: "manual",
-				},
-			],
-		});
+		vi.mocked(listFriends).mockResolvedValue([
+			{
+				tenantId: "friend-1",
+				name: "Art's Grove",
+				subdomain: "a2a0",
+				source: "manual",
+			},
+			{
+				tenantId: "friend-2",
+				name: "River's Place",
+				subdomain: "river",
+				source: "manual",
+			},
+		]);
 
+		const db = createMockDB();
 		const response = await GET(createGETEvent(db));
 		const data = await response.json();
 
@@ -136,28 +143,34 @@ describe("GET /api/lantern/friends", () => {
 		await expect(GET(event)).rejects.toThrow();
 	});
 
-	it("should query friends scoped to home tenant", async () => {
+	it("should call listFriends with home tenant ID", async () => {
+		vi.mocked(listFriends).mockResolvedValue([]);
 		const db = createMockDB();
 		await GET(createGETEvent(db));
 
-		const bindCall = db.prepare.mock.results[0].value.bind;
-		expect(bindCall).toHaveBeenCalledWith("home-tenant");
+		expect(listFriends).toHaveBeenCalledWith(db, "home-tenant");
 	});
 });
 
-// ── POST /api/lantern/friends ───────────────────────────────────────────────
+// ── POST /api/friends ───────────────────────────────────────────────────────
 
-describe("POST /api/lantern/friends", () => {
+describe("POST /api/friends", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		vi.mocked(getUserHomeGrove).mockResolvedValue(HOME_GROVE);
 	});
 
 	it("should add a friend by subdomain", async () => {
-		const db = createMockDB({
-			firstResult: { id: "friend-tenant", subdomain: "a2a0", display_name: "Art's Grove" },
+		vi.mocked(addFriend).mockResolvedValue({
+			friend: {
+				tenantId: "friend-tenant",
+				name: "Art's Grove",
+				subdomain: "a2a0",
+				source: "manual",
+			},
 		});
 
+		const db = createMockDB();
 		const event = createPOSTEvent({ friendSubdomain: "a2a0" }, db);
 		const response = await POST(event);
 		const data = await response.json();
@@ -194,33 +207,37 @@ describe("POST /api/lantern/friends", () => {
 	});
 
 	it("should prevent adding yourself as a friend", async () => {
-		const db = createMockDB({
-			// The looked-up tenant matches the user's own home tenant
-			firstResult: { id: "home-tenant", subdomain: "autumn", display_name: "Autumn's Grove" },
-		});
+		vi.mocked(addFriend).mockResolvedValue({ error: "self_add" });
 
+		const db = createMockDB();
 		const event = createPOSTEvent({ friendSubdomain: "autumn" }, db);
 		await expect(POST(event)).rejects.toThrow();
 	});
 
 	it("should return 404 when friend's grove doesn't exist", async () => {
-		const db = createMockDB({ firstResult: null });
+		vi.mocked(addFriend).mockResolvedValue({ error: "not_found" });
 
+		const db = createMockDB();
 		const event = createPOSTEvent({ friendSubdomain: "nonexistent" }, db);
 		await expect(POST(event)).rejects.toThrow();
 	});
 
 	it("should normalize subdomain to lowercase", async () => {
-		const db = createMockDB({
-			firstResult: { id: "friend-tenant", subdomain: "a2a0", display_name: "Art's Grove" },
+		vi.mocked(addFriend).mockResolvedValue({
+			friend: {
+				tenantId: "friend-tenant",
+				name: "Art's Grove",
+				subdomain: "a2a0",
+				source: "manual",
+			},
 		});
 
+		const db = createMockDB();
 		const event = createPOSTEvent({ friendSubdomain: "A2A0" }, db);
 		await POST(event);
 
-		// The SELECT query should use the lowercased subdomain
-		const bindCall = db.prepare.mock.results[0].value.bind;
-		expect(bindCall).toHaveBeenCalledWith("a2a0");
+		// The service should be called with the lowercased subdomain
+		expect(addFriend).toHaveBeenCalledWith(db, "home-tenant", "a2a0");
 	});
 
 	it("should reject unauthenticated requests", async () => {
@@ -232,7 +249,7 @@ describe("POST /api/lantern/friends", () => {
 
 	it("should reject malformed JSON body", async () => {
 		const event = {
-			request: new Request("https://example.com/api/lantern/friends", {
+			request: new Request("https://example.com/api/friends", {
 				method: "POST",
 				body: "not json",
 			}),
@@ -247,11 +264,17 @@ describe("POST /api/lantern/friends", () => {
 		const validSubdomains = ["ab", "test-grove", "a2a0", "my-cool-site123"];
 
 		for (const subdomain of validSubdomains) {
-			const db = createMockDB({
-				firstResult: { id: `tenant-${subdomain}`, subdomain, display_name: "Test" },
+			vi.mocked(addFriend).mockResolvedValue({
+				friend: {
+					tenantId: `tenant-${subdomain}`,
+					name: "Test",
+					subdomain,
+					source: "manual",
+				},
 			});
 			vi.mocked(getUserHomeGrove).mockResolvedValue(HOME_GROVE);
 
+			const db = createMockDB();
 			const event = createPOSTEvent({ friendSubdomain: subdomain }, db);
 			const response = await POST(event);
 			expect(response.status).toBe(201);
@@ -259,17 +282,18 @@ describe("POST /api/lantern/friends", () => {
 	});
 });
 
-// ── DELETE /api/lantern/friends/:tenantId ───────────────────────────────────
+// ── DELETE /api/friends/:tenantId ───────────────────────────────────────────
 
-describe("DELETE /api/lantern/friends/:tenantId", () => {
+describe("DELETE /api/friends/:tenantId", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		vi.mocked(getUserHomeGrove).mockResolvedValue(HOME_GROVE);
 	});
 
 	it("should delete an existing friend connection", async () => {
-		const db = createMockDB({ firstResult: { id: "row-1" } });
+		vi.mocked(removeFriend).mockResolvedValue(true);
 
+		const db = createMockDB();
 		const event = createDELETEEvent("friend-tenant", db);
 		const response = await DELETE(event);
 		const data = await response.json();
@@ -279,8 +303,9 @@ describe("DELETE /api/lantern/friends/:tenantId", () => {
 	});
 
 	it("should return 404 when friend connection doesn't exist", async () => {
-		const db = createMockDB({ firstResult: null });
+		vi.mocked(removeFriend).mockResolvedValue(false);
 
+		const db = createMockDB();
 		const event = createDELETEEvent("nonexistent", db);
 		await expect(DELETE(event)).rejects.toThrow();
 	});
@@ -300,17 +325,12 @@ describe("DELETE /api/lantern/friends/:tenantId", () => {
 		await expect(DELETE(event)).rejects.toThrow();
 	});
 
-	it("should scope deletion to the user's home tenant", async () => {
-		const db = createMockDB({ firstResult: { id: "row-1" } });
+	it("should call removeFriend with home tenant and friend tenant", async () => {
+		vi.mocked(removeFriend).mockResolvedValue(true);
 
+		const db = createMockDB();
 		await DELETE(createDELETEEvent("friend-tenant", db));
 
-		// First prepare call: SELECT to check existence
-		const firstBind = db.prepare.mock.results[0].value.bind;
-		expect(firstBind).toHaveBeenCalledWith("home-tenant", "friend-tenant");
-
-		// Second prepare call: DELETE
-		const secondBind = db.prepare.mock.results[1].value.bind;
-		expect(secondBind).toHaveBeenCalledWith("home-tenant", "friend-tenant");
+		expect(removeFriend).toHaveBeenCalledWith(db, "home-tenant", "friend-tenant");
 	});
 });
