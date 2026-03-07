@@ -92,6 +92,39 @@ Apps auto-deploy via GitHub Actions on push to main. Resource IDs are hardcoded 
 - **Font Fallback:** All font mappings should fall back to `lexend`, not other fonts
 - **Available Fonts:** See `libs/engine/static/fonts/` for the full collection
 
+### CRITICAL: Verify Colors Exist Before Using Them
+
+**Before using ANY Tailwind color class, verify it exists in the Grove design system.** LLMs frequently hallucinate class names that look right but aren't defined.
+
+**Valid Grove color families** (defined in `tailwind.preset.js`):
+
+| Token | Variants | Example classes |
+|-------|----------|-----------------|
+| `grove` | 50–950 | `bg-grove-500`, `text-grove-700` |
+| `cream` | DEFAULT, 50–500 | `bg-cream-200`, `border-cream-300` |
+| `bark` | DEFAULT, 50–950 | `text-bark-900`, `bg-bark-50` |
+| `primary` | DEFAULT, foreground | `bg-primary`, `text-primary-foreground` |
+| `secondary` | DEFAULT, foreground | `bg-secondary` |
+| `background` | — | `bg-background` |
+| `foreground` | DEFAULT, muted, subtle, faint | `text-foreground-muted` |
+| `muted` | DEFAULT, foreground | `bg-muted`, `text-muted-foreground` |
+| `accent` | DEFAULT, foreground, muted, subtle | `bg-accent-subtle` |
+| `surface` | DEFAULT, hover, elevated, subtle, alt | `bg-surface-subtle` |
+| `card` | DEFAULT, foreground | `bg-card`, `text-card-foreground` |
+| `popover` | DEFAULT, foreground | `bg-popover` |
+| `destructive` | DEFAULT, foreground | `bg-destructive` |
+| `error` | DEFAULT, foreground, bg | `text-error`, `bg-error-bg` |
+| `divider` | — | `border-divider` |
+| `default` | — | `border-default` |
+| `subtle` | — | `bg-subtle` |
+| `border` | — | `border-border` |
+| `input` | — | `border-input` |
+| `ring` | — | `ring-ring` |
+
+**DO NOT use** standard Tailwind colors (`gray-*`, `slate-*`, `zinc-*`, `neutral-*`, `stone-*`, `red-*`, `blue-*`, `green-*`, `amber-*`, `purple-*`, `pink-*`, `emerald-*`, `indigo-*`, `teal-*`). These are not in the Grove palette and will render as transparent/invisible.
+
+**When unsure**, check the preset: `libs/engine/src/lib/ui/tailwind.preset.js`
+
 ### CRITICAL: Tailwind Preset Required
 
 **All consumer apps MUST use the engine's Tailwind preset.**

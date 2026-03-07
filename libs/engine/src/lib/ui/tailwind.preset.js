@@ -88,6 +88,24 @@ export default {
           subtle: "hsl(var(--surface-subtle, 30 15% 97%))",
           alt: "hsl(var(--surface-alt, 30 10% 95%))",
         },
+        // Card & Popover: shadcn-compatible semantic tokens
+        // CSS variables defined in app.css with light/dark values
+        card: {
+          DEFAULT: "hsl(var(--card, 0 0% 100%))",
+          foreground: "hsl(var(--card-foreground, 0 0% 20%))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover, 0 0% 100%))",
+          foreground: "hsl(var(--popover-foreground, 0 0% 20%))",
+        },
+        // Divider: alias for border — commonly hallucinated by LLMs
+        divider: "rgb(var(--cream-200) / <alpha-value>)",
+        // Error: alias for destructive — commonly hallucinated by LLMs
+        error: {
+          DEFAULT: "#dc2626",
+          foreground: "#ffffff",
+          bg: "#fef2f2",
+        },
         default: "hsl(var(--default, 0 0% 88%))",
         subtle: "hsl(var(--subtle, 0 0% 92%))",
         destructive: {
