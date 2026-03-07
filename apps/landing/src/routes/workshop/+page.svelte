@@ -165,7 +165,7 @@
 					description:
 						"A bloom is a flower opening—a moment of expression, color, and beauty. It's what your grove produces. Every piece you write is a bloom. Something that grew from your thinking, opened when it was ready, and now stands in your garden for others to see.",
 					status: "live",
-					icon: "cherry",
+					icon: "notebook-text",
 					domain: "{you}.grove.place/garden/{slug}",
 					integration: "Individual pieces of writing in your garden",
 					spec: "/knowledge/specs/grove-garden-bloom-spec",
@@ -700,7 +700,7 @@
 						},
 						{
 							name: "Blooms",
-							icon: "cherry",
+							icon: "notebook-text",
 							description: "RSS syndicated posts",
 							href: "/knowledge/help/what-are-blooms",
 						},
