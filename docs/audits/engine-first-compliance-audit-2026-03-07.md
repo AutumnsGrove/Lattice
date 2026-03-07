@@ -27,9 +27,12 @@ The engine-first principle states: _"The engine exists to prevent duplication. U
 | Rootwork type safety (`as` casts) | FAIL | 52+ | HIGH |
 | Sanitization duplication | FAIL | 2+ impls | MEDIUM |
 | Redirect URL validation duplication | FAIL | 2 impls | MEDIUM |
+| TIER_STORAGE constant mismatch | FAIL | 2 defs (diverged!) | CRITICAL |
+| Email SEQUENCES duplication | FAIL | 3 defs | HIGH |
+| Tailwind color tokens duplication | FAIL | 7 copies | LOW |
 | Markdown renderer imports | PASS | 0 outside | - |
 
-**Overall compliance: ~25%** — Only `cn()` and markdown rendering follow engine-first consistently. **Total violations: 230+**
+**Overall compliance: ~25%** — Only `cn()` and markdown rendering follow engine-first consistently. **Total violations: 240+**
 
 ---
 
@@ -305,13 +308,60 @@ The engine has timing-safe comparison in `libs/engine/src/lib/utils/csrf.ts` but
 
 ---
 
+## Finding 12: TIER_STORAGE Constant Mismatch — CRITICAL DATA BUG
+
+**Severity: CRITICAL** — Active data mismatch causing incorrect quota calculations.
+
+`services/amber/src/index.ts:263` defines:
+```
+free: 0, seedling: 1, sapling: 5, oak: 20, canopy: 20, evergreen: 100, platform: 100
+```
+
+`apps/amber/src/lib/server/storage.ts:16` defines:
+```
+free: 0, seedling: 1, sapling: 5, oak: 20, evergreen: 100
+```
+
+**The app is missing `canopy` and `platform` tiers.** Any user on these tiers will hit incorrect quota calculations in the app. The service has the correct values but the client-facing app doesn't.
+
+**Recommendation:** Consolidate `TIER_STORAGE` into `@autumnsgrove/lattice/config` or `@autumnsgrove/lattice/payments`. Import in both locations.
+
+---
+
+## Finding 13: Email SEQUENCES Defined in 3 Places
+
+**Severity: HIGH** — Changes to email sequences require updates in 3 files.
+
+| Location | Type |
+| ----------------------------------------------- | --------------------------------- |
+| `libs/engine/src/lib/email/types.ts:87` | Source of truth (engine) |
+| `workers/onboarding/src/types.ts:77` | Independent re-definition |
+| `workers/email-catchup/worker.ts:63` | Independent re-definition |
+
+The onboarding worker even has a comment: _"Must match services/email-render/src/templates/types.ts SEQUENCES"_ — acknowledging the drift risk but not importing from engine.
+
+**Recommendation:** Import `SEQUENCES` from `@autumnsgrove/lattice/email` in both workers.
+
+---
+
+## Finding 14: Tailwind Color Tokens Duplicated 7x
+
+**Severity: LOW** — All apps define the identical `grove` color palette (50-950 shades) in their `tailwind.config.js` instead of inheriting from the engine preset.
+
+All 7 apps (`landing`, `plant`, `meadow`, `clearing`, `domains`, `terrarium`, `login`) copy-paste the same color values. Brand color changes require editing 7 files.
+
+**Recommendation:** Move the `grove` color palette into the engine's Tailwind preset so apps inherit it automatically.
+
+---
+
 ## Remediation Priority
 
-### P0 — High Impact, Quick Wins (Security-Critical)
-1. **Export `escapeHtml` from `@autumnsgrove/lattice/utils`** — eliminates 12+ external copies
-2. **Export `timingSafeEqual` from `@autumnsgrove/lattice/utils`** — eliminates 6 security-critical copies
-3. **Migrate `apps/landing` route escapeHtml copies** — 6 identical inline functions in one app
-4. **Consolidate engine-internal `formatBytes` duplication** — 2 copies within engine
+### P0 — High Impact, Quick Wins (Security + Data Critical)
+1. **FIX: TIER_STORAGE mismatch** — apps/amber missing `canopy` and `platform` tiers, causing wrong quota calculations
+2. **Export `escapeHtml` from `@autumnsgrove/lattice/utils`** — eliminates 12+ external copies
+3. **Export `timingSafeEqual` from `@autumnsgrove/lattice/utils`** — eliminates 6 security-critical copies
+4. **Migrate `apps/landing` route escapeHtml copies** — 6 identical inline functions in one app
+5. **Consolidate engine-internal `formatBytes` duplication** — 2 copies within engine
 
 ### P1 — Medium Impact, Moderate Effort
 4. **Create shared `formatDate()` presets** in engine utils — eliminates ~25 copies
