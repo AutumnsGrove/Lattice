@@ -24,7 +24,6 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          use_sticky_comment: true
 
           prompt: |
             REPO: ${{ github.repository }}
@@ -37,6 +36,7 @@ jobs:
             1. Run `gh pr diff ${{ github.event.pull_request.number }}` to see the changes
             2. Analyze the diff for issues listed below
             3. Post your review using `gh pr comment`
+            Only post GitHub comments — don't submit review text as messages.
 
             ## What to Flag
 
@@ -59,7 +59,8 @@ jobs:
 
             ## Output Format
 
-            ```markdown
+            Use this exact format when posting via `gh pr comment`:
+
             ## Code Review
 
             🔴 **[Critical]** Brief title
@@ -70,10 +71,9 @@ jobs:
 
             ### Summary
             One paragraph: Is this ready to merge? Any blocking concerns?
-            ```
 
             If the PR looks good, say so briefly. A clean review is a good review — do not manufacture feedback.
 
           claude_args: >-
-            --max-turns 6
+            --max-turns 10
             --allowedTools "Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
