@@ -4,6 +4,7 @@
 export * from "./api";
 export * from "./cn";
 export * from "./csrf";
+export * from "./date";
 export * from "./debounce";
 export * from "./escape-html";
 export * from "./schedule";
