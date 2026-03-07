@@ -27,9 +27,16 @@ describe("REVERIE_ERRORS", () => {
 		}
 	});
 
-	it("should have non-empty messages", () => {
+	it("should have non-empty userMessage and adminMessage", () => {
 		for (const def of Object.values(REVERIE_ERRORS)) {
-			expect(def.message.length).toBeGreaterThan(0);
+			expect(def.userMessage.length).toBeGreaterThan(0);
+			expect(def.adminMessage.length).toBeGreaterThan(0);
+		}
+	});
+
+	it("should have valid category on all errors", () => {
+		for (const def of Object.values(REVERIE_ERRORS)) {
+			expect(["user", "admin", "bug"]).toContain(def.category);
 		}
 	});
 });

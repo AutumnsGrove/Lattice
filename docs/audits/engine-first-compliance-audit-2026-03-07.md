@@ -23,7 +23,7 @@ The engine-first principle states: _"The engine exists to prevent duplication. U
 | `slugify()` duplication | FAIL | 5 impls | LOW |
 | `timingSafeEqual()` duplication | FAIL | 6 impls | HIGH |
 | Subscription tier type duplication | FAIL | 7 defs | MEDIUM |
-| Local error catalogs (workers/services) | PARTIAL | 3 non-compliant of 8 (2 compliant, 2 exempt, 1 intentional) | MEDIUM |
+| Local error catalogs (workers/services) | PASS | 0 non-compliant (5 compliant, 2 exempt, 1 intentional) | - |
 | Rootwork type safety (`as` casts) | PARTIAL | 196+ (28 landing fixed, 147 engine remaining, 21+ other) | HIGH |
 | Sanitization duplication | FAIL | 2+ impls | MEDIUM |
 | Redirect URL validation duplication | FAIL | 2 impls | MEDIUM |
@@ -148,22 +148,22 @@ Workers and services define their own error types instead of using/extending Sig
 | ---------------------------------------- | -------------- | ---------------------- | ---------------- |
 | `apps/plant/src/lib/errors.ts` | `PLANT-XXX` | YES (compliant) | GOLD STANDARD |
 | `workers/onboarding/src/errors.ts` | `ONBOARDING-XXX` | YES | COMPLIANT |
-| `workers/reverie/src/errors.ts` | `REV-XXX` | NO — own interface | NEEDS MIGRATION |
-| `workers/reverie-exec/src/errors.ts` | `EXC-XXX` | NO — own interface | NEEDS MIGRATION |
+| `workers/reverie/src/errors.ts` | `REV-XXX` | YES — imports + extends | MIGRATED |
+| `workers/reverie-exec/src/errors.ts` | `EXC-XXX` | YES — imports + extends | MIGRATED |
 | `workers/lumen/src/lib/errors.ts` | (custom) | NO — own system | INTENTIONAL (see below) |
-| `services/zephyr/src/errors.ts` | `ZEPHYR-NNN` | NO — mirrors type | NEEDS MIGRATION |
+| `services/zephyr/src/errors.ts` | `ZEPHYR-NNN` | YES — imports + aliases | MIGRATED |
 | `libs/grove-agent/src/errors.ts` | (varies) | Unknown | NEEDS REVIEW |
 | `libs/infra/src/errors.ts` | `SRV-XXX` | Own catalog | EXEMPT (documented in AGENT.md) |
 
 **Assessment:** `apps/plant` is the gold standard — it imports `GroveErrorDef` from Lattice and creates a local alias `PlantErrorDef = GroveErrorDef`. `workers/onboarding` already imports `GroveErrorDef` directly (compliant). `libs/infra` has its own `SRV_ERRORS` catalog which is legitimate (documented in AGENT.md).
 
-**Migration details for the 3 non-compliant workers:**
+**Migration details (all 3 now completed):**
 
-| Worker | Current Interface | Shape Match? | Effort |
-| -------------------- | -------------------- | ------------ | ------ |
-| `services/zephyr` | `ZephyrErrorDef` | YES — already has `code`, `category`, `userMessage`, `adminMessage` | Trivial — swap to import + alias |
-| `workers/reverie` | `ReverieErrorDef` | NO — uses `message` + `status` instead of `userMessage`/`adminMessage` + `category` | Medium — restructure 15 error defs + update `buildReverieError()` call sites |
-| `workers/reverie-exec` | `ExecErrorDef` | NO — uses `message` + `status` instead of `userMessage`/`adminMessage` + `category` | Medium — restructure 12 error defs + update `buildExecError()` call sites |
+| Worker | Type Alias | Pattern | Status |
+| -------------------- | -------------------- | ------ | ------ |
+| `services/zephyr` | `ZephyrErrorDef = GroveErrorDef` | Direct alias — shape already matched | DONE |
+| `workers/reverie` | `ReverieErrorDef = GroveErrorDef & { status: number }` | Extended with HTTP status; 15 defs restructured from `message` → `userMessage`/`adminMessage` + `category` | DONE |
+| `workers/reverie-exec` | `ExecErrorDef = GroveErrorDef & { status: number }` | Extended with HTTP status; 12 defs restructured, same pattern as reverie | DONE |
 
 **`workers/lumen` exception:** Lumen's error file provides `extractError()` and `buildErrorResponse()` for mapping upstream library errors — it doesn't define an error catalog. This is an intentional isolation pattern, not a type alignment issue.
 
@@ -439,7 +439,10 @@ All P0 items have been fixed in commit `a9ea4be`:
 ### P1 — Medium Impact, Moderate Effort
 1. ~~**Create shared `formatDate()` presets**~~ — PARTIALLY DONE. Shared utility created, 14 of ~25 copies migrated. Remaining copies in apps without lattice dependency.
 2. ~~**Migrate form data parsing to `parseFormData()`**~~ — DONE. 28+ unsafe casts in `apps/landing` migrated to Zod-validated `parseFormData()` across 8 route files. See Finding 7a for details.
-3. **Migrate worker error catalogs to import `GroveErrorDef`** — 3 workers need type alignment (see Finding 3c updated notes)
+3. ~~**Migrate worker error catalogs to import `GroveErrorDef`**~~ — DONE. All 3 non-compliant workers migrated:
+   - `services/zephyr` — Trivial swap: imported `GroveErrorDef`, aliased as `ZephyrErrorDef`
+   - `workers/reverie` — Medium: restructured 15 error defs from `{message, status}` to `{category, userMessage, adminMessage, status}`, updated `buildReverieError()` + tests
+   - `workers/reverie-exec` — Medium: restructured 12 error defs, same pattern as reverie, updated `buildExecError()`
 4. ~~**Define canonical `TierKey` type**~~ — DONE (part of P0 tier alignment). All packages now use engine's `TierKey`.
 5. **Replace bare `throw new Error()` in API routes** — 62+ violations
 
