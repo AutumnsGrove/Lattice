@@ -172,13 +172,13 @@
 	:global(.header-icon) {
 		width: 1.25rem;
 		height: 1.25rem;
-		color: var(--color-primary);
+		color: hsl(var(--grove-600));
 	}
 
 	.passkey-count {
 		font-size: 0.9rem;
 		font-weight: normal;
-		color: var(--color-text-muted);
+		color: hsl(var(--foreground-muted));
 	}
 
 	/* Loading State */
@@ -188,7 +188,7 @@
 		gap: 0.75rem;
 		padding: 1.5rem;
 		justify-content: center;
-		color: var(--color-text-muted);
+		color: hsl(var(--foreground-muted));
 		font-size: 0.9rem;
 	}
 
@@ -202,15 +202,15 @@
 		align-items: center;
 		gap: 0.75rem;
 		padding: 1rem;
-		background: rgba(239, 68, 68, 0.1);
+		background: hsl(var(--destructive) / 0.1);
 		border-radius: var(--border-radius-small);
-		color: #dc2626;
+		color: hsl(var(--destructive));
 		margin-bottom: 1rem;
 	}
 
 	:global(.dark) .error-state {
-		background: rgba(239, 68, 68, 0.15);
-		color: #f87171;
+		background: hsl(var(--destructive) / 0.15);
+		color: hsl(var(--destructive));
 	}
 
 	:global(.error-icon) {
@@ -236,7 +236,7 @@
 		justify-content: center;
 		width: 4rem;
 		height: 4rem;
-		background: var(--color-surface-subtle);
+		background: hsl(var(--surface-subtle));
 		border-radius: 50%;
 		margin-bottom: 1rem;
 	}
@@ -244,18 +244,18 @@
 	:global(.empty-icon) {
 		width: 2rem;
 		height: 2rem;
-		color: var(--color-text-muted);
+		color: hsl(var(--foreground-muted));
 	}
 
 	.empty-state h3 {
 		margin: 0 0 0.5rem 0;
 		font-size: 1.1rem;
-		color: var(--color-text);
+		color: hsl(var(--foreground));
 	}
 
 	.empty-description {
 		margin: 0 0 1.5rem 0;
-		color: var(--color-text-muted);
+		color: hsl(var(--foreground-muted));
 		font-size: 0.9rem;
 		max-width: 32ch;
 		margin-left: auto;
@@ -265,9 +265,9 @@
 	.not-supported {
 		margin: 0;
 		padding: 0.75rem 1rem;
-		background: var(--color-surface-subtle);
+		background: hsl(var(--surface-subtle));
 		border-radius: var(--border-radius-small);
-		color: var(--color-text-muted);
+		color: hsl(var(--foreground-muted));
 		font-size: 0.9rem;
 	}
 
@@ -283,7 +283,7 @@
 		align-items: center;
 		justify-content: space-between;
 		padding: 0.75rem 0;
-		border-bottom: 1px solid var(--color-border);
+		border-bottom: 1px solid hsl(var(--border));
 	}
 
 	.passkey-item:last-child {
@@ -299,7 +299,7 @@
 	:global(.passkey-icon) {
 		width: 1.5rem;
 		height: 1.5rem;
-		color: var(--color-primary);
+		color: hsl(var(--grove-600));
 		flex-shrink: 0;
 	}
 
@@ -311,20 +311,20 @@
 
 	.passkey-name {
 		font-weight: 500;
-		color: var(--color-text);
+		color: hsl(var(--foreground));
 	}
 
 	.passkey-meta {
 		font-size: 0.8rem;
-		color: var(--color-text-muted);
+		color: hsl(var(--foreground-muted));
 	}
 
 	:global(.delete-btn) {
-		color: var(--color-text-muted);
+		color: hsl(var(--foreground-muted));
 	}
 
 	:global(.delete-btn:hover) {
-		color: #dc2626;
+		color: hsl(var(--destructive));
 	}
 
 	:global(.delete-icon) {
@@ -342,9 +342,9 @@
 	.security-note {
 		margin: 1rem 0 0 0;
 		padding-top: 1rem;
-		border-top: 1px solid var(--color-border);
+		border-top: 1px solid hsl(var(--border));
 		font-size: 0.8rem;
-		color: var(--color-text-subtle);
+		color: hsl(var(--foreground-muted));
 	}
 
 	:global(.btn-icon) {

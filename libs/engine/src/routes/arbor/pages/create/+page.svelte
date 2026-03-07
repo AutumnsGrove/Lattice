@@ -181,7 +181,7 @@
 				<h2 class="m-0 mb-4 text-xl text-foreground">Page Details</h2>
 
 				<div class="form-group">
-					<label for="title">Title <span class="text-red-500">*</span></label>
+					<label for="title">Title <span class="text-error">*</span></label>
 					<Input id="title" bind:value={title} placeholder="About Us" required />
 				</div>
 
@@ -200,10 +200,10 @@
 						placeholder="about-us"
 						disabled={autoGenerateSlug}
 						onblur={validateSlugInput}
-						class={slugError ? "border-red-500" : ""}
+						class={slugError ? "border-error" : ""}
 					/>
 					{#if slugError}
-						<p class="text-sm text-red-500 mt-1">{slugError}</p>
+						<p class="text-sm text-error mt-1">{slugError}</p>
 					{:else}
 						<p class="text-xs text-foreground-muted mt-1">
 							Preview: /{slug || "your-page-slug"}
@@ -260,7 +260,7 @@
 		<!-- Markdown Editor -->
 		<GlassCard variant="default" class="editor-section">
 			<h2 class="m-0 mb-4 text-xl text-foreground">
-				Content <span class="text-red-500">*</span>
+				Content <span class="text-error">*</span>
 			</h2>
 			<MarkdownEditor bind:content />
 		</GlassCard>

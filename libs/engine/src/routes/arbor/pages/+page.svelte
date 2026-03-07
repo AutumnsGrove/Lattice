@@ -175,7 +175,7 @@
 			<p class="m-0 text-foreground-muted">
 				{data.pages.length} pages
 				<span class="mx-2">·</span>
-				<span class:text-amber-600={atLimit} class:dark:text-amber-400={atLimit}>
+				<span class:text-warning={atLimit}>
 					{slotsUsed}/{navLimit} slots used
 				</span>
 			</p>
@@ -188,7 +188,7 @@
 
 	{#if data.pagesLoadError}
 		<div
-			class="flex items-center gap-2 p-3 mb-6 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200"
+			class="flex items-center gap-2 p-3 mb-6 rounded-lg bg-warning-bg border border-warning text-warning"
 		>
 			<AlertCircle class="w-4 h-4 flex-shrink-0" />
 			<span class="text-sm">Couldn't load your pages. Try refreshing the page.</span>
@@ -197,7 +197,7 @@
 
 	{#if navLimit === 0}
 		<div
-			class="flex items-center gap-2 p-3 mb-6 rounded-lg bg-slate-50 dark:bg-bark-900/40 border border-slate-200 dark:border-bark-700 text-slate-700 dark:text-bark-300"
+			class="flex items-center gap-2 p-3 mb-6 rounded-lg bg-surface-subtle border border-border text-foreground-muted"
 		>
 			<AlertCircle class="w-4 h-4 flex-shrink-0" />
 			<span class="text-sm"
@@ -209,7 +209,7 @@
 		</div>
 	{:else if atLimit}
 		<div
-			class="flex items-center gap-2 p-3 mb-6 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200"
+			class="flex items-center gap-2 p-3 mb-6 rounded-lg bg-warning-bg border border-warning text-warning"
 		>
 			<AlertCircle class="w-4 h-4 flex-shrink-0" />
 			<span class="text-sm"
@@ -224,23 +224,23 @@
 			<thead>
 				<tr>
 					<th
-						class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-cream-100/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3"
+						class="p-4 text-left border-b border-border bg-white/80 dark:bg-cream-100/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3"
 						>Page</th
 					>
 					<th
-						class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-cream-100/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden"
+						class="p-4 text-left border-b border-border bg-white/80 dark:bg-cream-100/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden"
 						>Type</th
 					>
 					<th
-						class="p-4 text-center border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-cream-100/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden"
+						class="p-4 text-center border-b border-border bg-white/80 dark:bg-cream-100/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden"
 						title="Show in navigation menu">Nav</th
 					>
 					<th
-						class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-cream-100/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden"
+						class="p-4 text-left border-b border-border bg-white/80 dark:bg-cream-100/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden"
 						>Updated</th
 					>
 					<th
-						class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-cream-100/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3"
+						class="p-4 text-left border-b border-border bg-white/80 dark:bg-cream-100/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3"
 						>Actions</th
 					>
 				</tr>
@@ -251,12 +251,12 @@
 					{@const canToggle = isInNav || !atLimit}
 					<tr>
 						<td
-							class="p-4 text-left border-b border-gray-200 dark:border-gray-700 transition-[border-color] max-md:px-2 max-md:py-3"
+							class="p-4 text-left border-b border-border transition-[border-color] max-md:px-2 max-md:py-3"
 						>
 							<a
 								href="/{page.slug === 'home' ? '' : page.slug}"
 								target="_blank"
-								class="font-medium text-green-700 dark:text-green-400 no-underline hover:underline transition-colors"
+								class="font-medium text-success no-underline hover:underline transition-colors"
 							>
 								{page.title}
 							</a>
@@ -265,12 +265,12 @@
 							{/if}
 						</td>
 						<td
-							class="p-4 text-left border-b border-gray-200 dark:border-gray-700 whitespace-nowrap transition-[border-color] max-md:hidden"
+							class="p-4 text-left border-b border-border whitespace-nowrap transition-[border-color] max-md:hidden"
 						>
 							<Badge variant="tag">{page.type}</Badge>
 						</td>
 						<td
-							class="p-4 text-center border-b border-gray-200 dark:border-gray-700 whitespace-nowrap transition-[border-color] max-md:hidden"
+							class="p-4 text-center border-b border-border whitespace-nowrap transition-[border-color] max-md:hidden"
 						>
 							<input
 								type="checkbox"
@@ -294,24 +294,24 @@
 							>{formatDate(page.updated_at)}</td
 						>
 						<td
-							class="p-4 text-left border-b border-gray-200 dark:border-gray-700 whitespace-nowrap transition-[border-color] max-md:px-2 max-md:py-3"
+							class="p-4 text-left border-b border-border whitespace-nowrap transition-[border-color] max-md:px-2 max-md:py-3"
 						>
 							<a
 								href="/{page.slug === 'home' ? '' : page.slug}"
 								target="_blank"
-								class="text-green-700 dark:text-green-400 no-underline text-sm mr-4 hover:underline transition-colors max-md:mr-2"
+								class="text-success no-underline text-sm mr-4 hover:underline transition-colors max-md:mr-2"
 								>View</a
 							>
 							<a
 								href="/arbor/pages/edit/{page.slug}"
-								class="text-green-700 dark:text-green-400 no-underline text-sm mr-4 hover:underline transition-colors max-md:mr-2"
+								class="text-success no-underline text-sm mr-4 hover:underline transition-colors max-md:mr-2"
 								>Edit</a
 							>
 							{#if !PROTECTED_SLUGS.includes(page.slug)}
 								<button
 									onclick={() => confirmDelete({ slug: page.slug, title: page.title })}
 									disabled={deleting}
-									class="text-red-500 dark:text-red-400 text-sm hover:underline transition-colors inline-flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:no-underline"
+									class="text-error text-sm hover:underline transition-colors inline-flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:no-underline"
 									aria-label="Delete {page.title}"
 								>
 									<Trash2 class="w-3.5 h-3.5" />

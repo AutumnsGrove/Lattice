@@ -64,9 +64,9 @@
 	<!-- Example Site Notice -->
 	{#if data.isExampleSite}
 		<div
-			class="mb-6 p-4 bg-amber-50 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-700 rounded-lg"
+			class="mb-6 p-4 bg-warning-bg border border-warning rounded-lg"
 		>
-			<p class="m-0 text-amber-800 dark:text-amber-200 text-sm">
+			<p class="m-0 text-warning text-sm">
 				<strong><Sparkles class="w-4 h-4 inline-block" /> Welcome to the Example Site!</strong> This <GroveSwap
 					term="arbor"
 					standard="dashboard">admin panel</GroveSwap
@@ -98,22 +98,22 @@
 				<tr>
 					<th
 						scope="col"
-						class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-cream-100/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3"
+						class="p-4 text-left border-b border-border bg-white/80 dark:bg-cream-100/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3"
 						>Title</th
 					>
 					<th
 						scope="col"
-						class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-cream-100/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden"
+						class="p-4 text-left border-b border-border bg-white/80 dark:bg-cream-100/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden"
 						>Date</th
 					>
 					<th
 						scope="col"
-						class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-cream-100/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden"
+						class="p-4 text-left border-b border-border bg-white/80 dark:bg-cream-100/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden"
 						>Tags</th
 					>
 					<th
 						scope="col"
-						class="p-4 text-left border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-cream-100/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3"
+						class="p-4 text-left border-b border-border bg-white/80 dark:bg-cream-100/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3"
 						>Actions</th
 					>
 				</tr>
@@ -122,7 +122,7 @@
 				{#each data.posts as post (post.slug)}
 					<tr>
 						<td
-							class="p-4 text-left border-b border-gray-200 dark:border-gray-700 transition-[border-color] max-md:px-2 max-md:py-3"
+							class="p-4 text-left border-b border-border transition-[border-color] max-md:px-2 max-md:py-3"
 						>
 							{#if post.status === "published"}
 								<a
@@ -130,7 +130,7 @@
 									target="_blank"
 									rel="noopener noreferrer"
 									aria-label="{post.title} (opens in new tab)"
-									class="font-medium text-green-700 dark:text-green-400 no-underline hover:underline transition-colors"
+									class="font-medium text-success no-underline hover:underline transition-colors"
 								>
 									{post.title}
 								</a>
@@ -142,18 +142,18 @@
 							{/if}
 						</td>
 						<td
-							class="p-4 text-left border-b border-gray-200 dark:border-gray-700 whitespace-nowrap text-foreground-muted text-sm transition-[border-color] max-md:hidden"
+							class="p-4 text-left border-b border-border whitespace-nowrap text-foreground-muted text-sm transition-[border-color] max-md:hidden"
 						>
 							{#if post.status === "published" && post.date}
 								{formatDate(post.date)}
 							{:else if post.status === "draft"}
-								<span class="text-amber-600 dark:text-amber-400 font-medium">Draft</span>
+								<span class="text-warning font-medium">Draft</span>
 							{:else}
 								<span class="text-foreground-subtle">—</span>
 							{/if}
 						</td>
 						<td
-							class="p-4 text-left border-b border-gray-200 dark:border-gray-700 transition-[border-color] max-md:hidden"
+							class="p-4 text-left border-b border-border transition-[border-color] max-md:hidden"
 						>
 							<div class="flex flex-wrap gap-1 items-center">
 								{#if post.blaze}
@@ -171,7 +171,7 @@
 							</div>
 						</td>
 						<td
-							class="p-4 text-left border-b border-gray-200 dark:border-gray-700 whitespace-nowrap transition-[border-color] max-md:px-2 max-md:py-3"
+							class="p-4 text-left border-b border-border whitespace-nowrap transition-[border-color] max-md:px-2 max-md:py-3"
 						>
 							{#if post.status === "published"}
 								<a
@@ -179,7 +179,7 @@
 									target="_blank"
 									rel="noopener noreferrer"
 									aria-label="View {post.title} (opens in new tab)"
-									class="text-green-700 dark:text-green-400 no-underline text-sm mr-4 hover:underline transition-colors max-md:mr-2"
+									class="text-success no-underline text-sm mr-4 hover:underline transition-colors max-md:mr-2"
 									>View</a
 								>
 							{:else}
@@ -190,13 +190,13 @@
 							{/if}
 							<a
 								href="/arbor/garden/edit/{post.slug}"
-								class="text-green-700 dark:text-green-400 no-underline text-sm mr-4 hover:underline transition-colors max-md:mr-2"
+								class="text-success no-underline text-sm mr-4 hover:underline transition-colors max-md:mr-2"
 								>Edit</a
 							>
 							<button
 								onclick={() => confirmDelete({ slug: post.slug, title: post.title })}
 								disabled={deleting}
-								class="text-red-500 dark:text-red-400 text-sm hover:underline transition-colors inline-flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:no-underline"
+								class="text-error text-sm hover:underline transition-colors inline-flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:no-underline"
 								aria-label="Delete {post.title}"
 							>
 								<Trash2 class="w-3.5 h-3.5" />
