@@ -18,7 +18,7 @@ The engine-first principle states: _"The engine exists to prevent duplication. U
 | `cn()` / class merging | PASS | 0 | - |
 | Error handling (Signpost) | FAIL | 108+ | HIGH |
 | `escapeHtml()` duplication | FAIL | 17 impls | HIGH |
-| `formatDate()` duplication | FAIL | 41 impls | MEDIUM |
+| `formatDate()` duplication | PARTIAL | 14 migrated | MEDIUM |
 | `formatBytes()` duplication | FAIL | 6 impls | LOW |
 | `slugify()` duplication | FAIL | 5 impls | LOW |
 | `timingSafeEqual()` duplication | FAIL | 6 impls | HIGH |
@@ -66,26 +66,52 @@ The engine has `escapeHtml` in `libs/engine/src/lib/utils/sanitize.ts` but it is
 
 ---
 
-## Finding 2: `formatDate()` — 41 Independent Implementations
+## Finding 2: `formatDate()` — 41 Independent Implementations → PARTIALLY RESOLVED
 
 **Severity: MEDIUM** — Not security-critical but massive duplication.
 
-There are 41 separate `formatDate()` implementations across the codebase, each doing slightly different formatting:
+**Status: PARTIALLY RESOLVED** in commits `afc85f0`, `6fcd8f1`, `4e8139b`.
 
-| Package | Count | Notes |
-| --------------------------------- | ----- | ------------------------------------------ |
-| `libs/engine/` (various Svelte) | ~15 | Inline in components, not shared |
-| `libs/engine/src/routes/arbor/` | ~8 | Each arbor page has its own |
-| `apps/landing/` | 1 | `docs-loader.ts` |
-| `apps/amber/` | 1 | `FileList.svelte` |
-| `libs/foliage/` | 1 | `ModerationQueue.svelte` |
-| `workers/patina/` | 1 | `utils.ts` |
-| `scripts/` | 1 | `broadcast.ts` |
-| `tools/cairn/` | 1 | `layout.ts` |
+Created shared date utility at `libs/engine/src/lib/utils/date.ts` with 7 presets:
+- `formatRelativeTime()` — "just now", "5m ago", "2h ago", "3d ago"
+- `formatDateFull()` — "January 15, 2026"
+- `formatDateShort()` — "Jan 15" / "Jan 15, 2024"
+- `formatDateTime()` — "Jan 5, 3:45 PM"
+- `formatDateISO()` — "2024-01-15"
+- `formatSmartDate()` — context-aware (time today, short this year, full otherwise)
+- `formatDuration()` — "45 min", "2h 30m", "1d 4h"
 
-**Root cause:** No shared date formatting utility in the engine. Each component writes its own.
+All accept flexible input (ISO string, Date, unix seconds). Exported via `@autumnsgrove/lattice/utils`.
 
-**Recommendation:** Create `formatDate()`, `formatRelativeDate()`, and `formatTimestamp()` utilities in `@autumnsgrove/lattice/utils` with common format presets (ISO date, display date, relative "2 hours ago", etc.).
+**Migrated (14 implementations removed):**
+
+| Location | What changed |
+| ---------------------------------------- | ------------------------------------------ |
+| `ReedsComment.svelte` | formatTimeAgo → formatRelativeTime |
+| `SafetyMonitoring.svelte` | formatTime → formatDateTime |
+| `guestbook/index.ts` | re-export from shared |
+| `pulse/index.ts` | re-export from shared |
+| `GlassStatusWidget.svelte` | import from shared |
+| `arbor/traces/+page.svelte` | formatRelativeTime + formatFullDate → shared |
+| `arbor/settings/+page.svelte` | formatRelativeTime → shared |
+| `arbor/account/utils.ts` | formatDate delegates to formatDateFull |
+| `PasskeyCard.svelte` | formatDate → formatDateShort |
+| `meadow/utils/time.ts` | re-export from shared |
+| `landing/vista/workers` | import from shared |
+| `landing/vista/databases` | import from shared |
+| `landing/vista/alerts` | import from shared |
+| `landing/vista/+page` | import from shared |
+
+**Remaining (not migrated):**
+
+| Location | Reason |
+| --------------------------------- | ------------------------------------------ |
+| `apps/clearing/utils/date.ts` | Intentionally verbose format for status page UX |
+| `apps/ivy/` (3 inline copies) | App doesn't import from lattice yet |
+| `workers/patina/utils.ts` | Worker doesn't depend on lattice |
+| `tools/cairn/layout.ts` | Tool doesn't depend on lattice |
+| `apps/amber/FileList.svelte` | Needs separate migration |
+| `libs/foliage/ModerationQueue.svelte` | Needs separate migration |
 
 ---
 
@@ -367,7 +393,7 @@ All P0 items have been fixed in commit `a9ea4be`:
 5. ~~**Consolidate `formatBytes`**~~ — DONE. `imageProcessor.ts` upgraded to handle GB/TB, `amber/utils.ts` now re-exports from it.
 
 ### P1 — Medium Impact, Moderate Effort
-1. **Create shared `formatDate()` presets** in engine utils — eliminates ~25 copies
+1. ~~**Create shared `formatDate()` presets**~~ — PARTIALLY DONE. Shared utility created, 14 of ~25 copies migrated. Remaining copies in apps without lattice dependency.
 2. **Migrate form data parsing to `parseFormData()`** — 18+ unsafe cast sites in landing/plant
 3. **Migrate worker error catalogs to import `GroveErrorDef`** — 4 workers need type alignment
 4. ~~**Define canonical `TierKey` type**~~ — DONE (part of P0 tier alignment). All packages now use engine's `TierKey`.
