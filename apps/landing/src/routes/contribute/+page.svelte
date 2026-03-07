@@ -354,7 +354,7 @@
 
 						<div class="grid gap-4">
 							<div class="flex items-start gap-4 p-4 rounded-xl border border-default bg-surface">
-								<div class="p-2 rounded-lg bg-accent-subtle/20 mt-0.5 shrink-0">
+								<div class="p-2 rounded-lg bg-accent-subtle/20 shrink-0">
 									<TreePine class="w-4 h-4 text-accent-muted" />
 								</div>
 								<div>
@@ -364,7 +364,7 @@
 							</div>
 
 							<div class="flex items-start gap-4 p-4 rounded-xl border border-default bg-surface">
-								<div class="p-2 rounded-lg bg-accent-subtle/20 mt-0.5 shrink-0">
+								<div class="p-2 rounded-lg bg-accent-subtle/20 shrink-0">
 									<Sparkles class="w-4 h-4 text-accent-muted" />
 								</div>
 								<div>
@@ -374,7 +374,7 @@
 							</div>
 
 							<div class="flex items-start gap-4 p-4 rounded-xl border border-default bg-surface">
-								<div class="p-2 rounded-lg bg-accent-subtle/20 mt-0.5 shrink-0">
+								<div class="p-2 rounded-lg bg-accent-subtle/20 shrink-0">
 									<Heart class="w-4 h-4 text-accent-muted" />
 								</div>
 								<div>
@@ -386,7 +386,7 @@
 					</div>
 
 					<!-- Already a subscriber note -->
-					<div class="text-center p-6 rounded-xl bg-surface-subtle border border-default">
+					<div class="text-center p-6 rounded-xl bg-accent border border-default">
 						<p class="text-foreground-muted font-sans text-sm leading-relaxed">
 							Already have a Grove subscription? <span class="text-foreground">You're already supporting the dream.</span> Thank you for being <GroveTerm term="rooted">rooted</GroveTerm> with us.
 						</p>
