@@ -24,6 +24,7 @@ var skillCategories = []string{
 	"Surgical Fixers",
 	"Exploration",
 	"Enhancement",
+	"Compliance",
 	"Security",
 	"Reasoning",
 	"Gatherings",
@@ -49,6 +50,9 @@ var skillRegistry = []skillEntry{
 	{"d", "deer-sense", "Audit accessibility barriers", "Enhancement"},
 	{"c", "chameleon-adapt", "Theme/design with glassmorphism", "Enhancement"},
 	{"t", "beaver-build", "Write robust tests", "Enhancement"},
+
+	// Compliance & Quality
+	{"i", "crane-audit", "PR compliance audit for Grove SDK standards", "Compliance"},
 
 	// Security & Hardening
 	{"s", "spider-weave", "Auth integration and route security", "Security"},
@@ -83,6 +87,9 @@ var labelSuggestions = map[string][]string{
 	"bug":           {"panther-strike", "mole-debug"},
 	"feature":       {"elephant-build", "eagle-architect"},
 	"enhancement":   {"elephant-build", "gathering-feature"},
+	"lumen":         {"crane-audit"},
+	"foliage":       {"crane-audit"},
+	"lattice":       {"crane-audit", "elephant-build"},
 	"security":      {"gathering-security"},
 	"performance":   {"fox-optimize"},
 	"documentation": {"owl-archive"},
