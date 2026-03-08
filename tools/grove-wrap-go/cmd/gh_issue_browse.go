@@ -27,21 +27,23 @@ type browseIssue struct {
 
 // issueBrowseModel is the Bubble Tea model for the interactive issue browser.
 type issueBrowseModel struct {
-	issues    []browseIssue
-	filtered  []browseIssue // subset after filter
-	cursor    int
-	offset    int
-	pageSize  int
-	filter    string // active label filter
-	filterBuf string // filter input buffer
-	filtering bool   // in filter-input mode
-	detail    *browseIssue
-	width     int
-	height    int
-	err       error
-	quitting  bool
-	action    string // post-quit action: "worktree", "panther"
-	actionNum int    // issue number for action
+	issues      []browseIssue
+	filtered    []browseIssue // subset after filter
+	cursor      int
+	offset      int
+	pageSize    int
+	filter      string // active label filter
+	filterBuf   string // filter input buffer
+	filtering   bool   // in filter-input mode
+	detail      *browseIssue
+	showHelp    bool   // help overlay visible
+	width       int
+	height      int
+	err         error
+	quitting    bool
+	action      string // post-quit action: "worktree", "skill"
+	actionSkill string // skill name for "skill" action
+	actionNum   int    // issue number for action
 }
 
 func newIssueBrowseModel(issues []browseIssue, pageSize int) issueBrowseModel {
@@ -71,6 +73,12 @@ func (m issueBrowseModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case tea.KeyMsg:
+		// Help overlay — any key dismisses
+		if m.showHelp {
+			m.showHelp = false
+			return m, nil
+		}
+
 		// Detail view mode
 		if m.detail != nil {
 			switch msg.String() {
@@ -103,7 +111,9 @@ func (m issueBrowseModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		// Normal list mode
-		switch msg.String() {
+		key := msg.String()
+
+		switch key {
 		case "q", "ctrl+c":
 			m.quitting = true
 			return m, tea.Quit
@@ -160,7 +170,7 @@ func (m issueBrowseModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.detail = &issue
 			}
 
-		case "o":
+		case "O": // Open in browser (shift+o)
 			if len(m.filtered) > 0 {
 				issue := m.filtered[m.cursor]
 				ghArgs := []string{"issue", "view", fmt.Sprintf("%d", issue.Number), "--web"}
@@ -168,15 +178,7 @@ func (m issueBrowseModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				gwexec.GH(ghArgs...)
 			}
 
-		case "p":
-			if len(m.filtered) > 0 {
-				m.action = "panther"
-				m.actionNum = m.filtered[m.cursor].Number
-				m.quitting = true
-				return m, tea.Quit
-			}
-
-		case "w":
+		case "W": // Create worktree (shift+w)
 			if len(m.filtered) > 0 {
 				m.action = "worktree"
 				m.actionNum = m.filtered[m.cursor].Number
@@ -188,11 +190,26 @@ func (m issueBrowseModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.filtering = true
 			m.filterBuf = m.filter
 
+		case "?":
+			m.showHelp = true
+
 		case "esc":
 			if m.filter != "" {
 				m.filter = ""
 				m.filterBuf = ""
 				m.applyFilter()
+			}
+
+		default:
+			// Check skill hotkeys
+			if skill, ok := skillByKey[key]; ok {
+				if len(m.filtered) > 0 {
+					m.action = "skill"
+					m.actionSkill = skill.Name
+					m.actionNum = m.filtered[m.cursor].Number
+					m.quitting = true
+					return m, tea.Quit
+				}
 			}
 		}
 	}
@@ -243,13 +260,30 @@ var (
 	browseHintStyle = lipgloss.NewStyle().
 		Foreground(ui.DimGray)
 
+	browseSuggestStyle = lipgloss.NewStyle().
+		Foreground(ui.SunsetAmber).
+		Italic(true)
+
 	browseDetailStyle = lipgloss.NewStyle().
 		Padding(1, 2)
+
+	browseHelpKeyStyle = lipgloss.NewStyle().
+		Foreground(ui.ForestGreen).
+		Bold(true)
+
+	browseHelpCatStyle = lipgloss.NewStyle().
+		Foreground(ui.SunsetAmber).
+		Bold(true)
 )
 
 func (m issueBrowseModel) View() string {
 	if m.quitting {
 		return ""
+	}
+
+	// Help overlay
+	if m.showHelp {
+		return m.renderHelp()
 	}
 
 	// Detail view
@@ -300,14 +334,71 @@ func (m issueBrowseModel) View() string {
 		}
 	}
 
-	// Hints
+	// Footer hints
 	b.WriteString("\n")
 	hints := []string{
-		"j/k navigate", "v view", "o open", "w worktree", "p panther",
-		"/ filter", "q quit",
+		"j/k nav", "v view", "O open", "W tree",
+		"/ filter", "? skills", "q quit",
 	}
 	b.WriteString(browseHintStyle.Render("  " + strings.Join(hints, " • ")))
 
+	// Label-based skill suggestion
+	if len(m.filtered) > 0 {
+		issue := m.filtered[m.cursor]
+		suggestions := suggestSkills(issue.Labels)
+		if len(suggestions) > 0 {
+			var parts []string
+			for _, s := range suggestions {
+				if entry, ok := skillByName[s]; ok {
+					parts = append(parts, fmt.Sprintf("[%s] %s", entry.Key, entry.Name))
+				}
+				if len(parts) >= 2 {
+					break
+				}
+			}
+			b.WriteString("\n")
+			b.WriteString(browseSuggestStyle.Render("  suggested: " + strings.Join(parts, " or ")))
+		}
+	}
+
+	return b.String()
+}
+
+func (m issueBrowseModel) renderHelp() string {
+	var b strings.Builder
+	b.WriteString(browseHeaderStyle.Render("🌿 Skill Launcher — Hotkey Reference") + "\n\n")
+
+	// Browser controls
+	b.WriteString(browseHelpCatStyle.Render("  Browser") + "\n")
+	b.WriteString(fmt.Sprintf("    %s  Navigate           %s  View detail\n",
+		browseHelpKeyStyle.Render("j/k"), browseHelpKeyStyle.Render("v")))
+	b.WriteString(fmt.Sprintf("    %s    Open in browser    %s  Create worktree\n",
+		browseHelpKeyStyle.Render("O"), browseHelpKeyStyle.Render("W")))
+	b.WriteString(fmt.Sprintf("    %s    Filter by label    %s  Quit\n",
+		browseHelpKeyStyle.Render("/"), browseHelpKeyStyle.Render("q")))
+	b.WriteString("\n")
+
+	// Skills by category
+	for _, cat := range skillCategories {
+		b.WriteString(browseHelpCatStyle.Render("  "+cat) + "\n")
+		for i := range skillRegistry {
+			skill := &skillRegistry[i]
+			if skill.Category == cat {
+				keyDisplay := skill.Key
+				// Show shift indicator for uppercase keys
+				if len(keyDisplay) == 1 && keyDisplay[0] >= 'A' && keyDisplay[0] <= 'Z' {
+					keyDisplay = "⇧" + strings.ToLower(keyDisplay)
+				}
+				b.WriteString(fmt.Sprintf("    %s  %-24s %s\n",
+					browseHelpKeyStyle.Render(fmt.Sprintf("%-3s", keyDisplay)),
+					skill.Name,
+					browseHintStyle.Render(skill.Purpose)))
+			}
+		}
+	}
+
+	b.WriteString("\n")
+	b.WriteString(browseHintStyle.Render("  Press any key to return"))
 	return b.String()
 }
 
@@ -349,40 +440,9 @@ func runIssueBrowse(issues []browseIssue, pageSize int) error {
 
 	// Handle post-quit actions
 	switch final.action {
-	case "panther":
-		// Create (or reuse) worktree, then launch claude inside it
+	case "skill":
 		num := fmt.Sprintf("%d", final.actionNum)
-		wtPath, err := worktreePathForIssue(num)
-		if err != nil {
-			return fmt.Errorf("failed to resolve worktree path: %w", err)
-		}
-
-		if _, err := os.Stat(wtPath); os.IsNotExist(err) {
-			ui.Info(fmt.Sprintf("Creating worktree for issue #%s...", num))
-			wtCmd := gitWorktreeCreateCmd
-			wtCmd.SetArgs([]string{num})
-			if err := wtCmd.RunE(wtCmd, []string{num}); err != nil {
-				ui.Warning(fmt.Sprintf("Worktree creation failed, launching in current directory: %v", err))
-				wtPath = "" // fall back to current directory
-			}
-		} else {
-			ui.Info(fmt.Sprintf("Reusing existing worktree at %s", wtPath))
-		}
-
-		prompt := fmt.Sprintf("/panther-strike #%s", num)
-		var exitCode int
-		if wtPath != "" {
-			ui.Info(fmt.Sprintf("Working in %s", wtPath))
-			exitCode, err = gwexec.RunStreamingInDir(wtPath, "claude", prompt)
-		} else {
-			exitCode, err = gwexec.RunStreaming("claude", prompt)
-		}
-		if err != nil {
-			return fmt.Errorf("failed to launch claude: %w", err)
-		}
-		if exitCode != 0 {
-			return fmt.Errorf("claude exited with code %d", exitCode)
-		}
+		return launchSkillForIssue(final.actionSkill, num)
 
 	case "worktree":
 		// Create worktree for issue
