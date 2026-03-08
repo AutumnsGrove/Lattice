@@ -77,7 +77,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&flagAgent, "agent", false, "Agent mode: stricter safety, no colors")
 	rootCmd.PersistentFlags().BoolVarP(&flagVerbose, "verbose", "v", false, "Verbose output")
 	rootCmd.PersistentFlags().BoolVar(&flagNoCloud, "no-cloud", false, "Skip cloud/wrangler calls (faster, offline-safe)")
-	rootCmd.PersistentFlags().BoolVarP(&flagInteractive, "interactive", "i", false, "Enable interactive Bubble Tea TUI (humans only)")
+	rootCmd.PersistentFlags().BoolVarP(&flagInteractive, "interactive", "i", true, "Interactive TUI mode (auto-disabled for --agent/--json)")
 
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(doctorCmd)

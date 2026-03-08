@@ -10,7 +10,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"golang.org/x/term"
 
-	"github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/exec"
+	gwexec "github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/exec"
 	"github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/ui"
 )
 
@@ -148,7 +148,7 @@ func (m issueBrowseModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				ghArgs := []string{"issue", "view", fmt.Sprintf("%d", issue.Number)}
 				ghArgs = append(ghArgs, ghRepoArgs()...)
 				ghArgs = append(ghArgs, "--json", "body")
-				output, err := exec.GHOutput(ghArgs...)
+				output, err := gwexec.GHOutput(ghArgs...)
 				if err == nil {
 					var data map[string]interface{}
 					if json.Unmarshal([]byte(output), &data) == nil {
@@ -165,7 +165,7 @@ func (m issueBrowseModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				issue := m.filtered[m.cursor]
 				ghArgs := []string{"issue", "view", fmt.Sprintf("%d", issue.Number), "--web"}
 				ghArgs = append(ghArgs, ghRepoArgs()...)
-				exec.GH(ghArgs...)
+				gwexec.GH(ghArgs...)
 			}
 
 		case "p":
@@ -350,16 +350,16 @@ func runIssueBrowse(issues []browseIssue, pageSize int) error {
 	// Handle post-quit actions
 	switch final.action {
 	case "panther":
-		// Print structured context for panther-strike
-		issue := findIssueByNumber(final.issues, final.actionNum)
-		if issue != nil {
-			fmt.Printf("🐾 Panther context for issue #%d\n\n", issue.Number)
-			fmt.Printf("Title:  %s\n", issue.Title)
-			fmt.Printf("State:  %s\n", issue.State)
-			fmt.Printf("URL:    %s\n", issue.URL)
-			if len(issue.Labels) > 0 {
-				fmt.Printf("Labels: %s\n", strings.Join(issue.Labels, ", "))
-			}
+		// Launch Claude Code with panther-strike on the selected issue
+		num := fmt.Sprintf("%d", final.actionNum)
+		prompt := fmt.Sprintf("/panther-strike #%s", num)
+		ui.Info(fmt.Sprintf("Launching panther-strike on issue #%s...", num))
+		exitCode, err := gwexec.RunStreaming("claude", prompt)
+		if err != nil {
+			return fmt.Errorf("failed to launch claude: %w", err)
+		}
+		if exitCode != 0 {
+			return fmt.Errorf("claude exited with code %d", exitCode)
 		}
 
 	case "worktree":

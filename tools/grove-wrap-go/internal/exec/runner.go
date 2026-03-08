@@ -30,6 +30,7 @@ var allowedBinaries = map[string]bool{
 	"pnpm":     true,
 	"bun":      true,
 	"npm":      true,
+	"claude":   true,
 }
 
 // Result holds the output of a completed command.
