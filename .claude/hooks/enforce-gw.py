@@ -18,11 +18,14 @@ import json
 import re
 import sys
 
-# Read hook input
-input_data = json.load(sys.stdin)
+# Read hook input — fail open on bad input
+try:
+    input_data = json.load(sys.stdin)
+except (json.JSONDecodeError, ValueError):
+    sys.exit(0)
 
 # Only process Bash commands
-if input_data.get("tool_name") != "Bash":
+if not isinstance(input_data, dict) or input_data.get("tool_name") != "Bash":
     sys.exit(0)
 
 # Get the command

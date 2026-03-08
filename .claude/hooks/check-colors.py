@@ -17,10 +17,15 @@ import os
 import re
 import sys
 
-# Read hook input
-input_data = json.load(sys.stdin)
+# Read hook input — fail open on bad input
+try:
+    input_data = json.load(sys.stdin)
+except (json.JSONDecodeError, ValueError):
+    sys.exit(0)
 
 # Only process Edit and Write tools
+if not isinstance(input_data, dict):
+    sys.exit(0)
 tool_name = input_data.get("tool_name", "")
 if tool_name not in ("Edit", "Write"):
     sys.exit(0)
