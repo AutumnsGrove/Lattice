@@ -85,16 +85,26 @@ func TestSettingsNavigation(t *testing.T) {
 		t.Errorf("after j: cursor = %d, want 1", s.cursor)
 	}
 
+	// Move to last item
+	for i := s.cursor; i < settingCount-1; i++ {
+		s.handleKey("j")
+	}
+	if s.cursor != settingCount-1 {
+		t.Errorf("cursor should be at %d, got %d", settingCount-1, s.cursor)
+	}
+
 	// Can't go past bottom
 	s.handleKey("j")
 	if s.cursor != settingCount-1 {
 		t.Errorf("cursor should not exceed %d, got %d", settingCount-1, s.cursor)
 	}
 
-	// Move up
-	s.handleKey("k")
+	// Move up to top
+	for i := s.cursor; i > 0; i-- {
+		s.handleKey("k")
+	}
 	if s.cursor != 0 {
-		t.Errorf("after k: cursor = %d, want 0", s.cursor)
+		t.Errorf("cursor should be at 0, got %d", s.cursor)
 	}
 
 	// Can't go above top
@@ -148,5 +158,63 @@ func TestSettingsRenderDirty(t *testing.T) {
 	output := s.render()
 	if !strings.Contains(output, "Unsaved changes") {
 		t.Error("render should show 'Unsaved changes' when dirty")
+	}
+}
+
+func TestSettingsYoloToggle(t *testing.T) {
+	s := newTUISettings()
+	if s.yoloMode {
+		t.Error("yoloMode should default to false")
+	}
+
+	s.cursor = settingYoloMode
+	s.toggle()
+
+	if !s.yoloMode {
+		t.Error("toggle should flip yoloMode to true")
+	}
+	if !s.dirty {
+		t.Error("should be dirty after toggle")
+	}
+
+	// Toggle back
+	s.toggle()
+	if s.yoloMode {
+		t.Error("second toggle should flip yoloMode back to false")
+	}
+}
+
+func TestSettingsRenderYolo(t *testing.T) {
+	s := newTUISettings()
+	output := s.render()
+
+	if !strings.Contains(output, "Yolo mode") {
+		t.Error("render should contain 'Yolo mode' label")
+	}
+	if !strings.Contains(output, "off") {
+		t.Error("render should show yolo as 'off' by default")
+	}
+
+	s.yoloMode = true
+	output = s.render()
+	if !strings.Contains(output, "ON") {
+		t.Error("render should show 'ON' when yolo is enabled")
+	}
+}
+
+func TestSettingsNavigationWithYolo(t *testing.T) {
+	s := newTUISettings()
+
+	// Navigate to yolo (3rd item, index 2)
+	s.handleKey("j") // → items per page
+	s.handleKey("j") // → yolo mode
+	if s.cursor != settingYoloMode {
+		t.Errorf("cursor = %d, want %d (settingYoloMode)", s.cursor, settingYoloMode)
+	}
+
+	// Can't go past bottom
+	s.handleKey("j")
+	if s.cursor != settingCount-1 {
+		t.Errorf("cursor should not exceed %d, got %d", settingCount-1, s.cursor)
 	}
 }

@@ -100,9 +100,17 @@ var labelSuggestions = map[string][]string{
 }
 
 // claudeArgs builds the argument list for launching claude with a skill.
-// If the skill has Yolo set, --dangerously-skip-permissions is prepended.
+// Yolo mode (--dangerously-skip-permissions) is enabled when either the
+// individual skill has Yolo set, or the global tui.yolo_mode config is on.
 func claudeArgs(skillName, prompt string) []string {
-	if entry, ok := skillByName[skillName]; ok && entry.Yolo {
+	cfg := config.Get()
+	yolo := cfg.TUI.YoloMode
+	if !yolo {
+		if entry, ok := skillByName[skillName]; ok && entry.Yolo {
+			yolo = true
+		}
+	}
+	if yolo {
 		return []string{"--dangerously-skip-permissions", prompt}
 	}
 	return []string{prompt}

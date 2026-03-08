@@ -42,6 +42,7 @@ type Config struct {
 type TUIConfig struct {
 	AutoWorktree bool `toml:"auto_worktree"` // auto-create worktrees when launching skills
 	ItemsPerPage int  `toml:"items_per_page"` // number of items to fetch per page
+	YoloMode     bool `toml:"yolo_mode"`      // launch all skills with --dangerously-skip-permissions
 }
 
 // Database represents a D1 database alias.

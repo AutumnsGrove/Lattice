@@ -14,6 +14,7 @@ import (
 type tuiSettings struct {
 	autoWorktree bool
 	itemsPerPage int
+	yoloMode     bool
 	cursor       int // which setting is selected (0-based)
 	dirty        bool
 	saveErr      error
@@ -23,7 +24,8 @@ type tuiSettings struct {
 const (
 	settingAutoWorktree = 0
 	settingItemsPerPage = 1
-	settingCount        = 2
+	settingYoloMode     = 2
+	settingCount        = 3
 
 	minItemsPerPage = 10
 	maxItemsPerPage = 100
@@ -35,6 +37,7 @@ func newTUISettings() *tuiSettings {
 	return &tuiSettings{
 		autoWorktree: cfg.TUI.AutoWorktree,
 		itemsPerPage: cfg.TUI.ItemsPerPage,
+		yoloMode:     cfg.TUI.YoloMode,
 	}
 }
 
@@ -73,6 +76,10 @@ func (s *tuiSettings) toggle() {
 		s.saved = false
 	case settingItemsPerPage:
 		s.adjust(10)
+	case settingYoloMode:
+		s.yoloMode = !s.yoloMode
+		s.dirty = true
+		s.saved = false
 	}
 }
 
@@ -82,6 +89,11 @@ func (s *tuiSettings) adjust(delta int) {
 	case settingAutoWorktree:
 		// Toggle on any direction press
 		s.autoWorktree = !s.autoWorktree
+		s.dirty = true
+		s.saved = false
+	case settingYoloMode:
+		// Toggle on any direction press
+		s.yoloMode = !s.yoloMode
 		s.dirty = true
 		s.saved = false
 	case settingItemsPerPage:
@@ -113,6 +125,7 @@ func (s *tuiSettings) save() {
 	cfg := config.Get()
 	cfg.TUI.AutoWorktree = s.autoWorktree
 	cfg.TUI.ItemsPerPage = s.itemsPerPage
+	cfg.TUI.YoloMode = s.yoloMode
 
 	if err := cfg.Save(); err != nil {
 		s.saveErr = err
@@ -143,6 +156,10 @@ var (
 	settingsValueNumStyle = lipgloss.NewStyle().
 		Bold(true).
 		Foreground(ui.SunsetAmber)
+
+	settingsValueWarnStyle = lipgloss.NewStyle().
+		Bold(true).
+		Foreground(ui.DangerRed)
 
 	settingsCursorStyle = lipgloss.NewStyle().
 		Foreground(ui.SunsetAmber).
@@ -189,6 +206,23 @@ func (s *tuiSettings) render() string {
 		settingsValueNumStyle.Render(fmt.Sprintf("%d", s.itemsPerPage))))
 	if s.cursor == settingItemsPerPage {
 		b.WriteString(browseHintStyle.Render("    Number of issues/PRs to fetch per page (←/→ to adjust by 5)") + "\n")
+	}
+
+	// Yolo mode toggle
+	cursor2 := "  "
+	if s.cursor == settingYoloMode {
+		cursor2 = settingsCursorStyle.Render("▸ ")
+	}
+	yoloValue := settingsValueOffStyle.Render("off")
+	if s.yoloMode {
+		yoloValue = settingsValueWarnStyle.Render("ON")
+	}
+	b.WriteString(fmt.Sprintf("%s%s  %s\n",
+		cursor2,
+		settingsLabelStyle.Render("Yolo mode"),
+		yoloValue))
+	if s.cursor == settingYoloMode {
+		b.WriteString(browseHintStyle.Render("    Skip permission prompts for all skills (--dangerously-skip-permissions)") + "\n")
 	}
 
 	b.WriteString("\n")
