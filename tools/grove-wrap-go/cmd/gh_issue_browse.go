@@ -36,7 +36,9 @@ type issueBrowseModel struct {
 	filterBuf   string // filter input buffer
 	filtering   bool   // in filter-input mode
 	detail      *browseIssue
-	showHelp    bool   // help overlay visible
+	showHelp     bool         // help overlay visible
+	showSettings bool         // settings overlay visible
+	settings     *tuiSettings // settings state
 	width       int
 	height      int
 	err         error
@@ -103,6 +105,14 @@ func (m issueBrowseModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Help overlay — any key dismisses
 		if m.showHelp {
 			m.showHelp = false
+			return m, nil
+		}
+
+		// Settings overlay — delegate to settings handler
+		if m.showSettings {
+			if m.settings.handleKey(msg.String()) {
+				m.showSettings = false
+			}
 			return m, nil
 		}
 
@@ -231,6 +241,12 @@ func (m issueBrowseModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "?":
 			m.showHelp = true
 
+		case ",":
+			m.showSettings = true
+			if m.settings == nil {
+				m.settings = newTUISettings()
+			}
+
 		case "esc":
 			if m.filter != "" {
 				m.filter = ""
@@ -324,6 +340,11 @@ func (m issueBrowseModel) View() string {
 		return m.renderHelp()
 	}
 
+	// Settings overlay
+	if m.showSettings && m.settings != nil {
+		return m.settings.render()
+	}
+
 	// Detail view
 	if m.detail != nil {
 		return m.renderDetail()
@@ -381,7 +402,7 @@ func (m issueBrowseModel) View() string {
 	b.WriteString("\n")
 	hints := []string{
 		"j/k nav", "v view", "O open", "W tree",
-		"/ filter", "? skills", "q quit",
+		"/ filter", "? skills", ", settings", "q quit",
 	}
 	if !m.allLoaded && m.fetchArgs != nil {
 		hints = append(hints[:6], append([]string{"N more"}, hints[6:]...)...)
@@ -422,8 +443,8 @@ func (m issueBrowseModel) renderHelp() string {
 		browseHelpKeyStyle.Render("O"), browseHelpKeyStyle.Render("W")))
 	b.WriteString(fmt.Sprintf("    %s    Filter by label    %s  Load more issues\n",
 		browseHelpKeyStyle.Render("/"), browseHelpKeyStyle.Render("N")))
-	b.WriteString(fmt.Sprintf("    %s    Quit\n",
-		browseHelpKeyStyle.Render("q")))
+	b.WriteString(fmt.Sprintf("    %s    Settings           %s  Quit\n",
+		browseHelpKeyStyle.Render(","), browseHelpKeyStyle.Render("q")))
 	b.WriteString("\n")
 
 	// Skills by category

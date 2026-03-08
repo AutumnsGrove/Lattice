@@ -156,6 +156,14 @@ var prListCmd = &cobra.Command{
 		all, _ := cmd.Flags().GetBool("all")
 		pageSize, _ := cmd.Flags().GetInt("page-size")
 
+		// Use config defaults when flags not explicitly set
+		if !cmd.Flags().Changed("limit") && cfg.TUI.ItemsPerPage > 0 {
+			limit = cfg.TUI.ItemsPerPage
+		}
+		if !cmd.Flags().Changed("page-size") && cfg.TUI.ViewportRows > 0 {
+			pageSize = cfg.TUI.ViewportRows
+		}
+
 		fetchLimit, startIndex := paginateArgs(limit, page, all)
 		limit = clampGHLimit(limit)
 

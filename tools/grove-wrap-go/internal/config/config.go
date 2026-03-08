@@ -6,7 +6,9 @@
 package config
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
@@ -23,6 +25,7 @@ type Config struct {
 	Git          GitConfig           `toml:"git"`
 	GitHub       GitHubConfig        `toml:"github"`
 	Grove        GroveConfig         `toml:"grove"`
+	TUI          TUIConfig           `toml:"tui"`
 
 	// Runtime state (not from TOML)
 	AgentMode       bool   `toml:"-"`
@@ -33,6 +36,14 @@ type Config struct {
 	GroveRoot       string `toml:"-"`
 	NoCloud         bool   `toml:"-"` // skip wrangler/cloud calls (offline mode)
 	InteractiveMode bool   `toml:"-"` // enable Bubble Tea TUI (opt-in, humans only)
+}
+
+// TUIConfig controls interactive TUI browser behavior.
+type TUIConfig struct {
+	AutoWorktree bool `toml:"auto_worktree"` // auto-create worktrees when launching skills
+	ItemsPerPage int  `toml:"items_per_page"` // number of items to fetch per page
+	ViewportRows int  `toml:"viewport_rows"`  // visible rows in the TUI browser
+	YoloMode     bool `toml:"yolo_mode"`      // launch all skills with --dangerously-skip-permissions
 }
 
 // Database represents a D1 database alias.
@@ -186,6 +197,11 @@ func DefaultConfig() *Config {
 			AuthBaseURL:    "https://auth-api.grove.place",
 			LatticeBaseURL: "https://grove.place",
 		},
+		TUI: TUIConfig{
+			AutoWorktree: true,
+			ItemsPerPage: 30,
+			ViewportRows: 15,
+		},
 	}
 }
 
@@ -214,6 +230,76 @@ func loadFromFile(cfg *Config) {
 		// Config file exists but is malformed — proceed with defaults
 		return
 	}
+}
+
+// Save persists the current configuration to ~/.grove/gw.toml.
+// Only TOML-tagged fields are written; runtime state (toml:"-") is excluded.
+// Uses atomic write (temp file + rename) to prevent corruption on interruption.
+func (c *Config) Save() error {
+	configPath := ConfigPath()
+	if configPath == "" {
+		return fmt.Errorf("could not determine config path")
+	}
+
+	// Ensure directory exists
+	dir := filepath.Dir(configPath)
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return fmt.Errorf("failed to create config directory: %w", err)
+	}
+
+	// Re-read the existing file so we don't lose sections managed by
+	// other tools. Note: keys not mapped to Config struct fields will
+	// be dropped — all current sections are covered.
+	var diskCfg Config
+	if _, err := os.Stat(configPath); err == nil {
+		toml.DecodeFile(configPath, &diskCfg) // best-effort
+	}
+
+	// Overlay the sections we manage
+	diskCfg.TUI = c.TUI
+	diskCfg.Safety = c.Safety
+	diskCfg.Git = c.Git
+	diskCfg.GitHub = c.GitHub
+	diskCfg.Grove = c.Grove
+	diskCfg.Databases = c.Databases
+	diskCfg.KVNamespaces = c.KVNamespaces
+	diskCfg.R2Buckets = c.R2Buckets
+
+	var buf bytes.Buffer
+	enc := toml.NewEncoder(&buf)
+	if err := enc.Encode(diskCfg); err != nil {
+		return fmt.Errorf("failed to encode config: %w", err)
+	}
+
+	// Atomic write: write to temp file in same directory, then rename.
+	// os.Rename is atomic on macOS/Linux when src and dst are on the same filesystem.
+	tmp, err := os.CreateTemp(dir, ".gw-config-*.toml")
+	if err != nil {
+		return fmt.Errorf("failed to create temp file: %w", err)
+	}
+	tmpPath := tmp.Name()
+
+	if _, err := tmp.Write(buf.Bytes()); err != nil {
+		tmp.Close()
+		os.Remove(tmpPath)
+		return fmt.Errorf("failed to write config: %w", err)
+	}
+	if err := tmp.Close(); err != nil {
+		os.Remove(tmpPath)
+		return fmt.Errorf("failed to close temp file: %w", err)
+	}
+
+	// Match original file permissions
+	if err := os.Chmod(tmpPath, 0o644); err != nil {
+		os.Remove(tmpPath)
+		return fmt.Errorf("failed to set file permissions: %w", err)
+	}
+
+	if err := os.Rename(tmpPath, configPath); err != nil {
+		os.Remove(tmpPath)
+		return fmt.Errorf("failed to rename config file: %w", err)
+	}
+	return nil
 }
 
 // IsInteractive returns true when running in an interactive terminal.
