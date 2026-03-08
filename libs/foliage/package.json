@@ -28,6 +28,10 @@
 		"./server": {
 			"types": "./dist/server/index.d.ts",
 			"default": "./dist/server/index.js"
+		},
+		"./prism": {
+			"types": "./dist/prism/index.d.ts",
+			"default": "./dist/prism/index.js"
 		}
 	},
 	"svelte": "./dist/index.js",

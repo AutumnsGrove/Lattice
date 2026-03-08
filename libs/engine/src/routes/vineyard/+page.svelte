@@ -59,7 +59,7 @@
 		midnightBloom,
 		flowers,
 	} from "$lib/ui/components/nature/palette";
-	import { grove, cream, bark as barkTokens, status } from "$lib/ui/tokens/colors";
+	import { groveColors as grove, cream, bark as barkTokens, status } from "@autumnsgrove/foliage";
 	import { Sparkles, Palette, Box, ChevronRight, Type } from "lucide-svelte";
 
 	// Interactive state for demos
