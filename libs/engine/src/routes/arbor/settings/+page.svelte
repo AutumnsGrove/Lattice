@@ -616,7 +616,7 @@
 			if (result.success) {
 				humanJsonVouches = [
 					...humanJsonVouches,
-					{ id: Date.now(), url: result.url, vouched_at: result.vouched_at },
+					{ id: result.id, url: result.url, vouched_at: result.vouched_at },
 				];
 				newVouchUrl = "";
 				toast.success("Vouch added");

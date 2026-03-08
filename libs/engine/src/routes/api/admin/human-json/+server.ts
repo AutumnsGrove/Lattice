@@ -178,7 +178,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
 		const today = new Date().toISOString().split("T")[0];
 
-		await db
+		const insertResult = await db
 			.prepare(
 				`INSERT INTO human_json_vouches (tenant_id, url, vouched_at)
 				 VALUES (?, ?, ?)
@@ -187,7 +187,17 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 			.bind(tenantId, normalizedUrl, today)
 			.run();
 
-		return json({ success: true, url: normalizedUrl, vouched_at: today });
+		// If ON CONFLICT suppressed the insert, fetch the existing row's id
+		let id = insertResult.meta?.last_row_id;
+		if (!id) {
+			const existing = await db
+				.prepare("SELECT id FROM human_json_vouches WHERE tenant_id = ? AND url = ?")
+				.bind(tenantId, normalizedUrl)
+				.first<{ id: number }>();
+			id = existing?.id ?? 0;
+		}
+
+		return json({ success: true, id, url: normalizedUrl, vouched_at: today });
 	} catch (err) {
 		if (err instanceof Error && "status" in err) throw err;
 		console.error("Human.json POST error:", err);
