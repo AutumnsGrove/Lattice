@@ -187,8 +187,8 @@ describe("Themes", () => {
 			expect(evergreenThemes).toHaveLength(10);
 		});
 
-		it("should return 0 themes for free tier", () => {
-			const freeThemes = getThemesForTier("wanderer");
+		it("should return 0 themes for wanderer tier", () => {
+			const wandererThemes = getThemesForTier("wanderer");
 			expect(wandererThemes).toHaveLength(0);
 		});
 
