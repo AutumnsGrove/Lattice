@@ -251,12 +251,12 @@
 	{#if featured}
 		<!-- Featured star indicator (decorative - context provides meaning) -->
 		<div
-			class="absolute top-2 right-2 z-grove-raised flex items-center justify-center w-6 h-6 rounded-full bg-white dark:bg-cream-200 shadow-md border border-amber-200 dark:border-amber-700"
+			class="absolute top-2 right-2 z-grove-raised flex items-center justify-center w-6 h-6 rounded-full bg-white dark:bg-cream-200 shadow-md border border-warning/30 dark:border-warning-muted/50"
 			title="Featured"
 			aria-hidden="true"
 		>
 			<Star
-				class="w-3.5 h-3.5 fill-current {featuredColor ? '' : 'text-amber-500'}"
+				class="w-3.5 h-3.5 fill-current {featuredColor ? '' : 'text-warning'}"
 				style={featuredColor ? `color: ${featuredColor}` : undefined}
 			/>
 		</div>

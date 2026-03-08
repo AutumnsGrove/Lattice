@@ -113,8 +113,8 @@
 					{#if flourishState !== "active"}
 						<span
 							class="px-3 py-1 rounded-full text-sm font-medium {flourishState === 'past_due'
-								? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
-								: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'}"
+								? 'bg-error-bg text-error dark:text-error'
+								: 'bg-surface-subtle text-foreground-muted'}"
 						>
 							{flourishState.charAt(0).toUpperCase() + flourishState.slice(1).replace("_", " ")}
 						</span>

@@ -350,7 +350,7 @@
 										<button
 											type="submit"
 											disabled={archiving === trace.id}
-											class="p-2 rounded text-foreground-muted hover:text-rose-600 hover:error-bg transition-colors"
+											class="p-2 rounded text-foreground-muted hover:text-error hover:bg-error-bg transition-colors"
 											title="Archive"
 										>
 											{#if archiving === trace.id}

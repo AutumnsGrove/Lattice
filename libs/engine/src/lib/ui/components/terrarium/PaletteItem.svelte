@@ -152,7 +152,7 @@
 				class="w-4 h-4 border-2 border-accent border-t-transparent rounded-full animate-spin"
 			></div>
 		{:else if loadError}
-			<span class="text-xs text-red-500">Error</span>
+			<span class="text-xs text-error">Error</span>
 		{:else if ComponentPreview}
 			{@const Preview = ComponentPreview}
 			<Preview class="w-12 h-12" color="#2D5F3F" />

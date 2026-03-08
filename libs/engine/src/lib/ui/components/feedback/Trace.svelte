@@ -166,7 +166,7 @@
 					sizeClasses.button,
 					vote === "up"
 						? "bg-success-bg text-success border-success/30"
-						: "hover:bg-cream-100 dark:hover:bg-bark-800 text-foreground-muted hover:text-success",
+						: "hover:bg-surface-hover text-foreground-muted hover:text-success",
 					isSubmitting && "opacity-50 cursor-not-allowed",
 				)}
 				aria-pressed={vote === "up"}
@@ -191,7 +191,7 @@
 					sizeClasses.button,
 					vote === "down"
 						? "bg-error-bg text-error border-error/30"
-						: "hover:bg-cream-100 dark:hover:bg-bark-800 text-foreground-muted hover:text-error",
+						: "hover:bg-surface-hover text-foreground-muted hover:text-error",
 					isSubmitting && "opacity-50 cursor-not-allowed",
 				)}
 				aria-pressed={vote === "down"}
