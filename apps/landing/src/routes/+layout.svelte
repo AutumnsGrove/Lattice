@@ -1,15 +1,26 @@
 <script lang="ts">
-	import '../app.css';
+	import { onMount } from "svelte";
+	import "../app.css";
 	// Import theme store from engine to initialize it on page load
 	// The store is self-managing via $effect.root() - just importing it triggers initialization
-	import { themeStore } from '@autumnsgrove/lattice/ui/stores';
-	import { navigating } from '$app/stores';
-	import { PassageTransition } from '@autumnsgrove/lattice/ui';
+	import { themeStore } from "@autumnsgrove/lattice/ui/stores";
+	import { navigating } from "$app/stores";
+	import { PassageTransition } from "@autumnsgrove/lattice/ui";
 
 	let { children } = $props();
 
 	// Access the store to ensure it initializes (the store auto-applies dark class via its own effects)
 	themeStore.resolvedTheme;
+
+	// grove-entrance-dismiss: fade out the pre-hydration loading overlay
+	// once SvelteKit has hydrated and this layout is interactive
+	onMount(() => {
+		const entrance = document.getElementById("grove-entrance");
+		if (entrance) {
+			entrance.classList.add("ge-hidden");
+			entrance.addEventListener("transitionend", () => entrance.remove(), { once: true });
+		}
+	});
 
 	// Navigation loading state — shows a progress bar during all page transitions
 	let isNavigating = $derived(!!$navigating);
@@ -60,9 +71,15 @@
 		background: var(--grove-300, #86efac);
 	}
 	@keyframes nav-loading {
-		0% { transform: translateX(-100%) scaleX(0.3); }
-		50% { transform: translateX(0%) scaleX(0.6); }
-		100% { transform: translateX(100%) scaleX(0.3); }
+		0% {
+			transform: translateX(-100%) scaleX(0.3);
+		}
+		50% {
+			transform: translateX(0%) scaleX(0.6);
+		}
+		100% {
+			transform: translateX(100%) scaleX(0.3);
+		}
 	}
 	@media (prefers-reduced-motion: reduce) {
 		.nav-loading-bar-fill {
@@ -71,7 +88,12 @@
 		}
 	}
 	@keyframes nav-loading-pulse {
-		0%, 100% { opacity: 0.3; }
-		50% { opacity: 0.7; }
+		0%,
+		100% {
+			opacity: 0.3;
+		}
+		50% {
+			opacity: 0.7;
+		}
 	}
 </style>

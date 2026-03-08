@@ -1,4 +1,5 @@
 <script>
+	import { onMount } from "svelte";
 	import "../app.css";
 	import "$lib/styles/tokens.css";
 	import "$lib/styles/vine-pattern.css";
@@ -16,6 +17,16 @@
 	import FriendsLoader from "$lib/ui/components/chrome/FriendsLoader.svelte";
 	import { themeStore } from "$lib/ui/stores/theme.svelte";
 	import { groveModeStore } from "$lib/ui/stores/grove-mode.svelte";
+
+	// grove-entrance-dismiss: fade out the pre-hydration loading overlay
+	// once SvelteKit has hydrated and this layout is interactive
+	onMount(() => {
+		const entrance = document.getElementById("grove-entrance");
+		if (entrance) {
+			entrance.classList.add("ge-hidden");
+			entrance.addEventListener("transitionend", () => entrance.remove(), { once: true });
+		}
+	});
 
 	/** @type {{ children: import('svelte').Snippet, data: any }} */
 	let { children, data } = $props();
