@@ -55,7 +55,7 @@ var skillRegistry = []skillEntry{
 	{"t", "beaver-build", "Write robust tests", "Enhancement", false},
 
 	// Compliance & Quality
-	{"i", "crane-audit", "PR compliance audit for Grove SDK standards", "Compliance", true},
+	{"i", "crane-audit", "PR compliance audit for Grove SDK standards", "Compliance", false},
 
 	// Security & Hardening
 	{"s", "spider-weave", "Auth integration and route security", "Security", false},
