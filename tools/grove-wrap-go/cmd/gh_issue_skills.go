@@ -143,6 +143,47 @@ func launchSkillForIssue(skillName, issueNum string) error {
 	return nil
 }
 
+// launchSkillForPR creates a worktree from the PR's head branch and launches claude with the given skill.
+func launchSkillForPR(skillName string, prNumber int, headBranch string) error {
+	base, err := worktreeBasePath()
+	if err != nil {
+		return fmt.Errorf("failed to resolve worktree path: %w", err)
+	}
+
+	wtPath := fmt.Sprintf("%s/pr-%d", base, prNumber)
+
+	if _, err := os.Stat(wtPath); os.IsNotExist(err) {
+		ui.Info(fmt.Sprintf("Creating worktree for PR #%d (branch: %s)...", prNumber, headBranch))
+		// Fetch the PR branch first
+		if _, fetchErr := gwexec.GitOutput("fetch", "origin", headBranch); fetchErr != nil {
+			ui.Warning(fmt.Sprintf("Failed to fetch branch %s: %v", headBranch, fetchErr))
+		}
+		// Create worktree from the PR's head branch
+		if _, wtErr := gwexec.GitOutput("worktree", "add", wtPath, fmt.Sprintf("origin/%s", headBranch)); wtErr != nil {
+			ui.Warning(fmt.Sprintf("Worktree creation failed, launching in current directory: %v", wtErr))
+			wtPath = ""
+		}
+	} else {
+		ui.Info(fmt.Sprintf("Reusing existing worktree at %s", wtPath))
+	}
+
+	prompt := fmt.Sprintf("/%s #%d", skillName, prNumber)
+	var exitCode int
+	if wtPath != "" {
+		ui.Info(fmt.Sprintf("Working in %s", wtPath))
+		exitCode, err = gwexec.RunStreamingInDir(wtPath, "claude", prompt)
+	} else {
+		exitCode, err = gwexec.RunStreaming("claude", prompt)
+	}
+	if err != nil {
+		return fmt.Errorf("failed to launch claude: %w", err)
+	}
+	if exitCode != 0 {
+		return fmt.Errorf("claude exited with code %d", exitCode)
+	}
+	return nil
+}
+
 // --- issue launch ---
 
 var issueLaunchCmd = &cobra.Command{

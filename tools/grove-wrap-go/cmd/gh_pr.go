@@ -3,10 +3,12 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 
 	"github.com/spf13/cobra"
+	"golang.org/x/term"
 
 	"github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/config"
 	"github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/exec"
@@ -117,13 +119,15 @@ var prListCmd = &cobra.Command{
 		author, _ := cmd.Flags().GetString("author")
 		label, _ := cmd.Flags().GetString("label")
 		limit, _ := cmd.Flags().GetInt("limit")
+		pageSize, _ := cmd.Flags().GetInt("page-size")
 
 		ghArgs := []string{"pr", "list"}
 		ghArgs = append(ghArgs, ghRepoArgs()...)
 		limit = clampGHLimit(limit)
 		ghArgs = append(ghArgs, "--state", state, "--limit", fmt.Sprintf("%d", limit))
 
-		fields := []string{"number", "title", "state", "author", "url", "isDraft", "labels"}
+		fields := []string{"number", "title", "state", "author", "url", "isDraft", "labels",
+			"headRefName", "baseRefName"}
 		ghArgs = append(ghArgs, jsonFields(fields, "")...)
 
 		if author != "" {
@@ -136,6 +140,14 @@ var prListCmd = &cobra.Command{
 		output, err := exec.GHOutput(ghArgs...)
 		if err != nil {
 			return fmt.Errorf("github error: %w", err)
+		}
+
+		// Interactive TUI mode — launch browser if in a TTY and not agent/JSON mode
+		if cfg.InteractiveMode && term.IsTerminal(int(os.Stdout.Fd())) {
+			browsePRs, parseErr := parsePRsToBrowse(output)
+			if parseErr == nil && len(browsePRs) > 0 {
+				return runPRBrowse(browsePRs, pageSize)
+			}
 		}
 
 		if cfg.JSONMode {
@@ -792,6 +804,7 @@ func init() {
 	prListCmd.Flags().String("author", "", "Filter by author")
 	prListCmd.Flags().String("label", "", "Filter by label")
 	prListCmd.Flags().Int("limit", 30, "Maximum number to return")
+	prListCmd.Flags().Int("page-size", 15, "Rows per page in interactive browser")
 	prCmd.AddCommand(prListCmd)
 
 	// pr view
