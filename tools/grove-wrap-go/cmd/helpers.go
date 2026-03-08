@@ -45,3 +45,53 @@ func TruncateStr(s string, max int) string {
 	}
 	return s[:max-1] + "…"
 }
+
+// viewportSlice takes rendered content, a scroll offset, and terminal height,
+// and returns only the visible lines with a scroll indicator when needed.
+func viewportSlice(content string, offset, height int) string {
+	lines := strings.Split(content, "\n")
+
+	// If content fits, no viewport needed
+	if len(lines) <= height {
+		return content
+	}
+
+	// Reserve 1 line for the scroll indicator
+	viewH := height - 1
+	if viewH < 1 {
+		viewH = 1
+	}
+
+	maxOffset := len(lines) - viewH
+	if maxOffset < 0 {
+		maxOffset = 0
+	}
+	if offset > maxOffset {
+		offset = maxOffset
+	}
+	if offset < 0 {
+		offset = 0
+	}
+
+	end := offset + viewH
+	if end > len(lines) {
+		end = len(lines)
+	}
+
+	visible := strings.Join(lines[offset:end], "\n")
+
+	// Build scroll indicator
+	hasAbove := offset > 0
+	hasBelow := end < len(lines)
+	var indicator string
+	switch {
+	case hasAbove && hasBelow:
+		indicator = fmt.Sprintf("  ↑↓ j/k scroll (%d/%d)", offset+viewH, len(lines))
+	case hasAbove:
+		indicator = fmt.Sprintf("  ↑ k scroll up • any key to return (%d/%d)", offset+viewH, len(lines))
+	case hasBelow:
+		indicator = fmt.Sprintf("  ↓ j scroll down • any key to return (%d/%d)", offset+viewH, len(lines))
+	}
+
+	return visible + "\n" + indicator
+}

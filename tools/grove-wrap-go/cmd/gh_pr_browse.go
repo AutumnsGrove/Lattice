@@ -99,6 +99,7 @@ type prBrowseModel struct {
 	filtering   bool   // in filter-input mode
 	detail      *browsePR
 	showHelp     bool         // help overlay visible
+	helpOffset   int          // scroll offset within help overlay
 	showSettings bool         // settings overlay visible
 	settings     *tuiSettings // settings state
 	width       int
@@ -157,9 +158,26 @@ func (m prBrowseModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case tea.KeyMsg:
-		// Help overlay — any key dismisses
+		// Help overlay — scroll with j/k, dismiss with q/esc
 		if m.showHelp {
-			m.showHelp = false
+			switch msg.String() {
+			case "j", "down":
+				m.helpOffset++
+			case "k", "up":
+				if m.helpOffset > 0 {
+					m.helpOffset--
+				}
+			case "pgdown":
+				m.helpOffset += m.height - 2
+			case "pgup":
+				m.helpOffset -= m.height - 2
+				if m.helpOffset < 0 {
+					m.helpOffset = 0
+				}
+			default:
+				m.showHelp = false
+				m.helpOffset = 0
+			}
 			return m, nil
 		}
 
@@ -539,8 +557,9 @@ func (m prBrowseModel) renderHelp() string {
 	}
 
 	b.WriteString("\n")
-	b.WriteString(browseHintStyle.Render("  Press any key to return"))
-	return b.String()
+	b.WriteString(browseHintStyle.Render("  j/k scroll • any other key to return"))
+
+	return viewportSlice(b.String(), m.helpOffset, m.height)
 }
 
 func (m prBrowseModel) renderDetail() string {
