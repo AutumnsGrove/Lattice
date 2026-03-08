@@ -22,7 +22,7 @@ This is a _journey_, not a checklist. Take your time.
 
 ```bash
 # Always start here
-cat docs/grove-naming.md
+cat docs/philosophy/grove-naming.md
 ```
 
 Read the entire document. Don't skim. Let it sink in:

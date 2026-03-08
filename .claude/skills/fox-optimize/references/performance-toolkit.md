@@ -84,6 +84,53 @@ CREATE INDEX idx_{table}_tenant_slug ON {table}(tenant_id, slug);
 -- grove-observability-db tables: sentinel_events, vista_pageviews, etc.
 ```
 
+## Server-Side Lifecycle Profiling
+
+### TTFB Measurement
+
+```bash
+# Quick TTFB check from CLI (time_starttransfer = TTFB)
+curl -o /dev/null -s -w "DNS: %{time_namelookup}s\nTCP: %{time_connect}s\nTLS: %{time_appconnect}s\nTTFB: %{time_starttransfer}s\nTotal: %{time_total}s\n" https://autumn.grove.place
+
+# Compare anonymous vs logged-in
+curl -o /dev/null -s -w "TTFB: %{time_starttransfer}s\n" https://autumn.grove.place
+curl -o /dev/null -s -w "TTFB: %{time_starttransfer}s\n" -H "Cookie: grove_session=..." https://autumn.grove.place
+```
+
+### Middleware Waterfall Profiling
+
+Add temporary timing to hooks.server.ts to identify which phase is slow:
+
+```typescript
+// [MOLE:HOOKS] Temporary profiling — remove before commit
+const t0 = performance.now();
+const tenant = await getTenantConfig(subdomain, event.platform);
+console.log(`[perf] tenant lookup: ${(performance.now() - t0).toFixed(1)}ms`);
+
+const t1 = performance.now();
+const authResponse = await sessionAuthPromise;
+console.log(`[perf] auth resolve: ${(performance.now() - t1).toFixed(1)}ms`);
+```
+
+### SvelteKit Load Function Profiling
+
+```typescript
+// In +layout.server.ts or +page.server.ts
+const t0 = performance.now();
+const [settings, nav, curios] = await Promise.all([...]);
+console.log(`[perf] layout queries: ${(performance.now() - t0).toFixed(1)}ms`);
+```
+
+### Common Middleware Bottleneck Patterns
+
+| Symptom | Check | Fix |
+|---------|-------|-----|
+| TTFB > 800ms | Sequential awaits in hooks | Promise hoisting, parallelization |
+| TTFB varies wildly (200ms-2s) | DO cold starts | Keepalive crons, KV fallback |
+| Logged-in 2x slower than guest | Extra auth + feature queries | Conditional skipping, batch merge |
+| Repeat visits same speed | No edge caching | Add Cache-Control + CDN-Cache-Control |
+| First load after deploy slow | Worker cold start | Keepalive cron on critical workers |
+
 ## Cloudflare-Specific Performance
 
 ### KV Caching with GroveKV

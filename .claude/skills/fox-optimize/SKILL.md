@@ -58,12 +58,13 @@ _Ears perk. The fox isolates exactly where the prey hides..._
 
 Find the specific bottleneck with evidence.
 
+- Server lifecycle: check hooks/middleware for sequential awaits, Promise.all batching, conditional work skipping, edge caching headers, DO cold starts
 - Frontend: check for Long Tasks, Layout thrashing, blocking JS, unoptimized images, large bundles
 - Database: run EXPLAIN QUERY PLAN, look for SCAN instead of SEARCH, identify N+1 patterns
 - API: check response times, parallelization opportunities, missing caching
 - Memory: take heap snapshots, compare before/after user actions, check for growing heap
 
-The 80/20 rule: 80% of problems come from unoptimized images, missing indexes, no caching, or too much upfront JS. Check these first.
+The 80/20 rule: In SSR apps, check TTFB first — if the server is slow, no client-side optimization will help. Then check images, indexes, caching, and JS bundle size.
 
 **Reference:** Load `references/optimization-patterns.md` for the diagnosis decision tree — it maps symptoms to likely causes
 
@@ -203,6 +204,10 @@ Use hunting metaphors:
 
 | Symptom | Likely Cause | Quick Fix |
 |---------|-------------|-----------|
+| High TTFB (>500ms) | Sequential awaits in hooks/middleware | Parallelize with Promise.all or promise hoisting |
+| Slow for guests too | No edge caching on SSR pages | Add Cache-Control + CDN-Cache-Control headers |
+| Slow only when logged in | Extra queries for auth/features | Skip unnecessary work for anonymous visitors |
+| First request very slow | DO/Worker cold starts | Add keepalive crons, KV fallback for config |
 | Slow initial load | Large JS bundle | Code splitting, tree shaking |
 | Images slow | Unoptimized formats | WebP/AVIF, lazy loading |
 | Janky scrolling | Layout thrashing | Use transform, avoid layout changes |

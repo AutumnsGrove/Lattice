@@ -4,10 +4,23 @@
 
 ```
 Is it slow on first load?
-├── YES → Check bundle size
-│   ├── Bundle > 200kb? → Code split, tree shake
-│   ├── Images > 500kb each? → Compress, lazy load
-│   └── Many HTTP requests? → Combine, preload critical
+├── YES → Where is the time spent?
+│   │
+│   ├── Server response slow (TTFB > 500ms)?
+│   │   ├── Sequential awaits in hooks/middleware? → Parallelize or hoist promises
+│   │   ├── Too many DB queries per request? → Batch into Promise.all
+│   │   ├── Unnecessary work for guests? → Skip logged-in-only queries
+│   │   ├── DO/service cold starts? → Add keepalive crons, cache in KV
+│   │   └── No edge caching? → Add Cache-Control + CDN-Cache-Control headers
+│   │
+│   ├── Client render slow (FCP/LCP high but TTFB ok)?
+│   │   ├── Bundle > 200kb? → Code split, tree shake
+│   │   ├── Images > 500kb each? → Compress, lazy load
+│   │   └── Many HTTP requests? → Combine, preload critical
+│   │
+│   └── Not sure? → Check Network tab waterfall
+│       ├── Long green bar (TTFB)? → Server-side problem
+│       └── Long blue bar (content download/parse)? → Client-side problem
 │
 └── NO → Slow during use?
     ├── Slow API responses?
@@ -136,6 +149,134 @@ ORDER BY created_at DESC;
 CREATE INDEX idx_posts_tenant_status_created
 ON posts(tenant_id, status, created_at DESC);
 ```
+
+## Server-Side Request Lifecycle (SSR / Middleware)
+
+The most impactful perf wins in multi-tenant SSR apps often aren't in the database
+or the client — they're in the **middleware chain** where sequential awaits compound.
+
+### Sequential Await Chain Detection
+
+Look for this pattern in hooks, middleware, or layout load functions:
+
+```typescript
+// BAD: Each await blocks the next — total time = sum of all
+const tenant = await getTenantConfig(subdomain);    // 150ms
+const user = await validateSession(cookies);         // 200ms
+const rateOk = await checkRateLimit(identifier);     // 50ms
+const csrf = await generateCSRF(session);            // 30ms
+// Total: ~430ms — and that's BEFORE layout/page loads even start
+```
+
+**Ask:** Do these depend on each other's results? If not, they can overlap.
+
+### Promise Hoisting
+
+Start a fetch **before** you need its result. Await it later when you do.
+This is different from `Promise.all` — it works when operations are in
+separate code sections that can't easily be wrapped in one call.
+
+```typescript
+// GOOD: Start auth fetch early, await it after routing completes
+const authPromise = sessionCookie
+    ? authService.fetch("/session/validate", {
+        method: "POST",
+        headers: { Cookie: cookieHeader },
+      }).catch(() => null)
+    : Promise.resolve(null);
+
+// Subdomain routing runs while auth fetch is in flight
+const tenant = await getTenantConfig(subdomain);
+setTenantContext(tenant);
+
+// Auth response likely already arrived — near-zero extra wait
+const authResponse = await authPromise;
+if (authResponse?.ok) { /* set user */ }
+```
+
+**Key insight:** The auth fetch and tenant lookup are independent — auth needs
+cookies (available immediately), tenant needs the subdomain (also available
+immediately). There's no reason to wait for one before starting the other.
+
+### Batch Consolidation (Merge Promise.all Layers)
+
+Multiple sequential `Promise.all` calls are a hidden waterfall:
+
+```typescript
+// BAD: 3 sequential await layers
+const [settings, nav, curios] = await Promise.all([/* 5 queries */]);
+// ^^^ must complete before vvv starts
+const [greenhouse, homeGrove] = await Promise.all([/* 2 queries */]);
+// ^^^ must complete before vvv starts
+const lantern = await isFeatureEnabled("lantern", { greenhouse });
+
+// GOOD: merge independent queries into one batch
+const [settings, nav, curios, greenhouse, homeGrove] =
+    await Promise.all([/* all 7 queries */]);
+// Only the truly dependent call stays sequential
+const lantern = await isFeatureEnabled("lantern", { greenhouse });
+```
+
+**Rule:** If query B doesn't need the result of query A, they belong in the
+same `Promise.all`. Only keep things sequential when there's a real data
+dependency.
+
+### Conditional Work Skipping
+
+Don't load data nobody will use:
+
+```typescript
+// BAD: Runs greenhouse + home grove check for every visitor
+const greenhouse = await isInGreenhouse(tenantId);
+const homeGrove = await getUserHomeGrove(db, email);
+
+// GOOD: Only for logged-in users who actually need it
+const greenhouse = locals.user
+    ? await isInGreenhouse(tenantId).catch(() => false)
+    : false;
+const homeGrove = locals.user
+    ? await getUserHomeGrove(db, locals.user.email).catch(() => null)
+    : null;
+```
+
+**Common skippable work:**
+- Greenhouse/feature flag checks → only for logged-in users
+- Upload gate checks → only for tenant owners
+- Admin UI data → only when `isOwner` is true
+- Lantern/social features → only when user is authenticated
+
+### Edge Caching for SSR Pages
+
+Most SSR pages are the same for all anonymous visitors. Let the CDN serve them:
+
+```typescript
+// In +page.server.ts load function
+if (tenantId) {
+    setHeaders({
+        "Cache-Control": "public, max-age=60, s-maxage=120",
+        "CDN-Cache-Control": "max-age=300, stale-while-revalidate=3600",
+        Vary: "Cookie",  // Different cache for logged-in vs anonymous
+    });
+}
+```
+
+**TTL guidance for Grove:**
+| Content type | s-maxage | stale-while-revalidate | Why |
+|-------------|----------|----------------------|-----|
+| Home page | 120s | 3600s | Settings change occasionally |
+| Blog post | 300s | 86400s | Published content is stable |
+| Blog list | 300-600s | 3600s | New posts are infrequent |
+| API feeds | 60s | 300s | More dynamic |
+| Admin pages | no-store | — | Always personalized |
+
+### Durable Object Cold Start Awareness
+
+DOs add latency on first request after eviction (~200-500ms). Mitigations:
+
+- **Keepalive crons** on critical-path DOs (grove-router already does this)
+- **KV fallback** for config data that doesn't need real-time freshness
+- **Staleness thresholds** in DO config (TenantDO uses 5-min; consider longer for rarely-changed config)
+- **Never put a DO in the critical path of a cold-start chain** — if the router AND the tenant DO AND the auth DO all cold-start simultaneously, you get ~1.5s before any app code runs
 
 ## Caching Strategy
 
