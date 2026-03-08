@@ -423,6 +423,7 @@
 		fetchSessions();
 		fetchCanopySettings();
 		fetchBlazes();
+		fetchHumanJson();
 	});
 	// CANOPY SETTINGS
 	// =========================================================================
@@ -553,6 +554,97 @@
 		}
 
 		savingMeadow = false;
+	}
+
+	// =========================================================================
+	// HUMAN.JSON — Human Authorship Assertion
+	// =========================================================================
+
+	let humanJsonEnabled = $state(false);
+	let savingHumanJson = $state(false);
+	let humanJsonMessage = $state("");
+	/** @type {{ id: number; url: string; vouched_at: string }[]} */
+	let humanJsonVouches = $state([]);
+	let loadingHumanJson = $state(true);
+	let newVouchUrl = $state("");
+	let addingVouch = $state(false);
+	/** @type {number | null} */
+	let removingVouchId = $state(null);
+
+	async function fetchHumanJson() {
+		loadingHumanJson = true;
+		try {
+			const data = await api.get("/api/admin/human-json");
+			humanJsonEnabled = data.enabled;
+			humanJsonVouches = data.vouches ?? [];
+		} catch (error) {
+			console.error("Failed to fetch human.json settings:", error);
+		}
+		loadingHumanJson = false;
+	}
+
+	async function saveHumanJsonEnabled() {
+		savingHumanJson = true;
+		humanJsonMessage = "";
+
+		try {
+			await api.put("/api/admin/human-json", {
+				enabled: humanJsonEnabled,
+			});
+
+			humanJsonMessage = humanJsonEnabled
+				? "human.json enabled — your site now asserts human authorship."
+				: "human.json disabled.";
+			toast.success(humanJsonEnabled ? "human.json enabled" : "human.json disabled");
+		} catch (error) {
+			humanJsonMessage = "Error: " + (error instanceof Error ? error.message : String(error));
+			toast.error("Failed to save human.json setting");
+		}
+
+		savingHumanJson = false;
+	}
+
+	async function addVouch() {
+		if (!newVouchUrl.trim()) return;
+		addingVouch = true;
+
+		try {
+			const result = await api.post("/api/admin/human-json", {
+				url: newVouchUrl.trim(),
+			});
+
+			if (result.success) {
+				humanJsonVouches = [
+					...humanJsonVouches,
+					{ id: Date.now(), url: result.url, vouched_at: result.vouched_at },
+				];
+				newVouchUrl = "";
+				toast.success("Vouch added");
+			} else {
+				toast.error(result.error || "Failed to add vouch");
+			}
+		} catch (error) {
+			toast.error(error instanceof Error ? error.message : "Failed to add vouch");
+		}
+
+		addingVouch = false;
+	}
+
+	async function removeVouch(/** @type {number} */ id) {
+		removingVouchId = id;
+
+		try {
+			await api.delete("/api/admin/human-json", {
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ id }),
+			});
+			humanJsonVouches = humanJsonVouches.filter((v) => v.id !== id);
+			toast.success("Vouch removed");
+		} catch (error) {
+			toast.error("Failed to remove vouch");
+		}
+
+		removingVouchId = null;
 	}
 
 	// =========================================================================
@@ -1397,6 +1489,107 @@
 				{savingMeadow ? "Saving..." : "Save Meadow Settings"}
 			</Button>
 		</div>
+	</GlassCard>
+
+	<!-- Human.json — Human Authorship Assertion -->
+	<GlassCard variant="frosted" class="mb-6">
+		<div class="section-header">
+			<h2>human.json</h2>
+		</div>
+		<p class="section-description">
+			Assert that a real person tends this garden. When enabled, your site serves a
+			<a
+				href="https://codeberg.org/robida/human.json"
+				target="_blank"
+				rel="noopener noreferrer"
+				class="canopy-link">human.json</a
+			> file — a lightweight protocol for human authorship and a web of trust between sites.
+		</p>
+
+		{#if loadingHumanJson}
+			<div class="sessions-loading">
+				<Spinner />
+			</div>
+		{:else}
+			<label class="logo-toggle">
+				<input type="checkbox" bind:checked={humanJsonEnabled} />
+				<span class="toggle-label">
+					<span class="toggle-title">Enable human.json</span>
+					<span class="toggle-description">
+						Adds a <code>/human.json</code> file to your site and a
+						<code>&lt;link rel="human-json"&gt;</code> tag so visitors and tools can verify
+						human authorship.
+					</span>
+				</span>
+			</label>
+
+			{#if humanJsonMessage}
+				<div
+					class="message"
+					class:success={!humanJsonMessage.includes("Error")}
+					class:error={humanJsonMessage.includes("Error")}
+				>
+					{humanJsonMessage}
+				</div>
+			{/if}
+
+			<div class="button-row">
+				<Button onclick={saveHumanJsonEnabled} variant="primary" disabled={savingHumanJson}>
+					{savingHumanJson ? "Saving..." : "Save"}
+				</Button>
+			</div>
+
+			{#if humanJsonEnabled}
+				<div class="human-json-vouches">
+					<h3 class="blaze-subsection-title">Vouches</h3>
+					<p class="section-description">
+						Vouch for other sites you trust. This creates a decentralized web of trust — when
+						you vouch for someone, visitors who trust you can transitively trust them too.
+					</p>
+
+					{#if humanJsonVouches.length > 0}
+						<div class="vouch-list">
+							{#each humanJsonVouches as vouch (vouch.id)}
+								<div class="vouch-item">
+									<div class="vouch-info">
+										<a href={vouch.url} target="_blank" rel="noopener noreferrer" class="vouch-url">
+											{vouch.url}
+										</a>
+										<span class="vouch-date">vouched {vouch.vouched_at}</span>
+									</div>
+									<Button
+										variant="danger"
+										size="sm"
+										onclick={() => removeVouch(vouch.id)}
+										disabled={removingVouchId === vouch.id}
+									>
+										{removingVouchId === vouch.id ? "Removing..." : "Remove"}
+									</Button>
+								</div>
+							{/each}
+						</div>
+					{/if}
+
+					<div class="vouch-add-row">
+						<input
+							type="url"
+							placeholder="https://example.com"
+							bind:value={newVouchUrl}
+							class="vouch-input"
+							onkeydown={(e) => e.key === "Enter" && addVouch()}
+						/>
+						<Button
+							onclick={addVouch}
+							variant="primary"
+							size="sm"
+							disabled={addingVouch || !newVouchUrl.trim()}
+						>
+							{addingVouch ? "Adding..." : "Add Vouch"}
+						</Button>
+					</div>
+				</div>
+			{/if}
+		{/if}
 	</GlassCard>
 
 	<!-- Blazes — Custom Content Markers -->
@@ -2616,5 +2809,69 @@
 			flex-direction: column;
 			align-items: flex-start;
 		}
+	}
+
+	/* Human.json vouches */
+	.human-json-vouches {
+		margin-top: 1.5rem;
+		padding-top: 1.5rem;
+		border-top: 1px solid var(--color-border);
+	}
+	.vouch-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		margin-bottom: 1rem;
+	}
+	.vouch-item {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		padding: 0.75rem 1rem;
+		background: var(--grove-overlay-8);
+		border-radius: 8px;
+	}
+	.vouch-info {
+		display: flex;
+		flex-direction: column;
+		gap: 0.125rem;
+		min-width: 0;
+	}
+	.vouch-url {
+		color: var(--color-primary);
+		text-decoration: none;
+		font-size: 0.9rem;
+		word-break: break-all;
+	}
+	.vouch-url:hover {
+		text-decoration: underline;
+	}
+	.vouch-date {
+		color: var(--color-text-muted);
+		font-size: 0.8rem;
+	}
+	.vouch-add-row {
+		display: flex;
+		gap: 0.5rem;
+		align-items: center;
+	}
+	.vouch-input {
+		flex: 1;
+		padding: 0.5rem 0.75rem;
+		border: 1px solid var(--color-border);
+		border-radius: 6px;
+		background: var(--grove-overlay-8);
+		color: var(--color-text);
+		font-size: 0.9rem;
+		font-family: inherit;
+	}
+	.vouch-input:focus {
+		outline: none;
+		border-color: var(--color-primary);
+		box-shadow: 0 0 0 2px var(--grove-overlay-16);
+	}
+	.vouch-input::placeholder {
+		color: var(--color-text-muted);
 	}
 </style>

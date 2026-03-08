@@ -104,6 +104,9 @@
 	{#if context?.type === "tenant"}
 		<title>{siteName}</title>
 		<link rel="alternate" type="application/rss+xml" title="{siteName} RSS Feed" href="/api/feed" />
+		{#if data.humanJsonEnabled}
+			<link rel="human-json" href="/human.json" />
+		{/if}
 	{:else}
 		<link rel="alternate" type="application/rss+xml" title="The Grove RSS Feed" href="/api/feed" />
 	{/if}

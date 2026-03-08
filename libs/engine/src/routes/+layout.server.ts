@@ -40,6 +40,9 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
 	// Track database access failures for admin-only error banners
 	let dbAccessError = false;
 
+	// human.json enabled state (for <link rel="human-json"> in head)
+	let humanJsonEnabled = false;
+
 	// Only fetch from database at runtime (not during prerendering)
 	// The Cloudflare adapter throws when accessing platform.env during prerendering
 	// Must check `building` BEFORE accessing platform.env to avoid the getter throwing
@@ -114,6 +117,8 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
 						for (const row of settingsResult.results) {
 							siteSettings[row.setting_key] = row.setting_value;
 						}
+						// Check human.json enabled flag from site_settings
+						humanJsonEnabled = siteSettings.human_json_enabled === "true";
 					}
 
 					// Process navigation results
@@ -200,6 +205,7 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
 		// Uses hoisted booleans since Promise.all results are block-scoped
 		showTimeline: timelineEnabled,
 		showGallery: galleryEnabled,
+		humanJsonEnabled,
 		dbAccessError,
 		lanternData: locals.user
 			? {
