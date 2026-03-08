@@ -51,60 +51,76 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
 				// If we have a tenant context, load tenant-specific settings
 				if (tenantId) {
 					// PERFORMANCE: Run independent queries in parallel to reduce latency
-					// Settings, nav pages, curio configs, and greenhouse check run concurrently
+					// Settings, nav pages, curio configs, greenhouse check, and home grove lookup run concurrently
+					// Sequential await reduced to just the lantern feature flag evaluation (see below)
 					// Each query has its own error handling to prevent cascading failures
 					const kv = platform?.env?.CACHE_KV;
 					const flagsEnv = kv ? { DB: db, FLAGS_KV: kv } : null;
 
-					const [settingsResult, navResult, timelineResult, uploadGateResult, journeyResult] =
-						await Promise.all([
-							// Site settings query
-							db
-								.prepare("SELECT setting_key, setting_value FROM site_settings WHERE tenant_id = ?")
-								.bind(tenantId)
-								.all<{ setting_key: string; setting_value: string }>()
-								.catch((err) => {
-									console.warn("[Layout] site_settings query failed:", err);
-									return null;
-								}),
+					const [
+						settingsResult,
+						navResult,
+						timelineResult,
+						uploadGateResult,
+						journeyResult,
+						greenhouseResult,
+						groveResult,
+					] = await Promise.all([
+						// Site settings query
+						db
+							.prepare("SELECT setting_key, setting_value FROM site_settings WHERE tenant_id = ?")
+							.bind(tenantId)
+							.all<{ setting_key: string; setting_value: string }>()
+							.catch((err) => {
+								console.warn("[Layout] site_settings query failed:", err);
+								return null;
+							}),
 
-							// Navigation pages query
-							db
-								.prepare(
-									`SELECT slug, title, show_in_nav, nav_order FROM pages WHERE tenant_id = ?`,
-								)
-								.bind(tenantId)
-								.all<NavPage & { show_in_nav: number; nav_order: number }>()
-								.catch((err) => {
-									console.warn("[Layout] navPages query failed:", err);
-									return null;
-								}),
+						// Navigation pages query
+						db
+							.prepare(`SELECT slug, title, show_in_nav, nav_order FROM pages WHERE tenant_id = ?`)
+							.bind(tenantId)
+							.all<NavPage & { show_in_nav: number; nav_order: number }>()
+							.catch((err) => {
+								console.warn("[Layout] navPages query failed:", err);
+								return null;
+							}),
 
-							// Timeline curio config query
-							db
-								.prepare(
-									`SELECT enabled FROM timeline_curio_config WHERE tenant_id = ? AND enabled = 1`,
-								)
-								.bind(tenantId)
-								.first<{ enabled: number }>()
-								.catch(() => null), // Timeline table might not exist - that's OK
+						// Timeline curio config query
+						db
+							.prepare(
+								`SELECT enabled FROM timeline_curio_config WHERE tenant_id = ? AND enabled = 1`,
+							)
+							.bind(tenantId)
+							.first<{ enabled: number }>()
+							.catch(() => null), // Timeline table might not exist - that's OK
 
-							// Gallery: check upload gate (image_uploads + uploads_suspended)
-							flagsEnv
-								? canUploadImages(tenantId, undefined, flagsEnv)
-										.then((gate) => gate.allowed)
-										.catch(() => false)
-								: Promise.resolve(false),
+						// Gallery: check upload gate (image_uploads + uploads_suspended)
+						flagsEnv
+							? canUploadImages(tenantId, undefined, flagsEnv)
+									.then((gate) => gate.allowed)
+									.catch(() => false)
+							: Promise.resolve(false),
 
-							// Journey curio config query
-							db
-								.prepare(
-									`SELECT enabled FROM journey_curio_config WHERE tenant_id = ? AND enabled = 1`,
-								)
-								.bind(tenantId)
-								.first<{ enabled: number }>()
-								.catch(() => null), // Journey table might not exist - that's OK
-						]);
+						// Journey curio config query
+						db
+							.prepare(
+								`SELECT enabled FROM journey_curio_config WHERE tenant_id = ? AND enabled = 1`,
+							)
+							.bind(tenantId)
+							.first<{ enabled: number }>()
+							.catch(() => null), // Journey table might not exist - that's OK
+
+						// Greenhouse check — only for logged-in users (guests never need this)
+						locals.user && flagsEnv
+							? isInGreenhouse(tenantId, flagsEnv).catch(() => false)
+							: Promise.resolve(false as boolean),
+
+						// Home grove lookup — only for logged-in users
+						locals.user && db
+							? getUserHomeGrove(db, locals.user.email).catch(() => null)
+							: Promise.resolve(null as HomeGrove | null),
+					]);
 
 					// Gallery is enabled if the upload gate allows it
 					galleryEnabled = uploadGateResult;
@@ -139,18 +155,16 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
 						navPages.push({ slug: "gallery", title: "Gallery" });
 					}
 
-					// Lantern navigation panel — only check flag and resolve home grove for logged-in users
-					if (locals.user && flagsEnv) {
-						const [greenhouse, groveResult] = await Promise.all([
-							isInGreenhouse(tenantId, flagsEnv).catch(() => false),
-							getUserHomeGrove(db, locals.user.email).catch(() => null),
-						]);
-						homeGrove = groveResult;
+					// Process logged-in user results (greenhouse + home grove ran in the batch above)
+					homeGrove = groveResult;
 
-						// greenhouse_only flags require inGreenhouse in the evaluation context
+					// Lantern navigation panel — only for logged-in users.
+					// This is the one remaining sequential await: lantern's feature flag
+					// evaluation needs the greenhouse result as context.
+					if (locals.user && flagsEnv) {
 						lanternEnabled = await isFeatureEnabled(
 							"lantern_enabled",
-							{ tenantId, inGreenhouse: greenhouse },
+							{ tenantId, inGreenhouse: greenhouseResult },
 							flagsEnv,
 						).catch(() => false);
 					}
