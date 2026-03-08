@@ -284,12 +284,21 @@ func migrateMyceliumTenant() string {
 }
 
 // detectGroveRoot walks up from cwd looking for monorepo markers.
+// Falls back to GROVE_ROOT env var, then common project paths.
 func detectGroveRoot() string {
+	// Check env var first — explicit always wins
+	if envRoot := os.Getenv("GROVE_ROOT"); envRoot != "" {
+		if _, err := os.Stat(envRoot); err == nil {
+			return envRoot
+		}
+	}
+
 	cwd, err := os.Getwd()
 	if err != nil {
 		return "."
 	}
 
+	// Walk up from cwd looking for monorepo markers
 	dir := cwd
 	for {
 		if _, err := os.Stat(filepath.Join(dir, "pnpm-workspace.yaml")); err == nil {
@@ -304,5 +313,21 @@ func detectGroveRoot() string {
 		}
 		dir = parent
 	}
+
+	// Last resort: check common project paths
+	home, err := os.UserHomeDir()
+	if err == nil {
+		candidates := []string{
+			filepath.Join(home, "Documents", "Projects", "Lattice"),
+			filepath.Join(home, "Projects", "Lattice"),
+			filepath.Join(home, "Lattice"),
+		}
+		for _, c := range candidates {
+			if _, err := os.Stat(filepath.Join(c, "pnpm-workspace.yaml")); err == nil {
+				return c
+			}
+		}
+	}
+
 	return cwd
 }
