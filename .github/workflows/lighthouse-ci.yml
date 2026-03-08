@@ -55,6 +55,37 @@ jobs:
         run: pnpm run build
         working-directory: apps/landing
 
+      - name: Debug - Test wrangler dev server
+        working-directory: apps/landing
+        run: |
+          # Start wrangler dev in the background
+          npx wrangler dev --port 4173 --ip 0.0.0.0 &
+          SERVER_PID=$!
+          echo "Server PID: $SERVER_PID"
+
+          # Wait for server to be ready
+          for i in $(seq 1 30); do
+            if curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:4173/ 2>/dev/null | grep -q "200\|301\|302"; then
+              echo "Server is ready after ${i}s"
+              break
+            fi
+            sleep 1
+          done
+
+          # Test the server
+          echo "=== Response headers ==="
+          curl -sI http://127.0.0.1:4173/ 2>&1 || echo "curl failed"
+          echo ""
+          echo "=== Response body (first 500 chars) ==="
+          curl -s http://127.0.0.1:4173/ 2>&1 | head -c 500 || echo "curl failed"
+          echo ""
+          echo "=== Server process status ==="
+          kill -0 $SERVER_PID 2>/dev/null && echo "Server still running" || echo "Server has crashed!"
+
+          # Clean up
+          kill $SERVER_PID 2>/dev/null || true
+          wait $SERVER_PID 2>/dev/null || true
+
       - name: Run Lighthouse CI
         id: lighthouse
         uses: treosh/lighthouse-ci-action@v12
