@@ -282,11 +282,20 @@ _If you're not logged in, you go to login. If you are, you continue. Simple chec
 
 ### Avoid
 
+Refer to `owl-archive/references/anti-patterns.md` for the full list. Key ones for museum writing:
+
 - Em-dashes (use periods, commas, or parentheses)
-- Corporate jargon ("robust," "seamless," "leverage")
-- Heavy transitions ("Furthermore," "Moreover," "Additionally")
+- Corporate jargon ("robust," "seamless," "leverage," "utilize," "streamline")
+- Heavy transitions ("Furthermore," "Moreover," "Additionally," "It's worth noting")
+- The "Not X, but Y" pattern and its variants ("Not X. Not Y. Just Z.")
 - Passive voice when active is clearer
 - Hedging language ("This may potentially help...")
+- Dead metaphors (don't repeat the same metaphor in every paragraph)
+- Fractal summaries (don't preview, state, then re-summarize every section)
+- "Here's the thing" / "Here's the kicker" false suspense
+- Gerund fragment litanies ("Fixing bugs. Writing features. Shipping code.")
+- Historical analogy stacking ("Apple... Facebook... Uber..." rapid-fire)
+- Bold-first bullet patterns in narrative lists
 
 ### The Distinction
 

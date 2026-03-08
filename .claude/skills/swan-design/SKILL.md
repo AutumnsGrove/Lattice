@@ -89,12 +89,17 @@ Write the technical content with visual elements.
 
 Apply Grove voice and validate formatting.
 
-- No em-dashes — use periods or commas instead
-- No "not X, but Y" patterns
-- No AI-coded words (robust, seamless, leverage, synergy)
-- Short paragraphs — 2-3 sentences maximum
+- No em-dashes. Use periods or commas instead
+- No "not X, but Y" patterns or its variants ("Not X. Not Y. Just Z.", "The X? A Y.")
+- No AI-coded words (robust, seamless, leverage, synergy, delve, utilize, streamline)
+- No "serves as" / "stands as" / "marks a". Use simple verbs
+- No magic adverbs for false gravity ("quietly", "deeply", "fundamentally")
+- No filler transitions ("Furthermore", "It's worth noting", "Notably")
+- No gerund fragment litanies, bold-first bullet patterns, or dead metaphors
+- Short paragraphs. 2-3 sentences maximum
 - Poetic closers that are earned, not forced
 - Run the full validation checklist from the spec template
+- Refer to `owl-archive/references/anti-patterns.md` for the complete avoidance list
 
 **Output:** Spec polished with proper Grove voice and validated structure
 

@@ -282,10 +282,15 @@ Before finalizing any spec, verify:
 - [ ] Code blocks for technical details
 - [ ] No walls of text without visual breaks
 
-### Voice (refer to grove-documentation skill)
+### Voice (refer to `owl-archive/references/anti-patterns.md` for the full list)
 - [ ] No em-dashes (use periods or commas)
-- [ ] No "not X, but Y" patterns
-- [ ] No AI-coded words (robust, seamless, leverage, etc.)
+- [ ] No "not X, but Y" patterns or variants ("Not X. Not Y. Just Z.", "The X? A Y.")
+- [ ] No AI-coded words (robust, seamless, leverage, delve, utilize, streamline, etc.)
+- [ ] No "serves as" / "stands as" / "marks a". Use simple verbs
+- [ ] No filler transitions (Furthermore, Moreover, It's worth noting, Notably)
+- [ ] No gerund fragment litanies or bold-first bullet patterns
+- [ ] No false suspense ("Here's the kicker", "Here's the thing")
+- [ ] No dead metaphors (same metaphor repeated in every section)
 - [ ] Short paragraphs
 - [ ] Poetic closers earned, not forced
 

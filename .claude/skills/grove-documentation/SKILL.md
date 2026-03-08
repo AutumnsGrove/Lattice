@@ -116,73 +116,50 @@ When writing text that includes Grove terminology in UI or content, **use GroveT
 
 These patterns make text sound like AI wrote it. Avoid them completely.
 
-### Em-Dashes
+The full anti-patterns reference lives in `owl-archive/references/anti-patterns.md`. Here's a quick summary of the most critical avoidances.
 
-**Avoid em-dashes (—).** One tasteful use per thousand words, maximum. Use commas, periods, or parentheses instead.
+### Word Choice
 
-**Avoid:** The forest—our home—is where we gather.
-**Better:** The forest is our home. It's where we gather.
-**Also fine:** The forest (our home) is where we gather.
+- **Em-dashes (—):** One per thousand words, maximum. Use commas, periods, or parentheses.
+- **"Not X, but Y":** The most AI-coded pattern. Just say the thing directly.
+- **"Serves as" / "stands as" / "marks a":** Use simple verbs. "Is" works fine.
+- **Magic adverbs:** "quietly", "deeply", "fundamentally", "remarkably" sprinkled for false gravity.
+- **AI vocabulary:** robust, seamless, delve, leverage, tapestry, landscape, harness, empower, embark, unlock, streamline, utilize.
 
-### The "Not X, But Y" Pattern
+### Sentence & Paragraph Structure
 
-This phrasing is deeply AI-coded. Avoid it entirely.
+- **"Not X. Not Y. Just Z."** The dramatic countdown. Cut it.
+- **"The X? A Y."** Self-posed rhetorical questions answered immediately. Remove.
+- **Anaphora abuse:** "They could... They could... They could..." Same opening repeated.
+- **Tricolon abuse:** One rule-of-three is fine. Three back-to-back are not.
+- **Gerund fragment lists:** "Fixing bugs. Writing features. Shipping code." These add nothing.
+- **Listicle in a trench coat:** "The first... The second... The third..." disguised as prose.
+- **Short punchy fragments as standalone paragraphs:** Vary your rhythm. Not every sentence is a paragraph.
 
-**Never write:**
+### Tone
 
-- "It's not X, but Y"
-- "It's not just X, but Y"
-- "It's not merely X, but rather Y"
-- "Grove isn't just a platform, it's a home"
+- **"Here's the kicker" / "Here's the thing":** False suspense before unremarkable points.
+- **"Think of it as...":** Patronizing analogies in teacher mode.
+- **"Imagine a world where...":** AI futurism invitations.
+- **"Let's break this down" / "Let's unpack this":** Hand-holding the reader.
+- **Grandiose stakes inflation:** Not everything reshapes civilization.
+- **Vague attributions:** "Experts argue..." Name the expert or own the claim.
+- **Filler transitions:** Furthermore, Moreover, Additionally, It's worth noting, Notably.
 
-**Instead, just say the thing:**
+### Composition
 
-- "Grove is a home for your words."
-- "This is where you belong."
+- **Fractal summaries:** Don't tell them what you'll say, say it, then tell them what you said.
+- **Dead metaphors:** Don't repeat the same metaphor 10 times. Use it and move on.
+- **Historical analogy stacking:** "Apple... Facebook... Stripe... Uber..." rapid-fire company lists.
+- **"Despite its challenges...":** The formula that acknowledges problems only to dismiss them.
+- **Signposted conclusions:** "In conclusion..." Competent writing doesn't need to announce it's ending.
+- **Semantic echoes:** Don't repeat the same descriptor multiple times.
+- **Generic hedging:** AI hedges. Humans commit. Say what you mean.
 
-### Overused AI Words
+### Formatting
 
-These words appear in AI text at rates far higher than human writing. Avoid them:
-
-| Category       | Words to Avoid                                                                                    |
-| -------------- | ------------------------------------------------------------------------------------------------- |
-| **Adjectives** | robust, seamless, innovative, cutting-edge, transformative, intricate, captivating, comprehensive |
-| **Nouns**      | tapestry, camaraderie, realm, plethora, myriad, landscape, journey (when not literal)             |
-| **Verbs**      | delve, foster, leverage, navigate, empower, embark, unlock, harness                               |
-| **Phrases**    | at the end of the day, in today's world, it goes without saying, needless to say                  |
-
-### Heavy Transition Words
-
-These make text feel stiff and robotic:
-
-- Furthermore
-- Moreover
-- Additionally
-- In conclusion
-- That being said
-- It's worth noting that
-- It's important to note
-
-**Instead:** Let ideas connect naturally. Use short transitions like "And," "But," "So," "Still." Or no transition at all—just start the next thought.
-
-### Semantic Echoes
-
-Don't repeat the same adjective or descriptor multiple times. AI does this constantly.
-
-**Bad:**
-
-> Grove provides a seamless experience. The seamless integration means you can seamlessly move between features.
-
-**Good:**
-
-> Grove gets out of your way. Move between features without friction.
-
-### Generic Safe Claims
-
-AI hedges. Humans commit.
-
-**Bad:** "This may help improve your workflow in many cases."
-**Good:** "This makes your workflow faster."
+- **Bold-first bullets:** Not every list item needs a bolded keyword at the start.
+- **Unicode arrows:** Use `->` not `→` in prose.
 
 ---
 
@@ -392,6 +369,12 @@ Before finalizing any Grove documentation:
 - [ ] Check for em-dashes. Remove them.
 - [ ] Search for "not just" and "but rather." Rewrite.
 - [ ] Look for words from the avoid list. Replace them.
+- [ ] Scan for "serves as", "stands as", "marks a". Simplify.
+- [ ] Check for rhetorical self-questions ("The result? ..."). Remove.
+- [ ] Look for gerund fragment lists. Rewrite as real sentences.
+- [ ] Count your tricolons. If more than one, cut.
+- [ ] Check for "Here's the thing" / "Here's where it gets interesting." Remove.
+- [ ] Check for bold-first bullet patterns in narrative lists. Unbold.
 - [ ] Vary sentence length. No monotone rhythm.
 - [ ] Cut unnecessary transitions. Ideas should flow naturally.
 - [ ] Is the closer earned? If forced, remove it.
