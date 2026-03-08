@@ -37,6 +37,11 @@ var issueListCmd = &cobra.Command{
 		all, _ := cmd.Flags().GetBool("all")
 		pageSize, _ := cmd.Flags().GetInt("page-size")
 
+		// Use config items_per_page as default when --limit not explicitly set
+		if !cmd.Flags().Changed("limit") && cfg.TUI.ItemsPerPage > 0 {
+			limit = cfg.TUI.ItemsPerPage
+		}
+
 		fetchLimit, startIndex := paginateArgs(limit, page, all)
 		limit = clampGHLimit(limit) // keep clamped limit for slicing
 
