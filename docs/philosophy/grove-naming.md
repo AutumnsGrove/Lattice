@@ -165,6 +165,8 @@ Foliage is what you see when you look at a tree. The leaves, the color, the pers
 
 Foliage is visual customization for your blog, from accent colors to full theme control. Pick a curated theme or build your own. Make it warm, make it bold, make it _yours_. Your foliage is how the world sees your corner of the grove.
 
+**Prism** is the design system that powers Foliage and every visual surface in Grove. Glassmorphism, seasonal palettes, color tokens, randomized forests, weather particles. Sunlight enters the grove as one thing and hits the mist, the dew, the glass between content and forest. What emerges is the spectrum: grove greens, warm creams, deep bark browns, seven glass variants, four seasons of atmosphere. Every theme draws from the same light. The Prism reveals what was always there.
+
 ### Curios
 
 **Cabinet of Wonders** · `curios.grove.place`
@@ -873,6 +875,7 @@ _In a forest full of harvesters, this grove stays shaded._
 | **Loam**       | Platform     | Name protection                | _(internal)_                    |
 | **Amber**      | Platform     | Storage management             | amber.grove.place               |
 | **Foliage**    | Platform     | Theming system                 | foliage.grove.place             |
+| **Prism**      | Platform     | Design system                  | _(powers Foliage)_              |
 | **Curios**     | Platform     | Cabinet of wonders             | curios.grove.place              |
 | **Burrow**     | Platform     | Cross-property access          | _(integrated into Arbor)_       |
 | **Lantern**    | Platform     | Cross-grove navigation         | _(engine chrome)_               |
@@ -939,6 +942,7 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Amber           | GroveStorage    |
 | Pantry          | GroveShop       |
 | Foliage         | GroveThemes     |
+| Prism           | GroveTokens     |
 | Terrarium       | GroveTerrarium  |
 | Weave           | GroveWeave      |
 | Curios          | GroveCurios     |
@@ -1134,6 +1138,18 @@ Vines climb the lattice, filling the spaces between the main structure. They add
 
 Vines are sidebar widgets in your blog's gutters—the content that grows alongside your posts. Related links, callouts, annotations, metadata. Gutter content that adds context without interrupting the flow. In Meadow, Notes can include vine-style annotations too.
 
+### Prism
+
+**Design System** · _Powers Foliage and all Grove properties_
+**Standard:** Design System
+**Waystone:** Grove's visual language, glassmorphism, seasonal theming, nature-named color tokens, and the principle that every page is a place you visit.
+
+A prism takes white light, unified and undifferentiated, and reveals the spectrum hidden inside. Every color was already there. The prism separates them, names them, makes them usable.
+
+Prism is Grove's design system. It defines the color token vocabulary (grove greens, warm creams, bark browns), seven glass variants for translucent surfaces, seasonal palettes that shift the atmosphere through the year, and the organic decoration patterns (randomized forests, weather particles, creatures) that make every page feel alive. Foliage composes themes from the Prism. Lattice delivers Prism values as CSS variables and Tailwind utilities. Every visual surface in Grove speaks the Prism's language.
+
+_Every color was already in the light._
+
 ### Blazes
 
 **Content Type Indicators** · _Part of Meadow_
@@ -1152,5 +1168,5 @@ _A small mark that tells you everything._
 
 ---
 
-_Last updated: February 21, 2026 — Added Blazes (content type indicators for Meadow)_
+_Last updated: March 8, 2026 — Added Prism (color token vocabulary for Foliage)_
 _Status: Placeholder names, pending launch_

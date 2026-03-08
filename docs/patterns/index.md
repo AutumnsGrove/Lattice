@@ -29,7 +29,7 @@ Grove patterns are reusable solutions to common problems in multi-tenant blog pl
 |---------|---------|--------|-------------|
 | **[Threshold](threshold-pattern.md)** | Multi-layer rate limiting & abuse prevention | **Active** | Loom DO, SessionDO, TenantDO |
 | **[Firefly](firefly-pattern.md)** | Real-time notifications & WebSocket coordination | Planned | PostDO, CommentDO |
-| **[Prism](prism-pattern.md)** | Multi-tenant data isolation & access control | Active | TenantDO, D1 partitioning |
+| **[Prism](prism-pattern.md)** | Glassmorphism, seasonal theming & organic UI patterns | **Active** | Foliage, Landing, Engine |
 
 ### 📊 Observability & Testing
 
