@@ -11,8 +11,15 @@ import (
 )
 
 // RunViewport displays content in a scrollable Bubble Tea viewport.
+// Falls back to plain printing if stdout is not a terminal.
 // Exits on q, Escape, or Ctrl+C.
 func RunViewport(title, content string) error {
+	if !term.IsTerminal(int(os.Stdout.Fd())) {
+		fmt.Println(PanelTitleStyle.Render(title))
+		fmt.Println(content)
+		return nil
+	}
+
 	width, height, err := term.GetSize(int(os.Stdout.Fd()))
 	if err != nil {
 		width, height = 80, 24

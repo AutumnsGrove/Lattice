@@ -3,10 +3,12 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"regexp"
 	"strings"
 
 	"github.com/spf13/cobra"
+	"golang.org/x/term"
 
 	"github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/config"
 	gwexec "github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/exec"
@@ -151,7 +153,7 @@ var gitLogCmd = &cobra.Command{
 		}
 
 		table := ui.RenderTable("gw git log", headers, rows)
-		if cfg.InteractiveMode {
+		if cfg.InteractiveMode && term.IsTerminal(int(os.Stdout.Fd())) {
 			return ui.RunViewport("gw git log", table)
 		}
 		fmt.Print(table)
