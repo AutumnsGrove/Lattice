@@ -1528,6 +1528,8 @@
 					class="message"
 					class:success={!humanJsonMessage.includes("Error")}
 					class:error={humanJsonMessage.includes("Error")}
+					role="status"
+					aria-live="polite"
 				>
 					{humanJsonMessage}
 				</div>
@@ -1548,9 +1550,9 @@
 					</p>
 
 					{#if humanJsonVouches.length > 0}
-						<div class="vouch-list">
+						<ul class="vouch-list" aria-label="Vouched sites">
 							{#each humanJsonVouches as vouch (vouch.id)}
-								<div class="vouch-item">
+								<li class="vouch-item">
 									<div class="vouch-info">
 										<a href={vouch.url} target="_blank" rel="noopener noreferrer" class="vouch-url">
 											{vouch.url}
@@ -1562,21 +1564,25 @@
 										size="sm"
 										onclick={() => removeVouch(vouch.id)}
 										disabled={removingVouchId === vouch.id}
+										aria-label="Remove vouch for {vouch.url}"
 									>
 										{removingVouchId === vouch.id ? "Removing..." : "Remove"}
 									</Button>
-								</div>
+								</li>
 							{/each}
-						</div>
+						</ul>
 					{/if}
 
 					<div class="vouch-add-row">
+						<label for="vouch-url-input" class="sr-only">URL to vouch for</label>
 						<input
+							id="vouch-url-input"
 							type="url"
 							placeholder="https://example.com"
 							bind:value={newVouchUrl}
 							class="vouch-input"
 							onkeydown={(e) => e.key === "Enter" && addVouch()}
+							aria-describedby="vouch-help"
 						/>
 						<Button
 							onclick={addVouch}
@@ -1587,6 +1593,7 @@
 							{addingVouch ? "Adding..." : "Add Vouch"}
 						</Button>
 					</div>
+					<p id="vouch-help" class="sr-only">Enter the full URL of a site you want to vouch for, then press Enter or click Add Vouch.</p>
 				</div>
 			{/if}
 		{/if}
@@ -2822,6 +2829,9 @@
 		flex-direction: column;
 		gap: 0.5rem;
 		margin-bottom: 1rem;
+		list-style: none;
+		padding: 0;
+		margin-top: 0;
 	}
 	.vouch-item {
 		display: flex;
@@ -2866,10 +2876,10 @@
 		font-size: 0.9rem;
 		font-family: inherit;
 	}
-	.vouch-input:focus {
-		outline: none;
+	.vouch-input:focus-visible {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 1px;
 		border-color: var(--color-primary);
-		box-shadow: 0 0 0 2px var(--grove-overlay-16);
 	}
 	.vouch-input::placeholder {
 		color: var(--color-text-muted);
