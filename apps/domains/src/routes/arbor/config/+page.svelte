@@ -1,50 +1,57 @@
 <script lang="ts">
-	import type { PageData } from './$types';
-	import { SEARCH_DEFAULTS } from '$lib/config';
-	import { untrack } from 'svelte';
-	import { GlassCard, GlassButton } from '@autumnsgrove/lattice/ui';
+	import type { PageData } from "./$types";
+	import { SEARCH_DEFAULTS } from "$lib/config";
+	import { untrack } from "svelte";
+	import { GlassCard, GlassButton } from "@autumnsgrove/lattice/ui";
 
 	let { data }: { data: PageData } = $props();
 
 	// Form state initialized from config - using untrack to capture initial values
 	let maxBatches = $state(untrack(() => data.config?.max_batches || SEARCH_DEFAULTS.MAX_BATCHES));
-	let candidatesPerBatch = $state(untrack(() => data.config?.candidates_per_batch || SEARCH_DEFAULTS.CANDIDATES_PER_BATCH));
-	let targetGoodResults = $state(untrack(() => data.config?.target_good_results || SEARCH_DEFAULTS.TARGET_GOOD_RESULTS));
+	let candidatesPerBatch = $state(
+		untrack(() => data.config?.candidates_per_batch || SEARCH_DEFAULTS.CANDIDATES_PER_BATCH),
+	);
+	let targetGoodResults = $state(
+		untrack(() => data.config?.target_good_results || SEARCH_DEFAULTS.TARGET_GOOD_RESULTS),
+	);
 	let creativity = $state(untrack(() => data.config?.creativity || SEARCH_DEFAULTS.CREATIVITY));
-	let rdapDelaySeconds = $state(untrack(() => data.config?.rdap_delay_seconds || SEARCH_DEFAULTS.RDAP_DELAY_SECONDS));
+	let rdapDelaySeconds = $state(
+		untrack(() => data.config?.rdap_delay_seconds || SEARCH_DEFAULTS.RDAP_DELAY_SECONDS),
+	);
 
 	// UI state
 	let isSaving = $state(false);
-	let successMessage = $state('');
-	let errorMessage = $state('');
+	let successMessage = $state("");
+	let errorMessage = $state("");
 
 	async function saveConfig() {
 		isSaving = true;
-		successMessage = '';
-		errorMessage = '';
+		successMessage = "";
+		errorMessage = "";
 
 		try {
-			const response = await fetch('/api/config', { // csrf-ok
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
+			const response = await fetch("/api/config", {
+				// csrf-ok
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
 					max_batches: maxBatches,
 					candidates_per_batch: candidatesPerBatch,
 					target_good_results: targetGoodResults,
 					creativity,
-					rdap_delay_seconds: rdapDelaySeconds
-				})
+					rdap_delay_seconds: rdapDelaySeconds,
+				}),
 			});
 
 			const result = (await response.json()) as { success?: boolean; error?: string };
 
 			if (response.ok && result.success) {
-				successMessage = 'Configuration saved successfully';
+				successMessage = "Configuration saved successfully";
 			} else {
-				throw new Error(result.error || 'Failed to save configuration');
+				throw new Error(result.error || "Failed to save configuration");
 			}
 		} catch (err) {
-			errorMessage = err instanceof Error ? err.message : 'Failed to save configuration';
+			errorMessage = err instanceof Error ? err.message : "Failed to save configuration";
 		} finally {
 			isSaving = false;
 		}
@@ -66,7 +73,7 @@
 <div class="space-y-8">
 	<!-- Page Header -->
 	<div>
-		<h1 class="text-2xl font-serif text-bark dark:text-neutral-100">Configuration</h1>
+		<h1 class="text-2xl font-serif text-bark dark:text-foreground">Configuration</h1>
 		<p class="text-foreground-muted font-sans mt-1">Configure the domain search agent settings</p>
 	</div>
 
@@ -78,20 +85,29 @@
 	{/if}
 
 	{#if errorMessage}
-		<div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+		<div class="bg-surface-subtle border border-error text-error px-4 py-3 rounded-lg">
 			<p class="text-sm font-sans">{errorMessage}</p>
 		</div>
 	{/if}
 
-	<form onsubmit={(e) => { e.preventDefault(); saveConfig(); }} class="space-y-8">
+	<form
+		onsubmit={(e) => {
+			e.preventDefault();
+			saveConfig();
+		}}
+		class="space-y-8"
+	>
 		<!-- Search Parameters Section -->
 		<GlassCard class="p-6">
-			<h2 class="font-serif text-lg text-bark dark:text-neutral-100 mb-6">Search Parameters</h2>
+			<h2 class="font-serif text-lg text-bark dark:text-foreground mb-6">Search Parameters</h2>
 
 			<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
 				<!-- Max Batches -->
 				<div>
-					<label for="max_batches" class="block text-sm font-sans font-medium text-bark dark:text-neutral-100 mb-2">
+					<label
+						for="max_batches"
+						class="block text-sm font-sans font-medium text-bark dark:text-foreground mb-2"
+					>
 						Max Batches
 					</label>
 					<input
@@ -110,7 +126,10 @@
 
 				<!-- Candidates Per Batch -->
 				<div>
-					<label for="candidates_per_batch" class="block text-sm font-sans font-medium text-bark dark:text-neutral-100 mb-2">
+					<label
+						for="candidates_per_batch"
+						class="block text-sm font-sans font-medium text-bark dark:text-foreground mb-2"
+					>
 						Candidates Per Batch
 					</label>
 					<input
@@ -129,7 +148,10 @@
 
 				<!-- Target Good Results -->
 				<div>
-					<label for="target_good_results" class="block text-sm font-sans font-medium text-bark dark:text-neutral-100 mb-2">
+					<label
+						for="target_good_results"
+						class="block text-sm font-sans font-medium text-bark dark:text-foreground mb-2"
+					>
 						Target Good Results
 					</label>
 					<input
@@ -150,12 +172,17 @@
 
 		<!-- Creativity & Rate Limiting -->
 		<GlassCard class="p-6">
-			<h2 class="font-serif text-lg text-bark dark:text-neutral-100 mb-6">Creativity & Rate Limiting</h2>
+			<h2 class="font-serif text-lg text-bark dark:text-foreground mb-6">
+				Creativity & Rate Limiting
+			</h2>
 
 			<div class="grid md:grid-cols-2 gap-6">
 				<!-- Creativity Slider -->
 				<div>
-					<label for="creativity" class="block text-sm font-sans font-medium text-bark dark:text-neutral-100 mb-2">
+					<label
+						for="creativity"
+						class="block text-sm font-sans font-medium text-bark dark:text-foreground mb-2"
+					>
 						Creativity Level: {(creativity * 100).toFixed(0)}%
 					</label>
 					<input
@@ -179,7 +206,10 @@
 
 				<!-- RDAP Delay -->
 				<div>
-					<label for="rdap_delay" class="block text-sm font-sans font-medium text-bark dark:text-neutral-100 mb-2">
+					<label
+						for="rdap_delay"
+						class="block text-sm font-sans font-medium text-bark dark:text-foreground mb-2"
+					>
 						RDAP Check Delay (seconds)
 					</label>
 					<input
@@ -198,14 +228,14 @@
 					<div class="mt-2 flex gap-2">
 						<button
 							type="button"
-							onclick={() => rdapDelaySeconds = 0.2}
-							class="text-xs px-2 py-1 rounded bg-amber-100 text-amber-700 hover:bg-amber-200 transition-colors"
+							onclick={() => (rdapDelaySeconds = 0.2)}
+							class="text-xs px-2 py-1 rounded bg-surface-subtle text-warning hover:bg-surface-hover transition-colors"
 						>
 							Fast (0.2s)
 						</button>
 						<button
 							type="button"
-							onclick={() => rdapDelaySeconds = 10}
+							onclick={() => (rdapDelaySeconds = 10)}
 							class="text-xs px-2 py-1 rounded bg-grove-100 text-grove-700 hover:bg-grove-200 transition-colors"
 						>
 							Production (10s)
@@ -221,17 +251,18 @@
 				Reset to Defaults
 			</GlassButton>
 			<GlassButton variant="accent" type="submit" disabled={isSaving}>
-				{isSaving ? 'Saving...' : 'Save Configuration'}
+				{isSaving ? "Saving..." : "Save Configuration"}
 			</GlassButton>
 		</div>
 	</form>
 
 	<!-- Info Box -->
 	<GlassCard variant="accent" class="p-6">
-		<h3 class="font-serif text-bark dark:text-neutral-100 mb-2">About Configuration</h3>
-		<p class="text-sm text-foreground-muted dark:text-neutral-300 font-sans leading-relaxed">
-			These settings control how the domain search agent operates. Changes take effect on the next search.
-			For testing, use the "Fast" RDAP delay. In production, keep it at 10 seconds to avoid rate limiting from registries.
+		<h3 class="font-serif text-bark dark:text-foreground mb-2">About Configuration</h3>
+		<p class="text-sm text-foreground-muted dark:text-foreground font-sans leading-relaxed">
+			These settings control how the domain search agent operates. Changes take effect on the next
+			search. For testing, use the "Fast" RDAP delay. In production, keep it at 10 seconds to avoid
+			rate limiting from registries.
 		</p>
 	</GlassCard>
 </div>

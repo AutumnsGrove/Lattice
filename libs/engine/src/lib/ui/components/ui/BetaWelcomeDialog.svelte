@@ -129,8 +129,8 @@
 			<GlassCard variant="frosted" class="overflow-hidden">
 				<!-- Header with beta icon -->
 				<div class="px-6 pt-6 pb-4 flex items-start gap-4">
-					<div class="flex-shrink-0 p-3 rounded-full bg-blue-100 dark:bg-blue-900/30">
-						<FlaskConical class="w-6 h-6 text-blue-600 dark:text-blue-400" />
+					<div class="flex-shrink-0 p-3 rounded-full bg-info-bg">
+						<FlaskConical class="w-6 h-6 text-info" />
 					</div>
 					<div class="flex-1 min-w-0">
 						<DialogPrimitive.Title
@@ -151,17 +151,17 @@
 					{:else}
 						<div class="text-sm text-muted-foreground leading-relaxed space-y-3">
 							<p>
-								You're one of the first wanderers to explore Grove. Thank you for being here
-								 -- it genuinely means a lot.
+								You're one of the first wanderers to explore Grove. Thank you for being here -- it
+								genuinely means a lot.
 							</p>
 							<p>
-								Things will be rough around the edges. Pages might break, features might
-								shift, and there will be moments where something just doesn't work yet.
-								That's expected. You're seeing Grove while it's still growing.
+								Things will be rough around the edges. Pages might break, features might shift, and
+								there will be moments where something just doesn't work yet. That's expected. You're
+								seeing Grove while it's still growing.
 							</p>
 							<p>
-								If you run into something broken or have thoughts on how things feel,
-								we'd love to hear from you.
+								If you run into something broken or have thoughts on how things feel, we'd love to
+								hear from you.
 							</p>
 						</div>
 					{/if}
@@ -173,9 +173,9 @@
 						rel="noopener noreferrer"
 						class={cn(
 							"mt-4 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium",
-							"bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300",
-							"border border-blue-200 dark:border-blue-800/40",
-							"hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors",
+							"bg-info-bg text-info",
+							"border border-info/30",
+							"hover:bg-info/20 transition-colors",
 						)}
 					>
 						<MessageSquare class="w-4 h-4 flex-shrink-0" />
@@ -185,13 +185,10 @@
 				</div>
 
 				<!-- Footer -->
-				<div class="px-6 py-4 bg-cream-100/70 dark:bg-bark-800/30 border-t border-white/20 dark:border-bark-700/30 flex justify-end">
-					<Button
-						variant="primary"
-						onclick={handleDismiss}
-					>
-						Let's go
-					</Button>
+				<div
+					class="px-6 py-4 bg-cream-100/70 dark:bg-bark-800/30 border-t border-white/20 dark:border-bark-700/30 flex justify-end"
+				>
+					<Button variant="primary" onclick={handleDismiss}>Let's go</Button>
 				</div>
 			</GlassCard>
 		</DialogPrimitive.Content>

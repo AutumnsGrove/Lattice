@@ -801,7 +801,7 @@
 		text-decoration: underline;
 	}
 	.picker-error {
-		color: var(--grove-error, #ef4444);
+		color: hsl(var(--destructive));
 	}
 	.retry-link {
 		background: transparent;

@@ -4,8 +4,8 @@
   Licensed under AGPL-3.0
 -->
 <script lang="ts">
-	import type { AssetCategory } from './types';
-	import type { Component as SvelteComponent } from 'svelte';
+	import type { AssetCategory } from "./types";
+	import type { Component as SvelteComponent } from "svelte";
 
 	interface Props {
 		name: string;
@@ -19,7 +19,7 @@
 	const displayName = $derived(() => {
 		// Handle special cases
 		const specialCases: Record<string, string> = {
-			LatticeWithVine: 'Lattice with Vine'
+			LatticeWithVine: "Lattice with Vine",
 		};
 
 		if (specialCases[name]) {
@@ -30,12 +30,12 @@
 		const words = name.split(/(?=[A-Z])/).filter(Boolean);
 
 		// For trees, put the type first (e.g., TreePine -> Pine Tree)
-		if (words[0] === 'Tree' && words.length > 1) {
-			return `${words.slice(1).join(' ')} Tree`;
+		if (words[0] === "Tree" && words.length > 1) {
+			return `${words.slice(1).join(" ")} Tree`;
 		}
 
 		// For everything else, just join with spaces
-		return words.join(' ');
+		return words.join(" ");
 	});
 
 	// Dynamically import the component for preview
@@ -51,28 +51,28 @@
 
 			let module;
 			switch (category) {
-				case 'trees':
+				case "trees":
 					module = await import(`../nature/trees/${name}.svelte`);
 					break;
-				case 'creatures':
+				case "creatures":
 					module = await import(`../nature/creatures/${name}.svelte`);
 					break;
-				case 'botanical':
+				case "botanical":
 					module = await import(`../nature/botanical/${name}.svelte`);
 					break;
-				case 'ground':
+				case "ground":
 					module = await import(`../nature/ground/${name}.svelte`);
 					break;
-				case 'sky':
+				case "sky":
 					module = await import(`../nature/sky/${name}.svelte`);
 					break;
-				case 'structural':
+				case "structural":
 					module = await import(`../nature/structural/${name}.svelte`);
 					break;
-				case 'water':
+				case "water":
 					module = await import(`../nature/water/${name}.svelte`);
 					break;
-				case 'weather':
+				case "weather":
 					module = await import(`../nature/weather/${name}.svelte`);
 					break;
 				default:
@@ -99,7 +99,7 @@
 	}
 
 	function handleKeydown(e: KeyboardEvent) {
-		if (e.key === 'Enter' || e.key === ' ') {
+		if (e.key === "Enter" || e.key === " ") {
 			e.preventDefault();
 			onSelect(name, category);
 		}
@@ -109,13 +109,13 @@
 	function handleDragStart(e: DragEvent) {
 		if (!e.dataTransfer) return;
 
-		e.dataTransfer.effectAllowed = 'copy';
+		e.dataTransfer.effectAllowed = "copy";
 		e.dataTransfer.setData(
-			'application/json',
+			"application/json",
 			JSON.stringify({
 				name,
-				category
-			})
+				category,
+			}),
 		);
 	}
 </script>
@@ -137,6 +137,7 @@
 	ondragstart={handleDragStart}
 	aria-label={`Add ${displayName()} to canvas`}
 >
+	<!-- brand-color: intentional (terrarium asset preview gradient) -->
 	<!-- Preview container -->
 	<div
 		class="w-16 h-16 flex items-center justify-center rounded-md
@@ -147,7 +148,9 @@
 			transition-colors duration-200"
 	>
 		{#if isLoading}
-			<div class="w-4 h-4 border-2 border-accent border-t-transparent rounded-full animate-spin"></div>
+			<div
+				class="w-4 h-4 border-2 border-accent border-t-transparent rounded-full animate-spin"
+			></div>
 		{:else if loadError}
 			<span class="text-xs text-red-500">Error</span>
 		{:else if ComponentPreview}

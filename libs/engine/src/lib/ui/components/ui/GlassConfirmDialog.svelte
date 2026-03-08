@@ -70,7 +70,7 @@
 		loading = false,
 		onconfirm,
 		oncancel,
-		children
+		children,
 	}: Props = $props();
 
 	// Variant-specific styling
@@ -78,18 +78,18 @@
 		default: {
 			icon: HelpCircle,
 			iconClass: "text-accent-muted",
-			confirmVariant: "primary" as const
+			confirmVariant: "primary" as const,
 		},
 		danger: {
 			icon: Trash2,
-			iconClass: "text-red-500 dark:text-red-400",
-			confirmVariant: "danger" as const
+			iconClass: "text-error",
+			confirmVariant: "danger" as const,
 		},
 		warning: {
 			icon: AlertTriangle,
-			iconClass: "text-amber-500 dark:text-amber-400",
-			confirmVariant: "primary" as const
-		}
+			iconClass: "text-warning",
+			confirmVariant: "primary" as const,
+		},
 	};
 
 	const config = $derived(variantConfig[variant]);
@@ -105,7 +105,7 @@
 			open = false;
 		} catch (error) {
 			// Don't close on error - let the caller handle it
-			console.error('Confirm action failed:', error);
+			console.error("Confirm action failed:", error);
 		}
 	}
 
@@ -133,12 +133,14 @@
 			<GlassCard variant="frosted" class="overflow-hidden">
 				<!-- Header with icon -->
 				<div class="px-6 pt-6 pb-4 flex items-start gap-4">
-					<div class={cn(
-						"flex-shrink-0 p-3 rounded-full",
-						variant === "danger" && "bg-red-100 dark:bg-red-900/30",
-						variant === "warning" && "bg-amber-100 dark:bg-amber-900/30",
-						variant === "default" && "bg-accent/10 dark:bg-accent/20"
-					)}>
+					<div
+						class={cn(
+							"flex-shrink-0 p-3 rounded-full",
+							variant === "danger" && "bg-error-bg",
+							variant === "warning" && "bg-warning-bg",
+							variant === "default" && "bg-accent/10 dark:bg-accent/20",
+						)}
+					>
 						<config.icon class={cn("w-6 h-6", config.iconClass)} />
 					</div>
 					<div class="flex-1 min-w-0">
@@ -149,7 +151,9 @@
 							{title}
 						</DialogPrimitive.Title>
 						{#if message && !children}
-							<DialogPrimitive.Description class="mt-2 text-sm text-muted-foreground leading-relaxed">
+							<DialogPrimitive.Description
+								class="mt-2 text-sm text-muted-foreground leading-relaxed"
+							>
 								{message}
 							</DialogPrimitive.Description>
 						{/if}
@@ -162,22 +166,18 @@
 				</div>
 
 				<!-- Footer with actions -->
-				<div class="px-6 py-4 bg-cream-100/70 dark:bg-bark-800/30 border-t border-white/20 dark:border-bark-700/30 flex justify-end gap-3">
-					<Button
-						variant="ghost"
-						onclick={handleCancel}
-						disabled={loading}
-					>
+				<div
+					class="px-6 py-4 bg-cream-100/70 dark:bg-bark-800/30 border-t border-white/20 dark:border-bark-700/30 flex justify-end gap-3"
+				>
+					<Button variant="ghost" onclick={handleCancel} disabled={loading}>
 						{cancelLabel}
 					</Button>
-					<Button
-						variant={config.confirmVariant}
-						onclick={handleConfirm}
-						disabled={loading}
-					>
+					<Button variant={config.confirmVariant} onclick={handleConfirm} disabled={loading}>
 						{#if loading}
 							<span class="inline-flex items-center gap-2">
-								<span class="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></span>
+								<span
+									class="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"
+								></span>
 								Processing...
 							</span>
 						{:else}

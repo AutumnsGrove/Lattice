@@ -767,7 +767,7 @@
 		display: block;
 		margin-top: 0.35rem;
 		font-size: 0.75rem;
-		color: #e07030;
+		color: hsl(var(--warning-foreground));
 		transition: color 0.3s ease;
 	}
 	.char-count {
@@ -780,10 +780,10 @@
 		color: var(--accent-success);
 	}
 	.char-count.warning {
-		color: #e07030;
+		color: hsl(var(--warning-foreground));
 	}
 	.form-input.char-warning {
-		border-color: #e07030;
+		border-color: hsl(var(--warning-foreground));
 	}
 	.tags-preview {
 		display: flex;
@@ -793,7 +793,7 @@
 	}
 	.tag-preview {
 		padding: 0.2rem 0.6rem;
-		background: rgba(34, 197, 94, 0.7);
+		background: hsl(var(--success) / 0.7);
 		backdrop-filter: blur(4px);
 		color: white;
 		border-radius: 12px;
@@ -842,8 +842,8 @@
 	.toggle-vines-btn {
 		margin-top: 0.75rem;
 		padding: 0.5rem 1rem;
-		background: rgba(34, 197, 94, 0.1);
-		border: 1px solid rgba(34, 197, 94, 0.2);
+		background: hsl(var(--success) / 0.1);
+		border: 1px solid hsl(var(--success) / 0.2);
 		border-radius: var(--border-radius-button);
 		color: var(--color-primary);
 		font-size: 0.85rem;
@@ -853,17 +853,17 @@
 		align-self: flex-end;
 	}
 	.toggle-vines-btn:hover {
-		background: rgba(34, 197, 94, 0.18);
-		border-color: rgba(34, 197, 94, 0.35);
+		background: hsl(var(--success) / 0.18);
+		border-color: hsl(var(--success) / 0.35);
 	}
 	:global(.dark) .toggle-vines-btn {
-		background: rgba(74, 222, 128, 0.12);
-		border-color: rgba(74, 222, 128, 0.2);
-		color: #86efac;
+		background: hsl(var(--success) / 0.12);
+		border-color: hsl(var(--success) / 0.2);
+		color: hsl(var(--success));
 	}
 	:global(.dark) .toggle-vines-btn:hover {
-		background: rgba(74, 222, 128, 0.2);
-		border-color: rgba(74, 222, 128, 0.35);
+		background: hsl(var(--success) / 0.2);
+		border-color: hsl(var(--success) / 0.35);
 	}
 
 	/* Meadow toggle */

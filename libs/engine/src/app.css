@@ -3,171 +3,177 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    /* shadcn HSL color system - AutumnsGrove color mapping */
+	:root {
+		/* shadcn HSL color system - AutumnsGrove color mapping */
 
-    /* Primary: Forest Green (#2c5f2d) */
-    --primary: 121 37% 27%;
-    --primary-foreground: 0 0% 100%;
+		/* Primary: Forest Green (#2c5f2d) */
+		--primary: 121 37% 27%;
+		--primary-foreground: 0 0% 100%;
 
-    /* Secondary: Light Gray (#f5f5f5) */
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 20%;
+		/* Secondary: Light Gray (#f5f5f5) */
+		--secondary: 0 0% 96%;
+		--secondary-foreground: 0 0% 20%;
 
-    /* Muted: Medium Gray */
-    --muted: 0 0% 96%;
-    --muted-foreground: 25 32% 33%;
+		/* Muted: Medium Gray */
+		--muted: 0 0% 96%;
+		--muted-foreground: 25 32% 33%;
 
-    /* Accent: Purple for tags (#7c4dab) */
-    --accent: 270 38% 49%;
-    --accent-foreground: 0 0% 100%;
+		/* Accent: Purple for tags (#7c4dab) */
+		--accent: 270 38% 49%;
+		--accent-foreground: 0 0% 100%;
 
-    /* Destructive: Red (#d73a49) */
-    --destructive: 354 66% 54%;
-    --destructive-foreground: 0 0% 100%;
+		/* Destructive: Red (#d73a49) */
+		--destructive: 354 66% 54%;
+		--destructive-foreground: 0 0% 100%;
 
-    /* Background & Foreground */
-    --background: 0 0% 98%;
-    --foreground: 0 0% 20%;
-    --foreground-muted: 25 30% 38%;
-    --foreground-subtle: 25 25% 45%;
+		/* Background & Foreground */
+		--background: 0 0% 98%;
+		--foreground: 0 0% 20%;
+		--foreground-muted: 25 30% 38%;
+		--foreground-subtle: 25 25% 45%;
 
-    /* Card */
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 20%;
+		/* Card */
+		--card: 0 0% 100%;
+		--card-foreground: 0 0% 20%;
 
-    /* Popover */
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 20%;
+		/* Popover */
+		--popover: 0 0% 100%;
+		--popover-foreground: 0 0% 20%;
 
-    /* Surface: component backgrounds */
-    --surface: 0 0% 100%;
-    --surface-hover: 30 10% 96%;
-    --surface-elevated: 0 0% 100%;
-    --surface-subtle: 30 15% 97%;
-    --surface-alt: 30 10% 95%;
+		/* Surface: component backgrounds */
+		--surface: 0 0% 100%;
+		--surface-hover: 30 10% 96%;
+		--surface-elevated: 0 0% 100%;
+		--surface-subtle: 30 15% 97%;
+		--surface-alt: 30 10% 95%;
 
-    /* Accent extensions */
-    --accent-muted: 121 37% 32%;
-    --accent-subtle: 121 40% 92%;
+		/* Accent extensions */
+		--accent-muted: 121 37% 32%;
+		--accent-subtle: 121 40% 92%;
 
-    /* Border & Input */
-    --border: 0 0% 88%;
-    --input: 0 0% 88%;
-    --ring: 121 37% 27%;
-    --default: 0 0% 88%;
-    --subtle: 0 0% 92%;
+		/* Border & Input */
+		--border: 0 0% 88%;
+		--input: 0 0% 88%;
+		--ring: 121 37% 27%;
+		--default: 0 0% 88%;
+		--subtle: 0 0% 92%;
 
-    /* Foreground extensions */
-    --foreground-faint: 25 15% 62%;
+		/* Foreground extensions */
+		--foreground-faint: 25 15% 62%;
 
-    /* Status: Warning (amber-adjacent) */
-    --warning: 38 92% 50%;
-    --warning-foreground: 38 92% 20%;
-    --warning-bg: 48 96% 95%;
-    --warning-muted: 45 93% 47%;
+		/* Status: Warning (amber-adjacent) */
+		--warning: 38 92% 50%;
+		--warning-foreground: 38 92% 20%;
+		--warning-bg: 48 96% 95%;
+		--warning-muted: 45 93% 47%;
 
-    /* Status: Success (emerald-adjacent) */
-    --success: 160 84% 39%;
-    --success-foreground: 160 84% 15%;
-    --success-bg: 152 76% 95%;
-    --success-muted: 160 60% 45%;
+		/* Status: Success (emerald-adjacent) */
+		--success: 160 84% 39%;
+		--success-foreground: 160 84% 15%;
+		--success-bg: 152 76% 95%;
+		--success-muted: 160 60% 45%;
 
-    /* Status: Info (blue-adjacent) */
-    --info: 217 91% 60%;
-    --info-foreground: 217 91% 20%;
-    --info-bg: 214 95% 96%;
-    --info-muted: 217 70% 55%;
+		/* Status: Info (blue-adjacent) */
+		--info: 217 91% 60%;
+		--info-foreground: 217 91% 20%;
+		--info-bg: 214 95% 96%;
+		--info-muted: 217 70% 55%;
 
-    /* Border Radius */
-    --radius: 0.5rem;
-  }
+		/* Phantom alias — commonly hallucinated by LLMs */
+		--primary-color: var(--primary);
 
-  .dark {
-    /* Dark mode HSL values */
+		/* Border Radius */
+		--radius: 0.5rem;
+	}
 
-    /* Primary: Lighter Forest Green */
-    --primary: 121 37% 45%;
-    --primary-foreground: 0 0% 100%;
+	.dark {
+		/* Dark mode HSL values */
 
-    /* Secondary: Dark Gray */
-    --secondary: 0 0% 10%;
-    --secondary-foreground: 0 0% 90%;
+		/* Primary: Lighter Forest Green */
+		--primary: 121 37% 45%;
+		--primary-foreground: 0 0% 100%;
 
-    /* Muted: Darker Gray */
-    --muted: 0 0% 15%;
-    --muted-foreground: 30 6% 75%;
+		/* Secondary: Dark Gray */
+		--secondary: 0 0% 10%;
+		--secondary-foreground: 0 0% 90%;
 
-    /* Accent: Lighter Purple for tags */
-    --accent: 270 38% 60%;
-    --accent-foreground: 0 0% 100%;
+		/* Muted: Darker Gray */
+		--muted: 0 0% 15%;
+		--muted-foreground: 30 6% 75%;
 
-    /* Destructive: Same red */
-    --destructive: 354 66% 54%;
-    --destructive-foreground: 0 0% 100%;
+		/* Accent: Lighter Purple for tags */
+		--accent: 270 38% 60%;
+		--accent-foreground: 0 0% 100%;
 
-    /* Background & Foreground */
-    --background: 0 0% 10%;
-    --foreground: 0 0% 94%;
-    --foreground-muted: 30 6% 65%;
-    --foreground-subtle: 30 5% 58%;
+		/* Destructive: Same red */
+		--destructive: 354 66% 54%;
+		--destructive-foreground: 0 0% 100%;
 
-    /* Card */
-    --card: 0 0% 14%;
-    --card-foreground: 0 0% 94%;
+		/* Background & Foreground */
+		--background: 0 0% 10%;
+		--foreground: 0 0% 94%;
+		--foreground-muted: 30 6% 65%;
+		--foreground-subtle: 30 5% 58%;
 
-    /* Popover */
-    --popover: 0 0% 14%;
-    --popover-foreground: 0 0% 94%;
+		/* Card */
+		--card: 0 0% 14%;
+		--card-foreground: 0 0% 94%;
 
-    /* Surface: component backgrounds */
-    --surface: 0 0% 12%;
-    --surface-hover: 0 0% 18%;
-    --surface-elevated: 0 0% 16%;
-    --surface-subtle: 0 0% 14%;
-    --surface-alt: 0 0% 16%;
+		/* Popover */
+		--popover: 0 0% 14%;
+		--popover-foreground: 0 0% 94%;
 
-    /* Accent extensions */
-    --accent-muted: 121 45% 55%;
-    --accent-subtle: 121 25% 20%;
+		/* Surface: component backgrounds */
+		--surface: 0 0% 12%;
+		--surface-hover: 0 0% 18%;
+		--surface-elevated: 0 0% 16%;
+		--surface-subtle: 0 0% 14%;
+		--surface-alt: 0 0% 16%;
 
-    /* Border & Input */
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --ring: 121 37% 45%;
-    --default: 0 0% 20%;
-    --subtle: 0 0% 16%;
+		/* Accent extensions */
+		--accent-muted: 121 45% 55%;
+		--accent-subtle: 121 25% 20%;
 
-    /* Foreground extensions */
-    --foreground-faint: 30 5% 45%;
+		/* Border & Input */
+		--border: 0 0% 20%;
+		--input: 0 0% 20%;
+		--ring: 121 37% 45%;
+		--default: 0 0% 20%;
+		--subtle: 0 0% 16%;
 
-    /* Status: Warning (dark mode) */
-    --warning: 45 93% 47%;
-    --warning-foreground: 48 96% 89%;
-    --warning-bg: 38 75% 15%;
-    --warning-muted: 45 80% 55%;
+		/* Foreground extensions */
+		--foreground-faint: 30 5% 45%;
 
-    /* Status: Success (dark mode) */
-    --success: 160 70% 45%;
-    --success-foreground: 152 76% 90%;
-    --success-bg: 160 50% 12%;
-    --success-muted: 160 55% 50%;
+		/* Status: Warning (dark mode) */
+		--warning: 45 93% 47%;
+		--warning-foreground: 48 96% 89%;
+		--warning-bg: 38 75% 15%;
+		--warning-muted: 45 80% 55%;
 
-    /* Status: Info (dark mode) */
-    --info: 217 80% 60%;
-    --info-foreground: 214 95% 90%;
-    --info-bg: 217 60% 15%;
-    --info-muted: 217 65% 55%;
-  }
+		/* Status: Success (dark mode) */
+		--success: 160 70% 45%;
+		--success-foreground: 152 76% 90%;
+		--success-bg: 160 50% 12%;
+		--success-muted: 160 55% 50%;
+
+		/* Status: Info (dark mode) */
+		--info: 217 80% 60%;
+		--info-foreground: 214 95% 90%;
+		--info-bg: 217 60% 15%;
+		--info-muted: 217 65% 55%;
+
+		/* Phantom alias — commonly hallucinated by LLMs */
+		--primary-color: var(--primary);
+	}
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
+	* {
+		@apply border-border;
+	}
+	body {
+		@apply bg-background text-foreground;
+	}
 }
 
 /* ─────────────────────────────────────────────────────────────────
@@ -176,10 +182,10 @@
    ───────────────────────────────────────────────────────────────── */
 
 @layer utilities {
-  /* Text color utilities using HSL CSS variables */
-  .text-foreground-subtle {
-    color: hsl(var(--foreground-subtle));
-  }
+	/* Text color utilities using HSL CSS variables */
+	.text-foreground-subtle {
+		color: hsl(var(--foreground-subtle));
+	}
 }
 
 /* ─────────────────────────────────────────────────────────────────
@@ -190,16 +196,21 @@
    ───────────────────────────────────────────────────────────────── */
 
 @keyframes grove-skeleton-shimmer {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 0.3; }
+	0%,
+	100% {
+		opacity: 0.6;
+	}
+	50% {
+		opacity: 0.3;
+	}
 }
 
 .grove-curio-placeholder {
-  background: rgba(0, 0, 0, 0.08);
-  border-radius: 0.375rem;
-  animation: grove-skeleton-shimmer 1.5s ease-in-out infinite;
+	background: rgba(0, 0, 0, 0.08);
+	border-radius: 0.375rem;
+	animation: grove-skeleton-shimmer 1.5s ease-in-out infinite;
 }
 
 .dark .grove-curio-placeholder {
-  background: rgba(255, 255, 255, 0.1);
+	background: rgba(255, 255, 255, 0.1);
 }

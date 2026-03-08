@@ -1,12 +1,6 @@
 <script lang="ts">
 	import { cn } from "$lib/ui/utils";
-	import {
-		Info,
-		AlertTriangle,
-		Sparkles,
-		PartyPopper,
-		X,
-	} from "lucide-svelte";
+	import { Info, AlertTriangle, Sparkles, PartyPopper, X } from "lucide-svelte";
 	import type { GroveMessage, GroveMessageType } from "./types";
 
 	interface Props {
@@ -16,12 +10,7 @@
 		class?: string;
 	}
 
-	let {
-		messages,
-		dismissible = false,
-		centered = false,
-		class: className,
-	}: Props = $props();
+	let { messages, dismissible = false, centered = false, class: className }: Props = $props();
 
 	// localStorage key for dismissed message IDs
 	const STORAGE_KEY = "grove_dismissed_messages";
@@ -72,27 +61,27 @@
 	> = {
 		info: {
 			icon: Info,
-			accent: "text-teal-700 dark:text-teal-300",
-			bg: "bg-teal-50/60 dark:bg-teal-950/30",
-			border: "border-teal-300/50 dark:border-teal-700/40",
+			accent: "text-info",
+			bg: "bg-info-bg",
+			border: "border-info/40",
 		},
 		warning: {
 			icon: AlertTriangle,
-			accent: "text-amber-700 dark:text-amber-300",
-			bg: "bg-amber-50/60 dark:bg-amber-950/30",
-			border: "border-amber-300/50 dark:border-amber-700/40",
+			accent: "text-warning",
+			bg: "bg-warning-bg",
+			border: "border-warning/40",
 		},
 		celebration: {
 			icon: PartyPopper,
-			accent: "text-emerald-700 dark:text-emerald-300",
-			bg: "bg-emerald-50/60 dark:bg-emerald-950/30",
-			border: "border-emerald-300/50 dark:border-emerald-700/40",
+			accent: "text-success",
+			bg: "bg-success-bg",
+			border: "border-success/40",
 		},
 		update: {
 			icon: Sparkles,
-			accent: "text-violet-700 dark:text-violet-300",
-			bg: "bg-violet-50/60 dark:bg-violet-950/30",
-			border: "border-violet-300/50 dark:border-violet-700/40",
+			accent: "text-accent",
+			bg: "bg-accent/20 dark:bg-accent/15",
+			border: "border-accent/40",
 		},
 	};
 
@@ -150,11 +139,7 @@
 </script>
 
 {#if visibleMessages.length > 0}
-	<div
-		class={cn("flex flex-col gap-3", className)}
-		role="region"
-		aria-label="Messages from Grove"
-	>
+	<div class={cn("flex flex-col gap-3", className)} role="region" aria-label="Messages from Grove">
 		{#each visibleMessages as message (message.id)}
 			{@const config = typeConfig[message.message_type]}
 			{#if centered}
@@ -168,14 +153,10 @@
 					)}
 					role="article"
 				>
-					<h3
-						class="font-sans font-medium text-sm text-foreground leading-snug mb-1"
-					>
+					<h3 class="font-sans font-medium text-sm text-foreground leading-snug mb-1">
 						{message.title}
 					</h3>
-					<p
-						class="font-sans text-sm text-foreground-muted leading-relaxed whitespace-pre-line"
-					>
+					<p class="font-sans text-sm text-foreground-muted leading-relaxed whitespace-pre-line">
 						{#each parseBody(message.body) as segment}
 							{#if segment.type === "link"}
 								<a
@@ -183,7 +164,8 @@
 									target="_blank"
 									rel="noopener noreferrer"
 									class="underline decoration-current/40 hover:decoration-current transition-colors"
-								>{segment.label}</a>
+									>{segment.label}</a
+								>
 							{:else}
 								{segment.value}
 							{/if}
@@ -210,9 +192,7 @@
 						<!-- Content -->
 						<div class="flex-1 min-w-0">
 							<div class="flex items-baseline gap-2 mb-0.5">
-								<h3
-									class="font-sans font-medium text-sm text-foreground leading-snug"
-								>
+								<h3 class="font-sans font-medium text-sm text-foreground leading-snug">
 									{message.title}
 								</h3>
 								{#if message.pinned}
@@ -232,7 +212,8 @@
 											target="_blank"
 											rel="noopener noreferrer"
 											class="underline decoration-current/40 hover:decoration-current transition-colors"
-										>{segment.label}</a>
+											>{segment.label}</a
+										>
 									{:else}
 										{segment.value}
 									{/if}

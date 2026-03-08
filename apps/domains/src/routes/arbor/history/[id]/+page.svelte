@@ -262,7 +262,7 @@
 			case "needs_followup":
 				return "badge-warning";
 			default:
-				return "bg-bark/10 dark:bg-white/10 text-foreground-muted";
+				return "bg-bark/10 dark:bg-surface-subtle text-foreground-muted";
 		}
 	}
 
@@ -273,7 +273,7 @@
 			case "recommended":
 				return "text-domain-600 dark:text-domain-400";
 			case "premium":
-				return "text-amber-600 dark:text-amber-400";
+				return "text-warning";
 			default:
 				return "text-foreground-muted";
 		}
@@ -477,7 +477,7 @@
 
 {#if !job}
 	<GlassCard variant="muted" class="p-12 text-center">
-		<p class="text-foreground-muted dark:text-neutral-400 font-sans">Job not found</p>
+		<p class="text-foreground-muted dark:text-foreground-muted font-sans">Job not found</p>
 		<GlassButton variant="accent" href="/arbor/history" class="mt-4">Back to History</GlassButton>
 	</GlassCard>
 {:else}
@@ -499,7 +499,7 @@
 							/>
 						</svg>
 					</a>
-					<h1 class="text-2xl font-serif text-bark dark:text-neutral-100">{job.business_name}</h1>
+					<h1 class="text-2xl font-serif text-bark dark:text-foreground">{job.business_name}</h1>
 					<div class="flex items-center gap-2">
 						{#if isRunning}
 							<span class="w-2 h-2 bg-domain-500 rounded-full animate-pulse"></span>
@@ -520,42 +520,42 @@
 		<!-- Job Details -->
 		<div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
 			<GlassCard hoverable class="p-4">
-				<div class="text-sm font-sans text-foreground-muted dark:text-neutral-400 mb-1">
+				<div class="text-sm font-sans text-foreground-muted dark:text-foreground-muted mb-1">
 					Domains Checked
 				</div>
 				<div
 					class="text-2xl font-serif {isRunning
 						? 'text-domain-600 dark:text-domain-400'
-						: 'text-bark dark:text-neutral-100'}"
+						: 'text-bark dark:text-foreground'}"
 				>
 					{job.domains_checked}
 				</div>
 			</GlassCard>
 			<GlassCard hoverable class="p-4">
-				<div class="text-sm font-sans text-foreground-muted dark:text-neutral-400 mb-1">
+				<div class="text-sm font-sans text-foreground-muted dark:text-foreground-muted mb-1">
 					Available Found
 				</div>
 				<div class="text-2xl font-serif text-grove-600 dark:text-grove-400">{job.good_results}</div>
 			</GlassCard>
 			<GlassCard hoverable class="p-4">
-				<div class="text-sm font-sans text-foreground-muted dark:text-neutral-400 mb-1">
+				<div class="text-sm font-sans text-foreground-muted dark:text-foreground-muted mb-1">
 					{isRunning ? "Elapsed" : "Duration"}
 				</div>
 				<div
 					class="text-2xl font-serif {isRunning
 						? 'text-domain-600 dark:text-domain-400'
-						: 'text-bark dark:text-neutral-100'}"
+						: 'text-bark dark:text-foreground'}"
 				>
 					{isRunning ? formatElapsed(elapsedSeconds) : formatDuration(job.duration_seconds)}
 				</div>
 			</GlassCard>
 			<GlassCard hoverable class="p-4">
-				<div class="text-sm font-sans text-foreground-muted dark:text-neutral-400 mb-1">
+				<div class="text-sm font-sans text-foreground-muted dark:text-foreground-muted mb-1">
 					Batches
 				</div>
-				<div class="text-2xl font-serif text-bark dark:text-neutral-100">{job.batch_num} / 6</div>
+				<div class="text-2xl font-serif text-bark dark:text-foreground">{job.batch_num} / 6</div>
 				{#if isRunning}
-					<div class="mt-2 h-1.5 bg-grove-100 dark:bg-neutral-700 rounded-full overflow-hidden">
+					<div class="mt-2 h-1.5 bg-grove-100 dark:bg-card rounded-full overflow-hidden">
 						<div
 							class="h-full bg-domain-500 transition-all"
 							style="width: {(job.batch_num / 6) * 100}%"
@@ -567,16 +567,16 @@
 
 		<!-- Search Parameters -->
 		<GlassCard class="p-6">
-			<h2 class="font-serif text-lg text-bark dark:text-neutral-100 mb-4">Search Parameters</h2>
+			<h2 class="font-serif text-lg text-bark dark:text-foreground mb-4">Search Parameters</h2>
 			<div class="grid sm:grid-cols-2 gap-4 text-sm font-sans">
 				<div>
 					<span class="text-foreground-muted">Vibe:</span>
-					<span class="text-bark dark:text-neutral-100 ml-2 capitalize">{job.vibe}</span>
+					<span class="text-bark dark:text-foreground ml-2 capitalize">{job.vibe}</span>
 				</div>
 				{#if job.domain_idea}
 					<div class="flex items-center gap-2 flex-wrap">
 						<span class="text-foreground-muted">Domain Idea:</span>
-						<span class="text-bark dark:text-neutral-100 font-mono">{job.domain_idea}</span>
+						<span class="text-bark dark:text-foreground font-mono">{job.domain_idea}</span>
 						{#if domainIdeaStatus}
 							{#if domainIdeaStatus.checked}
 								{#if domainIdeaStatus.available}
@@ -591,7 +591,7 @@
 										Available
 									</span>
 								{:else}
-									<span class="inline-flex items-center gap-1 text-red-500 text-xs">
+									<span class="inline-flex items-center gap-1 text-error text-xs">
 										<svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
 											<path
 												fill-rule="evenodd"
@@ -612,24 +612,24 @@
 				{/if}
 				<div>
 					<span class="text-foreground-muted">TLD Preferences:</span>
-					<span class="text-bark dark:text-neutral-100 ml-2"
+					<span class="text-bark dark:text-foreground ml-2"
 						>{formatTldPreferences(job.tld_preferences)}</span
 					>
 				</div>
 				{#if job.keywords}
 					<div>
 						<span class="text-foreground-muted">Keywords:</span>
-						<span class="text-bark dark:text-neutral-100 ml-2">{job.keywords}</span>
+						<span class="text-bark dark:text-foreground ml-2">{job.keywords}</span>
 					</div>
 				{/if}
 				<div>
 					<span class="text-foreground-muted">Created:</span>
-					<span class="text-bark dark:text-neutral-100 ml-2">{formatDate(job.created_at)}</span>
+					<span class="text-bark dark:text-foreground ml-2">{formatDate(job.created_at)}</span>
 				</div>
 				{#if job.completed_at}
 					<div>
 						<span class="text-foreground-muted">Completed:</span>
-						<span class="text-bark dark:text-neutral-100 ml-2">{formatDate(job.completed_at)}</span>
+						<span class="text-bark dark:text-foreground ml-2">{formatDate(job.completed_at)}</span>
 					</div>
 				{/if}
 			</div>
@@ -637,12 +637,12 @@
 
 		<!-- Follow-up Quiz -->
 		{#if job.status === "needs_followup"}
-			<GlassCard variant="accent" class="p-6 border-2 border-amber-200/60 dark:border-amber-700/40">
+			<GlassCard variant="accent" class="p-6 border-2 border-warning/60 dark:border-warning/40">
 				<div class="flex items-start gap-3 mb-4">
 					<div
-						class="flex-shrink-0 w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center"
+						class="flex-shrink-0 w-10 h-10 rounded-full bg-surface-subtle flex items-center justify-center"
 					>
-						<svg class="w-5 h-5 text-amber-600" viewBox="0 0 20 20" fill="currentColor">
+						<svg class="w-5 h-5 text-warning" viewBox="0 0 20 20" fill="currentColor">
 							<path
 								fill-rule="evenodd"
 								d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
@@ -651,7 +651,7 @@
 						</svg>
 					</div>
 					<div class="flex-1">
-						<h2 class="font-serif text-lg text-bark dark:text-neutral-100">Refine Your Search</h2>
+						<h2 class="font-serif text-lg text-bark dark:text-foreground">Refine Your Search</h2>
 						<p class="text-sm text-foreground-muted font-sans mt-1">
 							We need a bit more information to find the perfect domains for you.
 						</p>
@@ -682,7 +682,7 @@
 						<p class="mt-3 text-foreground-muted font-sans">Loading follow-up questions...</p>
 					</div>
 				{:else if followupError}
-					<div class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+					<div class="mb-4 bg-surface-subtle border border-error text-error px-4 py-3 rounded-lg">
 						<p class="text-sm font-sans">{followupError}</p>
 					</div>
 					<button
@@ -730,7 +730,7 @@
 						<!-- Questions -->
 						<div class="space-y-5">
 							{#each followupQuiz.questions as question, idx}
-								<div class="bg-white p-4 rounded-lg border border-grove-100 shadow-sm">
+								<div class="bg-surface-elevated p-4 rounded-lg border border-grove-100 shadow-sm">
 									<div class="flex items-start gap-3 mb-3">
 										<div
 											class="flex-shrink-0 w-6 h-6 rounded-full bg-domain-100 text-domain-700 text-xs font-sans font-bold flex items-center justify-center"
@@ -740,10 +740,10 @@
 										<div class="flex-1">
 											<!-- svelte-ignore a11y_label_has_associated_control -->
 											<label
-												class="block text-sm font-sans font-medium text-bark dark:text-neutral-100 mb-1"
+												class="block text-sm font-sans font-medium text-bark dark:text-foreground mb-1"
 											>
 												{question.prompt}
-												{#if question.required}<span class="text-red-500 ml-1">*</span>{/if}
+												{#if question.required}<span class="text-error ml-1">*</span>{/if}
 											</label>
 											{#if question.placeholder}
 												<p class="text-xs text-foreground-subtle font-sans mb-2">
@@ -789,7 +789,7 @@
 													}}
 													class="px-3 py-2 rounded-lg text-sm font-sans transition-all {selected
 														? 'bg-domain-100 text-domain-700 border-2 border-domain-300 shadow-sm'
-														: 'bg-bark/5 text-foreground-muted border border-transparent hover:bg-bark/10 dark:hover:bg-white/10 hover:border-bark/20'}"
+														: 'bg-bark/5 text-foreground-muted border border-transparent hover:bg-bark/10 dark:hover:bg-surface-elevated/10 hover:border-bark/20'}"
 												>
 													{opt.label}
 												</button>
@@ -849,7 +849,7 @@
 		{#if availableResults.length > 0 || isRunning}
 			<GlassCard>
 				<div class="p-4 border-b border-grove-200 flex justify-between items-center">
-					<h2 class="font-serif text-lg text-bark dark:text-neutral-100">Available Domains</h2>
+					<h2 class="font-serif text-lg text-bark dark:text-foreground">Available Domains</h2>
 					<div class="flex items-center gap-2">
 						{#if isRunning}
 							<span class="inline-flex items-center gap-1.5 text-sm text-domain-600 font-sans">
@@ -895,7 +895,7 @@
 											: ''}"
 									>
 										<td class="px-4 py-3">
-											<span class="font-mono text-bark dark:text-neutral-100 font-medium"
+											<span class="font-mono text-bark dark:text-foreground font-medium"
 												>{result.domain}</span
 											>
 										</td>
@@ -958,7 +958,7 @@
 				<summary
 					class="p-4 cursor-pointer hover:bg-grove-50 transition-colors flex justify-between items-center"
 				>
-					<h2 class="font-serif text-lg text-bark dark:text-neutral-100">
+					<h2 class="font-serif text-lg text-bark dark:text-foreground">
 						Checked Domains (Unavailable)
 					</h2>
 					<span class="text-sm text-foreground-subtle font-sans"

@@ -40,7 +40,7 @@
 <div class="result-card" class:partial={!allSuccess}>
 	<div class="result-header">
 		{#if allSuccess}
-			<Check size={16} class="text-emerald-400" aria-hidden="true" />
+			<Check size={16} class="text-success" aria-hidden="true" />
 			<span>Applied {appliedCount} change{appliedCount === 1 ? "" : "s"}</span>
 		{:else}
 			<span>Applied {appliedCount} of {total} change{total === 1 ? "" : "s"}</span>
@@ -77,15 +77,15 @@
 	.result-card {
 		border-radius: 0.5rem;
 		padding: 0.75rem;
-		background: rgba(34, 197, 94, 0.05);
-		border: 1px solid rgba(34, 197, 94, 0.15);
-		box-shadow: inset 0 1px 0 rgba(34, 197, 94, 0.06);
+		background: hsl(var(--success) / 0.05);
+		border: 1px solid hsl(var(--success) / 0.15);
+		box-shadow: inset 0 1px 0 hsl(var(--success) / 0.06);
 	}
 
 	.result-card.partial {
-		background: rgba(245, 158, 11, 0.05);
-		border-color: rgba(245, 158, 11, 0.15);
-		box-shadow: inset 0 1px 0 rgba(245, 158, 11, 0.06);
+		background: hsl(var(--warning) / 0.05);
+		border-color: hsl(var(--warning) / 0.15);
+		box-shadow: inset 0 1px 0 hsl(var(--warning) / 0.06);
 	}
 
 	.result-header {
@@ -94,7 +94,7 @@
 		gap: 0.375rem;
 		font-size: 0.8125rem;
 		font-weight: 500;
-		color: rgba(255, 255, 255, 0.8);
+		color: rgb(255 255 255 / 0.8);
 		margin-bottom: 0.5rem;
 	}
 
@@ -110,17 +110,17 @@
 		align-items: center;
 		gap: 0.25rem;
 		font-size: 0.75rem;
-		color: rgba(74, 222, 128, 0.8);
+		color: hsl(var(--success) / 0.8);
 	}
 
 	.domain-item.failed {
-		color: rgba(248, 113, 113, 0.8);
+		color: hsl(var(--destructive) / 0.8);
 	}
 
 	.result-message {
 		margin: 0;
 		font-size: 0.8125rem;
-		color: rgba(255, 255, 255, 0.45);
+		color: rgb(255 255 255 / 0.45);
 	}
 
 	/* Screen reader only utility */

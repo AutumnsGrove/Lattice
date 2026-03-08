@@ -92,7 +92,7 @@
 </div>
 
 <!-- Danger Zone -->
-<Glass variant="accent" class="bg-red-500/10 border-red-500/30 p-6 rounded-lg mb-8">
+<Glass variant="accent" class="error-bg border-error/30 p-6 rounded-lg mb-8">
 	<div class="danger-header">
 		<div>
 			<h2 class="flex items-center gap-2"><AlertTriangle class="w-5 h-5" /> Mass Email Zone</h2>

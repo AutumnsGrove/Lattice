@@ -52,8 +52,8 @@
 					onclick={handleReset}
 					disabled={resetting}
 					class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-sans font-medium rounded-lg transition-colors disabled:opacity-50 {confirmReset
-						? 'bg-amber-600 text-white hover:bg-amber-700'
-						: 'text-foreground-muted hover:bg-grove-100 dark:hover:bg-cream-100/10'}"
+						? 'bg-warning text-white hover:bg-warning/90'
+						: 'text-foreground-muted hover:bg-surface-subtle'}"
 				>
 					<RotateCcw class="w-3.5 h-3.5" aria-hidden="true" />
 					{#if confirmReset}
@@ -77,8 +77,8 @@
 
 	{#if grafts.length === 0}
 		<p class="text-sm font-sans text-foreground-muted">
-			No controllable grafts available. Greenhouse-only flags must be cultivated (enabled
-			globally) before they appear here.
+			No controllable grafts available. Greenhouse-only flags must be cultivated (enabled globally)
+			before they appear here.
 		</p>
 	{:else}
 		<p class="text-sm font-sans text-foreground-muted mb-4">
@@ -86,11 +86,7 @@
 		</p>
 		<div class="space-y-2">
 			{#each grafts as graft (graft.id)}
-				<GraftToggleRow
-					{graft}
-					{onToggle}
-					loading={loadingGraftId === graft.id || resetting}
-				/>
+				<GraftToggleRow {graft} {onToggle} loading={loadingGraftId === graft.id || resetting} />
 			{/each}
 		</div>
 	{/if}

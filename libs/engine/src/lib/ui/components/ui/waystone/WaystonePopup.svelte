@@ -82,9 +82,7 @@
 		>
 			<GlassCard variant="frosted" flush class="overflow-hidden max-h-[70vh] flex flex-col">
 				<!-- Header -->
-				<div
-					class="flex-shrink-0 px-6 pt-5 pb-4 flex items-start gap-4 border-b border-white/20 dark:border-bark-700/30"
-				>
+				<div class="flex-shrink-0 px-6 pt-5 pb-4 flex items-start gap-4 border-b border-divider">
 					<div class="flex-shrink-0 p-2.5 rounded-full bg-accent/10 dark:bg-accent/20">
 						<HelpCircle class="w-5 h-5 text-accent-muted" />
 					</div>
@@ -99,7 +97,7 @@
 							>
 								Unable to load help
 							</DialogPrimitive.Title>
-							<p class="mt-1 text-sm text-red-600 dark:text-red-400">{error}</p>
+							<p class="mt-1 text-sm text-error">{error}</p>
 						{:else if excerpt}
 							<DialogPrimitive.Title
 								id="waystone-popup-title"
@@ -158,7 +156,7 @@
 
 				<!-- Footer with link to full article - flex-shrink-0 ensures always visible -->
 				<div
-					class="flex-shrink-0 px-6 py-4 bg-cream-100/70 dark:bg-bark-800/30 border-t border-white/20 dark:border-bark-700/30 flex items-center justify-between"
+					class="flex-shrink-0 px-6 py-4 bg-surface-subtle border-t border-divider flex items-center justify-between"
 				>
 					<div class="flex items-center gap-2 text-sm text-muted-foreground">
 						{#if excerpt?.readingTime}

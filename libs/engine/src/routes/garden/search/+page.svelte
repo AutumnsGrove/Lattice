@@ -182,9 +182,7 @@
 		{#each filteredPosts as post (post.slug)}
 			<Card hoverable>
 				<a href="/garden/{post.slug}" class="post-link">
-					<h2
-						class="text-xl font-semibold mb-4 text-green-800 dark:text-green-500 transition-colors"
-					>
+					<h2 class="text-xl font-semibold mb-4 text-success transition-colors">
 						{post.title}
 					</h2>
 					<div class="post-meta">

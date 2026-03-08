@@ -1803,7 +1803,7 @@
 		gap: 0.5rem;
 	}
 	.voice-error {
-		color: var(--grove-error, #ef4444);
+		color: hsl(var(--destructive));
 		font-size: 0.75rem;
 		white-space: nowrap;
 	}

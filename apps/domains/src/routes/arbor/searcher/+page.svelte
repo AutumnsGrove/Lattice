@@ -789,7 +789,7 @@
 			case "recommended":
 				return "text-domain-600 dark:text-domain-400";
 			case "premium":
-				return "text-amber-600 dark:text-amber-400";
+				return "text-warning";
 			default:
 				return "text-foreground-muted";
 		}
@@ -804,11 +804,11 @@
 			case "complete":
 				return "text-grove-600 dark:text-grove-400";
 			case "needs_followup":
-				return "text-amber-600 dark:text-amber-400";
+				return "text-warning";
 			case "failed":
-				return "text-red-600 dark:text-red-400";
+				return "text-error";
 			case "cancelled":
-				return "text-red-500 dark:text-red-400";
+				return "text-error";
 			default:
 				return "text-foreground-muted";
 		}
@@ -929,7 +929,7 @@
 					onclick={() => (searchMode = "vibe")}
 					class="flex-1 px-4 py-2 text-sm font-sans font-medium rounded-md transition-all {searchMode ===
 					'vibe'
-						? 'bg-white dark:bg-neutral-800 text-bark dark:text-neutral-100 shadow-sm'
+						? 'bg-surface-elevated dark:bg-card text-bark dark:text-neutral-100 shadow-sm'
 						: 'text-foreground-muted hover:text-foreground'}"
 					disabled={isFormDisabled}
 				>
@@ -940,7 +940,7 @@
 					onclick={() => (searchMode = "detailed")}
 					class="flex-1 px-4 py-2 text-sm font-sans font-medium rounded-md transition-all {searchMode ===
 					'detailed'
-						? 'bg-white dark:bg-neutral-800 text-bark dark:text-neutral-100 shadow-sm'
+						? 'bg-surface-elevated dark:bg-card text-bark dark:text-neutral-100 shadow-sm'
 						: 'text-foreground-muted hover:text-foreground'}"
 					disabled={isFormDisabled}
 				>
@@ -949,7 +949,7 @@
 			</div>
 
 			{#if errorMessage}
-				<div class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+				<div class="mb-4 bg-surface-subtle border border-error text-error px-4 py-3 rounded-lg">
 					<p class="text-sm font-sans">{errorMessage}</p>
 				</div>
 			{/if}
@@ -1006,7 +1006,9 @@
 
 						<!-- Error message -->
 						{#if vibeError}
-							<div class="bg-amber-50 border border-amber-200 text-amber-700 px-4 py-3 rounded-lg">
+							<div
+								class="bg-surface-subtle border border-warning text-warning px-4 py-3 rounded-lg"
+							>
 								<p class="text-sm font-sans">{vibeError}</p>
 							</div>
 						{/if}
@@ -1019,7 +1021,7 @@
 									<button
 										type="button"
 										onclick={() => useExample(example)}
-										class="text-left px-3 py-2 text-sm font-sans text-foreground-muted bg-bark/5 hover:bg-bark/10 dark:hover:bg-white/10 rounded-lg transition-colors line-clamp-2"
+										class="text-left px-3 py-2 text-sm font-sans text-foreground-muted bg-bark/5 hover:bg-bark/10 dark:hover:bg-surface-hover rounded-lg transition-colors line-clamp-2"
 										disabled={isParsingVibe || isFormDisabled}
 									>
 										"{example}"
@@ -1166,7 +1168,7 @@
 													tld,
 												)
 													? 'bg-domain-100 text-domain-700 border border-domain-300'
-													: 'bg-bark/5 text-foreground-muted border border-transparent hover:bg-bark/10 dark:hover:bg-white/10'}"
+													: 'bg-bark/5 text-foreground-muted border border-transparent hover:bg-bark/10 dark:hover:bg-surface-hover'}"
 												disabled={isSubmitting}
 											>
 												.{tld}
@@ -1337,7 +1339,7 @@
 
 									<!-- Group Content -->
 									{#if isExpanded}
-										<div class="px-3 py-2 bg-white">
+										<div class="px-3 py-2 bg-surface-elevated">
 											<div class="flex items-center justify-between mb-2">
 												<div class="flex gap-2">
 													<button
@@ -1368,7 +1370,7 @@
 															tld.value,
 														)
 															? 'bg-domain-100 text-domain-700 border border-domain-300'
-															: 'bg-bark/5 text-foreground-muted border border-transparent hover:bg-bark/10 dark:hover:bg-white/10'}"
+															: 'bg-bark/5 text-foreground-muted border border-transparent hover:bg-bark/10 dark:hover:bg-surface-hover'}"
 														disabled={isFormDisabled}
 													>
 														{tld.label}
@@ -1403,7 +1405,7 @@
 									: 'bg-bark/20'}"
 							>
 								<span
-									class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform {diverseTlds
+									class="inline-block h-4 w-4 transform rounded-full bg-surface-elevated shadow transition-transform {diverseTlds
 										? 'translate-x-6'
 										: 'translate-x-1'}"
 								></span>
@@ -1570,7 +1572,7 @@
 							type="button"
 							onclick={cancelSearch}
 							disabled={isCancelling}
-							class="mt-4 w-full px-4 py-2 text-sm font-sans font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors disabled:opacity-50"
+							class="mt-4 w-full px-4 py-2 text-sm font-sans font-medium text-error bg-surface-subtle hover:bg-surface-hover rounded-lg transition-colors disabled:opacity-50"
 						>
 							{isCancelling ? "Cancelling..." : "Cancel Search"}
 						</button>
@@ -1578,8 +1580,8 @@
 
 					<!-- Error/cancelled message -->
 					{#if (currentJob.status === "failed" || currentJob.status === "cancelled") && currentJob.error}
-						<div class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-							<p class="text-sm text-red-700 font-sans">{currentJob.error}</p>
+						<div class="mt-4 p-3 bg-surface-subtle border border-error rounded-lg">
+							<p class="text-sm text-error font-sans">{currentJob.error}</p>
 						</div>
 					{/if}
 				</GlassCard>
@@ -1603,7 +1605,7 @@
 										class="block text-sm font-sans font-medium text-bark dark:text-neutral-100 mb-2"
 									>
 										{question.prompt}
-										{#if question.required}<span class="text-red-500">*</span>{/if}
+										{#if question.required}<span class="text-error">*</span>{/if}
 									</label>
 
 									{#if question.type === "text"}
@@ -1642,7 +1644,7 @@
 													}}
 													class="px-3 py-1.5 rounded-full text-sm font-sans transition-colors {selected
 														? 'bg-domain-100 text-domain-700 border border-domain-300'
-														: 'bg-bark/5 text-foreground-muted border border-transparent hover:bg-bark/10 dark:hover:bg-white/10'}"
+														: 'bg-bark/5 text-foreground-muted border border-transparent hover:bg-bark/10 dark:hover:bg-surface-hover'}"
 												>
 													{opt.label}
 												</button>
@@ -1714,8 +1716,8 @@
 								</div>
 								<div class="text-[10px] sm:text-xs text-foreground-muted font-sans">Standard</div>
 							</div>
-							<div class="text-center p-2 sm:p-3 bg-amber-50 rounded-lg">
-								<div class="text-xl sm:text-2xl font-mono font-bold text-amber-600">
+							<div class="text-center p-2 sm:p-3 bg-surface-subtle rounded-lg">
+								<div class="text-xl sm:text-2xl font-mono font-bold text-warning">
 									{pricingSummary.premium}
 								</div>
 								<div class="text-[10px] sm:text-xs text-foreground-muted font-sans">
@@ -1802,8 +1804,8 @@
 															: category === 'recommended'
 																? 'bg-domain-100 text-domain-700'
 																: category === 'premium'
-																	? 'bg-amber-100 text-amber-700'
-																	: 'bg-bark/10 dark:bg-white/10 text-foreground-muted'}"
+																	? 'bg-surface-subtle text-warning'
+																	: 'bg-bark/10 dark:bg-surface-subtle text-foreground-muted'}"
 													>
 														{category}
 													</span>
@@ -1852,7 +1854,7 @@
 														{/if}
 														{#if evalData.brand_fit}
 															<span
-																class="w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center rounded-full bg-amber-100 text-amber-600"
+																class="w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center rounded-full bg-amber-100 text-warning"
 																title="Good brand fit"
 															>
 																<svg
@@ -1867,7 +1869,7 @@
 														{/if}
 														{#if evalData.email_friendly}
 															<span
-																class="w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center rounded-full bg-blue-100 text-blue-600"
+																class="w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center rounded-full bg-surface-subtle text-info"
 																title="Email-friendly"
 															>
 																<svg
@@ -2016,7 +2018,7 @@
 												<div class="mt-3 flex flex-wrap gap-1">
 													{#each result.flags as flag}
 														<span
-															class="px-2 py-0.5 text-xs font-sans bg-bark/10 dark:bg-white/10 text-foreground-muted rounded"
+															class="px-2 py-0.5 text-xs font-sans bg-bark/10 dark:bg-surface-subtle text-foreground-muted rounded"
 															>{flag}</span
 														>
 													{/each}

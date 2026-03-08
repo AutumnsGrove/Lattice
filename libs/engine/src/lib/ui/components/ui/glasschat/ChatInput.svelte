@@ -67,7 +67,7 @@
 	}
 </script>
 
-<footer class={cn("border-t border-white/10 bg-black/20 px-4 py-3", className)}>
+<footer class={cn("border-t border-divider bg-surface-subtle px-4 py-3", className)}>
 	{#if toolbar}
 		<div class="mb-3">
 			{@render toolbar()}
@@ -86,10 +86,10 @@
 			aria-label={placeholder || "Your message"}
 			aria-describedby="glasschat-input-hint"
 			class={cn(
-				"flex-1 resize-none rounded-lg border border-white/20 bg-black/30 px-4 py-3",
+				"flex-1 resize-none rounded-lg border border-input bg-surface-subtle px-4 py-3",
 				"text-sm leading-relaxed text-inherit font-[inherit]",
-				"placeholder:text-white/40",
-				"focus:outline-none focus:border-emerald-500/50",
+				"placeholder:text-foreground-muted/40",
+				"focus:outline-none focus:border-accent/50",
 				"disabled:opacity-50 disabled:cursor-not-allowed",
 				"min-h-[44px] max-h-[150px]",
 			)}
@@ -101,9 +101,9 @@
 			aria-label="Send message"
 			class={cn(
 				"flex items-center justify-center w-11 h-11 rounded-lg",
-				"bg-emerald-700/80 text-white",
-				"hover:bg-emerald-600/80",
-				"focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400",
+				"bg-success text-white",
+				"hover:bg-success/90",
+				"focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-success/70",
 				"disabled:opacity-50 disabled:cursor-not-allowed",
 			)}
 		>

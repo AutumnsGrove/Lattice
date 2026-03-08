@@ -19,7 +19,7 @@
 	 * />
 	 * ```
 	 */
-	import { cn } from '$lib/ui/utils';
+	import { cn } from "$lib/ui/utils";
 	import {
 		CheckCircle,
 		AlertTriangle,
@@ -27,10 +27,16 @@
 		XCircle,
 		Wrench,
 		RefreshCw,
-		ExternalLink
-	} from 'lucide-svelte';
+		ExternalLink,
+	} from "lucide-svelte";
 
-	type OverallStatus = 'operational' | 'degraded' | 'partial_outage' | 'major_outage' | 'maintenance' | 'unknown';
+	type OverallStatus =
+		| "operational"
+		| "degraded"
+		| "partial_outage"
+		| "major_outage"
+		| "maintenance"
+		| "unknown";
 
 	interface StatusResponse {
 		status: OverallStatus;
@@ -66,12 +72,12 @@
 	}
 
 	let {
-		clearingUrl = 'https://status.grove.place',
+		clearingUrl = "https://status.grove.place",
 		refreshInterval = 60,
 		showComponents = false,
 		showIncidents = false,
 		compact = false,
-		class: className
+		class: className,
 	}: Props = $props();
 
 	let statusData = $state<StatusResponse | null>(null);
@@ -79,59 +85,62 @@
 	let error = $state<string | null>(null);
 
 	// Status configuration
-	const statusConfig: Record<OverallStatus, {
-		icon: typeof CheckCircle;
-		label: string;
-		color: string;
-		bg: string;
-		border: string;
-	}> = {
+	const statusConfig: Record<
+		OverallStatus,
+		{
+			icon: typeof CheckCircle;
+			label: string;
+			color: string;
+			bg: string;
+			border: string;
+		}
+	> = {
 		operational: {
 			icon: CheckCircle,
-			label: 'All Systems Operational',
-			color: 'text-green-500',
-			bg: 'bg-green-500/10',
-			border: 'border-green-500/20'
+			label: "All Systems Operational",
+			color: "text-success",
+			bg: "bg-success-bg",
+			border: "border-success/30",
 		},
 		degraded: {
 			icon: AlertTriangle,
-			label: 'Degraded Performance',
-			color: 'text-yellow-500',
-			bg: 'bg-yellow-500/10',
-			border: 'border-yellow-500/20'
+			label: "Degraded Performance",
+			color: "text-warning",
+			bg: "bg-warning-bg",
+			border: "border-warning/30",
 		},
 		partial_outage: {
 			icon: AlertCircle,
-			label: 'Partial Outage',
-			color: 'text-orange-500',
-			bg: 'bg-orange-500/10',
-			border: 'border-orange-500/20'
+			label: "Partial Outage",
+			color: "text-warning",
+			bg: "bg-warning-bg",
+			border: "border-warning/30",
 		},
 		major_outage: {
 			icon: XCircle,
-			label: 'Major Outage',
-			color: 'text-red-500',
-			bg: 'bg-red-500/10',
-			border: 'border-red-500/20'
+			label: "Major Outage",
+			color: "text-error",
+			bg: "bg-error-bg",
+			border: "border-error/30",
 		},
 		maintenance: {
 			icon: Wrench,
-			label: 'Under Maintenance',
-			color: 'text-blue-500',
-			bg: 'bg-blue-500/10',
-			border: 'border-blue-500/20'
+			label: "Under Maintenance",
+			color: "text-info",
+			bg: "bg-info-bg",
+			border: "border-info/30",
 		},
 		unknown: {
 			icon: RefreshCw,
-			label: 'Status Unknown',
-			color: 'text-foreground-muted',
-			bg: 'bg-foreground/10',
-			border: 'border-foreground/20'
-		}
+			label: "Status Unknown",
+			color: "text-foreground-muted",
+			bg: "bg-foreground/10",
+			border: "border-foreground/20",
+		},
 	};
 
 	const currentConfig = $derived(
-		statusData ? statusConfig[statusData.status] : statusConfig.unknown
+		statusData ? statusConfig[statusData.status] : statusConfig.unknown,
 	);
 	const StatusIcon = $derived(currentConfig.icon);
 
@@ -142,7 +151,7 @@
 			statusData = await response.json();
 			error = null;
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to fetch status';
+			error = e instanceof Error ? e.message : "Failed to fetch status";
 			// Keep old data if available, just show error
 		} finally {
 			loading = false;
@@ -156,7 +165,7 @@
 		const diffSec = Math.floor(diffMs / 1000);
 		const diffMin = Math.floor(diffSec / 60);
 
-		if (diffSec < 60) return 'just now';
+		if (diffSec < 60) return "just now";
 		if (diffMin < 60) return `${diffMin}m ago`;
 		return `${Math.floor(diffMin / 60)}h ago`;
 	}
@@ -176,25 +185,25 @@
 {#if compact}
 	<!-- Compact mode: just icon + status text -->
 	<a
-		href="{clearingUrl}"
+		href={clearingUrl}
 		target="_blank"
 		rel="noopener noreferrer"
 		class={cn(
-			'inline-flex items-center gap-2 px-3 py-1.5 rounded-full',
-			'glass-card transition-all duration-200 hover:shadow-md',
+			"inline-flex items-center gap-2 px-3 py-1.5 rounded-full",
+			"glass-card transition-all duration-200 hover:shadow-md",
 			currentConfig.bg,
 			currentConfig.border,
-			'border',
-			className
+			"border",
+			className,
 		)}
 	>
 		{#if loading}
 			<RefreshCw class="w-4 h-4 text-foreground-muted animate-spin" />
 			<span class="text-sm text-foreground-muted">Loading...</span>
 		{:else}
-			<StatusIcon class={cn('w-4 h-4', currentConfig.color)} />
-			<span class={cn('text-sm font-medium', currentConfig.color)}>
-				{statusData?.status === 'operational' ? 'All Systems Go' : currentConfig.label}
+			<StatusIcon class={cn("w-4 h-4", currentConfig.color)} />
+			<span class={cn("text-sm font-medium", currentConfig.color)}>
+				{statusData?.status === "operational" ? "All Systems Go" : currentConfig.label}
 			</span>
 		{/if}
 	</a>
@@ -202,14 +211,14 @@
 	<!-- Full widget -->
 	<div
 		class={cn(
-			'glass-card rounded-xl overflow-hidden',
-			'bg-white/80 dark:bg-bark-800/50 backdrop-blur-md',
-			'border border-white/40 dark:border-bark-700/40',
-			className
+			"glass-card rounded-xl overflow-hidden",
+			"bg-white/80 dark:bg-bark-800/50 backdrop-blur-md",
+			"border border-white/40 dark:border-bark-700/40",
+			className,
 		)}
 	>
 		<!-- Header -->
-		<div class={cn('px-4 py-3', currentConfig.bg)}>
+		<div class={cn("px-4 py-3", currentConfig.bg)}>
 			<div class="flex items-center justify-between">
 				<div class="flex items-center gap-2">
 					{#if loading}
@@ -218,8 +227,8 @@
 							Checking status...
 						</span>
 					{:else}
-						<StatusIcon class={cn('w-5 h-5', currentConfig.color)} />
-						<span class={cn('font-medium', currentConfig.color)}>
+						<StatusIcon class={cn("w-5 h-5", currentConfig.color)} />
+						<span class={cn("font-medium", currentConfig.color)}>
 							{currentConfig.label}
 						</span>
 					{/if}
@@ -237,7 +246,7 @@
 			</div>
 
 			{#if error}
-				<p class="text-xs text-red-500 mt-1">{error}</p>
+				<p class="text-xs text-error mt-1">{error}</p>
 			{/if}
 		</div>
 
@@ -249,11 +258,12 @@
 				</h4>
 				<div class="space-y-1.5">
 					{#each statusData.components as component}
-						{@const compConfig = statusConfig[component.status as OverallStatus] || statusConfig.unknown}
+						{@const compConfig =
+							statusConfig[component.status as OverallStatus] || statusConfig.unknown}
 						<div class="flex items-center justify-between text-sm">
 							<span class="text-foreground">{component.name}</span>
-							<span class={cn('text-xs', compConfig.color)}>
-								{component.status === 'operational' ? '✓' : component.status}
+							<span class={cn("text-xs", compConfig.color)}>
+								{component.status === "operational" ? "✓" : component.status}
 							</span>
 						</div>
 					{/each}
@@ -283,7 +293,9 @@
 		{/if}
 
 		<!-- Footer -->
-		<div class="px-4 py-2 bg-white/50 dark:bg-bark-900/30 border-t border-white/20 dark:border-bark-700/30">
+		<div
+			class="px-4 py-2 bg-white/50 dark:bg-bark-900/30 border-t border-white/20 dark:border-bark-700/30"
+		>
 			<div class="flex items-center justify-between text-xs text-foreground-muted">
 				<span>
 					{#if statusData?.updatedAt}
@@ -297,7 +309,7 @@
 					class="hover:text-foreground transition-colors"
 					title="Refresh status"
 				>
-					<RefreshCw class={cn('w-3 h-3', loading && 'animate-spin')} />
+					<RefreshCw class={cn("w-3 h-3", loading && "animate-spin")} />
 				</button>
 			</div>
 		</div>

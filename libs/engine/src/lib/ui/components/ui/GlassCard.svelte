@@ -204,11 +204,11 @@
 	// Border colors per variant - subtle, warm borders
 	// Dark mode: cream-300 = 67 64 58 (medium warm gray), cream-400 = 87 83 76
 	const borderClasses: Record<GlassVariant, string> = {
-		default: "border-white/40 dark:border-cream-300/40",
-		accent: "border-accent/30 dark:border-cream-300/30",
-		dark: "border-bark-700/30 dark:border-cream-400/30",
-		muted: "border-white/20 dark:border-cream-300/30",
-		frosted: "border-white/50 dark:border-cream-300/40",
+		default: "border-white/40 dark:border-border",
+		accent: "border-accent/30 dark:border-border",
+		dark: "border-bark-700/30 dark:border-border",
+		muted: "border-white/20 dark:border-border",
+		frosted: "border-white/50 dark:border-border",
 	};
 
 	// Hover styles - slightly more visible on hover

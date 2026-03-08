@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { PageData } from './$types';
-	import { untrack } from 'svelte';
-	import { GlassCard, GlassButton } from '@autumnsgrove/lattice/ui';
+	import type { PageData } from "./$types";
+	import { untrack } from "svelte";
+	import { GlassCard, GlassButton } from "@autumnsgrove/lattice/ui";
 
 	let { data }: { data: PageData } = $props();
 
@@ -21,13 +21,15 @@
 			const parts = [];
 			if (synced > 0) parts.push(`${synced} new`);
 			if (updated > 0) parts.push(`${updated} updated`);
-			syncMessage = `Synced: ${parts.join(', ')}`;
+			syncMessage = `Synced: ${parts.join(", ")}`;
 			setTimeout(() => (syncMessage = null), 5000);
 		}
 	});
 
 	// Get running job IDs
-	const runningJobIds = $derived(jobs.filter(j => j.status === 'running' || j.status === 'pending').map(j => j.id));
+	const runningJobIds = $derived(
+		jobs.filter((j) => j.status === "running" || j.status === "pending").map((j) => j.id),
+	);
 
 	// Start/stop polling based on running jobs
 	$effect(() => {
@@ -63,7 +65,7 @@
 		// Note: This is called only when runningJobIds.length > 0 (from $effect above),
 		// which is derived from jobs (server-loaded data), so jobs should always be populated
 		const newTimers: Record<string, number> = { ...elapsedTimers };
-		const runningJobs = jobs.filter(j => j.status === 'running' || j.status === 'pending');
+		const runningJobs = jobs.filter((j) => j.status === "running" || j.status === "pending");
 
 		// Defensive: Only initialize if we have jobs with valid start times
 		if (runningJobs.length === 0) return;
@@ -96,10 +98,10 @@
 			try {
 				const response = await fetch(`/api/search/status?job_id=${jobId}`); // csrf-ok
 				if (response.ok) {
-					const result = await response.json() as { job?: typeof jobs[0] };
+					const result = (await response.json()) as { job?: (typeof jobs)[0] };
 					if (result.job) {
 						// Update job in list
-						const idx = jobs.findIndex(j => j.id === jobId);
+						const idx = jobs.findIndex((j) => j.id === jobId);
 						if (idx >= 0) {
 							jobs[idx] = { ...jobs[idx], ...result.job };
 							jobs = [...jobs]; // Trigger reactivity
@@ -131,10 +133,10 @@
 		syncing = true;
 		syncMessage = null;
 		try {
-			const response = await fetch('/api/search/sync', { method: 'POST' }); // csrf-ok
+			const response = await fetch("/api/search/sync", { method: "POST" }); // csrf-ok
 			if (!response.ok) {
 				const errData = await response.json().catch(() => ({}));
-				syncMessage = `Sync failed: ${(errData as {message?: string}).message || response.statusText}`;
+				syncMessage = `Sync failed: ${(errData as { message?: string }).message || response.statusText}`;
 				return;
 			}
 			const result = (await response.json()) as SyncResult;
@@ -143,17 +145,17 @@
 				if (result.synced > 0) parts.push(`${result.synced} new`);
 				if (result.updated > 0) parts.push(`${result.updated} updated`);
 				if (parts.length > 0) {
-					syncMessage = `Synced: ${parts.join(', ')}`;
+					syncMessage = `Synced: ${parts.join(", ")}`;
 					// Reload the page to show updated data
 					window.location.reload();
 				} else {
-					syncMessage = 'Already up to date';
+					syncMessage = "Already up to date";
 				}
 			} else {
-				syncMessage = 'Sync failed';
+				syncMessage = "Sync failed";
 			}
 		} catch (err) {
-			syncMessage = `Sync failed: ${err instanceof Error ? err.message : 'Unknown error'}`;
+			syncMessage = `Sync failed: ${err instanceof Error ? err.message : "Unknown error"}`;
 		} finally {
 			syncing = false;
 			setTimeout(() => (syncMessage = null), 5000);
@@ -161,7 +163,7 @@
 	}
 
 	function formatDuration(seconds: number | null): string {
-		if (!seconds) return '-';
+		if (!seconds) return "-";
 		if (seconds < 60) return `${seconds}s`;
 		const mins = Math.floor(seconds / 60);
 		const secs = seconds % 60;
@@ -170,32 +172,32 @@
 
 	function formatDate(dateStr: string): string {
 		// Use toLocaleString for proper local timezone conversion
-		return new Date(dateStr).toLocaleString('en-US', {
-			year: 'numeric',
-			month: 'short',
-			day: 'numeric',
-			hour: '2-digit',
-			minute: '2-digit'
+		return new Date(dateStr).toLocaleString("en-US", {
+			year: "numeric",
+			month: "short",
+			day: "numeric",
+			hour: "2-digit",
+			minute: "2-digit",
 		});
 	}
 
 	function getStatusBadge(status: string): string {
 		switch (status) {
-			case 'running':
-				return 'badge-info';
-			case 'complete':
-				return 'badge-success';
-			case 'failed':
-				return 'badge-error';
-			case 'needs_followup':
-				return 'badge-warning';
+			case "running":
+				return "badge-info";
+			case "complete":
+				return "badge-success";
+			case "failed":
+				return "badge-error";
+			case "needs_followup":
+				return "badge-warning";
 			default:
-				return 'bg-bark/10 dark:bg-white/10 text-foreground-muted';
+				return "bg-bark/10 dark:bg-surface-subtle text-foreground-muted";
 		}
 	}
 
 	function isRunning(status: string): boolean {
-		return status === 'running' || status === 'pending';
+		return status === "running" || status === "pending";
 	}
 </script>
 
@@ -216,20 +218,16 @@
 	<!-- Page Header -->
 	<div class="flex justify-between items-center">
 		<div>
-			<h1 class="text-2xl font-serif text-bark dark:text-neutral-100">Search History</h1>
-			<p class="text-foreground-muted font-sans mt-1">All previous domain searches ({data.total} total)</p>
+			<h1 class="text-2xl font-serif text-bark dark:text-foreground">Search History</h1>
+			<p class="text-foreground-muted font-sans mt-1">
+				All previous domain searches ({data.total} total)
+			</p>
 		</div>
 		<div class="flex gap-3">
 			<GlassButton variant="default" onclick={manualSync} disabled={syncing}>
 				{#if syncing}
 					<svg class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
-						<circle
-							class="opacity-25"
-							cx="12"
-							cy="12"
-							r="10"
-							stroke="currentColor"
-							stroke-width="4"
+						<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"
 						></circle>
 						<path
 							class="opacity-75"
@@ -249,36 +247,72 @@
 	<!-- Jobs List -->
 	{#if jobs.length === 0}
 		<GlassCard variant="muted" class="p-12 text-center">
-			<svg class="w-16 h-16 mx-auto text-bark/20 dark:text-neutral-600 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-				<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+			<svg
+				class="w-16 h-16 mx-auto text-bark/20 dark:text-foreground-subtle mb-4"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="1.5"
+			>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
+				/>
 			</svg>
-			<p class="text-foreground-muted dark:text-neutral-400 font-sans mb-4">No search history yet</p>
-			<GlassButton variant="accent" href="/arbor/searcher">
-				Start Your First Search
-			</GlassButton>
+			<p class="text-foreground-muted dark:text-foreground-muted font-sans mb-4">
+				No search history yet
+			</p>
+			<GlassButton variant="accent" href="/arbor/searcher">Start Your First Search</GlassButton>
 		</GlassCard>
 	{:else}
 		<div class="card overflow-hidden">
 			<table class="w-full">
 				<thead class="bg-grove-50 border-b border-grove-200">
 					<tr>
-						<th class="text-left px-4 py-3 text-sm font-sans font-medium text-foreground-muted">Business</th>
-						<th class="text-left px-4 py-3 text-sm font-sans font-medium text-foreground-muted hidden sm:table-cell">Status</th>
-						<th class="text-right px-4 py-3 text-sm font-sans font-medium text-foreground-muted hidden md:table-cell">Checked</th>
-						<th class="text-right px-4 py-3 text-sm font-sans font-medium text-foreground-muted">Found</th>
-						<th class="text-right px-4 py-3 text-sm font-sans font-medium text-foreground-muted hidden lg:table-cell">Tokens</th>
-						<th class="text-right px-4 py-3 text-sm font-sans font-medium text-foreground-muted hidden md:table-cell">Date</th>
+						<th class="text-left px-4 py-3 text-sm font-sans font-medium text-foreground-muted"
+							>Business</th
+						>
+						<th
+							class="text-left px-4 py-3 text-sm font-sans font-medium text-foreground-muted hidden sm:table-cell"
+							>Status</th
+						>
+						<th
+							class="text-right px-4 py-3 text-sm font-sans font-medium text-foreground-muted hidden md:table-cell"
+							>Checked</th
+						>
+						<th class="text-right px-4 py-3 text-sm font-sans font-medium text-foreground-muted"
+							>Found</th
+						>
+						<th
+							class="text-right px-4 py-3 text-sm font-sans font-medium text-foreground-muted hidden lg:table-cell"
+							>Tokens</th
+						>
+						<th
+							class="text-right px-4 py-3 text-sm font-sans font-medium text-foreground-muted hidden md:table-cell"
+							>Date</th
+						>
 						<th class="px-4 py-3"></th>
 					</tr>
 				</thead>
 				<tbody class="divide-y divide-grove-100">
 					{#each jobs as job (job.id)}
-						<tr class="hover:bg-grove-50 transition-colors {isRunning(job.status) ? 'bg-domain-50/30' : ''}">
+						<tr
+							class="hover:bg-grove-50 transition-colors {isRunning(job.status)
+								? 'bg-domain-50/30'
+								: ''}"
+						>
 							<td class="px-4 py-4">
-								<div class="font-sans font-medium text-bark dark:text-neutral-100">{job.business_name}</div>
+								<div class="font-sans font-medium text-bark dark:text-foreground">
+									{job.business_name}
+								</div>
 								<div class="text-sm text-foreground-subtle font-sans">{job.client_email}</div>
 								<div class="sm:hidden mt-1">
-									<span class="badge {getStatusBadge(job.status)} {isRunning(job.status) ? 'animate-pulse' : ''}">{job.status}</span>
+									<span
+										class="badge {getStatusBadge(job.status)} {isRunning(job.status)
+											? 'animate-pulse'
+											: ''}">{job.status}</span
+									>
 								</div>
 							</td>
 							<td class="px-4 py-4 hidden sm:table-cell">
@@ -294,24 +328,34 @@
 									</div>
 								{/if}
 							</td>
-							<td class="px-4 py-4 text-right text-sm font-sans text-foreground-muted hidden md:table-cell">
-								<span class="{isRunning(job.status) ? 'font-medium text-domain-600' : ''}">
+							<td
+								class="px-4 py-4 text-right text-sm font-sans text-foreground-muted hidden md:table-cell"
+							>
+								<span class={isRunning(job.status) ? "font-medium text-domain-600" : ""}>
 									{job.domains_checked}
 								</span>
 							</td>
 							<td class="px-4 py-4 text-right">
-								<span class="font-sans font-medium {job.good_results > 0 ? 'text-grove-600' : 'text-foreground-muted'}">
+								<span
+									class="font-sans font-medium {job.good_results > 0
+										? 'text-grove-600'
+										: 'text-foreground-muted'}"
+								>
 									{job.good_results}
 								</span>
 							</td>
-							<td class="px-4 py-4 text-right text-sm font-sans text-foreground-muted hidden lg:table-cell">
+							<td
+								class="px-4 py-4 text-right text-sm font-sans text-foreground-muted hidden lg:table-cell"
+							>
 								{#if job.input_tokens || job.output_tokens}
 									{((job.input_tokens ?? 0) + (job.output_tokens ?? 0)).toLocaleString()}
 								{:else}
 									-
 								{/if}
 							</td>
-							<td class="px-4 py-4 text-right text-sm font-sans text-foreground-subtle hidden md:table-cell">
+							<td
+								class="px-4 py-4 text-right text-sm font-sans text-foreground-subtle hidden md:table-cell"
+							>
 								{formatDate(job.created_at)}
 							</td>
 							<td class="px-4 py-4 text-right">

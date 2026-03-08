@@ -224,23 +224,23 @@
 			<thead>
 				<tr>
 					<th
-						class="p-4 text-left border-b border-border bg-white/80 dark:bg-cream-100/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3"
+						class="p-4 text-left border-b border-border bg-surface-elevated backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3"
 						>Page</th
 					>
 					<th
-						class="p-4 text-left border-b border-border bg-white/80 dark:bg-cream-100/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden"
+						class="p-4 text-left border-b border-border bg-surface-elevated backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden"
 						>Type</th
 					>
 					<th
-						class="p-4 text-center border-b border-border bg-white/80 dark:bg-cream-100/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden"
+						class="p-4 text-center border-b border-border bg-surface-elevated backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden"
 						title="Show in navigation menu">Nav</th
 					>
 					<th
-						class="p-4 text-left border-b border-border bg-white/80 dark:bg-cream-100/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden"
+						class="p-4 text-left border-b border-border bg-surface-elevated backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:hidden"
 						>Updated</th
 					>
 					<th
-						class="p-4 text-left border-b border-border bg-white/80 dark:bg-cream-100/80 backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3"
+						class="p-4 text-left border-b border-border bg-surface-elevated backdrop-blur-sm font-semibold text-xs text-foreground transition-[background-color,border-color] sticky top-0 z-10 max-md:px-2 max-md:py-3"
 						>Actions</th
 					>
 				</tr>
@@ -290,7 +290,7 @@
 							/>
 						</td>
 						<td
-							class="p-4 text-left border-b border-gray-200 dark:border-gray-700 whitespace-nowrap text-foreground-muted text-sm transition-[border-color] max-md:hidden"
+							class="p-4 text-left border-b border-border whitespace-nowrap text-foreground-muted text-sm transition-[border-color] max-md:hidden"
 							>{formatDate(page.updated_at)}</td
 						>
 						<td
@@ -351,12 +351,12 @@
 						href={curio.configUrl}
 						class="flex items-center gap-3 p-3 rounded-lg border transition-all {curio.enabled
 							? 'border-grove-300 bg-grove-50 dark:border-grove-700 dark:bg-grove-900/30 hover:border-grove-400 dark:hover:border-grove-600'
-							: 'border-cream-200 bg-cream-50 dark:border-bark-700 dark:bg-bark-800/30 hover:border-cream-300 dark:hover:border-bark-600'}"
+							: 'border-border bg-surface-subtle dark:border-border dark:bg-surface-subtle hover:border-border dark:hover:border-border'}"
 					>
 						<div
 							class="w-10 h-10 rounded-lg flex items-center justify-center {curio.enabled
 								? 'bg-grove-100 text-grove-600 dark:bg-grove-800 dark:text-grove-400'
-								: 'bg-cream-100 text-foreground-faint dark:bg-bark-700 dark:text-foreground-muted'}"
+								: 'bg-surface-subtle text-foreground-faint dark:bg-surface-subtle dark:text-foreground-muted'}"
 						>
 							<CurioIcon class="w-5 h-5" />
 						</div>
