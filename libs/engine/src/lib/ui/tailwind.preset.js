@@ -1,5 +1,5 @@
 /**
- * Grove Design System - Tailwind CSS Preset
+ * Prism - Tailwind CSS Preset
  *
  * A calm, organic design system for the Grove blogging platform.
  * "a place to Be"

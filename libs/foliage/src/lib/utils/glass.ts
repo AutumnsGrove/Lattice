@@ -16,7 +16,7 @@ export function hexToRgba(hex: string, opacity: number): string {
 
 /**
  * Prism pattern opacity values for each glass variant.
- * Based on GroveEngine's Glass component specifications.
+ * Based on Prism pattern specifications.
  */
 export const GLASS_OPACITY = {
 	surface: { light: 0.95, dark: 0.95 },
@@ -154,7 +154,7 @@ export function generateDarkGlass(options: GlassGeneratorOptions = {}): ThemeGla
 }
 
 /**
- * Midnight Bloom palette - GroveEngine's canonical dark theme.
+ * Midnight Bloom palette - Prism's canonical dark theme.
  * Deep purples and slate for intimate evening atmosphere.
  */
 export const MIDNIGHT_BLOOM = {

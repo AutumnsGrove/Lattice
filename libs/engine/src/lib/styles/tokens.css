@@ -1,5 +1,5 @@
 /**
- * Grove Design Token System
+ * Prism design tokens
  *
  * Flattened CSS variables that work reliably in Svelte scoped styles.
  * All values use direct HSL notation to eliminate cascade failures.

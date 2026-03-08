@@ -30,7 +30,7 @@ export interface ThemeColors {
 
 /**
  * Glass variant configuration for Prism pattern glassmorphism.
- * Maps to GroveEngine's Glass component variants.
+ * Maps to Prism Glass component variants.
  */
 export interface GlassVariant {
 	/** Background with alpha channel (e.g., "rgba(255,255,255,0.6)") */
@@ -66,7 +66,7 @@ export interface ThemeGlass {
 	muted: GlassVariant;
 }
 
-/** Seasonal context for theme - inferred by GroveEngine, consumed by Foliage */
+/** Seasonal context for theme - inferred by the platform, consumed by Foliage */
 export type Season = "spring" | "summer" | "autumn" | "winter";
 
 /** Theme's seasonal affinity - which season(s) it pairs best with */
