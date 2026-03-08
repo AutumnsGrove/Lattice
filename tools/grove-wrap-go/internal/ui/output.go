@@ -1,6 +1,11 @@
 package ui
 
-import "fmt"
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"strings"
+)
 
 // Success prints a success message with a green checkmark.
 func Success(msg string) {
@@ -54,6 +59,19 @@ func PrintHeader(title string) {
 // PrintKeyValue prints a key-value pair with styled formatting.
 func PrintKeyValue(key, value string) {
 	fmt.Printf("  %s  %s\n", CommandStyle.Render(key), value)
+}
+
+// Confirm prompts the user with a yes/no question and returns the answer.
+// Returns true for y/yes, false for n/no/empty. Defaults to "no" if empty.
+func Confirm(prompt string) bool {
+	fmt.Printf("%s [y/N] ", prompt)
+	reader := bufio.NewReader(os.Stdin)
+	answer, err := reader.ReadString('\n')
+	if err != nil {
+		return false
+	}
+	answer = strings.TrimSpace(strings.ToLower(answer))
+	return answer == "y" || answer == "yes"
 }
 
 // SafetyError prints a safety check failure with an optional suggestion.

@@ -72,7 +72,7 @@ var gitOperationTiers = map[string]Tier{
 	"merge":               TierDangerous,
 	"clean":               TierDangerous,
 	"branch_force_delete": TierDangerous,
-	"worktree_clean":      TierDangerous,
+	"worktree_clean":      TierWrite,
 }
 
 // GitOperationTier returns the safety tier for a git operation.

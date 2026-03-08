@@ -304,6 +304,7 @@ var gitWorktreeFinishCmd = &cobra.Command{
 
 		cfg := config.Get()
 		message, _ := cmd.Flags().GetString("message")
+		deleteBranch, _ := cmd.Flags().GetBool("delete-branch")
 
 		// Get current working directory and branch
 		cwd, err := os.Getwd()
@@ -382,13 +383,24 @@ var gitWorktreeFinishCmd = &cobra.Command{
 			}
 		}
 
+		// Delete local branch (now safe since worktree is removed)
+		gwexec.Git("branch", "-d", branch)
+
+		// Delete remote branch if requested
+		remoteBranchDeleted := false
+		if deleteBranch {
+			remoteResult, remoteErr := gwexec.Git("push", "origin", "--delete", branch)
+			remoteBranchDeleted = remoteErr == nil && remoteResult.OK()
+		}
+
 		if cfg.JSONMode {
 			data, _ := json.Marshal(map[string]interface{}{
-				"branch":     branch,
-				"pushed":     true,
-				"removed":    cwd,
-				"main_path":  mainPath,
-				"committed":  hasChanges,
+				"branch":         branch,
+				"pushed":         true,
+				"removed":        cwd,
+				"main_path":      mainPath,
+				"committed":      hasChanges,
+				"remote_deleted": remoteBranchDeleted,
 			})
 			fmt.Println(string(data))
 		} else {
@@ -397,8 +409,235 @@ var gitWorktreeFinishCmd = &cobra.Command{
 			}
 			ui.Step(true, fmt.Sprintf("Pushed branch %s", branch))
 			ui.Step(true, fmt.Sprintf("Removed worktree %s", cwd))
+			if remoteBranchDeleted {
+				ui.Step(true, fmt.Sprintf("Deleted remote branch %s", branch))
+			}
 			ui.Success("Worktree finished")
 			ui.Hint(fmt.Sprintf("cd %s", mainPath))
+		}
+		return nil
+	},
+}
+
+// ── worktree clean ──────────────────────────────────────────────────
+
+var gitWorktreeCleanCmd = &cobra.Command{
+	Use:   "clean",
+	Short: "Remove worktrees whose branches have been merged",
+	Long: `Find worktrees whose branches have been merged into main and remove them.
+
+In interactive mode, confirms each removal. In agent/JSON mode, removes all
+merged worktrees automatically (requires --write).
+
+Also cleans up local branches that have been merged and optionally deletes
+remote tracking branches.`,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if !gwexec.IsGitRepo() {
+			return notARepo()
+		}
+		if err := requireSafety("worktree_clean"); err != nil {
+			return err
+		}
+
+		cfg := config.Get()
+		deleteBranch, _ := cmd.Flags().GetBool("delete-branch")
+
+		// List all worktrees
+		output, err := gwexec.GitOutput("worktree", "list", "--porcelain")
+		if err != nil {
+			return fmt.Errorf("failed to list worktrees: %w", err)
+		}
+		trees := parseWorktreeListPorcelain(output)
+
+		// Find the main branch name
+		mainBranch := ""
+		for _, t := range trees {
+			if t.Branch == "main" || t.Branch == "master" {
+				mainBranch = t.Branch
+				break
+			}
+		}
+		if mainBranch == "" {
+			mainBranch = "main" // default assumption
+		}
+
+		// Get list of branches merged into main
+		mergedOutput, err := gwexec.GitOutput("branch", "--merged", mainBranch, "--format=%(refname:short)")
+		if err != nil {
+			return fmt.Errorf("failed to check merged branches: %w", err)
+		}
+		mergedBranches := make(map[string]bool)
+		for _, line := range strings.Split(strings.TrimSpace(mergedOutput), "\n") {
+			line = strings.TrimSpace(line)
+			if line != "" {
+				mergedBranches[line] = true
+			}
+		}
+
+		// Find worktrees with merged branches (skip main/bare)
+		type cleanCandidate struct {
+			tree   worktreeInfo
+			reason string
+		}
+		var candidates []cleanCandidate
+		for _, t := range trees {
+			if t.Branch == mainBranch || t.Branch == "" || t.Bare {
+				continue
+			}
+			if mergedBranches[t.Branch] {
+				candidates = append(candidates, cleanCandidate{
+					tree:   t,
+					reason: fmt.Sprintf("branch %s merged into %s", t.Branch, mainBranch),
+				})
+			}
+		}
+
+		if len(candidates) == 0 {
+			if cfg.JSONMode {
+				data, _ := json.Marshal(map[string]interface{}{
+					"cleaned": 0,
+					"message": "no merged worktrees found",
+				})
+				fmt.Println(string(data))
+			} else {
+				ui.Muted("No merged worktrees to clean")
+			}
+			return nil
+		}
+
+		interactive := cfg.IsInteractive() && !cfg.JSONMode
+
+		var cleaned []map[string]string
+		for _, c := range candidates {
+			if interactive {
+				ui.Info(fmt.Sprintf("%s (%s)", c.tree.Path, c.reason))
+				if !ui.Confirm("  Remove this worktree?") {
+					ui.Muted("  Skipped")
+					continue
+				}
+			}
+
+			// Remove the worktree
+			result, gitErr := gwexec.Git("worktree", "remove", c.tree.Path)
+			if gitErr != nil || !result.OK() {
+				// Try with force (may have untracked files from build artifacts)
+				result, gitErr = gwexec.Git("worktree", "remove", "--force", c.tree.Path)
+				if gitErr != nil {
+					if interactive {
+						ui.Step(false, fmt.Sprintf("Failed to remove %s: %v", c.tree.Path, gitErr))
+					}
+					continue
+				}
+				if !result.OK() {
+					if interactive {
+						ui.Step(false, fmt.Sprintf("Failed to remove %s: %s", c.tree.Path, strings.TrimSpace(result.Stderr)))
+					}
+					continue
+				}
+			}
+
+			entry := map[string]string{
+				"path":   c.tree.Path,
+				"branch": c.tree.Branch,
+			}
+
+			// Delete the local branch
+			delResult, delErr := gwexec.Git("branch", "-d", c.tree.Branch)
+			if delErr == nil && delResult.OK() {
+				entry["branch_deleted"] = "true"
+			}
+
+			// Delete remote branch if requested
+			if deleteBranch {
+				remoteResult, remoteErr := gwexec.Git("push", "origin", "--delete", c.tree.Branch)
+				if remoteErr == nil && remoteResult.OK() {
+					entry["remote_deleted"] = "true"
+				}
+			}
+
+			cleaned = append(cleaned, entry)
+
+			if interactive {
+				branchMsg := ""
+				if entry["branch_deleted"] == "true" {
+					branchMsg = " + deleted branch"
+				}
+				if entry["remote_deleted"] == "true" {
+					branchMsg += " + remote"
+				}
+				ui.Step(true, fmt.Sprintf("Removed %s%s", c.tree.Path, branchMsg))
+			}
+		}
+
+		if cfg.JSONMode {
+			data, _ := json.Marshal(map[string]interface{}{
+				"cleaned":   len(cleaned),
+				"worktrees": cleaned,
+			})
+			fmt.Println(string(data))
+		} else if !interactive {
+			ui.Success(fmt.Sprintf("Cleaned %d merged worktree(s)", len(cleaned)))
+		} else if len(cleaned) > 0 {
+			ui.Success(fmt.Sprintf("Cleaned %d worktree(s)", len(cleaned)))
+		}
+
+		return nil
+	},
+}
+
+// ── worktree prune ──────────────────────────────────────────────────
+
+var gitWorktreePruneCmd = &cobra.Command{
+	Use:   "prune",
+	Short: "Clean up stale worktree metadata",
+	Long: `Remove worktree administrative files for worktrees whose directories
+have been manually deleted. This is safe to run — it only cleans up
+metadata in .git/worktrees/, never deletes actual directories.`,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if !gwexec.IsGitRepo() {
+			return notARepo()
+		}
+		if err := requireSafety("worktree_prune"); err != nil {
+			return err
+		}
+
+		cfg := config.Get()
+		dryRun, _ := cmd.Flags().GetBool("dry-run")
+
+		gitArgs := []string{"worktree", "prune"}
+		if dryRun {
+			gitArgs = append(gitArgs, "--dry-run")
+		}
+		if cfg.Verbose {
+			gitArgs = append(gitArgs, "--verbose")
+		}
+
+		result, err := gwexec.Git(gitArgs...)
+		if err != nil {
+			return fmt.Errorf("failed to prune worktrees: %w", err)
+		}
+		if !result.OK() {
+			return fmt.Errorf("git worktree prune: %s", strings.TrimSpace(result.Stderr))
+		}
+
+		output := strings.TrimSpace(result.Stdout + result.Stderr)
+
+		if cfg.JSONMode {
+			data, _ := json.Marshal(map[string]interface{}{
+				"pruned":  !dryRun,
+				"dry_run": dryRun,
+				"output":  output,
+			})
+			fmt.Println(string(data))
+		} else {
+			if output != "" {
+				fmt.Println(output)
+			}
+			if dryRun {
+				ui.Muted("Dry run — no changes made")
+			} else {
+				ui.Success("Pruned stale worktree metadata")
+			}
 		}
 		return nil
 	},
@@ -419,5 +658,14 @@ func init() {
 
 	// worktree finish
 	gitWorktreeFinishCmd.Flags().StringP("message", "m", "", "Commit message (default: auto-generated)")
+	gitWorktreeFinishCmd.Flags().Bool("delete-branch", false, "Delete remote branch after push")
 	gitWorktreeCmd.AddCommand(gitWorktreeFinishCmd)
+
+	// worktree clean
+	gitWorktreeCleanCmd.Flags().Bool("delete-branch", false, "Also delete remote branches")
+	gitWorktreeCmd.AddCommand(gitWorktreeCleanCmd)
+
+	// worktree prune
+	gitWorktreePruneCmd.Flags().Bool("dry-run", false, "Show what would be pruned without doing it")
+	gitWorktreeCmd.AddCommand(gitWorktreePruneCmd)
 }
