@@ -14,8 +14,8 @@ UPDATE tenants SET plan = 'wanderer' WHERE plan = 'free';
 -- Update billing records (if any free-tier rows exist)
 UPDATE platform_billing SET plan = 'wanderer' WHERE plan = 'free';
 
--- Rebuild partial index from migration 053 for new plan name
+-- Rebuild partial index from migration 053 for new plan name.
+-- Note: migration 053 adds last_activity_at and this index. If 053 hasn't
+-- been applied yet, DROP INDEX is a no-op and the CREATE will fail safely.
+-- In that case, 053 itself should be updated to use 'wanderer' before applying.
 DROP INDEX IF EXISTS idx_tenants_plan_activity;
-CREATE INDEX idx_tenants_plan_activity
-  ON tenants(plan, last_activity_at)
-  WHERE plan = 'wanderer' AND active = 1;

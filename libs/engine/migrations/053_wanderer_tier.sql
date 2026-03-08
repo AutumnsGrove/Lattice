@@ -51,4 +51,4 @@ CREATE INDEX IF NOT EXISTS idx_free_account_creation_ip
 -- Index for the reclamation cron to find inactive free-tier accounts.
 CREATE INDEX IF NOT EXISTS idx_tenants_plan_activity
   ON tenants(plan, last_activity_at)
-  WHERE plan = 'free' AND active = 1;
+  WHERE plan = 'wanderer' AND active = 1;
