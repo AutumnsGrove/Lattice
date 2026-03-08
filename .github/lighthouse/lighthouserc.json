@@ -1,14 +1,14 @@
 {
   "ci": {
     "collect": {
-      "startServerCommand": "pnpm --filter grove-landing preview -- --port 9222",
+      "startServerCommand": "pnpm --filter grove-landing preview -- --port 4173 --ip 0.0.0.0",
       "startServerReadyPattern": "Ready on",
       "startServerReadyTimeout": 30000,
       "url": [
-        "http://localhost:9222/",
-        "http://localhost:9222/about",
-        "http://localhost:9222/help",
-        "http://localhost:9222/pricing"
+        "http://127.0.0.1:4173/",
+        "http://127.0.0.1:4173/about",
+        "http://127.0.0.1:4173/help",
+        "http://127.0.0.1:4173/pricing"
       ],
       "numberOfRuns": 3,
       "settings": {

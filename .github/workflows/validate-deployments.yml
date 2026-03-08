@@ -4,6 +4,8 @@ name: Validate Deployments
 # Runs dry-run deployments for Workers and build validation for Pages
 
 on:
+  workflow_dispatch:
+
   pull_request:
     branches: [main]
     paths:
@@ -99,6 +101,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Build gossamer
+        if: matrix.needs-engine
+        run: pnpm run build
+        working-directory: libs/gossamer
+
       - name: Build engine package (dependency)
         if: matrix.needs-engine
         run: pnpm run package
@@ -176,6 +183,11 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install
+
+      - name: Build gossamer
+        if: matrix.needs-engine
+        run: pnpm run build
+        working-directory: libs/gossamer
 
       - name: Build engine package (dependency)
         if: matrix.needs-engine
