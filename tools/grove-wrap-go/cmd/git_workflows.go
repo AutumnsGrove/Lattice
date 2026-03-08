@@ -93,15 +93,30 @@ var gitShipCmd = &cobra.Command{
 		commitOK := result.OK()
 		commitErr := ""
 		if !commitOK {
-			commitErr = strings.TrimSpace(result.Stderr)
-			if strings.Contains(commitErr, "nothing to commit") {
-				return fmt.Errorf("nothing to commit — stage files first")
+			// Git puts "nothing to commit" in stdout, not stderr.
+			// Pre-commit hook output goes to stderr, which can be misleading.
+			combined := strings.TrimSpace(result.Stdout) + " " + strings.TrimSpace(result.Stderr)
+			if strings.Contains(combined, "nothing to commit") || strings.Contains(combined, "no changes added") {
+				if gitShipAll {
+					return fmt.Errorf("nothing to commit — working tree is clean")
+				}
+				return fmt.Errorf("nothing to commit — stage files first (use -a to auto-stage, or gw git add)")
 			}
+			commitErr = strings.TrimSpace(result.Stderr)
 		}
 		hash := extractCommitHash(result.Stdout)
 		steps = append(steps, shipStep{"commit", commitOK, commitErr})
 
 		if !commitOK {
+			// When stderr only has hook output (success markers, ANSI codes),
+			// it's misleading. Fall back to stdout which has the real git message.
+			if commitErr == "" || isOnlyHookOutput(commitErr) {
+				stdoutMsg := strings.TrimSpace(result.Stdout)
+				if stdoutMsg != "" {
+					return fmt.Errorf("commit failed: %s", stdoutMsg)
+				}
+				return fmt.Errorf("commit failed — check git status for details")
+			}
 			return fmt.Errorf("commit failed: %s", commitErr)
 		}
 
@@ -545,6 +560,56 @@ func suggestPRTitle(branch, mergeBase string) string {
 		return parts[1]
 	}
 	return branch
+}
+
+// isOnlyHookOutput detects when stderr contains only pre-commit hook
+// output (success markers, ANSI color codes) rather than actual errors.
+// This prevents misleading "commit failed: ✓ No files to check" messages.
+func isOnlyHookOutput(stderr string) bool {
+	// Strip ANSI escape codes
+	stripped := stripANSI(stderr)
+	stripped = strings.TrimSpace(stripped)
+	if stripped == "" {
+		return true
+	}
+	// Common hook success patterns that aren't real errors
+	hookPatterns := []string{
+		"no javascript/typescript files to check",
+		"no files to check",
+		"all checks passed",
+		"✓",
+		"✔",
+	}
+	lower := strings.ToLower(stripped)
+	for _, p := range hookPatterns {
+		if strings.Contains(lower, p) {
+			return true
+		}
+	}
+	return false
+}
+
+// stripANSI removes ANSI escape sequences from a string.
+func stripANSI(s string) string {
+	var result strings.Builder
+	i := 0
+	for i < len(s) {
+		if s[i] == '\033' && i+1 < len(s) && s[i+1] == '[' {
+			// Skip until we find the terminating letter
+			j := i + 2
+			for j < len(s) && !((s[j] >= 'A' && s[j] <= 'Z') || (s[j] >= 'a' && s[j] <= 'z')) {
+				j++
+			}
+			if j < len(s) {
+				j++ // skip the terminating letter
+			}
+			i = j
+		} else {
+			result.WriteByte(s[i])
+			i++
+		}
+	}
+	return result.String()
 }
 
 // ── Registration ────────────────────────────────────────────────────
