@@ -4,6 +4,7 @@
 	import { cn } from "$lib/ui/utils";
 	import { GossamerClouds } from "@autumnsgrove/gossamer/svelte";
 	import { Star } from "@lucide/svelte";
+	import Waystone from "./Waystone.svelte";
 
 	/**
 	 * GlassCard - A glassmorphism card component with seasonal theming
@@ -45,6 +46,13 @@
 	 * ```svelte
 	 * <GlassCard title="Settings" icon={Settings} description="Manage your preferences">
 	 *   <p>Settings content</p>
+	 * </GlassCard>
+	 * ```
+	 *
+	 * @example Card with Waystone help marker
+	 * ```svelte
+	 * <GlassCard title="Typography" waystone="custom-fonts" waystoneLabel="Learn about fonts">
+	 *   <p>Font settings here</p>
 	 * </GlassCard>
 	 * ```
 	 *
@@ -135,6 +143,10 @@
 		/** Render children without padding wrapper, propagating flex layout.
 		 *  Use when the card needs flex-col overflow control (e.g. scroll + sticky footer). */
 		flush?: boolean;
+		/** Optional Waystone help marker — pass a KB article slug (e.g. "custom-fonts") */
+		waystone?: string;
+		/** Screen reader label for the waystone (defaults to "Learn more") */
+		waystoneLabel?: string;
 	}
 
 	// svelte-ignore custom_element_props_identifier
@@ -158,6 +170,8 @@
 		featured = false,
 		featuredColor,
 		flush = false,
+		waystone,
+		waystoneLabel,
 		...restProps
 	}: Props = $props();
 
@@ -295,12 +309,19 @@
 					{@render header()}
 				{:else}
 					{#if title}
-						<h3 class="text-lg font-semibold {titleClass} {icon ? 'flex items-center gap-2' : ''}">
-							{#if icon}
-								<icon class="w-5 h-5 shrink-0 text-muted-foreground"></icon>
+						<div class="flex items-center gap-2">
+							<h3
+								class="text-lg font-semibold {titleClass} {icon ? 'flex items-center gap-2' : ''}"
+							>
+								{#if icon}
+									<icon class="w-5 h-5 shrink-0 text-muted-foreground"></icon>
+								{/if}
+								{title}
+							</h3>
+							{#if waystone}
+								<Waystone slug={waystone} label={waystoneLabel} class="shrink-0" />
 							{/if}
-							{title}
-						</h3>
+						</div>
 					{/if}
 					{#if description}
 						<p class="text-sm {descriptionClass} {icon ? 'ml-7' : ''} mt-1">{description}</p>
