@@ -392,10 +392,11 @@ var gitWorktreeFinishCmd = &cobra.Command{
 		// Merge into main (unless --no-merge)
 		merged := false
 		if !noMerge {
-			// Pull latest main first
-			pullResult, pullErr := gwexec.RunInDir(mainPath, "git", "pull", "--ff-only")
-			if pullErr != nil || !pullResult.OK() {
-				ui.Warning("Could not fast-forward main — merging with current state")
+			// Sync main with origin before merging (fetch + rebase, same as gw git sync)
+			gwexec.RunInDir(mainPath, "git", "fetch", "origin", "--prune")
+			rebaseResult, rebaseErr := gwexec.RunInDir(mainPath, "git", "rebase", "origin/"+mainBranch)
+			if rebaseErr != nil || !rebaseResult.OK() {
+				ui.Warning("Could not rebase " + mainBranch + " onto origin/" + mainBranch + " — merging with current state")
 			}
 
 			// Merge the branch into main
