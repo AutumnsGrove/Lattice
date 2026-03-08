@@ -1,0 +1,147 @@
+name: Claude Compliance Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - "libs/engine/**"
+      - "libs/infra/**"
+      - "libs/grove-agent/**"
+      - "libs/server-sdk/**"
+      - "libs/shutter/**"
+      - "workers/**"
+      - "apps/**"
+
+concurrency:
+  group: compliance-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  compliance-review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: read
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run Compliance Review
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
+            You are a Grove SDK compliance reviewer. Check the PR diff for
+            violations of Grove's SDK and coding conventions. Only flag patterns
+            that match the FAIL rules below. Do NOT flag style, performance,
+            or bugs — another reviewer handles those.
+
+            ## Steps
+
+            1. Run `gh pr diff ${{ github.event.pull_request.number }}` to see changes
+            2. Check ONLY added/modified lines against the rules below
+            3. Post findings via `gh pr comment`
+            Only post GitHub comments — don't submit review text as messages.
+
+            ## Category 1: Grove SDK Compliance
+
+            Application code must use Grove SDKs, not raw Cloudflare bindings.
+            Exception: SDK libraries themselves (libs/infra/, libs/engine/src/lib/threshold/),
+            migration scripts, test mocks, and Durable Objects with dual-binding strategy.
+
+            FAIL patterns:
+            - `env.DB.prepare()` / `c.env.DB` → use GroveDatabase from @autumnsgrove/infra
+            - `env.BUCKET.put()` / `.get()` / `.delete()` → use Amber FileManager or GroveStorage
+            - `env.KV.get()` / `env.KV.put()` → use GroveKV from @autumnsgrove/infra
+            - `new Anthropic()` / `new OpenAI()` → use LumenClient or RemoteLumenClient
+            - Raw `fetch()` to OpenRouter/Anthropic/OpenAI URLs → use Lumen
+            - `new Resend()` / raw fetch to email APIs → use ZephyrClient
+            - `env.GITHUB_TOKEN` in application code → use Warden
+            - Hand-rolled rate limit with KV read-modify-write → use Threshold
+            - `alert()` in Svelte → use toast from @autumnsgrove/lattice/ui
+            - `adminMessage` exposed to client responses → admin messages are server-only
+
+            ## Category 2: Fetch Safety & CSRF
+
+            FAIL patterns:
+            - Raw `fetch()` to external APIs → use appropriate SDK (Lumen, Zephyr, Warden)
+            - Raw `fetch()` to internal APIs without CSRF → use apiRequest() from $lib/utils/api
+            - POST/PUT/DELETE handler without CSRF validation → use validateCSRF()
+            - Timing-unsafe `===` comparison for CSRF tokens → use constant-time comparison
+            - Client forms without CSRF token → use apiRequest() (auto-injects)
+
+            Exception: fetch() in server-side code to Cloudflare service bindings is fine.
+
+            ## Category 3: Barrel Import Safety
+
+            FAIL in layout routes (+layout.svelte), WARN in page/component routes:
+            - `import { X } from "$lib/ui"` → use direct import from component path
+            - `import { X } from "$lib/ui/components/ui"` → same
+            - `import { X } from "$lib/ui/components/nature"` → same
+
+            PASS: Lines with `// barrel-ok` comment. Server files and test files.
+
+            ## Category 4: Svelte 5 Patterns
+
+            FAIL/WARN patterns:
+            - `$derived.by()` value called as function: `tags()` → should be `tags`
+            - `import { writable } from 'svelte/store'` → use $state() rune
+            - `$: reactive = ...` → use $derived() or $derived.by()
+            - Multi-rule svelte-ignore on one line → split onto separate lines
+            - Stale svelte-ignore comments (rule no longer triggered) → remove
+
+            ## Category 5: Rootwork Type Safety
+
+            FAIL patterns:
+            - `formData.get("name") as string` → use parseFormData(formData, ZodSchema)
+            - `(await kv.get(key, "json")) as MyType` → use safeJsonParse(raw, Schema)
+            - `JSON.parse(raw) as Config` → use safeJsonParse(raw, Schema) ?? fallback
+            - `(err as any)?.status === 302` → use isRedirect(err)
+            - `(err as any)?.status >= 400` → use isHttpError(err)
+            - Catch block that swallows redirects without isRedirect() check → re-throw
+
+            PASS: `as const` for literal narrowing, `as SomeType` on internal known data.
+
+            ## Category 6: Security Anti-Patterns
+
+            FAIL patterns:
+            - `Object.assign(new Error(), untrustedData)` → prototype pollution
+            - `token === expectedToken` for secrets/tokens → use timing-safe comparison
+            - `Math.random()` for security-sensitive values → use crypto.getRandomValues()
+            - `eval()` or `new Function()` → code injection
+            - `innerHTML = userInput` → XSS risk
+            - Hardcoded API keys/tokens in source → use env vars or Warden
+            - `.env` files (not .env.example) in diff → should be gitignored
+            - `Bearer ${hardcodedToken}` → use Warden or env var
+
+            ## Output Format
+
+            Post via `gh pr comment` using this format:
+
+            ## Compliance Review
+
+            For each finding:
+            {FAIL|WARN} **[Category]** Brief title
+            `path/to/file.ts:42` — What the violation is.
+
+            ### Summary
+            X violations found across Y categories.
+
+            If no violations found, post only:
+            **Compliance Review**: No findings.
+
+            Do not manufacture findings. Only flag patterns that match the specific
+            FAIL/WARN rules above.
+
+          claude_args: >-
+            --max-turns 6
+            --allowedTools "Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
