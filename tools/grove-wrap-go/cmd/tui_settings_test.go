@@ -205,8 +205,9 @@ func TestSettingsRenderYolo(t *testing.T) {
 func TestSettingsNavigationWithYolo(t *testing.T) {
 	s := newTUISettings()
 
-	// Navigate to yolo (3rd item, index 2)
+	// Navigate to yolo (4th item, index 3)
 	s.handleKey("j") // → items per page
+	s.handleKey("j") // → viewport rows
 	s.handleKey("j") // → yolo mode
 	if s.cursor != settingYoloMode {
 		t.Errorf("cursor = %d, want %d (settingYoloMode)", s.cursor, settingYoloMode)

@@ -14,6 +14,7 @@ import (
 type tuiSettings struct {
 	autoWorktree bool
 	itemsPerPage int
+	viewportRows int
 	yoloMode     bool
 	cursor       int // which setting is selected (0-based)
 	dirty        bool
@@ -24,11 +25,14 @@ type tuiSettings struct {
 const (
 	settingAutoWorktree = 0
 	settingItemsPerPage = 1
-	settingYoloMode     = 2
-	settingCount        = 3
+	settingViewportRows = 2
+	settingYoloMode     = 3
+	settingCount        = 4
 
 	minItemsPerPage = 10
 	maxItemsPerPage = 100
+	minViewportRows = 5
+	maxViewportRows = 50
 )
 
 // newTUISettings creates settings from the current config.
@@ -37,6 +41,7 @@ func newTUISettings() *tuiSettings {
 	return &tuiSettings{
 		autoWorktree: cfg.TUI.AutoWorktree,
 		itemsPerPage: cfg.TUI.ItemsPerPage,
+		viewportRows: cfg.TUI.ViewportRows,
 		yoloMode:     cfg.TUI.YoloMode,
 	}
 }
@@ -76,6 +81,8 @@ func (s *tuiSettings) toggle() {
 		s.saved = false
 	case settingItemsPerPage:
 		s.adjust(10)
+	case settingViewportRows:
+		s.adjust(1)
 	case settingYoloMode:
 		s.yoloMode = !s.yoloMode
 		s.dirty = true
@@ -109,6 +116,19 @@ func (s *tuiSettings) adjust(delta int) {
 			s.dirty = true
 			s.saved = false
 		}
+	case settingViewportRows:
+		newVal := s.viewportRows + (delta * 5)
+		if newVal < minViewportRows {
+			newVal = minViewportRows
+		}
+		if newVal > maxViewportRows {
+			newVal = maxViewportRows
+		}
+		if newVal != s.viewportRows {
+			s.viewportRows = newVal
+			s.dirty = true
+			s.saved = false
+		}
 	}
 }
 
@@ -122,9 +142,17 @@ func (s *tuiSettings) save() {
 		s.itemsPerPage = maxItemsPerPage
 	}
 
+	if s.viewportRows < minViewportRows {
+		s.viewportRows = minViewportRows
+	}
+	if s.viewportRows > maxViewportRows {
+		s.viewportRows = maxViewportRows
+	}
+
 	cfg := config.Get()
 	cfg.TUI.AutoWorktree = s.autoWorktree
 	cfg.TUI.ItemsPerPage = s.itemsPerPage
+	cfg.TUI.ViewportRows = s.viewportRows
 	cfg.TUI.YoloMode = s.yoloMode
 
 	if err := cfg.Save(); err != nil {
@@ -208,17 +236,30 @@ func (s *tuiSettings) render() string {
 		b.WriteString(browseHintStyle.Render("    Number of issues/PRs to fetch per page (←/→ to adjust by 5)") + "\n")
 	}
 
-	// Yolo mode toggle
+	// Viewport rows
 	cursor2 := "  "
-	if s.cursor == settingYoloMode {
+	if s.cursor == settingViewportRows {
 		cursor2 = settingsCursorStyle.Render("▸ ")
+	}
+	b.WriteString(fmt.Sprintf("%s%s  %s\n",
+		cursor2,
+		settingsLabelStyle.Render("Viewport rows"),
+		settingsValueNumStyle.Render(fmt.Sprintf("%d", s.viewportRows))))
+	if s.cursor == settingViewportRows {
+		b.WriteString(browseHintStyle.Render("    Visible rows in the browser list (←/→ to adjust by 5)") + "\n")
+	}
+
+	// Yolo mode toggle
+	cursor3 := "  "
+	if s.cursor == settingYoloMode {
+		cursor3 = settingsCursorStyle.Render("▸ ")
 	}
 	yoloValue := settingsValueOffStyle.Render("off")
 	if s.yoloMode {
 		yoloValue = settingsValueWarnStyle.Render("ON")
 	}
 	b.WriteString(fmt.Sprintf("%s%s  %s\n",
-		cursor2,
+		cursor3,
 		settingsLabelStyle.Render("Yolo mode"),
 		yoloValue))
 	if s.cursor == settingYoloMode {
