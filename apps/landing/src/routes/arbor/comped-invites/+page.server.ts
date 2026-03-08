@@ -9,7 +9,9 @@
 import { error, fail } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
 import { sendInviteEmail } from "$lib/server/invite-email";
+import { parseFormData } from "@autumnsgrove/lattice/server";
 import { isWayfinder } from "@autumnsgrove/lattice/config";
+import { z } from "zod";
 
 interface CompedInvite {
 	id: string;
@@ -47,6 +49,32 @@ type InviteType = (typeof VALID_INVITE_TYPES)[number];
 
 // Basic email format check — real validation happens at send time via Zephyr
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const CreateInviteSchema = z.object({
+	email: z.string().toLowerCase().trim().min(1, "Please enter a valid email address"),
+	tier: z.enum(["seedling", "sapling", "oak", "evergreen"], {
+		errorMap: () => ({ message: "Please select a valid tier" }),
+	}),
+	invite_type: z.enum(["comped", "beta"]).optional().default("beta"),
+	custom_message: z.string().trim().optional().default(""),
+	notes: z.string().trim().optional().default(""),
+});
+
+const InviteIdSchema = z.object({
+	invite_id: z.string().min(1, "Invite ID is required"),
+	notes: z.string().trim().optional().default(""),
+});
+
+const PromoteSchema = z.object({
+	email: z.string().toLowerCase().trim().min(1, "Invalid email address"),
+	tier: z.enum(["seedling", "sapling", "oak", "evergreen"]).optional().default("seedling"),
+	custom_message: z.string().trim().optional().default(""),
+});
+
+const PromoteAllSchema = z.object({
+	tier: z.enum(["seedling", "sapling", "oak", "evergreen"]).optional().default("seedling"),
+	custom_message: z.string().trim().optional().default(""),
+});
 
 interface EligibleSubscriber {
 	id: number;
@@ -210,22 +238,18 @@ export const actions: Actions = {
 
 		const { DB } = platform.env;
 		const formData = await request.formData();
-		const email = formData.get("email")?.toString().toLowerCase().trim();
-		const tier = formData.get("tier")?.toString() as CompedTier;
-		const inviteType = (formData.get("invite_type")?.toString() as InviteType) || "beta";
-		const customMessage = formData.get("custom_message")?.toString().trim() || null;
-		const notes = formData.get("notes")?.toString().trim() || null;
+		const result = parseFormData(formData, CreateInviteSchema);
+		if (!result.success) {
+			const firstError = Object.values(result.errors).flat()[0];
+			return fail(400, { error: firstError || "Invalid form data" });
+		}
+		const { email, tier } = result.data;
+		const inviteType = result.data.invite_type;
+		const customMessage = result.data.custom_message || null;
+		const notes = result.data.notes || null;
 
-		if (!email || !EMAIL_RE.test(email)) {
+		if (!EMAIL_RE.test(email)) {
 			return fail(400, { error: "Please enter a valid email address" });
-		}
-
-		if (!tier || !VALID_TIERS.includes(tier)) {
-			return fail(400, { error: "Please select a valid tier" });
-		}
-
-		if (!VALID_INVITE_TYPES.includes(inviteType)) {
-			return fail(400, { error: "Please select a valid invite type" });
 		}
 
 		let step = "check-existing";
@@ -342,11 +366,11 @@ export const actions: Actions = {
 
 		const { DB } = platform.env;
 		const formData = await request.formData();
-		const inviteId = formData.get("invite_id")?.toString();
-
-		if (!inviteId) {
+		const result = parseFormData(formData, InviteIdSchema);
+		if (!result.success) {
 			return fail(400, { error: "Invite ID is required" });
 		}
+		const inviteId = result.data.invite_id;
 
 		try {
 			const invite = await DB.prepare(
@@ -451,12 +475,12 @@ export const actions: Actions = {
 
 		const { DB } = platform.env;
 		const formData = await request.formData();
-		const inviteId = formData.get("invite_id")?.toString();
-		const notes = formData.get("notes")?.toString().trim() || null;
-
-		if (!inviteId) {
+		const result = parseFormData(formData, InviteIdSchema);
+		if (!result.success) {
 			return fail(400, { error: "Invite ID is required" });
 		}
+		const inviteId = result.data.invite_id;
+		const notes = result.data.notes || null;
 
 		try {
 			const invite = await DB.prepare(
@@ -514,16 +538,16 @@ export const actions: Actions = {
 
 		const { DB } = platform.env;
 		const formData = await request.formData();
-		const email = formData.get("email")?.toString().toLowerCase().trim();
-		const tier = (formData.get("tier")?.toString() as CompedTier) || "seedling";
-		const customMessage = formData.get("custom_message")?.toString().trim() || null;
-
-		if (!email || !EMAIL_RE.test(email)) {
-			return fail(400, { error: "Invalid email address" });
+		const result = parseFormData(formData, PromoteSchema);
+		if (!result.success) {
+			const firstError = Object.values(result.errors).flat()[0];
+			return fail(400, { error: firstError || "Invalid form data" });
 		}
+		const { email, tier } = result.data;
+		const customMessage = result.data.custom_message || null;
 
-		if (!VALID_TIERS.includes(tier)) {
-			return fail(400, { error: "Please select a valid tier" });
+		if (!EMAIL_RE.test(email)) {
+			return fail(400, { error: "Invalid email address" });
 		}
 
 		let step = "check-subscriber";
@@ -656,12 +680,12 @@ export const actions: Actions = {
 
 		const { DB } = platform.env;
 		const formData = await request.formData();
-		const tier = (formData.get("tier")?.toString() as CompedTier) || "seedling";
-		const customMessage = formData.get("custom_message")?.toString().trim() || null;
-
-		if (!VALID_TIERS.includes(tier)) {
+		const result = parseFormData(formData, PromoteAllSchema);
+		if (!result.success) {
 			return fail(400, { error: "Please select a valid tier" });
 		}
+		const { tier } = result.data;
+		const customMessage = result.data.custom_message || null;
 
 		// Cap batch size to avoid worker timeout (4 async ops per subscriber)
 		const BATCH_LIMIT = 50;

@@ -26,7 +26,7 @@ describe("Pricing Graft Configuration", () => {
   describe("Constants", () => {
     it("exports default tier order matching TIER_ORDER", () => {
       expect(DEFAULT_TIER_ORDER).toEqual([
-        "free",
+        "wanderer",
         "seedling",
         "sapling",
         "oak",
@@ -77,10 +77,10 @@ describe("Pricing Graft Configuration", () => {
   });
 
   describe("transformTier", () => {
-    it("transforms free tier correctly", () => {
-      const tier = transformTier("free", TIERS.free);
+    it("transforms wanderer tier correctly", () => {
+      const tier = transformTier("wanderer", TIERS.wanderer);
 
-      expect(tier.key).toBe("free");
+      expect(tier.key).toBe("wanderer");
       expect(tier.name).toBe("Wanderer");
       expect(tier.standardName).toBe("Free");
       expect(tier.monthlyPrice).toBe(0);
@@ -166,7 +166,7 @@ describe("Pricing Graft Configuration", () => {
       const tiers = transformAllTiers();
 
       expect(tiers).toHaveLength(5);
-      expect(tiers[0].key).toBe("free");
+      expect(tiers[0].key).toBe("wanderer");
       expect(tiers[1].key).toBe("seedling");
       expect(tiers[2].key).toBe("sapling");
       expect(tiers[3].key).toBe("oak");
@@ -234,7 +234,7 @@ describe("Pricing Graft Configuration", () => {
 
     it("filters with excludeTiers", () => {
       const tiers = transformAllTiers({
-        excludeTiers: ["free", "evergreen"],
+        excludeTiers: ["wanderer", "evergreen"],
       });
 
       expect(tiers).toHaveLength(3);
@@ -258,11 +258,11 @@ describe("Pricing Graft Configuration", () => {
 
     beforeEach(() => {
       seedlingTier = transformTier("seedling", TIERS.seedling);
-      freeTier = transformTier("free", TIERS.free);
+      freeTier = transformTier("wanderer", TIERS.wanderer);
     });
 
     describe("getDisplayPrice", () => {
-      it("returns 'Free' for free tier", () => {
+      it("returns 'Free' for wanderer tier", () => {
         expect(getDisplayPrice(freeTier, "monthly")).toBe("Free");
         expect(getDisplayPrice(freeTier, "annual")).toBe("Free");
       });
@@ -329,12 +329,12 @@ describe("Pricing Graft Configuration", () => {
         expect(price).toBe("10.20");
       });
 
-      it("returns '0' for free tier monthly", () => {
+      it("returns '0' for wanderer tier monthly", () => {
         expect(getMonthlyEquivalentPrice(freeTier, "monthly")).toBe("0");
       });
 
-      it("returns '0' for free tier annual", () => {
-        // Free: $0/year ÷ 12 = $0/month (integer, so no decimals)
+      it("returns '0' for wanderer tier annual", () => {
+        // Wanderer: $0/year ÷ 12 = $0/month (integer, so no decimals)
         expect(getMonthlyEquivalentPrice(freeTier, "annual")).toBe("0");
       });
 
@@ -378,7 +378,7 @@ describe("Pricing Graft Configuration", () => {
         expect(savings).toBe("63");
       });
 
-      it("returns '0' for free tier", () => {
+      it("returns '0' for wanderer tier", () => {
         const savings = getYearlySavingsAmount(freeTier);
         expect(savings).toBe("0");
       });

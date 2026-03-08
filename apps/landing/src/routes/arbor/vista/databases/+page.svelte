@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData } from "./$types";
 	import { GlassCard } from "@autumnsgrove/lattice/ui";
+	import { formatRelativeTime } from "@autumnsgrove/lattice/utils";
 	import { Database, Info } from "lucide-svelte";
 
 	let { data }: { data: PageData } = $props();
@@ -10,15 +11,6 @@
 		if (bytes < 1024) return bytes + " B";
 		if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
 		return (bytes / 1024 / 1024).toFixed(2) + " MB";
-	}
-
-	function formatRelativeTime(epochSeconds: number): string {
-		const diffMs = Date.now() - epochSeconds * 1000;
-		const minutes = Math.floor(diffMs / 60000);
-		const hours = Math.floor(diffMs / 3600000);
-		if (minutes < 1) return "Just now";
-		if (minutes < 60) return `${minutes}m ago`;
-		return `${hours}h ago`;
 	}
 </script>
 

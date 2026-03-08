@@ -25,7 +25,7 @@ export type GroveTool =
 /**
  * Tier levels for TierGate component
  */
-export type GroveTier = "free" | "seedling" | "sapling" | "oak" | "evergreen";
+export type GroveTier = "wanderer" | "seedling" | "sapling" | "oak" | "evergreen";
 
 /**
  * Props for VineyardLayout component

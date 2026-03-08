@@ -19,23 +19,13 @@
  */
 
 // =============================================================================
-// TYPE (mirrors GroveErrorDef from @autumnsgrove/lattice/errors)
+// TYPE (imported from @autumnsgrove/lattice/errors)
 // =============================================================================
 
-/** Who can fix this error? */
-export type ErrorCategory = "user" | "admin" | "bug";
+import type { GroveErrorDef } from "@autumnsgrove/lattice/errors";
 
-/** Structured error definition — same shape as GroveErrorDef. */
-export interface ZephyrErrorDef {
-  /** Structured error code (e.g. "ZEPHYR-020") */
-  code: string;
-  /** Who can fix it: user (retry), admin (config), bug (investigation) */
-  category: ErrorCategory;
-  /** Safe to show to users — warm, clear, actionable */
-  userMessage: string;
-  /** Detailed message for server logs and admin dashboards */
-  adminMessage: string;
-}
+/** Zephyr error definition — same shape as the engine's GroveErrorDef. */
+export type ZephyrErrorDef = GroveErrorDef;
 
 // =============================================================================
 // ERROR CATALOG

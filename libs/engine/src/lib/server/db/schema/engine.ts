@@ -23,7 +23,7 @@ export const tenants = sqliteTable("tenants", {
 	email: text("email").notNull(),
 
 	// Subscription & limits
-	plan: text("plan", { enum: ["free", "seedling", "sapling", "oak", "evergreen"] }).default(
+	plan: text("plan", { enum: ["wanderer", "seedling", "sapling", "oak", "evergreen"] }).default(
 		"seedling",
 	),
 	storageUsed: integer("storage_used").default(0),
@@ -362,7 +362,7 @@ export const platformBilling = sqliteTable("platform_billing", {
 		.notNull()
 		.unique()
 		.references(() => tenants.id, { onDelete: "cascade" }),
-	plan: text("plan", { enum: ["free", "seedling", "sapling", "oak", "evergreen"] })
+	plan: text("plan", { enum: ["wanderer", "seedling", "sapling", "oak", "evergreen"] })
 		.notNull()
 		.default("seedling"),
 	status: text("status", {

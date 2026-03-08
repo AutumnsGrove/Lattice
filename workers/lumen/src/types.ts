@@ -110,7 +110,7 @@ export const InferenceRequestSchema = z.object({
 	task: LumenTaskSchema,
 	input: z.union([z.string().max(102400), z.array(MessageSchema).min(1).max(100)]),
 	tenant_id: z.string().optional(),
-	tier: z.enum(["free", "seedling", "sapling", "oak", "evergreen"]).optional(),
+	tier: z.enum(["wanderer", "seedling", "sapling", "oak", "evergreen"]).optional(),
 	options: z
 		.object({
 			model: z.string().optional(),
@@ -131,7 +131,7 @@ export const InferenceRequestSchema = z.object({
 export const EmbedRequestSchema = z.object({
 	input: z.union([z.string().max(32768), z.array(z.string().max(32768)).min(1).max(100)]),
 	tenant_id: z.string().optional(),
-	tier: z.enum(["free", "seedling", "sapling", "oak", "evergreen"]).optional(),
+	tier: z.enum(["wanderer", "seedling", "sapling", "oak", "evergreen"]).optional(),
 	model: z.string().optional(),
 });
 
@@ -139,7 +139,7 @@ export const EmbedRequestSchema = z.object({
 export const ModerateRequestSchema = z.object({
 	content: z.string().max(102400),
 	tenant_id: z.string().optional(),
-	tier: z.enum(["free", "seedling", "sapling", "oak", "evergreen"]).optional(),
+	tier: z.enum(["wanderer", "seedling", "sapling", "oak", "evergreen"]).optional(),
 	model: z.string().optional(),
 });
 
@@ -147,7 +147,7 @@ export const ModerateRequestSchema = z.object({
 export const TranscribeRequestSchema = z.object({
 	audio: z.string().max(10485760), // base64-encoded audio, 10MB max
 	tenant_id: z.string().optional(),
-	tier: z.enum(["free", "seedling", "sapling", "oak", "evergreen"]).optional(),
+	tier: z.enum(["wanderer", "seedling", "sapling", "oak", "evergreen"]).optional(),
 	mode: z.enum(["raw", "draft"]).default("raw"),
 });
 

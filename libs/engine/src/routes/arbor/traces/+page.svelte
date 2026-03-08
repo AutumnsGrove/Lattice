@@ -9,6 +9,7 @@
 	import { enhance } from "$app/forms";
 	import { goto } from "$app/navigation";
 	import { page } from "$app/state";
+	import { formatRelativeTime, formatDateTime } from "$lib/utils/date";
 	import {
 		MessageSquare,
 		ThumbsUp,
@@ -46,32 +47,8 @@
 	let archiving = $state<string | null>(null);
 	let markingAllRead = $state(false);
 
-	// Format relative timestamp
-	function formatRelativeTime(timestamp: number): string {
-		const now = Math.floor(Date.now() / 1000);
-		const diff = now - timestamp;
-
-		if (diff < 60) return "Just now";
-		if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-		if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-		if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
-
-		return new Date(timestamp * 1000).toLocaleDateString("en-US", {
-			month: "short",
-			day: "numeric",
-		});
-	}
-
-	// Format full timestamp
-	function formatFullDate(timestamp: number): string {
-		return new Date(timestamp * 1000).toLocaleString("en-US", {
-			year: "numeric",
-			month: "short",
-			day: "numeric",
-			hour: "2-digit",
-			minute: "2-digit",
-		});
-	}
+	// Alias formatDateTime for full date display in title attributes
+	const formatFullDate = (ts: number) => formatDateTime(ts, "");
 
 	// Apply filters
 	function applyFilters() {

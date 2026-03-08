@@ -4,21 +4,11 @@ import {
   verifyTurnstileToken,
   generateId,
 } from "@autumnsgrove/lattice/services";
+import { parseFormData } from "@autumnsgrove/lattice/server";
 import { GROVE_EMAILS } from "@autumnsgrove/lattice/config";
+import { escapeHtml } from "@autumnsgrove/lattice/utils";
 import { Resend } from "resend";
-
-/**
- * Escape HTML special characters to prevent XSS in email templates
- */
-function escapeHtml(unsafe: string | null): string {
-  if (!unsafe) return "";
-  return unsafe
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
+import { z } from "zod";
 
 /**
  * Generate next visit number in format: PORCH-2026-00001
@@ -84,6 +74,19 @@ const VALID_CATEGORIES = [
   "other",
 ] as const;
 
+const PorchSubmitSchema = z.object({
+  name: z.string().trim().optional().default(""),
+  email: z.string().trim().min(1, "Email is required so I can get back to you."),
+  subject: z.string().trim().min(3, "Please provide a subject."),
+  message: z
+    .string()
+    .trim()
+    .min(10, "Please enter a message between 10 and 5000 characters.")
+    .max(5000, "Please enter a message between 10 and 5000 characters."),
+  category: z.string().trim().optional().default("other"),
+  "cf-turnstile-response": z.string().optional().default(""),
+});
+
 export const load: PageServerLoad = async ({ locals, platform }) => {
   return {
     user: locals.user || null,
@@ -98,36 +101,21 @@ export const actions: Actions = {
     }
 
     const formData = await request.formData();
-    const name = (formData.get("name") as string)?.trim() || null;
-    const email = (formData.get("email") as string)?.trim();
-    const subject = (formData.get("subject") as string)?.trim();
-    const message = (formData.get("message") as string)?.trim();
-    const categoryRaw = (formData.get("category") as string)?.trim() || "other";
-    const turnstileToken = formData.get("cf-turnstile-response") as string;
+    const result = parseFormData(formData, PorchSubmitSchema);
+    if (!result.success) {
+      const firstError = Object.values(result.errors).flat()[0];
+      return fail(400, { error: firstError || "Invalid form data" });
+    }
+    const { email, subject, message } = result.data;
+    const name = result.data.name || null;
+    const turnstileToken = result.data["cf-turnstile-response"];
 
     // Validate category
     const category = VALID_CATEGORIES.includes(
-      categoryRaw as (typeof VALID_CATEGORIES)[number],
+      result.data.category as (typeof VALID_CATEGORIES)[number],
     )
-      ? categoryRaw
+      ? result.data.category
       : "other";
-
-    // Validate required fields
-    if (!email) {
-      return fail(400, {
-        error: "Email is required so I can get back to you.",
-      });
-    }
-
-    if (!subject || subject.length < 3) {
-      return fail(400, { error: "Please provide a subject." });
-    }
-
-    if (!message || message.length < 10 || message.length > 5000) {
-      return fail(400, {
-        error: "Please enter a message between 10 and 5000 characters.",
-      });
-    }
 
     // Turnstile verification for guests
     if (!locals.user) {

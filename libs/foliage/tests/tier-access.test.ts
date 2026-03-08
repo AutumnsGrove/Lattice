@@ -15,9 +15,9 @@ import type { UserTier } from "../src/lib/types.js";
 
 describe("Tier-Based Access Control", () => {
 	describe("Theme Access by Tier", () => {
-		it("should return no themes for free tier", () => {
-			const freeThemes = getThemesForTier("free");
-			expect(freeThemes).toHaveLength(0);
+		it("should return no themes for wanderer tier", () => {
+			const wandererThemes = getThemesForTier("wanderer");
+			expect(wandererThemes).toHaveLength(0);
 		});
 
 		it("should return seedling themes for seedling tier", () => {
@@ -82,10 +82,10 @@ describe("Tier-Based Access Control", () => {
 
 	describe("Tier Hierarchy", () => {
 		it("should enforce tier hierarchy correctly", () => {
-			const tiers: UserTier[] = ["free", "seedling", "sapling", "oak", "evergreen"];
+			const tiers: UserTier[] = ["wanderer", "seedling", "sapling", "oak", "evergreen"];
 
-			// Free tier: no themes
-			expect(getThemesForTier("free")).toHaveLength(0);
+			// Wanderer tier: no themes
+			expect(getThemesForTier("wanderer")).toHaveLength(0);
 
 			// Seedling tier: only seedling themes (3)
 			const seedlingThemes = getThemesForTier("seedling");
@@ -100,7 +100,7 @@ describe("Tier-Based Access Control", () => {
 		});
 
 		it("should have correct theme counts per tier", () => {
-			expect(getThemeCountForTier("free")).toBe(0);
+			expect(getThemeCountForTier("wanderer")).toBe(0);
 			expect(getThemeCountForTier("seedling")).toBe(3);
 			expect(getThemeCountForTier("sapling")).toBe(10);
 			expect(getThemeCountForTier("oak")).toBe(10);
@@ -108,9 +108,9 @@ describe("Tier-Based Access Control", () => {
 		});
 
 		it("should validate tier access hierarchy", () => {
-			// Free has no access
-			expect(hasTierAccess("free", "seedling")).toBe(false);
-			expect(hasTierAccess("free", "sapling")).toBe(false);
+			// Wanderer has no access
+			expect(hasTierAccess("wanderer", "seedling")).toBe(false);
+			expect(hasTierAccess("wanderer", "sapling")).toBe(false);
 
 			// Seedling can access seedling
 			expect(hasTierAccess("seedling", "seedling")).toBe(true);
@@ -135,9 +135,9 @@ describe("Tier-Based Access Control", () => {
 			const groveTheme = getTheme("grove")!;
 			const saplingTierTheme = Object.values(themes).find((t) => t.tier === "sapling")!;
 
-			// Free tier cannot access any themes
-			expect(canAccessTheme("free", groveTheme)).toBe(false);
-			expect(canAccessTheme("free", saplingTierTheme)).toBe(false);
+			// Wanderer tier cannot access any themes
+			expect(canAccessTheme("wanderer", groveTheme)).toBe(false);
+			expect(canAccessTheme("wanderer", saplingTierTheme)).toBe(false);
 
 			// Seedling tier can access grove (seedling theme)
 			expect(canAccessTheme("seedling", groveTheme)).toBe(true);
@@ -165,7 +165,7 @@ describe("Tier-Based Access Control", () => {
 				expect(canAccessTheme("evergreen", theme)).toBe(true);
 
 				// Free tier cannot access
-				expect(canAccessTheme("free", theme)).toBe(false);
+				expect(canAccessTheme("wanderer", theme)).toBe(false);
 			});
 		});
 
@@ -174,8 +174,8 @@ describe("Tier-Based Access Control", () => {
 			expect(saplingTierThemes.length).toBeGreaterThan(0);
 
 			saplingTierThemes.forEach((theme) => {
-				// Free and seedling cannot access
-				expect(canAccessTheme("free", theme)).toBe(false);
+				// Wanderer and seedling cannot access
+				expect(canAccessTheme("wanderer", theme)).toBe(false);
 				expect(canAccessTheme("seedling", theme)).toBe(false);
 
 				// Sapling and above can access
@@ -216,7 +216,7 @@ describe("Tier-Based Access Control", () => {
 
 	describe("Feature Access by Tier", () => {
 		it("should restrict theme customizer to oak+ tiers", () => {
-			expect(canUseCustomizer("free")).toBe(false);
+			expect(canUseCustomizer("wanderer")).toBe(false);
 			expect(canUseCustomizer("seedling")).toBe(false);
 			expect(canUseCustomizer("sapling")).toBe(false);
 			expect(canUseCustomizer("oak")).toBe(true);
@@ -224,7 +224,7 @@ describe("Tier-Based Access Control", () => {
 		});
 
 		it("should restrict custom font uploads to evergreen tier", () => {
-			expect(canUploadFonts("free")).toBe(false);
+			expect(canUploadFonts("wanderer")).toBe(false);
 			expect(canUploadFonts("seedling")).toBe(false);
 			expect(canUploadFonts("sapling")).toBe(false);
 			expect(canUploadFonts("oak")).toBe(false);
@@ -232,7 +232,7 @@ describe("Tier-Based Access Control", () => {
 		});
 
 		it("should restrict community themes to oak+ tiers", () => {
-			expect(canAccessCommunityThemes("free")).toBe(false);
+			expect(canAccessCommunityThemes("wanderer")).toBe(false);
 			expect(canAccessCommunityThemes("seedling")).toBe(false);
 			expect(canAccessCommunityThemes("sapling")).toBe(false);
 			expect(canAccessCommunityThemes("oak")).toBe(true);
@@ -274,11 +274,11 @@ describe("Tier-Based Access Control", () => {
 	describe("Edge Cases", () => {
 		it("should handle accessing themes with different tier combinations", () => {
 			const groveTheme = getTheme("grove")!;
-			const tiers: UserTier[] = ["free", "seedling", "sapling", "oak", "evergreen"];
+			const tiers: UserTier[] = ["wanderer", "seedling", "sapling", "oak", "evergreen"];
 
 			tiers.forEach((tier) => {
 				const hasAccess = canAccessTheme(tier, groveTheme);
-				const expectedAccess = tier !== "free";
+				const expectedAccess = tier !== "wanderer";
 				expect(hasAccess).toBe(expectedAccess);
 			});
 		});
@@ -296,7 +296,7 @@ describe("Tier-Based Access Control", () => {
 		});
 
 		it("should handle theme access for all tier permutations", () => {
-			const tiers: UserTier[] = ["free", "seedling", "sapling", "oak", "evergreen"];
+			const tiers: UserTier[] = ["wanderer", "seedling", "sapling", "oak", "evergreen"];
 			const allThemes = Object.values(themes);
 
 			tiers.forEach((userTier) => {
@@ -304,7 +304,7 @@ describe("Tier-Based Access Control", () => {
 					const hasAccess = canAccessTheme(userTier, theme);
 
 					// Validate access logic
-					if (userTier === "free") {
+					if (userTier === "wanderer") {
 						expect(hasAccess).toBe(false);
 					} else if (theme.tier === "seedling") {
 						expect(hasAccess).toBe(true);

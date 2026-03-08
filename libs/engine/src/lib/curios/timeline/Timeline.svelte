@@ -12,6 +12,7 @@
 
 	import MarkdownIt from "markdown-it";
 	import { sanitizeMarkdown } from "$lib/utils";
+	import { escapeHtml } from "$lib/utils/escape-html.js";
 
 	// Local instance with breaks: true for timeline rendering
 	const timelineMd = new MarkdownIt({ breaks: true, linkify: true });
@@ -218,16 +219,6 @@
 		}
 
 		return html;
-	}
-
-	function escapeHtml(text: string): string {
-		if (!text) return "";
-		return text
-			.replace(/&/g, "&amp;")
-			.replace(/</g, "&lt;")
-			.replace(/>/g, "&gt;")
-			.replace(/"/g, "&quot;")
-			.replace(/'/g, "&#039;");
 	}
 
 	function escapeRegex(str: string): string {

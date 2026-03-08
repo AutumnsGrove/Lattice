@@ -15,8 +15,8 @@ describe("loadSchemas", () => {
 	// ─── Tier Limits ─────────────────────────────────────────────
 
 	describe("tier limits", () => {
-		it("should return 0 schemas for free tier", () => {
-			const result = loadSchemas(allDomains, "free");
+		it("should return 0 schemas for wanderer tier", () => {
+			const result = loadSchemas(allDomains, "wanderer");
 			expect(result.schemas).toHaveLength(0);
 			expect(result.limit).toBe(0);
 		});

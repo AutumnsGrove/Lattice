@@ -383,9 +383,9 @@ describe("Tier Utilities", () => {
       expect(isTierAtLeast("sapling", "evergreen")).toBe(false);
     });
 
-    it("handles free tier", () => {
-      expect(isTierAtLeast("seedling", "free")).toBe(true);
-      expect(isTierAtLeast("free", "seedling")).toBe(false);
+    it("handles wanderer tier", () => {
+      expect(isTierAtLeast("seedling", "wanderer")).toBe(true);
+      expect(isTierAtLeast("wanderer", "seedling")).toBe(false);
     });
   });
 
@@ -396,7 +396,7 @@ describe("Tier Utilities", () => {
       expect(tiers).toContain("sapling");
       expect(tiers).toContain("oak");
       expect(tiers).toContain("evergreen");
-      expect(tiers).not.toContain("free");
+      expect(tiers).not.toContain("wanderer");
     });
 
     it("returns only evergreen for evergreen", () => {
@@ -404,8 +404,8 @@ describe("Tier Utilities", () => {
       expect(tiers).toEqual(["evergreen"]);
     });
 
-    it("returns all tiers for free", () => {
-      const tiers = getTiersAtLeast("free");
+    it("returns all tiers for wanderer", () => {
+      const tiers = getTiersAtLeast("wanderer");
       expect(tiers.length).toBe(5);
     });
   });

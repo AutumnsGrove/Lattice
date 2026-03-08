@@ -283,7 +283,7 @@ export interface AuthError {
 // SUBSCRIPTION TYPES
 // =============================================================================
 
-export type SubscriptionTier = "seedling" | "sapling" | "oak" | "evergreen" | "canopy" | "platform";
+export type SubscriptionTier = "seedling" | "sapling" | "oak" | "evergreen";
 
 export interface UserSubscription {
 	id: string;
@@ -329,8 +329,6 @@ export const TIER_POST_LIMITS: Record<SubscriptionTier, number | null> = {
 	sapling: null,
 	oak: null,
 	evergreen: null,
-	canopy: null,
-	platform: null,
 };
 
 export interface SubscriptionStatus {

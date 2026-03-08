@@ -1,0 +1,507 @@
+# Engine-First Compliance Audit
+
+**Date:** 2026-03-07
+**Auditor:** Claude Opus 4.6
+**Scope:** All apps/, workers/, services/, libs/ (excluding engine internals)
+**Codebase size:** ~515,818 LOC
+
+---
+
+## Executive Summary
+
+The engine-first principle states: _"The engine exists to prevent duplication. USE IT."_ This audit found **significant non-compliance** across the codebase, with utility duplication being a major contributor to the 515k LOC count.
+
+### Compliance Scorecard
+
+| Category | Status | Violations | Severity |
+| ---------------------------------------- | ------ | ---------- | -------- |
+| `cn()` / class merging | PASS | 0 | - |
+| Error handling (Signpost) | PARTIAL | 108+ (13 app-layer fixed, catalogs aligned, services remain) | HIGH |
+| `escapeHtml()` duplication | FAIL | 17 impls | HIGH |
+| `formatDate()` duplication | PARTIAL | 14 migrated | MEDIUM |
+| `formatBytes()` duplication | FAIL | 6 impls | LOW |
+| `slugify()` duplication | FAIL | 5 impls | LOW |
+| `timingSafeEqual()` duplication | FAIL | 6 impls | HIGH |
+| Subscription tier type duplication | FAIL | 7 defs | MEDIUM |
+| Local error catalogs (workers/services) | PASS | 0 non-compliant (5 compliant, 2 exempt, 1 intentional) | - |
+| Rootwork type safety (`as` casts) | PARTIAL | 196+ (28 landing fixed, 147 engine remaining, 21+ other) | HIGH |
+| Sanitization duplication | FAIL | 2+ impls | MEDIUM |
+| Redirect URL validation duplication | FAIL | 2 impls | MEDIUM |
+| TIER_STORAGE constant mismatch | FAIL | 2 defs (diverged!) | CRITICAL |
+| Email SEQUENCES duplication | FAIL | 3 defs | HIGH |
+| Tailwind color tokens duplication | FAIL | 7 copies | LOW |
+| Markdown renderer imports | PASS | 0 outside | - |
+
+**Overall compliance: ~25%** — Only `cn()` and markdown rendering follow engine-first consistently. **Total violations: 240+**
+
+---
+
+## Finding 1: `escapeHtml()` — 17 Independent Implementations
+
+**Severity: HIGH** — Security-critical function copy-pasted everywhere.
+
+The engine has `escapeHtml` in `libs/engine/src/lib/utils/sanitize.ts` but it is **not exported at the top level**. This has led to 17 independent implementations:
+
+| Location | Notes |
+| ------------------------------------------------------------ | -------------------------------- |
+| `libs/engine/src/lib/utils/markdown-directives.ts` | Internal to engine |
+| `libs/engine/src/lib/utils/rehype-groveterm.ts` | Internal to engine |
+| `libs/engine/src/lib/server/services/trace-email.ts` | Internal to engine |
+| `services/durable-objects/src/triage/digest.ts` | Standalone copy |
+| `services/heartwood/src/templates/device.ts` | Standalone copy |
+| `services/heartwood/src/templates/settings.ts` | **TWO copies in same file** |
+| `services/og-worker/src/pure-functions.ts` | Standalone copy |
+| `tools/cairn/render.ts` | Standalone copy |
+| `apps/landing/src/lib/utils/docs-loader.ts` | Standalone copy |
+| `apps/landing/src/routes/arbor/porch/[id]/+page.server.ts` | Inline copy |
+| `apps/landing/src/routes/security/+page.server.ts` | Inline copy |
+| `apps/landing/src/routes/api/webhooks/email-feedback/+server.ts` | Inline copy |
+| `apps/landing/src/routes/porch/new/+page.server.ts` | Inline copy |
+| `apps/landing/src/routes/porch/visits/[id]/+page.server.ts` | Inline copy |
+| `apps/landing/src/routes/feedback/+page.server.ts` | Inline copy |
+
+**Root cause:** `escapeHtml` exists in the engine but isn't prominently exported from `@autumnsgrove/lattice/utils`. Each developer copies the 5-line function instead.
+
+**Recommendation:** Export `escapeHtml` from `@autumnsgrove/lattice/utils`, then replace all 17 copies with the import. The `apps/landing` routes alone have **6 identical inline copies**.
+
+---
+
+## Finding 2: `formatDate()` — 41 Independent Implementations → PARTIALLY RESOLVED
+
+**Severity: MEDIUM** — Not security-critical but massive duplication.
+
+**Status: PARTIALLY RESOLVED** in commits `afc85f0`, `6fcd8f1`, `4e8139b`.
+
+Created shared date utility at `libs/engine/src/lib/utils/date.ts` with 7 presets:
+- `formatRelativeTime()` — "just now", "5m ago", "2h ago", "3d ago"
+- `formatDateFull()` — "January 15, 2026"
+- `formatDateShort()` — "Jan 15" / "Jan 15, 2024"
+- `formatDateTime()` — "Jan 5, 3:45 PM"
+- `formatDateISO()` — "2024-01-15"
+- `formatSmartDate()` — context-aware (time today, short this year, full otherwise)
+- `formatDuration()` — "45 min", "2h 30m", "1d 4h"
+
+All accept flexible input (ISO string, Date, unix seconds). Exported via `@autumnsgrove/lattice/utils`.
+
+**Migrated (14 implementations removed):**
+
+| Location | What changed |
+| ---------------------------------------- | ------------------------------------------ |
+| `ReedsComment.svelte` | formatTimeAgo → formatRelativeTime |
+| `SafetyMonitoring.svelte` | formatTime → formatDateTime |
+| `guestbook/index.ts` | re-export from shared |
+| `pulse/index.ts` | re-export from shared |
+| `GlassStatusWidget.svelte` | import from shared |
+| `arbor/traces/+page.svelte` | formatRelativeTime + formatFullDate → shared |
+| `arbor/settings/+page.svelte` | formatRelativeTime → shared |
+| `arbor/account/utils.ts` | formatDate delegates to formatDateFull |
+| `PasskeyCard.svelte` | formatDate → formatDateShort |
+| `meadow/utils/time.ts` | re-export from shared |
+| `landing/vista/workers` | import from shared |
+| `landing/vista/databases` | import from shared |
+| `landing/vista/alerts` | import from shared |
+| `landing/vista/+page` | import from shared |
+
+**Remaining (not migrated):**
+
+| Location | Reason |
+| --------------------------------- | ------------------------------------------ |
+| `apps/clearing/utils/date.ts` | Intentionally verbose format for status page UX |
+| `apps/ivy/` (3 inline copies) | App doesn't import from lattice yet |
+| `workers/patina/utils.ts` | Worker doesn't depend on lattice |
+| `tools/cairn/layout.ts` | Tool doesn't depend on lattice |
+| `apps/amber/FileList.svelte` | Needs separate migration |
+| `libs/foliage/ModerationQueue.svelte` | Needs separate migration |
+
+---
+
+## Finding 3: Error Handling — 108+ Signpost Violations
+
+**Severity: HIGH** — Violates MANDATORY requirement from AGENT.md.
+
+### 3a. Bare `throw new Error()` — 62+ instances → PARTIALLY RESOLVED
+
+**Apps-layer violations resolved (13 throws migrated):**
+
+| Location | What changed |
+| --------------------------------------------------------- | ------------------------------------------ |
+| `apps/landing/knowledge/exhibit/sister-museum/+page.server.ts` | 1 throw → `logGroveError()` + coded Error with `SITE_ERRORS.PAGE_LOAD_FAILED` |
+| `apps/plant/routes/verify-email/+page.server.ts` | 1 throw → `throwGroveError()` with `PLANT_ERRORS.DB_UNAVAILABLE` / `KV_BINDING_MISSING` |
+| `apps/plant/lib/server/stripe.ts` | 5 throws → `logGroveError()` + coded Errors with new `PLANT-005` through `PLANT-009` |
+| `apps/plant/lib/server/email-verification.ts` | 1 throw → coded Error with new `PLANT-045` |
+| `apps/meadow/lib/server/reactions.ts` | 1 throw → coded Error with new `MEADOW-020` |
+| `apps/meadow/lib/utils/note-upload.ts` | 2 throws → coded Errors with new `MEADOW-040`, `MEADOW-041` |
+
+**New error catalog created:** `apps/meadow/src/lib/errors.ts` — `MEADOW_ERRORS` with prefix `MEADOW-XXX` (3 initial codes).
+
+**New errors added to `PLANT_ERRORS`:** `PLANT-005` through `PLANT-009` (Stripe price/checkout/portal), `PLANT-045` (email format).
+
+**Remaining (services/workers — deferred to P2):**
+
+- **apps/landing** — 6 client-side .svelte throws (acceptable — caught by Svelte error boundaries)
+- **apps/amber** — 5 client-side .svelte throws (acceptable — caught by Svelte error boundaries)
+- **services/forage** — 11 violations across providers and routes
+- **services/heartwood** — 13+ violations in auth flow and settings templates
+- **services/og-worker** — 3 violations in worker internals
+
+### 3b. Raw `new Response(JSON.stringify({ error: ... }))` — 42+ instances
+
+API routes returning ad-hoc JSON errors instead of using `buildErrorJson()`:
+
+- **apps/login** — 4 violations in auth proxy
+- **apps/ivy** — 16+ violations across triage API routes
+- **services/forage** — 20+ violations
+
+### 3c. Local Error Catalogs — 8 separate files
+
+Workers and services define their own error types instead of using/extending Signpost:
+
+| File | Prefix | Imports Signpost types? | Migration Status |
+| ---------------------------------------- | -------------- | ---------------------- | ---------------- |
+| `apps/plant/src/lib/errors.ts` | `PLANT-XXX` | YES (compliant) | GOLD STANDARD |
+| `workers/onboarding/src/errors.ts` | `ONBOARDING-XXX` | YES | COMPLIANT |
+| `workers/reverie/src/errors.ts` | `REV-XXX` | YES — imports + extends | MIGRATED |
+| `workers/reverie-exec/src/errors.ts` | `EXC-XXX` | YES — imports + extends | MIGRATED |
+| `workers/lumen/src/lib/errors.ts` | (custom) | NO — own system | INTENTIONAL (see below) |
+| `services/zephyr/src/errors.ts` | `ZEPHYR-NNN` | YES — imports + aliases | MIGRATED |
+| `libs/grove-agent/src/errors.ts` | (varies) | Unknown | NEEDS REVIEW |
+| `libs/infra/src/errors.ts` | `SRV-XXX` | Own catalog | EXEMPT (documented in AGENT.md) |
+
+**Assessment:** `apps/plant` is the gold standard — it imports `GroveErrorDef` from Lattice and creates a local alias `PlantErrorDef = GroveErrorDef`. `workers/onboarding` already imports `GroveErrorDef` directly (compliant). `libs/infra` has its own `SRV_ERRORS` catalog which is legitimate (documented in AGENT.md).
+
+**Migration details (all 3 now completed):**
+
+| Worker | Type Alias | Pattern | Status |
+| -------------------- | -------------------- | ------ | ------ |
+| `services/zephyr` | `ZephyrErrorDef = GroveErrorDef` | Direct alias — shape already matched | DONE |
+| `workers/reverie` | `ReverieErrorDef = GroveErrorDef & { status: number }` | Extended with HTTP status; 15 defs restructured from `message` → `userMessage`/`adminMessage` + `category` | DONE |
+| `workers/reverie-exec` | `ExecErrorDef = GroveErrorDef & { status: number }` | Extended with HTTP status; 12 defs restructured, same pattern as reverie | DONE |
+
+**`workers/lumen` exception:** Lumen's error file provides `extractError()` and `buildErrorResponse()` for mapping upstream library errors — it doesn't define an error catalog. This is an intentional isolation pattern, not a type alignment issue.
+
+**Recommendation:**
+1. Workers that define `ReverieErrorDef`, `ExecErrorDef`, `ZephyrErrorDef` should import `GroveErrorDef` from `@autumnsgrove/lattice/errors` and alias it
+2. All bare `throw new Error()` in API routes should use `buildErrorJson()` or `throwGroveError()`
+3. All `new Response(JSON.stringify({ error: ... }))` should migrate to `buildErrorJson()`
+
+---
+
+## Finding 4: `formatBytes()` — 6 Implementations
+
+**Severity: LOW** — Small function but unnecessarily duplicated.
+
+| Location | Exported? |
+| ---------------------------------------------------- | --------- |
+| `libs/engine/src/lib/amber/utils.ts` | Yes |
+| `libs/engine/src/lib/utils/imageProcessor.ts` | Yes |
+| `workers/patina/src/lib/utils.ts` | Yes |
+| `scripts/journey/backfill-npm-sizes.ts` | No |
+
+**Note:** The engine has `formatBytes` in **two** places internally (`amber/utils.ts` AND `utils/imageProcessor.ts`) — duplication within the engine itself.
+
+**Recommendation:** Consolidate to a single `formatBytes` in `@autumnsgrove/lattice/utils`, remove the engine-internal duplicates, update external consumers.
+
+---
+
+## Finding 5: Subscription Tier Types — 7 Definitions
+
+**Severity: MEDIUM** — Type drift risk across packages.
+
+The same union type `"free" | "seedling" | "sapling" | "oak" | "evergreen"` is independently defined in:
+
+| Location | Type Name |
+| -------------------------------------------------- | ------------------ |
+| `services/durable-objects/src/tiers.ts` | `TierKey` |
+| `services/heartwood/src/types.ts` | `SubscriptionTier` |
+| `services/amber/src/index.ts` | `SubscriptionTier` |
+| `workers/post-migrator/src/index.ts` | `TierKey` |
+| `workers/post-migrator/tests/storage-thresholds.test.ts` | `TierKey` |
+| `libs/foliage/src/lib/types.ts` | `UserTier` |
+| `libs/vineyard/src/lib/types/index.ts` | `GroveTier` |
+
+**Drift already present:** Heartwood includes `"canopy" | "platform"` in its definition. Vineyard uses `"grove"` instead of `"evergreen"`. Foliage lacks `"canopy"`.
+
+**Recommendation:** Define canonical `TierKey` and `SubscriptionTier` types in `@autumnsgrove/lattice/config` or `@autumnsgrove/lattice/payments` and import everywhere.
+
+---
+
+## Finding 6: `slugify()` — 5 Implementations
+
+**Severity: LOW**
+
+| Location | Approach |
+| ------------------------------------------------ | ------------------------------------------------- |
+| `services/heartwood/src/db/status-queries.ts` | Full slugify with toLowerCase + replace |
+| `services/heartwood/src/routes/cdn.ts` | Simple replace for filenames |
+| `tools/cairn/render.ts` | Heading slugification for anchor links |
+| `tools/cairn/index.ts` | Path-based slug for doc indexing |
+| `scripts/generate/grove-term-manifest.ts` | Simple kebab-case |
+
+**Recommendation:** Add `slugify()` to `@autumnsgrove/lattice/utils` with options for different modes (URL slug, filename, anchor ID).
+
+---
+
+## Finding 7: Rootwork Type Safety — 52+ Violations
+
+**Severity: HIGH** — Violates MANDATORY requirement: "No `as` casts at trust boundaries."
+
+### 7a. Form Data Casts — `formData.get() as string`
+
+**Status: PARTIALLY RESOLVED** — All `apps/landing` form data casts migrated to `parseFormData()` with Zod schemas (28+ casts). **147+ additional casts remain in `libs/engine/src/routes/`** (curio handlers) — tracked as future scope.
+
+**Migrated — `apps/landing` (28+ unsafe casts removed):**
+
+| Location | What changed |
+| --------------------------------------------------------- | ------------------------------------------ |
+| `apps/landing/src/routes/security/+page.server.ts` | 6 casts → SecurityReportSchema |
+| `apps/landing/src/routes/porch/new/+page.server.ts` | 6 casts → PorchSubmitSchema |
+| `apps/landing/src/routes/feedback/+page.server.ts` | 6 casts → FeedbackSchema |
+| `apps/landing/src/routes/arbor/feedback/+page.server.ts` | 4 casts → FeedbackIdSchema/FeedbackNotesSchema |
+| `apps/landing/src/routes/arbor/porch/[id]/+page.server.ts` | 3 casts → ReplySchema/StatusSchema/NotesSchema |
+| `apps/landing/src/routes/porch/visits/[id]/+page.server.ts` | 1 cast → VisitorReplySchema |
+| `apps/landing/src/routes/api/arbor/cdn/upload/+server.ts` | 2 casts → UploadMetadataSchema |
+| `apps/landing/src/routes/arbor/comped-invites/+page.server.ts` | 5 actions → CreateInviteSchema/InviteIdSchema/PromoteSchema/PromoteAllSchema |
+
+**Remaining — `libs/engine/src/routes/` (147+ casts, future scope):**
+
+| Location | Cast Count | Notes |
+| --------------------------------------------------- | ---------- | ---------------------------------- |
+| `arbor/curios/shelves/+page.server.ts` | 29 | Largest — create/edit/reorder/delete actions |
+| `arbor/curios/polls/+page.server.ts` | 12 | Multiple poll management actions |
+| `arbor/curios/artifacts/+page.server.ts` | 12 | Artifact CRUD |
+| `arbor/curios/timeline/+page.server.ts` | 12 | Timeline entry fields |
+| `api/images/upload/+server.ts` | 11 | Image upload metadata |
+| `arbor/curios/shrines/+page.server.ts` | 11 | Shrine management |
+| `arbor/curios/moodring/+page.server.ts` | 11 | Mood ring settings |
+| `arbor/curios/webring/+page.server.ts` | 11 | Webring management |
+| `arbor/curios/guestbook/+page.server.ts` | 9 | Guestbook moderation |
+| `arbor/curios/badges/+page.server.ts` | 8 | Badge management |
+| `arbor/curios/clipart/+page.server.ts` | 8 | Clipart upload/management |
+| `arbor/curios/nowplaying/+page.server.ts` | 8 | Now playing config |
+| `arbor/curios/statusbadge/+page.server.ts` | 7 | Status badge settings |
+| `arbor/curios/blogroll/+page.server.ts` | 5 | Blogroll entries |
+| `arbor/curios/cursors/+page.server.ts` | 5 | Custom cursor settings |
+| `api/curios/gallery/backfill/+server.ts` | 4 | Gallery backfill |
+| `arbor/curios/activitystatus/+page.server.ts` | 4 | Activity status |
+| `arbor/curios/pulse/+page.server.ts` | 4 | Pulse widget |
+| Other curio handlers | 6 | Scattered across remaining handlers |
+
+**Also remaining — `services/heartwood/` (2 casts):**
+- `src/routes/cdn.ts:167-168` — CDN upload metadata
+
+Each engine curio handler will need its own Zod schema(s) designed for its specific form actions. This is a larger effort (~20 schemas across 20+ files) and should be tracked as a separate initiative.
+
+### 7b. Database Query Result Casts (15+ violations)
+
+Raw `.first()` and `.all()` results cast with `as` instead of using typed schemas:
+
+| Location | Issue |
+| ---------------------------------------------------- | ------------------------------------------ |
+| `apps/plant/src/routes/+layout.server.ts` | 20+ casts on onboarding/user data |
+| `apps/plant/src/routes/auth/callback/+server.ts` | Auth flow DB results cast to interface |
+| `apps/plant/src/routes/comped/+page.server.ts` | Multiple DB casts without validation |
+| `apps/ivy/src/routes/(app)/inbox/+page.server.ts` | 10+ casts on email envelope data |
+| `workers/warden/src/routes/admin.ts` | Agent list DB results cast |
+| `workers/email-catchup/worker.ts` | User list cast as `EmailSignup[]` |
+
+### 7c. JSON Parsing Without Validation (10+ violations)
+
+Using `JSON.parse(raw) as T` instead of `safeJsonParse(raw, ZodSchema)`:
+
+| Location | Data Source |
+| ---------------------------------------------------- | ------------------------------ |
+| `workers/meadow-poller/src/index.ts:306` | KV poll state |
+| `workers/timeline-sync/src/github.ts:43` | GitHub API response |
+| `workers/timeline-sync/src/context.ts:195` | Generic JSON parse as `T` |
+| `workers/reverie/src/lib/validator.ts:78` | Tool function arguments |
+| `workers/warden/src/routes/admin.ts` | Agent scopes from DB |
+
+### 7d. Missing Error Type Guards (2+ violations)
+
+Using `(err as any)?.status` instead of `isRedirect()` / `isHttpError()`:
+
+- `apps/clearing/src/routes/incidents/[slug]/+page.server.ts:39`
+- `apps/plant/src/routes/auth/callback/+server.ts` (implicit)
+
+---
+
+## Finding 8: `cn()` / Class Merging — COMPLIANT
+
+**Severity: None** — This is the success story.
+
+Zero violations found. All class merging uses `cn()` from `@autumnsgrove/lattice/ui/utils`. No direct `clsx` or `tailwind-merge` imports outside the engine.
+
+---
+
+## Finding 9: Workers Utility Isolation
+
+**Severity: LOW** — Some duplication is acceptable for standalone workers.
+
+`workers/patina/src/lib/utils.ts` contains:
+- `formatSqlValue()` — Patina-specific, reasonable to keep local
+- `formatBytes()` — Should import from engine
+- `generateJobId()` — Wrapper around `crypto.randomUUID()`, trivial
+- `formatDate()` — Should import from engine
+- `getUnixTimestamp()` — Trivial one-liner
+- `calculateExpirationTimestamp()` — Patina-specific, reasonable to keep local
+
+`apps/clearing/src/lib/server/monitor/utils.ts` contains:
+- `ComponentStatus` enum — Clearing-specific, reasonable to keep local
+- `generateUUID()` — Wrapper around `crypto.randomUUID()`, trivial
+
+---
+
+## Finding 10: `timingSafeEqual()` — 6 Implementations
+
+**Severity: HIGH** — Security-critical function reimplemented in every worker that does auth.
+
+| Location | Context |
+| ---------------------------------------------------------- | -------------------------------- |
+| `apps/ivy/src/lib/utils/index.ts` | Exported for webhook validation |
+| `apps/ivy/src/lib/api/forwardEmail.ts` | **Re-implemented inline** |
+| `workers/reverie/src/auth/middleware.ts` | API key comparison |
+| `workers/reverie-exec/src/auth/middleware.ts` | API key comparison |
+| `workers/lumen/src/auth/middleware.ts` | API key comparison |
+| `workers/warden/src/auth/signature.ts` | Signature verification |
+
+The engine has timing-safe comparison in `libs/engine/src/lib/utils/csrf.ts` but it's not exported as a standalone utility. Each worker reimplements the same `crypto.subtle.timingSafeEqual()` + TextEncoder pattern.
+
+**Also duplicated:** `hashIp()` in `apps/ivy` — implemented in both `src/lib/utils/index.ts` and inline in `src/routes/api/webhook/incoming/+server.ts`.
+
+**Recommendation:** Export `timingSafeEqual()` from `@autumnsgrove/lattice/utils` (or a new `@autumnsgrove/lattice/security` path). Workers can import it since it uses only Web Crypto APIs.
+
+---
+
+## Finding 11: Sanitization & Redirect Validation Duplication
+
+**Severity: MEDIUM**
+
+### 11a. `sanitizeNoteHtml()` in Meadow
+
+`apps/meadow/src/lib/server/sanitize.ts` reimplements HTML sanitization with its own tag allowlist via `sanitize-html`, duplicating engine's `sanitizeHTML()` from `@autumnsgrove/lattice/utils`.
+
+**Recommendation:** Either use engine's `sanitizeHTML()` with a custom config, or document why Meadow needs a different allowlist.
+
+### 11b. Redirect URL Validation
+
+`apps/login/src/lib/redirect.ts` implements `validateRedirectUrl()` which duplicates the engine's `sanitizeReturnTo()` from `@autumnsgrove/lattice/utils`.
+
+**Recommendation:** Replace with engine import. `apps/domains` already imports `sanitizeReturnTo()` correctly.
+
+---
+
+## Finding 12: TIER_STORAGE Constant Mismatch — CRITICAL DATA BUG
+
+**Severity: CRITICAL** — Active data mismatch causing incorrect quota calculations.
+
+`services/amber/src/index.ts:263` defines:
+```
+free: 0, seedling: 1, sapling: 5, oak: 20, canopy: 20, evergreen: 100, platform: 100
+```
+
+`apps/amber/src/lib/server/storage.ts:16` defines:
+```
+free: 0, seedling: 1, sapling: 5, oak: 20, evergreen: 100
+```
+
+**The app is missing `canopy` and `platform` tiers.** Any user on these tiers will hit incorrect quota calculations in the app. The service has the correct values but the client-facing app doesn't.
+
+**Recommendation:** Consolidate `TIER_STORAGE` into `@autumnsgrove/lattice/config` or `@autumnsgrove/lattice/payments`. Import in both locations.
+
+---
+
+## Finding 13: Email SEQUENCES Defined in 3 Places
+
+**Severity: HIGH** — Changes to email sequences require updates in 3 files.
+
+| Location | Type |
+| ----------------------------------------------- | --------------------------------- |
+| `libs/engine/src/lib/email/types.ts:87` | Source of truth (engine) |
+| `workers/onboarding/src/types.ts:77` | Independent re-definition |
+| `workers/email-catchup/worker.ts:63` | Independent re-definition |
+
+The onboarding worker even has a comment: _"Must match services/email-render/src/templates/types.ts SEQUENCES"_ — acknowledging the drift risk but not importing from engine.
+
+**Recommendation:** Import `SEQUENCES` from `@autumnsgrove/lattice/email` in both workers.
+
+---
+
+## Finding 14: Tailwind Color Tokens Duplicated 7x
+
+**Severity: LOW** — All apps define the identical `grove` color palette (50-950 shades) in their `tailwind.config.js` instead of inheriting from the engine preset.
+
+All 7 apps (`landing`, `plant`, `meadow`, `clearing`, `domains`, `terrarium`, `login`) copy-paste the same color values. Brand color changes require editing 7 files.
+
+**Recommendation:** Move the `grove` color palette into the engine's Tailwind preset so apps inherit it automatically.
+
+---
+
+## Remediation Priority
+
+### P0 — High Impact, Quick Wins (Security + Data Critical) — RESOLVED
+
+All P0 items have been fixed in commit `a9ea4be`:
+
+1. ~~**FIX: TIER_STORAGE mismatch**~~ — FIXED. Removed fake `canopy` and `platform` tiers. Renamed "free" → "wanderer" across 78 files. `apps/amber` now imports `TIER_STORAGE_GB` from engine. `services/amber` aligned to 5 correct tiers.
+2. ~~**Export `escapeHtml`**~~ — DONE. New `escape-html.ts` in engine utils, exported via `@autumnsgrove/lattice/utils`. 12 duplicate implementations replaced with imports.
+3. ~~**Export `timingSafeEqual`**~~ — DONE. Exported from `csrf.ts`, improved to handle different-length strings safely.
+4. ~~**Migrate `apps/landing` escapeHtml copies**~~ — DONE. 7 inline functions replaced with engine imports.
+5. ~~**Consolidate `formatBytes`**~~ — DONE. `imageProcessor.ts` upgraded to handle GB/TB, `amber/utils.ts` now re-exports from it.
+
+### P1 — Medium Impact, Moderate Effort
+1. ~~**Create shared `formatDate()` presets**~~ — PARTIALLY DONE. Shared utility created, 14 of ~25 copies migrated. Remaining copies in apps without lattice dependency.
+2. ~~**Migrate form data parsing to `parseFormData()`**~~ — DONE. 28+ unsafe casts in `apps/landing` migrated to Zod-validated `parseFormData()` across 8 route files. See Finding 7a for details.
+3. ~~**Migrate worker error catalogs to import `GroveErrorDef`**~~ — DONE. All 3 non-compliant workers migrated:
+   - `services/zephyr` — Trivial swap: imported `GroveErrorDef`, aliased as `ZephyrErrorDef`
+   - `workers/reverie` — Medium: restructured 15 error defs from `{message, status}` to `{category, userMessage, adminMessage, status}`, updated `buildReverieError()` + tests
+   - `workers/reverie-exec` — Medium: restructured 12 error defs, same pattern as reverie, updated `buildExecError()`
+4. ~~**Define canonical `TierKey` type**~~ — DONE (part of P0 tier alignment). All packages now use engine's `TierKey`.
+5. ~~**Replace bare `throw new Error()` in apps**~~ — PARTIALLY DONE. 13 app-layer throws migrated to Signpost codes across landing, plant, meadow. New `PLANT-005`–`PLANT-009`, `PLANT-045`, `MEADOW-020`/`040`/`041` error codes added. Services-layer violations (forage, heartwood, og-worker) deferred to P2.
+
+### P2 — Lower Impact, Larger Effort
+9. **Migrate DB query results to typed schemas** — 15+ unsafe `as` casts on `.first()` / `.all()`
+10. **Migrate `apps/ivy` and `apps/login` error responses** to `buildErrorJson()` — 20+ violations
+11. **Add `safeJsonParse()` to KV/webhook/API parsing** — 10+ unsafe `JSON.parse() as T`
+12. **Migrate `services/forage` error handling** — 20+ violations but standalone service
+13. **Add `slugify()` to engine utils** — 5 external implementations
+
+### Estimated LOC Savings
+
+| Action | Lines Removed | Lines Added |
+| ------------------------------------- | ------------- | ----------- |
+| Consolidate `escapeHtml` | ~170 | ~15 |
+| Consolidate `formatDate` | ~200 | ~40 |
+| Consolidate `formatBytes` | ~50 | ~10 |
+| Consolidate tier types | ~35 | ~5 |
+| Migrate error handling to Signpost | ~300 | ~200 |
+| **Total estimated net reduction** | **~455** | |
+
+The LOC savings from utility consolidation alone are modest (~455 lines). The real value is:
+- **Consistency** — One `escapeHtml` means one security review surface
+- **Type safety** — One `TierKey` means no drift between "evergreen" vs "grove"
+- **Discoverability** — Developers find utilities in the engine instead of writing new ones
+
+---
+
+## Where the Real LOC Lives
+
+At 515k LOC, utilities aren't the main bloat driver. A quick breakdown:
+
+| Area | Estimated LOC | Notes |
+| ------------------------------------------ | ------------- | ----------------------------------------- |
+| `libs/engine/` (core framework) | ~180k | Expected to be large |
+| `services/` (7 services) | ~60k | Heartwood alone is ~20k |
+| `workers/` (13 workers) | ~40k | Many standalone workers |
+| `apps/` (9 apps) | ~80k | Plant + Landing are largest |
+| `libs/` (non-engine: foliage, infra, etc.) | ~30k | Foliage themes library is growing |
+| `tools/`, `scripts/`, `docs/` | ~50k | Build tooling, generators |
+| `tests/` (embedded) | ~75k | Good test coverage = LOC |
+
+The biggest savings opportunities for reducing total LOC are likely in:
+1. **Dead code removal** — Unused routes, components, and features
+2. **Test consolidation** — Duplicate test setups across packages
+3. **Service extraction** — Some services may have code that belongs in engine
+
+---
+
+_Audit complete. Ready for remediation planning._

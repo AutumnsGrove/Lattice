@@ -4,6 +4,7 @@ import { sanitizeMarkdown } from "./sanitize.js";
 import { humPlugin } from "./markdown-hum.js";
 import { groveDirectivePlugin } from "./markdown-directives.js";
 import { mentionsPlugin } from "./markdown-mentions.js";
+import { escapeHtml as escapeHtmlForAttr } from "./escape-html.js";
 
 // ============================================================================
 // Type Definitions
@@ -206,18 +207,6 @@ export interface ContentLoaderConfig {
 // ============================================================================
 // Markdown-it Configuration
 // ============================================================================
-
-/**
- * Escape HTML special characters for safe embedding in attributes
- */
-function escapeHtmlForAttr(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
 
 // Per-instance markdown-it with GFM-like defaults
 // html: true is required because anchor comments (<!-- anchor:tagname -->)

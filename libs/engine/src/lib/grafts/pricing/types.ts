@@ -248,7 +248,7 @@ export interface PricingFineprintProps extends BaseGraftProps {
  */
 export type FineprintSection =
   | "reading"
-  | "free"
+  | "wanderer"
   | "themes"
   | "curios"
   | "comments"

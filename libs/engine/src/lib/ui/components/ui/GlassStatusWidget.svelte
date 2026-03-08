@@ -20,6 +20,7 @@
 	 * ```
 	 */
 	import { cn } from "$lib/ui/utils";
+	import { formatRelativeTime } from "$lib/utils/date";
 	import {
 		CheckCircle,
 		AlertTriangle,
@@ -158,17 +159,7 @@
 		}
 	}
 
-	function formatRelativeTime(dateStr: string): string {
-		const date = new Date(dateStr);
-		const now = new Date();
-		const diffMs = now.getTime() - date.getTime();
-		const diffSec = Math.floor(diffMs / 1000);
-		const diffMin = Math.floor(diffSec / 60);
-
-		if (diffSec < 60) return "just now";
-		if (diffMin < 60) return `${diffMin}m ago`;
-		return `${Math.floor(diffMin / 60)}h ago`;
-	}
+	// formatRelativeTime imported from $lib/utils/date
 
 	// Setup status fetching with auto-refresh
 	$effect(() => {

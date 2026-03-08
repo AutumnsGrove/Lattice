@@ -261,13 +261,11 @@ async function getAuthUser(
 
 // Storage helpers
 const TIER_STORAGE: Record<string, number> = {
-	free: 0,
+	wanderer: 0,
 	seedling: 1,
 	sapling: 5,
 	oak: 20,
-	canopy: 20,
 	evergreen: 100,
-	platform: 100,
 };
 
 const GB_IN_BYTES = 1024 * 1024 * 1024;

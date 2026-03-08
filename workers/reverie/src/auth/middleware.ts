@@ -78,11 +78,11 @@ export const reverieAuth = createMiddleware<{
 	}
 
 	const tier = c.req.header("X-Tier") as ReverieVariables["tier"] | undefined;
-	const validTiers = new Set(["free", "seedling", "sapling", "oak", "evergreen"]);
-	const resolvedTier = tier && validTiers.has(tier) ? tier : "free";
+	const validTiers = new Set(["wanderer", "seedling", "sapling", "oak", "evergreen"]);
+	const resolvedTier = tier && validTiers.has(tier) ? tier : "wanderer";
 
-	// Step 3: Free tier has no Reverie access
-	if (resolvedTier === "free") {
+	// Step 3: Wanderer tier has no Reverie access
+	if (resolvedTier === "wanderer") {
 		const { body, status } = buildReverieError(REVERIE_ERRORS.TIER_FORBIDDEN);
 		return c.json(body, status as 403);
 	}

@@ -5,6 +5,8 @@
  */
 
 import { redirect } from "@sveltejs/kit";
+import { throwGroveError } from "@autumnsgrove/lattice/errors";
+import { PLANT_ERRORS } from "$lib/errors";
 import type { PageServerLoad } from "./$types";
 import {
   createVerificationCode,
@@ -25,8 +27,16 @@ export const load: PageServerLoad = async ({ cookies, platform }) => {
   const kv = platform?.env?.KV;
   const env = platform?.env as Record<string, string> | undefined;
 
-  if (!db || !kv) {
-    throw new Error("Service unavailable");
+  if (!db) {
+    throwGroveError(503, PLANT_ERRORS.DB_UNAVAILABLE, "Plant", {
+      path: "/verify-email",
+    });
+  }
+
+  if (!kv) {
+    throwGroveError(503, PLANT_ERRORS.KV_BINDING_MISSING, "Plant", {
+      path: "/verify-email",
+    });
   }
 
   // Get user info

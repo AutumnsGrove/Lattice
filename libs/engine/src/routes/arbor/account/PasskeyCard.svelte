@@ -4,6 +4,7 @@
 	import Spinner from "$lib/ui/components/ui/Spinner.svelte";
 	import { KeyRound, Plus, Trash2, Fingerprint, AlertCircle } from "lucide-svelte";
 	import type { Passkey } from "$lib/heartwood";
+	import { formatDateShort } from "$lib/utils/date";
 
 	interface Props {
 		passkeys: Passkey[];
@@ -25,29 +26,18 @@
 		loading = false,
 	}: Props = $props();
 
-	/**
-	 * Format a date string for display
-	 */
-	function formatDate(dateString: string | null): string {
-		if (!dateString) return "Never";
-		const date = new Date(dateString);
-		return date.toLocaleDateString(undefined, {
-			year: "numeric",
-			month: "short",
-			day: "numeric",
-		});
-	}
+	/** Alias for template readability */
+	const formatDate = (d: string | null) => formatDateShort(d, "Never");
 
 	/**
-	 * Format relative time for last used
+	 * Format relative time for last used (passkey-specific context)
 	 */
 	function formatLastUsed(dateString: string | null): string {
 		if (!dateString) return "Never used";
 
 		const date = new Date(dateString);
 		const now = new Date();
-		const diffMs = now.getTime() - date.getTime();
-		const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+		const diffDays = Math.floor((now.getTime() - date.getTime()) / 86_400_000);
 
 		if (diffDays === 0) return "Used today";
 		if (diffDays === 1) return "Used yesterday";
