@@ -19,6 +19,7 @@ type skillEntry struct {
 	Name     string // slash command name (e.g., "panther-strike")
 	Purpose  string
 	Category string
+	Yolo     bool // launch with --dangerously-skip-permissions
 }
 
 // skillCategories controls help display ordering.
@@ -37,45 +38,45 @@ var skillCategories = []string{
 // Keys j/k are reserved for navigation; conflicts resolved with shift or alternate keys.
 var skillRegistry = []skillEntry{
 	// Surgical Fixers (Issue Resolution)
-	{"p", "panther-strike", "Lock onto ONE issue, fix it fast", "Surgical Fixers"},
-	{"m", "mole-debug", "Systematic hypothesis-driven debugging", "Surgical Fixers"},
-	{"e", "elephant-build", "Multi-file feature implementation", "Surgical Fixers"},
-	{"r", "lynx-repair", "Address PR review feedback", "Surgical Fixers"},
+	{"p", "panther-strike", "Lock onto ONE issue, fix it fast", "Surgical Fixers", false},
+	{"m", "mole-debug", "Systematic hypothesis-driven debugging", "Surgical Fixers", false},
+	{"e", "elephant-build", "Multi-file feature implementation", "Surgical Fixers", false},
+	{"r", "lynx-repair", "Address PR review feedback", "Surgical Fixers", false},
 
 	// Exploration & Planning
-	{"a", "eagle-architect", "System architecture from 10,000 feet", "Exploration"},
-	{"b", "bloodhound-scout", "Track code through the codebase", "Exploration"},
-	{"g", "groundhog-surface", "Surface and validate assumptions", "Exploration"},
+	{"a", "eagle-architect", "System architecture from 10,000 feet", "Exploration", false},
+	{"b", "bloodhound-scout", "Track code through the codebase", "Exploration", false},
+	{"g", "groundhog-surface", "Surface and validate assumptions", "Exploration", false},
 
 	// Enhancement & Optimization
-	{"f", "fox-optimize", "Hunt performance bottlenecks", "Enhancement"},
-	{"d", "deer-sense", "Audit accessibility barriers", "Enhancement"},
-	{"c", "chameleon-adapt", "Theme/design with glassmorphism", "Enhancement"},
-	{"t", "beaver-build", "Write robust tests", "Enhancement"},
+	{"f", "fox-optimize", "Hunt performance bottlenecks", "Enhancement", false},
+	{"d", "deer-sense", "Audit accessibility barriers", "Enhancement", false},
+	{"c", "chameleon-adapt", "Theme/design with glassmorphism", "Enhancement", false},
+	{"t", "beaver-build", "Write robust tests", "Enhancement", false},
 
 	// Compliance & Quality
-	{"i", "crane-audit", "PR compliance audit for Grove SDK standards", "Compliance"},
+	{"i", "crane-audit", "PR compliance audit for Grove SDK standards", "Compliance", true},
 
 	// Security & Hardening
-	{"s", "spider-weave", "Auth integration and route security", "Security"},
-	{"u", "turtle-harden", "Defense-in-depth protection layers", "Security"},
-	{"x", "raccoon-audit", "Security sweep and secret cleanup", "Security"},
-	{"h", "hawk-survey", "Full application security assessment", "Security"},
+	{"s", "spider-weave", "Auth integration and route security", "Security", false},
+	{"u", "turtle-harden", "Defense-in-depth protection layers", "Security", false},
+	{"x", "raccoon-audit", "Security sweep and secret cleanup", "Security", false},
+	{"h", "hawk-survey", "Full application security assessment", "Security", false},
 
 	// Reasoning & Documentation
-	{"w", "crow-reason", "Critical reasoning, devil's advocate", "Reasoning"},
-	{"o", "owl-archive", "Documentation and user-facing text", "Reasoning"},
-	{"n", "swan-design", "Technical specs with diagrams", "Reasoning"},
+	{"w", "crow-reason", "Critical reasoning, devil's advocate", "Reasoning", false},
+	{"o", "owl-archive", "Documentation and user-facing text", "Reasoning", false},
+	{"n", "swan-design", "Technical specs with diagrams", "Reasoning", false},
 
 	// Multi-Animal Chains (Gatherings — shift keys)
-	{"G", "gathering-feature", "Full lifecycle: explore → build → test → doc", "Gatherings"},
-	{"S", "gathering-security", "Spider → Raccoon → Turtle pipeline", "Gatherings"},
-	{"U", "gathering-ui", "Chameleon → Deer pipeline", "Gatherings"},
-	{"A", "gathering-architecture", "Eagle → Crow → Swan → Elephant", "Gatherings"},
+	{"G", "gathering-feature", "Full lifecycle: explore → build → test → doc", "Gatherings", false},
+	{"S", "gathering-security", "Spider → Raccoon → Turtle pipeline", "Gatherings", false},
+	{"U", "gathering-ui", "Chameleon → Deer pipeline", "Gatherings", false},
+	{"A", "gathering-architecture", "Eagle → Crow → Swan → Elephant", "Gatherings", false},
 
 	// Board Management
-	{"J", "vulture-sweep", "Clean up stale/closed issues", "Board Mgmt"},
-	{"l", "safari-explore", "Systematically review a collection", "Board Mgmt"},
+	{"J", "vulture-sweep", "Clean up stale/closed issues", "Board Mgmt", false},
+	{"l", "safari-explore", "Systematically review a collection", "Board Mgmt", false},
 }
 
 // skillByKey provides O(1) lookup from hotkey to skill entry.
@@ -96,6 +97,15 @@ var labelSuggestions = map[string][]string{
 	"performance":   {"fox-optimize"},
 	"documentation": {"owl-archive"},
 	"accessibility": {"deer-sense"},
+}
+
+// claudeArgs builds the argument list for launching claude with a skill.
+// If the skill has Yolo set, --dangerously-skip-permissions is prepended.
+func claudeArgs(skillName, prompt string) []string {
+	if entry, ok := skillByName[skillName]; ok && entry.Yolo {
+		return []string{"--dangerously-skip-permissions", prompt}
+	}
+	return []string{prompt}
 }
 
 // effectiveRoot returns the best directory to launch Claude from.
@@ -163,7 +173,8 @@ func launchSkillForIssue(skillName, issueNum string) error {
 		prompt = fmt.Sprintf("/%s #%s", skillName, issueNum)
 		ui.Info(fmt.Sprintf("Launching Claude from %s", root))
 	}
-	exitCode, err = gwexec.RunStreamingInDir(root, "claude", prompt)
+	args := claudeArgs(skillName, prompt)
+	exitCode, err = gwexec.RunStreamingInDir(root, "claude", args...)
 	if err != nil {
 		return fmt.Errorf("failed to launch claude: %w", err)
 	}
@@ -211,7 +222,8 @@ func launchSkillForPR(skillName string, prNumber int, headBranch string) error {
 		prompt = fmt.Sprintf("/%s #%d", skillName, prNumber)
 		ui.Info(fmt.Sprintf("Launching Claude from %s", root))
 	}
-	exitCode, err = gwexec.RunStreamingInDir(root, "claude", prompt)
+	args := claudeArgs(skillName, prompt)
+	exitCode, err = gwexec.RunStreamingInDir(root, "claude", args...)
 	if err != nil {
 		return fmt.Errorf("failed to launch claude: %w", err)
 	}
