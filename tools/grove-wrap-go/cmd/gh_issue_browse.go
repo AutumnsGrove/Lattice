@@ -350,11 +350,33 @@ func runIssueBrowse(issues []browseIssue, pageSize int) error {
 	// Handle post-quit actions
 	switch final.action {
 	case "panther":
-		// Launch Claude Code with panther-strike on the selected issue
+		// Create (or reuse) worktree, then launch claude inside it
 		num := fmt.Sprintf("%d", final.actionNum)
+		wtPath, err := worktreePathForIssue(num)
+		if err != nil {
+			return fmt.Errorf("failed to resolve worktree path: %w", err)
+		}
+
+		if _, err := os.Stat(wtPath); os.IsNotExist(err) {
+			ui.Info(fmt.Sprintf("Creating worktree for issue #%s...", num))
+			wtCmd := gitWorktreeCreateCmd
+			wtCmd.SetArgs([]string{num})
+			if err := wtCmd.RunE(wtCmd, []string{num}); err != nil {
+				ui.Warning(fmt.Sprintf("Worktree creation failed, launching in current directory: %v", err))
+				wtPath = "" // fall back to current directory
+			}
+		} else {
+			ui.Info(fmt.Sprintf("Reusing existing worktree at %s", wtPath))
+		}
+
 		prompt := fmt.Sprintf("/panther-strike #%s", num)
-		ui.Info(fmt.Sprintf("Launching panther-strike on issue #%s...", num))
-		exitCode, err := gwexec.RunStreaming("claude", prompt)
+		var exitCode int
+		if wtPath != "" {
+			ui.Info(fmt.Sprintf("Working in %s", wtPath))
+			exitCode, err = gwexec.RunStreamingInDir(wtPath, "claude", prompt)
+		} else {
+			exitCode, err = gwexec.RunStreaming("claude", prompt)
+		}
 		if err != nil {
 			return fmt.Errorf("failed to launch claude: %w", err)
 		}
