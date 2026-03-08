@@ -14,8 +14,10 @@ import (
 	"github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/ui"
 )
 
-// Version is set via ldflags at build time.
+// Version, CommitHash, and BuildTime are set via ldflags at build time.
 var Version = "dev"
+var CommitHash = ""
+var BuildTime = ""
 
 // cmdStartTime records when the command began executing.
 var cmdStartTime time.Time
@@ -91,13 +93,21 @@ var versionCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg := config.Get()
 		if cfg.JSONMode {
-			fmt.Printf(`{"version":"%s","runtime":"go"}`+"\n", Version)
+			fmt.Printf(`{"version":"%s","commit":"%s","built":"%s","runtime":"go"}`+"\n",
+				Version, CommitHash, BuildTime)
 			return
 		}
-		fmt.Print(ui.RenderInfoPanel("gw", [][2]string{
+		pairs := [][2]string{
 			{"version", Version},
 			{"runtime", "go"},
-		}))
+		}
+		if CommitHash != "" {
+			pairs = append(pairs, [2]string{"commit", CommitHash})
+		}
+		if BuildTime != "" {
+			pairs = append(pairs, [2]string{"built", BuildTime})
+		}
+		fmt.Print(ui.RenderInfoPanel("gw", pairs))
 	},
 }
 

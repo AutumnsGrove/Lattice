@@ -24,6 +24,9 @@ import (
 var allowedBinaries = map[string]bool{
 	"git":      true,
 	"gh":       true,
+	"gf":       true,
+	"go":       true,
+	"gw":       true,
 	"wrangler": true,
 	"npx":      true,
 	"node":     true,
