@@ -53,6 +53,7 @@ var skillRegistry = []skillEntry{
 	{"d", "deer-sense", "Audit accessibility barriers", "Enhancement", false},
 	{"c", "chameleon-adapt", "Theme/design with glassmorphism", "Enhancement", false},
 	{"t", "beaver-build", "Write robust tests", "Enhancement", false},
+	{"y", "bear-migrate", "Data migration with patient strength", "Enhancement", false},
 
 	// Compliance & Quality
 	{"i", "crane-audit", "PR compliance audit for Grove SDK standards", "Compliance", true},
@@ -73,6 +74,7 @@ var skillRegistry = []skillEntry{
 	{"S", "gathering-security", "Spider → Raccoon → Turtle pipeline", "Gatherings", false},
 	{"U", "gathering-ui", "Chameleon → Deer pipeline", "Gatherings", false},
 	{"A", "gathering-architecture", "Eagle → Crow → Swan → Elephant", "Gatherings", false},
+	{"M", "gathering-migration", "Bear → Bloodhound pipeline", "Gatherings", false},
 
 	// Board Management
 	{"J", "vulture-sweep", "Clean up stale/closed issues", "Board Mgmt", false},
@@ -97,6 +99,8 @@ var labelSuggestions = map[string][]string{
 	"performance":   {"fox-optimize"},
 	"documentation": {"owl-archive"},
 	"accessibility": {"deer-sense"},
+	"database":      {"bear-migrate", "elephant-build"},
+	"migration":     {"bear-migrate"},
 }
 
 // claudeArgs builds the argument list for launching claude with a skill.
