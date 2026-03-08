@@ -127,7 +127,7 @@
 				tabindex="0"
 			>
 				{@const blazeDef = resolveBlaze(post.blaze, post.blazeDefinition)}
-				<h2 class="text-xl font-semibold mb-4 text-green-800 dark:text-green-500 transition-colors">
+				<h2 class="text-xl font-semibold mb-4 text-success transition-colors">
 					{post.title}
 				</h2>
 				<div class="flex items-center gap-4 mb-3 flex-wrap">

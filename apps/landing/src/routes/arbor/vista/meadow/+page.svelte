@@ -45,7 +45,7 @@
 			<p class="text-xs font-sans text-foreground-muted uppercase tracking-wide">Report Queue</p>
 			<p
 				class="text-xl font-serif {data.meadow.reportQueueDepth > 0
-					? 'text-amber-600 dark:text-amber-400'
+					? 'text-warning-foreground'
 					: 'text-foreground'} mt-1"
 			>
 				{data.meadow.reportQueueDepth}

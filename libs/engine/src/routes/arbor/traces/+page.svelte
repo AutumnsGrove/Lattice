@@ -130,7 +130,7 @@
 				<button
 					type="submit"
 					disabled={markingAllRead}
-					class="px-4 py-2 rounded-lg bg-grove-600 hover:bg-grove-700 text-white transition-colors flex items-center gap-2"
+					class="px-4 py-2 rounded-lg bg-grove-600 hover:bg-primary/90 text-white transition-colors flex items-center gap-2"
 				>
 					{#if markingAllRead}
 						<Loader2 class="w-4 h-4 animate-spin" />
@@ -146,7 +146,7 @@
 	<!-- Feedback Messages -->
 	{#if form?.success && form?.message}
 		<div
-			class="p-4 rounded-lg bg-grove-100 dark:bg-grove-900/30 border border-grove-300 dark:border-grove-700 text-grove-700 dark:text-grove-300 flex items-center gap-2"
+			class="p-4 rounded-lg success-bg border border-success/30 text-success flex items-center gap-2"
 		>
 			<Check size={18} />
 			{form.message}
@@ -154,9 +154,7 @@
 	{/if}
 
 	{#if form?.error}
-		<div
-			class="p-4 rounded-lg bg-rose-100 dark:bg-rose-900/30 border border-rose-300 dark:border-rose-700 text-rose-700 dark:text-rose-300 flex items-center gap-2"
-		>
+		<div class="p-4 rounded-lg error-bg border border-error/30 text-error flex items-center gap-2">
 			<AlertTriangle size={18} />
 			{form.error}
 		</div>
@@ -170,9 +168,7 @@
 		</GlassCard>
 
 		<GlassCard variant="muted" class="p-4 text-center">
-			<div
-				class="text-3xl font-bold text-grove-600 dark:text-grove-400 flex items-center justify-center gap-1"
-			>
+			<div class="text-3xl font-bold text-success flex items-center justify-center gap-1">
 				<ThumbsUp class="w-6 h-6" />
 				{data.stats.upvotes}
 			</div>
@@ -180,9 +176,7 @@
 		</GlassCard>
 
 		<GlassCard variant="muted" class="p-4 text-center">
-			<div
-				class="text-3xl font-bold text-rose-600 dark:text-rose-400 flex items-center justify-center gap-1"
-			>
+			<div class="text-3xl font-bold text-error flex items-center justify-center gap-1">
 				<ThumbsDown class="w-6 h-6" />
 				{data.stats.downvotes}
 			</div>
@@ -207,7 +201,7 @@
 					<select
 						bind:value={voteFilter}
 						onchange={applyFilters}
-						class="px-4 py-2 rounded-lg bg-white/70 dark:bg-bark-800/50 border border-white/30 dark:border-bark-700/30 text-foreground focus:outline-none focus:border-grove-500"
+						class="px-4 py-2 rounded-lg bg-surface-elevated dark:bg-surface-elevated border border-border/30 text-foreground focus:outline-none focus:border-primary"
 					>
 						<option value="">All votes</option>
 						<option value="up">👍 Helpful only</option>
@@ -220,7 +214,7 @@
 						bind:value={sourceFilter}
 						onkeydown={(e) => e.key === "Enter" && applyFilters()}
 						placeholder="Filter by source path..."
-						class="flex-1 px-4 py-2 rounded-lg bg-white/70 dark:bg-bark-800/50 border border-white/30 dark:border-bark-700/30 text-foreground placeholder:text-foreground-faint focus:outline-none focus:border-grove-500"
+						class="flex-1 px-4 py-2 rounded-lg bg-surface-elevated dark:bg-surface-elevated border border-border/30 text-foreground placeholder:text-foreground-faint focus:outline-none focus:border-primary"
 					/>
 
 					<!-- Unread toggle -->
@@ -231,8 +225,8 @@
 							applyFilters();
 						}}
 						class="px-4 py-2 rounded-lg transition-colors flex items-center gap-2 {unreadOnly
-							? 'bg-grove-600 text-white'
-							: 'bg-white/50 dark:bg-bark-800/30 text-foreground-muted hover:text-foreground'}"
+							? 'bg-primary text-white'
+							: 'bg-surface-subtle dark:bg-surface-subtle text-foreground-muted hover:text-foreground'}"
 					>
 						{#if unreadOnly}
 							<EyeOff class="w-4 h-4" />
@@ -245,7 +239,7 @@
 					<button
 						type="button"
 						onclick={applyFilters}
-						class="px-4 py-2 rounded-lg bg-grove-600 text-white hover:bg-grove-700 transition-colors"
+						class="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors"
 					>
 						<Filter class="w-4 h-4" />
 					</button>
@@ -254,7 +248,7 @@
 						<button
 							type="button"
 							onclick={clearFilters}
-							class="px-4 py-2 rounded-lg bg-white/50 dark:bg-bark-800/30 text-foreground-muted hover:text-foreground transition-colors"
+							class="px-4 py-2 rounded-lg bg-surface-subtle dark:bg-surface-subtle text-foreground-muted hover:text-foreground transition-colors"
 						>
 							<X class="w-4 h-4" />
 						</button>
@@ -264,7 +258,7 @@
 
 			<!-- Traces List -->
 			<GlassCard variant="frosted">
-				<div class="divide-y divide-white/10 dark:divide-bark-700/30">
+				<div class="divide-y divide-divider">
 					{#each data.traces as trace}
 						<div class="p-4 group {trace.read_at ? 'opacity-70' : ''}">
 							<div class="flex items-start gap-4">
@@ -272,8 +266,8 @@
 								<div
 									class="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-2xl {trace.vote ===
 									'up'
-										? 'bg-grove-100 dark:bg-grove-900/30'
-										: 'bg-rose-100 dark:bg-rose-900/30'}"
+										? 'success-bg'
+										: 'error-bg'}"
 								>
 									{trace.vote === "up" ? "👍" : "👎"}
 								</div>
@@ -282,14 +276,14 @@
 								<div class="flex-1 min-w-0">
 									<div class="flex items-center gap-2 flex-wrap">
 										<code
-											class="px-2 py-0.5 rounded bg-white/40 dark:bg-bark-800/40 text-sm font-mono text-foreground"
+											class="px-2 py-0.5 rounded bg-surface-subtle text-sm font-mono text-foreground"
 										>
 											{trace.source_path}
 										</code>
 
 										{#if !trace.read_at}
 											<span
-												class="px-2 py-0.5 text-xs rounded-full bg-grove-100 dark:bg-grove-900/50 text-grove-700 dark:text-grove-300"
+												class="px-2 py-0.5 text-xs rounded-full bg-grove-100 dark:bg-grove-900/50 text-success"
 											>
 												New
 											</span>
@@ -329,7 +323,7 @@
 											<button
 												type="submit"
 												disabled={markingRead === trace.id}
-												class="p-2 rounded text-foreground-muted hover:text-grove-600 hover:bg-grove-100 dark:hover:bg-grove-900/30 transition-colors"
+												class="p-2 rounded text-foreground-muted hover:text-grove-600 hover:success-bg transition-colors"
 												title="Mark as read"
 											>
 												{#if markingRead === trace.id}
@@ -356,7 +350,7 @@
 										<button
 											type="submit"
 											disabled={archiving === trace.id}
-											class="p-2 rounded text-foreground-muted hover:text-rose-600 hover:bg-rose-100 dark:hover:bg-rose-900/30 transition-colors"
+											class="p-2 rounded text-foreground-muted hover:text-error hover:bg-error-bg transition-colors"
 											title="Archive"
 										>
 											{#if archiving === trace.id}
@@ -384,9 +378,7 @@
 
 				<!-- Pagination -->
 				{#if data.pagination.totalPages > 1}
-					<div
-						class="p-4 border-t border-white/10 dark:border-bark-700/30 flex items-center justify-between"
-					>
+					<div class="p-4 border-t border-border flex items-center justify-between">
 						<span class="text-sm text-foreground-muted">
 							Showing {(data.pagination.page - 1) * data.pagination.pageSize + 1} -
 							{Math.min(data.pagination.page * data.pagination.pageSize, data.pagination.total)} of {data
@@ -398,7 +390,7 @@
 								type="button"
 								onclick={() => goToPage(data.pagination.page - 1)}
 								disabled={data.pagination.page === 1}
-								class="p-2 rounded hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed"
+								class="p-2 rounded hover:bg-surface-hover disabled:opacity-50 disabled:cursor-not-allowed"
 							>
 								<ChevronLeft class="w-4 h-4" />
 							</button>
@@ -411,7 +403,7 @@
 								type="button"
 								onclick={() => goToPage(data.pagination.page + 1)}
 								disabled={data.pagination.page === data.pagination.totalPages}
-								class="p-2 rounded hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed"
+								class="p-2 rounded hover:bg-surface-hover disabled:opacity-50 disabled:cursor-not-allowed"
 							>
 								<ChevronRight class="w-4 h-4" />
 							</button>
@@ -429,7 +421,7 @@
 					By Location
 				</h2>
 
-				<div class="divide-y divide-white/10 dark:divide-bark-700/30">
+				<div class="divide-y divide-divider">
 					{#each data.sourceStats as source}
 						{@const rate = source.total > 0 ? Math.round((source.upvotes / source.total) * 100) : 0}
 						<button
@@ -438,7 +430,7 @@
 								sourceFilter = source.source_path;
 								applyFilters();
 							}}
-							class="w-full p-3 text-left hover:bg-white/30 dark:hover:bg-bark-800/20 transition-colors"
+							class="w-full p-3 text-left hover:bg-surface-hover transition-colors"
 						>
 							<div class="flex items-center justify-between">
 								<code class="text-sm font-mono text-foreground truncate">
@@ -452,7 +444,7 @@
 								<span class="text-grove-600 dark:text-grove-400">
 									👍 {source.upvotes}
 								</span>
-								<span class="text-rose-600 dark:text-rose-400">
+								<span class="text-error">
 									👎 {source.downvotes}
 								</span>
 								<span class="text-foreground-subtle">

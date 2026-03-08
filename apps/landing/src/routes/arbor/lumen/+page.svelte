@@ -125,7 +125,7 @@
 	<div class="flex items-center justify-between">
 		<div>
 			<h1 class="text-2xl font-serif text-foreground flex items-center gap-2">
-				<Sparkles class="w-6 h-6 text-violet-500" />
+				<Sparkles class="w-6 h-6 text-accent" />
 				Lumen
 			</h1>
 			<p class="text-foreground-muted mt-1">
@@ -135,7 +135,7 @@
 		<button
 			onclick={fetchData}
 			disabled={loading}
-			class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-white/50 dark:bg-slate-800/50 border border-grove-200 dark:border-grove-700 rounded-lg hover:bg-white/70 dark:hover:bg-slate-700/50 transition-colors disabled:opacity-50"
+			class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-surface hover:bg-surface-hover border border-border rounded-lg transition-colors disabled:opacity-50"
 		>
 			<RefreshCw class="w-4 h-4 {loading ? 'animate-spin' : ''}" />
 			Refresh
@@ -144,7 +144,7 @@
 
 	<!-- Tab Bar -->
 	{#if data?.safety}
-		<div class="flex gap-1 p-1 bg-white/30 dark:bg-slate-800/30 rounded-lg border border-grove-200 dark:border-grove-700 w-fit">
+		<div class="flex gap-1 p-1 bg-surface/50 rounded-lg border border-border w-fit">
 			<button
 				class="tab-button {activeTab === 'ai' ? 'tab-active' : ''}"
 				onclick={() => activeTab = 'ai'}
@@ -178,7 +178,7 @@
 	<!-- Error State -->
 	{#if error && !data}
 		<GlassCard variant="default" class="p-8">
-			<div class="flex flex-col items-center justify-center text-red-600 dark:text-red-400">
+			<div class="flex flex-col items-center justify-center text-error-foreground">
 				<AlertTriangle class="w-8 h-8 mb-4" />
 				<p class="font-medium">{error}</p>
 				<button

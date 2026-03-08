@@ -159,7 +159,7 @@
 					<!-- Grove Term Banner (for "What is X?" articles when Grove Mode is OFF) -->
 					{#if showGroveBanner && groveTermEntry}
 						<div
-							class="mb-6 px-4 py-3 rounded-lg bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200/50 dark:border-emerald-800/30 text-sm text-foreground-subtle"
+							class="mb-6 px-4 py-3 rounded-lg bg-accent-subtle/20 dark:bg-accent-subtle/10 border border-accent/20 dark:border-accent/15 text-sm text-foreground-subtle"
 						>
 							<strong class="text-foreground">{groveTermEntry.term}</strong> is Grove's name for
 							<strong>{groveTermEntry.standardTerm}</strong>

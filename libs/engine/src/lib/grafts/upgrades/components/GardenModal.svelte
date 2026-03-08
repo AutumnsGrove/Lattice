@@ -74,14 +74,14 @@
 		<div
 			class="
         relative w-full max-w-4xl max-h-[90vh] overflow-y-auto
-        bg-white/90 dark:bg-grove-950/90 backdrop-blur-xl
-        rounded-2xl shadow-2xl border border-white/40 dark:border-grove-800/30
+        bg-white/90 dark:bg-surface-subtle backdrop-blur-xl
+        rounded-2xl shadow-2xl border border-white/40 dark:border-border
       "
 		>
 			<!-- Close button -->
 			<button
 				type="button"
-				class="absolute top-4 right-4 p-2 rounded-full hover:bg-grove-100 dark:hover:bg-grove-800 transition-colors"
+				class="absolute top-4 right-4 p-2 rounded-full hover:bg-surface-hover transition-colors"
 				onclick={() => onClose?.()}
 				aria-label="Close garden modal"
 			>
@@ -89,7 +89,7 @@
 			</button>
 
 			<!-- Header -->
-			<div class="p-6 border-b border-grove-200 dark:border-grove-800">
+			<div class="p-6 border-b border-border">
 				<div class="flex items-center gap-3 mb-2">
 					<div class="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center">
 						<Sprout class="w-5 h-5 text-accent" />
@@ -113,8 +113,8 @@
 					{#if flourishState !== "active"}
 						<span
 							class="px-3 py-1 rounded-full text-sm font-medium {flourishState === 'past_due'
-								? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
-								: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'}"
+								? 'bg-error-bg text-error dark:text-error'
+								: 'bg-surface-subtle text-foreground-muted'}"
 						>
 							{flourishState.charAt(0).toUpperCase() + flourishState.slice(1).replace("_", " ")}
 						</span>
@@ -123,9 +123,7 @@
 			</div>
 
 			<!-- Billing period toggle -->
-			<div
-				class="p-4 border-b border-grove-200 dark:border-grove-800 bg-grove-50/50 dark:bg-grove-900/20"
-			>
+			<div class="p-4 border-b border-border bg-surface-subtle">
 				<PricingToggle
 					{billingPeriod}
 					savingsPercent={17}
@@ -158,9 +156,7 @@
 			</div>
 
 			<!-- Footer actions -->
-			<div
-				class="p-4 border-t border-grove-200 dark:border-grove-800 bg-grove-50/50 dark:bg-grove-900/20 flex items-center justify-between"
-			>
+			<div class="p-4 border-t border-border bg-surface-subtle flex items-center justify-between">
 				<button
 					type="button"
 					class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground-muted hover:text-foreground transition-colors"

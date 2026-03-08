@@ -83,11 +83,11 @@
 		<div
 			class={cn(
 				"p-2 rounded-lg flex-shrink-0",
-				status === "resolved" ? "bg-green-500/10" : "bg-orange-500/10",
+				status === "resolved" ? "bg-success-bg" : "bg-warning-bg",
 			)}
 		>
 			<TypeIcon
-				class={cn("w-5 h-5", status === "resolved" ? "text-green-500" : "text-orange-500")}
+				class={cn("w-5 h-5", status === "resolved" ? "text-success" : "text-warning")}
 			/>
 		</div>
 
@@ -98,10 +98,10 @@
 					class={cn(
 						"px-2 py-0.5 text-xs font-medium rounded-full whitespace-nowrap",
 						status === "resolved"
-							? "bg-green-500/10 text-green-600 dark:text-green-400"
+							? "bg-success-bg text-success"
 							: status === "monitoring"
-								? "bg-blue-500/10 text-blue-600 dark:text-blue-400"
-								: "bg-orange-500/10 text-orange-600 dark:text-orange-400",
+								? "bg-info-bg text-info"
+								: "bg-warning-bg text-warning",
 					)}
 				>
 					{getIncidentStatusLabel(status)}
@@ -113,7 +113,7 @@
 				{#if resolvedAt}
 					<span class="text-foreground-subtle">Resolved in {duration}</span>
 				{:else}
-					<span class="text-orange-500">Ongoing ({duration})</span>
+					<span class="text-warning">Ongoing ({duration})</span>
 				{/if}
 			</div>
 
@@ -159,14 +159,14 @@
 								class={cn(
 									"p-1.5 rounded-full",
 									update.status === "resolved"
-										? "bg-green-500/10"
+										? "bg-success-bg"
 										: "bg-cream-100 dark:bg-bark-800",
 								)}
 							>
 								<UpdateIcon
 									class={cn(
 										"w-4 h-4",
-										update.status === "resolved" ? "text-green-500" : "text-foreground-muted",
+										update.status === "resolved" ? "text-success" : "text-foreground-muted",
 									)}
 								/>
 							</div>

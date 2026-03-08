@@ -77,7 +77,7 @@
 	<!-- Header -->
 	<div>
 		<h2 class="flex items-center gap-2 text-2xl font-serif text-foreground mb-1">
-			<Sprout class="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+			<Sprout class="w-6 h-6 text-success" />
 			Greenhouse
 		</h2>
 		<p class="text-sm font-sans text-foreground-muted">
@@ -89,15 +89,15 @@
 	{#if form?.success}
 		<GlassCard class="p-4">
 			<div class="flex items-center gap-2 text-sm font-sans">
-				<CheckCircle class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+				<CheckCircle class="w-4 h-4 text-success shrink-0" />
 				<span class="text-foreground">{form.message || 'Action completed'}</span>
 			</div>
 		</GlassCard>
 	{:else if form?.error}
 		<GlassCard class="p-4">
 			<div class="flex items-center gap-2 text-sm font-sans">
-				<XCircle class="w-4 h-4 text-red-600 dark:text-red-400 shrink-0" />
-				<span class="text-red-700 dark:text-red-400">{form.error}</span>
+				<XCircle class="w-4 h-4 text-error shrink-0" />
+				<span class="text-error">{form.error}</span>
 			</div>
 		</GlassCard>
 	{/if}
@@ -105,7 +105,7 @@
 	<!-- Enrollment Stats -->
 	<div class="grid grid-cols-2 gap-4">
 		<GlassCard class="p-4 text-center">
-			<div class="text-2xl font-serif text-emerald-600 dark:text-emerald-400">
+			<div class="text-2xl font-serif text-success">
 				{data.enrolledCount}
 			</div>
 			<div class="flex items-center justify-center gap-1.5 text-sm font-sans text-foreground-muted">
@@ -114,7 +114,7 @@
 			</div>
 		</GlassCard>
 		<GlassCard class="p-4 text-center">
-			<div class="text-2xl font-serif text-green-600 dark:text-green-400">
+			<div class="text-2xl font-serif text-success">
 				{data.activeCount}
 			</div>
 			<div class="flex items-center justify-center gap-1.5 text-sm font-sans text-foreground-muted">
@@ -128,9 +128,9 @@
 	<GlassCard class="p-4">
 		<div class="flex items-start gap-3">
 			<div
-				class="shrink-0 w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center"
+				class="shrink-0 w-10 h-10 rounded-lg bg-success-bg flex items-center justify-center"
 			>
-				<Sprout class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+				<Sprout class="w-5 h-5 text-success" />
 			</div>
 			<div>
 				<h3 class="text-sm font-sans font-medium text-foreground mb-1">
@@ -142,7 +142,7 @@
 				</p>
 				<a
 					href="/arbor/tenants"
-					class="inline-flex items-center gap-1 text-sm font-sans text-grove-600 dark:text-grove-400 hover:text-grove-700 dark:hover:text-grove-300"
+					class="inline-flex items-center gap-1 text-sm font-sans text-primary hover:text-primary/80"
 				>
 					Go to Tenants
 					<ArrowRight class="w-3.5 h-3.5" />
@@ -155,7 +155,7 @@
 	<div class="pt-4 border-t border-border/30">
 		<div class="mb-4">
 			<div class="flex items-center gap-2 mb-1">
-				<Leaf class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+				<Leaf class="w-5 h-5 text-success" />
 				<h3 class="text-lg font-serif text-foreground">Cultivate Mode</h3>
 			</div>
 			<p class="text-sm font-sans text-foreground-muted">

@@ -54,10 +54,10 @@
   <Header user={data.user} />
 
   <!-- Hero -->
-  <section class="relative py-12 px-6 text-center bg-gradient-to-b from-emerald-50/80 via-transparent to-transparent dark:from-emerald-950/20 dark:via-transparent dark:to-transparent">
+  <section class="relative py-12 px-6 text-center bg-gradient-to-b from-success-bg/80 via-transparent to-transparent dark:from-success-bg/20 dark:via-transparent dark:to-transparent">
     <div class="max-w-3xl mx-auto">
       <nav aria-label="Breadcrumb" class="flex items-center justify-center space-x-2 text-sm text-foreground-muted mb-6">
-        <a href="/knowledge" class="hover:text-emerald-600 dark:hover:text-emerald-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 rounded transition-colors">Knowledge Base</a>
+        <a href="/knowledge" class="hover:text-success dark:hover:text-success focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-success focus-visible:ring-offset-2 rounded transition-colors">Knowledge Base</a>
         <span aria-hidden="true">/</span>
         <span class="text-foreground" aria-current="page">Help Center</span>
       </nav>
@@ -89,7 +89,7 @@
           <div id={getSectionId(section.name)}>
             <!-- Section Header -->
             <div class="flex items-center gap-4 mb-8">
-              <div class="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+              <div class="w-12 h-12 rounded-xl bg-success-bg dark:bg-success-bg/30 flex items-center justify-center text-success dark:text-success">
                 <SectionIcon class="w-6 h-6" />
               </div>
               <div>
@@ -101,15 +101,15 @@
             <!-- Articles Grid -->
             <div class="grid gap-4">
               {#each sectionArticles as article}
-                <article class="p-5 rounded-xl bg-white/80 dark:bg-cream-100/80 backdrop-blur-sm shadow-sm border border-emerald-200/50 dark:border-cream-300 hover:shadow-md hover:border-emerald-300 dark:hover:border-emerald-700/50 focus-within:shadow-md focus-within:border-emerald-300 dark:focus-within:border-emerald-700/50 transition-all motion-reduce:transition-none">
+                <article class="p-5 rounded-xl bg-white/80 dark:bg-cream-100/80 backdrop-blur-sm shadow-sm border border-success/50 dark:border-cream-300 hover:shadow-md hover:border-success dark:hover:border-success/50 focus-within:shadow-md focus-within:border-success dark:focus-within:border-success/50 transition-all motion-reduce:transition-none">
                   <h3 class="text-lg font-semibold text-foreground mb-2">
-                    <a href="/knowledge/help/{article.slug}" class="hover:text-emerald-600 dark:hover:text-emerald-400 focus-visible:outline-none focus-visible:text-emerald-600 dark:focus-visible:text-emerald-400 transition-colors motion-reduce:transition-none">
+                    <a href="/knowledge/help/{article.slug}" class="hover:text-success dark:hover:text-success focus-visible:outline-none focus-visible:text-success dark:focus-visible:text-success transition-colors motion-reduce:transition-none">
                       {article.title}
                     </a>
                   </h3>
                   <p class="text-foreground-muted mb-3 line-clamp-2">{article.excerpt}</p>
                   <div class="flex items-center justify-between text-sm">
-                    <a href="/knowledge/help/{article.slug}" class="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium transition-colors">
+                    <a href="/knowledge/help/{article.slug}" class="text-success dark:text-success hover:text-success dark:hover:text-success font-medium transition-colors">
                       Read more
                       <svg class="w-4 h-4 ml-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -125,12 +125,12 @@
       {/each}
 
       <!-- Contact Support CTA -->
-      <div class="text-center p-8 rounded-xl bg-emerald-100/50 dark:bg-emerald-950/25 backdrop-blur-md border border-dashed border-emerald-300 dark:border-emerald-800/30">
+      <div class="text-center p-8 rounded-xl bg-success-bg/50 dark:bg-success-bg/25 backdrop-blur-md border border-dashed border-success dark:border-success/30">
         <h3 class="text-xl font-semibold text-foreground mb-2">Need more help?</h3>
         <p class="text-foreground-muted mb-4">
           Can't find what you're looking for? Contact our support team and we'll get back to you within 48 hours.
         </p>
-        <a href="mailto:hello@grove.place" class="inline-flex items-center px-4 py-2 bg-emerald-600 dark:bg-emerald-500 text-white rounded-lg hover:bg-emerald-700 dark:hover:bg-emerald-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 transition-colors motion-reduce:transition-none">
+        <a href="mailto:hello@grove.place" class="inline-flex items-center px-4 py-2 bg-success dark:bg-success text-white rounded-lg hover:bg-success dark:hover:bg-success focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-success focus-visible:ring-offset-2 transition-colors motion-reduce:transition-none">
           Contact Support
           <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -143,10 +143,10 @@
   <!-- Links -->
   <section class="py-8 px-6 bg-white/50 dark:bg-cream-50/50 backdrop-blur-sm border-t border-divider">
     <div class="max-w-4xl mx-auto flex flex-wrap justify-center gap-4">
-      <a href="/knowledge" class="px-4 py-2 rounded-lg bg-cream-100 dark:bg-cream-200 text-foreground-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 transition-colors motion-reduce:transition-none">
+      <a href="/knowledge" class="px-4 py-2 rounded-lg bg-cream-100 dark:bg-cream-200 text-foreground-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-success focus-visible:ring-offset-2 transition-colors motion-reduce:transition-none">
         ← Knowledge Base
       </a>
-      <a href="/knowledge/specs" class="px-4 py-2 rounded-lg bg-cream-100 dark:bg-cream-200 text-foreground-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 transition-colors motion-reduce:transition-none">
+      <a href="/knowledge/specs" class="px-4 py-2 rounded-lg bg-cream-100 dark:bg-cream-200 text-foreground-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-success focus-visible:ring-offset-2 transition-colors motion-reduce:transition-none">
         Technical Specs →
       </a>
     </div>

@@ -64,9 +64,9 @@
 	};
 
 	const sentimentColors: Record<string, string> = {
-		positive: "text-green-500 dark:text-green-400",
-		negative: "text-red-500 dark:text-red-400",
-		neutral: "text-amber-500 dark:text-amber-400",
+		positive: "text-success",
+		negative: "text-error",
+		neutral: "text-warning",
 	};
 
 	function getSentimentLabel(sentiment: string | null): string {
@@ -127,10 +127,10 @@
 		<div class="text-sm text-foreground-muted font-sans">Total</div>
 	</GlassCard>
 	<GlassCard
-		class="p-4 text-center bg-green-50/50 dark:bg-green-950/20 border-green-200 dark:border-green-800"
+		class="p-4 text-center bg-success-bg border-success"
 	>
-		<div class="text-2xl font-serif text-green-700 dark:text-green-400">{stats.new_count}</div>
-		<div class="text-sm text-green-700/80 dark:text-green-400/80 font-sans">New</div>
+		<div class="text-2xl font-serif text-success">{stats.new_count}</div>
+		<div class="text-sm text-success/80 font-sans">New</div>
 	</GlassCard>
 	<GlassCard class="p-4 text-center">
 		<div class="text-2xl font-serif text-foreground">{stats.web_count}</div>
@@ -150,11 +150,11 @@
 			<p class="text-foreground-muted font-sans">No feedback yet</p>
 		</GlassCard>
 	{:else}
-		<div class="overflow-hidden rounded-xl border border-grove-200 dark:border-cream-300">
+		<div class="overflow-hidden rounded-xl border border-border">
 			<div class="overflow-x-auto">
 				<table class="w-full" aria-label="Wanderer feedback">
 					<thead
-						class="bg-grove-50 dark:bg-cream-100/50 border-b border-grove-200 dark:border-cream-300"
+						class="bg-surface-subtle border-b border-border"
 					>
 						<tr>
 							<th
@@ -190,13 +190,13 @@
 						</tr>
 					</thead>
 					<tbody
-						class="divide-y divide-grove-100 dark:divide-cream-300/50 bg-white dark:bg-cream-100/30"
+						class="divide-y divide-border bg-white dark:bg-card"
 					>
 						{#each feedback as item}
 							{@const SourceIcon = sourceIcons[item.source] || Globe}
 							{@const SentimentIcon = item.sentiment ? sentimentIcons[item.sentiment] : null}
 							<tr
-								class="hover:bg-grove-50/50 dark:hover:bg-cream-200/30 transition-colors cursor-pointer"
+								class="hover:bg-surface-hover transition-colors cursor-pointer"
 								tabindex="0"
 								role="button"
 								aria-expanded={expandedId === item.id}
@@ -245,24 +245,24 @@
 								<td class="px-6 py-4">
 									{#if item.status === "new"}
 										<span
-											class="text-xs font-sans bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-1 rounded"
+											class="text-xs font-sans bg-success-bg text-success px-2 py-1 rounded"
 											>New</span
 										>
 									{:else if item.status === "read"}
 										<span
-											class="text-xs font-sans bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-2 py-1 rounded"
+											class="text-xs font-sans bg-info-bg text-info px-2 py-1 rounded"
 											>Read</span
 										>
 									{:else}
 										<span
-											class="text-xs font-sans bg-cream-100 dark:bg-cream-200 text-foreground-muted dark:text-cream-300 px-2 py-1 rounded"
+											class="text-xs font-sans bg-surface-subtle text-foreground-muted px-2 py-1 rounded"
 											>Archived</span
 										>
 									{/if}
 								</td>
 							</tr>
 							{#if expandedId === item.id}
-								<tr id="details-{item.id}" class="bg-grove-50/30 dark:bg-cream-100/50">
+								<tr id="details-{item.id}" class="bg-surface-subtle">
 									<td colspan="5" class="px-6 py-6">
 										<div class="max-w-3xl">
 											<!-- Full Details -->
@@ -320,20 +320,20 @@
 															name="notes"
 															bind:value={notesText[item.id]}
 															rows="3"
-															class="w-full px-3 py-2 border border-grove-200 dark:border-cream-300 rounded-lg text-sm font-sans bg-white dark:bg-cream-100 text-foreground focus:outline-none focus:ring-2 focus:ring-grove-500"
+															class="w-full px-3 py-2 border border-border rounded-lg text-sm font-sans bg-white dark:bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
 															placeholder="Add notes about this feedback..."
 														></textarea>
 														<div class="flex gap-2 mt-2">
 															<button
 																type="submit"
-																class="px-4 py-2 bg-grove-600 text-white rounded-lg text-sm font-sans hover:bg-grove-700 transition-colors"
+																class="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-sans hover:opacity-90 transition-colors"
 															>
 																Save Notes
 															</button>
 															<button
 																type="button"
 																onclick={cancelEditingNotes}
-																class="px-4 py-2 bg-white dark:bg-cream-200 border border-grove-200 dark:border-cream-300 text-foreground rounded-lg text-sm font-sans hover:bg-grove-50 dark:hover:bg-cream-300 transition-colors"
+																class="px-4 py-2 bg-white dark:bg-card border border-border text-foreground rounded-lg text-sm font-sans hover:bg-surface-hover transition-colors"
 															>
 																Cancel
 															</button>
@@ -348,7 +348,7 @@
 													<button
 														type="button"
 														onclick={() => startEditingNotes(item.id, item.admin_notes)}
-														class="text-sm text-grove-600 dark:text-grove-400 hover:text-grove-700 dark:hover:text-grove-300 font-sans"
+														class="text-sm text-primary hover:text-primary/80 font-sans"
 													>
 														Edit notes
 													</button>
@@ -362,7 +362,7 @@
 														<input type="hidden" name="id" value={item.id} />
 														<button
 															type="submit"
-															class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-sans hover:bg-blue-700 transition-colors"
+															class="px-4 py-2 bg-info text-white rounded-lg text-sm font-sans hover:opacity-90 transition-colors"
 														>
 															Mark as Read
 														</button>
@@ -373,7 +373,7 @@
 														<input type="hidden" name="id" value={item.id} />
 														<button
 															type="submit"
-															class="px-4 py-2 bg-white dark:bg-cream-200 border border-grove-200 dark:border-cream-300 text-foreground rounded-lg text-sm font-sans hover:bg-grove-50 dark:hover:bg-cream-300 transition-colors"
+															class="px-4 py-2 bg-white dark:bg-card border border-border text-foreground rounded-lg text-sm font-sans hover:bg-surface-hover transition-colors"
 														>
 															Archive
 														</button>

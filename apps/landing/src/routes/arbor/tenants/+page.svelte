@@ -21,28 +21,28 @@
 	const planConfig: Record<string, { label: string; color: string; bg: string }> = {
 		free: {
 			label: 'Wanderer',
-			color: 'text-stone-700 dark:text-stone-400',
-			bg: 'bg-stone-100 dark:bg-stone-900/30'
+			color: 'text-muted-foreground dark:text-muted-foreground',
+			bg: 'bg-muted dark:bg-muted/30'
 		},
 		seedling: {
 			label: 'Seedling',
-			color: 'text-green-700 dark:text-green-400',
-			bg: 'bg-green-100 dark:bg-green-900/30'
+			color: 'text-success dark:text-success',
+			bg: 'bg-success-bg dark:bg-success-bg/30'
 		},
 		sapling: {
 			label: 'Sapling',
-			color: 'text-teal-700 dark:text-teal-400',
-			bg: 'bg-teal-100 dark:bg-teal-900/30'
+			color: 'text-info dark:text-info',
+			bg: 'bg-info-bg dark:bg-info-bg/30'
 		},
 		oak: {
 			label: 'Oak',
-			color: 'text-amber-700 dark:text-amber-400',
-			bg: 'bg-amber-100 dark:bg-amber-900/30'
+			color: 'text-warning dark:text-warning',
+			bg: 'bg-warning-bg dark:bg-warning-bg/30'
 		},
 		evergreen: {
 			label: 'Evergreen',
-			color: 'text-emerald-700 dark:text-emerald-400',
-			bg: 'bg-emerald-100 dark:bg-emerald-900/30'
+			color: 'text-success dark:text-success',
+			bg: 'bg-success-bg dark:bg-success-bg/30'
 		}
 	};
 
@@ -129,7 +129,7 @@
 			type="text"
 			bind:value={searchQuery}
 			placeholder="Search by subdomain, name, or email..."
-			class="w-full pl-10 pr-4 py-2 border border-grove-200 dark:border-cream-300 rounded-lg text-sm font-sans bg-white dark:bg-cream-100 text-foreground focus:outline-none focus:ring-2 focus:ring-grove-500"
+			class="w-full pl-10 pr-4 py-2 border border-border dark:border-border rounded-lg text-sm font-sans bg-white dark:bg-cream-100 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
 		/>
 	</div>
 </div>
@@ -143,11 +143,11 @@
 		</p>
 	</GlassCard>
 {:else}
-	<div class="overflow-hidden rounded-xl border border-grove-200 dark:border-cream-300">
+	<div class="overflow-hidden rounded-xl border border-border dark:border-border">
 		<div class="overflow-x-auto">
 			<table class="w-full" aria-label="Tenant list">
 				<thead
-					class="bg-grove-50 dark:bg-cream-100/50 border-b border-grove-200 dark:border-cream-300"
+					class="bg-surface-subtle dark:bg-cream-100/50 border-b border-border dark:border-border"
 				>
 					<tr>
 						<th
@@ -198,7 +198,7 @@
 					</tr>
 				</thead>
 				<tbody
-					class="divide-y divide-grove-100 dark:divide-cream-300/50 bg-white dark:bg-cream-100/30"
+					class="divide-y divide-border dark:divide-border/50 bg-white dark:bg-cream-100/30"
 				>
 					{#each filteredTenants as tenant (tenant.id)}
 						{@const plan = planConfig[tenant.plan] || planConfig.seedling}
@@ -206,7 +206,7 @@
 							<td class="px-6 py-4">
 								<a
 									href="/arbor/tenants/{tenant.id}"
-									class="text-sm font-sans font-medium text-grove-600 dark:text-grove-400 hover:text-grove-700 dark:hover:text-grove-300"
+									class="text-sm font-sans font-medium text-primary dark:text-primary hover:text-primary dark:hover:text-primary"
 								>
 									{tenant.subdomain}
 								</a>
@@ -236,13 +236,13 @@
 							<td class="px-6 py-4">
 								{#if tenant.active}
 									<span
-										class="text-xs font-sans bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-1 rounded"
+										class="text-xs font-sans bg-success-bg dark:bg-success-bg/30 text-success dark:text-success px-2 py-1 rounded"
 									>
 										Active
 									</span>
 								{:else}
 									<span
-										class="text-xs font-sans bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 px-2 py-1 rounded"
+										class="text-xs font-sans bg-error-bg dark:bg-error-bg/30 text-error dark:text-error px-2 py-1 rounded"
 									>
 										Suspended
 									</span>
@@ -251,7 +251,7 @@
 							<td class="px-6 py-4">
 								<a
 									href="/arbor/tenants/{tenant.id}"
-									class="text-foreground-muted group-hover:text-grove-600 dark:group-hover:text-grove-400 transition-colors"
+									class="text-foreground-muted group-hover:text-primary dark:group-hover:text-primary transition-colors"
 									aria-label="View {tenant.subdomain} details"
 								>
 									<ChevronRight class="w-4 h-4" />

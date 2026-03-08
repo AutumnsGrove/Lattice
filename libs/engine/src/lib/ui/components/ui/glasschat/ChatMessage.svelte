@@ -28,8 +28,8 @@
 
 	const defaultBubble = $derived(
 		roleConfig.align === "end"
-			? "bg-emerald-700/80 dark:bg-emerald-600/80 text-white"
-			: "bg-white/10 dark:bg-white/5 border border-white/20",
+			? "bg-success text-white"
+			: "bg-white/10 dark:bg-white/5 border border-divider",
 	);
 </script>
 

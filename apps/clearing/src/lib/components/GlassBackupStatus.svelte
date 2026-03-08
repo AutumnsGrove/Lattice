@@ -48,26 +48,26 @@
 			? {
 					icon: CheckCircle,
 					label: "Protected",
-					color: "text-green-500",
-					bgColor: "bg-green-500/10",
-					borderColor: "border-green-500/20",
+					color: "text-success",
+					bgColor: "bg-success-bg",
+					borderColor: "border-success",
 				}
 			: {
 					icon: AlertTriangle,
 					label: "Attention Needed",
-					color: "text-yellow-500",
-					bgColor: "bg-yellow-500/10",
-					borderColor: "border-yellow-500/20",
+					color: "text-warning",
+					bgColor: "bg-warning-bg",
+					borderColor: "border-warning",
 				},
 	);
 
 	// Reliability bar color
 	const reliabilityColor = $derived(
 		backupStatus.reliability.score >= 90
-			? "bg-green-500"
+			? "bg-success"
 			: backupStatus.reliability.score >= 70
-				? "bg-yellow-500"
-				: "bg-red-500",
+				? "bg-warning"
+				: "bg-error",
 	);
 </script>
 
@@ -75,8 +75,8 @@
 	<!-- Header -->
 	<div class="flex items-center justify-between mb-6">
 		<div class="flex items-center gap-3">
-			<div class="p-2.5 rounded-xl bg-emerald-500/10">
-				<Shield class="w-5 h-5 text-emerald-500" aria-hidden="true" />
+			<div class="p-2.5 rounded-xl bg-success-bg">
+				<Shield class="w-5 h-5 text-success" aria-hidden="true" />
 			</div>
 			<div>
 				<h2 id="data-protection-heading" class="text-lg font-semibold text-foreground">
@@ -148,11 +148,11 @@
 		</div>
 		<div class="flex items-center gap-4 mt-2.5 text-xs text-foreground-muted">
 			<span class="flex items-center gap-1.5">
-				<CheckCircle class="w-3.5 h-3.5 text-green-500" aria-hidden="true" />
+				<CheckCircle class="w-3.5 h-3.5 text-success" aria-hidden="true" />
 				{backupStatus.reliability.perfectJobs} perfect
 			</span>
 			<span class="flex items-center gap-1.5">
-				<AlertTriangle class="w-3.5 h-3.5 text-yellow-500" aria-hidden="true" />
+				<AlertTriangle class="w-3.5 h-3.5 text-warning" aria-hidden="true" />
 				{backupStatus.reliability.partialJobs} partial
 			</span>
 			<span class="ml-auto text-foreground-muted/60">
@@ -177,13 +177,13 @@
 						</span>
 						{#if day.type === "weekly"}
 							<span
-								class="px-2 py-0.5 text-xs font-medium rounded-full bg-blue-500/10 text-blue-500 border border-blue-500/20"
+								class="px-2 py-0.5 text-xs font-medium rounded-full bg-info-bg text-info border border-info"
 							>
 								Weekly Full
 							</span>
 						{:else}
 							<span
-								class="px-2 py-0.5 text-xs font-medium rounded-full bg-green-500/10 text-green-500 border border-green-500/20"
+								class="px-2 py-0.5 text-xs font-medium rounded-full bg-success-bg text-success border border-success"
 							>
 								Daily
 							</span>

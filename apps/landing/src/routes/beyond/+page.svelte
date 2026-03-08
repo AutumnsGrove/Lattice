@@ -104,12 +104,12 @@
 
 	function getStatusBadge(status: string) {
 		switch (status) {
-			case 'live': return { text: 'Live', class: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' };
-			case 'building': return { text: 'Building', class: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' };
-			case 'planned': return { text: 'Planned', class: 'bg-cream-100 text-bark-600 dark:bg-cream-100 dark:text-cream-400' };
-			case 'early': return { text: 'Early Research', class: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300' };
-			case 'paused': return { text: 'Paused', class: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' };
-			default: return { text: status, class: 'bg-cream-100 text-bark-600' };
+			case 'live': return { text: 'Live', class: 'bg-success-bg text-success-foreground' };
+			case 'building': return { text: 'Building', class: 'bg-accent-subtle text-accent' };
+			case 'planned': return { text: 'Planned', class: 'bg-surface-subtle text-foreground-muted' };
+			case 'early': return { text: 'Early Research', class: 'bg-accent-subtle text-accent' };
+			case 'paused': return { text: 'Paused', class: 'bg-warning-bg text-warning-foreground' };
+			default: return { text: status, class: 'bg-surface-subtle text-foreground-muted' };
 		}
 	}
 </script>
@@ -121,11 +121,11 @@
 	accentColor="8b5cf6"
 />
 
-<main class="min-h-screen flex flex-col bg-slate-900">
+<main class="min-h-screen flex flex-col bg-surface">
 	<Header user={data.user} />
 
 	<!-- Hero - Night sky theme -->
-	<section class="relative py-16 px-6 text-center overflow-hidden bg-gradient-to-b from-slate-950 via-indigo-950 to-slate-900">
+	<section class="relative py-16 px-6 text-center overflow-hidden bg-gradient-to-b from-card via-accent-subtle to-surface">
 		<!-- Stars -->
 		<div class="absolute top-8 left-[10%]" aria-hidden="true">
 			<StarCluster class="w-20 h-20 opacity-60" />
@@ -146,38 +146,39 @@
 		</div>
 
 		<div class="max-w-3xl mx-auto relative z-10">
-			<a href="/roadmap" class="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white mb-6 transition-colors">
+			<a href="/roadmap" class="inline-flex items-center gap-2 text-sm text-foreground-subtle hover:text-white mb-6 transition-colors">
 				← Back to Roadmap
 			</a>
 			<h1 class="text-4xl md:text-5xl font-serif text-white mb-4">
 				Beyond the Grove
 			</h1>
-			<p class="text-lg text-slate-300 max-w-xl mx-auto">
+			<p class="text-lg text-foreground-muted max-w-xl mx-auto">
 				Standalone tools built because they're needed. Self-hostable or hosted by Grove—your choice.
 			</p>
-			<p class="text-sm text-slate-500 mt-4">
+			<p class="text-sm text-foreground-subtle mt-4">
 				These aren't part of the core Grove platform, but they share the same philosophy: useful, private, beautifully crafted.
 			</p>
 		</div>
 	</section>
 
 	<!-- Tools Grid -->
-	<section class="flex-1 py-12 px-6 bg-gradient-to-b from-slate-900 to-slate-950">
+	<!-- brand-color: intentional — dark background for tools grid -->
+	<section class="flex-1 py-12 px-6 bg-gradient-to-b from-surface to-surface">
 		<div class="max-w-4xl mx-auto">
 			<div class="grid gap-8 md:grid-cols-2">
 				{#each tools as tool}
 					{@const badge = getStatusBadge(tool.status)}
 					{@const ToolIcon = getToolIcon(tool.icon)}
-					<article class="p-6 rounded-xl bg-slate-800/50 border border-slate-700 backdrop-blur-sm">
+					<article class="p-6 rounded-xl bg-surface-hover border border-border backdrop-blur-sm">
 						<div class="flex items-start justify-between mb-4">
 							<div class="flex items-center gap-3">
-								<div class="w-10 h-10 rounded-lg bg-indigo-900/50 flex items-center justify-center text-indigo-400">
+								<div class="w-10 h-10 rounded-lg bg-accent-subtle flex items-center justify-center text-accent">
 									<!-- Use centralized icon registry -->
 									<ToolIcon class="w-5 h-5" />
 								</div>
 								<div>
 									<h2 class="text-xl font-serif text-white">{tool.name}</h2>
-									<p class="text-sm text-slate-400">{tool.tagline}</p>
+									<p class="text-sm text-foreground-subtle">{tool.tagline}</p>
 								</div>
 							</div>
 							<span class="px-2 py-1 rounded-full text-xs font-medium {badge.class}">
@@ -192,7 +193,7 @@
 									<svelte:element
 										this={sub.href ? 'a' : 'span'}
 										href={sub.href}
-										class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-700/50 text-xs text-slate-400 transition-colors {sub.href ? 'cursor-pointer hover:bg-indigo-900/50 hover:text-indigo-300' : ''}"
+										class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface-hover/50 text-xs text-foreground-subtle transition-colors {sub.href ? 'cursor-pointer hover:bg-accent-subtle hover:text-accent-foreground' : ''}"
 										title={sub.description}
 										role="listitem"
 										aria-label="{sub.name}{sub.description ? `: ${sub.description}` : ''}"
@@ -204,28 +205,28 @@
 							</div>
 						{/if}
 
-						<p class="text-slate-300 mb-4 leading-relaxed">
+						<p class="text-foreground-muted mb-4 leading-relaxed">
 							{tool.description}
 						</p>
 
-						<div class="pt-4 border-t border-slate-700 space-y-2">
+						<div class="pt-4 border-t border-border space-y-2">
 							<div class="flex items-center gap-2 text-sm">
-								<span class="text-slate-500">Domain:</span>
+								<span class="text-foreground-subtle">Domain:</span>
 								<a
 									href="https://{tool.domain}"
 									target="_blank"
 									rel="noopener noreferrer"
-									class="px-2 py-0.5 rounded bg-slate-700 text-slate-300 hover:text-white hover:bg-slate-600 transition-colors font-mono text-sm"
+									class="px-2 py-0.5 rounded bg-surface-hover text-foreground-muted hover:text-white hover:bg-surface-elevated transition-colors font-mono text-sm"
 								>{tool.domain}</a>
 							</div>
 							<div class="flex items-center gap-2 text-sm">
-								<span class="text-slate-500">Stack:</span>
-								<span class="text-slate-400">{tool.stack}</span>
+								<span class="text-foreground-subtle">Stack:</span>
+								<span class="text-foreground-subtle">{tool.stack}</span>
 							</div>
 							{#if tool.github}
 								<div class="flex items-center gap-2 text-sm">
-									<Github class="w-4 h-4 text-slate-500" />
-									<a href={tool.github} target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-white transition-colors">
+									<Github class="w-4 h-4 text-foreground-subtle" />
+									<a href={tool.github} target="_blank" rel="noopener noreferrer" class="text-foreground-subtle hover:text-white transition-colors">
 										GitHub Repository
 									</a>
 								</div>
@@ -236,9 +237,9 @@
 			</div>
 
 			<!-- Self-host note -->
-			<div class="text-center mt-12 p-8 rounded-xl bg-indigo-950/30 border border-indigo-800/30">
+			<div class="text-center mt-12 p-8 rounded-xl bg-accent-subtle border border-border">
 				<h3 class="text-lg font-medium text-white mb-2">Open Source, Self-Hostable</h3>
-				<p class="text-slate-400 max-w-lg mx-auto">
+				<p class="text-foreground-subtle max-w-lg mx-auto">
 					All tools in "Beyond the Grove" will be open source. Run them yourself, or let Grove host them for a small fee. Your data, your choice.
 				</p>
 			</div>
@@ -246,12 +247,12 @@
 	</section>
 
 	<!-- Links -->
-	<section class="py-8 px-6 bg-slate-950 border-t border-slate-800">
+	<section class="py-8 px-6 bg-card border-t border-border">
 		<div class="max-w-4xl mx-auto flex flex-wrap justify-center gap-4">
-			<a href="/roadmap" class="px-4 py-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white transition-colors">
+			<a href="/roadmap" class="px-4 py-2 rounded-lg bg-surface text-foreground-muted hover:text-white transition-colors">
 				← Main Roadmap
 			</a>
-			<a href="/workshop" class="px-4 py-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white transition-colors">
+			<a href="/workshop" class="px-4 py-2 rounded-lg bg-surface text-foreground-muted hover:text-white transition-colors">
 				← The Workshop
 			</a>
 		</div>

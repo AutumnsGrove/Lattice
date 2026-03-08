@@ -865,6 +865,7 @@
 			<GlassCard title="Display Fonts" variant="default">
 				<p class="text-sm text-bark-600 mb-4">Eye-catching fonts for headers and special moments</p>
 				<div class="space-y-6">
+					<!-- brand-color: intentional — Vineyard showcase styling -->
 					<div class="p-4 bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg">
 						<Alagard as="h2" class="text-3xl text-purple-900 mb-2">
 							Welcome to the Fantasy Realm
@@ -873,12 +874,14 @@
 							Alagard - pixel art medieval display font for gaming and fantasy
 						</p>
 					</div>
+					<!-- brand-color: intentional — Vineyard showcase styling -->
 					<div class="p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg">
 						<Calistoga as="h2" class="text-3xl text-amber-900 mb-2">
 							Friendly Headlines Welcome You
 						</Calistoga>
 						<p class="text-sm text-amber-700">Calistoga - casual brush serif, warm and inviting</p>
 					</div>
+					<!-- brand-color: intentional — Vineyard showcase styling -->
 					<div class="p-4 bg-gradient-to-r from-rose-50 to-pink-50 rounded-lg">
 						<Caveat as="h2" class="text-3xl text-rose-900 mb-2">
 							A personal note just for you...
@@ -936,6 +939,7 @@
 greet("Grove");`}</IBMPlexMono
 						>
 					</div>
+					<!-- brand-color: intentional — Vineyard showcase styling -->
 					<div class="p-4 bg-purple-950 rounded-lg">
 						<Cozette as="code" class="text-purple-400 block mb-2">
 							# Cozette - retro terminal aesthetic

@@ -188,19 +188,19 @@
 
 					<ul class="space-y-3 text-foreground-muted font-sans">
 						<li class="flex items-start gap-3">
-							<CheckIcon class="w-4 h-4 text-green-500 mt-1 shrink-0" />
+							<CheckIcon class="w-4 h-4 text-success mt-1 shrink-0" />
 							<span><strong>Find or create an issue</strong> — Check existing issues first</span>
 						</li>
 						<li class="flex items-start gap-3">
-							<CheckIcon class="w-4 h-4 text-green-500 mt-1 shrink-0" />
+							<CheckIcon class="w-4 h-4 text-success mt-1 shrink-0" />
 							<span><strong>Discuss your approach</strong> — Comment with your plan</span>
 						</li>
 						<li class="flex items-start gap-3">
-							<CheckIcon class="w-4 h-4 text-green-500 mt-1 shrink-0" />
+							<CheckIcon class="w-4 h-4 text-success mt-1 shrink-0" />
 							<span><strong>Get the green light</strong> — Wait for maintainer approval</span>
 						</li>
 						<li class="flex items-start gap-3">
-							<CheckIcon class="w-4 h-4 text-green-500 mt-1 shrink-0" />
+							<CheckIcon class="w-4 h-4 text-success mt-1 shrink-0" />
 							<span><strong>Submit your PR</strong> — Reference the issue number</span>
 						</li>
 					</ul>

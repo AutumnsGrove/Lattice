@@ -66,14 +66,14 @@
 
 	// State labels and colors
 	const stateConfig: Record<FlourishState, { label: string; color: string; bg: string }> = {
-		active: { label: "Active", color: "text-green-600", bg: "bg-green-100 dark:bg-green-900/30" },
-		past_due: { label: "Past Due", color: "text-red-600", bg: "bg-red-100 dark:bg-red-900/30" },
+		active: { label: "Active", color: "text-success", bg: "bg-success-bg" },
+		past_due: { label: "Past Due", color: "text-error", bg: "bg-error-bg" },
 		resting: {
 			label: "Scheduled End",
-			color: "text-yellow-600",
-			bg: "bg-yellow-100 dark:bg-yellow-900/30",
+			color: "text-warning",
+			bg: "bg-warning-bg",
 		},
-		pruned: { label: "Ended", color: "text-gray-600", bg: "bg-gray-100 dark:bg-gray-900/30" },
+		pruned: { label: "Ended", color: "text-foreground-muted", bg: "bg-muted" },
 	};
 
 	// Next stage for nurture CTA

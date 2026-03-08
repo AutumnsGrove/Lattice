@@ -91,12 +91,12 @@
 
 	// Color palette - warm grove tones
 	const colorClasses: Record<ColorKey, string> = {
-		green: "bg-green-500 dark:bg-green-400",
-		amber: "bg-amber-500 dark:bg-amber-400",
-		blue: "bg-blue-500 dark:bg-blue-400",
+		green: "bg-success dark:bg-success",
+		amber: "bg-warning dark:bg-warning",
+		blue: "bg-info dark:bg-info",
 		slate: "bg-bark-400 dark:bg-bark-500",
-		red: "bg-red-500 dark:bg-red-400",
-		purple: "bg-purple-500 dark:bg-purple-400",
+		red: "bg-destructive dark:bg-destructive",
+		purple: "bg-accent dark:bg-accent",
 		accent: "bg-accent dark:bg-accent",
 	};
 

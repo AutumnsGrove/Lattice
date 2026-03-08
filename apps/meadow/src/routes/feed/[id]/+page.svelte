@@ -333,7 +333,7 @@
 			<div class="mt-6 text-center">
 				<button
 					type="button"
-					class="text-sm text-red-500/70 transition-colors hover:text-red-600 disabled:opacity-50"
+					class="text-sm text-error/70 transition-colors hover:text-error disabled:opacity-50"
 					disabled={deleting}
 					onclick={handleDelete}
 				>

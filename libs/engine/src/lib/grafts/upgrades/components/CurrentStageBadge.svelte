@@ -42,10 +42,10 @@
 
 	// Flourish state colors
 	const stateColors = {
-		active: 'bg-green-500',
-		past_due: 'bg-red-500',
-		resting: 'bg-yellow-500',
-		pruned: 'bg-gray-500',
+		active: 'bg-success',
+		past_due: 'bg-destructive',
+		resting: 'bg-warning',
+		pruned: 'bg-muted-foreground',
 	};
 
 	// Flourish state labels

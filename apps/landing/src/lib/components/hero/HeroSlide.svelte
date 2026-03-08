@@ -43,11 +43,12 @@
 	</div>
 
 	<!-- Layer 2: Gradient veil for text readability -->
+	<!-- brand-color: intentional — emerald tint for seasonal dark mode veil -->
 	<div class="absolute inset-0 pointer-events-none
 		bg-gradient-to-t from-white/80 via-white/40 to-transparent
-		dark:from-emerald-950/85 dark:via-emerald-950/50 dark:to-transparent
+		dark:from-surface/85 dark:via-surface/50 dark:to-transparent
 		md:bg-gradient-to-r md:from-white/75 md:via-white/30 md:to-transparent
-		md:dark:from-emerald-950/80 md:dark:via-emerald-950/30 md:dark:to-transparent">
+		md:dark:from-surface/80 md:dark:via-surface/30 md:dark:to-transparent">
 	</div>
 
 	<!-- Layer 3: Text overlay -->

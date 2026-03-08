@@ -45,9 +45,9 @@
 			</p>
 			<p
 				class="text-xl font-serif {data.warden.authFailureRate24h > 5
-					? 'text-red-600 dark:text-red-400'
+					? 'text-error-foreground'
 					: data.warden.authFailureRate24h > 1
-						? 'text-amber-600 dark:text-amber-400'
+						? 'text-warning-foreground'
 						: 'text-foreground'} mt-1"
 			>
 				{data.warden.authFailureRate24h.toFixed(2)}%
@@ -59,7 +59,7 @@
 			</p>
 			<p
 				class="text-xl font-serif {data.warden.nonceReuseAttempts24h > 0
-					? 'text-red-600 dark:text-red-400'
+					? 'text-error-foreground'
 					: 'text-foreground'} mt-1"
 			>
 				{data.warden.nonceReuseAttempts24h}
@@ -85,7 +85,7 @@
 			</GlassCard>
 			<GlassCard class="p-4">
 				<p class="text-xs font-sans text-foreground-muted">Failed</p>
-				<p class="text-lg font-serif text-red-600 dark:text-red-400 mt-1">
+				<p class="text-lg font-serif text-error-foreground mt-1">
 					{data.warden.authBreakdown24h.failed.toLocaleString()}
 				</p>
 			</GlassCard>

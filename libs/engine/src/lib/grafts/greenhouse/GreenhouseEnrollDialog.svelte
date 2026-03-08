@@ -84,10 +84,10 @@
 	{#snippet header()}
 		<div class="dialog-header">
 			<div class="icon-wrapper">
-				<Sprout class="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+				<Sprout class="w-6 h-6 text-success-foreground" />
 			</div>
-			<h2 class="text-xl font-serif text-slate-800 dark:text-slate-100">Enroll in Greenhouse</h2>
-			<p class="text-sm text-slate-600 dark:text-slate-400 mt-1">
+			<h2 class="text-xl font-serif text-foreground">Enroll in Greenhouse</h2>
+			<p class="text-sm text-foreground-muted mt-1">
 				Give a tenant early access to experimental features.
 			</p>
 		</div>
@@ -116,7 +116,7 @@
 			<!-- Notes textarea -->
 			<div class="form-group">
 				<label for="notes-input" class="form-label">
-					Notes <span class="text-slate-500 dark:text-slate-400">(optional)</span>
+					Notes <span class="text-foreground-muted">(optional)</span>
 				</label>
 				<textarea
 					id="notes-input"
@@ -142,7 +142,7 @@
 		</form>
 	{:else}
 		<div class="empty-state">
-			<p class="text-slate-600 dark:text-slate-400 text-center">
+			<p class="text-foreground-muted text-center">
 				All tenants are already enrolled in the greenhouse program!
 			</p>
 			<div class="dialog-actions">

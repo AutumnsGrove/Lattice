@@ -4,8 +4,8 @@
   Licensed under AGPL-3.0
 -->
 <script lang="ts">
-	import type { PlacedAsset, Point } from './types';
-	import type { Component as SvelteComponent } from 'svelte';
+	import type { PlacedAsset, Point } from "./types";
+	import type { Component as SvelteComponent } from "svelte";
 
 	// Module-level cache for dynamically imported components
 	// Prevents redundant imports when multiple PlacedAssets use the same component
@@ -30,7 +30,7 @@
 		onSelect,
 		onMove,
 		onScale,
-		onRotate
+		onRotate,
 	}: Props = $props();
 
 	let component: SvelteComponent | null = $state(null);
@@ -59,28 +59,28 @@
 			try {
 				let module;
 				switch (asset.category) {
-					case 'trees':
+					case "trees":
 						module = await import(`../nature/trees/${asset.componentName}.svelte`);
 						break;
-					case 'creatures':
+					case "creatures":
 						module = await import(`../nature/creatures/${asset.componentName}.svelte`);
 						break;
-					case 'botanical':
+					case "botanical":
 						module = await import(`../nature/botanical/${asset.componentName}.svelte`);
 						break;
-					case 'ground':
+					case "ground":
 						module = await import(`../nature/ground/${asset.componentName}.svelte`);
 						break;
-					case 'sky':
+					case "sky":
 						module = await import(`../nature/sky/${asset.componentName}.svelte`);
 						break;
-					case 'structural':
+					case "structural":
 						module = await import(`../nature/structural/${asset.componentName}.svelte`);
 						break;
-					case 'water':
+					case "water":
 						module = await import(`../nature/water/${asset.componentName}.svelte`);
 						break;
-					case 'weather':
+					case "weather":
 						module = await import(`../nature/weather/${asset.componentName}.svelte`);
 						break;
 					default:
@@ -101,13 +101,13 @@
 	const scaleX = $derived(asset.flipX ? -asset.scale : asset.scale);
 	const scaleY = $derived(asset.flipY ? -asset.scale : asset.scale);
 	const transformStyle = $derived(
-		`translate(${asset.position.x}px, ${asset.position.y}px) scale(${scaleX}, ${scaleY}) rotate(${asset.rotation}deg)`
+		`translate(${asset.position.x}px, ${asset.position.y}px) scale(${scaleX}, ${scaleY}) rotate(${asset.rotation}deg)`,
 	);
 
 	// Component props including animation state
 	const componentProps = $derived({
 		...asset.props,
-		animate: animationsEnabled && asset.animationEnabled
+		animate: animationsEnabled && asset.animationEnabled,
 	});
 
 	function handleMouseDown(event: MouseEvent) {
@@ -124,7 +124,7 @@
 		positionStart = { ...asset.position };
 
 		if (containerElement) {
-			containerElement.style.cursor = 'grabbing';
+			containerElement.style.cursor = "grabbing";
 		}
 	}
 
@@ -136,7 +136,7 @@
 
 		const newPosition = {
 			x: positionStart.x + dx,
-			y: positionStart.y + dy
+			y: positionStart.y + dy,
 		};
 
 		onMove?.(newPosition);
@@ -146,7 +146,7 @@
 		if (isDragging) {
 			isDragging = false;
 			if (containerElement) {
-				containerElement.style.cursor = isSelected ? 'grab' : 'pointer';
+				containerElement.style.cursor = isSelected ? "grab" : "pointer";
 			}
 		}
 	}
@@ -177,7 +177,7 @@
 
 		const newPosition = {
 			x: positionStart.x + dx,
-			y: positionStart.y + dy
+			y: positionStart.y + dy,
 		};
 
 		onMove?.(newPosition);
@@ -195,7 +195,7 @@
 		const rect = containerElement.getBoundingClientRect();
 		return {
 			x: rect.left + rect.width / 2,
-			y: rect.top + rect.height / 2
+			y: rect.top + rect.height / 2,
 		};
 	}
 
@@ -276,12 +276,12 @@
 		const handleGlobalMouseUp = () => handleMouseUp();
 
 		if (isDragging) {
-			window.addEventListener('mousemove', handleGlobalMouseMove);
-			window.addEventListener('mouseup', handleGlobalMouseUp);
+			window.addEventListener("mousemove", handleGlobalMouseMove);
+			window.addEventListener("mouseup", handleGlobalMouseUp);
 
 			return () => {
-				window.removeEventListener('mousemove', handleGlobalMouseMove);
-				window.removeEventListener('mouseup', handleGlobalMouseUp);
+				window.removeEventListener("mousemove", handleGlobalMouseMove);
+				window.removeEventListener("mouseup", handleGlobalMouseUp);
 			};
 		}
 	});
@@ -292,12 +292,12 @@
 		const handleGlobalMouseUp = () => handleResizeEnd();
 
 		if (isResizing) {
-			window.addEventListener('mousemove', handleGlobalMouseMove);
-			window.addEventListener('mouseup', handleGlobalMouseUp);
+			window.addEventListener("mousemove", handleGlobalMouseMove);
+			window.addEventListener("mouseup", handleGlobalMouseUp);
 
 			return () => {
-				window.removeEventListener('mousemove', handleGlobalMouseMove);
-				window.removeEventListener('mouseup', handleGlobalMouseUp);
+				window.removeEventListener("mousemove", handleGlobalMouseMove);
+				window.removeEventListener("mouseup", handleGlobalMouseUp);
 			};
 		}
 	});
@@ -308,12 +308,12 @@
 		const handleGlobalMouseUp = () => handleRotateEnd();
 
 		if (isRotating) {
-			window.addEventListener('mousemove', handleGlobalMouseMove);
-			window.addEventListener('mouseup', handleGlobalMouseUp);
+			window.addEventListener("mousemove", handleGlobalMouseMove);
+			window.addEventListener("mouseup", handleGlobalMouseUp);
 
 			return () => {
-				window.removeEventListener('mousemove', handleGlobalMouseMove);
-				window.removeEventListener('mouseup', handleGlobalMouseUp);
+				window.removeEventListener("mousemove", handleGlobalMouseMove);
+				window.removeEventListener("mouseup", handleGlobalMouseUp);
 			};
 		}
 	});
@@ -339,6 +339,7 @@
 	ontouchmove={handleTouchMove}
 	ontouchend={handleTouchEnd}
 >
+	<!-- brand-color: intentional (game UI selection handles) -->
 	<!-- Selection border with glass effect -->
 	{#if isSelected}
 		<div
@@ -401,7 +402,9 @@
 		<Component {...componentProps} />
 	{:else}
 		<!-- Loading placeholder -->
-		<div class="w-16 h-16 flex items-center justify-center bg-white/20 backdrop-blur-sm rounded-lg border border-white/30">
+		<div
+			class="w-16 h-16 flex items-center justify-center bg-white/20 backdrop-blur-sm rounded-lg border border-white/30"
+		>
 			<div class="text-xs text-foreground-muted">Loading...</div>
 		</div>
 	{/if}

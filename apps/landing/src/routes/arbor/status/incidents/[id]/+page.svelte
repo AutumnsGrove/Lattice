@@ -8,20 +8,16 @@
 	let form = $state<{ error?: string; success?: boolean; resolved?: boolean } | null>(null);
 
 	const impactColors: Record<string, string> = {
-		critical: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400',
-		major: 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400',
-		minor: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'
+		critical: 'bg-error-bg text-error',
+		major: 'bg-warning-bg text-warning',
+		minor: 'bg-info-bg text-info'
 	};
 
 	const statusColors: Record<string, string> = {
-		investigating:
-			'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400',
-		identified:
-			'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400',
-		monitoring:
-			'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400',
-		resolved:
-			'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+		investigating: 'bg-error-bg text-error',
+		identified: 'bg-warning-bg text-warning',
+		monitoring: 'bg-info-bg text-info',
+		resolved: 'bg-success-bg text-success'
 	};
 
 	function formatDate(dateStr: string): string {
@@ -44,7 +40,7 @@
 <div class="mb-8">
 	<a
 		href="/arbor/status"
-		class="inline-flex items-center gap-1 text-sm font-sans text-foreground-muted hover:text-grove-600 dark:hover:text-grove-400 transition-colors mb-4"
+		class="inline-flex items-center gap-1 text-sm font-sans text-foreground-muted hover:text-primary transition-colors mb-4"
 	>
 		<ArrowLeft class="w-4 h-4" />
 		Back to Status
@@ -70,16 +66,16 @@
 			<form method="POST" action="?/resolve" use:enhance>
 				<button
 					type="submit"
-					class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-sans hover:bg-green-700 transition-colors flex items-center gap-2"
+					class="px-4 py-2 bg-success text-success-foreground rounded-lg text-sm font-sans hover:bg-success/90 transition-colors flex items-center gap-2"
 				>
 					<CheckCircle2 class="w-4 h-4" />
 					Resolve
 				</button>
 			</form>
 		{:else}
-			<div class="flex items-center gap-2 px-3 py-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
-				<CheckCircle2 class="w-4 h-4 text-green-600 dark:text-green-400" />
-				<span class="text-sm font-sans text-green-700 dark:text-green-400">Resolved</span>
+			<div class="flex items-center gap-2 px-3 py-2 bg-success-bg rounded-lg">
+				<CheckCircle2 class="w-4 h-4 text-success" />
+				<span class="text-sm font-sans text-success">Resolved</span>
 			</div>
 		{/if}
 	</div>
@@ -92,7 +88,7 @@
 		<div class="flex flex-wrap gap-2">
 			{#each data.affectedComponents as component}
 				<span
-					class="text-xs font-sans px-2 py-1 rounded bg-grove-100 dark:bg-cream-200 text-foreground"
+					class="text-xs font-sans px-2 py-1 rounded bg-surface-subtle text-foreground"
 				>
 					{component.name}
 				</span>
@@ -102,8 +98,8 @@
 {/if}
 
 {#if form?.error}
-	<GlassCard class="mb-6 p-4 border-red-200 dark:border-red-800" role="alert">
-		<p class="text-sm font-sans text-red-700 dark:text-red-400">{form.error}</p>
+	<GlassCard class="mb-6 p-4 border-error" role="alert">
+		<p class="text-sm font-sans text-error">{form.error}</p>
 	</GlassCard>
 {/if}
 
@@ -131,7 +127,7 @@
 				id="update-status"
 				name="status"
 				required
-				class="w-full px-3 py-2 border border-grove-200 dark:border-cream-300 rounded-lg text-sm font-sans bg-white dark:bg-cream-100 text-foreground focus:outline-none focus:ring-2 focus:ring-grove-500"
+				class="w-full px-3 py-2 border border-border rounded-lg text-sm font-sans bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
 			>
 				<option value="investigating">Investigating</option>
 				<option value="identified">Identified</option>
@@ -144,12 +140,12 @@
 				required
 				rows="3"
 				placeholder="Update on the current situation..."
-				class="w-full px-3 py-2 border border-grove-200 dark:border-cream-300 rounded-lg text-sm font-sans bg-white dark:bg-cream-100 text-foreground focus:outline-none focus:ring-2 focus:ring-grove-500"
+				class="w-full px-3 py-2 border border-border rounded-lg text-sm font-sans bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
 			></textarea>
 			<div class="flex justify-end">
 				<button
 					type="submit"
-					class="px-4 py-2 bg-grove-600 text-white rounded-lg text-sm font-sans hover:bg-grove-700 transition-colors"
+					class="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-sans hover:bg-primary/90 transition-colors"
 				>
 					Post Update
 				</button>
@@ -169,13 +165,13 @@
 	{:else}
 		<ol class="space-y-0">
 			{#each data.updates as update, i}
-				<li class="relative pl-8 pb-6 {i < data.updates.length - 1 ? 'border-l-2 border-grove-200 dark:border-cream-300 ml-2' : 'ml-2'}">
+				<li class="relative pl-8 pb-6 {i < data.updates.length - 1 ? 'border-l-2 border-border ml-2' : 'ml-2'}">
 					<!-- Timeline dot -->
-					<div class="absolute -left-[5px] top-1 w-3 h-3 rounded-full {update.status === 'resolved' ? 'bg-green-500' : 'bg-grove-400 dark:bg-grove-600'}"></div>
+					<div class="absolute -left-[5px] top-1 w-3 h-3 rounded-full {update.status === 'resolved' ? 'bg-success' : 'bg-primary'}"></div>
 
 					<div class="ml-4">
 						<div class="flex items-center gap-2 mb-1">
-							<span class="text-xs font-sans px-2 py-0.5 rounded {statusColors[update.status] || 'bg-cream-100 dark:bg-cream-200 text-foreground-muted dark:text-cream-300'}">
+							<span class="text-xs font-sans px-2 py-0.5 rounded {statusColors[update.status] || 'bg-surface-subtle text-foreground-muted'}">
 								{update.status}
 							</span>
 							<span class="text-xs font-sans text-foreground-muted">

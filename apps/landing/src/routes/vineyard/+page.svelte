@@ -853,7 +853,7 @@
 									>
 										<CurrentComponent class="w-32 h-32" {...propValues} />
 										{#snippet failed()}
-											<div class="text-center text-red-500">
+											<div class="text-center text-error">
 												<p class="text-sm font-medium">Component error</p>
 												<p class="text-xs mt-1 opacity-75">
 													{componentError ?? "Failed to render"}
@@ -926,12 +926,12 @@
 														oninput={(e) => debouncedColorUpdate(prop, e.currentTarget.value)}
 														placeholder="#16a34a"
 														class="vine-input flex-1 font-mono text-sm {colorError
-															? 'border-red-400'
+															? 'border-error'
 															: ''}"
 													/>
 												</div>
 												{#if colorError}
-													<p class="text-xs text-red-500">{colorError}</p>
+													<p class="text-xs text-error">{colorError}</p>
 												{/if}
 												<div class="flex flex-wrap gap-1">
 													{#each colorPresets as preset}

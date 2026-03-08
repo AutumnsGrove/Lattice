@@ -96,28 +96,28 @@
 		}
 	> = {
 		available: {
-			text: "text-emerald-600 dark:text-emerald-400",
-			bg: "bg-emerald-100/60 dark:bg-emerald-900/40",
-			check: "text-emerald-500",
+			text: "text-success",
+			bg: "bg-success-bg/60 dark:bg-success-bg/40",
+			check: "text-success",
 			overlay: "",
 		},
 		coming_soon: {
-			text: "text-amber-600 dark:text-amber-400",
-			bg: "bg-amber-100/60 dark:bg-amber-900/30",
-			check: "text-amber-500",
-			overlay: "bg-amber-500/10 dark:bg-amber-500/5",
+			text: "text-warning",
+			bg: "bg-warning-bg/60 dark:bg-warning-bg/30",
+			check: "text-warning",
+			overlay: "bg-warning/10 dark:bg-warning/5",
 		},
 		future: {
 			text: "text-foreground-subtle",
-			bg: "bg-bark-100/60 dark:bg-bark-800/40",
-			check: "text-bark-700 dark:text-bark-400",
-			overlay: "bg-bark-500/10 dark:bg-bark-500/10",
+			bg: "bg-surface-subtle/60 dark:bg-surface-subtle/40",
+			check: "text-foreground-subtle",
+			overlay: "bg-foreground-subtle/10 dark:bg-foreground-subtle/10",
 		},
 		deprecated: {
-			text: "text-red-600 dark:text-red-400",
-			bg: "bg-red-100/60 dark:bg-red-900/40",
-			check: "text-red-400",
-			overlay: "bg-red-500/10 dark:bg-red-500/10",
+			text: "text-error",
+			bg: "bg-error-bg/60 dark:bg-error-bg/40",
+			check: "text-error",
+			overlay: "bg-error/10 dark:bg-error/10",
 		},
 	};
 
@@ -204,7 +204,7 @@
 					<div class="absolute -top-3 left-6 z-20" aria-hidden="true">
 						<span
 							class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium
-								bg-amber-500 text-white shadow-lg shadow-amber-500/25"
+								bg-warning text-white shadow-lg shadow-warning/25"
 						>
 							<Clock class="w-3 h-3" />
 							Coming Soon
@@ -214,7 +214,7 @@
 					<div class="absolute -top-3 left-6 z-20" aria-hidden="true">
 						<span
 							class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium
-								bg-bark-400 dark:bg-bark-600 text-white shadow-lg"
+								bg-foreground-subtle dark:bg-foreground-subtle text-white shadow-lg"
 						>
 							<Lock class="w-3 h-3" />
 							Future
@@ -253,7 +253,7 @@
 	<div class="space-y-4">
 		{#if submitError}
 			<div
-				class="p-3 rounded-lg bg-red-50/80 dark:bg-red-950/30 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 text-sm"
+				class="p-3 rounded-lg bg-error-bg/80 dark:bg-error-bg/30 border border-error dark:border-error text-error dark:text-error text-sm"
 			>
 				{submitError}
 			</div>
@@ -266,7 +266,7 @@
 					? getYearlySavingsAmount(selectedTier)
 					: 0}
 			<div
-				class="p-4 rounded-lg bg-grove-100/50 dark:bg-grove-900/30 border border-grove-200 dark:border-grove-800"
+				class="p-4 rounded-lg bg-surface-subtle/50 dark:bg-surface-subtle/30 border border-border dark:border-border"
 			>
 				<div class="flex items-center justify-between">
 					<div>
@@ -286,7 +286,7 @@
 					{#if isSubmitting}
 						<Loader2 class="w-5 h-5 animate-spin text-foreground-muted" />
 					{:else}
-						<Check class="w-5 h-5 text-emerald-500" />
+						<Check class="w-5 h-5 text-success" />
 					{/if}
 				</div>
 			</div>

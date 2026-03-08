@@ -418,7 +418,7 @@
 					href="#{key}"
 					class="px-3 py-1.5 rounded-full text-sm font-medium transition-all inline-flex items-center gap-1.5
 						{status === 'current' ? 'bg-accent text-white shadow-md' : ''}
-						{status === 'past' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' : ''}
+						{status === 'past' ? 'bg-success-bg text-success-foreground' : ''}
 						{status === 'future' ? 'bg-cream-100 dark:bg-cream-100 text-foreground-muted hover:bg-cream-200 dark:hover:bg-cream-200' : ''}"
 				>
 					{#if status === 'current'}
@@ -454,7 +454,7 @@
 			<div class="max-w-3xl mx-auto relative z-10">
 				<div class="text-center mb-12">
 					{#if phaseStatus['first-frost'] === 'past'}
-						<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-sm font-medium mb-4">
+						<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-success-bg text-success-foreground text-sm font-medium mb-4">
 							<CheckCircle class="w-4 h-4" />
 							Complete
 						</span>
@@ -467,14 +467,14 @@
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases['first-frost'].features as feature}
 						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-cream-50/25 backdrop-blur-sm shadow-sm">
-							<Check class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+							<Check class="w-5 h-5 text-success mt-0.5 flex-shrink-0" />
 							<div class="flex-1">
 								<div class="flex items-center gap-2">
 									<span class="font-medium text-bark-900">
 										{#if feature.articleSlug}
 											<a
 												href="/knowledge/help/{feature.articleSlug}"
-												class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors underline-offset-2 hover:underline"
+												class="hover:text-accent transition-colors underline-offset-2 hover:underline"
 											>
 												{#if feature.termSlug}<GroveTerm term={feature.termSlug}>{feature.name}</GroveTerm>{:else}{feature.name}{/if}
 											</a>
@@ -495,11 +495,12 @@
 		</section>
 
 		<!-- THAW -->
+		<!-- brand-color: intentional — seasonal gradient for each roadmap phase -->
 		<section
 			id="thaw"
 			class="relative py-20 px-6 overflow-hidden
-				bg-gradient-to-b from-bark-200 via-sky-100 to-teal-100
-				dark:from-cream-100 dark:via-cream-50 dark:to-teal-950"
+				bg-gradient-to-b from-bark-200 via-surface-hover to-surface-subtle
+				dark:from-cream-100 dark:via-cream-50 dark:to-surface"
 		>
 			<!-- Light snowfall - the thaw -->
 			<div class="absolute inset-0 pointer-events-none" aria-hidden="true">
@@ -554,11 +555,11 @@
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases.thaw.features as feature}
 						{@const IconComponent = getFeatureIcon(feature.icon)}
-						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-cream-50/25 backdrop-blur-sm border-l-4 border-teal-400 shadow-sm
+						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-cream-50/25 backdrop-blur-sm border-l-4 border-accent shadow-sm
 							{feature.internal ? 'opacity-75' : ''}">
 							<!-- Use icon lookup map with seasonal color (Thaw = teal) -->
 							<IconComponent
-								class="w-5 h-5 text-teal-500 mt-0.5 flex-shrink-0"
+								class="w-5 h-5 text-accent mt-0.5 flex-shrink-0"
 							/>
 							<div class="flex-1">
 								<div class="flex items-center gap-2">
@@ -566,7 +567,7 @@
 										{#if feature.articleSlug}
 											<a
 												href="/knowledge/help/{feature.articleSlug}"
-												class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors underline-offset-2 hover:underline"
+												class="hover:text-accent transition-colors underline-offset-2 hover:underline"
 											>
 												{#if feature.termSlug}<GroveTerm term={feature.termSlug}>{feature.name}</GroveTerm>{:else}{feature.name}{/if}
 											</a>
@@ -593,8 +594,8 @@
 		<section
 			id="first-buds"
 			class="relative py-20 px-6 overflow-hidden
-				bg-gradient-to-b from-teal-50 via-rose-100 to-pink-100
-				dark:from-teal-950/30 dark:via-rose-950/40 dark:to-pink-950/30"
+				bg-gradient-to-b from-surface-subtle via-surface-hover to-surface-hover
+				dark:from-surface/30 dark:via-surface/40 dark:to-surface/30"
 		>
 			<!-- Spring petals -->
 			<div class="absolute inset-0 pointer-events-none" aria-hidden="true">
@@ -651,7 +652,7 @@
 							You are here
 						</span>
 					{:else if phaseStatus['first-buds'] === 'future'}
-						<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-lime-100 dark:bg-lime-900/30 text-lime-700 dark:text-lime-300 text-sm font-medium mb-4">
+						<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-success-bg text-success-foreground text-sm font-medium mb-4">
 							<Sprout class="w-3.5 h-3.5" />
 							Coming Soon
 						</span>
@@ -665,28 +666,28 @@
 					{#each phases['first-buds'].features as feature}
 						{@const IconComponent = getFeatureIcon(feature.icon)}
 						{@const colorMap = {
-							ivy: 'text-green-500',
-							amber: 'text-amber-500',
-							trails: 'text-teal-500',
-							tree: 'text-emerald-500',
-							swatchbook: 'text-violet-500',
-							wisp: 'text-sky-400',
-							forests: 'text-green-600',
-							porch: 'text-orange-400',
-							terminal: 'text-lime-500',
-							centennial: 'text-indigo-500'
+							ivy: 'text-success',
+							amber: 'text-warning',
+							trails: 'text-accent',
+							tree: 'text-success',
+							swatchbook: 'text-accent-subtle',
+							wisp: 'text-info',
+							forests: 'text-success',
+							porch: 'text-warning',
+							terminal: 'text-success',
+							centennial: 'text-accent'
 						}}
 						{@const borderMap = {
-							ivy: 'border-l-4 border-green-500',
-							amber: 'border-l-4 border-amber-500',
-							trails: 'border-l-4 border-teal-500',
-							tree: 'border-l-4 border-emerald-500',
-							swatchbook: 'border-l-4 border-violet-500',
-							wisp: 'border-l-4 border-sky-400',
-							forests: 'border-l-4 border-green-600',
-							porch: 'border-l-4 border-orange-400',
-							terminal: 'border-l-4 border-lime-500',
-							centennial: 'border-l-4 border-indigo-500'
+							ivy: 'border-l-4 border-success',
+							amber: 'border-l-4 border-warning',
+							trails: 'border-l-4 border-accent',
+							tree: 'border-l-4 border-success',
+							swatchbook: 'border-l-4 border-accent-subtle',
+							wisp: 'border-l-4 border-info',
+							forests: 'border-l-4 border-success',
+							porch: 'border-l-4 border-warning',
+							terminal: 'border-l-4 border-success',
+							centennial: 'border-l-4 border-accent'
 						}}
 						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-cream-50/25 backdrop-blur-sm shadow-sm
 							{(borderMap as Record<string, string>)[feature.icon ?? ''] || ''}"
@@ -701,7 +702,7 @@
 										{#if feature.articleSlug}
 											<a
 												href="/knowledge/help/{feature.articleSlug}"
-												class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors underline-offset-2 hover:underline"
+												class="hover:text-accent transition-colors underline-offset-2 hover:underline"
 											>
 												{#if feature.termSlug}<GroveTerm term={feature.termSlug}>{feature.name}</GroveTerm>{:else}{feature.name}{/if}
 											</a>
@@ -725,8 +726,8 @@
 		<section
 			id="full-bloom"
 			class="relative py-20 px-6 overflow-hidden
-				bg-gradient-to-b from-pink-50 via-green-100 to-yellow-100
-				dark:from-pink-950/20 dark:via-green-950/40 dark:to-yellow-950/30"
+				bg-gradient-to-b from-surface-subtle via-surface-hover to-surface-hover
+				dark:from-surface/20 dark:via-surface/40 dark:to-surface/30"
 		>
 			<!-- Fireflies in the summer evening -->
 			<div class="absolute top-1/4 left-[15%] opacity-80" aria-hidden="true">
@@ -784,7 +785,7 @@
 			<div class="max-w-3xl mx-auto relative z-10">
 				<div class="text-center mb-12">
 					{#if phaseStatus['full-bloom'] === 'future'}
-						<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-sm font-medium mb-4">
+						<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-success-bg text-success-foreground text-sm font-medium mb-4">
 							<Sun class="w-3.5 h-3.5" />
 							On the Horizon
 						</span>
@@ -798,19 +799,19 @@
 					{#each phases['full-bloom'].features as feature}
 						{@const IconComponent = getFeatureIcon(feature.icon)}
 						{@const colorMap = {
-							meadow: 'text-green-500',
-							clock: 'text-blue-500',
-							message: 'text-sky-500',
-							heart: 'text-pink-500',
-							trending: 'text-emerald-500',
-							crown: 'text-amber-500',
-							paintbrush: 'text-violet-500',
-							users: 'text-indigo-500',
-							shield: 'text-bark-500',
-							curios: 'text-amber-600',
-							terrarium: 'text-lime-500',
-							weave: 'text-cyan-500',
-							outpost: 'text-purple-500'
+							meadow: 'text-success',
+							clock: 'text-info',
+							message: 'text-info',
+							heart: 'text-accent-subtle',
+							trending: 'text-success',
+							crown: 'text-warning',
+							paintbrush: 'text-accent-subtle',
+							users: 'text-accent',
+							shield: 'text-foreground-muted',
+							curios: 'text-warning',
+							terrarium: 'text-success',
+							weave: 'text-info',
+							outpost: 'text-accent'
 						}}
 						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-cream-50/25 backdrop-blur-sm shadow-sm">
 							<!-- Use icon lookup map with feature-specific color -->
@@ -823,7 +824,7 @@
 										{#if feature.articleSlug}
 											<a
 												href="/knowledge/help/{feature.articleSlug}"
-												class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors underline-offset-2 hover:underline"
+												class="hover:text-accent transition-colors underline-offset-2 hover:underline"
 											>
 												{#if feature.termSlug}<GroveTerm term={feature.termSlug}>{feature.name}</GroveTerm>{:else}{feature.name}{/if}
 											</a>
@@ -847,8 +848,8 @@
 		<section
 			id="golden-hour"
 			class="relative py-24 px-6 overflow-hidden min-h-[600px]
-				bg-gradient-to-b from-yellow-50 via-amber-200 to-orange-300
-				dark:from-yellow-950/30 dark:via-amber-950/50 dark:to-orange-950/60"
+				bg-gradient-to-b from-surface-subtle via-surface-hover to-surface-hover
+				dark:from-surface/30 dark:via-surface/50 dark:to-surface/60"
 		>
 			<!-- MASSIVE Falling autumn leaves - the magic! Uses dynamically generated trees -->
 			<!-- Extended fall distance (80-100vh) so leaves travel the entire section height -->
@@ -863,7 +864,7 @@
 			/>
 
 			<!-- Warm sunlight rays (CSS effect) -->
-			<div class="absolute inset-0 bg-gradient-to-br from-amber-300/30 via-transparent to-orange-400/25 pointer-events-none" aria-hidden="true"></div>
+			<div class="absolute inset-0 bg-gradient-to-br from-surface/30 via-transparent to-surface/25 pointer-events-none" aria-hidden="true"></div>
 
 			<!-- Many lanterns lighting the magical path -->
 			<div class="absolute bottom-8 left-[8%] w-5 h-8 opacity-60" aria-hidden="true">
@@ -913,39 +914,39 @@
 			<div class="max-w-3xl mx-auto relative z-10">
 				<div class="text-center mb-12">
 					{#if phaseStatus['golden-hour'] === 'future'}
-						<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-200/80 dark:bg-amber-900/50 text-amber-800 dark:text-amber-200 text-sm font-medium mb-4 shadow-sm">
+						<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-warning-bg text-warning-foreground text-sm font-medium mb-4 shadow-sm">
 							<Gem class="w-3.5 h-3.5" />
 							Refinement
 						</span>
 					{/if}
-					<h2 class="text-3xl md:text-4xl font-serif text-amber-900 dark:text-amber-100 mb-2">{phases['golden-hour'].title}</h2>
-					<p class="text-amber-800/80 dark:text-amber-200/80 italic">{phases['golden-hour'].subtitle}</p>
-					<p class="mt-4 text-amber-900/70 dark:text-amber-100/70 max-w-lg mx-auto">{phases['golden-hour'].description}</p>
+					<h2 class="text-3xl md:text-4xl font-serif text-warning mb-2">{phases['golden-hour'].title}</h2>
+					<p class="text-warning italic">{phases['golden-hour'].subtitle}</p>
+					<p class="mt-4 text-warning max-w-lg mx-auto">{phases['golden-hour'].description}</p>
 				</div>
 
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases['golden-hour'].features as feature}
 						{@const IconComponent = getFeatureIcon(feature.icon)}
 						{@const colorMap = {
-							gem: 'text-amber-600 dark:text-amber-400',
-							zap: 'text-yellow-500',
-							accessibility: 'text-blue-500',
-							smartphone: 'text-bark-600',
-							puzzle: 'text-purple-500',
-							wander: 'text-teal-500'
+							gem: 'text-warning',
+							zap: 'text-warning',
+							accessibility: 'text-info',
+							smartphone: 'text-foreground-muted',
+							puzzle: 'text-accent',
+							wander: 'text-accent'
 						}}
-						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/70 dark:bg-cream-50/25 backdrop-blur-sm shadow-md border border-amber-200/50 dark:border-amber-800/30">
-							<!-- Use icon lookup map with feature-specific color (Golden Hour = amber tones) -->
+						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/70 dark:bg-cream-50/25 backdrop-blur-sm shadow-md border border-warning">
+							<!-- Use icon lookup map with feature-specific color (Golden Hour = warning tones) -->
 							<IconComponent
-								class="w-5 h-5 {(colorMap as Record<string, string>)[feature.icon ?? ''] || 'text-amber-500'} mt-0.5 flex-shrink-0"
+								class="w-5 h-5 {(colorMap as Record<string, string>)[feature.icon ?? ''] || 'text-warning'} mt-0.5 flex-shrink-0"
 							/>
 							<div class="flex-1">
 								<div class="flex items-center gap-2">
-									<span class="font-medium text-amber-900 dark:text-amber-100">
+									<span class="font-medium text-warning">
 										{#if feature.articleSlug}
 											<a
 												href="/knowledge/help/{feature.articleSlug}"
-												class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors underline-offset-2 hover:underline"
+												class="hover:text-accent transition-colors underline-offset-2 hover:underline"
 											>
 												{#if feature.termSlug}<GroveTerm term={feature.termSlug}>{feature.name}</GroveTerm>{:else}{feature.name}{/if}
 											</a>
@@ -957,7 +958,7 @@
 										<FeatureStar />
 									{/if}
 								</div>
-								<p class="text-sm text-amber-800/70 dark:text-amber-200/70">{feature.description}</p>
+								<p class="text-sm text-warning">{feature.description}</p>
 							</div>
 						</li>
 					{/each}
@@ -969,7 +970,7 @@
 		<section
 			id="midnight-bloom"
 			class="relative py-24 px-6 overflow-hidden
-				bg-gradient-to-b from-orange-950/50 via-purple-950 to-slate-950"
+				bg-gradient-to-b from-surface/50 via-surface to-surface"
 		>
 			<!-- Stars -->
 			<div class="absolute top-12 left-[10%]" aria-hidden="true">
@@ -1026,19 +1027,19 @@
 
 			<div class="max-w-3xl mx-auto relative z-10">
 				<div class="text-center mb-12">
-					<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-900/50 text-purple-300 text-sm font-medium mb-4 border border-purple-700/50">
+					<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent text-white text-sm font-medium mb-4 border border-accent">
 						<MoonIcon class="w-3.5 h-3.5" />
 						The Dream
 						<Star class="w-3.5 h-3.5" />
 					</span>
 					<h2 class="text-3xl md:text-4xl font-serif text-white mb-2">{phases['midnight-bloom'].title}</h2>
-					<p class="text-purple-300 italic">{phases['midnight-bloom'].subtitle}</p>
-					<p class="mt-4 text-purple-200/80 max-w-lg mx-auto">{phases['midnight-bloom'].description}</p>
+					<p class="text-foreground-subtle italic">{phases['midnight-bloom'].subtitle}</p>
+					<p class="mt-4 text-foreground-muted max-w-lg mx-auto">{phases['midnight-bloom'].description}</p>
 				</div>
 
 				<!-- The vision quote -->
-				<blockquote class="max-w-xl mx-auto mb-12 p-6 rounded-lg bg-purple-900/30 border border-purple-700/30 backdrop-blur-sm">
-					<p class="text-purple-200 italic leading-relaxed">
+				<blockquote class="max-w-xl mx-auto mb-12 p-6 rounded-lg bg-surface-subtle border border-border backdrop-blur-sm">
+					<p class="text-foreground-subtle italic leading-relaxed">
 						"A soft glow spilling onto quiet sidewalks after the world has gone still. The kind of third place that becomes a first home. A bloom that opens only in darkness, for those who need it most."
 					</p>
 				</blockquote>
@@ -1047,15 +1048,15 @@
 					{#each phases['midnight-bloom'].features as feature}
 						{@const IconComponent = getFeatureIcon(feature.icon)}
 						{@const colorMap = {
-							coffee: 'text-amber-400',
-							qrcode: 'text-purple-300',
-							bookopen: 'text-pink-300',
-							home: 'text-amber-300'
+							coffee: 'text-warning',
+							qrcode: 'text-accent',
+							bookopen: 'text-foreground-subtle',
+							home: 'text-warning'
 						}}
-						<li class="flex items-start gap-3 p-4 rounded-lg bg-purple-900/30 backdrop-blur-sm border border-purple-700/30">
+						<li class="flex items-start gap-3 p-4 rounded-lg bg-surface-subtle backdrop-blur-sm border border-border">
 							<!-- Use icon lookup map with feature-specific color (Midnight Bloom = mystical purples) -->
 							<IconComponent
-								class="w-5 h-5 {(colorMap as Record<string, string>)[feature.icon ?? ''] || 'text-amber-400'} mt-0.5 flex-shrink-0"
+								class="w-5 h-5 {(colorMap as Record<string, string>)[feature.icon ?? ''] || 'text-warning'} mt-0.5 flex-shrink-0"
 							/>
 							<div class="flex-1">
 								<div class="flex items-center gap-2">
@@ -1063,7 +1064,7 @@
 										{#if feature.articleSlug}
 											<a
 												href="/knowledge/help/{feature.articleSlug}"
-												class="hover:text-emerald-400 transition-colors underline-offset-2 hover:underline"
+												class="hover:text-accent transition-colors underline-offset-2 hover:underline"
 											>
 												{#if feature.termSlug}<GroveTerm term={feature.termSlug}>{feature.name}</GroveTerm>{:else}{feature.name}{/if}
 											</a>
@@ -1075,25 +1076,25 @@
 										<FeatureStar variant="midnight" />
 									{/if}
 								</div>
-								<p class="text-sm text-purple-300">{feature.description}</p>
+								<p class="text-sm text-foreground-subtle">{feature.description}</p>
 							</div>
 						</li>
 					{/each}
 				</ul>
 
 				<!-- Tools link -->
-				<div class="text-center mt-16 pt-8 border-t border-purple-800/30">
-					<p class="text-purple-400 mb-4">There's more growing in the grove...</p>
+				<div class="text-center mt-16 pt-8 border-t border-border">
+					<p class="text-foreground-muted mb-4">There's more growing in the grove...</p>
 					<div class="flex flex-wrap justify-center gap-4">
 						<a
 							href="/workshop"
-							class="px-4 py-2 rounded-lg bg-purple-800/50 text-purple-200 hover:bg-purple-700/50 transition-colors"
+							class="px-4 py-2 rounded-lg bg-accent text-white hover:bg-accent/90 transition-colors"
 						>
 							The Workshop →
 						</a>
 						<a
 							href="/beyond"
-							class="px-4 py-2 rounded-lg bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 transition-colors"
+							class="px-4 py-2 rounded-lg bg-surface-subtle text-foreground hover:bg-muted transition-colors"
 						>
 							Beyond the Grove →
 						</a>

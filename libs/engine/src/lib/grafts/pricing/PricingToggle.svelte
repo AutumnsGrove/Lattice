@@ -29,16 +29,16 @@
 <div
 	role="group"
 	aria-label="Billing period selection"
-	class="inline-flex items-center gap-3 p-1 bg-white/40 dark:bg-emerald-950/30 backdrop-blur-sm rounded-full border border-white/40 dark:border-emerald-800/30 {className}"
+	class="inline-flex items-center gap-3 p-1 bg-white/40 dark:bg-surface-subtle backdrop-blur-sm rounded-full border border-white/40 dark:border-border {className}"
 >
 	<!-- Monthly option -->
 	<button
 		type="button"
 		onclick={() => selectPeriod("monthly")}
 		aria-pressed={billingPeriod === "monthly"}
-		class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-grove-500 focus-visible:ring-offset-2 focus-visible:outline-none {billingPeriod ===
+		class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:outline-none {billingPeriod ===
 		'monthly'
-			? 'bg-white dark:bg-emerald-800/60 text-foreground shadow-sm'
+			? 'bg-white dark:bg-surface-elevated text-foreground shadow-sm'
 			: 'text-foreground-muted hover:text-foreground'}"
 	>
 		Monthly
@@ -49,9 +49,9 @@
 		type="button"
 		onclick={() => selectPeriod("annual")}
 		aria-pressed={billingPeriod === "annual"}
-		class="relative px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-grove-500 focus-visible:ring-offset-2 focus-visible:outline-none {billingPeriod ===
+		class="relative px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:outline-none {billingPeriod ===
 		'annual'
-			? 'bg-white dark:bg-emerald-800/60 text-foreground shadow-sm'
+			? 'bg-white dark:bg-surface-elevated text-foreground shadow-sm'
 			: 'text-foreground-muted hover:text-foreground'}"
 	>
 		Annual

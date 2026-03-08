@@ -74,9 +74,9 @@
 					<div
 						class="relative flex items-center justify-center w-9 h-9 rounded-full transition-all duration-300
 							{status === 'completed'
-							? 'bg-emerald-500/90 text-white shadow-md shadow-emerald-500/30'
+							? 'bg-success/90 text-white shadow-md shadow-success/30'
 							: status === 'current'
-								? 'bg-primary/90 text-white shadow-lg shadow-primary/40 ring-2 ring-primary/30 ring-offset-2 ring-offset-white/50 dark:ring-offset-slate-800/50'
+								? 'bg-primary/90 text-white shadow-lg shadow-primary/40 ring-2 ring-primary/30 ring-offset-2 ring-offset-white/50 dark:ring-offset-surface/50'
 								: 'bg-white/70 dark:bg-bark-700/50 text-foreground-muted backdrop-blur-sm border border-white/40 dark:border-bark-600/40'}"
 	>
 						{#if status === 'completed'}
@@ -90,7 +90,7 @@
 					{#if index < steps.length - 1}
 						<div
 							class="w-6 h-0.5 mx-1 rounded-full transition-colors duration-300
-								{status === 'completed' ? 'bg-emerald-500/70' : 'bg-white/30 dark:bg-bark-600/30'}"
+								{status === 'completed' ? 'bg-success/70' : 'bg-white/30 dark:bg-bark-600/30'}"
 						></div>
 					{/if}
 				</div>
@@ -120,9 +120,9 @@
 						<div
 							class="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300
 								{status === 'completed'
-								? 'bg-emerald-500/90 text-white shadow-md shadow-emerald-500/25'
+								? 'bg-success/90 text-white shadow-md shadow-success/25'
 								: status === 'current'
-									? 'bg-primary/90 text-white shadow-lg shadow-primary/30 ring-2 ring-primary/20 ring-offset-2 ring-offset-white/30 dark:ring-offset-slate-800/30'
+									? 'bg-primary/90 text-white shadow-lg shadow-primary/30 ring-2 ring-primary/20 ring-offset-2 ring-offset-white/30 dark:ring-offset-surface/30'
 									: 'bg-white/80 dark:bg-bark-700/60 text-foreground-muted backdrop-blur-sm border border-white/50 dark:border-bark-600/40'}"
 						>
 							{#if status === 'completed'}
@@ -136,7 +136,7 @@
 						{#if index < steps.length - 1}
 							<div
 								class="absolute top-10 left-1/2 -translate-x-1/2 w-0.5 h-8 rounded-full transition-colors duration-300
-									{status === 'completed' ? 'bg-emerald-500/50' : 'bg-white/30 dark:bg-bark-600/30'}"
+									{status === 'completed' ? 'bg-success/50' : 'bg-white/30 dark:bg-bark-600/30'}"
 							></div>
 						{/if}
 					</div>
@@ -146,7 +146,7 @@
 						<p
 							class="text-sm font-medium transition-colors duration-200
 								{status === 'completed'
-								? 'text-emerald-600 dark:text-emerald-400'
+								? 'text-success'
 								: status === 'current'
 									? 'text-foreground'
 									: 'text-foreground-muted'}"

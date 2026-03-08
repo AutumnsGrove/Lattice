@@ -26,9 +26,7 @@
 	let { variant = "default" }: Props = $props();
 
 	const colorClass = $derived(
-		variant === "midnight"
-			? "text-amber-400 fill-amber-400"
-			: "text-amber-500 fill-amber-500"
+		variant === "midnight" ? "text-accent-muted fill-accent-muted" : "text-accent fill-accent",
 	);
 </script>
 

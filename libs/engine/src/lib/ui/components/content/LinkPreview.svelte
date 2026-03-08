@@ -92,7 +92,7 @@
 		showFavicon = true,
 		class: className,
 		newTab = true,
-		disabled = false
+		disabled = false,
 	}: Props = $props();
 
 	// State
@@ -118,7 +118,7 @@
 
 	// Determine if we should fetch (has endpoint and missing required data)
 	const shouldFetch = $derived(
-		fetchEndpoint && !initialTitle && !initialDescription && !initialImage
+		fetchEndpoint && !initialTitle && !initialDescription && !initialImage,
 	);
 
 	// Fetch metadata on mount if needed
@@ -170,14 +170,14 @@
 	const containerClasses = $derived.by(() => {
 		const base = `
 			group relative overflow-hidden rounded-xl
-			bg-white/80 dark:bg-bark-800/50 backdrop-blur-md
-			border border-white/40 dark:border-bark-700/40
+			bg-white/80 dark:bg-surface-subtle backdrop-blur-md
+			border border-white/40 dark:border-border
 			shadow-sm transition-all duration-200
 		`;
 
 		const hover = disabled
 			? ""
-			: "hover:bg-white/70 dark:hover:bg-bark-800/60 hover:shadow-md hover:border-white/50 dark:hover:border-bark-600/50";
+			: "hover:bg-white/70 dark:hover:bg-surface-elevated hover:shadow-md hover:border-white/50 dark:hover:border-border";
 
 		const layout =
 			effectiveImagePosition === "top"
@@ -192,9 +192,7 @@
 	// Image container classes
 	const imageContainerClasses = $derived.by(() => {
 		if (effectiveImagePosition === "top") {
-			return variant === "large"
-				? "w-full h-48 sm:h-56"
-				: "w-full h-32 sm:h-40";
+			return variant === "large" ? "w-full h-48 sm:h-56" : "w-full h-32 sm:h-40";
 		}
 		// Side positioning
 		return variant === "compact"
@@ -205,9 +203,7 @@
 	// Content padding classes
 	const contentClasses = $derived.by(() => {
 		const base = "flex flex-col justify-center min-w-0";
-		return variant === "compact"
-			? cn(base, "p-3 gap-1")
-			: cn(base, "p-4 gap-2 flex-1");
+		return variant === "compact" ? cn(base, "p-3 gap-1") : cn(base, "p-4 gap-2 flex-1");
 	});
 </script>
 
@@ -230,7 +226,7 @@
 	<!-- Loading state -->
 	{#if loading}
 		<div class="flex items-center justify-center p-6 w-full">
-			<div class="flex items-center gap-3 text-bark-400 dark:text-cream-500">
+			<div class="flex items-center gap-3 text-foreground-muted">
 				<div
 					class="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin"
 					role="status"
@@ -242,7 +238,7 @@
 	{:else}
 		<!-- Image -->
 		{#if hasImage}
-			<div class={cn(imageContainerClasses, "relative bg-bark-100 dark:bg-bark-700/50")}>
+			<div class={cn(imageContainerClasses, "relative bg-surface-subtle")}>
 				<img
 					src={displayImage}
 					alt={displayTitle || "Link preview"}
@@ -265,7 +261,7 @@
 		<!-- Content -->
 		<div class={contentClasses}>
 			<!-- Site name / Domain row -->
-			<div class="flex items-center gap-2 text-xs text-bark-500 dark:text-cream-500">
+			<div class="flex items-center gap-2 text-xs text-foreground-muted">
 				{#if showFavicon && displayFavicon}
 					<img
 						src={displayFavicon}
@@ -284,9 +280,9 @@
 			{#if displayTitle}
 				<h3
 					class={cn(
-						"font-medium text-bark dark:text-cream leading-snug",
+						"font-medium text-foreground leading-snug",
 						variant === "compact" ? "text-sm line-clamp-1" : "text-base line-clamp-2",
-						!disabled && "group-hover:text-primary dark:group-hover:text-primary-400"
+						!disabled && "group-hover:text-accent",
 					)}
 				>
 					{displayTitle}
@@ -297,8 +293,8 @@
 			{#if displayDescription && variant !== "compact"}
 				<p
 					class={cn(
-						"text-sm text-bark-600 dark:text-cream-400 leading-relaxed",
-						variant === "large" ? "line-clamp-3" : "line-clamp-2"
+						"text-sm text-foreground-muted leading-relaxed",
+						variant === "large" ? "line-clamp-3" : "line-clamp-2",
 					)}
 				>
 					{displayDescription}
@@ -307,7 +303,7 @@
 
 			<!-- Error state -->
 			{#if error}
-				<div class="flex items-center gap-2 text-xs text-amber-600 dark:text-amber-400">
+				<div class="flex items-center gap-2 text-xs text-warning">
 					<AlertCircle class="w-4 h-4" />
 					<span>Preview unavailable</span>
 				</div>
@@ -317,10 +313,10 @@
 		<!-- External link indicator (decorative, link already has rel and target) -->
 		{#if !disabled && newTab}
 			<div
-				class="absolute top-2 right-2 p-1.5 rounded-md bg-white/80 dark:bg-bark-800/80 opacity-0 group-hover:opacity-100 transition-opacity"
+				class="absolute top-2 right-2 p-1.5 rounded-md bg-surface-elevated opacity-0 group-hover:opacity-100 transition-opacity"
 				aria-hidden="true"
 			>
-				<Icons name="external" size="sm" class="text-bark-400 dark:text-cream-500" />
+				<Icons name="external" size="sm" class="text-foreground-muted" />
 			</div>
 		{/if}
 	{/if}

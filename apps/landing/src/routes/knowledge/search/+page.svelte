@@ -127,14 +127,14 @@
 									<span
 										class="ml-4 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {doc.category ===
 										'specs'
-											? 'bg-accent/10 text-accent dark:bg-accent/20 dark:text-accent-text'
+											? 'bg-accent/10 text-accent dark:bg-accent/20 dark:text-accent'
 											: doc.category === 'help'
-												? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
+												? 'info-bg text-info'
 												: doc.category === 'legal'
-													? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300'
+													? 'bg-accent-muted/10 text-accent-muted dark:bg-accent-muted/20 dark:text-accent-muted'
 													: doc.category === 'marketing'
-														? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300'
-														: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300'}"
+														? 'success-bg text-success'
+														: 'warning-bg text-warning'}"
 									>
 										{doc.category === "specs"
 											? "Spec"
@@ -202,7 +202,7 @@
 							</a>
 							<a
 								href="/knowledge/help"
-								class="px-4 py-2 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/40 transition-colors"
+								class="px-4 py-2 info-bg text-info rounded-lg hover:bg-info/80 transition-colors"
 							>
 								Browse Help Articles
 							</a>

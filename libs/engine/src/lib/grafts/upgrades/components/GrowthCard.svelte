@@ -6,23 +6,32 @@
 	 * Used in garden modals and dashboard widgets.
 	 */
 
-	import { Sprout, TreeDeciduous, Trees, Crown, User, Footprints, Check, ArrowRight } from 'lucide-svelte';
-	import type { GrowthCardProps } from './types.js';
+	import {
+		Sprout,
+		TreeDeciduous,
+		Trees,
+		Crown,
+		User,
+		Footprints,
+		Check,
+		ArrowRight,
+	} from "lucide-svelte";
+	import type { GrowthCardProps } from "./types.js";
 
 	let {
 		stage,
 		displayName,
 		tagline,
-		icon = 'sprout',
+		icon = "sprout",
 		isCurrent = false,
 		available = true,
 		isNext = false,
 		monthlyPrice = 0,
 		annualPrice = 0,
 		features = [],
-		variant = 'secondary',
+		variant = "secondary",
 		onCultivate,
-		class: className = '',
+		class: className = "",
 	}: GrowthCardProps = $props();
 
 	// Icon mapping
@@ -30,7 +39,7 @@
 		user: User,
 		footprints: Footprints,
 		sprout: Sprout,
-		'tree-deciduous': TreeDeciduous,
+		"tree-deciduous": TreeDeciduous,
 		trees: Trees,
 		crown: Crown,
 	};
@@ -38,18 +47,16 @@
 	let IconComponent = $derived(iconComponents[icon] || Sprout);
 
 	// Price display
-	let displayPrice = $derived(
-		monthlyPrice === 0 ? 'Free' : `$${monthlyPrice}`
-	);
+	let displayPrice = $derived(monthlyPrice === 0 ? "Free" : `$${monthlyPrice}`);
 
-	let priceSuffix = $derived(monthlyPrice === 0 ? '' : '/mo');
+	let priceSuffix = $derived(monthlyPrice === 0 ? "" : "/mo");
 
 	// Button text based on state
 	let buttonText = $derived.by(() => {
-		if (isCurrent) return 'Current Stage';
-		if (!available) return 'Coming Soon';
-		if (isNext) return 'Nurture';
-		return 'Cultivate';
+		if (isCurrent) return "Current Stage";
+		if (!available) return "Coming Soon";
+		if (isNext) return "Nurture";
+		return "Cultivate";
 	});
 
 	// Button disabled state
@@ -58,12 +65,12 @@
 	// Button variant styles
 	let buttonStyles = $derived.by(() => {
 		switch (variant) {
-			case 'primary':
-				return 'bg-accent text-white hover:bg-accent/90';
-			case 'outline':
-				return 'border-2 border-accent text-accent hover:bg-accent/10';
+			case "primary":
+				return "bg-accent text-white hover:bg-accent/90";
+			case "outline":
+				return "border-2 border-accent text-accent hover:bg-accent/10";
 			default:
-				return 'bg-grove-100 dark:bg-grove-800 text-foreground hover:bg-grove-200 dark:hover:bg-grove-700';
+				return "bg-grove-100 dark:bg-grove-800 text-foreground hover:bg-grove-200 dark:hover:bg-grove-700";
 		}
 	});
 </script>
@@ -73,9 +80,7 @@
     relative flex flex-col h-full p-5 rounded-lg
     bg-white/60 dark:bg-grove-950/20 backdrop-blur-sm
     border transition-all duration-200
-    {isCurrent
-		? 'border-accent/50 bg-accent/5'
-		: 'border-white/30 dark:border-grove-800/20'}
+    {isCurrent ? 'border-accent/50 bg-accent/5' : 'border-white/30 dark:border-grove-800/20'}
     {isNext ? 'ring-2 ring-accent/30 scale-[1.02]' : ''}
     {className}
   "
@@ -92,7 +97,7 @@
 	<!-- Next stage indicator -->
 	{#if isNext && !isCurrent}
 		<div
-			class="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-green-600 text-white text-xs font-medium rounded-full"
+			class="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-success text-white text-xs font-medium rounded-full"
 		>
 			Next Stage
 		</div>

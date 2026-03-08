@@ -295,16 +295,16 @@
 
 <!-- Messages -->
 {#if errorMessage}
-	<div class="mb-6 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg flex items-center justify-between">
+	<div class="mb-6 error-bg border border-error text-error px-4 py-3 rounded-lg flex items-center justify-between">
 		<span class="font-sans text-sm">{errorMessage}</span>
-		<button onclick={() => (errorMessage = '')} class="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-200" aria-label="Dismiss error">
+		<button onclick={() => (errorMessage = '')} class="text-error hover:text-error dark:text-error dark:hover:text-error" aria-label="Dismiss error">
 			<X class="w-4 h-4" />
 		</button>
 	</div>
 {/if}
 
 {#if successMessage}
-	<div class="mb-6 bg-grove-50 dark:bg-grove-950/30 border border-grove-200 dark:border-grove-800 text-grove-700 dark:text-grove-300 px-4 py-3 rounded-lg" role="status" aria-live="polite">
+	<div class="mb-6 success-bg border border-success text-success px-4 py-3 rounded-lg" role="status" aria-live="polite">
 		<span class="font-sans text-sm">{successMessage}</span>
 	</div>
 {/if}
@@ -314,8 +314,8 @@
 	<div
 		class="border-2 border-dashed rounded-xl p-8 text-center transition-colors
 			{isDragging
-				? 'border-grove-500 dark:border-grove-400 bg-grove-50/50 dark:bg-grove-950/30'
-				: 'border-grove-300 dark:border-cream-300 hover:border-grove-400 dark:hover:border-grove-500'}"
+				? 'border-accent dark:border-accent bg-accent/5 dark:bg-accent/5'
+				: 'border-border dark:border-border hover:border-accent dark:hover:border-accent'}"
 		ondrop={handleDrop}
 		ondragover={handleDragOver}
 		ondragleave={handleDragLeave}
@@ -324,11 +324,11 @@
 		tabindex="0"
 		aria-label="Upload files. Press Enter or Space to browse, or drag and drop files here."
 	>
-		<Upload class="w-12 h-12 mx-auto mb-4 text-grove-400 dark:text-grove-500" aria-hidden="true" />
+		<Upload class="w-12 h-12 mx-auto mb-4 text-foreground-subtle dark:text-foreground-subtle" aria-hidden="true" />
 
 		<p class="text-foreground-muted font-sans mb-4">
 			Drag & drop files here, or
-			<label class="text-grove-600 dark:text-grove-400 hover:text-grove-700 dark:hover:text-grove-300 cursor-pointer underline">
+			<label class="text-accent dark:text-accent hover:text-accent-muted dark:hover:text-accent-muted cursor-pointer underline">
 				browse
 				<input bind:this={fileInputRef} type="file" multiple class="hidden" onchange={handleFileSelect} />
 			</label>
@@ -343,7 +343,7 @@
 						type="text"
 						bind:value={newFolderName}
 						placeholder="folder-name"
-						class="px-3 py-1.5 text-sm border border-grove-300 dark:border-cream-300 rounded-lg bg-white dark:bg-cream-100 text-foreground focus:border-grove-500 focus:outline-none"
+						class="px-3 py-1.5 text-sm border border-border dark:border-border rounded-lg bg-surface dark:bg-surface text-foreground focus:border-accent focus:outline-none"
 					/>
 					<button
 						onclick={() => {
@@ -358,7 +358,7 @@
 					<select
 						id="folder-select"
 						bind:value={selectedFolder}
-						class="px-3 py-1.5 text-sm border border-grove-300 dark:border-cream-300 rounded-lg bg-white dark:bg-cream-100 text-foreground focus:border-grove-500 focus:outline-none"
+						class="px-3 py-1.5 text-sm border border-border dark:border-border rounded-lg bg-surface dark:bg-surface text-foreground focus:border-accent focus:outline-none"
 					>
 						<option value="/">/ (root)</option>
 						{#each folders.filter((f) => f !== '/') as folder}
@@ -367,7 +367,7 @@
 					</select>
 					<button
 						onclick={() => (showNewFolder = true)}
-						class="text-grove-600 dark:text-grove-400 hover:text-grove-700 dark:hover:text-grove-300 text-sm font-sans"
+						class="text-accent dark:text-accent hover:text-accent-muted dark:hover:text-accent-muted text-sm font-sans"
 					>
 						+ New folder
 					</button>
@@ -387,12 +387,12 @@
 				<GlassCard class="flex items-center gap-3 p-3">
 					<span class="text-sm font-sans text-foreground-muted flex-1 truncate">{item.name}</span>
 					{#if item.progress === -1}
-						<span class="text-xs text-red-500 dark:text-red-400 font-sans">Failed</span>
+						<span class="text-xs text-error dark:text-error font-sans">Failed</span>
 					{:else if item.progress === 100}
-						<CheckCircle class="w-5 h-5 text-grove-500 dark:text-grove-400" />
+						<CheckCircle class="w-5 h-5 text-success dark:text-success" />
 					{:else}
 						<div
-							class="w-24 h-2 bg-grove-100 dark:bg-cream-200 rounded-full overflow-hidden"
+							class="w-24 h-2 bg-surface-subtle dark:bg-surface-subtle rounded-full overflow-hidden"
 							role="progressbar"
 							aria-valuenow={item.progress}
 							aria-valuemin={0}
@@ -400,7 +400,7 @@
 							aria-label="Upload progress for {item.name}"
 						>
 							<div
-								class="h-full bg-grove-500 dark:bg-grove-400 transition-all duration-300"
+								class="h-full bg-accent dark:bg-accent transition-all duration-300"
 								style="width: {item.progress}%"
 							></div>
 						</div>
@@ -442,9 +442,9 @@
 			{#each files as file (file.id)}
 				{@const iconType = getFileIconType(file.content_type)}
 				{@const FileTypeIcon = fileTypeIcons[iconType] || FileIcon}
-				<GlassCard class="overflow-hidden hover:border-grove-300 dark:hover:border-grove-600 transition-colors group">
+				<GlassCard class="overflow-hidden hover:border-border dark:hover:border-border transition-colors group">
 					<!-- Preview -->
-					<div class="aspect-square bg-grove-50 dark:bg-cream-100/50 flex items-center justify-center relative">
+					<div class="aspect-square bg-surface-subtle dark:bg-surface-subtle flex items-center justify-center relative">
 						{#if isImage(file.content_type)}
 							<img
 								src={file.url}
@@ -452,7 +452,7 @@
 								class="w-full h-full object-cover"
 							/>
 						{:else}
-							<FileTypeIcon class="w-12 h-12 text-grove-400 dark:text-grove-500" aria-hidden="true" />
+							<FileTypeIcon class="w-12 h-12 text-foreground-subtle dark:text-foreground-subtle" aria-hidden="true" />
 						{/if}
 
 						<!-- Delete Confirmation Overlay -->
@@ -465,11 +465,11 @@
 								tabindex="-1"
 								onkeydown={(e) => handleDeleteDialogKeydown(e, file.id)}
 							>
-								<p id="delete-dialog-{file.id}" class="text-white text-sm font-sans mb-3 text-center">Delete this file?</p>
+								<p id="delete-dialog-{file.id}" class="text-foreground text-sm font-sans mb-3 text-center">Delete this file?</p>
 								<div class="flex gap-2">
 									<button
 										onclick={() => deleteFile(file.id)}
-										class="px-3 py-1.5 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 transition-colors"
+										class="px-3 py-1.5 bg-error text-error-foreground text-sm rounded-lg hover:bg-error transition-colors"
 									>
 										Delete
 									</button>
@@ -478,7 +478,7 @@
 											deleteConfirmId = null;
 											deleteButtonRefs[file.id]?.focus();
 										}}
-										class="px-3 py-1.5 bg-white text-bark-900 text-sm rounded-lg hover:bg-gray-100 transition-colors"
+										class="px-3 py-1.5 bg-surface text-foreground text-sm rounded-lg hover:bg-surface-hover transition-colors"
 									>
 										Cancel
 									</button>
@@ -501,14 +501,14 @@
 							<span>{formatDate(file.created_at)}</span>
 						</div>
 						{#if file.folder !== '/'}
-							<p class="text-xs text-grove-600 dark:text-grove-400 font-sans mt-1">{file.folder}</p>
+							<p class="text-xs text-accent dark:text-accent font-sans mt-1">{file.folder}</p>
 						{/if}
 
 						<!-- Actions -->
 						<div class="flex items-center gap-2 mt-3">
 							<button
 								onclick={() => copyUrl(file)}
-								class="flex-1 px-2 py-1.5 text-xs font-sans bg-grove-50 dark:bg-cream-200 text-grove-700 dark:text-grove-300 rounded-lg hover:bg-grove-100 dark:hover:bg-cream-300 transition-colors flex items-center justify-center gap-1"
+								class="flex-1 px-2 py-1.5 text-xs font-sans bg-surface-subtle dark:bg-surface-subtle text-accent dark:text-accent rounded-lg hover:bg-surface-hover dark:hover:bg-surface-hover transition-colors flex items-center justify-center gap-1"
 							>
 								{#if copiedId === file.id}
 									<Check class="w-3.5 h-3.5" />
@@ -522,7 +522,7 @@
 								href={file.url}
 								target="_blank"
 								rel="noopener noreferrer"
-								class="p-1.5 text-foreground/40 hover:text-grove-600 dark:hover:text-grove-400 transition-colors"
+								class="p-1.5 text-foreground-subtle hover:text-accent dark:hover:text-accent transition-colors"
 								aria-label="Open {file.original_filename} in new tab"
 							>
 								<ExternalLink class="w-4 h-4" aria-hidden="true" />
@@ -530,7 +530,7 @@
 							<button
 								bind:this={deleteButtonRefs[file.id]}
 								onclick={() => (deleteConfirmId = file.id)}
-								class="p-1.5 text-foreground/40 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+								class="p-1.5 text-foreground-subtle hover:text-error dark:hover:text-error transition-colors"
 								aria-label="Delete file {file.original_filename}"
 							>
 								<Trash2 class="w-4 h-4" aria-hidden="true" />

@@ -15,7 +15,7 @@
 <div class="mb-8">
 	<a
 		href="/arbor/status"
-		class="inline-flex items-center gap-1 text-sm font-sans text-foreground-muted hover:text-grove-600 dark:hover:text-grove-400 transition-colors mb-4"
+		class="inline-flex items-center gap-1 text-sm font-sans text-foreground-muted hover:text-accent transition-colors mb-4"
 	>
 		<ArrowLeft class="w-4 h-4" />
 		Back to Status
@@ -24,8 +24,8 @@
 </div>
 
 {#if form?.error}
-	<GlassCard class="mb-6 p-4 border-red-200 dark:border-red-800" role="alert">
-		<p class="text-sm font-sans text-red-700 dark:text-red-400">{form.error}</p>
+	<GlassCard class="mb-6 p-4 border-error" role="alert">
+		<p class="text-sm font-sans text-error-foreground">{form.error}</p>
 	</GlassCard>
 {/if}
 

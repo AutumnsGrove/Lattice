@@ -114,7 +114,7 @@
 					<form method="POST" action={logoutHref}>
 						<button
 							type="submit"
-							class="p-2 rounded-lg text-foreground-subtle hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+							class="p-2 rounded-lg text-foreground-subtle hover:text-error hover:bg-error-bg transition-colors"
 							title="Logout"
 							aria-label="Logout"
 						>
@@ -124,7 +124,7 @@
 				{:else if onLogout}
 					<button
 						onclick={handleLogout}
-						class="p-2 rounded-lg text-foreground-subtle hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+						class="p-2 rounded-lg text-foreground-subtle hover:text-error hover:bg-error-bg transition-colors"
 						title="Logout"
 						aria-label="Logout"
 					>

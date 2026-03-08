@@ -98,35 +98,46 @@ Apps auto-deploy via GitHub Actions on push to main. Resource IDs are hardcoded 
 
 **Valid Grove color families** (defined in `tailwind.preset.js`):
 
-| Token | Variants | Example classes |
-|-------|----------|-----------------|
-| `grove` | 50–950 | `bg-grove-500`, `text-grove-700` |
-| `cream` | DEFAULT, 50–500 | `bg-cream-200`, `border-cream-300` |
-| `bark` | DEFAULT, 50–950 | `text-bark-900`, `bg-bark-50` |
-| `primary` | DEFAULT, foreground | `bg-primary`, `text-primary-foreground` |
-| `secondary` | DEFAULT, foreground | `bg-secondary` |
-| `background` | — | `bg-background` |
-| `foreground` | DEFAULT, muted, subtle, faint | `text-foreground-muted` |
-| `muted` | DEFAULT, foreground | `bg-muted`, `text-muted-foreground` |
-| `accent` | DEFAULT, foreground, muted, subtle | `bg-accent-subtle` |
-| `surface` | DEFAULT, hover, elevated, subtle, alt | `bg-surface-subtle` |
-| `card` | DEFAULT, foreground | `bg-card`, `text-card-foreground` |
-| `popover` | DEFAULT, foreground | `bg-popover` |
-| `destructive` | DEFAULT, foreground | `bg-destructive` |
-| `error` | DEFAULT, foreground, bg | `text-error`, `bg-error-bg` |
-| `warning` | DEFAULT, foreground, bg, muted | `text-warning`, `bg-warning-bg` |
-| `success` | DEFAULT, foreground, bg, muted | `text-success`, `bg-success-bg` |
-| `info` | DEFAULT, foreground, bg, muted | `text-info`, `bg-info-bg` |
-| `divider` | — | `border-divider` |
-| `default` | — | `border-default` |
-| `subtle` | — | `bg-subtle` |
-| `border` | — | `border-border` |
-| `input` | — | `border-input` |
-| `ring` | — | `ring-ring` |
+| Token         | Variants                              | Example classes                         |
+| ------------- | ------------------------------------- | --------------------------------------- |
+| `grove`       | 50–950                                | `bg-grove-500`, `text-grove-700`        |
+| `cream`       | DEFAULT, 50–500                       | `bg-cream-200`, `border-cream-300`      |
+| `bark`        | DEFAULT, 50–950                       | `text-bark-900`, `bg-bark-50`           |
+| `primary`     | DEFAULT, foreground                   | `bg-primary`, `text-primary-foreground` |
+| `secondary`   | DEFAULT, foreground                   | `bg-secondary`                          |
+| `background`  | —                                     | `bg-background`                         |
+| `foreground`  | DEFAULT, muted, subtle, faint         | `text-foreground-muted`                 |
+| `muted`       | DEFAULT, foreground                   | `bg-muted`, `text-muted-foreground`     |
+| `accent`      | DEFAULT, foreground, muted, subtle    | `bg-accent-subtle`                      |
+| `surface`     | DEFAULT, hover, elevated, subtle, alt | `bg-surface-subtle`                     |
+| `card`        | DEFAULT, foreground                   | `bg-card`, `text-card-foreground`       |
+| `popover`     | DEFAULT, foreground                   | `bg-popover`                            |
+| `destructive` | DEFAULT, foreground                   | `bg-destructive`                        |
+| `error`       | DEFAULT, foreground, bg               | `text-error`, `bg-error-bg`             |
+| `warning`     | DEFAULT, foreground, bg, muted        | `text-warning`, `bg-warning-bg`         |
+| `success`     | DEFAULT, foreground, bg, muted        | `text-success`, `bg-success-bg`         |
+| `info`        | DEFAULT, foreground, bg, muted        | `text-info`, `bg-info-bg`               |
+| `divider`     | —                                     | `border-divider`                        |
+| `default`     | —                                     | `border-default`                        |
+| `subtle`      | —                                     | `bg-subtle`                             |
+| `border`      | —                                     | `border-border`                         |
+| `input`       | —                                     | `border-input`                          |
+| `ring`        | —                                     | `ring-ring`                             |
 
 **DO NOT use** standard Tailwind colors (`gray-*`, `slate-*`, `zinc-*`, `neutral-*`, `stone-*`, `red-*`, `blue-*`, `green-*`, `amber-*`, `purple-*`, `pink-*`, `emerald-*`, `indigo-*`, `teal-*`). These are not in the Grove palette and will render as transparent/invisible.
 
 **When unsure**, check the preset: `libs/engine/src/lib/ui/tailwind.preset.js`
+
+### Dual Token System (CSS Custom Properties)
+
+The engine has **two parallel CSS variable systems** loaded in order by `+layout.svelte`:
+
+1. **`app.css`** (via Tailwind directives) — shadcn-style HSL system (`--primary`, `--foreground`, `--border`). Values are bare HSL channels, used as `hsl(var(--primary))`.
+2. **`tokens.css`** (`libs/engine/src/lib/styles/tokens.css`) — Grove's full semantic token system (`--color-text`, `--color-border`, `--glass-bg`, `--grove-overlay-*`, etc.). Values are complete color expressions.
+
+**tokens.css loads after app.css**, so it wins the cascade for any shared names. Do NOT add aliases to `app.css` for variables that `tokens.css` already defines — they'll be overridden silently.
+
+**When using CSS variables in scoped `<style>` blocks**, always verify the variable exists in one of these two files. Invented variable names fail silently (render as transparent).
 
 ### CRITICAL: Tailwind Preset Required
 
@@ -279,6 +290,7 @@ That's it. `glimpse seed` sets up the database, `--auto` starts the dev server, 
 #### Local Routing
 
 Locally, subdomains are simulated via query parameter:
+
 - `http://localhost:5173/?subdomain=midnight-bloom` — Home page
 - `http://localhost:5173/garden?subdomain=midnight-bloom` — Blog listing
 - `http://localhost:5173/garden/some-post?subdomain=midnight-bloom` — Blog post
@@ -302,12 +314,12 @@ uv run --project tools/glimpse glimpse seed --profile fake --fake-posts 5 --yes
 uv run --project tools/glimpse glimpse seed --profile fresh --yes
 ```
 
-| Profile | Subdomain | Use Case |
-|---------|-----------|----------|
-| `blog` | `midnight-bloom` | Default. Curated tea shop blog with known content |
-| `empty` | `empty-grove` | Empty state testing — what does a blank site look like? |
-| `fake` | _(random each run)_ | Random content — proves rendering works with arbitrary data |
-| `fresh` | _(none)_ | Migrations only — no tenant data at all |
+| Profile | Subdomain           | Use Case                                                    |
+| ------- | ------------------- | ----------------------------------------------------------- |
+| `blog`  | `midnight-bloom`    | Default. Curated tea shop blog with known content           |
+| `empty` | `empty-grove`       | Empty state testing — what does a blank site look like?     |
+| `fake`  | _(random each run)_ | Random content — proves rendering works with arbitrary data |
+| `fresh` | _(none)_            | Migrations only — no tenant data at all                     |
 
 **Use `fake` when you want to prove your UI handles real-world variation, not just the one test dataset you designed around.**
 

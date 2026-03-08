@@ -10,9 +10,9 @@
 	let { data }: { data: PageData } = $props();
 
 	const statusConfig = {
-		open: { label: 'Open', icon: MessageCircle, color: 'text-blue-600 bg-blue-100 dark:text-blue-400 dark:bg-blue-900/30' },
-		pending: { label: 'Pending', icon: Clock, color: 'text-amber-600 bg-amber-100 dark:text-amber-400 dark:bg-amber-900/30' },
-		resolved: { label: 'Resolved', icon: CheckCircle, color: 'text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/30' },
+		open: { label: 'Open', icon: MessageCircle, color: 'text-info-foreground bg-info-bg' },
+		pending: { label: 'Pending', icon: Clock, color: 'text-warning-foreground bg-warning-bg' },
+		resolved: { label: 'Resolved', icon: CheckCircle, color: 'text-success-foreground bg-success-bg' },
 	} as const;
 
 	const categoryLabels: Record<string, string> = {
@@ -55,7 +55,7 @@
 		<!-- Not authenticated -->
 		{#if !data.user}
 			<GlassCard class="text-center">
-				<AlertCircle class="w-12 h-12 mx-auto text-amber-500 dark:text-amber-400 mb-4" />
+				<AlertCircle class="w-12 h-12 mx-auto text-warning mb-4" />
 				<h2 class="text-xl font-serif text-foreground mb-2">Sign in to view your visits</h2>
 				<p class="text-foreground-muted font-sans mb-4">
 					Visit history is available for signed-in wanderers.

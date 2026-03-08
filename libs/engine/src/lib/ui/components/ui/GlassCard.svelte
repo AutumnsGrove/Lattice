@@ -204,11 +204,11 @@
 	// Border colors per variant - subtle, warm borders
 	// Dark mode: cream-300 = 67 64 58 (medium warm gray), cream-400 = 87 83 76
 	const borderClasses: Record<GlassVariant, string> = {
-		default: "border-white/40 dark:border-cream-300/40",
-		accent: "border-accent/30 dark:border-cream-300/30",
-		dark: "border-bark-700/30 dark:border-cream-400/30",
-		muted: "border-white/20 dark:border-cream-300/30",
-		frosted: "border-white/50 dark:border-cream-300/40",
+		default: "border-white/40 dark:border-border",
+		accent: "border-accent/30 dark:border-border",
+		dark: "border-bark-700/30 dark:border-border",
+		muted: "border-white/20 dark:border-border",
+		frosted: "border-white/50 dark:border-border",
 	};
 
 	// Hover styles - slightly more visible on hover
@@ -251,12 +251,12 @@
 	{#if featured}
 		<!-- Featured star indicator (decorative - context provides meaning) -->
 		<div
-			class="absolute top-2 right-2 z-grove-raised flex items-center justify-center w-6 h-6 rounded-full bg-white dark:bg-cream-200 shadow-md border border-amber-200 dark:border-amber-700"
+			class="absolute top-2 right-2 z-grove-raised flex items-center justify-center w-6 h-6 rounded-full bg-white dark:bg-cream-200 shadow-md border border-warning/30 dark:border-warning-muted/50"
 			title="Featured"
 			aria-hidden="true"
 		>
 			<Star
-				class="w-3.5 h-3.5 fill-current {featuredColor ? '' : 'text-amber-500'}"
+				class="w-3.5 h-3.5 fill-current {featuredColor ? '' : 'text-warning'}"
 				style={featuredColor ? `color: ${featuredColor}` : undefined}
 			/>
 		</div>

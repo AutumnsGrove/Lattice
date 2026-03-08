@@ -81,15 +81,15 @@
 		const total = data.latest.totalCodeLines;
 		if (total === 0) return [];
 		return [
-			{ name: 'TypeScript', lines: data.latest.tsLines, color: 'bg-[#0284c7]', pct: Math.round((data.latest.tsLines / total) * 100) },
-			{ name: 'Svelte', lines: data.latest.svelteLines, color: 'bg-[#e54d2e]', pct: Math.round((data.latest.svelteLines / total) * 100) },
-			{ name: 'Python', lines: data.latest.pyLines, color: 'bg-[#22c55e]', pct: Math.round((data.latest.pyLines / total) * 100) },
-			{ name: 'Go', lines: data.latest.goLines, color: 'bg-[#7dd3fc]', pct: Math.round((data.latest.goLines / total) * 100) },
-			{ name: 'SQL', lines: data.latest.sqlLines, color: 'bg-[#a78bfa]', pct: Math.round((data.latest.sqlLines / total) * 100) },
-			{ name: 'JavaScript', lines: data.latest.jsLines, color: 'bg-[#f59e0b]', pct: Math.round((data.latest.jsLines / total) * 100) },
-			{ name: 'CSS', lines: data.latest.cssLines, color: 'bg-[#f472b6]', pct: Math.round((data.latest.cssLines / total) * 100) },
-			{ name: 'Shell', lines: data.latest.shLines, color: 'bg-[#78716c]', pct: Math.round((data.latest.shLines / total) * 100) },
-			{ name: 'TSX', lines: data.latest.tsxLines, color: 'bg-[#f43f5e]', pct: Math.round((data.latest.tsxLines / total) * 100) }
+			{ name: 'TypeScript', lines: data.latest.tsLines, color: 'bg-info', pct: Math.round((data.latest.tsLines / total) * 100) },
+			{ name: 'Svelte', lines: data.latest.svelteLines, color: 'bg-error', pct: Math.round((data.latest.svelteLines / total) * 100) },
+			{ name: 'Python', lines: data.latest.pyLines, color: 'bg-success', pct: Math.round((data.latest.pyLines / total) * 100) },
+			{ name: 'Go', lines: data.latest.goLines, color: 'bg-info-muted', pct: Math.round((data.latest.goLines / total) * 100) },
+			{ name: 'SQL', lines: data.latest.sqlLines, color: 'bg-accent', pct: Math.round((data.latest.sqlLines / total) * 100) },
+			{ name: 'JavaScript', lines: data.latest.jsLines, color: 'bg-warning', pct: Math.round((data.latest.jsLines / total) * 100) },
+			{ name: 'CSS', lines: data.latest.cssLines, color: 'bg-accent-muted', pct: Math.round((data.latest.cssLines / total) * 100) },
+			{ name: 'Shell', lines: data.latest.shLines, color: 'bg-foreground-muted', pct: Math.round((data.latest.shLines / total) * 100) },
+			{ name: 'TSX', lines: data.latest.tsxLines, color: 'bg-destructive', pct: Math.round((data.latest.tsxLines / total) * 100) }
 		].filter(lang => lang.lines > 0);
 	});
 
@@ -111,15 +111,15 @@
 		const total = snapshot.totalCodeLines;
 		if (total === 0) return [];
 		return [
-			{ name: 'TypeScript', pct: Math.round((snapshot.tsLines / total) * 100), color: 'bg-[#0284c7]' },
-			{ name: 'Svelte', pct: Math.round((snapshot.svelteLines / total) * 100), color: 'bg-[#e54d2e]' },
-			{ name: 'Python', pct: Math.round(((snapshot.pyLines || 0) / total) * 100), color: 'bg-[#22c55e]' },
-			{ name: 'Go', pct: Math.round(((snapshot.goLines || 0) / total) * 100), color: 'bg-[#7dd3fc]' },
-			{ name: 'SQL', pct: Math.round(((snapshot.sqlLines || 0) / total) * 100), color: 'bg-[#a78bfa]' },
-			{ name: 'JavaScript', pct: Math.round((snapshot.jsLines / total) * 100), color: 'bg-[#f59e0b]' },
-			{ name: 'CSS', pct: Math.round((snapshot.cssLines / total) * 100), color: 'bg-[#f472b6]' },
-			{ name: 'Shell', pct: Math.round(((snapshot.shLines || 0) / total) * 100), color: 'bg-[#78716c]' },
-			{ name: 'TSX', pct: Math.round(((snapshot.tsxLines || 0) / total) * 100), color: 'bg-[#f43f5e]' }
+			{ name: 'TypeScript', pct: Math.round((snapshot.tsLines / total) * 100), color: 'bg-info' },
+			{ name: 'Svelte', pct: Math.round((snapshot.svelteLines / total) * 100), color: 'bg-error' },
+			{ name: 'Python', pct: Math.round(((snapshot.pyLines || 0) / total) * 100), color: 'bg-success' },
+			{ name: 'Go', pct: Math.round(((snapshot.goLines || 0) / total) * 100), color: 'bg-info-muted' },
+			{ name: 'SQL', pct: Math.round(((snapshot.sqlLines || 0) / total) * 100), color: 'bg-accent' },
+			{ name: 'JavaScript', pct: Math.round((snapshot.jsLines / total) * 100), color: 'bg-warning' },
+			{ name: 'CSS', pct: Math.round((snapshot.cssLines / total) * 100), color: 'bg-accent-muted' },
+			{ name: 'Shell', pct: Math.round(((snapshot.shLines || 0) / total) * 100), color: 'bg-foreground-muted' },
+			{ name: 'TSX', pct: Math.round(((snapshot.tsxLines || 0) / total) * 100), color: 'bg-destructive' }
 		].filter(lang => lang.pct > 0);
 	}
 
@@ -330,7 +330,7 @@
 								</div>
 								<div class="flex-1 h-3.5 md:h-4 bg-surface rounded-full overflow-hidden min-w-0">
 									<div
-										class="h-full bg-emerald-500 rounded-full transition-all duration-500"
+										class="h-full bg-success rounded-full transition-all duration-500"
 										style="width: {barWidth}%"
 									></div>
 								</div>
@@ -432,13 +432,13 @@
 											<!-- Stats badges -->
 											<div class="flex flex-wrap gap-2 mb-3 {isLeft ? 'md:justify-end' : ''}">
 												{#if summary.stats.features > 0}
-													<span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-sans rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
+													<span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-sans rounded-full success-bg text-success">
 														<Sparkles class="w-3 h-3" />
 														{summary.stats.features} features
 													</span>
 												{/if}
 												{#if summary.stats.fixes > 0}
-													<span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-sans rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
+													<span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-sans rounded-full info-bg text-info">
 														<Wrench class="w-3 h-3" />
 														{summary.stats.fixes} fixes
 													</span>
@@ -460,7 +460,7 @@
 																<ul class="space-y-1 text-xs text-foreground-muted">
 																	{#each summary.highlights.features.slice(0, 5) as feature}
 																		<li class="flex items-start gap-1.5">
-																			<span class="text-green-500 mt-0.5">●</span>
+																			<span class="text-success mt-0.5">●</span>
 																			<span>{feature}</span>
 																		</li>
 																	{/each}
@@ -474,7 +474,7 @@
 																<ul class="space-y-1 text-xs text-foreground-muted">
 																	{#each summary.highlights.fixes.slice(0, 5) as fix}
 																		<li class="flex items-start gap-1.5">
-																			<span class="text-blue-500 mt-0.5">●</span>
+																			<span class="text-info mt-0.5">●</span>
 																			<span>{fix}</span>
 																		</li>
 																	{/each}

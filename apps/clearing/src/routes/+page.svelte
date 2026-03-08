@@ -72,7 +72,7 @@
 
 			<!-- Mock data indicator for development -->
 			{#if data.isMockData}
-				<div class="flex items-center justify-center gap-2 py-2 px-4 bg-amber-500/10 border border-amber-500/20 rounded-lg text-sm text-amber-700 dark:text-amber-300" role="alert">
+				<div class="flex items-center justify-center gap-2 py-2 px-4 bg-warning-bg border border-warning rounded-lg text-sm text-warning" role="alert">
 					<FlaskConical class="w-4 h-4" aria-hidden="true" />
 					<span>Showing demo data — database not connected</span>
 				</div>
@@ -88,7 +88,7 @@
 			{#if data.activeIncidents.length > 0}
 				<section aria-labelledby="active-incidents-heading">
 					<h2 id="active-incidents-heading" class="flex items-center gap-2 text-lg font-semibold text-foreground mb-4">
-						<Activity class="w-5 h-5 text-orange-500" aria-hidden="true" />
+						<Activity class="w-5 h-5 text-warning" aria-hidden="true" />
 						Active Incidents
 					</h2>
 
@@ -114,7 +114,7 @@
 			{#if data.scheduledMaintenance.length > 0}
 				<section aria-labelledby="scheduled-maintenance-heading">
 					<h2 id="scheduled-maintenance-heading" class="flex items-center gap-2 text-lg font-semibold text-foreground mb-4">
-						<Calendar class="w-5 h-5 text-blue-500" aria-hidden="true" />
+						<Calendar class="w-5 h-5 text-info" aria-hidden="true" />
 						Scheduled Maintenance
 					</h2>
 

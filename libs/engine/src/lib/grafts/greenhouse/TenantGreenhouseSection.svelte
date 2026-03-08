@@ -63,7 +63,7 @@
 
 <GlassCard class="p-6 {className}">
 	<div class="flex items-center gap-2 mb-4">
-		<Sprout class="w-5 h-5 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+		<Sprout class="w-5 h-5 text-success" aria-hidden="true" />
 		<h3 class="text-lg font-serif text-foreground">Greenhouse Program</h3>
 	</div>
 
@@ -88,7 +88,7 @@
 				type="button"
 				onclick={handleEnroll}
 				disabled={loading}
-				class="px-4 py-2 text-sm font-sans font-medium rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors"
+				class="px-4 py-2 text-sm font-sans font-medium rounded-lg bg-primary text-primary-foreground hover:bg-grove-700 disabled:opacity-50 transition-colors"
 			>
 				{loading ? "Enrolling..." : "Enroll in Greenhouse"}
 			</button>
@@ -101,8 +101,8 @@
 				<div class="flex items-center gap-3">
 					<span
 						class="text-xs font-sans px-2 py-1 rounded {greenhouse.enabled
-							? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
-							: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'}"
+							? 'bg-success-bg text-success-foreground'
+							: 'bg-warning-bg text-warning-foreground'}"
 					>
 						{greenhouse.enabled ? "Active" : "Paused"}
 					</span>
@@ -141,7 +141,7 @@
 								type="button"
 								onclick={saveNotes}
 								disabled={loading}
-								class="px-3 py-1.5 text-xs font-sans font-medium rounded-lg bg-grove-600 text-white hover:bg-grove-700 disabled:opacity-50 transition-colors"
+								class="px-3 py-1.5 text-xs font-sans font-medium rounded-lg bg-primary text-primary-foreground hover:bg-grove-700 disabled:opacity-50 transition-colors"
 							>
 								Save
 							</button>
@@ -183,8 +183,8 @@
 					onclick={handleRemove}
 					disabled={loading}
 					class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-sans font-medium rounded-lg {confirmRemove
-						? 'bg-red-600 text-white hover:bg-red-700'
-						: 'text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20'} disabled:opacity-50 transition-colors"
+						? 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
+						: 'text-error hover:bg-error-bg'} disabled:opacity-50 transition-colors"
 				>
 					<Trash2 class="w-3.5 h-3.5" aria-hidden="true" />
 					{#if confirmRemove}

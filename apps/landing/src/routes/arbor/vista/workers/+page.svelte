@@ -37,10 +37,10 @@
 </div>
 
 {#if !data.collectionStatus?.hasCompleted}
-	<GlassCard class="mb-6 p-5 border-amber-200 dark:border-amber-800">
+	<GlassCard class="mb-6 p-5 border-warning dark:border-warning">
 		<div class="flex items-start gap-3">
-			<Info class="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
-			<p class="text-sm font-sans text-amber-700 dark:text-amber-400">
+			<Info class="w-5 h-5 text-warning dark:text-warning mt-0.5 shrink-0" />
+			<p class="text-sm font-sans text-warning dark:text-warning">
 				Awaiting first collection run — ensure the grove-vista-collector worker is deployed.
 			</p>
 		</div>
@@ -55,11 +55,11 @@
 		</p>
 	</GlassCard>
 {:else}
-	<div class="overflow-hidden rounded-xl border border-grove-200 dark:border-cream-300">
+	<div class="overflow-hidden rounded-xl border border-border dark:border-border">
 		<table class="w-full text-sm font-sans" aria-label="Worker metrics — last 24 hours">
 			<thead>
 				<tr
-					class="bg-grove-50 dark:bg-cream-200/20 text-xs text-foreground-muted uppercase tracking-wide"
+					class="bg-surface-subtle dark:bg-surface-subtle text-xs text-foreground-muted uppercase tracking-wide"
 				>
 					<th scope="col" class="px-5 py-3 text-left font-medium">Worker</th>
 					<th scope="col" class="px-5 py-3 text-right font-medium">Last Seen</th>
@@ -69,10 +69,10 @@
 					<th scope="col" class="px-5 py-3 text-right font-medium">p95</th>
 				</tr>
 			</thead>
-			<tbody class="divide-y divide-grove-100 dark:divide-cream-300/40">
+			<tbody class="divide-y divide-border dark:divide-border">
 				{#each data.workers as worker}
 					<tr
-						class="bg-white dark:bg-cream-100/30 hover:bg-grove-50/50 dark:hover:bg-cream-200/20 transition-colors"
+						class="bg-surface dark:bg-surface hover:bg-surface-hover dark:hover:bg-surface-hover transition-colors"
 					>
 						<td class="px-5 py-3 font-mono text-xs text-foreground">{worker.serviceName}</td>
 						<td class="px-5 py-3 text-right text-foreground-muted"
@@ -82,9 +82,9 @@
 						<td
 							class="px-5 py-3 text-right {worker.requests > 0 &&
 							worker.errors / worker.requests > 0.05
-								? 'text-red-600 dark:text-red-400'
+								? 'text-error dark:text-error'
 								: worker.requests > 0 && worker.errors / worker.requests > 0.01
-									? 'text-amber-600 dark:text-amber-400'
+									? 'text-warning dark:text-warning'
 									: 'text-foreground-muted'}"
 						>
 							{formatErrorRate(worker.requests, worker.errors)}

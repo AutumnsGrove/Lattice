@@ -30,46 +30,46 @@
 			icon: CheckCircle,
 			label: 'All Systems Operational',
 			description: 'Everything is running smoothly.',
-			bgGradient: 'from-green-500/20 via-green-500/10 to-transparent',
-			borderColor: 'border-green-500/30',
-			iconColor: 'text-green-500',
-			textColor: 'text-green-700 dark:text-green-300'
+			bgGradient: 'from-success/20 via-success/10 to-transparent',
+			borderColor: 'border-success/30',
+			iconColor: 'text-success',
+			textColor: 'text-success'
 		},
 		degraded: {
 			icon: AlertTriangle,
 			label: 'Degraded Performance',
 			description: 'Some services are experiencing slowdowns.',
-			bgGradient: 'from-yellow-500/20 via-yellow-500/10 to-transparent',
-			borderColor: 'border-yellow-500/30',
-			iconColor: 'text-yellow-500',
-			textColor: 'text-yellow-700 dark:text-yellow-300'
+			bgGradient: 'from-warning/20 via-warning/10 to-transparent',
+			borderColor: 'border-warning/30',
+			iconColor: 'text-warning',
+			textColor: 'text-warning'
 		},
 		partial_outage: {
 			icon: AlertCircle,
 			label: 'Partial Outage',
 			description: 'Some services are currently unavailable.',
-			bgGradient: 'from-orange-500/20 via-orange-500/10 to-transparent',
-			borderColor: 'border-orange-500/30',
-			iconColor: 'text-orange-500',
-			textColor: 'text-orange-700 dark:text-orange-300'
+			bgGradient: 'from-warning/20 via-warning/10 to-transparent',
+			borderColor: 'border-warning/30',
+			iconColor: 'text-warning',
+			textColor: 'text-warning'
 		},
 		major_outage: {
 			icon: XCircle,
 			label: 'Major Outage',
 			description: 'We are experiencing significant issues.',
-			bgGradient: 'from-red-500/20 via-red-500/10 to-transparent',
-			borderColor: 'border-red-500/30',
-			iconColor: 'text-red-500',
-			textColor: 'text-red-700 dark:text-red-300'
+			bgGradient: 'from-error/20 via-error/10 to-transparent',
+			borderColor: 'border-error/30',
+			iconColor: 'text-error',
+			textColor: 'text-error'
 		},
 		maintenance: {
 			icon: Wrench,
 			label: 'Under Maintenance',
 			description: 'Scheduled maintenance is in progress.',
-			bgGradient: 'from-blue-500/20 via-blue-500/10 to-transparent',
-			borderColor: 'border-blue-500/30',
-			iconColor: 'text-blue-500',
-			textColor: 'text-blue-700 dark:text-blue-300'
+			bgGradient: 'from-info/20 via-info/10 to-transparent',
+			borderColor: 'border-info/30',
+			iconColor: 'text-info',
+			textColor: 'text-info'
 		}
 	};
 
@@ -91,11 +91,11 @@
 	<div
 		class={cn(
 			'absolute -top-24 -right-24 w-48 h-48 rounded-full blur-3xl opacity-30',
-			status === 'operational' && 'bg-green-500',
-			status === 'degraded' && 'bg-yellow-500',
-			status === 'partial_outage' && 'bg-orange-500',
-			status === 'major_outage' && 'bg-red-500',
-			status === 'maintenance' && 'bg-blue-500'
+			status === 'operational' && 'bg-success',
+			status === 'degraded' && 'bg-warning',
+			status === 'partial_outage' && 'bg-warning',
+			status === 'major_outage' && 'bg-error',
+			status === 'maintenance' && 'bg-info'
 		)}
 		aria-hidden="true"
 	></div>
@@ -106,11 +106,11 @@
 				'p-3 rounded-full',
 				'bg-white/70 dark:bg-bark-800/50',
 				'ring-2 ring-inset',
-				status === 'operational' && 'ring-green-500/30',
-				status === 'degraded' && 'ring-yellow-500/30',
-				status === 'partial_outage' && 'ring-orange-500/30',
-				status === 'major_outage' && 'ring-red-500/30',
-				status === 'maintenance' && 'ring-blue-500/30'
+				status === 'operational' && 'ring-success/30',
+				status === 'degraded' && 'ring-warning/30',
+				status === 'partial_outage' && 'ring-warning/30',
+				status === 'major_outage' && 'ring-error/30',
+				status === 'maintenance' && 'ring-info/30'
 			)}>
 				<StatusIcon class={cn('w-10 h-10', config.iconColor)} />
 			</div>

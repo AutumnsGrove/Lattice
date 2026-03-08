@@ -159,7 +159,7 @@
 				srText="{config.label} is thinking..."
 				class={cn(
 					"rounded-lg px-4 py-3",
-					config.bubbleClass || "bg-white/10 dark:bg-white/5 border border-white/20",
+					config.bubbleClass || "bg-white/10 dark:bg-white/5 border border-divider",
 				)}
 			/>
 		{/if}
@@ -167,7 +167,7 @@
 
 	{#if error}
 		<div
-			class="mx-4 mb-2 rounded-lg px-4 py-3 bg-red-500/15 border border-red-500/30 text-red-300 text-sm"
+			class="mx-4 mb-2 rounded-lg px-4 py-3 bg-error-bg border border-error/30 text-error text-sm"
 			role="alert"
 		>
 			{error}

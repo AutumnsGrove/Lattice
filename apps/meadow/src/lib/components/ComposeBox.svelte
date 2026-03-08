@@ -158,7 +158,7 @@
 			onclick={expand}
 		>
 			<div
-				class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-grove-100 text-sm font-semibold text-grove-700 dark:bg-cream-100/40 dark:text-cream-900"
+				class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-elevated text-sm font-semibold text-foreground dark:bg-surface-elevated dark:text-foreground"
 			>
 				{(userName || "?").charAt(0).toUpperCase()}
 			</div>
@@ -169,7 +169,7 @@
 		<div class="px-5 pt-4 pb-4">
 			<div class="flex items-start gap-3">
 				<div
-					class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-grove-100 text-sm font-semibold text-grove-700 dark:bg-cream-100/40 dark:text-cream-900"
+					class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-elevated text-sm font-semibold text-foreground dark:bg-surface-elevated dark:text-foreground"
 				>
 					{(userName || "?").charAt(0).toUpperCase()}
 				</div>
@@ -188,9 +188,9 @@
 					<div class="mt-1 flex items-center justify-between">
 						<span
 							class="text-xs {isOverLimit
-								? 'text-red-500 font-medium'
+								? 'text-error font-medium'
 								: isNearLimit
-									? 'text-amber-500'
+									? 'text-warning'
 									: 'text-foreground-subtle'}"
 						>
 							{charCount}/{MAX_BODY}
@@ -203,7 +203,7 @@
 							{#each tags as tag}
 								<button
 									type="button"
-									class="inline-flex items-center gap-1 rounded-full bg-grove-50 px-2.5 py-0.5 text-xs font-medium text-grove-700 transition-colors hover:bg-grove-100 dark:bg-cream-100/30 dark:text-cream-800 dark:hover:bg-cream-100/40"
+									class="inline-flex items-center gap-1 rounded-full bg-surface-subtle px-2.5 py-0.5 text-xs font-medium text-foreground transition-colors hover:bg-surface-hover dark:bg-surface-subtle dark:text-foreground dark:hover:bg-surface-hover"
 									onclick={() => removeTag(tag)}
 									aria-label="Remove tag: {tag}"
 								>
@@ -252,7 +252,7 @@
 
 					<!-- Error -->
 					{#if errorMsg}
-						<p class="mt-2 text-xs text-red-500">{errorMsg}</p>
+						<p class="mt-2 text-xs text-error">{errorMsg}</p>
 					{/if}
 
 					<!-- Actions -->
@@ -266,7 +266,7 @@
 						</button>
 						<button
 							type="button"
-							class="rounded-lg bg-grove-600 px-4 py-1.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-grove-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-grove-500 dark:hover:bg-grove-600"
+							class="rounded-lg bg-accent-foreground px-4 py-1.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-accent-foreground/80 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-accent-foreground dark:hover:bg-accent-foreground/80"
 							disabled={!canSubmit}
 							onclick={submit}
 						>

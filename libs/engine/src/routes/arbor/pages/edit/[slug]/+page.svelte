@@ -568,21 +568,21 @@
 		user-select: none;
 	}
 	.status-badge.live {
-		background: rgba(16, 185, 129, 0.1);
-		color: #065f46;
-		border: 1px solid rgba(16, 185, 129, 0.3);
+		background: hsl(var(--success) / 0.1);
+		color: hsl(var(--success));
+		border: 1px solid hsl(var(--success) / 0.3);
 	}
 	:global(.dark) .status-badge.live {
-		background: rgba(16, 185, 129, 0.12);
-		color: #6ee7b7;
-		border-color: rgba(16, 185, 129, 0.25);
+		background: hsl(var(--success) / 0.12);
+		color: hsl(var(--success) / 0.7);
+		border-color: hsl(var(--success) / 0.25);
 	}
 	.status-dot {
 		width: 6px;
 		height: 6px;
 		border-radius: 50%;
 		flex-shrink: 0;
-		background: #10b981;
+		background: hsl(var(--success));
 	}
 
 	/* More menu (overflow) */
@@ -624,16 +624,16 @@
 		background: var(--color-bg-secondary);
 	}
 	.menu-item.danger {
-		color: #dc2626;
+		color: hsl(var(--destructive));
 	}
 	.menu-item.danger:hover {
-		background: rgba(220, 38, 38, 0.08);
+		background: hsl(var(--destructive) / 0.08);
 	}
 	:global(.dark) .menu-item.danger {
-		color: #f87171;
+		color: hsl(var(--destructive) / 0.7);
 	}
 	:global(.dark) .menu-item.danger:hover {
-		background: rgba(248, 113, 113, 0.1);
+		background: hsl(var(--destructive) / 0.1);
 	}
 
 	/* Editor Layout — vertical flow */

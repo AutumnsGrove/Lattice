@@ -32,10 +32,10 @@
 </div>
 
 {#if !data.collectionStatus?.hasCompleted}
-	<GlassCard class="mb-6 p-5 border-amber-200 dark:border-amber-800">
+	<GlassCard class="mb-6 p-5 border-warning dark:border-warning">
 		<div class="flex items-start gap-3">
-			<Info class="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
-			<p class="text-sm font-sans text-amber-700 dark:text-amber-400">
+			<Info class="w-5 h-5 text-warning-foreground dark:text-warning-foreground mt-0.5 shrink-0" />
+			<p class="text-sm font-sans text-warning-foreground dark:text-warning-foreground">
 				Awaiting first collection run — ensure the grove-vista-collector worker is deployed.
 			</p>
 		</div>

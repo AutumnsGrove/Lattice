@@ -790,9 +790,9 @@
 						{#if checkingUsername}
 							<Loader2 size={18} class="animate-spin text-white/50" />
 						{:else if usernameAvailable === true}
-							<Check size={18} class="text-green-400" />
+							<Check size={18} class="text-success" />
 						{:else if usernameAvailable === false}
-							<X size={18} class="text-red-400" />
+							<X size={18} class="text-error" />
 						{/if}
 					</div>
 				</div>
@@ -1897,11 +1897,11 @@
 	}
 	.font-option.selected {
 		border-color: var(--color-primary);
-		background: rgba(44, 95, 45, 0.05);
+		background: hsl(var(--primary-color) / 0.05);
 	}
 	:global(.dark) .font-option.selected {
 		border-color: var(--color-primary-light);
-		background: rgba(92, 184, 95, 0.1);
+		background: hsl(var(--primary-color) / 0.1);
 	}
 	.font-option input[type="radio"] {
 		width: 18px;
@@ -2028,11 +2028,11 @@
 	}
 	.logo-toggle:has(input:checked) {
 		border-color: var(--color-primary);
-		background: rgba(44, 95, 45, 0.05);
+		background: hsl(var(--primary-color) / 0.05);
 	}
 	:global(.dark) .logo-toggle:has(input:checked) {
 		border-color: var(--color-primary-light);
-		background: rgba(92, 184, 95, 0.1);
+		background: hsl(var(--primary-color) / 0.1);
 	}
 	.logo-toggle input[type="checkbox"] {
 		width: 20px;
@@ -2103,30 +2103,38 @@
 	/* Current device - soft breathing glow */
 	.session-card.current {
 		border-color: var(--color-primary);
-		background: linear-gradient(135deg, rgba(44, 95, 45, 0.08) 0%, rgba(44, 95, 45, 0.03) 100%);
+		background: linear-gradient(
+			135deg,
+			hsl(var(--primary-color) / 0.08) 0%,
+			hsl(var(--primary-color) / 0.03) 100%
+		);
 		box-shadow:
-			0 0 0 1px rgba(44, 95, 45, 0.1),
-			0 0 20px rgba(44, 95, 45, 0.1);
+			0 0 0 1px hsl(var(--primary-color) / 0.1),
+			0 0 20px hsl(var(--primary-color) / 0.1);
 		animation: session-glow 3s ease-in-out infinite;
 	}
 	:global(.dark) .session-card.current {
 		border-color: var(--color-primary-light);
-		background: linear-gradient(135deg, rgba(92, 184, 95, 0.12) 0%, rgba(92, 184, 95, 0.05) 100%);
+		background: linear-gradient(
+			135deg,
+			hsl(var(--primary-color) / 0.12) 0%,
+			hsl(var(--primary-color) / 0.05) 100%
+		);
 		box-shadow:
-			0 0 0 1px rgba(92, 184, 95, 0.15),
-			0 0 20px rgba(92, 184, 95, 0.15);
+			0 0 0 1px hsl(var(--primary-color) / 0.15),
+			0 0 20px hsl(var(--primary-color) / 0.15);
 	}
 	@keyframes session-glow {
 		0%,
 		100% {
 			box-shadow:
-				0 0 0 1px rgba(44, 95, 45, 0.1),
-				0 0 20px rgba(44, 95, 45, 0.1);
+				0 0 0 1px hsl(var(--primary-color) / 0.1),
+				0 0 20px hsl(var(--primary-color) / 0.1);
 		}
 		50% {
 			box-shadow:
-				0 0 0 1px rgba(44, 95, 45, 0.15),
-				0 0 25px rgba(44, 95, 45, 0.15);
+				0 0 0 1px hsl(var(--primary-color) / 0.15),
+				0 0 25px hsl(var(--primary-color) / 0.15);
 		}
 	}
 	:global(.dark) .session-card.current {
@@ -2136,13 +2144,13 @@
 		0%,
 		100% {
 			box-shadow:
-				0 0 0 1px rgba(92, 184, 95, 0.15),
-				0 0 20px rgba(92, 184, 95, 0.15);
+				0 0 0 1px hsl(var(--primary-color) / 0.15),
+				0 0 20px hsl(var(--primary-color) / 0.15);
 		}
 		50% {
 			box-shadow:
-				0 0 0 1px rgba(92, 184, 95, 0.2),
-				0 0 25px rgba(92, 184, 95, 0.2);
+				0 0 0 1px hsl(var(--primary-color) / 0.2),
+				0 0 25px hsl(var(--primary-color) / 0.2);
 		}
 	}
 	/* Revoking animation - fade and slide */
@@ -2162,7 +2170,7 @@
 		background: linear-gradient(
 			135deg,
 			var(--color-surface-elevated) 0%,
-			rgba(44, 95, 45, 0.08) 100%
+			hsl(var(--primary-color) / 0.08) 100%
 		);
 		color: var(--color-primary);
 		flex-shrink: 0;
@@ -2183,14 +2191,14 @@
 		background: linear-gradient(
 			135deg,
 			var(--color-surface-elevated) 0%,
-			rgba(92, 184, 95, 0.1) 100%
+			hsl(var(--primary-color) / 0.1) 100%
 		);
 	}
 	:global(.dark) .session-card:hover .session-icon {
 		background: linear-gradient(
 			135deg,
 			var(--color-surface-elevated) 0%,
-			rgba(92, 184, 95, 0.15) 100%
+			hsl(var(--primary-color) / 0.15) 100%
 		);
 	}
 	.session-info {
@@ -2218,7 +2226,7 @@
 		color: white;
 		text-transform: uppercase;
 		letter-spacing: 0.03em;
-		box-shadow: 0 2px 4px rgba(44, 95, 45, 0.2);
+		box-shadow: 0 2px 4px hsl(var(--primary-color) / 0.2);
 	}
 	:global(.dark) .session-badge {
 		background: linear-gradient(135deg, var(--color-primary-light) 0%, #4ade80 100%);
@@ -2352,7 +2360,7 @@
 	}
 	.category-checkbox:hover {
 		border-color: var(--color-primary);
-		background: rgba(44, 95, 45, 0.05);
+		background: hsl(var(--primary-color) / 0.05);
 	}
 	.category-checkbox input[type="checkbox"] {
 		width: 18px;
@@ -2580,10 +2588,10 @@
 	}
 	.domain-cta:hover {
 		border-color: var(--color-primary);
-		background: rgba(44, 95, 45, 0.03);
+		background: hsl(var(--primary-color) / 0.03);
 	}
 	:global(.dark) .domain-cta:hover {
-		background: rgba(92, 184, 95, 0.05);
+		background: hsl(var(--primary-color) / 0.05);
 	}
 	.domain-cta__inner {
 		display: flex;

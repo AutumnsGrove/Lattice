@@ -37,20 +37,20 @@
 	// Determine status label
 	const statusLabel = $derived(flag.enabled ? "Cultivated" : "Pruned");
 	const statusColor = $derived(
-		flag.enabled ? "text-emerald-600" : "text-foreground-muted"
+		flag.enabled ? "text-success" : "text-foreground-muted"
 	);
 
 	// Type badge color
 	const typeBadgeClass = $derived(() => {
 		switch (flag.flagType) {
 			case "boolean":
-				return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400";
+				return "bg-info-bg text-info-foreground";
 			case "percentage":
-				return "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400";
+				return "bg-accent-subtle text-accent-foreground";
 			case "tier":
-				return "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400";
+				return "bg-warning-bg text-warning-foreground";
 			case "variant":
-				return "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400";
+				return "bg-error-bg text-error";
 			case "json":
 				return "bg-cream-100 text-bark-700 dark:bg-bark-900/30 dark:text-cream-400";
 			default:
@@ -65,12 +65,12 @@
 		<div class="flex items-center gap-2">
 			{#if flag.greenhouseOnly}
 				<Sprout
-					class="w-4 h-4 text-emerald-600 dark:text-emerald-400"
+					class="w-4 h-4 text-success"
 					aria-label="Greenhouse Only"
 				/>
 			{:else}
 				<Home
-					class="w-4 h-4 text-amber-600 dark:text-amber-400"
+					class="w-4 h-4 text-warning"
 					aria-label="Global Flag"
 				/>
 			{/if}
@@ -97,8 +97,8 @@
 		<div class="flex items-center gap-1.5">
 			<span
 				class="w-2 h-2 rounded-full {flag.enabled
-					? 'bg-emerald-500'
-					: 'bg-cream-300 dark:bg-bark-600'}"
+					? 'bg-success'
+					: 'bg-muted dark:bg-muted'}"
 				aria-hidden="true"
 			></span>
 			<span class="text-sm {statusColor}">{statusLabel}</span>

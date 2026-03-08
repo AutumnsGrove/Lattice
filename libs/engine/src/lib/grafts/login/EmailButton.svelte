@@ -142,16 +142,10 @@
 <div class="email-button-wrapper {className}">
 	{#if mode === "button"}
 		<!-- Initial button state -->
-		<GlassButton
-			variant="default"
-			{size}
-			onclick={showInput}
-			class="w-full justify-start gap-3"
-		>
+		<GlassButton variant="default" {size} onclick={showInput} class="w-full justify-start gap-3">
 			<ProviderIcon provider="email" size={20} />
 			<span>Continue with Email</span>
 		</GlassButton>
-
 	{:else if mode === "input" || mode === "sending"}
 		<!-- Email input state -->
 		<form onsubmit={handleSubmit} class="space-y-3">
@@ -162,10 +156,10 @@
 					placeholder="you@example.com"
 					disabled={mode === "sending"}
 					class="w-full px-4 py-3 rounded-xl
-						bg-white/80 dark:bg-bark-800/40 backdrop-blur-md
-						border border-bark-200/50 dark:border-bark-700/40
+						bg-white/80 dark:bg-surface-subtle backdrop-blur-md
+						border border-input
 						text-foreground placeholder:text-muted-foreground
-						focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50
+						focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50
 						disabled:opacity-50 disabled:cursor-not-allowed
 						transition-colors"
 					aria-label="Email address"
@@ -174,7 +168,7 @@
 			</div>
 
 			{#if errorMessage}
-				<p class="text-sm text-red-600 dark:text-red-400" role="alert">
+				<p class="text-sm text-error" role="alert">
 					{errorMessage}
 				</p>
 			{/if}
@@ -225,14 +219,13 @@
 				← Back
 			</button>
 		</form>
-
 	{:else if mode === "sent"}
 		<!-- Success state -->
 		<div class="text-center space-y-4 py-2">
-			<div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-grove-100/50 dark:bg-grove-900/30">
+			<div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-success-bg">
 				<!-- Checkmark icon -->
 				<svg
-					class="w-6 h-6 text-grove-600 dark:text-grove-400"
+					class="w-6 h-6 text-success"
 					fill="none"
 					viewBox="0 0 24 24"
 					stroke="currentColor"
