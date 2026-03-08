@@ -288,12 +288,13 @@ var gitWorktreeRemoveCmd = &cobra.Command{
 
 var gitWorktreeFinishCmd = &cobra.Command{
 	Use:   "finish",
-	Short: "Commit, push, switch to main, and remove worktree",
+	Short: "Commit, push, merge into main, and remove worktree",
 	Long: `Finish work in the current worktree:
 1. Stage and commit all changes (if any)
 2. Push the branch to remote
-3. Switch to main worktree
-4. Remove the current worktree`,
+3. Merge branch into main
+4. Push main
+5. Remove the worktree and clean up branches`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if !gwexec.IsGitRepo() {
 			return notARepo()
@@ -305,6 +306,7 @@ var gitWorktreeFinishCmd = &cobra.Command{
 		cfg := config.Get()
 		message, _ := cmd.Flags().GetString("message")
 		deleteBranch, _ := cmd.Flags().GetBool("delete-branch")
+		noMerge, _ := cmd.Flags().GetBool("no-merge")
 
 		// Get current working directory and branch
 		cwd, err := os.Getwd()
@@ -359,9 +361,11 @@ var gitWorktreeFinishCmd = &cobra.Command{
 		}
 		trees := parseWorktreeListPorcelain(listOutput)
 		mainPath := ""
+		mainBranch := ""
 		for _, t := range trees {
 			if t.Branch == "main" || t.Branch == "master" {
 				mainPath = t.Path
+				mainBranch = t.Branch
 				break
 			}
 		}
@@ -369,12 +373,40 @@ var gitWorktreeFinishCmd = &cobra.Command{
 			return fmt.Errorf("could not find main worktree — remove this worktree manually")
 		}
 
-		// Switch to main worktree directory (informational — user needs to cd)
+		// Merge into main (unless --no-merge)
+		merged := false
+		if !noMerge {
+			// Pull latest main first
+			pullResult, pullErr := gwexec.RunInDir(mainPath, "git", "pull", "--ff-only")
+			if pullErr != nil || !pullResult.OK() {
+				ui.Warning("Could not fast-forward main — merging with current state")
+			}
+
+			// Merge the branch into main
+			mergeResult, mergeErr := gwexec.RunInDir(mainPath, "git", "merge", branch)
+			if mergeErr != nil {
+				return fmt.Errorf("merge into %s failed: %w — resolve manually in %s", mainBranch, mergeErr, mainPath)
+			}
+			if !mergeResult.OK() {
+				return fmt.Errorf("merge into %s failed: %s\nResolve manually in %s", mainBranch, strings.TrimSpace(mergeResult.Stderr), mainPath)
+			}
+
+			// Push main
+			pushMainResult, pushMainErr := gwexec.RunInDir(mainPath, "git", "push")
+			if pushMainErr != nil {
+				return fmt.Errorf("push %s failed: %w", mainBranch, pushMainErr)
+			}
+			if !pushMainResult.OK() {
+				return fmt.Errorf("push %s failed: %s", mainBranch, strings.TrimSpace(pushMainResult.Stderr))
+			}
+			merged = true
+		}
+
 		// Remove the current worktree
-		removeResult, err := gwexec.Git("worktree", "remove", cwd)
+		removeResult, err := gwexec.RunInDir(mainPath, "git", "worktree", "remove", cwd)
 		if err != nil || !removeResult.OK() {
 			// Try with force
-			removeResult, err = gwexec.Git("worktree", "remove", "--force", cwd)
+			removeResult, err = gwexec.RunInDir(mainPath, "git", "worktree", "remove", "--force", cwd)
 			if err != nil {
 				return fmt.Errorf("failed to remove worktree: %w", err)
 			}
@@ -384,12 +416,12 @@ var gitWorktreeFinishCmd = &cobra.Command{
 		}
 
 		// Delete local branch (now safe since worktree is removed)
-		gwexec.Git("branch", "-d", branch)
+		gwexec.RunInDir(mainPath, "git", "branch", "-d", branch)
 
-		// Delete remote branch if requested
+		// Delete remote branch if requested or if merged (branch served its purpose)
 		remoteBranchDeleted := false
-		if deleteBranch {
-			remoteResult, remoteErr := gwexec.Git("push", "origin", "--delete", branch)
+		if deleteBranch || merged {
+			remoteResult, remoteErr := gwexec.RunInDir(mainPath, "git", "push", "origin", "--delete", branch)
 			remoteBranchDeleted = remoteErr == nil && remoteResult.OK()
 		}
 
@@ -397,6 +429,7 @@ var gitWorktreeFinishCmd = &cobra.Command{
 			data, _ := json.Marshal(map[string]interface{}{
 				"branch":         branch,
 				"pushed":         true,
+				"merged":         merged,
 				"removed":        cwd,
 				"main_path":      mainPath,
 				"committed":      hasChanges,
@@ -408,6 +441,9 @@ var gitWorktreeFinishCmd = &cobra.Command{
 				ui.Step(true, "Committed changes")
 			}
 			ui.Step(true, fmt.Sprintf("Pushed branch %s", branch))
+			if merged {
+				ui.Step(true, fmt.Sprintf("Merged into %s and pushed", mainBranch))
+			}
 			ui.Step(true, fmt.Sprintf("Removed worktree %s", cwd))
 			if remoteBranchDeleted {
 				ui.Step(true, fmt.Sprintf("Deleted remote branch %s", branch))
@@ -659,6 +695,7 @@ func init() {
 	// worktree finish
 	gitWorktreeFinishCmd.Flags().StringP("message", "m", "", "Commit message (default: auto-generated)")
 	gitWorktreeFinishCmd.Flags().Bool("delete-branch", false, "Delete remote branch after push")
+	gitWorktreeFinishCmd.Flags().Bool("no-merge", false, "Skip merging into main (just commit, push, and remove)")
 	gitWorktreeCmd.AddCommand(gitWorktreeFinishCmd)
 
 	// worktree clean
