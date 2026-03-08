@@ -364,11 +364,17 @@ export const handle: Handle = async ({ event, resolve }) => {
 	}
 
 	// =========================================================================
+	// COOKIE EXTRACTION (hoisted for parallel auth + routing)
+	// =========================================================================
+	// Extracted early so auth validation can start concurrently with subdomain
+	// routing. Used by: Turnstile, auth, CSRF, rate limiting.
+	const cookieHeader = event.request.headers.get("cookie");
+
+	// =========================================================================
 	// TURNSTILE VERIFICATION (Shade)
 	// =========================================================================
 	// Skip verification for excluded paths
 	if (!shouldSkipTurnstile(event.url.pathname)) {
-		const cookieHeader = event.request.headers.get("cookie");
 		const verificationCookie = getCookie(cookieHeader, TURNSTILE_COOKIE_NAME);
 		const secretKey = event.platform?.env?.TURNSTILE_SECRET_KEY;
 
@@ -386,6 +392,29 @@ export const handle: Handle = async ({ event, resolve }) => {
 			}
 		}
 	}
+
+	// =========================================================================
+	// AUTHENTICATION — start SessionDO validation early (parallel with routing)
+	// =========================================================================
+	// PERFORMANCE: Auth only needs cookies, not tenant context. Starting the
+	// SessionDO fetch here lets it run concurrently with the tenant lookup in
+	// subdomain routing, saving ~100-300ms on tenant page loads.
+	const groveSession = getCookie(cookieHeader, "grove_session");
+	const betterAuthSession =
+		getCookie(cookieHeader, "__Secure-better-auth.session_token") ||
+		getCookie(cookieHeader, "better-auth.session_token");
+	const sessionCookie = groveSession || betterAuthSession;
+
+	const sessionAuthPromise =
+		sessionCookie && event.platform?.env?.AUTH
+			? event.platform.env.AUTH.fetch("https://login.grove.place/session/validate", {
+					method: "POST",
+					headers: { Cookie: cookieHeader || "" },
+				}).catch((err: unknown) => {
+					console.error("[Auth] SessionDO validation error:", err);
+					return null as Response | null;
+				})
+			: Promise.resolve(null as Response | null);
 
 	// =========================================================================
 	// SUBDOMAIN ROUTING
@@ -463,62 +492,44 @@ export const handle: Handle = async ({ event, resolve }) => {
 	}
 
 	// =========================================================================
-	// AUTHENTICATION (Heartwood SessionDO)
+	// AUTHENTICATION — resolve the parallel SessionDO validation
 	// =========================================================================
-	const cookieHeader = event.request.headers.get("cookie");
-
-	// Try grove_session cookie first (SessionDO - fast path via service binding)
-	// Also check for Better Auth session cookies (OAuth flow sets these)
-	const groveSession = getCookie(cookieHeader, "grove_session");
-	const betterAuthSession =
-		getCookie(cookieHeader, "__Secure-better-auth.session_token") ||
-		getCookie(cookieHeader, "better-auth.session_token");
-	const sessionCookie = groveSession || betterAuthSession;
-
-	if (sessionCookie && event.platform?.env?.AUTH) {
+	// The fetch was started before subdomain routing — it ran concurrently with
+	// tenant lookup, so by now the response is likely already available.
+	const authResponse = await sessionAuthPromise;
+	if (authResponse?.ok) {
 		try {
-			// Pass the full cookie header so GroveAuth can find whichever session cookie exists
-			const response = await event.platform.env.AUTH.fetch(
-				"https://login.grove.place/session/validate",
-				{
-					method: "POST",
-					headers: { Cookie: cookieHeader || "" },
-				},
-			);
+			const data = (await authResponse.json()) as Record<string, unknown>;
 
-			if (response.ok) {
-				const data = (await response.json()) as Record<string, unknown>;
-
-				// Validate response shape and extract user if valid
-				if (data && typeof data === "object" && typeof data.valid === "boolean") {
-					if (data.valid && data.user) {
-						const user = data.user as Record<string, unknown>;
-						// Only set user if all required fields are valid
-						if (
-							typeof user === "object" &&
-							typeof user.id === "string" &&
-							typeof user.email === "string" &&
-							typeof user.name === "string" &&
-							typeof user.avatarUrl === "string" &&
-							typeof user.isAdmin === "boolean"
-						) {
-							event.locals.user = {
-								id: user.id,
-								email: user.email,
-								name: user.name,
-								picture: user.avatarUrl,
-								isAdmin: user.isAdmin,
-							};
-						} else {
-							console.error("[Auth] Invalid SessionDO response: user object has invalid fields");
-						}
+			// Validate response shape and extract user if valid
+			if (data && typeof data === "object" && typeof data.valid === "boolean") {
+				if (data.valid && data.user) {
+					const user = data.user as Record<string, unknown>;
+					// Only set user if all required fields are valid
+					if (
+						typeof user === "object" &&
+						typeof user.id === "string" &&
+						typeof user.email === "string" &&
+						typeof user.name === "string" &&
+						typeof user.avatarUrl === "string" &&
+						typeof user.isAdmin === "boolean"
+					) {
+						event.locals.user = {
+							id: user.id,
+							email: user.email,
+							name: user.name,
+							picture: user.avatarUrl,
+							isAdmin: user.isAdmin,
+						};
+					} else {
+						console.error("[Auth] Invalid SessionDO response: user object has invalid fields");
 					}
-				} else {
-					console.error("[Auth] Invalid SessionDO response: unexpected shape");
 				}
+			} else {
+				console.error("[Auth] Invalid SessionDO response: unexpected shape");
 			}
 		} catch (err) {
-			console.error("[Auth] SessionDO validation error:", err);
+			console.error("[Auth] SessionDO response parsing error:", err);
 		}
 	}
 
