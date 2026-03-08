@@ -29,11 +29,15 @@ var runListCmd = &cobra.Command{
 		branch, _ := cmd.Flags().GetString("branch")
 		status, _ := cmd.Flags().GetString("status")
 		limit, _ := cmd.Flags().GetInt("limit")
+		page, _ := cmd.Flags().GetInt("page")
+		all, _ := cmd.Flags().GetBool("all")
+
+		fetchLimit, startIndex := paginateArgs(limit, page, all)
+		limit = clampGHLimit(limit)
 
 		ghArgs := []string{"run", "list"}
 		ghArgs = append(ghArgs, ghRepoArgs()...)
-		limit = clampGHLimit(limit)
-		ghArgs = append(ghArgs, "--limit", fmt.Sprintf("%d", limit))
+		ghArgs = append(ghArgs, "--limit", fmt.Sprintf("%d", fetchLimit))
 		ghArgs = append(ghArgs, "--json",
 			"databaseId,displayTitle,status,conclusion,workflowName,headBranch,event,createdAt,url,headSha")
 
@@ -60,6 +64,11 @@ var runListCmd = &cobra.Command{
 		var runs []map[string]interface{}
 		if err := json.Unmarshal([]byte(output), &runs); err != nil {
 			return fmt.Errorf("failed to parse runs: %w", err)
+		}
+
+		// Apply pagination slicing (--page flag; --all returns everything)
+		if !all && page > 1 {
+			runs, _ = slicePage(runs, startIndex, limit)
 		}
 
 		if len(runs) == 0 {
@@ -468,7 +477,9 @@ func init() {
 	runListCmd.Flags().StringP("workflow", "w", "", "Filter by workflow file name")
 	runListCmd.Flags().StringP("branch", "b", "", "Filter by branch")
 	runListCmd.Flags().StringP("status", "s", "", "Filter by status")
-	runListCmd.Flags().Int("limit", 20, "Maximum number to return")
+	runListCmd.Flags().Int("limit", 20, "Maximum number to return per page")
+	runListCmd.Flags().Int("page", 1, "Page number (1-based)")
+	runListCmd.Flags().Bool("all", false, "Fetch all runs (overrides --limit)")
 	runListCmd.Flags().Bool("flat", false, "Flat view: one run per line with IDs")
 	runCmd.AddCommand(runListCmd)
 

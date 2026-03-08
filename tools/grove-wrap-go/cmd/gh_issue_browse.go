@@ -44,21 +44,34 @@ type issueBrowseModel struct {
 	action      string // post-quit action: "worktree", "skill"
 	actionSkill string // skill name for "skill" action
 	actionNum   int    // issue number for action
+	fetchArgs   *issueFetchArgs // args for loading more issues
+	loading     bool            // true while fetching next page
+	allLoaded   bool            // true when no more pages available
 }
 
-func newIssueBrowseModel(issues []browseIssue, pageSize int) issueBrowseModel {
+func newIssueBrowseModel(issues []browseIssue, pageSize int, fetchArgs *issueFetchArgs) issueBrowseModel {
 	w, h, err := term.GetSize(int(os.Stdout.Fd()))
 	if err != nil {
 		w, h = 80, 24
 	}
+	// If we got fewer issues than the limit, all issues are loaded
+	allLoaded := fetchArgs == nil || len(issues) < fetchArgs.limit
 	m := issueBrowseModel{
-		issues:   issues,
-		filtered: issues,
-		pageSize: pageSize,
-		width:    w,
-		height:   h,
+		issues:    issues,
+		filtered:  issues,
+		pageSize:  pageSize,
+		width:     w,
+		height:    h,
+		fetchArgs: fetchArgs,
+		allLoaded: allLoaded,
 	}
 	return m
+}
+
+// issuesFetchedMsg carries the result of an async "load more" fetch.
+type issuesFetchedMsg struct {
+	issues []browseIssue
+	err    error
 }
 
 func (m issueBrowseModel) Init() tea.Cmd {
@@ -70,6 +83,20 @@ func (m issueBrowseModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
+		return m, nil
+
+	case issuesFetchedMsg:
+		m.loading = false
+		if msg.err != nil {
+			m.err = msg.err
+			return m, nil
+		}
+		if len(msg.issues) <= len(m.issues) {
+			m.allLoaded = true
+			return m, nil
+		}
+		m.issues = msg.issues
+		m.applyFilter()
 		return m, nil
 
 	case tea.KeyMsg:
@@ -184,6 +211,17 @@ func (m issueBrowseModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.actionNum = m.filtered[m.cursor].Number
 				m.quitting = true
 				return m, tea.Quit
+			}
+
+		case "N": // Load more issues (shift+n)
+			if !m.loading && !m.allLoaded && m.fetchArgs != nil {
+				m.loading = true
+				args := *m.fetchArgs
+				count := len(m.issues)
+				return m, func() tea.Msg {
+					issues, err := fetchMoreIssues(args, count)
+					return issuesFetchedMsg{issues: issues, err: err}
+				}
 			}
 
 		case "/":
@@ -334,11 +372,19 @@ func (m issueBrowseModel) View() string {
 		}
 	}
 
+	// Loading indicator
+	if m.loading {
+		b.WriteString(browseFilterStyle.Render("  Loading more issues...") + "\n")
+	}
+
 	// Footer hints
 	b.WriteString("\n")
 	hints := []string{
 		"j/k nav", "v view", "O open", "W tree",
 		"/ filter", "? skills", "q quit",
+	}
+	if !m.allLoaded && m.fetchArgs != nil {
+		hints = append(hints[:6], append([]string{"N more"}, hints[6:]...)...)
 	}
 	b.WriteString(browseHintStyle.Render("  " + strings.Join(hints, " • ")))
 
@@ -374,8 +420,10 @@ func (m issueBrowseModel) renderHelp() string {
 		browseHelpKeyStyle.Render("j/k"), browseHelpKeyStyle.Render("v")))
 	b.WriteString(fmt.Sprintf("    %s    Open in browser    %s  Create worktree\n",
 		browseHelpKeyStyle.Render("O"), browseHelpKeyStyle.Render("W")))
-	b.WriteString(fmt.Sprintf("    %s    Filter by label    %s  Quit\n",
-		browseHelpKeyStyle.Render("/"), browseHelpKeyStyle.Render("q")))
+	b.WriteString(fmt.Sprintf("    %s    Filter by label    %s  Load more issues\n",
+		browseHelpKeyStyle.Render("/"), browseHelpKeyStyle.Render("N")))
+	b.WriteString(fmt.Sprintf("    %s    Quit\n",
+		browseHelpKeyStyle.Render("q")))
 	b.WriteString("\n")
 
 	// Skills by category
@@ -428,8 +476,8 @@ func (m issueBrowseModel) renderDetail() string {
 }
 
 // runIssueBrowse launches the interactive issue browser.
-func runIssueBrowse(issues []browseIssue, pageSize int) error {
-	m := newIssueBrowseModel(issues, pageSize)
+func runIssueBrowse(issues []browseIssue, pageSize int, fetchArgs issueFetchArgs) error {
+	m := newIssueBrowseModel(issues, pageSize, &fetchArgs)
 	p := tea.NewProgram(m, tea.WithAltScreen())
 	finalModel, err := p.Run()
 	if err != nil {

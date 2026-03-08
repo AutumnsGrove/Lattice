@@ -37,6 +37,56 @@ func (pr browsePR) prStatus() string {
 	return strings.ToLower(pr.State)
 }
 
+// prFetchArgs holds the parameters needed to re-fetch PRs in the TUI.
+type prFetchArgs struct {
+	state  string
+	author string
+	label  string
+	limit  int
+}
+
+// buildPRFetchArgs captures the current filter flags for TUI re-fetching.
+func buildPRFetchArgs(state, author, label string, limit int) prFetchArgs {
+	return prFetchArgs{state: state, author: author, label: label, limit: limit}
+}
+
+// fetchMorePRs fetches the next page of PRs for the TUI browser.
+func fetchMorePRs(args prFetchArgs, currentCount int) ([]browsePR, error) {
+	nextPage := (currentCount / args.limit) + 1
+	fetchLimit := args.limit * (nextPage + 1)
+	if fetchLimit > maxGHLimit {
+		fetchLimit = maxGHLimit
+	}
+	if fetchLimit <= currentCount {
+		return nil, nil
+	}
+
+	ghArgs := []string{"pr", "list"}
+	ghArgs = append(ghArgs, ghRepoArgs()...)
+	ghArgs = append(ghArgs, "--state", args.state, "--limit", fmt.Sprintf("%d", fetchLimit))
+	fields := []string{"number", "title", "state", "author", "url", "isDraft", "labels",
+		"headRefName", "baseRefName"}
+	ghArgs = append(ghArgs, jsonFields(fields, "")...)
+	if args.author != "" {
+		ghArgs = append(ghArgs, "--author", args.author)
+	}
+	if args.label != "" {
+		ghArgs = append(ghArgs, "--label", args.label)
+	}
+
+	output, err := gwexec.GHOutput(ghArgs...)
+	if err != nil {
+		return nil, err
+	}
+	return parsePRsToBrowse(output)
+}
+
+// prsFetchedMsg carries the result of an async "load more" PR fetch.
+type prsFetchedMsg struct {
+	prs []browsePR
+	err error
+}
+
 // prBrowseModel is the Bubble Tea model for the interactive PR browser.
 type prBrowseModel struct {
 	prs         []browsePR
@@ -56,19 +106,25 @@ type prBrowseModel struct {
 	action      string // post-quit action: "skill", "merge", "checks", "diff"
 	actionSkill string // skill name for "skill" action
 	actionPR    *browsePR
+	fetchArgs   *prFetchArgs // args for loading more PRs
+	loading     bool         // true while fetching next page
+	allLoaded   bool         // true when no more pages available
 }
 
-func newPRBrowseModel(prs []browsePR, pageSize int) prBrowseModel {
+func newPRBrowseModel(prs []browsePR, pageSize int, fetchArgs *prFetchArgs) prBrowseModel {
 	w, h, err := term.GetSize(int(os.Stdout.Fd()))
 	if err != nil {
 		w, h = 80, 24
 	}
+	allLoaded := fetchArgs == nil || len(prs) < fetchArgs.limit
 	m := prBrowseModel{
-		prs:      prs,
-		filtered: prs,
-		pageSize: pageSize,
-		width:    w,
-		height:   h,
+		prs:       prs,
+		filtered:  prs,
+		pageSize:  pageSize,
+		width:     w,
+		height:    h,
+		fetchArgs: fetchArgs,
+		allLoaded: allLoaded,
 	}
 	return m
 }
@@ -82,6 +138,20 @@ func (m prBrowseModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
+		return m, nil
+
+	case prsFetchedMsg:
+		m.loading = false
+		if msg.err != nil {
+			m.err = msg.err
+			return m, nil
+		}
+		if len(msg.prs) <= len(m.prs) {
+			m.allLoaded = true
+			return m, nil
+		}
+		m.prs = msg.prs
+		m.applyFilter()
 		return m, nil
 
 	case tea.KeyMsg:
@@ -229,6 +299,17 @@ func (m prBrowseModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, tea.Quit
 			}
 
+		case "N": // Load more PRs (shift+n)
+			if !m.loading && !m.allLoaded && m.fetchArgs != nil {
+				m.loading = true
+				args := *m.fetchArgs
+				count := len(m.prs)
+				return m, func() tea.Msg {
+					prs, err := fetchMorePRs(args, count)
+					return prsFetchedMsg{prs: prs, err: err}
+				}
+			}
+
 		case "/":
 			m.filtering = true
 			m.filterBuf = m.filter
@@ -362,11 +443,19 @@ func (m prBrowseModel) View() string {
 		}
 	}
 
+	// Loading indicator
+	if m.loading {
+		b.WriteString(browseFilterStyle.Render("  Loading more PRs...") + "\n")
+	}
+
 	// Footer hints
 	b.WriteString("\n")
 	hints := []string{
 		"j/k nav", "v view", "O open", "C checks", "D diff", "M merge",
 		"/ filter", "? skills", "q quit",
+	}
+	if !m.allLoaded && m.fetchArgs != nil {
+		hints = append(hints[:8], append([]string{"N more"}, hints[8:]...)...)
 	}
 	b.WriteString(browseHintStyle.Render("  " + strings.Join(hints, " • ")))
 
@@ -404,8 +493,10 @@ func (m prBrowseModel) renderHelp() string {
 		browseHelpKeyStyle.Render("O"), browseHelpKeyStyle.Render("C")))
 	b.WriteString(fmt.Sprintf("    %s    View diff stat     %s  Merge PR\n",
 		browseHelpKeyStyle.Render("D"), browseHelpKeyStyle.Render("M")))
-	b.WriteString(fmt.Sprintf("    %s    Filter by label    %s  Quit\n",
-		browseHelpKeyStyle.Render("/"), browseHelpKeyStyle.Render("q")))
+	b.WriteString(fmt.Sprintf("    %s    Filter by label    %s  Load more PRs\n",
+		browseHelpKeyStyle.Render("/"), browseHelpKeyStyle.Render("N")))
+	b.WriteString(fmt.Sprintf("    %s    Quit\n",
+		browseHelpKeyStyle.Render("q")))
 	b.WriteString("\n")
 
 	// Skills by category
@@ -460,8 +551,8 @@ func (m prBrowseModel) renderDetail() string {
 }
 
 // runPRBrowse launches the interactive PR browser.
-func runPRBrowse(prs []browsePR, pageSize int) error {
-	m := newPRBrowseModel(prs, pageSize)
+func runPRBrowse(prs []browsePR, pageSize int, fetchArgs prFetchArgs) error {
+	m := newPRBrowseModel(prs, pageSize, &fetchArgs)
 	p := tea.NewProgram(m, tea.WithAltScreen())
 	finalModel, err := p.Run()
 	if err != nil {
