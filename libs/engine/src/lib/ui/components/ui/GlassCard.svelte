@@ -297,7 +297,7 @@
 					{#if title}
 						<h3 class="text-lg font-semibold {titleClass} {icon ? 'flex items-center gap-2' : ''}">
 							{#if icon}
-								<svelte:component this={icon} class="w-5 h-5 shrink-0 text-muted-foreground" />
+								<icon class="w-5 h-5 shrink-0 text-muted-foreground"></icon>
 							{/if}
 							{title}
 						</h3>
