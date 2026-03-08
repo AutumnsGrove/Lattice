@@ -9,6 +9,14 @@ commit_msg=$(cat "$commit_msg_file")
 # Get first line of commit message
 first_line=$(echo "$commit_msg" | head -n 1)
 
+# Allow git-generated merge and revert commits through without validation
+if echo "$first_line" | grep -qE "^Merge (branch|remote-tracking|tag) "; then
+    exit 0
+fi
+if echo "$first_line" | grep -qE '^Revert "'; then
+    exit 0
+fi
+
 # Define valid action verbs for custom format
 valid_actions="Add|Update|Fix|Refactor|Remove|Enhance"
 
