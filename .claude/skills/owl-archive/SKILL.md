@@ -72,11 +72,14 @@ Collect the raw material while avoiding AI patterns.
 
 - Draft the content from a user-need perspective
 - Watch for em-dashes, "not X but Y" constructions, and overused AI words
-- Keep paragraphs short — one idea, two to four sentences
+- Watch for sentence-level tropes: "The X? A Y.", gerund fragment lists, tricolon abuse, anaphora
+- Watch for tone tropes: "Here's the kicker", "Think of it as...", "Let's break this down", stakes inflation
+- Watch for composition tropes: fractal summaries, dead metaphors, historical analogy stacking, signposted conclusions
+- Keep paragraphs short. One idea, two to four sentences
 - Use lists only when they genuinely clarify; let narrative flow where prose works better
 - Mix sentence lengths for rhythm; read it aloud
 
-**Reference:** Load `references/anti-patterns.md` for the full list of writing anti-patterns, AI-coded words to avoid, and the self-review checklist
+**Reference:** Load `references/anti-patterns.md` for the full list of writing anti-patterns (word choice, sentence structure, paragraph structure, tone, formatting, composition), AI-coded words to avoid, and the self-review checklist
 
 **Output:** Raw content drafted, voice-checked, AI patterns removed
 
