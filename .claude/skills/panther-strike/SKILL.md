@@ -149,6 +149,10 @@ gw git ship --write -a -m "fix(component): brief description of fix — Fixes #{
 
 The "Hunted by" trailer lets you trace the panther's path through your git history. The forest remembers nothing but the echo of the kill and the fading warmth of fresh tracks in the mud.
 
+**Worktree awareness:** If `gw git ship` prints a worktree hint (e.g. `Worktree: issue-1380`), include it in the summary table and remind the user to clean up after the PR is approved:
+
+> After approval: `gw git worktree finish --write`
+
 **Output:** Summary table of the hunt:
 
 ```
