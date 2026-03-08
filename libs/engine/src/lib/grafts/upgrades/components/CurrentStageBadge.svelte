@@ -6,23 +6,31 @@
 	 * Used in dashboard headers and account settings.
 	 */
 
-	import { Sprout, TreeDeciduous, Trees, Crown, Footprints, Settings, ArrowRight } from 'lucide-svelte';
-	import type { CurrentStageBadgeProps } from './types.js';
-	import type { TierKey } from '$lib/config/tiers';
+	import {
+		Sprout,
+		TreeDeciduous,
+		Trees,
+		Crown,
+		Footprints,
+		Settings,
+		ArrowRight,
+	} from "lucide-svelte";
+	import type { CurrentStageBadgeProps } from "./types.js";
+	import type { TierKey } from "$lib/config/tiers";
 
 	let {
-		currentStage = 'free',
-		flourishState = 'active',
+		currentStage = "wanderer",
+		flourishState = "active",
 		showNurture = true,
 		showTend = true,
 		onNurture,
 		onTend,
-		class: className = '',
+		class: className = "",
 	}: CurrentStageBadgeProps = $props();
 
 	// Icon mapping — keyed by TierKey
 	const iconComponents: Record<TierKey, typeof Sprout> = {
-		free: Footprints,
+		wanderer: Footprints,
 		seedling: Sprout,
 		sapling: TreeDeciduous,
 		oak: Trees,
@@ -31,37 +39,37 @@
 
 	// Stage display names
 	const stageNames: Record<TierKey, string> = {
-		free: 'Wanderer',
-		seedling: 'Seedling',
-		sapling: 'Sapling',
-		oak: 'Oak',
-		evergreen: 'Evergreen',
+		wanderer: "Wanderer",
+		seedling: "Seedling",
+		sapling: "Sapling",
+		oak: "Oak",
+		evergreen: "Evergreen",
 	};
 
 	let IconComponent = $derived(iconComponents[currentStage] || Sprout);
 
 	// Flourish state colors
 	const stateColors = {
-		active: 'bg-success',
-		past_due: 'bg-destructive',
-		resting: 'bg-warning',
-		pruned: 'bg-muted-foreground',
+		active: "bg-success",
+		past_due: "bg-destructive",
+		resting: "bg-warning",
+		pruned: "bg-muted-foreground",
 	};
 
 	// Flourish state labels
 	const stateLabels = {
-		active: 'Flourishing',
-		past_due: 'Past Due',
-		resting: 'Scheduled End',
-		pruned: 'Ended',
+		active: "Flourishing",
+		past_due: "Past Due",
+		resting: "Scheduled End",
+		pruned: "Ended",
 	};
 
 	// Next stage for nurture
 	const nextStage: Record<TierKey, TierKey | null> = {
-		free: 'seedling',
-		seedling: 'sapling',
-		sapling: 'oak',
-		oak: 'evergreen',
+		wanderer: "seedling",
+		seedling: "sapling",
+		sapling: "oak",
+		oak: "evergreen",
 		evergreen: null,
 	};
 
@@ -86,7 +94,9 @@
 
 		<!-- Flourish state indicator -->
 		<div
-			class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white dark:border-grove-950 {stateColors[flourishState]}"
+			class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white dark:border-grove-950 {stateColors[
+				flourishState
+			]}"
 			title={stateLabels[flourishState]}
 		></div>
 	</div>

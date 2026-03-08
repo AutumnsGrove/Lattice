@@ -24,7 +24,7 @@
 			detail:
 				"When you publish a post, it becomes visible to anyone on the internet, indexed by search engines, and shareable via direct links. This is by design—Grove is about sharing your voice with the world.",
 		},
-		free: {
+		wanderer: {
 			title: "Wanderer Accounts",
 			content:
 				"Wanderer accounts get 25 blog posts and 100 MB storage — enough to try your hand at writing with no commitment. [[meadow|Meadow]] access for browsing and reacting. No credit card needed. When you're ready for more room, cultivate to [[seedling|Seedling]].",

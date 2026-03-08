@@ -9,7 +9,7 @@
   </TierGate>
 
   Tiers (lowest to highest):
-  - free
+  - wanderer
   - seedling
   - sapling
   - oak
@@ -29,7 +29,7 @@
 	let { required, current, children, fallback, showPreview = false }: Props = $props();
 
 	const tierLevels: Record<GroveTier, number> = {
-		free: 0,
+		wanderer: 0,
 		seedling: 1,
 		sapling: 2,
 		oak: 3,
@@ -37,7 +37,7 @@
 	};
 
 	const tierLabels: Record<GroveTier, string> = {
-		free: "Wanderer",
+		wanderer: "Wanderer",
 		seedling: "Seedling",
 		sapling: "Sapling",
 		oak: "Oak",

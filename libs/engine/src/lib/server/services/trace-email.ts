@@ -6,15 +6,15 @@
  */
 
 import { ZephyrClient } from "$lib/zephyr/client.js";
-import { escapeHtml } from "../utils/escape-html.js";
+import { escapeHtml } from "$lib/utils/escape-html.js";
 
 const DEFAULT_ZEPHYR_URL = "https://grove-zephyr.m7jv4v7npb.workers.dev";
 
 export interface TraceNotification {
-  sourcePath: string;
-  vote: "up" | "down";
-  comment?: string;
-  id: string;
+	sourcePath: string;
+	vote: "up" | "down";
+	comment?: string;
+	id: string;
 }
 
 /**
@@ -27,49 +27,45 @@ export interface TraceNotification {
  * @returns Success status and optional error
  */
 export async function sendTraceNotification(
-  zephyrUrl: string | undefined,
-  zephyrApiKey: string,
-  adminEmail: string,
-  trace: TraceNotification,
+	zephyrUrl: string | undefined,
+	zephyrApiKey: string,
+	adminEmail: string,
+	trace: TraceNotification,
 ): Promise<{ success: boolean; error?: string }> {
-  const zephyr = new ZephyrClient({
-    baseUrl: zephyrUrl || DEFAULT_ZEPHYR_URL,
-    apiKey: zephyrApiKey,
-  });
+	const zephyr = new ZephyrClient({
+		baseUrl: zephyrUrl || DEFAULT_ZEPHYR_URL,
+		apiKey: zephyrApiKey,
+	});
 
-  const emoji = trace.vote === "up" ? "👍" : "👎";
-  const voteText = trace.vote === "up" ? "positive" : "negative";
+	const emoji = trace.vote === "up" ? "👍" : "👎";
+	const voteText = trace.vote === "up" ? "positive" : "negative";
 
-  const result = await zephyr.sendRaw({
-    to: adminEmail,
-    subject: `[Trace] ${emoji} ${trace.sourcePath}`,
-    html: buildHtmlEmail(trace, emoji, voteText),
-    text: buildTextEmail(trace, emoji, voteText),
-    type: "notification",
-  });
+	const result = await zephyr.sendRaw({
+		to: adminEmail,
+		subject: `[Trace] ${emoji} ${trace.sourcePath}`,
+		html: buildHtmlEmail(trace, emoji, voteText),
+		text: buildTextEmail(trace, emoji, voteText),
+		type: "notification",
+	});
 
-  if (!result.success) {
-    console.error("[Trace Email] Zephyr error:", result.errorMessage);
-    return { success: false, error: result.errorMessage };
-  }
+	if (!result.success) {
+		console.error("[Trace Email] Zephyr error:", result.errorMessage);
+		return { success: false, error: result.errorMessage };
+	}
 
-  return { success: true };
+	return { success: true };
 }
 
-function buildHtmlEmail(
-  trace: TraceNotification,
-  emoji: string,
-  voteText: string,
-): string {
-  const commentSection = trace.comment
-    ? `
+function buildHtmlEmail(trace: TraceNotification, emoji: string, voteText: string): string {
+	const commentSection = trace.comment
+		? `
       <div style="margin-top: 16px; padding: 16px; background-color: #f5f0e6; border-radius: 8px; border-left: 4px solid #4a5d23;">
         <p style="margin: 0; color: #1a1a1a; font-style: italic;">"${escapeHtml(trace.comment)}"</p>
       </div>
     `
-    : "";
+		: "";
 
-  return `
+	return `
 <!DOCTYPE html>
 <html>
 <head>
@@ -116,21 +112,16 @@ function buildHtmlEmail(
   `.trim();
 }
 
-function buildTextEmail(
-  trace: TraceNotification,
-  emoji: string,
-  voteText: string,
-): string {
-  let text = `${emoji} Someone left a trace\n\n`;
-  text += `Location: ${trace.sourcePath}\n`;
-  text += `Feedback: ${voteText}\n`;
+function buildTextEmail(trace: TraceNotification, emoji: string, voteText: string): string {
+	let text = `${emoji} Someone left a trace\n\n`;
+	text += `Location: ${trace.sourcePath}\n`;
+	text += `Feedback: ${voteText}\n`;
 
-  if (trace.comment) {
-    text += `\nComment:\n"${trace.comment}"\n`;
-  }
+	if (trace.comment) {
+		text += `\nComment:\n"${trace.comment}"\n`;
+	}
 
-  text += `\n---\nView all traces: https://grove.place/admin/traces`;
+	text += `\n---\nView all traces: https://grove.place/admin/traces`;
 
-  return text;
+	return text;
 }
-

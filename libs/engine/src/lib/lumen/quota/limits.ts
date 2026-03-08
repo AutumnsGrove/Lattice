@@ -30,8 +30,8 @@ import type { LumenTask } from "../types.js";
  * - code: Low-medium (Claude is expensive but important for devs)
  */
 export const LUMEN_QUOTAS: Record<TierKey, Record<LumenTask, number>> = {
-	// Free tier: Meadow only, very limited AI access
-	free: {
+	// Wanderer tier: Meadow only, very limited AI access
+	wanderer: {
 		moderation: 100, // Safety is important
 		generation: 10,
 		summary: 10,
@@ -116,7 +116,7 @@ export function getTierQuota(tier: TierKey, task: LumenTask): number {
  * Get all quotas for a tier
  */
 export function getTierQuotas(tier: TierKey): Record<LumenTask, number> {
-	return LUMEN_QUOTAS[tier] ?? LUMEN_QUOTAS.free;
+	return LUMEN_QUOTAS[tier] ?? LUMEN_QUOTAS.wanderer;
 }
 
 /**

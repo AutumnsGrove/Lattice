@@ -40,7 +40,7 @@ const IN_PROGRESS_WINDOW_SECONDS = 3600;
  */
 export const USERNAME_CHANGE_LIMITS: Record<TierKey, { maxPerYear: number; cooldownDays: number }> =
 	{
-		free: { maxPerYear: 1, cooldownDays: 0 },
+		wanderer: { maxPerYear: 1, cooldownDays: 0 },
 		seedling: { maxPerYear: 1, cooldownDays: 0 },
 		sapling: { maxPerYear: 2, cooldownDays: 0 },
 		oak: { maxPerYear: Infinity, cooldownDays: 7 },
