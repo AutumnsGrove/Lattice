@@ -81,7 +81,7 @@ jobs:
 
       - name: Generate repository snapshot
         id: snapshot
-        if: (steps.version.outputs.changed == 'true' && steps.tag_exists.outputs.exists == 'false') || github.event.inputs.force_snapshot == 'true'
+        if: steps.version.outputs.changed == 'true' || github.event.inputs.force_snapshot == 'true'
         run: |
           TAG="${{ steps.create_tag.outputs.tag_name || format('v{0}', steps.version.outputs.current) }}"
           echo "Generating snapshot for: $TAG"
@@ -264,27 +264,26 @@ jobs:
           git commit -m "docs: add repository snapshot and release summary for ${{ steps.snapshot.outputs.tag_name }}"
           git push origin main
 
-      - name: Check if GitHub Release exists
+      - name: Check if release exists
         id: release_exists
-        if: steps.create_tag.outcome == 'success'
+        if: steps.version.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG="${{ steps.create_tag.outputs.tag_name }}"
+          TAG="v${{ steps.version.outputs.current }}"
           if gh release view "$TAG" >/dev/null 2>&1; then
             echo "exists=true" >> $GITHUB_OUTPUT
             echo "Release $TAG already exists (created by gw publish lattice)"
           else
             echo "exists=false" >> $GITHUB_OUTPUT
-            echo "Release $TAG does not exist — will create"
           fi
 
       - name: Create GitHub Release
-        if: steps.create_tag.outcome == 'success' && steps.release_exists.outputs.exists == 'false'
+        if: steps.version.outputs.changed == 'true' && steps.release_exists.outputs.exists != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG="${{ steps.create_tag.outputs.tag_name }}"
+          TAG="${{ steps.create_tag.outputs.tag_name || format('v{0}', steps.version.outputs.current) }}"
           VERSION="${{ steps.version.outputs.current }}"
           SUMMARY_FILE="snapshots/summaries/${TAG}.json"
 
@@ -371,7 +370,7 @@ jobs:
           echo "Created GitHub Release: $TAG"
 
       - name: Publish to GitHub Package Registry
-        if: steps.create_tag.outcome == 'success'
+        if: steps.version.outputs.changed == 'true'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
