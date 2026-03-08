@@ -4,6 +4,8 @@ name: Validate Deployments
 # Runs dry-run deployments for Workers and build validation for Pages
 
 on:
+  workflow_dispatch:
+
   pull_request:
     branches: [main]
     paths:
