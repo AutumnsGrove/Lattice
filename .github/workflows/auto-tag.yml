@@ -264,8 +264,23 @@ jobs:
           git commit -m "docs: add repository snapshot and release summary for ${{ steps.snapshot.outputs.tag_name }}"
           git push origin main
 
-      - name: Create GitHub Release
+      - name: Check if GitHub Release exists
+        id: release_exists
         if: steps.create_tag.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ steps.create_tag.outputs.tag_name }}"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Release $TAG already exists (created by gw publish lattice)"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Release $TAG does not exist — will create"
+          fi
+
+      - name: Create GitHub Release
+        if: steps.create_tag.outcome == 'success' && steps.release_exists.outputs.exists == 'false'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
