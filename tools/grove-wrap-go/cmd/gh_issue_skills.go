@@ -3,10 +3,12 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/spf13/cobra"
 
+	"github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/config"
 	gwexec "github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/exec"
 	"github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/ui"
 )
@@ -96,6 +98,21 @@ var labelSuggestions = map[string][]string{
 	"accessibility": {"deer-sense"},
 }
 
+// effectiveRoot returns the best directory to launch Claude from.
+// Prefers git repo root (when inside a repo), falls back to GroveRoot config.
+func effectiveRoot() string {
+	if root, err := repoRoot(); err == nil {
+		return root
+	}
+	cfg := config.Get()
+	groveRoot := cfg.GroveRoot
+	// Verify GroveRoot looks like a real repo (has .git)
+	if _, err := os.Stat(filepath.Join(groveRoot, ".git")); err == nil {
+		return groveRoot
+	}
+	return groveRoot
+}
+
 // suggestSkills returns suggested skill names based on issue labels.
 func suggestSkills(labels []string) []string {
 	seen := make(map[string]bool)
@@ -118,17 +135,18 @@ func suggestSkills(labels []string) []string {
 // Claude is launched from the repo root (not the worktree) so that worktree
 // deletion during the session doesn't break Claude's working directory.
 func launchSkillForIssue(skillName, issueNum string) error {
-	root, rootErr := repoRoot()
+	root := effectiveRoot()
+
 	wtPath, err := worktreePathForIssue(issueNum)
 	if err != nil {
-		ui.Warning(fmt.Sprintf("Not in a git repository, launching in current directory: %v", err))
+		ui.Warning(fmt.Sprintf("Could not resolve worktree path: %v", err))
 	} else {
 		if _, err := os.Stat(wtPath); os.IsNotExist(err) {
 			ui.Info(fmt.Sprintf("Creating worktree for issue #%s...", issueNum))
 			wtCmd := gitWorktreeCreateCmd
 			wtCmd.SetArgs([]string{issueNum})
 			if err := wtCmd.RunE(wtCmd, []string{issueNum}); err != nil {
-				ui.Warning(fmt.Sprintf("Worktree creation failed, launching in current directory: %v", err))
+				ui.Warning(fmt.Sprintf("Worktree creation failed, launching in repo root: %v", err))
 				wtPath = ""
 			}
 		} else {
@@ -140,16 +158,12 @@ func launchSkillForIssue(skillName, issueNum string) error {
 	var exitCode int
 	if wtPath != "" {
 		prompt = fmt.Sprintf("A worktree has been prepared at %s for issue #%s. Start by running: cd %s\n\nThen: /%s #%s", wtPath, issueNum, wtPath, skillName, issueNum)
-		ui.Info(fmt.Sprintf("Launching Claude from repo root (worktree: %s)", wtPath))
-		exitCode, err = gwexec.RunStreamingInDir(root, "claude", prompt)
+		ui.Info(fmt.Sprintf("Launching Claude from %s (worktree: %s)", root, wtPath))
 	} else {
 		prompt = fmt.Sprintf("/%s #%s", skillName, issueNum)
-		if rootErr == nil {
-			exitCode, err = gwexec.RunStreamingInDir(root, "claude", prompt)
-		} else {
-			exitCode, err = gwexec.RunStreaming("claude", prompt)
-		}
+		ui.Info(fmt.Sprintf("Launching Claude from %s", root))
 	}
+	exitCode, err = gwexec.RunStreamingInDir(root, "claude", prompt)
 	if err != nil {
 		return fmt.Errorf("failed to launch claude: %w", err)
 	}
@@ -164,23 +178,23 @@ func launchSkillForIssue(skillName, issueNum string) error {
 // deletion during the session doesn't break Claude's working directory.
 func launchSkillForPR(skillName string, prNumber int, headBranch string) error {
 	var wtPath string
+	root := effectiveRoot()
 
-	root, rootErr := repoRoot()
 	base, err := worktreeBasePath()
 	if err != nil {
-		ui.Warning(fmt.Sprintf("Not in a git repository, launching in current directory: %v", err))
+		ui.Warning(fmt.Sprintf("Could not resolve worktree path: %v", err))
 	} else {
 		wtPath = fmt.Sprintf("%s/pr-%d", base, prNumber)
 
 		if _, err := os.Stat(wtPath); os.IsNotExist(err) {
 			ui.Info(fmt.Sprintf("Creating worktree for PR #%d (branch: %s)...", prNumber, headBranch))
-			// Fetch the PR branch first
-			if _, fetchErr := gwexec.GitOutput("fetch", "origin", headBranch); fetchErr != nil {
+			// Fetch the PR branch first (run from repo root so git can find .git)
+			if fetchResult, fetchErr := gwexec.RunInDir(root, "git", "fetch", "origin", headBranch); fetchErr != nil || !fetchResult.OK() {
 				ui.Warning(fmt.Sprintf("Failed to fetch branch %s: %v", headBranch, fetchErr))
 			}
 			// Create worktree from the PR's head branch
-			if _, wtErr := gwexec.GitOutput("worktree", "add", wtPath, fmt.Sprintf("origin/%s", headBranch)); wtErr != nil {
-				ui.Warning(fmt.Sprintf("Worktree creation failed, launching in current directory: %v", wtErr))
+			if wtResult, wtErr := gwexec.RunInDir(root, "git", "worktree", "add", wtPath, fmt.Sprintf("origin/%s", headBranch)); wtErr != nil || !wtResult.OK() {
+				ui.Warning(fmt.Sprintf("Worktree creation failed, launching in repo root: %v", wtErr))
 				wtPath = ""
 			}
 		} else {
@@ -192,16 +206,12 @@ func launchSkillForPR(skillName string, prNumber int, headBranch string) error {
 	var exitCode int
 	if wtPath != "" {
 		prompt = fmt.Sprintf("A worktree has been prepared at %s for PR #%d. Start by running: cd %s\n\nThen: /%s #%d", wtPath, prNumber, wtPath, skillName, prNumber)
-		ui.Info(fmt.Sprintf("Launching Claude from repo root (worktree: %s)", wtPath))
-		exitCode, err = gwexec.RunStreamingInDir(root, "claude", prompt)
+		ui.Info(fmt.Sprintf("Launching Claude from %s (worktree: %s)", root, wtPath))
 	} else {
 		prompt = fmt.Sprintf("/%s #%d", skillName, prNumber)
-		if rootErr == nil {
-			exitCode, err = gwexec.RunStreamingInDir(root, "claude", prompt)
-		} else {
-			exitCode, err = gwexec.RunStreaming("claude", prompt)
-		}
+		ui.Info(fmt.Sprintf("Launching Claude from %s", root))
 	}
+	exitCode, err = gwexec.RunStreamingInDir(root, "claude", prompt)
 	if err != nil {
 		return fmt.Errorf("failed to launch claude: %w", err)
 	}

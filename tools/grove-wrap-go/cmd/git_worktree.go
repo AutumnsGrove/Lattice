@@ -54,9 +54,15 @@ func repoRoot() (string, error) {
 }
 
 // worktreeBasePath returns the directory where worktrees are created.
+// Falls back to GroveRoot when not inside a git repository.
 func worktreeBasePath() (string, error) {
 	root, err := repoRoot()
 	if err != nil {
+		// Not in a git repo — try GroveRoot from config
+		cfg := config.Get()
+		if _, statErr := os.Stat(filepath.Join(cfg.GroveRoot, ".git")); statErr == nil {
+			return filepath.Join(filepath.Dir(cfg.GroveRoot), ".worktrees"), nil
+		}
 		return "", err
 	}
 	return filepath.Join(filepath.Dir(root), ".worktrees"), nil
