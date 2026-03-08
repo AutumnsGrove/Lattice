@@ -54,6 +54,8 @@ func repoRoot() (string, error) {
 }
 
 // worktreeBasePath returns the directory where worktrees are created.
+// Worktrees live inside the repo at <root>/.worktrees/ so each project
+// keeps its own worktrees and they don't leak into parent directories.
 // Falls back to GroveRoot when not inside a git repository.
 func worktreeBasePath() (string, error) {
 	root, err := repoRoot()
@@ -61,11 +63,11 @@ func worktreeBasePath() (string, error) {
 		// Not in a git repo — try GroveRoot from config
 		cfg := config.Get()
 		if _, statErr := os.Stat(filepath.Join(cfg.GroveRoot, ".git")); statErr == nil {
-			return filepath.Join(filepath.Dir(cfg.GroveRoot), ".worktrees"), nil
+			return filepath.Join(cfg.GroveRoot, ".worktrees"), nil
 		}
 		return "", err
 	}
-	return filepath.Join(filepath.Dir(root), ".worktrees"), nil
+	return filepath.Join(root, ".worktrees"), nil
 }
 
 // worktreePathForIssue returns the worktree path for an issue.
