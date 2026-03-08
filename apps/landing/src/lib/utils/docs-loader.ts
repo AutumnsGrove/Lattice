@@ -4,6 +4,7 @@ import matter from "@11ty/gray-matter";
 import MarkdownIt from "markdown-it";
 import type { Doc, DocCategory, DocWithContent, DocHeader } from "$lib/types/docs";
 import { groveTermPlugin } from "./markdown-groveterm";
+import { escapeHtml } from "@autumnsgrove/lattice/utils";
 
 /**
  * Generate a URL-safe ID from text.
@@ -16,18 +17,6 @@ function generateHeadingId(text: string): string {
 		.replace(/\s+/g, "-")
 		.replace(/-+/g, "-")
 		.trim();
-}
-
-/**
- * Escape HTML special characters for safe embedding in HTML attributes.
- */
-function escapeHtml(text: string): string {
-	return text
-		.replace(/&/g, "&amp;")
-		.replace(/</g, "&lt;")
-		.replace(/>/g, "&gt;")
-		.replace(/"/g, "&quot;")
-		.replace(/'/g, "&#39;");
 }
 
 // Create markdown-it instance with custom renderers and GroveTerm plugin

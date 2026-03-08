@@ -1,5 +1,16 @@
 import { error, fail, type Actions } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
+import { parseFormData } from "@autumnsgrove/lattice/server";
+import { z } from "zod";
+
+const FeedbackIdSchema = z.object({
+  id: z.string().min(1, "Missing feedback ID"),
+});
+
+const FeedbackNotesSchema = z.object({
+  id: z.string().min(1, "Missing feedback ID"),
+  notes: z.string().trim().optional().default(""),
+});
 
 interface FeedbackRow {
   id: string;
@@ -86,11 +97,11 @@ export const actions: Actions = {
     }
 
     const formData = await request.formData();
-    const id = formData.get("id") as string;
-
-    if (!id) {
+    const result = parseFormData(formData, FeedbackIdSchema);
+    if (!result.success) {
       return fail(400, { error: "Missing feedback ID" });
     }
+    const { id } = result.data;
 
     const now = Math.floor(Date.now() / 1000);
 
@@ -117,11 +128,11 @@ export const actions: Actions = {
     }
 
     const formData = await request.formData();
-    const id = formData.get("id") as string;
-
-    if (!id) {
+    const result = parseFormData(formData, FeedbackIdSchema);
+    if (!result.success) {
       return fail(400, { error: "Missing feedback ID" });
     }
+    const { id } = result.data;
 
     const now = Math.floor(Date.now() / 1000);
 
@@ -148,12 +159,12 @@ export const actions: Actions = {
     }
 
     const formData = await request.formData();
-    const id = formData.get("id") as string;
-    const notes = (formData.get("notes") as string)?.trim() || null;
-
-    if (!id) {
+    const result = parseFormData(formData, FeedbackNotesSchema);
+    if (!result.success) {
       return fail(400, { error: "Missing feedback ID" });
     }
+    const { id } = result.data;
+    const notes = result.data.notes || null;
 
     const now = Math.floor(Date.now() / 1000);
 

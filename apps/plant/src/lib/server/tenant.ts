@@ -9,7 +9,7 @@ export interface CreateTenantInput {
   username: string;
   displayName: string;
   email: string;
-  plan: "free" | "seedling" | "sapling" | "oak" | "evergreen";
+  plan: "wanderer" | "seedling" | "sapling" | "oak" | "evergreen";
   favoriteColor?: string | null;
   /** Payment provider customer ID (Lemon Squeezy customer_id) */
   providerCustomerId?: string | null;

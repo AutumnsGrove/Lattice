@@ -53,7 +53,7 @@ describe("Billing Module", () => {
       expect(result).toBeNull();
     });
 
-    it("returns subscription with free tier when no plan specified", async () => {
+    it("returns subscription with wanderer tier when no plan specified", async () => {
       const db = createMockDb();
       const prepareChain = {
         bind: vi.fn().mockReturnThis(),
@@ -66,7 +66,7 @@ describe("Billing Module", () => {
 
       const result = await getTenantSubscription(db, "tenant-1");
 
-      expect(result?.tier).toBe("free");
+      expect(result?.tier).toBe("wanderer");
       expect(result?.status).toBeUndefined();
       expect(result?.isActive).toBe(true);
       expect(result?.currentPeriodEnd).toBeNull();
@@ -90,20 +90,20 @@ describe("Billing Module", () => {
       expect(result?.isActive).toBe(true);
     });
 
-    it("handles free tier (no billing record)", async () => {
+    it("handles wanderer tier (no billing record)", async () => {
       const db = createMockDb();
       const prepareChain = {
         bind: vi.fn().mockReturnThis(),
         first: vi
           .fn()
-          .mockResolvedValueOnce({ plan: "free", active: 1 })
+          .mockResolvedValueOnce({ plan: "wanderer", active: 1 })
           .mockResolvedValueOnce(null),
       };
       (db.prepare as any).mockReturnValue(prepareChain);
 
       const result = await getTenantSubscription(db, "tenant-1");
 
-      expect(result?.tier).toBe("free");
+      expect(result?.tier).toBe("wanderer");
       expect(result?.isActive).toBe(true); // Active even without billing
     });
 
@@ -253,7 +253,7 @@ describe("Billing Module", () => {
         bind: vi.fn().mockReturnThis(),
         first: vi
           .fn()
-          .mockResolvedValueOnce({ plan: "free", active: 1 })
+          .mockResolvedValueOnce({ plan: "wanderer", active: 1 })
           .mockResolvedValueOnce(null),
       };
       (db.prepare as any).mockReturnValue(prepareChain);
@@ -313,7 +313,7 @@ describe("Billing Module", () => {
     });
 
     it("handles all valid tier keys", async () => {
-      const validTiers = ["free", "seedling", "sapling", "oak", "evergreen"];
+      const validTiers = ["wanderer", "seedling", "sapling", "oak", "evergreen"];
 
       for (const tier of validTiers) {
         const db = createMockDb();
@@ -398,7 +398,7 @@ describe("Billing Module", () => {
         bind: vi.fn().mockReturnThis(),
         first: vi
           .fn()
-          .mockResolvedValueOnce({ plan: "free", active: 1 })
+          .mockResolvedValueOnce({ plan: "wanderer", active: 1 })
           .mockResolvedValueOnce(null),
       };
       (db.prepare as any).mockReturnValue(prepareChain);
@@ -435,7 +435,7 @@ describe("Billing Module", () => {
         bind: vi.fn().mockReturnThis(),
         first: vi
           .fn()
-          .mockResolvedValueOnce({ plan: "free", active: 1 })
+          .mockResolvedValueOnce({ plan: "wanderer", active: 1 })
           .mockResolvedValueOnce(null),
       };
       (db.prepare as any).mockReturnValue(prepareChain);
@@ -580,7 +580,7 @@ describe("Billing Module", () => {
       }
     });
 
-    it("returns allowed=false for free tier on all premium features", async () => {
+    it("returns allowed=false for wanderer tier on all premium features", async () => {
       const features = [
         "ai",
         "shop",
@@ -595,7 +595,7 @@ describe("Billing Module", () => {
           bind: vi.fn().mockReturnThis(),
           first: vi
             .fn()
-            .mockResolvedValueOnce({ plan: "free", active: 1 })
+            .mockResolvedValueOnce({ plan: "wanderer", active: 1 })
             .mockResolvedValueOnce(null),
         };
         (db.prepare as any).mockReturnValue(prepareChain);
@@ -612,7 +612,7 @@ describe("Billing Module", () => {
         bind: vi.fn().mockReturnThis(),
         first: vi
           .fn()
-          .mockResolvedValueOnce({ plan: "free", active: 1 })
+          .mockResolvedValueOnce({ plan: "wanderer", active: 1 })
           .mockResolvedValueOnce(null),
       };
       (db.prepare as any).mockReturnValue(prepareChain);
@@ -718,13 +718,13 @@ describe("Billing Module", () => {
       ).resolves.toBeUndefined();
     });
 
-    it("succeeds silently for free tier with no billing", async () => {
+    it("succeeds silently for wanderer tier with no billing", async () => {
       const db = createMockDb();
       const prepareChain = {
         bind: vi.fn().mockReturnThis(),
         first: vi
           .fn()
-          .mockResolvedValueOnce({ plan: "free", active: 1 })
+          .mockResolvedValueOnce({ plan: "wanderer", active: 1 })
           .mockResolvedValueOnce(null),
       };
       (db.prepare as any).mockReturnValue(prepareChain);
@@ -757,14 +757,14 @@ describe("Billing Module", () => {
   // ==========================================================================
 
   describe("Integration scenarios", () => {
-    it("handles complete subscription lifecycle: free -> active -> inactive", async () => {
-      // Start with free tier
+    it("handles complete subscription lifecycle: wanderer -> active -> inactive", async () => {
+      // Start with wanderer tier
       let db = createMockDb();
       const prepareChain: any = {
         bind: vi.fn().mockReturnThis(),
         first: vi
           .fn()
-          .mockResolvedValueOnce({ plan: "free", active: 1 })
+          .mockResolvedValueOnce({ plan: "wanderer", active: 1 })
           .mockResolvedValueOnce(null),
       };
       (db.prepare as any).mockReturnValue(prepareChain);
@@ -983,8 +983,8 @@ describe("Billing Module", () => {
 
       const result = await getTenantSubscription(db, "tenant-1");
 
-      // Undefined should be treated as free tier (via || operator)
-      expect(result?.tier).toBe("free");
+      // Undefined should be treated as wanderer tier (via || operator)
+      expect(result?.tier).toBe("wanderer");
     });
 
     it("handles active field as number (database representation)", async () => {

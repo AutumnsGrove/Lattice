@@ -96,7 +96,7 @@ export async function getTenantSubscription(
     .bind(tenantId)
     .first<{ status: string; current_period_end: number }>();
 
-  const tier = (tenant.plan || "free") as PlanTier;
+  const tier = (tenant.plan || "wanderer") as PlanTier;
   const status = billing?.status as SubscriptionStatus | null;
 
   // Subscription is active if:
@@ -195,7 +195,7 @@ export async function isCompedAccount(
     return { isComped: false, tier: null };
   }
 
-  const tier = (tenant.plan || "free") as PlanTier;
+  const tier = (tenant.plan || "wanderer") as PlanTier;
 
   // Free tier is not "comped" - it's just free
   if (!PAID_TIERS.includes(tier)) {

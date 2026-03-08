@@ -339,7 +339,7 @@ describe("Storage Service", () => {
 
 	describe("Constants", () => {
 		it("should have correct tier storage values", () => {
-			expect(TIER_STORAGE.free).toBe(0);
+			expect(TIER_STORAGE.wanderer).toBe(0);
 			expect(TIER_STORAGE.seedling).toBe(1);
 			expect(TIER_STORAGE.sapling).toBe(5);
 			expect(TIER_STORAGE.oak).toBe(20);

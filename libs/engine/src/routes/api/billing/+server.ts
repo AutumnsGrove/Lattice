@@ -226,7 +226,7 @@ interface UpdateRequest {
 /** Derive PLANS from single source of truth in tiers.ts */
 const PLANS: Record<string, PlanConfig> = Object.fromEntries(
 	Object.entries(TIERS)
-		.filter(([key]) => key !== "free") // Exclude free tier from billing
+		.filter(([key]) => key !== "wanderer") // Exclude wanderer tier from billing
 		.map(([key, tier]) => [
 			key,
 			{

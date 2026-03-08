@@ -93,7 +93,7 @@ export const load: LayoutServerLoad = async ({ cookies, platform }) => {
       step = "plans";
     } else if (
       !result.payment_completed_at &&
-      result.plan_selected !== "free"
+      result.plan_selected !== "wanderer"
     ) {
       step = "checkout";
     } else if (!result.tenant_id) {

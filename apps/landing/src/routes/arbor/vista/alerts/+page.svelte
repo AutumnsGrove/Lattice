@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData } from "./$types";
 	import { GlassCard } from "@autumnsgrove/lattice/ui";
+	import { formatRelativeTime } from "@autumnsgrove/lattice/utils";
 	import { Bell, AlertCircle, CheckCircle2, Info } from "lucide-svelte";
 	let { data }: { data: PageData } = $props();
 
@@ -20,17 +21,6 @@
 		warning: "bg-warning-bg text-warning",
 		info: "bg-info-bg text-info",
 	};
-
-	function formatRelativeTime(epochSeconds: number): string {
-		const diffMs = Date.now() - epochSeconds * 1000;
-		const minutes = Math.floor(diffMs / 60000);
-		const hours = Math.floor(diffMs / 3600000);
-		const days = Math.floor(diffMs / 86400000);
-		if (minutes < 1) return "Just now";
-		if (minutes < 60) return `${minutes}m ago`;
-		if (hours < 24) return `${hours}h ago`;
-		return `${days}d ago`;
-	}
 
 	async function handleSaveThreshold(e: SubmitEvent) {
 		e.preventDefault();

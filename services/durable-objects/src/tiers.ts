@@ -5,7 +5,7 @@
  * This file consolidates feature limits, rate limits, pricing, and display info.
  *
  * Tier progression:
- * - free: Meadow-only (no blog) - coming soon
+ * - wanderer: Wanderer Plan — 25 posts, 100 MB, no credit card
  * - seedling: $8/mo entry tier
  * - sapling: $12/mo mid tier - coming soon
  * - oak: $25/mo with BYOD domain - future
@@ -16,8 +16,8 @@
 // TIER IDENTIFIERS
 // =============================================================================
 
-export type TierKey = "free" | "seedling" | "sapling" | "oak" | "evergreen";
-export type PaidTierKey = Exclude<TierKey, "free">;
+export type TierKey = "wanderer" | "seedling" | "sapling" | "oak" | "evergreen";
+export type PaidTierKey = Exclude<TierKey, "wanderer">;
 export type TierStatus = "available" | "coming_soon" | "future" | "deprecated";
 export type TierIcon =
   | "user"
@@ -114,8 +114,8 @@ export interface TierConfig {
 // =============================================================================
 
 export const TIERS: Record<TierKey, TierConfig> = {
-  free: {
-    id: "free",
+  wanderer: {
+    id: "wanderer",
     order: 0,
     status: "available",
     limits: {
@@ -418,7 +418,8 @@ export const TIERS: Record<TierKey, TierConfig> = {
  *
  * Seedling is the default because:
  * - It's the entry-level paid tier with reasonable limits
- * - Free tier doesn't have blog access, so can't be a safe default
+ * - Wanderer tier has tight limits (25 posts, 100 MB), so defaulting
+ *   to it could unexpectedly restrict users with unknown/invalid tier data
  * - It provides a good baseline without being overly permissive
  */
 export const DEFAULT_TIER: TierKey = "seedling";
@@ -428,7 +429,7 @@ export const DEFAULT_TIER: TierKey = "seedling";
 // =============================================================================
 
 export const TIER_ORDER: TierKey[] = [
-  "free",
+  "wanderer",
   "seedling",
   "sapling",
   "oak",

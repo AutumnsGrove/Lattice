@@ -4,7 +4,14 @@
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { storage, StorageError } from "@autumnsgrove/lattice/services";
+import { parseFormData } from "@autumnsgrove/lattice/server";
 import { getUserByEmail } from "$lib/server/db";
+import { z } from "zod";
+
+const UploadMetadataSchema = z.object({
+  folder: z.string().optional().default("/"),
+  alt_text: z.string().optional().default(""),
+});
 
 export const POST: RequestHandler = async ({ request, locals, platform }) => {
   if (!locals.user) {
@@ -28,8 +35,9 @@ export const POST: RequestHandler = async ({ request, locals, platform }) => {
   try {
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
-    const folder = (formData.get("folder") as string) || "/";
-    const altText = (formData.get("alt_text") as string) || "";
+    const metaResult = parseFormData(formData, UploadMetadataSchema);
+    const folder = metaResult.success ? metaResult.data.folder : "/";
+    const altText = metaResult.success ? metaResult.data.alt_text : "";
 
     if (!file) {
       throw error(400, "No file provided");

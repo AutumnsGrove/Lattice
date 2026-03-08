@@ -38,8 +38,8 @@ describe("Threshold", () => {
       expect(result.allowed).toBe(true);
     });
 
-    it("uses free tier limits correctly", async () => {
-      await threshold.checkTier("free", "requests", "user1");
+    it("uses wanderer tier limits correctly", async () => {
+      await threshold.checkTier("wanderer", "requests", "user1");
 
       expect(store.check).toHaveBeenCalledWith(
         expect.objectContaining({

@@ -1,23 +1,26 @@
 import { fail, type Actions } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import { verifyTurnstileToken, generateId } from "@autumnsgrove/lattice/services";
+import { parseFormData } from "@autumnsgrove/lattice/server";
 import { GROVE_EMAILS } from "@autumnsgrove/lattice/config";
+import { escapeHtml } from "@autumnsgrove/lattice/utils";
 import { Resend } from "resend";
-
-/**
- * Escape HTML special characters to prevent XSS in email templates
- */
-function escapeHtml(unsafe: string | null): string {
-	if (!unsafe) return "";
-	return unsafe
-		.replace(/&/g, "&amp;")
-		.replace(/</g, "&lt;")
-		.replace(/>/g, "&gt;")
-		.replace(/"/g, "&quot;")
-		.replace(/'/g, "&#039;");
-}
+import { z } from "zod";
 
 const VALID_SEVERITY = ["critical", "high", "medium", "low", "informational"] as const;
+
+const SecurityReportSchema = z.object({
+	name: z.string().trim().optional().default(""),
+	email: z.string().trim().min(1, "Email is required so we can follow up with you."),
+	severity: z.string().trim().optional().default("medium"),
+	subject: z.string().trim().min(3, "Please provide a brief summary."),
+	description: z
+		.string()
+		.trim()
+		.min(20, "Please provide a description between 20 and 10,000 characters.")
+		.max(10000, "Please provide a description between 20 and 10,000 characters."),
+	"cf-turnstile-response": z.string().optional().default(""),
+});
 
 export const load: PageServerLoad = async ({ locals, platform }) => {
 	return {
@@ -29,34 +32,21 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
 export const actions: Actions = {
 	report: async ({ request, platform, locals, getClientAddress }) => {
 		const formData = await request.formData();
-		const name = (formData.get("name") as string)?.trim() || null;
-		const email = (formData.get("email") as string)?.trim();
-		const severity = (formData.get("severity") as string)?.trim() || "medium";
-		const subject = (formData.get("subject") as string)?.trim();
-		const description = (formData.get("description") as string)?.trim();
-		const turnstileToken = formData.get("cf-turnstile-response") as string;
+		const result = parseFormData(formData, SecurityReportSchema);
+		if (!result.success) {
+			const firstError = Object.values(result.errors).flat()[0];
+			return fail(400, { error: firstError || "Invalid form data" });
+		}
+		const { email, subject, description } = result.data;
+		const name = result.data.name || null;
+		const turnstileToken = result.data["cf-turnstile-response"];
 
 		// Validate severity
-		const validSeverity = VALID_SEVERITY.includes(severity as (typeof VALID_SEVERITY)[number])
-			? severity
+		const validSeverity = VALID_SEVERITY.includes(
+			result.data.severity as (typeof VALID_SEVERITY)[number],
+		)
+			? result.data.severity
 			: "medium";
-
-		// Validate required fields
-		if (!email) {
-			return fail(400, {
-				error: "Email is required so we can follow up with you.",
-			});
-		}
-
-		if (!subject || subject.length < 3) {
-			return fail(400, { error: "Please provide a brief summary." });
-		}
-
-		if (!description || description.length < 20 || description.length > 10000) {
-			return fail(400, {
-				error: "Please provide a description between 20 and 10,000 characters.",
-			});
-		}
 
 		// Turnstile verification for guests
 		if (!locals.user) {

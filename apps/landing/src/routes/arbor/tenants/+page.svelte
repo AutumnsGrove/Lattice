@@ -19,7 +19,7 @@
 	);
 
 	const planConfig: Record<string, { label: string; color: string; bg: string }> = {
-		free: {
+		wanderer: {
 			label: 'Wanderer',
 			color: 'text-muted-foreground dark:text-muted-foreground',
 			bg: 'bg-muted dark:bg-muted/30'
@@ -104,7 +104,7 @@
 		{@const paid = data.stats.seedling + data.stats.sapling + data.stats.oak + data.stats.evergreen}
 		{@const pct = data.stats.total > 0 ? Math.round((paid / data.stats.total) * 100) : 0}
 		<div class="flex justify-center gap-1 mb-1">
-			{#each ['free', 'seedling', 'sapling', 'oak', 'evergreen'] as plan}
+			{#each ['wanderer', 'seedling', 'sapling', 'oak', 'evergreen'] as plan}
 				{@const count = data.stats[plan as keyof typeof data.stats]}
 				{#if typeof count === 'number' && count > 0}
 					<span class="text-xs font-sans px-1.5 py-0.5 rounded {planConfig[plan]?.bg} {planConfig[plan]?.color}">

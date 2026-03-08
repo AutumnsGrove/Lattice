@@ -164,7 +164,7 @@ export function getAllCheckoutUrls(
 	config: CheckoutConfig,
 	options: CheckoutOptions = {},
 ): Record<TierKey, { monthly?: string; annual?: string }> {
-	const tiers: TierKey[] = ["free", "seedling", "sapling", "oak", "evergreen"];
+	const tiers: TierKey[] = ["wanderer", "seedling", "sapling", "oak", "evergreen"];
 	const result = {} as Record<TierKey, { monthly?: string; annual?: string }>;
 
 	for (const tier of tiers) {
@@ -208,7 +208,7 @@ export function createCheckoutConfigFromEnv(env: {
 	return {
 		storeId: env.LEMON_SQUEEZY_STORE_ID ?? "",
 		products: {
-			// Free tier has no checkout
+			// Wanderer tier has no checkout
 			seedling: {
 				monthlyVariantId: env.LEMON_SEEDLING_MONTHLY,
 				annualVariantId: env.LEMON_SEEDLING_ANNUAL,

@@ -7,7 +7,7 @@ import type { UserTier, Theme } from "../types.js";
  * Tier hierarchy for comparison
  */
 const TIER_LEVELS: Record<UserTier, number> = {
-	free: 0,
+	wanderer: 0,
 	seedling: 1,
 	sapling: 2,
 	oak: 3,
@@ -53,7 +53,7 @@ export function canAccessCommunityThemes(userTier: UserTier): boolean {
  * Get the number of themes available for a tier
  */
 export function getThemeCountForTier(userTier: UserTier): number {
-	if (userTier === "free") return 0;
+	if (userTier === "wanderer") return 0;
 	if (userTier === "seedling") return 3;
 	return 10;
 }

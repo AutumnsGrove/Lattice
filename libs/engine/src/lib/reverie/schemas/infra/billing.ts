@@ -18,7 +18,7 @@ export const billingSchema: DomainSchema = {
 		tier: {
 			type: "enum",
 			description: "Your current subscription tier",
-			options: ["free", "seedling", "sapling", "oak", "evergreen"],
+			options: ["wanderer", "seedling", "sapling", "oak", "evergreen"],
 			readonly: true,
 		},
 		billingCycle: {

@@ -122,21 +122,8 @@ export function getMimeType(filename: string): string {
 
 // ─── Formatting ───────────────────────────────────────────────────
 
-/**
- * Format a byte count into a human-readable string.
- *
- * @example
- * formatBytes(0)          // "0 B"
- * formatBytes(1024)       // "1 KB"
- * formatBytes(1536000)    // "1.46 MB"
- */
-export function formatBytes(bytes: number): string {
-	if (bytes === 0) return "0 B";
-	const k = 1024;
-	const sizes = ["B", "KB", "MB", "GB", "TB"];
-	const i = Math.floor(Math.log(bytes) / Math.log(k));
-	return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-}
+// Re-export from utils for backwards compatibility
+export { formatBytes } from "../utils/imageProcessor.js";
 
 // ─── ID Generation ────────────────────────────────────────────────
 

@@ -5,6 +5,7 @@
  * Uses D1 for code storage and KV for rate limiting.
  */
 
+import { PLANT_ERRORS } from "$lib/errors";
 import { sendEmail } from "./send-email";
 import { getVerificationEmail } from "./verification-email-template";
 
@@ -57,7 +58,7 @@ export function isValidEmailFormat(email: string): boolean {
 export function normalizeEmail(email: string): string {
   const normalized = email.toLowerCase().trim();
   if (!isValidEmailFormat(normalized)) {
-    throw new Error("Invalid email format");
+    throw new Error(`${PLANT_ERRORS.INVALID_EMAIL_FORMAT.code}: ${PLANT_ERRORS.INVALID_EMAIL_FORMAT.adminMessage}`);
   }
   return normalized;
 }

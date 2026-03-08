@@ -5,7 +5,7 @@
  * This file consolidates feature limits, rate limits, pricing, and display info.
  *
  * Tier progression:
- * - free: Wanderer Plan — 25 posts, 100 MB, no credit card
+ * - wanderer: Wanderer Plan — 25 posts, 100 MB, no credit card
  * - seedling: $8/mo entry tier
  * - sapling: $12/mo mid tier - coming soon
  * - oak: $25/mo with BYOD domain - future
@@ -16,8 +16,8 @@
 // TIER IDENTIFIERS
 // =============================================================================
 
-export type TierKey = "free" | "seedling" | "sapling" | "oak" | "evergreen";
-export type PaidTierKey = Exclude<TierKey, "free">;
+export type TierKey = "wanderer" | "seedling" | "sapling" | "oak" | "evergreen";
+export type PaidTierKey = Exclude<TierKey, "wanderer">;
 export type TierStatus = "available" | "coming_soon" | "future" | "deprecated";
 export type TierIcon =
   | "user"
@@ -119,8 +119,8 @@ export interface TierConfig {
 // =============================================================================
 
 export const TIERS: Record<TierKey, TierConfig> = {
-  free: {
-    id: "free",
+  wanderer: {
+    id: "wanderer",
     order: 0,
     status: "available",
     limits: {
@@ -173,7 +173,7 @@ export const TIERS: Record<TierKey, TierConfig> = {
         "RSS feed",
         "No credit card needed",
       ],
-      standardName: "Free",
+      standardName: "Wanderer",
       standardFeatureStrings: [
         "25 posts",
         "100 MB storage",
@@ -483,7 +483,7 @@ export const TIERS: Record<TierKey, TierConfig> = {
  *
  * Seedling is the default because:
  * - It's the entry-level paid tier with reasonable limits
- * - Free tier (Wanderer) has tight limits (25 posts, 100 MB), so defaulting
+ * - Wanderer tier has tight limits (25 posts, 100 MB), so defaulting
  *   to it could unexpectedly restrict users with unknown/invalid tier data
  * - It provides a good baseline without being overly permissive
  */
@@ -494,7 +494,7 @@ export const DEFAULT_TIER: TierKey = "seedling";
 // =============================================================================
 
 export const TIER_ORDER: TierKey[] = [
-  "free",
+  "wanderer",
   "seedling",
   "sapling",
   "oak",
@@ -506,6 +506,18 @@ export const PAID_TIERS: PaidTierKey[] = [
   "oak",
   "evergreen",
 ];
+
+/**
+ * Storage allocation per tier in GB.
+ * Derived from the unified tier config.
+ * Used by Amber (storage service) and any other service that needs tier→GB mapping.
+ */
+export const TIER_STORAGE_GB: Record<TierKey, number> = Object.fromEntries(
+  TIER_ORDER.map((key) => [
+    key,
+    Math.floor(TIERS[key].limits.storage / (1024 * 1024 * 1024)),
+  ]),
+) as Record<TierKey, number>;
 
 // =============================================================================
 // HELPER FUNCTIONS

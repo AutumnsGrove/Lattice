@@ -1,8 +1,25 @@
 import { fail, redirect, type Actions } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import { generateId } from "@autumnsgrove/lattice/services";
+import { parseFormData } from "@autumnsgrove/lattice/server";
 import { isWayfinder, GROVE_EMAILS } from "@autumnsgrove/lattice/config";
+import { escapeHtml } from "@autumnsgrove/lattice/utils";
 import { Resend } from "resend";
+import { z } from "zod";
+
+const ReplySchema = z.object({
+  content: z.string().trim().min(1, "Please enter a reply."),
+});
+
+const StatusSchema = z.object({
+  status: z.enum(["open", "pending", "resolved"], {
+    errorMap: () => ({ message: "Invalid status." }),
+  }),
+});
+
+const NotesSchema = z.object({
+  notes: z.string().optional().default(""),
+});
 
 interface Visit {
   id: string;
@@ -31,16 +48,6 @@ interface User {
   id: string;
   email: string;
   name: string | null;
-}
-
-function escapeHtml(unsafe: string | null): string {
-  if (!unsafe) return "";
-  return unsafe
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
 }
 
 export const load: PageServerLoad = async ({ params, parent, platform }) => {
@@ -125,11 +132,11 @@ export const actions: Actions = {
     }
 
     const formData = await request.formData();
-    const content = (formData.get("content") as string)?.trim();
-
-    if (!content || content.length < 1) {
+    const result = parseFormData(formData, ReplySchema);
+    if (!result.success) {
       return fail(400, { error: "Please enter a reply." });
     }
+    const { content } = result.data;
 
     // Get visit with email
     const visit = await platform.env.DB.prepare(
@@ -232,11 +239,11 @@ Grove`;
     }
 
     const formData = await request.formData();
-    const status = formData.get("status") as string;
-
-    if (!["open", "pending", "resolved"].includes(status)) {
+    const statusResult = parseFormData(formData, StatusSchema);
+    if (!statusResult.success) {
       return fail(400, { error: "Invalid status." });
     }
+    const { status } = statusResult.data;
 
     const now = Math.floor(Date.now() / 1000);
 
@@ -272,7 +279,8 @@ Grove`;
     }
 
     const formData = await request.formData();
-    const notes = (formData.get("notes") as string) || "";
+    const notesResult = parseFormData(formData, NotesSchema);
+    const notes = notesResult.success ? notesResult.data.notes : "";
 
     const now = Math.floor(Date.now() / 1000);
 

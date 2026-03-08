@@ -31,7 +31,7 @@ describe("Tier Configuration", () => {
     it("defines all 5 tiers in correct order", () => {
       expect(TIER_ORDER).toHaveLength(5);
       expect(TIER_ORDER).toEqual([
-        "free",
+        "wanderer",
         "seedling",
         "sapling",
         "oak",
@@ -46,8 +46,8 @@ describe("Tier Configuration", () => {
       expect(PAID_TIERS).toEqual(["seedling", "sapling", "oak", "evergreen"]);
     });
 
-    it("excludes free tier", () => {
-      expect(PAID_TIERS).not.toContain("free");
+    it("excludes wanderer tier", () => {
+      expect(PAID_TIERS).not.toContain("wanderer");
     });
   });
 
@@ -70,7 +70,7 @@ describe("Tier Configuration", () => {
     });
 
     it("has correct order values", () => {
-      expect(TIERS.free.order).toBe(0);
+      expect(TIERS.wanderer.order).toBe(0);
       expect(TIERS.seedling.order).toBe(1);
       expect(TIERS.sapling.order).toBe(2);
       expect(TIERS.oak.order).toBe(3);
@@ -78,7 +78,7 @@ describe("Tier Configuration", () => {
     });
 
     it("has increasing post limits", () => {
-      expect(TIERS.free.limits.posts).toBe(25);
+      expect(TIERS.wanderer.limits.posts).toBe(25);
       expect(TIERS.seedling.limits.posts).toBe(100);
       expect(TIERS.sapling.limits.posts).toBe(Infinity);
       expect(TIERS.oak.limits.posts).toBe(Infinity);
@@ -86,7 +86,7 @@ describe("Tier Configuration", () => {
     });
 
     it("has increasing storage limits", () => {
-      const freeStorage = TIERS.free.limits.storage;
+      const freeStorage = TIERS.wanderer.limits.storage;
       const seedlingStorage = TIERS.seedling.limits.storage;
       const saplingStorage = TIERS.sapling.limits.storage;
       const oakStorage = TIERS.oak.limits.storage;
@@ -100,7 +100,7 @@ describe("Tier Configuration", () => {
     });
 
     it("has draft limits for free tier and unlimited for paid", () => {
-      expect(TIERS.free.limits.drafts).toBe(100);
+      expect(TIERS.wanderer.limits.drafts).toBe(100);
       expect(TIERS.seedling.limits.drafts).toBe(Infinity);
       expect(TIERS.sapling.limits.drafts).toBe(Infinity);
       expect(TIERS.oak.limits.drafts).toBe(Infinity);
@@ -142,7 +142,7 @@ describe("Tier Configuration", () => {
 
     describe("isValidTier", () => {
       it("returns true for valid tier keys", () => {
-        expect(isValidTier("free")).toBe(true);
+        expect(isValidTier("wanderer")).toBe(true);
         expect(isValidTier("seedling")).toBe(true);
         expect(isValidTier("evergreen")).toBe(true);
       });
@@ -161,8 +161,8 @@ describe("Tier Configuration", () => {
         expect(isPaidTier("evergreen")).toBe(true);
       });
 
-      it("returns false for free tier", () => {
-        expect(isPaidTier("free")).toBe(false);
+      it("returns false for wanderer tier", () => {
+        expect(isPaidTier("wanderer")).toBe(false);
       });
 
       it("returns false for invalid keys", () => {
@@ -172,7 +172,7 @@ describe("Tier Configuration", () => {
 
     describe("getNextTier", () => {
       it("returns correct next tier in progression", () => {
-        expect(getNextTier("free")).toBe("seedling");
+        expect(getNextTier("wanderer")).toBe("seedling");
         expect(getNextTier("seedling")).toBe("sapling");
         expect(getNextTier("sapling")).toBe("oak");
         expect(getNextTier("oak")).toBe("evergreen");
@@ -186,14 +186,14 @@ describe("Tier Configuration", () => {
     describe("getTiersWithFeature", () => {
       it("returns tiers with AI feature", () => {
         const aiTiers = getTiersWithFeature("ai");
-        expect(aiTiers).not.toContain("free");
+        expect(aiTiers).not.toContain("wanderer");
         expect(aiTiers).toContain("seedling");
         expect(aiTiers).toContain("evergreen");
       });
 
       it("returns tiers with customDomain feature", () => {
         const domainTiers = getTiersWithFeature("customDomain");
-        expect(domainTiers).not.toContain("free");
+        expect(domainTiers).not.toContain("wanderer");
         expect(domainTiers).not.toContain("seedling");
         expect(domainTiers).not.toContain("sapling");
         expect(domainTiers).toContain("oak");
@@ -202,7 +202,7 @@ describe("Tier Configuration", () => {
 
       it("returns tiers with meadow feature (all tiers)", () => {
         const meadowTiers = getTiersWithFeature("meadow");
-        expect(meadowTiers).toContain("free");
+        expect(meadowTiers).toContain("wanderer");
         expect(meadowTiers).toContain("seedling");
         expect(meadowTiers).toContain("evergreen");
       });
@@ -217,24 +217,24 @@ describe("Tier Configuration", () => {
 
     describe("tierHasFeature", () => {
       it("correctly checks feature availability", () => {
-        expect(tierHasFeature("free", "blog")).toBe(true);
+        expect(tierHasFeature("wanderer", "blog")).toBe(true);
         expect(tierHasFeature("seedling", "blog")).toBe(true);
         expect(tierHasFeature("seedling", "customDomain")).toBe(false);
         expect(tierHasFeature("oak", "customDomain")).toBe(true);
       });
 
-      it("free tier has limited features", () => {
-        expect(tierHasFeature("free", "ai")).toBe(false);
-        expect(tierHasFeature("free", "customDomain")).toBe(false);
-        expect(tierHasFeature("free", "themeCustomizer")).toBe(false);
-        expect(tierHasFeature("free", "emailForwarding")).toBe(false);
-        expect(tierHasFeature("free", "shop")).toBe(false);
-        expect(tierHasFeature("free", "analytics")).toBe(false);
+      it("wanderer tier has limited features", () => {
+        expect(tierHasFeature("wanderer", "ai")).toBe(false);
+        expect(tierHasFeature("wanderer", "customDomain")).toBe(false);
+        expect(tierHasFeature("wanderer", "themeCustomizer")).toBe(false);
+        expect(tierHasFeature("wanderer", "emailForwarding")).toBe(false);
+        expect(tierHasFeature("wanderer", "shop")).toBe(false);
+        expect(tierHasFeature("wanderer", "analytics")).toBe(false);
       });
 
-      it("free tier has blog and meadow", () => {
-        expect(tierHasFeature("free", "blog")).toBe(true);
-        expect(tierHasFeature("free", "meadow")).toBe(true);
+      it("wanderer tier has blog and meadow", () => {
+        expect(tierHasFeature("wanderer", "blog")).toBe(true);
+        expect(tierHasFeature("wanderer", "meadow")).toBe(true);
       });
     });
 
@@ -256,42 +256,42 @@ describe("Tier Configuration", () => {
     });
   });
 
-  describe("Wanderer (Free) Tier", () => {
+  describe("Wanderer Tier", () => {
     it("has correct status and pricing", () => {
-      expect(TIERS.free.status).toBe("available");
-      expect(TIERS.free.pricing.monthlyPrice).toBe(0);
-      expect(TIERS.free.pricing.yearlyPrice).toBe(0);
+      expect(TIERS.wanderer.status).toBe("available");
+      expect(TIERS.wanderer.pricing.monthlyPrice).toBe(0);
+      expect(TIERS.wanderer.pricing.yearlyPrice).toBe(0);
     });
 
     it("has blog enabled with correct limits", () => {
-      expect(TIERS.free.features.blog).toBe(true);
-      expect(TIERS.free.limits.posts).toBe(25);
-      expect(TIERS.free.limits.drafts).toBe(100);
-      expect(TIERS.free.limits.storage).toBe(100 * 1024 * 1024);
-      expect(TIERS.free.limits.themes).toBe(1);
+      expect(TIERS.wanderer.features.blog).toBe(true);
+      expect(TIERS.wanderer.limits.posts).toBe(25);
+      expect(TIERS.wanderer.limits.drafts).toBe(100);
+      expect(TIERS.wanderer.limits.storage).toBe(100 * 1024 * 1024);
+      expect(TIERS.wanderer.limits.themes).toBe(1);
     });
 
     it("has correct display strings", () => {
-      expect(TIERS.free.display.name).toBe("Wanderer");
-      expect(TIERS.free.display.standardName).toBe("Free");
-      expect(TIERS.free.display.icon).toBe("footprints");
-      expect(TIERS.free.display.tagline).toBe("Your first steps in the grove");
-      expect(TIERS.free.display.bestFor).toBe("Trying it out");
+      expect(TIERS.wanderer.display.name).toBe("Wanderer");
+      expect(TIERS.wanderer.display.standardName).toBe("Wanderer");
+      expect(TIERS.wanderer.display.icon).toBe("footprints");
+      expect(TIERS.wanderer.display.tagline).toBe("Your first steps in the grove");
+      expect(TIERS.wanderer.display.bestFor).toBe("Trying it out");
     });
 
     it("has restrictive rate limits", () => {
-      expect(TIERS.free.rateLimits.requests.limit).toBe(60);
-      expect(TIERS.free.rateLimits.uploads.limit).toBe(5);
-      expect(TIERS.free.rateLimits.ai.limit).toBe(0);
+      expect(TIERS.wanderer.rateLimits.requests.limit).toBe(60);
+      expect(TIERS.wanderer.rateLimits.uploads.limit).toBe(5);
+      expect(TIERS.wanderer.rateLimits.ai.limit).toBe(0);
     });
 
     it("disables premium features", () => {
-      expect(TIERS.free.features.ai).toBe(false);
-      expect(TIERS.free.features.customDomain).toBe(false);
-      expect(TIERS.free.features.themeCustomizer).toBe(false);
-      expect(TIERS.free.features.emailForwarding).toBe(false);
-      expect(TIERS.free.features.shop).toBe(false);
-      expect(TIERS.free.features.analytics).toBe(false);
+      expect(TIERS.wanderer.features.ai).toBe(false);
+      expect(TIERS.wanderer.features.customDomain).toBe(false);
+      expect(TIERS.wanderer.features.themeCustomizer).toBe(false);
+      expect(TIERS.wanderer.features.emailForwarding).toBe(false);
+      expect(TIERS.wanderer.features.shop).toBe(false);
+      expect(TIERS.wanderer.features.analytics).toBe(false);
     });
   });
 

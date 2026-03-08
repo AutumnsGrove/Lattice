@@ -12,6 +12,7 @@ import {
   getActionableUploadError,
 } from "@autumnsgrove/lattice/utils/upload-validation";
 import { convertHeicToJpeg } from "@autumnsgrove/lattice/utils/imageProcessor";
+import { MEADOW_ERRORS } from "$lib/errors";
 
 /**
  * Upload an image file for use in a Note.
@@ -38,12 +39,12 @@ export async function uploadNoteImage(file: File): Promise<string> {
     });
 
     if (!result?.url) {
-      throw new Error("Upload succeeded but no URL returned.");
+      throw new Error(`${MEADOW_ERRORS.UPLOAD_NO_URL.code}: ${MEADOW_ERRORS.UPLOAD_NO_URL.adminMessage}`);
     }
 
     return result.url;
   } catch (err) {
     const rawMessage = err instanceof Error ? err.message : String(err);
-    throw new Error(getActionableUploadError(rawMessage));
+    throw new Error(`${MEADOW_ERRORS.UPLOAD_FAILED.code}: ${getActionableUploadError(rawMessage)}`);
   }
 }

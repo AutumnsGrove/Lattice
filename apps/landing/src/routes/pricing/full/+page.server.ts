@@ -10,9 +10,9 @@ import { transformAllTiers } from "@autumnsgrove/lattice/grafts/pricing";
 export function load() {
   // All tiers, no filters
   const tiers = transformAllTiers({
-    highlightTier: "free",
+    highlightTier: "wanderer",
     badges: {
-      free: "Free",
+      wanderer: "Free",
       seedling: "$8/mo",
       sapling: "$12/mo",
       oak: "$25/mo",

@@ -301,15 +301,13 @@ subscription.put("/:userId/tier", async (c) => {
 		"sapling",
 		"oak",
 		"evergreen",
-		"canopy",
-		"platform",
 	];
 	if (!body.tier || !validTiers.includes(body.tier as SubscriptionTier)) {
 		return c.json(
 			{
 				error: "invalid_request",
 				error_description:
-					'Body must contain { tier: "seedling" | "sapling" | "oak" | "evergreen" | "canopy" | "platform" }',
+					'Body must contain { tier: "seedling" | "sapling" | "oak" | "evergreen" }',
 			},
 			400,
 		);

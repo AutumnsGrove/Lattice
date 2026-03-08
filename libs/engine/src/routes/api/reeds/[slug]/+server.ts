@@ -249,13 +249,13 @@ export const POST: RequestHandler = async ({
       throwGroveError(403, API_ERRORS.COMMENTS_DISABLED, "API");
     }
 
-    // Per-tier rate limiting (free users have weekly/daily caps)
+    // Per-tier rate limiting (wanderer users have weekly/daily caps)
     const context = locals.context;
     const tenantPlan =
       context?.type === "tenant" ? context.tenant.plan : "seedling";
-    const isFreeUser = !tenantPlan || tenantPlan === "free";
+    const isWandererUser = !tenantPlan || tenantPlan === "wanderer";
 
-    if (isFreeUser) {
+    if (isWandererUser) {
       const limitType = isPublic ? "public_comment" : "private_reply";
       const limit = isPublic ? 20 : 50;
       const window = isPublic ? "week" : "day";

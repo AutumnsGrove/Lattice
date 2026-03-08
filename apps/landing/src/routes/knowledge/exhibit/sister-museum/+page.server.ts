@@ -1,4 +1,5 @@
 import MarkdownIt from "markdown-it";
+import { logGroveError, SITE_ERRORS } from "@autumnsgrove/lattice/errors";
 import type { PageServerLoad } from "./$types";
 
 // Prerender at build time - fetch from GitHub during build
@@ -100,7 +101,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		const response = await fetch(GITHUB_RAW_URL);
 
 		if (!response.ok) {
-			throw new Error(`Failed to fetch: ${response.status}`);
+			throw new Error(`${SITE_ERRORS.PAGE_LOAD_FAILED.code}: Failed to fetch sister museum: ${response.status}`);
 		}
 
 		const markdown = await response.text();
@@ -128,7 +129,11 @@ export const load: PageServerLoad = async ({ fetch }) => {
 			sourceUrl: "https://github.com/AutumnsGrove/AutumnsGrove/blob/main/MUSEUM.md",
 		};
 	} catch (error) {
-		console.error("Failed to fetch sister museum content:", error);
+		logGroveError("Landing", SITE_ERRORS.PAGE_LOAD_FAILED, {
+			path: "/knowledge/exhibit/sister-museum",
+			detail: "Failed to fetch sister museum content from GitHub",
+			cause: error,
+		});
 
 		// Return fallback content
 		return {

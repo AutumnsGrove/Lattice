@@ -754,7 +754,7 @@ describe("PUT /subscription/:userId/tier", () => {
 	});
 
 	it("allows all valid tiers", async () => {
-		const validTiers = ["seedling", "sapling", "oak", "evergreen", "canopy", "platform"];
+		const validTiers = ["seedling", "sapling", "oak", "evergreen"];
 
 		for (const tier of validTiers) {
 			vi.clearAllMocks();

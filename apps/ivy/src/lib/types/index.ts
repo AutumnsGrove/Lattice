@@ -195,7 +195,7 @@ export interface WebhookPayload {
 // User Tiers
 // ============================================================================
 
-export type UserTier = "free" | "seedling" | "sapling" | "oak" | "evergreen";
+export type UserTier = "wanderer" | "seedling" | "sapling" | "oak" | "evergreen";
 
 export interface TierCapabilities {
 	canAccessIvy: boolean;

@@ -7,6 +7,7 @@
 	 */
 
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
+	import { formatDateTime } from "$lib/utils/date";
 	import {
 		Shield,
 		ShieldAlert,
@@ -62,19 +63,8 @@
 	let reviewMessage = $state<{ type: "success" | "error"; text: string } | null>(null);
 	let reviewingId = $state<string | null>(null);
 
-	function formatTime(ts: string): string {
-		try {
-			const d = new Date(ts);
-			return d.toLocaleDateString("en-US", {
-				month: "short",
-				day: "numeric",
-				hour: "2-digit",
-				minute: "2-digit",
-			});
-		} catch {
-			return ts;
-		}
-	}
+	/** Alias for template readability */
+	const formatTime = (ts: string) => formatDateTime(ts, ts);
 
 	function actionClass(action: string): string {
 		switch (action) {

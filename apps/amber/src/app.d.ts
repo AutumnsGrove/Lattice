@@ -11,7 +11,7 @@ declare global {
 			user: {
 				id: string;
 				email: string;
-				tier: "free" | "seedling" | "sapling" | "oak" | "evergreen";
+				tier: "wanderer" | "seedling" | "sapling" | "oak" | "evergreen";
 			} | null;
 		}
 		interface PageData {

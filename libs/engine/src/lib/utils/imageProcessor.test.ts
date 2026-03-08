@@ -175,13 +175,18 @@ describe("formatBytes", () => {
   });
 
   it("formats kilobytes", () => {
-    expect(formatBytes(1024)).toBe("1.0 KB");
+    expect(formatBytes(1024)).toBe("1 KB");
     expect(formatBytes(1536)).toBe("1.5 KB");
   });
 
   it("formats megabytes", () => {
-    expect(formatBytes(1024 * 1024)).toBe("1.0 MB");
+    expect(formatBytes(1024 * 1024)).toBe("1 MB");
     expect(formatBytes(2.5 * 1024 * 1024)).toBe("2.5 MB");
+  });
+
+  it("formats gigabytes", () => {
+    expect(formatBytes(1024 * 1024 * 1024)).toBe("1 GB");
+    expect(formatBytes(20.5 * 1024 * 1024 * 1024)).toBe("20.5 GB");
   });
 
   it("handles zero", () => {

@@ -43,7 +43,7 @@ export function getTheme(id: string): Theme | undefined {
 
 /**
  * Get themes available for a given user tier
- * - Free: no themes
+ * - Wanderer: no themes
  * - Seedling: grove, minimal, night-garden
  * - Sapling+: all themes
  */
@@ -51,7 +51,7 @@ export function getThemesForTier(tier: UserTier): Theme[] {
 	const allThemes = Object.values(themes);
 
 	switch (tier) {
-		case "free":
+		case "wanderer":
 			return [];
 		case "seedling":
 			return allThemes.filter((theme) => theme.tier === "seedling");

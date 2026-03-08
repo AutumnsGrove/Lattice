@@ -24,7 +24,7 @@ import type { LumenTask } from "../types.js";
 
 describe("Quota Structure", () => {
   const allTiers: TierKey[] = [
-    "free",
+    "wanderer",
     "seedling",
     "sapling",
     "oak",
@@ -58,35 +58,35 @@ describe("Quota Structure", () => {
   it("should have increasing quotas for higher tiers", () => {
     // For most tasks, higher tiers should have higher limits
     for (const task of allTasks) {
-      const freeLimit = LUMEN_QUOTAS.free[task];
+      const wandererLimit = LUMEN_QUOTAS.wanderer[task];
       const evergreenLimit = LUMEN_QUOTAS.evergreen[task];
 
-      expect(evergreenLimit).toBeGreaterThanOrEqual(freeLimit);
+      expect(evergreenLimit).toBeGreaterThanOrEqual(wandererLimit);
     }
   });
 });
 
 // =============================================================================
-// FREE TIER RESTRICTIONS
+// WANDERER TIER RESTRICTIONS
 // =============================================================================
 
-describe("Free Tier Restrictions", () => {
+describe("Wanderer Tier Restrictions", () => {
   it("should have no image access", () => {
-    expect(getTierQuota("free", "image")).toBe(0);
+    expect(getTierQuota("wanderer", "image")).toBe(0);
   });
 
   it("should have no code access", () => {
-    expect(getTierQuota("free", "code")).toBe(0);
+    expect(getTierQuota("wanderer", "code")).toBe(0);
   });
 
   it("should have limited but nonzero moderation", () => {
-    const quota = getTierQuota("free", "moderation");
+    const quota = getTierQuota("wanderer", "moderation");
     expect(quota).toBeGreaterThan(0);
     expect(quota).toBeLessThan(1000);
   });
 
   it("should have very limited generation", () => {
-    const quota = getTierQuota("free", "generation");
+    const quota = getTierQuota("wanderer", "generation");
     expect(quota).toBeGreaterThan(0);
     expect(quota).toBeLessThanOrEqual(20);
   });
@@ -148,21 +148,21 @@ describe("getTierQuotas", () => {
     expect(quotas.code).toBe(10);
   });
 
-  it("should return free tier quotas for invalid tier", () => {
+  it("should return wanderer tier quotas for invalid tier", () => {
     const quotas = getTierQuotas("invalid" as TierKey);
-    expect(quotas).toEqual(LUMEN_QUOTAS.free);
+    expect(quotas).toEqual(LUMEN_QUOTAS.wanderer);
   });
 });
 
 describe("isTaskAvailable", () => {
   it("should return true when quota > 0", () => {
     expect(isTaskAvailable("seedling", "generation")).toBe(true);
-    expect(isTaskAvailable("free", "moderation")).toBe(true);
+    expect(isTaskAvailable("wanderer", "moderation")).toBe(true);
   });
 
   it("should return false when quota is 0", () => {
-    expect(isTaskAvailable("free", "image")).toBe(false);
-    expect(isTaskAvailable("free", "code")).toBe(false);
+    expect(isTaskAvailable("wanderer", "image")).toBe(false);
+    expect(isTaskAvailable("wanderer", "code")).toBe(false);
   });
 
   it("should return true for unlimited quotas", () => {
