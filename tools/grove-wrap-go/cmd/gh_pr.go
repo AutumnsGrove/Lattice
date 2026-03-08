@@ -62,6 +62,39 @@ func clampGHLimit(limit int) int {
 	return limit
 }
 
+// paginateArgs calculates the fetch limit for gh CLI and the start index for
+// slicing results, based on --page and --all flags.
+// When all=true, fetchLimit is 0 (gh CLI treats this as unlimited).
+// Otherwise, fetchLimit = min(page * limit, maxGHLimit).
+func paginateArgs(limit, page int, all bool) (fetchLimit, startIndex int) {
+	if all {
+		return 0, 0
+	}
+	limit = clampGHLimit(limit)
+	if page < 1 {
+		page = 1
+	}
+	fetchLimit = limit * page
+	if fetchLimit > maxGHLimit {
+		fetchLimit = maxGHLimit
+	}
+	startIndex = limit * (page - 1)
+	return fetchLimit, startIndex
+}
+
+// slicePage extracts the current page from a result set.
+// Returns the slice and whether there may be more items beyond this page.
+func slicePage[T any](items []T, startIndex, limit int) (page []T, hasMore bool) {
+	if startIndex >= len(items) {
+		return nil, false
+	}
+	end := startIndex + limit
+	if end >= len(items) {
+		return items[startIndex:], false
+	}
+	return items[startIndex:end], true
+}
+
 // ghRepoArgs returns the --repo flag for gh CLI if configured.
 func ghRepoArgs() []string {
 	cfg := config.Get()
@@ -119,12 +152,16 @@ var prListCmd = &cobra.Command{
 		author, _ := cmd.Flags().GetString("author")
 		label, _ := cmd.Flags().GetString("label")
 		limit, _ := cmd.Flags().GetInt("limit")
+		page, _ := cmd.Flags().GetInt("page")
+		all, _ := cmd.Flags().GetBool("all")
 		pageSize, _ := cmd.Flags().GetInt("page-size")
+
+		fetchLimit, startIndex := paginateArgs(limit, page, all)
+		limit = clampGHLimit(limit)
 
 		ghArgs := []string{"pr", "list"}
 		ghArgs = append(ghArgs, ghRepoArgs()...)
-		limit = clampGHLimit(limit)
-		ghArgs = append(ghArgs, "--state", state, "--limit", fmt.Sprintf("%d", limit))
+		ghArgs = append(ghArgs, "--state", state, "--limit", fmt.Sprintf("%d", fetchLimit))
 
 		fields := []string{"number", "title", "state", "author", "url", "isDraft", "labels",
 			"headRefName", "baseRefName"}
@@ -146,7 +183,7 @@ var prListCmd = &cobra.Command{
 		if cfg.InteractiveMode && term.IsTerminal(int(os.Stdout.Fd())) {
 			browsePRs, parseErr := parsePRsToBrowse(output)
 			if parseErr == nil && len(browsePRs) > 0 {
-				return runPRBrowse(browsePRs, pageSize)
+				return runPRBrowse(browsePRs, pageSize, buildPRFetchArgs(state, author, label, limit))
 			}
 		}
 
@@ -158,6 +195,11 @@ var prListCmd = &cobra.Command{
 		var prs []map[string]interface{}
 		if err := json.Unmarshal([]byte(output), &prs); err != nil {
 			return fmt.Errorf("failed to parse PR list: %w", err)
+		}
+
+		// Apply pagination slicing (--page flag; --all returns everything)
+		if !all && page > 1 {
+			prs, _ = slicePage(prs, startIndex, limit)
 		}
 
 		if len(prs) == 0 {
@@ -180,7 +222,14 @@ var prListCmd = &cobra.Command{
 			}
 			rows = append(rows, []string{number, title, author, status})
 		}
-		fmt.Print(ui.RenderTable(fmt.Sprintf("Pull Requests (%s)", state), headers, rows))
+
+		tableTitle := fmt.Sprintf("Pull Requests (%s)", state)
+		if !all && page > 1 {
+			tableTitle = fmt.Sprintf("Pull Requests (%s) — page %d", state, page)
+		} else if all {
+			tableTitle = fmt.Sprintf("Pull Requests (%s) — all", state)
+		}
+		fmt.Print(ui.RenderTable(tableTitle, headers, rows))
 		return nil
 	},
 }
@@ -803,7 +852,9 @@ func init() {
 	prListCmd.Flags().String("state", "open", "Filter by state (open, closed, merged, all)")
 	prListCmd.Flags().String("author", "", "Filter by author")
 	prListCmd.Flags().String("label", "", "Filter by label")
-	prListCmd.Flags().Int("limit", 30, "Maximum number to return")
+	prListCmd.Flags().Int("limit", 30, "Maximum number to return per page")
+	prListCmd.Flags().Int("page", 1, "Page number (1-based)")
+	prListCmd.Flags().Bool("all", false, "Fetch all PRs (overrides --limit)")
 	prListCmd.Flags().Int("page-size", 15, "Rows per page in interactive browser")
 	prCmd.AddCommand(prListCmd)
 

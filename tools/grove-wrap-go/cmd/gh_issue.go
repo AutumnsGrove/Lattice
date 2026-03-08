@@ -33,12 +33,16 @@ var issueListCmd = &cobra.Command{
 		label, _ := cmd.Flags().GetString("label")
 		milestone, _ := cmd.Flags().GetString("milestone")
 		limit, _ := cmd.Flags().GetInt("limit")
+		page, _ := cmd.Flags().GetInt("page")
+		all, _ := cmd.Flags().GetBool("all")
 		pageSize, _ := cmd.Flags().GetInt("page-size")
+
+		fetchLimit, startIndex := paginateArgs(limit, page, all)
+		limit = clampGHLimit(limit) // keep clamped limit for slicing
 
 		ghArgs := []string{"issue", "list"}
 		ghArgs = append(ghArgs, ghRepoArgs()...)
-		limit = clampGHLimit(limit)
-		ghArgs = append(ghArgs, "--state", state, "--limit", fmt.Sprintf("%d", limit))
+		ghArgs = append(ghArgs, "--state", state, "--limit", fmt.Sprintf("%d", fetchLimit))
 		ghArgs = append(ghArgs, "--json", "number,title,state,author,url,labels")
 
 		if author != "" {
@@ -63,7 +67,7 @@ var issueListCmd = &cobra.Command{
 		if cfg.InteractiveMode && term.IsTerminal(int(os.Stdout.Fd())) {
 			browseIssues, parseErr := parseIssuesToBrowse(output)
 			if parseErr == nil && len(browseIssues) > 0 {
-				return runIssueBrowse(browseIssues, pageSize)
+				return runIssueBrowse(browseIssues, pageSize, buildIssueFetchArgs(state, author, assignee, label, milestone, limit))
 			}
 		}
 
@@ -75,6 +79,11 @@ var issueListCmd = &cobra.Command{
 		var issues []map[string]interface{}
 		if err := json.Unmarshal([]byte(output), &issues); err != nil {
 			return fmt.Errorf("failed to parse issues: %w", err)
+		}
+
+		// Apply pagination slicing (--page flag; --all returns everything)
+		if !all && page > 1 {
+			issues, _ = slicePage(issues, startIndex, limit)
 		}
 
 		if len(issues) == 0 {
@@ -102,7 +111,14 @@ var issueListCmd = &cobra.Command{
 			}
 			rows = append(rows, []string{number, title, author, strings.Join(labelNames, ", ")})
 		}
-		fmt.Print(ui.RenderTable(fmt.Sprintf("Issues (%s)", state), headers, rows))
+
+		tableTitle := fmt.Sprintf("Issues (%s)", state)
+		if !all && page > 1 {
+			tableTitle = fmt.Sprintf("Issues (%s) — page %d", state, page)
+		} else if all {
+			tableTitle = fmt.Sprintf("Issues (%s) — all", state)
+		}
+		fmt.Print(ui.RenderTable(tableTitle, headers, rows))
 		return nil
 	},
 }
@@ -631,6 +647,64 @@ var issueBatchCmd = &cobra.Command{
 	},
 }
 
+// issueFetchArgs holds the parameters needed to re-fetch issues in the TUI.
+type issueFetchArgs struct {
+	state    string
+	author   string
+	assignee string
+	label    string
+	milestone string
+	limit    int
+}
+
+// buildIssueFetchArgs captures the current filter flags for TUI re-fetching.
+func buildIssueFetchArgs(state, author, assignee, label, milestone string, limit int) issueFetchArgs {
+	return issueFetchArgs{
+		state:     state,
+		author:    author,
+		assignee:  assignee,
+		label:     label,
+		milestone: milestone,
+		limit:     limit,
+	}
+}
+
+// fetchMoreIssues fetches the next page of issues for the TUI browser.
+func fetchMoreIssues(args issueFetchArgs, currentCount int) ([]browseIssue, error) {
+	nextPage := (currentCount / args.limit) + 1
+	fetchLimit := args.limit * (nextPage + 1)
+	if fetchLimit > maxGHLimit {
+		fetchLimit = maxGHLimit
+	}
+	if fetchLimit <= currentCount {
+		return nil, nil // already at max
+	}
+
+	ghArgs := []string{"issue", "list"}
+	ghArgs = append(ghArgs, ghRepoArgs()...)
+	ghArgs = append(ghArgs, "--state", args.state, "--limit", fmt.Sprintf("%d", fetchLimit))
+	ghArgs = append(ghArgs, "--json", "number,title,state,author,url,labels")
+
+	if args.author != "" {
+		ghArgs = append(ghArgs, "--author", args.author)
+	}
+	if args.assignee != "" {
+		ghArgs = append(ghArgs, "--assignee", args.assignee)
+	}
+	if args.label != "" {
+		ghArgs = append(ghArgs, "--label", args.label)
+	}
+	if args.milestone != "" {
+		ghArgs = append(ghArgs, "--milestone", args.milestone)
+	}
+
+	output, err := exec.GHOutput(ghArgs...)
+	if err != nil {
+		return nil, err
+	}
+	return parseIssuesToBrowse(output)
+}
+
 var issueHelpCategories = []ui.HelpCategory{
 	{Title: "Read (Always Safe)", Icon: "📖", Style: ui.SafeReadStyle, Commands: []ui.HelpCommand{
 		{Name: "list", Desc: "List issues"},
@@ -660,7 +734,9 @@ func init() {
 	issueListCmd.Flags().String("assignee", "", "Filter by assignee")
 	issueListCmd.Flags().String("label", "", "Filter by label")
 	issueListCmd.Flags().String("milestone", "", "Filter by milestone")
-	issueListCmd.Flags().Int("limit", 30, "Maximum number to return")
+	issueListCmd.Flags().Int("limit", 30, "Maximum number to return per page")
+	issueListCmd.Flags().Int("page", 1, "Page number (1-based)")
+	issueListCmd.Flags().Bool("all", false, "Fetch all issues (overrides --limit)")
 	issueListCmd.Flags().Int("page-size", 15, "Viewport height in interactive mode")
 	issueCmd.AddCommand(issueListCmd)
 
