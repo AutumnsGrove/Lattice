@@ -234,6 +234,7 @@ func loadFromFile(cfg *Config) {
 
 // Save persists the current configuration to ~/.grove/gw.toml.
 // Only TOML-tagged fields are written; runtime state (toml:"-") is excluded.
+// Uses atomic write (temp file + rename) to prevent corruption on interruption.
 func (c *Config) Save() error {
 	configPath := ConfigPath()
 	if configPath == "" {
@@ -246,8 +247,9 @@ func (c *Config) Save() error {
 		return fmt.Errorf("failed to create config directory: %w", err)
 	}
 
-	// Re-read the file to preserve fields we don't model,
-	// then overlay our in-memory TOML fields
+	// Re-read the existing file so we don't lose sections managed by
+	// other tools. Note: keys not mapped to Config struct fields will
+	// be dropped — all current sections are covered.
 	var diskCfg Config
 	if _, err := os.Stat(configPath); err == nil {
 		toml.DecodeFile(configPath, &diskCfg) // best-effort
@@ -269,8 +271,33 @@ func (c *Config) Save() error {
 		return fmt.Errorf("failed to encode config: %w", err)
 	}
 
-	if err := os.WriteFile(configPath, buf.Bytes(), 0o644); err != nil {
+	// Atomic write: write to temp file in same directory, then rename.
+	// os.Rename is atomic on macOS/Linux when src and dst are on the same filesystem.
+	tmp, err := os.CreateTemp(dir, ".gw-config-*.toml")
+	if err != nil {
+		return fmt.Errorf("failed to create temp file: %w", err)
+	}
+	tmpPath := tmp.Name()
+
+	if _, err := tmp.Write(buf.Bytes()); err != nil {
+		tmp.Close()
+		os.Remove(tmpPath)
 		return fmt.Errorf("failed to write config: %w", err)
+	}
+	if err := tmp.Close(); err != nil {
+		os.Remove(tmpPath)
+		return fmt.Errorf("failed to close temp file: %w", err)
+	}
+
+	// Match original file permissions
+	if err := os.Chmod(tmpPath, 0o644); err != nil {
+		os.Remove(tmpPath)
+		return fmt.Errorf("failed to set file permissions: %w", err)
+	}
+
+	if err := os.Rename(tmpPath, configPath); err != nil {
+		os.Remove(tmpPath)
+		return fmt.Errorf("failed to rename config file: %w", err)
 	}
 	return nil
 }

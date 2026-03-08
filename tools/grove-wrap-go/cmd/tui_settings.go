@@ -80,7 +80,7 @@ func (s *tuiSettings) toggle() {
 		s.dirty = true
 		s.saved = false
 	case settingItemsPerPage:
-		s.adjust(10)
+		s.adjust(1)
 	case settingViewportRows:
 		s.adjust(1)
 	case settingYoloMode:
@@ -91,18 +91,23 @@ func (s *tuiSettings) toggle() {
 }
 
 // adjust changes a numeric setting by delta.
+// For booleans, positive delta = on, negative delta = off.
 func (s *tuiSettings) adjust(delta int) {
 	switch s.cursor {
 	case settingAutoWorktree:
-		// Toggle on any direction press
-		s.autoWorktree = !s.autoWorktree
-		s.dirty = true
-		s.saved = false
+		newVal := delta > 0
+		if newVal != s.autoWorktree {
+			s.autoWorktree = newVal
+			s.dirty = true
+			s.saved = false
+		}
 	case settingYoloMode:
-		// Toggle on any direction press
-		s.yoloMode = !s.yoloMode
-		s.dirty = true
-		s.saved = false
+		newVal := delta > 0
+		if newVal != s.yoloMode {
+			s.yoloMode = newVal
+			s.dirty = true
+			s.saved = false
+		}
 	case settingItemsPerPage:
 		newVal := s.itemsPerPage + (delta * 5)
 		if newVal < minItemsPerPage {
@@ -132,7 +137,7 @@ func (s *tuiSettings) adjust(delta int) {
 	}
 }
 
-// save persists settings to ~/.grove/gw.toml and updates the in-memory config.
+// save persists settings to ~/.grove/gw.toml, then updates the in-memory config.
 func (s *tuiSettings) save() {
 	// Clamp to valid range before saving
 	if s.itemsPerPage < minItemsPerPage {
@@ -149,13 +154,20 @@ func (s *tuiSettings) save() {
 		s.viewportRows = maxViewportRows
 	}
 
+	// Build the desired TUI config, but don't mutate the singleton until Save succeeds
+	desired := config.TUIConfig{
+		AutoWorktree: s.autoWorktree,
+		ItemsPerPage: s.itemsPerPage,
+		ViewportRows: s.viewportRows,
+		YoloMode:     s.yoloMode,
+	}
+
 	cfg := config.Get()
-	cfg.TUI.AutoWorktree = s.autoWorktree
-	cfg.TUI.ItemsPerPage = s.itemsPerPage
-	cfg.TUI.ViewportRows = s.viewportRows
-	cfg.TUI.YoloMode = s.yoloMode
+	prev := cfg.TUI
+	cfg.TUI = desired
 
 	if err := cfg.Save(); err != nil {
+		cfg.TUI = prev // rollback on failure
 		s.saveErr = err
 		return
 	}
