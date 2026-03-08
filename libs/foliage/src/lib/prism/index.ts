@@ -17,6 +17,8 @@ export {
 	type SemanticColor,
 	type StatusColor,
 	type Colors,
+	SEASONAL_PALETTES,
+	type SeasonalPalette,
 } from "../tokens/index.js";
 
 // Glass utilities
