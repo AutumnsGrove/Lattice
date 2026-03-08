@@ -134,14 +134,19 @@ var gitShipCmd = &cobra.Command{
 			for i, s := range steps {
 				stepMaps[i] = map[string]any{"step": s.name, "ok": s.ok, "error": s.err}
 			}
-			return printJSON(map[string]any{
+			result := map[string]any{
 				"shipped": commitOK && pushOK,
 				"hash":    hash,
 				"message": msg,
 				"branch":  branch,
 				"issue":   issue,
 				"steps":   stepMaps,
-			})
+			}
+			if wt := detectWorktree(); wt != "" {
+				result["worktree"] = wt
+				result["worktree_cleanup"] = "gw git worktree finish --write"
+			}
+			return printJSON(result)
 		}
 
 		// Rich output
@@ -153,6 +158,7 @@ var gitShipCmd = &cobra.Command{
 
 		if commitOK && pushOK {
 			fmt.Print(ui.RenderSuccessPanel("Shipped", hash+" "+msg+"\n"+branch+" → origin/"+branch))
+			printWorktreeHint()
 		} else if commitOK {
 			ui.Action("Committed", hash+" "+msg)
 			fmt.Print(ui.RenderWarningPanel("Push Failed", pushErr+"\nTry: gw git push --write"))
@@ -610,6 +616,43 @@ func stripANSI(s string) string {
 		}
 	}
 	return result.String()
+}
+
+// ── Worktree detection ──────────────────────────────────────────────
+
+// detectWorktree returns the worktree name if the current directory is inside
+// a git worktree, or empty string if it's the main working tree.
+func detectWorktree() string {
+	gitDir, err := gwexec.GitOutput("rev-parse", "--git-dir")
+	if err != nil {
+		return ""
+	}
+	commonDir, err := gwexec.GitOutput("rev-parse", "--git-common-dir")
+	if err != nil {
+		return ""
+	}
+	gitDir = strings.TrimSpace(gitDir)
+	commonDir = strings.TrimSpace(commonDir)
+	if gitDir == commonDir {
+		return ""
+	}
+	// git-dir is like /path/.git/worktrees/<name> — extract the name
+	parts := strings.Split(gitDir, "/")
+	if len(parts) >= 2 && parts[len(parts)-2] == "worktrees" {
+		return parts[len(parts)-1]
+	}
+	return "unknown"
+}
+
+// printWorktreeHint prints a cleanup hint if running inside a worktree.
+func printWorktreeHint() {
+	wt := detectWorktree()
+	if wt == "" {
+		return
+	}
+	fmt.Println()
+	ui.Muted(fmt.Sprintf("Worktree: %s", wt))
+	ui.Muted("After approval: gw git worktree finish --write")
 }
 
 // ── Registration ────────────────────────────────────────────────────
