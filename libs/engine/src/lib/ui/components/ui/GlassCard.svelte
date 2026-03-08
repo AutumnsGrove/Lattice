@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Snippet } from "svelte";
+	import type { Component, Snippet } from "svelte";
 	import type { HTMLAttributes } from "svelte/elements";
 	import { cn } from "$lib/ui/utils";
 	import { GossamerClouds } from "@autumnsgrove/gossamer/svelte";
@@ -38,6 +38,13 @@
 	 * ```svelte
 	 * <GlassCard title="Enchanted" gossamer="grove-mist" gossamerColor="#34d399">
 	 *   <p>Content with animated ASCII clouds</p>
+	 * </GlassCard>
+	 * ```
+	 *
+	 * @example Card with icon (pass any Lucide component as the icon prop)
+	 * ```svelte
+	 * <GlassCard title="Settings" icon={Settings} description="Manage your preferences">
+	 *   <p>Settings content</p>
 	 * </GlassCard>
 	 * ```
 	 *
@@ -101,6 +108,8 @@
 		variant?: GlassVariant;
 		title?: string;
 		description?: string;
+		/** Optional icon component rendered beside the title */
+		icon?: Component;
 		hoverable?: boolean;
 		border?: boolean;
 		class?: string;
@@ -133,6 +142,7 @@
 		variant = "default",
 		title,
 		description,
+		icon,
 		hoverable = false,
 		border = true,
 		class: className,
@@ -285,10 +295,15 @@
 					{@render header()}
 				{:else}
 					{#if title}
-						<h3 class="text-lg font-semibold {titleClass}">{title}</h3>
+						<h3 class="text-lg font-semibold {titleClass} {icon ? 'flex items-center gap-2' : ''}">
+							{#if icon}
+								<svelte:component this={icon} class="w-5 h-5 shrink-0 text-muted-foreground" />
+							{/if}
+							{title}
+						</h3>
 					{/if}
 					{#if description}
-						<p class="text-sm {descriptionClass} mt-1">{description}</p>
+						<p class="text-sm {descriptionClass} {icon ? 'ml-7' : ''} mt-1">{description}</p>
 					{/if}
 				{/if}
 			</div>
