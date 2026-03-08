@@ -2,10 +2,7 @@
   "ci": {
     "collect": {
       "url": [
-        "http://127.0.0.1:8788/",
-        "http://127.0.0.1:8788/about",
-        "http://127.0.0.1:8788/help",
-        "http://127.0.0.1:8788/pricing"
+        "http://127.0.0.1:8788/"
       ],
       "numberOfRuns": 3,
       "settings": {
