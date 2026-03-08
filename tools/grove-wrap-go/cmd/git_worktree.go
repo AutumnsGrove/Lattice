@@ -44,14 +44,22 @@ func branchNameForIssue(number string, title string, labels []string) string {
 	return name
 }
 
-// worktreeBasePath returns the directory where worktrees are created.
-func worktreeBasePath() (string, error) {
+// repoRoot returns the top-level directory of the current git repository.
+func repoRoot() (string, error) {
 	output, err := gwexec.GitOutput("rev-parse", "--show-toplevel")
 	if err != nil {
 		return "", fmt.Errorf("not a git repository: %w", err)
 	}
-	repoRoot := strings.TrimSpace(output)
-	return filepath.Join(filepath.Dir(repoRoot), ".worktrees"), nil
+	return strings.TrimSpace(output), nil
+}
+
+// worktreeBasePath returns the directory where worktrees are created.
+func worktreeBasePath() (string, error) {
+	root, err := repoRoot()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(filepath.Dir(root), ".worktrees"), nil
 }
 
 // worktreePathForIssue returns the worktree path for an issue.
