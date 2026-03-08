@@ -3,7 +3,7 @@
 	import Footer from '$lib/components/Footer.svelte';
 	import { GroveTerm } from '@autumnsgrove/lattice/ui';
 	import SEO from '$lib/components/SEO.svelte';
-	import { Shredder, Heart, Cpu, Layers, Package, Smile, Type } from 'lucide-svelte';
+	import { Shredder, Heart, Cpu, Layers, Package, Smile, Type, Fingerprint } from 'lucide-svelte';
 
 	let { data } = $props();
 
@@ -17,7 +17,8 @@
 		{ id: 'tech-stack', text: 'Tech Stack', icon: Layers },
 		{ id: 'libraries', text: 'Libraries', icon: Package },
 		{ id: 'icons', text: 'Icons', icon: Smile },
-		{ id: 'fonts', text: 'Fonts', icon: Type }
+		{ id: 'fonts', text: 'Fonts', icon: Type },
+		{ id: 'protocols', text: 'Protocols', icon: Fingerprint }
 	];
 </script>
 
@@ -791,6 +792,28 @@
 							</div>
 						</div>
 					</details>
+				</div>
+			</section>
+
+			<!-- Protocols -->
+			<section class="mb-12" id="protocols">
+				<h2 class="text-2xl font-serif text-foreground mb-2">Protocols</h2>
+				<p class="text-foreground-subtle font-sans text-sm mb-6">
+					Open standards and protocols that Grove supports.
+				</p>
+
+				<div class="grid gap-3">
+					<a href="https://codeberg.org/robida/human.json" target="_blank" rel="noopener noreferrer" class="card p-4 hover:border-accent transition-colors group">
+						<div class="flex items-center justify-between">
+							<div>
+								<span class="font-serif text-foreground group-hover:text-accent-muted transition-colors">human.json</span>
+								<span class="text-foreground-subtle font-sans text-sm ml-2">— Human authorship assertion & web of trust</span>
+							</div>
+						</div>
+						<p class="text-foreground-muted font-sans text-sm mt-2">
+							A lightweight protocol for humans to assert authorship of their website content and vouch for the humanity of others. Wanderers can enable it in their settings to say "a real person tends this garden" and build a decentralized trust network by vouching for sites they believe in.
+						</p>
+					</a>
 				</div>
 			</section>
 
