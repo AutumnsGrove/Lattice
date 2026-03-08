@@ -272,14 +272,13 @@ export const load: PageServerLoad = async ({ platform, locals, setHeaders }) => 
 		}
 	}
 
-	// PERFORMANCE: Cache tenant home pages at the edge.
-	// Shorter TTL than garden posts since home pages reflect settings changes.
-	// Vary: Cookie ensures logged-in users (who may see owner UI) get fresh responses.
-	if (tenantId) {
+	// PERFORMANCE: Cache tenant home pages at the edge for anonymous visitors only.
+	// Logged-in users always get fresh SSR (layout includes owner UI like admin gear).
+	// Cloudflare ignores Vary: Cookie for HTML, so we gate on auth state instead.
+	if (tenantId && !locals.user) {
 		setHeaders({
 			"Cache-Control": "public, max-age=60, s-maxage=120",
 			"CDN-Cache-Control": "max-age=300, stale-while-revalidate=3600",
-			Vary: "Cookie",
 		});
 	}
 
