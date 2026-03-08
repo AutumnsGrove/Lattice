@@ -25,6 +25,16 @@ func GHStreaming(args ...string) (int, error) {
 	return RunStreaming("gh", args...)
 }
 
+// GHGraphQL runs a GraphQL query via `gh api graphql` and returns the response.
+// Variables are passed as -F key=value pairs (string interpolation).
+func GHGraphQL(query string, variables map[string]string) (string, error) {
+	args := []string{"api", "graphql", "-f", "query=" + query}
+	for k, v := range variables {
+		args = append(args, "-F", k+"="+v)
+	}
+	return GHOutput(args...)
+}
+
 // IsGHAvailable returns true if the GitHub CLI is installed.
 func IsGHAvailable() bool {
 	_, ok := Which("gh")

@@ -35,6 +35,14 @@ var ghHelpCategories = []ui.HelpCategory{
 		},
 	},
 	{
+		Title: "Projects",
+		Icon:  "📊",
+		Style: lipglossStyle(ui.BlossomPink),
+		Commands: []ui.HelpCommand{
+			{Name: "project", Desc: "Project board operations"},
+		},
+	},
+	{
 		Title: "Management",
 		Icon:  "🔧",
 		Style: lipglossStyle(ui.BarkBrown),

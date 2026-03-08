@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	"golang.org/x/term"
 
 	"github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/config"
 	"github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/exec"
@@ -32,6 +33,7 @@ var issueListCmd = &cobra.Command{
 		label, _ := cmd.Flags().GetString("label")
 		milestone, _ := cmd.Flags().GetString("milestone")
 		limit, _ := cmd.Flags().GetInt("limit")
+		pageSize, _ := cmd.Flags().GetInt("page-size")
 
 		ghArgs := []string{"issue", "list"}
 		ghArgs = append(ghArgs, ghRepoArgs()...)
@@ -55,6 +57,14 @@ var issueListCmd = &cobra.Command{
 		output, err := exec.GHOutput(ghArgs...)
 		if err != nil {
 			return fmt.Errorf("github error: %w", err)
+		}
+
+		// Interactive TUI mode — launch browser if in a TTY and not agent/JSON mode
+		if cfg.InteractiveMode && term.IsTerminal(int(os.Stdout.Fd())) {
+			browseIssues, parseErr := parseIssuesToBrowse(output)
+			if parseErr == nil && len(browseIssues) > 0 {
+				return runIssueBrowse(browseIssues, pageSize)
+			}
 		}
 
 		if cfg.JSONMode {
@@ -651,6 +661,7 @@ func init() {
 	issueListCmd.Flags().String("label", "", "Filter by label")
 	issueListCmd.Flags().String("milestone", "", "Filter by milestone")
 	issueListCmd.Flags().Int("limit", 30, "Maximum number to return")
+	issueListCmd.Flags().Int("page-size", 15, "Viewport height in interactive mode")
 	issueCmd.AddCommand(issueListCmd)
 
 	// issue view

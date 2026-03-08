@@ -14,8 +14,9 @@ var githubOperationTiers = map[string]Tier{
 	"run_list":     TierRead,
 	"run_view":     TierRead,
 	"run_watch":    TierRead,
-	"project_list": TierRead,
-	"project_view": TierRead,
+	"project_list":  TierRead,
+	"project_view":  TierRead,
+	"project_items": TierRead,
 	"api_get":      TierRead,
 	"rate_limit":   TierRead,
 
