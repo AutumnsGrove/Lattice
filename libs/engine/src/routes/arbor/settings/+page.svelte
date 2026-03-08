@@ -2840,7 +2840,15 @@
 		gap: 1rem;
 		padding: 0.75rem 1rem;
 		background: var(--grove-overlay-8);
+		border: 1px solid transparent;
 		border-radius: 8px;
+		transition:
+			background-color 0.2s ease,
+			border-color 0.2s ease;
+	}
+	.vouch-item:hover {
+		background: var(--grove-overlay-16);
+		border-color: var(--color-border);
 	}
 	.vouch-info {
 		display: flex;
@@ -2853,9 +2861,15 @@
 		text-decoration: none;
 		font-size: 0.9rem;
 		word-break: break-all;
+		transition: color 0.2s ease;
 	}
 	.vouch-url:hover {
 		text-decoration: underline;
+	}
+	.vouch-url:focus-visible {
+		outline: 2px solid var(--color-greens-grove);
+		outline-offset: 2px;
+		border-radius: 2px;
 	}
 	.vouch-date {
 		color: var(--color-text-muted);
@@ -2868,20 +2882,36 @@
 	}
 	.vouch-input {
 		flex: 1;
-		padding: 0.5rem 0.75rem;
+		padding: 0.625rem 0.75rem;
 		border: 1px solid var(--color-border);
-		border-radius: 6px;
+		border-radius: 8px;
 		background: var(--grove-overlay-8);
+		backdrop-filter: blur(4px);
 		color: var(--color-text);
 		font-size: 0.9rem;
 		font-family: inherit;
+		min-height: 44px;
+		transition: border-color 0.2s ease;
 	}
 	.vouch-input:focus-visible {
-		outline: 2px solid var(--color-primary);
+		outline: 2px solid var(--color-greens-grove);
 		outline-offset: 1px;
-		border-color: var(--color-primary);
+		border-color: var(--color-greens-grove);
 	}
 	.vouch-input::placeholder {
 		color: var(--color-text-muted);
+	}
+	/* Vouch remove button touch target */
+	.vouch-item :global(.btn) {
+		min-height: 44px;
+		min-width: 44px;
+	}
+	/* Reduced motion for vouch interactions */
+	@media (prefers-reduced-motion: reduce) {
+		.vouch-item,
+		.vouch-url,
+		.vouch-input {
+			transition: none;
+		}
 	}
 </style>
