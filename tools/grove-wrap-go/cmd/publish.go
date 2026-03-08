@@ -515,13 +515,18 @@ func publishTool(toolName, tagPrefix string, cmd *cobra.Command) error {
 		return nil
 	}
 
-	// Dirty check
-	statusResult, err := exec.Git("status", "--porcelain")
-	if err != nil {
-		return fmt.Errorf("failed to check git status: %w", err)
-	}
-	if strings.TrimSpace(statusResult.Stdout) != "" {
-		return fmt.Errorf("working tree is dirty — commit or stash first")
+	// Dirty check — only for the tool's own directory unless --force skips it.
+	// Tool publishes create a git tag (no commit), so unrelated dirty files
+	// in other parts of the monorepo are irrelevant.
+	if !cfg.ForceFlag {
+		toolDir := toolDirectory(toolName)
+		statusResult, err := exec.Git("status", "--porcelain", "--", ":(top)"+toolDir)
+		if err != nil {
+			return fmt.Errorf("failed to check git status: %w", err)
+		}
+		if strings.TrimSpace(statusResult.Stdout) != "" {
+			return fmt.Errorf("working tree has uncommitted changes in %s — commit or stash first\n  (use --force --write to skip this check)", toolDir)
+		}
 	}
 
 	// Build tag message with changelog
