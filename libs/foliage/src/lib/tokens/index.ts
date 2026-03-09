@@ -17,3 +17,5 @@ export {
 	type StatusColor,
 	type Colors,
 } from "./colors.js";
+
+export { SEASONAL_PALETTES, type SeasonalPalette } from "./seasons.js";

@@ -13,7 +13,7 @@
 // - Cream: Background and light surfaces (#fefdfb)
 
 // Design token exports
-export * from "./colors.js";
+// Colors consolidated into @autumnsgrove/foliage (Prism) — see #1411
 export * from "./typography.js";
 export * from "./spacing.js";
 export * from "./effects.js";

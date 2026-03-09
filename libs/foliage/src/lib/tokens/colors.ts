@@ -1,8 +1,8 @@
 /**
- * Foliage Design System - Color Tokens
+ * Prism design system color tokens
  *
- * All color values for the Foliage design system.
- * Adapted from Grove Design System.
+ * The foundational color vocabulary: grove greens, cream off-whites,
+ * bark browns, semantic mappings, and status indicators.
  */
 
 export const grove = {
