@@ -7,6 +7,7 @@ import { emailsMatch } from "$lib/utils/user.js";
 import { isFeatureEnabled, isInGreenhouse } from "$lib/feature-flags/index.js";
 import { getUserHomeGrove } from "$lib/server/services/users.js";
 import type { HomeGrove } from "$lib/server/services/users.js";
+import { resolveSeasonPreference } from "$lib/ui/season-meta";
 
 interface SiteSettings {
 	font_family: string;
@@ -42,6 +43,9 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
 
 	// human.json enabled state (for <link rel="human-json"> in head)
 	let humanJsonEnabled = false;
+
+	// Preferred season for favicons/PWA icons (#1304)
+	let preferredSeason: string | null = null;
 
 	// Only fetch from database at runtime (not during prerendering)
 	// The Cloudflare adapter throws when accessing platform.env during prerendering
@@ -135,6 +139,8 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
 						}
 						// Check human.json enabled flag from site_settings
 						humanJsonEnabled = siteSettings.human_json_enabled === "true";
+						// Extract preferred season for seasonal favicons (#1304)
+						preferredSeason = resolveSeasonPreference(siteSettings.preferred_season);
 					}
 
 					// Process navigation results
@@ -220,6 +226,7 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
 		showTimeline: timelineEnabled,
 		showGallery: galleryEnabled,
 		humanJsonEnabled,
+		preferredSeason,
 		dbAccessError,
 		lanternData: locals.user
 			? {

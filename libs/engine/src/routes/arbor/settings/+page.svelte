@@ -24,6 +24,8 @@
 	} from "lucide-svelte";
 	import { DomainCheckerModal } from "$lib/ui/components/domain";
 	import { groveModeStore } from "$lib/ui/stores/grove-mode.svelte";
+	import { ALL_SEASONS, SEASON_LABELS, SEASON_ICONS } from "$lib/ui/types/season";
+	import { SEASON_THEME_COLORS } from "$lib/ui/season-meta";
 	import { toast } from "$lib/ui/components/ui/toast";
 	import { api, apiRequest } from "$lib/utils";
 	import {
@@ -74,6 +76,12 @@
 	let showGroveLogo = $state(false);
 	let savingLogo = $state(false);
 	let logoMessage = $state("");
+
+	// Season preference state (#1304)
+	/** @type {string} */
+	let preferredSeason = $state("");
+	let savingSeason = $state(false);
+	let seasonMessage = $state("");
 
 	// Profile photo state
 	/** @type {string | null} */
@@ -158,7 +166,7 @@
 			const controller = new AbortController();
 			usernameAbortController = controller;
 			try {
-				const res = await fetch(`/api/username/check?username=${encodeURIComponent(trimmed)}`, {
+				const res = await fetch(`/api/username/check?username=${encodeURIComponent(trimmed)}`, { // csrf-ok — read-only GET
 					signal: controller.signal,
 				});
 				const result = await res.json();
@@ -193,6 +201,7 @@
 			groveTitle = data.grove_title || "";
 			showGroveLogo = data.show_grove_logo === true || data.show_grove_logo === "true";
 			avatarUrl = data.avatar_url || null;
+			preferredSeason = data.preferred_season || "";
 		} catch (error) {
 			toast.error("Failed to load settings");
 			console.error("Failed to fetch settings:", error);
@@ -200,6 +209,7 @@
 			currentAccentColor = DEFAULT_ACCENT_COLOR;
 			groveTitle = "";
 			showGroveLogo = false;
+			preferredSeason = "";
 		}
 		loadingFont = false;
 	}
@@ -284,6 +294,35 @@
 		}
 
 		savingLogo = false;
+	}
+
+	// Save preferred season setting
+	async function saveSeason() {
+		savingSeason = true;
+		seasonMessage = "";
+
+		try {
+			if (preferredSeason) {
+				await api.put("/api/admin/settings", {
+					setting_key: "preferred_season",
+					setting_value: preferredSeason,
+				});
+				seasonMessage = "Season saved! Your favicons and PWA icon will reflect this season.";
+			} else {
+				// Clear the preference by setting to empty — the API still requires a value,
+				// so we set it to the default which the layout treats as "no override"
+				await api.put("/api/admin/settings", {
+					setting_key: "preferred_season",
+					setting_value: "summer",
+				});
+				preferredSeason = "";
+				seasonMessage = "Reset to default — your icons will follow the global season.";
+			}
+		} catch (error) {
+			seasonMessage = "Error: " + (error instanceof Error ? error.message : String(error));
+		}
+
+		savingSeason = false;
 	}
 
 	// =========================================================================
@@ -1255,6 +1294,53 @@
 		</div>
 	</GlassCard>
 
+	<!-- Preferred Season (#1304) -->
+	<GlassCard variant="frosted" class="mb-6">
+		<div class="section-header">
+			<h2>Preferred Season</h2>
+		</div>
+		<p class="section-description">
+			Choose a season for your PWA home screen icon and browser theme color. When you pin your grove
+			to your phone's home screen, it'll show your chosen season's icon.
+		</p>
+
+		<div class="season-picker">
+			{#each ALL_SEASONS as season}
+				<button
+					type="button"
+					class="season-option"
+					class:selected={preferredSeason === season}
+					style:--season-color={SEASON_THEME_COLORS[season]}
+					onclick={() => (preferredSeason = season)}
+					title={SEASON_LABELS[season]}
+				>
+					<span class="season-icon">{SEASON_ICONS[season]}</span>
+					<span class="season-label">{SEASON_LABELS[season]}</span>
+				</button>
+			{/each}
+		</div>
+
+		<p class="section-hint">
+			iOS caches home screen icons at pin time — re-add after changing to see the new icon.
+		</p>
+
+		{#if seasonMessage}
+			<div
+				class="message"
+				class:success={!seasonMessage.startsWith("Error")}
+				class:error={seasonMessage.startsWith("Error")}
+			>
+				{seasonMessage}
+			</div>
+		{/if}
+
+		<div class="button-row">
+			<Button onclick={saveSeason} variant="primary" disabled={savingSeason || !preferredSeason}>
+				{savingSeason ? "Saving..." : "Save Season"}
+			</Button>
+		</div>
+	</GlassCard>
+
 	<GlassCard variant="frosted" class="mb-6">
 		<div class="section-header">
 			<h2>Header Branding</h2>
@@ -1517,8 +1603,7 @@
 					<span class="toggle-title">Enable human.json</span>
 					<span class="toggle-description">
 						Adds a <code>/human.json</code> file to your site and a
-						<code>&lt;link rel="human-json"&gt;</code> tag so visitors and tools can verify
-						human authorship.
+						<code>&lt;link rel="human-json"&gt;</code> tag so visitors and tools can verify human authorship.
 					</span>
 				</span>
 			</label>
@@ -1545,8 +1630,8 @@
 				<div class="human-json-vouches">
 					<h3 class="blaze-subsection-title">Vouches</h3>
 					<p class="section-description">
-						Vouch for other sites you trust. This creates a decentralized web of trust — when
-						you vouch for someone, visitors who trust you can transitively trust them too.
+						Vouch for other sites you trust. This creates a decentralized web of trust — when you
+						vouch for someone, visitors who trust you can transitively trust them too.
 					</p>
 
 					{#if humanJsonVouches.length > 0}
@@ -1593,7 +1678,9 @@
 							{addingVouch ? "Adding..." : "Add Vouch"}
 						</Button>
 					</div>
-					<p id="vouch-help" class="sr-only">Enter the full URL of a site you want to vouch for, then press Enter or click Add Vouch.</p>
+					<p id="vouch-help" class="sr-only">
+						Enter the full URL of a site you want to vouch for, then press Enter or click Add Vouch.
+					</p>
 				</div>
 			{/if}
 		{/if}
@@ -2913,5 +3000,61 @@
 		.vouch-input {
 			transition: none;
 		}
+	}
+	/* Season picker (#1304) */
+	.season-picker {
+		display: flex;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+		margin: 1rem 0;
+	}
+	.season-option {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.35rem;
+		padding: 0.75rem 1rem;
+		border: 2px solid var(--color-border);
+		border-radius: 12px;
+		background: var(--glass-bg, rgba(255, 255, 255, 0.05));
+		cursor: pointer;
+		transition:
+			border-color 0.15s,
+			transform 0.15s,
+			box-shadow 0.15s;
+		min-width: 80px;
+	}
+	.season-option:hover {
+		transform: translateY(-2px);
+		border-color: var(--season-color);
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+	}
+	.season-option.selected {
+		border-color: var(--season-color);
+		box-shadow:
+			0 0 0 1px var(--season-color),
+			0 4px 12px rgba(0, 0, 0, 0.15);
+	}
+	.season-option:focus-visible {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 2px;
+	}
+	.season-icon {
+		font-size: 1.5rem;
+		line-height: 1;
+	}
+	.season-label {
+		font-size: 0.8rem;
+		color: var(--color-text-muted);
+		font-weight: 500;
+	}
+	.season-option.selected .season-label {
+		color: var(--color-text);
+	}
+	.section-hint {
+		font-size: 0.8rem;
+		color: var(--color-text-muted);
+		margin: 0.5rem 0 1rem;
+		font-style: italic;
 	}
 </style>
