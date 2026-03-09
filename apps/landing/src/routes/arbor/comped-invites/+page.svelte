@@ -180,9 +180,7 @@
 
 		<!-- Stats -->
 		<div class="flex flex-wrap gap-3 text-sm">
-			<div
-				class="px-3 py-1.5 rounded-lg bg-info-bg border border-info flex items-center gap-2"
-			>
+			<div class="px-3 py-1.5 rounded-lg bg-info-bg border border-info flex items-center gap-2">
 				<span class="text-info">Beta:</span>
 				<span class="font-medium text-foreground">{data.stats.beta}</span>
 			</div>
@@ -247,9 +245,7 @@
 			</div>
 		{/if}
 		{#if form.promoteErrors?.length}
-			<div
-				class="p-4 rounded-lg bg-error-bg border border-error text-error"
-			>
+			<div class="p-4 rounded-lg bg-error-bg border border-error text-error">
 				<div class="flex items-center gap-2 mb-2">
 					<AlertTriangle size={18} />
 					<span class="font-medium">Some promotions failed:</span>
@@ -264,9 +260,7 @@
 	{/if}
 
 	{#if form?.error}
-		<div
-			class="p-4 rounded-lg bg-error-bg border border-error text-error flex items-center gap-2"
-		>
+		<div class="p-4 rounded-lg bg-error-bg border border-error text-error flex items-center gap-2">
 			<AlertTriangle size={18} />
 			{form.error}
 		</div>
@@ -349,9 +343,7 @@
 					class="divide-y divide-border max-h-96 overflow-y-auto rounded-lg border border-border"
 				>
 					{#each data.eligibleSubscribers as sub}
-						<div
-							class="px-4 py-3 flex items-center justify-between group hover:bg-surface-hover"
-						>
+						<div class="px-4 py-3 flex items-center justify-between group hover:bg-surface-hover">
 							<div class="min-w-0">
 								<div class="flex items-center gap-2">
 									<span class="font-medium text-foreground text-sm truncate">{sub.email}</span>
@@ -586,9 +578,7 @@
 
 				<!-- Pagination -->
 				{#if data.pagination.totalPages > 1}
-					<div
-						class="p-4 border-t border-border flex items-center justify-between"
-					>
+					<div class="p-4 border-t border-border flex items-center justify-between">
 						<span class="text-sm text-foreground-muted">
 							Showing {(data.pagination.page - 1) * data.pagination.pageSize + 1} -
 							{Math.min(data.pagination.page * data.pagination.pageSize, data.pagination.total)} of {data
@@ -626,12 +616,12 @@
 		<!-- Sidebar -->
 		<div class="space-y-4">
 			<!-- Create New Invite -->
-			<GlassCard class="p-6">
-				<h2 class="text-lg font-serif text-foreground mb-4 flex items-center gap-2">
-					<Plus class="w-5 h-5 text-grove-600 dark:text-grove-400" />
-					Create Invite
-				</h2>
-
+			<GlassCard
+				class="p-6"
+				title="Create Invite"
+				icon={Plus}
+				iconClass="text-grove-600 dark:text-grove-400"
+			>
 				<form
 					method="POST"
 					action="?/create"
@@ -864,12 +854,12 @@
 			</GlassCard>
 
 			<!-- Recent Activity -->
-			<GlassCard class="p-6">
-				<h2 class="text-lg font-serif text-foreground mb-4 flex items-center gap-2">
-					<History class="w-5 h-5 text-grove-600 dark:text-grove-400" />
-					Recent Activity
-				</h2>
-
+			<GlassCard
+				class="p-6"
+				title="Recent Activity"
+				icon={History}
+				iconClass="text-grove-600 dark:text-grove-400"
+			>
 				<div class="space-y-3 max-h-80 overflow-y-auto">
 					{#each data.auditLog as entry}
 						<div class="p-2 rounded-lg bg-surface-subtle text-sm">

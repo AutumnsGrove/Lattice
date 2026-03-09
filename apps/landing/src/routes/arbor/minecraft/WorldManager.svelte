@@ -5,7 +5,7 @@
 	 * Uses client-side fetch to Heartwood for world and backup operations.
 	 */
 
-	import { GlassCard } from '@autumnsgrove/lattice/ui';
+	import { GlassCard } from "@autumnsgrove/lattice/ui";
 	import {
 		Map,
 		Download,
@@ -14,8 +14,8 @@
 		Loader2,
 		HardDrive,
 		Clock,
-		Trash2
-	} from 'lucide-svelte';
+		Trash2,
+	} from "lucide-svelte";
 
 	interface Props {
 		serverRunning: boolean;
@@ -50,23 +50,24 @@
 
 		try {
 			const [worldRes, backupsRes] = await Promise.all([
-				fetch('/api/minecraft/world', { credentials: 'include' }).catch(() => null), // csrf-ok
-				fetch('/api/minecraft/backups?limit=10', { credentials: 'include' }).catch( // csrf-ok
-					() => null
-				)
+				fetch("/api/minecraft/world", { credentials: "include" }).catch(() => null), // csrf-ok
+				fetch("/api/minecraft/backups?limit=10", { credentials: "include" }).catch(
+					// csrf-ok
+					() => null,
+				),
 			]);
 
 			if (worldRes?.ok) {
-				const data = await worldRes.json() as any;
+				const data = (await worldRes.json()) as any;
 				worldInfo = data.world || data;
 			}
 
 			if (backupsRes?.ok) {
-				const data = await backupsRes.json() as any;
+				const data = (await backupsRes.json()) as any;
 				backups = data.backups || [];
 			}
 		} catch {
-			error = 'Failed to load world data';
+			error = "Failed to load world data";
 		}
 
 		loading = false;
@@ -76,39 +77,41 @@
 		restoring = backupId;
 		error = null;
 		try {
-			const res = await fetch(`/api/minecraft/backups/${backupId}/restore`, { // csrf-ok
-				method: 'POST',
-				credentials: 'include',
-				headers: { 'X-Confirm-Restore': 'true' }
+			const res = await fetch(`/api/minecraft/backups/${backupId}/restore`, {
+				// csrf-ok
+				method: "POST",
+				credentials: "include",
+				headers: { "X-Confirm-Restore": "true" },
 			});
 			if (!res.ok) {
-				const data = await res.json().catch(() => ({})) as any;
-				error = data.error || 'Failed to restore backup';
+				const data = (await res.json().catch(() => ({}))) as any;
+				error = data.error || "Failed to restore backup";
 			}
 		} catch {
-			error = 'Failed to restore backup';
+			error = "Failed to restore backup";
 		}
 		restoring = null;
 	}
 
 	async function downloadBackup(backupId: string) {
 		try {
-			const res = await fetch(`/api/minecraft/backups/${backupId}/download`, { // csrf-ok
-				credentials: 'include'
+			const res = await fetch(`/api/minecraft/backups/${backupId}/download`, {
+				// csrf-ok
+				credentials: "include",
 			});
 			if (res.ok) {
 				const blob = await res.blob();
 				const url = URL.createObjectURL(blob);
-				const a = document.createElement('a');
+				const a = document.createElement("a");
 				a.href = url;
 				a.download = `backup-${backupId}.tar.gz`;
 				a.click();
 				URL.revokeObjectURL(url);
 			} else {
-				error = 'Failed to download backup';
+				error = "Failed to download backup";
 			}
 		} catch {
-			error = 'Failed to download backup';
+			error = "Failed to download backup";
 		}
 	}
 
@@ -116,37 +119,38 @@
 		resetting = true;
 		error = null;
 		try {
-			const res = await fetch('/api/minecraft/world', { // csrf-ok
-				method: 'DELETE',
-				credentials: 'include',
-				headers: { 'X-Confirm-Delete': 'true' }
+			const res = await fetch("/api/minecraft/world", {
+				// csrf-ok
+				method: "DELETE",
+				credentials: "include",
+				headers: { "X-Confirm-Delete": "true" },
 			});
 			if (res.ok) {
 				showResetConfirm = false;
 				await loadData();
 			} else {
-				const data = await res.json().catch(() => ({})) as any;
-				error = data.error || 'Failed to reset world';
+				const data = (await res.json().catch(() => ({}))) as any;
+				error = data.error || "Failed to reset world";
 			}
 		} catch {
-			error = 'Failed to reset world';
+			error = "Failed to reset world";
 		}
 		resetting = false;
 	}
 
 	function formatSize(bytes: number): string {
-		if (!bytes) return '0 B';
-		const units = ['B', 'KB', 'MB', 'GB'];
+		if (!bytes) return "0 B";
+		const units = ["B", "KB", "MB", "GB"];
 		const i = Math.floor(Math.log(bytes) / Math.log(1024));
 		return `${(bytes / Math.pow(1024, i)).toFixed(i > 1 ? 1 : 0)} ${units[i]}`;
 	}
 
 	function formatDate(dateStr: string): string {
-		return new Date(dateStr).toLocaleDateString('en-US', {
-			month: 'short',
-			day: 'numeric',
-			hour: '2-digit',
-			minute: '2-digit'
+		return new Date(dateStr).toLocaleDateString("en-US", {
+			month: "short",
+			day: "numeric",
+			hour: "2-digit",
+			minute: "2-digit",
 		});
 	}
 
@@ -175,11 +179,7 @@
 		</GlassCard>
 	{:else}
 		<!-- World Info -->
-		<GlassCard class="mb-6 p-4">
-			<h3 class="text-sm font-sans font-medium text-foreground mb-3 flex items-center gap-2">
-				<Map class="w-4 h-4 text-foreground-muted" />
-				World Info
-			</h3>
+		<GlassCard class="mb-6 p-4" title="World Info" icon={Map}>
 			<div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm font-sans">
 				{#if worldInfo.size}
 					<div>
@@ -217,9 +217,7 @@
 				<div class="overflow-hidden rounded-xl border border-border">
 					<div class="divide-y divide-divider">
 						{#each backups as backup}
-							<div
-								class="flex items-center justify-between px-4 py-3 bg-surface"
-							>
+							<div class="flex items-center justify-between px-4 py-3 bg-surface">
 								<div>
 									<div class="text-sm font-sans text-foreground">
 										{formatDate(backup.created_at)}
@@ -246,8 +244,8 @@
 										disabled={restoring === backup.id || serverRunning}
 										class="p-1.5 text-foreground-muted hover:text-warning transition-colors disabled:opacity-50"
 										title={serverRunning
-											? 'Stop the server before restoring'
-											: 'Restore this backup'}
+											? "Stop the server before restoring"
+											: "Restore this backup"}
 										aria-label="Restore backup from {formatDate(backup.created_at)}"
 									>
 										{#if restoring === backup.id}
@@ -268,40 +266,38 @@
 		<GlassCard class="p-4 border-error">
 			<div class="flex items-center gap-2 mb-3">
 				<AlertTriangle class="w-4 h-4 text-error" />
-				<h3 class="text-sm font-sans font-medium text-error">
-					Danger Zone
-				</h3>
+				<h3 class="text-sm font-sans font-medium text-error">Danger Zone</h3>
 			</div>
 
 			{#if showResetConfirm}
-			<div role="alertdialog" aria-label="Confirm world reset">
-				<p class="text-xs font-sans text-foreground-muted mb-3">
-					This will permanently delete the current world. A backup will be created first.
-					The server {serverRunning ? 'must be stopped' : 'should be stopped'} before resetting.
-				</p>
-				<div class="flex gap-2">
-					<button
-						type="button"
-						onclick={resetWorld}
-						disabled={resetting || serverRunning}
-						class="px-3 py-1.5 bg-destructive text-destructive-foreground rounded-lg text-xs font-sans hover:bg-destructive/90 transition-colors disabled:opacity-50"
-					>
-						{#if resetting}
-							<Loader2 class="w-3 h-3 inline animate-spin mr-1" />
-							Resetting...
-						{:else}
-							Yes, Reset World
-						{/if}
-					</button>
-					<button
-						type="button"
-						onclick={() => (showResetConfirm = false)}
-						class="px-3 py-1.5 bg-surface border border-border text-foreground rounded-lg text-xs font-sans hover:bg-surface-hover transition-colors"
-					>
-						Cancel
-					</button>
+				<div role="alertdialog" aria-label="Confirm world reset">
+					<p class="text-xs font-sans text-foreground-muted mb-3">
+						This will permanently delete the current world. A backup will be created first. The
+						server {serverRunning ? "must be stopped" : "should be stopped"} before resetting.
+					</p>
+					<div class="flex gap-2">
+						<button
+							type="button"
+							onclick={resetWorld}
+							disabled={resetting || serverRunning}
+							class="px-3 py-1.5 bg-destructive text-destructive-foreground rounded-lg text-xs font-sans hover:bg-destructive/90 transition-colors disabled:opacity-50"
+						>
+							{#if resetting}
+								<Loader2 class="w-3 h-3 inline animate-spin mr-1" />
+								Resetting...
+							{:else}
+								Yes, Reset World
+							{/if}
+						</button>
+						<button
+							type="button"
+							onclick={() => (showResetConfirm = false)}
+							class="px-3 py-1.5 bg-surface border border-border text-foreground rounded-lg text-xs font-sans hover:bg-surface-hover transition-colors"
+						>
+							Cancel
+						</button>
+					</div>
 				</div>
-			</div>
 			{:else}
 				<div class="flex items-center justify-between">
 					<div>
@@ -315,7 +311,7 @@
 						onclick={() => (showResetConfirm = true)}
 						disabled={serverRunning}
 						class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-sans text-error border border-error rounded-lg hover:bg-error/10 transition-colors disabled:opacity-50"
-						title={serverRunning ? 'Stop the server first' : 'Reset world'}
+						title={serverRunning ? "Stop the server first" : "Reset world"}
 					>
 						<Trash2 class="w-3 h-3" />
 						Reset

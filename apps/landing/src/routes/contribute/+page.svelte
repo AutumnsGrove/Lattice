@@ -1,16 +1,16 @@
 <script lang="ts">
-	import Header from '$lib/components/Header.svelte';
-	import Footer from '$lib/components/Footer.svelte';
-	import { GlassCard } from '@autumnsgrove/lattice/ui';
-	import { MobileTOC } from '@autumnsgrove/lattice';
-	import { GroveTerm } from '@autumnsgrove/lattice/ui';
-	import SEO from '$lib/components/SEO.svelte';
+	import Header from "$lib/components/Header.svelte";
+	import Footer from "$lib/components/Footer.svelte";
+	import { GlassCard } from "@autumnsgrove/lattice/ui";
+	import { MobileTOC } from "@autumnsgrove/lattice";
+	import { GroveTerm } from "@autumnsgrove/lattice/ui";
+	import SEO from "$lib/components/SEO.svelte";
 
 	let { data } = $props();
 
 	// Icon imports
-	import { featureIcons, contentIcons, actionIcons, stateIcons, toolIcons } from '$lib/utils/icons';
-	import { Coffee, Heart, TreePine, Sparkles } from 'lucide-svelte';
+	import { featureIcons, contentIcons, actionIcons, stateIcons, toolIcons } from "$lib/utils/icons";
+	import { Coffee, Heart, TreePine, Sparkles } from "lucide-svelte";
 
 	// Page icons
 	const HeartIcon = contentIcons.heart;
@@ -26,11 +26,11 @@
 
 	// TOC headers
 	const tocHeaders = [
-		{ id: 'how-to-help', text: 'How to Help', level: 2, icon: HeartIcon },
-		{ id: 'the-workflow', text: 'The Workflow', level: 2, icon: ArrowIcon },
-		{ id: 'get-started', text: 'Get Started', level: 2, icon: SproutIcon },
-		{ id: 'community', text: 'Community', level: 2, icon: UsersIcon },
-		{ id: 'support-financially', text: 'Support Financially', level: 2, icon: Coffee }
+		{ id: "how-to-help", text: "How to Help", level: 2, icon: HeartIcon },
+		{ id: "the-workflow", text: "The Workflow", level: 2, icon: ArrowIcon },
+		{ id: "get-started", text: "Get Started", level: 2, icon: SproutIcon },
+		{ id: "community", text: "Community", level: 2, icon: UsersIcon },
+		{ id: "support-financially", text: "Support Financially", level: 2, icon: Coffee },
 	];
 </script>
 
@@ -47,11 +47,13 @@
 		<div class="max-w-3xl mx-auto">
 			<!-- Hero Header -->
 			<header class="mb-12 text-center">
-				<p class="text-foreground-faint font-sans text-sm uppercase tracking-wide mb-3">Join the Grove</p>
+				<p class="text-foreground-faint font-sans text-sm uppercase tracking-wide mb-3">
+					Join the Grove
+				</p>
 				<h1 class="text-4xl md:text-5xl font-serif text-foreground mb-4">Contribute</h1>
 				<p class="text-lg text-foreground-muted font-sans leading-relaxed max-w-xl mx-auto mb-6">
-					Grove is built by people who believe the internet can be better. Warmer. More human.
-					If that resonates with you, there's a place for you here.
+					Grove is built by people who believe the internet can be better. Warmer. More human. If
+					that resonates with you, there's a place for you here.
 				</p>
 				<div class="flex items-center justify-center gap-4">
 					<div class="w-12 h-px bg-divider"></div>
@@ -76,14 +78,10 @@
 					</h2>
 
 					<div class="grid gap-6">
-						<GlassCard>
-							<h3 class="text-lg font-serif text-accent-muted mb-2 flex items-center gap-2">
-								<BugIcon class="w-5 h-5 text-accent-subtle" />
-								Report Bugs
-							</h3>
+						<GlassCard title="Report Bugs" icon={BugIcon} iconClass="text-accent-subtle">
 							<p class="text-foreground-muted font-sans leading-relaxed">
-								Found something broken? That's genuinely helpful. Open an issue describing what happened,
-								what you expected, and how to reproduce it.
+								Found something broken? That's genuinely helpful. Open an issue describing what
+								happened, what you expected, and how to reproduce it.
 							</p>
 							<a
 								href="https://github.com/AutumnsGrove/Lattice/issues/new?template=bug_report.md"
@@ -95,11 +93,7 @@
 							</a>
 						</GlassCard>
 
-						<GlassCard>
-							<h3 class="text-lg font-serif text-accent-muted mb-2 flex items-center gap-2">
-								<LightbulbIcon class="w-5 h-5 text-accent-subtle" />
-								Suggest Features
-							</h3>
+						<GlassCard title="Suggest Features" icon={LightbulbIcon} iconClass="text-accent-subtle">
 							<p class="text-foreground-muted font-sans leading-relaxed">
 								Have an idea that would make Grove better? We want to hear it. Tell us what problem
 								it solves and who would benefit.
@@ -114,33 +108,21 @@
 							</a>
 						</GlassCard>
 
-						<GlassCard>
-							<h3 class="text-lg font-serif text-accent-muted mb-2 flex items-center gap-2">
-								<EyeIcon class="w-5 h-5 text-accent-subtle" />
-								Test & Explore
-							</h3>
+						<GlassCard title="Test & Explore" icon={EyeIcon} iconClass="text-accent-subtle">
 							<p class="text-foreground-muted font-sans leading-relaxed">
-								Wander through the site. Try things. Click on stuff. Test on your phone, your tablet,
-								with a screen reader. Then tell us what felt off—or what felt right.
+								Wander through the site. Try things. Click on stuff. Test on your phone, your
+								tablet, with a screen reader. Then tell us what felt off—or what felt right.
 							</p>
 						</GlassCard>
 
-						<GlassCard>
-							<h3 class="text-lg font-serif text-accent-muted mb-2 flex items-center gap-2">
-								<FileTextIcon class="w-5 h-5 text-accent-subtle" />
-								Improve Docs
-							</h3>
+						<GlassCard title="Improve Docs" icon={FileTextIcon} iconClass="text-accent-subtle">
 							<p class="text-foreground-muted font-sans leading-relaxed">
-								Clear documentation helps everyone. Fix typos, clarify confusing sections,
-								or add examples where they'd help.
+								Clear documentation helps everyone. Fix typos, clarify confusing sections, or add
+								examples where they'd help.
 							</p>
 						</GlassCard>
 
-						<GlassCard>
-							<h3 class="text-lg font-serif text-accent-muted mb-2 flex items-center gap-2">
-								<SproutIcon class="w-5 h-5 text-accent-subtle" />
-								Write Code
-							</h3>
+						<GlassCard title="Write Code" icon={SproutIcon} iconClass="text-accent-subtle">
 							<p class="text-foreground-muted font-sans leading-relaxed">
 								If you're ready to dive into the codebase, check out issues labeled
 								<strong class="text-accent-muted">"good first issue"</strong> for beginner-friendly tasks.
@@ -224,14 +206,22 @@
 							rel="noopener noreferrer"
 							class="group flex items-center gap-4 p-4 bg-background border border-default hover:border-accent/50 rounded-xl transition-all"
 						>
-							<div class="flex items-center justify-center w-12 h-12 bg-accent/10 rounded-full group-hover:bg-accent/20 transition-colors">
+							<div
+								class="flex items-center justify-center w-12 h-12 bg-accent/10 rounded-full group-hover:bg-accent/20 transition-colors"
+							>
 								<GithubIcon class="w-6 h-6 text-foreground" />
 							</div>
 							<div class="flex-1">
-								<h3 class="font-serif text-foreground group-hover:text-accent-muted transition-colors">Browse Open Issues</h3>
+								<h3
+									class="font-serif text-foreground group-hover:text-accent-muted transition-colors"
+								>
+									Browse Open Issues
+								</h3>
 								<p class="text-sm text-foreground-subtle">See what needs doing</p>
 							</div>
-							<ArrowIcon class="w-5 h-5 text-foreground-subtle group-hover:text-accent-muted motion-safe:group-hover:translate-x-1 transition-all" />
+							<ArrowIcon
+								class="w-5 h-5 text-foreground-subtle group-hover:text-accent-muted motion-safe:group-hover:translate-x-1 transition-all"
+							/>
 						</a>
 
 						<a
@@ -240,14 +230,22 @@
 							rel="noopener noreferrer"
 							class="group flex items-center gap-4 p-4 bg-background border border-default hover:border-accent/50 rounded-xl transition-all"
 						>
-							<div class="flex items-center justify-center w-12 h-12 bg-accent/10 rounded-full group-hover:bg-accent/20 transition-colors">
+							<div
+								class="flex items-center justify-center w-12 h-12 bg-accent/10 rounded-full group-hover:bg-accent/20 transition-colors"
+							>
 								<SproutIcon class="w-6 h-6 text-foreground" />
 							</div>
 							<div class="flex-1">
-								<h3 class="font-serif text-foreground group-hover:text-accent-muted transition-colors">View the Repository</h3>
+								<h3
+									class="font-serif text-foreground group-hover:text-accent-muted transition-colors"
+								>
+									View the Repository
+								</h3>
 								<p class="text-sm text-foreground-subtle">Explore the codebase</p>
 							</div>
-							<ArrowIcon class="w-5 h-5 text-foreground-subtle group-hover:text-accent-muted motion-safe:group-hover:translate-x-1 transition-all" />
+							<ArrowIcon
+								class="w-5 h-5 text-foreground-subtle group-hover:text-accent-muted motion-safe:group-hover:translate-x-1 transition-all"
+							/>
 						</a>
 
 						<a
@@ -256,14 +254,22 @@
 							rel="noopener noreferrer"
 							class="group flex items-center gap-4 p-4 bg-background border border-default hover:border-accent/50 rounded-xl transition-all"
 						>
-							<div class="flex items-center justify-center w-12 h-12 bg-accent/10 rounded-full group-hover:bg-accent/20 transition-colors">
+							<div
+								class="flex items-center justify-center w-12 h-12 bg-accent/10 rounded-full group-hover:bg-accent/20 transition-colors"
+							>
 								<FileTextIcon class="w-6 h-6 text-foreground" />
 							</div>
 							<div class="flex-1">
-								<h3 class="font-serif text-foreground group-hover:text-accent-muted transition-colors">Read the Contributor Guide</h3>
+								<h3
+									class="font-serif text-foreground group-hover:text-accent-muted transition-colors"
+								>
+									Read the Contributor Guide
+								</h3>
 								<p class="text-sm text-foreground-subtle">Setup, code style, and conventions</p>
 							</div>
-							<ArrowIcon class="w-5 h-5 text-foreground-subtle group-hover:text-accent-muted motion-safe:group-hover:translate-x-1 transition-all" />
+							<ArrowIcon
+								class="w-5 h-5 text-foreground-subtle group-hover:text-accent-muted motion-safe:group-hover:translate-x-1 transition-all"
+							/>
 						</a>
 					</div>
 				</section>
@@ -281,14 +287,14 @@
 					</p>
 
 					<p class="text-foreground-muted font-sans leading-relaxed mb-6">
-						Be kind. Be respectful. Remember there's a human (or a helpful AI) on the other
-						side of every interaction. We're building something meaningful together.
+						Be kind. Be respectful. Remember there's a human (or a helpful AI) on the other side of
+						every interaction. We're building something meaningful together.
 					</p>
 
 					<GlassCard variant="accent">
 						<p class="text-foreground-muted font-sans leading-relaxed italic">
-							"Every issue, commit, and review helps build something meaningful.
-							Here's to queer-friendly infrastructure and solarpunk dreams."
+							"Every issue, commit, and review helps build something meaningful. Here's to
+							queer-friendly infrastructure and solarpunk dreams."
 						</p>
 					</GlassCard>
 				</section>
@@ -311,20 +317,25 @@
 					<div class="glass-support rounded-2xl p-8 mb-8">
 						<div class="prose prose-grove max-w-none text-center">
 							<p class="text-foreground font-sans leading-relaxed mb-4">
-								Grove doesn't have investors. No venture capital. No pressure to grow at all costs or sell your data to make the numbers work.
+								Grove doesn't have investors. No venture capital. No pressure to grow at all costs
+								or sell your data to make the numbers work.
 							</p>
 							<p class="text-foreground font-sans leading-relaxed mb-4">
 								It's just me, building something I believe in.
 							</p>
 							<p class="text-foreground font-sans leading-relaxed">
-								If Grove resonates with you, if you believe in quiet corners of the internet, queer-friendly spaces, and words that belong to the people who write them, you can support the vision directly.
+								If Grove resonates with you, if you believe in quiet corners of the internet,
+								queer-friendly spaces, and words that belong to the people who write them, you can
+								support the vision directly.
 							</p>
 						</div>
 					</div>
 
 					<!-- Ko-fi Widget -->
 					<div class="mb-8">
-						<div class="kofi-widget-container rounded-2xl overflow-hidden shadow-sm border border-default">
+						<div
+							class="kofi-widget-container rounded-2xl overflow-hidden shadow-sm border border-default"
+						>
 							<iframe
 								id="kofiframe"
 								src="https://ko-fi.com/autumnsgrove/?hidefeed=true&widget=true&embed=true&preview=true"
@@ -344,13 +355,16 @@
 								target="_blank"
 								rel="noopener noreferrer"
 								class="underline underline-offset-2 hover:text-foreground motion-safe:transition-colors"
-							>Open Ko-fi directly →</a>
+								>Open Ko-fi directly →</a
+							>
 						</p>
 					</div>
 
 					<!-- What support goes toward -->
 					<div class="space-y-4 mb-8">
-						<h3 class="text-lg font-serif text-foreground text-center mb-6">What your support goes toward</h3>
+						<h3 class="text-lg font-serif text-foreground text-center mb-6">
+							What your support goes toward
+						</h3>
 
 						<div class="grid gap-4">
 							<div class="flex items-start gap-4 p-4 rounded-xl border border-default bg-surface">
@@ -359,7 +373,9 @@
 								</div>
 								<div>
 									<p class="font-sans font-medium text-foreground">Keeping the servers running</p>
-									<p class="text-sm text-foreground-muted">Hosting, databases, CDN, and all the infrastructure that keeps Grove online.</p>
+									<p class="text-sm text-foreground-muted">
+										Hosting, databases, CDN, and all the infrastructure that keeps Grove online.
+									</p>
 								</div>
 							</div>
 
@@ -369,7 +385,10 @@
 								</div>
 								<div>
 									<p class="font-sans font-medium text-foreground">Building new features</p>
-									<p class="text-sm text-foreground-muted">More time to code means more features, faster. Federation, galleries, and everything on the roadmap.</p>
+									<p class="text-sm text-foreground-muted">
+										More time to code means more features, faster. Federation, galleries, and
+										everything on the roadmap.
+									</p>
 								</div>
 							</div>
 
@@ -379,7 +398,10 @@
 								</div>
 								<div>
 									<p class="font-sans font-medium text-foreground">Sustaining the dream</p>
-									<p class="text-sm text-foreground-muted">Every coffee helps me spend more time on Grove and less time worrying about whether I can keep doing this.</p>
+									<p class="text-sm text-foreground-muted">
+										Every coffee helps me spend more time on Grove and less time worrying about
+										whether I can keep doing this.
+									</p>
 								</div>
 							</div>
 						</div>
@@ -388,18 +410,20 @@
 					<!-- Already a subscriber note -->
 					<div class="text-center p-6 rounded-xl bg-accent border border-default">
 						<p class="text-foreground-muted font-sans text-sm leading-relaxed">
-							Already have a Grove subscription? <span class="text-foreground">You're already supporting the dream.</span> Thank you for being <GroveTerm term="rooted">rooted</GroveTerm> with us.
+							Already have a Grove subscription? <span class="text-foreground"
+								>You're already supporting the dream.</span
+							>
+							Thank you for being <GroveTerm term="rooted">rooted</GroveTerm> with us.
 						</p>
 					</div>
 				</section>
 
 				<!-- Closing -->
 				<section class="text-center py-8 border-t border-default">
-					<p class="text-accent-muted font-serif text-lg mb-2">
-						Thank you for being here.
-					</p>
+					<p class="text-accent-muted font-serif text-lg mb-2">Thank you for being here.</p>
 					<p class="text-foreground-muted font-sans">
-						Every contribution—a bug report, a line of code, or a coffee—helps build a better corner of the internet.
+						Every contribution—a bug report, a line of code, or a coffee—helps build a better corner
+						of the internet.
 					</p>
 					<p class="text-sm text-foreground-muted font-sans mt-2 italic">
 						Every bit helps. Every kind word, too.
@@ -410,7 +434,10 @@
 	</article>
 
 	<!-- Desktop TOC -->
-	<nav class="fixed top-1/2 right-6 -translate-y-1/2 z-grove-fab hidden lg:flex flex-col gap-2" aria-label="Section navigation">
+	<nav
+		class="fixed top-1/2 right-6 -translate-y-1/2 z-grove-fab hidden lg:flex flex-col gap-2"
+		aria-label="Section navigation"
+	>
 		{#each tocHeaders as header}
 			{@const SectionIcon = header.icon}
 			<div class="relative group">
@@ -421,11 +448,17 @@
 					title={header.text}
 				>
 					{#if SectionIcon}
-						<SectionIcon class="w-5 h-5 text-accent dark:text-accent-muted motion-safe:group-hover:scale-110 transition-transform" />
+						<SectionIcon
+							class="w-5 h-5 text-accent dark:text-accent-muted motion-safe:group-hover:scale-110 transition-transform"
+						/>
 					{/if}
 				</a>
-				<div class="absolute right-full mr-3 top-1/2 -translate-y-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none">
-					<div class="px-3 py-1.5 rounded-lg bg-white dark:bg-cream-50 shadow-md border border-accent/20 dark:border-accent/10 text-sm font-medium text-foreground whitespace-nowrap">
+				<div
+					class="absolute right-full mr-3 top-1/2 -translate-y-1/2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none"
+				>
+					<div
+						class="px-3 py-1.5 rounded-lg bg-white dark:bg-cream-50 shadow-md border border-accent/20 dark:border-accent/10 text-sm font-medium text-foreground whitespace-nowrap"
+					>
 						{header.text}
 					</div>
 				</div>
@@ -440,7 +473,9 @@
 </main>
 
 <style>
-	.bg-divider { background-color: var(--color-divider); }
+	.bg-divider {
+		background-color: var(--color-divider);
+	}
 
 	.glass-support {
 		background: rgba(255, 255, 255, 0.6);

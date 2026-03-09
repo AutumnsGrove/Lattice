@@ -155,11 +155,13 @@
 	<!-- Task Breakdown -->
 	<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 		<!-- Today's Stats -->
-		<GlassCard variant="default" class="p-6">
-			<h3 class="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-				<Activity class="w-5 h-5 text-foreground-subtle" />
-				Today's Usage by Task
-			</h3>
+		<GlassCard
+			variant="default"
+			class="p-6"
+			title="Today's Usage by Task"
+			icon={Activity}
+			iconClass="text-foreground-subtle"
+		>
 			{#if today.length === 0}
 				<div class="text-center py-8 text-foreground-subtle">
 					<AlertTriangle class="w-8 h-8 mx-auto mb-2 opacity-50" />
@@ -174,9 +176,7 @@
 							color: "text-foreground-muted",
 						}}
 						{@const Icon = info.icon}
-						<div
-							class="flex items-center justify-between p-3 rounded-lg bg-surface/50"
-						>
+						<div class="flex items-center justify-between p-3 rounded-lg bg-surface/50">
 							<div class="flex items-center gap-3">
 								<Icon class="w-4 h-4 {info.color}" />
 								<span class="font-medium text-foreground">{info.name}</span>
@@ -193,11 +193,13 @@
 		</GlassCard>
 
 		<!-- Provider Breakdown -->
-		<GlassCard variant="default" class="p-6">
-			<h3 class="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-				<Database class="w-5 h-5 text-foreground-subtle" />
-				Provider Usage (7 Days)
-			</h3>
+		<GlassCard
+			variant="default"
+			class="p-6"
+			title="Provider Usage (7 Days)"
+			icon={Database}
+			iconClass="text-foreground-subtle"
+		>
 			{#if providers.length === 0}
 				<div class="text-center py-8 text-foreground-subtle">
 					<AlertTriangle class="w-8 h-8 mx-auto mb-2 opacity-50" />
@@ -206,9 +208,7 @@
 			{:else}
 				<div class="space-y-3">
 					{#each providers as provider (provider.provider)}
-						<div
-							class="flex items-center justify-between p-3 rounded-lg bg-surface/50"
-						>
+						<div class="flex items-center justify-between p-3 rounded-lg bg-surface/50">
 							<div class="flex items-center gap-3">
 								<div class="w-2 h-2 rounded-full bg-grove-500"></div>
 								<span class="font-medium text-foreground capitalize">{provider.provider}</span>
@@ -226,11 +226,13 @@
 	</div>
 
 	<!-- Recent Requests -->
-	<GlassCard variant="default" class="p-6">
-		<h3 class="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-			<Clock class="w-5 h-5 text-foreground-subtle" />
-			Recent Requests
-		</h3>
+	<GlassCard
+		variant="default"
+		class="p-6"
+		title="Recent Requests"
+		icon={Clock}
+		iconClass="text-foreground-subtle"
+	>
 		{#if recent.length === 0}
 			<div class="text-center py-8 text-foreground-subtle">
 				<AlertTriangle class="w-8 h-8 mx-auto mb-2 opacity-50" />

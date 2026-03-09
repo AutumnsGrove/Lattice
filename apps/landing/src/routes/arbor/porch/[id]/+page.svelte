@@ -216,11 +216,7 @@
 		<!-- Sidebar -->
 		<div class="space-y-4">
 			<!-- Visitor Info -->
-			<GlassCard>
-				<h3 class="text-sm font-sans font-medium text-foreground mb-3 flex items-center gap-2">
-					<User class="w-4 h-4" />
-					Visitor
-				</h3>
+			<GlassCard title="Visitor" icon={User}>
 				<div class="space-y-2 text-sm font-sans">
 					<p class="text-foreground">
 						{data.visit.guest_name || "No name provided"}

@@ -5,7 +5,6 @@
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import GlassButton from "$lib/ui/components/ui/GlassButton.svelte";
 	import Badge from "$lib/ui/components/ui/Badge.svelte";
-	import Waystone from "$lib/ui/components/ui/Waystone.svelte";
 	import { toast } from "$lib/ui/components/ui/toast";
 	import { api } from "$lib/utils/api";
 	import {

@@ -131,11 +131,13 @@
 
 	<!-- Platform Breakdown -->
 	{#if stats && Object.keys(stats.byPlatform).length > 0}
-		<GlassCard variant="default" class="p-6">
-			<h3 class="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-				<TrendingUp class="w-5 h-5 text-foreground-subtle" />
-				Platform Breakdown (Recent)
-			</h3>
+		<GlassCard
+			variant="default"
+			class="p-6"
+			title="Platform Breakdown (Recent)"
+			icon={TrendingUp}
+			iconClass="text-foreground-subtle"
+		>
 			<div class="flex flex-wrap gap-3">
 				{#each Object.entries(stats.byPlatform) as [platform, count] (platform)}
 					{@const info = platformInfo[platform] || {
@@ -152,11 +154,13 @@
 	{/if}
 
 	<!-- Recent Broadcasts -->
-	<GlassCard variant="default" class="p-6">
-		<h3 class="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-			<Clock class="w-5 h-5 text-foreground-subtle" />
-			Recent Broadcasts
-		</h3>
+	<GlassCard
+		variant="default"
+		class="p-6"
+		title="Recent Broadcasts"
+		icon={Clock}
+		iconClass="text-foreground-subtle"
+	>
 		{#if broadcasts.length === 0}
 			<div class="text-center py-8 text-foreground-subtle">
 				<AlertTriangle class="w-8 h-8 mx-auto mb-2 opacity-50" />
@@ -173,9 +177,7 @@
 						bgColor: "bg-muted",
 					}}
 					{@const StatusIcon = status.icon}
-					<div
-						class="p-4 rounded-lg bg-surface/50 border border-grove-100 dark:border-grove-800"
-					>
+					<div class="p-4 rounded-lg bg-surface/50 border border-grove-100 dark:border-grove-800">
 						<p class="text-foreground text-sm whitespace-pre-wrap break-words mb-3">
 							{broadcast.content}
 						</p>

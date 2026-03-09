@@ -127,9 +127,7 @@
 		<div class="overflow-hidden rounded-xl border border-border">
 			<table class="w-full text-sm font-sans" aria-label="Recent alert history">
 				<thead>
-					<tr
-						class="bg-surface-subtle text-xs text-foreground-muted uppercase tracking-wide"
-					>
+					<tr class="bg-surface-subtle text-xs text-foreground-muted uppercase tracking-wide">
 						<th scope="col" class="px-5 py-3 text-left font-medium">Alert</th>
 						<th scope="col" class="px-5 py-3 text-left font-medium">Service</th>
 						<th scope="col" class="px-5 py-3 text-right font-medium">Severity</th>
@@ -176,9 +174,7 @@
 		<div class="overflow-hidden rounded-xl border border-border mb-6">
 			<table class="w-full text-sm font-sans" aria-label="Configured alert thresholds">
 				<thead>
-					<tr
-						class="bg-surface-subtle text-xs text-foreground-muted uppercase tracking-wide"
-					>
+					<tr class="bg-surface-subtle text-xs text-foreground-muted uppercase tracking-wide">
 						<th scope="col" class="px-5 py-3 text-left font-medium">Service</th>
 						<th scope="col" class="px-5 py-3 text-left font-medium">Metric</th>
 						<th scope="col" class="px-5 py-3 text-left font-medium">Rule</th>
@@ -215,12 +211,12 @@
 	{/if}
 
 	<!-- Add new threshold -->
-	<GlassCard class="p-5">
-		<h3 class="text-sm font-sans font-medium text-foreground mb-4 flex items-center gap-2">
-			<Bell class="w-4 h-4 text-foreground-muted" />
-			Add / Update Threshold
-		</h3>
-
+	<GlassCard
+		class="p-5"
+		title="Add / Update Threshold"
+		icon={Bell}
+		iconClass="text-foreground-muted"
+	>
 		<form onsubmit={handleSaveThreshold} class="space-y-3">
 			<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
 				<div>
@@ -323,9 +319,7 @@
 	<GlassCard class="p-5 border-warning">
 		<div class="flex items-start gap-3">
 			<Info class="w-4 h-4 text-warning mt-0.5 shrink-0" />
-			<p class="text-xs font-sans text-warning">
-				Database not available in this environment.
-			</p>
+			<p class="text-xs font-sans text-warning">Database not available in this environment.</p>
 		</div>
 	</GlassCard>
 {/if}

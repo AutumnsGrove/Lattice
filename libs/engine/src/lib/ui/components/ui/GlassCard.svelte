@@ -118,6 +118,8 @@
 		description?: string;
 		/** Optional icon component rendered beside the title */
 		icon?: Component;
+		/** Additional CSS classes for the icon (overrides default text-muted-foreground) */
+		iconClass?: string;
 		hoverable?: boolean;
 		border?: boolean;
 		class?: string;
@@ -155,6 +157,7 @@
 		title,
 		description,
 		icon,
+		iconClass,
 		hoverable = false,
 		border = true,
 		class: className,
@@ -314,7 +317,7 @@
 								class="text-lg font-semibold {titleClass} {icon ? 'flex items-center gap-2' : ''}"
 							>
 								{#if icon}
-									<icon class="w-5 h-5 shrink-0 text-muted-foreground"></icon>
+									<icon class="w-5 h-5 shrink-0 {iconClass || 'text-muted-foreground'}"></icon>
 								{/if}
 								{title}
 							</h3>
