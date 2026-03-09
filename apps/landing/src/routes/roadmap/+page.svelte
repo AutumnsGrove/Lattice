@@ -1,28 +1,29 @@
 <script lang="ts">
-	import Header from '$lib/components/Header.svelte';
-	import Footer from '$lib/components/Footer.svelte';
-	import { FeatureStar, GroveTerm } from '@autumnsgrove/lattice/ui';
-	import SEO from '$lib/components/SEO.svelte';
-	import { TableOfContents, MobileTOC } from '@autumnsgrove/lattice';
+	import Header from "$lib/components/Header.svelte";
+	import Footer from "$lib/components/Footer.svelte";
+	import { FeatureStar } from "@autumnsgrove/lattice/ui";
+	import SEO from "$lib/components/SEO.svelte";
+	import { MobileTOC } from "@autumnsgrove/lattice";
+	import RoadmapFeatureItem from "$lib/components/RoadmapFeatureItem.svelte";
+
+	// Icon registry (only phase/state icons needed directly in template)
+	import { stateIcons, navIcons, phaseIcons } from "$lib/utils/icons";
+
+	// Roadmap data & styling
+	import {
+		PHASE_ORDER,
+		phases,
+		phaseStatus,
+		phaseStyles,
+		featureColorMaps,
+		featureBorderMaps,
+		tocHeaders,
+		getFeatureIconColor,
+		getFeatureBorderClass,
+		type PhaseKey,
+	} from "$lib/data/roadmapData";
 
 	let { data } = $props();
-
-	// Centralized icon registry - single source of truth for all icons
-	import {
-		roadmapFeatureIcons,
-		seasonalIconColors,
-		getPhaseColor,
-		stateIcons,
-		navIcons,
-		phaseIcons,
-		type RoadmapFeatureIconKey
-	} from '$lib/utils/icons';
-
-	// Type-safe icon getter
-	function getFeatureIcon(icon: string | undefined) {
-		if (!icon) return stateIcons.circle;
-		return roadmapFeatureIcons[icon as RoadmapFeatureIconKey] ?? stateIcons.circle;
-	}
 
 	// Local aliases from centralized registry for cleaner template usage
 	const MapPin = navIcons.roadmap;
@@ -39,201 +40,46 @@
 	import {
 		Logo,
 		// Trees
-		TreePine, TreeCherry, TreeAspen, TreeBirch,
+		TreePine,
+		TreeCherry,
+		TreeAspen,
+		TreeBirch,
 		// Weather
 		SnowfallLayer,
 		// Botanical
-		FallingPetalsLayer, FallingLeavesLayer, Vine,
+		FallingPetalsLayer,
+		FallingLeavesLayer,
+		Vine,
 		// Sky
-		Cloud, Moon, StarCluster,
+		Cloud,
+		Moon,
+		StarCluster,
 		// Creatures
 		Firefly,
 		// Structural
 		Lantern,
 		// Ground
-		Tulip, Daffodil, FlowerWild, GrassTuft,
+		Tulip,
+		Daffodil,
+		FlowerWild,
+		GrassTuft,
 		// Palette
-		greens, bark, autumn, spring, winter, pinks, accents, midnightBloom,
-		type Season
-	} from '@autumnsgrove/lattice/ui/nature';
-
-	// =============================================================================
-	// PHASE CONFIGURATION
-	// =============================================================================
-
-	/**
-	 * Phase order - the seasonal journey through Grove's development.
-	 * These keys must match the keys in the `phases` object below.
-	 */
-	const PHASE_ORDER = ['first-frost', 'thaw', 'first-buds', 'full-bloom', 'golden-hour', 'midnight-bloom'] as const;
-	type PhaseKey = typeof PHASE_ORDER[number];
-
-	/**
-	 * Feature type for roadmap items.
-	 * - internal: Infrastructure/tooling features (displayed with reduced opacity)
-	 * - major: Highlighted features with special border styling
-	 * - dream: Future aspirational features in the Midnight Bloom phase
-	 */
-	type Feature = {
-		name: string;
-		description: string;
-		done: boolean;
-		icon?: string;
-		internal?: boolean;
-		major?: boolean;
-		dream?: boolean;
-		articleSlug?: string; // Links to /knowledge/help/{slug}
-		termSlug?: string; // Grove term slug for GroveTerm wrapper
-	};
-
-	/**
-	 * HOWTO: Update this constant as Grove reaches new phases.
-	 * This controls the "You are here" indicator and phase status styling.
-	 *
-	 * Valid values: 'first-frost' | 'thaw' | 'first-buds' | 'full-bloom' | 'golden-hour' | 'midnight-bloom'
-	 */
-	const currentPhase: PhaseKey = 'thaw';
-
-	// Feature definitions for each phase
-	const phases: Record<PhaseKey, {
-		title: string;
-		subtitle: string;
-		season: Season;
-		description: string;
-		features: Feature[];
-	}> = {
-		'first-frost': {
-			title: 'First Frost',
-			subtitle: 'The quiet before dawn',
-			season: 'winter' as Season,
-			description: 'The groundwork has been laid. Foundations built in stillness.',
-			features: [
-				{ name: 'Lattice', description: 'Core engine — powers the grove', done: true, major: true, articleSlug: 'what-is-lattice', termSlug: 'lattice' },
-				{ name: 'Heartwood', description: 'Authentication — keeps you safe', done: true, major: true, articleSlug: 'what-is-heartwood', termSlug: 'heartwood' },
-				{ name: 'Landing Site', description: 'grove.place welcomes visitors', done: true },
-				{ name: 'Clearing', description: 'Status page — transparent platform health', done: true, icon: 'clearing', articleSlug: 'what-is-clearing', termSlug: 'clearing' },
-				{ name: 'Patina', description: 'Nightly backups — age as armor', done: true, icon: 'database', internal: true, termSlug: 'patina' },
-				{ name: 'Petal', description: 'Image moderation — protection without surveillance', done: false, icon: 'petal', major: true, articleSlug: 'what-is-petal', termSlug: 'petal' },
-				{ name: 'Forage', description: 'Domain discovery — AI-powered name hunting', done: true, icon: 'forage', articleSlug: 'what-is-forage', termSlug: 'forage' },
-				{ name: 'Email Waitlist', description: '67 seeds, waiting to sprout', done: true }
-			]
-		},
-		thaw: {
-			title: 'Thaw',
-			subtitle: 'February 2026 — The ice begins to crack',
-			season: 'winter' as Season,
-			description: 'Grove opens its doors. The first trees take root.',
-			features: [
-				{ name: 'Wanderer Tier', description: 'Free forever — your space on the web', done: true, icon: 'footprints', major: true, termSlug: 'wanderer' },
-				{ name: 'Seedling Tier', description: '$8/month — your corner of the grove', done: true, icon: 'sprout', major: true, termSlug: 'seedling' },
-				{ name: 'Sign Up', description: 'Google, email, or Hub account', done: true, icon: 'userplus' },
-				{ name: 'Your Blog', description: 'username.grove.place', done: true, icon: 'globe' },
-				{ name: 'Markdown Writing', description: 'Write beautifully, simply', done: true, icon: 'penline' },
-				{ name: 'Image Hosting', description: 'Upload, we optimize', done: true, icon: 'imageplus' },
-				{ name: 'RSS Feed', description: 'Built-in, because it should be', done: true, icon: 'rss' },
-				{ name: 'Data Export', description: 'Your words, always portable — a core feature', done: true, icon: 'download', major: true },
-				{ name: 'Waystone', description: 'Contextual help — guidance where you need it', done: true, icon: 'signpost', articleSlug: 'what-are-waystones', termSlug: 'waystone' },
-				{ name: 'Shade', description: 'AI content protection — crawlers blocked at the gate', done: true, icon: 'shieldcheck', major: true, articleSlug: 'what-is-shade', termSlug: 'shade' }
-			]
-		},
-		'first-buds': {
-			title: 'First Buds',
-			subtitle: 'Early Spring — Green emerging through snow',
-			season: 'spring' as Season,
-			description: 'New growth appears. The grove finds its voice.',
-			features: [
-				{ name: 'Sapling Tier', description: 'More space, more themes', done: false, icon: 'tree', major: true, termSlug: 'sapling' },
-				{ name: 'Forests', description: 'Community groves — find your people', done: false, icon: 'forests', major: true, termSlug: 'forests' },
-				{ name: 'Wisp', description: 'Writing assistant — a helper, not a writer', done: false, icon: 'wisp', major: true, articleSlug: 'what-is-wisp', termSlug: 'wisp' },
-				{ name: 'Foliage', description: 'Theme library — more color for your corner', done: false, icon: 'swatchbook', major: true, articleSlug: 'what-is-foliage', termSlug: 'foliage' },
-				{ name: 'Amber', description: 'Storage dashboard — see and manage your files', done: false, icon: 'amber', major: true, articleSlug: 'what-is-amber', termSlug: 'amber' },
-				{ name: 'Ivy', description: 'Email at @grove.place — your words, your inbox', done: false, icon: 'ivy', articleSlug: 'what-is-ivy', termSlug: 'ivy' },
-				{ name: 'Trails', description: 'Personal roadmaps — share your journey', done: false, icon: 'trails', articleSlug: 'what-is-trails', termSlug: 'trails' },
-				{ name: 'Porch', description: 'Support conversations — come sit and talk', done: false, icon: 'porch', articleSlug: 'what-is-porch', termSlug: 'porch' },
-				{ name: 'Centennial', description: '100-year preservation — your words outlive you', done: false, icon: 'centennial', major: true, articleSlug: 'what-is-centennial', termSlug: 'centennial' }
-			]
-		},
-		'full-bloom': {
-			title: 'Full Bloom',
-			subtitle: 'Spring into Summer — Petals everywhere',
-			season: 'summer' as Season,
-			description: 'The grove becomes a community. Roots intertwine.',
-			features: [
-				{ name: 'Meadow', description: 'Social feed — connection without competition', done: false, major: true, icon: 'meadow', articleSlug: 'what-is-meadow', termSlug: 'meadow' },
-				{ name: 'Chronological Feed', description: 'No algorithms, just friends', done: false, icon: 'clock' },
-				{ name: 'Private Reactions', description: 'Encouragement only the author sees', done: false, icon: 'heart' },
-				{ name: 'Reeds', description: 'Comments — replies and thoughtful discussions', done: false, icon: 'message', termSlug: 'reeds' },
-				{ name: 'Rings', description: 'Private analytics — your growth, reflected', done: false, icon: 'trending', articleSlug: 'what-is-rings', termSlug: 'rings' },
-				{ name: 'Thorn', description: 'Content moderation — keeping the grove safe', done: false, icon: 'shield', articleSlug: 'what-is-thorn', termSlug: 'thorn' },
-				{ name: 'Oak & Evergreen Tiers', description: 'Custom domains, full control', done: false, icon: 'crown', major: true },
-				{ name: 'Foliage', description: 'Theme customizer — make it truly yours', done: false, icon: 'paintbrush', articleSlug: 'what-is-foliage', termSlug: 'foliage' },
-				{ name: 'Community Themes', description: 'Share what you create', done: false, icon: 'users' },
-				{ name: 'Terrarium', description: 'Creative canvas — compose scenes for your blog', done: false, major: true, icon: 'terrarium', articleSlug: 'what-is-terrarium', termSlug: 'terrarium' },
-				{ name: 'Curios', description: 'Cabinet of wonders — guestbooks, shrines, old-web magic', done: false, icon: 'curios', major: true, termSlug: 'curios' },
-				{ name: 'Weave', description: 'Visual composition — animations and diagrams', done: false, icon: 'weave', articleSlug: 'what-is-weave', termSlug: 'weave' },
-				{ name: 'Outpost', description: 'Community Minecraft — a server that waits for you', done: false, icon: 'outpost', termSlug: 'outpost' }
-			]
-		},
-		'golden-hour': {
-			title: 'Golden Hour',
-			subtitle: 'Autumn — Warm light through the canopy',
-			season: 'autumn' as Season,
-			description: 'The grove settles into itself. A time for refinement.',
-			features: [
-				{ name: 'Wander', description: 'Immersive discovery — walk through the forest', done: false, major: true, icon: 'wander', termSlug: 'wander' },
-				{ name: 'Polish', description: 'Attention to every detail', done: false, icon: 'gem', major: true },
-				{ name: 'Performance', description: 'Fast everywhere, always', done: false, icon: 'zap' },
-				{ name: 'Accessibility', description: 'Grove for everyone', done: false, icon: 'accessibility' },
-				{ name: 'Mobile Experience', description: 'Beautiful on every screen', done: false, icon: 'smartphone' },
-				{ name: 'Edge Cases', description: 'The small things that matter', done: false, icon: 'puzzle' }
-			]
-		},
-		'midnight-bloom': {
-			title: 'Midnight Bloom',
-			subtitle: 'The far horizon — A dream taking shape',
-			season: 'winter' as Season, // Night scene
-			description: 'Where digital roots meet physical ground.',
-			features: [
-				{ name: 'The Café', description: 'A late-night tea shop for the sleepless and searching', done: false, dream: true, icon: 'coffee' },
-				{ name: 'Community Boards', description: 'QR codes linking physical to digital', done: false, dream: true, icon: 'qrcode' },
-				{ name: 'Local Zines', description: 'Grove blogs printed and shared', done: false, dream: true, icon: 'bookopen' },
-				{ name: 'A Third Place', description: 'That becomes a first home', done: false, dream: true, icon: 'home', major: true }
-			]
-		}
-	};
-
-	// Helper to check if a phase is current or past
-	function getPhaseStatus(phaseKey: PhaseKey): 'past' | 'current' | 'future' {
-		const currentIndex = PHASE_ORDER.indexOf(currentPhase);
-		const thisIndex = PHASE_ORDER.indexOf(phaseKey);
-
-		if (thisIndex < currentIndex) return 'past';
-		if (thisIndex === currentIndex) return 'current';
-		return 'future';
-	}
-
-	// Pre-computed status for each phase (for use in template)
-	const phaseStatus: Record<PhaseKey, 'past' | 'current' | 'future'> = {
-		'first-frost': getPhaseStatus('first-frost'),
-		'thaw': getPhaseStatus('thaw'),
-		'first-buds': getPhaseStatus('first-buds'),
-		'full-bloom': getPhaseStatus('full-bloom'),
-		'golden-hour': getPhaseStatus('golden-hour'),
-		'midnight-bloom': getPhaseStatus('midnight-bloom')
-	};
-
-	// Table of Contents headers
-	const tocHeaders = PHASE_ORDER.map(key => ({
-		id: key,
-		text: phases[key].title,
-		level: 2
-	}));
+		greens,
+		bark,
+		autumn,
+		spring,
+		winter,
+		pinks,
+		accents,
+		midnightBloom,
+		type Season,
+	} from "@autumnsgrove/lattice/ui/nature";
 
 	// =============================================================================
 	// RANDOMIZED TREE GENERATION
 	// =============================================================================
 
-	type TreeType = 'pine' | 'cherry' | 'aspen' | 'birch' | 'logo';
+	type TreeType = "pine" | "cherry" | "aspen" | "birch" | "logo";
 
 	interface GeneratedTree {
 		id: number;
@@ -250,33 +96,33 @@
 	const TREE_ASPECT_RATIO_RANGE = { min: 1.0, max: 1.5 };
 
 	// Tree count ranges per section (grows as grove develops)
-	const TREE_RANGES = {
-		'first-frost': { min: 1, max: 1 },      // Just the beginning - always 1
-		'thaw': { min: 2, max: 4 },              // Growth beginning
-		'first-buds': { min: 3, max: 5 },        // Spring awakening
-		'full-bloom': { min: 5, max: 8 },        // Peak growth!
-		'golden-hour': { min: 8, max: 14 },      // Magical forest
-		'midnight-bloom': { min: 6, max: 10 }    // Silhouetted grove
+	const TREE_RANGES: Record<PhaseKey, { min: number; max: number }> = {
+		"first-frost": { min: 1, max: 1 }, // Just the beginning - always 1
+		thaw: { min: 2, max: 4 }, // Growth beginning
+		"first-buds": { min: 3, max: 5 }, // Spring awakening
+		"full-bloom": { min: 5, max: 8 }, // Peak growth!
+		"golden-hour": { min: 8, max: 14 }, // Magical forest
+		"midnight-bloom": { min: 6, max: 10 }, // Silhouetted grove
 	};
 
 	// Tree SIZE ranges per section (trees get bigger as grove matures!)
-	const TREE_SIZE_RANGES = {
-		'first-frost': { min: 80, max: 120 },     // Young seedling
-		'thaw': { min: 90, max: 130 },            // Early growth
-		'first-buds': { min: 100, max: 140 },     // Spring vigor
-		'full-bloom': { min: 110, max: 160 },     // Full maturity
-		'golden-hour': { min: 120, max: 180 },    // Majestic forest
-		'midnight-bloom': { min: 100, max: 150 }  // Silhouettes (slightly smaller for mystery)
+	const TREE_SIZE_RANGES: Record<PhaseKey, { min: number; max: number }> = {
+		"first-frost": { min: 80, max: 120 }, // Young seedling
+		thaw: { min: 90, max: 130 }, // Early growth
+		"first-buds": { min: 100, max: 140 }, // Spring vigor
+		"full-bloom": { min: 110, max: 160 }, // Full maturity
+		"golden-hour": { min: 120, max: 180 }, // Majestic forest
+		"midnight-bloom": { min: 100, max: 150 }, // Silhouettes (slightly smaller for mystery)
 	};
 
 	// Available tree types per season
 	const TREE_TYPES_BY_SECTION: Record<PhaseKey, TreeType[]> = {
-		'first-frost': ['logo'],
-		'thaw': ['logo', 'pine', 'birch'],
-		'first-buds': ['logo', 'pine', 'cherry', 'birch'],
-		'full-bloom': ['logo', 'pine', 'cherry', 'birch', 'aspen'],
-		'golden-hour': ['logo', 'pine', 'cherry', 'birch', 'aspen'],
-		'midnight-bloom': ['logo', 'pine', 'cherry', 'birch', 'aspen']
+		"first-frost": ["logo"],
+		thaw: ["logo", "pine", "birch"],
+		"first-buds": ["logo", "pine", "cherry", "birch"],
+		"full-bloom": ["logo", "pine", "cherry", "birch", "aspen"],
+		"golden-hour": ["logo", "pine", "cherry", "birch", "aspen"],
+		"midnight-bloom": ["logo", "pine", "cherry", "birch", "aspen"],
 	};
 
 	// State for dynamically generated trees
@@ -304,14 +150,14 @@
 			do {
 				x = 5 + Math.random() * 88; // 5-93% range to avoid edges
 				attempts++;
-			} while (usedPositions.some(pos => Math.abs(pos - x) < 8) && attempts < 20);
+			} while (usedPositions.some((pos) => Math.abs(pos - x) < 8) && attempts < 20);
 
 			usedPositions.push(x);
 
 			// Random tree type (but ensure at least one logo tree in larger groves)
 			let treeType: TreeType;
 			if (i === Math.floor(count / 2) && count >= 3) {
-				treeType = 'logo'; // Center tree is logo for larger groves
+				treeType = "logo"; // Center tree is logo for larger groves
 			} else {
 				treeType = availableTypes[Math.floor(Math.random() * availableTypes.length)];
 			}
@@ -321,7 +167,8 @@
 			const size = sizeRange.min + Math.random() * (sizeRange.max - sizeRange.min);
 
 			// Randomize aspect ratio for natural height variation (like /forest page)
-			const aspectRatio = TREE_ASPECT_RATIO_RANGE.min +
+			const aspectRatio =
+				TREE_ASPECT_RATIO_RANGE.min +
 				Math.random() * (TREE_ASPECT_RATIO_RANGE.max - TREE_ASPECT_RATIO_RANGE.min);
 
 			// Opacity varies by position (creates depth)
@@ -338,7 +185,7 @@
 				aspectRatio,
 				treeType,
 				opacity,
-				zIndex
+				zIndex,
 			});
 		}
 
@@ -350,11 +197,11 @@
 	 * Regenerate all trees on mount (called once per page load)
 	 */
 	function regenerateAllTrees() {
-		thawTrees = generateSectionTrees('thaw');
-		firstBudsTrees = generateSectionTrees('first-buds');
-		fullBloomTrees = generateSectionTrees('full-bloom');
-		goldenHourRandomTrees = generateSectionTrees('golden-hour');
-		midnightBloomTrees = generateSectionTrees('midnight-bloom');
+		thawTrees = generateSectionTrees("thaw");
+		firstBudsTrees = generateSectionTrees("first-buds");
+		fullBloomTrees = generateSectionTrees("full-bloom");
+		goldenHourRandomTrees = generateSectionTrees("golden-hour");
+		midnightBloomTrees = generateSectionTrees("midnight-bloom");
 	}
 
 	$effect(() => {
@@ -372,13 +219,14 @@
 	<Header user={data.user} />
 
 	<!-- Hero Section -->
-	<section class="relative py-16 px-6 text-center overflow-hidden bg-gradient-to-b from-cream-100 via-cream-50 to-white dark:from-cream-100 dark:via-cream-50 dark:to-cream-50">
+	<section
+		class="relative py-16 px-6 text-center overflow-hidden bg-gradient-to-b from-cream-100 via-cream-50 to-white dark:from-cream-100 dark:via-cream-50 dark:to-cream-50"
+	>
 		<div class="max-w-3xl mx-auto relative z-10">
-			<h1 class="text-4xl md:text-5xl font-serif text-foreground mb-4">
-				The Journey Ahead
-			</h1>
+			<h1 class="text-4xl md:text-5xl font-serif text-foreground mb-4">The Journey Ahead</h1>
 			<p class="text-lg text-foreground-muted max-w-xl mx-auto mb-6">
-				A grove doesn't grow overnight. Here's the path we're walking together—from first frost to midnight bloom.
+				A grove doesn't grow overnight. Here's the path we're walking together—from first frost to
+				midnight bloom.
 			</p>
 
 			<!-- Quick link to version history -->
@@ -413,17 +261,19 @@
 	>
 		<div class="max-w-4xl mx-auto flex flex-wrap justify-center gap-2">
 			{#each Object.entries(phases) as [key, phase]}
-				{@const status = getPhaseStatus(key as PhaseKey)}
+				{@const status = phaseStatus[key as PhaseKey]}
 				<a
 					href="#{key}"
 					class="px-3 py-1.5 rounded-full text-sm font-medium transition-all inline-flex items-center gap-1.5
 						{status === 'current' ? 'bg-accent text-white shadow-md' : ''}
 						{status === 'past' ? 'bg-success-bg text-success-foreground' : ''}
-						{status === 'future' ? 'bg-cream-100 dark:bg-cream-100 text-foreground-muted hover:bg-cream-200 dark:hover:bg-cream-200' : ''}"
+						{status === 'future'
+						? 'bg-cream-100 dark:bg-cream-100 text-foreground-muted hover:bg-cream-200 dark:hover:bg-cream-200'
+						: ''}"
 				>
-					{#if status === 'current'}
+					{#if status === "current"}
 						<MapPin class="w-3.5 h-3.5" />
-					{:else if status === 'past'}
+					{:else if status === "past"}
 						<Check class="w-3.5 h-3.5" />
 					{/if}
 					{phase.title}
@@ -443,52 +293,47 @@
 		>
 			<!-- Snowfall -->
 			<div class="absolute inset-0 pointer-events-none" aria-hidden="true">
-				<SnowfallLayer count={40} zIndex={5} enabled opacity={{ min: 0.4, max: 0.8 }} spawnDelay={8} />
+				<SnowfallLayer
+					count={40}
+					zIndex={5}
+					enabled
+					opacity={{ min: 0.4, max: 0.8 }}
+					spawnDelay={8}
+				/>
 			</div>
 
 			<!-- Single tree - the beginning (positioned at 25% to not block waitlist card) -->
-			<div class="absolute bottom-0 left-[25%] -translate-x-1/2 w-32 h-40 opacity-60" aria-hidden="true">
+			<div
+				class="absolute bottom-0 left-[25%] -translate-x-1/2 w-32 h-40 opacity-60"
+				aria-hidden="true"
+			>
 				<Logo class="w-full h-full" season="winter" rotation={0} background={false} />
 			</div>
 
 			<div class="max-w-3xl mx-auto relative z-10">
 				<div class="text-center mb-12">
-					{#if phaseStatus['first-frost'] === 'past'}
-						<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-success-bg text-success-foreground text-sm font-medium mb-4">
+					{#if phaseStatus["first-frost"] === "past"}
+						<span
+							class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-success-bg text-success-foreground text-sm font-medium mb-4"
+						>
 							<CheckCircle class="w-4 h-4" />
 							Complete
 						</span>
 					{/if}
-					<h2 class="text-3xl md:text-4xl font-serif text-bark-900 mb-2">{phases['first-frost'].title}</h2>
-					<p class="text-bark-700 italic">{phases['first-frost'].subtitle}</p>
-					<p class="mt-4 text-bark-700/80 max-w-lg mx-auto">{phases['first-frost'].description}</p>
+					<h2 class="text-3xl md:text-4xl font-serif text-bark-900 mb-2">
+						{phases["first-frost"].title}
+					</h2>
+					<p class="text-bark-700 italic">{phases["first-frost"].subtitle}</p>
+					<p class="mt-4 text-bark-700/80 max-w-lg mx-auto">{phases["first-frost"].description}</p>
 				</div>
 
 				<ul class="space-y-4 max-w-md mx-auto">
-					{#each phases['first-frost'].features as feature}
-						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-cream-50/25 backdrop-blur-sm shadow-sm">
-							<Check class="w-5 h-5 text-success mt-0.5 flex-shrink-0" />
-							<div class="flex-1">
-								<div class="flex items-center gap-2">
-									<span class="font-medium text-bark-900">
-										{#if feature.articleSlug}
-											<a
-												href="/knowledge/help/{feature.articleSlug}"
-												class="hover:text-accent transition-colors underline-offset-2 hover:underline"
-											>
-												{#if feature.termSlug}<GroveTerm term={feature.termSlug}>{feature.name}</GroveTerm>{:else}{feature.name}{/if}
-											</a>
-										{:else}
-											{#if feature.termSlug}<GroveTerm term={feature.termSlug}>{feature.name}</GroveTerm>{:else}{feature.name}{/if}
-										{/if}
-									</span>
-									{#if feature.major}
-										<FeatureStar />
-									{/if}
-								</div>
-								<p class="text-sm text-bark-700">{feature.description}</p>
-							</div>
-						</li>
+					{#each phases["first-frost"].features as feature}
+						<RoadmapFeatureItem
+							{feature}
+							style={phaseStyles["first-frost"]}
+							iconColor={getFeatureIconColor("first-frost", feature.icon)}
+						/>
 					{/each}
 				</ul>
 			</div>
@@ -504,7 +349,13 @@
 		>
 			<!-- Light snowfall - the thaw -->
 			<div class="absolute inset-0 pointer-events-none" aria-hidden="true">
-				<SnowfallLayer count={20} zIndex={5} enabled opacity={{ min: 0.3, max: 0.6 }} spawnDelay={12} />
+				<SnowfallLayer
+					count={20}
+					zIndex={5}
+					enabled
+					opacity={{ min: 0.3, max: 0.6 }}
+					spawnDelay={12}
+				/>
 			</div>
 
 			<!-- Randomized trees - growth beginning -->
@@ -521,11 +372,11 @@
 					"
 					aria-hidden="true"
 				>
-					{#if tree.treeType === 'logo'}
+					{#if tree.treeType === "logo"}
 						<Logo class="w-full h-full" season="winter" rotation={0} background={false} />
-					{:else if tree.treeType === 'pine'}
+					{:else if tree.treeType === "pine"}
 						<TreePine class="w-full h-full" season="winter" animate color={winter.frostedPine} />
-					{:else if tree.treeType === 'birch'}
+					{:else if tree.treeType === "birch"}
 						<TreeBirch class="w-full h-full" season="winter" />
 					{/if}
 				</div>
@@ -541,8 +392,10 @@
 
 			<div class="max-w-3xl mx-auto relative z-10">
 				<div class="text-center mb-12">
-					{#if phaseStatus['thaw'] === 'current'}
-						<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent text-white text-sm font-medium mb-4 shadow-md">
+					{#if phaseStatus["thaw"] === "current"}
+						<span
+							class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent text-white text-sm font-medium mb-4 shadow-md"
+						>
 							<span class="w-2 h-2 bg-white rounded-full animate-pulse"></span>
 							You are here
 						</span>
@@ -554,37 +407,11 @@
 
 				<ul class="space-y-4 max-w-md mx-auto">
 					{#each phases.thaw.features as feature}
-						{@const IconComponent = getFeatureIcon(feature.icon)}
-						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-cream-50/25 backdrop-blur-sm border-l-4 border-accent shadow-sm
-							{feature.internal ? 'opacity-75' : ''}">
-							<!-- Use icon lookup map with seasonal color (Thaw = teal) -->
-							<IconComponent
-								class="w-5 h-5 text-accent mt-0.5 flex-shrink-0"
-							/>
-							<div class="flex-1">
-								<div class="flex items-center gap-2">
-									<span class="font-medium text-bark-900">
-										{#if feature.articleSlug}
-											<a
-												href="/knowledge/help/{feature.articleSlug}"
-												class="hover:text-accent transition-colors underline-offset-2 hover:underline"
-											>
-												{#if feature.termSlug}<GroveTerm term={feature.termSlug}>{feature.name}</GroveTerm>{:else}{feature.name}{/if}
-											</a>
-										{:else}
-											{#if feature.termSlug}<GroveTerm term={feature.termSlug}>{feature.name}</GroveTerm>{:else}{feature.name}{/if}
-										{/if}
-									</span>
-									{#if feature.major}
-										<FeatureStar />
-									{/if}
-									{#if feature.internal}
-										<span class="px-2 py-0.5 text-xs font-medium rounded bg-bark-200 text-bark-700">Internal</span>
-									{/if}
-								</div>
-								<p class="text-sm text-bark-700">{feature.description}</p>
-							</div>
-						</li>
+						<RoadmapFeatureItem
+							{feature}
+							style={phaseStyles.thaw}
+							iconColor={getFeatureIconColor("thaw", feature.icon)}
+						/>
 					{/each}
 				</ul>
 			</div>
@@ -599,7 +426,15 @@
 		>
 			<!-- Spring petals -->
 			<div class="absolute inset-0 pointer-events-none" aria-hidden="true">
-				<FallingPetalsLayer count={50} zIndex={5} enabled opacity={{ min: 0.4, max: 0.8 }} fallDuration={{ min: 18, max: 26 }} driftRange={120} spawnDelay={10} />
+				<FallingPetalsLayer
+					count={50}
+					zIndex={5}
+					enabled
+					opacity={{ min: 0.4, max: 0.8 }}
+					fallDuration={{ min: 18, max: 26 }}
+					driftRange={120}
+					spawnDelay={10}
+				/>
 			</div>
 
 			<!-- Randomized spring grove -->
@@ -616,13 +451,13 @@
 					"
 					aria-hidden="true"
 				>
-					{#if tree.treeType === 'logo'}
+					{#if tree.treeType === "logo"}
 						<Logo class="w-full h-full" season="spring" rotation={0} background={false} />
-					{:else if tree.treeType === 'pine'}
+					{:else if tree.treeType === "pine"}
 						<TreePine class="w-full h-full" season="spring" animate color={greens.grove} />
-					{:else if tree.treeType === 'cherry'}
+					{:else if tree.treeType === "cherry"}
 						<TreeCherry class="w-full h-full" season="spring" />
-					{:else if tree.treeType === 'birch'}
+					{:else if tree.treeType === "birch"}
 						<TreeBirch class="w-full h-full" season="spring" />
 					{/if}
 				</div>
@@ -646,77 +481,36 @@
 
 			<div class="max-w-3xl mx-auto relative z-10">
 				<div class="text-center mb-12">
-					{#if phaseStatus['first-buds'] === 'current'}
-						<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent text-white text-sm font-medium mb-4 shadow-md">
+					{#if phaseStatus["first-buds"] === "current"}
+						<span
+							class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent text-white text-sm font-medium mb-4 shadow-md"
+						>
 							<span class="w-2 h-2 bg-white rounded-full animate-pulse"></span>
 							You are here
 						</span>
-					{:else if phaseStatus['first-buds'] === 'future'}
-						<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-success-bg text-success-foreground text-sm font-medium mb-4">
+					{:else if phaseStatus["first-buds"] === "future"}
+						<span
+							class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-success-bg text-success-foreground text-sm font-medium mb-4"
+						>
 							<Sprout class="w-3.5 h-3.5" />
 							Coming Soon
 						</span>
 					{/if}
-					<h2 class="text-3xl md:text-4xl font-serif text-bark-900 mb-2">{phases['first-buds'].title}</h2>
-					<p class="text-bark-700 italic">{phases['first-buds'].subtitle}</p>
-					<p class="mt-4 text-bark-700/80 max-w-lg mx-auto">{phases['first-buds'].description}</p>
+					<h2 class="text-3xl md:text-4xl font-serif text-bark-900 mb-2">
+						{phases["first-buds"].title}
+					</h2>
+					<p class="text-bark-700 italic">{phases["first-buds"].subtitle}</p>
+					<p class="mt-4 text-bark-700/80 max-w-lg mx-auto">{phases["first-buds"].description}</p>
 				</div>
 
 				<ul class="space-y-4 max-w-md mx-auto">
-					{#each phases['first-buds'].features as feature}
-						{@const IconComponent = getFeatureIcon(feature.icon)}
-						{@const colorMap = {
-							ivy: 'text-success',
-							amber: 'text-warning',
-							trails: 'text-accent',
-							tree: 'text-success',
-							swatchbook: 'text-accent-subtle',
-							wisp: 'text-info',
-							forests: 'text-success',
-							porch: 'text-warning',
-							terminal: 'text-success',
-							centennial: 'text-accent'
-						}}
-						{@const borderMap = {
-							ivy: 'border-l-4 border-success',
-							amber: 'border-l-4 border-warning',
-							trails: 'border-l-4 border-accent',
-							tree: 'border-l-4 border-success',
-							swatchbook: 'border-l-4 border-accent-subtle',
-							wisp: 'border-l-4 border-info',
-							forests: 'border-l-4 border-success',
-							porch: 'border-l-4 border-warning',
-							terminal: 'border-l-4 border-success',
-							centennial: 'border-l-4 border-accent'
-						}}
-						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-cream-50/25 backdrop-blur-sm shadow-sm
-							{(borderMap as Record<string, string>)[feature.icon ?? ''] || ''}"
-						>
-							<!-- Use icon lookup map with feature-specific color -->
-							<IconComponent
-								class="w-5 h-5 {(colorMap as Record<string, string>)[feature.icon ?? ''] || 'text-bark-400'} mt-0.5 flex-shrink-0"
-							/>
-							<div class="flex-1">
-								<div class="flex items-center gap-2">
-									<span class="font-medium text-bark-900">
-										{#if feature.articleSlug}
-											<a
-												href="/knowledge/help/{feature.articleSlug}"
-												class="hover:text-accent transition-colors underline-offset-2 hover:underline"
-											>
-												{#if feature.termSlug}<GroveTerm term={feature.termSlug}>{feature.name}</GroveTerm>{:else}{feature.name}{/if}
-											</a>
-										{:else}
-											{#if feature.termSlug}<GroveTerm term={feature.termSlug}>{feature.name}</GroveTerm>{:else}{feature.name}{/if}
-										{/if}
-									</span>
-									{#if feature.major}
-										<FeatureStar />
-									{/if}
-								</div>
-								<p class="text-sm text-bark-700">{feature.description}</p>
-							</div>
-						</li>
+					{#each phases["first-buds"].features as feature}
+						<RoadmapFeatureItem
+							{feature}
+							style={phaseStyles["first-buds"]}
+							iconColor={getFeatureIconColor("first-buds", feature.icon)}
+							borderClass={getFeatureBorderClass("first-buds", feature.icon)}
+						/>
 					{/each}
 				</ul>
 			</div>
@@ -757,15 +551,15 @@
 					"
 					aria-hidden="true"
 				>
-					{#if tree.treeType === 'logo'}
+					{#if tree.treeType === "logo"}
 						<Logo class="w-full h-full" season="summer" rotation={0} background={false} />
-					{:else if tree.treeType === 'pine'}
+					{:else if tree.treeType === "pine"}
 						<TreePine class="w-full h-full" season="summer" animate color={greens.deepGreen} />
-					{:else if tree.treeType === 'cherry'}
+					{:else if tree.treeType === "cherry"}
 						<TreeCherry class="w-full h-full" season="summer" />
-					{:else if tree.treeType === 'birch'}
+					{:else if tree.treeType === "birch"}
 						<TreeBirch class="w-full h-full" season="summer" />
-					{:else if tree.treeType === 'aspen'}
+					{:else if tree.treeType === "aspen"}
 						<TreeAspen class="w-full h-full" season="summer" />
 					{/if}
 				</div>
@@ -784,61 +578,28 @@
 
 			<div class="max-w-3xl mx-auto relative z-10">
 				<div class="text-center mb-12">
-					{#if phaseStatus['full-bloom'] === 'future'}
-						<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-success-bg text-success-foreground text-sm font-medium mb-4">
+					{#if phaseStatus["full-bloom"] === "future"}
+						<span
+							class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-success-bg text-success-foreground text-sm font-medium mb-4"
+						>
 							<Sun class="w-3.5 h-3.5" />
 							On the Horizon
 						</span>
 					{/if}
-					<h2 class="text-3xl md:text-4xl font-serif text-bark-900 mb-2">{phases['full-bloom'].title}</h2>
-					<p class="text-bark-700 italic">{phases['full-bloom'].subtitle}</p>
-					<p class="mt-4 text-bark-700/80 max-w-lg mx-auto">{phases['full-bloom'].description}</p>
+					<h2 class="text-3xl md:text-4xl font-serif text-bark-900 mb-2">
+						{phases["full-bloom"].title}
+					</h2>
+					<p class="text-bark-700 italic">{phases["full-bloom"].subtitle}</p>
+					<p class="mt-4 text-bark-700/80 max-w-lg mx-auto">{phases["full-bloom"].description}</p>
 				</div>
 
 				<ul class="space-y-4 max-w-md mx-auto">
-					{#each phases['full-bloom'].features as feature}
-						{@const IconComponent = getFeatureIcon(feature.icon)}
-						{@const colorMap = {
-							meadow: 'text-success',
-							clock: 'text-info',
-							message: 'text-info',
-							heart: 'text-accent-subtle',
-							trending: 'text-success',
-							crown: 'text-warning',
-							paintbrush: 'text-accent-subtle',
-							users: 'text-accent',
-							shield: 'text-foreground-muted',
-							curios: 'text-warning',
-							terrarium: 'text-success',
-							weave: 'text-info',
-							outpost: 'text-accent'
-						}}
-						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/80 dark:bg-cream-50/25 backdrop-blur-sm shadow-sm">
-							<!-- Use icon lookup map with feature-specific color -->
-							<IconComponent
-								class="w-5 h-5 {(colorMap as Record<string, string>)[feature.icon ?? ''] || 'text-bark-400'} mt-0.5 flex-shrink-0"
-							/>
-							<div class="flex-1">
-								<div class="flex items-center gap-2">
-									<span class="font-medium text-bark-900">
-										{#if feature.articleSlug}
-											<a
-												href="/knowledge/help/{feature.articleSlug}"
-												class="hover:text-accent transition-colors underline-offset-2 hover:underline"
-											>
-												{#if feature.termSlug}<GroveTerm term={feature.termSlug}>{feature.name}</GroveTerm>{:else}{feature.name}{/if}
-											</a>
-										{:else}
-											{#if feature.termSlug}<GroveTerm term={feature.termSlug}>{feature.name}</GroveTerm>{:else}{feature.name}{/if}
-										{/if}
-									</span>
-									{#if feature.major}
-										<FeatureStar />
-									{/if}
-								</div>
-								<p class="text-sm text-bark-700">{feature.description}</p>
-							</div>
-						</li>
+					{#each phases["full-bloom"].features as feature}
+						<RoadmapFeatureItem
+							{feature}
+							style={phaseStyles["full-bloom"]}
+							iconColor={getFeatureIconColor("full-bloom", feature.icon)}
+						/>
 					{/each}
 				</ul>
 			</div>
@@ -854,7 +615,14 @@
 			<!-- MASSIVE Falling autumn leaves - the magic! Uses dynamically generated trees -->
 			<!-- Extended fall distance (80-100vh) so leaves travel the entire section height -->
 			<FallingLeavesLayer
-				trees={goldenHourRandomTrees.map(t => ({ id: t.id, x: t.x, y: t.y, size: t.size, treeType: t.treeType, zIndex: t.zIndex }))}
+				trees={goldenHourRandomTrees.map((t) => ({
+					id: t.id,
+					x: t.x,
+					y: t.y,
+					size: t.size,
+					treeType: t.treeType,
+					zIndex: t.zIndex,
+				}))}
 				season="autumn"
 				minLeavesPerTree={5}
 				maxLeavesPerTree={10}
@@ -864,7 +632,10 @@
 			/>
 
 			<!-- Warm sunlight rays (CSS effect) -->
-			<div class="absolute inset-0 bg-gradient-to-br from-surface/30 via-transparent to-surface/25 pointer-events-none" aria-hidden="true"></div>
+			<div
+				class="absolute inset-0 bg-gradient-to-br from-surface/30 via-transparent to-surface/25 pointer-events-none"
+				aria-hidden="true"
+			></div>
 
 			<!-- Many lanterns lighting the magical path -->
 			<div class="absolute bottom-8 left-[8%] w-5 h-8 opacity-60" aria-hidden="true">
@@ -873,7 +644,10 @@
 			<div class="absolute bottom-8 left-[25%] w-6 h-10 opacity-70" aria-hidden="true">
 				<Lantern class="w-full h-full" variant="post" lit animate />
 			</div>
-			<div class="absolute bottom-8 left-[50%] -translate-x-1/2 w-7 h-12 opacity-80" aria-hidden="true">
+			<div
+				class="absolute bottom-8 left-[50%] -translate-x-1/2 w-7 h-12 opacity-80"
+				aria-hidden="true"
+			>
 				<Lantern class="w-full h-full" variant="hanging" lit animate />
 			</div>
 			<div class="absolute bottom-8 right-[25%] w-6 h-10 opacity-70" aria-hidden="true">
@@ -897,15 +671,15 @@
 					"
 					aria-hidden="true"
 				>
-					{#if tree.treeType === 'logo'}
+					{#if tree.treeType === "logo"}
 						<Logo class="w-full h-full" season="autumn" rotation={0} background={false} />
-					{:else if tree.treeType === 'pine'}
+					{:else if tree.treeType === "pine"}
 						<TreePine class="w-full h-full" season="autumn" animate color={autumn.gold} />
-					{:else if tree.treeType === 'cherry'}
+					{:else if tree.treeType === "cherry"}
 						<TreeCherry class="w-full h-full" season="autumn" />
-					{:else if tree.treeType === 'birch'}
+					{:else if tree.treeType === "birch"}
 						<TreeBirch class="w-full h-full" season="autumn" />
-					{:else if tree.treeType === 'aspen'}
+					{:else if tree.treeType === "aspen"}
 						<TreeAspen class="w-full h-full" season="autumn" />
 					{/if}
 				</div>
@@ -913,54 +687,28 @@
 
 			<div class="max-w-3xl mx-auto relative z-10">
 				<div class="text-center mb-12">
-					{#if phaseStatus['golden-hour'] === 'future'}
-						<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-warning-bg text-warning-foreground text-sm font-medium mb-4 shadow-sm">
+					{#if phaseStatus["golden-hour"] === "future"}
+						<span
+							class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-warning-bg text-warning-foreground text-sm font-medium mb-4 shadow-sm"
+						>
 							<Gem class="w-3.5 h-3.5" />
 							Refinement
 						</span>
 					{/if}
-					<h2 class="text-3xl md:text-4xl font-serif text-warning mb-2">{phases['golden-hour'].title}</h2>
-					<p class="text-warning italic">{phases['golden-hour'].subtitle}</p>
-					<p class="mt-4 text-warning max-w-lg mx-auto">{phases['golden-hour'].description}</p>
+					<h2 class="text-3xl md:text-4xl font-serif text-warning mb-2">
+						{phases["golden-hour"].title}
+					</h2>
+					<p class="text-warning italic">{phases["golden-hour"].subtitle}</p>
+					<p class="mt-4 text-warning max-w-lg mx-auto">{phases["golden-hour"].description}</p>
 				</div>
 
 				<ul class="space-y-4 max-w-md mx-auto">
-					{#each phases['golden-hour'].features as feature}
-						{@const IconComponent = getFeatureIcon(feature.icon)}
-						{@const colorMap = {
-							gem: 'text-warning',
-							zap: 'text-warning',
-							accessibility: 'text-info',
-							smartphone: 'text-foreground-muted',
-							puzzle: 'text-accent',
-							wander: 'text-accent'
-						}}
-						<li class="flex items-start gap-3 p-4 rounded-lg bg-white/70 dark:bg-cream-50/25 backdrop-blur-sm shadow-md border border-warning">
-							<!-- Use icon lookup map with feature-specific color (Golden Hour = warning tones) -->
-							<IconComponent
-								class="w-5 h-5 {(colorMap as Record<string, string>)[feature.icon ?? ''] || 'text-warning'} mt-0.5 flex-shrink-0"
-							/>
-							<div class="flex-1">
-								<div class="flex items-center gap-2">
-									<span class="font-medium text-warning">
-										{#if feature.articleSlug}
-											<a
-												href="/knowledge/help/{feature.articleSlug}"
-												class="hover:text-accent transition-colors underline-offset-2 hover:underline"
-											>
-												{#if feature.termSlug}<GroveTerm term={feature.termSlug}>{feature.name}</GroveTerm>{:else}{feature.name}{/if}
-											</a>
-										{:else}
-											{#if feature.termSlug}<GroveTerm term={feature.termSlug}>{feature.name}</GroveTerm>{:else}{feature.name}{/if}
-										{/if}
-									</span>
-									{#if feature.major}
-										<FeatureStar />
-									{/if}
-								</div>
-								<p class="text-sm text-warning">{feature.description}</p>
-							</div>
-						</li>
+					{#each phases["golden-hour"].features as feature}
+						<RoadmapFeatureItem
+							{feature}
+							style={phaseStyles["golden-hour"]}
+							iconColor={getFeatureIconColor("golden-hour", feature.icon)}
+						/>
 					{/each}
 				</ul>
 			</div>
@@ -992,13 +740,16 @@
 			</div>
 
 			<!-- Warm lantern glow in the darkness -->
-			<div class="absolute bottom-1/3 left-1/2 -translate-x-1/2 w-10 h-16 opacity-90" aria-hidden="true">
+			<div
+				class="absolute bottom-1/3 left-1/2 -translate-x-1/2 w-10 h-16 opacity-90"
+				aria-hidden="true"
+			>
 				<Lantern class="w-full h-full" variant="hanging" lit animate />
 			</div>
 
 			<!-- Randomized silhouetted trees in the night -->
 			{#each midnightBloomTrees as tree (tree.id)}
-				{@const nightColor = ['#1e1b4b', '#2e1065', '#3b0764', '#4c1d95'][tree.id % 4]}
+				{@const nightColor = ["#1e1b4b", "#2e1065", "#3b0764", "#4c1d95"][tree.id % 4]}
 				<div
 					class="absolute bottom-0"
 					style="
@@ -1011,15 +762,15 @@
 					"
 					aria-hidden="true"
 				>
-					{#if tree.treeType === 'logo'}
+					{#if tree.treeType === "logo"}
 						<Logo class="w-full h-full" season="midnight" rotation={0} background={false} />
-					{:else if tree.treeType === 'pine'}
+					{:else if tree.treeType === "pine"}
 						<TreePine class="w-full h-full" season="winter" color={nightColor} />
-					{:else if tree.treeType === 'cherry'}
+					{:else if tree.treeType === "cherry"}
 						<TreeCherry class="w-full h-full" season="winter" color={nightColor} />
-					{:else if tree.treeType === 'birch'}
+					{:else if tree.treeType === "birch"}
 						<TreeBirch class="w-full h-full" season="winter" color={nightColor} />
-					{:else if tree.treeType === 'aspen'}
+					{:else if tree.treeType === "aspen"}
 						<TreeAspen class="w-full h-full" season="winter" color={nightColor} />
 					{/if}
 				</div>
@@ -1027,58 +778,40 @@
 
 			<div class="max-w-3xl mx-auto relative z-10">
 				<div class="text-center mb-12">
-					<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent text-white text-sm font-medium mb-4 border border-accent">
+					<span
+						class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent text-white text-sm font-medium mb-4 border border-accent"
+					>
 						<MoonIcon class="w-3.5 h-3.5" />
 						The Dream
 						<Star class="w-3.5 h-3.5" />
 					</span>
-					<h2 class="text-3xl md:text-4xl font-serif text-white mb-2">{phases['midnight-bloom'].title}</h2>
-					<p class="text-foreground-subtle italic">{phases['midnight-bloom'].subtitle}</p>
-					<p class="mt-4 text-foreground-muted max-w-lg mx-auto">{phases['midnight-bloom'].description}</p>
+					<h2 class="text-3xl md:text-4xl font-serif text-white mb-2">
+						{phases["midnight-bloom"].title}
+					</h2>
+					<p class="text-foreground-subtle italic">{phases["midnight-bloom"].subtitle}</p>
+					<p class="mt-4 text-foreground-muted max-w-lg mx-auto">
+						{phases["midnight-bloom"].description}
+					</p>
 				</div>
 
 				<!-- The vision quote -->
-				<blockquote class="max-w-xl mx-auto mb-12 p-6 rounded-lg bg-surface-subtle border border-border backdrop-blur-sm">
+				<blockquote
+					class="max-w-xl mx-auto mb-12 p-6 rounded-lg bg-surface-subtle border border-border backdrop-blur-sm"
+				>
 					<p class="text-foreground-subtle italic leading-relaxed">
-						"A soft glow spilling onto quiet sidewalks after the world has gone still. The kind of third place that becomes a first home. A bloom that opens only in darkness, for those who need it most."
+						"A soft glow spilling onto quiet sidewalks after the world has gone still. The kind of
+						third place that becomes a first home. A bloom that opens only in darkness, for those
+						who need it most."
 					</p>
 				</blockquote>
 
 				<ul class="space-y-4 max-w-md mx-auto">
-					{#each phases['midnight-bloom'].features as feature}
-						{@const IconComponent = getFeatureIcon(feature.icon)}
-						{@const colorMap = {
-							coffee: 'text-warning',
-							qrcode: 'text-accent',
-							bookopen: 'text-foreground-subtle',
-							home: 'text-warning'
-						}}
-						<li class="flex items-start gap-3 p-4 rounded-lg bg-surface-subtle backdrop-blur-sm border border-border">
-							<!-- Use icon lookup map with feature-specific color (Midnight Bloom = mystical purples) -->
-							<IconComponent
-								class="w-5 h-5 {(colorMap as Record<string, string>)[feature.icon ?? ''] || 'text-warning'} mt-0.5 flex-shrink-0"
-							/>
-							<div class="flex-1">
-								<div class="flex items-center gap-2">
-									<span class="font-medium text-white">
-										{#if feature.articleSlug}
-											<a
-												href="/knowledge/help/{feature.articleSlug}"
-												class="hover:text-accent transition-colors underline-offset-2 hover:underline"
-											>
-												{#if feature.termSlug}<GroveTerm term={feature.termSlug}>{feature.name}</GroveTerm>{:else}{feature.name}{/if}
-											</a>
-										{:else}
-											{#if feature.termSlug}<GroveTerm term={feature.termSlug}>{feature.name}</GroveTerm>{:else}{feature.name}{/if}
-										{/if}
-									</span>
-									{#if feature.major}
-										<FeatureStar variant="midnight" />
-									{/if}
-								</div>
-								<p class="text-sm text-foreground-subtle">{feature.description}</p>
-							</div>
-						</li>
+					{#each phases["midnight-bloom"].features as feature}
+						<RoadmapFeatureItem
+							{feature}
+							style={phaseStyles["midnight-bloom"]}
+							iconColor={getFeatureIconColor("midnight-bloom", feature.icon)}
+						/>
 					{/each}
 				</ul>
 
@@ -1122,10 +855,19 @@
 	}
 
 	@keyframes firefly-drift {
-		0%, 100% { transform: translate(0, 0); }
-		25% { transform: translate(10px, -15px); }
-		50% { transform: translate(-5px, -25px); }
-		75% { transform: translate(-15px, -10px); }
+		0%,
+		100% {
+			transform: translate(0, 0);
+		}
+		25% {
+			transform: translate(10px, -15px);
+		}
+		50% {
+			transform: translate(-5px, -25px);
+		}
+		75% {
+			transform: translate(-15px, -10px);
+		}
 	}
 
 	/* Respect reduced motion preference */
