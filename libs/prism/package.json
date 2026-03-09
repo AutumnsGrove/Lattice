@@ -1,0 +1,42 @@
+{
+	"name": "@autumnsgrove/prism",
+	"version": "0.1.0",
+	"description": "Design tokens, glass utilities, and contrast tools for Grove — the light that splits into color",
+	"author": "AutumnsGrove",
+	"license": "AGPL-3.0-only",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/AutumnsGrove/Lattice.git",
+		"directory": "libs/prism"
+	},
+	"type": "module",
+	"main": "./src/index.ts",
+	"types": "./src/index.ts",
+	"exports": {
+		".": {
+			"types": "./src/index.ts",
+			"default": "./src/index.ts"
+		}
+	},
+	"files": [
+		"src"
+	],
+	"scripts": {
+		"check": "tsc --noEmit",
+		"test": "vitest",
+		"test:run": "vitest run"
+	},
+	"devDependencies": {
+		"typescript": "^5.0.0",
+		"vitest": "^2.0.0"
+	},
+	"keywords": [
+		"grove",
+		"prism",
+		"design-tokens",
+		"colors",
+		"glass",
+		"contrast",
+		"wcag"
+	]
+}

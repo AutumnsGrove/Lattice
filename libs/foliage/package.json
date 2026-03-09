@@ -47,6 +47,9 @@
 		"lint": "eslint .",
 		"format": "prettier --write ."
 	},
+	"dependencies": {
+		"@autumnsgrove/prism": "workspace:*"
+	},
 	"peerDependencies": {
 		"svelte": "^5.0.0"
 	},

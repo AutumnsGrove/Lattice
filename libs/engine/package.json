@@ -2,9 +2,9 @@
 	"author": "AutumnsGrove",
 	"dependencies": {
 		"@11ty/gray-matter": "^2.0.1",
-		"@autumnsgrove/foliage": "workspace:*",
 		"@autumnsgrove/gossamer": "workspace:*",
 		"@autumnsgrove/infra": "workspace:*",
+		"@autumnsgrove/prism": "workspace:*",
 		"@jsquash/jxl": "^1.3.0",
 		"@react-email/components": "^1.0.7",
 		"@react-email/render": "^2.0.4",
@@ -196,24 +196,6 @@
 		"./firefly": {
 			"default": "./dist/firefly/index.js",
 			"types": "./dist/firefly/index.d.ts"
-		},
-		"./foliage": {
-			"default": "./dist/foliage/index.js",
-			"svelte": "./dist/foliage/index.js",
-			"types": "./dist/foliage/index.d.ts"
-		},
-		"./foliage/components": {
-			"default": "./dist/foliage/components.js",
-			"svelte": "./dist/foliage/components.js",
-			"types": "./dist/foliage/components.d.ts"
-		},
-		"./foliage/server": {
-			"default": "./dist/foliage/server.js",
-			"types": "./dist/foliage/server.d.ts"
-		},
-		"./foliage/themes": {
-			"default": "./dist/foliage/themes.js",
-			"types": "./dist/foliage/themes.d.ts"
 		},
 		"./grafts": {
 			"default": "./dist/grafts/index.js",

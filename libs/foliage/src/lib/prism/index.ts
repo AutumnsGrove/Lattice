@@ -1,10 +1,9 @@
 // src/lib/prism/index.ts
-// Prism design system — color tokens, glass utilities, and contrast tools
-//
-// import { groveColors, generateGlass, meetsWCAGAA } from '@autumnsgrove/foliage/prism'
+// Re-exports from @autumnsgrove/prism for backward compatibility.
+// New code should import directly from '@autumnsgrove/prism'.
 
-// Color tokens
 export {
+	// Color tokens
 	groveColors,
 	cream,
 	bark,
@@ -19,10 +18,8 @@ export {
 	type Colors,
 	SEASONAL_PALETTES,
 	type SeasonalPalette,
-} from "../tokens/index.js";
 
-// Glass utilities
-export {
+	// Glass utilities
 	generateGlass,
 	generateDarkGlass,
 	generateMidnightBloomGlass,
@@ -32,17 +29,20 @@ export {
 	BORDER_OPACITY,
 	MIDNIGHT_BLOOM,
 	type GlassGeneratorOptions,
-} from "../utils/glass.js";
 
-// Contrast utilities
-export {
+	// Contrast utilities
 	getRelativeLuminance,
 	getContrastRatio,
 	meetsWCAGAA,
 	meetsWCAGAAA,
 	validateThemeContrast,
 	suggestReadableColor,
-} from "../utils/contrast.js";
 
-// Prism-relevant types
-export type { GlassVariant, ThemeGlass, ThemeColors, Season, SeasonalAffinity } from "../types.js";
+	// Types
+	type GlassVariant,
+	type ThemeGlass,
+	type ThemeColors,
+	type Season,
+	type SeasonalAffinity,
+	type ValidationResult,
+} from "@autumnsgrove/prism";
