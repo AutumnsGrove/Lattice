@@ -9,6 +9,7 @@ export * from "./debounce";
 export * from "./escape-html";
 export * from "./schedule";
 export * from "./shuffle";
+export * from "./slugify";
 
 // Gallery - explicit exports to avoid ambiguity
 export {
