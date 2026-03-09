@@ -3,6 +3,7 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<!-- theme-color is set dynamically in +layout.svelte based on preferred season -->
 		<meta name="theme-color" content="#16a34a" />
 		<!-- Prevent Dark Reader from interfering with Grove's native dark mode -->
 		<meta name="darkreader-lock" />
@@ -32,8 +33,8 @@
 		<!-- Safari Pinned Tab -->
 		<link rel="mask-icon" href="%sveltekit.assets%/safari-pinned-tab.svg" color="#16a34a" />
 
-		<!-- PWA Manifest -->
-		<link rel="manifest" href="%sveltekit.assets%/site.webmanifest" />
+		<!-- PWA Manifest (dynamic route — serves season-aware icons per tenant preference) -->
+		<link rel="manifest" href="/site.webmanifest" />
 
 		<!-- Windows -->
 		<meta name="msapplication-TileColor" content="#0f172a" />

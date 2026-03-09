@@ -3,6 +3,7 @@ import { sanitizeObject } from "$lib/utils/validation.js";
 import type { RequestHandler } from "./$types";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
 import { validFontIds } from "$lib/ui/tokens/fonts";
+import { ALL_SEASONS } from "$lib/ui/types/season";
 import { API_ERRORS, throwGroveError } from "$lib/errors";
 
 export const prerender = false;
@@ -56,6 +57,7 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
 			"accent_color",
 			"show_grove_logo",
 			"grove_title",
+			"preferred_season",
 			"canopy_visible",
 			"canopy_banner",
 			"canopy_categories",
@@ -95,6 +97,13 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
 		// Validate font_family value against canonical font list
 		if (setting_key === "font_family") {
 			if (!validFontIds.includes(setting_value)) {
+				throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
+			}
+		}
+
+		// Validate preferred_season against the canonical season list
+		if (setting_key === "preferred_season") {
+			if (!ALL_SEASONS.includes(setting_value as (typeof ALL_SEASONS)[number])) {
 				throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
 			}
 		}

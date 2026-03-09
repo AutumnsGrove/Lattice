@@ -231,6 +231,105 @@ async function generatePackageFavicons() {
 	}
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// SEASONAL FAVICON VARIANTS (for engine only — PWA personalization #1304)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Generate a circular favicon SVG for a specific season.
+ * Returns the SVG string suitable for use as favicon.svg.
+ */
+function generateFaviconSvg(season) {
+	const colors = SEASONAL_PALETTES[season];
+	// Use seasonal border color instead of hardcoded green
+	const borderColor = colors.tier3.light;
+
+	return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="32" height="32">
+  <defs>
+    <radialGradient id="circleGradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#122a1a" />
+      <stop offset="70%" stop-color="#0f2015" />
+      <stop offset="100%" stop-color="#0d1a12" />
+    </radialGradient>
+    <radialGradient id="glassHighlight" cx="35%" cy="30%" r="50%">
+      <stop offset="0%" stop-color="white" stop-opacity="0.06" />
+      <stop offset="100%" stop-color="white" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  <!-- Circular background -->
+  <circle cx="50" cy="50" r="48" fill="url(#circleGradient)" />
+  <circle cx="50" cy="50" r="48" fill="url(#glassHighlight)" />
+  <circle cx="50" cy="50" r="48" fill="none" stroke="${borderColor}" stroke-opacity="0.12" stroke-width="1" />
+  <!-- Tree logo (scaled to fit within circle with padding) -->
+  <g transform="translate(15, 15) scale(0.7)">
+    <g transform="rotate(-12 50 50)">
+      <path fill="${colors.tier1.dark}" d="M50 5 L18 32 L50 18 Z" />
+      <path fill="${colors.tier1.light}" d="M50 5 L50 18 L82 32 Z" />
+      <path fill="${colors.tier2.dark}" d="M50 20 L12 50 L50 35 Z" />
+      <path fill="${colors.tier2.light}" d="M50 20 L50 35 L88 50 Z" />
+      <path fill="${colors.tier3.dark}" d="M50 38 L18 68 L50 54 Z" />
+      <path fill="${colors.tier3.light}" d="M50 38 L50 54 L82 68 Z" />
+      <path fill="${colors.trunk.dark}" d="M50 54 L42 58 L46 100 L50 100 Z" />
+      <path fill="${colors.trunk.light}" d="M50 54 L58 58 L54 100 L50 100 Z" />
+    </g>
+  </g>
+</svg>`;
+}
+
+async function generateSeasonalFavicons() {
+	console.log("🌿 Generating seasonal favicon variants for engine (#1304)...\n");
+
+	const engineStaticDir = join(ROOT_DIR, "libs/engine/static");
+	await mkdir(engineStaticDir, { recursive: true });
+
+	// Generate seasonal variants for non-summer seasons
+	// Summer files already exist as the defaults (favicon.svg, icon-192.png, etc.)
+	const nonSummerSeasons = SEASONS.filter((s) => s !== "summer");
+
+	for (const season of nonSummerSeasons) {
+		console.log(`  ${season}:`);
+
+		// Generate SVG favicon variant
+		const svgContent = generateFaviconSvg(season);
+		await writeFile(join(engineStaticDir, `favicon-${season}.svg`), svgContent);
+		console.log(`    ✓ favicon-${season}.svg`);
+
+		// Generate PNG favicon variants at all sizes
+		for (const [filename, size] of Object.entries(FAVICON_SIZES)) {
+			const logoSvg = generateSvg(season);
+			const logoSvgBuffer = Buffer.from(logoSvg);
+
+			const padding = Math.round(size * 0.15);
+			const logoSize = size - padding * 2;
+
+			const bgSvg = generateCircularBackgroundSvg(size, season);
+			const bgBuffer = await sharp(Buffer.from(bgSvg)).png().toBuffer();
+			const logoBuffer = await sharp(logoSvgBuffer).resize(logoSize, logoSize).png().toBuffer();
+
+			const finalBuffer = await sharp({
+				create: {
+					width: size,
+					height: size,
+					channels: 4,
+					background: { r: 0, g: 0, b: 0, alpha: 0 },
+				},
+			})
+				.composite([
+					{ input: bgBuffer, left: 0, top: 0 },
+					{ input: logoBuffer, left: padding, top: padding },
+				])
+				.png()
+				.toBuffer();
+
+			// Insert season before extension: "icon-192.png" → "icon-192-autumn.png"
+			const seasonalFilename = filename.replace(/\.png$/, `-${season}.png`);
+			await writeFile(join(engineStaticDir, seasonalFilename), finalBuffer);
+			console.log(`    ✓ ${seasonalFilename} (${size}x${size})`);
+		}
+		console.log("");
+	}
+}
+
 async function generateEmailAssets() {
 	console.log("📧 Generating seasonal email assets...\n");
 
@@ -905,6 +1004,9 @@ async function main() {
 
 	// Generate favicon PNGs for all packages
 	await generatePackageFavicons();
+
+	// Generate seasonal favicon variants for engine (PWA personalization #1304)
+	await generateSeasonalFavicons();
 
 	// Generate seasonal email assets
 	await generateEmailAssets();

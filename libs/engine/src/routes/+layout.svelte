@@ -11,6 +11,7 @@
 	import GroveSwap from "$lib/ui/components/ui/groveterm/GroveSwap.svelte";
 	import PassageTransition from "$lib/ui/components/ui/PassageTransition.svelte";
 	import { fontMap, DEFAULT_FONT } from "$lib/ui/tokens/fonts";
+	import { getSeasonFavicons } from "$lib/ui/season-meta";
 	import Header from "$lib/ui/components/chrome/Header.svelte";
 	import { buildTenantNavItems } from "$lib/ui/components/chrome/tenant-nav";
 	import Lantern from "$lib/ui/components/chrome/lantern/Lantern.svelte";
@@ -106,6 +107,11 @@
 	// Just need to sync with the layout's needs for the footer toggle
 	let darkMode = $derived(themeStore.resolvedTheme === "dark");
 
+	// Seasonal favicons — when a preferred season is set, override favicon paths (#1304)
+	const seasonFavicons = $derived(
+		data.preferredSeason ? getSeasonFavicons(data.preferredSeason) : null,
+	);
+
 	function toggleTheme() {
 		themeStore.toggle();
 	}
@@ -117,6 +123,13 @@
 		<link rel="alternate" type="application/rss+xml" title="{siteName} RSS Feed" href="/api/feed" />
 		{#if data.humanJsonEnabled}
 			<link rel="human-json" href="/human.json" />
+		{/if}
+		{#if seasonFavicons}
+			<!-- Seasonal favicon overrides (#1304) -->
+			<link rel="icon" type="image/svg+xml" href={seasonFavicons.svg} />
+			<link rel="icon" type="image/png" sizes="32x32" href={seasonFavicons.png32} />
+			<link rel="apple-touch-icon" sizes="180x180" href={seasonFavicons.appleTouch} />
+			<meta name="theme-color" content={seasonFavicons.themeColor} />
 		{/if}
 	{:else}
 		<link rel="alternate" type="application/rss+xml" title="The Grove RSS Feed" href="/api/feed" />
