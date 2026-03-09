@@ -1,0 +1,63 @@
+{
+  "version": "v0.8.6",
+  "date": "2026-01-05 08:12:03 -0500",
+  "commitHash": "b0f269f1",
+  "summary": "This week I added a new Clearing status page, a Terrarium creative canvas to the workshop, and a three-column layout for the workshop on large screens. I also fixed a bunch of accessibility warnings from our audit and made subdomain links on the roadmap clickable. The rest was mostly documentation, adding ASCII art headers to specs and refining some diagrams.\n",
+  "stats": {
+    "totalCommits": 38,
+    "features": 3,
+    "fixes": 12,
+    "refactoring": 0,
+    "docs": 20,
+    "tests": 0,
+    "performance": 0
+  },
+  "scopes": [
+  "specs",
+  "plans",
+  "toc",
+  "engine",
+  "Wind"
+],
+  "highlights": {
+    "features": [
+  "add Terrarium to workshop page",
+  "add 3-column layout for workshop page on large displays",
+  "add Clearing status page frontend"
+],
+    "fixes": [
+  "Address accessibility warnings from audit",
+  "Address high-priority accessibility warnings from audit",
+  "Address high-priority accessibility warnings from audit",
+  "add terrarium-spec to knowledge base and update icons",
+  "update roadmap and workshop page icons",
+  "use correct Lucide icon names for ShieldUser and BrickWallShield",
+  "restore Wisp icon (Wind) to workshop page",
+  "address PR review feedback for Clearing status page",
+  "ensure header IDs are added by tracking contentBodyElement",
+  "address additional code review feedback",
+  "address final PR review feedback",
+  "make subdomain links clickable on roadmap pages"
+],
+    "refactoring": [],
+    "docs": [
+  "add asset playground implementation plan",
+  "finalize asset playground plan with user decisions",
+  "add Playground + Foliage integration vision",
+  "add Terrarium creative canvas specification",
+  "address PR feedback on Terrarium spec",
+  "address additional PR feedback on Terrarium spec",
+  "add security hardening and Web Worker export to Terrarium",
+  "address reviewer refinements on Terrarium spec",
+  "add repository snapshot for v0.8.5",
+  "remove completed audit report"
+],
+    "performance": [],
+    "tests": [],
+    "chores": [
+  "remove deprecated renovate-spec and autumnsgrove-post-migration files",
+  "update pnpm-lock.yaml",
+  "bump version to 0.8.6 and configure GitHub Packages"
+]
+  }
+}

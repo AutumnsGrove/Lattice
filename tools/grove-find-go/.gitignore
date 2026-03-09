@@ -1,0 +1,6 @@
+# Root build artifacts
+/gf
+/*.exe
+
+# Pre-built binaries (now distributed via GitHub Releases)
+dist/

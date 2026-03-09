@@ -1,0 +1,27 @@
+{
+  "version": "v0.4.10",
+  "date": "2025-12-07 15:27:51 -0500",
+  "commitHash": "e351562e",
+  "summary": "Fixed a CSRF token bug that was causing some actions to fail, and moved DOMPurify to its own external bundle to trim down the main code size.\n",
+  "stats": {
+    "totalCommits": 1,
+    "features": 0,
+    "fixes": 1,
+    "refactoring": 0,
+    "docs": 0,
+    "tests": 0,
+    "performance": 0
+  },
+  "scopes": [],
+  "highlights": {
+    "features": [],
+    "fixes": [
+  "CSRF token header fallback and DOMPurify externalization"
+],
+    "refactoring": [],
+    "docs": [],
+    "performance": [],
+    "tests": [],
+    "chores": []
+  }
+}

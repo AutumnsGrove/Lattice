@@ -1,0 +1,39 @@
+{
+  "version": "v0.5.0",
+  "date": "2025-12-08 19:00:52 -0500",
+  "commitHash": "40d73cfe",
+  "summary": "This release completes the GroveAuth integration, so you can now sign in directly from the landing page. It adds posting limits and switches all backend calls to the new auth-api service. Also fixed a few Svelte 5 quirks and added the Quicksand font.\n",
+  "stats": {
+    "totalCommits": 9,
+    "features": 4,
+    "fixes": 4,
+    "refactoring": 0,
+    "docs": 1,
+    "tests": 0,
+    "performance": 0
+  },
+  "scopes": [
+  "#45"
+],
+  "highlights": {
+    "features": [
+  "add Quicksand font to landing site",
+  "add posting limits and GroveAuth integration scaffolding (#45)",
+  "Add sign-in functionality to landing page",
+  "Release v0.5.0 - GroveAuth Integration Complete!"
+],
+    "fixes": [
+  "Use auth-api.grove.place for token exchange",
+  "Use auth-api.grove.place for all API calls",
+  "Add error display and debug logging for auth failures",
+  "Use $derived for error state in Svelte 5 runes mode"
+],
+    "refactoring": [],
+    "docs": [
+  "Mark Google Sign-In and post limits as done via GroveAuth"
+],
+    "performance": [],
+    "tests": [],
+    "chores": []
+  }
+}

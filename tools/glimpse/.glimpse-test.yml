@@ -1,0 +1,99 @@
+# Glimpse Test Configuration — Systematic page verification
+#
+# Usage:
+#   glimpse batch tools/glimpse/.glimpse-test.yml
+#   glimpse batch tools/glimpse/.glimpse-test.yml --dry-run
+#
+# Prerequisites:
+#   1. glimpse seed --profile blog   (or: --profile empty for empty states)
+#   2. Dev server running: cd libs/engine && pnpm dev:wrangler
+#      (or use --auto flag on glimpse commands)
+#
+# Two profiles tested here:
+#   - midnight-bloom: Full blog (3 posts, 5 pages) → tests content rendering
+#   - empty-grove: Empty tenant → tests empty states and setup wizards
+
+defaults:
+  viewport: {width: 1920, height: 1080}
+  scale: 2
+  wait: 1000
+  format: png
+  logs: true
+  output_dir: screenshots/test
+  concurrency: 2
+
+captures:
+  # ============================================
+  # BLOG PROFILE — Full content (midnight-bloom)
+  # ============================================
+
+  # Homepage with hero and latest post
+  - url: http://localhost:5173/?subdomain=midnight-bloom
+    name: blog-homepage
+    season: autumn
+    theme: dark
+
+  # Blog listing (garden) with 3 posts
+  - url: http://localhost:5173/garden?subdomain=midnight-bloom
+    name: blog-garden
+    season: autumn
+    theme: dark
+
+  # Individual post
+  - url: http://localhost:5173/the-art-of-brewing-patience?subdomain=midnight-bloom
+    name: blog-post
+    season: autumn
+    theme: dark
+
+  # About page
+  - url: http://localhost:5173/about?subdomain=midnight-bloom
+    name: blog-about
+    season: autumn
+    theme: dark
+
+  # Menu page (custom page)
+  - url: http://localhost:5173/menu?subdomain=midnight-bloom
+    name: blog-menu
+    season: autumn
+    theme: dark
+
+  # Light theme variant
+  - url: http://localhost:5173/?subdomain=midnight-bloom
+    name: blog-homepage-light
+    season: spring
+    theme: light
+
+  # Mobile viewport
+  - url: http://localhost:5173/?subdomain=midnight-bloom
+    name: blog-homepage-mobile
+    season: autumn
+    theme: dark
+    viewport:
+      width: 375
+      height: 812
+
+  # ============================================
+  # EMPTY PROFILE — No content (empty-grove)
+  # ============================================
+
+  # Homepage empty state (setup wizard)
+  - url: http://localhost:5173/?subdomain=empty-grove
+    name: empty-homepage
+    season: autumn
+    theme: dark
+
+  # Garden with no posts
+  - url: http://localhost:5173/garden?subdomain=empty-grove
+    name: empty-garden
+    season: autumn
+    theme: dark
+
+  # ============================================
+  # FRESH — No tenant (not-found state)
+  # ============================================
+
+  # Invalid subdomain → "Garden Not Found" page
+  - url: http://localhost:5173/?subdomain=nonexistent-grove
+    name: not-found
+    season: autumn
+    theme: dark

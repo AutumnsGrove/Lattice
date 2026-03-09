@@ -1,0 +1,75 @@
+{
+  "version": "v0.9.6",
+  "date": "2026-01-14 15:10:16 -0500",
+  "commitHash": "99135beb",
+  "summary": "This release mostly ties up loose ends. I've consolidated the legal pages into the knowledge base, finished the Lemon Squeezy migration for payments, and fixed a handful of bugs like the TOC not working. I also restored the seasonal logo tap and added a lot of ASCII art to the spec docs.\n",
+  "stats": {
+    "totalCommits": 39,
+    "features": 11,
+    "fixes": 11,
+    "refactoring": 1,
+    "docs": 14,
+    "tests": 0,
+    "performance": 0
+  },
+  "scopes": [
+  "specs",
+  "plant",
+  "landing",
+  "spec",
+  "kb",
+  "arbor",
+  "workshop",
+  "ux",
+  "skills",
+  "settings"
+],
+  "highlights": {
+    "features": [
+  "add npm-publish skill for registry swap workflow",
+  "add grove-spec-writing skill for spec standardization",
+  "update nav slots terminology to curios (#329)",
+  "simplify auth to Google-only and add UX improvements",
+  "update pricing page nav pages to curios (#330)",
+  "replace Stripe with Lemon Squeezy on credits page (#331)",
+  "consolidate legal pages into knowledge base with TOC support (#334)",
+  "add ASCII visual effects library spec and documentation",
+  "update tool icons and add Patina status note",
+  "improve admin sidebar and Plant onboarding flow",
+  "restore season cycling on logo tap"
+],
+    "fixes": [
+  "correct import path for GlassLegend component (#327)",
+  "standardize header logo to toggle dark/light mode",
+  "handle legacy plain-string theme values in tenant lookup",
+  "complete Lemon Squeezy migration and fix type errors",
+  "align posts insert with database schema",
+  "unify color presets and fix settings persistence",
+  "resolve TOC clickability by fixing heading ID mismatch (#332)",
+  "remove outdated footer links from settings page (#333)",
+  "correct import path for COLOR_PRESETS",
+  "update legal links to use knowledge base routes",
+  "add code block renderer and copy button functionality"
+],
+    "refactoring": [
+  "consolidate duplicated utilities to use engine package"
+],
+    "docs": [
+  "add repository snapshot and release summary for v0.9.5",
+  "adjust formatting and spacing in spec diagrams",
+  "adjust formatting and spacing in spec diagrams",
+  "unify frontmatter across all spec files",
+  "add ASCII art headers and UI mockups across 16 specs",
+  "standardize spacing in ASCII art and UI mockups across spec files",
+  "add Plant walkthrough improvement plans to TODOS",
+  "add 19 missing specs to technical specs index (#325)",
+  "update README with new tree logo and v0.9.5 features (#326)",
+  "add comprehensive file reorganization plan (#328)"
+],
+    "performance": [],
+    "tests": [],
+    "chores": [
+  "bump engine version to 0.9.6"
+]
+  }
+}

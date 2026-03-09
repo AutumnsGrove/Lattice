@@ -1,0 +1,51 @@
+{
+  "version": "v0.4.7",
+  "date": "2025-12-07 11:14:50 -0500",
+  "commitHash": "ed65b9df",
+  "summary": "This week I added a follow-up quiz to the history detail page and improved the domain tool with live history updates, TLD diversity UI, and proper token tracking. Fixed a bunch of small bugs in the domain search and cleaned up some CI workflows. Also, the sanitizer now correctly allows relative URLs.\n",
+  "stats": {
+    "totalCommits": 16,
+    "features": 5,
+    "fixes": 7,
+    "refactoring": 1,
+    "docs": 3,
+    "tests": 0,
+    "performance": 0
+  },
+  "scopes": [
+  "domains",
+  "ci",
+  "todos",
+  "sanitize",
+  "db"
+],
+  "highlights": {
+    "features": [
+  "add auto-tag workflow on version bump",
+  "sync tokens, duration, results from worker",
+  "add TLD diversity UI and live history updates",
+  "Add follow-up quiz to history detail page",
+  "add token tracking to domain search jobs"
+],
+    "fixes": [
+  "fix sync schema mismatch for domains_available column",
+  "add workflow_dispatch and fix checkout ref for npm publish",
+  "add NODE_AUTH_TOKEN env for npm publish",
+  "fix elapsed timer and TLD preferences display",
+  "prevent negative elapsed times",
+  "improve date display and update TODOs",
+  "allow relative URLs in sanitizeMarkdown and sanitizeHTML"
+],
+    "refactoring": [
+  "Add debugging logs and improve error handling for follow-up quiz flow"
+],
+    "docs": [
+  "update TODOS with remaining domain tool improvements",
+  "update completed tasks and remove markdown editor refactoring section",
+  "update google sign-in task and add documentation"
+],
+    "performance": [],
+    "tests": [],
+    "chores": []
+  }
+}

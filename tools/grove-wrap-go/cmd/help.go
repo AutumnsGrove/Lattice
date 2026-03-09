@@ -1,0 +1,134 @@
+package cmd
+
+import (
+	"fmt"
+
+	"github.com/spf13/cobra"
+
+	"github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/ui"
+)
+
+// rootHelpCategories defines the top-level command categories for gw --help.
+var rootHelpCategories = []ui.HelpCategory{
+	{
+		Title: "Git",
+		Icon:  "📖",
+		Style: ui.SafeReadStyle,
+		Commands: []ui.HelpCommand{
+			{Name: "git", Desc: "Git operations with safety tiers"},
+		},
+	},
+	{
+		Title: "GitHub",
+		Icon:  "🐙",
+		Style: ui.SafeReadStyle,
+		Commands: []ui.HelpCommand{
+			{Name: "gh", Desc: "GitHub CLI operations (PRs, issues, runs)"},
+		},
+	},
+	{
+		Title: "Dev Tools",
+		Icon:  "🔧",
+		Style: ui.SafeWriteStyle,
+		Commands: []ui.HelpCommand{
+			{Name: "dev", Desc: "Development server, testing, building"},
+		},
+	},
+	{
+		Title: "Social",
+		Icon:  "\U0001f4e3",
+		Style: ui.SafeWriteStyle,
+		Commands: []ui.HelpCommand{
+			{Name: "social", Desc: "Social broadcasting via Zephyr"},
+		},
+	},
+	{
+		Title: "Publishing",
+		Icon:  "\U0001f4e6",
+		Style: ui.SafeWriteStyle,
+		Commands: []ui.HelpCommand{
+			{Name: "publish", Desc: "Package publishing to npm"},
+		},
+	},
+	{
+		Title: "Infrastructure",
+		Icon:  "☁️",
+		Style: ui.SafeWriteStyle,
+		Commands: []ui.HelpCommand{
+			{Name: "d1", Desc: "D1 database operations"},
+			{Name: "kv", Desc: "KV storage operations"},
+			{Name: "r2", Desc: "R2 object storage"},
+			{Name: "deploy", Desc: "Cloudflare deployment"},
+			{Name: "logs", Desc: "Worker log streaming"},
+			{Name: "flag", Desc: "Feature flag management"},
+			{Name: "backup", Desc: "D1 database backups"},
+			{Name: "do", Desc: "Durable Object operations"},
+			{Name: "email", Desc: "Email routing operations"},
+			{Name: "secret", Desc: "Encrypted secrets vault"},
+			{Name: "cache", Desc: "Cache management and CDN purge"},
+			{Name: "bindings", Desc: "Scan wrangler.toml bindings"},
+			{Name: "export", Desc: "Storage export management"},
+			{Name: "warden", Desc: "Grove Warden service"},
+		},
+	},
+	{
+		Title: "Grove",
+		Icon:  "🌿",
+		Style: ui.SafeWriteStyle,
+		Commands: []ui.HelpCommand{
+			{Name: "login", Desc: "Authenticate with Grove via Heartwood"},
+			{Name: "logout", Desc: "Log out and revoke session"},
+			{Name: "lattice", Desc: "Blog post management (CRUD)"},
+			{Name: "config", Desc: "Grove configuration (tenant, URLs)"},
+		},
+	},
+	{
+		Title: "Status & Info",
+		Icon:  "ℹ️",
+		Style: ui.SafeReadStyle,
+		Commands: []ui.HelpCommand{
+			{Name: "status", Desc: "Config and account status"},
+			{Name: "health", Desc: "Health checks"},
+			{Name: "doctor", Desc: "Check dependencies and environment"},
+			{Name: "whoami", Desc: "Current context display"},
+			{Name: "context", Desc: "Session context"},
+			{Name: "packages", Desc: "Monorepo package detection"},
+			{Name: "version", Desc: "Print version"},
+			{Name: "history", Desc: "Command history tracking"},
+			{Name: "metrics", Desc: "Performance diagnostics"},
+			{Name: "config-validate", Desc: "Validate gw.toml config"},
+			{Name: "env-audit", Desc: "Check environment variables"},
+			{Name: "monorepo-size", Desc: "Monorepo filesystem stats"},
+		},
+	},
+	{
+		Title: "Platform Admin",
+		Icon:  "👑",
+		Style: ui.DangerStyle,
+		Commands: []ui.HelpCommand{
+			{Name: "auth", Desc: "Authentication & OAuth clients"},
+			{Name: "tenant", Desc: "Tenant management"},
+		},
+	},
+}
+
+// setupCozyHelp replaces the root command's default help function
+// with the cozy categorized help renderer.
+func setupCozyHelp() {
+	rootCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+		// Only use cozy help for the root command
+		if cmd != rootCmd {
+			cmd.Root().SetHelpFunc(nil)
+			cmd.Help()
+			return
+		}
+
+		output := ui.RenderCozyHelp(
+			"gw",
+			"tend the grove with safety and warmth",
+			rootHelpCategories,
+			true,
+		)
+		fmt.Print(output)
+	})
+}

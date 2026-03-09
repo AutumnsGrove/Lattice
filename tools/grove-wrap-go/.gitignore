@@ -1,0 +1,10 @@
+# Built binary
+gw
+gw.exe
+
+# Pre-built binaries (now distributed via GitHub Releases)
+dist/
+
+# Go build cache
+*.test
+*.out

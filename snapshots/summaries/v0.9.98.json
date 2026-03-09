@@ -1,0 +1,97 @@
+{
+  "version": "v0.9.98",
+  "date": "2026-02-05 14:15:17 -0500",
+  "commitHash": "e71be6d6",
+  "summary": "Added passkey authentication, email magic links, and a fresh landing page with a feature carousel. Migrated all payments and tokens over to Stripe, unified our three competing auth systems, and fixed a bunch of bugs, including that infinite loop in the editor. The lexicon work is now fully integrated, so terms like Garden and Bloom should feel native across the site.\n",
+  "stats": {
+    "totalCommits": 189,
+    "features": 71,
+    "fixes": 65,
+    "refactoring": 5,
+    "docs": 31,
+    "tests": 2,
+    "performance": 2
+  },
+  "scopes": [
+  "gw",
+  "landing",
+  "chrome",
+  "arbor",
+  "admin",
+  "ui",
+  "plant",
+  "plans",
+  "lexicon",
+  "zephyr"
+],
+  "highlights": {
+    "features": [
+  "add dark mode infrastructure for nature components (#822)",
+  "engine-first grafts cascade architecture",
+  "greenhouse self-serve graft controls (#459)",
+  "add Wayfinder-only Greenhouse Admin Panel graft (#825)",
+  "add lynx-repair skill for PR feedback review",
+  "comprehensive accessibility remediation (#827)",
+  "add greenhouse status tier and promote 7 tools",
+  "add broadcast CLI for sending emails via Resend",
+  "unify tenant mobile sidebar with chrome components (#848, #849)",
+  "add Grove logo toggle to settings",
+  "add self-service subscription cancellation",
+  "add Waystones to major sections for better help discoverability",
+  "add Porch to Connect links",
+  "add FAQ section with collapsible accordion",
+  "add sign-in link to Header with toggleable prop"
+],
+    "fixes": [
+  "resolve 10 accessibility issues from deer-sense audit",
+  "update KV namespace ID to valid grove-cache",
+  "add CSRF token to transcription request",
+  "add aria-hidden and prefers-reduced-motion to nature components (#823)",
+  "replace arrow emoji with Lucide ExternalLink icon (#829)",
+  "update launch timeline to end of February",
+  "rename Trails to Trail in admin panel",
+  "show Grove text on mobile header",
+  "restore custom font, glassmorphism, and logo settings",
+  "match tenant logo size to landing (md → lg)",
+  "use lg logo size to match landing",
+  "standardize Logo sizing across all packages",
+  "correct frontmatter for secrets article",
+  "link logged-in users to their actual grove",
+  "migrate Timeline tokens to SecretsManager envelope encryption"
+],
+    "refactoring": [
+  "wrap GlassConfirmDialog with bits-ui Dialog + GlassCard",
+  "consolidate cn utility to canonical location",
+  "use GreenhouseAdminPanel graft",
+  "flatten CSS variables to fix Svelte scoped style cascade",
+  "move health check from Engine to Plant"
+],
+    "docs": [
+  "add repository snapshot and release summary for v0.9.97",
+  "polish animal skills with enhanced guidance sections",
+  "update Thaw phase timeline to February 2026",
+  "mark Porch and Trace as live",
+  "update footer Lattice link to documentation page",
+  "add tenant mobile sidebar unification plan (#847)",
+  "add planning documents for arbor bugs and auth navigation",
+  "add developer guide for grafts and feature flags",
+  "add gw CLI specification for Cloudflare wrapper",
+  "add Warden external API gateway spec and documentation"
+],
+    "performance": [
+  "comprehensive Fox Hunt performance audit (#855)",
+  "disable vine animation for mobile performance (#879)"
+],
+    "tests": [
+  "add unit and integration tests for grafts cascade",
+  "add tests and UUID validation for session APIs"
+],
+    "chores": [
+  "archive original grove-find bash scripts and BATS tests",
+  "add .gw-worktrees/ to gitignore",
+  "update knowledge base inventory counts",
+  "format with prettier",
+  "bump version to 0.9.98"
+]
+  }
+}

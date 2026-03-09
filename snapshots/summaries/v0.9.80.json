@@ -1,0 +1,79 @@
+{
+  "version": "v0.9.80",
+  "date": "2026-01-16 20:07:50 -0500",
+  "commitHash": "88d7901e",
+  "summary": "This week was mostly infrastructure and security work — completed three security audit phases and reorganized all the code into a cleaner packages structure. Added seasonal logo variants and a floating table of contents for the Journey page. Also updated the help center articles and fixed a handful of small bugs, like mobile responsiveness and broken links.\n",
+  "stats": {
+    "totalCommits": 46,
+    "features": 6,
+    "fixes": 7,
+    "refactoring": 0,
+    "docs": 18,
+    "tests": 6,
+    "performance": 0
+  },
+  "scopes": [
+  "engine",
+  "kb",
+  "roadmap",
+  "landing",
+  "journey",
+  "security",
+  "mobile-menu",
+  "legal",
+  "help",
+  "assets"
+],
+  "highlights": {
+    "features": [
+  "implement seasonal color palettes for knowledge base sections (#356)",
+  "add floating table of contents for navigation",
+  "add related content section to knowledge base articles (#360)",
+  "add Why I Built the Grove philosophy article",
+  "add combined seasonal logo with all 5 variants",
+  "complete Phase 2 security remediation"
+],
+    "fixes": [
+  "remove duplicate Contact button from main navigation (#354)",
+  "use Grove green and default vine background for help center (#355)",
+  "replace broken /support links with /contact (#357)",
+  "improve mobile responsiveness for chart sections (#359)",
+  "replace browser confirm() with GlassConfirmDialog + add DB helpers",
+  "correct GlassCard import path and flaky test timing",
+  "update docs-loader path after packages/ move"
+],
+    "refactoring": [],
+    "docs": [
+  "add repository snapshot and release summary for v0.9.71",
+  "simplify what-is-grove and add what-is-loom article (#358)",
+  "add personal origin story and connect vision to emotional core",
+  "consolidate TODOS.md and create Amber export integration plan",
+  "complete Phase 2 documentation restructure",
+  "update TODOS.md with major v1 progress",
+  "add parallel execution plan for 1.0 security remediation",
+  "reorganize planning documents into completed/planned/planning structure",
+  "fix logo path and update README for v0.9.71 (#361)",
+  "update payment provider from Stripe to LemonSqueezy (#362)"
+],
+    "performance": [],
+    "tests": [
+  "add coverage for batch 1 - critical security modules",
+  "add coverage for batch 2 - payments and file validation",
+  "add comprehensive tests for markdown.ts utility (92 tests, 70%+ coverage)",
+  "add coverage for batch 3 - core utilities",
+  "add coverage for batch 4 - feature flags",
+  "add coverage for batch 5 & 6 - auth client and server services"
+],
+    "chores": [
+  "ignore coverage directories in all packages",
+  "complete Phase 1 of file reorganization",
+  "complete Phase 3 root cleanup",
+  "fix migration numbering collisions (Phase 4)",
+  "complete Phase 6 structural moves",
+  "consolidate all apps into packages/ directory",
+  "update GitHub workflows for new package locations",
+  "unify @cloudflare/workers-types to ^4.20260116.0 across all packages",
+  "bump version to 0.9.80"
+]
+  }
+}

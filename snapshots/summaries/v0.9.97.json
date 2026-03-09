@@ -1,0 +1,80 @@
+{
+  "version": "v0.9.97",
+  "date": "2026-01-30 21:57:24 -0500",
+  "commitHash": "e15df369",
+  "summary": "This week I added envelope encryption for tenant secrets, which means your data gets an extra layer of protection. You can now add cover images to blog posts, and there's a new nightly worker that builds timeline summaries. Also fixed a bunch of auth cookie handling and admin panel quirks.\n",
+  "stats": {
+    "totalCommits": 49,
+    "features": 14,
+    "fixes": 24,
+    "refactoring": 0,
+    "docs": 5,
+    "tests": 0,
+    "performance": 1
+  },
+  "scopes": [
+  "admin",
+  "domains",
+  "auth",
+  "trace",
+  "timeline-sync",
+  "skills",
+  "security",
+  "login",
+  "landing",
+  "engine"
+],
+  "highlights": {
+    "features": [
+  "add universal inline feedback component (#779)",
+  "add prominent publish toggle + fix View Live button size",
+  "add Zig/WASM validation and search modules",
+  "add PhotoDNA client integration structure",
+  "export transcription types from public API",
+  "Timeline Sync cron worker for nightly summaries (#808)",
+  "implement envelope encryption for tenant secrets (#807)",
+  "migrate to envelope encryption",
+  "add complete animal skill ecosystem",
+  "rename squirrel to bee and update AGENT.md",
+  "add cover images for blog posts (#809)",
+  "add OpenCode credit and update AI tools descriptions",
+  "differentiate Claude credit and align OpenCode with Kilo",
+  "add structured Heartwood error codes for auth failures"
+],
+    "fixes": [
+  "remove Gossamer to fix 500 errors",
+  "use minimal footer for Forage",
+  "add explicit text-foreground-subtle utility for menu icon (#778)",
+  "address medium/low priority audit items #488 (#775)",
+  "add semantic foreground colors for dark mode contrast",
+  "add dark mode variants to all text-bark classes",
+  "add API route to landing and improve UX",
+  "enhance verification page with better messaging and context",
+  "handle mixed timestamp formats in blog post list",
+  "add credentials include for cross-origin auth cookies",
+  "use TenantDb for edit post route to fix 404",
+  "auto-save when toggling publish status",
+  "use actual post count instead of stale cached value",
+  "calculate storage from image_hashes instead of stale cache",
+  "remove non-existent columns from posts update"
+],
+    "refactoring": [],
+    "docs": [
+  "add repository snapshot and release summary for v0.9.96",
+  "add envelope encryption and shadcn unification plans",
+  "add animal skill ecosystem plan",
+  "add encryption explainer with Waystone links",
+  "add Animal Skills ecosystem to CONTRIBUTING and README"
+],
+    "performance": [
+  "optimize client loading sequence for faster first paint"
+],
+    "tests": [],
+    "chores": [
+  "add temporary debug banner to admin blog",
+  "remove debug banner after fixing blog posts issue",
+  "remove Zig testing from CI workflow",
+  "bump version to 0.9.97"
+]
+  }
+}

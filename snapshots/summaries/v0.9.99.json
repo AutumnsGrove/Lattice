@@ -1,0 +1,93 @@
+{
+  "version": "v0.9.99",
+  "date": "2026-02-07 15:38:47 -0500",
+  "commitHash": "7531f791",
+  "summary": "This release adds a beta messaging system so you can send notes between Plant, Meadow, and Clearing, and we've rolled out Grove Mode terminology across the entire app. Under the hood, we hardened security across auth and sessions, fixed a bunch of iOS Safari quirks by replacing form actions with JSON APIs, and added a security auditor skill called hawk-survey.\n",
+  "stats": {
+    "totalCommits": 137,
+    "features": 40,
+    "fixes": 64,
+    "refactoring": 5,
+    "docs": 17,
+    "tests": 1,
+    "performance": 0
+  },
+  "scopes": [
+  "landing",
+  "arbor",
+  "security",
+  "gw",
+  "zephyr",
+  "skills",
+  "email",
+  "messages",
+  "auth",
+  "plant"
+],
+  "highlights": {
+    "features": [
+  "configure D1 database and fix migrations",
+  "add comparison table and visual polish (#957, #958)",
+  "replace hero PNGs with live Svelte slides (#956)",
+  "configure client URL and add ZEPHYR_URL to workers",
+  "move comparison table to dedicated /compare page",
+  "migrate from Resend SDK to Zephyr email gateway",
+  "redesign hero carousel from two-panel to layered scene layout",
+  "add --force flag to secret apply and sync commands",
+  "add secret reveal command for human-only access",
+  "add turtle-harden security hardening skill (#966)",
+  "Add Grove Mode terminology toggle (Phases 1-3) (#967)",
+  "wire text moderation into publish flow + safety dashboard",
+  "add live interactive demos and screenshot capture plan",
+  "expand Grove Mode across pricing, roadmap, workshop, and scattered pages",
+  "Grove Mode V2 — GroveSwap, GroveText, and full term coverage"
+],
+    "fixes": [
+  "wire up GroveTerm rendering in help center",
+  "cascade auth state and fix logout/magic-link",
+  "fix image uploads with graft gate and retry",
+  "replace npx with pnpm exec and standardize workflow config",
+  "migrate GROVE_KEK from Secrets Store to regular secret",
+  "rewrite GroveTerm as proper markdown-it plugin (#959)",
+  "update credits page — Stripe replaces Lemon Squeezy, fix Crush overflow (#960)",
+  "remediate audit findings across monorepo",
+  "correct reply_to → replyTo in resend provider test",
+  "surface D1 errors and add step tracking to comped invites",
+  "remove vine animation from app.html to eliminate FCP flash",
+  "correct tenant JOIN direction in comped invites",
+  "add overlayNav to GlassCarousel hero",
+  "use direct tenants.email lookup instead of JOIN",
+  "add inline critical colors to prevent white flash on load"
+],
+    "refactoring": [
+  "make fd optional and update docs for Python CLI (#972)",
+  "move formatting buttons to persistent toolbar",
+  "warm copy pass and engine icon migration",
+  "simplify magic-link callback URL construction",
+  "declutter homepage and reorganize bottom sections"
+],
+    "docs": [
+  "add repository snapshot and release summary for v0.9.98",
+  "rewrite git-workflows skill to reference gw CLI",
+  "update Crush description",
+  "rewrite Waystones article to describe contextual help markers (#961)",
+  "add .grove and .foliage file formats specification",
+  "add comprehensive development plans for all curios (#962)",
+  "move security audit report to docs/plans/planned directory",
+  "Add Grove Mode terminology toggle plan (#963)",
+  "Add Burrow integration research and security hardening (#964)",
+  "add Heartwood monorepo migration plan"
+],
+    "performance": [],
+    "tests": [
+  "add unit tests for GlassComparisonTable"
+],
+    "chores": [
+  "add workers/* to pnpm workspace",
+  "hide museum section until ready for public release (#970)",
+  "add csrf-ok annotations for pre-commit hook suppression",
+  "sync pnpm lockfile",
+  "bump @autumnsgrove/groveengine version to 0.9.99"
+]
+  }
+}

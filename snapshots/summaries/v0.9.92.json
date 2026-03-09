@@ -1,0 +1,91 @@
+{
+  "version": "v0.9.92",
+  "date": "2026-01-26 21:27:59 -0500",
+  "commitHash": "bfe8a538",
+  "summary": "This week I added a feedback system so you can send thoughts directly from the landing page, and gave the vine illustration on the homepage a softer, more organic entrance. I also rebuilt the admin dashboard text for better legibility in dark mode and fixed a handful of bugs, including one that was causing stale post counts on your stats page.\n",
+  "stats": {
+    "totalCommits": 87,
+    "features": 17,
+    "fixes": 45,
+    "refactoring": 8,
+    "docs": 14,
+    "tests": 0,
+    "performance": 0
+  },
+  "scopes": [
+  "ui",
+  "landing",
+  "logo",
+  "ci",
+  "workshop",
+  "engine",
+  "plant",
+  "help",
+  "clearing",
+  "vineyard"
+],
+  "highlights": {
+    "features": [
+  "add circular glass background treatment (#538)",
+  "add AI Features and API Access fineprint sections (#522)",
+  "enable signups for LemonSqueezy walkthrough (#456)",
+  "add account deletion and auth integration skills",
+  "add glass overlay content sections (#512) (#543)",
+  "implement Sentinel stress testing system (#422)",
+  "add pattern labels for architectural patterns",
+  "name the router Passage with kayak icon (#644)",
+  "make Flow's Fireside chip clickable",
+  "add \"Read more\" links to entries with help articles (#665)",
+  "add public contribute page and update issue-first workflow",
+  "add How It Works section for explainer articles (#673)",
+  "improve Claude code review prompt with structured guidance (#677)",
+  "add Mermaid flowchart to Claude code review format",
+  "add Wanderer Feedback System (#683)"
+],
+    "fixes": [
+  "increase hero logo size from w-24 to w-32 (#540)",
+  "increase nav/header logo size from w-6 to w-8 (#542)",
+  "bump nav logo to w-10 for better glass visibility (#542)",
+  "use size prop instead of class for nav logo (#542)",
+  "trigger landing deploy on engine changes",
+  "add engine path trigger to all dependent deploy workflows",
+  "wire 90-day uptime to real-time health check data (#529)",
+  "add real KV namespace ID to wrangler config (#456)",
+  "remove hidden exclusions from docs-freshness inventory counts",
+  "restore chrome, dark mode, and collapsible sections (#536)",
+  "reorganize service ordering for Clearing page (#547)",
+  "prevent Dark Reader from overriding Grove's color scheme (#551)",
+  "auto-detect theme for background variant in light mode (#549)",
+  "resolve Dark Reader override and Logo light mode issues (#546, #550)",
+  "use MutationObserver for reliable Logo theme detection (#546)"
+],
+    "refactoring": [
+  "extract CategoryNav component from floating TOC pattern (#552)",
+  "modernize to Svelte 5 runes pattern (#569)",
+  "complete Svelte 5 migration for $app/state and event handlers",
+  "migrate onMount/onDestroy to $effect() across all packages (#624)",
+  "migrate Pages project from groveengine to grove-lattice",
+  "create single source of truth for font definitions (#636)",
+  "move Heartwood to Core Infrastructure section",
+  "make frontmatter scanner the default for knowledge base (#662)"
+],
+    "docs": [
+  "add repository snapshot and release summary for v0.9.91",
+  "add \"What is Sentinel?\" help center article",
+  "update references from groveengine to grove-lattice",
+  "add \"What is Lattice?\" help center article (#638)",
+  "add lastUpdated frontmatter to 59 knowledge base files",
+  "add \"What is Passage?\" help center article",
+  "add sustainability philosophy link to Centennial workshop entry",
+  "add Flow spec (Markdown editor documentation)",
+  "update ZDR article with expanded AI features (#667)",
+  "add scribe voice transcription spec (#663)"
+],
+    "performance": [],
+    "tests": [],
+    "chores": [
+  "update knowledge base inventory for Passage docs",
+  "bump engine version to 0.9.92"
+]
+  }
+}

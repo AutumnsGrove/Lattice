@@ -1,0 +1,34 @@
+{
+  "version": "v0.1.1",
+  "date": "2025-12-03 17:14:53 -0500",
+  "commitHash": "32048254",
+  "summary": "This release is mostly about fixing installation issues — Grove can now be installed directly from GitHub, and the library no longer crashes due to an import bug. I also moved the UI components to a separate repo and updated the docs.\n",
+  "stats": {
+    "totalCommits": 6,
+    "features": 0,
+    "fixes": 2,
+    "refactoring": 0,
+    "docs": 2,
+    "tests": 0,
+    "performance": 0
+  },
+  "scopes": [],
+  "highlights": {
+    "features": [],
+    "fixes": [
+  "Add exports to root package.json for GitHub direct installs",
+  "Remove import.meta.glob from library code to fix runtime errors"
+],
+    "refactoring": [],
+    "docs": [
+  "Refresh TODO list and README with completed tasks",
+  "Update docs to reflect UI split to GroveUI repo"
+],
+    "performance": [],
+    "tests": [],
+    "chores": [
+  "Include dist folder in git for direct GitHub installs",
+  "Update package-lock.json"
+]
+  }
+}
