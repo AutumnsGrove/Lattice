@@ -248,7 +248,7 @@ subscription.post("/:userId/post-count", async (c) => {
 
 /**
  * PUT /subscription/:userId/tier - Update subscription tier
- * Body: { tier: 'seedling' | 'sapling' | 'oak' | 'evergreen' | 'canopy' | 'platform' }
+ * Body: { tier: 'seedling' | 'sapling' | 'oak' | 'evergreen' }
  */
 subscription.put("/:userId/tier", async (c) => {
 	// Rate limit by IP (write endpoint — stricter limit)
@@ -296,12 +296,7 @@ subscription.put("/:userId/tier", async (c) => {
 		return c.json({ error: "invalid_request", error_description: "Invalid JSON body" }, 400);
 	}
 
-	const validTiers: SubscriptionTier[] = [
-		"seedling",
-		"sapling",
-		"oak",
-		"evergreen",
-	];
+	const validTiers: SubscriptionTier[] = ["seedling", "sapling", "oak", "evergreen"];
 	if (!body.tier || !validTiers.includes(body.tier as SubscriptionTier)) {
 		return c.json(
 			{

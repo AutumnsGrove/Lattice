@@ -206,7 +206,7 @@ export interface TierCapabilities {
 }
 
 export const TIER_CAPABILITIES: Record<UserTier, TierCapabilities> = {
-	free: {
+	wanderer: {
 		canAccessIvy: false,
 		canSendEmail: false,
 		canReceiveEmail: false,

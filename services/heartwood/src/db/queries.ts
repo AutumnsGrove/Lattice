@@ -878,8 +878,6 @@ export async function updateSubscriptionTier(
 		sapling: 1,
 		oak: 2,
 		evergreen: 3,
-		canopy: 4,
-		platform: 5,
 	};
 	const eventType: SubscriptionAuditEventType =
 		tierOrder[newTier] > tierOrder[oldTier] ? "tier_upgraded" : "tier_downgraded";

@@ -23,7 +23,7 @@
 
 	// Tier hierarchy for access control
 	const tierLevels: Record<UserTier, number> = {
-		free: 0,
+		wanderer: 0,
 		seedling: 1,
 		sapling: 2,
 		oak: 3,

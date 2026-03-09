@@ -69,7 +69,7 @@
 		@apply bg-transparent hover:bg-bark/5 dark:hover:bg-surface-hover
 			text-bark dark:text-foreground font-sans font-medium
 			px-4 py-2 rounded-lg transition-colors duration-200
-			focus:outline-none focus:ring-2 focus:ring-bark/20 dark:focus:ring-surface-hover/20;
+			focus:outline-none focus:ring-2 focus:ring-bark/20 dark:focus:ring-grove-800;
 	}
 
 	.input-field {
@@ -83,8 +83,8 @@
 	}
 
 	.card {
-		@apply bg-surface-elevated dark:bg-card/75 rounded-xl
-			border border-grove-200 dark:border-card/50 shadow-sm;
+		@apply bg-surface-elevated dark:bg-card rounded-xl
+			border border-grove-200 dark:border-grove-800 shadow-sm;
 	}
 
 	.badge {
@@ -96,11 +96,11 @@
 	}
 
 	.badge-warning {
-		@apply bg-surface-subtle dark:bg-warning/20 text-warning dark:text-warning;
+		@apply bg-warning-bg text-warning-foreground dark:text-warning;
 	}
 
 	.badge-error {
-		@apply bg-surface-subtle dark:bg-error/20 text-error dark:text-error;
+		@apply bg-error-bg text-error dark:text-error;
 	}
 
 	.badge-info {
@@ -204,18 +204,31 @@
 
 /* Glass card - fallback for native HTML elements (details, etc.) */
 .glass-card {
-	@apply bg-surface-elevated/75 dark:bg-card/75 backdrop-blur-md
-		rounded-xl border border-surface-elevated/50 dark:border-card/50
-		shadow-sm transition-all duration-200;
+	@apply backdrop-blur-md rounded-xl shadow-sm transition-all duration-200;
+	background-color: hsl(var(--surface-elevated) / 0.75);
+	border: 1px solid hsl(var(--surface-elevated) / 0.5);
+}
+
+.dark .glass-card {
+	background-color: hsl(var(--card) / 0.75);
+	border-color: hsl(var(--card) / 0.5);
 }
 
 /* Glass internal dividers - lighter than card borders for subtle separation */
 .glass-divider {
-	@apply border-surface-elevated/30 dark:border-card/40;
+	border-color: hsl(var(--surface-elevated) / 0.3);
 }
 
-.glass-divide {
-	@apply divide-surface-elevated/30 dark:divide-card/40;
+.dark .glass-divider {
+	border-color: hsl(var(--card) / 0.4);
+}
+
+.glass-divide > * + * {
+	border-color: hsl(var(--surface-elevated) / 0.3);
+}
+
+.dark .glass-divide > * + * {
+	border-color: hsl(var(--card) / 0.4);
 }
 
 /* =============================================================================

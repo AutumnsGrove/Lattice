@@ -39,7 +39,7 @@ import { DEFAULT_TIER, type TierKey } from "./tiers.js";
  * Values represent daily views required for "popular" status.
  */
 const POPULAR_POST_THRESHOLDS: Record<TierKey, number> = {
-	free: 150, // Highest bar (no blog anyway)
+	wanderer: 150, // Highest bar (limited posts)
 	seedling: 100, // Entry tier - standard threshold
 	sapling: 75, // Growing tier - slightly easier
 	oak: 50, // Premium tier - more posts become "popular"

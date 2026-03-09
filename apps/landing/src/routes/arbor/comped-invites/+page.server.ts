@@ -53,7 +53,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const CreateInviteSchema = z.object({
 	email: z.string().toLowerCase().trim().min(1, "Please enter a valid email address"),
 	tier: z.enum(["seedling", "sapling", "oak", "evergreen"], {
-		errorMap: () => ({ message: "Please select a valid tier" }),
+		error: "Please select a valid tier",
 	}),
 	invite_type: z.enum(["comped", "beta"]).optional().default("beta"),
 	custom_message: z.string().trim().optional().default(""),

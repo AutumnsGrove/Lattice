@@ -99,9 +99,10 @@ body {
 .greenhouse-badge {
 	@apply inline-flex items-center gap-1.5 px-2 py-1 rounded-full;
 	@apply text-xs font-medium;
-	@apply bg-warning-bg text-warning-foreground border border-warning/30;
+	@apply bg-warning-bg text-warning-foreground border border-warning-muted;
 }
 
 .dark .greenhouse-badge {
-	@apply bg-warning-bg text-warning border-warning-muted/50;
+	@apply bg-warning-bg text-warning;
+	border-color: hsl(var(--warning-muted) / 0.5);
 }

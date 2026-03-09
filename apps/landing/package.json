@@ -41,6 +41,7 @@
 		"@tabler/icons-svelte": "^3.36.1",
 		"lucide-svelte": "^0.554.0",
 		"markdown-it": "^14.1.1",
-		"resend": "^4.8.0"
+		"resend": "^4.8.0",
+		"zod": "^4.3.6"
 	}
 }

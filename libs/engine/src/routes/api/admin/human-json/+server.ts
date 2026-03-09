@@ -153,8 +153,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 			// Normalize: strip trailing slash, default ports
 			normalizedUrl = `${parsed.protocol}//${parsed.hostname}${parsed.port && parsed.port !== "443" && parsed.port !== "80" ? ":" + parsed.port : ""}${parsed.pathname.replace(/\/$/, "") || ""}`;
 		} catch {
-			throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
-			return; // TypeScript flow
+			return throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
 		}
 
 		// Prevent vouching for yourself
@@ -162,7 +161,10 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 		if (context?.type === "tenant") {
 			const ownUrl = `https://${context.tenant.subdomain}.grove.place`;
 			if (normalizedUrl === ownUrl || normalizedUrl.startsWith(ownUrl + "/")) {
-				return json({ success: false, error: "You can't vouch for your own site" }, { status: 400 });
+				return json(
+					{ success: false, error: "You can't vouch for your own site" },
+					{ status: 400 },
+				);
 			}
 		}
 
@@ -188,7 +190,8 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 			.run();
 
 		// If ON CONFLICT suppressed the insert, fetch the existing row's id
-		let id = insertResult.meta?.last_row_id;
+		const meta = insertResult.meta as Record<string, unknown>;
+		let id = typeof meta?.last_row_id === "number" ? meta.last_row_id : 0;
 		if (!id) {
 			const existing = await db
 				.prepare("SELECT id FROM human_json_vouches WHERE tenant_id = ? AND url = ?")

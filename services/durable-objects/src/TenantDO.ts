@@ -48,7 +48,7 @@ export interface TenantConfig {
 	subdomain: string;
 	displayName: string;
 	theme: Record<string, unknown> | null;
-	tier: PaidTierKey; // Uses centralized type from tiers.ts (excludes 'free' since tenants are paying)
+	tier: PaidTierKey; // Uses centralized type from tiers.ts (excludes 'wanderer' since tenants are paying)
 	limits: TierLimits;
 	ownerId: string;
 }
