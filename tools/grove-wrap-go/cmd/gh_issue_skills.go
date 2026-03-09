@@ -113,6 +113,12 @@ var labelSuggestions = map[string][]string{
 	"migration":     {"bear-migrate"},
 }
 
+// sessionGuidance is injected into every skill session prompt so agents
+// read project conventions and use Grove tools instead of raw CLI commands.
+const sessionGuidance = "IMPORTANT: Before starting, read AGENT.md for project conventions. " +
+	"Use `gw` for ALL git, gh, and wrangler commands (never raw git/gh). " +
+	"Use `gf` for codebase search (never grep/rg). Run `gw context` for a session snapshot."
+
 // claudeArgs builds the argument list for launching claude with a skill.
 // Yolo mode (--dangerously-skip-permissions) is enabled when either the
 // individual skill has Yolo set, or the global tui.yolo_mode config is on.
@@ -177,7 +183,7 @@ func skillScope(s *skillEntry) string {
 // vulture-sweep scans all open issues for staleness/completion).
 func launchBoardSkill(skillName string) error {
 	root := effectiveRoot()
-	prompt := fmt.Sprintf("/%s", skillName)
+	prompt := fmt.Sprintf("%s\n\n/%s", sessionGuidance, skillName)
 	ui.Info(fmt.Sprintf("Launching board-scoped skill %q from %s", skillName, root))
 	args := claudeArgs(skillName, prompt)
 	exitCode, launchErr := gwexec.RunStreamingInDir(root, "claude", args...)
@@ -223,10 +229,10 @@ func launchSkillForIssue(skillName, issueNum string) error {
 
 	var prompt string
 	if wtPath != "" {
-		prompt = fmt.Sprintf("A worktree has been prepared at %s for issue #%s. Start by running: cd %s\n\nThen: /%s #%s", wtPath, issueNum, wtPath, skillName, issueNum)
+		prompt = fmt.Sprintf("A worktree has been prepared at %s for issue #%s.\n\n%s\n\nStart by running: cd %s\n\nThen: /%s #%s", wtPath, issueNum, sessionGuidance, wtPath, skillName, issueNum)
 		ui.Info(fmt.Sprintf("Launching Claude from %s (worktree: %s)", root, wtPath))
 	} else {
-		prompt = fmt.Sprintf("/%s #%s", skillName, issueNum)
+		prompt = fmt.Sprintf("%s\n\n/%s #%s", sessionGuidance, skillName, issueNum)
 		ui.Info(fmt.Sprintf("Launching Claude from %s", root))
 	}
 	args := claudeArgs(skillName, prompt)
@@ -277,10 +283,10 @@ func launchSkillForPR(skillName string, prNumber int, headBranch string) error {
 
 	var prompt string
 	if wtPath != "" {
-		prompt = fmt.Sprintf("A worktree has been prepared at %s for PR #%d. Start by running: cd %s\n\nThen: /%s #%d", wtPath, prNumber, wtPath, skillName, prNumber)
+		prompt = fmt.Sprintf("A worktree has been prepared at %s for PR #%d.\n\n%s\n\nStart by running: cd %s\n\nThen: /%s #%d", wtPath, prNumber, sessionGuidance, wtPath, skillName, prNumber)
 		ui.Info(fmt.Sprintf("Launching Claude from %s (worktree: %s)", root, wtPath))
 	} else {
-		prompt = fmt.Sprintf("/%s #%d", skillName, prNumber)
+		prompt = fmt.Sprintf("%s\n\n/%s #%d", sessionGuidance, skillName, prNumber)
 		ui.Info(fmt.Sprintf("Launching Claude from %s", root))
 	}
 	args := claudeArgs(skillName, prompt)
