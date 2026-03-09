@@ -1,0 +1,82 @@
+{
+  "version": "v0.9.7",
+  "date": "2026-01-15 21:39:17 -0500",
+  "commitHash": "64360886",
+  "summary": "This week I added a data-driven Help Center to the knowledge base, gave the admin panel a subscription management UI, and taught Grove to encode images as JPEG XL. The monochrome logo option is there if you prefer it, and I cleared up a batch of test failures that were mostly about timezones.\n",
+  "stats": {
+    "totalCommits": 49,
+    "features": 14,
+    "fixes": 15,
+    "refactoring": 1,
+    "docs": 16,
+    "tests": 0,
+    "performance": 0
+  },
+  "scopes": [
+  "todos",
+  "plant",
+  "curios",
+  "workshop",
+  "admin",
+  "reorg",
+  "migrations",
+  "meadow",
+  "marketing",
+  "logo"
+],
+  "highlights": {
+    "features": [
+  "add Solarpunk tags to aligned specs",
+  "add Timeline Curio - AI-powered GitHub activity summaries",
+  "add Gossamer ASCII background support",
+  "add signup gate until Lemon Squeezy verification",
+  "implement JPEG XL encoding with feature flag support (#336)",
+  "add new Grove services to blocklist",
+  "add direct blog link on success page",
+  "add hover-to-expand behavior for collapsed sidebar",
+  "add Grove User Identity to knowledge base",
+  "update OG image assets to new tree logo",
+  "connect test infrastructure to git hooks",
+  "add monochrome prop to remove split-tone effect (#351)",
+  "add subscription management UI and data export (#341)",
+  "implement data-driven Help Center with section icons and TOC"
+],
+    "fixes": [
+  "update Gossamer subtags to reflect Svelte-only scope (#342)",
+  "use AlertTriangle icon instead of missing Info",
+  "use correct 'id' column for feature_flags table",
+  "improve shell compatibility for bash and zsh",
+  "remove stale @jsquash/jxl entry from root lockfile (#349)",
+  "resolve CI deployment failures",
+  "resolve TypeScript errors for CI build",
+  "add @jsquash/jxl external config to all apps",
+  "correct GossamerPreset type in vineyard demo page",
+  "register wanderers-and-pathfinders help article",
+  "prevent HTML entities showing literally in OG images",
+  "resolve 21 test failures across the engine package",
+  "resolve timezone failures in clearing date tests",
+  "add Contact link to mobile menu Connect section (#350)",
+  "use noon UTC in formatDate test to avoid timezone boundary issues"
+],
+    "refactoring": [
+  "simplify to basic pre-launch page (#337)"
+],
+    "docs": [
+  "add repository snapshot and release summary for v0.9.6",
+  "update TODOS with Jan 14 session progress and tomorrow's plan",
+  "add Journey Curio implementation plan",
+  "add tag-walking strategy and update OpenRouter models",
+  "add PR #336 JXL encoding review fixes to tomorrow's plan (#338)",
+  "update business card spec for new logo design (#340)",
+  "mark JXL PR merged and migrations complete",
+  "expand LS custom domain task with steps, mark blocked on approval",
+  "add Loam updates and quick wins status",
+  "mark quick wins complete"
+],
+    "performance": [],
+    "tests": [],
+    "chores": [
+  "bump engine version to 0.9.7"
+]
+  }
+}

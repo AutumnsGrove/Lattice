@@ -1,0 +1,49 @@
+{
+  "version": "v0.9.94",
+  "date": "2026-01-29 16:47:32 -0500",
+  "commitHash": "306c5afa",
+  "summary": "This week we added passkey login and management, so you can sign in without a password. Grove can now transcribe voice notes in Lumen and Flow, and the account page has an inline feedback system for reporting bugs. We also cleaned up a bunch of Svelte warnings and fixed our CI.\n",
+  "stats": {
+    "totalCommits": 12,
+    "features": 7,
+    "fixes": 2,
+    "refactoring": 0,
+    "docs": 3,
+    "tests": 0,
+    "performance": 0
+  },
+  "scopes": [
+  "login",
+  "trace",
+  "scribe",
+  "infrastructure",
+  "hooks",
+  "engine",
+  "ci",
+  "arbor"
+],
+  "highlights": {
+    "features": [
+  "add static analysis security scanning",
+  "add inline feedback system with spec and workshop entry",
+  "improve pre-push with inline errors and parallel checks",
+  "add voice transcription to Lumen and Flow (#743)",
+  "add passkey management to account page (#741)",
+  "add passkey authentication to LoginGraft (#742)",
+  "unify login pages with LoginGraft across all packages (#744)"
+],
+    "fixes": [
+  "resolve 59 svelte-check warnings",
+  "resolve failing CI and Semgrep workflows"
+],
+    "refactoring": [],
+    "docs": [
+  "add repository snapshot and release summary for v0.9.93",
+  "add Meadow PWA implementation plan",
+  "add Meadow v1 implementation plan"
+],
+    "performance": [],
+    "tests": [],
+    "chores": []
+  }
+}

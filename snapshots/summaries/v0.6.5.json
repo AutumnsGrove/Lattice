@@ -1,0 +1,97 @@
+{
+  "version": "v0.6.5",
+  "date": "2025-12-25 21:08:15 -0500",
+  "commitHash": "5c44abdc",
+  "summary": "This release brings the Grove logo tree into spring with pink blossoms, adds falling petals and dancing snowflakes to the forest, and unifies the vine background pattern across all sites. We also shipped the first version of the admin panel for email subscribers, wired up Stripe products, and added Turnstile human verification. Mostly polish, bug fixes, and laying groundwork for what’s next.\n",
+  "stats": {
+    "totalCommits": 130,
+    "features": 45,
+    "fixes": 30,
+    "refactoring": 8,
+    "docs": 35,
+    "tests": 1,
+    "performance": 0
+  },
+  "scopes": [
+  "landing",
+  "forest",
+  "ci",
+  "sst",
+  "domains",
+  "docs",
+  "knowledge",
+  "stripe",
+  "specs",
+  "shade"
+],
+  "highlights": {
+    "features": [
+  "add winter mode with snowfall and seasonal palette (#105)",
+  "improve winter mode with better snow and birds (#106)",
+  "migrate all fonts to cdn.grove.place",
+  "add font showcase page and R2 routing",
+  "add knowledge base with documentation pages",
+  "Remove AI Models section from config page",
+  "serve CDN files directly from R2 bucket",
+  "add markdown utilities for knowledge base",
+  "embed full helpdesk article content on website (#108)",
+  "add help redirect routes to knowledge base (#109)",
+  "add 4 help desk articles and update contact email (#113)",
+  "add AI Sanctuary as core value - block all AI crawlers",
+  "add AI Sanctuary to /vision page core values",
+  "add comprehensive robots.txt blocking AI crawlers",
+  "add KagiBot to allowed search engines"
+],
+    "fixes": [
+  "add missing groveengine workspace dependency",
+  "update footer link to knowledge base",
+  "build engine package before domains deployment",
+  "use package script for engine in domains workflow",
+  "use correct Pages project name for domains",
+  "fix broken links preventing knowledge base build (#110)",
+  "improve knowledge base readability and add dark mode support (#111)",
+  "restore markdown formatting in knowledge base articles (#112)",
+  "address PR review feedback",
+  "resolve PostCSS build error in PetalFalling component",
+  "add solid background to MobileTOC menu",
+  "correct default target from example-site to groveengine",
+  "address PR review feedback",
+  "address round 2 PR review feedback",
+  "add prerender entries for redirect routes"
+],
+    "refactoring": [
+  "rebrand from Acorn to Forage",
+  "production refactor for multi-tenant architecture (issue #100) (#102)",
+  "switch to OpenRouter as default AI provider",
+  "address PR review - use palette for Robin colors",
+  "separate Foliage integration from SST migration plan",
+  "simplify MarkdownEditor with Medium-style UX",
+  "use ContentWithGutter for knowledge base articles",
+  "address PR feedback and add falling leaves"
+],
+    "docs": [
+  "add repository snapshot for v0.6.4",
+  "move completed specifications to archive directory",
+  "add Patina theme system project specification (#96)",
+  "rename Patina to Foliage and Acorn to Forage (#97)",
+  "fix remaining Patina/Acorn references and expand Vines docs (#98)",
+  "add 4 new help desk articles (#99)",
+  "draft SST migration plan for unified infrastructure (#103)",
+  "fix DOMAIN_WORKER_URL comment with correct URL",
+  "add honest caveat about AI crawler circumvention",
+  "add Cloudflare documentation link for AI bot blocking"
+],
+    "performance": [],
+    "tests": [
+  "add tests for season logic"
+],
+    "chores": [
+  "Move completed specs and update documentation",
+  "sync BaseProject AgentUsage guides (#101)",
+  "add plans directory for project documentation",
+  "update pnpm-lock.yaml",
+  "sync BaseProject skills and docs",
+  "bump engine version to 0.6.5"
+]
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "version": "v0.6.2",
+  "date": "2025-12-16 17:59:27 -0500",
+  "commitHash": "6811fa3d",
+  "summary": "This release adds a proper license, renames Cellar to Amber across the docs, and expands the features of the platform plan. I also added a full test suite for the engine and a guide for publishing with passkey 2FA.\n",
+  "stats": {
+    "totalCommits": 6,
+    "features": 3,
+    "fixes": 0,
+    "refactoring": 0,
+    "docs": 1,
+    "tests": 1,
+    "performance": 0
+  },
+  "scopes": [
+  "payments",
+  "#80"
+],
+  "highlights": {
+    "features": [
+  "rename plan tiers and expand platform plan features",
+  "rename Cellar to Amber across documentation",
+  "bump engine version to 0.6.2 and publish to npm"
+],
+    "fixes": [],
+    "refactoring": [],
+    "docs": [
+  "add npm publishing guide for passkey 2FA workaround"
+],
+    "performance": [],
+    "tests": [
+  "add comprehensive test coverage for engine modules (#80)"
+],
+    "chores": [
+  "add AGPL-3.0 license and update package.json files"
+]
+  }
+}

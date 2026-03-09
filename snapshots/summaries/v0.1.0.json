@@ -1,0 +1,73 @@
+{
+  "version": "v0.1.0",
+  "date": "2025-12-02 16:27:22 -0500",
+  "commitHash": "12dff310",
+  "summary": "I finished moving the blog engine into its own npm package and set up publishing to GitHub Packages. I added a CDN uploader for your admin panel that uses Cloudflare R2, and wired up Stripe payments with an abstraction layer so you can swap providers later. The landing page now has a working email signup and an example site showing off all the engine features.\n",
+  "stats": {
+    "totalCommits": 45,
+    "features": 14,
+    "fixes": 7,
+    "refactoring": 0,
+    "docs": 13,
+    "tests": 0,
+    "performance": 0
+  },
+  "scopes": [
+  "icon",
+  "deps"
+],
+  "highlights": {
+    "features": [
+  "Add grove.place landing page with email signup",
+  "Add meta description for SEO",
+  "Add friendly message for duplicate email signups",
+  "Add \"How It Works\" preview and footer links to landing page",
+  "Add Grove Design System UI component library",
+  "Add temporary Stripe branding assets (icon + logo)",
+  "Complete blog engine migration from AutumnsGrove to packages/engine",
+  "Configure npm publishing for @groveengine packages",
+  "Add enhanced CDN Uploader with AI analysis to admin panel",
+  "Add example site showcasing all GroveEngine features",
+  "Add example site link to landing page and prepare workspace",
+  "Add Stripe payments system with provider abstraction",
+  "Add CDN admin upload system with R2 storage",
+  "Set up GitHub Packages publishing for @autumnsgrove/groveengine"
+],
+    "fixes": [
+  "Enable autofill and text expansion on email input",
+  "Update success message to mention confirmation email",
+  "Use hardcoded font stacks to avoid theme() lookup issues",
+  "Deploy example site and update dependencies",
+  "Sync package-lock.json with package.json for CI",
+  "Add smooth scroll and URL hash update to TOC navigation",
+  "Update engine component imports to use main export for Rollup resolution"
+],
+    "refactoring": [],
+    "docs": [
+  "Add comprehensive diagrams, analytics spec, and research prompts",
+  "Update auth strategy to magic links with 6-digit email codes",
+  "Add comprehensive web engine extraction prompt",
+  "Update domain to grove.place and move to Phase 0.1",
+  "Add Cloudflare infrastructure setup documentation",
+  "Update GroveEngine specs for npm package architecture",
+  "Update extraction prompt and add implementation/refactor prompts",
+  "Add grove-domain-search to future internal tools",
+  "Add vision & alignment content across documentation",
+  "Add comprehensive migration plan from AutumnsGrove"
+],
+    "performance": [],
+    "tests": [],
+    "chores": [
+  "Remove BaseProject backup directory",
+  "remove integration-summary.md file",
+  "Switch from npm to pnpm across all documentation and scripts",
+  "bump vite from 5.4.0 to 5.4.21 in landing",
+  "Add nodejs_compat flag to wrangler config",
+  "Add pnpm lockfile for CI",
+  "Add publishConfig for public npm access",
+  "Reorganize docs and add project diagrams",
+  "Update package-lock.json after dependency install",
+  "Update pnpm-lock.yaml after package rename"
+]
+  }
+}

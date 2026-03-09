@@ -1,0 +1,30 @@
+{
+  "version": "v0.4.9",
+  "date": "2025-12-07 15:13:09 -0500",
+  "commitHash": "43194921",
+  "summary": "This week was mostly under-the-hood fixes: patched some UI bugs in the Markdown editor and swapped out the HTML sanitizer for something simpler. Also cleaned up a few lingering issues with CSRF tokens and duplicate tasks.\n",
+  "stats": {
+    "totalCommits": 8,
+    "features": 0,
+    "fixes": 2,
+    "refactoring": 0,
+    "docs": 1,
+    "tests": 0,
+    "performance": 0
+  },
+  "scopes": [],
+  "highlights": {
+    "features": [],
+    "fixes": [
+  "update ContentWithGutter to use dompurify instead of isomorphic-dompurify",
+  "resolve UI bugs in MarkdownEditor and CSRF token flow"
+],
+    "refactoring": [],
+    "docs": [
+  "update TODOS.md with fixes for Personal TODOS"
+],
+    "performance": [],
+    "tests": [],
+    "chores": []
+  }
+}

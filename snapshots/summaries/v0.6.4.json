@@ -1,0 +1,46 @@
+{
+  "version": "v0.6.4",
+  "date": "2025-12-18 12:09:48 -0500",
+  "commitHash": "598bab96",
+  "summary": "This week I added a setup page for new blogs so they’re not just an empty dashboard, and I reorganized the public journey page with a clearer timeline, version history, and notes on the TypeScript migration. Also fixed some snapshot data and tidied up the deployment workflow.\n",
+  "stats": {
+    "totalCommits": 12,
+    "features": 6,
+    "fixes": 2,
+    "refactoring": 1,
+    "docs": 1,
+    "tests": 0,
+    "performance": 0
+  },
+  "scopes": [
+  "landing",
+  "snapshot",
+  "ci"
+],
+  "highlights": {
+    "features": [
+  "add historical milestones and show versions in growth chart",
+  "add stacked language bars to growth timeline",
+  "add TypeScript migration and documentation sections",
+  "add test coverage tracking to journey page",
+  "Add setup page for empty tenant blogs",
+  "add /groveauth export to package"
+],
+    "fixes": [
+  "update landing deployment to trigger on auto-tag workflow",
+  "exclude .svelte-kit from code counts and correct historical data"
+],
+    "refactoring": [
+  "reorganize journey page sections and remove test coverage"
+],
+    "docs": [
+  "add repository snapshot for v0.6.3"
+],
+    "performance": [],
+    "tests": [],
+    "chores": [
+  "Organize specs into completed folder",
+  "bump engine version to 0.6.4"
+]
+  }
+}

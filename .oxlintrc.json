@@ -1,0 +1,5 @@
+{
+	"$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
+	"plugins": ["typescript", "unicorn", "import", "vitest"],
+	"ignorePatterns": ["**/*.svelte", "**/dist/**", "**/.svelte-kit/**", "**/build/**", "**/*.d.ts"]
+}

@@ -1,0 +1,33 @@
+[project]
+name = "grove-glimpse"
+version = "0.1.0"
+description = "A quick peek through the trees — programmatic screenshot capture for Grove"
+requires-python = ">=3.12"
+dependencies = [
+    "click>=8.1",
+    "rich>=13.0",
+    "playwright>=1.42,<1.51",
+    "tomli>=2.0",
+    "pyyaml>=6.0",
+    "httpx>=0.27",
+    "psutil>=5.9",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+]
+
+[project.scripts]
+glimpse = "glimpse.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/glimpse"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

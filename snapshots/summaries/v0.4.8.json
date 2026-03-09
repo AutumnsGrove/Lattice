@@ -1,0 +1,34 @@
+{
+  "version": "v0.4.8",
+  "date": "2025-12-07 11:43:21 -0500",
+  "commitHash": "90118e3e",
+  "summary": "This week was mostly cleanup under the hood. Swapped out the sanitization library to a client-only version for better compatibility, and tidied up the example site's build configuration to keep the production bundle lean.\n",
+  "stats": {
+    "totalCommits": 5,
+    "features": 0,
+    "fixes": 5,
+    "refactoring": 0,
+    "docs": 0,
+    "tests": 0,
+    "performance": 0
+  },
+  "scopes": [
+  "example-site",
+  "ci"
+],
+  "highlights": {
+    "features": [],
+    "fixes": [
+  "exclude jsdom from production bundle",
+  "use npm for wrangler install in monorepo",
+  "mark jsdom as external in wrangler config",
+  "add jsdom to adapter-cloudflare external config",
+  "replace isomorphic-dompurify with client-only DOMPurify"
+],
+    "refactoring": [],
+    "docs": [],
+    "performance": [],
+    "tests": [],
+    "chores": []
+  }
+}

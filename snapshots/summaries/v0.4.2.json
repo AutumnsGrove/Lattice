@@ -1,0 +1,37 @@
+{
+  "version": "v0.4.2",
+  "date": "2025-12-05 14:11:07 -0500",
+  "commitHash": "e8bff58a",
+  "summary": "This release adds a live elapsed timer and loading spinners to the searcher, and a new dashboard for the domain finder at domains.grove.place. It also includes a comprehensive security audit and some fixes for pnpm compatibility across the monorepo.\n",
+  "stats": {
+    "totalCommits": 9,
+    "features": 2,
+    "fixes": 4,
+    "refactoring": 0,
+    "docs": 0,
+    "tests": 0,
+    "performance": 0
+  },
+  "scopes": [
+  "security"
+],
+  "highlights": {
+    "features": [
+  "add domain finder dashboard for domains.grove.place",
+  "add live elapsed timer and loading spinners to searcher"
+],
+    "fixes": [
+  "improve pnpm compatibility across monorepo",
+  "address security and robustness issues in domain finder",
+  "address additional security concerns",
+  "comprehensive security audit fixes"
+],
+    "refactoring": [],
+    "docs": [],
+    "performance": [],
+    "tests": [],
+    "chores": [
+  "bump version to 0.4.2"
+]
+  }
+}

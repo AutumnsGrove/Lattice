@@ -1,0 +1,80 @@
+{
+  "version": "v0.6.0",
+  "date": "2025-12-14 23:08:31 -0500",
+  "commitHash": "c1af4923",
+  "summary": "This release adds a proper onboarding flow at plant.grove.place, so new sites can get started easily. We've migrated authentication to Heartwood OAuth, added a dark mode toggle to the landing page, and introduced a credits page for fonts and tech. Under the hood, we fixed multi-tenant routing and updated our footer branding to Lattice.\n",
+  "stats": {
+    "totalCommits": 70,
+    "features": 16,
+    "fixes": 12,
+    "refactoring": 0,
+    "docs": 32,
+    "tests": 0,
+    "performance": 0
+  },
+  "scopes": [
+  "landing",
+  "engine",
+  "vision",
+  "pricing",
+  "ci",
+  "auth",
+  "Lattice",
+  "20",
+  "#72",
+  "#70"
+],
+  "highlights": {
+    "features": [
+  "Add D1 Sessions API for read replication readiness",
+  "implement wildcard subdomain routing for multi-tenant platform",
+  "add grove-router Worker for wildcard subdomain proxying",
+  "make home page loader tenant-aware",
+  "rebrand GroveEngine to Lattice public name",
+  "add vision, pricing, and legal pages to landing site (#59)",
+  "add email signup CTA to vision page (#63)",
+  "add dark mode toggle with CSS variables (#64)",
+  "add repository snapshot generator for tracking project growth (#67)",
+  "add credits page for fonts, tech stack, and AI tools",
+  "enhance credits page with font previews",
+  "add 11 new fonts to Grove font collection (20 total)",
+  "Fix multi-tenant routing and deploy engine for all tenants",
+  "migrate from magic code to Heartwood OAuth",
+  "update footer branding to Lattice"
+],
+    "fixes": [
+  "reduce icon spacing on shop coming soon pages",
+  "change homepage CTA from shop to blog",
+  "correct Pages hostname and add subdomain routing map",
+  "update deploy workflow to use correct Pages project name",
+  "proxy auth-api and mc-control through grove-router",
+  "update SITE_NAME to Acorn in domains wrangler config",
+  "move vision, pricing, and legal pages from domains to landing (#60)",
+  "update terms of service with accurate pricing and rename Grove Social to Meadow (#61)",
+  "update UpgradePrompt tier names to match new pricing structure (#62)",
+  "address theme toggle PR feedback (#65)",
+  "set Lexend as default font across all Grove properties",
+  "deploy engine package instead of example-site"
+],
+    "refactoring": [],
+    "docs": [
+  "Update README for v0.5.0 with GroveAuth and Grove ecosystem (#46)",
+  "fix OAuth client setup - use base64url hash format",
+  "add important URLs section clarifying API vs frontend",
+  "remove outdated documentation files",
+  "add project vision, journey, and pricing documentation",
+  "Apply cohesive formatting to Grove vision documents",
+  "add multi-tenant architecture plan and update progress",
+  "add wildcard router worker implementation plan",
+  "add answers to open questions in multi-tenant architecture",
+  "update progress and add Dave debugging notes"
+],
+    "performance": [],
+    "tests": [],
+    "chores": [
+  "disable shop e-commerce feature, keep subscriptions active",
+  "temporarily deleted files, will update them soon as MD",
+  "add deploy script"
+]
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "version": "v1.1.1",
+  "date": "2026-02-28 12:16:12 -0500",
+  "commitHash": "a6b95274",
+  "summary": "This release adds a self-service domain checker, lets you change your username, and makes RSS feeds rate-limited by default. I also rebuilt all the command-line binaries for the latest Go changes and fixed a handful of bugs, like Stripe webhooks failing and a duplicate-key freeze in the dashboard.\n",
+  "stats": {
+    "totalCommits": 60,
+    "features": 20,
+    "fixes": 23,
+    "refactoring": 0,
+    "docs": 2,
+    "tests": 1,
+    "performance": 0
+  },
+  "scopes": [
+  "gw",
+  "ci",
+  "engine",
+  "tools",
+  "onboarding",
+  "glimpse",
+  "plant",
+  "grove-agent",
+  "grove",
+  "blazes"
+],
+  "highlights": {
+    "features": [
+  "add --token, --tag flags and .npmrc management to publish npm",
+  "add autonomous agent framework package",
+  "add diff command, device presets, --wait-for, fix seed & install",
+  "add behavioral defense layer",
+  "add OnboardingAgent — DO-per-user email sequences",
+  "add onboarding subcommand for agent management",
+  "add screenshots to 22 help center articles",
+  "port Mycelium CLI to Go",
+  "add device verification proxy route",
+  "make blazes a real part of the grove (#1289)",
+  "add username change feature (#482) (#1290)",
+  "add UA-based rate limiting to RSS feed endpoint (#1291)",
+  "add self-service domain availability checker (#1293)",
+  "add D1 migration tracking and gw d1 migrate-all",
+  "promote wisp_enabled to a proper graft"
+],
+    "fixes": [
+  "show visitor's own avatar instead of site owner's",
+  "pin playwright <1.51, fix classList null crash, improve browser discovery",
+  "remap historical paths for cohesive Living Grove timeline",
+  "render logo tree upright without background",
+  "make migration rollback real, surface --wait-for timeouts",
+  "repair inventory workflows, remove useless PR checks",
+  "drop logo tree, fix duplicate-key freeze",
+  "fix type check failures in validate-deployments workflow",
+  "populate default database/KV/R2 aliases in Go config",
+  "defer .name access until after DO construction",
+  "use direct RPC for @callable() methods",
+  "use Lexend font and fix unsubscribe link",
+  "correct R2 object path joining and add --remote flag",
+  "use build tags for Windows-compatible process management",
+  "remove stale svelte-ignore comments breaking CI"
+],
+    "refactoring": [],
+    "docs": [
+  "add repository snapshot and release summary for v1.1.0",
+  "clean up stale packages/ path references across 31 files"
+],
+    "performance": [],
+    "tests": [
+  "update palette test for expanded 16-color set"
+],
+    "chores": [
+  "reconcile waystone, component, and KB inventories",
+  "rebuild gw binaries for latest Go changes",
+  "rebuild gw binaries for latest Go changes",
+  "rebuild gw binaries for latest Go changes",
+  "rebuild gw binaries for latest Go changes",
+  "rebuild dist binaries (darwin-arm64, linux-arm64)",
+  "rebuild darwin-arm64 dist binary",
+  "rebuild linux-arm64 dist binary",
+  "rebuild linux-x86_64 dist binary",
+  "rebuild windows-x86_64 dist binary"
+]
+  }
+}

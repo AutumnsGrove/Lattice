@@ -1,0 +1,108 @@
+{
+  "version": "v1.0.0",
+  "date": "2026-02-18 17:21:39 -0500",
+  "commitHash": "9c7939ab",
+  "summary": "Loom now has Durable Object-backed rate limiting, and auto-save actually syncs to the server. Meadow got its community feed with RSS and two-level privacy controls, and I finally wired up the observability dashboard I've been calling Vista. Mostly a lot of renaming and lint fixes under the hood to get everything ready for 1.0.\n",
+  "stats": {
+    "totalCommits": 386,
+    "features": 103,
+    "fixes": 173,
+    "refactoring": 15,
+    "docs": 62,
+    "tests": 3,
+    "performance": 2
+  },
+  "scopes": [
+  "engine",
+  "ui",
+  "arbor",
+  "curios",
+  "gw",
+  "meadow",
+  "auth",
+  "landing",
+  "canopy",
+  "zephyr"
+],
+  "highlights": {
+    "features": [
+  "add magic link email login to sign-in page",
+  "add social cross-posting spec for marketing automation",
+  "add git pull command",
+  "add Bluesky link to footer connect section",
+  "add Bluesky social cross-posting",
+  "add deployment tracking and vault integration for social",
+  "add structured error codes (ZEPHYR-NNN)",
+  "add programmatic screenshot tool for Grove",
+  "gate photo gallery behind greenhouse-only graft",
+  "add d1 migrate command for SQL file execution",
+  "add demo mode for screenshots and development",
+  "auto-convert HEIC/HEIF photos to JPEG on upload",
+  "accept AVIF uploads from Android devices",
+  "add Waystone to image upload error messages",
+  "add Reeds dual-mode comment system"
+],
+    "fixes": [
+  "rewrite OAuth callback for Better Auth, use PLANT error codes",
+  "show inverse grove term in GroveIntro subtitle",
+  "restore live preview by resetting isMounted flag in debounce effect",
+  "apply missing patches from PR987 and PR990",
+  "address review feedback on zephyr-social spec",
+  "fix Waystone popup overflow hiding footer and article link",
+  "fix Waystone popup overflow hiding footer and article link",
+  "define missing Tailwind semantic color tokens for light mode readability",
+  "sweep light mode readability across all packages",
+  "warm up arbor images page dark mode",
+  "remove bark/cream single-value overrides that squash preset shade scales",
+  "add ZEPHYR binding type, fix Svelte 5 warnings",
+  "improve push/sync error detection for hook failures",
+  "align test assertions with ZEPHYR-NNN error codes",
+  "replace inverted bark shades with cream for dark mode backgrounds"
+],
+    "refactoring": [
+  "import categories from engine config instead of duplicating",
+  "eliminate all duplication following engine-first pattern",
+  "extract shared query logic to engine server utility",
+  "centralize identity, emails, and dashboard links",
+  "separate export zips into dedicated R2 bucket",
+  "simplify forest scene to pine trees, lanterns, and fireflies",
+  "fix reactivity timing and improve tag comparison performance",
+  "make PassageTransition self-contained with event delegation",
+  "simplify forest display to three pine trees",
+  "Verge-style punch-in layout for vines"
+],
+    "docs": [
+  "add repository snapshot and release summary for v0.9.99",
+  "add gallery image fixes plan",
+  "add dreamscape component suite planning document",
+  "add 4 priority help center articles for V1 launch",
+  "add Songbird universal music link preview plan",
+  "rename Songbird → Hum for music link previews",
+  "lock in KV for artwork caching strategy",
+  "close all open questions",
+  "move to planned/ — all questions resolved, ready to build",
+  "add naming journey for user directory feature (Canopy)"
+],
+    "performance": [
+  "parallelize layout data loading and add navigation indicator",
+  "wire ThresholdDO as primary rate limiting backend"
+],
+    "tests": [
+  "add arbor panel cross-account access regression tests",
+  "update auth-api.grove.place references to login.grove.place",
+  "fix upload.test.ts by mocking canUploadImages"
+],
+    "chores": [
+  "replace legacy PKCE initiation route with redirect",
+  "update knowledge base inventory for zephyr-social spec",
+  "update component inventory for BlueSky icon",
+  "update KB inventory counts and fix glimpse-spec frontmatter",
+  "update knowledge base inventory counts",
+  "move claude hooks to project-level .claude/",
+  "update component inventory for PassageTransition",
+  "update component and knowledge base inventories for ArborPanel",
+  "drop Intel Mac support, keep 4-platform builds",
+  "add deploy workflow and real KV IDs"
+]
+  }
+}

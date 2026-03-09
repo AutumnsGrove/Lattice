@@ -1,0 +1,2 @@
+# Binary files - don't attempt text diffs, don't normalize line endings
+dist/* binary -diff
