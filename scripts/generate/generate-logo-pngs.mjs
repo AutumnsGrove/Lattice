@@ -43,6 +43,7 @@ const PACKAGES = [
 	"apps/plant",
 	"apps/domains",
 	"apps/meadow",
+	"apps/login",
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
