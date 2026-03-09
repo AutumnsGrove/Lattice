@@ -1,6 +1,8 @@
 import type { PageServerLoad, Actions } from "./$types";
 import { fail } from "@sveltejs/kit";
+import { z } from "zod";
 import { ARBOR_ERRORS, logGroveError } from "$lib/errors";
+import { parseFormData } from "$lib/server/utils/form-data";
 import {
 	isValidPreset,
 	isValidTrailEffect,
@@ -59,6 +61,15 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 	};
 };
 
+const SaveCursorSchema = z.object({
+	cursorType: z.string().optional().default("preset"),
+	preset: z.string().optional().default(""),
+	customUrl: z.string().optional().default(""),
+	trailEnabled: z.string().optional(),
+	trailEffect: z.string().optional().default("sparkle"),
+	trailLength: z.string().optional().default("5"),
+});
+
 export const actions: Actions = {
 	save: async ({ request, platform, locals }) => {
 		const db = platform?.env?.CURIO_DB;
@@ -72,9 +83,15 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const cursorType = formData.get("cursorType") === "custom" ? "custom" : "preset";
+		const parsed = parseFormData(formData, SaveCursorSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const d = parsed.data;
 
-		const preset = formData.get("preset") as string;
+		const cursorType = d.cursorType === "custom" ? "custom" : "preset";
+
+		const preset = d.preset;
 		if (cursorType === "preset" && preset && !isValidPreset(preset)) {
 			return fail(400, {
 				error: "Invalid cursor preset",
@@ -82,7 +99,7 @@ export const actions: Actions = {
 			});
 		}
 
-		const customUrl = (formData.get("customUrl") as string)?.trim() || null;
+		const customUrl = d.customUrl?.trim() || null;
 		if (cursorType === "custom" && customUrl && !isValidCursorUrl(customUrl)) {
 			return fail(400, {
 				error: "Invalid custom cursor URL",
@@ -90,12 +107,10 @@ export const actions: Actions = {
 			});
 		}
 
-		const trailEnabled = formData.get("trailEnabled") === "on" ? 1 : 0;
-		const trailEffect = isValidTrailEffect(formData.get("trailEffect") as string)
-			? (formData.get("trailEffect") as string)
-			: "sparkle";
+		const trailEnabled = d.trailEnabled === "on" ? 1 : 0;
+		const trailEffect = isValidTrailEffect(d.trailEffect) ? d.trailEffect : "sparkle";
 
-		const trailLengthRaw = parseInt(formData.get("trailLength") as string, 10);
+		const trailLengthRaw = parseInt(d.trailLength, 10);
 		const trailLength = isValidTrailLength(trailLengthRaw) ? trailLengthRaw : DEFAULT_TRAIL_LENGTH;
 
 		try {

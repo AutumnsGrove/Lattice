@@ -1,6 +1,8 @@
 import type { PageServerLoad, Actions } from "./$types";
 import { fail } from "@sveltejs/kit";
+import { z } from "zod";
 import { ARBOR_ERRORS, logGroveError } from "$lib/errors";
+import { parseFormData } from "$lib/server/utils/form-data";
 import {
 	generateBlogrollId,
 	isValidUrl,
@@ -59,6 +61,17 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 	return { items };
 };
 
+const AddBlogSchema = z.object({
+	url: z.string().optional().default(""),
+	title: z.string().optional().default(""),
+	description: z.string().optional().default(""),
+	feedUrl: z.string().optional().default(""),
+});
+
+const RemoveBlogSchema = z.object({
+	blogId: z.string().min(1),
+});
+
 export const actions: Actions = {
 	add: async ({ request, platform, locals }) => {
 		const db = platform?.env?.CURIO_DB;
@@ -72,7 +85,13 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const url = (formData.get("url") as string)?.trim();
+		const parsed = parseFormData(formData, AddBlogSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const d = parsed.data;
+
+		const url = d.url.trim();
 
 		if (!url || !isValidUrl(url) || url.length > MAX_URL_LENGTH) {
 			return fail(400, {
@@ -81,7 +100,7 @@ export const actions: Actions = {
 			});
 		}
 
-		const title = sanitizeTitle(formData.get("title") as string);
+		const title = sanitizeTitle(d.title);
 		if (!title) {
 			return fail(400, {
 				error: "Blog title is required",
@@ -89,9 +108,9 @@ export const actions: Actions = {
 			});
 		}
 
-		const description = sanitizeDescription(formData.get("description") as string);
+		const description = sanitizeDescription(d.description);
 
-		const feedUrl = (formData.get("feedUrl") as string)?.trim() || null;
+		const feedUrl = d.feedUrl.trim() || null;
 		if (feedUrl && (!isValidUrl(feedUrl) || feedUrl.length > MAX_FEED_URL_LENGTH)) {
 			return fail(400, {
 				error: "Feed URL must be valid",
@@ -142,7 +161,11 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const blogId = formData.get("blogId") as string;
+		const parsed = parseFormData(formData, RemoveBlogSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const { blogId } = parsed.data;
 
 		try {
 			await db

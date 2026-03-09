@@ -1,6 +1,8 @@
 import type { PageServerLoad, Actions } from "./$types";
 import { fail } from "@sveltejs/kit";
+import { z } from "zod";
 import { ARBOR_ERRORS, logGroveError } from "$lib/errors";
+import { parseFormData } from "$lib/server/utils/form-data";
 import {
 	generateCustomBadgeId,
 	sanitizeBadgeName,
@@ -46,6 +48,27 @@ interface ConfigRow {
 	showcase_style: string;
 	badge_size: string;
 }
+
+const ToggleShowcaseSchema = z.object({
+	badgeId: z.string().min(1),
+	showcase: z.string().optional(),
+});
+
+const SaveBadgeConfigSchema = z.object({
+	wallLayout: z.string().optional().default(""),
+	showcaseStyle: z.string().optional().default(""),
+	badgeSize: z.string().optional().default(""),
+});
+
+const CreateCustomBadgeSchema = z.object({
+	name: z.string().optional().default(""),
+	description: z.string().optional().default(""),
+	iconUrl: z.string().optional().default(""),
+});
+
+const RemoveCustomBadgeSchema = z.object({
+	badgeId: z.string().min(1),
+});
 
 export const load: PageServerLoad = async ({ platform, locals }) => {
 	const db = platform?.env?.CURIO_DB;
@@ -159,8 +182,12 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const badgeId = formData.get("badgeId") as string;
-		const showcase = formData.get("showcase") === "true" ? 1 : 0;
+		const parsed = parseFormData(formData, ToggleShowcaseSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const { badgeId } = parsed.data;
+		const showcase = parsed.data.showcase === "true" ? 1 : 0;
 
 		try {
 			await db
@@ -190,10 +217,13 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const wallLayout = (formData.get("wallLayout") as string) || DEFAULT_CONFIG.wallLayout;
-		const showcaseStyle =
-			(formData.get("showcaseStyle") as string) || DEFAULT_CONFIG.showcaseStyle;
-		const badgeSize = (formData.get("badgeSize") as string) || DEFAULT_CONFIG.badgeSize;
+		const parsed = parseFormData(formData, SaveBadgeConfigSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const wallLayout = parsed.data.wallLayout || DEFAULT_CONFIG.wallLayout;
+		const showcaseStyle = parsed.data.showcaseStyle || DEFAULT_CONFIG.showcaseStyle;
+		const badgeSize = parsed.data.badgeSize || DEFAULT_CONFIG.badgeSize;
 
 		if (!isValidWallLayout(wallLayout)) {
 			return fail(400, { error: "Invalid wall layout", error_code: "INVALID_LAYOUT" });
@@ -241,7 +271,11 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const name = sanitizeBadgeName(formData.get("name") as string);
+		const parsed = parseFormData(formData, CreateCustomBadgeSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const name = sanitizeBadgeName(parsed.data.name);
 		if (!name) {
 			return fail(400, {
 				error: "Badge name is required",
@@ -249,7 +283,7 @@ export const actions: Actions = {
 			});
 		}
 
-		const description = sanitizeBadgeDescription(formData.get("description") as string);
+		const description = sanitizeBadgeDescription(parsed.data.description);
 		if (!description) {
 			return fail(400, {
 				error: "Badge description is required",
@@ -257,7 +291,7 @@ export const actions: Actions = {
 			});
 		}
 
-		const iconUrl = (formData.get("iconUrl") as string)?.trim();
+		const iconUrl = parsed.data.iconUrl?.trim();
 		if (!iconUrl || !isValidIconUrl(iconUrl)) {
 			return fail(400, {
 				error: "A valid icon URL is required",
@@ -310,7 +344,11 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const badgeId = formData.get("badgeId") as string;
+		const parsed = parseFormData(formData, RemoveCustomBadgeSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const { badgeId } = parsed.data;
 
 		try {
 			await db

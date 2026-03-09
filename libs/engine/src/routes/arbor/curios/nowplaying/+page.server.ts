@@ -1,6 +1,8 @@
 import type { PageServerLoad, Actions } from "./$types";
 import { fail } from "@sveltejs/kit";
+import { z } from "zod";
 import { ARBOR_ERRORS, logGroveError } from "$lib/errors";
+import { parseFormData } from "$lib/server/utils/form-data";
 import {
 	generateHistoryId,
 	isValidDisplayStyle,
@@ -103,6 +105,22 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 	};
 };
 
+const SaveNowPlayingConfigSchema = z.object({
+	provider: z.string().optional().default("manual"),
+	displayStyle: z.string().optional().default("compact"),
+	showAlbumArt: z.string().optional(),
+	showProgress: z.string().optional(),
+	fallbackText: z.string().nullable().optional(),
+	lastFmUsername: z.string().nullable().optional(),
+});
+
+const SetTrackSchema = z.object({
+	trackName: z.string().nullable().optional(),
+	artist: z.string().nullable().optional(),
+	album: z.string().nullable().optional(),
+	albumArtUrl: z.string().optional().default(""),
+});
+
 export const actions: Actions = {
 	saveConfig: async ({ request, platform, locals }) => {
 		const db = platform?.env?.CURIO_DB;
@@ -116,12 +134,18 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const provider = formData.get("provider") as string;
-		const displayStyle = formData.get("displayStyle") as string;
-		const showAlbumArt = formData.get("showAlbumArt") === "true";
-		const showProgress = formData.get("showProgress") === "true";
-		const fallbackText = sanitizeFallbackText(formData.get("fallbackText") as string | null);
-		const lastFmUsername = sanitizeLastFmUsername(formData.get("lastFmUsername") as string | null);
+		const parsed = parseFormData(formData, SaveNowPlayingConfigSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const d = parsed.data;
+
+		const provider = d.provider;
+		const displayStyle = d.displayStyle;
+		const showAlbumArt = d.showAlbumArt === "true";
+		const showProgress = d.showProgress === "true";
+		const fallbackText = sanitizeFallbackText(d.fallbackText ?? null);
+		const lastFmUsername = sanitizeLastFmUsername(d.lastFmUsername ?? null);
 
 		const finalProvider = isValidProvider(provider) ? provider : "manual";
 		const finalStyle = isValidDisplayStyle(displayStyle) ? displayStyle : "compact";
@@ -173,11 +197,14 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const trackName = sanitizeTrackText(
-			formData.get("trackName") as string | null,
-			MAX_TRACK_NAME_LENGTH,
-		);
-		const artist = sanitizeTrackText(formData.get("artist") as string | null, MAX_ARTIST_LENGTH);
+		const parsed = parseFormData(formData, SetTrackSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const d = parsed.data;
+
+		const trackName = sanitizeTrackText(d.trackName ?? null, MAX_TRACK_NAME_LENGTH);
+		const artist = sanitizeTrackText(d.artist ?? null, MAX_ARTIST_LENGTH);
 
 		if (!trackName || !artist) {
 			return fail(400, {
@@ -186,8 +213,8 @@ export const actions: Actions = {
 			});
 		}
 
-		const album = sanitizeTrackText(formData.get("album") as string | null, MAX_ALBUM_LENGTH);
-		const albumArtUrl = (formData.get("albumArtUrl") as string)?.trim() || null;
+		const album = sanitizeTrackText(d.album ?? null, MAX_ALBUM_LENGTH);
+		const albumArtUrl = d.albumArtUrl?.trim() || null;
 
 		const id = generateHistoryId();
 

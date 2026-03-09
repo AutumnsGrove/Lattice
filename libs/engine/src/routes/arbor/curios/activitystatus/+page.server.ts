@@ -1,6 +1,8 @@
 import type { PageServerLoad, Actions } from "./$types";
 import { fail } from "@sveltejs/kit";
+import { z } from "zod";
 import { ARBOR_ERRORS, logGroveError } from "$lib/errors";
+import { parseFormData } from "$lib/server/utils/form-data";
 import {
 	sanitizeStatusText,
 	sanitizeStatusEmoji,
@@ -62,6 +64,13 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 	};
 };
 
+const SetStatusSchema = z.object({
+	preset: z.string().nullable().optional(),
+	statusText: z.string().nullable().optional(),
+	statusEmoji: z.string().nullable().optional(),
+	expiresInHours: z.string().nullable().optional(),
+});
+
 export const actions: Actions = {
 	set: async ({ request, platform, locals }) => {
 		const db = platform?.env?.CURIO_DB;
@@ -75,10 +84,16 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const presetId = formData.get("preset") as string | null;
-		const customText = formData.get("statusText") as string | null;
-		const customEmoji = formData.get("statusEmoji") as string | null;
-		const expiresInHours = formData.get("expiresInHours") as string | null;
+		const parsed = parseFormData(formData, SetStatusSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const {
+			preset: presetId,
+			statusText: customText,
+			statusEmoji: customEmoji,
+			expiresInHours,
+		} = parsed.data;
 
 		let statusText: string | null = null;
 		let statusEmoji: string | null = null;

@@ -1,6 +1,8 @@
 import type { PageServerLoad, Actions } from "./$types";
 import { fail } from "@sveltejs/kit";
+import { z } from "zod";
 import { ARBOR_ERRORS, logGroveError } from "$lib/errors";
+import { parseFormData } from "$lib/server/utils/form-data";
 import {
 	generateBadgeId,
 	isValidBadgeType,
@@ -68,6 +70,26 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 	};
 };
 
+const AddBadgeSchema = z.object({
+	badgeType: z.string().min(1),
+	position: z.string().optional().default("floating"),
+	animated: z.string().optional(),
+	customText: z.string().nullable().optional(),
+	showDate: z.string().optional(),
+});
+
+const UpdateBadgeSchema = z.object({
+	id: z.string().min(1),
+	position: z.string().optional().default("floating"),
+	animated: z.string().optional(),
+	customText: z.string().nullable().optional(),
+	showDate: z.string().optional(),
+});
+
+const RemoveBadgeSchema = z.object({
+	id: z.string().min(1),
+});
+
 export const actions: Actions = {
 	add: async ({ request, platform, locals }) => {
 		const db = platform?.env?.CURIO_DB;
@@ -81,11 +103,16 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const badgeType = formData.get("badgeType") as string;
-		const position = (formData.get("position") as string) || "floating";
-		const animated = formData.get("animated") !== "false";
-		const customText = sanitizeCustomText(formData.get("customText") as string | null);
-		const showDate = formData.get("showDate") === "true";
+		const parsed = parseFormData(formData, AddBadgeSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const d = parsed.data;
+		const badgeType = d.badgeType;
+		const position = d.position || "floating";
+		const animated = d.animated !== "false";
+		const customText = sanitizeCustomText(d.customText ?? null);
+		const showDate = d.showDate === "true";
 
 		if (!isValidBadgeType(badgeType)) {
 			return fail(400, {
@@ -134,18 +161,16 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const id = formData.get("id") as string;
-		const position = (formData.get("position") as string) || "floating";
-		const animated = formData.get("animated") !== "false";
-		const customText = sanitizeCustomText(formData.get("customText") as string | null);
-		const showDate = formData.get("showDate") === "true";
-
-		if (!id) {
-			return fail(400, {
-				error: "Badge ID required",
-				error_code: "MISSING_ID",
-			});
+		const parsed = parseFormData(formData, UpdateBadgeSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
 		}
+		const d = parsed.data;
+		const id = d.id;
+		const position = d.position || "floating";
+		const animated = d.animated !== "false";
+		const customText = sanitizeCustomText(d.customText ?? null);
+		const showDate = d.showDate === "true";
 
 		if (!isValidBadgePosition(position)) {
 			return fail(400, {
@@ -186,14 +211,11 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const id = formData.get("id") as string;
-
-		if (!id) {
-			return fail(400, {
-				error: "Badge ID required",
-				error_code: "MISSING_ID",
-			});
+		const parsed = parseFormData(formData, RemoveBadgeSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
 		}
+		const { id } = parsed.data;
 
 		try {
 			await db

@@ -1,6 +1,8 @@
 import type { PageServerLoad, Actions } from "./$types";
 import { fail } from "@sveltejs/kit";
+import { z } from "zod";
 import { ARBOR_ERRORS, logGroveError } from "$lib/errors";
+import { parseFormData } from "$lib/server/utils/form-data";
 import {
 	getAllVoices,
 	getOpenRouterModels,
@@ -128,6 +130,22 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 	};
 };
 
+const SaveTimelineSchema = z.object({
+	enabled: z.string().optional(),
+	githubUsername: z.string().nullable().optional(),
+	githubToken: z.string().nullable().optional(),
+	openrouterKey: z.string().nullable().optional(),
+	openrouterModel: z.string().optional().default(""),
+	voicePreset: z.string().optional().default(""),
+	customSystemPrompt: z.string().nullable().optional(),
+	customSummaryInstructions: z.string().nullable().optional(),
+	customGutterStyle: z.string().nullable().optional(),
+	reposInclude: z.string().nullable().optional(),
+	reposExclude: z.string().nullable().optional(),
+	timezone: z.string().optional().default(""),
+	ownerName: z.string().nullable().optional(),
+});
+
 export const actions: Actions = {
 	save: async ({ request, platform, locals }) => {
 		console.warn("[Timeline Config] Save action called");
@@ -144,21 +162,26 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		console.warn("[Timeline Config] Form data received, enabled:", formData.get("enabled"));
+		const parsed = parseFormData(formData, SaveTimelineSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const d = parsed.data;
+		console.warn("[Timeline Config] Form data received, enabled:", d.enabled);
 
-		const enabled = formData.get("enabled") === "true";
-		const githubUsername = formData.get("githubUsername") as string | null;
-		const githubToken = formData.get("githubToken") as string | null;
-		const openrouterKey = formData.get("openrouterKey") as string | null;
-		const openrouterModel = formData.get("openrouterModel") as string;
-		const voicePreset = formData.get("voicePreset") as string;
-		const customSystemPrompt = formData.get("customSystemPrompt") as string | null;
-		const customSummaryInstructions = formData.get("customSummaryInstructions") as string | null;
-		const customGutterStyle = formData.get("customGutterStyle") as string | null;
-		const reposInclude = formData.get("reposInclude") as string | null;
-		const reposExclude = formData.get("reposExclude") as string | null;
-		const timezone = formData.get("timezone") as string;
-		const ownerName = formData.get("ownerName") as string | null;
+		const enabled = d.enabled === "true";
+		const githubUsername = d.githubUsername ?? null;
+		const githubToken = d.githubToken ?? null;
+		const openrouterKey = d.openrouterKey ?? null;
+		const openrouterModel = d.openrouterModel;
+		const voicePreset = d.voicePreset;
+		const customSystemPrompt = d.customSystemPrompt ?? null;
+		const customSummaryInstructions = d.customSummaryInstructions ?? null;
+		const customGutterStyle = d.customGutterStyle ?? null;
+		const reposInclude = d.reposInclude ?? null;
+		const reposExclude = d.reposExclude ?? null;
+		const timezone = d.timezone;
+		const ownerName = d.ownerName ?? null;
 
 		// Validate required fields if enabling
 		if (enabled) {

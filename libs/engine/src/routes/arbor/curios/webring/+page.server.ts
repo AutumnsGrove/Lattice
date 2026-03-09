@@ -1,6 +1,8 @@
 import type { PageServerLoad, Actions } from "./$types";
 import { fail } from "@sveltejs/kit";
+import { z } from "zod";
 import { ARBOR_ERRORS, logGroveError } from "$lib/errors";
+import { parseFormData } from "$lib/server/utils/form-data";
 import {
 	generateWebringId,
 	isValidBadgeStyle,
@@ -71,6 +73,26 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 	};
 };
 
+const AddWebringSchema = z.object({
+	ringName: z.string().nullable().optional(),
+	prevUrl: z.string().optional().default(""),
+	nextUrl: z.string().optional().default(""),
+	ringUrl: z.string().optional().default(""),
+	homeUrl: z.string().optional().default(""),
+	badgeStyle: z.string().optional().default("classic"),
+	position: z.string().optional().default("footer"),
+});
+
+const UpdateWebringSchema = z.object({
+	ringId: z.string().min(1),
+	badgeStyle: z.string().optional().default(""),
+	position: z.string().optional().default(""),
+});
+
+const RemoveWebringSchema = z.object({
+	ringId: z.string().min(1),
+});
+
 export const actions: Actions = {
 	add: async ({ request, platform, locals }) => {
 		const db = platform?.env?.CURIO_DB;
@@ -84,7 +106,13 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const ringName = sanitizeRingName(formData.get("ringName") as string | null);
+		const parsed = parseFormData(formData, AddWebringSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const d = parsed.data;
+
+		const ringName = sanitizeRingName(d.ringName ?? null);
 
 		if (!ringName) {
 			return fail(400, {
@@ -93,8 +121,8 @@ export const actions: Actions = {
 			});
 		}
 
-		const prevUrl = (formData.get("prevUrl") as string)?.trim();
-		const nextUrl = (formData.get("nextUrl") as string)?.trim();
+		const prevUrl = d.prevUrl?.trim();
+		const nextUrl = d.nextUrl?.trim();
 
 		if (!prevUrl || !nextUrl) {
 			return fail(400, {
@@ -117,7 +145,7 @@ export const actions: Actions = {
 			});
 		}
 
-		const ringUrl = (formData.get("ringUrl") as string)?.trim() || null;
+		const ringUrl = d.ringUrl?.trim() || null;
 		if (ringUrl && (!isValidUrl(ringUrl) || ringUrl.length > MAX_URL_LENGTH)) {
 			return fail(400, {
 				error: "Ring URL must be a valid http or https address",
@@ -125,7 +153,7 @@ export const actions: Actions = {
 			});
 		}
 
-		const homeUrl = (formData.get("homeUrl") as string)?.trim() || null;
+		const homeUrl = d.homeUrl?.trim() || null;
 		if (homeUrl && (!isValidUrl(homeUrl) || homeUrl.length > MAX_URL_LENGTH)) {
 			return fail(400, {
 				error: "Home URL must be a valid http or https address",
@@ -133,11 +161,8 @@ export const actions: Actions = {
 			});
 		}
 
-		const badgeStyleRaw = formData.get("badgeStyle") as string;
-		const badgeStyle = isValidBadgeStyle(badgeStyleRaw) ? badgeStyleRaw : "classic";
-
-		const positionRaw = formData.get("position") as string;
-		const position = isValidPosition(positionRaw) ? positionRaw : "footer";
+		const badgeStyle = isValidBadgeStyle(d.badgeStyle) ? d.badgeStyle : "classic";
+		const position = isValidPosition(d.position) ? d.position : "footer";
 
 		const id = generateWebringId();
 
@@ -192,17 +217,13 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const ringId = formData.get("ringId") as string;
-
-		if (!ringId) {
-			return fail(400, {
-				error: "Ring ID is required",
-				error_code: "MISSING_ID",
-			});
+		const parsed = parseFormData(formData, UpdateWebringSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
 		}
-
-		const badgeStyleRaw = formData.get("badgeStyle") as string;
-		const positionRaw = formData.get("position") as string;
+		const { ringId } = parsed.data;
+		const badgeStyleRaw = parsed.data.badgeStyle;
+		const positionRaw = parsed.data.position;
 
 		const updates: string[] = [];
 		const values: unknown[] = [];
@@ -253,7 +274,11 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const ringId = formData.get("ringId") as string;
+		const parsed = parseFormData(formData, RemoveWebringSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const { ringId } = parsed.data;
 
 		try {
 			await db

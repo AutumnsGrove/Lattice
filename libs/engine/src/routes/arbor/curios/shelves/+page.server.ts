@@ -1,6 +1,8 @@
 import type { PageServerLoad, Actions } from "./$types";
 import { fail } from "@sveltejs/kit";
+import { z } from "zod";
 import { ARBOR_ERRORS, logGroveError } from "$lib/errors";
+import { parseFormData } from "$lib/server/utils/form-data";
 import {
 	generateShelfId,
 	generateItemId,
@@ -150,6 +152,59 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 	};
 };
 
+const AddShelfSchema = z.object({
+	name: z.string().optional().default(""),
+	description: z.string().optional().default(""),
+	preset: z.string().optional().default("custom"),
+	displayMode: z.string().optional().default(""),
+	material: z.string().optional().default(""),
+});
+
+const AddItemSchema = z.object({
+	shelfId: z.string().min(1),
+	url: z.string().optional().default(""),
+	title: z.string().optional().default(""),
+	creator: z.string().optional().default(""),
+	description: z.string().optional().default(""),
+	category: z.string().optional().default(""),
+	coverUrl: z.string().optional().default(""),
+	thumbnailUrl: z.string().optional().default(""),
+	isStatus1: z.string().optional(),
+	isStatus2: z.string().optional(),
+	rating: z.string().optional().default(""),
+	note: z.string().optional().default(""),
+});
+
+const UpdateShelfSchema = z.object({
+	shelfId: z.string().min(1),
+	name: z.string().optional().default(""),
+	description: z.string().nullable().optional(),
+	displayMode: z.string().optional().default(""),
+	material: z.string().optional().default(""),
+	creatorLabel: z.string().optional().default(""),
+	status1Label: z.string().optional().default(""),
+	status2Label: z.string().optional().default(""),
+});
+
+const UpdateItemSchema = z.object({
+	itemId: z.string().min(1),
+	title: z.string().optional().default(""),
+	url: z.string().optional().default(""),
+	creator: z.string().nullable().optional(),
+	description: z.string().nullable().optional(),
+	category: z.string().nullable().optional(),
+	rating: z.string().nullable().optional(),
+	note: z.string().nullable().optional(),
+});
+
+const ShelfIdSchema = z.object({
+	shelfId: z.string().min(1),
+});
+
+const ItemIdSchema = z.object({
+	itemId: z.string().min(1),
+});
+
 export const actions: Actions = {
 	addShelf: async ({ request, platform, locals }) => {
 		const db = platform?.env?.CURIO_DB;
@@ -163,22 +218,24 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const name = sanitizeShelfName(formData.get("name") as string);
+		const parsed = parseFormData(formData, AddShelfSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const d = parsed.data;
+
+		const name = sanitizeShelfName(d.name);
 		if (!name) {
 			return fail(400, { error: "Shelf name is required", error_code: "MISSING_NAME" });
 		}
 
-		const description = sanitizeDescription(formData.get("description") as string);
-		const presetRaw = (formData.get("preset") as string) || "custom";
+		const description = sanitizeDescription(d.description);
+		const presetRaw = d.preset || "custom";
 		const preset: ShelfPreset = isValidPreset(presetRaw) ? (presetRaw as ShelfPreset) : "custom";
 		const defaults = getPresetDefaults(preset);
 
-		const displayMode = isValidDisplayMode(formData.get("displayMode") as string)
-			? (formData.get("displayMode") as string)
-			: defaults.displayMode;
-		const material = isValidMaterial(formData.get("material") as string)
-			? (formData.get("material") as string)
-			: defaults.material;
+		const displayMode = isValidDisplayMode(d.displayMode) ? d.displayMode : defaults.displayMode;
+		const material = isValidMaterial(d.material) ? d.material : defaults.material;
 
 		const id = generateShelfId();
 
@@ -237,7 +294,12 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const shelfId = formData.get("shelfId") as string;
+		const parsed = parseFormData(formData, AddItemSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const d = parsed.data;
+		const { shelfId } = d;
 
 		const shelf = await db
 			.prepare(`SELECT id, auto_favicon FROM bookmark_shelves WHERE id = ? AND tenant_id = ?`)
@@ -248,25 +310,25 @@ export const actions: Actions = {
 			return fail(400, { error: "Shelf not found", error_code: "INVALID_SHELF" });
 		}
 
-		const url = ((formData.get("url") as string) || "").trim();
+		const url = d.url.trim();
 		if (url && (!isValidUrl(url) || url.length > MAX_URL_LENGTH)) {
 			return fail(400, { error: "Please enter a valid URL", error_code: "INVALID_URL" });
 		}
 
-		const title = sanitizeTitle(formData.get("title") as string);
+		const title = sanitizeTitle(d.title);
 		if (!title) {
 			return fail(400, { error: "Title is required", error_code: "MISSING_TITLE" });
 		}
 
-		const creator = sanitizeCreator(formData.get("creator") as string);
-		const description = sanitizeDescription(formData.get("description") as string);
-		const category = sanitizeCategory(formData.get("category") as string);
-		const coverUrl = ((formData.get("coverUrl") as string) || "").trim() || null;
-		const thumbnailUrl = ((formData.get("thumbnailUrl") as string) || "").trim() || null;
-		const isStatus1 = formData.get("isStatus1") === "on" ? 1 : 0;
-		const isStatus2 = formData.get("isStatus2") === "on" ? 1 : 0;
-		const rating = sanitizeRating(formData.get("rating") as string);
-		const note = sanitizeNote(formData.get("note") as string);
+		const creator = sanitizeCreator(d.creator);
+		const description = sanitizeDescription(d.description);
+		const category = sanitizeCategory(d.category);
+		const coverUrl = d.coverUrl.trim() || null;
+		const thumbnailUrl = d.thumbnailUrl.trim() || null;
+		const isStatus1 = d.isStatus1 === "on" ? 1 : 0;
+		const isStatus2 = d.isStatus2 === "on" ? 1 : 0;
+		const rating = sanitizeRating(d.rating);
+		const note = sanitizeNote(d.note);
 
 		// Auto-generate favicon if shelf has auto_favicon enabled and no cover provided
 		const finalCoverUrl =
@@ -333,51 +395,50 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const shelfId = formData.get("shelfId") as string;
+		const parsed = parseFormData(formData, UpdateShelfSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const d = parsed.data;
+		const { shelfId } = d;
 
 		const updates: string[] = [];
 		const values: unknown[] = [];
 
-		const name = sanitizeShelfName(formData.get("name") as string);
+		const name = sanitizeShelfName(d.name);
 		if (name) {
 			updates.push("name = ?");
 			values.push(name);
 		}
 
-		const description = formData.get("description");
-		if (description !== null) {
+		if (d.description !== undefined && d.description !== null) {
 			updates.push("description = ?");
-			values.push(sanitizeDescription(description as string));
+			values.push(sanitizeDescription(d.description));
 		}
 
-		const displayMode = formData.get("displayMode") as string;
-		if (displayMode && isValidDisplayMode(displayMode)) {
+		if (d.displayMode && isValidDisplayMode(d.displayMode)) {
 			updates.push("display_mode = ?");
-			values.push(displayMode);
+			values.push(d.displayMode);
 		}
 
-		const material = formData.get("material") as string;
-		if (material && isValidMaterial(material)) {
+		if (d.material && isValidMaterial(d.material)) {
 			updates.push("material = ?");
-			values.push(material);
+			values.push(d.material);
 		}
 
-		const creatorLabel = formData.get("creatorLabel") as string;
-		if (creatorLabel) {
+		if (d.creatorLabel) {
 			updates.push("creator_label = ?");
-			values.push(creatorLabel.slice(0, 50));
+			values.push(d.creatorLabel.slice(0, 50));
 		}
 
-		const status1Label = formData.get("status1Label") as string;
-		if (status1Label) {
+		if (d.status1Label) {
 			updates.push("status1_label = ?");
-			values.push(status1Label.slice(0, 50));
+			values.push(d.status1Label.slice(0, 50));
 		}
 
-		const status2Label = formData.get("status2Label") as string;
-		if (status2Label) {
+		if (d.status2Label) {
 			updates.push("status2_label = ?");
-			values.push(status2Label.slice(0, 50));
+			values.push(d.status2Label.slice(0, 50));
 		}
 
 		if (updates.length === 0) {
@@ -414,18 +475,23 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const itemId = formData.get("itemId") as string;
+		const parsed = parseFormData(formData, UpdateItemSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const d = parsed.data;
+		const { itemId } = d;
 
 		const updates: string[] = [];
 		const values: unknown[] = [];
 
-		const title = sanitizeTitle(formData.get("title") as string);
+		const title = sanitizeTitle(d.title);
 		if (title) {
 			updates.push("title = ?");
 			values.push(title);
 		}
 
-		const url = ((formData.get("url") as string) || "").trim();
+		const url = d.url.trim();
 		if (url) {
 			if (!isValidUrl(url) || url.length > MAX_URL_LENGTH) {
 				return fail(400, { error: "Invalid URL", error_code: "INVALID_URL" });
@@ -434,34 +500,29 @@ export const actions: Actions = {
 			values.push(url);
 		}
 
-		const creator = formData.get("creator");
-		if (creator !== null) {
+		if (d.creator !== undefined && d.creator !== null) {
 			updates.push("author = ?");
-			values.push(sanitizeCreator(creator as string));
+			values.push(sanitizeCreator(d.creator));
 		}
 
-		const description = formData.get("description");
-		if (description !== null) {
+		if (d.description !== undefined && d.description !== null) {
 			updates.push("description = ?");
-			values.push(sanitizeDescription(description as string));
+			values.push(sanitizeDescription(d.description));
 		}
 
-		const category = formData.get("category");
-		if (category !== null) {
+		if (d.category !== undefined && d.category !== null) {
 			updates.push("category = ?");
-			values.push(sanitizeCategory(category as string));
+			values.push(sanitizeCategory(d.category));
 		}
 
-		const rating = formData.get("rating");
-		if (rating !== null) {
+		if (d.rating !== undefined && d.rating !== null) {
 			updates.push("rating = ?");
-			values.push(sanitizeRating(rating as string));
+			values.push(sanitizeRating(d.rating));
 		}
 
-		const note = formData.get("note");
-		if (note !== null) {
+		if (d.note !== undefined && d.note !== null) {
 			updates.push("note = ?");
-			values.push(sanitizeNote(note as string));
+			values.push(sanitizeNote(d.note));
 		}
 
 		if (updates.length === 0) {
@@ -501,7 +562,11 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const shelfId = formData.get("shelfId") as string;
+		const parsed = parseFormData(formData, ShelfIdSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const { shelfId } = parsed.data;
 
 		try {
 			await db
@@ -531,7 +596,11 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const itemId = formData.get("itemId") as string;
+		const parsed = parseFormData(formData, ItemIdSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const { itemId } = parsed.data;
 
 		try {
 			await db
