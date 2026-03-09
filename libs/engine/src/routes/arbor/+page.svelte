@@ -23,7 +23,7 @@
 		ArrowRight,
 		Megaphone,
 		TreeDeciduous,
-		Users,
+		BookUser,
 		Sprout,
 	} from "lucide-svelte";
 
@@ -230,7 +230,7 @@
 				rel="noopener noreferrer"
 				aria-label="Browse the Canopy directory (opens in new tab)"
 			>
-				<Users class="w-7 h-7 text-accent-muted" />
+				<BookUser class="w-7 h-7 text-accent-muted" />
 				<span class="font-medium text-center text-sm"
 					><GroveTerm term="canopy">Canopy</GroveTerm></span
 				>

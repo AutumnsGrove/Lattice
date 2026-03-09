@@ -6,7 +6,7 @@ import {
 	Tag,
 	BookOpen,
 	Trees,
-	Users,
+	BookUser,
 	PenLine,
 	Home,
 	HandCoins,
@@ -61,7 +61,7 @@ export const DEFAULT_NAV_ITEMS: NavItem[] = [
 	{ href: "/roadmap", label: "Roadmap", icon: MapPin },
 	{ href: "/pricing", label: "Pricing", icon: Tag },
 	{ href: "/knowledge", label: "Knowledge", icon: BookOpen },
-	{ href: "/canopy", label: "Canopy", icon: Users, termSlug: "canopy" },
+	{ href: "/canopy", label: "Canopy", icon: BookUser, termSlug: "canopy" },
 	{
 		href: "https://autumn.grove.place/garden",
 		label: "Garden",
@@ -79,7 +79,7 @@ export const DEFAULT_MOBILE_NAV_ITEMS: NavItem[] = [
 	{ href: "/roadmap", label: "Roadmap", icon: MapPin },
 	{ href: "/pricing", label: "Pricing", icon: HandCoins },
 	{ href: "/knowledge", label: "Knowledge", icon: BookOpen },
-	{ href: "/canopy", label: "Canopy", icon: Users, termSlug: "canopy" },
+	{ href: "/canopy", label: "Canopy", icon: BookUser, termSlug: "canopy" },
 	{
 		href: "https://autumn.grove.place/garden",
 		label: "Garden",
