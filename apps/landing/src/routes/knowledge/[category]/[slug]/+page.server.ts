@@ -7,10 +7,11 @@ import type { PageServerLoad } from "./$types";
 import { readFileSync } from "fs";
 import { resolve } from "path";
 
-// No prerender — articles are loaded from D1 at runtime (SSR at the edge).
-// This replaces the filesystem-based prerender which caused hydration failures
-// on large articles (95KB+ markdown). D1 queries are fast (<5ms) and the response
-// is streamed, avoiding the massive inline data payload that choked hydration.
+// Explicitly disable prerender — articles are loaded from D1 at runtime (SSR at the edge).
+// Without this, SvelteKit's prerender crawler auto-prerenders articles discovered
+// through links on prerendered listing pages, falling back to filesystem loading
+// and re-creating the massive inline HTML payloads that caused issue #1373.
+export const prerender = false;
 
 // Load grove term manifest at build time for "what-is-*" article banners.
 // In production (Workers runtime), readFileSync won't work — the manifest
