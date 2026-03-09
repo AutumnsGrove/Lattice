@@ -1,24 +1,25 @@
 ---
 name: bear-migrate
-description: Move mountains of data with patient strength. Wake from hibernation, gather the data, move it carefully, hibernate to verify, and wake again to confirm. Use when migrating data, transforming schemas, or moving between systems.
+description: Move mountains with patient strength. Wake from hibernation, gather what must move, carry it carefully, hibernate to verify, and wake again to confirm. Use when migrating anything — data, components, icons, documents, formats, or systems.
 ---
 
 # Bear Migrate
 
-The bear moves slowly but with unstoppable strength. When it's time to move, the bear doesn't rush—it wakes deliberately, surveys what must be moved, and carries it carefully to the new den. Some journeys take seasons. The bear is patient. Data arrives intact, or it doesn't arrive at all.
+The bear moves slowly but with unstoppable strength. When it's time to move, the bear doesn't rush — it wakes deliberately, surveys what must be moved, and carries it carefully to the new den. Some journeys take seasons. The bear is patient. Everything arrives intact, or it doesn't arrive at all. Databases, components, icons, documents — the bear carries whatever needs carrying.
 
 ## When to Activate
 
-- User asks to "migrate data" or "move this data"
-- User says "transform the schema" or "update the database"
+- User asks to "migrate" or "move" anything between systems, formats, or patterns
+- User says "upgrade to the new API" or "switch from X to Y"
 - User calls `/bear-migrate` or mentions bear/migration
 - Database schema changes requiring data migration
-- Moving data between systems or formats
-- Upgrading to new data structures
-- Splitting or merging tables
-- Importing/exporting large datasets
+- Component API migrations (prop changes, new patterns, framework upgrades)
+- Icon or asset migrations (swapping libraries, consolidating sources)
+- Document or content format changes (markdown flavors, frontmatter schemas)
+- Moving between systems, libraries, or conventions
+- Any bulk transformation where safety and completeness matter
 
-**Pair with:** `bloodhound-scout` to understand data relationships first
+**Pair with:** `bloodhound-scout` to understand relationships and dependencies first
 
 ---
 
@@ -27,22 +28,29 @@ The bear moves slowly but with unstoppable strength. When it's time to move, the
 ```
 WAKE --> GATHER --> MOVE --> HIBERNATE --> VERIFY
   |          |         |           |           |
-Prepare   Collect   Execute    Review      Confirm
- Tools      Data    Safely     Results     Success
+Prepare   Inventory  Execute    Review      Confirm
+ Plan      & Audit   Safely     Results     Success
 ```
 
 ### Phase 1: WAKE
 
 *The bear stirs from hibernation, deliberate and unhurried, before the long journey begins...*
 
-Set up the migration environment. Document the plan, take the backup, and build the Kysely migration script before moving a single row.
+Set up the migration environment. Document the plan, preserve the original state, and prepare the transformation strategy before touching a single item.
 
-- Document the migration plan: source schema, destination schema, transformation mappings, calculated fields, data cleanup needed
-- Back up the database — SQLite: `sqlite3 production.db ".backup backup-$(date +%Y%m%d).db"` — PostgreSQL: `pg_dump -Fc` — D1: `wrangler d1 export`
-- Create the dated migration script (e.g., `migrations/20260130_name.ts`) with `up()` and `down()` functions
-- Identify SQLite/D1 ALTER TABLE constraints: DROP COLUMN and MODIFY COLUMN require a full table rebuild
+- Document the migration plan: source format/structure, destination format/structure, transformation mappings, edge cases to handle
+- Preserve the original — git branch, database backup, file copies — whatever "undo" looks like for this domain
+- Identify constraints: what can't be changed in-place? What requires a rebuild? What has downstream dependencies?
+- Choose the right domain guide for detailed patterns
 
-**Reference:** Load `references/migration-patterns.md` for the MigrationPlan interface and Kysely migration script structure. Load `references/schema-changes.md` for SQLite/D1 ALTER TABLE limitations and the table rebuild pattern. Load `references/backup-rollback.md` for backup commands and verification.
+**Reference:** Load the appropriate domain guide based on what's being migrated:
+
+| Migrating... | Load |
+|---|---|
+| Database schemas, tables, rows | `references/domain-database.md` |
+| Components, props, imports, APIs | `references/domain-components.md` |
+| Icons, assets, files, documents | `references/domain-content.md` |
+| Anything else | `references/domain-general.md` |
 
 ---
 
@@ -50,14 +58,14 @@ Set up the migration environment. Document the plan, take the backup, and build 
 
 *The bear knows exactly what it carries before lifting a single stone...*
 
-Understand the data thoroughly before writing transformation logic. Count rows, find orphans, check for quality issues, and map relationships. Surprises during MOVE are costly; surprises during GATHER are free.
+Understand the scope thoroughly before writing transformation logic. Count items, find orphans, check for quality issues, and map dependencies. Surprises during MOVE are costly; surprises during GATHER are free.
 
-- Count rows per table; estimate total migration time at expected batch size
-- Check for orphaned records (comments without posts, preferences without users)
-- Run data quality checks: nulls in required fields, duplicate unique values, malformed data (emails without `@`, invalid dates)
-- Map parent-to-child relationships and establish migration order (always migrate parent tables first)
+- Count everything: how many items, files, records, or references need to migrate?
+- Check for edge cases: missing data, inconsistent formats, deprecated patterns, unused items
+- Map dependencies: what references what? What order must things move in?
+- Estimate effort: simple find-replace, or complex transformation with branching logic?
 
-**Reference:** Load `references/migration-patterns.md` for data inventory queries, quality check code, relationship mapping patterns, and how to fail fast when quality issues are found
+**Output:** Complete inventory with item counts, dependency map, edge case list, and estimated complexity
 
 ---
 
@@ -65,14 +73,14 @@ Understand the data thoroughly before writing transformation logic. Count rows, 
 
 *The bear carries its load carefully, step by heavy step, never more than it can hold...*
 
-Execute the migration safely. Use batch processing for large datasets (1000 records per batch). Wrap in a transaction so a failure leaves the database clean. Log progress so long migrations are observable.
+Execute the migration safely. Work in manageable chunks. Make the transformation reversible where possible. Track progress so long migrations are observable.
 
-- For small datasets (<10k rows): wrap all operations in a single transaction with validation before dropping old structure
-- For large datasets (>100k rows): batch process in groups of 1000 with progress logging; pause every 10,000 records to prevent memory pressure
-- Apply transformation logic: normalize emails, split names, calculate derived fields, convert status enums
-- Track progress: total rows counted before batching, percent complete logged after each batch
+- For small scope (<50 items): transform everything in one pass, review the diff
+- For large scope (>200 items): batch the work, commit checkpoints, log progress
+- Apply transformation logic consistently — same rule for every item, no manual one-offs
+- Track progress: items completed vs. total, percent logged after each batch or file
 
-**Reference:** Load `references/migration-patterns.md` for the complete `migrateInBatches()` implementation, transaction safety pattern, `transformRecord()` examples, and progress tracking code. Load `references/schema-changes.md` for D1-specific constraints and the table rebuild pattern for unsupported ALTER operations.
+**Output:** All items transformed, progress logged, no silent failures
 
 ---
 
@@ -80,14 +88,14 @@ Execute the migration safely. Use batch processing for large datasets (1000 reco
 
 *The bear rests in the new den, patient, letting the results settle before declaring success...*
 
-Verify the migration before removing old data. Row counts must match. Data integrity checks must pass. Spot-check real records. Do not drop old tables until verification is complete.
+Verify the migration before removing old artifacts. Counts must match. Nothing should be broken, missing, or silently wrong. Do not delete originals until verification is complete.
 
-- Verify row counts match between old and new structures
-- Run data integrity checks: required fields, format validation (email patterns), foreign key integrity
-- Spot-check 10 sample records to verify transformation logic ran correctly
-- If any check fails: stop, investigate, do NOT drop old tables — the backup is your safety net
+- Verify counts match between old inventory and new state
+- Run integrity checks: do all references resolve? Do all imports work? Are all items accounted for?
+- Spot-check samples to verify transformation logic ran correctly
+- If any check fails: stop, investigate, do NOT remove originals — the preserved state is your safety net
 
-**Reference:** Load `references/backup-rollback.md` for the row count validation query, integrity check code, and spot check pattern
+**Output:** Verification report — counts, integrity checks, spot check results
 
 ---
 
@@ -95,48 +103,44 @@ Verify the migration before removing old data. Row counts must match. Data integ
 
 *The bear wakes again, testing the new den, confirming all is well before settling in for the season...*
 
-Final confirmation: run the full application test suite, check query performance on the new schema, archive the backup, and generate the migration report.
+Final confirmation: run the full test suite, check for regressions, clean up old artifacts, and generate the migration report.
 
-- Run full application test suite (`npm test`); test critical paths manually in dev server
-- Check query performance with `EXPLAIN QUERY PLAN` on queries that touch migrated tables; add indexes if full table scans appear where they didn't before
-- Archive the pre-migration backup (keep 30 days minimum in production)
-- Generate the migration completion report: records migrated, duration, transformations applied, validation results, rollback location
+- Run relevant tests — `gw ci`, type checks, linting, visual inspection, whatever catches regressions
+- Check for performance or bundle size regressions if applicable
+- Clean up: remove old files, deprecated imports, unused dependencies — only after tests pass
+- Generate the migration completion report
 
-**Reference:** Load `references/backup-rollback.md` for performance check queries, cleanup procedures, and the migration completion report template
+**Output:** Migration report with items migrated, duration, transformations applied, and verification results
 
 ---
 
 ## Reference Routing Table
 
-| Phase | Reference | Load When |
-|-------|-----------|-----------|
-| WAKE | `references/migration-patterns.md` | Always (plan structure, Kysely script scaffold) |
-| WAKE | `references/schema-changes.md` | Any schema change (ALTER TABLE, column types) |
-| WAKE | `references/backup-rollback.md` | Always (backup commands before touching data) |
-| GATHER | `references/migration-patterns.md` | Data inventory queries, quality checks |
-| MOVE | `references/migration-patterns.md` | Batch processing, transactions, transformations |
-| MOVE | `references/schema-changes.md` | D1 constraints, table rebuild, zero-downtime |
-| HIBERNATE | `references/backup-rollback.md` | Row count validation, integrity checks |
-| VERIFY | `references/backup-rollback.md` | Performance checks, cleanup, completion report |
+| Domain | Reference | Load When |
+|--------|-----------|-----------|
+| Database | `references/domain-database.md` | Schema changes, table migrations, D1/SQLite/Kysely |
+| Components | `references/domain-components.md` | Prop changes, API upgrades, framework migrations |
+| Content | `references/domain-content.md` | Icons, assets, documents, file formats |
+| General | `references/domain-general.md` | Anything else — config, conventions, systems |
 
 ---
 
 ## Bear Rules
 
 ### Patience
-Large migrations take time. Don't rush. Process in batches to avoid memory issues and timeout limits. A migration that takes 20 minutes safely beats one that takes 2 minutes and corrupts data.
+Large migrations take time. Don't rush. Work in batches to avoid mistakes and cognitive overload. A migration that takes an hour safely beats one that takes five minutes and misses 12 edge cases.
 
 ### Safety
-Always backup. Always test rollbacks. Never migrate production without a way back. If the `down()` migration is lossy, document the backup location explicitly in the code.
+Always preserve the original state. Always test rollbacks where possible. Never migrate production without a way back. If the migration is lossy, document what's lost and where the backup lives.
 
 ### Thoroughness
-Verify everything. Row counts, data integrity, application functionality. A migration that looks complete but has 3 orphaned records with null foreign keys will surface as a bug in production at the worst possible time.
+Verify everything. Item counts, reference integrity, test results. A migration that looks complete but has 3 broken imports will surface at the worst possible time.
 
 ### Communication
 Use migration metaphors:
 - "Waking from hibernation..." (preparation)
-- "Gathering the harvest..." (data inventory)
-- "Carrying the load..." (migration execution)
+- "Gathering the harvest..." (inventory)
+- "Carrying the load..." (execution)
 - "Resting in the new den..." (verification)
 - "The den is ready." (migration complete)
 
@@ -145,30 +149,49 @@ Use migration metaphors:
 ## Anti-Patterns
 
 **The bear does NOT:**
-- Migrate without backups
-- Skip validation steps (count checks, integrity checks, spot checks)
-- Migrate production without testing on staging first
-- Delete old data before verifying new data is complete and correct
-- Rush large migrations (memory issues, timeouts, silent truncation)
-- Write lossy `down()` migrations without documenting the rollback path
+- Migrate without preserving the original state
+- Skip verification steps (count checks, integrity checks, spot checks)
+- Migrate production without testing on staging/dev first
+- Delete old artifacts before verifying new ones are complete and correct
+- Rush large migrations (missed items, broken references, silent failures)
+- Assume the migration is "just a simple find-replace" without gathering first
+- Treat non-database migrations as second-class — every migration deserves the full flow
 
 ---
 
-## Example Migration
+## Examples
 
-**User:** "We need to split the user's full name into first and last name fields"
+### Example 1: Database Migration
+
+**User:** "Split the user's full name into first and last name fields"
 
 **Bear flow:**
 
-1. **WAKE** — "Create migration script, backup database, plan transformation logic: split `full_name` on first space, handle null names, preserve id/email/created_at"
+1. 🐻 **WAKE** — "Create migration script, backup database. Plan: split `full_name` on first space, handle nulls, preserve all other columns."
 
-2. **GATHER** — "15,423 users. Found 234 emails with mixed case. 12 users with null names (will default to null first_name/last_name)."
+2. 🐻 **GATHER** — "15,423 users. 234 emails with mixed case. 12 users with null names (default to null first/last). No orphaned records."
 
-3. **MOVE** — "Batch migration (1000 records/batch). Transform: lowercase emails, split names, calculate account_age_days. Progress logged per batch."
+3. 🐻 **MOVE** — "Batch migration (1000 records/batch). Transform: lowercase emails, split names, calculate account_age_days."
 
-4. **HIBERNATE** — "Verify: row counts match (15,423/15,423), no null created_at, FK integrity intact. Spot check 10 users — transformation looks correct."
+4. 🐻 **HIBERNATE** — "Row counts match (15,423/15,423). No null created_at. FK integrity intact. 10 spot-checked users look correct."
 
-5. **VERIFY** — "App tests pass, EXPLAIN QUERY PLAN shows index use on users.email, backup archived. Migration complete."
+5. 🐻 **VERIFY** — "Tests pass. EXPLAIN QUERY PLAN shows index use. Backup archived. The den is ready."
+
+### Example 2: Component Migration
+
+**User:** "Migrate all icon rendering from inline Lucide imports to GlassCard's icon prop"
+
+**Bear flow:**
+
+1. 🐻 **WAKE** — "Create feature branch. Plan: replace `<Icon>` component usage with GlassCard `icon` prop across all roadmap cards."
+
+2. 🐻 **GATHER** — "Found 23 files with inline Lucide icon imports. 4 use dynamic icon selection (need special handling). 2 use icons outside GlassCard (leave alone)."
+
+3. 🐻 **MOVE** — "Migrating file by file. Remove Lucide imports, add icon prop to GlassCard, verify each file compiles. 21/23 files migrated, 2 skipped (not GlassCard contexts)."
+
+4. 🐻 **HIBERNATE** — "21 files migrated, 2 intentionally skipped. All GlassCards render icons. No orphaned Lucide imports. Spot-checked 5 pages — icons render correctly."
+
+5. 🐻 **VERIFY** — "svelte-check passes. No unused imports. Bundle size decreased by 2KB (shared icon resolution). The den is ready."
 
 ---
 
@@ -176,24 +199,26 @@ Use migration metaphors:
 
 | Scenario | Approach |
 |----------|----------|
-| Schema change only (add column) | Standard migration — no batch processing needed |
-| Small dataset (<10k rows) | Single transaction |
-| Large dataset (>100k rows) | Batch processing with progress tracking (load `references/migration-patterns.md`) |
-| Zero downtime required | Expand-Migrate-Contract pattern (load `references/schema-changes.md`) |
-| Drop column in SQLite/D1 | Table rebuild pattern required (load `references/schema-changes.md`) |
-| Complex transformations | ETL pipeline with validation checkpoints at each step |
-| Cross-database migration | Export/import with explicit type mapping |
+| Database schema change (add column) | Standard migration — domain-database guide |
+| Database with data transformation | Batch processing — domain-database guide |
+| Component prop API change | File-by-file with type checking — domain-components guide |
+| Framework version upgrade | Codemod + manual review — domain-components guide |
+| Icon library swap | Inventory → mapping table → bulk replace — domain-content guide |
+| Document format change | Template + batch transform — domain-content guide |
+| Config or convention change | Grep → plan → execute — domain-general guide |
+| Zero downtime required | Expand-Migrate-Contract — domain-database or domain-general guide |
+| Simple find-replace (<10 items) | Still GATHER first, but single-pass MOVE is fine |
 
 ---
 
 ## Integration with Other Skills
 
 **Before Migrating:**
-- `bloodhound-scout` — Understand data relationships before migrating them
+- `bloodhound-scout` — Understand dependencies and relationships before migrating them
 
 **After Migrating:**
-- `beaver-build` — Write migration regression tests
-- `fox-optimize` — If new schema has performance implications
+- `beaver-build` — Write regression tests for the new state
+- `fox-optimize` — If migration has performance implications
 
 ---
 

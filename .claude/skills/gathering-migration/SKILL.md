@@ -1,31 +1,33 @@
 ---
 name: gathering-migration
-description: The drum sounds. Bear and Bloodhound gather for safe data movement. Use when migrating data that requires both careful movement and codebase understanding.
+description: The drum sounds. Bear and Bloodhound gather for safe migration. Use when migrating anything that requires both careful movement and codebase understanding.
 ---
 
 # Gathering Migration 🌲🐻🐕
 
-The drum echoes through the valleys. The Bear wakes from long slumber, gathering strength for the journey ahead. The Bloodhound sniffs the terrain, understanding every path and connection. Together they move mountains of data safely—nothing lost, nothing broken, everything finding its new home.
+The drum echoes through the valleys. The Bloodhound sniffs the terrain first, understanding every path, connection, and dependency. Then the Bear wakes from long slumber, gathering strength for the journey ahead. Together they move mountains safely — nothing lost, nothing broken, everything finding its new home. Whether it's database tables, component APIs, icon libraries, or document formats, no single animal can both map the territory AND carry the load.
 
 ## When to Summon
 
-- Complex data migrations requiring codebase exploration
-- Moving data between different system architectures
+- Complex migrations requiring codebase exploration before execution
+- Moving between systems, libraries, or architectural patterns
 - Schema changes affecting multiple relationships
-- Migrations requiring careful pathfinding
-- When you need to understand the territory before moving
+- Component or API migrations spanning many files
+- Icon, asset, or content migrations with downstream dependencies
+- Any migration where you need to understand the territory before moving
+- User says "migrate" and the scope touches multiple files or systems
+- User calls `/gathering-migration`
 
 ---
 
 ## Grove Tools for This Gathering
 
-Use `gw` and `gf` throughout. Quick reference for migration work:
+Use `gw` and `gf` throughout. Quick reference:
 
 ```bash
-# Find migration-related code and schemas
-gf --agent search "table_name"      # Find references to affected tables
-gf --agent db                       # Find database-related code
-gf --agent migrations               # List existing migration files
+# Find references, dependencies, and affected code
+gf --agent search "pattern"       # Find references to affected items
+gf grep "import.*OldThing"        # Track imports and usage
 
 # Commit completed migrations
 gw git ship --write -a -m "feat: migrate description"
@@ -39,28 +41,39 @@ gw git ship --write -a -m "feat: migrate description"
 SUMMON → ORGANIZE → EXECUTE → VALIDATE → COMPLETE
    ↓         ↲          ↲          ↲          ↓
 Receive  Dispatch   Animals    Verify   Migration
-Request  Animals    Work       Data     Complete
+Request  Animals    Work       Results  Complete
 ```
 
 ### Animals Mobilized
 
-1. **🐕 Bloodhound** — Scout the codebase, understand data relationships
-2. **🐻 Bear** — Migrate data with patient strength
+1. **🐕 Bloodhound** (`bloodhound-scout`) — Scout the codebase, map dependencies and relationships
+2. **🐻 Bear** (`bear-migrate`) — Migrate with patient strength using the appropriate domain guide
+
+### Dependencies
+
+```
+Bloodhound ──→ Bear
+     │            │
+Scout          Migrate
+Territory      Safely
+```
+
+Bloodhound must complete before Bear. The territory map becomes the Bear's migration plan.
 
 ---
 
 ### Phase 1: SUMMON
 
-_The drum sounds. The valleys stir..._
+*The drum sounds. The animals gather at the clearing...*
 
 Receive and parse the request:
 
 **Clarify the Migration:**
 
-- What data needs to move?
-- From where to where?
-- Are relationships involved?
-- What's the rollback plan?
+- What needs to migrate? (data, components, icons, config, conventions...)
+- From where to where? (old pattern → new pattern)
+- What downstream dependencies exist?
+- What does "undo" look like if something goes wrong?
 
 **Scope Check:**
 
@@ -69,13 +82,13 @@ Receive and parse the request:
 > This will involve:
 >
 > - 🐕 Bloodhound scouting the codebase
->   - Map data relationships
->   - Find all references to affected tables
->   - Identify integration points
+>   - Map dependencies and relationships
+>   - Find all references to affected items
+>   - Identify integration points and edge cases
 >   - Document current patterns
-> - 🐻 Bear migrating the data
->   - Backup before moving
->   - Transform in batches
+> - 🐻 Bear migrating with the appropriate domain guide
+>   - Preserve original state before touching anything
+>   - Transform in manageable chunks
 >   - Validate after each phase
 >   - Verify complete migration
 >
@@ -85,31 +98,25 @@ Receive and parse the request:
 
 ### Phase 2: ORGANIZE
 
-_The animals prepare for the journey..._
+*The animals prepare for the journey...*
 
 Dispatch in sequence:
 
-**Dispatch Order:**
+- Bloodhound begins scouting: find every reference, dependency, and edge case
+- Bear waits for the territory map before waking
+- Determine which Bear domain guide applies (database, components, content, or general)
 
-```
-Bloodhound ──→ Bear
-     │            │
-     │            │
-Scout          Migrate
-Territory      Data
-```
+**Handoff protocol:** Bloodhound produces a territory map → Bear uses it as its WAKE/GATHER foundation
 
-**Dependencies:**
-
-- Bloodhound must complete before Bear (needs to understand relationships)
+**Output:** Scout dispatched, domain guide identified
 
 ---
 
 ### Phase 3: EXECUTE
 
-_The paths are known. The migration begins..._
+*The paths are known. The migration begins...*
 
-Execute each phase by loading and running each animal's dedicated skill:
+Execute each animal's full workflow by loading their dedicated skill:
 
 ---
 
@@ -117,8 +124,9 @@ Execute each phase by loading and running each animal's dedicated skill:
 
 Load skill: `bloodhound-scout`
 
-Execute the full Bloodhound SCENT → TRACK → HUNT → REPORT → RETURN workflow focused on [the data being migrated]: tables, foreign key relationships, code references, orphaned records, and edge cases.
-Handoff: complete territory map (data relationship map, affected files, migration risk assessment, edge case documentation) → Bear
+Execute the full Bloodhound SCENT → TRACK → HUNT → REPORT → RETURN workflow focused on the migration target: find every reference, map relationships, identify edge cases, and document the current state.
+
+Handoff: complete territory map (dependency map, affected files, edge cases, risk assessment) → Bear
 
 ---
 
@@ -126,64 +134,43 @@ Handoff: complete territory map (data relationship map, affected files, migratio
 
 Load skill: `bear-migrate`
 
-Execute the full Bear WAKE → GATHER → MOVE → HIBERNATE → VERIFY workflow using the Bloodhound's territory map as the migration plan.
-Handoff: migration complete (migrated data, validation reports, updated codebase) → VALIDATE phase
+Execute the full Bear WAKE → GATHER → MOVE → HIBERNATE → VERIFY workflow, using:
+- The Bloodhound's territory map as the migration plan foundation
+- The appropriate domain guide from `bear-migrate/references/`:
+  - `domain-database.md` — for schema changes, table migrations, D1/SQLite
+  - `domain-components.md` — for prop changes, API upgrades, import rewrites
+  - `domain-content.md` — for icons, assets, documents, file formats
+  - `domain-general.md` — for config, conventions, dependencies, anything else
+
+Handoff: migration complete (transformed items, validation reports, updated codebase) → VALIDATE phase
 
 ---
 
 ### Phase 4: VALIDATE
 
-_The journey ends. Both animals confirm safe arrival..._
+*The journey ends. Both animals confirm safe arrival...*
 
 **Validation Checklist:**
 
-- [ ] Bloodhound: All relationships mapped
+- [ ] Bloodhound: All dependencies mapped
 - [ ] Bloodhound: All references found
 - [ ] Bloodhound: Edge cases documented
-- [ ] Bear: Backup created and verified
-- [ ] Bear: Row counts match (source vs dest)
-- [ ] Bear: Data integrity checks pass
-- [ ] Bear: Foreign keys intact
-- [ ] Bear: Application tests pass
-- [ ] Bear: Rollback tested
+- [ ] Bear: Original state preserved (branch, backup, or snapshot)
+- [ ] Bear: Item counts match (source vs destination)
+- [ ] Bear: Integrity checks pass (references resolve, imports work, no orphans)
+- [ ] Bear: Spot check confirms transformation correctness
+- [ ] Bear: Tests pass (`gw ci --affected` or relevant suite)
+- [ ] Bear: Rollback verified or documented
 
-**Data Quality Checks:**
+**Domain-Specific Checks:**
 
-```sql
--- Row count validation
-SELECT
-  (SELECT COUNT(*) FROM old_table) as source_count,
-  (SELECT COUNT(*) FROM new_table) as dest_count;
-
--- Should be equal
-
--- Foreign key integrity
-SELECT COUNT(*) as orphaned_records
-FROM child_table c
-LEFT JOIN parent_table p ON c.parent_id = p.id
-WHERE p.id IS NULL;
-
--- Should be 0
-
--- Data sampling
-SELECT * FROM new_table
-ORDER BY RANDOM()
-LIMIT 10;
-
--- Spot check transformation logic
-```
-
-**Type Safety During Migration:**
-
-- Validate migrated JSON columns with `safeJsonParse(raw, ZodSchema)` to catch corruption
-- If migrating storage data, respect Amber SDK's QuotaManager constraints
-- Use text-mode KV reads (`kv.get(key)`) with `safeJsonParse()`, not `kv.get(key, "json")`
+The Bear's domain guide (loaded in EXECUTE) defines the specific verification patterns — SQL queries for databases, `svelte-check` for components, visual inspection for icons, etc. Defer to the domain guide rather than hardcoding checks here.
 
 ---
 
 ### Phase 5: COMPLETE
 
-_The gathering ends. Data rests in its new home..._
+*The gathering disperses. Everything found its new home...*
 
 **Completion Report:**
 
@@ -198,56 +185,51 @@ _The gathering ends. Data rests in its new home..._
 
 ### Territory Mapped (Bloodhound)
 
-- Tables affected: [count]
-- Relationships found: [count]
-- Code files referencing data: [count]
+- Items affected: [count] [type]
+- Dependencies found: [count]
+- Files referencing migrated items: [count]
 - Edge cases identified: [list]
 
-### Data Moved (Bear)
+### Migration Executed (Bear)
 
-- Records migrated: [count]
+- Domain guide used: [database / components / content / general]
+- Items migrated: [count]
+- Items skipped (intentional): [count] — [reason]
 - Duration: [time]
-- Batches processed: [count]
-- Errors encountered: [count]
+- Errors: [count]
 
 ### Validation Results
 
-- Row count match: ✅ [source] = [dest]
-- Data integrity: ✅
-- Foreign keys: ✅
-- Application tests: ✅ [X/Y passing]
-- Performance: ✅
+- Item count match: ✅ [source] = [dest]
+- Integrity checks: ✅
+- Tests passing: ✅ [suite]
+- Spot check: ✅ [N samples verified]
 
 ### Rollback Status
 
-- Backup retained at: [location]
-- Rollback tested: ✅
-- Rollback time: [estimated]
+- Original preserved at: [branch / backup / snapshot]
+- Rollback path: [how to undo]
 
 ### Files Updated
 
-- Migration scripts: [files]
-- Application code: [files]
-- Documentation: [files]
+- [list of changed files or summary]
 
-### Time Elapsed
-
-[Duration]
-
-_The data has found its new home._ 🌲
+_Everything found its new home._ 🌲
 ```
 
 ---
 
-## Example Gathering
+## Examples
+
+### Example 1: Database Migration
 
 **User:** "/gathering-migration Move user preferences from users table to separate table"
 
-**Gathering execution:**
+**Gathering flow:**
 
 1. 🌲 **SUMMON** — "Mobilizing for: Split user preferences. Move theme, notifications from users table to user_preferences table."
 
-2. 🌲 **ORGANIZE** — "Bloodhound scouts → Bear migrates"
+2. 🌲 **ORGANIZE** — "Bloodhound scouts → Bear migrates with `domain-database.md`"
 
 3. 🌲 **EXECUTE** —
    - 🐕 Bloodhound: "Found 15,423 users. 234 have theme set. 12 have notifications disabled. Referenced in dashboard, settings, 3 API routes."
@@ -257,6 +239,37 @@ _The data has found its new home._ 🌲
 
 5. 🌲 **COMPLETE** — "Preferences migrated. Code updated. Backup retained."
 
+### Example 2: Icon System Migration
+
+**User:** "/gathering-migration Migrate all inline Lucide icon imports to use the icon registry pattern"
+
+**Gathering flow:**
+
+1. 🌲 **SUMMON** — "Mobilizing for: Icon import migration. Replace per-file Lucide imports with centralized icon registry lookups."
+
+2. 🌲 **ORGANIZE** — "Bloodhound scouts icon usage → Bear migrates with `domain-content.md`"
+
+3. 🌲 **EXECUTE** —
+   - 🐕 Bloodhound: "Found 47 files importing from lucide-svelte. 31 unique icons used. 3 files use dynamic icon selection. 2 barrel re-exports in ui/index.ts."
+   - 🐻 Bear: "Feature branch created. Migrated 44 files to registry pattern. 3 dynamic-icon files handled manually. All svelte-check passes."
+
+4. 🌲 **VALIDATE** — "47 source files, 44 migrated + 3 manual = 47 accounted. Zero remaining lucide-svelte imports. Visual spot check on 5 pages — all icons render."
+
+5. 🌲 **COMPLETE** — "Icon registry migration complete. Bundle size reduced. Branch ready for review."
+
 ---
 
-_Every piece of data arrived safely._ 🌲
+## Integration with Other Gatherings
+
+**Precedes:** `gathering-feature` — Migrations often unblock new features built on the new pattern
+
+**Follows:** `gathering-architecture` — Architecture decisions often require migrations to implement
+
+**Animals available for extension:**
+- `beaver-build` — Add regression tests after migration
+- `fox-optimize` — Profile performance if migration touches hot paths
+- `deer-sense` — Audit accessibility if migrating UI components
+
+---
+
+*When no single animal suffices, the gathering answers.* 🌲🐾
