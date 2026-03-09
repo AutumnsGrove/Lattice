@@ -207,13 +207,14 @@
 	<PaymentMethodCard billing={data.billing} />
 
 	<!-- Passkeys — managed on login hub (single WebAuthn origin) -->
-	<GlassCard
-		variant="default"
-		class="mb-6"
-		title="Passkeys"
-		icon={KeyRound}
-		iconClass="text-primary"
-	>
+	<GlassCard variant="default" class="mb-6">
+		<h2 style="display: flex; align-items: center; gap: 0.5rem; margin: 0 0 1rem 0;">
+			<KeyRound
+				style="width: 1.25rem; height: 1.25rem; color: var(--color-primary);"
+				aria-hidden="true"
+			/>
+			Passkeys
+		</h2>
 		<p style="margin: 0 0 1.5rem 0; color: var(--color-text-muted); font-size: 0.9rem;">
 			Passkeys let you sign in securely using Face ID, Touch ID, or Windows Hello — no password
 			needed. Manage your passkeys on the Grove login hub.

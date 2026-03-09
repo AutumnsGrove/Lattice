@@ -5,6 +5,7 @@
 	import Spinner from "$lib/ui/components/ui/Spinner.svelte";
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import GlassConfirmDialog from "$lib/ui/components/ui/GlassConfirmDialog.svelte";
+	import Waystone from "$lib/ui/components/ui/Waystone.svelte";
 	import GroveTerm from "$lib/ui/components/ui/groveterm/GroveTerm.svelte";
 	import { GreenhouseStatusCard, GraftControlPanel } from "$lib/grafts/greenhouse";
 	import {
@@ -1118,13 +1119,11 @@
 		</div>
 	{/if}
 
-	<GlassCard
-		variant="frosted"
-		class="mb-6"
-		title="Typography"
-		waystone="custom-fonts"
-		waystoneLabel="Learn about fonts"
-	>
+	<GlassCard variant="frosted" class="mb-6">
+		<div class="section-header">
+			<h2>Typography</h2>
+			<Waystone slug="custom-fonts" label="Learn about fonts" />
+		</div>
 		<p class="section-description">
 			Choose the font family used across the entire site. Changes take effect immediately.
 		</p>
@@ -1247,13 +1246,11 @@
 		{/if}
 	</GlassCard>
 
-	<GlassCard
-		variant="frosted"
-		class="mb-6"
-		title="Accent Color"
-		waystone="choosing-a-theme"
-		waystoneLabel="Learn about themes"
-	>
+	<GlassCard variant="frosted" class="mb-6">
+		<div class="section-header">
+			<h2>Accent Color</h2>
+			<Waystone slug="choosing-a-theme" label="Learn about themes" />
+		</div>
 		<p class="section-description">
 			Customize the accent color used for tags and interactive elements on your blog.
 		</p>
@@ -1691,13 +1688,11 @@
 	</GlassCard>
 
 	<!-- Blazes — Custom Content Markers -->
-	<GlassCard
-		variant="frosted"
-		class="mb-6"
-		title="Blazes"
-		waystone="what-are-blazes"
-		waystoneLabel="What are blazes?"
-	>
+	<GlassCard variant="frosted" class="mb-6">
+		<div class="section-header">
+			<h2>Blazes</h2>
+			<Waystone slug="what-are-blazes" label="What are blazes?" size="sm" />
+		</div>
 		<p class="section-description">
 			Small markers that tell readers what your posts are about. The 8 default blazes are always
 			available. You can create up to 20 custom blazes for your garden.
