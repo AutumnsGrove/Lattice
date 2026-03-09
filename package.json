@@ -43,6 +43,7 @@
 		"oxlint": "^1.0.0",
 		"prettier": "^3.5.0",
 		"prettier-plugin-svelte": "^3.4.0",
+		"qrcode": "^1.5.4",
 		"sharp": "^0.34.5",
 		"svelte-eslint-parser": "^0.43.0",
 		"tsx": "^4.21.0",
