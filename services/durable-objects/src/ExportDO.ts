@@ -80,14 +80,13 @@ interface PageRecord {
 
 interface MediaRecord {
 	id: string;
-	filename: string;
-	original_name: string;
 	r2_key: string;
-	url: string;
-	size: number;
-	mime_type: string;
+	parsed_slug: string | null;
+	custom_title: string | null;
 	alt_text: string | null;
-	uploaded_at: number;
+	file_size: number | null;
+	cdn_url: string | null;
+	uploaded_at: string | null;
 }
 
 // =============================================================================
@@ -262,17 +261,17 @@ export class ExportDO extends LoomDO<ExportJobState, ExportDOEnv> {
 		// Query pages
 		const pagesResult = await this.env.DB.prepare(
 			`SELECT id, slug, title, description, markdown_content, type, created_at, updated_at
-       FROM pages WHERE tenant_id = ? ORDER BY display_order ASC`,
+       FROM pages WHERE tenant_id = ? ORDER BY nav_order ASC`,
 		)
 			.bind(this.state_data.tenantId)
 			.all<PageRecord>();
 
 		const pages = pagesResult.results || [];
 
-		// Query media
+		// Query media (gallery_images is the current image table; legacy `media` table is unused)
 		const mediaResult = await this.env.DB.prepare(
-			`SELECT id, filename, original_name, r2_key, url, size, mime_type, alt_text, uploaded_at
-       FROM media WHERE tenant_id = ? ORDER BY uploaded_at DESC`,
+			`SELECT id, r2_key, parsed_slug, custom_title, alt_text, file_size, cdn_url, uploaded_at
+       FROM gallery_images WHERE tenant_id = ? ORDER BY created_at DESC`,
 		)
 			.bind(this.state_data.tenantId)
 			.all<MediaRecord>();
@@ -326,10 +325,13 @@ export class ExportDO extends LoomDO<ExportJobState, ExportDOEnv> {
 		const pages = (await this.state.storage.get<PageRecord[]>("pages")) || [];
 		const media = (await this.state.storage.get<MediaRecord[]>("media")) || [];
 
-		// Build media URL to filename map for featured image rewriting
+		// Build media CDN URL to filename map for featured image rewriting
 		const mediaMap = new Map<string, string>();
 		for (const m of media) {
-			mediaMap.set(m.url, m.original_name);
+			const filename = this.deriveFilename(m);
+			if (m.cdn_url) {
+				mediaMap.set(m.cdn_url, filename);
+			}
 		}
 
 		// Handle images if enabled - fetch and store separately
@@ -361,8 +363,9 @@ export class ExportDO extends LoomDO<ExportJobState, ExportDOEnv> {
 			for (const m of media) {
 				const imageData = await this.state.storage.get<Uint8Array>(`image:${m.r2_key}`);
 				if (imageData) {
+					const filename = this.deriveFilename(m);
 					// Store without recompressing (JPEG, PNG, WebP already compressed)
-					zipFiles[`images/${m.original_name}`] = [imageData, { level: 0 }];
+					zipFiles[`images/${filename}`] = [imageData, { level: 0 }];
 				}
 			}
 		}
@@ -424,14 +427,14 @@ export class ExportDO extends LoomDO<ExportJobState, ExportDOEnv> {
 					await this.state.storage.put(`image:${m.r2_key}`, imageData);
 				} else {
 					this.log.warn("Image not found in R2", { r2Key: m.r2_key });
-					this.state_data.skippedImages.push(m.original_name);
+					this.state_data.skippedImages.push(this.deriveFilename(m));
 				}
 			} catch (error) {
 				this.log.warn("Failed to fetch image", {
 					r2Key: m.r2_key,
 					error: String(error),
 				});
-				this.state_data.skippedImages.push(m.original_name);
+				this.state_data.skippedImages.push(this.deriveFilename(m));
 			}
 		}
 
@@ -712,6 +715,20 @@ export class ExportDO extends LoomDO<ExportJobState, ExportDOEnv> {
 			.replace(/\n/g, "\\n") // Escape newlines
 			.replace(/\r/g, "\\r") // Escape carriage returns
 			.replace(/\t/g, "\\t"); // Escape tabs
+	}
+
+	/**
+	 * Derive a human-friendly filename from a gallery_images record.
+	 * Falls back to the last segment of the R2 key.
+	 */
+	private deriveFilename(m: MediaRecord): string {
+		if (m.custom_title) {
+			// Sanitize custom title into a safe filename, preserve extension from r2_key
+			const ext = m.r2_key.includes(".") ? "." + m.r2_key.split(".").pop() : "";
+			return this.sanitizeForPath(m.custom_title) + ext;
+		}
+		// Use the last path segment of the R2 key (the actual filename in the bucket)
+		return m.r2_key.split("/").pop() || m.id;
 	}
 
 	private sanitizeForPath(str: string): string {
