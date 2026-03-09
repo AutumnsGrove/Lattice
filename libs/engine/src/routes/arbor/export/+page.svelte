@@ -362,8 +362,13 @@
 
 	<!-- Section 2b: Completed export — download prompt -->
 	{#if activeExportId && activeStatus === "complete" && deliveryMethod === "download"}
-		<GlassCard variant="default" class="mb-6">
-			<h2><CheckCircle class="header-icon success-icon" aria-hidden="true" /> Export Ready!</h2>
+		<GlassCard
+			variant="default"
+			class="mb-6"
+			title="Export Ready!"
+			icon={CheckCircle}
+			iconClass="text-primary"
+		>
 			<p class="section-desc">Your export is bundled and ready to download.</p>
 			<Button
 				variant="primary"
@@ -395,9 +400,7 @@
 
 	<!-- Section 3: Past Exports -->
 	{#if data.pastExports.length > 0}
-		<GlassCard variant="default">
-			<h2><Clock class="header-icon" aria-hidden="true" /> Past Exports</h2>
-
+		<GlassCard variant="default" title="Past Exports" icon={Clock} iconClass="text-primary">
 			<div class="exports-list">
 				{#each data.pastExports as exp (exp.id)}
 					<div class="export-row">
@@ -642,10 +645,6 @@
 	.section-desc {
 		margin: 0 0 1rem 0;
 		color: var(--color-text-muted);
-	}
-
-	:global(.success-icon) {
-		color: var(--color-primary) !important;
 	}
 
 	/* Error Banner */
