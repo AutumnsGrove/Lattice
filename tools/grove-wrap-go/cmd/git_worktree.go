@@ -393,39 +393,7 @@ When omitted, operates on the current working directory (existing behavior).`,
 			return fmt.Errorf("cannot finish from main/master branch — must be in a worktree branch")
 		}
 
-		// Check for uncommitted changes
-		statusResult, err := gwexec.RunInDir(cwd, "git", "status", "--porcelain")
-		if err != nil {
-			return fmt.Errorf("git status failed: %w", err)
-		}
-		hasChanges := strings.TrimSpace(statusResult.Stdout) != ""
-
-		if hasChanges {
-			if message == "" {
-				message = fmt.Sprintf("feat: work in progress on %s", branch)
-			}
-
-			// Stage all and commit
-			result, err := gwexec.RunInDir(cwd, "git", "add", "-A")
-			if err != nil || !result.OK() {
-				return fmt.Errorf("git add failed: %w", err)
-			}
-			result, err = gwexec.RunInDir(cwd, "git", "commit", "-m", message)
-			if err != nil || !result.OK() {
-				return fmt.Errorf("git commit failed: %s", strings.TrimSpace(result.Stderr))
-			}
-		}
-
-		// Push branch
-		pushResult, err := gwexec.RunInDir(cwd, "git", "push", "-u", "origin", branch)
-		if err != nil {
-			return fmt.Errorf("git push failed: %w", err)
-		}
-		if !pushResult.OK() {
-			return fmt.Errorf("git push: %s", strings.TrimSpace(pushResult.Stderr))
-		}
-
-		// Find the main worktree path
+		// Find the main worktree path early — needed for rebase and merge
 		listOutput, err := gwexec.GitOutput("worktree", "list", "--porcelain")
 		if err != nil {
 			return fmt.Errorf("failed to list worktrees: %w", err)
@@ -444,14 +412,86 @@ When omitted, operates on the current working directory (existing behavior).`,
 			return fmt.Errorf("could not find main worktree — remove this worktree manually")
 		}
 
+		// Sync branch with main BEFORE staging to prevent ghost deletions.
+		// Without this, files added to main after the branch point would be
+		// absent from the worktree. `git add -A` would stage their absence
+		// as deletions, and the merge would propagate those deletions to main.
+		// See: https://github.com/AutumnsGrove/Lattice/issues/1435
+		if !noMerge {
+			gwexec.RunInDir(cwd, "git", "fetch", "origin", "--prune")
+			rebaseResult, rebaseErr := gwexec.RunInDir(cwd, "git", "rebase", "origin/"+mainBranch)
+			if rebaseErr != nil || !rebaseResult.OK() {
+				ui.Warning("Could not rebase branch onto origin/" + mainBranch + " — proceeding with current state")
+				// Abort the failed rebase to restore clean state
+				gwexec.RunInDir(cwd, "git", "rebase", "--abort")
+			}
+		}
+
+		// Check for uncommitted changes
+		statusResult, err := gwexec.RunInDir(cwd, "git", "status", "--porcelain")
+		if err != nil {
+			return fmt.Errorf("git status failed: %w", err)
+		}
+		hasChanges := strings.TrimSpace(statusResult.Stdout) != ""
+
+		if hasChanges {
+			if message == "" {
+				message = fmt.Sprintf("feat: work in progress on %s", branch)
+			}
+
+			// Stage all and commit
+			result, err := gwexec.RunInDir(cwd, "git", "add", "-A")
+			if err != nil || !result.OK() {
+				return fmt.Errorf("git add failed: %w", err)
+			}
+
+			// Safety check: detect unexpected deletions before committing.
+			// If staging produced more than 50 deletions, something is wrong —
+			// abort rather than propagate mass deletions to main.
+			diffResult, diffErr := gwexec.RunInDir(cwd, "git", "diff", "--cached", "--diff-filter=D", "--name-only")
+			if diffErr == nil {
+				deletedFiles := strings.TrimSpace(diffResult.Stdout)
+				if deletedFiles != "" {
+					deleteCount := len(strings.Split(deletedFiles, "\n"))
+					if deleteCount > 50 {
+						// Unstage everything and abort
+						gwexec.RunInDir(cwd, "git", "reset", "HEAD")
+						return fmt.Errorf("safety abort: staging would delete %d files — this likely indicates the branch is out of sync with %s\nRun `git rebase %s` in the worktree first, or use --no-merge to skip", deleteCount, mainBranch, mainBranch)
+					}
+				}
+			}
+
+			result, err = gwexec.RunInDir(cwd, "git", "commit", "-m", message)
+			if err != nil || !result.OK() {
+				return fmt.Errorf("git commit failed: %s", strings.TrimSpace(result.Stderr))
+			}
+		}
+
+		// Push branch
+		pushResult, err := gwexec.RunInDir(cwd, "git", "push", "-u", "origin", branch)
+		if err != nil {
+			return fmt.Errorf("git push failed: %w", err)
+		}
+		if !pushResult.OK() {
+			// Force push may be needed after rebase rewrote history
+			pushResult, err = gwexec.RunInDir(cwd, "git", "push", "--force-with-lease", "-u", "origin", branch)
+			if err != nil {
+				return fmt.Errorf("git push failed: %w", err)
+			}
+			if !pushResult.OK() {
+				return fmt.Errorf("git push: %s", strings.TrimSpace(pushResult.Stderr))
+			}
+		}
+
 		// Merge into main (unless --no-merge)
 		merged := false
 		if !noMerge {
-			// Sync main with origin before merging (fetch + rebase, same as gw git sync)
+			// Sync main with origin before merging
 			gwexec.RunInDir(mainPath, "git", "fetch", "origin", "--prune")
 			rebaseResult, rebaseErr := gwexec.RunInDir(mainPath, "git", "rebase", "origin/"+mainBranch)
 			if rebaseErr != nil || !rebaseResult.OK() {
 				ui.Warning("Could not rebase " + mainBranch + " onto origin/" + mainBranch + " — merging with current state")
+				gwexec.RunInDir(mainPath, "git", "rebase", "--abort")
 			}
 
 			// Merge the branch into main
