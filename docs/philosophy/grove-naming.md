@@ -830,6 +830,20 @@ The paradox is the point. The hollow that carries light. The void through which 
 
 _Light from the void._
 
+### Moss
+
+**AI Memory** · _Module inside Lumen_
+**Standard:** AI Memory
+**Waystone:** The memory layer that gives Grove's AI agents persistent, personalized context across sessions, with full export for portability.
+
+Moss grows on the surfaces the forest touches most. It doesn't announce itself. It accumulates, layer by layer, until the forest floor is softened by what came before. Always there when you look. Never in the way when you don't.
+
+Moss is Grove's per-user AI memory system. As Wanderers interact with AI agents across Grove (Fireside Chat, Reverie, Porch, Lantern Chat), Moss stores structured facts, preferences, and context that carry across sessions. It lives inside Lumen as a module, built entirely on Cloudflare primitives: D1 for structured facts, Vectorize for semantic search, Workers AI for embeddings, and a Loom-pattern Durable Object per user for coordination.
+
+Memories are entirely exportable. Download everything as a portable artifact (Markdown + ingestion prompt), paste it into any other AI service, and your context follows you. No vendor lock-in. No API integrations. The user's journey is portable because the artifact is portable. Grove doesn't hold your memories hostage. It holds them until you ask for them.
+
+_The forest remembers through its moss._
+
 ### Zephyr
 
 **Email Gateway** · _Internal service_
@@ -922,6 +936,7 @@ _In a forest full of harvesters, this grove stays shaded._
 | **Patina**     | Ops          | Backup system                  | _(internal)_                    |
 | **Mycelium**   | Ops          | MCP server                     | mycelium.grove.place            |
 | **Lumen**      | Ops          | AI gateway                     | _(internal)_                    |
+| **Moss**       | Ops          | AI memory                      | _(module inside Lumen)_         |
 | **Zephyr**     | Ops          | Email gateway                  | _(internal)_                    |
 | **Shade**      | Ops          | AI content protection          | grove.place/shade               |
 
@@ -979,6 +994,7 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Patina          | GrovePatina     |
 | Mycelium        | GroveMCP        |
 | Lumen           | GroveLumen      |
+| Moss            | GroveMoss       |
 | Zephyr          | GroveZephyr     |
 | Shade           | GroveShade      |
 | Etch            | GroveEtch       |

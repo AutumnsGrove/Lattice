@@ -252,6 +252,31 @@
 					],
 				},
 				{
+					name: "Reverie",
+					termSlug: "reverie",
+					tagline: "Composition Layer",
+					description:
+						"A reverie is that state between waking and dreaming, when something forms in your mind's eye. Tell Reverie what you want ('make it cozy', 'add something that glows') and it translates your intent into actual component arrangements for your blog. Not a drag-and-drop builder. A conversation with your space.",
+					status: "building",
+					icon: "eclipse",
+					domain: "reverie.grove.place",
+					integration: "AI composition layer, accessible through Arbor and Lantern",
+					subComponents: [
+						{
+							name: "Solarpunk",
+							icon: "solarpanel",
+							description: "Solarpunk aligned",
+							href: "/knowledge/help/what-is-solarpunk",
+						},
+						{
+							name: "ZDR",
+							icon: "shredder",
+							description: "Zero data retention",
+							href: "/knowledge/help/what-is-zdr",
+						},
+					],
+				},
+				{
 					name: "Plant",
 					termSlug: "plant",
 					tagline: "Tenant Onboarding",
@@ -292,6 +317,16 @@
 						{ name: "Blight", icon: "triangle-alert", description: "Emergency kill switch" },
 						{ name: "Greenhouse", icon: "warehouse", description: "Early access testing" },
 					],
+				},
+				{
+					name: "Blazes",
+					termSlug: "blazes",
+					tagline: "Content Type Indicators",
+					description:
+						"A trail blaze is a painted mark on a tree. A small rectangle of color that tells hikers which path they're on. You don't read it. You glance. Blazes are the small icon and label on each post that tells you what kind of content it is. A bloom, a note, or something else. The mark that keeps you oriented.",
+					status: "live",
+					icon: "flamekindling",
+					integration: "Visible across all content types in Grove",
 				},
 				{
 					name: "Amber",
@@ -472,6 +507,17 @@
 					integration: "Support and conversation for all Wanderers",
 					spec: "/knowledge/specs/porch-spec",
 					whatIsLink: "/knowledge/help/what-is-porch",
+				},
+				{
+					name: "Lantern",
+					termSlug: "lantern",
+					tagline: "Cross-Grove Navigation",
+					description:
+						"A lantern in the forest shows you what's around you, where you can go, and always the way back home. Lantern is the floating navigation panel on every grove. Hop between sites, visit friends, access platform services. It glows softly. It doesn't demand attention, but when you need it, it's there.",
+					status: "live",
+					icon: "ferris-wheel",
+					integration: "Engine chrome component, loads on every site",
+					whatIsLink: "/knowledge/help/what-is-lantern",
 				},
 				{
 					name: "Trace",
@@ -980,6 +1026,19 @@
 					spec: "/knowledge/specs/press-spec",
 				},
 				{
+					name: "Shutter",
+					termSlug: "shutter",
+					tagline: "Web Content Distillation",
+					description:
+						"A shutter controls what reaches the lens. Open it, and light floods in. Everything, all at once, overwhelming. But a photographer doesn't want everything. They want the shot. Give Shutter a URL and a question, get clean focused content back instead of raw HTML noise. The shutter opens precisely when needed, captures exactly what's in frame, and closes before the noise can follow.",
+					status: "live",
+					icon: "aperture",
+					domain: "shutter.grove.place",
+					integration: "Web content extraction for agents and workflows",
+					github: "https://github.com/AutumnsGrove/Shutter",
+					spec: "/knowledge/specs/shutter-spec",
+				},
+				{
 					name: "Lumen",
 					termSlug: "lumen",
 					tagline: "AI Gateway",
@@ -1003,6 +1062,23 @@
 							description: "Zero data retention",
 							href: "/knowledge/help/what-is-zdr",
 						},
+					],
+				},
+				{
+					name: "Moss",
+					termSlug: "moss",
+					tagline: "AI Memory",
+					description:
+						"Moss grows on the surfaces the forest touches most. It accumulates, layer by layer, until the forest floor is softened by what came before. Moss is Grove's per-user AI memory system. As Wanderers interact with AI agents, Moss stores structured facts, preferences, and context that carry across sessions. Entirely exportable. No vendor lock-in.",
+					status: "planned",
+					icon: "leaf",
+					integration: "Module inside Lumen, available to all AI services",
+					spec: "/knowledge/specs/moss-spec",
+					subComponents: [
+						{ name: "Warm", icon: "layers", description: "Always-on context cache" },
+						{ name: "Recall", icon: "searchcode", description: "Semantic memory search" },
+						{ name: "Extract", icon: "database", description: "Async fact extraction" },
+						{ name: "Export", icon: "download", description: "Portable memory artifact" },
 					],
 				},
 				{
@@ -1312,9 +1388,7 @@
 					aria-label="Jump to {item.text}"
 					title={item.text}
 				>
-					<ItemIcon
-						class="w-5 h-5 text-warning group-hover:scale-110 transition-transform"
-					/>
+					<ItemIcon class="w-5 h-5 text-warning group-hover:scale-110 transition-transform" />
 				</a>
 
 				<!-- Tools revealed on hover -->

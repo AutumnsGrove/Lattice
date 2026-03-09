@@ -17,227 +17,231 @@
 import BeeIcon from "$lib/components/icons/BeeIcon.svelte";
 
 import {
-  // Navigation
-  Home,
-  Info,
-  Telescope,
-  MapPin,
-  HandCoins,
-  BookOpen,
-  Trees,
-  PenLine,
-  // Features
-  Mail,
-  HardDrive,
-  Palette,
-  ShieldCheck,
-  Cloud,
-  SearchCode,
-  Archive,
-  Upload,
-  MessagesSquare,
-  ExternalLink,
-  Github,
-  // Content
-  FileText,
-  Tag,
-  Sprout,
-  Heart,
-  Leaf,
-  Flower2,
-  // States
-  Check,
-  CheckCircle,
-  X,
-  Loader2,
-  AlertTriangle,
-  HelpCircle,
-  Info as InfoIcon,
-  // Phases & Dreams
-  Gem,
-  Sparkles,
-  Star,
-  Moon,
-  Sun,
-  // Actions
-  Compass,
-  Megaphone,
-  Lightbulb,
-  Download,
-  Settings,
-  Menu,
-  // Growth indicators
-  Clock,
-  TrendingUp,
-  TrendingDown,
-  ArrowRight,
-  Activity,
-  Users,
-  ShieldUser,
-  BarChart3,
-  Circle,
-  // Midnight Bloom specific
-  Coffee,
-  QrCode,
-  // Beyond page icons
-  Music,
-  Newspaper,
-  // Pricing page icons
-  Globe,
-  MessageCircle,
-  CalendarDays,
-  TreeDeciduous,
-  Crown,
-  LifeBuoy,
-  // Workshop/Tool specific icons
-  Pickaxe,
-  Codesandbox,
-  Webhook,
-  Spool,
-  CircuitBoard,
-  Binoculars,
-  LandPlot,
-  Projector,
-  Mailbox,
-  MapPinPlus,
-  UserRoundCheck,
-  BrickWall,
-  LayoutDashboard,
-  Wind,
-  Grape,
-  Gauge,
-  Radar,
-  Layers,
-  PencilRuler,
-  SwatchBook,
-  Bird,
-  Triangle,
-  Terminal,
-  Signpost,
-  Database,
-  Zap,
-  Store,
-  Stamp,
-  SplinePointer,
-  Waves,
-  Waypoints,
-  Route,
-  Funnel,
-  // Subicon additions for workshop features
-  LayoutList,
-  Origami,
-  Feather,
-  ToolCase,
-  CloudCog,
-  Building2,
-  House,
-  ShieldOff,
-  Key,
-  Codepen,
-  FileCode,
-  PaintbrushVertical,
-  SlidersHorizontal,
-  BookType,
-  Component,
-  Lock,
-  Contact,
-  Eye,
-  BookOpenCheck,
-  Goal,
-  // Additional subicon imports (round 2)
-  Chrome,
-  Wand2,
-  Layout,
-  Image,
-  Reply,
-  Bot,
-  Bug,
-  Cpu,
-  Frame,
-  Shapes,
-  Share2,
-  // Additional subicon imports (round 3) - workshop expansion
-  ImageUp,
-  FlameKindling,
-  GlobeLock,
-  Trash2,
-  Rss,
-  SquareAsterisk,
-  IdCard,
-  BadgeCheck,
-  Refrigerator,
-  BrickWallFire,
-  FileBox,
-  ServerCog,
-  SolarPanel,
-  CloudCog as MonitorCloud,
-  ShoppingBasket,
-  ScanQrCode,
-  SendToBack,
-  Regex,
-  // Icon additions for workshop TOC and tools
-  Pyramid,
-  Blinds,
-  RockingChair,
-  Wrench,
-  Dock,
-  IdCardLanyard,
-  ListTree,
-  // Shutter - web content distillation
-  Aperture,
-  // Curios - cabinet of wonders
-  Amphora,
-  NotebookPen,
-  NotebookText,
-  Shell,
-  // Wander - immersive discovery
-  Earth,
-  LineSquiggle,
-  // Icon updates for workshop - January 2026
-  Loader,
-  SquaresExclude,
-  FileWarning,
-  GalleryHorizontalEnd,
-  GitBranch,
-  ChevronsLeftRightEllipsis,
-  BookUser,
-  // Grafts - feature customization
-  Flag,
-  FlagOff,
-  FileStack,
-  TriangleAlert,
-  Unplug,
-  Gamepad,
-  // Petal - image content moderation
-  Fan,
-  // Lumen - AI gateway
-  LampCeiling,
-  // Greenhouse mode - internal testing
-  Warehouse,
-  // Burrow - cross-property access
-  Network,
-  // Etch - link saving & highlights
-  Highlighter,
-  // Passage - subdomain routing
-  Kayak,
-  // Scribe - voice transcription
-  Mic,
-  // Flow - writing sanctuary icons
-  DraftingCompass,
-  Focus,
-  Save,
-  // Trace - inline feedback
-  Footprints,
-  // Passkeys - passwordless authentication
-  Fingerprint,
-  // Warden - external API gateway
-  Vault,
-  // Zephyr - email gateway
-  Send,
-  RefreshCw,
-  // Garden & Blooms icons
-  Flower,
-  Cherry,
+	// Navigation
+	Home,
+	Info,
+	Telescope,
+	MapPin,
+	HandCoins,
+	BookOpen,
+	Trees,
+	PenLine,
+	// Features
+	Mail,
+	HardDrive,
+	Palette,
+	ShieldCheck,
+	Cloud,
+	SearchCode,
+	Archive,
+	Upload,
+	MessagesSquare,
+	ExternalLink,
+	Github,
+	// Content
+	FileText,
+	Tag,
+	Sprout,
+	Heart,
+	Leaf,
+	Flower2,
+	// States
+	Check,
+	CheckCircle,
+	X,
+	Loader2,
+	AlertTriangle,
+	HelpCircle,
+	Info as InfoIcon,
+	// Phases & Dreams
+	Gem,
+	Sparkles,
+	Star,
+	Moon,
+	Sun,
+	// Actions
+	Compass,
+	Megaphone,
+	Lightbulb,
+	Download,
+	Settings,
+	Menu,
+	// Growth indicators
+	Clock,
+	TrendingUp,
+	TrendingDown,
+	ArrowRight,
+	Activity,
+	Users,
+	ShieldUser,
+	BarChart3,
+	Circle,
+	// Midnight Bloom specific
+	Coffee,
+	QrCode,
+	// Beyond page icons
+	Music,
+	Newspaper,
+	// Pricing page icons
+	Globe,
+	MessageCircle,
+	CalendarDays,
+	TreeDeciduous,
+	Crown,
+	LifeBuoy,
+	// Workshop/Tool specific icons
+	Pickaxe,
+	Codesandbox,
+	Webhook,
+	Spool,
+	CircuitBoard,
+	Binoculars,
+	LandPlot,
+	Projector,
+	Mailbox,
+	MapPinPlus,
+	UserRoundCheck,
+	BrickWall,
+	LayoutDashboard,
+	Wind,
+	Grape,
+	Gauge,
+	Radar,
+	Layers,
+	PencilRuler,
+	SwatchBook,
+	Bird,
+	Triangle,
+	Terminal,
+	Signpost,
+	Database,
+	Zap,
+	Store,
+	Stamp,
+	SplinePointer,
+	Waves,
+	Waypoints,
+	Route,
+	Funnel,
+	// Subicon additions for workshop features
+	LayoutList,
+	Origami,
+	Feather,
+	ToolCase,
+	CloudCog,
+	Building2,
+	House,
+	ShieldOff,
+	Key,
+	Codepen,
+	FileCode,
+	PaintbrushVertical,
+	SlidersHorizontal,
+	BookType,
+	Component,
+	Lock,
+	Contact,
+	Eye,
+	BookOpenCheck,
+	Goal,
+	// Additional subicon imports (round 2)
+	Chrome,
+	Wand2,
+	Layout,
+	Image,
+	Reply,
+	Bot,
+	Bug,
+	Cpu,
+	Frame,
+	Shapes,
+	Share2,
+	// Additional subicon imports (round 3) - workshop expansion
+	ImageUp,
+	FlameKindling,
+	GlobeLock,
+	Trash2,
+	Rss,
+	SquareAsterisk,
+	IdCard,
+	BadgeCheck,
+	Refrigerator,
+	BrickWallFire,
+	FileBox,
+	ServerCog,
+	SolarPanel,
+	CloudCog as MonitorCloud,
+	ShoppingBasket,
+	ScanQrCode,
+	SendToBack,
+	Regex,
+	// Icon additions for workshop TOC and tools
+	Pyramid,
+	Blinds,
+	RockingChair,
+	Wrench,
+	Dock,
+	IdCardLanyard,
+	ListTree,
+	// Shutter - web content distillation
+	Aperture,
+	// Curios - cabinet of wonders
+	Amphora,
+	NotebookPen,
+	NotebookText,
+	Shell,
+	// Wander - immersive discovery
+	Earth,
+	LineSquiggle,
+	// Icon updates for workshop - January 2026
+	Loader,
+	SquaresExclude,
+	FileWarning,
+	GalleryHorizontalEnd,
+	GitBranch,
+	ChevronsLeftRightEllipsis,
+	BookUser,
+	// Grafts - feature customization
+	Flag,
+	FlagOff,
+	FileStack,
+	TriangleAlert,
+	Unplug,
+	Gamepad,
+	// Petal - image content moderation
+	Fan,
+	// Lumen - AI gateway
+	LampCeiling,
+	// Reverie - AI composition layer
+	Eclipse,
+	// Lantern - cross-grove navigation
+	FerrisWheel,
+	// Greenhouse mode - internal testing
+	Warehouse,
+	// Burrow - cross-property access
+	Network,
+	// Etch - link saving & highlights
+	Highlighter,
+	// Passage - subdomain routing
+	Kayak,
+	// Scribe - voice transcription
+	Mic,
+	// Flow - writing sanctuary icons
+	DraftingCompass,
+	Focus,
+	Save,
+	// Trace - inline feedback
+	Footprints,
+	// Passkeys - passwordless authentication
+	Fingerprint,
+	// Warden - external API gateway
+	Vault,
+	// Zephyr - email gateway
+	Send,
+	RefreshCw,
+	// Garden & Blooms icons
+	Flower,
+	Cherry,
 } from "lucide-svelte";
 
 // ============================================================================
@@ -245,14 +249,14 @@ import {
 // ============================================================================
 /** Icons for main navigation items */
 export const navIcons = {
-  home: Home,
-  about: Info,
-  vision: Telescope,
-  roadmap: MapPin,
-  pricing: HandCoins,
-  knowledge: BookOpen,
-  forest: Trees,
-  blog: PenLine,
+	home: Home,
+	about: Info,
+	vision: Telescope,
+	roadmap: MapPin,
+	pricing: HandCoins,
+	knowledge: BookOpen,
+	forest: Trees,
+	blog: PenLine,
 } as const;
 
 // ============================================================================
@@ -260,17 +264,17 @@ export const navIcons = {
 // ============================================================================
 /** Icons for features, tools, and services */
 export const featureIcons = {
-  mail: Mail,
-  harddrive: HardDrive,
-  palette: Palette,
-  shieldcheck: ShieldCheck,
-  cloud: Cloud,
-  searchcode: SearchCode,
-  archive: Archive,
-  upload: Upload,
-  messagessquare: MessagesSquare,
-  externallink: ExternalLink,
-  github: Github,
+	mail: Mail,
+	harddrive: HardDrive,
+	palette: Palette,
+	shieldcheck: ShieldCheck,
+	cloud: Cloud,
+	searchcode: SearchCode,
+	archive: Archive,
+	upload: Upload,
+	messagessquare: MessagesSquare,
+	externallink: ExternalLink,
+	github: Github,
 } as const;
 
 // ============================================================================
@@ -278,20 +282,20 @@ export const featureIcons = {
 // ============================================================================
 /** Icons for content types and growth concepts */
 export const contentIcons = {
-  filetext: FileText,
-  bookopen: BookOpen,
-  tag: Tag,
-  sprout: Sprout,
-  heart: Heart,
-  leaf: Leaf,
-  flower2: Flower2,
-  trees: Trees,
-  clock: Clock,
-  trending: TrendingUp,
-  users: Users,
-  shield: ShieldUser,
-  barchart: BarChart3,
-  activity: Activity,
+	filetext: FileText,
+	bookopen: BookOpen,
+	tag: Tag,
+	sprout: Sprout,
+	heart: Heart,
+	leaf: Leaf,
+	flower2: Flower2,
+	trees: Trees,
+	clock: Clock,
+	trending: TrendingUp,
+	users: Users,
+	shield: ShieldUser,
+	barchart: BarChart3,
+	activity: Activity,
 } as const;
 
 // ============================================================================
@@ -299,15 +303,15 @@ export const contentIcons = {
 // ============================================================================
 /** Icons for states: success, error, loading, etc. */
 export const stateIcons = {
-  check: Check,
-  checkcircle: CheckCircle,
-  x: X,
-  loader: Loader2,
-  warning: AlertTriangle,
-  help: HelpCircle,
-  info: InfoIcon,
-  circle: Circle, // Fallback/default
-  tag: Tag, // For version tags, labels
+	check: Check,
+	checkcircle: CheckCircle,
+	x: X,
+	loader: Loader2,
+	warning: AlertTriangle,
+	help: HelpCircle,
+	info: InfoIcon,
+	circle: Circle, // Fallback/default
+	tag: Tag, // For version tags, labels
 } as const;
 
 // ============================================================================
@@ -315,12 +319,12 @@ export const stateIcons = {
 // ============================================================================
 /** Icons for phases, refinement, and mystical/future content */
 export const phaseIcons = {
-  gem: Gem,
-  sparkles: Sparkles,
-  star: Star,
-  moon: Moon,
-  sun: Sun,
-  sprout: Sprout,
+	gem: Gem,
+	sparkles: Sparkles,
+	star: Star,
+	moon: Moon,
+	sun: Sun,
+	sprout: Sprout,
 } as const;
 
 // ============================================================================
@@ -328,15 +332,15 @@ export const phaseIcons = {
 // ============================================================================
 /** Icons for user actions and processes */
 export const actionIcons = {
-  compass: Compass,
-  megaphone: Megaphone,
-  lightbulb: Lightbulb,
-  download: Download,
-  settings: Settings,
-  menu: Menu,
-  trend: TrendingUp,
-  trenddown: TrendingDown,
-  arrow: ArrowRight,
+	compass: Compass,
+	megaphone: Megaphone,
+	lightbulb: Lightbulb,
+	download: Download,
+	settings: Settings,
+	menu: Menu,
+	trend: TrendingUp,
+	trenddown: TrendingDown,
+	arrow: ArrowRight,
 } as const;
 
 // ============================================================================
@@ -344,191 +348,197 @@ export const actionIcons = {
 // ============================================================================
 /** Icons specific to tools and workshop features */
 export const toolIcons = {
-  mailbox: Mailbox,
-  harddrive: HardDrive,
-  palette: Palette,
-  shieldcheck: ShieldCheck,
-  cloud: Cloud,
-  searchcode: SearchCode,
-  pickaxe: Pickaxe,
-  archive: Archive,
-  upload: Upload,
-  projector: Projector,
-  circuitboard: CircuitBoard,
-  spool: Spool,
-  binoculars: Binoculars,
-  bird: Bird,
-  dashboard: LayoutDashboard,
-  activity: Activity,
-  landplot: LandPlot,
-  messagessquare: MessagesSquare,
-  shielduser: UserRoundCheck,
-  barchart: BarChart3,
-  grape: Grape,
-  codesandbox: Codesandbox,
-  users: Users,
-  map: MapPin,
-  helpcircle: HelpCircle,
-  signpost: Signpost,
-  triangle: Triangle,
-  gauge: Gauge,
-  radar: Radar,
-  webhook: Webhook,
-  terminal: Terminal,
-  database: Database,
-  mapplus: MapPinPlus,
-  layers: Layers,
-  pencilruler: PencilRuler,
-  swatchbook: SwatchBook,
-  brickwallshield: BrickWall,
-  wind: Wind,
-  // Petal - image content moderation
-  fan: Fan,
-  // Beyond page icons (standalone tools)
-  music: Music,
-  book: BookOpen,
-  newspaper: Newspaper,
-  telescope: Telescope,
-  // Commerce
-  store: Store,
-  // Support
-  lifebuoy: LifeBuoy,
-  // Press - image processing CLI
-  stamp: Stamp,
-  // Creative/Composition (Weave)
-  splinepointer: SplinePointer, // Weave - main icon
-  "send-to-back": SendToBack, // Breeze - animation mode
-  waves: Waves, // (legacy Sway reference)
-  waypoints: Waypoints, // Map - diagram mode (Weave)
-  route: Route, // Thread - connections
-  regex: Regex, // Patterns - design system
-  // Curios - cabinet of wonders
-  amphora: Amphora, // Curios - main icon (cabinet of curiosities)
-  "notebook-pen": NotebookPen, // Curios - Guestbook
-  "notebook-text": NotebookText, // Blooms - individual pieces of writing
-  shell: Shell, // Curios - Artifacts
-  // Forests - community aggregation
-  trees: Trees, // Forests - main icon (many trees together)
-  // Wander - immersive discovery
-  earth: Earth, // Wander - main icon (a world to explore)
-  "line-squiggle": LineSquiggle, // Wander - Drift mode
-  // Gossamer - ASCII visual effects
-  sparkles: Sparkles, // Gossamer - main icon
-  // Subicons for workshop features
-  layoutlist: LayoutList, // Lattice - Vines
-  origami: Origami, // Songbird - Canary
-  feather: Feather, // Songbird - Kestrel
-  toolcase: ToolCase, // Songbird - Robin
-  cloudcog: CloudCog, // Threshold - Edge
-  building2: Building2, // Threshold - Tenant
-  house: House, // Threshold - User
-  shieldoff: ShieldOff, // Threshold - Endpoint
-  key: Key, // Loom - Session
-  codepen: Codepen, // Loom - Tenant
-  filecode: FileCode, // Loom - Post
-  paintbrush: PaintbrushVertical, // Foliage - Themes
-  sliders: SlidersHorizontal, // Foliage - Customizer
-  booktype: BookType, // Foliage - Fonts
-  component: Component, // Ivy - Compose
-  lock: Lock, // Ivy - Encrypt
-  contact: Contact, // Ivy - Contacts
-  eye: Eye, // Rings - Views
-  bookopencheck: BookOpenCheck, // Rings - Readers
-  goal: Goal, // Rings - Resonance
-  // Additional subicons (round 2)
-  chrome: Chrome, // Heartwood - Google
-  github: Github, // Heartwood - GitHub
-  wand2: Wand2, // Heartwood - Magic
-  penline: PenLine, // Arbor - Posts
-  layout: Layout, // Arbor - Pages
-  image: Image, // Arbor - Media
-  reply: Reply, // Reeds - Replies
-  messagecircle: MessageCircle, // Reeds - Comments
-  bot: Bot, // Shade - Bot
-  bug: Bug, // Shade - Scraper
-  cpu: Cpu, // Vista - Workers
-  frame: Frame, // Terrarium - Canvas
-  shapes: Shapes, // Terrarium - Assets
-  share2: Share2, // Terrarium - Export
-  // Additional subicons (round 3) - workshop expansion
-  imageup: ImageUp, // Terrarium - Export (alternative)
-  flamekindling: FlameKindling, // Wisp - Fireside mode
-  globelock: GlobeLock, // Wisp/Shade/Thorn - Privacy
-  shredder: Trash2, // ZDR - Zero Data Retention
-  rss: Rss, // Meadow - RSS feeds
-  squareasterisk: SquareAsterisk, // Meadow - Opt-in
-  idcard: IdCard, // Heartwood - Identity
-  badgecheck: BadgeCheck, // Nook/Outpost - Private access
-  refrigerator: Refrigerator, // Vista - Storage
-  brickwallfire: BrickWallFire, // Shade - Complete protection
-  filebox: FileBox, // Loom - main icon
-  servercog: ServerCog, // Threshold - Edge
-  solarpanel: SolarPanel, // Firefly - Solarpunk aligned
-  monitorcloud: MonitorCloud, // Outpost - main icon
-  // Lab icons (experimental @lucide/lab)
-  bee: BeeIcon, // Swarm - agentic swarm mode
-  // Loam - name protection & validation
-  funnel: Funnel, // Loam - filters valid names
-  // Scout & Trove
-  "shopping-basket": ShoppingBasket, // Scout - shopping research
-  "scan-qr-code": ScanQrCode, // Trove - book discovery
-  // Workshop TOC icons
-  pyramid: Pyramid, // Core Infrastructure TOC
-  blinds: Blinds, // Shade - AI protection
-  aperture: Aperture, // Shutter - web content distillation
-  "rocking-chair": RockingChair, // Porch - front porch conversations
-  toolbox: Wrench, // Standalone Tools TOC (legacy)
-  wrench: Wrench, // Standalone Tools TOC
-  dock: Dock, // Operations TOC
-  "id-card-lanyard": IdCardLanyard, // Content & Community TOC
-  // Knowledge base additional icons
-  clock: Clock, // Centennial - domain preservation
-  tag: Tag, // Seasons - versioning
-  globe: Globe, // Website spec
-  // Icon updates - January 2026
-  loader: Loader, // Bloom - remote coding (spinner/loading icon)
-  "squares-exclude": SquaresExclude, // Centennial - domain preservation (legacy/permanence)
-  "file-warning": FileWarning, // Thorn - content moderation
-  "gallery-horizontal-end": GalleryHorizontalEnd, // Curios/Shrines - dedications
-  "git-branch": GitBranch, // Forests/Stroll - random discovery (branching paths)
-  "chevrons-left-right-ellipsis": ChevronsLeftRightEllipsis, // Wander/Active - WASD exploration
-  "book-user": BookUser, // Forests/Directory - member listings
-  // Grafts - feature customization
-  flag: Flag, // Grafts - Graft (enable)
-  "flag-off": FlagOff, // Grafts - Prune (disable)
-  "file-stack": FileStack, // Grafts - Propagate (rollout)
-  "triangle-alert": TriangleAlert, // Grafts - Blight (kill switch)
-  unplug: Unplug, // Grafts - Cultivate (full rollout)
-  gamepad: Gamepad, // Grafts - Cultivars (A/B variants)
-  // Lumen - AI gateway
-  "lamp-ceiling": LampCeiling, // Lumen - unified AI routing
-  // Greenhouse mode - internal testing (Dave mode)
-  warehouse: Warehouse, // Grafts - Greenhouse (early access testing)
-  // Burrow - cross-property access
-  network: Network, // Burrow - trusted connections between properties
-  // Etch - link saving & highlights
-  highlighter: Highlighter, // Etch - scoring/highlighting text
-  // Passage - subdomain routing (the hidden way through)
-  kayak: Kayak, // Passage - navigating the river passage
-  // Scribe - voice transcription
-  mic: Mic, // Scribe - voice-to-text
-  // Flow - writing sanctuary
-  "drafting-compass": DraftingCompass, // Flow - main icon (creative arc)
-  focus: Focus, // Flow/Zen - distraction-free mode
-  save: Save, // Flow/Draft - auto-save to localStorage
-  // Trace - inline feedback
-  footprints: Footprints, // Trace - the mark you leave
-  // Passkeys - passwordless authentication
-  fingerprint: Fingerprint, // Heartwood - Passkeys
-  // Warden - external API gateway
-  vault: Vault, // Warden - credential vault for agents
-  // Zephyr - email gateway
-  send: Send, // Zephyr - email delivery (the gentle wind that carries)
-  "refresh-cw": RefreshCw, // Zephyr - retry with backoff
-  // Garden & Blooms - core terminology
-  flower: Flower, // Garden - collection of blooms
-  cherry: Cherry, // Cherry trees (nature theming)
-  zap: Zap, // Verge - remote AI coding
+	mailbox: Mailbox,
+	harddrive: HardDrive,
+	palette: Palette,
+	shieldcheck: ShieldCheck,
+	cloud: Cloud,
+	searchcode: SearchCode,
+	pickaxe: Pickaxe,
+	archive: Archive,
+	upload: Upload,
+	projector: Projector,
+	circuitboard: CircuitBoard,
+	spool: Spool,
+	binoculars: Binoculars,
+	bird: Bird,
+	dashboard: LayoutDashboard,
+	activity: Activity,
+	landplot: LandPlot,
+	messagessquare: MessagesSquare,
+	shielduser: UserRoundCheck,
+	barchart: BarChart3,
+	grape: Grape,
+	codesandbox: Codesandbox,
+	users: Users,
+	map: MapPin,
+	helpcircle: HelpCircle,
+	signpost: Signpost,
+	triangle: Triangle,
+	gauge: Gauge,
+	radar: Radar,
+	webhook: Webhook,
+	terminal: Terminal,
+	database: Database,
+	mapplus: MapPinPlus,
+	layers: Layers,
+	pencilruler: PencilRuler,
+	swatchbook: SwatchBook,
+	brickwallshield: BrickWall,
+	wind: Wind,
+	// Petal - image content moderation
+	fan: Fan,
+	// Beyond page icons (standalone tools)
+	music: Music,
+	book: BookOpen,
+	newspaper: Newspaper,
+	telescope: Telescope,
+	// Commerce
+	store: Store,
+	// Support
+	lifebuoy: LifeBuoy,
+	// Press - image processing CLI
+	stamp: Stamp,
+	// Creative/Composition (Weave)
+	splinepointer: SplinePointer, // Weave - main icon
+	"send-to-back": SendToBack, // Breeze - animation mode
+	waves: Waves, // (legacy Sway reference)
+	waypoints: Waypoints, // Map - diagram mode (Weave)
+	route: Route, // Thread - connections
+	regex: Regex, // Patterns - design system
+	// Curios - cabinet of wonders
+	amphora: Amphora, // Curios - main icon (cabinet of curiosities)
+	"notebook-pen": NotebookPen, // Curios - Guestbook
+	"notebook-text": NotebookText, // Blooms - individual pieces of writing
+	shell: Shell, // Curios - Artifacts
+	// Forests - community aggregation
+	trees: Trees, // Forests - main icon (many trees together)
+	// Wander - immersive discovery
+	earth: Earth, // Wander - main icon (a world to explore)
+	"line-squiggle": LineSquiggle, // Wander - Drift mode
+	// Gossamer - ASCII visual effects
+	sparkles: Sparkles, // Gossamer - main icon
+	// Subicons for workshop features
+	layoutlist: LayoutList, // Lattice - Vines
+	origami: Origami, // Songbird - Canary
+	feather: Feather, // Songbird - Kestrel
+	toolcase: ToolCase, // Songbird - Robin
+	cloudcog: CloudCog, // Threshold - Edge
+	building2: Building2, // Threshold - Tenant
+	house: House, // Threshold - User
+	shieldoff: ShieldOff, // Threshold - Endpoint
+	key: Key, // Loom - Session
+	codepen: Codepen, // Loom - Tenant
+	filecode: FileCode, // Loom - Post
+	paintbrush: PaintbrushVertical, // Foliage - Themes
+	sliders: SlidersHorizontal, // Foliage - Customizer
+	booktype: BookType, // Foliage - Fonts
+	component: Component, // Ivy - Compose
+	lock: Lock, // Ivy - Encrypt
+	contact: Contact, // Ivy - Contacts
+	eye: Eye, // Rings - Views
+	bookopencheck: BookOpenCheck, // Rings - Readers
+	goal: Goal, // Rings - Resonance
+	// Additional subicons (round 2)
+	chrome: Chrome, // Heartwood - Google
+	github: Github, // Heartwood - GitHub
+	wand2: Wand2, // Heartwood - Magic
+	penline: PenLine, // Arbor - Posts
+	layout: Layout, // Arbor - Pages
+	image: Image, // Arbor - Media
+	reply: Reply, // Reeds - Replies
+	messagecircle: MessageCircle, // Reeds - Comments
+	bot: Bot, // Shade - Bot
+	bug: Bug, // Shade - Scraper
+	cpu: Cpu, // Vista - Workers
+	frame: Frame, // Terrarium - Canvas
+	shapes: Shapes, // Terrarium - Assets
+	share2: Share2, // Terrarium - Export
+	// Additional subicons (round 3) - workshop expansion
+	imageup: ImageUp, // Terrarium - Export (alternative)
+	flamekindling: FlameKindling, // Wisp - Fireside mode
+	globelock: GlobeLock, // Wisp/Shade/Thorn - Privacy
+	shredder: Trash2, // ZDR - Zero Data Retention
+	rss: Rss, // Meadow - RSS feeds
+	squareasterisk: SquareAsterisk, // Meadow - Opt-in
+	idcard: IdCard, // Heartwood - Identity
+	badgecheck: BadgeCheck, // Nook/Outpost - Private access
+	refrigerator: Refrigerator, // Vista - Storage
+	brickwallfire: BrickWallFire, // Shade - Complete protection
+	filebox: FileBox, // Loom - main icon
+	servercog: ServerCog, // Threshold - Edge
+	solarpanel: SolarPanel, // Firefly - Solarpunk aligned
+	monitorcloud: MonitorCloud, // Outpost - main icon
+	// Lab icons (experimental @lucide/lab)
+	bee: BeeIcon, // Swarm - agentic swarm mode
+	// Loam - name protection & validation
+	funnel: Funnel, // Loam - filters valid names
+	// Scout & Trove
+	"shopping-basket": ShoppingBasket, // Scout - shopping research
+	"scan-qr-code": ScanQrCode, // Trove - book discovery
+	// Workshop TOC icons
+	pyramid: Pyramid, // Core Infrastructure TOC
+	blinds: Blinds, // Shade - AI protection
+	aperture: Aperture, // Shutter - web content distillation
+	"rocking-chair": RockingChair, // Porch - front porch conversations
+	toolbox: Wrench, // Standalone Tools TOC (legacy)
+	wrench: Wrench, // Standalone Tools TOC
+	dock: Dock, // Operations TOC
+	"id-card-lanyard": IdCardLanyard, // Content & Community TOC
+	// Knowledge base additional icons
+	clock: Clock, // Centennial - domain preservation
+	tag: Tag, // Seasons - versioning
+	globe: Globe, // Website spec
+	// Icon updates - January 2026
+	loader: Loader, // Bloom - remote coding (spinner/loading icon)
+	"squares-exclude": SquaresExclude, // Centennial - domain preservation (legacy/permanence)
+	"file-warning": FileWarning, // Thorn - content moderation
+	"gallery-horizontal-end": GalleryHorizontalEnd, // Curios/Shrines - dedications
+	"git-branch": GitBranch, // Forests/Stroll - random discovery (branching paths)
+	"chevrons-left-right-ellipsis": ChevronsLeftRightEllipsis, // Wander/Active - WASD exploration
+	"book-user": BookUser, // Forests/Directory - member listings
+	// Grafts - feature customization
+	flag: Flag, // Grafts - Graft (enable)
+	"flag-off": FlagOff, // Grafts - Prune (disable)
+	"file-stack": FileStack, // Grafts - Propagate (rollout)
+	"triangle-alert": TriangleAlert, // Grafts - Blight (kill switch)
+	unplug: Unplug, // Grafts - Cultivate (full rollout)
+	gamepad: Gamepad, // Grafts - Cultivars (A/B variants)
+	// Lumen - AI gateway
+	"lamp-ceiling": LampCeiling, // Lumen - unified AI routing
+	// Reverie - AI composition layer
+	eclipse: Eclipse, // Reverie - intent-to-configuration pipeline
+	// Lantern - cross-grove navigation
+	"ferris-wheel": FerrisWheel, // Lantern - lifts you up, shows you around, brings you back
+	// Moss - AI memory
+	leaf: Leaf, // Moss - persistent conversational memory
+	// Greenhouse mode - internal testing (Dave mode)
+	warehouse: Warehouse, // Grafts - Greenhouse (early access testing)
+	// Burrow - cross-property access
+	network: Network, // Burrow - trusted connections between properties
+	// Etch - link saving & highlights
+	highlighter: Highlighter, // Etch - scoring/highlighting text
+	// Passage - subdomain routing (the hidden way through)
+	kayak: Kayak, // Passage - navigating the river passage
+	// Scribe - voice transcription
+	mic: Mic, // Scribe - voice-to-text
+	// Flow - writing sanctuary
+	"drafting-compass": DraftingCompass, // Flow - main icon (creative arc)
+	focus: Focus, // Flow/Zen - distraction-free mode
+	save: Save, // Flow/Draft - auto-save to localStorage
+	// Trace - inline feedback
+	footprints: Footprints, // Trace - the mark you leave
+	// Passkeys - passwordless authentication
+	fingerprint: Fingerprint, // Heartwood - Passkeys
+	// Warden - external API gateway
+	vault: Vault, // Warden - credential vault for agents
+	// Zephyr - email gateway
+	send: Send, // Zephyr - email delivery (the gentle wind that carries)
+	"refresh-cw": RefreshCw, // Zephyr - retry with backoff
+	// Garden & Blooms - core terminology
+	flower: Flower, // Garden - collection of blooms
+	cherry: Cherry, // Cherry trees (nature theming)
+	zap: Zap, // Verge - remote AI coding
 } as const;
 
 // ============================================================================
@@ -536,65 +546,65 @@ export const toolIcons = {
 // ============================================================================
 /** Icons for features in roadmap phases */
 export const roadmapFeatureIcons = {
-  // Thaw Phase
-  userplus: Users,
-  sprout: Sprout,
-  globe: Trees,
-  penline: PenLine,
-  imageplus: Upload,
-  rss: FileText,
-  shieldcheck: ShieldCheck,
-  download: Download,
-  lifebuoy: HelpCircle,
-  signpost: Signpost,
-  terminal: Terminal, // Bloom - remote coding (was FileText)
-  network: CircuitBoard, // Mycelium - MCP server (was Github)
-  database: Database, // Patina - backups (was HardDrive)
-  // First Buds Phase
-  ivy: Mailbox, // Ivy - email (was Mail, Workshop uses mailbox)
-  amber: HardDrive, // Amber - storage
-  trails: MapPinPlus, // Trails - personal roadmaps (was MapPin, Workshop uses mapplus)
-  tree: Trees,
-  swatchbook: SwatchBook, // Foliage - theming (was Palette)
-  // Full Bloom Phase
-  meadow: Users, // Meadow - social feed (was Flower2, Workshop uses users)
-  clock: Clock,
-  message: MessagesSquare,
-  heart: Heart,
-  trending: TrendingUp,
-  crown: Star,
-  paintbrush: Palette,
-  users: Users,
-  shield: UserRoundCheck, // Thorn - moderation (was ShieldUser)
-  // Golden Hour Phase
-  gem: Gem,
-  zap: Zap, // Performance (was TrendingUp)
-  accessibility: Info,
-  smartphone: FileText,
-  puzzle: Lightbulb,
-  // Midnight Bloom Phase
-  coffee: Coffee, // The Cafe (was Heart)
-  qrcode: QrCode, // Community Boards (was Lightbulb)
-  bookopen: BookOpen,
-  home: Home,
-  // First Frost additions
-  clearing: Activity, // Clearing - status page
-  forage: SearchCode, // Forage - domain discovery
-  // First Buds additions
-  gossamer: Sparkles, // Gossamer - ASCII visual effects
-  wisp: Wind, // Wisp - writing assistant
-  petal: Fan, // Petal - image content moderation
-  forests: Trees, // Forests - community groves
-  porch: RockingChair, // Porch - support conversations
-  centennial: SquaresExclude, // Centennial - 100-year preservation
-  // Full Bloom additions
-  curios: Amphora, // Curios - cabinet of wonders
-  terrarium: PencilRuler, // Terrarium - creative canvas
-  weave: SplinePointer, // Weave - visual composition
-  outpost: Telescope, // Outpost - Minecraft server
-  // Golden Hour additions
-  wander: Earth, // Wander - immersive discovery
-  pantry: Store, // Pantry - shop system
+	// Thaw Phase
+	userplus: Users,
+	sprout: Sprout,
+	globe: Trees,
+	penline: PenLine,
+	imageplus: Upload,
+	rss: FileText,
+	shieldcheck: ShieldCheck,
+	download: Download,
+	lifebuoy: HelpCircle,
+	signpost: Signpost,
+	terminal: Terminal, // Bloom - remote coding (was FileText)
+	network: CircuitBoard, // Mycelium - MCP server (was Github)
+	database: Database, // Patina - backups (was HardDrive)
+	// First Buds Phase
+	ivy: Mailbox, // Ivy - email (was Mail, Workshop uses mailbox)
+	amber: HardDrive, // Amber - storage
+	trails: MapPinPlus, // Trails - personal roadmaps (was MapPin, Workshop uses mapplus)
+	tree: Trees,
+	swatchbook: SwatchBook, // Foliage - theming (was Palette)
+	// Full Bloom Phase
+	meadow: Users, // Meadow - social feed (was Flower2, Workshop uses users)
+	clock: Clock,
+	message: MessagesSquare,
+	heart: Heart,
+	trending: TrendingUp,
+	crown: Star,
+	paintbrush: Palette,
+	users: Users,
+	shield: UserRoundCheck, // Thorn - moderation (was ShieldUser)
+	// Golden Hour Phase
+	gem: Gem,
+	zap: Zap, // Performance (was TrendingUp)
+	accessibility: Info,
+	smartphone: FileText,
+	puzzle: Lightbulb,
+	// Midnight Bloom Phase
+	coffee: Coffee, // The Cafe (was Heart)
+	qrcode: QrCode, // Community Boards (was Lightbulb)
+	bookopen: BookOpen,
+	home: Home,
+	// First Frost additions
+	clearing: Activity, // Clearing - status page
+	forage: SearchCode, // Forage - domain discovery
+	// First Buds additions
+	gossamer: Sparkles, // Gossamer - ASCII visual effects
+	wisp: Wind, // Wisp - writing assistant
+	petal: Fan, // Petal - image content moderation
+	forests: Trees, // Forests - community groves
+	porch: RockingChair, // Porch - support conversations
+	centennial: SquaresExclude, // Centennial - 100-year preservation
+	// Full Bloom additions
+	curios: Amphora, // Curios - cabinet of wonders
+	terrarium: PencilRuler, // Terrarium - creative canvas
+	weave: SplinePointer, // Weave - visual composition
+	outpost: Telescope, // Outpost - Minecraft server
+	// Golden Hour additions
+	wander: Earth, // Wander - immersive discovery
+	pantry: Store, // Pantry - shop system
 } as const;
 
 // ============================================================================
@@ -602,30 +612,30 @@ export const roadmapFeatureIcons = {
 // ============================================================================
 /** Icons for pricing page features and tiers */
 export const pricingIcons = {
-  // Tier icons
-  sprout: Sprout,
-  treedeciduous: TreeDeciduous,
-  trees: Trees,
-  crown: Crown,
-  // Feature row icons
-  penline: PenLine,
-  filetext: FileText,
-  harddrive: HardDrive,
-  palette: Palette,
-  flower2: Flower2,
-  messagecircle: MessageCircle,
-  globe: Globe, // Legacy - prefer searchcode for domains (Forage)
-  searchcode: SearchCode, // Forage - domain discovery
-  mail: Mail,
-  lifebuoy: LifeBuoy,
-  calendardays: CalendarDays,
-  clock: Clock,
-  // Checkmark
-  check: Check,
-  // Curios (cabinet of wonders - custom nav pages)
-  amphora: Amphora,
-  // Navigation (legacy)
-  listTree: ListTree,
+	// Tier icons
+	sprout: Sprout,
+	treedeciduous: TreeDeciduous,
+	trees: Trees,
+	crown: Crown,
+	// Feature row icons
+	penline: PenLine,
+	filetext: FileText,
+	harddrive: HardDrive,
+	palette: Palette,
+	flower2: Flower2,
+	messagecircle: MessageCircle,
+	globe: Globe, // Legacy - prefer searchcode for domains (Forage)
+	searchcode: SearchCode, // Forage - domain discovery
+	mail: Mail,
+	lifebuoy: LifeBuoy,
+	calendardays: CalendarDays,
+	clock: Clock,
+	// Checkmark
+	check: Check,
+	// Curios (cabinet of wonders - custom nav pages)
+	amphora: Amphora,
+	// Navigation (legacy)
+	listTree: ListTree,
 } as const;
 
 // ============================================================================
@@ -633,14 +643,14 @@ export const pricingIcons = {
 // ============================================================================
 /** Icons for knowledge base categories */
 export const knowledgeCategoryIcons = {
-  specs: FileText,
-  help: HelpCircle,
-  legal: ShieldCheck,
-  marketing: Megaphone,
-  patterns: Layers,
-  philosophy: Trees,
-  design: PaintbrushVertical,
-  exhibit: Frame,
+	specs: FileText,
+	help: HelpCircle,
+	legal: ShieldCheck,
+	marketing: Megaphone,
+	patterns: Layers,
+	philosophy: Trees,
+	design: PaintbrushVertical,
+	exhibit: Frame,
 } as const;
 
 /** Type for knowledge category icon keys */
@@ -651,12 +661,12 @@ export type KnowledgeCategoryIconKey = keyof typeof knowledgeCategoryIcons;
 // ============================================================================
 /** All icons in one map (use specific maps above when possible) */
 export const allIcons = {
-  ...navIcons,
-  ...featureIcons,
-  ...contentIcons,
-  ...stateIcons,
-  ...phaseIcons,
-  ...actionIcons,
+	...navIcons,
+	...featureIcons,
+	...contentIcons,
+	...stateIcons,
+	...phaseIcons,
+	...actionIcons,
 } as const;
 
 /** Type for any icon key in the registry */
@@ -679,11 +689,8 @@ export type ToolIconKey = keyof typeof toolIcons;
  * const icon = getIcon(featureIcons, 'mail');
  * ```
  */
-export function getIcon<T extends Record<string, any>>(
-  map: T,
-  key: keyof T | string,
-) {
-  return (map as Record<string, any>)[key as string];
+export function getIcon<T extends Record<string, any>>(map: T, key: keyof T | string) {
+	return (map as Record<string, any>)[key as string];
 }
 
 /**
@@ -694,7 +701,7 @@ export function getIcon<T extends Record<string, any>>(
  * ```
  */
 export function getIconFromAll(key: string) {
-  return (allIcons as Record<string, any>)[key];
+	return (allIcons as Record<string, any>)[key];
 }
 
 // ============================================================================
@@ -705,27 +712,27 @@ export function getIconFromAll(key: string) {
  * Seasonal icon colors for roadmap phases
  */
 export const seasonalIconColors = {
-  "first-frost": "text-blue-500",
-  thaw: "text-teal-500",
-  "first-buds": "text-pink-500",
-  "full-bloom": "text-green-500",
-  "golden-hour": "text-amber-500",
-  "midnight-bloom": "text-purple-300",
+	"first-frost": "text-blue-500",
+	thaw: "text-teal-500",
+	"first-buds": "text-pink-500",
+	"full-bloom": "text-green-500",
+	"golden-hour": "text-amber-500",
+	"midnight-bloom": "text-purple-300",
 } as const;
 
 /**
  * Status-based icon colors
  */
 export const statusIconColors = {
-  live: "text-green-500",
-  complete: "text-green-500",
-  integrated: "text-blue-500",
-  implemented: "text-blue-500",
-  building: "text-amber-500",
-  planned: "text-slate-400",
-  past: "text-green-500",
-  current: "text-accent",
-  future: "text-slate-400",
+	live: "text-green-500",
+	complete: "text-green-500",
+	integrated: "text-blue-500",
+	implemented: "text-blue-500",
+	building: "text-amber-500",
+	planned: "text-slate-400",
+	past: "text-green-500",
+	current: "text-accent",
+	future: "text-slate-400",
 } as const;
 
 /**
@@ -736,7 +743,7 @@ export const statusIconColors = {
  * ```
  */
 export function getPhaseColor(phase: keyof typeof seasonalIconColors) {
-  return seasonalIconColors[phase];
+	return seasonalIconColors[phase];
 }
 
 /**
@@ -747,5 +754,5 @@ export function getPhaseColor(phase: keyof typeof seasonalIconColors) {
  * ```
  */
 export function getStatusColor(status: keyof typeof statusIconColors) {
-  return statusIconColors[status];
+	return statusIconColors[status];
 }
