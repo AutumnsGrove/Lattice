@@ -275,7 +275,15 @@ func (m issueBrowseModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		default:
 			// Check skill hotkeys
 			if skill, ok := skillByKey[key]; ok {
+				if skillScope(skill) == ScopeBoard {
+					// Board-scoped: no issue selection needed
+					m.action = "board-skill"
+					m.actionSkill = skill.Name
+					m.quitting = true
+					return m, tea.Quit
+				}
 				if len(m.filtered) > 0 {
+					// Issue-scoped: requires a selected issue
 					m.action = "skill"
 					m.actionSkill = skill.Name
 					m.actionNum = m.filtered[m.cursor].Number
@@ -476,9 +484,14 @@ func (m issueBrowseModel) renderHelp() string {
 				if len(keyDisplay) == 1 && keyDisplay[0] >= 'A' && keyDisplay[0] <= 'Z' {
 					keyDisplay = "⇧" + strings.ToLower(keyDisplay)
 				}
+				// Board-scoped skills get a scope indicator
+				scopeTag := ""
+				if skillScope(skill) == ScopeBoard {
+					scopeTag = " [board]"
+				}
 				b.WriteString(fmt.Sprintf("    %s  %-24s %s\n",
 					browseHelpKeyStyle.Render(fmt.Sprintf("%-3s", keyDisplay)),
-					skill.Name,
+					skill.Name+scopeTag,
 					browseHintStyle.Render(skill.Purpose)))
 			}
 		}
@@ -486,6 +499,8 @@ func (m issueBrowseModel) renderHelp() string {
 
 	b.WriteString("\n")
 	b.WriteString(browseHintStyle.Render("  j/k scroll • any other key to return"))
+	b.WriteString("\n")
+	b.WriteString(browseHintStyle.Render("  [board] = no issue selection needed"))
 
 	return viewportSlice(b.String(), m.helpOffset, m.height)
 }
@@ -528,6 +543,9 @@ func runIssueBrowse(issues []browseIssue, pageSize int, fetchArgs issueFetchArgs
 
 	// Handle post-quit actions
 	switch final.action {
+	case "board-skill":
+		return launchBoardSkill(final.actionSkill)
+
 	case "skill":
 		num := fmt.Sprintf("%d", final.actionNum)
 		return launchSkillForIssue(final.actionSkill, num)

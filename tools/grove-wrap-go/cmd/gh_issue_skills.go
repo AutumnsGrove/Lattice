@@ -13,13 +13,22 @@ import (
 	"github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/ui"
 )
 
+// Skill dispatch scopes control how a skill is launched from the browser.
+const (
+	// ScopeIssue is the default: requires a selected issue, optionally creates a worktree.
+	ScopeIssue = "issue"
+	// ScopeBoard launches without issue context or worktree (board-wide operations).
+	ScopeBoard = "board"
+)
+
 // skillEntry defines a skill that can be launched from the issue browser.
 type skillEntry struct {
 	Key      string
 	Name     string // slash command name (e.g., "panther-strike")
 	Purpose  string
 	Category string
-	Yolo     bool // launch with --dangerously-skip-permissions
+	Yolo     bool   // launch with --dangerously-skip-permissions
+	Scope    string // "issue" (default) or "board" — controls dispatch behavior
 }
 
 // skillCategories controls help display ordering.
@@ -38,47 +47,47 @@ var skillCategories = []string{
 // Keys j/k are reserved for navigation; conflicts resolved with shift or alternate keys.
 var skillRegistry = []skillEntry{
 	// Surgical Fixers (Issue Resolution)
-	{"p", "panther-strike", "Lock onto ONE issue, fix it fast", "Surgical Fixers", false},
-	{"m", "mole-debug", "Systematic hypothesis-driven debugging", "Surgical Fixers", false},
-	{"e", "elephant-build", "Multi-file feature implementation", "Surgical Fixers", false},
-	{"r", "lynx-repair", "Address PR review feedback", "Surgical Fixers", false},
+	{"p", "panther-strike", "Lock onto ONE issue, fix it fast", "Surgical Fixers", false, ""},
+	{"m", "mole-debug", "Systematic hypothesis-driven debugging", "Surgical Fixers", false, ""},
+	{"e", "elephant-build", "Multi-file feature implementation", "Surgical Fixers", false, ""},
+	{"r", "lynx-repair", "Address PR review feedback", "Surgical Fixers", false, ""},
 
 	// Exploration & Planning
-	{"a", "eagle-architect", "System architecture from 10,000 feet", "Exploration", false},
-	{"b", "bloodhound-scout", "Track code through the codebase", "Exploration", false},
-	{"g", "groundhog-surface", "Surface and validate assumptions", "Exploration", false},
+	{"a", "eagle-architect", "System architecture from 10,000 feet", "Exploration", false, ""},
+	{"b", "bloodhound-scout", "Track code through the codebase", "Exploration", false, ""},
+	{"g", "groundhog-surface", "Surface and validate assumptions", "Exploration", false, ""},
 
 	// Enhancement & Optimization
-	{"f", "fox-optimize", "Hunt performance bottlenecks", "Enhancement", false},
-	{"d", "deer-sense", "Audit accessibility barriers", "Enhancement", false},
-	{"c", "chameleon-adapt", "Theme/design with glassmorphism", "Enhancement", false},
-	{"t", "beaver-build", "Write robust tests", "Enhancement", false},
-	{"y", "bear-migrate", "Data migration with patient strength", "Enhancement", false},
+	{"f", "fox-optimize", "Hunt performance bottlenecks", "Enhancement", false, ""},
+	{"d", "deer-sense", "Audit accessibility barriers", "Enhancement", false, ""},
+	{"c", "chameleon-adapt", "Theme/design with glassmorphism", "Enhancement", false, ""},
+	{"t", "beaver-build", "Write robust tests", "Enhancement", false, ""},
+	{"y", "bear-migrate", "Data migration with patient strength", "Enhancement", false, ""},
 
 	// Compliance & Quality
-	{"i", "crane-audit", "PR compliance audit for Grove SDK standards", "Compliance", false},
+	{"i", "crane-audit", "PR compliance audit for Grove SDK standards", "Compliance", false, ""},
 
 	// Security & Hardening
-	{"s", "spider-weave", "Auth integration and route security", "Security", false},
-	{"u", "turtle-harden", "Defense-in-depth protection layers", "Security", false},
-	{"x", "raccoon-audit", "Security sweep and secret cleanup", "Security", false},
-	{"h", "hawk-survey", "Full application security assessment", "Security", false},
+	{"s", "spider-weave", "Auth integration and route security", "Security", false, ""},
+	{"u", "turtle-harden", "Defense-in-depth protection layers", "Security", false, ""},
+	{"x", "raccoon-audit", "Security sweep and secret cleanup", "Security", false, ""},
+	{"h", "hawk-survey", "Full application security assessment", "Security", false, ""},
 
 	// Reasoning & Documentation
-	{"w", "crow-reason", "Critical reasoning, devil's advocate", "Reasoning", false},
-	{"o", "owl-archive", "Documentation and user-facing text", "Reasoning", false},
-	{"n", "swan-design", "Technical specs with diagrams", "Reasoning", false},
+	{"w", "crow-reason", "Critical reasoning, devil's advocate", "Reasoning", false, ""},
+	{"o", "owl-archive", "Documentation and user-facing text", "Reasoning", false, ""},
+	{"n", "swan-design", "Technical specs with diagrams", "Reasoning", false, ""},
 
 	// Multi-Animal Chains (Gatherings — shift keys)
-	{"G", "gathering-feature", "Full lifecycle: explore → build → test → doc", "Gatherings", false},
-	{"S", "gathering-security", "Spider → Raccoon → Turtle pipeline", "Gatherings", false},
-	{"U", "gathering-ui", "Chameleon → Deer pipeline", "Gatherings", false},
-	{"A", "gathering-architecture", "Eagle → Crow → Swan → Elephant", "Gatherings", false},
-	{"M", "gathering-migration", "Bear → Bloodhound pipeline", "Gatherings", false},
+	{"G", "gathering-feature", "Full lifecycle: explore → build → test → doc", "Gatherings", false, ""},
+	{"S", "gathering-security", "Spider → Raccoon → Turtle pipeline", "Gatherings", false, ""},
+	{"U", "gathering-ui", "Chameleon → Deer pipeline", "Gatherings", false, ""},
+	{"A", "gathering-architecture", "Eagle → Crow → Swan → Elephant", "Gatherings", false, ""},
+	{"M", "gathering-migration", "Bear → Bloodhound pipeline", "Gatherings", false, ""},
 
-	// Board Management
-	{"J", "vulture-sweep", "Clean up stale/closed issues", "Board Mgmt", false},
-	{"l", "safari-explore", "Systematically review a collection", "Board Mgmt", false},
+	// Board Management (board-scoped skills skip issue selection and worktree creation)
+	{"J", "vulture-sweep", "Clean up stale/closed issues", "Board Mgmt", false, ScopeBoard},
+	{"l", "safari-explore", "Systematically review a collection", "Board Mgmt", false, ""},
 }
 
 // skillByKey provides O(1) lookup from hotkey to skill entry.
@@ -151,6 +160,33 @@ func suggestSkills(labels []string) []string {
 		}
 	}
 	return suggestions
+}
+
+// skillScope returns the effective scope for a skill entry.
+// Empty string defaults to ScopeIssue for backward compatibility.
+func skillScope(s *skillEntry) string {
+	if s.Scope == "" {
+		return ScopeIssue
+	}
+	return s.Scope
+}
+
+// launchBoardSkill launches a board-scoped skill without issue context or
+// worktree creation. Board skills operate on the entire issue board (e.g.,
+// vulture-sweep scans all open issues for staleness/completion).
+func launchBoardSkill(skillName string) error {
+	root := effectiveRoot()
+	prompt := fmt.Sprintf("/%s", skillName)
+	ui.Info(fmt.Sprintf("Launching board-scoped skill %q from %s", skillName, root))
+	args := claudeArgs(skillName, prompt)
+	exitCode, launchErr := gwexec.RunStreamingInDir(root, "claude", args...)
+	if launchErr != nil {
+		return fmt.Errorf("failed to launch claude: %w", launchErr)
+	}
+	if exitCode != 0 {
+		return fmt.Errorf("claude exited with code %d", exitCode)
+	}
+	return nil
 }
 
 // launchSkillForIssue creates a worktree (if auto_worktree is enabled) and
@@ -260,38 +296,62 @@ func launchSkillForPR(skillName string, prNumber int, headBranch string) error {
 // --- issue launch ---
 
 var issueLaunchCmd = &cobra.Command{
-	Use:   "launch <number>",
-	Short: "Launch a skill against an issue",
-	Long:  "Create a worktree and launch Claude with a skill for the given issue.",
-	Args:  cobra.ExactArgs(1),
+	Use:   "launch [number]",
+	Short: "Launch a skill against an issue (or board-wide)",
+	Long: `Create a worktree and launch Claude with a skill for the given issue.
+Board-scoped skills (e.g., vulture-sweep) don't require an issue number.`,
+	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		skillName, _ := cmd.Flags().GetString("skill")
+
+		// Resolve skill name (allow short names like "mole" → "mole-debug")
+		resolved, err := resolveSkillName(skillName)
+		if err != nil {
+			return err
+		}
+		skillName = resolved
+
+		entry := skillByName[skillName]
+
+		// Board-scoped skills don't need an issue number
+		if skillScope(entry) == ScopeBoard {
+			if len(args) > 0 {
+				ui.Warning("Board-scoped skill " + skillName + " ignores issue number")
+			}
+			return launchBoardSkill(skillName)
+		}
+
+		// Issue-scoped skills require a number
+		if len(args) == 0 {
+			return fmt.Errorf("issue-scoped skill %q requires an issue number: gw gh issue launch <number> --skill %s", skillName, skillName)
+		}
 		number := args[0]
 		if err := validateGHNumber(number); err != nil {
 			return err
 		}
-
-		skillName, _ := cmd.Flags().GetString("skill")
-
-		// Allow short names (e.g., "mole" matches "mole-debug")
-		if _, ok := skillByName[skillName]; !ok {
-			// Try prefix match
-			var match *skillEntry
-			for i := range skillRegistry {
-				if strings.HasPrefix(skillRegistry[i].Name, skillName) {
-					if match != nil {
-						return fmt.Errorf("ambiguous skill %q — matches %q and %q", skillName, match.Name, skillRegistry[i].Name)
-					}
-					match = &skillRegistry[i]
-				}
-			}
-			if match == nil {
-				return fmt.Errorf("unknown skill %q — available skills:\n%s", skillName, listSkillNames())
-			}
-			skillName = match.Name
-		}
-
 		return launchSkillForIssue(skillName, number)
 	},
+}
+
+// resolveSkillName resolves a skill name, supporting prefix matching.
+// Returns the resolved name and any error (ambiguity or not found).
+func resolveSkillName(name string) (string, error) {
+	if _, ok := skillByName[name]; ok {
+		return name, nil
+	}
+	var match *skillEntry
+	for i := range skillRegistry {
+		if strings.HasPrefix(skillRegistry[i].Name, name) {
+			if match != nil {
+				return "", fmt.Errorf("ambiguous skill %q — matches %q and %q", name, match.Name, skillRegistry[i].Name)
+			}
+			match = &skillRegistry[i]
+		}
+	}
+	if match != nil {
+		return match.Name, nil
+	}
+	return "", fmt.Errorf("unknown skill %q — available skills:\n%s", name, listSkillNames())
 }
 
 // listSkillNames returns a formatted list of all available skill names.

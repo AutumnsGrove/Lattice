@@ -361,7 +361,15 @@ func (m prBrowseModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		default:
 			// Check skill hotkeys
 			if skill, ok := skillByKey[key]; ok {
+				if skillScope(skill) == ScopeBoard {
+					// Board-scoped: no PR selection needed
+					m.action = "board-skill"
+					m.actionSkill = skill.Name
+					m.quitting = true
+					return m, tea.Quit
+				}
 				if len(m.filtered) > 0 {
+					// Issue-scoped: requires a selected PR
 					pr := m.filtered[m.cursor]
 					m.action = "skill"
 					m.actionSkill = skill.Name
@@ -548,9 +556,13 @@ func (m prBrowseModel) renderHelp() string {
 				if len(keyDisplay) == 1 && keyDisplay[0] >= 'A' && keyDisplay[0] <= 'Z' {
 					keyDisplay = "⇧" + strings.ToLower(keyDisplay)
 				}
+				scopeTag := ""
+				if skillScope(skill) == ScopeBoard {
+					scopeTag = " [board]"
+				}
 				b.WriteString(fmt.Sprintf("    %s  %-24s %s\n",
 					browseHelpKeyStyle.Render(fmt.Sprintf("%-3s", keyDisplay)),
-					skill.Name,
+					skill.Name+scopeTag,
 					browseHintStyle.Render(skill.Purpose)))
 			}
 		}
@@ -558,6 +570,8 @@ func (m prBrowseModel) renderHelp() string {
 
 	b.WriteString("\n")
 	b.WriteString(browseHintStyle.Render("  j/k scroll • any other key to return"))
+	b.WriteString("\n")
+	b.WriteString(browseHintStyle.Render("  [board] = no issue/PR selection needed"))
 
 	return viewportSlice(b.String(), m.helpOffset, m.height)
 }
@@ -603,6 +617,9 @@ func runPRBrowse(prs []browsePR, pageSize int, fetchArgs prFetchArgs) error {
 
 	// Handle post-quit actions
 	switch final.action {
+	case "board-skill":
+		return launchBoardSkill(final.actionSkill)
+
 	case "skill":
 		pr := final.actionPR
 		// Need head branch — fetch if not already populated
