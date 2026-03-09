@@ -1,6 +1,8 @@
 import type { PageServerLoad, Actions } from "./$types";
 import { fail } from "@sveltejs/kit";
+import { z } from "zod";
 import { ARBOR_ERRORS, logGroveError } from "$lib/errors";
+import { parseFormData } from "$lib/server/utils/form-data";
 import {
 	DEFAULT_GUESTBOOK_CONFIG,
 	GUESTBOOK_STYLE_OPTIONS,
@@ -145,6 +147,21 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 	};
 };
 
+const SaveGuestbookSchema = z.object({
+	enabled: z.string().optional(),
+	style: z.string().optional().default("cozy"),
+	entriesPerPage: z.string().optional().default("20"),
+	requireApproval: z.string().optional(),
+	allowEmoji: z.string().optional(),
+	maxMessageLength: z.string().optional().default("500"),
+	customPrompt: z.string().nullable().optional(),
+	wallBacking: z.string().optional().default(""),
+	ctaStyle: z.string().optional().default(""),
+	inlineMode: z.string().optional().default(""),
+	allowedStyles: z.string().nullable().optional(),
+	colorPalette: z.string().nullable().optional(),
+});
+
 export const actions: Actions = {
 	save: async ({ request, platform, locals }) => {
 		const db = platform?.env?.CURIO_DB;
@@ -158,21 +175,26 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
+		const parsed = parseFormData(formData, SaveGuestbookSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const d = parsed.data;
 
-		const enabled = formData.get("enabled") === "true";
-		const style = formData.get("style") as string;
-		const entriesPerPage = parseInt(formData.get("entriesPerPage") as string) || 20;
-		const requireApproval = formData.get("requireApproval") === "true";
-		const allowEmoji = formData.get("allowEmoji") === "true";
-		const maxMessageLength = parseInt(formData.get("maxMessageLength") as string) || 500;
-		const customPrompt = formData.get("customPrompt") as string | null;
+		const enabled = d.enabled === "true";
+		const style = d.style;
+		const entriesPerPage = parseInt(d.entriesPerPage) || 20;
+		const requireApproval = d.requireApproval === "true";
+		const allowEmoji = d.allowEmoji === "true";
+		const maxMessageLength = parseInt(d.maxMessageLength) || 500;
+		const customPrompt = d.customPrompt ?? null;
 
 		// New enhancement fields
-		const wallBacking = formData.get("wallBacking") as string;
-		const ctaStyle = formData.get("ctaStyle") as string;
-		const inlineMode = formData.get("inlineMode") as string;
-		const allowedStylesRaw = formData.get("allowedStyles") as string | null;
-		const colorPaletteRaw = formData.get("colorPalette") as string | null;
+		const wallBacking = d.wallBacking;
+		const ctaStyle = d.ctaStyle;
+		const inlineMode = d.inlineMode;
+		const allowedStylesRaw = d.allowedStyles ?? null;
+		const colorPaletteRaw = d.colorPalette ?? null;
 
 		// Validate existing fields
 		const validStyles = ["cozy", "classic", "modern", "pixel"];

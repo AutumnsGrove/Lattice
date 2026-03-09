@@ -1,6 +1,8 @@
 import type { PageServerLoad, Actions } from "./$types";
 import { fail } from "@sveltejs/kit";
+import { z } from "zod";
 import { ARBOR_ERRORS, logGroveError } from "$lib/errors";
+import { parseFormData } from "$lib/server/utils/form-data";
 import {
 	generateHitCounterId,
 	sanitizeLabel,
@@ -80,6 +82,14 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 	};
 };
 
+const SaveHitCounterSchema = z.object({
+	style: z.string().optional().default("classic"),
+	label: z.string().optional().default(""),
+	showSinceDate: z.string().optional(),
+	countMode: z.string().optional().default("every"),
+	sinceDateStyle: z.string().optional().default("footnote"),
+});
+
 export const actions: Actions = {
 	save: async ({ request, platform, locals }) => {
 		const db = platform?.env?.CURIO_DB;
@@ -93,12 +103,17 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
+		const parsed = parseFormData(formData, SaveHitCounterSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const d = parsed.data;
 
-		const style = formData.get("style") as string;
-		const label = formData.get("label") as string;
-		const showSinceDate = formData.get("showSinceDate") === "true";
-		const countMode = formData.get("countMode") as string;
-		const sinceDateStyle = formData.get("sinceDateStyle") as string;
+		const style = d.style;
+		const label = d.label;
+		const showSinceDate = d.showSinceDate === "true";
+		const countMode = d.countMode;
+		const sinceDateStyle = d.sinceDateStyle;
 
 		// Validate against allowed values — invalid silently falls back to defaults
 		const validStyles = ["classic", "odometer", "minimal", "lcd"];

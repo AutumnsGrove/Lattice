@@ -1,6 +1,8 @@
 import type { PageServerLoad, Actions } from "./$types";
 import { fail } from "@sveltejs/kit";
+import { z } from "zod";
 import { ARBOR_ERRORS, logGroveError } from "$lib/errors";
+import { parseFormData } from "$lib/server/utils/form-data";
 import {
 	generatePlacementId,
 	isValidScale,
@@ -60,6 +62,20 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 	};
 };
 
+const AddClipartSchema = z.object({
+	assetId: z.string().optional().default(""),
+	pagePath: z.string().optional().default("/"),
+	xPosition: z.string().optional().default("50"),
+	yPosition: z.string().optional().default("50"),
+	scale: z.string().optional().default("1.0"),
+	rotation: z.string().optional().default("0"),
+	zIndex: z.string().optional().default("10"),
+});
+
+const RemoveClipartSchema = z.object({
+	placementId: z.string().min(1),
+});
+
 export const actions: Actions = {
 	add: async ({ request, platform, locals }) => {
 		const db = platform?.env?.CURIO_DB;
@@ -73,8 +89,13 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
+		const parsed = parseFormData(formData, AddClipartSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const d = parsed.data;
 
-		const assetId = (formData.get("assetId") as string)?.trim();
+		const assetId = d.assetId.trim();
 		if (!assetId) {
 			return fail(400, {
 				error: "Asset is required",
@@ -82,10 +103,10 @@ export const actions: Actions = {
 			});
 		}
 
-		const pagePath = (formData.get("pagePath") as string)?.trim() || "/";
+		const pagePath = d.pagePath.trim() || "/";
 
-		const xPosition = parseFloat(formData.get("xPosition") as string) || 50;
-		const yPosition = parseFloat(formData.get("yPosition") as string) || 50;
+		const xPosition = parseFloat(d.xPosition) || 50;
+		const yPosition = parseFloat(d.yPosition) || 50;
 		if (!isValidPosition(xPosition) || !isValidPosition(yPosition)) {
 			return fail(400, {
 				error: "Invalid position",
@@ -93,12 +114,12 @@ export const actions: Actions = {
 			});
 		}
 
-		const scale = parseFloat(formData.get("scale") as string) || 1.0;
+		const scale = parseFloat(d.scale) || 1.0;
 		if (!isValidScale(scale)) {
 			return fail(400, { error: "Invalid scale", error_code: "INVALID_SCALE" });
 		}
 
-		const rotation = parseFloat(formData.get("rotation") as string) || 0;
+		const rotation = parseFloat(d.rotation) || 0;
 		if (!isValidRotation(rotation)) {
 			return fail(400, {
 				error: "Invalid rotation",
@@ -106,7 +127,7 @@ export const actions: Actions = {
 			});
 		}
 
-		const zIndex = parseInt(formData.get("zIndex") as string, 10) || 10;
+		const zIndex = parseInt(d.zIndex, 10) || 10;
 		if (!isValidZIndex(zIndex)) {
 			return fail(400, {
 				error: "Invalid z-index",
@@ -147,7 +168,11 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const placementId = formData.get("placementId") as string;
+		const parsed = parseFormData(formData, RemoveClipartSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const { placementId } = parsed.data;
 
 		try {
 			await db

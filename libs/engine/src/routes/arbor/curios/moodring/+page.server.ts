@@ -1,6 +1,8 @@
 import type { PageServerLoad, Actions } from "./$types";
 import { fail } from "@sveltejs/kit";
+import { z } from "zod";
 import { ARBOR_ERRORS, logGroveError } from "$lib/errors";
+import { parseFormData } from "$lib/server/utils/form-data";
 import {
 	isValidMode,
 	isValidDisplayStyle,
@@ -85,6 +87,21 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 	};
 };
 
+const SaveMoodConfigSchema = z.object({
+	mode: z.string().optional().default("time"),
+	displayStyle: z.string().optional().default("ring"),
+	colorScheme: z.string().optional().default("default"),
+	manualMood: z.string().optional().default(""),
+	manualColor: z.string().optional().default(""),
+	showMoodLog: z.string().optional(),
+});
+
+const LogMoodSchema = z.object({
+	mood: z.string().optional().default(""),
+	color: z.string().optional().default(""),
+	note: z.string().optional().default(""),
+});
+
 export const actions: Actions = {
 	saveConfig: async ({ request, platform, locals }) => {
 		const db = platform?.env?.CURIO_DB;
@@ -98,22 +115,19 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const mode = isValidMode(formData.get("mode") as string)
-			? (formData.get("mode") as string)
-			: "time";
+		const parsed = parseFormData(formData, SaveMoodConfigSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const d = parsed.data;
 
-		const displayStyle = isValidDisplayStyle(formData.get("displayStyle") as string)
-			? (formData.get("displayStyle") as string)
-			: "ring";
-
-		const colorScheme = isValidColorScheme(formData.get("colorScheme") as string)
-			? (formData.get("colorScheme") as string)
-			: "default";
-
-		const manualMood = sanitizeMoodText(formData.get("manualMood") as string);
-		const manualColorRaw = (formData.get("manualColor") as string)?.trim();
+		const mode = isValidMode(d.mode) ? d.mode : "time";
+		const displayStyle = isValidDisplayStyle(d.displayStyle) ? d.displayStyle : "ring";
+		const colorScheme = isValidColorScheme(d.colorScheme) ? d.colorScheme : "default";
+		const manualMood = sanitizeMoodText(d.manualMood);
+		const manualColorRaw = d.manualColor?.trim();
 		const manualColor = manualColorRaw && isValidHexColor(manualColorRaw) ? manualColorRaw : null;
-		const showMoodLog = formData.has("showMoodLog") ? 1 : 0;
+		const showMoodLog = d.showMoodLog ? 1 : 0;
 
 		try {
 			// Try with show_mood_log column (requires migration 084)
@@ -184,7 +198,13 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const mood = sanitizeMoodText(formData.get("mood") as string);
+		const parsed = parseFormData(formData, LogMoodSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const d = parsed.data;
+
+		const mood = sanitizeMoodText(d.mood);
 		if (!mood) {
 			return fail(400, {
 				error: "Mood text is required",
@@ -192,9 +212,9 @@ export const actions: Actions = {
 			});
 		}
 
-		const colorRaw = (formData.get("color") as string)?.trim();
+		const colorRaw = d.color?.trim();
 		const color = colorRaw && isValidHexColor(colorRaw) ? colorRaw : "#7cb85c";
-		const note = sanitizeNote(formData.get("note") as string);
+		const note = sanitizeNote(d.note);
 		const id = generateMoodLogId();
 
 		try {

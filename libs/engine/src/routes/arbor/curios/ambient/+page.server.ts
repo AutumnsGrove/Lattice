@@ -1,6 +1,8 @@
 import type { PageServerLoad, Actions } from "./$types";
 import { fail } from "@sveltejs/kit";
+import { z } from "zod";
 import { ARBOR_ERRORS, logGroveError } from "$lib/errors";
+import { parseFormData } from "$lib/server/utils/form-data";
 import {
 	isValidSoundSet,
 	isValidVolume,
@@ -51,6 +53,13 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 	};
 };
 
+const SaveAmbientSchema = z.object({
+	soundSet: z.string().optional().default("forest-rain"),
+	volume: z.string().optional().default("50"),
+	enabled: z.string().optional(),
+	customUrl: z.string().optional().default(""),
+});
+
 export const actions: Actions = {
 	save: async ({ request, platform, locals }) => {
 		const db = platform?.env?.CURIO_DB;
@@ -64,16 +73,17 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
+		const parsed = parseFormData(formData, SaveAmbientSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const d = parsed.data;
 
-		const soundSetRaw = formData.get("soundSet") as string;
-		const soundSet = isValidSoundSet(soundSetRaw) ? soundSetRaw : "forest-rain";
-
-		const volumeRaw = parseInt(formData.get("volume") as string, 10);
+		const soundSet = isValidSoundSet(d.soundSet) ? d.soundSet : "forest-rain";
+		const volumeRaw = parseInt(d.volume, 10);
 		const volume = isValidVolume(volumeRaw) ? volumeRaw : DEFAULT_VOLUME;
-
-		const enabled = formData.get("enabled") === "on" ? 1 : 0;
-
-		const customUrl = (formData.get("customUrl") as string)?.trim() || null;
+		const enabled = d.enabled === "on" ? 1 : 0;
+		const customUrl = d.customUrl?.trim() || null;
 		if (customUrl && !isValidUrl(customUrl)) {
 			return fail(400, {
 				error: "Invalid custom audio URL",

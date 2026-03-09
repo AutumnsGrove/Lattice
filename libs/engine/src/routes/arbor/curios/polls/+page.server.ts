@@ -1,7 +1,9 @@
 import type { PageServerLoad, Actions } from "./$types";
 import { fail } from "@sveltejs/kit";
+import { z } from "zod";
 import { ARBOR_ERRORS, logGroveError } from "$lib/errors";
 import { stripHtml } from "$lib/curios/sanitize";
+import { parseFormData } from "$lib/server/utils/form-data";
 import {
 	generatePollId,
 	generateOptionId,
@@ -106,6 +108,20 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 	};
 };
 
+const CreatePollSchema = z.object({
+	question: z.string().nullable().optional(),
+	description: z.string().optional().default(""),
+	pollType: z.string().optional().default("single"),
+	resultsVisibility: z.string().optional().default("after-vote"),
+	containerStyle: z.string().optional().default("glass"),
+	isPinned: z.string().optional(),
+	closeDate: z.string().optional().default(""),
+});
+
+const PollIdSchema = z.object({
+	pollId: z.string().min(1),
+});
+
 export const actions: Actions = {
 	create: async ({ request, platform, locals }) => {
 		const db = platform?.env?.CURIO_DB;
@@ -119,7 +135,13 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const question = sanitizeQuestion(formData.get("question") as string | null);
+		const parsed = parseFormData(formData, CreatePollSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const d = parsed.data;
+
+		const question = sanitizeQuestion(d.question ?? null);
 
 		if (!question) {
 			return fail(400, {
@@ -128,22 +150,14 @@ export const actions: Actions = {
 			});
 		}
 
-		const description =
-			stripHtml(formData.get("description") as string)
-				.trim()
-				.slice(0, MAX_DESCRIPTION_LENGTH) || null;
+		const description = stripHtml(d.description).trim().slice(0, MAX_DESCRIPTION_LENGTH) || null;
 
-		const pollType = formData.get("pollType") as string;
-		const finalPollType = isValidPollType(pollType) ? pollType : "single";
-
-		const resultsVisibility = formData.get("resultsVisibility") as string;
-		const finalVisibility = isValidResultsVisibility(resultsVisibility)
-			? resultsVisibility
+		const finalPollType = isValidPollType(d.pollType) ? d.pollType : "single";
+		const finalVisibility = isValidResultsVisibility(d.resultsVisibility)
+			? d.resultsVisibility
 			: "after-vote";
-
-		const containerStyleRaw = formData.get("containerStyle") as string;
-		const finalContainerStyle = isValidContainerStyle(containerStyleRaw)
-			? containerStyleRaw
+		const finalContainerStyle = isValidContainerStyle(d.containerStyle)
+			? d.containerStyle
 			: "glass";
 
 		// Parse options with optional emoji + color
@@ -166,8 +180,8 @@ export const actions: Actions = {
 			});
 		}
 
-		const isPinned = formData.get("isPinned") === "true";
-		const closeDate = (formData.get("closeDate") as string) || null;
+		const isPinned = d.isPinned === "true";
+		const closeDate = d.closeDate || null;
 
 		const id = generatePollId();
 
@@ -213,7 +227,11 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const pollId = formData.get("pollId") as string;
+		const parsed = parseFormData(formData, PollIdSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const { pollId } = parsed.data;
 
 		try {
 			await db
@@ -245,7 +263,11 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const sourcePollId = formData.get("pollId") as string;
+		const parsed = parseFormData(formData, PollIdSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const sourcePollId = parsed.data.pollId;
 
 		const source = await db
 			.prepare(
@@ -314,7 +336,11 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const pollId = formData.get("pollId") as string;
+		const parsed = parseFormData(formData, PollIdSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const { pollId } = parsed.data;
 
 		try {
 			await db

@@ -1,6 +1,8 @@
 import type { PageServerLoad, Actions } from "./$types";
 import { fail } from "@sveltejs/kit";
+import { z } from "zod";
 import { ARBOR_ERRORS, logGroveError } from "$lib/errors";
+import { parseFormData } from "$lib/server/utils/form-data";
 import {
 	generateShrineId,
 	isValidShrineId,
@@ -31,6 +33,28 @@ interface ShrineRow {
 	is_published: number;
 	sort_order: number;
 }
+
+const AddShrineSchema = z.object({
+	title: z.string().optional().default(""),
+	shrineType: z.string().min(1),
+	size: z.string().min(1),
+	frameStyle: z.string().min(1),
+	description: z.string().optional().default(""),
+});
+
+const ShrineIdSchema = z.object({
+	shrineId: z.string().min(1),
+});
+
+const UpdateContentsSchema = z.object({
+	shrineId: z.string().min(1),
+	contents: z.string().min(1),
+});
+
+const LoadTemplateSchema = z.object({
+	shrineId: z.string().min(1),
+	shrineType: z.string().min(1),
+});
 
 export const load: PageServerLoad = async ({ platform, locals }) => {
 	const db = platform?.env?.CURIO_DB;
@@ -111,8 +135,13 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
+		const parsed = parseFormData(formData, AddShrineSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const d = parsed.data;
 
-		const title = sanitizeTitle(formData.get("title") as string);
+		const title = sanitizeTitle(d.title);
 		if (!title) {
 			return fail(400, {
 				error: ARBOR_ERRORS.FIELD_REQUIRED.userMessage,
@@ -120,7 +149,7 @@ export const actions: Actions = {
 			});
 		}
 
-		const shrineType = formData.get("shrineType") as string;
+		const shrineType = d.shrineType;
 		if (!isValidShrineType(shrineType)) {
 			return fail(400, {
 				error: ARBOR_ERRORS.INVALID_INPUT.userMessage,
@@ -128,7 +157,7 @@ export const actions: Actions = {
 			});
 		}
 
-		const size = formData.get("size") as string;
+		const size = d.size;
 		if (!isValidSize(size)) {
 			return fail(400, {
 				error: ARBOR_ERRORS.INVALID_INPUT.userMessage,
@@ -136,7 +165,7 @@ export const actions: Actions = {
 			});
 		}
 
-		const frameStyle = formData.get("frameStyle") as string;
+		const frameStyle = d.frameStyle;
 		if (!isValidFrameStyle(frameStyle)) {
 			return fail(400, {
 				error: ARBOR_ERRORS.INVALID_INPUT.userMessage,
@@ -144,7 +173,7 @@ export const actions: Actions = {
 			});
 		}
 
-		const description = sanitizeDescription(formData.get("description") as string);
+		const description = sanitizeDescription(d.description);
 		const id = generateShrineId();
 
 		// Auto-populate with template contents based on shrine type
@@ -201,7 +230,11 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const shrineId = formData.get("shrineId") as string;
+		const parsed = parseFormData(formData, ShrineIdSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const { shrineId } = parsed.data;
 
 		if (!isValidShrineId(shrineId)) {
 			return fail(400, {
@@ -243,7 +276,11 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const shrineId = formData.get("shrineId") as string;
+		const parsed = parseFormData(formData, ShrineIdSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const { shrineId } = parsed.data;
 
 		if (!isValidShrineId(shrineId)) {
 			return fail(400, {
@@ -280,8 +317,11 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const shrineId = formData.get("shrineId") as string;
-		const contentsRaw = formData.get("contents") as string;
+		const parsed = parseFormData(formData, UpdateContentsSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const { shrineId, contents: contentsRaw } = parsed.data;
 
 		if (!isValidShrineId(shrineId) || !contentsRaw) {
 			return fail(400, {
@@ -332,8 +372,11 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const shrineId = formData.get("shrineId") as string;
-		const shrineType = formData.get("shrineType") as string;
+		const parsed = parseFormData(formData, LoadTemplateSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const { shrineId, shrineType } = parsed.data;
 
 		if (!isValidShrineId(shrineId) || !isValidShrineType(shrineType)) {
 			return fail(400, {

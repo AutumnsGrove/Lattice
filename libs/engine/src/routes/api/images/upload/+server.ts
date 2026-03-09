@@ -1,5 +1,6 @@
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
+import { z } from "zod";
 import { getVerifiedTenantId } from "$lib/auth/session.js";
 import { createThreshold } from "$lib/threshold/factory.js";
 import { thresholdCheckWithResult, thresholdHeaders } from "$lib/threshold/adapters/sveltekit.js";
@@ -17,6 +18,7 @@ import { canUploadImages } from "$lib/server/upload-gate.js";
 import { API_ERRORS, buildErrorJson, logGroveError, throwGroveError } from "$lib/errors";
 import { updateLastActivity } from "$lib/server/activity-tracking.js";
 import { generateGalleryId, parseImageFilename } from "$lib/curios/gallery";
+import { parseFormData } from "$lib/server/utils/form-data.js";
 
 /** Maximum file size (10MB) */
 const MAX_SIZE = 10 * 1024 * 1024;
@@ -26,6 +28,21 @@ const MAX_IMAGE_DIMENSION = 8192;
 
 /** Maximum total pixels (50 megapixels) */
 const MAX_IMAGE_PIXELS = 50_000_000;
+
+/** Schema for validating image upload metadata fields */
+const ImageUploadMetadataSchema = z.object({
+	filename: z.string().nullable().optional(),
+	altText: z.string().optional().default(""),
+	description: z.string().optional().default(""),
+	hash: z.string().nullable().optional(),
+	imageFormat: z.string().nullable().optional(),
+	originalSize: z.string().nullable().optional(),
+	storedSize: z.string().nullable().optional(),
+	dominantColor: z.string().nullable().optional(),
+	imageWidth: z.string().nullable().optional(),
+	imageHeight: z.string().nullable().optional(),
+	context: z.string().optional().default("general"),
+});
 
 /**
  * Validate image dimensions by parsing file signatures
@@ -130,25 +147,38 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 		const tenantId = await getVerifiedTenantId(db, locals.tenantId, locals.user);
 		const formData = await request.formData();
 		const file = formData.get("file");
-		const customFilename = formData.get("filename") as string | null;
-		const altText = (formData.get("altText") as string) || "";
-		const description = (formData.get("description") as string) || "";
-		const hash = formData.get("hash") as string | null;
+		const metaParsed = parseFormData(formData, ImageUploadMetadataSchema);
+		const meta = metaParsed.success
+			? metaParsed.data
+			: {
+					filename: null,
+					altText: "",
+					description: "",
+					hash: null,
+					imageFormat: null,
+					originalSize: null,
+					storedSize: null,
+					dominantColor: null,
+					imageWidth: null,
+					imageHeight: null,
+					context: "general",
+				};
+
+		const customFilename = meta.filename ?? null;
+		const altText = meta.altText || "";
+		const description = meta.description || "";
+		const hash = meta.hash ?? null;
 
 		// Format metadata for analytics (JXL tracking)
-		const imageFormat = formData.get("imageFormat") as string | null;
-		const originalSizeStr = formData.get("originalSize") as string | null;
-		const storedSizeStr = formData.get("storedSize") as string | null;
-		const originalSizeBytes = originalSizeStr ? parseInt(originalSizeStr, 10) : null;
-		const storedSizeBytes = storedSizeStr ? parseInt(storedSizeStr, 10) : null;
+		const imageFormat = meta.imageFormat ?? null;
+		const originalSizeBytes = meta.originalSize ? parseInt(meta.originalSize, 10) : null;
+		const storedSizeBytes = meta.storedSize ? parseInt(meta.storedSize, 10) : null;
 
 		// Thumbnail + dominant color metadata (gallery performance)
 		const thumbnail = formData.get("thumbnail") as File | null;
-		const dominantColor = formData.get("dominantColor") as string | null;
-		const imageWidthStr = formData.get("imageWidth") as string | null;
-		const imageHeightStr = formData.get("imageHeight") as string | null;
-		const parsedWidth = imageWidthStr ? parseInt(imageWidthStr, 10) : null;
-		const parsedHeight = imageHeightStr ? parseInt(imageHeightStr, 10) : null;
+		const dominantColor = meta.dominantColor ?? null;
+		const parsedWidth = meta.imageWidth ? parseInt(meta.imageWidth, 10) : null;
+		const parsedHeight = meta.imageHeight ? parseInt(meta.imageHeight, 10) : null;
 
 		if (!file || !(file instanceof File)) {
 			throwGroveError(400, API_ERRORS.INVALID_REQUEST_BODY, "API", {
@@ -250,7 +280,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 			};
 
 			// Determine context from form data (default: general upload)
-			const uploadContext = (formData.get("context") as string) || "general";
+			const uploadContext = meta.context || "general";
 			const petalContext = ["tryon", "profile", "blog"].includes(uploadContext)
 				? (uploadContext as "tryon" | "profile" | "blog")
 				: "general";

@@ -1,6 +1,8 @@
 import type { PageServerLoad, Actions } from "./$types";
 import { fail } from "@sveltejs/kit";
+import { z } from "zod";
 import { ARBOR_ERRORS, logGroveError } from "$lib/errors";
+import { parseFormData } from "$lib/server/utils/form-data";
 import {
 	generateArtifactId,
 	isValidArtifactType,
@@ -87,6 +89,20 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 	};
 };
 
+const AddArtifactSchema = z.object({
+	name: z.string().optional().default(""),
+	artifactType: z.string().optional().default(""),
+	placement: z.string().optional().default("sidebar"),
+	visibility: z.string().optional().default("always"),
+	revealAnimation: z.string().optional().default("fade"),
+	container: z.string().optional().default("none"),
+	config: z.string().optional().default("{}"),
+});
+
+const RemoveArtifactSchema = z.object({
+	artifactId: z.string().min(1),
+});
+
 export const actions: Actions = {
 	add: async ({ request, platform, locals }) => {
 		const db = platform?.env?.CURIO_DB;
@@ -100,8 +116,14 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const name = ((formData.get("name") as string) ?? "").trim();
-		const artifactType = formData.get("artifactType") as string;
+		const parsed = parseFormData(formData, AddArtifactSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const d = parsed.data;
+
+		const name = d.name.trim();
+		const artifactType = d.artifactType;
 
 		if (name && !isValidArtifactName(name)) {
 			return fail(400, {
@@ -117,23 +139,12 @@ export const actions: Actions = {
 			});
 		}
 
-		const placement = isValidPlacement(formData.get("placement") as string)
-			? (formData.get("placement") as string)
-			: "sidebar";
+		const placement = isValidPlacement(d.placement) ? d.placement : "sidebar";
+		const visibility = isValidVisibility(d.visibility) ? d.visibility : "always";
+		const revealAnimation = isValidRevealAnimation(d.revealAnimation) ? d.revealAnimation : "fade";
+		const container = isValidContainer(d.container) ? d.container : "none";
 
-		const visibility = isValidVisibility(formData.get("visibility") as string)
-			? (formData.get("visibility") as string)
-			: "always";
-
-		const revealAnimation = isValidRevealAnimation(formData.get("revealAnimation") as string)
-			? (formData.get("revealAnimation") as string)
-			: "fade";
-
-		const container = isValidContainer(formData.get("container") as string)
-			? (formData.get("container") as string)
-			: "none";
-
-		const configStr = (formData.get("config") as string) || "{}";
+		const configStr = d.config || "{}";
 		if (configStr.length > MAX_CONFIG_SIZE) {
 			return fail(400, {
 				error: "Configuration too large",
@@ -195,7 +206,11 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const artifactId = formData.get("artifactId") as string;
+		const parsed = parseFormData(formData, RemoveArtifactSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const { artifactId } = parsed.data;
 
 		try {
 			await db

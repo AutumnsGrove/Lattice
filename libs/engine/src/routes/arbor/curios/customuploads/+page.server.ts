@@ -1,7 +1,9 @@
 import type { PageServerLoad, Actions } from "./$types";
 import { fail } from "@sveltejs/kit";
+import { z } from "zod";
 import { ARBOR_ERRORS, logGroveError } from "$lib/errors";
 import { MAX_FILE_SIZE, MAX_UPLOADS_PER_TENANT, formatFileSize } from "$lib/curios/customuploads";
+import { parseFormData } from "$lib/server/utils/form-data";
 
 interface UploadRow {
 	id: string;
@@ -66,6 +68,10 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 	};
 };
 
+const RemoveUploadSchema = z.object({
+	uploadId: z.string().min(1),
+});
+
 export const actions: Actions = {
 	remove: async ({ request, platform, locals }) => {
 		const db = platform?.env?.CURIO_DB;
@@ -79,7 +85,11 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
-		const uploadId = formData.get("uploadId") as string;
+		const parsed = parseFormData(formData, RemoveUploadSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const { uploadId } = parsed.data;
 
 		try {
 			await db

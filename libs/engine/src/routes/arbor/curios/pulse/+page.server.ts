@@ -1,8 +1,10 @@
 import type { PageServerLoad, Actions } from "./$types";
 import { fail } from "@sveltejs/kit";
+import { z } from "zod";
 import { ARBOR_ERRORS, logGroveError } from "$lib/errors";
 import { DEFAULT_PULSE_CONFIG, buildWebhookUrl } from "$lib/curios/pulse";
 import { createSecretsManager } from "$lib/server/secrets";
+import { parseFormData } from "$lib/server/utils/form-data";
 
 function safeParseJson(value: string): unknown {
 	try {
@@ -116,6 +118,19 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 	};
 };
 
+const SavePulseSchema = z.object({
+	enabled: z.string().optional(),
+	showHeatmap: z.string().optional(),
+	showFeed: z.string().optional(),
+	showStats: z.string().optional(),
+	showTrends: z.string().optional(),
+	showCi: z.string().optional(),
+	timezone: z.string().optional().default("America/New_York"),
+	feedMaxItems: z.string().optional().default("100"),
+	reposInclude: z.string().optional().default(""),
+	reposExclude: z.string().optional().default(""),
+});
+
 export const actions: Actions = {
 	save: async ({ request, platform, locals }) => {
 		const db = platform?.env?.CURIO_DB;
@@ -133,20 +148,22 @@ export const actions: Actions = {
 		}
 
 		const formData = await request.formData();
+		const parsed = parseFormData(formData, SavePulseSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const d = parsed.data;
 
-		const enabled = formData.get("enabled") === "true";
-		const showHeatmap = formData.get("showHeatmap") === "true";
-		const showFeed = formData.get("showFeed") === "true";
-		const showStats = formData.get("showStats") === "true";
-		const showTrends = formData.get("showTrends") === "true";
-		const showCi = formData.get("showCi") === "true";
-		const timezone = (formData.get("timezone") as string) || "America/New_York";
-		const feedMaxItems = Math.max(
-			10,
-			Math.min(500, parseInt(formData.get("feedMaxItems") as string) || 100),
-		);
-		const reposInclude = (formData.get("reposInclude") as string)?.trim() || null;
-		const reposExclude = (formData.get("reposExclude") as string)?.trim() || null;
+		const enabled = d.enabled === "true";
+		const showHeatmap = d.showHeatmap === "true";
+		const showFeed = d.showFeed === "true";
+		const showStats = d.showStats === "true";
+		const showTrends = d.showTrends === "true";
+		const showCi = d.showCi === "true";
+		const timezone = d.timezone || "America/New_York";
+		const feedMaxItems = Math.max(10, Math.min(500, parseInt(d.feedMaxItems) || 100));
+		const reposInclude = d.reposInclude?.trim() || null;
+		const reposExclude = d.reposExclude?.trim() || null;
 
 		const reposIncludeJson = reposInclude
 			? JSON.stringify(
