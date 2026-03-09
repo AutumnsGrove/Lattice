@@ -373,7 +373,7 @@ var prCreateCmd = &cobra.Command{
 		reviewers, _ := cmd.Flags().GetStringSlice("reviewer")
 
 		if title == "" {
-			return fmt.Errorf("title required (use -t)")
+			return fmt.Errorf("title required (use --title or -t)")
 		}
 
 		ghArgs := []string{"pr", "create"}
@@ -441,7 +441,7 @@ var prCommentCmd = &cobra.Command{
 		body, _ := cmd.Flags().GetString("body")
 
 		if body == "" {
-			return fmt.Errorf("body required (use -b)")
+			return fmt.Errorf("body required (use --body or -b)")
 		}
 
 		ghArgs := []string{"pr", "comment", number, "--body", body}

@@ -89,6 +89,7 @@ var gitHelpCategories = []ui.HelpCategory{
 			{Name: "ship", Desc: "Format, check, commit, push — all at once"},
 			{Name: "prep", Desc: "Pre-commit checks (lint, format, test)"},
 			{Name: "pr-prep", Desc: "PR readiness report"},
+			{Name: "pr", Desc: "Pull request operations (alias for gw gh pr)"},
 		},
 	},
 	{
