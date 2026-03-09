@@ -14,6 +14,7 @@
 	},
 	"dependencies": {
 		"@autumnsgrove/infra": "workspace:*",
+		"@autumnsgrove/lattice": "workspace:*",
 		"resend": "^4.8.0"
 	},
 	"devDependencies": {

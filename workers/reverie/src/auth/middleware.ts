@@ -10,34 +10,9 @@
  */
 
 import { createMiddleware } from "hono/factory";
+import { timingSafeEqual } from "@autumnsgrove/lattice/utils";
 import type { Env, ReverieVariables } from "../types";
 import { REVERIE_ERRORS, buildReverieError } from "../errors";
-
-/**
- * Constant-time string comparison to prevent timing attacks.
- * Uses HMAC comparison so output length is always 32 bytes.
- */
-async function timingSafeEqual(a: string, b: string): Promise<boolean> {
-	const encoder = new TextEncoder();
-	const aBytes = encoder.encode(a);
-	const bBytes = encoder.encode(b);
-	const aKey = await crypto.subtle.importKey(
-		"raw",
-		aBytes,
-		{ name: "HMAC", hash: "SHA-256" },
-		false,
-		["sign"],
-	);
-	const sig = await crypto.subtle.sign("HMAC", aKey, bBytes);
-	const expected = await crypto.subtle.sign("HMAC", aKey, aBytes);
-	const sigArr = new Uint8Array(sig);
-	const expectedArr = new Uint8Array(expected);
-	let diff = 0;
-	for (let i = 0; i < sigArr.length; i++) {
-		diff |= sigArr[i] ^ expectedArr[i];
-	}
-	return diff === 0;
-}
 
 /**
  * Auth middleware for protected routes.
@@ -64,7 +39,7 @@ export const reverieAuth = createMiddleware<{
 		return c.json(body, status as 500);
 	}
 
-	const valid = await timingSafeEqual(apiKey, expected);
+	const valid = timingSafeEqual(apiKey, expected);
 	if (!valid) {
 		const { body, status } = buildReverieError(REVERIE_ERRORS.AUTH_INVALID);
 		return c.json(body, status as 401);

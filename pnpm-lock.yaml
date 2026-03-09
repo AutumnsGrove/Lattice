@@ -1239,6 +1239,9 @@ importers:
       '@autumnsgrove/infra':
         specifier: workspace:*
         version: link:../../libs/infra
+      '@autumnsgrove/lattice':
+        specifier: workspace:*
+        version: link:../../libs/engine
       resend:
         specifier: ^4.8.0
         version: 4.8.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)

@@ -5,6 +5,8 @@
  * https://forwardemail.net/en/email-api
  */
 
+import { timingSafeEqual } from "@autumnsgrove/lattice/utils";
+
 export interface ForwardEmailConfig {
 	apiKey: string;
 	baseUrl?: string;
@@ -143,27 +145,4 @@ export class ForwardEmailClient {
 			return false;
 		}
 	}
-}
-
-/**
- * Constant-time string comparison
- * Prevents timing attacks by comparing every character regardless of early mismatches
- */
-function timingSafeEqual(a: string, b: string): boolean {
-	// Length check is NOT constant-time, but that's acceptable here
-	// The important part is that we don't short-circuit on character mismatches
-	if (a.length !== b.length) {
-		return false;
-	}
-
-	const encoder = new TextEncoder();
-	const aBytes = encoder.encode(a);
-	const bBytes = encoder.encode(b);
-
-	let result = 0;
-	for (let i = 0; i < aBytes.length; i++) {
-		result |= aBytes[i] ^ bBytes[i];
-	}
-
-	return result === 0;
 }

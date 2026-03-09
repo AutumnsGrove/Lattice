@@ -79,10 +79,7 @@ export function formatRelativeTime(
 /**
  * Full date: "January 15, 2026"
  */
-export function formatDateFull(
-	input: DateInput | null | undefined,
-	fallback = "—",
-): string {
+export function formatDateFull(input: DateInput | null | undefined, fallback = "—"): string {
 	const date = toDate(input);
 	if (!date) return fallback;
 	return date.toLocaleDateString("en-US", {
@@ -95,10 +92,7 @@ export function formatDateFull(
 /**
  * Short date: "Jan 15" (same year) or "Jan 15, 2024" (different year).
  */
-export function formatDateShort(
-	input: DateInput | null | undefined,
-	fallback = "—",
-): string {
+export function formatDateShort(input: DateInput | null | undefined, fallback = "—"): string {
 	const date = toDate(input);
 	if (!date) return fallback;
 	const now = new Date();
@@ -110,17 +104,16 @@ export function formatDateShort(
 }
 
 /**
- * Date with time: "Jan 5, 3:45 PM"
+ * Date with time: "Jan 5, 3:45 PM" (same year) or "Jan 5, 2024, 3:45 PM".
  */
-export function formatDateTime(
-	input: DateInput | null | undefined,
-	fallback = "—",
-): string {
+export function formatDateTime(input: DateInput | null | undefined, fallback = "—"): string {
 	const date = toDate(input);
 	if (!date) return fallback;
+	const now = new Date();
 	return date.toLocaleString("en-US", {
 		month: "short",
 		day: "numeric",
+		year: date.getFullYear() !== now.getFullYear() ? "numeric" : undefined,
 		hour: "numeric",
 		minute: "2-digit",
 	});
@@ -129,10 +122,7 @@ export function formatDateTime(
 /**
  * ISO date only: "2024-01-15"
  */
-export function formatDateISO(
-	input: DateInput | null | undefined,
-	fallback = "",
-): string {
+export function formatDateISO(input: DateInput | null | undefined, fallback = ""): string {
 	const date = toDate(input);
 	if (!date) return fallback;
 	return date.toISOString().split("T")[0];
@@ -142,10 +132,7 @@ export function formatDateISO(
  * Context-aware "smart" date: time if today, short date if this year,
  * full date otherwise.  Useful for inbox/list UIs.
  */
-export function formatSmartDate(
-	input: DateInput | null | undefined,
-	fallback = "—",
-): string {
+export function formatSmartDate(input: DateInput | null | undefined, fallback = "—"): string {
 	const date = toDate(input);
 	if (!date) return fallback;
 
