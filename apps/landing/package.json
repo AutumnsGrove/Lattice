@@ -13,7 +13,9 @@
 		"deploy": "pnpm run build && wrangler deploy",
 		"test": "vitest",
 		"test:run": "vitest run",
-		"test:coverage": "vitest run --coverage"
+		"test:coverage": "vitest run --coverage",
+		"kb:sync": "bun run scripts/kb-sync.ts",
+		"kb:sync:dry": "bun run scripts/kb-sync.ts --dry-run"
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20260210.0",
