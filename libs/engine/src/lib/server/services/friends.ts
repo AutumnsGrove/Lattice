@@ -139,8 +139,9 @@ export async function searchTenants(
 		.prepare(
 			`SELECT id, subdomain, display_name
 			 FROM tenants
-			 WHERE (subdomain LIKE ? ESCAPE '\\' OR display_name LIKE ? ESCAPE '\\')
+			 WHERE (LOWER(subdomain) LIKE ? ESCAPE '\\' OR LOWER(display_name) LIKE ? ESCAPE '\\')
 			   AND id != ?
+			   AND active = 1
 			 LIMIT 10`,
 		)
 		.bind(pattern, pattern, excludeTenantId)
