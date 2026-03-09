@@ -9,43 +9,9 @@
  */
 
 import { createMiddleware } from "hono/factory";
+import { timingSafeEqual } from "@autumnsgrove/lattice/utils";
 import type { Env, ExecVariables } from "../types";
 import { EXEC_ERRORS, buildExecError } from "../errors";
-
-/**
- * Constant-time string comparison to prevent timing attacks.
- *
- * Uses HMAC(key=a, data=b) === HMAC(key=a, data=a) comparison.
- * The HMAC output length is always 32 bytes (SHA-256) regardless of
- * input length, so no timing information is leaked about key length.
- */
-async function timingSafeEqual(a: string, b: string): Promise<boolean> {
-	const encoder = new TextEncoder();
-	const aBytes = encoder.encode(a);
-	const bBytes = encoder.encode(b);
-
-	// Use crypto.subtle for timing-safe comparison via HMAC.
-	// HMAC outputs are always 32 bytes regardless of input length,
-	// so the comparison below never leaks the key length.
-	const aKey = await crypto.subtle.importKey(
-		"raw",
-		aBytes,
-		{ name: "HMAC", hash: "SHA-256" },
-		false,
-		["sign"],
-	);
-	const sig = await crypto.subtle.sign("HMAC", aKey, bBytes);
-	const expected = await crypto.subtle.sign("HMAC", aKey, aBytes);
-
-	// Compare the HMAC outputs (constant-time, fixed 32-byte length)
-	const sigArr = new Uint8Array(sig);
-	const expectedArr = new Uint8Array(expected);
-	let diff = 0;
-	for (let i = 0; i < sigArr.length; i++) {
-		diff |= sigArr[i] ^ expectedArr[i];
-	}
-	return diff === 0;
-}
 
 /**
  * Auth middleware for the execution worker.
@@ -68,7 +34,7 @@ export const execAuth = createMiddleware<{
 		return c.json(body, status as 500);
 	}
 
-	const valid = await timingSafeEqual(apiKey, expected);
+	const valid = timingSafeEqual(apiKey, expected);
 	if (!valid) {
 		const { body, status } = buildExecError(EXEC_ERRORS.AUTH_INVALID);
 		return c.json(body, status as 401);

@@ -3,22 +3,24 @@
  * Account settings including passkey management
  */
 
+import { escapeHtml } from "@autumnsgrove/lattice/utils";
+
 interface SettingsPageOptions {
-  authBaseUrl: string;
-  user?: {
-    id: string;
-    name: string | null;
-    email: string;
-    image: string | null;
-  };
-  error?: string;
-  success?: string;
+	authBaseUrl: string;
+	user?: {
+		id: string;
+		name: string | null;
+		email: string;
+		image: string | null;
+	};
+	error?: string;
+	success?: string;
 }
 
 export function getSettingsPageHTML(options: SettingsPageOptions): string {
-  const { authBaseUrl, user, error, success } = options;
+	const { authBaseUrl, user, error, success } = options;
 
-  return `<!DOCTYPE html>
+	return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -417,8 +419,8 @@ export function getSettingsPageHTML(options: SettingsPageOptions): string {
     ${success ? `<div class="message message-success">${escapeHtml(success)}</div>` : ""}
 
     ${
-      user
-        ? `
+			user
+				? `
     <!-- User Profile Card -->
     <div class="card">
       <div class="user-info">
@@ -522,14 +524,14 @@ export function getSettingsPageHTML(options: SettingsPageOptions): string {
       </button>
     </div>
     `
-        : `
+				: `
     <div class="card not-authenticated">
       <h2>Not Signed In</h2>
       <p>Please sign in to manage your account settings.</p>
       <a href="/login" class="btn btn-primary">Sign In</a>
     </div>
     `
-    }
+		}
   </div>
 
   <!-- Add Passkey Modal -->
@@ -634,8 +636,8 @@ export function getSettingsPageHTML(options: SettingsPageOptions): string {
   </div>
 
   ${
-    user
-      ? `
+		user
+			? `
   <script>
     const API_BASE = '${authBaseUrl}';
     let deletePasskeyId = null;
@@ -1178,17 +1180,8 @@ export function getSettingsPageHTML(options: SettingsPageOptions): string {
     load2faStatus();
   </script>
   `
-      : ""
-  }
+			: ""
+	}
 </body>
 </html>`;
-}
-
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
 }

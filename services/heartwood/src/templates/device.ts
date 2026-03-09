@@ -3,22 +3,22 @@
  * Styled to match Grove ecosystem aesthetic
  */
 
+import { escapeHtml } from "@autumnsgrove/lattice/utils";
+
 interface DeviceAuthorizationPageOptions {
-  userCode: string;
-  clientName: string;
-  userName?: string;
-  error?: string | null;
-  showForm: boolean;
-  authBaseUrl: string;
-  success?: "approved" | "denied" | null;
+	userCode: string;
+	clientName: string;
+	userName?: string;
+	error?: string | null;
+	showForm: boolean;
+	authBaseUrl: string;
+	success?: "approved" | "denied" | null;
 }
 
-export function getDeviceAuthorizationPageHTML(
-  options: DeviceAuthorizationPageOptions,
-): string {
-  const { userName } = options;
+export function getDeviceAuthorizationPageHTML(options: DeviceAuthorizationPageOptions): string {
+	const { userName } = options;
 
-  return `<!DOCTYPE html>
+	return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -337,8 +337,8 @@ export function getDeviceAuthorizationPageHTML(
       </div>
 
       ${
-        userName
-          ? `
+				userName
+					? `
       <div style="text-align: center;">
         <span class="user-badge">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -349,8 +349,8 @@ export function getDeviceAuthorizationPageHTML(
         </span>
       </div>
       `
-          : ""
-      }
+					: ""
+			}
 
       ${renderContent(options)}
 
@@ -364,44 +364,37 @@ export function getDeviceAuthorizationPageHTML(
 }
 
 function renderContent(options: DeviceAuthorizationPageOptions): string {
-  const { userCode, clientName, error, showForm, authBaseUrl, success } =
-    options;
+	const { userCode, clientName, error, showForm, authBaseUrl, success } = options;
 
-  // Handle success states from redirect
-  if (success === "approved") {
-    return renderSuccess(
-      "Device Authorized",
-      "You can close this window and return to your CLI.",
-    );
-  }
-  if (success === "denied") {
-    return renderSuccess(
-      "Authorization Denied",
-      "The device authorization request was denied.",
-    );
-  }
+	// Handle success states from redirect
+	if (success === "approved") {
+		return renderSuccess("Device Authorized", "You can close this window and return to your CLI.");
+	}
+	if (success === "denied") {
+		return renderSuccess("Authorization Denied", "The device authorization request was denied.");
+	}
 
-  // Show error if present
-  if (error) {
-    return `
+	// Show error if present
+	if (error) {
+		return `
       <div class="error-box">
         <p>${escapeHtml(error)}</p>
       </div>
       ${renderCodeEntry(authBaseUrl)}
     `;
-  }
+	}
 
-  // Show authorization form if device code is valid
-  if (showForm && userCode) {
-    return renderAuthorizationForm(userCode, clientName, authBaseUrl);
-  }
+	// Show authorization form if device code is valid
+	if (showForm && userCode) {
+		return renderAuthorizationForm(userCode, clientName, authBaseUrl);
+	}
 
-  // Default: show code entry form
-  return renderCodeEntry(authBaseUrl);
+	// Default: show code entry form
+	return renderCodeEntry(authBaseUrl);
 }
 
 function renderSuccess(title: string, message: string): string {
-  return `
+	return `
     <div class="success-box">
       <h3>${escapeHtml(title)}</h3>
       <p>${escapeHtml(message)}</p>
@@ -410,7 +403,7 @@ function renderSuccess(title: string, message: string): string {
 }
 
 function renderCodeEntry(authBaseUrl: string): string {
-  return `
+	return `
     <p class="subtitle">Enter the code displayed on your device</p>
     <form action="${authBaseUrl}/auth/device" method="GET">
       <div class="form-group">
@@ -434,11 +427,11 @@ function renderCodeEntry(authBaseUrl: string): string {
 }
 
 function renderAuthorizationForm(
-  userCode: string,
-  clientName: string,
-  authBaseUrl: string,
+	userCode: string,
+	clientName: string,
+	authBaseUrl: string,
 ): string {
-  return `
+	return `
     <p class="subtitle">
       <span class="client-name">${escapeHtml(clientName)}</span> is requesting access to your account
     </p>
@@ -465,13 +458,4 @@ function renderAuthorizationForm(
       If you did not request this authorization, click Deny.
     </p>
   `;
-}
-
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
 }

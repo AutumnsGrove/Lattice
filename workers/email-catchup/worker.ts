@@ -15,6 +15,7 @@
 
 import { createCloudflareContext } from "@autumnsgrove/infra/cloudflare";
 import type { GroveContext } from "@autumnsgrove/infra";
+import { SEQUENCES, type AudienceType } from "@autumnsgrove/lattice/email";
 import { Resend } from "resend";
 
 // =============================================================================
@@ -44,8 +45,6 @@ function createContext(env: Env): GroveContext {
 	});
 }
 
-type AudienceType = "wanderer" | "promo" | "rooted";
-
 interface EmailSignup {
 	id: number;
 	email: string;
@@ -55,39 +54,6 @@ interface EmailSignup {
 	sequence_stage: number;
 	last_email_at: string | null;
 }
-
-/**
- * Sequence definitions by audience type
- * Must match libs/engine/src/lib/email/types.ts
- */
-const SEQUENCES: Record<AudienceType, { dayOffset: number; subject: string }[]> = {
-	wanderer: [
-		{ dayOffset: 0, subject: "Welcome to the Grove 🌿" },
-		{ dayOffset: 7, subject: "What makes Grove different" },
-		{ dayOffset: 14, subject: "Why Grove exists" },
-		{ dayOffset: 30, subject: "Still there? 👋" },
-	],
-	promo: [
-		{ dayOffset: 0, subject: "You found Grove 🌱" },
-		{ dayOffset: 7, subject: "Still thinking about it?" },
-	],
-	rooted: [
-		{ dayOffset: 0, subject: "Welcome home 🏡" },
-		{ dayOffset: 1, subject: "Making it yours" },
-		{ dayOffset: 7, subject: "The blank page" },
-	],
-};
-
-/**
- * Template names matching the sequence
- */
-const TEMPLATE_MAP: Record<number, string> = {
-	0: "WelcomeEmail",
-	1: "Day1Email",
-	7: "Day7Email",
-	14: "Day14Email",
-	30: "Day30Email",
-};
 
 // =============================================================================
 // Main Handler
@@ -213,11 +179,15 @@ async function processOverdueEmails(ctx: GroveContext, env: Env) {
 				continue;
 			}
 
+			// Look up the sequence entry for this stage
+			const sequence = SEQUENCES[user.audience_type];
+			const emailConfig = sequence.find((e) => e.dayOffset === nextStage);
+
 			// Get the email content for this stage
 			const emailContent = await renderEmail(
 				renderUrl,
 				{
-					template: TEMPLATE_MAP[nextStage],
+					template: emailConfig?.template || `Day${nextStage}Email`,
 					audienceType: user.audience_type,
 					name: user.name,
 				},
@@ -229,9 +199,6 @@ async function processOverdueEmails(ctx: GroveContext, env: Env) {
 				continue;
 			}
 
-			// Get the subject for this audience/stage
-			const sequence = SEQUENCES[user.audience_type];
-			const emailConfig = sequence.find((e) => e.dayOffset === nextStage);
 			const subject = emailConfig?.subject || `Day ${nextStage} from Grove`;
 
 			// Send via Resend
