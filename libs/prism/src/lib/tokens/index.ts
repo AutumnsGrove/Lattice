@@ -1,10 +1,10 @@
 /**
  * Tokens index
- * Re-exports Prism design tokens for backward compatibility
+ * Exports all Prism design tokens
  */
 
 export {
-	groveColors,
+	grove as groveColors,
 	cream,
 	bark,
 	semantic,
@@ -16,6 +16,6 @@ export {
 	type SemanticColor,
 	type StatusColor,
 	type Colors,
-	SEASONAL_PALETTES,
-	type SeasonalPalette,
-} from "@autumnsgrove/prism";
+} from "./colors.js";
+
+export { SEASONAL_PALETTES, type SeasonalPalette } from "./seasons.js";
