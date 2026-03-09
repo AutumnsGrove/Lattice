@@ -87,6 +87,7 @@ var skillRegistry = []skillEntry{
 
 	// Board Management (board-scoped skills skip issue selection and worktree creation)
 	{"J", "vulture-sweep", "Clean up stale/closed issues", "Board Mgmt", false, ScopeBoard},
+	{"B", "bee-collect", "Gather scattered ideas into issues", "Board Mgmt", false, ScopeBoard},
 	{"l", "safari-explore", "Systematically review a collection", "Board Mgmt", false, ""},
 }
 
