@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env tsx
 /**
  * KB Sync — Syncs Knowledge Base markdown files to D1.
  *
@@ -22,7 +22,8 @@
  */
 
 import { readFileSync, readdirSync, statSync } from "fs";
-import { join, resolve } from "path";
+import { join, resolve, dirname } from "path";
+import { fileURLToPath } from "url";
 import { createHash } from "crypto";
 import matter from "@11ty/gray-matter";
 import MarkdownIt from "markdown-it";
@@ -31,7 +32,8 @@ import MarkdownIt from "markdown-it";
 // Configuration
 // ---------------------------------------------------------------------------
 
-const PROJECT_ROOT = resolve(import.meta.dir, "../../..");
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const PROJECT_ROOT = resolve(__dirname, "../../..");
 const DOCS_ROOT = resolve(PROJECT_ROOT, "docs");
 
 // Database ID from wrangler.toml (DB binding = grove-engine-db)

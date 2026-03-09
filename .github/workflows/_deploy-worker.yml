@@ -70,6 +70,11 @@ on:
         required: false
         type: string
         default: ""
+      pre-deploy-command:
+        description: "Command to run after migrations but before deploy (e.g. KB sync)"
+        required: false
+        type: string
+        default: ""
 
 jobs:
   deploy:
@@ -143,6 +148,14 @@ jobs:
           command: d1 migrations apply ${{ inputs.migration-db }} --remote
           workingDirectory: ${{ inputs.worker-dir }}
           packageManager: pnpm
+
+      - name: Run pre-deploy command
+        if: inputs.pre-deploy-command != ''
+        run: ${{ inputs.pre-deploy-command }}
+        working-directory: ${{ inputs.worker-dir }}
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3

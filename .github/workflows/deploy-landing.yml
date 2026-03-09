@@ -9,6 +9,11 @@ on:
       - "docs/help-center/**"
       - "docs/legal/**"
       - "docs/specs/**"
+      - "docs/marketing/**"
+      - "docs/patterns/**"
+      - "docs/philosophy/**"
+      - "docs/design-system/**"
+      - "docs/museum/**"
   workflow_run:
     workflows: ["Auto-tag on Version Bump"]
     types: [completed]
@@ -32,4 +37,5 @@ jobs:
       run-migrations: true
       migration-db: grove-engine-db
       checkout-ref: main
+      pre-deploy-command: "pnpm run kb:sync"
     secrets: inherit
