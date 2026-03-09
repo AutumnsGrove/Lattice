@@ -2,7 +2,7 @@ import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { building } from "$app/environment";
 import { getSeasonFavicons, resolveSeasonPreference } from "$lib/ui/season-meta";
-import { DEFAULT_SEASON } from "$lib/ui/types/season";
+import { DEFAULT_SEASON, type Season } from "$lib/ui/types/season";
 
 /**
  * Dynamic PWA manifest — serves season-aware icon paths based on tenant's
@@ -11,7 +11,7 @@ import { DEFAULT_SEASON } from "$lib/ui/types/season";
  * Replaces the static site.webmanifest file. (#1304)
  */
 export const GET: RequestHandler = async ({ platform, locals }) => {
-	let season = DEFAULT_SEASON;
+	let season: Season = DEFAULT_SEASON;
 
 	// Read tenant's preferred season from site_settings (if available)
 	if (!building) {
