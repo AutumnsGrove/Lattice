@@ -23,8 +23,8 @@
 	} from "lucide-svelte";
 	import { DomainCheckerModal } from "$lib/ui/components/domain";
 	import { groveModeStore } from "$lib/ui/stores/grove-mode.svelte";
-	import { ALL_SEASONS, SEASON_LABELS, SEASON_ICONS } from "$lib/ui/types/season";
-	import { SEASON_THEME_COLORS } from "$lib/ui/season-meta";
+	import { ALL_SEASONS, SEASON_LABELS } from "$lib/ui/types/season";
+	import { SEASON_THEME_COLORS, getSeasonFavicons } from "$lib/ui/season-meta";
 	import { toast } from "$lib/ui/components/ui/toast";
 	import { api, apiRequest } from "$lib/utils";
 	import {
@@ -1318,7 +1318,7 @@
 					onclick={() => (preferredSeason = season)}
 					title={SEASON_LABELS[season]}
 				>
-					<span class="season-icon">{SEASON_ICONS[season]}</span>
+					<img class="season-icon" src={getSeasonFavicons(season).png32} alt={SEASON_LABELS[season]} />
 					<span class="season-label">{SEASON_LABELS[season]}</span>
 				</button>
 			{/each}
@@ -3046,8 +3046,9 @@
 		outline-offset: 2px;
 	}
 	.season-icon {
-		font-size: 1.5rem;
-		line-height: 1;
+		width: 32px;
+		height: 32px;
+		object-fit: contain;
 	}
 	.season-label {
 		font-size: 0.8rem;
