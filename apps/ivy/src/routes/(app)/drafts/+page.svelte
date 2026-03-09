@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Icon from "$lib/components/Icons.svelte";
 	import { isComposing } from "$lib/stores";
+	import { formatRelativeTime } from "@autumnsgrove/lattice/utils";
 
 	// Mock draft for demo
 	const drafts = [
@@ -12,16 +13,6 @@
 			lastEdited: new Date(Date.now() - 1000 * 60 * 60 * 2),
 		},
 	];
-
-	function formatDate(date: Date): string {
-		const now = new Date();
-		const diff = now.getTime() - date.getTime();
-		const hours = Math.floor(diff / (1000 * 60 * 60));
-
-		if (hours < 1) return "Just now";
-		if (hours < 24) return `${hours}h ago`;
-		return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-	}
 </script>
 
 <svelte:head>
@@ -44,7 +35,7 @@
 				<div class="draft-content">
 					<div class="draft-top">
 						<span class="draft-to">To: {draft.to || "(no recipient)"}</span>
-						<span class="draft-date">{formatDate(draft.lastEdited)}</span>
+						<span class="draft-date">{formatRelativeTime(draft.lastEdited)}</span>
 					</div>
 					<div class="draft-subject">{draft.subject || "(no subject)"}</div>
 					<div class="draft-snippet">{draft.snippet}</div>
