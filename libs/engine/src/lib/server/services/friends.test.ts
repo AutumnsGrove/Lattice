@@ -257,4 +257,23 @@ describe("searchTenants", () => {
 		const prepareCall = (db.prepare as ReturnType<typeof vi.fn>).mock.calls[0][0] as string;
 		expect(prepareCall).toContain("LIMIT 10");
 	});
+
+	it("should use LOWER() for case-insensitive matching", async () => {
+		const db = createMockDB();
+
+		await searchTenants(db, "a2a0", "exclude-me");
+
+		const prepareCall = (db.prepare as ReturnType<typeof vi.fn>).mock.calls[0][0] as string;
+		expect(prepareCall).toContain("LOWER(subdomain)");
+		expect(prepareCall).toContain("LOWER(display_name)");
+	});
+
+	it("should only return active tenants", async () => {
+		const db = createMockDB();
+
+		await searchTenants(db, "grove", "");
+
+		const prepareCall = (db.prepare as ReturnType<typeof vi.fn>).mock.calls[0][0] as string;
+		expect(prepareCall).toContain("active = 1");
+	});
 });

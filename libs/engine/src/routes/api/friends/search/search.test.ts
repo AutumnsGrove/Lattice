@@ -140,6 +140,27 @@ describe("GET /api/friends/search", () => {
 		expect(passedQuery.length).toBe(64);
 	});
 
+	it("should normalize query to lowercase before searching", async () => {
+		vi.mocked(searchTenants).mockResolvedValue([]);
+
+		const db = createMockDB();
+		const event = createRequestEvent("A2A0", { db });
+		await GET(event);
+
+		// searchTenants should receive the lowercased query
+		expect(searchTenants).toHaveBeenCalledWith(db, "a2a0", "my-tenant");
+	});
+
+	it("should normalize mixed-case query to lowercase", async () => {
+		vi.mocked(searchTenants).mockResolvedValue([]);
+
+		const db = createMockDB();
+		const event = createRequestEvent("Autumn", { db });
+		await GET(event);
+
+		expect(searchTenants).toHaveBeenCalledWith(db, "autumn", "my-tenant");
+	});
+
 	it("should return multiple results from service", async () => {
 		const tenants = Array.from({ length: 10 }, (_, i) => ({
 			tenantId: `tenant-${i}`,
