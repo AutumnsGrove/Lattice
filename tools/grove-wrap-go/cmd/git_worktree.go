@@ -302,15 +302,52 @@ var gitWorktreeRemoveCmd = &cobra.Command{
 
 // ── worktree finish ─────────────────────────────────────────────────
 
+// resolveWorktreeByIssue scans git worktree list for a branch containing
+// "issue-{number}" and returns the matching worktree info.
+// Errors if zero or multiple worktrees match.
+func resolveWorktreeByIssue(number string) (*worktreeInfo, error) {
+	output, err := gwexec.GitOutput("worktree", "list", "--porcelain")
+	if err != nil {
+		return nil, fmt.Errorf("failed to list worktrees: %w", err)
+	}
+	trees := parseWorktreeListPorcelain(output)
+
+	needle := "issue-" + number + "-"
+	var matches []worktreeInfo
+	for _, t := range trees {
+		if strings.Contains(t.Branch, needle) {
+			matches = append(matches, t)
+		}
+	}
+
+	switch len(matches) {
+	case 0:
+		return nil, fmt.Errorf("no worktree found for issue #%s", number)
+	case 1:
+		return &matches[0], nil
+	default:
+		var paths []string
+		for _, m := range matches {
+			paths = append(paths, m.Path)
+		}
+		return nil, fmt.Errorf("multiple worktrees match issue #%s: %s", number, strings.Join(paths, ", "))
+	}
+}
+
 var gitWorktreeFinishCmd = &cobra.Command{
-	Use:   "finish",
+	Use:   "finish [issue-number]",
 	Short: "Commit, push, merge into main, and remove worktree",
 	Long: `Finish work in the current worktree:
 1. Stage and commit all changes (if any)
 2. Push the branch to remote
 3. Merge branch into main
 4. Push main
-5. Remove the worktree and clean up branches`,
+5. Remove the worktree and clean up branches
+
+When an issue number is provided, resolves the matching worktree by branch
+name (e.g. fix/issue-1349-...) and operates on it from any directory.
+When omitted, operates on the current working directory (existing behavior).`,
+	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if !gwexec.IsGitRepo() {
 			return notARepo()
@@ -324,14 +361,32 @@ var gitWorktreeFinishCmd = &cobra.Command{
 		deleteBranch, _ := cmd.Flags().GetBool("delete-branch")
 		noMerge, _ := cmd.Flags().GetBool("no-merge")
 
-		// Get current working directory and branch
-		cwd, err := os.Getwd()
-		if err != nil {
-			return fmt.Errorf("cannot determine working directory: %w", err)
-		}
-		branch, err := gwexec.CurrentBranch()
-		if err != nil {
-			return fmt.Errorf("cannot determine current branch: %w", err)
+		var cwd string
+		var branch string
+
+		if len(args) == 1 {
+			// Resolve worktree by issue number
+			number := args[0]
+			if err := validateGHNumber(number); err != nil {
+				return err
+			}
+			wt, err := resolveWorktreeByIssue(number)
+			if err != nil {
+				return err
+			}
+			cwd = wt.Path
+			branch = wt.Branch
+		} else {
+			// Existing behavior: use current working directory
+			var err error
+			cwd, err = os.Getwd()
+			if err != nil {
+				return fmt.Errorf("cannot determine working directory: %w", err)
+			}
+			branch, err = gwexec.CurrentBranch()
+			if err != nil {
+				return fmt.Errorf("cannot determine current branch: %w", err)
+			}
 		}
 
 		if branch == "main" || branch == "master" {
@@ -339,7 +394,7 @@ var gitWorktreeFinishCmd = &cobra.Command{
 		}
 
 		// Check for uncommitted changes
-		statusResult, err := gwexec.Git("status", "--porcelain")
+		statusResult, err := gwexec.RunInDir(cwd, "git", "status", "--porcelain")
 		if err != nil {
 			return fmt.Errorf("git status failed: %w", err)
 		}
@@ -351,18 +406,18 @@ var gitWorktreeFinishCmd = &cobra.Command{
 			}
 
 			// Stage all and commit
-			result, err := gwexec.Git("add", "-A")
+			result, err := gwexec.RunInDir(cwd, "git", "add", "-A")
 			if err != nil || !result.OK() {
 				return fmt.Errorf("git add failed: %w", err)
 			}
-			result, err = gwexec.Git("commit", "-m", message)
+			result, err = gwexec.RunInDir(cwd, "git", "commit", "-m", message)
 			if err != nil || !result.OK() {
 				return fmt.Errorf("git commit failed: %s", strings.TrimSpace(result.Stderr))
 			}
 		}
 
 		// Push branch
-		pushResult, err := gwexec.Git("push", "-u", "origin", branch)
+		pushResult, err := gwexec.RunInDir(cwd, "git", "push", "-u", "origin", branch)
 		if err != nil {
 			return fmt.Errorf("git push failed: %w", err)
 		}

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -103,5 +104,52 @@ bare
 	}
 	if !trees[0].Bare {
 		t.Error("expected bare to be true")
+	}
+}
+
+func TestMatchWorktreeByIssueNumber(t *testing.T) {
+	// Test the branch-matching logic used by resolveWorktreeByIssue.
+	// We test the matching directly since resolveWorktreeByIssue depends on
+	// gwexec.GitOutput which requires a real git repo.
+	input := `worktree /Users/autumn/Projects/Lattice
+HEAD abc1234567890
+branch refs/heads/main
+
+worktree /Users/autumn/.worktrees/issue-1349
+HEAD def5678901234
+branch refs/heads/fix/issue-1349-fix-inconsistent-lantern-icons
+
+worktree /Users/autumn/.worktrees/issue-1434
+HEAD 789012345abcd
+branch refs/heads/feat/issue-1434-allow-worktree-finish-to-accept-an-issue-number
+
+`
+	trees := parseWorktreeListPorcelain(input)
+
+	tests := []struct {
+		number    string
+		wantPath  string
+		wantCount int
+	}{
+		{"1349", "/Users/autumn/.worktrees/issue-1349", 1},
+		{"1434", "/Users/autumn/.worktrees/issue-1434", 1},
+		{"9999", "", 0},
+	}
+
+	for _, tt := range tests {
+		needle := "issue-" + tt.number + "-"
+		var matches []worktreeInfo
+		for _, tr := range trees {
+			if strings.Contains(tr.Branch, needle) {
+				matches = append(matches, tr)
+			}
+		}
+		if len(matches) != tt.wantCount {
+			t.Errorf("issue %s: got %d matches, want %d", tt.number, len(matches), tt.wantCount)
+			continue
+		}
+		if tt.wantCount == 1 && matches[0].Path != tt.wantPath {
+			t.Errorf("issue %s: got path %q, want %q", tt.number, matches[0].Path, tt.wantPath)
+		}
 	}
 }
