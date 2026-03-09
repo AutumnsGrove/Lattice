@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="32" height="32">
+  <!-- Monochrome version for Safari pinned tabs -->
+  <!-- Safari will apply the color from the mask-icon color attribute -->
+  <g transform="rotate(-12 50 50)">
+    <!-- Tier 1: Top branches -->
+    <path d="M50 5 L18 32 L50 18 Z" />
+    <path d="M50 5 L50 18 L82 32 Z" />
+
+    <!-- Tier 2: Middle branches -->
+    <path d="M50 20 L12 50 L50 35 Z" />
+    <path d="M50 20 L50 35 L88 50 Z" />
+
+    <!-- Tier 3: Bottom branches -->
+    <path d="M50 38 L18 68 L50 54 Z" />
+    <path d="M50 38 L50 54 L82 68 Z" />
+
+    <!-- Trunk -->
+    <path d="M50 54 L42 58 L46 100 L50 100 Z" />
+    <path d="M50 54 L58 58 L54 100 L50 100 Z" />
+  </g>
+</svg>
