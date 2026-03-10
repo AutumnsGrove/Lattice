@@ -88,7 +88,7 @@ export function parseScribeDraftResponse(response: string): {
 		const parsed = safeParseJson<{
 			text?: string;
 			gutterContent?: unknown[];
-		}>(jsonMatch[0], null);
+		} | null>(jsonMatch[0], null);
 
 		if (!parsed) {
 			return null;
