@@ -30,11 +30,12 @@ Request Context     Options   Animals  Path
 
 ### Phase 1: PERCH
 
-*The robin perches, listening to what the wanderer needs...*
+_The robin perches, listening to what the wanderer needs..._
 
 Understand the request:
 
 **What does the user want to do?**
+
 - Fix a specific issue? → Panther
 - Build something new? → Elephant
 - Write tests? → Beaver
@@ -42,6 +43,7 @@ Understand the request:
 - Design UI? → Chameleon
 - Write docs? → Owl
 - Debug something broken? → Mole
+- Build test-first with TDD? → Frog
 - Challenge a plan? → Crow
 - Surface assumptions? → Groundhog
 - Respond to PR feedback? → Lynx
@@ -49,6 +51,7 @@ Understand the request:
 - Something else? → Keep listening
 
 **How specific is the task?**
+
 - Single focused issue → Individual animal
 - Multi-step process → Gathering chain
 - Unclear scope → Ask clarifying questions
@@ -59,7 +62,7 @@ Understand the request:
 
 ### Phase 2: TILT
 
-*The robin tilts its head, understanding the context...*
+_The robin tilts its head, understanding the context..._
 
 Assess the situation:
 
@@ -105,6 +108,11 @@ Assess the situation:
 │  Groundhog-Surface                                             │
 │  (assumptions)                                                 │
 │                                                              │
+│  🐸 ORCHESTRATORS                                              │
+│  ────────────────                                              │
+│  Frog-Cycle                                                    │
+│  (TDD red-green-refactor)                                      │
+│                                                              │
 │  🦅 APPRAISERS        🚙 EXPLORERS        🦅 CLEANERS           │
 │  ────────────         ──────────          ─────────           │
 │  Osprey-Appraise      Safari-Explore      Vulture-Sweep        │
@@ -123,6 +131,9 @@ What do you need to do?
 │
 ├─ Write tests? ─────────────────→ 🦫 Beaver-Build
 │   "Add tests for login form"
+│
+├─ Build test-first (TDD)? ─────→ 🐸 Frog-Cycle
+│   "TDD this feature" / "red green refactor"
 │
 ├─ Design UI/make it pretty? ────→ 🦎 Chameleon-Adapt
 │   "Make this page feel like Grove"
@@ -203,22 +214,34 @@ What do you need to do?
 
 ### Phase 3: CHATTER
 
-*The robin chatters, explaining what each animal does...*
+_The robin chatters, explaining what each animal does..._
 
 Describe the options:
 
 **If Panther fits:**
+
 > "The 🐆 **Panther** hunts single issues. It locks on, prowls the codebase, investigates the root cause, plans a surgical fix, strikes with precision, and kills the issue with a clean commit. Best when you have one specific bug or issue to eliminate."
 
 **If Beaver fits:**
+
 > "The 🦫 **Beaver** builds test dams. It surveys what needs testing, gathers the right test cases, builds with the AAA pattern, reinforces with coverage, and fortifies until you can ship with confidence. Best for writing tests that catch real bugs."
 
+**If Frog fits:**
+
+> "The 🐸 **Frog** orchestrates the TDD cycle — red, green, refactor — using three isolated subagents that never contaminate each other's thinking. It writes failing tests first (adversarially), then implements the minimum to pass, then refactors for structure. Best when you want tests to _drive_ the development, not follow it."
+
+**Beaver vs Frog?**
+
+> "🦫 **Beaver** writes tests for existing or new code — it's a test _builder_. 🐸 **Frog** runs the full TDD _cycle_ where tests come first and drive implementation through isolated phases. If you already have code and need tests → Beaver. If you want tests to define the code before it exists → Frog."
+
 **If multiple could work:**
+
 > "A few animals could help here:
+>
 > - 🐕 **Bloodhound** could scout the codebase first to understand patterns
 > - 🐘 **Elephant** could build the multi-file feature
 > - 🦫 **Beaver** could write tests after
-> 
+>
 > Would you like to start with scouting, or jump straight to building?"
 
 **Output:** User understands their options
@@ -227,7 +250,7 @@ Describe the options:
 
 ### Phase 4: PRESENT
 
-*The robin presents the branch choices...*
+_The robin presents the branch choices..._
 
 Show the specific animals available:
 
@@ -284,24 +307,28 @@ Show the specific animals available:
 
 ### Phase 5: WARBLE
 
-*The robin warbles the recommendation, guiding the way...*
+_The robin warbles the recommendation, guiding the way..._
 
 Make a clear recommendation:
 
 **Simple recommendation:**
+
 > "For fixing issue #456, call the **Panther**: `/panther-strike 456`"
 
 **Complex recommendation:**
+
 > "This is a multi-step architecture project. I recommend:
-> 
+>
 > 1. Start with **Eagle-Architect** to design the system
 > 2. Then **Swan-Design** to write the detailed spec
 > 3. Finally **Elephant-Build** to implement across files
-> 
+>
 > Or use the gathering: `/gathering-architecture`"
 
 **When unsure:**
+
 > "I see a few possibilities. Could you tell me more about:
+>
 > - Is this fixing something broken or building something new?
 > - How many files will likely change?
 > - Is there a GitHub issue number?"
@@ -313,16 +340,21 @@ Make a clear recommendation:
 ## Robin Rules
 
 ### Knowledge
+
 Know every animal's domain. The robin can guide because it understands all paths.
 
 ### Neutrality
+
 Don't push one animal over another. Present options fairly, let the wanderer choose.
 
 ### Clarity
+
 Make recommendations specific. "Try Panther" is better than "maybe a predator."
 
 ### Communication
+
 Use guiding metaphors:
+
 - "Perching to listen..." (understanding needs)
 - "Tilting my head..." (assessing context)
 - "Chattering about options..." (explaining choices)
@@ -442,6 +474,10 @@ Use guiding metaphors:
 │     Circle high, spot what's dead or decaying, clean it up         │
 │     Use: Closing stale issues, consolidating duplicates            │
 │                                                                    │
+│  🐸 frog-cycle                                                     │
+│     Orchestrate TDD with isolated red-green-refactor subagents     │
+│     Use: Test-driven development, writing tests first              │
+│                                                                    │
 │  🌿 druid                                                          │
 │     The keeper who summons new animals into the forest             │
 │     Use: Creating new skills, growing the ecosystem                │
@@ -497,4 +533,4 @@ When the drum sounds, animals gather:
 
 ---
 
-*The robin knows the forest. Ask, and the path will be shown.* 🐦
+_The robin knows the forest. Ask, and the path will be shown._ 🐦
