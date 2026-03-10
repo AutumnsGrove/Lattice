@@ -1,9 +1,9 @@
 {
-	"lastUpdated": "2026-03-05",
+	"lastUpdated": "2026-03-10",
 	"docs": {
-		"total": 345,
+		"total": 351,
 		"breakdown": {
-			"specs": 91,
+			"specs": 95,
 			"help": 99,
 			"legal": 6,
 			"marketing": 20,
@@ -11,9 +11,9 @@
 			"philosophy": 69,
 			"design": 9,
 			"exhibit": 37,
-			"research": 2,
+			"research": 3,
 			"playbooks": 1,
-			"audits": 2
+			"audits": 3
 		},
 		"paths": {
 			"specs": "docs/specs",
