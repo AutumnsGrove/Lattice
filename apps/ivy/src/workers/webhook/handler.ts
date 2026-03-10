@@ -6,6 +6,7 @@
  * immediately writes to the buffer and returns 200.
  */
 
+import { safeParseJson } from "@autumnsgrove/lattice/utils";
 import type { IvyWebhookBuffer, WebhookPayload, DecryptedEnvelope } from "$lib/types";
 
 export interface WebhookHandlerEnv {
@@ -146,7 +147,12 @@ export async function processWebhookEntry(
 ): Promise<void> {
 	try {
 		// 1. PARSE WEBHOOK PAYLOAD
-		const payload: WebhookPayload = JSON.parse(entry.raw_payload);
+		const payload = safeParseJson<WebhookPayload | null>(entry.raw_payload, null, {
+			context: "webhook.handler.raw_payload",
+		});
+		if (!payload) {
+			throw new Error("Failed to parse webhook payload");
+		}
 
 		// 2. PARSE EMAIL HEADERS AND BODY
 		const headers = parseEmailHeaders(payload.headers);

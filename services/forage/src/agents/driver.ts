@@ -6,6 +6,7 @@
  * Supports tool calling with fallback to JSON prompts.
  */
 
+import { safeJsonParse } from "@autumnsgrove/lattice/loom";
 import { DRIVER_SYSTEM_PROMPT, formatDriverPrompt, type PreviousResults } from "../prompts";
 import type { AIProvider, ProviderResponse } from "../providers/types";
 import { DRIVER_TOOL } from "../providers/tools";
@@ -176,10 +177,10 @@ function parseCandidates(content: string, batchNum: number): DomainCandidate[] {
 	const seen = new Set<string>();
 
 	// Try to extract JSON
-	try {
-		const jsonMatch = content.match(/\{[\s\S]*\}/);
-		if (jsonMatch) {
-			const data = JSON.parse(jsonMatch[0]) as { domains?: string[] };
+	const jsonMatch = content.match(/\{[\s\S]*\}/);
+	if (jsonMatch) {
+		const data = safeJsonParse(jsonMatch[0], { domains: [] }) as { domains?: string[] };
+		if (data) {
 			const domains = data.domains || [];
 			for (const domain of domains) {
 				if (isValidDomain(domain) && !seen.has(domain.toLowerCase())) {
@@ -188,8 +189,6 @@ function parseCandidates(content: string, batchNum: number): DomainCandidate[] {
 				}
 			}
 		}
-	} catch {
-		// JSON parse failed, try regex fallback
 	}
 
 	// Fallback: extract domain-like patterns from text

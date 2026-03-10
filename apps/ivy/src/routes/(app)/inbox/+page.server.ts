@@ -5,6 +5,7 @@
  * Non-owners get empty data (demo mode handled client-side).
  */
 
+import { safeParseJson } from "@autumnsgrove/lattice/utils";
 import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ url, locals, platform }) => {
@@ -50,12 +51,11 @@ export const load: PageServerLoad = async ({ url, locals, platform }) => {
 
 		// Parse emails
 		const emails = (results || []).map((row: Record<string, unknown>) => {
-			let envelope: Record<string, unknown> = {};
-			try {
-				envelope = JSON.parse(row.encrypted_envelope as string);
-			} catch {
-				// fallback
-			}
+			const envelope = safeParseJson<Record<string, unknown>>(
+				row.encrypted_envelope as string,
+				{},
+				{ context: "inbox.encrypted_envelope" },
+			);
 			return {
 				id: row.id as string,
 				from: (envelope.from as string) || (row.original_sender as string) || "Unknown",
@@ -64,7 +64,7 @@ export const load: PageServerLoad = async ({ url, locals, platform }) => {
 				category: row.category as string,
 				confidence: row.confidence as number,
 				suggested_action: row.suggested_action as string,
-				topics: JSON.parse((row.topics as string) || "[]"),
+				topics: safeParseJson<string[]>(row.topics as string, []),
 				is_read: row.is_read as number,
 				created_at: row.created_at as string,
 			};

@@ -4,11 +4,14 @@
  * GET /api/emails - List emails with pagination, category/read filters
  */
 
+import { safeParseJson } from "@autumnsgrove/lattice/utils";
+import { buildErrorJson } from "@autumnsgrove/lattice/errors";
+import { IVY_ERRORS } from "$lib/errors";
 import type { RequestHandler } from "./$types";
 
 export const GET: RequestHandler = async ({ url, locals, platform }) => {
 	if (!locals.isOwner) {
-		return new Response(JSON.stringify({ error: "Unauthorized" }), {
+		return new Response(JSON.stringify(buildErrorJson(IVY_ERRORS.UNAUTHORIZED)), {
 			status: 401,
 			headers: { "Content-Type": "application/json" },
 		});
@@ -16,7 +19,7 @@ export const GET: RequestHandler = async ({ url, locals, platform }) => {
 
 	const env = platform?.env;
 	if (!env?.DB) {
-		return new Response(JSON.stringify({ error: "Server configuration error" }), {
+		return new Response(JSON.stringify(buildErrorJson(IVY_ERRORS.CONFIG_ERROR)), {
 			status: 500,
 			headers: { "Content-Type": "application/json" },
 		});
@@ -72,19 +75,18 @@ export const GET: RequestHandler = async ({ url, locals, platform }) => {
 
 		// Parse envelopes for client
 		const emails = (results || []).map((row: Record<string, unknown>) => {
-			let envelope = {};
-			try {
-				envelope = JSON.parse(row.encrypted_envelope as string);
-			} catch {
-				// fallback
-			}
+			const envelope = safeParseJson<Record<string, unknown>>(
+				row.encrypted_envelope as string,
+				{},
+				{ context: "emails.list.encrypted_envelope" },
+			);
 			return {
 				id: row.id,
 				...envelope,
 				category: row.category,
 				confidence: row.confidence,
 				suggested_action: row.suggested_action,
-				topics: JSON.parse((row.topics as string) || "[]"),
+				topics: safeParseJson<string[]>(row.topics as string, []),
 				is_read: row.is_read,
 				original_sender: row.original_sender,
 				created_at: row.created_at,
@@ -103,7 +105,7 @@ export const GET: RequestHandler = async ({ url, locals, platform }) => {
 		);
 	} catch (error) {
 		console.error("Failed to fetch emails:", error);
-		return new Response(JSON.stringify({ error: "Failed to fetch emails" }), {
+		return new Response(JSON.stringify(buildErrorJson(IVY_ERRORS.FETCH_FAILED)), {
 			status: 500,
 			headers: { "Content-Type": "application/json" },
 		});

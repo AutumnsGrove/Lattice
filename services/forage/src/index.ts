@@ -5,6 +5,7 @@
  * Exposes MCP-style tool endpoints for domain search operations.
  */
 
+import { safeParseJson } from "@autumnsgrove/lattice/utils";
 import type { Env, InitialQuizResponse, AuthenticatedUser } from "./types";
 import { SearchJobDO } from "./durable-object";
 import {
@@ -17,6 +18,7 @@ import {
 import { getProvider, type ProviderName } from "./providers";
 import { VIBE_PARSE_SYSTEM_PROMPT, formatVibeParsePrompt } from "./prompts";
 import { validateSession, unauthorizedResponse, getClientId } from "./auth";
+import { FORAGE_ERRORS, logForageError, buildForageErrorResponse } from "./errors";
 
 // Re-export Durable Object class
 export { SearchJobDO };
@@ -77,8 +79,8 @@ export default {
 				headers: corsHeaders,
 			});
 		} catch (error) {
-			console.error("Worker error:", error);
-			return new Response(JSON.stringify({ error: String(error) }), {
+			logForageError(FORAGE_ERRORS.INTERNAL_ERROR, { cause: error });
+			return new Response(JSON.stringify(buildForageErrorResponse(FORAGE_ERRORS.INTERNAL_ERROR)), {
 				status: 500,
 				headers: {
 					"Content-Type": "application/json",
@@ -146,7 +148,7 @@ async function handleApiRequest(request: Request, env: Env, path: string): Promi
 		case "backfill":
 			return handleBackfill(request, env, url, user);
 		default:
-			return new Response(JSON.stringify({ error: `Unknown action: ${action}` }), {
+			return new Response(JSON.stringify(buildForageErrorResponse(FORAGE_ERRORS.UNKNOWN_ACTION)), {
 				status: 404,
 				headers: { "Content-Type": "application/json" },
 			});
@@ -165,10 +167,13 @@ async function handleSearch(
 	user: AuthenticatedUser,
 ): Promise<Response> {
 	if (request.method !== "POST") {
-		return new Response(JSON.stringify({ error: "Method not allowed" }), {
-			status: 405,
-			headers: { "Content-Type": "application/json" },
-		});
+		return new Response(
+			JSON.stringify(buildForageErrorResponse(FORAGE_ERRORS.METHOD_NOT_ALLOWED)),
+			{
+				status: 405,
+				headers: { "Content-Type": "application/json" },
+			},
+		);
 	}
 
 	const body = (await request.json()) as {
@@ -176,10 +181,13 @@ async function handleSearch(
 	};
 
 	if (!body.quiz_responses) {
-		return new Response(JSON.stringify({ error: "Missing quiz_responses" }), {
-			status: 400,
-			headers: { "Content-Type": "application/json" },
-		});
+		return new Response(
+			JSON.stringify(buildForageErrorResponse(FORAGE_ERRORS.MISSING_QUIZ_RESPONSES)),
+			{
+				status: 400,
+				headers: { "Content-Type": "application/json" },
+			},
+		);
 	}
 
 	// Use authenticated user's email as client_id
@@ -234,10 +242,13 @@ async function handleVibeSearch(
 	user: AuthenticatedUser,
 ): Promise<Response> {
 	if (request.method !== "POST") {
-		return new Response(JSON.stringify({ error: "Method not allowed" }), {
-			status: 405,
-			headers: { "Content-Type": "application/json" },
-		});
+		return new Response(
+			JSON.stringify(buildForageErrorResponse(FORAGE_ERRORS.METHOD_NOT_ALLOWED)),
+			{
+				status: 405,
+				headers: { "Content-Type": "application/json" },
+			},
+		);
 	}
 
 	const body = (await request.json()) as {
@@ -245,7 +256,7 @@ async function handleVibeSearch(
 	};
 
 	if (!body.vibe_text) {
-		return new Response(JSON.stringify({ error: "Missing vibe_text" }), {
+		return new Response(JSON.stringify(buildForageErrorResponse(FORAGE_ERRORS.MISSING_VIBE_TEXT)), {
 			status: 400,
 			headers: { "Content-Type": "application/json" },
 		});
@@ -256,7 +267,7 @@ async function handleVibeSearch(
 	if (wordCount < 5) {
 		return new Response(
 			JSON.stringify({
-				error: "vibe_text must be at least 5 words",
+				...buildForageErrorResponse(FORAGE_ERRORS.VIBE_TEXT_TOO_SHORT),
 				word_count: wordCount,
 				hint: "Tell us more about your business, project, or the vibe you're going for",
 			}),
@@ -289,9 +300,20 @@ async function handleVibeSearch(
 		// Handle potential markdown code blocks
 		const jsonMatch = content.match(/\{[\s\S]*\}/);
 		if (!jsonMatch) {
-			throw new Error("No JSON object found in response");
+			logForageError(FORAGE_ERRORS.PARSE_FAILED, { detail: "No JSON object found in response" });
+			return new Response(JSON.stringify(buildForageErrorResponse(FORAGE_ERRORS.PARSE_FAILED)), {
+				status: 500,
+				headers: { "Content-Type": "application/json" },
+			});
 		}
-		parsedParams = JSON.parse(jsonMatch[0]);
+		parsedParams = safeParseJson(jsonMatch[0], null);
+		if (!parsedParams) {
+			logForageError(FORAGE_ERRORS.PARSE_FAILED, { detail: "Failed to parse JSON response" });
+			return new Response(JSON.stringify(buildForageErrorResponse(FORAGE_ERRORS.PARSE_FAILED)), {
+				status: 500,
+				headers: { "Content-Type": "application/json" },
+			});
+		}
 
 		// Validate required fields
 		if (!parsedParams.business_name) {
@@ -304,14 +326,11 @@ async function handleVibeSearch(
 			parsedParams.tld_preferences = ["any"];
 		}
 	} catch (err) {
-		console.error("Failed to parse vibe text:", err);
-		return new Response(
-			JSON.stringify({
-				error: "Failed to parse vibe text",
-				details: String(err),
-			}),
-			{ status: 500, headers: { "Content-Type": "application/json" } },
-		);
+		logForageError(FORAGE_ERRORS.PARSE_FAILED, { cause: err });
+		return new Response(JSON.stringify(buildForageErrorResponse(FORAGE_ERRORS.PARSE_FAILED)), {
+			status: 500,
+			headers: { "Content-Type": "application/json" },
+		});
 	}
 
 	// Build quiz responses from parsed parameters
@@ -387,7 +406,7 @@ async function handleStatus(
 ): Promise<Response> {
 	const jobId = url.searchParams.get("job_id");
 	if (!jobId) {
-		return new Response(JSON.stringify({ error: "Missing job_id parameter" }), {
+		return new Response(JSON.stringify(buildForageErrorResponse(FORAGE_ERRORS.MISSING_JOB_ID)), {
 			status: 400,
 			headers: { "Content-Type": "application/json" },
 		});
@@ -437,7 +456,7 @@ async function handleResults(
 ): Promise<Response> {
 	const jobId = url.searchParams.get("job_id");
 	if (!jobId) {
-		return new Response(JSON.stringify({ error: "Missing job_id parameter" }), {
+		return new Response(JSON.stringify(buildForageErrorResponse(FORAGE_ERRORS.MISSING_JOB_ID)), {
 			status: 400,
 			headers: { "Content-Type": "application/json" },
 		});
@@ -461,7 +480,7 @@ async function handleFollowup(
 ): Promise<Response> {
 	const jobId = url.searchParams.get("job_id");
 	if (!jobId) {
-		return new Response(JSON.stringify({ error: "Missing job_id parameter" }), {
+		return new Response(JSON.stringify(buildForageErrorResponse(FORAGE_ERRORS.MISSING_JOB_ID)), {
 			status: 400,
 			headers: { "Content-Type": "application/json" },
 		});
@@ -484,15 +503,18 @@ async function handleCancel(
 	user: AuthenticatedUser,
 ): Promise<Response> {
 	if (request.method !== "POST") {
-		return new Response(JSON.stringify({ error: "Method not allowed" }), {
-			status: 405,
-			headers: { "Content-Type": "application/json" },
-		});
+		return new Response(
+			JSON.stringify(buildForageErrorResponse(FORAGE_ERRORS.METHOD_NOT_ALLOWED)),
+			{
+				status: 405,
+				headers: { "Content-Type": "application/json" },
+			},
+		);
 	}
 
 	const jobId = url.searchParams.get("job_id");
 	if (!jobId) {
-		return new Response(JSON.stringify({ error: "Missing job_id parameter" }), {
+		return new Response(JSON.stringify(buildForageErrorResponse(FORAGE_ERRORS.MISSING_JOB_ID)), {
 			status: 400,
 			headers: { "Content-Type": "application/json" },
 		});
@@ -516,15 +538,18 @@ async function handleResume(
 	user: AuthenticatedUser,
 ): Promise<Response> {
 	if (request.method !== "POST") {
-		return new Response(JSON.stringify({ error: "Method not allowed" }), {
-			status: 405,
-			headers: { "Content-Type": "application/json" },
-		});
+		return new Response(
+			JSON.stringify(buildForageErrorResponse(FORAGE_ERRORS.METHOD_NOT_ALLOWED)),
+			{
+				status: 405,
+				headers: { "Content-Type": "application/json" },
+			},
+		);
 	}
 
 	const jobId = url.searchParams.get("job_id");
 	if (!jobId) {
-		return new Response(JSON.stringify({ error: "Missing job_id parameter" }), {
+		return new Response(JSON.stringify(buildForageErrorResponse(FORAGE_ERRORS.MISSING_JOB_ID)), {
 			status: 400,
 			headers: { "Content-Type": "application/json" },
 		});
@@ -556,7 +581,7 @@ async function handleStream(
 ): Promise<Response> {
 	const jobId = url.searchParams.get("job_id");
 	if (!jobId) {
-		return new Response(JSON.stringify({ error: "Missing job_id parameter" }), {
+		return new Response(JSON.stringify(buildForageErrorResponse(FORAGE_ERRORS.MISSING_JOB_ID)), {
 			status: 400,
 			headers: { "Content-Type": "application/json" },
 		});
@@ -598,8 +623,8 @@ async function handleJobsList(
 			headers: { "Content-Type": "application/json" },
 		});
 	} catch (err) {
-		console.error("Failed to list jobs:", err);
-		return new Response(JSON.stringify({ error: "Failed to list jobs" }), {
+		logForageError(FORAGE_ERRORS.LIST_JOBS_FAILED, { cause: err });
+		return new Response(JSON.stringify(buildForageErrorResponse(FORAGE_ERRORS.LIST_JOBS_FAILED)), {
 			status: 500,
 			headers: { "Content-Type": "application/json" },
 		});
@@ -624,8 +649,8 @@ async function handleRecentJobs(
 			headers: { "Content-Type": "application/json" },
 		});
 	} catch (err) {
-		console.error("Failed to get recent jobs:", err);
-		return new Response(JSON.stringify({ error: "Failed to get recent jobs" }), {
+		logForageError(FORAGE_ERRORS.LIST_JOBS_FAILED, { cause: err });
+		return new Response(JSON.stringify(buildForageErrorResponse(FORAGE_ERRORS.LIST_JOBS_FAILED)), {
 			status: 500,
 			headers: { "Content-Type": "application/json" },
 		});
@@ -717,8 +742,8 @@ async function handleJobsRefresh(
 			{ headers: { "Content-Type": "application/json" } },
 		);
 	} catch (err) {
-		console.error("Failed to refresh jobs:", err);
-		return new Response(JSON.stringify({ error: "Failed to refresh jobs" }), {
+		logForageError(FORAGE_ERRORS.REFRESH_FAILED, { cause: err });
+		return new Response(JSON.stringify(buildForageErrorResponse(FORAGE_ERRORS.REFRESH_FAILED)), {
 			status: 500,
 			headers: { "Content-Type": "application/json" },
 		});
@@ -739,10 +764,13 @@ async function handleJobs(
 	user: AuthenticatedUser,
 ): Promise<Response> {
 	if (request.method !== "POST") {
-		return new Response(JSON.stringify({ error: "Method not allowed" }), {
-			status: 405,
-			headers: { "Content-Type": "application/json" },
-		});
+		return new Response(
+			JSON.stringify(buildForageErrorResponse(FORAGE_ERRORS.METHOD_NOT_ALLOWED)),
+			{
+				status: 405,
+				headers: { "Content-Type": "application/json" },
+			},
+		);
 	}
 
 	const body = (await request.json()) as { job_ids?: string[] };
@@ -756,11 +784,14 @@ async function handleJobs(
 				headers: { "Content-Type": "application/json" },
 			});
 		} catch (err) {
-			console.error("Failed to list jobs from index:", err);
-			return new Response(JSON.stringify({ error: "Failed to list jobs" }), {
-				status: 500,
-				headers: { "Content-Type": "application/json" },
-			});
+			logForageError(FORAGE_ERRORS.LIST_JOBS_FAILED, { cause: err });
+			return new Response(
+				JSON.stringify(buildForageErrorResponse(FORAGE_ERRORS.LIST_JOBS_FAILED)),
+				{
+					status: 500,
+					headers: { "Content-Type": "application/json" },
+				},
+			);
 		}
 	}
 
@@ -807,17 +838,20 @@ async function handleBackfill(
 	user: AuthenticatedUser,
 ): Promise<Response> {
 	if (request.method !== "POST") {
-		return new Response(JSON.stringify({ error: "Method not allowed" }), {
-			status: 405,
-			headers: { "Content-Type": "application/json" },
-		});
+		return new Response(
+			JSON.stringify(buildForageErrorResponse(FORAGE_ERRORS.METHOD_NOT_ALLOWED)),
+			{
+				status: 405,
+				headers: { "Content-Type": "application/json" },
+			},
+		);
 	}
 
 	const body = (await request.json()) as { job_ids?: string[] };
 	const jobIds = body.job_ids || [];
 
 	if (!Array.isArray(jobIds) || jobIds.length === 0) {
-		return new Response(JSON.stringify({ error: "job_ids array is required" }), {
+		return new Response(JSON.stringify(buildForageErrorResponse(FORAGE_ERRORS.JOB_IDS_REQUIRED)), {
 			status: 400,
 			headers: { "Content-Type": "application/json" },
 		});

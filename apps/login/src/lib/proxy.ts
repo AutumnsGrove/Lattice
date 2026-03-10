@@ -12,6 +12,8 @@
  */
 
 import type { Cookies, RequestEvent } from "@sveltejs/kit";
+import { buildErrorJson } from "@autumnsgrove/lattice/errors";
+import { LOGIN_ERRORS } from "$lib/errors";
 
 const DEFAULT_AUTH_URL = "https://login.grove.place";
 
@@ -84,7 +86,7 @@ export async function proxyToHeartwood(event: RequestEvent, targetPath: string):
 	const { request, cookies, platform, url } = event;
 
 	if (!platform?.env?.AUTH) {
-		return new Response(JSON.stringify({ error: "Auth service unavailable" }), {
+		return new Response(JSON.stringify(buildErrorJson(LOGIN_ERRORS.AUTH_SERVICE_UNAVAILABLE)), {
 			status: 503,
 			headers: { "Content-Type": "application/json" },
 		});
@@ -94,7 +96,7 @@ export async function proxyToHeartwood(event: RequestEvent, targetPath: string):
 	if (!["GET", "HEAD"].includes(request.method)) {
 		const contentLength = request.headers.get("content-length");
 		if (contentLength && parseInt(contentLength, 10) > MAX_BODY_SIZE) {
-			return new Response(JSON.stringify({ error: "Request body too large" }), {
+			return new Response(JSON.stringify(buildErrorJson(LOGIN_ERRORS.REQUEST_TOO_LARGE)), {
 				status: 413,
 				headers: { "Content-Type": "application/json" },
 			});

@@ -9,6 +9,7 @@ import type { LumenToolCall } from "@autumnsgrove/lattice/lumen";
 import { SCHEMA_REGISTRY } from "@autumnsgrove/lattice/reverie";
 import type { DomainId, DomainSchema, FieldDefinition } from "@autumnsgrove/lattice/reverie";
 import type { ChangePreview } from "../types";
+import { safeParseJson } from "@autumnsgrove/lattice/utils";
 
 // =============================================================================
 // Types
@@ -73,10 +74,8 @@ export function validateToolCalls(toolCalls: LumenToolCall[]): ValidationResult 
 		}
 
 		// Parse arguments
-		let args: Record<string, unknown>;
-		try {
-			args = JSON.parse(tc.function.arguments) as Record<string, unknown>;
-		} catch {
+		const args = safeParseJson<Record<string, unknown>>(tc.function.arguments, null);
+		if (!args) {
 			errors.push({
 				toolCall: toolName,
 				message: "Invalid JSON in tool call arguments",

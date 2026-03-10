@@ -4,6 +4,7 @@
  * Shared types for feed queries, pagination, and API responses.
  */
 
+import { safeParseJson } from "@autumnsgrove/lattice/utils";
 import type { MeadowPost } from "$lib/types/post";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -96,26 +97,9 @@ export interface PostRow {
  * Transform a database row into the client-facing MeadowPost shape.
  */
 export function rowToPost(row: PostRow): MeadowPost {
-	let tags: string[] = [];
-	try {
-		tags = row.tags ? JSON.parse(row.tags) : [];
-	} catch {
-		tags = [];
-	}
-
-	let reactionCounts: Record<string, number> = {};
-	try {
-		reactionCounts = row.reaction_counts ? JSON.parse(row.reaction_counts) : {};
-	} catch {
-		reactionCounts = {};
-	}
-
-	let userReactions: string[] = [];
-	try {
-		userReactions = row.user_reactions ? JSON.parse(row.user_reactions) : [];
-	} catch {
-		userReactions = [];
-	}
+	const tags = safeParseJson<string[]>(row.tags, []);
+	const reactionCounts = safeParseJson<Record<string, number>>(row.reaction_counts, {});
+	const userReactions = safeParseJson<string[]>(row.user_reactions, []);
 
 	return {
 		id: row.id,

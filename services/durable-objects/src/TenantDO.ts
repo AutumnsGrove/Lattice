@@ -20,6 +20,7 @@ import {
 	type LoomRoute,
 	type LoomConfig,
 	type LoomRequestContext,
+	safeJsonParse,
 } from "@autumnsgrove/lattice/loom";
 import { TIERS, type TierKey, type PaidTierKey } from "./tiers.js";
 
@@ -130,11 +131,7 @@ export class TenantDO extends LoomDO<TenantConfig, TenantEnv> {
 			"SELECT value FROM config WHERE key = 'tenant_config'",
 		);
 		if (!rows.length || !rows[0].value) return null;
-		try {
-			return JSON.parse(rows[0].value);
-		} catch {
-			return null;
-		}
+		return safeJsonParse<TenantConfig>(rows[0].value, null);
 	}
 
 	routes(): LoomRoute[] {
@@ -229,20 +226,18 @@ export class TenantDO extends LoomDO<TenantConfig, TenantEnv> {
 		);
 
 		if (rows.length > 0 && rows[0].value) {
-			try {
-				this.state_data = JSON.parse(rows[0].value);
+			const parsed = safeJsonParse<TenantConfig>(rows[0].value, null);
+			if (parsed) {
+				this.state_data = parsed;
 				// Also set subdomain from cached config if we don't have it
 				if (this.state_data?.subdomain && !this.subdomain) {
 					this.subdomain = this.state_data.subdomain;
 				}
 				this.configLoadedAt = Date.now();
 				return;
-			} catch (err) {
+			} else {
 				// Corrupted cache - clear it and fall through to D1
-				this.log.warn(
-					"Failed to parse cached config, clearing",
-					err instanceof Error ? { error: err.message } : {},
-				);
+				this.log.warn("Failed to parse cached config, clearing");
 				this.sql.exec("DELETE FROM config WHERE key = 'tenant_config'");
 			}
 		}
@@ -270,17 +265,7 @@ export class TenantDO extends LoomDO<TenantConfig, TenantEnv> {
 			const tier = (row.tier as TenantConfig["tier"]) || "seedling";
 
 			// Safely parse theme JSON (corrupted data shouldn't crash the DO)
-			let theme: Record<string, unknown> | null = null;
-			if (row.theme) {
-				try {
-					theme = JSON.parse(row.theme as string);
-				} catch (err) {
-					this.log.warn(
-						"Failed to parse theme JSON",
-						err instanceof Error ? { error: err.message } : {},
-					);
-				}
-			}
+			const theme = row.theme ? safeJsonParse(row.theme as string, null) : null;
 
 			this.state_data = {
 				id: row.id as string,
@@ -385,15 +370,7 @@ export class TenantDO extends LoomDO<TenantConfig, TenantEnv> {
 		}>("SELECT slug, metadata, last_saved, device_id FROM drafts ORDER BY last_saved DESC");
 
 		const drafts = rows.map((row) => {
-			let metadata: DraftMetadata = { title: "Untitled" };
-			try {
-				metadata = JSON.parse(row.metadata as string);
-			} catch (err) {
-				this.log.warn(
-					`Failed to parse draft metadata for ${row.slug}`,
-					err instanceof Error ? { error: err.message } : {},
-				);
-			}
+			const metadata = safeJsonParse<DraftMetadata>(row.metadata as string, { title: "Untitled" });
 			return {
 				slug: row.slug,
 				metadata,
@@ -420,15 +397,7 @@ export class TenantDO extends LoomDO<TenantConfig, TenantEnv> {
 			return new Response("Draft not found", { status: 404 });
 		}
 
-		let metadata: DraftMetadata = { title: "Untitled" };
-		try {
-			metadata = JSON.parse(row.metadata as string);
-		} catch (err) {
-			this.log.warn(
-				`Failed to parse draft metadata for ${slug}`,
-				err instanceof Error ? { error: err.message } : {},
-			);
-		}
+		const metadata = safeJsonParse<DraftMetadata>(row.metadata as string, { title: "Untitled" });
 
 		return Response.json({
 			slug: row.slug,

@@ -13,22 +13,24 @@
 
 import type { RequestHandler } from "./$types";
 import { proxyToHeartwood } from "$lib/proxy";
+import { buildErrorJson } from "@autumnsgrove/lattice/errors";
+import { LOGIN_ERRORS } from "$lib/errors";
 
 /** Path validation: only letters, digits, hyphens, and slashes */
 function validatePath(path: string): boolean {
-  return !!path && /^[a-zA-Z0-9\-/]+$/.test(path);
+	return !!path && /^[a-zA-Z0-9\-/]+$/.test(path);
 }
 
 const handler: RequestHandler = async (event) => {
-  const path = event.params.path || "";
-  if (!validatePath(path)) {
-    return new Response(JSON.stringify({ error: "Invalid path" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
+	const path = event.params.path || "";
+	if (!validatePath(path)) {
+		return new Response(JSON.stringify(buildErrorJson(LOGIN_ERRORS.INVALID_PATH)), {
+			status: 400,
+			headers: { "Content-Type": "application/json" },
+		});
+	}
 
-  return proxyToHeartwood(event, `/session/${path}`);
+	return proxyToHeartwood(event, `/session/${path}`);
 };
 
 export const GET: RequestHandler = handler;

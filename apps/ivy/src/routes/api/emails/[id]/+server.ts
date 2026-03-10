@@ -6,11 +6,14 @@
  * DELETE /api/emails/[id] - Move to trash / permanent delete
  */
 
+import { safeParseJson } from "@autumnsgrove/lattice/utils";
+import { buildErrorJson } from "@autumnsgrove/lattice/errors";
+import { IVY_ERRORS } from "$lib/errors";
 import type { RequestHandler } from "./$types";
 
 export const GET: RequestHandler = async ({ params, locals, platform }) => {
 	if (!locals.isOwner) {
-		return new Response(JSON.stringify({ error: "Unauthorized" }), {
+		return new Response(JSON.stringify(buildErrorJson(IVY_ERRORS.UNAUTHORIZED)), {
 			status: 401,
 			headers: { "Content-Type": "application/json" },
 		});
@@ -18,7 +21,7 @@ export const GET: RequestHandler = async ({ params, locals, platform }) => {
 
 	const env = platform?.env;
 	if (!env?.DB) {
-		return new Response(JSON.stringify({ error: "Server configuration error" }), {
+		return new Response(JSON.stringify(buildErrorJson(IVY_ERRORS.CONFIG_ERROR)), {
 			status: 500,
 			headers: { "Content-Type": "application/json" },
 		});
@@ -34,18 +37,17 @@ export const GET: RequestHandler = async ({ params, locals, platform }) => {
 			.first();
 
 		if (!row) {
-			return new Response(JSON.stringify({ error: "Email not found" }), {
+			return new Response(JSON.stringify(buildErrorJson(IVY_ERRORS.EMAIL_NOT_FOUND)), {
 				status: 404,
 				headers: { "Content-Type": "application/json" },
 			});
 		}
 
-		let envelope: Record<string, unknown> = {};
-		try {
-			envelope = JSON.parse(row.encrypted_envelope as string);
-		} catch {
-			// fallback
-		}
+		const envelope = safeParseJson<Record<string, unknown>>(
+			row.encrypted_envelope as string,
+			{},
+			{ context: "emails.[id].encrypted_envelope" },
+		);
 
 		// Try to fetch body from R2
 		let body = null;
@@ -73,7 +75,7 @@ export const GET: RequestHandler = async ({ params, locals, platform }) => {
 				category: row.category,
 				confidence: row.confidence,
 				suggested_action: row.suggested_action,
-				topics: JSON.parse((row.topics as string) || "[]"),
+				topics: safeParseJson<string[]>(row.topics as string, []),
 				is_read: 1,
 				original_sender: row.original_sender,
 				created_at: row.created_at,
@@ -83,7 +85,7 @@ export const GET: RequestHandler = async ({ params, locals, platform }) => {
 		);
 	} catch (error) {
 		console.error("Failed to fetch email:", error);
-		return new Response(JSON.stringify({ error: "Failed to fetch email" }), {
+		return new Response(JSON.stringify(buildErrorJson(IVY_ERRORS.FETCH_FAILED)), {
 			status: 500,
 			headers: { "Content-Type": "application/json" },
 		});
@@ -92,7 +94,7 @@ export const GET: RequestHandler = async ({ params, locals, platform }) => {
 
 export const PUT: RequestHandler = async ({ params, request, locals, platform }) => {
 	if (!locals.isOwner) {
-		return new Response(JSON.stringify({ error: "Unauthorized" }), {
+		return new Response(JSON.stringify(buildErrorJson(IVY_ERRORS.UNAUTHORIZED)), {
 			status: 401,
 			headers: { "Content-Type": "application/json" },
 		});
@@ -100,7 +102,7 @@ export const PUT: RequestHandler = async ({ params, request, locals, platform })
 
 	const env = platform?.env;
 	if (!env?.DB) {
-		return new Response(JSON.stringify({ error: "Server configuration error" }), {
+		return new Response(JSON.stringify(buildErrorJson(IVY_ERRORS.CONFIG_ERROR)), {
 			status: 500,
 			headers: { "Content-Type": "application/json" },
 		});
@@ -122,7 +124,7 @@ export const PUT: RequestHandler = async ({ params, request, locals, platform })
 		}
 
 		if (updates.length === 0) {
-			return new Response(JSON.stringify({ error: "No fields to update" }), {
+			return new Response(JSON.stringify(buildErrorJson(IVY_ERRORS.NO_FIELDS_TO_UPDATE)), {
 				status: 400,
 				headers: { "Content-Type": "application/json" },
 			});
@@ -135,7 +137,7 @@ export const PUT: RequestHandler = async ({ params, request, locals, platform })
 			.run();
 
 		if (result.meta.changes === 0) {
-			return new Response(JSON.stringify({ error: "Email not found" }), {
+			return new Response(JSON.stringify(buildErrorJson(IVY_ERRORS.EMAIL_NOT_FOUND)), {
 				status: 404,
 				headers: { "Content-Type": "application/json" },
 			});
@@ -146,7 +148,7 @@ export const PUT: RequestHandler = async ({ params, request, locals, platform })
 		});
 	} catch (error) {
 		console.error("Failed to update email:", error);
-		return new Response(JSON.stringify({ error: "Failed to update email" }), {
+		return new Response(JSON.stringify(buildErrorJson(IVY_ERRORS.UPDATE_FAILED)), {
 			status: 500,
 			headers: { "Content-Type": "application/json" },
 		});
@@ -155,7 +157,7 @@ export const PUT: RequestHandler = async ({ params, request, locals, platform })
 
 export const DELETE: RequestHandler = async ({ params, locals, platform }) => {
 	if (!locals.isOwner) {
-		return new Response(JSON.stringify({ error: "Unauthorized" }), {
+		return new Response(JSON.stringify(buildErrorJson(IVY_ERRORS.UNAUTHORIZED)), {
 			status: 401,
 			headers: { "Content-Type": "application/json" },
 		});
@@ -163,7 +165,7 @@ export const DELETE: RequestHandler = async ({ params, locals, platform }) => {
 
 	const env = platform?.env;
 	if (!env?.DB) {
-		return new Response(JSON.stringify({ error: "Server configuration error" }), {
+		return new Response(JSON.stringify(buildErrorJson(IVY_ERRORS.CONFIG_ERROR)), {
 			status: 500,
 			headers: { "Content-Type": "application/json" },
 		});
@@ -176,7 +178,7 @@ export const DELETE: RequestHandler = async ({ params, locals, platform }) => {
 			.first<{ r2_content_key: string | null }>();
 
 		if (!email) {
-			return new Response(JSON.stringify({ error: "Email not found" }), {
+			return new Response(JSON.stringify(buildErrorJson(IVY_ERRORS.EMAIL_NOT_FOUND)), {
 				status: 404,
 				headers: { "Content-Type": "application/json" },
 			});
@@ -199,7 +201,7 @@ export const DELETE: RequestHandler = async ({ params, locals, platform }) => {
 		});
 	} catch (error) {
 		console.error("Failed to delete email:", error);
-		return new Response(JSON.stringify({ error: "Failed to delete email" }), {
+		return new Response(JSON.stringify(buildErrorJson(IVY_ERRORS.DELETE_FAILED)), {
 			status: 500,
 			headers: { "Content-Type": "application/json" },
 		});

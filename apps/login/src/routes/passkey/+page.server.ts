@@ -7,22 +7,21 @@
  */
 
 import { redirect } from "@sveltejs/kit";
+import { sanitizeReturnTo } from "@autumnsgrove/lattice/utils";
 import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ cookies, url }) => {
-  // Check for a better-auth session cookie
-  const hasSession =
-    cookies.get("better-auth.session_token") ||
-    cookies.get("__Secure-better-auth.session_token");
+	// Check for a better-auth session cookie
+	const hasSession =
+		cookies.get("better-auth.session_token") || cookies.get("__Secure-better-auth.session_token");
 
-  if (!hasSession) {
-    // No session — redirect to sign-in, preserving the original redirect param
-    const redirectParam = url.searchParams.get("redirect");
-    const loginUrl = redirectParam
-      ? `/?redirect=${encodeURIComponent(redirectParam)}`
-      : "/";
-    throw redirect(302, loginUrl);
-  }
+	if (!hasSession) {
+		// No session — redirect to sign-in, preserving the original redirect param
+		const redirectParam = url.searchParams.get("redirect");
+		const safeRedirect = sanitizeReturnTo(redirectParam);
+		const loginUrl = safeRedirect !== "/" ? `/?redirect=${encodeURIComponent(safeRedirect)}` : "/";
+		throw redirect(302, loginUrl);
+	}
 
-  return {};
+	return {};
 };

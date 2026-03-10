@@ -10,6 +10,7 @@
  */
 
 import type { GutterItem } from "../types.js";
+import { safeParseJson } from "../../../utils/json.js";
 
 /**
  * System prompt for structuring voice transcriptions.
@@ -60,7 +61,7 @@ If there are no tangents, use an empty array for gutterContent.`;
  * Build the user prompt with the raw transcript.
  */
 export function buildScribeDraftPrompt(rawTranscript: string): string {
-  return `Please structure this voice transcription. Extract any tangents or asides as Vines.
+	return `Please structure this voice transcription. Extract any tangents or asides as Vines.
 
 <transcript>
 ${rawTranscript}
@@ -74,55 +75,56 @@ Remember: Output ONLY valid JSON with "text" and "gutterContent" fields.`;
  * Returns null if parsing fails (caller should fallback to raw text).
  */
 export function parseScribeDraftResponse(response: string): {
-  text: string;
-  gutterContent: GutterItem[];
+	text: string;
+	gutterContent: GutterItem[];
 } | null {
-  try {
-    // Try to extract JSON from the response (in case LLM adds extra text)
-    const jsonMatch = response.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      return null;
-    }
+	try {
+		// Try to extract JSON from the response (in case LLM adds extra text)
+		const jsonMatch = response.match(/\{[\s\S]*\}/);
+		if (!jsonMatch) {
+			return null;
+		}
 
-    const parsed = JSON.parse(jsonMatch[0]) as {
-      text?: string;
-      gutterContent?: unknown[];
-    };
+		const parsed = safeParseJson<{
+			text?: string;
+			gutterContent?: unknown[];
+		}>(jsonMatch[0], null);
 
-    // Validate required fields
-    if (typeof parsed.text !== "string" || parsed.text.length === 0) {
-      return null;
-    }
+		if (!parsed) {
+			return null;
+		}
 
-    // Validate and filter gutter content
-    const gutterContent: GutterItem[] = [];
-    if (Array.isArray(parsed.gutterContent)) {
-      for (const item of parsed.gutterContent) {
-        if (
-          item &&
-          typeof item === "object" &&
-          "type" in item &&
-          item.type === "vine" &&
-          "content" in item &&
-          typeof item.content === "string"
-        ) {
-          gutterContent.push({
-            type: "vine",
-            content: item.content,
-            anchor:
-              "anchor" in item && typeof item.anchor === "string"
-                ? item.anchor
-                : undefined,
-          });
-        }
-      }
-    }
+		// Validate required fields
+		if (typeof parsed.text !== "string" || parsed.text.length === 0) {
+			return null;
+		}
 
-    return {
-      text: parsed.text,
-      gutterContent,
-    };
-  } catch {
-    return null;
-  }
+		// Validate and filter gutter content
+		const gutterContent: GutterItem[] = [];
+		if (Array.isArray(parsed.gutterContent)) {
+			for (const item of parsed.gutterContent) {
+				if (
+					item &&
+					typeof item === "object" &&
+					"type" in item &&
+					item.type === "vine" &&
+					"content" in item &&
+					typeof item.content === "string"
+				) {
+					gutterContent.push({
+						type: "vine",
+						content: item.content,
+						anchor: "anchor" in item && typeof item.anchor === "string" ? item.anchor : undefined,
+					});
+				}
+			}
+		}
+
+		return {
+			text: parsed.text,
+			gutterContent,
+		};
+	} catch {
+		return null;
+	}
 }

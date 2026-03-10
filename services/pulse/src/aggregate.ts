@@ -5,6 +5,7 @@
  * Daily: Finalize pulse_daily_stats from events
  */
 
+import { safeParseJson } from "@autumnsgrove/lattice/utils";
 import type { Env } from "./types";
 
 /**
@@ -113,14 +114,7 @@ export async function runDailyAggregation(env: Env): Promise<void> {
 		}
 
 		const stats = tenantStats.get(row.tenant_id)!;
-		let data: Record<string, unknown> = {};
-		if (row.data) {
-			try {
-				data = JSON.parse(row.data);
-			} catch {
-				continue; // Skip events with corrupted data
-			}
-		}
+		const data = safeParseJson<Record<string, unknown>>(row.data, {});
 
 		switch (row.event_type) {
 			case "push":

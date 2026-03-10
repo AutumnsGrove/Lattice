@@ -3,6 +3,7 @@ import type { PageServerLoad, Actions } from "./$types";
 import { PLANT_ERRORS, logPlantError } from "$lib/errors";
 import { z } from "zod";
 import { parseFormData } from "@autumnsgrove/lattice/server";
+import { safeParseJson } from "@autumnsgrove/lattice/utils";
 
 // ─── Zod schema for profile form validation (Rootwork Phase 3) ──────
 const ProfileSchema = z.object({
@@ -112,14 +113,9 @@ export const actions: Actions = {
 		}
 
 		// ─── Parse interests (validated with Zod) ────────────────────────
-		let interests: string[] = [];
-		try {
-			const parsed = interestsRaw ? JSON.parse(interestsRaw) : [];
-			const validated = InterestsSchema.safeParse(parsed);
-			interests = validated.success ? validated.data : [];
-		} catch {
-			interests = [];
-		}
+		const parsed = safeParseJson<unknown>(interestsRaw, []);
+		const validated = InterestsSchema.safeParse(parsed);
+		const interests = validated.success ? validated.data : [];
 
 		// ─── Update onboarding record ────────────────────────────────────
 		try {

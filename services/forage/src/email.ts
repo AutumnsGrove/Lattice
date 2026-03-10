@@ -6,6 +6,7 @@
  */
 
 import type { DomainResult, ResultsEmailData, FollowupEmailData } from "./types";
+import { FORAGE_ERRORS, logForageError } from "./errors";
 
 /**
  * Send an email via Zephyr service binding
@@ -39,7 +40,9 @@ export async function sendEmail(
 
 	if (!response.ok) {
 		const error = await response.text();
-		throw new Error(`Zephyr send error: ${error}`);
+		const errorMsg = `Zephyr send error: ${error}`;
+		logForageError(FORAGE_ERRORS.ZEPHYR_SEND_FAILED, { detail: errorMsg });
+		throw new Error(errorMsg);
 	}
 
 	return response.json();

@@ -22,6 +22,7 @@ import {
 	type LoomRoute,
 	type LoomConfig,
 	type LoomRequestContext,
+	safeJsonParse,
 } from "@autumnsgrove/lattice/loom";
 import { DEFAULT_TIER, type TierKey } from "./tiers.js";
 
@@ -161,7 +162,7 @@ export class PostMetaDO extends LoomDO<PostMeta, MetaEnv> {
 			"SELECT value FROM meta WHERE key = 'post_meta'",
 		);
 		if (!stored?.value) return null;
-		return JSON.parse(stored.value);
+		return safeJsonParse<PostMeta>(stored.value, null);
 	}
 
 	routes(): LoomRoute[] {
@@ -461,7 +462,8 @@ export class PostMetaDO extends LoomDO<PostMeta, MetaEnv> {
 	}
 
 	protected async onWebSocketMessage(_ws: WebSocket, message: string | ArrayBuffer): Promise<void> {
-		const msg = JSON.parse(message.toString()) as WSMessage;
+		const msg = safeJsonParse<WSMessage>(message.toString(), { type: "presence", data: {} });
+		if (!msg) return;
 
 		if (msg.type === "presence") {
 			const data = msg.data as { sessionId?: string };

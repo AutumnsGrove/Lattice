@@ -5,6 +5,7 @@
  * Supports both named templates and "raw" for pre-rendered content.
  */
 
+import { ZEPHYR_ERRORS } from "../errors";
 import type { TemplateRenderFn } from "../types";
 
 /**
@@ -14,25 +15,25 @@ import type { TemplateRenderFn } from "../types";
  * This registry maps template names to their rendering logic.
  */
 export const TEMPLATES: Record<string, TemplateRenderFn> = {
-  // Raw template - use pre-rendered HTML/text
-  raw: async (data) => {
-    const html = data.html as string;
-    const text = data.text as string;
-    const subject = data.subject as string;
+	// Raw template - use pre-rendered HTML/text
+	raw: async (data) => {
+		const html = data.html as string;
+		const text = data.text as string;
+		const subject = data.subject as string;
 
-    if (!html && !text) {
-      throw new Error("Raw template requires html or text");
-    }
-    if (!subject) {
-      throw new Error("Raw template requires subject");
-    }
+		if (!html && !text) {
+			throw new Error(ZEPHYR_ERRORS.INVALID_TEMPLATE.adminMessage);
+		}
+		if (!subject) {
+			throw new Error(ZEPHYR_ERRORS.INVALID_TEMPLATE.adminMessage);
+		}
 
-    return {
-      html: html || text!,
-      text: text || html!,
-      subject,
-    };
-  },
+		return {
+			html: html || text!,
+			text: text || html!,
+			subject,
+		};
+	},
 };
 
 /**
@@ -43,95 +44,96 @@ export const TEMPLATES: Record<string, TemplateRenderFn> = {
  * For "raw" template, returns pre-rendered content.
  */
 export async function renderTemplate(
-  templateName: string,
-  data: Record<string, unknown>,
-  renderUrl: string,
-  rawHtml?: string,
-  rawText?: string,
-  rawSubject?: string,
-  renderBinding?: Fetcher,
+	templateName: string,
+	data: Record<string, unknown>,
+	renderUrl: string,
+	rawHtml?: string,
+	rawText?: string,
+	rawSubject?: string,
+	renderBinding?: Fetcher,
 ): Promise<{ html: string; text: string; subject: string }> {
-  // Handle raw template
-  if (templateName === "raw") {
-    if (!rawHtml && !rawText) {
-      throw new Error("Raw template requires html or text");
-    }
-    if (!rawSubject) {
-      throw new Error("Raw template requires subject");
-    }
+	// Handle raw template
+	if (templateName === "raw") {
+		if (!rawHtml && !rawText) {
+			throw new Error(ZEPHYR_ERRORS.INVALID_TEMPLATE.adminMessage);
+		}
+		if (!rawSubject) {
+			throw new Error(ZEPHYR_ERRORS.INVALID_TEMPLATE.adminMessage);
+		}
 
-    return {
-      html: rawHtml || rawText!,
-      text: rawText || rawHtml!,
-      subject: rawSubject,
-    };
-  }
+		return {
+			html: rawHtml || rawText!,
+			text: rawText || rawHtml!,
+			subject: rawSubject,
+		};
+	}
 
-  // Call email-render worker for named templates
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+	// Call email-render worker for named templates
+	try {
+		const controller = new AbortController();
+		const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
 
-    const body = JSON.stringify({
-      template: templateName,
-      audienceType: data.audienceType || "wanderer",
-      name: data.name || null,
-      ...data,
-    });
+		const body = JSON.stringify({
+			template: templateName,
+			audienceType: data.audienceType || "wanderer",
+			name: data.name || null,
+			...data,
+		});
 
-    // Prefer Service Binding (direct Worker-to-Worker), fall back to HTTP URL
-    const response = renderBinding
-      ? await renderBinding.fetch("https://email-render/render", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body,
-          signal: controller.signal,
-        })
-      : await fetch(`${renderUrl}/render`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body,
-          signal: controller.signal,
-        });
+		// Prefer Service Binding (direct Worker-to-Worker), fall back to HTTP URL
+		const response = renderBinding
+			? await renderBinding.fetch("https://email-render/render", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body,
+					signal: controller.signal,
+				})
+			: await fetch(`${renderUrl}/render`, {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body,
+					signal: controller.signal,
+				});
 
-    clearTimeout(timeoutId);
+		clearTimeout(timeoutId);
 
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`Render worker returned ${response.status}: ${error}`);
-    }
+		if (!response.ok) {
+			const error = await response.text();
+			throw new Error(
+				`${ZEPHYR_ERRORS.TEMPLATE_RENDER_FAILED.adminMessage} (${response.status}: ${error})`,
+			);
+		}
 
-    const result = (await response.json()) as {
-      html: string;
-      text: string;
-      subject?: string;
-    };
+		const result = (await response.json()) as {
+			html: string;
+			text: string;
+			subject?: string;
+		};
 
-    // If the render worker doesn't return a subject, use the one from data
-    const subject =
-      result.subject || (data.subject as string) || "Message from Grove";
+		// If the render worker doesn't return a subject, use the one from data
+		const subject = result.subject || (data.subject as string) || "Message from Grove";
 
-    return {
-      html: result.html,
-      text: result.text,
-      subject,
-    };
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`Template rendering failed: ${message}`);
-  }
+		return {
+			html: result.html,
+			text: result.text,
+			subject,
+		};
+	} catch (error) {
+		const message = error instanceof Error ? error.message : String(error);
+		throw new Error(`${ZEPHYR_ERRORS.TEMPLATE_RENDER_FAILED.adminMessage}: ${message}`);
+	}
 }
 
 /**
  * Check if a template exists
  */
 export function templateExists(name: string): boolean {
-  return name === "raw" || true; // Named templates are validated by render worker
+	return name === "raw" || true; // Named templates are validated by render worker
 }
 
 /**
  * Get list of available templates
  */
 export function getTemplateNames(): string[] {
-  return Object.keys(TEMPLATES);
+	return Object.keys(TEMPLATES);
 }
