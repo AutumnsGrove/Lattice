@@ -3,6 +3,7 @@ package nlp
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -70,21 +71,46 @@ func TestRunAgent_DirectAnswer(t *testing.T) {
 	}
 }
 
-func TestRunAgent_ToolCallThenAnswer(t *testing.T) {
+func TestRunAgent_GiveUpAfterEnoughSearches(t *testing.T) {
 	cleanup := setupTestConfig(t)
 	defer cleanup()
 
+	// Model does 6 searches (grep_search with different args), then gives up.
+	// The give_up should be accepted since minToolCalls (6) is met.
+	searchCall := func(id, pattern string) ChatResponse {
+		return ChatResponse{Choices: []Choice{{
+			Message: Message{
+				Role: "assistant",
+				ToolCalls: []ToolCall{{
+					ID:   id,
+					Type: "function",
+					Function: FunctionCall{
+						Name:      "grep_search",
+						Arguments: fmt.Sprintf(`{"pattern":%q}`, pattern),
+					},
+				}},
+			},
+			FinishReason: "tool_calls",
+		}}}
+	}
+
 	server := mockServer(t, []ChatResponse{
-		// Round 1: model requests a tool call
+		searchCall("call_1", "icon"),
+		searchCall("call_2", "icons"),
+		searchCall("call_3", "service icon"),
+		searchCall("call_4", "svg"),
+		searchCall("call_5", "image"),
+		searchCall("call_6", "asset"),
+		// Round 7: give_up (6 searches done, should be accepted)
 		{Choices: []Choice{{
 			Message: Message{
 				Role: "assistant",
 				ToolCalls: []ToolCall{{
-					ID:   "call_1",
+					ID:   "call_7",
 					Type: "function",
 					Function: FunctionCall{
 						Name:      "give_up",
-						Arguments: `{"reason":"nothing found","tried":["grep_search icon"]}`,
+						Arguments: `{"reason":"nothing found","tried":["icon","icons","service icon","svg","image","asset"]}`,
 					},
 				}},
 			},
@@ -104,6 +130,54 @@ func TestRunAgent_ToolCallThenAnswer(t *testing.T) {
 	}
 	if result.GiveUp.Reason != "nothing found" {
 		t.Errorf("unexpected reason: %s", result.GiveUp.Reason)
+	}
+}
+
+func TestRunAgent_BlocksEarlyGiveUp(t *testing.T) {
+	cleanup := setupTestConfig(t)
+	defer cleanup()
+
+	callCount := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		callCount++
+		if callCount == 1 {
+			// Round 1: model tries to give_up immediately (0 searches)
+			json.NewEncoder(w).Encode(ChatResponse{Choices: []Choice{{
+				Message: Message{
+					Role: "assistant",
+					ToolCalls: []ToolCall{{
+						ID:   "call_early_giveup",
+						Type: "function",
+						Function: FunctionCall{
+							Name:      "give_up",
+							Arguments: `{"reason":"cant find it"}`,
+						},
+					}},
+				},
+				FinishReason: "tool_calls",
+			}}})
+		} else {
+			// After being told to keep searching, model gives a text answer
+			json.NewEncoder(w).Encode(ChatResponse{Choices: []Choice{{
+				Message:      Message{Role: "assistant", Content: "I could not find it after more searching."},
+				FinishReason: "stop",
+			}}})
+		}
+	}))
+	defer server.Close()
+
+	client := NewClient(server.URL, "test", 5*time.Second)
+	result, err := RunAgent(context.Background(), client, "find something", AgentOptions{MaxRounds: 7})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// The early give_up should have been blocked, model should have been nudged
+	if result.GaveUp {
+		t.Error("early give_up should have been blocked")
+	}
+	if result.Answer == "" {
+		t.Error("expected a text answer after blocked give_up")
 	}
 }
 

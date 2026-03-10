@@ -1,6 +1,7 @@
 package nlp
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -17,119 +18,162 @@ const maxDirEntries = 100
 // defaultMaxResults caps grep_search results returned to the model.
 const defaultMaxResults = 20
 
-// ToolDefs returns the tool definitions sent to the model.
-func ToolDefs() []Tool {
+// ToolContext provides the index and client needed by vector_search.
+// When nil or missing fields, vector_search is unavailable and the tool
+// returns an error suggesting --index.
+type ToolContext struct {
+	Ctx    context.Context
+	Index  *Index
+	Client *Client
+}
+
+// HybridToolDefs returns tool definitions for the hybrid (vector + agent) mode.
+// The agent gets vector_search as its primary tool plus grep/list_dir for refinement.
+func HybridToolDefs() []Tool {
 	return []Tool{
-		{
-			Type: "function",
-			Function: ToolDefinition{
-				Name:        "grep_search",
-				Description: "Search file contents for a regex pattern. Returns matching lines with file paths and line numbers.",
-				Parameters: map[string]any{
-					"type": "object",
-					"properties": map[string]any{
-						"pattern": map[string]any{
-							"type":        "string",
-							"description": "Regex pattern to search for",
-						},
-						"file_type": map[string]any{
-							"type":        "string",
-							"description": "Filter by file type: svelte, ts, js, py, go, md, json, yaml, css, html",
-						},
-						"path": map[string]any{
-							"type":        "string",
-							"description": "Limit search to this directory path (relative to project root)",
-						},
-						"max_results": map[string]any{
-							"type":        "integer",
-							"description": "Maximum number of result lines to return (default: 20)",
-						},
+		vectorSearchToolDef(),
+		grepSearchToolDef(),
+		listDirectoryToolDef(),
+		giveUpToolDef(),
+	}
+}
+
+// FallbackToolDefs returns tool definitions for pure agent mode (no index).
+// Same as the old tool set: grep, find_files, list_dir, give_up.
+func FallbackToolDefs() []Tool {
+	return []Tool{
+		grepSearchToolDef(),
+		findFilesToolDef(),
+		listDirectoryToolDef(),
+		giveUpToolDef(),
+	}
+}
+
+func vectorSearchToolDef() Tool {
+	return Tool{
+		Type: "function",
+		Function: ToolDefinition{
+			Name:        "vector_search",
+			Description: "Semantic search across the codebase. Returns the most relevant files ranked by similarity to your query. This is your primary search tool — use it first.",
+			Parameters: map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"query": map[string]any{
+						"type":        "string",
+						"description": "Natural language description of what you are looking for",
 					},
-					"required": []string{"pattern"},
+					"top_n": map[string]any{
+						"type":        "integer",
+						"description": "Number of results to return (default: 20)",
+					},
 				},
+				"required": []string{"query"},
 			},
 		},
-		{
-			Type: "function",
-			Function: ToolDefinition{
-				Name:        "find_files",
-				Description: "Find files whose names match a pattern. Returns file paths.",
-				Parameters: map[string]any{
-					"type": "object",
-					"properties": map[string]any{
-						"pattern": map[string]any{
-							"type":        "string",
-							"description": "File name pattern to search for (e.g. 'workshop', 'icon')",
-						},
-						"glob": map[string]any{
-							"type":        "string",
-							"description": "Glob pattern filter (e.g. '*.svelte', '*.ts')",
-						},
+	}
+}
+
+func grepSearchToolDef() Tool {
+	return Tool{
+		Type: "function",
+		Function: ToolDefinition{
+			Name:        "grep_search",
+			Description: "Search file contents for a regex pattern. Returns matching lines with file paths and line numbers. Use this to refine after vector_search.",
+			Parameters: map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"pattern": map[string]any{
+						"type":        "string",
+						"description": "Regex pattern to search for",
 					},
-					"required": []string{"pattern"},
+					"file_type": map[string]any{
+						"type":        "string",
+						"description": "Filter by file type: svelte, ts, js, py, go, md, json, yaml, css, html",
+					},
+					"path": map[string]any{
+						"type":        "string",
+						"description": "Limit search to this directory path (relative to project root)",
+					},
+					"max_results": map[string]any{
+						"type":        "integer",
+						"description": "Maximum number of result lines to return (default: 20)",
+					},
 				},
+				"required": []string{"pattern"},
 			},
 		},
-		{
-			Type: "function",
-			Function: ToolDefinition{
-				Name:        "find_by_glob",
-				Description: "Find files matching one or more glob patterns. Returns file paths.",
-				Parameters: map[string]any{
-					"type": "object",
-					"properties": map[string]any{
-						"globs": map[string]any{
-							"type":        "array",
-							"items":       map[string]any{"type": "string"},
-							"description": "Glob patterns (e.g. ['libs/engine/**/*.ts', 'apps/**/*.svelte'])",
-						},
+	}
+}
+
+func findFilesToolDef() Tool {
+	return Tool{
+		Type: "function",
+		Function: ToolDefinition{
+			Name:        "find_files",
+			Description: "Search for files by name. If no filenames match, automatically searches file contents too.",
+			Parameters: map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"pattern": map[string]any{
+						"type":        "string",
+						"description": "File name pattern to search for (e.g. 'workshop', 'icon')",
 					},
-					"required": []string{"globs"},
+					"glob": map[string]any{
+						"type":        "string",
+						"description": "Glob pattern filter (e.g. '*.svelte', '*.ts')",
+					},
 				},
+				"required": []string{"pattern"},
 			},
 		},
-		{
-			Type: "function",
-			Function: ToolDefinition{
-				Name:        "list_directory",
-				Description: "List files and subdirectories in a directory (one level). Use this to explore before searching.",
-				Parameters: map[string]any{
-					"type": "object",
-					"properties": map[string]any{
-						"path": map[string]any{
-							"type":        "string",
-							"description": "Directory path relative to project root",
-						},
+	}
+}
+
+func listDirectoryToolDef() Tool {
+	return Tool{
+		Type: "function",
+		Function: ToolDefinition{
+			Name:        "list_directory",
+			Description: "List files and subdirectories in a directory (one level). Use this to explore directories found in search results.",
+			Parameters: map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"path": map[string]any{
+						"type":        "string",
+						"description": "Directory path relative to project root",
 					},
-					"required": []string{"path"},
 				},
+				"required": []string{"path"},
 			},
 		},
-		{
-			Type: "function",
-			Function: ToolDefinition{
-				Name:        "give_up",
-				Description: "Call this when you cannot find what the user described after trying multiple searches. Provide what you tried so the user can refine their query.",
-				Parameters: map[string]any{
-					"type": "object",
-					"properties": map[string]any{
-						"reason": map[string]any{
-							"type":        "string",
-							"description": "Why you could not find it",
-						},
-						"tried": map[string]any{
-							"type":        "array",
-							"items":       map[string]any{"type": "string"},
-							"description": "List of search strategies you attempted",
-						},
-						"suggestions": map[string]any{
-							"type":        "array",
-							"items":       map[string]any{"type": "string"},
-							"description": "Suggested gf commands the user could try manually",
-						},
+	}
+}
+
+func giveUpToolDef() Tool {
+	return Tool{
+		Type: "function",
+		Function: ToolDefinition{
+			Name:        "give_up",
+			Description: "Call this when you cannot find what the user described after reviewing results and trying refinement searches.",
+			Parameters: map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"reason": map[string]any{
+						"type":        "string",
+						"description": "Why you could not find it",
 					},
-					"required": []string{"reason", "tried"},
+					"tried": map[string]any{
+						"type":        "array",
+						"items":       map[string]any{"type": "string"},
+						"description": "List of search strategies you attempted",
+					},
+					"suggestions": map[string]any{
+						"type":        "array",
+						"items":       map[string]any{"type": "string"},
+						"description": "Suggested gf commands the user could try manually",
+					},
 				},
+				"required": []string{"reason", "tried"},
 			},
 		},
 	}
@@ -151,7 +195,6 @@ type ToolResult struct {
 }
 
 // typeMap maps user-friendly type names to ripgrep arguments.
-// Matches the map in cmd/search.go for consistency.
 var typeMap = map[string][]string{
 	"svelte":     {"--glob", "*.svelte"},
 	"ts":         {"--type", "ts"},
@@ -171,8 +214,11 @@ var typeMap = map[string][]string{
 }
 
 // ExecuteToolCall runs a single tool call and returns the result.
-func ExecuteToolCall(tc ToolCall) ToolResult {
+// The toolCtx is needed for vector_search; it can be nil for other tools.
+func ExecuteToolCall(tc ToolCall, toolCtx *ToolContext) ToolResult {
 	switch tc.Function.Name {
+	case "vector_search":
+		return execVectorSearch(tc, toolCtx)
 	case "grep_search":
 		return execGrepSearch(tc)
 	case "find_files":
@@ -189,6 +235,61 @@ func ExecuteToolCall(tc ToolCall) ToolResult {
 			Content:    fmt.Sprintf("Unknown tool: %s", tc.Function.Name),
 		}
 	}
+}
+
+func execVectorSearch(tc ToolCall, toolCtx *ToolContext) ToolResult {
+	var args struct {
+		Query string `json:"query"`
+		TopN  int    `json:"top_n"`
+	}
+	if err := json.Unmarshal([]byte(tc.Function.Arguments), &args); err != nil {
+		return ToolResult{ToolCallID: tc.ID, Content: "Error: invalid arguments"}
+	}
+	if args.Query == "" {
+		return ToolResult{ToolCallID: tc.ID, Content: "Error: query is required"}
+	}
+	if args.TopN <= 0 {
+		args.TopN = 20
+	}
+
+	if toolCtx == nil || toolCtx.Index == nil || toolCtx.Client == nil {
+		return ToolResult{ToolCallID: tc.ID, Content: "Error: no vector index available. Run `gf ask --index` to build one."}
+	}
+
+	// Embed the query
+	vectors, err := toolCtx.Client.Embed(toolCtx.Ctx, []string{args.Query})
+	if err != nil {
+		return ToolResult{ToolCallID: tc.ID, Content: "Error embedding query: " + err.Error()}
+	}
+	if len(vectors) == 0 || len(vectors[0]) == 0 {
+		return ToolResult{ToolCallID: tc.ID, Content: "Error: embedding returned empty vector"}
+	}
+
+	results := QueryIndex(toolCtx.Index, vectors[0], args.TopN)
+	if len(results) == 0 {
+		return ToolResult{ToolCallID: tc.ID, Content: "(no matches in vector index)"}
+	}
+
+	// Format results for the model
+	var lines []string
+	for i, r := range results {
+		line := fmt.Sprintf("%d. %s", i+1, r.FilePath)
+		if r.StartLine > 0 && r.EndLine > r.StartLine {
+			line += fmt.Sprintf(":%d-%d", r.StartLine, r.EndLine)
+		}
+		line += fmt.Sprintf(" (score: %.3f)", r.Score)
+		if r.Snippet != "" {
+			// Show first 100 chars of snippet
+			snippet := r.Snippet
+			if len(snippet) > 100 {
+				snippet = snippet[:100] + "..."
+			}
+			line += "\n   " + snippet
+		}
+		lines = append(lines, line)
+	}
+
+	return ToolResult{ToolCallID: tc.ID, Content: strings.Join(lines, "\n")}
 }
 
 func execGrepSearch(tc ToolCall) ToolResult {
@@ -271,19 +372,37 @@ func execFindFiles(tc ToolCall) ToolResult {
 		return ToolResult{ToolCallID: tc.ID, Content: "Error: " + err.Error()}
 	}
 
-	if len(files) == 0 {
-		return ToolResult{ToolCallID: tc.ID, Content: "(no files found)"}
-	}
+	var parts []string
 
-	if len(files) > defaultMaxResults {
-		result := strings.Join(files[:defaultMaxResults], "\n")
-		return ToolResult{
-			ToolCallID: tc.ID,
-			Content:    result + fmt.Sprintf("\n... (%d more files)", len(files)-defaultMaxResults),
+	if len(files) > 0 {
+		if len(files) > defaultMaxResults {
+			parts = append(parts, "Files matching name:")
+			parts = append(parts, strings.Join(files[:defaultMaxResults], "\n"))
+			parts = append(parts, fmt.Sprintf("... (%d more files)", len(files)-defaultMaxResults))
+		} else {
+			parts = append(parts, "Files matching name:")
+			parts = append(parts, strings.Join(files, "\n"))
 		}
 	}
 
-	return ToolResult{ToolCallID: tc.ID, Content: strings.Join(files, "\n")}
+	// Auto-fallback: if no filename matches, also grep file contents for the pattern.
+	if len(files) == 0 {
+		grepResult, grepErr := search.RunRg(args.Pattern)
+		if grepErr == nil && grepResult != "" {
+			lines := search.SplitLines(grepResult)
+			if len(lines) > defaultMaxResults {
+				lines = lines[:defaultMaxResults]
+			}
+			parts = append(parts, "No files with that name, but found in file contents:")
+			parts = append(parts, strings.Join(lines, "\n"))
+		}
+	}
+
+	if len(parts) == 0 {
+		return ToolResult{ToolCallID: tc.ID, Content: "(no files found)"}
+	}
+
+	return ToolResult{ToolCallID: tc.ID, Content: strings.Join(parts, "\n")}
 }
 
 func execFindByGlob(tc ToolCall) ToolResult {

@@ -9,6 +9,7 @@ tags:
   - search
   - local-llm
   - agent-integration
+  - embeddings
 type: tech-spec
 ---
 
@@ -20,18 +21,18 @@ type: tech-spec
                     │          damn icons?"             │
                     │              │                    │
                     │              ▼                    │
+                    │         ╭─────────╮              │
+                    │         │ vectors │              │
+                    │         ╰────┬────╯              │
+                    │              │ top 20             │
+                    │              ▼                    │
                     │         ╭────────╮               │
                     │         │ 🧠 LLM │               │
                     │         ╰───┬────╯               │
-                    │             │                    │
-                    │    ┌────────┼────────┐           │
-                    │    ▼        ▼        ▼           │
-                    │  grep    find     list           │
-                    │    │        │        │           │
-                    │    └────────┼────────┘           │
-                    │             ▼                    │
-                    │    libs/engine/src/lib/          │
-                    │      workshop/entries.ts         │
+                    │             │ refine              │
+                    │             ▼                     │
+                    │    libs/engine/src/lib/           │
+                    │      workshop/entries.ts          │
                     │                                  │
                     ╰──────────────────────────────────╯
 
@@ -47,7 +48,7 @@ type: tech-spec
 
 You know what you're looking for. You just don't know what it's called. Maybe it's "that page with all the service icons" or "the thing that handles rate limiting for webhooks" or "wherever the seasonal theme stuff lives." Today that means guessing keywords, trying three or four `gf search` calls, scanning results, adjusting. Tomorrow you type what you mean and the forest finds it for you.
 
-`gf ask` adds natural language search to Grove Find. A tiny local model (LFM 2.5 1.2B, running on your machine through LM Studio) translates your description into structured searches, executes them against the codebase, reads the results, and tells you exactly where to look. No cloud APIs. No latency. No cost per query. Just you, your words, and ripgrep doing the heavy lifting behind a model that speaks both languages.
+`gf ask` adds natural language search to Grove Find. A local embedding model indexes your codebase into vectors. When you search, your query is embedded and compared against the index. The top matches are handed to a local LLM agent that reads them, refines with targeted searches, and tells you exactly where to look. No cloud APIs. No latency. No cost per query. Two models working together: one for understanding, one for reasoning.
 
 ---
 
@@ -55,23 +56,49 @@ You know what you're looking for. You just don't know what it's called. Maybe it
 
 ### What This Is
 
-A new `gf ask` command that accepts natural language queries and returns file paths with explanations. It wraps an agentic tool-calling loop around `gf`'s existing search infrastructure, powered by a local LLM running in LM Studio.
+A new `gf ask` command that accepts natural language queries and returns file paths with explanations. It combines **vector similarity search** (for fast semantic matching) with an **agentic LLM loop** (for refinement and explanation), powered entirely by local models running in LM Studio.
+
+### The Hybrid Approach
+
+Neither vectors nor agents work well alone for this problem:
+
+- **Vectors alone** return ranked files but can't filter noise. "Payment stuff" might return 20 files mentioning "payment" with no way to distinguish the core payment module from a migration doc.
+- **Agent alone** (what we built first) can reason about results, but a 1.2B model can't reliably decide *what* to search for. It wastes rounds on broad globs, misses obvious directories, and gives up too early.
+
+**Together:** Vectors handle discovery (semantic understanding). The agent handles interpretation (picking the right files from candidates, drilling in with grep). Each model does what it's good at.
+
+```
+ VECTORS                          AGENT
+ (embedding model)                (language model)
+ ┌──────────────┐                 ┌──────────────┐
+ │ Understands   │                │ Reads context │
+ │ meaning       │                │ Makes choices │
+ │ Ranks by      │                │ Refines with  │
+ │ similarity    │                │ grep/list_dir │
+ └───────┬──────┘                 └───────┬──────┘
+         │ "these 20 files                │ "these 3 are
+         │  are most relevant"            │  what you want"
+         └──────────────┬─────────────────┘
+                        ▼
+                  Final answer
+```
 
 ### Goals
 
 1. **Natural language in, file paths out.** Type what you mean, get where it lives.
 2. **Zero cloud dependency.** Everything runs locally. No API keys, no usage fees, no network required.
-3. **Zero new Go dependencies.** Raw `net/http` for the LLM client. Reuse existing Charm libraries for TUI.
-4. **Sub-second typical response.** The model is 1.2B params. Searches take ~40ms each. Most queries resolve in 1-3 rounds.
-5. **Graceful lifecycle management.** Auto-detect and auto-start LM Studio when possible.
-6. **Two modes.** Single-shot (default) for quick answers. Interactive TUI (`-i`) for exploratory sessions.
+3. **Zero new Go dependencies.** Raw `net/http` for both LLM and embedding clients. Cosine similarity in pure Go.
+4. **Vector-first search.** Semantic understanding via embeddings. The agent refines, not discovers.
+5. **Fast indexing, fast queries.** Full index in under 30 seconds. Incremental re-index in seconds. Query response in 2-5 seconds.
+6. **Graceful lifecycle management.** Auto-detect and auto-start LM Studio when possible.
+7. **Two modes.** Single-shot (default) for quick answers. Interactive TUI (`-i`) for exploratory sessions.
 
 ### Non-Goals
 
 - Replacing existing `gf search`, `gf class`, `gf func` commands (those are precise tools, this is a fuzzy finder)
 - Supporting cloud LLM providers (this is intentionally local-only)
 - Code generation or modification (search only)
-- Indexing or embedding the codebase (we lean on ripgrep, not vector search)
+- Real-time index updates on every file save (too expensive; re-index on demand or via git hooks)
 
 ---
 
@@ -94,21 +121,24 @@ A new `gf ask` command that accepts natural language queries and returns file pa
 │  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐         │  │
 │  │  │ Health check │  │ net/http POST│  │ Scan dirs    │         │  │
 │  │  │ Auto-start   │  │ OpenAI types │  │ Build prompt │         │  │
-│  │  │ Model load   │  │ Stream parse │  │ ~150 tokens  │         │  │
+│  │  │ Model load   │  │ Chat + Embed │  │ ~150 tokens  │         │  │
 │  │  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘         │  │
 │  │         │                 │                  │                 │  │
 │  │  ┌──────▼─────────────────▼──────────────────▼───────────────┐ │  │
 │  │  │                    agent.go                                │ │  │
 │  │  │                                                            │ │  │
-│  │  │  System prompt + codebase map + user query                 │ │  │
+│  │  │  1. Load vector index                                      │ │  │
+│  │  │  2. Embed query via /v1/embeddings                         │ │  │
+│  │  │  3. Cosine similarity → top 20 candidates                  │ │  │
+│  │  │  4. Build prompt with candidates + codebase map            │ │  │
 │  │  │           │                                                │ │  │
 │  │  │           ▼                                                │ │  │
 │  │  │  POST /v1/chat/completions (messages + tools)              │ │  │
 │  │  │           │                                                │ │  │
 │  │  │           ├── finish_reason: "tool_calls"                  │ │  │
-│  │  │           │     Execute via tools.go → search.*            │ │  │
+│  │  │           │     Execute grep_search / list_directory       │ │  │
 │  │  │           │     Append results, round++                    │ │  │
-│  │  │           │     Loop (max 7 rounds)                        │ │  │
+│  │  │           │     Loop (max 14 rounds)                       │ │  │
 │  │  │           │                                                │ │  │
 │  │  │           ├── finish_reason: "stop"                        │ │  │
 │  │  │           │     Render answer + file paths                 │ │  │
@@ -117,17 +147,24 @@ A new `gf ask` command that accepts natural language queries and returns file pa
 │  │  │                 Show reason + suggested gf commands         │ │  │
 │  │  └────────────────────────────────────────────────────────────┘ │  │
 │  │                                                                │  │
+│  │  index.go                                                      │  │
+│  │  ┌────────────────────────────────────────────────────────────┐ │  │
+│  │  │  BuildIndex()    ── walk codebase, chunk, embed, save     │ │  │
+│  │  │  LoadIndex()     ── read from .grove/gf-index.bin         │ │  │
+│  │  │  QueryIndex()    ── embed query, cosine sim, top N        │ │  │
+│  │  │  IncrementalUpdate() ── re-embed changed files only       │ │  │
+│  │  └────────────────────────────────────────────────────────────┘ │  │
+│  │                                                                │  │
 │  │  tools.go                                                      │  │
 │  │  ┌────────────────────────────────────────────────────────────┐ │  │
-│  │  │  grep_search  ──→  search.RunRg()                         │ │  │
-│  │  │  find_files   ──→  search.FindFiles()                     │ │  │
-│  │  │  find_by_glob ──→  search.FindFilesByGlob()               │ │  │
-│  │  │  list_dir     ──→  os.ReadDir()                           │ │  │
-│  │  │  give_up      ──→  terminates loop                        │ │  │
+│  │  │  vector_search ──→  index.QueryIndex()                    │ │  │
+│  │  │  grep_search   ──→  search.RunRg()                        │ │  │
+│  │  │  list_dir      ──→  os.ReadDir()                          │ │  │
+│  │  │  give_up       ──→  terminates loop                       │ │  │
 │  │  └────────────────────────────────────────────────────────────┘ │  │
 │  └────────────────────────────────────────────────────────────────┘  │
 │                                                                      │
-│  internal/asktui/ (Phase 2)                                          │
+│  internal/asktui/                                                    │
 │  ┌────────────────────────────────────────────────────────────────┐  │
 │  │  Bubble Tea program: spinner → search status → answer viewer  │  │
 │  └────────────────────────────────────────────────────────────────┘  │
@@ -143,8 +180,12 @@ A new `gf ask` command that accepts natural language queries and returns file pa
 | Component | Technology | Why |
 |-----------|-----------|-----|
 | LLM Client | Raw `net/http` + `encoding/json` | Zero new dependencies |
+| Embedding Client | Raw `net/http` (same client) | Same LM Studio endpoint |
 | LLM Runtime | LM Studio (localhost:1234) | Local, free, OpenAI-compatible |
-| Model | LFM 2.5 1.2B (`liquid/lfm2.5-1.2b`) | Fast, small, good at tool calling |
+| Chat Model | LFM 2.5 1.2B (`liquid/lfm2.5-1.2b`) | Fast, small, good at tool calling |
+| Embedding Model | `jina-code-embeddings-0.5b` | Code-specialized, 896-dim, 32K context, trained on modern TS/Svelte |
+| Vector Math | Pure Go (cosine similarity) | No CGo, no external deps |
+| Index Storage | Binary file (`.grove/gf-index.bin`) | Fast load, compact |
 | Search Backend | ripgrep + fd (existing) | Already integrated via `search.*` |
 | TUI Framework | Bubble Tea (existing) | Already a dependency for pager |
 | Server Management | `lms` CLI (exec) | Ships with LM Studio |
@@ -154,91 +195,274 @@ A new `gf ask` command that accepts natural language queries and returns file pa
 ```
 tools/grove-find-go/
 ├── cmd/
-│   ├── ask.go              ← NEW: Cobra command for gf ask
+│   ├── ask.go              ← Cobra command for gf ask
 │   └── ... (existing)
 ├── internal/
-│   ├── nlp/                ← NEW: all LLM logic
+│   ├── nlp/
 │   │   ├── server.go       ← LM Studio lifecycle
-│   │   ├── client.go       ← OpenAI-compatible HTTP client
-│   │   ├── agent.go        ← Agentic loop + system prompt
-│   │   ├── tools.go        ← Tool definitions + executor
-│   │   └── codemap.go      ← Dynamic codebase map
-│   ├── asktui/             ← NEW (Phase 2): interactive TUI
-│   │   └── tui.go          ← Bubble Tea program
+│   │   ├── client.go       ← OpenAI-compatible HTTP client (chat + embeddings)
+│   │   ├── agent.go        ← Hybrid loop: vector search → agent refinement
+│   │   ├── tools.go        ← Tool definitions + executor (vector_search, grep, list_dir, give_up)
+│   │   ├── index.go        ← NEW: Vector index (build, load, query, incremental update)
+│   │   ├── chunk.go        ← NEW: File chunking strategies
+│   │   └── codemap.go      ← Dynamic codebase map (still used in system prompt)
+│   ├── asktui/
+│   │   └── tui.go          ← Bubble Tea interactive mode
 │   ├── search/             (existing, untouched)
-│   ├── config/             (extended: 3 new fields)
+│   ├── config/             (extended: embedding model fields)
 │   ├── output/             (existing, untouched)
 │   ├── pager/              (existing, untouched)
 │   └── tools/              (extended: lms binary discovery)
+├── .grove/
+│   └── gf-index.bin        ← Vector index file (gitignored, machine-local)
 └── ...
 ```
 
 ---
 
-## The Agentic Loop
+## Vector Index
 
-This is the core of the system. A conversation loop between `gf` and the local model, mediated by tool calls.
+The index is the foundation of the search system. It maps every meaningful chunk of code to a vector embedding, enabling semantic similarity search.
+
+### Chunking Strategy
+
+Files are chunked based on size:
 
 ```
-Round 0                    Round 1                    Round 2
-┌─────────────┐            ┌─────────────┐            ┌─────────────┐
-│ System:     │            │ Tool result:│            │ Tool result:│
-│  codebase   │            │  12 matches │            │  3 files    │
-│  map +      │            │  in libs/   │            │  found      │
-│  rules      │            │             │            │             │
-│             │            │             │            │             │
-│ User:       │            │             │            │             │
-│  "where are │            │             │            │             │
-│   the icons"│            │             │            │             │
-└──────┬──────┘            └──────┬──────┘            └──────┬──────┘
-       │                          │                          │
-       ▼                          ▼                          ▼
-  ┌─────────┐              ┌─────────┐              ┌─────────────┐
-  │  Model   │              │  Model   │              │    Model    │
-  │ decides: │              │ decides: │              │   decides:  │
-  │ grep for │              │ list_dir │              │   "stop"    │
-  │ "icon"   │              │ workshop/│              │   (answer)  │
-  └─────────┘              └─────────┘              └─────────────┘
+File size              Strategy
+─────────────────────  ─────────────────────────────────────────────
+< 6000 chars           Whole file as one chunk
+                       Embedding text: "{filepath}\n{full content}"
+
+6000-20000 chars       Split on natural boundaries:
+                       - Function/class declarations
+                       - Export blocks
+                       - Section comments (// ----, // ====)
+                       Each chunk: "{filepath}:{startLine}-{endLine}\n{content}"
+
+> 20000 chars           Split into ~4000 char windows with 500 char overlap
+                       Each chunk: "{filepath}:{startLine}-{endLine}\n{content}"
 ```
 
-### Loop Rules
+Every chunk is tagged with its file path so results always trace back to the source.
 
-1. **Max 7 rounds.** After round 7, the agent is forced to summarize whatever it found. The model is tiny and fast, so 7 rounds adds at most ~3-4 seconds.
+### File Selection
 
-2. **Duplicate detection.** If the model calls the same tool with the same arguments twice, inject a system message: "You already tried that search. Try different terms, a broader pattern, or call give_up if nothing matches."
+**Indexed:**
+- `*.ts`, `*.svelte`, `*.js`, `*.go`, `*.md`, `*.json`, `*.yaml`, `*.css`, `*.html`
+- Markdown files (specs, docs) are valuable search targets
 
-3. **Empty result escalation.** If rounds 1-5 all return empty, inject: "All searches have returned empty. Call give_up with what you tried, or try a completely different approach."
+**Skipped:**
+- `node_modules/`, `dist/`, `build/`, `.git/`, `_archived/`
+- `.wrangler/`, `.venv/`, `.worktrees/`, `.svelte-kit/`
+- `worker-configuration.d.ts` (generated, 12k+ lines)
+- Files over 50000 chars (generated bundles)
+- Binary files
 
-4. **give_up terminates immediately.** No further rounds. The loop exits and renders the give_up payload.
+### Embedding
 
-5. **Multiple tool calls per round.** If the model returns multiple tool calls in one response, execute them all (in parallel where possible) and return all results in a single round.
+Each chunk is embedded via LM Studio's `/v1/embeddings` endpoint:
 
-### Convergence Guarantee
+```
+POST /v1/embeddings
+{
+  "model": "jina-code-embeddings-0.5b",
+  "input": "libs/engine/src/lib/payments/stripe.ts\nimport { StripeClient } from..."
+}
 
-The loop always terminates via one of:
-- Model returns `finish_reason: "stop"` (natural answer)
-- Model calls `give_up` tool (explicit surrender)
-- Round counter exceeds 7 (forced summarization)
-- HTTP error or timeout (error path)
+→ { "data": [{ "embedding": [0.023, -0.118, ...] }] }  // 896 floats
+```
 
-There is no path to infinite iteration.
+Embeddings are 896-dimensional float32 vectors. At ~3.5KB per vector and ~7000 chunks, the full index is roughly **24-28MB**.
+
+### Index Storage Format
+
+Binary format for fast loading:
+
+```
+Header:
+  magic: "GFIDX" (5 bytes)
+  version: uint8 (1)
+  dimensions: uint16 (896)
+  chunk_count: uint32
+  embedding_model: length-prefixed string
+
+Per chunk:
+  filepath: length-prefixed string
+  start_line: uint32
+  end_line: uint32
+  snippet: length-prefixed string (first 200 chars, for display)
+  mtime: int64 (unix timestamp)
+  vector: [896]float32
+```
+
+Stored at `.grove/gf-index.bin` in the project root. Gitignored. Machine-local.
+
+### Building the Index
+
+```
+gf ask --index
+    │
+    ▼
+Walk codebase (skip excluded dirs/files)
+    │
+    ▼
+Chunk each file based on size
+    │
+    ▼
+Batch embed via /v1/embeddings
+(batch size: 32 chunks per request)
+    │
+    ▼
+Write .grove/gf-index.bin
+    │
+    ▼
+Done. "Indexed 4,832 chunks from 3,291 files in 18.3s"
+```
+
+### Incremental Re-indexing
+
+```
+gf ask --reindex
+    │
+    ▼
+Load existing index
+    │
+    ▼
+Walk codebase, compare mtimes
+    │
+    ├── File unchanged → keep existing chunks
+    ├── File modified  → re-chunk, re-embed, replace
+    ├── File deleted   → remove chunks
+    └── File new       → chunk, embed, add
+    │
+    ▼
+Write updated index
+    │
+    ▼
+Done. "Re-indexed 47 chunks from 12 changed files in 2.1s"
+```
+
+### Querying
+
+```go
+func QueryIndex(index *Index, queryVec []float32, topN int) []SearchResult {
+    // Cosine similarity against all chunks
+    // Return top N sorted by score
+}
+
+type SearchResult struct {
+    FilePath  string
+    StartLine int
+    EndLine   int
+    Snippet   string
+    Score     float32  // 0.0 to 1.0
+}
+```
+
+Pure Go cosine similarity. No external libraries. For 7000 chunks with 896-dim vectors, this takes <5ms.
+
+---
+
+## The Hybrid Search Flow
+
+This replaces the previous pure-agentic loop.
+
+```
+Query: "where are the payment webhooks"
+           │
+           ▼
+    ┌──────────────┐
+    │ Embed query   │  (1 API call, ~10ms)
+    └──────┬───────┘
+           │
+           ▼
+    ┌──────────────┐
+    │ Vector search │  (cosine sim, <5ms)
+    │ top 20 chunks │
+    └──────┬───────┘
+           │
+           │  Candidates:
+           │  1. libs/engine/src/lib/payments/webhook-handler.ts  (0.87)
+           │  2. workers/webhook-cleanup/src/index.ts             (0.84)
+           │  3. libs/engine/src/lib/payments/stripe.ts           (0.81)
+           │  4. docs/specs/payment-webhooks-spec.md              (0.79)
+           │  5. ... (16 more)
+           │
+           ▼
+    ┌──────────────┐
+    │ Agent prompt  │  "Here are the top search results for the query.
+    │ + candidates  │   Which files best match? You can use grep_search
+    │ + codebase    │   or list_directory to refine."
+    │   map         │
+    └──────┬───────┘
+           │
+           ▼
+    ┌──────────────┐
+    │ LLM decides: │  Round 1: grep_search("webhook", path: "libs/engine/src/lib/payments")
+    │ refine       │  Round 2: "stop" — found the answer
+    └──────┬───────┘
+           │
+           ▼
+    Answer: libs/engine/src/lib/payments/webhook-handler.ts
+            workers/webhook-cleanup/src/index.ts
+            "Payment webhooks are handled in two places..."
+```
+
+### Why This Works
+
+The old flow required the agent to *discover* files through blind search. The new flow hands the agent 20 pre-ranked candidates and asks it to *choose* from them. Choosing from a list is trivially easy for even a 1.2B model.
+
+The refinement tools (grep, list_dir) still exist for when the agent wants to peek inside a file or explore a directory it saw in the candidates. But the heavy lifting is done by vectors.
 
 ---
 
 ## Tool Definitions
 
-Five tools. Each maps directly to existing `gf` infrastructure.
+Four tools. Down from five (removed `find_files` and `find_by_glob`, added `vector_search`).
+
+### `vector_search`
+
+Semantic search against the pre-built index.
+
+```json
+{
+  "type": "function",
+  "function": {
+    "name": "vector_search",
+    "description": "Semantic search across the codebase. Returns the most relevant files ranked by similarity to your query. This is your primary search tool.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "Natural language description of what you are looking for"
+        },
+        "top_n": {
+          "type": "integer",
+          "description": "Number of results to return (default: 20)"
+        }
+      },
+      "required": ["query"]
+    }
+  }
+}
+```
+
+**Maps to:** Embed query via `/v1/embeddings`, then `index.QueryIndex()`. Returns file paths with similarity scores and snippets.
+
+**This is the primary tool.** The agent should call this first on every query. The results give it a map of the most relevant code to work with.
 
 ### `grep_search`
 
-Search file contents using ripgrep.
+Search file contents using ripgrep. For targeted refinement after vector_search narrows the field.
 
 ```json
 {
   "type": "function",
   "function": {
     "name": "grep_search",
-    "description": "Search file contents for a regex pattern. Returns matching lines with file paths and line numbers.",
+    "description": "Search file contents for a regex pattern. Returns matching lines with file paths and line numbers. Use this to refine after vector_search.",
     "parameters": {
       "type": "object",
       "properties": {
@@ -265,66 +489,7 @@ Search file contents using ripgrep.
 }
 ```
 
-**Maps to:** `search.RunRg(pattern, WithType(...), WithPath(...))` with result truncation.
-
-**Default max_results: 20.** A 1.2B model can't process hundreds of grep lines. 20 gives enough signal to orient without flooding the context window.
-
-### `find_files`
-
-Search for files by name.
-
-```json
-{
-  "type": "function",
-  "function": {
-    "name": "find_files",
-    "description": "Find files whose names match a pattern. Returns file paths.",
-    "parameters": {
-      "type": "object",
-      "properties": {
-        "pattern": {
-          "type": "string",
-          "description": "File name pattern to search for (e.g. 'workshop', 'icon')"
-        },
-        "glob": {
-          "type": "string",
-          "description": "Glob pattern filter (e.g. '*.svelte', '*.ts')"
-        }
-      },
-      "required": ["pattern"]
-    }
-  }
-}
-```
-
-**Maps to:** `search.FindFiles(pattern, WithGlob(...))`.
-
-### `find_by_glob`
-
-Find files matching glob patterns.
-
-```json
-{
-  "type": "function",
-  "function": {
-    "name": "find_by_glob",
-    "description": "Find files matching one or more glob patterns. Returns file paths.",
-    "parameters": {
-      "type": "object",
-      "properties": {
-        "globs": {
-          "type": "array",
-          "items": { "type": "string" },
-          "description": "Glob patterns (e.g. ['libs/engine/**/*.ts', 'apps/**/*.svelte'])"
-        }
-      },
-      "required": ["globs"]
-    }
-  }
-}
-```
-
-**Maps to:** `search.FindFilesByGlob(globs)`.
+**Maps to:** `search.RunRg(pattern, opts...)` with result truncation.
 
 ### `list_directory`
 
@@ -335,7 +500,7 @@ List the contents of a directory (one level deep).
   "type": "function",
   "function": {
     "name": "list_directory",
-    "description": "List files and subdirectories in a directory (one level). Use this to explore before searching.",
+    "description": "List files and subdirectories in a directory (one level). Use this to explore directories found by vector_search.",
     "parameters": {
       "type": "object",
       "properties": {
@@ -350,7 +515,7 @@ List the contents of a directory (one level deep).
 }
 ```
 
-**Maps to:** `os.ReadDir()` on the resolved path. Returns entries as `name/` (dirs) or `name` (files). Capped at 100 entries to protect context.
+**Maps to:** `os.ReadDir()` on the resolved path. Capped at 100 entries.
 
 ### `give_up`
 
@@ -361,7 +526,7 @@ Signal that the search cannot find what the user described.
   "type": "function",
   "function": {
     "name": "give_up",
-    "description": "Call this when you cannot find what the user described after trying multiple searches. Provide what you tried so the user can refine their query.",
+    "description": "Call this when you cannot find what the user described after reviewing vector results and trying refinement searches.",
     "parameters": {
       "type": "object",
       "properties": {
@@ -386,57 +551,89 @@ Signal that the search cannot find what the user described.
 }
 ```
 
-**Maps to:** Loop termination. Renders the give_up payload with mode-specific formatting (see Output section).
-
 ---
 
 ## System Prompt
 
-The system prompt has two parts: static instructions and a dynamic codebase map.
+The system prompt changes significantly. The agent is no longer searching blindly. It receives vector candidates and interprets them.
 
-### Static Instructions (~200 tokens)
-
-```
-You are a codebase search assistant for a monorepo called Lattice.
-
-Given a natural language description, use the provided tools to find the relevant files and code. Return specific file paths and a brief description of what you found.
-
-Rules:
-- Start with the most likely location based on the codebase map below
-- Use grep_search for content, find_files for file names, list_directory to explore
-- If a search returns nothing, try alternative keywords or broader patterns
-- Keep pattern arguments short and specific
-- If nothing matches after thorough searching, call give_up with what you tried
-- When you find it, respond with the file path(s) and a one-sentence description
-- Do not guess file paths. Only report paths from search results.
-```
-
-### Dynamic Codebase Map (~150 tokens)
-
-Generated at runtime by `codemap.go`:
+### Template (~250 tokens)
 
 ```
-Codebase Map:
-apps: amber, clearing, domains, ivy, landing, login, meadow, plant, terrarium
-libs: engine (core business logic), foliage, gossamer, grove-agent, infra, prism, server-sdk, shutter, vineyard
-workers: email-catchup, loft, lumen, meadow-poller, onboarding, patina, post-migrator, reverie-exec, reverie, timeline-sync, vista-collector, warden, webhook-cleanup
-tools: cairn, census, glimpse, grove-find-go, grove-wrap-go
-docs: specs/, plans/, guides/
+You are a codebase search assistant for a TypeScript/Svelte monorepo called Lattice.
+
+The user asked: "{query}"
+
+Below are the top search results from semantic vector search, ranked by relevance.
+Review these results and identify which files best match the user's query.
+
+You can use these tools to refine:
+- grep_search: search inside files for specific patterns
+- list_directory: explore a directory's contents
+- give_up: if nothing matches after reviewing results
+
+RULES:
+1. Start by reviewing the vector search results below. Most answers are in there.
+2. Use grep_search to verify or drill into specific files from the results.
+3. Use list_directory to explore directories that appear in the results.
+4. Respond with ONLY file paths and a brief description. Do not guess paths.
+
+VECTOR SEARCH RESULTS:
+{top 20 results with scores and snippets}
+
+CODEBASE MAP:
+{dynamic codebase map}
 ```
 
-**Generation algorithm:**
+The key difference: the agent starts with context, not a blank slate. The vector results are baked into the first message. The agent's job is interpretation, not discovery.
 
-1. Read directories in `GroveRoot` at depth 0
-2. For `apps/`, `libs/`, `workers/`, `tools/`: list subdirectory names at depth 1
-3. For `docs/`: list subdirectory names at depth 1
-4. Skip: `node_modules`, `.git`, `dist`, `build`, `_archived`, hidden dirs (`.` prefix)
-5. Format as compact key-value lines
+---
 
-The `libs/engine` entry gets a parenthetical "(core business logic)" because it's the largest package and most searches end up there. This hint saves the model a round of exploration.
+## The Agentic Loop (Updated)
+
+### Flow
+
+1. **Embed the query** via `/v1/embeddings` (single API call)
+2. **Vector search** against the index → top 20 candidates
+3. **Build the system prompt** with candidates + codebase map
+4. **Enter agent loop** (max 14 rounds, but typically 1-3 now)
+5. Agent reviews candidates, optionally uses grep/list_dir to refine
+6. Agent returns answer with file paths
+
+### Loop Rules
+
+1. **Max 14 rounds.** After round 14, forced summarization. In practice, with vector candidates pre-loaded, most queries resolve in 1-3 rounds.
+
+2. **Minimum 2 tool calls before give_up.** The agent should at least review vectors and try one refinement before surrendering.
+
+3. **Duplicate detection.** Same as before. If the model repeats a call, inject a hint.
+
+4. **Auto vector_search on round 1.** If the agent doesn't call vector_search in round 1, the system automatically injects vector results. This handles cases where the model skips the tool and tries to answer from the codebase map alone.
+
+5. **No index, no problem.** If the vector index doesn't exist, fall back to the pure agentic approach (grep_search + list_directory). Print a hint: "Run `gf ask --index` for faster, smarter search."
+
+### Convergence Guarantee
+
+The loop always terminates via one of:
+- Model returns `finish_reason: "stop"` (natural answer)
+- Model calls `give_up` tool (explicit surrender)
+- Round counter exceeds 14 (forced summarization)
+- HTTP error or timeout (error path)
 
 ---
 
 ## LM Studio Lifecycle Management
+
+### Models Required
+
+`gf ask` needs two models loaded in LM Studio:
+
+| Model | Purpose | Size | Config |
+|-------|---------|------|--------|
+| `liquid/lfm2.5-1.2b` | Chat/reasoning | ~1.2B params | `GF_LLM_MODEL` |
+| `jina-code-embeddings-0.5b` | Embeddings | ~500M params | `GF_EMBED_MODEL` |
+
+Both run simultaneously. Total VRAM usage: ~2-3GB.
 
 ### Startup Sequence
 
@@ -449,64 +646,46 @@ GET /v1/models ─── 200 OK ──→ Server running
     Connection                     ▼
     refused                   Parse model list
     │                              │
-    ▼                         ┌────┴─────────────┐
-which lms                     │ Models loaded?   │
-    │                         └────┬──────┬──────┘
-    ├── not found                  │      │
-    │     → Error:                Yes    No
-    │       "LM Studio            │      │
-    │        required"            │      ▼
-    │                             │   lms load liquid/lfm2.5-1.2b
-    ▼                             │     --gpu max
-lms server start                  │     --identifier gf-search
-    │                             │      │
-    Poll /v1/models               │      Poll /v1/models
-    every 1s, up to 10s           │      every 2s, up to 30s
-    │                             │      │
-    ├── success ──────────────────┤      ├── success
-    │                             │      │
-    └── timeout                   ▼      └── timeout
-          → Error:             Ready!          → Error:
-            "Could not                           "Model failed
-             start server"                        to load"
-```
-
-### Server Discovery
-
-The `lms` binary is discovered the same way as `rg`, `fd`, and `git`: via `exec.LookPath`. Added to the existing `internal/tools/Tools` struct:
-
-```go
-type Tools struct {
-    Rg  string
-    Fd  string
-    Git string
-    Gh  string
-    Lms string  // NEW
-}
+    ▼                         Check both models loaded
+which lms                         │
+    │                         ┌────┴─────────────┐
+    ├── not found             │                  │
+    │     → Error:          Both              Missing
+    │       "LM Studio       loaded            model(s)
+    │        required"        │                  │
+    │                         │                  ▼
+    ▼                         │    lms load <missing-model>
+lms server start              │      --gpu max
+    │                         │      │
+    Poll /v1/models           │      Poll /v1/models
+    every 1s, up to 10s       │      every 2s, up to 30s
+    │                         │      │
+    ├── success ──────────────┤      ├── success
+    │                         │      │
+    └── timeout               ▼      └── timeout
+          → Error:         Ready!          → Error:
+            "Could not                       "Model failed
+             start server"                    to load"
 ```
 
 ### Auto-start Behavior
 
-Auto-start is **on by default**. The `--no-autostart` flag disables it, which is useful when:
-- Running in CI (no LM Studio installed)
-- The user manages LM Studio manually
-- Testing against a different endpoint
-
-When auto-start is disabled and the server isn't running, `gf ask` exits immediately with a clear message about what's needed.
+Auto-start is **on by default**. The `--no-autostart` flag disables it. When auto-start is disabled and the server isn't running, `gf ask` exits with a clear message.
 
 ---
 
 ## Configuration
 
-### New Config Fields
+### Config Fields
 
 ```go
 type Config struct {
     // ... existing fields ...
 
-    LLMEndpoint string // env: GF_LLM_ENDPOINT, default: http://localhost:1234/v1
-    LLMModel    string // env: GF_LLM_MODEL,    default: liquid/lfm2.5-1.2b
-    LLMTimeout  int    // env: GF_LLM_TIMEOUT,  default: 30 (seconds)
+    LLMEndpoint  string // env: GF_LLM_ENDPOINT,  default: http://localhost:1234/v1
+    LLMModel     string // env: GF_LLM_MODEL,     default: liquid/lfm2.5-1.2b
+    EmbedModel   string // env: GF_EMBED_MODEL,   default: jina-code-embeddings-0.5b
+    LLMTimeout   int    // env: GF_LLM_TIMEOUT,   default: 30 (seconds)
 }
 ```
 
@@ -517,7 +696,8 @@ type Config struct {
 | Flag | Env Var | Default | Description |
 |------|---------|---------|-------------|
 | `--llm-endpoint` | `GF_LLM_ENDPOINT` | `http://localhost:1234/v1` | LM Studio API endpoint |
-| `--llm-model` | `GF_LLM_MODEL` | `liquid/lfm2.5-1.2b` | Model to use |
+| `--llm-model` | `GF_LLM_MODEL` | `liquid/lfm2.5-1.2b` | Chat model |
+| `--embed-model` | `GF_EMBED_MODEL` | `jina-code-embeddings-0.5b` | Embedding model |
 
 **Ask-specific:**
 
@@ -525,11 +705,10 @@ type Config struct {
 |------|---------|-------------|
 | `-i`, `--interactive` | `false` | Launch interactive TUI mode |
 | `--no-autostart` | `false` | Skip LM Studio auto-start |
-| `--max-rounds` | `7` | Maximum agentic loop iterations |
-
-### Precedence
-
-Flag > Environment variable > Default. Same pattern as existing `--root` / `GROVE_ROOT`.
+| `--max-rounds` | `14` | Maximum agentic loop iterations |
+| `--index` | `false` | Build/rebuild the vector index |
+| `--reindex` | `false` | Incrementally update the index |
+| `--no-vectors` | `false` | Skip vector search, use pure agent mode |
 
 ---
 
@@ -537,195 +716,156 @@ Flag > Environment variable > Default. Same pattern as existing `--root` / `GROV
 
 ### Single-shot Mode (default)
 
-The model's answer rendered through existing output functions, with file paths styled as clickable references.
-
 **Success:**
 
 ```
-  Searching: "that place where all the damn icons are"
+  Searching: "where are the payment webhooks"
 
-  ◐ Thinking... (round 1/7)
-  ◐ Searching... grep_search("icon", path: "libs/engine")  (round 2/7)
-  ◐ Exploring... list_directory("libs/engine/src/lib/workshop")  (round 3/7)
+  ◐ Searching index... (4,832 chunks)
+  ◐ Found 20 candidates
+  ◐ Refining... grep_search("webhook", path: "libs/engine/src/lib/payments")  (round 1/14)
 
   Found it!
 
-  libs/engine/src/lib/workshop/entries.ts
-  libs/engine/src/lib/workshop/icons.ts
+  libs/engine/src/lib/payments/webhook-handler.ts
+  workers/webhook-cleanup/src/index.ts
 
-  The service icons and descriptions are defined in the workshop module.
-  entries.ts maps each service to its icon, category, and description.
-  icons.ts exports the icon components used across service pages.
+  Payment webhooks are handled in two places:
+  webhook-handler.ts processes incoming Stripe/LemonSqueezy events.
+  webhook-cleanup runs as a scheduled worker to retry failed deliveries.
 ```
 
-Status lines (`◐ Thinking...`) are printed to stderr so they don't pollute piped output. The final answer goes to stdout.
-
-**give_up (regular mode):**
+**No index (fallback):**
 
 ```
-  Searching: "the quantum flux capacitor config"
+  Searching: "where are the payment webhooks"
 
-  Could not find what you described.
-
-  Tried:
-    grep_search("quantum")
-    grep_search("flux capacitor")
-    find_files("quantum")
-
-  You could try:
-    gf search "capacitor"
-    gf search "flux" --type ts
-    gf func "quantumConfig"
+  ⚠ No vector index found. Run `gf ask --index` for faster search.
+  ◐ Thinking... (round 1/14)
+  ...
 ```
 
-**Agent mode** (`--agent`): No spinners, no colors. Plain text with `---` section markers.
+**Index build:**
+
+```
+  gf ask --index
+
+  Building vector index...
+  ◐ Scanning files... 3,291 files found
+  ◐ Chunking... 4,832 chunks
+  ◐ Embedding... [████████████████████████] 4,832/4,832
+  ◐ Writing .grove/gf-index.bin (22.4 MB)
+
+  Index built in 18.3s
+  4,832 chunks from 3,291 files
+```
 
 **JSON mode** (`--json`):
 
 ```json
 {
   "command": "ask",
-  "query": "that place where all the damn icons are",
-  "rounds": 3,
-  "answer": "The service icons are defined in the workshop module...",
+  "query": "where are the payment webhooks",
+  "rounds": 2,
+  "vector_candidates": 20,
+  "answer": "Payment webhooks are handled in two places...",
   "files": [
-    "libs/engine/src/lib/workshop/entries.ts",
-    "libs/engine/src/lib/workshop/icons.ts"
+    "libs/engine/src/lib/payments/webhook-handler.ts",
+    "workers/webhook-cleanup/src/index.ts"
   ],
   "tool_calls": [
-    {"tool": "grep_search", "args": {"pattern": "icon", "path": "libs/engine"}, "result_count": 12},
-    {"tool": "list_directory", "args": {"path": "libs/engine/src/lib/workshop"}, "result_count": 8},
-    {"tool": "grep_search", "args": {"pattern": "icon", "file_type": "ts", "path": "libs/engine/src/lib/workshop"}, "result_count": 3}
+    {"tool": "vector_search", "args": {"query": "payment webhooks"}, "result_count": 20},
+    {"tool": "grep_search", "args": {"pattern": "webhook", "path": "libs/engine/src/lib/payments"}, "result_count": 5}
   ]
 }
 ```
 
-### Interactive TUI Mode (Phase 2)
+### Interactive TUI Mode
 
-A Bubble Tea program with live status, streaming output, and post-answer actions.
+Same Bubble Tea program as before, with an added index status indicator:
 
 ```
 ┌──────────────────────────────────────────────────────────┐
 │  gf ask -i                                               │
 │                                                          │
-│  ◐ Thinking...                                           │
-│                                                          │
-│  ▸ grep_search("icon", type: "svelte")                   │
-│    → 12 results in libs/engine/src/lib/workshop/         │
-│                                                          │
-│  ▸ list_directory("libs/engine/src/lib/workshop")        │
-│    → entries.ts, icons.ts, services.ts, ...              │
+│  ▸ vector_search("payment webhooks") → 20 candidates     │
+│  ▸ grep_search("webhook", path: "payments/") → 5 results │
 │                                                          │
 │  ───────────────────────────────────────────────────────  │
 │                                                          │
-│  Found it! The service icons are defined in:             │
+│  Found it!                                               │
 │                                                          │
-│    libs/engine/src/lib/workshop/entries.ts               │
-│    Each entry maps a service name to its icon,           │
-│    description, and category.                            │
+│    libs/engine/src/lib/payments/webhook-handler.ts       │
+│    workers/webhook-cleanup/src/index.ts                  │
+│                                                          │
+│  Payment webhooks are handled in two places:             │
+│  webhook-handler.ts processes incoming Stripe events.    │
+│  webhook-cleanup retries failed deliveries.              │
 │                                                          │
 │  ↑↓ scroll  q quit  r retry  n new query  c copy path   │
 └──────────────────────────────────────────────────────────┘
 ```
 
-**TUI States:**
-
-| State | Display | Transitions |
-|-------|---------|-------------|
-| Connecting | Spinner + "Connecting to LM Studio..." | → Thinking (on connect) |
-| Thinking | Spinner + "Thinking..." | → Searching (on tool call) |
-| Searching | Tool call name + live result count | → Thinking (next round) or Answer |
-| Answer | Scrollable viewport with file paths | → New Query (n) or Quit (q) |
-| Failed | Error message + retry prompt | → Connecting (r) or Quit (q) |
-| GiveUp | Reason + "Try different phrasing?" prompt | → Thinking (y) or Quit (q) |
-
-**Interactive give_up:** Instead of suggesting `gf` commands, the TUI prompts: "Could not find that. Want to try different words?" The user can type a new description without leaving the session.
-
-**Streaming:** The TUI uses `"stream": true` in the API request. SSE chunks are parsed and rendered token-by-token for the final answer. Tool call arguments stream in too, so the user sees the search pattern forming in real time.
-
 ---
 
 ## OpenAI-Compatible Client
 
-Raw `net/http` implementation. No external dependencies.
+Same raw `net/http` client as before, extended with an embedding method.
 
-### Types
-
-```go
-// Message represents a chat message in the OpenAI format.
-type Message struct {
-    Role       string      `json:"role"`
-    Content    string      `json:"content,omitempty"`
-    ToolCalls  []ToolCall  `json:"tool_calls,omitempty"`
-    ToolCallID string      `json:"tool_call_id,omitempty"`
-}
-
-// ToolCall represents a function call from the model.
-type ToolCall struct {
-    ID       string       `json:"id"`
-    Type     string       `json:"type"`
-    Function FunctionCall `json:"function"`
-}
-
-// FunctionCall holds the function name and arguments.
-type FunctionCall struct {
-    Name      string `json:"name"`
-    Arguments string `json:"arguments"` // JSON string
-}
-
-// ChatRequest is the POST body for /v1/chat/completions.
-type ChatRequest struct {
-    Model    string    `json:"model"`
-    Messages []Message `json:"messages"`
-    Tools    []Tool    `json:"tools,omitempty"`
-    Stream   bool      `json:"stream,omitempty"`
-}
-
-// ChatResponse is the response from /v1/chat/completions.
-type ChatResponse struct {
-    Choices []Choice `json:"choices"`
-}
-
-// Choice holds one completion result.
-type Choice struct {
-    Message      Message `json:"message"`
-    FinishReason string  `json:"finish_reason"`
-}
-
-// Tool defines a function the model can call.
-type Tool struct {
-    Type     string         `json:"type"`
-    Function ToolDefinition `json:"function"`
-}
-
-// ToolDefinition holds the function schema.
-type ToolDefinition struct {
-    Name        string `json:"name"`
-    Description string `json:"description"`
-    Parameters  any    `json:"parameters"`
-}
-```
-
-### Client
+### Extended Client
 
 ```go
 type Client struct {
-    endpoint   string        // e.g. "http://localhost:1234/v1"
-    model      string        // e.g. "liquid/lfm2.5-1.2b"
-    httpClient *http.Client  // with timeout
+    endpoint   string
+    model      string        // chat model
+    embedModel string        // embedding model
+    httpClient *http.Client
 }
 
-func NewClient(endpoint, model string, timeout time.Duration) *Client
+func NewClient(endpoint, model, embedModel string, timeout time.Duration) *Client
+
+// Existing
 func (c *Client) ChatCompletion(ctx context.Context, req ChatRequest) (*ChatResponse, error)
 func (c *Client) ListModels(ctx context.Context) ([]string, error)
 func (c *Client) IsHealthy(ctx context.Context) bool
+
+// New
+func (c *Client) Embed(ctx context.Context, texts []string) ([][]float32, error)
 ```
 
-The `ChatCompletion` method handles:
-- JSON marshaling of the request
-- POST to `{endpoint}/chat/completions`
-- Response parsing with proper error messages for non-200 status codes
-- Timeout enforcement via `http.Client.Timeout` and context cancellation
+### Embedding Types
+
+```go
+// EmbedRequest is the POST body for /v1/embeddings.
+type EmbedRequest struct {
+    Model string   `json:"model"`
+    Input []string `json:"input"`
+}
+
+// EmbedResponse is the response from /v1/embeddings.
+type EmbedResponse struct {
+    Data []EmbedData `json:"data"`
+}
+
+// EmbedData holds one embedding result.
+type EmbedData struct {
+    Embedding []float32 `json:"embedding"`
+    Index     int       `json:"index"`
+}
+```
+
+The `Embed` method sends batches of texts and returns their vector representations. Batch size capped at 32 to avoid overwhelming the embedding model.
+
+---
+
+## Security Considerations
+
+- **Local only.** All traffic goes to `localhost`. No data leaves the machine.
+- **No secrets in prompts.** The codebase map contains only directory names. Search results pass through the model ephemerally.
+- **No arbitrary code execution.** Tools are limited to read-only operations (grep, list_dir, vector lookup).
+- **Path traversal prevention.** All path arguments are resolved relative to GroveRoot and validated.
+- **Index is read-only at query time.** The index file is only written during explicit `--index` or `--reindex` operations.
+- **Index is machine-local.** Gitignored. Contains code snippets but never leaves the local filesystem.
 
 ---
 
@@ -737,28 +877,13 @@ The `ChatCompletion` method handles:
 |------|-----------|-------------|
 | `GF-ASK-001` | LM Studio not running, `lms` not found | "LM Studio is required for gf ask. Install from lmstudio.ai" |
 | `GF-ASK-002` | LM Studio not running, auto-start failed | "Could not start LM Studio. Start it manually and try again." |
-| `GF-ASK-003` | Server running, model failed to load | "Could not load model. Run: lms load liquid/lfm2.5-1.2b --gpu max" |
-| `GF-ASK-004` | Request timeout | "Model took too long to respond. Check GPU load or try a smaller model." |
-| `GF-ASK-005` | Model returned unparseable response | "Model returned an unexpected response. Retrying..." (retry once) |
+| `GF-ASK-003` | Server running, model failed to load | "Could not load model. Run: lms load {model} --gpu max" |
+| `GF-ASK-004` | Request timeout | "Model took too long to respond." |
+| `GF-ASK-005` | Model returned unparseable response | "Unexpected response. Retrying..." (retry once) |
 | `GF-ASK-006` | Max rounds exceeded | (not an error, forced summarization) |
-| `GF-ASK-007` | Duplicate tool call detected | (inject hint to model, not shown to user) |
-
-### Retry Policy
-
-- **Model garbage (GF-ASK-005):** Retry once with the same messages. If it fails again, show the error.
-- **Timeout (GF-ASK-004):** No retry. Timeouts usually mean the model is stuck or the GPU is overloaded.
-- **Server errors (5xx from LM Studio):** Retry once after a 1-second pause.
-- **Everything else:** No retry. Show the error and exit.
-
----
-
-## Security Considerations
-
-- **Local only.** All traffic goes to `localhost`. No data leaves the machine.
-- **No secrets in prompts.** The codebase map contains only directory names, never file contents. Search results are ephemerally passed to the model and discarded.
-- **No arbitrary code execution.** The model can only call the 5 defined tools. Tool arguments are validated before execution (e.g., `path` is resolved relative to GroveRoot and cannot escape it).
-- **Path traversal prevention.** `list_directory` and `WithPath` resolve paths with `filepath.Join(cfg.GroveRoot, path)` and verify the result is still under GroveRoot.
-- **Pattern length cap.** Inherited from `search.RunRg`: max 4096 bytes per regex pattern.
+| `GF-ASK-007` | No vector index | Warning + fallback to pure agent mode |
+| `GF-ASK-008` | Index corrupt or wrong version | "Index file is corrupted. Run `gf ask --index` to rebuild." |
+| `GF-ASK-009` | Embedding model not loaded | "Embedding model required. Run: lms load jina-code-embeddings-0.5b" |
 
 ---
 
@@ -766,53 +891,58 @@ The `ChatCompletion` method handles:
 
 | File | Approach | What It Covers |
 |------|----------|----------------|
-| `client_test.go` | `httptest.NewServer` returning scripted JSON | Request format, response parsing, error handling, timeout |
-| `tools_test.go` | Unit tests on tool definition JSON + executor with mock search | Schema validity, argument mapping, result truncation |
-| `codemap_test.go` | `os.MkdirTemp` with known structure | Map generation, skip rules, format |
-| `agent_test.go` | Mock HTTP server returning tool-call sequences | Loop termination, duplicate detection, give_up handling, round counting |
-| `server_test.go` | Mock `exec.Command` (Go test helper pattern) | lms detection, start sequence, model loading |
-| `ask_test.go` | Integration: mock server + real search on test fixtures | End-to-end query flow |
-
-The mock HTTP server for `agent_test.go` follows a scripted conversation: round 1 returns a tool call, round 2 returns another, round 3 returns a stop. This validates the full loop without needing a real LLM.
+| `client_test.go` | `httptest.NewServer` | Chat completion, embedding, error handling, timeout |
+| `index_test.go` | Temp dir + mock embeddings | Chunking, index build/load/query, incremental update, cosine similarity |
+| `chunk_test.go` | Unit tests on chunking logic | Size thresholds, boundary detection, path tagging |
+| `tools_test.go` | Unit tests on tool executor | vector_search dispatch, grep_search, list_dir, give_up |
+| `codemap_test.go` | `os.MkdirTemp` | Map generation, skip rules, format |
+| `agent_test.go` | Mock HTTP server | Loop termination, vector-first flow, fallback to pure agent |
+| `server_test.go` | Mock `exec.Command` | lms detection, dual model loading |
 
 ---
 
 ## Implementation Checklist
 
-### Phase 1: Single-shot MVP
+### Phase 1: Vector Index (NEW)
 
-- [ ] `internal/nlp/client.go` — OpenAI-compatible HTTP client with types
-- [ ] `internal/nlp/client_test.go` — Mock server tests
-- [ ] `internal/nlp/tools.go` — Tool definitions, JSON schemas, executor
-- [ ] `internal/nlp/tools_test.go` — Schema validation, argument mapping
-- [ ] `internal/nlp/codemap.go` — Dynamic codebase map generator
-- [ ] `internal/nlp/codemap_test.go` — Temp dir structure tests
-- [ ] `internal/nlp/agent.go` — Agentic loop, system prompt, convergence
-- [ ] `internal/nlp/agent_test.go` — Scripted conversation tests
-- [ ] `internal/nlp/server.go` — LM Studio health, auto-start, model load
-- [ ] `internal/nlp/server_test.go` — Mock exec tests
-- [ ] `internal/tools/tools.go` — Add `Lms` field + `HasLms()`
-- [ ] `internal/config/config.go` — Add LLM fields + env var parsing
-- [ ] `cmd/ask.go` — Cobra command, flag wiring, orchestration
-- [ ] `cmd/root.go` — Register `askCmd`, add persistent LLM flags
-- [ ] Manual E2E test with real LM Studio
+- [ ] `internal/nlp/chunk.go` — File walking, size-based chunking, boundary detection
+- [ ] `internal/nlp/chunk_test.go` — Chunking unit tests
+- [ ] `internal/nlp/index.go` — Index build, load, save, query (cosine similarity)
+- [ ] `internal/nlp/index_test.go` — Index lifecycle tests with mock embeddings
+- [ ] `client.go` — Add `Embed()` method and types
+- [ ] `client_test.go` — Add embedding endpoint tests
+- [ ] `cmd/ask.go` — Add `--index`, `--reindex` flags and index build flow
+- [ ] `config.go` — Add `EmbedModel` field
+- [ ] Manual test: build index, verify file count and size
 
-### Phase 2: Interactive TUI
+### Phase 2: Hybrid Agent
 
-- [ ] `internal/asktui/tui.go` — Bubble Tea model, states, key bindings
-- [ ] Streaming SSE parser in `client.go`
-- [ ] `-i` flag wiring in `cmd/ask.go`
-- [ ] Live tool-call display during search rounds
-- [ ] Post-answer actions: retry, new query, copy path
-- [ ] give_up → "try different words?" prompt
+- [ ] `tools.go` — Replace find_files/find_by_glob with vector_search tool
+- [ ] `agent.go` — Rewrite loop: embed query → vector search → agent refines
+- [ ] `agent_test.go` — Update tests for vector-first flow
+- [ ] System prompt rewrite for interpreter role (not searcher role)
+- [ ] Fallback to pure agent mode when no index exists
+- [ ] Manual E2E test with real LM Studio (both models loaded)
 
 ### Phase 3: Polish
 
-- [ ] Tune system prompt based on real usage patterns
-- [ ] Adjust `max_results` defaults per tool based on model performance
-- [ ] Add `--verbose` output showing full tool call details
-- [ ] Consider caching codebase map for 60s (if startup scan is noticeable)
+- [ ] Tune vector result count (top N) based on real usage
+- [ ] Add progress bar for index building
+- [ ] Incremental re-index via `--reindex`
+- [ ] Git hook integration docs (post-commit re-index)
+- [ ] `--verbose` output showing vector scores and tool call details
 - [ ] Document in `gf --help` and `AGENT.md`
+
+### Already Complete (from v1)
+
+- [x] `internal/nlp/client.go` — OpenAI-compatible HTTP client
+- [x] `internal/nlp/codemap.go` — Dynamic codebase map
+- [x] `internal/nlp/server.go` — LM Studio lifecycle
+- [x] `internal/asktui/tui.go` — Bubble Tea interactive mode
+- [x] `cmd/ask.go` — Cobra command, flag wiring, output rendering
+- [x] `cmd/root.go` — Register askCmd, persistent LLM flags
+- [x] `internal/config/config.go` — LLM config fields
+- [x] `internal/tools/tools.go` — lms binary discovery
 
 ---
 

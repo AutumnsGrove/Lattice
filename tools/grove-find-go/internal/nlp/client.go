@@ -78,12 +78,32 @@ type ModelInfo struct {
 	ID string `json:"id"`
 }
 
+// ---------- Embedding types ----------
+
+// EmbedRequest is the POST body for /v1/embeddings.
+type EmbedRequest struct {
+	Model string   `json:"model"`
+	Input []string `json:"input"`
+}
+
+// EmbedResponse is the response from /v1/embeddings.
+type EmbedResponse struct {
+	Data []EmbedData `json:"data"`
+}
+
+// EmbedData holds one embedding result.
+type EmbedData struct {
+	Embedding []float32 `json:"embedding"`
+	Index     int       `json:"index"`
+}
+
 // ---------- Client ----------
 
 // Client communicates with an OpenAI-compatible LLM API (e.g. LM Studio).
 type Client struct {
 	endpoint   string
 	model      string
+	embedModel string
 	httpClient *http.Client
 }
 
@@ -92,6 +112,18 @@ func NewClient(endpoint, model string, timeout time.Duration) *Client {
 	return &Client{
 		endpoint: endpoint,
 		model:    model,
+		httpClient: &http.Client{
+			Timeout: timeout,
+		},
+	}
+}
+
+// NewClientWithEmbed creates a client for both chat and embedding models.
+func NewClientWithEmbed(endpoint, model, embedModel string, timeout time.Duration) *Client {
+	return &Client{
+		endpoint:   endpoint,
+		model:      model,
+		embedModel: embedModel,
 		httpClient: &http.Client{
 			Timeout: timeout,
 		},
@@ -175,6 +207,83 @@ func (c *Client) ListModels(ctx context.Context) ([]string, error) {
 func (c *Client) IsHealthy(ctx context.Context) bool {
 	_, err := c.ListModels(ctx)
 	return err == nil
+}
+
+// Embed sends texts to /v1/embeddings and returns their vector representations.
+// Batch size is capped at 16 texts per request. Each batch gets a generous 5-minute
+// timeout since embedding can be slow for large inputs on smaller GPUs.
+func (c *Client) Embed(ctx context.Context, texts []string) ([][]float32, error) {
+	if len(texts) == 0 {
+		return nil, nil
+	}
+
+	model := c.embedModel
+	if model == "" {
+		return nil, fmt.Errorf("no embedding model configured")
+	}
+
+	const batchSize = 64
+	allEmbeddings := make([][]float32, len(texts))
+
+	for start := 0; start < len(texts); start += batchSize {
+		end := start + batchSize
+		if end > len(texts) {
+			end = len(texts)
+		}
+		batch := texts[start:end]
+
+		reqBody := EmbedRequest{
+			Model: model,
+			Input: batch,
+		}
+		body, err := json.Marshal(reqBody)
+		if err != nil {
+			return nil, fmt.Errorf("marshal embed request: %w", err)
+		}
+
+		// Use a per-batch timeout (5 minutes) since embedding can be slow
+		batchCtx, cancel := context.WithTimeout(ctx, 5*time.Minute)
+		httpReq, err := http.NewRequestWithContext(batchCtx, http.MethodPost, c.endpoint+"/embeddings", bytes.NewReader(body))
+		if err != nil {
+			cancel()
+			return nil, fmt.Errorf("create embed request: %w", err)
+		}
+		httpReq.Header.Set("Content-Type", "application/json")
+
+		// Use a separate client without the global timeout for embedding
+		embedHTTP := &http.Client{Timeout: 0} // context handles timeout
+		resp, err := embedHTTP.Do(httpReq)
+		if err != nil {
+			cancel()
+			return nil, fmt.Errorf("embed request failed: %w", err)
+		}
+
+		respBody, err := io.ReadAll(resp.Body)
+		resp.Body.Close()
+		cancel()
+		if err != nil {
+			return nil, fmt.Errorf("read embed response: %w", err)
+		}
+
+		if resp.StatusCode != http.StatusOK {
+			return nil, fmt.Errorf("embed API returned %d: %s", resp.StatusCode, truncate(string(respBody), 200))
+		}
+
+		var embedResp EmbedResponse
+		if err := json.Unmarshal(respBody, &embedResp); err != nil {
+			return nil, fmt.Errorf("parse embed response: %w", err)
+		}
+
+		if len(embedResp.Data) != len(batch) {
+			return nil, fmt.Errorf("embed returned %d results for %d inputs", len(embedResp.Data), len(batch))
+		}
+
+		for _, d := range embedResp.Data {
+			allEmbeddings[start+d.Index] = d.Embedding
+		}
+	}
+
+	return allEmbeddings, nil
 }
 
 // truncate cuts a string to maxLen and adds "..." if truncated.

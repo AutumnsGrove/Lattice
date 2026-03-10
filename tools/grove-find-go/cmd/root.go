@@ -18,6 +18,7 @@ var (
 	flagPageThreshold int
 	flagLLMEndpoint   string
 	flagLLMModel      string
+	flagEmbedModel    string
 )
 
 // Version, CommitHash, and BuildTime are set via ldflags at build time.
@@ -37,6 +38,7 @@ that reduce agent round-trips by ~50%.`,
 		cfg := config.Init(flagRoot, flagAgent, flagJSON, flagVerbose, flagNoPager, flagPageThreshold)
 		cfg.SetLLMEndpoint(flagLLMEndpoint)
 		cfg.SetLLMModel(flagLLMModel)
+		cfg.SetEmbedModel(flagEmbedModel)
 	},
 	SilenceUsage:  true,
 	SilenceErrors: true,
@@ -51,6 +53,7 @@ func init() {
 	rootCmd.PersistentFlags().IntVar(&flagPageThreshold, "page-threshold", 50, "Lines before paginator activates")
 	rootCmd.PersistentFlags().StringVar(&flagLLMEndpoint, "llm-endpoint", "", "LM Studio API endpoint (env: GF_LLM_ENDPOINT)")
 	rootCmd.PersistentFlags().StringVar(&flagLLMModel, "llm-model", "", "LLM model to use (env: GF_LLM_MODEL)")
+	rootCmd.PersistentFlags().StringVar(&flagEmbedModel, "embed-model", "", "Embedding model to use (env: GF_EMBED_MODEL)")
 
 	rootCmd.AddCommand(versionCmd)
 

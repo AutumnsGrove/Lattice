@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 
@@ -18,6 +19,9 @@ var (
 	askFlagInteractive bool
 	askFlagNoAutostart bool
 	askFlagMaxRounds   int
+	askFlagIndex       bool
+	askFlagReindex     bool
+	askFlagNoVectors   bool
 )
 
 var askCmd = &cobra.Command{
@@ -31,11 +35,21 @@ Examples:
   gf ask "where are the service icons defined"
   gf ask "the thing that handles rate limiting"
   gf ask "wherever the seasonal theme colors live"`,
-	Args: cobra.MinimumNArgs(1),
+	Args: cobra.ArbitraryArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		query := strings.Join(args, " ")
 		cfg := config.Get()
 		ctx := context.Background()
+
+		// Handle --index / --reindex (no query required)
+		if askFlagIndex || askFlagReindex {
+			return runIndexBuild(ctx, cfg, askFlagReindex)
+		}
+
+		if len(args) == 0 {
+			return fmt.Errorf("query required (or use --index to build the vector index)")
+		}
+
+		query := strings.Join(args, " ")
 
 		// Interactive TUI mode
 		if askFlagInteractive {
@@ -85,11 +99,31 @@ Examples:
 			return err
 		}
 
+		// Load vector index (if available and not skipped)
+		var idx *nlp.Index
+		if !askFlagNoVectors {
+			loaded, err := nlp.LoadIndex()
+			if err != nil {
+				onStatus(fmt.Sprintf("Warning: could not load index: %v", err))
+			} else if loaded == nil {
+				if !cfg.JSONMode {
+					onStatus("No vector index found. Run `gf ask --index` for faster, smarter search.")
+				}
+			} else {
+				idx = loaded
+				if !cfg.JSONMode {
+					onStatus(fmt.Sprintf("Loaded index: %d chunks, %d dimensions", len(idx.Entries), idx.Dimensions))
+				}
+			}
+		}
+
 		// Run the agentic loop
 		result, err := nlp.RunAgent(ctx, client, query, nlp.AgentOptions{
 			MaxRounds: askFlagMaxRounds,
 			Verbose:   cfg.Verbose,
 			OnStatus:  onRoundStatus,
+			Index:     idx,
+			NoVectors: askFlagNoVectors,
 		})
 		if err != nil {
 			return fmt.Errorf("search failed: %w", err)
@@ -117,6 +151,9 @@ func init() {
 	askCmd.Flags().BoolVarP(&askFlagInteractive, "interactive", "i", false, "Interactive TUI mode (Phase 2)")
 	askCmd.Flags().BoolVar(&askFlagNoAutostart, "no-autostart", false, "Skip LM Studio auto-start")
 	askCmd.Flags().IntVar(&askFlagMaxRounds, "max-rounds", nlp.DefaultMaxRounds, "Maximum agentic loop iterations")
+	askCmd.Flags().BoolVar(&askFlagIndex, "index", false, "Build the vector index from scratch")
+	askCmd.Flags().BoolVar(&askFlagReindex, "reindex", false, "Incrementally update the vector index")
+	askCmd.Flags().BoolVar(&askFlagNoVectors, "no-vectors", false, "Skip vector search, use pure agent mode")
 }
 
 func renderJSON(query string, result *nlp.AgentResult) error {
@@ -230,6 +267,118 @@ func renderAnswer(cfg *config.Config, result *nlp.AgentResult) error {
 	}
 
 	return nil
+}
+
+// runIndexBuild handles --index and --reindex.
+func runIndexBuild(ctx context.Context, cfg *config.Config, incremental bool) error {
+	// Status callback
+	onStatus := func(msg string) {
+		if cfg.JSONMode {
+			return
+		}
+		if cfg.AgentMode {
+			fmt.Fprintf(os.Stderr, "--- %s ---\n", msg)
+		} else {
+			fmt.Fprintf(os.Stderr, "  %s\n", msg)
+		}
+	}
+
+	if !cfg.JSONMode {
+		if incremental {
+			onStatus("Updating vector index...")
+		} else {
+			onStatus("Building vector index...")
+		}
+	}
+
+	// Ensure LM Studio is running with the embedding model
+	client, err := nlp.EnsureServer(ctx, !askFlagNoAutostart, onStatus)
+	if err != nil {
+		return err
+	}
+
+	// Create an embed-capable client
+	embedClient := nlp.NewClientWithEmbed(
+		cfg.LLMEndpoint,
+		cfg.LLMModel,
+		cfg.EmbedModel,
+		time.Duration(cfg.LLMTimeout)*time.Second,
+	)
+	// Copy health state from the ensured client
+	_ = client
+
+	// Walk and chunk
+	onStatus("Scanning files...")
+	chunks, err := nlp.WalkAndChunk()
+	if err != nil {
+		return fmt.Errorf("scan codebase: %w", err)
+	}
+	onStatus(fmt.Sprintf("Found %d files, %d chunks", countUniqueFiles(chunks), len(chunks)))
+
+	// Progress callback for embedding
+	onProgress := func(done, total int) {
+		if cfg.JSONMode {
+			return
+		}
+		if cfg.AgentMode {
+			if done%100 == 0 || done == total {
+				fmt.Fprintf(os.Stderr, "--- Embedding %d/%d ---\n", done, total)
+			}
+		} else {
+			pct := 0
+			if total > 0 {
+				pct = done * 100 / total
+			}
+			fmt.Fprintf(os.Stderr, "\r  \033[K  Embedding... %d/%d (%d%%)", done, total, pct)
+		}
+	}
+
+	idx, err := nlp.BuildIndex(ctx, embedClient, onProgress)
+	if err != nil {
+		return fmt.Errorf("build index: %w", err)
+	}
+
+	if !cfg.JSONMode && !cfg.AgentMode {
+		fmt.Fprintln(os.Stderr) // newline after progress
+	}
+
+	// Save
+	if err := nlp.SaveIndex(idx); err != nil {
+		return fmt.Errorf("save index: %w", err)
+	}
+
+	indexPath := nlp.IndexPath()
+	info, _ := os.Stat(indexPath)
+	sizeMB := float64(0)
+	if info != nil {
+		sizeMB = float64(info.Size()) / (1024 * 1024)
+	}
+
+	if cfg.JSONMode {
+		output.PrintJSON(map[string]any{
+			"command":    "ask",
+			"action":     "index",
+			"chunks":     len(idx.Entries),
+			"dimensions": idx.Dimensions,
+			"model":      idx.EmbedModel,
+			"size_mb":    fmt.Sprintf("%.1f", sizeMB),
+			"path":       indexPath,
+		})
+	} else {
+		onStatus(fmt.Sprintf("Index built: %d chunks, %d dimensions, %.1f MB", len(idx.Entries), idx.Dimensions, sizeMB))
+		onStatus(fmt.Sprintf("Saved to %s", indexPath))
+	}
+
+	return nil
+}
+
+// countUniqueFiles counts distinct file paths across chunks.
+func countUniqueFiles(chunks []nlp.Chunk) int {
+	seen := make(map[string]bool)
+	for _, c := range chunks {
+		seen[c.FilePath] = true
+	}
+	return len(seen)
 }
 
 // isInFileList checks if a line matches one of the extracted file paths.
