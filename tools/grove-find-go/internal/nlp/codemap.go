@@ -12,12 +12,18 @@ import (
 
 // expandDirs are top-level directories whose children get listed in the codebase map.
 var expandDirs = map[string]bool{
-	"apps":    true,
-	"libs":    true,
-	"workers": true,
-	"tools":   true,
-	"docs":    true,
+	"apps":     true,
+	"libs":     true,
+	"workers":  true,
+	"tools":    true,
+	"docs":     true,
 	"services": true,
+}
+
+// deepExpandDirs get an additional level of expansion (depth 2 children listed).
+// This is for large packages where knowing subdirectories saves the model a round.
+var deepExpandDirs = map[string]string{
+	"libs/engine": "src/lib",
 }
 
 // skipDirs are directories excluded from the codebase map.
@@ -31,7 +37,7 @@ var skipDirs = map[string]bool{
 
 // annotatedDirs provides hints for common large packages.
 var annotatedDirs = map[string]string{
-	"libs/engine": "core business logic",
+	"libs/engine": "core business logic, domain modules listed below",
 }
 
 // BuildCodebaseMap generates a compact text map of the project structure.
@@ -82,6 +88,15 @@ func BuildCodebaseMap() string {
 		lines = append(lines, fmt.Sprintf("other: %s", strings.Join(otherDirs, ", ")))
 	}
 
+	// Deep expansion: list subdirectories of key packages one level deeper
+	for dir, subpath := range deepExpandDirs {
+		deepPath := filepath.Join(root, dir, subpath)
+		children := listChildrenFlat(deepPath)
+		if len(children) > 0 {
+			lines = append(lines, fmt.Sprintf("%s/%s modules: %s", dir, subpath, strings.Join(children, ", ")))
+		}
+	}
+
 	return "Codebase Map:\n" + strings.Join(lines, "\n") + "\n"
 }
 
@@ -116,5 +131,26 @@ func listChildren(dir string) []string {
 		}
 	}
 
+	return children
+}
+
+// listChildrenFlat returns subdirectory names without annotations.
+func listChildrenFlat(dir string) []string {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return nil
+	}
+
+	var children []string
+	for _, entry := range entries {
+		name := entry.Name()
+		if !entry.IsDir() {
+			continue
+		}
+		if strings.HasPrefix(name, ".") || skipDirs[name] {
+			continue
+		}
+		children = append(children, name)
+	}
 	return children
 }

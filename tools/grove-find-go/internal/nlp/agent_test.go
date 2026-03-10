@@ -39,7 +39,13 @@ func TestRunAgent_DirectAnswer(t *testing.T) {
 	cleanup := setupTestConfig(t)
 	defer cleanup()
 
+	// The model answers immediately twice: first triggers the "try more searches" nudge,
+	// second is accepted (nudge only fires once).
 	server := mockServer(t, []ChatResponse{
+		{Choices: []Choice{{
+			Message:      Message{Role: "assistant", Content: "The file is at libs/engine/src/workshop.ts"},
+			FinishReason: "stop",
+		}}},
 		{Choices: []Choice{{
 			Message:      Message{Role: "assistant", Content: "The file is at libs/engine/src/workshop.ts"},
 			FinishReason: "stop",
@@ -53,8 +59,8 @@ func TestRunAgent_DirectAnswer(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if result.Rounds != 1 {
-		t.Errorf("expected 1 round, got %d", result.Rounds)
+	if result.Rounds != 2 {
+		t.Errorf("expected 2 rounds (1 nudge + 1 answer), got %d", result.Rounds)
 	}
 	if !strings.Contains(result.Answer, "workshop.ts") {
 		t.Errorf("expected answer to mention workshop.ts, got: %s", result.Answer)

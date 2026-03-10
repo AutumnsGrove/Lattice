@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"os"
 	"strings"
 )
 
@@ -11,26 +13,29 @@ import (
 const DefaultMaxRounds = 7
 
 // systemPromptTemplate is the static portion of the system prompt.
-const systemPromptTemplate = `You are a codebase search assistant for a monorepo called Lattice.
+const systemPromptTemplate = `You are a codebase search assistant for a TypeScript/Svelte monorepo called Lattice.
 
-Given a natural language description, use the provided tools to find the relevant files and code. Return specific file paths and a brief description of what you found.
+Given a natural language description, use the provided tools to find the relevant files and code.
 
-Rules:
-- Start with the most likely location based on the codebase map below
-- Use grep_search for content, find_files for file names, list_directory to explore
-- If a search returns nothing, try alternative keywords or broader patterns
-- Keep pattern arguments short and specific
-- If nothing matches after thorough searching, call give_up with what you tried
-- When you find it, respond with the file path(s) and a one-sentence description
-- Do not guess file paths. Only report paths from search results.
+IMPORTANT RULES:
+1. Try AT LEAST 3 different searches before giving up. Extract multiple keywords from the query and try each one.
+2. If the user says "icons" also try "icon". If they say "services" also try "service". Try singular and plural forms.
+3. Use grep_search to find content inside files. Use find_files to find files by name. Use list_directory to explore directories.
+4. Start broad, then narrow. Example: grep_search("icon") first, then grep_search("icon", path: "libs/engine") if too many results.
+5. Most domain logic lives in libs/engine/src/lib/. If unsure where to look, search there first.
+6. Apps contain pages and routes (Svelte). Workers contain background services. libs contain shared code.
+7. When you find relevant results, respond with ONLY the file path(s) and a brief description. No extra commentary.
+8. Do not guess file paths. Only report paths that appeared in search results.
+9. If truly nothing matches after multiple attempts, call give_up.
 
 %s`
 
 // AgentOptions configures the agentic loop.
 type AgentOptions struct {
-	MaxRounds  int
-	Verbose    bool
-	OnStatus   func(round int, maxRounds int, status string) // called on each round for UI feedback
+	MaxRounds     int
+	Verbose       bool
+	VerboseWriter io.Writer // where to print verbose output (defaults to os.Stderr)
+	OnStatus      func(round int, maxRounds int, status string) // called on each round for UI feedback
 }
 
 // AgentResult holds the outcome of the agentic search loop.
@@ -55,19 +60,29 @@ func RunAgent(ctx context.Context, client *Client, query string, opts AgentOptio
 	if opts.MaxRounds <= 0 {
 		opts.MaxRounds = DefaultMaxRounds
 	}
+	if opts.VerboseWriter == nil {
+		opts.VerboseWriter = os.Stderr
+	}
 
 	codebaseMap := BuildCodebaseMap()
 	systemPrompt := fmt.Sprintf(systemPromptTemplate, codebaseMap)
 	tools := ToolDefs()
+
+	if opts.Verbose {
+		fmt.Fprintf(opts.VerboseWriter, "\n--- System Prompt ---\n%s\n--- End System Prompt ---\n\n", systemPrompt)
+	}
 
 	messages := []Message{
 		{Role: "system", Content: systemPrompt},
 		{Role: "user", Content: query},
 	}
 
+	const minToolCalls = 3 // force model to try at least this many searches before accepting an answer
+
 	var allToolCalls []ToolCallLog
 	seenCalls := make(map[string]bool) // for duplicate detection
 	emptyRounds := 0
+	nudgedOnce := false // only nudge once to avoid infinite loops
 
 	for round := 1; round <= opts.MaxRounds; round++ {
 		if opts.OnStatus != nil {
@@ -86,6 +101,19 @@ func RunAgent(ctx context.Context, client *Client, query string, opts AgentOptio
 
 		// Natural stop: model has an answer
 		if choice.FinishReason == "stop" || (choice.FinishReason != "tool_calls" && choice.Message.Content != "") {
+			// If the model hasn't done enough searching, push it back
+			if len(allToolCalls) < minToolCalls && !nudgedOnce {
+				nudgedOnce = true
+				messages = append(messages, Message{
+					Role:    "assistant",
+					Content: choice.Message.Content,
+				})
+				messages = append(messages, Message{
+					Role:    "user",
+					Content: fmt.Sprintf("You only tried %d search(es). Try at least %d different searches with different keywords before answering. Use grep_search, find_files, and list_directory with varied terms.", len(allToolCalls), minToolCalls),
+				})
+				continue
+			}
 			return &AgentResult{
 				Answer:    choice.Message.Content,
 				Files:     extractFilePaths(choice.Message.Content),

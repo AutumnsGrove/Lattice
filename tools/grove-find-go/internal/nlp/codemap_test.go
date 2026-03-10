@@ -56,7 +56,7 @@ func TestBuildCodebaseMap(t *testing.T) {
 	if !strings.Contains(result, "apps: amber, login") {
 		t.Errorf("missing apps line, got:\n%s", result)
 	}
-	if !strings.Contains(result, "libs: engine (core business logic), foliage") {
+	if !strings.Contains(result, "libs: engine (core business logic, domain modules listed below), foliage") {
 		t.Errorf("missing libs line with annotation, got:\n%s", result)
 	}
 	if !strings.Contains(result, "workers: lumen") {
