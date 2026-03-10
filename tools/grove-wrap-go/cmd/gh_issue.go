@@ -143,12 +143,12 @@ var issueViewCmd = &cobra.Command{
 		if err := validateGHNumber(number); err != nil {
 			return err
 		}
-		showComments, _ := cmd.Flags().GetBool("comments")
+		noComments, _ := cmd.Flags().GetBool("no-comments")
 
 		ghArgs := []string{"issue", "view", number}
 		ghArgs = append(ghArgs, ghRepoArgs()...)
 		ghArgs = append(ghArgs, "--json",
-			"number,title,state,author,url,body,labels,assignees,milestone")
+			"number,title,state,author,url,body,labels,assignees,milestone,comments")
 
 		output, err := exec.GHOutput(ghArgs...)
 		if err != nil {
@@ -156,18 +156,15 @@ var issueViewCmd = &cobra.Command{
 		}
 
 		if cfg.JSONMode {
-			if showComments {
-				commentArgs := []string{"issue", "view", number}
-				commentArgs = append(commentArgs, ghRepoArgs()...)
-				commentArgs = append(commentArgs, "--json", "comments", "--jq", ".comments")
-				commentOutput, _ := exec.GHOutput(commentArgs...)
+			if noComments {
+				// Strip comments from JSON output
 				var issueData map[string]interface{}
-				json.Unmarshal([]byte(output), &issueData)
-				var comments interface{}
-				json.Unmarshal([]byte(commentOutput), &comments)
-				issueData["comments"] = comments
-				merged, _ := json.MarshalIndent(issueData, "", "  ")
-				fmt.Println(string(merged))
+				if err := json.Unmarshal([]byte(output), &issueData); err != nil {
+					return fmt.Errorf("failed to parse issue: %w", err)
+				}
+				delete(issueData, "comments")
+				stripped, _ := json.MarshalIndent(issueData, "", "  ")
+				fmt.Println(string(stripped))
 				return nil
 			}
 			fmt.Println(output)
@@ -187,10 +184,21 @@ var issueViewCmd = &cobra.Command{
 			author = fmt.Sprintf("%v", a["login"])
 		}
 
+		// Count comments for header metadata
+		var comments []map[string]interface{}
+		if rawComments, ok := issue["comments"].([]interface{}); ok {
+			for _, c := range rawComments {
+				if m, ok := c.(map[string]interface{}); ok {
+					comments = append(comments, m)
+				}
+			}
+		}
+
 		pairs := [][2]string{
 			{"title", title},
 			{"state", state},
 			{"author", author},
+			{"comments", fmt.Sprintf("%d", len(comments))},
 			{"url", url},
 		}
 
@@ -228,20 +236,11 @@ var issueViewCmd = &cobra.Command{
 		}
 		fmt.Print(ui.RenderDetailView(fmt.Sprintf("Issue #%v", issue["number"]), pairs, body))
 
-		// Comments
-		if showComments {
-			commentArgs := []string{"issue", "view", number}
-			commentArgs = append(commentArgs, ghRepoArgs()...)
-			commentArgs = append(commentArgs, "--json", "comments", "--jq", ".comments")
-			commentOutput, err := exec.GHOutput(commentArgs...)
-			if err == nil {
-				var comments []map[string]interface{}
-				if json.Unmarshal([]byte(commentOutput), &comments) == nil && len(comments) > 0 {
-					items := ghCommentsToItems(comments)
-					fmt.Print(ui.RenderCommentThread(
-						fmt.Sprintf("Comments (%d)", len(comments)), items))
-				}
-			}
+		// Comments (shown by default, suppress with --no-comments)
+		if !noComments && len(comments) > 0 {
+			items := ghCommentsToItems(comments)
+			fmt.Print(ui.RenderCommentThread(
+				fmt.Sprintf("Comments (%d)", len(comments)), items))
 		}
 
 		return nil
@@ -716,7 +715,7 @@ func fetchMoreIssues(args issueFetchArgs, currentCount int) ([]browseIssue, erro
 var issueHelpCategories = []ui.HelpCategory{
 	{Title: "Read (Always Safe)", Icon: "📖", Style: ui.SafeReadStyle, Commands: []ui.HelpCommand{
 		{Name: "list", Desc: "List issues"},
-		{Name: "view", Desc: "View issue details"},
+		{Name: "view", Desc: "View issue details (includes comments)"},
 		{Name: "comments", Desc: "List all comments"},
 	}},
 	{Title: "Write (--write)", Icon: "✏️", Style: ui.SafeWriteStyle, Commands: []ui.HelpCommand{
@@ -749,7 +748,7 @@ func init() {
 	issueCmd.AddCommand(issueListCmd)
 
 	// issue view
-	issueViewCmd.Flags().Bool("comments", false, "Show comments")
+	issueViewCmd.Flags().Bool("no-comments", false, "Suppress comment stream")
 	issueCmd.AddCommand(issueViewCmd)
 
 	// issue create
