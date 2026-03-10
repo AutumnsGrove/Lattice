@@ -68,7 +68,7 @@ var searchCmd = &cobra.Command{
 		}
 
 		if searchFlagPath != "" {
-			opts = append(opts, search.WithExtraArgs(searchFlagPath))
+			opts = append(opts, search.WithPath(searchFlagPath))
 		}
 
 		// Exclude _archived/ by default unless --archived is set.

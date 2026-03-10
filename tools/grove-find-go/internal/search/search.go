@@ -36,6 +36,7 @@ type rgOpts struct {
 	globs     []string
 	filesOnly bool
 	extraArgs []string
+	paths     []string
 }
 
 func WithContext(ctx context.Context) Option { return func(o *rgOpts) { o.ctx = ctx } }
@@ -48,6 +49,7 @@ func WithGlob(g string) Option               { return func(o *rgOpts) { o.globs 
 func WithGlobs(gs ...string) Option          { return func(o *rgOpts) { o.globs = append(o.globs, gs...) } }
 func WithFilesOnly() Option                  { return func(o *rgOpts) { o.filesOnly = true } }
 func WithExtraArgs(args ...string) Option    { return func(o *rgOpts) { o.extraArgs = append(o.extraArgs, args...) } }
+func WithPath(p string) Option               { return func(o *rgOpts) { o.paths = append(o.paths, p) } }
 
 // RunRg executes ripgrep with the given pattern and options.
 // Returns stdout as a string. Non-zero exit with no output is not an error (just no matches).
@@ -97,6 +99,7 @@ func RunRg(pattern string, opts ...Option) (string, error) {
 
 	args = append(args, o.extraArgs...)
 	args = append(args, pattern)
+	args = append(args, o.paths...)
 
 	cmd := makeCommand(o.ctx, t.Rg, args...)
 	cmd.Dir = o.cwd
