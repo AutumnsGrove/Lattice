@@ -46,9 +46,9 @@
 		{
 			id: "guestbook",
 			name: "Guestbook",
-			description: "Let visitors sign your guestbook — the classic personal web element",
+			description: "Let visitors leave notes on your site — classic personal web warmth with moderation built in",
 			icon: BookOpen,
-			status: "available",
+			status: "greenhouse",
 			href: "/arbor/curios/guestbook",
 			features: ["Visitor signatures", "4 display styles", "Moderation queue", "Emoji support"],
 		},
@@ -56,9 +56,9 @@
 			id: "hitcounter",
 			name: "Hit Counter",
 			description:
-				"Nostalgic page view counter with grove-ified styles — frosted glass, brass odometer, LCD, or minimal",
+				"Nostalgic page view counter with frosted glass, brass odometer, LCD, and minimal styles",
 			icon: Hash,
-			status: "available",
+			status: "greenhouse",
 			href: "/arbor/curios/hitcounter",
 			features: [
 				"4 grove-ified styles",
@@ -70,9 +70,9 @@
 		{
 			id: "statusbadge",
 			name: "Status Badges",
-			description: "Small, expressive badges that signal the state of your site",
+			description: "Small, expressive badges that signal the state of your site — online, away, creating, or custom",
 			icon: Shield,
-			status: "available",
+			status: "greenhouse",
 			href: "/arbor/curios/statusbadge",
 			features: [
 				"9 badge types",
@@ -86,16 +86,16 @@
 			name: "Activity Status",
 			description: "A customizable status indicator — let visitors know you're here",
 			icon: Activity,
-			status: "available",
+			status: "greenhouse",
 			href: "/arbor/curios/activitystatus",
 			features: ["15 quick presets", "Custom text + emoji", "Auto-expiration", "One-line display"],
 		},
 		{
 			id: "shelves",
 			name: "Shelves",
-			description: "Universal collection shelves — books, links, and more with 4 display modes",
+			description: "Collect and display anything — books you've read, links you love, or custom collections with ratings and notes",
 			icon: BookMarked,
-			status: "available",
+			status: "greenhouse",
 			href: "/arbor/curios/shelves",
 			features: [
 				"3 presets (Books, Links, Custom)",
@@ -109,7 +109,7 @@
 			name: "Now Playing",
 			description: "Share what you're listening to — music fills the grove",
 			icon: Music,
-			status: "available",
+			status: "greenhouse",
 			href: "/arbor/curios/nowplaying",
 			features: [
 				"Manual + Spotify + Last.fm",
@@ -123,7 +123,7 @@
 			name: "Polls",
 			description: "Run interactive polls on your site — quick votes, live results",
 			icon: BarChart3,
-			status: "available",
+			status: "greenhouse",
 			href: "/arbor/curios/polls",
 			features: [
 				"Single & multiple choice",
@@ -137,7 +137,7 @@
 			name: "Webring Hub",
 			description: "Join webrings and connect your site to the wider indie web",
 			icon: Globe,
-			status: "available",
+			status: "greenhouse",
 			href: "/arbor/curios/webring",
 			features: [
 				"Multiple ring memberships",
@@ -149,9 +149,9 @@
 		{
 			id: "artifacts",
 			name: "Weird Artifacts",
-			description: "Interactive chaos objects — Magic 8-Ball, fortune cookies, dice rollers",
+			description: "Playful chaos objects — Magic 8-Ball, fortune cookies, dice rollers, and more weird fun",
 			icon: Wand2,
-			status: "available",
+			status: "greenhouse",
 			href: "/arbor/curios/artifacts",
 			features: [
 				"8 artifact types",
@@ -165,7 +165,7 @@
 			name: "Custom Cursors",
 			description: "Replace the default pointer with something that matches your vibe",
 			icon: MousePointer,
-			status: "available",
+			status: "greenhouse",
 			href: "/arbor/curios/cursors",
 			features: [
 				"13 cursor presets",
@@ -179,7 +179,7 @@
 			name: "Mood Ring",
 			description: "A visual mood indicator that changes color throughout the day",
 			icon: Circle,
-			status: "available",
+			status: "greenhouse",
 			href: "/arbor/curios/moodring",
 			features: [
 				"4 color modes",
@@ -193,7 +193,7 @@
 			name: "Blogroll",
 			description: "The blogs you love, the voices you return to — curated recommendations",
 			icon: Rss,
-			status: "available",
+			status: "greenhouse",
 			href: "/arbor/curios/blogroll",
 			features: ["Auto-favicons", "RSS feed tracking", "Latest post display", "Blog descriptions"],
 		},
@@ -202,7 +202,7 @@
 			name: "Badges",
 			description: "Collectible achievements celebrating your milestones and journey",
 			icon: Award,
-			status: "available",
+			status: "greenhouse",
 			href: "/arbor/curios/badges",
 			features: [
 				"12 system badges",
@@ -216,7 +216,7 @@
 			name: "Ambient Sounds",
 			description: "Optional background audio — forest rain, morning birds, or lo-fi vibes",
 			icon: Volume2,
-			status: "available",
+			status: "greenhouse",
 			href: "/arbor/curios/ambient",
 			features: [
 				"7 curated sound sets",
@@ -230,7 +230,7 @@
 			name: "Personal Shrines",
 			description: "Sacred spaces for things you love — memories, fandoms, gratitude",
 			icon: Heart,
-			status: "available",
+			status: "greenhouse",
 			href: "/arbor/curios/shrines",
 			features: [
 				"6 shrine types",
@@ -244,7 +244,7 @@
 			name: "Clip Art Library",
 			description: "Decorative overlays — borders, critters, sparkles dropped onto any page",
 			icon: Sticker,
-			status: "available",
+			status: "greenhouse",
 			href: "/arbor/curios/clipart",
 			features: [
 				"5 asset categories",
@@ -256,9 +256,9 @@
 		{
 			id: "customuploads",
 			name: "Custom Uploads",
-			description: "Upload and manage images used across all your curios",
+			description: "Upload and manage images used across your curios — auto-resized with quota tracking",
 			icon: Upload,
-			status: "available",
+			status: "greenhouse",
 			href: "/arbor/curios/customuploads",
 			features: [
 				"Auto-resize & thumbnails",
@@ -286,7 +286,7 @@
 			name: "Journey",
 			description: "Visualize your repo's growth with line-based metrics and beautiful charts",
 			icon: GitBranch,
-			status: "greenhouse",
+			status: "building",
 			href: "/arbor/curios/journey",
 			features: ["Version milestones", "Code composition", "Growth timeline", "AI release notes"],
 		},
@@ -295,7 +295,7 @@
 			name: "Pulse",
 			description: "Live development heartbeat — real-time activity from your GitHub repos",
 			icon: Activity,
-			status: "greenhouse",
+			status: "building",
 			href: "/arbor/curios/pulse",
 			features: [
 				"Real-time webhooks",
@@ -330,14 +330,19 @@
 
 	<div class="curios-grid">
 		{#each curios as curio}
-			<GlassCard class="curio-card {curio.status === 'coming-soon' ? 'coming-soon' : ''}">
+			<GlassCard class="curio-card {curio.status === 'coming-soon' || curio.status === 'building' ? 'coming-soon' : ''}">
 				<div class="curio-header">
 					<div class="curio-icon">
 						<svelte:component this={curio.icon} />
 					</div>
 					<div class="curio-title-row">
 						<h2>{curio.name}</h2>
-						{#if curio.status === "coming-soon"}
+						{#if curio.status === "building"}
+							<Badge variant="secondary">
+								<Construction class="badge-icon" />
+								Building
+							</Badge>
+						{:else if curio.status === "coming-soon"}
 							<Badge variant="secondary">
 								<Construction class="badge-icon" />
 								Coming Soon
@@ -467,6 +472,12 @@
 		width: 0.875rem;
 		height: 0.875rem;
 		margin-right: 0.25rem;
+	}
+
+	.curio-title-row :global(.greenhouse-badge),
+	.curio-title-row :global([class*="badge"]) {
+		min-width: 5.5rem;
+		text-align: center;
 	}
 
 	:global(.greenhouse-badge) {
