@@ -11,7 +11,7 @@ import { PROVIDERS, calculateCost } from "../config.js";
 import { ProviderError, ProviderTimeoutError } from "../errors.js";
 import type { LumenMessage, LumenProviderName, LumenStreamChunk } from "../types.js";
 import type { LumenInferenceOptions, LumenProvider, LumenProviderResponse } from "./types.js";
-import { safeParseJson } from "../../../utils/json.js";
+import { safeParseJson } from "../../utils/json.js";
 
 // =============================================================================
 // TYPES

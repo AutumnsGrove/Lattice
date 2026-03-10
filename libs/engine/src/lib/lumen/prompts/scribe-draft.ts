@@ -10,7 +10,7 @@
  */
 
 import type { GutterItem } from "../types.js";
-import { safeParseJson } from "../../../utils/json.js";
+import { safeParseJson } from "../../utils/json.js";
 
 /**
  * System prompt for structuring voice transcriptions.

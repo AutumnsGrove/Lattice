@@ -23,7 +23,7 @@ import type {
 	SongbirdResult,
 } from "./types.js";
 import type { ProviderRegistry } from "./providers/index.js";
-import { safeParseJson } from "../../utils/json.js";
+import { safeParseJson } from "../utils/json.js";
 
 // =============================================================================
 // DEFAULT KESTREL CONTEXTS PER TASK
