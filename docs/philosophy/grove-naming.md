@@ -96,7 +96,7 @@ _The foundation everything grows from_
 
 **Core Platform** · `npm: @autumnsgrove/lattice`
 **Repository:** [AutumnsGrove/Lattice](https://github.com/AutumnsGrove/Lattice)
-**AlwaysGrove**
+**Standard:** Engine
 **Waystone:** The shared framework that powers every Grove site — UI components, design tools, and platform utilities.
 
 A lattice is the framework that supports growth. Vines climb it. Gardens are built around it. It's not the thing you see, it's the thing that holds everything else up.
@@ -285,6 +285,7 @@ _The path becomes clear by walking it._
 ### Trace
 
 **Inline Feedback** · _(integrated component)_
+**Standard:** Feedback
 **Waystone:** A small feedback widget that lets visitors say whether something was helpful, with room for a short note.
 
 A trace is what remains when something passes through. In the forest, it's the impression of a hoof in soft earth, the path worn smooth by many feet, the faintest evidence that someone walked this way before. You don't need to see the whole journey to know it happened. The trace is enough.
@@ -326,7 +327,7 @@ _Writing, moderation, and social features_
 ### Flow
 
 **The Writing Sanctuary** · Arbor editor
-**AlwaysGrove**
+**Standard:** Editor
 **Waystone:** Grove's blog editor — a distraction-free Markdown writing space inside your admin dashboard.
 
 Flow is where words find their way. Like water carving through stone, it follows the contours of how writers actually work.
@@ -364,6 +365,7 @@ _Weave your world together._
 ### Reverie
 
 **Composition Layer** · `reverie.grove.place`
+**Standard:** Customizer
 **Waystone:** An AI layer that translates your intent ("make it cozy", "add something that glows") into actual component arrangements for your blog.
 
 A reverie is that state between waking and dreaming, when you're gazing at sunlight through branches, lost in thought, and something forms in your mind's eye. Not a plan. A vision.
@@ -379,7 +381,7 @@ _Half-dream, half-real. Yours._
 ### Scribe
 
 **Voice Transcription** · _Integrated into editor_
-**AlwaysGrove**
+**Standard:** Transcription
 **Waystone:** Voice-to-text for the blog editor — hold a button, speak, and your words appear as text at the cursor.
 
 A scribe is a patient listener—someone who sits beside you and transforms your spoken words into written text. Before keyboards, before typewriters, scribes were how thoughts became documents. You spoke; they wrote.
@@ -544,7 +546,7 @@ _Trail markers for when you're lost._
 
 **ASCII Visual Effects** · `npm: gossamer` · Icon: `SprayCan`
 **Repository:** [AutumnsGrove/Gossamer](https://github.com/AutumnsGrove/Gossamer)
-**AlwaysGrove**
+**Standard:** ASCII Effects
 **Waystone:** An open-source visual effects library — ASCII patterns, ambient textures, and atmospheric backgrounds for websites.
 
 Gossamer is spider silk stretched between branches—delicate threads nearly invisible until the light finds them. Catching dew at dawn, glittering for a moment, then vanishing into the green. Something so fine it seems impossible, yet there it is.
@@ -611,6 +613,7 @@ _Gather close. Share quietly._
 
 **Web Content Distillation** · `shutter.grove.place`
 **Repository:** [AutumnsGrove/Shutter](https://github.com/AutumnsGrove/Shutter)
+**Standard:** Content Retrieval
 **Waystone:** A web content distillation service — give it a URL and a question, get clean focused content back instead of raw HTML noise.
 
 A shutter controls what reaches the lens. Open it, and light floods in—everything, all at once, overwhelming. But a photographer doesn't want everything. They want _the shot_. The shutter opens precisely when needed, captures exactly what's in frame, and closes before the noise can follow.
@@ -634,6 +637,7 @@ Outpost is an on-demand Minecraft server for friends. It spins up when someone w
 
 **Music Curation** · `aria.grove.place`
 **Repository:** [AutumnsGrove/GroveMusic](https://github.com/AutumnsGrove/GroveMusic)
+**Standard:** Music Discovery
 **Waystone:** A music discovery tool — give it a song you love, and it builds a playlist of tracks with similar sonic DNA, with explanations for each pick.
 
 An aria is a self-contained melody, a single voice carrying emotion through song.
