@@ -1,6 +1,6 @@
 ---
-title: "The Lattice Split — Lattice and Trellis"
-description: "Architectural specification for separating the reusable Lattice framework from the Trellis live deployment domain code."
+title: "The Lattice Split — Lattice and Aspen"
+description: "Architectural specification for separating the reusable Lattice framework from the Aspen live deployment domain code."
 category: specs
 specCategory: core-infrastructure
 icon: scissors
@@ -13,7 +13,7 @@ tags:
   - architecture
   - refactor
   - lattice
-  - trellis
+  - aspen
   - engine
 type: tech-spec
 ---
@@ -33,21 +33,21 @@ type: tech-spec
                 ╱          ╲  ╱          ╲
               ━━━           ━━━           ━━━
 
-      The vine grew so deep into the trellis
-        that you couldn't tell them apart.
-            Time to untangle them.
+       The lattice held every branch so close
+         you couldn't tell root from frame.
+            Time to let the aspen grow.
 ```
 
-> _Separate the structure from what grows on it._
+> _The lattice stays still. The aspen reaches for the light._
 
 # The Lattice Split
 
 Right now, `libs/engine` is one package that does two things. It's the framework (Lattice, the structure, the support system) and it's also the living deployment (what tenants interact with daily). When something breaks in production, you're debugging inside the framework package, scrolling past rate limiters and Durable Object coordinators to find the curio that's misbehaving. When you want to understand what the engine *is*, you're staring at 140+ exports mixing UI primitives with Stripe billing hooks.
 
-This spec separates them. The framework stays as **Lattice**. The live deployment becomes **Trellis**.
+This spec separates them. The framework stays as **Lattice**. The live deployment becomes **Aspen**.
 
 **Type:** Architectural refactor
-**Scope:** `libs/engine/`, new `libs/trellis/`, new `apps/trellis/`
+**Scope:** `libs/engine/`, new `libs/aspen/`, new `apps/aspen/`
 **Breaking:** Yes. All import paths for domain modules change.
 **Last Updated:** March 2026
 
@@ -56,12 +56,12 @@ This spec separates them. The framework stays as **Lattice**. The live deploymen
 | Name | What it is | Package | Location |
 |------|-----------|---------|----------|
 | **Lattice** | The framework. UI, utilities, error system, feature flags, rate limiting, DO coordination. The structure things grow on. | `@autumnsgrove/lattice` (npm published) | `libs/engine/` |
-| **Trellis** | The live deployment. Domain logic, database, auth, payments, curios, moderation. The thing tenants actually use. | `@autumnsgrove/trellis` (workspace lib) | `libs/trellis/` |
-| **Trellis App** | The SvelteKit app that serves the live tenant experience. Pages, admin panels, daily interaction. | N/A (app, not a lib) | `apps/trellis/` |
+| **Aspen** | The grove itself. Domain logic, database, auth, payments, curios, moderation. The living tree that tenants tend. | `@autumnsgrove/aspen` (workspace lib) | `libs/aspen/` |
+| **Aspen App** | The SvelteKit app that serves the live tenant experience. Pages, admin panels, daily interaction. | N/A (app, not a lib) | `apps/aspen/` |
 
 ### Prior Art: Prism
 
-This split follows the pattern established by **Prism** (`libs/prism/`, `@autumnsgrove/prism`), which was recently extracted from the engine as a standalone design token package. Prism proved that extraction works: isolate the concern, create the package, update imports. The Lattice/Trellis split is the same idea, just larger.
+This split follows the pattern established by **Prism** (`libs/prism/`, `@autumnsgrove/prism`), which was recently extracted from the engine as a standalone design token package. Prism proved that extraction works: isolate the concern, create the package, update imports. The Lattice/Aspen split is the same idea, just larger.
 
 ---
 
@@ -69,19 +69,19 @@ This split follows the pattern established by **Prism** (`libs/prism/`, `@autumn
 
 ### What This Is
 
-A plan to split `libs/engine` (published as `@autumnsgrove/lattice`) into two clear layers: the reusable framework (Lattice) and the Grove-specific domain code (Trellis). Plus a new `apps/trellis/` that serves as the tenant-facing live deployment.
+A plan to split `libs/engine` (published as `@autumnsgrove/lattice`) into two clear layers: the reusable framework (Lattice) and the Grove-specific domain code (Aspen). Plus a new `apps/aspen/` that serves as the tenant-facing live deployment.
 
 ### Goals
 
 - **Clarity.** When debugging, you know immediately whether you're in framework code or domain code. The import path tells you.
-- **Clean boundaries.** Lattice has zero knowledge of Grove's business logic. Trellis depends on Lattice, never the reverse.
-- **Debuggability.** Stack traces tell you where you are. `@autumnsgrove/lattice/ui` is framework. `@autumnsgrove/trellis/curios/timeline` is domain. No ambiguity.
+- **Clean boundaries.** Lattice has zero knowledge of Grove's business logic. Aspen depends on Lattice, never the reverse.
+- **Debuggability.** Stack traces tell you where you are. `@autumnsgrove/lattice/ui` is framework. `@autumnsgrove/aspen/curios/timeline` is domain. No ambiguity.
 
 ### Non-Goals (Out of Scope)
 
 - Making the engine reusable for non-Grove projects. This is about clarity within Grove.
-- Publishing `libs/trellis` to npm. It stays as a workspace-only lib.
-- Consolidating existing apps (landing, plant, meadow, etc.) into `apps/trellis/`.
+- Publishing `libs/aspen` to npm. It stays as a workspace-only lib.
+- Consolidating existing apps (landing, plant, meadow, etc.) into `apps/aspen/`.
 - Changing any runtime behavior. This is a structural refactor only.
 
 ---
@@ -136,7 +136,7 @@ libs/
 │       ├── ui/              Glass design system
 │       └── utils/           Markdown, sanitization, image
 │
-├── trellis/         →  @autumnsgrove/trellis     (the live deployment)
+├── aspen/         →  @autumnsgrove/aspen     (the live deployment)
 │   └── src/lib/
 │       ├── amber/           Storage SDK
 │       ├── blazes/          Content marking
@@ -165,7 +165,7 @@ libs/
 └── gossamer/        →  @autumnsgrove/gossamer    (already separate)
 
 apps/
-├── trellis/         →  The live deployment (tenant-facing SvelteKit app)
+├── aspen/         →  The live deployment (tenant-facing SvelteKit app)
 ├── landing/         →  grove.place marketing
 ├── plant/           →  Onboarding
 ├── meadow/          →  Community feed
@@ -176,7 +176,7 @@ apps/
 
 ```
                     ┌───────────────────────────┐
-                    │      apps/trellis/         │
+                    │      apps/aspen/         │
                     │    apps/plant/  etc.        │
                     └─────┬──────────┬───────────┘
                           │          │
@@ -184,19 +184,19 @@ apps/
                           ▼          ▼
          ┌────────────────────┐  ┌────────────────────┐
          │  @autumnsgrove/    │  │  @autumnsgrove/    │
-         │     trellis        │  │     lattice        │
+         │     aspen        │  │     lattice        │
          │   (domain lib)     │  │   (framework)      │
          └────────┬───────────┘  └────────────────────┘
                   │                        ▲
                   │       depends on       │
                   └────────────────────────┘
 
-         trellis depends on lattice.
-         lattice knows nothing about trellis.
+         aspen depends on lattice.
+         lattice knows nothing about aspen.
          apps import from both.
 ```
 
-The arrow only goes one direction. Lattice never imports from Trellis. Trellis builds on Lattice. Apps consume both.
+The arrow only goes one direction. Lattice never imports from Aspen. Aspen builds on Lattice. Apps consume both.
 
 ---
 
@@ -222,7 +222,7 @@ Framework code. Things that have no opinion about what Grove *is*.
 
 Note: `foliage/` no longer exists in the engine (the theme bridge was removed). The `@autumnsgrove/foliage` package already lives separately in `libs/foliage/`.
 
-### What Moves to Trellis (`@autumnsgrove/trellis`)
+### What Moves to Aspen (`@autumnsgrove/aspen`)
 
 Grove's soul. The things that make it *this* platform.
 
@@ -250,16 +250,16 @@ Grove's soul. The things that make it *this* platform.
 | `warden/` | 12 | API gateway SDK | None (leaf module) |
 | `zephyr/` | ~5 | Email + social broadcasting | None (leaf module) |
 
-### What the New App Is (`apps/trellis/`)
+### What the New App Is (`apps/aspen/`)
 
-The live deployment. The thing tenants interact with every day. Their pages, their admin panels, their posts and curios. It's a SvelteKit app on Cloudflare Pages that imports from both `@autumnsgrove/lattice` (framework) and `@autumnsgrove/trellis` (domain).
+The live deployment. The thing tenants interact with every day. Their pages, their admin panels, their posts and curios. It's a SvelteKit app on Cloudflare Pages that imports from both `@autumnsgrove/lattice` (framework) and `@autumnsgrove/aspen` (domain).
 
 This is distinct from:
 - `apps/landing/` (marketing at grove.place)
 - `apps/plant/` (onboarding at plant.grove.place)
 - `apps/meadow/` (community feed at meadow.grove.place)
 
-`apps/trellis/` is the *grove itself*. The tenant subdomain. The daily experience.
+`apps/aspen/` is the *grove itself*. The tenant subdomain. The daily experience.
 
 ---
 
@@ -272,7 +272,7 @@ The split is mostly clean cuts. Dependencies flow downward, no circular imports 
 **File:** `ui/components/indicators/Blaze.svelte`
 **Imports:** `BLAZE_CONFIG`, `BLAZE_COLORS`, `resolveLucideIcon`, `isValidBlazeHexColor`
 
-**Fix:** Move `Blaze.svelte` to Trellis. It's a domain component wearing a framework disguise. The UI layer should have a generic `Badge` or `Indicator` primitive. `Blaze.svelte` wraps that with Grove-specific config.
+**Fix:** Move `Blaze.svelte` to Aspen. It's a domain component wearing a framework disguise. The UI layer should have a generic `Badge` or `Indicator` primitive. `Blaze.svelte` wraps that with Grove-specific config.
 
 ### 2. `ui/` imports from `data/` (Grove terminology)
 
@@ -286,7 +286,7 @@ The split is mostly clean cuts. Dependencies flow downward, no circular imports 
 
 **Imports:** `grove-term-manifest.json`
 
-**Fix:** The `groveterm/` components are entirely Grove-specific. Move them to Trellis. For `Header.svelte`, `Footer.svelte`, and `MobileMenu.svelte`, move them to Trellis too. A generic engine wouldn't have a branded Header. Lattice can keep a `BaseHeader` slot component if needed. Trellis wraps it.
+**Fix:** The `groveterm/` components are entirely Grove-specific. Move them to Aspen. For `Header.svelte`, `Footer.svelte`, and `MobileMenu.svelte`, move them to Aspen too. A generic engine wouldn't have a branded Header. Lattice can keep a `BaseHeader` slot component if needed. Aspen wraps it.
 
 ### 3. `ui/` imports from `curios/` (expanded since v1 of this spec)
 
@@ -296,7 +296,7 @@ The split is mostly clean cuts. Dependencies flow downward, no circular imports 
 - `ui/components/content/curios/CurioGuestbook.svelte` (guestbook types)
 - Multiple artifact renderers in `ui/` (Hourglass, TerrariumGlobe, RainbowDivider, etc.) importing from `curios/artifacts`
 
-**Fix:** Move the entire `ui/components/content/curios/` subtree to Trellis. All curio display components are domain components.
+**Fix:** Move the entire `ui/components/content/curios/` subtree to Aspen. All curio display components are domain components.
 
 ### 4. `ui/` imports `Friend` type from `server/`
 
@@ -310,7 +310,7 @@ The split is mostly clean cuts. Dependencies flow downward, no circular imports 
 
 **Fix:** Two options:
 - (a) Extract the `Friend` type into a shared types location in the engine (`types/` or `config/`)
-- (b) Move the friends-related UI components to Trellis
+- (b) Move the friends-related UI components to Aspen
 
 Option (a) if `Friend` is a simple type. Option (b) if the components are tightly coupled to Grove's friend system.
 
@@ -319,28 +319,28 @@ Option (a) if `Friend` is a simple type. Option (b) if the components are tightl
 **File:** `utils/rehype-groveterm.ts`
 **Imports:** `grove-term-manifest.json`
 
-**Fix:** Make the rehype plugin accept a terminology manifest as a parameter instead of hardcoding the import. Lattice provides the generic `rehypeTermReplace(manifest)` function. Trellis calls it with Grove's manifest.
+**Fix:** Make the rehype plugin accept a terminology manifest as a parameter instead of hardcoding the import. Lattice provides the generic `rehypeTermReplace(manifest)` function. Aspen calls it with Grove's manifest.
 
 ### 6. `lumen/` imports from `server/` (encryption)
 
 **File:** `lumen/client.ts`
 **Imports:** `safeDecryptToken`, `isEncryptedToken` from `$lib/server/encryption.js`
 
-**Fix:** Both `lumen/` and `server/` are moving to Trellis, so this is a domain-to-domain import. No surgery needed. This was a false alarm for the split, it resolves naturally.
+**Fix:** Both `lumen/` and `server/` are moving to Aspen, so this is a domain-to-domain import. No surgery needed. This was a false alarm for the split, it resolves naturally.
 
 ### 7. `errors/` test imports from `heartwood/`
 
 **File:** `errors/integrity.test.ts`
 **Imports:** `AUTH_ERRORS` from `../heartwood/errors`
 
-**Fix:** Test-only import. Either move the test to Trellis alongside heartwood, or inline the error code constants in the test file.
+**Fix:** Test-only import. Either move the test to Aspen alongside heartwood, or inline the error code constants in the test file.
 
 ### 8. Root `index.ts` re-exports `heartwood/`
 
 **File:** `libs/engine/src/lib/index.ts` (lines 75-119)
 **Exports:** `GroveAuthClient`, `createGroveAuthClient`, `TIER_POST_LIMITS`, `TIER_NAMES`, quota utilities
 
-**Fix:** Remove these re-exports. After the split, apps import heartwood from `@autumnsgrove/trellis/heartwood` instead.
+**Fix:** Remove these re-exports. After the split, apps import heartwood from `@autumnsgrove/aspen/heartwood` instead.
 
 ---
 
@@ -359,13 +359,13 @@ import { TimelineCurio }     from "@autumnsgrove/lattice/curios/timeline";
 import { buildErrorJson }    from "@autumnsgrove/lattice/errors";
 import { getSchema }         from "@autumnsgrove/lattice/reverie";
 
-// AFTER (framework from lattice, domain from trellis)
+// AFTER (framework from lattice, domain from aspen)
 import { GlassCard }         from "@autumnsgrove/lattice/ui";            // unchanged
-import { createDb }          from "@autumnsgrove/trellis/db";            // moved
-import { GroveAuthClient }   from "@autumnsgrove/trellis/heartwood";     // moved
-import { TimelineCurio }     from "@autumnsgrove/trellis/curios/timeline"; // moved
+import { createDb }          from "@autumnsgrove/aspen/db";            // moved
+import { GroveAuthClient }   from "@autumnsgrove/aspen/heartwood";     // moved
+import { TimelineCurio }     from "@autumnsgrove/aspen/curios/timeline"; // moved
 import { buildErrorJson }    from "@autumnsgrove/lattice/errors";        // unchanged
-import { getSchema }         from "@autumnsgrove/trellis/reverie";       // moved
+import { getSchema }         from "@autumnsgrove/aspen/reverie";       // moved
 ```
 
 ### Scope of Changes
@@ -377,7 +377,7 @@ Every file that imports a domain module from `@autumnsgrove/lattice` needs updat
 - All `workers/*` (7 workers)
 - `libs/gossamer/`, `libs/foliage/`, `libs/vineyard/`
 
-The change is mechanical. `@autumnsgrove/lattice/<domain-module>` becomes `@autumnsgrove/trellis/<domain-module>`. The subpath is identical.
+The change is mechanical. `@autumnsgrove/lattice/<domain-module>` becomes `@autumnsgrove/aspen/<domain-module>`. The subpath is identical.
 
 ### Tailwind Content Paths
 
@@ -394,7 +394,7 @@ content: [
 content: [
   "./src/**/*.{html,js,svelte,ts}",
   "../../libs/engine/src/lib/**/*.{html,js,svelte,ts}",
-  "../../libs/trellis/src/lib/**/*.{html,js,svelte,ts}",   // added
+  "../../libs/aspen/src/lib/**/*.{html,js,svelte,ts}",   // added
 ],
 ```
 
@@ -426,14 +426,14 @@ Resolve the surgery points listed above while everything still lives in one pack
 - [ ] Verify: `grep` for any remaining cross-layer imports
 - [ ] Verify: engine builds cleanly
 
-### Phase 1: Create `libs/trellis/`
+### Phase 1: Create `libs/aspen/`
 
 Set up the new workspace library.
 
 **Checklist:**
 
-- [ ] Create `libs/trellis/` directory structure
-- [ ] Create `package.json` with name `@autumnsgrove/trellis`, `workspace:*` dep on `@autumnsgrove/lattice`
+- [ ] Create `libs/aspen/` directory structure
+- [ ] Create `package.json` with name `@autumnsgrove/aspen`, `workspace:*` dep on `@autumnsgrove/lattice`
 - [ ] Create `svelte.config.js` (SvelteKit library package format)
 - [ ] Create `tsconfig.json` extending the monorepo base
 - [ ] Create `vite.config.js` with svelte-package build
@@ -443,7 +443,7 @@ Set up the new workspace library.
 
 ### Phase 2: Move Domain Modules
 
-Move modules from `libs/engine/src/lib/` to `libs/trellis/src/lib/` in dependency order.
+Move modules from `libs/engine/src/lib/` to `libs/aspen/src/lib/` in dependency order.
 
 **Wave 1 — Leaf modules (no cross-deps):**
 - [ ] `data/`
@@ -483,26 +483,26 @@ Move modules from `libs/engine/src/lib/` to `libs/trellis/src/lib/` in dependenc
 - [ ] Remove all moved module paths from `libs/engine/package.json` exports
 - [ ] Clean up root `index.ts` (remove domain re-exports)
 - [ ] Verify: engine builds with `pnpm --filter @autumnsgrove/lattice run build:package`
-- [ ] Verify: `libs/trellis` builds with its new export map
+- [ ] Verify: `libs/aspen` builds with its new export map
 
 ### Phase 4: Update All Consumer Imports (Clean Break)
 
 For every file in `apps/`, `services/`, `workers/`, and other `libs/`:
 
-- [ ] Find-and-replace `@autumnsgrove/lattice/<domain-module>` to `@autumnsgrove/trellis/<domain-module>` for all moved modules
-- [ ] Add `@autumnsgrove/trellis` as `workspace:*` dependency to every consuming `package.json`
-- [ ] Update every `tailwind.config.js` to include `libs/trellis/` content path
+- [ ] Find-and-replace `@autumnsgrove/lattice/<domain-module>` to `@autumnsgrove/aspen/<domain-module>` for all moved modules
+- [ ] Add `@autumnsgrove/aspen` as `workspace:*` dependency to every consuming `package.json`
+- [ ] Update every `tailwind.config.js` to include `libs/aspen/` content path
 - [ ] Update any `tsconfig.json` path aliases if applicable
 - [ ] Run `pnpm install` to wire workspace dependencies
 - [ ] Verify: every app/service/worker builds
 
-### Phase 5: Create `apps/trellis/`
+### Phase 5: Create `apps/aspen/`
 
 - [ ] Create SvelteKit app skeleton
 - [ ] Set up `wrangler.toml` with all Cloudflare bindings (DB, CURIO_DB, OBS_DB, KV, R2, service bindings)
 - [ ] Set up `hooks.server.ts` with auth, session handling
 - [ ] Move or create tenant-facing routes (the pages and admin panels tenants use daily)
-- [ ] Import from both `@autumnsgrove/lattice` and `@autumnsgrove/trellis`
+- [ ] Import from both `@autumnsgrove/lattice` and `@autumnsgrove/aspen`
 - [ ] Set up `tailwind.config.js` scanning both libs
 - [ ] Verify: app builds and deploys to Cloudflare Pages
 
@@ -511,7 +511,7 @@ For every file in `apps/`, `services/`, `workers/`, and other `libs/`:
 - [ ] `pnpm install` from root succeeds
 - [ ] Every package in the workspace builds: `pnpm -r run build`
 - [ ] CI passes: `gw dev ci --affected --fail-fast --diagnose`
-- [ ] No remaining imports of `@autumnsgrove/trellis/<domain-module>` referencing old `@autumnsgrove/lattice` path
+- [ ] No remaining imports of `@autumnsgrove/aspen/<domain-module>` referencing old `@autumnsgrove/lattice` path
 - [ ] No remaining imports of domain modules from any engine file
 - [ ] Staging deploy of at least one app succeeds
 
@@ -523,12 +523,12 @@ For every file in `apps/`, `services/`, `workers/`, and other `libs/`:
 |------|----------|------------|
 | Volume of import changes (140+ paths across 26+ packages) | Medium | Mechanical find-and-replace. Script it. Subpaths don't change, only package name. |
 | Surgery points in `ui/` require real refactoring (more than originally estimated) | High | Do Phase 0 first, in isolation. Everything still builds as one package during surgery. No consumer changes needed. |
-| Build ordering in pnpm workspace | Low | `libs/engine` must build before `libs/trellis`. pnpm workspace protocol handles this via dependency graph. Verify with `pnpm -r run build`. |
-| Tailwind class purging | Medium | If any app forgets to add `libs/trellis/` to its content paths, classes from domain components get purged silently. Add a CI check. |
-| TypeScript path resolution | Low | `$lib/` alias in `libs/trellis` resolves to `libs/trellis/src/lib/` automatically via SvelteKit conventions. Cross-package imports use full package names. |
-| `apps/trellis/` route ownership | Medium | Clarify which routes move to `apps/trellis/` vs stay in existing apps. Tenant-facing routes are the scope. Marketing stays in landing. Onboarding stays in plant. |
-| `lumen/` depends on `server/encryption` | Low | Both move to Trellis. This is a domain-to-domain dep that resolves naturally. No action needed. |
-| `ui/` → `server/` Friend type imports (new) | Medium | Either extract the `Friend` type to a shared location in Lattice, or move the friends UI to Trellis. Decide during Phase 0. |
+| Build ordering in pnpm workspace | Low | `libs/engine` must build before `libs/aspen`. pnpm workspace protocol handles this via dependency graph. Verify with `pnpm -r run build`. |
+| Tailwind class purging | Medium | If any app forgets to add `libs/aspen/` to its content paths, classes from domain components get purged silently. Add a CI check. |
+| TypeScript path resolution | Low | `$lib/` alias in `libs/aspen` resolves to `libs/aspen/src/lib/` automatically via SvelteKit conventions. Cross-package imports use full package names. |
+| `apps/aspen/` route ownership | Medium | Clarify which routes move to `apps/aspen/` vs stay in existing apps. Tenant-facing routes are the scope. Marketing stays in landing. Onboarding stays in plant. |
+| `lumen/` depends on `server/encryption` | Low | Both move to Aspen. This is a domain-to-domain dep that resolves naturally. No action needed. |
+| `ui/` → `server/` Friend type imports (new) | Medium | Either extract the `Friend` type to a shared location in Lattice, or move the friends UI to Aspen. Decide during Phase 0. |
 
 ---
 
@@ -536,7 +536,7 @@ For every file in `apps/`, `services/`, `workers/`, and other `libs/`:
 
 - No auth logic changes. Heartwood moves packages but its behavior is identical.
 - No database changes. Schema stays the same, just lives in a different directory.
-- No API changes. Endpoints work the same, they just import from `@autumnsgrove/trellis` instead of `@autumnsgrove/lattice`.
+- No API changes. Endpoints work the same, they just import from `@autumnsgrove/aspen` instead of `@autumnsgrove/lattice`.
 - Multi-tenant isolation remains unchanged. `WHERE tenant_id = ?` patterns are structural, not affected by which package they live in.
 
 ---
@@ -545,7 +545,7 @@ For every file in `apps/`, `services/`, `workers/`, and other `libs/`:
 
 This spec was originally written March 1st with the domain lib named `@autumnsgrove/grove` and the app as `apps/grove/`. Key updates:
 
-- **Renamed:** Domain lib from `grove` to `trellis` (`@autumnsgrove/trellis`). Similar names to Lattice, but meaningfully different things.
+- **Renamed:** Domain lib from `grove` → `trellis` → `aspen` (`@autumnsgrove/aspen`). Lattice is the framework, Aspen is the living grove.
 - **New modules classified:** `reverie/` (domain, schema registry), `sentinel/` (domain, stress testing), `durable-objects/` (domain, Grove-specific DOs), `git/` (domain, GitHub integration), `types/` (framework, shared type defs).
 - **foliage/ bridge removed:** No longer exists in the engine. Already separate as `libs/foliage/`.
 - **Prism extraction noted** as prior art for the same pattern.
@@ -557,13 +557,13 @@ This spec was originally written March 1st with the domain lib named `@autumnsgr
 ## Implementation Checklist (Summary)
 
 - [ ] **Phase 0:** Resolve 8 surgery points (cross-layer deps)
-- [ ] **Phase 1:** Create `libs/trellis/` package
+- [ ] **Phase 1:** Create `libs/aspen/` package
 - [ ] **Phase 2:** Move 21 domain modules in 3 waves
 - [ ] **Phase 3:** Clean up engine exports
 - [ ] **Phase 4:** Update all consumer imports (clean break)
-- [ ] **Phase 5:** Create `apps/trellis/` deployment
+- [ ] **Phase 5:** Create `apps/aspen/` deployment
 - [ ] **Phase 6:** Full verification pass
 
 ---
 
-*The vine and the trellis, finally, each knowing where they end and the other begins.*
+*The lattice and the aspen, finally, each knowing where they end and the other begins.*
