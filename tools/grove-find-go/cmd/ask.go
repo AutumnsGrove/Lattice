@@ -8,6 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/AutumnsGrove/Lattice/tools/grove-find-go/internal/asktui"
 	"github.com/AutumnsGrove/Lattice/tools/grove-find-go/internal/config"
 	"github.com/AutumnsGrove/Lattice/tools/grove-find-go/internal/nlp"
 	"github.com/AutumnsGrove/Lattice/tools/grove-find-go/internal/output"
@@ -35,6 +36,15 @@ Examples:
 		query := strings.Join(args, " ")
 		cfg := config.Get()
 		ctx := context.Background()
+
+		// Interactive TUI mode
+		if askFlagInteractive {
+			return asktui.Run(asktui.Options{
+				Query:     query,
+				Autostart: !askFlagNoAutostart,
+				MaxRounds: askFlagMaxRounds,
+			})
+		}
 
 		// Status callback: prints to stderr so stdout stays clean for piping
 		onStatus := func(msg string) {
