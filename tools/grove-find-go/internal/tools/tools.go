@@ -11,6 +11,7 @@ type Tools struct {
 	Fd  string // fd-find
 	Git string
 	Gh  string // GitHub CLI
+	Lms string // LM Studio CLI
 }
 
 var (
@@ -26,6 +27,7 @@ func Discover() *Tools {
 			Fd:  findFd(),
 			Git: findBinary("git"),
 			Gh:  findBinary("gh"),
+			Lms: findBinary("lms"),
 		}
 	})
 	return discovered
@@ -42,6 +44,9 @@ func (t *Tools) HasGit() bool { return t.Git != "" }
 
 // HasGh returns true if GitHub CLI is available.
 func (t *Tools) HasGh() bool { return t.Gh != "" }
+
+// HasLms returns true if LM Studio CLI is available.
+func (t *Tools) HasLms() bool { return t.Lms != "" }
 
 func findBinary(name string) string {
 	path, err := exec.LookPath(name)

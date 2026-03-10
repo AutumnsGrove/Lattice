@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"path/filepath"
+	"strconv"
 	"sync"
 )
 
@@ -15,6 +16,11 @@ type Config struct {
 	IncludeArchived bool // when true, _archived/ dirs are included in results
 	NoPager         bool // when true, skip Bubble Tea paginator
 	PageThreshold   int  // min lines before paginator activates (default 50)
+
+	// LLM config for gf ask
+	LLMEndpoint string // env: GF_LLM_ENDPOINT, default: http://localhost:1234/v1
+	LLMModel    string // env: GF_LLM_MODEL,    default: liquid/lfm2.5-1.2b
+	LLMTimeout  int    // env: GF_LLM_TIMEOUT,  default: 30 (seconds per request)
 }
 
 var (
@@ -51,7 +57,42 @@ func Init(root string, agent, jsonMode, verbose, noPager bool, pageThreshold int
 		cfg.GroveRoot = detectGroveRoot()
 	}
 
+	// LLM config (for gf ask)
+	cfg.LLMEndpoint = envOrDefault("GF_LLM_ENDPOINT", "http://localhost:1234/v1")
+	cfg.LLMModel = envOrDefault("GF_LLM_MODEL", "liquid/lfm2.5-1.2b")
+	cfg.LLMTimeout = envIntOrDefault("GF_LLM_TIMEOUT", 30)
+
 	return cfg
+}
+
+// SetLLMEndpoint overrides the LLM endpoint (called from persistent flags).
+func (c *Config) SetLLMEndpoint(endpoint string) {
+	if endpoint != "" {
+		c.LLMEndpoint = endpoint
+	}
+}
+
+// SetLLMModel overrides the LLM model (called from persistent flags).
+func (c *Config) SetLLMModel(model string) {
+	if model != "" {
+		c.LLMModel = model
+	}
+}
+
+func envOrDefault(key, defaultVal string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	return defaultVal
+}
+
+func envIntOrDefault(key string, defaultVal int) int {
+	if v := os.Getenv(key); v != "" {
+		if n, err := strconv.Atoi(v); err == nil {
+			return n
+		}
+	}
+	return defaultVal
 }
 
 // IsHumanMode returns true when output should be human-formatted (colors, rich output).

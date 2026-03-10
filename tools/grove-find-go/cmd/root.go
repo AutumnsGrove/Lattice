@@ -16,10 +16,16 @@ var (
 	flagVerbose       bool
 	flagNoPager       bool
 	flagPageThreshold int
+	flagLLMEndpoint   string
+	flagLLMModel      string
 )
 
-// Version is set via ldflags at build time.
-var Version = "dev"
+// Version, CommitHash, and BuildTime are set via ldflags at build time.
+var (
+	Version    = "dev"
+	CommitHash = "unknown"
+	BuildTime  = "unknown"
+)
 
 var rootCmd = &cobra.Command{
 	Use:   "gf",
@@ -28,7 +34,9 @@ var rootCmd = &cobra.Command{
 It wraps ripgrep, fd, git, and gh with context-enriched commands
 that reduce agent round-trips by ~50%.`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		config.Init(flagRoot, flagAgent, flagJSON, flagVerbose, flagNoPager, flagPageThreshold)
+		cfg := config.Init(flagRoot, flagAgent, flagJSON, flagVerbose, flagNoPager, flagPageThreshold)
+		cfg.SetLLMEndpoint(flagLLMEndpoint)
+		cfg.SetLLMModel(flagLLMModel)
 	},
 	SilenceUsage:  true,
 	SilenceErrors: true,
@@ -41,8 +49,13 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&flagVerbose, "verbose", "v", false, "Verbose output")
 	rootCmd.PersistentFlags().BoolVar(&flagNoPager, "no-pager", false, "Disable Bubble Tea paginator (dump full output)")
 	rootCmd.PersistentFlags().IntVar(&flagPageThreshold, "page-threshold", 50, "Lines before paginator activates")
+	rootCmd.PersistentFlags().StringVar(&flagLLMEndpoint, "llm-endpoint", "", "LM Studio API endpoint (env: GF_LLM_ENDPOINT)")
+	rootCmd.PersistentFlags().StringVar(&flagLLMModel, "llm-model", "", "LLM model to use (env: GF_LLM_MODEL)")
 
 	rootCmd.AddCommand(versionCmd)
+
+	// Natural language search
+	rootCmd.AddCommand(askCmd)
 
 	// Search commands
 	rootCmd.AddCommand(searchCmd)
@@ -111,14 +124,28 @@ func init() {
 
 	// Cloudflare subcommand group
 	rootCmd.AddCommand(cfCmd)
+
+	// Self-update
+	rootCmd.AddCommand(updateCmd)
 }
+
+var versionFlagJSON bool
 
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Print version",
 	Run: func(cmd *cobra.Command, args []string) {
+		if versionFlagJSON || flagJSON {
+			fmt.Printf(`{"version":"%s","commit":"%s","built":"%s","runtime":"go"}`+"\n",
+				Version, CommitHash, BuildTime)
+			return
+		}
 		fmt.Printf("gf version %s (go)\n", Version)
 	},
+}
+
+func init() {
+	versionCmd.Flags().BoolVar(&versionFlagJSON, "json", false, "Output version as JSON")
 }
 
 // Execute runs the root command.
