@@ -95,6 +95,26 @@
 					whatIsLink: "/knowledge/help/what-is-lattice",
 				},
 				{
+					name: "Aspen",
+					termSlug: "aspen",
+					tagline: "Domain Layer",
+					description:
+						"The living tree that grows on the Lattice. Database schemas, authentication, payments, curios, content moderation — everything that makes Grove a platform, not just a framework. Like an aspen grove, every tenant looks independent but shares a single root system underneath.",
+					status: "building",
+					icon: "treedeciduous",
+					integration: "Domain logic consumed by all Grove apps",
+					github: "https://github.com/AutumnsGrove/Lattice",
+					spec: "/knowledge/specs/lattice-split-spec",
+					whatIsLink: "/knowledge/help/what-is-aspen",
+					subComponents: [
+						{ name: "Heartwood", icon: "shieldcheck", description: "Authentication", href: "/knowledge/help/what-is-heartwood" },
+						{ name: "Curios", icon: "amphora", description: "Interactive widgets", href: "/knowledge/help/what-is-curios" },
+						{ name: "Lumen", icon: "lamp-ceiling", description: "AI gateway", href: "/knowledge/help/what-is-lumen" },
+						{ name: "Thorn", icon: "file-warning", description: "Content moderation", href: "/knowledge/help/what-is-thorn" },
+						{ name: "Warden", icon: "vault", description: "API gateway", href: "/knowledge/help/what-is-warden" },
+					],
+				},
+				{
 					name: "Heartwood",
 					termSlug: "heartwood",
 					tagline: "Centralized Authentication",

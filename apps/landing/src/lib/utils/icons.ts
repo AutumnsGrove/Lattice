@@ -539,6 +539,8 @@ export const toolIcons = {
 	flower: Flower, // Garden - collection of blooms
 	cherry: Cherry, // Cherry trees (nature theming)
 	zap: Zap, // Verge - remote AI coding
+	// Aspen - domain layer (the living tree)
+	treedeciduous: TreeDeciduous, // Aspen - domain logic package
 } as const;
 
 // ============================================================================
