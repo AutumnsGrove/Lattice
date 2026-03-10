@@ -502,10 +502,16 @@
 							</GlassButton>
 						{/if}
 
-						<!-- Save -->
-						<form method="POST" action="?/updateContents" use:enhance class="save-form">
+						<!-- Save — inject editorItems at submit time to avoid stale hidden input values -->
+						<form
+							method="POST"
+							action="?/updateContents"
+							use:enhance={({ formData }) => {
+								formData.set("contents", JSON.stringify(editorItems));
+							}}
+							class="save-form"
+						>
 							<input type="hidden" name="shrineId" value={editingShrine.id} />
-							<input type="hidden" name="contents" value={JSON.stringify(editorItems)} />
 							<GlassButton type="submit" variant="accent" class="save-btn">
 								<Save class="btn-icon" />
 								Save Contents

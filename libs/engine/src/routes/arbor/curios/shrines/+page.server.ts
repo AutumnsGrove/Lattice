@@ -323,10 +323,10 @@ export const actions: Actions = {
 		}
 		const { shrineId, contents: contentsRaw } = parsed.data;
 
-		if (!isValidShrineId(shrineId) || !contentsRaw) {
+		if (!isValidShrineId(shrineId)) {
 			return fail(400, {
-				error: ARBOR_ERRORS.FIELD_REQUIRED.userMessage,
-				error_code: ARBOR_ERRORS.FIELD_REQUIRED.code,
+				error: ARBOR_ERRORS.INVALID_INPUT.userMessage,
+				error_code: ARBOR_ERRORS.INVALID_INPUT.code,
 			});
 		}
 

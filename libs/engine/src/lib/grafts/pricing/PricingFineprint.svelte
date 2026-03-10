@@ -38,9 +38,9 @@
 		curios: {
 			title: "Curios",
 			content:
-				"Every blog includes Home, Blog, and About in the navigation. [[curios|Curios]] let you add custom pages (like Portfolio, Contact, or Gallery) to your site navigation—little treasures in your cabinet of wonders. [[sapling|Sapling]]: 3 curios. [[oak|Oak]]: 5 curios. [[evergreen|Evergreen]]: 8 curios.",
+				"Every blog includes Home, Blog, and About in the navigation. [[curios|Curios]] let you add custom pages (like Portfolio, Contact, or Gallery) to your site navigation—little treasures in your cabinet of wonders. [[wanderer|Wanderer]]: 1 curio. [[seedling|Seedling]]: 3 curios. [[sapling|Sapling]]: 5 curios. [[oak|Oak]]: 10 curios. [[evergreen|Evergreen]]: 20 curios.",
 			detail:
-				"Those on [[seedling|Seedling]] can still create unlimited pages—they just won't appear in the navigation bar. Link to them from posts or your About page.",
+				"All plans can create unlimited pages—the curio limit only affects how many appear in the navigation bar. Link to extras from posts or your About page.",
 		},
 		comments: {
 			title: "Comments",

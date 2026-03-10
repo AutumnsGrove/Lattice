@@ -118,7 +118,7 @@ export const TIERS: Record<TierKey, TierConfig> = {
 			storage: 100 * 1024 * 1024, // 100 MB
 			storageDisplay: "100 MB",
 			themes: 1,
-			navPages: 0,
+			navPages: 1,
 			commentsPerWeek: 20,
 			aiWordsPerMonth: 0,
 		},
@@ -183,7 +183,7 @@ export const TIERS: Record<TierKey, TierConfig> = {
 			storage: 1 * 1024 * 1024 * 1024, // 1 GB
 			storageDisplay: "1 GB",
 			themes: 3,
-			navPages: 0,
+			navPages: 3,
 			commentsPerWeek: Infinity,
 			aiWordsPerMonth: 750, // ~25/day * 30 days
 		},
@@ -252,7 +252,7 @@ export const TIERS: Record<TierKey, TierConfig> = {
 			storage: 5 * 1024 * 1024 * 1024, // 5 GB
 			storageDisplay: "5 GB",
 			themes: 10,
-			navPages: 3,
+			navPages: 5,
 			commentsPerWeek: Infinity,
 			aiWordsPerMonth: 3000, // ~100/day * 30 days
 		},
@@ -293,7 +293,7 @@ export const TIERS: Record<TierKey, TierConfig> = {
 				"5 GB storage",
 				// TODO(foliage): uncomment when themes launch
 				// "10 themes",
-				"3 nav pages",
+				"5 nav pages",
 				"Email forwarding",
 				"Centennial eligible",
 				"Everything in Seedling",
@@ -304,7 +304,7 @@ export const TIERS: Record<TierKey, TierConfig> = {
 				"5 GB storage",
 				// TODO(foliage): uncomment when themes launch
 				// "10 themes",
-				"3 nav pages",
+				"5 nav pages",
 				"Email forwarding",
 				"100-year preservation eligible",
 				"Everything in Starter",
@@ -323,7 +323,7 @@ export const TIERS: Record<TierKey, TierConfig> = {
 			storage: 20 * 1024 * 1024 * 1024, // 20 GB
 			storageDisplay: "20 GB",
 			themes: Infinity,
-			navPages: 5,
+			navPages: 10,
 			commentsPerWeek: Infinity,
 			aiWordsPerMonth: 15000, // ~500/day * 30 days
 		},
@@ -364,7 +364,7 @@ export const TIERS: Record<TierKey, TierConfig> = {
 				"20 GB storage",
 				// TODO(foliage): uncomment when themes launch
 				// "Theme customizer",
-				"5 nav pages",
+				"10 nav pages",
 				"Bring your own domain",
 				"Centennial eligible",
 				"Priority support",
@@ -375,7 +375,7 @@ export const TIERS: Record<TierKey, TierConfig> = {
 				"20 GB storage",
 				// TODO(foliage): uncomment when themes launch
 				// "Theme customizer",
-				"5 nav pages",
+				"10 nav pages",
 				"Bring your own domain",
 				"100-year preservation eligible",
 				"Priority support",
@@ -394,7 +394,7 @@ export const TIERS: Record<TierKey, TierConfig> = {
 			storage: 100 * 1024 * 1024 * 1024, // 100 GB
 			storageDisplay: "100 GB",
 			themes: Infinity,
-			navPages: 8,
+			navPages: 20,
 			commentsPerWeek: Infinity,
 			aiWordsPerMonth: 75000, // ~2500/day * 30 days
 		},
@@ -434,7 +434,7 @@ export const TIERS: Record<TierKey, TierConfig> = {
 				"Unlimited everything",
 				"100 GB storage",
 				"Custom fonts",
-				"8 nav pages",
+				"20 nav pages",
 				"Domain included",
 				"Centennial eligible",
 				"8 hrs/mo dedicated support",
@@ -444,7 +444,7 @@ export const TIERS: Record<TierKey, TierConfig> = {
 				"Unlimited everything",
 				"100 GB storage",
 				"Custom fonts",
-				"8 nav pages",
+				"20 nav pages",
 				"Domain included",
 				"100-year preservation eligible",
 				"8 hrs/mo dedicated support",

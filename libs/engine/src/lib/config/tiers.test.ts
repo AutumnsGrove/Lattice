@@ -233,7 +233,7 @@ describe("Tier Configuration", () => {
 		describe("getTierLimit", () => {
 			it("returns correct limits", () => {
 				expect(getTierLimit("seedling", "posts")).toBe(100);
-				expect(getTierLimit("sapling", "navPages")).toBe(3);
+				expect(getTierLimit("sapling", "navPages")).toBe(5);
 				expect(getTierLimit("oak", "posts")).toBe(Infinity);
 			});
 		});
