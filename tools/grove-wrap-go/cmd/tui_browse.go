@@ -416,7 +416,7 @@ func (m browseModel) View() string {
 		b.WriteString(browseFilterStyle.Render("  Loading more...") + "\n")
 	}
 
-	// Footer hints
+	// Footer hints — wrap to multiple lines based on terminal width
 	b.WriteString("\n")
 	hints := []string{"j/k nav", "v view"}
 	for _, a := range m.config.Actions {
@@ -427,7 +427,32 @@ func (m browseModel) View() string {
 		baseHints = append([]string{"N more"}, baseHints...)
 	}
 	hints = append(hints, baseHints...)
-	b.WriteString(browseHintStyle.Render("  " + strings.Join(hints, " • ")))
+
+	maxWidth := m.width - 4 // leave margin
+	if maxWidth < 40 {
+		maxWidth = 40
+	}
+	var lines []string
+	current := " "
+	for i, h := range hints {
+		sep := " • "
+		if i == 0 {
+			sep = " "
+		}
+		candidate := current + sep + h
+		if len(candidate) > maxWidth && current != " " {
+			lines = append(lines, current)
+			current = "  " + h
+		} else {
+			current = candidate
+		}
+	}
+	if current != " " {
+		lines = append(lines, current)
+	}
+	for _, line := range lines {
+		b.WriteString(browseHintStyle.Render(line) + "\n")
+	}
 
 	// Label-based skill suggestions
 	if m.config.OnSkill != nil && len(m.filtered) > 0 {

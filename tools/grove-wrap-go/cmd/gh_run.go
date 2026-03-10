@@ -3,9 +3,11 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
+	"golang.org/x/term"
 
 	"github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/config"
 	"github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/exec"
@@ -31,6 +33,15 @@ var runListCmd = &cobra.Command{
 		limit, _ := cmd.Flags().GetInt("limit")
 		page, _ := cmd.Flags().GetInt("page")
 		all, _ := cmd.Flags().GetBool("all")
+		pageSize, _ := cmd.Flags().GetInt("page-size")
+
+		// Use config defaults when flags not explicitly set
+		if !cmd.Flags().Changed("limit") && cfg.TUI.ItemsPerPage > 0 {
+			limit = cfg.TUI.ItemsPerPage
+		}
+		if !cmd.Flags().Changed("page-size") && cfg.TUI.ViewportRows > 0 {
+			pageSize = cfg.TUI.ViewportRows
+		}
 
 		fetchLimit, startIndex := paginateArgs(limit, page, all)
 		limit = clampGHLimit(limit)
@@ -59,6 +70,14 @@ var runListCmd = &cobra.Command{
 		if cfg.JSONMode {
 			fmt.Println(output)
 			return nil
+		}
+
+		// Interactive TUI mode — launch browser if in a TTY and not agent/JSON mode
+		if cfg.InteractiveMode && term.IsTerminal(int(os.Stdout.Fd())) {
+			browseRuns, parseErr := parseRunsToBrowse(output)
+			if parseErr == nil && len(browseRuns) > 0 {
+				return runRunBrowse(browseRuns, pageSize, buildRunFetchArgs(workflow, branch, status, limit))
+			}
 		}
 
 		var runs []map[string]interface{}
@@ -481,6 +500,7 @@ func init() {
 	runListCmd.Flags().Int("page", 1, "Page number (1-based)")
 	runListCmd.Flags().Bool("all", false, "Fetch all runs (overrides --limit)")
 	runListCmd.Flags().Bool("flat", false, "Flat view: one run per line with IDs")
+	runListCmd.Flags().Int("page-size", 15, "Viewport height in interactive mode")
 	runCmd.AddCommand(runListCmd)
 
 	// run view
