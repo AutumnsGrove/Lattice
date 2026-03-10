@@ -6,7 +6,7 @@
  * Implements alarm-based batch chaining for long-running searches.
  */
 
-import { LoomDO } from "@autumnsgrove/lattice/loom";
+import { LoomDO, safeJsonParse } from "@autumnsgrove/lattice/loom";
 import type { LoomRoute, LoomConfig, LoomRequestContext } from "@autumnsgrove/lattice/loom";
 import type {
 	Env,
@@ -25,6 +25,7 @@ import { CerebrasRDAPChecker } from "./cerebras-rdap";
 import { getBatchPricing, type DomainPrice } from "./pricing";
 import { getProvider, type ProviderName } from "./providers";
 import { sendResultsEmail, sendFollowupEmail } from "./email";
+import { FORAGE_ERRORS, buildForageErrorResponse } from "./errors";
 
 /** State tracked by the DO across requests */
 interface SearchJobState {
@@ -185,7 +186,9 @@ export class SearchJobDO extends LoomDO<SearchJobState, Env> {
 		// Check if job already exists
 		const existing = this.getJob();
 		if (existing) {
-			return Response.json({ error: "Job already exists", job_id: existing.id }, { status: 409 });
+			return Response.json(buildForageErrorResponse(FORAGE_ERRORS.JOB_ALREADY_EXISTS), {
+				status: 409,
+			});
 		}
 
 		// Create job with optional provider overrides
@@ -211,7 +214,7 @@ export class SearchJobDO extends LoomDO<SearchJobState, Env> {
 	private handleGetStatus(): Response {
 		const job = this.getJob();
 		if (!job) {
-			return Response.json({ error: "No job found" }, { status: 404 });
+			return Response.json(buildForageErrorResponse(FORAGE_ERRORS.JOB_NOT_FOUND), { status: 404 });
 		}
 
 		const domainsChecked = this.getTotalDomainsChecked();
@@ -239,7 +242,7 @@ export class SearchJobDO extends LoomDO<SearchJobState, Env> {
 	private handleGetResults(): Response {
 		const job = this.getJob();
 		if (!job) {
-			return Response.json({ error: "No job found" }, { status: 404 });
+			return Response.json(buildForageErrorResponse(FORAGE_ERRORS.JOB_NOT_FOUND), { status: 404 });
 		}
 
 		// Get all available domains, sorted by score then price
@@ -253,9 +256,11 @@ export class SearchJobDO extends LoomDO<SearchJobState, Env> {
 		// Format results with pricing display
 		const formattedResults = results.map((r) => ({
 			...r,
-			flags: typeof r.flags === "string" ? JSON.parse(r.flags) : r.flags,
+			flags: typeof r.flags === "string" ? safeJsonParse(r.flags, []) : r.flags,
 			evaluation_data:
-				typeof r.evaluation_data === "string" ? JSON.parse(r.evaluation_data) : r.evaluation_data,
+				typeof r.evaluation_data === "string"
+					? safeJsonParse(r.evaluation_data, {})
+					: r.evaluation_data,
 			price_display: r.price_cents ? `$${(r.price_cents / 100).toFixed(2)}/yr` : "Price unknown",
 			pricing_category: r.price_cents
 				? r.price_cents <= 3000
@@ -293,11 +298,13 @@ export class SearchJobDO extends LoomDO<SearchJobState, Env> {
 	private async handleResume(ctx: LoomRequestContext): Promise<Response> {
 		const job = this.getJob();
 		if (!job) {
-			return Response.json({ error: "No job found" }, { status: 404 });
+			return Response.json(buildForageErrorResponse(FORAGE_ERRORS.JOB_NOT_FOUND), { status: 404 });
 		}
 
 		if (job.status !== "needs_followup") {
-			return Response.json({ error: "Job not awaiting follow-up" }, { status: 400 });
+			return Response.json(buildForageErrorResponse(FORAGE_ERRORS.JOB_NOT_AWAITING_FOLLOWUP), {
+				status: 400,
+			});
 		}
 
 		const body = (await ctx.request.json()) as { followup_responses: FollowupQuizResponse };
@@ -325,14 +332,13 @@ export class SearchJobDO extends LoomDO<SearchJobState, Env> {
 	private async handleCancel(): Promise<Response> {
 		const job = this.getJob();
 		if (!job) {
-			return Response.json({ error: "No job found" }, { status: 404 });
+			return Response.json(buildForageErrorResponse(FORAGE_ERRORS.JOB_NOT_FOUND), { status: 404 });
 		}
 
 		if (job.status !== "running" && job.status !== "pending") {
-			return Response.json(
-				{ error: "Job not running", status: job.status, job_id: job.id },
-				{ status: 400 },
-			);
+			return Response.json(buildForageErrorResponse(FORAGE_ERRORS.JOB_NOT_RUNNING), {
+				status: 400,
+			});
 		}
 
 		// Update status to cancelled
@@ -355,7 +361,7 @@ export class SearchJobDO extends LoomDO<SearchJobState, Env> {
 	private handleGetFollowup(): Response {
 		const job = this.getJob();
 		if (!job) {
-			return Response.json({ error: "No job found" }, { status: 404 });
+			return Response.json(buildForageErrorResponse(FORAGE_ERRORS.JOB_NOT_FOUND), { status: 404 });
 		}
 
 		// Get the most recent follow-up quiz artifact
@@ -367,7 +373,9 @@ export class SearchJobDO extends LoomDO<SearchJobState, Env> {
 		);
 
 		if (!artifact) {
-			return Response.json({ error: "No follow-up quiz available" }, { status: 404 });
+			return Response.json(buildForageErrorResponse(FORAGE_ERRORS.NO_FOLLOWUP_QUIZ), {
+				status: 404,
+			});
 		}
 
 		return new Response(artifact.content, {
@@ -381,7 +389,7 @@ export class SearchJobDO extends LoomDO<SearchJobState, Env> {
 	private handleStream(): Response {
 		const job = this.getJob();
 		if (!job) {
-			return Response.json({ error: "No job found" }, { status: 404 });
+			return Response.json(buildForageErrorResponse(FORAGE_ERRORS.JOB_NOT_FOUND), { status: 404 });
 		}
 
 		const domainsChecked = this.getTotalDomainsChecked();
@@ -445,8 +453,10 @@ export class SearchJobDO extends LoomDO<SearchJobState, Env> {
 			client_id: row.client_id,
 			status: row.status as SearchStatus,
 			batch_num: row.batch_num,
-			quiz_responses: JSON.parse(row.quiz_responses),
-			followup_responses: row.followup_responses ? JSON.parse(row.followup_responses) : undefined,
+			quiz_responses: safeJsonParse(row.quiz_responses, {}),
+			followup_responses: row.followup_responses
+				? safeJsonParse(row.followup_responses, undefined)
+				: undefined,
 			driver_provider: row.driver_provider ?? undefined,
 			swarm_provider: row.swarm_provider ?? undefined,
 			created_at: row.created_at,
@@ -568,8 +578,8 @@ export class SearchJobDO extends LoomDO<SearchJobState, Env> {
 			status: r.status as "available" | "registered" | "unknown",
 			price_cents: r.price_cents ?? undefined,
 			score: r.score,
-			flags: r.flags ? JSON.parse(r.flags) : [],
-			evaluation_data: r.evaluation_data ? JSON.parse(r.evaluation_data) : undefined,
+			flags: r.flags ? safeJsonParse(r.flags, []) : [],
+			evaluation_data: r.evaluation_data ? safeJsonParse(r.evaluation_data, undefined) : undefined,
 			created_at: r.created_at,
 		}));
 	}
@@ -966,7 +976,7 @@ export class SearchJobDO extends LoomDO<SearchJobState, Env> {
 			// Format domains for email
 			const formattedDomains = domains.map((d) => ({
 				...d,
-				flags: typeof d.flags === "string" ? JSON.parse(d.flags) : d.flags,
+				flags: typeof d.flags === "string" ? safeJsonParse(d.flags, []) : d.flags,
 			}));
 
 			// Build URLs

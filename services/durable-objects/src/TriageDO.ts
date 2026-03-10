@@ -18,8 +18,10 @@ import {
 	type LoomRoute,
 	type LoomConfig,
 	type LoomRequestContext,
+	safeJsonParse,
 } from "@autumnsgrove/lattice/loom";
 import { createLumenClient, type LumenClient } from "@autumnsgrove/lattice/lumen";
+import { DO_ERRORS } from "./errors.js";
 import { evaluateFilters } from "./triage/filters.js";
 import { classifyEmail, type EmailEnvelope } from "./triage/classifier.js";
 import {
@@ -348,24 +350,23 @@ export class TriageDO extends LoomDO<TriageState, TriageDOEnv> {
 			.run();
 
 		// 2. Parse payload
-		let payload: {
+		const payload = safeJsonParse(bufferEntry.raw_payload, null);
+		if (!payload) {
+			throw new Error(DO_ERRORS.INVALID_PAYLOAD.adminMessage);
+		}
+		const typedPayload = payload as {
 			raw?: string;
 			headers?: Record<string, string>;
 			recipients?: string[];
 		};
-		try {
-			payload = JSON.parse(bufferEntry.raw_payload);
-		} catch {
-			throw new Error("Invalid JSON in buffer payload");
-		}
 
 		// Extract email metadata from headers or raw content
-		const headers = payload.headers || {};
+		const headers = typedPayload.headers || {};
 		const from =
 			headers["x-original-from"] || headers["from"] || headers["reply-to"] || "unknown@unknown.com";
 		const subject = headers["subject"] || "No subject";
-		const snippet = extractSnippet(payload.raw || "");
-		const to = payload.recipients || [];
+		const snippet = extractSnippet(typedPayload.raw || "");
+		const to = typedPayload.recipients || [];
 
 		// 3. Check filters
 		const filterResult = await evaluateFilters(from, this.env.IVY_DB);
@@ -553,12 +554,7 @@ export class TriageDO extends LoomDO<TriageState, TriageDOEnv> {
 
 		if (!settings || !settings.digest_enabled) return;
 
-		let times: string[];
-		try {
-			times = JSON.parse(settings.digest_times);
-		} catch {
-			times = ["08:00", "13:00", "18:00"];
-		}
+		const times = safeJsonParse(settings.digest_times, ["08:00", "13:00", "18:00"]);
 
 		const nextAlarmMs = calculateNextAlarm(times, settings.digest_timezone);
 		if (nextAlarmMs && this.state_data) {

@@ -17,8 +17,10 @@ import {
 	type LoomRoute,
 	type LoomConfig,
 	type LoomRequestContext,
+	safeJsonParse,
 } from "@autumnsgrove/lattice/loom";
 import { zipSync, strToU8 } from "fflate";
+import { DO_ERRORS } from "./errors.js";
 
 // =============================================================================
 // TYPES
@@ -467,7 +469,7 @@ export class ExportDO extends LoomDO<ExportJobState, ExportDOEnv> {
 
 		const zipData = await this.state.storage.get<Uint8Array>("zipData");
 		if (!zipData) {
-			throw new Error("Zip data not found in storage");
+			throw new Error(DO_ERRORS.STORAGE_READ_FAILED.adminMessage);
 		}
 
 		// Generate R2 key and filename
@@ -580,7 +582,9 @@ export class ExportDO extends LoomDO<ExportJobState, ExportDOEnv> {
 		});
 
 		if (!response.ok) {
-			throw new Error(`Zephyr email send failed: ${response.status} ${response.statusText}`);
+			throw new Error(
+				`${DO_ERRORS.EXPORT_PROCESSING_FAILED.adminMessage}: ${response.status} ${response.statusText}`,
+			);
 		}
 
 		// Update D1
@@ -646,13 +650,8 @@ export class ExportDO extends LoomDO<ExportJobState, ExportDOEnv> {
 
 	private buildPostFrontmatter(post: PostRecord, mediaMap: Map<string, string>): string {
 		// Safely parse tags with error handling
-		let tags: string[] = [];
-		try {
-			tags = JSON.parse(post.tags || "[]");
-			if (!Array.isArray(tags)) tags = [];
-		} catch {
-			tags = [];
-		}
+		const parsedTags = safeJsonParse(post.tags, []);
+		const tags = Array.isArray(parsedTags) ? parsedTags : [];
 
 		// Rewrite featured image if it's a local media file
 		let featuredImage = post.featured_image;

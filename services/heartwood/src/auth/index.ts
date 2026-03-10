@@ -18,6 +18,7 @@ import { magicLink, twoFactor } from "better-auth/plugins";
 import { passkey } from "@better-auth/passkey";
 import { drizzle } from "drizzle-orm/d1";
 import { ZephyrClient } from "@autumnsgrove/lattice/zephyr";
+import { HW_SVC_ERRORS } from "../errors.js";
 import type { Env } from "../types.js";
 import { isEmailAllowed } from "../db/queries.js";
 import { createDbSession } from "../db/session.js";
@@ -100,9 +101,9 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 	// Validate critical env vars early — fail loudly instead of crashing mid-flow.
 	// These are set via wrangler.toml [vars] or `wrangler secret put`.
 	// If missing after a migration, the error message here tells ops exactly what to fix.
-	if (!env.DB) throw new Error("[createAuth] Missing DB binding (D1 groveauth database)");
-	if (!env.AUTH_BASE_URL) throw new Error("[createAuth] Missing AUTH_BASE_URL env var");
-	if (!env.SESSION_SECRET) throw new Error("[createAuth] Missing SESSION_SECRET secret");
+	if (!env.DB) throw new Error(HW_SVC_ERRORS.MISSING_DB_BINDING.adminMessage);
+	if (!env.AUTH_BASE_URL) throw new Error(HW_SVC_ERRORS.MISSING_AUTH_BASE_URL.adminMessage);
+	if (!env.SESSION_SECRET) throw new Error(HW_SVC_ERRORS.MISSING_SESSION_SECRET.adminMessage);
 	if (!env.GOOGLE_CLIENT_ID || !env.GOOGLE_CLIENT_SECRET) {
 		console.warn(
 			"[createAuth] Missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET — Google OAuth will fail",
@@ -113,7 +114,7 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 	const db = drizzle(env.DB, { schema });
 	const groveDb = createDbSession(env);
 	if (!env.ZEPHYR_API_KEY) {
-		console.warn("[createAuth] Missing ZEPHYR_API_KEY — magic link emails will fail");
+		console.warn(HW_SVC_ERRORS.MISSING_ZEPHYR_KEY.adminMessage);
 	}
 	const zephyr = new ZephyrClient({
 		baseUrl: env.ZEPHYR_URL || "https://grove-zephyr.m7jv4v7npb.workers.dev",
@@ -346,7 +347,7 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 
 					if (!result.success) {
 						console.error("[MagicLink] Zephyr send failed:", result.errorCode, result.errorMessage);
-						throw new Error("Failed to send magic link email");
+						throw new Error(HW_SVC_ERRORS.ACCOUNT_CREATION_FAILED.adminMessage);
 					}
 
 					console.log("[MagicLink] Sent magic link via Zephyr");
@@ -416,9 +417,7 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 						}
 
 						console.log("[Auth] Signup blocked - email not in allowlist or comped invites");
-						throw new Error(
-							"We couldn't create your account right now. If you think this is a mistake, visit grove.place/support for help.",
-						);
+						throw new Error(HW_SVC_ERRORS.ACCOUNT_CREATION_FAILED.userMessage);
 					},
 				},
 			},

@@ -17,6 +17,7 @@ import {
 	type LoomRoute,
 	type LoomConfig,
 	type LoomRequestContext,
+	safeJsonParse,
 } from "@autumnsgrove/lattice/loom";
 import type { LoadProfile, RunResults, SentinelMetric, SentinelCheckpoint } from "./types.js";
 import { getOpsPerSecondAt, selectWeightedSystem } from "./profiles.js";
@@ -131,10 +132,10 @@ export class SentinelDO extends LoomDO<SentinelState, SentinelDOEnv> {
 	// ════════════════════════════════════════════════════════════════════
 
 	protected async onWebSocketMessage(_ws: WebSocket, message: string | ArrayBuffer): Promise<void> {
-		try {
-			const data = JSON.parse(message as string);
+		const data = safeJsonParse(message as string, null);
+		if (data) {
 			this.log.debug("WebSocket message", data);
-		} catch {
+		} else {
 			this.log.warn("Invalid WebSocket message");
 		}
 	}

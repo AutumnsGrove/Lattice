@@ -5,10 +5,12 @@
  */
 
 import type { RequestHandler } from "./$types";
+import { buildErrorJson } from "@autumnsgrove/lattice/errors";
+import { IVY_ERRORS } from "$lib/errors";
 
 export const DELETE: RequestHandler = async ({ params, locals, platform }) => {
 	if (!locals.isOwner) {
-		return new Response(JSON.stringify({ error: "Unauthorized" }), {
+		return new Response(JSON.stringify(buildErrorJson(IVY_ERRORS.UNAUTHORIZED)), {
 			status: 401,
 			headers: { "Content-Type": "application/json" },
 		});
@@ -16,7 +18,7 @@ export const DELETE: RequestHandler = async ({ params, locals, platform }) => {
 
 	const env = platform?.env;
 	if (!env?.DB) {
-		return new Response(JSON.stringify({ error: "Server configuration error" }), {
+		return new Response(JSON.stringify(buildErrorJson(IVY_ERRORS.CONFIG_ERROR)), {
 			status: 500,
 			headers: { "Content-Type": "application/json" },
 		});
@@ -31,7 +33,7 @@ export const DELETE: RequestHandler = async ({ params, locals, platform }) => {
 			.first();
 
 		if (!existing) {
-			return new Response(JSON.stringify({ error: "Filter not found" }), {
+			return new Response(JSON.stringify(buildErrorJson(IVY_ERRORS.FILTER_NOT_FOUND)), {
 				status: 404,
 				headers: { "Content-Type": "application/json" },
 			});
@@ -45,7 +47,7 @@ export const DELETE: RequestHandler = async ({ params, locals, platform }) => {
 		});
 	} catch (error) {
 		console.error("Failed to delete filter:", error);
-		return new Response(JSON.stringify({ error: "Failed to delete filter" }), {
+		return new Response(JSON.stringify(buildErrorJson(IVY_ERRORS.DELETE_FAILED)), {
 			status: 500,
 			headers: { "Content-Type": "application/json" },
 		});

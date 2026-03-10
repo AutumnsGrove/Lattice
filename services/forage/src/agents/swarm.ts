@@ -6,6 +6,7 @@
  * Supports tool calling with fallback to JSON prompts.
  */
 
+import { safeJsonParse } from "@autumnsgrove/lattice/loom";
 import { SWARM_SYSTEM_PROMPT, formatSwarmPrompt } from "../prompts";
 import type { AIProvider, ProviderResponse } from "../providers/types";
 import { SWARM_TOOL } from "../providers/tools";
@@ -236,23 +237,23 @@ function parseEvaluations(content: string, expectedDomains: string[]): DomainEva
 	const parsedDomains = new Set<string>();
 
 	// Try to extract JSON
-	try {
-		const jsonMatch = content.match(/\{[\s\S]*\}/);
-		if (jsonMatch) {
-			const data = JSON.parse(jsonMatch[0]) as {
-				evaluations?: Array<{
-					domain: string;
-					score?: number;
-					worth_checking?: boolean;
-					pronounceable?: boolean;
-					memorable?: boolean;
-					brand_fit?: boolean;
-					email_friendly?: boolean;
-					flags?: string[];
-					notes?: string;
-				}>;
-			};
+	const jsonMatch = content.match(/\{[\s\S]*\}/);
+	if (jsonMatch) {
+		const data = safeJsonParse(jsonMatch[0], { evaluations: [] }) as {
+			evaluations?: Array<{
+				domain: string;
+				score?: number;
+				worth_checking?: boolean;
+				pronounceable?: boolean;
+				memorable?: boolean;
+				brand_fit?: boolean;
+				email_friendly?: boolean;
+				flags?: string[];
+				notes?: string;
+			}>;
+		};
 
+		if (data) {
 			const evalList = data.evaluations || [];
 			for (const evalData of evalList) {
 				if (evalData.domain) {
@@ -274,8 +275,6 @@ function parseEvaluations(content: string, expectedDomains: string[]): DomainEva
 				}
 			}
 		}
-	} catch {
-		// JSON parse failed
 	}
 
 	// Fill in missing domains with quick evaluation

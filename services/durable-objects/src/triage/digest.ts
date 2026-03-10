@@ -9,6 +9,7 @@
 
 import type { LumenClient } from "@autumnsgrove/lattice/lumen";
 import { escapeHtml } from "@autumnsgrove/lattice/utils";
+import { safeJsonParse } from "@autumnsgrove/lattice/loom";
 import type { EmailCategory } from "./types.js";
 
 // =============================================================================
@@ -99,15 +100,13 @@ export async function getDigestEmails(
 		let snippet = "";
 		let from = row.from || "unknown";
 
-		try {
-			const envelope = JSON.parse(row.encrypted_envelope);
+		const envelope = safeJsonParse(row.encrypted_envelope, {});
+		if (envelope) {
 			subject = envelope.subject || subject;
 			snippet = envelope.snippet || "";
 			if (!row.from && envelope.from) {
 				from = envelope.from;
 			}
-		} catch {
-			// Envelope may be encrypted or malformed — use what we have
 		}
 
 		return {

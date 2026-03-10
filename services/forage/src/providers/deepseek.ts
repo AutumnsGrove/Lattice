@@ -12,6 +12,7 @@ import type {
 	ToolCallResult,
 } from "./types";
 import { toOpenAITool } from "./tools";
+import { FORAGE_ERRORS, logForageError } from "../errors";
 
 const DEEPSEEK_API_URL = "https://api.deepseek.com/chat/completions";
 
@@ -26,7 +27,7 @@ export class DeepSeekProvider implements AIProvider {
 	constructor(env: Env, model?: string) {
 		const apiKey = env.DEEPSEEK_API_KEY;
 		if (!apiKey) {
-			throw new Error("DEEPSEEK_API_KEY not configured");
+			throw new Error(FORAGE_ERRORS.API_KEY_NOT_CONFIGURED.adminMessage);
 		}
 		this.apiKey = apiKey;
 		this.model = model || this.defaultModel;
@@ -58,7 +59,9 @@ export class DeepSeekProvider implements AIProvider {
 
 		if (!response.ok) {
 			const error = await response.text();
-			throw new Error(`DeepSeek API error: ${response.status} - ${error}`);
+			const errorMsg = `DeepSeek API error: ${response.status} - ${error}`;
+			logForageError(FORAGE_ERRORS.PROVIDER_ERROR, { detail: errorMsg });
+			throw new Error(errorMsg);
 		}
 
 		const data = (await response.json()) as OpenAIResponse;
@@ -118,7 +121,9 @@ export class DeepSeekProvider implements AIProvider {
 
 		if (!response.ok) {
 			const error = await response.text();
-			throw new Error(`DeepSeek API error: ${response.status} - ${error}`);
+			const errorMsg = `DeepSeek API error: ${response.status} - ${error}`;
+			logForageError(FORAGE_ERRORS.PROVIDER_ERROR, { detail: errorMsg });
+			throw new Error(errorMsg);
 		}
 
 		const data = (await response.json()) as OpenAIResponse;

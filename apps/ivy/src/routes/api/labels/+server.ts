@@ -6,6 +6,8 @@
  */
 
 import type { RequestHandler } from "./$types";
+import { buildErrorJson } from "@autumnsgrove/lattice/errors";
+import { IVY_ERRORS } from "$lib/errors";
 
 export const GET: RequestHandler = async ({ locals, platform }) => {
 	// TODO: Auth check
@@ -20,7 +22,7 @@ export const POST: RequestHandler = async ({ request, locals, platform }) => {
 	// TODO: Auth check
 	// TODO: Create label
 
-	return new Response(JSON.stringify({ error: "Not implemented" }), {
+	return new Response(JSON.stringify(buildErrorJson(IVY_ERRORS.NOT_IMPLEMENTED)), {
 		status: 501,
 		headers: { "Content-Type": "application/json" },
 	});

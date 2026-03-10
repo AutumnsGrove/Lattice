@@ -2,6 +2,8 @@
  * Database query functions
  */
 
+import { safeParseJson } from "@autumnsgrove/lattice/utils";
+import { HW_SVC_ERRORS } from "../errors.js";
 import type {
 	Client,
 	User,
@@ -124,7 +126,7 @@ export async function validateRedirectUriForClient(
 	engineDb?: D1Database,
 ): Promise<boolean> {
 	// First, check exact match (backward compatible)
-	const allowedUris: string[] = JSON.parse(client.redirect_uris);
+	const allowedUris = safeParseJson(client.redirect_uris, []);
 	if (allowedUris.includes(redirectUri)) {
 		return true;
 	}
@@ -172,7 +174,7 @@ export async function validateClientOrigin(
 	const client = await getClientByClientId(db, clientId);
 	if (!client) return false;
 
-	const allowedOrigins: string[] = JSON.parse(client.allowed_origins);
+	const allowedOrigins = safeParseJson(client.allowed_origins, []);
 	return allowedOrigins.includes(origin);
 }
 
@@ -637,9 +639,7 @@ export async function cleanupOldAuditLogs(
 ): Promise<number> {
 	// Validate minimum retention to prevent accidental mass deletion
 	if (retentionDays < MIN_AUDIT_RETENTION_DAYS) {
-		throw new Error(
-			`Audit log retention must be at least ${MIN_AUDIT_RETENTION_DAYS} days (got ${retentionDays})`,
-		);
+		throw new Error(HW_SVC_ERRORS.INVALID_AUDIT_RETENTION.adminMessage);
 	}
 
 	const cutoffDate = new Date();

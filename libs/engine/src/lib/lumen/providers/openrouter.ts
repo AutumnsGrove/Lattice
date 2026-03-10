@@ -11,6 +11,7 @@ import { PROVIDERS, calculateCost } from "../config.js";
 import { ProviderError, ProviderTimeoutError } from "../errors.js";
 import type { LumenMessage, LumenProviderName, LumenStreamChunk } from "../types.js";
 import type { LumenInferenceOptions, LumenProvider, LumenProviderResponse } from "./types.js";
+import { safeParseJson } from "../../../utils/json.js";
 
 // =============================================================================
 // TYPES
@@ -129,12 +130,16 @@ function parsePolicyModerationResponse(response: string): {
 			return { safe: true, categories: [], confidence: 0.5 };
 		}
 
-		const parsed = JSON.parse(jsonMatch[0]) as {
+		const parsed = safeParseJson<{
 			safe?: boolean;
 			categories?: string[];
 			confidence?: number;
 			reason?: string;
-		};
+		}>(jsonMatch[0], null);
+
+		if (!parsed) {
+			return { safe: true, categories: [], confidence: 0.5 };
+		}
 
 		if (parsed.safe === true || parsed.safe === undefined) {
 			return { safe: true, categories: [], confidence: 1.0 };

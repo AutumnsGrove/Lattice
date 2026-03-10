@@ -12,6 +12,9 @@
  * 5. Async: Process buffer entry
  */
 
+import { safeParseJson } from "@autumnsgrove/lattice/utils";
+import { buildErrorJson } from "@autumnsgrove/lattice/errors";
+import { IVY_ERRORS } from "$lib/errors";
 import { ForwardEmailClient } from "$lib/api/forwardEmail";
 import type { RequestHandler } from "./$types";
 
@@ -94,7 +97,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 	// Ensure we have required bindings
 	if (!env?.KV || !env?.DB || !env?.WEBHOOK_SECRET) {
 		console.error("Missing required environment bindings");
-		return new Response(JSON.stringify({ error: "Server configuration error" }), {
+		return new Response(JSON.stringify(buildErrorJson(IVY_ERRORS.CONFIG_ERROR)), {
 			status: 500,
 			headers: { "Content-Type": "application/json" },
 		});
@@ -108,7 +111,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		if (!rateLimitCheck.allowed) {
 			return new Response(
 				JSON.stringify({
-					error: "Rate limit exceeded",
+					...buildErrorJson(IVY_ERRORS.RATE_LIMITED),
 					retryAfter: rateLimitCheck.retryAfter,
 				}),
 				{
@@ -126,7 +129,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		const signature = request.headers.get("x-webhook-signature");
 
 		if (!signature) {
-			return new Response(JSON.stringify({ error: "Missing webhook signature" }), {
+			return new Response(JSON.stringify(buildErrorJson(IVY_ERRORS.MISSING_SIGNATURE)), {
 				status: 401,
 				headers: { "Content-Type": "application/json" },
 			});
@@ -141,19 +144,17 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 
 		if (!isValid) {
 			console.error("Invalid webhook signature from IP:", ip);
-			return new Response(JSON.stringify({ error: "Invalid signature" }), {
+			return new Response(JSON.stringify(buildErrorJson(IVY_ERRORS.INVALID_SIGNATURE)), {
 				status: 403,
 				headers: { "Content-Type": "application/json" },
 			});
 		}
 
 		// 4. PARSE PAYLOAD
-		let payload;
-		try {
-			payload = JSON.parse(rawBody);
-		} catch (error) {
-			console.error("Invalid JSON payload:", error);
-			return new Response(JSON.stringify({ error: "Invalid JSON" }), {
+		const payload = safeParseJson(rawBody, null, { context: "webhook.incoming.payload" });
+		if (!payload) {
+			console.error("Invalid JSON payload");
+			return new Response(JSON.stringify(buildErrorJson(IVY_ERRORS.INVALID_JSON)), {
 				status: 400,
 				headers: { "Content-Type": "application/json" },
 			});
@@ -161,7 +162,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 
 		// 5. VALIDATE REQUIRED FIELDS
 		if (!payload.recipients || !Array.isArray(payload.recipients)) {
-			return new Response(JSON.stringify({ error: "Missing recipients" }), {
+			return new Response(JSON.stringify(buildErrorJson(IVY_ERRORS.MISSING_RECIPIENTS)), {
 				status: 400,
 				headers: { "Content-Type": "application/json" },
 			});
@@ -173,7 +174,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 
 		if (!groveRecipient) {
 			console.warn("No @grove.place recipient found in:", payload.recipients);
-			return new Response(JSON.stringify({ error: "No grove.place recipient" }), {
+			return new Response(JSON.stringify(buildErrorJson(IVY_ERRORS.NO_GROVE_RECIPIENT)), {
 				status: 400,
 				headers: { "Content-Type": "application/json" },
 			});
@@ -182,7 +183,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		const userId = extractUserId(groveRecipient);
 		if (!userId) {
 			console.error("Could not extract user ID from:", groveRecipient);
-			return new Response(JSON.stringify({ error: "Invalid recipient format" }), {
+			return new Response(JSON.stringify(buildErrorJson(IVY_ERRORS.INVALID_RECIPIENT_FORMAT)), {
 				status: 400,
 				headers: { "Content-Type": "application/json" },
 			});
@@ -229,7 +230,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		});
 	} catch (error) {
 		console.error("Webhook processing error:", error);
-		return new Response(JSON.stringify({ error: "Internal server error" }), {
+		return new Response(JSON.stringify(buildErrorJson(IVY_ERRORS.INTERNAL_ERROR)), {
 			status: 500,
 			headers: { "Content-Type": "application/json" },
 		});

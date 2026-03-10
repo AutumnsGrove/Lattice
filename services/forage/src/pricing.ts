@@ -10,6 +10,8 @@
  * - Batch pricing lookups for efficiency
  */
 
+import { FORAGE_ERRORS, logForageError } from "./errors";
+
 const PRICING_API_URL = "https://cfdomainpricing.com/prices.json";
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
@@ -83,7 +85,9 @@ async function fetchPricingData(): Promise<Map<string, TldPricingData>> {
 	});
 
 	if (!response.ok) {
-		throw new Error(`Failed to fetch pricing: ${response.status} ${response.statusText}`);
+		const errorMsg = `Failed to fetch pricing: ${response.status} ${response.statusText}`;
+		logForageError(FORAGE_ERRORS.PRICING_FETCH_FAILED, { detail: errorMsg });
+		throw new Error(errorMsg);
 	}
 
 	const data = (await response.json()) as Record<string, TldPricingData>;

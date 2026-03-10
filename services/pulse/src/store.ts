@@ -5,6 +5,7 @@
  */
 
 import { z } from "zod";
+import { safeParseJson } from "@autumnsgrove/lattice/utils";
 import type { Env, NormalizedEvent } from "./types";
 import { asPushData } from "./types";
 
@@ -122,10 +123,9 @@ async function updateTodayStats(env: Env, tenantId: string, event: NormalizedEve
 	const raw = await env.KV.get(key, "text");
 	let parsed: ReturnType<typeof TodayStatsSchema.safeParse> | null = null;
 	if (raw) {
-		try {
-			parsed = TodayStatsSchema.safeParse(JSON.parse(raw));
-		} catch {
-			// Malformed JSON in KV — fall through to defaults
+		const data = safeParseJson(raw, null);
+		if (data) {
+			parsed = TodayStatsSchema.safeParse(data);
 		}
 	}
 

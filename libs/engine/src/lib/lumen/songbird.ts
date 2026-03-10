@@ -23,6 +23,7 @@ import type {
 	SongbirdResult,
 } from "./types.js";
 import type { ProviderRegistry } from "./providers/index.js";
+import { safeParseJson } from "../../utils/json.js";
 
 // =============================================================================
 // DEFAULT KESTREL CONTEXTS PER TASK
@@ -217,24 +218,24 @@ export async function runSongbird(
 		metrics.kestrelMs = Date.now() - kestrelStart;
 
 		// Parse JSON response — fail-closed on parse error or unexpected shape
-		const raw = JSON.parse(kestrelResponse.content.trim());
+		const raw = safeParseJson<unknown>(kestrelResponse.content.trim(), null);
 
 		// Runtime validation: reject if response doesn't match expected shape
 		if (
+			!raw ||
 			typeof raw !== "object" ||
-			raw === null ||
-			typeof raw.valid !== "boolean" ||
-			typeof raw.confidence !== "number" ||
-			typeof raw.reason !== "string"
+			typeof (raw as Record<string, unknown>).valid !== "boolean" ||
+			typeof (raw as Record<string, unknown>).confidence !== "number" ||
+			typeof (raw as Record<string, unknown>).reason !== "string"
 		) {
 			metrics.kestrelMs = Date.now() - kestrelStart;
 			return { passed: false, failedLayer: "kestrel", metrics };
 		}
 
-		const confidence: number = raw.confidence;
-		const reason: string = raw.reason;
+		const confidence: number = (raw as Record<string, unknown>).confidence as number;
+		const reason: string = (raw as Record<string, unknown>).reason as string;
 
-		if (!raw.valid || confidence < threshold) {
+		if (!(raw as Record<string, unknown>).valid || confidence < threshold) {
 			return {
 				passed: false,
 				failedLayer: "kestrel",

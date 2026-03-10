@@ -24,6 +24,7 @@ import {
 	type LoomRequestContext,
 	safeJsonParse,
 } from "@autumnsgrove/lattice/loom";
+import { DO_ERRORS } from "./errors.js";
 
 // ============================================================================
 // Types
@@ -248,7 +249,7 @@ export class PostContentDO extends LoomDO<PostContent, ContentEnv> {
 
 				const verification = await r2.head(data.r2Key);
 				if (!verification) {
-					throw new Error("R2 upload verification failed - object not found");
+					throw new Error(DO_ERRORS.STORAGE_READ_FAILED.adminMessage);
 				}
 
 				// Atomic: prepare → persist to SQL → update memory
@@ -313,7 +314,7 @@ export class PostContentDO extends LoomDO<PostContent, ContentEnv> {
 			if (!object) return null;
 
 			const text = await object.text();
-			return JSON.parse(text);
+			return safeJsonParse(text, null);
 		} catch (err) {
 			this.log.errorWithCause("R2 fetch error", err);
 			return null;

@@ -7,22 +7,19 @@
  */
 
 import type { LumenClient } from "@autumnsgrove/lattice/lumen";
-import type {
-  EmailCategory,
-  SuggestedAction,
-  ClassificationResult,
-} from "./types.js";
+import { safeJsonParse } from "@autumnsgrove/lattice/loom";
+import type { EmailCategory, SuggestedAction, ClassificationResult } from "./types.js";
 
 // =============================================================================
 // TYPES
 // =============================================================================
 
 export interface EmailEnvelope {
-  from: string;
-  subject: string;
-  snippet: string; // First ~300 chars of body text
-  date?: string;
-  to?: string;
+	from: string;
+	subject: string;
+	snippet: string; // First ~300 chars of body text
+	date?: string;
+	to?: string;
 }
 
 // =============================================================================
@@ -51,22 +48,20 @@ Respond with ONLY valid JSON in this exact format:
 {"category":"<category>","confidence":<0.0-1.0>,"reason":"<brief reason>","suggestedAction":"<action>","topics":["<topic1>","<topic2>"]}`;
 
 function buildClassificationPrompt(envelope: EmailEnvelope): string {
-  const parts = [`From: ${envelope.from}`, `Subject: ${envelope.subject}`];
+	const parts = [`From: ${envelope.from}`, `Subject: ${envelope.subject}`];
 
-  if (envelope.date) {
-    parts.push(`Date: ${envelope.date}`);
-  }
+	if (envelope.date) {
+		parts.push(`Date: ${envelope.date}`);
+	}
 
-  if (envelope.snippet) {
-    // Truncate snippet to ~300 chars to keep costs low
-    const truncated =
-      envelope.snippet.length > 300
-        ? envelope.snippet.slice(0, 300) + "..."
-        : envelope.snippet;
-    parts.push(`Preview: ${truncated}`);
-  }
+	if (envelope.snippet) {
+		// Truncate snippet to ~300 chars to keep costs low
+		const truncated =
+			envelope.snippet.length > 300 ? envelope.snippet.slice(0, 300) + "..." : envelope.snippet;
+		parts.push(`Preview: ${truncated}`);
+	}
 
-  return parts.join("\n");
+	return parts.join("\n");
 }
 
 // =============================================================================
@@ -74,23 +69,17 @@ function buildClassificationPrompt(envelope: EmailEnvelope): string {
 // =============================================================================
 
 const VALID_CATEGORIES: EmailCategory[] = [
-  "important",
-  "actionable",
-  "fyi",
-  "social",
-  "marketing",
-  "transactional",
-  "junk",
-  "uncategorized",
+	"important",
+	"actionable",
+	"fyi",
+	"social",
+	"marketing",
+	"transactional",
+	"junk",
+	"uncategorized",
 ];
 
-const VALID_ACTIONS: SuggestedAction[] = [
-  "respond",
-  "read",
-  "archive",
-  "delete",
-  "review",
-];
+const VALID_ACTIONS: SuggestedAction[] = ["respond", "read", "archive", "delete", "review"];
 
 /**
  * Classify an email envelope using Lumen AI.
@@ -99,78 +88,65 @@ const VALID_ACTIONS: SuggestedAction[] = [
  * This keeps costs at ~$0.0002/email with DeepSeek v3.
  */
 export async function classifyEmail(
-  envelope: EmailEnvelope,
-  lumen: LumenClient,
+	envelope: EmailEnvelope,
+	lumen: LumenClient,
 ): Promise<ClassificationResult> {
-  try {
-    const response = await lumen.run({
-      task: "summary" as const,
-      input: [
-        { role: "system", content: CLASSIFICATION_SYSTEM_PROMPT },
-        { role: "user", content: buildClassificationPrompt(envelope) },
-      ],
-      options: {
-        maxTokens: 200,
-        temperature: 0.1, // Low temperature for consistent classification
-        skipQuota: true, // Ivy is a personal tool, no tenant quotas
-        skipPiiScrub: true, // We're deliberately sending email metadata
-      },
-    });
+	try {
+		const response = await lumen.run({
+			task: "summary" as const,
+			input: [
+				{ role: "system", content: CLASSIFICATION_SYSTEM_PROMPT },
+				{ role: "user", content: buildClassificationPrompt(envelope) },
+			],
+			options: {
+				maxTokens: 200,
+				temperature: 0.1, // Low temperature for consistent classification
+				skipQuota: true, // Ivy is a personal tool, no tenant quotas
+				skipPiiScrub: true, // We're deliberately sending email metadata
+			},
+		});
 
-    return parseClassificationResponse(response.content);
-  } catch (error) {
-    console.error("[TriageDO/Classifier] Lumen call failed:", error);
-    return fallbackClassification(envelope);
-  }
+		return parseClassificationResponse(response.content);
+	} catch (error) {
+		console.error("[TriageDO/Classifier] Lumen call failed:", error);
+		return fallbackClassification(envelope);
+	}
 }
 
 /**
  * Parse the JSON response from Lumen, with validation.
  */
 function parseClassificationResponse(content: string): ClassificationResult {
-  try {
-    // Extract JSON from response (handle markdown code blocks)
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error("No JSON found in response");
-    }
+	// Extract JSON from response (handle markdown code blocks)
+	const jsonMatch = content.match(/\{[\s\S]*\}/);
+	if (!jsonMatch) {
+		return fallbackClassification({ from: "", subject: "", snippet: "" });
+	}
 
-    const parsed = JSON.parse(jsonMatch[0]);
+	const parsed = safeJsonParse(jsonMatch[0], null);
+	if (!parsed) {
+		return fallbackClassification({ from: "", subject: "", snippet: "" });
+	}
 
-    // Validate and coerce fields
-    const category: EmailCategory = VALID_CATEGORIES.includes(parsed.category)
-      ? parsed.category
-      : "uncategorized";
+	// Validate and coerce fields
+	const category: EmailCategory = VALID_CATEGORIES.includes(parsed.category)
+		? parsed.category
+		: "uncategorized";
 
-    const suggestedAction: SuggestedAction = VALID_ACTIONS.includes(
-      parsed.suggestedAction,
-    )
-      ? parsed.suggestedAction
-      : "read";
+	const suggestedAction: SuggestedAction = VALID_ACTIONS.includes(parsed.suggestedAction)
+		? parsed.suggestedAction
+		: "read";
 
-    const confidence =
-      typeof parsed.confidence === "number"
-        ? Math.max(0, Math.min(1, parsed.confidence))
-        : 0.5;
+	const confidence =
+		typeof parsed.confidence === "number" ? Math.max(0, Math.min(1, parsed.confidence)) : 0.5;
 
-    const reason =
-      typeof parsed.reason === "string" ? parsed.reason.slice(0, 200) : "";
+	const reason = typeof parsed.reason === "string" ? parsed.reason.slice(0, 200) : "";
 
-    const topics = Array.isArray(parsed.topics)
-      ? parsed.topics.filter((t: unknown) => typeof t === "string").slice(0, 5)
-      : [];
+	const topics = Array.isArray(parsed.topics)
+		? parsed.topics.filter((t: unknown) => typeof t === "string").slice(0, 5)
+		: [];
 
-    return { category, confidence, reason, suggestedAction, topics };
-  } catch (error) {
-    console.warn("[TriageDO/Classifier] Failed to parse response:", content);
-    return {
-      category: "uncategorized",
-      confidence: 0,
-      reason: "Failed to parse AI response",
-      suggestedAction: "review",
-      topics: [],
-    };
-  }
+	return { category, confidence, reason, suggestedAction, topics };
 }
 
 /**
@@ -178,40 +154,40 @@ function parseClassificationResponse(content: string): ClassificationResult {
  * Uses simple heuristics based on sender domain.
  */
 function fallbackClassification(envelope: EmailEnvelope): ClassificationResult {
-  const sender = envelope.from.toLowerCase();
-  const subject = envelope.subject.toLowerCase();
+	const sender = envelope.from.toLowerCase();
+	const subject = envelope.subject.toLowerCase();
 
-  // Simple heuristic fallbacks
-  if (sender.includes("noreply") || sender.includes("no-reply")) {
-    return {
-      category: "transactional",
-      confidence: 0.6,
-      reason: "Automated sender (noreply)",
-      suggestedAction: "read",
-      topics: ["automated"],
-    };
-  }
+	// Simple heuristic fallbacks
+	if (sender.includes("noreply") || sender.includes("no-reply")) {
+		return {
+			category: "transactional",
+			confidence: 0.6,
+			reason: "Automated sender (noreply)",
+			suggestedAction: "read",
+			topics: ["automated"],
+		};
+	}
 
-  if (
-    subject.includes("unsubscribe") ||
-    subject.includes("newsletter") ||
-    subject.includes("sale") ||
-    subject.includes("% off")
-  ) {
-    return {
-      category: "marketing",
-      confidence: 0.5,
-      reason: "Marketing keywords in subject",
-      suggestedAction: "archive",
-      topics: ["marketing"],
-    };
-  }
+	if (
+		subject.includes("unsubscribe") ||
+		subject.includes("newsletter") ||
+		subject.includes("sale") ||
+		subject.includes("% off")
+	) {
+		return {
+			category: "marketing",
+			confidence: 0.5,
+			reason: "Marketing keywords in subject",
+			suggestedAction: "archive",
+			topics: ["marketing"],
+		};
+	}
 
-  return {
-    category: "uncategorized",
-    confidence: 0,
-    reason: "Lumen unavailable, no heuristic match",
-    suggestedAction: "review",
-    topics: [],
-  };
+	return {
+		category: "uncategorized",
+		confidence: 0,
+		reason: "Lumen unavailable, no heuristic match",
+		suggestedAction: "review",
+		topics: [],
+	};
 }

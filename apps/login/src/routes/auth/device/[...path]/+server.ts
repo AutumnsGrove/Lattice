@@ -12,13 +12,15 @@
 
 import type { RequestHandler } from "./$types";
 import { proxyToHeartwood } from "$lib/proxy";
+import { buildErrorJson } from "@autumnsgrove/lattice/errors";
+import { LOGIN_ERRORS } from "$lib/errors";
 
 const handler: RequestHandler = async (event) => {
 	const path = event.params.path || "";
 
 	// Only allow expected sub-paths (empty = /auth/device, "authorize" = /auth/device/authorize)
 	if (path !== "" && path !== "authorize") {
-		return new Response(JSON.stringify({ error: "Not found" }), {
+		return new Response(JSON.stringify(buildErrorJson(LOGIN_ERRORS.NOT_FOUND)), {
 			status: 404,
 			headers: { "Content-Type": "application/json" },
 		});

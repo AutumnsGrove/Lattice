@@ -6,10 +6,12 @@
  */
 
 import type { RequestHandler } from "./$types";
+import { buildErrorJson } from "@autumnsgrove/lattice/errors";
+import { IVY_ERRORS } from "$lib/errors";
 
 export const GET: RequestHandler = async ({ locals, platform }) => {
 	if (!locals.isOwner) {
-		return new Response(JSON.stringify({ error: "Unauthorized" }), {
+		return new Response(JSON.stringify(buildErrorJson(IVY_ERRORS.UNAUTHORIZED)), {
 			status: 401,
 			headers: { "Content-Type": "application/json" },
 		});
@@ -17,7 +19,7 @@ export const GET: RequestHandler = async ({ locals, platform }) => {
 
 	const env = platform?.env;
 	if (!env?.DB) {
-		return new Response(JSON.stringify({ error: "Server configuration error" }), {
+		return new Response(JSON.stringify(buildErrorJson(IVY_ERRORS.CONFIG_ERROR)), {
 			status: 500,
 			headers: { "Content-Type": "application/json" },
 		});
@@ -40,7 +42,7 @@ export const GET: RequestHandler = async ({ locals, platform }) => {
 		);
 	} catch (error) {
 		console.error("Failed to fetch filters:", error);
-		return new Response(JSON.stringify({ error: "Failed to fetch filters" }), {
+		return new Response(JSON.stringify(buildErrorJson(IVY_ERRORS.FETCH_FAILED)), {
 			status: 500,
 			headers: { "Content-Type": "application/json" },
 		});
@@ -49,7 +51,7 @@ export const GET: RequestHandler = async ({ locals, platform }) => {
 
 export const POST: RequestHandler = async ({ request, locals, platform }) => {
 	if (!locals.isOwner) {
-		return new Response(JSON.stringify({ error: "Unauthorized" }), {
+		return new Response(JSON.stringify(buildErrorJson(IVY_ERRORS.UNAUTHORIZED)), {
 			status: 401,
 			headers: { "Content-Type": "application/json" },
 		});
@@ -57,7 +59,7 @@ export const POST: RequestHandler = async ({ request, locals, platform }) => {
 
 	const env = platform?.env;
 	if (!env?.DB) {
-		return new Response(JSON.stringify({ error: "Server configuration error" }), {
+		return new Response(JSON.stringify(buildErrorJson(IVY_ERRORS.CONFIG_ERROR)), {
 			status: 500,
 			headers: { "Content-Type": "application/json" },
 		});
@@ -73,31 +75,25 @@ export const POST: RequestHandler = async ({ request, locals, platform }) => {
 
 		// Validate required fields
 		if (!body.type || !body.pattern || !body.match_type) {
-			return new Response(
-				JSON.stringify({
-					error: "Missing required fields: type, pattern, match_type",
-				}),
-				{ status: 400, headers: { "Content-Type": "application/json" } },
-			);
+			return new Response(JSON.stringify(buildErrorJson(IVY_ERRORS.MISSING_REQUIRED_FIELDS)), {
+				status: 400,
+				headers: { "Content-Type": "application/json" },
+			});
 		}
 
 		// Validate enum values
 		if (!["blocklist", "allowlist"].includes(body.type)) {
-			return new Response(
-				JSON.stringify({
-					error: 'Invalid type. Must be "blocklist" or "allowlist"',
-				}),
-				{ status: 400, headers: { "Content-Type": "application/json" } },
-			);
+			return new Response(JSON.stringify(buildErrorJson(IVY_ERRORS.INVALID_FILTER_TYPE)), {
+				status: 400,
+				headers: { "Content-Type": "application/json" },
+			});
 		}
 
 		if (!["exact", "domain", "contains"].includes(body.match_type)) {
-			return new Response(
-				JSON.stringify({
-					error: 'Invalid match_type. Must be "exact", "domain", or "contains"',
-				}),
-				{ status: 400, headers: { "Content-Type": "application/json" } },
-			);
+			return new Response(JSON.stringify(buildErrorJson(IVY_ERRORS.INVALID_MATCH_TYPE)), {
+				status: 400,
+				headers: { "Content-Type": "application/json" },
+			});
 		}
 
 		// Generate ID: timestamp + random component
@@ -129,7 +125,7 @@ export const POST: RequestHandler = async ({ request, locals, platform }) => {
 		);
 	} catch (error) {
 		console.error("Failed to create filter:", error);
-		return new Response(JSON.stringify({ error: "Failed to create filter" }), {
+		return new Response(JSON.stringify(buildErrorJson(IVY_ERRORS.CREATE_FAILED)), {
 			status: 500,
 			headers: { "Content-Type": "application/json" },
 		});
