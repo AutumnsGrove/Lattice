@@ -114,6 +114,112 @@ func BuildIndex(ctx context.Context, client *Client, onProgress func(done, total
 	return idx, nil
 }
 
+// RebuildIndex incrementally updates the index, only re-embedding chunks whose
+// source files have changed (based on mtime). Unchanged chunks carry forward
+// their existing vectors. This turns a 2-hour full rebuild into a seconds-long update.
+func RebuildIndex(ctx context.Context, client *Client, existing *Index, onStatus func(string), onProgress func(done, total int)) (*Index, error) {
+	chunks, err := WalkAndChunk()
+	if err != nil {
+		return nil, fmt.Errorf("walk codebase: %w", err)
+	}
+
+	if len(chunks) == 0 {
+		return nil, fmt.Errorf("no indexable files found")
+	}
+
+	// Collect current file mtimes
+	cfg := config.Get()
+	mtimes := make(map[string]int64)
+	for _, c := range chunks {
+		if _, exists := mtimes[c.FilePath]; !exists {
+			absPath := filepath.Join(cfg.GroveRoot, filepath.FromSlash(c.FilePath))
+			if info, err := os.Stat(absPath); err == nil {
+				mtimes[c.FilePath] = info.ModTime().Unix()
+			}
+		}
+	}
+
+	// Build lookup from existing index: key is "filepath:startLine-endLine"
+	type cachedEntry struct {
+		mtime  int64
+		vector []float32
+	}
+	cache := make(map[string]cachedEntry)
+	if existing != nil {
+		for _, e := range existing.Entries {
+			key := fmt.Sprintf("%s:%d-%d", e.FilePath, e.StartLine, e.EndLine)
+			cache[key] = cachedEntry{mtime: e.Mtime, vector: e.Vector}
+		}
+	}
+
+	// Partition chunks into reusable vs needs-embedding
+	var needEmbed []int // indices into chunks that need fresh vectors
+	vectors := make([][]float32, len(chunks))
+	reused := 0
+
+	for i, c := range chunks {
+		key := fmt.Sprintf("%s:%d-%d", c.FilePath, c.StartLine, c.EndLine)
+		if cached, ok := cache[key]; ok && cached.mtime == mtimes[c.FilePath] {
+			vectors[i] = cached.vector
+			reused++
+		} else {
+			needEmbed = append(needEmbed, i)
+		}
+	}
+
+	if onStatus != nil {
+		onStatus(fmt.Sprintf("Reuse %d cached vectors, embedding %d new/changed chunks", reused, len(needEmbed)))
+	}
+
+	// Embed only the changed chunks
+	if len(needEmbed) > 0 {
+		texts := make([]string, len(needEmbed))
+		for i, idx := range needEmbed {
+			texts[i] = chunks[idx].Content
+		}
+
+		newVectors, err := client.Embed(ctx, texts, onProgress)
+		if err != nil {
+			return nil, fmt.Errorf("embed chunks: %w", err)
+		}
+
+		for i, idx := range needEmbed {
+			vectors[idx] = newVectors[i]
+		}
+	}
+
+	// Determine dimensions from first non-nil vector
+	dims := 0
+	for _, v := range vectors {
+		if len(v) > 0 {
+			dims = len(v)
+			break
+		}
+	}
+	if dims == 0 {
+		return nil, fmt.Errorf("no vectors produced")
+	}
+
+	// Build final entries
+	entries := make([]IndexEntry, len(chunks))
+	for i, c := range chunks {
+		entries[i] = IndexEntry{
+			FilePath:  c.FilePath,
+			StartLine: c.StartLine,
+			EndLine:   c.EndLine,
+			Snippet:   c.Snippet,
+			Mtime:     mtimes[c.FilePath],
+			Vector:    vectors[i],
+		}
+	}
+
+	return &Index{
+		Dimensions: dims,
+		EmbedModel: client.embedModel,
+		Entries:    entries,
+	}, nil
+}
+
 // SaveIndex writes the index to disk in binary format.
 func SaveIndex(idx *Index) error {
 	path := IndexPath()

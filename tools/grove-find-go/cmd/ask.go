@@ -307,14 +307,6 @@ func runIndexBuild(ctx context.Context, cfg *config.Config, incremental bool) er
 	// Copy health state from the ensured client
 	_ = client
 
-	// Walk and chunk
-	onStatus("Scanning files...")
-	chunks, err := nlp.WalkAndChunk()
-	if err != nil {
-		return fmt.Errorf("scan codebase: %w", err)
-	}
-	onStatus(fmt.Sprintf("Found %d files, %d chunks", countUniqueFiles(chunks), len(chunks)))
-
 	// Progress callback for embedding — fires after each batch
 	embedStart := time.Now()
 	onProgress := func(done, total int) {
@@ -339,9 +331,34 @@ func runIndexBuild(ctx context.Context, cfg *config.Config, incremental bool) er
 		}
 	}
 
-	idx, err := nlp.BuildIndex(ctx, embedClient, onProgress)
-	if err != nil {
-		return fmt.Errorf("build index: %w", err)
+	var idx *nlp.Index
+	if incremental {
+		// Load existing index and only re-embed changed files
+		existing, err := nlp.LoadIndex()
+		if err != nil {
+			onStatus(fmt.Sprintf("Warning: could not load existing index: %v", err))
+		}
+		if existing == nil {
+			onStatus("No existing index found, building from scratch...")
+		}
+		embedStart = time.Now()
+		idx, err = nlp.RebuildIndex(ctx, embedClient, existing, onStatus, onProgress)
+		if err != nil {
+			return fmt.Errorf("rebuild index: %w", err)
+		}
+	} else {
+		// Full build from scratch
+		onStatus("Scanning files...")
+		chunks, err := nlp.WalkAndChunk()
+		if err != nil {
+			return fmt.Errorf("scan codebase: %w", err)
+		}
+		onStatus(fmt.Sprintf("Found %d files, %d chunks", countUniqueFiles(chunks), len(chunks)))
+		embedStart = time.Now()
+		idx, err = nlp.BuildIndex(ctx, embedClient, onProgress)
+		if err != nil {
+			return fmt.Errorf("build index: %w", err)
+		}
 	}
 
 	if !cfg.JSONMode && !cfg.AgentMode {
