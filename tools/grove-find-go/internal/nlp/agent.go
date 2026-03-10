@@ -325,7 +325,7 @@ func RunAgent(ctx context.Context, client *Client, query string, opts AgentOptio
 // preSearchVectors embeds the query and returns formatted vector search results
 // for inclusion in the system prompt. This gives the agent a head start.
 func preSearchVectors(ctx context.Context, client *Client, idx *Index, query string) string {
-	vectors, err := client.Embed(ctx, []string{query})
+	vectors, err := client.Embed(ctx, []string{query}, nil)
 	if err != nil {
 		return "(vector search failed: " + err.Error() + ")"
 	}

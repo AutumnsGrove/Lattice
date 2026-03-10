@@ -257,7 +257,7 @@ func execVectorSearch(tc ToolCall, toolCtx *ToolContext) ToolResult {
 	}
 
 	// Embed the query
-	vectors, err := toolCtx.Client.Embed(toolCtx.Ctx, []string{args.Query})
+	vectors, err := toolCtx.Client.Embed(toolCtx.Ctx, []string{args.Query}, nil)
 	if err != nil {
 		return ToolResult{ToolCallID: tc.ID, Content: "Error embedding query: " + err.Error()}
 	}

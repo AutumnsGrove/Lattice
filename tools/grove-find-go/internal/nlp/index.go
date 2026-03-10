@@ -81,7 +81,7 @@ func BuildIndex(ctx context.Context, client *Client, onProgress func(done, total
 		texts[i] = c.Content
 	}
 
-	vectors, err := client.Embed(ctx, texts)
+	vectors, err := client.Embed(ctx, texts, onProgress)
 	if err != nil {
 		return nil, fmt.Errorf("embed chunks: %w", err)
 	}
@@ -102,9 +102,6 @@ func BuildIndex(ctx context.Context, client *Client, onProgress func(done, total
 			Snippet:   c.Snippet,
 			Mtime:     mtimes[c.FilePath],
 			Vector:    vectors[i],
-		}
-		if onProgress != nil {
-			onProgress(i+1, len(chunks))
 		}
 	}
 

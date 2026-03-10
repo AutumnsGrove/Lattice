@@ -315,21 +315,27 @@ func runIndexBuild(ctx context.Context, cfg *config.Config, incremental bool) er
 	}
 	onStatus(fmt.Sprintf("Found %d files, %d chunks", countUniqueFiles(chunks), len(chunks)))
 
-	// Progress callback for embedding
+	// Progress callback for embedding — fires after each batch
+	embedStart := time.Now()
 	onProgress := func(done, total int) {
 		if cfg.JSONMode {
 			return
 		}
+		pct := 0
+		if total > 0 {
+			pct = done * 100 / total
+		}
+		elapsed := time.Since(embedStart).Round(time.Second)
+		eta := ""
+		if done > 0 && done < total {
+			rate := float64(done) / time.Since(embedStart).Seconds()
+			remaining := time.Duration(float64(total-done)/rate) * time.Second
+			eta = fmt.Sprintf(", ~%s remaining", remaining.Round(time.Second))
+		}
 		if cfg.AgentMode {
-			if done%100 == 0 || done == total {
-				fmt.Fprintf(os.Stderr, "--- Embedding %d/%d ---\n", done, total)
-			}
+			fmt.Fprintf(os.Stderr, "--- Embedding %d/%d (%d%%) [%s elapsed%s] ---\n", done, total, pct, elapsed, eta)
 		} else {
-			pct := 0
-			if total > 0 {
-				pct = done * 100 / total
-			}
-			fmt.Fprintf(os.Stderr, "\r  \033[K  Embedding... %d/%d (%d%%)", done, total, pct)
+			fmt.Fprintf(os.Stderr, "\r\033[K  Embedding... %d/%d (%d%%) [%s elapsed%s]", done, total, pct, elapsed, eta)
 		}
 	}
 

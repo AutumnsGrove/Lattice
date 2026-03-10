@@ -210,9 +210,10 @@ func (c *Client) IsHealthy(ctx context.Context) bool {
 }
 
 // Embed sends texts to /v1/embeddings and returns their vector representations.
-// Batch size is capped at 16 texts per request. Each batch gets a generous 5-minute
+// Batch size is 64 texts per request. Each batch gets a generous 5-minute
 // timeout since embedding can be slow for large inputs on smaller GPUs.
-func (c *Client) Embed(ctx context.Context, texts []string) ([][]float32, error) {
+// The optional onProgress callback is called after each batch with (done, total) counts.
+func (c *Client) Embed(ctx context.Context, texts []string, onProgress func(done, total int)) ([][]float32, error) {
 	if len(texts) == 0 {
 		return nil, nil
 	}
@@ -280,6 +281,10 @@ func (c *Client) Embed(ctx context.Context, texts []string) ([][]float32, error)
 
 		for _, d := range embedResp.Data {
 			allEmbeddings[start+d.Index] = d.Embedding
+		}
+
+		if onProgress != nil {
+			onProgress(end, len(texts))
 		}
 	}
 
