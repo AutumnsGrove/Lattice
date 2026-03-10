@@ -2,6 +2,8 @@
 -- Initial clients and allowed emails
 
 -- GroveEngine client (internal sites on *.grove.place)
+-- NOTE: client_id "groveengine" is a legacy opaque identifier. Not worth
+-- renaming to "lattice" — see #1153 for the full trace (14+ files, D1 prod data).
 INSERT OR REPLACE INTO clients (id, name, client_id, client_secret_hash, redirect_uris, allowed_origins)
 VALUES (
     'c1000000-0000-0000-0000-000000000001',

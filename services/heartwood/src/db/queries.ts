@@ -35,6 +35,11 @@ import { generateUUID } from "../utils/crypto.js";
  * Wildcard configuration for multi-tenant clients.
  * Maps client_id to pattern config for dynamic redirect URI validation.
  */
+// NOTE: "groveengine" is a legacy client_id baked into D1 production data,
+// OAuth flows, CORS lists, domain blocklists, and seed SQL. Renaming to
+// "lattice" was considered (#1153) but the blast radius across 14+ files
+// and a required D1 migration isn't worth it for an opaque identifier
+// that users never see. Leave as-is. — 2026-03-10
 const WILDCARD_CLIENTS: Record<string, { pattern: RegExp; baseDomain: string }> = {
 	groveengine: {
 		// Matches https://{subdomain}.grove.place/auth/callback
