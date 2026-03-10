@@ -1,353 +1,380 @@
 ---
 name: gathering-feature
-description: The drum sounds. Eight animals gather — each a fresh subagent with its own context, model, and focus. The conductor orchestrates, verifies gates, and ensures every animal actually does its job. Use when building a full feature from exploration to documentation.
+description: The drum sounds. Bloodhound, Elephant, Turtle, Beaver, Raccoon, Deer, Fox, and Owl gather for complete feature development. Use when building a full feature from exploration to documentation — secure by design.
 ---
 
 # Gathering Feature 🌲🐾
 
-The drum echoes through the forest. But this time, it's different. The conductor stands at the center of the clearing — not doing the work, but orchestrating it. Each animal arrives with fresh eyes, reads its own instructions, and works with full attention. No context fatigue. No phoning it in. No "the code documents itself." Eight animals, eight fresh minds, one feature built right.
+The drum echoes through the forest. One by one, they come. The Bloodhound scouts the territory. The Elephant builds with unstoppable momentum. The Turtle hardens what was built — bone-deep security, not bolted on afterward. The Beaver tests the hardened code. The Raccoon audits for secrets and cleanup. The Deer ensures all can travel the paths. The Fox optimizes for speed. The Owl documents what was learned. When the gathering completes, a feature stands where before there was only forest — secure from birth.
 
 ## When to Summon
 
 - Building a complete feature from scratch
 - Major functionality spanning frontend, backend, and database
 - Features requiring exploration, implementation, testing, and documentation
-- When you want the full lifecycle handled with consistent quality through every phase
+- When you want the full lifecycle handled automatically
 
-**IMPORTANT:** This gathering is a **conductor**. It never writes code, tests, or docs directly. It dispatches subagents — one per animal — each with isolated context and an intentional model. The conductor only manages handoffs and gate checks.
+---
+
+## Grove Tools for This Gathering
+
+Use `gw` and `gf` throughout. Quick reference for feature work:
+
+```bash
+# Orientation — start every gathering here
+gw context
+
+# Exploration phase (Bloodhound)
+gf --agent search "pattern"         # Find relevant code
+gf --agent func "functionName"      # Find function definitions
+gf --agent usage "ComponentName"    # Find where things are used
+gf --agent impact "module"          # Understand change blast radius
+
+# Testing phase (Beaver)
+gw ci --affected --diagnose         # Run CI on affected packages
+
+# Shipping phase (after all animals complete)
+gw git pr-prep                      # Preflight check before PR
+gw git ship --write -a -m "feat: description"  # Commit + push
+```
 
 ---
 
 ## The Gathering
 
 ```
-SUMMON → DISPATCH → GATE → DISPATCH → GATE → ... → CHORUS
-  ↓         ↓        ↓        ↓        ↓              ↓
-Spec    Bloodhound  Check  Elephant  Check    Final Verification
-(self)   (haiku)     ✓     (opus)    ✓         & Summary
+SUMMON → ORGANIZE → EXECUTE → VALIDATE → COMPLETE
+   ↓         ↲          ↲          ↲          ↓
+Receive  Dispatch   Animals    Verify   Feature
+Request  Animals    Work       All      Ready
 ```
 
-### Animals Dispatched
+### Animals Mobilized
 
-| Order | Animal        | Model  | Role                           | Fresh Eyes?                                    |
-| ----- | ------------- | ------ | ------------------------------ | ---------------------------------------------- |
-| 1     | 🐕 Bloodhound | haiku  | Scout codebase, map territory  | Yes — sees only the spec                       |
-| 2     | 🐘 Elephant   | opus   | Build the feature across files | Yes — sees only spec + territory map           |
-| 3     | 🐢 Turtle     | opus   | Harden security (adversarial)  | Yes — sees only file list, not build reasoning |
-| 4     | 🦫 Beaver     | sonnet | Write tests from behavior      | Yes — sees only file list, not impl details    |
-| 5a    | 🦝 Raccoon    | sonnet | Security audit + cleanup       | Yes — parallel                                 |
-| 5b    | 🦌 Deer       | sonnet | Accessibility audit            | Yes — parallel                                 |
-| 5c    | 🦊 Fox        | sonnet | Performance optimization       | Yes — parallel                                 |
-| 6     | 🦉 Owl        | opus   | Write actual documentation     | Yes — receives full summary                    |
-
-**Reference:** Load `references/conductor-dispatch.md` for exact subagent prompts and handoff formats
+1. **🐕 Bloodhound** — Scout the codebase, understand patterns
+2. **🐘 Elephant** — Build the multi-file feature
+3. **🐢 Turtle** — Harden what was built (secure by design, not bolted on)
+4. **🦫 Beaver** — Write comprehensive tests (including hardened code)
+5. **🦝 Raccoon** — Security audit and cleanup
+6. **🦌 Deer** — Accessibility audit
+7. **🦊 Fox** — Performance optimization
+8. **🦉 Owl** — Document the feature
 
 ---
 
 ### Phase 1: SUMMON
 
-_The drum sounds. The conductor steps into the clearing..._
+_The drum sounds. The forest listens..._
 
-The conductor (this skill) receives the feature request and prepares the dispatch plan:
+Receive and parse the request:
 
-- Clarify: What does this feature do? Which users benefit? What's in scope?
-- Identify affected packages and likely file count
-- Determine if Elephant needs multi-agent dispatch (>15 files across multiple packages)
-- Confirm the gathering with the human
+**Clarify the Feature:**
 
-**Output:** Feature specification, estimated scope, dispatch plan confirmed.
+- What does this feature do?
+- Which users benefit?
+- What's in scope? What's out?
+- Any existing issues or specs?
 
----
+**Confirm:**
 
-### Phase 2: SCOUT (Bloodhound)
-
-_The conductor signals. The Bloodhound enters the forest..._
-
-```
-Agent(bloodhound, model: haiku)
-  Input:  feature spec only
-  Reads:  bloodhound-scout/SKILL.md (MANDATORY)
-  Output: territory map
-```
-
-Dispatch a **haiku subagent** to scout the codebase. The Bloodhound receives ONLY the feature specification — no opinions, no pre-analysis. It reads its own skill file and executes its full SCENT → TRACK → HUNT → REPORT workflow.
-
-**Handoff to conductor:** Territory map (files to change, patterns found, integration points, existing conventions, potential obstacles).
-
-**Gate check:** Territory map received with at least: file list, pattern summary, integration points. If incomplete, resume the agent with specific questions.
+> "I'll mobilize a gathering for: **[feature description]**
+>
+> This will involve:
+>
+> - 🐕 Bloodhound scouting the codebase
+> - 🐘 Elephant building across **[estimated files]** files
+> - 🐢 Turtle hardening security by design
+> - 🦫 Beaver writing tests
+> - 🦝 Raccoon auditing for secrets and cleanup
+> - 🦌 Deer checking accessibility
+> - 🦊 Fox optimizing performance
+> - 🦉 Owl writing documentation
+>
+> Proceed with the gathering?"
 
 ---
 
-### Phase 3: BUILD (Elephant)
+### Phase 2: ORGANIZE
 
-_The ground trembles. The Elephant arrives..._
+_The animals assemble, knowing their roles..._
 
-```
-Agent(elephant, model: opus)
-  Input:  feature spec + territory map (from Bloodhound)
-  Reads:  elephant-build/SKILL.md + references (MANDATORY)
-  Output: built files list + implementation summary
-```
+Dispatch in sequence:
 
-Dispatch an **opus subagent** to build the feature. The Elephant receives the spec and territory map — NOT the Bloodhound's reasoning process, just its structured output.
-
-**Multi-agent dispatch** (when scope > 15 files or spans 3+ packages):
+**Dispatch Order:**
 
 ```
-Agent(elephant-backend, model: opus)   → API routes, services, migrations
-Agent(elephant-frontend, model: opus)  → Svelte components, stores, pages    PARALLEL
-Agent(elephant-schema, model: sonnet)  → Database migrations, types
-
-Then: Agent(elephant-wire, model: opus) → Integration wiring across all three
+Bloodhound ──→ Elephant ──→ Turtle ──→ Beaver ──→ Raccoon ──→ Deer ──→ Fox ──→ Owl
+   │              │            │          │           │          │        │       │
+   │              │            │          │           │          │        │       │
+Scout          Build       Harden      Test       Secrets    a11y    Speed   Docs
+Patterns      Feature     Security    Coverage    Cleanup    Check   Opt     Write
 ```
 
-Each sub-elephant reads `elephant-build/SKILL.md` and works on its domain only.
+**Cross-Cutting Standard — Signpost Error Codes:**
+All animals MUST use Signpost error codes (from `@autumnsgrove/lattice/errors`). This is not optional:
 
-**Cross-cutting standards the Elephant MUST follow:**
+- **Elephant** uses them when building (buildErrorJson in API routes, throwGroveError in page loads)
+- **Turtle** verifies all errors use Signpost codes during hardening (Phase 2E checklist)
+- **Beaver** tests that API routes return proper `error_code` fields
+- **Raccoon** audits for bare `throw error()` and `console.error` without `logGroveError()`
+- Client-side feedback uses `toast` from `@autumnsgrove/lattice/ui`
 
-- Signpost error codes for all error paths (`buildErrorJson`, `throwGroveError`)
-- Rootwork type safety at boundaries (`parseFormData`, `safeJsonParse`)
-- Reference: `AgentUsage/error_handling.md`, `AgentUsage/rootwork_type_safety.md`
+See `AgentUsage/error_handling.md` for the full reference.
 
-**Handoff to conductor:** File list (every file created/modified), implementation summary (what was built, key decisions), any open questions.
+**Type Safety at Boundaries (Rootwork):**
 
-**Gate check:** Run `gw ci --affected --fail-fast` — must at least compile. If build fails, resume the Elephant agent with error output.
+- **Elephant** validates form inputs with `parseFormData()` and KV reads with `safeJsonParse()`
+- **Turtle** verifies all trust boundaries use Rootwork utilities (no `as` casts at boundaries)
+- **Beaver** tests that validation rejects bad input and catch blocks use `isRedirect()`/`isHttpError()`
+- **Raccoon** audits for unsafe casts and unvalidated JSON parsing
+- Reference: `AgentUsage/rootwork_type_safety.md`
+
+**Dependencies:**
+
+- Bloodhound must complete before Elephant (needs context)
+- Elephant must complete before Turtle (hardens what was built)
+- Turtle must complete before Beaver (tests the hardened code)
+- Beaver must complete before Raccoon (tests catch remaining issues)
+- Raccoon, Deer, Fox can run in parallel after Beaver
+- Owl last (documents everything)
+
+**Why Turtle before Beaver:**
+Security is not a phase you bolt on after testing — it shapes _what_ you build. The Turtle reviews Elephant's work and hardens it: adds input validation schemas, output encoding, parameterized queries, security headers. Then Beaver tests the hardened code, catching both functional and security regressions. This is secure by design.
 
 ---
 
-### Phase 4: HARDEN (Turtle)
+### Phase 3: EXECUTE
 
-_The Turtle approaches slowly. It sees only what was built — not why..._
+_The animals work. The forest transforms..._
 
-```
-Agent(turtle, model: opus)
-  Input:  file list ONLY (not Elephant's reasoning — fresh adversarial eyes)
-  Reads:  turtle-harden/SKILL.md + references (MANDATORY)
-  Output: hardening report + applied fixes
-```
-
-Dispatch an **opus subagent** for security hardening. The Turtle receives ONLY the file list — not the Elephant's implementation summary. This is intentional: the Turtle should examine the code with adversarial fresh eyes, not sympathize with the builder's reasoning.
-
-**What the Turtle hardens:**
-
-- Input validation (Zod schemas on all entry points)
-- Output encoding (context-aware, DOMPurify for rich text)
-- Parameterized queries (no string concatenation in SQL)
-- Security headers (CSP with nonces, HSTS, X-Frame)
-- Signpost error codes (verify Elephant used them correctly)
-- Rootwork boundary safety (verify no `as` casts at trust boundaries)
-
-**Handoff to conductor:** Hardening report (what was found, what was fixed, defense layers applied), updated file list.
-
-**Gate check:** Run `gw ci --affected --fail-fast` — must still compile after hardening. If broken, resume Turtle agent.
+Execute each phase by loading and running each animal's dedicated skill:
 
 ---
 
-### Phase 5: TEST (Beaver)
+**🐕 BLOODHOUND — SCOUT**
 
-_The Beaver surveys the stream. It doesn't know how the dam was built — only what it should hold..._
+Load skill: `bloodhound-scout`
 
-```
-Agent(beaver, model: sonnet)
-  Input:  file list + feature spec (NOT implementation details)
-  Reads:  beaver-build/SKILL.md + references (MANDATORY)
-  Output: test suite + test results
-```
-
-Dispatch a **sonnet subagent** to write tests. The Beaver receives the file list and the original feature spec — NOT the Elephant's implementation summary or Turtle's hardening report. Tests should be written from **behavior**, not from reading the code.
-
-**What the Beaver tests:**
-
-- Feature behavior (from the spec, not the code)
-- Security regressions (API routes return proper `error_code` fields)
-- Boundary validation (rejection of bad input)
-- Catch block type guards (`isRedirect`/`isHttpError`)
-
-**Handoff to conductor:** Test file list, test results (pass/fail counts), any behavioral gaps found.
-
-**Gate check:** ALL tests pass. Run `gw ci --affected --fail-fast --diagnose`. If tests fail, resume Beaver agent with failure output. If a test reveals an implementation bug, note it for the conductor to decide: resume Elephant or Turtle?
+Execute the full Bloodhound workflow focused on [the feature being built].
+Handoff: territory map (files to change, patterns found, integration points, potential obstacles) → Elephant
 
 ---
 
-### Phase 6: AUDIT (Raccoon + Deer + Fox — PARALLEL)
+**🐘 ELEPHANT — BUILD**
 
-_Three animals enter the clearing at once. Each sees with different eyes..._
+Load skill: `elephant-build`
 
-Dispatch three subagents **simultaneously**:
-
-```
-Agent(raccoon, model: sonnet)  → Input: file list + feature scope
-  Reads: raccoon-audit/SKILL.md
-  Focus: secrets, dead code, dependency audit, unsafe patterns
-
-Agent(deer, model: sonnet)     → Input: UI file list + feature spec      PARALLEL
-  Reads: deer-sense/SKILL.md
-  Focus: keyboard nav, screen readers, contrast, touch targets
-
-Agent(fox, model: sonnet)      → Input: hot path files + feature spec
-  Reads: fox-optimize/SKILL.md
-  Focus: bundle size, query performance, lazy loading
-```
-
-Each animal works in isolation. They don't see each other's findings. The conductor collects all three reports.
-
-**Handoff to conductor:** Three reports — audit findings, a11y findings, performance findings. Plus any fixes each animal applied.
-
-**Gate check:** Review all three reports. If any animal found issues that need fixing:
-
-- Security issues → conductor applies fixes or re-dispatches targeted agent
-- A11y issues → conductor applies fixes
-- Performance issues → conductor applies fixes
-- Re-run `gw ci --affected --fail-fast --diagnose` after all fixes
+Execute the full Elephant workflow using the Bloodhound's territory map.
+Handoff: complete list of built files (components, endpoints, schema changes, wired integrations) → Turtle for hardening
 
 ---
 
-### Phase 7: DOCUMENT (Owl)
+**🐢 TURTLE — HARDEN**
 
-_The Owl opens its eyes. It has heard everything — now it speaks..._
+Load skill: `turtle-harden`
 
-```
-Agent(owl, model: opus)
-  Input:  FULL gathering summary (spec, territory map, file list,
-          hardening report, test results, audit/a11y/perf reports)
-  Reads:  owl-archive/SKILL.md + references (MANDATORY)
-  Output: actual documentation written to files
-```
-
-Dispatch an **opus subagent** to write documentation. The Owl receives the FULL gathering summary — it needs context to write meaningful docs. Opus because documentation requires warmth, voice, and the judgment to know what's worth documenting.
-
-**What the Owl writes:**
-
-- Help article or user-facing documentation (if feature is user-visible)
-- API documentation (if new endpoints were created)
-- Inline code comments where logic isn't self-evident (NOT "the code documents itself")
-- Update any affected existing docs
-
-**Handoff to conductor:** Documentation file list, summary of what was documented.
-
-**Gate check:** Verify documentation files exist and have actual content (not stubs).
+Execute the full Turtle workflow on everything the Elephant built.
+Handoff: hardened code (input validation, output encoding, parameterized queries, security headers, error handling) → Beaver for testing
 
 ---
 
-### Phase 8: CHORUS
+**🦫 BEAVER — TEST**
 
-_Dawn breaks. The conductor raises their hands. The forest sings..._
+Load skill: `beaver-build`
 
-The conductor runs final verification and presents the summary:
+Execute the full Beaver workflow on the hardened code, including security regression tests from Turtle's hardening.
+Handoff: test results and coverage summary → Raccoon, Deer, Fox (parallel)
+
+---
+
+**🦝 RACCOON — AUDIT** _(parallel with Deer and Fox)_
+
+Load skill: `raccoon-audit`
+
+Execute the full Raccoon workflow on the completed feature.
+Handoff: audit findings resolved → Owl
+
+---
+
+**🦌 DEER — SENSE** _(parallel with Raccoon and Fox)_
+
+Load skill: `deer-sense`
+
+Execute the full Deer workflow on all UI produced by the Elephant and Chameleon.
+Handoff: accessibility findings resolved → Owl
+
+---
+
+**🦊 FOX — OPTIMIZE** _(parallel with Raccoon and Deer)_
+
+Load skill: `fox-optimize`
+
+Execute the full Fox workflow targeting the new feature's bundle, queries, and assets.
+Handoff: performance findings resolved → Owl
+
+---
+
+**🦉 OWL — ARCHIVE**
+
+Load skill: `owl-archive`
+
+Execute the full Owl workflow, documenting everything built, hardened, tested, and optimized in this gathering.
+
+---
+
+### Phase 4: VALIDATE
+
+_The work is done. Each animal verifies their contribution..._
+
+**MANDATORY: Run full affected-package verification before the gathering concludes.**
+
+This is the final quality gate — the moment the entire gathering's work is proven sound:
 
 ```bash
-# Final verification — the whole gathering's work proven sound
+# Step 1: Sync all dependencies
 pnpm install
+
+# Step 2: Run affected-only CI — lint, check, test, build on ONLY packages the gathering touched
 gw ci --affected --fail-fast --diagnose
 ```
 
+**If verification fails:** Identify which animal's work caused the failure. Return to that phase, fix the issue, and re-run verification. The gathering does not conclude on broken code.
+
 **Visual Verification (for features with UI):**
 
+If the feature has a user-facing interface, capture it before declaring the gathering complete:
+
 ```bash
+# Prerequisite: seed the database if not already done
+uv run --project tools/glimpse glimpse seed --yes
+
+# Verify the feature renders correctly across seasons
+# Local routing uses ?subdomain= for tenant isolation; --auto starts the dev server
 uv run --project tools/glimpse glimpse matrix \
   "http://localhost:5173/[feature-page]?subdomain=midnight-bloom" \
   --seasons autumn,winter --themes light,dark --logs --auto
+
+# Walk through the feature flow visually
+uv run --project tools/glimpse glimpse browse \
+  "http://localhost:5173/[feature-page]?subdomain=midnight-bloom" \
+  --do "interact with the new feature elements" --screenshot-each --logs --auto
 ```
+
+Review screenshots for visual correctness, console errors, and theme consistency. Fix and re-capture until the feature looks right.
+
+**Validation Checklist (after CI passes):**
+
+- [ ] CI: `gw ci --affected` passes clean (lint, check, test, build)
+- [ ] Glimpse: Feature visually verified (if UI work) — no console errors
+- [ ] Bloodhound: All integration points mapped
+- [ ] Elephant: Feature functional end-to-end
+- [ ] Turtle: Input validation on all entry points
+- [ ] Turtle: Output encoding on all exit points
+- [ ] Turtle: Security headers configured
+- [ ] Turtle: Defense-in-depth layers verified
+- [ ] Beaver: All tests passing, coverage adequate
+- [ ] Raccoon: No secrets or dead code found
+- [ ] Deer: WCAG AA compliance verified
+- [ ] Fox: Performance targets met
+- [ ] Owl: Documentation complete
+- [ ] All form data parsed with parseFormData() + Zod schemas
+- [ ] All KV/JSON reads use safeJsonParse() with schemas
+- [ ] Catch blocks use isRedirect()/isHttpError() type guards
+- [ ] No `as` casts at trust boundaries
+
+**Quality Gates:**
+
+```
+If CI fails:
+  → Read diagnostics (--diagnose output)
+  → Identify the responsible animal phase
+  → Fix the issue
+  → Re-run: gw ci --affected --fail-fast --diagnose
+  → Repeat until clean
+
+If any animal finds critical issues:
+  → Return to that phase
+  → Fix the issue
+  → Re-run CI verification
+  → Continue validation
+
+If all gates pass:
+  → Proceed to COMPLETE
+```
+
+---
+
+### Phase 5: COMPLETE
+
+_The gathering ends. A feature stands complete..._
 
 **Completion Report:**
 
+```markdown
+## 🌲 GATHERING FEATURE COMPLETE
+
+### Feature: [Name]
+
+### Animals Mobilized
+
+🐕 Bloodhound → 🐘 Elephant → 🐢 Turtle → 🦫 Beaver → 🦝 Raccoon → 🦌 Deer → 🦊 Fox → 🦉 Owl
+
+### What Was Built
+
+- **Files Changed:** [count]
+- **New Components:** [list]
+- **API Endpoints:** [list]
+- **Database Changes:** [summary]
+
+### Quality Verification
+
+- ✅ Tests: [X] passing, [Y]% coverage
+- ✅ Hardened: Input validation, output encoding, security headers
+- ✅ Security: No secrets or vulnerabilities found
+- ✅ Accessibility: WCAG AA compliant
+- ✅ Performance: [metrics]
+- ✅ Documentation: Complete
+
+### Artifacts Created
+
+- Source code (committed)
+- Tests ([location])
+- Documentation ([location])
+- Migration scripts (if applicable)
+
+### Time Elapsed
+
+[Duration]
+
+_The forest grows. The feature lives._
 ```
-🌲 GATHERING FEATURE COMPLETE
-
-Feature: [Name]
-
-DISPATCH LOG
-  🐕 Bloodhound (haiku)  — [territory mapped, X files identified]
-  🐘 Elephant (opus)      — [Y files built across Z packages]
-  🐢 Turtle (opus)        — [N hardening fixes applied, M defense layers]
-  🦫 Beaver (sonnet)      — [P tests written, all passing]
-  🦝 Raccoon (sonnet)     — [audit clean / N issues fixed]
-  🦌 Deer (sonnet)        — [a11y verified / N issues fixed]
-  🦊 Fox (sonnet)         — [performance verified / N optimizations]
-  🦉 Owl (opus)           — [documentation written at: paths]
-
-GATE LOG
-  After Scout:    ✅ territory map complete
-  After Build:    ✅ compiles clean
-  After Harden:   ✅ compiles clean, hardening applied
-  After Test:     ✅ all tests pass
-  After Audit:    ✅ findings resolved
-  After Document: ✅ docs written (not stubs)
-  Final CI:       ✅ gw ci --affected passes
-
-The forest grows. The feature lives.
-```
 
 ---
 
-## Conductor Rules
+## Example Gathering
 
-### Never Do Animal Work
+**User:** "/gathering-feature Add a bookmarking system for posts"
 
-The conductor dispatches. It does not scout, build, harden, test, audit, or document. If you catch yourself writing code, stop — you should be dispatching a subagent.
+**Gathering execution:**
 
-### Fresh Eyes Are a Feature
+1. 🌲 **SUMMON** — "Mobilizing for: Bookmarking system. Allow users to save posts for later."
 
-Turtle and Beaver intentionally receive LESS context than the full history. Turtle doesn't see Elephant's reasoning (adversarial fresh eyes). Beaver doesn't see implementation details (behavioral testing). This isolation produces better results.
+2. 🌲 **ORGANIZE** — "Dispatch sequence: Bloodhound → Elephant → Turtle → Beaver → Raccoon + Deer + Fox → Owl"
 
-### Gate Every Transition
+3. 🌲 **EXECUTE** —
+   - 🐕 Scout: "Found post components, user service patterns, database conventions"
+   - 🐘 Build: "Created bookmark service, API endpoints, UI components, database schema"
+   - 🐢 Harden: "Added Zod validation on bookmark endpoints, parameterized all queries, output encoding on bookmark titles, CSP headers configured"
+   - 🦫 Test: "Added 18 tests covering CRUD operations, auth checks, security regressions, edge cases"
+   - 🦝 Audit: "No secrets, clean dependencies, dead code removed"
+   - 🦌 Sense: "Keyboard nav works, screen reader announces, contrast passes"
+   - 🦊 Optimize: "Lazy loaded bookmarks, indexed queries, compressed images"
+   - 🦉 Archive: "Help doc written, API documented, code commented"
 
-Run verification between every animal. Don't let bad state cascade — catch it early.
+4. 🌲 **VALIDATE** — "All quality gates pass"
 
-### Parallel When Possible
-
-Raccoon, Deer, and Fox run simultaneously. Three fresh agents, three different concerns, zero context sharing.
-
-### Multi-Agent for Heavy Phases
-
-If Elephant would touch 15+ files across multiple packages, split into domain-focused sub-elephants. Each reads the skill, each handles its domain, then a wiring agent integrates.
-
-### Resume, Don't Restart
-
-If a gate check fails, **resume** the failing agent with the error context. Don't spawn a new one — the resumed agent has its prior work in context.
-
-### Communication
-
-- "The drum sounds..." (summoning)
-- "Dispatching [animal]..." (spawning subagent)
-- "Gate check: [result]..." (verifying between phases)
-- "The chorus rises..." (final verification)
+5. 🌲 **COMPLETE** — "Feature deployed, hardened, tested, audited, documented — secure from birth"
 
 ---
 
-## Anti-Patterns
-
-**The conductor does NOT:**
-
-- Write code, tests, or documentation itself (dispatch subagents)
-- Pass full conversation history to every agent (structured handoffs only)
-- Skip gate checks ("I'm sure it's fine")
-- Run all animals in the same context (the whole point is isolation)
-- Let agents skip reading their skill file (MANDATORY in every prompt)
-- Declare documentation "complete" without verifying files exist with content
-- Continue after a gate failure without fixing it
-
----
-
-## Quick Decision Guide
-
-| Scope                                  | Dispatch Strategy                                        |
-| -------------------------------------- | -------------------------------------------------------- |
-| Small feature (< 10 files)             | Standard: one agent per animal                           |
-| Medium feature (10-20 files)           | Standard, but consider parallel sub-elephants            |
-| Large feature (20+ files, 3+ packages) | Multi-elephant dispatch + parallel audit phase           |
-| UI-only feature                        | Skip Fox, emphasize Deer, add Glimpse verification       |
-| API-only feature                       | Skip Deer, emphasize Turtle + Raccoon                    |
-| Feature with existing tests            | Beaver reviews + extends instead of writing from scratch |
-
----
-
-## Integration
-
-**Before:** `swan-design` or `eagle-architect` for spec/architecture
-**During:** `mole-debug` if a gate check reveals mysterious failures
-**After:** `crow-reason` to challenge the result before shipping
-
----
-
-_When the drum sounds, the forest answers — with fresh eyes, full attention, and no animal phoning it in._ 🌲
+_When the drum sounds, the forest answers._ 🌲

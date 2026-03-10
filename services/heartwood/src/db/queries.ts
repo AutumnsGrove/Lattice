@@ -131,7 +131,7 @@ export async function validateRedirectUriForClient(
 	engineDb?: D1Database,
 ): Promise<boolean> {
 	// First, check exact match (backward compatible)
-	const allowedUris = safeParseJson<string[]>(client.redirect_uris, []);
+	const allowedUris = safeParseJson(client.redirect_uris, []);
 	if (allowedUris.includes(redirectUri)) {
 		return true;
 	}
@@ -179,7 +179,7 @@ export async function validateClientOrigin(
 	const client = await getClientByClientId(db, clientId);
 	if (!client) return false;
 
-	const allowedOrigins = safeParseJson<string[]>(client.allowed_origins, []);
+	const allowedOrigins = safeParseJson(client.allowed_origins, []);
 	return allowedOrigins.includes(origin);
 }
 

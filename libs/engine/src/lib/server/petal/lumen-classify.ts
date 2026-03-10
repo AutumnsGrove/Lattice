@@ -92,7 +92,7 @@ export async function classifyWithLumen(
 		const parsed = safeParseJson<{
 			category: string;
 			confidence: number;
-		} | null>(jsonMatch[0], null);
+		}>(jsonMatch[0], null);
 
 		if (!parsed) {
 			throw new Error("Failed to parse JSON");

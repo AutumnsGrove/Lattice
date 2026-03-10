@@ -279,7 +279,7 @@ export async function verifyWebhookSignature(
 		}
 
 		// Parse and return the event
-		const event = safeParseJson<StripeWebhookEvent | null>(payload, null);
+		const event = safeParseJson<StripeWebhookEvent>(payload, null);
 		if (!event) {
 			return { valid: false, error: "Failed to parse webhook payload" };
 		}

@@ -135,7 +135,7 @@ function parsePolicyModerationResponse(response: string): {
 			categories?: string[];
 			confidence?: number;
 			reason?: string;
-		} | null>(jsonMatch[0], null);
+		}>(jsonMatch[0], null);
 
 		if (!parsed) {
 			return { safe: true, categories: [], confidence: 0.5 };

@@ -446,7 +446,7 @@ export async function classifyImage(
 		const parsed = safeParseJson<{
 			category: string;
 			confidence: number;
-		} | null>(jsonMatch[0], null);
+		}>(jsonMatch[0], null);
 
 		if (!parsed) {
 			throw new Error("Failed to parse JSON");
@@ -513,7 +513,7 @@ export async function runSanityCheck(
 			isMeme?: boolean;
 			isDrawing?: boolean;
 			quality?: number;
-		} | null>(jsonMatch[0], null);
+		}>(jsonMatch[0], null);
 
 		if (!parsed) {
 			throw new Error("Failed to parse JSON");
