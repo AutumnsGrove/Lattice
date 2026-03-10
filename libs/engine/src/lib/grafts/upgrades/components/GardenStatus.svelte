@@ -113,9 +113,9 @@
 	<div class="flex items-start justify-between mb-4">
 		<div class="flex items-center gap-3">
 			<div
-				class="w-12 h-12 rounded-full bg-grove-100/50 dark:bg-grove-900/50 flex items-center justify-center"
+				class="w-12 h-12 rounded-full bg-grove-100/50 dark:bg-cream-300/30 flex items-center justify-center"
 			>
-				<IconComponent class="w-6 h-6 text-grove-600 dark:text-grove-400" />
+				<IconComponent class="w-6 h-6 text-grove-600 dark:text-grove-300" />
 			</div>
 			<div>
 				<h3 class="font-serif text-lg text-foreground">

@@ -317,7 +317,8 @@
 								class="text-lg font-semibold {titleClass} {icon ? 'flex items-center gap-2' : ''}"
 							>
 								{#if icon}
-									<icon class="w-5 h-5 shrink-0 {iconClass || 'text-muted-foreground'}"></icon>
+									{@const Icon = icon}
+								<Icon class="w-5 h-5 shrink-0 {iconClass || 'text-muted-foreground'}" />
 								{/if}
 								{title}
 							</h3>
