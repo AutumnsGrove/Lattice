@@ -90,6 +90,6 @@ export async function validateOriginForClient(
 	const client = await getClientByClientId(db, clientId);
 	if (!client) return false;
 
-	const allowedOrigins = safeParseJson(client.allowed_origins, []);
+	const allowedOrigins = safeParseJson<string[]>(client.allowed_origins, []);
 	return allowedOrigins.includes(origin);
 }

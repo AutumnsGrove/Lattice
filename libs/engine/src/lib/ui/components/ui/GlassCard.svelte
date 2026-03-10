@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Component, Snippet } from "svelte";
+	import type { Component, Snippet, SvelteComponent } from "svelte";
 	import type { HTMLAttributes } from "svelte/elements";
 	import { cn } from "$lib/ui/utils";
 	import { GossamerClouds } from "@autumnsgrove/gossamer/svelte";
@@ -116,8 +116,9 @@
 		variant?: GlassVariant;
 		title?: string;
 		description?: string;
-		/** Optional icon component rendered beside the title */
-		icon?: Component;
+		/** Optional icon component rendered beside the title (accepts Svelte 4 + 5 component types) */
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		icon?: Component | (new (...args: any[]) => SvelteComponent);
 		/** Additional CSS classes for the icon (overrides default text-muted-foreground) */
 		iconClass?: string;
 		hoverable?: boolean;
@@ -318,7 +319,7 @@
 							>
 								{#if icon}
 									{@const Icon = icon}
-								<Icon class="w-5 h-5 shrink-0 {iconClass || 'text-muted-foreground'}" />
+									<Icon class="w-5 h-5 shrink-0 {iconClass || 'text-muted-foreground'}" />
 								{/if}
 								{title}
 							</h3>
