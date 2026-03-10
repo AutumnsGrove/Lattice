@@ -5,7 +5,7 @@
  * This endpoint requires authentication.
  */
 
-import { error, json } from "@sveltejs/kit";
+import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { parseImageFilename, isSupportedImage, generateGalleryId } from "$lib/curios/gallery";
 import { API_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
@@ -90,6 +90,9 @@ export const POST: RequestHandler = async ({ platform, locals }) => {
 			parsed: ReturnType<typeof parseImageFilename>;
 		}[] = [];
 
+		// R2 paths that are NOT gallery content (system files, generated thumbnails)
+		const EXCLUDED_PREFIXES = ["profile/", "thumbs/"];
+
 		// First pass: collect all objects from R2
 		do {
 			const listResult = await r2Bucket.list({
@@ -105,11 +108,16 @@ export const POST: RequestHandler = async ({ platform, locals }) => {
 					continue;
 				}
 
-				// Strip tenant prefix before parsing metadata
-				const keyWithoutPrefix = obj.key.startsWith(tenantPrefix)
+				// Skip system paths (avatars, thumbnails, etc.)
+				const keyWithoutTenant = obj.key.startsWith(tenantPrefix)
 					? obj.key.slice(tenantPrefix.length)
 					: obj.key;
-				const parsed = parseImageFilename(keyWithoutPrefix);
+				if (EXCLUDED_PREFIXES.some((p) => keyWithoutTenant.startsWith(p))) {
+					skipped++;
+					continue;
+				}
+
+				const parsed = parseImageFilename(keyWithoutTenant);
 				const existingId = existingByKey.get(obj.key);
 
 				if (existingId) {
@@ -185,6 +193,33 @@ export const POST: RequestHandler = async ({ platform, locals }) => {
 		}
 		added = inserts.length;
 
+		// Remove orphaned D1 rows: system paths that slipped in + R2 objects that no longer exist
+		let removed = 0;
+		const r2KeysFound = new Set([
+			...updates.map(({ obj }) => obj.key),
+			...inserts.map(({ obj }) => obj.key),
+		]);
+		const orphanedIds: string[] = [];
+		for (const [r2Key, id] of existingByKey) {
+			const keyWithoutTenant = r2Key.startsWith(tenantPrefix)
+				? r2Key.slice(tenantPrefix.length)
+				: r2Key;
+			// Remove rows for system paths (avatars, thumbs) that were synced before the filter
+			const isSystemPath = EXCLUDED_PREFIXES.some((p) => keyWithoutTenant.startsWith(p));
+			// Remove rows whose R2 objects no longer exist
+			const isOrphaned = !r2KeysFound.has(r2Key);
+			if (isSystemPath || isOrphaned) {
+				orphanedIds.push(id);
+			}
+		}
+		for (let i = 0; i < orphanedIds.length; i += BATCH_SIZE) {
+			const batch = orphanedIds.slice(i, i + BATCH_SIZE);
+			await db.batch(
+				batch.map((id) => db.prepare(`DELETE FROM gallery_images WHERE id = ?`).bind(id)),
+			);
+		}
+		removed = orphanedIds.length;
+
 		// Backfill aspect_ratio from existing width/height data
 		let backfilledAspectRatio = 0;
 		try {
@@ -209,6 +244,7 @@ export const POST: RequestHandler = async ({ platform, locals }) => {
 			success: true,
 			added,
 			updated,
+			removed,
 			skipped,
 			backfilledAspectRatio,
 			total: added + updated,
