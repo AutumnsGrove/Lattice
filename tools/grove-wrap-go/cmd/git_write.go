@@ -899,6 +899,88 @@ var gitCherryPickCmd = &cobra.Command{
 	},
 }
 
+// ── git merge ───────────────────────────────────────────────────────
+
+var gitMergeNoFF bool
+var gitMergeFFOnly bool
+var gitMergeAbort bool
+
+var gitMergeCmd = &cobra.Command{
+	Use:   "merge <branch>",
+	Short: "Merge a branch into the current branch",
+	Args:  cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if !gwexec.IsGitRepo() {
+			return notARepo()
+		}
+
+		branch := args[0]
+		if err := sanitizeRef(branch); err != nil {
+			return err
+		}
+
+		// Abort mode is write-tier (recovery operation)
+		if gitMergeAbort {
+			if err := requireSafety("merge"); err != nil {
+				return err
+			}
+			result, err := gwexec.Git("merge", "--abort")
+			if err != nil {
+				return err
+			}
+			if !result.OK() {
+				return fmt.Errorf("git merge --abort: %s", strings.TrimSpace(result.Stderr))
+			}
+			cfg := config.Get()
+			if cfg.JSONMode {
+				return printJSON(map[string]any{"merge_aborted": true})
+			}
+			ui.Action("Aborted", "merge in progress")
+			return nil
+		}
+
+		if err := requireSafety("merge"); err != nil {
+			return err
+		}
+		cfg := config.Get()
+
+		gitArgs := []string{"merge"}
+		if gitMergeNoFF {
+			gitArgs = append(gitArgs, "--no-ff")
+		}
+		if gitMergeFFOnly {
+			gitArgs = append(gitArgs, "--ff-only")
+		}
+		gitArgs = append(gitArgs, branch)
+
+		result, err := gwexec.Git(gitArgs...)
+		if err != nil {
+			return err
+		}
+		if !result.OK() {
+			stderr := strings.TrimSpace(result.Stderr)
+			if strings.Contains(stderr, "CONFLICT") || strings.Contains(stderr, "conflict") {
+				return fmt.Errorf("merge has conflicts — resolve them and run: git merge --continue\n  Or abort with: gw git merge --abort --write --force")
+			}
+			if strings.Contains(stderr, "Not possible to fast-forward") {
+				return fmt.Errorf("fast-forward not possible — remove --ff-only or use --no-ff")
+			}
+			return fmt.Errorf("git merge: %s", stderr)
+		}
+
+		if cfg.JSONMode {
+			return printJSON(map[string]any{
+				"merged": branch,
+				"no_ff":  gitMergeNoFF,
+			})
+		}
+
+		currentBranch, _ := gwexec.CurrentBranch()
+		ui.Action("Merged", branch+" → "+currentBranch)
+		return nil
+	},
+}
+
 // ── Helpers ─────────────────────────────────────────────────────────
 
 // maxCommitMessageLen is the maximum allowed commit message length.
@@ -1014,4 +1096,10 @@ func init() {
 
 	// git cherry-pick
 	gitCmd.AddCommand(gitCherryPickCmd)
+
+	// git merge
+	gitMergeCmd.Flags().BoolVar(&gitMergeNoFF, "no-ff", false, "Create a merge commit even for fast-forward merges")
+	gitMergeCmd.Flags().BoolVar(&gitMergeFFOnly, "ff-only", false, "Only allow fast-forward merges")
+	gitMergeCmd.Flags().BoolVar(&gitMergeAbort, "abort", false, "Abort the current merge")
+	gitCmd.AddCommand(gitMergeCmd)
 }
