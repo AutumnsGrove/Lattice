@@ -61,6 +61,49 @@ export function createChatMessage(
 }
 
 // ============================================================================
+// ERROR RESOLUTION
+// ============================================================================
+
+/**
+ * Extract an error code from a thrown value.
+ * Supports Signpost errors (error_code), Reverie errors (code), and
+ * Error instances with a code property.
+ */
+export function extractErrorCode(err: unknown): string | null {
+	if (err && typeof err === "object") {
+		const obj = err as Record<string, unknown>;
+		if (typeof obj.error_code === "string") return obj.error_code;
+		if (typeof obj.code === "string") return obj.code;
+	}
+	return null;
+}
+
+/**
+ * Resolve a caught error into a user-friendly display string.
+ *
+ * Priority: onError callback → errorMessages code lookup → Error.message → defaultError.
+ */
+export function resolveErrorMessage(
+	err: unknown,
+	options: {
+		onError?: (error: unknown) => string;
+		errorMessages?: Record<string, string>;
+		defaultError?: string;
+	},
+): string {
+	if (options.onError) return options.onError(err);
+
+	if (options.errorMessages) {
+		const code = extractErrorCode(err);
+		if (code && code in options.errorMessages) return options.errorMessages[code];
+	}
+
+	if (err instanceof Error) return err.message;
+
+	return options.defaultError ?? "Something went wrong";
+}
+
+// ============================================================================
 // BASE CONTROLLER
 // ============================================================================
 
@@ -98,6 +141,11 @@ export function createChatController(initialMessages: ChatMessageData[] = []) {
 		);
 	}
 
+	/** Mark a message as retracted (unsend). UI decides whether to hide or show placeholder. */
+	function retractMessage(id: string): void {
+		updateMessage(id, { status: "retracted" as ChatMessageStatus });
+	}
+
 	function clear(): void {
 		messages = [];
 		error = null;
@@ -120,6 +168,7 @@ export function createChatController(initialMessages: ChatMessageData[] = []) {
 		updateMessage,
 		updateMessageMetadata,
 		removeMessage,
+		retractMessage,
 		clear,
 		setLoading(value: boolean) {
 			isLoading = value;
@@ -153,8 +202,14 @@ export interface AIChatControllerOptions {
 	aiRole?: string;
 	/** Send the user's message and return the AI's response */
 	onSend: (message: string, messages: ChatMessageData[]) => Promise<AIChatResponse>;
-	/** Transform caught errors into display strings */
+	/** Transform caught errors into display strings. Takes priority over errorMessages. */
 	onError?: (error: unknown) => string;
+	/** Map error codes (Signpost error_code or code) to friendly display strings */
+	errorMessages?: Record<string, string>;
+	/** Default error when no code matches and error isn't an Error instance */
+	defaultError?: string;
+	/** Session identifier for conversation continuity (auto-generated if omitted) */
+	sessionId?: string;
 }
 
 /**
@@ -169,6 +224,7 @@ export function createAIChatController(options: AIChatControllerOptions) {
 	const aiRole = options.aiRole ?? "assistant";
 
 	let inputValue = $state("");
+	let sessionId = $state(options.sessionId ?? crypto.randomUUID());
 
 	async function send(): Promise<void> {
 		const text = inputValue.trim();
@@ -185,12 +241,7 @@ export function createAIChatController(options: AIChatControllerOptions) {
 				metadata: response.metadata,
 			});
 		} catch (err) {
-			const message = options.onError
-				? options.onError(err)
-				: err instanceof Error
-					? err.message
-					: "Something went wrong";
-			base.setError(message);
+			base.setError(resolveErrorMessage(err, options));
 		} finally {
 			base.setLoading(false);
 		}
@@ -214,6 +265,7 @@ export function createAIChatController(options: AIChatControllerOptions) {
 		updateMessage: base.updateMessage,
 		updateMessageMetadata: base.updateMessageMetadata,
 		removeMessage: base.removeMessage,
+		retractMessage: base.retractMessage,
 		clear: base.clear,
 		setLoading: base.setLoading,
 		setError: base.setError,
@@ -223,6 +275,12 @@ export function createAIChatController(options: AIChatControllerOptions) {
 		},
 		set inputValue(v: string) {
 			inputValue = v;
+		},
+		get sessionId() {
+			return sessionId;
+		},
+		set sessionId(v: string) {
+			sessionId = v;
 		},
 		send,
 		/** The role string used for user messages */
@@ -252,8 +310,14 @@ export interface ConversationalChatControllerOptions {
 	 * When omitted, the consumer manages sending manually via addLocalMessage + markSent.
 	 */
 	onSend?: (message: string, messages: ChatMessageData[]) => Promise<void>;
-	/** Transform caught errors into display strings */
+	/** Transform caught errors into display strings. Takes priority over errorMessages. */
 	onError?: (error: unknown) => string;
+	/** Map error codes (Signpost error_code or code) to friendly display strings */
+	errorMessages?: Record<string, string>;
+	/** Default error when no code matches and error isn't an Error instance */
+	defaultError?: string;
+	/** Session identifier for conversation continuity (auto-generated if omitted) */
+	sessionId?: string;
 }
 
 /**
@@ -267,6 +331,7 @@ export function createConversationalChatController(options: ConversationalChatCo
 
 	let inputValue = $state("");
 	let remoteTyping = $state<string | null>(null);
+	let sessionId = $state(options.sessionId ?? crypto.randomUUID());
 
 	/** Add a message from the local user with "sending" status. */
 	function addLocalMessage(
@@ -329,12 +394,12 @@ export function createConversationalChatController(options: ConversationalChatCo
 			markSent(id);
 		} catch (err) {
 			base.updateMessage(id, { status: "failed" as ChatMessageStatus });
-			const message = options.onError
-				? options.onError(err)
-				: err instanceof Error
-					? err.message
-					: "Failed to send";
-			base.setError(message);
+			base.setError(
+				resolveErrorMessage(err, {
+					...options,
+					defaultError: options.defaultError ?? "Failed to send",
+				}),
+			);
 		} finally {
 			base.setLoading(false);
 		}
@@ -358,6 +423,7 @@ export function createConversationalChatController(options: ConversationalChatCo
 		updateMessage: base.updateMessage,
 		updateMessageMetadata: base.updateMessageMetadata,
 		removeMessage: base.removeMessage,
+		retractMessage: base.retractMessage,
 		clear: base.clear,
 		setLoading: base.setLoading,
 		setError: base.setError,
@@ -370,6 +436,12 @@ export function createConversationalChatController(options: ConversationalChatCo
 		},
 		get remoteTyping() {
 			return remoteTyping;
+		},
+		get sessionId() {
+			return sessionId;
+		},
+		set sessionId(v: string) {
+			sessionId = v;
 		},
 		localRole: options.localRole,
 		addLocalMessage,

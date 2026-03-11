@@ -7,7 +7,7 @@
  */
 
 /** Message delivery status for conversational (non-AI) chats. */
-export type ChatMessageStatus = "sending" | "sent" | "delivered" | "read" | "failed";
+export type ChatMessageStatus = "sending" | "sent" | "delivered" | "read" | "failed" | "retracted";
 
 /** Sender identity for multi-participant chats. */
 export interface ChatSender {

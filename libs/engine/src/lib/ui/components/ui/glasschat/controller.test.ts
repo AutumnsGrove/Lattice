@@ -4,6 +4,8 @@ import {
 	createChatController,
 	createAIChatController,
 	createConversationalChatController,
+	extractErrorCode,
+	resolveErrorMessage,
 } from "./controller.svelte";
 
 // ============================================================================
@@ -869,5 +871,322 @@ describe("integration: read-only chat (Porch Admin pattern)", () => {
 			adminNote: "check account settings",
 		});
 		expect(chat.messages[0].metadata?.adminNote).toBe("check account settings");
+	});
+});
+
+// ============================================================================
+// extractErrorCode
+// ============================================================================
+
+describe("extractErrorCode", () => {
+	it("should extract Signpost error_code", () => {
+		expect(extractErrorCode({ error_code: "REV-001" })).toBe("REV-001");
+	});
+
+	it("should extract Reverie-style code", () => {
+		expect(extractErrorCode({ code: "GROVE-API-010" })).toBe("GROVE-API-010");
+	});
+
+	it("should prefer error_code over code when both present", () => {
+		expect(extractErrorCode({ error_code: "SIG-001", code: "REV-001" })).toBe("SIG-001");
+	});
+
+	it("should return null for plain Error instances", () => {
+		expect(extractErrorCode(new Error("boom"))).toBeNull();
+	});
+
+	it("should return null for non-object values", () => {
+		expect(extractErrorCode("string error")).toBeNull();
+		expect(extractErrorCode(null)).toBeNull();
+		expect(extractErrorCode(undefined)).toBeNull();
+		expect(extractErrorCode(42)).toBeNull();
+	});
+
+	it("should return null for numeric codes", () => {
+		expect(extractErrorCode({ code: 500 })).toBeNull();
+	});
+});
+
+// ============================================================================
+// resolveErrorMessage
+// ============================================================================
+
+describe("resolveErrorMessage", () => {
+	it("should use onError callback when provided", () => {
+		const result = resolveErrorMessage(new Error("raw"), {
+			onError: () => "Custom message",
+			errorMessages: { "REV-001": "should not reach" },
+		});
+		expect(result).toBe("Custom message");
+	});
+
+	it("should look up error code in errorMessages map", () => {
+		const result = resolveErrorMessage(
+			{ error_code: "REV-006" },
+			{
+				errorMessages: {
+					"REV-006": "No settings found. Try being more specific.",
+				},
+			},
+		);
+		expect(result).toBe("No settings found. Try being more specific.");
+	});
+
+	it("should fall back to Error.message when no code matches", () => {
+		const result = resolveErrorMessage(new Error("network timeout"), {
+			errorMessages: { "REV-001": "auth required" },
+		});
+		expect(result).toBe("network timeout");
+	});
+
+	it("should fall back to defaultError for unknown thrown values", () => {
+		const result = resolveErrorMessage("just a string", {
+			defaultError: "Something went wrong",
+		});
+		expect(result).toBe("Something went wrong");
+	});
+
+	it("should use built-in fallback when no options match", () => {
+		expect(resolveErrorMessage(42, {})).toBe("Something went wrong");
+	});
+
+	it("should skip errorMessages when code is not in the map", () => {
+		const result = resolveErrorMessage(
+			{ code: "UNKNOWN-999" },
+			{
+				errorMessages: { "REV-001": "auth required" },
+				defaultError: "Fallback",
+			},
+		);
+		expect(result).toBe("Fallback");
+	});
+});
+
+// ============================================================================
+// retractMessage
+// ============================================================================
+
+describe("retractMessage", () => {
+	it("should mark a message as retracted in base controller", () => {
+		const chat = createChatController();
+		const id = chat.addMessage("user", "oops I said too much");
+
+		chat.retractMessage(id);
+
+		expect(chat.messages[0].status).toBe("retracted");
+		expect(chat.messages[0].content).toBe("oops I said too much"); // content preserved
+	});
+
+	it("should be forwarded through AI controller", async () => {
+		const chat = createAIChatController({
+			onSend: vi.fn().mockResolvedValue({ content: "reply" }),
+		});
+		chat.inputValue = "test";
+		await chat.send();
+
+		const userMsgId = chat.messages[0].id;
+		chat.retractMessage(userMsgId);
+
+		expect(chat.messages[0].status).toBe("retracted");
+	});
+
+	it("should be forwarded through conversational controller", () => {
+		const chat = createConversationalChatController({ localRole: "me" });
+		const id = chat.addLocalMessage("regretful message");
+
+		chat.retractMessage(id);
+
+		expect(chat.messages[0].status).toBe("retracted");
+	});
+});
+
+// ============================================================================
+// sessionId
+// ============================================================================
+
+describe("sessionId", () => {
+	it("should auto-generate a session ID for AI controller", () => {
+		const chat = createAIChatController({
+			onSend: vi.fn().mockResolvedValue({ content: "ok" }),
+		});
+
+		expect(chat.sessionId).toBeDefined();
+		expect(chat.sessionId.length).toBeGreaterThan(0);
+	});
+
+	it("should accept a custom session ID for AI controller", () => {
+		const chat = createAIChatController({
+			onSend: vi.fn().mockResolvedValue({ content: "ok" }),
+			sessionId: "custom-session-abc",
+		});
+
+		expect(chat.sessionId).toBe("custom-session-abc");
+	});
+
+	it("should allow updating session ID for AI controller", () => {
+		const chat = createAIChatController({
+			onSend: vi.fn().mockResolvedValue({ content: "ok" }),
+		});
+
+		const original = chat.sessionId;
+		chat.sessionId = "new-session-xyz";
+
+		expect(chat.sessionId).toBe("new-session-xyz");
+		expect(chat.sessionId).not.toBe(original);
+	});
+
+	it("should auto-generate a session ID for conversational controller", () => {
+		const chat = createConversationalChatController({ localRole: "me" });
+
+		expect(chat.sessionId).toBeDefined();
+		expect(chat.sessionId.length).toBeGreaterThan(0);
+	});
+
+	it("should accept a custom session ID for conversational controller", () => {
+		const chat = createConversationalChatController({
+			localRole: "me",
+			sessionId: "porch-session-42",
+		});
+
+		expect(chat.sessionId).toBe("porch-session-42");
+	});
+
+	it("should allow updating session ID for conversational controller", () => {
+		const chat = createConversationalChatController({ localRole: "me" });
+
+		chat.sessionId = "updated-session";
+		expect(chat.sessionId).toBe("updated-session");
+	});
+});
+
+// ============================================================================
+// errorMessages option
+// ============================================================================
+
+describe("errorMessages option", () => {
+	it("should map Signpost error codes to friendly messages in AI controller", async () => {
+		const chat = createAIChatController({
+			onSend: vi.fn().mockRejectedValue({ error_code: "REV-012" }),
+			errorMessages: {
+				"REV-012": "AI is temporarily unavailable. Try again soon.",
+			},
+		});
+
+		chat.inputValue = "make it cozy";
+		await chat.send();
+
+		expect(chat.error).toBe("AI is temporarily unavailable. Try again soon.");
+	});
+
+	it("should fall back to defaultError in AI controller when code is unknown", async () => {
+		const chat = createAIChatController({
+			onSend: vi.fn().mockRejectedValue({ error_code: "UNKNOWN-999" }),
+			errorMessages: { "REV-001": "auth required" },
+			defaultError: "Reverie couldn't process that.",
+		});
+
+		chat.inputValue = "test";
+		await chat.send();
+
+		expect(chat.error).toBe("Reverie couldn't process that.");
+	});
+
+	it("should map error codes to friendly messages in conversational controller", async () => {
+		const chat = createConversationalChatController({
+			localRole: "visitor",
+			onSend: vi.fn().mockRejectedValue({ error_code: "GROVE-API-020" }),
+			errorMessages: {
+				"GROVE-API-020": "You need to sign in first.",
+			},
+		});
+
+		chat.inputValue = "hello";
+		await chat.send();
+
+		expect(chat.error).toBe("You need to sign in first.");
+		expect(chat.messages[0].status).toBe("failed");
+	});
+
+	it("should use conversational defaultError when code not in map", async () => {
+		const chat = createConversationalChatController({
+			localRole: "visitor",
+			onSend: vi.fn().mockRejectedValue({ code: "UNKNOWN" }),
+			errorMessages: {},
+			defaultError: "Couldn't send your message.",
+		});
+
+		chat.inputValue = "hello";
+		await chat.send();
+
+		expect(chat.error).toBe("Couldn't send your message.");
+	});
+});
+
+// ============================================================================
+// Integration: Reverie error code mapping end-to-end
+// ============================================================================
+
+describe("integration: Reverie error code mapping", () => {
+	it("should resolve known Reverie error codes through the full pipeline", async () => {
+		const REVERIE_ERRORS: Record<string, string> = {
+			"REV-001": "You need to be signed in to use Reverie.",
+			"REV-004": "Reverie didn't understand that. Try rephrasing?",
+			"REV-011": "You're sending too quickly. Take a breath.",
+			"REV-012": "Reverie's AI is temporarily unavailable.",
+		};
+
+		const chat = createAIChatController({
+			aiRole: "reverie",
+			onSend: vi.fn().mockRejectedValue({ error_code: "REV-004" }),
+			errorMessages: REVERIE_ERRORS,
+			defaultError: "Reverie couldn't process that.",
+		});
+
+		chat.inputValue = "asdfjkl";
+		await chat.send();
+
+		expect(chat.error).toBe("Reverie didn't understand that. Try rephrasing?");
+		expect(chat.messages).toHaveLength(1); // user msg kept, no AI msg
+		expect(chat.isLoading).toBe(false);
+	});
+
+	it("should fall through to defaultError for unknown Reverie codes", async () => {
+		const chat = createAIChatController({
+			aiRole: "reverie",
+			onSend: vi.fn().mockRejectedValue({ error_code: "REV-999" }),
+			errorMessages: { "REV-001": "auth required" },
+			defaultError: "Reverie couldn't process that.",
+		});
+
+		chat.inputValue = "test";
+		await chat.send();
+
+		expect(chat.error).toBe("Reverie couldn't process that.");
+	});
+
+	it("should handle Reverie change-preview with retract lifecycle", async () => {
+		const onSend = vi.fn().mockResolvedValue({
+			content: "Here are the changes",
+			metadata: { type: "change-preview", requestId: "req-1", applied: false },
+		});
+
+		const chat = createAIChatController({
+			aiRole: "reverie",
+			onSend,
+			sessionId: "reverie-session-1",
+		});
+
+		chat.inputValue = "make it warm";
+		await chat.send();
+
+		// Session tracked
+		expect(chat.sessionId).toBe("reverie-session-1");
+
+		// User cancels the preview — retract the suggestion
+		const previewId = chat.messages[1].id;
+		chat.retractMessage(previewId);
+
+		expect(chat.messages[1].status).toBe("retracted");
+		expect(chat.messages[1].metadata?.type).toBe("change-preview"); // metadata preserved
 	});
 });

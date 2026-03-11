@@ -10,6 +10,8 @@ export {
 	createChatController,
 	createAIChatController,
 	createConversationalChatController,
+	extractErrorCode,
+	resolveErrorMessage,
 } from "./controller.svelte";
 export type {
 	ChatController,
