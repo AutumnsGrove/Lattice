@@ -1,5 +1,6 @@
 <script lang="ts">
 	import GlassChat from "$lib/ui/components/ui/glasschat/GlassChat.svelte";
+	import { createAIChatController } from "$lib/ui/components/ui/glasschat/controller.svelte";
 	import type { ChatMessageData, ChatRoleMap } from "$lib/ui/components/ui/glasschat/types";
 	import { TierGate } from "$lib/ui/vineyard";
 	import type { GroveTier } from "$lib/ui/vineyard/types";
@@ -30,16 +31,9 @@
 		},
 	};
 
-	// ── Chat State ────────────────────────────────────────────────────────────
-	let messages = $state<ChatMessageData[]>([]);
-	let inputValue = $state("");
-	let isLoading = $state(false);
-	let error = $state<string | null>(null);
-
-	// ── Reverie State ─────────────────────────────────────────────────────────
+	// ── Reverie State (domain-specific, not managed by controller) ────────────
 	let pendingRequestId = $state<string | null>(null);
 	let isApplying = $state(false);
-	let sessionId = $state(crypto.randomUUID());
 
 	// ── Types ─────────────────────────────────────────────────────────────────
 	interface ChangePreview {
@@ -79,9 +73,10 @@
 		error?: { code: string; message: string };
 	}
 
-	// ── Error Sanitization ────────────────────────────────────────────────────
+	// ── Error Messages ────────────────────────────────────────────────────────
 	// Map every known error code to a friendly, actionable message.
 	// Never display raw API error messages — they may leak internal details.
+	// Fed into the controller's errorMessages option for automatic resolution.
 	const SAFE_ERROR_MESSAGES: Record<string, string> = {
 		// Reverie worker errors (REV-XXX)
 		"REV-001": "You need to be signed in to use Reverie.",
@@ -108,38 +103,6 @@
 	const DEFAULT_CONFIGURE_ERROR = "Reverie couldn't process that request. Please try again.";
 	const DEFAULT_EXECUTE_ERROR = "Some changes couldn't be applied. Please try again.";
 
-	function sanitizeError(
-		raw: { code?: string; message?: string } | undefined,
-		fallback: string,
-	): string {
-		if (raw?.code && raw.code in SAFE_ERROR_MESSAGES) {
-			return SAFE_ERROR_MESSAGES[raw.code];
-		}
-		return fallback;
-	}
-
-	// ── Helpers ───────────────────────────────────────────────────────────────
-	function pushMessage(role: string, content: string, metadata?: Record<string, unknown>): string {
-		const id = crypto.randomUUID();
-		messages = [
-			...messages,
-			{
-				id,
-				role,
-				content,
-				timestamp: new Date().toISOString(),
-				metadata,
-			},
-		];
-		return id;
-	}
-
-	function updateMessageMetadata(id: string, updates: Record<string, unknown>) {
-		messages = messages.map((m) =>
-			m.id === id ? { ...m, metadata: { ...m.metadata, ...updates } } : m,
-		);
-	}
-
 	// ── Reverie Fetch Helper ──────────────────────────────────────────────────
 	// Uses fetch directly instead of api.post because api.post throws on non-2xx,
 	// which loses the structured error codes we need for friendly messages.
@@ -162,51 +125,42 @@
 		return res.json() as Promise<ReverieResponse<T>>;
 	}
 
-	// ── Send Message ──────────────────────────────────────────────────────────
-	async function handleSend() {
-		const input = inputValue.trim();
-		if (!input) return;
-
-		inputValue = "";
-		error = null;
-		pushMessage("user", input);
-		isLoading = true;
-
-		try {
+	// ── Chat Controller ──────────────────────────────────────────────────────
+	const chat = createAIChatController({
+		aiRole: "reverie",
+		errorMessages: SAFE_ERROR_MESSAGES,
+		defaultError: DEFAULT_CONFIGURE_ERROR,
+		async onSend(input) {
 			const result = await reverieFetch<ConfigureResponseData>("/api/reverie/configure", {
 				input,
-				session_id: sessionId,
+				session_id: chat.sessionId,
 			});
 
 			if (!result || !result.success || !result.data) {
 				console.error("[Reverie] Configure failed:", result?.error);
-				const errMsg = sanitizeError(result?.error, DEFAULT_CONFIGURE_ERROR);
-				error = errMsg;
-				pushMessage("reverie", errMsg);
-				return;
+				// Throw the error object — extractErrorCode finds .code,
+				// errorMessages maps it to a friendly string
+				throw result?.error ?? new Error(DEFAULT_CONFIGURE_ERROR);
 			}
 
 			const { requestId, changes, message, atmosphereUsed } = result.data;
 			pendingRequestId = requestId;
 
-			// Group changes by domain for display
 			const domainSet = new Set(changes.map((c) => c.domain.split(".")[0]));
 
-			pushMessage("reverie", message, {
-				type: "change-preview",
-				requestId,
-				changes,
-				atmosphereUsed,
-				domainCount: domainSet.size,
-				applied: false,
-			});
-		} catch {
-			error = DEFAULT_CONFIGURE_ERROR;
-			pushMessage("reverie", DEFAULT_CONFIGURE_ERROR);
-		} finally {
-			isLoading = false;
-		}
-	}
+			return {
+				content: message,
+				metadata: {
+					type: "change-preview",
+					requestId,
+					changes,
+					atmosphereUsed,
+					domainCount: domainSet.size,
+					applied: false,
+				},
+			};
+		},
+	});
 
 	// ── Apply Changes ─────────────────────────────────────────────────────────
 	async function handleApply(messageId: string, requestId: string, changes: ChangePreview[]) {
@@ -225,15 +179,20 @@
 			});
 
 			// Mark the change card as applied
-			updateMessageMetadata(messageId, { applied: true });
+			chat.updateMessageMetadata(messageId, { applied: true });
 
 			if (!result || !result.success || !result.data) {
-				const errMsg = sanitizeError(result?.error, DEFAULT_EXECUTE_ERROR);
-				pushMessage("reverie", errMsg, {
-					type: "execution-result",
-					appliedCount: 0,
-					failedCount: changes.length,
-					steps: [],
+				const errMsg =
+					(result?.error?.code && result.error.code in SAFE_ERROR_MESSAGES
+						? SAFE_ERROR_MESSAGES[result.error.code]
+						: null) ?? DEFAULT_EXECUTE_ERROR;
+				chat.addMessage("reverie", errMsg, {
+					metadata: {
+						type: "execution-result",
+						appliedCount: 0,
+						failedCount: changes.length,
+						steps: [],
+					},
 				});
 				toast.error(errMsg);
 				return;
@@ -241,16 +200,18 @@
 
 			const { appliedCount, failedCount, steps } = result.data;
 
-			pushMessage(
+			chat.addMessage(
 				"reverie",
 				failedCount > 0
 					? `Applied ${appliedCount} of ${appliedCount + failedCount} changes.`
 					: `Applied ${appliedCount} changes.`,
 				{
-					type: "execution-result",
-					appliedCount,
-					failedCount,
-					steps,
+					metadata: {
+						type: "execution-result",
+						appliedCount,
+						failedCount,
+						steps,
+					},
 				},
 			);
 
@@ -263,22 +224,22 @@
 			pendingRequestId = null;
 		} catch {
 			toast.error(DEFAULT_EXECUTE_ERROR);
-			pushMessage("reverie", DEFAULT_EXECUTE_ERROR);
+			chat.addMessage("reverie", DEFAULT_EXECUTE_ERROR);
 		} finally {
 			isApplying = false;
 		}
 	}
 
 	function handleCancel(messageId: string) {
-		updateMessageMetadata(messageId, { applied: true, cancelled: true });
+		chat.updateMessageMetadata(messageId, { applied: true, cancelled: true });
 		pendingRequestId = null;
-		pushMessage("reverie", "No changes applied. What else would you like to try?");
+		chat.addMessage("reverie", "No changes applied. What else would you like to try?");
 	}
 
 	// ── Atmosphere Quick-Pick ─────────────────────────────────────────────────
 	function handleAtmospherePick(keyword: string) {
-		inputValue = `Make my site feel ${keyword}`;
-		handleSend();
+		chat.inputValue = `Make my site feel ${keyword}`;
+		chat.send();
 	}
 </script>
 
@@ -289,14 +250,14 @@
 <div class="reverie-page">
 	<TierGate required="seedling" current={data.userTier as GroveTier}>
 		<GlassChat
-			{messages}
+			messages={chat.messages}
 			roles={REVERIE_ROLES}
-			{isLoading}
+			isLoading={chat.isLoading}
 			loadingRole="reverie"
-			{error}
-			bind:inputValue
-			onSend={handleSend}
-			inputDisabled={isLoading || isApplying}
+			error={chat.error}
+			bind:inputValue={chat.inputValue}
+			onSend={chat.send}
+			inputDisabled={chat.isLoading || isApplying}
 			inputPlaceholder="Describe your grove..."
 			variant="dark"
 			logLabel="Reverie conversation"
