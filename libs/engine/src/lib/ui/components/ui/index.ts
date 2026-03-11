@@ -74,6 +74,18 @@ export { default as GroveTermPopup } from "./groveterm/GroveTermPopup.svelte";
 export { default as GroveIntro } from "./groveterm/GroveIntro.svelte";
 export * from "./groveterm/types";
 
+// GroveIcon - manifest-driven service icon swap
+export { default as GroveIcon } from "./groveicon/GroveIcon.svelte";
+export { defaultSuite, groveIconManifest, getSuite } from "./groveicon/manifest";
+export { resolveIcon, hasIcon } from "./groveicon/resolver";
+export type {
+	IconComponent,
+	GroveIconEntry,
+	GroveIconSuite,
+	GroveIconManifest,
+	ResolvedIcon,
+} from "./groveicon/types";
+
 // Table sub-components (from primitives)
 export {
 	TableHeader,
