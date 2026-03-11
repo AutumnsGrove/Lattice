@@ -4,7 +4,7 @@ description: How information flows and persists
 category: exhibit
 exhibitWing: data
 icon: database
-lastUpdated: '2026-01-22'
+lastUpdated: '2026-03-10'
 ---
 # The Data Wing
 
@@ -28,6 +28,9 @@ KV caching strategies for speed.
 
 ### [The Media Vault](./media-vault.md)
 R2 storage for images and files.
+
+### Amber
+Unified storage management. Files, exports, quotas, addons. The keeper of your uploads.
 
 ### [The Query Builders](./query-builders.md)
 Type-safe database helpers.

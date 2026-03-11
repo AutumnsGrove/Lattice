@@ -1,21 +1,23 @@
 ---
 title: Museum Layout Plan
-description: The blueprint for the Lattice Museum
+description: The blueprint for the Grove Museum
 category: exhibit
 exhibitWing: entrance
 icon: layout
-lastUpdated: "2026-01-22"
+lastUpdated: "2026-03-10"
 ---
 
-# The Lattice Museum: Layout Plan
+# The Grove Museum: Layout Plan
 
 > _A guided tour through how this forest grows._
 
 ---
 
-> **Status: Planning**
+> **Status: Scaffolded**
 >
-> This document outlines the museum structure, exhibits, and agent orchestration model. The museum itself has not been written yet. Currently complete: MUSEUM.md (entrance), glossary.md. All wing exhibits are pending.
+> Museum structure is defined. Entrance (MUSEUM.md), glossary, and all wing introductions (WING.md) are written. Individual exhibit files exist as stubs with frontmatter and navigation. No exhibit content has been written yet.
+>
+> **Last major update:** March 2026 (added Aspen, Philosophy, AI, and Jungle wings; removed stale file paths; updated ecosystem count from 40+ to 60+)
 
 ---
 
@@ -25,9 +27,7 @@ Traditional documentation answers "how does this work?" Museum documentation ans
 
 Most codebases hand you a catalog and wish you luck. API references. Method signatures. Configuration options. Useful for people who already understand the system, useless for everyone else.
 
-Grove was built to have texture. The forest on the landing page isn't decoration—it's a backyard rebuilt in code. The naming system isn't branding—it's world-building. The feature flags aren't just toggles—they're grafts on a living tree.
-
-That texture deserves documentation that preserves it.
+Grove was built to have texture. The forest on the landing page isn't decoration. The naming system isn't branding. The feature flags aren't just toggles. That texture deserves documentation that preserves it.
 
 **The museum approach:**
 
@@ -50,13 +50,11 @@ That texture deserves documentation that preserves it.
 - Patterns worth stealing
 - A welcoming entry point for contributors
 
-The museum exists because Grove's architecture is elegant enough to deserve a guided tour, and because the person who built it cried in a parking lot when she realized she'd made something real.
-
 ---
 
 ## Overview
 
-The Lattice Museum transforms Grove's codebase into a welcoming experience for Wanderers. Rather than dry API references, we offer curated exhibits that explain _why_ things work the way they do.
+The Grove Museum transforms the codebase into a welcoming experience for Wanderers. Ten wings organized around themes, not file paths. The museum explains _why_ things exist, not just _how_ they work.
 
 **Target Audience:** Wanderers of all experience levels who want to understand Grove's architecture, patterns, and philosophy.
 
@@ -67,7 +65,7 @@ The Lattice Museum transforms Grove's codebase into a welcoming experience for W
 ## Museum Structure
 
 ```
-                    🌲  THE LATTICE MUSEUM  🌲
+                    🌲  THE GROVE MUSEUM  🌲
               ╭──────────────────────────────────────╮
               │                                      │
               │           ╭─────────────╮            │
@@ -79,21 +77,28 @@ The Lattice Museum transforms Grove's codebase into a welcoming experience for W
               │    │             │             │     │
               │    ▼             ▼             ▼     │
               │ ┌───────┐  ┌───────────┐  ┌───────┐ │
-              │ │ARCHIT-│  │  NATURE   │  │ TRUST │ │
-              │ │ECTURE │  │   WING    │  │ WING  │ │
-              │ │ WING  │  │           │  │       │ │
+              │ │ ASPEN │  │PHILOSOPHY │  │ARCHIT-│ │
+              │ │ (why) │  │  (how we  │  │ECTURE │ │
+              │ │       │  │  decide)  │  │(infra)│ │
               │ └───────┘  └───────────┘  └───────┘ │
               │    │             │             │     │
               │    ▼             ▼             ▼     │
               │ ┌───────┐  ┌───────────┐  ┌───────┐ │
-              │ │ DATA  │  │PERSONALI- │  │COMMUN-│ │
-              │ │ WING  │  │  ZATION   │  │  ITY  │ │
-              │ │       │  │   WING    │  │ WING  │ │
+              │ │NATURE │  │  TRUST    │  │ DATA  │ │
+              │ │(look/ │  │ (auth/    │  │(store/│ │
+              │ │ feel) │  │  safety)  │  │ flow) │ │
+              │ └───────┘  └───────────┘  └───────┘ │
+              │    │             │             │     │
+              │    ▼             ▼             ▼     │
+              │ ┌───────┐  ┌───────────┐  ┌───────┐ │
+              │ │PERSON-│  │ COMMUNITY │  │  AI   │ │
+              │ │ALIZE  │  │           │  │(priv- │ │
+              │ │       │  │           │  │ acy)  │ │
               │ └───────┘  └───────────┘  └───────┘ │
               │                  │                   │
               │           ╭──────┴──────╮            │
-              │           │   NAMING    │            │
-              │           │    WING     │            │
+              │           │   JUNGLE    │            │
+              │           │  (tooling)  │            │
               │           ╰──────┬──────╯            │
               │                  │                   │
               │           ╭──────┴──────╮            │
@@ -108,224 +113,253 @@ The Lattice Museum transforms Grove's codebase into a welcoming experience for W
 
 ## Wing Definitions
 
-### 1. The Architecture Wing
+### 1. The Aspen Wing (NEW)
+
+**Theme:** Why this exists, and why it was built this way.
+
+**Location:** `docs/museum/aspen/`
+
+| Exhibit | Focus |
+| --- | --- |
+| **The Origin Story** | From personal blog to platform, the moment of realization |
+| **The Values** | Privacy-first, solarpunk, queer, indie web, content ownership |
+| **The Aspen Identity** | Why aspens, clonal colonies, resilience through connection |
+| **The Predecessor** | The AutumnsGrove Museum, where this pattern was born |
+
+**Visitor Journey:**
+
+1. Understand the personal story behind the platform
+2. Feel the values that shaped every technical decision
+3. Discover why "Aspen" names the living deployment
+4. Walk through the original museum that inspired this one
+
+**Emotional Goal:** Visitors should feel the authenticity. This isn't a startup. It's a world someone is creating because it matters to them.
+
+---
+
+### 2. The Philosophy Wing (NEW, absorbs Naming Wing)
+
+**Theme:** How Grove names things, makes decisions, and builds with intention.
+
+**Location:** `docs/museum/philosophy/`
+
+| Exhibit | Focus |
+| --- | --- |
+| **The Naming Ritual** | The walk process, how names are discovered |
+| **The Walks Gallery** | 56+ naming journeys with categories |
+| **The Ecosystem Map** | 60+ named services, each with its story |
+| **The Design Language** | Voice, visual identity, interaction patterns |
+
+**Visitor Journey:**
+
+1. Understand why Grove doesn't use words like "user" or "feature flag"
+2. Learn the ritual: visualize the forest, ask what this thing does, let the name emerge
+3. Walk through a naming journey (Porch, Lumen, Loom)
+4. See how design language serves philosophy
+
+**Note:** The original `naming/` wing content is preserved and linked from here. Philosophy is the broader container; naming is the core practice within it.
+
+---
+
+### 3. The Architecture Wing
 
 **Theme:** How Grove is built at the infrastructure level.
 
 **Location:** `docs/museum/architecture/`
 
-| Exhibit              | Focus                                                            | Key Files                      |
-| -------------------- | ---------------------------------------------------------------- | ------------------------------ |
-| **The Foundation**   | Multi-tenant architecture: one deployment, unlimited blogs       | `docs/developer/architecture/` |
-| **The Engine Room**  | Engine-first pattern: how we prevent 11,925 lines of duplication | `libs/engine/`                 |
-| **The Loom**         | Durable Objects coordination layer                               | `docs/patterns/loom-*`         |
-| **The Cloud Garden** | Cloudflare Workers, D1, KV, R2 working together                  | `wrangler.toml` files          |
+| Exhibit | Focus |
+| --- | --- |
+| **The Foundation** | Multi-tenant architecture: one deployment, unlimited blogs |
+| **The Engine Room** | Engine-first pattern: shared code prevents duplication |
+| **The Loom** | Durable Objects coordination layer (7 DOs) |
+| **The Cloud Garden** | Cloudflare Workers, D1, KV, R2 composing together |
+| **The Infra SDK** | GroveDatabase, GroveStorage, GroveKV, middleware |
 
 **Visitor Journey:**
 
-1. Understand the multi-tenant model (one Pages app serves all blogs)
+1. Understand the multi-tenant model
 2. Learn why shared components live in the engine
 3. See how Durable Objects coordinate real-time state
-4. Appreciate how Cloudflare primitives compose together
-
-**ASCII Diagram to Include:**
-
-```
-  Request arrives at grove.place
-           │
-           ▼
-    ╭─────────────╮
-    │grove-router │  "Which blog is this?"
-    │   Worker    │
-    ╰──────┬──────╯
-           │ subdomain extracted
-           ▼
-    ╭─────────────╮
-    │ lattice │  Single SvelteKit app
-    │    Pages    │  serves all tenants
-    ╰──────┬──────╯
-           │
-    ┌──────┼──────┐
-    ▼      ▼      ▼
-   D1     KV     R2
- (data) (cache) (media)
-```
+4. Appreciate how Cloudflare primitives compose
+5. See how the Infra SDK abstracts infrastructure
 
 ---
 
-### 2. The Nature Wing
+### 4. The Nature Wing
 
 **Theme:** The visual and emotional language of Grove.
 
 **Location:** `docs/museum/nature/`
 
-| Exhibit                    | Focus                                            | Key Files                   |
-| -------------------------- | ------------------------------------------------ | --------------------------- |
-| **The Forest**             | 64 SVG components with customizable Svelte props | `ui/components/nature/`     |
-| **The Seasons**            | Five seasons including Midnight easter egg       | `ui/stores/season.ts`       |
-| **The Glass Garden**       | Glassmorphism design system                      | `ui/components/ui/Glass*`   |
-| **The Typography Gallery** | 10 fonts including accessible options            | `ui/components/typography/` |
+| Exhibit | Focus |
+| --- | --- |
+| **The Forest** | Mathematically-driven SVG components with customizable props |
+| **The Seasons** | Five seasons including the Midnight easter egg |
+| **The Glass Garden** | Glassmorphism design system |
+| **The Typography Gallery** | Accessible font choices |
+| **Gossamer** | ASCII art effects, domain warping, 8 presets |
+| **Prism** | Design tokens, colors, icons, seasonal palettes, contrast tools |
 
 **Visitor Journey:**
 
-1. Meet the mathematically-driven trees (Cherry, Pine, Aspen, Oak...)
-2. Discover creatures that bring the forest alive (Bee, Butterfly, Deer...)
-3. Experience seasons changing (Spring → Summer → Autumn → Winter)
-4. Find the Midnight easter egg (queer aesthetic, deep purple)
-5. See how glass surfaces layer over nature backgrounds
-6. Explore accessible font choices (OpenDyslexic, Atkinson Hyperlegible)
-
-**What Makes It Delightful:** The nature system harnesses mathematically-driven SVGs with customizable Svelte props. Each tree, creature, and weather effect can be tuned through component properties, creating organic variety from precise parameters.
-
-**Emotional Goal:** Visitors should feel the warmth and intentionality behind every visual choice.
+1. Meet the trees (Cherry, Pine, Aspen, Oak...)
+2. Discover creatures and weather effects
+3. Experience seasonal transformation
+4. Find Midnight (queer aesthetic, deep purple)
+5. See glass surfaces layering over organic backgrounds
+6. Watch ASCII effects dance through Gossamer
+7. Explore how Prism refracts tokens into palettes
 
 ---
 
-### 3. The Trust Wing
+### 5. The Trust Wing
 
 **Theme:** Authentication, security, and identity.
 
 **Location:** `docs/museum/trust/`
 
-| Exhibit                     | Focus                                | Key Files                      |
-| --------------------------- | ------------------------------------ | ------------------------------ |
-| **The Heartwood**           | OAuth flow, how login actually works | `docs/specs/heartwood-spec.md` |
-| **The Session Gallery**     | How we remember who you are          | `lib/groveauth/`               |
-| **The Security Checkpoint** | Rate limiting, CAPTCHA, protection   | `lib/server/services/`         |
+| Exhibit | Focus |
+| --- | --- |
+| **The Heartwood** | OAuth flow, PKCE, how login actually works |
+| **The Session Gallery** | How we remember who you are, halfway refresh |
+| **The Security Checkpoint** | Rate limiting, protection patterns |
 
 **Visitor Journey:**
 
 1. Follow a login from "Sign in with Google" to session cookie
-2. Understand PKCE flow without cryptography degree required
-3. See how sessions refresh silently (halfway pattern)
-4. Learn about device fingerprinting and multi-tab coordination
-5. Appreciate rate limiting that protects without frustrating
-
-**Key Lesson:** Security doesn't have to feel hostile. We protect without making visitors feel surveilled.
+2. Understand PKCE flow without a cryptography degree
+3. See how sessions refresh silently
+4. Appreciate rate limiting that protects without frustrating
 
 ---
 
-### 4. The Data Wing
+### 6. The Data Wing
 
 **Theme:** How information flows and persists.
 
 **Location:** `docs/museum/data/`
 
-| Exhibit                    | Focus                           | Key Files                         |
-| -------------------------- | ------------------------------- | --------------------------------- |
-| **The Filing Cabinet**     | D1 database patterns            | `lib/server/services/database.ts` |
-| **The Quick-Lookup Shelf** | KV caching strategies           | `lib/server/services/cache.ts`    |
-| **The Media Vault**        | R2 storage for images and files | `lib/server/services/storage.ts`  |
-| **The Query Builders**     | Type-safe database helpers      | `database.ts` exports             |
+| Exhibit | Focus |
+| --- | --- |
+| **The Filing Cabinet** | D1 database patterns, 118+ migrations |
+| **The Quick-Lookup Shelf** | KV caching strategies |
+| **The Media Vault** | R2 storage for images and files |
+| **Amber** | Unified storage management (files, exports, quotas) |
+| **The Query Builders** | Type-safe database helpers |
 
 **Visitor Journey:**
 
-1. See how posts flow from editor → D1 → cache → browser
+1. See how posts flow from editor to D1 to cache to browser
 2. Understand tenant isolation (your data stays yours)
-3. Learn the caching strategy (why some pages load instantly)
-4. Explore typed query helpers that prevent SQL injection
-5. See how images are validated and stored
-
-**Key Pattern to Highlight:** The "isolated try/catch" lesson (one failing query shouldn't block others).
+3. Learn the caching strategy
+4. Explore how Amber manages files, exports, and quotas
+5. See typed query helpers that prevent SQL injection
 
 ---
 
-### 5. The Personalization Wing
+### 7. The Personalization Wing
 
 **Theme:** Making each blog feel like home.
 
 **Location:** `docs/museum/personalization/`
 
-| Exhibit                   | Focus                               | Key Files                   |
-| ------------------------- | ----------------------------------- | --------------------------- |
-| **The Grafts Exhibit**    | Feature flags with Grove vocabulary | `docs/specs/grafts-spec.md` |
-| **The Curios Collection** | Old-web personalization             | `docs/specs/curios-spec.md` |
-| **The Theme Workshop**    | How blogs get customized            | Settings system             |
+| Exhibit | Focus |
+| --- | --- |
+| **The Grafts Exhibit** | Feature flags with Grove vocabulary |
+| **The Curios Collection** | Old-web personalization (guestbooks, shrines) |
+| **The Theme Workshop** | Foliage customization, Vineyard showcase |
+| **Blazes** | Content markers with icons and meaning |
 
 **Visitor Journey:**
 
-1. Learn Grove vocabulary: Graft (enable), Prune (disable), Blight (kill switch)
+1. Learn Grove vocabulary: Graft, Prune, Blight, Cultivar
 2. Discover Curios: guestbooks, hit counters, shrines, custom cursors
-3. Understand tier-gated features (Seedling → Sapling → Oak → Evergreen)
-4. See how A/B testing works with "cultivars"
-5. Appreciate the old-web energy meeting modern standards
-
-**Emotional Goal:** Visitors should feel inspired to personalize their own spaces.
+3. Understand tier-gated features (Seedling, Sapling)
+4. See how Blazes mark content with visual meaning
 
 ---
 
-### 6. The Community Wing
+### 8. The Community Wing
 
 **Theme:** The social layer and shared spaces.
 
 **Location:** `docs/museum/community/`
 
-| Exhibit          | Focus                                  | Key Files            |
-| ---------------- | -------------------------------------- | -------------------- |
-| **The Meadow**   | Community feed where blogs share posts | `apps/meadow/`   |
-| **The Landing**  | How grove.place welcomes visitors      | `apps/landing/`  |
-| **The Clearing** | Status page and transparency           | `apps/clearing/` |
+| Exhibit | Focus |
+| --- | --- |
+| **The Meadow** | Community feed where blogs share posts |
+| **The Canopy** | Opt-in wanderer directory, no algorithms, no ranking |
+| **The Landing** | How grove.place welcomes visitors |
+| **The Clearing** | Status page and transparency |
 
 **Visitor Journey:**
 
 1. See how individual blogs can share to the community feed
-2. Explore voting, reactions, and discovery
-3. Walk through the landing page's seasonal showcase
-4. Appreciate the transparent status page (Clearing)
-5. Understand Grove's philosophy of optional community
-
-**Key Message:** Community is opt-in. Your blog is yours first.
+2. Walk through the landing page's seasonal showcase
+3. Appreciate the transparent status page
+4. Understand Grove's philosophy of optional community
 
 ---
 
-### 7. The Naming Wing
+### 9. The AI Wing (NEW)
 
-**Theme:** How Grove names things, and why it matters.
+**Theme:** Privacy-first AI that serves creators, not surveillance.
 
-**Location:** `docs/museum/naming/`
+**Location:** `docs/museum/ai/`
 
-| Exhibit                  | Focus                                                            | Key Files                                      |
-| ------------------------ | ---------------------------------------------------------------- | ---------------------------------------------- |
-| **The Philosophy**       | Why names aren't branding, they're world-building                | `docs/philosophy/grove-naming.md`              |
-| **The Walk**             | The ritual: how names are discovered, not invented               | `docs/philosophy/walking-through-the-grove.md` |
-| **The Journeys Gallery** | 50+ naming journeys with ASCII art, rejected ideas, realizations | `docs/philosophy/naming-research/`             |
-| **The Ecosystem Map**    | 40+ services, each with nature metaphors that fit                | `grove-naming.md` ecosystem table              |
+| Exhibit | Focus |
+| --- | --- |
+| **Thorn** | Content moderation: behavioral (sub-ms) then AI |
+| **Reverie** | AI configuration pipeline, 5-layer architecture |
+| **Lumen** | Provider abstraction, tool-calling, zero lock-in |
+| **Songbird** | Prompt injection protection |
 
 **Visitor Journey:**
 
-1. Understand why Grove doesn't use words like "user" or "feature flag"
-2. Learn the philosophy: "The Grove is the place. These are the things you find there."
-3. Walk through a naming journey (Loom, Heartwood, Porch)
-4. See how a name is tested: "Does it complete the tagline naturally?"
-5. Appreciate that rejected names teach as much as chosen ones
+1. Understand the zero-data-retention principle
+2. See how behavioral analysis catches abuse before AI is invoked
+3. Watch "make my site cozy" become coordinated changes
+4. Learn how provider abstraction prevents vendor lock-in
+5. Appreciate prompt injection defense
 
-**Featured Journeys:**
-
-- **Porch** - The origin story. Support isn't a ticket system. It's a porch conversation. This journey created the naming ritual.
-- **Lumen** - A difficult journey. Light vs. dark. The hollow center where everything flows, yet also illumination. Close between Lumen and Umbra—decided by trying names in sentences.
-- **Loom** - A walk that returned home. "Sometimes you walk through the forest looking for something new... and realize the name you started with was right all along."
-
-**Emotional Goal:** Visitors should feel how naming shapes the entire experience. Words create worlds.
+**Key Message:** AI should serve the creator, never the platform. Your words belong to you.
 
 ---
 
-### 8. The Glossary Alcove
+### 10. The Jungle (NEW)
+
+**Theme:** The animal skills, the tooling, and the craft of building things that build things.
+
+**Location:** `docs/museum/jungle/`
+
+| Exhibit | Focus |
+| --- | --- |
+| **The Menagerie** | 72 animal skills organized by role and category |
+| **The Conductor** | Orchestration pattern, Gatherings, gate verification |
+| **GW: Grove Wrap** | Go CLI for git, CI, secrets, deployments |
+| **GF: Grove Find** | Go codebase search with hybrid matching |
+| **Glimpse** | Development snapshots, capturing moments during the build |
+| **The Craft** | How tooling compounds into development velocity |
+
+**Visitor Journey:**
+
+1. Meet the animals: builders, investigators, architects, protectors, guides
+2. See how Gatherings orchestrate multi-skill workflows
+3. Understand GW and GF as force multipliers
+4. Appreciate how tooling investment compounds over time
+5. Feel the difference between 8 commits per issue and 2
+
+**Emotional Goal:** Visitors should feel the joy of good tools. Not just productivity, but the pleasure of a workflow that fits.
+
+---
+
+### 11. The Glossary Alcove
 
 **Theme:** Grove vocabulary demystified.
 
 **Location:** `docs/museum/glossary.md`
 
-| Term           | Meaning                  | Why This Word                  |
-| -------------- | ------------------------ | ------------------------------ |
-| **Wanderer**   | Any visitor to Grove     | Everyone is welcome, exploring |
-| **Rooted**     | Paid subscriber          | Taking root, committed         |
-| **Pathfinder** | Trusted community guide  | Helps others find their way    |
-| **Wayfinder**  | Autumn (singular)        | Shows the way forward          |
-| **Grafts**     | Feature flags            | Attaching new growth           |
-| **Curios**     | Personalization features | Collected treasures            |
-| **Loom**       | Durable Objects layer    | Weaving coordination           |
-| **Heartwood**  | Auth system              | The core of trust              |
-| **Lattice**    | The engine itself        | Framework for growth           |
+_(Already written. May need updates as new terms are added.)_
 
 ---
 
@@ -333,49 +367,59 @@ The Lattice Museum transforms Grove's codebase into a welcoming experience for W
 
 ```
 docs/museum/
-├── MUSEUM.md                    # Main entrance
+├── MUSEUM.md                    # Main entrance (written)
+├── museum-layout-plan.md        # This file
+├── glossary.md                  # Grove vocabulary (written)
+├── aspen/                       # NEW
+│   └── WING.md                  # Values and origin (stub)
+├── philosophy/                  # NEW (absorbs naming concepts)
+│   └── WING.md                  # Naming ritual, design language (stub)
 ├── architecture/
-│   ├── WING.md                  # Wing introduction
-│   ├── foundation.md            # Multi-tenant exhibit
-│   ├── engine-room.md           # Engine-first pattern
-│   ├── loom.md                  # Durable Objects
-│   └── cloud-garden.md          # Cloudflare primitives
+│   ├── WING.md                  # Wing introduction (stub)
+│   ├── foundation.md            # Multi-tenant (stub)
+│   ├── engine-room.md           # Engine-first pattern (stub)
+│   ├── loom.md                  # Durable Objects (stub)
+│   └── cloud-garden.md          # Cloudflare primitives (stub)
 ├── nature/
-│   ├── WING.md
-│   ├── forest.md                # Nature components
-│   ├── seasons.md               # Seasonal theming
-│   ├── glass-garden.md          # Glassmorphism
-│   └── typography.md            # Fonts and accessibility
+│   ├── WING.md                  # Wing introduction (stub)
+│   ├── forest.md                # Nature components (stub)
+│   ├── seasons.md               # Seasonal theming (stub)
+│   ├── glass-garden.md          # Glassmorphism (stub)
+│   └── typography.md            # Fonts and accessibility (stub)
 ├── trust/
-│   ├── WING.md
-│   ├── heartwood.md             # Authentication
-│   ├── sessions.md              # Session management
-│   └── security.md              # Protection patterns
+│   ├── WING.md                  # Wing introduction (stub)
+│   ├── heartwood.md             # Authentication (stub)
+│   ├── sessions.md              # Session management (stub)
+│   └── security.md              # Protection patterns (stub)
 ├── data/
-│   ├── WING.md
-│   ├── filing-cabinet.md        # D1 patterns
-│   ├── quick-lookup.md          # KV caching
-│   ├── media-vault.md           # R2 storage
-│   └── query-builders.md        # Type-safe helpers
+│   ├── WING.md                  # Wing introduction (stub)
+│   ├── filing-cabinet.md        # D1 patterns (stub)
+│   ├── quick-lookup.md          # KV caching (stub)
+│   ├── media-vault.md           # R2 storage (stub)
+│   └── query-builders.md        # Type-safe helpers (stub)
 ├── personalization/
-│   ├── WING.md
-│   ├── grafts.md                # Feature flags
-│   ├── curios.md                # Old-web features
-│   └── themes.md                # Customization
+│   ├── WING.md                  # Wing introduction (stub)
+│   ├── grafts.md                # Feature flags (stub)
+│   ├── curios.md                # Old-web features (stub)
+│   └── themes.md                # Customization (stub)
 ├── community/
-│   ├── WING.md
-│   ├── meadow.md                # Community feed
-│   ├── landing.md               # Welcome experience
-│   └── clearing.md              # Status transparency
-├── naming/
-│   ├── WING.md                  # The philosophy of naming
-│   ├── the-walk.md              # The naming ritual
-│   ├── journeys/                # Individual naming journeys
-│   │   ├── porch.md             # Featured: Origin story
-│   │   ├── lumen.md             # Featured: A difficult journey
-│   │   └── loom.md              # Featured: Returning home
-│   └── ecosystem.md             # The full naming map
-└── glossary.md                  # Grove vocabulary
+│   ├── WING.md                  # Wing introduction (stub)
+│   ├── meadow.md                # Community feed (stub)
+│   ├── landing.md               # Welcome experience (stub)
+│   └── clearing.md              # Status transparency (stub)
+├── ai/                          # NEW
+│   └── WING.md                  # Privacy-first AI (stub)
+├── jungle/                      # NEW
+│   └── WING.md                  # Animal skills and tooling (stub)
+└── naming/                      # LEGACY (content migrating to philosophy/)
+    ├── WING.md
+    ├── the-walk.md
+    ├── walks-gallery.md
+    ├── ecosystem.md
+    └── journeys/
+        ├── porch.md
+        ├── lumen.md
+        └── loom.md
 ```
 
 ---
@@ -393,7 +437,9 @@ Each exhibit should follow the museum-documentation skill structure:
 7. **"Continue Your Tour"** — Links to related exhibits
 8. **Meaningful closing** — Signature or poetic line
 
-**Voice:** Warm, conversational, explains "why" before "how." No em-dashes. No corporate jargon.
+**Voice:** Warm, conversational, explains "why" before "how." No corporate jargon. Write like you're helping someone speak, not perform.
+
+**Important:** Do not hardcode file paths in exhibits. The monorepo structure evolves. Reference systems by name and concept, not by directory. If a specific file is relevant, describe what it does and where to find it generally, not with an absolute path that will rot.
 
 ---
 
@@ -405,112 +451,56 @@ The museum will be written by a swarm of agents, each responsible for one exhibi
 
 **Before drafting any exhibit, every agent MUST read:**
 
-```
-docs/philosophy/why-i-built-the-grove.md
-```
-
-This document explains why texture matters. Grove isn't just a platform—it's a reconstruction of a sanctuary that was lost. The forest is a backyard. Songbird is the robins at dawn. Wander mode is the freedom to pick a direction and walk. Every feature maps to something real.
-
-Without understanding this, agents will write documentation. With it, they'll preserve texture.
-
-### The Model
-
-```
-                    ┌─────────────────┐
-                    │  ORCHESTRATOR   │
-                    │                 │
-                    │  Guides the     │
-                    │  swarm, tracks  │
-                    │  progress,      │
-                    │  resolves       │
-                    │  conflicts      │
-                    └────────┬────────┘
-                             │
-         ┌───────────────────┼───────────────────┐
-         │                   │                   │
-         ▼                   ▼                   ▼
-    ┌─────────┐        ┌─────────┐        ┌─────────┐
-    │ Agent A │        │ Agent B │        │ Agent C │
-    │         │        │         │        │         │
-    │ Owns:   │        │ Owns:   │        │ Owns:   │
-    │ seasons │        │ loom    │        │ grafts  │
-    │ .md     │        │ .md     │        │ .md     │
-    └─────────┘        └─────────┘        └─────────┘
-         │                   │                   │
-         └───────────────────┴───────────────────┘
-                             │
-                    Explore elsewhere to
-                    understand connections
-```
+- `docs/philosophy/why-i-built-the-grove.md` — Why texture matters
+- `docs/philosophy/grove-naming.md` — The vocabulary and naming philosophy
+- `.claude/skills/museum-documentation/SKILL.md` — The exhibit writing guide
 
 ### Principles
 
-1. **One exhibit, one agent.** Each agent owns exactly one exhibit file. This reduces context drift and keeps focus sharp.
-
-2. **Explore broadly before writing.** Agents are strongly encouraged to wander the codebase, read related specs, understand how their exhibit connects to others. The goal is complete narrative understanding before writing a single line.
-
-3. **The orchestrator doesn't write.** It coordinates. It tracks which exhibits are complete, identifies conflicts or overlaps, and ensures the museum tells a coherent story.
-
-4. **Texture over thoroughness.** An exhibit that captures _why_ something matters is better than one that explains every implementation detail. We're preserving the feeling of building something you're proud of.
+1. **One exhibit, one agent.** Each agent owns exactly one exhibit file.
+2. **Explore broadly before writing.** Wander the codebase. Understand connections.
+3. **The orchestrator doesn't write.** It coordinates, tracks, resolves conflicts.
+4. **Texture over thoroughness.** Capture _why_ something matters, not every implementation detail.
+5. **No stale paths.** Reference systems by name, not by file path.
 
 ### Agent Checklist
 
 Before writing, each agent should:
 
-- [ ] Read `docs/philosophy/why-i-built-the-grove.md`
-- [ ] Read `docs/philosophy/grove-naming.md` (understand the vocabulary)
-- [ ] Read the museum-documentation skill (`.claude/skills/museum-documentation/SKILL.md`)
+- [ ] Read the required reading (above)
 - [ ] Explore the code/specs relevant to their exhibit
 - [ ] Understand how their exhibit connects to at least two others
 - [ ] Identify what makes their subject _textured_, not just functional
-
-### Exhibit Assignments
-
-| Exhibit           | Wing            | Key Sources                                                    |
-| ----------------- | --------------- | -------------------------------------------------------------- |
-| foundation.md     | Architecture    | `docs/developer/architecture/multi-tenant-architecture.md`     |
-| engine-room.md    | Architecture    | `libs/engine/`, engine-first pattern                           |
-| loom.md           | Architecture    | `docs/patterns/loom-durable-objects-pattern.md`                |
-| cloud-garden.md   | Architecture    | `wrangler.toml` files, Cloudflare docs                         |
-| forest.md         | Nature          | `libs/engine/src/lib/ui/components/nature/`                    |
-| seasons.md        | Nature          | `libs/engine/src/lib/ui/stores/season.ts`                      |
-| glass-garden.md   | Nature          | `libs/engine/src/lib/ui/components/ui/Glass*`                  |
-| typography.md     | Nature          | `libs/engine/src/lib/ui/components/typography/`                |
-| heartwood.md      | Trust           | `docs/specs/heartwood-spec.md`                                 |
-| sessions.md       | Trust           | `libs/engine/src/lib/groveauth/`                               |
-| security.md       | Trust           | `libs/engine/src/lib/server/services/`                         |
-| filing-cabinet.md | Data            | `libs/engine/src/lib/server/services/database.ts`              |
-| quick-lookup.md   | Data            | `libs/engine/src/lib/server/services/cache.ts`                 |
-| media-vault.md    | Data            | `libs/engine/src/lib/server/services/storage.ts`               |
-| query-builders.md | Data            | Database helpers, typed queries                                |
-| grafts.md         | Personalization | `docs/specs/grafts-spec.md`                                    |
-| curios.md         | Personalization | `docs/specs/curios-spec.md`                                    |
-| themes.md         | Personalization | Settings system, Foliage                                       |
-| meadow.md         | Community       | `apps/meadow/`                                             |
-| landing.md        | Community       | `apps/landing/`                                            |
-| clearing.md       | Community       | `apps/clearing/`                                           |
-| WING.md (naming)  | Naming          | `docs/philosophy/grove-naming.md`                              |
-| the-walk.md       | Naming          | `docs/philosophy/walking-through-the-grove.md`                 |
-| porch.md          | Naming          | `docs/philosophy/naming-research/grove-journey.md`             |
-| lumen.md          | Naming          | `docs/philosophy/naming-research/ai-gateway-naming-journey.md` |
-| loom.md (naming)  | Naming          | `docs/philosophy/naming-research/loom-grove-journey.md`        |
-| ecosystem.md      | Naming          | `docs/philosophy/grove-naming.md` ecosystem table              |
+- [ ] Verify any referenced systems still exist and work as described
 
 ---
 
 ## Priority Order
 
-**Phase 1: Core Understanding**
+**Phase 1: The Heart**
 
-1. MUSEUM.md (entrance)
-2. Architecture Wing (foundation, engine-room)
-3. Nature Wing (seasons, forest)
-4. Naming Wing (philosophy, the-walk, featured journeys)
-5. Glossary
+1. The Aspen Wing (origin, values, identity)
+2. The Philosophy Wing (naming ritual, design language)
 
-**Phase 2: Trust & Data** 6. Trust Wing (heartwood, sessions) 7. Data Wing (filing-cabinet, query-builders)
+**Phase 2: Core Understanding**
 
-**Phase 3: Personalization & Community** 8. Personalization Wing (grafts, curios) 9. Community Wing (meadow, landing)
+3. Architecture Wing (foundation, engine-room, infra SDK)
+4. Nature Wing (seasons, forest, gossamer, prism)
+
+**Phase 3: Trust & Data**
+
+5. Trust Wing (heartwood, sessions)
+6. Data Wing (filing-cabinet, amber, query-builders)
+
+**Phase 4: Features**
+
+7. Personalization Wing (grafts, curios, blazes)
+8. AI Wing (thorn, reverie, lumen, songbird)
+
+**Phase 5: Community & Craft**
+
+9. Community Wing (meadow, landing, clearing)
+10. The Jungle (menagerie, conductor, GW, GF)
 
 ---
 
@@ -518,17 +508,19 @@ Before writing, each agent should:
 
 A Wanderer who completes the museum tour should:
 
-- [ ] Understand how multi-tenant architecture works
-- [ ] Know why the engine-first pattern matters
-- [ ] Feel the warmth behind nature component choices
+- [ ] Understand why Grove exists and what values drive it
+- [ ] Feel the authenticity behind every naming choice
+- [ ] Know how multi-tenant architecture works
+- [ ] Appreciate the nature-themed visual system
 - [ ] Grasp how authentication flows without fear
-- [ ] Appreciate the caching strategy's elegance
-- [ ] Understand why naming matters (words create worlds)
+- [ ] See how privacy-first AI serves creators
+- [ ] Understand the caching strategy's elegance
 - [ ] Want to personalize their own blog
+- [ ] Feel the joy of good tooling
 - [ ] Feel welcomed into the Grove community
 
 ---
 
 _This plan transforms technical documentation into hospitality._
 
-_— Planned January 2026_
+_Planned January 2026. Updated March 2026._

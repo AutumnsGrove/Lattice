@@ -4,7 +4,7 @@ description: The social layer and shared spaces
 category: exhibit
 exhibitWing: community
 icon: users
-lastUpdated: '2026-01-22'
+lastUpdated: '2026-03-10'
 ---
 # The Community Wing
 
@@ -23,6 +23,9 @@ This wing explains how Grove handles community. The Meadow is where blogs can sh
 ### [The Meadow](./meadow.md)
 Community feed where blogs share posts.
 
+### [The Canopy](./canopy.md)
+The opt-in directory. Rise into the canopy to be found. Browse who's growing here. No algorithms, no ranking. Just trees reaching up, visible to anyone who looks.
+
 ### [The Landing](./landing.md)
 How grove.place welcomes visitors.
 
@@ -34,7 +37,7 @@ Status page and transparency.
 ## Continue Your Tour
 
 - **[The Personalization Wing](../personalization/WING.md)** — How you make it yours
-- **[The Naming Wing](../naming/WING.md)** — How Grove names things
+- **[The AI Wing](../ai/WING.md)** — Privacy-first AI
 - **[Return to Entrance](../MUSEUM.md)**
 
 ---

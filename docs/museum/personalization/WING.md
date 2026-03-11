@@ -4,7 +4,7 @@ description: Making each blog feel like home
 category: exhibit
 exhibitWing: personalization
 icon: palette
-lastUpdated: '2026-01-22'
+lastUpdated: '2026-03-10'
 ---
 # The Personalization Wing
 
@@ -27,7 +27,10 @@ Feature flags with Grove vocabulary.
 Old-web personalization features.
 
 ### [The Theme Workshop](./themes.md)
-How blogs get customized.
+How blogs get customized. Foliage themes, Vineyard showcases.
+
+### Blazes
+Content markers with icons and meaning. Visual language for categorizing and highlighting.
 
 ---
 

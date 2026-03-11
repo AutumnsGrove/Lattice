@@ -4,7 +4,7 @@ description: Grove speaks its own language. Here's the phrasebook.
 category: exhibit
 exhibitWing: entrance
 icon: book
-lastUpdated: '2026-01-22'
+lastUpdated: '2026-03-10'
 ---
 # The Glossary Alcove
 
@@ -44,12 +44,13 @@ The levels of commitment, named for growth stages.
 
 | Tier | What It Means | Features |
 |------|---------------|----------|
-| **Seedling** | Entry tier | Basic blogging, community access |
-| **Sapling** | Growing tier | Custom domain, more storage |
-| **Oak** | Established tier | Advanced features, priority support |
-| **Evergreen** | Highest tier | Everything, forever pricing locked |
+| **Wanderer** | Free tier | Basic blogging, community access, everyone can wander |
+| **Seedling** | Entry paid tier | More blooms, curated themes, your own corner |
+| **Sapling** | Growing tier | More storage, email forwarding, room to stretch |
+| **Oak** | Established tier | Unlimited blooms, theme customizer, custom domain, analytics |
+| **Evergreen** | Highest tier | Everything, dedicated support, always flourishing |
 
-**Note:** Creating a blog makes you Rooted. Tiers describe the size of your tree, not whether it exists. All Rooted Wanderers have taken root; tiers reflect how much they've grown.
+**Note:** Creating a blog makes you Rooted. Tiers describe the size of your tree, not whether it exists. All Rooted Wanderers have taken root; tiers reflect how much they've grown. Everyone starts as a Wanderer, and Wanderers can blog too.
 
 ---
 
@@ -60,9 +61,11 @@ The components that make Grove work.
 | Name | What It Is | Why This Word |
 |------|------------|---------------|
 | **Lattice** | The core framework | A structure that supports growth; vines climb it |
+| **Aspen** | The live deployment | Clonal colonies, shared roots, resilience through connection |
 | **Heartwood** | Authentication system | The dense core of a tree; where trust lives |
 | **Loom** | Durable Objects coordination | Weaves threads of state together |
 | **Meadow** | Community feed | Open space where the community gathers |
+| **Canopy** | Wanderer directory | What you see looking at the forest from above; opt-in visibility |
 | **Clearing** | Status page | A gap in the forest; visibility and transparency |
 | **Forage** | Domain discovery tool | Searching and gathering what you need |
 | **Plant** | Tenant management app | Where you tend your blog garden |
@@ -89,16 +92,53 @@ How we talk about feature management.
 
 ## Personalization Features (Curios)
 
-The old-web elements that make blogs feel personal.
+21 old-web elements that make blogs feel personal. A cabinet of wonders. 45 database tables. "Someone lives here."
+
+### Built
+
+| Curio | What It Does |
+|-------|--------------|
+| **Timeline** | AI-powered daily GitHub activity summaries with voice presets |
+| **Journey** | Repository evolution tracking with code metrics and AI release summaries |
+| **Gallery** | R2-backed image gallery with tags, collections, and display styles |
+
+### Social
 
 | Curio | What It Does | Old-Web Inspiration |
 |-------|--------------|---------------------|
-| **Guestbook** | Visitors leave signatures | GeoCities-era guestbooks |
-| **Hit Counter** | Shows visitor count | "You are visitor #12,847" |
-| **Shrine** | Dedication board | Fan shrines, memorial pages |
-| **Link Garden** | Curated link collection | Blogrolls, webrings |
-| **Custom Cursor** | Personalized mouse pointer | Sparkle trails, themed pointers |
-| **Under Construction** | Classic badge | "This page is under construction" GIFs |
+| **Guestbook** | Visitors leave signatures with moderation | GeoCities-era guestbooks |
+| **Link Gardens** | Curated link collections with 88x31 buttons | Blogrolls |
+| **Blogroll** | RSS-powered blog recommendations with latest posts | Classic blogrolls |
+| **Badges** | Collectible achievements, auto-award and custom | Forum badges, profile flair |
+| **Web Ring Hub** | Webring navigation with Prev/Hub/Next links | Webrings! |
+
+### Decoration
+
+| Curio | What It Does | Old-Web Inspiration |
+|-------|--------------|---------------------|
+| **Hit Counter** | Nostalgic page view counter with display styles | "You are visitor #12,847" |
+| **Status Badges** | Site status indicators | "Under Construction" GIFs |
+| **Custom Cursors** | Cursor themes with trail effects | Sparkle trails, themed pointers |
+| **Mood Ring** | Visual mood indicator, time-based or manual | Mood GIFs, "current mood:" |
+| **Clip Art Library** | Decorative drag-and-drop assets | GeoCities clip art, but good |
+
+### Interactive
+
+| Curio | What It Does | Old-Web Inspiration |
+|-------|--------------|---------------------|
+| **Polls** | Interactive voting with live results, embeddable | Forum polls |
+| **Weird Artifacts** | Magic 8-Ball, fortune cookies, dice, tarot | The chaos corner |
+| **Ambient Sounds** | Optional background audio, nature and lo-fi | MIDI autoplay, but tasteful |
+
+### Media & Integration
+
+| Curio | What It Does | Old-Web Inspiration |
+|-------|--------------|---------------------|
+| **Now Playing** | Spotify/Last.fm currently listening display | "Now playing" sidebar widgets |
+| **Shrines** | Dedication boards for things you love | Fan shrines, memorial pages |
+| **Bookmark Shelf** | Visual bookshelf-style reading list | "What I'm reading" pages |
+| **Activity Status** | Discord-style "currently doing" indicator | AIM away messages |
+| **Custom Uploads** | Your own images for customizing curios | "My Homepage" energy |
 
 ---
 

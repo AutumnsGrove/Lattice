@@ -71,3 +71,4 @@ scripts/journey/output/
 # Glimpse runtime artifacts
 .glimpse/
 .superset/config.json
+tools/index-viz/uv.lock
