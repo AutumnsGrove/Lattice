@@ -13,46 +13,38 @@ import (
 const DefaultMaxRounds = 14
 
 // hybridSystemPromptTemplate is used when vector search results are available.
-const hybridSystemPromptTemplate = `You are a codebase search assistant for a TypeScript/Svelte monorepo called Lattice.
+// Designed for small models (1-4B params): present candidates, model just verifies.
+const hybridSystemPromptTemplate = `You are a codebase search assistant. The user asked: %q
 
-The user asked: %q
-
-Below are the top search results from semantic vector search, ranked by relevance.
-Review these results and identify which files best match the user's query.
-
-You can use these tools to refine:
-- vector_search: search again with different terms if the initial results don't match
-- grep_search: search inside files for specific patterns
-- list_directory: explore a directory's contents
-- give_up: if nothing matches after reviewing results
-
-RULES:
-1. Start by reviewing the VECTOR SEARCH RESULTS below. Most answers are in there.
-2. Use grep_search to verify or drill into specific files from the results.
-3. Use list_directory to explore directories that appear in the results.
-4. Respond with ONLY file paths and a brief description. Do not guess paths.
-
-VECTOR SEARCH RESULTS:
+CANDIDATE FILES (from semantic search, most relevant first):
 %s
 
-CODEBASE MAP:
+TASK: Verify which candidates match the query. Use grep_search with a SHORT keyword (one word) from the query to check the top candidates.
+
+IMPORTANT:
+- grep_search keyword must be ONE word, not a phrase. Example: "seasonal colors" → grep "season"
+- Only use list_directory on DIRECTORIES, never on file paths
+- If candidates look right, answer with those file paths
+- If candidates are wrong, use vector_search with different terms
+
+OUTPUT: File paths and one-line descriptions only.
+
 %s`
 
-// fallbackSystemPromptTemplate is the old prompt for pure agent mode (no index).
+// fallbackSystemPromptTemplate is the prompt for pure agent mode (no index).
 const fallbackSystemPromptTemplate = `You are a codebase search assistant for a TypeScript/Svelte monorepo called Lattice.
 
-Given a natural language description, find the relevant files using the tools provided.
+Find the files that match the user's description.
 
-RULES:
-1. Search for ONE keyword at a time. Extract keywords from the query and search each one.
-2. Try shorter words. "glassmorphism card" → search "glass", then "card". "rate limiting" → search "rate".
-3. Try singular AND plural. "icons" → also "icon". "services" → also "service".
-4. Check the CODEBASE MAP below. If a directory name matches, use list_directory on it.
-5. Always search for actual words — never search for just file extensions like "*.ts".
+STRATEGY:
+1. Extract keywords from the query. Search ONE keyword at a time.
+2. Use SHORT keywords. "glassmorphism card" → search "glass". "rate limiting" → search "rate".
+3. Try singular AND plural. "icons" → also try "icon".
+4. Check the CODEBASE MAP — if a directory name matches, use list_directory.
 
-CODEBASE MAP HINTS:
+CODEBASE MAP:
 - apps/ = web pages. workers/ = background jobs. services/ = APIs.
-- libs/engine/src/lib/ = most business logic (modules listed below)
+- libs/engine/src/lib/ = most business logic (subdirs listed below)
 - Other libs: foliage=themes, prism=colors, gossamer=ascii-effects, vineyard=UI-components
 
 OUTPUT: File paths and one-line descriptions only. Do not guess paths.
@@ -65,20 +57,24 @@ type AgentOptions struct {
 	Verbose       bool
 	VerboseWriter io.Writer // where to print verbose output (defaults to os.Stderr)
 	OnStatus      func(round int, maxRounds int, status string) // called on each round for UI feedback
-	Index         *Index       // optional: vector index for hybrid mode
-	NoVectors     bool         // when true, skip vector search even if index is available
-	Filter        *QueryFilter // optional: restrict vector search to matching entries
+	Index         *Index         // optional: vector index for hybrid mode
+	NoVectors     bool           // when true, skip vector search even if index is available
+	Filter        *QueryFilter   // optional: restrict vector search to matching entries
+	Pricing       *ModelPricing  // optional: for cost tracking (cloud mode)
 }
 
 // AgentResult holds the outcome of the agentic search loop.
 type AgentResult struct {
-	Answer    string        // final model answer (empty if give_up)
-	Files     []string      // file paths extracted from the answer
-	Rounds    int           // number of rounds executed
-	ToolCalls []ToolCallLog // log of all tool calls made
-	GaveUp    bool          // true if the model called give_up
-	GiveUp    *GiveUpResult // populated when GaveUp is true
-	UsedIndex bool          // true if vector index was used
+	Answer           string        // final model answer (empty if give_up)
+	Files            []string      // file paths extracted from the answer
+	Rounds           int           // number of rounds executed
+	ToolCalls        []ToolCallLog // log of all tool calls made
+	GaveUp           bool          // true if the model called give_up
+	GiveUp           *GiveUpResult // populated when GaveUp is true
+	UsedIndex        bool          // true if vector index was used
+	PromptTokens     int           // total prompt tokens across all rounds
+	CompletionTokens int           // total completion tokens across all rounds
+	Cost             float64       // estimated cost in USD (cloud mode only)
 }
 
 // ToolCallLog records a single tool call for output.
@@ -142,6 +138,8 @@ func RunAgent(ctx context.Context, client *Client, query string, opts AgentOptio
 	seenCalls := make(map[string]bool) // for duplicate detection
 	emptyRounds := 0
 	nudgedOnce := false // only nudge once to avoid infinite loops
+	totalPromptTokens := 0
+	totalCompletionTokens := 0
 
 	for round := 1; round <= opts.MaxRounds; round++ {
 		if opts.OnStatus != nil {
@@ -154,6 +152,12 @@ func RunAgent(ctx context.Context, client *Client, query string, opts AgentOptio
 		})
 		if err != nil {
 			return nil, fmt.Errorf("round %d: %w", round, err)
+		}
+
+		// Track token usage
+		if resp.Usage != nil {
+			totalPromptTokens += resp.Usage.PromptTokens
+			totalCompletionTokens += resp.Usage.CompletionTokens
 		}
 
 		choice := resp.Choices[0]
@@ -171,7 +175,7 @@ func RunAgent(ctx context.Context, client *Client, query string, opts AgentOptio
 				if useIndex {
 					messages = append(messages, Message{
 						Role:    "user",
-						Content: fmt.Sprintf("You only tried %d search(es). Review the vector search results more carefully, or use grep_search to verify specific files before answering.", searchCount),
+						Content: fmt.Sprintf("You only tried %d search(es). Use grep_search to verify at least one file from the vector results before answering.", searchCount),
 					})
 				} else {
 					messages = append(messages, Message{
@@ -182,22 +186,28 @@ func RunAgent(ctx context.Context, client *Client, query string, opts AgentOptio
 				continue
 			}
 			return &AgentResult{
-				Answer:    choice.Message.Content,
-				Files:     extractFilePaths(choice.Message.Content),
-				Rounds:    round,
-				ToolCalls: allToolCalls,
-				UsedIndex: useIndex,
+				Answer:           choice.Message.Content,
+				Files:            extractFilePaths(choice.Message.Content),
+				Rounds:           round,
+				ToolCalls:        allToolCalls,
+				UsedIndex:        useIndex,
+				PromptTokens:     totalPromptTokens,
+				CompletionTokens: totalCompletionTokens,
+				Cost:             computeCost(opts.Pricing, totalPromptTokens, totalCompletionTokens),
 			}, nil
 		}
 
 		// No tool calls and no content: unexpected
 		if len(choice.Message.ToolCalls) == 0 {
 			return &AgentResult{
-				Answer:    choice.Message.Content,
-				Files:     extractFilePaths(choice.Message.Content),
-				Rounds:    round,
-				ToolCalls: allToolCalls,
-				UsedIndex: useIndex,
+				Answer:           choice.Message.Content,
+				Files:            extractFilePaths(choice.Message.Content),
+				Rounds:           round,
+				ToolCalls:        allToolCalls,
+				UsedIndex:        useIndex,
+				PromptTokens:     totalPromptTokens,
+				CompletionTokens: totalCompletionTokens,
+				Cost:             computeCost(opts.Pricing, totalPromptTokens, totalCompletionTokens),
 			}, nil
 		}
 
@@ -250,7 +260,7 @@ func RunAgent(ctx context.Context, client *Client, query string, opts AgentOptio
 						messages = append(messages, Message{
 							Role:       "tool",
 							ToolCallID: tc.ID,
-							Content:    fmt.Sprintf("Do NOT give up yet. You have only tried %d search(es). The vector results above contain relevant files — review them more carefully, or use grep_search to drill into specific paths.", searchCount),
+							Content:    fmt.Sprintf("Do NOT give up yet. You have only tried %d search(es). Look at the VECTOR SEARCH RESULTS at the top of this conversation — pick files from there and use grep_search to verify them.", searchCount),
 						})
 					} else {
 						messages = append(messages, Message{
@@ -262,11 +272,14 @@ func RunAgent(ctx context.Context, client *Client, query string, opts AgentOptio
 					continue
 				}
 				return &AgentResult{
-					Rounds:    round,
-					ToolCalls: allToolCalls,
-					GaveUp:    true,
-					GiveUp:    result.GiveUp,
-					UsedIndex: useIndex,
+					Rounds:           round,
+					ToolCalls:        allToolCalls,
+					GaveUp:           true,
+					GiveUp:           result.GiveUp,
+					UsedIndex:        useIndex,
+					PromptTokens:     totalPromptTokens,
+					CompletionTokens: totalCompletionTokens,
+					Cost:             computeCost(opts.Pricing, totalPromptTokens, totalCompletionTokens),
 				}, nil
 			}
 
@@ -308,19 +321,30 @@ func RunAgent(ctx context.Context, client *Client, query string, opts AgentOptio
 	})
 	if err != nil {
 		return &AgentResult{
-			Answer:    "Search reached maximum rounds without a conclusive answer.",
-			Rounds:    opts.MaxRounds,
-			ToolCalls: allToolCalls,
-			UsedIndex: useIndex,
+			Answer:           "Search reached maximum rounds without a conclusive answer.",
+			Rounds:           opts.MaxRounds,
+			ToolCalls:        allToolCalls,
+			UsedIndex:        useIndex,
+			PromptTokens:     totalPromptTokens,
+			CompletionTokens: totalCompletionTokens,
+			Cost:             computeCost(opts.Pricing, totalPromptTokens, totalCompletionTokens),
 		}, nil
 	}
 
+	if resp.Usage != nil {
+		totalPromptTokens += resp.Usage.PromptTokens
+		totalCompletionTokens += resp.Usage.CompletionTokens
+	}
+
 	return &AgentResult{
-		Answer:    resp.Choices[0].Message.Content,
-		Files:     extractFilePaths(resp.Choices[0].Message.Content),
-		Rounds:    opts.MaxRounds,
-		ToolCalls: allToolCalls,
-		UsedIndex: useIndex,
+		Answer:           resp.Choices[0].Message.Content,
+		Files:            extractFilePaths(resp.Choices[0].Message.Content),
+		Rounds:           opts.MaxRounds,
+		ToolCalls:        allToolCalls,
+		UsedIndex:        useIndex,
+		PromptTokens:     totalPromptTokens,
+		CompletionTokens: totalCompletionTokens,
+		Cost:             computeCost(opts.Pricing, totalPromptTokens, totalCompletionTokens),
 	}, nil
 }
 
@@ -335,7 +359,7 @@ func preSearchVectors(ctx context.Context, client *Client, idx *Index, query str
 		return "(vector search returned empty embedding)"
 	}
 
-	results := QueryIndex(idx, vectors[0], 20, filter)
+	results := QueryIndex(idx, vectors[0], 10, filter)
 	if len(results) == 0 {
 		return "(no matches found in vector index)"
 	}
@@ -358,6 +382,14 @@ func preSearchVectors(ctx context.Context, client *Client, idx *Index, query str
 	}
 
 	return strings.Join(lines, "\n")
+}
+
+// computeCost calculates the estimated cost based on pricing and token counts.
+func computeCost(pricing *ModelPricing, promptTokens, completionTokens int) float64 {
+	if pricing == nil {
+		return 0
+	}
+	return float64(promptTokens)*pricing.PromptCost + float64(completionTokens)*pricing.CompletionCost
 }
 
 // countSearchCalls counts actual search tool calls (excludes give_up).

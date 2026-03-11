@@ -25,7 +25,7 @@ const modelLoadTimeout = 30 * time.Second
 // If autostart is true, it will attempt to start the server and load a model.
 func EnsureServer(ctx context.Context, autostart bool, onStatus func(string)) (*Client, error) {
 	cfg := config.Get()
-	client := NewClient(cfg.LLMEndpoint, cfg.LLMModel, time.Duration(cfg.LLMTimeout)*time.Second)
+	client := NewClientWithEmbed(cfg.LLMEndpoint, cfg.LLMModel, cfg.EmbedModel, time.Duration(cfg.LLMTimeout)*time.Second)
 
 	// Step 1: Check if server is already running
 	if client.IsHealthy(ctx) {

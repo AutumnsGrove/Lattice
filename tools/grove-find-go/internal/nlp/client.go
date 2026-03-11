@@ -47,12 +47,20 @@ type ChatRequest struct {
 // ChatResponse is the parsed response from /v1/chat/completions.
 type ChatResponse struct {
 	Choices []Choice `json:"choices"`
+	Usage   *Usage   `json:"usage,omitempty"`
 }
 
 // Choice holds one completion result.
 type Choice struct {
 	Message      Message `json:"message"`
 	FinishReason string  `json:"finish_reason"`
+}
+
+// Usage holds token counts from the API response.
+type Usage struct {
+	PromptTokens     int `json:"prompt_tokens"`
+	CompletionTokens int `json:"completion_tokens"`
+	TotalTokens      int `json:"total_tokens"`
 }
 
 // Tool defines a function the model can call.
@@ -99,11 +107,13 @@ type EmbedData struct {
 
 // ---------- Client ----------
 
-// Client communicates with an OpenAI-compatible LLM API (e.g. LM Studio).
+// Client communicates with an OpenAI-compatible LLM API (e.g. LM Studio, OpenRouter).
 type Client struct {
 	endpoint   string
 	model      string
 	embedModel string
+	apiKey     string  // optional: Bearer token for cloud providers
+	localEmbed *Client // optional: separate client for local embeddings (cloud mode)
 	httpClient *http.Client
 }
 
@@ -130,6 +140,41 @@ func NewClientWithEmbed(endpoint, model, embedModel string, timeout time.Duratio
 	}
 }
 
+// NewCloudClient creates a client for a cloud API (OpenRouter, etc.) with an API key.
+// The embedModel is optional — cloud mode typically uses a local embed model.
+func NewCloudClient(endpoint, model, apiKey string, timeout time.Duration) *Client {
+	return &Client{
+		endpoint: endpoint,
+		model:    model,
+		apiKey:   apiKey,
+		httpClient: &http.Client{
+			Timeout: timeout,
+		},
+	}
+}
+
+// SetEmbedModel overrides the embedding model used for queries.
+// This is used to match the model that was used to build the index.
+func (c *Client) SetEmbedModel(model string) {
+	c.embedModel = model
+}
+
+// SetEmbedFrom copies embedding config from another client.
+// Used in cloud mode: chat goes to OpenRouter, embeddings go to local LM Studio.
+func (c *Client) SetEmbedFrom(local *Client) {
+	c.embedModel = local.embedModel
+	c.localEmbed = local
+}
+
+// embedClient returns the client to use for embedding requests.
+// In cloud mode this is the local LM Studio client; otherwise it's self.
+func (c *Client) embedClient() *Client {
+	if c.localEmbed != nil {
+		return c.localEmbed
+	}
+	return c
+}
+
 // ChatCompletion sends a chat completion request and returns the parsed response.
 func (c *Client) ChatCompletion(ctx context.Context, req ChatRequest) (*ChatResponse, error) {
 	if req.Model == "" {
@@ -146,6 +191,9 @@ func (c *Client) ChatCompletion(ctx context.Context, req ChatRequest) (*ChatResp
 		return nil, fmt.Errorf("create request: %w", err)
 	}
 	httpReq.Header.Set("Content-Type", "application/json")
+	if c.apiKey != "" {
+		httpReq.Header.Set("Authorization", "Bearer "+c.apiKey)
+	}
 
 	resp, err := c.httpClient.Do(httpReq)
 	if err != nil {
@@ -179,6 +227,9 @@ func (c *Client) ListModels(ctx context.Context) ([]string, error) {
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodGet, c.endpoint+"/models", nil)
 	if err != nil {
 		return nil, fmt.Errorf("create request: %w", err)
+	}
+	if c.apiKey != "" {
+		httpReq.Header.Set("Authorization", "Bearer "+c.apiKey)
 	}
 
 	resp, err := c.httpClient.Do(httpReq)
@@ -214,6 +265,12 @@ func (c *Client) IsHealthy(ctx context.Context) bool {
 // timeout since embedding can be slow for large inputs on smaller GPUs.
 // The optional onProgress callback is called after each batch with (done, total) counts.
 func (c *Client) Embed(ctx context.Context, texts []string, onProgress func(done, total int)) ([][]float32, error) {
+	// Delegate to local embed client if in cloud mode
+	ec := c.embedClient()
+	return ec.doEmbed(ctx, texts, onProgress)
+}
+
+func (c *Client) doEmbed(ctx context.Context, texts []string, onProgress func(done, total int)) ([][]float32, error) {
 	if len(texts) == 0 {
 		return nil, nil
 	}
@@ -289,6 +346,64 @@ func (c *Client) Embed(ctx context.Context, texts []string, onProgress func(done
 	}
 
 	return allEmbeddings, nil
+}
+
+// ModelPricing holds per-token pricing for a model.
+type ModelPricing struct {
+	PromptCost     float64 // cost per token for prompt
+	CompletionCost float64 // cost per token for completion
+}
+
+// FetchModelPricing queries OpenRouter's /api/v1/models endpoint for pricing.
+func FetchModelPricing(ctx context.Context, modelID string) (*ModelPricing, error) {
+	url := "https://openrouter.ai/api/v1/models"
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := (&http.Client{Timeout: 10 * time.Second}).Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("models API returned %d", resp.StatusCode)
+	}
+
+	var result struct {
+		Data []struct {
+			ID      string `json:"id"`
+			Pricing struct {
+				Prompt     string `json:"prompt"`
+				Completion string `json:"completion"`
+			} `json:"pricing"`
+		} `json:"data"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, err
+	}
+
+	for _, m := range result.Data {
+		if m.ID == modelID {
+			promptCost := parseFloat(m.Pricing.Prompt)
+			completionCost := parseFloat(m.Pricing.Completion)
+			return &ModelPricing{
+				PromptCost:     promptCost,
+				CompletionCost: completionCost,
+			}, nil
+		}
+	}
+
+	return nil, fmt.Errorf("model %q not found in OpenRouter catalog", modelID)
+}
+
+// parseFloat parses a string to float64, returning 0 on error.
+func parseFloat(s string) float64 {
+	var f float64
+	fmt.Sscanf(s, "%f", &f)
+	return f
 }
 
 // truncate cuts a string to maxLen and adds "..." if truncated.

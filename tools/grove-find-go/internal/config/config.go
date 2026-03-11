@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -17,11 +18,16 @@ type Config struct {
 	NoPager         bool // when true, skip Bubble Tea paginator
 	PageThreshold   int  // min lines before paginator activates (default 50)
 
-	// LLM config for gf ask
+	// LLM config for gf ask (local)
 	LLMEndpoint string // env: GF_LLM_ENDPOINT, default: http://localhost:1234/v1
 	LLMModel    string // env: GF_LLM_MODEL,    default: liquid/lfm2.5-1.2b
 	EmbedModel  string // env: GF_EMBED_MODEL,  default: text-embedding-jina-code-embeddings-0.5b
 	LLMTimeout  int    // env: GF_LLM_TIMEOUT,  default: 30 (seconds per request)
+
+	// Cloud LLM config for gf ask --cloud
+	CloudEndpoint string // env: GF_CLOUD_ENDPOINT, default: https://openrouter.ai/api/v1
+	CloudModel    string // env: GF_CLOUD_MODEL,    default: xiaomi/mimo-v2-flash
+	CloudAPIKey   string // secrets.json "openrouter_api_key" or env: GF_CLOUD_API_KEY
 }
 
 var (
@@ -64,6 +70,16 @@ func Init(root string, agent, jsonMode, verbose, noPager bool, pageThreshold int
 	cfg.EmbedModel = envOrDefault("GF_EMBED_MODEL", "text-embedding-jina-code-embeddings-0.5b")
 	cfg.LLMTimeout = envIntOrDefault("GF_LLM_TIMEOUT", 30)
 
+	// Cloud config (for gf ask --cloud)
+	cfg.CloudEndpoint = envOrDefault("GF_CLOUD_ENDPOINT", "https://openrouter.ai/api/v1")
+	cfg.CloudModel = envOrDefault("GF_CLOUD_MODEL", "xiaomi/mimo-v2-flash")
+	cfg.CloudAPIKey = envOrDefault("GF_CLOUD_API_KEY", "")
+
+	// Load API key from secrets.json if not set via env
+	if cfg.CloudAPIKey == "" {
+		cfg.CloudAPIKey = loadSecret(cfg.GroveRoot, "openrouter_api_key")
+	}
+
 	return cfg
 }
 
@@ -86,6 +102,27 @@ func (c *Config) SetEmbedModel(model string) {
 	if model != "" {
 		c.EmbedModel = model
 	}
+}
+
+// SetCloudModel overrides the cloud model (called from persistent flags).
+func (c *Config) SetCloudModel(model string) {
+	if model != "" {
+		c.CloudModel = model
+	}
+}
+
+// loadSecret reads a key from secrets.json in the project root.
+func loadSecret(root, key string) string {
+	path := filepath.Join(root, "secrets.json")
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return ""
+	}
+	var secrets map[string]string
+	if err := json.Unmarshal(data, &secrets); err != nil {
+		return ""
+	}
+	return secrets[key]
 }
 
 func envOrDefault(key, defaultVal string) string {

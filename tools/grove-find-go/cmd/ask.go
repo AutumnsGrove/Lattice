@@ -29,6 +29,8 @@ var (
 	askFlagTier        string
 	askFlagDocs        bool
 	askFlagAll         bool
+	askFlagCloud       bool
+	askFlagCloudModel  string
 )
 
 var askCmd = &cobra.Command{
@@ -105,16 +107,48 @@ Examples:
 			}
 		}
 
-		// Ensure LM Studio is running
-		client, err := nlp.EnsureServer(ctx, !askFlagNoAutostart, onStatus)
-		if err != nil {
-			return err
+		// Create the LLM client (cloud or local)
+		var client *nlp.Client
+		var pricing *nlp.ModelPricing
+		if askFlagCloud {
+			// Cloud mode: use OpenRouter for chat, local LM Studio for embeddings
+			cloudModel := cfg.CloudModel
+			if askFlagCloudModel != "" {
+				cloudModel = askFlagCloudModel
+			}
+			if cfg.CloudAPIKey == "" {
+				return fmt.Errorf("no API key found. Set GF_CLOUD_API_KEY env var or add \"openrouter_api_key\" to secrets.json")
+			}
+			client = nlp.NewCloudClient(cfg.CloudEndpoint, cloudModel, cfg.CloudAPIKey, 30*time.Second)
+			onStatus(fmt.Sprintf("Using cloud model: %s", cloudModel))
+
+			// Fetch pricing for cost tracking
+			if p, err := nlp.FetchModelPricing(ctx, cloudModel); err == nil {
+				pricing = p
+			}
+		} else {
+			// Local mode: LM Studio for both chat and embeddings
+			var err error
+			client, err = nlp.EnsureServer(ctx, !askFlagNoAutostart, onStatus)
+			if err != nil {
+				return err
+			}
 		}
 
 		// Load vector index (if available and not skipped)
 		var idx *nlp.Index
 		if !askFlagNoVectors {
 			idx = loadSearchIndex(cfg, askFlagDocs, askFlagAll, onStatus)
+			// For vector pre-search, we need a local embed client regardless of cloud mode
+			if idx != nil && idx.EmbedModel != "" {
+				if askFlagCloud {
+					// Cloud mode: create a separate local client just for embedding
+					localEmbed := nlp.NewClientWithEmbed(cfg.LLMEndpoint, "", idx.EmbedModel, time.Duration(cfg.LLMTimeout)*time.Second)
+					client.SetEmbedFrom(localEmbed)
+				} else {
+					client.SetEmbedModel(idx.EmbedModel)
+				}
+			}
 		}
 
 		// Run the agentic loop
@@ -134,6 +168,7 @@ Examples:
 			Index:     idx,
 			NoVectors: askFlagNoVectors,
 			Filter:    filter,
+			Pricing:   pricing,
 		})
 		if err != nil {
 			return fmt.Errorf("search failed: %w", err)
@@ -150,10 +185,13 @@ Examples:
 		}
 
 		if result.GaveUp {
+			renderCostSummary(cfg, result)
 			return renderGiveUp(cfg, result)
 		}
 
-		return renderAnswer(cfg, result)
+		err = renderAnswer(cfg, result)
+		renderCostSummary(cfg, result)
+		return err
 	},
 }
 
@@ -171,6 +209,8 @@ func init() {
 	askCmd.Flags().StringVar(&askFlagTier, "tier", "", "Embedding model tier: tiny, small, full (default: full)")
 	askCmd.Flags().BoolVar(&askFlagDocs, "docs", false, "Index/search documentation (.md) instead of code")
 	askCmd.Flags().BoolVar(&askFlagAll, "all", false, "Search both code and docs indexes")
+	askCmd.Flags().BoolVar(&askFlagCloud, "cloud", false, "Use cloud LLM (OpenRouter) instead of local LM Studio")
+	askCmd.Flags().StringVar(&askFlagCloudModel, "cloud-model", "", "Override cloud model (default: xiaomi/mimo-v2-flash)")
 }
 
 func renderJSON(query string, result *nlp.AgentResult) error {
@@ -179,6 +219,12 @@ func renderJSON(query string, result *nlp.AgentResult) error {
 		"query":      query,
 		"rounds":     result.Rounds,
 		"tool_calls": result.ToolCalls,
+		"usage": map[string]any{
+			"prompt_tokens":     result.PromptTokens,
+			"completion_tokens": result.CompletionTokens,
+			"total_tokens":      result.PromptTokens + result.CompletionTokens,
+			"cost_usd":          result.Cost,
+		},
 	}
 
 	if result.GaveUp {
@@ -486,6 +532,31 @@ func runIndexMutate(ctx context.Context, cfg *config.Config) error {
 	}
 
 	return nil
+}
+
+// renderCostSummary prints token usage and cost info to stderr (cloud mode only).
+func renderCostSummary(cfg *config.Config, result *nlp.AgentResult) {
+	if result.PromptTokens == 0 && result.CompletionTokens == 0 {
+		return
+	}
+	if cfg.JSONMode {
+		return
+	}
+	totalTokens := result.PromptTokens + result.CompletionTokens
+	if cfg.AgentMode {
+		fmt.Fprintf(os.Stderr, "--- tokens: %d prompt + %d completion = %d total", result.PromptTokens, result.CompletionTokens, totalTokens)
+		if result.Cost > 0 {
+			fmt.Fprintf(os.Stderr, " ($%.6f)", result.Cost)
+		}
+		fmt.Fprintln(os.Stderr, " ---")
+	} else {
+		costStr := ""
+		if result.Cost > 0 {
+			costStr = fmt.Sprintf("  cost: $%.6f", result.Cost)
+		}
+		output.PrintDim(fmt.Sprintf("  %d tokens (%d prompt + %d completion)%s", totalTokens, result.PromptTokens, result.CompletionTokens, costStr))
+		fmt.Println()
+	}
 }
 
 // loadSearchIndex loads the appropriate index(es) for the search flags.

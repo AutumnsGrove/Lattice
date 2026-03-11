@@ -79,13 +79,13 @@ func grepSearchToolDef() Tool {
 		Type: "function",
 		Function: ToolDefinition{
 			Name:        "grep_search",
-			Description: "Search file contents for a regex pattern. Returns matching lines with file paths and line numbers. Use this to refine after vector_search.",
+			Description: "Search file contents for a pattern. Use ONE short keyword, never a full phrase. Example: to find seasonal colors, search 'season' not 'seasonal theme colors'.",
 			Parameters: map[string]any{
 				"type": "object",
 				"properties": map[string]any{
 					"pattern": map[string]any{
 						"type":        "string",
-						"description": "Regex pattern to search for",
+						"description": "ONE keyword to search for (short, single word works best)",
 					},
 					"file_type": map[string]any{
 						"type":        "string",
@@ -448,6 +448,11 @@ func execListDirectory(tc ToolCall) ToolResult {
 	resolved, err := safePath(args.Path)
 	if err != nil {
 		return ToolResult{ToolCallID: tc.ID, Content: "Error: " + err.Error()}
+	}
+
+	// Guard: reject file paths (model sometimes passes file paths instead of directories)
+	if info, err := os.Stat(resolved); err == nil && !info.IsDir() {
+		return ToolResult{ToolCallID: tc.ID, Content: fmt.Sprintf("Error: %s is a file, not a directory. Use grep_search to search inside files.", args.Path)}
 	}
 
 	entries, err := os.ReadDir(resolved)
