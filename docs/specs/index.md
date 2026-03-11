@@ -36,7 +36,7 @@ Core  Tools  Docs
 
 # Grove Specifications
 
-68 technical specifications covering every component, service, and tool in the Grove ecosystem. Organized by domain, linked to source files, kept current.
+66 technical specifications covering every component, service, and tool in the Grove ecosystem. Organized by domain, linked to source files, kept current.
 
 ---
 
@@ -113,7 +113,7 @@ Core  Tools  Docs
 |---------------|---------|--------|
 | **[Pantry](pantry-spec.md)** | Shop, merchandise, and provisioning | Active |
 | **[Porch](porch-spec.md)** | Front porch conversations and support | Active |
-| **[Waystone](waystone-spec.md)** | Help center and contextual documentation | Planned |
+| **[Waystone](waystone-spec.md)** | Contextual help system with in-context popups | Active |
 | **[Wanderer Plan](wanderer-plan-spec.md)** | Free blog tier for trying Grove | Active |
 | **[Centennial](centennial-spec.md)** | 100-year domain preservation | Planned |
 
@@ -206,8 +206,6 @@ Core  Tools  Docs
 
 | Specification | Purpose | Status |
 |---------------|---------|--------|
-| **[Customer Repository](customer-repo-spec.md)** | Template structure for customer repos | Reference |
-| **[Fiction House Publishing](fiction-house-publishing-spec.md)** | Publishing house client site | Client |
 | **[Tenant Onboarding Plan](tenant-onboarding-implementation-plan.md)** | Detailed onboarding implementation guide | Reference |
 
 ---
