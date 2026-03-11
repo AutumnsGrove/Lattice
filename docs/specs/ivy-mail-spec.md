@@ -4,7 +4,7 @@ description: First-party mail client for @grove.place email addresses
 category: specs
 specCategory: standalone-tools
 icon: mailbox
-lastUpdated: '2025-12-01'
+lastUpdated: '2026-03-11'
 aliases: []
 tags:
   - email
