@@ -12,10 +12,10 @@
 	 * @fires close - When user exits Fireside mode without a draft
 	 */
 
-	import { tick } from "svelte";
 	import { Sparkles, ArrowLeft, Check, RotateCcw, X } from "lucide-svelte";
 	import GlassChat from "$lib/ui/components/ui/glasschat/GlassChat.svelte";
-	import type { ChatMessageData, ChatRoleMap } from "$lib/ui/components/ui/glasschat/types";
+	import { createAIChatController } from "$lib/ui/components/ui/glasschat/controller.svelte";
+	import type { ChatRoleMap } from "$lib/ui/components/ui/glasschat/types";
 	import { api } from "$lib/utils/api";
 
 	// ============================================================================
@@ -50,10 +50,9 @@
 	};
 
 	// ============================================================================
-	// State
+	// API Response Types
 	// ============================================================================
 
-	// API response types
 	interface StartResponse {
 		conversationId: string;
 		reply: string;
@@ -71,22 +70,36 @@
 		warning?: string;
 	}
 
-	let messages = $state<ChatMessageData[]>([]);
-	let inputValue = $state("");
-	let isLoading = $state(false);
+	// ============================================================================
+	// Chat Controller
+	// ============================================================================
+
+	// Domain state that extends beyond the generic chat lifecycle
 	let canDraft = $state(false);
 	let conversationId = $state<string | null>(null);
-	let error = $state<string | null>(null);
-
-	// Draft state
 	let draftMode = $state(false);
 	let draft = $state<{ title: string; content: string; marker: string; warning?: string } | null>(
 		null,
 	);
 	let isDrafting = $state(false);
 
+	const chat = createAIChatController({
+		aiRole: "wisp",
+		async onSend(message, messages) {
+			const data = await api.post<RespondResponse>("/api/grove/wisp/fireside", {
+				action: "respond",
+				message,
+				conversation: messages,
+			});
+			if (!data) throw new Error("Failed to send message");
+
+			canDraft = data.canDraft;
+			return { content: data.reply };
+		},
+	});
+
 	// ============================================================================
-	// Constants
+	// Helpers
 	// ============================================================================
 
 	const WORDS_PER_MINUTE = 200;
@@ -100,77 +113,23 @@
 	}
 
 	// ============================================================================
-	// API Calls
+	// Fireside Domain Logic
 	// ============================================================================
 
 	async function startConversation() {
-		isLoading = true;
-		error = null;
+		chat.setLoading(true);
+		chat.setError(null);
 
 		try {
 			const data = await api.post<StartResponse>("/api/grove/wisp/fireside", { action: "start" });
 			if (!data) throw new Error("Failed to start conversation");
 
 			conversationId = data.conversationId;
-
-			messages = [
-				{
-					id: crypto.randomUUID(),
-					role: "wisp",
-					content: data.reply,
-					timestamp: new Date().toISOString(),
-				},
-			];
+			chat.addMessage("wisp", data.reply);
 		} catch (err) {
-			error = err instanceof Error ? err.message : "Something went wrong";
+			chat.setError(err instanceof Error ? err.message : "Something went wrong");
 		} finally {
-			isLoading = false;
-		}
-	}
-
-	async function sendMessage() {
-		if (!inputValue.trim() || isLoading) return;
-
-		const userMessage = inputValue.trim();
-		inputValue = "";
-		error = null;
-
-		const newMessage: ChatMessageData = {
-			id: crypto.randomUUID(),
-			role: "user",
-			content: userMessage,
-			timestamp: new Date().toISOString(),
-		};
-
-		messages = [...messages, newMessage];
-		await tick();
-
-		isLoading = true;
-
-		try {
-			const data = await api.post<RespondResponse>("/api/grove/wisp/fireside", {
-				action: "respond",
-				message: userMessage,
-				conversation: messages,
-			});
-			if (!data) throw new Error("Failed to send message");
-
-			canDraft = data.canDraft;
-
-			messages = [
-				...messages,
-				{
-					id: crypto.randomUUID(),
-					role: "wisp",
-					content: data.reply,
-					timestamp: new Date().toISOString(),
-				},
-			];
-		} catch (err) {
-			error = err instanceof Error ? err.message : "Something went wrong";
-			messages = messages.filter((m) => m.id !== newMessage.id);
-		} finally {
-			isLoading = false;
+			chat.setLoading(false);
 		}
 	}
 
@@ -178,12 +137,12 @@
 		if (isDrafting) return;
 
 		isDrafting = true;
-		error = null;
+		chat.setError(null);
 
 		try {
 			const data = await api.post<DraftResponse>("/api/grove/wisp/fireside", {
 				action: "draft",
-				conversation: messages,
+				conversation: chat.messages,
 				conversationId,
 			});
 			if (!data) throw new Error("Failed to generate draft");
@@ -195,7 +154,7 @@
 			};
 			draftMode = true;
 		} catch (err) {
-			error = err instanceof Error ? err.message : "Failed to generate draft";
+			chat.setError(err instanceof Error ? err.message : "Failed to generate draft");
 		} finally {
 			isDrafting = false;
 		}
@@ -265,14 +224,14 @@
 	{:else}
 		<!-- Chat Mode via GlassChat -->
 		<GlassChat
-			{messages}
+			messages={chat.messages}
 			roles={FIRESIDE_ROLES}
-			{isLoading}
+			isLoading={chat.isLoading}
 			loadingRole="wisp"
-			{error}
-			bind:inputValue
-			onSend={sendMessage}
-			inputDisabled={isLoading}
+			error={chat.error}
+			bind:inputValue={chat.inputValue}
+			onSend={chat.send}
+			inputDisabled={chat.isLoading}
 			inputPlaceholder="Type your thoughts..."
 			onClose={handleClose}
 			variant="dark"
@@ -305,7 +264,7 @@
 						<Sparkles size={16} />
 						{isDrafting ? "Drafting..." : "Ready to draft"}
 					</button>
-				{:else if messages.length > 0}
+				{:else if chat.messages.length > 0}
 					<p
 						class="draft-hint"
 						title="Share a few more thoughts and I'll be able to help shape them into a draft"
