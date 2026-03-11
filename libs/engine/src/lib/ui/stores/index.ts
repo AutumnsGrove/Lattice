@@ -12,3 +12,4 @@ export { sidebarStore } from "./sidebar.svelte";
 export { groveModeStore } from "./grove-mode.svelte";
 export { lanternStore } from "./lantern.svelte";
 export { friendsStore } from "./friends.svelte";
+export { chatStore } from "./chat.svelte";

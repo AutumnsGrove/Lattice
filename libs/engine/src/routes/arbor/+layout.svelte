@@ -2,7 +2,14 @@
 	import { ArborPanel } from "$lib/ui/components/arbor";
 	import Toast from "$lib/ui/components/ui/Toast.svelte";
 	import { defaultSuite, resolveIcon } from "$lib/ui/components/ui/groveicon";
-	import { LayoutDashboard, FileStack, Image, Settings, CreditCard } from "@lucide/svelte";
+	import {
+		LayoutDashboard,
+		FileStack,
+		Image,
+		Settings,
+		CreditCard,
+		MessageCircle,
+	} from "@lucide/svelte";
 
 	let { data, children } = $props();
 
@@ -26,6 +33,7 @@
 			badge: data.pendingCommentCount ?? 0,
 			visible: !!data.grafts?.reeds_comments,
 		},
+		{ href: "/arbor/chat", label: "Messages", icon: MessageCircle },
 		{ href: "/arbor/curios", label: "Curios", icon: curioIcon, termSlug: "curio" },
 		{ href: "/arbor/reverie", label: "Reverie", icon: reverieIcon },
 		{ href: "/arbor/account", label: "Account", icon: CreditCard },

@@ -93,6 +93,9 @@ declare global {
 				/** ThresholdDO - Per-identifier rate limiting (Loom pattern) */
 				THRESHOLD?: DurableObjectNamespace;
 
+				/** ChatDO - Per-conversation real-time messaging (Chirp DMs) */
+				CHAT?: DurableObjectNamespace;
+
 				// Secrets
 				GITHUB_TOKEN?: string;
 				ANTHROPIC_API_KEY?: string;

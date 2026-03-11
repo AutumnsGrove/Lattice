@@ -124,6 +124,27 @@ export async function isFriend(
 }
 
 /**
+ * Check if two tenants are mutual friends (both follow each other).
+ * Required for Chirp DM access — both parties must opt in.
+ */
+export async function areMutualFriends(
+	db: D1Database,
+	tenantA: string,
+	tenantB: string,
+): Promise<boolean> {
+	const result = await db
+		.prepare(
+			`SELECT COUNT(*) as cnt FROM friends
+			 WHERE (tenant_id = ? AND friend_tenant_id = ?)
+			    OR (tenant_id = ? AND friend_tenant_id = ?)`,
+		)
+		.bind(tenantA, tenantB, tenantB, tenantA)
+		.first<{ cnt: number }>();
+
+	return (result?.cnt ?? 0) >= 2;
+}
+
+/**
  * Search tenants by subdomain or display name, excluding a given tenant.
  * LIKE wildcards in user input are escaped to prevent injection.
  */

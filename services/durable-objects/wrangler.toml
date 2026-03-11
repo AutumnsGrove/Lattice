@@ -50,6 +50,11 @@ class_name = "TriageDO"
 name = "THRESHOLD"
 class_name = "ThresholdDO"
 
+# ChatDO: Per-conversation real-time messaging (Chirp DMs, hibernation-aware)
+[[durable_objects.bindings]]
+name = "CHAT"
+class_name = "ChatDO"
+
 # =============================================================================
 # DO Migrations - Declare new SQLite-backed classes
 # =============================================================================
@@ -76,6 +81,10 @@ new_sqlite_classes = ["TriageDO"]
 [[migrations]]
 tag = "v6"
 new_sqlite_classes = ["ThresholdDO"]
+
+[[migrations]]
+tag = "v7"
+new_sqlite_classes = ["ChatDO"]
 
 # =============================================================================
 # Zephyr Service Binding (email gateway — for ExportDO email delivery)

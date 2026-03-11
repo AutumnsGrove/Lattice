@@ -16,30 +16,32 @@ export { SentinelDO } from "./sentinel/SentinelDO.js";
 export { ExportDO } from "./ExportDO.js";
 export { TriageDO } from "./TriageDO.js";
 export { ThresholdDO } from "./ThresholdDO.js";
+export { ChatDO } from "./ChatDO.js";
 
 // Minimal fetch handler for health checks
 export default {
-  async fetch(request: Request): Promise<Response> {
-    const url = new URL(request.url);
+	async fetch(request: Request): Promise<Response> {
+		const url = new URL(request.url);
 
-    if (url.pathname === "/health") {
-      return Response.json({
-        status: "ok",
-        service: "grove-durable-objects",
-        classes: [
-          "TenantDO",
-          "PostMetaDO",
-          "PostContentDO",
-          "SentinelDO",
-          "ExportDO",
-          "TriageDO",
-          "ThresholdDO",
-        ],
-      });
-    }
+		if (url.pathname === "/health") {
+			return Response.json({
+				status: "ok",
+				service: "grove-durable-objects",
+				classes: [
+					"TenantDO",
+					"PostMetaDO",
+					"PostContentDO",
+					"SentinelDO",
+					"ExportDO",
+					"TriageDO",
+					"ThresholdDO",
+					"ChatDO",
+				],
+			});
+		}
 
-    return new Response("Grove Durable Objects Worker", {
-      headers: { "Content-Type": "text/plain" },
-    });
-  },
+		return new Response("Grove Durable Objects Worker", {
+			headers: { "Content-Type": "text/plain" },
+		});
+	},
 };

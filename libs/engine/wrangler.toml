@@ -138,6 +138,12 @@ name = "THRESHOLD"
 class_name = "ThresholdDO"
 script_name = "grove-durable-objects"
 
+# ChatDO: Per-conversation real-time messaging (Chirp DMs, hibernation-aware)
+[[durable_objects.bindings]]
+name = "CHAT"
+class_name = "ChatDO"
+script_name = "grove-durable-objects"
+
 # NOTE: DO migrations are in the grove-durable-objects worker, not here.
 # Pages projects reference external DOs via script_name.
 

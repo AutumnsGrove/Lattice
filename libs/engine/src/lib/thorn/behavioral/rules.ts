@@ -22,7 +22,7 @@ export const BEHAVIORAL_RULES: BehavioralRule[] = [
 	{
 		name: "repeat_offender_block",
 		description: "Users with repeat_offender label are blocked immediately",
-		contentTypes: ["blog_post", "comment", "profile_bio"],
+		contentTypes: ["blog_post", "comment", "profile_bio", "dm_message"],
 		conditions: [{ type: "has_label", label: "thorn:repeat_offender" }],
 		action: "block",
 		skipAI: true,
@@ -39,7 +39,7 @@ export const BEHAVIORAL_RULES: BehavioralRule[] = [
 	{
 		name: "trusted_user_pass",
 		description: "Users with trusted label skip AI moderation (5% sampling passthrough)",
-		contentTypes: ["blog_post", "comment", "profile_bio"],
+		contentTypes: ["blog_post", "comment", "profile_bio", "dm_message"],
 		conditions: [{ type: "has_label", label: "thorn:trusted" }],
 		action: "allow",
 		skipAI: true,
