@@ -16,6 +16,7 @@
 		"test:run": "vitest run"
 	},
 	"devDependencies": {
+		"@autumnsgrove/prism": "workspace:*",
 		"@cloudflare/workers-types": "^4.20260210.0",
 		"esbuild": "^0.25.0",
 		"@sveltejs/adapter-cloudflare": "^7.2.6",

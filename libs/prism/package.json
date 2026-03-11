@@ -16,7 +16,9 @@
 		".": {
 			"types": "./src/index.ts",
 			"default": "./src/index.ts"
-		}
+		},
+		"./css": "./src/lib/css/grove-tokens.css",
+		"./tailwind": "./src/lib/tailwind/preset.js"
 	},
 	"files": [
 		"src"

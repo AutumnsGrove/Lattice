@@ -215,12 +215,12 @@
 	url="/roadmap"
 />
 
-<main class="min-h-screen flex flex-col bg-cream-50 dark:bg-cream-50">
+<main class="min-h-screen flex flex-col bg-background">
 	<Header user={data.user} />
 
 	<!-- Hero Section -->
 	<section
-		class="relative py-16 px-6 text-center overflow-hidden bg-gradient-to-b from-cream-100 via-cream-50 to-white dark:from-cream-100 dark:via-cream-50 dark:to-cream-50"
+		class="relative py-16 px-6 text-center overflow-hidden bg-gradient-to-b from-cream-100 via-cream-50 to-white dark:to-cream-50"
 	>
 		<div class="max-w-3xl mx-auto relative z-10">
 			<h1 class="text-4xl md:text-5xl font-serif text-foreground mb-4">The Journey Ahead</h1>
@@ -232,7 +232,7 @@
 			<!-- Quick link to version history -->
 			<a
 				href="/journey"
-				class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/80 dark:bg-cream-100/80 backdrop-blur-sm border border-divider text-sm text-foreground hover:bg-white dark:hover:bg-cream-100 transition-colors"
+				class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-elevated/80 backdrop-blur-sm border border-divider text-sm text-foreground hover:bg-surface-elevated transition-colors"
 			>
 				<Tag class="w-4 h-4" />
 				View the Journey
@@ -256,7 +256,7 @@
 
 	<!-- Navigation Pills -->
 	<nav
-		class="sticky top-[73px] z-30 bg-white/80 dark:bg-cream-50/80 backdrop-blur-sm border-b border-divider py-3 px-4"
+		class="sticky top-[73px] z-30 bg-surface-elevated/80 backdrop-blur-sm border-b border-divider py-3 px-4"
 		aria-label="Development phases"
 	>
 		<div class="max-w-4xl mx-auto flex flex-wrap justify-center gap-2">
@@ -268,7 +268,7 @@
 						{status === 'current' ? 'bg-accent text-white shadow-md' : ''}
 						{status === 'past' ? 'bg-success-bg text-success-foreground' : ''}
 						{status === 'future'
-						? 'bg-cream-100 dark:bg-cream-100 text-foreground-muted hover:bg-cream-200 dark:hover:bg-cream-200'
+						? 'bg-cream-100 text-foreground-muted hover:bg-cream-200'
 						: ''}"
 				>
 					{#if status === "current"}
@@ -289,7 +289,7 @@
 			id="first-frost"
 			class="relative py-20 px-6 overflow-hidden transition-colors duration-700
 				bg-gradient-to-b from-bark-200 via-cream-100 to-cream-50
-				dark:from-cream-100 dark:via-cream-50 dark:to-cream-50"
+				dark:from-cream-300 dark:via-cream-100 dark:to-cream-50"
 		>
 			<!-- Snowfall -->
 			<div class="absolute inset-0 pointer-events-none" aria-hidden="true">
@@ -320,11 +320,11 @@
 							Complete
 						</span>
 					{/if}
-					<h2 class="text-3xl md:text-4xl font-serif text-bark-900 mb-2">
+					<h2 class="text-3xl md:text-4xl font-serif text-foreground mb-2">
 						{phases["first-frost"].title}
 					</h2>
-					<p class="text-bark-700 italic">{phases["first-frost"].subtitle}</p>
-					<p class="mt-4 text-bark-700/80 max-w-lg mx-auto">{phases["first-frost"].description}</p>
+					<p class="text-foreground-muted italic">{phases["first-frost"].subtitle}</p>
+					<p class="mt-4 text-foreground-subtle max-w-lg mx-auto">{phases["first-frost"].description}</p>
 				</div>
 
 				<ul class="space-y-4 max-w-md mx-auto">
@@ -345,7 +345,7 @@
 			id="thaw"
 			class="relative py-20 px-6 overflow-hidden
 				bg-gradient-to-b from-bark-200 via-surface-hover to-surface-subtle
-				dark:from-cream-100 dark:via-cream-50 dark:to-surface"
+				dark:from-cream-200 dark:via-cream-100 dark:to-cream-50"
 		>
 			<!-- Light snowfall - the thaw -->
 			<div class="absolute inset-0 pointer-events-none" aria-hidden="true">
@@ -400,9 +400,9 @@
 							You are here
 						</span>
 					{/if}
-					<h2 class="text-3xl md:text-4xl font-serif text-bark-900 mb-2">{phases.thaw.title}</h2>
-					<p class="text-bark-700 italic">{phases.thaw.subtitle}</p>
-					<p class="mt-4 text-bark-700/80 max-w-lg mx-auto">{phases.thaw.description}</p>
+					<h2 class="text-3xl md:text-4xl font-serif text-foreground mb-2">{phases.thaw.title}</h2>
+					<p class="text-foreground-muted italic">{phases.thaw.subtitle}</p>
+					<p class="mt-4 text-foreground-subtle max-w-lg mx-auto">{phases.thaw.description}</p>
 				</div>
 
 				<ul class="space-y-4 max-w-md mx-auto">
@@ -422,7 +422,7 @@
 			id="first-buds"
 			class="relative py-20 px-6 overflow-hidden
 				bg-gradient-to-b from-surface-subtle via-surface-hover to-surface-hover
-				dark:from-surface/30 dark:via-surface/40 dark:to-surface/30"
+				dark:from-grove-950/40 dark:via-cream-50 dark:to-cream-50"
 		>
 			<!-- Spring petals -->
 			<div class="absolute inset-0 pointer-events-none" aria-hidden="true">
@@ -496,11 +496,11 @@
 							Coming Soon
 						</span>
 					{/if}
-					<h2 class="text-3xl md:text-4xl font-serif text-bark-900 mb-2">
+					<h2 class="text-3xl md:text-4xl font-serif text-foreground mb-2">
 						{phases["first-buds"].title}
 					</h2>
-					<p class="text-bark-700 italic">{phases["first-buds"].subtitle}</p>
-					<p class="mt-4 text-bark-700/80 max-w-lg mx-auto">{phases["first-buds"].description}</p>
+					<p class="text-foreground-muted italic">{phases["first-buds"].subtitle}</p>
+					<p class="mt-4 text-foreground-subtle max-w-lg mx-auto">{phases["first-buds"].description}</p>
 				</div>
 
 				<ul class="space-y-4 max-w-md mx-auto">
@@ -521,7 +521,7 @@
 			id="full-bloom"
 			class="relative py-20 px-6 overflow-hidden
 				bg-gradient-to-b from-surface-subtle via-surface-hover to-surface-hover
-				dark:from-surface/20 dark:via-surface/40 dark:to-surface/30"
+				dark:from-grove-950/30 dark:via-cream-100 dark:to-cream-50"
 		>
 			<!-- Fireflies in the summer evening -->
 			<div class="absolute top-1/4 left-[15%] opacity-80" aria-hidden="true">
@@ -586,11 +586,11 @@
 							On the Horizon
 						</span>
 					{/if}
-					<h2 class="text-3xl md:text-4xl font-serif text-bark-900 mb-2">
+					<h2 class="text-3xl md:text-4xl font-serif text-foreground mb-2">
 						{phases["full-bloom"].title}
 					</h2>
-					<p class="text-bark-700 italic">{phases["full-bloom"].subtitle}</p>
-					<p class="mt-4 text-bark-700/80 max-w-lg mx-auto">{phases["full-bloom"].description}</p>
+					<p class="text-foreground-muted italic">{phases["full-bloom"].subtitle}</p>
+					<p class="mt-4 text-foreground-subtle max-w-lg mx-auto">{phases["full-bloom"].description}</p>
 				</div>
 
 				<ul class="space-y-4 max-w-md mx-auto">
@@ -610,7 +610,7 @@
 			id="golden-hour"
 			class="relative py-24 px-6 overflow-hidden min-h-[600px]
 				bg-gradient-to-b from-surface-subtle via-surface-hover to-surface-hover
-				dark:from-surface/30 dark:via-surface/50 dark:to-surface/60"
+				dark:from-cream-300/40 dark:via-cream-200/20 dark:to-cream-100"
 		>
 			<!-- MASSIVE Falling autumn leaves - the magic! Uses dynamically generated trees -->
 			<!-- Extended fall distance (80-100vh) so leaves travel the entire section height -->

@@ -1,4 +1,4 @@
-import grovePreset from "../../libs/engine/src/lib/ui/tailwind.preset.js";
+import grovePreset from "@autumnsgrove/prism/tailwind";
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -12,13 +12,13 @@ export default {
 	theme: {
 		extend: {
 			colors: {
-				// Status colors for the clearing
+				// Status colors for the clearing (app-specific)
 				status: {
-					operational: "#22c55e", // Green
-					degraded: "#eab308", // Yellow
-					partial: "#f97316", // Orange
-					major: "#ef4444", // Red
-					maintenance: "#3b82f6", // Blue
+					operational: "#22c55e",
+					degraded: "#eab308",
+					partial: "#f97316",
+					major: "#ef4444",
+					maintenance: "#3b82f6",
 				},
 			},
 			fontFamily: {

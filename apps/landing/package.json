@@ -39,6 +39,7 @@
 	"dependencies": {
 		"@11ty/gray-matter": "^2.0.1",
 		"@autumnsgrove/lattice": "workspace:*",
+		"@autumnsgrove/prism": "workspace:*",
 		"@lucide/lab": "^0.1.2",
 		"@lucide/svelte": "^0.577.0",
 		"@tabler/icons-svelte": "^3.36.1",

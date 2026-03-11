@@ -149,6 +149,9 @@ importers:
         specifier: ^0.577.0
         version: 0.577.0(svelte@5.50.1)
     devDependencies:
+      '@autumnsgrove/prism':
+        specifier: workspace:*
+        version: link:../../libs/prism
       '@cloudflare/workers-types':
         specifier: ^4.20260210.0
         version: 4.20260210.0
@@ -207,6 +210,9 @@ importers:
         specifier: ^4.8.0
         version: 4.8.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
     devDependencies:
+      '@autumnsgrove/prism':
+        specifier: workspace:*
+        version: link:../../libs/prism
       '@cloudflare/workers-types':
         specifier: ^4.20260210.0
         version: 4.20260210.0
@@ -322,6 +328,9 @@ importers:
       '@autumnsgrove/lattice':
         specifier: workspace:*
         version: link:../../libs/engine
+      '@autumnsgrove/prism':
+        specifier: workspace:*
+        version: link:../../libs/prism
       '@lucide/lab':
         specifier: ^0.1.2
         version: 0.1.2
@@ -408,6 +417,9 @@ importers:
         specifier: ^1.4.18
         version: 1.4.18(@sveltejs/kit@2.50.2(@opentelemetry/api@1.9.0)(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.50.1)(vite@5.4.21(@types/node@25.2.3)))(svelte@5.50.1)(typescript@5.9.3)(vite@5.4.21(@types/node@25.2.3)))(drizzle-kit@0.31.9)(drizzle-orm@0.44.5(@cloudflare/workers-types@4.20260210.0)(@opentelemetry/api@1.9.0)(kysely@0.28.11))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(svelte@5.50.1)(vitest@4.0.18)
     devDependencies:
+      '@autumnsgrove/prism':
+        specifier: workspace:*
+        version: link:../../libs/prism
       '@cloudflare/workers-types':
         specifier: ^4.20260210.0
         version: 4.20260210.0
@@ -457,6 +469,9 @@ importers:
         specifier: ^0.577.0
         version: 0.577.0(svelte@5.50.1)
     devDependencies:
+      '@autumnsgrove/prism':
+        specifier: workspace:*
+        version: link:../../libs/prism
       '@cloudflare/workers-types':
         specifier: ^4.20260210.0
         version: 4.20260210.0
@@ -512,6 +527,9 @@ importers:
         specifier: ^4.3.6
         version: 4.3.6
     devDependencies:
+      '@autumnsgrove/prism':
+        specifier: workspace:*
+        version: link:../../libs/prism
       '@cloudflare/workers-types':
         specifier: ^4.20260210.0
         version: 4.20260210.0
@@ -561,6 +579,9 @@ importers:
         specifier: ^0.577.0
         version: 0.577.0(svelte@5.50.1)
     devDependencies:
+      '@autumnsgrove/prism':
+        specifier: workspace:*
+        version: link:../../libs/prism
       '@cloudflare/workers-types':
         specifier: ^4.20260210.0
         version: 4.20260210.0

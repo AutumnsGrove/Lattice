@@ -6,7 +6,7 @@
 //
 // import { groveColors, generateGlass, meetsWCAGAA } from '@autumnsgrove/prism'
 
-// Color tokens
+// Color tokens — light mode
 export {
 	groveColors,
 	cream,
@@ -23,6 +23,21 @@ export {
 	SEASONAL_PALETTES,
 	type SeasonalPalette,
 } from "./lib/tokens/index.js";
+
+// Color tokens — dark mode
+export {
+	darkCream,
+	darkBark,
+	darkSemantic,
+	darkStatus,
+	type DarkCreamColor,
+	type DarkBarkColor,
+	type DarkSemanticColor,
+	type DarkStatusColor,
+} from "./lib/tokens/index.js";
+
+// HSL semantic tokens (light + dark values for CSS custom properties)
+export { HSL_SEMANTIC_TOKENS, type HSLTokenSet } from "./lib/tokens/index.js";
 
 // Glass utilities
 export {

@@ -1,4 +1,4 @@
-import grovePreset from "../../libs/engine/src/lib/ui/tailwind.preset.js";
+import grovePreset from "@autumnsgrove/prism/tailwind";
 
 /** @type {import('tailwindcss').Config} */
 export default {
