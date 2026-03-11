@@ -21,6 +21,7 @@
 		Clock,
 		Globe,
 	} from "lucide-svelte";
+	import GroveIcon from "$lib/ui/components/ui/groveicon/GroveIcon.svelte";
 	import { DomainCheckerModal } from "$lib/ui/components/domain";
 	import { groveModeStore } from "$lib/ui/stores/grove-mode.svelte";
 	import { ALL_SEASONS, SEASON_LABELS } from "$lib/ui/types/season";
@@ -1318,7 +1319,11 @@
 					onclick={() => (preferredSeason = season)}
 					title={SEASON_LABELS[season]}
 				>
-					<img class="season-icon" src={getSeasonFavicons(season).png32} alt={SEASON_LABELS[season]} />
+					<img
+						class="season-icon"
+						src={getSeasonFavicons(season).png32}
+						alt={SEASON_LABELS[season]}
+					/>
 					<span class="season-label">{SEASON_LABELS[season]}</span>
 				</button>
 			{/each}
@@ -1439,7 +1444,9 @@
 	<!-- Canopy Settings -->
 	<GlassCard variant="frosted" class="mb-6">
 		<div class="section-header">
-			<h2>Canopy</h2>
+			<h2>
+				<GroveIcon service="grove" size={18} class="inline-block mr-1.5 align-text-bottom" /> Canopy
+			</h2>
 		</div>
 		<p class="section-description">
 			Let other wanderers discover your <GroveTerm term="grove">grove</GroveTerm> in the public directory.
@@ -1540,7 +1547,9 @@
 	<!-- Meadow Settings -->
 	<GlassCard variant="frosted" class="mb-6">
 		<div class="section-header">
-			<h2>Meadow</h2>
+			<h2>
+				<GroveIcon service="meadow" size={18} class="inline-block mr-1.5 align-text-bottom" /> Meadow
+			</h2>
 		</div>
 		<p class="section-description">
 			Share your published <GroveTerm term="blooms">posts</GroveTerm> to the community feed at

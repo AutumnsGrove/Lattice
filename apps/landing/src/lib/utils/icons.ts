@@ -13,6 +13,9 @@
  * ```
  */
 
+// Canonical service icon manifest from the engine
+import { defaultSuite, resolveIcon as resolveServiceIcon } from "@autumnsgrove/lattice/ui";
+
 // Lab icons - experimental icons from @lucide/lab wrapped as Svelte components
 import BeeIcon from "$lib/components/icons/BeeIcon.svelte";
 
@@ -342,6 +345,18 @@ export const actionIcons = {
 	trenddown: TrendingDown,
 	arrow: ArrowRight,
 } as const;
+
+// ============================================================================
+// SERVICE ICONS (Canonical — from GroveIcon manifest)
+// ============================================================================
+/**
+ * Service-level icons resolved from the engine's canonical manifest.
+ * Maps service slugs (e.g., "reverie", "meadow") to their official Lucide components.
+ * Sub-feature icons (e.g., "fingerprint" for Passkeys) remain in toolIcons below.
+ */
+const serviceIconMap: Record<string, any> = Object.fromEntries(
+	Object.entries(defaultSuite).map(([slug, entry]) => [slug, resolveServiceIcon(entry.icon)]),
+);
 
 // ============================================================================
 // WORKSHOP & TOOL ICONS (Roadmap workshop page)
@@ -704,6 +719,25 @@ export function getIcon<T extends Record<string, any>>(map: T, key: keyof T | st
  */
 export function getIconFromAll(key: string) {
 	return (allIcons as Record<string, any>)[key];
+}
+
+/**
+ * Get a tool/service icon by key.
+ * Checks the canonical service icon manifest first (by service slug),
+ * then falls back to the toolIcons registry for sub-feature icons.
+ *
+ * @example
+ * ```ts
+ * getToolIcon("reverie")  // → manifest: Eclipse component
+ * getToolIcon("fingerprint") // → toolIcons: Fingerprint component
+ * ```
+ */
+export function getToolIcon(key: string | undefined) {
+	if (!key) return stateIcons.circle;
+	// Service slug → canonical manifest icon
+	if (key in serviceIconMap) return serviceIconMap[key];
+	// Sub-feature or legacy key → toolIcons registry
+	return toolIcons[key as ToolIconKey] ?? stateIcons.circle;
 }
 
 // ============================================================================
