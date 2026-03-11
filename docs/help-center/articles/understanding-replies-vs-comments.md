@@ -3,7 +3,7 @@ title: Understanding Replies vs Comments
 description: The difference between private replies and public comments
 category: help
 section: community-social
-lastUpdated: '2025-12-01'
+lastUpdated: '2026-03-11'
 keywords:
   - comments
   - replies

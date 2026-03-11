@@ -3,7 +3,7 @@ title: Reactions and Voting
 description: Understanding emoji reactions and voting on posts
 category: help
 section: community-social
-lastUpdated: '2025-12-01'
+lastUpdated: '2026-03-11'
 keywords:
   - meadow
   - reactions

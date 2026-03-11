@@ -3,7 +3,7 @@ title: Your RSS Feed
 description: How to access and use your blog's RSS feed
 category: help
 section: support-resources
-lastUpdated: '2025-12-01'
+lastUpdated: '2026-03-11'
 keywords:
   - rss
   - feed
