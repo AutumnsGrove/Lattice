@@ -3,32 +3,31 @@ import { vitePreprocess } from "@sveltejs/vite-plugin-svelte";
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
-  preprocess: vitePreprocess(),
-  kit: {
-    adapter: adapter({
-      routes: {
-        include: ["/*"],
-        exclude: ["<all>"],
-      },
-    }),
-    csrf: {
-      checkOrigin: true,
-      trustedOrigins: [
-        "https://grove.place",
-        "https://*.grove.place",
-        "http://localhost:*",
-        "http://127.0.0.1:*",
-      ],
-    },
-    prerender: {
-      handleMissingId: "warn",
-      handleHttpError: ({ status, path, referrer, referenceType }) => {
-        // Ignore 404 errors, fail on others
-        if (status === 404) return;
-        throw new Error(`Failed to fetch ${path}: ${status}`);
-      },
-    },
-  },
+	preprocess: vitePreprocess(),
+	kit: {
+		adapter: adapter({
+			routes: {
+				include: ["/*"],
+				exclude: ["<all>"],
+			},
+		}),
+		csrf: {
+			trustedOrigins: [
+				"https://grove.place",
+				"https://*.grove.place",
+				"http://localhost:*",
+				"http://127.0.0.1:*",
+			],
+		},
+		prerender: {
+			handleMissingId: "warn",
+			handleHttpError: ({ status, path, referrer, referenceType }) => {
+				// Ignore 404 errors, fail on others
+				if (status === 404) return;
+				throw new Error(`Failed to fetch ${path}: ${status}`);
+			},
+		},
+	},
 };
 
 export default config;
