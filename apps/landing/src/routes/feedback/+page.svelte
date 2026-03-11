@@ -6,7 +6,7 @@
 	import { seasonStore } from "@autumnsgrove/lattice/ui/chrome";
 	import Footer from "$lib/components/Footer.svelte";
 	import { Logo } from "@autumnsgrove/lattice/ui/nature";
-	import { Smile, Meh, Frown } from "lucide-svelte";
+	import { Smile, Meh, Frown } from "@lucide/svelte";
 	import type { ActionData, PageData } from "./$types";
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();

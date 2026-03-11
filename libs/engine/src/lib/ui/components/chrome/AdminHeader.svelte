@@ -22,7 +22,7 @@
 	import { page } from "$app/state";
 	import ThemeToggle from "./ThemeToggle.svelte";
 	import { Logo } from "../ui";
-	import { LogOut } from "lucide-svelte";
+	import { LogOut } from "@lucide/svelte";
 	import type { AdminTab, MaxWidth } from "./types";
 	import type { Snippet } from "svelte";
 

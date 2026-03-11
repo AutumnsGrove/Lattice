@@ -2,7 +2,7 @@
 	import ThemeToggle from "./ThemeToggle.svelte";
 	import Logo from "../ui/Logo.svelte";
 	import GroveDivider from "../nature/GroveDivider.svelte";
-	import { ExternalLink, Leaf } from "lucide-svelte";
+	import { ExternalLink, Leaf } from "@lucide/svelte";
 	import { seasonStore } from "../../stores/season.svelte";
 	import { groveModeStore } from "../../stores/grove-mode.svelte";
 	import type { FooterLink, MaxWidth, Season } from "./types";

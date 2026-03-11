@@ -100,7 +100,7 @@ Waystones should feel like helpful signposts, not intrusive tooltips:
 ```svelte
 <!-- Waystone.svelte -->
 <script lang="ts">
-	import { HelpCircle } from "lucide-svelte";
+	import { HelpCircle } from "@lucide/svelte";
 	import { cn } from "$lib/ui/utils";
 
 	interface Props {
@@ -595,7 +595,7 @@ Include feedback on every article page. Simple thumbs up/down with Lucide icons 
 
 ```svelte
 <script lang="ts">
-	import { ThumbsUp, ThumbsDown } from "lucide-svelte";
+	import { ThumbsUp, ThumbsDown } from "@lucide/svelte";
 	import { enhance } from "$app/forms";
 
 	interface Props {
@@ -824,7 +824,7 @@ Each article page includes an "Edit on GitHub" link for community contributions:
 ```svelte
 <script lang="ts">
 	// Additional imports for HelpArticle.svelte footer
-	import { Pencil } from "lucide-svelte";
+	import { Pencil } from "@lucide/svelte";
 	import ArticleFeedback from "./ArticleFeedback.svelte";
 </script>
 

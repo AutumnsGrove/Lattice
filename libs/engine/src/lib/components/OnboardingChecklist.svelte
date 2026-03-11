@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Check, Circle, X, Compass } from 'lucide-svelte';
+	import { Check, Circle, X, Compass } from '@lucide/svelte';
 
 	interface ChecklistItem {
 		id: string;

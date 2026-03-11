@@ -17,7 +17,7 @@
 -->
 
 <script lang="ts">
-	import { X, Loader2, Download } from 'lucide-svelte';
+	import { X, Loader2, Download } from '@lucide/svelte';
 	import { cn } from '$lib/ui/utils';
 	import GlassCard from '$lib/ui/components/ui/GlassCard.svelte';
 	import GlassButton from '$lib/ui/components/ui/GlassButton.svelte';

@@ -8,7 +8,7 @@
 	import { seasonStore } from "@autumnsgrove/lattice/ui/chrome";
 	import Footer from "$lib/components/Footer.svelte";
 	import { Logo } from "@autumnsgrove/lattice/ui/nature";
-	import { MessageCircle, Clock, CheckCircle, ArrowLeft } from "lucide-svelte";
+	import { MessageCircle, Clock, CheckCircle, ArrowLeft } from "@lucide/svelte";
 	import { toChatMessages, PORCH_VISITOR_ROLES } from "$lib/utils/porch";
 	import type { ActionData, PageData } from "./$types";
 

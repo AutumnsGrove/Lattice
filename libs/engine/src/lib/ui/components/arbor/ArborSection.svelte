@@ -16,7 +16,7 @@
     </ArborSection>
 -->
 <script lang="ts">
-  import { ChevronLeft } from "lucide-svelte";
+  import { ChevronLeft } from "@lucide/svelte";
   import { resolveTerm } from "../../utils/grove-term-resolve";
   import type { ArborSectionProps } from "./types";
 

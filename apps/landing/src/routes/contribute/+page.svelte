@@ -10,7 +10,7 @@
 
 	// Icon imports
 	import { featureIcons, contentIcons, actionIcons, stateIcons, toolIcons } from "$lib/utils/icons";
-	import { Coffee, Heart, TreePine, Sparkles } from "lucide-svelte";
+	import { Coffee, Heart, TreePine, Sparkles } from "@lucide/svelte";
 
 	// Page icons
 	const HeartIcon = contentIcons.heart;

@@ -47,6 +47,18 @@
     ],
     "standardTerm": "Engine"
   },
+  "aspen": {
+    "slug": "aspen",
+    "term": "Aspen",
+    "category": "foundational",
+    "tagline": "Domain Layer",
+    "definition": "The domain logic that makes Grove a living platform — database, auth, payments, curios, moderation, and everything tenants interact with.",
+    "seeAlso": [
+      "lattice",
+      "curios"
+    ],
+    "alwaysGrove": true
+  },
   "arbor": {
     "slug": "arbor",
     "term": "Arbor",

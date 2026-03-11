@@ -16,7 +16,7 @@
 
 	import type { CultivateFlagRowProps } from "./types.js";
 	import GreenhouseToggle from "./GreenhouseToggle.svelte";
-	import { Sprout, Home } from "lucide-svelte";
+	import { Sprout, Home } from "@lucide/svelte";
 
 	let {
 		flag,

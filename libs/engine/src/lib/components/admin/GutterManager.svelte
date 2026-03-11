@@ -19,7 +19,7 @@
 		Check,
 		Anchor,
 		Pilcrow,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 	import { debounce } from "$lib/utils/debounce";
 
 	/**

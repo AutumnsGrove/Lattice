@@ -6,7 +6,7 @@
  * - Services: platform tools (Email, Storage, AI Config, etc.)
  */
 
-import { BookUser, BookOpen } from "lucide-svelte";
+import { BookUser, BookOpen } from "@lucide/svelte";
 import { defaultSuite, resolveIcon } from "$lib/ui/components/ui/groveicon";
 import type { LanternDestination } from "./types";
 

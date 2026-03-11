@@ -5,7 +5,7 @@
 	 * Minimal footer with links to main Grove site and support.
 	 */
 	import { cn } from '$lib/utils/cn';
-	import { Mail, ExternalLink } from 'lucide-svelte';
+	import { Mail, ExternalLink } from '@lucide/svelte';
 	import { defaultSuite, resolveIcon } from '$lib/ui/components/ui/groveicon';
 	import type { FooterLink, MaxWidth } from './types';
 

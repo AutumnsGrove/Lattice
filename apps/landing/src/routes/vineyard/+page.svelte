@@ -3,7 +3,7 @@
 	import Footer from "$lib/components/Footer.svelte";
 
 	// Lucide Icons
-	import { Sparkles, TreePine as TreeIcon, Palette, Type, Eye, ChevronDown } from "lucide-svelte";
+	import { Sparkles, TreePine as TreeIcon, Palette, Type, Eye, ChevronDown } from "@lucide/svelte";
 
 	// Import Glass components
 	import {

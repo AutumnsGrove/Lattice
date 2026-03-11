@@ -22,7 +22,7 @@
 		BarChart3,
 		FlaskConical,
 		Trees
-	} from 'lucide-svelte';
+	} from '@lucide/svelte';
 
 	// Status page navigation - just a way home (no grove.place footer sections)
 	const navItems: NavItem[] = [

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { GlassCard } from '@autumnsgrove/lattice/ui';
-	import { Copy, Download, Check, AlertTriangle, AtSign } from 'lucide-svelte';
+	import { Copy, Download, Check, AlertTriangle, AtSign } from '@lucide/svelte';
 
 	interface Subscriber {
 		id: number;

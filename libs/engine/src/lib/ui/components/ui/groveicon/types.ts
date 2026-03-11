@@ -7,10 +7,10 @@
 
 /**
  * A Lucide icon component type.
- * Uses typeof import to match the actual component class that lucide-svelte exports.
+ * Matches @lucide/svelte's Svelte 5 Component export.
  * Same pattern as blazes/types.ts LucideIcon.
  */
-export type IconComponent = typeof import("lucide-svelte").Cherry;
+export type IconComponent = typeof import("@lucide/svelte").Cherry;
 
 /**
  * A single entry in a service icon manifest.

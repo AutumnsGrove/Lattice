@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { UserPlus } from "lucide-svelte";
+	import { UserPlus } from "@lucide/svelte";
 	import { friendsStore } from "$lib/ui/stores/friends.svelte";
 	import { api } from "$lib/utils/api";
 	import type { VisitingGrove } from "./types";

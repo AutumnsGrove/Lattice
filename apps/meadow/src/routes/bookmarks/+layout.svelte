@@ -5,7 +5,7 @@
   import { page } from '$app/state';
   import { Header, Footer, type NavItem } from '@autumnsgrove/lattice/ui/chrome';
   import { buildLoginUrl } from '@autumnsgrove/lattice/grafts/login';
-  import { Bookmark } from 'lucide-svelte';
+  import { Bookmark } from '@lucide/svelte';
   import { defaultSuite, resolveIcon } from '@autumnsgrove/lattice/ui';
 
   let { children, data } = $props();

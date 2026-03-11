@@ -4,7 +4,7 @@
 	import { seasonStore } from '@autumnsgrove/lattice/ui/chrome';
 	import Footer from '$lib/components/Footer.svelte';
 	import { Logo } from '@autumnsgrove/lattice/ui/nature';
-	import { MessageCircle, Clock, CheckCircle, AlertCircle, ArrowRight } from 'lucide-svelte';
+	import { MessageCircle, Clock, CheckCircle, AlertCircle, ArrowRight } from '@lucide/svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();

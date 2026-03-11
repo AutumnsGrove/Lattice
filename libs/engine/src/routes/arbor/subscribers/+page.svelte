@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { copyToClipboard } from "$lib/utils/share";
-	import { Mail, AlertTriangle, Check, Copy, Download, MailOpen } from "lucide-svelte";
+	import { Mail, AlertTriangle, Check, Copy, Download, MailOpen } from "@lucide/svelte";
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import Glass from "$lib/ui/components/ui/Glass.svelte";
 

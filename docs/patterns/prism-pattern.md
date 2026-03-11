@@ -642,7 +642,7 @@ Maintain consistency by using the same icon for the same concept:
 
 ```svelte
 <script>
-  import { Sprout, Check, Trees, Loader2 } from 'lucide-svelte';
+  import { Sprout, Check, Trees, Loader2 } from '@lucide/svelte';
 </script>
 
 <!-- Inline with text -->

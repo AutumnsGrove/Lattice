@@ -33,7 +33,7 @@
 	import GreenhouseEnrollTable from "./GreenhouseEnrollTable.svelte";
 	import GreenhouseEnrollDialog from "./GreenhouseEnrollDialog.svelte";
 	import CultivateFlagTable from "./CultivateFlagTable.svelte";
-	import { Sprout, Plus, Users, CheckCircle, XCircle, Leaf } from "lucide-svelte";
+	import { Sprout, Plus, Users, CheckCircle, XCircle, Leaf } from "@lucide/svelte";
 
 	/**
 	 * @typedef {import('../../feature-flags/types.js').GreenhouseTenant} GreenhouseTenant

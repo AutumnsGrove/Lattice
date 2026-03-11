@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Lamp, Compass } from "lucide-svelte";
+	import { Lamp, Compass } from "@lucide/svelte";
 	import { groveModeStore } from "$lib/ui/stores/grove-mode.svelte";
 	import { lanternStore } from "$lib/ui/stores/lantern.svelte";
 

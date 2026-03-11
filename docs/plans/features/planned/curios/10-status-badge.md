@@ -56,7 +56,7 @@ category: features
 - [ ] **No color picker** — all badges are the same gray
 - [ ] **No display style picker** — only one style exists
 - [ ] **No custom badge creation** — limited to 9 presets
-- [ ] **Uses lucide-svelte directly** (ArrowLeft, Shield, Plus, Trash2, Eye)
+- [ ] **Uses @lucide/svelte directly** (ArrowLeft, Shield, Plus, Trash2, Eye)
 
 **API** (2 route files):
 
@@ -259,7 +259,7 @@ Each display style has its own night personality:
 - [ ] **Auto-detect badges**: show "Auto" label with explanation of trigger
 - [ ] **Live preview** that renders the selected style with chosen color
 - [ ] **Remove position selector** — no longer relevant
-- [ ] **Migrate from lucide-svelte** to engine icons
+- [ ] **Migrate from @lucide/svelte** to engine icons
 
 ### Migration needs
 

@@ -14,7 +14,7 @@
 		LifeBuoy,
 		Mail,
 		MessageCircleQuestion,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 
 	// --- Item definitions (titles only, content rendered via snippets) ---
 

@@ -5,7 +5,7 @@
 	import type { GroveTier } from "$lib/ui/vineyard/types";
 	import { toast } from "$lib/ui/components/ui/toast";
 	import { getCSRFToken } from "$lib/utils/api";
-	import { Sparkles, Lock } from "lucide-svelte";
+	import { Sparkles, Lock } from "@lucide/svelte";
 	import ReverieHeader from "./ReverieHeader.svelte";
 	import ReverieChangeCard from "./ReverieChangeCard.svelte";
 	import ReverieResultCard from "./ReverieResultCard.svelte";

@@ -9,7 +9,7 @@
 	import type { TenantGreenhouseSectionProps } from "./types.js";
 	import { GlassCard } from "../../ui/index.js";
 	import GreenhouseToggle from "./GreenhouseToggle.svelte";
-	import { Sprout, Trash2 } from "lucide-svelte";
+	import { Sprout, Trash2 } from "@lucide/svelte";
 
 	let {
 		greenhouse,

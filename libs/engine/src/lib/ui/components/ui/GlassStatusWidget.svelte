@@ -29,7 +29,7 @@
 		Wrench,
 		RefreshCw,
 		ExternalLink,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 
 	type OverallStatus =
 		| "operational"

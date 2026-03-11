@@ -28,6 +28,6 @@
   },
   "dependencies": {
     "@autumnsgrove/vineyard": "link:../../../Vineyard",
-    "lucide-svelte": "^0.460.0"
+    "@lucide/svelte": "^0.460.0"
   }
 }

@@ -20,7 +20,7 @@
 		Plus,
 		RotateCcw,
 		Eye,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 	import {
 		formatRelativeTime,
 		type GuestbookStyle,

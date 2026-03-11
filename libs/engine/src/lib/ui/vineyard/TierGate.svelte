@@ -18,7 +18,7 @@
 <script lang="ts">
 	import type { TierGateProps, GroveTier } from "./types.js";
 	import type { Snippet } from "svelte";
-	import { Lock, Sparkles } from "lucide-svelte";
+	import { Lock, Sparkles } from "@lucide/svelte";
 
 	interface Props extends TierGateProps {
 		children: Snippet;

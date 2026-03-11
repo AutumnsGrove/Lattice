@@ -16,7 +16,7 @@
 
 	import type { GraftToggleRowProps } from "./types.js";
 	import GreenhouseToggle from "./GreenhouseToggle.svelte";
-	import { Sprout, Leaf } from "lucide-svelte";
+	import { Sprout, Leaf } from "@lucide/svelte";
 
 	let {
 		graft,

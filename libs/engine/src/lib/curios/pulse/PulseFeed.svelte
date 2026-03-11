@@ -19,7 +19,7 @@
 		GitFork,
 		GitBranch,
 		Trash2,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 
 	interface Props {
 		events: PulseEvent[];

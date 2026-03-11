@@ -1,21 +1,13 @@
-import type { Component, ComponentType, SvelteComponent } from "svelte";
+import type { Component } from "svelte";
 
 // Re-export Season type for convenience
 export type { Season } from "../nature/palette";
 
 /**
- * Flexible icon type that accepts:
- * - Svelte 5 Component type
- * - Legacy SvelteComponent/SvelteComponentTyped (Lucide icons)
- * - Any component constructor
- *
- * This allows cross-package compatibility when Lucide versions differ.
+ * Icon component type — accepts any Svelte 5 Component.
+ * @lucide/svelte exports proper Component<IconProps> types.
  */
-
-export type IconComponent =
-	| Component
-	| ComponentType<SvelteComponent<any>>
-	| (new (...args: any[]) => any);
+export type IconComponent = Component<any>;
 
 export interface NavItem {
 	href: string;

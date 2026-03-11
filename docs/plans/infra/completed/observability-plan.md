@@ -473,7 +473,7 @@ Then Vista's own layout renders its own ArborPanel:
 		Flame,
 		Bell,
 		ArrowLeft,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 
 	const vistaNav = [
 		{ href: "/arbor", label: "Back to Admin", icon: ArrowLeft },

@@ -17,7 +17,7 @@
 	import type { CultivateFlagTableProps } from "./types.js";
 	import CultivateFlagRow from "./CultivateFlagRow.svelte";
 	import { GlassCard } from "../../ui/index.js";
-	import { Sprout, Home } from "lucide-svelte";
+	import { Sprout, Home } from "@lucide/svelte";
 
 	let {
 		flags,

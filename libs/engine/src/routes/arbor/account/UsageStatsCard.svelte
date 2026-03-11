@@ -1,7 +1,7 @@
 <script lang="ts">
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import GroveSwap from "$lib/ui/components/ui/groveterm/GroveSwap.svelte";
-	import { AlertCircle, HardDrive, FileText, Calendar } from "lucide-svelte";
+	import { AlertCircle, HardDrive, FileText, Calendar } from "@lucide/svelte";
 	import { formatStorage, formatLimit } from "$lib/config/tiers";
 	import type { UsageData } from "./types";
 	import { USAGE_WARNING_THRESHOLD } from "./utils";

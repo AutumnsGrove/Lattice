@@ -58,7 +58,7 @@ category: features
 - [ ] **No display style picker** — only one style exists
 - [ ] **No category management**
 - [ ] **No personal note field**
-- [ ] **Uses lucide-svelte directly** (Rss, Plus, Trash2, ExternalLink)
+- [ ] **Uses @lucide/svelte directly** (Rss, Plus, Trash2, ExternalLink)
 
 **API** (2 route files):
 
@@ -243,7 +243,7 @@ Deep indie web integration. Each blog entry can have optional XFN `rel` values t
 - [ ] **Category management**: create/edit/delete/reorder categories with emoji + color + description
 - [ ] **Category assignment**: dropdown per blog to assign to a category
 - [ ] **Live preview** that switches between display styles
-- [ ] **Migrate from lucide-svelte** to engine icons (Rss, Plus, Trash2, ExternalLink)
+- [ ] **Migrate from @lucide/svelte** to engine icons (Rss, Plus, Trash2, ExternalLink)
 
 ### Migration needs
 

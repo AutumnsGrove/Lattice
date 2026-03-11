@@ -41,7 +41,7 @@
 		Heading3,
 		Check,
 		Images,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 	import CurioAutocomplete from "./CurioAutocomplete.svelte";
 	import FiresideChat from "./FiresideChat.svelte";
 	import PhotoPicker from "./PhotoPicker.svelte";

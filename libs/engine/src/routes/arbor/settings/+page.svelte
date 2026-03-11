@@ -20,7 +20,7 @@
 		AlertTriangle,
 		Clock,
 		Globe,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 	import GroveIcon from "$lib/ui/components/ui/groveicon/GroveIcon.svelte";
 	import { DomainCheckerModal } from "$lib/ui/components/domain";
 	import { groveModeStore } from "$lib/ui/stores/grove-mode.svelte";

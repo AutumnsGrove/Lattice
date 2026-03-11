@@ -14,7 +14,7 @@
 <script lang="ts">
 	import type { DemoContainerProps } from "../../types/index.js";
 	import type { Snippet } from "svelte";
-	import { FlaskConical } from "lucide-svelte";
+	import { FlaskConical } from "@lucide/svelte";
 
 	interface Props extends DemoContainerProps {
 		children: Snippet;

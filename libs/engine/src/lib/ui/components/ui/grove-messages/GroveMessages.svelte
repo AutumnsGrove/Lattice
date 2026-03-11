@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { cn } from "$lib/ui/utils";
-	import { Info, AlertTriangle, Sparkles, PartyPopper, X } from "lucide-svelte";
+	import { Info, AlertTriangle, Sparkles, PartyPopper, X } from "@lucide/svelte";
 	import type { GroveMessage, GroveMessageType } from "./types";
 
 	interface Props {

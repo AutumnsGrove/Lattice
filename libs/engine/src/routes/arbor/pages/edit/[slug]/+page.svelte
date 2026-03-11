@@ -7,7 +7,7 @@
 	import { toast } from "$lib/ui/components/ui/toast";
 	import { api } from "$lib/utils";
 	import { clickOutside } from "$lib/actions/clickOutside";
-	import { ExternalLink, Ellipsis, Trash2, ChevronRight, ArrowLeft } from "lucide-svelte";
+	import { ExternalLink, Ellipsis, Trash2, ChevronRight, ArrowLeft } from "@lucide/svelte";
 	import Waystone from "$lib/ui/components/ui/Waystone.svelte";
 
 	/**

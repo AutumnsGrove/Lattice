@@ -6,7 +6,7 @@
 	 * Glassmorphism styled with Grove aesthetics.
 	 */
 
-	import { Check } from "lucide-svelte";
+	import { Check } from "@lucide/svelte";
 	import { defaultSuite, resolveIcon } from "$lib/ui/components/ui/groveicon";
 	import type { IconComponent } from "$lib/ui/components/ui/groveicon";
 	import type { PricingCardProps } from "./types.js";
@@ -34,7 +34,7 @@
 		crown: resolveIcon(defaultSuite.evergreen.icon),
 	};
 
-	let IconComponent = $derived(iconComponents[tier.icon] || resolveIcon(defaultSuite.seedling.icon));
+	let ResolvedIcon = $derived(iconComponents[tier.icon] || resolveIcon(defaultSuite.seedling.icon));
 
 	// Calculate display price
 	let displayPrice = $derived(
@@ -102,7 +102,7 @@
 		<div
 			class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-grove-100/50 dark:bg-grove-900/30 mb-3"
 		>
-			<IconComponent class="w-6 h-6 text-grove-600 dark:text-grove-400" />
+			<ResolvedIcon class="w-6 h-6 text-grove-600 dark:text-grove-400" />
 		</div>
 
 		<!-- Name & tagline -->

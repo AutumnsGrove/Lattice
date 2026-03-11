@@ -1,6 +1,6 @@
 <script lang="ts">
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
-	import { CreditCard, ExternalLink, Loader2, Gift } from "lucide-svelte";
+	import { CreditCard, ExternalLink, Loader2, Gift } from "@lucide/svelte";
 	import { api } from "$lib/utils";
 	import type { BillingData } from "./types";
 

@@ -22,7 +22,7 @@
 		Search,
 		Eye,
 		Clock,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 
 	interface Props {
 		title: string;

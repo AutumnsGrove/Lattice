@@ -5,7 +5,7 @@
  * JIT scanner sees it at build time. Never construct class names dynamically.
  */
 
-import { NotebookText, Feather } from "lucide-svelte";
+import { NotebookText, Feather } from "@lucide/svelte";
 import {
 	Bell,
 	UtensilsCrossed,
@@ -49,7 +49,7 @@ import {
 	Laptop,
 	Briefcase,
 	Footprints,
-} from "lucide-svelte";
+} from "@lucide/svelte";
 import type { AutoBlazeConfig, BlazeColorClasses, LucideIcon, PostType } from "./types.js";
 
 /**

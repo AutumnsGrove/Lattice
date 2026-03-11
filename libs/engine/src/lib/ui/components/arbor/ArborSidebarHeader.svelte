@@ -7,7 +7,7 @@
 -->
 <script lang="ts">
 	import { Logo } from "../ui";
-	import { ChevronLeft, X } from "lucide-svelte";
+	import { ChevronLeft, X } from "@lucide/svelte";
 	import { GroveSwap } from "../ui";
 	import { sidebarStore } from "../../stores/sidebar.svelte";
 	import type { Snippet } from "svelte";

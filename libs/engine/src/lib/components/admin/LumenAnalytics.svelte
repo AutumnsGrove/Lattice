@@ -14,7 +14,7 @@
 		TrendingUp,
 		BarChart3,
 		Layers,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 
 	interface LumenTaskStat {
 		task: string;

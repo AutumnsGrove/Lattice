@@ -99,7 +99,7 @@ Utility to transform tenant database data into `NavItem[]` format:
 
 ```typescript
 import type { NavItem } from "./types";
-import { Home, BookOpen, Image, Clock, User } from "lucide-svelte";
+import { Home, BookOpen, Image, Clock, User } from "@lucide/svelte";
 
 interface TenantNavPage {
 	slug: string;

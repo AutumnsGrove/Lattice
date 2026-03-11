@@ -462,7 +462,7 @@ When providers land, the existing `nowplaying_config.provider` field and encrypt
 - [ ] **No signing styles config** (which styles visitors can use)
 - [ ] **No color palette config**
 - [ ] **No CTA style selector**
-- [ ] **Uses lucide-svelte directly** (BookOpen, Shield)
+- [ ] **Uses @lucide/svelte directly** (BookOpen, Shield)
 
 **API** (5 endpoints):
 
@@ -643,7 +643,7 @@ Owner toggles which mode the inline widget uses.
 - [ ] **Inline widget mode toggle** (compact / styled mini-collage)
 - [ ] **Entry preview**: Show sample entries in each signing style within the admin
 - [ ] **Moderation enhancement**: Show entry style + color in the pending queue (so moderator sees what it'll look like)
-- [ ] **Migrate from lucide-svelte** to engine icons (BookOpen, Shield)
+- [ ] **Migrate from @lucide/svelte** to engine icons (BookOpen, Shield)
 
 ### Migration needs
 
@@ -859,7 +859,7 @@ Frosted glass pane tinted with flag colors — like stained glass segments. Tran
 - [ ] **No display style picker** — only one style exists
 - [ ] **No category management**
 - [ ] **No personal note field**
-- [ ] **Uses lucide-svelte directly** (Rss, Plus, Trash2, ExternalLink)
+- [ ] **Uses @lucide/svelte directly** (Rss, Plus, Trash2, ExternalLink)
 
 **API** (2 route files):
 
@@ -1044,7 +1044,7 @@ Deep indie web integration. Each blog entry can have optional XFN `rel` values t
 - [ ] **Category management**: create/edit/delete/reorder categories with emoji + color + description
 - [ ] **Category assignment**: dropdown per blog to assign to a category
 - [ ] **Live preview** that switches between display styles
-- [ ] **Migrate from lucide-svelte** to engine icons (Rss, Plus, Trash2, ExternalLink)
+- [ ] **Migrate from @lucide/svelte** to engine icons (Rss, Plus, Trash2, ExternalLink)
 
 ### Migration needs
 
@@ -1438,7 +1438,7 @@ The status pill's visual character shifts based on the status category:
 - [ ] **No color picker** — all badges are the same gray
 - [ ] **No display style picker** — only one style exists
 - [ ] **No custom badge creation** — limited to 9 presets
-- [ ] **Uses lucide-svelte directly** (ArrowLeft, Shield, Plus, Trash2, Eye)
+- [ ] **Uses @lucide/svelte directly** (ArrowLeft, Shield, Plus, Trash2, Eye)
 
 **API** (2 route files):
 
@@ -1641,7 +1641,7 @@ Each display style has its own night personality:
 - [ ] **Auto-detect badges**: show "Auto" label with explanation of trigger
 - [ ] **Live preview** that renders the selected style with chosen color
 - [ ] **Remove position selector** — no longer relevant
-- [ ] **Migrate from lucide-svelte** to engine icons
+- [ ] **Migrate from @lucide/svelte** to engine icons
 
 ### Migration needs
 
@@ -2484,7 +2484,7 @@ Each particle: position, velocity, opacity, lifetime, rotation (for leaves). Can
 - [ ] **No preview/test play** — can't hear the sound before saving
 - [ ] **No seasonal mapping UI** — "Seasonal" is a dropdown option but no way to configure which sound plays when
 - [ ] **No custom upload integration** — just a raw URL field
-- [ ] **Uses lucide-svelte directly** (Volume2)
+- [ ] **Uses @lucide/svelte directly** (Volume2)
 
 **API** (1 route file):
 
@@ -2656,7 +2656,7 @@ When sounds transition (owner changes config, seasonal mode shifts, or future so
 - [ ] **Time-of-day toggle**: "Also adjust for time of day" checkbox with explanation
 - [ ] **Custom audio upload**: Replace raw URL field with Custom Uploads picker (Oak+)
 - [ ] **Visualization preview**: Show the micro-animation for the selected sound in the admin
-- [ ] **Migrate from lucide-svelte** to engine icons (Volume2)
+- [ ] **Migrate from @lucide/svelte** to engine icons (Volume2)
 
 ### Migration needs
 
@@ -3018,7 +3018,7 @@ These curios have admin pages and data models but **no public hydration componen
 - [ ] **Hardcoded rgba colors**: Many components use `rgba(0,0,0,0.04)` / `rgba(255,255,255,0.06)` instead of theme-aware vars.
 - [ ] **Hardcoded `#4ade80`**: Hit counter, now playing, webring all use raw green hex instead of `rgb(var(--grove-500))`.
 - [ ] **No shared skeleton animation**: Each component has static gray rectangles. Could pulse/shimmer.
-- [ ] **lucide-svelte in admin pages**: Several admin pages import directly from lucide-svelte instead of engine icons.
+- [ ] **@lucide/svelte in admin pages**: Several admin pages import directly from @lucide/svelte instead of engine icons.
 - [ ] **No upload picker integration**: Badges, shrines, and cursors ask for external URLs — should have a "pick from Custom Uploads" button using the existing R2 infrastructure.
 - [ ] **Trail canvas not implemented**: Cursors config has trail effects but the canvas rendering is a no-op.
 

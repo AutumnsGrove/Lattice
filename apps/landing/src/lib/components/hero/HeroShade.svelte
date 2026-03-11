@@ -7,7 +7,7 @@
 <script lang="ts">
 	import type { HeroSlideContentProps } from './hero-types';
 	import HeroSlide from './HeroSlide.svelte';
-	import { Shield } from 'lucide-svelte';
+	import { Shield } from '@lucide/svelte';
 	import {
 		TreePine
 	} from '@autumnsgrove/lattice/ui/nature';

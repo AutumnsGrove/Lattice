@@ -1,7 +1,7 @@
 <script lang="ts">
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import Spinner from "$lib/ui/components/ui/Spinner.svelte";
-	import { ArrowUpRight, ArrowDownRight } from "lucide-svelte";
+	import { ArrowUpRight, ArrowDownRight } from "@lucide/svelte";
 	import type { AvailableTier } from "./types";
 
 	interface Props {

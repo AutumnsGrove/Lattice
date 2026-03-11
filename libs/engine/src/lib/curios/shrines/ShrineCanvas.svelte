@@ -6,7 +6,7 @@
 	 * Supports parallax depth effect on hover (respects prefers-reduced-motion).
 	 */
 
-	import { Heart, Star, Flame, Sparkles, Trophy, Flower2, type Icon } from "lucide-svelte";
+	import { Heart, Star, Flame, Sparkles, Trophy, Flower2, type Icon } from "@lucide/svelte";
 	import type { ShrineContentItem, ShrineSize, FrameStyle } from "./index";
 	import { SIZE_DIMENSIONS } from "./index";
 

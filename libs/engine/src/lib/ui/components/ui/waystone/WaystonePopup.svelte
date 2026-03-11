@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Dialog as DialogPrimitive } from "bits-ui";
-	import { X, BookOpen, HelpCircle } from "lucide-svelte";
+	import { X, BookOpen, HelpCircle } from "@lucide/svelte";
 	import { cn } from "$lib/ui/utils";
 	import GlassCard from "../GlassCard.svelte";
 	import Button from "../Button.svelte";

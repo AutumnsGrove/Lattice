@@ -2,7 +2,7 @@
 	import '../app.css';
 	import { Logo } from '@autumnsgrove/lattice/ui/nature';
 	import { ThemeToggle, seasonStore, themeStore } from '@autumnsgrove/lattice/ui/chrome';
-	import { ArrowLeft, FlaskConical } from 'lucide-svelte';
+	import { ArrowLeft, FlaskConical } from '@lucide/svelte';
 
 	let { children } = $props();
 

@@ -30,7 +30,7 @@
 	import { page } from "$app/stores";
 	import { buildTracePath } from "$lib/utils/trace-path.js";
 	import { cn } from "$lib/ui/utils";
-	import { ThumbsUp, ThumbsDown, Loader2, Check } from "lucide-svelte";
+	import { ThumbsUp, ThumbsDown, Loader2, Check } from "@lucide/svelte";
 
 	interface Props {
 		/** Override auto-detected path (appended as suffix to route path) */
@@ -100,7 +100,7 @@
 		error = null;
 
 		try {
-			const response = await fetch("/api/trace", {
+			const response = await fetch("/api/trace", { // csrf-ok — anonymous feedback, no auth required
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",

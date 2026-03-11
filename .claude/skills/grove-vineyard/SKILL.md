@@ -142,7 +142,7 @@ The philosophy quotes and related tool mappings are built-in. No configuration n
 
 ### FeatureCard
 
-Icons are any valid [lucide-svelte](https://lucide.dev) icon name as a string:
+Icons are any valid [@lucide/svelte](https://lucide.dev) icon name as a string:
 
 ```svelte
 <FeatureCard
@@ -312,6 +312,6 @@ Before shipping a vineyard page:
 - [ ] `RoadmapSection` with honest built/inProgress/planned arrays
 - [ ] At least one interactive demo (even with mock data)
 - [ ] Works on mobile (feature grid responsive)
-- [ ] Icons are valid lucide-svelte names
+- [ ] Icons are valid @lucide/svelte names
 - [ ] Status badges accurately reflect feature state
 - [ ] Grove terminology uses GroveTerm components (not hardcoded)

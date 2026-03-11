@@ -10,7 +10,7 @@
 	import { toast } from "$lib/ui/components/ui/toast";
 	import { resolveTermString } from "$lib/ui/utils/grove-term-resolve";
 	import { api } from "$lib/utils";
-	import { ArrowLeft, ArrowRight, ChevronRight, X, AlertCircle } from "lucide-svelte";
+	import { ArrowLeft, ArrowRight, ChevronRight, X, AlertCircle } from "@lucide/svelte";
 	import Waystone from "$lib/ui/components/ui/Waystone.svelte";
 	import { Blaze } from "$lib/ui/components/indicators";
 	import { GLOBAL_BLAZE_DEFAULTS } from "$lib/blazes";
@@ -40,7 +40,7 @@
 
 	onMount(async () => {
 		try {
-			const res = await fetch("/api/blazes");
+			const res = await fetch("/api/blazes"); // csrf-ok — GET-only read
 			if (res.ok) {
 				const { blazes } = await res.json();
 				if (Array.isArray(blazes) && blazes.length > 0) {

@@ -2,7 +2,7 @@
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import Button from "$lib/ui/components/ui/Button.svelte";
 	import Spinner from "$lib/ui/components/ui/Spinner.svelte";
-	import { AlertCircle, Check, X, Package, Calendar, RefreshCw } from "lucide-svelte";
+	import { AlertCircle, Check, X, Package, Calendar, RefreshCw } from "@lucide/svelte";
 	import type { BillingData, TierConfig } from "./types";
 	import { formatDate, daysRemaining } from "./utils";
 

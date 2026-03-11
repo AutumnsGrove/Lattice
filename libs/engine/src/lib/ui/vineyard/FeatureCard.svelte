@@ -30,7 +30,7 @@
     Palette,
     Search,
     type Icon,
-  } from 'lucide-svelte';
+  } from '@lucide/svelte';
 
   // Use lucide's Icon type for proper typing
   const iconMap: Record<string, typeof Icon> = {

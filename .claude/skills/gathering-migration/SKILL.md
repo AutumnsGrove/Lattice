@@ -250,10 +250,10 @@ _Everything found its new home._ 🌲
 2. 🌲 **ORGANIZE** — "Bloodhound scouts icon usage → Bear migrates with `domain-content.md`"
 
 3. 🌲 **EXECUTE** —
-   - 🐕 Bloodhound: "Found 47 files importing from lucide-svelte. 31 unique icons used. 3 files use dynamic icon selection. 2 barrel re-exports in ui/index.ts."
+   - 🐕 Bloodhound: "Found 47 files importing from @lucide/svelte. 31 unique icons used. 3 files use dynamic icon selection. 2 barrel re-exports in ui/index.ts."
    - 🐻 Bear: "Feature branch created. Migrated 44 files to registry pattern. 3 dynamic-icon files handled manually. All svelte-check passes."
 
-4. 🌲 **VALIDATE** — "47 source files, 44 migrated + 3 manual = 47 accounted. Zero remaining lucide-svelte imports. Visual spot check on 5 pages — all icons render."
+4. 🌲 **VALIDATE** — "47 source files, 44 migrated + 3 manual = 47 accounted. Zero remaining @lucide/svelte imports. Visual spot check on 5 pages — all icons render."
 
 5. 🌲 **COMPLETE** — "Icon registry migration complete. Bundle size reduced. Branch ready for review."
 

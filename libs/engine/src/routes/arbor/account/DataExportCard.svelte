@@ -2,7 +2,7 @@
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import Button from "$lib/ui/components/ui/Button.svelte";
 	import Waystone from "$lib/ui/components/ui/Waystone.svelte";
-	import { Archive } from "lucide-svelte";
+	import { Archive } from "@lucide/svelte";
 
 	interface ExportCounts {
 		posts: number;

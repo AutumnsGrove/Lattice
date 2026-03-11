@@ -363,7 +363,7 @@ These are complementary, not duplicates. The consolidation: engine's `/arbor/exp
 - `grove-storage` R2 binding (shared bucket — same one all Grove services write to)
 - ExportJobV2 Durable Object → Loom SDK (alarm scheduling, state management, chunk orchestration)
 - Cron simplification: `processPendingExports` (every 5 min) becomes lightweight orphaned-job recovery rather than primary trigger
-- `apps/amber/` engine upgrade: `^0.6.4` → `workspace:*`; replace `lucide-svelte` imports with engine icons
+- `apps/amber/` engine upgrade: `^0.6.4` → `workspace:*`; replace `@lucide/svelte` imports with engine icons
 - Engine's `/arbor/export/` page gets redirect/pointer to Amber
 
 ---
@@ -783,7 +783,7 @@ Shutter maintains both a Python and TypeScript implementation. Both come in toge
 1. Copy `~/Documents/Projects/Ivy/` into `apps/ivy/` (no clone needed — available locally)
    - Preserve all source files, migrations, wrangler.toml, and package.json
 2. **Update engine dependency:** `@autumnsgrove/groveengine: ^0.9.99` → `workspace:*`
-3. **Replace `lucide-svelte` imports with engine icons** — Ivy likely imports icons directly from lucide-svelte; swap to `@autumnsgrove/groveengine/icons`
+3. **Replace `@lucide/svelte` imports with engine icons** — Ivy likely imports icons directly from @lucide/svelte; swap to `@autumnsgrove/groveengine/icons`
 4. **Replace auth HTTP call with Heartwood service binding:**
    - Remove: `fetch('https://auth-api.grove.place/api/auth/session')` (deprecated endpoint)
    - Add: Heartwood service binding in `wrangler.toml`
@@ -812,7 +812,7 @@ Amber is a two-part import: SvelteKit UI to `apps/amber/` and the CF Worker to `
 1. Copy the Amber SvelteKit root (everything _except_ the `worker/` directory) into `apps/amber/`
 2. **Update engine dependency:** `@autumnsgrove/groveengine: ^0.6.4` → `workspace:*`
    - This is a large version jump — audit for any breaking changes between 0.6.4 and current engine
-3. **Replace `lucide-svelte` imports with engine icons** — same pattern as other apps
+3. **Replace `@lucide/svelte` imports with engine icons** — same pattern as other apps
 4. **Add deploy workflow:** `.github/workflows/deploy-amber.yml` using the reusable `_deploy.yml` template
 5. Verify: build, type-check
 

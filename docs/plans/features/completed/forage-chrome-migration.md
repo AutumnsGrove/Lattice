@@ -115,7 +115,7 @@ Add Header and Footer for public pages:
 	import { GossamerClouds } from "@autumnsgrove/gossamer/svelte";
 	import "@autumnsgrove/gossamer/svelte/style.css";
 	import { Header, Footer } from "@autumnsgrove/lattice/chrome";
-	import { Search } from "lucide-svelte";
+	import { Search } from "@lucide/svelte";
 
 	let { children } = $props();
 
@@ -160,7 +160,7 @@ Replace custom header/tabs with AdminHeader:
 	import type { LayoutData } from "./$types";
 	import { page } from "$app/state";
 	import { AdminHeader } from "@autumnsgrove/lattice/chrome";
-	import { LayoutDashboard, Search, Clock, Settings } from "lucide-svelte";
+	import { LayoutDashboard, Search, Clock, Settings } from "@lucide/svelte";
 
 	let { data, children }: { data: LayoutData; children: any } = $props();
 

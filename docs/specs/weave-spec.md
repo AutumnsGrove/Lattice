@@ -532,7 +532,7 @@ Diagram nodes use Grove's glass component system for consistent styling:
 ```svelte
 <script>
 	import { GlassCard } from "@lattice/ui/ui";
-	import { Database, Zap, Cloud } from "lucide-svelte";
+	import { Database, Zap, Cloud } from "@lucide/svelte";
 </script>
 
 <!-- Glass card node in diagram -->
@@ -609,7 +609,7 @@ const diagramIcons = {
 
 ```svelte
 <script>
-	import { Cloud, Zap, Database } from "lucide-svelte";
+	import { Cloud, Zap, Database } from "@lucide/svelte";
 </script>
 ```
 

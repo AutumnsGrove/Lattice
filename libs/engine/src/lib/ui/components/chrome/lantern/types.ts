@@ -6,7 +6,7 @@
  * In Grove mode it's "Lantern"; in standard mode it's "Compass".
  */
 
-import type { ComponentType } from "svelte";
+import type { Component } from "svelte";
 
 /**
  * Minimal data passed from layout to Lantern.
@@ -34,7 +34,7 @@ export interface LanternDestination {
 	href: string;
 	label: string;
 	groveLabel?: string;
-	icon: ComponentType;
+	icon: Component<any>;
 	external: boolean;
 	termSlug?: string;
 }

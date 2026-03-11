@@ -15,7 +15,7 @@
 		Footprints,
 		Check,
 		ArrowRight,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 	import type { GrowthCardProps } from "./types.js";
 
 	let {

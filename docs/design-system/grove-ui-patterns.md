@@ -154,7 +154,7 @@ return 3.5; // Ultrawide
 **NEVER use emojis. ALWAYS use Lucide icons.**
 
 ```svelte
-import { MapPin, Check, Leaf, Trees, Mail } from 'lucide-svelte';
+import { MapPin, Check, Leaf, Trees, Mail } from '@lucide/svelte';
 
 <!-- Good -->
 <MapPin class="w-4 h-4" />

@@ -30,7 +30,7 @@
 		Heart,
 		Sticker,
 		Upload,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 
 	// Available curios with their status
 	const curios = [

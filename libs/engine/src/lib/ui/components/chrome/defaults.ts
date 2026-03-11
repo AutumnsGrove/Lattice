@@ -22,7 +22,7 @@ import {
 	Inbox,
 	Armchair,
 	Shield,
-} from "lucide-svelte";
+} from "@lucide/svelte";
 import BlueSky from "../icons/BlueSky.svelte";
 import { defaultSuite, resolveIcon } from "$lib/ui/components/ui/groveicon";
 

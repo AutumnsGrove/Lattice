@@ -7,7 +7,7 @@
 <script lang="ts">
 	import type { HeroSlideContentProps } from './hero-types';
 	import HeroSlide from './HeroSlide.svelte';
-	import { Sprout } from 'lucide-svelte';
+	import { Sprout } from '@lucide/svelte';
 	import {
 		TreePine,
 		Lantern

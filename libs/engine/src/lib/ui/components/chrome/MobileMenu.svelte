@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from "$app/state";
-	import { X, ExternalLink, Search, LogIn, LogOut } from "lucide-svelte";
+	import { X, ExternalLink, Search, LogIn, LogOut } from "@lucide/svelte";
 	import type { NavItem, FooterLink, HeaderUser } from "./types";
 	import { isActivePath, resolveDisplayName, resolveInitial } from "./types";
 	import {

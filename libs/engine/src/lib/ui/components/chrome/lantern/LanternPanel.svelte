@@ -7,7 +7,7 @@
 	import LanternAddFriends from "./LanternAddFriends.svelte";
 	import LanternVisitingCard from "./LanternVisitingCard.svelte";
 	import type { LanternLayoutData } from "./types";
-	import { UserPlus, Settings } from "lucide-svelte";
+	import { UserPlus, Settings } from "@lucide/svelte";
 
 	interface Props {
 		data: LanternLayoutData;

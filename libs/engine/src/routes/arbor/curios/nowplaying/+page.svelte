@@ -3,7 +3,7 @@
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import GlassButton from "$lib/ui/components/ui/GlassButton.svelte";
 	import { toast } from "$lib/ui/components/ui/toast";
-	import { Music, ArrowLeft, Trash2 } from "lucide-svelte";
+	import { Music, ArrowLeft, Trash2 } from "@lucide/svelte";
 	import {
 		DISPLAY_STYLE_OPTIONS,
 		PROVIDER_OPTIONS,

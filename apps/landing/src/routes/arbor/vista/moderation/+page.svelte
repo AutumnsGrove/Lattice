@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from "./$types";
 	import { GlassCard } from "@autumnsgrove/lattice/ui";
-	import { Shield } from "lucide-svelte";
+	import { Shield } from "@lucide/svelte";
 
 	let { data }: { data: PageData } = $props();
 </script>

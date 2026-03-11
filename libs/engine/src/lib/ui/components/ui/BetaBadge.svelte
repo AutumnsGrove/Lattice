@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { cn } from "$lib/ui/utils";
-	import { FlaskConical } from "lucide-svelte";
+	import { FlaskConical } from "@lucide/svelte";
 	import type { Snippet } from "svelte";
 
 	/**

@@ -7,7 +7,7 @@
 <script lang="ts">
 	import { browser } from "$app/environment";
 	import MarkdownIt from "markdown-it";
-	import { Bold, Italic, Code, Link, Heading1, Heading2, Heading3 } from "lucide-svelte";
+	import { Bold, Italic, Code, Link, Heading1, Heading2, Heading3 } from "@lucide/svelte";
 
 	const md = new MarkdownIt({
 		html: false,

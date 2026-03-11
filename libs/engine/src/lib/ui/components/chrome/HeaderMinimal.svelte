@@ -4,12 +4,12 @@
 	 *
 	 * Clean, minimal header with Grove branding and theme toggle.
 	 */
-	import { Rss } from 'lucide-svelte';
+	import { Rss } from '@lucide/svelte';
 	import { defaultSuite, resolveIcon } from '$lib/ui/components/ui/groveicon';
 	import ThemeToggle from './ThemeToggle.svelte';
 	import { cn } from '$lib/utils/cn';
 
-	const groveIcon = resolveIcon(defaultSuite.grove.icon);
+	const GroveIcon = resolveIcon(defaultSuite.grove.icon);
 
 	interface Props {
 		class?: string;
@@ -44,7 +44,6 @@
 		<!-- Logo and title -->
 		<a href="/" class="flex items-center gap-2.5 group">
 			<div class="p-1.5 rounded-lg bg-grove-500/10 group-hover:bg-grove-500/20 transition-colors">
-				{@const GroveIcon = groveIcon}
 				<GroveIcon class="w-6 h-6 text-grove-600 dark:text-grove-400" />
 			</div>
 			<div>

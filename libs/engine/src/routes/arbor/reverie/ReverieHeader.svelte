@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Sparkles } from "lucide-svelte";
+	import { Sparkles } from "@lucide/svelte";
 
 	interface Props {
 		onAtmospherePick: (keyword: string) => void;

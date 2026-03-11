@@ -30,7 +30,7 @@
 		PenLine,
 		Image as ImageIcon,
 		ChevronRight
-	} from 'lucide-svelte';
+	} from '@lucide/svelte';
 
 	let { data } = $props();
 

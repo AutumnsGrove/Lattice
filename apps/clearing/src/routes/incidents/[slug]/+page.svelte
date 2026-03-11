@@ -19,7 +19,7 @@
 		Eye,
 		Clock,
 		Trees
-	} from 'lucide-svelte';
+	} from '@lucide/svelte';
 
 	// Status page navigation - just a way home
 	const navItems: NavItem[] = [

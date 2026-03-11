@@ -18,7 +18,7 @@
 		XCircle,
 		Activity,
 		Clock,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 
 	interface Props {
 		thornStats: {

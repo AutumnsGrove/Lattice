@@ -12,7 +12,7 @@
 	 * Full implementation: docs/specs/vista-spec.md
 	 */
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
-	import { Activity, Bell, TrendingUp, HandCoins } from "lucide-svelte";
+	import { Activity, Bell, TrendingUp, HandCoins } from "@lucide/svelte";
 </script>
 
 <svelte:head>

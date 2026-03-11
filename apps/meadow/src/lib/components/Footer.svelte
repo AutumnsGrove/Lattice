@@ -5,7 +5,7 @@
 	 * Minimal footer with links to main Grove site.
 	 */
 	import { cn } from '@autumnsgrove/lattice/ui/utils';
-	import { Mail, ExternalLink } from 'lucide-svelte';
+	import { Mail, ExternalLink } from '@lucide/svelte';
 	import { defaultSuite, resolveIcon } from '@autumnsgrove/lattice/ui';
 
 	const groveIcon = resolveIcon(defaultSuite.grove.icon);

@@ -3,7 +3,7 @@
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import GlassButton from "$lib/ui/components/ui/GlassButton.svelte";
 	import { toast } from "$lib/ui/components/ui/toast";
-	import { Sticker, Plus, Trash2 } from "lucide-svelte";
+	import { Sticker, Plus, Trash2 } from "@lucide/svelte";
 
 	let { data, form } = $props();
 

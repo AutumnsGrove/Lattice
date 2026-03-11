@@ -26,7 +26,7 @@
 		Flame,
 		Bell,
 		ArrowLeft,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 	import type { ArborNavEntry } from "@autumnsgrove/lattice/ui/arbor";
 	import type { LayoutData } from "./$types";
 	import type { Snippet } from "svelte";

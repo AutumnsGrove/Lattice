@@ -2,7 +2,7 @@
 	import { ArborPanel } from "$lib/ui/components/arbor";
 	import Toast from "$lib/ui/components/ui/Toast.svelte";
 	import { defaultSuite, resolveIcon } from "$lib/ui/components/ui/groveicon";
-	import { LayoutDashboard, FileStack, Image, Settings, CreditCard } from "lucide-svelte";
+	import { LayoutDashboard, FileStack, Image, Settings, CreditCard } from "@lucide/svelte";
 
 	let { data, children } = $props();
 

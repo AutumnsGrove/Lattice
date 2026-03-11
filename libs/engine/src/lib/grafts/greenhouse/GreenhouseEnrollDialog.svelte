@@ -19,7 +19,7 @@
 	import type { GreenhouseEnrollDialogProps } from "./types.js";
 	import Dialog from "$lib/ui/components/ui/Dialog.svelte";
 	import Button from "$lib/ui/components/ui/Button.svelte";
-	import { Sprout } from "lucide-svelte";
+	import { Sprout } from "@lucide/svelte";
 
 	let {
 		open,

@@ -5,7 +5,7 @@
 	import GlassButton from "$lib/ui/components/ui/GlassButton.svelte";
 	import GlassConfirmDialog from "$lib/ui/components/ui/GlassConfirmDialog.svelte";
 	import { toast } from "$lib/ui/components/ui/toast";
-	import { Wand2, Plus, Trash2, Eye, Sparkles, Box, Pencil } from "lucide-svelte";
+	import { Wand2, Plus, Trash2, Eye, Sparkles, Box, Pencil } from "@lucide/svelte";
 	import { api } from "$lib/utils/api";
 	import ArtifactConfigForm from "$lib/ui/components/content/curios/artifacts/ArtifactConfigForm.svelte";
 	import ArtifactShowcase from "$lib/ui/components/content/curios/artifacts/ArtifactShowcase.svelte";

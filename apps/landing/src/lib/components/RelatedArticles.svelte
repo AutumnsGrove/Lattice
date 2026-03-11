@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { FileText, ArrowRight } from 'lucide-svelte';
+  import { FileText, ArrowRight } from '@lucide/svelte';
   import type { Doc } from '$lib/types/docs';
   import { kbCategoryColors } from '$lib/utils/kb-colors';
 

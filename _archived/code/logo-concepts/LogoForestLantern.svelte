@@ -8,7 +8,7 @@
 	 * Grove Logo: Forest Lantern
 	 * Multiple trees creating a grove with a warm lantern at center
 	 */
-	import { TreePine, TreeDeciduous, Shrub } from 'lucide-svelte';
+	import { TreePine, TreeDeciduous, Shrub } from '@lucide/svelte';
 	import { IconTree } from '@tabler/icons-svelte';
 
 	interface Props {

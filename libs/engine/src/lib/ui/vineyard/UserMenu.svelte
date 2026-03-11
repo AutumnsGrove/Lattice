@@ -10,7 +10,7 @@
 	import type { UserMenuProps } from "./types.js";
 	import type { BetterAuthUser } from "./types.js";
 	import { getSession, signOut } from "./auth.js";
-	import { User, LogOut, ChevronDown } from "lucide-svelte";
+	import { User, LogOut, ChevronDown } from "@lucide/svelte";
 
 	type Props = UserMenuProps;
 

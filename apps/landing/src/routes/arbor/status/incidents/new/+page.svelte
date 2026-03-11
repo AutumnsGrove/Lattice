@@ -2,7 +2,7 @@
 	import type { PageData } from './$types';
 	import { enhance } from '$app/forms';
 	import { GlassCard } from '@autumnsgrove/lattice/ui';
-	import { ArrowLeft } from 'lucide-svelte';
+	import { ArrowLeft } from '@lucide/svelte';
 
 	let { data }: { data: PageData } = $props();
 	let form = $state<{ error?: string } | null>(null);

@@ -145,9 +145,9 @@ importers:
       '@autumnsgrove/lattice':
         specifier: workspace:*
         version: link:../../libs/engine
-      lucide-svelte:
-        specifier: ^0.554.0
-        version: 0.554.0(svelte@5.50.1)
+      '@lucide/svelte':
+        specifier: ^0.577.0
+        version: 0.577.0(svelte@5.50.1)
     devDependencies:
       '@cloudflare/workers-types':
         specifier: ^4.20260210.0
@@ -200,9 +200,9 @@ importers:
       '@autumnsgrove/lattice':
         specifier: workspace:*
         version: link:../../libs/engine
-      lucide-svelte:
-        specifier: ^0.563.0
-        version: 0.563.0(svelte@5.50.1)
+      '@lucide/svelte':
+        specifier: ^0.577.0
+        version: 0.577.0(svelte@5.50.1)
       resend:
         specifier: ^4.8.0
         version: 4.8.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -325,12 +325,12 @@ importers:
       '@lucide/lab':
         specifier: ^0.1.2
         version: 0.1.2
+      '@lucide/svelte':
+        specifier: ^0.577.0
+        version: 0.577.0(svelte@5.50.1)
       '@tabler/icons-svelte':
         specifier: ^3.36.1
         version: 3.36.1(svelte@5.50.1)
-      lucide-svelte:
-        specifier: ^0.554.0
-        version: 0.554.0(svelte@5.50.1)
       markdown-it:
         specifier: ^14.1.1
         version: 14.1.1
@@ -453,9 +453,9 @@ importers:
       '@autumnsgrove/lattice':
         specifier: workspace:*
         version: link:../../libs/engine
-      lucide-svelte:
-        specifier: ^0.554.0
-        version: 0.554.0(svelte@5.50.1)
+      '@lucide/svelte':
+        specifier: ^0.577.0
+        version: 0.577.0(svelte@5.50.1)
     devDependencies:
       '@cloudflare/workers-types':
         specifier: ^4.20260210.0
@@ -499,9 +499,9 @@ importers:
       '@autumnsgrove/lattice':
         specifier: workspace:*
         version: link:../../libs/engine
-      lucide-svelte:
-        specifier: ^0.554.0
-        version: 0.554.0(svelte@5.50.1)
+      '@lucide/svelte':
+        specifier: ^0.577.0
+        version: 0.577.0(svelte@5.50.1)
       resend:
         specifier: ^4.8.0
         version: 4.8.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -557,9 +557,9 @@ importers:
       '@autumnsgrove/lattice':
         specifier: workspace:*
         version: link:../../libs/engine
-      lucide-svelte:
-        specifier: ^0.554.0
-        version: 0.554.0(svelte@5.50.1)
+      '@lucide/svelte':
+        specifier: ^0.577.0
+        version: 0.577.0(svelte@5.50.1)
     devDependencies:
       '@cloudflare/workers-types':
         specifier: ^4.20260210.0
@@ -663,9 +663,6 @@ importers:
       heic2any:
         specifier: ^0.0.4
         version: 0.0.4
-      lucide-svelte:
-        specifier: ^0.554.0
-        version: 0.554.0(svelte@5.50.1)
       markdown-it:
         specifier: ^14.1.1
         version: 14.1.1
@@ -692,8 +689,8 @@ importers:
         specifier: ^4.20260210.0
         version: 4.20260210.0
       '@lucide/svelte':
-        specifier: ^0.482.0
-        version: 0.482.0(svelte@5.50.1)
+        specifier: ^0.577.0
+        version: 0.577.0(svelte@5.50.1)
       '@sveltejs/adapter-cloudflare':
         specifier: ^7.2.6
         version: 7.2.6(@sveltejs/kit@2.50.2(@opentelemetry/api@1.9.0)(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.50.1)(vite@5.4.21(@types/node@25.2.3)))(svelte@5.50.1)(typescript@5.9.3)(vite@5.4.21(@types/node@25.2.3)))(wrangler@4.64.0(@cloudflare/workers-types@4.20260210.0))
@@ -973,9 +970,9 @@ importers:
 
   libs/vineyard:
     dependencies:
-      lucide-svelte:
-        specifier: ^0.460.1
-        version: 0.460.1(svelte@5.50.1)
+      '@lucide/svelte':
+        specifier: ^0.577.0
+        version: 0.577.0(svelte@5.50.1)
     devDependencies:
       '@sveltejs/adapter-auto':
         specifier: ^3.3.1
@@ -3010,13 +3007,13 @@ packages:
   '@lucide/lab@0.1.2':
     resolution: {integrity: sha512-VprF2BJa7ZuTGOhUd5cf8tHJXyL63wdxcGieAiVVoR9hO0YmPsnZO0AGqDiX2/br+/MC6n8BoJcmPilltOXIJA==}
 
-  '@lucide/svelte@0.482.0':
-    resolution: {integrity: sha512-n2ycHU9cNcleRDwwpEHBJ6pYzVhHIaL3a+9dQa8kns9hB2g05bY+v2p2KP8v0pZwtNhYTHk/F2o2uZ1bVtQGhw==}
+  '@lucide/svelte@0.562.0':
+    resolution: {integrity: sha512-wDMULwtTFN2Sc/TFBm6gfuVCNb4Y5P9LDrwxNnUbV52+IEU7NXZmvxwXoz+vrrpad6Xupq+Hw5eUlqIHEGhouw==}
     peerDependencies:
       svelte: ^5
 
-  '@lucide/svelte@0.562.0':
-    resolution: {integrity: sha512-wDMULwtTFN2Sc/TFBm6gfuVCNb4Y5P9LDrwxNnUbV52+IEU7NXZmvxwXoz+vrrpad6Xupq+Hw5eUlqIHEGhouw==}
+  '@lucide/svelte@0.577.0':
+    resolution: {integrity: sha512-0P6mkySd2MapIEgq08tADPmcN4DHndC/02PWwaLkOerXlx5Sv9aT4BxyXLIY+eccr0g/nEyCYiJesqS61YdBZQ==}
     peerDependencies:
       svelte: ^5
 
@@ -6044,21 +6041,6 @@ packages:
   lru-cache@6.0.0:
     resolution: {integrity: sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==}
     engines: {node: '>=10'}
-
-  lucide-svelte@0.460.1:
-    resolution: {integrity: sha512-guJjJSeWlKivsEG51Xg41egunBMJcobhDmkLv/NYTXmXyCEwxMf1A+HX7RvDEKiXbXYgtLImih67tI08MSUOkA==}
-    peerDependencies:
-      svelte: ^3 || ^4 || ^5.0.0-next.42
-
-  lucide-svelte@0.554.0:
-    resolution: {integrity: sha512-LLcpHi3SuKup0nVD1kKqo8FDZnjXJp48uST26GGh8Jcyrxqk5gmgpnvKmHsHox674UL3cPS1DCul/wFL7ybGqg==}
-    peerDependencies:
-      svelte: ^3 || ^4 || ^5.0.0-next.42
-
-  lucide-svelte@0.563.0:
-    resolution: {integrity: sha512-pjZKw7TpQcamfQrx7YdbOHgmrcNeKiGGMD0tKZQaVktwSsbqw28CsKc2Q97ttwjytiCWkJyOa8ij2Q+Og0nPfQ==}
-    peerDependencies:
-      svelte: ^3 || ^4 || ^5.0.0-next.42
 
   lz-string@1.5.0:
     resolution: {integrity: sha512-h5bgJWpxJNswbU7qCrV0tIKQCaS3blPDrqKWx+QxzuzL1zGUzij9XCWLrSLsJPu5t+eWA/ycetzYAO5IOMcWAQ==}
@@ -9256,11 +9238,11 @@ snapshots:
 
   '@lucide/lab@0.1.2': {}
 
-  '@lucide/svelte@0.482.0(svelte@5.50.1)':
+  '@lucide/svelte@0.562.0(svelte@5.50.1)':
     dependencies:
       svelte: 5.50.1
 
-  '@lucide/svelte@0.562.0(svelte@5.50.1)':
+  '@lucide/svelte@0.577.0(svelte@5.50.1)':
     dependencies:
       svelte: 5.50.1
 
@@ -12775,18 +12757,6 @@ snapshots:
   lru-cache@6.0.0:
     dependencies:
       yallist: 4.0.0
-
-  lucide-svelte@0.460.1(svelte@5.50.1):
-    dependencies:
-      svelte: 5.50.1
-
-  lucide-svelte@0.554.0(svelte@5.50.1):
-    dependencies:
-      svelte: 5.50.1
-
-  lucide-svelte@0.563.0(svelte@5.50.1):
-    dependencies:
-      svelte: 5.50.1
 
   lz-string@1.5.0: {}
 

@@ -30,7 +30,7 @@
 		Star,
 		MousePointer,
 		Wind,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 	import { api } from "$lib/utils";
 
 	// Map curio slugs to icons

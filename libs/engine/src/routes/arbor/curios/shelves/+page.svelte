@@ -4,7 +4,7 @@
 	import GlassButton from "$lib/ui/components/ui/GlassButton.svelte";
 	import GlassConfirmDialog from "$lib/ui/components/ui/GlassConfirmDialog.svelte";
 	import { toast } from "$lib/ui/components/ui/toast";
-	import { BookMarked, Plus, Trash2, Settings, ChevronDown, ChevronUp } from "lucide-svelte";
+	import { BookMarked, Plus, Trash2, Settings, ChevronDown, ChevronUp } from "@lucide/svelte";
 	import { api } from "$lib/utils/api";
 
 	let { data, form } = $props();

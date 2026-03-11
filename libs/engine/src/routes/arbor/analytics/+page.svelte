@@ -13,7 +13,7 @@
 		Sprout,
 		Leaf,
 		TreePine,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 </script>
 
 <div class="max-w-4xl mx-auto">

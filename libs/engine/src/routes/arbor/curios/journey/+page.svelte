@@ -1,7 +1,7 @@
 <script lang="ts">
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import Waystone from "$lib/ui/components/ui/Waystone.svelte";
-	import { ChevronLeft, Sparkles } from "lucide-svelte";
+	import { ChevronLeft, Sparkles } from "@lucide/svelte";
 </script>
 
 <svelte:head>

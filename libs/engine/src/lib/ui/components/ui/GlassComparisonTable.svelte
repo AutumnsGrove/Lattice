@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from "svelte";
 	import { cn } from "$lib/ui/utils";
-	import { Check, X, Minus } from "lucide-svelte";
+	import { Check, X, Minus } from "@lucide/svelte";
 
 	/**
 	 * GlassComparisonTable - A glassmorphism comparison table with mobile card layout

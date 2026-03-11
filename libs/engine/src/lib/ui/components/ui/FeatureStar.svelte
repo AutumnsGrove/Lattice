@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Star } from "lucide-svelte";
+	import { Star } from "@lucide/svelte";
 
 	/**
 	 * FeatureStar - Inline star indicator for key/featured items

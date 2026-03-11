@@ -8,7 +8,7 @@
 
 	import type { ShrineDisplay } from "./index";
 	import ShrineCanvas from "./ShrineCanvas.svelte";
-	import { Heart } from "lucide-svelte";
+	import { Heart } from "@lucide/svelte";
 
 	interface Props {
 		shrines: ShrineDisplay[];

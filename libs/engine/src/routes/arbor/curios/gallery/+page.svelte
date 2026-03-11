@@ -19,7 +19,7 @@
 		Tags,
 		FolderOpen,
 		RefreshCw,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 
 	const { data, form }: { data: PageData; form: ActionData } = $props();
 

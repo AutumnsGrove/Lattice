@@ -20,7 +20,7 @@
 		Loader2,
 		Package,
 		Map
-	} from 'lucide-svelte';
+	} from '@lucide/svelte';
 	import ModpackManager from './ModpackManager.svelte';
 	import WorldManager from './WorldManager.svelte';
 

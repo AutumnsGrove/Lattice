@@ -11,7 +11,7 @@ Safely update all packages to latest versions for security patches and new featu
 ## Current State
 
 The monorepo has multiple packages with varying dependency freshness:
-- `lucide-svelte`: 0.554.0 (latest: 0.562.0) - missing newer icons like `LayersPlus`
+- `@lucide/svelte`: 0.554.0 (latest: 0.562.0) - missing newer icons like `LayersPlus`
 - Various other packages likely behind on security patches
 - Some deprecated API warnings appearing in builds
 
@@ -35,7 +35,7 @@ The monorepo has multiple packages with varying dependency freshness:
 ### Low Risk Updates (Usually Safe)
 | Package | Risk | Why |
 |---------|------|-----|
-| `lucide-svelte` | Low | Icon additions, rarely breaking |
+| `@lucide/svelte` | Low | Icon additions, rarely breaking |
 | `prettier` / `eslint` | Low | Formatting only |
 | `@types/*` | Low | Type definitions |
 | Security patches (minor) | Low | Bug fixes |
@@ -61,7 +61,7 @@ git tag pre-dependency-update-$(date +%Y%m%d)
 
 ```bash
 # Example: Update lucide
-pnpm update lucide-svelte --recursive
+pnpm update @lucide/svelte --recursive
 
 # Verify
 pnpm run build --filter=landing
@@ -131,7 +131,7 @@ git checkout -b hotfix/revert-updates
 ## Packages to Update (Current Session Candidates)
 
 ### Immediate (Low Risk)
-- [ ] `lucide-svelte` 0.554.0 → 0.562.0+ (get `LayersPlus` and other new icons)
+- [ ] `@lucide/svelte` 0.554.0 → 0.562.0+ (get `LayersPlus` and other new icons)
 
 ### Soon (When Convenient)
 - [ ] Security patches from `pnpm audit`

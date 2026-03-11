@@ -31,7 +31,7 @@
     FlipVertical,
     Palette,
     X,
-  } from "lucide-svelte";
+  } from "@lucide/svelte";
   import { cn } from "$lib/ui/utils";
   import { CANVAS_BACKGROUNDS } from "./types";
 

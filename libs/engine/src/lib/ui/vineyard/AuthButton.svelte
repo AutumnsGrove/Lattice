@@ -9,7 +9,7 @@
 <script lang="ts">
 	import type { AuthButtonProps } from "./types.js";
 	import { signIn, signOut, getSession } from "./auth.js";
-	import { LogIn, LogOut } from "lucide-svelte";
+	import { LogIn, LogOut } from "@lucide/svelte";
 
 	type Props = AuthButtonProps;
 

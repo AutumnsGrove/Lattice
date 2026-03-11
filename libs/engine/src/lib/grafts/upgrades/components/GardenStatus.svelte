@@ -19,7 +19,7 @@
 		CheckCircle2,
 		Clock,
 		ArrowRight,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 	import GroveSwap from "$lib/ui/components/ui/groveterm/GroveSwap.svelte";
 	import type { GardenStatusProps } from "./types.js";
 	import type { TierKey } from "$lib/config/tiers";

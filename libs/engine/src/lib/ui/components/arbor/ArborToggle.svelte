@@ -13,7 +13,7 @@
     </header>
 -->
 <script lang="ts">
-  import { Menu } from "lucide-svelte";
+  import { Menu } from "@lucide/svelte";
   import { sidebarStore } from "../../stores/sidebar.svelte";
 
   interface Props {

@@ -3,7 +3,7 @@
 	import Badge from "$lib/ui/components/ui/Badge.svelte";
 	import { toast } from "$lib/ui/components/ui/toast";
 	import GroveSwap from "$lib/ui/components/ui/groveterm/GroveSwap.svelte";
-	import { MessageSquare, Mail, Check, X, Ban, Settings, ShieldAlert, UserX } from "lucide-svelte";
+	import { MessageSquare, Mail, Check, X, Ban, Settings, ShieldAlert, UserX } from "@lucide/svelte";
 	import { api } from "$lib/utils/api";
 
 	let { data } = $props();

@@ -57,7 +57,7 @@ category: features
 - [ ] **No preview/test play** — can't hear the sound before saving
 - [ ] **No seasonal mapping UI** — "Seasonal" is a dropdown option but no way to configure which sound plays when
 - [ ] **No custom upload integration** — just a raw URL field
-- [ ] **Uses lucide-svelte directly** (Volume2)
+- [ ] **Uses @lucide/svelte directly** (Volume2)
 
 **API** (1 route file):
 
@@ -229,7 +229,7 @@ When sounds transition (owner changes config, seasonal mode shifts, or future so
 - [ ] **Time-of-day toggle**: "Also adjust for time of day" checkbox with explanation
 - [ ] **Custom audio upload**: Replace raw URL field with Custom Uploads picker (Oak+)
 - [ ] **Visualization preview**: Show the micro-animation for the selected sound in the admin
-- [ ] **Migrate from lucide-svelte** to engine icons (Volume2)
+- [ ] **Migrate from @lucide/svelte** to engine icons (Volume2)
 
 ### Migration needs
 

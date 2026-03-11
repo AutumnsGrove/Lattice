@@ -14,7 +14,7 @@
 	 * @prop {"inline" | "modal"} variant - Layout variant
 	 */
 
-	import { Check, X, Loader2, Globe, ExternalLink } from "lucide-svelte";
+	import { Check, X, Loader2, Globe, ExternalLink } from "@lucide/svelte";
 	import { TIERS } from "$lib/config/tiers";
 
 	/** @type {{ username: string; userTier: string; variant?: "inline" | "modal" }} */

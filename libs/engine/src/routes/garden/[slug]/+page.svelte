@@ -4,7 +4,7 @@
 	import Button from "$lib/ui/components/ui/Button.svelte";
 	import Badge from "$lib/ui/components/ui/Badge.svelte";
 	import GroveSwap from "$lib/ui/components/ui/groveterm/GroveSwap.svelte";
-	import { MessageSquare, MessageSquareText } from "lucide-svelte";
+	import { MessageSquare, MessageSquareText } from "@lucide/svelte";
 	import { fontMap } from "$lib/ui/tokens/fonts";
 	import { Blaze } from "$lib/ui/components/indicators";
 	import { resolveBlaze } from "$lib/blazes";

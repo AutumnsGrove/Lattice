@@ -3,7 +3,7 @@
   Used for Swarm feature indicators in workshop/beyond pages
 -->
 <script lang="ts">
-	import { Icon } from 'lucide-svelte';
+	import { Icon } from '@lucide/svelte';
 	import { bee } from '@lucide/lab';
 
 	interface Props {

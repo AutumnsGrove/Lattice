@@ -10,7 +10,7 @@
 	import type { TenantGraftSectionProps } from "./types.js";
 	import { GlassCard } from "../../ui/index.js";
 	import GraftToggleRow from "./GraftToggleRow.svelte";
-	import { Settings, RotateCcw } from "lucide-svelte";
+	import { Settings, RotateCcw } from "@lucide/svelte";
 
 	let {
 		grafts,

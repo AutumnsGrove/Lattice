@@ -11,7 +11,7 @@
 -->
 <script lang="ts">
 	import type { RoadmapSectionProps } from "../../types/index.js";
-	import { Check, ArrowRight, Circle } from "lucide-svelte";
+	import { Check, ArrowRight, Circle } from "@lucide/svelte";
 
 	let { built, inProgress, planned }: RoadmapSectionProps = $props();
 </script>

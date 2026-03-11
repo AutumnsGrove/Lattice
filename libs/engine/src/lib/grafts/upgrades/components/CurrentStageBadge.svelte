@@ -14,7 +14,7 @@
 		Footprints,
 		Settings,
 		ArrowRight,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 	import type { CurrentStageBadgeProps } from "./types.js";
 	import type { TierKey } from "$lib/config/tiers";
 

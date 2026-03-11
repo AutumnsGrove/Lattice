@@ -103,7 +103,7 @@ Following Grove UI Design principles:
 - ✅ Use Lucide icons exclusively
 - ❌ Never use emojis
 - ✅ Import from centralized `icons.ts`
-- ❌ Never import directly from `lucide-svelte`
+- ❌ Never import directly from `@lucide/svelte`
 
 ### Icon Usage Pattern
 

@@ -23,7 +23,7 @@
 		Trees,
 		Kanban,
 		Eye
-	} from 'lucide-svelte';
+	} from '@lucide/svelte';
 	import { WAYFINDER_LINKS } from '@autumnsgrove/lattice/config';
 
 	let { data }: { data: PageData } = $props();

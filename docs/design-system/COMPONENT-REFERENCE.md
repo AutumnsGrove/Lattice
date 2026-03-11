@@ -139,7 +139,7 @@ Translucent buttons that feel substantial yet light.
 ```svelte
 <script>
   import { GlassButton } from '@autumnsgrove/lattice/ui';
-  import { X } from 'lucide-svelte';
+  import { X } from '@lucide/svelte';
 </script>
 
 <!-- Basic button -->

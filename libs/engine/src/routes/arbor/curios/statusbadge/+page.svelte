@@ -3,7 +3,7 @@
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import GlassButton from "$lib/ui/components/ui/GlassButton.svelte";
 	import { toast } from "$lib/ui/components/ui/toast";
-	import { Shield, ArrowLeft, Trash2, Plus } from "lucide-svelte";
+	import { Shield, ArrowLeft, Trash2, Plus } from "@lucide/svelte";
 	import {
 		BADGE_DEFINITIONS,
 		BADGE_POSITION_OPTIONS,

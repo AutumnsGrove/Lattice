@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { Terrarium } from '@autumnsgrove/lattice/ui/terrarium';
-	import { Monitor, Smartphone } from 'lucide-svelte';
+	import { Monitor, Smartphone } from '@lucide/svelte';
 
 	// Check viewport width on mount
 	let isMobile = $state(false);

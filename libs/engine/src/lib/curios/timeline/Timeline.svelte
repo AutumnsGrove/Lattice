@@ -27,7 +27,7 @@
 		Cloud,
 		Loader2,
 		Flame,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import GlassButton from "$lib/ui/components/ui/GlassButton.svelte";
 	import Badge from "$lib/ui/components/ui/Badge.svelte";

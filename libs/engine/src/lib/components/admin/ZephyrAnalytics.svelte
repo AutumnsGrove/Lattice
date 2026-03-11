@@ -12,7 +12,7 @@
 		CheckCircle2,
 		XCircle,
 		Activity,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 
 	interface Broadcast {
 		id: string;

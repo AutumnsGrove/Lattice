@@ -25,7 +25,7 @@
 		Loader2,
 		X,
 		MapPin,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 
 	let { data, form } = $props();

@@ -28,7 +28,7 @@
 		Plus,
 		Users,
 		Amphora,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 
 	/**
 	 * @typedef {Object} DashboardStats

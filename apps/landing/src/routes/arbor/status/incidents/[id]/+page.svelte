@@ -2,7 +2,7 @@
 	import type { PageData } from './$types';
 	import { enhance } from '$app/forms';
 	import { GlassCard } from '@autumnsgrove/lattice/ui';
-	import { ArrowLeft, Clock, AlertCircle, CheckCircle2 } from 'lucide-svelte';
+	import { ArrowLeft, Clock, AlertCircle, CheckCircle2 } from '@lucide/svelte';
 
 	let { data }: { data: PageData } = $props();
 	let form = $state<{ error?: string; success?: boolean; resolved?: boolean } | null>(null);

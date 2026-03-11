@@ -10,7 +10,7 @@
 <script lang="ts">
 	import type { CodeExampleProps } from "../../types/index.js";
 	import type { Snippet } from "svelte";
-	import { Copy, Check, FileCode } from "lucide-svelte";
+	import { Copy, Check, FileCode } from "@lucide/svelte";
 
 	interface Props extends CodeExampleProps {
 		children: Snippet;

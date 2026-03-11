@@ -10,7 +10,7 @@
 		XCircle,
 		Leaf,
 		ArrowRight
-	} from 'lucide-svelte';
+	} from '@lucide/svelte';
 	import type { PageData, ActionData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();

@@ -3,7 +3,7 @@
  * Single source of truth for all icon usage.
  *
  * ✅ DO: Import icons from here in components
- * ❌ DON'T: Import directly from 'lucide-svelte'
+ * ❌ DON'T: Import directly from '@lucide/svelte'
  *
  * @example
  * ```svelte
@@ -245,7 +245,7 @@ import {
 	// Garden & Blooms icons
 	Flower,
 	Cherry,
-} from "lucide-svelte";
+} from "@lucide/svelte";
 
 // ============================================================================
 // NAVIGATION ICONS

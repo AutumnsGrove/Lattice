@@ -20,7 +20,7 @@
 
 	// Import types and utils
 	import { sanitizeErrorMessage } from "./utils";
-	import { KeyRound } from "lucide-svelte";
+	import { KeyRound } from "@lucide/svelte";
 	import type { TierKey } from "$lib/config/tiers";
 
 	let { data } = $props();

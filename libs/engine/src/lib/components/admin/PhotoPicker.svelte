@@ -2,7 +2,7 @@
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import { apiRequest } from "$lib/utils/api";
 	import { tick } from "svelte";
-	import { X, Check, Search, Images, Link, Plus } from "lucide-svelte";
+	import { X, Check, Search, Images, Link, Plus } from "@lucide/svelte";
 
 	/**
 	 * @typedef {Object} PickerImage

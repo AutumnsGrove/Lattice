@@ -80,7 +80,7 @@ Gallery (#19), Journey (#20), Timeline (#21), and Pulse (#22) were observed duri
 - [ ] **Hardcoded rgba colors**: Many components use `rgba(0,0,0,0.04)` / `rgba(255,255,255,0.06)` instead of theme-aware vars.
 - [ ] **Hardcoded `#4ade80`**: Hit counter, now playing, webring all use raw green hex instead of `rgb(var(--grove-500))`.
 - [ ] **No shared skeleton animation**: Each component has static gray rectangles. Could pulse/shimmer.
-- [ ] **lucide-svelte in admin pages**: Several admin pages import directly from lucide-svelte instead of engine icons.
+- [ ] **@lucide/svelte in admin pages**: Several admin pages import directly from @lucide/svelte instead of engine icons.
 - [ ] **No upload picker integration**: Badges, shrines, and cursors ask for external URLs — should have a "pick from Custom Uploads" button.
 - [ ] **Trail canvas not implemented**: Cursors config has trail effects but the canvas rendering is a no-op.
 

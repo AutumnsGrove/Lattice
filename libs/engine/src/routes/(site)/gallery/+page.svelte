@@ -5,7 +5,7 @@
 	import GlassOverlay from "$lib/ui/components/ui/GlassOverlay.svelte";
 	import Button from "$lib/ui/components/ui/Button.svelte";
 	import { getImageTitle } from "$lib/utils";
-	import { X, ChevronLeft, ChevronRight } from "lucide-svelte";
+	import { X, ChevronLeft, ChevronRight } from "@lucide/svelte";
 
 	let { data } = $props();
 

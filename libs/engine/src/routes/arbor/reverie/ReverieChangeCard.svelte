@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Spinner from "$lib/ui/components/ui/Spinner.svelte";
-	import { ChevronDown, ChevronUp, Check, X } from "lucide-svelte";
+	import { ChevronDown, ChevronUp, Check, X } from "@lucide/svelte";
 
 	interface ChangePreview {
 		domain: string;

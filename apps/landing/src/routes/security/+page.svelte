@@ -7,7 +7,7 @@
 	import Footer from "$lib/components/Footer.svelte";
 	import SEO from "$lib/components/SEO.svelte";
 	import { Logo } from "@autumnsgrove/lattice/ui/nature";
-	import { Shield, Mail, AlertTriangle, Clock, Lock, ChevronDown } from "lucide-svelte";
+	import { Shield, Mail, AlertTriangle, Clock, Lock, ChevronDown } from "@lucide/svelte";
 	import type { ActionData, PageData } from "./$types";
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();

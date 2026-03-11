@@ -13,7 +13,7 @@ Prism already owns color tokens for the entire Grove ecosystem. Icons are
 the natural companion — if Prism is "the light that splits into color,"
 icons are the shapes that light illuminates.
 
-**Today:** 384 files import directly from `lucide-svelte`. Two separate
+**Today:** 384 files import directly from `@lucide/svelte`. Two separate
 icon registries exist (Landing ~240 icons, Engine ~125 icons) with
 significant overlap but no shared source of truth. Domain-specific icon
 files (blazes, chrome, lantern, tenant-nav) each independently import
@@ -24,7 +24,7 @@ semantic names to icon components. Swapping packs = changing one file.
 
 ### Audit Results (March 2026)
 
-| Package | Files with bare `lucide-svelte` imports |
+| Package | Files with bare `@lucide/svelte` imports |
 |---------|----------------------------------------|
 | libs/engine | 283 |
 | apps/landing | 61 |
@@ -62,7 +62,7 @@ Prism stays zero-dependency at its core. The architecture splits into two layers
   │  Pure data: string constants, types, groupings
   │
   ▼
-@autumnsgrove/prism/icons/lucide   (depends lucide-svelte — the ADAPTER)
+@autumnsgrove/prism/icons/lucide   (depends @lucide/svelte — the ADAPTER)
      Resolves manifest names → actual Svelte components
      THE swap point: change this one file to change every icon
 ```
@@ -97,7 +97,7 @@ Rationale:
 {
   ".":              "./src/index.ts",          // existing (colors, glass, contrast)
   "./icons":        "./src/lib/icons/index.ts", // manifest + types (zero-dep)
-  "./icons/lucide": "./src/lib/icons/adapters/lucide.ts"  // adapter (lucide-svelte dep)
+  "./icons/lucide": "./src/lib/icons/adapters/lucide.ts"  // adapter (@lucide/svelte dep)
 }
 ```
 
@@ -121,7 +121,7 @@ libs/prism/src/
 ### Manifest Design
 
 The manifest maps **semantic aliases** (what Grove code uses) to
-**icon pack names** (what lucide-svelte exports). Groups are semantic,
+**icon pack names** (what @lucide/svelte exports). Groups are semantic,
 not organizational — they describe the icon's role, not where it's used.
 
 **Groups (flat — no sub-groups):**
@@ -269,11 +269,11 @@ from the manifest — one source of truth.
 
 ### Adapter Design
 
-The adapter file is the ONE place that imports from `lucide-svelte`.
+The adapter file is the ONE place that imports from `@lucide/svelte`.
 It reads the manifest, builds typed icon maps with Proxy-based forgiving
 lookups, and exports ONLY semantic maps — no individual icon re-exports.
 
-`lucide-svelte` is a **direct dependency** of `@autumnsgrove/prism`,
+`@lucide/svelte` is a **direct dependency** of `@autumnsgrove/prism`,
 not a peer dependency. This means only Prism itself needs lucide
 installed — consumers get icons through Prism and never touch lucide
 directly. Prism owns the entire icon pipeline end-to-end.
@@ -281,7 +281,7 @@ directly. Prism owns the entire icon pipeline end-to-end.
 ```ts
 // Conceptual — exact API designed during implementation
 import { ICON_MANIFEST, normalize } from '../manifest.js';
-import * as Lucide from 'lucide-svelte';
+import * as Lucide from '@lucide/svelte';
 
 // Each group is a Proxy that normalizes property access
 export const navIcons = resolveGroup(ICON_MANIFEST.nav);
@@ -310,7 +310,7 @@ export type NavIconKey = keyof typeof navIcons;
 **Before:**
 ```svelte
 <script>
-  import { Sprout, Check, Settings } from 'lucide-svelte';
+  import { Sprout, Check, Settings } from '@lucide/svelte';
 </script>
 ```
 
@@ -351,7 +351,7 @@ Consumers import semantic maps only:
 import { natureIcons, stateIcons } from '@autumnsgrove/prism/icons/lucide';
 ```
 
-The adapter file itself imports from `lucide-svelte` using named imports
+The adapter file itself imports from `@lucide/svelte` using named imports
 (not `import *`) to preserve tree-shaking.
 
 ### What About `@lucide/lab`?
@@ -381,7 +381,7 @@ Split into two sub-phases for separation of concerns.
   forgiving lookups, `getIcon()`, `getIconFromAll()`, and `resolveIcon()`
   (the safe boundary resolver)
 - Add subpath exports to `package.json`
-- Add `lucide-svelte` as **direct dependency** (not peer)
+- Add `@lucide/svelte` as **direct dependency** (not peer)
 - Write tests for normalizer (`checkCircle` = `CHECK_CIRCLE` = `check-circle`)
 - Write tests for Proxy-based map access
 - Write tests for `resolveIcon()` — valid keys, invalid keys, fallback
@@ -471,13 +471,13 @@ since all icon re-exports now come from Prism.
 Add enforcement to prevent regression:
 
 1. **Pre-commit hook check** — same pattern as the barrel import cascade check:
-   scan staged `.svelte` and `.ts` files for `from "lucide-svelte"` or
-   `from 'lucide-svelte'`. Only `libs/prism/src/lib/icons/adapters/lucide.ts`
+   scan staged `.svelte` and `.ts` files for `from "@lucide/svelte"` or
+   `from '@lucide/svelte'`. Only `libs/prism/src/lib/icons/adapters/lucide.ts`
    is whitelisted. Suppressible with `// lucide-ok` comment for edge cases.
 
 2. **Crane audit category** — add "Icon Gateway Compliance" as category 10
    in `.claude/skills/crane-audit/references/compliance-checks.md`:
-   - Flag: bare `lucide-svelte` imports in non-adapter files
+   - Flag: bare `@lucide/svelte` imports in non-adapter files
    - Flag: new icons added to components without adding to Prism manifest
    - Flag: `import *` from icon adapter (tree-shaking risk)
    - Add `@autumnsgrove/prism/icons/lucide` to the SDK Quick Reference table
@@ -499,7 +499,7 @@ Add enforcement to prevent regression:
    > When using icons, verify names against the Prism icon reference
    > (`.claude/references/prism-icon-reference.md`). Import from
    > `@autumnsgrove/prism/icons/lucide` semantic maps only — never
-   > from `lucide-svelte` directly.
+   > from `@lucide/svelte` directly.
 
 ### Phase 6: Cleanup
 
@@ -540,7 +540,7 @@ in use before Phase 1 (bridging) begins.
 
 ### Svelte 4/5 Compatibility
 
-Use the same `typeof import('lucide-svelte').Home` bridge pattern
+Use the same `typeof import('@lucide/svelte').Home` bridge pattern
 that `blazes/palette.ts` already uses. The adapter's type exports
 work in both Svelte 4 and Svelte 5 component contexts.
 
@@ -552,7 +552,7 @@ After full migration:
 
 ```bash
 # No bare lucide imports outside the adapter
-rg "from ['\"]lucide-svelte['\"]" --type ts --type svelte \
+rg "from ['\"]@lucide/svelte['\"]" --type ts --type svelte \
   | grep -v "libs/prism/src/lib/icons/adapters/"
 # Should return zero results
 
@@ -560,7 +560,7 @@ rg "from ['\"]lucide-svelte['\"]" --type ts --type svelte \
 gw ci
 
 # Pre-commit hook catches new bare imports
-echo "import { Home } from 'lucide-svelte';" > /tmp/test.ts
+echo "import { Home } from '@lucide/svelte';" > /tmp/test.ts
 # Hook should warn/block
 ```
 

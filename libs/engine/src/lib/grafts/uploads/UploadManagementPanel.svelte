@@ -19,7 +19,7 @@
 <script>
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import Button from "$lib/ui/components/ui/Button.svelte";
-	import { Upload, Users, CheckCircle, XCircle, ShieldCheck, Search } from "lucide-svelte";
+	import { Upload, Users, CheckCircle, XCircle, ShieldCheck, Search } from "@lucide/svelte";
 
 	/** @type {import('./types.js').UploadManagementPanelProps} */
 	let {

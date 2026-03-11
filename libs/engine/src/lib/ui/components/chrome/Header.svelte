@@ -4,7 +4,7 @@
 	import ThemeToggle from "./ThemeToggle.svelte";
 	import MobileMenu from "./MobileMenu.svelte";
 	import { seasonStore } from "../../stores/season.svelte";
-	import { Menu, Search, X, PanelLeftOpen } from "lucide-svelte";
+	import { Menu, Search, X, PanelLeftOpen } from "@lucide/svelte";
 	import type { NavItem, MaxWidth, FooterLink, HeaderUser } from "./types";
 	import type { Season } from "../../types/season";
 	import { isActivePath } from "./types";

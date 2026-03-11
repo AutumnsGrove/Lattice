@@ -18,7 +18,7 @@
 		Leaf,
 		Trees,
 		BookOpen
-	} from 'lucide-svelte';
+	} from '@lucide/svelte';
 </script>
 
 <SEO

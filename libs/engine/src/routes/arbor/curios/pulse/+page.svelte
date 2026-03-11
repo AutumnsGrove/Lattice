@@ -22,7 +22,7 @@
 		Globe,
 		Filter,
 		BarChart3,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 
 	const { data, form }: { data: PageData; form: ActionData } = $props();
 

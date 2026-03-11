@@ -17,8 +17,8 @@
 		X,
 		CheckCircle,
 		RefreshCw
-	} from 'lucide-svelte';
-	import type { ComponentType } from 'svelte';
+	} from '@lucide/svelte';
+	import type { Component } from 'svelte';
 
 	interface CdnFile {
 		id: string;
@@ -73,7 +73,7 @@
 	}
 
 	// File type icon mapping (replacing inline SVGs)
-	const fileTypeIcons: Record<string, ComponentType> = {
+	const fileTypeIcons: Record<string, Component<any>> = {
 		image: Image,
 		video: Video,
 		audio: Music,

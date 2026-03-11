@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { HelpCircle } from 'lucide-svelte';
+	import { HelpCircle } from '@lucide/svelte';
 	import { cn } from '$lib/ui/utils';
 	import WaystonePopup from './WaystonePopup.svelte';
 	import type { WaystoneExcerpt, WaystoneManifest } from './types';

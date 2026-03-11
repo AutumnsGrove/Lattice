@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { UserPlus, UserCheck, UserMinus } from "lucide-svelte";
+	import { UserPlus, UserCheck, UserMinus } from "@lucide/svelte";
 	import GlassButton from "$lib/ui/components/ui/GlassButton.svelte";
 	import { friendsStore } from "$lib/ui/stores/friends.svelte";
 	import { api } from "$lib/utils/api";

@@ -250,7 +250,7 @@ that map feature icon keys to Tailwind classes:
   rather than GlassCard — could be migrated for consistency, but it's an `<a>` link element
   with hover animations that GlassCard's `hoverable` prop could handle
 - **Vineyard `FeatureCard`** (`libs/vineyard/src/lib/components/vineyard/FeatureCard.svelte`)
-  uses `import * from 'lucide-svelte'` which defeats tree-shaking (~300KB) — the engine-side
+  uses `import * from '@lucide/svelte'` which defeats tree-shaking (~300KB) — the engine-side
   copy already has a safe explicit `iconMap`; vineyard should adopt the same pattern
 
 ---

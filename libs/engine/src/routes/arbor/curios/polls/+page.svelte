@@ -3,7 +3,7 @@
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import GlassButton from "$lib/ui/components/ui/GlassButton.svelte";
 	import { toast } from "$lib/ui/components/ui/toast";
-	import { BarChart3, ArrowLeft, Plus, Trash2, Copy, Archive } from "lucide-svelte";
+	import { BarChart3, ArrowLeft, Plus, Trash2, Copy, Archive } from "@lucide/svelte";
 	import {
 		POLL_TYPE_OPTIONS,
 		RESULTS_VISIBILITY_OPTIONS,

@@ -2,7 +2,7 @@
 	import type { PageData } from "./$types";
 	import { GlassCard } from "@autumnsgrove/lattice/ui";
 	import { formatRelativeTime } from "@autumnsgrove/lattice/utils";
-	import { Database, Info } from "lucide-svelte";
+	import { Database, Info } from "@lucide/svelte";
 
 	let { data }: { data: PageData } = $props();
 

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
-	import { Mail, Loader2, RefreshCw, Check, ArrowRight } from "lucide-svelte";
+	import { Mail, Loader2, RefreshCw, Check, ArrowRight } from "@lucide/svelte";
 	import { GlassCard } from "@autumnsgrove/lattice/ui";
 
 	let { data } = $props();
@@ -69,7 +69,7 @@
 		error = null;
 
 		try {
-			const res = await fetch("/api/verify-email", {
+			const res = await fetch("/api/verify-email", { // csrf-ok — SvelteKit server endpoint with built-in origin check
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ code }),
@@ -109,7 +109,7 @@
 		error = null;
 
 		try {
-			const res = await fetch("/api/verify-email/resend", {
+			const res = await fetch("/api/verify-email/resend", { // csrf-ok — SvelteKit server endpoint with built-in origin check
 				method: "POST",
 			});
 

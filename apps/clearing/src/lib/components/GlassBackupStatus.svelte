@@ -11,7 +11,7 @@
 	 */
 	import { cn } from "@autumnsgrove/lattice/ui/utils";
 	import type { BackupStatus } from "$lib/server/backups";
-	import { Shield, CheckCircle, AlertTriangle, Calendar, HardDrive } from "lucide-svelte";
+	import { Shield, CheckCircle, AlertTriangle, Calendar, HardDrive } from "@lucide/svelte";
 
 	interface Props {
 		backupStatus: BackupStatus;

@@ -19,7 +19,7 @@
 	import type { GreenhouseEnrollTableProps } from "./types.js";
 	import type { GreenhouseTenant } from "../../feature-flags/types.js";
 	import GreenhouseToggle from "./GreenhouseToggle.svelte";
-	import { Trash2, FileEdit, Sprout } from "lucide-svelte";
+	import { Trash2, FileEdit, Sprout } from "@lucide/svelte";
 
 	let {
 		tenants,

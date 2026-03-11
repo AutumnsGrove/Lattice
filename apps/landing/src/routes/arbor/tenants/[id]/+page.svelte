@@ -19,7 +19,7 @@
 		ExternalLink,
 		CheckCircle,
 		XCircle
-	} from 'lucide-svelte';
+	} from '@lucide/svelte';
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 

@@ -6,7 +6,7 @@
 	 */
 	import { cn } from '@autumnsgrove/lattice/ui/utils';
 	import type { ScheduledMaintenance, StatusComponent } from '$lib/types/status';
-	import { Calendar, Clock, Wrench } from 'lucide-svelte';
+	import { Calendar, Clock, Wrench } from '@lucide/svelte';
 
 	interface Props {
 		maintenance: ScheduledMaintenance;

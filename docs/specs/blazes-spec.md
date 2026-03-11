@@ -218,8 +218,8 @@ const BLAZE_CONFIG: Record<PostType, AutoBlazeConfig> = {
 
 **Why these icons:**
 
-- **Cherry** (`Cherry` from lucide-svelte). Already mapped in the Grove icon registry as "Blooms: individual pieces of writing." A cherry is a fruit of the tree, just as a bloom is a fruit of the garden.
-- **Feather** (`Feather` from lucide-svelte). Already in the registry for songbird features. Notes are described as "the smallest complete sound a bird can make." A feather is the lightest natural mark.
+- **Cherry** (`Cherry` from @lucide/svelte). Already mapped in the Grove icon registry as "Blooms: individual pieces of writing." A cherry is a fruit of the tree, just as a bloom is a fruit of the garden.
+- **Feather** (`Feather` from @lucide/svelte). Already in the registry for songbird features. Notes are described as "the smallest complete sound a bird can make." A feather is the lightest natural mark.
 
 ---
 

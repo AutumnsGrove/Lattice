@@ -7,7 +7,7 @@
 		CodeExample,
 		RoadmapSection
 	} from '$lib/vineyard';
-	import { Grape, Layout, CreditCard, Code, Lock, Map, Sparkles } from 'lucide-svelte';
+	import { Grape, Layout, CreditCard, Code, Lock, Map, Sparkles } from '@lucide/svelte';
 </script>
 
 <VineyardLayout tool="foliage" tagline="Where Grove tools bloom" status="preview">

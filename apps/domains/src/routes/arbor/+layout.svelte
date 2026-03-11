@@ -2,7 +2,7 @@
 	import type { LayoutData } from './$types';
 	import { page } from '$app/state';
 	import { AdminHeader } from '@autumnsgrove/lattice/ui/chrome';
-	import { LayoutDashboard, Search, Clock, Settings } from 'lucide-svelte';
+	import { LayoutDashboard, Search, Clock, Settings } from '@lucide/svelte';
 
 	let { data, children }: { data: LayoutData; children: any } = $props();
 

@@ -65,7 +65,7 @@ category: features
 - [ ] **No signing styles config** (which styles visitors can use)
 - [ ] **No color palette config**
 - [ ] **No CTA style selector**
-- [ ] **Uses lucide-svelte directly** (BookOpen, Shield)
+- [ ] **Uses @lucide/svelte directly** (BookOpen, Shield)
 
 **API** (5 endpoints):
 
@@ -246,7 +246,7 @@ Owner toggles which mode the inline widget uses.
 - [ ] **Inline widget mode toggle** (compact / styled mini-collage)
 - [ ] **Entry preview**: Show sample entries in each signing style within the admin
 - [ ] **Moderation enhancement**: Show entry style + color in the pending queue (so moderator sees what it'll look like)
-- [ ] **Migrate from lucide-svelte** to engine icons (BookOpen, Shield)
+- [ ] **Migrate from @lucide/svelte** to engine icons (BookOpen, Shield)
 
 ### Migration needs
 

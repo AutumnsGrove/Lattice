@@ -4,7 +4,7 @@
 	import SEO from '$lib/components/SEO.svelte';
 	import { Header, Footer, type NavItem } from '@autumnsgrove/lattice/ui/chrome';
 	import { seasonStore } from '@autumnsgrove/lattice/ui/stores';
-	import { Users, Heart, Calendar, Zap, Sprout, ArrowRight } from 'lucide-svelte';
+	import { Users, Heart, Calendar, Zap, Sprout, ArrowRight } from '@lucide/svelte';
 	import { defaultSuite, resolveIcon } from '@autumnsgrove/lattice/ui';
 
 	const groveIcon = resolveIcon(defaultSuite.grove.icon);

@@ -5,7 +5,7 @@
 	import { GroveTerm } from "@autumnsgrove/lattice/ui";
 	import SEO from "$lib/components/SEO.svelte";
 	import { Logo } from "@autumnsgrove/lattice/ui/nature";
-	import { Mail, ExternalLink, Heart, Compass, Shield } from "lucide-svelte";
+	import { Mail, ExternalLink, Heart, Compass, Shield } from "@lucide/svelte";
 
 	let { data } = $props();
 </script>

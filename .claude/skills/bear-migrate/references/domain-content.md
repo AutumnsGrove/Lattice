@@ -25,12 +25,12 @@ For icon/asset migrations, the git branch is your backup. For document format mi
 
 ```bash
 # Find all icon imports from the old library
-gf grep "from \"lucide-svelte\""
+gf grep "from \"@lucide/svelte\""
 gf grep "from \"@iconify"
 gf grep "from \"svelte-icons"
 
 # Count unique icons used
-gf grep "import.*from \"lucide-svelte\"" | sort -u
+gf grep "import.*from \"@lucide/svelte\"" | sort -u
 
 # Find dynamic icon usage (harder to migrate automatically)
 gf grep "Icon.*name={"
@@ -80,7 +80,7 @@ gf grep "{{.*}}" --include="*.md"          # Template syntax
 ```svelte
 <!-- Old: explicit icon import and rendering -->
 <script>
-  import { Cherry } from "lucide-svelte";
+  import { Cherry } from "@lucide/svelte";
 </script>
 <div class="card-header">
   <Cherry size={20} class="text-grove-500" />
@@ -154,7 +154,7 @@ done
 
 ```bash
 # Verify no old icon imports remain
-gf grep "from \"lucide-svelte\""
+gf grep "from \"@lucide/svelte\""
 # Should return 0 (or only intentionally kept usages)
 
 # Verify new icons resolve

@@ -2,7 +2,7 @@
 	import type { Snippet } from "svelte";
 	import { Dialog as DialogPrimitive } from "bits-ui";
 	import { cn } from "$lib/ui/utils";
-	import { FlaskConical, MessageSquare, ExternalLink } from "lucide-svelte";
+	import { FlaskConical, MessageSquare, ExternalLink } from "@lucide/svelte";
 	import Button from "./Button.svelte";
 	import GlassCard from "./GlassCard.svelte";
 	import { DialogOverlay } from "$lib/ui/components/primitives/dialog";

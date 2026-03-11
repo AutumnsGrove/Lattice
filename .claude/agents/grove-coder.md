@@ -47,7 +47,7 @@ import { cn } from "@autumnsgrove/lattice/ui/utils";
 import { GlassCard, GlassButton } from "@autumnsgrove/lattice/ui";
 import { Header, Footer, Logo } from "@autumnsgrove/lattice/ui/chrome";
 
-// Icons — ALWAYS from engine, never lucide-svelte directly
+// Icons — ALWAYS from engine, never @lucide/svelte directly
 import { ArrowRight, Check } from "@autumnsgrove/lattice/ui/icons";
 
 // Stores

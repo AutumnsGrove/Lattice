@@ -8,7 +8,7 @@
 
 	import type { TenantUploadSectionProps } from "./types.js";
 	import { GlassCard } from "../../ui/index.js";
-	import { Upload } from "lucide-svelte";
+	import { Upload } from "@lucide/svelte";
 
 	let {
 		suspended,

@@ -6,7 +6,7 @@
 	import SEO from '$lib/components/SEO.svelte';
 	import { Logo } from '@autumnsgrove/lattice/ui/nature';
 	import { enhance } from '$app/forms';
-	import { MailX, Check } from 'lucide-svelte';
+	import { MailX, Check } from '@lucide/svelte';
 
 	let { data, form } = $props();
 

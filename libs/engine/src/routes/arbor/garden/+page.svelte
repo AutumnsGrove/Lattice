@@ -8,7 +8,7 @@
 	import GroveSwap from "$lib/ui/components/ui/groveterm/GroveSwap.svelte";
 	import GroveIntro from "$lib/ui/components/ui/groveterm/GroveIntro.svelte";
 	import { api } from "$lib/utils";
-	import { Trash2, Sparkles } from "lucide-svelte";
+	import { Trash2, Sparkles } from "@lucide/svelte";
 	import { Blaze } from "$lib/ui/components/indicators";
 	import { resolveBlaze } from "$lib/blazes";
 

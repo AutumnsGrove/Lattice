@@ -2,7 +2,7 @@
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import Button from "$lib/ui/components/ui/Button.svelte";
 	import Spinner from "$lib/ui/components/ui/Spinner.svelte";
-	import { KeyRound, Plus, Trash2, Fingerprint, AlertCircle } from "lucide-svelte";
+	import { KeyRound, Plus, Trash2, Fingerprint, AlertCircle } from "@lucide/svelte";
 	import type { Passkey } from "$lib/heartwood";
 	import { formatDateShort } from "$lib/utils/date";
 

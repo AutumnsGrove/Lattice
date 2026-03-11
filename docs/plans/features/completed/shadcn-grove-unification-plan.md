@@ -379,7 +379,7 @@ export type { ClassValue } from "clsx";
 	import GlassCard from "./GlassCard.svelte";
 	import Button from "./Button.svelte";
 	import type { Snippet } from "svelte";
-	import { AlertTriangle, Trash2, HelpCircle } from "lucide-svelte";
+	import { AlertTriangle, Trash2, HelpCircle } from "@lucide/svelte";
 	import { cn } from "$lib/ui/utils";
 
 	type DialogVariant = "default" | "danger" | "warning";

@@ -4,7 +4,7 @@
 	import GlassButton from "$lib/ui/components/ui/GlassButton.svelte";
 	import Badge from "$lib/ui/components/ui/Badge.svelte";
 	import { toast } from "$lib/ui/components/ui/toast";
-	import { Heart, Plus, Trash2, Eye, EyeOff, Pencil, X, RotateCcw, Save } from "lucide-svelte";
+	import { Heart, Plus, Trash2, Eye, EyeOff, Pencil, X, RotateCcw, Save } from "@lucide/svelte";
 	import ShrineCanvas from "$lib/curios/shrines/ShrineCanvas.svelte";
 	import type { ShrineContentItem, ShrineSize, FrameStyle } from "$lib/curios/shrines";
 

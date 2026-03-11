@@ -6,7 +6,7 @@
   Internal component — not exported to consumers.
 -->
 <script lang="ts">
-	import { LogOut, HelpCircle, MessageCircle } from "lucide-svelte";
+	import { LogOut, HelpCircle, MessageCircle } from "@lucide/svelte";
 	import type { Snippet } from "svelte";
 	import type { ArborFooterLink } from "./types";
 

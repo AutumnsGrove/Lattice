@@ -9,7 +9,7 @@
 	import type { ArtifactDisplay } from "$lib/curios/artifacts";
 	import { getTypeLabel, summarizeConfig } from "$lib/curios/artifacts";
 	import ArtifactRenderer from "./ArtifactRenderer.svelte";
-	import { ChevronLeft, ChevronRight, X } from "lucide-svelte";
+	import { ChevronLeft, ChevronRight, X } from "@lucide/svelte";
 
 	let {
 		artifacts,

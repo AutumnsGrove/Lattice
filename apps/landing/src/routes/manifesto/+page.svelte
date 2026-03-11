@@ -19,7 +19,7 @@
 	} from '@autumnsgrove/lattice/ui/nature';
 
 	// Icon for solarpunk link
-	import { SolarPanel } from 'lucide-svelte';
+	import { SolarPanel } from '@lucide/svelte';
 </script>
 
 <SEO

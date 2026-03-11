@@ -5,7 +5,7 @@
 	 * Modal dialog for comparing growth stages and initiating cultivation.
 	 */
 
-	import { X, Sprout, RefreshCw, Settings } from "lucide-svelte";
+	import { X, Sprout, RefreshCw, Settings } from "@lucide/svelte";
 	import type { GardenModalProps } from "./types.js";
 	import type { TierKey } from "$lib/config/tiers";
 	import { transformAllTiers, type PricingTier, type BillingPeriod } from "$lib/grafts/pricing";

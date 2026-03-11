@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Share2, Check, Link } from "lucide-svelte";
+	import { Share2, Check, Link } from "@lucide/svelte";
 	import GlassButton from "$lib/ui/components/ui/GlassButton.svelte";
 	import { share } from "$lib/utils/share";
 

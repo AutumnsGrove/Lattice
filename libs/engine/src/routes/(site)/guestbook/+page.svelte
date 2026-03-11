@@ -2,7 +2,7 @@
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import GlassButton from "$lib/ui/components/ui/GlassButton.svelte";
 	import GuestbookEntryCollage from "$lib/curios/guestbook/GuestbookEntryCollage.svelte";
-	import { Send, BookOpen, ChevronDown, Loader2, Palette } from "lucide-svelte";
+	import { Send, BookOpen, ChevronDown, Loader2, Palette } from "@lucide/svelte";
 	import {
 		DEFAULT_COLOR_PALETTE,
 		GUESTBOOK_SIGNING_STYLES,

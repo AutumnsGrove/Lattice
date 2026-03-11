@@ -11,15 +11,15 @@
 		Plus,
 		Clock,
 		ChevronRight
-	} from 'lucide-svelte';
-	import type { ComponentType } from 'svelte';
+	} from '@lucide/svelte';
+	import type { Component } from 'svelte';
 
 	let { data }: { data: PageData } = $props();
 
 	// Status display config
 	const statusConfig: Record<
 		string,
-		{ label: string; color: string; bg: string; icon: ComponentType }
+		{ label: string; color: string; bg: string; icon: Component<any> }
 	> = {
 		operational: {
 			label: 'Operational',

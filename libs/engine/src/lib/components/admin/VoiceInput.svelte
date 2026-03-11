@@ -9,7 +9,7 @@
 	 * @fires error - When an error occurs { message: string }
 	 */
 
-	import { Mic, MicOff, Loader2 } from "lucide-svelte";
+	import { Mic, MicOff, Loader2 } from "@lucide/svelte";
 	import {
 		createScribeRecorder,
 		type ScribeRecorder,
@@ -165,7 +165,7 @@
 			// Get CSRF token for state-changing request
 			const csrfToken = getCSRFToken();
 
-			const response = await fetch("/api/lumen/transcribe", {
+			const response = await fetch("/api/lumen/transcribe", { // csrf-ok — manual CSRF token via getCSRFToken() above
 				method: "POST",
 				body: formData,
 				credentials: "include",

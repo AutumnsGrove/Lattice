@@ -13,7 +13,7 @@
 
 	import type { GreenhouseStatusCardProps } from "./types.js";
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
-	import { Sprout, Sparkles } from "lucide-svelte";
+	import { Sprout, Sparkles } from "@lucide/svelte";
 
 	let {
 		inGreenhouse,

@@ -2,8 +2,8 @@
 	import type { PageData } from "./$types";
 	import { enhance } from "$app/forms";
 	import { GlassCard, GroveSwap } from "@autumnsgrove/lattice/ui";
-	import { Smile, Frown, Meh, Mail, Globe, MessageCircle } from "lucide-svelte";
-	import type { ComponentType } from "svelte";
+	import { Smile, Frown, Meh, Mail, Globe, MessageCircle } from "@lucide/svelte";
+	import type { Component } from "svelte";
 
 	interface Feedback {
 		id: string;
@@ -57,7 +57,7 @@
 	}
 
 	// Sentiment icon mapping (replacing emojis)
-	const sentimentIcons: Record<string, ComponentType> = {
+	const sentimentIcons: Record<string, Component<any>> = {
 		positive: Smile,
 		negative: Frown,
 		neutral: Meh,
@@ -77,7 +77,7 @@
 	}
 
 	// Source icon mapping (replacing emojis)
-	const sourceIcons: Record<string, ComponentType> = {
+	const sourceIcons: Record<string, Component<any>> = {
 		email: Mail,
 		web: Globe,
 	};

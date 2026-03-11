@@ -22,7 +22,7 @@
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import Button from "$lib/ui/components/ui/Button.svelte";
 	import Waystone from "$lib/ui/components/ui/Waystone.svelte";
-	import { Sprout, RotateCcw, Sparkles, FlaskConical, Leaf } from "lucide-svelte";
+	import { Sprout, RotateCcw, Sparkles, FlaskConical, Leaf } from "@lucide/svelte";
 
 	let {
 		grafts,

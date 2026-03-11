@@ -290,7 +290,7 @@ Add to existing dashboard sidebar in `frontend/src/routes/dashboard/+layout.svel
 ```svelte
 <a href="/dashboard/flags" class="nav-item">
 	<Flag class="nav-icon" />
-	<!-- lucide-svelte -->
+	<!-- @lucide/svelte -->
 	<span>Feature Flags</span>
 </a>
 ```

@@ -31,7 +31,7 @@
 		Palette,
 		Search,
 		type Icon,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 
 	const iconMap: Record<string, typeof Icon> = {
 		HardDrive,

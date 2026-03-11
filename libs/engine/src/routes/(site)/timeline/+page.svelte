@@ -6,7 +6,7 @@
 	 * Uses the Timeline component from the curios library.
 	 */
 
-	import { Calendar } from "lucide-svelte";
+	import { Calendar } from "@lucide/svelte";
 	import { Timeline } from "$lib/curios/timeline";
 	import { toast } from "$lib/ui/components/ui/toast";
 

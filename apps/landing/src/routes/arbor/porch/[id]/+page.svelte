@@ -11,7 +11,7 @@
 		User,
 		Mail,
 		StickyNote,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 	import { toChatMessages, PORCH_ADMIN_ROLES } from "$lib/utils/porch";
 	import type { ActionData, PageData } from "./$types";
 

@@ -5,7 +5,7 @@
 -->
 <script lang="ts">
 	import { GlassCard, Badge } from '@autumnsgrove/lattice/ui';
-	import { CalendarDays } from 'lucide-svelte';
+	import { CalendarDays } from '@lucide/svelte';
 
 	const posts = [
 		{

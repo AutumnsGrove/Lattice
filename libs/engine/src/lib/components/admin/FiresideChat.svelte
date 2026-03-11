@@ -12,7 +12,7 @@
 	 * @fires close - When user exits Fireside mode without a draft
 	 */
 
-	import { Sparkles, ArrowLeft, Check, RotateCcw, X } from "lucide-svelte";
+	import { Sparkles, ArrowLeft, Check, RotateCcw, X } from "@lucide/svelte";
 	import GlassChat from "$lib/ui/components/ui/glasschat/GlassChat.svelte";
 	import { createAIChatController } from "$lib/ui/components/ui/glasschat/controller.svelte";
 	import type { ChatRoleMap } from "$lib/ui/components/ui/glasschat/types";

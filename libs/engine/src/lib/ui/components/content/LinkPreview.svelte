@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { cn } from "$lib/ui/utils";
 	import Icons from "../icons/Icons.svelte";
-	import { AlertCircle } from "lucide-svelte";
+	import { AlertCircle } from "@lucide/svelte";
 	import type { OGMetadata } from "$lib/types/og.js";
 
 	/**

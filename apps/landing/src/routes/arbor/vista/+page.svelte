@@ -13,7 +13,7 @@
 		Info,
 		RefreshCw,
 		Loader2,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 
 	let { data }: { data: PageData } = $props();
 

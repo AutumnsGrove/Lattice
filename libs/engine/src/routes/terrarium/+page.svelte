@@ -17,7 +17,7 @@
 -->
 
 <script lang="ts">
-	import { Monitor } from 'lucide-svelte';
+	import { Monitor } from '@lucide/svelte';
 	import Terrarium from '$lib/ui/components/terrarium/Terrarium.svelte';
 
 	let isMobileViewport = $state(false);

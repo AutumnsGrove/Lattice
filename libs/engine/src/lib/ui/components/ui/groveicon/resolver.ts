@@ -43,7 +43,7 @@ import {
 	// Additional service icons
 	Wind,
 	Store,
-} from "lucide-svelte";
+} from "@lucide/svelte";
 
 // These icons aren't in the engine's existing lucide.ts registry
 // but are used by services in the landing toolIcons map.
@@ -68,7 +68,7 @@ import {
 	Kayak,
 	Earth,
 	Flower,
-} from "lucide-svelte";
+} from "@lucide/svelte";
 
 import type { IconComponent } from "./types";
 

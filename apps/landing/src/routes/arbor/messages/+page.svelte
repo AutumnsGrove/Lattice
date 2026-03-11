@@ -14,7 +14,7 @@
 		AlertTriangle,
 		Sparkles,
 		PartyPopper
-	} from 'lucide-svelte';
+	} from '@lucide/svelte';
 
 	interface DbMessage {
 		id: string;

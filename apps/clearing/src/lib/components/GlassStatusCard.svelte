@@ -14,7 +14,7 @@
 		AlertCircle,
 		XCircle,
 		Wrench
-	} from 'lucide-svelte';
+	} from '@lucide/svelte';
 
 	interface Props {
 		name: string;

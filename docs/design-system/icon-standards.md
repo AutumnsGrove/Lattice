@@ -174,7 +174,7 @@ landing/
  * Centralized icon registry for Grove landing.
  * Single source of truth for all icon usage.
  *
- * Import this, never import lucide-svelte directly in components.
+ * Import this, never import @lucide/svelte directly in components.
  */
 
 import {
@@ -194,7 +194,7 @@ import {
   // Additional
   Clock, TrendingUp, TrendingDown, ArrowRight, Activity, Users, Shield,
   BarChart3, MessagesSquare as MessageSquare,
-} from 'lucide-svelte';
+} from '@lucide/svelte';
 
 // Navigation icon map
 export const navIcons = {
@@ -495,7 +495,7 @@ featureIconColor: 'text-amber-400'
 
 When updating a component to use centralized icons:
 
-- [ ] Remove all direct lucide-svelte imports
+- [ ] Remove all direct @lucide/svelte imports
 - [ ] Import from `$lib/utils/icons` instead
 - [ ] Update data structure to use string keys (lowercase)
 - [ ] Use `svelte:component` with icon map lookup

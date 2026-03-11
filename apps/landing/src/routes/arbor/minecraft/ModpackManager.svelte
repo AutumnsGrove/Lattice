@@ -16,7 +16,7 @@
 		Loader2,
 		FileBox,
 		X
-	} from 'lucide-svelte';
+	} from '@lucide/svelte';
 
 	interface Props {
 		serverRunning: boolean;

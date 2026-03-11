@@ -23,7 +23,7 @@
 		Clock,
 		LifeBuoy,
 		CalendarDays,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 	import type { TierIcon } from "../../config/tiers.js";
 
 	// Icon components for tier headers - defined at module level for performance

@@ -17,8 +17,8 @@
 		Droplets,
 		Snowflake,
 		ChevronDown
-	} from 'lucide-svelte';
-	import type { ComponentType } from 'svelte';
+	} from '@lucide/svelte';
+	import type { Component } from 'svelte';
 
 	interface Props {
 		onAssetSelect: (name: string, category: AssetCategory) => void;
@@ -29,7 +29,7 @@
 	// Define category metadata
 	interface CategoryMeta {
 		name: string;
-		icon: ComponentType;
+		icon: Component<any>;
 		assets: readonly string[];
 	}
 

@@ -7,7 +7,7 @@
 	 */
 
 	import { themeStore } from '$lib/ui/stores/theme.svelte';
-	import { Sun, Moon } from 'lucide-svelte';
+	import { Sun, Moon } from '@lucide/svelte';
 
 	// Derive button title from current theme
 	let title = $derived(

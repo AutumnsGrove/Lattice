@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ArrowLeft, UserPlus } from "lucide-svelte";
+	import { ArrowLeft, UserPlus } from "@lucide/svelte";
 	import { lanternStore } from "$lib/ui/stores/lantern.svelte";
 	import { friendsStore } from "$lib/ui/stores/friends.svelte";
 	import { api } from "$lib/utils/api";

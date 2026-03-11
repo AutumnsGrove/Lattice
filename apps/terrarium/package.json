@@ -28,6 +28,6 @@
   },
   "dependencies": {
     "@autumnsgrove/lattice": "workspace:*",
-    "lucide-svelte": "^0.554.0"
+    "@lucide/svelte": "^0.577.0"
   }
 }
