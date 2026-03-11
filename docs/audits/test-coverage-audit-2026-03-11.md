@@ -133,6 +133,21 @@ Still at zero. Unchanged from last audit. Sorted by risk.
 
 ---
 
+## Financial & Security-Critical Untested Code
+
+These files handle money or auth with zero test coverage:
+
+| File | Lines | Risk |
+|------|-------|------|
+| `apps/plant/src/routes/api/webhooks/stripe/+server.ts` | 547 | Processes ALL subscription changes |
+| `apps/plant/src/lib/server/stripe.ts` | 496 | Stripe integration — billing logic |
+| `apps/ivy/src/lib/crypto/index.ts` | 380 | Encryption logic for email forwarding |
+| `apps/domains/src/routes/auth/callback/+server.ts` | 206 | OAuth callback handler |
+| `apps/domains/src/hooks.server.ts` | 268 | First middleware layer for all requests |
+| `apps/plant/src/routes/auth/callback/+server.ts` | 406 | Auth callback for billing app |
+
+---
+
 ## Largest Untested Source Files
 
 Files with >500 lines that have no corresponding test file:
