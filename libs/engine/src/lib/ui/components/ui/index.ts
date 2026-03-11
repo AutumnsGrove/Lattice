@@ -55,6 +55,20 @@ export { default as ChatMessage } from "./glasschat/ChatMessage.svelte";
 export { default as ChatInput } from "./glasschat/ChatInput.svelte";
 export { default as ChatTypingIndicator } from "./glasschat/ChatTypingIndicator.svelte";
 export * from "./glasschat/types";
+export {
+	createChatMessage,
+	createChatController,
+	createAIChatController,
+	createConversationalChatController,
+} from "./glasschat/controller.svelte";
+export type {
+	ChatController,
+	AIChatController,
+	AIChatControllerOptions,
+	AIChatResponse,
+	ConversationalChatController,
+	ConversationalChatControllerOptions,
+} from "./glasschat/controller.svelte";
 
 export { default as Waystone } from "./Waystone.svelte";
 export { default as WaystonePopup } from "./waystone/WaystonePopup.svelte";

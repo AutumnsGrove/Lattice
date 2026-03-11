@@ -6,6 +6,19 @@
  * the component doesn't know or care about the domain.
  */
 
+/** Message delivery status for conversational (non-AI) chats. */
+export type ChatMessageStatus = "sending" | "sent" | "delivered" | "read";
+
+/** Sender identity for multi-participant chats. */
+export interface ChatSender {
+	/** Unique user identifier */
+	id: string;
+	/** Display name */
+	name: string;
+	/** Optional avatar URL */
+	avatar?: string;
+}
+
 /** A single chat message. */
 export interface ChatMessageData {
 	/** Unique identifier (e.g., crypto.randomUUID()) */
@@ -18,6 +31,10 @@ export interface ChatMessageData {
 	timestamp: string;
 	/** Consumer-specific extras (e.g., Reverie change previews, Porch attachments) */
 	metadata?: Record<string, unknown>;
+	/** Delivery status — used by conversational controllers for send/deliver/read tracking */
+	status?: ChatMessageStatus;
+	/** Sender identity — used by conversational controllers for multi-user chats */
+	sender?: ChatSender;
 }
 
 /** Rendering configuration for a single chat role. */
