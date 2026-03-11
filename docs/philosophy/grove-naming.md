@@ -403,6 +403,24 @@ Scribe is voice-to-text for Grove. Press and hold, speak your thoughts, and watc
 
 _Speak. The grove scribes._
 
+### Chirp
+
+**Two Robins on a Branch** · _Arbor feature_
+**Standard:** Direct Messages
+**Waystone:** Private 1:1 messaging — quick, real-time conversations with a friend.
+
+A chirp is the first sound you hear when you enter a grove. Short, bright, unmistakable—one bird calling to another. Not a song performed for an audience. Not an alarm raised for the whole forest. Just one robin turning to another and saying: _hey. I'm here. Are you there?_
+
+Chirp is Grove's direct messaging. Two Wanderers, one branch—a private, real-time exchange that lives inside Arbor. Send text, share images, see when they're typing, know when they've read it. Pull back a message before it lands. Each chirp is a small, bright thing: personal, immediate, gone as fast as a bird's call between the branches.
+
+Users are robins. Robins chirp. Your DMs were always going to be called this.
+
+> "I chirped you about that bloom."
+> "Check your chirps—I sent photos."
+> "We were chirping all night."
+
+_Two robins. One branch. Everything to say._
+
 ### Reeds
 
 **Comments System** · _Integrated into blogs_

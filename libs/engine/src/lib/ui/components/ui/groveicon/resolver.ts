@@ -16,6 +16,7 @@ import {
 	// Content & Community
 	Users,
 	MessageCircle,
+	MessageSquareDot,
 	// Media & Storage
 	HardDrive,
 	Sparkles,
@@ -25,6 +26,7 @@ import {
 	Leaf,
 	// Communication
 	Mail,
+	Cable,
 	// Safety
 	ShieldCheck,
 	// Infrastructure
@@ -57,7 +59,7 @@ import {
 	Vault,
 	PencilRuler,
 	Eclipse,
-	FerrisWheel,
+	Lamp,
 	LampCeiling,
 	Fan,
 	Blinds,
@@ -87,6 +89,7 @@ const ICON_COMPONENTS: Record<string, IconComponent> = {
 	// Content & Community
 	Users,
 	MessageCircle,
+	MessageSquareDot,
 	Amphora,
 	Frame,
 	// Media
@@ -97,12 +100,13 @@ const ICON_COMPONENTS: Record<string, IconComponent> = {
 	SwatchBook,
 	// AI
 	LampCeiling,
+	Lamp,
 	Eclipse,
-	FerrisWheel,
 	Leaf,
 	Wind,
 	// Communication
 	Mail,
+	Cable,
 	Send,
 	// Safety
 	ShieldCheck,

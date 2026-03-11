@@ -25,7 +25,8 @@ export const defaultSuite: GroveIconSuite = {
 
 	// ── Content & Community ────────────────────────────────────────
 	meadow: { icon: "Users", label: "Meadow" },
-	reeds: { icon: "MessageCircle", label: "Reeds" },
+	reeds: { icon: "MessageSquareDot", label: "Reeds" },
+	chirp: { icon: "MessageCircle", label: "Chirp" },
 	curio: { icon: "Amphora", label: "Curio" },
 	forests: { icon: "Trees", label: "Forests" },
 	museum: { icon: "Frame", label: "Museum" },
@@ -41,13 +42,13 @@ export const defaultSuite: GroveIconSuite = {
 	// ── AI & Intelligence ──────────────────────────────────────────
 	lumen: { icon: "LampCeiling", label: "Lumen" },
 	reverie: { icon: "Eclipse", label: "Reverie" },
-	lantern: { icon: "FerrisWheel", label: "Lantern" },
+	lantern: { icon: "Lamp", label: "Lantern" },
 	moss: { icon: "Leaf", label: "Moss" },
 	wisp: { icon: "Wind", label: "Wisp" },
 
 	// ── Communication ──────────────────────────────────────────────
 	ivy: { icon: "Mail", label: "Ivy" },
-	zephyr: { icon: "Send", label: "Zephyr" },
+	zephyr: { icon: "Cable", label: "Zephyr" },
 
 	// ── Safety & Moderation ────────────────────────────────────────
 	thorn: { icon: "ShieldCheck", label: "Thorn" },

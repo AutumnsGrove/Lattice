@@ -88,6 +88,7 @@ import {
 	// Pricing page icons
 	Globe,
 	MessageCircle,
+	MessageSquareDot,
 	CalendarDays,
 	TreeDeciduous,
 	Crown,
@@ -218,7 +219,7 @@ import {
 	// Reverie - AI composition layer
 	Eclipse,
 	// Lantern - cross-grove navigation
-	FerrisWheel,
+	Lamp,
 	// Greenhouse mode - internal testing
 	Warehouse,
 	// Burrow - cross-property access
@@ -240,6 +241,7 @@ import {
 	// Warden - external API gateway
 	Vault,
 	// Zephyr - email gateway
+	Cable,
 	Send,
 	RefreshCw,
 	// Garden & Blooms icons
@@ -462,7 +464,8 @@ export const toolIcons = {
 	layout: Layout, // Arbor - Pages
 	image: Image, // Arbor - Media
 	reply: Reply, // Reeds - Replies
-	messagecircle: MessageCircle, // Reeds - Comments
+	messagecircle: MessageCircle, // Chirp - DMs (was Reeds)
+	"message-square-dot": MessageSquareDot, // Reeds - Comments
 	bot: Bot, // Shade - Bot
 	bug: Bug, // Shade - Scraper
 	cpu: Cpu, // Vista - Workers
@@ -524,7 +527,7 @@ export const toolIcons = {
 	// Reverie - AI composition layer
 	eclipse: Eclipse, // Reverie - intent-to-configuration pipeline
 	// Lantern - cross-grove navigation
-	"ferris-wheel": FerrisWheel, // Lantern - lifts you up, shows you around, brings you back
+	lamp: Lamp, // Lantern - a light to guide you through the grove
 	// Moss - AI memory
 	leaf: Leaf, // Moss - persistent conversational memory
 	// Greenhouse mode - internal testing (Dave mode)
@@ -548,7 +551,8 @@ export const toolIcons = {
 	// Warden - external API gateway
 	vault: Vault, // Warden - credential vault for agents
 	// Zephyr - email gateway
-	send: Send, // Zephyr - email delivery (the gentle wind that carries)
+	cable: Cable, // Zephyr - email delivery infrastructure
+	send: Send, // Zephyr - send action (legacy)
 	"refresh-cw": RefreshCw, // Zephyr - retry with backoff
 	// Garden & Blooms - core terminology
 	flower: Flower, // Garden - collection of blooms

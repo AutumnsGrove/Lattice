@@ -592,6 +592,22 @@
 			description: "Writing, social features, and community tools",
 			tools: [
 				{
+					name: "Chirp",
+					termSlug: "chirp",
+					tagline: "Direct Messages",
+					description:
+						"Two robins on a branch. [[chirp|Chirp]] is Grove's private 1:1 messaging — quick, real-time conversations with a friend. Send text, share images, see when they're typing. Each chirp is a small, bright call from one robin to another.",
+					status: "building",
+					icon: "chirp",
+					integration: "Real-time messaging via Durable Objects, accessible from Arbor",
+					whatIsLink: "/knowledge/help/what-are-chirps",
+					subComponents: [
+						{ name: "Messages", icon: "messagecircle", description: "Real-time text & images" },
+						{ name: "Typing", icon: "loader", description: "Live typing indicators" },
+						{ name: "Read", icon: "eye", description: "Read receipts" },
+					],
+				},
+				{
 					name: "Reeds",
 					termSlug: "reeds",
 					tagline: "Comments System",
@@ -604,7 +620,7 @@
 					whatIsLink: "/knowledge/help/what-are-reeds",
 					subComponents: [
 						{ name: "Replies", icon: "reply", description: "Private to author" },
-						{ name: "Comments", icon: "messagecircle", description: "Public discussion" },
+						{ name: "Comments", icon: "message-square-dot", description: "Public discussion" },
 					],
 				},
 				{

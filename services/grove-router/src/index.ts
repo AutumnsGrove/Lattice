@@ -93,6 +93,7 @@ const SUBDOMAIN_ROUTES: Record<string, string | RouteTarget> = {
 	search: "grove-landing.m7jv4v7npb.workers.dev", // Search (coming soon)
 	porch: "grove-landing.m7jv4v7npb.workers.dev", // Porch conversations (coming soon)
 	canopy: "grove-landing.m7jv4v7npb.workers.dev", // Canopy directory (route-based at grove.place/canopy)
+	chirp: "grove-landing.m7jv4v7npb.workers.dev", // Chirp DMs (coming soon)
 
 	// Special handling
 	www: "REDIRECT", // Redirect to root
