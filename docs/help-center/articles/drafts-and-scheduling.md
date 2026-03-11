@@ -3,7 +3,7 @@ title: Drafts and Scheduling
 description: How to save drafts and schedule posts for later
 category: help
 section: writing-publishing
-lastUpdated: '2025-12-01'
+lastUpdated: '2026-03-11'
 keywords:
   - draft
   - drafts

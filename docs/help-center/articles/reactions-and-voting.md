@@ -3,7 +3,7 @@ title: Reactions and Voting
 description: Understanding emoji reactions and voting on posts
 category: help
 section: community-social
-lastUpdated: '2025-12-01'
+lastUpdated: '2026-03-11'
 keywords:
   - meadow
   - reactions
@@ -18,7 +18,7 @@ order: 3
 
 # Reactions and Voting in [[meadow|Meadow]]
 
-> **Coming in Full Bloom:** [[meadow|Meadow]] is launching as part of [[your-grove|Grove]]'s Full Bloom release. The features described below represent what's coming—not what's available today.
+> **Currently in beta.** [[meadow|Meadow]] is available to [[greenhouse|Greenhouse]] participants. It'll roll out to everyone once testing is complete.
 
 [[meadow|Meadow]] has two ways to engage with posts: voting and emoji reactions. Here's how they work.
 

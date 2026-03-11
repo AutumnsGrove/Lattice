@@ -3,7 +3,7 @@ title: Tags and Organization
 description: Using tags to organize your blog posts
 category: help
 section: writing-publishing
-lastUpdated: '2025-12-01'
+lastUpdated: '2026-03-11'
 keywords:
   - tags
   - categories
@@ -76,11 +76,16 @@ You can edit tags on any post anytime:
 
 Your changes take effect immediately.
 
-## What tags don't do (yet)
+## Browsing by tag
 
-A few things to know:
+Tags are clickable. When a reader taps a tag on one of your posts, they're taken to your blog's search page filtered to that tag. It's a quick way to explore everything you've written on a topic.
 
-- **No tag pages yet.** You can't click a tag and see all posts with that tag. This is on our roadmap.
+You can also link directly to a tag view: `yourblog.grove.place/garden/search?tag=recipes`
+
+## Good to know
+
+A few things about how tags work today:
+
 - **No tag suggestions.** You'll need to remember your own tags or keep them simple enough that consistency is easy.
 - **No limits.** You can add as many tags as you want, but more isn't better.
 

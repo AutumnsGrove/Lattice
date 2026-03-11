@@ -3,7 +3,7 @@ title: Opting Into the Feed
 description: How to share your posts on the Grove community feed
 category: help
 section: community-social
-lastUpdated: '2025-12-01'
+lastUpdated: '2026-03-11'
 keywords:
   - meadow
   - feed
@@ -18,7 +18,7 @@ order: 2
 
 # Sharing Posts to [[meadow|Meadow]]
 
-> **Coming in Full Bloom:** [[meadow|Meadow]] is launching as part of [[your-grove|Grove]]'s Full Bloom release. The features described below represent what's coming—not what's available today.
+> **Currently in beta.** [[meadow|Meadow]] is available to [[greenhouse|Greenhouse]] participants. It'll roll out to everyone once testing is complete.
 
 [[meadow|Meadow]] is [[your-grove|Grove]]'s community feed—a place where blog posts from across [[your-grove|Grove]] can be discovered, upvoted, and discussed. Sharing your posts there is entirely optional.
 

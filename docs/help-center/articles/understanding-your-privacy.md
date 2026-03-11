@@ -3,7 +3,7 @@ title: Understanding Your Privacy
 description: How Grove handles your data and privacy
 category: help
 section: privacy-security
-lastUpdated: '2025-12-01'
+lastUpdated: '2026-03-11'
 keywords:
   - privacy
   - data

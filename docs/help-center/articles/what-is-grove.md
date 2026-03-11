@@ -3,7 +3,7 @@ title: What is Grove?
 description: An introduction to Grove and what makes it different
 category: help
 section: getting-started
-lastUpdated: '2025-12-01'
+lastUpdated: '2026-03-11'
 keywords:
   - grove
   - about
