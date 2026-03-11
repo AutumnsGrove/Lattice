@@ -1,5 +1,5 @@
 # Grove User Blog robots.txt
-# Last updated: December 22, 2025
+# Last updated: March 11, 2026
 #
 # Grove blocks AI crawlers and training bots to protect user content.
 # We allow traditional search engines for discoverability.
@@ -302,6 +302,9 @@ User-agent: ChatGLM-Spider
 Disallow: /
 
 User-agent: Cloudflare-AutoRAG
+Disallow: /
+
+User-agent: Cloudflare-BrowserRendering
 Disallow: /
 
 User-agent: Cotoyogi
