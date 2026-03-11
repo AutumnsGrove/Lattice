@@ -100,7 +100,7 @@
 					tagline: "Domain Layer",
 					description:
 						"The living tree that grows on the Lattice. Database schemas, authentication, payments, curios, content moderation — everything that makes Grove a platform, not just a framework. Like an aspen grove, every tenant looks independent but shares a single root system underneath.",
-					status: "building",
+					status: "live",
 					icon: "treedeciduous",
 					integration: "Domain logic consumed by all Grove apps",
 					github: "https://github.com/AutumnsGrove/Lattice",
