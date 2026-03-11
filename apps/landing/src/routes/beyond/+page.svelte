@@ -1,24 +1,18 @@
 <script lang="ts">
-	import Header from '$lib/components/Header.svelte';
-	import Footer from '$lib/components/Footer.svelte';
-	import SEO from '$lib/components/SEO.svelte';
+	import Header from "$lib/components/Header.svelte";
+	import Footer from "$lib/components/Footer.svelte";
+	import SEO from "$lib/components/SEO.svelte";
 
 	let { data } = $props();
 
 	// Centralized icon registry - single source of truth for all icons
-	import { toolIcons, featureIcons, type ToolIconKey, stateIcons } from '$lib/utils/icons';
+	import { featureIcons, getToolIcon } from "$lib/utils/icons";
 
 	// Use centralized registry for social link icons
 	const Github = featureIcons.github;
 
-	// Type-safe icon getter for tools
-	function getToolIcon(icon: string | undefined) {
-		if (!icon) return stateIcons.circle;
-		return toolIcons[icon as ToolIconKey] ?? stateIcons.circle;
-	}
-
 	// Import nature assets from engine package
-	import { StarCluster, Moon } from '@autumnsgrove/lattice/ui/nature';
+	import { StarCluster, Moon } from "@autumnsgrove/lattice/ui/nature";
 
 	interface SubComponent {
 		name: string;
@@ -42,74 +36,100 @@
 	// Standalone tools - built for personal use, shared with the world
 	const tools: Tool[] = [
 		{
-			name: 'Shutter',
-			tagline: 'Web Content Distillation',
-			description: 'A shutter controls what reaches the lens. Hand it a URL and a question, and it opens briefly—just long enough to capture what you need—then closes, leaving the chaos outside. Your agents get clean, focused content instead of raw HTML noise. Token budgets stay sane. Prompt injection attempts never make it past the aperture.',
-			status: 'building',
-			icon: 'aperture',
-			domain: 'shutter.grove.place',
-			stack: 'Python + Cloudflare Workers',
-			github: 'https://github.com/AutumnsGrove/Shutter',
+			name: "Shutter",
+			tagline: "Web Content Distillation",
+			description:
+				"A shutter controls what reaches the lens. Hand it a URL and a question, and it opens briefly—just long enough to capture what you need—then closes, leaving the chaos outside. Your agents get clean, focused content instead of raw HTML noise. Token budgets stay sane. Prompt injection attempts never make it past the aperture.",
+			status: "building",
+			icon: "aperture",
+			domain: "shutter.grove.place",
+			stack: "Python + Cloudflare Workers",
+			github: "https://github.com/AutumnsGrove/Shutter",
 			subComponents: [
-				{ name: 'ZDR', icon: 'shredder', description: 'Zero data retention', href: '/knowledge/help/what-is-zdr' }
-			]
+				{
+					name: "ZDR",
+					icon: "shredder",
+					description: "Zero data retention",
+					href: "/knowledge/help/what-is-zdr",
+				},
+			],
 		},
 		{
-			name: 'Aria',
-			tagline: 'Music Curation',
-			description: 'Give Aria a song you love, and it builds a playlist of tracks that share the same musical DNA. Not just "similar artists" or genre tags, but actual sonic and emotional connections, with explanations for why each song belongs.',
-			status: 'paused',
-			icon: 'music',
-			domain: 'aria.grove.place',
-			stack: 'Python + SvelteKit',
-			github: 'https://github.com/AutumnsGrove/GroveMusic'
+			name: "Aria",
+			tagline: "Music Curation",
+			description:
+				'Give Aria a song you love, and it builds a playlist of tracks that share the same musical DNA. Not just "similar artists" or genre tags, but actual sonic and emotional connections, with explanations for why each song belongs.',
+			status: "paused",
+			icon: "music",
+			domain: "aria.grove.place",
+			stack: "Python + SvelteKit",
+			github: "https://github.com/AutumnsGrove/GroveMusic",
 		},
 		{
-			name: 'Trove',
-			tagline: 'Library Book Discovery',
-			description: 'Point your camera at a library shelf. Trove identifies the books, cross-references your reading history and tastes, and tells you which ones are worth your time—with visual markers showing exactly where they sit on the shelf.',
-			status: 'planned',
-			icon: 'scan-qr-code',
-			domain: 'trove.grove.place',
-			stack: 'Python + SvelteKit',
-			github: 'https://github.com/AutumnsGrove/TreasureTrove'
+			name: "Trove",
+			tagline: "Library Book Discovery",
+			description:
+				"Point your camera at a library shelf. Trove identifies the books, cross-references your reading history and tastes, and tells you which ones are worth your time—with visual markers showing exactly where they sit on the shelf.",
+			status: "planned",
+			icon: "scan-qr-code",
+			domain: "trove.grove.place",
+			stack: "Python + SvelteKit",
+			github: "https://github.com/AutumnsGrove/TreasureTrove",
 		},
 		{
-			name: 'The Daily Clearing',
-			tagline: 'Curated News',
-			description: 'Extremely curated newspapers delivered to your inbox. AI-powered research with skeptical analysis, cutting through the noise to surface what actually matters. Thorough, thoughtful, and refreshingly free of clickbait.',
-			status: 'building',
-			icon: 'newspaper',
-			domain: 'clearing.grove.place',
-			stack: 'Python + Cloudflare Workers',
-			github: 'https://github.com/AutumnsGrove/AgenticNewspaper',
+			name: "The Daily Clearing",
+			tagline: "Curated News",
+			description:
+				"Extremely curated newspapers delivered to your inbox. AI-powered research with skeptical analysis, cutting through the noise to surface what actually matters. Thorough, thoughtful, and refreshingly free of clickbait.",
+			status: "building",
+			icon: "newspaper",
+			domain: "clearing.grove.place",
+			stack: "Python + Cloudflare Workers",
+			github: "https://github.com/AutumnsGrove/AgenticNewspaper",
 			subComponents: [
-				{ name: 'Swarm', icon: 'bee', description: 'Agentic swarm', href: '/knowledge/help/what-is-swarm' }
-			]
+				{
+					name: "Swarm",
+					icon: "bee",
+					description: "Agentic swarm",
+					href: "/knowledge/help/what-is-swarm",
+				},
+			],
 		},
 		{
-			name: 'Scout',
-			tagline: 'Swarming Search',
-			description: 'Scout is an async shopping research tool that eliminates the cognitive overload of deal-hunting. Tell it what you want, walk away, and come back to a clean list of 5 perfect matches.',
-			status: 'building',
-			icon: 'shopping-basket',
-			domain: 'scout.grove.place',
-			stack: 'Python + TypeScript',
-			github: 'https://github.com/AutumnsGrove/GroveScout',
+			name: "Scout",
+			tagline: "Swarming Search",
+			description:
+				"Scout is an async shopping research tool that eliminates the cognitive overload of deal-hunting. Tell it what you want, walk away, and come back to a clean list of 5 perfect matches.",
+			status: "building",
+			icon: "shopping-basket",
+			domain: "scout.grove.place",
+			stack: "Python + TypeScript",
+			github: "https://github.com/AutumnsGrove/GroveScout",
 			subComponents: [
-				{ name: 'Swarm', icon: 'bee', description: 'Agentic swarm', href: '/knowledge/help/what-is-swarm' }
-			]
-		}
+				{
+					name: "Swarm",
+					icon: "bee",
+					description: "Agentic swarm",
+					href: "/knowledge/help/what-is-swarm",
+				},
+			],
+		},
 	];
 
 	function getStatusBadge(status: string) {
 		switch (status) {
-			case 'live': return { text: 'Live', class: 'bg-success-bg text-success-foreground' };
-			case 'building': return { text: 'Building', class: 'bg-accent-subtle text-accent' };
-			case 'planned': return { text: 'Planned', class: 'bg-surface-subtle text-foreground-muted' };
-			case 'early': return { text: 'Early Research', class: 'bg-accent-subtle text-accent' };
-			case 'paused': return { text: 'Paused', class: 'bg-warning-bg text-warning-foreground' };
-			default: return { text: status, class: 'bg-surface-subtle text-foreground-muted' };
+			case "live":
+				return { text: "Live", class: "bg-success-bg text-success-foreground" };
+			case "building":
+				return { text: "Building", class: "bg-accent-subtle text-accent" };
+			case "planned":
+				return { text: "Planned", class: "bg-surface-subtle text-foreground-muted" };
+			case "early":
+				return { text: "Early Research", class: "bg-accent-subtle text-accent" };
+			case "paused":
+				return { text: "Paused", class: "bg-warning-bg text-warning-foreground" };
+			default:
+				return { text: status, class: "bg-surface-subtle text-foreground-muted" };
 		}
 	}
 </script>
@@ -125,7 +145,9 @@
 	<Header user={data.user} />
 
 	<!-- Hero - Night sky theme -->
-	<section class="relative py-16 px-6 text-center overflow-hidden bg-gradient-to-b from-card via-accent-subtle to-surface">
+	<section
+		class="relative py-16 px-6 text-center overflow-hidden bg-gradient-to-b from-card via-accent-subtle to-surface"
+	>
 		<!-- Stars -->
 		<div class="absolute top-8 left-[10%]" aria-hidden="true">
 			<StarCluster class="w-20 h-20 opacity-60" />
@@ -146,17 +168,19 @@
 		</div>
 
 		<div class="max-w-3xl mx-auto relative z-10">
-			<a href="/roadmap" class="inline-flex items-center gap-2 text-sm text-foreground-subtle hover:text-white mb-6 transition-colors">
+			<a
+				href="/roadmap"
+				class="inline-flex items-center gap-2 text-sm text-foreground-subtle hover:text-white mb-6 transition-colors"
+			>
 				← Back to Roadmap
 			</a>
-			<h1 class="text-4xl md:text-5xl font-serif text-white mb-4">
-				Beyond the Grove
-			</h1>
+			<h1 class="text-4xl md:text-5xl font-serif text-white mb-4">Beyond the Grove</h1>
 			<p class="text-lg text-foreground-muted max-w-xl mx-auto">
 				Standalone tools built because they're needed. Self-hostable or hosted by Grove—your choice.
 			</p>
 			<p class="text-sm text-foreground-subtle mt-4">
-				These aren't part of the core Grove platform, but they share the same philosophy: useful, private, beautifully crafted.
+				These aren't part of the core Grove platform, but they share the same philosophy: useful,
+				private, beautifully crafted.
 			</p>
 		</div>
 	</section>
@@ -172,7 +196,9 @@
 					<article class="p-6 rounded-xl bg-surface-hover border border-border backdrop-blur-sm">
 						<div class="flex items-start justify-between mb-4">
 							<div class="flex items-center gap-3">
-								<div class="w-10 h-10 rounded-lg bg-accent-subtle flex items-center justify-center text-accent">
+								<div
+									class="w-10 h-10 rounded-lg bg-accent-subtle flex items-center justify-center text-accent"
+								>
 									<!-- Use centralized icon registry -->
 									<ToolIcon class="w-5 h-5" />
 								</div>
@@ -191,9 +217,11 @@
 								{#each tool.subComponents as sub}
 									{@const SubIcon = getToolIcon(sub.icon)}
 									<svelte:element
-										this={sub.href ? 'a' : 'span'}
+										this={sub.href ? "a" : "span"}
 										href={sub.href}
-										class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface-hover/50 text-xs text-foreground-subtle transition-colors {sub.href ? 'cursor-pointer hover:bg-accent-subtle hover:text-accent-foreground' : ''}"
+										class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface-hover/50 text-xs text-foreground-subtle transition-colors {sub.href
+											? 'cursor-pointer hover:bg-accent-subtle hover:text-accent-foreground'
+											: ''}"
 										title={sub.description}
 										role="listitem"
 										aria-label="{sub.name}{sub.description ? `: ${sub.description}` : ''}"
@@ -217,7 +245,8 @@
 									target="_blank"
 									rel="noopener noreferrer"
 									class="px-2 py-0.5 rounded bg-surface-hover text-foreground-muted hover:text-white hover:bg-surface-elevated transition-colors font-mono text-sm"
-								>{tool.domain}</a>
+									>{tool.domain}</a
+								>
 							</div>
 							<div class="flex items-center gap-2 text-sm">
 								<span class="text-foreground-subtle">Stack:</span>
@@ -226,7 +255,12 @@
 							{#if tool.github}
 								<div class="flex items-center gap-2 text-sm">
 									<Github class="w-4 h-4 text-foreground-subtle" />
-									<a href={tool.github} target="_blank" rel="noopener noreferrer" class="text-foreground-subtle hover:text-white transition-colors">
+									<a
+										href={tool.github}
+										target="_blank"
+										rel="noopener noreferrer"
+										class="text-foreground-subtle hover:text-white transition-colors"
+									>
 										GitHub Repository
 									</a>
 								</div>
@@ -240,7 +274,8 @@
 			<div class="text-center mt-12 p-8 rounded-xl bg-accent-subtle border border-border">
 				<h3 class="text-lg font-medium text-white mb-2">Open Source, Self-Hostable</h3>
 				<p class="text-foreground-subtle max-w-lg mx-auto">
-					All tools in "Beyond the Grove" will be open source. Run them yourself, or let Grove host them for a small fee. Your data, your choice.
+					All tools in "Beyond the Grove" will be open source. Run them yourself, or let Grove host
+					them for a small fee. Your data, your choice.
 				</p>
 			</div>
 		</div>
@@ -249,10 +284,16 @@
 	<!-- Links -->
 	<section class="py-8 px-6 bg-card border-t border-border">
 		<div class="max-w-4xl mx-auto flex flex-wrap justify-center gap-4">
-			<a href="/roadmap" class="px-4 py-2 rounded-lg bg-surface text-foreground-muted hover:text-white transition-colors">
+			<a
+				href="/roadmap"
+				class="px-4 py-2 rounded-lg bg-surface text-foreground-muted hover:text-white transition-colors"
+			>
 				← Main Roadmap
 			</a>
-			<a href="/workshop" class="px-4 py-2 rounded-lg bg-surface text-foreground-muted hover:text-white transition-colors">
+			<a
+				href="/workshop"
+				class="px-4 py-2 rounded-lg bg-surface text-foreground-muted hover:text-white transition-colors"
+			>
 				← The Workshop
 			</a>
 		</div>

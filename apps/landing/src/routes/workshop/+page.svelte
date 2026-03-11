@@ -7,26 +7,13 @@
 	let { data } = $props();
 
 	// Centralized icon registry - single source of truth for all icons
-	import {
-		toolIcons,
-		featureIcons,
-		contentIcons,
-		actionIcons,
-		type ToolIconKey,
-		stateIcons,
-	} from "$lib/utils/icons";
+	import { featureIcons, contentIcons, actionIcons, getToolIcon } from "$lib/utils/icons";
 
 	// Use centralized registry for spec/github link icons
 	const FileText = contentIcons.filetext;
 	const BookOpen = contentIcons.bookopen;
 	const Github = featureIcons.github;
 	const Lightbulb = actionIcons.lightbulb;
-
-	// Type-safe icon getter for tools
-	function getToolIcon(icon: string | undefined) {
-		if (!icon) return stateIcons.circle;
-		return toolIcons[icon as ToolIconKey] ?? stateIcons.circle;
-	}
 
 	// Import nature assets from engine package
 	import { Logo, Lantern } from "@autumnsgrove/lattice/ui/nature";
@@ -107,11 +94,36 @@
 					spec: "/knowledge/specs/lattice-split-spec",
 					whatIsLink: "/knowledge/help/what-is-aspen",
 					subComponents: [
-						{ name: "Heartwood", icon: "shieldcheck", description: "Authentication", href: "/knowledge/help/what-is-heartwood" },
-						{ name: "Curios", icon: "amphora", description: "Interactive widgets", href: "/knowledge/help/what-is-curios" },
-						{ name: "Lumen", icon: "lamp-ceiling", description: "AI gateway", href: "/knowledge/help/what-is-lumen" },
-						{ name: "Thorn", icon: "file-warning", description: "Content moderation", href: "/knowledge/help/what-is-thorn" },
-						{ name: "Warden", icon: "vault", description: "API gateway", href: "/knowledge/help/what-is-warden" },
+						{
+							name: "Heartwood",
+							icon: "shieldcheck",
+							description: "Authentication",
+							href: "/knowledge/help/what-is-heartwood",
+						},
+						{
+							name: "Curios",
+							icon: "amphora",
+							description: "Interactive widgets",
+							href: "/knowledge/help/what-is-curios",
+						},
+						{
+							name: "Lumen",
+							icon: "lamp-ceiling",
+							description: "AI gateway",
+							href: "/knowledge/help/what-is-lumen",
+						},
+						{
+							name: "Thorn",
+							icon: "file-warning",
+							description: "Content moderation",
+							href: "/knowledge/help/what-is-thorn",
+						},
+						{
+							name: "Warden",
+							icon: "vault",
+							description: "API gateway",
+							href: "/knowledge/help/what-is-warden",
+						},
 					],
 				},
 				{
@@ -121,7 +133,7 @@
 					description:
 						"One identity, verified and protected, that works across every Grove property. Passkeys are the primary method—secure, passwordless, and built into your device. Google OAuth available as a fallback when needed. The authentic core of the ecosystem.",
 					status: "live",
-					icon: "shieldcheck",
+					icon: "heartwood",
 					domain: "heartwood.grove.place",
 					integration: "Powers authentication for all Grove services",
 					github: "https://github.com/AutumnsGrove/GroveAuth",
@@ -146,7 +158,7 @@
 					description:
 						"A passage is a way through—a corridor connecting spaces that seem separate. Passage is the invisible layer that makes the impossible possible: one domain, infinite destinations. Type any *.grove.place address and Passage carries you through—navigating the river of subdomains to your destination like a kayak finding its channel.",
 					status: "live",
-					icon: "kayak",
+					icon: "passage",
 					integration: "Routes all *.grove.place subdomain traffic",
 					github: "https://github.com/AutumnsGrove/Lattice/tree/main/packages/grove-router",
 					spec: "/knowledge/specs/passage-spec",
@@ -172,7 +184,7 @@
 					description:
 						"A garden is where you tend what grows. It's the cultivated space within your grove where your blooms are planted, arranged, and displayed for visitors to wander through. Not a feed. Not a list. A garden you've tended, ready for someone to stroll through.",
 					status: "live",
-					icon: "flower",
+					icon: "garden",
 					domain: "{you}.grove.place/garden",
 					integration: "The home for all your writing",
 					spec: "/knowledge/specs/grove-garden-bloom-spec",
@@ -185,7 +197,7 @@
 					description:
 						"A bloom is a flower opening—a moment of expression, color, and beauty. It's what your grove produces. Every piece you write is a bloom. Something that grew from your thinking, opened when it was ready, and now stands in your garden for others to see.",
 					status: "live",
-					icon: "notebook-text",
+					icon: "bloom",
 					domain: "{you}.grove.place/garden/{slug}",
 					integration: "Individual pieces of writing in your garden",
 					spec: "/knowledge/specs/grove-garden-bloom-spec",
@@ -218,7 +230,7 @@
 					description:
 						"A clearing in the forest where you can see what's happening. Transparent, real-time communication about platform health. When something goes wrong or maintenance is planned, check the clearing to understand what's happening.",
 					status: "live",
-					icon: "activity",
+					icon: "clearing",
 					domain: "status.grove.place",
 					integration: "Public platform status for all Wanderers",
 					github: "https://github.com/AutumnsGrove/Clearing",
@@ -232,7 +244,7 @@
 					description:
 						"The structured framework where growth is tended. [[arbor|Arbor]] is your blog's control center—write posts, manage pages, upload images, configure settings. Simple, focused, and designed to get out of the way so you can write.",
 					status: "live",
-					icon: "dashboard",
+					icon: "arbor",
 					domain: "{you}.grove.place/arbor",
 					integration: "Built into every Grove blog",
 					spec: "/knowledge/specs/arbor-spec",
@@ -250,7 +262,7 @@
 					description:
 						"Where the current carries you. Flow is Grove's immersive Markdown editor—the space inside [[arbor|Arbor]] where words take shape. Three editor modes, zen mode for distraction-free writing, drag-and-drop images, and Fireside mode for writers who freeze at the blank page.",
 					status: "live",
-					icon: "drafting-compass",
+					icon: "flow",
 					integration: "Built into Arbor",
 					spec: "/knowledge/specs/flow-spec",
 					whatIsLink: "/knowledge/help/what-is-flow",
@@ -278,7 +290,7 @@
 					description:
 						"A reverie is that state between waking and dreaming, when something forms in your mind's eye. Tell Reverie what you want ('make it cozy', 'add something that glows') and it translates your intent into actual component arrangements for your blog. Not a drag-and-drop builder. A conversation with your space.",
 					status: "building",
-					icon: "eclipse",
+					icon: "reverie",
 					domain: "reverie.grove.place",
 					integration: "AI composition layer, accessible through Arbor and Lantern",
 					subComponents: [
@@ -303,7 +315,7 @@
 					description:
 						"Where new growth begins. Plant is Grove's onboarding system—the complete flow from signup through payment, interactive tour, and handoff to your own blog. A frictionless, welcoming experience that gets you publishing within minutes.",
 					status: "live",
-					icon: "landplot",
+					icon: "plant",
 					domain: "plant.grove.place",
 					integration: "Signup and onboarding for new Wanderers",
 					spec: "/knowledge/specs/plant-spec",
@@ -355,7 +367,7 @@
 					description:
 						"Your Grove storage, made visible. See what's using your space, download and export your data, clean up what you don't need, and buy more when you need it. Every file you upload, from blog images to email attachments, organized in one place.",
 					status: "building",
-					icon: "harddrive",
+					icon: "amber",
 					domain: "amber.grove.place",
 					integration: "Storage dashboard for all Wanderers",
 					github: "https://github.com/AutumnsGrove/Amber",
@@ -424,7 +436,7 @@
 					description:
 						"Visual customization for your blog—from accent colors to full theme control. Pick a curated theme or build your own. Make it warm, make it bold, make it yours. Your [[foliage|foliage]] is how the world sees your corner of the grove.",
 					status: "greenhouse",
-					icon: "swatchbook",
+					icon: "foliage",
 					integration: "Theme customization for all Grove blogs",
 					github: "https://github.com/AutumnsGrove/Foliage",
 					spec: "/knowledge/specs/foliage-project-spec",
@@ -442,7 +454,7 @@
 					description:
 						'Your personal cabinet of wonders. Guestbooks, shrines, hit counters, custom cursors, link gardens, under-construction badges—the curious little things that make visitors pause and smile. Not your theme, not the editor. The STUFF. The old-web-chaos-energy that says "someone lives here."',
 					status: "greenhouse",
-					icon: "amphora",
+					icon: "curio",
 					integration: "Visitor experience features for all Grove blogs",
 					spec: "/knowledge/specs/curios-spec",
 					whatIsLink: "/knowledge/help/what-are-curios",
@@ -469,7 +481,7 @@
 					description:
 						"A sealed world under glass—a miniature ecosystem you design, arrange, and watch grow. Drag nature components onto an open space, compose scenes from trees and creatures and flowers, then bring them home to your blog as decorations. Your terrarium becomes your [[foliage|foliage]].",
 					status: "greenhouse",
-					icon: "pencilruler",
+					icon: "terrarium",
 					domain: "terrarium.grove.place",
 					integration: "Creative tool for building blog decorations",
 					spec: "/knowledge/specs/terrarium-spec",
@@ -487,7 +499,7 @@
 					description:
 						"Weave your world together. A node-graph editor within Terrarium for creating animations (Breeze mode) and diagrams (Trace mode). Draw threads between assets, configure timing, watch chains of movement ripple through your scene. A lightweight Mermaid alternative with Grove's dark-mode-first aesthetic.",
 					status: "planned",
-					icon: "splinepointer",
+					icon: "weave",
 					integration: "Animation and diagram creation within Terrarium",
 					spec: "/knowledge/specs/weave-spec",
 					whatIsLink: "/knowledge/help/what-is-weave",
@@ -535,7 +547,7 @@
 					description:
 						"A lantern in the forest shows you what's around you, where you can go, and always the way back home. Lantern is the floating navigation panel on every grove. Hop between sites, visit friends, access platform services. It glows softly. It doesn't demand attention, but when you need it, it's there.",
 					status: "live",
-					icon: "ferris-wheel",
+					icon: "lantern",
 					integration: "Engine chrome component, loads on every site",
 					whatIsLink: "/knowledge/help/what-is-lantern",
 				},
@@ -545,7 +557,7 @@
 					description:
 						"A trace is what remains when something passes through. Thumbs up or down, right where you are. Quick impressions that help the [[wayfinder|Wayfinder]] see which paths are clear and which need tending.",
 					status: "live",
-					icon: "footprints",
+					icon: "trace",
 					integration: "Embedded in help articles, docs, and anywhere feedback matters",
 					spec: "/knowledge/specs/trace-spec",
 					whatIsLink: "/knowledge/help/what-are-traces",
@@ -586,7 +598,7 @@
 					description:
 						"Whisper together at the water's edge. [[reeds|Reeds]] is Grove's comment system, supporting both private replies (author-only) and public conversations. Thoughtful engagement flowing naturally beneath your posts.",
 					status: "live",
-					icon: "messagessquare",
+					icon: "reeds",
 					integration: "Comments and replies for Grove blogs",
 					spec: "/knowledge/specs/reeds-spec",
 					whatIsLink: "/knowledge/help/what-are-reeds",
@@ -619,7 +631,7 @@
 					description:
 						"Every rose has thorns for protection. Thorn is Grove's automated content moderation—privacy-first, context-aware, designed to protect without surveillance. AI-powered but never storing or training on your content.",
 					status: "live",
-					icon: "file-warning",
+					icon: "thorn",
 					integration: "Automated moderation for comments and community content",
 					spec: "/knowledge/specs/thorn-spec",
 					whatIsLink: "/knowledge/help/what-is-thorn",
@@ -646,7 +658,7 @@
 					description:
 						"Petals close to protect what's precious. Petal is Grove's image moderation system—four layers of protection for user photos and AI-generated images. CSAM detection, content classification, sanity checks, and output verification. Protection without surveillance.",
 					status: "greenhouse",
-					icon: "fan",
+					icon: "petal",
 					integration: "Image moderation for uploads and AI-generated content",
 					spec: "/knowledge/specs/petal-spec",
 					whatIsLink: "/knowledge/help/what-is-petal",
@@ -673,7 +685,7 @@
 					description:
 						"A helper, not a writer. And sometimes, a good listener. Wisp polishes your voice without replacing it: grammar checks, tone analysis, readability scores. Fireside mode helps writers who freeze at the blank page. Have a conversation, and your words get organized into a draft.",
 					status: "greenhouse",
-					icon: "wind",
+					icon: "wisp",
 					integration: "Integrated into the Grove editor, off by default",
 					spec: "/knowledge/specs/wisp-spec",
 					whatIsLink: "/knowledge/help/what-is-wisp",
@@ -706,7 +718,7 @@
 					description:
 						"Speak. The grove scribes. Voice-to-text for your blog—press and hold, say what you're thinking, watch your words appear. Raw mode gives you 1:1 transcription. Draft mode transforms rambling speech into structured posts with auto-generated Vines for your tangents.",
 					status: "greenhouse",
-					icon: "mic",
+					icon: "scribe",
 					integration: "Built into Flow mode in Arbor",
 					spec: "/knowledge/specs/scribe-voice-transcription-spec",
 					whatIsLink: "/knowledge/help/what-is-scribe",
@@ -752,7 +764,7 @@
 					description:
 						"Where voices gather. [[meadow|Meadow]] is Grove's opt-in community feed—share posts to a wider audience, discover other writers, vote and react with emojis. Connection without algorithms, community without surveillance.",
 					status: "greenhouse",
-					icon: "users",
+					icon: "meadow",
 					domain: "meadow.grove.place",
 					integration: "Optional social layer for Grove blogs",
 					spec: "/knowledge/specs/meadow-spec",
@@ -787,7 +799,7 @@
 					description:
 						'Many trees, one grove. Forests are themed community aggregators—places where like-minded folks gather. Join "The Prism" for LGBTQ+ community, "The Terminal" for developers, "The Kitchen" for food lovers. Take a stroll and discover kindred spirits among the trees.',
 					status: "planned",
-					icon: "trees",
+					icon: "forests",
 					domain: "{forest}.grove.place",
 					integration: "Community discovery for all Wanderers",
 					spec: "/knowledge/specs/forests-spec",
@@ -809,7 +821,7 @@
 					description:
 						"Step into the forest. A first-person walking experience through the Grove where other people's groves float among the trees as living terrariums. Complete with time of day, seasons, weather, and an immersive soundscape. Discovery through presence, not browsing.",
 					status: "planned",
-					icon: "earth",
+					icon: "wander",
 					domain: "wander.grove.place",
 					integration: "Immersive exploration mode for Forests",
 					spec: "/knowledge/specs/wander-spec",
@@ -835,7 +847,7 @@
 					description:
 						"An AI-powered domain hunting tool that turns weeks of frustrating searches into hours. Tell it about your project, your vibe, your budget, and it returns a curated list of available domains that actually fit. Powered exclusively by DeepSeek v3.2 via OpenRouter for zero-data-retention compliance.",
 					status: "live",
-					icon: "searchcode",
+					icon: "forage",
 					domain: "forage.grove.place",
 					integration: "Available as an add-on for Evergreen tier, or standalone purchase",
 					github: "https://github.com/AutumnsGrove/Forage",
@@ -896,7 +908,7 @@
 					description:
 						"A zero-knowledge email client for your @grove.place address. Client-side encryption means we can't read your mail. It's yours alone. Threaded conversations, rich text, attachments, and integration with your blog's contact forms.",
 					status: "building",
-					icon: "mailbox",
+					icon: "ivy",
 					domain: "ivy.grove.place",
 					integration: "Included with Oak and Evergreen tiers",
 					github: "https://github.com/AutumnsGrove/Ivy",
@@ -949,7 +961,7 @@
 					description:
 						"Spider silk stretched between branches—delicate threads nearly invisible until the light finds them. Gossamer is an open-source library for 2D Canvas ASCII art effects. Ambient textures, floating patterns, image transformations. The quality of light around your content.",
 					status: "building",
-					icon: "sparkles",
+					icon: "gossamer",
 					integration: "Open-source NPM package for any web project",
 					github: "https://github.com/AutumnsGrove/Gossamer",
 					spec: "/knowledge/specs/gossamer-spec",
@@ -980,7 +992,7 @@
 					description:
 						"Your externalized memory. Save any link, highlight any text, carve out what counts. Anything can go in, but you decide what it means. Tag it, plate it, score the passages that matter. Patient, permanent, yours.",
 					status: "planned",
-					icon: "highlighter",
+					icon: "etch",
 					domain: "etch.grove.place",
 					integration: "Available as a standalone tool for all Wanderers",
 					spec: "/knowledge/specs/etch-spec",
@@ -1004,7 +1016,7 @@
 					description:
 						"Writers own their words. Shade is Grove's seven-layer defense system against AI crawlers, scrapers, and automated data harvesting—protection that works in the background so writers can focus on writing.",
 					status: "live",
-					icon: "blinds",
+					icon: "shade",
 					domain: "grove.place/shade",
 					integration: "Automatic protection for all Grove blogs",
 					spec: "/knowledge/specs/shade-spec",
@@ -1065,7 +1077,7 @@
 					description:
 						"In anatomy, a lumen is the hollow center of a tube—the void through which everything flows. But lumen also means light. Lumen is Grove's unified AI gateway. Every AI request passes through this hollow center: moderation to LlamaGuard, generation to DeepSeek, images to Claude. One interface, intelligent routing, complete observability.",
 					status: "live",
-					icon: "lamp-ceiling",
+					icon: "lumen",
 					integration: "Internal AI routing for all Grove services",
 					spec: "/knowledge/specs/lumen-spec",
 					whatIsLink: "/knowledge/help/what-is-lumen",
@@ -1091,7 +1103,7 @@
 					description:
 						"Moss grows on the surfaces the forest touches most. It accumulates, layer by layer, until the forest floor is softened by what came before. Moss is Grove's per-user AI memory system. As Wanderers interact with AI agents, Moss stores structured facts, preferences, and context that carry across sessions. Entirely exportable. No vendor lock-in.",
 					status: "planned",
-					icon: "leaf",
+					icon: "moss",
 					integration: "Module inside Lumen, available to all AI services",
 					spec: "/knowledge/specs/moss-spec",
 					subComponents: [
@@ -1108,7 +1120,7 @@
 					description:
 						"In mythology, Zephyrus was the god of the west wind—the gentlest of the four winds, bringer of spring. Zephyr is Grove's unified email gateway. Every email from every service rides the same wind: onboarding sequences, payment notifications, support replies, verification codes. One interface, retries, fallbacks, complete observability.",
 					status: "live",
-					icon: "send",
+					icon: "zephyr",
 					integration: "Internal email delivery for all Grove services",
 					spec: "/knowledge/specs/zephyr-spec",
 					subComponents: [
@@ -1124,7 +1136,7 @@
 					description:
 						"A warden guards what matters. Warden is Grove's external API gateway for agent operations. When Claude needs to create a GitHub issue or search the web, the request goes through Warden. Agents describe what they need, Warden validates permissions, injects credentials, executes, and returns results. Keys never leave the vault.",
 					status: "live",
-					icon: "vault",
+					icon: "warden",
 					domain: "warden.grove.place",
 					integration: "Secure external API access for agents and workflows",
 					spec: "/knowledge/specs/warden-spec",
@@ -1153,7 +1165,7 @@
 					description:
 						"A clearing where the whole grove stretches out before you. Vista monitors every worker, database, and storage bucket—tracking health, latency, error rates, and costs. Real-time dashboards, email alerts, and ninety days of history.",
 					status: "live",
-					icon: "binoculars",
+					icon: "vista",
 					domain: "vista.grove.place",
 					integration: "Internal infrastructure monitoring for Grove operators",
 					github: "https://github.com/AutumnsGrove/GroveMonitor",
@@ -1189,7 +1201,7 @@
 					description:
 						"Light enters plain and emerges transformed. Prism defines Grove's visual language: glassmorphism surfaces, seasonal theming, randomized forests, and the warm aesthetic that makes every page feel like a place.",
 					status: "live",
-					icon: "triangle",
+					icon: "prism",
 					integration: "Visual foundation for all Grove properties",
 					spec: "/knowledge/patterns/prism-pattern",
 					whatIsLink: "/knowledge/help/what-is-prism",
@@ -1200,7 +1212,7 @@
 					description:
 						"The framework where Grove's threads come together. Loom coordinates auth, state, and real-time features using Cloudflare Durable Objects—the invisible structure that makes everything feel seamless.",
 					status: "live",
-					icon: "spool",
+					icon: "loom",
 					integration: "Architectural pattern for coordination and real-time",
 					spec: "/knowledge/patterns/loom-durable-objects-pattern",
 					whatIsLink: "/knowledge/help/what-is-loom",
@@ -1216,7 +1228,7 @@
 					description:
 						"The forest has boundaries. Threshold enforces them with four-layer rate limiting: Cloudflare edge protection, tenant fairness, user abuse detection, and endpoint-specific limits. Graduated response from warnings to blocks.",
 					status: "live",
-					icon: "gauge",
+					icon: "threshold",
 					integration: "Protection layer for all Grove endpoints",
 					spec: "/knowledge/patterns/threshold-pattern",
 					whatIsLink: "/knowledge/help/what-is-threshold",
@@ -1233,7 +1245,7 @@
 					description:
 						"A brief light in the darkness. Firefly defines Grove's pattern for ephemeral infrastructure—servers that spin up on demand, complete their work, and tear down automatically. Near-zero idle cost, sub-minute availability.",
 					status: "greenhouse",
-					icon: "webhook",
+					icon: "firefly",
 					integration: "Powers Verge and Outpost infrastructure",
 					spec: "/knowledge/patterns/firefly-pattern",
 					whatIsLink: "/knowledge/help/what-is-firefly",
