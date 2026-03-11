@@ -46,16 +46,29 @@ type SearchResult struct {
 	Score     float32 `json:"score"`
 }
 
-// IndexPath returns the path to the index file.
+// IndexPath returns the path to the code index file.
 func IndexPath() string {
+	return IndexPathFor("code")
+}
+
+// DocsIndexPath returns the path to the docs index file.
+func DocsIndexPath() string {
+	return IndexPathFor("docs")
+}
+
+// IndexPathFor returns the path to a named index file.
+func IndexPathFor(name string) string {
 	cfg := config.Get()
-	return filepath.Join(cfg.GroveRoot, ".grove", "gf-index.bin")
+	if name == "code" || name == "" {
+		return filepath.Join(cfg.GroveRoot, ".grove", "gf-index.bin")
+	}
+	return filepath.Join(cfg.GroveRoot, ".grove", "gf-index-"+name+".bin")
 }
 
 // BuildIndex walks the codebase, chunks files, embeds them, and writes the index.
 // The onProgress callback receives (chunksEmbedded, totalChunks) for UI updates.
-func BuildIndex(ctx context.Context, client *Client, onProgress func(done, total int)) (*Index, error) {
-	chunks, err := WalkAndChunk()
+func BuildIndex(ctx context.Context, client *Client, mode IndexMode, onProgress func(done, total int)) (*Index, error) {
+	chunks, err := WalkAndChunkMode(mode)
 	if err != nil {
 		return nil, fmt.Errorf("walk codebase: %w", err)
 	}
@@ -118,8 +131,8 @@ func BuildIndex(ctx context.Context, client *Client, onProgress func(done, total
 // RebuildIndex incrementally updates the index, only re-embedding chunks whose
 // source files have changed (based on mtime). Unchanged chunks carry forward
 // their existing vectors. This turns a 2-hour full rebuild into a seconds-long update.
-func RebuildIndex(ctx context.Context, client *Client, existing *Index, onStatus func(string), onProgress func(done, total int)) (*Index, error) {
-	chunks, err := WalkAndChunk()
+func RebuildIndex(ctx context.Context, client *Client, existing *Index, mode IndexMode, onStatus func(string), onProgress func(done, total int)) (*Index, error) {
+	chunks, err := WalkAndChunkMode(mode)
 	if err != nil {
 		return nil, fmt.Errorf("walk codebase: %w", err)
 	}
@@ -350,11 +363,18 @@ func (idx *Index) UpdateFile(ctx context.Context, client *Client, filePath strin
 	return len(chunks), nil
 }
 
-// SaveIndex writes the index to disk in binary format.
+// SaveIndex writes the code index to disk.
 func SaveIndex(idx *Index) error {
-	path := IndexPath()
+	return SaveIndexTo(IndexPath(), idx)
+}
 
-	// Ensure .grove directory exists
+// LoadIndex reads the code index from disk.
+func LoadIndex() (*Index, error) {
+	return LoadIndexFrom(IndexPath())
+}
+
+// SaveIndexTo writes an index to the given path.
+func SaveIndexTo(path string, idx *Index) error {
 	dir := filepath.Dir(path)
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return fmt.Errorf("create index dir: %w", err)
@@ -369,10 +389,8 @@ func SaveIndex(idx *Index) error {
 	return writeIndex(f, idx)
 }
 
-// LoadIndex reads the index from disk.
-func LoadIndex() (*Index, error) {
-	path := IndexPath()
-
+// LoadIndexFrom reads an index from the given path.
+func LoadIndexFrom(path string) (*Index, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		if os.IsNotExist(err) {

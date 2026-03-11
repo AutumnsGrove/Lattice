@@ -28,7 +28,28 @@ type Chunk struct {
 	Snippet   string // first SnippetLen chars of raw content for display
 }
 
-// indexedExtensions lists file extensions we index.
+// IndexMode controls which file types get chunked.
+type IndexMode int
+
+const (
+	IndexAll  IndexMode = iota // code + docs (legacy default)
+	IndexCode                  // code files only
+	IndexDocs                  // documentation only (.md)
+)
+
+// codeExtensions are the file types indexed for the code index.
+var codeExtensions = map[string]bool{
+	".ts": true, ".svelte": true, ".js": true, ".go": true,
+	".json": true, ".yaml": true, ".yml": true,
+	".css": true, ".html": true, ".py": true, ".rs": true,
+}
+
+// docsExtensions are the file types indexed for the docs index.
+var docsExtensions = map[string]bool{
+	".md": true,
+}
+
+// indexedExtensions lists all file extensions we index (union of code + docs).
 var indexedExtensions = map[string]bool{
 	".ts": true, ".svelte": true, ".js": true, ".go": true,
 	".md": true, ".json": true, ".yaml": true, ".yml": true,
@@ -60,7 +81,13 @@ var maxSizeByExt = map[string]int{
 }
 
 // WalkAndChunk walks the codebase and returns chunks for all indexable files.
+// Deprecated: use WalkAndChunkMode instead.
 func WalkAndChunk() ([]Chunk, error) {
+	return WalkAndChunkMode(IndexAll)
+}
+
+// WalkAndChunkMode walks the codebase and returns chunks filtered by mode.
+func WalkAndChunkMode(mode IndexMode) ([]Chunk, error) {
 	cfg := config.Get()
 	root := cfg.GroveRoot
 
@@ -86,10 +113,21 @@ func WalkAndChunk() ([]Chunk, error) {
 			return nil
 		}
 
-		// Skip non-indexed extensions
+		// Skip non-indexed extensions based on mode
 		ext := strings.ToLower(filepath.Ext(name))
-		if !indexedExtensions[ext] {
-			return nil
+		switch mode {
+		case IndexCode:
+			if !codeExtensions[ext] {
+				return nil
+			}
+		case IndexDocs:
+			if !docsExtensions[ext] {
+				return nil
+			}
+		default:
+			if !indexedExtensions[ext] {
+				return nil
+			}
 		}
 
 		// Skip specific filenames

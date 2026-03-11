@@ -26,6 +26,9 @@ var (
 	askFlagRemoveFile  string
 	askFlagScope       string
 	askFlagType        string
+	askFlagTier        string
+	askFlagDocs        bool
+	askFlagAll         bool
 )
 
 var askCmd = &cobra.Command{
@@ -111,19 +114,7 @@ Examples:
 		// Load vector index (if available and not skipped)
 		var idx *nlp.Index
 		if !askFlagNoVectors {
-			loaded, err := nlp.LoadIndex()
-			if err != nil {
-				onStatus(fmt.Sprintf("Warning: could not load index: %v", err))
-			} else if loaded == nil {
-				if !cfg.JSONMode {
-					onStatus("No vector index found. Run `gf ask --index` for faster, smarter search.")
-				}
-			} else {
-				idx = loaded
-				if !cfg.JSONMode {
-					onStatus(fmt.Sprintf("Loaded index: %d chunks, %d dimensions", len(idx.Entries), idx.Dimensions))
-				}
-			}
+			idx = loadSearchIndex(cfg, askFlagDocs, askFlagAll, onStatus)
 		}
 
 		// Run the agentic loop
@@ -177,6 +168,9 @@ func init() {
 	askCmd.Flags().StringVar(&askFlagRemoveFile, "remove-file", "", "Remove a file from the index")
 	askCmd.Flags().StringVar(&askFlagScope, "scope", "", "Limit search to a path prefix (e.g. libs/engine)")
 	askCmd.Flags().StringVar(&askFlagType, "type", "", "Limit search to a file extension (e.g. ts, svelte, go)")
+	askCmd.Flags().StringVar(&askFlagTier, "tier", "", "Embedding model tier: tiny, small, full (default: full)")
+	askCmd.Flags().BoolVar(&askFlagDocs, "docs", false, "Index/search documentation (.md) instead of code")
+	askCmd.Flags().BoolVar(&askFlagAll, "all", false, "Search both code and docs indexes")
 }
 
 func renderJSON(query string, result *nlp.AgentResult) error {
@@ -306,29 +300,50 @@ func runIndexBuild(ctx context.Context, cfg *config.Config, incremental bool) er
 		}
 	}
 
+	// Determine index mode and model from flags
+	mode := nlp.IndexCode
+	indexName := "code"
+	embedModel := cfg.EmbedModel
+
+	if askFlagDocs {
+		mode = nlp.IndexDocs
+		indexName = "docs"
+		embedModel = nlp.ResolveModel(nlp.DocsTier, cfg.EmbedModel)
+		onStatus("Indexing documentation (.md files)...")
+	} else if askFlagTier != "" {
+		// Validate tier
+		if _, ok := nlp.Tiers[askFlagTier]; !ok {
+			return fmt.Errorf("unknown tier %q — use: tiny, small, full", askFlagTier)
+		}
+		embedModel = nlp.ResolveModel(askFlagTier, cfg.EmbedModel)
+		tier := nlp.Tiers[askFlagTier]
+		onStatus(fmt.Sprintf("Using tier %q: %s (%s)", askFlagTier, tier.Model, tier.Desc))
+	}
+
+	indexPath := nlp.IndexPathFor(indexName)
+
 	if !cfg.JSONMode {
 		if incremental {
-			onStatus("Updating vector index...")
+			onStatus(fmt.Sprintf("Updating %s index...", indexName))
 		} else {
-			onStatus("Building vector index...")
+			onStatus(fmt.Sprintf("Building %s index with model %s...", indexName, embedModel))
 		}
 	}
 
-	// Ensure LM Studio is running with the embedding model
+	// Ensure LM Studio is running
 	client, err := nlp.EnsureServer(ctx, !askFlagNoAutostart, onStatus)
 	if err != nil {
 		return err
 	}
+	_ = client
 
-	// Create an embed-capable client
+	// Create an embed-capable client with the resolved model
 	embedClient := nlp.NewClientWithEmbed(
 		cfg.LLMEndpoint,
 		cfg.LLMModel,
-		cfg.EmbedModel,
+		embedModel,
 		time.Duration(cfg.LLMTimeout)*time.Second,
 	)
-	// Copy health state from the ensured client
-	_ = client
 
 	// Progress callback for embedding — fires after each batch
 	embedStart := time.Now()
@@ -357,7 +372,7 @@ func runIndexBuild(ctx context.Context, cfg *config.Config, incremental bool) er
 	var idx *nlp.Index
 	if incremental {
 		// Load existing index and only re-embed changed files
-		existing, err := nlp.LoadIndex()
+		existing, err := nlp.LoadIndexFrom(indexPath)
 		if err != nil {
 			onStatus(fmt.Sprintf("Warning: could not load existing index: %v", err))
 		}
@@ -365,20 +380,20 @@ func runIndexBuild(ctx context.Context, cfg *config.Config, incremental bool) er
 			onStatus("No existing index found, building from scratch...")
 		}
 		embedStart = time.Now()
-		idx, err = nlp.RebuildIndex(ctx, embedClient, existing, onStatus, onProgress)
+		idx, err = nlp.RebuildIndex(ctx, embedClient, existing, mode, onStatus, onProgress)
 		if err != nil {
 			return fmt.Errorf("rebuild index: %w", err)
 		}
 	} else {
 		// Full build from scratch
 		onStatus("Scanning files...")
-		chunks, err := nlp.WalkAndChunk()
+		chunks, err := nlp.WalkAndChunkMode(mode)
 		if err != nil {
 			return fmt.Errorf("scan codebase: %w", err)
 		}
 		onStatus(fmt.Sprintf("Found %d files, %d chunks", countUniqueFiles(chunks), len(chunks)))
 		embedStart = time.Now()
-		idx, err = nlp.BuildIndex(ctx, embedClient, onProgress)
+		idx, err = nlp.BuildIndex(ctx, embedClient, mode, onProgress)
 		if err != nil {
 			return fmt.Errorf("build index: %w", err)
 		}
@@ -388,12 +403,11 @@ func runIndexBuild(ctx context.Context, cfg *config.Config, incremental bool) er
 		fmt.Fprintln(os.Stderr) // newline after progress
 	}
 
-	// Save
-	if err := nlp.SaveIndex(idx); err != nil {
+	// Save to the correct index path
+	if err := nlp.SaveIndexTo(indexPath, idx); err != nil {
 		return fmt.Errorf("save index: %w", err)
 	}
 
-	indexPath := nlp.IndexPath()
 	info, _ := os.Stat(indexPath)
 	sizeMB := float64(0)
 	if info != nil {
@@ -404,6 +418,7 @@ func runIndexBuild(ctx context.Context, cfg *config.Config, incremental bool) er
 		output.PrintJSON(map[string]any{
 			"command":    "ask",
 			"action":     "index",
+			"index":      indexName,
 			"chunks":     len(idx.Entries),
 			"dimensions": idx.Dimensions,
 			"model":      idx.EmbedModel,
@@ -471,6 +486,76 @@ func runIndexMutate(ctx context.Context, cfg *config.Config) error {
 	}
 
 	return nil
+}
+
+// loadSearchIndex loads the appropriate index(es) for the search flags.
+// --docs loads the docs index, --all merges both, default loads the code index.
+func loadSearchIndex(cfg *config.Config, docs, all bool, onStatus func(string)) *nlp.Index {
+	loadOne := func(name string) *nlp.Index {
+		path := nlp.IndexPathFor(name)
+		loaded, err := nlp.LoadIndexFrom(path)
+		if err != nil {
+			onStatus(fmt.Sprintf("Warning: could not load %s index: %v", name, err))
+			return nil
+		}
+		if loaded == nil {
+			return nil
+		}
+		if !cfg.JSONMode {
+			onStatus(fmt.Sprintf("Loaded %s index: %d chunks, %d dimensions", name, len(loaded.Entries), loaded.Dimensions))
+		}
+		return loaded
+	}
+
+	if docs && !all {
+		idx := loadOne("docs")
+		if idx == nil && !cfg.JSONMode {
+			onStatus("No docs index found. Run `gf ask --index --docs` to build it.")
+		}
+		return idx
+	}
+
+	if all {
+		codeIdx := loadOne("code")
+		docsIdx := loadOne("docs")
+
+		if codeIdx == nil && docsIdx == nil {
+			if !cfg.JSONMode {
+				onStatus("No indexes found. Run `gf ask --index` and `gf ask --index --docs` to build them.")
+			}
+			return nil
+		}
+		if codeIdx == nil {
+			return docsIdx
+		}
+		if docsIdx == nil {
+			return codeIdx
+		}
+
+		// Merge: append docs entries to code index.
+		// If dimensions differ, keep them separate — QueryIndex handles mixed dims
+		// by checking cosine similarity (mismatched dims return 0).
+		// For same-model indexes this is a clean merge.
+		merged := &nlp.Index{
+			Dimensions: codeIdx.Dimensions,
+			EmbedModel: codeIdx.EmbedModel,
+			Entries:    make([]nlp.IndexEntry, 0, len(codeIdx.Entries)+len(docsIdx.Entries)),
+		}
+		merged.Entries = append(merged.Entries, codeIdx.Entries...)
+		merged.Entries = append(merged.Entries, docsIdx.Entries...)
+		if !cfg.JSONMode {
+			onStatus(fmt.Sprintf("Merged: %d total chunks (%d code + %d docs)",
+				len(merged.Entries), len(codeIdx.Entries), len(docsIdx.Entries)))
+		}
+		return merged
+	}
+
+	// Default: code index
+	idx := loadOne("code")
+	if idx == nil && !cfg.JSONMode {
+		onStatus("No vector index found. Run `gf ask --index` for faster, smarter search.")
+	}
+	return idx
 }
 
 // isInFileList checks if a line matches one of the extracted file paths.

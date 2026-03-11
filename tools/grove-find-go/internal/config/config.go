@@ -20,7 +20,7 @@ type Config struct {
 	// LLM config for gf ask
 	LLMEndpoint string // env: GF_LLM_ENDPOINT, default: http://localhost:1234/v1
 	LLMModel    string // env: GF_LLM_MODEL,    default: liquid/lfm2.5-1.2b
-	EmbedModel  string // env: GF_EMBED_MODEL,  default: jina-code-embeddings-0.5b
+	EmbedModel  string // env: GF_EMBED_MODEL,  default: text-embedding-jina-code-embeddings-0.5b
 	LLMTimeout  int    // env: GF_LLM_TIMEOUT,  default: 30 (seconds per request)
 }
 
@@ -61,7 +61,7 @@ func Init(root string, agent, jsonMode, verbose, noPager bool, pageThreshold int
 	// LLM config (for gf ask)
 	cfg.LLMEndpoint = envOrDefault("GF_LLM_ENDPOINT", "http://localhost:1234/v1")
 	cfg.LLMModel = envOrDefault("GF_LLM_MODEL", "liquid/lfm2.5-1.2b")
-	cfg.EmbedModel = envOrDefault("GF_EMBED_MODEL", "jina-code-embeddings-0.5b")
+	cfg.EmbedModel = envOrDefault("GF_EMBED_MODEL", "text-embedding-jina-code-embeddings-0.5b")
 	cfg.LLMTimeout = envIntOrDefault("GF_LLM_TIMEOUT", 30)
 
 	return cfg
