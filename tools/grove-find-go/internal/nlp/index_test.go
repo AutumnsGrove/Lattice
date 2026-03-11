@@ -61,7 +61,7 @@ func TestQueryIndex_TopN(t *testing.T) {
 	}
 
 	query := []float32{1.0, 0.0, 0.0}
-	results := QueryIndex(idx, query, 2)
+	results := QueryIndex(idx, query, 2, nil)
 
 	if len(results) != 2 {
 		t.Fatalf("expected 2 results, got %d", len(results))
@@ -79,13 +79,13 @@ func TestQueryIndex_TopN(t *testing.T) {
 }
 
 func TestQueryIndex_EmptyIndex(t *testing.T) {
-	results := QueryIndex(nil, []float32{1.0}, 10)
+	results := QueryIndex(nil, []float32{1.0}, 10, nil)
 	if results != nil {
 		t.Error("nil index should return nil")
 	}
 
 	idx := &Index{Entries: nil}
-	results = QueryIndex(idx, []float32{1.0}, 10)
+	results = QueryIndex(idx, []float32{1.0}, 10, nil)
 	if results != nil {
 		t.Error("empty index should return nil")
 	}
@@ -100,7 +100,7 @@ func TestQueryIndex_TopNExceedsEntries(t *testing.T) {
 		},
 	}
 
-	results := QueryIndex(idx, []float32{1.0, 0.0}, 100)
+	results := QueryIndex(idx, []float32{1.0, 0.0}, 100, nil)
 	if len(results) != 2 {
 		t.Errorf("expected 2 results (capped to entries), got %d", len(results))
 	}

@@ -25,6 +25,7 @@ type ToolContext struct {
 	Ctx    context.Context
 	Index  *Index
 	Client *Client
+	Filter *QueryFilter
 }
 
 // HybridToolDefs returns tool definitions for the hybrid (vector + agent) mode.
@@ -265,7 +266,7 @@ func execVectorSearch(tc ToolCall, toolCtx *ToolContext) ToolResult {
 		return ToolResult{ToolCallID: tc.ID, Content: "Error: embedding returned empty vector"}
 	}
 
-	results := QueryIndex(toolCtx.Index, vectors[0], args.TopN)
+	results := QueryIndex(toolCtx.Index, vectors[0], args.TopN, toolCtx.Filter)
 	if len(results) == 0 {
 		return ToolResult{ToolCallID: tc.ID, Content: "(no matches in vector index)"}
 	}

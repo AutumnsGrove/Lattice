@@ -22,6 +22,10 @@ var (
 	askFlagIndex       bool
 	askFlagReindex     bool
 	askFlagNoVectors   bool
+	askFlagUpdateFile  string
+	askFlagRemoveFile  string
+	askFlagScope       string
+	askFlagType        string
 )
 
 var askCmd = &cobra.Command{
@@ -43,6 +47,11 @@ Examples:
 		// Handle --index / --reindex (no query required)
 		if askFlagIndex || askFlagReindex {
 			return runIndexBuild(ctx, cfg, askFlagReindex)
+		}
+
+		// Handle --update-file / --remove-file (single-entry mutations)
+		if askFlagUpdateFile != "" || askFlagRemoveFile != "" {
+			return runIndexMutate(ctx, cfg)
 		}
 
 		if len(args) == 0 {
@@ -118,12 +127,22 @@ Examples:
 		}
 
 		// Run the agentic loop
+		// Build query filter from --scope and --type flags
+		var filter *nlp.QueryFilter
+		if askFlagScope != "" || askFlagType != "" {
+			filter = &nlp.QueryFilter{
+				PathPrefix: askFlagScope,
+				FileType:   askFlagType,
+			}
+		}
+
 		result, err := nlp.RunAgent(ctx, client, query, nlp.AgentOptions{
 			MaxRounds: askFlagMaxRounds,
 			Verbose:   cfg.Verbose,
 			OnStatus:  onRoundStatus,
 			Index:     idx,
 			NoVectors: askFlagNoVectors,
+			Filter:    filter,
 		})
 		if err != nil {
 			return fmt.Errorf("search failed: %w", err)
@@ -152,8 +171,12 @@ func init() {
 	askCmd.Flags().BoolVar(&askFlagNoAutostart, "no-autostart", false, "Skip LM Studio auto-start")
 	askCmd.Flags().IntVar(&askFlagMaxRounds, "max-rounds", nlp.DefaultMaxRounds, "Maximum agentic loop iterations")
 	askCmd.Flags().BoolVar(&askFlagIndex, "index", false, "Build the vector index from scratch")
-	askCmd.Flags().BoolVar(&askFlagReindex, "reindex", false, "Incrementally update the vector index")
+	askCmd.Flags().BoolVar(&askFlagReindex, "reindex", false, "Update the index: embed changed/new files, drop deleted ones")
 	askCmd.Flags().BoolVar(&askFlagNoVectors, "no-vectors", false, "Skip vector search, use pure agent mode")
+	askCmd.Flags().StringVar(&askFlagUpdateFile, "update-file", "", "Re-embed a single file in the index")
+	askCmd.Flags().StringVar(&askFlagRemoveFile, "remove-file", "", "Remove a file from the index")
+	askCmd.Flags().StringVar(&askFlagScope, "scope", "", "Limit search to a path prefix (e.g. libs/engine)")
+	askCmd.Flags().StringVar(&askFlagType, "type", "", "Limit search to a file extension (e.g. ts, svelte, go)")
 }
 
 func renderJSON(query string, result *nlp.AgentResult) error {
@@ -402,6 +425,52 @@ func countUniqueFiles(chunks []nlp.Chunk) int {
 		seen[c.FilePath] = true
 	}
 	return len(seen)
+}
+
+// runIndexMutate handles --update-file and --remove-file.
+func runIndexMutate(ctx context.Context, cfg *config.Config) error {
+	idx, err := nlp.LoadIndex()
+	if err != nil {
+		return fmt.Errorf("load index: %w", err)
+	}
+	if idx == nil {
+		return fmt.Errorf("no index found — run `gf ask --index` first")
+	}
+
+	if askFlagRemoveFile != "" {
+		removed := idx.RemoveFile(askFlagRemoveFile)
+		if removed == 0 {
+			fmt.Fprintf(os.Stderr, "  No entries found for %s\n", askFlagRemoveFile)
+			return nil
+		}
+		if err := nlp.SaveIndex(idx); err != nil {
+			return fmt.Errorf("save index: %w", err)
+		}
+		fmt.Fprintf(os.Stderr, "  Removed %d chunks for %s\n", removed, askFlagRemoveFile)
+		return nil
+	}
+
+	if askFlagUpdateFile != "" {
+		// Need embedding client
+		embedClient := nlp.NewClientWithEmbed(
+			cfg.LLMEndpoint,
+			cfg.LLMModel,
+			cfg.EmbedModel,
+			time.Duration(cfg.LLMTimeout)*time.Second,
+		)
+
+		added, err := idx.UpdateFile(ctx, embedClient, askFlagUpdateFile)
+		if err != nil {
+			return fmt.Errorf("update file: %w", err)
+		}
+		if err := nlp.SaveIndex(idx); err != nil {
+			return fmt.Errorf("save index: %w", err)
+		}
+		fmt.Fprintf(os.Stderr, "  Updated %s: %d chunks embedded\n", askFlagUpdateFile, added)
+		return nil
+	}
+
+	return nil
 }
 
 // isInFileList checks if a line matches one of the extracted file paths.

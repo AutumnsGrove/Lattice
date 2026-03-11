@@ -65,8 +65,9 @@ type AgentOptions struct {
 	Verbose       bool
 	VerboseWriter io.Writer // where to print verbose output (defaults to os.Stderr)
 	OnStatus      func(round int, maxRounds int, status string) // called on each round for UI feedback
-	Index         *Index  // optional: vector index for hybrid mode
-	NoVectors     bool    // when true, skip vector search even if index is available
+	Index         *Index       // optional: vector index for hybrid mode
+	NoVectors     bool         // when true, skip vector search even if index is available
+	Filter        *QueryFilter // optional: restrict vector search to matching entries
 }
 
 // AgentResult holds the outcome of the agentic search loop.
@@ -106,13 +107,14 @@ func RunAgent(ctx context.Context, client *Client, query string, opts AgentOptio
 
 	if useIndex {
 		// Hybrid mode: pre-search vectors and embed results in prompt
-		vectorResults := preSearchVectors(ctx, client, opts.Index, query)
+		vectorResults := preSearchVectors(ctx, client, opts.Index, query, opts.Filter)
 		systemPrompt = fmt.Sprintf(hybridSystemPromptTemplate, query, vectorResults, codebaseMap)
 		tools = HybridToolDefs()
 		toolCtx = &ToolContext{
 			Ctx:    ctx,
 			Index:  opts.Index,
 			Client: client,
+			Filter: opts.Filter,
 		}
 	} else {
 		// Fallback mode: pure agent (no vectors)
@@ -324,7 +326,7 @@ func RunAgent(ctx context.Context, client *Client, query string, opts AgentOptio
 
 // preSearchVectors embeds the query and returns formatted vector search results
 // for inclusion in the system prompt. This gives the agent a head start.
-func preSearchVectors(ctx context.Context, client *Client, idx *Index, query string) string {
+func preSearchVectors(ctx context.Context, client *Client, idx *Index, query string, filter *QueryFilter) string {
 	vectors, err := client.Embed(ctx, []string{query}, nil)
 	if err != nil {
 		return "(vector search failed: " + err.Error() + ")"
@@ -333,7 +335,7 @@ func preSearchVectors(ctx context.Context, client *Client, idx *Index, query str
 		return "(vector search returned empty embedding)"
 	}
 
-	results := QueryIndex(idx, vectors[0], 20)
+	results := QueryIndex(idx, vectors[0], 20, filter)
 	if len(results) == 0 {
 		return "(no matches found in vector index)"
 	}

@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 
 	"github.com/AutumnsGrove/Lattice/tools/grove-find-go/internal/config"
 )
@@ -152,10 +153,41 @@ func RebuildIndex(ctx context.Context, client *Client, existing *Index, onStatus
 		}
 	}
 
+	// Figure out which files existed in the old index
+	oldFiles := make(map[string]bool)
+	if existing != nil {
+		for _, e := range existing.Entries {
+			oldFiles[e.FilePath] = true
+		}
+	}
+
+	// Figure out which files exist now
+	newFiles := make(map[string]bool)
+	for _, c := range chunks {
+		newFiles[c.FilePath] = true
+	}
+
+	// Count deleted files (in old index but not on disk anymore)
+	deletedFiles := 0
+	for f := range oldFiles {
+		if !newFiles[f] {
+			deletedFiles++
+		}
+	}
+
+	// Count added files (on disk but not in old index)
+	addedFiles := make(map[string]bool)
+	for f := range newFiles {
+		if !oldFiles[f] {
+			addedFiles[f] = true
+		}
+	}
+
 	// Partition chunks into reusable vs needs-embedding
 	var needEmbed []int // indices into chunks that need fresh vectors
 	vectors := make([][]float32, len(chunks))
 	reused := 0
+	changedFiles := make(map[string]bool)
 
 	for i, c := range chunks {
 		key := fmt.Sprintf("%s:%d-%d", c.FilePath, c.StartLine, c.EndLine)
@@ -164,11 +196,39 @@ func RebuildIndex(ctx context.Context, client *Client, existing *Index, onStatus
 			reused++
 		} else {
 			needEmbed = append(needEmbed, i)
+			if !addedFiles[c.FilePath] {
+				changedFiles[c.FilePath] = true
+			}
 		}
 	}
 
 	if onStatus != nil {
-		onStatus(fmt.Sprintf("Reuse %d cached vectors, embedding %d new/changed chunks", reused, len(needEmbed)))
+		onStatus(fmt.Sprintf("%d files unchanged, %d changed, %d added, %d deleted",
+			len(newFiles)-len(changedFiles)-len(addedFiles), len(changedFiles), len(addedFiles), deletedFiles))
+		onStatus(fmt.Sprintf("Reusing %d cached vectors, embedding %d new/changed chunks", reused, len(needEmbed)))
+		if len(needEmbed) == 0 {
+			onStatus("Index is already up to date!")
+		}
+	}
+
+	// Nothing to embed — return the refreshed index (with deletions applied)
+	if len(needEmbed) == 0 {
+		entries := make([]IndexEntry, len(chunks))
+		for i, c := range chunks {
+			entries[i] = IndexEntry{
+				FilePath:  c.FilePath,
+				StartLine: c.StartLine,
+				EndLine:   c.EndLine,
+				Snippet:   c.Snippet,
+				Mtime:     mtimes[c.FilePath],
+				Vector:    vectors[i],
+			}
+		}
+		return &Index{
+			Dimensions: existing.Dimensions,
+			EmbedModel: existing.EmbedModel,
+			Entries:    entries,
+		}, nil
 	}
 
 	// Embed only the changed chunks
@@ -220,6 +280,76 @@ func RebuildIndex(ctx context.Context, client *Client, existing *Index, onStatus
 	}, nil
 }
 
+// RemoveFile drops all entries for the given file path from the index.
+func (idx *Index) RemoveFile(filePath string) int {
+	var kept []IndexEntry
+	removed := 0
+	for _, e := range idx.Entries {
+		if e.FilePath == filePath {
+			removed++
+		} else {
+			kept = append(kept, e)
+		}
+	}
+	idx.Entries = kept
+	return removed
+}
+
+// UpdateFile re-chunks a single file and replaces its entries in the index.
+// It embeds the new chunks via the provided client and saves the result.
+// Returns the number of new chunks added.
+func (idx *Index) UpdateFile(ctx context.Context, client *Client, filePath string) (int, error) {
+	cfg := config.Get()
+	absPath := filepath.Join(cfg.GroveRoot, filepath.FromSlash(filePath))
+
+	// Remove old entries for this file
+	idx.RemoveFile(filePath)
+
+	// Read and chunk the file
+	data, err := os.ReadFile(absPath)
+	if err != nil {
+		// File was deleted — removal is the update
+		return 0, nil
+	}
+
+	content := string(data)
+	chunks := chunkFile(filePath, content)
+	if len(chunks) == 0 {
+		return 0, nil
+	}
+
+	// Get file mtime
+	var mtime int64
+	if info, err := os.Stat(absPath); err == nil {
+		mtime = info.ModTime().Unix()
+	}
+
+	// Embed the new chunks
+	texts := make([]string, len(chunks))
+	for i, c := range chunks {
+		texts[i] = c.Content
+	}
+
+	vectors, err := client.Embed(ctx, texts, nil)
+	if err != nil {
+		return 0, fmt.Errorf("embed file chunks: %w", err)
+	}
+
+	// Append new entries
+	for i, c := range chunks {
+		idx.Entries = append(idx.Entries, IndexEntry{
+			FilePath:  c.FilePath,
+			StartLine: c.StartLine,
+			EndLine:   c.EndLine,
+			Snippet:   c.Snippet,
+			Mtime:     mtime,
+			Vector:    vectors[i],
+		})
+	}
+
+	return len(chunks), nil
+}
+
 // SaveIndex writes the index to disk in binary format.
 func SaveIndex(idx *Index) error {
 	path := IndexPath()
@@ -255,8 +385,33 @@ func LoadIndex() (*Index, error) {
 	return readIndex(f)
 }
 
+// QueryFilter constrains which index entries are searched.
+// All fields are optional — zero values mean "no filter".
+type QueryFilter struct {
+	PathPrefix string // only entries whose FilePath starts with this
+	FileType   string // extension without dot, e.g. "ts", "svelte", "go"
+}
+
+// Matches returns true if the entry passes the filter.
+func (f *QueryFilter) Matches(entry *IndexEntry) bool {
+	if f == nil {
+		return true
+	}
+	if f.PathPrefix != "" && !strings.HasPrefix(entry.FilePath, f.PathPrefix) {
+		return false
+	}
+	if f.FileType != "" {
+		ext := filepath.Ext(entry.FilePath)
+		if ext == "" || strings.ToLower(ext[1:]) != strings.ToLower(f.FileType) {
+			return false
+		}
+	}
+	return true
+}
+
 // QueryIndex finds the top N chunks most similar to the query vector.
-func QueryIndex(idx *Index, queryVec []float32, topN int) []SearchResult {
+// An optional filter restricts which entries are considered.
+func QueryIndex(idx *Index, queryVec []float32, topN int, filter *QueryFilter) []SearchResult {
 	if idx == nil || len(idx.Entries) == 0 || len(queryVec) == 0 {
 		return nil
 	}
@@ -266,12 +421,15 @@ func QueryIndex(idx *Index, queryVec []float32, topN int) []SearchResult {
 		score float32
 	}
 
-	scores := make([]scored, len(idx.Entries))
+	var scores []scored
 	for i, entry := range idx.Entries {
-		scores[i] = scored{
+		if !filter.Matches(&entry) {
+			continue
+		}
+		scores = append(scores, scored{
 			idx:   i,
 			score: cosineSimilarity(queryVec, entry.Vector),
-		}
+		})
 	}
 
 	sort.Slice(scores, func(i, j int) bool {
