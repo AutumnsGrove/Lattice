@@ -2,7 +2,11 @@
 	import { deserialize } from "$app/forms";
 	import { invalidateAll } from "$app/navigation";
 	import { page } from "$app/stores";
-	import { GlassChat, GlassCard } from "@autumnsgrove/lattice/ui";
+	import {
+		GlassChat,
+		GlassCard,
+		createConversationalChatController,
+	} from "@autumnsgrove/lattice/ui";
 	import type { ChatMessageData } from "@autumnsgrove/lattice/ui";
 	import Header from "$lib/components/Header.svelte";
 	import { seasonStore } from "@autumnsgrove/lattice/ui/chrome";
@@ -13,9 +17,6 @@
 	import type { ActionData, PageData } from "./$types";
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
-
-	let inputValue = $state("");
-	let submitting = $state(false);
 
 	const statusConfig = {
 		open: {
@@ -53,16 +54,14 @@
 		});
 	}
 
-	const chatMessages: ChatMessageData[] = $derived(toChatMessages(data.messages));
 	const isResolved = $derived(data.visit?.status === "resolved");
 
-	async function handleSend() {
-		if (!inputValue.trim() || submitting) return;
-		submitting = true;
-
-		try {
+	// ── Chat Controller ──────────────────────────────────────────────────────
+	const chat = createConversationalChatController({
+		localRole: "visitor",
+		async onSend(message) {
 			const formData = new FormData();
-			formData.set("content", inputValue.trim());
+			formData.set("content", message);
 
 			const response = await fetch($page.url.pathname + "?/reply", {
 				method: "POST",
@@ -71,16 +70,18 @@
 
 			const result = deserialize(await response.text());
 
-			if (result.type === "success") {
-				inputValue = "";
-				await invalidateAll();
-			} else if (result.type === "failure") {
-				// form action returned fail() — data is in result.data
+			if (result.type !== "success") {
+				throw new Error("Failed to send reply");
 			}
-		} finally {
-			submitting = false;
-		}
-	}
+
+			await invalidateAll();
+		},
+	});
+
+	// Sync server messages into the controller whenever page data changes
+	$effect(() => {
+		chat.messages = toChatMessages(data.messages);
+	});
 </script>
 
 <svelte:head>
@@ -136,12 +137,8 @@
 
 			<!-- Chat -->
 			{#if form?.success}
-				<GlassCard
-					class="bg-success-bg border-success/30 mb-4"
-				>
-					<p class="text-sm text-success font-sans">
-						Reply sent! Autumn will see it soon.
-					</p>
+				<GlassCard class="bg-success-bg border-success/30 mb-4">
+					<p class="text-sm text-success font-sans">Reply sent! Autumn will see it soon.</p>
 				</GlassCard>
 			{/if}
 
@@ -152,12 +149,12 @@
 			{/if}
 
 			<GlassChat
-				messages={chatMessages}
+				messages={chat.messages}
 				roles={PORCH_VISITOR_ROLES}
 				variant="default"
-				bind:inputValue
-				onSend={handleSend}
-				inputDisabled={isResolved || submitting}
+				bind:inputValue={chat.inputValue}
+				onSend={chat.send}
+				inputDisabled={isResolved || chat.isLoading}
 				inputPlaceholder={isResolved
 					? "This conversation has been resolved"
 					: "Continue the conversation..."}

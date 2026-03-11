@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from "$app/forms";
-	import { GlassCard, GlassChat, GroveSwap } from "@autumnsgrove/lattice/ui";
+	import { GlassCard, GlassChat, GroveSwap, createChatController } from "@autumnsgrove/lattice/ui";
 	import type { ChatMessageData } from "@autumnsgrove/lattice/ui";
 	import {
 		MessageCircle,
@@ -47,7 +47,12 @@
 		});
 	}
 
-	const chatMessages: ChatMessageData[] = $derived(toChatMessages(data.messages));
+	// ── Chat Controller (read-only, synced from server) ──────────────────────
+	const chat = createChatController();
+
+	$effect(() => {
+		chat.messages = toChatMessages(data.messages);
+	});
 
 	// Get reply email
 	const replyToEmail = $derived(data.visit?.guest_email || data.userEmail || null);
@@ -95,7 +100,7 @@
 
 			<!-- Messages (read-only GlassChat) -->
 			<GlassChat
-				messages={chatMessages}
+				messages={chat.messages}
 				roles={PORCH_ADMIN_ROLES}
 				variant="default"
 				hideInput
