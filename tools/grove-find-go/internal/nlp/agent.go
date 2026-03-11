@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"regexp"
 	"strings"
 )
 
@@ -185,9 +186,10 @@ func RunAgent(ctx context.Context, client *Client, query string, opts AgentOptio
 				}
 				continue
 			}
+			answer := cleanAnswer(choice.Message.Content)
 			return &AgentResult{
-				Answer:           choice.Message.Content,
-				Files:            extractFilePaths(choice.Message.Content),
+				Answer:           answer,
+				Files:            extractFilePaths(answer),
 				Rounds:           round,
 				ToolCalls:        allToolCalls,
 				UsedIndex:        useIndex,
@@ -199,9 +201,10 @@ func RunAgent(ctx context.Context, client *Client, query string, opts AgentOptio
 
 		// No tool calls and no content: unexpected
 		if len(choice.Message.ToolCalls) == 0 {
+			answer := cleanAnswer(choice.Message.Content)
 			return &AgentResult{
-				Answer:           choice.Message.Content,
-				Files:            extractFilePaths(choice.Message.Content),
+				Answer:           answer,
+				Files:            extractFilePaths(answer),
 				Rounds:           round,
 				ToolCalls:        allToolCalls,
 				UsedIndex:        useIndex,
@@ -336,9 +339,10 @@ func RunAgent(ctx context.Context, client *Client, query string, opts AgentOptio
 		totalCompletionTokens += resp.Usage.CompletionTokens
 	}
 
+	finalAnswer := cleanAnswer(resp.Choices[0].Message.Content)
 	return &AgentResult{
-		Answer:           resp.Choices[0].Message.Content,
-		Files:            extractFilePaths(resp.Choices[0].Message.Content),
+		Answer:           finalAnswer,
+		Files:            extractFilePaths(finalAnswer),
 		Rounds:           opts.MaxRounds,
 		ToolCalls:        allToolCalls,
 		UsedIndex:        useIndex,
@@ -480,6 +484,26 @@ func extractFilePaths(text string) []string {
 	}
 
 	return paths
+}
+
+// cleanAnswer strips model-specific XML artifacts from the final answer text.
+// Some models (e.g. mimo-v2-flash) emit raw XML tool call syntax or result tags
+// in their text output. This strips those while preserving any actual content.
+var xmlTagPattern = regexp.MustCompile(`</?(?:tool_call|function|parameter|result|search_result)[^>]*>`)
+
+func cleanAnswer(text string) string {
+	// Strip XML-style tags from certain models
+	text = xmlTagPattern.ReplaceAllString(text, "")
+
+	// Clean up resulting empty lines and whitespace
+	var lines []string
+	for _, line := range strings.Split(text, "\n") {
+		trimmed := strings.TrimSpace(line)
+		if trimmed != "" {
+			lines = append(lines, line)
+		}
+	}
+	return strings.TrimSpace(strings.Join(lines, "\n"))
 }
 
 // looksLikeFilePath returns true if the string resembles a relative file path.

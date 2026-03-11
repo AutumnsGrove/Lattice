@@ -3,7 +3,9 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"math"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -35,15 +37,17 @@ var (
 
 var askCmd = &cobra.Command{
 	Use:   "ask <query>",
-	Short: "Natural language codebase search (requires local LLM)",
-	Long: `Search the codebase using natural language. Powered by a local LLM
-running in LM Studio, gf ask translates your description into structured
-searches and returns file paths with explanations.
+	Short: "Natural language codebase search",
+	Long: `Search the codebase using natural language via semantic vector search.
+
+By default, uses fast vector-only mode (no LLM needed, just local embeddings).
+Add --cloud for a deeper agentic search powered by a cloud LLM.
 
 Examples:
-  gf ask "where are the service icons defined"
-  gf ask "the thing that handles rate limiting"
-  gf ask "wherever the seasonal theme colors live"`,
+  gf ask "seasonal theme colors"           # fast vector search (default)
+  gf ask --cloud "where is rate limiting"   # cloud agent with tool calling
+  gf ask --scope libs/engine "auth logic"   # scoped to a directory
+  gf ask --docs "how do backups work"       # search docs index only`,
 	Args: cobra.ArbitraryArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg := config.Get()
@@ -86,72 +90,6 @@ Examples:
 			}
 		}
 
-		// Round status callback
-		onRoundStatus := func(round, maxRounds int, status string) {
-			if cfg.JSONMode {
-				return
-			}
-			if cfg.AgentMode {
-				fmt.Fprintf(os.Stderr, "--- round %d/%d: %s ---\n", round, maxRounds, status)
-			} else {
-				fmt.Fprintf(os.Stderr, "\r  \033[K  ◐ %s  (round %d/%d)", status, round, maxRounds)
-			}
-		}
-
-		// Print the query header
-		if !cfg.JSONMode {
-			if cfg.AgentMode {
-				fmt.Fprintf(os.Stderr, "--- Searching: %s ---\n", query)
-			} else {
-				output.PrintSection(fmt.Sprintf("Searching: %q", query))
-			}
-		}
-
-		// Create the LLM client (cloud or local)
-		var client *nlp.Client
-		var pricing *nlp.ModelPricing
-		if askFlagCloud {
-			// Cloud mode: use OpenRouter for chat, local LM Studio for embeddings
-			cloudModel := cfg.CloudModel
-			if askFlagCloudModel != "" {
-				cloudModel = askFlagCloudModel
-			}
-			if cfg.CloudAPIKey == "" {
-				return fmt.Errorf("no API key found. Set GF_CLOUD_API_KEY env var or add \"openrouter_api_key\" to secrets.json")
-			}
-			client = nlp.NewCloudClient(cfg.CloudEndpoint, cloudModel, cfg.CloudAPIKey, 30*time.Second)
-			onStatus(fmt.Sprintf("Using cloud model: %s", cloudModel))
-
-			// Fetch pricing for cost tracking
-			if p, err := nlp.FetchModelPricing(ctx, cloudModel); err == nil {
-				pricing = p
-			}
-		} else {
-			// Local mode: LM Studio for both chat and embeddings
-			var err error
-			client, err = nlp.EnsureServer(ctx, !askFlagNoAutostart, onStatus)
-			if err != nil {
-				return err
-			}
-		}
-
-		// Load vector index (if available and not skipped)
-		var idx *nlp.Index
-		if !askFlagNoVectors {
-			idx = loadSearchIndex(cfg, askFlagDocs, askFlagAll, onStatus)
-			// For vector pre-search, we need a local embed client regardless of cloud mode
-			if idx != nil && idx.EmbedModel != "" {
-				if askFlagCloud {
-					// Cloud mode: create a separate local client just for embedding
-					localEmbed := nlp.NewClientWithEmbed(cfg.LLMEndpoint, "", idx.EmbedModel, time.Duration(cfg.LLMTimeout)*time.Second)
-					client.SetEmbedFrom(localEmbed)
-				} else {
-					client.SetEmbedModel(idx.EmbedModel)
-				}
-			}
-		}
-
-		// Run the agentic loop
 		// Build query filter from --scope and --type flags
 		var filter *nlp.QueryFilter
 		if askFlagScope != "" || askFlagType != "" {
@@ -161,56 +99,39 @@ Examples:
 			}
 		}
 
-		result, err := nlp.RunAgent(ctx, client, query, nlp.AgentOptions{
-			MaxRounds: askFlagMaxRounds,
-			Verbose:   cfg.Verbose,
-			OnStatus:  onRoundStatus,
-			Index:     idx,
-			NoVectors: askFlagNoVectors,
-			Filter:    filter,
-			Pricing:   pricing,
-		})
-		if err != nil {
-			return fmt.Errorf("search failed: %w", err)
+		// ─── FAST MODE (default): vector-only, no LLM ───
+		if !askFlagCloud {
+			return runFastSearch(ctx, cfg, query, filter, onStatus)
 		}
 
-		// Clear the status line in human mode
-		if cfg.IsHumanMode() {
-			fmt.Fprintf(os.Stderr, "\r\033[K")
-		}
-
-		// Render output
-		if cfg.JSONMode {
-			return renderJSON(query, result)
-		}
-
-		if result.GaveUp {
-			renderCostSummary(cfg, result)
-			return renderGiveUp(cfg, result)
-		}
-
-		err = renderAnswer(cfg, result)
-		renderCostSummary(cfg, result)
-		return err
+		// ─── CLOUD MODE (--cloud): full agentic loop via OpenRouter ───
+		return runCloudSearch(ctx, cfg, query, filter, onStatus)
 	},
 }
 
 func init() {
-	askCmd.Flags().BoolVarP(&askFlagInteractive, "interactive", "i", false, "Interactive TUI mode (Phase 2)")
-	askCmd.Flags().BoolVar(&askFlagNoAutostart, "no-autostart", false, "Skip LM Studio auto-start")
-	askCmd.Flags().IntVar(&askFlagMaxRounds, "max-rounds", nlp.DefaultMaxRounds, "Maximum agentic loop iterations")
+	// Index management
 	askCmd.Flags().BoolVar(&askFlagIndex, "index", false, "Build the vector index from scratch")
 	askCmd.Flags().BoolVar(&askFlagReindex, "reindex", false, "Update the index: embed changed/new files, drop deleted ones")
-	askCmd.Flags().BoolVar(&askFlagNoVectors, "no-vectors", false, "Skip vector search, use pure agent mode")
+	askCmd.Flags().StringVar(&askFlagTier, "tier", "", "Embedding model tier: tiny, small, full (default: full)")
 	askCmd.Flags().StringVar(&askFlagUpdateFile, "update-file", "", "Re-embed a single file in the index")
 	askCmd.Flags().StringVar(&askFlagRemoveFile, "remove-file", "", "Remove a file from the index")
+
+	// Search filters
 	askCmd.Flags().StringVar(&askFlagScope, "scope", "", "Limit search to a path prefix (e.g. libs/engine)")
 	askCmd.Flags().StringVar(&askFlagType, "type", "", "Limit search to a file extension (e.g. ts, svelte, go)")
-	askCmd.Flags().StringVar(&askFlagTier, "tier", "", "Embedding model tier: tiny, small, full (default: full)")
 	askCmd.Flags().BoolVar(&askFlagDocs, "docs", false, "Index/search documentation (.md) instead of code")
 	askCmd.Flags().BoolVar(&askFlagAll, "all", false, "Search both code and docs indexes")
-	askCmd.Flags().BoolVar(&askFlagCloud, "cloud", false, "Use cloud LLM (OpenRouter) instead of local LM Studio")
+
+	// Cloud agent mode
+	askCmd.Flags().BoolVar(&askFlagCloud, "cloud", false, "Use cloud LLM (OpenRouter) for deeper agentic search")
 	askCmd.Flags().StringVar(&askFlagCloudModel, "cloud-model", "", "Override cloud model (default: xiaomi/mimo-v2-flash)")
+	askCmd.Flags().IntVar(&askFlagMaxRounds, "max-rounds", nlp.DefaultMaxRounds, "Maximum agentic loop iterations (--cloud only)")
+	askCmd.Flags().BoolVar(&askFlagNoVectors, "no-vectors", false, "Skip vector pre-search in agent mode (--cloud only)")
+	askCmd.Flags().BoolVar(&askFlagNoAutostart, "no-autostart", false, "Skip LM Studio auto-start")
+
+	// Phase 2
+	askCmd.Flags().BoolVarP(&askFlagInteractive, "interactive", "i", false, "Interactive TUI mode (Phase 2)")
 }
 
 func renderJSON(query string, result *nlp.AgentResult) error {
@@ -534,6 +455,178 @@ func runIndexMutate(ctx context.Context, cfg *config.Config) error {
 	return nil
 }
 
+// runFastSearch does vector-only search: embed the query, cosine scan, print results.
+// No LLM chat model needed — just the local embedding model.
+func runFastSearch(ctx context.Context, cfg *config.Config, query string, filter *nlp.QueryFilter, onStatus func(string)) error {
+	// Load the vector index
+	idx := loadSearchIndex(cfg, askFlagDocs, askFlagAll, onStatus)
+	if idx == nil {
+		return fmt.Errorf("no vector index found. Run `gf ask --index` to build one, or use `--cloud` for agent mode")
+	}
+
+	// We need a local embed client to embed the query
+	embedClient := nlp.NewClientWithEmbed(cfg.LLMEndpoint, "", idx.EmbedModel, time.Duration(cfg.LLMTimeout)*time.Second)
+
+	// Check that LM Studio is running (for embedding only)
+	if !embedClient.IsHealthy(ctx) {
+		return fmt.Errorf("LM Studio is not running (needed for embedding). Start it or use `--cloud` for cloud-only mode")
+	}
+
+	if !cfg.JSONMode {
+		if cfg.AgentMode {
+			fmt.Fprintf(os.Stderr, "--- Searching: %s ---\n", query)
+		} else {
+			output.PrintSection(fmt.Sprintf("Searching: %q", query))
+		}
+	}
+
+	// Embed the query
+	vectors, err := embedClient.Embed(ctx, []string{query}, nil)
+	if err != nil {
+		return fmt.Errorf("embed query: %w", err)
+	}
+	if len(vectors) == 0 || len(vectors[0]) == 0 {
+		return fmt.Errorf("embedding returned empty vector")
+	}
+
+	// Search the index
+	results := nlp.QueryIndex(idx, vectors[0], 10, filter)
+	if len(results) == 0 {
+		if cfg.JSONMode {
+			output.PrintJSON(map[string]any{"command": "ask", "query": query, "results": []any{}})
+			return nil
+		}
+		output.PrintWarning("No matches found.")
+		return nil
+	}
+
+	// Render results
+	if cfg.JSONMode {
+		output.PrintJSON(map[string]any{
+			"command": "ask",
+			"query":   query,
+			"results": results,
+		})
+		return nil
+	}
+
+	if cfg.AgentMode {
+		fmt.Println("\n--- Found ---")
+		for _, r := range results {
+			loc := r.FilePath
+			if r.StartLine > 0 && r.EndLine > r.StartLine {
+				loc += fmt.Sprintf(":%d-%d", r.StartLine, r.EndLine)
+			}
+			fmt.Printf("%s (%.3f)\n", loc, r.Score)
+		}
+		return nil
+	}
+
+	// Human mode — group by file, show relevance bar + description
+	grouped := groupResultsByFile(results)
+	fmt.Println()
+	output.PrintSuccess("Found it!")
+	fmt.Println()
+
+	for i, g := range grouped {
+		if i >= 7 {
+			break
+		}
+		renderFileResult(g)
+	}
+
+	// Summary
+	extra := len(grouped) - 7
+	if extra > 0 {
+		output.PrintDim(fmt.Sprintf("  ... and %d more files", extra))
+	}
+	fmt.Println()
+	return nil
+}
+
+// runCloudSearch runs the full agentic loop via a cloud LLM provider.
+func runCloudSearch(ctx context.Context, cfg *config.Config, query string, filter *nlp.QueryFilter, onStatus func(string)) error {
+	cloudModel := cfg.CloudModel
+	if askFlagCloudModel != "" {
+		cloudModel = askFlagCloudModel
+	}
+	if cfg.CloudAPIKey == "" {
+		return fmt.Errorf("no API key found. Set GF_CLOUD_API_KEY env var or add \"openrouter_api_key\" to secrets.json")
+	}
+
+	client := nlp.NewCloudClient(cfg.CloudEndpoint, cloudModel, cfg.CloudAPIKey, 30*time.Second)
+	onStatus(fmt.Sprintf("Using cloud model: %s", cloudModel))
+
+	// Fetch pricing for cost tracking
+	var pricing *nlp.ModelPricing
+	if p, err := nlp.FetchModelPricing(ctx, cloudModel); err == nil {
+		pricing = p
+	}
+
+	// Round status callback
+	onRoundStatus := func(round, maxRounds int, status string) {
+		if cfg.JSONMode {
+			return
+		}
+		if cfg.AgentMode {
+			fmt.Fprintf(os.Stderr, "--- round %d/%d: %s ---\n", round, maxRounds, status)
+		} else {
+			fmt.Fprintf(os.Stderr, "\r  \033[K  ◐ %s  (round %d/%d)", status, round, maxRounds)
+		}
+	}
+
+	// Print the query header
+	if !cfg.JSONMode {
+		if cfg.AgentMode {
+			fmt.Fprintf(os.Stderr, "--- Searching: %s ---\n", query)
+		} else {
+			output.PrintSection(fmt.Sprintf("Searching: %q", query))
+		}
+	}
+
+	// Load vector index for hybrid pre-search
+	var idx *nlp.Index
+	if !askFlagNoVectors {
+		idx = loadSearchIndex(cfg, askFlagDocs, askFlagAll, onStatus)
+		if idx != nil && idx.EmbedModel != "" {
+			localEmbed := nlp.NewClientWithEmbed(cfg.LLMEndpoint, "", idx.EmbedModel, time.Duration(cfg.LLMTimeout)*time.Second)
+			client.SetEmbedFrom(localEmbed)
+		}
+	}
+
+	result, err := nlp.RunAgent(ctx, client, query, nlp.AgentOptions{
+		MaxRounds: askFlagMaxRounds,
+		Verbose:   cfg.Verbose,
+		OnStatus:  onRoundStatus,
+		Index:     idx,
+		NoVectors: askFlagNoVectors,
+		Filter:    filter,
+		Pricing:   pricing,
+	})
+	if err != nil {
+		return fmt.Errorf("search failed: %w", err)
+	}
+
+	// Clear the status line in human mode
+	if cfg.IsHumanMode() {
+		fmt.Fprintf(os.Stderr, "\r\033[K")
+	}
+
+	// Render output
+	if cfg.JSONMode {
+		return renderJSON(query, result)
+	}
+
+	if result.GaveUp {
+		renderCostSummary(cfg, result)
+		return renderGiveUp(cfg, result)
+	}
+
+	err = renderAnswer(cfg, result)
+	renderCostSummary(cfg, result)
+	return err
+}
+
 // renderCostSummary prints token usage and cost info to stderr (cloud mode only).
 func renderCostSummary(cfg *config.Config, result *nlp.AgentResult) {
 	if result.PromptTokens == 0 && result.CompletionTokens == 0 {
@@ -627,6 +720,185 @@ func loadSearchIndex(cfg *config.Config, docs, all bool, onStatus func(string)) 
 		onStatus("No vector index found. Run `gf ask --index` for faster, smarter search.")
 	}
 	return idx
+}
+
+// fileGroup holds all results for a single file, with the best score.
+type fileGroup struct {
+	FilePath    string
+	BestScore   float32
+	Description string
+	LineRange   string // e.g. "1-48" from the best-scoring chunk
+	ChunkCount  int
+}
+
+// groupResultsByFile deduplicates results by file path, keeping best score and extracting a description.
+func groupResultsByFile(results []nlp.SearchResult) []fileGroup {
+	seen := make(map[string]*fileGroup)
+	var order []string
+
+	for _, r := range results {
+		// Skip build artifacts
+		if strings.Contains(r.FilePath, "/coverage/") || strings.Contains(r.FilePath, "/dist/") ||
+			strings.Contains(r.FilePath, "/.preview/") || strings.HasPrefix(r.FilePath, ".preview/") ||
+			strings.Contains(r.FilePath, "/node_modules/") {
+			continue
+		}
+		if g, ok := seen[r.FilePath]; ok {
+			g.ChunkCount++
+			if r.Score > g.BestScore {
+				g.BestScore = r.Score
+				g.LineRange = fmt.Sprintf("%d-%d", r.StartLine, r.EndLine)
+				if desc := extractDescription(r.Snippet); desc != "" {
+					g.Description = desc
+				}
+			}
+		} else {
+			g := &fileGroup{
+				FilePath:    r.FilePath,
+				BestScore:   r.Score,
+				Description: extractDescription(r.Snippet),
+				LineRange:   fmt.Sprintf("%d-%d", r.StartLine, r.EndLine),
+				ChunkCount:  1,
+			}
+			seen[r.FilePath] = g
+			order = append(order, r.FilePath)
+		}
+	}
+
+	groups := make([]fileGroup, 0, len(order))
+	for _, path := range order {
+		groups = append(groups, *seen[path])
+	}
+	return groups
+}
+
+// extractDescription pulls a readable description from a code snippet.
+// Looks for JSDoc/Go-style comments, then falls back to the first meaningful line.
+func extractDescription(snippet string) string {
+	lines := strings.Split(snippet, "\n")
+	for _, line := range lines {
+		trimmed := strings.TrimSpace(line)
+
+		// Skip empty lines, opening comment markers, import lines, boilerplate
+		if trimmed == "" || trimmed == "/**" || trimmed == "*/" || trimmed == "/*" {
+			continue
+		}
+		if strings.HasPrefix(trimmed, "import ") || strings.HasPrefix(trimmed, "import(") {
+			continue
+		}
+		if strings.HasPrefix(trimmed, "// ====") || strings.HasPrefix(trimmed, "═") {
+			continue
+		}
+		if strings.HasPrefix(trimmed, "<script") || strings.HasPrefix(trimmed, "</script") {
+			continue
+		}
+		if strings.HasPrefix(trimmed, "<style") || strings.HasPrefix(trimmed, "</style") {
+			continue
+		}
+		if strings.HasPrefix(trimmed, "/// <reference") {
+			continue
+		}
+		// Skip shebangs and partial HTML fragments
+		if strings.HasPrefix(trimmed, "#!") {
+			continue
+		}
+		if len(trimmed) < 10 && (strings.HasSuffix(trimmed, ">") || strings.HasPrefix(trimmed, "<")) {
+			continue
+		}
+		// Skip CSS property lines
+		if strings.HasPrefix(trimmed, "font-") || strings.HasPrefix(trimmed, "animation") ||
+			strings.HasPrefix(trimmed, "color:") || strings.HasPrefix(trimmed, "margin") {
+			continue
+		}
+
+		// Strip comment prefixes
+		if strings.HasPrefix(trimmed, "* ") {
+			trimmed = trimmed[2:]
+		} else if strings.HasPrefix(trimmed, "// ") {
+			trimmed = trimmed[3:]
+		} else if strings.HasPrefix(trimmed, "/// ") {
+			trimmed = trimmed[4:]
+		}
+
+		// Skip @param, @returns, etc.
+		if strings.HasPrefix(trimmed, "@") {
+			continue
+		}
+
+		trimmed = strings.TrimSpace(trimmed)
+		if trimmed == "" || len(trimmed) < 3 {
+			continue
+		}
+
+		// Skip CSS selectors and other noise
+		if strings.HasPrefix(trimmed, "*") && (strings.HasSuffix(trimmed, ",") || strings.HasSuffix(trimmed, "{")) {
+			continue
+		}
+		if strings.HasPrefix(trimmed, ".") && !strings.Contains(trimmed, " ") {
+			continue
+		}
+
+		// Truncate if too long
+		if len(trimmed) > 80 {
+			trimmed = trimmed[:77] + "..."
+		}
+		return trimmed
+	}
+	return ""
+}
+
+// renderFileResult renders a single file group with relevance bar and description.
+func renderFileResult(g fileGroup) {
+	// Relevance bar: map score to 1-8 filled blocks
+	bar := relevanceBar(g.BestScore)
+
+	// Shorten the file path for display: remove leading dirs that are obvious
+	displayPath := g.FilePath
+
+	// Show the bar + file path
+	output.PrintColor("#4a7c59", fmt.Sprintf("  %s  %s", bar, displayPath))
+
+	// Show description if we have one
+	if g.Description != "" {
+		output.PrintDim(fmt.Sprintf("       %s", g.Description))
+	}
+
+	// Show chunk count if multiple
+	if g.ChunkCount > 1 {
+		output.PrintDim(fmt.Sprintf("       (%d matching sections)", g.ChunkCount))
+	}
+}
+
+// relevanceBar creates a visual bar like "████░░░░" from a cosine similarity score.
+// Scores typically range from ~0.3 to ~0.7 for real matches.
+func relevanceBar(score float32) string {
+	const barLen = 8
+	// Map score: 0.3 → 1 block, 0.7+ → 8 blocks
+	normalized := (float64(score) - 0.3) / 0.4
+	if normalized < 0 {
+		normalized = 0
+	}
+	if normalized > 1 {
+		normalized = 1
+	}
+	filled := int(math.Round(normalized * barLen))
+	if filled < 1 {
+		filled = 1
+	}
+	return strings.Repeat("█", filled) + strings.Repeat("░", barLen-filled)
+}
+
+// shortenPath trims a file path to make it more readable in terminal output.
+func shortenPath(path string) string {
+	// Remove ./ prefix
+	path = strings.TrimPrefix(path, "./")
+
+	// For very deep paths, show package/dir + filename
+	parts := strings.Split(path, string(filepath.Separator))
+	if len(parts) > 5 {
+		return strings.Join(parts[:2], "/") + "/.../" + parts[len(parts)-1]
+	}
+	return path
 }
 
 // isInFileList checks if a line matches one of the extracted file paths.
