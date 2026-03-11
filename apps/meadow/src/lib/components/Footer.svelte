@@ -5,7 +5,10 @@
 	 * Minimal footer with links to main Grove site.
 	 */
 	import { cn } from '@autumnsgrove/lattice/ui/utils';
-	import { Trees, Mail, ExternalLink } from 'lucide-svelte';
+	import { Mail, ExternalLink } from 'lucide-svelte';
+	import { defaultSuite, resolveIcon } from '@autumnsgrove/lattice/ui';
+
+	const groveIcon = resolveIcon(defaultSuite.grove.icon);
 
 	interface Props {
 		class?: string;
@@ -31,7 +34,8 @@
 				rel="noopener noreferrer"
 				class="inline-flex items-center gap-1.5 text-foreground-muted hover:text-foreground transition-colors"
 			>
-				<Trees class="w-4 h-4" />
+				{@const GroveIcon = groveIcon}
+				<GroveIcon class="w-4 h-4" />
 				grove.place
 				<ExternalLink class="w-3 h-3 opacity-50" />
 			</a>

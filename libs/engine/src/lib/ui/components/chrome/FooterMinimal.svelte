@@ -5,8 +5,11 @@
 	 * Minimal footer with links to main Grove site and support.
 	 */
 	import { cn } from '$lib/utils/cn';
-	import { Trees, Mail, ExternalLink } from 'lucide-svelte';
+	import { Mail, ExternalLink } from 'lucide-svelte';
+	import { defaultSuite, resolveIcon } from '$lib/ui/components/ui/groveicon';
 	import type { FooterLink, MaxWidth } from './types';
+
+	const groveIcon = resolveIcon(defaultSuite.grove.icon);
 
 	interface Props {
 		class?: string;
@@ -30,7 +33,7 @@
 
 	// Default links for status page
 	const DEFAULT_LINKS: FooterLink[] = [
-		{ href: 'https://grove.place', label: 'grove.place', icon: Trees, external: true },
+		{ href: 'https://grove.place', label: 'grove.place', icon: groveIcon, external: true },
 		{ href: '/feed', label: 'Subscribe via RSS' },
 		{ href: 'mailto:support@grove.place', label: 'Contact Support', icon: Mail }
 	];

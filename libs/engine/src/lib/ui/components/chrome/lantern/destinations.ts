@@ -6,17 +6,17 @@
  * - Services: platform tools (Email, Storage, AI Config, etc.)
  */
 
-import {
-	BookUser,
-	Users,
-	Trees,
-	BookOpen,
-	Mailbox,
-	Archive,
-	Sparkles,
-	Settings,
-} from "lucide-svelte";
+import { BookUser, BookOpen } from "lucide-svelte";
+import { defaultSuite, resolveIcon } from "$lib/ui/components/ui/groveicon";
 import type { LanternDestination } from "./types";
+
+// Resolve service icons from the canonical manifest
+const meadowIcon = resolveIcon(defaultSuite.meadow.icon);
+const forestsIcon = resolveIcon(defaultSuite.forests.icon);
+const ivyIcon = resolveIcon(defaultSuite.ivy.icon);
+const amberIcon = resolveIcon(defaultSuite.amber.icon);
+const reverieIcon = resolveIcon(defaultSuite.reverie.icon);
+const arborIcon = resolveIcon(defaultSuite.arbor.icon);
 
 /**
  * Build the destinations list, personalized with the user's home grove.
@@ -38,7 +38,7 @@ export function getDestinations(_homeGrove: string): LanternDestination[] {
 			href: "https://meadow.grove.place",
 			label: "Feed",
 			groveLabel: "Meadow",
-			icon: Users,
+			icon: meadowIcon,
 			external: true,
 			termSlug: "meadow",
 		},
@@ -46,7 +46,7 @@ export function getDestinations(_homeGrove: string): LanternDestination[] {
 			href: "https://grove.place/forest",
 			label: "Communities",
 			groveLabel: "Forests",
-			icon: Trees,
+			icon: forestsIcon,
 			external: true,
 			termSlug: "forests",
 		},
@@ -66,7 +66,7 @@ export const services: LanternDestination[] = [
 		href: "https://ivy.grove.place",
 		label: "Email",
 		groveLabel: "Ivy",
-		icon: Mailbox,
+		icon: ivyIcon,
 		external: true,
 		termSlug: "ivy",
 	},
@@ -74,7 +74,7 @@ export const services: LanternDestination[] = [
 		href: "https://amber.grove.place",
 		label: "Storage",
 		groveLabel: "Amber",
-		icon: Archive,
+		icon: amberIcon,
 		external: true,
 		termSlug: "amber",
 	},
@@ -82,7 +82,7 @@ export const services: LanternDestination[] = [
 		href: "/arbor/reverie",
 		label: "AI Config",
 		groveLabel: "Reverie",
-		icon: Sparkles,
+		icon: reverieIcon,
 		external: false,
 		termSlug: "reverie",
 	},
@@ -90,7 +90,7 @@ export const services: LanternDestination[] = [
 		href: "/arbor",
 		label: "Admin",
 		groveLabel: "Arbor",
-		icon: Settings,
+		icon: arborIcon,
 		external: false,
 		termSlug: "arbor",
 	},

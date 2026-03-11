@@ -6,7 +6,9 @@
 	 * Glassmorphism styled with Grove aesthetics.
 	 */
 
-	import { Sprout, TreeDeciduous, Trees, Crown, User, Footprints, Check } from "lucide-svelte";
+	import { Check } from "lucide-svelte";
+	import { defaultSuite, resolveIcon } from "$lib/ui/components/ui/groveicon";
+	import type { IconComponent } from "$lib/ui/components/ui/groveicon";
 	import type { PricingCardProps } from "./types.js";
 	import type { TierIcon } from "../../config/tiers.js";
 	import PricingCTA from "./PricingCTA.svelte";
@@ -22,17 +24,17 @@
 		class: className = "",
 	}: PricingCardProps = $props();
 
-	// Map tier icons to components
-	const iconComponents: Record<TierIcon, typeof Sprout> = {
-		user: User,
-		footprints: Footprints,
-		sprout: Sprout,
-		"tree-deciduous": TreeDeciduous,
-		trees: Trees,
-		crown: Crown,
+	// Map tier icon keys to manifest service slugs → canonical icons
+	const iconComponents: Record<TierIcon, IconComponent> = {
+		user: resolveIcon(defaultSuite.wanderer.icon),
+		footprints: resolveIcon(defaultSuite.wanderer.icon),
+		sprout: resolveIcon(defaultSuite.seedling.icon),
+		"tree-deciduous": resolveIcon(defaultSuite.sapling.icon),
+		trees: resolveIcon(defaultSuite.oak.icon),
+		crown: resolveIcon(defaultSuite.evergreen.icon),
 	};
 
-	let IconComponent = $derived(iconComponents[tier.icon] || Sprout);
+	let IconComponent = $derived(iconComponents[tier.icon] || resolveIcon(defaultSuite.seedling.icon));
 
 	// Calculate display price
 	let displayPrice = $derived(

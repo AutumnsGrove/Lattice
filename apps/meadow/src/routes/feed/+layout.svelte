@@ -5,15 +5,17 @@
   import { page } from '$app/state';
   import { Header, Footer, type NavItem } from '@autumnsgrove/lattice/ui/chrome';
   import { buildLoginUrl } from '@autumnsgrove/lattice/grafts/login';
-  import { Trees, Bookmark, Rss } from 'lucide-svelte';
+  import { Bookmark, Rss } from 'lucide-svelte';
+  import { defaultSuite, resolveIcon } from '@autumnsgrove/lattice/ui';
 
   let { children, data } = $props();
 
+  const groveIcon = resolveIcon(defaultSuite.grove.icon);
   const loggedIn = $derived(!!data?.user);
 
   const navItems: NavItem[] = $derived.by(() => {
     const items: NavItem[] = [
-      { href: 'https://grove.place', label: 'Grove', icon: Trees, external: true },
+      { href: 'https://grove.place', label: 'Grove', icon: groveIcon, external: true },
       { href: '/feed', label: 'Feed', icon: Rss },
     ];
     if (loggedIn) {

@@ -5,9 +5,7 @@ import {
 	MapPin,
 	Tag,
 	BookOpen,
-	Trees,
 	BookUser,
-	PenLine,
 	Home,
 	HandCoins,
 	Send,
@@ -20,13 +18,18 @@ import {
 	HeartHandshake,
 	Activity,
 	TreePine,
-	Blinds,
 	Coffee,
 	Inbox,
 	Armchair,
 	Shield,
 } from "lucide-svelte";
 import BlueSky from "../icons/BlueSky.svelte";
+import { defaultSuite, resolveIcon } from "$lib/ui/components/ui/groveicon";
+
+// Resolve service icons from the canonical manifest
+const forestsIcon = resolveIcon(defaultSuite.forests.icon);
+const gardenIcon = resolveIcon(defaultSuite.garden.icon);
+const shadeIcon = resolveIcon(defaultSuite.shade.icon);
 
 // =============================================================================
 // GROVE DIVIDER CONFIGURATION
@@ -65,7 +68,7 @@ export const DEFAULT_NAV_ITEMS: NavItem[] = [
 	{
 		href: "https://autumn.grove.place/garden",
 		label: "Garden",
-		icon: PenLine,
+		icon: gardenIcon,
 		external: true,
 		termSlug: "your-garden",
 	},
@@ -83,7 +86,7 @@ export const DEFAULT_MOBILE_NAV_ITEMS: NavItem[] = [
 	{
 		href: "https://autumn.grove.place/garden",
 		label: "Garden",
-		icon: PenLine,
+		icon: gardenIcon,
 		external: true,
 		termSlug: "your-garden",
 	},
@@ -99,7 +102,7 @@ export const DEFAULT_MOBILE_NAV_ITEMS: NavItem[] = [
 export const LANDING_RESOURCE_LINKS: FooterLink[] = [
 	{ href: "/workshop", label: "Workshop", icon: Hammer, termSlug: "workshop" },
 	{ href: "/vineyard", label: "Vineyard", icon: Grape, termSlug: "vineyard" },
-	{ href: "/forest", label: "Forest", icon: Trees, termSlug: "forests" },
+	{ href: "/forest", label: "Forest", icon: forestsIcon, termSlug: "forests" },
 	{ href: "/journey", label: "Journey", icon: Footprints },
 	{ href: "/grove", label: "Grove", icon: TreePine },
 	{
@@ -139,7 +142,7 @@ export const LANDING_CONNECT_LINKS: FooterLink[] = [
 export const LANDING_MOBILE_RESOURCE_LINKS: FooterLink[] = [
 	{ href: "/workshop", label: "Workshop", icon: Hammer, termSlug: "workshop" },
 	{ href: "/vineyard", label: "Vineyard", icon: Grape, termSlug: "vineyard" },
-	{ href: "/forest", label: "Forest", icon: Trees, termSlug: "forests" },
+	{ href: "/forest", label: "Forest", icon: forestsIcon, termSlug: "forests" },
 	{ href: "/journey", label: "Journey", icon: Footprints },
 	{ href: "/grove", label: "Grove", icon: TreePine },
 	{
@@ -179,7 +182,7 @@ export const LANDING_MOBILE_CONNECT_LINKS: FooterLink[] = [
 export const LANDING_LEGAL_LINKS: FooterLink[] = [
 	{ href: "/knowledge/legal/privacy-policy", label: "Privacy" },
 	{ href: "/knowledge/legal/terms-of-service", label: "Terms" },
-	{ href: "/shade", label: "Shade", icon: Blinds, termSlug: "shade" },
+	{ href: "/shade", label: "Shade", icon: shadeIcon, termSlug: "shade" },
 	{ href: "/security", label: "Security", icon: Shield },
 ];
 
