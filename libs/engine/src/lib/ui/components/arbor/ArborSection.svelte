@@ -2,7 +2,7 @@
   ArborSection — Standardized section page wrapper
 
   Provides a consistent layout for individual Arbor pages: title + icon,
-  optional description, optional action buttons, and content area.
+  optional description, optional action buttons, back-navigation, and content area.
 
   Usage:
     import { ArborSection } from '@autumnsgrove/lattice/ui/arbor';
@@ -10,17 +10,28 @@
     <ArborSection title="Garden" description="Manage your blog posts" icon={FileText}>
       page content here
     </ArborSection>
+
+    <ArborSection title="Guestbook" backHref="/arbor/curios" backLabel="Back to Curios">
+      sub-page content
+    </ArborSection>
 -->
 <script lang="ts">
+  import { ChevronLeft } from "lucide-svelte";
   import { resolveTerm } from "../../utils/grove-term-resolve";
   import type { ArborSectionProps } from "./types";
 
-  let { title, description, icon, termSlug, actions, children }: ArborSectionProps = $props();
+  let { title, description, icon, termSlug, backHref, backLabel, actions, children }: ArborSectionProps = $props();
 
   let resolvedTitle = $derived(termSlug ? resolveTerm(termSlug) : title);
 </script>
 
 <section class="arbor-section">
+  {#if backHref}
+    <a href={backHref} class="arbor-section-back">
+      <ChevronLeft class="arbor-section-back-icon" />
+      <span>{backLabel ?? "Back"}</span>
+    </a>
+  {/if}
   <div class="arbor-section-header">
     <div class="arbor-section-title-row">
       {#if icon}
@@ -46,6 +57,27 @@
 <style>
   .arbor-section {
     width: 100%;
+  }
+
+  .arbor-section-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+    text-decoration: none;
+    margin-bottom: 1rem;
+    transition: color 0.15s;
+  }
+
+  .arbor-section-back:hover {
+    color: var(--color-text);
+  }
+
+  :global(.arbor-section-back-icon) {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
   }
 
   .arbor-section-header {

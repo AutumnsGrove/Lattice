@@ -10,6 +10,7 @@
 		CreditCard,
 		MessageSquare,
 		Sparkles,
+		Amphora,
 	} from "lucide-svelte";
 
 	let { data, children } = $props();
@@ -28,6 +29,7 @@
 			badge: data.pendingCommentCount ?? 0,
 			visible: !!data.grafts?.reeds_comments,
 		},
+		{ href: "/arbor/curios", label: "Curios", icon: Amphora, termSlug: "curio" },
 		{ href: "/arbor/reverie", label: "Reverie", icon: Sparkles },
 		{ href: "/arbor/account", label: "Account", icon: CreditCard },
 		{ href: "/arbor/settings", label: "Settings", icon: Settings },
