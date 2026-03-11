@@ -175,16 +175,6 @@
 					}
 				]
 			}
-		],
-		"Stop": [
-			{
-				"hooks": [
-					{
-						"type": "command",
-						"command": "uv run --with 'langfuse>=3.0.0' .claude/hooks/langfuse.py"
-					}
-				]
-			}
 		]
 	}
 }
