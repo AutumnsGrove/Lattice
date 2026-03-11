@@ -105,6 +105,19 @@ Lattice is the npm package powering every Grove site. UI components, authenticat
 
 **Vines** are a feature of Lattice: the widgets and content that fill your blog's gutters (the sidebar margins alongside your main content). Like vines climbing a trellis, they grow alongside your posts: related links, callouts, annotations, metadata. Gutter content that adds context without interrupting the flow.
 
+### Aspen
+
+**Domain Layer** · `npm: @autumnsgrove/aspen` (workspace)
+**Repository:** [AutumnsGrove/Lattice](https://github.com/AutumnsGrove/Lattice) (monorepo)
+**AlwaysGrove**
+**Waystone:** The domain logic that makes Grove a living platform — database, auth, payments, curios, moderation, and everything tenants interact with.
+
+An aspen is the tree that grows on the lattice's framework. Where Lattice is the structure, Aspen is the living thing. Aspen groves are famous for something remarkable: they share a single root system underground. What looks like a forest of individual trees is actually one organism, connected beneath the surface.
+
+That's what Aspen is. The domain layer of Grove. Database schemas, authentication, payments, curios, content moderation, email, AI routing — all the pieces that make Grove a living platform rather than an empty framework. Each tenant's grove looks independent, but they share the same root system: the same infrastructure, the same patterns, the same careful design.
+
+Lattice holds the structure. Aspen is what grows.
+
 ---
 
 ## Platform Services
