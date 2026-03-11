@@ -3,7 +3,7 @@
 	import Waystone from "$lib/ui/components/ui/Waystone.svelte";
 	import GroveTerm from "$lib/ui/components/ui/groveterm/GroveTerm.svelte";
 	import GroveSwap from "$lib/ui/components/ui/groveterm/GroveSwap.svelte";
-	import { BarChart3, Calendar, Sparkles } from "$lib/ui/components/icons";
+	import { BarChart3, Calendar, Sparkles, MessageSquare } from "$lib/ui/components/icons";
 
 	interface Props {
 		curiosCount?: number;
@@ -55,6 +55,23 @@
 			</div>
 		</a>
 
+		<!-- Reeds (Comments) -->
+		<a href="/arbor/reeds" class="feature-item">
+			<div class="feature-icon">
+				<MessageSquare class="icon" />
+			</div>
+			<div class="feature-content">
+				<div class="feature-title">
+					<span><GroveTerm term="reeds">Reeds</GroveTerm></span>
+					<Waystone slug="what-are-reeds" label="Learn about Reeds comments" />
+				</div>
+				<p class="feature-description">
+					Threaded comments that let <GroveTerm term="wanderer">Wanderers</GroveTerm> leave
+					thoughts on your <GroveSwap term="bloom">blooms</GroveSwap>.
+				</p>
+			</div>
+		</a>
+
 		<!-- Curios -->
 		<a href="/arbor/curios" class="feature-item">
 			<div class="feature-icon curios">
@@ -71,6 +88,22 @@
 					{#if curiosCount > 0}
 						<span class="curio-count">{curiosCount} active</span>
 					{/if}
+				</p>
+			</div>
+		</a>
+
+		<!-- Reverie (AI Configuration) -->
+		<a href="/arbor/reverie" class="feature-item">
+			<div class="feature-icon">
+				<Sparkles class="icon" />
+			</div>
+			<div class="feature-content">
+				<div class="feature-title">
+					<span><GroveTerm term="reverie">Reverie</GroveTerm></span>
+					<Waystone slug="what-is-reverie" label="Learn about Reverie" />
+				</div>
+				<p class="feature-description">
+					Describe a vibe and let AI configure your Grove — "make my site cozy" just works.
 				</p>
 			</div>
 		</a>

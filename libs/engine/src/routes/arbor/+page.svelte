@@ -25,6 +25,9 @@
 		TreeDeciduous,
 		BookUser,
 		Sprout,
+		Plus,
+		Users,
+		Amphora,
 	} from "lucide-svelte";
 
 	/**
@@ -201,6 +204,12 @@
 	<section class="mb-8">
 		<h2 class="m-0 mb-4 text-xl text-foreground">Quick Actions</h2>
 		<div class="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-4">
+			<a href="/arbor/garden/new" class="action-card glass-action">
+				<Plus class="w-7 h-7 text-accent-muted" />
+				<span class="font-medium text-center text-sm"
+					>New <GroveSwap term="bloom">Bloom</GroveSwap></span
+				>
+			</a>
 			<a href="/arbor/garden" class="action-card glass-action">
 				<FileText class="w-7 h-7 text-accent-muted" />
 				<span class="font-medium text-center text-sm"
@@ -218,9 +227,21 @@
 				>
 			</a>
 			<a href="/arbor/curios" class="action-card glass-action">
-				<Calendar class="w-7 h-7 text-accent-muted" />
+				<Amphora class="w-7 h-7 text-accent-muted" />
 				<span class="font-medium text-center text-sm"
 					><GroveTerm term="curios">Curios</GroveTerm></span
+				>
+			</a>
+			<a
+				href="https://grove.place/meadow"
+				class="action-card glass-action"
+				target="_blank"
+				rel="noopener noreferrer"
+				aria-label="Browse the Meadow feed (opens in new tab)"
+			>
+				<Users class="w-7 h-7 text-accent-muted" />
+				<span class="font-medium text-center text-sm"
+					><GroveTerm term="meadow">Meadow</GroveTerm></span
 				>
 			</a>
 			<a
