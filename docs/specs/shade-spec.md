@@ -17,7 +17,7 @@ tags:
 
 > *In a forest full of harvesters, this grove stays shaded.*
 
-Grove's layered defense system against AI crawlers, scrapers, and automated data harvesting. Implements eight complementary protection layers from Cloudflare bot blocking to Turnstile verification, establishing that users own their words.
+Grove's layered defense system against AI crawlers, scrapers, and automated data harvesting. Implements nine complementary protection layers from Cloudflare bot blocking to TDMRep rights reservation, establishing that users own their words.
 
 **Public Name:** Shade
 **Internal Name:** GroveShade
@@ -113,9 +113,9 @@ No single protection is foolproof. Sophisticated actors fake user agents, ignore
 
 ## 2. Defense Architecture
 
-### 2.1 The Eight Layers
+### 2.1 The Nine Layers
 
-Shade implements defense in depth through eight complementary layers:
+Shade implements defense in depth through nine complementary layers:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -188,6 +188,14 @@ Shade implements defense in depth through eight complementary layers:
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
+│              LAYER 9: TDMRep RIGHTS RESERVATION                 │
+│  • W3C TDM-Reservation protocol (horizontal opt-out)            │
+│  • HTTP header + .well-known/tdmrep.json                        │
+│  • EU CDSM Article 4 legal standing                             │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
 │                    HUMAN READER                                 │
 │              (or very determined bot)                           │
 └─────────────────────────────────────────────────────────────────┘
@@ -205,6 +213,7 @@ Shade implements defense in depth through eight complementary layers:
 | Legal Framework | Nothing technical | Nothing technical | Legal standing |
 | Turnstile | Automated scripts, headless browsers | Sophisticated browser automation | Human verification |
 | Archive Protection | Internet Archive, Archive-It, compliant archive crawlers | Personal archiving tools (Raindrop, Pocket), archive.today | Public archive prevention |
+| TDMRep | Compliant TDM operators (Spawning, EU-regulated AI providers) | Non-compliant crawlers ignoring the protocol | EU legal standing |
 
 ### 2.3 What We Accept
 
@@ -760,6 +769,48 @@ For the HTTP header, add to your Cloudflare Worker or use Transform Rules:
 
 ---
 
+## 5b. TDMRep Rights Reservation (Layer 9)
+
+### 5b.1 What It Is
+
+TDMRep (Text and Data Mining Reservation Protocol) is a W3C Community Group protocol that allows rightsholders to declare whether they reserve text and data mining rights. Unlike robots.txt which requires naming individual crawlers, TDMRep is a **horizontal opt-out** — it applies to all TDM operators at once.
+
+### 5b.2 Legal Backing
+
+TDMRep implements the opt-out mechanism described in **EU CDSM Directive Article 4(3)** and referenced by the **EU AI Act (Article 53)**. Key rulings:
+
+- A Dutch court (2024) ruled TDM opt-outs must be machine-readable
+- German courts confirmed Article 4 applies to AI training
+- The GPAI Code of Practice commits signatories to respect machine-readable TDM reservations
+
+### 5b.3 Implementation
+
+Grove implements TDMRep through two complementary mechanisms:
+
+**HTTP Response Header** (set in `libs/engine/src/hooks.server.ts`):
+```
+TDM-Reservation: 1
+```
+
+**`.well-known/tdmrep.json`** (served at `grove.place/.well-known/tdmrep.json`):
+```json
+[
+  {
+    "location": "/",
+    "tdm-reservation": 1,
+    "tdm-policy": "https://grove.place/shade"
+  }
+]
+```
+
+The `tdm-policy` field points to the /shade page, which serves as Grove's human-readable TDM policy — no separate ODRL document needed for a blanket "no" stance.
+
+### 5b.4 Why Both?
+
+Per the TDMRep spec, mechanisms are checked in priority order: `.well-known/tdmrep.json` first, then HTTP headers (which override), then HTML meta tags (which override headers). The JSON file provides domain-wide coverage for crawlers that check before scraping. The HTTP header provides per-response confirmation for crawlers that check during scraping.
+
+---
+
 ## 6. The /shade Page
 
 ### 6.1 Purpose
@@ -980,7 +1031,9 @@ Key metrics to track in Dashboard → Security → Events:
 - [x] Subscribe to Dark Visitors for ongoing blocklist updates
 - [x] Deploy comprehensive robots.txt
 - [ ] Add noai/noimageai meta tags to all pages
-- [ ] Set X-Robots-Tag header via Transform Rules or Workers
+- [x] Set X-Robots-Tag header via hooks.server.ts
+- [x] Add TDM-Reservation HTTP header (Layer 9)
+- [x] Serve .well-known/tdmrep.json on grove.place (Layer 9)
 
 ### Phase 2: Turnstile Human Verification ✅
 

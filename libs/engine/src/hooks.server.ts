@@ -806,6 +806,11 @@ export const handle: Handle = async ({ event, resolve }) => {
 	response.headers.set("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
 	response.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
 
+	// Shade Layer 5: AI/TDM opt-out headers
+	response.headers.set("X-Robots-Tag", "noai, noimageai");
+	// Shade Layer 9: TDMRep — W3C text and data mining rights reservation (EU CDSM Article 4)
+	response.headers.set("TDM-Reservation", "1");
+
 	// Content-Security-Policy
 	// Nonce-based script-src replaces 'unsafe-inline' for stronger XSS protection.
 	// 'unsafe-eval' is only allowed on routes that need Mermaid diagram rendering.

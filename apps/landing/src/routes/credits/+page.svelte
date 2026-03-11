@@ -814,6 +814,18 @@
 							A lightweight protocol for humans to assert authorship of their website content and vouch for the humanity of others. Wanderers can enable it in their settings to say "a real person tends this garden" and build a decentralized trust network by vouching for sites they believe in.
 						</p>
 					</a>
+
+					<a href="https://www.w3.org/community/reports/tdmrep/CG-FINAL-tdmrep-20240510/" target="_blank" rel="noopener noreferrer" class="card p-4 hover:border-accent transition-colors group">
+						<div class="flex items-center justify-between">
+							<div>
+								<span class="font-serif text-foreground group-hover:text-accent-muted transition-colors">TDMRep</span>
+								<span class="text-foreground-subtle font-sans text-sm ml-2">— W3C Text & Data Mining Reservation Protocol</span>
+							</div>
+						</div>
+						<p class="text-foreground-muted font-sans text-sm mt-2">
+							A machine-readable protocol for declaring that text and data mining rights are reserved. Part of <a href="/shade" class="text-accent-muted hover:underline">Shade</a> — Grove serves a TDM-Reservation header on every response and a <code class="text-xs bg-surface-hover px-1 py-0.5 rounded">tdmrep.json</code> at the well-known path, establishing legal standing under EU copyright law.
+						</p>
+					</a>
 				</div>
 			</section>
 
