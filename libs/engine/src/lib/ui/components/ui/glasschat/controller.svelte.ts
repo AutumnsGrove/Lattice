@@ -91,6 +91,13 @@ export function createChatController(initialMessages: ChatMessageData[] = []) {
 		messages = messages.filter((m) => m.id !== id);
 	}
 
+	/** Merge updates into a message's metadata without replacing the whole object. */
+	function updateMessageMetadata(id: string, metadataUpdates: Record<string, unknown>): void {
+		messages = messages.map((m) =>
+			m.id === id ? { ...m, metadata: { ...m.metadata, ...metadataUpdates } } : m,
+		);
+	}
+
 	function clear(): void {
 		messages = [];
 		error = null;
@@ -111,6 +118,7 @@ export function createChatController(initialMessages: ChatMessageData[] = []) {
 		},
 		addMessage,
 		updateMessage,
+		updateMessageMetadata,
 		removeMessage,
 		clear,
 		setLoading(value: boolean) {
@@ -204,6 +212,7 @@ export function createAIChatController(options: AIChatControllerOptions) {
 		},
 		addMessage: base.addMessage,
 		updateMessage: base.updateMessage,
+		updateMessageMetadata: base.updateMessageMetadata,
 		removeMessage: base.removeMessage,
 		clear: base.clear,
 		setLoading: base.setLoading,
@@ -236,6 +245,15 @@ export interface ConversationalChatControllerOptions {
 	localRole: string;
 	/** Initial messages (e.g., loaded from server) */
 	initialMessages?: ChatMessageData[];
+	/**
+	 * Send callback — handles transport (fetch, form action, WebSocket, etc.).
+	 * When provided, the controller's send() method handles the full lifecycle:
+	 * guard → addLocalMessage("sending") → onSend → markSent (or "failed").
+	 * When omitted, the consumer manages sending manually via addLocalMessage + markSent.
+	 */
+	onSend?: (message: string, messages: ChatMessageData[]) => Promise<void>;
+	/** Transform caught errors into display strings */
+	onError?: (error: unknown) => string;
 }
 
 /**
@@ -291,6 +309,37 @@ export function createConversationalChatController(options: ConversationalChatCo
 		remoteTyping = role;
 	}
 
+	/**
+	 * Send the current input as a local message with full lifecycle management.
+	 * Requires onSend callback in options. Guards against empty input and double-send.
+	 *
+	 * Flow: guard → addLocalMessage("sending") → onSend() → markSent (or "failed" + error).
+	 */
+	async function send(): Promise<void> {
+		const text = inputValue.trim();
+		if (!text || base.isLoading || !options.onSend) return;
+
+		inputValue = "";
+		base.setError(null);
+		const id = addLocalMessage(text);
+		base.setLoading(true);
+
+		try {
+			await options.onSend(text, base.messages);
+			markSent(id);
+		} catch (err) {
+			base.updateMessage(id, { status: "failed" as ChatMessageStatus });
+			const message = options.onError
+				? options.onError(err)
+				: err instanceof Error
+					? err.message
+					: "Failed to send";
+			base.setError(message);
+		} finally {
+			base.setLoading(false);
+		}
+	}
+
 	return {
 		// Forward base state via getters to preserve reactivity
 		get messages() {
@@ -307,6 +356,7 @@ export function createConversationalChatController(options: ConversationalChatCo
 		},
 		addMessage: base.addMessage,
 		updateMessage: base.updateMessage,
+		updateMessageMetadata: base.updateMessageMetadata,
 		removeMessage: base.removeMessage,
 		clear: base.clear,
 		setLoading: base.setLoading,
@@ -323,6 +373,7 @@ export function createConversationalChatController(options: ConversationalChatCo
 		},
 		localRole: options.localRole,
 		addLocalMessage,
+		send,
 		markSent,
 		markDelivered,
 		markRead,
