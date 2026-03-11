@@ -95,7 +95,7 @@
 			<section class="mb-10">
 				<h2 class="text-2xl font-serif text-foreground mb-4">How we protect your content</h2>
 				<p class="text-foreground-muted mb-4">
-					Shade uses eight layers of protection—from Cloudflare's bot detection to human verification, from robots.txt directives to legal frameworks. No single layer is perfect, but together they make Grove an expensive, low-value target for scrapers.
+					Shade uses nine layers of protection—from Cloudflare's bot detection to human verification, from robots.txt directives to legal frameworks and machine-readable rights reservations. No single layer is perfect, but together they make Grove an expensive, low-value target for scrapers.
 				</p>
 				<p class="text-foreground-muted">
 					We accept that determined actors with significant resources may still find ways through. Our goal isn't an impenetrable fortress—it's making scraping difficult enough that AI companies move to easier targets, while establishing clear documentation that consent was never given.
@@ -108,6 +108,9 @@
 				<div class="bg-surface-subtle p-6 rounded-lg border border-border">
 					<p class="text-foreground-muted mb-4">
 						This prohibition applies regardless of robots.txt compliance. The absence of technical barriers does not imply permission. Any use of Grove content for AI training, machine learning, or automated data collection is expressly prohibited.
+					</p>
+					<p class="text-foreground-muted mb-4">
+						Grove reserves all text and data mining rights under <strong>Article 4 of the EU Copyright in the Digital Single Market Directive</strong>. This reservation is declared via the <a href="https://www.w3.org/community/reports/tdmrep/CG-FINAL-tdmrep-20240510/" target="_blank" rel="noopener noreferrer" class="text-accent-muted hover:underline">W3C TDMRep protocol</a>—a machine-readable <code class="text-xs bg-surface-hover px-1 py-0.5 rounded">TDM-Reservation</code> header on every response and a <a href="/.well-known/tdmrep.json" class="text-accent-muted hover:underline">tdmrep.json</a> declaration at the well-known path.
 					</p>
 					<p class="text-foreground-muted">
 						This applies to all entities, including but not limited to: OpenAI, Anthropic, Google, Meta, Microsoft, and their subsidiaries.
