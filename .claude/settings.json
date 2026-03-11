@@ -176,12 +176,12 @@
 				]
 			}
 		],
-		"PostToolUse": [
+		"Stop": [
 			{
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 ~/.claude/hooks/langfuse.py"
+						"command": "uv run --with 'langfuse>=3.0.0' .claude/hooks/langfuse.py"
 					}
 				]
 			}

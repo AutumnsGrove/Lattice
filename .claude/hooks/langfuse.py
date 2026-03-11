@@ -413,7 +413,8 @@ def emit_turn(langfuse: Langfuse, session_id: str, turn_num: int, turn: Turn, tr
         trace_name=f"Claude Code - Turn {turn_num}",
         tags=["claude-code"],
     ):
-        with langfuse.start_as_current_span(
+        with langfuse.start_as_current_observation(
+            as_type="span",
             name=f"Claude Code - Turn {turn_num}",
             input={"role": "user", "content": user_text},
             metadata={
