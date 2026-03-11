@@ -36,14 +36,7 @@
 		name: string;
 		tagline: string;
 		description: string;
-		status:
-			| "live"
-			| "greenhouse"
-			| "building"
-			| "planned"
-			| "complete"
-			| "applied"
-			| "being implemented";
+		status: "live" | "greenhouse" | "building" | "planned" | "complete" | "applied";
 		icon: string;
 		domain?: string;
 		integration: string;
@@ -61,7 +54,7 @@
 		tools: Tool[];
 	}
 
-	// Organized by category
+	// Organized by category — progression: live → greenhouse → building → planned
 	const categories: Category[] = [
 		{
 			name: "Core Infrastructure",
@@ -164,6 +157,12 @@
 					spec: "/knowledge/specs/passage-spec",
 					whatIsLink: "/knowledge/help/what-is-passage",
 				},
+			],
+		},
+		{
+			name: "Your Space",
+			description: "The places that are yours — and the promise that they endure",
+			tools: [
 				{
 					name: "Your Grove",
 					termSlug: "your-grove",
@@ -217,6 +216,27 @@
 						},
 					],
 				},
+				{
+					name: "Centennial",
+					termSlug: "centennial",
+					tagline: "Domain Preservation",
+					description:
+						"Some trees outlive the people who planted them. After 12 cumulative months of Sapling+ membership, your grove.place subdomain stays online for 100 years—even if you stop paying, even after you're gone. Your words can have the longevity of an oak.",
+					status: "building",
+					icon: "squares-exclude",
+					integration: "Automatic unlock after 12 months of Sapling+ membership",
+					spec: "/knowledge/specs/centennial-spec",
+					howLink: "/knowledge/philosophy/grove-sustainability",
+					whatIsLink: "/knowledge/help/what-is-centennial",
+					subComponents: [
+						{
+							name: "Solarpunk",
+							icon: "solarpanel",
+							description: "Solarpunk aligned",
+							href: "/knowledge/help/what-is-solarpunk",
+						},
+					],
+				},
 			],
 		},
 		{
@@ -253,59 +273,6 @@
 						{ name: "Posts", icon: "penline", description: "Write & edit" },
 						{ name: "Pages", icon: "layout", description: "Static pages" },
 						{ name: "Media", icon: "image", description: "Image gallery" },
-					],
-				},
-				{
-					name: "Flow",
-					termSlug: "flow",
-					tagline: "The Writing Sanctuary",
-					description:
-						"Where the current carries you. Flow is Grove's immersive Markdown editor—the space inside [[arbor|Arbor]] where words take shape. Three editor modes, zen mode for distraction-free writing, drag-and-drop images, and Fireside mode for writers who freeze at the blank page.",
-					status: "live",
-					icon: "flow",
-					integration: "Built into Arbor",
-					spec: "/knowledge/specs/flow-spec",
-					whatIsLink: "/knowledge/help/what-is-flow",
-					subComponents: [
-						{ name: "Zen", icon: "focus", description: "Distraction-free mode" },
-						{
-							name: "Fireside",
-							icon: "flamekindling",
-							description: "Conversational drafting",
-							href: "/knowledge/help/what-is-fireside",
-						},
-						{ name: "Draft", icon: "save", description: "Auto-save to localStorage" },
-						{
-							name: "Vines",
-							icon: "layoutlist",
-							description: "Margin notes",
-							href: "/knowledge/help/what-are-vines",
-						},
-					],
-				},
-				{
-					name: "Reverie",
-					termSlug: "reverie",
-					tagline: "Composition Layer",
-					description:
-						"A reverie is that state between waking and dreaming, when something forms in your mind's eye. Tell Reverie what you want ('make it cozy', 'add something that glows') and it translates your intent into actual component arrangements for your blog. Not a drag-and-drop builder. A conversation with your space.",
-					status: "building",
-					icon: "reverie",
-					domain: "reverie.grove.place",
-					integration: "AI composition layer, accessible through Arbor and Lantern",
-					subComponents: [
-						{
-							name: "Solarpunk",
-							icon: "solarpanel",
-							description: "Solarpunk aligned",
-							href: "/knowledge/help/what-is-solarpunk",
-						},
-						{
-							name: "ZDR",
-							icon: "shredder",
-							description: "Zero data retention",
-							href: "/knowledge/help/what-is-zdr",
-						},
 					],
 				},
 				{
@@ -351,14 +318,15 @@
 					],
 				},
 				{
-					name: "Blazes",
-					termSlug: "blazes",
-					tagline: "Content Type Indicators",
+					name: "Lantern",
+					termSlug: "lantern",
+					tagline: "Cross-Grove Navigation",
 					description:
-						"A trail blaze is a painted mark on a tree. A small rectangle of color that tells hikers which path they're on. You don't read it. You glance. Blazes are the small icon and label on each post that tells you what kind of content it is. A bloom, a note, or something else. The mark that keeps you oriented.",
+						"A lantern in the forest shows you what's around you, where you can go, and always the way back home. Lantern is the floating navigation panel on every grove. Hop between sites, visit friends, access platform services. It glows softly. It doesn't demand attention, but when you need it, it's there.",
 					status: "live",
-					icon: "flamekindling",
-					integration: "Visible across all content types in Grove",
+					icon: "lantern",
+					integration: "Engine chrome component, loads on every site",
+					whatIsLink: "/knowledge/help/what-is-lantern",
 				},
 				{
 					name: "Amber",
@@ -375,23 +343,27 @@
 					whatIsLink: "/knowledge/help/what-is-amber",
 				},
 				{
-					name: "Centennial",
-					termSlug: "centennial",
-					tagline: "Domain Preservation",
+					name: "Reverie",
+					termSlug: "reverie",
+					tagline: "Composition Layer",
 					description:
-						"Some trees outlive the people who planted them. After 12 cumulative months of Sapling+ membership, your grove.place subdomain stays online for 100 years—even if you stop paying, even after you're gone. Your words can have the longevity of an oak.",
+						"A reverie is that state between waking and dreaming, when something forms in your mind's eye. Tell Reverie what you want ('make it cozy', 'add something that glows') and it translates your intent into actual component arrangements for your blog. Not a drag-and-drop builder. A conversation with your space.",
 					status: "building",
-					icon: "squares-exclude",
-					integration: "Automatic unlock after 12 months of Sapling+ membership",
-					spec: "/knowledge/specs/centennial-spec",
-					howLink: "/knowledge/philosophy/grove-sustainability",
-					whatIsLink: "/knowledge/help/what-is-centennial",
+					icon: "reverie",
+					domain: "reverie.grove.place",
+					integration: "AI composition layer, accessible through Arbor and Lantern",
 					subComponents: [
 						{
 							name: "Solarpunk",
 							icon: "solarpanel",
 							description: "Solarpunk aligned",
 							href: "/knowledge/help/what-is-solarpunk",
+						},
+						{
+							name: "ZDR",
+							icon: "shredder",
+							description: "Zero data retention",
+							href: "/knowledge/help/what-is-zdr",
 						},
 					],
 				},
@@ -429,6 +401,44 @@
 			name: "Creative Studio",
 			description: "Tools for making your grove uniquely yours",
 			tools: [
+				{
+					name: "Flow",
+					termSlug: "flow",
+					tagline: "The Writing Sanctuary",
+					description:
+						"Where the current carries you. Flow is Grove's immersive Markdown editor—the space inside [[arbor|Arbor]] where words take shape. Three editor modes, zen mode for distraction-free writing, drag-and-drop images, and Fireside mode for writers who freeze at the blank page.",
+					status: "live",
+					icon: "flow",
+					integration: "Built into Arbor",
+					spec: "/knowledge/specs/flow-spec",
+					whatIsLink: "/knowledge/help/what-is-flow",
+					subComponents: [
+						{ name: "Zen", icon: "focus", description: "Distraction-free mode" },
+						{
+							name: "Fireside",
+							icon: "flamekindling",
+							description: "Conversational drafting",
+							href: "/knowledge/help/what-is-fireside",
+						},
+						{ name: "Draft", icon: "save", description: "Auto-save to localStorage" },
+						{
+							name: "Vines",
+							icon: "layoutlist",
+							description: "Margin notes",
+							href: "/knowledge/help/what-are-vines",
+						},
+					],
+				},
+				{
+					name: "Blazes",
+					termSlug: "blazes",
+					tagline: "Content Type Indicators",
+					description:
+						"A trail blaze is a painted mark on a tree. A small rectangle of color that tells hikers which path they're on. You don't read it. You glance. Blazes are the small icon and label on each post that tells you what kind of content it is. A bloom, a note, or something else. The mark that keeps you oriented.",
+					status: "live",
+					icon: "flamekindling",
+					integration: "Visible across all content types in Grove",
+				},
 				{
 					name: "Foliage",
 					termSlug: "foliage",
@@ -490,208 +500,6 @@
 						{ name: "Canvas", icon: "frame", description: "Design space" },
 						{ name: "Assets", icon: "shapes", description: "Nature components" },
 						{ name: "Export", icon: "imageup", description: "Publish to blog" },
-					],
-				},
-				{
-					name: "Weave",
-					termSlug: "weave",
-					tagline: "Visual Composition Studio",
-					description:
-						"Weave your world together. A node-graph editor within Terrarium for creating animations (Breeze mode) and diagrams (Trace mode). Draw threads between assets, configure timing, watch chains of movement ripple through your scene. A lightweight Mermaid alternative with Grove's dark-mode-first aesthetic.",
-					status: "planned",
-					icon: "weave",
-					integration: "Animation and diagram creation within Terrarium",
-					spec: "/knowledge/specs/weave-spec",
-					whatIsLink: "/knowledge/help/what-is-weave",
-					subComponents: [
-						{ name: "Breeze", icon: "send-to-back", description: "Animation mode" },
-						{ name: "Map", icon: "waypoints", description: "Diagram mode" },
-						{ name: "Thread", icon: "route", description: "Connections" },
-					],
-				},
-			],
-		},
-		{
-			name: "Support & Insights",
-			description: "Help, conversations, and understanding your readers",
-			tools: [
-				{
-					name: "Waystone",
-					termSlug: "waystone",
-					tagline: "Help Center",
-					description:
-						"Integrated help that meets you where you are. Waystone is Grove's help system—contextual assistance built directly into the platform, no external docs site required. When you need help, it's already there.",
-					status: "live",
-					icon: "signpost",
-					integration: "Built into all Grove properties",
-					spec: "/knowledge/specs/waystone-spec",
-					whatIsLink: "/knowledge/help/what-are-waystones",
-				},
-				{
-					name: "Porch",
-					termSlug: "porch",
-					tagline: "Front Porch Conversations",
-					description:
-						"A porch is where you sit and talk. Come up the steps, have a seat, and the grove keeper comes out to chat. Submit a question, start a conversation, or just drop by to say hi. Every visit is tracked, but it never feels like a ticket.",
-					status: "live",
-					icon: "rocking-chair",
-					domain: "porch.grove.place",
-					integration: "Support and conversation for all Wanderers",
-					spec: "/knowledge/specs/porch-spec",
-					whatIsLink: "/knowledge/help/what-is-porch",
-				},
-				{
-					name: "Lantern",
-					termSlug: "lantern",
-					tagline: "Cross-Grove Navigation",
-					description:
-						"A lantern in the forest shows you what's around you, where you can go, and always the way back home. Lantern is the floating navigation panel on every grove. Hop between sites, visit friends, access platform services. It glows softly. It doesn't demand attention, but when you need it, it's there.",
-					status: "live",
-					icon: "lantern",
-					integration: "Engine chrome component, loads on every site",
-					whatIsLink: "/knowledge/help/what-is-lantern",
-				},
-				{
-					name: "Trace",
-					tagline: "Inline Feedback",
-					description:
-						"A trace is what remains when something passes through. Thumbs up or down, right where you are. Quick impressions that help the [[wayfinder|Wayfinder]] see which paths are clear and which need tending.",
-					status: "live",
-					icon: "trace",
-					integration: "Embedded in help articles, docs, and anywhere feedback matters",
-					spec: "/knowledge/specs/trace-spec",
-					whatIsLink: "/knowledge/help/what-are-traces",
-				},
-				{
-					name: "Rings",
-					termSlug: "rings",
-					tagline: "Private Analytics",
-					description:
-						"Count the rings to learn the story. Rings provides private insights for writers: aggregate page views, popular posts, reader geography. No anxiety-inducing real-time dashboards. Your growth reflected back to you, not performed for others.",
-					status: "planned",
-					icon: "barchart",
-					integration: "Analytics dashboard for Grove blogs (Sapling tier and up)",
-					spec: "/knowledge/specs/rings-spec",
-					whatIsLink: "/knowledge/help/what-is-rings",
-					subComponents: [
-						{
-							name: "Solarpunk",
-							icon: "solarpanel",
-							description: "Solarpunk aligned",
-							href: "/knowledge/help/what-is-solarpunk",
-						},
-						{ name: "Views", icon: "eye", description: "Page views" },
-						{ name: "Readers", icon: "bookopencheck", description: "Engaged readers" },
-						{ name: "Resonance", icon: "goal", description: "Content signals" },
-					],
-				},
-			],
-		},
-		{
-			name: "Content & Community",
-			description: "Writing, social features, and community tools",
-			tools: [
-				{
-					name: "Chirp",
-					termSlug: "chirp",
-					tagline: "Direct Messages",
-					description:
-						"Two robins on a branch. [[chirp|Chirp]] is Grove's private 1:1 messaging — quick, real-time conversations with a friend. Send text, share images, see when they're typing. Each chirp is a small, bright call from one robin to another.",
-					status: "building",
-					icon: "chirp",
-					integration: "Real-time messaging via Durable Objects, accessible from Arbor",
-					whatIsLink: "/knowledge/help/what-are-chirps",
-					subComponents: [
-						{ name: "Messages", icon: "messagecircle", description: "Real-time text & images" },
-						{ name: "Typing", icon: "loader", description: "Live typing indicators" },
-						{ name: "Read", icon: "eye", description: "Read receipts" },
-					],
-				},
-				{
-					name: "Reeds",
-					termSlug: "reeds",
-					tagline: "Comments System",
-					description:
-						"Whisper together at the water's edge. [[reeds|Reeds]] is Grove's comment system, supporting both private replies (author-only) and public conversations. Thoughtful engagement flowing naturally beneath your posts.",
-					status: "live",
-					icon: "reeds",
-					integration: "Comments and replies for Grove blogs",
-					spec: "/knowledge/specs/reeds-spec",
-					whatIsLink: "/knowledge/help/what-are-reeds",
-					subComponents: [
-						{ name: "Replies", icon: "reply", description: "Private to author" },
-						{ name: "Comments", icon: "message-square-dot", description: "Public discussion" },
-					],
-				},
-				{
-					name: "Canopy",
-					termSlug: "canopy",
-					tagline: "Wanderer Directory",
-					description:
-						"See who's growing here. Canopy is Grove's opt-in directory — browse who's here, discover other writers, and find your people. Rise into the Canopy by enabling visibility in your settings, write a line about yourself, and choose what kind of growth you represent. No algorithms. No ranking. Just trees, visible to anyone who looks.",
-					status: "live",
-					icon: "book-user",
-					domain: "grove.place/canopy",
-					integration: "Discovery layer for all Wanderers",
-					spec: "/knowledge/specs/canopy-spec",
-					subComponents: [
-						{ name: "Directory", icon: "book-user", description: "Browse wanderers" },
-						{ name: "Categories", icon: "tag", description: "Filter by interest" },
-						{ name: "Opt-In", icon: "squareasterisk", description: "Consent-first visibility" },
-					],
-				},
-				{
-					name: "Thorn",
-					termSlug: "thorn",
-					tagline: "Content Moderation",
-					description:
-						"Every rose has thorns for protection. Thorn is Grove's automated content moderation—privacy-first, context-aware, designed to protect without surveillance. AI-powered but never storing or training on your content.",
-					status: "live",
-					icon: "thorn",
-					integration: "Automated moderation for comments and community content",
-					spec: "/knowledge/specs/thorn-spec",
-					whatIsLink: "/knowledge/help/what-is-thorn",
-					subComponents: [
-						{
-							name: "Solarpunk",
-							icon: "solarpanel",
-							description: "Solarpunk aligned",
-							href: "/knowledge/help/what-is-solarpunk",
-						},
-						{ name: "Privacy", icon: "globelock", description: "No data retention" },
-						{
-							name: "ZDR",
-							icon: "shredder",
-							description: "Zero data retention",
-							href: "/knowledge/help/what-is-zdr",
-						},
-					],
-				},
-				{
-					name: "Petal",
-					termSlug: "petal",
-					tagline: "Image Content Moderation",
-					description:
-						"Petals close to protect what's precious. Petal is Grove's image moderation system—four layers of protection for user photos and AI-generated images. CSAM detection, content classification, sanity checks, and output verification. Protection without surveillance.",
-					status: "greenhouse",
-					icon: "petal",
-					integration: "Image moderation for uploads and AI-generated content",
-					spec: "/knowledge/specs/petal-spec",
-					whatIsLink: "/knowledge/help/what-is-petal",
-					subComponents: [
-						{
-							name: "Solarpunk",
-							icon: "solarpanel",
-							description: "Solarpunk aligned",
-							href: "/knowledge/help/what-is-solarpunk",
-						},
-						{ name: "Privacy", icon: "globelock", description: "No data retention" },
-						{
-							name: "ZDR",
-							icon: "shredder",
-							description: "Zero data retention",
-							href: "/knowledge/help/what-is-zdr",
-						},
 					],
 				},
 				{
@@ -762,6 +570,144 @@
 					],
 				},
 				{
+					name: "Gossamer",
+					termSlug: "gossamer",
+					tagline: "ASCII Visual Effects",
+					description:
+						"Spider silk stretched between branches—delicate threads nearly invisible until the light finds them. Gossamer is an open-source library for 2D Canvas ASCII art effects. Ambient textures, floating patterns, image transformations. The quality of light around your content.",
+					status: "building",
+					icon: "gossamer",
+					integration: "Open-source NPM package for any web project",
+					github: "https://github.com/AutumnsGrove/Gossamer",
+					spec: "/knowledge/specs/gossamer-spec",
+					subComponents: [
+						{ name: "Clouds", icon: "cloud", description: "Ambient ASCII backgrounds" },
+						{ name: "Patterns", icon: "waves", description: "Pattern generators" },
+						{ name: "Canvas", icon: "frame", description: "2D rendering" },
+					],
+				},
+				{
+					name: "Weave",
+					termSlug: "weave",
+					tagline: "Visual Composition Studio",
+					description:
+						"Weave your world together. A node-graph editor within Terrarium for creating animations (Breeze mode) and diagrams (Trace mode). Draw threads between assets, configure timing, watch chains of movement ripple through your scene. A lightweight Mermaid alternative with Grove's dark-mode-first aesthetic.",
+					status: "planned",
+					icon: "weave",
+					integration: "Animation and diagram creation within Terrarium",
+					spec: "/knowledge/specs/weave-spec",
+					whatIsLink: "/knowledge/help/what-is-weave",
+					subComponents: [
+						{ name: "Breeze", icon: "send-to-back", description: "Animation mode" },
+						{ name: "Map", icon: "waypoints", description: "Diagram mode" },
+						{ name: "Thread", icon: "route", description: "Connections" },
+					],
+				},
+			],
+		},
+		{
+			name: "Support & Insights",
+			description: "Help, conversations, and understanding your readers",
+			tools: [
+				{
+					name: "Waystone",
+					termSlug: "waystone",
+					tagline: "Help Center",
+					description:
+						"Integrated help that meets you where you are. Waystone is Grove's help system—contextual assistance built directly into the platform, no external docs site required. When you need help, it's already there.",
+					status: "live",
+					icon: "signpost",
+					integration: "Built into all Grove properties",
+					spec: "/knowledge/specs/waystone-spec",
+					whatIsLink: "/knowledge/help/what-are-waystones",
+				},
+				{
+					name: "Porch",
+					termSlug: "porch",
+					tagline: "Front Porch Conversations",
+					description:
+						"A porch is where you sit and talk. Come up the steps, have a seat, and the grove keeper comes out to chat. Submit a question, start a conversation, or just drop by to say hi. Every visit is tracked, but it never feels like a ticket.",
+					status: "live",
+					icon: "rocking-chair",
+					domain: "porch.grove.place",
+					integration: "Support and conversation for all Wanderers",
+					spec: "/knowledge/specs/porch-spec",
+					whatIsLink: "/knowledge/help/what-is-porch",
+				},
+				{
+					name: "Trace",
+					tagline: "Inline Feedback",
+					description:
+						"A trace is what remains when something passes through. Thumbs up or down, right where you are. Quick impressions that help the [[wayfinder|Wayfinder]] see which paths are clear and which need tending.",
+					status: "live",
+					icon: "trace",
+					integration: "Embedded in help articles, docs, and anywhere feedback matters",
+					spec: "/knowledge/specs/trace-spec",
+					whatIsLink: "/knowledge/help/what-are-traces",
+				},
+				{
+					name: "Rings",
+					termSlug: "rings",
+					tagline: "Private Analytics",
+					description:
+						"Count the rings to learn the story. Rings provides private insights for writers: aggregate page views, popular posts, reader geography. No anxiety-inducing real-time dashboards. Your growth reflected back to you, not performed for others.",
+					status: "planned",
+					icon: "barchart",
+					integration: "Analytics dashboard for Grove blogs (Sapling tier and up)",
+					spec: "/knowledge/specs/rings-spec",
+					whatIsLink: "/knowledge/help/what-is-rings",
+					subComponents: [
+						{
+							name: "Solarpunk",
+							icon: "solarpanel",
+							description: "Solarpunk aligned",
+							href: "/knowledge/help/what-is-solarpunk",
+						},
+						{ name: "Views", icon: "eye", description: "Page views" },
+						{ name: "Readers", icon: "bookopencheck", description: "Engaged readers" },
+						{ name: "Resonance", icon: "goal", description: "Content signals" },
+					],
+				},
+			],
+		},
+		{
+			name: "Content & Community",
+			description: "Social features and community tools",
+			tools: [
+				{
+					name: "Reeds",
+					termSlug: "reeds",
+					tagline: "Comments System",
+					description:
+						"Whisper together at the water's edge. [[reeds|Reeds]] is Grove's comment system, supporting both private replies (author-only) and public conversations. Thoughtful engagement flowing naturally beneath your posts.",
+					status: "live",
+					icon: "reeds",
+					integration: "Comments and replies for Grove blogs",
+					spec: "/knowledge/specs/reeds-spec",
+					whatIsLink: "/knowledge/help/what-are-reeds",
+					subComponents: [
+						{ name: "Replies", icon: "reply", description: "Private to author" },
+						{ name: "Comments", icon: "message-square-dot", description: "Public discussion" },
+					],
+				},
+				{
+					name: "Canopy",
+					termSlug: "canopy",
+					tagline: "Wanderer Directory",
+					description:
+						"See who's growing here. Canopy is Grove's opt-in directory — browse who's here, discover other writers, and find your people. Rise into the Canopy by enabling visibility in your settings, write a line about yourself, and choose what kind of growth you represent. No algorithms. No ranking. Just trees, visible to anyone who looks.",
+					status: "live",
+					icon: "book-user",
+					domain: "grove.place/canopy",
+					integration: "Discovery layer for all Wanderers",
+					spec: "/knowledge/specs/canopy-spec",
+					subComponents: [
+						{ name: "Directory", icon: "book-user", description: "Browse wanderers" },
+						{ name: "Categories", icon: "tag", description: "Filter by interest" },
+						{ name: "Opt-In", icon: "squareasterisk", description: "Consent-first visibility" },
+					],
+				},
+				{
 					name: "Trails",
 					termSlug: "trails",
 					tagline: "Personal Roadmaps",
@@ -806,6 +752,22 @@
 						},
 						{ name: "RSS", icon: "rss", description: "Feed syndication" },
 						{ name: "Opt-In", icon: "squareasterisk", description: "Consent-first sharing" },
+					],
+				},
+				{
+					name: "Chirp",
+					termSlug: "chirp",
+					tagline: "Direct Messages",
+					description:
+						"Two robins on a branch. [[chirp|Chirp]] is Grove's private 1:1 messaging — quick, real-time conversations with a friend. Send text, share images, see when they're typing. Each chirp is a small, bright call from one robin to another.",
+					status: "building",
+					icon: "chirp",
+					integration: "Real-time messaging via Durable Objects, accessible from Arbor",
+					whatIsLink: "/knowledge/help/what-are-chirps",
+					subComponents: [
+						{ name: "Messages", icon: "messagecircle", description: "Real-time text & images" },
+						{ name: "Typing", icon: "loader", description: "Live typing indicators" },
+						{ name: "Read", icon: "eye", description: "Read receipts" },
 					],
 				},
 				{
@@ -971,23 +933,6 @@
 					],
 				},
 				{
-					name: "Gossamer",
-					termSlug: "gossamer",
-					tagline: "ASCII Visual Effects",
-					description:
-						"Spider silk stretched between branches—delicate threads nearly invisible until the light finds them. Gossamer is an open-source library for 2D Canvas ASCII art effects. Ambient textures, floating patterns, image transformations. The quality of light around your content.",
-					status: "building",
-					icon: "gossamer",
-					integration: "Open-source NPM package for any web project",
-					github: "https://github.com/AutumnsGrove/Gossamer",
-					spec: "/knowledge/specs/gossamer-spec",
-					subComponents: [
-						{ name: "Clouds", icon: "cloud", description: "Ambient ASCII backgrounds" },
-						{ name: "Patterns", icon: "waves", description: "Pattern generators" },
-						{ name: "Canvas", icon: "frame", description: "2D rendering" },
-					],
-				},
-				{
 					name: "Nook",
 					tagline: "Private Video Sharing",
 					description:
@@ -1047,6 +992,33 @@
 						{ name: "Bot", icon: "bot", description: "Bot detection" },
 						{ name: "Scraper", icon: "bug", description: "Scraper blocking" },
 						{ name: "Protection", icon: "brickwallfire", description: "Complete protection" },
+					],
+				},
+				{
+					name: "Thorn",
+					termSlug: "thorn",
+					tagline: "Content Moderation",
+					description:
+						"Every rose has thorns for protection. Thorn is Grove's automated content moderation—privacy-first, context-aware, designed to protect without surveillance. AI-powered but never storing or training on your content.",
+					status: "live",
+					icon: "thorn",
+					integration: "Automated moderation for comments and community content",
+					spec: "/knowledge/specs/thorn-spec",
+					whatIsLink: "/knowledge/help/what-is-thorn",
+					subComponents: [
+						{
+							name: "Solarpunk",
+							icon: "solarpanel",
+							description: "Solarpunk aligned",
+							href: "/knowledge/help/what-is-solarpunk",
+						},
+						{ name: "Privacy", icon: "globelock", description: "No data retention" },
+						{
+							name: "ZDR",
+							icon: "shredder",
+							description: "Zero data retention",
+							href: "/knowledge/help/what-is-zdr",
+						},
 					],
 				},
 				{
@@ -1113,23 +1085,6 @@
 					],
 				},
 				{
-					name: "Moss",
-					termSlug: "moss",
-					tagline: "AI Memory",
-					description:
-						"Moss grows on the surfaces the forest touches most. It accumulates, layer by layer, until the forest floor is softened by what came before. Moss is Grove's per-user AI memory system. As Wanderers interact with AI agents, Moss stores structured facts, preferences, and context that carry across sessions. Entirely exportable. No vendor lock-in.",
-					status: "planned",
-					icon: "moss",
-					integration: "Module inside Lumen, available to all AI services",
-					spec: "/knowledge/specs/moss-spec",
-					subComponents: [
-						{ name: "Warm", icon: "layers", description: "Always-on context cache" },
-						{ name: "Recall", icon: "searchcode", description: "Semantic memory search" },
-						{ name: "Extract", icon: "database", description: "Async fact extraction" },
-						{ name: "Export", icon: "download", description: "Portable memory artifact" },
-					],
-				},
-				{
 					name: "Zephyr",
 					termSlug: "zephyr",
 					tagline: "Email Gateway",
@@ -1193,6 +1148,33 @@
 					],
 				},
 				{
+					name: "Petal",
+					termSlug: "petal",
+					tagline: "Image Content Moderation",
+					description:
+						"Petals close to protect what's precious. Petal is Grove's image moderation system—four layers of protection for user photos and AI-generated images. CSAM detection, content classification, sanity checks, and output verification. Protection without surveillance.",
+					status: "greenhouse",
+					icon: "petal",
+					integration: "Image moderation for uploads and AI-generated content",
+					spec: "/knowledge/specs/petal-spec",
+					whatIsLink: "/knowledge/help/what-is-petal",
+					subComponents: [
+						{
+							name: "Solarpunk",
+							icon: "solarpanel",
+							description: "Solarpunk aligned",
+							href: "/knowledge/help/what-is-solarpunk",
+						},
+						{ name: "Privacy", icon: "globelock", description: "No data retention" },
+						{
+							name: "ZDR",
+							icon: "shredder",
+							description: "Zero data retention",
+							href: "/knowledge/help/what-is-zdr",
+						},
+					],
+				},
+				{
 					name: "Mycelium",
 					termSlug: "mycelium",
 					tagline: "MCP Server",
@@ -1204,6 +1186,23 @@
 					integration: "MCP server for AI agent integration",
 					github: "https://github.com/AutumnsGrove/GroveMCP",
 					spec: "/knowledge/specs/mycelium-spec",
+				},
+				{
+					name: "Moss",
+					termSlug: "moss",
+					tagline: "AI Memory",
+					description:
+						"Moss grows on the surfaces the forest touches most. It accumulates, layer by layer, until the forest floor is softened by what came before. Moss is Grove's per-user AI memory system. As Wanderers interact with AI agents, Moss stores structured facts, preferences, and context that carry across sessions. Entirely exportable. No vendor lock-in.",
+					status: "planned",
+					icon: "moss",
+					integration: "Module inside Lumen, available to all AI services",
+					spec: "/knowledge/specs/moss-spec",
+					subComponents: [
+						{ name: "Warm", icon: "layers", description: "Always-on context cache" },
+						{ name: "Recall", icon: "searchcode", description: "Semantic memory search" },
+						{ name: "Extract", icon: "database", description: "Async fact extraction" },
+						{ name: "Export", icon: "download", description: "Portable memory artifact" },
+					],
 				},
 			],
 		},
@@ -1311,7 +1310,7 @@
 					tagline: "Tool Showcase Pattern",
 					description:
 						"Every vine starts somewhere. Vineyard is a documentation and demo pattern that every Grove tool implements. Visit toolname.grove.place/vineyard to explore what each tool does, how it works, and where it's headed.",
-					status: "being implemented",
+					status: "building",
 					icon: "grape",
 					integration: "Documentation pattern implemented by all Grove tools",
 					spec: "/knowledge/patterns/vineyard-spec",
@@ -1347,11 +1346,6 @@
 					text: "Building",
 					class: "bg-warning-bg text-warning-foreground",
 				};
-			case "being implemented":
-				return {
-					text: "Building",
-					class: "bg-warning-bg text-warning-foreground",
-				};
 			case "planned":
 				return {
 					text: "Planned",
@@ -1372,13 +1366,14 @@
 	// Icons must exist in toolIcons (icons.ts) - using valid icons for each category
 	const tocItems = [
 		{ id: categoryIds[0], text: "Core Infrastructure", icon: "pyramid" },
-		{ id: categoryIds[1], text: "Core Services", icon: "circuitboard" },
-		{ id: categoryIds[2], text: "Creative Studio", icon: "paintbrush" },
-		{ id: categoryIds[3], text: "Support & Insights", icon: "signpost" },
-		{ id: categoryIds[4], text: "Content & Community", icon: "id-card-lanyard" },
-		{ id: categoryIds[5], text: "Standalone Tools", icon: "toolbox" },
-		{ id: categoryIds[6], text: "Operations", icon: "dock" },
-		{ id: categoryIds[7], text: "Patterns", icon: "regex" },
+		{ id: categoryIds[1], text: "Your Space", icon: "trees" },
+		{ id: categoryIds[2], text: "Core Services", icon: "circuitboard" },
+		{ id: categoryIds[3], text: "Creative Studio", icon: "paintbrush" },
+		{ id: categoryIds[4], text: "Support & Insights", icon: "signpost" },
+		{ id: categoryIds[5], text: "Content & Community", icon: "id-card-lanyard" },
+		{ id: categoryIds[6], text: "Standalone Tools", icon: "toolbox" },
+		{ id: categoryIds[7], text: "Operations", icon: "dock" },
+		{ id: categoryIds[8], text: "Patterns", icon: "regex" },
 	];
 
 	// Helper to generate tool ID for navigation
