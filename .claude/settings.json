@@ -175,6 +175,16 @@
 					}
 				]
 			}
+		],
+		"PostToolUse": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "python3 ~/.claude/hooks/langfuse.py"
+					}
+				]
+			}
 		]
 	}
 }
