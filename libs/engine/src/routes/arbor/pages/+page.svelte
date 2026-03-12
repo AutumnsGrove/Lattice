@@ -30,6 +30,7 @@
 		Star,
 		MousePointer,
 		Wind,
+		ArrowRight,
 	} from "@lucide/svelte";
 	import { api } from "$lib/utils";
 
@@ -334,11 +335,20 @@
 	<!-- Active Curios Section -->
 	{#if data.curios && data.curios.length > 0}
 		<GlassCard variant="default" class="mb-8">
-			<div class="flex items-center gap-2 mb-4">
-				<Sparkles class="w-5 h-5 text-grove-600 dark:text-grove-400" />
-				<h2 class="m-0 text-lg font-semibold text-foreground">
-					Active <GroveTerm term="curios">Curios</GroveTerm>
-				</h2>
+			<div class="flex items-center justify-between mb-4">
+				<div class="flex items-center gap-2">
+					<Sparkles class="w-5 h-5 text-grove-600 dark:text-grove-400" />
+					<h2 class="m-0 text-lg font-semibold text-foreground">
+						Active <GroveTerm term="curios">Curios</GroveTerm>
+					</h2>
+				</div>
+				<a
+					href="/arbor/curios"
+					class="inline-flex items-center gap-1 text-sm text-grove-600 dark:text-grove-400 no-underline hover:underline transition-colors"
+				>
+					Manage all
+					<ArrowRight class="w-4 h-4" />
+				</a>
 			</div>
 			<p class="text-sm text-foreground-muted mb-4">
 				<GroveTerm term="curios">Curios</GroveTerm> are special page types that add dynamic functionality
