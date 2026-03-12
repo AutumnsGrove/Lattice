@@ -1,3 +1,14 @@
+---
+title: "Paddle vs Polar Deep Dive Safari"
+description: "Comparing Paddle and Polar as merchant-of-record payment solutions"
+category: safari
+lastUpdated: "2026-03-02"
+tags:
+  - payments
+  - paddle
+  - polar
+---
+
 # Merchant of Record Deep Dive — Paddle vs Polar.sh for Grove
 
 > Stripe isn't bad. It's just not what we want. We want someone else to handle the taxes.

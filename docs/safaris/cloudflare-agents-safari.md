@@ -1,3 +1,14 @@
+---
+title: "Cloudflare Agents Safari"
+description: "Deep dive into Cloudflare's Agents SDK capabilities and patterns"
+category: safari
+lastUpdated: "2026-03-02"
+tags:
+  - cloudflare
+  - agents
+  - durable-objects
+---
+
 # Cloudflare Agents SDK Safari — The Forest Awakens
 
 > Every tree in the Grove could have its own heartbeat. The Agents SDK gives them one.

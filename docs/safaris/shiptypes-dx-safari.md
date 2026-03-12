@@ -1,3 +1,13 @@
+---
+title: "ShipTypes DX Safari"
+description: "Exploring developer experience patterns for type-safe shipping"
+category: safari
+lastUpdated: "2026-03-02"
+tags:
+  - dx
+  - types
+---
+
 # ShipTypes DX Safari — Types as Contracts Across the Grove
 
 > "The type signature _is_ the documentation. It cannot drift because it _is_ the code."

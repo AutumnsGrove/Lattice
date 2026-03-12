@@ -1,7 +1,11 @@
 ---
 title: "Login Safari — Into the Authentication Wilderness"
-status: active
 category: safari
+lastUpdated: "2026-02-20"
+tags:
+  - heartwood
+  - auth
+  - login
 ---
 
 # Login Safari — Into the Authentication Wilderness

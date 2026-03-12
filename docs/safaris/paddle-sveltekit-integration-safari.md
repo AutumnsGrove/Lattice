@@ -1,3 +1,14 @@
+---
+title: "Paddle SvelteKit Integration Safari"
+description: "Exploring Paddle Billing integration patterns with SvelteKit"
+category: safari
+lastUpdated: "2026-03-02"
+tags:
+  - payments
+  - paddle
+  - sveltekit
+---
+
 # Paddle + SvelteKit Integration Safari — How Does This Actually Work?
 
 > Not "should we use Paddle?" — that was the last safari. This is "how does it live inside SvelteKit?"

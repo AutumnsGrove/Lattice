@@ -1,7 +1,11 @@
 ---
 title: "Meadow Notes Safari — Dual Content Types for the Community Feed"
-status: active
 category: safari
+lastUpdated: "2026-03-02"
+tags:
+  - meadow
+  - social
+  - content
 ---
 
 # Meadow Notes Safari — Dual Content Types for the Community Feed

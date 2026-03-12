@@ -1,3 +1,14 @@
+---
+title: "Reverie Expansion Safari"
+description: "Mapping all possible Reverie domain schemas and configuration levers"
+category: safari
+lastUpdated: "2026-03-02"
+tags:
+  - reverie
+  - ai
+  - configuration
+---
+
 # Reverie Expansion Safari — Every Lever in the Grove
 
 > *The jeep idles at the edge of the grove. Binoculars around your neck, journal open on the dashboard. The territory stretches in every direction — themes, curios, content, community, identity. 32 stops. 100+ levers. One mission: map everything a Wanderer should be able to touch with their voice.*

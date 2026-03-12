@@ -1,8 +1,11 @@
 ---
 title: "Passkey Safari — Tracking the Ghost Keys"
-status: active
 category: safari
-updated: 2026-02-24
+lastUpdated: "2026-02-24"
+tags:
+  - passkeys
+  - auth
+  - webauthn
 ---
 
 # Passkey Safari — Tracking the Ghost Keys

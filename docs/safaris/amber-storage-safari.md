@@ -2,8 +2,12 @@
 title: "Amber Storage Safari — From Beautiful Shell to Data Sovereignty"
 description: "A safari expedition across the Amber storage landscape: Worker backend, SvelteKit frontend, specs, and the vision for automated backup + external storage sync"
 category: safari
-status: active
 created: 2026-02-21
+lastUpdated: "2026-02-21"
+tags:
+  - amber
+  - storage
+  - infrastructure
 ---
 
 # Amber Storage Safari — From Beautiful Shell to Data Sovereignty

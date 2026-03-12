@@ -1,7 +1,7 @@
 ---
 title: "Grove's Decentralization Strategy — Safari Expedition Journal"
 description: "A strategic exploration of how Grove prevents platform capture, inspired by 'Be Wary of Bluesky'"
-category: plans
+category: safari
 icon: compass
 lastUpdated: "2026-02-21"
 tags:

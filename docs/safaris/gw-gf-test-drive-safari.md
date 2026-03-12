@@ -1,3 +1,14 @@
+---
+title: "GW/GF Test Drive Safari"
+description: "Testing and evaluating grove-wrap and grove-find CLI tools"
+category: safari
+lastUpdated: "2026-03-02"
+tags:
+  - gw
+  - gf
+  - cli
+---
+
 # gw + gf Test Drive Safari
 
 > "You don't know a tool until you've driven it through rough terrain."

@@ -1,3 +1,13 @@
+---
+title: "Shellbox vs Firefly Safari"
+description: "Comparing ephemeral server provisioning approaches"
+category: safari
+lastUpdated: "2026-03-02"
+tags:
+  - firefly
+  - infrastructure
+---
+
 # Shellbox vs Firefly Safari — What the Wild Can Teach the Grove
 
 > _Two approaches to the same dream: servers that exist only when you need them._

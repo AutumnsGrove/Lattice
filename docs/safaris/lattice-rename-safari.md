@@ -1,7 +1,11 @@
 ---
 title: "Lattice Rename Safari — From Lattice to @autumnsgrove/lattice"
-status: active
 category: safari
+lastUpdated: "2026-03-02"
+tags:
+  - lattice
+  - monorepo
+  - rename
 ---
 
 # Lattice Rename Safari — From Lattice to @autumnsgrove/lattice

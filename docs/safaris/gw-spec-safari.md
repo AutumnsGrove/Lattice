@@ -1,7 +1,11 @@
 ---
 title: "Grove Wrap Safari — Mapping the Wilderness Before the Rewrite"
-status: active
 category: safari
+lastUpdated: "2026-03-02"
+tags:
+  - gw
+  - cli
+  - specs
 ---
 
 # Grove Wrap Safari — Mapping the Wilderness Before the Rewrite

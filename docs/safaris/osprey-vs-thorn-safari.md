@@ -1,3 +1,14 @@
+---
+title: "Osprey vs Thorn Safari"
+description: "Comparing automated moderation approaches for content protection"
+category: safari
+lastUpdated: "2026-03-02"
+tags:
+  - moderation
+  - thorn
+  - osprey
+---
+
 # Osprey Safari — Discord's Rules Engine vs Grove's Thorn
 
 > Two raptors in the sky — one hunts with rules, the other with intuition.

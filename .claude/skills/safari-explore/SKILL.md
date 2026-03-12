@@ -84,7 +84,6 @@ What are you looking at per item? Define this upfront so every stop is consisten
 
 ```bash
 # The expedition journal lives in docs/safaris/
-# Active safaris go in docs/safaris/active/, planned in docs/safaris/planned/
 # Name it after the safari: curio-safari.md, admin-safari.md, etc.
 ```
 
@@ -332,8 +331,8 @@ Compile the full expedition journal:
 **Write the journal to disk:**
 
 ```bash
-# The journal goes in docs/safaris/active/ or docs/safaris/planned/
-# Active = implementation starts soon, Planned = queued for later
+# The journal goes in docs/safaris/
+# All safaris live flat — no lifecycle subdirectories
 ```
 
 **Final safari narration:**

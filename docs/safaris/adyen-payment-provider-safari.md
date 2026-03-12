@@ -1,3 +1,13 @@
+---
+title: "Adyen Payment Provider Safari"
+description: "Exploring Adyen as a payment provider alternative"
+category: safari
+lastUpdated: "2026-03-02"
+tags:
+  - payments
+  - adyen
+---
+
 # Adyen Payment Provider Safari — Should Grove Switch from Stripe?
 
 > Can a payment provider built for Uber and Spotify serve an indie tea shop for queer creators?

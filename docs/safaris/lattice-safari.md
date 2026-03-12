@@ -1,7 +1,11 @@
 ---
 title: "Lattice Safari — Full Ecosystem Expedition"
-status: active
 category: safari
+lastUpdated: "2026-03-02"
+tags:
+  - lattice
+  - architecture
+  - monorepo
 ---
 
 # Lattice Safari — Full Ecosystem Expedition

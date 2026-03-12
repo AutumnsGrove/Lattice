@@ -1,3 +1,14 @@
+---
+title: "GW Charm Glowup Safari"
+description: "Exploring Charm CLI libraries for improving grove-wrap terminal UX"
+category: safari
+lastUpdated: "2026-03-02"
+tags:
+  - gw
+  - cli
+  - charm
+---
+
 # GW Charm Glow-Up Safari
 
 > "The tool works. Now make it sing."
