@@ -17,7 +17,7 @@ A rolling inventory of what has dev docs and what doesn't. Specs describe *what*
 
 The waystone guide (`waystone-developer-guide.md`) is the template. Every guide should answer: "How do I add/modify X?", "How does X work under the hood?", and "What breaks and why?"
 
-Last updated: 2026-03-12 (Priority 1 complete)
+Last updated: 2026-03-12 (Priority 1 + Priority 2 complete)
 
 ---
 
@@ -52,20 +52,20 @@ These are live, actively modified, and have non-obvious registration steps or fa
 
 | System | Location | Spec | Guide | What a guide would cover |
 |--------|----------|:----:|:-----:|--------------------------|
-| Passage | router/wildcard system | yes | **NEEDS GUIDE** | Subdomain routing, how tenant resolution works, DNS/CF config |
-| Foliage | `libs/foliage/` | yes | **NEEDS GUIDE** | Theme structure, adding a new theme, tier validation, Prism integration |
-| Flow | `libs/engine/.../flow/` | yes | **NEEDS GUIDE** | Editor modes, Fireside integration, localStorage drafts, zen mode |
-| Arbor | engine routes | yes | **NEEDS GUIDE** | Route structure, GlassCard patterns, page layout conventions |
-| Lantern | `libs/engine/.../lantern/` | yes | **NEEDS GUIDE** | Chrome component lifecycle, cross-grove nav, how it loads on tenant sites |
-| Blazes | `libs/engine/src/lib/blazes/` | yes | **NEEDS GUIDE** | Adding a new blaze type, palette system, Lucide icon bridging |
-| Shade | engine middleware | yes | **NEEDS GUIDE** | Seven-layer defense, how each layer works, adding new bot rules |
-| Reeds | comments system | yes | **NEEDS GUIDE** | Reply vs comment, moderation hooks, notification flow |
-| Curios | `libs/engine/src/lib/curios/` | yes | **NEEDS GUIDE** | Adding a new curio type, directive system, curio rendering pipeline |
-| Amber | `libs/engine/src/lib/amber/` | yes | **NEEDS GUIDE** | FileManager/QuotaManager/ExportManager, storage quota system |
-| Plant | `apps/plant/` | yes | **NEEDS GUIDE** | Onboarding flow steps, Loam name validation, payment handoff |
-| Canopy | directory system | yes | **NEEDS GUIDE** | Opt-in visibility, directory categories, search |
-| Reverie | `workers/reverie/` | yes | **NEEDS GUIDE** | 5-layer pipeline, adding domains/schemas, auth pattern, Lumen tool-calling |
-| Warden | `workers/warden/` | yes | **NEEDS GUIDE** | Adding new external API integrations, permission model, credential vault |
+| Passage | `services/grove-router/` | yes | **HAS GUIDE** | Subdomain routing, tenant resolution, adding service routes |
+| Foliage | `libs/foliage/` | yes | **HAS GUIDE** | Theme structure, adding themes, tier validation, Prism integration |
+| Flow | `libs/engine/.../admin/` | yes | **HAS GUIDE** | Editor modes, Fireside integration, localStorage drafts, zen mode |
+| Arbor | engine routes | yes | **HAS GUIDE** | ArborPanel shell, GlassCard patterns, adding sections, nav config |
+| Lantern | `libs/engine/.../lantern/` | yes | **HAS GUIDE** | Chrome lifecycle, cross-grove nav, friends system, FAB behavior |
+| Blazes | `libs/engine/src/lib/blazes/` | yes | **HAS GUIDE** | Two-slot model, palette system, Lucide icon bridging, adding types |
+| Shade | engine middleware | yes | **HAS GUIDE** | Nine-layer defense, Turnstile verification, cookie signing, bot rules |
+| Reeds | comments system | yes | **HAS GUIDE** | Reply vs comment, moderation hooks, threading, rate limiting |
+| Curios | `libs/engine/src/lib/curios/` | yes | **HAS GUIDE** | Module anatomy, config pattern, adding curios, import safety |
+| Amber | `libs/engine/src/lib/amber/` | yes | **HAS GUIDE** | Four managers, upload flow, quota system, error catalog |
+| Plant | `apps/plant/` | yes | **HAS GUIDE** | Onboarding state machine, Loam validation, payment handoff |
+| Canopy | directory system | yes | **HAS GUIDE** | Opt-in visibility, categories, daily shuffle, client filtering |
+| Reverie | `workers/reverie/` | yes | **HAS GUIDE** | Five-layer pipeline, domain schemas, atmospheres, Lumen tool-calling |
+| Warden | `workers/warden/` | yes | **HAS GUIDE** | Dual auth, credential vault, scopes, adding services, audit logging |
 
 ## Priority 3 — Libraries and infrastructure
 
@@ -122,6 +122,20 @@ Developer guides in `docs/guides/`:
 | `heartwood-developer-guide.md` | Auth system, PKCE flow, session validation |
 | `zephyr-developer-guide.md` | Email gateway, templates, retry logic |
 | `threshold-developer-guide.md` | Rate limiting, tier-based limits, KV tracking |
+| `passage-developer-guide.md` | Subdomain routing, tenant resolution, service bindings |
+| `foliage-developer-guide.md` | Theme system, tier gating, Prism integration |
+| `flow-developer-guide.md` | Markdown editor, modes, drafts, Fireside AI |
+| `arbor-developer-guide.md` | Admin panel shell, GlassCard, nav configuration |
+| `lantern-developer-guide.md` | Cross-grove navigation, friends, chrome lifecycle |
+| `blazes-developer-guide.md` | Content markers, two-slot model, icon resolution |
+| `shade-developer-guide.md` | Content protection, nine layers, Turnstile |
+| `reeds-developer-guide.md` | Comments, moderation, threading, rate limiting |
+| `curios-developer-guide.md` | Widget modules, config pattern, adding curios |
+| `amber-developer-guide.md` | Storage SDK, four managers, quota system |
+| `plant-developer-guide.md` | Onboarding app, Loam validation, Stripe flow |
+| `canopy-developer-guide.md` | Directory system, categories, daily shuffle |
+| `reverie-developer-guide.md` | AI config pipeline, domains, atmospheres |
+| `warden-developer-guide.md` | Credential gateway, auth paths, service abstraction |
 | `adding-grafts-and-flags.md` | Graft/feature flag system |
 | `grove-mcp-guide.md` | Mycelium MCP setup |
 | `error-code-diagnostic-guide.md` | Signpost error codes |
