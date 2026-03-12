@@ -6,6 +6,8 @@ on:
     paths:
       - "libs/engine/migrations/*.sql"
       - "libs/engine/src/lib/feature-flags/**"
+      - ".github/graft-inventory.json"
+      - "docs/help-center/articles/greenhouse-features.md"
 
   # Run weekly on Wednesday mornings
   schedule:
@@ -104,6 +106,62 @@ jobs:
           echo "actual_greenhouse=$ACTUAL_GREENHOUSE" >> $GITHUB_OUTPUT
           echo "last_updated=$LAST_UPDATED" >> $GITHUB_OUTPUT
 
+      - name: Validate maturity fields in inventory
+        id: check-maturity
+        shell: bash
+        run: |
+          echo "🌿 Checking maturity fields in graft inventory..."
+
+          # Check that all flags have a maturity field
+          MISSING_MATURITY=$(jq -r '.flags[] | select(.maturity == null) | .id' .github/graft-inventory.json)
+          VALID_VALUES='["experimental","beta","stable","graduated"]'
+          INVALID_MATURITY=$(jq -r --argjson valid "$VALID_VALUES" '.flags[] | select(.maturity != null) | select([.maturity] | inside($valid) | not) | "\(.id): \(.maturity)"' .github/graft-inventory.json)
+
+          if [ -n "$MISSING_MATURITY" ]; then
+            echo "⚠️ Flags missing maturity field:"
+            echo "$MISSING_MATURITY"
+            echo "has_maturity_issues=true" >> $GITHUB_OUTPUT
+            echo "missing_maturity<<EOF" >> $GITHUB_OUTPUT
+            echo "$MISSING_MATURITY" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          elif [ -n "$INVALID_MATURITY" ]; then
+            echo "⚠️ Flags with invalid maturity values:"
+            echo "$INVALID_MATURITY"
+            echo "has_maturity_issues=true" >> $GITHUB_OUTPUT
+            echo "invalid_maturity<<EOF" >> $GITHUB_OUTPUT
+            echo "$INVALID_MATURITY" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "✅ All flags have valid maturity values"
+            echo "has_maturity_issues=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check greenhouse article freshness
+        id: check-article
+        shell: bash
+        run: |
+          ARTICLE="docs/help-center/articles/greenhouse-features.md"
+
+          if [ ! -f "$ARTICLE" ]; then
+            echo "⚠️ Greenhouse features article not found"
+            echo "article_status=missing" >> $GITHUB_OUTPUT
+          else
+            # Check if article lastUpdated is older than inventory lastUpdated
+            ARTICLE_DATE=$(grep -m1 "^lastUpdated:" "$ARTICLE" | sed "s/lastUpdated: *['\"]*//" | sed "s/['\"].*$//")
+            INVENTORY_DATE=$(jq -r '.lastUpdated' .github/graft-inventory.json)
+
+            echo "Article lastUpdated: $ARTICLE_DATE"
+            echo "Inventory lastUpdated: $INVENTORY_DATE"
+
+            if [ "$ARTICLE_DATE" \< "$INVENTORY_DATE" ]; then
+              echo "⚠️ Article is older than inventory — regeneration needed"
+              echo "article_status=stale" >> $GITHUB_OUTPUT
+            else
+              echo "✅ Article is up to date with inventory"
+              echo "article_status=fresh" >> $GITHUB_OUTPUT
+            fi
+          fi
+
       - name: Find new graft definitions in PR
         if: github.event_name == 'pull_request' && steps.count-grafts.outputs.has_changes == 'true'
         id: find-new-grafts
@@ -125,58 +183,90 @@ jobs:
           fi
 
       - name: Comment on PR (if grafts changed)
-        if: github.event_name == 'pull_request' && steps.count-grafts.outputs.has_changes == 'true'
+        if: github.event_name == 'pull_request' && (steps.count-grafts.outputs.has_changes == 'true' || steps.check-maturity.outputs.has_maturity_issues == 'true' || steps.check-article.outputs.article_status != 'fresh')
         uses: actions/github-script@v7
         env:
           EXPECTED: ${{ steps.count-grafts.outputs.expected }}
           ACTUAL: ${{ steps.count-grafts.outputs.actual }}
           DIFF: ${{ steps.count-grafts.outputs.diff }}
           CHANGE_TYPE: ${{ steps.count-grafts.outputs.change_type }}
+          HAS_CHANGES: ${{ steps.count-grafts.outputs.has_changes }}
           NEW_GRAFTS: ${{ steps.find-new-grafts.outputs.new_grafts }}
+          HAS_MATURITY_ISSUES: ${{ steps.check-maturity.outputs.has_maturity_issues }}
+          MISSING_MATURITY: ${{ steps.check-maturity.outputs.missing_maturity }}
+          INVALID_MATURITY: ${{ steps.check-maturity.outputs.invalid_maturity }}
+          ARTICLE_STATUS: ${{ steps.check-article.outputs.article_status }}
         with:
           script: |
-            const expected = process.env.EXPECTED;
-            const actual = process.env.ACTUAL;
-            const diff = parseInt(process.env.DIFF);
-            const changeType = process.env.CHANGE_TYPE;
-            const newGrafts = process.env.NEW_GRAFTS || '';
+            const hasChanges = process.env.HAS_CHANGES === 'true';
+            const hasMaturityIssues = process.env.HAS_MATURITY_ISSUES === 'true';
+            const articleStatus = process.env.ARTICLE_STATUS;
 
-            const emoji = changeType === 'added' ? '🌱' : '✂️';
-            const verb = changeType === 'added' ? 'added' : 'removed';
-            const absDiff = Math.abs(diff);
+            let body = '';
 
-            let newGraftsList = '';
-            if (newGrafts) {
-              const grafts = newGrafts.trim().split('\n').map(g => `- \`${g}\``).join('\n');
-              newGraftsList = `
+            // Graft count section
+            if (hasChanges) {
+              const expected = process.env.EXPECTED;
+              const actual = process.env.ACTUAL;
+              const diff = parseInt(process.env.DIFF);
+              const changeType = process.env.CHANGE_TYPE;
+              const newGrafts = process.env.NEW_GRAFTS || '';
 
-            ### New Grafts Detected
-            ${grafts}`;
+              const emoji = changeType === 'added' ? '🌱' : '✂️';
+              const verb = changeType === 'added' ? 'added' : 'removed';
+              const absDiff = Math.abs(diff);
+
+              let newGraftsList = '';
+              if (newGrafts) {
+                const grafts = newGrafts.trim().split('\n').map(g => `- \`${g}\``).join('\n');
+                newGraftsList = `\n\n### New Grafts Detected\n${grafts}`;
+              }
+
+              body += `## ${emoji} Graft Inventory Change Detected\n\n`;
+              body += `This PR appears to have **${verb} ${absDiff} graft(s)**.\n\n`;
+              body += `| Metric | Count |\n|--------|-------|\n`;
+              body += `| Expected (inventory) | ${expected} |\n`;
+              body += `| Actual (migrations) | ${actual} |\n`;
+              body += `| Difference | ${diff > 0 ? '+' : ''}${diff} |\n`;
+              body += newGraftsList + '\n\n';
             }
 
-            const body = `## ${emoji} Graft Inventory Change Detected
+            // Maturity section
+            if (hasMaturityIssues) {
+              const missing = process.env.MISSING_MATURITY || '';
+              const invalid = process.env.INVALID_MATURITY || '';
 
-            This PR appears to have **${verb} ${absDiff} graft(s)**.
+              body += `### 🌿 Maturity Field Issues\n\n`;
+              if (missing) {
+                const flags = missing.trim().split('\n').map(f => `- \`${f}\``).join('\n');
+                body += `Flags missing \`maturity\` field in inventory:\n${flags}\n\n`;
+              }
+              if (invalid) {
+                body += `Flags with invalid maturity values:\n\`\`\`\n${invalid}\n\`\`\`\n\n`;
+              }
+              body += `Valid values: \`experimental\`, \`beta\`, \`stable\`, \`graduated\`\n\n`;
+            }
 
-            | Metric | Count |
-            |--------|-------|
-            | Expected (inventory) | ${expected} |
-            | Actual (migrations) | ${actual} |
-            | Difference | ${diff > 0 ? '+' : ''}${diff} |
-            ${newGraftsList}
+            // Article freshness section
+            if (articleStatus === 'stale') {
+              body += `### 📄 Greenhouse Article Needs Regeneration\n\n`;
+              body += `The greenhouse features article is older than the graft inventory. Please run:\n\n`;
+              body += `\`\`\`bash\nbun run tools/generate-greenhouse-article.ts\n\`\`\`\n\n`;
+            } else if (articleStatus === 'missing') {
+              body += `### 📄 Greenhouse Article Missing\n\n`;
+              body += `No \`greenhouse-features.md\` found. Generate it:\n\n`;
+              body += `\`\`\`bash\nbun run tools/generate-greenhouse-article.ts\n\`\`\`\n\n`;
+            }
 
-            ### Action Required
-
-            If this PR adds new grafts, please:
-            1. Update \`.github/graft-inventory.json\` with the new flag(s)
-            2. Add the flag ID to \`KnownGraftId\` type in \`grafts.ts\`
-            3. Apply migration to production: \`pnpm exec wrangler d1 execute grove-engine-db --remote --file=...\`
-            4. Update the developer guide if the pattern is novel
-
-            See \`docs/guides/adding-grafts-and-flags.md\` for the full process.
-
-            ---
-            *This check helps keep our graft documentation accurate.*`;
+            // Action required section
+            body += `### Action Required\n\n`;
+            body += `If this PR adds new grafts, please:\n`;
+            body += `1. Update \`.github/graft-inventory.json\` with the new flag(s) — include \`maturity\` field\n`;
+            body += `2. Add the flag ID to \`KnownGraftId\` type in \`grafts.ts\`\n`;
+            body += `3. Regenerate the greenhouse article: \`bun run tools/generate-greenhouse-article.ts\`\n`;
+            body += `4. Apply migration to production: \`pnpm exec wrangler d1 execute grove-engine-db --remote --file=...\`\n\n`;
+            body += `See \`docs/guides/adding-grafts-and-flags.md\` for the full process.\n\n`;
+            body += `---\n*This check helps keep our graft documentation accurate.*`;
 
             await github.rest.issues.createComment({
               owner: context.repo.owner,
@@ -268,6 +358,8 @@ jobs:
           EXPECTED: ${{ steps.count-grafts.outputs.expected }}
           ACTUAL: ${{ steps.count-grafts.outputs.actual }}
           DIFF: ${{ steps.count-grafts.outputs.diff }}
+          HAS_MATURITY_ISSUES: ${{ steps.check-maturity.outputs.has_maturity_issues }}
+          ARTICLE_STATUS: ${{ steps.check-article.outputs.article_status }}
         run: |
           echo "## Graft Inventory Check" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -284,4 +376,22 @@ jobs:
             echo "Update \`.github/graft-inventory.json\` to match current state." >> $GITHUB_STEP_SUMMARY
           else
             echo "✅ Graft count matches inventory" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Maturity & Article Status" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$HAS_MATURITY_ISSUES" = "true" ]; then
+            echo "⚠️ Some flags are missing or have invalid \`maturity\` values" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ All flags have valid maturity values" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ "$ARTICLE_STATUS" = "fresh" ]; then
+            echo "✅ Greenhouse features article is up to date" >> $GITHUB_STEP_SUMMARY
+          elif [ "$ARTICLE_STATUS" = "stale" ]; then
+            echo "⚠️ Greenhouse features article needs regeneration: \`bun run tools/generate-greenhouse-article.ts\`" >> $GITHUB_STEP_SUMMARY
+          elif [ "$ARTICLE_STATUS" = "missing" ]; then
+            echo "⚠️ Greenhouse features article is missing" >> $GITHUB_STEP_SUMMARY
           fi

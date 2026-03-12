@@ -52,6 +52,7 @@
 		<div class="graft-info">
 			<div class="graft-header">
 				<span class="graft-name">{displayName}</span>
+				<span class="maturity-badge maturity-{graft.maturity}" title="{graft.maturity} feature">{graft.maturity}</span>
 				{#if graft.hasOverride}
 					<span class="override-badge" title="Custom preference">Modified</span>
 				{/if}
@@ -139,6 +140,37 @@
 		font-weight: 600;
 		font-size: 0.95rem;
 		color: var(--color-text);
+	}
+
+	.maturity-badge {
+		display: inline-flex;
+		align-items: center;
+		padding: 0.125rem 0.5rem;
+		font-size: 0.65rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		border-radius: 9999px;
+	}
+
+	.maturity-experimental {
+		color: var(--color-warning, #d97706);
+		background: rgba(217, 119, 6, 0.1);
+	}
+
+	.maturity-beta {
+		color: var(--color-info, #3b82f6);
+		background: rgba(59, 130, 246, 0.1);
+	}
+
+	.maturity-stable {
+		color: var(--color-primary);
+		background: rgba(16, 185, 129, 0.1);
+	}
+
+	.maturity-graduated {
+		color: var(--color-text-muted);
+		background: var(--grove-overlay-10);
 	}
 
 	.override-badge {

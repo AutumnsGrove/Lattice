@@ -7,7 +7,7 @@
 
 import type { Snippet } from "svelte";
 import type { BaseGraftProps } from "../types.js";
-import type { GreenhouseTenant, FlagType } from "../../feature-flags/types.js";
+import type { GreenhouseTenant, FlagType, FlagMaturity } from "../../feature-flags/types.js";
 
 // Re-export for convenience
 export type { GreenhouseTenant };
@@ -225,8 +225,8 @@ export interface TenantGraftInfo {
 	/** The graft's global default value */
 	globalDefault: boolean;
 
-	/** Category for grouping */
-	category: "experimental" | "stable" | "beta";
+	/** Lifecycle stage of this graft */
+	maturity: FlagMaturity;
 }
 
 /**

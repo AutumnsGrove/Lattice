@@ -118,6 +118,7 @@ const WAYSTONE_ARTICLE_SLUGS = [
 	"what-is-reverie", // Reverie AI config — used in arbor/account features
 	"what-is-canopy", // Canopy page design — used in arbor/settings
 	"what-is-meadow", // Meadow social links — used in arbor/settings
+	"greenhouse-features", // Greenhouse features — used in GraftControlPanel
 ];
 
 // Generate entries for all waystone-linked articles

@@ -1,8 +1,8 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"description": "Tracks feature flag (graft) inventory for documentation and drift detection",
-	"lastUpdated": "2026-03-05",
+	"lastUpdated": "2026-03-12",
 	"lastAuditedBy": "claude/inventory-audit",
 	"grafts": {
 		"total": 18,
@@ -21,6 +21,7 @@
 			"name": "Fireside Mode",
 			"type": "boolean",
 			"greenhouseOnly": true,
+			"maturity": "experimental",
 			"migration": "040_fireside_scribe_grafts.sql",
 			"description": "AI-assisted writing prompts in the blog editor"
 		},
@@ -29,6 +30,7 @@
 			"name": "Image Uploads",
 			"type": "boolean",
 			"greenhouseOnly": false,
+			"maturity": "stable",
 			"migration": "055_upload_gate_redesign.sql",
 			"description": "Master switch for image upload functionality"
 		},
@@ -37,6 +39,7 @@
 			"name": "Image Uploads Enabled (Legacy)",
 			"type": "boolean",
 			"greenhouseOnly": false,
+			"maturity": "graduated",
 			"migration": "031_petal_upload_gate.sql",
 			"description": "Legacy master gate for image uploads (superseded by image_uploads + uploads_suspended)"
 		},
@@ -45,6 +48,7 @@
 			"name": "JPEG XL Encoding",
 			"type": "boolean",
 			"greenhouseOnly": false,
+			"maturity": "stable",
 			"migration": "020_feature_flags.sql",
 			"description": "Enable JPEG XL image compression for uploads"
 		},
@@ -53,6 +57,7 @@
 			"name": "JXL Kill Switch",
 			"type": "boolean",
 			"greenhouseOnly": false,
+			"maturity": "stable",
 			"migration": "020_feature_flags.sql",
 			"description": "Emergency disable for JPEG XL (no caching, instant effect)"
 		},
@@ -61,6 +66,7 @@
 			"name": "JPEG XL Rollout Percentage",
 			"type": "number",
 			"greenhouseOnly": false,
+			"maturity": "stable",
 			"migration": "023_jxl_format_tracking.sql",
 			"description": "Percentage of tenants receiving JXL encoding"
 		},
@@ -69,6 +75,7 @@
 			"name": "Lantern Navigation",
 			"type": "boolean",
 			"greenhouseOnly": true,
+			"maturity": "experimental",
 			"migration": "094_lantern.sql",
 			"description": "Cross-grove navigation panel for hopping between groves and accessing platform services"
 		},
@@ -77,6 +84,7 @@
 			"name": "Meadow Access",
 			"type": "boolean",
 			"greenhouseOnly": false,
+			"maturity": "stable",
 			"migration": "020_feature_flags.sql",
 			"description": "Enable Meadow social features (tier-gated)"
 		},
@@ -85,6 +93,7 @@
 			"name": "Petal Image Moderation",
 			"type": "boolean",
 			"greenhouseOnly": false,
+			"maturity": "stable",
 			"migration": "030_petal.sql",
 			"description": "4-layer image moderation system"
 		},
@@ -93,6 +102,7 @@
 			"name": "PhotoDNA Hash Detection",
 			"type": "boolean",
 			"greenhouseOnly": false,
+			"maturity": "stable",
 			"migration": "031_petal_upload_gate.sql",
 			"description": "PhotoDNA hash-based CSAM detection is integrated"
 		},
@@ -101,6 +111,7 @@
 			"name": "Petal Try-On Strict Mode",
 			"type": "boolean",
 			"greenhouseOnly": false,
+			"maturity": "stable",
 			"migration": "030_petal.sql",
 			"description": "Strict validation for try-on detection"
 		},
@@ -109,6 +120,7 @@
 			"name": "Photo Gallery (Deprecated)",
 			"type": "boolean",
 			"greenhouseOnly": true,
+			"maturity": "graduated",
 			"migration": "049_photo_gallery_graft.sql",
 			"description": "DEPRECATED: Disabled by migration 055. Superseded by image_uploads + uploads_suspended",
 			"deprecated": true
@@ -118,6 +130,7 @@
 			"name": "Reeds Comments",
 			"type": "boolean",
 			"greenhouseOnly": true,
+			"maturity": "experimental",
 			"migration": "052_reeds_comments_graft.sql",
 			"description": "Enable threaded comments on blog posts with moderation, blocking, and private replies"
 		},
@@ -126,6 +139,7 @@
 			"name": "Scribe Mode",
 			"type": "boolean",
 			"greenhouseOnly": true,
+			"maturity": "experimental",
 			"migration": "040_fireside_scribe_grafts.sql",
 			"description": "Voice-to-text transcription in the blog editor"
 		},
@@ -134,6 +148,7 @@
 			"name": "Thorn Behavioral Layer",
 			"type": "boolean",
 			"greenhouseOnly": false,
+			"maturity": "stable",
 			"migration": "090_thorn_entity_labels.sql",
 			"description": "Enable Thorn behavioral defense layer (entity labels, rate limiting, pattern matching before AI inference)"
 		},
@@ -142,6 +157,7 @@
 			"name": "Thorn Text Moderation",
 			"type": "boolean",
 			"greenhouseOnly": false,
+			"maturity": "stable",
 			"migration": "044_thorn_moderation_log.sql",
 			"description": "AI-powered text content moderation"
 		},
@@ -150,6 +166,7 @@
 			"name": "Uploads Suspended",
 			"type": "boolean",
 			"greenhouseOnly": false,
+			"maturity": "stable",
 			"migration": "055_upload_gate_redesign.sql",
 			"description": "Per-tenant upload suspension. Default true (suspended). Add tenant rule with result_value=false to unsuspend."
 		},
@@ -158,6 +175,7 @@
 			"name": "Wisp Writing Assistant",
 			"type": "boolean",
 			"greenhouseOnly": true,
+			"maturity": "experimental",
 			"migration": "092_wisp_enabled_graft.sql",
 			"description": "Master toggle for the Wisp AI writing assistant. Controls visibility of Fireside, Scribe, and analysis features in the editor."
 		}

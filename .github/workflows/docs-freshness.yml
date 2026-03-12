@@ -188,8 +188,46 @@ jobs:
             echo "has_issues=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: Check greenhouse article drift
+        id: check-greenhouse
+        shell: bash
+        run: |
+          ARTICLE="docs/help-center/articles/greenhouse-features.md"
+          INVENTORY=".github/graft-inventory.json"
+          TODAY=$(date +%s)
+
+          if [ ! -f "$ARTICLE" ]; then
+            echo "greenhouse_status=missing" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Check article age (30-day threshold for greenhouse)
+          ARTICLE_DATE=$(grep -m1 "^lastUpdated:" "$ARTICLE" | sed "s/lastUpdated: *['\"]*//" | sed "s/['\"].*$//")
+
+          if [ -z "$ARTICLE_DATE" ]; then
+            echo "greenhouse_status=no_date" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Cross-reference: count greenhouse flags in inventory vs article
+          INVENTORY_GH_COUNT=$(jq '[.flags[] | select(.greenhouseOnly == true)] | length' "$INVENTORY" 2>/dev/null || echo "0")
+          ARTICLE_FEATURE_COUNT=$(grep -c "^\- \*\*" "$ARTICLE" 2>/dev/null || echo "0")
+
+          echo "Inventory greenhouse flags: $INVENTORY_GH_COUNT"
+          echo "Article feature entries: $ARTICLE_FEATURE_COUNT"
+
+          if [ "$INVENTORY_GH_COUNT" -ne "$ARTICLE_FEATURE_COUNT" ]; then
+            echo "⚠️ Greenhouse article feature count ($ARTICLE_FEATURE_COUNT) doesn't match inventory ($INVENTORY_GH_COUNT)"
+            echo "greenhouse_status=drift" >> $GITHUB_OUTPUT
+            echo "inventory_count=$INVENTORY_GH_COUNT" >> $GITHUB_OUTPUT
+            echo "article_count=$ARTICLE_FEATURE_COUNT" >> $GITHUB_OUTPUT
+          else
+            echo "✅ Greenhouse article matches inventory"
+            echo "greenhouse_status=ok" >> $GITHUB_OUTPUT
+          fi
+
       - name: Comment on PR (if issues found)
-        if: github.event_name == 'pull_request' && steps.check-docs.outputs.has_issues == 'true'
+        if: github.event_name == 'pull_request' && (steps.check-docs.outputs.has_issues == 'true' || steps.check-greenhouse.outputs.greenhouse_status == 'drift')
         uses: actions/github-script@v7
         env:
           ACTUAL_TOTAL: ${{ steps.check-docs.outputs.actual_total }}
@@ -203,6 +241,9 @@ jobs:
           STALE_FILES: ${{ steps.check-docs.outputs.stale_files }}
           MISSING_DATE_FILES: ${{ steps.check-docs.outputs.missing_date_files }}
           CATEGORY_BREAKDOWN: ${{ steps.check-docs.outputs.category_breakdown }}
+          GREENHOUSE_STATUS: ${{ steps.check-greenhouse.outputs.greenhouse_status }}
+          GREENHOUSE_INVENTORY_COUNT: ${{ steps.check-greenhouse.outputs.inventory_count }}
+          GREENHOUSE_ARTICLE_COUNT: ${{ steps.check-greenhouse.outputs.article_count }}
         with:
           script: |
             const actualTotal = process.env.ACTUAL_TOTAL;
@@ -259,6 +300,19 @@ jobs:
               body += `|------|----------|-----|-------------|\n`;
               body += `${staleFiles}\n`;
               body += `Consider reviewing these docs as part of this PR.\n\n`;
+            }
+
+            // Greenhouse drift section
+            const greenhouseStatus = process.env.GREENHOUSE_STATUS;
+            if (greenhouseStatus === 'drift') {
+              const invCount = process.env.GREENHOUSE_INVENTORY_COUNT;
+              const artCount = process.env.GREENHOUSE_ARTICLE_COUNT;
+              body += `### 🌿 Greenhouse Article Drift\n\n`;
+              body += `The greenhouse features article has **${artCount} entries** but the inventory has **${invCount} greenhouse flags**.\n\n`;
+              body += `Regenerate with: \`bun run tools/generate-greenhouse-article.ts\`\n\n`;
+            } else if (greenhouseStatus === 'missing') {
+              body += `### 🌿 Greenhouse Article Missing\n\n`;
+              body += `No \`greenhouse-features.md\` found. Generate it: \`bun run tools/generate-greenhouse-article.ts\`\n\n`;
             }
 
             body += `---\n*See \`.github/knowledge-base-inventory.json\` for inventory configuration.*`;
@@ -369,6 +423,7 @@ jobs:
           STALE_FILES: ${{ steps.check-docs.outputs.stale_files }}
           MISSING_DATE_FILES: ${{ steps.check-docs.outputs.missing_date_files }}
           CATEGORY_BREAKDOWN: ${{ steps.check-docs.outputs.category_breakdown }}
+          GREENHOUSE_STATUS: ${{ steps.check-greenhouse.outputs.greenhouse_status }}
         run: |
           echo "## 📚 Knowledge Base Health Check" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -409,4 +464,16 @@ jobs:
             fi
           else
             echo "✅ All documentation is healthy!" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🌿 Greenhouse Article" >> $GITHUB_STEP_SUMMARY
+          if [ "$GREENHOUSE_STATUS" = "ok" ]; then
+            echo "✅ Greenhouse features article matches inventory" >> $GITHUB_STEP_SUMMARY
+          elif [ "$GREENHOUSE_STATUS" = "drift" ]; then
+            echo "⚠️ Greenhouse article has drifted from inventory — run \`bun run tools/generate-greenhouse-article.ts\`" >> $GITHUB_STEP_SUMMARY
+          elif [ "$GREENHOUSE_STATUS" = "missing" ]; then
+            echo "⚠️ Greenhouse features article is missing" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ Greenhouse article status: $GREENHOUSE_STATUS" >> $GITHUB_STEP_SUMMARY
           fi

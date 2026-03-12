@@ -58,6 +58,13 @@ In orcharding, a graft joins a cutting from one tree onto the rootstock of anoth
 
 Feature Grafts decide which branches grow. UI Grafts are the branches themselves. Together, they let any Grove property customize its features and appearance while sharing a common rootstock.
 
+## Terminology
+
+- **Feature Graft (flag):** A feature flag controlling what capabilities are enabled for a tenant. Lives in the `feature_flags` table with rules in `flag_rules`.
+- **UI Graft (component):** A reusable Svelte component (e.g., `PricingGraft`, `GraftControlPanel`) that renders feature UI. Found under `libs/engine/src/lib/grafts/`.
+- **Greenhouse:** The early access program — membership determines who gets experimental features. Tenants are enrolled via the `greenhouse_tenants` table.
+- **Maturity:** The lifecycle stage of a feature graft: `experimental → beta → stable → graduated`. Stored as a column on `feature_flags` (migration 100). Replaces the previous convention of deriving category from flag ID prefixes.
+
 ---
 
 ## The Graft Lexicon

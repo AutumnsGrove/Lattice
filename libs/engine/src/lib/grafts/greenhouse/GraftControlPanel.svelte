@@ -22,7 +22,7 @@
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import Button from "$lib/ui/components/ui/Button.svelte";
 	import Waystone from "$lib/ui/components/ui/Waystone.svelte";
-	import { Sprout, RotateCcw, Sparkles, FlaskConical, Leaf } from "@lucide/svelte";
+	import { Sprout, RotateCcw, Sparkles, FlaskConical, Leaf, CheckCircle } from "@lucide/svelte";
 
 	let {
 		grafts,
@@ -38,10 +38,10 @@
 	const enabledCount = $derived(grafts.filter((g) => g.enabled).length);
 	const hasOverrides = $derived(grafts.some((g) => g.hasOverride));
 
-	// Group grafts by category
-	const experimentalGrafts = $derived(grafts.filter((g) => g.category === "experimental"));
-	const betaGrafts = $derived(grafts.filter((g) => g.category === "beta"));
-	const stableGrafts = $derived(grafts.filter((g) => g.category === "stable"));
+	// Group grafts by maturity
+	const experimentalGrafts = $derived(grafts.filter((g) => g.maturity === "experimental"));
+	const betaGrafts = $derived(grafts.filter((g) => g.maturity === "beta"));
+	const stableGrafts = $derived(grafts.filter((g) => g.maturity === "stable"));
 </script>
 
 {#if grafts.length === 0}

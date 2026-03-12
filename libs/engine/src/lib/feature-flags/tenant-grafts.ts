@@ -20,7 +20,7 @@
  * ```
  */
 
-import type { FeatureFlagsEnv, FeatureFlagRow, FlagRuleRow } from "./types.js";
+import type { FeatureFlagsEnv, FeatureFlagRow, FlagMaturity } from "./types.js";
 import { invalidateFlag } from "./cache.js";
 
 // =============================================================================
@@ -49,8 +49,8 @@ export interface TenantGraftInfo {
 	/** The graft's global default value */
 	globalDefault: boolean;
 
-	/** Category for grouping (derived from flag ID prefix) */
-	category: "experimental" | "stable" | "beta";
+	/** Lifecycle stage of this graft */
+	maturity: FlagMaturity;
 }
 
 // =============================================================================
@@ -74,7 +74,7 @@ export async function getTenantControllableGrafts(
 	try {
 		// Get all greenhouse-only flags that are enabled
 		const flagsResult = await env.DB.prepare(
-			`SELECT id, name, description, flag_type, default_value, enabled, greenhouse_only
+			`SELECT id, name, description, flag_type, default_value, enabled, greenhouse_only, maturity
        FROM feature_flags
        WHERE greenhouse_only = 1 AND enabled = 1 AND flag_type = 'boolean'
        ORDER BY name ASC`,
@@ -122,7 +122,7 @@ export async function getTenantControllableGrafts(
 				enabled,
 				hasOverride,
 				globalDefault,
-				category: getCategoryFromId(flag.id),
+				maturity: (flag.maturity || "experimental") as FlagMaturity,
 			};
 		});
 	} catch (error) {
@@ -270,18 +270,4 @@ export async function resetTenantGraftOverrides(
 		console.error("[TenantGrafts] Failed to reset overrides:", error);
 		return 0;
 	}
-}
-
-// =============================================================================
-// HELPERS
-// =============================================================================
-
-/**
- * Derive a category from a flag ID.
- * Convention: IDs starting with "beta_" are beta, others are experimental.
- */
-function getCategoryFromId(id: string): "experimental" | "stable" | "beta" {
-	if (id.startsWith("beta_")) return "beta";
-	if (id.startsWith("stable_")) return "stable";
-	return "experimental";
 }
