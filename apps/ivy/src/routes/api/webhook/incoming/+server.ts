@@ -151,7 +151,9 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		}
 
 		// 4. PARSE PAYLOAD
-		const payload = safeParseJson(rawBody, null, { context: "webhook.incoming.payload" });
+		const payload = safeParseJson<Record<string, unknown> | null>(rawBody, null, {
+			context: "webhook.incoming.payload",
+		});
 		if (!payload) {
 			console.error("Invalid JSON payload");
 			return new Response(JSON.stringify(buildErrorJson(IVY_ERRORS.INVALID_JSON)), {

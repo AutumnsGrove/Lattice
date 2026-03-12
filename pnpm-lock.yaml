@@ -1193,6 +1193,9 @@ importers:
         specifier: ^0.0.27
         version: 0.0.27
     devDependencies:
+      '@autumnsgrove/lattice':
+        specifier: workspace:*
+        version: link:../../libs/engine
       '@cloudflare/workers-types':
         specifier: ^4.20260210.0
         version: 4.20260210.0

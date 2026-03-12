@@ -14,7 +14,7 @@
  * "a place to Be"
  */
 
-/** @satisfies {Partial<import('tailwindcss').Config>} */
+/** @satisfies {Partial<Record<string, unknown>>} */
 export default {
 	content: [], // Presets don't provide content paths - consumers configure this
 	theme: {
@@ -403,7 +403,7 @@ export default {
 	},
 	plugins: [
 		// Custom plugin for Grove utilities
-		/** @param {import('tailwindcss/types/config').PluginAPI} api */
+		/** @param {{ addUtilities: Function, addComponents: Function, theme: Function }} api */
 		function ({ addUtilities, addComponents, theme }) {
 			// ─────────────────────────────────────────────────────────────
 			// UTILITY CLASSES

@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 
@@ -508,7 +509,7 @@ func typeCheckAffected(cfg *config.Config) bool {
 		if scripts == nil || scripts["check"] == "" {
 			continue
 		}
-		result, err := gwexec.Run("pnpm", "run", "check", "--filter", pkg)
+		result, err := gwexec.RunInDirWithTimeout(120*time.Second, pkgDir, "pnpm", "run", "check")
 		if err != nil || (result != nil && !result.OK()) {
 			allOK = false
 		}

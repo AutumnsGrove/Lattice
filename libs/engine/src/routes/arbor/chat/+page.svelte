@@ -429,8 +429,8 @@
 				class="h-full"
 			>
 				{#snippet header()}
+					{@const friend = getFriend(activeConv.friendTenantId)}
 					<header class="px-4 py-3 border-b border-divider flex items-center gap-3">
-						{@const friend = getFriend(activeConv.friendTenantId)}
 						<!-- aria-hidden: the h3 below identifies the person; avatar is decorative here -->
 						<div
 							class="w-8 h-8 rounded-full bg-grove-500/20 flex items-center justify-center flex-shrink-0"

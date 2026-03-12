@@ -179,6 +179,14 @@ var checkCmd = &cobra.Command{
 		strict, _ := cmd.Flags().GetBool("strict")
 		dryRun, _ := cmd.Flags().GetBool("dry-run")
 
+		// Default to --all when no package specified and at monorepo root
+		if !all && pkg == "" {
+			dir, err := resolvePackageDir("")
+			if err == nil && dir == cfg.GroveRoot {
+				all = true
+			}
+		}
+
 		if all {
 			runArgs := []string{"pnpm", "-r", "run", "check"}
 			if dryRun {

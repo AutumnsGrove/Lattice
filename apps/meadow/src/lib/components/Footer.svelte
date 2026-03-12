@@ -4,11 +4,11 @@
 	 *
 	 * Minimal footer with links to main Grove site.
 	 */
-	import { cn } from '@autumnsgrove/lattice/ui/utils';
-	import { Mail, ExternalLink } from '@lucide/svelte';
-	import { defaultSuite, resolveIcon } from '@autumnsgrove/lattice/ui';
+	import { cn } from "@autumnsgrove/lattice/ui/utils";
+	import { Mail, ExternalLink } from "@lucide/svelte";
+	import { defaultSuite, resolveIcon } from "@autumnsgrove/lattice/ui";
 
-	const groveIcon = resolveIcon(defaultSuite.grove.icon);
+	const GroveIcon = resolveIcon(defaultSuite.grove.icon);
 
 	interface Props {
 		class?: string;
@@ -19,10 +19,10 @@
 
 <footer
 	class={cn(
-		'mt-auto py-8 px-6',
-		'border-t border-white/20 dark:border-bark-700/30',
-		'bg-white/50 dark:bg-bark-900/30',
-		className
+		"mt-auto py-8 px-6",
+		"border-t border-white/20 dark:border-bark-700/30",
+		"bg-white/50 dark:bg-bark-900/30",
+		className,
 	)}
 >
 	<div class="max-w-4xl mx-auto">
@@ -34,7 +34,6 @@
 				rel="noopener noreferrer"
 				class="inline-flex items-center gap-1.5 text-foreground-muted hover:text-foreground transition-colors"
 			>
-				{@const GroveIcon = groveIcon}
 				<GroveIcon class="w-4 h-4" />
 				grove.place
 				<ExternalLink class="w-3 h-3 opacity-50" />
@@ -50,8 +49,6 @@
 		</div>
 
 		<!-- Tagline -->
-		<p class="text-center text-sm text-foreground-subtle">
-			Where the forest opens up.
-		</p>
+		<p class="text-center text-sm text-foreground-subtle">Where the forest opens up.</p>
 	</div>
 </footer>
