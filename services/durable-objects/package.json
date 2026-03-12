@@ -6,7 +6,9 @@
 	"scripts": {
 		"dev": "wrangler dev",
 		"deploy": "wrangler deploy",
-		"check": "tsc --noEmit"
+		"check": "tsc --noEmit",
+		"test": "vitest",
+		"test:run": "vitest run"
 	},
 	"dependencies": {
 		"@autumnsgrove/lattice": "workspace:*",
