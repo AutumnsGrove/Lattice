@@ -1,456 +1,401 @@
 /**
  * Pricing Graft Configuration Tests
  *
- * Tests for tier transformation and display helpers.
+ * Tests for pricing transformation, display helpers, and billing period conversion.
  */
 
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import {
-  calculateAnnualSavings,
-  transformTier,
-  transformAllTiers,
-  getDisplayPrice,
-  getPriceSuffix,
-  formatAnnualAsMonthly,
-  getMonthlyEquivalentPrice,
-  getYearlySavingsAmount,
-  billingPeriodToDbFormat,
-  dbFormatToBillingPeriod,
-  DEFAULT_TIER_ORDER,
-  DEFAULT_ANNUAL_SAVINGS,
-} from "./config.js";
-import { TIERS, type TierKey } from "../../config/tiers.js";
-import type { PricingTier } from "./types.js";
-
-describe("Pricing Graft Configuration", () => {
-  describe("Constants", () => {
-    it("exports default tier order matching TIER_ORDER", () => {
-      expect(DEFAULT_TIER_ORDER).toEqual([
-        "wanderer",
-        "seedling",
-        "sapling",
-        "oak",
-        "evergreen",
-      ]);
-    });
-
-    it("exports default annual savings of 15%", () => {
-      expect(DEFAULT_ANNUAL_SAVINGS).toBe(15);
-    });
-  });
-
-  describe("calculateAnnualSavings", () => {
-    it("returns 0 for free tier (monthly price 0)", () => {
-      expect(calculateAnnualSavings(0, 0)).toBe(0);
-    });
-
-    it("returns 0 for negative monthly price", () => {
-      expect(calculateAnnualSavings(-5, 100)).toBe(0);
-    });
-
-    it("calculates 15% savings correctly", () => {
-      // Monthly $10, Annual $102 (equivalent to $8.50/mo = 15% off)
-      const savings = calculateAnnualSavings(10, 102);
-      expect(savings).toBe(15);
-    });
-
-    it("calculates exact savings for seedling tier", () => {
-      const seedling = TIERS.seedling;
-      const savings = calculateAnnualSavings(
-        seedling.pricing.monthlyPrice,
-        seedling.pricing.yearlyPrice,
-      );
-      // Seedling: $8/mo, $81.60/yr → 15% savings
-      expect(savings).toBe(15);
-    });
-
-    it("handles 0% savings (same price)", () => {
-      expect(calculateAnnualSavings(10, 120)).toBe(0);
-    });
-
-    it("handles scenarios where annual is more expensive", () => {
-      // If annual divided by 12 is MORE than monthly, savings would be negative
-      // But we round, so let's test it
-      const savings = calculateAnnualSavings(10, 130);
-      expect(savings).toBeLessThan(0);
-    });
-  });
-
-  describe("transformTier", () => {
-    it("transforms wanderer tier correctly", () => {
-      const tier = transformTier("wanderer", TIERS.wanderer);
-
-      expect(tier.key).toBe("wanderer");
-      expect(tier.name).toBe("Wanderer");
-      expect(tier.standardName).toBe("Free");
-      expect(tier.monthlyPrice).toBe(0);
-      expect(tier.annualPrice).toBe(0);
-      expect(tier.annualSavings).toBe(0);
-      expect(tier.limits.posts).toBe("25");
-      expect(tier.limits.storage).toBe("100 MB");
-    });
-
-    it("transforms seedling tier with correct limits", () => {
-      const tier = transformTier("seedling", TIERS.seedling);
-
-      expect(tier.key).toBe("seedling");
-      expect(tier.name).toBe("Seedling");
-      expect(tier.monthlyPrice).toBe(8);
-      expect(tier.annualSavings).toBe(15);
-      expect(tier.limits.posts).toBe("100");
-    });
-
-    it("transforms oak tier with unlimited posts", () => {
-      const tier = transformTier("oak", TIERS.oak);
-
-      expect(tier.limits.posts).toBe("Unlimited");
-    });
-
-    it("includes checkout URLs when provided", () => {
-      const tier = transformTier("seedling", TIERS.seedling, {
-        monthly: "https://checkout.example.com/monthly",
-        annual: "https://checkout.example.com/annual",
-      });
-
-      expect(tier.checkoutUrls.monthly).toBe(
-        "https://checkout.example.com/monthly",
-      );
-      expect(tier.checkoutUrls.annual).toBe(
-        "https://checkout.example.com/annual",
-      );
-    });
-
-    it("sets highlight and badge from options", () => {
-      const tier = transformTier(
-        "seedling",
-        TIERS.seedling,
-        {},
-        { highlight: true, badge: "Most Popular" },
-      );
-
-      expect(tier.highlight).toBe(true);
-      expect(tier.badge).toBe("Most Popular");
-    });
-
-    it("includes tier status", () => {
-      const seedling = transformTier("seedling", TIERS.seedling);
-      expect(seedling.status).toBe("available");
-    });
-
-    it("includes icon from display config", () => {
-      const seedling = transformTier("seedling", TIERS.seedling);
-      expect(seedling.icon).toBe("sprout");
-    });
-
-    it("includes feature availability", () => {
-      const seedling = transformTier("seedling", TIERS.seedling);
-      expect(seedling.features.blog).toBe(true);
-      expect(seedling.features.customDomain).toBe(false);
-    });
-
-    it("includes feature strings for display", () => {
-      const seedling = transformTier("seedling", TIERS.seedling);
-      expect(seedling.featureStrings).toBeDefined();
-      expect(Array.isArray(seedling.featureStrings)).toBe(true);
-    });
-
-    it("includes support level string", () => {
-      const seedling = transformTier("seedling", TIERS.seedling);
-      expect(seedling.supportLevel).toBeDefined();
-      expect(typeof seedling.supportLevel).toBe("string");
-    });
-  });
-
-  describe("transformAllTiers", () => {
-    it("transforms all tiers in default order", () => {
-      const tiers = transformAllTiers();
-
-      expect(tiers).toHaveLength(5);
-      expect(tiers[0].key).toBe("wanderer");
-      expect(tiers[1].key).toBe("seedling");
-      expect(tiers[2].key).toBe("sapling");
-      expect(tiers[3].key).toBe("oak");
-      expect(tiers[4].key).toBe("evergreen");
-    });
-
-    it("applies highlightTier option", () => {
-      const tiers = transformAllTiers({ highlightTier: "seedling" });
-
-      const highlighted = tiers.filter((t) => t.highlight);
-      expect(highlighted).toHaveLength(1);
-      expect(highlighted[0].key).toBe("seedling");
-    });
-
-    it("applies badges option", () => {
-      const tiers = transformAllTiers({
-        badges: {
-          seedling: "Start Here",
-          oak: "Best Value",
-        },
-      });
-
-      expect(tiers.find((t) => t.key === "seedling")?.badge).toBe("Start Here");
-      expect(tiers.find((t) => t.key === "oak")?.badge).toBe("Best Value");
-      expect(tiers.find((t) => t.key === "sapling")?.badge).toBeUndefined();
-    });
-
-    it("applies checkoutUrls option", () => {
-      const tiers = transformAllTiers({
-        checkoutUrls: {
-          seedling: {
-            monthly: "https://checkout.example.com/seedling-monthly",
-          },
-          sapling: { annual: "https://checkout.example.com/sapling-annual" },
-        } as Record<TierKey, { monthly?: string; annual?: string }>,
-      });
-
-      expect(
-        tiers.find((t) => t.key === "seedling")?.checkoutUrls.monthly,
-      ).toBe("https://checkout.example.com/seedling-monthly");
-      expect(tiers.find((t) => t.key === "sapling")?.checkoutUrls.annual).toBe(
-        "https://checkout.example.com/sapling-annual",
-      );
-    });
-
-    it("respects custom tierOrder", () => {
-      const tiers = transformAllTiers({
-        tierOrder: ["evergreen", "oak", "seedling"],
-      });
-
-      expect(tiers).toHaveLength(3);
-      expect(tiers[0].key).toBe("evergreen");
-      expect(tiers[1].key).toBe("oak");
-      expect(tiers[2].key).toBe("seedling");
-    });
-
-    it("filters with includeTiers", () => {
-      const tiers = transformAllTiers({
-        includeTiers: ["seedling", "oak"],
-      });
-
-      expect(tiers).toHaveLength(2);
-      expect(tiers.map((t) => t.key)).toEqual(["seedling", "oak"]);
-    });
-
-    it("filters with excludeTiers", () => {
-      const tiers = transformAllTiers({
-        excludeTiers: ["wanderer", "evergreen"],
-      });
-
-      expect(tiers).toHaveLength(3);
-      expect(tiers.map((t) => t.key)).toEqual(["seedling", "sapling", "oak"]);
-    });
-
-    it("combines includeTiers and excludeTiers", () => {
-      const tiers = transformAllTiers({
-        includeTiers: ["seedling", "sapling", "oak"],
-        excludeTiers: ["sapling"],
-      });
-
-      expect(tiers).toHaveLength(2);
-      expect(tiers.map((t) => t.key)).toEqual(["seedling", "oak"]);
-    });
-  });
-
-  describe("Display Helpers", () => {
-    let seedlingTier: PricingTier;
-    let freeTier: PricingTier;
-
-    beforeEach(() => {
-      seedlingTier = transformTier("seedling", TIERS.seedling);
-      freeTier = transformTier("wanderer", TIERS.wanderer);
-    });
-
-    describe("getDisplayPrice", () => {
-      it("returns 'Free' for wanderer tier", () => {
-        expect(getDisplayPrice(freeTier, "monthly")).toBe("Free");
-        expect(getDisplayPrice(freeTier, "annual")).toBe("Free");
-      });
-
-      it("returns monthly price for monthly period", () => {
-        expect(getDisplayPrice(seedlingTier, "monthly")).toBe("$8");
-      });
-
-      it("returns rounded annual price for annual period", () => {
-        const price = getDisplayPrice(seedlingTier, "annual");
-        expect(price).toMatch(/^\$\d+$/);
-      });
-    });
-
-    describe("getPriceSuffix", () => {
-      it("returns '/mo' for monthly", () => {
-        expect(getPriceSuffix("monthly")).toBe("/mo");
-      });
-
-      it("returns '/yr' for annual", () => {
-        expect(getPriceSuffix("annual")).toBe("/yr");
-      });
-    });
-
-    describe("formatAnnualAsMonthly", () => {
-      it("formats annual price as monthly equivalent", () => {
-        // $120/year = $10/month
-        expect(formatAnnualAsMonthly(120)).toBe("$10.00/mo");
-      });
-
-      it("handles decimal results", () => {
-        // $100/year = $8.33/month
-        expect(formatAnnualAsMonthly(100)).toBe("$8.33/mo");
-      });
-
-      it("handles 0", () => {
-        expect(formatAnnualAsMonthly(0)).toBe("$0.00/mo");
-      });
-    });
-
-    describe("getMonthlyEquivalentPrice", () => {
-      it("returns monthly price as string for monthly period", () => {
-        // Seedling: $8/month
-        expect(getMonthlyEquivalentPrice(seedlingTier, "monthly")).toBe("8");
-      });
-
-      it("returns monthly equivalent with 2 decimals for annual period", () => {
-        // Seedling: $81.60/year ÷ 12 = $6.80/month
-        const price = getMonthlyEquivalentPrice(seedlingTier, "annual");
-        expect(price).toBe("6.80");
-      });
-
-      it("returns 2 decimal places for oak tier", () => {
-        // Oak: $255/year ÷ 12 = $21.25/month
-        const oakTier = transformTier("oak", TIERS.oak);
-        const price = getMonthlyEquivalentPrice(oakTier, "annual");
-        expect(price).toBe("21.25");
-      });
-
-      it("returns 2 decimal places for sapling tier", () => {
-        // Sapling: $122.40/year ÷ 12 = $10.20/month
-        const saplingTier = transformTier("sapling", TIERS.sapling);
-        const price = getMonthlyEquivalentPrice(saplingTier, "annual");
-        expect(price).toBe("10.20");
-      });
-
-      it("returns '0' for wanderer tier monthly", () => {
-        expect(getMonthlyEquivalentPrice(freeTier, "monthly")).toBe("0");
-      });
-
-      it("returns '0' for wanderer tier annual", () => {
-        // Wanderer: $0/year ÷ 12 = $0/month (integer, so no decimals)
-        expect(getMonthlyEquivalentPrice(freeTier, "annual")).toBe("0");
-      });
-
-      it("formats annual correctly for evergreen tier", () => {
-        // Evergreen: $357/year ÷ 12 = $29.75/month
-        const evergreenTier = transformTier("evergreen", TIERS.evergreen);
-        const price = getMonthlyEquivalentPrice(evergreenTier, "annual");
-        expect(price).toBe("29.75");
-      });
-    });
-
-    describe("getYearlySavingsAmount", () => {
-      it("calculates savings for seedling tier", () => {
-        // Seedling: $8/month × 12 = $96/year, annual price $81.60
-        // Savings: $96 - $81.60 = $14.40, rounds to "14"
-        const savings = getYearlySavingsAmount(seedlingTier);
-        expect(savings).toBe("14");
-      });
-
-      it("calculates savings for sapling tier", () => {
-        // Sapling: $12/month × 12 = $144/year, annual price $122.40
-        // Savings: $144 - $122.40 = $21.60, rounds to "22"
-        const saplingTier = transformTier("sapling", TIERS.sapling);
-        const savings = getYearlySavingsAmount(saplingTier);
-        expect(savings).toBe("22");
-      });
-
-      it("calculates savings for oak tier", () => {
-        // Oak: $25/month × 12 = $300/year, annual price $255
-        // Savings: $300 - $255 = $45
-        const oakTier = transformTier("oak", TIERS.oak);
-        const savings = getYearlySavingsAmount(oakTier);
-        expect(savings).toBe("45");
-      });
-
-      it("calculates savings for evergreen tier", () => {
-        // Evergreen: $35/month × 12 = $420/year, annual price $357
-        // Savings: $420 - $357 = $63
-        const evergreenTier = transformTier("evergreen", TIERS.evergreen);
-        const savings = getYearlySavingsAmount(evergreenTier);
-        expect(savings).toBe("63");
-      });
-
-      it("returns '0' for wanderer tier", () => {
-        const savings = getYearlySavingsAmount(freeTier);
-        expect(savings).toBe("0");
-      });
-
-      it("returns integer string without decimal places", () => {
-        const savings = getYearlySavingsAmount(seedlingTier);
-        expect(savings).toMatch(/^\d+$/);
-        expect(savings).not.toContain(".");
-      });
-    });
-  });
-
-  describe("Billing Period Utilities", () => {
-    describe("billingPeriodToDbFormat", () => {
-      it("converts 'monthly' to 'monthly'", () => {
-        expect(billingPeriodToDbFormat("monthly")).toBe("monthly");
-      });
-
-      it("converts 'annual' to 'yearly'", () => {
-        expect(billingPeriodToDbFormat("annual")).toBe("yearly");
-      });
-
-      it("is type-safe for BillingPeriod input", () => {
-        // TypeScript should enforce these are the only valid inputs
-        const monthly: "monthly" | "annual" = "monthly";
-        const annual: "monthly" | "annual" = "annual";
-
-        expect(billingPeriodToDbFormat(monthly)).toBe("monthly");
-        expect(billingPeriodToDbFormat(annual)).toBe("yearly");
-      });
-    });
-
-    describe("dbFormatToBillingPeriod", () => {
-      it("converts 'monthly' to 'monthly'", () => {
-        expect(dbFormatToBillingPeriod("monthly")).toBe("monthly");
-      });
-
-      it("converts 'yearly' to 'annual'", () => {
-        expect(dbFormatToBillingPeriod("yearly")).toBe("annual");
-      });
-
-      it("is type-safe for DbBillingCycle input", () => {
-        // TypeScript should enforce these are the only valid inputs
-        const monthly: "monthly" | "yearly" = "monthly";
-        const yearly: "monthly" | "yearly" = "yearly";
-
-        expect(dbFormatToBillingPeriod(monthly)).toBe("monthly");
-        expect(dbFormatToBillingPeriod(yearly)).toBe("annual");
-      });
-    });
-
-    describe("round-trip conversion", () => {
-      it("monthly survives round-trip", () => {
-        const original: "monthly" | "annual" = "monthly";
-        const dbFormat = billingPeriodToDbFormat(original);
-        const backToGraft = dbFormatToBillingPeriod(dbFormat);
-        expect(backToGraft).toBe(original);
-      });
-
-      it("annual survives round-trip", () => {
-        const original: "monthly" | "annual" = "annual";
-        const dbFormat = billingPeriodToDbFormat(original);
-        const backToGraft = dbFormatToBillingPeriod(dbFormat);
-        expect(backToGraft).toBe(original);
-      });
-
-      it("yearly survives round-trip from db side", () => {
-        const original: "monthly" | "yearly" = "yearly";
-        const graftFormat = dbFormatToBillingPeriod(original);
-        const backToDb = billingPeriodToDbFormat(graftFormat);
-        expect(backToDb).toBe(original);
-      });
-    });
-  });
+	calculateAnnualSavings,
+	transformTier,
+	transformAllTiers,
+	getDisplayPrice,
+	getPriceSuffix,
+	formatAnnualAsMonthly,
+	getMonthlyEquivalentPrice,
+	getYearlySavingsAmount,
+	billingPeriodToDbFormat,
+	dbFormatToBillingPeriod,
+	DEFAULT_ANNUAL_SAVINGS,
+	DEFAULT_TIER_ORDER,
+} from "./config";
+import { TIERS } from "../../config/tiers";
+import type { PricingTier } from "./types";
+
+// ===
+// TEST HELPERS
+// ===
+
+function makeTier(overrides: Partial<PricingTier> = {}): PricingTier {
+	return {
+		key: "seedling",
+		name: "Seedling",
+		tagline: "Test",
+		icon: "sprout",
+		status: "available",
+		bestFor: "testing",
+		monthlyPrice: 10,
+		annualPrice: 102,
+		annualSavings: 15,
+		limits: {
+			posts: "Unlimited",
+			storage: "1 GB",
+			themes: "3 themes",
+			navPages: "5",
+			commentsPerWeek: "50/week",
+		},
+		features: {} as any,
+		featureStrings: [],
+		supportLevel: "Email",
+		checkoutUrls: {},
+		...overrides,
+	};
+}
+
+// ===
+// calculateAnnualSavings TESTS
+// ===
+
+describe("calculateAnnualSavings", () => {
+	it("calculates 15% savings for 10 monthly vs 102 annual", () => {
+		const savings = calculateAnnualSavings(10, 102);
+		expect(savings).toBe(15);
+	});
+
+	it("returns 0 savings when annual equals monthly * 12", () => {
+		const savings = calculateAnnualSavings(10, 120);
+		expect(savings).toBe(0);
+	});
+
+	it("returns 0 savings for free tier", () => {
+		const savings = calculateAnnualSavings(0, 0);
+		expect(savings).toBe(0);
+	});
+
+	it("calculates 50% savings for 20 monthly vs 120 annual", () => {
+		const savings = calculateAnnualSavings(20, 120);
+		expect(savings).toBe(50);
+	});
+
+	it("rounds to nearest percentage", () => {
+		const savings = calculateAnnualSavings(10, 101);
+		expect(typeof savings).toBe("number");
+		expect(savings).toBeLessThanOrEqual(100);
+	});
+});
+
+// ===
+// getDisplayPrice TESTS
+// ===
+
+describe("getDisplayPrice", () => {
+	it("returns 'Free' for free tier", () => {
+		const tier = makeTier({ monthlyPrice: 0 });
+		const price = getDisplayPrice(tier, "monthly");
+		expect(price).toBe("Free");
+	});
+
+	it("returns monthly price formatted with dollar sign", () => {
+		const tier = makeTier({ monthlyPrice: 10 });
+		const price = getDisplayPrice(tier, "monthly");
+		expect(price).toBe("$10");
+	});
+
+	it("returns annual price formatted with dollar sign and rounded", () => {
+		const tier = makeTier({ annualPrice: 102.4 });
+		const price = getDisplayPrice(tier, "annual");
+		expect(price).toBe("$102");
+	});
+
+	it("returns correct price for annual at 120", () => {
+		const tier = makeTier({ annualPrice: 120 });
+		const price = getDisplayPrice(tier, "annual");
+		expect(price).toBe("$120");
+	});
+});
+
+// ===
+// getPriceSuffix TESTS
+// ===
+
+describe("getPriceSuffix", () => {
+	it("returns '/mo' for monthly period", () => {
+		const suffix = getPriceSuffix("monthly");
+		expect(suffix).toBe("/mo");
+	});
+
+	it("returns '/yr' for annual period", () => {
+		const suffix = getPriceSuffix("annual");
+		expect(suffix).toBe("/yr");
+	});
+});
+
+// ===
+// formatAnnualAsMonthly TESTS
+// ===
+
+describe("formatAnnualAsMonthly", () => {
+	it("formats annual 120 as monthly 10", () => {
+		const formatted = formatAnnualAsMonthly(120);
+		expect(formatted).toBe("$10.00/mo");
+	});
+
+	it("formats annual 102 as monthly 8.50", () => {
+		const formatted = formatAnnualAsMonthly(102);
+		expect(formatted).toBe("$8.50/mo");
+	});
+});
+
+// ===
+// getMonthlyEquivalentPrice TESTS
+// ===
+
+describe("getMonthlyEquivalentPrice", () => {
+	it("returns monthly price for monthly period", () => {
+		const tier = makeTier({ monthlyPrice: 10 });
+		const price = getMonthlyEquivalentPrice(tier, "monthly");
+		expect(price).toBe("10");
+	});
+
+	it("returns integer string when annual divides evenly by 12", () => {
+		const tier = makeTier({ annualPrice: 120 });
+		const price = getMonthlyEquivalentPrice(tier, "annual");
+		expect(price).toBe("10");
+	});
+
+	it("returns 2 decimal places when annual doesn't divide evenly", () => {
+		const tier = makeTier({ annualPrice: 102 });
+		const price = getMonthlyEquivalentPrice(tier, "annual");
+		expect(price).toBe("8.50");
+	});
+
+	it("handles edge case of 0 monthly price", () => {
+		const tier = makeTier({ monthlyPrice: 0 });
+		const price = getMonthlyEquivalentPrice(tier, "monthly");
+		expect(price).toBe("0");
+	});
+
+	it("handles annual price with more decimal precision", () => {
+		const tier = makeTier({ annualPrice: 119.99 });
+		const price = getMonthlyEquivalentPrice(tier, "annual");
+		// 119.99 / 12 = 9.9991... → toFixed(2) = "10.00"
+		expect(price).toBe("10.00");
+	});
+});
+
+// ===
+// getYearlySavingsAmount TESTS
+// ===
+
+describe("getYearlySavingsAmount", () => {
+	it("calculates savings for 10 monthly vs 102 annual", () => {
+		const tier = makeTier({ monthlyPrice: 10, annualPrice: 102 });
+		const savings = getYearlySavingsAmount(tier);
+		expect(savings).toBe("18");
+	});
+
+	it("returns '0' for free tier", () => {
+		const tier = makeTier({ monthlyPrice: 0, annualPrice: 0 });
+		const savings = getYearlySavingsAmount(tier);
+		expect(savings).toBe("0");
+	});
+
+	it("calculates large savings amount", () => {
+		const tier = makeTier({ monthlyPrice: 20, annualPrice: 180 });
+		const savings = getYearlySavingsAmount(tier);
+		expect(savings).toBe("60");
+	});
+});
+
+// ===
+// billingPeriodToDbFormat TESTS
+// ===
+
+describe("billingPeriodToDbFormat", () => {
+	it("converts 'annual' to 'yearly'", () => {
+		const format = billingPeriodToDbFormat("annual");
+		expect(format).toBe("yearly");
+	});
+
+	it("converts 'monthly' to 'monthly'", () => {
+		const format = billingPeriodToDbFormat("monthly");
+		expect(format).toBe("monthly");
+	});
+});
+
+// ===
+// dbFormatToBillingPeriod TESTS
+// ===
+
+describe("dbFormatToBillingPeriod", () => {
+	it("converts 'yearly' to 'annual'", () => {
+		const period = dbFormatToBillingPeriod("yearly");
+		expect(period).toBe("annual");
+	});
+
+	it("converts 'monthly' to 'monthly'", () => {
+		const period = dbFormatToBillingPeriod("monthly");
+		expect(period).toBe("monthly");
+	});
+});
+
+// ===
+// transformTier TESTS
+// ===
+
+describe("transformTier", () => {
+	it("returns pricing tier with key, name, and tagline from wanderer config", () => {
+		const tier = transformTier("wanderer", TIERS.wanderer, {});
+		expect(tier.key).toBe("wanderer");
+		expect(tier.name).toBe(TIERS.wanderer.display.name);
+		expect(tier.tagline).toBe(TIERS.wanderer.display.tagline);
+	});
+
+	it("computes annual savings from monthly and annual prices", () => {
+		const tier = transformTier("wanderer", TIERS.wanderer, {});
+		const expectedSavings = calculateAnnualSavings(
+			TIERS.wanderer.pricing.monthlyPrice,
+			TIERS.wanderer.pricing.yearlyPrice,
+		);
+		expect(tier.annualSavings).toBe(expectedSavings);
+	});
+
+	it("includes checkout URLs in transformed tier", () => {
+		const checkoutUrls = {
+			monthly: "https://checkout.example.com/monthly",
+			annual: "https://checkout.example.com/annual",
+		};
+		const tier = transformTier("wanderer", TIERS.wanderer, checkoutUrls);
+		expect(tier.checkoutUrls).toEqual(checkoutUrls);
+	});
+
+	it("applies highlight option to tier", () => {
+		const tier = transformTier("wanderer", TIERS.wanderer, {}, { highlight: true });
+		expect(tier.highlight).toBe(true);
+	});
+
+	it("applies badge option to tier", () => {
+		const tier = transformTier("wanderer", TIERS.wanderer, {}, { badge: "Best Value" });
+		expect(tier.badge).toBe("Best Value");
+	});
+
+	it("includes feature limits and feature strings", () => {
+		const tier = transformTier("wanderer", TIERS.wanderer, {});
+		expect(tier.limits).toBeDefined();
+		expect(tier.features).toBeDefined();
+		expect(Array.isArray(tier.featureStrings)).toBe(true);
+	});
+
+	it("includes pricing information", () => {
+		const tier = transformTier("seedling", TIERS.seedling, {});
+		expect(tier.monthlyPrice).toBe(TIERS.seedling.pricing.monthlyPrice);
+		expect(tier.annualPrice).toBe(TIERS.seedling.pricing.yearlyPrice);
+	});
+});
+
+// ===
+// transformAllTiers TESTS
+// ===
+
+describe("transformAllTiers", () => {
+	it("returns all five tiers by default", () => {
+		const tiers = transformAllTiers();
+		expect(tiers).toHaveLength(5);
+		expect(tiers.map((t) => t.key)).toEqual([
+			"wanderer",
+			"seedling",
+			"sapling",
+			"oak",
+			"evergreen",
+		]);
+	});
+
+	it("respects includeTiers filter", () => {
+		const tiers = transformAllTiers({ includeTiers: ["seedling", "sapling"] });
+		expect(tiers).toHaveLength(2);
+		expect(tiers.map((t) => t.key)).toEqual(["seedling", "sapling"]);
+	});
+
+	it("respects excludeTiers filter", () => {
+		const tiers = transformAllTiers({ excludeTiers: ["wanderer", "evergreen"] });
+		expect(tiers).toHaveLength(3);
+		expect(tiers.map((t) => t.key)).toEqual(["seedling", "sapling", "oak"]);
+	});
+
+	it("applies highlightTier to correct tier", () => {
+		const tiers = transformAllTiers({ highlightTier: "seedling" });
+		const seedling = tiers.find((t) => t.key === "seedling");
+		const sapling = tiers.find((t) => t.key === "sapling");
+		expect(seedling?.highlight).toBe(true);
+		expect(sapling?.highlight).toBe(false);
+	});
+
+	it("applies badges to specified tiers", () => {
+		const tiers = transformAllTiers({
+			badges: {
+				seedling: "Most Popular",
+				oak: "Best Value",
+			},
+		});
+		const seedling = tiers.find((t) => t.key === "seedling");
+		const oak = tiers.find((t) => t.key === "oak");
+		const sapling = tiers.find((t) => t.key === "sapling");
+		expect(seedling?.badge).toBe("Most Popular");
+		expect(oak?.badge).toBe("Best Value");
+		expect(sapling?.badge).toBeUndefined();
+	});
+
+	it("passes checkout URLs to each tier", () => {
+		const checkoutUrls = {
+			seedling: {
+				monthly: "https://checkout.example.com/seedling/monthly",
+				annual: "https://checkout.example.com/seedling/annual",
+			},
+			sapling: {
+				monthly: "https://checkout.example.com/sapling/monthly",
+			},
+		};
+		const tiers = transformAllTiers({ checkoutUrls });
+		const seedling = tiers.find((t) => t.key === "seedling");
+		expect(seedling?.checkoutUrls).toEqual(checkoutUrls.seedling);
+	});
+
+	it("respects custom tier order", () => {
+		const customOrder = ["oak", "seedling", "wanderer"];
+		const tiers = transformAllTiers({
+			tierOrder: customOrder as any,
+		});
+		expect(tiers.map((t) => t.key)).toEqual(customOrder);
+	});
+
+	it("combines includeTiers and excludeTiers filters", () => {
+		const tiers = transformAllTiers({
+			includeTiers: ["seedling", "sapling", "oak"],
+			excludeTiers: ["sapling"],
+		});
+		expect(tiers.map((t) => t.key)).toEqual(["seedling", "oak"]);
+	});
+});
+
+// ===
+// CONSTANTS TESTS
+// ===
+
+describe("Constants", () => {
+	it("DEFAULT_ANNUAL_SAVINGS is 15", () => {
+		expect(DEFAULT_ANNUAL_SAVINGS).toBe(15);
+	});
+
+	it("DEFAULT_TIER_ORDER contains all five tiers", () => {
+		expect(DEFAULT_TIER_ORDER).toHaveLength(5);
+		expect(DEFAULT_TIER_ORDER).toEqual(["wanderer", "seedling", "sapling", "oak", "evergreen"]);
+	});
+
+	it("DEFAULT_TIER_ORDER maintains correct tier sequence", () => {
+		expect(DEFAULT_TIER_ORDER[0]).toBe("wanderer");
+		expect(DEFAULT_TIER_ORDER[1]).toBe("seedling");
+		expect(DEFAULT_TIER_ORDER[2]).toBe("sapling");
+		expect(DEFAULT_TIER_ORDER[3]).toBe("oak");
+		expect(DEFAULT_TIER_ORDER[4]).toBe("evergreen");
+	});
 });
