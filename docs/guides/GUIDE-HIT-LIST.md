@@ -17,7 +17,7 @@ A rolling inventory of what has dev docs and what doesn't. Specs describe *what*
 
 The waystone guide (`waystone-developer-guide.md`) is the template. Every guide should answer: "How do I add/modify X?", "How does X work under the hood?", and "What breaks and why?"
 
-Last updated: 2026-03-12 (Priority 1 + Priority 2 complete)
+Last updated: 2026-03-12 (Priority 1 + Priority 2 + Priority 3 complete, except Press)
 
 ---
 
@@ -71,17 +71,17 @@ These are live, actively modified, and have non-obvious registration steps or fa
 
 | System | Location | Spec | Guide | What a guide would cover |
 |--------|----------|:----:|:-----:|--------------------------|
-| Gossamer | `libs/gossamer/` | yes | **NEEDS GUIDE** | Adding presets, dual render paths, performance tuning |
-| Vineyard | `libs/vineyard/` | yes | **NEEDS GUIDE** | Building showcase pages, component library conventions |
-| Forage | separate repo | yes | **NEEDS GUIDE** | DeepSeek integration, search pipeline, domain validation |
-| Vista | `apps/vista/` | yes | **NEEDS GUIDE** | Adding monitoring targets, collector setup, alert rules |
-| Patina | separate repo | yes | **NEEDS GUIDE** | Backup scheduling, cold storage structure, recovery procedures |
+| Gossamer | `libs/gossamer/` | yes | **HAS GUIDE** (`gossamer-developer-guide.md`) | Adding presets, dual render paths, performance tuning |
+| Vineyard | `libs/vineyard/` | yes | **HAS GUIDE** (`vineyard-developer-guide.md`) | Building showcase pages, component library conventions |
+| Forage | `services/forage/` | yes | **HAS GUIDE** (`forage-developer-guide.md`) | AI-powered domain search, RDAP, pricing tiers |
+| Vista | `apps/landing/.../arbor/vista/` | yes | **HAS GUIDE** (`vista-developer-guide.md`) | Monitoring dashboard, collectors, alert thresholds |
+| Patina | `workers/patina/` | yes | **HAS GUIDE** (`patina-developer-guide.md`) | Backup scheduling, cold storage, recovery procedures |
 | Press | separate repo | yes | **NEEDS GUIDE** | Image pipeline, WebP conversion, R2 upload, content hashing |
-| Clearing | `apps/clearing/` | yes | **NEEDS GUIDE** | Incident creation, status page structure, component health |
-| Infra SDK | `libs/infra/` | no | **NEEDS GUIDE** | GroveContext, middleware patterns, partial bindings, testing mocks |
-| GroveAgent SDK | `libs/grove-agent/` | yes | **NEEDS GUIDE** | Base classes, groveConfig, callable decorator, error catalog |
-| Porch | `apps/porch/` | yes | **NEEDS GUIDE** | Conversation model, support flow, tracking |
-| Trace | inline feedback | yes | **NEEDS GUIDE** | Feedback collection, where to embed, analytics |
+| Clearing | `apps/clearing/` | yes | **HAS GUIDE** (`clearing-developer-guide.md`) | Status page, incident management, health checks |
+| Infra SDK | `libs/infra/` | yes | **HAS GUIDE** (`infra-developer-guide.md`) | GroveContext, middleware patterns, partial bindings, testing mocks |
+| GroveAgent SDK | `libs/grove-agent/` | yes | **HAS GUIDE** (`grove-agent-developer-guide.md`) | Base classes, groveConfig, callable decorator, error catalog |
+| Porch | `apps/landing/.../porch/` | yes | **HAS GUIDE** (`porch-developer-guide.md`) | Conversation model, support flow, visit tracking |
+| Trace | engine + landing API | yes | **HAS GUIDE** (`trace-developer-guide.md`) | Inline feedback collection, privacy model, analytics |
 
 ## Priority 4 — Greenhouse / Building (guide when they stabilize)
 
@@ -136,6 +136,16 @@ Developer guides in `docs/guides/`:
 | `canopy-developer-guide.md` | Directory system, categories, daily shuffle |
 | `reverie-developer-guide.md` | AI config pipeline, domains, atmospheres |
 | `warden-developer-guide.md` | Credential gateway, auth paths, service abstraction |
+| `gossamer-developer-guide.md` | ASCII effects, presets, dual render paths, performance |
+| `vineyard-developer-guide.md` | Component showcase library, demo pages |
+| `forage-developer-guide.md` | Domain search, RDAP, AI providers, pricing |
+| `vista-developer-guide.md` | Monitoring dashboard, collectors, alerts |
+| `patina-developer-guide.md` | Backup scheduling, cold storage, recovery |
+| `clearing-developer-guide.md` | Status page, incidents, health checks |
+| `infra-developer-guide.md` | Infrastructure SDK, GroveContext, middleware |
+| `grove-agent-developer-guide.md` | Agent SDK, base classes, error catalog |
+| `porch-developer-guide.md` | Support conversations, visit tracking |
+| `trace-developer-guide.md` | Inline feedback, privacy model |
 | `adding-grafts-and-flags.md` | Graft/feature flag system |
 | `grove-mcp-guide.md` | Mycelium MCP setup |
 | `error-code-diagnostic-guide.md` | Signpost error codes |
@@ -166,7 +176,7 @@ A system has good dev docs when a developer who has never touched it can:
 3. Debug a failure without reading source code first
 4. Know which files to touch and which to leave alone
 
-The waystone guide is the bar. Not every system needs one right now, but everything in Priority 1 and 2 does.
+The waystone guide is the bar. Priority 1, 2, and 3 systems all have guides now (except Press, which lives in a separate repo).
 
 ---
 
