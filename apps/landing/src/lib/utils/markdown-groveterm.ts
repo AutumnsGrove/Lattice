@@ -37,6 +37,8 @@ type GroveTermManifest = Record<string, GroveTermEntry>;
 const manifestPath = resolve(
 	process.cwd(),
 	"..",
+	"..",
+	"libs",
 	"engine",
 	"src",
 	"lib",
