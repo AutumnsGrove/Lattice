@@ -1,3 +1,10 @@
+---
+title: "Heartwood → Better Auth Migration Plan"
+status: completed
+category: infra
+lastUpdated: "2026-02-22"
+---
+
 # Heartwood → Better Auth Migration Plan
 
 ```

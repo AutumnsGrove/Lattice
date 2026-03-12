@@ -1,3 +1,10 @@
+---
+title: "Automated Status Monitoring for The Clearing"
+status: completed
+category: infra
+lastUpdated: "2026-02-22"
+---
+
 # Automated Status Monitoring for The Clearing
 
 ## Overview

@@ -1,3 +1,10 @@
+---
+title: "Curio: Webring Hub"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Curio: Webring Hub
 
 > *We're all connected, and clicking through is the adventure.*

@@ -1,3 +1,10 @@
+---
+title: "Feature Flags Admin UI Implementation Prompt"
+status: planned
+category: features
+lastUpdated: "2026-03-12"
+---
+
 # Feature Flags Admin UI Implementation Prompt
 
 ## Context

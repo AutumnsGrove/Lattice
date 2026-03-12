@@ -1,3 +1,10 @@
+---
+title: "Curio: Hit Counter"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Curio: Hit Counter
 
 > *You are visitor #1,247!*

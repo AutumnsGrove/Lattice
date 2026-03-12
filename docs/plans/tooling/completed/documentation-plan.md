@@ -1,3 +1,10 @@
+---
+title: "Developer Documentation Plan"
+status: completed
+category: tooling
+lastUpdated: "2026-02-22"
+---
+
 # Developer Documentation Plan
 
 **Created**: January 18, 2026

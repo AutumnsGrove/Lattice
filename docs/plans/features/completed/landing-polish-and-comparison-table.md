@@ -1,3 +1,10 @@
+---
+title: "Landing Page Polish + Competitor Comparison Table"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Landing Page Polish + Competitor Comparison Table
 
 **Issues:** #957 (comparison table), #958 (visual polish)

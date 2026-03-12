@@ -1,3 +1,10 @@
+---
+title: "Zephyr Client Library & Secrets Setup"
+status: completed
+category: infra
+lastUpdated: "2026-02-22"
+---
+
 # Zephyr Client Library & Secrets Setup
 
 **Status:** Planned

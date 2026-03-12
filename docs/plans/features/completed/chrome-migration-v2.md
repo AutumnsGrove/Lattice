@@ -1,3 +1,10 @@
+---
+title: "Chrome Migration Plan v2 — Corrected Implementation"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Chrome Migration Plan v2 — Corrected Implementation
 
 > **Status**: Ready for implementation

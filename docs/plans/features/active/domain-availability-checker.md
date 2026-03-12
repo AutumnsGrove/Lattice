@@ -1,3 +1,10 @@
+---
+title: "Domain Availability Checker — Implementation Plan"
+status: active
+category: features
+lastUpdated: "2026-02-27"
+---
+
 # Domain Availability Checker — Implementation Plan
 
 ## Overview

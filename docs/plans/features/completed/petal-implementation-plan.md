@@ -1,3 +1,10 @@
+---
+title: "Petal Implementation Plan — Image Content Moderation"
+status: completed
+category: features
+lastUpdated: "2026-03-12"
+---
+
 # Petal Implementation Plan — Image Content Moderation
 
 **Status:** ✅ Implementation Complete

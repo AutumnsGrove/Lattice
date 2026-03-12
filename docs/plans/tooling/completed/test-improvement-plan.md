@@ -1,3 +1,10 @@
+---
+title: "Test Improvement Plan"
+status: completed
+category: tooling
+lastUpdated: "2026-02-22"
+---
+
 # Test Improvement Plan
 
 ## Summary

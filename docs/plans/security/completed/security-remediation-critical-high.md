@@ -1,3 +1,10 @@
+---
+title: "Grove 1.0 Critical & High Priority Remediation Plan"
+status: completed
+category: security
+lastUpdated: "2026-02-22"
+---
+
 # Grove 1.0 Critical & High Priority Remediation Plan
 
 **Created**: January 8, 2026

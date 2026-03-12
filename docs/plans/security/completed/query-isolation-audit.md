@@ -1,3 +1,10 @@
+---
+title: "Query Isolation Audit - Action Items"
+status: completed
+category: security
+lastUpdated: "2026-02-22"
+---
+
 # Query Isolation Audit - Action Items
 
 **Created**: 2026-01-12

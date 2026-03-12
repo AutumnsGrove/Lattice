@@ -1,3 +1,10 @@
+---
+title: "Amber ZIP Export Integration Plan"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Amber ZIP Export Integration Plan
 
 > **Status:** Ready for Implementation

@@ -1,3 +1,10 @@
+---
+title: "Lattice Migration Strategy"
+status: completed
+category: infra
+lastUpdated: "2026-02-22"
+---
+
 # Lattice Migration Strategy
 
 **Source Repository:** [AutumnsGrove](https://github.com/AutumnsGrove/AutumnsGrove)

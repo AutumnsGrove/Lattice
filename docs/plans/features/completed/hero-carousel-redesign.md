@@ -1,3 +1,10 @@
+---
+title: "Hero Carousel Redesign + Broken Link Fixes"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Hero Carousel Redesign + Broken Link Fixes
 
 ## Summary

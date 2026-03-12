@@ -1,3 +1,10 @@
+---
+title: "Design Token Unification Architecture Plan"
+status: completed
+category: infra
+lastUpdated: "2026-02-22"
+---
+
 # Design Token Unification Architecture Plan
 
 ## Issue #660: Unify design token system between tokens.css and Tailwind config

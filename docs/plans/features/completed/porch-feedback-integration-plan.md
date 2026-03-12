@@ -1,3 +1,10 @@
+---
+title: "Porch & Feedback Integration Plan"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Porch & Feedback Integration Plan
 
 **Created**: January 28, 2026

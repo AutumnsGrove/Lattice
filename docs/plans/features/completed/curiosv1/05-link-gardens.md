@@ -1,3 +1,10 @@
+---
+title: "Curio: Link Gardens"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Curio: Link Gardens
 
 > *Here are the places and people I love on the web.*

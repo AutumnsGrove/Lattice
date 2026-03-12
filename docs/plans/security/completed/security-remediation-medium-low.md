@@ -1,3 +1,10 @@
+---
+title: "Grove 1.1 Medium & Low Priority Remediation Plan"
+status: completed
+category: security
+lastUpdated: "2026-02-22"
+---
+
 # Grove 1.1 Medium & Low Priority Remediation Plan
 
 **Created**: January 8, 2026

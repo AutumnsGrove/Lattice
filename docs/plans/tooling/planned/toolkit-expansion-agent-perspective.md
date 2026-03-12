@@ -1,3 +1,10 @@
+---
+title: "Toolkit Expansion Proposal: Agent Perspective"
+status: planned
+category: tooling
+lastUpdated: "2026-03-12"
+---
+
 # Toolkit Expansion Proposal: Agent Perspective
 
 > Written by Claude (Opus 4.6) after deep exploration of both `gf` and `gw` codebases.

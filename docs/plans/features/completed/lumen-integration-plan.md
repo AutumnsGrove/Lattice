@@ -1,3 +1,10 @@
+---
+title: "Lumen AI Gateway — Unified Integration Plan"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Lumen AI Gateway — Unified Integration Plan
 
 ## Summary

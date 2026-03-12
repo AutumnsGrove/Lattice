@@ -1,3 +1,10 @@
+---
+title: "Grove Tenant Secrets: Envelope Encryption Implementation Guide"
+status: completed
+category: security
+lastUpdated: "2026-02-22"
+---
+
 # Grove Tenant Secrets: Envelope Encryption Implementation Guide
 
 **Target Repository:** `AutumnsGrove/Lattice`  

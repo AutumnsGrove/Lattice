@@ -1,3 +1,10 @@
+---
+title: "Dependency Update Strategy"
+status: completed
+category: tooling
+lastUpdated: "2026-03-11"
+---
+
 # Dependency Update Strategy
 
 **Created**: 2026-01-12

@@ -1,3 +1,10 @@
+---
+title: "Grove Mode Rollout: All Packages"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Grove Mode Rollout: All Packages
 
 **Date:** 2026-02-06

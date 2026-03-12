@@ -1,3 +1,10 @@
+---
+title: "GlassCard Prop Migration Plan"
+status: planned
+category: general
+lastUpdated: "2026-03-11"
+---
+
 # GlassCard Prop Migration Plan
 
 > Consolidate manual icon and waystone boilerplate across the monorepo

@@ -1,3 +1,10 @@
+---
+title: "Grove Find (gf) — Python to Go Port"
+status: completed
+category: tooling
+lastUpdated: "2026-02-22"
+---
+
 # Grove Find (gf) — Python to Go Port
 
 **Created**: 2026-02-13

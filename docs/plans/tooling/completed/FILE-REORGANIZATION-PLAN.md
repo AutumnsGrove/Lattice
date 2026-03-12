@@ -1,3 +1,10 @@
+---
+title: "Lattice File Reorganization Plan"
+status: completed
+category: tooling
+lastUpdated: "2026-02-22"
+---
+
 # Lattice File Reorganization Plan
 
 > **Status**: ✅ COMPLETE

@@ -1,3 +1,10 @@
+---
+title: "Journey Curio - Repository Evolution Tracker"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Journey Curio - Repository Evolution Tracker
 
 ## Overview

@@ -1,3 +1,10 @@
+---
+title: "Curio: Activity Status"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Curio: Activity Status
 
 > *Currently: writing a blog post about mushrooms.*

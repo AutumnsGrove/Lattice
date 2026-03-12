@@ -1,3 +1,10 @@
+---
+title: "Testing Fixes Plan"
+status: completed
+category: tooling
+lastUpdated: "2026-02-22"
+---
+
 # Testing Fixes Plan
 
 **Created**: January 18, 2026

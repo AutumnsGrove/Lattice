@@ -1,3 +1,10 @@
+---
+title: "Tier Feature Centralization Plan"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Tier Feature Centralization Plan
 
 **Created**: 2026-01-12

@@ -1,3 +1,10 @@
+---
+title: "Curios Shared Infrastructure"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Curios Shared Infrastructure
 
 > Build once, use everywhere. This is the foundation that every curio stands on.

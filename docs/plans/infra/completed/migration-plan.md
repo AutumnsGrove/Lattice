@@ -1,3 +1,10 @@
+---
+title: "Lattice Migration Plan"
+status: completed
+category: infra
+lastUpdated: "2026-02-22"
+---
+
 # Lattice Migration Plan
 
 **Source:** AutumnsGrove (autumnsgrove.com)

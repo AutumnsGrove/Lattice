@@ -1,3 +1,10 @@
+---
+title: "Implementation Plan: Wanderer Feedback System"
+status: completed
+category: features
+lastUpdated: "2026-03-12"
+---
+
 # Implementation Plan: Wanderer Feedback System
 
 ## Overview

@@ -1,3 +1,10 @@
+---
+title: "Curio: Custom Cursors"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Curio: Custom Cursors
 
 > *Even your mouse knows this place is special.*

@@ -1,3 +1,10 @@
+---
+title: "Tenant Mobile Sidebar Unification Plan"
+status: completed
+category: features
+lastUpdated: "2026-03-11"
+---
+
 # Tenant Mobile Sidebar Unification Plan
 
 ## Overview

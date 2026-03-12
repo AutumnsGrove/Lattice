@@ -1,3 +1,10 @@
+---
+title: "Grove Platform: Development Roadmap"
+status: planned
+category: general
+lastUpdated: "2026-02-20"
+---
+
 # Grove Platform: Development Roadmap
 
 > **Internal Technical Roadmap**

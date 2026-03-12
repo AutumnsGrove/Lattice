@@ -1,3 +1,10 @@
+---
+title: "Curio Directive Autocomplete in MarkdownEditor"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Curio Directive Autocomplete in MarkdownEditor
 
 ## Context

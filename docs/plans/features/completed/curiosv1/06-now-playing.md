@@ -1,3 +1,10 @@
+---
+title: "Curio: Now Playing"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Curio: Now Playing
 
 > *We're listening to music together right now.*

@@ -1,3 +1,10 @@
+---
+title: "Curio: Status Badges"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Curio: Status Badges
 
 > *Here's what's happening with my corner of the internet.*

@@ -1,3 +1,10 @@
+---
+title: "Security Hardening Plan"
+status: completed
+category: security
+lastUpdated: "2026-02-22"
+---
+
 # Security Hardening Plan
 
 **Created**: January 18, 2026

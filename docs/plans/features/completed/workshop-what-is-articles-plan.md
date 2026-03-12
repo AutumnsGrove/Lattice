@@ -1,3 +1,10 @@
+---
+title: "Workshop \"What Is\" Articles Plan"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Workshop "What Is" Articles Plan
 
 **Created**: January 28, 2026

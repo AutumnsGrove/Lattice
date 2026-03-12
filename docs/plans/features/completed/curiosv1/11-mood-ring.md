@@ -1,3 +1,10 @@
+---
+title: "Curio: Mood Ring"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Curio: Mood Ring
 
 > *The site reflects how I'm feeling.*

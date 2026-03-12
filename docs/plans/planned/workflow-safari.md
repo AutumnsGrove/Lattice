@@ -1,3 +1,10 @@
+---
+title: "Workflow Safari — What the Wild Is Doing That We Haven't Tried Yet"
+status: planned
+category: general
+lastUpdated: "2026-02-21"
+---
+
 # Workflow Safari — What the Wild Is Doing That We Haven't Tried Yet
 
 > _"The jeep cools under an acacia tree. The journal is full — 13 new creatures spotted in the wild, each one a pattern we haven't brought home to the grove yet."_

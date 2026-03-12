@@ -54,7 +54,24 @@ Before designing anything, gain altitude. See the full context:
 Every major architectural choice deserves a record. Start a document:
 
 ```
-docs/adr/YYYYMMDD-descriptive-name.md
+docs/plans/{category}/{stage}/{descriptive-name}.md
+```
+
+Categories: `features/`, `infra/`, `security/`, `tooling/`
+Lifecycle stages: `planning/` → `planned/` → `active/` → `completed/`
+
+**Every plan file MUST have YAML frontmatter:**
+
+```yaml
+---
+title: "Human-Readable Plan Title"
+description: "One-line summary of what this plan covers"
+status: planning | planned | active | completed
+category: features | infra | security | tooling
+lastUpdated: "YYYY-MM-DD"
+tags:
+  - relevant-tag
+---
 ```
 
 **Output:** Context summary including scale, constraints, and problem statement
@@ -234,7 +251,7 @@ Document the architecture so others can build it:
    - Decision (what we chose)
    - Consequences (trade-offs, future implications)
 
-**Output:** Complete documentation package in `docs/architecture/`
+**Output:** Complete documentation package in `docs/plans/{category}/{stage}/`
 
 ---
 

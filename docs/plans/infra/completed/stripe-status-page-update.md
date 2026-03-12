@@ -1,3 +1,10 @@
+---
+title: "Plan: Issue #921 - Update Clearing Status Page for Stripe Payment Testing"
+status: completed
+category: infra
+lastUpdated: "2026-02-22"
+---
+
 # Plan: Issue #921 - Update Clearing Status Page for Stripe Payment Testing
 
 ## Summary

@@ -1,3 +1,10 @@
+---
+title: "Waystone Integration Plan"
+status: completed
+category: features
+lastUpdated: "2026-03-11"
+---
+
 # Waystone Integration Plan
 
 **Created:** January 28, 2026

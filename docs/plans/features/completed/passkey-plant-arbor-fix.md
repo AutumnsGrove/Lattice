@@ -1,3 +1,10 @@
+---
+title: "Plan: Passkey Login in Plant + Arbor Panel Passkey Fix"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Plan: Passkey Login in Plant + Arbor Panel Passkey Fix
 
 ## Overview

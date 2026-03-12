@@ -1,3 +1,10 @@
+---
+title: "Plan: Migrate Plant Package from Legacy JWT to grove_session"
+status: completed
+category: infra
+lastUpdated: "2026-02-22"
+---
+
 # Plan: Migrate Plant Package from Legacy JWT to grove_session
 
 ## Overview

@@ -1,3 +1,10 @@
+---
+title: "Curio: Bookmark Shelf"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Curio: Bookmark Shelf
 
 > *Browse my shelf, take what interests you.*

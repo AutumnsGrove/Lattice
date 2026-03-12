@@ -1,3 +1,10 @@
+---
+title: "Curio: Guestbook"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Curio: Guestbook
 
 > *Someone visited and wanted to say hi.*

@@ -1,3 +1,10 @@
+---
+title: "Plant Onboarding Enhancements"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Plant Onboarding Enhancements
 
 **Created**: January 18, 2026

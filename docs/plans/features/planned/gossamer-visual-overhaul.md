@@ -1,3 +1,10 @@
+---
+title: "Gossamer Visual Quality Overhaul"
+status: planned
+category: features
+lastUpdated: "2026-03-05"
+---
+
 # Gossamer Visual Quality Overhaul
 
 > _Spider silk stretched between branches — nearly invisible until the light finds it._

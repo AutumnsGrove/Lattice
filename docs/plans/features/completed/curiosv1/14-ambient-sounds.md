@@ -1,3 +1,10 @@
+---
+title: "Curio: Ambient Sounds"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Curio: Ambient Sounds
 
 > *Step into the grove and hear it.*

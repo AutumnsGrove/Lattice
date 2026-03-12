@@ -1,3 +1,10 @@
+---
+title: "Landing Page Performance Optimization Plan"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Landing Page Performance Optimization Plan
 
 **Created:** February 1, 2026

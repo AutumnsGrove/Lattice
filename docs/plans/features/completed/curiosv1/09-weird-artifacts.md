@@ -1,3 +1,10 @@
+---
+title: "Curio: Weird Artifacts"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Curio: Weird Artifacts
 
 > _Click the thing and something unexpected happens._

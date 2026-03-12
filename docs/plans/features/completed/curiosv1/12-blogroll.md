@@ -1,3 +1,10 @@
+---
+title: "Curio: Blogroll"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Curio: Blogroll
 
 > *Here's who I read and recommend.*

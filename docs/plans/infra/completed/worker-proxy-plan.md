@@ -1,3 +1,10 @@
+---
+title: "Grove Wildcard Router Worker - Implementation Plan"
+status: completed
+category: infra
+lastUpdated: "2026-02-22"
+---
+
 # Grove Wildcard Router Worker - Implementation Plan
 
 ## Context

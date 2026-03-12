@@ -1,3 +1,10 @@
+---
+title: "The Lattice Museum: Layout Plan"
+status: planning
+category: features
+lastUpdated: "2026-03-12"
+---
+
 # The Lattice Museum: Layout Plan
 
 > _A guided tour through how this forest grows._

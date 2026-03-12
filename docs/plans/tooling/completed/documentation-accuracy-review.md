@@ -1,3 +1,10 @@
+---
+title: "Documentation Accuracy Review Plan"
+status: completed
+category: tooling
+lastUpdated: "2026-02-22"
+---
+
 # Documentation Accuracy Review Plan
 
 **Created**: January 15, 2026

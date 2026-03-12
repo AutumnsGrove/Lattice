@@ -1,3 +1,10 @@
+---
+title: "Auth/Navigation Bug Fix Plan"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Auth/Navigation Bug Fix Plan
 
 **Issues:** #865, #866

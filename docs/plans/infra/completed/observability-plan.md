@@ -1,3 +1,10 @@
+---
+title: "Observability Plan: Comprehensive Platform Monitoring for Grove"
+status: completed
+category: infra
+lastUpdated: "2026-03-11"
+---
+
 # Observability Plan: Comprehensive Platform Monitoring for Grove
 
 ## Current State

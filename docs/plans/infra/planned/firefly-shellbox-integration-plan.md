@@ -1,3 +1,10 @@
+---
+title: "Firefly Integration Plan: Wake-on-HTTP, Named Instances, Pause/Resume"
+status: planned
+category: infra
+lastUpdated: "2026-03-06"
+---
+
 # Firefly Integration Plan: Wake-on-HTTP, Named Instances, Pause/Resume
 
 ```

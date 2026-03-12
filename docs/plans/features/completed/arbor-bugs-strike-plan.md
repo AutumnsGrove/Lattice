@@ -1,3 +1,10 @@
+---
+title: "Arbor Bug Strike Plan"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Arbor Bug Strike Plan
 
 ## Overview

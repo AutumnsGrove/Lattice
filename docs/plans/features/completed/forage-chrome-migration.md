@@ -1,3 +1,10 @@
+---
+title: "Forage Chrome Migration Plan"
+status: completed
+category: features
+lastUpdated: "2026-03-11"
+---
+
 # Forage Chrome Migration Plan
 
 ## Overview

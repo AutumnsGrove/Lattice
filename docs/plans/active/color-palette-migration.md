@@ -1,3 +1,10 @@
+---
+title: "Color Palette Migration Plan"
+status: active
+category: general
+lastUpdated: "2026-03-07"
+---
+
 # Color Palette Migration Plan
 
 > **Status:** Complete — Phases 1-6 executed. ~1,200 violations migrated across ~100 files. ~295 remaining are intentional brand/data-viz colors or in apps/domains (not originally scoped).

@@ -1,3 +1,10 @@
+---
+title: "Acorn Frontend Migration Plan"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Acorn Frontend Migration Plan
 
 > Moving the domain discovery frontend from Lattice to the Acorn repo

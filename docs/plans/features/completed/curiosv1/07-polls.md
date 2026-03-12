@@ -1,3 +1,10 @@
+---
+title: "Curio: Polls"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Curio: Polls
 
 > *I'm curious what you think.*

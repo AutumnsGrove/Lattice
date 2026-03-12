@@ -1,3 +1,10 @@
+---
+title: "grove-find: Shell to Python CLI Conversion"
+status: completed
+category: tooling
+lastUpdated: "2026-02-22"
+---
+
 > **ARCHIVED:** Python CLI was built, then replaced by Go version (gf). See `gf-python-to-go-port.md` for the final migration.
 
 # grove-find: Shell to Python CLI Conversion

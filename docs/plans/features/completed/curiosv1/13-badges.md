@@ -1,3 +1,10 @@
+---
+title: "Curio: Badges"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Curio: Badges
 
 > *You earned this. Wear it proudly.*

@@ -1,3 +1,10 @@
+---
+title: "Waystones Pop-up Architecture Plan"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Waystones Pop-up Architecture Plan
 
 **Issue:** #860 — Research KB article format and plan content strategy

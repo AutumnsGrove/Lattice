@@ -1,3 +1,10 @@
+---
+title: "Greenhouse Admin Graft - Implementation Plan"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Greenhouse Admin Graft - Implementation Plan
 
 Issue: #824

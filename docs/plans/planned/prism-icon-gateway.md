@@ -1,3 +1,10 @@
+---
+title: "Prism Icon Gateway Migration Plan"
+status: planned
+category: general
+lastUpdated: "2026-03-11"
+---
+
 # Prism Icon Gateway Migration Plan
 
 > **Issue:** [#1448](https://github.com/AutumnsGrove/Lattice/issues/1448)

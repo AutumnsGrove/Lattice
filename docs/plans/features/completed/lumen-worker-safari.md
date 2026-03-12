@@ -1,3 +1,10 @@
+---
+title: "Lumen Worker Architecture Safari"
+status: completed
+category: features
+lastUpdated: "2026-02-23"
+---
+
 # Lumen Worker Architecture Safari
 
 > _"Grove talks to AI through Lumen."_ — but only when someone's home.

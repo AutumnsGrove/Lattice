@@ -1,3 +1,10 @@
+---
+title: "Grove Mode: Terminology Toggle Plan"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Grove Mode: Terminology Toggle Plan
 
 **Date:** 2026-02-06

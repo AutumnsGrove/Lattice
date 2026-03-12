@@ -1,3 +1,10 @@
+---
+title: "Plan: Fix Logout Route"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Plan: Fix Logout Route
 
 ## Problem

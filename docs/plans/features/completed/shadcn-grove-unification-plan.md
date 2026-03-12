@@ -1,3 +1,10 @@
+---
+title: "Shadcn-Grove Unification Plan"
+status: completed
+category: features
+lastUpdated: "2026-03-11"
+---
+
 # Shadcn-Grove Unification Plan
 
 **Created:** January 30, 2026

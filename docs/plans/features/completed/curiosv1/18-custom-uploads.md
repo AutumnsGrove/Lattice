@@ -1,3 +1,10 @@
+---
+title: "Curio: Custom Uploads"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Curio: Custom Uploads
 
 > *Make it truly yours.*

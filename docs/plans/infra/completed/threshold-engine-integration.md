@@ -1,3 +1,10 @@
+---
+title: "Threshold Engine Integration Plan"
+status: completed
+category: infra
+lastUpdated: "2026-02-22"
+---
+
 # Threshold Engine Integration Plan
 
 **Created:** January 3, 2026

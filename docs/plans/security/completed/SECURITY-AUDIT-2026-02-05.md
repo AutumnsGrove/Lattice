@@ -1,3 +1,10 @@
+---
+title: "Lattice Security Audit Report"
+status: completed
+category: security
+lastUpdated: "2026-02-22"
+---
+
 # Lattice Security Audit Report
 
 **Date:** 2026-02-05

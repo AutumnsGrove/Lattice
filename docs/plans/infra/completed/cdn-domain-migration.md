@@ -1,3 +1,10 @@
+---
+title: "CDN Domain Migration Plan"
+status: completed
+category: infra
+lastUpdated: "2026-02-22"
+---
+
 # CDN Domain Migration Plan
 
 ## Overview

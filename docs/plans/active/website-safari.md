@@ -1,3 +1,10 @@
+---
+title: "Website Spec Safari — The Map That Forgot the Territory"
+status: active
+category: general
+lastUpdated: "2026-02-21"
+---
+
 # Website Spec Safari — The Map That Forgot the Territory
 
 > The spec describes a house that was never built. The territory built something better.

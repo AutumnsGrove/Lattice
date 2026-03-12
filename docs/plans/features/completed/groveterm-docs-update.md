@@ -1,3 +1,10 @@
+---
+title: "Plan: Add [[term]] Syntax to Documentation"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Plan: Add [[term]] Syntax to Documentation
 
 **Goal:** Update all Grove documentation to use the new `[[term]]` GroveTerm syntax for interactive terminology.

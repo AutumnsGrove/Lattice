@@ -1,3 +1,10 @@
+---
+title: "Data-Driven Documentation Sections Pattern"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Data-Driven Documentation Sections Pattern
 
 **Created**: January 15, 2026

@@ -1,3 +1,10 @@
+---
+title: "Grove Payment Migration: Stripe → Lemon Squeezy"
+status: completed
+category: infra
+lastUpdated: "2026-02-22"
+---
+
 > **ARCHIVED:** This migration was planned but never executed. Stripe approval came through in Feb 2026 and Stripe remains the live payment provider. Kept for historical reference.
 
 # Grove Payment Migration: Stripe → Lemon Squeezy

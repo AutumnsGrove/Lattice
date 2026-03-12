@@ -1,3 +1,10 @@
+---
+title: "Arbor Account Panel — Three Broken Features"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Arbor Account Panel — Three Broken Features
 
 > **Status:** Planned

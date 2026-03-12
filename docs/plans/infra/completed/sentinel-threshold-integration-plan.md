@@ -1,3 +1,10 @@
+---
+title: "Sentinel & Threshold Integration Plan"
+status: completed
+category: infra
+lastUpdated: "2026-02-22"
+---
+
 # Sentinel & Threshold Integration Plan
 
 **Created:** January 2, 2026

@@ -1,3 +1,10 @@
+---
+title: "🐆 PANTHER STRIKE: Issue #459 - Greenhouse Self-Serve Graft Controls"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # 🐆 PANTHER STRIKE: Issue #459 - Greenhouse Self-Serve Graft Controls
 
 ---

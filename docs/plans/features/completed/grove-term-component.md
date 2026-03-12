@@ -1,3 +1,10 @@
+---
+title: "GroveTerm Component Implementation Plan"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # GroveTerm Component Implementation Plan
 
 **Issue:** #925 - Integrate Grove terminology UI and Waystone Lexicon Elements

@@ -1,3 +1,10 @@
+---
+title: "ADR: Dynamic Grafts Cascade Architecture"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # ADR: Dynamic Grafts Cascade Architecture
 
 **Date:** 2026-01-31

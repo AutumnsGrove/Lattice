@@ -1,3 +1,10 @@
+---
+title: "App-Layer Encryption Pass"
+status: completed
+category: security
+lastUpdated: "2026-02-22"
+---
+
 # App-Layer Encryption Pass
 
 **Created**: January 18, 2026

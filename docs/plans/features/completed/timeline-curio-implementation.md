@@ -1,3 +1,10 @@
+---
+title: "Timeline Curio - Developer Curios Implementation Plan"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Timeline Curio - Developer Curios Implementation Plan
 
 ## Overview

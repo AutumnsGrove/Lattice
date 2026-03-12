@@ -1,3 +1,10 @@
+---
+title: "Feature Flags Expansion Roadmap"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Feature Flags Expansion Roadmap
 
 ```

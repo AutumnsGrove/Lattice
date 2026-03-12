@@ -1,3 +1,10 @@
+---
+title: "Plan: Fun Documentation Statistics for Journey Page"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Plan: Fun Documentation Statistics for Journey Page
 
 **Issue:** #708 - Add fun documentation statistics to Journey page (word cloud, etc.)

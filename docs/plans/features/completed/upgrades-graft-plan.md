@@ -1,3 +1,10 @@
+---
+title: "UpgradesGraft Plan"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # UpgradesGraft Plan
 
 > **Date:** February 9, 2026

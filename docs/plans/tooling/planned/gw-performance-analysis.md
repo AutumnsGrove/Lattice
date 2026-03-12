@@ -1,3 +1,10 @@
+---
+title: "Grove Wrap (gw) — Performance Analysis & Go Port Feasibility"
+status: planned
+category: tooling
+lastUpdated: "2026-02-22"
+---
+
 # Grove Wrap (gw) — Performance Analysis & Go Port Feasibility
 
 **Created**: 2026-02-22

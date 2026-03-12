@@ -1,3 +1,10 @@
+---
+title: "Grove Security Hardening Plan"
+status: completed
+category: security
+lastUpdated: "2026-02-22"
+---
+
 # Grove Security Hardening Plan
 
 ## Context

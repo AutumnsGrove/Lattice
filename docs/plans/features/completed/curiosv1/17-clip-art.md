@@ -1,3 +1,10 @@
+---
+title: "Curio: Clip Art Library"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Curio: Clip Art Library
 
 > *The craft drawer of your digital scrapbook.*

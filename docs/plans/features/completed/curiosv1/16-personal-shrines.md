@@ -1,3 +1,10 @@
+---
+title: "Curio: Personal Shrines"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Curio: Personal Shrines
 
 > *This is sacred to me and I wanted to share it.*

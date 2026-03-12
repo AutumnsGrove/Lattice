@@ -1,3 +1,10 @@
+---
+title: "Grove Email Infrastructure v2 - COMPLETED"
+status: completed
+category: infra
+lastUpdated: "2026-02-22"
+---
+
 # Grove Email Infrastructure v2 - COMPLETED
 
 Issue: #453

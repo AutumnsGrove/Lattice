@@ -1,3 +1,10 @@
+---
+title: "Animal Skill Ecosystem Migration Plan"
+status: completed
+category: tooling
+lastUpdated: "2026-02-22"
+---
+
 # Animal Skill Ecosystem Migration Plan
 
 ## Overview

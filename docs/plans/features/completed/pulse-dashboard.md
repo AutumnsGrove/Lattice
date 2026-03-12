@@ -1,3 +1,10 @@
+---
+title: "Pulse Curio — Architecture Plan"
+status: completed
+category: features
+lastUpdated: "2026-02-22"
+---
+
 # Pulse Curio — Architecture Plan
 
 ## Vision
