@@ -100,7 +100,10 @@ export async function getDigestEmails(
 		let snippet = "";
 		let from = row.from || "unknown";
 
-		const envelope = safeJsonParse(row.encrypted_envelope, {});
+		const envelope = safeJsonParse<{ subject?: string; snippet?: string; from?: string }>(
+			row.encrypted_envelope,
+			{},
+		);
 		if (envelope) {
 			subject = envelope.subject || subject;
 			snippet = envelope.snippet || "";

@@ -174,7 +174,7 @@ export class ChatDO extends LoomDO<ChatState, ChatEnv> {
 			return;
 		}
 
-		const parsed = safeJsonParse<WSClientMessage>(message.toString(), null);
+		const parsed = safeJsonParse<WSClientMessage | null>(message.toString(), null);
 		if (!parsed || !parsed.type) {
 			this.sendToSocket(ws, {
 				type: "error",
@@ -417,7 +417,7 @@ export class ChatDO extends LoomDO<ChatState, ChatEnv> {
 			alreadyPersisted?: boolean;
 			messageId?: string;
 			createdAt?: string;
-		}>(await ctx.request.text(), null);
+		} | null>(await ctx.request.text(), null);
 
 		if (!body || !body.conversationId || !body.senderId) {
 			return Response.json({ error: "Invalid request body" }, { status: 400 });
@@ -667,7 +667,7 @@ export class ChatDO extends LoomDO<ChatState, ChatEnv> {
 	}): ChatMessageData {
 		let parsedMetadata: ChatImageMetadata | null = null;
 		if (row.metadata && !row.retracted_at) {
-			parsedMetadata = safeJsonParse<ChatImageMetadata>(row.metadata, null);
+			parsedMetadata = safeJsonParse<ChatImageMetadata | null>(row.metadata, null);
 		}
 
 		return {

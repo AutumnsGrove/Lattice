@@ -9,7 +9,7 @@
  *   export default { presets: [grovePreset], ... }
  *
  * CSS variables are provided by @autumnsgrove/prism/css (grove-tokens.css).
- * Import that in your app's CSS: @import '@autumnsgrove/prism/css';
+ * Import that in your app's CSS: `@import '@autumnsgrove/prism/css'`
  *
  * "a place to Be"
  */

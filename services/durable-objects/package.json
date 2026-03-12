@@ -1,20 +1,21 @@
 {
-  "name": "grove-durable-objects",
-  "version": "0.1.0",
-  "private": true,
-  "description": "Cloudflare Worker hosting Durable Objects for Grove Platform",
-  "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
-    "check": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@autumnsgrove/lattice": "workspace:*",
-    "fflate": "^0.8.2"
-  },
-  "devDependencies": {
-    "@cloudflare/workers-types": "^4.20260210.0",
-    "typescript": "^5.9.3",
-    "wrangler": "^4.64.0"
-  }
+	"name": "grove-durable-objects",
+	"version": "0.1.0",
+	"private": true,
+	"description": "Cloudflare Worker hosting Durable Objects for Grove Platform",
+	"scripts": {
+		"dev": "wrangler dev",
+		"deploy": "wrangler deploy",
+		"check": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@autumnsgrove/lattice": "workspace:*",
+		"fflate": "^0.8.2"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20260210.0",
+		"vitest": "^3.2.4",
+		"typescript": "^5.9.3",
+		"wrangler": "^4.64.0"
+	}
 }

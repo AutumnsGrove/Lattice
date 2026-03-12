@@ -74,7 +74,7 @@ export function validateToolCalls(toolCalls: LumenToolCall[]): ValidationResult 
 		}
 
 		// Parse arguments
-		const args = safeParseJson<Record<string, unknown>>(tc.function.arguments, null);
+		const args = safeParseJson<Record<string, unknown> | null>(tc.function.arguments, null);
 		if (!args) {
 			errors.push({
 				toolCall: toolName,

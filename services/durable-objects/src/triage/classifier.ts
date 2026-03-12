@@ -123,18 +123,26 @@ function parseClassificationResponse(content: string): ClassificationResult {
 		return fallbackClassification({ from: "", subject: "", snippet: "" });
 	}
 
-	const parsed = safeJsonParse(jsonMatch[0], null);
+	const parsed = safeJsonParse<{
+		category?: string;
+		suggestedAction?: string;
+		confidence?: number;
+		reason?: string;
+		topics?: string[];
+	} | null>(jsonMatch[0], null);
 	if (!parsed) {
 		return fallbackClassification({ from: "", subject: "", snippet: "" });
 	}
 
 	// Validate and coerce fields
-	const category: EmailCategory = VALID_CATEGORIES.includes(parsed.category)
-		? parsed.category
+	const category: EmailCategory = VALID_CATEGORIES.includes(parsed.category as EmailCategory)
+		? (parsed.category as EmailCategory)
 		: "uncategorized";
 
-	const suggestedAction: SuggestedAction = VALID_ACTIONS.includes(parsed.suggestedAction)
-		? parsed.suggestedAction
+	const suggestedAction: SuggestedAction = VALID_ACTIONS.includes(
+		parsed.suggestedAction as SuggestedAction,
+	)
+		? (parsed.suggestedAction as SuggestedAction)
 		: "read";
 
 	const confidence =

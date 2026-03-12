@@ -162,7 +162,7 @@ export class PostMetaDO extends LoomDO<PostMeta, MetaEnv> {
 			"SELECT value FROM meta WHERE key = 'post_meta'",
 		);
 		if (!stored?.value) return null;
-		return safeJsonParse<PostMeta>(stored.value, null);
+		return safeJsonParse<PostMeta | null>(stored.value, null);
 	}
 
 	routes(): LoomRoute[] {

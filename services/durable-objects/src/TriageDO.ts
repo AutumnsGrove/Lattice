@@ -350,7 +350,7 @@ export class TriageDO extends LoomDO<TriageState, TriageDOEnv> {
 			.run();
 
 		// 2. Parse payload
-		const payload = safeJsonParse(bufferEntry.raw_payload, null);
+		const payload = safeJsonParse<Record<string, unknown> | null>(bufferEntry.raw_payload, null);
 		if (!payload) {
 			throw new Error(DO_ERRORS.INVALID_PAYLOAD.adminMessage);
 		}
@@ -409,7 +409,7 @@ export class TriageDO extends LoomDO<TriageState, TriageDOEnv> {
 		const r2Key = `emails/${bufferEntry.user_id}/${emailId}`;
 
 		// Store full raw content in R2
-		await this.env.IVY_R2.put(r2Key, payload.raw || bufferEntry.raw_payload);
+		await this.env.IVY_R2.put(r2Key, (payload.raw as string) || bufferEntry.raw_payload);
 
 		// Store envelope + classification in D1
 		const envelope = JSON.stringify({

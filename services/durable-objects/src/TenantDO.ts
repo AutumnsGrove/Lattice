@@ -131,7 +131,7 @@ export class TenantDO extends LoomDO<TenantConfig, TenantEnv> {
 			"SELECT value FROM config WHERE key = 'tenant_config'",
 		);
 		if (!rows.length || !rows[0].value) return null;
-		return safeJsonParse<TenantConfig>(rows[0].value, null);
+		return safeJsonParse<TenantConfig | null>(rows[0].value, null);
 	}
 
 	routes(): LoomRoute[] {
@@ -226,7 +226,7 @@ export class TenantDO extends LoomDO<TenantConfig, TenantEnv> {
 		);
 
 		if (rows.length > 0 && rows[0].value) {
-			const parsed = safeJsonParse<TenantConfig>(rows[0].value, null);
+			const parsed = safeJsonParse<TenantConfig | null>(rows[0].value, null);
 			if (parsed) {
 				this.state_data = parsed;
 				// Also set subdomain from cached config if we don't have it
