@@ -1,7 +1,11 @@
 <script lang="ts" module>
 	export type BorderStyle = "dots" | "dashes" | "stars" | "corners" | "simple" | "double";
 
+	import type { Snippet } from "svelte";
+
 	export interface GossamerBorderProps {
+		/** Content to render inside the border */
+		children?: Snippet;
 		/** Border style preset */
 		style?: BorderStyle;
 		/** Custom characters for border (overrides style) */
@@ -36,6 +40,7 @@
 
 	// Props with defaults
 	let {
+		children,
 		style = "simple",
 		characters,
 		color = "currentColor",
@@ -291,7 +296,7 @@
 <div bind:this={container} class="gossamer-border {className}" style:padding="{padding}px">
 	<canvas bind:this={canvas} aria-hidden="true" class="gossamer-border-canvas"></canvas>
 	<div class="gossamer-border-content">
-		<slot />
+		{@render children?.()}
 	</div>
 </div>
 

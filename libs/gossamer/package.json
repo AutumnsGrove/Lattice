@@ -23,6 +23,7 @@
 	"scripts": {
 		"dev": "svelte-package -i src -o dist --watch",
 		"build": "svelte-package -i src -o dist",
+		"check": "svelte-check --tsconfig ./tsconfig.json",
 		"test": "vitest run",
 		"test:watch": "vitest",
 		"test:coverage": "vitest run --coverage",
@@ -72,6 +73,7 @@
 		"gif-encoder-2": "^1.0.5",
 		"jsdom": "^27.4.0",
 		"svelte": "^5.0.0",
+		"svelte-check": "^4.0.0",
 		"tsx": "^4.21.0",
 		"typescript": "^5.3.0",
 		"vite": "^5.0.0",
