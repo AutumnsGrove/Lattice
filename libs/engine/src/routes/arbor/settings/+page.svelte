@@ -6,6 +6,7 @@
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import GlassConfirmDialog from "$lib/ui/components/ui/GlassConfirmDialog.svelte";
 	import GroveTerm from "$lib/ui/components/ui/groveterm/GroveTerm.svelte";
+	import Waystone from "$lib/ui/components/ui/waystone/Waystone.svelte";
 	import { GreenhouseStatusCard, GraftControlPanel } from "$lib/grafts/greenhouse";
 	import {
 		Smartphone,
@@ -1051,6 +1052,8 @@
 		inGreenhouse={data.greenhouseStatus?.inGreenhouse ?? false}
 		enrolledAt={data.greenhouseStatus?.enrolledAt}
 		notes={data.greenhouseStatus?.notes}
+		waystone="what-is-greenhouse"
+		waystoneLabel="Learn about the Greenhouse"
 		class="mb-6"
 	/>
 
@@ -1447,6 +1450,7 @@
 			<h2>
 				<GroveIcon service="grove" size={18} class="inline-block mr-1.5 align-text-bottom" /> Canopy
 			</h2>
+			<Waystone slug="what-is-canopy" label="Learn about the Canopy" />
 		</div>
 		<p class="section-description">
 			Let other wanderers discover your <GroveTerm term="grove">grove</GroveTerm> in the public directory.
@@ -1550,6 +1554,7 @@
 			<h2>
 				<GroveIcon service="meadow" size={18} class="inline-block mr-1.5 align-text-bottom" /> Meadow
 			</h2>
+			<Waystone slug="what-is-meadow" label="Learn about Meadow" />
 		</div>
 		<p class="section-description">
 			Share your published <GroveTerm term="blooms">posts</GroveTerm> to the community feed at

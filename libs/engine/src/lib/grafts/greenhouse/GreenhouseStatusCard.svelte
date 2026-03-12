@@ -20,6 +20,8 @@
 		enrolledAt,
 		notes,
 		footer,
+		waystone,
+		waystoneLabel,
 		class: className = "",
 	}: GreenhouseStatusCardProps = $props();
 
@@ -35,7 +37,7 @@
 	);
 </script>
 
-<GlassCard variant="default" class="greenhouse-status-card {className}">
+<GlassCard variant="default" class="greenhouse-status-card {className}" {waystone} {waystoneLabel}>
 	{#snippet children()}
 		<div class="flex items-start gap-4">
 			<!-- Icon -->
