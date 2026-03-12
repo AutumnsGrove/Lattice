@@ -1,8 +1,15 @@
 ---
 title: "Threshold Developer Guide"
 description: "Rate limiting SDK providing a single interface across every package and framework."
+category: guides
+guideCategory: operations
 lastUpdated: "2026-03-12"
-type: "dev-guide"
+aliases: []
+tags:
+  - threshold
+  - rate-limiting
+  - kv
+  - cloudflare-workers
 ---
 
 # Threshold Developer Guide

@@ -1,8 +1,15 @@
 ---
 title: "Loom Developer Guide"
 description: "How to build, deploy, and debug Durable Objects in the Grove monorepo."
+category: guides
+guideCategory: infrastructure
 lastUpdated: "2026-03-12"
-type: "dev-guide"
+aliases: []
+tags:
+  - loom
+  - durable-objects
+  - cloudflare-workers
+  - deploy
 ---
 
 # Loom Developer Guide

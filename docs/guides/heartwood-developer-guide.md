@@ -1,8 +1,16 @@
 ---
 title: "Heartwood Developer Guide"
 description: "How to integrate with Grove's centralized authentication system."
+category: guides
+guideCategory: auth
 lastUpdated: "2026-03-12"
-type: "dev-guide"
+aliases: []
+tags:
+  - heartwood
+  - auth
+  - oauth
+  - pkce
+  - sessions
 ---
 
 # Heartwood Developer Guide

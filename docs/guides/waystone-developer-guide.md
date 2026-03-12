@@ -1,8 +1,15 @@
 ---
 title: "Waystone Developer Guide"
 description: "How to add, debug, and maintain help markers throughout Grove apps."
+category: guides
+guideCategory: content-community
 lastUpdated: "2026-03-12"
-type: "dev-guide"
+aliases: []
+tags:
+  - waystone
+  - help-center
+  - prerender
+  - cors
 ---
 
 # Waystone Developer Guide

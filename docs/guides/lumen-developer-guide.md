@@ -1,8 +1,16 @@
 ---
 title: "Lumen Developer Guide"
 description: "Unified AI gateway handling provider routing, fallback chains, and usage tracking."
+category: guides
+guideCategory: operations
 lastUpdated: "2026-03-12"
-type: "dev-guide"
+aliases: []
+tags:
+  - lumen
+  - ai-integration
+  - openrouter
+  - tool-calling
+  - songbird
 ---
 
 # Lumen Developer Guide

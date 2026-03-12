@@ -1,8 +1,15 @@
 ---
 title: "Thorn Developer Guide"
 description: "Content moderation system with behavioral and AI layers for Grove."
+category: guides
+guideCategory: content-community
 lastUpdated: "2026-03-12"
-type: "dev-guide"
+aliases: []
+tags:
+  - thorn
+  - content-moderation
+  - behavioral
+  - lumen
 ---
 
 # Thorn Developer Guide

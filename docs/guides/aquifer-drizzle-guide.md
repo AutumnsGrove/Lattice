@@ -1,8 +1,15 @@
 ---
 title: "The Aquifer: Typed Database Queries with Drizzle"
 description: "Developer guide for using Drizzle ORM in Grove."
+category: guides
+guideCategory: infrastructure
 lastUpdated: "2026-03-12"
-type: "dev-guide"
+aliases: []
+tags:
+  - drizzle
+  - database
+  - d1
+  - orm
 ---
 
 # The Aquifer: Typed Database Queries with Drizzle

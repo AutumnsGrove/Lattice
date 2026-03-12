@@ -1,8 +1,14 @@
 ---
 title: "Developer Guide Hit List"
 description: "Rolling inventory of what has dev docs and what doesn't in the Grove ecosystem."
+category: guides
+guideCategory: reference
 lastUpdated: "2026-03-12"
-type: "reference"
+aliases: []
+tags:
+  - documentation
+  - inventory
+  - meta
 ---
 
 # Developer Guide Hit List
@@ -104,7 +110,7 @@ Forests, Wander, Nook, Etch, Moss, Weave, Rings (full version)
 
 ## Existing Guides
 
-What we already have in `docs/guides/`:
+Developer guides in `docs/guides/`:
 
 | Guide | Covers |
 |-------|--------|
@@ -117,19 +123,23 @@ What we already have in `docs/guides/`:
 | `zephyr-developer-guide.md` | Email gateway, templates, retry logic |
 | `threshold-developer-guide.md` | Rate limiting, tier-based limits, KV tracking |
 | `adding-grafts-and-flags.md` | Graft/feature flag system |
-| `local-auth-testing.md` | Local Heartwood auth setup |
-| `rate-limiting-guide.md` | Threshold rate limiting |
-| `zephyr-migration-guide.md` | Zephyr email migration |
 | `grove-mcp-guide.md` | Mycelium MCP setup |
-| `load-testing-guide.md` | Sentinel load testing |
-| `tenant-setup-guide.md` | New tenant provisioning |
-| `customer-setup.md` | Customer onboarding |
-| `agent-guide-new-grove-sites.md` | Agent workflow for new sites |
-| `broadcast-guide.md` | Broadcast email system |
 | `error-code-diagnostic-guide.md` | Signpost error codes |
 | `aquifer-drizzle-guide.md` | Drizzle ORM setup |
-| `wildcard-consolidation-guide.md` | Wildcard DNS/routing |
-| `woodpecker-codeberg-setup.md` | Codeberg CI setup |
+
+Related docs that live elsewhere:
+
+| Doc | Location | Covers |
+|-----|----------|--------|
+| `broadcast-guide.md` | `docs/playbooks/` | Broadcast email ops |
+| `load-testing-guide.md` | `docs/playbooks/` | Sentinel load testing ops |
+| `rate-limiting-guide.md` | `docs/playbooks/` | Threshold ops procedures |
+| `customer-setup.md` | `docs/setup/` | Customer onboarding |
+| `tenant-setup-guide.md` | `docs/setup/` | New tenant provisioning |
+| `local-auth-testing.md` | `docs/setup/` | Local Heartwood auth setup |
+| `agent-guide-new-grove-sites.md` | `AgentUsage/` | Agent workflow for new sites |
+| `woodpecker-codeberg-setup.md` | `docs/plans/infra/` | Codeberg CI (future work) |
+| `zephyr-migration-guide.md` | `docs/archive/` | Zephyr email migration (done) |
 
 ---
 

@@ -1,8 +1,15 @@
 ---
 title: "Signpost: Error Code Diagnostic Guide"
 description: "Reference guide for diagnosing and understanding Grove error codes."
+category: guides
+guideCategory: reference
 lastUpdated: "2026-03-12"
-type: "reference"
+aliases: []
+tags:
+  - signpost
+  - errors
+  - debugging
+  - error-codes
 ---
 
 # Signpost: Error Code Diagnostic Guide

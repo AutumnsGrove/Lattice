@@ -1,8 +1,16 @@
 ---
 title: "Prism Developer Guide"
 description: "Single source of truth for colors, design tokens, and Tailwind configuration."
+category: guides
+guideCategory: design
 lastUpdated: "2026-03-12"
-type: "dev-guide"
+aliases: []
+tags:
+  - prism
+  - design-tokens
+  - tailwind
+  - css
+  - dark-mode
 ---
 
 # Prism Developer Guide

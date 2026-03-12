@@ -1,8 +1,15 @@
 ---
 title: "Zephyr Developer Guide"
 description: "Unified email gateway for validation, rate limiting, template rendering, and retries."
+category: guides
+guideCategory: operations
 lastUpdated: "2026-03-12"
-type: "dev-guide"
+aliases: []
+tags:
+  - zephyr
+  - email
+  - templates
+  - cloudflare-workers
 ---
 
 # Zephyr Developer Guide

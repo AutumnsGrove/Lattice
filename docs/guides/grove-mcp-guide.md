@@ -1,8 +1,15 @@
 ---
 title: "GroveMCP: Remote MCP Servers on Cloudflare Workers"
 description: "Extending Grove's ecosystem with AI-agent tooling via the Model Context Protocol."
+category: guides
+guideCategory: infrastructure
 lastUpdated: "2026-03-12"
-type: "dev-guide"
+aliases: []
+tags:
+  - mycelium
+  - mcp
+  - cloudflare-workers
+  - ai-integration
 ---
 
 # 🌳 GroveMCP: Remote MCP Servers on Cloudflare Workers

@@ -1,8 +1,15 @@
 ---
 title: "Adding Grafts and Feature Flags"
 description: "Developer guide for adding new feature flags and grafts to Grove."
+category: guides
+guideCategory: infrastructure
 lastUpdated: "2026-03-12"
-type: "dev-guide"
+aliases: []
+tags:
+  - grafts
+  - feature-flags
+  - greenhouse
+  - migrations
 ---
 
 # Adding Grafts and Feature Flags
