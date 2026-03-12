@@ -1,14 +1,19 @@
+---
+title: "Heartwood Developer Guide"
+description: "How to integrate with Grove's centralized authentication system."
+lastUpdated: "2026-03-12"
+type: "dev-guide"
+---
+
 # Heartwood Developer Guide
 
 > How to integrate with Grove's centralized authentication system.
-
----
 
 ## What Heartwood Is
 
 Heartwood is Grove's centralized authentication service. It runs as a Cloudflare Worker (`groveauth`) and handles all user identity across the Grove ecosystem. Individual apps never implement their own auth logic. They redirect users to Heartwood, receive verified session tokens back, and validate those tokens on every request.
 
-Authentication methods: Google OAuth (PKCE), magic links (email), and passkeys (WebAuthn). All users must be on an email allowlist. There is no public registration.
+Authentication methods: Google OAuth (PKCE), magic links (email), and passkeys (WebAuthn).
 
 The public entry point is `login.grove.place`, which proxies all requests to the Heartwood worker via a Cloudflare service binding. The client library lives at `@autumnsgrove/lattice/heartwood`.
 

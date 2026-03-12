@@ -1,10 +1,15 @@
+---
+title: "Threshold Developer Guide"
+description: "Rate limiting SDK providing a single interface across every package and framework."
+lastUpdated: "2026-03-12"
+type: "dev-guide"
+---
+
 # Threshold Developer Guide
 
 Threshold is Grove's rate limiting SDK. It provides a single interface for rate limiting across every package, framework, and storage backend in the monorepo. This guide covers how to use it in practice.
 
 For the full architectural spec, see `docs/specs/threshold-spec.md`. For the original vision and layered architecture overview, see `docs/guides/rate-limiting-guide.md`.
-
----
 
 ## How Threshold works
 

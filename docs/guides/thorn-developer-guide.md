@@ -1,3 +1,10 @@
+---
+title: "Thorn Developer Guide"
+description: "Content moderation system with behavioral and AI layers for Grove."
+lastUpdated: "2026-03-12"
+type: "dev-guide"
+---
+
 # Thorn Developer Guide
 
 Thorn is Grove's content moderation system. It runs in two layers: a fast deterministic layer that checks behavioral signals (labels, rate limits, content patterns), followed by an AI layer that classifies content through Lumen inference. The behavioral layer runs in under 1ms. The AI layer takes around 500ms and costs roughly $0.001 per call.

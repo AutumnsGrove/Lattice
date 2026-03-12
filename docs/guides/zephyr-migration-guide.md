@@ -1,3 +1,10 @@
+---
+title: "Zephyr Migration Guide"
+description: "Migrate existing email code to use Zephyr, Grove's unified email gateway."
+lastUpdated: "2026-03-12"
+type: "migration"
+---
+
 # Zephyr Migration Guide
 
 A guide for migrating existing email code to use Zephyr, Grove's unified email gateway.

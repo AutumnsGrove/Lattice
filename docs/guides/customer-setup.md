@@ -1,8 +1,8 @@
 ---
-date created: Tuesday, November 26th 2025
-date modified: Tuesday, November 26th 2025
-tags:
-type: guide
+title: "Customer Setup Guide"
+description: "Step-by-step guide for onboarding a new customer to the Grove platform."
+lastUpdated: "2026-03-12"
+type: "setup"
 ---
 
 # Customer Setup Guide

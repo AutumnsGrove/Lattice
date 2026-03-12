@@ -1,3 +1,10 @@
+---
+title: "Loom Developer Guide"
+description: "How to build, deploy, and debug Durable Objects in the Grove monorepo."
+lastUpdated: "2026-03-12"
+type: "dev-guide"
+---
+
 # Loom Developer Guide
 
 How to build, deploy, and debug Durable Objects in the Grove monorepo.

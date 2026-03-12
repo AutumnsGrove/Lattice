@@ -1,11 +1,8 @@
 ---
-date created: Thursday, January 2nd 2026
-date modified: Thursday, January 2nd 2026
-tags:
-  - security
-  - infrastructure
-  - abuse-prevention
-type: guide
+title: "Rate Limiting & Abuse Prevention Guide"
+description: "Implement and configure the Threshold rate limiting system in Grove."
+lastUpdated: "2026-03-12"
+type: "ops"
 ---
 
 # Rate Limiting & Abuse Prevention Guide

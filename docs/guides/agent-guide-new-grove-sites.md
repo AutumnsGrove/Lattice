@@ -1,3 +1,10 @@
+---
+title: "Agent Guide: Creating New Grove Sites"
+description: "Help AI agents understand and work with the Lattice platform to create and deploy new Grove blog sites."
+lastUpdated: "2026-03-12"
+type: "dev-guide"
+---
+
 # Agent Guide: Creating New Grove Sites
 
 **Purpose:** This guide helps AI agents understand and work with the Lattice platform to create, configure, and deploy new Grove blog sites.

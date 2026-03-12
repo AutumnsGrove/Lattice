@@ -1,8 +1,13 @@
+---
+title: "Adding Grafts and Feature Flags"
+description: "Developer guide for adding new feature flags and grafts to Grove."
+lastUpdated: "2026-03-12"
+type: "dev-guide"
+---
+
 # Adding Grafts and Feature Flags
 
 > A developer guide for adding new feature flags and grafts to Grove.
-
----
 
 ## Quick Reference
 

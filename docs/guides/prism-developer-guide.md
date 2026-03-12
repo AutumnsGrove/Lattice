@@ -1,3 +1,10 @@
+---
+title: "Prism Developer Guide"
+description: "Single source of truth for colors, design tokens, and Tailwind configuration."
+lastUpdated: "2026-03-12"
+type: "dev-guide"
+---
+
 # Prism Developer Guide
 
 Prism (`@autumnsgrove/prism`) is the single source of truth for all colors, design tokens, and Tailwind configuration across the Grove ecosystem. Every app, every component library, every worker that needs a color gets it from Prism.
@@ -239,6 +246,14 @@ The CSS file uses two different formats for different purposes. Scale colors (gr
 | `libs/prism/src/lib/css/grove-tokens.css` | All CSS custom properties, `:root` and `.dark` blocks |
 | `libs/prism/src/lib/tailwind/preset.js` | Tailwind preset with colors, typography, animations, utilities |
 | `libs/engine/src/lib/ui/tailwind.preset.js` | Deprecated re-export stub (backward compat only) |
+
+## Future: Icon Gateway (#1448)
+
+Prism will eventually route all icons in the monorepo through `@autumnsgrove/prism/icons`. Currently 384 files import directly from lucide-svelte across 8 packages.
+
+The pattern mirrors how Prism already handles colors: a zero-dependency Manifest with semantic groups (nav, state, nature, season, action, feature, auth, metric, phase, tool, blaze, chrome) lives in `@autumnsgrove/prism/icons`. An Adapter layer at `@autumnsgrove/prism/icons/lucide` wraps the actual lucide-svelte dependency, making icon packs swappable with a one-file change.
+
+Icon lookups are forgiving via Proxy, accepting case and delimiter variations. See issue #1448 and the detailed plan at `docs/plans/planned/prism-icon-gateway.md`.
 
 ## Quick Checklist: Adding a New Token
 

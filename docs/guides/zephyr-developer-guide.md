@@ -1,10 +1,15 @@
+---
+title: "Zephyr Developer Guide"
+description: "Unified email gateway for validation, rate limiting, template rendering, and retries."
+lastUpdated: "2026-03-12"
+type: "dev-guide"
+---
+
 # Zephyr Developer Guide
 
 Zephyr is Grove's unified email gateway. Every email from every service goes through Zephyr: Porch replies, onboarding sequences, payment notifications, verification codes. It runs as a standalone Cloudflare Worker (`grove-zephyr`) and handles validation, rate limiting, unsubscribe checks, template rendering, retries, and logging.
 
 This guide covers how to work with Zephyr day-to-day. For migrating existing email code to Zephyr, see `docs/guides/zephyr-migration-guide.md`. For the full architecture spec, see `docs/specs/zephyr-spec.md`.
-
----
 
 ## How Zephyr Works
 

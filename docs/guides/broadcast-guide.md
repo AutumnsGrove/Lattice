@@ -1,3 +1,10 @@
+---
+title: "Broadcast Guide"
+description: "Send email broadcasts to Grove subscribers with sync and send commands."
+lastUpdated: "2026-03-12"
+type: "ops"
+---
+
 # Broadcast Guide
 
 Send email broadcasts to Grove subscribers. One command to sync, one to send.

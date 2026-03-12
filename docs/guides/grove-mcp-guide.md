@@ -1,8 +1,13 @@
+---
+title: "GroveMCP: Remote MCP Servers on Cloudflare Workers"
+description: "Extending Grove's ecosystem with AI-agent tooling via the Model Context Protocol."
+lastUpdated: "2026-03-12"
+type: "dev-guide"
+---
+
 # 🌳 GroveMCP: Remote MCP Servers on Cloudflare Workers
 
 > *Extending Grove's ecosystem with AI-agent tooling via the Model Context Protocol*
-
----
 
 ## TL;DR - Yes, This is PERFECT for Grove
 

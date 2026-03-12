@@ -1,3 +1,10 @@
+---
+title: "Waystone Developer Guide"
+description: "How to add, debug, and maintain help markers throughout Grove apps."
+lastUpdated: "2026-03-12"
+type: "dev-guide"
+---
+
 # Waystone Developer Guide
 
 How to add, debug, and maintain waystones (the `?` help markers throughout Arbor and other Grove apps).

@@ -1,12 +1,8 @@
 ---
-date created: Thursday, January 2nd 2026
-date modified: Thursday, January 2nd 2026
-tags:
-  - testing
-  - observability
-  - performance
-  - scalability
-type: guide
+title: "Load Testing & Scale Validation Guide"
+description: "Implement and use the Sentinel load testing framework to validate Grove's scalability."
+lastUpdated: "2026-03-12"
+type: "ops"
 ---
 
 # Load Testing & Scale Validation Guide

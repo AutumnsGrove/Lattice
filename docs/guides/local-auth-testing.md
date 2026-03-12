@@ -1,8 +1,13 @@
+---
+title: "Local Auth Testing with Cloudflare Tunnel"
+description: "Test the full Google OAuth login flow from your local dev server without deploying."
+lastUpdated: "2026-03-12"
+type: "setup"
+---
+
 # Local Auth Testing with Cloudflare Tunnel
 
 > Test the full Google OAuth login flow from your local dev server — no deploy needed.
-
----
 
 ## Why This Exists
 

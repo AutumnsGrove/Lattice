@@ -1,3 +1,10 @@
+---
+title: "Developer Guide Hit List"
+description: "Rolling inventory of what has dev docs and what doesn't in the Grove ecosystem."
+lastUpdated: "2026-03-12"
+type: "reference"
+---
+
 # Developer Guide Hit List
 
 A rolling inventory of what has dev docs and what doesn't. Specs describe *what* something is. Guides describe *how to work with it*: how to add things, how it breaks, how to debug it.

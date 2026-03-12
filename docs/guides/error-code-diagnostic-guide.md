@@ -1,3 +1,10 @@
+---
+title: "Signpost: Error Code Diagnostic Guide"
+description: "Reference guide for diagnosing and understanding Grove error codes."
+lastUpdated: "2026-03-12"
+type: "reference"
+---
+
 # Signpost: Error Code Diagnostic Guide
 
 ```
