@@ -323,6 +323,41 @@ var gitFastCmd = &cobra.Command{
 
 // ── git sync ────────────────────────────────────────────────────────
 
+// worktreePrefixes are paths that should be ignored when checking for a
+// dirty working tree. Both gw and Claude Code create worktrees in
+// directories that may appear as untracked but aren't real changes.
+var worktreePrefixes = []string{
+	".worktrees/",
+	".claude/worktrees/",
+}
+
+// hasMeaningfulChanges returns true if porcelain status output contains
+// changes outside of known worktree directories.
+func hasMeaningfulChanges(porcelain string) bool {
+	for _, line := range strings.Split(porcelain, "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+		// Porcelain v1 format: "XY path" — the path starts after the 3rd character
+		path := line
+		if len(line) > 3 {
+			path = line[3:]
+		}
+		ignored := false
+		for _, prefix := range worktreePrefixes {
+			if strings.HasPrefix(path, prefix) {
+				ignored = true
+				break
+			}
+		}
+		if !ignored {
+			return true
+		}
+	}
+	return false
+}
+
 var gitSyncCmd = &cobra.Command{
 	Use:   "sync [remote] [base-branch]",
 	Short: "Fetch, rebase, and push to sync with remote",
@@ -351,9 +386,9 @@ var gitSyncCmd = &cobra.Command{
 			baseBranch = args[1]
 		}
 
-		// Check for dirty working tree
+		// Check for dirty working tree (ignore worktree directories)
 		statusResult, _ := gwexec.Git("status", "--porcelain=v1")
-		if strings.TrimSpace(statusResult.Stdout) != "" {
+		if hasMeaningfulChanges(statusResult.Stdout) {
 			return fmt.Errorf("working tree is dirty — commit or stash changes first\n" +
 				"  Suggestions:\n" +
 				"  • gw git wip --write     (quick WIP commit)\n" +

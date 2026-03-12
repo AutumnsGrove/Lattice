@@ -65,8 +65,9 @@ scripts/journey/output/
 # Email preview output
 .preview/
 
-# gw-managed worktrees
+# Worktrees (gw-managed and Claude Code-managed)
 .worktrees/
+.claude/worktrees/
 
 # Glimpse runtime artifacts
 .glimpse/
