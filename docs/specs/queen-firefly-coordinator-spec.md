@@ -1,4 +1,8 @@
 ---
+title: "Queen Firefly: Pool Coordinator"
+description: "Coordinator pattern for managing pools of ephemeral Firefly instances"
+category: specs
+specCategory: infrastructure
 aliases: []
 date created: Wednesday, February 5th 2026
 date modified: Sunday, February 22nd 2026

@@ -1,4 +1,8 @@
 ---
+title: "Portable Grove: Deployable Static Exports"
+description: "Self-contained static site exports that work offline from a zip file"
+category: specs
+specCategory: features
 aliases: []
 date created: Sunday, February 22nd 2026
 date modified: Sunday, February 22nd 2026

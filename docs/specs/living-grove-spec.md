@@ -1,4 +1,8 @@
 ---
+title: "The Living Grove: Cinematic Codebase Visualization"
+description: "Interactive visualization of the Grove codebase as a growing forest"
+category: specs
+specCategory: tooling
 aliases: []
 date created: Wednesday, February 25th 2026
 date modified: Wednesday, February 25th 2026

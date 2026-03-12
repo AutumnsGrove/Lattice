@@ -1,4 +1,8 @@
 ---
+title: "Glimpse: Verification Loops"
+description: "Automated verification loops for checking system health and consistency"
+category: specs
+specCategory: operations
 aliases: []
 date created: Friday, February 7th 2026
 date modified: Tuesday, February 25th 2026

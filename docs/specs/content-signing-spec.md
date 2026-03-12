@@ -1,4 +1,8 @@
 ---
+title: "Content Signing"
+description: "Cryptographic content signing for post authenticity and tamper detection"
+category: specs
+specCategory: security
 aliases: []
 date created: Sunday, February 22nd 2026
 date modified: Sunday, February 22nd 2026

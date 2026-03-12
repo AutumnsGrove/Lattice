@@ -1,4 +1,8 @@
 ---
+title: "Dynamic Post Types"
+description: "Extensible content architecture for custom post type definitions"
+category: specs
+specCategory: content-community
 aliases: []
 date created: Sunday, February 22nd 2026
 date modified: Sunday, February 22nd 2026

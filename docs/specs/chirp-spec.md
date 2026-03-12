@@ -1,4 +1,8 @@
 ---
+title: "Chirp: 1:1 Direct Messaging"
+description: "Real-time direct messaging between mutual followers using Durable Objects"
+category: specs
+specCategory: content-community
 aliases: []
 date created: Tuesday, March 11th 2026
 date modified: Tuesday, March 11th 2026

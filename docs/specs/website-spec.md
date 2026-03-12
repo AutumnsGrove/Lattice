@@ -1,4 +1,8 @@
 ---
+title: "Plant: Grove Onboarding"
+description: "Onboarding flow and landing page for new Wanderers joining the grove"
+category: specs
+specCategory: features
 aliases: []
 date created: Saturday, February 21st 2026
 date modified: Saturday, February 21st 2026

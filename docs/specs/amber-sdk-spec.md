@@ -1,4 +1,8 @@
 ---
+title: "Amber SDK: Unified Storage Management"
+description: "Three-manager SDK for file uploads, storage quotas, and GDPR data exports"
+category: specs
+specCategory: infrastructure
 aliases: []
 date created: Sunday, February 22nd 2026
 date modified: Sunday, February 22nd 2026

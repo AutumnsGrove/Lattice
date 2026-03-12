@@ -1,4 +1,8 @@
 ---
+title: "Prism: Grove Design System"
+description: "Three-layer design token system powering colors, themes, and Tailwind config across all apps"
+category: specs
+specCategory: design
 aliases: []
 date created: Sunday, March 8th 2026
 date modified: Sunday, March 8th 2026

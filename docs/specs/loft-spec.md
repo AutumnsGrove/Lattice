@@ -1,4 +1,8 @@
 ---
+title: "Loft: Hands-On Dev Sessions"
+description: "Interactive development session framework for pair programming and workshops"
+category: specs
+specCategory: tooling
 aliases: []
 date created: Tuesday, February 25th 2026
 date modified: Tuesday, February 25th 2026

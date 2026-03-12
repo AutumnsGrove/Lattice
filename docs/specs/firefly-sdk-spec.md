@@ -1,4 +1,8 @@
 ---
+title: "Firefly SDK: Ephemeral Server Provisioning"
+description: "SDK for spinning up temporary server instances with automatic cleanup"
+category: specs
+specCategory: infrastructure
 aliases: []
 date created: Tuesday, February 17th 2026
 date modified: Tuesday, February 17th 2026

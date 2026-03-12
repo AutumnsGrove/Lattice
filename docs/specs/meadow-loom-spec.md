@@ -1,4 +1,8 @@
 ---
+title: "Meadow Loom: Durable Object Coordination"
+description: "Durable Object coordination layer for the community feed system"
+category: specs
+specCategory: infrastructure
 aliases: []
 date created: Saturday, February 15th 2026
 date modified: Saturday, February 15th 2026

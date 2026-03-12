@@ -1,4 +1,8 @@
 ---
+title: "Infra SDK: Infrastructure Abstraction Layer"
+description: "Platform-agnostic infrastructure SDK for database, storage, KV, and scheduling"
+category: specs
+specCategory: infrastructure
 aliases: []
 date created: Sunday, February 22nd 2026
 date modified: Sunday, February 22nd 2026

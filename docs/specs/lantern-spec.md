@@ -1,4 +1,8 @@
 ---
+title: "Lantern: Cross-Grove Navigation"
+description: "Chrome-level navigation panel for discovering and traversing connected groves"
+category: specs
+specCategory: features
 aliases: [compass, grove-launcher, grove-compass, grove-lantern]
 date created: Sunday, March 2nd 2026
 date modified: Sunday, March 2nd 2026

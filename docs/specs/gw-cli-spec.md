@@ -1,4 +1,8 @@
 ---
+title: "GW CLI: Grove Wrap"
+description: "Safety-tiered CLI wrapper around Wrangler for agent-safe infrastructure operations"
+category: specs
+specCategory: tooling
 aliases: []
 date created: Sunday, February 2nd 2026
 date modified: Sunday, February 2nd 2026

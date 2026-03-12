@@ -1,4 +1,8 @@
 ---
+title: "Grove Specifications"
+description: "Index of all technical specifications in the Grove ecosystem"
+category: specs
+specCategory: meta
 lastUpdated: '2026-02-25'
 aliases: []
 date created: Thursday, January 2nd 2026

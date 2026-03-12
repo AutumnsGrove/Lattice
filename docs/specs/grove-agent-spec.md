@@ -1,4 +1,8 @@
 ---
+title: "GroveAgent: Autonomous Agent Framework"
+description: "Base classes bridging Grove's Durable Object patterns with Cloudflare's Agents SDK"
+category: specs
+specCategory: infrastructure
 aliases: []
 date created: Thursday, February 26th 2026
 date modified: Thursday, February 26th 2026

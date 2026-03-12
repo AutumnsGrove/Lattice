@@ -1,4 +1,8 @@
 ---
+title: "RSS Rate Limiting"
+description: "Feed-level rate limiting and bot protection for RSS endpoints via Shade"
+category: specs
+specCategory: operations
 aliases: []
 date created: Sunday, February 22nd 2026
 date modified: Sunday, February 22nd 2026

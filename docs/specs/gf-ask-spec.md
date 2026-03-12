@@ -1,4 +1,8 @@
 ---
+title: "GF Ask: Hybrid Vector Search"
+description: "Natural language codebase queries combining vector search with grep"
+category: specs
+specCategory: tooling
 aliases: []
 date created: Sunday, March 9th 2026
 date modified: Sunday, March 9th 2026
