@@ -13,6 +13,7 @@ tags:
   - navigation
   - feature
 type: tech-spec
+lastUpdated: "2026-03-12"
 ---
 
 ```

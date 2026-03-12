@@ -1,3 +1,11 @@
+---
+title: "Hands-On Dev Sessions"
+description: "Finding the name for ephemeral dev servers accessible from any browser"
+category: philosophy
+subcategory: naming-research
+lastUpdated: "2026-03-12"
+---
+
 # Naming Journey: Hands-On Dev Sessions
 
 > A Firefly consumer that provisions an ephemeral dev server you access from any browser.

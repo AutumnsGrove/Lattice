@@ -1,8 +1,8 @@
 ---
 title: "Load Testing & Scale Validation Guide"
 description: "Implement and use the Sentinel load testing framework to validate Grove's scalability."
+category: "playbooks"
 lastUpdated: "2026-03-12"
-type: "ops"
 ---
 
 # Load Testing & Scale Validation Guide

@@ -1,3 +1,11 @@
+---
+title: "Security Hardening Skill"
+description: "Finding the name for a security hardening AI skill"
+category: philosophy
+subcategory: naming-research
+lastUpdated: "2026-03-12"
+---
+
 # Naming Journey: Security Hardening Skill
 
 ## What Is This Thing?

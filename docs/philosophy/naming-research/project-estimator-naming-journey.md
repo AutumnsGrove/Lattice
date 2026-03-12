@@ -1,3 +1,11 @@
+---
+title: "Project Quoting & Estimation Animal"
+description: "Finding the name for Grove's project estimation and quoting system"
+category: philosophy
+subcategory: naming-research
+lastUpdated: "2026-03-12"
+---
+
 # Naming Journey: Project Quoting & Estimation Animal
 
 ## What Is This Thing?

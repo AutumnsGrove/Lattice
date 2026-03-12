@@ -1,13 +1,8 @@
 ---
-aliases: []
-date created: Sunday, February 22nd 2026
-date modified: Sunday, February 22nd 2026
-tags:
-  - infrastructure
-  - migration
-  - cloudflare
-  - contingency
-type: implementation-plan
+title: "Break Glass: Moving Off Cloudflare"
+description: "Contingency playbook for migrating Grove away from Cloudflare if needed."
+category: "playbooks"
+lastUpdated: "2026-03-12"
 ---
 
 ```

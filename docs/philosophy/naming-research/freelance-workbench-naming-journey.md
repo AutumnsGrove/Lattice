@@ -1,3 +1,11 @@
+---
+title: "The Freelance Workbench"
+description: "Finding the name for a standalone repo holding Autumn's entire freelance practice"
+category: philosophy
+subcategory: naming-research
+lastUpdated: "2026-03-12"
+---
+
 # Naming Journey: The Freelance Workbench
 
 ## What We're Naming

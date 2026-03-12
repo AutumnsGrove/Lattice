@@ -1,3 +1,11 @@
+---
+title: "Systematic Debugger"
+description: "Finding the name for a systematic debugging AI creature"
+category: philosophy
+subcategory: naming-research
+lastUpdated: "2026-03-12"
+---
+
 # Naming Journey: Systematic Debugger
 
 ## What Is This Thing?

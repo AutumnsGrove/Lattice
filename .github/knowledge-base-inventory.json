@@ -1,16 +1,16 @@
 {
-	"lastUpdated": "2026-03-10",
+	"lastUpdated": "2026-03-12",
 	"docs": {
-		"total": 354,
+		"total": 380,
 		"breakdown": {
 			"specs": 95,
-			"help": 99,
+			"help": 103,
 			"legal": 6,
 			"marketing": 20,
 			"patterns": 9,
-			"philosophy": 69,
+			"philosophy": 97,
 			"design": 9,
-			"exhibit": 37,
+			"exhibit": 41,
 			"research": 3,
 			"playbooks": 4,
 			"audits": 3

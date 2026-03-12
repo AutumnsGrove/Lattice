@@ -1,3 +1,11 @@
+---
+title: "Burrow Lexicon Refinement"
+description: "Walking the grove to find better names for Den and Warrened"
+category: philosophy
+subcategory: naming-research
+lastUpdated: "2026-03-12"
+---
+
 # Burrow Lexicon Refinement
 
 *Walking the grove to find better names for Den and Warrened*

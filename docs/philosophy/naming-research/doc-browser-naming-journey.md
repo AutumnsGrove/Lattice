@@ -1,3 +1,11 @@
+---
+title: "Documentation Browser & Agent Activity Viewer"
+description: "Finding the right name for the local dev server that makes all project knowledge browseable"
+category: philosophy
+subcategory: naming-research
+lastUpdated: "2026-03-12"
+---
+
 # Naming Journey: Documentation Browser & Agent Activity Viewer
 
 *Finding the right name for the local dev server that makes all project knowledge browseable*

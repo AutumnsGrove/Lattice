@@ -1,3 +1,10 @@
+---
+title: "Email Broadcast & Automation Implementation"
+description: "Implement mass email broadcasts and automated onboarding sequences for Grove subscribers."
+category: "playbooks"
+lastUpdated: "2026-03-12"
+---
+
 # Email Broadcast & Automation Implementation
 
 *Created: December 26, 2025*

@@ -1,3 +1,11 @@
+---
+title: "The Beats Equivalent"
+description: "Finding a name for lightweight content type markers in Meadow"
+category: philosophy
+subcategory: naming-research
+lastUpdated: "2026-03-12"
+---
+
 # Naming Journey: The Beats Equivalent
 
 > _Finding a name for lightweight content type markers in Meadow_

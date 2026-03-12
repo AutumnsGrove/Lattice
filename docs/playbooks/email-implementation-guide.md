@@ -1,3 +1,10 @@
+---
+title: "Email Provisioning Implementation Guide"
+description: "Set up email forwarding and full mailbox provisioning via Cloudflare Email Routing and Forward Email."
+category: "playbooks"
+lastUpdated: "2026-03-12"
+---
+
 # Email Provisioning Implementation Guide
 
 *Internal technical documentation for @grove.place email feature*

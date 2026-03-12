@@ -13,6 +13,7 @@ tags:
   - websocket
   - lattice
 type: tech-spec
+lastUpdated: "2026-03-12"
 ---
 
 ```

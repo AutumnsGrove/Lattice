@@ -1,3 +1,11 @@
+---
+title: "Compliance Auditor"
+description: "Finding the name for a compliance auditor that watches pull requests"
+category: philosophy
+subcategory: naming-research
+lastUpdated: "2026-03-12"
+---
+
 # Naming Journey: Compliance Auditor
 
 ## What Is This Thing?

@@ -1,3 +1,10 @@
+---
+title: "Release Summary Generation - Setup Guide"
+description: "Configure automated AI-powered release summary generation using OpenRouter and DeepSeek."
+category: "setup"
+lastUpdated: "2026-03-12"
+---
+
 # Release Summary Generation - Setup Guide
 
 ## Quick Setup (Required for Production)

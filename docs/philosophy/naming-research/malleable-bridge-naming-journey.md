@@ -1,3 +1,11 @@
+---
+title: "The Malleable Software Bridge"
+description: "Finding a name for the composition layer that lets AI agents discover and arrange Grove components"
+category: philosophy
+subcategory: naming-research
+lastUpdated: "2026-03-12"
+---
+
 # Naming Journey: The Malleable Software Bridge
 
 *Finding a name for the composition layer that lets AI agents discover and arrange Grove components*

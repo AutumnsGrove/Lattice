@@ -1,3 +1,11 @@
+---
+title: "TDD Orchestrator"
+description: "Finding the name for an AI creature that orchestrates the Test-Driven Development cycle"
+category: philosophy
+subcategory: naming-research
+lastUpdated: "2026-03-12"
+---
+
 # Naming Journey: TDD Orchestrator
 
 ## What Is This Thing?

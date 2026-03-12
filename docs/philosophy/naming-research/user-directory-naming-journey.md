@@ -1,3 +1,11 @@
+---
+title: "User Directory"
+description: "Finding the name for an opt-in user directory / phone book for Grove"
+category: philosophy
+subcategory: naming-research
+lastUpdated: "2026-03-12"
+---
+
 # User Directory Naming Journey
 
 **Date:** 2026-02-08

@@ -1,3 +1,11 @@
+---
+title: "Color Tokens"
+description: "Finding a Grove name for the color token system powering the design system"
+category: philosophy
+subcategory: naming-research
+lastUpdated: "2026-03-12"
+---
+
 # Naming Journey: Color Tokens
 
 > Finding a Grove name for our color token system — the raw palette that everything visual grows from.

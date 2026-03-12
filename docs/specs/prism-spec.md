@@ -13,6 +13,7 @@ tags:
   - color-tokens
   - seasonal-theming
 type: tech-spec
+lastUpdated: "2026-03-12"
 ---
 
 # Prism: Grove Design System

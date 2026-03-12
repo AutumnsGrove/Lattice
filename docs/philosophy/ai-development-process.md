@@ -1,3 +1,10 @@
+---
+title: "Building with AI: The Grove Development Process"
+description: "How Grove was built in 50 days using Claude Code, Kilo Code, and AI-assisted development"
+category: philosophy
+lastUpdated: "2026-03-12"
+---
+
 # Building with AI: The Grove Development Process
 
 > *How Grove was built in 50 days using Claude Code, Kilo Code, and AI-assisted development.*

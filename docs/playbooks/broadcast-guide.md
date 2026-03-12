@@ -1,8 +1,8 @@
 ---
 title: "Broadcast Guide"
 description: "Send email broadcasts to Grove subscribers with sync and send commands."
+category: "playbooks"
 lastUpdated: "2026-03-12"
-type: "ops"
 ---
 
 # Broadcast Guide

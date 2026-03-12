@@ -1,3 +1,10 @@
+---
+title: "Setting Up a New OAuth Client for GroveAuth"
+description: "Register and configure a new OAuth 2.0 client application with GroveAuth."
+category: "setup"
+lastUpdated: "2026-03-12"
+---
+
 # Setting Up a New OAuth Client for GroveAuth
 
 This guide walks through registering a new website/application as an OAuth client with GroveAuth.

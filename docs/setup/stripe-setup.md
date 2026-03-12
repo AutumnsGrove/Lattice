@@ -1,3 +1,10 @@
+---
+title: "Stripe Setup Guide"
+description: "Configure Stripe payments and webhooks for Grove's subscription billing system."
+category: "setup"
+lastUpdated: "2026-03-12"
+---
+
 # Stripe Setup Guide
 
 Complete guide for configuring Stripe payments for Grove's plant.grove.place signup flow.

@@ -1,3 +1,11 @@
+---
+title: "Inline Feedback Component"
+description: "Finding a name for a universal, reusable feedback component"
+category: philosophy
+subcategory: naming-research
+lastUpdated: "2026-03-12"
+---
+
 # Naming Journey: Inline Feedback Component
 
 *January 29, 2026*

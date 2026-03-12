@@ -1,3 +1,11 @@
+---
+title: "Link-Saving Service"
+description: "Finding the name for a link-saving service in Grove"
+category: philosophy
+subcategory: naming-research
+lastUpdated: "2026-03-12"
+---
+
 # Link-Saving Service — Naming Journey
 
 > *What does the forest do when it needs to retain something?*

@@ -1,3 +1,11 @@
+---
+title: "Assumption Surfacing Animal"
+description: "Finding the name for an assumption surfacing AI creature"
+category: philosophy
+subcategory: naming-research
+lastUpdated: "2026-03-12"
+---
+
 # Naming Journey: Assumption Surfacing Animal
 
 ## What Is This Thing?

@@ -1,8 +1,8 @@
 ---
 title: "Creating a New Tenant (Blog Site)"
 description: "Walk through creating a new tenant blog site on the Grove platform."
+category: "setup"
 lastUpdated: "2026-03-12"
-type: "setup"
 ---
 
 # Creating a New Tenant (Blog Site)

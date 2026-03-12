@@ -1,3 +1,11 @@
+---
+title: "Voice Transcription"
+description: "Finding the name for Grove's voice-to-text feature"
+category: philosophy
+subcategory: naming-research
+lastUpdated: "2026-03-12"
+---
+
 # Voice Transcription Naming Journey
 
 > *Finding the name for Grove's voice-to-text feature*

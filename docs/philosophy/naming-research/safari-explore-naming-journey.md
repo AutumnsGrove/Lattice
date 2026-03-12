@@ -1,3 +1,11 @@
+---
+title: "Safari Explore"
+description: "Finding the name for an exploration and discovery system"
+category: philosophy
+subcategory: naming-research
+lastUpdated: "2026-03-12"
+---
+
 # Naming Journey: Safari Explore
 
 ## What Is This Thing?

@@ -1,3 +1,11 @@
+---
+title: "Cross-Codebase Security Auditor"
+description: "Finding the name for a security auditor that examines codebases"
+category: philosophy
+subcategory: naming-research
+lastUpdated: "2026-03-12"
+---
+
 # Naming Journey: Cross-Codebase Security Auditor
 
 ## What Is This Thing?

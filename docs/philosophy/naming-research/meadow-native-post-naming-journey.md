@@ -1,3 +1,11 @@
+---
+title: "Meadow Native Post"
+description: "Finding the name for short-form posts written directly on Meadow"
+category: philosophy
+subcategory: naming-research
+lastUpdated: "2026-03-12"
+---
+
 # Meadow Native Post — Naming Journey
 
 ## What Are We Naming?

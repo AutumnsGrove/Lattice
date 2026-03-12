@@ -1,8 +1,8 @@
 ---
 title: "Customer Setup Guide"
 description: "Step-by-step guide for onboarding a new customer to the Grove platform."
+category: "setup"
 lastUpdated: "2026-03-12"
-type: "setup"
 ---
 
 # Customer Setup Guide

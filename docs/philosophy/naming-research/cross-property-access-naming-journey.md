@@ -1,3 +1,11 @@
+---
+title: "Cross-Property Access (Tunneling)"
+description: "Finding the name for cross-property access and tunneling functionality"
+category: philosophy
+subcategory: naming-research
+lastUpdated: "2026-03-12"
+---
+
 # Naming Journey: Cross-Property Access ("Tunneling")
 
 *A walk through the grove to find the right name*

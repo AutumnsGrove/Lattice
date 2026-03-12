@@ -1,3 +1,11 @@
+---
+title: "Chat Naming Journey"
+description: "Finding the name for Grove's 1:1 direct messaging system"
+category: philosophy
+subcategory: naming-research
+lastUpdated: "2026-03-12"
+---
+
 # Chat Naming Journey
 
 > Finding the name for Grove's 1:1 direct messaging system.

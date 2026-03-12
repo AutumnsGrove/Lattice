@@ -1,3 +1,11 @@
+---
+title: "Comprehensive Security Auditor"
+description: "Finding the name for a comprehensive security auditor"
+category: philosophy
+subcategory: naming-research
+lastUpdated: "2026-03-12"
+---
+
 # Naming Journey: Comprehensive Security Auditor
 
 ## What Is This Thing?

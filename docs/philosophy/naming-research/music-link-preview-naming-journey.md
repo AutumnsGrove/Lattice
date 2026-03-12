@@ -1,3 +1,11 @@
+---
+title: "Music Link Preview"
+description: "Finding the name for beautiful music link cards in the grove"
+category: philosophy
+subcategory: naming-research
+lastUpdated: "2026-03-12"
+---
+
 # Music Link Preview Naming Journey
 
 > *Finding the name for beautiful music link cards in the grove*

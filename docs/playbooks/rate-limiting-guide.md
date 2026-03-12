@@ -1,8 +1,8 @@
 ---
 title: "Rate Limiting & Abuse Prevention Guide"
 description: "Implement and configure the Threshold rate limiting system in Grove."
+category: "playbooks"
 lastUpdated: "2026-03-12"
-type: "ops"
 ---
 
 # Rate Limiting & Abuse Prevention Guide

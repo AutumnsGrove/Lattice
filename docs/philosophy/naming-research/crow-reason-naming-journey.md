@@ -1,3 +1,11 @@
+---
+title: "Critical Reasoning Animal"
+description: "Finding the name for a critical reasoning AI creature"
+category: philosophy
+subcategory: naming-research
+lastUpdated: "2026-03-12"
+---
+
 # Naming Journey: Critical Reasoning Animal
 
 ## What Is This Thing?
