@@ -167,6 +167,9 @@ export interface FeatureFlagSummary {
 
 	/** Cache TTL in seconds (0 = no cache) */
 	cacheTtl: number;
+
+	/** Lifecycle maturity stage */
+	maturity: FlagMaturity;
 }
 
 /**
@@ -179,6 +182,9 @@ export interface CultivateFlagRowProps extends BaseGraftProps {
 
 	/** Called when toggling the flag's enabled status */
 	onToggle: (flagId: string, enabled: boolean) => void;
+
+	/** Called when changing the flag's maturity stage */
+	onMaturityChange?: (flagId: string, maturity: FlagMaturity) => void;
 
 	/** Whether the row is in a loading state */
 	loading?: boolean;
@@ -194,6 +200,9 @@ export interface CultivateFlagTableProps extends BaseGraftProps {
 
 	/** Called when toggling a flag's enabled status */
 	onToggle: (flagId: string, enabled: boolean) => void;
+
+	/** Called when changing a flag's maturity stage */
+	onMaturityChange?: (flagId: string, maturity: FlagMaturity) => void;
 
 	/** Flag ID currently being toggled (for loading state) */
 	loadingFlagId?: string;

@@ -22,11 +22,7 @@
  */
 
 import { evaluateFlag, evaluateFlags } from "./evaluate.js";
-import type {
-  EvaluationContext,
-  EvaluationResult,
-  FeatureFlagsEnv,
-} from "./types.js";
+import type { EvaluationContext, EvaluationResult, FeatureFlagsEnv } from "./types.js";
 
 // =============================================================================
 // PUBLIC API
@@ -55,12 +51,12 @@ import type {
  * ```
  */
 export async function isFeatureEnabled(
-  flagId: string,
-  context: EvaluationContext,
-  env: FeatureFlagsEnv,
+	flagId: string,
+	context: EvaluationContext,
+	env: FeatureFlagsEnv,
 ): Promise<boolean> {
-  const result = await evaluateFlag<boolean>(flagId, context, env);
-  return result.value === true;
+	const result = await evaluateFlag<boolean>(flagId, context, env);
+	return result.value === true;
 }
 
 /**
@@ -82,13 +78,13 @@ export async function isFeatureEnabled(
  * ```
  */
 export async function getFeatureValue<T>(
-  flagId: string,
-  context: EvaluationContext,
-  env: FeatureFlagsEnv,
-  defaultValue: T,
+	flagId: string,
+	context: EvaluationContext,
+	env: FeatureFlagsEnv,
+	defaultValue: T,
 ): Promise<T> {
-  const result = await evaluateFlag<T>(flagId, context, env);
-  return result.matched ? result.value : defaultValue;
+	const result = await evaluateFlag<T>(flagId, context, env);
+	return result.matched ? result.value : defaultValue;
 }
 
 /**
@@ -111,16 +107,16 @@ export async function getFeatureValue<T>(
  * ```
  */
 export async function getVariant(
-  flagId: string,
-  context: EvaluationContext,
-  env: FeatureFlagsEnv,
+	flagId: string,
+	context: EvaluationContext,
+	env: FeatureFlagsEnv,
 ): Promise<string> {
-  const result = await evaluateFlag<string>(flagId, context, env);
-  // For missing flags or non-string values, default to 'control'
-  if (!result.matched || typeof result.value !== "string") {
-    return "control";
-  }
-  return result.value;
+	const result = await evaluateFlag<string>(flagId, context, env);
+	// For missing flags or non-string values, default to 'control'
+	if (!result.matched || typeof result.value !== "string") {
+		return "control";
+	}
+	return result.value;
 }
 
 /**
@@ -135,11 +131,11 @@ export async function getVariant(
  * @returns The full evaluation result
  */
 export async function getFlag<T = unknown>(
-  flagId: string,
-  context: EvaluationContext,
-  env: FeatureFlagsEnv,
+	flagId: string,
+	context: EvaluationContext,
+	env: FeatureFlagsEnv,
 ): Promise<EvaluationResult<T>> {
-  return evaluateFlag<T>(flagId, context, env);
+	return evaluateFlag<T>(flagId, context, env);
 }
 
 /**
@@ -168,11 +164,11 @@ export async function getFlag<T = unknown>(
  * ```
  */
 export async function getFlags(
-  flagIds: string[],
-  context: EvaluationContext,
-  env: FeatureFlagsEnv,
+	flagIds: string[],
+	context: EvaluationContext,
+	env: FeatureFlagsEnv,
 ): Promise<Map<string, EvaluationResult>> {
-  return evaluateFlags(flagIds, context, env);
+	return evaluateFlags(flagIds, context, env);
 }
 
 // =============================================================================
@@ -181,23 +177,24 @@ export async function getFlags(
 
 // Types
 export type {
-  EvaluationContext,
-  EvaluationResult,
-  FeatureFlag,
-  FeatureFlagsEnv,
-  FlagRule,
-  FlagType,
-  RuleType,
-  RuleCondition,
-  TenantRuleCondition,
-  TierRuleCondition,
-  PercentageRuleCondition,
-  UserRuleCondition,
-  TimeRuleCondition,
-  GreenhouseRuleCondition,
-  AuditAction,
-  FlagAuditEntry,
-  GreenhouseTenant,
+	EvaluationContext,
+	EvaluationResult,
+	FeatureFlag,
+	FeatureFlagsEnv,
+	FlagRule,
+	FlagType,
+	FlagMaturity,
+	RuleType,
+	RuleCondition,
+	TenantRuleCondition,
+	TierRuleCondition,
+	PercentageRuleCondition,
+	UserRuleCondition,
+	TimeRuleCondition,
+	GreenhouseRuleCondition,
+	AuditAction,
+	FlagAuditEntry,
+	GreenhouseTenant,
 } from "./types.js";
 
 // Cache utilities (for admin operations)
@@ -211,45 +208,47 @@ export { getUserBucket, getUserBucketSync } from "./percentage.js";
 
 // Greenhouse management
 export {
-  isInGreenhouse,
-  getGreenhouseTenants,
-  getGreenhouseTenant,
-  enrollInGreenhouse,
-  removeFromGreenhouse,
-  toggleGreenhouseStatus,
-  updateGreenhouseNotes,
-  invalidateGreenhouseCache,
+	isInGreenhouse,
+	getGreenhouseTenants,
+	getGreenhouseTenant,
+	enrollInGreenhouse,
+	removeFromGreenhouse,
+	toggleGreenhouseStatus,
+	updateGreenhouseNotes,
+	invalidateGreenhouseCache,
 } from "./greenhouse.js";
 
 // Admin functions (Cultivate Mode)
 export {
-  getFeatureFlags,
-  getFeatureFlag,
-  setFlagEnabled,
-  type FeatureFlagSummary,
+	getFeatureFlags,
+	getFeatureFlag,
+	setFlagEnabled,
+	setFlagMaturity,
+	isMaturityDemotion,
+	type FeatureFlagSummary,
 } from "./admin.js";
 
 // Grafts API (Engine-first loading)
 export {
-  getEnabledGrafts,
-  isGraftEnabled,
-  type GraftsRecord,
-  type KnownGraftId,
+	getEnabledGrafts,
+	isGraftEnabled,
+	type GraftsRecord,
+	type KnownGraftId,
 } from "./grafts.js";
 
 // Upload Admin (suspension management)
 export {
-  getUploadSuspensionStatus,
-  getTenantUploadSuspension,
-  setUploadSuspension,
-  type TenantUploadStatus,
+	getUploadSuspensionStatus,
+	getTenantUploadSuspension,
+	setUploadSuspension,
+	type TenantUploadStatus,
 } from "./upload-admin.js";
 
 // Tenant Graft Overrides (Self-serve controls)
 export {
-  getTenantControllableGrafts,
-  setTenantGraftOverride,
-  removeTenantGraftOverride,
-  resetTenantGraftOverrides,
-  type TenantGraftInfo,
+	getTenantControllableGrafts,
+	setTenantGraftOverride,
+	removeTenantGraftOverride,
+	resetTenantGraftOverrides,
+	type TenantGraftInfo,
 } from "./tenant-grafts.js";

@@ -3,15 +3,8 @@
 	 * CultivateFlagTable - Table of all feature flags with cultivate/prune controls
 	 *
 	 * Displays all feature flags in a table format with toggles to enable
-	 * (cultivate) or disable (prune) each flag globally.
-	 *
-	 * @example Basic usage
-	 * ```svelte
-	 * <CultivateFlagTable
-	 *   flags={data.featureFlags}
-	 *   onToggle={(id, enabled) => handleToggle(id, enabled)}
-	 * />
-	 * ```
+	 * (cultivate) or disable (prune) each flag globally, plus maturity
+	 * lifecycle management.
 	 */
 
 	import type { CultivateFlagTableProps } from "./types.js";
@@ -22,6 +15,7 @@
 	let {
 		flags,
 		onToggle,
+		onMaturityChange,
 		loadingFlagId,
 		class: className = "",
 	}: CultivateFlagTableProps = $props();
@@ -60,11 +54,10 @@
 		<GlassCard class="overflow-hidden p-0">
 			<table class="w-full" aria-label="Feature flags">
 				<thead>
-					<tr
-						class="text-left text-sm text-foreground-muted border-b border-border/50"
-					>
+					<tr class="text-left text-sm text-foreground-muted border-b border-border/50">
 						<th scope="col" class="py-3 px-4 font-medium">Flag</th>
 						<th scope="col" class="py-3 px-4 font-medium">Type</th>
+						<th scope="col" class="py-3 px-4 font-medium">Maturity</th>
 						<th scope="col" class="py-3 px-4 font-medium">Status</th>
 						<th scope="col" class="py-3 px-4 font-medium">Toggle</th>
 					</tr>
@@ -75,6 +68,7 @@
 						<CultivateFlagRow
 							{flag}
 							{onToggle}
+							{onMaturityChange}
 							loading={loadingFlagId === flag.id}
 						/>
 					{/each}
@@ -84,6 +78,7 @@
 						<CultivateFlagRow
 							{flag}
 							{onToggle}
+							{onMaturityChange}
 							loading={loadingFlagId === flag.id}
 						/>
 					{/each}

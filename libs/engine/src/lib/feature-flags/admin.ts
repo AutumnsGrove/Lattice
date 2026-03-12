@@ -19,8 +19,11 @@
  * ```
  */
 
-import type { FeatureFlagsEnv, FlagType, FeatureFlagRow } from "./types.js";
+import type { FeatureFlagsEnv, FlagType, FlagMaturity, FeatureFlagRow } from "./types.js";
 import { invalidateFlag } from "./cache.js";
+
+/** Maturity levels ordered from least to most mature. */
+const MATURITY_ORDER: FlagMaturity[] = ["experimental", "beta", "stable", "graduated"];
 
 // =============================================================================
 // TYPES
@@ -53,6 +56,9 @@ export interface FeatureFlagSummary {
 
 	/** Cache TTL in seconds (0 = no cache) */
 	cacheTtl: number;
+
+	/** Lifecycle maturity stage */
+	maturity: FlagMaturity;
 }
 
 // =============================================================================
@@ -68,7 +74,7 @@ export interface FeatureFlagSummary {
 export async function getFeatureFlags(env: FeatureFlagsEnv): Promise<FeatureFlagSummary[]> {
 	try {
 		const result = await env.DB.prepare(
-			`SELECT id, name, description, flag_type, default_value, enabled, greenhouse_only, cache_ttl
+			`SELECT id, name, description, flag_type, default_value, enabled, greenhouse_only, maturity, cache_ttl
        FROM feature_flags
        ORDER BY name ASC`,
 		).all<FeatureFlagRow>();
@@ -133,7 +139,7 @@ export async function getFeatureFlag(
 ): Promise<FeatureFlagSummary | null> {
 	try {
 		const result = await env.DB.prepare(
-			`SELECT id, name, description, flag_type, default_value, enabled, greenhouse_only, cache_ttl
+			`SELECT id, name, description, flag_type, default_value, enabled, greenhouse_only, maturity, cache_ttl
        FROM feature_flags
        WHERE id = ?`,
 		)
@@ -145,6 +151,58 @@ export async function getFeatureFlag(
 		console.error(`Failed to load flag ${flagId}:`, error);
 		return null;
 	}
+}
+
+/**
+ * Update a flag's maturity lifecycle stage.
+ *
+ * @param flagId - The flag identifier
+ * @param maturity - The new maturity stage
+ * @param env - Cloudflare environment bindings
+ * @returns True if the update succeeded
+ */
+export async function setFlagMaturity(
+	flagId: string,
+	maturity: FlagMaturity,
+	env: FeatureFlagsEnv,
+): Promise<boolean> {
+	if (!MATURITY_ORDER.includes(maturity)) {
+		return false;
+	}
+
+	try {
+		const result = await env.DB.prepare(
+			`UPDATE feature_flags
+       SET maturity = ?, updated_at = datetime('now')
+       WHERE id = ?`,
+		)
+			.bind(maturity, flagId)
+			.run();
+
+		if ((result.meta as D1Meta).changes === 0) {
+			return false;
+		}
+
+		await invalidateFlag(flagId, env);
+		return true;
+	} catch (error) {
+		console.error(`Failed to update maturity for ${flagId}:`, error);
+		return false;
+	}
+}
+
+/**
+ * Check if changing maturity is a demotion (going to a less mature stage).
+ *
+ * @param currentMaturity - The flag's current maturity
+ * @param newMaturity - The proposed new maturity
+ * @returns True if this is a demotion
+ */
+export function isMaturityDemotion(
+	currentMaturity: FlagMaturity,
+	newMaturity: FlagMaturity,
+): boolean {
+	return MATURITY_ORDER.indexOf(newMaturity) < MATURITY_ORDER.indexOf(currentMaturity);
 }
 
 // =============================================================================
@@ -171,5 +229,6 @@ function rowToFlagSummary(row: FeatureFlagRow): FeatureFlagSummary {
 		flagType: row.flag_type as FlagType,
 		defaultValue,
 		cacheTtl: row.cache_ttl ?? 300,
+		maturity: (row.maturity as FlagMaturity) ?? "experimental",
 	};
 }

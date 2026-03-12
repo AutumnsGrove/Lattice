@@ -6,7 +6,13 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { getFeatureFlags, setFlagEnabled, getFeatureFlag } from "./admin.js";
+import {
+	getFeatureFlags,
+	setFlagEnabled,
+	getFeatureFlag,
+	setFlagMaturity,
+	isMaturityDemotion,
+} from "./admin.js";
 import type { FeatureFlagsEnv, FeatureFlagRow } from "./types.js";
 
 // =============================================================================
@@ -285,5 +291,114 @@ describe("getFeatureFlag", () => {
 
 		// Assert
 		expect(result).toBeNull();
+	});
+});
+
+// =============================================================================
+// setFlagMaturity
+// =============================================================================
+
+describe("setFlagMaturity", () => {
+	it("should update maturity and invalidate cache", async () => {
+		// Arrange
+		const env = createMockEnv();
+		const runMock = vi.fn().mockResolvedValue({ meta: { changes: 1 } });
+
+		(env.DB.prepare as ReturnType<typeof vi.fn>).mockReturnValue({
+			bind: vi.fn().mockReturnValue({ run: runMock }),
+		});
+
+		// Act
+		const result = await setFlagMaturity("jxl_encoding", "stable", env);
+
+		// Assert
+		expect(result).toBe(true);
+		expect(env.DB.prepare).toHaveBeenCalledWith(expect.stringContaining("UPDATE feature_flags"));
+		expect(env.FLAGS_KV.list).toHaveBeenCalledWith({
+			prefix: "flag:jxl_encoding:",
+			cursor: undefined,
+		});
+	});
+
+	it("should return false for invalid maturity value", async () => {
+		// Arrange
+		const env = createMockEnv();
+
+		// Act
+		const result = await setFlagMaturity("jxl_encoding", "invalid" as any, env);
+
+		// Assert
+		expect(result).toBe(false);
+		expect(env.DB.prepare).not.toHaveBeenCalled();
+	});
+
+	it("should return false when flag not found (0 changes)", async () => {
+		// Arrange
+		const env = createMockEnv();
+		const runMock = vi.fn().mockResolvedValue({ meta: { changes: 0 } });
+
+		(env.DB.prepare as ReturnType<typeof vi.fn>).mockReturnValue({
+			bind: vi.fn().mockReturnValue({ run: runMock }),
+		});
+
+		// Act
+		const result = await setFlagMaturity("nonexistent_flag", "beta", env);
+
+		// Assert
+		expect(result).toBe(false);
+	});
+
+	it("should return false on database error", async () => {
+		// Arrange
+		const env = createMockEnv();
+		const runMock = vi.fn().mockRejectedValue(new Error("DB error"));
+
+		(env.DB.prepare as ReturnType<typeof vi.fn>).mockReturnValue({
+			bind: vi.fn().mockReturnValue({ run: runMock }),
+		});
+
+		// Act
+		const result = await setFlagMaturity("jxl_encoding", "stable", env);
+
+		// Assert
+		expect(result).toBe(false);
+	});
+});
+
+// =============================================================================
+// isMaturityDemotion
+// =============================================================================
+
+describe("isMaturityDemotion", () => {
+	it("should detect demotion from graduated to experimental", () => {
+		// Arrange / Act
+		const result = isMaturityDemotion("graduated", "experimental");
+
+		// Assert
+		expect(result).toBe(true);
+	});
+
+	it("should detect demotion from stable to beta", () => {
+		// Arrange / Act
+		const result = isMaturityDemotion("stable", "beta");
+
+		// Assert
+		expect(result).toBe(true);
+	});
+
+	it("should NOT flag promotion (experimental to stable)", () => {
+		// Arrange / Act
+		const result = isMaturityDemotion("experimental", "stable");
+
+		// Assert
+		expect(result).toBe(false);
+	});
+
+	it("should NOT flag same-level (beta to beta)", () => {
+		// Arrange / Act
+		const result = isMaturityDemotion("beta", "beta");
+
+		// Assert
+		expect(result).toBe(false);
 	});
 });
