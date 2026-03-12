@@ -1,7 +1,7 @@
 {
 	"lastUpdated": "2026-03-10",
 	"docs": {
-		"total": 351,
+		"total": 354,
 		"breakdown": {
 			"specs": 95,
 			"help": 99,
@@ -12,7 +12,7 @@
 			"design": 9,
 			"exhibit": 37,
 			"research": 3,
-			"playbooks": 1,
+			"playbooks": 4,
 			"audits": 3
 		},
 		"paths": {

@@ -1,0 +1,22 @@
+{
+	"lastUpdated": "2026-03-12",
+	"docs": {
+		"total": 23,
+		"breakdown": {
+			"guides": 13,
+			"playbooks": 4,
+			"setup": 6
+		},
+		"paths": {
+			"guides": "docs/guides",
+			"playbooks": "docs/playbooks",
+			"setup": "docs/setup"
+		}
+	},
+	"freshnessThreshold": {
+		"staleDays": 30,
+		"warnDays": 20
+	},
+	"requiredFields": ["title", "description", "category", "lastUpdated"],
+	"notes": "Tracks developer guide inventory and freshness (30-day cycle). Used by guide-freshness.yml workflow."
+}

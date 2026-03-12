@@ -1,0 +1,395 @@
+name: Guide Freshness Check
+
+on:
+  # Run monthly on the 1st at 9am UTC
+  schedule:
+    - cron: '0 9 1 * *'
+
+  # Run on PRs that touch guide directories
+  pull_request:
+    paths:
+      - 'docs/guides/**'
+      - 'docs/playbooks/**'
+      - 'docs/setup/**'
+
+  # Allow manual trigger
+  workflow_dispatch:
+
+jobs:
+  check-guide-freshness:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check guide inventory and freshness
+        id: check-guides
+        run: |
+          #!/bin/bash
+          set -e
+
+          STALE_DAYS=$(jq -r '.freshnessThreshold.staleDays' .github/guide-inventory.json)
+          WARN_DAYS=$(jq -r '.freshnessThreshold.warnDays' .github/guide-inventory.json)
+          EXPECTED_TOTAL=$(jq -r '.docs.total' .github/guide-inventory.json)
+          TODAY=$(date +%s)
+
+          echo "Developer Guide Health Check"
+          echo "============================"
+          echo "Stale threshold: ${STALE_DAYS} days"
+          echo "Warning threshold: ${WARN_DAYS} days"
+          echo ""
+
+          STALE_FILES=""
+          STALE_COUNT=0
+          WARN_FILES=""
+          WARN_COUNT=0
+          MISSING_DATE_FILES=""
+          MISSING_DATE_COUNT=0
+          MISSING_FIELDS_FILES=""
+          MISSING_FIELDS_COUNT=0
+          ACTUAL_TOTAL=0
+          CATEGORY_BREAKDOWN=""
+
+          # Read required fields
+          REQUIRED_FIELDS=$(jq -r '.requiredFields[]' .github/guide-inventory.json)
+
+          # Read categories from inventory
+          CATEGORIES=$(jq -r '.docs.paths | keys[]' .github/guide-inventory.json)
+
+          for category in $CATEGORIES; do
+            DIR_PATH=$(jq -r ".docs.paths.$category" .github/guide-inventory.json)
+            EXPECTED_CAT=$(jq -r ".docs.breakdown.$category // 0" .github/guide-inventory.json)
+
+            if [ ! -d "$DIR_PATH" ]; then
+              echo "Directory not found: $DIR_PATH"
+              continue
+            fi
+
+            ACTUAL_CAT=$(find "$DIR_PATH" -name "*.md" -type f 2>/dev/null | wc -l | tr -d ' ')
+            ACTUAL_TOTAL=$((ACTUAL_TOTAL + ACTUAL_CAT))
+
+            CAT_DIFF=$((ACTUAL_CAT - EXPECTED_CAT))
+            if [ "$CAT_DIFF" -ne 0 ]; then
+              SIGN="+"
+              [ "$CAT_DIFF" -lt 0 ] && SIGN=""
+              CATEGORY_BREAKDOWN="${CATEGORY_BREAKDOWN}| $category | $EXPECTED_CAT | $ACTUAL_CAT | ${SIGN}${CAT_DIFF} |\n"
+            fi
+
+            echo "Checking $category ($ACTUAL_CAT docs)..."
+
+            while IFS= read -r file; do
+              [ -z "$file" ] && continue
+              FILENAME=$(basename "$file")
+
+              # Check required frontmatter fields
+              MISSING=""
+              for field in $REQUIRED_FIELDS; do
+                if ! grep -q "^${field}:" "$file" 2>/dev/null; then
+                  MISSING="${MISSING}${field}, "
+                fi
+              done
+
+              if [ -n "$MISSING" ]; then
+                MISSING="${MISSING%, }"
+                MISSING_FIELDS_FILES="${MISSING_FIELDS_FILES}| $FILENAME | $category | Missing: $MISSING |\n"
+                MISSING_FIELDS_COUNT=$((MISSING_FIELDS_COUNT + 1))
+              fi
+
+              # Extract lastUpdated
+              LAST_UPDATED=$(grep -m1 "^lastUpdated:" "$file" 2>/dev/null | sed "s/lastUpdated: *['\"]*//" | sed "s/['\"].*$//" || echo "")
+
+              if [ -z "$LAST_UPDATED" ]; then
+                MISSING_DATE_FILES="${MISSING_DATE_FILES}| $FILENAME | $category | Missing lastUpdated |\n"
+                MISSING_DATE_COUNT=$((MISSING_DATE_COUNT + 1))
+                continue
+              fi
+
+              UPDATED_EPOCH=$(date -d "$LAST_UPDATED" +%s 2>/dev/null || echo "0")
+
+              if [ "$UPDATED_EPOCH" = "0" ]; then
+                MISSING_DATE_FILES="${MISSING_DATE_FILES}| $FILENAME | $category | Invalid: $LAST_UPDATED |\n"
+                MISSING_DATE_COUNT=$((MISSING_DATE_COUNT + 1))
+                continue
+              fi
+
+              DAYS_OLD=$(( (TODAY - UPDATED_EPOCH) / 86400 ))
+
+              if [ "$DAYS_OLD" -gt "$STALE_DAYS" ]; then
+                echo "  Stale (${DAYS_OLD} days): $FILENAME"
+                STALE_FILES="${STALE_FILES}| $FILENAME | $category | ${DAYS_OLD} days | $LAST_UPDATED |\n"
+                STALE_COUNT=$((STALE_COUNT + 1))
+              elif [ "$DAYS_OLD" -gt "$WARN_DAYS" ]; then
+                echo "  Aging (${DAYS_OLD} days): $FILENAME"
+                WARN_FILES="${WARN_FILES}| $FILENAME | $category | ${DAYS_OLD} days | $LAST_UPDATED |\n"
+                WARN_COUNT=$((WARN_COUNT + 1))
+              fi
+            done < <(find "$DIR_PATH" -name "*.md" -type f 2>/dev/null)
+          done
+
+          echo ""
+          echo "================================"
+          echo "Summary"
+          echo "================================"
+
+          TOTAL_DIFF=$((ACTUAL_TOTAL - EXPECTED_TOTAL))
+          echo "Total docs: $ACTUAL_TOTAL (expected: $EXPECTED_TOTAL, diff: $TOTAL_DIFF)"
+          echo "Stale docs (>${STALE_DAYS} days): $STALE_COUNT"
+          echo "Aging docs (>${WARN_DAYS} days): $WARN_COUNT"
+          echo "Missing dates: $MISSING_DATE_COUNT"
+          echo "Missing fields: $MISSING_FIELDS_COUNT"
+
+          # Set outputs
+          echo "actual_total=$ACTUAL_TOTAL" >> $GITHUB_OUTPUT
+          echo "expected_total=$EXPECTED_TOTAL" >> $GITHUB_OUTPUT
+          echo "total_diff=$TOTAL_DIFF" >> $GITHUB_OUTPUT
+          echo "stale_count=$STALE_COUNT" >> $GITHUB_OUTPUT
+          echo "warn_count=$WARN_COUNT" >> $GITHUB_OUTPUT
+          echo "missing_date_count=$MISSING_DATE_COUNT" >> $GITHUB_OUTPUT
+          echo "missing_fields_count=$MISSING_FIELDS_COUNT" >> $GITHUB_OUTPUT
+
+          if [ "$STALE_COUNT" -gt 0 ]; then
+            echo "has_stale=true" >> $GITHUB_OUTPUT
+            echo "stale_files<<EOF" >> $GITHUB_OUTPUT
+            echo -e "$STALE_FILES" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "has_stale=false" >> $GITHUB_OUTPUT
+          fi
+
+          if [ "$WARN_COUNT" -gt 0 ]; then
+            echo "has_warn=true" >> $GITHUB_OUTPUT
+            echo "warn_files<<EOF" >> $GITHUB_OUTPUT
+            echo -e "$WARN_FILES" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "has_warn=false" >> $GITHUB_OUTPUT
+          fi
+
+          if [ "$MISSING_DATE_COUNT" -gt 0 ]; then
+            echo "has_missing_dates=true" >> $GITHUB_OUTPUT
+            echo "missing_date_files<<EOF" >> $GITHUB_OUTPUT
+            echo -e "$MISSING_DATE_FILES" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "has_missing_dates=false" >> $GITHUB_OUTPUT
+          fi
+
+          if [ "$MISSING_FIELDS_COUNT" -gt 0 ]; then
+            echo "has_missing_fields=true" >> $GITHUB_OUTPUT
+            echo "missing_fields_files<<EOF" >> $GITHUB_OUTPUT
+            echo -e "$MISSING_FIELDS_FILES" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "has_missing_fields=false" >> $GITHUB_OUTPUT
+          fi
+
+          if [ "$TOTAL_DIFF" -ne 0 ]; then
+            echo "has_inventory_drift=true" >> $GITHUB_OUTPUT
+            echo "category_breakdown<<EOF" >> $GITHUB_OUTPUT
+            echo -e "$CATEGORY_BREAKDOWN" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "has_inventory_drift=false" >> $GITHUB_OUTPUT
+          fi
+
+          if [ "$STALE_COUNT" -gt 0 ] || [ "$MISSING_DATE_COUNT" -gt 0 ] || [ "$TOTAL_DIFF" -ne 0 ] || [ "$MISSING_FIELDS_COUNT" -gt 0 ]; then
+            echo "has_issues=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_issues=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Comment on PR (if issues found)
+        if: github.event_name == 'pull_request' && steps.check-guides.outputs.has_issues == 'true'
+        uses: actions/github-script@v7
+        env:
+          ACTUAL_TOTAL: ${{ steps.check-guides.outputs.actual_total }}
+          EXPECTED_TOTAL: ${{ steps.check-guides.outputs.expected_total }}
+          TOTAL_DIFF: ${{ steps.check-guides.outputs.total_diff }}
+          STALE_COUNT: ${{ steps.check-guides.outputs.stale_count }}
+          WARN_COUNT: ${{ steps.check-guides.outputs.warn_count }}
+          MISSING_DATE_COUNT: ${{ steps.check-guides.outputs.missing_date_count }}
+          MISSING_FIELDS_COUNT: ${{ steps.check-guides.outputs.missing_fields_count }}
+          HAS_STALE: ${{ steps.check-guides.outputs.has_stale }}
+          HAS_WARN: ${{ steps.check-guides.outputs.has_warn }}
+          HAS_MISSING_DATES: ${{ steps.check-guides.outputs.has_missing_dates }}
+          HAS_MISSING_FIELDS: ${{ steps.check-guides.outputs.has_missing_fields }}
+          HAS_INVENTORY_DRIFT: ${{ steps.check-guides.outputs.has_inventory_drift }}
+          STALE_FILES: ${{ steps.check-guides.outputs.stale_files }}
+          WARN_FILES: ${{ steps.check-guides.outputs.warn_files }}
+          MISSING_DATE_FILES: ${{ steps.check-guides.outputs.missing_date_files }}
+          MISSING_FIELDS_FILES: ${{ steps.check-guides.outputs.missing_fields_files }}
+          CATEGORY_BREAKDOWN: ${{ steps.check-guides.outputs.category_breakdown }}
+        with:
+          script: |
+            const hasStale = process.env.HAS_STALE === 'true';
+            const hasWarn = process.env.HAS_WARN === 'true';
+            const hasMissingDates = process.env.HAS_MISSING_DATES === 'true';
+            const hasMissingFields = process.env.HAS_MISSING_FIELDS === 'true';
+            const hasInventoryDrift = process.env.HAS_INVENTORY_DRIFT === 'true';
+            const totalDiff = parseInt(process.env.TOTAL_DIFF);
+
+            let body = `## Developer Guide Health Check\n\n`;
+            body += `Guides use a **30-day freshness cycle** (shorter than the 90-day KB cycle) because they track live code.\n\n`;
+
+            if (hasInventoryDrift) {
+              const verb = totalDiff > 0 ? 'added' : 'removed';
+              body += `### Inventory Change\n\n`;
+              body += `This PR appears to have **${verb} ${Math.abs(totalDiff)} doc(s)**.\n\n`;
+              body += `| Category | Expected | Actual | Diff |\n`;
+              body += `|----------|----------|--------|------|\n`;
+              body += `${process.env.CATEGORY_BREAKDOWN}\n`;
+              body += `Update \`.github/guide-inventory.json\` with the new counts.\n\n`;
+            }
+
+            if (hasMissingFields) {
+              body += `### Missing Frontmatter Fields\n\n`;
+              body += `| File | Category | Issue |\n`;
+              body += `|------|----------|-------|\n`;
+              body += `${process.env.MISSING_FIELDS_FILES}\n`;
+              body += `All guides need: \`title\`, \`description\`, \`category\`, \`lastUpdated\`.\n\n`;
+            }
+
+            if (hasMissingDates) {
+              body += `### Missing \`lastUpdated\`\n\n`;
+              body += `| File | Category | Issue |\n`;
+              body += `|------|----------|-------|\n`;
+              body += `${process.env.MISSING_DATE_FILES}\n\n`;
+            }
+
+            if (hasStale) {
+              body += `### Stale Guides (>30 days)\n\n`;
+              body += `| File | Category | Age | Last Updated |\n`;
+              body += `|------|----------|-----|-------------|\n`;
+              body += `${process.env.STALE_FILES}\n`;
+              body += `These guides may be out of sync with the code they document.\n\n`;
+            }
+
+            if (hasWarn) {
+              body += `### Aging Guides (>20 days)\n\n`;
+              body += `| File | Category | Age | Last Updated |\n`;
+              body += `|------|----------|-----|-------------|\n`;
+              body += `${process.env.WARN_FILES}\n\n`;
+            }
+
+            body += `---\n*See \`.github/guide-inventory.json\` for configuration.*`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: body
+            });
+
+      - name: Create issue (scheduled run only)
+        if: github.event_name == 'schedule' && steps.check-guides.outputs.has_issues == 'true'
+        uses: actions/github-script@v7
+        env:
+          ACTUAL_TOTAL: ${{ steps.check-guides.outputs.actual_total }}
+          EXPECTED_TOTAL: ${{ steps.check-guides.outputs.expected_total }}
+          STALE_COUNT: ${{ steps.check-guides.outputs.stale_count }}
+          WARN_COUNT: ${{ steps.check-guides.outputs.warn_count }}
+          MISSING_DATE_COUNT: ${{ steps.check-guides.outputs.missing_date_count }}
+          MISSING_FIELDS_COUNT: ${{ steps.check-guides.outputs.missing_fields_count }}
+          HAS_STALE: ${{ steps.check-guides.outputs.has_stale }}
+          HAS_MISSING_DATES: ${{ steps.check-guides.outputs.has_missing_dates }}
+          HAS_MISSING_FIELDS: ${{ steps.check-guides.outputs.has_missing_fields }}
+          STALE_FILES: ${{ steps.check-guides.outputs.stale_files }}
+          MISSING_DATE_FILES: ${{ steps.check-guides.outputs.missing_date_files }}
+          MISSING_FIELDS_FILES: ${{ steps.check-guides.outputs.missing_fields_files }}
+        with:
+          script: |
+            const today = new Date().toISOString().split('T')[0];
+
+            const existingIssues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'documentation,maintenance'
+            });
+
+            const hasExisting = existingIssues.data.some(issue =>
+              issue.title.includes('Guide Freshness')
+            );
+
+            if (hasExisting) {
+              console.log('Existing guide freshness issue found, skipping');
+              return;
+            }
+
+            const hasStale = process.env.HAS_STALE === 'true';
+            const hasMissingDates = process.env.HAS_MISSING_DATES === 'true';
+            const hasMissingFields = process.env.HAS_MISSING_FIELDS === 'true';
+
+            let body = `## Monthly Guide Freshness Report\n\n`;
+            body += `| Metric | Value |\n`;
+            body += `|--------|-------|\n`;
+            body += `| Total Guides | ${process.env.ACTUAL_TOTAL} |\n`;
+            body += `| Stale (>30 days) | ${process.env.STALE_COUNT} |\n`;
+            body += `| Aging (>20 days) | ${process.env.WARN_COUNT} |\n`;
+            body += `| Missing Dates | ${process.env.MISSING_DATE_COUNT} |\n`;
+            body += `| Missing Fields | ${process.env.MISSING_FIELDS_COUNT} |\n\n`;
+
+            if (hasStale) {
+              body += `### Stale Guides\n\n`;
+              body += `| File | Category | Age | Last Updated |\n`;
+              body += `|------|----------|-----|-------------|\n`;
+              body += `${process.env.STALE_FILES}\n\n`;
+            }
+
+            if (hasMissingDates) {
+              body += `### Missing Dates\n\n`;
+              body += `| File | Category | Issue |\n`;
+              body += `|------|----------|-------|\n`;
+              body += `${process.env.MISSING_DATE_FILES}\n\n`;
+            }
+
+            if (hasMissingFields) {
+              body += `### Missing Frontmatter\n\n`;
+              body += `| File | Category | Issue |\n`;
+              body += `|------|----------|-------|\n`;
+              body += `${process.env.MISSING_FIELDS_FILES}\n\n`;
+            }
+
+            body += `---\n*Auto-created by guide-freshness workflow. Guides use a 30-day cycle because they track live code.*`;
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Guide Freshness Review - ${today}`,
+              body: body,
+              labels: ['documentation', 'maintenance']
+            });
+
+      - name: Summary
+        env:
+          HAS_ISSUES: ${{ steps.check-guides.outputs.has_issues }}
+          ACTUAL_TOTAL: ${{ steps.check-guides.outputs.actual_total }}
+          EXPECTED_TOTAL: ${{ steps.check-guides.outputs.expected_total }}
+          STALE_COUNT: ${{ steps.check-guides.outputs.stale_count }}
+          WARN_COUNT: ${{ steps.check-guides.outputs.warn_count }}
+          MISSING_DATE_COUNT: ${{ steps.check-guides.outputs.missing_date_count }}
+          MISSING_FIELDS_COUNT: ${{ steps.check-guides.outputs.missing_fields_count }}
+        run: |
+          echo "## Developer Guide Health Check" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Count |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Total Guides | $ACTUAL_TOTAL (expected: $EXPECTED_TOTAL) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Stale (>30 days) | $STALE_COUNT |" >> $GITHUB_STEP_SUMMARY
+          echo "| Aging (>20 days) | $WARN_COUNT |" >> $GITHUB_STEP_SUMMARY
+          echo "| Missing Dates | $MISSING_DATE_COUNT |" >> $GITHUB_STEP_SUMMARY
+          echo "| Missing Fields | $MISSING_FIELDS_COUNT |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$HAS_ISSUES" = "true" ]; then
+            echo "Issues found - see details above" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "All developer guides are healthy!" >> $GITHUB_STEP_SUMMARY
+          fi
