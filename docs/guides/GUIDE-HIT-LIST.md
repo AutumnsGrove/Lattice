@@ -4,7 +4,7 @@ A rolling inventory of what has dev docs and what doesn't. Specs describe *what*
 
 The waystone guide (`waystone-developer-guide.md`) is the template. Every guide should answer: "How do I add/modify X?", "How does X work under the hood?", and "What breaks and why?"
 
-Last updated: 2026-03-12
+Last updated: 2026-03-12 (Priority 1 complete)
 
 ---
 
@@ -27,13 +27,13 @@ These are live, actively modified, and have non-obvious registration steps or fa
 |--------|----------|:----:|:-----:|--------------------------|
 | Waystone | `libs/engine/.../waystone/` | yes | **HAS GUIDE** | Allowlist, CORS, prerender architecture |
 | Grafts | `libs/engine/src/lib/grafts/` | yes | **HAS GUIDE** (`adding-grafts-and-flags.md`) | Feature flags, greenhouse, migrations |
-| Heartwood | `apps/login/`, GroveAuth repo | yes | partial (`local-auth-testing.md`) | PKCE flow, session validation, adding auth to new apps |
-| Loom | `libs/engine/src/lib/loom/` | yes | **NEEDS GUIDE** | Adding a new DO, LoomDO base class, worker bindings, deploy pipeline |
-| Thorn | `libs/engine/src/lib/thorn/` | yes | **NEEDS GUIDE** | Two-layer architecture, adding behavioral rules, entity labels, feature flags |
-| Lumen | `libs/engine/src/lib/lumen/` | yes | **NEEDS GUIDE** | Adding a new AI task, provider routing, tool-calling, fallback chain |
-| Threshold | `libs/engine/src/lib/threshold/` | yes | partial (`rate-limiting-guide.md`) | Adding rate limits to new endpoints, tier-based limits, KV keys |
-| Prism | `libs/prism/` | yes | **NEEDS GUIDE** | Adding tokens, CSS layer system, Tailwind preset, how all 8 apps consume it |
-| Zephyr | `libs/engine/src/lib/zephyr/` | yes | partial (`zephyr-migration-guide.md`) | Adding email templates, send pipeline, retry logic |
+| Heartwood | `apps/login/`, GroveAuth repo | yes | **HAS GUIDE** (`heartwood-developer-guide.md`) | PKCE flow, session validation, adding auth to new apps |
+| Loom | `libs/engine/src/lib/loom/` | yes | **HAS GUIDE** (`loom-developer-guide.md`) | Adding a new DO, LoomDO base class, worker bindings, deploy pipeline |
+| Thorn | `libs/engine/src/lib/thorn/` | yes | **HAS GUIDE** (`thorn-developer-guide.md`) | Two-layer architecture, adding behavioral rules, entity labels, feature flags |
+| Lumen | `libs/engine/src/lib/lumen/` | yes | **HAS GUIDE** (`lumen-developer-guide.md`) | Adding a new AI task, provider routing, tool-calling, fallback chain |
+| Threshold | `libs/engine/src/lib/threshold/` | yes | **HAS GUIDE** (`threshold-developer-guide.md`) | Adding rate limits to new endpoints, tier-based limits, KV keys |
+| Prism | `libs/prism/` | yes | **HAS GUIDE** (`prism-developer-guide.md`) | Adding tokens, CSS layer system, Tailwind preset, how all 8 apps consume it |
+| Zephyr | `libs/engine/src/lib/zephyr/` | yes | **HAS GUIDE** (`zephyr-developer-guide.md`) | Adding email templates, send pipeline, retry logic |
 
 ## Priority 2 — Live systems that are complex but less frequently modified
 
@@ -102,6 +102,13 @@ What we already have in `docs/guides/`:
 | Guide | Covers |
 |-------|--------|
 | `waystone-developer-guide.md` | Waystone system end-to-end |
+| `loom-developer-guide.md` | Durable Objects SDK and deploy pipeline |
+| `thorn-developer-guide.md` | Content moderation two-layer architecture |
+| `lumen-developer-guide.md` | AI gateway, task routing, tool-calling |
+| `prism-developer-guide.md` | Design tokens, CSS layers, Tailwind preset |
+| `heartwood-developer-guide.md` | Auth system, PKCE flow, session validation |
+| `zephyr-developer-guide.md` | Email gateway, templates, retry logic |
+| `threshold-developer-guide.md` | Rate limiting, tier-based limits, KV tracking |
 | `adding-grafts-and-flags.md` | Graft/feature flag system |
 | `local-auth-testing.md` | Local Heartwood auth setup |
 | `rate-limiting-guide.md` | Threshold rate limiting |
