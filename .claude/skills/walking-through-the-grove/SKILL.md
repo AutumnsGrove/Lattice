@@ -37,8 +37,7 @@ Read the entire document. Don't skim. Let it sink in:
 Create a markdown file for your journey:
 
 ```bash
-mkdir -p docs/scratch
-# Create: docs/scratch/{concept}-naming-journey.md
+# Create: docs/philosophy/naming-research/{concept}-naming-journey.md
 ```
 
 This scratchpad is where you think out loud. Include:
@@ -248,14 +247,14 @@ The naming document entries should follow Grove's voice: warm, direct, avoiding 
 
 ---
 
-## The Scratchpad is Sacred
+## The Journey Files are Sacred
 
-Keep your scratchpad files. They're documentation of how we think about Grove:
+Keep your naming journey files. They're documentation of how we think about Grove:
 
 ```
-docs/scratch/
-  grove-journey.md         ← The original Porch discovery
-  {feature}-naming.md      ← Future naming journeys
+docs/philosophy/naming-research/
+  grove-journey.md                    ← The original Porch discovery
+  {feature}-naming-journey.md         ← All naming journeys
 ```
 
 These become part of Grove's story.
