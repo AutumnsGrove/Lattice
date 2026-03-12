@@ -1,0 +1,11 @@
+# Cloudflare Pages custom headers
+# https://developers.cloudflare.com/pages/configuration/headers/
+
+# Waystone excerpt API — prerendered JSON served as static files.
+# Waystones render on tenant subdomains (*.grove.place) and fetch
+# excerpts from grove.place, so CORS headers are required.
+/api/kb/excerpt/*
+  Access-Control-Allow-Origin: *
+  Access-Control-Allow-Methods: GET, OPTIONS
+  Access-Control-Allow-Headers: Content-Type
+  Vary: Origin

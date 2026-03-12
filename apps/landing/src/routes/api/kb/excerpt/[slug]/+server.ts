@@ -114,6 +114,10 @@ const WAYSTONE_ARTICLE_SLUGS = [
 	"what-is-pulse", // Pulse GitHub activity curio
 	"using-curios-in-content", // Curio directives cheatsheet for editors
 	"what-are-blazes", // Blazes content markers — used in arbor/settings
+	"what-are-reeds", // Reeds comments — used in arbor/account features
+	"what-is-reverie", // Reverie AI config — used in arbor/account features
+	"what-is-canopy", // Canopy page design — used in arbor/settings
+	"what-is-meadow", // Meadow social links — used in arbor/settings
 ];
 
 // Generate entries for all waystone-linked articles
