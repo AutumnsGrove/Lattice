@@ -55,8 +55,10 @@ function getCorsHeaders(origin: string): Record<string, string> {
 }
 
 /**
- * Validate session via AUTH service binding.
- * Returns { tenantId, userId } if valid, undefined otherwise.
+ * Validate session via AUTH service binding (Heartwood SessionDO).
+ * Uses POST /session/validate — the same endpoint Landing and other
+ * Grove properties use. This correctly handles grove_session cookies
+ * as well as Better Auth session cookies from OAuth flows.
  */
 async function validateSession(
 	auth: Fetcher,
@@ -65,20 +67,22 @@ async function validateSession(
 	if (!cookieHeader) return undefined;
 
 	try {
-		const response = await auth.fetch("https://auth.internal/api/auth/get-session", {
-			method: "GET",
+		const response = await auth.fetch("https://login.grove.place/session/validate", {
+			method: "POST",
 			headers: { Cookie: cookieHeader },
 		});
 
 		if (!response.ok) return undefined;
 
 		const data = (await response.json()) as {
-			session?: { userId?: string };
+			valid?: boolean;
 			user?: { id?: string; tenantId?: string };
 		};
 
-		const userId = data.session?.userId || data.user?.id;
-		const tenantId = data.user?.tenantId;
+		if (!data.valid || !data.user) return undefined;
+
+		const userId = data.user.id;
+		const tenantId = data.user.tenantId;
 
 		if (!userId || !tenantId) return undefined;
 
