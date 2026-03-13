@@ -45,6 +45,9 @@ const SUBDOMAIN_ROUTES: Record<string, string | RouteTarget> = {
 	login: "grove-login.pages.dev", // Unified auth hub (packages/login)
 	heartwood: "REDIRECT_TO_LOGIN",
 
+	// Billing hub — centralized payment infrastructure
+	billing: "grove-billing.workers.dev",
+
 	// Grove internal Pages projects
 	amber: "amber-4x2.pages.dev", // Amber storage
 	ivy: "ivy-3uv.pages.dev", // Ivy mail client

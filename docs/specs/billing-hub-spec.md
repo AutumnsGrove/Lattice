@@ -830,4 +830,75 @@ The UX tradeoff (page navigation for a quick toggle) is acceptable because:
 
 ---
 
+## Phase 1 Implementation Notes
+
+*Completed March 2026. All Phase 1 Migration Plan items are done.*
+
+### What Was Built
+
+Two workers, 52 files total, 171 passing tests:
+
+- **`services/billing-api/`** (23 files) — Hono worker with all 7 endpoints from the spec, StripeClient, webhook processing with idempotency, GDPR sanitization, 120-day retention, tenant creation on checkout completion, payment emails via Zephyr, KV-backed rate limiting, error catalog BILLING-001 through BILLING-007, and audit logging on all mutations.
+- **`apps/billing/`** (29 files) — SvelteKit worker with all 7 routes from the spec, session validation via AUTH binding, belt-and-suspenders webhook verification, `grove_billing_redirect` cookie, redirect allowlist validation, and friendly error pages.
+- **`libs/engine/src/lib/config/billing.ts`** — SSOT config with `BILLING_HUB_URL`, `buildCheckoutUrl()`, `buildPortalUrl()`, `buildCancelUrl()`, `buildResumeUrl()`.
+- **`services/grove-router/`** — `billing` subdomain route added.
+
+### Architectural Decisions
+
+- **Self-contained worker, no lattice dependency.** billing-api carries its own StripeClient (simplified from engine's payments SDK — no Connect methods). This avoids pulling engine as a dependency and keeps the worker lean on cold start.
+- **Inline Svelte components in apps/billing.** The billing UI uses self-contained components rather than importing from vineyard or engine barrels. This sidesteps the barrel cascade hydration issue documented in CLAUDE.md and keeps the billing app independently deployable.
+- **Upsert pattern for upgrades.** The checkout-completed handler uses `INSERT ... ON CONFLICT DO UPDATE` for platform_billing records, collapsing a SELECT + conditional INSERT/UPDATE into a single D1 round-trip.
+- **Parallel DB operations in invoice handlers.** The UPDATE (status change) and SELECT (tenant lookup for emails) run via `Promise.all` since the SELECT doesn't depend on the UPDATE completing.
+
+### Security Hardening
+
+Found and fixed during review:
+
+- **Open redirect in checkout successUrl** (critical) — `redirect` parameter now validated against `*.grove.place` allowlist before use.
+- **Timing attack in webhook signature comparison** (critical) — `secureCompare()` pads both strings to equal length and XORs every byte, preventing early-return length leaks.
+- **Future timestamp rejection** — Webhook verification rejects signatures with timestamps more than 60 seconds in the future (clock skew tolerance).
+- **UUID validation** on all mutation route parameters.
+- **HTML escaping** in Zephyr email templates to prevent injection.
+- **Input not echoed** in error responses (prevents reflection attacks).
+- **Request body size limits** (64KB) on all POST endpoints.
+- **Minimal root endpoint** — returns only `{ ok: true }`, no service topology information.
+- **Safe error logging** — error messages truncated to 200 chars, never stores full error objects (which may contain PII from Stripe payloads).
+
+### Test Coverage
+
+171 tests across 6 suites, all passing:
+
+- Validation utilities (tier mapping, status mapping, UUID checks)
+- GDPR payload sanitizer (field stripping, retention calculation)
+- Error catalog and response formatting
+- StripeClient (webhook signature verification, secret rotation, replay rejection)
+- Redirect validation (allowlist enforcement, subdomain patterns)
+- URL builder functions (all param combinations)
+
+### Performance Optimizations
+
+- Batched D1 inserts for `site_settings` during tenant creation (4 round-trips collapsed to 1).
+- Upsert pattern in webhook upgrade path (2 round-trips collapsed to 1).
+- Merged DB queries in cancel/resume routes (2 collapsed to 1 each).
+- Parallel UPDATE + SELECT in `invoice.paid` and `invoice.payment_failed` handlers.
+- Efficient HMAC hex encoding (Uint8Array reduce, no intermediate arrays).
+
+### Pre-Deployment Checklist
+
+Before deploying to production:
+
+1. `pnpm install` from monorepo root (registers new workspace packages).
+2. `wrangler secret put STRIPE_SECRET_KEY` for `grove-billing-api`.
+3. `wrangler secret put STRIPE_WEBHOOK_SECRET` for both `grove-billing-api` and `grove-billing`.
+4. Configure Stripe Dashboard webhook endpoint: `https://billing.grove.place/api/webhooks/stripe`.
+5. Deploy grove-router with the new `billing` subdomain route.
+6. Deploy both workers: `wrangler deploy` in `services/billing-api/` and `apps/billing/`.
+7. Verify `/api/health` returns Stripe connectivity confirmation.
+
+### Phase 2 Readiness
+
+All Phase 1 infrastructure is in place. Phase 2 (Redirect Everything) can begin immediately. The URL builders in `libs/engine/src/lib/config/billing.ts` are ready for import by Plant, Arbor, and the upgrades graft. Five contract field-name mismatches between API responses and UI consumers were identified and fixed during Phase 1, so the API surface is stable.
+
+---
+
 *The water finds its way. Through root and soil, one path, one source, every tree drinks.*

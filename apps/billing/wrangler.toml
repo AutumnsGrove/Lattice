@@ -1,0 +1,17 @@
+name = "grove-billing"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".svelte-kit/cloudflare"
+
+# Billing API Service Binding (Hono backend — never public)
+[[services]]
+binding = "BILLING_API"
+service = "grove-billing-api"
+
+# GroveAuth Service Binding (session validation)
+[[services]]
+binding = "AUTH"
+service = "groveauth"
+
+# Secrets (configured in Cloudflare Dashboard - Pages > Settings > Bindings):
+# - STRIPE_WEBHOOK_SECRET = whsec_...

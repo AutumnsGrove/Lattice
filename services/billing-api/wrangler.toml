@@ -1,0 +1,42 @@
+# BillingHub API - Centralized Payment Logic
+# Canonical Name: BillingHub API | Worker Name: grove-billing-api
+# Internal service — accessed via service binding only, not public internet
+
+name = "grove-billing-api"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Production environment variables
+[vars]
+ENVIRONMENT = "production"
+BILLING_HUB_URL = "https://billing.grove.place"
+
+# D1 Database binding (shared grove-engine-db)
+[[d1_databases]]
+binding = "DB"
+database_name = "grove-engine-db"
+database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
+
+# KV Namespace for rate limiting
+[[kv_namespaces]]
+binding = "CACHE_KV"
+id = "placeholder-kv-id"
+
+# Zephyr Service Binding (email gateway - direct internal routing)
+[[services]]
+binding = "ZEPHYR"
+service = "grove-zephyr"
+
+# Smart Placement - run worker closer to D1 database location
+[placement]
+mode = "smart"
+
+# Cron triggers
+# - Daily at 2 AM UTC: webhook event cleanup (120-day retention)
+[triggers]
+crons = ["0 2 * * *"]
+
+# Secrets (set via `wrangler secret put <NAME>`):
+# - STRIPE_SECRET_KEY: Stripe secret key for API calls
+# - STRIPE_WEBHOOK_SECRET: Stripe webhook signing secret

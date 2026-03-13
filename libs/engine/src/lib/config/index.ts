@@ -3,6 +3,7 @@
 
 export * from "./ai-models.js";
 export * from "./auth.js";
+export * from "./billing.js";
 export * from "./canopy-categories.js";
 export * from "./contact.js";
 export * from "./domain-blocklist.js";

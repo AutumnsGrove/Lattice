@@ -1,0 +1,24 @@
+{
+	"name": "grove-billing-api",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "wrangler dev",
+		"deploy": "wrangler deploy",
+		"lint": "echo 'no lint configured'",
+		"check": "tsc --noEmit",
+		"test": "vitest",
+		"test:run": "vitest run",
+		"build": "echo 'wrangler handles build'"
+	},
+	"dependencies": {
+		"hono": "^4.11.9"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20260210.0",
+		"typescript": "^5.9.3",
+		"vitest": "^4.0.18",
+		"wrangler": "^4.64.0"
+	}
+}
