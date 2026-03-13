@@ -3,7 +3,7 @@ title: What is Wisp?
 description: Grove's ethical AI writing assistant that polishes without replacing your voice
 category: help
 section: how-it-works
-lastUpdated: '2026-01-28'
+lastUpdated: '2026-03-13'
 keywords:
   - wisp
   - ai
@@ -21,6 +21,8 @@ Some people want AI to write for them. Grove isn't for those people.
 Wisp is Grove's writing assistant—a tool that helps polish your voice without replacing it. It checks grammar, analyzes tone, suggests word choices, and evaluates readability. What it never does: write content for you, expand your paragraphs, or generate ideas.
 
 Your words. Refined. Not replaced.
+
+> **Currently in the [[greenhouse|Greenhouse]]** — Wisp is an experimental feature available to greenhouse members. It's functional and growing, but still finding its final shape.
 
 ## Why Wisp exists
 

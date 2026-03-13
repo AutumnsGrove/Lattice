@@ -3,7 +3,7 @@ title: What is Scribe?
 description: Voice-to-text for your blog—speak your thoughts and watch them become posts
 category: help
 section: how-it-works
-lastUpdated: '2026-01-25'
+lastUpdated: '2026-03-13'
 keywords:
   - scribe
   - voice
@@ -22,6 +22,8 @@ order: 6
 Some thoughts flow better when spoken. Maybe you're walking and an idea hits. Maybe typing feels like friction when you just want to get something down. Maybe you think more clearly out loud than staring at a blinking cursor.
 
 Scribe lets you speak your posts into existence.
+
+> **Currently in the [[greenhouse|Greenhouse]]** — Scribe is an experimental feature available to greenhouse members. It's functional and growing, but still finding its final shape.
 
 ## The short version
 

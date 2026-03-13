@@ -49,7 +49,9 @@ export type KnownGraftId =
 	| "photo_gallery"
 	| "reeds_comments"
 	| "thorn_moderation"
-	| "lantern_enabled";
+	| "chirp_enabled"
+	| "lantern_enabled"
+	| "reverie_enabled";
 
 /**
  * Record of graft ID to enabled status.

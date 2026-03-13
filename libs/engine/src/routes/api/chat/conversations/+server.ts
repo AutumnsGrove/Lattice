@@ -14,6 +14,25 @@ import { listConversations, getOrCreateConversation } from "$lib/server/services
 import { areMutualFriends } from "$lib/server/services/friends.js";
 import { createThreshold } from "$lib/threshold/factory.js";
 import { thresholdCheck } from "$lib/threshold/adapters/sveltekit.js";
+import { isInGreenhouse, isFeatureEnabled } from "$lib/feature-flags/index.js";
+
+/**
+ * Check if the chirp_enabled graft is enabled for this tenant.
+ * Returns false (feature disabled) if any check fails.
+ */
+async function isChirpEnabled(
+	db: D1Database,
+	kv: KVNamespace | undefined,
+	tenantId: string,
+): Promise<boolean> {
+	if (!kv) return false;
+	const flagsEnv = { DB: db, FLAGS_KV: kv };
+	const inGreenhouse = await isInGreenhouse(tenantId, flagsEnv).catch(() => false);
+	if (!inGreenhouse) return false;
+	return isFeatureEnabled("chirp_enabled", { tenantId, inGreenhouse: true }, flagsEnv).catch(
+		() => false,
+	);
+}
 
 export const GET: RequestHandler = async ({ platform, locals, url }) => {
 	const db = platform?.env?.DB;
@@ -29,6 +48,11 @@ export const GET: RequestHandler = async ({ platform, locals, url }) => {
 	const homeGrove = await getUserHomeGrove(db, locals.user.email);
 	if (!homeGrove) {
 		return json({ conversations: [] });
+	}
+
+	// Gate: chirp_enabled graft
+	if (!(await isChirpEnabled(db, platform?.env?.CACHE_KV, homeGrove.tenantId))) {
+		throwGroveError(403, API_ERRORS.FORBIDDEN, "API");
 	}
 
 	const rawLimit = parseInt(url.searchParams.get("limit") ?? "50", 10);
@@ -64,6 +88,11 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 	const homeGrove = await getUserHomeGrove(db, locals.user.email);
 	if (!homeGrove) {
 		throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
+	}
+
+	// Gate: chirp_enabled graft
+	if (!(await isChirpEnabled(db, platform?.env?.CACHE_KV, homeGrove.tenantId))) {
+		throwGroveError(403, API_ERRORS.FORBIDDEN, "API");
 	}
 
 	let body: Record<string, unknown>;

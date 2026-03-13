@@ -3,7 +3,7 @@ title: What is Reverie?
 description: Grove's composition layer that turns your dreams into decorations, powered by AI
 category: help
 section: how-it-works
-lastUpdated: '2026-02-02'
+lastUpdated: '2026-03-13'
 keywords:
   - reverie
   - composition
@@ -20,6 +20,8 @@ order: 14
 You know that moment when you're gazing at sunlight through branches, half-awake, and a scene forms in your mind? Not a plan. A feeling. "Something glowing... peaceful... like fireflies at dusk."
 
 Reverie turns that feeling into your grove.
+
+> **Currently in the [[greenhouse|Greenhouse]]** — Reverie is an experimental feature available to greenhouse members. It's functional and growing, but still finding its final shape.
 
 Instead of dragging components around a canvas or writing code, you describe what you want. An AI agent listens, searches Grove's library of nature components, and composes a scene that captures what you meant. You describe the dream. Reverie makes it real.
 
@@ -45,7 +47,7 @@ The agent uses Reverie to:
 
 If you like it, apply it. If you want changes, just say so. "More fireflies." "Less bright." "Add a moon."
 
-**Note:** Reverie is currently in planning. The features described here represent what we're building toward.
+**Note:** Reverie is currently in the greenhouse. Some features described here are still being refined.
 
 ## What this means for you
 

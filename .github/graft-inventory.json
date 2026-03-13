@@ -2,20 +2,29 @@
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
 	"version": "1.1.0",
 	"description": "Tracks feature flag (graft) inventory for documentation and drift detection",
-	"lastUpdated": "2026-03-12",
+	"lastUpdated": "2026-03-13",
 	"lastAuditedBy": "claude/inventory-audit",
 	"grafts": {
-		"total": 18,
+		"total": 20,
 		"breakdown": {
 			"platform": 11,
-			"greenhouse": 7
+			"greenhouse": 9
 		},
 		"byType": {
-			"boolean": 17,
+			"boolean": 19,
 			"number": 1
 		}
 	},
 	"flags": [
+		{
+			"id": "chirp_enabled",
+			"name": "Chirp Direct Messages",
+			"type": "boolean",
+			"greenhouseOnly": true,
+			"maturity": "experimental",
+			"migration": "102_chirp_graft.sql",
+			"description": "Private 1:1 messaging between mutual friends via Durable Objects"
+		},
 		{
 			"id": "fireside_mode",
 			"name": "Fireside Mode",
@@ -133,6 +142,15 @@
 			"maturity": "experimental",
 			"migration": "052_reeds_comments_graft.sql",
 			"description": "Enable threaded comments on blog posts with moderation, blocking, and private replies"
+		},
+		{
+			"id": "reverie_enabled",
+			"name": "Reverie Configuration",
+			"type": "boolean",
+			"greenhouseOnly": true,
+			"maturity": "experimental",
+			"migration": "103_reverie_graft.sql",
+			"description": "AI-powered natural language site configuration pipeline"
 		},
 		{
 			"id": "scribe_mode",

@@ -3,7 +3,7 @@ title: Greenhouse Features
 description: What's growing in the greenhouse — experimental and beta features you can try today
 category: help
 section: how-it-works
-lastUpdated: '2026-03-12'
+lastUpdated: '2026-03-13'
 keywords:
   - greenhouse
   - features
@@ -17,7 +17,7 @@ order: 71
 
 The greenhouse is where new features take root before they're ready for the open air. If you're a greenhouse member, these are the features you can explore right now.
 
-Currently there are **5 active features** in the greenhouse at various stages of growth.
+Currently there are **7 active features** in the greenhouse at various stages of growth.
 
 For more about how the greenhouse program works, see [[greenhouse|What is Greenhouse?]].
 
@@ -25,9 +25,11 @@ For more about how the greenhouse program works, see [[greenhouse|What is Greenh
 
 These are the newest additions—fresh from the greenhouse. They're functional but still finding their shape. Expect changes.
 
+- **Chirp Direct Messages** — Private 1:1 messaging between mutual friends via Durable Objects
 - **Fireside Mode** — AI-assisted writing prompts in the blog editor
 - **Lantern Navigation** — Cross-grove navigation panel for hopping between groves and accessing platform services
 - **Reeds Comments** — Enable threaded comments on blog posts with moderation, blocking, and private replies
+- **Reverie Configuration** — AI-powered natural language site configuration pipeline
 - **Scribe Mode** — Voice-to-text transcription in the blog editor
 - **Wisp Writing Assistant** — Master toggle for the Wisp AI writing assistant. Controls visibility of Fireside, Scribe, and analysis features in the editor.
 

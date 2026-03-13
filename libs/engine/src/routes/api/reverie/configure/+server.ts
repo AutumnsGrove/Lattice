@@ -7,6 +7,7 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { API_ERRORS, buildErrorJson, logGroveError } from "$lib/errors";
+import { isInGreenhouse, isFeatureEnabled } from "$lib/feature-flags/index.js";
 
 export const POST: RequestHandler = async ({ request, platform, locals }) => {
 	if (!locals.user) {
@@ -16,6 +17,24 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 		return json(buildErrorJson(API_ERRORS.TENANT_CONTEXT_REQUIRED), { status: 403 });
 	}
 
+	// Gate: reverie_enabled graft
+	const db = platform?.env?.DB;
+	const kv = platform?.env?.CACHE_KV;
+	if (db && kv) {
+		const flagsEnv = { DB: db, FLAGS_KV: kv };
+		const inGreenhouse = await isInGreenhouse(locals.tenantId, flagsEnv).catch(() => false);
+		const enabled =
+			inGreenhouse &&
+			(await isFeatureEnabled(
+				"reverie_enabled",
+				{ tenantId: locals.tenantId, inGreenhouse: true },
+				flagsEnv,
+			).catch(() => false));
+		if (!enabled) {
+			return json(buildErrorJson(API_ERRORS.FORBIDDEN), { status: 403 });
+		}
+	}
+
 	const reverie = platform?.env?.REVERIE;
 	if (!reverie) {
 		return json(buildErrorJson(API_ERRORS.SERVICE_UNAVAILABLE), { status: 503 });
@@ -23,7 +42,8 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
 	// Extract and validate tier — prevents header injection via forged plan values
 	const VALID_TIERS = new Set(["wanderer", "seedling", "sapling", "oak", "evergreen"]);
-	const rawTier = locals.context.type === "tenant" ? locals.context.tenant.plan || "wanderer" : "wanderer";
+	const rawTier =
+		locals.context.type === "tenant" ? locals.context.tenant.plan || "wanderer" : "wanderer";
 	const tier = VALID_TIERS.has(rawTier) ? rawTier : "wanderer";
 
 	const apiKey = platform?.env?.REVERIE_API_KEY ?? "";

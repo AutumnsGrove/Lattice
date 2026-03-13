@@ -33,9 +33,19 @@
 			badge: data.pendingCommentCount ?? 0,
 			visible: !!data.grafts?.reeds_comments,
 		},
-		{ href: "/arbor/chat", label: "Messages", icon: MessageCircle },
+		{
+			href: "/arbor/chat",
+			label: "Messages",
+			icon: MessageCircle,
+			visible: !!data.grafts?.chirp_enabled,
+		},
 		{ href: "/arbor/curios", label: "Curios", icon: curioIcon, termSlug: "curio" },
-		{ href: "/arbor/reverie", label: "Reverie", icon: reverieIcon },
+		{
+			href: "/arbor/reverie",
+			label: "Reverie",
+			icon: reverieIcon,
+			visible: !!data.grafts?.reverie_enabled,
+		},
 		{ href: "/arbor/account", label: "Account", icon: CreditCard },
 		{ href: "/arbor/settings", label: "Settings", icon: Settings },
 	]);

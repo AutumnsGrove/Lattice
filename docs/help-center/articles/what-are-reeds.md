@@ -3,7 +3,7 @@ title: What are Reeds?
 description: Grove's comment system with private replies and public conversations
 category: help
 section: how-it-works
-lastUpdated: '2026-01-28'
+lastUpdated: '2026-03-13'
 keywords:
   - reeds
   - comments
@@ -18,6 +18,8 @@ order: 51
 Every blog post invites a response. [[reeds|Reeds]] is how those responses happen.
 
 [[reeds|Reeds]] is [[your-grove|Grove]]'s comment system—but not quite like the ones you've seen before. It offers two modes: private replies that only you see, and public comments that you moderate. Thoughtful engagement without the performance anxiety.
+
+> **Currently in the [[greenhouse|Greenhouse]]** — Reeds are an experimental feature available to greenhouse members. It's functional and growing, but still finding its final shape.
 
 ## Why [[reeds|Reeds]] exists
 
@@ -46,8 +48,6 @@ Use cases:
 - Sharing related experiences
 
 Both types support threaded replies, so conversations can develop naturally.
-
-**Note:** [[reeds|Reeds]] is currently planned and will launch alongside the comments feature.
 
 ## What this means for you
 

@@ -3,7 +3,7 @@ title: What are Chirps?
 description: Private 1:1 messaging between friends on Grove
 category: help
 section: community-social
-lastUpdated: "2026-03-11"
+lastUpdated: "2026-03-13"
 keywords:
   - chirps
   - chirp
@@ -21,6 +21,8 @@ order: 7
 Two robins on a branch. One turns to the other and calls out. The other calls back. That's a chirp.
 
 [[chirp|Chirps]] are Grove's private 1:1 messages. Quick, real-time conversations between you and one other [[wanderer|Wanderer]]. Not a group chat. Not a public feed. Just two people, talking.
+
+> **Currently in the [[greenhouse|Greenhouse]]** — Chirps are an experimental feature available to greenhouse members. They're functional and growing, but still finding their final shape.
 
 ## Why Chirps exist
 

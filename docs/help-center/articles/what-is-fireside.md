@@ -3,7 +3,7 @@ title: What is Fireside?
 description: How Grove turns conversation into writing for those who freeze at the blank page
 category: help
 section: how-it-works
-lastUpdated: '2026-01-30'
+lastUpdated: '2026-03-13'
 keywords:
   - fireside
   - wisp
@@ -21,6 +21,8 @@ order: 42
 Some people have no trouble talking. In group chats, over coffee, explaining something to a friend. The ideas flow. The voice is there. But sit them in front of a blank page and everything locks up. "What do I write? Where do I start?"
 
 Fireside is for those moments.
+
+> **Currently in the [[greenhouse|Greenhouse]]** — Fireside is an experimental feature available to greenhouse members. It's functional and growing, but still finding its final shape.
 
 ## The short version
 

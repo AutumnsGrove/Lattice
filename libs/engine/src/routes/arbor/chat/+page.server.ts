@@ -1,10 +1,17 @@
 import { redirect } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import type { ChatConversationWithMeta } from "$lib/server/services/chat.types.js";
+import { ARBOR_ERRORS, throwGroveError } from "$lib/errors";
 
-export const load: PageServerLoad = async ({ locals, url, fetch }) => {
+export const load: PageServerLoad = async ({ locals, url, fetch, parent }) => {
 	if (!locals.user) {
 		redirect(302, `/auth/login?redirect=${encodeURIComponent(url.pathname)}`);
+	}
+
+	// Gate: chirp_enabled graft (cascaded from arbor layout)
+	const parentData = await parent();
+	if (!parentData.grafts?.chirp_enabled) {
+		throwGroveError(404, ARBOR_ERRORS.GREENHOUSE_REQUIRED, "Arbor");
 	}
 
 	// Fetch conversations and friend profiles in parallel.
