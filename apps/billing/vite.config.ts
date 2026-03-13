@@ -3,6 +3,14 @@ import { defineConfig } from "vite";
 
 export default defineConfig({
 	plugins: [sveltekit()],
+	optimizeDeps: {
+		exclude: ["@jsquash/jxl", "gray-matter"],
+	},
+	build: {
+		rollupOptions: {
+			external: ["@jsquash/jxl", "gray-matter"],
+		},
+	},
 	ssr: {
 		// @lucide/svelte ships .svelte files that Node's ESM loader can't handle.
 		// Tell Vite to process them through its own pipeline during SSR.
