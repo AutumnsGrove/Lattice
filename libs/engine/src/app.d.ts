@@ -127,11 +127,6 @@ declare global {
 				GROVEAUTH_CLIENT_ID?: string;
 				GROVEAUTH_CLIENT_SECRET?: string;
 
-				// Stripe (optional, for shop features)
-				STRIPE_SECRET_KEY?: string;
-				STRIPE_PUBLISHABLE_KEY?: string;
-				STRIPE_WEBHOOK_SECRET?: string;
-
 				// Cloudflare Turnstile (bot protection)
 				TURNSTILE_SECRET_KEY?: string;
 				TURNSTILE_SITE_KEY?: string;

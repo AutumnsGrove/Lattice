@@ -39,10 +39,6 @@ declare global {
 				GROVEAUTH_CLIENT_ID: string;
 				GROVEAUTH_CLIENT_SECRET: string;
 
-				// Stripe payment processing
-				STRIPE_SECRET_KEY?: string;
-				STRIPE_WEBHOOK_SECRET?: string;
-
 				/** @deprecated Use ZEPHYR_API_KEY instead */
 				RESEND_API_KEY?: string;
 				/** Zephyr email gateway API key */

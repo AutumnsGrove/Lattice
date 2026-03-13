@@ -39,7 +39,7 @@ BillingHub is the single point of contact for all payment operations across Grov
 **Internal Name:** GroveBilling
 **Domain:** `billing.grove.place`
 **Service Binding:** `BILLING`
-**Last Updated:** March 2026
+**Last Updated:** March 13, 2026
 
 In an aspen grove, water and nutrients flow through a shared root system. Every trunk, no matter how far from the center, drinks from the same underground network. BillingHub is that root system for payments. Today, Stripe calls scatter across Plant, Engine, Arbor, and the upgrades graft. Four places to debug, four places for things to break. BillingHub consolidates everything into a single root, so every payment flows through one path.
 
@@ -581,9 +581,20 @@ return json(mapToGrowthStatus(status));
 
 ```toml
 name = "grove-billing"
-main = ".svelte-kit/cloudflare/server/index.js"
 compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
+
+# Worker entry point (SvelteKit adapter-cloudflare output)
+main = ".svelte-kit/cloudflare/_worker.js"
+
+# Static assets served alongside the Worker
+[assets]
+directory = ".svelte-kit/cloudflare"
+binding = "ASSETS"
+
+# Smart Placement — run closer to back-end services (billing-api) for lower latency
+[placement]
+mode = "smart"
 
 # Billing API Service Binding (internal, all Stripe logic lives here)
 [[services]]
@@ -595,12 +606,7 @@ service = "grove-billing-api"
 binding = "AUTH"
 service = "groveauth"
 
-# Custom domain
-[[routes]]
-pattern = "billing.grove.place"
-custom_domain = true
-
-# Secrets (configured via wrangler secret put):
+# Secrets (deploy via `gw secret apply --write --worker grove-billing`):
 # - STRIPE_WEBHOOK_SECRET (webhook signature verification, belt-and-suspenders with billing-api)
 # D1: none (least privilege)
 ```
@@ -626,7 +632,7 @@ database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
 # KV for rate limiting
 [[kv_namespaces]]
 binding = "CACHE_KV"
-id = "existing-cache-kv-id"
+id = "78c2d912764641cc8696cce7e15f23b1"
 
 # Zephyr email gateway
 [[services]]
@@ -641,7 +647,7 @@ mode = "smart"
 [triggers]
 crons = ["0 2 * * *"]
 
-# Secrets (set via wrangler secret put):
+# Secrets (deploy via `gw secret apply --write --worker grove-billing-api`):
 # - STRIPE_SECRET_KEY
 # - STRIPE_WEBHOOK_SECRET
 ```
@@ -649,8 +655,16 @@ crons = ["0 2 * * *"]
 ### Grove Router Addition
 
 ```typescript
-// services/grove-router/src/index.ts — add to SUBDOMAIN_ROUTES
-billing: "grove-billing.workers.dev",  // or use service binding when available
+// services/grove-router/src/index.ts — SUBDOMAIN_ROUTES entry
+// Uses service binding for direct internal routing (no DNS/TLS overhead)
+billing: { origin: "grove-billing.m7jv4v7npb.workers.dev", binding: "BILLING" },
+```
+
+```toml
+# services/grove-router/wrangler.toml — service binding
+[[services]]
+binding = "BILLING"
+service = "grove-billing"
 ```
 
 ---
@@ -718,7 +732,7 @@ Build the two workers from scratch. No existing code needs to change yet.
 - [x] Create `libs/engine/src/lib/config/billing.ts` with `buildCheckoutUrl()` and `buildPortalUrl()`
 - [x] Add `billing` entry to grove-router `SUBDOMAIN_ROUTES`
 - [x] Deploy both workers to Cloudflare
-- [ ] Configure Stripe webhook endpoint to `billing.grove.place/api/webhooks/stripe`
+- [x] Configure Stripe webhook endpoint to `billing.grove.place/api/webhooks/stripe`
 - [x] Write tests for all billing-api endpoints
 
 ### Phase 2: Redirect Everything (Swap Over) ✅
@@ -736,18 +750,22 @@ Point all existing payment touchpoints to BillingHub.
 - [x] Remove `/api/shop/webhooks` endpoint from engine
 - [x] Remove Plant's `src/lib/server/stripe.ts` and `/api/webhooks/stripe/` route
 - [x] Remove Plant's payment health check endpoint
-- [ ] Update Stripe Dashboard: single webhook endpoint at `billing.grove.place`
+- [x] Update Stripe Dashboard: single webhook endpoint at `billing.grove.place`
 - [ ] Verify all flows end-to-end: new signup, upgrade, portal, cancel, resume, webhook processing
 
-### Phase 3: Cleanup and Verification
+### Phase 3: Cleanup and Verification ✅
 
 - [x] Remove stale Stripe environment variables from Plant and Engine
 - [x] Delete `libs/engine/src/lib/payments/` (moved to billing-api)
 - [x] Remove Plant's email templates for payment receipt/failure (moved to billing-api)
+- [x] Delete orphaned test files (payments/*.test.ts, plant/stripe.test.ts, scripts/test-stripe.ts)
+- [x] Remove STRIPE_* type declarations from Plant and Engine app.d.ts
+- [x] Remove dead Stripe error codes from Plant errors.ts (PLANT-003, 005-009, 060-062)
+- [x] Update existing specs that reference the old payment endpoints
 - [ ] Close #1357 (payment management non-functional)
 - [ ] Close #1177 (Amber Stripe integration, if applicable)
-- [x] Update existing specs that reference the old payment endpoints
 - [ ] Security audit (Hawk report) on the new billing hub
+- [ ] Verify all flows end-to-end: new signup, upgrade, portal, cancel, resume, webhook processing
 - [ ] Begin E2E payment test suite (#935)
 
 ---
