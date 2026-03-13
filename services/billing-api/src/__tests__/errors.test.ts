@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { billingError, BILLING_ERRORS, type BillingErrorKey } from "../errors.js";
+import { billingError, BILLING_ERRORS } from "../errors.js";
 
 describe("BILLING_ERRORS catalog", () => {
 	it("all error codes follow the BILLING-NNN format", () => {

@@ -40,6 +40,11 @@ checkout.post("/", async (c) => {
 
 	const { tenantId, onboardingId, tier, billingCycle, customerEmail, successUrl, cancelUrl } = body;
 
+	// Validate email format if provided (defense-in-depth — Stripe also validates)
+	if (customerEmail && !/^.+@.+\..+$/.test(customerEmail)) {
+		return billingError(BILLING_ERRORS.INVALID_TIER, "Invalid email format");
+	}
+
 	// Validate: one of tenantId or onboardingId required
 	if (!tenantId && !onboardingId) {
 		return billingError(BILLING_ERRORS.INVALID_TIER, "tenantId or onboardingId required");

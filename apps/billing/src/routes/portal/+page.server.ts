@@ -66,5 +66,15 @@ export const load: PageServerLoad = async ({ url, locals, platform, cookies }) =
 		});
 	}
 
+	// Defense-in-depth: validate portal URL points to Stripe before redirecting.
+	// Prevents open redirect if billing-api were ever compromised.
+	if (!data.portalUrl.startsWith("https://billing.stripe.com/")) {
+		console.error("[billing] Portal URL not on stripe.com:", data.portalUrl);
+		error(502, {
+			message: "Could not open the billing portal. Please try again.",
+			code: "BILLING-041",
+		});
+	}
+
 	redirect(302, data.portalUrl);
 };

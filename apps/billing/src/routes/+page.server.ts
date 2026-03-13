@@ -19,7 +19,7 @@ import { isGreenhouseMode } from "$lib/greenhouse";
 export const load: PageServerLoad = async ({ url, locals, platform, cookies }) => {
 	const action = url.searchParams.get("action");
 	const redirectUrl = url.searchParams.get("redirect");
-	const tenant = url.searchParams.get("tenant") || locals.tenantId;
+	const tenant = locals.tenantId || url.searchParams.get("tenant");
 	const tier = url.searchParams.get("tier");
 	const cycle = url.searchParams.get("cycle");
 	const onboarding = url.searchParams.get("onboarding");
@@ -94,6 +94,15 @@ export const load: PageServerLoad = async ({ url, locals, platform, cookies }) =
 			error(502, {
 				message: "Could not start checkout. Please try again.",
 				code: "BILLING-022",
+			});
+		}
+
+		// Defense-in-depth: validate checkout URL points to Stripe
+		if (!data.checkoutUrl.startsWith("https://checkout.stripe.com/")) {
+			console.error("[billing] Checkout URL not on stripe.com:", data.checkoutUrl);
+			error(502, {
+				message: "Could not start checkout. Please try again.",
+				code: "BILLING-023",
 			});
 		}
 

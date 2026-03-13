@@ -18,7 +18,7 @@ export function isGreenhouseMode(cookies: Cookies, platform?: App.Platform): boo
 
 	// Only allow in dev or when explicitly enabled in environment
 	if (import.meta.env.DEV) return true;
-	if (platform?.env && "GREENHOUSE_ENABLED" in platform.env) return true;
+	if (platform?.env && platform.env.GREENHOUSE_ENABLED === "true") return true;
 
 	return false;
 }
@@ -33,7 +33,12 @@ export function isGreenhouseCancelled(cookies: Cookies): boolean {
 
 /** Mark the greenhouse subscription as cancelled. */
 export function setGreenhouseCancelled(cookies: Cookies): void {
-	cookies.set("grove_greenhouse_billing", "cancelled", { path: "/" });
+	cookies.set("grove_greenhouse_billing", "cancelled", {
+		path: "/",
+		secure: true,
+		httpOnly: true,
+		sameSite: "lax",
+	});
 }
 
 /** Clear the greenhouse cancellation (resume). */

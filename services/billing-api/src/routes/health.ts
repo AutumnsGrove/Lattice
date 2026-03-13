@@ -46,12 +46,17 @@ health.get("/", async (c) => {
 
 	const allHealthy = Object.values(checks).every((c) => c.ok);
 
+	// Strip latency details from response — only expose ok/error status.
+	// Internal monitoring uses logs; response avoids leaking timing info.
+	const safeChecks: Record<string, { ok: boolean; error?: string }> = {};
+	for (const [name, check] of Object.entries(checks)) {
+		safeChecks[name] = { ok: check.ok, ...(check.error && { error: check.error }) };
+	}
+
 	return c.json(
 		{
 			status: allHealthy ? "healthy" : "degraded",
-			service: "grove-billing-api",
-			checks,
-			timestamp: new Date().toISOString(),
+			checks: safeChecks,
 		},
 		allHealthy ? 200 : 503,
 	);

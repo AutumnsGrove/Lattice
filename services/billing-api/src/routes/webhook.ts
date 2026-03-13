@@ -22,7 +22,7 @@ import type {
 	StripeSubscription,
 	StripeInvoice,
 } from "../stripe/types.js";
-import { rateLimitMiddleware, extractClientIP } from "../middleware/rateLimit.js";
+import { checkRateLimit, RATE_LIMITS, extractClientIP } from "../middleware/rateLimit.js";
 import { sanitizeStripeWebhookPayload, calculateWebhookExpiry } from "../utils/sanitizer.js";
 import { mapSubscriptionStatus } from "../utils/validation.js";
 import { createTenant, getTenantForOnboarding } from "../services/tenant.js";
@@ -30,8 +30,10 @@ import { sendPaymentReceivedEmail, sendPaymentFailedEmail } from "../services/em
 
 const webhook = new Hono<{ Bindings: Env }>();
 
-// Rate limit: 1000 requests per hour (keyed by IP)
-webhook.use("*", rateLimitMiddleware("webhook", extractClientIP));
+// Rate limiting is applied AFTER signature verification (see below).
+// Invalid signatures are rejected cheaply by HMAC (~0.1ms), so we don't
+// want attacker traffic with forged signatures consuming the rate limit
+// budget that legitimate Stripe webhooks need.
 
 webhook.post("/", async (c) => {
 	const db = c.env.DB;
@@ -50,13 +52,23 @@ webhook.post("/", async (c) => {
 		return c.json({ error: "Missing signature" }, 400);
 	}
 
-	// Verify signature
+	// Verify signature FIRST — cheap HMAC check rejects forged requests
 	const stripe = new StripeClient(c.env.STRIPE_SECRET_KEY);
 	const verification = await stripe.verifyWebhookSignature(payload, signature, webhookSecret);
 
 	if (!verification.valid || !verification.event) {
 		console.error("[Webhook] Signature verification failed:", verification.error);
 		return c.json({ error: verification.error || "Invalid signature" }, 401);
+	}
+
+	// Rate limit AFTER verification — only verified Stripe events count
+	const kv = c.env.CACHE_KV;
+	if (kv) {
+		const ip = extractClientIP(c);
+		const rlResult = await checkRateLimit(kv, ip, RATE_LIMITS.webhook);
+		if (!rlResult.allowed) {
+			return billingError(BILLING_ERRORS.RATE_LIMITED);
+		}
 	}
 
 	const event = verification.event as StripeEvent;
@@ -152,7 +164,12 @@ webhook.post("/", async (c) => {
 
 		// Truncate to 200 chars — Stripe errors can embed customer emails, card
 		// details, or request IDs that we don't want persisted in our DB.
-		const safeError = error instanceof Error ? error.message.slice(0, 200) : "Processing error";
+		// Strip potential PII (emails, customer IDs) from error messages before D1 storage.
+		// Stripe errors can embed "No such customer: cus_xxx for email foo@bar.com".
+		const safeError =
+			error instanceof Error
+				? error.message.replace(/\S+@\S+\.\S+/g, "[email]").slice(0, 200)
+				: "Processing error";
 		await db
 			.prepare("UPDATE webhook_events SET error = ?, retry_count = retry_count + 1 WHERE id = ?")
 			.bind(safeError, webhookEventId)

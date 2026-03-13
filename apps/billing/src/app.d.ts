@@ -31,6 +31,8 @@ declare global {
 				AUTH: Fetcher;
 				/** Stripe webhook signing secret (belt-and-suspenders verification) */
 				STRIPE_WEBHOOK_SECRET: string;
+				/** Optional: enables greenhouse mode in non-dev environments (must be "true") */
+				GREENHOUSE_ENABLED?: string;
 			};
 			context?: {
 				waitUntil(promise: Promise<unknown>): void;

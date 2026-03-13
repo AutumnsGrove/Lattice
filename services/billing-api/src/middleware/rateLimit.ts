@@ -45,8 +45,13 @@ interface RateLimitResult {
 /**
  * Check rate limit against KV.
  * Fails open (allows request) if KV is unavailable.
+ *
+ * Note: KV GET+PUT is non-atomic (TOCTOU). Under concurrent requests,
+ * two requests can both read count=9 (limit=10) and both pass. This is
+ * an inherent KV limitation — for atomic counting, use Durable Objects.
+ * Accepted as a known limitation given BillingHub's low traffic volume.
  */
-async function checkRateLimit(
+export async function checkRateLimit(
 	kv: KVNamespace,
 	key: string,
 	config: RateLimitConfig,

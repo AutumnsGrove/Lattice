@@ -764,7 +764,7 @@ Point all existing payment touchpoints to BillingHub.
 - [x] Update existing specs that reference the old payment endpoints
 - [ ] Close #1357 (payment management non-functional)
 - [ ] Close #1177 (Amber Stripe integration, if applicable)
-- [ ] Security audit (Hawk report) on the new billing hub
+- [x] Security audit (Hawk report) on the new billing hub — `docs/security/hawk-report-2026-03-13-billing-hub.md`, all 12 findings remediated
 - [ ] Verify all flows end-to-end: new signup, upgrade, portal, cancel, resume, webhook processing
 - [ ] Begin E2E payment test suite (#935)
 
@@ -895,7 +895,7 @@ Found and fixed during review:
 
 ### Performance Optimizations
 
-- Batched D1 inserts for `site_settings` during tenant creation (4 round-trips collapsed to 1).
+- Atomic tenant creation via `db.batch()` — all 10 statements (tenant, billing, settings, onboarding link, home page, about page) in a single transaction (6 round-trips collapsed to 1).
 - Upsert pattern in webhook upgrade path (2 round-trips collapsed to 1).
 - Merged DB queries in cancel/resume routes (2 collapsed to 1 each).
 - Parallel UPDATE + SELECT in `invoice.paid` and `invoice.payment_failed` handlers.

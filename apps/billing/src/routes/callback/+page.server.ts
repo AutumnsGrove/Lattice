@@ -16,8 +16,15 @@ import { isGreenhouseMode } from "$lib/greenhouse";
  *   (no params)         — returning from billing portal
  */
 export const load: PageServerLoad = async ({ url, cookies, platform }) => {
-	const sessionId = url.searchParams.get("session_id");
+	const rawSessionId = url.searchParams.get("session_id");
 	const cancelled = url.searchParams.get("cancelled");
+
+	// Validate session_id matches Stripe's format (cs_test_ or cs_live_ prefix, alphanumeric)
+	const STRIPE_SESSION_RE = /^cs_(test|live)_[a-zA-Z0-9]{10,200}$/;
+	const sessionId =
+		rawSessionId && (STRIPE_SESSION_RE.test(rawSessionId) || rawSessionId.startsWith("greenhouse_"))
+			? rawSessionId
+			: null;
 
 	// Greenhouse mode: redirect back to billing hub home, not to an external app
 	if (isGreenhouseMode(cookies, platform)) {
