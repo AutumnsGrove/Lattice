@@ -48,4 +48,6 @@ service = "grove-lumen"
 # =============================================================================
 # Secrets (configured via wrangler secret put)
 # =============================================================================
+# LUMEN_API_KEY        - API key for authenticating with the Lumen worker (REQUIRED)
+#                        Set via: gw secret apply LUMEN_API_KEY --worker grove-timeline-sync
 # OPENROUTER_API_KEY   - Optional fallback if tenant key fails

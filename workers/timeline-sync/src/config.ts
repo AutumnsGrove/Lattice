@@ -17,6 +17,8 @@ export interface Env {
 	GROVE_KEK: string;
 	/** Service binding to the Lumen AI Gateway worker */
 	LUMEN: { fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response> };
+	/** API key for authenticating with the Lumen worker */
+	LUMEN_API_KEY: string;
 	/** Optional fallback OpenRouter key if tenant key fails */
 	OPENROUTER_API_KEY?: string;
 }

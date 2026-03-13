@@ -186,7 +186,8 @@ export async function processTenantTimeline(
 		// 6. Call Lumen (via service binding — full pipeline: PII scrub, quota, fallback)
 		console.log(`${logPrefix} Calling Lumen (${config.openrouterModel})...`);
 		const lumen = new RemoteLumenClient({
-			baseUrl: "https://lumen.grove.place",
+			baseUrl: "https://grove-lumen",
+			apiKey: env.LUMEN_API_KEY,
 			fetcher: env.LUMEN,
 		});
 
