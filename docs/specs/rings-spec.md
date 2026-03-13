@@ -4,7 +4,7 @@ description: Privacy-respecting analytics system for Grove platform
 category: specs
 specCategory: platform-services
 icon: barchart
-lastUpdated: '2025-12-01'
+lastUpdated: '2026-03-11'
 aliases: []
 tags:
   - analytics
@@ -39,7 +39,7 @@ Grove's private analytics system designed for writers, not marketers. Provides m
 **Public Name:** Rings
 **Internal Name:** GroveRings
 **Phase:** Phase 5 Enhancement
-**Last Updated:** December 2025
+**Last Updated:** March 2026
 
 Count the rings of a tree and you learn its story. Each ring records a season: growth in plenty, resilience through hardship, the quiet accumulation of years. Rings are internal. Private. You only see them when you look closely at your own tree.
 
@@ -289,7 +289,7 @@ Percentage of readers who scrolled to the bottom of the post. Contextualized int
 ### Return Readers
 Logged-in readers who came back to read another post on your blog within 30 days. This is the loyalty metric—building real audience vs viral spikes.
 
-**Logged-in users only.** Anonymous visitors can't be reliably tracked (IP addresses change, VPNs, etc.). Since Grove has a free tier, there's always an incentive to log in. This keeps the metric honest—you're seeing real returning people, not fuzzy estimates.
+**Logged-in users only.** Anonymous visitors can't be reliably tracked (IP addresses change, VPNs, etc.). Since Grove has a free Wanderer tier, there's always an incentive to log in. This keeps the metric honest—you're seeing real returning people, not fuzzy estimates.
 
 ### First Impressions
 Posts that were someone's first encounter with your blog. High numbers here indicate good entry points—posts that are bringing in new readers.
@@ -385,7 +385,7 @@ All stats across all tiers are delayed by 24 hours. This is not a limitation—i
 A visual representation of your publishing history:
 
 ```
-December 2025
+March 2026
 ┌───┬───┬───┬───┬───┬───┬───┐
 │ S │ M │ T │ W │ T │ F │ S │
 ├───┼───┼───┼───┼───┼───┼───┤
@@ -539,7 +539,7 @@ As platform owner, you have access to aggregate data for platform health and bus
 
 | Metric | Description |
 |--------|-------------|
-| Total Users | Count by tier (Free, Seedling, Sapling, Oak, Evergreen) |
+| Total Users | Count by tier (Wanderer, Seedling, Sapling, Oak, Evergreen) |
 | Total Posts | All published posts across platform |
 | Posts (24hr) | Published in last 24 hours |
 | Active Blogs | Posted at least once in last 30 days |
@@ -874,7 +874,7 @@ CREATE TABLE platform_metrics (
 
   -- Users
   total_users INTEGER DEFAULT 0,
-  users_by_tier TEXT,              -- JSON: {"free": 100, "seedling": 50, ...}
+  users_by_tier TEXT,              -- JSON: {"wanderer": 100, "seedling": 50, ...}
   new_signups INTEGER DEFAULT 0,
 
   -- Content
@@ -1421,7 +1421,7 @@ Daily cron job removes:
 - Prevents accidental data loss from billing issues
 - Re-upgrading within grace period restores full access
 
-**Cancellation (any tier → Free):**
+**Cancellation (any tier → Wanderer):**
 - Same 30-day grace period
 - After grace: all analytics data deleted
 - Reader history cleared (user hashes can't be re-linked anyway)
@@ -1553,7 +1553,7 @@ const MAX_EXPORT_SIZE_BYTES = 50 * 1024 * 1024;
 ### D1 Database Limits
 
 Cloudflare D1 has row limits:
-- **Free tier:** 100,000 rows per database
+- **Wanderer tier:** 100,000 rows per database
 - **Paid tier:** 25,000,000 rows per database
 
 **Estimated Row Counts (per blog, per year):**
@@ -1759,4 +1759,4 @@ function isDeepRead(timeOnPage: number, estimatedTime: number): boolean {
 
 ---
 
-*Last Updated: December 2025*
+*Last Updated: March 2026*

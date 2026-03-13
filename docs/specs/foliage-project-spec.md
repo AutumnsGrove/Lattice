@@ -4,7 +4,7 @@ description: Customizable themes and visual customization options
 category: specs
 specCategory: platform-services
 icon: swatchbook
-lastUpdated: "2025-12-01"
+lastUpdated: "2026-03-11"
 aliases: []
 tags:
   - themes
@@ -34,14 +34,15 @@ tags:
 
 Grove's theme system enabling visual customization from accent colors to full theme customizers. Extracted from Lattice to be independently testable and reusable, with progressive enhancement unlocking more features at higher tiers.
 
-## Overview Section
+## Overview
 
 **Internal Name:** GroveThemes
 **Public Name:** Foliage
-**Repository:** `AutumnsGrove/Foliage`
+**Location:** `libs/foliage/` (Lattice monorepo)
 **Package:** `@autumnsgrove/foliage`
+**Dependency:** `@autumnsgrove/prism` (design tokens, glass, contrast)
 
-Foliage is Grove's theme system enabling visual customization from accent colors to full theme customizers. The project is extracted from Lattice to be independently testable, reusable across Grove properties, and maintainable as a focused codebase.
+Foliage is Grove's theme system enabling visual customization from accent colors to full theme customizers. Lives in the Lattice monorepo as a workspace library, independently testable and reusable across Grove properties. Built on top of Prism for design tokens, glassmorphism, seasonal palettes, and WCAG contrast utilities.
 
 ## Design Philosophy
 
@@ -54,7 +55,7 @@ Foliage is Grove's theme system enabling visual customization from accent colors
 
 | Tier          | Themes | Accent Color | Customizer | Community | Custom Fonts |
 | ------------- | ------ | ------------ | ---------- | --------- | ------------ |
-| **Free**      | —      | —            | —          | —         | —            |
+| **Wanderer**  | —      | —            | —          | —         | —            |
 | **Seedling**  | 3      | Custom       | —          | —         | —            |
 | **Sapling**   | 10     | Custom       | —          | —         | —            |
 | **Oak**       | 10     | Custom       | Full       | Import    | —            |
@@ -116,61 +117,83 @@ Users share customizations with the community supporting:
 ## Project Structure
 
 ```
-foliage/
+libs/foliage/
 ├── src/
 │ ├── lib/
 │ │ ├── themes/
-│ │ │ ├── index.ts # Theme exports
-│ │ │ ├── grove.ts # Grove theme definition
-│ │ │ ├── minimal.ts
-│ │ │ ├── night-garden.ts
-│ │ │ ├── zine.ts
-│ │ │ ├── moodboard.ts
-│ │ │ ├── typewriter.ts
-│ │ │ ├── solarpunk.ts
-│ │ │ ├── cozy-cabin.ts
-│ │ │ ├── ocean.ts
-│ │ │ └── wildflower.ts
+│ │ │ ├── index.ts          # Theme exports
+│ │ │ ├── registry.ts       # Theme registry + tier filtering
+│ │ │ ├── grove.ts           # Default theme (seedling)
+│ │ │ ├── minimal.ts         # (seedling)
+│ │ │ ├── night-garden.ts    # (seedling)
+│ │ │ ├── zine.ts            # (sapling)
+│ │ │ ├── moodboard.ts       # (sapling)
+│ │ │ ├── typewriter.ts      # (sapling)
+│ │ │ ├── solarpunk.ts       # (sapling)
+│ │ │ ├── cozy-cabin.ts      # (sapling)
+│ │ │ ├── ocean.ts           # (sapling)
+│ │ │ └── wildflower.ts      # (sapling)
 │ │ ├── components/
+│ │ │ ├── index.ts           # Component exports
 │ │ │ ├── ThemeSelector.svelte
 │ │ │ ├── ThemePreview.svelte
 │ │ │ ├── AccentColorPicker.svelte
-│ │ │ ├── ThemeCustomizer.svelte
+│ │ │ ├── ThemeCustomizer.svelte    # 4-tab panel (Colors/Typography/Layout/CSS)
 │ │ │ ├── ColorPanel.svelte
 │ │ │ ├── TypographyPanel.svelte
 │ │ │ ├── LayoutPanel.svelte
 │ │ │ ├── CustomCSSEditor.svelte
-│ │ │ └── FontUploader.svelte
+│ │ │ ├── FontUploader.svelte       # Drag-drop WOFF2 upload (Evergreen)
+│ │ │ ├── ThemeRating.svelte        # 5-star rating (Oak+)
+│ │ │ ├── CommunityThemeBrowser.svelte  # Browse/search/filter (Oak+)
+│ │ │ ├── CommunityThemeSubmit.svelte   # Submit to community (Oak+)
+│ │ │ └── ModerationQueue.svelte    # Admin review queue
 │ │ ├── server/
-│ │ │ ├── theme-loader.ts # Load theme from D1
-│ │ │ ├── theme-saver.ts # Save theme settings
-│ │ │ ├── font-validator.ts # WOFF2 validation
-│ │ │ └── css-validator.ts # Custom CSS sanitization
+│ │ │ ├── index.ts           # Server exports
+│ │ │ ├── theme-loader.ts    # Load theme from D1
+│ │ │ ├── theme-saver.ts     # Save/delete theme settings
+│ │ │ ├── font-validator.ts  # WOFF2 magic byte validation
+│ │ │ ├── css-validator.ts   # Custom CSS sanitization
+│ │ │ ├── font-uploader.ts   # R2 font storage
+│ │ │ └── community-themes.ts # Community CRUD, ratings, moderation
+│ │ ├── stores/
+│ │ │ ├── index.ts           # Store exports
+│ │ │ └── theme.ts           # Light/dark/system preference store
+│ │ ├── tokens/
+│ │ │ ├── index.ts           # Prism color token re-exports
+│ │ │ ├── colors.ts          # grove, bark, cream, semantic palettes
+│ │ │ └── seasons.ts         # Seasonal palette mappings
 │ │ ├── utils/
-│ │ │ ├── contrast.ts # WCAG contrast checking
-│ │ │ ├── css-vars.ts # CSS variable generation
-│ │ │ └── tier-access.ts # Feature gating by tier
-│ │ └── types.ts # Theme interfaces
-│ └── index.ts # Package entry point
-├── migrations/
-│ ├── 001_theme_settings.sql
-│ ├── 002_custom_fonts.sql
-│ └── 003_community_themes.sql
+│ │ │ ├── index.ts           # Utils exports
+│ │ │ ├── contrast.ts        # WCAG contrast (re-exports from Prism)
+│ │ │ ├── css-vars.ts        # CSS variable generation
+│ │ │ ├── glass.ts           # Glassmorphism (re-exports from Prism)
+│ │ │ └── tier-access.ts     # Feature gating by tier
+│ │ └── types.ts             # Theme + community type definitions
+│ └── index.ts               # Package entry point
 ├── tests/
 │ ├── themes.test.ts
-│ ├── customizer.test.ts
 │ ├── contrast.test.ts
-│ └── css-validator.test.ts
+│ ├── css-validator.test.ts
+│ ├── css-vars.test.ts
+│ ├── font-validator.test.ts
+│ ├── font-uploader.test.ts
+│ ├── tier-access.test.ts
+│ ├── community-themes.test.ts
+│ ├── theme-switching.test.ts
+│ ├── customizer.test.ts
+│ ├── seasonal-palettes.test.ts
+│ └── prism-contrast.test.ts
 ├── package.json
 ├── tsconfig.json
-├── vite.config.ts
-└── README.md
+└── vite.config.ts
 ```
 
 ## TypeScript Interfaces
 
 ```typescript
 // src/lib/types.ts
+// Types marked with (Prism) are re-exported from @autumnsgrove/prism
 
 export interface Theme {
   id: string;
@@ -179,12 +202,15 @@ export interface Theme {
   thumbnail: string;
   tier: "seedling" | "sapling";
 
-  colors: ThemeColors;
+  colors: ThemeColors;          // (Prism)
   fonts: ThemeFonts;
   layout: ThemeLayout;
   customCSS?: string;
+  glass?: ThemeGlass;           // (Prism) Glassmorphism variants
+  seasonalAffinity?: SeasonalAffinity; // (Prism) Which season(s) this theme pairs with
 }
 
+// ThemeColors — imported from @autumnsgrove/prism
 export interface ThemeColors {
   background: string;
   surface: string;
@@ -220,6 +246,7 @@ export interface ThemeSettings {
   customColors?: Partial<ThemeColors>;
   customTypography?: Partial<ThemeFonts>;
   customLayout?: Partial<ThemeLayout>;
+  customGlass?: Partial<ThemeGlass>;
   customCSS?: string;
   communityThemeId?: string;
 }
@@ -235,7 +262,38 @@ export interface CustomFont {
   fileSize: number;
 }
 
-export type UserTier = "free" | "seedling" | "sapling" | "oak" | "evergreen";
+export interface CommunityTheme {
+  id: string;
+  creatorTenantId: string;
+  name: string;
+  description?: string;
+  tags?: string[];
+  baseTheme: string;
+  customColors?: Partial<ThemeColors>;
+  customTypography?: Partial<ThemeFonts>;
+  customLayout?: Partial<ThemeLayout>;
+  customCSS?: string;
+  thumbnailPath?: string;
+  downloads: number;
+  ratingSum: number;
+  ratingCount: number;
+  status: CommunityThemeStatus;
+  reviewedAt?: number;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export type CommunityThemeStatus =
+  | "draft"
+  | "pending"
+  | "in_review"
+  | "approved"
+  | "featured"
+  | "changes_requested"
+  | "rejected"
+  | "removed";
+
+export type UserTier = "wanderer" | "seedling" | "sapling" | "oak" | "evergreen";
 ```
 
 ## Database Schema
@@ -309,16 +367,45 @@ CREATE INDEX idx_community_themes_status ON community_themes(status);
 CREATE INDEX idx_community_themes_creator ON community_themes(creator_tenant_id);
 ```
 
-## Integration with Lattice
+## Prism Integration
 
-### 1. Package Export
+Foliage is built on top of `@autumnsgrove/prism`, Grove's design token library. Prism provides:
+
+- **Color tokens:** `groveColors`, `cream`, `bark`, `semantic`, `status` palettes
+- **Glass utilities:** `generateGlass()`, `generateDarkGlass()`, `generateMidnightBloomGlass()`
+- **Contrast validation:** `getContrastRatio()`, `meetsWCAGAA()`, `meetsWCAGAAA()`
+- **Seasonal palettes:** `SEASONAL_PALETTES` for seasonal color variation
+- **Types:** `ThemeColors`, `ThemeGlass`, `GlassVariant`, `Season`, `SeasonalAffinity`, `ValidationResult`
+
+Foliage re-exports these through `@autumnsgrove/foliage/prism` for convenience, but new code should import from Prism directly.
+
+## Theme Store
+
+Client-side light/dark/system preference management:
 
 ```typescript
-// In Lattice's package.json exports
-"./foliage": "./src/lib/foliage/index.js"
+import { themeStore } from '@autumnsgrove/foliage';
 
-// Usage in tenant sites
-import { loadTheme, ThemeSelector } from '@autumnsgrove/lattice/foliage';
+themeStore.setTheme('dark');     // Set explicitly
+themeStore.toggle();              // Toggle light/dark
+// themeStore.resolvedTheme      // Derived: resolves 'system' to actual light/dark
+```
+
+- Persists to `localStorage`
+- Listens for `prefers-color-scheme` system changes
+- Applies `.dark` class to `document.documentElement`
+
+## Integration with Lattice
+
+### 1. Package Exports
+
+```typescript
+// @autumnsgrove/foliage exports map
+".":            // Types, themes, CSS vars, contrast, tier-access
+"./themes":     // Theme registry only
+"./components": // All 13 Svelte components
+"./server":     // Server functions (D1, R2, validation)
+"./prism":      // Prism re-exports (tokens, glass, contrast)
 ```
 
 ### 2. Layout Integration
@@ -326,7 +413,7 @@ import { loadTheme, ThemeSelector } from '@autumnsgrove/lattice/foliage';
 ```svelte
 <!-- +layout.svelte -->
 <script>
-  import { loadTheme, applyThemeVariables } from '@autumnsgrove/lattice/foliage';
+  import { applyThemeVariables } from '@autumnsgrove/foliage';
 
   const { data } = $props();
 
@@ -340,66 +427,77 @@ import { loadTheme, ThemeSelector } from '@autumnsgrove/lattice/foliage';
 
 ```typescript
 // +layout.server.ts
-import { loadThemeSettings } from "@autumnsgrove/lattice/foliage";
-import { db } from "@autumnsgrove/lattice/services";
+import { loadThemeSettingsWithDefaults } from "@autumnsgrove/foliage/server";
 
 export const load = async ({ locals }) => {
-  const themeSettings = await loadThemeSettings(locals.db, locals.tenant.id);
+  const themeSettings = await loadThemeSettingsWithDefaults(locals.db, locals.tenant.id);
   return { themeSettings };
 };
 ```
 
-## Implementation Phases
+## Server Functions
 
-### Phase 1: Foundation (Week 1-2)
+### Theme Management
 
-- Initialize repository with SvelteKit library mode
-- Set up TypeScript, Vitest, ESLint
-- Implement CSS variable system
-- Create `applyThemeVariables()` utility
-- Build `AccentColorPicker` component
-- Write theme_settings migration
+- `loadThemeSettings(db, tenantId)` — Load from D1 (returns null if not found)
+- `loadThemeSettingsWithDefaults(db, tenantId)` — Falls back to Grove theme + `#16a34a` accent
+- `hasThemeSettings(db, tenantId)` — Boolean check
+- `saveThemeSettings(db, settings)` — Upsert to D1 with ON CONFLICT handling
+- `deleteThemeSettings(db, tenantId)` — Remove settings
 
-### Phase 2: Curated Themes (Week 3-4)
+### CSS Validation
 
-- Design and implement Grove theme (default)
-- Design and implement Minimal theme
-- Design and implement Night Garden theme
-- Build `ThemeSelector` component
-- Build `ThemePreview` component
-- Add tier gating logic
+- `validateCustomCSS(css)` — Checks 10KB limit, blocks `@import`, `javascript:`, `expression()`, `binding()`, script tags, external URLs
+- `sanitizeCSS(css)` — Strips dangerous patterns
+- `ALLOWED_URL_PATTERNS` — Only Google Fonts domains permitted in `url()`
 
-### Phase 3: Remaining Themes (Week 5-6)
+### Font Validation & Upload
 
-- Implement Zine, Moodboard, Typewriter
-- Implement Solarpunk, Cozy Cabin, Ocean, Wildflower
-- Add theme thumbnails
-- Complete theme preview functionality
+- `validateWoff2(arrayBuffer)` — Magic byte check (`0x774F4632`) + 500KB max
+- `validateWoff(arrayBuffer)` — Fallback WOFF validation
+- `sanitizeFontName(name)` — Remove special characters for CSS safety
+- `uploadFontToR2(file, bucket, key)` — Upload to Cloudflare R2
+- `deleteFontFromR2(bucket, key)` — Cleanup
+- Constants: `MAX_FONT_SIZE = 512000`, `MAX_FONTS_PER_TENANT = 10`
 
-### Phase 4: Customizer (Week 7-9)
+### Community Themes
 
-- Build customizer sidebar UI
-- Implement live preview
-- Build ColorPanel component
-- Build TypographyPanel component
-- Build LayoutPanel component
-- Implement CustomCSSEditor with validation
-- Add reset to default
+- `createCommunityTheme(db, theme)` — Insert with status `draft`
+- `getCommunityTheme(db, id)` — By ID
+- `getCommunityThemesForCreator(db, tenantId)` — User's themes
+- `listCommunityThemes(db, filter?)` — All approved/featured
+- `updateCommunityThemeStatus(db, id, status)` — Moderation action
+- `updateCommunityThemeRating(db, id, newRating)` — Atomic increment
+- `incrementDownloadCount(db, id)` — Download tracking
 
-### Phase 5: Custom Fonts (Week 10)
+## Theme Registry
 
-- Build FontUploader component
-- Implement WOFF2 validation (magic bytes, parsing)
-- Add R2 storage integration
-- Add font limit enforcement (10 per tenant)
+Themes are registered in `registry.ts` with lookup and filtering:
 
-### Phase 6: Community Themes (Week 11-13)
+```typescript
+import { getTheme, getThemesForTier, themes, themeList } from '@autumnsgrove/foliage';
 
-- Build theme sharing flow
-- Create community theme browser
-- Implement theme import
-- Build moderation queue
-- Add rating and download tracking
+getTheme('grove');              // Single theme lookup
+getThemesForTier('seedling');   // Returns: grove, minimal, night-garden
+getThemesForTier('sapling');    // Returns: all 10 themes
+getThemesForTier('wanderer');   // Returns: [] (no themes)
+```
+
+Each theme definition includes Prism glass variants and optional seasonal affinity:
+
+```typescript
+export const grove: Theme = {
+  id: "grove",
+  name: "Grove",
+  description: "Warm, earthy, and cozy — the default Grove experience",
+  tier: "seedling",
+  colors: { /* semantic + grove palette tokens */ },
+  fonts: { heading: "system-ui", body: "system-ui", mono: "ui-monospace" },
+  layout: { type: "sidebar", maxWidth: "1200px", spacing: "comfortable" },
+  glass: generateGlass({ /* Prism glass config */ }),
+  seasonalAffinity: "all",
+};
+```
 
 ## UI Mockups
 
@@ -704,10 +802,13 @@ All themes must:
 ### Contrast Validation
 
 ```typescript
-// src/lib/utils/contrast.ts
-export function getContrastRatio(fg: string, bg: string): number;
-export function meetsWCAGAA(fg: string, bg: string): boolean;
+// src/lib/utils/contrast.ts (re-exports from Prism)
+export function getRelativeLuminance(hex: string): number;
+export function getContrastRatio(hex1: string, hex2: string): number;
+export function meetsWCAGAA(hex1: string, hex2: string): boolean;
+export function meetsWCAGAAA(hex1: string, hex2: string): boolean;
 export function validateThemeContrast(theme: Theme): ValidationResult;
+export function suggestReadableColor(hex: string): "white" | "black";
 ```
 
 ## Custom CSS Security
@@ -737,79 +838,22 @@ export function validateCustomCSS(css: string): ValidationResult {
 }
 ```
 
-## Package.json Template
+## Package Configuration
 
-```json
-{
-  "name": "@autumnsgrove/foliage",
-  "version": "0.1.0",
-  "description": "Theme system for Grove — personal expression with modern guardrails",
-  "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "svelte": "./dist/index.js",
-      "default": "./dist/index.js"
-    },
-    "./themes": {
-      "types": "./dist/themes/index.d.ts",
-      "default": "./dist/themes/index.js"
-    },
-    "./components": {
-      "types": "./dist/components/index.d.ts",
-      "svelte": "./dist/components/index.js",
-      "default": "./dist/components/index.js"
-    },
-    "./server": {
-      "types": "./dist/server/index.d.ts",
-      "default": "./dist/server/index.js"
-    }
-  },
-  "svelte": "./dist/index.js",
-  "files": ["dist"],
-  "scripts": {
-    "dev": "vite dev",
-    "build": "svelte-kit sync && svelte-package",
-    "test": "vitest",
-    "check": "svelte-check --tsconfig ./tsconfig.json",
-    "lint": "eslint ."
-  },
-  "peerDependencies": {
-    "svelte": "^5.0.0"
-  },
-  "devDependencies": {
-    "@sveltejs/kit": "^2.0.0",
-    "@sveltejs/package": "^2.0.0",
-    "@sveltejs/vite-plugin-svelte": "^4.0.0",
-    "svelte": "^5.0.0",
-    "svelte-check": "^4.0.0",
-    "typescript": "^5.0.0",
-    "vite": "^6.0.0",
-    "vitest": "^4.0.0"
-  },
-  "keywords": ["grove", "themes", "svelte", "css", "customization"],
-  "license": "AGPL-3.0",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/AutumnsGrove/Foliage.git"
-  }
-}
 ```
+Package:      @autumnsgrove/foliage
+Location:     libs/foliage/ (workspace library)
+Dependencies: @autumnsgrove/prism (workspace:*)
+Peer deps:    svelte ^5.0.0
+License:      AGPL-3.0
 
-## Repository Initialization Checklist
-
-- Create `AutumnsGrove/Foliage` on GitHub
-- Initialize with `pnpm create svelte@latest` (library mode)
-- Copy this spec to `docs/PROJECT-SPEC.md`
-- Create `AGENT.md` with project-specific instructions
-- Set up GitHub Actions for CI
-- Add AGPL-3.0 license
-- Create migrations directory
-- Set up Vitest for testing
-- Add Svelte 5 type definitions
-- Configure package exports
+Exports:
+  .             → Types, themes, CSS vars, contrast, tier-access
+  ./themes      → Theme registry only
+  ./components  → All Svelte components
+  ./server      → Server functions (D1, R2, validation)
+  ./prism       → Prism re-exports (tokens, glass, contrast)
+```
 
 ## Success Metrics
 
