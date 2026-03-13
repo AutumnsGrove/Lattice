@@ -21,7 +21,7 @@ database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
 # KV Namespace for rate limiting
 [[kv_namespaces]]
 binding = "CACHE_KV"
-id = "placeholder-kv-id"
+id = "78c2d912764641cc8696cce7e15f23b1"
 
 # Zephyr Service Binding (email gateway - direct internal routing)
 [[services]]
