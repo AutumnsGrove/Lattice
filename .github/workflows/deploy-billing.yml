@@ -13,10 +13,10 @@ permissions:
 
 jobs:
   deploy:
-    uses: ./.github/workflows/_deploy-pages.yml
+    uses: ./.github/workflows/_deploy-worker.yml
     with:
-      app-dir: apps/billing
-      project-name: grove-billing
+      worker-dir: apps/billing
       needs-engine: false
+      run-build: true
       run-tests: true
     secrets: inherit

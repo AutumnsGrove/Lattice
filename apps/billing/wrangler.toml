@@ -1,7 +1,32 @@
+# Grove Billing Hub — centralized payment infrastructure
+# Deployed to: billing.grove.place
+#
+# Workers deployment with Smart Placement for lower latency
+# on Stripe webhook verification and billing-api service binding calls.
+
 name = "grove-billing"
 compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
-pages_build_output_dir = ".svelte-kit/cloudflare"
+
+# Worker entry point (SvelteKit adapter-cloudflare output)
+main = ".svelte-kit/cloudflare/_worker.js"
+
+# Static assets served alongside the Worker
+[assets]
+directory = ".svelte-kit/cloudflare"
+binding = "ASSETS"
+
+# Smart Placement — run closer to back-end services (billing-api) for lower latency
+[placement]
+mode = "smart"
+
+# Observability — structured logs in Cloudflare dashboard
+[observability]
+enabled = true
+
+[observability.logs]
+enabled = true
+invocation_logs = true
 
 # Billing API Service Binding (Hono backend — never public)
 [[services]]
@@ -13,5 +38,5 @@ service = "grove-billing-api"
 binding = "AUTH"
 service = "groveauth"
 
-# Secrets (configured in Cloudflare Dashboard - Pages > Settings > Bindings):
+# Secrets (deploy via `gw secret apply --write --worker grove-billing`):
 # - STRIPE_WEBHOOK_SECRET = whsec_...

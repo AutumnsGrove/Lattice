@@ -56,6 +56,10 @@ service = "grove-og"
 binding = "WARDEN"
 service = "grove-warden"
 
+[[services]]
+binding = "BILLING"
+service = "grove-billing"
+
 # Cron triggers
 # - Every minute: keepalive to prevent cold starts (~10s delay on first request)
 [triggers]

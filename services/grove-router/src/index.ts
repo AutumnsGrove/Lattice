@@ -20,6 +20,7 @@ export interface Env {
 	MYCELIUM?: Fetcher;
 	OG?: Fetcher;
 	WARDEN?: Fetcher;
+	BILLING?: Fetcher;
 }
 
 /**
@@ -46,7 +47,7 @@ const SUBDOMAIN_ROUTES: Record<string, string | RouteTarget> = {
 	heartwood: "REDIRECT_TO_LOGIN",
 
 	// Billing hub — centralized payment infrastructure
-	billing: "grove-billing.workers.dev",
+	billing: { origin: "grove-billing.m7jv4v7npb.workers.dev", binding: "BILLING" },
 
 	// Grove internal Pages projects
 	amber: "amber-4x2.pages.dev", // Amber storage
