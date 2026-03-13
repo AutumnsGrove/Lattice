@@ -265,6 +265,18 @@ func (v *SecretsVault) RecordDeployment(name, target string) error {
 	return v.Save()
 }
 
+// RemoveDeployment removes a target from a secret's deployment tracking.
+func (v *SecretsVault) RemoveDeployment(name, target string) error {
+	entry, ok := v.data.Secrets[name]
+	if !ok {
+		return fmt.Errorf("secret '%s' not found", name)
+	}
+	if entry.DeployedTo != nil {
+		delete(entry.DeployedTo, target)
+	}
+	return v.Save()
+}
+
 // Count returns the number of secrets in the vault.
 func (v *SecretsVault) Count() int {
 	return len(v.data.Secrets)

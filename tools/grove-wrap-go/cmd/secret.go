@@ -511,6 +511,102 @@ var secretApplyCmd = &cobra.Command{
 	},
 }
 
+// --- secret unapply ---
+
+var secretUnapplyCmd = &cobra.Command{
+	Use:   "unapply <name> [name...]",
+	Short: "Remove secrets from a Cloudflare Worker (without deleting from vault)",
+	Args:  cobra.MinimumNArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if err := requireCFSafety("secret_unapply"); err != nil {
+			return err
+		}
+		cfg := config.Get()
+		worker, _ := cmd.Flags().GetString("worker")
+		pages, _ := cmd.Flags().GetString("pages")
+
+		if worker == "" && pages == "" {
+			return fmt.Errorf("specify --worker or --pages target")
+		}
+
+		password, err := vault.GetVaultPassword()
+		if err != nil {
+			return err
+		}
+
+		v, err := vault.Unlock(password)
+		if err != nil {
+			return err
+		}
+
+		var results []map[string]interface{}
+		allOK := true
+
+		for _, name := range args {
+			// Build wrangler command
+			var wranglerArgs []string
+			var target string
+			if worker != "" {
+				wranglerArgs = []string{"secret", "delete", name, "--name", worker}
+				target = worker
+			} else {
+				wranglerArgs = []string{"pages", "secret", "delete", name, "--project", pages}
+				target = "Pages:" + pages
+			}
+
+			// wrangler secret delete prompts for confirmation — pipe "y" to accept
+			result, err := exec.WranglerWithStdin("y", wranglerArgs...)
+			if err != nil {
+				allOK = false
+				results = append(results, map[string]interface{}{
+					"name": name, "removed": false, "error": err.Error(),
+				})
+				if !cfg.JSONMode {
+					ui.Error(fmt.Sprintf("Failed to remove '%s': %v", name, err))
+				}
+				continue
+			}
+
+			if !result.OK() {
+				stderr := result.Stderr
+				allOK = false
+				results = append(results, map[string]interface{}{
+					"name": name, "removed": false, "error": stderr,
+				})
+				if !cfg.JSONMode {
+					ui.Error(fmt.Sprintf("Failed to remove '%s': %s", name, stderr))
+				}
+				continue
+			}
+
+			// Remove deployment record from vault (best-effort — secret may not be tracked)
+			if v.Exists(name) {
+				_ = v.RemoveDeployment(name, target)
+			}
+
+			results = append(results, map[string]interface{}{
+				"name": name, "removed": true, "target": target,
+			})
+			if !cfg.JSONMode {
+				ui.Success(fmt.Sprintf("Removed '%s' from %s", name, target))
+			}
+		}
+
+		if cfg.JSONMode {
+			data, _ := json.Marshal(map[string]interface{}{
+				"results": results,
+				"all_ok":  allOK,
+			})
+			fmt.Println(string(data))
+		}
+
+		if !allOK {
+			os.Exit(1)
+		}
+		return nil
+	},
+}
+
 // --- secret sync ---
 
 var secretSyncCmd = &cobra.Command{
@@ -652,6 +748,7 @@ var secretHelpCategories = []ui.HelpCategory{
 		Style: lipglossStyle(ui.BlossomPink),
 		Commands: []ui.HelpCommand{
 			{Name: "apply", Desc: "Deploy secrets to a Cloudflare Worker"},
+			{Name: "unapply", Desc: "Remove secrets from a Worker (keeps vault)"},
 			{Name: "sync", Desc: "Deploy all secrets to a Worker"},
 		},
 	},
@@ -703,6 +800,11 @@ func init() {
 	secretApplyCmd.Flags().StringP("worker", "w", "", "Cloudflare Worker name")
 	secretApplyCmd.Flags().StringP("pages", "p", "", "Cloudflare Pages project name")
 	secretCmd.AddCommand(secretApplyCmd)
+
+	// unapply
+	secretUnapplyCmd.Flags().StringP("worker", "w", "", "Cloudflare Worker name")
+	secretUnapplyCmd.Flags().StringP("pages", "p", "", "Cloudflare Pages project name")
+	secretCmd.AddCommand(secretUnapplyCmd)
 
 	// sync
 	secretSyncCmd.Flags().StringP("worker", "w", "", "Cloudflare Worker name")
