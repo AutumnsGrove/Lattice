@@ -1,8 +1,8 @@
-# Grove Plant - Payment & Billing Hub
+# Grove Plant - Onboarding & Signup UI
 # Deployed to: plant.grove.place
 #
-# Workers deployment with Smart Placement for lower D1 latency
-# on Stripe webhook processing and subscription management.
+# Workers deployment with Smart Placement for lower D1 latency.
+# Handles new-wanderer signup, Turnstile verification, and OAuth flow.
 
 name = "grove-plant"
 compatibility_date = "2025-01-01"
@@ -38,8 +38,7 @@ ZEPHYR_URL = "https://grove-zephyr.m7jv4v7npb.workers.dev"
 GROVEAUTH_URL = "https://login.grove.place"
 GROVEAUTH_CLIENT_ID = "grove-plant"
 
-# Signup gate - set to "true" when payment processing is ready
-# This prevents OAuth flow from proceeding until Stripe is configured
+# Signup gate - set to "true" to allow new wanderer registration
 SIGNUPS_ENABLED = "true"
 
 # D1 Database binding (same as landing/engine - shared database)
@@ -67,7 +66,5 @@ id = "3d3c7bcadf2a49d2ab46aa507d437f2f"
 
 # Secrets (deploy via `gw secret apply --write --worker grove-plant`):
 # - GROVEAUTH_CLIENT_SECRET
-# - RESEND_API_KEY
-# NOTE: Stripe secrets removed — all payment logic now lives in billing-api
 # - TURNSTILE_SECRET_KEY
 # - ZEPHYR_API_KEY
