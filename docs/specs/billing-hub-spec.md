@@ -704,49 +704,49 @@ No card numbers or full payment details ever touch Grove infrastructure. Stripe 
 
 ## Migration Plan
 
-### Phase 1: Build the Hub (New Code)
+### Phase 1: Build the Hub (New Code) ✅
 
 Build the two workers from scratch. No existing code needs to change yet.
 
-- [ ] Create `apps/billing/` SvelteKit project with `@sveltejs/adapter-cloudflare`
-- [ ] Create `services/billing-api/` Hono worker
-- [ ] Move `libs/engine/src/lib/payments/` (StripeClient, StripeProvider) into billing-api
-- [ ] Implement billing-api endpoints: `/checkout`, `/portal`, `/cancel`, `/resume`, `/status`, `/webhook`
-- [ ] Implement UI worker routes: `/`, `/portal`, `/cancel`, `/resume`, `/callback`, `/api/webhooks/stripe`, `/api/health`
-- [ ] Migrate Plant's `createTenant()` logic into billing-api (username reservation, subdomain setup, platform_billing record)
-- [ ] Consolidate Plant's webhook handler logic (tenant creation, email sending) into billing-api
-- [ ] Create `libs/engine/src/lib/config/billing.ts` with `buildCheckoutUrl()` and `buildPortalUrl()`
-- [ ] Add `billing` entry to grove-router `SUBDOMAIN_ROUTES`
-- [ ] Deploy both workers to Cloudflare
+- [x] Create `apps/billing/` SvelteKit project with `@sveltejs/adapter-cloudflare`
+- [x] Create `services/billing-api/` Hono worker
+- [x] Move `libs/engine/src/lib/payments/` (StripeClient, StripeProvider) into billing-api
+- [x] Implement billing-api endpoints: `/checkout`, `/portal`, `/cancel`, `/resume`, `/status`, `/webhook`
+- [x] Implement UI worker routes: `/`, `/portal`, `/cancel`, `/resume`, `/callback`, `/api/webhooks/stripe`, `/api/health`
+- [x] Migrate Plant's `createTenant()` logic into billing-api (username reservation, subdomain setup, platform_billing record)
+- [x] Consolidate Plant's webhook handler logic (tenant creation, email sending) into billing-api
+- [x] Create `libs/engine/src/lib/config/billing.ts` with `buildCheckoutUrl()` and `buildPortalUrl()`
+- [x] Add `billing` entry to grove-router `SUBDOMAIN_ROUTES`
+- [x] Deploy both workers to Cloudflare
 - [ ] Configure Stripe webhook endpoint to `billing.grove.place/api/webhooks/stripe`
-- [ ] Write tests for all billing-api endpoints
+- [x] Write tests for all billing-api endpoints
 
-### Phase 2: Redirect Everything (Swap Over)
+### Phase 2: Redirect Everything (Swap Over) ✅
 
 Point all existing payment touchpoints to BillingHub.
 
-- [ ] Update Plant checkout to use `buildCheckoutUrl()` redirect instead of direct Stripe calls
-- [ ] Update Arbor SubscriptionCard: cancel/resume buttons use `buildCancelUrl()` / `buildResumeUrl()` redirects
-- [ ] Update Arbor PaymentMethodCard: "Manage" button uses `buildPortalUrl()` redirect
-- [ ] Update Arbor ChangePlanCard: upgrade buttons use `buildCheckoutUrl()` redirect
-- [ ] Add comped account check in upgrades graft before building checkout URL (defense in depth)
-- [ ] Simplify upgrades graft: `cultivate.ts` → redirect, `tend.ts` → redirect, `growth.ts` → service binding
-- [ ] Remove `STRIPE_SECRET_KEY` from Plant and Engine wrangler configs
-- [ ] Remove `/api/billing` endpoint from engine (781 lines)
-- [ ] Remove `/api/shop/webhooks` endpoint from engine
-- [ ] Remove Plant's `src/lib/server/stripe.ts` and `/api/webhooks/stripe/` route
-- [ ] Remove Plant's payment health check endpoint
+- [x] Update Plant checkout to use `buildCheckoutUrl()` redirect instead of direct Stripe calls
+- [x] Update Arbor SubscriptionCard: cancel/resume buttons use `buildCancelUrl()` / `buildResumeUrl()` redirects
+- [x] Update Arbor PaymentMethodCard: "Manage" button uses `buildPortalUrl()` redirect
+- [x] Update Arbor ChangePlanCard: upgrade buttons use `buildCheckoutUrl()` redirect
+- [x] Add comped account check in upgrades graft before building checkout URL (defense in depth)
+- [x] Simplify upgrades graft: `cultivate.ts` → redirect, `tend.ts` → redirect, `growth.ts` → service binding
+- [x] Remove `STRIPE_SECRET_KEY` from Plant and Engine wrangler configs
+- [x] Remove `/api/billing` endpoint from engine (781 lines)
+- [x] Remove `/api/shop/webhooks` endpoint from engine
+- [x] Remove Plant's `src/lib/server/stripe.ts` and `/api/webhooks/stripe/` route
+- [x] Remove Plant's payment health check endpoint
 - [ ] Update Stripe Dashboard: single webhook endpoint at `billing.grove.place`
 - [ ] Verify all flows end-to-end: new signup, upgrade, portal, cancel, resume, webhook processing
 
 ### Phase 3: Cleanup and Verification
 
-- [ ] Remove stale Stripe environment variables from Plant and Engine
-- [ ] Delete `libs/engine/src/lib/payments/` (moved to billing-api)
-- [ ] Remove Plant's email templates for payment receipt/failure (moved to billing-api)
+- [x] Remove stale Stripe environment variables from Plant and Engine
+- [x] Delete `libs/engine/src/lib/payments/` (moved to billing-api)
+- [x] Remove Plant's email templates for payment receipt/failure (moved to billing-api)
 - [ ] Close #1357 (payment management non-functional)
 - [ ] Close #1177 (Amber Stripe integration, if applicable)
-- [ ] Update existing specs that reference the old payment endpoints
+- [x] Update existing specs that reference the old payment endpoints
 - [ ] Security audit (Hawk report) on the new billing hub
 - [ ] Begin E2E payment test suite (#935)
 

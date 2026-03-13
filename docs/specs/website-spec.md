@@ -54,7 +54,7 @@ Plant is a seedling pushing through soil. It is the first thing a Wanderer touch
 
 ### What This Is
 
-Plant is a SvelteKit app deployed as Cloudflare Pages. It handles the onboarding funnel: authenticate via Heartwood, build a profile, verify email, pick a plan, pay via Stripe, and provision a tenant. Plant is a thin frontend over Engine's shared D1 database and Heartwood's auth service.
+Plant is a SvelteKit app deployed as Cloudflare Pages. It handles the onboarding funnel: authenticate via Heartwood, build a profile, verify email, pick a plan, redirect to BillingHub for payment, and provision a tenant. Plant is a thin frontend over Engine's shared D1 database and Heartwood's auth service.
 
 ### Goals
 
@@ -136,7 +136,7 @@ grove-router (wildcard *.grove.place)
 | Deployment     | Cloudflare Pages               | Edge-deployed, integrates with D1/KV/R2 bindings |
 | Database       | D1 (shared `grove-engine-db`)  | Single source of truth across all Grove services |
 | Auth           | Heartwood (Better Auth 1.4.18) | Google OAuth, magic links, passkeys, 2FA         |
-| Payments       | Stripe (hosted checkout)       | PCI compliant, auto tax, promo codes             |
+| Payments       | BillingHub → Stripe            | Centralized at billing.grove.place, PCI compliant |
 | Email          | Zephyr gateway (Resend)        | React email templates, scheduled delivery        |
 | Bot Protection | Shade (Cloudflare Turnstile)   | Bot mitigation on auth and verification flows    |
 | Rate Limiting  | KV Namespace                   | Throttle email verification and API abuse        |
@@ -159,9 +159,6 @@ grove-router (wildcard *.grove.place)
 - `GROVEAUTH_URL` — Heartwood URL (`https://login.grove.place`)
 - `GROVEAUTH_CLIENT_ID` — OAuth client ID (`grove-plant`)
 - `GROVEAUTH_CLIENT_SECRET` — OAuth client secret
-- `STRIPE_SECRET_KEY` — Stripe API key
-- `STRIPE_PUBLISHABLE_KEY` — Stripe public key
-- `STRIPE_WEBHOOK_SECRET` — Webhook signature verification
 - `RESEND_API_KEY` — Email delivery
 - `TURNSTILE_SECRET_KEY` — Shade bot protection
 
@@ -270,7 +267,7 @@ Saved via `POST /api/select-plan`. Sets `plan_selected` and `plan_billing_cycle`
 
 **Step 5: Checkout** (`/checkout`)
 
-Skipped entirely for the free (Wanderer) plan. For paid plans, creates a Stripe Checkout Session via `createCheckoutSession()` and redirects to Stripe's hosted checkout. On success, Stripe sends a webhook. Sets `payment_completed_at`.
+Skipped entirely for the free (Wanderer) plan. For paid plans, redirects to BillingHub (`billing.grove.place`) via `buildCheckoutUrl()`. BillingHub handles Stripe Checkout and webhooks. On success, sets `payment_completed_at`.
 
 **Step 6: Success / Tour** (`/success`, `/tour`)
 
@@ -335,7 +332,7 @@ else → "success"
 | `/profile`            | Display name, username, color | Yes           |
 | `/verify-email`       | Email verification            | Yes           |
 | `/plans`              | Plan selection                | Yes           |
-| `/checkout`           | Stripe checkout redirect      | Yes           |
+| `/checkout`           | BillingHub redirect           | Yes           |
 | `/success`            | Tenant provisioning           | Yes           |
 | `/tour`               | Guided tour of new blog       | Yes           |
 | `/invited`            | Beta invite code entry        | Yes           |
@@ -357,8 +354,6 @@ else → "success"
 | `/api/verify-email/resend`                 | POST   | Resend verification email       |
 | `/api/select-plan`                         | POST   | Save plan selection             |
 | `/api/claim-comped`                        | POST   | Claim comped access             |
-| `/api/webhooks/stripe`                     | POST   | Stripe webhook handler          |
-| `/api/health/payments`                     | GET    | Payment system health check     |
 | `/api/account/passkey/register-options`    | POST   | WebAuthn registration options   |
 | `/api/account/passkey/verify-registration` | POST   | Verify passkey registration     |
 | `/api/passkey/authenticate/options`        | POST   | WebAuthn auth options           |
@@ -398,30 +393,11 @@ Only the first two tiers (Wanderer and Seedling) are currently available for sel
 | Analytics     | Basic     | Basic     | Standard    | Advanced   | Advanced      |
 | Support       | Community | Community | Email       | Priority   | 8hrs+Priority |
 
-### Stripe Integration
+### Payment (BillingHub)
 
-`apps/plant/src/lib/server/stripe.ts` (480 lines) handles all payment operations.
+All payment processing is centralized in BillingHub (`billing.grove.place`). See `docs/specs/billing-hub-spec.md` for full details.
 
-**Key functions:**
-
-- `createCheckoutSession()` — Creates Stripe hosted checkout with metadata, auto tax collection, promo code support
-- `verifyWebhookSignature()` — HMAC-SHA256 verification with constant-time comparison
-- `createBillingPortalSession()` — Self-service billing management
-- `mapSubscriptionStatus()` — Maps Stripe statuses to Grove statuses
-
-**Price IDs** are hardcoded in the Stripe module (safe to commit, not secrets).
-
-**Webhook Events Handled:**
-
-| Event                           | Action                                   |
-| ------------------------------- | ---------------------------------------- |
-| `checkout.session.completed`    | Mark payment complete, update onboarding |
-| `customer.subscription.updated` | Sync plan/status changes                 |
-| `customer.subscription.deleted` | Mark subscription canceled               |
-| `invoice.payment_succeeded`     | Log successful payment                   |
-| `invoice.payment_failed`        | Log failed payment, notify               |
-
-**Idempotency:** The `webhook_events` table stores processed event IDs to prevent duplicate handling.
+Plant redirects to BillingHub for checkout via `buildCheckoutUrl()` from `@autumnsgrove/lattice/config`. Stripe API keys, webhook handling, and payment processing all live in `services/billing-api/`.
 
 ### Payment Flow
 
@@ -433,19 +409,16 @@ POST /api/select-plan
     │ saves plan_selected, plan_billing_cycle
     ▼
 GET /checkout
-    │ +page.server.ts calls createCheckoutSession()
+    │ +server.ts builds redirect URL via buildCheckoutUrl()
     ▼
-Redirect to Stripe hosted checkout
+Redirect to billing.grove.place
+    │ BillingHub creates Stripe Checkout Session
     │ Stripe collects payment
-    ▼
-Stripe webhook: checkout.session.completed
-    │ POST /api/webhooks/stripe
-    │ verifyWebhookSignature()
-    │ check webhook_events for idempotency
-    │ update user_onboarding.payment_completed_at
+    │ BillingHub webhook processes checkout.session.completed
+    │ BillingHub creates tenant via billing-api
     ▼
 Wanderer returns to /success
-    │ createTenant() provisions blog
+    │ polls for tenant readiness
     ▼
 Blog live at username.grove.place
 ```
@@ -552,7 +525,7 @@ System-protected subdomains. Checked during username selection.
 
 ### webhook_events
 
-Stripe webhook idempotency. Stores processed event IDs to prevent duplicate handling.
+Webhook idempotency. Stores processed event IDs to prevent duplicate handling. Now written by billing-api, not Plant.
 
 ---
 
@@ -615,9 +588,8 @@ logGroveError("Plant", PLANT_ERRORS.DB_QUERY_FAILED, {
 
 ### Webhook Security
 
-- Stripe webhook signature verification using HMAC-SHA256
-- Constant-time comparison to prevent timing attacks
-- Idempotency via `webhook_events` table
+- Stripe webhooks are handled by BillingHub (`billing.grove.place`), not Plant
+- See `docs/specs/billing-hub-spec.md` for webhook security details
 
 ### Data Isolation
 
@@ -670,8 +642,7 @@ Plant uses Lattice's shared component library. No custom design system.
 - [x] Profile step (display name, username, favorite color)
 - [x] Email verification with rate-limited resend
 - [x] Plan selection (Wanderer and Seedling)
-- [x] Stripe checkout integration with hosted checkout
-- [x] Webhook handling with signature verification and idempotency
+- [x] BillingHub checkout integration (redirects to billing.grove.place)
 - [x] Tenant provisioning via `createTenant()`
 - [x] Welcome email sequence (Welcome, Day1, Day7, Day14, Day30)
 - [x] Invited flow (beta invite codes)
@@ -689,7 +660,7 @@ Plant uses Lattice's shared component library. No custom design system.
 - [ ] Oak tier ($25/mo) — status: `future`
 - [ ] Evergreen tier ($35/mo) — status: `future`
 - [ ] Custom domain setup flow (Oak+)
-- [ ] Billing portal integration in account page
+- [x] Billing portal integration in account page (via BillingHub redirect)
 - [ ] Account deletion flow
 - [ ] Data export from account page
 - [ ] Onboarding analytics (funnel tracking, drop-off analysis)
@@ -700,6 +671,7 @@ Plant uses Lattice's shared component library. No custom design system.
 
 | Spec                | Relationship                                             |
 | ------------------- | -------------------------------------------------------- |
+| `billing-hub-spec.md` | Payment hub. Plant redirects here for all billing flows |
 | `porch-spec.md`     | Support system. Plant links to it, does not replicate it |
 | `amber-spec.md`     | Storage system. Tracks files uploaded via Engine         |
 | `heartwood-spec.md` | Auth service. Plant delegates all auth here              |

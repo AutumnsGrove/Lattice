@@ -8,16 +8,16 @@ aliases: []
 tags:
   - plant
   - onboarding
-  - stripe
+  - billing-hub
   - loam
   - tenant-provisioning
 ---
 
 # Plant Developer Guide
 
-Plant is Grove's onboarding app. It takes a new user from "I just clicked Sign Up" to "my blog is live at `username.grove.place`" in a handful of steps. It runs as its own SvelteKit app at `plant.grove.place`, backed by the shared D1 database, Cloudflare KV for rate limiting, and Stripe for payments.
+Plant is Grove's onboarding app. It takes a new user from "I just clicked Sign Up" to "my blog is live at `username.grove.place`" in a handful of steps. It runs as its own SvelteKit app at `plant.grove.place`, backed by the shared D1 database and Cloudflare KV for rate limiting. Payment processing is handled by BillingHub (`billing.grove.place`).
 
-This guide covers the actual implementation: the state machine that drives step progression, how Loam validates usernames, how Stripe sessions get created and confirmed, what happens with comped invites, and what to check when things break.
+This guide covers the actual implementation: the state machine that drives step progression, how Loam validates usernames, how BillingHub handles payments, what happens with comped invites, and what to check when things break.
 
 ## How Plant Works
 
@@ -30,7 +30,7 @@ The full journey:
 3. **Profile** (`/profile`) -- Display name, username, color, interests
 4. **Email Verification** (`/verify-email`) -- 6-digit code sent via Zephyr
 5. **Plans** (`/plans`) -- Tier selection (Seedling through Evergreen, plus free Wanderer)
-6. **Checkout** (`/checkout`) -- Stripe Checkout redirect (skipped for Wanderer/comped)
+6. **Checkout** (`/checkout`) -- BillingHub redirect (skipped for Wanderer/comped)
 7. **Success** (`/success`) -- Polls for tenant creation, then links to the new blog
 
 The session lives in two cookies: `onboarding_id` (7-day TTL) and `access_token` (1-hour TTL). The layout server uses `onboarding_id` to load the `user_onboarding` row and compute the current step.
@@ -134,70 +134,34 @@ Users who sign in through an OAuth provider that already verified their email (G
 
 ## Payment Flow
 
-### Stripe Checkout
+### BillingHub Redirect
+
+All payment processing is centralized in BillingHub (`billing.grove.place`). Plant no longer holds any Stripe keys or webhook handlers.
 
 When the user hits the checkout page and clicks pay, the client-side code POSTs to `/checkout` (the `+server.ts` endpoint). That endpoint:
 
 1. Loads the onboarding record to get plan, billing cycle, and email
 2. Checks for a comped invite first (redirects to `/comped` if found)
-3. Looks up the Stripe price ID from the hardcoded `STRIPE_PRICES` map in `$lib/server/stripe.ts`
-4. Creates a Stripe Checkout Session via the REST API (no Stripe SDK, just `fetch`)
-5. Stores the `stripe_checkout_session_id` on the onboarding record
-6. Returns the Stripe-hosted checkout URL for the client to redirect to
-
-The checkout session includes metadata (`onboarding_id`, `username`, `plan`, `billing_cycle`) that the webhook handler uses to match the payment back to the right user. This metadata is set on both the session and the subscription so it survives beyond checkout.
+3. Builds a redirect URL to BillingHub via `buildCheckoutUrl()` from `@autumnsgrove/lattice/config`
+4. Returns the BillingHub URL for the client to redirect to
 
 ```typescript
-const session = await createCheckoutSession({
-  stripeSecretKey,
-  priceId,
-  customerEmail: onboarding.email,
+import { buildCheckoutUrl } from "@autumnsgrove/lattice/config";
+
+const checkoutUrl = buildCheckoutUrl({
   onboardingId: onboarding.id,
-  username: onboarding.username,
-  plan,
+  tier: plan,
   billingCycle,
-  successUrl: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
-  cancelUrl: `${baseUrl}/plans`,
+  redirect: `${baseUrl}/success`,
 });
+return json({ url: checkoutUrl });
 ```
 
-Stripe Tax is enabled (`automatic_tax[enabled]: true`), billing address collection is required, and promotion codes are allowed.
+BillingHub handles the Stripe session creation, payment collection, webhook processing, and tenant creation. See `docs/specs/billing-hub-spec.md` for details on the billing-api endpoints.
 
-### Webhook Processing
+### Tenant Creation
 
-The webhook handler at `/api/webhooks/stripe` processes six event types:
-
-| Event | Action |
-|-------|--------|
-| `checkout.session.completed` | Creates tenant, links Stripe IDs to onboarding |
-| `customer.subscription.created` | Logged only (tenant creation happens in checkout handler) |
-| `customer.subscription.updated` | Updates `platform_billing` status and period |
-| `customer.subscription.deleted` | Sets billing status to `cancelled` |
-| `invoice.paid` | Sets status to `active`, sends receipt email on first payment |
-| `invoice.payment_failed` | Sets status to `past_due`, sends failure notification |
-
-Signature verification uses HMAC-SHA256 with constant-time comparison (`secureCompare()`). The handler supports Stripe's secret rotation by checking all `v1` signatures in the header.
-
-Every webhook event is stored in the `webhook_events` table with a 120-day expiry. Duplicate events are detected by `provider_event_id` and skipped if already processed. Failed events get their error recorded and `retry_count` incremented.
-
-The webhook payloads are sanitized before storage using `sanitizeStripeWebhookPayload()` to remove PII (GDPR/PCI DSS compliance).
-
-### Tenant Creation (from webhook)
-
-When `checkout.session.completed` fires with `payment_status === "paid"`:
-
-1. Extracts `onboarding_id` from session metadata
-2. Checks for an existing tenant (idempotent)
-3. Calls `createTenant()` which inserts into `tenants`, `platform_billing`, `site_settings`, and creates default home/about pages
-4. Updates `user_onboarding` with `tenant_id` and `payment_completed_at`
-
-The `createTenant()` function in `$lib/server/tenant.ts` does six things in sequence:
-- Inserts the tenant row (with username as subdomain, default theme, accent color)
-- Creates a `platform_billing` record
-- Seeds four `site_settings` entries (title, description, accent color, font)
-- Links the onboarding record via `tenant_id`
-- Creates a default home page with welcome content
-- Creates a default about page
+Tenant creation now happens inside `services/billing-api/` when the Stripe `checkout.session.completed` webhook fires. The billing-api calls `createTenant()` which inserts into `tenants`, `platform_billing`, `site_settings`, and creates default pages.
 
 ## Comped Invites
 
@@ -240,10 +204,10 @@ Plant uses structured error codes in the `PLANT-XXX` format, defined in `$lib/er
 
 | Range | Category |
 |-------|----------|
-| 001-019 | Service and binding errors (DB, Auth, Stripe, KV) |
+| 001-019 | Service and binding errors (DB, Auth, KV) |
 | 020-039 | Session and auth errors |
 | 040-059 | Database and onboarding errors |
-| 060-079 | Webhook errors |
+| 060-079 | Reserved (webhook errors moved to billing-api) |
 | 080-099 | Internal/catch-all |
 
 Each error has a `userMessage` (safe to display) and an `adminMessage` (for logs, often includes fix instructions). The `logPlantError()` function wraps the shared `logGroveError()` helper, and `buildPlantErrorUrl()` creates redirect URLs with `error` and `error_code` query params.
@@ -252,9 +216,9 @@ Each error has a `userMessage` (safe to display) and an `adminMessage` (for logs
 
 **Redirect loops between pages.** Both the layout and page loaders compute the current step. If their logic disagrees (e.g., one checks `emailVerified` and the other checks `email_verified`), you get infinite redirects. Always check both files when modifying step progression.
 
-**Webhook never fires after payment.** The tenant isn't created until the `checkout.session.completed` webhook arrives. If the webhook secret is wrong, the signature check fails silently (returns 401 to Stripe). Check `STRIPE_WEBHOOK_SECRET` in Cloudflare Dashboard. Look at the `webhook_events` table for stored events with `processed = 0`.
+**Webhook never fires after payment.** Tenant creation now happens in billing-api (`services/billing-api/`). If a webhook fails, check the `webhook_events` table in D1 and the billing-api worker logs. The Stripe webhook endpoint is at `billing.grove.place/api/webhooks/stripe`.
 
-**User stuck on success page (polling forever).** The `createTenant()` call might have failed inside the webhook handler. Check the `webhook_events` table for the relevant event and its `error` column. Common causes: duplicate subdomain in `tenants`, missing columns after a migration.
+**User stuck on success page (polling forever).** The `createTenant()` call might have failed inside billing-api's webhook handler. Check the `webhook_events` table for the relevant event and its `error` column. Common causes: duplicate subdomain in `tenants`, missing columns after a migration.
 
 **Username shows available but profile save fails.** The client-side check and server-side check are independent queries. Between the check and the save, someone else could have claimed the username. The profile action re-validates and returns a 400 if the username is now taken.
 
@@ -275,11 +239,9 @@ Each error has a `userMessage` (safe to display) and an `adminMessage` (for logs
 | `apps/plant/src/routes/api/check-username/+server.ts` | Loam username validation API |
 | `apps/plant/src/routes/api/verify-email/+server.ts` | Code verification endpoint |
 | `apps/plant/src/routes/plans/+page.server.ts` | Plan selection, comped invite detection |
-| `apps/plant/src/routes/checkout/+server.ts` | Stripe session creation |
-| `apps/plant/src/routes/api/webhooks/stripe/+server.ts` | Webhook handler, tenant creation |
+| `apps/plant/src/routes/checkout/+server.ts` | BillingHub redirect via `buildCheckoutUrl()` |
 | `apps/plant/src/routes/comped/+page.server.ts` | Comped invite claim flow |
 | `apps/plant/src/routes/success/check/+server.ts` | Tenant readiness polling |
-| `apps/plant/src/lib/server/stripe.ts` | Price IDs, checkout, webhook verification |
 | `apps/plant/src/lib/server/tenant.ts` | `createTenant()` and `getTenantForOnboarding()` |
 | `apps/plant/src/lib/server/onboarding-helper.ts` | `shouldSkipCheckout()` for free tier |
 | `apps/plant/src/lib/errors.ts` | PLANT-XXX error codes |
@@ -291,10 +253,9 @@ When working on Plant, verify these things:
 
 - [ ] State machine in layout and page loaders agree on step progression
 - [ ] Username validation runs both client-side (API check) and server-side (form action)
-- [ ] Stripe price IDs in `$lib/server/stripe.ts` match Stripe Dashboard
-- [ ] Environment variables are set: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `ZEPHYR_API_KEY`
+- [ ] Environment variables are set: `ZEPHYR_API_KEY`
 - [ ] Cloudflare bindings configured: `DB` (D1), `KV` (rate limiting), `AUTH` (GroveAuth service binding)
-- [ ] Webhook idempotency: `checkout.session.completed` checks for existing tenant before creating
+- [ ] BillingHub redirect works: `buildCheckoutUrl()` produces valid `billing.grove.place` URLs
 - [ ] Comped invite lookup uses `.toLowerCase()` on email
 - [ ] The `createTenant()` function seeds default pages and settings
 - [ ] Free tier (Wanderer) skips checkout via `shouldSkipCheckout()`

@@ -12,22 +12,22 @@
 
 // Types
 export type {
-  GrowthStage,
-  GrowthStageKey,
-  CultivateRequest,
-  CultivateResponse,
-  TendRequest,
-  TendResponse,
-  FlourishState,
-  GrowthStatus,
-  PlantingSession,
-  GardenStats,
-  UpgradesConfig,
+	GrowthStage,
+	GrowthStageKey,
+	CultivateRequest,
+	CultivateResponse,
+	TendRequest,
+	TendResponse,
+	FlourishState,
+	GrowthStatus,
+	PlantingSession,
+	GardenStats,
+	UpgradesConfig,
 } from "./types";
 export { GROWTH_STAGES } from "./types";
 
 // Config
-export { createUpgradeConfig, getPlantingUrl, canCultivateTo } from "./config";
+export { createUpgradeConfig } from "./config";
 
 // Client Components
 export { default as GrowthCard } from "./components/GrowthCard.svelte";
