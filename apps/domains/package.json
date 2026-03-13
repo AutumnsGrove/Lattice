@@ -10,10 +10,14 @@
     "build": "vite build",
     "preview": "wrangler pages dev .svelte-kit/cloudflare",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "deploy": "pnpm run build && wrangler pages deploy .svelte-kit/cloudflare"
+    "deploy": "pnpm run build && wrangler pages deploy .svelte-kit/cloudflare",
+    "test": "vitest run",
+    "test:run": "vitest run",
+    "test:watch": "vitest"
   },
   "devDependencies": {
     "@autumnsgrove/prism": "workspace:*",
+    "vitest": "^2.1.0",
     "@cloudflare/workers-types": "^4.20260210.0",
     "@sveltejs/adapter-cloudflare": "^7.2.6",
     "@sveltejs/kit": "^2.50.2",
