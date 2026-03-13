@@ -1,0 +1,22 @@
+name: Deploy Billing
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/billing/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/_deploy-pages.yml
+    with:
+      app-dir: apps/billing
+      project-name: grove-billing
+      needs-engine: false
+      run-tests: true
+    secrets: inherit

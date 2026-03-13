@@ -1,8 +1,7 @@
 <script lang="ts">
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import Button from "$lib/ui/components/ui/Button.svelte";
-	import Spinner from "$lib/ui/components/ui/Spinner.svelte";
-	import { AlertCircle, Check, X, Package, Calendar, RefreshCw } from "@lucide/svelte";
+	import { AlertCircle, Check, X, Package, RefreshCw } from "@lucide/svelte";
 	import type { BillingData, TierConfig } from "./types";
 	import { formatDate, daysRemaining } from "./utils";
 
@@ -10,8 +9,6 @@
 		billing: BillingData | null;
 		billingError: boolean;
 		tierConfig: TierConfig | null;
-		cancellingSubscription: boolean;
-		resumingSubscription: boolean;
 		onCancel: () => void;
 		onResume: () => void;
 	}
@@ -20,8 +17,6 @@
 		billing,
 		billingError,
 		tierConfig,
-		cancellingSubscription,
-		resumingSubscription,
 		onCancel,
 		onResume,
 	}: Props = $props();
@@ -120,30 +115,18 @@
 				<Button
 					variant="primary"
 					onclick={onResume}
-					disabled={resumingSubscription}
-					aria-busy={resumingSubscription}
-					aria-label={resumingSubscription ? "Resuming subscription..." : "Resume subscription"}
+					aria-label="Resume subscription"
 				>
-					{#if resumingSubscription}
-						<span aria-hidden="true"><Spinner size="sm" /></span>
-					{:else}
-						<RefreshCw class="btn-icon" aria-hidden="true" />
-					{/if}
+					<RefreshCw class="btn-icon" aria-hidden="true" />
 					Resume Membership
 				</Button>
 			{:else}
 				<Button
 					variant="danger"
 					onclick={onCancel}
-					disabled={cancellingSubscription}
-					aria-busy={cancellingSubscription}
-					aria-label={cancellingSubscription ? "Cancelling subscription..." : "Cancel subscription"}
+					aria-label="Cancel subscription"
 				>
-					{#if cancellingSubscription}
-						<span aria-hidden="true"><Spinner size="sm" /></span>
-					{:else}
-						<X class="btn-icon" aria-hidden="true" />
-					{/if}
+					<X class="btn-icon" aria-hidden="true" />
 					Cancel Membership
 				</Button>
 			{/if}

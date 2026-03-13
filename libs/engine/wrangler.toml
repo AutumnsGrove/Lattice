@@ -225,30 +225,11 @@ TURNSTILE_SITE_KEY = "0x4AAAAAACI9p49O_VFDy3WA"
 #                           Keep this secure!
 #
 # =============================================================================
-# Stripe Secrets (for Shop & Billing)
+# Stripe Secrets — REMOVED (BillingHub Migration)
 # =============================================================================
-# STRIPE_SECRET_KEY  - Stripe secret key (sk_live_xxx or sk_test_xxx)
-#                      Get from: https://dashboard.stripe.com/apikeys
-#
-# STRIPE_PUBLISHABLE_KEY - Stripe publishable key (pk_live_xxx or pk_test_xxx)
-#                          Used in frontend for Stripe.js
-#
-# STRIPE_WEBHOOK_SECRET - Webhook signing secret (whsec_xxx)
-#                         Get from: https://dashboard.stripe.com/webhooks
-#
-# STRIPE_CONNECT_ENABLED - Set to "true" to enable marketplace mode
-#
-# PLATFORM_FEE_PERCENT - Platform fee percentage for Connect (default: 5)
-#
-# =============================================================================
-# Stripe Price IDs (for Platform Billing)
-# =============================================================================
-# Create these prices in Stripe Dashboard, then set:
-#
-# STRIPE_PRICE_SEEDLING     - Price ID for Seedling plan ($8/mo)
-# STRIPE_PRICE_SAPLING      - Price ID for Sapling plan ($12/mo)
-# STRIPE_PRICE_OAK          - Price ID for Oak plan ($25/mo)
-# STRIPE_PRICE_EVERGREEN    - Price ID for Evergreen plan ($35/mo)
+# All Stripe secrets now live in billing-api (grove-billing-api worker).
+# See: services/billing-api/wrangler.toml
+# Warden retains read-only STRIPE_SECRET_KEY for admin queries.
 
 # =============================================================================
 # Cloudflare Pages Notes

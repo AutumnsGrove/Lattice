@@ -67,8 +67,7 @@ id = "3d3c7bcadf2a49d2ab46aa507d437f2f"
 
 # Secrets (deploy via `gw secret apply --write --worker grove-plant`):
 # - GROVEAUTH_CLIENT_SECRET
-# - STRIPE_SECRET_KEY
-# - STRIPE_WEBHOOK_SECRET
 # - RESEND_API_KEY
+# NOTE: Stripe secrets removed — all payment logic now lives in billing-api
 # - TURNSTILE_SECRET_KEY
 # - ZEPHYR_API_KEY

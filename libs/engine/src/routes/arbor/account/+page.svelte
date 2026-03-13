@@ -1,10 +1,13 @@
 <script lang="ts">
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
-	import GlassConfirmDialog from "$lib/ui/components/ui/GlassConfirmDialog.svelte";
-	import { toast } from "$lib/ui/components/ui/toast";
-	import { api } from "$lib/utils";
-	import { invalidateAll } from "$app/navigation";
 	import { CONTACT } from "$lib/config/contact";
+	import {
+		buildPortalUrl,
+		buildCancelUrl,
+		buildResumeUrl,
+		buildCheckoutUrl,
+	} from "$lib/config/billing";
+	import { page } from "$app/stores";
 
 	// Import extracted components
 	import SubscriptionCard from "./SubscriptionCard.svelte";
@@ -19,25 +22,17 @@
 	import type { FlourishState } from "$lib/grafts/upgrades";
 
 	// Import types and utils
-	import { sanitizeErrorMessage } from "./utils";
 	import { KeyRound } from "@lucide/svelte";
 	import type { TierKey } from "$lib/config/tiers";
 
 	let { data } = $props();
 
-	// Action states
-	let cancellingSubscription = $state(false);
-	let resumingSubscription = $state(false);
+	// Action states (retained for spinner UX during redirect)
 	let changingPlan = $state(false);
 	let selectedPlan = $state("");
 
-	// Dialog states
-	let showCancelDialog = $state(false);
-	let showChangePlanDialog = $state(false);
-	let pendingPlanChange = $state<{
-		plan: string;
-		tierInfo: { name: string; isUpgrade: boolean } | null;
-	}>({ plan: "", tierInfo: null });
+	// Current page URL for redirect-back after billing hub actions
+	const currentUrl = $derived($page.url.href);
 
 	// Derive flourish state from billing status
 	function getFlourishState(): FlourishState {
@@ -67,102 +62,34 @@
 		changePlanSection?.scrollIntoView({ behavior: "smooth" });
 	}
 
-	// Handle tend - open billing portal
-	async function handleTend(): Promise<void> {
-		try {
-			const response = await api.post("/api/grafts/upgrades/tend", {});
-			if (response.shedUrl) {
-				window.location.href = response.shedUrl;
-			} else {
-				toast.error("Unable to open billing portal");
-			}
-		} catch (error) {
-			toast.error(sanitizeErrorMessage(error, "Failed to open billing portal"));
-		}
+	// Handle tend - redirect to BillingHub portal
+	function handleTend(): void {
+		window.location.href = buildPortalUrl(currentUrl);
 	}
 
-	// Cancel subscription - show dialog
+	// Cancel subscription - redirect to BillingHub cancel page (has its own confirmation)
 	function handleCancelClick(): void {
-		showCancelDialog = true;
+		window.location.href = buildCancelUrl(currentUrl);
 	}
 
-	// Cancel subscription - confirmed
-	async function handleCancelConfirm(): Promise<void> {
-		cancellingSubscription = true;
-		try {
-			await api.patch("/api/billing", {
-				action: "cancel",
-				cancelImmediately: false,
-			});
-			toast.success("Subscription cancelled. Access continues until period end.");
-			try {
-				await invalidateAll();
-			} catch (e) {
-				console.error("Failed to refresh data:", e);
-				toast.warning("Page data may be stale. Please refresh if needed.");
-			}
-		} catch (error) {
-			toast.error(sanitizeErrorMessage(error, "Failed to cancel subscription"));
-		} finally {
-			cancellingSubscription = false;
-		}
+	// Resume cancelled subscription - redirect to BillingHub resume page (has its own confirmation)
+	function handleResume(): void {
+		window.location.href = buildResumeUrl(currentUrl);
 	}
 
-	// Resume cancelled subscription
-	async function handleResume(): Promise<void> {
-		resumingSubscription = true;
-		try {
-			await api.patch("/api/billing", {
-				action: "resume",
-			});
-			toast.success("Subscription resumed!");
-			try {
-				await invalidateAll();
-			} catch (e) {
-				console.error("Failed to refresh data:", e);
-				toast.warning("Page data may be stale. Please refresh if needed.");
-			}
-		} catch (error) {
-			toast.error(sanitizeErrorMessage(error, "Failed to resume subscription"));
-		} finally {
-			resumingSubscription = false;
-		}
-	}
-
-	// Change plan - show dialog
+	// Change plan - redirect to BillingHub checkout for the new tier
 	function handleChangePlan(newPlan: string): void {
 		if (newPlan === data.currentPlan) return;
 
-		const tierInfo = data.availableTiers.find((t) => t.id === newPlan);
-		pendingPlanChange = { plan: newPlan, tierInfo: tierInfo ?? null };
-		showChangePlanDialog = true;
-	}
-
-	// Change plan - confirmed
-	async function handleChangePlanConfirm(): Promise<void> {
-		const { plan: newPlan, tierInfo } = pendingPlanChange;
-		if (!newPlan) return;
-
 		changingPlan = true;
 		selectedPlan = newPlan;
-		try {
-			await api.patch("/api/billing", {
-				action: "change_plan",
-				plan: newPlan,
-			});
-			toast.success(`Plan changed to ${tierInfo?.name}!`);
-			try {
-				await invalidateAll();
-			} catch (e) {
-				console.error("Failed to refresh data:", e);
-				toast.warning("Page data may be stale. Please refresh if needed.");
-			}
-		} catch (error) {
-			toast.error(sanitizeErrorMessage(error, "Failed to change plan"));
-		} finally {
-			changingPlan = false;
-			selectedPlan = "";
-		}
+
+		window.location.href = buildCheckoutUrl({
+			tenantId: data.tenantId,
+			tier: newPlan,
+			billingCycle: "monthly",
+			redirect: currentUrl,
+		});
 	}
 </script>
 
@@ -191,8 +118,6 @@
 		billing={data.billing}
 		billingError={data.billingError}
 		tierConfig={data.tierConfig}
-		{cancellingSubscription}
-		{resumingSubscription}
 		onCancel={handleCancelClick}
 		onResume={handleResume}
 	/>
@@ -204,7 +129,7 @@
 	<FeaturesCard curiosCount={data.curiosCount} />
 
 	<!-- Payment Method -->
-	<PaymentMethodCard billing={data.billing} />
+	<PaymentMethodCard billing={data.billing} isComped={data.isComped} />
 
 	<!-- Passkeys — managed on login hub (single WebAuthn origin) -->
 	<GlassCard variant="default" class="mb-6">
@@ -264,29 +189,6 @@
 	</GlassCard>
 </div>
 
-<!-- Cancel Subscription Dialog -->
-<GlassConfirmDialog
-	bind:open={showCancelDialog}
-	title="Cancel Subscription"
-	message="Your subscription will remain active until the end of your current billing period. You can resume at any time before then."
-	confirmLabel="Cancel Subscription"
-	variant="danger"
-	loading={cancellingSubscription}
-	onconfirm={handleCancelConfirm}
-/>
-
-<!-- Change Plan Dialog -->
-<GlassConfirmDialog
-	bind:open={showChangePlanDialog}
-	title={pendingPlanChange.tierInfo?.isUpgrade ? "Upgrade Plan" : "Downgrade Plan"}
-	message={pendingPlanChange.tierInfo?.isUpgrade
-		? `Are you sure you want to upgrade to ${pendingPlanChange.tierInfo?.name}? You will be charged the pro-rated difference immediately.`
-		: `Are you sure you want to downgrade to ${pendingPlanChange.tierInfo?.name}? You will receive a pro-rated credit for your remaining time.`}
-	confirmLabel={pendingPlanChange.tierInfo?.isUpgrade ? "Upgrade" : "Downgrade"}
-	variant={pendingPlanChange.tierInfo?.isUpgrade ? "default" : "warning"}
-	loading={changingPlan}
-	onconfirm={handleChangePlanConfirm}
-/>
 
 <style>
 	.account-page {

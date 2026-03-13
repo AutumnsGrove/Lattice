@@ -1,56 +1,23 @@
 <script lang="ts">
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
-	import { CreditCard, ExternalLink, Loader2, Gift } from "@lucide/svelte";
-	import { api } from "$lib/utils";
+	import { CreditCard, ExternalLink, Gift } from "@lucide/svelte";
+	import { buildPortalUrl } from "$lib/config/billing";
+	import { page } from "$app/stores";
 	import type { BillingData } from "./types";
 
 	interface Props {
 		billing: BillingData | null;
+		isComped?: boolean;
 	}
 
-	let { billing }: Props = $props();
-
-	let isLoading = $state(false);
-	let errorMessage = $state<string | null>(null);
-	let isComped = $state(false);
-	let compedMessage = $state<string | null>(null);
+	let { billing, isComped = false }: Props = $props();
 
 	/**
-	 * Open Stripe Billing Portal
-	 * Creates a portal session and redirects the user
+	 * Open BillingHub Portal — redirects to billing.grove.place/portal
+	 * which handles Stripe Billing Portal session creation
 	 */
-	async function openBillingPortal() {
-		isLoading = true;
-		errorMessage = null;
-		isComped = false;
-		compedMessage = null;
-
-		try {
-			const data = await api.put<{
-				isComped?: boolean;
-				message?: string;
-				portalUrl?: string;
-				success?: boolean;
-			}>("/api/billing", {});
-
-			// Handle comped accounts gracefully
-			if (data?.isComped) {
-				isComped = true;
-				compedMessage = data.message || "Your account is complimentary.";
-				isLoading = false;
-				return;
-			}
-
-			if (data?.portalUrl) {
-				window.location.href = data.portalUrl;
-			} else {
-				throw new Error("No portal URL returned");
-			}
-		} catch (err) {
-			console.error("Failed to open billing portal:", err);
-			errorMessage = err instanceof Error ? err.message : "Failed to open billing portal";
-			isLoading = false;
-		}
+	function openBillingPortal() {
+		window.location.href = buildPortalUrl($page.url.href);
 	}
 </script>
 
@@ -65,7 +32,7 @@
 			</div>
 			<div class="comped-content">
 				<p class="comped-title">Complimentary Account</p>
-				<p class="comped-description">{compedMessage}</p>
+				<p class="comped-description">Your account is complimentary.</p>
 			</div>
 		</div>
 	{:else if billing?.paymentMethod}
@@ -84,20 +51,11 @@
 		</div>
 	{/if}
 
-	{#if errorMessage}
-		<p class="error-message">{errorMessage}</p>
-	{/if}
-
 	{#if !isComped}
 		<p class="payment-note">
-			<button type="button" onclick={openBillingPortal} disabled={isLoading} class="portal-button">
-				{#if isLoading}
-					<Loader2 class="spinner" aria-hidden="true" />
-					Opening portal...
-				{:else}
-					Manage Payment Method
-					<ExternalLink class="external-icon" aria-hidden="true" />
-				{/if}
+			<button type="button" onclick={openBillingPortal} class="portal-button">
+				Manage Payment Method
+				<ExternalLink class="external-icon" aria-hidden="true" />
 			</button>
 		</p>
 	{/if}
@@ -172,35 +130,9 @@
 		background: var(--color-primary-dark, #15803d);
 	}
 
-	.portal-button:disabled {
-		opacity: 0.7;
-		cursor: not-allowed;
-	}
-
 	:global(.external-icon) {
 		width: 0.875rem;
 		height: 0.875rem;
-	}
-
-	:global(.spinner) {
-		width: 1rem;
-		height: 1rem;
-		animation: spin 1s linear infinite;
-	}
-
-	@keyframes spin {
-		from {
-			transform: rotate(0deg);
-		}
-		to {
-			transform: rotate(360deg);
-		}
-	}
-
-	.error-message {
-		color: var(--color-error, #ef4444);
-		font-size: 0.875rem;
-		margin: 0.5rem 0;
 	}
 
 	.muted {

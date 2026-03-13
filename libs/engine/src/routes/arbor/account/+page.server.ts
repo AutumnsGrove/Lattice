@@ -226,6 +226,8 @@ export const load: PageServerLoad = async ({ locals, platform, parent, cookies }
 
 	return {
 		...parentData,
+		tenantId: locals.tenantId,
+		isComped: isCompedPremium,
 		billing: billingData,
 		billingError,
 		usage: tenant

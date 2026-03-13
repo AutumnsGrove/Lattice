@@ -2,6 +2,7 @@
  * Garden Shed API: POST /api/grafts/upgrades/tend
  *
  * Open the garden shed for self-service billing management.
+ * Redirects to BillingHub portal — all Stripe logic lives in billing-api.
  */
 
 import { json } from "@sveltejs/kit";
@@ -12,147 +13,88 @@ import { throwGroveError, API_ERRORS } from "$lib/errors";
 import { getVerifiedTenantId } from "$lib/auth/session";
 import { createThreshold } from "$lib/threshold/factory.js";
 import { thresholdCheck } from "$lib/threshold/adapters/sveltekit.js";
-import { createPaymentProvider } from "$lib/payments";
+import { buildPortalUrl } from "$lib/config/billing";
 import { logBillingAudit } from "$lib/server/billing";
 
 const TEND_RATE_LIMIT = { limit: 20, windowSeconds: 3600 }; // 20 per hour
 
-export const POST: RequestHandler = async ({
-  request,
-  platform,
-  locals,
-}): Promise<Response> => {
-  // Authentication required
-  if (!locals.user) {
-    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
-  }
+export const POST: RequestHandler = async ({ request, platform, locals }): Promise<Response> => {
+	// Authentication required
+	if (!locals.user) {
+		throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
+	}
 
-  // CSRF validation — use URL.origin for exact domain match (prevents grove.place.evil.com bypass)
-  const requestOrigin =
-    request.headers.get("origin") || request.headers.get("referer");
-  try {
-    if (!requestOrigin) throw new Error("Missing origin");
-    const originUrl = new URL(requestOrigin);
-    const expectedUrl = new URL(locals.origin ?? "https://grove.place");
-    if (originUrl.origin !== expectedUrl.origin) {
-      throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
-    }
-  } catch (e) {
-    if ((e as { status?: number }).status === 403) throw e;
-    throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
-  }
+	// CSRF validation — use URL.origin for exact domain match (prevents grove.place.evil.com bypass)
+	const requestOrigin = request.headers.get("origin") || request.headers.get("referer");
+	try {
+		if (!requestOrigin) throw new Error("Missing origin");
+		const originUrl = new URL(requestOrigin);
+		const expectedUrl = new URL(locals.origin ?? "https://grove.place");
+		if (originUrl.origin !== expectedUrl.origin) {
+			throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
+		}
+	} catch (e) {
+		if ((e as { status?: number }).status === 403) throw e;
+		throwGroveError(403, API_ERRORS.INVALID_ORIGIN, "API");
+	}
 
-  // Environment check
-  if (!platform?.env?.DB) {
-    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
-  }
+	// Environment check
+	if (!platform?.env?.DB) {
+		throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
+	}
 
-  if (!platform?.env?.STRIPE_SECRET_KEY) {
-    throwGroveError(500, API_ERRORS.PAYMENT_PROVIDER_NOT_CONFIGURED, "API");
-  }
+	// Get and verify tenant
+	const tenantId = locals.tenantId;
+	if (!tenantId) {
+		throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
+	}
 
-  // Get and verify tenant
-  const tenantId = locals.tenantId;
-  if (!tenantId) {
-    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
-  }
+	const verifiedTenantId = await getVerifiedTenantId(platform.env.DB, tenantId, locals.user);
 
-  const verifiedTenantId = await getVerifiedTenantId(
-    platform.env.DB,
-    tenantId,
-    locals.user,
-  );
+	// Rate limiting
+	const threshold = createThreshold(platform?.env);
+	if (threshold) {
+		const denied = await thresholdCheck(threshold, {
+			key: `tend:${verifiedTenantId}`,
+			limit: TEND_RATE_LIMIT.limit,
+			windowSeconds: TEND_RATE_LIMIT.windowSeconds,
+		});
 
-  // Rate limiting
-  const threshold = createThreshold(platform?.env);
-  if (threshold) {
-    const denied = await thresholdCheck(threshold, {
-      key: `tend:${verifiedTenantId}`,
-      limit: TEND_RATE_LIMIT.limit,
-      windowSeconds: TEND_RATE_LIMIT.windowSeconds,
-    });
+		if (denied) {
+			return denied;
+		}
+	}
 
-    if (denied) {
-      return denied;
-    }
-  }
+	// Parse request body
+	let body: TendRequest;
+	try {
+		body = await request.json();
+	} catch {
+		throwGroveError(400, API_ERRORS.INVALID_REQUEST_BODY, "API");
+	}
 
-  // Parse request body
-  let body: TendRequest;
-  try {
-    body = await request.json();
-  } catch {
-    throwGroveError(400, API_ERRORS.INVALID_REQUEST_BODY, "API");
-  }
+	const { returnTo } = body;
 
-  const { returnTo } = body;
+	// Build BillingHub portal URL — all Stripe logic lives in billing-api
+	const config = createUpgradeConfig(platform.env as unknown as Record<string, string | undefined>);
 
-  try {
-    // Get billing record for customer ID
-    const billing = (await platform.env.DB.prepare(
-      `SELECT provider_customer_id FROM platform_billing WHERE tenant_id = ?`,
-    )
-      .bind(verifiedTenantId)
-      .first()) as { provider_customer_id: string | null } | null;
+	const redirectUrl = returnTo?.startsWith("/")
+		? `${config.appUrl}${returnTo}`
+		: `${config.appUrl}/garden`;
 
-    if (!billing?.provider_customer_id) {
-      throwGroveError(400, API_ERRORS.RESOURCE_NOT_FOUND, "API");
-    }
+	const shedUrl = buildPortalUrl(redirectUrl);
 
-    // Create Stripe Billing Portal session
-    const payments = createPaymentProvider("stripe", {
-      secretKey: platform.env.STRIPE_SECRET_KEY,
-    });
+	// Audit log the portal access
+	await logBillingAudit(platform.env.DB, {
+		tenantId: verifiedTenantId,
+		action: "garden_shed_opened",
+		details: { returnTo },
+		userEmail: locals.user.email,
+	});
 
-    const config = createUpgradeConfig(
-      platform.env as unknown as Record<string, string | undefined>,
-    );
+	const response: TendResponse = {
+		shedUrl,
+	};
 
-    const portalSession = await payments.createBillingPortalSession(
-      billing.provider_customer_id,
-      constructReturnUrl(config.appUrl, returnTo),
-    );
-
-    // Audit log the portal access
-    await logBillingAudit(platform.env.DB, {
-      tenantId: verifiedTenantId,
-      action: "garden_shed_opened",
-      details: {
-        returnTo,
-        sessionId: portalSession.id,
-      },
-      userEmail: locals.user.email,
-    });
-
-    const response: TendResponse = {
-      shedUrl: portalSession.url,
-    };
-
-    return json(response);
-  } catch (error) {
-    console.error("[Tend] Failed to create portal session:", error);
-
-    // Audit log the failure
-    await logBillingAudit(platform.env.DB, {
-      tenantId: verifiedTenantId,
-      action: "garden_shed_failed",
-      details: {
-        returnTo,
-        error: error instanceof Error ? error.message : "Unknown error",
-      },
-      userEmail: locals.user.email,
-    });
-
-    throwGroveError(500, API_ERRORS.INTERNAL_ERROR, "API");
-  }
+	return json(response);
 };
-
-/**
- * Construct the return URL after tending the garden.
- */
-function constructReturnUrl(appUrl: string, returnTo?: string): string {
-  if (returnTo && returnTo.startsWith("/")) {
-    return `${appUrl}${returnTo}`;
-  }
-  return `${appUrl}/garden`;
-}

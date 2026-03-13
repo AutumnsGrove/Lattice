@@ -1,0 +1,20 @@
+name: Deploy Billing API
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "services/billing-api/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/_deploy-worker.yml
+    with:
+      worker-dir: services/billing-api
+      run-tests: true
+    secrets: inherit
