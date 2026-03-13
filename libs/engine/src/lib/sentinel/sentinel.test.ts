@@ -522,9 +522,10 @@ describe("sentinel/operations", () => {
 		});
 
 		it("should catch and wrap operation errors", async () => {
-			// Make D1 throw
+			// Make all D1 statement methods throw (getOperation picks randomly)
 			db._statement.all.mockRejectedValue(new Error("D1 connection lost"));
 			db._statement.run.mockRejectedValue(new Error("D1 connection lost"));
+			db._statement.first.mockRejectedValue(new Error("D1 connection lost"));
 
 			const result = await executeOperation(
 				"d1_reads",
