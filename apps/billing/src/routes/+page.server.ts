@@ -2,6 +2,7 @@ import { redirect, error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import { proxyToBillingApi } from "$lib/billing-proxy";
 import { isValidRedirect, getSafeRedirect } from "$lib/redirect";
+import { isGreenhouseMode } from "$lib/greenhouse";
 
 /**
  * Checkout page loader
@@ -59,6 +60,11 @@ export const load: PageServerLoad = async ({ url, locals, platform, cookies }) =
 		}
 
 		const safeRedirect = getSafeRedirect(redirectUrl);
+
+		// Greenhouse mode: simulate checkout success → redirect to callback
+		if (isGreenhouseMode(cookies, platform)) {
+			redirect(302, "/callback?session_id=greenhouse_cs_test_mock&greenhouse=true");
+		}
 
 		const response = await proxyToBillingApi(platform, "/checkout", {
 			method: "POST",

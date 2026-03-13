@@ -8,16 +8,20 @@
 
 	let { data } = $props();
 
-	const planName = data.status?.plan
-		? data.status.plan.charAt(0).toUpperCase() + data.status.plan.slice(1)
-		: "Current";
-	const periodEnd = data.status?.currentPeriodEnd
-		? new Date(data.status.currentPeriodEnd).toLocaleDateString("en-US", {
-				year: "numeric",
-				month: "long",
-				day: "numeric",
-			})
-		: null;
+	const planName = $derived(
+		data.status?.plan
+			? data.status.plan.charAt(0).toUpperCase() + data.status.plan.slice(1)
+			: "Current",
+	);
+	const periodEnd = $derived(
+		data.status?.currentPeriodEnd
+			? new Date(data.status.currentPeriodEnd).toLocaleDateString("en-US", {
+					year: "numeric",
+					month: "long",
+					day: "numeric",
+				})
+			: null,
+	);
 </script>
 
 <svelte:head>
@@ -25,18 +29,17 @@
 </svelte:head>
 
 <div class="w-full max-w-md mx-auto animate-fade-in">
-	<div class="glass-grove rounded-2xl border border-default p-8 shadow-md">
+	<div class="glass-grove rounded-2xl border border-default p-8 shadow-lg">
 		<div class="text-center mb-6">
-			<div class="text-4xl mb-4">&#127793;</div>
-			<h1 class="text-xl font-serif text-foreground mb-2">Resume your subscription?</h1>
+			<h1 class="text-xl font-serif text-foreground mb-2 tracking-tight">Resume your subscription?</h1>
 			<p class="text-foreground-muted">
-				Welcome back! Your {planName} plan can pick up right where it left off.
+				Your {planName} plan is still here, right where you left it.
 			</p>
 		</div>
 
 		{#if !data.status?.cancelAtPeriodEnd}
 			<!-- Not actually cancelled — redirect back -->
-			<div class="rounded-lg p-4 mb-6" style="background-color: var(--color-success-bg);">
+			<div class="banner-success mb-6">
 				<p class="text-sm text-foreground">
 					Your subscription is already active. No action needed.
 				</p>
@@ -45,13 +48,13 @@
 			<a href={data.redirectUrl} class="btn-primary w-full text-center"> Back to your Grove </a>
 		{:else}
 			<!-- Scheduled for cancellation — offer resume -->
-			<div class="rounded-lg border border-default p-4 mb-6">
-				<div class="flex justify-between items-center mb-2">
+			<div class="status-card mb-6">
+				<div class="flex justify-between items-center mb-3">
 					<span class="text-sm text-foreground-muted">Plan</span>
 					<span class="text-sm font-medium text-foreground">{planName}</span>
 				</div>
 				{#if data.status?.paymentMethod}
-					<div class="flex justify-between items-center mb-2">
+					<div class="flex justify-between items-center mb-3">
 						<span class="text-sm text-foreground-muted">Payment</span>
 						<span class="text-sm font-medium text-foreground capitalize"
 							>{data.status.paymentMethod.brand} ending in {data.status.paymentMethod.last4}</span
@@ -72,7 +75,9 @@
 
 			<div class="flex flex-col gap-3">
 				<form method="POST">
-					<button type="submit" class="btn-primary w-full"> Resume subscription </button>
+					<button type="submit" class="btn-primary w-full" aria-label="Confirm resumption of your subscription">
+						Resume subscription
+					</button>
 				</form>
 				<a href={data.redirectUrl} class="btn-secondary w-full text-center"> Not now </a>
 			</div>

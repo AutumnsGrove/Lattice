@@ -7,13 +7,11 @@
 </svelte:head>
 
 <div class="w-full max-w-md mx-auto animate-fade-in">
-	<div class="glass-grove rounded-2xl border border-default p-8 text-center shadow-md">
-		<div class="text-4xl mb-4">&#127807;</div>
-
-		<h1 class="text-xl font-serif text-foreground mb-2">Something went wrong</h1>
+	<div class="glass-grove rounded-2xl border border-default p-8 text-center shadow-lg">
+		<h1 class="text-xl font-serif text-foreground mb-2 tracking-tight">Something went sideways</h1>
 
 		<p class="text-foreground-muted mb-6">
-			{$page.error?.message || "We ran into an issue with billing. Please try again in a moment."}
+			{$page.error?.message || "We hit a snag with billing. Give it another moment and try again."}
 		</p>
 
 		{#if $page.error?.code}
@@ -27,7 +25,7 @@
 				Try again
 			</button>
 
-			<a href="https://grove.place" class="btn-secondary w-full"> Back to Grove </a>
+			<a href="/" class="btn-secondary w-full text-center"> Back to billing </a>
 		</div>
 	</div>
 </div>

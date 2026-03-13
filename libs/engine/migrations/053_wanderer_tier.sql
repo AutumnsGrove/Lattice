@@ -7,7 +7,9 @@
 
 -- Track last meaningful activity for inactivity reclamation (free tier only).
 -- Updated on: login, post create/update, media upload.
-ALTER TABLE tenants ADD COLUMN last_activity_at INTEGER DEFAULT (unixepoch());
+-- Note: DEFAULT (unixepoch()) is valid in CREATE TABLE but not ALTER TABLE
+-- in newer SQLite versions. Using constant default for compatibility.
+ALTER TABLE tenants ADD COLUMN last_activity_at INTEGER DEFAULT 0;
 
 -- Track reclamation warning state for free tier accounts.
 -- null = no warnings sent

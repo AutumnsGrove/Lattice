@@ -1,4 +1,5 @@
 import type { Handle } from "@sveltejs/kit";
+import { isGreenhouseMode, GREENHOUSE_AUTH } from "$lib/greenhouse";
 
 /**
  * Server hooks for the Billing app
@@ -109,6 +110,12 @@ export const handle: Handle = async ({ event, resolve }) => {
 			event.locals.tenantId = session.tenantId;
 			event.locals.userId = session.userId;
 		}
+	}
+
+	// Greenhouse Mode: mock auth when toggle is active (dev/test only)
+	if (!isApi && !event.locals.tenantId && isGreenhouseMode(event.cookies, platform)) {
+		event.locals.tenantId = GREENHOUSE_AUTH.tenantId;
+		event.locals.userId = GREENHOUSE_AUTH.userId;
 	}
 
 	const response = await resolve(event);

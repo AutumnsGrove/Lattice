@@ -8,8 +8,7 @@
  * All requests flow through this proxy via Cloudflare service bindings.
  */
 
-import { buildErrorJson } from "@autumnsgrove/lattice/errors";
-import { BILLING_ERRORS } from "$lib/errors";
+import { buildErrorJson, BILLING_ERRORS } from "$lib/errors";
 
 /**
  * Proxy a request to the billing-api worker via service binding.

@@ -27,7 +27,10 @@ export function isValidRedirect(url: string): boolean {
 /**
  * Get a safe redirect URL, falling back to the default if invalid.
  */
-export function getSafeRedirect(url: string | null, fallback = "https://grove.place"): string {
+export function getSafeRedirect(
+	url: string | null | undefined,
+	fallback = "https://grove.place",
+): string {
 	if (url && isValidRedirect(url)) return url;
 	return fallback;
 }

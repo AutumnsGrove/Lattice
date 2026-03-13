@@ -2,6 +2,7 @@ import { redirect, error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import { proxyToBillingApi } from "$lib/billing-proxy";
 import { isValidRedirect } from "$lib/redirect";
+import { isGreenhouseMode } from "$lib/greenhouse";
 
 /**
  * Portal redirect — creates a Stripe Billing Portal session and redirects.
@@ -29,6 +30,11 @@ export const load: PageServerLoad = async ({ url, locals, platform, cookies }) =
 			sameSite: "lax",
 			maxAge: 60 * 30,
 		});
+	}
+
+	// Greenhouse mode: stay on portal page (shows mock message instead of redirecting to Stripe)
+	if (isGreenhouseMode(cookies, platform)) {
+		return;
 	}
 
 	const returnUrl = "https://billing.grove.place/callback";

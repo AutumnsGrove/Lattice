@@ -62,7 +62,6 @@ BillingHub replaces all scattered payment code with two Cloudflare Workers that 
 ### Non-Goals (Out of Scope)
 
 - Tenant shop payments (Stripe Connect for selling products). Platform billing only.
-- Changing the `platform_billing` D1 schema. The existing table works fine.
 - Building a custom payment form. Stripe Checkout and Billing Portal handle the sensitive UI.
 - Replacing Warden's read-only Stripe queries. Admin tooling stays separate.
 
@@ -777,8 +776,9 @@ A clear accounting of code that goes away:
 
 | Component | Location | Why It Stays |
 |-----------|----------|-------------|
-| `platform_billing` table | D1 migration 007 | Schema works. billing-api reads/writes it. |
+| `platform_billing` table | D1 migrations 007, 013, 101 | Plan CHECK updated to match canonical tier names (`wanderer` replaces `free`). billing-api reads/writes it. |
 | `webhook_events` table | D1 migration 007 | Idempotency and audit trail. billing-api uses it. |
+| `billing_audit_log` table | D1 migration 101 | New. Billing-api logs all mutations here. Survives tenant deletion (no FK) for compliance. |
 | `$lib/server/billing.ts` | Engine | Feature gating (`checkFeatureAccess`, `isCompedAccount`). Not payment processing. |
 | `$lib/config/tiers.ts` | Engine | Tier definitions are display/feature config, not Stripe config. |
 | Upgrades graft components | Engine grafts | GardenModal, GrowthCard, etc. UI stays embedded. |

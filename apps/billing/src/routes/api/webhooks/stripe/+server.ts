@@ -118,7 +118,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 	const rawBody = new TextEncoder().encode(bodyText);
 
 	// Proxy raw body + signature header to billing-api for processing
-	const response = await proxyRawToBillingApi(platform, "/webhook", rawBody, {
+	const response = await proxyRawToBillingApi(platform, "/webhook", rawBody.buffer as ArrayBuffer, {
 		"Content-Type": "application/json",
 		"Stripe-Signature": signatureHeader,
 	});

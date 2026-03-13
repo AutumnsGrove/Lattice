@@ -14,6 +14,9 @@
  */
 
 import type { GroveErrorDef } from "@autumnsgrove/lattice/errors";
+import { buildErrorJson } from "@autumnsgrove/lattice/errors";
+
+export { buildErrorJson };
 
 export const BILLING_ERRORS = {
 	// ─────────────────────────────────────────────────────────────────────────

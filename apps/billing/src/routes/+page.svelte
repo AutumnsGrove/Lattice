@@ -24,18 +24,17 @@
 <div class="w-full max-w-md mx-auto animate-fade-in">
 	{#if data.checkoutUrl}
 		<!-- Redirecting to Stripe Checkout -->
-		<div class="glass-grove rounded-2xl border border-default p-8 text-center shadow-md">
-			<div class="spinner mx-auto mb-4"></div>
-			<h1 class="text-lg font-serif text-foreground mb-2">Redirecting to checkout...</h1>
+		<div class="glass-grove rounded-2xl border border-default p-8 text-center shadow-lg" role="status" aria-live="polite" aria-label="Redirecting to checkout">
+			<div class="spinner mx-auto mb-4" role="status" aria-label="Loading"></div>
+			<h1 class="text-lg font-serif text-foreground mb-2 tracking-tight">Redirecting to checkout...</h1>
 			<p class="text-sm text-foreground-muted">
 				You'll be taken to our secure payment page in a moment.
 			</p>
 		</div>
 	{:else if !data.authenticated}
 		<!-- Not signed in -->
-		<div class="glass-grove rounded-2xl border border-default p-8 text-center shadow-md">
-			<div class="text-4xl mb-4">&#127793;</div>
-			<h1 class="text-xl font-serif text-foreground mb-2">Grove Billing</h1>
+		<div class="glass-grove rounded-2xl border border-default p-8 text-center shadow-lg">
+			<h1 class="text-xl font-serif text-foreground mb-2 tracking-tight">Grove Billing</h1>
 			<p class="text-foreground-muted mb-6">Sign in to manage your subscription and billing.</p>
 			<a
 				href="https://login.grove.place?redirect={encodeURIComponent(
@@ -48,12 +47,11 @@
 		</div>
 	{:else}
 		<!-- Signed in, no checkout action — show management links -->
-		<div class="glass-grove rounded-2xl border border-default p-8 shadow-md">
+		<div class="glass-grove rounded-2xl border border-default p-8 shadow-lg">
 			<div class="text-center mb-6">
-				<div class="text-4xl mb-4">&#127793;</div>
-				<h1 class="text-xl font-serif text-foreground mb-2">Manage your Grove</h1>
+				<h1 class="text-xl font-serif text-foreground mb-2 tracking-tight">Your Grove</h1>
 				<p class="text-foreground-muted">
-					View and manage your subscription, payment methods, and billing history.
+					Subscription, payment methods, and billing — all in one place.
 				</p>
 			</div>
 

@@ -2,6 +2,13 @@ import { error, redirect } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
 import { proxyToBillingApi } from "$lib/billing-proxy";
 import { getSafeRedirect } from "$lib/redirect";
+import {
+	isGreenhouseMode,
+	isGreenhouseCancelled,
+	setGreenhouseCancelled,
+	GREENHOUSE_STATUS,
+	GREENHOUSE_STATUS_CANCELLING,
+} from "$lib/greenhouse";
 
 /**
  * Cancellation confirmation page
@@ -18,19 +25,7 @@ export const load: PageServerLoad = async ({ locals, platform, cookies }) => {
 		});
 	}
 
-	const response = await proxyToBillingApi(platform, `/status/${locals.tenantId}`, {
-		headers: locals.userId ? { "X-User-Id": locals.userId } : undefined,
-	});
-
-	if (!response.ok) {
-		console.error("[billing] Status fetch failed:", response.status);
-		error(502, {
-			message: "Could not load billing information.",
-			code: "BILLING-043",
-		});
-	}
-
-	const status = (await response.json()) as {
+	let status: {
 		plan?: string;
 		status?: string;
 		flourishState?: string;
@@ -40,11 +35,33 @@ export const load: PageServerLoad = async ({ locals, platform, cookies }) => {
 		paymentMethod?: { last4: string; brand: string } | null;
 	};
 
+	if (isGreenhouseMode(cookies, platform)) {
+		status = isGreenhouseCancelled(cookies)
+			? { ...GREENHOUSE_STATUS_CANCELLING }
+			: { ...GREENHOUSE_STATUS };
+	} else {
+		const response = await proxyToBillingApi(platform, `/status/${locals.tenantId}`, {
+			headers: locals.userId ? { "X-User-Id": locals.userId } : undefined,
+		});
+
+		if (!response.ok) {
+			console.error("[billing] Status fetch failed:", response.status);
+			error(502, {
+				message: "Could not load billing information.",
+				code: "BILLING-043",
+			});
+		}
+
+		status = (await response.json()) as typeof status;
+	}
+
 	const redirectUrl = cookies.get("grove_billing_redirect") || null;
+	const greenhouse = isGreenhouseMode(cookies, platform);
 
 	return {
 		status,
-		redirectUrl: getSafeRedirect(redirectUrl),
+		redirectUrl: greenhouse ? "/" : getSafeRedirect(redirectUrl),
+		greenhouse,
 	};
 };
 
@@ -55,6 +72,12 @@ export const actions: Actions = {
 				message: "Please sign in to manage your billing.",
 				code: "BILLING-002",
 			});
+		}
+
+		// In greenhouse mode, simulate success without calling billing-api
+		if (isGreenhouseMode(cookies, platform)) {
+			setGreenhouseCancelled(cookies);
+			redirect(303, "/cancel");
 		}
 
 		const response = await proxyToBillingApi(platform, "/cancel", {

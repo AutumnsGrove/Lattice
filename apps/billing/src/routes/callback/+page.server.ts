@@ -1,6 +1,7 @@
 import { redirect } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import { getSafeRedirect } from "$lib/redirect";
+import { isGreenhouseMode } from "$lib/greenhouse";
 
 /**
  * Post-payment callback handler
@@ -14,9 +15,19 @@ import { getSafeRedirect } from "$lib/redirect";
  *   ?cancelled=true     — user cancelled checkout
  *   (no params)         — returning from billing portal
  */
-export const load: PageServerLoad = async ({ url, cookies }) => {
+export const load: PageServerLoad = async ({ url, cookies, platform }) => {
 	const sessionId = url.searchParams.get("session_id");
 	const cancelled = url.searchParams.get("cancelled");
+
+	// Greenhouse mode: redirect back to billing hub home, not to an external app
+	if (isGreenhouseMode(cookies, platform)) {
+		const result = sessionId
+			? "?billing=success"
+			: cancelled
+				? "?billing=cancelled"
+				: "?billing=portal";
+		redirect(302, `/${result}`);
+	}
 
 	// Read and clear the redirect cookie
 	const storedRedirect = cookies.get("grove_billing_redirect");
