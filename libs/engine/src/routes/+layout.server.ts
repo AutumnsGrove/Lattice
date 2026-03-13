@@ -93,8 +93,8 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
 								return null;
 							}),
 
-						// Timeline curio config query
-						db
+						// Timeline curio config query (table lives in CURIO_DB since Phase 3)
+						(platform?.env?.CURIO_DB ?? db)
 							.prepare(
 								`SELECT enabled FROM timeline_curio_config WHERE tenant_id = ? AND enabled = 1`,
 							)
@@ -109,8 +109,8 @@ export const load: LayoutServerLoad = async ({ locals, platform }) => {
 									.catch(() => false)
 							: Promise.resolve(false),
 
-						// Journey curio config query
-						db
+						// Journey curio config query (table lives in CURIO_DB since Phase 3)
+						(platform?.env?.CURIO_DB ?? db)
 							.prepare(
 								`SELECT enabled FROM journey_curio_config WHERE tenant_id = ? AND enabled = 1`,
 							)
