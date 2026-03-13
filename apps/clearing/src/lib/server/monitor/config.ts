@@ -50,8 +50,8 @@ export const COMPONENTS: ComponentConfig[] = [
 	{
 		id: "comp_payments",
 		name: "Payments",
-		// Plant handles all payment processing, so health check lives there
-		url: "https://plant.grove.place/api/health/payments",
+		// BillingHub handles all payment processing (billing.grove.place → billing-api)
+		url: "https://billing.grove.place/api/health",
 		checkType: "deep",
 		method: "GET",
 	},
