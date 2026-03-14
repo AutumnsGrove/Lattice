@@ -65,7 +65,7 @@ jobs:
             typecheck-command: "node scripts/sync-templates.mjs && pnpm exec tsc --noEmit"
           - name: og-worker
             path: services/og-worker
-            needs-engine: false
+            needs-engine: true
           - name: lumen
             path: workers/lumen
             needs-engine: true
@@ -145,7 +145,7 @@ jobs:
           - name: engine
             path: libs/engine
             project: grove-lattice
-            needs-engine: false
+            needs-engine: true
           - name: clearing
             path: apps/clearing
             project: grove-clearing
