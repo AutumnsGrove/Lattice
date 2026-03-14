@@ -607,8 +607,10 @@ export const handle: Handle = async ({ event, resolve }) => {
 					false,
 					["sign"],
 				);
-				const sig = new Uint8Array(await crypto.subtle.sign("HMAC", hmacKey, bBytes));
-				const exp = new Uint8Array(await crypto.subtle.sign("HMAC", hmacKey, aBytes));
+				const [sig, exp] = await Promise.all([
+					crypto.subtle.sign("HMAC", hmacKey, bBytes).then((b) => new Uint8Array(b)),
+					crypto.subtle.sign("HMAC", hmacKey, aBytes).then((b) => new Uint8Array(b)),
+				]);
 				let diff = 0;
 				for (let i = 0; i < sig.length; i++) {
 					diff |= sig[i] ^ exp[i];
@@ -665,9 +667,11 @@ export const handle: Handle = async ({ event, resolve }) => {
 	// falls back to KV when THRESHOLD binding is absent (local dev, etc.).
 	// Fails open if neither backend is available.
 	if (event.url.pathname.startsWith("/api/")) {
-		const { createThreshold } = await import("@autumnsgrove/lattice/threshold/factory.js");
-		const { thresholdCheck } = await import("@autumnsgrove/lattice/threshold/adapters/sveltekit.js");
-		const { getClientIP } = await import("@autumnsgrove/lattice/threshold/adapters/worker.js");
+		const [{ createThreshold }, { thresholdCheck }, { getClientIP }] = await Promise.all([
+			import("@autumnsgrove/lattice/threshold/factory.js"),
+			import("@autumnsgrove/lattice/threshold/adapters/sveltekit.js"),
+			import("@autumnsgrove/lattice/threshold/adapters/worker.js"),
+		]);
 		const clientIp = getClientIP(event.request);
 		// Authenticated users: rate limit per user ID so limits follow sessions, not IPs.
 		// Anonymous: rate limit per IP.

@@ -336,6 +336,15 @@
 			"svelte": "./dist/ui/components/ui/index.js",
 			"types": "./dist/ui/components/ui/index.d.ts"
 		},
+		"./ui/components/ui/*.svelte": {
+			"svelte": "./dist/ui/components/ui/*.svelte",
+			"default": "./dist/ui/components/ui/*.svelte"
+		},
+		"./ui/components/ui/*": {
+			"svelte": "./dist/ui/components/ui/*/index.js",
+			"default": "./dist/ui/components/ui/*/index.js",
+			"types": "./dist/ui/components/ui/*/index.d.ts"
+		},
 		"./ui/content": {
 			"default": "./dist/ui/components/content/index.js",
 			"svelte": "./dist/ui/components/content/index.js",
