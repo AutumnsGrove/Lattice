@@ -1,0 +1,176 @@
+# Aspen - The Tenant Deployment
+# Cloudflare Worker serving the daily tenant experience at subdomain.grove.place
+# Migrated from libs/engine/ (grove-lattice Pages project) to Worker mode.
+
+name = "grove-aspen"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Worker entry point (SvelteKit adapter-cloudflare output)
+main = ".svelte-kit/cloudflare/_worker.js"
+
+# Static assets served alongside the Worker
+[assets]
+directory = ".svelte-kit/cloudflare"
+binding = "ASSETS"
+
+# Smart Placement — run closer to back-end services (D1, KV, R2, DOs)
+[placement]
+mode = "smart"
+
+# Observability — structured logs in Cloudflare dashboard
+[observability]
+enabled = true
+
+[observability.logs]
+enabled = true
+invocation_logs = true
+
+# =============================================================================
+# KV Namespace - For caching and rate limiting
+# =============================================================================
+[[kv_namespaces]]
+binding = "CACHE_KV"
+id = "514e91e81cc44d128a82ec6f668303e4"
+
+# =============================================================================
+# KV Namespace - For feature flags caching
+# =============================================================================
+[[kv_namespaces]]
+binding = "FLAGS_KV"
+id = "65a600876aa14e9cbec8f8acd7d53b5f"
+
+# =============================================================================
+# R2 Bucket - For image and media storage
+# =============================================================================
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "grove-media"
+
+# =============================================================================
+# R2 Bucket - Source bucket for image migration
+# =============================================================================
+[[r2_buckets]]
+binding = "IMAGES_SOURCE"
+bucket_name = "autumnsgrove-images"
+
+# =============================================================================
+# R2 Bucket - Dedicated bucket for temporary export zip files
+# =============================================================================
+[[r2_buckets]]
+binding = "EXPORTS_BUCKET"
+bucket_name = "grove-exports"
+
+# =============================================================================
+# D1 Database - Main shared database for multi-tenant platform
+# =============================================================================
+[[d1_databases]]
+binding = "DB"
+database_name = "grove-engine-db"
+database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
+migrations_dir = "../../libs/engine/migrations"
+
+# =============================================================================
+# D1 Database - Curio widgets (gallery, timeline, guestbook, etc.)
+# =============================================================================
+[[d1_databases]]
+binding = "CURIO_DB"
+database_name = "grove-curios-db"
+database_id = "b03756ad-30d7-427a-9a1b-ec2f6478fcbd"
+
+# =============================================================================
+# Workers AI - For Petal image moderation (Llama 4 Scout vision)
+# =============================================================================
+[ai]
+binding = "AI"
+
+# =============================================================================
+# GroveAuth Service Binding (Heartwood - fast session validation)
+# =============================================================================
+[[services]]
+binding = "AUTH"
+service = "groveauth"
+
+# =============================================================================
+# Zephyr Service Binding (email gateway - direct internal routing)
+# =============================================================================
+[[services]]
+binding = "ZEPHYR"
+service = "grove-zephyr"
+
+# =============================================================================
+# Reverie Service Binding (AI configuration pipeline)
+# =============================================================================
+[[services]]
+binding = "REVERIE"
+service = "grove-reverie"
+
+# =============================================================================
+# Durable Objects - Loom Pattern (Grove's coordination layer)
+# =============================================================================
+# DOs are hosted in the grove-durable-objects worker and referenced here.
+
+# TenantDO: Per-tenant config caching, draft sync, analytics buffering
+[[durable_objects.bindings]]
+name = "TENANTS"
+class_name = "TenantDO"
+script_name = "grove-durable-objects"
+
+# PostMetaDO: Per-post reactions, views, real-time presence (hot data)
+[[durable_objects.bindings]]
+name = "POST_META"
+class_name = "PostMetaDO"
+script_name = "grove-durable-objects"
+
+# PostContentDO: Per-post content caching (warm data, hibernates quickly)
+[[durable_objects.bindings]]
+name = "POST_CONTENT"
+class_name = "PostContentDO"
+script_name = "grove-durable-objects"
+
+# SentinelDO: Stress test coordination (long-running tests, WebSocket updates)
+[[durable_objects.bindings]]
+name = "SENTINEL"
+class_name = "SentinelDO"
+script_name = "grove-durable-objects"
+
+# ExportDO: Per-export zip assembly job (alarm-based, long-running)
+[[durable_objects.bindings]]
+name = "EXPORTS"
+class_name = "ExportDO"
+script_name = "grove-durable-objects"
+
+# ThresholdDO: Per-identifier rate limiting (Loom pattern)
+[[durable_objects.bindings]]
+name = "THRESHOLD"
+class_name = "ThresholdDO"
+script_name = "grove-durable-objects"
+
+# ChatDO: Per-conversation real-time messaging (Chirp DMs, hibernation-aware)
+[[durable_objects.bindings]]
+name = "CHAT"
+class_name = "ChatDO"
+script_name = "grove-durable-objects"
+
+# =============================================================================
+# Environment Variables (non-sensitive)
+# =============================================================================
+[vars]
+CACHE_TTL_SECONDS = "3600"
+ZEPHYR_URL = "https://grove-zephyr.m7jv4v7npb.workers.dev"
+GROVEAUTH_URL = "https://auth.grove.place"
+# The Clearing (Status Page) - for Sentinel integration
+CLEARING_API_URL = "https://status.grove.place"
+# Turnstile (Shade) - human verification
+TURNSTILE_SITE_KEY = "0x4AAAAAACI9p49O_VFDy3WA"
+
+# =============================================================================
+# Secrets (set via `gw secret apply --worker grove-aspen`)
+# =============================================================================
+# SESSION_SECRET        - Secret for signing JWT tokens (32+ random chars)
+# ALLOWED_ADMIN_EMAILS  - Comma-separated list of admin emails
+# RESEND_API_KEY        - API key for Resend email service
+# TURNSTILE_SECRET_KEY  - Cloudflare Turnstile secret key (Shade)
+# GROVEAUTH_CLIENT_ID   - OAuth client ID for this application
+# GROVEAUTH_CLIENT_SECRET - OAuth client secret
+# GROVE_KEK             - Key Encryption Key for envelope encryption

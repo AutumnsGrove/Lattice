@@ -20,7 +20,7 @@
 <script lang="ts">
 	import type { MeadowPost } from "$lib/types/post.js";
 	import { formatRelativeTime } from "$lib/utils/time.js";
-	import { Blaze } from "@autumnsgrove/lattice/ui/indicators";
+	import { Blaze } from "@autumnsgrove/lattice/blazes/components";
 
 	interface Props {
 		post: MeadowPost;

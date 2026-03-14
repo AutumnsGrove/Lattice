@@ -3,7 +3,7 @@
 	import { lanternStore } from "$lib/ui/stores/lantern.svelte";
 	import { friendsStore } from "$lib/ui/stores/friends.svelte";
 	import { api } from "$lib/utils/api";
-	import type { Friend } from "$lib/server/services/friends";
+	import type { Friend } from "$lib/types/friend";
 	import type { LanternSearchResult } from "./types";
 
 	let searchInput: HTMLInputElement | undefined = $state();

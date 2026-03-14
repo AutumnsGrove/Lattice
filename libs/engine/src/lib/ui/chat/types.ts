@@ -8,7 +8,7 @@
  * deps, so importing it from client code is safe.
  */
 
-// ── Re-export WS protocol types from the canonical source of truth ──────
+// ── Re-export WS protocol types from the shared UI-safe location ────────
 export type {
 	ChatWSClientMessage,
 	ChatWSServerMessage,
@@ -23,7 +23,7 @@ export type {
 	ChatMessageData as ChatMessageWireData,
 	ChatContentType,
 	ChatImageMetadata,
-} from "$lib/server/services/chat.types.js";
+} from "$lib/types/chat";
 
 // ── Conversation Types ───────────────────────────────────────────────────
 

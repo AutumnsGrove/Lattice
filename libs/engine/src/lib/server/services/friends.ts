@@ -7,12 +7,8 @@
  * Types defined here are the source of truth — validated at the API boundary.
  */
 
-export interface Friend {
-	tenantId: string;
-	name: string;
-	subdomain: string;
-	source: string;
-}
+import type { Friend } from "$lib/types/friend";
+export type { Friend } from "$lib/types/friend";
 
 export interface FriendSearchResult {
 	tenantId: string;

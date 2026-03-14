@@ -96,6 +96,11 @@
 			"svelte": "./dist/blazes/index.js",
 			"types": "./dist/blazes/index.d.ts"
 		},
+		"./blazes/components": {
+			"default": "./dist/blazes/components/index.js",
+			"svelte": "./dist/blazes/components/index.js",
+			"types": "./dist/blazes/components/index.d.ts"
+		},
 		"./components/admin/*": {
 			"svelte": "./dist/components/admin/*.svelte",
 			"types": "./dist/components/admin/*.svelte.d.ts"
@@ -337,9 +342,9 @@
 			"types": "./dist/ui/components/content/index.d.ts"
 		},
 		"./ui/content/curios": {
-			"default": "./dist/ui/components/content/curios/index.js",
-			"svelte": "./dist/ui/components/content/curios/index.js",
-			"types": "./dist/ui/components/content/curios/index.d.ts"
+			"default": "./dist/curios/components/index.js",
+			"svelte": "./dist/curios/components/index.js",
+			"types": "./dist/curios/components/index.d.ts"
 		},
 		"./ui/content/hum": {
 			"default": "./dist/ui/components/content/hum/index.js",

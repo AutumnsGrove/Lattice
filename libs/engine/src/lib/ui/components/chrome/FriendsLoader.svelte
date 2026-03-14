@@ -9,7 +9,7 @@
 <script lang="ts">
 	import { friendsStore } from "$lib/ui/stores/friends.svelte";
 	import { api } from "$lib/utils/api";
-	import type { Friend } from "$lib/server/services/friends";
+	import type { Friend } from "$lib/types/friend";
 
 	$effect(() => {
 		if (friendsStore.loaded || friendsStore.loading) return;

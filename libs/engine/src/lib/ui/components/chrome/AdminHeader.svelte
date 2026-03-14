@@ -21,7 +21,7 @@
 
 	import { page } from "$app/state";
 	import ThemeToggle from "./ThemeToggle.svelte";
-	import { Logo } from "../ui";
+	import Logo from "../ui/Logo.svelte";
 	import { LogOut } from "@lucide/svelte";
 	import type { AdminTab, MaxWidth } from "./types";
 	import type { Snippet } from "svelte";
@@ -69,7 +69,7 @@
 	function isActiveTab(href: string): boolean {
 		// Exact match for root arbor path
 		if (href === "/arbor") {
-			return currentPath === "/arbor";
+			return (currentPath as string) === "/arbor";
 		}
 		// Prefix match for sub-paths
 		return currentPath.startsWith(href);

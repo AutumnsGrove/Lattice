@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { X } from "@lucide/svelte";
-	import type { Friend } from "$lib/server/services/friends";
+	import type { Friend } from "$lib/types/friend";
 	import { friendsStore } from "$lib/ui/stores/friends.svelte";
 	import { api } from "$lib/utils/api";
 

@@ -10,15 +10,8 @@ export { default as CollapsibleSection } from "./components/custom/CollapsibleSe
 export { default as CategoryNav } from "./components/custom/CategoryNav.svelte";
 
 // TOC and CategoryNav types and constants
-export type {
-  TOCHeader,
-  CategoryNavSection,
-  CategoryNavItem,
-} from "./components/custom/types.js";
-export {
-  DEFAULT_SCROLL_OFFSET,
-  isValidIcon,
-} from "./components/custom/types.js";
+export type { TOCHeader, CategoryNavSection, CategoryNavItem } from "./components/custom/types.js";
+export { DEFAULT_SCROLL_OFFSET, isValidIcon } from "./components/custom/types.js";
 
 // Admin components
 export { default as MarkdownEditor } from "./components/admin/MarkdownEditor.svelte";
@@ -32,11 +25,7 @@ export { default as WispPanel } from "./components/WispPanel.svelte";
 export { default as WispButton } from "./components/WispButton.svelte";
 
 // Quota components
-export {
-  QuotaWidget,
-  QuotaWarning,
-  UpgradePrompt,
-} from "./components/quota/index";
+export { QuotaWidget, QuotaWarning, UpgradePrompt } from "./components/quota/index";
 
 // Gallery components (from UI module)
 export { default as ImageGallery } from "./ui/components/gallery/ImageGallery.svelte";
@@ -53,70 +42,24 @@ export { seededShuffle } from "./utils/shuffle.js";
 
 // Config presets (colors, fonts)
 export {
-  COLOR_PRESETS,
-  DEFAULT_ACCENT_COLOR,
-  FONT_PRESETS,
-  DEFAULT_FONT,
-  getFontFamily,
+	COLOR_PRESETS,
+	DEFAULT_ACCENT_COLOR,
+	FONT_PRESETS,
+	DEFAULT_FONT,
+	getFontFamily,
 } from "./config/presets.js";
 export type { ColorPreset, FontPreset } from "./config/presets.js";
 
 // Canopy categories
 export {
-  CANOPY_CATEGORIES,
-  CANOPY_CATEGORY_LABELS,
-  CANOPY_SETTING_KEYS,
-  CANOPY_SETTINGS_SCHEMA,
-  isValidCanopyCategory,
-  parseCanopyCategories,
+	CANOPY_CATEGORIES,
+	CANOPY_CATEGORY_LABELS,
+	CANOPY_SETTING_KEYS,
+	CANOPY_SETTINGS_SCHEMA,
+	isValidCanopyCategory,
+	parseCanopyCategories,
 } from "./config/canopy-categories.js";
 export type { CanopyCategory } from "./config/canopy-categories.js";
-
-// Heartwood client (re-export explicitly to avoid StatusColor conflict with UI)
-export {
-  GroveAuthClient,
-  createGroveAuthClient,
-  generateCodeVerifier,
-  generateCodeChallenge,
-  generateState,
-  GroveAuthError,
-  TIER_POST_LIMITS,
-  TIER_NAMES,
-  getQuotaDescription,
-  getQuotaUrgency,
-  getSuggestedActions,
-  getUpgradeRecommendation,
-  getQuotaWidgetData,
-  getPreSubmitCheck,
-  STATUS_COLORS,
-  ALERT_VARIANTS,
-  getStatusColorFromPercentage,
-  getAlertVariantFromColor,
-  RateLimiter,
-  RateLimitError,
-  withRateLimit,
-  DEFAULT_RATE_LIMITS,
-} from "./heartwood/index";
-
-// Re-export Heartwood types with renamed StatusColor to avoid conflict
-export type {
-  GroveAuthConfig,
-  TokenResponse,
-  TokenInfo,
-  UserInfo,
-  LoginUrlResult,
-  UserSubscription,
-  SubscriptionStatus,
-  SubscriptionResponse,
-  CanPostResponse,
-  SubscriptionTier,
-  AuthError,
-  QuotaWidgetData,
-  PreSubmitCheckResult,
-  AlertVariant,
-} from "./heartwood/index";
-
-export type { StatusColor as GroveAuthStatusColor } from "./heartwood/index";
 
 // =============================================================================
 // Curios - Developer Tools & Fun Website Features
@@ -124,42 +67,42 @@ export type { StatusColor as GroveAuthStatusColor } from "./heartwood/index";
 
 // Timeline Curio - AI-powered daily summaries
 export {
-  // OpenRouter provider (model list + key validation for UI)
-  getOpenRouterModels,
-  validateOpenRouterKey,
-  OPENROUTER_MODELS,
-  DEFAULT_OPENROUTER_MODEL,
-  // Voice presets
-  buildVoicedPrompt,
-  getAllVoices,
-  getVoice,
-  buildCustomVoice,
-  VOICE_PRESETS,
-  DEFAULT_VOICE,
-  professional,
-  quest,
-  casual,
-  poetic,
-  minimal,
-  // Utilities
-  parseAIResponse,
-  DEFAULT_TIMELINE_CONFIG,
+	// OpenRouter provider (model list + key validation for UI)
+	getOpenRouterModels,
+	validateOpenRouterKey,
+	OPENROUTER_MODELS,
+	DEFAULT_OPENROUTER_MODEL,
+	// Voice presets
+	buildVoicedPrompt,
+	getAllVoices,
+	getVoice,
+	buildCustomVoice,
+	VOICE_PRESETS,
+	DEFAULT_VOICE,
+	professional,
+	quest,
+	casual,
+	poetic,
+	minimal,
+	// Utilities
+	parseAIResponse,
+	DEFAULT_TIMELINE_CONFIG,
 } from "./curios/timeline";
 
 export type {
-  // OpenRouter types
-  OpenRouterModel,
-  OpenRouterResponse,
-  OpenRouterOptions,
-  OpenRouterKeyValidation,
-  // Voice types
-  VoicePreset,
-  VoicePromptResult,
-  CustomVoiceConfig,
-  Commit,
-  GutterComment,
-  // Timeline types
-  TimelineCurioConfig,
-  TimelineSummary,
-  TimelineActivity,
+	// OpenRouter types
+	OpenRouterModel,
+	OpenRouterResponse,
+	OpenRouterOptions,
+	OpenRouterKeyValidation,
+	// Voice types
+	VoicePreset,
+	VoicePromptResult,
+	CustomVoiceConfig,
+	Commit,
+	GutterComment,
+	// Timeline types
+	TimelineCurioConfig,
+	TimelineSummary,
+	TimelineActivity,
 } from "./curios/timeline";

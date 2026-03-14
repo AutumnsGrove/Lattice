@@ -6,9 +6,9 @@
   Internal component — not exported to consumers.
 -->
 <script lang="ts">
-	import { Logo } from "../ui";
+	import Logo from "../ui/Logo.svelte";
 	import { ChevronLeft, X } from "@lucide/svelte";
-	import { GroveTerm } from "../ui";
+	import GroveTerm from "$lib/components/terminology/GroveTerm.svelte";
 	import { sidebarStore } from "../../stores/sidebar.svelte";
 	import type { Snippet } from "svelte";
 

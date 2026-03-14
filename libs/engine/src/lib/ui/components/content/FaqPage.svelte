@@ -3,7 +3,7 @@
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import GlassButton from "$lib/ui/components/ui/GlassButton.svelte";
 	import Accordion from "$lib/ui/components/ui/Accordion.svelte";
-	import GroveTerm from "$lib/ui/components/ui/groveterm/GroveTerm.svelte";
+	import GroveTerm from "$lib/components/terminology/GroveTerm.svelte";
 	import {
 		Sprout,
 		PenLine,

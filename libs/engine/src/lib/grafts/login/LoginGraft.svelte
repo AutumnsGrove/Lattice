@@ -26,7 +26,7 @@
 		getProviderName,
 	} from "./config.js";
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
-	import GroveTerm from "$lib/ui/components/ui/groveterm/GroveTerm.svelte";
+	import GroveTerm from "$lib/components/terminology/GroveTerm.svelte";
 	import PasskeyButton from "./PasskeyButton.svelte";
 	import EmailButton from "./EmailButton.svelte";
 	import ProviderIcon from "./ProviderIcon.svelte";

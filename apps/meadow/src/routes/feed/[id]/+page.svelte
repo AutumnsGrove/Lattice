@@ -11,7 +11,7 @@
 	import { formatRelativeTime } from "$lib/utils/time";
 	import ReactionPicker from "$lib/components/ReactionPicker.svelte";
 	import SEO from "$lib/components/SEO.svelte";
-	import { Blaze } from "@autumnsgrove/lattice/ui/indicators";
+	import { Blaze } from "@autumnsgrove/lattice/blazes/components";
 	import { resolveBlaze } from "@autumnsgrove/lattice/blazes";
 
 	let { data } = $props();
@@ -39,7 +39,7 @@
 		if (!isOwnNote || deleting) return;
 		deleting = true;
 		try {
-			const res = await fetch(`/api/notes/${post.id}`, {
+			const res = await fetch(`/api/notes/${post.id}`, { // csrf-ok
 				method: "DELETE",
 				credentials: "include",
 			}); // csrf-ok
@@ -83,7 +83,7 @@
 		post.userBookmarked = !post.userBookmarked;
 
 		try {
-			const res = await fetch(`/api/feed/${post.id}/bookmark`, {
+			const res = await fetch(`/api/feed/${post.id}/bookmark`, { // csrf-ok
 				method: "POST",
 				credentials: "include",
 			}); // csrf-ok

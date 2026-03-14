@@ -189,7 +189,7 @@
 		let cancelled = false;
 		let cleanup: (() => void) | null = null;
 
-		import(`$lib/ui/components/content/curios/Curio${componentName}.svelte`)
+		import(`$lib/curios/components/Curio${componentName}.svelte`)
 			.then((module) => {
 				if (cancelled) return;
 				el.innerHTML = "";
