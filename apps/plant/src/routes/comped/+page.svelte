@@ -7,7 +7,7 @@
 	 */
 
 	import { Gift, Check, Loader2, Sparkles, ArrowRight, Heart } from '@autumnsgrove/lattice/ui/icons';
-	import { GlassCard, GroveSwap } from '@autumnsgrove/lattice/ui';
+	import { GlassCard, GroveTerm } from '@autumnsgrove/lattice/ui';
 	import { TIERS } from '@autumnsgrove/lattice/config';
 	import { submitForm } from '$lib/submit-form';
 
@@ -90,7 +90,7 @@
 				</h1>
 
 				<p class="text-foreground-muted max-w-md mx-auto">
-					Thank you for being one of our first <GroveSwap term="wanderer" standard="visitors">Wanderers</GroveSwap>. You're helping us grow.
+					Thank you for being one of our first <GroveTerm term="wanderer" standard="visitors">Wanderers</GroveTerm>. You're helping us grow.
 				</p>
 			{:else}
 				<h1 class="text-2xl md:text-3xl font-medium text-foreground mb-3">

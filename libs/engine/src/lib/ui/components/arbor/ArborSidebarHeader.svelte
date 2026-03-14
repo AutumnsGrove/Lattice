@@ -8,7 +8,7 @@
 <script lang="ts">
 	import { Logo } from "../ui";
 	import { ChevronLeft, X } from "@lucide/svelte";
-	import { GroveSwap } from "../ui";
+	import { GroveTerm } from "../ui";
 	import { sidebarStore } from "../../stores/sidebar.svelte";
 	import type { Snippet } from "svelte";
 
@@ -39,9 +39,9 @@
 				<Logo class="arbor-sidebar-logo-small" />
 			{/if}
 			<h2>
-				<GroveSwap term="arbor">{brandTitle}</GroveSwap>
+				<GroveTerm term="arbor">{brandTitle}</GroveTerm>
 				<span class="arbor-admin-label"
-					>(<GroveSwap term="arbor" standard="dashboard">admin panel</GroveSwap>)</span
+					>(<GroveTerm term="arbor" standard="dashboard">admin panel</GroveTerm>)</span
 				>
 			</h2>
 		</div>

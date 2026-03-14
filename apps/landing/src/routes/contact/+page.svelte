@@ -34,7 +34,7 @@
 				aria-label="Learn about the Wayfinder role"
 			>
 				<Compass class="w-3.5 h-3.5" />
-				<span><GroveTerm term="wayfinder">Wayfinder</GroveTerm></span>
+				<span><GroveTerm interactive term="wayfinder">Wayfinder</GroveTerm></span>
 			</a>
 		</div>
 

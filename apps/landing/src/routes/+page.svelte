@@ -85,7 +85,7 @@
 		{
 			id: 'ai-protection',
 			question: 'Is my writing safe from AI training?',
-			answer: "Yes. Every Grove blog is protected by [[shade|Shade]] — our defense system that blocks AI crawlers and scraping bots. Your words are never used to train AI models. We're building a corner of the internet where human creativity stays human."
+			answer: "Yes. Every Grove blog is protected by [[shade!|Shade]] — our defense system that blocks AI crawlers and scraping bots. Your words are never used to train AI models. We're building a corner of the internet where human creativity stays human."
 		},
 		{
 			id: 'data-ownership',
@@ -95,17 +95,17 @@
 		{
 			id: 'custom-domain',
 			question: 'Can I use my own domain?',
-			answer: "Yes! [[oak|Oak]] tier lets you bring a domain you already own. [[evergreen|Evergreen]] tier includes domain registration — we'll find and set up the perfect domain for you."
+			answer: "Yes! [[oak!|Oak]] tier lets you bring a domain you already own. [[evergreen!|Evergreen]] tier includes domain registration — we'll find and set up the perfect domain for you."
 		},
 		{
 			id: 'shutdown',
 			question: 'What if Grove shuts down?',
-			answer: "After 12 months on a paid plan, your blog earns [[centennial|Centennial]] status — it stays online as a read-only archive for 100 years, even if you stop paying or Grove closes. Your words outlive the platform."
+			answer: "After 12 months on a paid plan, your blog earns [[centennial!|Centennial]] status — it stays online as a read-only archive for 100 years, even if you stop paying or Grove closes. Your words outlive the platform."
 		},
 		{
 			id: 'pricing',
 			question: 'How much does it cost?',
-			answer: "Writing is free with [[wanderer|Wanderer]] tier. Paid plans start at $8/month ([[seedling|Seedling]]) for more storage, custom domains, and archival protection. See the pricing page for details."
+			answer: "Writing is free with [[wanderer!|Wanderer]] tier. Paid plans start at $8/month ([[seedling!|Seedling]]) for more storage, custom domains, and archival protection. See the pricing page for details."
 		}
 	];
 

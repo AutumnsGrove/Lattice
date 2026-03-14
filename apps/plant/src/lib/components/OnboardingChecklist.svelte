@@ -7,7 +7,7 @@
 	 */
 
 	import { Check, User, Mail, CreditCard, Sparkles } from '@autumnsgrove/lattice/ui/icons';
-	import { GlassCard, GroveSwap } from '@autumnsgrove/lattice/ui';
+	import { GlassCard, GroveTerm } from '@autumnsgrove/lattice/ui';
 	import { page } from '$app/state';
 
 	// Define onboarding steps with Grove-friendly language
@@ -169,7 +169,7 @@
 		{#snippet footer()}
 			<p class="text-xs text-foreground-subtle text-center">
 				{#if completedCount === 0}
-					Let's get started<GroveSwap term="wanderer" standard="">, Wanderer</GroveSwap> ✨
+					Let's get started<GroveTerm term="wanderer" standard="">, Wanderer</GroveTerm> ✨
 				{:else if completedCount < steps.length - 1}
 					You're making great progress!
 				{:else}

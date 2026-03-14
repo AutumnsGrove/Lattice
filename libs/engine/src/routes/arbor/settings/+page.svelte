@@ -825,8 +825,8 @@
 			<h2>Profile Photo</h2>
 		</div>
 		<p class="section-description">
-			Your photo appears in the <GroveTerm term="canopy">Canopy</GroveTerm> directory and across your
-			<GroveTerm term="grove">grove</GroveTerm>.
+			Your photo appears in the <GroveTerm interactive term="canopy">Canopy</GroveTerm> directory and across your
+			<GroveTerm interactive term="grove">grove</GroveTerm>.
 		</p>
 
 		<div class="avatar-section">
@@ -1024,7 +1024,7 @@
 			<h2>Preferences</h2>
 		</div>
 		<p class="section-description">
-			Personal display preferences for your <GroveTerm term="arbor">Arbor</GroveTerm>.
+			Personal display preferences for your <GroveTerm interactive term="arbor">Arbor</GroveTerm>.
 		</p>
 
 		<label class="logo-toggle">
@@ -1358,7 +1358,7 @@
 			<h2>Header Branding</h2>
 		</div>
 		<p class="section-description">
-			Customize what appears in the header of your <GroveTerm term="grove">grove</GroveTerm>.
+			Customize what appears in the header of your <GroveTerm interactive term="grove">grove</GroveTerm>.
 		</p>
 
 		<div class="canopy-field">
@@ -1453,7 +1453,7 @@
 			<Waystone slug="what-is-canopy" label="Learn about the Canopy" />
 		</div>
 		<p class="section-description">
-			Let other wanderers discover your <GroveTerm term="grove">grove</GroveTerm> in the public directory.
+			Let other wanderers discover your <GroveTerm interactive term="grove">grove</GroveTerm> in the public directory.
 			<a
 				href="https://grove.place/canopy"
 				target="_blank"
@@ -1557,7 +1557,7 @@
 			<Waystone slug="what-is-meadow" label="Learn about Meadow" />
 		</div>
 		<p class="section-description">
-			Share your published <GroveTerm term="blooms">posts</GroveTerm> to the community feed at
+			Share your published <GroveTerm interactive term="blooms">posts</GroveTerm> to the community feed at
 			<a
 				href="https://meadow.grove.place"
 				target="_blank"
@@ -1887,7 +1887,7 @@
 			<h2>Active Sessions</h2>
 		</div>
 		<p class="section-description">
-			Devices where you're currently signed in to your <GroveTerm term="grove">grove</GroveTerm>.
+			Devices where you're currently signed in to your <GroveTerm interactive term="grove">grove</GroveTerm>.
 		</p>
 
 		{#if loadingSessions}

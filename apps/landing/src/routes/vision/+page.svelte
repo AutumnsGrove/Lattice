@@ -2,7 +2,7 @@
 	import EmailSignup from "$lib/components/EmailSignup.svelte";
 	import Header from "$lib/components/Header.svelte";
 	import Footer from "$lib/components/Footer.svelte";
-	import { GlassCard, GroveSwap } from "@autumnsgrove/lattice/ui";
+	import { GlassCard, GroveTerm } from "@autumnsgrove/lattice/ui";
 	import { MobileTOC } from "@autumnsgrove/lattice";
 	import SEO from "$lib/components/SEO.svelte";
 
@@ -92,7 +92,7 @@
 						The Vision
 					</h2>
 					<p class="text-foreground-muted font-sans leading-relaxed">
-						<em>A forest of voices.</em> Every <GroveSwap term="wanderer">Wanderer</GroveSwap> is a tree
+						<em>A forest of voices.</em> Every <GroveTerm term="wanderer">Wanderer</GroveTerm> is a tree
 						in the grove. Some are saplings just starting out. Some are ancient oaks with deep roots.
 						All are welcome. All have space to grow.
 					</p>

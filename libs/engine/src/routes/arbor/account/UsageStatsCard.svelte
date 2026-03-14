@@ -1,6 +1,6 @@
 <script lang="ts">
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
-	import GroveSwap from "$lib/ui/components/ui/groveterm/GroveSwap.svelte";
+	import GroveTerm from "$lib/ui/components/ui/groveterm/GroveTerm.svelte";
 	import { AlertCircle, HardDrive, FileText, Calendar } from "@lucide/svelte";
 	import { formatStorage, formatLimit } from "$lib/config/tiers";
 	import type { UsageData } from "./types";
@@ -62,7 +62,7 @@
 				<FileText class="usage-icon" aria-hidden="true" />
 				<div class="usage-info">
 					<span class="usage-label" id="posts-label"
-						><GroveSwap term="blooms">Blooms</GroveSwap></span
+						><GroveTerm term="blooms">Blooms</GroveTerm></span
 					>
 					<span class="usage-value">
 						{usage.postCount} / {usage.postLimit ? formatLimit(usage.postLimit) : "Unlimited"}

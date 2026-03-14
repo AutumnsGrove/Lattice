@@ -5,7 +5,7 @@
 	import MarkdownEditor from "$lib/components/admin/MarkdownEditor.svelte";
 	import GutterManager from "$lib/components/admin/GutterManager.svelte";
 	import Button from "$lib/ui/components/ui/Button.svelte";
-	import GroveSwap from "$lib/ui/components/ui/groveterm/GroveSwap.svelte";
+	import GroveTerm from "$lib/ui/components/ui/groveterm/GroveTerm.svelte";
 	import Dialog from "$lib/ui/components/ui/Dialog.svelte";
 	import { toast } from "$lib/ui/components/ui/toast";
 	import { resolveTermString } from "$lib/ui/utils/grove-term-resolve";
@@ -377,12 +377,12 @@
 	<header class="page-header">
 		<div class="header-content">
 			<a href="/arbor/garden" class="back-link"
-				><ArrowLeft size={14} class="inline-block" /> Back to <GroveSwap term="your-garden"
-					>Garden</GroveSwap
+				><ArrowLeft size={14} class="inline-block" /> Back to <GroveTerm term="your-garden"
+					>Garden</GroveTerm
 				></a
 			>
 			<div class="title-row">
-				<h1>Edit <GroveSwap term="blooms">Bloom</GroveSwap></h1>
+				<h1>Edit <GroveTerm term="blooms">Bloom</GroveTerm></h1>
 				<Waystone slug="using-curios-in-content" label="Curio directives" size="sm" />
 				{#if hasUnsavedChanges}
 					<span class="unsaved-badge">Unsaved changes</span>

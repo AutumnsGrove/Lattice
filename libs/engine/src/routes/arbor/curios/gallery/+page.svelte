@@ -5,7 +5,7 @@
 	import GlassButton from "$lib/ui/components/ui/GlassButton.svelte";
 	import Badge from "$lib/ui/components/ui/Badge.svelte";
 	import Waystone from "$lib/ui/components/ui/Waystone.svelte";
-	import GroveSwap from "$lib/ui/components/ui/groveterm/GroveSwap.svelte";
+	import GroveTerm from "$lib/ui/components/ui/groveterm/GroveTerm.svelte";
 	import {
 		Image,
 		Settings2,
@@ -225,9 +225,9 @@
 					<div>
 						<strong>For power users only</strong>
 						<p>
-							These settings are pre-configured for most <GroveSwap
+							These settings are pre-configured for most <GroveTerm
 								term="wanderer"
-								standard="visitors">Wanderers</GroveSwap
+								standard="visitors">Wanderers</GroveTerm
 							>. Changing them incorrectly can break your gallery or cause images not to load. Only
 							modify if you have your own CDN or storage setup.
 						</p>
@@ -246,7 +246,7 @@
 					/>
 					<p class="field-help">
 						Where your images are served from. The default (<code>cdn.grove.place</code>) works for
-						all <GroveSwap term="wanderer" standard="visitors">Wanderers</GroveSwap>. Only change
+						all <GroveTerm term="wanderer" standard="visitors">Wanderers</GroveTerm>. Only change
 						this if you have your own CDN that you control and can upload to.
 					</p>
 					<p class="field-help field-warning">

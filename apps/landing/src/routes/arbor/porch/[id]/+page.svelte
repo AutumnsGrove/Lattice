@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from "$app/forms";
-	import { GlassCard, GlassChat, GroveSwap, createChatController } from "@autumnsgrove/lattice/ui";
+	import { GlassCard, GlassChat, GroveTerm, createChatController } from "@autumnsgrove/lattice/ui";
 	import type { ChatMessageData } from "@autumnsgrove/lattice/ui";
 	import {
 		MessageCircle,
@@ -115,7 +115,7 @@
 							{:else if message.metadata?.senderName}
 								{message.metadata.senderName}
 							{:else}
-								<GroveSwap term="wanderer">Wanderer</GroveSwap>
+								<GroveTerm term="wanderer">Wanderer</GroveTerm>
 							{/if}
 						</span>
 						<time datetime={message.timestamp} class="text-xs text-foreground/50">

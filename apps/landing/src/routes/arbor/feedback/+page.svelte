@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from "./$types";
 	import { enhance } from "$app/forms";
-	import { GlassCard, GroveSwap } from "@autumnsgrove/lattice/ui";
+	import { GlassCard, GroveTerm } from "@autumnsgrove/lattice/ui";
 	import { Smile, Frown, Meh, Mail, Globe, MessageCircle } from "@lucide/svelte";
 	import type { Component } from "svelte";
 
@@ -110,7 +110,7 @@
 <!-- Header -->
 <div class="mb-8">
 	<h1 class="text-2xl font-serif text-foreground">
-		<GroveSwap term="wanderer">Wanderer</GroveSwap> Feedback
+		<GroveTerm term="wanderer">Wanderer</GroveTerm> Feedback
 	</h1>
 	<p class="text-foreground-muted font-sans mt-1">
 		{stats.total} total

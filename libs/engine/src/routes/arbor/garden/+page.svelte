@@ -5,9 +5,8 @@
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import { toast } from "$lib/ui/components/ui/toast";
 	import GroveTerm from "$lib/ui/components/ui/groveterm/GroveTerm.svelte";
-	import GroveSwap from "$lib/ui/components/ui/groveterm/GroveSwap.svelte";
-	import GroveIntro from "$lib/ui/components/ui/groveterm/GroveIntro.svelte";
 	import { api } from "$lib/utils";
+	import { groveModeStore } from "$lib/ui/stores";
 	import { Trash2, Sparkles } from "@lucide/svelte";
 	import { Blaze } from "$lib/ui/components/indicators";
 	import { resolveBlaze } from "$lib/blazes";
@@ -67,9 +66,9 @@
 			class="mb-6 p-4 bg-warning-bg border border-warning rounded-lg"
 		>
 			<p class="m-0 text-warning text-sm">
-				<strong><Sparkles class="w-4 h-4 inline-block" /> Welcome to the Example Site!</strong> This <GroveSwap
+				<strong><Sparkles class="w-4 h-4 inline-block" /> Welcome to the Example Site!</strong> This <GroveTerm
 					term="arbor"
-					standard="dashboard">admin panel</GroveSwap
+					standard="dashboard">admin panel</GroveTerm
 				> is publicly accessible so you can explore Grove's features. On your own site, this panel is
 				private and only accessible to you.
 			</p>
@@ -80,15 +79,17 @@
 		class="flex justify-between items-start mb-8 max-md:flex-col max-md:items-stretch max-md:gap-4"
 	>
 		<div>
-			<h1 class="m-0 mb-1 text-3xl text-foreground"><GroveTerm term="garden">Garden</GroveTerm></h1>
-			<GroveIntro term="your-garden" />
+			<h1 class="m-0 mb-1 text-3xl text-foreground"><GroveTerm interactive term="garden">Garden</GroveTerm></h1>
+			{#if !groveModeStore.current}
+				<p class="text-sm text-foreground-subtle italic mt-1 mb-0">(<GroveTerm term="your-garden" displayOverride="grove" icon />)</p>
+			{/if}
 			<p class="m-0 text-foreground-muted">
 				{data.posts.length}
-				<GroveSwap term="blooms">blooms</GroveSwap>
+				<GroveTerm interactive term="blooms">blooms</GroveTerm>
 			</p>
 		</div>
 		<Button variant="primary" onclick={() => (window.location.href = "/arbor/garden/new")}>
-			+ New <GroveSwap term="blooms">Bloom</GroveSwap>
+			+ New <GroveTerm interactive term="blooms">Bloom</GroveTerm>
 		</Button>
 	</header>
 
@@ -207,7 +208,7 @@
 				{:else}
 					<tr>
 						<td colspan="4" class="text-center text-foreground-muted py-12 px-4">
-							No <GroveSwap term="blooms">blooms</GroveSwap> yet. Create your first one!
+							No <GroveTerm interactive term="blooms">blooms</GroveTerm> yet. Create your first one!
 						</td>
 					</tr>
 				{/each}
@@ -216,20 +217,20 @@
 	</GlassCard>
 
 	<GlassCard variant="muted">
-		<h3>How the <GroveSwap term="your-garden">Garden</GroveSwap> Works</h3>
+		<h3>How the <GroveTerm interactive term="your-garden">Garden</GroveTerm> Works</h3>
 		<p>
-			Create and edit <GroveSwap term="blooms">blooms</GroveSwap> directly in the built-in markdown editor.
-			<GroveSwap term="blooms">Blooms</GroveSwap> are saved to the database and available immediately.
+			Create and edit <GroveTerm interactive term="blooms">blooms</GroveTerm> directly in the built-in markdown editor.
+			<GroveTerm interactive term="blooms">Blooms</GroveTerm> are saved to the database and available immediately.
 		</p>
 		<ul>
 			<li>
-				Use <strong>+ New <GroveSwap term="blooms">Bloom</GroveSwap></strong> to create a new <GroveSwap
-					term="blooms">bloom</GroveSwap
+				Use <strong>+ New <GroveTerm interactive term="blooms">Bloom</GroveTerm></strong> to create a new <GroveTerm
+					term="blooms">bloom</GroveTerm
 				> with the markdown editor
 			</li>
 			<li>
-				Use <strong>Edit</strong> links to modify existing <GroveSwap term="blooms"
-					>blooms</GroveSwap
+				Use <strong>Edit</strong> links to modify existing <GroveTerm interactive term="blooms"
+					>blooms</GroveTerm
 				>
 			</li>
 		</ul>

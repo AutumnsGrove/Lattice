@@ -2,14 +2,14 @@
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
 	"version": "1.0.0",
 	"description": "Tracks engine component counts for documentation freshness checks",
-	"lastUpdated": "2026-03-10",
+	"lastUpdated": "2026-03-14",
 	"lastAuditedBy": "claude/inventory-audit",
 	"components": {
-		"total": 278,
+		"total": 276,
 		"breakdown": {
 			"primitives": 45,
 			"nature": 65,
-			"ui": 48,
+			"ui": 46,
 			"domain": 2,
 			"typography": 11,
 			"chrome": 17,

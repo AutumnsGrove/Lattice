@@ -14,8 +14,9 @@
 		GlassOverlay,
 		GlassCarousel,
 		GroveTerm,
-		GroveIntro,
 	} from "@autumnsgrove/lattice/ui";
+
+	import { groveModeStore } from "@autumnsgrove/lattice/ui/stores";
 
 	// Import nature assets
 	import {
@@ -521,12 +522,18 @@
 	<!-- Hero Section -->
 	<section class="text-center mb-12">
 		<h1 class="text-4xl font-bold text-[var(--color-foreground)] mb-3">
-			<GroveTerm term="lattice">Lattice</GroveTerm>
-			<GroveTerm term="vineyard">Vineyard</GroveTerm>
+			<GroveTerm interactive term="lattice">Lattice</GroveTerm>
+			<GroveTerm interactive term="vineyard">Vineyard</GroveTerm>
 		</h1>
-		<GroveIntro term="vineyard" />
+		<p class="text-sm text-[var(--color-foreground-subtle)] italic mt-1 mb-3">
+			{#if groveModeStore.current}
+				<GroveTerm term="vineyard" displayOverride="grove" icon />
+			{:else}
+				<GroveTerm term="vineyard" displayOverride="standard" /> · <GroveTerm term="vineyard" displayOverride="grove" icon />
+			{/if}
+		</p>
 		<p class="text-lg text-[var(--color-foreground-muted)] max-w-2xl mx-auto">
-			Every vine starts somewhere. This is where <GroveTerm term="your-grove">Grove's</GroveTerm> UI components
+			Every vine starts somewhere. This is where <GroveTerm interactive term="your-grove">Grove's</GroveTerm> UI components
 			grow, ready to be picked and planted throughout the ecosystem.
 		</p>
 	</section>

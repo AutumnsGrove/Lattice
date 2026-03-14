@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Header from "$lib/components/Header.svelte";
 	import Footer from "$lib/components/Footer.svelte";
-	import { GroveTerm, GroveSwapText } from "@autumnsgrove/lattice/ui";
+	import { GroveTerm, GroveText } from "@autumnsgrove/lattice/ui";
 	import SEO from "$lib/components/SEO.svelte";
 
 	let { data } = $props();
@@ -1413,7 +1413,7 @@
 			</a>
 			<h1 class="text-4xl md:text-5xl font-serif text-foreground mb-4">The Workshop</h1>
 			<p class="text-lg text-foreground-muted max-w-xl mx-auto">
-				Tools being crafted alongside <GroveTerm term="your-grove">Grove</GroveTerm>. Some integrate
+				Tools being crafted alongside <GroveTerm interactive term="your-grove">Grove</GroveTerm>. Some integrate
 				directly, some stand alone—all built with the same care.
 			</p>
 		</div>
@@ -1563,7 +1563,7 @@
 										</div>
 										<div>
 											<h3 class="text-xl font-serif text-foreground">
-												{#if tool.termSlug}<GroveTerm term={tool.termSlug}>{tool.name}</GroveTerm
+												{#if tool.termSlug}<GroveTerm interactive term={tool.termSlug}>{tool.name}</GroveTerm
 													>{:else}{tool.name}{/if}
 											</h3>
 											<p class="text-sm text-foreground-muted">{tool.tagline}</p>
@@ -1596,7 +1596,7 @@
 								{/if}
 
 								<p class="text-foreground-muted mb-4 leading-relaxed">
-									<GroveSwapText content={tool.description} />
+									<GroveText content={tool.description} />
 								</p>
 
 								<div class="pt-4 border-t border-border space-y-2">

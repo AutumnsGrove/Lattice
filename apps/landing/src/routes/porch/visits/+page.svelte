@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { GlassCard, GroveSwap } from '@autumnsgrove/lattice/ui';
+	import { GlassCard, GroveTerm } from '@autumnsgrove/lattice/ui';
 	import Header from '$lib/components/Header.svelte';
 	import { seasonStore } from '@autumnsgrove/lattice/ui/chrome';
 	import Footer from '$lib/components/Footer.svelte';
@@ -48,7 +48,7 @@
 			</div>
 			<h1 class="text-3xl font-serif text-foreground mb-3">Your Visits</h1>
 			<p class="text-lg text-foreground-muted font-sans max-w-xl mx-auto">
-				Your past conversations with the <GroveSwap term="wayfinder">Wayfinder</GroveSwap>.
+				Your past conversations with the <GroveTerm term="wayfinder">Wayfinder</GroveTerm>.
 			</p>
 		</div>
 

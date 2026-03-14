@@ -1,9 +1,9 @@
 <script lang="ts">
 	import EmailSignup from '$lib/components/EmailSignup.svelte';
-	import { Logo, GroveSwap, GroveIntro } from '@autumnsgrove/lattice/ui';
+	import { Logo, GroveTerm } from '@autumnsgrove/lattice/ui';
 	import SEO from '$lib/components/SEO.svelte';
 	import { Header, Footer, type NavItem } from '@autumnsgrove/lattice/ui/chrome';
-	import { seasonStore } from '@autumnsgrove/lattice/ui/stores';
+	import { seasonStore, groveModeStore } from '@autumnsgrove/lattice/ui/stores';
 	import { Users, Heart, Calendar, Zap, Sprout, ArrowRight } from '@lucide/svelte';
 	import { defaultSuite, resolveIcon } from '@autumnsgrove/lattice/ui';
 
@@ -42,8 +42,14 @@
 	</div>
 
 	<!-- Title -->
-	<h1 class="text-4xl md:text-5xl font-serif text-foreground mb-2 text-center"><GroveSwap term="meadow">Meadow</GroveSwap></h1>
-	<GroveIntro term="meadow" />
+	<h1 class="text-4xl md:text-5xl font-serif text-foreground mb-2 text-center"><GroveTerm term="meadow">Meadow</GroveTerm></h1>
+	<p class="text-sm text-foreground-subtle italic mt-1 mb-0">
+		{#if groveModeStore.current}
+			<GroveTerm term="meadow" displayOverride="grove" icon />
+		{:else}
+			<GroveTerm term="meadow" displayOverride="standard" /> · <GroveTerm term="meadow" displayOverride="grove" icon />
+		{/if}
+	</p>
 
 	<!-- Tagline -->
 	<p class="text-xl md:text-2xl text-foreground-muted font-serif italic mb-4 text-center">
@@ -79,11 +85,11 @@
 	<!-- What is Meadow? Section -->
 	<section class="w-full max-w-2xl mb-12">
 		<h2 class="text-2xl md:text-3xl font-serif text-foreground mb-6 text-center">
-			What is <GroveSwap term="meadow">Meadow</GroveSwap>?
+			What is <GroveTerm term="meadow">Meadow</GroveTerm>?
 		</h2>
 		<div class="glass-grove rounded-xl p-6 border border-divider">
 			<p class="text-base md:text-lg text-foreground-muted font-sans leading-relaxed mb-4">
-				Think of it as the <GroveSwap term="clearing" standard="status page">clearing</GroveSwap> in the forest. When you step out from under the dense canopy of your own blog, you can see what others in the Grove are writing.
+				Think of it as the <GroveTerm term="clearing" standard="status page">clearing</GroveTerm> in the forest. When you step out from under the dense canopy of your own blog, you can see what others in the Grove are writing.
 			</p>
 			<p class="text-base md:text-lg text-foreground-muted font-sans leading-relaxed mb-4">
 				Posts flow chronologically. You can vote (only you see the scores). You can react with emojis (only the author sees who reacted). You can bookmark for later.
@@ -149,7 +155,7 @@
 	<!-- Why Meadow Exists Section -->
 	<section class="w-full max-w-2xl mb-12">
 		<h2 class="text-2xl md:text-3xl font-serif text-foreground mb-6 text-center">
-			Why <GroveSwap term="meadow">Meadow</GroveSwap> exists
+			Why <GroveTerm term="meadow">Meadow</GroveTerm> exists
 		</h2>
 		<div class="glass-grove rounded-xl p-6 border border-divider">
 			<p class="text-base md:text-lg text-foreground-muted font-sans leading-relaxed mb-4">

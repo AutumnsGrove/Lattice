@@ -85,7 +85,7 @@
     <div class="text-center px-6">
       <Glass variant="tint" intensity="medium" class="inline-block px-8 py-6 rounded-2xl max-w-xl mx-auto">
         <h1 class="text-3xl md:text-4xl font-serif text-foreground mb-2">
-          The <GroveTerm term="canopy" />
+          The <GroveTerm interactive term="canopy" />
         </h1>
         <p class="text-base text-accent-muted font-sans font-semibold mb-1">
           See who's growing here

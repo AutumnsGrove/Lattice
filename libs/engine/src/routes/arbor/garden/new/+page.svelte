@@ -5,8 +5,8 @@
 	import MarkdownEditor from "$lib/components/admin/MarkdownEditor.svelte";
 	import GutterManager from "$lib/components/admin/GutterManager.svelte";
 	import Glass from "$lib/ui/components/ui/Glass.svelte";
-	import GroveSwap from "$lib/ui/components/ui/groveterm/GroveSwap.svelte";
-	import GroveIntro from "$lib/ui/components/ui/groveterm/GroveIntro.svelte";
+	import GroveTerm from "$lib/ui/components/ui/groveterm/GroveTerm.svelte";
+	import { groveModeStore } from "$lib/ui/stores";
 	import { toast } from "$lib/ui/components/ui/toast";
 	import { resolveTermString } from "$lib/ui/utils/grove-term-resolve";
 	import { api } from "$lib/utils";
@@ -248,13 +248,15 @@
 	<header class="page-header">
 		<div class="header-content">
 			<a href="/arbor/garden" class="back-link"
-				><ArrowLeft size={14} class="inline-block" /> Back to <GroveSwap term="your-garden"
-					>Garden</GroveSwap
+				><ArrowLeft size={14} class="inline-block" /> Back to <GroveTerm term="your-garden"
+					>Garden</GroveTerm
 				></a
 			>
-			<h1>New <GroveSwap term="blooms">Bloom</GroveSwap></h1>
+			<h1>New <GroveTerm term="blooms">Bloom</GroveTerm></h1>
 			<Waystone slug="using-curios-in-content" label="Curio directives" size="sm" />
-			<GroveIntro term="blooms" />
+			{#if !groveModeStore.current}
+				<p class="text-sm text-foreground-subtle italic mt-1 mb-0">(<GroveTerm term="blooms" displayOverride="grove" icon />)</p>
+			{/if}
 		</div>
 		<div class="header-actions">
 			<button class="save-draft-btn" onclick={handleSave} disabled={saving}>

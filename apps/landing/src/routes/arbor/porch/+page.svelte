@@ -58,8 +58,8 @@
 
 <!-- Header -->
 <div class="mb-8">
-	<h1 class="text-2xl font-serif text-foreground">The <GroveTerm term="porch">Porch</GroveTerm></h1>
-	<p class="text-foreground-muted font-sans mt-1">Support conversations with <GroveTerm term="wanderer">Wanderers</GroveTerm></p>
+	<h1 class="text-2xl font-serif text-foreground">The <GroveTerm interactive term="porch">Porch</GroveTerm></h1>
+	<p class="text-foreground-muted font-sans mt-1">Support conversations with <GroveTerm interactive term="wanderer">Wanderers</GroveTerm></p>
 </div>
 
 	<!-- Stats -->
