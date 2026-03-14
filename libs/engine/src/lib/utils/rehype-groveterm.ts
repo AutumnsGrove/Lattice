@@ -21,7 +21,18 @@ import { visit, SKIP } from "unist-util-visit";
 import type { Root, Text, Html, Parent, RootContent } from "mdast";
 import type { Plugin } from "unified";
 import type { GroveTermManifest } from "$lib/components/terminology/types";
+import type { GroveErrorDef } from "$lib/errors/types";
 import { escapeHtml } from "./escape-html.js";
+
+/** Error catalog for rehype-groveterm plugin */
+const GROVETERM_ERRORS = {
+	MANIFEST_REQUIRED: {
+		code: "GROVE-UTILS-001",
+		category: "bug" as const,
+		userMessage: "Unable to process terminology.",
+		adminMessage: "GroveTerm manifest is required. Pass { manifest } to plugin options.",
+	},
+} as const satisfies Record<string, GroveErrorDef>;
 
 /** Node types that can be inserted into the AST */
 type ReplacementNode = Text | Html;
@@ -230,9 +241,8 @@ export const rehypeGroveTerm: Plugin<[RehypeGroveTermOptions], Root> = function 
 	options: RehypeGroveTermOptions,
 ) {
 	if (!options || !options.manifest) {
-		throw new Error(
-			"[rehypeGroveTerm] manifest is required. Pass { manifest: yourManifest } to the plugin options.",
-		);
+		const err = GROVETERM_ERRORS.MANIFEST_REQUIRED;
+		throw new Error(`[${err.code}] ${err.adminMessage}`);
 	}
 	return (tree: Root) => {
 		// Collect replacements first, then apply them
@@ -291,9 +301,8 @@ export const rehypeGroveTerm: Plugin<[RehypeGroveTermOptions], Root> = function 
  */
 export function processGroveTerms(text: string, options: RehypeGroveTermOptions): string {
 	if (!options || !options.manifest) {
-		throw new Error(
-			"[processGroveTerms] manifest is required. Pass { manifest: yourManifest } in options.",
-		);
+		const err = GROVETERM_ERRORS.MANIFEST_REQUIRED;
+		throw new Error(`[${err.code}] ${err.adminMessage}`);
 	}
 	const m = options.manifest;
 	const warnOnUnknown = options.warnOnUnknown ?? true;
