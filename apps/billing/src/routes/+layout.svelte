@@ -12,9 +12,22 @@
 	import { greenhouseStore } from "$lib/stores/greenhouse-mode.svelte";
 
 	let { data, children } = $props();
+	let showGreenhouseNotice = $state(false);
 
 	function handleLogoClick() {
 		themeStore.toggle();
+	}
+
+	function handleGreenhouseClick() {
+		if (data.greenhouseAvailable) {
+			greenhouseStore.toggle();
+		} else {
+			showGreenhouseNotice = true;
+		}
+	}
+
+	function dismissNotice() {
+		showGreenhouseNotice = false;
 	}
 </script>
 
@@ -79,7 +92,7 @@
 				type="button"
 				class="greenhouse-toggle"
 				class:greenhouse-active={greenhouseStore.current}
-				onclick={() => greenhouseStore.toggle()}
+				onclick={handleGreenhouseClick}
 				aria-label={greenhouseStore.current ? "Disable Greenhouse Mode" : "Enable Greenhouse Mode"}
 				aria-pressed={greenhouseStore.current}
 				title="Greenhouse Mode: {greenhouseStore.current ? 'on' : 'off'} — toggle dev/test mode"
@@ -95,3 +108,40 @@
 		</div>
 	</footer>
 </div>
+
+<!-- Greenhouse unavailable notice -->
+{#if showGreenhouseNotice}
+	<div
+		class="fixed inset-0 z-50 flex items-end justify-center p-4 sm:items-center"
+		role="dialog"
+		aria-modal="true"
+		aria-labelledby="greenhouse-notice-title"
+	>
+		<div class="absolute inset-0 bg-bark-950/30 backdrop-blur-sm" onclick={dismissNotice}></div>
+		<div class="relative glass-grove rounded-xl border border-default shadow-lg max-w-sm w-full p-5 animate-fade-in">
+			<div class="flex items-start gap-3">
+				<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-foreground-muted flex-shrink-0 mt-0.5">
+					<path d="M7 20h10" />
+					<path d="M10 20c5.5-2.5.8-6.4 3-10" />
+					<path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z" />
+					<path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z" />
+				</svg>
+				<div>
+					<h3 id="greenhouse-notice-title" class="text-sm font-medium text-foreground">
+						Greenhouse Mode
+					</h3>
+					<p class="text-sm text-foreground-muted mt-1">
+						Only available in the dev environment for E2E testing. This toggle is inactive in production.
+					</p>
+				</div>
+			</div>
+			<button
+				type="button"
+				class="mt-4 w-full text-sm text-center py-2 rounded-lg text-foreground-subtle hover:text-foreground-muted hover:bg-surface transition-colors"
+				onclick={dismissNotice}
+			>
+				Got it
+			</button>
+		</div>
+	</div>
+{/if}
