@@ -16,4 +16,6 @@ jobs:
     uses: ./.github/workflows/_deploy-worker.yml
     with:
       worker-dir: workers/timeline-sync
+      needs-engine: true
+      run-tests: true
     secrets: inherit

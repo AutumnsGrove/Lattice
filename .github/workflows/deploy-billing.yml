@@ -16,7 +16,7 @@ jobs:
     uses: ./.github/workflows/_deploy-worker.yml
     with:
       worker-dir: apps/billing
-      needs-engine: false
+      needs-engine: true
       run-build: true
       run-tests: true
     secrets: inherit

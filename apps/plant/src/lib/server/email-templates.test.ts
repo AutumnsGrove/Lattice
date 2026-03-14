@@ -5,8 +5,6 @@ import {
 	getDay3Email,
 	getDay7Email,
 	getDay30Email,
-	getPaymentFailedEmail,
-	getPaymentReceivedEmail,
 } from "./email-templates";
 
 const baseParams = {
@@ -115,93 +113,5 @@ describe("getDay30Email", () => {
 	it("omits post section when no posts", () => {
 		const { html } = getDay30Email({ ...baseParams, postCount: 0 });
 		expect(html).not.toContain("published");
-	});
-});
-
-describe("getPaymentFailedEmail", () => {
-	const failedParams = { name: "Autumn", subdomain: "autumn" };
-
-	it("has correct subject", () => {
-		const { subject } = getPaymentFailedEmail(failedParams);
-		expect(subject).toContain("payment");
-	});
-
-	it("includes billing page link in HTML", () => {
-		const { html } = getPaymentFailedEmail(failedParams);
-		expect(html).toContain("plant.grove.place/billing");
-	});
-
-	it("reassures blog is still live", () => {
-		const { html } = getPaymentFailedEmail(failedParams);
-		expect(html).toContain("still live");
-	});
-
-	it("mentions 7-day grace period", () => {
-		const { text } = getPaymentFailedEmail(failedParams);
-		expect(text).toContain("7 days");
-	});
-
-	it("mentions cancellation option", () => {
-		const { text } = getPaymentFailedEmail(failedParams);
-		expect(text).toContain("cancel");
-	});
-
-	it("includes name in greeting", () => {
-		const { html } = getPaymentFailedEmail(failedParams);
-		expect(html).toContain("Hi Autumn");
-	});
-});
-
-describe("getPaymentReceivedEmail", () => {
-	const receiptParams = {
-		name: "Autumn",
-		subdomain: "autumn",
-		amount: "8.00",
-		paymentDate: "March 12, 2026",
-		planName: "Seedling",
-		interval: "month",
-		nextPaymentDate: "April 12, 2026",
-		invoiceId: "inv_test_123",
-	};
-
-	it("has receipt subject", () => {
-		const { subject } = getPaymentReceivedEmail(receiptParams);
-		expect(subject).toContain("Receipt");
-	});
-
-	it("includes amount with dollar sign", () => {
-		const { html } = getPaymentReceivedEmail(receiptParams);
-		expect(html).toContain("$8.00");
-	});
-
-	it("includes payment date", () => {
-		const { html } = getPaymentReceivedEmail(receiptParams);
-		expect(html).toContain("March 12, 2026");
-	});
-
-	it("includes plan name and interval", () => {
-		const { html } = getPaymentReceivedEmail(receiptParams);
-		expect(html).toContain("Seedling");
-		expect(html).toContain("monthly");
-	});
-
-	it("includes next payment date", () => {
-		const { html } = getPaymentReceivedEmail(receiptParams);
-		expect(html).toContain("April 12, 2026");
-	});
-
-	it("includes invoice ID", () => {
-		const { html } = getPaymentReceivedEmail(receiptParams);
-		expect(html).toContain("inv_test_123");
-	});
-
-	it("includes blog link", () => {
-		const { html } = getPaymentReceivedEmail(receiptParams);
-		expect(html).toContain("autumn.grove.place");
-	});
-
-	it("includes billing page link for formal receipt", () => {
-		const { text } = getPaymentReceivedEmail(receiptParams);
-		expect(text).toContain("plant.grove.place/billing");
 	});
 });

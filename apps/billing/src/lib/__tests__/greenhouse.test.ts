@@ -10,6 +10,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import type { Cookies } from "@sveltejs/kit";
 import {
 	isGreenhouseMode,
 	isGreenhouseCancelled,
