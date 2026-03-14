@@ -1,14 +1,13 @@
 <script lang="ts">
 	import GroveTerm from './GroveTerm.svelte';
 
-	// GroveText - String parser that renders [[term]] as interactive GroveTerm
+	// GroveText - String parser that renders [[term]] markers as GroveTerm
 	//
-	// Parses [[term]] and [[term|display]] syntax in plain strings and renders
-	// each match as a <GroveTerm> with popup. Eliminates hand-written snippet
-	// overrides for data arrays (FAQs, descriptions, etc.).
-	//
-	// Usage:
-	//   <GroveText content="Your [[bloom|blooms]] are protected by [[shade]]." />
+	// Defaults to non-interactive (silent swap). Use ! suffix for interactive:
+	//   [[bloom]]         → <GroveTerm term="bloom" />              (silent swap)
+	//   [[bloom!]]        → <GroveTerm term="bloom" interactive />  (popup + underline)
+	//   [[bloom|blooms]]  → <GroveTerm term="bloom">blooms</GroveTerm>
+	//   [[bloom!|blooms]] → <GroveTerm term="bloom" interactive>blooms</GroveTerm>
 
 	interface Props {
 		/** String containing [[term]] or [[term|display]] markers */
@@ -17,12 +16,13 @@
 
 	let { content }: Props = $props();
 
-	const PATTERN = /\[\[([a-zA-Z][a-zA-Z0-9-]*)(?:\|([^\]]*))?\]\]/g;
+	const PATTERN = /\[\[([a-zA-Z][a-zA-Z0-9-]*)(!)?\s*(?:\|([^\]]*))?\]\]/g;
 
 	interface Segment {
 		type: 'text' | 'term';
 		value: string;
 		display?: string;
+		interactive?: boolean;
 	}
 
 	const segments = $derived.by(() => {
@@ -36,7 +36,8 @@
 			result.push({
 				type: 'term',
 				value: match[1],
-				display: match[2]?.trim() || undefined
+				interactive: match[2] === '!',
+				display: match[3]?.trim() || undefined
 			});
 			lastIndex = re.lastIndex;
 		}
@@ -46,4 +47,4 @@
 	});
 </script>
 
-{#each segments as seg}{#if seg.type === 'text'}{seg.value}{:else}<GroveTerm term={seg.value}>{#if seg.display}{seg.display}{:else}{seg.value}{/if}</GroveTerm>{/if}{/each}
+{#each segments as seg}{#if seg.type === 'text'}{seg.value}{:else}<GroveTerm term={seg.value} interactive={seg.interactive}>{#if seg.display}{seg.display}{:else}{seg.value}{/if}</GroveTerm>{/if}{/each}

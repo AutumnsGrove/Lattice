@@ -88,9 +88,9 @@ When `grove-support.grove.place` can't exist, no one can impersonate Grove suppo
 
 Good soil doesn't announce itself. It just quietly ensures that what grows here belongs here.
 
-## What we call this system
+## The system behind this
 
-Internally, we call username validation **[[loam|Loam]]**. Like the ideal soil that decides what can grow, Loam filters every name before it takes root. You'll never notice it working unless you try to plant something that doesn't belong.
+Username validation runs through **[[loam|Loam]]** — like the ideal soil that decides what can grow, it filters every name before it takes root. You'll never notice it working unless you try to plant something that doesn't belong.
 
 For technical details, see our [Loam specification](/knowledge/specs/loam-spec).
 

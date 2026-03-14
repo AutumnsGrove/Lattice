@@ -20,7 +20,7 @@
 		Clock,
 		ArrowRight,
 	} from "@lucide/svelte";
-	import GroveSwap from "$lib/ui/components/ui/groveterm/GroveSwap.svelte";
+	import GroveTerm from "$lib/ui/components/ui/groveterm/GroveTerm.svelte";
 	import type { GardenStatusProps } from "./types.js";
 	import type { TierKey } from "$lib/config/tiers";
 	import type { FlourishState } from "../types.js";
@@ -119,7 +119,7 @@
 			</div>
 			<div>
 				<h3 class="font-serif text-lg text-foreground">
-					<GroveSwap term="garden-status" standard="Plan Status">Garden Status</GroveSwap>
+					<GroveTerm term="garden-status" standard="Plan Status">Garden Status</GroveTerm>
 				</h3>
 				<p class="text-sm text-foreground-muted">{stageNames[currentStage]}</p>
 			</div>
@@ -178,10 +178,10 @@
 							onclick={() => onNurture?.()}
 						>
 							<Sprout class="w-3.5 h-3.5" />
-							{#if currentStage === "wanderer"}<GroveSwap term="cultivate" standard="Grow to Seedling"
-									>Cultivate to Seedling</GroveSwap
-								>{:else}<GroveSwap term="nurture" standard="Explore upgrades"
-									>Nurture your garden</GroveSwap
+							{#if currentStage === "wanderer"}<GroveTerm term="cultivate" standard="Grow to Seedling"
+									>Cultivate to Seedling</GroveTerm
+								>{:else}<GroveTerm term="nurture" standard="Explore upgrades"
+									>Nurture your garden</GroveTerm
 								>{/if}
 							<ArrowRight class="w-3 h-3" />
 						</button>

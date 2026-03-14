@@ -20,37 +20,37 @@
 		reading: {
 			title: "Reading Blogs",
 			content:
-				"Everyone can read Grove blogs—no login required. All blogs are publicly accessible by default. [[meadow|Meadow]] (the community feed) requires a free account to browse. Only [[rooted|Rooted]] [[evergreen|Evergreens]] can choose to make their blog require login to view.",
+				"Everyone can read Grove blogs—no login required. All blogs are publicly accessible by default. [[meadow!|Meadow]] (the community feed) requires a free account to browse. Only [[rooted!|Rooted]] [[evergreen!|Evergreens]] can choose to make their blog require login to view.",
 			detail:
 				"When you publish a post, it becomes visible to anyone on the internet, indexed by search engines, and shareable via direct links. This is by design—Grove is about sharing your voice with the world.",
 		},
 		wanderer: {
 			title: "Wanderer Accounts",
 			content:
-				"Wanderer accounts get 25 blog posts and 100 MB storage — enough to try your hand at writing with no commitment. [[meadow|Meadow]] access for browsing and reacting. No credit card needed. When you're ready for more room, cultivate to [[seedling|Seedling]].",
+				"Wanderer accounts get 25 blog posts and 100 MB storage — enough to try your hand at writing with no commitment. [[meadow!|Meadow]] access for browsing and reacting. No credit card needed. When you're ready for more room, cultivate to [[seedling!|Seedling]].",
 		},
 		// TODO(foliage): update content when themes launch
 		themes: {
 			title: "Themes",
 			content:
-				"Themes are coming soon. Every blog currently uses Grove's default theme with accent color customization. When themes launch, [[seedling|Seedling]] gets 3 curated themes, [[sapling|Sapling]] gets all 10, and [[oak|Oak]]+ gets the full theme customizer.",
+				"Themes are coming soon. Every blog currently uses Grove's default theme with accent color customization. When themes launch, [[seedling!|Seedling]] gets 3 curated themes, [[sapling!|Sapling]] gets all 10, and [[oak!|Oak]]+ gets the full theme customizer.",
 		},
 		curios: {
 			title: "Curios",
 			content:
-				"Every blog includes Home, Blog, and About in the navigation. [[curios|Curios]] let you add custom pages (like Portfolio, Contact, or Gallery) to your site navigation—little treasures in your cabinet of wonders. [[wanderer|Wanderer]]: 1 curio. [[seedling|Seedling]]: 3 curios. [[sapling|Sapling]]: 5 curios. [[oak|Oak]]: 10 curios. [[evergreen|Evergreen]]: 20 curios.",
+				"Every blog includes Home, Blog, and About in the navigation. [[curios!|Curios]] let you add custom pages (like Portfolio, Contact, or Gallery) to your site navigation—little treasures in your cabinet of wonders. [[wanderer!|Wanderer]]: 1 curio. [[seedling!|Seedling]]: 3 curios. [[sapling!|Sapling]]: 5 curios. [[oak!|Oak]]: 10 curios. [[evergreen!|Evergreen]]: 20 curios.",
 			detail:
 				"All plans can create unlimited pages—the curio limit only affects how many appear in the navigation bar. Link to extras from posts or your About page.",
 		},
 		comments: {
 			title: "Comments",
 			content:
-				"Grove supports Replies (private, only the author sees) and Comments (public, after author approval). Free accounts can post 20 public comments per week—the [[rooted|Rooted]] get unlimited. Private replies are rate-limited for free accounts to reduce spam.",
+				"Grove supports Replies (private, only the author sees) and Comments (public, after author approval). Free accounts can post 20 public comments per week—the [[rooted!|Rooted]] get unlimited. Private replies are rate-limited for free accounts to reduce spam.",
 		},
 		domains: {
 			title: "Custom Domains",
 			content:
-				"[[oak|Oak]] (BYOD): Bring a domain you already own at no extra cost. [[evergreen|Evergreen]]: We find and register the perfect domain for you. Registration included for domains up to $100/year.",
+				"[[oak!|Oak]] (BYOD): Bring a domain you already own at no extra cost. [[evergreen!|Evergreen]]: We find and register the perfect domain for you. Registration included for domains up to $100/year.",
 		},
 		email: {
 			title: "@grove.place Email",
@@ -60,19 +60,19 @@
 		support: {
 			title: "Support Hours (Evergreen)",
 			content:
-				"[[evergreen|Evergreen]] includes 8 hours of hands-on support in your first month — setup help, customization, whatever you need. After that, priority email support with faster response times.",
+				"[[evergreen!|Evergreen]] includes 8 hours of hands-on support in your first month — setup help, customization, whatever you need. After that, priority email support with faster response times.",
 		},
 		centennial: {
 			title: "Centennial (Sapling+)",
 			content:
-				"Your grove can outlive you. After 12 cumulative months on [[sapling|Sapling]] or above, your site earns [[centennial|Centennial]] status — it stays online for 100 years from the day you planted it. Even if you stop paying, your words remain as a read-only archive.",
+				"Your grove can outlive you. After 12 cumulative months on [[sapling!|Sapling]] or above, your site earns [[centennial!|Centennial]] status — it stays online for 100 years from the day you planted it. Even if you stop paying, your words remain as a read-only archive.",
 			detail:
 				"A hundred years is roughly how long an oak tree lives. Some trees outlive the people who planted them.",
 		},
 		included: {
 			title: "What's Included in Every Paid Tier",
 			content:
-				"Markdown blog posts with live preview, image hosting with automatic WebP compression, [[vines|Vines]] (sidebar links on your posts), global CDN delivery via Cloudflare, SSL/HTTPS included, data export anytime — your content is yours, RSS feed for your blog, no ads, no tracking of your readers.",
+				"Markdown blog posts with live preview, image hosting with automatic WebP compression, [[vines!|Vines]] (sidebar links on your posts), global CDN delivery via Cloudflare, SSL/HTTPS included, data export anytime — your content is yours, RSS feed for your blog, no ads, no tracking of your readers.",
 		},
 		ownership: {
 			title: "Your Data, Your Ownership",
@@ -82,14 +82,14 @@
 		ai: {
 			title: "AI Protection",
 			content:
-				"Every Grove blog is protected by [[shade|Shade]] — our defense against AI crawlers, scrapers, and training bots. Your words are yours, and they're never used to train AI models. This protection is active on every tier, free and paid.",
+				"Every Grove blog is protected by [[shade!|Shade]] — our defense against AI crawlers, scrapers, and training bots. Your words are yours, and they're never used to train AI models. This protection is active on every tier, free and paid.",
 			detail:
-				"We're building writing tools that help polish your voice without replacing it — grammar checks, readability scoring, and more. They're not ready yet, and when they arrive, they'll be available to paid tiers. For now, [[shade|Shade]] keeps your content safe.",
+				"We're building writing tools that help polish your voice without replacing it — grammar checks, readability scoring, and more. They're not ready yet, and when they arrive, they'll be available to paid tiers. For now, [[shade!|Shade]] keeps your content safe.",
 		},
 		api: {
 			title: "API Access",
 			content:
-				"API access for custom integrations and automated publishing is planned for [[oak|Oak]] and [[evergreen|Evergreen]] tiers. All blogs are accessible via RSS feeds and standard web protocols today.",
+				"API access for custom integrations and automated publishing is planned for [[oak!|Oak]] and [[evergreen!|Evergreen]] tiers. All blogs are accessible via RSS feeds and standard web protocols today.",
 		},
 	};
 

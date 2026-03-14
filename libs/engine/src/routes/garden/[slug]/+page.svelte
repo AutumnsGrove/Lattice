@@ -3,7 +3,7 @@
 	import ReedsThread from "$lib/components/reeds/ReedsThread.svelte";
 	import Button from "$lib/ui/components/ui/Button.svelte";
 	import Badge from "$lib/ui/components/ui/Badge.svelte";
-	import GroveSwap from "$lib/ui/components/ui/groveterm/GroveSwap.svelte";
+	import GroveTerm from "$lib/ui/components/ui/groveterm/GroveTerm.svelte";
 	import { MessageSquare, MessageSquareText } from "@lucide/svelte";
 	import { fontMap } from "$lib/ui/tokens/fonts";
 	import { Blaze } from "$lib/ui/components/indicators";
@@ -84,7 +84,7 @@
 			<nav class="article-nav" aria-label="Article navigation">
 				<div class="nav-row">
 					<Button variant="link" href="/garden" class="!p-0"
-						>&larr; Back to <GroveSwap term="your-garden">Garden</GroveSwap></Button
+						>&larr; Back to <GroveTerm term="your-garden">Garden</GroveTerm></Button
 					>
 					{#if data.isOwner}
 						<a

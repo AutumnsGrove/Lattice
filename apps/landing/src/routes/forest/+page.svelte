@@ -27,7 +27,8 @@
 	} from '@autumnsgrove/lattice/ui/nature';
 
 	// Import glass components and color utilities
-	import { Glass, GlassCard, GroveIntro } from '@autumnsgrove/lattice/ui';
+	import { Glass, GlassCard, GroveTerm } from '@autumnsgrove/lattice/ui';
+	import { groveModeStore } from '@autumnsgrove/lattice/ui/stores';
 	import { generateTierColors } from '@autumnsgrove/lattice/ui/utils';
 
 	// Path utilities
@@ -827,7 +828,13 @@
 				<h1 class="text-4xl md:text-6xl font-serif text-foreground mb-4">
 					The Grove Forest
 				</h1>
-				<GroveIntro term="forests" />
+				<p class="text-sm text-foreground-subtle italic mt-1 mb-3">
+					{#if groveModeStore.current}
+						<GroveTerm term="forests" displayOverride="grove" icon />
+					{:else}
+						<GroveTerm term="forests" displayOverride="standard" /> · <GroveTerm term="forests" displayOverride="grove" icon />
+					{/if}
+				</p>
 				<p class="text-lg md:text-xl text-foreground-muted font-sans">
 					A community of trees, each one unique, all growing together.
 				</p>

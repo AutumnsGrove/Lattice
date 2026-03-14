@@ -24,7 +24,7 @@
 			<!-- Hero -->
 			<header class="text-center mb-12">
 				<ShadeIcon class="w-12 h-12 mx-auto mb-4 text-grove-600" />
-				<h1 class="text-4xl md:text-5xl font-serif text-foreground mb-4"><GroveTerm term="shade">Shade</GroveTerm></h1>
+				<h1 class="text-4xl md:text-5xl font-serif text-foreground mb-4"><GroveTerm interactive term="shade">Shade</GroveTerm></h1>
 				<p class="text-xl text-foreground-faint font-serif italic">
 					In a forest full of harvesters, this grove stays shaded.
 				</p>

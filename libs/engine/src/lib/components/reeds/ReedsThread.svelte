@@ -10,7 +10,7 @@
 	import ReedsCommentForm from "./ReedsCommentForm.svelte";
 	import GlassConfirmDialog from "$lib/ui/components/ui/GlassConfirmDialog.svelte";
 	import { toast } from "$lib/ui/components/ui/toast";
-	import GroveSwap from "$lib/ui/components/ui/groveterm/GroveSwap.svelte";
+	import GroveTerm from "$lib/ui/components/ui/groveterm/GroveTerm.svelte";
 
 	interface Comment {
 		id: string;
@@ -169,9 +169,9 @@
 		<div class="reeds-header">
 			<h2 class="reeds-title">
 				{#if total > 0}
-					<GroveSwap term="reeds">Comments</GroveSwap> ({total})
+					<GroveTerm term="reeds">Comments</GroveTerm> ({total})
 				{:else}
-					<GroveSwap term="reeds">Comments</GroveSwap>
+					<GroveTerm term="reeds">Comments</GroveTerm>
 				{/if}
 			</h2>
 		</div>

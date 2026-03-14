@@ -69,7 +69,7 @@ Lattice is a SvelteKit application running on Cloudflare's edge network. It uses
 
 Session management, real-time features, and analytics coordination happen through Loom (our Durable Objects layer). If that sentence means nothing to you, that's fine. If it does, you might enjoy [What is Loom?](/knowledge/help/what-is-loom).
 
-The name "Lattice" appears in the codebase. That's the internal name. Lattice is what we call it publicly, because lattices support growth and Lattice sounds like middleware.
+The name "Lattice" appears throughout the codebase and powers every Grove blog behind the scenes.
 
 ## Why we tell you this
 

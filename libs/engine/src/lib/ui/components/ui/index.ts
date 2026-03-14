@@ -79,13 +79,10 @@ export { default as GroveMessages } from "./grove-messages/GroveMessages.svelte"
 export * from "./grove-messages/types";
 export type { GroveMessageChannel } from "./grove-messages/types";
 
-// GroveTerm - interactive terminology with popup definitions
+// GroveTerm - unified terminology (non-interactive by default, add `interactive` for popup)
 export { default as GroveTerm } from "./groveterm/GroveTerm.svelte";
-export { default as GroveSwap } from "./groveterm/GroveSwap.svelte";
 export { default as GroveText } from "./groveterm/GroveText.svelte";
-export { default as GroveSwapText } from "./groveterm/GroveSwapText.svelte";
 export { default as GroveTermPopup } from "./groveterm/GroveTermPopup.svelte";
-export { default as GroveIntro } from "./groveterm/GroveIntro.svelte";
 export * from "./groveterm/types";
 
 // GroveIcon - manifest-driven service icon swap

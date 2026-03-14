@@ -75,8 +75,11 @@ import groveTermManifest from '$lib/data/grove-term-manifest.json';
 	manifest={groveTermManifest}
 />
 
-<!-- Page intro banner: "we call it the Meadow" -->
-<GroveIntro term="meadow" manifest={groveTermManifest} />
+<!-- Silent text swap (non-interactive, default behavior) -->
+<GroveTerm term="meadow" />
+
+<!-- With leaf icon for Grove Mode hint -->
+<GroveTerm term="meadow" icon />
 ```
 
 **Key Rules:**

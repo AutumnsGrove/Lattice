@@ -5,8 +5,8 @@
 	import Badge from "$lib/ui/components/ui/Badge.svelte";
 	import Button from "$lib/ui/components/ui/Button.svelte";
 	import ContentSearch from "$lib/ui/components/forms/ContentSearch.svelte";
-	import GroveSwap from "$lib/ui/components/ui/groveterm/GroveSwap.svelte";
-	import GroveIntro from "$lib/ui/components/ui/groveterm/GroveIntro.svelte";
+	import GroveTerm from "$lib/ui/components/ui/groveterm/GroveTerm.svelte";
+	import { groveModeStore } from "$lib/ui/stores";
 
 	let { data } = $props();
 
@@ -113,9 +113,15 @@
 </svelte:head>
 
 <div class="search-header">
-	<h1>Search <GroveSwap term="your-garden">Garden</GroveSwap></h1>
-	<GroveIntro term="your-garden" />
-	<p>Find <GroveSwap term="blooms">blooms</GroveSwap> by keyword or filter by tags.</p>
+	<h1>Search <GroveTerm term="your-garden">Garden</GroveTerm></h1>
+	<p class="text-sm text-foreground-subtle italic mt-1 mb-3">
+		{#if groveModeStore.current}
+			<GroveTerm term="your-garden" displayOverride="grove" icon />
+		{:else}
+			<GroveTerm term="your-garden" displayOverride="standard" /> · <GroveTerm term="your-garden" displayOverride="grove" icon />
+		{/if}
+	</p>
+	<p>Find <GroveTerm term="blooms">blooms</GroveTerm> by keyword or filter by tags.</p>
 </div>
 
 <div class="search-container">
@@ -168,13 +174,13 @@
 			{/if}
 		</p>
 	{:else}
-		<p>Showing all {data.posts.length} <GroveSwap term="blooms">blooms</GroveSwap></p>
+		<p>Showing all {data.posts.length} <GroveTerm term="blooms">blooms</GroveTerm></p>
 	{/if}
 </div>
 
 {#if filteredPosts.length === 0}
 	<div class="no-results">
-		<p>No <GroveSwap term="blooms">blooms</GroveSwap> found matching your criteria.</p>
+		<p>No <GroveTerm term="blooms">blooms</GroveTerm> found matching your criteria.</p>
 		<Button variant="default" onclick={clearFilters}>Clear filters</Button>
 	</div>
 {:else}

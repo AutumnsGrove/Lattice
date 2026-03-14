@@ -1,7 +1,7 @@
 <script>
 	import InternalsPostViewer from "$lib/components/custom/InternalsPostViewer.svelte";
 	import Button from "$lib/ui/components/ui/Button.svelte";
-	import GroveSwap from "$lib/ui/components/ui/groveterm/GroveSwap.svelte";
+	import GroveTerm from "$lib/ui/components/ui/groveterm/GroveTerm.svelte";
 	import FollowButton from "$lib/ui/components/chrome/FollowButton.svelte";
 	import ShareButton from "$lib/ui/components/chrome/ShareButton.svelte";
 
@@ -41,7 +41,7 @@
 			<h1>Welcome to {data.tenantName}</h1>
 			<p class="setup-subtitle">Your new grove is ready to be set up!</p>
 			<p class="setup-description">
-				Sign in to the <GroveSwap term="arbor" standard="dashboard">admin panel</GroveSwap> to create
+				Sign in to the <GroveTerm term="arbor" standard="dashboard">admin panel</GroveTerm> to create
 				your first post, customize your theme, and make this space your own.
 			</p>
 			<div class="setup-actions">

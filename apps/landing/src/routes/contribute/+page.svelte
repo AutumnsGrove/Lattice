@@ -413,7 +413,7 @@
 							Already have a Grove subscription? <span class="text-foreground"
 								>You're already supporting the dream.</span
 							>
-							Thank you for being <GroveTerm term="rooted">rooted</GroveTerm> with us.
+							Thank you for being <GroveTerm interactive term="rooted">rooted</GroveTerm> with us.
 						</p>
 					</div>
 				</section>

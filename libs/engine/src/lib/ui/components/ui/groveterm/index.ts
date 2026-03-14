@@ -1,20 +1,17 @@
 /**
- * GroveTerm - Interactive Grove terminology component
+ * GroveTerm - Unified Grove terminology component
  *
- * Displays clickable terms with popup definitions, styled by category.
+ * Non-interactive by default (silent text swap). Add `interactive` for popup.
  *
  * Usage:
  *   import { GroveTerm } from '@autumnsgrove/lattice/ui';
- *   import groveTermManifest from '$lib/data/grove-term-manifest.json';
  *
- *   <GroveTerm term="grove" manifest={groveTermManifest} />
- *   <GroveTerm term="wanderer" manifest={groveTermManifest}>wanderers</GroveTerm>
+ *   <GroveTerm term="bloom" />                  <!-- silent swap -->
+ *   <GroveTerm term="bloom" interactive />       <!-- popup + underline -->
+ *   <GroveTerm term="bloom" icon />              <!-- with leaf icon -->
  */
 
 export { default as GroveTerm } from "./GroveTerm.svelte";
-export { default as GroveSwap } from "./GroveSwap.svelte";
 export { default as GroveText } from "./GroveText.svelte";
-export { default as GroveSwapText } from "./GroveSwapText.svelte";
 export { default as GroveTermPopup } from "./GroveTermPopup.svelte";
-export { default as GroveIntro } from "./GroveIntro.svelte";
 export * from "./types";

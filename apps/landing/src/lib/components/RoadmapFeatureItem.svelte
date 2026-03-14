@@ -46,10 +46,10 @@
 						href="/knowledge/help/{feature.articleSlug}"
 						class="hover:text-accent transition-colors underline-offset-2 hover:underline"
 					>
-						{#if feature.termSlug}<GroveTerm term={feature.termSlug}>{feature.name}</GroveTerm
+						{#if feature.termSlug}<GroveTerm interactive term={feature.termSlug}>{feature.name}</GroveTerm
 							>{:else}{feature.name}{/if}
 					</a>
-				{:else if feature.termSlug}<GroveTerm term={feature.termSlug}>{feature.name}</GroveTerm
+				{:else if feature.termSlug}<GroveTerm interactive term={feature.termSlug}>{feature.name}</GroveTerm
 					>{:else}{feature.name}{/if}
 			</span>
 			{#if feature.major}

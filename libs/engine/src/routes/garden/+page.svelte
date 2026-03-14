@@ -3,10 +3,10 @@
 	import Card from "$lib/ui/components/ui/Card.svelte";
 	import Badge from "$lib/ui/components/ui/Badge.svelte";
 	import GlassButton from "$lib/ui/components/ui/GlassButton.svelte";
-	import GroveSwap from "$lib/ui/components/ui/groveterm/GroveSwap.svelte";
-	import GroveIntro from "$lib/ui/components/ui/groveterm/GroveIntro.svelte";
+	import GroveTerm from "$lib/ui/components/ui/groveterm/GroveTerm.svelte";
 	import { Blaze } from "$lib/ui/components/indicators";
 	import { resolveBlaze } from "$lib/blazes";
+	import { groveModeStore } from "$lib/ui/stores";
 
 	let { data } = $props();
 
@@ -47,8 +47,14 @@
 </svelte:head>
 
 <div class="text-center mt-4 mb-16 max-md:mb-12">
-	<h1 class="blog-header-title"><GroveSwap term="your-garden">Garden</GroveSwap></h1>
-	<GroveIntro term="your-garden" />
+	<h1 class="blog-header-title"><GroveTerm term="your-garden">Garden</GroveTerm></h1>
+	<p class="text-sm text-foreground-subtle italic mt-1 mb-0">
+		{#if groveModeStore.current}
+			<GroveTerm term="your-garden" displayOverride="grove" icon />
+		{:else}
+			<GroveTerm term="your-garden" displayOverride="standard" /> · <GroveTerm term="your-garden" displayOverride="grove" icon />
+		{/if}
+	</p>
 	<p class="blog-header-text">Thoughts, ideas, and explorations.</p>
 	{#if data.isOwner}
 		<div class="flex flex-col items-center gap-3 mt-4">
@@ -68,7 +74,7 @@
 					<line x1="12" y1="5" x2="12" y2="19"></line>
 					<line x1="5" y1="12" x2="19" y2="12"></line>
 				</svg>
-				New <GroveSwap term="blooms" standard="Post">Bloom</GroveSwap>
+				New <GroveTerm term="blooms" standard="Post">Bloom</GroveTerm>
 			</GlassButton>
 			<div class="flex gap-2 items-center">
 				<span
@@ -114,7 +120,7 @@
 
 {#if data.posts.length === 0}
 	<div class="text-center py-12 text-foreground-muted">
-		<p>No <GroveSwap term="blooms">blooms</GroveSwap> yet. Check back soon!</p>
+		<p>No <GroveTerm term="blooms">blooms</GroveTerm> yet. Check back soon!</p>
 	</div>
 {:else}
 	<div class="grid gap-8 max-w-3xl mx-auto">

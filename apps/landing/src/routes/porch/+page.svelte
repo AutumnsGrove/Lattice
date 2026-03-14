@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { GlassCard, GlassButton, GroveTerm, GroveIntro } from '@autumnsgrove/lattice/ui';
+	import { GlassCard, GlassButton, GroveTerm } from '@autumnsgrove/lattice/ui';
 	import Header from '$lib/components/Header.svelte';
-	import { seasonStore } from '@autumnsgrove/lattice/ui/chrome';
+	import { seasonStore, groveModeStore } from '@autumnsgrove/lattice/ui/stores';
 	import Footer from '$lib/components/Footer.svelte';
 	import { Logo } from '@autumnsgrove/lattice/ui/nature';
 	import { MessageCircle, Clock, ArrowRight } from '@lucide/svelte';
@@ -24,8 +24,14 @@
 			<div class="inline-block mb-6">
 				<Logo class="w-16 h-16" season={seasonStore.current} />
 			</div>
-			<h1 class="text-3xl font-serif text-foreground mb-3">The <GroveTerm term="porch">Porch</GroveTerm></h1>
-			<GroveIntro term="porch" />
+			<h1 class="text-3xl font-serif text-foreground mb-3">The <GroveTerm interactive term="porch">Porch</GroveTerm></h1>
+			<p class="text-sm text-foreground-subtle italic mt-1 mb-0">
+				{#if groveModeStore.current}
+					<GroveTerm term="porch" displayOverride="grove" icon />
+				{:else}
+					<GroveTerm term="porch" displayOverride="standard" /> · <GroveTerm term="porch" displayOverride="grove" icon />
+				{/if}
+			</p>
 			<p class="text-lg text-foreground-muted font-sans max-w-xl mx-auto">
 				Have a seat. Whether you're stuck, confused, or just want to say hi—I'm here to help. This is a conversation, not a ticket queue.
 			</p>

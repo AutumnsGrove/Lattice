@@ -2,10 +2,9 @@
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import Spinner from "$lib/ui/components/ui/Spinner.svelte";
 	import GroveTerm from "$lib/ui/components/ui/groveterm/GroveTerm.svelte";
-	import GroveSwap from "$lib/ui/components/ui/groveterm/GroveSwap.svelte";
-	import BetaBadge from "$lib/ui/components/ui/BetaBadge.svelte";
+		import BetaBadge from "$lib/ui/components/ui/BetaBadge.svelte";
 	import BetaWelcomeDialog from "$lib/ui/components/ui/BetaWelcomeDialog.svelte";
-	import GroveIntro from "$lib/ui/components/ui/groveterm/GroveIntro.svelte";
+	import { groveModeStore } from "$lib/ui/stores";
 	import Badge from "$lib/ui/components/ui/Badge.svelte";
 	import { toast } from "$lib/ui/components/ui/toast";
 	import { api, getUserDisplayName } from "$lib/utils";
@@ -92,7 +91,7 @@
 <div class="max-w-screen-xl">
 	<header class="mb-8">
 		<div class="flex items-center gap-3 mb-2">
-			<h1 class="m-0 text-3xl text-foreground"><GroveSwap term="arbor">Dashboard</GroveSwap></h1>
+			<h1 class="m-0 text-3xl text-foreground"><GroveTerm interactive term="arbor">Dashboard</GroveTerm></h1>
 			<a
 				href="https://grove.place/knowledge/help/wanderers-and-pathfinders"
 				target="_blank"
@@ -102,7 +101,7 @@
 				aria-label="Learn about being Rooted in Grove"
 			>
 				<TreeDeciduous class="w-3.5 h-3.5" />
-				<GroveTerm term="rooted">Rooted</GroveTerm>
+				<GroveTerm interactive term="rooted">Rooted</GroveTerm>
 			</a>
 			{#if data.inGreenhouse}
 				<span
@@ -117,7 +116,9 @@
 				<BetaBadge />
 			{/if}
 		</div>
-		<GroveIntro term="arbor" />
+		{#if !groveModeStore.current}
+			<p class="text-sm text-foreground-subtle italic mt-1 mb-0">(<GroveTerm term="arbor" displayOverride="grove" icon />)</p>
+		{/if}
 		<p class="m-0 text-foreground-muted text-lg">Welcome back, {userName}.</p>
 	</header>
 
@@ -129,7 +130,7 @@
 					<FileText class="w-5 h-5" />
 				</div>
 				<div class="stat-content">
-					<span class="stat-label"><GroveTerm term="bloom">Blooms</GroveTerm></span>
+					<span class="stat-label"><GroveTerm interactive term="bloom">Blooms</GroveTerm></span>
 					{#if loading}
 						<Spinner />
 					{:else}
@@ -207,13 +208,13 @@
 			<a href="/arbor/garden/new" class="action-card glass-action">
 				<Plus class="w-7 h-7 text-accent-muted" />
 				<span class="font-medium text-center text-sm"
-					>New <GroveSwap term="bloom">Bloom</GroveSwap></span
+					>New <GroveTerm interactive term="bloom">Bloom</GroveTerm></span
 				>
 			</a>
 			<a href="/arbor/garden" class="action-card glass-action">
 				<FileText class="w-7 h-7 text-accent-muted" />
 				<span class="font-medium text-center text-sm"
-					>Manage <GroveSwap term="your-garden">Garden</GroveSwap></span
+					>Manage <GroveTerm interactive term="your-garden">Garden</GroveTerm></span
 				>
 			</a>
 			<a href="/arbor/images" class="action-card glass-action">
@@ -223,13 +224,13 @@
 			<a href="/arbor/analytics" class="action-card glass-action">
 				<BarChart3 class="w-7 h-7 text-accent-muted" />
 				<span class="font-medium text-center text-sm"
-					>View <GroveTerm term="rings">Rings</GroveTerm></span
+					>View <GroveTerm interactive term="rings">Rings</GroveTerm></span
 				>
 			</a>
 			<a href="/arbor/curios" class="action-card glass-action">
 				<Amphora class="w-7 h-7 text-accent-muted" />
 				<span class="font-medium text-center text-sm"
-					><GroveTerm term="curios">Curios</GroveTerm></span
+					><GroveTerm interactive term="curios">Curios</GroveTerm></span
 				>
 			</a>
 			<a
@@ -241,7 +242,7 @@
 			>
 				<Users class="w-7 h-7 text-accent-muted" />
 				<span class="font-medium text-center text-sm"
-					><GroveTerm term="meadow">Meadow</GroveTerm></span
+					><GroveTerm interactive term="meadow">Meadow</GroveTerm></span
 				>
 			</a>
 			<a
@@ -253,7 +254,7 @@
 			>
 				<BookUser class="w-7 h-7 text-accent-muted" />
 				<span class="font-medium text-center text-sm"
-					><GroveTerm term="canopy">Canopy</GroveTerm></span
+					><GroveTerm interactive term="canopy">Canopy</GroveTerm></span
 				>
 			</a>
 			<a href="/arbor/settings" class="action-card glass-action">

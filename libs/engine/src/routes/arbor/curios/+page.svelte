@@ -4,8 +4,7 @@
 	import Badge from "$lib/ui/components/ui/Badge.svelte";
 	import Waystone from "$lib/ui/components/ui/Waystone.svelte";
 	import GroveTerm from "$lib/ui/components/ui/groveterm/GroveTerm.svelte";
-	import GroveSwap from "$lib/ui/components/ui/groveterm/GroveSwap.svelte";
-	import GroveIntro from "$lib/ui/components/ui/groveterm/GroveIntro.svelte";
+	import { groveModeStore } from "$lib/ui/stores";
 	import {
 		Calendar,
 		Sparkles,
@@ -316,13 +315,15 @@
 		<div class="header-content">
 			<div class="title-row">
 				<Sparkles class="header-icon" />
-				<h1><GroveTerm term="curios">Curios</GroveTerm></h1>
+				<h1><GroveTerm interactive term="curios">Curios</GroveTerm></h1>
 				<Waystone slug="what-are-curios" label="Learn about Curios" />
 			</div>
-			<GroveIntro term="curios" />
+			{#if !groveModeStore.current}
+				<p class="text-sm text-foreground-subtle italic mt-1 mb-0">(<GroveTerm term="curios" displayOverride="grove" icon />)</p>
+			{/if}
 			<p class="subtitle">
-				Fun, delightful tools that make your site feel alive. Developer <GroveSwap term="curios"
-					>curios</GroveSwap
+				Fun, delightful tools that make your site feel alive. Developer <GroveTerm interactive term="curios"
+					>curios</GroveTerm
 				> help you showcase your work in unique ways.
 			</p>
 		</div>

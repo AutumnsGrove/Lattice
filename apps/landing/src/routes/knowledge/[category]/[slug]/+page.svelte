@@ -163,7 +163,7 @@
 						>
 							<strong class="text-foreground">{groveTermEntry.term}</strong> is Grove's name for
 							<strong>{groveTermEntry.standardTerm}</strong>
-							— <GroveTerm term={groveTermEntry.slug}>learn more</GroveTerm>
+							— <GroveTerm interactive term={groveTermEntry.slug}>learn more</GroveTerm>
 						</div>
 					{/if}
 

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { getUserDisplayName } from '@autumnsgrove/lattice/utils';
-	import { GlassCard, GroveSwap } from '@autumnsgrove/lattice/ui';
+	import { GlassCard, GroveTerm } from '@autumnsgrove/lattice/ui';
 	import {
 		MessageCircle,
 		AtSign,
@@ -52,7 +52,7 @@
 					<MessageCircle class="w-6 h-6 text-accent" />
 				</div>
 				<div class="flex-1 min-w-0">
-					<h2 class="text-lg font-serif text-foreground mb-1"><GroveSwap term="wanderer" standard="Visitor">Wanderer</GroveSwap> Feedback</h2>
+					<h2 class="text-lg font-serif text-foreground mb-1"><GroveTerm term="wanderer" standard="Visitor">Wanderer</GroveTerm> Feedback</h2>
 					<p class="text-sm text-foreground-muted font-sans">
 						View and respond to feedback from the community.
 					</p>
@@ -104,9 +104,9 @@
 						<MessageSquare class="w-6 h-6 text-accent" />
 					</div>
 					<div class="flex-1 min-w-0">
-						<h2 class="text-lg font-serif text-foreground mb-1"><GroveSwap term="porch">The Porch</GroveSwap></h2>
+						<h2 class="text-lg font-serif text-foreground mb-1"><GroveTerm term="porch">The Porch</GroveTerm></h2>
 						<p class="text-sm text-foreground-muted font-sans">
-							View and respond to support conversations from <GroveSwap term="wanderer" standard="visitors">Wanderers</GroveSwap>.
+							View and respond to support conversations from <GroveTerm term="wanderer" standard="visitors">Wanderers</GroveTerm>.
 						</p>
 					</div>
 				</div>

@@ -8,7 +8,7 @@
 	import { fade } from "svelte/transition";
 	import { goto } from "$app/navigation";
 	import Button from "$lib/ui/components/ui/Button.svelte";
-	import GroveSwap from "$lib/ui/components/ui/groveterm/GroveSwap.svelte";
+	import GroveTerm from "$lib/ui/components/ui/groveterm/GroveTerm.svelte";
 	import PassageTransition from "$lib/ui/components/ui/PassageTransition.svelte";
 	import { fontMap, DEFAULT_FONT } from "$lib/ui/tokens/fonts";
 	import { getSeasonFavicons } from "$lib/ui/season-meta";
@@ -140,13 +140,13 @@
 {#if context?.type === "not_found"}
 	<div class="not-found-layout">
 		<div class="not-found-content">
-			<h1><GroveSwap term="your-garden">Garden</GroveSwap> Not Found</h1>
+			<h1><GroveTerm term="your-garden">Garden</GroveTerm> Not Found</h1>
 			<p>
-				The <GroveSwap term="your-garden" standard="blog">garden</GroveSwap>
+				The <GroveTerm term="your-garden" standard="blog">garden</GroveTerm>
 				<strong>{context.subdomain}.grove.place</strong> doesn't exist yet.
 			</p>
 			<p>
-				Want to start your own <GroveSwap term="your-garden" standard="blog">garden</GroveSwap>?
+				Want to start your own <GroveTerm term="your-garden" standard="blog">garden</GroveTerm>?
 				<a href="https://grove.place">Get started at grove.place</a>
 			</p>
 		</div>

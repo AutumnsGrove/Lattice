@@ -248,7 +248,7 @@
 
 		<div>
 			<h1 class="text-3xl md:text-4xl font-medium text-foreground mb-3">
-				Plant your <GroveTerm term="your-garden">blog</GroveTerm>
+				Plant your <GroveTerm interactive term="your-garden">blog</GroveTerm>
 			</h1>
 			<p class="text-lg text-foreground-muted max-w-lg mx-auto leading-relaxed">
 				A warm corner of the internet for your words to grow. No algorithms, no ads, no tracking.
@@ -271,7 +271,7 @@
 		<p class="text-sm text-foreground-subtle flex items-center justify-center gap-1.5 flex-wrap">
 			<Users class="w-4 h-4 flex-shrink-0" />
 			<span
-				>Join <GroveTerm term="wanderer">wanderers</GroveTerm> building their corner of the web</span
+				>Join <GroveTerm interactive term="wanderer">wanderers</GroveTerm> building their corner of the web</span
 			>
 		</p>
 	</section>
@@ -301,7 +301,7 @@
 
 		<GlassCard variant="muted" class="text-center space-y-6">
 			<p class="text-foreground leading-relaxed max-w-md mx-auto">
-				<GroveTerm term="your-grove">Grove</GroveTerm> isn't just a blog host. It's a community of people
+				<GroveTerm interactive term="your-grove">Grove</GroveTerm> isn't just a blog host. It's a community of people
 				who believe the internet can be better — calmer, kinder, more intentional.
 			</p>
 
@@ -477,7 +477,7 @@
 		<GlassCard variant="frosted" class="max-w-lg mx-auto">
 			<div class="text-center space-y-5 py-2">
 				<p class="text-foreground-muted">
-					Ready to plant your <GroveTerm term="your-garden">blog</GroveTerm>? We'll walk you through
+					Ready to plant your <GroveTerm interactive term="your-garden">blog</GroveTerm>? We'll walk you through
 					the rest.
 				</p>
 

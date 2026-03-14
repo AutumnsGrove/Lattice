@@ -6,7 +6,8 @@
 	 * Public-facing status page showing platform health, incidents, and uptime.
 	 */
 	import { Header, Footer, type NavItem } from '@autumnsgrove/lattice/ui/chrome';
-	import { GroveIntro, GroveMessages } from '@autumnsgrove/lattice/ui';
+	import { GroveMessages, GroveTerm } from '@autumnsgrove/lattice/ui';
+	import { groveModeStore } from '@autumnsgrove/lattice/ui/stores';
 	import GlassStatusBanner from '$lib/components/GlassStatusBanner.svelte';
 	import GlassStatusCard from '$lib/components/GlassStatusCard.svelte';
 	import GlassUptimeBar from '$lib/components/GlassUptimeBar.svelte';
@@ -68,7 +69,13 @@
 				<GroveMessages messages={data.messages} centered={true} />
 			{/if}
 
-			<GroveIntro term="clearing" />
+			<p class="text-sm text-foreground-subtle italic mt-1 mb-4 text-center">
+				{#if groveModeStore.current}
+					<GroveTerm term="clearing" displayOverride="grove" icon />
+				{:else}
+					<GroveTerm term="clearing" displayOverride="standard" /> · <GroveTerm term="clearing" displayOverride="grove" icon />
+				{/if}
+			</p>
 
 			<!-- Mock data indicator for development -->
 			{#if data.isMockData}

@@ -2,7 +2,7 @@
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import Badge from "$lib/ui/components/ui/Badge.svelte";
 	import { toast } from "$lib/ui/components/ui/toast";
-	import GroveSwap from "$lib/ui/components/ui/groveterm/GroveSwap.svelte";
+	import GroveTerm from "$lib/ui/components/ui/groveterm/GroveTerm.svelte";
 	import { MessageSquare, Mail, Check, X, Ban, Settings, ShieldAlert, UserX } from "@lucide/svelte";
 	import { api } from "$lib/utils/api";
 
@@ -118,11 +118,11 @@
 	<header class="page-header">
 		<h1 class="page-title">
 			<MessageSquare class="title-icon" />
-			<GroveSwap term="reeds">Comments</GroveSwap>
+			<GroveTerm term="reeds">Comments</GroveTerm>
 		</h1>
 		<p class="page-subtitle">
-			<GroveSwap term="reeds" standard="Comments and replies on your posts"
-				>Reeds and replies on your blooms</GroveSwap
+			<GroveTerm term="reeds" standard="Comments and replies on your posts"
+				>Reeds and replies on your blooms</GroveTerm
 			>
 		</p>
 	</header>

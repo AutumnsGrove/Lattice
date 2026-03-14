@@ -2,7 +2,6 @@
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import Waystone from "$lib/ui/components/ui/Waystone.svelte";
 	import GroveTerm from "$lib/ui/components/ui/groveterm/GroveTerm.svelte";
-	import GroveSwap from "$lib/ui/components/ui/groveterm/GroveSwap.svelte";
 	import { BarChart3, Calendar, Sparkles, MessageSquare } from "$lib/ui/components/icons";
 
 	interface Props {
@@ -29,11 +28,11 @@
 			</div>
 			<div class="feature-content">
 				<div class="feature-title">
-					<span><GroveTerm term="rings">Rings</GroveTerm></span>
+					<span><GroveTerm interactive term="rings">Rings</GroveTerm></span>
 					<Waystone slug="what-is-rings" label="Learn about Rings analytics" />
 				</div>
 				<p class="feature-description">
-					Privacy-first analytics showing how <GroveTerm term="wanderer">Wanderers</GroveTerm> explore
+					Privacy-first analytics showing how <GroveTerm interactive term="wanderer">Wanderers</GroveTerm> explore
 					your Grove.
 				</p>
 			</div>
@@ -46,7 +45,7 @@
 			</div>
 			<div class="feature-content">
 				<div class="feature-title">
-					<span><GroveSwap term="trails">Trail</GroveSwap></span>
+					<span><GroveTerm interactive term="trails">Trail</GroveTerm></span>
 					<Waystone slug="what-are-trails" label="Learn about Trail" />
 				</div>
 				<p class="feature-description">
@@ -62,12 +61,12 @@
 			</div>
 			<div class="feature-content">
 				<div class="feature-title">
-					<span><GroveTerm term="reeds">Reeds</GroveTerm></span>
+					<span><GroveTerm interactive term="reeds">Reeds</GroveTerm></span>
 					<Waystone slug="what-are-reeds" label="Learn about Reeds comments" />
 				</div>
 				<p class="feature-description">
-					Threaded comments that let <GroveTerm term="wanderer">Wanderers</GroveTerm> leave
-					thoughts on your <GroveSwap term="bloom">blooms</GroveSwap>.
+					Threaded comments that let <GroveTerm interactive term="wanderer">Wanderers</GroveTerm> leave
+					thoughts on your <GroveTerm interactive term="bloom">blooms</GroveTerm>.
 				</p>
 			</div>
 		</a>
@@ -79,7 +78,7 @@
 			</div>
 			<div class="feature-content">
 				<div class="feature-title">
-					<span><GroveTerm term="curios">Curios</GroveTerm></span>
+					<span><GroveTerm interactive term="curios">Curios</GroveTerm></span>
 					<Waystone slug="what-are-curios" label="Learn about Curios" />
 				</div>
 				<p class="feature-description">
@@ -99,7 +98,7 @@
 			</div>
 			<div class="feature-content">
 				<div class="feature-title">
-					<span><GroveTerm term="reverie">Reverie</GroveTerm></span>
+					<span><GroveTerm interactive term="reverie">Reverie</GroveTerm></span>
 					<Waystone slug="what-is-reverie" label="Learn about Reverie" />
 				</div>
 				<p class="feature-description">

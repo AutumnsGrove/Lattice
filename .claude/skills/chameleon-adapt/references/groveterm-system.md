@@ -8,7 +8,7 @@
 
 Grove has a complete terminology system that automatically switches between Grove-themed terms and standard/understandable terms based on the user's **Grove Mode** setting.
 
-**Always use GroveTerm components instead of hardcoding Grove terminology.**
+**Always use the GroveTerm component instead of hardcoding Grove terminology.**
 
 - When Grove Mode is **OFF** (default for new visitors): users see familiar terms like "Posts", "Dashboard", "Support"
 - When Grove Mode is **ON** (user opted in): they see the full nature-themed vocabulary: "Blooms", "Arbor", "Porch"
@@ -18,7 +18,7 @@ Grove has a complete terminology system that automatically switches between Grov
 ## Import
 
 ```svelte
-import { GroveTerm, GroveSwap, GroveText, GroveSwapText, GroveIntro } from '@autumnsgrove/lattice/ui';
+import { GroveTerm, GroveText } from '@autumnsgrove/lattice/ui';
 import groveTermManifest from '$lib/data/grove-term-manifest.json';
 ```
 
@@ -26,33 +26,47 @@ import groveTermManifest from '$lib/data/grove-term-manifest.json';
 
 ## Component Suite
 
-| Component       | When to Use                              | Behavior                                                                                               |
-| --------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `GroveTerm`     | Interactive terms with popup definitions | Shows standard term when Grove Mode OFF, Grove term with colored underline when ON. Click opens popup. |
-| `GroveSwap`     | Silent text replacement (no popup)       | Reactively swaps between Grove/standard terms. No underline, no interaction.                           |
-| `GroveText`     | Parsing `[[term]]` syntax in strings     | Converts `[[bloom\|posts]]` in data strings to interactive GroveTerm components.                       |
-| `GroveSwapText` | Parsing `[[term]]` syntax silently       | Same parsing but renders silent swaps (no popups).                                                     |
-| `GroveIntro`    | "We call it X" banners below page titles | Shows a standardized intro: "we call it the [Grove Term]".                                             |
+| Component   | When to Use                              | Behavior                                                                                               |
+| ----------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `GroveTerm` | All Grove terminology display            | Defaults to non-interactive (silent text swap). Add `interactive` prop for popup + category underline.  |
+| `GroveText` | Parsing `[[term]]` syntax in strings     | Converts `[[bloom\|posts]]` in data strings to GroveTerm components. Use `!` suffix for interactive.   |
+
+### GroveTerm Props
+
+| Prop              | Type      | Default   | Description                                              |
+| ----------------- | --------- | --------- | -------------------------------------------------------- |
+| `term`            | `string`  | required  | Term slug (e.g., "bloom", "arbor", "porch")              |
+| `interactive`     | `boolean` | `false`   | Enable popup + category-colored underline                |
+| `standard`        | `string`  | —         | Explicit standard term override (skips manifest lookup)  |
+| `icon`            | `boolean` | `false`   | Show Leaf icon next to term (for Grove Mode hints)       |
+| `displayOverride` | `string`  | —         | Force "grove" or "standard" display regardless of mode   |
+| `children`        | snippet   | —         | Override display text                                    |
 
 ---
 
 ## Usage Examples
 
 ```svelte
+<!-- Non-interactive term (default — silent text swap) -->
+<GroveTerm term="arbor" />
+
 <!-- Interactive term with popup -->
-<GroveTerm term="bloom" manifest={groveTermManifest} />
+<GroveTerm interactive term="bloom" />
 
 <!-- Custom display text (for plurals, etc.) -->
-<GroveTerm term="wanderer" manifest={groveTermManifest}>wanderers</GroveTerm>
+<GroveTerm interactive term="wanderer">wanderers</GroveTerm>
 
-<!-- Silent swap (no popup, no underline) -->
-<GroveSwap term="arbor" manifest={groveTermManifest} />
+<!-- With leaf icon (for Grove Mode discovery) -->
+<GroveTerm term="porch" icon />
+
+<!-- Explicit standard term override -->
+<GroveTerm term="wanderer" standard="visitors">Wanderers</GroveTerm>
 
 <!-- Parse [[term]] syntax in data strings -->
-<GroveText content="Your [[bloom|posts]] live in your [[garden|blog]]." manifest={groveTermManifest} />
+<GroveText content="Your [[bloom|posts]] live in your [[garden|blog]]." />
 
-<!-- Page intro banner -->
-<GroveIntro term="meadow" manifest={groveTermManifest} />
+<!-- Interactive terms in parsed strings (use ! suffix) -->
+<GroveText content="Protected by [[shade!|Shade]]." />
 ```
 
 ---
@@ -74,9 +88,11 @@ const isGroveMode = $derived(groveModeStore.current);
 
 - **Never hardcode Grove terms** in user-facing UI. Always use GroveTerm components.
 - **Default is OFF** for new visitors. They see standard, familiar terminology.
+- **Default is non-interactive.** Only add `interactive` when the term should have a popup.
 - **URLs stay as Grove terms** (e.g., `/porch`, `/garden`) regardless of display mode.
 - **Subscription tiers** (Seedling/Sapling/Oak/Evergreen) and the brand name (Grove) always show as-is — they are not swapped.
 - **The `[[term]]` syntax** is preferred for data-driven content (FAQ items, pricing text, marketing copy, etc.).
+- **Use `[[term!]]` syntax** when terms in parsed strings should be interactive (popup + underline).
 
 ---
 
@@ -108,20 +124,23 @@ Use in data-driven strings (FAQ answers, pricing blurbs, onboarding copy):
 
 ```
 "Your [[bloom|posts]] live in your [[garden|blog]]."
+"Protected by [[shade!|Shade]]."
 ```
 
-Format: `[[grove-term|standard-term]]`
+Format: `[[grove-term|display-text]]` or `[[grove-term!|display-text]]`
 
-- `grove-term` — shown when Grove Mode is ON
-- `standard-term` — shown when Grove Mode is OFF (the default)
+- Without `!` — non-interactive (silent swap, default)
+- With `!` — interactive (popup + colored underline)
+- `display-text` — what's shown (optional, defaults to the term name)
 
-Render with `<GroveText>` for interactive popups or `<GroveSwapText>` for silent swaps.
+Render with `<GroveText>` — it handles both interactive and non-interactive based on the `!` suffix.
 
 ---
 
 ## Accessibility Considerations
 
-- GroveTerm popups are keyboard-accessible and screen-reader-friendly — the component handles ARIA automatically.
+- GroveTerm popups (when `interactive`) are keyboard-accessible and screen-reader-friendly — the component handles ARIA automatically.
 - When Grove Mode is OFF, users never encounter confusing nature jargon. The experience is welcoming by default.
-- The colored underline on active Grove terms provides a visual hint without breaking reading flow — do not remove or override this styling.
+- The colored underline on interactive Grove terms provides a visual hint without breaking reading flow — do not remove or override this styling.
+- The Leaf icon (`icon` prop) serves as a subtle discovery cue for Grove Mode — users who see it can find the toggle in the footer.
 - The footer toggle for Grove Mode is the single source of control — never add competing toggles on other pages.

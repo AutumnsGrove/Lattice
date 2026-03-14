@@ -202,7 +202,7 @@
 		>
 			<AlertCircle class="w-4 h-4 flex-shrink-0" />
 			<span class="text-sm"
-				>Custom navigation pages are available starting with <GroveTerm term="sapling"
+				>Custom navigation pages are available starting with <GroveTerm interactive term="sapling"
 					>Sapling</GroveTerm
 				>. <a href="/arbor/billing" class="underline hover:no-underline">Upgrade your plan</a> to add
 				pages to your nav.</span
@@ -339,7 +339,7 @@
 				<div class="flex items-center gap-2">
 					<Sparkles class="w-5 h-5 text-grove-600 dark:text-grove-400" />
 					<h2 class="m-0 text-lg font-semibold text-foreground">
-						Active <GroveTerm term="curios">Curios</GroveTerm>
+						Active <GroveTerm interactive term="curios">Curios</GroveTerm>
 					</h2>
 				</div>
 				<a
@@ -351,7 +351,7 @@
 				</a>
 			</div>
 			<p class="text-sm text-foreground-muted mb-4">
-				<GroveTerm term="curios">Curios</GroveTerm> are special page types that add dynamic functionality
+				<GroveTerm interactive term="curios">Curios</GroveTerm> are special page types that add dynamic functionality
 				to your site.
 			</p>
 			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
