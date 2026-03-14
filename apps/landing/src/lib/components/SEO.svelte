@@ -78,8 +78,11 @@
 	<title>{title}</title>
 	<meta name="description" content={description} />
 
+	<link rel="canonical" href={absoluteUrl} />
+
 	<!-- Open Graph / Facebook -->
 	<meta property="og:type" content={type} />
+	<meta property="og:site_name" content="Grove" />
 	<meta property="og:url" content={absoluteUrl} />
 	<meta property="og:title" content={title} />
 	<meta property="og:description" content={description} />

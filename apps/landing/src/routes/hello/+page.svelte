@@ -22,8 +22,8 @@
 </script>
 
 <SEO
-	title="Hello — Grove"
-	description="Thanks for your curiosity. Grove is a quiet corner of the internet where your words can grow — and stay yours."
+	title="Grove — A quiet corner of the internet that's actually yours"
+	description="Your own blog at yourname.grove.place. No ads, no algorithms, no AI scraping your work. A blogging platform that treats your writing like it belongs to you."
 	url="/hello"
 />
 
@@ -41,7 +41,7 @@
 	</h1>
 
 	<p class="text-lg text-foreground-muted font-sans text-center mb-8 max-w-md">
-		Thanks for scanning. Let me tell you what this is about.
+		You found us. Let me tell you what this is about.
 	</p>
 
 	<!-- Decorative divider -->
