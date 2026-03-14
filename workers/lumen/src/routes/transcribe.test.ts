@@ -64,7 +64,7 @@ describe("POST /transcribe", () => {
 		const res = await app.request(post({ audio: SAMPLE_AUDIO_BASE64 }), undefined, mockEnv);
 
 		expect(res.status).toBe(200);
-		const body: LumenWorkerResponse = await res.json();
+		const body: LumenWorkerResponse = (await res.json()) as any;
 		expect(body.success).toBe(true);
 		expect(body.data).toEqual({
 			text: "Hello world",
@@ -90,7 +90,7 @@ describe("POST /transcribe", () => {
 		const res = await app.request(post({ audio: SAMPLE_AUDIO_BASE64 }), undefined, mockEnv);
 
 		expect(res.status).toBe(200);
-		const body: LumenWorkerResponse = await res.json();
+		const body: LumenWorkerResponse = (await res.json()) as any;
 		expect((body.data as Record<string, unknown>).gutterContent).toHaveLength(1);
 	});
 
@@ -154,7 +154,7 @@ describe("POST /transcribe", () => {
 		);
 
 		expect(res.status).toBe(400);
-		const body: LumenWorkerResponse = await res.json();
+		const body: LumenWorkerResponse = (await res.json()) as any;
 		expect(body.error?.code).toBe("INVALID_REQUEST");
 	});
 
@@ -163,7 +163,7 @@ describe("POST /transcribe", () => {
 		const res = await app.request(post({}), undefined, mockEnv);
 
 		expect(res.status).toBe(400);
-		const body: LumenWorkerResponse = await res.json();
+		const body: LumenWorkerResponse = (await res.json()) as any;
 		expect(body.error?.code).toBe("INVALID_PARAMS");
 		expect(body.error?.message).toContain("audio");
 	});
@@ -177,7 +177,7 @@ describe("POST /transcribe", () => {
 		);
 
 		expect(res.status).toBe(400);
-		const body: LumenWorkerResponse = await res.json();
+		const body: LumenWorkerResponse = (await res.json()) as any;
 		expect(body.error?.code).toBe("INVALID_PARAMS");
 	});
 
@@ -188,7 +188,7 @@ describe("POST /transcribe", () => {
 		const res = await app.request(post({ audio: SAMPLE_AUDIO_BASE64 }), undefined, mockEnv);
 
 		expect(res.status).toBe(500);
-		const body: LumenWorkerResponse = await res.json();
+		const body: LumenWorkerResponse = (await res.json()) as any;
 		expect(body.success).toBe(false);
 		expect(body.meta?.task).toBe("transcription");
 	});

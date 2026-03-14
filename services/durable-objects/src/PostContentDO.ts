@@ -56,7 +56,7 @@ export interface ContentUpdate {
 	font?: string;
 }
 
-interface ContentEnv extends Record<string, unknown> {
+export interface ContentEnv extends Record<string, unknown> {
 	DB: D1Database;
 	IMAGES: R2Bucket;
 }

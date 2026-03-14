@@ -369,7 +369,7 @@ describe("POST /api/images/upload — Feature Gates", () => {
 		event.platform.env.CACHE_KV = undefined as any;
 
 		const response = await uploadHandler(event as any);
-		const body = await response.json();
+		const body = (await response.json()) as any;
 
 		expect(response.status).toBe(403);
 		expect(body.error).toBeDefined();
@@ -536,7 +536,7 @@ describe("POST /api/images/upload — Successful Upload", () => {
 		});
 
 		const response = await uploadHandler(event as any);
-		const body = await response.json();
+		const body = (await response.json()) as any;
 
 		expect(body.success).toBe(true);
 		expect(body.key).toContain(TENANT_ID);
@@ -552,7 +552,7 @@ describe("POST /api/images/upload — Successful Upload", () => {
 		});
 
 		const response = await uploadHandler(event as any);
-		const body = await response.json();
+		const body = (await response.json()) as any;
 
 		const key = body.key;
 		const parts = key.split("/");
@@ -655,7 +655,7 @@ describe("POST /api/images/upload — Successful Upload", () => {
 		});
 
 		const response = await uploadHandler(event as any);
-		const body = await response.json();
+		const body = (await response.json()) as any;
 
 		expect(body.success).toBe(true);
 		expect(body.url).toContain("https://cdn.grove.place/");
@@ -698,7 +698,7 @@ describe("POST /api/images/upload — Filename Handling", () => {
 		});
 
 		const response = await uploadHandler(event as any);
-		const body = await response.json();
+		const body = (await response.json()) as any;
 
 		expect(body.filename).toContain("my-photo-2024");
 		expect(body.filename).not.toContain("_");
@@ -713,7 +713,7 @@ describe("POST /api/images/upload — Filename Handling", () => {
 		});
 
 		const response = await uploadHandler(event as any);
-		const body = await response.json();
+		const body = (await response.json()) as any;
 
 		// Timestamp should be in base-36 format (alphanumeric)
 		expect(body.filename).toMatch(/-[a-z0-9]+\.jpg$/);
@@ -768,7 +768,7 @@ describe("POST /api/images/upload — Duplicate Detection", () => {
 		});
 
 		const response = await uploadHandler(event as any);
-		const body = await response.json();
+		const body = (await response.json()) as any;
 
 		expect(body.success).toBe(true);
 		expect(body.duplicate).toBe(true);
@@ -812,7 +812,7 @@ describe("POST /api/images/upload — Duplicate Detection", () => {
 		});
 
 		const response = await uploadHandler(event as any);
-		const body = await response.json();
+		const body = (await response.json()) as any;
 
 		expect(body.success).toBe(true);
 		expect(body.duplicate).toBeUndefined();
@@ -830,7 +830,7 @@ describe("POST /api/images/upload — Duplicate Detection", () => {
 		});
 
 		const response = await uploadHandler(event as any);
-		const body = await response.json();
+		const body = (await response.json()) as any;
 
 		expect(body.success).toBe(true);
 		// DB prepare should not be called for duplicate check (will be called for gallery insert, which is ok)
@@ -875,7 +875,7 @@ describe("POST /api/images/upload — Duplicate Detection", () => {
 		});
 
 		const response = await uploadHandler(event as any);
-		const body = await response.json();
+		const body = (await response.json()) as any;
 
 		// Should still succeed — D1 failure is non-critical
 		expect(body.success).toBe(true);
@@ -902,7 +902,7 @@ describe("POST /api/images/upload — Content Moderation (Petal)", () => {
 		event.platform.env.TOGETHER_API_KEY = undefined as any;
 
 		const response = await uploadHandler(event as any);
-		const body = await response.json();
+		const body = (await response.json()) as any;
 
 		expect(body.success).toBe(true);
 	});
@@ -1056,7 +1056,7 @@ describe("POST /api/images/upload — D1 Graceful Degradation", () => {
 		});
 
 		const response = await uploadHandler(event as any);
-		const body = await response.json();
+		const body = (await response.json()) as any;
 
 		expect(body.success).toBe(true);
 		expect(r2.put).toHaveBeenCalled();
@@ -1093,7 +1093,7 @@ describe("POST /api/images/upload — D1 Graceful Degradation", () => {
 		});
 
 		const response = await uploadHandler(event as any);
-		const body = await response.json();
+		const body = (await response.json()) as any;
 
 		expect(body.success).toBe(true);
 		expect(r2.put).toHaveBeenCalled();
@@ -1135,7 +1135,7 @@ describe("POST /api/images/upload — Copy Formats", () => {
 		});
 
 		const response = await uploadHandler(event as any);
-		const body = await response.json();
+		const body = (await response.json()) as any;
 
 		expect(body.markdown).toBe(`![Beautiful sunset](${body.url})`);
 	});
@@ -1166,7 +1166,7 @@ describe("POST /api/images/upload — Copy Formats", () => {
 		});
 
 		const response = await uploadHandler(event as any);
-		const body = await response.json();
+		const body = (await response.json()) as any;
 
 		expect(body.html).toContain('alt="Photo with &quot;quotes&quot;"');
 		expect(body.svelte).toContain('alt="Photo with &quot;quotes&quot;"');

@@ -13,7 +13,7 @@
  * 2. Commits API (backfill) - Complete history, per-repo queries
  */
 
-import { json, error } from "@sveltejs/kit";
+import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import type { Commit } from "$lib/curios/timeline";
 import { getTimelineToken, TIMELINE_SECRET_KEYS } from "$lib/curios/timeline/secrets.server";

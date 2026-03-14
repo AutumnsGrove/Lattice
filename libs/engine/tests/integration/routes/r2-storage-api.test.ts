@@ -284,7 +284,7 @@ describe("DELETE /api/images/delete", () => {
 			});
 
 			const response = await deleteHandler(event as any);
-			const body = await response.json();
+			const body = (await response.json()) as any;
 
 			expect(body.success).toBe(true);
 			expect(r2.delete).toHaveBeenCalledWith(key);
@@ -321,7 +321,7 @@ describe("DELETE /api/images/delete", () => {
 			});
 
 			const response = await deleteHandler(event as any);
-			const body = await response.json();
+			const body = (await response.json()) as any;
 
 			expect(body.success).toBe(true);
 			expect(r2.delete).toHaveBeenCalledWith(key);
@@ -341,7 +341,7 @@ describe("DELETE /api/images/delete", () => {
 
 			// The traversal gets stripped, key becomes the tenant path
 			const response = await deleteHandler(event as any);
-			const body = await response.json();
+			const body = (await response.json()) as any;
 
 			// Should succeed but with sanitized key (no ..)
 			expect(body.key).not.toContain("..");
@@ -357,7 +357,7 @@ describe("DELETE /api/images/delete", () => {
 			});
 
 			const response = await deleteHandler(event as any);
-			const body = await response.json();
+			const body = (await response.json()) as any;
 
 			expect(body.key).not.toMatch(/^\/+/);
 		});
@@ -372,7 +372,7 @@ describe("DELETE /api/images/delete", () => {
 			});
 
 			const response = await deleteHandler(event as any);
-			const body = await response.json();
+			const body = (await response.json()) as any;
 
 			expect(body.key).not.toContain("\\");
 			expect(body.key).toContain("/");
@@ -471,7 +471,7 @@ describe("DELETE /api/images/delete", () => {
 
 			// Should still succeed — R2 deletion is the primary operation
 			const response = await deleteHandler(event as any);
-			const body = await response.json();
+			const body = (await response.json()) as any;
 
 			expect(body.success).toBe(true);
 			expect(r2.delete).toHaveBeenCalledWith(key);
@@ -607,7 +607,7 @@ describe("POST /api/images/delete-batch", () => {
 			});
 
 			const response = await batchDeleteHandler(event as any);
-			const body = await response.json();
+			const body = (await response.json()) as any;
 
 			expect(body.success).toBe(true);
 			expect(body.deleted).toHaveLength(50);
@@ -644,7 +644,7 @@ describe("POST /api/images/delete-batch", () => {
 			});
 
 			const response = await batchDeleteHandler(event as any);
-			const body = await response.json();
+			const body = (await response.json()) as any;
 
 			expect(body.success).toBe(false); // One failed
 			expect(body.deleted).toHaveLength(2);
@@ -668,7 +668,7 @@ describe("POST /api/images/delete-batch", () => {
 			});
 
 			const response = await batchDeleteHandler(event as any);
-			const body = await response.json();
+			const body = (await response.json()) as any;
 
 			expect(body.success).toBe(true);
 			expect(body.deleted).toHaveLength(3);
@@ -699,7 +699,7 @@ describe("POST /api/images/delete-batch", () => {
 			});
 
 			const response = await batchDeleteHandler(event as any);
-			const body = await response.json();
+			const body = (await response.json()) as any;
 
 			expect(body.success).toBe(false);
 			expect(body.deleted).toHaveLength(2);
@@ -743,7 +743,7 @@ describe("POST /api/images/delete-batch", () => {
 			});
 
 			const response = await batchDeleteHandler(event as any);
-			const body = await response.json();
+			const body = (await response.json()) as any;
 
 			expect(body.summary).toBe("1 deleted, 1 failed");
 		});
@@ -891,7 +891,7 @@ describe("GET /api/images/list", () => {
 			const event = createRouteEvent({ r2 });
 
 			const response = await listHandler(event as any);
-			const body = await response.json();
+			const body = (await response.json()) as any;
 
 			expect(body.truncated).toBe(true);
 			expect(body.cursor).toBe("next-page-cursor");
@@ -916,7 +916,7 @@ describe("GET /api/images/list", () => {
 			const event = createRouteEvent({ r2 });
 
 			const response = await listHandler(event as any);
-			const body = await response.json();
+			const body = (await response.json()) as any;
 
 			expect(body.success).toBe(true);
 			expect(body.images).toHaveLength(1);
@@ -932,7 +932,7 @@ describe("GET /api/images/list", () => {
 			const event = createRouteEvent({ r2 });
 
 			const response = await listHandler(event as any);
-			const body = await response.json();
+			const body = (await response.json()) as any;
 
 			expect(body.images).toEqual([]);
 			expect(body.truncated).toBe(false);
@@ -974,7 +974,7 @@ describe("GET /api/images/list", () => {
 			});
 
 			const response = await listHandler(event as any);
-			const body = await response.json();
+			const body = (await response.json()) as any;
 
 			expect(body.images).toHaveLength(1);
 			expect(body.images[0].key).toContain("sunset");
@@ -988,7 +988,7 @@ describe("GET /api/images/list", () => {
 			});
 
 			const response = await listHandler(event as any);
-			const body = await response.json();
+			const body = (await response.json()) as any;
 
 			expect(body.images).toHaveLength(1);
 			expect(body.images[0].key).toContain("mountain");
@@ -1030,7 +1030,7 @@ describe("GET /api/images/list", () => {
 			});
 
 			const response = await listHandler(event as any);
-			const body = await response.json();
+			const body = (await response.json()) as any;
 
 			expect(body.images[0].key).toContain("a-image");
 			expect(body.images[2].key).toContain("c-image");
@@ -1044,7 +1044,7 @@ describe("GET /api/images/list", () => {
 			});
 
 			const response = await listHandler(event as any);
-			const body = await response.json();
+			const body = (await response.json()) as any;
 
 			expect(body.images[0].size).toBe(300);
 			expect(body.images[2].size).toBe(100);
@@ -1055,7 +1055,7 @@ describe("GET /api/images/list", () => {
 			const event = createRouteEvent({ r2 });
 
 			const response = await listHandler(event as any);
-			const body = await response.json();
+			const body = (await response.json()) as any;
 
 			// Most recent first
 			expect(body.images[0].key).toContain("b-image"); // June
@@ -1093,7 +1093,7 @@ describe("GET /api/images/list", () => {
 			const event = createRouteEvent({ r2, db });
 
 			const response = await listHandler(event as any);
-			const body = await response.json();
+			const body = (await response.json()) as any;
 
 			// Should still return images from R2
 			expect(body.success).toBe(true);

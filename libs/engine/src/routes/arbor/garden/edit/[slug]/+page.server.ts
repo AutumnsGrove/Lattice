@@ -1,4 +1,3 @@
-import { error } from "@sveltejs/kit";
 import { ARBOR_ERRORS, throwGroveError } from "$lib/errors";
 import { getTenantDb } from "$lib/server/services/database";
 import { loadCurioStatus } from "$lib/server/curio-status";

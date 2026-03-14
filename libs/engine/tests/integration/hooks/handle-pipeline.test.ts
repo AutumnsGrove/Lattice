@@ -1004,7 +1004,7 @@ describe("Engine Hook Pipeline (handle)", () => {
 			const response = await handle({ event: event as any, resolve });
 
 			expect(response.status).toBe(413);
-			const body = await response.json();
+			const body = (await response.json()) as any;
 			expect(body.error).toBe("payload_too_large");
 		});
 

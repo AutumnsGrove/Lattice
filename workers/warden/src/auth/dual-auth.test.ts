@@ -74,7 +74,7 @@ describe("dualAuth — API key path (service binding)", () => {
 		const res = await app.request(req, undefined, env);
 
 		expect(res.status).toBe(200);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body.agent.id).toBe(agent.id);
 		expect(body.authMethod).toBe("service_binding");
 	});
@@ -92,7 +92,7 @@ describe("dualAuth — API key path (service binding)", () => {
 		const res = await app.request(req, undefined, env);
 
 		expect(res.status).toBe(401);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body.error.code).toBe("AUTH_FAILED");
 	});
 });
@@ -123,7 +123,7 @@ describe("dualAuth — challenge-response path", () => {
 		const res = await app.request(req, undefined, env);
 
 		expect(res.status).toBe(401);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body.error.code).toBe("AUTH_REQUIRED");
 	});
 
@@ -141,7 +141,7 @@ describe("dualAuth — challenge-response path", () => {
 		const res = await app.request(req, undefined, env);
 
 		expect(res.status).toBe(401);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body.error.code).toBe("AUTH_REQUIRED");
 	});
 
@@ -161,7 +161,7 @@ describe("dualAuth — challenge-response path", () => {
 		const res = await app.request(req, undefined, env);
 
 		expect(res.status).toBe(401);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body.error.code).toBe("AGENT_NOT_FOUND");
 	});
 
@@ -183,7 +183,7 @@ describe("dualAuth — challenge-response path", () => {
 		const res = await app.request(req, undefined, env);
 
 		expect(res.status).toBe(401);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body.error.code).toBe("NONCE_INVALID");
 	});
 
@@ -205,7 +205,7 @@ describe("dualAuth — challenge-response path", () => {
 		const res = await app.request(req, undefined, env);
 
 		expect(res.status).toBe(401);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body.error.code).toBe("SIGNATURE_INVALID");
 	});
 
@@ -220,7 +220,7 @@ describe("dualAuth — challenge-response path", () => {
 		const res = await app.request(req, undefined, env);
 
 		expect(res.status).toBe(400);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body.error.code).toBe("INVALID_BODY");
 	});
 

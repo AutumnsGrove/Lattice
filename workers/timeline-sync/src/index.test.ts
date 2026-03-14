@@ -106,7 +106,7 @@ describe("Worker HTTP Handler", () => {
 			const response = await worker.fetch(request, env);
 
 			expect(response.status).toBe(200);
-			const data = await response.json();
+			const data = (await response.json()) as any;
 
 			expect(data).toHaveProperty("success");
 			expect(data).toHaveProperty("message");
@@ -121,7 +121,7 @@ describe("Worker HTTP Handler", () => {
 			const env = createMockEnv();
 
 			const response = await worker.fetch(request, env);
-			const data = await response.json();
+			const data = (await response.json()) as any;
 
 			expect(data.success).toBe(true);
 			expect(data.message).toContain("No enabled tenants");
@@ -135,7 +135,7 @@ describe("Worker HTTP Handler", () => {
 			const env = createMockEnv();
 
 			const response = await worker.fetch(request, env);
-			const data = await response.json();
+			const data = (await response.json()) as any;
 
 			expect(data.date).toBe("2026-03-10");
 		});
@@ -147,7 +147,7 @@ describe("Worker HTTP Handler", () => {
 			const env = createMockEnv();
 
 			const response = await worker.fetch(request, env);
-			const data = await response.json();
+			const data = (await response.json()) as any;
 
 			expect(data.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
 		});
@@ -183,7 +183,7 @@ describe("Worker HTTP Handler", () => {
 			const env = createMockEnv();
 
 			const response = await worker.fetch(request, env);
-			const data = await response.json();
+			const data = (await response.json()) as any;
 
 			expect(data.results).toHaveLength(3);
 			expect(data.results[0]).toHaveProperty("tenantId", "t1");
@@ -215,7 +215,7 @@ describe("Worker HTTP Handler", () => {
 			const env = createMockEnv();
 
 			const response = await worker.fetch(request, env);
-			const data = await response.json();
+			const data = (await response.json()) as any;
 
 			expect(data.success).toBe(false);
 		});
@@ -229,7 +229,7 @@ describe("Worker HTTP Handler", () => {
 			const response = await worker.fetch(request, env);
 
 			expect(response.status).toBe(500);
-			const data = await response.json();
+			const data = (await response.json()) as any;
 			expect(data.success).toBe(false);
 			expect(data.error).toContain("DB connection failed");
 		});
@@ -247,7 +247,7 @@ describe("Worker HTTP Handler", () => {
 			const env = createMockEnv();
 
 			const response = await worker.fetch(request, env);
-			const data = await response.json();
+			const data = (await response.json()) as any;
 
 			expect(data.count).toBe(2);
 			expect(data.tenants).toHaveLength(2);
@@ -264,7 +264,7 @@ describe("Worker HTTP Handler", () => {
 			const env = createMockEnv();
 
 			const response = await worker.fetch(request, env);
-			const data = await response.json();
+			const data = (await response.json()) as any;
 
 			expect(data.count).toBe(0);
 			expect(data.tenants).toEqual([]);
@@ -279,7 +279,7 @@ describe("Worker HTTP Handler", () => {
 			const response = await worker.fetch(request, env);
 
 			expect(response.status).toBe(500);
-			const data = await response.json();
+			const data = (await response.json()) as any;
 			expect(data.success).toBe(false);
 			expect(data.error).toContain("DB unreachable");
 		});
@@ -294,7 +294,7 @@ describe("Worker HTTP Handler", () => {
 			const env = createMockEnv();
 
 			const response = await worker.fetch(request, env);
-			const data = await response.json();
+			const data = (await response.json()) as any;
 
 			expect(data).toHaveProperty("worker", "grove-timeline-sync");
 			expect(data).toHaveProperty("timestamp");
@@ -312,7 +312,7 @@ describe("Worker HTTP Handler", () => {
 			const env = createMockEnv();
 
 			const response = await worker.fetch(request, env);
-			const data = await response.json();
+			const data = (await response.json()) as any;
 
 			expect(data.environment).toHaveProperty("kekPresent");
 			expect(data.environment).toHaveProperty("kekLength");
@@ -329,7 +329,7 @@ describe("Worker HTTP Handler", () => {
 			const env = createMockEnv();
 
 			const response = await worker.fetch(request, env);
-			const data = await response.json();
+			const data = (await response.json()) as any;
 
 			expect(data.tenants.enabledCount).toBe(2);
 			expect(data.tenants.configs).toHaveLength(2);
@@ -344,7 +344,7 @@ describe("Worker HTTP Handler", () => {
 			const response = await worker.fetch(request, env);
 
 			expect(response.status).toBe(200);
-			const data = await response.json();
+			const data = (await response.json()) as any;
 			expect(data).toHaveProperty("worker", "grove-timeline-sync");
 			expect(data.environment.dbConnected).toBe(false);
 		});

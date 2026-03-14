@@ -65,7 +65,7 @@ function createTriageDO(existingState?: Record<string, unknown> | null) {
 		ZEPHYR_API_KEY: "test-zephyr-key",
 	};
 
-	const doInstance = new TriageDO(state, env);
+	const doInstance = new TriageDO(state, env as any);
 	return { doInstance, sql, ivyDb, storage, env };
 }
 
@@ -75,7 +75,7 @@ describe("TriageDO", () => {
 			const { doInstance } = createTriageDO();
 
 			const res = await doInstance.fetch(doPost("/process", { bufferId: "buffer-1" }));
-			const body = await res.json();
+			const body = (await res.json()) as any;
 
 			expect(body.success).toBe(true);
 			expect(body.queued).toBe(true);
@@ -86,11 +86,11 @@ describe("TriageDO", () => {
 
 			const res = await doInstance.fetch(doPost("/process", { bufferId: "buffer-1" }));
 
-			expect((await res.json()).success).toBe(true);
+			expect(((await res.json()) as any).success).toBe(true);
 
 			// Check status to verify state was initialized
 			const statusRes = await doInstance.fetch(doRequest("/status"));
-			const statusBody = await statusRes.json();
+			const statusBody = (await statusRes.json()) as any;
 			expect(statusBody.queueLength).toBe(1);
 		});
 	});
@@ -100,7 +100,7 @@ describe("TriageDO", () => {
 			const { doInstance } = createTriageDO();
 
 			const res = await doInstance.fetch(doRequest("/status"));
-			const body = await res.json();
+			const body = (await res.json()) as any;
 
 			expect(body.queueLength).toBe(0);
 			expect(body.digestScheduled).toBe(false);
@@ -118,7 +118,7 @@ describe("TriageDO", () => {
 			});
 
 			const res = await doInstance.fetch(doRequest("/status"));
-			const body = await res.json();
+			const body = (await res.json()) as any;
 
 			expect(body.queueLength).toBe(2);
 			expect(body.digestScheduled).toBe(true);
@@ -137,7 +137,7 @@ describe("TriageDO", () => {
 					enabled: true,
 				}),
 			);
-			const body = await res.json();
+			const body = (await res.json()) as any;
 
 			expect(body.success).toBe(true);
 			expect(body.nextDigestAt).toBeDefined();
@@ -157,7 +157,7 @@ describe("TriageDO", () => {
 					enabled: false,
 				}),
 			);
-			const body = await res.json();
+			const body = (await res.json()) as any;
 
 			expect(body.success).toBe(true);
 			expect(body.digestDisabled).toBe(true);
@@ -182,7 +182,7 @@ describe("TriageDO", () => {
 			});
 
 			const res = await doInstance.fetch(doPost("/digest", {}));
-			const body = await res.json();
+			const body = (await res.json()) as any;
 
 			expect(body.success).toBe(true);
 		});

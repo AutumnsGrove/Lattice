@@ -189,7 +189,7 @@ describe("POST /api/search/start", () => {
 		});
 
 		const response = await startSearch(event);
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(response.status).toBe(200);
 		expect(data.success).toBe(true);
@@ -295,7 +295,7 @@ describe("POST /api/search/cancel", () => {
 		});
 
 		const response = await cancelSearch(event);
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(response.status).toBe(200);
 		expect(data.success).toBe(true);
@@ -366,7 +366,7 @@ describe("GET /api/search/status", () => {
 			id: "job-1",
 			status: "running",
 			business_name: "Test Business",
-		};
+		} as any;
 
 		vi.mocked(getSearchJob).mockResolvedValueOnce(localJob);
 
@@ -384,7 +384,7 @@ describe("GET /api/search/status", () => {
 		});
 
 		const response = await getStatus(event);
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(response.status).toBe(200);
 		expect(data.job.id).toBe("job-1");
@@ -392,7 +392,7 @@ describe("GET /api/search/status", () => {
 	});
 
 	it("returns merged worker and local data on success", async () => {
-		const localJob = { id: "job-1", status: "running", client_id: "c1" };
+		const localJob = { id: "job-1", status: "running", client_id: "c1" } as any;
 		vi.mocked(getSearchJob).mockResolvedValueOnce(localJob);
 
 		const workerData = {
@@ -419,7 +419,7 @@ describe("GET /api/search/status", () => {
 		});
 
 		const response = await getStatus(event);
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(response.status).toBe(200);
 		expect(data.job.id).toBe("job-1");
@@ -427,7 +427,7 @@ describe("GET /api/search/status", () => {
 	});
 
 	it("syncs worker status back to local D1", async () => {
-		const localJob = { id: "job-1", status: "running" };
+		const localJob = { id: "job-1", status: "running" } as any;
 		vi.mocked(getSearchJob).mockResolvedValueOnce(localJob);
 
 		const workerData = {
@@ -510,7 +510,7 @@ describe("GET /api/search/results", () => {
 		});
 
 		const response = await getResults(event);
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(response.status).toBe(200);
 		expect(data.results).toHaveLength(1);
@@ -581,7 +581,7 @@ describe("POST /api/search/resume", () => {
 		});
 
 		const response = await resumeSearch(event);
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(response.status).toBe(200);
 		expect(data.success).toBe(true);

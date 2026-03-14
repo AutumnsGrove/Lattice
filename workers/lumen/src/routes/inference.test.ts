@@ -82,7 +82,7 @@ describe("POST /inference", () => {
 		);
 
 		expect(res.status).toBe(200);
-		const body: LumenWorkerResponse = await res.json();
+		const body: LumenWorkerResponse = (await res.json()) as any;
 		expect(body.success).toBe(true);
 		expect(body.data).toEqual({
 			content: "Hello world!",
@@ -102,7 +102,7 @@ describe("POST /inference", () => {
 		const res = await app.request(postRaw("not json {{{"), undefined, mockEnv);
 
 		expect(res.status).toBe(400);
-		const body: LumenWorkerResponse = await res.json();
+		const body: LumenWorkerResponse = (await res.json()) as any;
 		expect(body.success).toBe(false);
 		expect(body.error?.code).toBe("INVALID_REQUEST");
 		expect(body.error?.message).toBe("Invalid JSON body");
@@ -113,7 +113,7 @@ describe("POST /inference", () => {
 		const res = await app.request(post({}), undefined, mockEnv);
 
 		expect(res.status).toBe(400);
-		const body: LumenWorkerResponse = await res.json();
+		const body: LumenWorkerResponse = (await res.json()) as any;
 		expect(body.success).toBe(false);
 		expect(body.error?.code).toBe("INVALID_PARAMS");
 		expect(body.error?.message).toContain("task");
@@ -128,7 +128,7 @@ describe("POST /inference", () => {
 		);
 
 		expect(res.status).toBe(400);
-		const body: LumenWorkerResponse = await res.json();
+		const body: LumenWorkerResponse = (await res.json()) as any;
 		expect(body.error?.code).toBe("INVALID_PARAMS");
 	});
 
@@ -209,7 +209,7 @@ describe("POST /inference", () => {
 		const res = await app.request(post({ task: "generation", input: "test" }), undefined, mockEnv);
 
 		expect(res.status).toBe(429);
-		const body: LumenWorkerResponse = await res.json();
+		const body: LumenWorkerResponse = (await res.json()) as any;
 		expect(body.success).toBe(false);
 		expect(body.error?.code).toBe("QUOTA_EXCEEDED");
 		expect(body.meta?.task).toBe("generation");
@@ -224,7 +224,7 @@ describe("POST /inference", () => {
 		);
 
 		expect(res.status).toBe(400);
-		const body: LumenWorkerResponse = await res.json();
+		const body: LumenWorkerResponse = (await res.json()) as any;
 		expect(body.error?.code).toBe("INVALID_PARAMS");
 	});
 

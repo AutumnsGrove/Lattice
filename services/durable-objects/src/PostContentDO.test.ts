@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { PostContentDO, type PostContent } from "./PostContentDO";
+import { PostContentDO, type PostContent, type ContentEnv } from "./PostContentDO";
 import {
 	createTestDOState,
 	createMockSql,
@@ -56,7 +56,7 @@ describe("PostContentDO", () => {
 		} else {
 			sql._pushResult(null);
 		}
-		const doInstance = new PostContentDO(state, env);
+		const doInstance = new PostContentDO(state, env as ContentEnv);
 		await waitForInit();
 		return doInstance;
 	}
@@ -90,7 +90,7 @@ describe("PostContentDO", () => {
 
 			// Assert
 			expect(response.status).toBe(200);
-			const data = await response.json();
+			const data = (await response.json()) as any;
 			expect(data).toEqual(sampleContent);
 			expect(data.storageLocation).toBe("hot");
 		});
@@ -122,7 +122,7 @@ describe("PostContentDO", () => {
 
 			// Assert
 			expect(response.status).toBe(200);
-			const data = await response.json();
+			const data = (await response.json()) as any;
 			expect(data.htmlContent).toBe("<h1>Hello</h1>");
 			expect(data.markdownContent).toBe("# Hello");
 		});
@@ -144,7 +144,7 @@ describe("PostContentDO", () => {
 
 			// Assert: Returns stored metadata
 			expect(response.status).toBe(200);
-			const data = await response.json();
+			const data = (await response.json()) as any;
 			expect(data.title).toBe(sampleContent.title);
 			expect(data.storageLocation).toBe("cold");
 		});
@@ -178,7 +178,7 @@ describe("PostContentDO", () => {
 
 			// Assert
 			expect(response.status).toBe(200);
-			const data = await response.json();
+			const data = (await response.json()) as any;
 			expect(data.success).toBe(true);
 			expect(data.content.tenantId).toBe("tenant-1");
 			expect(data.content.slug).toBe("new-post");
@@ -241,7 +241,7 @@ describe("PostContentDO", () => {
 			const response = await doInstance.fetch(request);
 
 			// Assert
-			const data = await response.json();
+			const data = (await response.json()) as any;
 			expect(data.content.description).toBe("");
 			expect(data.content.tags).toEqual([]);
 			expect(data.content.markdownContent).toBe("");
@@ -266,7 +266,7 @@ describe("PostContentDO", () => {
 			const response = await doInstance.fetch(request);
 
 			// Assert
-			const data = await response.json();
+			const data = (await response.json()) as any;
 			expect(data.content.storageLocation).toBe("hot");
 		});
 	});
@@ -301,7 +301,7 @@ describe("PostContentDO", () => {
 
 			// Assert
 			expect(response.status).toBe(200);
-			const data = await response.json();
+			const data = (await response.json()) as any;
 			expect(data.content.title).toBe("Updated Title");
 			expect(data.content.slug).toBe(sampleContent.slug);
 		});
@@ -316,7 +316,7 @@ describe("PostContentDO", () => {
 			const response = await doInstance.fetch(request);
 
 			// Assert
-			const data = await response.json();
+			const data = (await response.json()) as any;
 			expect(data.content.description).toBe("New description");
 		});
 
@@ -330,7 +330,7 @@ describe("PostContentDO", () => {
 			const response = await doInstance.fetch(request);
 
 			// Assert
-			const data = await response.json();
+			const data = (await response.json()) as any;
 			expect(data.content.tags).toEqual(["updated", "tags"]);
 		});
 
@@ -347,7 +347,7 @@ describe("PostContentDO", () => {
 			const response = await doInstance.fetch(request);
 
 			// Assert
-			const data = await response.json();
+			const data = (await response.json()) as any;
 			expect(data.content.markdownContent).toBe("# Updated");
 			expect(data.content.htmlContent).toBe("<h1>Updated</h1>");
 		});
@@ -365,7 +365,7 @@ describe("PostContentDO", () => {
 			const response = await doInstance.fetch(request);
 
 			// Assert
-			const data = await response.json();
+			const data = (await response.json()) as any;
 			expect(data.content.font).toBe("monospace");
 			expect(data.content.gutterContent).toBe('[{"line": 1}]');
 		});
@@ -381,7 +381,7 @@ describe("PostContentDO", () => {
 			const response = await doInstance.fetch(request);
 
 			// Assert
-			const data = await response.json();
+			const data = (await response.json()) as any;
 			expect(data.content.updatedAt).toBeGreaterThan(oldContent.updatedAt);
 		});
 
@@ -395,7 +395,7 @@ describe("PostContentDO", () => {
 			const response = await doInstance.fetch(request);
 
 			// Assert
-			const data = await response.json();
+			const data = (await response.json()) as any;
 			expect(data.content.title).toBe("New Title");
 			expect(data.content.description).toBe(sampleContent.description);
 			expect(data.content.tags).toEqual(sampleContent.tags);
@@ -500,7 +500,7 @@ describe("PostContentDO", () => {
 
 			// Assert
 			expect(response.status).toBe(200);
-			const data = await response.json();
+			const data = (await response.json()) as any;
 			expect(data.success).toBe(true);
 			expect(data.message).toBe("Content invalidated");
 		});
@@ -569,7 +569,7 @@ describe("PostContentDO", () => {
 		it("returns 500 when R2 is not configured", async () => {
 			// Arrange: No R2 in env
 			sql._pushResult({ value: JSON.stringify(sampleContent) });
-			const doInstanceEnv = { DB: undefined, IMAGES: null };
+			const doInstanceEnv = { DB: undefined, IMAGES: null } as any;
 			const doInstance = new PostContentDO(state, doInstanceEnv);
 			await waitForInit();
 
@@ -594,7 +594,7 @@ describe("PostContentDO", () => {
 
 			// Assert
 			expect(response.status).toBe(200);
-			const data = await response.json();
+			const data = (await response.json()) as any;
 			expect(data.success).toBe(true);
 			expect(data.r2Key).toBe("posts/migrated.json");
 			expect(doInstance["state_data"]?.storageLocation).toBe("cold");
@@ -610,7 +610,7 @@ describe("PostContentDO", () => {
 			const response = await doInstance.fetch(request);
 
 			// Assert
-			const data = await response.json();
+			const data = (await response.json()) as any;
 			expect(doInstance["state_data"]?.markdownContent).toBe("");
 			expect(doInstance["state_data"]?.htmlContent).toBe("");
 			expect(doInstance["state_data"]?.gutterContent).toBe("[]");
@@ -642,7 +642,7 @@ describe("PostContentDO", () => {
 			// Assert
 			const r2Object = await r2.get("posts/content.json");
 			expect(r2Object).toBeTruthy();
-			const stored = await r2Object?.json();
+			const stored = (await r2Object?.json()) as any;
 			expect(stored?.markdownContent).toBe(sampleContent.markdownContent);
 			expect(stored?.htmlContent).toBe(sampleContent.htmlContent);
 			expect(stored?.gutterContent).toBe(sampleContent.gutterContent);
@@ -658,7 +658,7 @@ describe("PostContentDO", () => {
 			const response = await doInstance.fetch(request);
 
 			// Assert
-			const data = await response.json();
+			const data = (await response.json()) as any;
 			expect(data.message).toBe("Migrated to cold storage");
 		});
 	});
@@ -671,7 +671,7 @@ describe("PostContentDO", () => {
 		it("creates content table on initialization", async () => {
 			// Arrange & Act
 			sql._pushResult(null);
-			const doInstance = new PostContentDO(state, env);
+			const doInstance = new PostContentDO(state, env as ContentEnv);
 			await waitForInit();
 
 			// Assert: Should have executed CREATE TABLE for content

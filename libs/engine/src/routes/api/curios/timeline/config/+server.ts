@@ -7,7 +7,7 @@
  * Admin-only endpoint for managing Timeline Curio settings.
  */
 
-import { json, error } from "@sveltejs/kit";
+import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { DEFAULT_TIMELINE_CONFIG, CLEAR_TOKEN_VALUE } from "$lib/curios/timeline";
 import { encryptToken } from "$lib/server/encryption";

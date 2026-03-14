@@ -149,7 +149,7 @@ describe("POST /request", () => {
 		const res = await app.request(req, undefined, env, mockExecutionCtx);
 
 		expect(res.status).toBe(200);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body.success).toBe(true);
 		expect(body.data).toBeDefined();
 		expect(body.meta.service).toBe("github");
@@ -171,7 +171,7 @@ describe("POST /request", () => {
 		const res = await app.request(req, undefined, env, mockExecutionCtx);
 
 		expect(res.status).toBe(400);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body.error.code).toBe("UNKNOWN_SERVICE");
 	});
 
@@ -187,7 +187,7 @@ describe("POST /request", () => {
 		const res = await app.request(req, undefined, env, mockExecutionCtx);
 
 		expect(res.status).toBe(400);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body.error.code).toBe("UNKNOWN_ACTION");
 	});
 
@@ -205,7 +205,7 @@ describe("POST /request", () => {
 		const res = await app.request(req, undefined, env, mockExecutionCtx);
 
 		expect(res.status).toBe(403);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body.error.code).toBe("SCOPE_DENIED");
 	});
 
@@ -252,7 +252,7 @@ describe("POST /request", () => {
 		const res = await app.request(req, undefined, env, mockExecutionCtx);
 
 		expect(res.status).toBe(429);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body.error.code).toBe("RATE_LIMITED");
 	});
 
@@ -293,7 +293,7 @@ describe("POST /request", () => {
 		const res = await app.request(req, undefined, env, mockExecutionCtx);
 
 		expect(res.status).toBe(400);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body.error.code).toBe("INVALID_PARAMS");
 	});
 
@@ -314,7 +314,7 @@ describe("POST /request", () => {
 		const res = await app.request(req, undefined, env, mockExecutionCtx);
 
 		expect(res.status).toBe(503);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body.error.code).toBe("NO_CREDENTIAL");
 	});
 
@@ -359,7 +359,7 @@ describe("POST /request", () => {
 		const res = await app.request(req, undefined, env, mockExecutionCtx);
 
 		expect(res.status).toBe(404);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body.success).toBe(false);
 	});
 
@@ -377,7 +377,7 @@ describe("POST /request", () => {
 		const res = await app.request(req, undefined, env, mockExecutionCtx);
 
 		expect(res.status).toBe(400);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body.error.code).toBe("INVALID_BODY");
 	});
 

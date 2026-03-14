@@ -65,7 +65,7 @@ describe("ExportDO", () => {
 					deliveryMethod: "email",
 				}),
 			);
-			const body = await res.json();
+			const body = (await res.json()) as any;
 
 			expect(res.status).toBe(200);
 			expect(body.success).toBe(true);
@@ -78,7 +78,7 @@ describe("ExportDO", () => {
 			const { doInstance } = createExportDO();
 
 			const res = await doInstance.fetch(doRequest("/status"));
-			const body = await res.json();
+			const body = (await res.json()) as any;
 
 			expect(body.status).toBe("idle");
 		});
@@ -92,7 +92,7 @@ describe("ExportDO", () => {
 			});
 
 			const res = await doInstance.fetch(doRequest("/status"));
-			const body = await res.json();
+			const body = (await res.json()) as any;
 
 			expect(body.exportId).toBe("exp-1");
 			expect(body.phase).toBe("assembling");
@@ -113,7 +113,7 @@ describe("ExportDO", () => {
 			db._pushResult({ meta: { changes: 1 } });
 
 			const res = await doInstance.fetch(doPost("/cancel", {}));
-			const body = await res.json();
+			const body = (await res.json()) as any;
 
 			expect(body.success).toBe(true);
 			expect(body.status).toBe("cancelled");
@@ -123,7 +123,7 @@ describe("ExportDO", () => {
 			const { doInstance } = createExportDO();
 
 			const res = await doInstance.fetch(doPost("/cancel", {}));
-			const body = await res.json();
+			const body = (await res.json()) as any;
 
 			expect(res.status).toBe(400);
 			expect(body.success).toBe(false);
@@ -189,7 +189,7 @@ describe("ExportDO", () => {
 
 			// After error, check status shows failed
 			const res = await doInstance.fetch(doRequest("/status"));
-			const body = await res.json();
+			const body = (await res.json()) as any;
 			expect(body.phase).toBe("failed");
 		});
 	});

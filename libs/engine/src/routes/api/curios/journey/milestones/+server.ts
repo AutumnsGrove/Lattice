@@ -6,7 +6,7 @@
  * Public access - used for embedding milestone cards on public pages.
  */
 
-import { json, error } from "@sveltejs/kit";
+import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { safeParseInt, DEFAULT_MILESTONE_LIMIT, MAX_MILESTONE_LIMIT } from "$lib/curios/journey";
 import { safeParseJson } from "$lib/utils/json";

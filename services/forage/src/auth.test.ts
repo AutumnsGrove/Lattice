@@ -146,7 +146,7 @@ describe("unauthorizedResponse", () => {
 
 	it("should include JSON error body", async () => {
 		const response = unauthorizedResponse();
-		const body = await response.json();
+		const body = (await response.json()) as any;
 		expect(body.error).toBe("Unauthorized");
 		expect(body.message).toContain("sign in");
 	});

@@ -14,7 +14,6 @@ import {
 	CLOUDFLARE_PRICING,
 	PRICING_LAST_VERIFIED,
 } from "../costs.js";
-import type { CostBreakdown } from "../types.js";
 
 // =============================================================================
 // Helpers

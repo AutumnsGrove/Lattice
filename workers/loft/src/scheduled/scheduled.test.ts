@@ -57,7 +57,7 @@ function createMockFirefly() {
 		getInstance: vi.fn().mockResolvedValue(null),
 		reportActivity: vi.fn(),
 		sweepOrphans: vi.fn().mockResolvedValue([]),
-	};
+	} as any;
 }
 
 const mockCtx = { waitUntil: vi.fn() } as any;
@@ -119,7 +119,7 @@ describe("handleIdleCheck", () => {
 		await handleIdleCheck(env, mockCtx);
 
 		const calls = vi.mocked(env.DB.prepare).mock.calls;
-		const updateCall = calls.find(([sql]) => sql.includes("UPDATE loft_activity"));
+		const updateCall = calls.find(([sql]: any) => sql.includes("UPDATE loft_activity"));
 		expect(updateCall).toBeDefined();
 		expect(mockFirefly.reportActivity).toHaveBeenCalledWith("inst-1");
 	});
@@ -150,7 +150,7 @@ describe("handleIdleCheck", () => {
 		await handleIdleCheck(env, mockCtx);
 
 		const calls = vi.mocked(env.DB.prepare).mock.calls;
-		const updateCall = calls.find(([sql]) => sql.includes("UPDATE loft_activity"));
+		const updateCall = calls.find(([sql]: any) => sql.includes("UPDATE loft_activity"));
 		expect(updateCall).toBeDefined();
 	});
 
@@ -168,7 +168,7 @@ describe("handleIdleCheck", () => {
 
 		globalThis.fetch = vi.fn().mockRejectedValue(new Error("Network error"));
 
-		vi.mocked(env.DB.prepare).mockImplementation((sql: string) => {
+		vi.mocked(env.DB.prepare).mockImplementation((sql: string): any => {
 			if (sql.includes("SELECT * FROM loft_activity")) {
 				return {
 					bind: vi.fn().mockReturnThis(),
@@ -188,7 +188,7 @@ describe("handleIdleCheck", () => {
 		await handleIdleCheck(env, mockCtx);
 
 		const calls = vi.mocked(env.DB.prepare).mock.calls;
-		const selectCall = calls.find(([sql]) => sql.includes("SELECT * FROM loft_activity"));
+		const selectCall = calls.find(([sql]: any) => sql.includes("SELECT * FROM loft_activity"));
 		expect(selectCall).toBeDefined();
 	});
 
@@ -206,7 +206,7 @@ describe("handleIdleCheck", () => {
 
 		globalThis.fetch = vi.fn().mockRejectedValue(new Error("Network error"));
 
-		vi.mocked(env.DB.prepare).mockImplementation((sql: string) => {
+		vi.mocked(env.DB.prepare).mockImplementation((sql: string): any => {
 			if (sql.includes("SELECT * FROM loft_activity")) {
 				return {
 					bind: vi.fn().mockReturnThis(),
@@ -242,7 +242,7 @@ describe("handleIdleCheck", () => {
 
 		globalThis.fetch = vi.fn().mockRejectedValue(new Error("Network error"));
 
-		vi.mocked(env.DB.prepare).mockImplementation((sql: string) => {
+		vi.mocked(env.DB.prepare).mockImplementation((sql: string): any => {
 			if (sql.includes("SELECT * FROM loft_activity")) {
 				return {
 					bind: vi.fn().mockReturnThis(),
@@ -264,7 +264,7 @@ describe("handleIdleCheck", () => {
 		expect(mockFirefly.fade).toHaveBeenCalledWith("inst-1", { stateKey: "default" });
 
 		const calls = vi.mocked(env.DB.prepare).mock.calls;
-		const deleteCall = calls.find(([sql]) => sql.includes("DELETE FROM loft_activity"));
+		const deleteCall = calls.find(([sql]: any) => sql.includes("DELETE FROM loft_activity"));
 		expect(deleteCall).toBeDefined();
 	});
 
@@ -283,7 +283,7 @@ describe("handleIdleCheck", () => {
 
 		globalThis.fetch = vi.fn().mockRejectedValue(new Error("Network error"));
 
-		vi.mocked(env.DB.prepare).mockImplementation((sql: string) => {
+		vi.mocked(env.DB.prepare).mockImplementation((sql: string): any => {
 			if (sql.includes("SELECT * FROM loft_activity")) {
 				return {
 					bind: vi.fn().mockReturnThis(),
@@ -303,7 +303,7 @@ describe("handleIdleCheck", () => {
 		await handleIdleCheck(env, mockCtx);
 
 		const calls = vi.mocked(env.DB.prepare).mock.calls;
-		const eventCall = calls.find(([sql]) => sql.includes("loft_events"));
+		const eventCall = calls.find(([sql]: any) => sql.includes("loft_events"));
 		expect(eventCall).toBeDefined();
 		expect(eventCall![0]).toContain("hard_cap_fade");
 	});
@@ -323,7 +323,7 @@ describe("handleIdleCheck", () => {
 
 		globalThis.fetch = vi.fn().mockRejectedValue(new Error("Network error"));
 
-		vi.mocked(env.DB.prepare).mockImplementation((sql: string) => {
+		vi.mocked(env.DB.prepare).mockImplementation((sql: string): any => {
 			if (sql.includes("SELECT * FROM loft_activity")) {
 				return {
 					bind: vi.fn().mockReturnThis(),
@@ -345,7 +345,7 @@ describe("handleIdleCheck", () => {
 		expect(mockFirefly.fade).toHaveBeenCalledWith("inst-1", { stateKey: "default" });
 
 		const calls = vi.mocked(env.DB.prepare).mock.calls;
-		const deleteCall = calls.find(([sql]) => sql.includes("DELETE FROM loft_activity"));
+		const deleteCall = calls.find(([sql]: any) => sql.includes("DELETE FROM loft_activity"));
 		expect(deleteCall).toBeDefined();
 	});
 
@@ -364,7 +364,7 @@ describe("handleIdleCheck", () => {
 
 		globalThis.fetch = vi.fn().mockRejectedValue(new Error("Network error"));
 
-		vi.mocked(env.DB.prepare).mockImplementation((sql: string) => {
+		vi.mocked(env.DB.prepare).mockImplementation((sql: string): any => {
 			if (sql.includes("SELECT * FROM loft_activity")) {
 				return {
 					bind: vi.fn().mockReturnThis(),
@@ -384,7 +384,7 @@ describe("handleIdleCheck", () => {
 		await handleIdleCheck(env, mockCtx);
 
 		const calls = vi.mocked(env.DB.prepare).mock.calls;
-		const eventCall = calls.find(([sql]) => sql.includes("loft_events"));
+		const eventCall = calls.find(([sql]: any) => sql.includes("loft_events"));
 		expect(eventCall).toBeDefined();
 		expect(eventCall![0]).toContain("idle_fade");
 	});
@@ -404,7 +404,7 @@ describe("handleIdleCheck", () => {
 
 		globalThis.fetch = vi.fn().mockRejectedValue(new Error("Network error"));
 
-		vi.mocked(env.DB.prepare).mockImplementation((sql: string) => {
+		vi.mocked(env.DB.prepare).mockImplementation((sql: string): any => {
 			if (sql.includes("SELECT * FROM loft_activity")) {
 				return {
 					bind: vi.fn().mockReturnThis(),
@@ -424,7 +424,7 @@ describe("handleIdleCheck", () => {
 		await handleIdleCheck(env, mockCtx);
 
 		const calls = vi.mocked(env.DB.prepare).mock.calls;
-		const updateCall = calls.find(([sql]) => sql.includes("UPDATE loft_activity SET warned"));
+		const updateCall = calls.find(([sql]: any) => sql.includes("UPDATE loft_activity SET warned"));
 		expect(updateCall).toBeDefined();
 		expect(updateCall![0]).toContain("warned = 1");
 	});
@@ -444,7 +444,7 @@ describe("handleIdleCheck", () => {
 
 		globalThis.fetch = vi.fn().mockRejectedValue(new Error("Network error"));
 
-		vi.mocked(env.DB.prepare).mockImplementation((sql: string) => {
+		vi.mocked(env.DB.prepare).mockImplementation((sql: string): any => {
 			if (sql.includes("SELECT * FROM loft_activity")) {
 				return {
 					bind: vi.fn().mockReturnThis(),
@@ -464,7 +464,7 @@ describe("handleIdleCheck", () => {
 		await handleIdleCheck(env, mockCtx);
 
 		const calls = vi.mocked(env.DB.prepare).mock.calls;
-		const eventCall = calls.find(([sql]) => sql.includes("idle_warning"));
+		const eventCall = calls.find(([sql]: any) => sql.includes("idle_warning"));
 		expect(eventCall).toBeDefined();
 	});
 
@@ -483,7 +483,7 @@ describe("handleIdleCheck", () => {
 
 		globalThis.fetch = vi.fn().mockRejectedValue(new Error("Network error"));
 
-		vi.mocked(env.DB.prepare).mockImplementation((sql: string) => {
+		vi.mocked(env.DB.prepare).mockImplementation((sql: string): any => {
 			if (sql.includes("SELECT * FROM loft_activity")) {
 				return {
 					bind: vi.fn().mockReturnThis(),
@@ -503,7 +503,7 @@ describe("handleIdleCheck", () => {
 		await handleIdleCheck(env, mockCtx);
 
 		const calls = vi.mocked(env.DB.prepare).mock.calls;
-		const eventCalls = calls.filter(([sql]) => sql.includes("idle_warning"));
+		const eventCalls = calls.filter(([sql]: any) => sql.includes("idle_warning"));
 		expect(eventCalls.length).toBe(0);
 	});
 
@@ -522,7 +522,7 @@ describe("handleIdleCheck", () => {
 
 		globalThis.fetch = vi.fn().mockRejectedValue(new Error("Network error"));
 
-		vi.mocked(env.DB.prepare).mockImplementation((sql: string) => {
+		vi.mocked(env.DB.prepare).mockImplementation((sql: string): any => {
 			if (sql.includes("SELECT * FROM loft_activity")) {
 				return {
 					bind: vi.fn().mockReturnThis(),
@@ -581,7 +581,7 @@ describe("handleIdleCheck", () => {
 			});
 		});
 
-		vi.mocked(env.DB.prepare).mockImplementation((sql: string) => {
+		vi.mocked(env.DB.prepare).mockImplementation((sql: string): any => {
 			if (sql.includes("SELECT * FROM loft_activity")) {
 				return {
 					bind: vi.fn().mockReturnThis(),
@@ -603,7 +603,7 @@ describe("handleIdleCheck", () => {
 		// Both instances should be processed despite first one error
 		const calls = vi.mocked(env.DB.prepare).mock.calls;
 		// 2 SELECT calls (one per instance)
-		const selectCalls = calls.filter(([sql]) => sql.includes("SELECT * FROM loft_activity"));
+		const selectCalls = calls.filter(([sql]: any) => sql.includes("SELECT * FROM loft_activity"));
 		expect(selectCalls.length).toBe(2);
 	});
 
@@ -628,7 +628,7 @@ describe("handleIdleCheck", () => {
 			}),
 		});
 
-		vi.mocked(env.DB.prepare).mockImplementation((sql: string) => {
+		vi.mocked(env.DB.prepare).mockImplementation((sql: string): any => {
 			if (sql.includes("SELECT * FROM loft_activity")) {
 				return {
 					bind: vi.fn().mockReturnThis(),
@@ -649,7 +649,7 @@ describe("handleIdleCheck", () => {
 
 		// Should proceed to SELECT query for idle check
 		const calls = vi.mocked(env.DB.prepare).mock.calls;
-		const selectCall = calls.find(([sql]) => sql.includes("SELECT * FROM loft_activity"));
+		const selectCall = calls.find(([sql]: any) => sql.includes("SELECT * FROM loft_activity"));
 		expect(selectCall).toBeDefined();
 	});
 
@@ -671,7 +671,7 @@ describe("handleIdleCheck", () => {
 			status: 500,
 		});
 
-		vi.mocked(env.DB.prepare).mockImplementation((sql: string) => {
+		vi.mocked(env.DB.prepare).mockImplementation((sql: string): any => {
 			if (sql.includes("SELECT * FROM loft_activity")) {
 				return {
 					bind: vi.fn().mockReturnThis(),
@@ -692,7 +692,7 @@ describe("handleIdleCheck", () => {
 
 		// Should fall back to D1 activity check
 		const calls = vi.mocked(env.DB.prepare).mock.calls;
-		const selectCall = calls.find(([sql]) => sql.includes("SELECT * FROM loft_activity"));
+		const selectCall = calls.find(([sql]: any) => sql.includes("SELECT * FROM loft_activity"));
 		expect(selectCall).toBeDefined();
 	});
 });
@@ -718,7 +718,7 @@ describe("handleOrphanSweep", () => {
 		await handleOrphanSweep(env, mockCtx);
 
 		const calls = vi.mocked(env.DB.prepare).mock.calls;
-		const eventCalls = calls.filter(([sql]) => sql.includes("loft_events"));
+		const eventCalls = calls.filter(([sql]: any) => sql.includes("loft_events"));
 		expect(eventCalls.length).toBe(0);
 	});
 
@@ -737,7 +737,7 @@ describe("handleOrphanSweep", () => {
 		await handleOrphanSweep(env, mockCtx);
 
 		const calls = vi.mocked(env.DB.prepare).mock.calls;
-		const eventCalls = calls.filter(([sql]) => sql.includes("orphan_swept"));
+		const eventCalls = calls.filter(([sql]: any) => sql.includes("orphan_swept"));
 		expect(eventCalls.length).toBe(2);
 	});
 
@@ -785,7 +785,7 @@ describe("handleOrphanSweep", () => {
 
 		const calls = vi.mocked(env.DB.prepare).mock.calls;
 		expect(calls.length).toBe(3);
-		for (const [sql] of calls) {
+		for (const [sql] of calls as any) {
 			expect(sql).toContain("orphan_swept");
 		}
 	});

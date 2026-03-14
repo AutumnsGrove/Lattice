@@ -6,7 +6,7 @@
  * Public access - used for embedding activity charts on public pages.
  */
 
-import { json, error } from "@sveltejs/kit";
+import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { API_ERRORS, throwGroveError } from "$lib/errors";
 
@@ -132,7 +132,7 @@ function calculateLongestStreak(activity: { date: string; commits: number }[]): 
 	let current = 0;
 
 	// Create a map of dates for quick lookup
-	const dateMap = new Map(activity.map((a) => [a.date, a.commits]));
+	const _dateMap = new Map(activity.map((a) => [a.date, a.commits]));
 
 	// Sort dates and iterate
 	const dates = activity

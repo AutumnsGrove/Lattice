@@ -30,7 +30,7 @@ describe("ThresholdDO", () => {
 			const res = await doInstance.fetch(
 				doPost("/check", { key: "api", limit: 10, windowSeconds: 60 }),
 			);
-			const body = await res.json();
+			const body = (await res.json()) as any;
 
 			expect(res.status).toBe(200);
 			expect(body.allowed).toBe(true);
@@ -44,7 +44,7 @@ describe("ThresholdDO", () => {
 			const res = await doInstance.fetch(
 				doPost("/check", { key: "api", limit: 10, windowSeconds: 60 }),
 			);
-			const body = await res.json();
+			const body = (await res.json()) as any;
 
 			expect(body.allowed).toBe(false);
 			expect(body.remaining).toBe(0);
@@ -57,7 +57,7 @@ describe("ThresholdDO", () => {
 			const res = await doInstance.fetch(
 				doPost("/check", { key: "api", limit: 10, windowSeconds: 60 }),
 			);
-			const body = await res.json();
+			const body = (await res.json()) as any;
 
 			expect(body.allowed).toBe(true);
 			expect(body.remaining).toBe(0);
@@ -67,7 +67,7 @@ describe("ThresholdDO", () => {
 			const res = await doInstance.fetch(doPost("/check", { key: "api" }));
 
 			expect(res.status).toBe(400);
-			const body = await res.json();
+			const body = (await res.json()) as any;
 			expect(body.error).toBe("bad_request");
 		});
 
@@ -95,7 +95,7 @@ describe("ThresholdDO", () => {
 			sql._pushResult({ total: 5 });
 
 			const res = await doInstance.fetch(doRequest("/health"));
-			const body = await res.json();
+			const body = (await res.json()) as any;
 
 			expect(body.status).toBe("ok");
 			expect(body.counters).toBe(5);
@@ -106,7 +106,7 @@ describe("ThresholdDO", () => {
 			sql._pushResult({ total: 0 });
 
 			const res = await doInstance.fetch(doRequest("/health"));
-			const body = await res.json();
+			const body = (await res.json()) as any;
 
 			expect(body.counters).toBe(0);
 		});

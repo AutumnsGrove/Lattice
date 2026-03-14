@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { checkComponent, checkAllComponents } from "../health-checks";
+import { checkComponent } from "../health-checks";
 import type { ComponentConfig } from "../config";
 
 // Mock config imports

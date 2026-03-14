@@ -56,7 +56,7 @@ describe("TenantDO", () => {
 			sql._pushResults([{ value: JSON.stringify(sampleConfig) }]);
 
 			const res = await doInstance.fetch(doRequest("/config"));
-			const body = await res.json();
+			const body = (await res.json()) as any;
 
 			expect(res.status).toBe(200);
 			expect(body.subdomain).toBe("autumn");
@@ -97,7 +97,7 @@ describe("TenantDO", () => {
 				headers: { "X-Tenant-Subdomain": "autumn" },
 			});
 			const res = await doInstance.fetch(req);
-			const body = await res.json();
+			const body = (await res.json()) as any;
 
 			expect(res.status).toBe(200);
 			expect(body.subdomain).toBe("autumn");
@@ -113,7 +113,7 @@ describe("TenantDO", () => {
 			// D1 update: env.DB.prepare().bind().run()
 
 			const res = await doInstance.fetch(doPut("/config", { displayName: "New Name" }));
-			const body = await res.json();
+			const body = (await res.json()) as any;
 
 			expect(body.success).toBe(true);
 		});
@@ -137,7 +137,7 @@ describe("TenantDO", () => {
 			sql._pushResults([]);
 
 			const res = await doInstance.fetch(doRequest("/drafts"));
-			const body = await res.json();
+			const body = (await res.json()) as any;
 
 			expect(res.status).toBe(200);
 			expect(body).toEqual([]);
@@ -156,7 +156,7 @@ describe("TenantDO", () => {
 			]);
 
 			const res = await doInstance.fetch(doRequest("/drafts"));
-			const body = await res.json();
+			const body = (await res.json()) as any;
 
 			expect(body).toHaveLength(1);
 			expect(body[0].slug).toBe("my-draft");
@@ -177,7 +177,7 @@ describe("TenantDO", () => {
 			});
 
 			const res = await doInstance.fetch(doRequest("/drafts/my-draft"));
-			const body = await res.json();
+			const body = (await res.json()) as any;
 
 			expect(body.slug).toBe("my-draft");
 			expect(body.content).toBe("# Hello World");
@@ -205,7 +205,7 @@ describe("TenantDO", () => {
 					deviceId: "device-1",
 				}),
 			);
-			const body = await res.json();
+			const body = (await res.json()) as any;
 
 			expect(body.success).toBe(true);
 			expect(body.lastSaved).toBeGreaterThan(0);
@@ -217,7 +217,7 @@ describe("TenantDO", () => {
 			const { doInstance } = await createTenantDO(sampleConfig);
 
 			const res = await doInstance.fetch(doDelete("/drafts/my-draft"));
-			const body = await res.json();
+			const body = (await res.json()) as any;
 
 			expect(body.success).toBe(true);
 		});
@@ -234,7 +234,7 @@ describe("TenantDO", () => {
 					timestamp: Date.now(),
 				}),
 			);
-			const body = await res.json();
+			const body = (await res.json()) as any;
 
 			expect(body.success).toBe(true);
 		});
@@ -243,7 +243,7 @@ describe("TenantDO", () => {
 			const { doInstance } = await createTenantDO(sampleConfig);
 
 			const res = await doInstance.fetch(doPost("/analytics", { type: "click" }));
-			const body = await res.json();
+			const body = (await res.json()) as any;
 
 			expect(body.success).toBe(true);
 		});
@@ -274,7 +274,7 @@ describe("TenantDO", () => {
 				headers: { "X-Tenant-Subdomain": "test" },
 			});
 			const res = await doInstance.fetch(req);
-			const body = await res.json();
+			const body = (await res.json()) as any;
 
 			expect(body.limits.postsPerMonth).toBe(100);
 			expect(body.limits.storageBytes).toBe(1 * 1024 * 1024 * 1024);

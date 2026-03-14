@@ -1,6 +1,5 @@
-import { error } from "@sveltejs/kit";
 import { ARBOR_ERRORS, throwGroveError } from "$lib/errors";
-import { loadCurioStatus, type CurioStatus } from "$lib/server/curio-status";
+import { loadCurioStatus } from "$lib/server/curio-status";
 import type { PageServerLoad } from "./$types";
 
 interface PageRecord {

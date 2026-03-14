@@ -323,7 +323,7 @@ describe("POST /api/config", () => {
 		});
 
 		const response = await POST(event);
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(response.status).toBe(200);
 		expect(data.success).toBe(true);
@@ -353,7 +353,7 @@ describe("POST /api/config", () => {
 		});
 
 		const response = await POST(event);
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(response.status).toBe(200);
 		expect(data.success).toBe(true);
@@ -377,7 +377,7 @@ describe("POST /api/config", () => {
 		});
 
 		const response = await POST(event);
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(response.status).toBe(200);
 		expect(data.success).toBe(true);
@@ -400,7 +400,7 @@ describe("POST /api/config", () => {
 		});
 
 		const response = await POST(event);
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(response.status).toBe(200);
 		expect(data.success).toBe(true);
@@ -418,7 +418,7 @@ describe("POST /api/config", () => {
 
 		const event = makeEvent({ body: {} });
 		const response = await POST(event);
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(response.status).toBe(200);
 		expect(data.success).toBe(true);

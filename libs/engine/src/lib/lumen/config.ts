@@ -407,7 +407,7 @@ export function calculateCost(model: string, inputTokens: number, outputTokens: 
  */
 export function getModelsForProvider(provider: LumenProviderName): string[] {
 	const models: string[] = [];
-	for (const [task, config] of Object.entries(TASK_REGISTRY)) {
+	for (const [_task, config] of Object.entries(TASK_REGISTRY)) {
 		if (config.primaryProvider === provider) {
 			models.push(config.primaryModel);
 		}

@@ -60,7 +60,7 @@ describe("POST /api/auth/logout", () => {
 		});
 
 		const response = await POST(event);
-		const json = await response.json();
+		const json = (await response.json()) as any;
 
 		expect(json).toEqual({ success: true });
 		expect(response.status).toBe(200);
@@ -169,7 +169,7 @@ describe("POST /api/auth/logout", () => {
 
 		// Should still return success despite deletion failure
 		expect(response.status).toBe(200);
-		const json = await response.json();
+		const json = (await response.json()) as any;
 		expect(json).toEqual({ success: true });
 
 		// Cookies should still be deleted
@@ -194,7 +194,7 @@ describe("POST /api/auth/logout", () => {
 
 		// Should still return success despite revocation failure
 		expect(response.status).toBe(200);
-		const json = await response.json();
+		const json = (await response.json()) as any;
 		expect(json).toEqual({ success: true });
 
 		// Cookies should still be deleted
@@ -317,7 +317,7 @@ describe("POST /api/auth/logout", () => {
 		const response = await POST(event);
 
 		expect(response.headers.get("Content-Type")).toBe("application/json");
-		const json = await response.json();
+		const json = (await response.json()) as any;
 		expect(json).toEqual({ success: true });
 	});
 });

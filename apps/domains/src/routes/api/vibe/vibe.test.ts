@@ -173,7 +173,7 @@ describe("POST /api/vibe", () => {
 		});
 
 		const response = await POST(event);
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(response.status).toBe(400);
 		expect(data.success).toBe(false);
@@ -188,7 +188,7 @@ describe("POST /api/vibe", () => {
 		});
 
 		const response = await POST(event);
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(response.status).toBe(400);
 		expect(data.success).toBe(false);
@@ -220,7 +220,7 @@ describe("POST /api/vibe", () => {
 		);
 
 		const response = await POST(event);
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(response.status).toBe(200);
 		expect(data.success).toBe(true);
@@ -228,7 +228,7 @@ describe("POST /api/vibe", () => {
 
 	it("rejects requests without DOMAIN_WORKER_URL with 500", async () => {
 		const event = makeEvent({
-			env: { DB: (event) => event, DOMAIN_WORKER_URL: undefined },
+			env: { DB: (e: any) => e, DOMAIN_WORKER_URL: undefined },
 		});
 
 		try {
@@ -253,7 +253,7 @@ describe("POST /api/vibe", () => {
 		);
 
 		const response = await POST(event);
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(response.status).toBe(422);
 		expect(data.success).toBe(false);
@@ -305,7 +305,7 @@ describe("POST /api/vibe", () => {
 		);
 
 		const response = await POST(event);
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(response.status).toBe(200);
 		expect(data.success).toBe(true);
@@ -452,7 +452,7 @@ describe("POST /api/vibe", () => {
 		);
 
 		const response = await POST(event);
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(response.status).toBe(200);
 		expect(data.success).toBe(true);
@@ -504,7 +504,7 @@ describe("POST /api/vibe", () => {
 		);
 
 		const response = await POST(event);
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(response.status).toBe(200);
 		expect(data.success).toBe(true);
@@ -534,7 +534,7 @@ describe("POST /api/vibe", () => {
 		);
 
 		const response = await POST(event);
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(response.status).toBe(200);
 		expect(data.success).toBe(true);
@@ -560,7 +560,7 @@ describe("POST /api/vibe", () => {
 		});
 
 		const response = await POST(event);
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(response.status).toBe(400);
 		expect(data.success).toBe(false);
@@ -574,7 +574,7 @@ describe("POST /api/vibe", () => {
 		});
 
 		const response1 = await POST(event1word);
-		const data1 = await response1.json();
+		const data1 = (await response1.json()) as Record<string, unknown>;
 		expect(data1.hint).toContain("1 word.");
 		expect(data1.hint).not.toContain("1 words");
 
@@ -583,7 +583,7 @@ describe("POST /api/vibe", () => {
 		});
 
 		const response2 = await POST(event2words);
-		const data2 = await response2.json();
+		const data2 = (await response2.json()) as Record<string, unknown>;
 		expect(data2.hint).toContain("2 words");
 	});
 

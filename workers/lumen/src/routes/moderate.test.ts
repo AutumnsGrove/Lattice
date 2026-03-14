@@ -61,7 +61,7 @@ describe("POST /moderate", () => {
 		const res = await app.request(post({ content: "Hello world" }), undefined, mockEnv);
 
 		expect(res.status).toBe(200);
-		const body: LumenWorkerResponse = await res.json();
+		const body: LumenWorkerResponse = (await res.json()) as any;
 		expect(body.success).toBe(true);
 		expect(body.data).toEqual({
 			safe: true,
@@ -84,7 +84,7 @@ describe("POST /moderate", () => {
 		const res = await app.request(post({ content: "bad content" }), undefined, mockEnv);
 
 		expect(res.status).toBe(200);
-		const body: LumenWorkerResponse = await res.json();
+		const body: LumenWorkerResponse = (await res.json()) as any;
 		expect(body.data).toMatchObject({
 			safe: false,
 			categories: ["hate", "violence"],
@@ -101,7 +101,7 @@ describe("POST /moderate", () => {
 
 		const app = createApp();
 		const res = await app.request(post({ content: "test" }), undefined, mockEnv);
-		const body: LumenWorkerResponse = await res.json();
+		const body: LumenWorkerResponse = (await res.json()) as any;
 		expect(body.meta?.provider).toBe("cloudflare-ai");
 	});
 
@@ -115,7 +115,7 @@ describe("POST /moderate", () => {
 
 		const app = createApp();
 		const res = await app.request(post({ content: "test" }), undefined, mockEnv);
-		const body: LumenWorkerResponse = await res.json();
+		const body: LumenWorkerResponse = (await res.json()) as any;
 		expect(body.meta?.provider).toBe("openrouter");
 	});
 
@@ -132,7 +132,7 @@ describe("POST /moderate", () => {
 		);
 
 		expect(res.status).toBe(400);
-		const body: LumenWorkerResponse = await res.json();
+		const body: LumenWorkerResponse = (await res.json()) as any;
 		expect(body.error?.code).toBe("INVALID_REQUEST");
 	});
 
@@ -141,7 +141,7 @@ describe("POST /moderate", () => {
 		const res = await app.request(post({}), undefined, mockEnv);
 
 		expect(res.status).toBe(400);
-		const body: LumenWorkerResponse = await res.json();
+		const body: LumenWorkerResponse = (await res.json()) as any;
 		expect(body.error?.code).toBe("INVALID_PARAMS");
 		expect(body.error?.message).toContain("content");
 	});
@@ -156,7 +156,7 @@ describe("POST /moderate", () => {
 		const res = await app.request(post({ content: "test" }), undefined, mockEnv);
 
 		expect(res.status).toBe(500);
-		const body: LumenWorkerResponse = await res.json();
+		const body: LumenWorkerResponse = (await res.json()) as any;
 		expect(body.success).toBe(false);
 		expect(body.error?.code).toBe("ALL_PROVIDERS_FAILED");
 		expect(body.meta?.task).toBe("moderation");

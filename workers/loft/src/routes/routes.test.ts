@@ -81,7 +81,7 @@ function createMockFirefly() {
 		getInstance: vi.fn().mockResolvedValue(null),
 		reportActivity: vi.fn(),
 		sweepOrphans: vi.fn().mockResolvedValue([]),
-	};
+	} as any;
 }
 
 function createTestApp() {
@@ -128,7 +128,7 @@ describe("POST /ignite", () => {
 		const env = createMockEnv();
 		const mockFirefly = createMockFirefly();
 
-		vi.mocked(env.DB.prepare).mockImplementation((sql: string) => {
+		vi.mocked(env.DB.prepare).mockImplementation((sql: string): any => {
 			if (sql.includes("ssh_public_key")) {
 				return {
 					...env._stmt,
@@ -154,7 +154,7 @@ describe("POST /ignite", () => {
 		const env = createMockEnv();
 		const mockFirefly = createMockFirefly();
 
-		vi.mocked(env.DB.prepare).mockImplementation((sql: string) => {
+		vi.mocked(env.DB.prepare).mockImplementation((sql: string): any => {
 			if (sql.includes("ssh_public_key")) {
 				return {
 					...env._stmt,
@@ -180,7 +180,7 @@ describe("POST /ignite", () => {
 		const env = createMockEnv();
 		const mockFirefly = createMockFirefly();
 
-		vi.mocked(env.DB.prepare).mockImplementation((sql: string) => {
+		vi.mocked(env.DB.prepare).mockImplementation((sql: string): any => {
 			if (sql.includes("ssh_public_key")) {
 				return {
 					...env._stmt,
@@ -204,7 +204,7 @@ describe("POST /ignite", () => {
 		const env = createMockEnv();
 		const mockFirefly = createMockFirefly();
 
-		vi.mocked(env.DB.prepare).mockImplementation((sql: string) => {
+		vi.mocked(env.DB.prepare).mockImplementation((sql: string): any => {
 			if (sql.includes("ssh_public_key")) {
 				return {
 					...env._stmt,
@@ -229,7 +229,7 @@ describe("POST /ignite", () => {
 		const env = createMockEnv();
 		const mockFirefly = createMockFirefly();
 
-		vi.mocked(env.DB.prepare).mockImplementation((sql: string) => {
+		vi.mocked(env.DB.prepare).mockImplementation((sql: string): any => {
 			if (sql.includes("ssh_public_key")) {
 				return {
 					...env._stmt,
@@ -256,7 +256,7 @@ describe("POST /ignite", () => {
 		const env = createMockEnv();
 		const mockFirefly = createMockFirefly();
 
-		vi.mocked(env.DB.prepare).mockImplementation((sql: string) => {
+		vi.mocked(env.DB.prepare).mockImplementation((sql: string): any => {
 			if (sql.includes("ssh_public_key")) {
 				return {
 					...env._stmt,
@@ -283,7 +283,7 @@ describe("POST /ignite", () => {
 		const env = createMockEnv();
 		const mockFirefly = createMockFirefly();
 
-		vi.mocked(env.DB.prepare).mockImplementation((sql: string) => {
+		vi.mocked(env.DB.prepare).mockImplementation((sql: string): any => {
 			if (sql.includes("ssh_public_key")) {
 				return {
 					...env._stmt,
@@ -420,7 +420,7 @@ describe("GET /status", () => {
 			},
 		]);
 
-		vi.mocked(env.DB.prepare).mockImplementation((sql: string) => {
+		vi.mocked(env.DB.prepare).mockImplementation((sql: string): any => {
 			if (sql.includes("loft_activity")) {
 				return {
 					...env._stmt,
@@ -461,7 +461,7 @@ describe("GET /status", () => {
 			},
 		]);
 
-		vi.mocked(env.DB.prepare).mockImplementation((sql: string) => {
+		vi.mocked(env.DB.prepare).mockImplementation((sql: string): any => {
 			if (sql.includes("loft_activity")) {
 				return {
 					...env._stmt,
@@ -502,7 +502,7 @@ describe("GET /status", () => {
 			},
 		]);
 
-		vi.mocked(env.DB.prepare).mockImplementation((sql: string) => {
+		vi.mocked(env.DB.prepare).mockImplementation((sql: string): any => {
 			if (sql.includes("loft_activity")) {
 				return {
 					...env._stmt,
@@ -542,7 +542,7 @@ describe("GET /status", () => {
 			},
 		]);
 
-		vi.mocked(env.DB.prepare).mockImplementation((sql: string) => {
+		vi.mocked(env.DB.prepare).mockImplementation((sql: string): any => {
 			if (sql.includes("loft_activity")) {
 				return {
 					...env._stmt,
@@ -581,7 +581,7 @@ describe("GET /status", () => {
 			},
 		]);
 
-		vi.mocked(env.DB.prepare).mockImplementation((sql: string) => {
+		vi.mocked(env.DB.prepare).mockImplementation((sql: string): any => {
 			if (sql.includes("loft_activity")) {
 				return {
 					...env._stmt,

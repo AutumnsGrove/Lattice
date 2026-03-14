@@ -85,7 +85,7 @@ describe("POST /resolve", () => {
 		const res = await app.request(req, undefined, env, mockExecutionCtx);
 
 		expect(res.status).toBe(403);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body.error.code).toBe("AUTH_METHOD_DENIED");
 	});
 
@@ -103,7 +103,7 @@ describe("POST /resolve", () => {
 		const res = await app.request(req, undefined, env, mockExecutionCtx);
 
 		expect(res.status).toBe(200);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body.success).toBe(true);
 		expect(body.data.credential).toBe("github-token-123");
 		expect(body.data.source).toBe("global");
@@ -123,7 +123,7 @@ describe("POST /resolve", () => {
 		const res = await app.request(req, undefined, env, mockExecutionCtx);
 
 		expect(res.status).toBe(200);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body.data.source).toBe("tenant");
 	});
 
@@ -135,7 +135,7 @@ describe("POST /resolve", () => {
 		const res = await app.request(req, undefined, env, mockExecutionCtx);
 
 		expect(res.status).toBe(403);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body.error.code).toBe("SCOPE_DENIED");
 	});
 
@@ -182,7 +182,7 @@ describe("POST /resolve", () => {
 		const res = await app.request(req, undefined, env, mockExecutionCtx);
 
 		expect(res.status).toBe(503);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body.error.code).toBe("NO_CREDENTIAL");
 	});
 
@@ -194,7 +194,7 @@ describe("POST /resolve", () => {
 		const res = await app.request(req, undefined, env, mockExecutionCtx);
 
 		expect(res.status).toBe(400);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body.error.code).toBe("INVALID_PARAMS");
 	});
 

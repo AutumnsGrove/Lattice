@@ -129,7 +129,7 @@ describe("vista-collector fetch — GET /health", () => {
 	it("GET request returns { status: 'ready' }", async () => {
 		const req = makeRequest("GET");
 		const res = await handleFetch(req, makeEnv(), mockCollectorFactory);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body).toEqual({ status: "ready" });
 	});
 
@@ -176,7 +176,7 @@ describe("vista-collector fetch — POST without auth", () => {
 	it("POST without auth returns { error: 'Unauthorized' }", async () => {
 		const req = makeRequest("POST");
 		const res = await handleFetch(req, makeEnv(), mockCollectorFactory);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body).toEqual({ error: "Unauthorized" });
 	});
 
@@ -203,7 +203,7 @@ describe("vista-collector fetch — POST with wrong token", () => {
 	it("POST with wrong token returns { error: 'Unauthorized' }", async () => {
 		const req = makeRequest("POST", "Bearer wrong-token");
 		const res = await handleFetch(req, makeEnv(), mockCollectorFactory);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body).toEqual({ error: "Unauthorized" });
 	});
 
@@ -261,7 +261,7 @@ describe("vista-collector fetch — POST with correct token", () => {
 	it("returns the CollectionResult as JSON", async () => {
 		const req = makeRequest("POST", "Bearer secret-token-abc");
 		const res = await handleFetch(req, makeEnv(), mockCollectorFactory);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body).toEqual(MOCK_COLLECTION_RESULT);
 	});
 
@@ -310,7 +310,7 @@ describe("vista-collector fetch — collection failure", () => {
 		});
 		const req = makeRequest("POST", "Bearer secret-token-abc");
 		const res = await handleFetch(req, makeEnv(), factory);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body).toEqual({ error: "An internal error occurred." });
 	});
 

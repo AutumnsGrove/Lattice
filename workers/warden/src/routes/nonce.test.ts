@@ -50,7 +50,7 @@ describe("POST /nonce", () => {
 		const res = await app.request(req, undefined, env);
 
 		expect(res.status).toBe(200);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body.success).toBe(true);
 		expect(body.data.nonce).toBeDefined();
 		expect(typeof body.data.nonce).toBe("string");
@@ -65,7 +65,7 @@ describe("POST /nonce", () => {
 		const res = await app.request(req, undefined, env);
 
 		expect(res.status).toBe(404);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body.error.code).toBe("AGENT_NOT_FOUND");
 	});
 
@@ -75,7 +75,7 @@ describe("POST /nonce", () => {
 		const res = await app.request(req, undefined, env);
 
 		expect(res.status).toBe(400);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body.error.code).toBe("MISSING_FIELD");
 	});
 
@@ -89,7 +89,7 @@ describe("POST /nonce", () => {
 		const res = await app.request(req, undefined, env);
 
 		expect(res.status).toBe(400);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body.error.code).toBe("INVALID_BODY");
 	});
 });

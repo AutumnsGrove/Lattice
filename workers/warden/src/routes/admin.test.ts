@@ -76,7 +76,7 @@ describe("admin auth middleware", () => {
 		const res = await app.request(req, undefined, env);
 
 		expect(res.status).toBe(401);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body.error.code).toBe("ADMIN_AUTH_REQUIRED");
 	});
 
@@ -117,7 +117,7 @@ describe("POST /admin/agents — agent registration", () => {
 		const res = await app.request(req, undefined, env);
 
 		expect(res.status).toBe(200);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body.success).toBe(true);
 		expect(body.data.id).toMatch(/^wdn_/);
 		expect(body.data.secret).toMatch(/^wdn_sk_/);
@@ -142,7 +142,7 @@ describe("POST /admin/agents — agent registration", () => {
 		const res = await app.request(req, undefined, env);
 
 		expect(res.status).toBe(200);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body.data.scopes).toEqual(["github:read", "tavily:read"]);
 	});
 
@@ -160,7 +160,7 @@ describe("POST /admin/agents — agent registration", () => {
 		const res = await app.request(req, undefined, env);
 
 		expect(res.status).toBe(200);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body.data.rate_limit_rpm).toBe(60);
 		expect(body.data.rate_limit_daily).toBe(1000);
 	});
@@ -178,7 +178,7 @@ describe("POST /admin/agents — agent registration", () => {
 		const res = await app.request(req, undefined, env);
 
 		expect(res.status).toBe(400);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body.error.code).toBe("MISSING_FIELDS");
 	});
 
@@ -209,7 +209,7 @@ describe("POST /admin/agents — agent registration", () => {
 		);
 
 		const res = await app.request(req, undefined, env);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 
 		// The execute call should contain a hashed secret, not the plaintext
 		const executeCall = db.execute.mock.calls[0];
@@ -236,7 +236,7 @@ describe("POST /admin/agents — agent registration", () => {
 		const res = await app.request(req, undefined, env);
 
 		expect(res.status).toBe(500);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body.error.code).toBe("CREATE_FAILED");
 
 		consoleSpy.mockRestore();
@@ -277,7 +277,7 @@ describe("GET /admin/agents — list agents", () => {
 		const res = await app.request(req, undefined, env);
 
 		expect(res.status).toBe(200);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body.success).toBe(true);
 		expect(body.data.agents).toHaveLength(1);
 		expect(body.data.agents[0].scopes).toEqual(["github:read"]);
@@ -319,7 +319,7 @@ describe("DELETE /admin/agents/:id — revoke agent", () => {
 		const res = await app.request(req, undefined, env);
 
 		expect(res.status).toBe(200);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body.data.id).toBe("wdn_target");
 		expect(body.data.enabled).toBe(false);
 	});
@@ -332,7 +332,7 @@ describe("DELETE /admin/agents/:id — revoke agent", () => {
 		const res = await app.request(req, undefined, env);
 
 		expect(res.status).toBe(404);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body.error.code).toBe("NOT_FOUND");
 	});
 });
@@ -370,7 +370,7 @@ describe("GET /admin/logs — audit log query", () => {
 		const res = await app.request(req, undefined, env);
 
 		expect(res.status).toBe(200);
-		const body = await res.json();
+		const body = (await res.json()) as any;
 		expect(body.data.entries).toHaveLength(1);
 		expect(body.data.limit).toBe(10);
 		expect(body.data.offset).toBe(0);

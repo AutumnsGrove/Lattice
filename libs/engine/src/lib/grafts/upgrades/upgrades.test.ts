@@ -250,7 +250,7 @@ describe("UpgradesGraft API", () => {
 				locals: mockLocals,
 				platform: mockPlatform,
 			} as any);
-			const responseData = await response.json();
+			const responseData = (await response.json()) as any;
 
 			expect(response.status).toBe(200);
 			expect(responseData).toHaveProperty("plantingUrl");
@@ -350,7 +350,7 @@ describe("UpgradesGraft API", () => {
 				locals: mockLocals,
 				platform: mockPlatform,
 			} as any);
-			const responseData = await response.json();
+			const responseData = (await response.json()) as any;
 
 			expect(response.status).toBe(200);
 			expect(responseData).toHaveProperty("shedUrl");
@@ -396,7 +396,7 @@ describe("UpgradesGraft API", () => {
 				locals: mockLocals,
 				platform: mockPlatform,
 			} as any);
-			const responseData = await response.json();
+			const responseData = (await response.json()) as any;
 
 			expect(response.status).toBe(200);
 			expect(responseData).toHaveProperty("currentStage", "seedling");

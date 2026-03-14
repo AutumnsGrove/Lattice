@@ -404,7 +404,7 @@ describe("createConversationalChatController", () => {
 	it("should add local messages with sending status", () => {
 		const chat = createConversationalChatController({ localRole: "me" });
 
-		const id = chat.addLocalMessage("hey there");
+		const _id = chat.addLocalMessage("hey there");
 
 		expect(chat.messages).toHaveLength(1);
 		expect(chat.messages[0].role).toBe("me");

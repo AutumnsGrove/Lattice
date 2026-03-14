@@ -29,18 +29,6 @@ interface D1DatabaseResponse {
 	errors?: Array<{ message: string }>;
 }
 
-interface D1AnalyticsResponse {
-	result?: {
-		data?: Array<{
-			rows_read: number;
-			rows_written: number;
-			query_count: number;
-		}>;
-	};
-	success?: boolean;
-	errors?: Array<{ message: string }>;
-}
-
 /**
  * Fetch D1 database metadata (size, table count) from the CF API.
  */

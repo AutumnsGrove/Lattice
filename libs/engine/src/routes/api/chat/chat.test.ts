@@ -195,7 +195,7 @@ describe("GET /api/chat/conversations", () => {
 
 		const db = createMockDB();
 		const response = await getConversations(makeGETEvent(db) as any);
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(response.status).toBe(200);
 		expect(data.conversations).toHaveLength(1);
@@ -206,7 +206,7 @@ describe("GET /api/chat/conversations", () => {
 
 		const db = createMockDB();
 		const response = await getConversations(makeGETEvent(db) as any);
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(response.status).toBe(200);
 		expect(data.conversations).toEqual([]);
@@ -252,7 +252,7 @@ describe("POST /api/chat/conversations", () => {
 		const response = await postConversations(
 			makePOSTEvent({ friendTenantId: "tenant-bob" }, db) as any,
 		);
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(response.status).toBe(201);
 		expect(data.success).toBe(true);
@@ -270,7 +270,7 @@ describe("POST /api/chat/conversations", () => {
 		const response = await postConversations(
 			makePOSTEvent({ friendTenantId: "tenant-bob" }, db) as any,
 		);
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(response.status).toBe(200);
 		expect(data.created).toBe(false);
@@ -348,7 +348,7 @@ describe("GET /api/chat/conversations/[id]/messages", () => {
 	it("should return message history for conversation participants", async () => {
 		const db = createMockDB();
 		const response = await getMessagesRoute(makeGETEvent(db, { params: { id: "conv-1" } }) as any);
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(response.status).toBe(200);
 		expect(data.messages).toHaveLength(1);
@@ -416,7 +416,7 @@ describe("POST /api/chat/conversations/[id]/messages", () => {
 				params: { id: "conv-1" },
 			}) as any,
 		);
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(response.status).toBe(201);
 		expect(data.success).toBe(true);
@@ -525,7 +525,7 @@ describe("POST /api/chat/conversations/[id]/read", () => {
 		const response = await postRead(
 			makePOSTEvent({ messageId: "msg-5" }, db, { params: { id: "conv-1" } }) as any,
 		);
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(response.status).toBe(200);
 		expect(data.success).toBe(true);
@@ -562,7 +562,7 @@ describe("POST /api/chat/conversations/[id]/read", () => {
 		const response = await postRead(
 			makePOSTEvent({ messageId: "latest" }, db, { params: { id: "conv-1" } }) as any,
 		);
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(response.status).toBe(200);
 		expect(updateReadCursor).toHaveBeenCalledWith(db, "conv-1", HOME_GROVE.tenantId, "msg-999");
@@ -574,7 +574,7 @@ describe("POST /api/chat/conversations/[id]/read", () => {
 		const response = await postRead(
 			makePOSTEvent({ messageId: "latest" }, db, { params: { id: "conv-1" } }) as any,
 		);
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(response.status).toBe(200);
 		expect(data.success).toBe(true);
@@ -615,7 +615,7 @@ describe("POST /api/chat/conversations/[id]/messages/[messageId]/retract", () =>
 		const response = await postRetract(
 			makePOSTEvent({}, db, { params: { id: "conv-1", messageId: "msg-1" } }) as any,
 		);
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(response.status).toBe(200);
 		expect(data.success).toBe(true);
@@ -684,7 +684,7 @@ describe("GET /api/chat/unread", () => {
 
 		const db = createMockDB();
 		const response = await getUnread(makeGETEvent(db) as any);
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(response.status).toBe(200);
 		expect(data.unread).toBe(5);
@@ -695,7 +695,7 @@ describe("GET /api/chat/unread", () => {
 
 		const db = createMockDB();
 		const response = await getUnread(makeGETEvent(db) as any);
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(response.status).toBe(200);
 		expect(data.unread).toBe(0);
@@ -706,7 +706,7 @@ describe("GET /api/chat/unread", () => {
 
 		const db = createMockDB();
 		const response = await getUnread(makeGETEvent(db) as any);
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(data.unread).toBe(0);
 	});

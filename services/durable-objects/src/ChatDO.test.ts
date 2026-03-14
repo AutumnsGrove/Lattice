@@ -44,7 +44,7 @@ describe("ChatDO", () => {
 					createdAt: "2024-01-01T00:00:00Z",
 				}),
 			);
-			const body = await res.json();
+			const body = (await res.json()) as any;
 
 			expect(body.success).toBe(true);
 			expect(body.message.id).toBe("msg-1");
@@ -88,7 +88,7 @@ describe("ChatDO", () => {
 					content: "Hello from REST!",
 				}),
 			);
-			const body = await res.json();
+			const body = (await res.json()) as any;
 
 			expect(body.success).toBe(true);
 			expect(body.message.content).toBe("Hello from REST!");
@@ -122,7 +122,7 @@ describe("ChatDO", () => {
 					content: "",
 				}),
 			);
-			const body = await res.json();
+			const body = (await res.json()) as any;
 
 			expect(res.status).toBe(400);
 			expect(body.error).toContain("content required");
@@ -140,7 +140,7 @@ describe("ChatDO", () => {
 			);
 
 			expect(res.status).toBe(400);
-			expect((await res.json()).error).toContain("too long");
+			expect(((await res.json()) as any).error).toContain("too long");
 		});
 
 		it("should reject invalid content_type", async () => {
@@ -178,7 +178,7 @@ describe("ChatDO", () => {
 					metadata: { url: "https://img.example.com/pic.jpg", width: 800, height: 600 },
 				}),
 			);
-			const body = await res.json();
+			const body = (await res.json()) as any;
 
 			expect(body.success).toBe(true);
 			expect(body.message.content_type).toBe("image");
@@ -228,7 +228,7 @@ describe("ChatDO", () => {
 			const res = await doInstance.fetch(
 				doRequest("/history?conversationId=conv-1&tenantId=tenant-a"),
 			);
-			const body = await res.json();
+			const body = (await res.json()) as any;
 
 			expect(body.messages).toHaveLength(1);
 			expect(body.messages[0].content).toBe("Hello");
@@ -284,7 +284,7 @@ describe("ChatDO", () => {
 			const res = await doInstance.fetch(
 				doRequest("/history?conversationId=conv-1&tenantId=tenant-a"),
 			);
-			const body = await res.json();
+			const body = (await res.json()) as any;
 
 			expect(body.messages[0].content).toBe("");
 			expect(body.messages[0].retracted_at).toBe("2024-01-01T00:05:00Z");

@@ -55,7 +55,7 @@ describe("apiKeyAuth middleware", () => {
 		const res = await app.request(req, undefined, env);
 
 		expect(res.status).toBe(200);
-		const body: LumenWorkerResponse = await res.json();
+		const body: LumenWorkerResponse = (await res.json()) as any;
 		expect(body.data).toBe("secret");
 	});
 
@@ -65,7 +65,7 @@ describe("apiKeyAuth middleware", () => {
 		const res = await app.request(req, undefined, createEnv());
 
 		expect(res.status).toBe(401);
-		const body: LumenWorkerResponse = await res.json();
+		const body: LumenWorkerResponse = (await res.json()) as any;
 		expect(body.success).toBe(false);
 		expect(body.error?.code).toBe("AUTH_REQUIRED");
 		expect(body.error?.message).toBe("Missing X-API-Key header");
@@ -77,7 +77,7 @@ describe("apiKeyAuth middleware", () => {
 		const res = await app.request(req, undefined, env);
 
 		expect(res.status).toBe(401);
-		const body: LumenWorkerResponse = await res.json();
+		const body: LumenWorkerResponse = (await res.json()) as any;
 		expect(body.success).toBe(false);
 		expect(body.error?.code).toBe("AUTH_REQUIRED");
 		expect(body.error?.message).toBe("Invalid API key");
@@ -91,7 +91,7 @@ describe("apiKeyAuth middleware", () => {
 		const res = await app.request(req, undefined, env);
 
 		expect(res.status).toBe(500);
-		const body: LumenWorkerResponse = await res.json();
+		const body: LumenWorkerResponse = (await res.json()) as any;
 		expect(body.success).toBe(false);
 		expect(body.error?.code).toBe("INTERNAL_ERROR");
 		expect(body.error?.message).toBe("LUMEN_API_KEY not configured");
@@ -104,7 +104,7 @@ describe("apiKeyAuth middleware", () => {
 		const res = await app.request(req, undefined, env);
 
 		expect(res.status).toBe(401);
-		const body: LumenWorkerResponse = await res.json();
+		const body: LumenWorkerResponse = (await res.json()) as any;
 		expect(body.error?.code).toBe("AUTH_REQUIRED");
 	});
 

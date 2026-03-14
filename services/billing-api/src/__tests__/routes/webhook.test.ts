@@ -174,7 +174,7 @@ describe("POST /webhook", () => {
 	// ─────────────────────────────────────────────────────────────────────────
 
 	it("applies rate limiting AFTER signature verification (L-04 fix)", async () => {
-		const { db, mocks } = createMockD1();
+		const { db } = createMockD1();
 		const mockKV = createMockKV();
 
 		// Valid signature

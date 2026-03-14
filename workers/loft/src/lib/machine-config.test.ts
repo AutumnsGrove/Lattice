@@ -20,63 +20,63 @@ describe("buildMachineConfig", () => {
 	};
 
 	it("returns correct image", () => {
-		const config = buildMachineConfig(testInput);
+		const config = buildMachineConfig(testInput) as any;
 		expect(config.image).toBe("registry.fly.io/grove-loft:v1");
 	});
 
 	it("uses LOFT_DEFAULTS.defaultSize for size", () => {
-		const config = buildMachineConfig(testInput);
+		const config = buildMachineConfig(testInput) as any;
 		expect(config.size).toBe("shared-cpu-1x");
 	});
 
 	it("uses LOFT_DEFAULTS.defaultRegion for region", () => {
-		const config = buildMachineConfig(testInput);
+		const config = buildMachineConfig(testInput) as any;
 		expect(config.region).toBe("iad");
 	});
 
 	it("uses LOFT_DEFAULTS.tags", () => {
-		const config = buildMachineConfig(testInput);
+		const config = buildMachineConfig(testInput) as any;
 		expect(config.tags).toEqual(["loft"]);
 	});
 
 	it("includes SSH key in providerOptions.env.SSH_AUTHORIZED_KEY", () => {
-		const config = buildMachineConfig(testInput);
-		expect(config.providerOptions.env.SSH_AUTHORIZED_KEY).toBe(testInput.sshPublicKey);
+		const config = buildMachineConfig(testInput) as any;
+		expect(config.providerOptions!.env.SSH_AUTHORIZED_KEY).toBe(testInput.sshPublicKey);
 	});
 
 	it("includes code-server password in providerOptions.env.CODE_SERVER_PASSWORD", () => {
-		const config = buildMachineConfig(testInput);
-		expect(config.providerOptions.env.CODE_SERVER_PASSWORD).toBe(testInput.codeServerPassword);
+		const config = buildMachineConfig(testInput) as any;
+		expect(config.providerOptions!.env.CODE_SERVER_PASSWORD).toBe(testInput.codeServerPassword);
 	});
 
 	it("includes firefly agent secret in providerOptions.env.FIREFLY_AGENT_SECRET", () => {
-		const config = buildMachineConfig(testInput);
-		expect(config.providerOptions.env.FIREFLY_AGENT_SECRET).toBe(testInput.fireflyAgentSecret);
+		const config = buildMachineConfig(testInput) as any;
+		expect(config.providerOptions!.env.FIREFLY_AGENT_SECRET).toBe(testInput.fireflyAgentSecret);
 	});
 
 	it("has 3 service port mappings", () => {
-		const config = buildMachineConfig(testInput);
-		expect(config.providerOptions.services).toHaveLength(3);
+		const config = buildMachineConfig(testInput) as any;
+		expect(config.providerOptions!.services).toHaveLength(3);
 	});
 
 	it("HTTP service maps 443/80 to internal 8080", () => {
-		const config = buildMachineConfig(testInput);
-		const httpService = config.providerOptions.services?.[0];
+		const config = buildMachineConfig(testInput) as any;
+		const httpService = config.providerOptions!.services?.[0];
 
 		expect(httpService?.internal_port).toBe(8080);
 		expect(httpService?.protocol).toBe("tcp");
 		expect(httpService?.ports).toHaveLength(2);
 
-		const ports443 = httpService?.ports?.find((p) => p.port === 443);
-		const ports80 = httpService?.ports?.find((p) => p.port === 80);
+		const ports443 = httpService?.ports?.find((p: any) => p.port === 443);
+		const ports80 = httpService?.ports?.find((p: any) => p.port === 80);
 
 		expect(ports443?.port).toBe(443);
 		expect(ports80?.port).toBe(80);
 	});
 
 	it("SSH service maps port 22 to internal 22", () => {
-		const config = buildMachineConfig(testInput);
-		const sshService = config.providerOptions.services?.[1];
+		const config = buildMachineConfig(testInput) as any;
+		const sshService = config.providerOptions!.services?.[1];
 
 		expect(sshService?.internal_port).toBe(22);
 		expect(sshService?.protocol).toBe("tcp");
@@ -85,13 +85,13 @@ describe("buildMachineConfig", () => {
 	});
 
 	it("auto-destroy is true", () => {
-		const config = buildMachineConfig(testInput);
-		expect(config.providerOptions.auto_destroy).toBe(true);
+		const config = buildMachineConfig(testInput) as any;
+		expect(config.providerOptions!.auto_destroy).toBe(true);
 	});
 
 	it("restart policy is on-failure with max 3 retries", () => {
-		const config = buildMachineConfig(testInput);
-		const restart = config.providerOptions.restart;
+		const config = buildMachineConfig(testInput) as any;
+		const restart = config.providerOptions!.restart;
 
 		expect(restart?.policy).toBe("on-failure");
 		expect(restart?.max_retries).toBe(3);

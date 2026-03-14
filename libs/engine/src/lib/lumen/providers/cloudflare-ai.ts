@@ -15,16 +15,8 @@
 
 import { PROVIDERS, MODELS } from "../config.js";
 import { ProviderError, ProviderTimeoutError } from "../errors.js";
-import type {
-  LumenMessage,
-  LumenProviderName,
-  LumenModerationCategory,
-} from "../types.js";
-import type {
-  LumenInferenceOptions,
-  LumenProvider,
-  LumenProviderResponse,
-} from "./types.js";
+import type { LumenMessage, LumenProviderName, LumenModerationCategory } from "../types.js";
+import type { LumenInferenceOptions, LumenProvider, LumenProviderResponse } from "./types.js";
 
 // =============================================================================
 // TYPES
@@ -48,60 +40,60 @@ import type {
  * @see https://developers.cloudflare.com/workers-ai/configuration/bindings/
  */
 type AiTextGenerationInput = {
-  prompt?: string;
-  messages?: Array<{
-    role: string;
-    content:
-      | string
-      | Array<{
-          type: string;
-          text?: string;
-          image_url?: { url: string };
-        }>;
-  }>;
-  max_tokens?: number;
-  temperature?: number;
-  stream?: boolean;
+	prompt?: string;
+	messages?: Array<{
+		role: string;
+		content:
+			| string
+			| Array<{
+					type: string;
+					text?: string;
+					image_url?: { url: string };
+			  }>;
+	}>;
+	max_tokens?: number;
+	temperature?: number;
+	stream?: boolean;
 };
 
 type AiTextGenerationOutput = {
-  response?: string;
-  // Streaming returns a ReadableStream
+	response?: string;
+	// Streaming returns a ReadableStream
 };
 
 type AiTextEmbeddingsInput = {
-  text: string | string[];
+	text: string | string[];
 };
 
 type AiTextEmbeddingsOutput = {
-  shape: number[];
-  data: number[][];
+	shape: number[];
+	data: number[][];
 };
 
 type AiTranscriptionInput = {
-  audio: number[];
+	audio: number[];
 };
 
 type AiTranscriptionOutput = {
-  text: string;
-  word_count?: number;
-  words?: Array<{
-    word: string;
-    start: number;
-    end: number;
-  }>;
-  vtt?: string;
+	text: string;
+	word_count?: number;
+	words?: Array<{
+		word: string;
+		start: number;
+		end: number;
+	}>;
+	vtt?: string;
 };
 
 // LlamaGuard response categories
 const LLAMAGUARD_CATEGORIES: Record<string, LumenModerationCategory> = {
-  S1: "violence",
-  S2: "hate",
-  S3: "sexual",
-  S4: "dangerous",
-  S5: "self_harm",
-  S6: "illegal",
-  S7: "harassment",
+	S1: "violence",
+	S2: "hate",
+	S3: "sexual",
+	S4: "dangerous",
+	S5: "self_harm",
+	S6: "illegal",
+	S7: "harassment",
 };
 
 // =============================================================================
@@ -109,285 +101,285 @@ const LLAMAGUARD_CATEGORIES: Record<string, LumenModerationCategory> = {
 // =============================================================================
 
 export class CloudflareAIProvider implements LumenProvider {
-  readonly name: LumenProviderName = "cloudflare-ai";
+	readonly name: LumenProviderName = "cloudflare-ai";
 
-  private readonly ai: Ai;
+	private readonly ai: Ai;
 
-  constructor(ai: Ai) {
-    this.ai = ai;
-  }
+	constructor(ai: Ai) {
+		this.ai = ai;
+	}
 
-  // ===========================================================================
-  // INFERENCE (for moderation models that use chat format)
-  // ===========================================================================
+	// ===========================================================================
+	// INFERENCE (for moderation models that use chat format)
+	// ===========================================================================
 
-  async inference(
-    model: string,
-    messages: LumenMessage[],
-    options: LumenInferenceOptions,
-  ): Promise<LumenProviderResponse> {
-    const timeoutMs = options.timeoutMs ?? PROVIDERS["cloudflare-ai"].timeoutMs;
+	async inference(
+		model: string,
+		messages: LumenMessage[],
+		options: LumenInferenceOptions,
+	): Promise<LumenProviderResponse> {
+		const timeoutMs = options.timeoutMs ?? PROVIDERS["cloudflare-ai"].timeoutMs;
 
-    try {
-      // Format messages, preserving multimodal content for vision models
-      const formattedMessages = messages.map((m) => {
-        if (typeof m.content === "string") {
-          return { role: m.role, content: m.content };
-        }
+		try {
+			// Format messages, preserving multimodal content for vision models
+			const formattedMessages = messages.map((m) => {
+				if (typeof m.content === "string") {
+					return { role: m.role, content: m.content };
+				}
 
-        // Check if this message has image content parts
-        const hasImages = m.content.some((p) => p.type === "image_url");
+				// Check if this message has image content parts
+				const hasImages = m.content.some((p) => p.type === "image_url");
 
-        if (hasImages) {
-          // Vision model: preserve multimodal content parts
-          return {
-            role: m.role,
-            content: m.content.map((p) => {
-              if (p.type === "text") {
-                return { type: "text" as const, text: p.text ?? "" };
-              }
-              return {
-                type: "image_url" as const,
-                image_url: { url: p.image_url?.url ?? "" },
-              };
-            }),
-          };
-        }
+				if (hasImages) {
+					// Vision model: preserve multimodal content parts
+					return {
+						role: m.role,
+						content: m.content.map((p) => {
+							if (p.type === "text") {
+								return { type: "text" as const, text: p.text ?? "" };
+							}
+							return {
+								type: "image_url" as const,
+								image_url: { url: p.image_url?.url ?? "" },
+							};
+						}),
+					};
+				}
 
-        // Text-only multipart: collapse to string
-        return {
-          role: m.role,
-          content: m.content.map((p) => p.text ?? "").join("\n"),
-        };
-      });
+				// Text-only multipart: collapse to string
+				return {
+					role: m.role,
+					content: m.content.map((p) => p.text ?? "").join("\n"),
+				};
+			});
 
-      const startTime = Date.now();
+			const startTime = Date.now();
 
-      // Create a timeout promise
-      const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error("Timeout")), timeoutMs);
-      });
+			// Create a timeout promise
+			const timeoutPromise = new Promise<never>((_, reject) => {
+				setTimeout(() => reject(new Error("Timeout")), timeoutMs);
+			});
 
-      // Run inference with timeout
-      const result = await Promise.race([
-        this.ai.run(
-          model as Parameters<Ai["run"]>[0],
-          {
-            messages: formattedMessages,
-            max_tokens: options.maxTokens,
-            temperature: options.temperature,
-          } as AiTextGenerationInput,
-        ) as Promise<AiTextGenerationOutput>,
-        timeoutPromise,
-      ]);
+			// Run inference with timeout
+			const result = await Promise.race([
+				this.ai.run(
+					model as Parameters<Ai["run"]>[0],
+					{
+						messages: formattedMessages,
+						max_tokens: options.maxTokens,
+						temperature: options.temperature,
+					} as AiTextGenerationInput,
+				) as Promise<AiTextGenerationOutput>,
+				timeoutPromise,
+			]);
 
-      const latency = Date.now() - startTime;
-      const content = result.response ?? "";
+			const _latency = Date.now() - startTime;
+			const content = result.response ?? "";
 
-      // Estimate tokens (CF AI doesn't return usage)
-      const inputTokens = this.estimateTokens(messages);
-      const outputTokens = Math.ceil(content.length / 4);
+			// Estimate tokens (CF AI doesn't return usage)
+			const inputTokens = this.estimateTokens(messages);
+			const outputTokens = Math.ceil(content.length / 4);
 
-      return {
-        content,
-        usage: {
-          input: inputTokens,
-          output: outputTokens,
-          cost: 0, // CF AI is included in Workers pricing
-        },
-        model,
-      };
-    } catch (err) {
-      if (err instanceof Error && err.message === "Timeout") {
-        throw new ProviderTimeoutError(this.name, timeoutMs);
-      }
+			return {
+				content,
+				usage: {
+					input: inputTokens,
+					output: outputTokens,
+					cost: 0, // CF AI is included in Workers pricing
+				},
+				model,
+			};
+		} catch (err) {
+			if (err instanceof Error && err.message === "Timeout") {
+				throw new ProviderTimeoutError(this.name, timeoutMs);
+			}
 
-      throw new ProviderError(
-        this.name,
-        err instanceof Error ? err.message : "Unknown error",
-        undefined,
-        err,
-      );
-    }
-  }
+			throw new ProviderError(
+				this.name,
+				err instanceof Error ? err.message : "Unknown error",
+				undefined,
+				err,
+			);
+		}
+	}
 
-  // ===========================================================================
-  // EMBEDDINGS
-  // ===========================================================================
+	// ===========================================================================
+	// EMBEDDINGS
+	// ===========================================================================
 
-  async embed(
-    model: string,
-    input: string | string[],
-  ): Promise<{ embeddings: number[][]; tokens: number }> {
-    try {
-      const texts = Array.isArray(input) ? input : [input];
+	async embed(
+		model: string,
+		input: string | string[],
+	): Promise<{ embeddings: number[][]; tokens: number }> {
+		try {
+			const texts = Array.isArray(input) ? input : [input];
 
-      const result = (await this.ai.run(
-        model as Parameters<Ai["run"]>[0],
-        {
-          text: texts,
-        } as AiTextEmbeddingsInput,
-      )) as AiTextEmbeddingsOutput;
+			const result = (await this.ai.run(
+				model as Parameters<Ai["run"]>[0],
+				{
+					text: texts,
+				} as AiTextEmbeddingsInput,
+			)) as AiTextEmbeddingsOutput;
 
-      // Estimate tokens
-      const tokens = texts.reduce((sum, t) => sum + Math.ceil(t.length / 4), 0);
+			// Estimate tokens
+			const tokens = texts.reduce((sum, t) => sum + Math.ceil(t.length / 4), 0);
 
-      return {
-        embeddings: result.data,
-        tokens,
-      };
-    } catch (err) {
-      throw new ProviderError(
-        this.name,
-        err instanceof Error ? err.message : "Embedding failed",
-        undefined,
-        err,
-      );
-    }
-  }
+			return {
+				embeddings: result.data,
+				tokens,
+			};
+		} catch (err) {
+			throw new ProviderError(
+				this.name,
+				err instanceof Error ? err.message : "Embedding failed",
+				undefined,
+				err,
+			);
+		}
+	}
 
-  // ===========================================================================
-  // MODERATION
-  // ===========================================================================
+	// ===========================================================================
+	// MODERATION
+	// ===========================================================================
 
-  async moderate(
-    model: string,
-    content: string,
-  ): Promise<{ safe: boolean; categories: string[]; confidence: number }> {
-    try {
-      // LlamaGuard expects a conversation format
-      const result = (await this.ai.run(
-        model as Parameters<Ai["run"]>[0],
-        {
-          messages: [{ role: "user", content }],
-        } as AiTextGenerationInput,
-      )) as AiTextGenerationOutput;
+	async moderate(
+		model: string,
+		content: string,
+	): Promise<{ safe: boolean; categories: string[]; confidence: number }> {
+		try {
+			// LlamaGuard expects a conversation format
+			const result = (await this.ai.run(
+				model as Parameters<Ai["run"]>[0],
+				{
+					messages: [{ role: "user", content }],
+				} as AiTextGenerationInput,
+			)) as AiTextGenerationOutput;
 
-      const response = (result.response ?? "").toLowerCase();
+			const response = (result.response ?? "").toLowerCase();
 
-      // LlamaGuard returns "safe" or "unsafe" followed by category codes
-      const isSafe = response.startsWith("safe");
+			// LlamaGuard returns "safe" or "unsafe" followed by category codes
+			const isSafe = response.startsWith("safe");
 
-      const categories: LumenModerationCategory[] = [];
-      if (!isSafe) {
-        // Parse categories (e.g., "unsafe\nS1,S3" or "unsafe S1")
-        for (const [code, category] of Object.entries(LLAMAGUARD_CATEGORIES)) {
-          if (response.includes(code.toLowerCase())) {
-            categories.push(category);
-          }
-        }
-      }
+			const categories: LumenModerationCategory[] = [];
+			if (!isSafe) {
+				// Parse categories (e.g., "unsafe\nS1,S3" or "unsafe S1")
+				for (const [code, category] of Object.entries(LLAMAGUARD_CATEGORIES)) {
+					if (response.includes(code.toLowerCase())) {
+						categories.push(category);
+					}
+				}
+			}
 
-      return {
-        safe: isSafe,
-        categories,
-        confidence: isSafe ? 1.0 : 0.9, // LlamaGuard doesn't return confidence, estimate
-      };
-    } catch (err) {
-      throw new ProviderError(
-        this.name,
-        err instanceof Error ? err.message : "Moderation failed",
-        undefined,
-        err,
-      );
-    }
-  }
+			return {
+				safe: isSafe,
+				categories,
+				confidence: isSafe ? 1.0 : 0.9, // LlamaGuard doesn't return confidence, estimate
+			};
+		} catch (err) {
+			throw new ProviderError(
+				this.name,
+				err instanceof Error ? err.message : "Moderation failed",
+				undefined,
+				err,
+			);
+		}
+	}
 
-  // ===========================================================================
-  // TRANSCRIPTION (WHISPER)
-  // ===========================================================================
+	// ===========================================================================
+	// TRANSCRIPTION (WHISPER)
+	// ===========================================================================
 
-  /**
-   * Transcribe audio to text using Whisper.
-   *
-   * @param model - The Whisper model to use (e.g., CF_WHISPER_TURBO)
-   * @param audio - Audio data as Uint8Array
-   * @returns Transcription result with text and word count
-   */
-  async transcribe(
-    model: string,
-    audio: Uint8Array,
-  ): Promise<{ text: string; wordCount: number; duration: number }> {
-    const startTime = Date.now();
+	/**
+	 * Transcribe audio to text using Whisper.
+	 *
+	 * @param model - The Whisper model to use (e.g., CF_WHISPER_TURBO)
+	 * @param audio - Audio data as Uint8Array
+	 * @returns Transcription result with text and word count
+	 */
+	async transcribe(
+		model: string,
+		audio: Uint8Array,
+	): Promise<{ text: string; wordCount: number; duration: number }> {
+		const startTime = Date.now();
 
-    try {
-      // Convert Uint8Array to number[] for the CF AI binding
-      const audioArray = [...audio];
+		try {
+			// Convert Uint8Array to number[] for the CF AI binding
+			const audioArray = [...audio];
 
-      const result = (await this.ai.run(
-        model as Parameters<Ai["run"]>[0],
-        {
-          audio: audioArray,
-        } as AiTranscriptionInput,
-      )) as AiTranscriptionOutput;
+			const result = (await this.ai.run(
+				model as Parameters<Ai["run"]>[0],
+				{
+					audio: audioArray,
+				} as AiTranscriptionInput,
+			)) as AiTranscriptionOutput;
 
-      const latency = Date.now() - startTime;
+			const _latency = Date.now() - startTime;
 
-      // Estimate duration from word count (approx 150 words/minute for speech)
-      // Note: This is approximate; recordings with long pauses may differ
-      const wordCount = result.word_count ?? result.text.split(/\s+/).length;
-      const estimatedDuration = Math.min((wordCount / 150) * 60, 600); // Cap at 10 minutes
+			// Estimate duration from word count (approx 150 words/minute for speech)
+			// Note: This is approximate; recordings with long pauses may differ
+			const wordCount = result.word_count ?? result.text.split(/\s+/).length;
+			const estimatedDuration = Math.min((wordCount / 150) * 60, 600); // Cap at 10 minutes
 
-      // If we have word timestamps, use actual duration from last word
-      let duration = estimatedDuration;
-      if (result.words && result.words.length > 0) {
-        const lastWord = result.words[result.words.length - 1];
-        duration = lastWord.end;
-      }
+			// If we have word timestamps, use actual duration from last word
+			let duration = estimatedDuration;
+			if (result.words && result.words.length > 0) {
+				const lastWord = result.words[result.words.length - 1];
+				duration = lastWord.end;
+			}
 
-      return {
-        text: result.text,
-        wordCount,
-        duration,
-      };
-    } catch (err) {
-      throw new ProviderError(
-        this.name,
-        err instanceof Error ? err.message : "Transcription failed",
-        undefined,
-        err,
-      );
-    }
-  }
+			return {
+				text: result.text,
+				wordCount,
+				duration,
+			};
+		} catch (err) {
+			throw new ProviderError(
+				this.name,
+				err instanceof Error ? err.message : "Transcription failed",
+				undefined,
+				err,
+			);
+		}
+	}
 
-  // ===========================================================================
-  // HEALTH CHECK
-  // ===========================================================================
+	// ===========================================================================
+	// HEALTH CHECK
+	// ===========================================================================
 
-  async healthCheck(): Promise<boolean> {
-    try {
-      // Simple embedding test
-      await this.ai.run(
-        MODELS.CF_BGE_BASE as Parameters<Ai["run"]>[0],
-        {
-          text: ["health check"],
-        } as AiTextEmbeddingsInput,
-      );
-      return true;
-    } catch {
-      return false;
-    }
-  }
+	async healthCheck(): Promise<boolean> {
+		try {
+			// Simple embedding test
+			await this.ai.run(
+				MODELS.CF_BGE_BASE as Parameters<Ai["run"]>[0],
+				{
+					text: ["health check"],
+				} as AiTextEmbeddingsInput,
+			);
+			return true;
+		} catch {
+			return false;
+		}
+	}
 
-  // ===========================================================================
-  // HELPERS
-  // ===========================================================================
+	// ===========================================================================
+	// HELPERS
+	// ===========================================================================
 
-  private estimateTokens(messages: LumenMessage[]): number {
-    let chars = 0;
-    for (const msg of messages) {
-      if (typeof msg.content === "string") {
-        chars += msg.content.length;
-      } else {
-        for (const part of msg.content) {
-          if (part.type === "text" && part.text) {
-            chars += part.text.length;
-          }
-        }
-      }
-    }
-    return Math.ceil(chars / 4);
-  }
+	private estimateTokens(messages: LumenMessage[]): number {
+		let chars = 0;
+		for (const msg of messages) {
+			if (typeof msg.content === "string") {
+				chars += msg.content.length;
+			} else {
+				for (const part of msg.content) {
+					if (part.type === "text" && part.text) {
+						chars += part.text.length;
+					}
+				}
+			}
+		}
+		return Math.ceil(chars / 4);
+	}
 }
 
 // =============================================================================
@@ -400,5 +392,5 @@ export class CloudflareAIProvider implements LumenProvider {
  * @param ai - The Ai binding from platform.env.AI
  */
 export function createCloudflareAIProvider(ai: Ai): CloudflareAIProvider {
-  return new CloudflareAIProvider(ai);
+	return new CloudflareAIProvider(ai);
 }

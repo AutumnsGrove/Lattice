@@ -146,7 +146,7 @@ describe("POST /session/validate", () => {
 		const res = await app.request("/session/validate", { method: "POST" }, env);
 
 		expect(res.status).toBe(200);
-		const json: any = await res.json();
+		const json: any = (await res.json()) as any;
 		expect(json.valid).toBe(false);
 	});
 
@@ -165,7 +165,7 @@ describe("POST /session/validate", () => {
 		const res = await app.request("/session/validate", { method: "POST" }, env);
 
 		expect(res.status).toBe(200);
-		const json: any = await res.json();
+		const json: any = (await res.json()) as any;
 		expect(json.valid).toBe(true);
 		expect(json.user.id).toBe("user-test-123");
 		expect(json.user.email).toBe("test@grove.place");
@@ -187,7 +187,7 @@ describe("POST /session/validate", () => {
 
 		const res = await app.request("/session/validate", { method: "POST" }, env);
 
-		const json: any = await res.json();
+		const json: any = (await res.json()) as any;
 		expect(json.valid).toBe(true);
 		expect(json.user.isAdmin).toBe(true);
 	});
@@ -217,7 +217,7 @@ describe("POST /session/validate", () => {
 		);
 
 		expect(res.status).toBe(200);
-		const json: any = await res.json();
+		const json: any = (await res.json()) as any;
 		expect(json.valid).toBe(true);
 		expect(json.session).toBeNull(); // No DO session for JWT auth
 	});
@@ -245,7 +245,7 @@ describe("POST /session/validate", () => {
 		const res = await app.request("/session/validate", { method: "POST" }, env);
 
 		expect(res.status).toBe(200);
-		const json: any = await res.json();
+		const json: any = (await res.json()) as any;
 		expect(json.valid).toBe(true);
 		expect(json.user.id).toBe("ba-user-1");
 		expect(json.user.email).toBe("ba@grove.place");
@@ -264,7 +264,7 @@ describe("POST /session/validate", () => {
 		const res = await app.request("/session/validate", { method: "POST" }, env);
 
 		expect(res.status).toBe(429);
-		const json: any = await res.json();
+		const json: any = (await res.json()) as any;
 		expect(json.error).toBe("rate_limit");
 
 		// Reset for other tests
@@ -289,7 +289,7 @@ describe("POST /session/revoke", () => {
 		const res = await app.request("/session/revoke", { method: "POST" }, env);
 
 		expect(res.status).toBe(401);
-		const json: any = await res.json();
+		const json: any = (await res.json()) as any;
 		expect(json.success).toBe(false);
 	});
 
@@ -307,7 +307,7 @@ describe("POST /session/revoke", () => {
 		const res = await app.request("/session/revoke", { method: "POST" }, env);
 
 		expect(res.status).toBe(200);
-		const json: any = await res.json();
+		const json: any = (await res.json()) as any;
 		expect(json.success).toBe(true);
 		expect(sessionDO.revokeSession).toHaveBeenCalledWith("sess-1");
 
@@ -383,7 +383,7 @@ describe("POST /session/revoke-all", () => {
 		);
 
 		expect(res.status).toBe(200);
-		const json: any = await res.json();
+		const json: any = (await res.json()) as any;
 		expect(json.success).toBe(true);
 		expect(json.revokedCount).toBe(3);
 		// Called without keepCurrent since keepCurrent=false
@@ -438,7 +438,7 @@ describe("POST /session/revoke-all", () => {
 		const res = await app.request("/session/revoke-all", { method: "POST" }, env);
 
 		expect(res.status).toBe(200);
-		const json: any = await res.json();
+		const json: any = (await res.json()) as any;
 		expect(json.betterAuthRevoked).toBe(true);
 	});
 });
@@ -473,7 +473,7 @@ describe("GET /session/list", () => {
 		const res = await app.request("/session/list", { method: "GET" }, env);
 
 		expect(res.status).toBe(200);
-		const json: any = await res.json();
+		const json: any = (await res.json()) as any;
 		expect(json.sessions).toHaveLength(2);
 
 		const current = json.sessions.find((s: any) => s.id === "sess-1");
@@ -531,7 +531,7 @@ describe("DELETE /session/:sessionId", () => {
 		const res = await app.request("/session/sess-2", { method: "DELETE" }, env);
 
 		expect(res.status).toBe(200);
-		const json: any = await res.json();
+		const json: any = (await res.json()) as any;
 		expect(json.success).toBe(true);
 		expect(sessionDO.revokeSession).toHaveBeenCalledWith("sess-2");
 	});
@@ -628,7 +628,7 @@ describe("POST /session/validate-service", () => {
 		);
 
 		expect(res.status).toBe(401);
-		const json: any = await res.json();
+		const json: any = (await res.json()) as any;
 		expect(json.error).toContain("Invalid session token");
 	});
 
@@ -660,7 +660,7 @@ describe("POST /session/validate-service", () => {
 		);
 
 		expect(res.status).toBe(200);
-		const json: any = await res.json();
+		const json: any = (await res.json()) as any;
 		expect(json.valid).toBe(true);
 		expect(json.user.id).toBe("user-test-123");
 		expect(json.user.email).toBe("test@grove.place");
@@ -690,7 +690,7 @@ describe("POST /session/validate-service", () => {
 		);
 
 		expect(res.status).toBe(200);
-		const json: any = await res.json();
+		const json: any = (await res.json()) as any;
 		expect(json.valid).toBe(true);
 	});
 });
@@ -709,7 +709,7 @@ describe("GET /session/check", () => {
 		const res = await app.request("/session/check", { method: "GET" }, env);
 
 		expect(res.status).toBe(200);
-		const json: any = await res.json();
+		const json: any = (await res.json()) as any;
 		expect(json.authenticated).toBe(false);
 	});
 
@@ -727,7 +727,7 @@ describe("GET /session/check", () => {
 		const res = await app.request("/session/check", { method: "GET" }, env);
 
 		expect(res.status).toBe(200);
-		const json: any = await res.json();
+		const json: any = (await res.json()) as any;
 		expect(json.authenticated).toBe(true);
 		expect(json.user.id).toBe("user-test-123");
 	});

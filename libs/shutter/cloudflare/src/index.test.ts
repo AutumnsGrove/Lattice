@@ -77,7 +77,7 @@ describe("worker entry point (index.ts)", () => {
 			const request = new Request("http://localhost/");
 			const response = await worker.fetch(request, createMockEnv(), { waitUntil: vi.fn() } as any);
 			expect(response.status).toBe(200);
-			const data = await response.json();
+			const data = (await response.json()) as any;
 			expect(data.name).toBe("Shutter");
 			expect(data.version).toBeDefined();
 		});
@@ -126,7 +126,7 @@ describe("worker entry point (index.ts)", () => {
 			});
 			const response = await worker.fetch(request, createMockEnv(), { waitUntil: vi.fn() } as any);
 			expect(response.status).toBe(200);
-			const data = await response.json();
+			const data = (await response.json()) as any;
 			expect(data.url).toBe("https://example.com");
 			expect(data.extracted).toBeDefined();
 		});
@@ -171,7 +171,7 @@ describe("worker entry point (index.ts)", () => {
 			});
 			const response = await worker.fetch(request, createMockEnv(), { waitUntil: vi.fn() } as any);
 			expect(response.status).toBe(200);
-			const data = await response.json();
+			const data = (await response.json()) as any;
 			expect(data.promptInjection).not.toBeNull();
 			expect(data.promptInjection.type).toBe("domain_blocked");
 		});
@@ -190,7 +190,7 @@ describe("worker entry point (index.ts)", () => {
 			});
 			const response = await worker.fetch(request, createMockEnv(), { waitUntil: vi.fn() } as any);
 			expect(response.status).toBe(200);
-			const data = await response.json();
+			const data = (await response.json()) as any;
 			expect(data.promptInjection).not.toBeNull();
 			expect(data.promptInjection.type).toBe("fetch_error");
 		});
@@ -208,7 +208,7 @@ describe("worker entry point (index.ts)", () => {
 			});
 			const response = await worker.fetch(request, createMockEnv(), { waitUntil: vi.fn() } as any);
 			expect(response.status).toBe(200);
-			const data = await response.json();
+			const data = (await response.json()) as any;
 			expect(data.promptInjection).not.toBeNull();
 			expect(data.promptInjection.type).toBe("empty_content");
 		});
@@ -240,7 +240,7 @@ describe("worker entry point (index.ts)", () => {
 			});
 			const response = await worker.fetch(request, createMockEnv(), { waitUntil: vi.fn() } as any);
 			expect(response.status).toBe(200);
-			const data = await response.json();
+			const data = (await response.json()) as any;
 			expect(data.promptInjection).not.toBeNull();
 			expect(vi.mocked(addOffender)).toHaveBeenCalled();
 		});
@@ -285,7 +285,7 @@ describe("worker entry point (index.ts)", () => {
 			});
 			const response = await worker.fetch(request, createMockEnv(), { waitUntil: vi.fn() } as any);
 			expect(response.status).toBe(200);
-			const data = await response.json();
+			const data = (await response.json()) as any;
 			expect(data.offenders).toHaveLength(1);
 			expect(data.count).toBe(1);
 		});

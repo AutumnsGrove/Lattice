@@ -60,7 +60,7 @@ describe("POST /embed", () => {
 		const res = await app.request(post({ input: "Hello world" }), undefined, mockEnv);
 
 		expect(res.status).toBe(200);
-		const body: LumenWorkerResponse = await res.json();
+		const body: LumenWorkerResponse = (await res.json()) as any;
 		expect(body.success).toBe(true);
 		expect(body.data).toEqual({
 			embeddings: [[0.1, 0.2, 0.3]],
@@ -97,7 +97,7 @@ describe("POST /embed", () => {
 		);
 
 		expect(res.status).toBe(400);
-		const body: LumenWorkerResponse = await res.json();
+		const body: LumenWorkerResponse = (await res.json()) as any;
 		expect(body.error?.code).toBe("INVALID_REQUEST");
 		expect(body.error?.message).toBe("Invalid JSON body");
 	});
@@ -107,7 +107,7 @@ describe("POST /embed", () => {
 		const res = await app.request(post({}), undefined, mockEnv);
 
 		expect(res.status).toBe(400);
-		const body: LumenWorkerResponse = await res.json();
+		const body: LumenWorkerResponse = (await res.json()) as any;
 		expect(body.error?.code).toBe("INVALID_PARAMS");
 		expect(body.error?.message).toContain("input");
 	});
@@ -142,7 +142,7 @@ describe("POST /embed", () => {
 		const res = await app.request(post({ input: "test" }), undefined, mockEnv);
 
 		expect(res.status).toBe(500);
-		const body: LumenWorkerResponse = await res.json();
+		const body: LumenWorkerResponse = (await res.json()) as any;
 		expect(body.success).toBe(false);
 		expect(body.error?.code).toBe("PROVIDER_ERROR");
 		expect(body.meta?.task).toBe("embedding");

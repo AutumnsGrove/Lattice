@@ -77,7 +77,7 @@ describe("SentinelDO", () => {
 					profile: sampleProfile,
 				}),
 			);
-			const body = await res.json();
+			const body = (await res.json()) as any;
 
 			expect(body.success).toBe(true);
 			expect(body.status).toBe("running");
@@ -89,7 +89,7 @@ describe("SentinelDO", () => {
 			const { doInstance } = createSentinelDO();
 
 			const res = await doInstance.fetch(doRequest("/status"));
-			const body = await res.json();
+			const body = (await res.json()) as any;
 
 			expect(body.status).toBe("idle");
 		});
@@ -110,7 +110,7 @@ describe("SentinelDO", () => {
 			});
 
 			const res = await doInstance.fetch(doRequest("/status"));
-			const body = await res.json();
+			const body = (await res.json()) as any;
 
 			expect(body.status).toBe("running");
 			expect(body.runId).toBe("run-1");
@@ -140,7 +140,7 @@ describe("SentinelDO", () => {
 			db._pushResult({ meta: { changes: 1 } });
 
 			const res = await doInstance.fetch(doPost("/cancel", {}));
-			const body = await res.json();
+			const body = (await res.json()) as any;
 
 			expect(body.success).toBe(true);
 			expect(body.status).toBe("cancelled");

@@ -69,7 +69,7 @@ describe("PostMetaDO", () => {
 			const res = await doInstance.fetch(doRequest("/meta"));
 
 			expect(res.status).toBe(200);
-			const body = await res.json();
+			const body = (await res.json()) as any;
 			expect(body.tenantId).toBe("tenant-1");
 			expect(body.slug).toBe("hello-world");
 			expect(body.viewCount).toBe(10);
@@ -96,7 +96,7 @@ describe("PostMetaDO", () => {
 			);
 
 			expect(res.status).toBe(200);
-			const body = await res.json();
+			const body = (await res.json()) as any;
 			expect(body.success).toBe(true);
 			expect(body.meta.tenantId).toBe("tenant-1");
 			expect(body.meta.slug).toBe("hello-world");
@@ -140,7 +140,7 @@ describe("PostMetaDO", () => {
 
 			// Should succeed but not insert again
 			expect(res.status).toBe(200);
-			const body = await res.json();
+			const body = (await res.json()) as any;
 			expect(body.meta.viewCount).toBe(10); // Original value preserved
 		});
 
@@ -162,7 +162,7 @@ describe("PostMetaDO", () => {
 			);
 
 			expect(res.status).toBe(200);
-			const body = await res.json();
+			const body = (await res.json()) as any;
 			expect(body.meta.tier).toBe("seedling");
 		});
 	});
@@ -185,7 +185,7 @@ describe("PostMetaDO", () => {
 			const res = await doInstance.fetch(doPost("/view", { sessionId: "session-1" }));
 
 			expect(res.status).toBe(200);
-			const body = await res.json();
+			const body = (await res.json()) as any;
 			expect(body.success).toBe(true);
 			expect(body.viewCount).toBe(11); // 10 + 1
 		});
@@ -200,13 +200,13 @@ describe("PostMetaDO", () => {
 
 			let res = await doInstance.fetch(doPost("/view", { sessionId: "session-2" }));
 			expect(res.status).toBe(200);
-			let body = await res.json();
+			let body = (await res.json()) as any;
 			expect(body.viewCount).toBe(11);
 
 			// Second view from same session within 5 min — should be dedup'd
 			res = await doInstance.fetch(doPost("/view", { sessionId: "session-2" }));
 			expect(res.status).toBe(200);
-			body = await res.json();
+			body = (await res.json()) as any;
 			// Should still be 11 (not incremented)
 			expect(body.viewCount).toBe(11);
 		});
@@ -230,7 +230,7 @@ describe("PostMetaDO", () => {
 			const res = await doInstance.fetch(doPost("/view", {}));
 
 			expect(res.status).toBe(200);
-			const body = await res.json();
+			const body = (await res.json()) as any;
 			expect(body.viewCount).toBe(11);
 		});
 	});
@@ -246,7 +246,7 @@ describe("PostMetaDO", () => {
 			const res = await doInstance.fetch(doRequest("/reactions"));
 
 			expect(res.status).toBe(200);
-			const body = await res.json();
+			const body = (await res.json()) as any;
 			expect(body.likes).toBe(3);
 			expect(body.bookmarks).toBe(1);
 		});
@@ -287,7 +287,7 @@ describe("PostMetaDO", () => {
 			);
 
 			expect(res.status).toBe(200);
-			const body = await res.json();
+			const body = (await res.json()) as any;
 			expect(body.success).toBe(true);
 			expect(body.reactions.likes).toBe(4); // 3 + 1
 			expect(body.reactions.bookmarks).toBe(1);
@@ -314,7 +314,7 @@ describe("PostMetaDO", () => {
 			);
 
 			expect(res.status).toBe(200);
-			const body = await res.json();
+			const body = (await res.json()) as any;
 			expect(body.success).toBe(true);
 			expect(body.reactions.likes).toBe(3);
 			expect(body.reactions.bookmarks).toBe(2); // 1 + 1
@@ -335,7 +335,7 @@ describe("PostMetaDO", () => {
 			);
 
 			expect(res.status).toBe(200);
-			const body = await res.json();
+			const body = (await res.json()) as any;
 			expect(body.success).toBe(false);
 			expect(body.message).toBe("Already reacted");
 			expect(body.reactions.likes).toBe(3); // Unchanged
@@ -387,7 +387,7 @@ describe("PostMetaDO", () => {
 			);
 
 			expect(res.status).toBe(200);
-			const body = await res.json();
+			const body = (await res.json()) as any;
 			expect(body.success).toBe(true);
 		});
 	});
@@ -413,7 +413,7 @@ describe("PostMetaDO", () => {
 			);
 
 			expect(res.status).toBe(200);
-			const body = await res.json();
+			const body = (await res.json()) as any;
 			expect(body.success).toBe(true);
 			expect(body.reactions.likes).toBe(2); // 3 - 1
 			expect(body.reactions.bookmarks).toBe(1);
@@ -435,7 +435,7 @@ describe("PostMetaDO", () => {
 			);
 
 			expect(res.status).toBe(200);
-			const body = await res.json();
+			const body = (await res.json()) as any;
 			expect(body.success).toBe(true);
 			expect(body.reactions.likes).toBe(3);
 			expect(body.reactions.bookmarks).toBe(0); // 1 - 1
@@ -458,7 +458,7 @@ describe("PostMetaDO", () => {
 			);
 
 			expect(res.status).toBe(200);
-			const body = await res.json();
+			const body = (await res.json()) as any;
 			expect(body.reactions.likes).toBe(0); // Stays at 0, not -1
 		});
 
@@ -479,7 +479,7 @@ describe("PostMetaDO", () => {
 			);
 
 			expect(res.status).toBe(200);
-			const body = await res.json();
+			const body = (await res.json()) as any;
 			expect(body.reactions.bookmarks).toBe(0); // Stays at 0
 		});
 
@@ -524,7 +524,7 @@ describe("PostMetaDO", () => {
 			);
 
 			expect(res.status).toBe(200);
-			const body = await res.json();
+			const body = (await res.json()) as any;
 			expect(body.success).toBe(true);
 		});
 	});
@@ -549,7 +549,7 @@ describe("PostMetaDO", () => {
 			const res = await doInstance.fetch(doRequest("/presence"));
 
 			expect(res.status).toBe(200);
-			const body = await res.json();
+			const body = (await res.json()) as any;
 			expect(body.activeReaders).toBe(1);
 			expect(body.lastActivity).toBeGreaterThan(0);
 		});
@@ -560,7 +560,7 @@ describe("PostMetaDO", () => {
 			const res = await doInstance.fetch(doRequest("/presence"));
 
 			expect(res.status).toBe(200);
-			const body = await res.json();
+			const body = (await res.json()) as any;
 			expect(body.activeReaders).toBe(0);
 			expect(body.lastActivity).toBe(0);
 		});
@@ -582,7 +582,7 @@ describe("PostMetaDO", () => {
 			const res = await doInstance.fetch(doRequest("/presence"));
 
 			expect(res.status).toBe(200);
-			const body = await res.json();
+			const body = (await res.json()) as any;
 			expect(body.activeReaders).toBe(0); // Old session cleaned up
 
 			vi.restoreAllMocks();

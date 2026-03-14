@@ -6,7 +6,7 @@
  * Admin-only endpoint for testing and on-demand generation.
  */
 
-import { json, error } from "@sveltejs/kit";
+import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import {
 	buildVoicedPrompt,
@@ -19,7 +19,6 @@ import {
 	formatContinuationForPrompt,
 	detectContinuation,
 	type Commit,
-	type GutterComment,
 	type CustomVoiceConfig,
 	type PromptContextInput,
 } from "$lib/curios/timeline";
@@ -27,7 +26,7 @@ import { getTimelineToken, TIMELINE_SECRET_KEYS } from "$lib/curios/timeline/sec
 import { createLumenClient } from "$lib/lumen/index.js";
 import { createThreshold } from "$lib/threshold/factory.js";
 import { thresholdCheck } from "$lib/threshold/adapters/sveltekit.js";
-import { API_ERRORS, throwGroveError, logGroveError } from "$lib/errors";
+import { API_ERRORS, throwGroveError } from "$lib/errors";
 
 /** Maximum concurrent GitHub API requests to avoid rate limiting */
 const CONCURRENCY_LIMIT = 5;

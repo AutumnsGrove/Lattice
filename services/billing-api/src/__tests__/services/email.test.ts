@@ -40,7 +40,7 @@ describe("Email Service", () => {
 			invoiceId: "inv_test_123",
 		});
 
-		await new Promise((resolve) => setImmediate(resolve));
+		await new Promise((resolve) => setTimeout(resolve, 0));
 
 		expect(mockFetch).toHaveBeenCalledWith(
 			"https://internal/send",
@@ -71,7 +71,7 @@ describe("Email Service", () => {
 			invoiceId: "inv_test_123",
 		});
 
-		await new Promise((resolve) => setImmediate(resolve));
+		await new Promise((resolve) => setTimeout(resolve, 0));
 
 		const callArgs = mockFetch.mock.calls[0];
 		const body = JSON.parse(callArgs[1].body as string) as Record<string, unknown>;
@@ -95,7 +95,7 @@ describe("Email Service", () => {
 			invoiceId: "inv_test_456",
 		});
 
-		await new Promise((resolve) => setImmediate(resolve));
+		await new Promise((resolve) => setTimeout(resolve, 0));
 
 		const callArgs = mockFetch.mock.calls[0];
 		const body = JSON.parse(callArgs[1].body as string) as Record<string, unknown>;
@@ -137,7 +137,7 @@ describe("Email Service", () => {
 			subdomain: "dianablog",
 		});
 
-		await new Promise((resolve) => setImmediate(resolve));
+		await new Promise((resolve) => setTimeout(resolve, 0));
 
 		const callArgs = mockFetch.mock.calls[0];
 		const body = JSON.parse(callArgs[1].body as string) as Record<string, unknown>;
@@ -153,7 +153,7 @@ describe("Email Service", () => {
 			subdomain: "eveblog",
 		});
 
-		await new Promise((resolve) => setImmediate(resolve));
+		await new Promise((resolve) => setTimeout(resolve, 0));
 
 		const callArgs = mockFetch.mock.calls[0];
 		const body = JSON.parse(callArgs[1].body as string) as Record<string, unknown>;
@@ -188,7 +188,7 @@ describe("Email Service", () => {
 			planName: "seedling",
 		});
 
-		await new Promise((resolve) => setImmediate(resolve));
+		await new Promise((resolve) => setTimeout(resolve, 0));
 
 		const callArgs = mockFetch.mock.calls[0];
 		const body = JSON.parse(callArgs[1].body as string) as Record<string, unknown>;
@@ -208,7 +208,7 @@ describe("Email Service", () => {
 			planName: "sapling",
 		});
 
-		await new Promise((resolve) => setImmediate(resolve));
+		await new Promise((resolve) => setTimeout(resolve, 0));
 
 		const callArgs = mockFetch.mock.calls[0];
 		const body = JSON.parse(callArgs[1].body as string) as Record<string, unknown>;
@@ -228,7 +228,7 @@ describe("Email Service", () => {
 			planName: "seedling",
 		});
 
-		await new Promise((resolve) => setImmediate(resolve));
+		await new Promise((resolve) => setTimeout(resolve, 0));
 
 		const callArgs = mockFetch.mock.calls[0];
 		const body = JSON.parse(callArgs[1].body as string) as Record<string, unknown>;
@@ -269,7 +269,7 @@ describe("Email Service", () => {
 			invoiceId: "inv_test_123",
 		});
 
-		await new Promise((resolve) => setImmediate(resolve));
+		await new Promise((resolve) => setTimeout(resolve, 0));
 
 		const callArgs = mockFetch.mock.calls[0];
 		const body = JSON.parse(callArgs[1].body as string) as Record<string, unknown>;
@@ -292,7 +292,7 @@ describe("Email Service", () => {
 			invoiceId: "inv_test_123",
 		});
 
-		await new Promise((resolve) => setImmediate(resolve));
+		await new Promise((resolve) => setTimeout(resolve, 0));
 
 		const callArgs = mockFetch.mock.calls[0];
 		const body = JSON.parse(callArgs[1].body as string) as Record<string, unknown>;

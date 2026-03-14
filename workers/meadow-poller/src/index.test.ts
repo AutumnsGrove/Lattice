@@ -117,7 +117,7 @@ describe("meadow-poller", () => {
 		it("returns service info on GET /", async () => {
 			const { env } = createTestEnv();
 			const response = await worker.default.fetch(new Request("https://example.com/"), env);
-			const json = await response.json();
+			const json = (await response.json()) as any;
 
 			expect(json.service).toBe("grove-meadow-poller");
 			expect(json.status).toBe("running");
@@ -126,7 +126,7 @@ describe("meadow-poller", () => {
 		it("triggers poll on GET /trigger", async () => {
 			const { env } = createTestEnv();
 			const response = await worker.default.fetch(new Request("https://example.com/trigger"), env);
-			const json = await response.json();
+			const json = (await response.json()) as any;
 
 			expect(json.ok).toBe(true);
 		});
@@ -137,7 +137,7 @@ describe("meadow-poller", () => {
 			const { env } = createTestEnv([]);
 
 			const response = await worker.default.fetch(new Request("https://example.com/trigger"), env);
-			const json = await response.json();
+			const json = (await response.json()) as any;
 
 			expect(json.ok).toBe(true);
 			expect(mockFetch).not.toHaveBeenCalled();

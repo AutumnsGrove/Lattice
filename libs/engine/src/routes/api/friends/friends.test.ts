@@ -114,7 +114,7 @@ describe("GET /api/friends", () => {
 
 		const db = createMockDB();
 		const response = await GET(createGETEvent(db));
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(response.status).toBe(200);
 		expect(data.friends).toHaveLength(2);
@@ -131,7 +131,7 @@ describe("GET /api/friends", () => {
 		const db = createMockDB();
 
 		const response = await GET(createGETEvent(db));
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(data.friends).toEqual([]);
 	});
@@ -173,7 +173,7 @@ describe("POST /api/friends", () => {
 		const db = createMockDB();
 		const event = createPOSTEvent({ friendSubdomain: "a2a0" }, db);
 		const response = await POST(event);
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(response.status).toBe(201);
 		expect(data.success).toBe(true);
@@ -296,7 +296,7 @@ describe("DELETE /api/friends/:tenantId", () => {
 		const db = createMockDB();
 		const event = createDELETEEvent("friend-tenant", db);
 		const response = await DELETE(event);
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(response.status).toBe(200);
 		expect(data.success).toBe(true);

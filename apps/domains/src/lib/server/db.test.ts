@@ -66,7 +66,7 @@ beforeEach(() => {
 	vi.mocked(queryMany).mockResolvedValue([]);
 	vi.mocked(execute).mockResolvedValue({
 		success: true,
-		meta: { changes: 0 },
+		meta: { changes: 0, duration: 0, lastRowId: 0, rowsRead: 0, rowsWritten: 0 },
 	});
 	vi.mocked(batch).mockResolvedValue([]);
 });
@@ -288,7 +288,7 @@ describe("Session Operations", () => {
 		it("returns count of deleted sessions", async () => {
 			vi.mocked(execute).mockResolvedValue({
 				success: true,
-				meta: { changes: 5 },
+				meta: { changes: 5, duration: 0, lastRowId: 0, rowsRead: 5, rowsWritten: 5 },
 			});
 
 			const count = await cleanupExpiredSessions(mockDb);

@@ -73,7 +73,7 @@ describe("GET /api/friends/search", () => {
 		const db = createMockDB();
 		const event = createRequestEvent("a2a0", { db });
 		const response = await GET(event);
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(response.status).toBe(200);
 		expect(data.results).toHaveLength(1);
@@ -98,7 +98,7 @@ describe("GET /api/friends/search", () => {
 		const db = createMockDB();
 		const event = createRequestEvent("", { db });
 		const response = await GET(event);
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(data.results).toEqual([]);
 		expect(searchTenants).not.toHaveBeenCalled();
@@ -120,7 +120,7 @@ describe("GET /api/friends/search", () => {
 		const db = createMockDB();
 		const event = createRequestEvent("a2a0", { db });
 		const response = await GET(event);
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		// Should still work — excludeTenantId will be empty string
 		expect(response.status).toBe(200);
@@ -172,7 +172,7 @@ describe("GET /api/friends/search", () => {
 		const db = createMockDB();
 		const event = createRequestEvent("grove", { db });
 		const response = await GET(event);
-		const data = await response.json();
+		const data = (await response.json()) as any;
 
 		expect(data.results).toHaveLength(10);
 	});
