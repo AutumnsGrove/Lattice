@@ -107,10 +107,9 @@
 	// Just need to sync with the layout's needs for the footer toggle
 	let darkMode = $derived(themeStore.resolvedTheme === "dark");
 
-	// Seasonal favicons — when a preferred season is set, override favicon paths (#1304)
-	const seasonFavicons = $derived(
-		data.preferredSeason ? getSeasonFavicons(data.preferredSeason) : null,
-	);
+	// Seasonal favicons — always resolve favicon paths, using preferred season or default (#1304)
+	// Rendered exclusively from <svelte:head> to avoid duplicate <link> tags with app.html
+	const favicons = $derived(getSeasonFavicons(data.preferredSeason || "summer"));
 
 	function toggleTheme() {
 		themeStore.toggle();
@@ -124,13 +123,11 @@
 		{#if data.humanJsonEnabled}
 			<link rel="human-json" href="/human.json" />
 		{/if}
-		{#if seasonFavicons}
-			<!-- Seasonal favicon overrides (#1304) -->
-			<link rel="icon" type="image/svg+xml" href={seasonFavicons.svg} />
-			<link rel="icon" type="image/png" sizes="32x32" href={seasonFavicons.png32} />
-			<link rel="apple-touch-icon" sizes="180x180" href={seasonFavicons.appleTouch} />
-			<meta name="theme-color" content={seasonFavicons.themeColor} />
-		{/if}
+		<!-- Favicons + theme-color: always rendered here to avoid duplicates with app.html (#1304) -->
+		<link rel="icon" type="image/svg+xml" href={favicons.svg} />
+		<link rel="icon" type="image/png" sizes="32x32" href={favicons.png32} />
+		<link rel="apple-touch-icon" sizes="180x180" href={favicons.appleTouch} />
+		<meta name="theme-color" content={favicons.themeColor} />
 	{:else}
 		<link rel="alternate" type="application/rss+xml" title="The Grove RSS Feed" href="/api/feed" />
 	{/if}

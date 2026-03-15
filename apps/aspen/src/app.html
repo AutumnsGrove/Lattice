@@ -3,8 +3,7 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<!-- theme-color is set dynamically in +layout.svelte based on preferred season -->
-		<meta name="theme-color" content="#16a34a" />
+		<!-- theme-color rendered in +layout.svelte <svelte:head> to support seasonal overrides (#1304) -->
 		<!-- Prevent Dark Reader from interfering with Grove's native dark mode -->
 		<meta name="darkreader-lock" />
 		<meta name="csrf-token" content="%sveltekit.locals.csrfToken%" />
@@ -23,14 +22,9 @@
 			crossorigin
 		/>
 
-		<!-- Favicons -->
-		<link rel="icon" type="image/svg+xml" href="%sveltekit.assets%/favicon.svg" />
-		<link rel="icon" type="image/png" sizes="32x32" href="%sveltekit.assets%/favicon-32x32.png" />
+		<!-- Favicons rendered in +layout.svelte <svelte:head> to support seasonal overrides (#1304) -->
 
-		<!-- Apple Touch Icon (iOS home screen, iMessage previews) -->
-		<link rel="apple-touch-icon" sizes="180x180" href="%sveltekit.assets%/apple-touch-icon.png" />
-
-		<!-- Safari Pinned Tab -->
+		<!-- Safari Pinned Tab (no seasonal variant — always the default) -->
 		<link rel="mask-icon" href="%sveltekit.assets%/safari-pinned-tab.svg" color="#16a34a" />
 
 		<!-- PWA Manifest (dynamic route — serves season-aware icons per tenant preference) -->
